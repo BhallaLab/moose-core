@@ -55,12 +55,20 @@ def loadElec():
 	return cellId
 
 def addPlot( objpath, field, plot ):
-    assert moose.exists( objpath )
-    tab = moose.Table( '/graphs/' + plot )
-    obj = moose.element( objpath )
-    moose.connect( tab, 'requestData', obj, field )
-    return tab
-
+	#assert moose.exists( objpath )
+	if moose.exists( objpath ):
+		tab = moose.Table( '/graphs/' + plot )
+		obj = moose.element( objpath )
+		if obj.className == 'Neutral':
+			print "addPlot failed: object is a Neutral: ", objpath
+			return moose.element( '/' )
+		else:
+			#print "object was found: ", objpath, obj.className
+			moose.connect( tab, 'requestData', obj, field )
+			return tab
+	else:
+		print "addPlot failed: object not found: ", objpath
+		return moose.element( '/' )
 
 def dumpPlots( fname ):
     if ( os.path.exists( fname ) ):
@@ -97,15 +105,27 @@ def loadChem( neuroCompt, spineCompt, psdCompt ):
 	modelId = moose.loadModel( 'psd_merged31d.g', '/model', 'ee' )
 	chem = moose.element( '/model/model' )
 	chem.name = 'chem'
-	oldN = moose.element( '/model/chem/compartment_1' )
-	oldS = moose.element( '/model/chem/compartment_2' )
-	oldP = moose.element( '/model/chem/kinetics' )
+	oldN = moose.element( '/model/chem/kinetics' )
+	oldS = moose.element( '/model/chem/compartment_1' )
+	oldP = moose.element( '/model/chem/compartment_2' )
+	print 'old NSP vols = ', oldN.volume, oldS.volume, oldP.volume
+	for i in moose.wildcardFind( '/model/chem/#/#/#/transloc#' ):
+		print i[0].name, i[0].Kf, i[0].Kb, i[0].kf, i[0].kb
+	tr0 = moose.element( '/model/chem/kinetics/SPINE/CaMKII_BULK/tr0[6]' )
+	print "tr0 rates = ", tr0.Kf, tr0.Kb, tr0.kf, tr0.kb
 	oldN.volume = neuroCompt.mesh[0].volume
 	oldS.volume = spineCompt.mesh[0].volume
 	oldP.volume = psdCompt.mesh[0].volume
-	moveCompt( '/model/chem/kinetics/DEND', oldN, neuroCompt )
-	moveCompt( '/model/chem/kinetics/SPINE', oldS, spineCompt )
+	print 'new NSP vols = ', neuroCompt.volume, spineCompt.volume, psdCompt.volume 
+	print "tr0 rates = ", tr0.Kf, tr0.Kb, tr0.kf, tr0.kb
+	for i in moose.wildcardFind( '/model/chem/#/#/#/transloc#' ):
+		print i[0].name, i[0].Kf, i[0].Kb, i[0].kf, i[0].kb
 	moveCompt( '/model/chem/kinetics/PSD', oldP, psdCompt )
+	moveCompt( '/model/chem/kinetics/SPINE', oldS, spineCompt )
+	moveCompt( '/model/chem/kinetics/DEND', oldN, neuroCompt )
+	print "aftermove tr0 rates = ", tr0.Kf, tr0.Kb, tr0.kf, tr0.kb
+	for i in moose.wildcardFind( '/model/chem/#/#/#/transloc#' ):
+		print i[0].name, i[0].Kf, i[0].Kb, i[0].kf, i[0].kb
 
 def makeNeuroMeshModel():
 	diffLength = 20e-6 # But we only want diffusion over part of the model.
@@ -306,6 +326,11 @@ def makeChemPlots():
 
 	addPlot( '/model/chem/psdMesh/PSD/CaMKII_PSD/bar[6]', 'get_conc', 'psd_bar' )
 	addPlot( '/model/chem/spineMesh/SPINE/CaMKII_BULK/foo[6]', 'get_conc', 'spine_foo' )
+	bar = moose.element( '/model/chem/psdMesh/PSD/CaMKII_PSD/bar[6]' )
+	foo = moose.element( '/model/chem/spineMesh/SPINE/CaMKII_BULK/foo[6]' )
+	print "bar,foo vols = ", bar.volume, foo.volume, bar.concInit, foo.concInit
+	tr0 = moose.element( '/model/chem/spineMesh/SPINE/CaMKII_BULK/tr0[6]' )
+	print "tr0 rates = ", tr0.Kf, tr0.Kb, tr0.kf, tr0.kb
 
 def testNeuroMeshMultiscale():
 	elecDt = 50e-6
@@ -314,11 +339,9 @@ def testNeuroMeshMultiscale():
 	plotName = 'nm.plot'
 
 	makeNeuroMeshModel()
-	moose.le( '/model/chem' )
-	moose.le( '/model/chem/psdMesh' )
-	moose.le( '/model/chem/psdMesh/PSD' )
+	print "after model is completely done"
 	for i in moose.wildcardFind( '/model/chem/#/#/#/transloc#' ):
-		print i[0].name, i[0].kf, i[0].kb
+		print i[0].name, i[0].Kf, i[0].Kb, i[0].kf, i[0].kb
 
 	"""
 	for i in moose.wildcardFind( '/model/chem/##[ISA=PoolBase]' ):
@@ -359,6 +382,7 @@ def testNeuroMeshMultiscale():
 	hsolve.target = '/model/elec/compt'
 	moose.reinit()
 	moose.reinit()
+	"""
 	print 'pre'
 	eca = moose.ematrix( '/model/chem/psdMesh/PSD/CaM/Ca' )
 	for i in range( 3 ):
@@ -366,7 +390,6 @@ def testNeuroMeshMultiscale():
 	print 'dend'
 	eca = moose.ematrix( '/model/chem/neuroMesh/DEND/Ca' )
 	#for i in ( 0, 1, 2, 30, 60, 90, 120, 144 ):
-	"""
 	for i in range( 13 ):
 		print i, eca[i].concInit, eca[i].conc, eca[i].nInit, eca[i].n, eca[i].volume
 

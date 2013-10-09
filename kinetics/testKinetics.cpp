@@ -465,6 +465,45 @@ void testWriteKkit( Id id )
 	cout << "." << flush;
 }
 
+void testVolSort()
+{
+	vector< unsigned int > findVolOrder( const vector< double >& vols );
+	vector< double > vols( 8 );
+	vols[0] = 7;
+	vols[1] = 8;
+	vols[2] = 6;
+	vols[3] = 5;
+	vols[4] = 1;
+	vols[5] = 2;
+	vols[6] = 3;
+	vols[7] = 4;
+	vector< unsigned int > order = findVolOrder( vols );
+	// The order is the rank of the volume entry, largest should be 0.
+	assert( order[0] == 1 );
+	assert( order[1] == 0 );
+	assert( order[2] == 2 );
+	assert( order[3] == 3 );
+	assert( order[4] == 7 );
+	assert( order[5] == 6 );
+	assert( order[6] == 5 );
+	assert( order[7] == 4 );
+
+	// This is a sequence which failed in a model test, despite the
+	// above test working.
+	vols.resize(5);
+	vols[0] = 1e-15;
+	vols[1] = 3e-15;
+	vols[2] = -1;
+	vols[3] = 2e-15;
+	vols[4] = 5e-15;
+	order = findVolOrder( vols );
+	assert( order[0] == 4 );
+	assert( order[1] == 1 );
+	assert( order[2] == 3 );
+	assert( order[3] == 0 );
+	assert( order[4] == 2 );
+}
+
 void testKinetics()
 {
 	testTwoReacGetNeighbours();
@@ -473,6 +512,7 @@ void testKinetics()
 	testPoolVolumeScaling();
 	testReacVolumeScaling();
 	testReadCspace();
+	testVolSort();
 
 	// This is now handled with real models in the regression tests.
 	// testWriteKkit( Id() ); 

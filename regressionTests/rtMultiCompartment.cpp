@@ -165,14 +165,14 @@ void checkJunction( const string& path, Id c1, Id c2, bool isDiffusive )
 
 void checkAllJunctions( bool isDiffusive )
 {
-	Id A( "/model/kinetics" ); assert( A != Id() );
+	Id A( "/model/compartment_3" ); assert( A != Id() );
 	Id B( "/model/compartment_1" ); assert( B != Id() );
 	Id D( "/model/compartment_2" ); // order is scrambled.
 	assert( D != Id() );
-	Id C( "/model/compartment_3" ); assert( C != Id() );
-	Id gsA( "/model/kinetics/stoich" ); assert( gsA != Id() );
+	Id C( "/model/kinetics" ); assert( C != Id() );
+	Id gsA( "/model/compartment_3/stoich" ); assert( gsA != Id() );
 	Id gsB( "/model/compartment_1/stoich" ); assert( gsB != Id() );
-	Id gsC( "/model/compartment_3/stoich" ); assert( gsC != Id() );
+	Id gsC( "/model/kinetics/stoich" ); assert( gsC != Id() );
 	Id gsD( "/model/compartment_2/stoich" ); assert( gsD != Id() );
 
 	unsigned int nj = 0;
@@ -195,13 +195,13 @@ void checkAllJunctions( bool isDiffusive )
 	// SolverJunction* j0 = reinterpret_cast< SolverJunction* >( oi0.data() );
 	// SolverJunction* j1 = reinterpret_cast< SolverJunction* >( oi1.data() );
 
-	checkJunction( "/model/kinetics/stoich/junction[0]", A, B, isDiffusive );
-	checkJunction( "/model/kinetics/stoich/junction[1]", A, D, isDiffusive );
-	checkJunction( "/model/kinetics/stoich/junction[2]", A, C, isDiffusive );
-	checkJunction( "/model/compartment_1/stoich/junction[0]", B, A, isDiffusive );
-	checkJunction( "/model/compartment_1/stoich/junction[1]", B, C, isDiffusive );
-	checkJunction( "/model/compartment_3/stoich/junction[0]", C, A, isDiffusive );
-	checkJunction( "/model/compartment_3/stoich/junction[1]", C, B, isDiffusive );
+	checkJunction( "/model/compartment_3/stoich/junction[0]", A, C, isDiffusive );
+	checkJunction( "/model/compartment_3/stoich/junction[1]", A, B, isDiffusive );
+	checkJunction( "/model/compartment_3/stoich/junction[2]", A, D, isDiffusive );
+	checkJunction( "/model/compartment_1/stoich/junction[0]", B, C, isDiffusive );
+	checkJunction( "/model/compartment_1/stoich/junction[1]", B, A, isDiffusive );
+	checkJunction( "/model/kinetics/stoich/junction[0]", C, B, isDiffusive );
+	checkJunction( "/model/kinetics/stoich/junction[1]", C, A, isDiffusive );
 	checkJunction( "/model/compartment_2/stoich/junction[0]", D, A, isDiffusive );
 }
 
@@ -248,31 +248,33 @@ void rtTestMultiCompartmentReaction()
 	Id model = shell->doLoadModel( 
 					"multicompt_reac.g", "/model", "multigsl" );
 	// SetGet1< string >::set( model, "buildMultiCompartment", "rk5" );
-	Id A( "/model/kinetics" );
+	
+	// Vol of compartments in this model are (x1e-15): A1, B3, C5, D2
+	// Note that the loadModel puts compartments in order of decreasing
+	// volume, so /kinetics is the biggest compartment.
+	Id C( "/model/kinetics" );		//	5e-15
+	Id B( "/model/compartment_1" );	// 	3e-15
+	Id D( "/model/compartment_2" ); // 	2e-15
+	Id A( "/model/compartment_3" );	// 	1e-15
+
 	assert( A != Id() );
 	double volumeA = Field< double >::get( A, "volume" );
-
-	Id B( "/model/compartment_1" );
 	assert( B != Id() );
 	double volumeB = Field< double >::get( B, "volume" );
-
-	Id D( "/model/compartment_2" ); // order is scrambled.
+	assert( C != Id() );
+	double volumeC = Field< double >::get( C, "volume" );
 	assert( D != Id() );
 	double volumeD = Field< double >::get( D, "volume" );
 
-	Id C( "/model/compartment_3" );
-	assert( C != Id() );
-	double volumeC = Field< double >::get( C, "volume" );
 
-
-	assert( doubleEq( volumeA, 1e-15 ) );
-	assert( doubleEq( volumeB, 3e-15 ) );
 	assert( doubleEq( volumeC, 5e-15 ) );
+	assert( doubleEq( volumeB, 3e-15 ) );
 	assert( doubleEq( volumeD, 2e-15 ) );
+	assert( doubleEq( volumeA, 1e-15 ) );
 
-	checkField( "/model/kinetics/R3", "kb", 1.660572e-7 );
+	checkField( "/model/compartment_3/R3", "kb", 1.660572e-7 );
 
-	Id gsA( "/model/kinetics/stoich" );
+	Id gsA( "/model/compartment_3/stoich" );
 	assert( gsA != Id() );
 	GslStoich* gs = reinterpret_cast< GslStoich* >( gsA.eref().data() );
 	assert( gs->pools().size() == 1 ); // No diffusion, but it does this?
@@ -289,26 +291,26 @@ void rtTestMultiCompartmentReaction()
 	assert( gs->ode()[0].stoich_->getNumProxyPools() == 0 );
 	assert( gs->ode()[0].stoich_->getNumRates() == 2 );
 
-	// R3 will use this.
-	assert( gs->ode()[5].compartmentSignature_.size() == 2 );
-	assert( gs->ode()[5].compartmentSignature_[0] == B );
-	assert( gs->ode()[5].compartmentSignature_[1] == C );
-	assert( gs->ode()[5].stoich_->getNumVarPools() == 2 );
-	assert( gs->ode()[5].stoich_->getNumProxyPools() == 2 );
-	assert( gs->ode()[5].stoich_->getNumRates() == 3 );
+	// R3 will use this. Why 4? Just because it is index with these compts.
+	assert( gs->ode()[4].compartmentSignature_.size() == 2 );
+	assert( gs->ode()[4].compartmentSignature_[0] == C ); // sorted by Id
+	assert( gs->ode()[4].compartmentSignature_[1] == B );
+	assert( gs->ode()[4].stoich_->getNumVarPools() == 2 );
+	assert( gs->ode()[4].stoich_->getNumProxyPools() == 2 );
+	assert( gs->ode()[4].stoich_->getNumRates() == 3 );
 
 	// R4 will use this.
-	assert( gs->ode()[2].compartmentSignature_.size() == 1 );
-	assert( gs->ode()[2].compartmentSignature_[0] == D );
-	assert( gs->ode()[2].stoich_->getNumVarPools() == 2 );
-	assert( gs->ode()[2].stoich_->getNumProxyPools() == 1 );
-	assert( gs->ode()[2].stoich_->getNumRates() == 3 );
+	assert( gs->ode()[3].compartmentSignature_.size() == 1 );
+	assert( gs->ode()[3].compartmentSignature_[0] == D );
+	assert( gs->ode()[3].stoich_->getNumVarPools() == 2 );
+	assert( gs->ode()[3].stoich_->getNumProxyPools() == 1 );
+	assert( gs->ode()[3].stoich_->getNumRates() == 3 );
 
 	// The combo will use this
 	assert( gs->ode()[7].compartmentSignature_.size() == 3 );
-	assert( gs->ode()[7].compartmentSignature_[0] == B );
-	assert( gs->ode()[7].compartmentSignature_[1] == D );
-	assert( gs->ode()[7].compartmentSignature_[2] == C );
+	assert( gs->ode()[7].compartmentSignature_[0] == C );
+	assert( gs->ode()[7].compartmentSignature_[1] == B );
+	assert( gs->ode()[7].compartmentSignature_[2] == D );
 
 	////////////////////////////////////////////////////////////////
 	Id gsB( "/model/compartment_1/stoich" );
@@ -336,7 +338,7 @@ void rtTestMultiCompartmentReaction()
 	assert( gs->ode()[1].stoich_->getNumRates() == 3 );
 
 	////////////////////////////////////////////////////////////////
-	Id gsC( "/model/compartment_3/stoich" );
+	Id gsC( "/model/kinetics/stoich" );
 	assert( gsC != Id() );
 	gs = reinterpret_cast< GslStoich* >( gsC.eref().data() );
 	assert( gs->pools().size() == 1 ); // No diffusion
@@ -374,13 +376,13 @@ void rtTestMultiCompartmentReaction()
 	// Check out rates
 	////////////////////////////////////////////////////////////////
 
-	checkField( "/model/kinetics/R1", "Kf", 0.1 ); 
-	checkField( "/model/kinetics/R1", "Kb", 0.1 ); 
-	checkField( "/model/kinetics/R2", "Kf", 0.1 ); 
-	checkField( "/model/kinetics/R2", "Kb", 0.1 ); 
-	checkField( "/model/kinetics/R3", "Kf", 0.1 ); 
-	checkField( "/model/kinetics/R3", "kb", 1.660572e-7 );
-	checkField( "/model/kinetics/R3", "Kb", 0.1 * 5.0 * 3.0 * 1000.0 ); 
+	checkField( "/model/compartment_3/R1", "Kf", 0.1 ); 
+	checkField( "/model/compartment_3/R1", "Kb", 0.1 ); 
+	checkField( "/model/compartment_3/R2", "Kf", 0.1 ); 
+	checkField( "/model/compartment_3/R2", "Kb", 0.1 ); 
+	checkField( "/model/compartment_3/R3", "Kf", 0.1 ); 
+	checkField( "/model/compartment_3/R3", "kb", 1.660572e-7 );
+	checkField( "/model/compartment_3/R3", "Kb", 0.1 * 5.0 * 3.0 * 1000.0 ); 
 	// To fix: It comes to 300.  I don't see why.
 	// One target is 5x vol. Other is 3x vol. 
 	// The scaling for uM to mM is 1000. That would have given 100.
@@ -392,16 +394,16 @@ void rtTestMultiCompartmentReaction()
 	// We get 100. That should have been it.
 	// Instead the vol that the system uses is 3e-15, from compt B.
 	//
-	checkField( "/model/kinetics/R4", "kf", 0.1 ); 
-	checkField( "/model/kinetics/R4", "kb", 0.1 ); 
-	checkField( "/model/kinetics/R4", "Kf", 0.1 ); 
-	checkField( "/model/kinetics/R4", "Kb", 0.2 ); 
+	checkField( "/model/compartment_3/R4", "kf", 0.1 ); 
+	checkField( "/model/compartment_3/R4", "kb", 0.1 ); 
+	checkField( "/model/compartment_3/R4", "Kf", 0.1 ); 
+	checkField( "/model/compartment_3/R4", "Kb", 0.2 ); 
 	checkField( "/model/compartment_1/R5", "kf", 0.1 ); 
 	checkField( "/model/compartment_1/R5", "kb", 0.1 ); 
 	checkField( "/model/compartment_1/R5", "Kf", 0.1 ); 
 	checkField( "/model/compartment_1/R5", "Kb", 0.1 * 5.0/3.0 ); 
-	checkField( "/model/compartment_3/R8", "Kf", 0.1 ); 
-	checkField( "/model/compartment_3/R8", "Kb", 0.1 ); 
+	checkField( "/model/kinetics/R8", "Kf", 0.1 ); 
+	checkField( "/model/kinetics/R8", "Kb", 0.1 ); 
 	checkField( "/model/compartment_2/R9", "Kf", 0.1 ); 
 	checkField( "/model/compartment_2/R9", "Kb", 0.1 ); 
 	checkField( "/model/compartment_1/M3/R6and7", "kcat", 0.1 ); 
@@ -411,9 +413,9 @@ void rtTestMultiCompartmentReaction()
 	////////////////////////////////////////////////////////////////
 	// Check out concs
 	////////////////////////////////////////////////////////////////
-	checkField( "/model/kinetics/M1A", "concInit", 0.001 - 1.6666e-8 ); // mM
+	checkField( "/model/compartment_3/M1A", "concInit", 0.001 - 1.6666e-8 ); // mM
 	checkField( "/model/compartment_1/M1B", "concInit", 0.001 ); // mM
-	checkField( "/model/compartment_3/M1C", "concInit", 0.001 ); // mM
+	checkField( "/model/kinetics/M1C", "concInit", 0.001 ); // mM
 	checkField( "/model/compartment_2/M1D", "concInit", 0.001 ); // mM
 	
 	////////////////////////////////////////////////////////////////

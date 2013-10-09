@@ -544,12 +544,38 @@ void ReadKkit::separateVols( Id pool, double vol )
 	volCategories_.push_back( temp );
 }
 
+bool volCompare( 
+				const pair< unsigned int, double >& A,
+				const pair< unsigned int, double >& B )
+{
+	return A.second < B.second;
+}
+// Returns the ranking of each volume. Largest is 0. This would be the
+// suffix to attach to the compartment name.
+vector< unsigned int > findVolOrder( const vector< double >& vols ) 
+{
+	vector< pair< unsigned int, double > > p( vols.size() );
+	for ( unsigned int i = 0; i < vols.size(); ++i ) {
+		p[i].first = i;
+		p[i].second = vols[i];
+	}
+	sort( p.begin(), p.end(), volCompare );
+	vector< unsigned int > ret( vols.size() );
+	for ( unsigned int i = 0; i < vols.size(); ++i ) {
+		ret[ vols.size() -i -1 ] = p[i].first;
+	}
+	return ret;
+}
+
 // We assume that the biggest compartment contains all the rest.
 // This is not true in synapses, where they are adjacent.
 void ReadKkit::assignPoolCompartments()
 {
 	Id kinetics = Neutral::child( baseId_.eref(), "kinetics" );
 	assert( kinetics != Id() );
+	vector< unsigned int > volOrder = findVolOrder( vols_ );
+	assert( volCategories_.size() == vols_.size() );
+	assert( volCategories_.size() == volOrder.size() );
 	/*
 	double max = 0.0;
 	unsigned int maxi = 0;
@@ -563,9 +589,10 @@ void ReadKkit::assignPoolCompartments()
 	
 	// Field< double >::set( kinetics.eref(), "size", max );
 	vector< int > dims( 1, 1 );
-	unsigned int comptNum = 1;
+	// unsigned int comptNum = 1;
 
-	for ( unsigned int i = 0 ; i < volCategories_.size(); ++i ) {
+	for ( unsigned int j = 0 ; j < volOrder.size(); ++j ) {
+		unsigned int i = volOrder[j];
 		if ( vols_[i] < 0 ) // Special case for enz complexes: vol == -1.
 			continue;
 		string name;
@@ -573,15 +600,16 @@ void ReadKkit::assignPoolCompartments()
 		assert( kinId != Id() );
 		Id comptId;
 		// if ( i == maxi )
-		if ( i == 0 ) {
+		if ( j == 0 ) {
 			comptId = kinId;
 		} else {
 			stringstream ss;
-			ss << "compartment_" << comptNum++;
+			ss << "compartment_" << j;
 			name = ss.str();
 			comptId = shell_->doCreate( "CubeMesh", baseId_, name, dims, 
 				true );
 		}
+		// cout << j << ", " << i << ", " << comptId << ", " << comptId.element()->getName() << ", " << vols_[i] << endl;
 		Id meshId = Neutral::child( comptId.eref(), "mesh" );
 		assert( meshId != Id() );
 		double side = pow( vols_[i], 1.0 / 3.0 );
