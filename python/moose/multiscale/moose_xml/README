@@ -6,3 +6,9 @@ Developer : Dilawar Singh, dilawars@ncbs.res.in
 
     Command `pyxbgen -u po1.xsd  -m po1` does the trick. 
 
+Fri 11 Oct 2013 02:53:35 AM IST
+    
+    pyxb would increase depencies for the generated code imports this class.
+    This is a big minus. Reverting back to generateDS.py
+
+

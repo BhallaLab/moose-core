@@ -1,9 +1,11 @@
 #!/bin/bash 
 if [ $# -lt 1 ]; then
-  echo "USAGE : ./gen_python_from_schema.sh schame.xsd"
+  echo "USAGE : ./generateDS.py schame.xsd"
   exit
 fi
 schamaName="$1"
 name=$(basename $schamaName)
 name=${name/".xsd"/".py"}
-pyxbgen -u $1 -m $name
+echo "Generating $name ..."
+generateDS.py -f -o $name $1 
+echo ".. Done"
