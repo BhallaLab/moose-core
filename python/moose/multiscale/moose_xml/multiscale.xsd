@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema targetNamespace="http://moose.ncbs.res.in/multiscale"
+  xmlns="http://moose.ncbs.res.in/multiscale"
+  elementFormDefault="qualified"
+  attributeFormDefault="unqualified">
+
+  <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+  <!-- Core elements -->
+  <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+  <xs:simpleType name="cellId">
+    <xs:annotation>
+      <xs:documentaion>An id attribute for cell which needs to be identified
+        uniquely.</xs:documentaion>
+    </xs:annotation>
+  </xs:simpleType>
+
+</xs:schema>

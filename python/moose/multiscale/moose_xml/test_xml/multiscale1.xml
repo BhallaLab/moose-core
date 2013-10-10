@@ -1,0 +1,42 @@
+<!-- First describe the domains inside the cells -->
+<elements>
+  <element id="1" cellId="cellA" type="electrical">
+    <morphology>
+      <geometry type="simple">cylinder</geometry>
+      <diameter>10.0</diameter>
+      <length>20.0</length>
+      <coordinates of="center" type="absolute">
+        <x>10.0</x>
+        <y>20.0</y>
+        <z>-1</z>
+      </coordinates>
+    </morphology>
+    <propterty></propterty>
+  </element>
+  <element id="2" cellId="cellA" type="electrical">
+    <morphology>
+      <geometry type="simple">cylinder</geometry>
+      <diameter>10.0</diameter>
+      <length>20.0</length>
+      <coordinates of="center" type="relative" relativeTo="cellA">
+        <x>-3</x>
+        <y>2</y>
+        <z>-1</z>
+      </coordinates>
+    </morphology>
+    <propterty></propterty>
+  </element>
+  <element id="1" cellId="cellA" type="chemical">
+    <morphology>
+      <geometry type="simple">cylinder</geometry>
+      <diameter>10.0</diameter>
+      <length>20.0</length>
+      <coordinates of="center" type="relative" relativeTo="cellA">
+        <x>-3</x>
+        <y>2</y>
+        <z>-1</z>
+      </coordinates>
+    </morphology>
+    <propterty></propterty>
+  </element>
+</elements>
