@@ -46,6 +46,9 @@
 # Code:
 
 import sys
+import config
+import pickle
+import os
 from collections import defaultdict
 import numpy as np
 
@@ -695,19 +698,41 @@ class PlotWidget(QtGui.QWidget):
     def plotAllData(self):
         """Plot data from all tables under dataRoot"""        
         path = moose.element(self.dataRoot).path
+        modelroot = moose.element(self.modelRoot).path
         time = moose.Clock('/clock').currentTime
         tabList = []
         for tabId in moose.wildcardFind('%s/##[TYPE=Table]' % (path)):
             tab = moose.Table(tabId)
-            if len(tab.neighbours['requestData']) > 0:
+            tableObject = tab.neighbours['requestData']
+            if len(tableObject) > 0:
                 # This is the default case: we do not plot the same
                 # table twice. But in special cases we want to have
                 # multiple variations of the same table on different
                 # axes.
                 #
+                #Harsha: Adding color to graph for signalling model, check if given path has cubemesh or cylmesh
+                color = ''
+                if (len(moose.wildcardFind('%s/##[ISA=ChemCompt]' %(modelroot)))):
+                    species = tableObject[0].path+'/info'
+                    colormap_file = open(os.path.join(config.settings[config.KEY_COLORMAP_DIR], 'rainbow2.pkl'),'rb')
+                    self.colorMap = pickle.load(colormap_file)
+                    colormap_file.close()
+                    hexchars = "0123456789ABCDEF"
+                    color = moose.element(species).getField('color')
+                    if ((not isinstance(color,(list,tuple)))):
+                        if color.isdigit():
+                            tc = int(color)
+                            tc = (tc * 2 )
+                            r,g,b = self.colorMap[tc]
+                            color = "#"+ hexchars[r / 16] + hexchars[r % 16] + hexchars[g / 16] + hexchars[g % 16] + hexchars[b / 16] + hexchars[b % 16]
                 lines = self.pathToLine[tab.path]
+
                 if len(lines) == 0:
-                    newLines = self.addTimeSeries(tab, label=tab.name)
+                    #Harsha: pass color if singnalling model by checking chemcompt but xml file doesn't have color
+                    if (len(moose.wildcardFind('%s/##[ISA=ChemCompt]' %(modelroot))) and color != 'white'):
+                        newLines = self.addTimeSeries(tab, label=tab.name,color=color)
+                    else:
+                        newLines = self.addTimeSeries(tab, label=tab.name)
                     self.pathToLine[tab.path].update(newLines)
                     for line in newLines:
                         self.lineToDataSource[line] = PlotDataSource(x='/clock', y=tab.path, z='')
