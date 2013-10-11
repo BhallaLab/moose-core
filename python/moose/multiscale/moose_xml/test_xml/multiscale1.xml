@@ -29,7 +29,7 @@
          If no coordinate system is specified, proximal/distal should be default.
       -->
     <morphology import="yes">
-      <import from="morphology_PurkinjeCell_t">
+      <import from="morphology_PurkinjeCell_t" xmlType="neuroml2">
         <segment id="0" name="Soma"></segment>
       </import>
     </morphology>
@@ -38,6 +38,7 @@
 
  
   <domain id="3" cellId="PurkinjeCell_t" type="electrical">
+    <!-- By default, use the proximal/distal coordinate system. -->
     <morphology import="no">
       <proximal x="0.0" y="-240.0" z="0.0" diameter="2.0"/>
       <distal x="-5.0" y="-260.0" z="0.0" diameter="2.0"/>
