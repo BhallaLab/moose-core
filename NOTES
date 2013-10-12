@@ -1,0 +1,7 @@
+12 Oct 2013.
+This is the async13 branch. It is based on the current (buildQ) branch and
+is designed to test out asynchronous messaging in MOOSE. This will drop
+all the multithreading and queueing code framework with a view to simplifying
+and speeding up calculations. It is also meant to implement parallelization
+from the ground up, using either MPI or Charm++ messaging.
+It is meant to keep the old buildQ API as much as possible.

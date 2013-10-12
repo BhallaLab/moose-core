@@ -1,6 +1,0 @@
-*Check the loadXplot loads the correct number of lines
-*loadXplot and compareXplot: Load a few files and compare values.
-- Check file identification in Shell::LoadModel.
--> ReadKkit load and run. First make the MOOSE class for the reader.
--> Ksolve load and run.
-

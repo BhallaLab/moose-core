@@ -12,9 +12,10 @@ TARGET = _biophysics.o
 OBJ = \
 	SynBase.o	\
 	IntFire.o	\
-	IzhikevichNrn.o	\
-	LeakyIaF.o	\
 	Synapse.o	\
+
+# IzhikevichNrn.o	\
+	LeakyIaF.o	\
 	Compartment.o	\
 	SymCompartment.o	\
 	ChanBase.o	\
@@ -55,36 +56,36 @@ default: $(TARGET)
 $(OBJ)	: $(HEADERS)
 SynBase.o:	SynBase.h Synapse.h 
 IntFire.o:	IntFire.h SynBase.h Synapse.h 
-IzhikevichNrn.o: IzhikevichNrn.h
-LeakyIaF.o: LeakyIaF.h
-Synapse.o:	SynBase.h Synapse.h
-Compartment.o: Compartment.h
-SymCompartment.o: Compartment.h SymCompartment.h
-ChanBase.o: ChanBase.h
-HHChannel.o: ChanBase.h HHChannel.h HHGate.h
-HHGate.o: HHGate.h
-SynChanBase.o: Synapse.h SynBase.h ChanBase.h
-SynChan.o: SynBase.h ChanBase.h Synapse.h SynChan.h
-GapJunction.o: GapJunction.h
-NMDAChan.o: NMDAChan.h SynBase.h ChanBase.h Synapse.h SynChan.h
-SpikeGen.o: SpikeGen.h
-CaConc.o:	CaConc.h
-Nernst.o:	Nernst.h
-Neuron.o:	Neuron.h
-MgBlock.o:	MgBlock.h
-GHK.o:	GHK.h
-HHGate2D.o:	../builtins/Interpol2D.h HHGate2D.h
-HHChannel2D.o: ChanBase.h HHChannel2D.h HHGate2D.h
-VectorTable.o : VectorTable.h
-MarkovGslSolver.o : MarkovGslSolver.h 
-MatrixOps.o : MatrixOps.h
-MarkovRateTable.o : VectorTable.h ../builtins/Interpol2D.h MarkovRateTable.h 
-MarkovSolverBase.o : MarkovSolver.h MatrixOps.h MarkovRateTable.h
-MarkovSolver.o : MarkovSolverBase.h MarkovSolver.h
-MarkovChannel.o : VectorTable.h ../builtins/Interpol2D.h MarkovRateTable.h ChanBase.h MarkovChannel.h 
-ReadCell.o: ReadCell.h ../shell/Shell.h ../utility/utility.h
-VClamp.o: VClamp.h
-testBiophysics.o: SynBase.h IntFire.h Synapse.h Compartment.h HHChannel.h HHGate.h 
+#IzhikevichNrn.o: IzhikevichNrn.h
+#LeakyIaF.o: LeakyIaF.h
+#Synapse.o:	SynBase.h Synapse.h
+#Compartment.o: Compartment.h
+#SymCompartment.o: Compartment.h SymCompartment.h
+#ChanBase.o: ChanBase.h
+#HHChannel.o: ChanBase.h HHChannel.h HHGate.h
+#HHGate.o: HHGate.h
+#SynChanBase.o: Synapse.h SynBase.h ChanBase.h
+#SynChan.o: SynBase.h ChanBase.h Synapse.h SynChan.h
+#GapJunction.o: GapJunction.h
+#NMDAChan.o: NMDAChan.h SynBase.h ChanBase.h Synapse.h SynChan.h
+#SpikeGen.o: SpikeGen.h
+#CaConc.o:	CaConc.h
+#Nernst.o:	Nernst.h
+#Neuron.o:	Neuron.h
+#MgBlock.o:	MgBlock.h
+#GHK.o:	GHK.h
+#HHGate2D.o:	../builtins/Interpol2D.h HHGate2D.h
+#HHChannel2D.o: ChanBase.h HHChannel2D.h HHGate2D.h
+#VectorTable.o : VectorTable.h
+#MarkovGslSolver.o : MarkovGslSolver.h 
+#MatrixOps.o : MatrixOps.h
+#MarkovRateTable.o : VectorTable.h ../builtins/Interpol2D.h MarkovRateTable.h 
+#MarkovSolverBase.o : MarkovSolver.h MatrixOps.h MarkovRateTable.h
+#MarkovSolver.o : MarkovSolverBase.h MarkovSolver.h
+#MarkovChannel.o : VectorTable.h ../builtins/Interpol2D.h MarkovRateTable.h ChanBase.h MarkovChannel.h 
+#ReadCell.o: ReadCell.h ../shell/Shell.h ../utility/utility.h
+#VClamp.o: VClamp.h
+#testBiophysics.o: SynBase.h IntFire.h Synapse.h Compartment.h HHChannel.h HHGate.h 
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I. -I../basecode -I../msg $< -c

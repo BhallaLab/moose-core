@@ -295,21 +295,12 @@ SUBDIR = \
 	basecode \
 	msg \
 	shell \
-	biophysics\
-	hsolve\
 	randnum\
 	scheduling\
 	builtins\
-	device\
-	kinetics \
-	ksolve \
-	regressionTests \
 	utility \
-	geom \
-	mesh \
-	manager \
-	signeur \
 	external/muparser \
+	biophysics \
 	$(SMOLDYN_DIR) \
 	$(SBML_DIR) \
 	$(HCUDA_DIR) \
@@ -322,21 +313,12 @@ OBJLIBS =	\
 	basecode/_basecode.o \
 	msg/_msg.o \
 	shell/_shell.o \
-	biophysics/_biophysics.o \
-	hsolve/_hsolve.o \
 	randnum/_randnum.o \
 	scheduling/_scheduling.o \
 	builtins/_builtins.o \
-	device/_device.o \
-	kinetics/_kinetics.o \
-	ksolve/_ksolve.o \
-	regressionTests/_rt.o \
 	utility/_utility.o \
-	geom/_geom.o \
-	mesh/_mesh.o \
-	manager/_manager.o \
-	signeur/_signeur.o \
 	external/muparser/_muparser.o \
+	biophysics/_biophysics.o \
 	$(SMOLDYN_LIB) \
 	$(SBML_LIB) \
 	$(HCUDA_LIB) \
