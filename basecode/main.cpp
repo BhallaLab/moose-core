@@ -51,22 +51,22 @@ extern void testMpiBuiltins();
 extern void testMpiShell();
 extern void testMsg();
 extern void testMpiMsg();
-extern void testKinetics();
-extern void testKineticSolvers();
-extern void	testKineticSolversProcess();
-extern void testBiophysics();
-extern void testBiophysicsProcess();
-extern void testHSolve();
-extern void testKineticsProcess();
-extern void testGeom();
-extern void testMesh();
-extern void testSimManager();
-extern void testSigNeur();
-extern void testSigNeurProcess();
+// extern void testKinetics();
+// extern void testKineticSolvers();
+// extern void	testKineticSolversProcess();
+// extern void testBiophysics();
+// extern void testBiophysicsProcess();
+// extern void testHSolve();
+// extern void testKineticsProcess();
+// extern void testGeom();
+// extern void testMesh();
+// extern void testSimManager();
+// extern void testSigNeur();
+// extern void testSigNeurProcess();
 
 extern void initMsgManagers();
 extern void destroyMsgManagers();
-void regressionTests();
+// void regressionTests();
 #endif
 extern void speedTestMultiNodeIntFireNetwork( 
 	unsigned int size, unsigned int runsteps );
@@ -74,7 +74,7 @@ extern void speedTestMultiNodeIntFireNetwork(
 #ifdef USE_SMOLDYN
 	extern void testSmoldyn();
 #endif
-bool benchmarkTests( int argc, char** argv );
+// bool benchmarkTests( int argc, char** argv );
 
 //////////////////////////////////////////////////////////////////
 // System-dependent function here
@@ -290,15 +290,15 @@ void nonMpiTests( Shell* s )
 		testShell();
 		testScheduling();
 		testBuiltins();
-		testKinetics();
-		testKineticSolvers();
-		testBiophysics();
-		testHSolve();
-		testGeom();
-		testMesh();
-		testSigNeur();
+		// testKinetics();
+		// testKineticSolvers();
+		// testBiophysics();
+		// testHSolve();
+		// testGeom();
+		// testMesh();
+		// testSigNeur();
 #ifdef USE_SMOLDYN
-		testSmoldyn();
+		// testSmoldyn();
 #endif
 		s->setHardware( numThreads, numCores, numNodes, 0 );
 	}
@@ -314,11 +314,11 @@ void processTests( Shell* s )
 #ifdef DO_UNIT_TESTS
 	testSchedulingProcess();
 	testBuiltinsProcess();
-	testKineticsProcess();
-	testBiophysicsProcess();
-	testKineticSolversProcess();
-	testSimManager();
-	testSigNeurProcess();
+	// testKineticsProcess();
+	// testBiophysicsProcess();
+	// testKineticSolversProcess();
+	// testSimManager();
+	// testSigNeurProcess();
 #endif
 }
 
@@ -362,14 +362,12 @@ int main( int argc, char** argv )
 			mpiTests();
 			processTests( s );
 		}
-		if ( doRegressionTests )
-			regressionTests();
+		// if ( doRegressionTests ) regressionTests();
 #endif
 		// These are outside unit tests because they happen in optimized
 		// mode, using a command-line argument. As soon as they are done
 		// the system quits, in order to estimate timing.
-		if ( benchmarkTests( argc, argv ) || quitFlag )
-			s->doQuit();
+		// if ( benchmarkTests( argc, argv ) || quitFlag ) s->doQuit();
 		else 
 			Shell::launchParser(); // Here we set off a little event loop to poll user input. It deals with the doQuit call too.
 	}

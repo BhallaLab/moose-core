@@ -40,7 +40,8 @@ void Shell::doSaveModel( Id model, const string& fileName, bool qFlag )
 	string fileType = fileName.substr( pos );
 
 	if ( fileType == ".g" ) { // kkit model requested.
-			writeKkit( model, fileName );
+			cout << "Cannot write kkit model at this point\n";
+			// writeKkit( model, fileName );
 	} else {
 		cout << "Warning: Shell::doSaveModel: Do not know how to save "
 				"model of file type '" << fileType << "'.\n";
