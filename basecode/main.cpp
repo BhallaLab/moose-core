@@ -368,7 +368,7 @@ int main( int argc, char** argv )
 		// mode, using a command-line argument. As soon as they are done
 		// the system quits, in order to estimate timing.
 		// if ( benchmarkTests( argc, argv ) || quitFlag ) s->doQuit();
-		else 
+		// else 
 			Shell::launchParser(); // Here we set off a little event loop to poll user input. It deals with the doQuit call too.
 	}
 	
