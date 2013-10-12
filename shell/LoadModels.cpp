@@ -12,9 +12,11 @@
 #include "Shell.h"
 #include "../utility/strutil.h"
 #include "LoadModels.h" // For the ModelType enum.
+/*
 #include "../biophysics/ReadCell.h"
 #include "../kinetics/ReadKkit.h"
 #include "../kinetics/ReadCspace.h"
+*/
 
 ModelType findModelType( string filename, ifstream& fin, string& line )
 {
@@ -129,8 +131,9 @@ Id Shell::doLoadModel( const string& fileName, const string& modelPath, const st
 	switch ( findModelType( fileName, fin, line ) ) {
 		case DOTP:
 			{
-				ReadCell rc;
-				return rc.read( fileName, modelName, parentId );
+		//		ReadCell rc;
+		//		return rc.read( fileName, modelName, parentId );
+				return Id();
 			}
 		case KKIT: 
 			{
@@ -139,23 +142,25 @@ Id Shell::doLoadModel( const string& fileName, const string& modelPath, const st
 				if ( solverClass == "" || solverClass == "gsl" )
 					sc = "Stoich";
 					*/
-				ReadKkit rk;
-				Id ret = rk.read( fileName, modelName, parentId, sc);
+		//		ReadKkit rk;
+		//		Id ret = rk.read( fileName, modelName, parentId, sc);
 				/*
 				if ( solverClass == "gsl" ) { // set up kkit run
 					rk.setupGslRun();
 				}
-				*/
 				return ret;
+				*/
+				return Id();
 			}
 			break;
 		case CSPACE:
 			{
 				string sc = solverClass;
-				ReadCspace rc;
-				Id ret = rc.readModelString( line, modelName, parentId, sc);
-				rc.makePlots( 1.0 );
-				return ret;
+		//		ReadCspace rc;
+		//		Id ret = rc.readModelString( line, modelName, parentId, sc);
+		//		rc.makePlots( 1.0 );
+		//		return ret;
+				return Id();
 			}
 		case UNKNOWN:
 		default:

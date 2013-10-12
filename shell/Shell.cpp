@@ -26,10 +26,6 @@
 #include "../scheduling/TickPtr.h"
 #include "../scheduling/Clock.h"
 
-#include "../mesh/MeshEntry.h"
-// #include "../mesh/Boundary.h"
-// #include "../mesh/ChemCompt.h"
-
 #ifdef USE_SBML
 #include "../sbml/SbmlWriter.h"
 #include "../sbml/SbmlReader.h"
@@ -1061,6 +1057,7 @@ void Shell::doSyncDataHandler( Id tgt )
  */
 void Shell::handleReMesh( Id baseMesh )
 {
+		/*
 	static const Finfo* finfo = MeshEntry::initCinfo()->findFinfo( "get_volume" );
 	static const DestFinfo* df = dynamic_cast< const DestFinfo* >( finfo );
 	assert( df );
@@ -1078,6 +1075,7 @@ void Shell::handleReMesh( Id baseMesh )
 		assert( ret );
 		// Now we need to tell each tgt to scale its n, rates etc from vol.
 	}
+	*/
 }
 
 /**
@@ -1090,6 +1088,7 @@ void Shell::handleReMesh( Id baseMesh )
 
 void Shell::doReacDiffMesh( Id baseCompartment )
 {
+		/*
 	Eref sheller( shelle_, 0 );
 	assert( baseCompartment()->dataHandler()->isGlobal() );
 	assert( baseCompartment()->cinfo()->isA( "ChemCompt" ) );
@@ -1111,6 +1110,7 @@ void Shell::doReacDiffMesh( Id baseCompartment )
 	}
 
 	// Here we need to check on any non-matching Reacs and enzymes.
+	// */
 	
 }
 

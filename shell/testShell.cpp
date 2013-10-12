@@ -576,6 +576,7 @@ void testObjIdToAndFromPath()
 	cout << "." << flush;
 }
 
+/*
 void testMultiLevelCopyAndPath()
 {
 	Eref sheller = Id().eref();
@@ -662,6 +663,7 @@ void testMultiLevelCopyAndPath()
 	shell->doDelete( bulb );
 	cout << "." << flush;
 }
+*/
 
 // Here we create the element independently on each node, and connect
 // it up independently. Using the doAddMsg we will be able to do this
@@ -1762,6 +1764,7 @@ void testGetMsgSrcAndTarget()
 	// cout << "." << flush;
 }
 
+/*
 void testShellMesh()
 {
 	Eref sheller = Id().eref();
@@ -1854,6 +1857,7 @@ void testShellMesh()
 	shell->doDelete( compt );
 	cout << "." << flush;
 }
+*/
 
 void testShell( )
 {
@@ -1864,7 +1868,7 @@ void testShell( )
 	// testShellParserQuit();
 	testGetMsgs();	// Tests getting Msg info from Neutral.
 	testGetMsgSrcAndTarget();
-	testShellMesh();
+	// testShellMesh();
 }
 
 extern void testWildcard();
@@ -1880,7 +1884,7 @@ void testMpiShell( )
 	testCopyFieldElement();
 
 	testObjIdToAndFromPath();
-	testMultiLevelCopyAndPath();
+	// testMultiLevelCopyAndPath(); // Uses HH channels.
 
 	testShellSetGet();
 	testInterNodeOps();
