@@ -5,3 +5,7 @@ all the multithreading and queueing code framework with a view to simplifying
 and speeding up calculations. It is also meant to implement parallelization
 from the ground up, using either MPI or Charm++ messaging.
 It is meant to keep the old buildQ API as much as possible.
+
+Compiled the reduced code base, got most of the unit tests to work. 
+Checkin 4792.
+===========================================================================
