@@ -8,4 +8,21 @@ It is meant to keep the old buildQ API as much as possible.
 
 Compiled the reduced code base, got most of the unit tests to work. 
 Checkin 4792.
+
+Fixed a dangling 'else' statement in the main.cpp that was preventing the
+unit tests from closing. Now it is OK. Checkin 4793.
+
+Next: eliminate threading. 
+	much eliminating later, it compiles but doesn't clear unit tests.
+
+Stuck in Shell::doReinit in the Qinfo::buildOn/buildOff around line 686
+Eliminated all buildOn/buildOff calls. Now it croaks much sooner in the
+unit tests.
+
+===========================================================================
+13 Oct 2013.
+Further cleanup. Moved the process loop into Clock. Gets some way through
+unit tests but fails in testShellAddMsg(), seems that between Clock::doReinit
+and doStart the message info isn't going around.
+
 ===========================================================================

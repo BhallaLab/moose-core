@@ -8,11 +8,9 @@
 **********************************************************************/
 
 // #include <unistd.h>
-#include <pthread.h>
 #ifdef USE_MPI
 #include <mpi.h>
 #endif
-#include "FuncBarrier.h"
 
 // #include <stdlib.h>
 #include "header.h"
@@ -55,8 +53,7 @@ void* processEventLoop( void* info )
 		// Phase 1. Carry out Process calculations on all simulated objects
 		/////////////////////////////////////////////////////////////////
 		clock->processPhase1( p );
-		// This custom barrier carries out the swap operation 
-		p->barrier1->wait(); // Within this func, inQ and outQ are swapped.
+		Qinfo::swapQ();
 
 		/////////////////////////////////////////////////////////////////
 		// Phase 2: Execute inQ for all nodes. Transfer data as needed
@@ -67,7 +64,7 @@ void* processEventLoop( void* info )
 		} else {
 			for ( unsigned int j = 0; j < Shell::numNodes(); ++j ) {
 #ifdef USE_MPI
-				p->barrier2->wait(); // Wait for MPI thread to recv data
+				Qinfo::swapMpiQ;
 #endif
 				Qinfo::readQ( p->threadIndexInGroup ); //Deliver all Msgs
 			}
@@ -75,9 +72,8 @@ void* processEventLoop( void* info )
 		/////////////////////////////////////////////////////////////////
 		// Phase 3: Just a barrier to tie things up and do clock scheduling
 		/////////////////////////////////////////////////////////////////
-		p->barrier3->wait();
+		Clock::checkProcState();
 	}
-	pthread_exit( NULL );
 	return 0; //To keep compiler happy.
 }
 
@@ -90,15 +86,13 @@ void* processEventLoop( void* info )
  */
 void* mpiEventLoop( void* info )
 {
-	ProcInfo *p = reinterpret_cast< ProcInfo* >( info );
-
 	while( Shell::keepLooping() )
 	{
 		/////////////////////////////////////////////////////////////////
 		// Phase 1: do nothing. But we must wait for barrier 0 to clear,
 		// because we need inQ to be settled before broadcasting it.
 		/////////////////////////////////////////////////////////////////
-		p->barrier1->wait(); // Here the inQ is set to the local Q.
+		Qinfo::swapQ();
 
 		/////////////////////////////////////////////////////////////////
 		// Phase 2: Send data, then juggle Queue buffers in the barrier
@@ -129,14 +123,14 @@ void* mpiEventLoop( void* info )
 
 			Qinfo::setSourceNode( j ); // needed for queue juggling.
 			p->barrier2->wait(); // This barrier swaps inQ and mpiRecvQ
+			Qinfo::swapMpiQ();
 		}
 #endif
 		/////////////////////////////////////////////////////////////////
 		// Phase 3: Do nothing, just let the Process threads wrap up.
 		/////////////////////////////////////////////////////////////////
-		p->barrier3->wait();
+		Clock::checkProcState();
 	}
-	pthread_exit( NULL );
 	return 0; //To keep compiler happy.
 }
 
@@ -145,38 +139,13 @@ void* mpiEventLoop( void* info )
 //////////////////////////////////////////////////////////////////////////
 void Shell::launchThreads()
 {
-	attr_ = new pthread_attr_t;
-	pthread_attr_init( attr_ );
-	pthread_attr_setdetachstate( attr_, PTHREAD_CREATE_JOINABLE );
-
 	// Add one for the MPI thread if we have multiple nodes.
 	unsigned int numThreads = numProcessThreads_ + ( numNodes_ > 1 ); 
-
-	barrier1_ = new FuncBarrier( numThreads, &Qinfo::swapQ );
-	barrier2_ = new FuncBarrier( numThreads, &Qinfo::swapMpiQ );
-	barrier3_ = new FuncBarrier( numThreads, &Clock::checkProcState );
-	int ret;
-
-	parserMutex_ = new pthread_mutex_t; // Assign the Shell variables.
-	parserBlockCond_ = new pthread_cond_t;
-
-	ret = pthread_mutex_init( parserMutex_, NULL );
-	assert( ret == 0 );
-
-	ret = pthread_cond_init( parserBlockCond_, NULL );
-	assert( ret == 0 );
-
 	keepLooping_ = 1;
-	
 	threadProcs_.resize( numThreads );
 	vector< ProcInfo >& p = threadProcs_;
-	// An extra thread is used by MPI, and on node 0, yet another for Shell
-	// pthread_t* threads = new pthread_t[ numThreads ];
-	threads_ = new pthread_t[ numThreads ];
-
 	// Have to prevent the parser thread from doing stuff during 
 	// the process loop, except at very tightly controlled times.
-	Qinfo::lockParserThread();
 	for ( unsigned int i = 0; i < numThreads; ++i ) {
 		// Note that here we put # of compute cores, not total threads.
 		p[i].numThreadsInGroup = numProcessThreads_; 
@@ -184,49 +153,8 @@ void Shell::launchThreads()
 		p[i].threadIndexInGroup = i + 1;
 		p[i].nodeIndexInGroup = myNode_;
 		p[i].numNodesInGroup = numNodes_;
-		p[i].barrier1 = barrier1_;
-		p[i].barrier2 = barrier2_;
-		p[i].barrier3 = barrier3_;
 		p[i].procIndex = i;
 
 	// cout << myNode_ << "." << i << ": ptr= " << &( p[i] ) << ", Shell::procInfo = " << &p_ << " setting up procs\n";
-		if ( i < numProcessThreads_ ) { // These are the compute threads
-			int rc = pthread_create( threads_ + i, attr_, processEventLoop, 
-				(void *)&p[i] );
-			assert( rc == 0 );
-		} else if ( numNodes_ > 1 && i == numProcessThreads_ ) { // mpiThread stufff.
-			int rc = pthread_create( 
-				threads_ + i, attr_, mpiEventLoop, (void *)&p[i] );
-			assert( rc == 0 );
-		}
 	}
 }
-
-void Shell::joinThreads()
-{
-	// Add one for the MPI thread if needed.
-	int numThreads = numProcessThreads_ + ( numNodes_ > 1 ); 
-	int ret;
-
-	for ( int i = 0; i < numThreads; ++i ) {
-		void* status;
-		ret = pthread_join( threads_[i], &status );
-		if ( ret )
-			cout << "Error: Unable to join threads\n";
-	}
-
-	delete[] threads_;
-	pthread_attr_destroy( attr_ );
-	delete attr_;
-	ret = pthread_mutex_destroy( parserMutex_ );
-	delete parserMutex_;
-	ret = pthread_cond_destroy( parserBlockCond_ );
-	delete parserBlockCond_;
-
-	delete barrier1_;
-	delete barrier2_;
-	delete barrier3_;
-
-	assert( ret == 0 );
-}
-

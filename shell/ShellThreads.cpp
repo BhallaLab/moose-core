@@ -8,10 +8,9 @@
 **********************************************************************/
 
 /**
- * This file contains the thread and MPI-handling functions in Shell.
+ * This file contains the MPI-handling functions in Shell.
  */
 
-#include <pthread.h>
 #ifdef USE_MPI
 #include <mpi.h>
 #endif
@@ -35,15 +34,7 @@
  */
 void Shell::initAck()
 {
-	if ( isSingleThreaded() || !keepLooping() ) {
-		numAcks_ = 0; 
-	} else {
-		pthread_mutex_lock( parserMutex() );
-			// Note that we protect this in the mutex in the threaded mode.
-			numAcks_ = 0;
-			isBlockedOnParser_ = 1;
-			acked_.assign( numNodes_, 0 );
-	}
+	numAcks_ = 0; 
 }
 
 /**
@@ -52,19 +43,8 @@ void Shell::initAck()
  */
 void Shell::waitForAck()
 {
-	if ( isSingleThreaded() || !keepLooping() ) {
-		while ( isAckPending() ) {
+	while ( isAckPending() ) {
 			Qinfo::clearQ( p_.threadIndexInGroup );
-	// Tried this to get it to work in single-thread mode. Doesn't work.
-	// Also causes problems by setting the size of Qinfo::reduceQ in
-	// Qinfo::clearReduceQ
-	//		Clock::checkProcState();
-		}
-	} else {
-		while ( isAckPending() )
-			pthread_cond_wait( parserBlockCond(), parserMutex() );
-		isBlockedOnParser_ = 0;
-		pthread_mutex_unlock( parserMutex() );
 	}
 }
 
@@ -94,9 +74,6 @@ void Shell::handleAck( unsigned int ackNode, unsigned int status )
 	if ( status != OkStatus ) {
 		cout << myNode_ << ": Shell::handleAck: Error: status = " <<
 			status << " from node " << ackNode << endl;
-	}
-	if ( !isAckPending() && !isSingleThreaded() && parserBlockCond() ) {
-		pthread_cond_signal( parserBlockCond() );
 	}
 }
 
@@ -128,6 +105,7 @@ void Shell::setHardware(
 	unsigned int numThreads, unsigned int numCores, unsigned int numNodes,
 	unsigned int myNode )
 {
+	assert( numThreads == 1 );
 	numProcessThreads_ = numThreads;
 	numCores_ = numCores;
 	numNodes_ = numNodes;
@@ -174,15 +152,6 @@ unsigned int Shell::myNode()
 	return myNode_;
 }
 
-pthread_mutex_t* Shell::parserMutex()
-{
-	return parserMutex_;
-}
-pthread_cond_t* Shell::parserBlockCond()
-{
-	return parserBlockCond_;
-}
-
 bool Shell::inBlockingParserCall()
 {
 	return isBlockedOnParser_;
@@ -221,10 +190,6 @@ void Shell::handleSync( const Eref& e, const Qinfo* q, Id elm, FuncId fid )
 {
 
 	assert( elm != Id() && elm() != 0 );
-	/*
-	FieldDataHandlerBase* fdh = dynamic_cast< FieldDataHandlerBase *>(
-		elm()->dataHandler() );
-		*/
 	const ReduceFinfoBase* rfb = reduceArraySizeFinfo();
 
 	if ( rfb )  {
@@ -234,6 +199,4 @@ void Shell::handleSync( const Eref& e, const Qinfo* q, Id elm, FuncId fid )
 		if ( myNode_ == 0 )
 			rfb->send( Eref( shelle_, 0 ), ScriptThreadNum, 0 );
 	}
-	// We don't send an ack, instead the digest function does the update.
-	// ack()->send( e, &p_, Shell::myNode(), OkStatus );
 }

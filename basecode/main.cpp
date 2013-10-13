@@ -281,7 +281,8 @@ void nonMpiTests( Shell* s )
 	if ( Shell::myNode() == 0 ) {
 		unsigned int numNodes = s->numNodes();
 		unsigned int numCores = s->numCores();
-		unsigned int numThreads = s->numProcessThreads();
+		// unsigned int numThreads = s->numProcessThreads();
+		unsigned int numThreads = 1;
 		if ( numCores > 0 )
 		// s->setHardware( numthreads, numCores, numNodes, myNode );
 		s->setHardware( 1, 1, 1, 0 );
@@ -349,7 +350,6 @@ int main( int argc, char** argv )
 	// spawn a lot of other stuff.
 	Element* shelle = shellId();
 	Shell* s = reinterpret_cast< Shell* >( shelle->dataHandler()->data( 0 ) );
-	Qinfo::initMutex(); // Mutex used to align Parser and MOOSE threads.
 	if ( doUnitTests )
 		nonMpiTests( s ); // These tests do not need the process loop.
 
@@ -370,12 +370,6 @@ int main( int argc, char** argv )
 		// if ( benchmarkTests( argc, argv ) || quitFlag ) s->doQuit();
 		// else 
 			Shell::launchParser(); // Here we set off a little event loop to poll user input. It deals with the doQuit call too.
-	}
-	
-	// Somehow we need to return control to our parser. Then we clean up
-	if ( !Shell::isSingleThreaded() ) {
-		Shell::joinThreads();
-		Qinfo::freeMutex();
 	}
 	Neutral* ns = reinterpret_cast< Neutral* >( shelle->dataHandler()->data( 0 ) );
 	ns->destroy( shellId.eref(), 0, 0 );

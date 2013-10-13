@@ -22,7 +22,6 @@
 #include "../randnum/randnum.h"
 #include "../shell/Shell.h"
 
-pthread_mutex_t TestSched::mutex_;
 bool TestSched::isInitPending_( 1 );
 int TestSched::globalIndex_( 0 );
 
@@ -150,11 +149,9 @@ void TestSched::process( const Eref& e, ProcPtr p )
 		*/
 
 	// Check that everything remains in sync across threads.
-	pthread_mutex_lock( &mutex_ );
 		assert( ( globalIndex_ - index_ )*( globalIndex_ - index_ ) <= 1 );
 		if ( p->threadIndexInGroup == 1 )
 			globalIndex_ = index_;
-	pthread_mutex_unlock( &mutex_ );
 
 	// assert( index_ <= max * p->numThreads );
 	// cout << index_ << ": " << p->currTime << endl;

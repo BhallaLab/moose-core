@@ -19,9 +19,7 @@ class ProcInfo
 				numNodesInGroup( 1 ), 
 				groupId( 0 ),
 				procIndex( 0 ),
-				isMpiThread( 0 ),
-				barrier1( 0 ),
-				barrier2( 0 )
+				isMpiThread( 0 )
 			{;}
 		double dt;
 		double currTime;
@@ -35,12 +33,6 @@ class ProcInfo
 		unsigned int groupId;
 		unsigned int procIndex; // Look up for this Proc on Shell::getProc
 		bool isMpiThread;
-		FuncBarrier* barrier1;
-		FuncBarrier* barrier2;
-		FuncBarrier* barrier3;
-
-		// void* barrier1;
-		// void* barrier2;
 		/**
 		 * This utility function sets policy for which thread to use
 		 * for Msg::exec, given any Id/DataId. 

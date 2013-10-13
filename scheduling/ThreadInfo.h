@@ -21,8 +21,6 @@ class ThreadInfo
 		unsigned int groupId;
 		unsigned int nodeIndexInGroup;
 		Qid outQid;
-		pthread_mutex_t* sortMutex; // Protects sorting of TickPtrs
-		pthread_mutex_t* timeMutex; // Protects time increment in TickPtrs
 };
 
 #endif // _THREAD_INFO_H

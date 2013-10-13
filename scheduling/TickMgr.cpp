@@ -11,7 +11,6 @@
 using namespace std;
 */
 
-#include <pthread.h>
 #include "header.h"
 #include "Tick.h"
 #include "TickMgr.h"
