@@ -44,13 +44,6 @@ ProcInfo Shell::p_;
 vector< ProcInfo> Shell::threadProcs_(1);
 unsigned int Shell::numAcks_ = 0;
 vector< unsigned int > Shell::acked_( 1, 0 );
-pthread_t* Shell::threads_( 0 );
-pthread_mutex_t* Shell::parserMutex_( 0 );
-pthread_cond_t* Shell::parserBlockCond_( 0 );
-pthread_attr_t* Shell::attr_( 0 );
-FuncBarrier* Shell::barrier1_( 0 );
-FuncBarrier* Shell::barrier2_( 0 );
-FuncBarrier* Shell::barrier3_( 0 );
 bool Shell::doReinit_( 0 );
 bool Shell::isParserIdle_( 0 );
 double Shell::runtime_( 0.0 );
@@ -504,9 +497,7 @@ Id Shell::doCreate( string type, Id parent, string name, vector< int > dimension
 	Id ret = Id::nextId();
 	vector< int > dims( dimensions );
 	dims.push_back( isGlobal );
-	Qinfo::buildOn( qFlag );
 		innerCreate( type, parent, ret, name, dims );
-	Qinfo::buildOff( qFlag );
 	/*
 	initAck(); // Nasty thread stuff happens here for multithread mode.
 		requestCreate()->send( Id().eref(), ScriptThreadNum, type, parent, ret, name, dims );
@@ -518,9 +509,7 @@ Id Shell::doCreate( string type, Id parent, string name, vector< int > dimension
 bool Shell::doDelete( Id i, bool qFlag )
 {
 	Neutral n;
-	Qinfo::buildOn( qFlag );
 		n.destroy( i.eref(), 0, 0 );
-	Qinfo::buildOff( qFlag );
 	/*
 	initAck();
 		requestDelete()->send( Id().eref(), ScriptThreadNum, i );
@@ -557,10 +546,8 @@ MsgId Shell::doAddMsg( const string& msgType,
 		cout << myNode_ << ": Shell::doAddMsg: Error: Src/Dest Msg type mismatch: " << srcField << "/" << destField << endl;
 		return Msg::bad;
 	}
-	Qinfo::buildOn( qFlag );
 		MsgId mid = Msg::nextMsgId();
 		innerAddMsg( msgType, mid, src, srcField, dest, destField );
-	Qinfo::buildOff( qFlag );
 	/*
 	initAck();
 	MsgId mid = Msg::nextMsgId();
@@ -616,61 +603,33 @@ void Shell::connectMasterMsg()
 
 void Shell::doQuit( bool qFlag )
 {
-	Qinfo::buildOn( qFlag );
 		Shell::keepLooping_ = 0;
-		// Send it off via MPI too.
-	Qinfo::buildOff( qFlag );
-	/*
-	// No acks needed: the next call from parser should be to 
-	// exit parser itself.
-	requestQuit()->send( Id().eref(), ScriptThreadNum );
-	*/
 }
 
 void Shell::doStart( double runtime, bool qFlag )
 {
 	extern void quickNap(); // Defined in Qinfo.cpp
 	static Id clockId( 1 );
-	Qinfo::buildOn( qFlag );
 		// bool isRunning = Field< double >::get( clockId, "isRunning" );
 		if ( isRunning() ) { // Prevent double start.
 			cout << "Shell::doStart: Warning: Simulation already running\n";
 		} else {
 			SetGet1< double >::set( clockId, "start", runtime );
 			// isRunning = 1;
+
+			/*
 			while ( isRunning() ) {
-				Qinfo::buildOff( qFlag );
 				// Here we let the simulation threads do stuff.
 					quickNap();
-				Qinfo::buildOn( qFlag );
 			}
+			*/
 		}
-	// Clean up and exit.
-	Qinfo::buildOff( qFlag );
-	/*
-	Eref sheller( shelle_, 0 );
-	// Check if sim not yet initialized. Do it if needed.
-
-	// Then actually run simulation.
-	initAck();
-		requestStart()->send( sheller, ScriptThreadNum, runtime );
-	waitForAck();
-	*/
-	// cout << Shell::myNode() << ": Shell::doStart(" << runtime << ")" << endl;
 }
 
 void Shell::doNonBlockingStart( double runtime, bool qFlag )
 {
-	Qinfo::buildOn( qFlag );
 		Id clockId( 1 );
 		SetGet1< double >::set( clockId, "start", runtime );
-	Qinfo::buildOff( qFlag );
-	/*
-	Eref sheller( shelle_, 0 );
-	// Check if sim not yet initialized. Do it if needed.
-
-	requestStart()->send( sheller, ScriptThreadNum, runtime );
-	*/
 }
 
 bool isDoingReinit()
@@ -689,23 +648,8 @@ void Shell::doReinit( bool qFlag )
 		cout << "Error: Shell::doReinit: Should not be called unless ProcessLoop is running\n";
 		return;
 	}
-	// Has to block till reinit is done.
-	Qinfo::buildOn( qFlag );
-		Id clockId( 1 );
-		SetGet0::set( clockId, "reinit" );
-		while ( isDoingReinit() ) {
-			Qinfo::buildOff( qFlag );
-			// Here we let the simulation threads do stuff.
-				quickNap();
-			Qinfo::buildOn( qFlag );
-		}
-	Qinfo::buildOff( qFlag );
-	/*
-	Eref sheller( shelle_, 0 );
-	initAck();
-		requestReinit()->send( sheller, ScriptThreadNum );
-	waitForAck();
-	*/
+	Id clockId( 1 );
+	SetGet0::set( clockId, "reinit" );
 }
 
 void Shell::doStop( bool qFlag )
@@ -714,53 +658,20 @@ void Shell::doStop( bool qFlag )
 		cout << "Error: Shell::doStop: Should not be called unless ProcessLoop is running\n";
 		return;
 	}
-	Qinfo::buildOn( qFlag );
-		Id clockId( 1 );
-		SetGet0::set( clockId, "stop" );
-	Qinfo::buildOff( qFlag );
-	/*
-	Eref sheller( shelle_, 0 );
-	initAck();
-		requestStop()->send( sheller, ScriptThreadNum );
-	waitForAck();
-	*/
+	Id clockId( 1 );
+	SetGet0::set( clockId, "stop" );
 }
 ////////////////////////////////////////////////////////////////////////
 
 void Shell::doSetClock( unsigned int tickNum, double dt, bool qFlag )
 {
-	/*
-	// if ( q->addToStructuralQ() ) return;
-	Eref ce = Id( 1 ).eref();
-	assert( ce.element() );
-	// We do NOT go through the message queuing here, as the clock is
-	// always local and this operation fiddles with scheduling.
-	Clock* clock = reinterpret_cast< Clock* >( ce.data() );
-	clock->setupTick( tickNum, dt );
-	*/
-	/*
-	Eref sheller( shelle_, 0 );
-	initAck(); // This causes a race condition in testShellAddMsg:771
-		requestSetupTick.send( sheller, ScriptThreadNum, tickNum, dt );
-	waitForAck();
-	*/
-	Qinfo::buildOn( qFlag );
 		SetGet2< unsigned int, double >::set( ObjId( 1 ), "setupTick", tickNum, dt );
-	Qinfo::buildOff( qFlag );
 }
 
 void Shell::doUseClock( string path, string field, unsigned int tick,
 	bool qFlag )
 {
-	Qinfo::buildOn( qFlag );
-		innerUseClock( path, field, tick);
-	Qinfo::buildOff( qFlag );
-	/*
-	Eref sheller( shelle_, 0 );
-	initAck();
-		requestUseClock()->send( sheller, ScriptThreadNum, path, field, tick );
-	waitForAck();
-	*/
+	innerUseClock( path, field, tick);
 }
 
 /**
@@ -811,9 +722,7 @@ void Shell::doMove( Id orig, Id newParent, bool qFlag )
 		return;
 		
 	}
-	Qinfo::buildOn( qFlag );
 		innerMove( orig, newParent );
-	Qinfo::buildOff( qFlag );
 	// Put in check here that newParent is not a child of orig.
 	/*
 	Eref sheller( shelle_, 0 );

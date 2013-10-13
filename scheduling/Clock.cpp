@@ -58,7 +58,6 @@
  * 		retain their state, the simulation can resume smoothly.
  */
 
-#include <pthread.h>
 #include "header.h"
 #include "Tick.h"
 #include "TickMgr.h"
@@ -605,6 +604,24 @@ void Clock::checkProcState()
 // the advancePhase1 and advancePhase2.
 /////////////////////////////////////////////////////////////////////
 
+void Clock::process()
+{
+		processPhase1( &info_ );
+		Qinfo::swapQ();
+		processPhase2( &info_ );
+		if ( Shell::numNodes() <= 1 ) {
+			Qinfo::readQ( info_.threadIndexInGroup ); //Deliver all local Msgs
+		} else {
+			for ( unsigned int j = 0; j < Shell::numNodes(); ++j ) {
+#ifdef USE_MPI
+				Qinfo::swapMpiQ;
+#endif
+				Qinfo::readQ( info_.threadIndexInGroup ); //Deliver all Msgs
+			}
+		}
+		Clock::checkProcState();
+}
+
 /**
  * This has to happen on a single thread, whatever the Clock is assigned to.
  * Start has to happen gracefully: If the simulation was stopped for any
@@ -639,6 +656,10 @@ void Clock::handleStart( double runtime )
 		procState_ = ReinitThenStart;
 	else
 		procState_ = StartOnly;
+
+	while( isRunning_ ) {
+		process();
+	}
 }
 
 /// Static function
@@ -740,6 +761,9 @@ void Clock::handleReinit()
 	// flipReinit_ = 1; // This tells the clock to reinit in barrier3.
 	// doingReinit_ = 1; // Can't do this here, may mess up other threads.
 	// isRunning_ = 0; // Can't do this here either.
+	while ( isRunning_ )
+		process();
+	process();
 }
 
 

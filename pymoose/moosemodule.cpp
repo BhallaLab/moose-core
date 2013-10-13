@@ -811,7 +811,6 @@ extern "C" {
         Id shellId = init(argc, argv, dounit, doregress);
         inited = 1;
         Shell * shellPtr = reinterpret_cast<Shell*>(shellId.eref().data());
-        Qinfo::initMutex(); // Mutex used to align Parser and MOOSE threads        
         if (dounit){
             nonMpiTests( shellPtr ); // These tests do not need the process loop.
         }
@@ -869,11 +868,6 @@ extern "C" {
             Py_XDECREF(it->second);
         }
         SHELLPTR->doQuit();
-        // Cleanup threads
-        if (!SHELLPTR->isSingleThreaded()){
-            SHELLPTR->joinThreads();
-            Qinfo::freeMutex();
-        }
         // Destroy the Shell object
         Neutral* ns = reinterpret_cast<Neutral*>(shellId.element()->dataHandler()->data(0));
         ns->destroy( shellId.eref(), 0, 0);

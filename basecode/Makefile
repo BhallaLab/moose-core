@@ -48,7 +48,6 @@ OBJ = \
 	FieldOpFunc.o \
 	SparseMatrix.o \
 	PrepackedBuffer.o \
-	FuncBarrier.o \
 	doubleEq.o \
 	ReduceBase.o \
 	testAsync.o	\
@@ -104,7 +103,6 @@ SetGet.o:	SetGet.h ../shell/Neutral.h
 DataHandlerWrapper.o: DataHandlerWrapper.h
 FieldDataHandlerBase.o: FieldOpFunc.h
 FieldOpFunc.o: FieldOpFunc.h FieldDataHandlerBase.h
-FuncBarrier.o:	FuncBarrier.h
 #TestBasecode.o:	Shell.h ShellWrapper.h
 
 .cpp.o:

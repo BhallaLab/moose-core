@@ -22,8 +22,6 @@
 */
 
 // Declaration of static fields
-bool Qinfo::isSafeForStructuralOps_ = 0;
-bool Qinfo::parserPending_ = 0;
 const BindIndex Qinfo::DirectAdd = -1;
 vector< double > Qinfo::q0_( 1000, 0.0 );
 
@@ -39,10 +37,6 @@ double* Qinfo::mpiRecvQ_ = &mpiQ0_[0];
 
 vector< Qinfo > Qinfo::structuralQinfo_( 0 );
 vector< double > Qinfo::structuralQdata_( 0 );
-
-pthread_mutex_t* Qinfo::qMutex_;
-pthread_mutex_t* Qinfo::pMutex_;
-pthread_cond_t* Qinfo::qCond_;
 
 bool Qinfo::waiting_ = 0;
 int Qinfo::numCyclesToWait_ = 0;
@@ -103,7 +97,6 @@ bool Qinfo::execThread( Id id, unsigned int dataIndex ) const
  */
 void Qinfo::clearStructuralQ()
 {
-	enableStructuralOps();
 	const double* data = &structuralQdata_[0];
 	for ( unsigned int i = 0; i < structuralQinfo_.size(); ++i ) {
 		const Qinfo& qi = structuralQinfo_[i];
@@ -119,7 +112,6 @@ void Qinfo::clearStructuralQ()
 		// }
 	}
 
-	disableStructuralOps();
 	structuralQinfo_.resize( 0 );
  	structuralQdata_.resize( 0 );
 }
@@ -159,54 +151,6 @@ void Qinfo::readQ( ThreadId threadNum )
 }
 
 /**
- * Presents a barrier to calls that modify MOOSE simulation structure.
- * This should be called before any build function.
- * It can be called in two contexts: from the parser, and from a Handler.
- * The former case is more common. If so, the call must be called within
- * a mutex protected portion of SwapQ.
- * The latter case applies if the call is initiated from within the MOOSE
- * messaging system, through a function Handler.
- * The qFlag must be set if the call is from a Handler. Otherwise the
- * system detects this and sends up an error.
- * static func
- */
-void Qinfo::buildOn( bool qFlag )
-{
-	if ( qFlag ) {
-		if ( isSafeForStructuralOps_ )
-			return;
-		else
-			assert( 0 );
-	} else {
-		parserPending_ = true;
-		pthread_mutex_lock( pMutex_ );
-		pthread_mutex_lock( qMutex_ );
-		return;
-	}
-}
-
-/**
- * Releases barrier to calls that modify MOOSE simulation structure.
- * Call after the build function.
- * Static func.
- */
-void Qinfo::buildOff( bool qFlag )
-{
-	if ( !qFlag ) {
-		parserPending_ = false;
-		pthread_cond_signal( qCond_ );
-		pthread_mutex_unlock( qMutex_ );
-		pthread_mutex_unlock( pMutex_ );
-	}
-}
-
-// static function. Called just before we start the process loop
-void Qinfo::lockParserThread() 
-{
-	pthread_mutex_lock( pMutex_ );
-}
-
-/**
  * System-independent timeout for busy loops when nothing is happening.
  */
 void quickNap()
@@ -240,17 +184,6 @@ void Qinfo::swapQ()
 	 * should not conflict.
 	 */
 	clearStructuralQ(); // static function.
-
-	if (parserPending_ ) {
-		pthread_mutex_unlock( pMutex_ );
-		pthread_mutex_lock( qMutex_ );
-		while (parserPending_ ) {
-			pthread_cond_wait( qCond_, qMutex_ );
-		}
-		pthread_mutex_unlock( qMutex_ );
-		pthread_mutex_lock( pMutex_ );
-	}
-
 
 	/**
 	 * This whole function is protected by a mutex so that the master
@@ -316,7 +249,6 @@ void Qinfo::swapQ()
 			dBuf_[i].resize( 0 );
 		}
 
-	// if ( !Shell::isSingleThreaded() ) pthread_mutex_lock( qMutex_ );
 	++numProcessCycles_;
 
 
@@ -335,19 +267,6 @@ void Qinfo::swapQ()
  */
 void Qinfo::waitProcCycles( unsigned int numCycles )
 {
-	/*
-	if ( Shell::keepLooping() && !Shell::isSingleThreaded()  ) {
-		pthread_mutex_lock( qMutex_ );
-			waiting_ = 1;
-			numCyclesToWait_ = numCycles;
-			while( waiting_ )
-				pthread_cond_wait( qCond_, qMutex_ );
-		pthread_mutex_unlock( qMutex_ );
-	} else {
-		for ( unsigned int i = 0; i < numCycles; ++i )
-			clearQ( ScriptThreadNum );
-	}
-	*/
 		for ( unsigned int i = 0; i < numCycles; ++i )
 			clearQ( ScriptThreadNum );
 }
@@ -665,28 +584,10 @@ void Qinfo::addVecDirectToQ( const ObjId& src, const ObjId& dest,
 		vec.insert( vec.end(), arg, arg + entrySize * numEntries );
 }
 
-/// Static func.
-void Qinfo::disableStructuralOps()
-{
-	// pthread_mutex_lock( qMutex_ );
-		isSafeForStructuralOps_ = 0;
-	// pthread_mutex_unlock( qMutex_ );
-}
-
-/// static func
-void Qinfo::enableStructuralOps()
-{
-	// pthread_mutex_lock( qMutex_ );
-		isSafeForStructuralOps_ = 1;
-	// pthread_mutex_unlock( qMutex_ );
-}
-
 /**
  * This is called by the 'handle<op>' functions in Shell. So it is always
  * either in phase2/3, or within clearStructuralQ() which is on a single 
  * thread inside Barrier1.
- * Note that the 'isSafeForStructuralOps' flag is only ever touched in 
- * clearStructuralQ(), except in the unit tests.
  */
 bool Qinfo::addToStructuralQ() const
 {
@@ -694,7 +595,7 @@ bool Qinfo::addToStructuralQ() const
 		1 + ( sizeof( ObjFid ) - 1 ) / sizeof( double );
 
 	bool ret = 0;
-		if ( !( isSafeForStructuralOps_ || threadNum_ == ScriptThreadNum )){
+		if ( !( threadNum_ == ScriptThreadNum )){
 			if ( isDummy() )
 				cout << "d" << flush;
 			structuralQinfo_.push_back( *this );
@@ -726,35 +627,6 @@ bool Qinfo::addToStructuralQ() const
 			ret = 1;
 		}
 	return ret;
-}
-
-/// Static func
-void Qinfo::initMutex()
-{
-	qMutex_ = new pthread_mutex_t;
-	pMutex_ = new pthread_mutex_t;
-	int ret = pthread_mutex_init( qMutex_, NULL );
-	assert( ret == 0 );
-	ret = pthread_mutex_init( pMutex_, NULL );
-	assert( ret == 0 );
-	qCond_ = new pthread_cond_t;
-	ret = pthread_cond_init( qCond_, NULL );
-	assert( ret == 0 );
-}
-
-/// Static func
-void Qinfo::freeMutex()
-{
-	int ret = pthread_mutex_destroy( qMutex_ );
-	assert( ret == 0 );
-	pthread_mutex_unlock( pMutex_ );
-	ret = pthread_mutex_destroy( pMutex_ );
-	assert( ret == 0 );
-	ret = pthread_cond_destroy( qCond_ );
-	assert( ret == 0 );
-	delete qMutex_;
-	delete pMutex_;
-	delete qCond_;
 }
 
 /// Static func

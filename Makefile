@@ -90,54 +90,54 @@ endif
 # Debug mode:
 
 ifeq ($(BUILD),debug)
-CXXFLAGS = -g -pthread -fpermissive -fno-strict-aliasing -fPIC -fno-inline-functions -Wall -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
+CXXFLAGS = -g -fpermissive -fno-strict-aliasing -fPIC -fno-inline-functions -Wall -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
 USE_GSL = 1
 endif
 # Optimized mode:
 ifeq ($(BUILD),release)
-CXXFLAGS  = -O3 -pthread -fpermissive -fno-strict-aliasing -fPIC -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER
+CXXFLAGS  = -O3 -fpermissive -fno-strict-aliasing -fPIC -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER
 USE_GSL = 1
 endif
 # Profiling mode:
 ifeq ($(BUILD),profile)
-CXXFLAGS  = -O3 -pg  -pthread -fpermissive -fno-strict-aliasing -fPIC -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER  
+CXXFLAGS  = -O3 -pg  -fpermissive -fno-strict-aliasing -fPIC -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER  
 USE_GSL = 1
 endif
 # Profiling mode with gperftoools
 ifeq ($(BUILD),gperf)
-CXXFLAGS  = -O3 -pthread -fpermissive -fno-strict-aliasing -fPIC -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER  
+CXXFLAGS  = -O3 -fpermissive -fno-strict-aliasing -fPIC -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER  
 LDFLAGS += -lprofiler -ltcmalloc
 USE_GSL = 1
 endif
 # Threading mode:
 ifeq ($(BUILD),thread)
-CXXFLAGS  = -O3 -pthread -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER  
+CXXFLAGS  = -O3 -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER  
 USE_GSL = 1
 endif
 
 # MPI mode:
 ifeq ($(BUILD),mpi)
-CXXFLAGS  = -g -pthread -Wall -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
+CXXFLAGS  = -g -Wall -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
 USE_MPI = 1
 USE_GSL = 1
 endif
 
 # optimized MPI mode:
 ifeq ($(BUILD),ompi)
-CXXFLAGS  = -O3 -pthread -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER
+CXXFLAGS  = -O3 -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER
 USE_MPI = 1
 USE_GSL = 1
 endif
 
 # optimised mode but with unit tests.
 ifeq ($(BUILD),odebug)
-CXXFLAGS = -O3 -pthread -Wall -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
+CXXFLAGS = -O3 -Wall -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
 USE_GSL = 1
 endif
 
 # including SMOLDYN
 ifdef USE_SMOLDYN
-CXXFLAGS = -g -pthread -Wall -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
+CXXFLAGS = -g -Wall -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
 USE_GSL = 1
 endif
 
@@ -173,13 +173,10 @@ endif
 
 # Libraries are defined below.
 SUBLIBS = 
-# Notice that pthread is included by default
-LIBS =	-L/usr/lib -L/usr/local/lib -lpthread
+# Notice that pthread is no more included
+LIBS =	-L/usr/lib -L/usr/local/lib
 
 #LIBS = 	-lm
-#ifeq ($(BUILD),thread)
-#LIBS += -lpthread
-#endif
 
 # For 64 bit Linux systems add paths to 64 bit libraries 
 ifeq ($(PLATFORM),Linux)
