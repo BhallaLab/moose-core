@@ -292,7 +292,6 @@ void testInnerSet()
 	assert( finfo );
 	FuncId f1 = dynamic_cast< const DestFinfo* >( finfo )->getFid();
 	Conv< string > conv( "New Improved Test" );
-	Qinfo::enableStructuralOps();
 	Qinfo::addDirectToQ( ObjId(), ret->id(), 0, f1,
 		conv.ptr(), conv.size() );
 	Qinfo::clearQ( 0  );
@@ -309,7 +308,6 @@ void testInnerSet()
 		double x = sqrt((double)i );
 		Conv< double > conv( x );
 		Eref dest( e2.element(), i );
-		Qinfo::enableStructuralOps();
 		Qinfo::addDirectToQ( ObjId(), dest.objId(), 0, f2,
 			conv.ptr(), conv.size() );
 
@@ -348,7 +346,6 @@ void testInnerGet() // Uses low-level ops to do a 'get'.
 	assert( finfo );
 	FuncId f1 = dynamic_cast< const DestFinfo* >( finfo )->getFid();
 	Qinfo q;
-	Qinfo::enableStructuralOps();
 	double temp = receiveGet()->getFid();
 	Qinfo::addDirectToQ( ObjId(), i2, 0, f1, &temp, 1 );
 	Qinfo::clearQ( 0 ); // The request goes to the target Element
@@ -358,7 +355,6 @@ void testInnerGet() // Uses low-level ops to do a 'get'.
 	shell->clearGetBuf();
 
 	ret->setName( "HupTwoThree" );
-	Qinfo::enableStructuralOps();
 	Qinfo::addDirectToQ( ObjId(), i2, 0, f1, &temp, 1 );
 
 	Qinfo::clearQ( 0 ); // The request goes to the target Element
@@ -378,7 +374,6 @@ void testInnerGet() // Uses low-level ops to do a 'get'.
 	for ( unsigned int i = 0; i < size; ++i ) {
 		Eref dest( e2.element(), i );
 
-		Qinfo::enableStructuralOps();
 		double temp = receiveGet()->getFid();
 		Qinfo::addDirectToQ( ObjId(), ObjId( i2, i ), 0, f2, &temp, 1 );
 		Qinfo::clearQ( 0 ); // The request goes to the target Element

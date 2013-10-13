@@ -81,6 +81,8 @@ class Clock
 		///////////////////////////////////////////////////////////////
 		// Stuff for new scheduling.
 		///////////////////////////////////////////////////////////////
+		// Goes through the process loop.
+		void process();
 
 		/**
 		 * Advance system state by one clock tick. This may be a subset of

@@ -9,7 +9,6 @@
 
 #ifndef QINFO_H
 #define QINFO_H
-#include <pthread.h>
 
 /// Forward declarations
 class ReduceFinfoBase;
@@ -105,22 +104,6 @@ class Qinfo
 			return dataIndex_;
 		}
 
-		/**
-		 * Lock Mutex, but only if a bunch of conditions are met:
-		 * First we should be running pthreads
-		 * Second, the system should be in multithread mode
-		 * Third, must be running on Script thread.
-		 * I put this into a function so that I can apply these 
-		 * conditions whenver we have to lock the thread.
-		 */
-		static void qLockMutex();
-
-		/**
-		 * Unlock Mutex, but only if a bunch of conditions are met.
-		 */
-		static void qUnlockMutex();
-
-
 		//////////////////////////////////////////////////////////////
 		// Functions to put data on Q.
 		//////////////////////////////////////////////////////////////
@@ -181,26 +164,6 @@ class Qinfo
 		//////////////////////////////////////////////////////////////
 		// From here, static funcs handling the Queues.
 		//////////////////////////////////////////////////////////////
-
-
-		/**
- 		 * Presents a barrier to calls that modify MOOSE simulation
-		 * structure. This should be called before any build function.
- 		 * It can be called in two contexts: from the parser, and from a
-		 * Handler. The former case is more common. If so, the call must
-		 * be called within a mutex protected portion of SwapQ.
- 		 * The latter case applies if the call is initiated from within
-		 * the MOOSE messaging system, through a function Handler.
- 		 * The qFlag must be set if the call is from a Handler. Otherwise
-		 * the system detects this and sends up an error.
- 		 */
-		static void buildOn( bool qFlag );
-
-		/**
-		 * Releases barrier to calls that modify MOOSE simulation structure.
-		 * Call after build function is done.
-		 */
-		static void buildOff( bool qFlag );
 
 		/**
 		 * Read the inQ. Meant to run on all the sim threads.
@@ -333,15 +296,6 @@ class Qinfo
 		static void clearReduceQ( unsigned int numThreads );
 
 		///////////////////////////////////////////////////////////////////
-		/**
-		 * Zeroes the isSafeForStructuralOps_ flag.
-		 */
-		static void disableStructuralOps();
-
-		/**
-		 * Sets the isSafeForStructuralOps_ flag.
-		 */
-		static void enableStructuralOps();
 
 		/**
 		 * Blocks for the specified number of Process cycles, if the
@@ -349,19 +303,6 @@ class Qinfo
 		 * Otherwise goes through the specified number of ClearQs.
 		 */
 		static void waitProcCycles( unsigned int numCyclesToWait );
-	 
-
-		/**
-		 * Initializes the qMutex
-		 */
-		static void initMutex();
-
-		/**
-		 * Cleans up the qMutex
-		 */
-		static void freeMutex();
-
-		// bool execThread( Id id, unsigned int dataIndex ) const;
 
 	private:
 		ObjId src_;	/// Originating object
@@ -430,13 +371,6 @@ class Qinfo
 		static vector< vector< Qinfo > > qBuf_;
 
 		/**
-		 * Ugly flag to tell Shell functions if the simulation should
-		 * actually compute structural operations, or if it should just
-		 * stuff them into a buffer.
-		 */
-		static bool isSafeForStructuralOps_;
-
-		/**
 		 * Flag to tell system that the parser wants to run a function.
 		 */
 		static bool parserPending_;
@@ -488,15 +422,6 @@ class Qinfo
 		 * After barrier3 the reduceQ_ should be empty.
 		 */
 		static vector< vector< ReduceBase* > > reduceQ_;
-
-		/**
-		 * Used to protect the queues from the timing of parser calls
-		 */
-		static pthread_mutex_t *qMutex_;
-		static pthread_cond_t *qCond_;
-
-		// Another mutex for the parser
-		static pthread_mutex_t* pMutex_;
 
 		static bool waiting_;
 

@@ -10,12 +10,6 @@
 #ifndef _SHELL_H
 #define _SHELL_H
 
-class FuncBarrier;
-// class pthread_barrier_t;
-// class pthread_mutex_t;
-// class pthread_cond_t;
-// class pthread_attr_t;
-
 enum AssignmentType { SINGLE, VECTOR, REPEAT };
 extern const ThreadId ScriptThreadNum; // Defined in Shell.cpp
 
@@ -433,15 +427,6 @@ class Shell
 		static void launchThreads();
 
 		/**
-		 * This function closes up shop with all the threads.
-		 */
-		static void joinThreads();
-
-		static pthread_mutex_t* parserMutex(); 
-
-		static pthread_cond_t* parserBlockCond(); 
-
-		/**
 		 * Checks for highest 'val' on all nodes
 		 */
 		static unsigned int reduceInt( unsigned int val );
@@ -601,27 +586,10 @@ class Shell
 		/**
 		 * Array of threads, initialized in launchThreads.
 		 */
-		static pthread_t* threads_;
-		static pthread_t* gThread_; /// graphics thread.
-		static pthread_attr_t *attr_;
 
 		static unsigned int numAcks_;
 		static vector< unsigned int > acked_;
-		static FuncBarrier* barrier1_;
-		static FuncBarrier* barrier2_;
-		static FuncBarrier* barrier3_;
 
-		/**
-		 * Pthreads mutex for synchronizing parser calls with underlying
-		 * thread work cycle. Void here so we can compile without pthreads.
-		 */
-		static pthread_mutex_t* parserMutex_; 
-
-		/**
-		 * Pthreads conditional for synchronizing parser calls with 
-		 * thread work cycle. Void here so we can compile without pthreads.
-		 */
-		static pthread_cond_t* parserBlockCond_; 
 
 		/**
 		 * Flag to tell system to reinitialize. We use this to defer the

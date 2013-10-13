@@ -18,14 +18,11 @@ class TestSched
 		{
 			if ( isInitPending_ ) {
 				globalIndex_ = 0;
-				pthread_mutex_init( &mutex_, NULL );
 				isInitPending_ = 0;
 			}
 		}
 		~TestSched()
 		{
-			if ( !isInitPending_ )
-				pthread_mutex_destroy( &mutex_ );
 			isInitPending_ = 1;
 		}
 
@@ -38,7 +35,6 @@ class TestSched
 		static const Cinfo* initCinfo();
 	private:
 		int index_;
-		static pthread_mutex_t mutex_;
 		static int globalIndex_;
 		static bool isInitPending_;
 };
