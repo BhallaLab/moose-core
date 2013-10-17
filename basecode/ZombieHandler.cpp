@@ -119,8 +119,7 @@ void ZombieHandler::process( const ProcInfo* p, Element* e, FuncId fid ) const
 
 void ZombieHandler::forall( const OpFunc* f, Element* e, const Qinfo* q,
  	const double* arg, unsigned int argSize, unsigned int numArgs ) const
-{ // This should be relevant. But I still have to define threadStart_
-	// Find which thread parent is willing to handle
+{ // This should be relevant.
 	// I still don't know how to get at the parent DataId. I need it.
 	if ( parent_->execThread( q->threadNum(), 0 ) ) {
 		// On this thread, figure out which index range we should use.
