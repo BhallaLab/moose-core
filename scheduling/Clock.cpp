@@ -62,7 +62,6 @@
 #include "Tick.h"
 #include "TickMgr.h"
 #include "TickPtr.h"
-#include "ThreadInfo.h"
 #include "Clock.h"
 
 #include "../shell/Shell.h"
@@ -279,8 +278,6 @@ Clock::Clock()
 	  isRunning_( 0 ),
 	  doingReinit_( 0 ),
 	  info_(),
-	  numPendingThreads_( 0 ),
-	  numThreads_( 0 ),
 	  isDirty_( false ),
 	  currTickPtr_( 0 ),
 	  ticks_( Tick::maxTicks ),
@@ -386,8 +383,6 @@ bool Clock::isDoingReinit() const
 /**
  * Does a graceful stop of the simulation, leaving so it can continue
  * cleanly with another step or start command.
- * This function can be called safely from any thread, provided it is
- * not within barrier3.
  */
 void Clock::stop()
 {
@@ -513,8 +508,8 @@ void Clock::rebuild()
 ///////////////////////////////////////////////////
 
 /**
- * The processPhase1 operation is called on every thread in the main event 
- * loop, during phase1 of the loop. This has to drive thread-specific 
+ * The processPhase1 operation is called in the main event 
+ * loop, during phase1 of the loop. This has to drive
  * calculations on all scheduled objects.
  */
 void Clock::processPhase1( ProcInfo* info )
@@ -523,7 +518,7 @@ void Clock::processPhase1( ProcInfo* info )
 		advancePhase1( info );
 	else if ( doingReinit_ )
 		reinitPhase1( info );
-	else if ( Shell::isSingleThreaded() || info->threadIndexInGroup == 1 )
+	else
 		++countNull1_;
 }
 
@@ -533,7 +528,7 @@ void Clock::processPhase2( ProcInfo* info )
 		advancePhase2( info );
 	else if ( doingReinit_ )
 		reinitPhase2( info );
-	else if ( Shell::isSingleThreaded() || info->threadIndexInGroup == 1 )
+	else
 		++countNull2_;
 }
 
@@ -555,7 +550,7 @@ void Clock::processPhase2( ProcInfo* info )
 void Clock::checkProcState()
 {
 	/// Handle pending Reduce operations.
-	Qinfo::clearReduceQ( Shell::numProcessThreads() );
+	// Qinfo::clearReduceQ( Shell::numProcessThreads() );
 
 	if ( procState_ == NoChange ) { // Most common 
 		return;
@@ -610,27 +605,24 @@ void Clock::process()
 		Qinfo::swapQ();
 		processPhase2( &info_ );
 		if ( Shell::numNodes() <= 1 ) {
-			Qinfo::readQ( info_.threadIndexInGroup ); //Deliver all local Msgs
+			Qinfo::readQ( 0 ); //Deliver all local Msgs
 		} else {
 			for ( unsigned int j = 0; j < Shell::numNodes(); ++j ) {
 #ifdef USE_MPI
 				Qinfo::swapMpiQ;
 #endif
-				Qinfo::readQ( info_.threadIndexInGroup ); //Deliver all Msgs
+				Qinfo::readQ( 0 ); //Deliver all Msgs
 			}
 		}
 		Clock::checkProcState();
 }
 
 /**
- * This has to happen on a single thread, whatever the Clock is assigned to.
  * Start has to happen gracefully: If the simulation was stopped for any
  * reason, it has to pick up where it left off.
  * runtime_ is the additional time to run the simulation. This is a little
  * odd when the simulation has stopped halfway through a clock tick.
- * Note that this is executed during the generic phase2 or phase3, in
- * parallel with lots of other threads. We cannot touch any fields that may
- * affect other threads.
+ * Note that this is executed during the generic phase2 or phase3.
  */
 void Clock::handleStart( double runtime )
 {
@@ -657,6 +649,7 @@ void Clock::handleStart( double runtime )
 	else
 		procState_ = StartOnly;
 
+	isRunning_ = true;
 	while( isRunning_ ) {
 		process();
 	}
@@ -694,33 +687,27 @@ void Clock::handleStep( unsigned int numSteps )
 void Clock::advancePhase1(  ProcInfo *p )
 {
 	tickPtr_[0].mgr()->advancePhase1( p );
-	if ( Shell::isSingleThreaded() || p->threadIndexInGroup == 1 ) {
-		++countAdvance1_;
-	}
+	++countAdvance1_;
 }
 
 // In phase 2 we need to do the updates to the Clock object, especially
 // sorting the TickPtrs. This also is when we find out if the simulation
 // is finished.
-// Note that this function happens when lots of other threads are doing
-// things. So it cannot touch any fields which might affect other threads.
 void Clock::advancePhase2(  ProcInfo *p )
 {
-	if ( Shell::isSingleThreaded() || p->threadIndexInGroup == 1 ) {
-		tickPtr_[0].mgr()->advancePhase2( p );
-		if ( tickPtr_.size() > 1 )
-			sort( tickPtr_.begin(), tickPtr_.end() );
-		currentTime_ = tickPtr_[0].mgr()->getNextTime() - 
-			tickPtr_[0].mgr()->getDt();
-		if ( currentTime_ > endTime_ ) {
-			Id clockId( 1 );
-			procState_ = StopOnly;
-			finished()->send( clockId.eref(), p->threadIndexInGroup );
-			ack()->send( clockId.eref(), p->threadIndexInGroup, 
-				p->nodeIndexInGroup, OkStatus );
-		}
-		++countAdvance2_;
+	tickPtr_[0].mgr()->advancePhase2( p );
+	if ( tickPtr_.size() > 1 )
+		sort( tickPtr_.begin(), tickPtr_.end() );
+	currentTime_ = tickPtr_[0].mgr()->getNextTime() - 
+		tickPtr_[0].mgr()->getDt();
+	if ( currentTime_ > endTime_ ) {
+		Id clockId( 1 );
+		procState_ = StopOnly;
+		finished()->send( clockId.eref(), 0 );
+		ack()->send( clockId.eref(), 0, 
+			p->nodeIndexInGroup, OkStatus );
 	}
+	++countAdvance2_;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -758,19 +745,17 @@ void Clock::handleReinit()
 		procState_ = StopThenReinit;
 	else
 		procState_ = TurnOnReinit;
-	// flipReinit_ = 1; // This tells the clock to reinit in barrier3.
-	// doingReinit_ = 1; // Can't do this here, may mess up other threads.
-	// isRunning_ = 0; // Can't do this here either.
 	while ( isRunning_ )
 		process();
-	process();
+	do {
+		process();
+	} while ( doingReinit_ );
 }
 
 
 /**
  * Reinit is used to reinit the state of the scheduling system.
- * This version is meant to be done through the multithread scheduling
- * loop.
+ * This version is meant to be done through the scheduling loop.
  * In phase1 it calls reinit on the target Elements.
  */
 void Clock::reinitPhase1( ProcInfo* info )
@@ -779,16 +764,7 @@ void Clock::reinitPhase1( ProcInfo* info )
 		return;
 	assert( currTickPtr_ < tickPtr_.size() );
 	tickPtr_[ currTickPtr_ ].mgr()->reinitPhase1( info );
-
-	/*
-	tickPtr_[0].mgr()->reinitPhase1( info );
-	for ( vector< TickPtr >::const_iterator i = tickPtr_.begin();
-		i != tickPtr_.end(); ++i ) {
-		i->mgr()->reinitPhase1( info );
-	}
-	*/
-	if ( Shell::isSingleThreaded() || info->threadIndexInGroup == 1 )
-		++countReinit1_;
+	++countReinit1_;
 }
 
 /**
@@ -800,17 +776,15 @@ void Clock::reinitPhase2( ProcInfo* info )
 {
 	info->currTime = 0.0;
 
-	if ( Shell::isSingleThreaded() || info->threadIndexInGroup == 1 ) {
-		if ( tickPtr_.size() == 0 || 
-					tickPtr_[ currTickPtr_ ].mgr()->reinitPhase2( info ) ) {
-			++currTickPtr_;
-			if ( currTickPtr_ >= tickPtr_.size() ) {
-				Id clockId( 1 );
-				ack()->send( clockId.eref(), info->threadIndexInGroup,
-					info->nodeIndexInGroup, OkStatus );
-				procState_ = TurnOffReinit;
-				++countReinit2_;
-			}
+	if ( tickPtr_.size() == 0 || 
+				tickPtr_[ currTickPtr_ ].mgr()->reinitPhase2( info ) ) {
+		++currTickPtr_;
+		if ( currTickPtr_ >= tickPtr_.size() ) {
+			Id clockId( 1 );
+			ack()->send( clockId.eref(), 0,
+				info->nodeIndexInGroup, OkStatus );
+			procState_ = TurnOffReinit;
+			++countReinit2_;
 		}
 	}
 }

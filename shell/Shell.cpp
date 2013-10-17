@@ -643,7 +643,6 @@ bool isDoingReinit()
 
 void Shell::doReinit( bool qFlag )
 {
-	extern void quickNap(); // Defined in Qinfo.cpp
 	if ( !keepLooping() ) {
 		cout << "Error: Shell::doReinit: Should not be called unless ProcessLoop is running\n";
 		return;
