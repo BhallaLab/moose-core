@@ -117,19 +117,6 @@ class BlockHandler: public DataHandler
 		char* data_;
 
 	private:
-		/**
-		 * Start index for each specified thread. Note that thread 0
-		 * executes all indices, and threads 1..numThreads inclusive
-		 * are for process and execute a subset.
-		 */
-		vector< unsigned int > threadStart_;
-
-		/**
-		 * End index for each specified thread. Note that thread 0
-		 * executes all indices, and threads 1..numThreads inclusive
-		 * are for process and execute a subset.
-		 */
-		vector< unsigned int > threadEnd_;
 };
 
 #endif	// _BLOCK_HANDLER_H

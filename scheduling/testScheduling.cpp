@@ -26,9 +26,6 @@ bool TestSched::isInitPending_( 1 );
 int TestSched::globalIndex_( 0 );
 
 /**
- * Used to test Tick operation specially with the new process design, where
- * the entire clock sequence is done one tick at a time in parallel from
- * the multithread process loop.
  * Note that ticks cannot be made independently; they are sub-elements
  * of the Clock.
  */
@@ -135,26 +132,17 @@ void TestSched::process( const Eref& e, ProcPtr p )
 		16, 16, 16, 17, 18, 18, 18, 18, 19, 20, 20, 20, 20, 20,
 		21, 21, 22, 22, 22, 23, 24, 24, 24, 24, 25, 25, 25 };
 	// unsigned int max = sizeof( timings ) / sizeof( int );
-	// cout << Shell::myNode() << ":" << p->threadIndexInGroup << " : timing[ " << index_ << ", " << p->threadId << " ] = " << timings[ index_ ] << ", time = " << p->currTime << endl;
+	// cout << Shell::myNode() << " : timing[ " << index_ << "  ] = " << timings[ index_ ] << ", time = " << p->currTime << endl;
 	if ( static_cast< int >( p->currTime ) != timings[ index_ ] ) {
-		cout << Shell::myNode() << ":" << p->threadIndexInGroup << " :testThreadSchedElement::process: index= " << index_ << ", numThreads = " <<
-			p->numThreads << ", currTime = " << p->currTime << endl;
+		cout << Shell::myNode() << ":testSchedElement::process: index= " << index_ << ", currTime = " << p->currTime << endl;
 	}
 
 	assert( static_cast< int >( p->currTime ) == timings[ index_ ] );
 	++index_;
-	/*
-	assert( static_cast< int >( p->currTime ) == 	
-		timings[ index_ / p->numThreadsInGroup ] );
-		*/
 
-	// Check that everything remains in sync across threads.
-		assert( ( globalIndex_ - index_ )*( globalIndex_ - index_ ) <= 1 );
-		if ( p->threadIndexInGroup == 1 )
-			globalIndex_ = index_;
-
-	// assert( index_ <= max * p->numThreads );
-	// cout << index_ << ": " << p->currTime << endl;
+	// Check that everything remains in sync
+	assert( ( globalIndex_ - index_ )*( globalIndex_ - index_ ) <= 1 );
+	globalIndex_ = index_;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -275,8 +263,11 @@ void setupTicks()
 
 	Qinfo::emptyAllQs();
 	ProcInfo p;
-	p.threadIndexInGroup = 1;
 	cdata->handleReinit();
+	/*
+	 * Now the handleReinit completes the entire reinit as soon as it is
+	 * called. The below sequence assumes that it waits for the process
+	 * loop.
 	assert( cdata->currTickPtr_ == 0 );
 	assert( Clock::procState_ == Clock::TurnOnReinit ); 
 	cdata->reinitPhase1( &p );
@@ -308,31 +299,13 @@ void setupTicks()
 
 	Clock::procState_ = Clock::NoChange;
 	// assert( cdata->doingReinit_ == 0 );
+	*/
 
 	cdata->handleStart( runtime );
-
-	// Normally flipRunning_ signals the system to flip the isRunning flag
-	assert( Clock::procState_ == Clock::StartOnly ); 
-	Clock::procState_ = Clock::NoChange;
-
-	while ( Clock::procState_ == Clock::NoChange ) {
-		cdata->advancePhase1( &p );
-		cdata->advancePhase2( &p );
-	}
-	Clock::procState_ = Clock::NoChange;
 
 	assert( doubleEq( cdata->getCurrentTime(), runtime ) );
 	// Get rid of pending events in the queues.
 	Qinfo::emptyAllQs();
-	/*
-	Qinfo::clearQ( p.threadIndexInGroup );
-	Qinfo::clearQ( p.threadIndexInGroup );
-	*/
-
-	/*
-	tickId.destroy();
-	clock.destroy();
-	*/
 	tsid.destroy();
 	for ( unsigned int i = 0; i < Tick::maxTicks; ++i ) {
 		cdata->ticks_[i].setDt( 0.0 );
@@ -340,67 +313,6 @@ void setupTicks()
 	cdata->rebuild();
 	assert( cdata->tickMgr_.size() == 0 );
 	assert( cdata->tickPtr_.size() == 0 );
-	cout << "." << flush;
-}
-
-void testThreads()
-{
-	Element* se = Id()();
-	Shell* s = reinterpret_cast< Shell* >( se->dataHandler()->data( 0 ) );
-	s->doSetClock( 0, 5.0 );
-	s->doSetClock( 1, 2.0 );
-	s->doSetClock( 2, 2.0 );
-	s->doSetClock( 3, 1.0 );
-	s->doSetClock( 4, 3.0 );
-	s->doSetClock( 5, 5.0 );
-
-	// A suitable number to test dispatch of Process calls during threading.
-	DimInfo temp = { 7, 1, false };
-	vector< DimInfo > dims( 1, temp );
-	Id tsid = Id::nextId();
-	Element* tse = new Element( tsid, testSchedCinfo, "tse", dims, 1, true);
-	// testThreadSchedElement tse;
-	Eref ts( tse, 0 );
-	Element* ticke = Id( 2 )();
-	Eref er0( ticke, DataId( 0 ) );
-	Eref er1( ticke, DataId( 1 ) );
-	Eref er2( ticke, DataId( 2 ) );
-	Eref er3( ticke, DataId( 3 ) );
-	Eref er4( ticke, DataId( 4 ) );
-	Eref er5( ticke, DataId( 5 ) );
-
-	const Finfo* proc0 = ticke->cinfo()->findFinfo( "process0" );
-	assert( proc0 );
-	const SrcFinfo* sproc0 = dynamic_cast< const SrcFinfo* >( proc0 );
-	assert( sproc0 );
-	unsigned int b0 = sproc0->getBindIndex();
-	/*
-	const Finfo* proc1 = ticke->cinfo()->findFinfo( "process1" );
-	const SrcFinfo* sproc1 = dynamic_cast< const SrcFinfo* >( proc1 );
-	const Finfo* proc2 = ticke->cinfo()->findFinfo( "process2" );
-	const SrcFinfo* sproc2 = dynamic_cast< const SrcFinfo* >( proc2 );
-	unsigned int b1 = sproc1->getBindIndex();
-	unsigned int b2 = sproc2->getBindIndex();
-	*/
-	FuncId f( processFinfo.getFid() );
-	SingleMsg* m0 = new SingleMsg( Msg::nextMsgId(), er0, ts );
-	er0.element()->addMsgAndFunc( m0->mid(), f, 0 + b0 );
-	SingleMsg* m1 = new SingleMsg( Msg::nextMsgId(), er1, ts );
-	er1.element()->addMsgAndFunc( m1->mid(), f, 2 + b0 );
-	SingleMsg* m2 = new SingleMsg( Msg::nextMsgId(), er2, ts );
-	er2.element()->addMsgAndFunc( m2->mid(), f, 4 + b0 );
-	SingleMsg* m3 = new SingleMsg( Msg::nextMsgId(), er3, ts );
-	er3.element()->addMsgAndFunc( m3->mid(), f, 6 + b0 );
-	SingleMsg* m4 = new SingleMsg( Msg::nextMsgId(), er4, ts );
-	er4.element()->addMsgAndFunc( m4->mid(), f, 8 + b0 );
-	SingleMsg* m5 = new SingleMsg( Msg::nextMsgId(), er5, ts );
-	er5.element()->addMsgAndFunc( m5->mid(), f, 10 + b0 );
-	s->start( 10 );
-
-	// Qinfo::mergeQ( 0 ); // Need to clean up stuff.
-
-	// cout << "Done TestThreads" << flush;
-	tsid.destroy();
 	cout << "." << flush;
 }
 
@@ -459,7 +371,6 @@ void testScheduling()
 void testSchedulingProcess()
 {
 	testTickConfig(); // Checks that the system has correctly built ticks
-	testThreads();
 }
 
 void testMpiScheduling()

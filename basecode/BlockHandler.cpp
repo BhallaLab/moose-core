@@ -176,29 +176,6 @@ bool BlockHandler::innerNodeBalance( unsigned int numData,
 		ret = ( numData != oldNumData || oldstart != start_ || 
 			oldend != end_ );
 	}
-	if ( Shell::numProcessThreads() == 0 ) { // Single thread mode.
-		threadStart_.resize( 2 );
-		threadEnd_.resize( 2 );
-		threadStart_[0] = start_;
-		threadEnd_[0] = end_;
-		threadStart_[1] = start_;
-		threadEnd_[1] = end_;
-	} else {
-		threadStart_.resize( Shell::numProcessThreads() + 1 );
-		threadEnd_.resize( Shell::numProcessThreads() + 1 );
-		threadStart_[0] = start_;
-		threadEnd_[0] = end_;
-		unsigned int n = end_ - start_;
-		for ( unsigned int i = 0; i < Shell::numProcessThreads(); ++i ) {
-			threadStart_[i + 1 ] = start_ + 
-			( n * i + Shell::numProcessThreads() - 1 ) /
-				Shell::numProcessThreads();
-
-			threadEnd_[i + 1 ] = start_ + 
-			( n * ( i + 1 ) + Shell::numProcessThreads() - 1 ) /
-				Shell::numProcessThreads();
-		}
-	}
 	return ret;
 	// cout << "BlockHandler::innerNodeBalance( " << numData_ << ", " << start_ << ", " << end_ << "), fieldDimension = " << getFieldDimension() << "\n";
 
@@ -206,13 +183,10 @@ bool BlockHandler::innerNodeBalance( unsigned int numData,
 
 bool BlockHandler::execThread( ThreadId thread, DataId di ) const
 {
-	assert( thread < threadStart_.size() );
-	assert( thread < threadEnd_.size() );
 	return ( 
-		( thread == ScriptThreadNum ) || 
-		( di == DataId::globalField && thread <= 1 ) ||
-		( threadStart_[ thread ] <= di.value() && 
-		di.value() < threadEnd_[ thread ] )
+		( di == DataId::globalField ) ||
+		( start_ <= di.value() && 
+		di.value() < end_ )
 	);
 }
 
@@ -225,8 +199,8 @@ bool BlockHandler::execThread( ThreadId thread, DataId di ) const
  */
 void BlockHandler::process( const ProcInfo* p, Element* e, FuncId fid ) const
 {
-	unsigned int startIndex = threadStart_[ p->threadIndexInGroup ];
-	unsigned int endIndex = threadEnd_[ p->threadIndexInGroup ];
+	unsigned int startIndex = start_;
+	unsigned int endIndex = end_;
 	// unsigned int endIndex = end_;
 	
 	assert( startIndex >= start_ && startIndex <= end_ );
@@ -245,9 +219,8 @@ void BlockHandler::process( const ProcInfo* p, Element* e, FuncId fid ) const
 void BlockHandler:: forall( const OpFunc* f, Element* e, const Qinfo* q,
 	const double* arg, unsigned int argSize, unsigned int numArgs ) const
 {
-	assert( q->threadNum() < threadStart_.size() );
-	unsigned int end = threadEnd_[ q->threadNum() ];
-	unsigned int start = threadStart_[ q->threadNum() ];
+	unsigned int end = end_;
+	unsigned int start = start_;
 	if ( numArgs <= 1 ) {
 		for( unsigned int i = start; i != end; ++i)
 			f->op( Eref( e, i ), q, arg );

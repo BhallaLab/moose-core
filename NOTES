@@ -24,5 +24,43 @@ unit tests.
 Further cleanup. Moved the process loop into Clock. Gets some way through
 unit tests but fails in testShellAddMsg(), seems that between Clock::doReinit
 and doStart the message info isn't going around.
+Checkin 4794.
 
+===========================================================================
+14 Oct 2013
+
+Clever trick to break a python script at a specified place to use gdb:
+
+import os
+import signal
+
+PID = os.getpid()
+
+def do_nothing(*args):
+    pass
+
+def foo():
+    print "Initializing..."
+    a=10
+    os.kill(PID, signal.SIGUSR1)
+    print "Variable value is %d" % (a)
+    print "All done!"
+
+signal.signal(signal.SIGUSR1, do_nothing)
+
+foo()
+
+From Stack overflow by Michael Hoffman in 2011.
+===========================================================================
+16 Oct 2013.
+Cleaning up threading references from Clock. Still doesn't get through the
+unit tests, some issue with doReinit crops up in testBuiltins.
+Some progress.
+Current status is that the requestData()->send call is invoked, but data doesn't
+get back in time for the reinit to complete. Need to investigate how the 
+send call is handled.
+
+===========================================================================
+17 Oct 2013
+Some more cleanup, it finally clears all unit tests.
 ===========================================================================
