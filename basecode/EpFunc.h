@@ -45,272 +45,121 @@ template<> Neutral* getEpFuncData< Neutral >( const Eref& e );
  * for the qinfo and Eref.
  */
 
-template< class T > class EpFunc0: public OpFunc
+template< class T > class EpFunc0: public OpFunc0Base
 {
 	public:
-		EpFunc0( void ( T::*func )( const Eref& e, const Qinfo* q ) )
+		EpFunc0( void ( T::*func )( const Eref& e ) )
 			: func_( func )
 			{;}
 
-		bool checkFinfo( const Finfo* s ) const {
-			return dynamic_cast< const SrcFinfo0* >( s );
-		}
-
-		bool checkSet( const SetGet* s ) const {
-			return dynamic_cast< const SetGet0* >( s );
-		}
-
-		bool strSet( const Eref& tgt,
-			const string& field, const string& arg ) const {
-			return SetGet0::innerStrSet( tgt.objId(), field, arg );
-		}
-
-		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
-			( getEpFuncData< T >( e )->*func_ )( e, q );
-		}
-
-		string rttiType() const {
-			return "void";
+		void op( const Eref& e ) const {
+			( reinterpret_cast< T* >( e.data() )->*func_ )( e );
 		}
 
 	private:
-		void ( T::*func_ )( const Eref& e, const Qinfo* q ); 
+		void ( T::*func_ )( const Eref& e ); 
 };
 
-template< class T, class A > class EpFunc1: public OpFunc
+template< class T, class A > class EpFunc1: public OpFunc1Base< A >
 {
 	public:
-		EpFunc1( void ( T::*func )( const Eref& e, const Qinfo* q, A ) )
+		EpFunc1( void ( T::*func )( const Eref&, A ) )
 			: func_( func )
 			{;}
 
-		bool checkFinfo( const Finfo* s ) const {
-			return dynamic_cast< const SrcFinfo1< A >* >( s );
-		}
-
-		bool checkSet( const SetGet* s ) const {
-			return dynamic_cast< const SetGet1< A >* >( s );
-		}
-
-		bool strSet( const Eref& tgt,
-			const string& field, const string& arg ) const {
-			return SetGet1< A >::innerStrSet( tgt.objId(), field, arg );
-		}
-
-		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
-			Conv< A > arg1( buf );
-			( getEpFuncData< T >( e )->*func_ )( e, q, *arg1 );
-		}
-
-		string rttiType() const {
-			return Conv< A >::rttiType();
+		void op( const Eref& e, A arg ) const {
+			( reinterpret_cast< T* >( e.data() )->*func_ )( e, arg );
 		}
 
 	private:
-		void ( T::*func_ )( const Eref& e, const Qinfo* q, A ); 
+		void ( T::*func_ )( const Eref& e, A ); 
 };
 
-template< class T, class A1, class A2 > class EpFunc2: public OpFunc
+template< class T, class A1, class A2 > class EpFunc2: 
+		public OpFunc2Base< A1, A2 >
 {
 	public:
-		EpFunc2( void ( T::*func )( const Eref& e, const Qinfo* q, A1, A2 ) )
+		EpFunc2( void ( T::*func )( const Eref&, A1, A2 ) )
 			: func_( func )
 			{;}
 
-		bool checkFinfo( const Finfo* s ) const {
-			return dynamic_cast< const SrcFinfo2< A1, A2 >* >( s );
-		}
-
-		bool checkSet( const SetGet* s ) const {
-			return dynamic_cast< const SetGet2< A1, A2 >* >( s );
-		}
-
-		bool strSet( const Eref& tgt,
-			const string& field, const string& arg ) const {
-			return SetGet2< A1, A2 >::innerStrSet( tgt.objId(), field, arg );
-		}
-
-		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
-			Conv< A1 > arg1( buf );
-			Conv< A2 > arg2( buf + arg1.size() );
-			( getEpFuncData< T >( e )->*func_ )( e, q, *arg1, *arg2 );
-		}
-
-		string rttiType() const {
-			return Conv< A1 >::rttiType() + "," + Conv< A2 >::rttiType(); 
+		void op( const Eref& e, A1 arg1, A2 arg2 ) const {
+			( reinterpret_cast< T* >( e.data() )->*func_ )( e, arg1, arg2 );
 		}
 
 	private:
-		void ( T::*func_ )( const Eref& e, const Qinfo* q, A1, A2 ); 
+		void ( T::*func_ )( const Eref& e, A1, A2 ); 
 };
 
 template< class T, class A1, class A2, class A3 > class EpFunc3:
-	public OpFunc
+	public OpFunc3Base< A1, A2, A3 >
 {
 	public:
-		EpFunc3( void ( T::*func )( const Eref& e, const Qinfo* q, A1, A2, A3 ) )
+		EpFunc3( void ( T::*func )( const Eref&, A1, A2, A3 ) )
 			: func_( func )
 			{;}
 
-		bool checkFinfo( const Finfo* s ) const {
-			return dynamic_cast< const SrcFinfo3< A1, A2, A3 >* >( s );
-		}
-
-		bool checkSet( const SetGet* s ) const {
-			return dynamic_cast< const SetGet3< A1, A2, A3 >* >( s );
-		}
-
-		bool strSet( const Eref& tgt,
-			const string& field, const string& arg ) const {
-			return SetGet3< A1, A2, A3 >::innerStrSet( tgt.objId(), field, arg );
-		}
-
-		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
-			Conv< A1 > arg1( buf );
-			Conv< A2 > arg2( buf + arg1.size() );
-			Conv< A3 > arg3( buf + arg1.size() + arg2.size() );
-			( getEpFuncData< T >( e )->*func_ )( e, q, *arg1, *arg2, *arg3);
-		}
-
-		string rttiType() const {
-			return Conv< A1 >::rttiType() + "," + Conv< A2 >::rttiType() +
-				"," + Conv< A3 >::rttiType();
+		void op( const Eref& e, A1 arg1, A2 arg2, A3 arg3 ) const {
+			( reinterpret_cast< T* >( e.data() )->*func_ )( 
+							e, arg1, arg2, arg3 );
 		}
 
 	private:
-		void ( T::*func_ )( const Eref& e, const Qinfo* q, A1, A2, A3 ); 
+		void ( T::*func_ )( const Eref& e, A1, A2, A3 ); 
 };
 
 template< class T, class A1, class A2, class A3, class A4 > class EpFunc4:
-	public OpFunc
+	public OpFunc4Base< A1, A2, A3, A4 >
 {
 	public:
-		EpFunc4( void ( T::*func )( const Eref& e, const Qinfo* q, A1, A2, A3, A4 ) )
+		EpFunc4( void ( T::*func )( const Eref&, A1, A2, A3, A4 ) )
 			: func_( func )
 			{;}
 
-		bool checkFinfo( const Finfo* s ) const {
-			return dynamic_cast< const SrcFinfo4< A1, A2, A3, A4 >* >( s );
-		}
-
-		bool checkSet( const SetGet* s ) const {
-			return dynamic_cast< const SetGet4< A1, A2, A3, A4 >* >( s );
-		}
-
-		bool strSet( const Eref& tgt,
-			const string& field, const string& arg ) const {
-			return SetGet4< A1, A2, A3, A4 >::innerStrSet( tgt.objId(), field, arg );
-		}
-
-		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
-			Conv< A1 > arg1( buf );
-			Conv< A2 > arg2( buf + arg1.size() );
-			Conv< A3 > arg3( buf + arg1.size() + arg2.size() );
-			Conv< A4 > arg4( buf + arg1.size() + arg2.size() + arg3.size());
-			( getEpFuncData< T >( e )->*func_ )( e, q, 
-				*arg1, *arg2, *arg3, *arg4);
-		}
-
-		string rttiType() const {
-			return Conv< A1 >::rttiType() + "," + Conv< A2 >::rttiType() +
-				"," + Conv<A3>::rttiType() + "," + Conv<A4>::rttiType();
+		void op( const Eref& e, A1 arg1, A2 arg2, A3 arg3, A4 arg4 ) const {
+			( reinterpret_cast< T* >( e.data() )->*func_ )( 
+							e, arg1, arg2, arg3, arg4 );
 		}
 
 	private:
-		void ( T::*func_ )( const Eref& e, const Qinfo* q, A1, A2, A3, A4 ); 
+		void ( T::*func_ )( const Eref& e, A1, A2, A3, A4 ); 
 };
 
-template< class T, class A1, class A2, class A3, class A4, class A5 > class EpFunc5:
-	public OpFunc
+template< class T, class A1, class A2, class A3, class A4, class A5 > 
+	class EpFunc5: public OpFunc5Base< A1, A2, A3, A4, A5 >
 {
 	public:
-		EpFunc5( void ( T::*func )( const Eref& e, const Qinfo* q, A1, A2, A3, A4, A5 ) )
+		EpFunc5( void ( T::*func )( const Eref&, A1, A2, A3, A4, A5 ) )
 			: func_( func )
 			{;}
 
-		bool checkFinfo( const Finfo* s ) const {
-			return dynamic_cast< const SrcFinfo5< A1, A2, A3, A4, A5 >* >( s );
+		void op( const Eref& e, 
+				A1 arg1, A2 arg2, A3 arg3, A4 arg4, A5 arg5 ) const {
+			( reinterpret_cast< T* >( e.data() )->*func_ )( 
+							e, arg1, arg2, arg3, arg4, arg5 );
 		}
-
-		bool checkSet( const SetGet* s ) const {
-			return dynamic_cast< const SetGet5< A1, A2, A3, A4, A5 >* >( s );
-		}
-
-		bool strSet( const Eref& tgt,
-			const string& field, const string& arg ) const {
-			return SetGet5< A1, A2, A3, A4, A5 >::innerStrSet( tgt.objId(), field, arg );
-		}
-
-		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
-			Conv< A1 > arg1( buf );
-			buf += arg1.size();
-			Conv< A2 > arg2( buf );
-			buf += arg2.size();
-			Conv< A3 > arg3( buf );
-			buf += arg3.size();
-			Conv< A4 > arg4( buf );
-			buf += arg4.size();
-			Conv< A5 > arg5( buf );
-			( getEpFuncData< T >( e )->*func_ )( e, q, 
-				*arg1, *arg2, *arg3, *arg4, *arg5 );
-		}
-
-		string rttiType() const {
-			return Conv< A1 >::rttiType() + "," + Conv< A2 >::rttiType() +
-				"," + Conv<A3>::rttiType() + "," + Conv<A4>::rttiType() +
-				"," + Conv<A5>::rttiType();
-		}
-
 	private:
-		void ( T::*func_ )( const Eref& e, const Qinfo* q, A1, A2, A3, A4, A5 ); 
+		void ( T::*func_ )( const Eref& e, A1, A2, A3, A4, A5 ); 
 };
 
-template< class T, class A1, class A2, class A3, class A4, class A5, class A6 > class EpFunc6:
-	public OpFunc
+template< class T, 
+		class A1, class A2, class A3, class A4, class A5, class A6 > 
+		class EpFunc6: public OpFunc6Base< A1, A2, A3, A4, A5, A6 >
 {
 	public:
-		EpFunc6( void ( T::*func )( const Eref& e, const Qinfo* q, A1, A2, A3, A4, A5, A6 ) )
+		EpFunc6( void ( T::*func )( const Eref&, A1, A2, A3, A4, A5, A6 ) )
 			: func_( func )
 			{;}
 
-		bool checkFinfo( const Finfo* s ) const {
-			return dynamic_cast< const SrcFinfo6< A1, A2, A3, A4, A5, A6 >* >( s );
-		}
-
-		bool checkSet( const SetGet* s ) const {
-			return dynamic_cast< const SetGet6< A1, A2, A3, A4, A5, A6 >* >( s );
-		}
-
-		bool strSet( const Eref& tgt,
-			const string& field, const string& arg ) const {
-			return SetGet6< A1, A2, A3, A4, A5, A6 >::innerStrSet( tgt.objId(), field, arg );
-		}
-
-		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
-			Conv< A1 > arg1( buf );
-			buf += arg1.size();
-			Conv< A2 > arg2( buf );
-			buf += arg2.size();
-			Conv< A3 > arg3( buf );
-			buf += arg3.size();
-			Conv< A4 > arg4( buf );
-			buf += arg4.size();
-			Conv< A5 > arg5( buf );
-			buf += arg5.size();
-			Conv< A6 > arg6( buf );
-			( getEpFuncData< T >( e )->*func_ )( e, q, 
-				*arg1, *arg2, *arg3, *arg4, *arg5, *arg6 );
-		}
-
-		string rttiType() const {
-			return Conv< A1 >::rttiType() + "," + Conv< A2 >::rttiType() +
-				"," + Conv<A3>::rttiType() + "," + Conv<A4>::rttiType() +
-				"," + Conv<A5>::rttiType() + "," + Conv<A6>::rttiType();
+		void op( const Eref& e, 
+				A1 arg1, A2 arg2, A3 arg3, A4 arg4, A5 arg5, A6 arg6 )
+			   	const {
+			( reinterpret_cast< T* >( e.data() )->*func_ )( 
+							e, arg1, arg2, arg3, arg4, arg5, arg6 );
 		}
 
 	private:
-		void ( T::*func_ )( const Eref& e, const Qinfo* q, 
-			A1, A2, A3, A4, A5, A6 ); 
+		void ( T::*func_ )( const Eref& e, A1, A2, A3, A4, A5, A6 ); 
 };
 
 /**
@@ -324,52 +173,24 @@ template< class T, class A1, class A2, class A3, class A4, class A5, class A6 > 
 template< class T, class A > class GetEpFunc: public GetOpFuncBase< A >
 {
 	public:
-		GetEpFunc( A ( T::*func )( const Eref& e, const Qinfo* q ) const )
+		GetEpFunc( A ( T::*func )( const Eref& e ) const )
 			: func_( func )
 			{;}
 
-		bool checkFinfo( const Finfo* s ) const {
-			return ( dynamic_cast< const SrcFinfo1< A >* >( s )
-			|| dynamic_cast< const SrcFinfo1< FuncId >* >( s ) );
+		void op( const Eref& e, ObjId recipient, FuncId fid ) const {
+			const OpFunc *f = recipient.element()->cinfo()->getOpFunc( fid);
+			const OpFunc1Base< A >* recvOpFunc =
+				dynamic_cast< const OpFunc1Base< A >* >( f );
+			assert( recvOpFunc );
+			recvOpFunc( recipient.eref(), returnOp( e ) );
 		}
 
-		bool checkSet( const SetGet* s ) const {
-			return dynamic_cast< const SetGet1< A >* >( s );
-		}
-
-		bool strSet( const Eref& tgt,
-			const string& field, const string& arg ) const {
-			return SetGet1< A >::innerStrSet( tgt.objId(), field, arg );
-		}
-
-		/**
-		 * The buf just contains the funcid on the src element that is
-		 * ready to receive the returned data.
-		 * Also we are returning the data along the Msg that brought in
-		 * the request, so we don't need to scan through all Msgs in
-		 * the Element to find the right one.
-		 * So we bypass the usual SrcFinfo::sendTo, and instead go
-		 * right to the Qinfo::addToQ to send off data.
-		 * Finally, the data is copied back-and-forth about 3 times.
-		 * Wasteful, but the 'get' function is not to be heavily used.
-		 */
-
-		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
-			if ( skipWorkerNodeGlobal( e ) )
-				return;
-			const A& ret = ( getEpFuncData< T >( e )->*func_ )( e, q );
-			Conv<A> conv0( ret );
-			returnFromGet( e, q, buf, conv0.ptr(), conv0.size() );
-		}
-
-		A reduceOp( const Eref& e ) const {
-			Qinfo q; // Dummy.
-			return ( getEpFuncData< T >( e )->*func_ )( e, &q );
-			// return ( reinterpret_cast< T* >( e.data() )->*func_)( e, &q );
+		A returnOp( const Eref& e ) const {
+			return ( getEpFuncData< T >( e )->*func_ )( e );
 		}
 
 	private:
-		A ( T::*func_ )( const Eref& e, const Qinfo* q ) const;
+		A ( T::*func_ )( const Eref& e ) const;
 };
 
 
@@ -382,46 +203,31 @@ template< class T, class A > class GetEpFunc: public GetOpFuncBase< A >
  * FuncId of the function on the object that requested the
  * value. The EpFunc then sends back a message with the info.
  */
-template< class T, class L, class A > class GetEpFunc1: public LookupGetOpFuncBase< L, A >
+template< class T, class L, class A > class GetEpFunc1: 
+		public LookupGetOpFuncBase< L, A >
 {
 	public:
-		GetEpFunc1( A ( T::*func )( const Eref& e, const Qinfo* q, L ) const )
+		GetEpFunc1( A ( T::*func )( const Eref& e, L ) const )
 			: func_( func )
 			{;}
 
-		bool checkFinfo( const Finfo* s ) const {
-			return dynamic_cast< const SrcFinfo1< A >* >( s );
+
+		void op( const Eref& e, L index, ObjId recipient, FuncId fid ) 
+				const {
+			const OpFunc *f = recipient.element()->cinfo()->getOpFunc( fid);
+			const OpFunc1Base< A >* recvOpFunc =
+				dynamic_cast< const OpFunc1Base< A >* >( f );
+			assert( recvOpFunc );
+			recvOpFunc( recipient.eref(), returnOp( e, index ) );
 		}
 
-		bool checkSet( const SetGet* s ) const {
-			return dynamic_cast< const LookupField< L, A >* >( s );
-		}
-
-		bool strSet( const Eref& tgt,
-			const string& field, const string& arg ) const {
-			return SetGet1< A >::innerStrSet( tgt.objId(), field, arg );
-		}
-
-		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
-			if ( skipWorkerNodeGlobal( e ) )
-				return;
-			Conv< FuncId > convFid( buf );
-			Conv< L > conv1( buf + convFid.size() );
-			const A& ret = 
-				( getEpFuncData< T >( e )->*func_ )( e, q, *conv1 );
-			Conv<A> conv0( ret );
-			returnFromGet( e, q, buf, conv0.ptr(), conv0.size() );
-		}
-
-		/// ReduceOp not permissible.
-		A reduceOp( const Eref& e, const L& index ) const {
-			Qinfo q; // default Qinfo
+		A returnOp( const Eref& e, const L& index ) const {
 			return ( reinterpret_cast< T* >( e.data() )->*func_)( 
-				e, &q, index );
+				e, index );
 		}
 
 	private:
-		A ( T::*func_ )( const Eref& e, const Qinfo* q, L ) const;
+		A ( T::*func_ )( const Eref& e, L ) const;
 };
 
 

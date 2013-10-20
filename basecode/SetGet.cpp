@@ -34,7 +34,7 @@ const vector< double* >* SetGet::dispatchGet(
 //////////////////////////////////////////////////////////////////////
 
 const OpFunc* SetGet::checkSet( 
-	const string& field, ObjId& tgt, FuncId& fid ) const
+	const string& field, ObjId& tgt, FuncId& fid )
 {
 	// string field = "set_" + destField;
 	const Finfo* f = oid_.element()->cinfo()->findFinfo( field );
@@ -87,14 +87,18 @@ const OpFunc* SetGet::checkSet(
 	fid = df->getFid();
 	const OpFunc* func = df->getOpFunc();
 	assert( func );
+	return func;
 
+	/*
 	// This is the crux of the function: typecheck for the field.
-	if ( func->checkSet( this ) ) {
+	// if ( func->checkSet( this ) )
+	if ( checkOpClass( func ) ) {
 		return func;
 	} else {
 		cout << "set::Type mismatch" << oid_ << "." << field << endl;
 		return 0;
 	}
+	*/
 }
 
 /////////////////////////////////////////////////////////////////////////

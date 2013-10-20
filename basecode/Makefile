@@ -29,7 +29,6 @@ OBJ = \
 	TwoDimHandler.o \
 	AnyDimHandler.o \
 	DataHandlerWrapper.o \
-	FieldDataHandlerBase.o \
 	MsgDataHandler.o \
 	ZombieHandler.o \
 	Eref.o	\
@@ -39,13 +38,10 @@ OBJ = \
 	SrcFinfo.o \
 	ValueFinfo.o \
 	SharedFinfo.o \
-	FieldElementFinfo.o \
 	Id.o \
 	ObjId.o \
-	DataId.o \
 	SetGet.o \
 	OpFunc.o \
-	FieldOpFunc.o \
 	SparseMatrix.o \
 	PrepackedBuffer.o \
 	doubleEq.o \
@@ -58,7 +54,6 @@ HEADERS = \
 	Cinfo.h \
 	PrepackedBuffer.h \
 	Conv.h \
-	DataId.h \
 	Dinfo.h \
 	DataDimensions.h \
 	DataHandler.h \
@@ -67,8 +62,6 @@ HEADERS = \
 	ZeroDimHandler.h \
 	ZeroDimParallelHandler.h \
 	OneDimHandler.h \
-	FieldDataHandlerBase.h \
-	FieldDataHandler.h \
 	MsgDataHandler.h \
 	ZombieHandler.h \
 	Element.h \
@@ -88,7 +81,6 @@ HEADERS = \
 	LookupValueFinfo.h \
 	LookupElementValueFinfo.h \
 	SharedFinfo.h \
-	FieldElementFinfo.h \
 	MsgFuncBinding.h \
 	ReduceBase.h \
 	ReduceFinfo.h \
@@ -101,9 +93,6 @@ testAsync.o:	SparseMatrix.h SetGet.h ../scheduling/Clock.h ../scheduling/Tick.h 
 SparseMsg.o:	SparseMatrix.h
 SetGet.o:	SetGet.h ../shell/Neutral.h
 DataHandlerWrapper.o: DataHandlerWrapper.h
-FieldDataHandlerBase.o: FieldOpFunc.h
-FieldOpFunc.o: FieldOpFunc.h FieldDataHandlerBase.h
-#TestBasecode.o:	Shell.h ShellWrapper.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -I../msg $< -c

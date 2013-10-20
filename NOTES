@@ -62,5 +62,83 @@ send call is handled.
 
 ===========================================================================
 17 Oct 2013
-Some more cleanup, it finally clears all unit tests.
+Some more cleanup, it finally clears all unit tests. Checkin 4796.
+Valgrind is totally happy too.
+
+Next items:
+Make benchmark for IntFire network.
+Message rebuild/eliminate Qinfo.
+Scheduling rebuild
+Id and data handler rebuild
+Synapse rebuild
+Conv elimination
+Prepacked buffer elimination
+Parallel rebuild
+
+===========================================================================
+20 Oct 2013
+
+Design of key sections. 
+
+Data and field access:
+Elements manage data as well as node info. All data are arrays. 
+Msgs managed too. No FieldElements. No DataHandlers. Cinfo deals with Dinfo.
+class Element {
+	private:
+		string name_;
+		Id id_;
+		const Cinfo* cinfo_;
+		char* data_;
+		unsigned int numData_;
+		vector< indexRange > indexRange_; // Looks up indices by node.
+		vector< MsgId > m_;
+		vector< MsgTraverse > mt_;
+};
+
+Synapses are an array of fields on a Receptor. Not FieldElements.
+
+Ids specify element and index of object entry.
+
+Msgs specify Id and field index to fully specify Obj and field. Msg ops call 
+back to Element, possibly Object.  For fast traversal, Msgs are digested into 
+{funcPtr, Element ptr} sets with { Obj ptr, field} arrays. Each Obj index looks
+up one such set of arrays, which can be shared for different funcs.
+
+Scheduling: Tick 0 is base clock with a specified dt. All others are integral
+multiples of it. Order within a given timestep is by tick#. No fieldElements,
+just 10 MsgSrcs emanating from Clock, and internal array for the Multiples.
+
+Conv: Used only to serialize off-node msgs, and to convert to and from strings,
+and to provide rttiType to MOOSE.
+
+Prepacked buffer goes away
+
+Parallel calls: At time of Msg digest, converted and condensed to single call
+	per msg per node for outgoing. Likewise incoming msgs expanded out
+	as if from original src Element, to all tgts on recipent node.
+	Outgoing bufsend right away.
+	Incoming polled at end of Tick by src element proxy.
+	Transfer of objects by serialization + rebuild of all element node info
+	+ rebuild of digested msgs.
+
+I think that the Element and Msg stuff are pretty intertwined. But lets start
+with the Msg and see how far we can go.
+
+............................................................................
+Alternative to this set is to have Synapses and other FieldElements
+as independent Elements, using pointers cleverly to refer back to parent.
+Possible disadvantage is some juggling to refer back to parent quickly.
+Advantage is to eliminate FieldIndex.
+Disadvantage is to proliferate Elements, many proxy Elements on all nodes.
+
+For now trying fieldIndex for synapses.
+===========================================================================
+20 Oct 2013.
+Begun massive refactoring of Msgs. To start with, redid the OpFuncs, 
+EpFuncs and SetGet headers. Threw out UpFuncs and FieldElement stuff.
+Now the headers seem consistent, but SrcFinfo::send calls need to be 
+populated, which can only happen after I redo Element.
+
+Compilation begun, far more to do.
+
 ===========================================================================
