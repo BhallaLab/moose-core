@@ -48,6 +48,13 @@ using namespace std;
 typedef unsigned int FuncId;
 
 /**
+ * Identifies data entry on an Element. This is a global index,
+ * in that it does not refer to the array on any given node, but uniquely
+ * identifies the entry over the entire multinode simulation.
+ */
+typedef unsigned int DataId;
+
+/**
  * Looks up and uniquely identifies Msgs. This is a global index
  */
 typedef unsigned int MsgId;
@@ -78,7 +85,6 @@ class ObjId;
 
 #include "doubleEq.h"
 #include "Id.h"
-#include "DataId.h"
 #include "ObjId.h"
 #include "Finfo.h"
 #include "DestFinfo.h"
@@ -103,8 +109,6 @@ class ObjId;
 #include "PrepackedBuffer.h"
 #include "Conv.h"
 #include "SrcFinfo.h"
-#include "FieldDataHandlerBase.h"
-#include "FieldDataHandler.h"
 
 extern DestFinfo* receiveGet();
 class Neutral;
@@ -112,12 +116,10 @@ class Neutral;
 #include "SetGet.h"
 #include "OpFunc.h"
 #include "EpFunc.h"
-#include "UpFunc.h"
 #include "ProcOpFunc.h"
 #include "ValueFinfo.h"
 #include "LookupValueFinfo.h"
 #include "SharedFinfo.h"
-#include "FieldElementFinfo.h"
 #include "ReduceBase.h"
 #include "../shell/Neutral.h"
 

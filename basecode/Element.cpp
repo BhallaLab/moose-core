@@ -303,62 +303,6 @@ Id Element::id() const
 	return id_;
 }
 
-/**
- * Executes a queue entry from the buffer. This is used primarily for
- * script-driven field access. The heavy-duty clock-driven function 
- * execution is dealt with by process and messages.
- */
-void Element::exec( const Qinfo* qi, const double* arg )
-	const
-{
-	static const unsigned int ObjFidSizeInDoubles = 
-		1 + ( sizeof( ObjFid ) - 1 ) / sizeof( double );
-	if ( qi->isDirect() ) { // Direct Q entry, where the first part
-		// of Data specifies the target Element.
-		const ObjFid *ofid = reinterpret_cast< const ObjFid* >( arg );
-		const OpFunc* f = 
-			ofid->oi.element()->cinfo()->getOpFunc( ofid->fid );
-		if ( ofid->oi.dataId == DataId::bad() )  {
-			return;
-		}
-		if ( ofid->oi.dataId == DataId::any ) {
-			// Here we iterate through the DataId, using the
-			// numEntries and entrySize of the ofid to set args.
-			Element* elm = ofid->oi.element();
-			assert( ofid->numEntries > 0 );
-			const double* data = arg + ObjFidSizeInDoubles;
-			elm->dataHandler()->forall( f,  elm, qi, 
-				data, ofid->entrySize, ofid->numEntries );
-			/*
-			DataHandler* dh = elm->dataHandler();
-			unsigned int count = 0;
-			unsigned int offset = 0;
-			for ( DataHandler::iterator 
-				i = dh->begin( qi->threadNum() ); 
-					i != dh->end( qi->threadNum() ); ++i ) {
-					// count = dh->getLinearIndex( i.dataId() );
-					offset = count * ofid->entrySize;
-					++count;
-					f->op( Eref( elm, i.dataId() ), qi, data + offset );
-			}
-			*/
-		} else if ( ofid->oi.element()->dataHandler()->execThread( 
-			qi->threadNum(), ofid->oi.dataId ) ) {
-			f->op( ofid->oi.eref(), qi, arg + ObjFidSizeInDoubles );
-		}
-	} else {
-		assert( qi->bindIndex() < msgBinding_.size() );
-		vector< MsgFuncBinding >::const_iterator end = 
-			msgBinding_[ qi->bindIndex() ].end();
-		for ( vector< MsgFuncBinding >::const_iterator i =
-			msgBinding_[ qi->bindIndex() ].begin(); i != end; ++i ) {
-			assert( i->mid != 0 );
-			assert( Msg::getMsg( i->mid ) != 0 );
-			Msg::getMsg( i->mid )->exec( qi, arg, i->fid );
-		}
-	}
-}
-
 void Element::showMsg() const
 {
 	cout << "Outgoing: \n";
