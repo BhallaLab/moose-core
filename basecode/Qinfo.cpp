@@ -97,44 +97,11 @@ bool Qinfo::execThread( Id id, unsigned int dataIndex ) const
  */
 void Qinfo::clearStructuralQ()
 {
-	const double* data = &structuralQdata_[0];
-	for ( unsigned int i = 0; i < structuralQinfo_.size(); ++i ) {
-		const Qinfo& qi = structuralQinfo_[i];
-		// if ( !qi.isDummy() ) {
-			/*
-			Qinfo newQ( qi, ScriptThreadNum );
-			const Element* e = qi->src_.element();
-			// cout << "Executing Structural Q[" << i << "] with " << e->getName() << endl;
-			e->exec( &newQ, inQ_ + newQ.dataIndex_ );
-			*/
-			const Element* e = qi.src_.element();
-			e->exec( &qi, data + qi.dataIndex_ );
-		// }
-	}
-
-	structuralQinfo_.resize( 0 );
  	structuralQdata_.resize( 0 );
 }
 
 void readBuf(const double* buf, ThreadId threadNum )
 {
-	// unsigned int bufsize = static_cast< unsigned int >( buf[0] );
-	unsigned int numQinfo = static_cast< unsigned int >( buf[1] );
-	assert( static_cast< unsigned int >( buf[0] ) > 0 );
-	assert( static_cast< unsigned int >( buf[0] ) > numQinfo * QinfoSizeInDoubles );
-
-	const double* qptr = buf + 2;
-
-	for ( unsigned int i = 0; i < numQinfo; ++i ) {
-		// const Qinfo* qi = reinterpret_cast< const Qinfo* >( qptr );
-		Qinfo qi( reinterpret_cast< const Qinfo* >( qptr ), threadNum );
-		qptr += QinfoSizeInDoubles;
-		if ( !qi.isDummy() ) {
-			const Element* e = qi.src().element();
-			if ( e )
-				e->exec( &qi, buf + qi.dataIndex() );
-		}
-	}
 }
 
 /** 
