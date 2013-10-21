@@ -50,13 +50,15 @@ FuncId DestFinfo::getFid() const
 bool DestFinfo::strSet( 
 	const Eref& tgt, const string& field, const string& arg ) const 
 {
-	return func_->strSet( tgt, field, arg );
+	assert( 0 );
+	return false;
 }
 
 bool DestFinfo::strGet( 
 	const Eref& tgt, const string& field, string& returnValue ) const 
 {
-	return 0;
+	assert( 0 );
+	return false;
 }
 
 string DestFinfo::rttiType() const

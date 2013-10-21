@@ -26,44 +26,19 @@ class Element
 	friend void Id::initIds();
 	public:
 		/**
-		 * This constructor is used when making zombies. It is used when
-		 * we want to have a
-		 * temporary Element for field access but nothing else, and it
-		 * should not mess with messages.
-		 */
-		Element( Id id, const Cinfo* c, DataHandler* d );
-
-		/**
 		 * This is the main constructor, used by Shell::innerCreate
 		 * which makes most Elements. Also used to create base
 		 * Elements to init the simulator in main.cpp.
 		 * Id is the Id of the new Element
 		 * Cinfo is the class
 		 * name is its name
-		 * dimensions specify the cumulative dimensions all the way up
-		 * to the current Element. So if you want to create an
-		 * Element 'synapse' as follows:
-		 * /bulb[0..1]/glom[0..1999]/mit[0..24]/dend[0..99]/synapse
-		 * the dimensions would be {2,2000,25,100,1}
-		 * Dimensions also allows you specify when a given dimension should
-		 * be ragged, that is, contain differently sized sub arrays. A
-		 * ragged array dimension has a negative sign. For example,
-		 * supposing we permitted anywhere up to 50 mitral cells per glom,
-		 * we would have dimensions[] = {2,2000,-50,100,1}
+		 * numData is the number of data entries, defaults to a singleton.
 		 * The isGlobal flag specifies whether the created objects should
 		 * be replicated on all nodes, or partitioned without replication. 
 		 */
 		Element( Id id, const Cinfo* c, const string& name,
-			const vector< DimInfo >& dimensions, unsigned short pathDepth,
+			unsigned int numData = 1,
 			bool isGlobal = 0 );
-
-		/**
-		 * This constructor is used when making FieldElements.
-		 * It allows the user to explicitly specify the DataHandler
-		 * to be used.
-		 */
-		Element( Id id, const Cinfo* c, const string& name,
-			DataHandler* dataHandler );
 
 		/**
 		 * This constructor copies over the original n times. It is
@@ -78,6 +53,10 @@ class Element
 		 */
 		~Element();
 
+		/////////////////////////////////////////////////////////////////
+		// Simple field access stuff
+		/////////////////////////////////////////////////////////////////
+
 		/**
 		 * Returns name of Element
 		 */
@@ -87,44 +66,34 @@ class Element
 		 * Changes name of Element
 		 */
 		void setName( const string& val );
-		
-		/**
-		 * Returns group in which Element belongs
-		 */
-		unsigned int getGroup() const;
-		
-		/**
-		 * Changes group of Element
-		 */
-		void setGroup( unsigned int val );
 
-		/**
-		 * Examine process queue, data that is expected every timestep.
-		 * This function is done for all the local data entries in order.
-		 */
-		void process( const ProcInfo* p, FuncId fid );
+		/// Returns number of data entries
+		unsigned int numData() const;
 
 
 		/**
-		 * Returns the DataHandler, which actually manages the data.
+		 * Returns the Id on this Elm
 		 */
-		DataHandler* dataHandler() const;
+		Id id() const;
 
 		/**
-		 * Resizes the data at the specified depth on the Element tree,
-		 * Returns true on success.
-		 * Adds a dimension if the original was zero and size > 1.
-		 * When resizing it uses the current data and puts it treadmill-
-		 * fashion into the expanded dimension. 
+		 * Looks up specified data entry. Note that the index is NOT a
+		 * DataId: it is instead the raw index of the data on the current
+		 * node. Index is also NOT the character offset, but the index
+		 * to the data array in whatever type the data may be.
+		 *
+		 * The DataId has to be filtered through the nodeMap to
+		 * find a) if the entry is here, and b) what its raw index is.
 		 */
-		bool resize( unsigned short pathDepth, unsigned int size );
+		char* data( unsigned int rawIndex ) const;
 
 		/**
-		 * Synchronizes the maxFieldEntries with the number of actual fields
-		 * in the parent. 
-		 * Also will need to synchronize across nodes, in due course.
+		 * Changes the number of entries in the data.
 		 */
-		void syncFieldDim() const;
+		void resize( unsigned int newNumData );
+
+		/////////////////////////////////////////////////////////////////
+
 
 		/** 
 		 * Pushes the Msg mid onto the list.
@@ -186,15 +155,16 @@ class Element
 		 */
 		static void destroyElementTree( const vector< Id >& tree );
 
-		/**
-		 * Returns the Id on this Elm
-		 */
-		Id id() const;
-
 
 	/////////////////////////////////////////////////////////////////////
 	// Utility functions for message traversal
 	/////////////////////////////////////////////////////////////////////
+	
+		/**
+		 * Raw lookup into MsgDigest vector. One for each MsgSrc X ObjEntry.
+		 */
+		const vector< MsgDigest >& msgDigest( unsigned int index ) const;
+
 		/**
 		 * Returns the binding index of the specified entry.
 		 * Returns ~0 on failure.
@@ -237,10 +207,10 @@ class Element
 			MsgId mid, vector< pair< BindIndex, FuncId > >& ret ) const;
 
 		/**
-		 * zombieSwap: replaces the Cinfo and DataHandler of the zombie.
-		 * Deletes old DataHandler first.
+		 * zombieSwap: replaces the Cinfo of the zombie.
 		 */
-		void zombieSwap( const Cinfo* newCinfo, DataHandler* newDataHandler     );
+		void zombieSwap( const Cinfo* newCinfo );
+
 
 	private:
 		/**
@@ -257,27 +227,26 @@ class Element
 		unsigned int getInputs( vector< Id >& ret, const DestFinfo* finfo )
 			const;
 
-		string name_;
+		string name_; /// Name of the Element.
 
 		Id id_; /// Stores the unique identifier for Element.
 
 		/**
-		 * This object stores and manages the actual data for the Element.
+		 * This points to an array holding the data for the Element.
 		 */
-		DataHandler* dataHandler_;
+		char* data_;
+
+		/**
+		 * This is the number of entries in the data. Note that these 
+		 * entries do not have to be sequential, some may be farmed out
+		 * to other nodes.
+		 */
+		unsigned int numData_;
 
 		/**
 		 * Class information
 		 */
 		const Cinfo* cinfo_;
-
-		/**
-		 * Identifies which closely-connected group the Element is in.
-		 * Each Group is assumed to have dense message traffic internally,
-		 * and uses MPI_Allgather to exchange data.
-		 * Not yet in use.
-		 */
-		 unsigned int group_;
 
 		/**
 		 * Message vector. This is the low-level messaging information.
@@ -295,4 +264,11 @@ class Element
 		 * through multiple msgs using a single 'send' call.
 		 */
 		vector< vector < MsgFuncBinding > > msgBinding_;
+
+		/**
+		 * Digested vector of message traversal sets. Each set has a
+		 * Func and element to lead off, followed by a list of target
+		 * indices and fields.
+		 */
+		vector< vector < MsgDigest > > msgDigest_;
 };

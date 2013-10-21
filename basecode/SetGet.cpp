@@ -12,36 +12,15 @@
 #include "../shell/Shell.h"
 #include "../shell/Neutral.h"
 
-// Static field defintion.
-Qinfo SetGet::qi_;
-
-//////////////////////////////////////////////////////////////////////
-// A group of functions to forward dispatch commands to the Shell.
-//////////////////////////////////////////////////////////////////////
-
-const vector< double* >* SetGet::dispatchGet( 
-	const ObjId& tgt, FuncId tgtFid, const double* arg, unsigned int size )
-{
-	static Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
-	s->clearGetBuf();
-	s->expectVector( tgt.dataId == DataId::any );
-	Qinfo::addDirectToQ( ObjId(), tgt, ScriptThreadNum, tgtFid, arg, size );
-	Qinfo::waitProcCycles( 2 );
-	return &s->getBuf();
-}
-
-
-//////////////////////////////////////////////////////////////////////
-
 const OpFunc* SetGet::checkSet( 
 	const string& field, ObjId& tgt, FuncId& fid )
 {
 	// string field = "set_" + destField;
-	const Finfo* f = oid_.element()->cinfo()->findFinfo( field );
+	const Finfo* f = tgt.element()->cinfo()->findFinfo( field );
 	if ( !f ) { // Could be a child element? Note that field name will 
 		// change from set_<name> to just <name>
 		string f2 = field.substr( 4 );
-		Id child = Neutral::child( oid_.eref(), f2 );
+		Id child = Neutral::child( tgt.eref(), f2 );
 		if ( child == Id() ) {
 			cout << "Error: SetGet:checkSet:: No field or child named '" <<
 				field << "' was found on\n" << tgt.id.path() << endl;
@@ -51,12 +30,11 @@ const OpFunc* SetGet::checkSet(
 			else if ( field.substr( 0, 4 ) == "get_" )
 				f = child()->cinfo()->findFinfo( "get_this" );
 			assert( f ); // should always work as Neutral has the field.
-			if ( child()->dataHandler()->totalEntries() == 
-				oid_.element()->dataHandler()->totalEntries() ) {
-				tgt = ObjId( child, oid_.dataId );
+			if ( child.element()->numData() == tgt.element()->numData() ) {
+				tgt = ObjId( child, tgt.dataId );
 				if ( !tgt.isDataHere() )
 					return 0;
-			} else if ( child()->dataHandler()->totalEntries() <= 1 ) {
+			} else if ( child.element()->numData() <= 1 ) {
 				tgt = ObjId( child, 0 );
 				if ( !tgt.isDataHere() )
 					return 0;
@@ -65,19 +43,6 @@ const OpFunc* SetGet::checkSet(
 				return 0;
 			}
 		}
-	} else {
-		tgt = oid_;
-	}
-
-	/*
-	* This is a hack to indicate that it it is a global field. Subsequently
-	* the check for isDataHere returns true. Possible issues crop up with
-	* messages calling the field multiple times, but that would require an
-	* odd combination of a message sent to such a field, and having a 
-	* large fan-out message.
-	*/
-	if ( Neutral::isGlobalField( field ) ) {
-		tgt.dataId = DataId::globalField;
 	}
 
 	const DestFinfo* df = dynamic_cast< const DestFinfo* >( f );

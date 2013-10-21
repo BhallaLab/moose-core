@@ -22,16 +22,6 @@ class Eref
 		char* data() const;
 
 		/**
-		 * Returns data entry for parent object. Relevant for
-		 * FieldDataHandlers.
-		 */
-		char* parentData() const;
-
-		/**
-		 * Returns data entry of parent object of field array
-		 */
-
-		/**
 		 * Returns Element part
 		 */
 		Element* element() const {
@@ -59,6 +49,8 @@ class Eref
 		 * Returns the Id corresponding to the Eref. Loses information.
 		 */
 		Id id() const;
+
+		const vector< MsgDigest >& msgDigest(unsigned int bindIndex ) const;
 
 		/**
 		 * True if the data are on the current node
