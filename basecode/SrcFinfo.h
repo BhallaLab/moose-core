@@ -78,6 +78,7 @@ class SrcFinfo0: public SrcFinfo
 };
 
 
+template< class A > class OpFunc1Base;
 // Should specialize for major cases like doubles.
 template < class T > class SrcFinfo1: public SrcFinfo
 {
@@ -91,19 +92,17 @@ template < class T > class SrcFinfo1: public SrcFinfo
 		// Will need to specialize for strings etc.
 		void send( const Eref& e, T arg ) const 
 		{
-				/*
-			const vector< FuncAndTargets >& fat =
-				e.getFuncAndTargets( getBindIndex() );
-			for ( vector< FuncAndTargets >::const_iterator
-				i = fat.begin(); i != fat.end(); ++i ) {
+			const vector< MsgDigest >& md = e.msgDigest( getBindIndex() );
+			for ( vector< MsgDigest >::const_iterator
+				i = md.begin(); i != md.end(); ++i ) {
 				const OpFunc1Base< T >* f = 
 					dynamic_cast< const OpFunc1Base< T >* >( i->func );
-				for ( vector< Targets >::const_iterator
-					j = i->tgts->begin(); j != i->tgts->end(); ++j ) {
-						f( j->eref(), arg );
+				assert( f );
+				for ( vector< Eref >::const_iterator
+					j = i->targets.begin(); j != i->targets.end(); ++j ) {
+						f->op( *j, arg );
 				}
 			}
-			*/
 		}
 
 		string rttiType() const {
@@ -113,6 +112,7 @@ template < class T > class SrcFinfo1: public SrcFinfo
 };
 
 
+template< class A1, class A2 > class OpFunc2Base;
 // Specialize for doubles.
 template < class T1, class T2 > class SrcFinfo2: public SrcFinfo
 {
@@ -125,6 +125,17 @@ template < class T1, class T2 > class SrcFinfo2: public SrcFinfo
 
 		void send( const Eref& e, const T1& arg1, const T2& arg2 ) const
 		{
+			const vector< MsgDigest >& md = e.msgDigest( getBindIndex() );
+			for ( vector< MsgDigest >::const_iterator
+				i = md.begin(); i != md.end(); ++i ) {
+				const OpFunc2Base< T1, T2 >* f = 
+					dynamic_cast< const OpFunc2Base< T1, T2 >* >( i->func );
+				assert( f );
+				for ( vector< Eref >::const_iterator
+					j = i->targets.begin(); j != i->targets.end(); ++j ) {
+						f->op( *j, arg1, arg2 );
+				}
+			}
 		}
 
 		string rttiType() const {

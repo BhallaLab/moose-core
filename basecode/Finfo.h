@@ -9,8 +9,6 @@
 #ifndef _FINFO_H
 #define _FINFO_H
 
-// typedef unsigned int (*OpFunc )( Eref e, const void* buf );
-
 class Finfo
 {
 	public:

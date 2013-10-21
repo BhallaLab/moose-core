@@ -139,6 +139,26 @@ EpFuncs and SetGet headers. Threw out UpFuncs and FieldElement stuff.
 Now the headers seem consistent, but SrcFinfo::send calls need to be 
 populated, which can only happen after I redo Element.
 
-Compilation begun, far more to do.
+Compilation begun, far more to do. Checkin 4801.
+
+===========================================================================
+21 Oct 2013.
+Marching through refactoring. Messaging there in skeleton but I'm not
+satisfied. I would like a generic way to handle the following cases:
+Traverse through single msgs, each with a unique Eref.
+	This is what I've implemented for now.
+Traverse through synapses, same Element but many indices and fieldIndices
+Traverse through obj arrays: same Element, many indices, all fieldIndices = 0.
+Traverse through 'all' obj: same element, auto through indices.
+
+Won't try to do this through all field indices. Unclear where that would be
+relevant.
+
+I've eliminated the FieldElements and DataHandlers. This caused some
+issues with the Cinfo element instances, which used to have FieldElements
+for the SrcFinfos, destFinfos and so on.
+I've hacked around it by explicitly creating Finfo elements as children of the
+Cinfo elements. It compiles but looks precarious. Need to fix up Finfo
+field access.
 
 ===========================================================================

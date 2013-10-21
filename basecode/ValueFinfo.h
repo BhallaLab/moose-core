@@ -115,8 +115,8 @@ template < class T, class F > class ReadOnlyValueFinfo: public ValueFinfoBase
 
 		bool strGet( const Eref& tgt, const string& field, 
 			string& returnValue ) const {
-			Field< F > sg( tgt.objId() );
-			return sg.innerStrGet( tgt.objId(), field, returnValue );
+			return Field< F >::innerStrGet( 
+							tgt.objId(), field, returnValue );
 		}
 
 		string rttiType() const {

@@ -166,8 +166,11 @@ template< class A > class SetGet1: public SetGet
 			const OpFunc* func = checkSet( field, tgt, fid );
 			const OpFunc1Base< A >* op = dynamic_cast< const OpFunc1Base< A >* >( func );
 			if ( op ) {
-				unsigned int size = arg.size(); // temporary: later set to total # of entries on element and maybe to include fields.
-				for ( unsigned int i = 0; i < arg.size(); ++i ) {
+			// total # of entries on element and maybe to include fields.
+			// This gets messy as we'll need to filter the data through
+			// the node decomposition
+				unsigned int size = tgt.element()->numData(); 
+				for ( unsigned int i = 0; i < size; ++i ) {
 					// Should also loop over field entries?
 					Eref er( tgt.element(), i );
 					op->op( er, arg[ i % arg.size() ] );
@@ -348,7 +351,8 @@ template< class A1, class A2 > class SetGet2: public SetGet
 			const OpFunc2Base< A1, A2 >* op = 
 					dynamic_cast< const OpFunc2Base< A1, A2 >* >( func );
 			if ( op ) {
-				unsigned int size = arg1.size(); // temporary: later set to total # of entries on element and maybe to include fields.
+				unsigned int size = tgt.element()->numData(); 
+				// total # of entries on element and maybe to include fields
 				for ( unsigned int i = 0; i < size; ++i ) {
 					Eref er( tgt.element(), i );
 					op->op( er, arg1[ i % arg1.size() ], 

@@ -65,7 +65,7 @@ const Cinfo* Finfo::initCinfo()
 		Neutral::initCinfo(),
 		finfoFinfos,
 		sizeof( finfoFinfos ) / sizeof( Finfo* ),
-		new Dinfo< short > // dummy
+		new Dinfo< Finfo* > // dummy
 	);
 
 	return &finfoCinfo;

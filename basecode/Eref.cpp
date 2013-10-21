@@ -17,7 +17,7 @@ Eref::Eref( Element* e, DataId index )
 
 ostream& operator <<( ostream& s, const Eref& e )
 {
-	if ( e.i_.value() == 0 )
+	if ( e.i_ == 0 )
 		s << e.e_->getName();
 	else
 		s << e.e_->getName() << "[" << e.i_ << "]";
@@ -26,17 +26,12 @@ ostream& operator <<( ostream& s, const Eref& e )
 
 char* Eref::data() const
 {
-	return e_->dataHandler()->data( i_ );
-}
-
-char* Eref::parentData() const
-{
-	return e_->dataHandler()->parentData( i_ );
+	return e_->data( i_ );
 }
 
 bool Eref::isDataHere() const
 {
-	return e_->dataHandler()->isDataHere( i_ );
+	return true;
 }
 
 ObjId Eref::objId() const
@@ -49,7 +44,7 @@ Id Eref::id() const
 	return e_->id();
 }
 
-unsigned int Eref::fieldIndex() const
+const vector< MsgDigest >& Eref::msgDigest( unsigned int bindIndex ) const
 {
-	return i_.myIndex( e_->dataHandler()->fieldMask() );
+	return e_->msgDigest( i_ * e_->cinfo()->numBindIndex() + bindIndex );
 }

@@ -9,83 +9,18 @@
 
 #include "header.h"
 
-/**
- * This version is used when making zombies. We want to have a
- * temporary Element for field access but nothing else, and it
- * should not mess with messages or Ids.
- * The passed in DataHandler is wrapped in a ZombieHandler.
- */
-Element::Element( Id id, const Cinfo* c, DataHandler* d )
-	: id_( id ), dataHandler_( d ), cinfo_( c ), group_( 0 )
-{
-	dataHandler_ = new ZombieHandler( d, d );
-}
-
-unsigned int numDimensionsActuallyUsed( 
-	const vector< DimInfo >& dimensions, unsigned int& raggedStart )
-{
-	unsigned int ret = 0;
-	raggedStart = 0;
-	for ( unsigned int i = 0; i < dimensions.size(); ++i ) {
-		if ( dimensions[i].size > 1 )
-			++ret;
-		if ( dimensions[i].isRagged )
-			raggedStart = i;
-	}
-	return ret;
-}
-
 Element::Element( Id id, const Cinfo* c, const string& name, 
-	const vector< DimInfo >& dimensions, unsigned short pathDepth,
-	bool isGlobal )
+	unsigned int numData, bool isGlobal )
 	:	name_( name ),
 		id_( id ),
 		cinfo_( c ), 
-		group_( 0 ),
-		msgBinding_( c->numBindIndex() )
-{
-	unsigned int raggedStart;
-	unsigned int numRealDimensions = numDimensionsActuallyUsed( dimensions,
-		raggedStart );
-
-	ThreadExecBalancer teb = c->internalThreadBalancer();
-	if ( teb ) {
-		dataHandler_ = new ZeroDimParallelHandler( c->dinfo(), dimensions,
-			pathDepth, isGlobal, teb );
-	} else if ( raggedStart == 0 ) { // All clean
-		if ( numRealDimensions == 0 ) {
-			dataHandler_ = new ZeroDimHandler( c->dinfo(), dimensions,
-				pathDepth, isGlobal );
-		} else if ( numRealDimensions == 1 ) {
-			dataHandler_ = new OneDimHandler( c->dinfo(), dimensions,
-				pathDepth, isGlobal );
-		} else if ( numRealDimensions == 2 ) {
-			dataHandler_ = new TwoDimHandler( c->dinfo(), dimensions,
-				pathDepth, isGlobal );
-		} else {
-			dataHandler_ = new AnyDimHandler( c->dinfo(), dimensions,
-				pathDepth, isGlobal );
-		}
-	} else {
-	//	dataHandler_ = new RaggedHandler( c->dinfo(), isGlobal, dimensions);
-	}
-
-	id.bindIdToElement( this );
-	c->postCreationFunc( id, this );
-}
-
-Element::Element( Id id, const Cinfo* c, const string& name, 
-	DataHandler* dataHandler )
-	:	name_( name ),
-		id_( id ),
-		dataHandler_( dataHandler ),
-		cinfo_( c ), 
-		group_( 0 ),
 		msgBinding_( c->numBindIndex() )
 {
 	id.bindIdToElement( this );
+	data_ = c->dinfo()->allocData( numData );
 	c->postCreationFunc( id, this );
 }
+
 
 /*
  * Used for copies. Note that it does NOT call the postCreation Func,
@@ -99,12 +34,10 @@ Element::Element( Id id, const Element* orig, unsigned int n,
 	:	name_( orig->getName() ),
 		id_( id ),
 		cinfo_( orig->cinfo_ ), 
-		group_( orig->group_ ),
 		msgBinding_( orig->cinfo_->numBindIndex() )
 {
 	if ( n >= 1 ) {
-		dataHandler_ = orig->dataHandler_->copy( newParentDepth, 
-			copyRootDepth, toGlobal, n );
+		data_ = cinfo()->dinfo()->copyData( orig->data_, orig->numData_, n);
 	}
 	id.bindIdToElement( this );
 	// cinfo_->postCreationFunc( id, this );
@@ -113,7 +46,7 @@ Element::Element( Id id, const Element* orig, unsigned int n,
 Element::~Element()
 {
 	// cout << "deleting element " << getName() << endl;
-	delete dataHandler_;
+	cinfo_->dinfo()->destroyData( data_ );
 	cinfo_ = 0; // A flag that the Element is doomed, used to avoid lookups when deleting Msgs.
 	for ( vector< vector< MsgFuncBinding > >::iterator i = msgBinding_.begin(); i != msgBinding_.end(); ++i ) {
 		for ( vector< MsgFuncBinding >::iterator j = i->begin(); j != i->end(); ++j ) {
@@ -127,6 +60,10 @@ Element::~Element()
 			Msg::deleteMsg( *i );
 }
 
+/////////////////////////////////////////////////////////////////////////
+// Element info functions
+/////////////////////////////////////////////////////////////////////////
+
 const string& Element::getName() const
 {
 	return name_;
@@ -137,28 +74,37 @@ void Element::setName( const string& val )
 	name_ = val;
 }
 
-unsigned int Element::getGroup() const
+unsigned int Element::numData() const
 {
-	return group_;
+	return numData_;
 }
 
-void Element::setGroup( unsigned int val )
+const Cinfo* Element::cinfo() const
 {
-	group_ = val;
+	return cinfo_;
 }
 
-/**
- * The indices handled by each thread are in blocks
- * Thread0 handles the first (numData_ / numThreads ) indices
- * Thread1 handles ( numData_ / numThreads ) to (numData_*2 / numThreads)
- * and so on.
- */
-void Element::process( const ProcInfo* p, FuncId fid )
+Id Element::id() const
 {
-	dataHandler_->process( p, this, fid );
+	return id_;
 }
 
+char* Element::data( unsigned int rawIndex ) const
+{
+	assert( rawIndex < numData_ );
+	return data_ + ( rawIndex * cinfo()->dinfo()->size() );
+}
 
+void Element::resize( unsigned int newNumData )
+{
+	char* temp = data_;
+	data_ = cinfo()->dinfo()->copyData( temp, numData_, newNumData );
+	cinfo()->dinfo()->destroyData( temp );
+}
+
+/////////////////////////////////////////////////////////////////////////
+// Msg Management
+/////////////////////////////////////////////////////////////////////////
 void Element::addMsg( MsgId m )
 {
 	while ( m_.size() > 0 ) {
@@ -218,6 +164,15 @@ void Element::clearBinding( BindIndex b )
 		Msg::deleteMsg( i->mid );
 	}
 }
+/////////////////////////////////////////////////////////////////////////
+// Msg Information
+/////////////////////////////////////////////////////////////////////////
+
+const vector< MsgDigest >& Element::msgDigest( unsigned int index ) const
+{
+	assert( index < msgDigest_.size() );
+	return msgDigest_[ index ];
+}
 
 const vector< MsgFuncBinding >* Element::getMsgAndFunc( BindIndex b ) const
 {
@@ -231,77 +186,6 @@ bool Element::hasMsgs( BindIndex b ) const
 	return ( b < msgBinding_.size() && msgBinding_[b].size() > 0 );
 }
 
-
-const Cinfo* Element::cinfo() const
-{
-	return cinfo_;
-}
-
-DataHandler* Element::dataHandler() const
-{
-	return dataHandler_;
-}
-
-/**
-* Resizes the current data, may include changing dimensions at the
-* specified pathDepth, or even introducing a new dimension in the
-* DataHandler.
-* Returns 0 on failure.
-* When resizing it uses the current data and puts it treadmill-
-* fashion into the new dimensions. This means that if we had a
-* 2-D array and add a z dimension while keeping x and y fixed, we
-* should just repeat the same plane of data for all z values.
-* Note that the resizing only works on the data dimensions, it
-* does not touch the field dimensions.
-*/
-
-bool Element::resize( unsigned short pathDepth, unsigned int size )
-{
-	if ( pathDepth < 1 )
-		return 0;
-	if ( size == 0 )
-		return 0;
-	for ( unsigned int i = 0; i < dataHandler_->dims().size(); ++i ) {
-		if ( pathDepth == dataHandler_->dims()[i].depth ) {
-			return dataHandler_->resize( i, size );
-		}
-	}
-	DataHandler* old = dataHandler_;
-	dataHandler_ = dataHandler_->copy( pathDepth - 1, pathDepth, 
-		dataHandler_->isGlobal(), size );
-	if ( dataHandler_ ) {
-		delete old;
-		return 1;
-	}
-	dataHandler_ = old;
-	return 0;
-}
-
-void Element::syncFieldDim() const
-{
-	dataHandler_->syncFieldDim();
-	// Later we use fieldMax to go through all nodes. ReduceOp.
-}
-
-/**
- * Appends a dimension at the top of the element tree.
- * Currently only for starting cases with zero dims.
-bool Element::appendDimension( unsigned int size )
-{
-	if ( size > 1 && dataHandler_->numDimensions() == 0 ) {
-		DataHandler* old = dataHandler_;
-		dataHandler_ = dataHandler_->copy( dataHandler_->isGlobal(), size );
-		delete old;
-		return 1;
-	}
-	return 0;
-}
-*/
-
-Id Element::id() const
-{
-	return id_;
-}
 
 void Element::showMsg() const
 {
@@ -334,6 +218,48 @@ void Element::showMsg() const
 	}
 }
 
+
+MsgId Element::findCaller( FuncId fid ) const
+{
+	for ( vector< MsgId >::const_iterator i = m_.begin(); 
+		i != m_.end(); ++i )
+	{
+		const Msg* m = Msg::getMsg( *i );
+		const Element* src;
+		if ( m->e1() == this ) {
+			src = m->e2();
+		} else {
+			src = m->e1();
+		}
+		unsigned int ret = src->findBinding( MsgFuncBinding( *i, fid ) );
+		if ( ret != ~0U ) {
+			return *i;
+		}
+	}
+	return Msg::bad;
+}
+
+unsigned int Element::findBinding( MsgFuncBinding b ) const
+{
+	for ( unsigned int i = 0; i < msgBinding_.size(); ++i ) 
+	{
+		const vector< MsgFuncBinding >& mb = msgBinding_[i];
+		vector< MsgFuncBinding>::const_iterator bi = 
+			find( mb.begin(), mb.end(), b );
+		if ( bi != mb.end() )
+			return i;
+	}
+	return ~0;
+}
+
+ const vector< MsgId >& Element::msgIn() const
+ {
+ 	return m_;
+ }
+
+/////////////////////////////////////////////////////////////////////////
+// Field Information
+/////////////////////////////////////////////////////////////////////////
 void Element::showFields() const
 {
 	vector< const SrcFinfo* > srcVec;
@@ -384,45 +310,6 @@ void Element::showFields() const
 	}
 }
 
-MsgId Element::findCaller( FuncId fid ) const
-{
-	for ( vector< MsgId >::const_iterator i = m_.begin(); 
-		i != m_.end(); ++i )
-	{
-		const Msg* m = Msg::getMsg( *i );
-		const Element* src;
-		if ( m->e1() == this ) {
-			src = m->e2();
-		} else {
-			src = m->e1();
-		}
-		unsigned int ret = src->findBinding( MsgFuncBinding( *i, fid ) );
-		if ( ret != ~0U ) {
-			return *i;
-		}
-	}
-	return Msg::bad;
-}
-
-unsigned int Element::findBinding( MsgFuncBinding b ) const
-{
-	for ( unsigned int i = 0; i < msgBinding_.size(); ++i ) 
-	{
-		const vector< MsgFuncBinding >& mb = msgBinding_[i];
-		vector< MsgFuncBinding>::const_iterator bi = 
-			find( mb.begin(), mb.end(), b );
-		if ( bi != mb.end() )
-			return i;
-	}
-	return ~0;
-}
-
- const vector< MsgId >& Element::msgIn() const
- {
- 	return m_;
- }
-
-
 void Element::destroyElementTree( const vector< Id >& tree )
 {
 	for( vector< Id >::const_iterator i = tree.begin(); 
@@ -442,14 +329,15 @@ void Element::destroyElementTree( const vector< Id >& tree )
 		Id().destroy();
 }
 
-void Element::zombieSwap( const Cinfo* newCinfo, DataHandler* newDataHandler )
+void Element::zombieSwap( const Cinfo* newCinfo )
 {
 	cinfo_ = newCinfo;
-	// delete dataHandler_;
-	// The zombie handler has now engulfed the original one.
-	dataHandler_ = newDataHandler;
+	// Stuff to be done here for data.
 }
 
+//////////////////////////////////////////////////////////////////////////
+// Message traversal
+//////////////////////////////////////////////////////////////////////////
 unsigned int Element::getOutputs( vector< Id >& ret, const SrcFinfo* finfo )
 	const
 {
