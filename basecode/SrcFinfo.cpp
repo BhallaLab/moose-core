@@ -66,26 +66,18 @@ SrcFinfo0::SrcFinfo0( const string& name, const string& doc )
 	: SrcFinfo( name, doc )
 { ; }
 
-void SrcFinfo0::send( const Eref& e, ThreadId threadNum ) const {
-	Qinfo::addToQ( e.objId(), getBindIndex(), threadNum, 0, 0 );
-	/*
-	Qinfo q( e.index(), 0, 0 );
-	e.element()->asend( q, getBindIndex(), p, 0 ); // last arg is data
-	*/
+class OpFunc0Base;
+void SrcFinfo0::send( const Eref& e ) const {
+	const vector< MsgDigest >& md = e.msgDigest( getBindIndex() );
+	for ( vector< MsgDigest >::const_iterator
+		i = md.begin(); i != md.end(); ++i ) {
+		const OpFunc0Base* f = 
+			dynamic_cast< const OpFunc0Base* >( i->func );
+		assert( f );
+		for ( vector< Eref >::const_iterator
+			j = i->targets.begin(); j != i->targets.end(); ++j ) {
+				f->op( *j );
+		}
+	}
 }
 
-/*
-void SrcFinfo0::sendTo( const Eref& e, const ProcInfo* p, 
-	const ObjId& target ) const
-{
-	// Qinfo( eindex, size, useSendTo );
-	Qinfo q( e.index(), 0, 1 );
-	e.element()->tsend( q, getBindIndex(), p, 0, target );
-}
-*/
-
-void SrcFinfo0::fastSend( const Eref& e, ThreadId threadNum ) const
-{
-	Qinfo qi( e.objId(), getBindIndex(), threadNum, 0, 0 );
-	e.element()->exec( &qi, 0 );
-}

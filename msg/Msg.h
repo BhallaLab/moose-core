@@ -47,7 +47,7 @@ class Msg
 		/**
 		 * Execute func( arg ) on all relevant indices of target
 		 */
-		virtual void exec( const Qinfo* qi, const double* arg, 
+		virtual void exec( const double* arg, 
 			FuncId fid ) const = 0;
 
 		/**

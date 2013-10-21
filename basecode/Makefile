@@ -20,17 +20,6 @@ TARGET = _basecode.o
 OBJ = \
 	consts.o	\
 	Element.o	\
-	Qinfo.o \
-	DataHandler.o \
-	ZeroDimHandler.o \
-	ZeroDimParallelHandler.o \
-	BlockHandler.o \
-	OneDimHandler.o \
-	TwoDimHandler.o \
-	AnyDimHandler.o \
-	DataHandlerWrapper.o \
-	MsgDataHandler.o \
-	ZombieHandler.o \
 	Eref.o	\
 	Finfo.o	\
 	DestFinfo.o	\
@@ -55,15 +44,7 @@ HEADERS = \
 	PrepackedBuffer.h \
 	Conv.h \
 	Dinfo.h \
-	DataDimensions.h \
-	DataHandler.h \
-	BlockHandler.h \
-	AnyDimHandler.h \
-	ZeroDimHandler.h \
-	ZeroDimParallelHandler.h \
-	OneDimHandler.h \
-	MsgDataHandler.h \
-	ZombieHandler.h \
+	MsgDigest.h \
 	Element.h \
 	Eref.h \
 	Finfo.h \
@@ -75,7 +56,6 @@ HEADERS = \
 	OpFunc.h \
 	EpFunc.h \
 	ProcInfo.h \
-	Qinfo.h \
 	SrcFinfo.h \
 	ValueFinfo.h \
 	LookupValueFinfo.h \
@@ -88,11 +68,9 @@ HEADERS = \
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS) ../shell/Shell.h
-Element.o:	DataHandlerWrapper.h
 testAsync.o:	SparseMatrix.h SetGet.h ../scheduling/Clock.h ../scheduling/Tick.h ../scheduling/TickPtr.h ../scheduling/TickMgr.h ../biophysics/IntFire.h ../biophysics/SynBase.h
 SparseMsg.o:	SparseMatrix.h
 SetGet.o:	SetGet.h ../shell/Neutral.h
-DataHandlerWrapper.o: DataHandlerWrapper.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -I../msg $< -c

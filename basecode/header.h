@@ -77,7 +77,6 @@ extern const double FaradayConst; // Defined in consts.cpp
 class Element;
 class Eref;
 class OpFunc;
-class Qinfo;
 class Cinfo;
 class SetGet;
 class FuncBarrier;
@@ -93,17 +92,8 @@ class ObjId;
 #include "Cinfo.h"
 #include "MsgFuncBinding.h"
 #include "../msg/Msg.h"
-#include "Qinfo.h"
 #include "Dinfo.h"
-#include "DataHandler.h"
-#include "BlockHandler.h"
-#include "ZeroDimHandler.h"
-#include "ZeroDimParallelHandler.h"
-#include "OneDimHandler.h"
-#include "TwoDimHandler.h"
-#include "DataDimensions.h"
-#include "AnyDimHandler.h"
-#include "ZombieHandler.h"
+#include "MsgDigest.h"
 #include "Element.h"
 #include "Eref.h"
 #include "PrepackedBuffer.h"

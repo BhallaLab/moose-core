@@ -115,9 +115,6 @@ void Cinfo::registerFinfo( Finfo* f )
 		else if ( dynamic_cast< SharedFinfo* >( f ) ) {
 			sharedFinfos_.push_back( f );
 		}
-		else if ( dynamic_cast< FieldElementFinfoBase* >( f ) ) {
-			fieldElementFinfos_.push_back( f );
-		}
 }
 
 void Cinfo::registerPostCreationFinfo( const Finfo* f )
@@ -133,21 +130,42 @@ void Cinfo::postCreationFunc( Id newId, Element* newElm ) const
 		(*i)->postCreationFunc( newId, newElm );
 }
 
+void buildFinfoElement( Id parent, vector< Finfo* >& f, const string& name )
+{
+	char* data = reinterpret_cast< char* >( &f[0] );
+	Id id = Id::nextId();
+	Element* e = new Element( id, Finfo::initCinfo(), name );
+	Finfo::initCinfo()->dinfo()->assignData( e->data( 0 ), f.size(), data, f.size());
+	Shell::adopt( parent, id );
+}
+
 // Static function called by init()
 void Cinfo::makeCinfoElements( Id parent )
 {
 	static Dinfo< Cinfo > dummy;
 	vector< unsigned int > dims( 1, 0 );
 
+	vector< Id > cinfoElements;
 	for ( map< string, Cinfo* >::iterator i = cinfoMap().begin(); 
 		i != cinfoMap().end(); ++i ) {
 		Id id = Id::nextId();
 		char* data = reinterpret_cast< char* >( i->second );
-		DataHandler* dh = new ZeroDimHandler( &dummy, data );
-			// (new Dinfo< Cinfo >(), data );
-		new Element( id, Cinfo::initCinfo(), i->first, dh );
+		Element* e = new Element( id, Cinfo::initCinfo(), i->first );
+		i->second->dinfo()->assignData( e->data( 0 ), 1, data, 1 );
+
 		Shell::adopt( parent, id );
+		cinfoElements.push_back( id );
 		// cout << "Cinfo::makeCinfoElements: parent= " << parent << ", Id = " << id << ", name = " << i->first << endl;
+	}
+	vector< Id >::iterator j = cinfoElements.begin();
+	for ( map< string, Cinfo* >::iterator i = cinfoMap().begin(); 
+		i != cinfoMap().end(); ++i ) {
+		buildFinfoElement( *j, i->second->srcFinfos_, "srcFinfo" );
+		buildFinfoElement( *j, i->second->destFinfos_, "destFinfo" );
+		buildFinfoElement( *j, i->second->valueFinfos_, "valueFinfo" );
+		buildFinfoElement( *j, i->second->lookupFinfos_, "lookupFinfo" );
+		buildFinfoElement( *j, i->second->sharedFinfos_, "sharedFinfo" );
+		j++;
 	}
 }
 
@@ -291,60 +309,6 @@ const Cinfo* Cinfo::initCinfo()
 			&Cinfo::getBaseClass
 		);
 
-		//////////////////////////////////////////////////////////////
-		// FieldElementFinfo definitions for different kinds of Finfos
-		// Assume up to 64 of each.
-		//////////////////////////////////////////////////////////////
-		static FieldElementFinfo< Cinfo, Finfo > srcFinfo( "srcFinfo",
-			"SrcFinfos in this Class",
-			Finfo::initCinfo(),
-			&Cinfo::getSrcFinfo,
-			&Cinfo::setNumFinfo, // Dummy
-			&Cinfo::getNumSrcFinfo,
-			64
-		);
-		static FieldElementFinfo< Cinfo, Finfo > destFinfo( "destFinfo",
-			"DestFinfos in this Class",
-			Finfo::initCinfo(),
-			&Cinfo::getDestFinfo,
-			&Cinfo::setNumFinfo, // Dummy
-			&Cinfo::getNumDestFinfo,
-			64
-		);
-		static FieldElementFinfo< Cinfo, Finfo > valueFinfo( "valueFinfo",
-			"ValueFinfos in this Class",
-			Finfo::initCinfo(),
-			&Cinfo::getValueFinfo,
-			&Cinfo::setNumFinfo, // Dummy
-			&Cinfo::getNumValueFinfo,
-			64
-		);
-		static FieldElementFinfo< Cinfo, Finfo > lookupFinfo( "lookupFinfo",
-			"LookupFinfos in this Class",
-			Finfo::initCinfo(),
-			&Cinfo::getLookupFinfo,
-			&Cinfo::setNumFinfo, // Dummy
-			&Cinfo::getNumLookupFinfo,
-			64
-		);
-		static FieldElementFinfo< Cinfo, Finfo > sharedFinfo( "sharedFinfo",
-			"SharedFinfos in this Class",
-			Finfo::initCinfo(),
-			&Cinfo::getSharedFinfo,
-			&Cinfo::setNumFinfo, // Dummy
-			&Cinfo::getNumSharedFinfo,
-			64
-		);
-		static FieldElementFinfo< Cinfo, Finfo > fieldElementFinfo( 
-			"fieldElementFinfo",
-			"fieldElementFinfos in this Class",
-			Finfo::initCinfo(),
-			&Cinfo::getFieldElementFinfo,
-			&Cinfo::setNumFinfo, // Dummy
-			&Cinfo::getNumFieldElementFinfo,
-			64
-		);
-
     static string doc[] =
     {
         "Name", "Cinfo",
@@ -355,12 +319,6 @@ const Cinfo* Cinfo::initCinfo()
 	static Finfo* cinfoFinfos[] = {
 		&docs,				// ReadOnlyValue
 		&baseClass,		// ReadOnlyValue
-		&srcFinfo,			// FieldElementFinfo
-		&destFinfo,			// FieldElementFinfo
-		&valueFinfo,			// FieldElementFinfo
-		&lookupFinfo,		// FieldElementFinfo
-		&sharedFinfo,		// FieldElementFinfo
-		&fieldElementFinfo,		// FieldElementFinfo
 	};
 
 	static Cinfo cinfoCinfo (

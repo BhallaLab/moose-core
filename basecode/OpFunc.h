@@ -147,7 +147,7 @@ template< class T, class A > class GetOpFunc: public GetOpFuncBase< A >
 			const OpFunc1Base< A >* recvOpFunc =
 				dynamic_cast< const OpFunc1Base< A >* >( f );
 			assert( recvOpFunc );
-			recvOpFunc( recipient.eref(), returnOp( e ) );
+			recvOpFunc->op( recipient.eref(), returnOp( e ) );
 		}
 
 		A returnOp( const Eref& e ) const {
@@ -194,7 +194,7 @@ template< class T, class L, class A > class GetOpFunc1:
 			const OpFunc1Base< A >* recvOpFunc =
 				dynamic_cast< const OpFunc1Base< A >* >( f );
 			assert( recvOpFunc );
-			recvOpFunc( recipient.eref(), returnOp( e, index ) );
+			recvOpFunc->op( recipient.eref(), returnOp( e, index ) );
 		}
 
 		/// Distinct reduceOp with the index.

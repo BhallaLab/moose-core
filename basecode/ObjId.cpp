@@ -16,13 +16,13 @@
 
 const ObjId ObjId::bad()
 {
-  static ObjId bad_( Id(), DataId::bad() );
+  static ObjId bad_( Id(), ~0U );
   return bad_;
 }
 
 ostream& operator <<( ostream& s, const ObjId& i )
 {
-	if ( i.dataId.value() == 0 )
+	if ( i.dataId == 0 )
 		s << i.id;
 	else 
 		s << i.id << "[" << i.dataId << "]";
@@ -58,12 +58,12 @@ bool ObjId::operator==( const ObjId& other ) const
 
 bool ObjId::isDataHere() const
 {
-	return id()->dataHandler()->isDataHere( dataId );
+	return true; // Later look up Element.
 }
 
 char* ObjId::data() const
 {
-	return id()->dataHandler()->data( dataId );
+	return id.element()->data( dataId );
 }
 
 string ObjId::path() const
@@ -73,5 +73,5 @@ string ObjId::path() const
 
 Element* ObjId::element() const
 {
-	return id();
+	return id.element();
 }
