@@ -1,19 +1,20 @@
 /**********************************************************************
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment.
-**           Copyright (C) 2003-2009 Upinder S. Bhalla. and NCBS
+**           Copyright (C) 2003-2013 Upinder S. Bhalla. and NCBS
 ** It is made available under the terms of the
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
+#ifndef _ELEMENT_H
+#define _ELEMENT_H
 
 class SrcFinfo;
-class Qinfo;
+
 /**
- * Have a single Element class, that uses an IndexRange. There can
- * be multiple such objects representing a complete array. So the Id
- * must know how to access them all. Or they each refer to each other.
- * Or the user only sees the master (but may be many if distrib over nodes)
+ * Base class for all object lookkups. Wrapper for actual data.
+ * Provides the MOOSE interface so that it handles messaging, class info,
+ * field lookup, memory management and many other things for the data.
  */
 class Element
 {
@@ -51,10 +52,10 @@ class Element
 		/**
 		 * Destructor
 		 */
-		~Element();
+		virtual ~Element();
 
 		/////////////////////////////////////////////////////////////////
-		// Simple field access stuff
+		// Information access fields
 		/////////////////////////////////////////////////////////////////
 
 		/**
@@ -68,8 +69,10 @@ class Element
 		void setName( const string& val );
 
 		/// Returns number of data entries
-		unsigned int numData() const;
+		virtual unsigned int numData() const;
 
+		/// Returns number of field entries for specified data
+		virtual unsigned int numField( unsigned int rawIndex ) const;
 
 		/**
 		 * Returns the Id on this Elm
@@ -77,20 +80,48 @@ class Element
 		Id id() const;
 
 		/**
-		 * Looks up specified data entry. Note that the index is NOT a
+		 * True if this is a FieldElement having an array of fields 
+		 * on each data entry. Clearly not true for the base Element.
+		 */
+		virtual bool hasFields() const {
+			return false;
+		}
+
+		/////////////////////////////////////////////////////////////////
+		// data access stuff
+		/////////////////////////////////////////////////////////////////
+
+		/**
+		 * Looks up specified field data entry. On regular objects just
+		 * returns the data entry specified by the rawIndex. 
+		 * On FieldElements like synapses, does a second lookup on the
+		 * field index.
+		 * Note that the index is NOT a
 		 * DataId: it is instead the raw index of the data on the current
 		 * node. Index is also NOT the character offset, but the index
 		 * to the data array in whatever type the data may be.
 		 *
 		 * The DataId has to be filtered through the nodeMap to
 		 * find a) if the entry is here, and b) what its raw index is.
+		 *
+		 * Returns 0 if either index is out of range.
 		 */
-		char* data( unsigned int rawIndex ) const;
+		virtual char* data( unsigned int rawIndex, 
+						unsigned int fieldIndex = 0 ) const;
 
 		/**
-		 * Changes the number of entries in the data.
+		 * Changes the number of entries in the data. Not permitted for
+		 * FieldElements since they are just fields on the data.
 		 */
-		void resize( unsigned int newNumData );
+		virtual void resize( unsigned int newNumData );
+
+		/**
+		 * Changes the number of fields on the specified data entry.
+		 * Doesn't do anything for the regular Element.
+		 */
+		virtual void resizeField( 
+				unsigned int rawIndex, unsigned int newNumField )
+		{;}
 
 		/////////////////////////////////////////////////////////////////
 
@@ -272,3 +303,5 @@ class Element
 		 */
 		vector< vector < MsgDigest > > msgDigest_;
 };
+
+#endif // _ELEMENT_H

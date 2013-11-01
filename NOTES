@@ -289,5 +289,16 @@ it may seem.
 Other thing is to put back the FieldElements, but have them point to the parent
 data_.
 
+Checkin 4818.
 For Msgs, since the MsgId is no longer needed for fast msg sending, I'll just
 have the MsgId be a regular ObjId pointing to the message. 
+
+Should also add callbacks to Elements for add and delete messages.  These
+are done as extra args in the Cinfo constructor, typically zero. 
+The callback functions pass in Element and Msg target info.
+
+Created FieldElements. Nothing there yet for FieldElementFinfos. Not yet
+compiled through SparseMsg.cpp.
+
+
+

@@ -9,7 +9,6 @@
 
 #include "header.h"
 #include "OneToAllMsg.h"
-#include "MsgDataHandler.h"
 
 Id OneToAllMsg::managerId_;
 
@@ -64,7 +63,7 @@ ObjId OneToAllMsg::findOtherEnd( ObjId f ) const
 		if ( f.dataId == i1_ )
 			return ObjId( e2()->id(), 0 );
 		else
-		  return ObjId( e2()->id(), DataId::bad() );
+		  return ObjId( Id() );
 	} else if ( f.id() == e2() ) {
 		return ObjId( e1()->id(), i1_ );
 	}
@@ -93,48 +92,6 @@ Msg* OneToAllMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 		cout << "Error: OneToAllMsg::copy: SliceToSliceMsg not yet implemented\n";
 		return 0;
 	}
-}
-
-unsigned int OneToAllMsg::srcToDestPairs(
-	vector< DataId >& src, vector< DataId >& dest ) const
-{
-	/*
-	class GetDataId: public OpFuncDummy
-	{
-		public:
-			GetDataId( vector< DataId >* vec )
-				: vec_( vec )
-			{;}
-			void op( const Eref& e, const Qinfo* q, const double* buf) const
-			{
-				vec_->push_back( e.index() );
-			}
-		private:
-			vector< DataId >* vec_;
-	};
-	*/
-
-	dest.resize( 0 );
-	DataIdExtractor di( &dest );
-
-	e2_->dataHandler()->forall( &di, 0, 0, 0, 0, 0 );
-	src.resize( dest.size(), i1_ );
-
-	/*
-	 unsigned int destRange = e2_->dataHandler()->totalEntries();
-	src.resize( destRange, i1_ );
-	dest.resize( destRange );
-	unsigned int fd = e2_->dataHandler()->getFieldDimension();
-	if ( fd <= 1 ) {
-		for ( unsigned int i = 0; i < destRange; ++i )
-			dest[i] = DataId( i );
-	} else {
-		for ( unsigned int i = 0; i < destRange; ++i )
-			dest[i] = DataId( i / fd, i % fd );
-	}
-	*/
-
-	return dest.size();
 }
 
 ///////////////////////////////////////////////////////////////////////

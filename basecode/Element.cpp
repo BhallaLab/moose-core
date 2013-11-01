@@ -89,7 +89,7 @@ Id Element::id() const
 	return id_;
 }
 
-char* Element::data( unsigned int rawIndex ) const
+char* Element::data( unsigned int rawIndex, unsigned int fieldIndex ) const
 {
 	assert( rawIndex < numData_ );
 	return data_ + ( rawIndex * cinfo()->dinfo()->size() );

@@ -12,8 +12,6 @@
 
 class DinfoBase;
 
-typedef bool ( *ThreadExecBalancer )( const char* data, ThreadId t, DataId di );
-
 /**
  * Class to manage class information for all the other classes.
  */
@@ -37,9 +35,7 @@ class Cinfo
 					unsigned int nFinfos,
 					DinfoBase* d,	// A handle to lots of utility functions for the Data class.
 					const string* doc = 0,
-					unsigned int numDoc = 0,
-					// bool hasInternalThreading = 0
-					ThreadExecBalancer internalThreadBalancer = 0
+					unsigned int numDoc = 0
 			);
 
 			/**
@@ -157,17 +153,6 @@ class Cinfo
 			 */
 			void reportFids() const;
 
-			/**
-			 * In the rare cases where the class does its own 
-			 * threading, this function returns a function pointer that
-			 * helps the DataHandler figure out whether to exec the call
-			 * on the specified thread. A nonzero return also indicates
-			 * that the Element should use a ZeroDimParallelHandler.
-			 * The default is 0, in which case the
-			 * DataHandlers manage the threading.
-			 */
-			// (bool (*)(ThreadId, DataId)) hasInternalExecThread() const;
-			ThreadExecBalancer internalThreadBalancer() const;
 		/////////////////////////////////////////////////////////////////
 		// Functions here for the MOOSE Cinfo inspection class
 		/////////////////////////////////////////////////////////////////
@@ -283,7 +268,6 @@ class Cinfo
 			const DinfoBase* dinfo_;
 
 			BindIndex numBindIndex_;
-			ThreadExecBalancer internalThreadBalancer_;
 			std::map< std::string, std::string > doc_;
 
 			/**

@@ -57,9 +57,6 @@ class SparseMsg: public Msg
 		Msg* copy( Id origSrc, Id newSrc, Id newTgt,
 			FuncId fid, unsigned int b, unsigned int n ) const;
 
-		unsigned int srcToDestPairs(
-			vector< DataId >& src, vector< DataId >& dest) const;
-
 		/**
 		 * Assigns the whole connection matrix
 		 */

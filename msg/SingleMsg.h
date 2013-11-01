@@ -31,14 +31,6 @@ class SingleMsg: public Msg
 		Msg* copy( Id origSrc, Id newSrc, Id newTgt,
 			FuncId fid, unsigned int b, unsigned int n ) const;
 		
-		/*
-		void addToQ( const Element* src, Qinfo& q, 
-			const ProcInfo* p, MsgFuncBinding i, const char* arg ) const;
-			*/
-
-		unsigned int srcToDestPairs(
-			vector< DataId >& src, vector< DataId >& dest) const;
-
 		void setI1( DataId di );
 		DataId getI1() const;
 

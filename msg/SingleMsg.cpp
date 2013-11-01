@@ -9,7 +9,6 @@
 
 #include "header.h"
 #include "SingleMsg.h"
-#include "MsgDataHandler.h"
 
 Id SingleMsg::managerId_;
 
@@ -72,13 +71,13 @@ ObjId SingleMsg::findOtherEnd( ObjId f ) const
 		if ( f.dataId == i1_ )
 			return ObjId( e2()->id(), i2_ );
 		else
-		  return ObjId( e2()->id(), DataId::bad() );
+		  return ObjId( Id() );
 	}
 	else if ( f.id() == e2() ) {
 		if ( f.dataId == i2_ )
 			return ObjId( e1()->id(), i1_ );
 		else
-		  return ObjId( e1()->id(), DataId::bad() );
+		  return ObjId( Id() );
 	}
 	
 	return ObjId::bad();
@@ -105,14 +104,6 @@ Msg* SingleMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 		cout << "Error: SingleMsg::copy: SliceMsg not yet implemented\n";
 		return 0;
 	}
-}
-
-unsigned int SingleMsg::srcToDestPairs(
-	vector< DataId >& src, vector< DataId >& dest ) const
-{
-	src.resize( 1, i1_ );
-	dest.resize( 1, i2_ );
-	return 1;
 }
 
 ///////////////////////////////////////////////////////////////////////
