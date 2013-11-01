@@ -14,8 +14,6 @@
 #include "OneToAllMsg.h"
 #include "SparseMatrix.h"
 #include "SparseMsg.h"
-#include "ReduceMsg.h"
-#include "MsgDataHandler.h"
 
 #include "../shell/Shell.h"
 
@@ -102,11 +100,6 @@ void Msg::initNull()
 	assert( msg_.size() == 0 );
 	nextMsgId(); // Set aside entry 0 for badMsg;
 	nextMsgId(); // Set aside entry 1 for setMsg;
-}
-
-void Msg::process( const ProcInfo* p, FuncId fid ) const 
-{
-	e2_->process( p, fid );
 }
 
 const Msg* Msg::getMsg( MsgId m )

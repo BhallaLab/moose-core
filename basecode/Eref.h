@@ -13,11 +13,12 @@
 class Eref
 {
 	public:
+
 		friend ostream& operator <<( ostream& s, const Eref& e );
-		Eref( Element* e, DataId index );
+		Eref( Element* e, DataId index, unsigned int field = 0 );
 
 		/**
-		 * Returns data entry
+		 * Returns data entry.
 		 */
 		char* data() const;
 
@@ -29,14 +30,17 @@ class Eref
 		}
 
 		/**
-		 * Returns index part
+		 * Returns data index, for now typecast to unsigned int.
 		 */
 		DataId index() const {
 			return i_;
 		}
 
 		/**
-		 * Returns index from field part of DataId.
+		 * Returns field index, for now typecast to unsigned int.
+		 * This is really an extra bit of baggage used here not for
+		 * immediate lookup, but to pass to EpFuncs that know
+		 * how to use this for lookup.
 		 */
 		unsigned int fieldIndex() const;
 
@@ -59,6 +63,7 @@ class Eref
 	private:
 		Element* e_;
 		DataId i_;
+		unsigned int f_;
 };
 
 #endif // _EREF_H

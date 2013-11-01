@@ -51,6 +51,16 @@ class SynBase
 		 */
 		Synapse* getSynapse( unsigned int i );
 
+		/// Sets weight of specified synapse
+		void setWeight( unsigned int index, double v );
+		/// Gets weight of specified synapse
+		double getWeight( unsigned int index ) const;
+
+		/// Sets delay of specified synapse
+		void setDelay( unsigned int index, double v );
+		/// Gets delay of specified synapse
+		double getDelay( unsigned int index ) const;
+
 		////////////////////////////////////////////////////////////////
 		/**
 		 * This is the key function of this class: meant to be overridden.

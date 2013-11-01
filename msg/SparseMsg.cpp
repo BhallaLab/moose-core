@@ -216,13 +216,12 @@ unsigned int rowIndex( const Element* e, const DataId& d )
 	return d.value();
 }
 
+/*
 void SparseMsg::exec( const Qinfo* q, const double* arg, FuncId fid ) const
 {
 	bool report = 1;
 
-	/**
-	 * The system is really optimized for data from e1 to e2.
-	 */
+	 // The system is really optimized for data from e1 to e2.
 	if ( q->src().element() == e1_ ) {
 		const OpFunc* f = e2_->cinfo()->getOpFunc( fid );
 		unsigned int row = rowIndex( e1_, q->src().dataId.value() );
@@ -292,6 +291,7 @@ void SparseMsg::exec( const Qinfo* q, const double* arg, FuncId fid ) const
 		}
 	}
 }
+*/
 
 Eref SparseMsg::firstTgt( const Eref& src ) const 
 {

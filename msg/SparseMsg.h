@@ -19,9 +19,6 @@
  * to the same target object (and all its synapses) are on the same queue.
  * So it builds up a separate SparseMatrix for each thread.
  *
- * It has a specialized version of exec, to select the appropriate
- * SparseMatrix. It goes through the entire set of incoming events.
- *
  * It has a function to do the node/thread decomposition to generate an
  * equivalent of the original sparse matrix, but using only the appropriate
  * RNG seed.
@@ -48,9 +45,6 @@ class SparseMsg: public Msg
 	public:
 		SparseMsg( MsgId mid, Element* e1, Element* e2 );
 		~SparseMsg();
-
-		// void exec( const char* arg, const ProcInfo* p ) const;
-		void exec( const Qinfo* qi, const double* arg, FuncId fid ) const;
 
 		Eref firstTgt( const Eref& src ) const;
 		

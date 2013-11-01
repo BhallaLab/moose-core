@@ -40,17 +40,6 @@ class Msg
 		static void initNull();
 
 		/**
-		 * Calls Process on e1.
-		 */
-		virtual void process( const ProcInfo *p, FuncId fid ) const;
-		
-		/**
-		 * Execute func( arg ) on all relevant indices of target
-		 */
-		virtual void exec( const double* arg, 
-			FuncId fid ) const = 0;
-
-		/**
 		 * Obtain the first target Eref for the specified Src Eref
 		 * It is really meant only to work with messages with a 
 		 * single target ObjId for each given src, typically OneToOne.

@@ -30,27 +30,6 @@ SingleMsg::~SingleMsg()
 	destroyDerivedMsg( managerId_, mid_ );
 }
 
-void SingleMsg::exec( const Qinfo* q, const double* arg, FuncId fid ) const
-{
-	if ( q->src().element() == e1_ ) { // forward message
-		if ( q->src().dataId == i1_ && 
-			e2_->dataHandler()->execThread( q->threadNum(), i2_ ) )
-		{
-			const OpFunc* f = e2_->cinfo()->getOpFunc( fid );
-			f->op( Eref( e2_, i2_ ), q, arg );
-			return;
-		}
-	} else {
-		if ( q->src().dataId == i2_ && 
-			e1_->dataHandler()->execThread( q->threadNum(), i1_ ) )
-		{
-			const OpFunc* f = e1_->cinfo()->getOpFunc( fid );
-			f->op( Eref( e1_, i1_ ), q, arg );
-			return;
-		}
-	}
-}
-
 Eref SingleMsg::firstTgt( const Eref& src ) const 
 {
 	if ( src.element() == e1_ )

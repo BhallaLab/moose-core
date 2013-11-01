@@ -43,25 +43,6 @@ OneToAllMsg::~OneToAllMsg()
 		*/
 }
 
-/**
- * Need to revisit to handle nodes
- */
-void OneToAllMsg::exec( const Qinfo* q, const double* arg, FuncId fid ) 
-	const
-{
-	if ( q->src().element() == e1_ ) {
-		if ( q->src().dataId == i1_ ) {
-			const OpFunc* f = e2_->cinfo()->getOpFunc( fid );
-			e2_->dataHandler()->forall( f, e2_, q, arg, 1, 0 );
-		}
-	} else {
-		if ( e1_->dataHandler()->execThread( q->threadNum(), i1_ ) )
-		{
-			const OpFunc* f = e1_->cinfo()->getOpFunc( fid );
-			f->op( Eref( e1_, i1_ ), q, arg );
-		}
-	}
-}
 
 Eref OneToAllMsg::firstTgt( const Eref& src ) const 
 {

@@ -23,9 +23,6 @@ class OneToAllMsg: public Msg
 		OneToAllMsg( MsgId mid, Eref e1, Element* e2 );
 		~OneToAllMsg();
 
-		// void exec( const char* arg, const ProcInfo* p ) const;
-		void exec( const Qinfo* qi, const double* arg, FuncId fid ) const;
-
 		Eref firstTgt( const Eref& src ) const;
 
 
