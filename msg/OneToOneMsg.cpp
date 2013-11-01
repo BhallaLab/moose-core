@@ -24,24 +24,6 @@ OneToOneMsg::~OneToOneMsg()
 	destroyDerivedMsg( managerId_, mid_ );
 }
 
-void OneToOneMsg::exec( const Qinfo* q, const double* arg, FuncId fid) const
-{
-	unsigned int src = q->src().dataId.value(); // will also be dest index.
-	if ( q->src().element() == e1_ ) {
-		if ( e2_->dataHandler()->execThread( q->threadNum(), src ) )
-		{
-			const OpFunc* f = e2_->cinfo()->getOpFunc( fid );
-			f->op( Eref( e2_, q->src().dataId ), q, arg );
-		}
-	} else {
-		if ( e1_->dataHandler()->execThread( q->threadNum(), src ) )
-		{
-			const OpFunc* f = e1_->cinfo()->getOpFunc( fid );
-			f->op( Eref( e1_, q->src().dataId ), q, arg );
-		}
-	}
-}
-
 /**
  * This is a little tricky because we might be mapping between
  * data entries and field entries here.

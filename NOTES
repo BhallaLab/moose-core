@@ -111,6 +111,15 @@ just 10 MsgSrcs emanating from Clock, and internal array for the Multiples.
 Conv: Used only to serialize off-node msgs, and to convert to and from strings,
 and to provide rttiType to MOOSE.
 
+Eref {
+	Element* e_;
+	DataId i_;	// An unsigned int for now
+	// An unsigned int, used to pass field index but does not affect data 
+	// lookup. Instead field index is extracted by the target EpFunc.
+	FieldIndex f_;	
+	char* data();
+};
+
 Prepacked buffer goes away
 
 Parallel calls: At time of Msg digest, converted and condensed to single call
@@ -160,5 +169,125 @@ for the SrcFinfos, destFinfos and so on.
 I've hacked around it by explicitly creating Finfo elements as children of the
 Cinfo elements. It compiles but looks precarious. Need to fix up Finfo
 field access.
+Checkin 4802.
 
 ===========================================================================
+22 Oct 2013
+Tediously slogging through compiling testAsync.cpp. Done, but the many
+tests with IntFire and synapses are not so clean and will need some thought
+on how better to set up this interface.
+===========================================================================
+25 Oct 2013
+
+Back to Element lookup options. 
+
+With just an integer data entry lookup:
+- Synapses would need to be FieldElements, one per receptor
+- Copies of neurons either to a new element tree, or arrayed in dataId.
+- Need to be able to create child Elements on every data entry.
+- Msg cleaner
+- 
+
+With data entry plus field entry lookup:
+- Synapses could be to be FieldElements, one per receptor, or tables.
+- Copies of neurons either to a new element tree, or arrayed in dataId.
+- Do not need to be able to create child Elements on every data entry, but handy
+- Msg has extra field.
+
+===========================================================================
+28 Oct
+
+Some memory estimates.
+
+Integer data lookup:
+- Elements
+	Suppose I have 1e6 neurons and 1e10 synapses.
+	Assume I have 100 synapses per receptor, this is still about 1e8 synapse
+	Elements. Somewhat strenuous if I attempt to put this all on each node.
+- Msgs
+	In sparse Msg form, it is essentially 2 longs per synapse, but only
+	for synapses on local node. The higher level Msg would be negligibly 
+	small.
+- Synapse data
+	2 doubles per synapse on the node. A modest circular buffer for the 
+	queue.
+
+Field entry lookup.
+- Elements
+	Here I would have 1 'synapse' per receptor on the parent neuron. A few
+	hundred at best. Rest is just a matter of looking up indices.
+	I could put the relevant Elements on each node easily.
+- Msgs
+	Same as above. 3 longs per synapse makes 
+- Synapse data
+	2 doubles per synapse on the node. A modest circular buffer for the 
+	queue.
+
+
+So it is pretty clear that the integer data lookup would require a different
+way to set up messaging, one where the skeleton simulation cannot fit on one
+node.
+
+Note that I have to do Data entry mapping to nodes in either case.
+Let's see what that looks like.
+
+===========================================================================
+1 Nov 2013
+Data entry mapping.
+Goals: 
+	From any node, find quickly which node holds data.
+		This doesn't have to be real-time: not used for sending msgs,
+		but used for setup.
+	Keep it compact. Can't have a full index of entire data list.
+
+Design: 
+	Element Ids: On all nodes
+	Data Ids: Decomposed between nodes
+	Field indices: Only on one node, that of the parent Data Id.
+
+Use cases:
+	- Neuronal model decomposed. Small # of neurons on each node, many 
+	nodes, some degree of spatial organization helps, load balancing may 
+	occur.  Little data transfer due to spiking.
+	- 3D space decomposed in rdesigneur. Unpleasant large matrix, simple
+	reacs but lots of diffusion. Heavy data transfer, each timestep for
+	matrix solution. Very spatially organized, unlikely to do funny 
+	balancing.
+	- rdesigneur cell models: Each model on its own, doesn't need to talk
+	to others except via spiking.
+	- Spiking neuron model decomposed. Huge # of neurons and synapses on
+	each node, many nodes, some spatial orgn. Load balancing may not be
+	so useful. Lots of data transfer.
+	- Large cluster vs small cluster/cores on a machine.
+
+// Returns blocks
+getNode( unsigned int numNodes, unsigned int numData, unsigned int dataId ) {
+	return dataId * numNodes / numData;
+}
+// Returns nicely arrayed.
+getNode( unsigned int numNodes, unsigned int numData, unsigned int dataId ) {
+	return dataId % numNodes;
+}
+Now, what if load balancing has happened? Add check for that.
+getNode( unsigned int numNodes, unsigned int numData, unsigned int dataId ) {
+	if ( auto i = dataMap.find( dataId ) ) {
+		return i->second;
+	}
+	return oldNodeMethod( numNodes, numData, dataId );
+}
+// May also have a situation where the data is on every node: a global.
+getNode()
+{
+	return GlobalNode
+}
+
+So we just need a virtual class or function for this to sit on every Element.
+Quite easy. Eventually will want to have a way to garbage collect if lots of
+object movement has happened. Could even have a policy switch field, ugly though
+it may seem.
+
+Other thing is to put back the FieldElements, but have them point to the parent
+data_.
+
+For Msgs, since the MsgId is no longer needed for fast msg sending, I'll just
+have the MsgId be a regular ObjId pointing to the message. 

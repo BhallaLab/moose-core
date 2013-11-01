@@ -31,7 +31,6 @@ DiagonalMsg::~DiagonalMsg()
  * any given input. Furthermore, this target will always be unique:
  * no other input will hit the same target. So we can partition the
  * message exec operation among sources as we like.
- */
 void DiagonalMsg::exec( const Qinfo* q, const double* arg, FuncId fid) const
 {
 	int src = q->src().dataId.value();
@@ -53,6 +52,7 @@ void DiagonalMsg::exec( const Qinfo* q, const double* arg, FuncId fid) const
 		}
 	}
 }
+ */
 
 Eref DiagonalMsg::firstTgt( const Eref& src ) const 
 {

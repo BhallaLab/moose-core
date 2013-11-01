@@ -15,11 +15,8 @@ extern const ThreadId ScriptThreadNum; // Defined in Shell.cpp
 
 // These Finfo objects are exposed to other classes for convenience in test cases and other functions.
 // NOTE: These should never be re-registered in an initCinfo of another class.
-//extern SrcFinfo1< PrepackedBuffer >* lowLevelSetGet(); // Not available
-//extern SrcFinfo4< Id, DataId, FuncId, PrepackedBuffer >* requestSet(); // Not currently used.
 //extern SrcFinfo4< Id, DataId, FuncId, unsigned int >* requestGet(); // Not available
 extern DestFinfo* receiveGet();
-extern ReduceFinfoBase* reduceArraySizeFinfo();
 //extern SrcFinfo2< unsigned int, unsigned int >* ack(); // Not currently used.
 
 class Shell
@@ -432,12 +429,6 @@ class Shell
 		static unsigned int reduceInt( unsigned int val );
 
 		////////////////////////////////////////////////////////////////
-		// Functions for handling field Set/Get operations
-		////////////////////////////////////////////////////////////////
-
-		void recvGet( const Eref& e, const Qinfo* q, PrepackedBuffer pb );
-
-		////////////////////////////////////////////////////////////////
 		// Sets up clock ticks. Essentially is a call into the 
 		// Clock::setupTick function, but may be needed to be called from
 		// the parser so it is a Shell function too.
@@ -468,10 +459,6 @@ class Shell
 		static const ProcInfo* procInfo();
 
 		const ProcInfo* getProcInfo( unsigned int index ) const;
-
-		/// Digests outcome of calculation for max index of ragged array
-		void digestReduceFieldDimension( 
-			const Eref& er, const ReduceFieldDimension* arg );
 
 		/**
  		 * Chops up the names in the string into the vector of strings,
@@ -605,12 +592,6 @@ class Shell
 
 		/// Current working Element
 		Id cwe_;
-
-		/// Return value from reduceMax calculation for array sizes.
-		unsigned int maxIndex_;
-
-		/// Keeps track of allocated reduceMsg so we can deallocate.
-		MsgId reduceMsg_;
 };
 
 /*

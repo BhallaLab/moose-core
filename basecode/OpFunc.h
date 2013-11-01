@@ -10,11 +10,6 @@
 #ifndef _OPFUNC_H
 #define _OPFUNC_H
 
-extern void returnFromGet( const Eref& e, const Qinfo* q, 
-	const double* buf, 
-	const double* data, unsigned int size );
-extern bool skipWorkerNodeGlobal( const Eref& e );
-
 template< class T > class OpFunc0: public OpFunc0Base
 {
 	public:
@@ -127,7 +122,6 @@ template< class T,
 	private:
 		void ( T::*func_ )( A1, A2, A3, A4, A5, A6 ); 
 };
-
 
 /**
  * This specialized OpFunc is for returning a single field value

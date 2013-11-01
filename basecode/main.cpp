@@ -203,10 +203,8 @@ Id init( int argc, char** argv, bool& doUnitTests, bool& doRegressionTests )
 
 	Msg::initNull();
 	Id shellId;
-	vector< DimInfo > dims;
 	Element* shelle = 
-		new Element( shellId, Shell::initCinfo(), "root", dims, 0, 1 );
-	// Shell::initCinfo()->create( shellId, "root", 1 );
+		new Element( shellId, Shell::initCinfo(), "root", 1, 1 );
 
 	Id clockId = Id::nextId();
 	assert( clockId.value() == 1 );
@@ -222,7 +220,7 @@ Id init( int argc, char** argv, bool& doUnitTests, bool& doRegressionTests )
 	Msg::initMsgManagers();
 
 	// Element* clocke = 
-	new Element( clockId, Clock::initCinfo(), "clock", dims, 1, 1 );
+	new Element( clockId, Clock::initCinfo(), "clock", 1, 1 );
 
 	// Some ugly hacks here to shift the Tick object to be Id(2).
 	Id::initIds(); // Shifted the dirty work to the Id class.
@@ -237,7 +235,7 @@ Id init( int argc, char** argv, bool& doUnitTests, bool& doRegressionTests )
 	assert( tickId.value() == 2 );
 	assert( tickId()->getName() == "tick" ) ;
 
-	new Element( classMasterId, Neutral::initCinfo(), "classes", dims, 1, 1 );
+	new Element( classMasterId, Neutral::initCinfo(), "classes", 1, 1 );
 
 	assert ( shellId == Id() );
 	assert( clockId == Id( 1 ) );
@@ -349,7 +347,7 @@ int main( int argc, char** argv )
 	// Note that the main loop remains the parser loop, though it may
 	// spawn a lot of other stuff.
 	Element* shelle = shellId();
-	Shell* s = reinterpret_cast< Shell* >( shelle->dataHandler()->data( 0 ) );
+	Shell* s = reinterpret_cast< Shell* >( shelle->data( 0 ) );
 	if ( doUnitTests )
 		nonMpiTests( s ); // These tests do not need the process loop.
 
@@ -371,7 +369,7 @@ int main( int argc, char** argv )
 		// else 
 			Shell::launchParser(); // Here we set off a little event loop to poll user input. It deals with the doQuit call too.
 	}
-	Neutral* ns = reinterpret_cast< Neutral* >( shelle->dataHandler()->data( 0 ) );
+	Neutral* ns = reinterpret_cast< Neutral* >( shelle->data( 0 ) );
 	ns->destroy( shellId.eref(), 0, 0 );
 #ifdef USE_MPI
 	MPI_Finalize();

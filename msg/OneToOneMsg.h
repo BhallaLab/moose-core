@@ -22,9 +22,6 @@ class OneToOneMsg: public Msg
 		OneToOneMsg( MsgId mid, Element* e1, Element* e2 );
 		~OneToOneMsg();
 
-		// void exec( const char* arg, const ProcInfo* p) const;
-		void exec( const Qinfo* qi, const double* arg, FuncId fid ) const;
-
 		Eref firstTgt( const Eref& src ) const;
 
 		Id managerId() const;

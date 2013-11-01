@@ -9,8 +9,8 @@
 
 #include "header.h"
 
-Eref::Eref( Element* e, DataId index )
-			: e_( e ), i_( index )
+Eref::Eref( Element* e, DataId index, unsigned int field )
+			: e_( e ), i_( index ), f_( field )
 {
 	;
 }
