@@ -31,9 +31,6 @@ class OneToOneMsg: public Msg
 		Msg* copy( Id origSrc, Id newSrc, Id newTgt,
 			FuncId fid, unsigned int b, unsigned int n ) const;
 
-		unsigned int srcToDestPairs(
-			vector< DataId >& src, vector< DataId >& dest) const;
-
 		/// Setup function for Element-style access to Msg fields.
 		static const Cinfo* initCinfo();
 	private:

@@ -13,8 +13,6 @@
  * This specialized set of classes is derived from OpFunc, and is used
  * to handle Process type calls which need to bypass the Queueing system.
  * These include process, reinit, and other intermediate stage process ops.
- * As the Queue is bypassed, the Qinfo is irrelevant and is not used as 
- * an argument.
  */
 
 class ProcOpFuncBase: public OpFunc
@@ -52,7 +50,7 @@ template< class T > class ProcOpFunc: public ProcOpFuncBase
 			return SetGet1< ProcPtr >::set( tgt.objId(), field, &p );
 		}
 
-		void op( const Eref& e, const Qinfo* q, const double* buf ) const {
+		void op( const Eref& e, const double* buf ) const {
 			Conv< ProcPtr > arg1( buf );
 			(reinterpret_cast< T* >( e.data() )->*func_)( e, *arg1 ) ;
 		}

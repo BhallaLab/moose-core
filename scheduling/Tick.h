@@ -80,7 +80,7 @@ class Tick
 		 * A dummy function for handling messages incoming from parent
 		 * Clock
 		 */
-		void destroy( Eref e, const Qinfo* q );
+		void destroy( Eref e );
 
 		///////////////////////////////////////////////////////
 		// Number of allocated ticks.

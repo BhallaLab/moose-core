@@ -61,7 +61,7 @@ class Clock
 		// Tick handlers
 		///////////////////////////////////////////////////////////
 		// Handles dt assignment from the child ticks.
-		void setDt( const Eref& e, const Qinfo* q, double dt );
+		void setDt( const Eref& e, double dt );
 
 		/**
 		 * Pushes the new Tick onto the TickPtr stack.

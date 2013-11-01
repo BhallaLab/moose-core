@@ -9,7 +9,6 @@
 
 #include "header.h"
 #include "DiagonalMsg.h"
-#include "MsgDataHandler.h"
 
 // Static field declaration
 Id DiagonalMsg::managerId_;
@@ -26,45 +25,15 @@ DiagonalMsg::~DiagonalMsg()
 	destroyDerivedMsg( managerId_, mid_ );
 }
 
-/**
- * This is sort of thread-safe, as there is only ever one target for
- * any given input. Furthermore, this target will always be unique:
- * no other input will hit the same target. So we can partition the
- * message exec operation among sources as we like.
-void DiagonalMsg::exec( const Qinfo* q, const double* arg, FuncId fid) const
-{
-	int src = q->src().dataId.value();
-	if ( q->src().element() == e1_ ) {
-		int dest = src + stride_;
-			
-		if ( dest >= 0 && 
-			e2_->dataHandler()->execThread( q->threadNum(), dest ) ) {
-				const OpFunc* f = e2_->cinfo()->getOpFunc( fid );
-				f->op( Eref( e2_, dest ), q, arg );
-		}
-	} else {
-		// Here we are stuck a bit. I will assume srcIndex is now for e2
-		int dest = src - stride_;
-		if ( dest >= 0 && 
-			e1_->dataHandler()->execThread( q->threadNum(), dest ) ) {
-				const OpFunc* f = e1_->cinfo()->getOpFunc( fid );
-				f->op( Eref( e1_, dest ), q, arg );
-		}
-	}
-}
- */
-
 Eref DiagonalMsg::firstTgt( const Eref& src ) const 
 {
 	if ( src.element() == e1_ ) {
-		unsigned int nextData = src.index().value() + stride_;
-		if ( e2_->dataHandler()->isDataHere( nextData ) )
-			return Eref( e2_, nextData );
+		unsigned int nextData = src.index() + stride_;
+		return Eref( e2_, nextData );
 	}
 	else if ( src.element() == e2_ ) {
-		unsigned int nextData = src.index().value() - stride_;
-		if ( e1_->dataHandler()->isDataHere( nextData ) )
-			return Eref( e1_, nextData );
+		unsigned int nextData = src.index() - stride_;
+		return Eref( e1_, nextData );
 	}
 	return Eref( 0, 0 );
 }
@@ -87,21 +56,21 @@ int DiagonalMsg::getStride() const
 ObjId DiagonalMsg::findOtherEnd( ObjId f ) const
 {
 	if ( f.id() == e1() ) {
-		int i2 = f.dataId.value() + stride_;
+		int i2 = f.dataId + stride_;
 		if ( i2 >= 0 ) {
 			unsigned int ui2 = i2;
-			if ( ui2 < e2()->dataHandler()->totalEntries() )
+			if ( ui2 < e2()->numData() )
 				return ObjId( e2()->id(), DataId( ui2 ) );
 		}
-		return ObjId( e2()->id(), DataId::bad() );
+		return ObjId( Id() );
 	} else if ( f.id() == e2() ) {
-		int i1 = f.dataId.value() - stride_;
+		int i1 = f.dataId - stride_;
 		if ( i1 >= 0 ) {
 			unsigned int ui1 = i1;
-			if ( ui1 < e1()->dataHandler()->totalEntries() )
+			if ( ui1 < e1()->numData() )
 				return ObjId( e1()->id(), DataId( ui1 ));
 		}
-		return ObjId( e1()->id(), DataId::bad() );
+		return ObjId( Id() );
 	}
 	return ObjId::bad();
 }
@@ -128,38 +97,6 @@ Msg* DiagonalMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 		cout << "Error: DiagonalMsg::copy: DiagonalSliceMsg not yet implemented\n";
 		return 0;
 	}
-}
-
-unsigned int DiagonalMsg::srcToDestPairs( 
-	vector< DataId >& src, vector< DataId >& dest ) const
-{
-	unsigned int srcRange = e1_->dataHandler()->totalEntries();
-	/*
-	if ( e1_->dataHandler()->getFieldDimension() != 0 ) {
-		srcRange /= e1_->dataHandler()->getFieldDimension();
-		cout << "Warning: DiagonalMsg::srcToDestPairs on " << mid() << ":"
-		<< "\nDiagonalMsgs do not properly handle FieldElement arrays.\n";
-	}
-	*/
-
-	unsigned int destRange = e2_->dataHandler()->totalEntries();
-	/*
-	if ( e2_->dataHandler()->getFieldDimension() != 0 ) {
-		destRange /= e2_->dataHandler()->getFieldDimension();
-		cout << "Warning: DiagonalMsg::srcToDestPairs on " << mid() << ":"
-		<< "\nDiagonalMsgs do not properly handle FieldElement arrays.\n";
-	}
-	*/
-	src.resize( 0 );
-	dest.resize( 0 );
-	for ( unsigned int i = 0; i < srcRange; ++i ) {
-		unsigned int j = i + stride_;
-		if ( j < destRange ) {
-			src.push_back( DataId( i ) );
-			dest.push_back( DataId( j ) );
-		}
-	}
-	return src.size();
 }
 
 ///////////////////////////////////////////////////////////////////////
