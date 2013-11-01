@@ -37,24 +37,16 @@ Msg::Msg( MsgId mid, Element* e1, Element* e2, Id mgrId )
 	msg_[mid_] = this;
 	e1->addMsg( mid_ );
 	e2->addMsg( mid_ );
+	/*
 	MsgDataHandler * mdh = dynamic_cast< MsgDataHandler* >( 
 		mgrId.element()->dataHandler() );
 	assert( mdh );
 	mdh->addMid( mid_ );
+	*/
 }
 
 Msg::~Msg()
 {
-	/*
-	 * I have to do this in the derived classes: the virtual funcs don't
-	 * work here.
-	Id mgrId = managerId();
-	MsgDataHandler * mdh = dynamic_cast< MsgDataHandler* >( 
-		mgrId.element()->dataHandler() );
-	assert( mdh );
-	mdh->dropMid( mid_ );
-	*/
-
 	msg_[ mid_ ] = 0;
 	e1_->dropMsg( mid_ );
 	e2_->dropMsg( mid_ );
@@ -69,15 +61,6 @@ Msg::~Msg()
 MsgId Msg::nextMsgId()
 {
 	MsgId ret;
-	/*
-	if ( garbageMsg_.size() > 0 ) {
-		ret = garbageMsg_.back();
-		garbageMsg_.pop_back();
-	} else {
-		ret = msg_.size();
-		msg_.push_back( 0 );
-	}
-	*/
 	ret = msg_.size();
 	msg_.push_back( 0 );
 	return ret;
@@ -121,24 +104,6 @@ Eref Msg::manager() const
 {
 	return Eref( ( this->managerId() )(), DataId( mid_ ) );
 }
-
-/*
-void Msg::setDataId( unsigned int di ) const
-{
-	assert( lookupDataId_.size() > mid_ );
-	lookupDataId_[ mid_ ] = di;
-}
-
-void Msg::addToQ( const Element* src, Qinfo& q,
-	const ProcInfo* p, MsgFuncBinding i, const char* arg ) const
-{
-	if ( e1_ == src ) {
-		q.addToQforward( p, i, arg );
-	} else {
-		q.addToQbackward( p, i, arg ); 
-	}
-}
-*/
 
 // Static func
 unsigned int Msg::numMsgs()
@@ -320,46 +285,36 @@ static const Cinfo* msgCinfo = Msg::initCinfo();
 // Static func
 void Msg::initMsgManagers()
 {
-	vector< DimInfo > dims;
 	Dinfo< short > dummyDinfo;
 
 	// This is to be the parent of all the msg managers.
 	msgManagerId_ = Id::nextId();
-	new Element( msgManagerId_, Neutral::initCinfo(), "Msgs", dims, 1, 1 );
-
-	DimInfo temp = { 65536, 2, false }; // ragged array for msgManagers.
-	dims.push_back( temp );
+	new Element( msgManagerId_, Neutral::initCinfo(), "Msgs", 1, 1 );
 
 	SingleMsg::managerId_ = Id::nextId();
 	new Element( SingleMsg::managerId_, SingleMsg::initCinfo(), 
-		"singleMsg", new MsgDataHandler( &dummyDinfo, dims, 2, true ) );
-
+		"singleMsg", 1, true );
 	msgMgrs.push_back( SingleMsg::managerId_ );
 
 	OneToOneMsg::managerId_ = Id::nextId();
 	new Element( OneToOneMsg::managerId_, OneToOneMsg::initCinfo(),
-		"oneToOneMsg", new MsgDataHandler( &dummyDinfo, dims, 2, true ) );
+		"oneToOneMsg", 1, true );
 	msgMgrs.push_back( OneToOneMsg::managerId_ );
 
 	OneToAllMsg::managerId_ = Id::nextId();
 	new Element( OneToAllMsg::managerId_, OneToAllMsg::initCinfo(), 
-		"oneToAllMsg", new MsgDataHandler( &dummyDinfo, dims, 2, true ) );
+		"oneToAllMsg", 1, true );
 	msgMgrs.push_back( OneToAllMsg::managerId_ );
 
 	DiagonalMsg::managerId_ = Id::nextId();
 	new Element( DiagonalMsg::managerId_, DiagonalMsg::initCinfo(), 
-		"diagonalMsg", new MsgDataHandler( &dummyDinfo, dims, 2, true ) );
+		"diagonalMsg", 1, true );
 	msgMgrs.push_back( DiagonalMsg::managerId_ );
 
 	SparseMsg::managerId_ = Id::nextId();
 	new Element( SparseMsg::managerId_, SparseMsg::initCinfo(), 
-		"sparseMsg", new MsgDataHandler( &dummyDinfo, dims, 2, true ) );
+		"sparseMsg", 1, true );
 	msgMgrs.push_back( SparseMsg::managerId_ );
-
-	ReduceMsg::managerId_ = Id::nextId();
-	new Element( ReduceMsg::managerId_, ReduceMsg::initCinfo(),
-		"ReduceMsg", new MsgDataHandler( &dummyDinfo, dims, 2, true ) );
-	msgMgrs.push_back( ReduceMsg::managerId_ );
 
 	msgMgrs.push_back( msgManagerId_ );
 
@@ -371,7 +326,6 @@ void Msg::initMsgManagers()
 	Shell::adopt( msgManagerId_, OneToAllMsg::managerId_ );
 	Shell::adopt( msgManagerId_, DiagonalMsg::managerId_ );
 	Shell::adopt( msgManagerId_, SparseMsg::managerId_ );
-	Shell::adopt( msgManagerId_, ReduceMsg::managerId_ );
 }
 
 void destroyMsgManagers()
@@ -389,10 +343,12 @@ void Msg::destroyDerivedMsg( Id managerId, MsgId mid )
 	// This test is used because it is possible for the deletion order
 	// when cleaning out the simulation to get rid of the msg Manager
 	// before other things, which may have messages still to remove.
+		/*
 	if ( managerId.element() && managerId.element()->cinfo() ) {
 		MsgDataHandler* mdh = dynamic_cast< MsgDataHandler* >(
 			managerId.element()->dataHandler() );
 		assert( mdh );
 		mdh->dropMid( mid );
 	}
+	*/
 }

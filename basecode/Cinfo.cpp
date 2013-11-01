@@ -17,12 +17,10 @@ Cinfo::Cinfo( const string& name,
 				unsigned int nFinfos,
 				DinfoBase* d,
 				const string* doc,
-				unsigned int numDoc,
-				ThreadExecBalancer internalThreadBalancer
+				unsigned int numDoc
 )
 		: name_( name ), baseCinfo_( baseCinfo ), dinfo_( d ),
-			numBindIndex_( 0 ),
-			internalThreadBalancer_( internalThreadBalancer )
+			numBindIndex_( 0 )
 {
 	if ( cinfoMap().find( name ) != cinfoMap().end() ) {
 		cout << "Warning: Duplicate Cinfo name " << name << endl;
@@ -262,11 +260,6 @@ void Cinfo::reportFids() const
 			cout << df->getFid() << "	" << df->name() << endl;
 		}
 	}
-}
-
-ThreadExecBalancer Cinfo::internalThreadBalancer() const
-{
-	return internalThreadBalancer_;
 }
 
 ////////////////////////////////////////////////////////////////////////

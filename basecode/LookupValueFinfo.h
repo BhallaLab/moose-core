@@ -68,17 +68,16 @@ template < class T, class L, class F > class LookupValueFinfo: public LookupValu
 			const string& arg ) const {
 			string fieldPart = field.substr( 0, field.find( "[" ) );
 			string indexPart = field.substr( field.find( "[" ) + 1, field.find( "]" ) );
-			LookupField< L, F > sg( tgt.objId() );
-			return sg.innerStrSet( tgt.objId(), fieldPart, indexPart, arg );
+			return LookupField< L, F >::innerStrSet( 
+							tgt.objId(), fieldPart, indexPart, arg );
 		}
 
 		bool strGet( const Eref& tgt, const string& field, 
 			string& returnValue ) const {
 			string fieldPart = field.substr( 0, field.find( "[" ) );
 			string indexPart = field.substr( field.find( "[" ) + 1, field.find( "]" ) );
-			LookupField< L, F > sg( tgt.objId() );
-			return sg.innerStrGet( tgt.objId(), fieldPart, 
-				indexPart, returnValue );
+			return LookupField< L, F >::innerStrGet( tgt.objId(), 
+							fieldPart, indexPart, returnValue );
 		}
 
 		string rttiType() const {
@@ -123,9 +122,8 @@ template < class T, class L, class F > class ReadOnlyLookupValueFinfo: public Lo
 			string& returnValue ) const {
 			string fieldPart = field.substr( 0, field.find( "[" ) );
 			string indexPart = field.substr( field.find( "[" ) + 1, field.find( "]" ) );
-			LookupField< L, F > sg( tgt.objId() );
-			return sg.innerStrGet( tgt.objId(), fieldPart, 
-				indexPart, returnValue );
+			return LookupField< L, F >::innerStrGet( tgt.objId(), 
+						fieldPart, indexPart, returnValue );
 		}
 
 		string rttiType() const {

@@ -10,7 +10,6 @@
 #include "header.h"
 #include "SparseMatrix.h"
 #include "SparseMsg.h"
-#include "MsgDataHandler.h"
 #include "../randnum/randnum.h"
 #include "../biophysics/Synapse.h"
 #include "../shell/Shell.h"
@@ -196,12 +195,20 @@ void SparseMsg::transpose()
 
 
 SparseMsg::SparseMsg( MsgId mid, Element* e1, Element* e2 )
-	: Msg( mid, e1, e2, SparseMsg::managerId_ ),
-	matrix_( e1->dataHandler()->parentDataHandler()->totalEntries(), 
-		e2->dataHandler()->parentDataHandler()->totalEntries() )
+	: Msg( mid, e1, e2, SparseMsg::managerId_ )
 {
-	assert( e1->dataHandler()->parentDataHandler()->numDimensions() >= 1  && 
-		e2->dataHandler()->parentDataHandler()->numDimensions() >= 1 );
+	unsigned int nrows = 0;
+	unsigned int ncolumns = 0;
+	if ( e1->hasFields() ) {
+		for ( unsigned int i = 0; i < e1->numData(); ++i )
+			nrows += e1->numField( i );
+	} else {
+		nrows = e1->numData();
+	}
+
+	for ( unsigned int i = 0; i < e2->numData(); ++i )
+		ncolumns += e2->numField( i );
+	matrix_.setSize( nrows, ncolumns );
 }
 
 SparseMsg::~SparseMsg()
@@ -213,7 +220,7 @@ unsigned int rowIndex( const Element* e, const DataId& d )
 {
 	// FieldDataHandlerBase* fdh = dynamic_cast< FieldDataHandlerBase* >( e->dataHandler() );
 
-	return d.value();
+	return d;
 }
 
 /*
@@ -301,17 +308,10 @@ Eref SparseMsg::firstTgt( const Eref& src ) const
 	if ( src.element() == e1_ ) {
 		const unsigned int* fieldIndex;
 		const unsigned int* colIndex;
-		unsigned int n = matrix_.getRow( src.index().value(), 
+		unsigned int n = matrix_.getRow( src.index(),
 			&fieldIndex, &colIndex );
 		if ( n != 0 ) {
-			FieldDataHandlerBase* fdh = 
-				dynamic_cast< FieldDataHandlerBase* >( e2_->dataHandler() );
-			if ( fdh ) {
-				return Eref( e2_, DataId( colIndex[0], fieldIndex[0], 
-					fdh->numFieldBits() ) );
-			} else {
-				return Eref( e2_, DataId( colIndex[0] )  );
-			}
+			return Eref( e2_, colIndex[0], fieldIndex[0] );
 		}
 	} else if ( src.element() == e2_ ) {
 		return Eref( e1_, 0 );
@@ -331,30 +331,21 @@ unsigned int SparseMsg::randomConnect( double probability )
 	vector< unsigned int > sizes( nCols, 0 );
 	bool isFirstRound = 1;
 	unsigned int totSynNum = 0;
-	unsigned int maxSynPerRow = 0;
 
 	Element* syn = e2_;
-	assert( nCols == syn->dataHandler()->parentDataHandler()->sizeOfDim( 0  ) );
-
-	assert ( syn->dataHandler()->dims().size() >= 1 );
-	FieldDataHandlerBase* fdh = 
-		dynamic_cast< FieldDataHandlerBase* >( syn->dataHandler() );
+	assert( nCols == syn->numData() );
 
 	for ( unsigned int i = 0; i < nCols; ++i ) {
-		// Check if synapse is on local node
-		bool isSynOnMyNode = syn->dataHandler()->isDataHere( i );
 		vector< unsigned int > synIndex;
 		// This needs to be obtained from current size of syn array.
 		// unsigned int synNum = sizes[ i ];
 		unsigned int synNum = 0;
 		for ( unsigned int j = 0; j < nRows; ++j ) {
 			double r = mtrand(); // Want to ensure it is called each time round the loop.
-			if ( isSynOnMyNode ) {
-				if ( isFirstRound ) {
-					isFirstRound = 0;
-				}
+			if ( isFirstRound ) {
+				isFirstRound = 0;
 			}
-			if ( r < probability && isSynOnMyNode ) {
+			if ( r < probability ) {
 				synIndex.push_back( synNum );
 				++synNum;
 			} else {
@@ -363,26 +354,11 @@ unsigned int SparseMsg::randomConnect( double probability )
 			if ( r < probability )
 				++totSynNum;
 		}
-		if ( maxSynPerRow < synNum )
-			maxSynPerRow = synNum;
 			
-		if ( fdh ) {
-			fdh->setFieldArraySize( i, synNum );
-			totalSynapses += synNum;
-		}
+		e2_->resizeField( i, synNum );
+		totalSynapses += synNum;
 		matrix_.addRow( i, synIndex );
 	}
-	/*
-	// Here we figure out the largest # of syns and use it.
-	unsigned int biggest = *max_element( sizes.begin(), sizes.end() );
-	sizes.resize( 0 );
-	sizes.push_back( nCols );
-	sizes.push_back( biggest );
-	syn->dataHandler()->resize( sizes );
-	*/
-	// need to work on to handle multiple nodes using MPI
-	if ( fdh )
-		fdh->setMaxFieldEntries( maxSynPerRow );
 
 	// cout << Shell::myNode() << ": sizes.size() = " << sizes.size() << ", ncols = " << nCols << ", startSynapse = " << startSynapse << endl;
 	matrix_.transpose();
@@ -409,35 +385,20 @@ ObjId SparseMsg::findOtherEnd( ObjId f ) const
 	if ( f.id() == e1() ) {
 		const unsigned int* entry;
 		const unsigned int* colIndex;
-		unsigned int num = matrix_.getRow( f.dataId.value(),
-			&entry, &colIndex );
+		unsigned int num = matrix_.getRow( f.dataId, &entry, &colIndex );
 		if ( num > 0 ) { // Return the first matching entry.
-			FieldDataHandlerBase* fdh = 
-				dynamic_cast< FieldDataHandlerBase* >( e2_->dataHandler() );
-			if ( fdh )
-				return ObjId( e2()->id(), DataId( colIndex[0], entry[0],
-					fdh->numFieldBits() ) );
-			else
-				return ObjId( e2()->id(), DataId( colIndex[0] ) );
+			return ObjId( e2()->id(), colIndex[0] );
 		}
-		return ObjId( e2()->id(), DataId::bad() );
+		return ObjId();
 	} else if ( f.id() == e2() ) { // Bad! Slow! Avoid!
 		vector< unsigned int > entry;
 		vector< unsigned int > rowIndex;
-		unsigned int num = matrix_.getColumn( f.dataId.value(), 
-			entry, rowIndex );
+		unsigned int num = matrix_.getColumn( f.dataId, entry, rowIndex );
 		if ( num > 0 ) { // Return the first matching entry.
-			FieldDataHandlerBase* fdh = 
-				dynamic_cast< FieldDataHandlerBase* >( e2_->dataHandler() );
-			if ( fdh )
-				return ObjId( e1()->id(), DataId( rowIndex[0], entry[0],
-					fdh->numFieldBits() ) );
-			else
 				return ObjId( e1()->id(), DataId( rowIndex[0] ) );
 		}
-		return ObjId( e1()->id(), DataId::bad() );
 	}
-	return ObjId::bad();
+	return ObjId();
 }
 
 Msg* SparseMsg::copy( Id origSrc, Id newSrc, Id newTgt,
@@ -456,7 +417,6 @@ Msg* SparseMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 			assert( 0 );
 		}
 		ret->setMatrix( matrix_ );
-		ret->numThreads_ = numThreads_;
 		ret->nrows_ = nrows_;
 		return ret;
 	} else {
@@ -464,33 +424,4 @@ Msg* SparseMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 		cout << "Error: SparseMsg::copy: SparseSliceMsg not yet implemented\n";
 		return 0;
 	}
-}
-
-unsigned int SparseMsg::srcToDestPairs(
-	vector< DataId >& src, vector< DataId >& dest ) const
-{
-	unsigned int nRows = matrix_.nRows(); // Sources
-	src.resize( 0 );
-	dest.resize( 0 );
-	src.reserve( matrix_.nEntries() );
-	dest.reserve( matrix_.nEntries() );
-	FieldDataHandlerBase* fdh = 
-		dynamic_cast< FieldDataHandlerBase* >( e2_->dataHandler() );
-	for ( unsigned int i = 0; i < nRows; ++i ) {
-		const unsigned int* fieldIndex;
-		const unsigned int* colIndex;
-		unsigned int n = matrix_.getRow( i, &fieldIndex, &colIndex );
-		// N is number of used column entries in this row.
-		for ( unsigned int j = 0; j < n; ++j ) {
-			src.push_back( DataId( i ) );
-			if ( fdh )
-				dest.push_back( DataId( colIndex[j], fieldIndex[j], 
-					fdh->numFieldBits() ) );
-			else
-				dest.push_back( DataId( colIndex[j] ) );
-		}
-	}
-	assert( src.size() == matrix_.nEntries() );
-
-	return src.size();
 }

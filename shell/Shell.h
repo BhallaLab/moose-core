@@ -11,7 +11,6 @@
 #define _SHELL_H
 
 enum AssignmentType { SINGLE, VECTOR, REPEAT };
-extern const ThreadId ScriptThreadNum; // Defined in Shell.cpp
 
 // These Finfo objects are exposed to other classes for convenience in test cases and other functions.
 // NOTE: These should never be re-registered in an initCinfo of another class.
@@ -238,7 +237,6 @@ class Shell
 		///////////////////////////////////////////////////////////
 		// DestFinfo functions
 		///////////////////////////////////////////////////////////
-		// void handleGet( const Eref& e, const Qinfo* q, const char* arg );
 
 		/**
 		 * Sets of a simulation for duration runTime. Handles
@@ -277,10 +275,10 @@ class Shell
 		 */
 		void handleQuit();
 
-		void handleCreate( const Eref& e, const Qinfo* q, 
+		void handleCreate( const Eref& e,
 			string type, Id parent, Id newElm, string name,
 			vector< int > dimensions );
-		void destroy( const Eref& e, const Qinfo* q, Id eid);
+		void destroy( const Eref& e, Id eid);
 		void innerCreate( string type, Id parent, Id newElm, string name,
 			const vector< int >& dimensions );
 
@@ -303,7 +301,7 @@ class Shell
 		 * msgType. 
 		 * This wrapper function sends the ack back to the master node.
 		 */
-		void handleAddMsg( const Eref& e, const Qinfo* q,
+		void handleAddMsg( const Eref& e, 
 			string msgType, MsgId mid,
 			ObjId src, string srcField, 
 			ObjId dest, string destField);
@@ -316,13 +314,13 @@ class Shell
 		/**
 		 * Handler to move Element orig onto the newParent.
 		 */
-		void handleMove( const Eref& e, const Qinfo* q,
+		void handleMove( const Eref& e,
 			Id orig, Id newParent );
 
 		/**
 		 * Handles sync of DataHandler indexing across nodes
 		 */
-		void handleSync( const Eref& e, const Qinfo* q, Id elm, FuncId fid);
+		void handleSync( const Eref& e, Id elm, FuncId fid);
 
 		/**
 		 * Deep copy of source element to target, renaming it to newName.
@@ -333,7 +331,7 @@ class Shell
 		 * Normally only copies msgs within the tree, but if the flag
 		 * copyExtMsgs is true then it copies external Msgs too.
 		 */
-		void handleCopy( const Eref& e, const Qinfo* q,
+		void handleCopy( const Eref& e,
 			vector< Id > args, string newName, unsigned int n, 
 			bool toGlobal, bool copyExtMsgs );
 
@@ -341,7 +339,7 @@ class Shell
 		 * Sets up scheduling for elements on the path.
 		 */
 		bool innerUseClock( string path, string field, unsigned int tick);
-		void handleUseClock( const Eref& e, const Qinfo* q,
+		void handleUseClock( const Eref& e,
 			string path, string field, unsigned int tick );
 
 		/**

@@ -121,10 +121,10 @@ void testAssortedMsg()
 	assert( f == ObjId( a1, 3 ) );
 
 	f = Msg::getMsg( m1 )->findOtherEnd( ObjId( a1, 0 ) );
-	assert( f == ObjId( a2, DataId::bad() ) );
+	assert( f == ObjId() );
 
 	f = Msg::getMsg( m1 )->findOtherEnd( ObjId( a2, 0 ) );
-	assert( f == ObjId( a1, DataId::bad() ) );
+	assert( f == ObjId() );
 
 	f = Msg::getMsg( m1 )->findOtherEnd( ObjId( b2, 1 ) );
 	assert( f == ObjId::bad() );
@@ -145,10 +145,10 @@ void testAssortedMsg()
 	assert( f == ObjId( b1, 2 ) );
 
 	f = Msg::getMsg( m2 )->findOtherEnd( ObjId( b1, 0 ) );
-	assert( f == ObjId( b2, DataId::bad() ) );
+	assert( f == ObjId() );
 
 	f = Msg::getMsg( m2 )->findOtherEnd( ObjId( a2, 1 ) );
-	assert( f == ObjId::bad() );
+	assert( f == ObjId() );
 
 	// OneToOne
 	for ( unsigned int i = 0; i < 5; ++i ) {

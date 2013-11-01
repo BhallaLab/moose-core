@@ -8,7 +8,6 @@
 **********************************************************************/
 
 #include "header.h"
-#include "MsgDataHandler.h"
 #include "OneToOneMsg.h"
 
 Id OneToOneMsg::managerId_;
@@ -74,40 +73,6 @@ ObjId OneToOneMsg::findOtherEnd( ObjId f ) const
 		return ObjId( e1()->id(), f.dataId );
 	
 	return ObjId::bad();
-}
-
-unsigned int OneToOneMsg::srcToDestPairs(
-	vector< DataId >& src, vector< DataId >& dest ) const
-{
-	Qinfo q;
-	DataIdExtractor srcdi( &src );
-	e1_->dataHandler()->forall( &srcdi, 0, &q, 0, 0, 0 );
-	DataIdExtractor destdi( &dest );
-	e2_->dataHandler()->forall( &destdi, 0, &q, 0, 0, 0 );
-	assert ( src.size() == dest.size() );
-
-	/*
-	unsigned int srcRange = e1_->dataHandler()->totalEntries();
-	unsigned int destRange = e2_->dataHandler()->totalEntries();
-	unsigned int range = ( srcRange < destRange ) ? srcRange : destRange;
-
-	src.resize( range );
-	dest.resize( range );
-	unsigned int fd1 = e2_->dataHandler()->getFieldDimension();
-	unsigned int fd2 = e2_->dataHandler()->getFieldDimension();
-	if ( fd1 != fd2 ) {
-		cout << "Warning: OneToOneMsg::srcToDestPairs: Mismatch in fieldDimension of e1 and e2:\n";
-		cout << e1_->getName() << " -> " << e2_->getName() << endl;
-	}
-	if ( fd1 == 0 ) fd1 = 1;
-	if ( fd2 == 0 ) fd2 = 1;
-	for ( unsigned int i = 0; i < range; ++i ) {
-		src[i] = DataId( i / fd1, i % fd1 );
-		dest[i] = DataId( i / fd2, i % fd2 );
-	}
-	*/
-
-	return src.size();
 }
 
 Msg* OneToOneMsg::copy( Id origSrc, Id newSrc, Id newTgt,

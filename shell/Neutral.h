@@ -44,26 +44,24 @@ class Neutral
 		/**
 		 * Field access functions for the name of the Element/Neutral
 		 */
-		void setName( const Eref& e, const Qinfo* q, string name );
-		string getName( const Eref& e, const Qinfo* q ) const;
+		void setName( const Eref& e, string name );
+		string getName( const Eref& e ) const;
 
 		/**
 		 * Field access functions for the group of the Element
 		 */
-		void setGroup( const Eref& e, const Qinfo* q, unsigned int val );
-		unsigned int getGroup( const Eref& e, const Qinfo* q ) const;
+		void setGroup( const Eref& e, unsigned int val );
+		unsigned int getGroup( const Eref& e ) const;
 
 		/**
 		 * Readonly field access function for getting all outgoing Msgs.
 		 */
-		vector< ObjId > getOutgoingMsgs(
-			const Eref& e, const Qinfo* q ) const;
+		vector< ObjId > getOutgoingMsgs( const Eref& e ) const;
 
 		/**
 		 * Readonly field access function for getting all incoming Msgs.
 		 */
-		vector< ObjId > getIncomingMsgs(
-			const Eref& e, const Qinfo* q ) const;
+		vector< ObjId > getIncomingMsgs( const Eref& e ) const;
 
 		/**
 		 * Readonly field access function for getting Ids connected to
@@ -71,40 +69,38 @@ class Neutral
 		 * Field is specified by its name.
 		 * Returns an empty vector if it fails.
 		 */
-		vector< Id > getNeighbours(
-			const Eref& e, const Qinfo* q, string field ) const;
+		vector< Id > getNeighbours( const Eref& e, string field ) const;
 
 
 		/**
 		 * Simply returns own ObjId
 		 */
-		ObjId getObjId( const Eref& e, const Qinfo* q ) const;
+		ObjId getObjId( const Eref& e ) const;
 
 		/**
 		 * Looks up the full Id info for the parent of the current Element
 		 */
-		ObjId getParent( const Eref& e, const Qinfo* q ) const;
+		ObjId getParent( const Eref& e ) const;
 
 		/**
 		 * Looks up all the Element children of the current Element
 		 */
-		vector< Id > getChildren( const Eref& e, const Qinfo* q ) const;
+		vector< Id > getChildren( const Eref& e ) const;
 
 		/**
 		 * Builds a vector of all descendants of e
 		 */
-		unsigned int buildTree( const Eref& e, const Qinfo* q, 
-			vector< Id >& tree ) const;
+		unsigned int buildTree( const Eref& e, vector< Id >& tree ) const;
 
 		/**
 		 * Traverses to root, building path.
 		 */
-		string getPath( const Eref& e, const Qinfo* q ) const;
+		string getPath( const Eref& e ) const;
 
 		/**
 		 * Looks up the Class name of the current Element
 		 */
-		string getClass( const Eref& e, const Qinfo* q ) const;
+		string getClass( const Eref& e ) const;
 
 		/**
 		 * linearSize is the # of entries on Element. Its value is
@@ -114,13 +110,13 @@ class Neutral
 		 * greater than the actual number of allocated entries, since the
 		 * fieldDimension is at least as big as the largest ragged array.
 		 */
-		unsigned int getLinearSize( const Eref& e, const Qinfo* q ) const;
+		unsigned int getLinearSize( const Eref& e ) const;
 
 		/**
 		 * Dimensions of data on the Element.
 		 * This includes the fieldDimension if present.
 		 */
-		vector< unsigned int > getDimensions( const Eref& e, const Qinfo* q ) const;
+		vector< unsigned int > getDimensions( const Eref& e ) const;
 
 		/**
 		 * Access function for the last (fastest varying) Dimension of the 
@@ -137,14 +133,14 @@ class Neutral
 		 * invalidated too.  
 		 * Messages should remain intact.
 		 */
-		void setLastDimension( const Eref& e, const Qinfo* q, unsigned int val );
+		void setLastDimension( const Eref& e, unsigned int val );
 		/**
 		 * Access function for the last (fastest varying) Dimension of the 
 		 * data handler for the Element. For FieldDataHandlers this gets
 		 * the max size of the ragged array for fields, such as synapses.
 		 * For regular data handlers this gets the last dimension.
 		 */
-		unsigned int getLastDimension( const Eref& e, const Qinfo* q ) const;
+		unsigned int getLastDimension( const Eref& e ) const;
 
 		/** 
 		 * Returns the vector of path index vectors for each dimension of
@@ -152,13 +148,13 @@ class Neutral
 		 * vectors, but the actual indices used to look up the object.
 		 */
 		vector< vector< unsigned int > > getPathIndices( 
-			const Eref& e, const Qinfo* q ) const;
+			const Eref& e ) const;
 
 		/**
 		 * Gets the number of entries of a FieldElement on current node.
 		 * If it is a regular Element, returns zero.
 		 */
-		unsigned int getLocalNumField( const Eref& e, const Qinfo* q) const;
+		unsigned int getLocalNumField( const Eref& e ) const;
 
 		////////////////////////////////////////////////////////////
 		// DestFinfo functions
@@ -167,20 +163,20 @@ class Neutral
 		/**
 		 * Destroys Element and all children
 		 */
-		void destroy( const Eref& e, const Qinfo* q, int stage );
+		void destroy( const Eref& e, int stage );
 
 		/**
 		 * Request conversion of data into a blockDataHandler subclass,
 		 * and to carry out node balancing of data as per args.
 		 */
-		void blockNodeBalance( const Eref& e, const Qinfo* q, 
+		void blockNodeBalance( const Eref& e, 
 			unsigned int, unsigned int, unsigned int );
 
 		/**
 		 * Request conversion of data into a generalDataHandler subclass,
 		 * and to carry out node balancing of data as per args.
 		 */
-		void generalNodeBalance( const Eref& e, const Qinfo* q, 
+		void generalNodeBalance( const Eref& e,
 			unsigned int myNode, vector< unsigned int > nodeAssignment );
 		
 
