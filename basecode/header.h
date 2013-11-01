@@ -96,7 +96,6 @@ class ObjId;
 #include "MsgDigest.h"
 #include "Element.h"
 #include "Eref.h"
-#include "PrepackedBuffer.h"
 #include "Conv.h"
 #include "SrcFinfo.h"
 
@@ -110,7 +109,6 @@ class Neutral;
 #include "ValueFinfo.h"
 #include "LookupValueFinfo.h"
 #include "SharedFinfo.h"
-#include "ReduceBase.h"
 #include "../shell/Neutral.h"
 
 #endif // _HEADER_H

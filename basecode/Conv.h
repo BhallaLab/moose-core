@@ -688,60 +688,6 @@ template<> class Conv< Id >
 		double val_;
 };
 
-template<> class Conv< PrepackedBuffer >
-{
-	public:
-		Conv( const double* buf )
-			: val_( buf )
-		{;}
-
-		Conv( const PrepackedBuffer& arg )
-			: val_( arg )
-		{;}
-
-		/**
-		 * This is the size of the double* converted array
-		 */
-		unsigned int size() const
-		{
-			return val_.size();
-		}
-
-		const PrepackedBuffer& operator*() const {
-			return val_;
-		}
-
-		const double* ptr() const
-		{
-			return val_.ptr();
-		}
-
-		/**
-		 * Converts data contents into char* buf. Buf must be allocated
-		 * ahead of time.
-		 * Needs to be specialized for variable size and pointer-containing
-		 * types T.
-		 * returns size of newly filled buffer.
-		 */
-		unsigned int val2buf( double* buf ) const {
-			return val_.conv2buf( buf );
-		}
-
-		static void str2val( PrepackedBuffer& val, const string& s ) {
-			; // Doesn't work.
-		}
-
-		static void val2str( string& s, const PrepackedBuffer& val ) {
-			; // Doesn't work.
-		}
-
-		static string rttiType() {
-			return "bad";
-		}
-	private:
-		PrepackedBuffer val_;
-};
-
 /**
  * Still more specialized partial specialization.
  * This works with any field that has a uniform size.

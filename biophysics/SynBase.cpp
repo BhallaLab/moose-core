@@ -22,31 +22,40 @@ const unsigned int SynBase::MAX_SYNAPSES = 1000000;
  */
 const Cinfo* SynBase::initCinfo()
 {
-		static ValueFinfo< SynBase, unsigned int > numSynapses(
-			"numSynapses",
-			"Number of synapses on SynBase",
-			&SynBase::setNumSynapses,
-			&SynBase::getNumSynapses
-		);
+	static ValueFinfo< SynBase, unsigned int > numSynapses(
+		"numSynapses",
+		"Number of synapses on SynBase",
+		&SynBase::setNumSynapses,
+		&SynBase::getNumSynapses
+	);
 
-		//////////////////////////////////////////////////////////////
-		// FieldElementFinfo definition for Synapses
-		// Let's assume that there will be 10K synapses per IntFire.
-		// This merely sets aside a certain # of bits to deal with it,
-		// doesn't actually use space. 60K will be 16 bits.
-		//////////////////////////////////////////////////////////////
-		static FieldElementFinfo< SynBase, Synapse > synFinfo( "synapse",
-			"Sets up field Elements for synapse",
-			Synapse::initCinfo(),
-			&SynBase::getSynapse,
-			&SynBase::setNumSynapses,
-			&SynBase::getNumSynapses,
-			65536
-		);
+	static LookupValueFinfo< SynBase, double, unsigned int > weight(
+		"weight",
+		"Synaptic weight",
+		&SynBase::setWeight,
+		&SynBase::getWeight,
+	);
 
+	static LookupValueFinfo< SynBase, double, unsigned int > delay(
+		"delay",
+		"Synaptic delay",
+		&SynBase::setDelay,
+		&SynBase::getDelay,
+	);
+
+	static DestFinfo addSpike( 
+		"addSpike",
+		"Handles arriving spike messages. "
+		"Single argument specifies timestamp of action potential",
+		new EpFunc1< SynBase, double >( &SynBase::addSpike )
+	);
+
+
+	//////////////////////////////////////////////////////////////////////
 	static Finfo* synBaseFinfos[] = {
 		&numSynapses,	// Value
-		&synFinfo		// FieldElementFinfo for synapses.
+		&weight			// LookupValue
+		&delay			// LookupValue
 	};
 
 	static Cinfo synBaseCinfo (
@@ -74,9 +83,9 @@ SynBase::~SynBase()
  * and gets redirected to the SynBase.
  * This is called by UpFunc1< double >
  */
-void SynBase::addSpike( unsigned int index, const double time )
+void SynBase::addSpike( const Eref& e, const double time )
 {
-	this->innerAddSpike( index, time );
+	this->innerAddSpike( e.fieldIndex(), time );
 }
 
 void SynBase::innerAddSpike( unsigned int index, const double time )
@@ -90,7 +99,6 @@ void SynBase::setNumSynapses( const unsigned int v )
 {
 	assert( v < MAX_SYNAPSES );
 	synapses_.resize( v );
-	// threadReduce< unsigned int >( er, getMaxNumSynapses, v );
 }
 
 unsigned int SynBase::getNumSynapses() const
@@ -106,4 +114,31 @@ Synapse* SynBase::getSynapse( unsigned int i )
 	cout << "Warning: SynBase::getSynapse: index: " << i <<
 		" is out of range: " << synapses_.size() << endl;
 	return &dummy;
+}
+
+void SynBase::setWeight( unsigned int i, double weight ) 
+{
+	if ( i < synapses_.size() )
+		synapses_[i].setWeight( weight );
+}
+
+void SynBase::setDelay( unsigned int i, double delay ) 
+{
+	if ( i < synapses_.size() )
+		synapses_[i].setDelay( delay );
+}
+
+
+double SynBase::getWeight( unsigned int i ) const
+{
+	if ( i < synapses_.size() )
+		return synapses_[i].getWeight();
+	return 0.0;
+}
+
+double SynBase::getDelay( unsigned int i ) const
+{
+	if ( i < synapses_.size() )
+		return synapses_[i].getDelay();
+	return 0.0;
 }

@@ -33,8 +33,6 @@ class DiagonalMsg: public Msg
 		DiagonalMsg( MsgId mid, Element* e1, Element* e2 );
 		~DiagonalMsg();
 
-		void exec( const Qinfo* q, const double* arg, FuncId fid ) const;
-
 		Eref firstTgt( const Eref& src ) const;
 
 		/*

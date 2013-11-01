@@ -30,18 +30,14 @@ OBJ = \
 	Id.o \
 	ObjId.o \
 	SetGet.o \
-	OpFunc.o \
 	SparseMatrix.o \
-	PrepackedBuffer.o \
 	doubleEq.o \
-	ReduceBase.o \
 	testAsync.o	\
 	main.o	\
 
 HEADERS = \
 	header.h \
 	Cinfo.h \
-	PrepackedBuffer.h \
 	Conv.h \
 	Dinfo.h \
 	MsgDigest.h \
@@ -62,8 +58,6 @@ HEADERS = \
 	LookupElementValueFinfo.h \
 	SharedFinfo.h \
 	MsgFuncBinding.h \
-	ReduceBase.h \
-	ReduceFinfo.h \
 
 default: $(TARGET)
 
