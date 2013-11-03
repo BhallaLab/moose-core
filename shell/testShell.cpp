@@ -12,9 +12,6 @@
 #ifdef USE_MPI
 #include <mpi.h>
 #endif
-#include "../scheduling/Tick.h"
-#include "../scheduling/TickMgr.h"
-#include "../scheduling/TickPtr.h"
 #include "../scheduling/Clock.h"
 #include "../scheduling/testScheduling.h"
 
@@ -217,9 +214,9 @@ void verifyKids( Id f1, Id f2a, Id f2b, Id f3, Id f4a, Id f4b )
 	assert( kids[1] == f2b );
 
 	vector< Id > tree;
-	Qinfo q;
+
 	// Neutral::buildTree is depth-first.
-	int num = f1Data->buildTree( f1.eref(), &q, tree );
+	int num = f1Data->buildTree( f1.eref(), tree );
 	assert( num == 6 );
 	assert( tree.size() == 6 );
 	assert( tree[5] == f1 );
@@ -281,13 +278,13 @@ void testMove()
 	assert( path == "/f1/f2a/f3/f4a" );
 	Neutral* f1data = reinterpret_cast< Neutral* >( f1.eref().data() );
 
-	vector< Id > kids = f1data->getChildren( f1.eref(), 0 );
+	vector< Id > kids = f1data->getChildren( f1.eref() );
 	assert( kids.size() == 2 );
 	assert( kids[0] == f2a );
 	assert( kids[1] == f2b );
 
 	Neutral* f3data = reinterpret_cast< Neutral* >( f3.eref().data() );
-	kids = f3data->getChildren( f3.eref(), 0 );
+	kids = f3data->getChildren( f3.eref() );
 	assert( kids.size() == 2 );
 	assert( kids[0] == f4a );
 	assert( kids[1] == f4b );
@@ -299,12 +296,12 @@ void testMove()
 	pa = Field< ObjId >::get( f4a, "parent" );
 	assert( pa == ObjId( f1, 0 ) );
 
-	kids = f1data->getChildren( f1.eref(), 0 );
+	kids = f1data->getChildren( f1.eref() );
 	assert( kids.size() == 3 );
 	assert( kids[0] == f2a );
 	assert( kids[1] == f2b );
 	assert( kids[2] == f4a );
-	kids = f3data->getChildren( f3.eref(), 0 );
+	kids = f3data->getChildren( f3.eref() );
 	assert( kids.size() == 1 );
 	assert( kids[0] == f4b );
 
@@ -316,7 +313,7 @@ void testMove()
 	path = Field< string >::get( f4b, "path" );
 	assert( path == "/f1/f4a/f2a/f3/f4b" );
 
-	kids = f1data->getChildren( f1.eref(), 0 );
+	kids = f1data->getChildren( f1.eref() );
 	assert( kids[0] == f2b );
 	assert( kids[1] == f4a );
 
@@ -362,13 +359,13 @@ void testCopy()
 	assert( dupf3 != Id() );
 	assert( dupf3 != f3 );
 	assert( dupf3()->getName() == "f3" );
-	vector< Id > kids = f2aDupData->getChildren( dupf2a.eref(), 0 );
+	vector< Id > kids = f2aDupData->getChildren( dupf2a.eref() );
 	assert( kids.size() == 1 );
 	assert( kids[0] == dupf3 );
 
 	Neutral* f3DupData = reinterpret_cast< Neutral* >( dupf3.eref().data());
-	assert( f3DupData->getParent( dupf3.eref(), 0 ) == ObjId( dupf2a, 0 ));
-	kids = f3DupData->getChildren( dupf3.eref(), 0 );
+	assert( f3DupData->getParent( dupf3.eref() ) == ObjId( dupf2a, 0 ));
+	kids = f3DupData->getChildren( dupf3.eref() );
 	assert( kids.size() == 2 );
 	assert( kids[0]()->getName() == "f4a" );
 	assert( kids[1]()->getName() == "f4b" );
@@ -390,8 +387,7 @@ void testCopyFieldElement()
 	Element* syn = origSynId();
 	assert( syn != 0 );
 	assert( syn->getName() == "synapse" );
-	assert( syn->dataHandler()->totalEntries() == size * 65536 );
-	assert( syn->dataHandler()->localEntries() == 0 );
+	assert( syn->numData() == 0 );
 	vector< unsigned int > vec(size);
 	for ( unsigned int i = 0; i < size; ++i )
 		vec[i] = i;
@@ -402,16 +398,8 @@ void testCopyFieldElement()
 	if ( shell->numNodes() == 1 ) {
 		numHere = size * (size - 1) / 2;
 	} else {
-		for ( unsigned int i = 0; i < size; ++i ) {
-			if ( origId()->dataHandler()->isDataHere( i ) ) {
-				numHere += i;
-			}
-		}
+		assert( 0 );
 	}
-	assert( syn->dataHandler()->localEntries() == numHere );
-	syn->syncFieldDim();
-
-	assert( syn->dataHandler()->totalEntries() == ( size - 1 ) * size );
 
 	vector< double > delay( size * ( size - 1 ), 0 );
 	// unsigned int k = 0;
@@ -430,7 +418,6 @@ void testCopyFieldElement()
 
 	Eref origEr( origId(), 0 );
 	Eref copyEr( copyId(), 0 );
-	assert( origId()->dataHandler() != copyId()->dataHandler() );
 	vector< Id > origChildren;
 	vector< Id > copyChildren;
 	Neutral::children( origEr, origChildren );
@@ -447,9 +434,8 @@ void testCopyFieldElement()
 	assert ( copySynElm->getName() == "synapse" );
 	// assert( syn->dataHandler()->data( 0 ) != 0 ); // Should warn
 	// assert( copySynElm->dataHandler()->data( 0 ) != 0 ); // Should warn
-	assert( copySynElm->dataHandler()->localEntries() == numHere );
-	assert( copySynElm->dataHandler()->totalEntries() ==
-		( size * (size - 1) ) );
+	assert( copySynElm->numData() == numHere );
+	assert( copySynElm->numData() == ( size * (size - 1) ) );
 	
 	vector< double > del;
 	Field< double >::getVec( origSynId, "delay", del );
@@ -515,26 +501,10 @@ void testObjIdToAndFromPath()
 	ObjId oi( level5, DataId( temp ) );
 	string path = oi.path();
 	assert( path == "/f1[1]/f2/f3[3]/f4/f5[5][6]" );
-	assert( oi.element()->dataHandler()->totalEntries() == s1 * s2 * s3 * s4 * s5 * s5a );
-	assert( oi.element()->dataHandler()->numDimensions() == 4 );
-	assert( oi.element()->dataHandler()->pathDepth() == 5 );
-	vector< vector< unsigned int > > pathIndices = 
-		oi.element()->dataHandler()->pathIndices( oi.dataId );
-	assert( pathIndices.size() == 6 );
-	assert( pathIndices[0].size() == 0 );
-	assert( pathIndices[1].size() == 1 );
-	assert( pathIndices[1][0] == index1 );
-	assert( pathIndices[2].size() == 0 );
-	assert( pathIndices[3].size() == 1 );
-	assert( pathIndices[3][0] == index3 );
-	assert( pathIndices[4].size() == 0 );
-	assert( pathIndices[5].size() == 2 );
-	assert( pathIndices[5][0] == index5 );
-	assert( pathIndices[5][1] == index5a );
 
 	ObjId readPath( path );
 	assert( readPath.id == level5 );
-	assert( readPath.dataId.value() == temp );
+	assert( readPath.dataId == temp );
 
 	ObjId f4 = Neutral::parent( oi.eref() );
 	path = f4.path();
@@ -567,7 +537,7 @@ void testObjIdToAndFromPath()
 	shell->doMove( level1, level8 );
 
 	ObjId noi( "/foo/bar/zod/f1[1]/f2/f3[3]/f4/f5[5][6]" );
-	assert( noi.dataId.value() == temp );
+	assert( noi.dataId == temp );
 	assert( noi.id == level5 );
 	assert( noi == oi );
 	// cout << noi.path() << endl;
@@ -575,95 +545,6 @@ void testObjIdToAndFromPath()
 	shell->doDelete( level6 );
 	cout << "." << flush;
 }
-
-/*
-void testMultiLevelCopyAndPath()
-{
-	Eref sheller = Id().eref();
-	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
-	unsigned int numChan = 10;
-	unsigned int numMitDend = 25;
-	unsigned int numPGdend = 4;
-	unsigned int numMit = 25;
-	unsigned int numPG = 40;
-	unsigned int numGlom = 50;
-
-	vector< int > dims;
-	Id library = shell->doCreate( "Neutral", Id(), "library", dims );
-	Id chan = shell->doCreate( "HHChannel", library, "chan", dims );
-	Field< double >::set( chan, "Gbar", 111 );
-
-	Id dend = shell->doCreate( "Compartment", library, "dend", dims );
-	Field< double >::set( dend, "Em", -65 );
-	Id level1 = shell->doCopy( chan, dend, "chan", numChan, 0, 0 );
-	vector< double > gbar( numChan );
-	for ( unsigned int i = 0; i < numChan; ++i ) {
-		gbar[i] = i + 1;
-	}
-	Field< double >::setVec( level1, "Gbar", gbar );
-
-	Id mit = shell->doCreate( "Neutral", library, "mit", dims );
-	Id level2 = shell->doCopy( dend, mit, "dends", numMitDend, 0, 0 );
-
-	Id pg = shell->doCreate( "Neutral", library, "pg", dims );
-	Id level3 = shell->doCopy( dend, pg, "dends", numPGdend, 0, 0 );
-
-	Id glom = shell->doCreate( "Neutral", library, "glom", dims );
-	Id level4 = shell->doCopy( mit, glom, "mit", numMit, 0, 0 );
-	Id level5 = shell->doCopy( pg, glom, "pg", numPG, 0, 0 );
-
-	Id bulb = shell->doCreate( "Neutral", Id(), "bulb", dims );
-	Id level6 = shell->doCopy( glom, bulb, "glom", numGlom, 0, 0 );
-
-	unsigned int glomNum = 3;
-	unsigned int mitNum = 4;
-	unsigned int dendNum = 5;
-	unsigned int chanNum = 6;
-	unsigned long long index = ( ( glomNum * numMit + mitNum ) * 
-								numMitDend + dendNum ) *
-								numChan + chanNum;
-	
-	Id temp( "/bulb/glom/mit/dends/chan" );
-	assert( temp != Id() );
-	ObjId oid( temp, DataId( index ) );
-	ObjId oid2( "/bulb/glom[3]/mit[4]/dends[5]/chan[6]" );
-	assert( oid == oid2 );
-
-	double g = Field< double >::get( oid2, "Gbar" );
-	assert( doubleEq( g, chanNum + 1 ) );
-
-	unsigned int totSize = numChan * numMitDend * numMit * numGlom;
-	assert( oid.element()->dataHandler()->totalEntries() == totSize );
-	
-	gbar.resize( totSize );
-	for ( unsigned int i = 0 ; i < totSize; ++i ) {
-		gbar[i] = i;
-	}
-	Field< double >::setVec( temp, "Gbar", gbar );
-	for ( unsigned int i = 0 ; i < totSize; i += 1234 ) {
-		ObjId oi( temp, i );
-		unsigned int index = i;
-		chanNum = index % numChan;
-		index = index / numChan;
-		dendNum = index % numMitDend;
-		index = index / numMitDend;
-		mitNum = index % numMit;
-		index = index / numMit;
-		glomNum = index % numGlom;
-		stringstream ss;
-		ss << "/bulb/glom[" << glomNum << "]/mit[" << mitNum << 
-			"]/dends[" << dendNum << "]/chan[" << chanNum << "]";
-		assert( oi.path() == ss.str() );
-
-		double x = Field< double >::get( oi, "Gbar" );
-		assert( doubleEq( x, i ) );
-	}
-
-	shell->doDelete( library );
-	shell->doDelete( bulb );
-	cout << "." << flush;
-}
-*/
 
 // Here we create the element independently on each node, and connect
 // it up independently. Using the doAddMsg we will be able to do this
@@ -682,10 +563,8 @@ void testShellParserStart()
 
 
 	const Cinfo* testSchedCinfo = TestSched::initCinfo();
-	vector< DimInfo > dims;
 	Id tsid = Id::nextId();
-	Element* tse = new Element( tsid, testSchedCinfo, "tse", dims,
-		1, true );
+	Element* tse = new Element( tsid, testSchedCinfo, "tse", 1, true );
 
 	// testThreadSchedElement tse;
 	Eref ts( tse, 0 );
@@ -979,7 +858,7 @@ void testShellAddMsg()
 	// I want to compare the # of process msgs before and after.
 	vector< Id > tgts;
 	const SrcFinfo* sf = dynamic_cast< const SrcFinfo* >(
-		Tick::initCinfo()->findFinfo( "process0" ) );
+		Clock::initCinfo()->findFinfo( "process0" ) );
 	assert( sf );
 	unsigned int numTgts = tick.eref().element()->getNeighbours( tgts, 
 		sf );
@@ -1531,39 +1410,17 @@ void testSyncSynapseSize()
 
 	// assert( syn->dataHandler()->data( 0 ) != 0 ); // Should warn
 
-	assert( syn->dataHandler()->totalEntries() == 65536 * size );
-	assert( syn->dataHandler()->localEntries() == 0 );
+	assert( syn->numData() == 0 );
 	vector< unsigned int > ns( size, 0 );
 	for ( unsigned int i = 0; i < size; ++i )
 		ns[i] = i;
 	bool ret = Field< unsigned int >::setVec( neuronId, "numSynapses", ns);
 	assert( ret );
 	// Here we check local entries
-	/*
-	DataHandler::iterator begin = syn->dataHandler()->begin();
-	DataHandler::iterator end = syn->dataHandler()->end();
-	assert( syn->dataHandler()->localEntries() == ( size * (size - 1) ) / 2 );
-	*/
 
-	// shell->doSyncDataHandler( neuronId, "get_numSynapses", synId );
-	synId.element()->syncFieldDim();
-	// shell->doSyncDataHandler( synId );
+	assert( Field< unsigned int >::get( neuronId, "numData" ) == size );
+	assert( Field< unsigned int >::get( synId, "numData" ) == size * (size - 1 ) );
 
-	assert( syn->dataHandler()->totalEntries() == size * (size - 1 ) );
-
-	assert( Field< unsigned int >::get( neuronId, "linearSize" ) == size );
-	assert( Field< unsigned int >::get( synId, "linearSize" ) == size * (size - 1 ) );
-
-	vector< unsigned int > udims =
-		Field< vector< unsigned int > >::get( neuronId, "objectDimensions" );
-	assert( udims.size() == 1 );
-	assert( udims[0] == size );
-	udims = Field< vector< unsigned int > >::get( synId, "objectDimensions" );
-	assert( udims.size() == 2 );
-	assert( udims[0] == size );
-	assert( udims[1] == size - 1 );
-
-	// cout << "NumSyn = " << syn.totalEntries() << endl;
 	shell->doDelete( neuronId );
 	cout << "." << flush;
 }

@@ -141,8 +141,7 @@ class Shell
 		 * to objects outside the copy tree. Usually we don't do this.
 		 */
 		Id doCopy( Id orig, Id newParent, string newName,
-			unsigned int n, bool toGlobal, bool copyExtMsgs, 
-			bool qFlag = 0 );
+			unsigned int n, bool toGlobal, bool copyExtMsgs );
 
 		/**
 		 * Looks up the Id specified by the given path. May include
@@ -369,7 +368,7 @@ class Shell
 		 * Assigns the hardware availability. Assumes that each node will
 		 * have the same number of cores available.
 		 */
-		static void setHardware( unsigned int numThreads, 
+		static void setHardware( 
 			unsigned int numCores, unsigned int numNodes, 
 			unsigned int myNode );
 
