@@ -168,12 +168,12 @@ void testAssortedMsg()
 		assert( f == ObjId( d1, i ) );
 	}
 	f = Msg::getMsg( m4 )->findOtherEnd( ObjId( d1, 4 ) );
-	assert( f == ObjId( d2, DataId::bad() ) );
+	assert( f == ObjId() );
 	f = Msg::getMsg( m4 )->findOtherEnd( ObjId( d2, 0 ) );
-	assert( f == ObjId( d1, DataId::bad() ) );
+	assert( f == ObjId() );
 
 	f = Msg::getMsg( m4 )->findOtherEnd( ObjId( a2, 1 ) );
-	assert( f == ObjId::bad() );
+	assert( f == ObjId() );
 
 	// Sparse
 	for ( unsigned int i = 0; i < 5; ++i ) {
@@ -184,7 +184,7 @@ void testAssortedMsg()
 	}
 
 	f = Msg::getMsg( m5 )->findOtherEnd( ObjId( a2, 1 ) );
-	assert( f == ObjId::bad() );
+	assert( f == ObjId() );
 
 	cout << "." << flush;
 

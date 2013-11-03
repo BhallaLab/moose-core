@@ -20,9 +20,6 @@
 #else
 #include <unistd.h> // for getopt
 #endif
-#include "../scheduling/Tick.h"
-#include "../scheduling/TickMgr.h"
-#include "../scheduling/TickPtr.h"
 #include "../scheduling/Clock.h"
 #include "DiagonalMsg.h"
 #include "SparseMatrix.h"

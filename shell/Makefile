@@ -23,8 +23,6 @@ OBJ = \
 
 HEADERS = \
 	../basecode/header.h \
-	../basecode/ReduceBase.h \
-	../basecode/ReduceMax.h \
 
 
 default: $(TARGET)
@@ -39,7 +37,7 @@ LoadModels.o:	Shell.h Neutral.h
 SaveModels.o:	Shell.h Neutral.h
 Neutral.o:	Neutral.h ../basecode/ElementValueFinfo.h
 Wildcard.o:	Wildcard.h Shell.h Neutral.h ../basecode/ElementValueFinfo.h
-testShell.o:	Wildcard.h Shell.h Neutral.h ../scheduling/Tick.h ../scheduling/testScheduling.h ../builtins/Arith.h ../basecode/SparseMatrix.h ../msg/SparseMsg.h ../msg/SingleMsg.h ../basecode/SetGet.h
+testShell.o:	Wildcard.h Shell.h Neutral.h ../builtins/Arith.h ../basecode/SparseMatrix.h ../msg/SparseMsg.h ../msg/SingleMsg.h ../basecode/SetGet.h
 
 #../kinetics/ReadKkit.h ../biophysics/ReadCell.h
 
