@@ -29,7 +29,6 @@ Element::Element( Id id, const Cinfo* c, const string& name,
  * retain info from the originals.
  */
 Element::Element( Id id, const Element* orig, unsigned int n,
-	unsigned short newParentDepth, unsigned short copyRootDepth,
 	bool toGlobal)
 	:	name_( orig->getName() ),
 		id_( id ),

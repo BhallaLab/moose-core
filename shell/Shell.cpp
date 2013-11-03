@@ -448,27 +448,8 @@ void Shell::doQuit( bool qFlag )
 
 void Shell::doStart( double runtime, bool qFlag )
 {
-	static Id clockId( 1 );
-		// bool isRunning = Field< double >::get( clockId, "isRunning" );
-		if ( isRunning() ) { // Prevent double start.
-			cout << "Shell::doStart: Warning: Simulation already running\n";
-		} else {
-			SetGet1< double >::set( clockId, "start", runtime );
-			// isRunning = 1;
-
-			/*
-			while ( isRunning() ) {
-				// Here we let the simulation threads do stuff.
-					quickNap();
-			}
-			*/
-		}
-}
-
-void Shell::doNonBlockingStart( double runtime, bool qFlag )
-{
-		Id clockId( 1 );
-		SetGet1< double >::set( clockId, "start", runtime );
+	Id clockId( 1 );
+	SetGet1< double >::set( clockId, "start", runtime );
 }
 
 bool isDoingReinit()

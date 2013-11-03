@@ -12,9 +12,7 @@ TARGET = _shell.o
 OBJ = \
 	Shell.o	\
 	ShellCopy.o	\
-	ShellSetGet.o	\
 	ShellThreads.o	\
-	ProcessLoop.o	\
 	LoadModels.o \
 	SaveModels.o \
 	Neutral.o	\
@@ -32,7 +30,6 @@ Shell.o:	Shell.h Neutral.h ../scheduling/Clock.h
 ShellCopy.o:	Shell.h Neutral.h
 ShellSetGet.o:	Shell.h
 ShellThreads.o:	Shell.h Neutral.h ../scheduling/Clock.h
-ProcessLoop.o:	Shell.h
 LoadModels.o:	Shell.h Neutral.h 
 SaveModels.o:	Shell.h Neutral.h
 Neutral.o:	Neutral.h ../basecode/ElementValueFinfo.h

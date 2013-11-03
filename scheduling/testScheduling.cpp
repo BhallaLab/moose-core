@@ -74,24 +74,22 @@ void TestSched::process( const Eref& e, ProcPtr p )
  */
 void testClock()
 {
-	static const double EPSILON = 1.0e-9;
 	const double runtime = 20.0;
 	Id clock(1);
-	Element* clocke = clock.element();
 
 	bool ret = Field< double >::set( clock, "dt", 1.0);
 	assert( ret );
-	ret = LookupField< double >::set( clock, "tickDt", 0, 2.0);
+	ret = LookupField< unsigned int, double >::set( clock, "tickDt", 0, 2.0);
 	assert( ret );
-	ret = LookupField< double >::set( clock, "tickDt", 1, 2.0);
+	ret = LookupField< unsigned int, double >::set( clock, "tickDt", 1, 2.0);
 	assert( ret );
-	ret = LookupField< double >::set( clock, "tickDt", 2, 5.0);
+	ret = LookupField< unsigned int, double >::set( clock, "tickDt", 2, 5.0);
 	assert( ret );
-	ret = LookupField< double >::set( clock, "tickDt", 3, 1.0);
+	ret = LookupField< unsigned int, double >::set( clock, "tickDt", 3, 1.0);
 	assert( ret );
-	ret = LookupField< double >::set( clock, "tickDt", 4, 3.0);
+	ret = LookupField< unsigned int, double >::set( clock, "tickDt", 4, 3.0);
 	assert( ret );
-	ret = LookupField< double >::set( clock, "tickDt", 7, 5.0);
+	ret = LookupField< unsigned int, double >::set( clock, "tickDt", 7, 5.0);
 	assert( ret );
 
 	/*
@@ -129,42 +127,43 @@ void testClock()
 	assert( cdata->tickPtr_[3].mgr()->ticks_[1] == reinterpret_cast< const Tick* >( er5.data() ) );
 	*/
 
+	Eref clocker = clock.eref();
 	Clock* cdata = reinterpret_cast< Clock* >( clocker.data() );
 	assert ( cdata->ticks_.size() == Clock::numTicks );
-	cdata->buildTicks();
-	assert( activeTicks_.size() == 0 ); // No messages
+	cdata->buildTicks( clocker );
+	assert( cdata->activeTicks_.size() == 0 ); // No messages
 
 	// Now put in the scheduling tester and messages.
 	Id test = Id::nextId();
-	Element* teste = new Element( test, testSchedCinfo, "test", 1 );
+	// Element* teste = new Element( test, testSchedCinfo, "test", 1 );
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 
-	Eref ts( tse, 0 );
-	Shell::doAddMsg( "oneToAll", clock, "process0", test, "process" );
-	Shell::doAddMsg( "oneToAll", clock, "process1", test, "process" );
-	Shell::doAddMsg( "oneToAll", clock, "process2", test, "process" );
-	Shell::doAddMsg( "oneToAll", clock, "process3", test, "process" );
-	Shell::doAddMsg( "oneToAll", clock, "process4", test, "process" );
-	Shell::doAddMsg( "oneToAll", clock, "process7", test, "process" );
-	cdata->handleReinit();
-	assert( activeTicks_.size() == 6 ); // No messages
-	assert( activeTicks_[0] == 2 );
-	assert( activeTicks_[1] == 2 );
-	assert( activeTicks_[2] == 5 );
-	assert( activeTicks_[3] == 1 );
-	assert( activeTicks_[4] == 3 );
-	assert( activeTicks_[5] == 5 );
-	cdata->handleStart( runtime );
+	shell->doAddMsg( "oneToAll", clock, "process0", test, "process" );
+	shell->doAddMsg( "oneToAll", clock, "process1", test, "process" );
+	shell->doAddMsg( "oneToAll", clock, "process2", test, "process" );
+	shell->doAddMsg( "oneToAll", clock, "process3", test, "process" );
+	shell->doAddMsg( "oneToAll", clock, "process4", test, "process" );
+	shell->doAddMsg( "oneToAll", clock, "process7", test, "process" );
+	cdata->handleReinit( clocker );
+	assert( cdata->activeTicks_.size() == 6 ); // No messages
+	assert( cdata->activeTicks_[0] == 2 );
+	assert( cdata->activeTicks_[1] == 2 );
+	assert( cdata->activeTicks_[2] == 5 );
+	assert( cdata->activeTicks_[3] == 1 );
+	assert( cdata->activeTicks_[4] == 3 );
+	assert( cdata->activeTicks_[5] == 5 );
+	cdata->handleStart( clocker, runtime );
 	assert( doubleEq( cdata->getCurrentTime(), runtime ) );
 	test.destroy();
 	for ( unsigned int i = 0; i < Clock::numTicks; ++i )
 		cdata->ticks_[i] = 0;
-	cdata->buildTicks();
+	cdata->buildTicks( clocker );
 	cout << "." << flush;
 }
 
 void testScheduling()
 {
-	testClock()
+	testClock();
 }
 
 void testSchedulingProcess()
