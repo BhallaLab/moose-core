@@ -48,12 +48,6 @@ class Neutral
 		string getName( const Eref& e ) const;
 
 		/**
-		 * Field access functions for the group of the Element
-		 */
-		void setGroup( const Eref& e, unsigned int val );
-		unsigned int getGroup( const Eref& e ) const;
-
-		/**
 		 * Readonly field access function for getting all outgoing Msgs.
 		 */
 		vector< ObjId > getOutgoingMsgs( const Eref& e ) const;
@@ -103,58 +97,17 @@ class Neutral
 		string getClass( const Eref& e ) const;
 
 		/**
-		 * linearSize is the # of entries on Element. Its value is
-		 * the product of all dimensions.
-		 * Note that on a FieldElement this includes field entries.
-		 * If field entries form a ragged array, then the linearSize may be
-		 * greater than the actual number of allocated entries, since the
-		 * fieldDimension is at least as big as the largest ragged array.
+		 * numData is the number of data entries on this Element.
 		 */
-		unsigned int getLinearSize( const Eref& e ) const;
+		void setNumData( const Eref& e, unsigned int num );
+		unsigned int getNumData( const Eref& e ) const;
 
 		/**
-		 * Dimensions of data on the Element.
-		 * This includes the fieldDimension if present.
+		 * numField is the size of the field array on the FieldElement 
+		 * specified by the Eref including its data index.
 		 */
-		vector< unsigned int > getDimensions( const Eref& e ) const;
-
-		/**
-		 * Access function for the last (fastest varying) Dimension of the 
-		 * data handler for the Element. For FieldDataHandlers this sets
-		 * the max size of the ragged array for fields, such as synapses.
-		 * For regular data handlers this sets the last dimension. It does
-		 * permit you to scale from zero to N on the last dimension, and
-		 * vice versa. A feeble attempt is made to retain existing data, but
-		 * should not be counted on. Node balancing is done in accordance
-		 * with whatever the last policy was.
-		 * Note that this operation invalidates all DataIds and ObjIds
-		 * that were set up for this Element. In the dubious event of your
-		 * using iterators on the Element or its contents, those will be
-		 * invalidated too.  
-		 * Messages should remain intact.
-		 */
-		void setLastDimension( const Eref& e, unsigned int val );
-		/**
-		 * Access function for the last (fastest varying) Dimension of the 
-		 * data handler for the Element. For FieldDataHandlers this gets
-		 * the max size of the ragged array for fields, such as synapses.
-		 * For regular data handlers this gets the last dimension.
-		 */
-		unsigned int getLastDimension( const Eref& e ) const;
-
-		/** 
-		 * Returns the vector of path index vectors for each dimension of
-		 * the current object. Note that this is not the dimensions of these
-		 * vectors, but the actual indices used to look up the object.
-		 */
-		vector< vector< unsigned int > > getPathIndices( 
-			const Eref& e ) const;
-
-		/**
-		 * Gets the number of entries of a FieldElement on current node.
-		 * If it is a regular Element, returns zero.
-		 */
-		unsigned int getLocalNumField( const Eref& e ) const;
+		void setNumField( const Eref& e, unsigned int num );
+		unsigned int getNumField( const Eref& e ) const;
 
 		////////////////////////////////////////////////////////////
 		// DestFinfo functions

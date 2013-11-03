@@ -13,24 +13,9 @@
 
 /// Returns the Id of the root of the copied tree upon success.
 Id Shell::doCopy( Id orig, Id newParent, string newName, 
-	unsigned int n, bool toGlobal, bool copyExtMsg, bool qFlag )
+	unsigned int n, bool toGlobal, bool copyExtMsg )
 {
-	/*
-	static const Finfo* reqf = 
-		Shell::initCinfo()->findFinfo( "copy" );
-	static const SrcFinfo5< vector< Id >, string, unsigned int, bool, bool >* 
-		requestCopy = dynamic_cast< const SrcFinfo5< vector< Id >, string, unsigned int, bool, bool >* >( reqf );
-	assert( reqf );
-	assert( requestCopy );
-	*/
 
-	if ( n > 1 && numNodes() > 1 && 
-		( !orig()->dataHandler()->isGlobal() ) ) {
-		cout << "Error: Shell::doCopy( " << orig.path() << " to " <<
-			newParent.path() << 
-			":\nCannot array copy local object across nodes (yet)\n";
-		return Id();
-	}
 	if ( Neutral::isDescendant( newParent, orig ) ) {
 		cout << "Error: Shell::doCopy: Cannot copy object to descendant in tree\n";
 		return Id();
@@ -46,33 +31,15 @@ Id Shell::doCopy( Id orig, Id newParent, string newName,
 		return newElm;
 	else
 		return Id();
-	/*
-	initAck();
-		requestCopy->send( sheller, ScriptThreadNum, args, newName , n, toGlobal, copyExtMsg);
-	waitForAck();
-
-	return newElm;
-	*/
 }
 
 /// Runs in parallel on all nodes.
 Element* innerCopyElements( Id orig, Id newParent, Id newElm, 
-	unsigned short paDepth, unsigned short origDepth,
 	unsigned int n, bool toGlobal, map< Id, Id >& tree )
 {
-	Element* e = new Element( newElm, orig(), n, 
-		paDepth, origDepth, toGlobal );
+	Element* e = new Element( newElm, orig(), n, toGlobal );
 	assert( e );
 	Shell::adopt( newParent, newElm );
-
-	// Nasty post-creation fix for FieldElements, which need to assign
-	// parent DataHandlers.
-	FieldDataHandlerBase* fdh =
-		dynamic_cast< FieldDataHandlerBase* >( e->dataHandler() );
-	if ( fdh ) {
-		fdh->assignParentDataHandler( newParent()->dataHandler() );
-	}
-
 
 	// cout << Shell::myNode() << ": Copy: orig= " << orig << ", newParent = " << newParent << ", newElm = " << newElm << endl;
 	tree[ orig ] = e->id();
@@ -82,9 +49,7 @@ Element* innerCopyElements( Id orig, Id newParent, Id newElm,
 	Neutral::children( orig.eref(), kids );
 
 	for ( vector< Id >::iterator i = kids.begin(); i != kids.end(); ++i ) {
-		innerCopyElements( *i, e->id(), Id::nextId(), 
-		paDepth, origDepth,
-		n, toGlobal, tree );
+		innerCopyElements( *i, e->id(), Id::nextId(), n, toGlobal, tree );
 	}
 	return e;
 }
@@ -143,33 +108,15 @@ void innerCopyMsgs( map< Id, Id >& tree, unsigned int n, bool copyExtMsgs )
 	}
 }
 
-// #define CHECK_TREE
 
 bool Shell::innerCopy( const vector< Id >& args, const string& newName,
 	unsigned int n, bool toGlobal, bool copyExtMsgs )
 {
-	/// Test here for tree structure on different nodes
-#ifdef CHECK_TREE
-	vector< Id > temp;
-	Eref baser = args[0].eref();
-	const Neutral* basen = reinterpret_cast< const Neutral *>( 
-		baser.data() );
-	unsigned int nret = basen->buildTree( baser, q, temp );
-	assert( nret == temp.size() );
-	cout << endl << Shell::myNode() << 
-		": handleCopy: ntree= " << nret << endl;
-	for ( unsigned int i = 0; i < nret; ++i )
-		cout << " (" << i << ", " << temp[i] << ") " << 
-		temp[i]()->getName() << "\n";
-#endif
-	unsigned short origDepth =args[0].element()->dataHandler()->pathDepth();
-	unsigned short paDepth =args[1].element()->dataHandler()->pathDepth();
-
 	map< Id, Id > tree;
 	// args are orig, newParent, newElm.
 	assert( args.size() == 3 );
 	Element* e = innerCopyElements( args[0], args[1], args[2], 
-		paDepth, origDepth, n, toGlobal, tree );
+					n, toGlobal, tree );
 	if ( !e ) {
 		return 0;
 	}
@@ -180,8 +127,7 @@ bool Shell::innerCopy( const vector< Id >& args, const string& newName,
 	return 1;
 }
 
-void Shell::handleCopy( const Eref& er, const Qinfo* q,
-	vector< Id > args, string newName,
+void Shell::handleCopy( const Eref& er, vector< Id > args, string newName,
 	unsigned int n, bool toGlobal, bool copyExtMsgs )
 {
 	static const Finfo* ackf = 
@@ -191,12 +137,8 @@ void Shell::handleCopy( const Eref& er, const Qinfo* q,
 	assert( ackf );
 	assert( ack );
 
-	if ( q->addToStructuralQ() )
-		return;
 	if ( innerCopy( args, newName, n, toGlobal, copyExtMsgs ) )
-		ack->send( Eref( shelle_, 0 ), ScriptThreadNum, 
-			Shell::myNode(), ErrorStatus );
+		ack->send( Eref( shelle_, 0 ), Shell::myNode(), ErrorStatus );
 	else
-		ack->send( Eref( shelle_, 0 ), ScriptThreadNum, 
-			Shell::myNode(), OkStatus );
+		ack->send( Eref( shelle_, 0 ), Shell::myNode(), OkStatus );
 }

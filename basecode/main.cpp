@@ -35,8 +35,7 @@
 #ifdef DO_UNIT_TESTS
 extern void testSync();
 extern void testAsync();
-extern void testSyncArray( unsigned int size, unsigned int numThreads,
-	unsigned int method );
+extern void testSyncArray( unsigned int size, unsigned int method );
 extern void testShell();
 extern void testScheduling();
 extern void testSchedulingProcess();
@@ -134,17 +133,14 @@ void checkChildren( Id parent, const string& info )
 Id init( int argc, char** argv, bool& doUnitTests, bool& doRegressionTests )
 {
 	unsigned int numCores = getNumCores();
-	unsigned int numThreads = numCores;
 	unsigned int numNodes = 1;
 	unsigned int myNode = 0;
-	bool isSingleThreaded = 0;
 	bool isInfinite = 0;
 	int opt;
 #ifdef USE_MPI
 	int provided;
 	// OpenMPI does not use argc or argv.
 	// unsigned int temp_argc = 1;
-	//MPI_Init_thread( &temp_argc, &argv, MPI_THREAD_SERIALIZED, &provided );
 	MPI_Init_thread( &argc, &argv, MPI_THREAD_SERIALIZED, &provided );
 
 	MPI_Comm_size( MPI_COMM_WORLD, &numNodes );
@@ -158,20 +154,13 @@ Id init( int argc, char** argv, bool& doUnitTests, bool& doRegressionTests )
 	 * Here we allow the user to override the automatic identification
 	 * of processor configuration
 	 */
-	while ( ( opt = getopt( argc, argv, "shiqurn:t:b:B:" ) ) != -1 ) {
+	while ( ( opt = getopt( argc, argv, "hiqurn:b:B:" ) ) != -1 ) {
 		switch ( opt ) {
-			case 's': // Single threaded mode. Overrides numThreads.
-				isSingleThreaded = 1;
-				break;
 			case 'i' : // infinite loop, used for multinode debugging, to give gdb something to attach to.
 				isInfinite = 1;
 				break;
 			case 'n': // Multiple nodes
 			  numNodes = (unsigned int)atoi( optarg );
-				break;
-			case 't': // Number of process threads to use. Default is
-				// obtained from hardware NumCores.
-			  numThreads = (unsigned int)atoi( optarg );
 				break;
 			case 'b': // Benchmark: handle later.
 				break;
@@ -188,15 +177,13 @@ Id init( int argc, char** argv, bool& doUnitTests, bool& doRegressionTests )
 				break;
 			case 'h': // help
 			default:
-				cout << "Usage: moose -singleThreaded -help -infiniteLoop -unit_tests -regression_tests -quit -t numComputeThreads -n numNodes -benchmark [ksolve intFire hhNet msg_<msgType>_<size>]\n";
+				cout << "Usage: moose -help -infiniteLoop -unit_tests -regression_tests -quit -n numNodes -benchmark [ksolve intFire hhNet msg_<msgType>_<size>]\n";
 
 				exit( 1 );
 		}
 	}
-	if ( isSingleThreaded )
-		numThreads = 0;
 	if ( myNode == 0 ) 
-		cout << "on node " << myNode << ", numNodes = " << numNodes << ", numCores = " << numCores << ", numComputeThreads = " << numThreads << endl;
+		cout << "on node " << myNode << ", numNodes = " << numNodes << ", numCores = " << numCores << endl;
 
 	Msg::initNull();
 	Id shellId;
@@ -210,7 +197,7 @@ Id init( int argc, char** argv, bool& doUnitTests, bool& doRegressionTests )
 
 	Shell* s = reinterpret_cast< Shell* >( shellId.eref().data() );
 	s->setShellElement( shelle );
-	s->setHardware( numThreads, numCores, numNodes, myNode );
+	s->setHardware( numCores, numNodes, myNode );
 	s->loadBalance();
 
 	/// Sets up the Elements that represent each class of Msg.
@@ -276,11 +263,8 @@ void nonMpiTests( Shell* s )
 	if ( Shell::myNode() == 0 ) {
 		unsigned int numNodes = s->numNodes();
 		unsigned int numCores = s->numCores();
-		// unsigned int numThreads = s->numProcessThreads();
-		unsigned int numThreads = 1;
 		if ( numCores > 0 )
-		// s->setHardware( numthreads, numCores, numNodes, myNode );
-		s->setHardware( 1, 1, 1, 0 );
+		s->setHardware( 1, 1, 0 );
 		testAsync();
 		testMsg();
 		testShell();
@@ -296,7 +280,7 @@ void nonMpiTests( Shell* s )
 #ifdef USE_SMOLDYN
 		// testSmoldyn();
 #endif
-		s->setHardware( numThreads, numCores, numNodes, 0 );
+		s->setHardware( numCores, numNodes, 0 );
 	}
 #endif
 }
@@ -348,9 +332,6 @@ int main( int argc, char** argv )
 	if ( doUnitTests )
 		nonMpiTests( s ); // These tests do not need the process loop.
 
-	if ( !s->isSingleThreaded() ) {
-		Shell::launchThreads(); // Here we set off the thread/MPI process loop.
-	}
 	if ( Shell::myNode() == 0 ) {
 #ifdef DO_UNIT_TESTS
 		if ( doUnitTests ) {

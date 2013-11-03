@@ -25,15 +25,6 @@ const Cinfo* Neutral::initCinfo()
 		&Neutral::setName, 
 		&Neutral::getName );
 
-	static ElementValueFinfo< Neutral, unsigned int > group( 
-		"group",
-		"Computational group in which object belongs. Assumed to require"
-		"high density message traffic, and queues are organized "
-		"according to group. Groups are inherited from parent but one" 
-		"can select any of the extant groups to use for an Element",
-		&Neutral::setGroup, 
-		&Neutral::getGroup );
-
 	// Should be renamed to myId
 	static ReadOnlyElementValueFinfo< Neutral, ObjId > me( 
 		"me",
@@ -62,53 +53,23 @@ const Cinfo* Neutral::initCinfo()
 		"Class Name of object", 
 			&Neutral::getClass );
 
-	// Add this because of namespace collision with python 'class'.
-	/*
-	static ReadOnlyElementValueFinfo< Neutral, string > className( 
-		"className",
-		"Class Name of object", 
-			&Neutral::getClass );
-			*/
-
-	static ReadOnlyElementValueFinfo< Neutral, unsigned int > linearSize( 
-		"linearSize",
+	static ElementValueFinfo< Neutral, unsigned int > numData( 
+		"numData",
 		"# of entries on Element: product of all dimensions."
 		"Note that on a FieldElement this includes field entries."
 		"If field entries form a ragged array, then the linearSize may be"
 		"greater than the actual number of allocated entries, since the"
 		"lastDimension is at least as big as the largest ragged array.",
-			&Neutral::getLinearSize );
+			&Neutral::setNumData,
+			&Neutral::getNumData );
 
-	static ReadOnlyElementValueFinfo< Neutral, vector< unsigned int > > objectDimensions( 
-		"objectDimensions",
-		"Array Dimensions of object on the Element." 
-		"This includes the lastDimension (field dimension) if present.",
-			&Neutral::getDimensions );
-
-	static ElementValueFinfo< Neutral, unsigned int > lastDimension( 
-		"lastDimension",
-		"Max size of the last dimension of the object."
-		"In the case of regular objects, resizing this value resizes"
-		"the last dimension"
-		"In the case of ragged arrays (such as synapses), resizing this"
-		"value resizes the upper limit of the last dimension,"
-		"but cannot make it smaller than the biggest ragged array size."
-		"Normally is only assigned from Shell::doSyncDataHandler.",
-			&Neutral::setLastDimension,
-			&Neutral::getLastDimension
-		);
-
-	static ReadOnlyElementValueFinfo< Neutral, vector< vector< unsigned int > > > pathIndices( 
-		"pathIndices",
-		"Indices of the entire path hierarchy leading up to this Object.", 
-			&Neutral::getPathIndices );
-
-	static ReadOnlyElementValueFinfo< Neutral, unsigned int > 
-		localNumField( 
-		"localNumField",
-		"For a FieldElement: number of entries of self on current node"
+	static ElementValueFinfo< Neutral, unsigned int > 
+		numField( 
+		"numField",
+		"For a FieldElement: number of entries of self"
 		"For a regular Element: zero.",
-			&Neutral::getLocalNumField );
+			&Neutral::setNumField,
+			&Neutral::getNumField );
 
 	static ReadOnlyElementValueFinfo< Neutral, vector< ObjId > > msgOut( 
 		"msgOut",
@@ -183,11 +144,8 @@ const Cinfo* Neutral::initCinfo()
 		&children,				// ReadOnlyValue
 		&path,					// ReadOnlyValue
 		&className,				// ReadOnlyValue
-		&linearSize,			// ReadOnlyValue
-		&objectDimensions,			// ReadOnlyValue
-		&lastDimension,			// Value
-		&localNumField,			// ReadOnlyValue
-		&pathIndices,			// ReadOnlyValue
+		&numData,				// Value
+		&numField,				// Value
 		&msgOut,				// ReadOnlyValue
 		&msgIn,					// ReadOnlyValue
 		&neighbours,			// ReadOnlyLookupValue
@@ -241,51 +199,30 @@ Neutral Neutral::getThis() const
 	return *this;
 }
 
-void Neutral::setName( const Eref& e, const Qinfo* q, string name )
+void Neutral::setName( const Eref& e, string name )
 {
-	// if ( Shell::isSingleThreaded() || q->threadNum() == 1 )
-		e.element()->setName( name );
+	e.element()->setName( name );
 }
 
-string Neutral::getName( const Eref& e, const Qinfo* q ) const
+string Neutral::getName( const Eref& e ) const
 {
 	return e.element()->getName();
 }
 
-void Neutral::setGroup( const Eref& e, const Qinfo* q, unsigned int val )
-{
-	e.element()->setGroup( val );
-}
-
-unsigned int Neutral::getGroup( const Eref& e, const Qinfo* q ) const
-{
-	return e.element()->getGroup();
-}
-
-ObjId Neutral::getObjId( const Eref& e, const Qinfo* q ) const
+ObjId Neutral::getObjId( const Eref& e ) const
 {
 	return e.objId();
 }
 
-ObjId Neutral::getParent( const Eref& e, const Qinfo* q ) const
+ObjId Neutral::getParent( const Eref& e ) const
 {
 	return parent( e );
-	/*
-	static const Finfo* pf = neutralCinfo->findFinfo( "parentMsg" );
-	static const DestFinfo* pf2 = dynamic_cast< const DestFinfo* >( pf );
-	static const FuncId pafid = pf2->getFid();
-
-	MsgId mid = e.element()->findCaller( pafid );
-	assert( mid != Msg::bad );
-
-	return Msg::getMsg( mid )->findOtherEnd( e.objId() );
-	*/
 }
 
 /**
  * Gets Element children, not individual entries in the array.
  */
-vector< Id > Neutral::getChildren( const Eref& e, const Qinfo* q ) const
+vector< Id > Neutral::getChildren( const Eref& e ) const
 {
 	vector< Id > ret;
 	children( e, ret );
@@ -314,114 +251,28 @@ void Neutral::children( const Eref& e, vector< Id >& ret )
 	}
 }
 
-/*
- * Gets specific named child
-Id Neutral::getChild( const Eref& e, const Qinfo* q, const string& name ) 
-{
-	static const Finfo* pf = neutralCinfo->findFinfo( "parentMsg" );
-	static const DestFinfo* pf2 = dynamic_cast< const DestFinfo* >( pf );
-	static const FuncId pafid = pf2->getFid();
-	static const Finfo* cf = neutralCinfo->findFinfo( "childMsg" );
-	static const SrcFinfo* cf2 = dynamic_cast< const SrcFinfo* >( cf );
-	static const BindIndex bi = cf2->getBindIndex();
-	
-	const vector< MsgFuncBinding >* bvec = e.element()->getMsgAndFunc( bi );
 
-	vector< Id > ret;
-
-	for ( vector< MsgFuncBinding >::const_iterator i = bvec->begin();
-		i != bvec->end(); ++i ) {
-		if ( i->fid == pafid ) {
-			const Msg* m = Msg::getMsg( i->mid );
-			assert( m );
-			if ( m->e2()->getName() == name )
-				return m->e2()->id();
-		}
-	}
-	return Id();
-}
-*/
-
-
-string Neutral::getPath( const Eref& e, const Qinfo* q ) const
+string Neutral::getPath( const Eref& e ) const
 {
 	return path( e );
 }
 
-string Neutral::getClass( const Eref& e, const Qinfo* q ) const
+string Neutral::getClass( const Eref& e ) const
 {
 	return e.element()->cinfo()->name();
 }
 
-unsigned int Neutral::getLinearSize( const Eref& e, const Qinfo* q ) const
+unsigned int Neutral::getNumData( const Eref& e ) const
 {
-	return e.element()->dataHandler()->totalEntries();
+	return e.element()->numData();
 }
 
-vector< unsigned int > Neutral::getDimensions( 
-	const Eref& e, const Qinfo* q ) const
+unsigned int Neutral::getNumField( const Eref& e ) const
 {
-	vector< unsigned int > ret;
-	const vector< DimInfo >& dims = e.element()->dataHandler()->dims();
-	for ( unsigned int i = 0; i < dims.size(); ++i )
-		ret.push_back( dims[i].size );
-	return ret;
+	return e.element()->numField( e.index() );
 }
 
-void Neutral::setLastDimension( const Eref& e, const Qinfo* q, 
-	unsigned int size )
-{
-	/*
-	if ( q->addToStructuralQ() )
-		return;
-		*/
-	// if ( Shell::isSingleThreaded() || q->threadNum() == 1 )
-	// e.element()->dataHandler()->setFieldDimension( size );
-	DataHandler* dh = e.element()->dataHandler();
-	FieldDataHandlerBase* fdh = 
-		dynamic_cast< FieldDataHandlerBase* >( dh );
-	if ( fdh ) {
-		fdh->setMaxFieldEntries( size );	
-	} else if ( dh->pathDepth() > 0 ) {
-		e.element()->resize( dh->pathDepth(), size );
-	}
-}
-
-unsigned int Neutral::getLastDimension( 
-	const Eref& e, const Qinfo* q ) const
-{
-	// return e.element()->dataHandler()->getFieldDimension();
-	const DataHandler* dh = e.element()->dataHandler();
-	const FieldDataHandlerBase* fdh = 
-		dynamic_cast< const FieldDataHandlerBase* >( dh );
-	if ( fdh ) {
-		return fdh->getMaxFieldEntries();
-	} else if ( dh->numDimensions() > 0 ) {
-		// vector< vector< unsigned int > > indices = dh->pathIndices( e.index() );
-		return dh->sizeOfDim( dh->numDimensions() - 1 );
-	}
-	return 0;
-}
-
-vector< vector< unsigned int > > Neutral::getPathIndices(
-	const Eref& e, const Qinfo* q ) const
-{
-	return e.element()->dataHandler()->pathIndices( e.index() );
-}
-
-unsigned int Neutral::getLocalNumField( 
-	const Eref& e, const Qinfo* q ) const
-{
-	FieldDataHandlerBase* fdh = dynamic_cast< FieldDataHandlerBase* >(
-		e.element()->dataHandler() );
-	if ( fdh )
-		return fdh->getFieldArraySize( e.index() );
-	else
-		return 0;
-}
-
-vector< ObjId > Neutral::getOutgoingMsgs( 
-	const Eref& e, const Qinfo* q ) const
+vector< ObjId > Neutral::getOutgoingMsgs( const Eref& e ) const
 {
 	vector< ObjId > ret;
 	unsigned int numBindIndex = e.element()->cinfo()->numBindIndex();
@@ -441,8 +292,7 @@ vector< ObjId > Neutral::getOutgoingMsgs(
 	return ret;
 }
 
-vector< ObjId > Neutral::getIncomingMsgs( 
-	const Eref& e, const Qinfo* q ) const
+vector< ObjId > Neutral::getIncomingMsgs( const Eref& e ) const
 {
 	vector< ObjId > ret;
 	const vector< MsgId >& msgIn = e.element()->msgIn();
@@ -456,8 +306,7 @@ vector< ObjId > Neutral::getIncomingMsgs(
 	return ret;
 }
 
-vector< Id > Neutral::getNeighbours( 
-	const Eref& e, const Qinfo* q, string field ) const
+vector< Id > Neutral::getNeighbours( const Eref& e, string field ) const
 {
 	vector< Id > ret;
 	const Finfo* finfo = e.element()->cinfo()->findFinfo( field );
@@ -472,13 +321,13 @@ vector< Id > Neutral::getNeighbours(
 
 //////////////////////////////////////////////////////////////////////////
 
-unsigned int Neutral::buildTree( const Eref& e, const Qinfo* q, vector< Id >& tree )
+unsigned int Neutral::buildTree( const Eref& e, vector< Id >& tree )
 	const 
 {
 	unsigned int ret = 1;
-	vector< Id > kids = getChildren( e, q );
+	vector< Id > kids = getChildren( e );
 	for ( vector< Id >::iterator i = kids.begin(); i != kids.end(); ++i )
-		ret += buildTree( i->eref(), q, tree );
+		ret += buildTree( i->eref(), tree );
 	tree.push_back( e.element()->id() );
 	return ret;
 }
@@ -490,10 +339,10 @@ unsigned int Neutral::buildTree( const Eref& e, const Qinfo* q, vector< Id >& tr
 // Stage 1: mark for deletion. This is done by setting cinfo = 0
 // Stage 2: Clear out outside-going msgs
 // Stage 3: delete self and attached msgs, 
-void Neutral::destroy( const Eref& e, const Qinfo* q, int stage )
+void Neutral::destroy( const Eref& e, int stage )
 {
 	vector< Id > tree;
-	unsigned int numDescendants = buildTree( e, q, tree );
+	unsigned int numDescendants = buildTree( e, tree );
 	/*
 	cout << "Neutral::destroy: id = " << e.id() << 
 		", name = " << e.element()->getName() <<
@@ -507,7 +356,7 @@ void Neutral::destroy( const Eref& e, const Qinfo* q, int stage )
  * Request conversion of data into a blockDataHandler subclass,
  * and to carry out node balancing of data as per args.
  */
-void Neutral::blockNodeBalance( const Eref& e, const Qinfo* q, 
+void Neutral::blockNodeBalance( const Eref& e, 
 	unsigned int, unsigned int, unsigned int )
 {
 }
@@ -516,7 +365,7 @@ void Neutral::blockNodeBalance( const Eref& e, const Qinfo* q,
  * Request conversion of data into a generalDataHandler subclass,
  * and to carry out node balancing of data as per args.
  */
-void Neutral::generalNodeBalance( const Eref& e, const Qinfo* q, 
+void Neutral::generalNodeBalance( const Eref& e, 
 	unsigned int myNode, vector< unsigned int > nodeAssignment )
 {
 }
@@ -570,30 +419,11 @@ Id Neutral::child( const Eref& e, const string& name )
 	return Id();
 }
 
-// static function
+// static function, needs updates 03 nov 2013.
 ObjId Neutral::parent( const Eref& e )
 {
-		/*
-	static const Finfo* pf = neutralCinfo->findFinfo( "parentMsg" );
-	static const DestFinfo* pf2 = dynamic_cast< const DestFinfo* >( pf );
-	static const FuncId pafid = pf2->getFid();
-
-	if ( e.element()->id() == Id() ) {
-		cout << "Warning: Neutral::parent: tried to take parent of root\n";
-		return ObjId( Id(), 0 );
-	}
-
-	MsgId mid = e.element()->findCaller( pafid );
-	assert( mid != Msg::bad );
-
-	Id pa = Msg::getMsg( mid )->findOtherEnd( e.objId() ).id;
-	*/
-	vector< vector< unsigned int > > index = e.element()->dataHandler()->pathIndices( e.index() );
-	assert( index.size() > 0 );
-	index.pop_back();
 	Id pa = parent( e.id() );
-	DataId padi = pa.element()->dataHandler()->pathDataId( index );
-	return ObjId( pa, padi );
+	return ObjId( pa );
 }
 
 Id Neutral::parent( Id id )
@@ -614,7 +444,7 @@ Id Neutral::parent( Id id )
 	return pa;
 }
 
-// Static function
+// Static function 03 nov 2013. Needs fixing for parent indices.
 string Neutral::path( const Eref& e )
 {
 	static const Finfo* pf = neutralCinfo->findFinfo( "parentMsg" );
@@ -633,49 +463,8 @@ string Neutral::path( const Eref& e )
 		pathVec.push_back( curr );
 	}
 
-	const DataHandler* dh = e.element()->dataHandler();
-	vector< vector< unsigned int > > pathIndex = dh->pathIndices( e.index() );
-	assert( pathVec.size() == pathIndex.size() );
-	assert( pathIndex.size() == static_cast< unsigned int >( dh->pathDepth()  ) + 1 );
-
 	ss << "/";
-	/*
-	for ( int i = pathVec.size() - 2; i >= 0; --i ) {
-		ss << pathVec[i].eref();
-		for ( unsigned int k = 0; k < pathIndex[i].size(); ++k ) {
-			ss << "[" << pathIndex[i][k] << "]";
-		}
-		if ( i > 0 )
-			ss << "/";
-	}
-	*/
 
-	// Skip the root
-	for ( unsigned int i = 1; i <= dh->pathDepth(); ++i ) {
-		unsigned int j = pathVec.size() - i - 1;
-		ss << pathVec[j].element()->getName();
-		unsigned int size = pathIndex[i].size();
-		for ( unsigned int k = 0; k < size; ++k ) {
-			// ss << "[" << pathIndex[i][size - k - 1] << "]";
-			ss << "[" << pathIndex[i][k] << "]";
-		}
-		if ( i < dh->pathDepth() )
-			ss << "/";
-	}
-	/*
-	const vector< DimInfo >& dims = dh->dims();
-	ss << "/";
-	unsigned int j = 0;
-	for ( int i = pathVec.size() - 2; i >= 0; --i ) {
-		ss << pathVec[i].eref();
-		while ( j < dims.size() && ( dims[j].depth == ( pathVec.size() - 1 - i ) ) ) {
-			ss << "[" << dims[j].size << "]";
-			++j;
-		}
-		if ( i > 0 )
-			ss << "/";
-	}
-	*/
 	return ss.str();
 }
 
@@ -692,16 +481,6 @@ ostream& operator <<( ostream& s, const Neutral& d )
 
 bool Neutral::isGlobalField( const string& field )
 {
-	/*
-	* This is over the top: only 3 cases to worry about.
-	static set< string > fieldnames;
-
-	if ( fieldnames.size() == 0 ) {
-		fieldnames.insert( "set_name" );
-		fieldnames.insert( "set_group" );
-		fieldnames.insert( "set_lastDimension" );
-	}
-	*/
 	if ( field.length() < 8 )
 		return 0;
 	if ( field.substr( 0, 4 ) == "set_" ) {

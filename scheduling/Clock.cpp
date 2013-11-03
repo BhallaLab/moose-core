@@ -67,7 +67,7 @@ static SrcFinfo0 *finished() {
 
 // This vector contains the SrcFinfos used for Process calls for each
 // of the Ticks.
-vector< SrcFinfo* >& processVec() {
+vector< SrcFinfo1< ProcPtr >* >& processVec() {
 	static SrcFinfo1< ProcPtr > process0( "process0", "Process for Tick 0");
 	static SrcFinfo1< ProcPtr > process1( "process1", "Process for Tick 1");
 	static SrcFinfo1< ProcPtr > process2( "process2", "Process for Tick 2");
@@ -79,14 +79,14 @@ vector< SrcFinfo* >& processVec() {
 	static SrcFinfo1< ProcPtr > process8( "process8", "Process for Tick 8");
 	static SrcFinfo1< ProcPtr > process9( "process9", "Process for Tick 9");
 
-	static SrcFinfo* processArray[] = {
+	static SrcFinfo1< ProcPtr >* processArray[] = {
 		&process0, &process1, &process2, &process3, &process4, &process5, &process6, &process7, &process8, &process9, };
-	static vector< SrcFinfo* > processVec(processArray, processArray + sizeof(processArray) / sizeof(SrcFinfo *));
+	static vector< SrcFinfo1< ProcPtr >* > processVec(processArray, processArray + sizeof(processArray) / sizeof(SrcFinfo1< ProcPtr > *));
 
 	return processVec;
 }
 
-vector< SrcFinfo* >& reinitVec() {
+vector< SrcFinfo1< ProcPtr >* >& reinitVec() {
 
 	static SrcFinfo1< ProcPtr > reinit0( "reinit0", "Reinit for Tick 0" );
 	static SrcFinfo1< ProcPtr > reinit1( "reinit1", "Reinit for Tick 1" );
@@ -99,9 +99,9 @@ vector< SrcFinfo* >& reinitVec() {
 	static SrcFinfo1< ProcPtr > reinit8( "reinit8", "Reinit for Tick 8" );
 	static SrcFinfo1< ProcPtr > reinit9( "reinit9", "Reinit for Tick 9" );
 
-	static SrcFinfo* reinitArray[] = {
+	static SrcFinfo1< ProcPtr >* reinitArray[] = {
 		&reinit0, &reinit1, &reinit2, &reinit3, &reinit4, &reinit5, &reinit6, &reinit7, &reinit8, &reinit9, };
-	static vector< SrcFinfo* > reinitVec(reinitArray, reinitArray + sizeof(reinitArray) / sizeof(SrcFinfo *));
+	static vector< SrcFinfo1< ProcPtr >* > reinitVec(reinitArray, reinitArray + sizeof(reinitArray) / sizeof(SrcFinfo1< ProcPtr > *));
 
 	return reinitVec;
 }
@@ -115,7 +115,7 @@ const Cinfo* Clock::initCinfo()
 			"dt",
 			"Base timestep for simulation",
 			&Clock::setDt,
-			&Clock::getdt
+			&Clock::getDt
 		);
 		static ReadOnlyValueFinfo< Clock, double > runTime( 
 			"runTime",
@@ -135,7 +135,6 @@ const Cinfo* Clock::initCinfo()
 		static ReadOnlyValueFinfo< Clock, unsigned int > numTicks( 
 			"numTicks",
 			"Number of clock ticks",
-			// &Clock::setNumTicks,
 			&Clock::getNumTicks
 		);
 		static ReadOnlyValueFinfo< Clock, unsigned int > currentStep( 
@@ -153,17 +152,19 @@ const Cinfo* Clock::initCinfo()
 		static ReadOnlyValueFinfo< Clock, bool > isRunning( 
 			"isRunning",
 			"Utility function to report if simulation is in progress.",
-			// &Clock::setNumTicks,
 			&Clock::isRunning
 		);
-		static LookupValueFinfo< Clock, unsigned int, unsigned int >(
+
+		static LookupValueFinfo< Clock, unsigned int, unsigned int > 
+			tickStep(
 			"tickStep",
 			"Step size of specified Tick, as integral multiple of dt_"
 			" A zero step size means that the Tick is inactive",
 			&Clock::setTickStep,
 			&Clock::getTickStep
 		);
-		static LookupValueFinfo< Clock, unsigned int, unsigned int >(
+
+		static LookupValueFinfo< Clock, unsigned int, double > tickDt(
 			"tickDt",
 			"Timestep dt of specified Tick. Always integral multiple of "
 			"dt_. If you assign a non-integer multiple it will round off. "
@@ -201,12 +202,12 @@ const Cinfo* Clock::initCinfo()
 	///////////////////////////////////////////////////////
 		static DestFinfo start( "start", 
 			"Sets off the simulation for the specified duration",
-			new OpFunc1< Clock, double >(&Clock::handleStart )
+			new EpFunc1< Clock, double >(&Clock::handleStart )
 		);
 
 		static DestFinfo step( "step", 
 			"Sets off the simulation for the specified # of steps",
-			new OpFunc1< Clock, unsigned int >(&Clock::handleStep )
+			new EpFunc1< Clock, unsigned int >(&Clock::handleStep )
 		);
 
 		static DestFinfo stop( "stop", 
@@ -214,18 +215,13 @@ const Cinfo* Clock::initCinfo()
 			new OpFunc0< Clock >(&Clock::stop )
 		);
 
-		static DestFinfo setupTick( "setupTick", 
-			"Sets up a specific clock tick: args tick#, dt",
-			new OpFunc2< Clock, unsigned int, double >(&Clock::setupTick )
-		);
-
 		static DestFinfo reinit( "reinit", 
 			"Zeroes out all ticks, starts at t = 0",
-	 		new OpFunc0< Clock >(&Clock::handleReinit )
+	 		new EpFunc0< Clock >(&Clock::handleReinit )
 		);
 
 		static Finfo* clockControlFinfos[] = {
-			&start, &step, &stop, &setupTick, &reinit, ack(),
+			&start, &step, &stop, &reinit,
 		};
 	///////////////////////////////////////////////////////
 	// SharedFinfo for Shell to control Clock
@@ -378,20 +374,21 @@ bool Clock::checkTickNum( const string& funcName, unsigned int i ) const
 	if ( isRunning_ || doingReinit_) {
 		cout << "Warning: Clock::" << funcName << 
 				": Cannot change dt while simulation is running\n";
-		return 0;
+		return false;
 	}
 	if ( i >= Clock::numTicks ) {
 		cout << "Warning: Clock::" << funcName <<
-				"( " i << ", " << v <<
-				" ): Clock has only " << Clock::numTicks << " ticks \n";
-		return 0;
+			"( " << i << " ): Clock has only " << 
+			Clock::numTicks << " ticks \n";
+		return false;
 	}
+	return true;
 }
 
-void Clock:;setTickStep( unsigned int i, unsigned int v )
+void Clock::setTickStep( unsigned int i, unsigned int v )
 {
-	if ( checkTickNum( "setTickStep", i )
-	ticks_[i] = v;
+	if ( checkTickNum( "setTickStep", i ) )
+		ticks_[i] = v;
 }
 unsigned int Clock::getTickStep( unsigned int i ) const
 {
@@ -400,16 +397,17 @@ unsigned int Clock::getTickStep( unsigned int i ) const
 	return 0;
 }
 
-void Clock:;setTickDt( unsigned int i, double v )
+void Clock::setTickDt( unsigned int i, double v )
 {
-	if ( checkTickNum( "setTickDt", i )
-	ticks_[i] = round( v / dt_ );
+	if ( checkTickNum( "setTickDt", i ) )
+		ticks_[i] = round( v / dt_ );
 }
 
 double Clock::getTickDt( unsigned int i ) const
 {
 	if ( i < Clock::numTicks )
 		return ticks_[i] * dt_;
+	return 0.0;
 }
 
 ///////////////////////////////////////////////////
@@ -442,9 +440,9 @@ void Clock::innerReportClock() const
 		", currentTime= " << currentTime_ <<
 		", dt= " << dt_ << ", isRunning = " << isRunning_ << endl;
 	cout << "Dts= ";
-	for ( unsigned int i = 0; i < tick_.size(); ++i ) {
-		cout <<  "tick[" << i << "] = " << tick_[i] << "	" <<
-				tick_[i] * dt_ << endl;
+	for ( unsigned int i = 0; i < ticks_.size(); ++i ) {
+		cout <<  "tick[" << i << "] = " << ticks_[i] << "	" <<
+				ticks_[i] * dt_ << endl;
 	}
 	cout << endl;
 }
@@ -458,7 +456,7 @@ void Clock::buildTicks( const Eref& e )
 	activeTicks_.resize(0);
 	for ( unsigned int i = 0; i < ticks_.size(); ++i ) {
 		if ( ticks_[i] > 0 && 
-						e.element()->hasMsgs( process[i].getBindIndex() )
+				e.element()->hasMsgs( processVec()[i]->getBindIndex() ) )
 			activeTicks_.push_back( ticks_[i] );
 	}
 }
@@ -468,10 +466,10 @@ void Clock::buildTicks( const Eref& e )
  * reason, it has to pick up where it left off.
  * The "runtime" argument is the additional time to run the simulation.
  */
-void Clock::handleStart( double runtime )
+void Clock::handleStart( const Eref& e, double runtime )
 {
 	unsigned int n = round( runtime / dt_ );
-	handleStep( n );
+	handleStep( e, n );
 }
 
 void Clock::handleStep( const Eref& e, unsigned int numSteps )
@@ -480,32 +478,32 @@ void Clock::handleStep( const Eref& e, unsigned int numSteps )
 		cout << "Clock::handleStart: Warning: simulation already in progress.\n Command ignored\n";
 		return;
 	}
-	buildTicks();
+	buildTicks( e );
 	assert( currentStep_ = nSteps_ );
 	nSteps_ += numSteps;
-	runtime_ = nSteps_ * dt_;
+	runTime_ = nSteps_ * dt_;
 	for ( isRunning_ = true;
-		isRunning && currentStep_ < nSteps_; ++currentStep_ )
+		isRunning_ && currentStep_ < nSteps_; ++currentStep_ )
 	{
 		// Curr time is end of current step.
 		info_.currTime = dt_ * (currentStep_ + 1); 
-		for ( vector< unsigned int>  j = 
+		for ( vector< unsigned int>::iterator j = 
 			activeTicks_.begin(); j != activeTicks_.end(); ++j ) {
 			if ( currentStep_ % *j == 0 ) {
 				info_.dt = *j * dt_;
-				process[*j].send( e, &info_ );
+				processVec()[*j]->send( e, &info_ );
 			}
 		}
 	}
 	info_.dt = dt_;
 	isRunning_ = false;
-	finished.send( e );
+	finished()->send( e );
 }
 
 /**
  * This is the dest function that sets off the reinit.
  */
-void Clock::handleReinit()
+void Clock::handleReinit( const Eref& e )
 {
 	if ( isRunning_ || doingReinit_ ) {
 		cout << "Clock::handleStart: Warning: simulation already in progress.\n Command ignored\n";
@@ -513,14 +511,14 @@ void Clock::handleReinit()
 	}
 	currentTime_ = 0.0;
 	currentStep_ = 0;
-	buildTicks();
+	buildTicks( e );
 	doingReinit_ = true;
 	// Curr time is end of current step.
 	info_.currTime = 0.0;
-	for ( vector< unsigned int>  j = 
+	for ( vector< unsigned int>::iterator j = 
 		activeTicks_.begin(); j != activeTicks_.end(); ++j ) {
 		info_.dt = *j * dt_;
-		reinit[*j].send( e, &info_ );
+		reinitVec()[*j]->send( e, &info_ );
 	}
 	info_.dt = dt_;
 	doingReinit_ = false;

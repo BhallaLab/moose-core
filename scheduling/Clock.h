@@ -55,13 +55,13 @@ class Clock
 		void stop();
 
 		/// dest function for message to run simulation for specified time
-		void handleStart( double runtime );
+		void handleStart( const Eref& e, double runtime );
 
 		/// dest function for message to run simulation for specified steps
-		void handleStep( unsigned int steps );
+		void handleStep( const Eref& e, unsigned int steps );
 
 		/// dest function for message to trigger reinit.
-		void handleReinit();
+		void handleReinit( const Eref& e );
 
 		///////////////////////////////////////////////////////////////
 		// Stuff for new scheduling.
@@ -72,7 +72,6 @@ class Clock
 
 		///////////////////////////////////////////////////////////////
 		unsigned int getNumTicks() const;
-		void setNumTicks( unsigned int num );
 
 		/**
 		 * Flag: True when the simulation is still running.
@@ -92,8 +91,11 @@ class Clock
 		// static void* threadStartFunc( void* threadInfo );
 		static const Cinfo* initCinfo();
 
+		/// Utility func to range-check when Ticks are being changed.
+		bool checkTickNum( const string& funcName, unsigned int i ) const;
+
 	private:
-		void buildTicks();
+		void buildTicks( const Eref& e );
 		double runTime_;
 		double currentTime_;
 		unsigned int nSteps_;
@@ -131,7 +133,7 @@ class Clock
 		/**
 		 * number of Ticks.
 		 */
-		const unsigned int numTicks;
+		static const unsigned int numTicks;
 };
 
 #endif // _CLOCK_H
