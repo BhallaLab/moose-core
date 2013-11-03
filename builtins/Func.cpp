@@ -573,10 +573,10 @@ void Func::process(const Eref &e, ProcPtr p)
         return;
     }
     if (_mode & 1){
-        valueOut()->send(e, p->threadIndexInGroup, getValue());
+        valueOut()->send(e, getValue());
     }
     if (_mode & 2){
-        derivativeOut()->send(e, p->threadIndexInGroup, getDerivative());
+        derivativeOut()->send(e, getDerivative());
     }
 }
 
