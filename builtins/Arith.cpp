@@ -126,12 +126,11 @@ void Arith::process( const Eref& e, ProcPtr p )
 	output_ = arg1_ + arg2_ + arg3_; // Doing a hard-coded function.
 	// cout << "process: " << e.element()->getName() << ", " << e.objId() << arg3_ << ", " << &arg3_ << endl;
 	if ( doReport ) {
-		cout << p->nodeIndexInGroup << "." << 
-			p->threadIndexInGroup << ": " <<
+		cout <<
 			e.element()->getName() << ", " << e.objId() << "		" << 
 			arg3_ << "	" << &arg3_ << endl;
 	}
-	output()->send( e, p->threadIndexInGroup, output_ );
+	output()->send( e, output_ );
 	arg3_ = 0.0;
 }
 

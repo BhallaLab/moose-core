@@ -12,11 +12,9 @@ TARGET = _builtins.o
 OBJ = \
 	Arith.o	\
 	Group.o	\
-	Mdouble.o	\
 	Mstring.o	\
 	Func.o \
 	TableBase.o	\
-	TableEntry.o	\
 	Table.o	\
 	StimulusTable.o	\
 	TimeTable.o	\
@@ -35,10 +33,8 @@ default: $(TARGET)
 $(OBJ)	: $(HEADERS)
 Arith.o:	Arith.h
 Group.o:	Group.h
-Mdouble.o:		Mdouble.h
 Mstring.o:		Mstring.h
 Func.o:	Func.h
-TableEntry.o:		TableEntry.h
 TableBase.o:		TableBase.h TableEntry.h
 Table.o:		TableBase.h Table.h TableEntry.h
 StimulusTable.o:		TableBase.h StimulusTable.h TableEntry.h
