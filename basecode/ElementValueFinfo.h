@@ -11,8 +11,7 @@
 
 /**
  * This variant of ValueFinfo provides facilities to set and get
- * values of fields that require information about the managing
- * Element and possibly the Qinfo as well.
+ * values of fields that require information about the managing Element 
  */
 template < class T, class F > class ElementValueFinfo: public ValueFinfoBase
 {
@@ -23,8 +22,8 @@ template < class T, class F > class ElementValueFinfo: public ValueFinfoBase
 		}
 
 		ElementValueFinfo( const string& name, const string& doc, 
-			void ( T::*setFunc )( const Eref&, const Qinfo*, F ),
-			F ( T::*getFunc )( const Eref&, const Qinfo* ) const )
+			void ( T::*setFunc )( const Eref&, F ),
+			F ( T::*getFunc )( const Eref& ) const )
 			: ValueFinfoBase( name, doc )
 		{
 				string setname = "set_" + name;
@@ -75,7 +74,7 @@ template < class T, class F > class ReadOnlyElementValueFinfo: public ValueFinfo
 		}
 
 		ReadOnlyElementValueFinfo( const string& name, const string& doc, 
-			F ( T::*getFunc )( const Eref& e, const Qinfo* q ) const )
+			F ( T::*getFunc )( const Eref& e ) const )
 			: ValueFinfoBase( name, doc )
 		{
 				string getname = "get_" + name;

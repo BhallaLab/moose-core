@@ -450,9 +450,6 @@ class Shell
 		// Initialization function, used only in main.cpp:init()
 		void setShellElement( Element* shelle );
 
-		const vector< double* >& getBuf() const;
-		void clearGetBuf();
-
 		/// Static func for returning the ProcInfo of the shell.
 		static const ProcInfo* procInfo();
 

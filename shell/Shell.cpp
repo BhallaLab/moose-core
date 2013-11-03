@@ -14,16 +14,11 @@
 #include "OneToAllMsg.h"
 #include "SparseMatrix.h"
 #include "SparseMsg.h"
-#include "ReduceMsg.h"
-#include "ReduceFinfo.h"
 #include "Shell.h"
 #include "Dinfo.h"
 #include "Wildcard.h"
 
 // Want to separate out this search path into the Makefile options
-#include "../scheduling/Tick.h"
-#include "../scheduling/TickMgr.h"
-#include "../scheduling/TickPtr.h"
 #include "../scheduling/Clock.h"
 
 #ifdef USE_SBML
@@ -37,18 +32,14 @@ const unsigned int Shell::ErrorStatus = ~1;
 bool Shell::isBlockedOnParser_ = 0;
 bool Shell::keepLooping_ = 0;
 unsigned int Shell::numCores_;
-unsigned int Shell::numProcessThreads_;
 unsigned int Shell::numNodes_;
 unsigned int Shell::myNode_;
 ProcInfo Shell::p_;
-vector< ProcInfo> Shell::threadProcs_(1);
 unsigned int Shell::numAcks_ = 0;
 vector< unsigned int > Shell::acked_( 1, 0 );
 bool Shell::doReinit_( 0 );
 bool Shell::isParserIdle_( 0 );
 double Shell::runtime_( 0.0 );
-
-const ThreadId ScriptThreadNum = 0;
 
 static SrcFinfo5< string, Id, Id, string, vector< int > > *requestCreate() {
 	static SrcFinfo5< string, Id, Id, string, vector< int > > requestCreate( "requestCreate",
@@ -136,17 +127,6 @@ static SrcFinfo0 *requestReinit() {
 	return &requestReinit;
 }
 
-/*
-static SrcFinfo0 *requestTerminate() {
-	static SrcFinfo0 requestTerminate( "requestTerminate",
-			"requestTerminate():"
-			"Violently stops a simulation, possibly leaving things half-done."
-			"Goes to all nodes including self."
-			);
-	return &requestTerminate;
-}
-*/
-
 static SrcFinfo6< string, MsgId, ObjId, string, ObjId, string > *requestAddMsg() {
 	static SrcFinfo6< string, MsgId, ObjId, string, ObjId, string > 
 		requestAddMsg( 
@@ -158,18 +138,6 @@ static SrcFinfo6< string, MsgId, ObjId, string, ObjId, string > *requestAddMsg()
 			     ); 
 	return &requestAddMsg;
 }
-
-/*
-static SrcFinfo4< Id, DataId, FuncId, PrepackedBuffer >* requestSet()
-{
-	static SrcFinfo4< Id, DataId, FuncId, PrepackedBuffer > temp(
-			"requestSet",
-			"requestSet( tgtId, tgtDataId, tgtFieldId, value ):"
-			"Assigns a value on target field."
-			);
-	return &temp;
-}
-*/
 
 static SrcFinfo2< Id, Id > *requestMove() {
 	static SrcFinfo2< Id, Id > requestMove(
@@ -201,95 +169,6 @@ static SrcFinfo3< string, string, unsigned int > *requestUseClock() {
 	return &requestUseClock;
 }
 
-
-/*
-static DestFinfo handleSet( "handleSet", 
-			"Deals with request, to set specified field on any node to a value.",
-			new EpFunc4< Shell, Id, DataId, FuncId, PrepackedBuffer >( 
-				&Shell::handleSet )
-			);
-			*/
-
-
-/**
- * Sequence is:
- * innerDispatchGet->requestGet->handleGet->lowLevelGet->get_field->
- * 	receiveGet->completeGet
- */
-
-/*
-// Declared extern in Shell.h. Hence, no static qualifier.
-SrcFinfo4< Id, DataId, FuncId, unsigned int >* requestGet()
-{
-	static SrcFinfo4< Id, DataId, FuncId, unsigned int > temp( 
-			"requestGet",
-			"Function to request another Element for a value."
-			"Args: Id of target, DataId of target, "
-			"FuncId identifying field, int to specify # of entries to get."
-			);
-	return &temp;
-}
-
-static DestFinfo handleGet( "handleGet", 
-			"handleGet( Id elementId, DataId index, FuncId fid )"
-			"Deals with requestGet, to get specified field from any node.",
-			new EpFunc4< Shell, Id, DataId, FuncId, unsigned int >( 
-				&Shell::handleGet )
-			);
-
-// Declared extern in Shell.h. Hence, no static qualifier.
-SrcFinfo1< PrepackedBuffer >* lowLevelSetGet() {
-	static SrcFinfo1< PrepackedBuffer > temp(
-			"lowLevelSetGet",
-			"lowlevelSetGet():"
-			"Low-level SrcFinfo. Not for external use, internally used as"
-			"a handle to set or get a single or vector value from "
-			" target field."
-	);
-	return &temp;
-}
-*/
-
-// Declared extern in Shell.h. Hence, no static qualifier.
-// This function is used directly outside of this file (see testAsync.cpp). 
-DestFinfo* receiveGet() {
-	static DestFinfo temp( "receiveGet", 
-		"receiveGet( Uint node#, Uint status, PrepackedBuffer data )"
-		"Function on master shell that handles the value relayed from worker.",
-		new EpFunc1< Shell, PrepackedBuffer >( &Shell::recvGet )
-	);
-	return &temp;
-}
-
-/** Deprecated?
-static SrcFinfo3< unsigned int, unsigned int, PrepackedBuffer > relayGet(
-	"relayGet",
-	"relayGet( node, status, data ): Passes 'get' data back to master node"
-);
-*/
-
-static SrcFinfo2< Id, FuncId > *requestSync() {
-	static SrcFinfo2< Id, FuncId > requestSync(
-			"sync",
-			"sync( ElementId, FuncId );"
-			"Synchronizes Element data indexing across all nodes."
-			"Used when distributed ops like message setup might set up"
-			"different #s of data entries on Elements on different nodes."
-			"The ElementId is the element being synchronized."
-			"The FuncId is the 'get' function for the synchronized field."
-			);
-	return &requestSync;
-}
-
-static SrcFinfo1< Id > *requestReMesh() {
-	static SrcFinfo1< Id > requestReMesh(
-			"requestReMesh",
-			"requestReMesh( meshId );"
-			"Chops up specified mesh."
-			);
-	return &requestReMesh;
-}
-
 static SrcFinfo1< bool > *requestSetParserIdleFlag() {
 	static SrcFinfo1< bool > requestSetParserIdleFlag(
 			"requestSetParserIdleFlag",
@@ -298,22 +177,6 @@ static SrcFinfo1< bool > *requestSetParserIdleFlag() {
 			"so as to avoid pounding on the CPU."
 			);
 	return &requestSetParserIdleFlag;
-}
-
-
-// Declared extern in Shell.h. Hence, no static qualifier.
-ReduceFinfoBase* reduceArraySizeFinfo()
-{
-	static ReduceFinfo< Shell, unsigned int, ReduceFieldDimension >
-		reduceArraySize(
-		"reduceArraySize",
-		"Look up maximum value of an index, here ragged array size,"
-		"across many nodes, and assign uniformly to all nodes. Normally"
-		"followed by an operation to assign the size to the object that"
-		"was resized.",
-		&Shell::digestReduceFieldDimension
-	);
-	return &reduceArraySize;
 }
 
 const Cinfo* Shell::initCinfo()
@@ -344,7 +207,7 @@ const Cinfo* Shell::initCinfo()
 		requestAddMsg(), 
 		requestQuit(),
 		requestMove(), requestCopy(), requestUseClock(),
-		requestSync(), requestReMesh(), requestSetParserIdleFlag(),
+		requestSetParserIdleFlag(),
 		&handleAck };
 	static DestFinfo handleUseClock( "handleUseClock", 
 			"Deals with assignment of path to a given clock.",
@@ -431,11 +294,6 @@ const Cinfo* Shell::initCinfo()
 	static Finfo* shellFinfos[] = {
 		receiveGet(),
 		&setclock,
-
-////////////////////////////////////////////////////////////////
-//  Predefined Msg Src and MsgDests.
-////////////////////////////////////////////////////////////////
-		reduceArraySizeFinfo(),
 ////////////////////////////////////////////////////////////////
 //  Shared msg
 ////////////////////////////////////////////////////////////////
@@ -462,18 +320,13 @@ Shell::Shell()
 	: 
 		gettingVector_( 0 ),
 		numGetVecReturns_( 0 ),
-		cwe_( Id() ),
-		reduceMsg_( Msg::bad )
+		cwe_( Id() )
 {
-	// cout << myNode() << ": fids\n";
-	// shellCinfo->reportFids();
 	getBuf_.resize( 1, 0 );
 }
 
 Shell::~Shell()
-{
-	clearGetBuf();
-}
+{;}
 
 void Shell::setShellElement( Element* shelle )
 {
@@ -509,12 +362,7 @@ Id Shell::doCreate( string type, Id parent, string name, vector< int > dimension
 bool Shell::doDelete( Id i, bool qFlag )
 {
 	Neutral n;
-		n.destroy( i.eref(), 0, 0 );
-	/*
-	initAck();
-		requestDelete()->send( Id().eref(), ScriptThreadNum, i );
-	waitForAck();
-	*/
+	n.destroy( i.eref(), 0 );
 	return 1;
 }
 
@@ -548,14 +396,6 @@ MsgId Shell::doAddMsg( const string& msgType,
 	}
 		MsgId mid = Msg::nextMsgId();
 		innerAddMsg( msgType, mid, src, srcField, dest, destField );
-	/*
-	initAck();
-	MsgId mid = Msg::nextMsgId();
-	requestAddMsg()->send( Eref( shelle_, 0 ), ScriptThreadNum, 
-		msgType, mid, src, srcField, dest, destField );
-	//	Qinfo::clearQ( &p_ );
-	waitForAck();
-	*/
 	return latestMsgId_;
 }
 
@@ -608,7 +448,6 @@ void Shell::doQuit( bool qFlag )
 
 void Shell::doStart( double runtime, bool qFlag )
 {
-	extern void quickNap(); // Defined in Qinfo.cpp
 	static Id clockId( 1 );
 		// bool isRunning = Field< double >::get( clockId, "isRunning" );
 		if ( isRunning() ) { // Prevent double start.
@@ -827,7 +666,9 @@ bool Shell::chopPath( const string& path, vector< string >& ret,
 		index.clear();
 		index.resize( 1 ); // The zero index is for /root.
 	} else {
-		index = cwe.element()->dataHandler()->pathIndices( 0 );
+		static vector< vector< unsigned int > > tempIndex( 1 );
+		// index = cwe.element()->pathIndices( 0 );
+		index = tempIndex;
 	}
 	for ( unsigned int i = 0; i < ret.size(); ++i )
 	{
@@ -902,15 +743,7 @@ ObjId Shell::doFind( const string& path ) const
 	}
 	
 	assert( curr.element() );
-	assert( curr.element()->dataHandler() );
-	DataId di = curr.element()->dataHandler()->pathDataId( indices );
-	/*
-	* Deprecated this fallback. If can't find indices, then just bail.
-	if ( di == DataId::bad ) {
-		// Check if there are indices that should be treated as strings.
-		return doFindWithoutIndexing( path );
-	}
-	*/
+	DataId di = 0; // temporary 03 Nov 2013.
 	return ObjId( curr, di );
 }
 
@@ -1027,7 +860,7 @@ void Shell::doReacDiffMesh( Id baseCompartment )
 void Shell::doSetParserIdleFlag( bool isParserIdle )
 {
 	Eref sheller( shelle_, 0 );
-	requestSetParserIdleFlag()->send( sheller, ScriptThreadNum, isParserIdle);
+	requestSetParserIdleFlag()->send( sheller, isParserIdle);
 }
 
 void Shell::handleSetParserIdleFlag( bool isParserIdle )
@@ -1068,11 +901,6 @@ bool Shell::isRunning() const
 	return ( reinterpret_cast< const Clock* >( clockId.eref().data() ) )->isRunning();
 }
 
-const vector< double* >& Shell::getBuf() const
-{
-	return getBuf_;
-}
-
 
 /**
  * This function handles the message request to create an Element.
@@ -1083,24 +911,12 @@ const vector< double* >& Shell::getBuf() const
  * Element, but for now the num indicates the total # of array entries.
  * This gets a bit complicated if the Element is a multidim array.
  */
-void Shell::handleCreate( const Eref& e, const Qinfo* q, 
+void Shell::handleCreate( const Eref& e,
 	string type, Id parent, Id newElm, string name,
 	vector< int > dims )
 {
-	// cout << myNode_ << ": Shell::handleCreate inner Create done for element " << name << " id " << newElm << endl;
-	if ( q->addToStructuralQ() )
-		return;
-
-	/*
-	vector< int > dims;
-	for ( unsigned int i = 0; i < dimensions.size(); ++i ) {
-		dims[i] = dimensions[i];
-	}
-	*/
 	innerCreate( type, parent, newElm, name, dims );
-//	if ( myNode_ != 0 )
-	ack()->send( e, q->threadNum(), Shell::myNode(), OkStatus );
-	// cout << myNode_ << ": Shell::handleCreate ack sent" << endl;
+	ack()->send( e, Shell::myNode(), OkStatus );
 }
 
 
@@ -1130,7 +946,6 @@ bool Shell::adopt( Id parent, Id child ) {
 			parent()->getName() << " to " << child()->getName() << "\n";
 		return 0;
 	}
-	child()->setGroup( parent()->getGroup() );
 	return 1;
 }
 
@@ -1178,16 +993,9 @@ void Shell::innerCreate( string type, Id parent, Id newElm, string name,
 		bool isGlobal = dims.back();
 		dims.pop_back();
 		cleanDimensions( dims );
-		vector< DimInfo > myDims = pa->dataHandler()->dims();
-		unsigned int myPathDepth = pa->dataHandler()->pathDepth() + 1;
-		for ( unsigned int i = 0; i < dims.size(); ++i ) {
-			if ( dims[i] > 1 || dims[i] < -1 ) {
-				DimInfo di = { dims[i], myPathDepth, 0 };
-				myDims.push_back( di );
-			}
-		}
-		Element* ret = new Element( newElm, c, name, myDims, 
-			myPathDepth, isGlobal);
+		unsigned int myPathDepth = 0;
+		Element* ret = new Element( newElm, c, name, 
+						myPathDepth, isGlobal);
 		assert( ret );
 		adopt( parent, newElm );
 
@@ -1198,19 +1006,16 @@ void Shell::innerCreate( string type, Id parent, Id newElm, string name,
 	}
 }
 
-void Shell::destroy( const Eref& e, const Qinfo* q, Id eid)
+void Shell::destroy( const Eref& e, Id eid)
 {
-	if ( q->addToStructuralQ() )
-		return;
-
 	Neutral *n = reinterpret_cast< Neutral* >( e.data() );
 	assert( n );
-	n->destroy( eid.eref(), 0, 0 );
+	n->destroy( eid.eref(), 0 );
 	// cout << myNode_ << ": Shell::destroy done for element id " << eid << endl;
 	if ( cwe_ == eid )
 		cwe_ = Id();
 
-	ack()->send( e, q->threadNum(), Shell::myNode(), OkStatus );
+	ack()->send( e, Shell::myNode(), OkStatus );
 }
 
 
@@ -1219,16 +1024,14 @@ void Shell::destroy( const Eref& e, const Qinfo* q, Id eid)
  * inner function to build message trees, so we don't want it to emit
  * multiple acks.
  */
-void Shell::handleAddMsg( const Eref& e, const Qinfo* q,
+void Shell::handleAddMsg( const Eref& e,
 	string msgType, MsgId mid, ObjId src, string srcField, 
 	ObjId dest, string destField )
 {
-	if ( q->addToStructuralQ() )
-		return;
 	if ( innerAddMsg( msgType, mid, src, srcField, dest, destField ) )
-		ack()->send( Eref( shelle_, 0 ), q->threadNum(), Shell::myNode(), OkStatus );
+		ack()->send( Eref( shelle_, 0 ), Shell::myNode(), OkStatus );
 	else
-		ack()->send( Eref( shelle_, 0), q->threadNum(), Shell::myNode(), ErrorStatus );
+		ack()->send( Eref( shelle_, 0), Shell::myNode(), ErrorStatus );
 }
 
 /**
@@ -1269,11 +1072,6 @@ bool Shell::innerAddMsg( string msgType, MsgId mid,
 		m = new OneToAllMsg( mid, dest.eref(), src.id() ); // Little hack.
 	} else if ( msgType == "OneToOne" || msgType == "oneToOne" ) {
 		m = new OneToOneMsg( mid, src.id(), dest.id() );
-	} else if ( msgType == "Reduce" || msgType == "reduce" ) {
-		const ReduceFinfoBase* rfb = 
-			dynamic_cast< const ReduceFinfoBase* >( f1 );
-		assert( rfb );
-		m = new ReduceMsg( mid, src.eref(), dest.eref().element(), rfb );
 	} else {
 		cout << myNode_ << 
 			": Error: Shell::handleAddMsg: msgType not known: "
@@ -1297,28 +1095,6 @@ bool Shell::innerAddMsg( string msgType, MsgId mid,
 //	ack()->send( Eref( shelle_, 0 ), &p_, Shell::myNode(), ErrorStatus );
 }
 
-static bool changeTreeDepth( Id id, short delta )
-{
-	DataHandler* dh = id.element()->dataHandler();
-	if ( delta < 0 ) {
-		unsigned short i = -delta;
-		if ( i > dh->pathDepth() )
-			return 0;
-	}
-
-	unsigned short newDepth = dh->pathDepth() + delta;
-	if ( !dh->changeDepth( newDepth ) )
-		return 0;
-	
-	vector< Id > children;
-	Neutral::children( id.eref(), children );
-	bool ret = 1;
-	for ( unsigned int i = 0; i < children.size(); ++i ) {
-		ret &= changeTreeDepth( children[i], delta );
-	}
-	return ret;
-}
-
 bool Shell::innerMove( Id orig, Id newParent )
 {
 	static const Finfo* pf = Neutral::initCinfo()->findFinfo( "parentMsg" );
@@ -1328,13 +1104,6 @@ bool Shell::innerMove( Id orig, Id newParent )
 
 	assert( !( orig == Id() ) );
 	assert( !( newParent() == 0 ) );
-
-	short origDepth = orig.element()->dataHandler()->pathDepth();
-	short newDepth = 1 +
-		newParent.element()->dataHandler()->pathDepth();
-	
-	if ( !changeTreeDepth( orig, newDepth - origDepth ) )
-		return 0;
 
 	MsgId mid = orig()->findCaller( pafid );
 	Msg::deleteMsg( mid );
@@ -1349,16 +1118,13 @@ bool Shell::innerMove( Id orig, Id newParent )
 	return 1;
 }
 
-void Shell::handleMove( const Eref& e, const Qinfo* q,
-	Id orig, Id newParent )
+void Shell::handleMove( const Eref& e, Id orig, Id newParent )
 {
-	if ( q->addToStructuralQ() )
-		return;
 	
 	if ( innerMove( orig, newParent ) )
-		ack()->send( Eref( shelle_, 0 ), q->threadNum(), Shell::myNode(), OkStatus );
+		ack()->send( Eref( shelle_, 0 ), Shell::myNode(), OkStatus );
 	else
-		ack()->send( Eref( shelle_, 0 ), q->threadNum(), Shell::myNode(), ErrorStatus );
+		ack()->send( Eref( shelle_, 0 ), Shell::myNode(), ErrorStatus );
 }
 
 void Shell::addClockMsgs( 
@@ -1398,17 +1164,15 @@ bool Shell::innerUseClock( string path, string field, unsigned int tick)
 	return 1;
 }
 
-void Shell::handleUseClock( const Eref& e, const Qinfo* q,
+void Shell::handleUseClock( const Eref& e, 
 	string path, string field, unsigned int tick)
 {
-	if ( q->addToStructuralQ() )
-		return;
 	// cout << q->getProcInfo()->threadIndexInGroup << ": in Shell::handleUseClock with path " << path << endl << flush;
 	if ( innerUseClock( path, field, tick ) )
-		ack()->send( Eref( shelle_, 0 ), q->threadNum(), 
+		ack()->send( Eref( shelle_, 0 ), 
 			Shell::myNode(), OkStatus );
 	else
-		ack()->send( Eref( shelle_, 0 ), q->threadNum(), 
+		ack()->send( Eref( shelle_, 0 ), 
 			Shell::myNode(), ErrorStatus );
 }
 
@@ -1438,12 +1202,6 @@ const ProcInfo* Shell::getProcInfo( unsigned int index ) const
 	return &( threadProcs_[index] );
 }
 
-///////////////////////////////////////////////////////////////////////////
-// Functions for handling acks for blocking Shell function calls are
-// moved to ShellThreads.cpp
-///////////////////////////////////////////////////////////////////////////
-
-
 ////////////////////////////////////////////////////////////////////////
 // Some static utility functions
 ////////////////////////////////////////////////////////////////////////
@@ -1453,15 +1211,6 @@ const ProcInfo* Shell::procInfo()
 {
 	return &p_;
 }
-
-void Shell::digestReduceFieldDimension( 
-	const Eref& er, const ReduceFieldDimension* arg )
-{
-	maxIndex_ = arg->maxIndex();
-	// ack()->send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus );
-	ack()->send( er, ScriptThreadNum, Shell::myNode(), OkStatus );
-}
-
 
 // Static func
 void Shell::cleanSimulation()

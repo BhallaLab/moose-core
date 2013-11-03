@@ -300,5 +300,11 @@ The callback functions pass in Element and Msg target info.
 Created FieldElements. Nothing there yet for FieldElementFinfos. Not yet
 compiled through SparseMsg.cpp.
 
+===========================================================================
+2 Nov 2013
+Grinding through compile. ElementValueFinfo and similar things need sorting.
 
-
+===========================================================================
+3 Nov 2013
+Grinding through compile. Cleared Shell.cpp, but many things to do with path
+are postponed.
