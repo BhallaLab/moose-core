@@ -37,7 +37,6 @@ class TableBase
 		void linearTransform( double scale, double offset );
 		void xplot( string file, string plotname );
 		void plainPlot( string file );
-		void recvData( PrepackedBuffer pb );
 		void loadXplot( string fname, string plotname );
 		void loadXplotRange( string fname, string plotname, 
 			unsigned int start, unsigned int end );

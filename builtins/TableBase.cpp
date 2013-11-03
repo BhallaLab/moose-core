@@ -10,7 +10,6 @@
 #include "header.h"
 #include <fstream>
 #include "../utility/strutil.h"
-#include "TableEntry.h"
 #include "TableBase.h"
 
 const Cinfo* TableBase::initCinfo()
@@ -48,10 +47,6 @@ const Cinfo* TableBase::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
-
-		static DestFinfo group( "group",
-			"Handle for grouping. Doesn't do anything.",
-			new OpFuncDummy() );
 
 		static DestFinfo linearTransform( "linearTransform",
 			"Linearly scales and offsets data. Scale first, then offset.",
