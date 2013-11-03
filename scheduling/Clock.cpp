@@ -2,7 +2,7 @@
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment,
 ** also known as GENESIS 3 base code.
-**           copyright (C) 2003-2009 Upinder S. Bhalla. and NCBS
+**           copyright (C) 2003-2013 Upinder S. Bhalla. and NCBS
 ** It is made available under the terms of the
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
@@ -11,13 +11,8 @@
 /**
  * The Clock manages simulation scheduling, in a close
  * collaboration with the Tick.
- * This new version does this using an array of child Ticks, which
- * it manages directly. This contrasts with the distributed approach
- * in the earlier version of MOOSE, where the clock ticks were more
- * independent and kept things organized using messages.
- * The reasons are a) to keep it simpler and b) because messages
- * are now themselves handled through queueing, and the management of
- * scheduling needs immediate function calls.
+ * This version does this using an array of child Ticks, which
+ * it manages directly.
  *
  * Simulation scheduling requires that certain functions of 
  * groups of objects be called in a strict sequence according to
@@ -31,59 +26,36 @@
  * The whole sequence has to be repeated till the runtime of the 
  * simulation is complete.
  *
- * In addition to all this, the scheduler has to interleave between
- * 'process' and 'clearQ' calls to target Elements. Furthermore, the
- * scheduler still has to keep 'clearQ' calls going when the processing
- * is not running, for setup.
- *
- * This scheduler is quite general and handles any combination of
- * simulation times, including non-multiple ratios of dt.
- *
- * The Clock part of the team manages a set of Ticks.
- * Each Tick handles a given dt and a given stage within a dt.
- * The scheduler guarantees that the call sequence is preserved
- * between Ticks, but there are no sequence assumptions within
- * a single Tick.
+ * This scheduler uses integral multiples of the base timestep dt_.
  *
  * The system works like this:
- * 1. We create a bunch of Ticks on the Clock using addTick
- * 		This directly sorts and assigns reasonable starting values.
- * 2. We assign their dts and stages within each dt, if needed.
- * 3. We connect up the Ticks to their target objects.
- * 4. We call Resched on the Clock... Not needed. Reinit is OK.
- * 5. We begin the simulation by calling 'start' or 'step' on the Clock.
- * 6. To interrupt the simulation at some intermediate time, call 'halt'.
- * 7. To restart the simulation from where it left off, use the same 
+ * 1. Assign times to each Tick. This is divided by dt_ and the rounded
+ * 		value is used for the integral multiple. Zero means the tick is not
+ * 		scheduled.
+ * 2. The process call goes through all active ticks in order every 
+ * 		timestep. Each Tick increments its counter and decides if it is 
+ * 		time to fire.
+ * 4. The Reinit call goes through all active ticks in order, just once.
+ * 5. We connect up the Ticks to their target objects.
+ * 6. We begin the simulation by calling 'start' or 'step' on the Clock.
+ * 		'step' executes exactly one timestep (of the minimum dt_), 
+ * 		visiting all ticks as above..
+ * 		'start' executes an integral number of such timesteps.
+ * 7. To interrupt the simulation at some intermediate time, call 'stop'.
+ * 		This lets the system complete its current step.
+ * 8. To restart the simulation from where it left off, use the same 
  * 		'start' or 'step' function on the Clock. As all the ticks
  * 		retain their state, the simulation can resume smoothly.
  */
 
 #include "header.h"
-#include "Tick.h"
-#include "TickMgr.h"
-#include "TickPtr.h"
 #include "Clock.h"
 
-#include "../shell/Shell.h"
+const unsigned int Clock::numTicks = 10;
 
-static const unsigned int OkStatus = ~0; // From Shell.cpp
-
-/// Microseconds to sleep when not processing.
-static const unsigned int SleepyTime = 50000; 
-
-/// Flag to tell Clock how to alter state gracefully in process loop.
-Clock::ProcState Clock::procState_ = NoChange;
-
-	///////////////////////////////////////////////////////
-	// MsgSrc definitions
-	///////////////////////////////////////////////////////
-static SrcFinfo0 *tickSrc() {
-	static SrcFinfo0 tickSrc( 
-			"childTick",
-			"Parent of Tick element"
-			);
-	return &tickSrc;
-}
+///////////////////////////////////////////////////////
+// MsgSrc definitions
+///////////////////////////////////////////////////////
 
 static SrcFinfo0 *finished() {
 	static SrcFinfo0 finished( 
@@ -93,13 +65,45 @@ static SrcFinfo0 *finished() {
 	return &finished;
 }
 
-static SrcFinfo2< unsigned int, unsigned int > *ack() {
-	static SrcFinfo2< unsigned int, unsigned int > ack( 
-			"ack",
-			"Acknowledgement signal for receipt/completion of function."
-			"Goes back to Shell on master node"
-			);
-	return &ack;
+// This vector contains the SrcFinfos used for Process calls for each
+// of the Ticks.
+vector< SrcFinfo* >& processVec() {
+	static SrcFinfo1< ProcPtr > process0( "process0", "Process for Tick 0");
+	static SrcFinfo1< ProcPtr > process1( "process1", "Process for Tick 1");
+	static SrcFinfo1< ProcPtr > process2( "process2", "Process for Tick 2");
+	static SrcFinfo1< ProcPtr > process3( "process3", "Process for Tick 3");
+	static SrcFinfo1< ProcPtr > process4( "process4", "Process for Tick 4");
+	static SrcFinfo1< ProcPtr > process5( "process5", "Process for Tick 5");
+	static SrcFinfo1< ProcPtr > process6( "process6", "Process for Tick 6");
+	static SrcFinfo1< ProcPtr > process7( "process7", "Process for Tick 7");
+	static SrcFinfo1< ProcPtr > process8( "process8", "Process for Tick 8");
+	static SrcFinfo1< ProcPtr > process9( "process9", "Process for Tick 9");
+
+	static SrcFinfo* processArray[] = {
+		&process0, &process1, &process2, &process3, &process4, &process5, &process6, &process7, &process8, &process9, };
+	static vector< SrcFinfo* > processVec(processArray, processArray + sizeof(processArray) / sizeof(SrcFinfo *));
+
+	return processVec;
+}
+
+vector< SrcFinfo* >& reinitVec() {
+
+	static SrcFinfo1< ProcPtr > reinit0( "reinit0", "Reinit for Tick 0" );
+	static SrcFinfo1< ProcPtr > reinit1( "reinit1", "Reinit for Tick 1" );
+	static SrcFinfo1< ProcPtr > reinit2( "reinit2", "Reinit for Tick 2" );
+	static SrcFinfo1< ProcPtr > reinit3( "reinit3", "Reinit for Tick 3" );
+	static SrcFinfo1< ProcPtr > reinit4( "reinit4", "Reinit for Tick 4" );
+	static SrcFinfo1< ProcPtr > reinit5( "reinit5", "Reinit for Tick 5" );
+	static SrcFinfo1< ProcPtr > reinit6( "reinit6", "Reinit for Tick 6" );
+	static SrcFinfo1< ProcPtr > reinit7( "reinit7", "Reinit for Tick 7" );
+	static SrcFinfo1< ProcPtr > reinit8( "reinit8", "Reinit for Tick 8" );
+	static SrcFinfo1< ProcPtr > reinit9( "reinit9", "Reinit for Tick 9" );
+
+	static SrcFinfo* reinitArray[] = {
+		&reinit0, &reinit1, &reinit2, &reinit3, &reinit4, &reinit5, &reinit6, &reinit7, &reinit8, &reinit9, };
+	static vector< SrcFinfo* > reinitVec(reinitArray, reinitArray + sizeof(reinitArray) / sizeof(SrcFinfo *));
+
+	return reinitVec;
 }
 
 const Cinfo* Clock::initCinfo()
@@ -107,10 +111,15 @@ const Cinfo* Clock::initCinfo()
 	///////////////////////////////////////////////////////
 	// Field definitions
 	///////////////////////////////////////////////////////
-		static ValueFinfo< Clock, double > runTime( 
+		static ValueFinfo< Clock, double > dt( 
+			"dt",
+			"Base timestep for simulation",
+			&Clock::setDt,
+			&Clock::getdt
+		);
+		static ReadOnlyValueFinfo< Clock, double > runTime( 
 			"runTime",
 			"Duration to run the simulation",
-			&Clock::setRunTime,
 			&Clock::getRunTime
 		);
 		static ReadOnlyValueFinfo< Clock, double > currentTime(
@@ -118,10 +127,9 @@ const Cinfo* Clock::initCinfo()
 			"Current simulation time",
 			&Clock::getCurrentTime
 		);
-		static ValueFinfo< Clock, unsigned int > nsteps( 
+		static ReadOnlyValueFinfo< Clock, unsigned int > nsteps( 
 			"nsteps",
 			"Number of steps to advance the simulation, in units of the smallest timestep on the clock ticks",
-			&Clock::setNsteps,
 			&Clock::getNsteps
 		);
 		static ReadOnlyValueFinfo< Clock, unsigned int > numTicks( 
@@ -148,9 +156,45 @@ const Cinfo* Clock::initCinfo()
 			// &Clock::setNumTicks,
 			&Clock::isRunning
 		);
+		static LookupValueFinfo< Clock, unsigned int, unsigned int >(
+			"tickStep",
+			"Step size of specified Tick, as integral multiple of dt_"
+			" A zero step size means that the Tick is inactive",
+			&Clock::setTickStep,
+			&Clock::getTickStep
+		);
+		static LookupValueFinfo< Clock, unsigned int, unsigned int >(
+			"tickDt",
+			"Timestep dt of specified Tick. Always integral multiple of "
+			"dt_. If you assign a non-integer multiple it will round off. "
+			" A zero timestep means that the Tick is inactive",
+			&Clock::setTickDt,
+			&Clock::getTickDt
+		);
 	///////////////////////////////////////////////////////
 	// Shared definitions
 	///////////////////////////////////////////////////////
+	static Finfo* procShared0[] = { processVec()[0], reinitVec()[0] };
+	static Finfo* procShared1[] = { processVec()[1], reinitVec()[1] };
+	static Finfo* procShared2[] = { processVec()[2], reinitVec()[2] };
+	static Finfo* procShared3[] = { processVec()[3], reinitVec()[3] };
+	static Finfo* procShared4[] = { processVec()[4], reinitVec()[4] };
+	static Finfo* procShared5[] = { processVec()[5], reinitVec()[5] };
+	static Finfo* procShared6[] = { processVec()[6], reinitVec()[6] };
+	static Finfo* procShared7[] = { processVec()[7], reinitVec()[7] };
+	static Finfo* procShared8[] = { processVec()[8], reinitVec()[8] };
+	static Finfo* procShared9[] = { processVec()[9], reinitVec()[9] };
+
+	static SharedFinfo proc0( "proc0", "Shared proc/reinit message", procShared0, sizeof( procShared0 ) / sizeof( const Finfo* ) );
+	static SharedFinfo proc1( "proc1", "Shared proc/reinit message", procShared1, sizeof( procShared1 ) / sizeof( const Finfo* ) );
+	static SharedFinfo proc2( "proc2", "Shared proc/reinit message", procShared2, sizeof( procShared2 ) / sizeof( const Finfo* ) );
+	static SharedFinfo proc3( "proc3", "Shared proc/reinit message", procShared3, sizeof( procShared3 ) / sizeof( const Finfo* ) );
+	static SharedFinfo proc4( "proc4", "Shared proc/reinit message", procShared4, sizeof( procShared4 ) / sizeof( const Finfo* ) );
+	static SharedFinfo proc5( "proc5", "Shared proc/reinit message", procShared5, sizeof( procShared5 ) / sizeof( const Finfo* ) );
+	static SharedFinfo proc6( "proc6", "Shared proc/reinit message", procShared6, sizeof( procShared6 ) / sizeof( const Finfo* ) );
+	static SharedFinfo proc7( "proc7", "Shared proc/reinit message", procShared7, sizeof( procShared7 ) / sizeof( const Finfo* ) );
+	static SharedFinfo proc8( "proc8", "Shared proc/reinit message", procShared8, sizeof( procShared8 ) / sizeof( const Finfo* ) );
+	static SharedFinfo proc9( "proc9", "Shared proc/reinit message", procShared9, sizeof( procShared9 ) / sizeof( const Finfo* ) );
 
 	///////////////////////////////////////////////////////
 	// MsgDest definitions
@@ -177,7 +221,6 @@ const Cinfo* Clock::initCinfo()
 
 		static DestFinfo reinit( "reinit", 
 			"Zeroes out all ticks, starts at t = 0",
-	// 		new EpFunc0< Clock >(&Clock::reinit )
 	 		new OpFunc0< Clock >(&Clock::handleReinit )
 		);
 
@@ -192,50 +235,45 @@ const Cinfo* Clock::initCinfo()
 			clockControlFinfos, 
 			sizeof( clockControlFinfos ) / sizeof( Finfo* )
 		);
-	///////////////////////////////////////////////////////
-	// FieldElementFinfo definition for ticks.
-	// Setup max of 16 of them.
-	///////////////////////////////////////////////////////
-		static FieldElementFinfo< Clock, Tick > tickFinfo( "tick",
-			"Sets up field Elements for Tick",
-			Tick::initCinfo(),
-			&Clock::getTick,
-			&Clock::setNumTicks,
-			&Clock::getNumTicks,
-			16
-		);
 
 	static Finfo* clockFinfos[] =
 	{
 		// Fields
-		&runTime,
-		&currentTime,
-		&nsteps,
-		&numTicks,
-		&currentStep,
-		&dts,
-		&isRunning,
-		// SrcFinfos
-		tickSrc(),
-		finished(),
-		// DestFinfos
-		// Shared Finfos
-		&clockControl,
-		// FieldElementFinfo
-		&tickFinfo,
+		&dt,				// Value
+		&runTime,			// ReadOnlyValue
+		&currentTime,		// ReadOnlyValue
+		&nsteps,			// ReadOnlyValue
+		&numTicks,			// ReadOnlyValue
+		&currentStep,		// ReadOnlyValue
+		&dts,				// ReadOnlyValue
+		&isRunning,			// ReadOnlyValue
+		&tickStep,			// LookupValue
+		&tickDt,			// LookupValue
+		finished(),			// Src
+		&proc0,				// Src
+		&proc1,				// Src
+		&proc2,				// Src
+		&proc3,				// Src
+		&proc4,				// Src
+		&proc5,				// Src
+		&proc6,				// Src
+		&proc7,				// Src
+		&proc8,				// Src
+		&proc9,				// Src
 	};
 	
 	static string doc[] =
 	{
 		"Name", "Clock",
-		"Author", "Upinder S. Bhalla, Mar 2007, NCBS",
+		"Author", "Upinder S. Bhalla, Nov 2013, NCBS",
 		"Description", "Clock: Clock class. Handles sequencing of operations in simulations."
 		"Every object scheduled for operations in MOOSE is connected to one"
-		"of the 'Tick' objects sitting as children on the Clock."
-		"The Clock manages ten 'Ticks', each of which has its own dt."
-		"The Ticks increment their internal time by their 'dt' every time "
-		"they are updated, and in doing so they also call the Process"
-		"function for every object that is connected to them."
+		"of the 'Tick' entries on the Clock."
+		"The Clock manages ten 'Ticks', each of which has its own dt,"
+		"which is an integral multiple of the base clock dt_. "
+		"On every clock step the ticks are examined to see which of them"
+		"is due for updating. When a tick is updated, the 'process' call "
+		"of all the objects scheduled on that tick is called."
 		"The default scheduling (should not be overridden) has the "
 		"following assignment of classes to Ticks:"
 		"0. Biophysics: Init call on Compartments in EE method"
@@ -271,39 +309,30 @@ static const Cinfo* clockCinfo = Clock::initCinfo();
 Clock::Clock()
 	: runTime_( 0.0 ), 
 	  currentTime_( 0.0 ), 
-	  nextTime_( 0.0 ),
 	  nSteps_( 0 ), 
 	  currentStep_( 0 ), 
 	  dt_( 1.0 ), 
-	  isRunning_( 0 ),
-	  doingReinit_( 0 ),
+	  isRunning_( false ),
+	  doingReinit_( false ),
 	  info_(),
-	  isDirty_( false ),
-	  currTickPtr_( 0 ),
-	  ticks_( Tick::maxTicks ),
-		countNull1_( 0 ),
-		countNull2_( 0 ),
-		countReinit1_( 0 ),
-		countReinit2_( 0 ),
-		countAdvance1_( 0 ),
-		countAdvance2_ ( 0 )
+	  ticks_( Clock::numTicks, 0 )
 {
-	for ( unsigned int i = 0; i < Tick::maxTicks; ++i ) {
-		ticks_[i].setIndex( i );
-	}
 }
 ///////////////////////////////////////////////////
 // Field function definitions
 ///////////////////////////////////////////////////
-
-/**
- * This sets the runtime to use for the simulation.
- * Perhaps this should not be assignable, but readonly.
- * Or The assignment should be a message.
- */
-void Clock::setRunTime( double v )
+void Clock::setDt( double v)
 {
-	runTime_ = v;
+	if ( isRunning_ ) {
+		cout << "Warning: Clock::setDt: Cannot change dt while simulation is running\n";
+		return;
+	}
+	dt_ = v;
+}
+
+double Clock::getDt() const
+{
+	return dt_;
 }
 double Clock::getRunTime() const
 {
@@ -315,16 +344,6 @@ double Clock::getCurrentTime() const
 	return currentTime_;
 }
 
-/**
- * This sets the number of steps to use for the simulation.
- * Perhaps this should not be assignable, but readonly.
- * Or The assignment should be a message.
- * It is a variant of the runtime function.
- */
-void Clock::setNsteps( unsigned int v )
-{
-	nSteps_ = v;
-}
 unsigned int Clock::getNsteps() const
 {
 	return nSteps_;
@@ -335,46 +354,63 @@ unsigned int Clock::getCurrentStep() const
 	return currentStep_;
 }
 
-Tick* Clock::getTick( unsigned int i )
-{
-	if ( i < ticks_.size() )
-		return &ticks_[i];
-	else
-		return 0;
-}
-
-unsigned int Clock::getNumTicks() const
-{
-	return ticks_.size();
-}
-
-void Clock::setNumTicks( unsigned int num )
-{
-	ticks_.resize( num );
-	rebuild();
-}
-
 vector< double > Clock::getDts() const
 {
 	vector< double > ret;
 	for ( unsigned int i = 0; i < ticks_.size(); ++i ) {
-		ret.push_back( ticks_[ i ].getDt() ); 
+		ret.push_back( ticks_[ i ] * dt_ );
 	}
 	return ret;
 }
 
 bool Clock::isRunning() const
 {
-	return isRunning_ || ( procState_ == StartOnly );
+	return isRunning_;
 }
 
 bool Clock::isDoingReinit() const
 {
-	return doingReinit_ || ( procState_ == TurnOnReinit ) || 
-		( procState_ == ReinitThenStart ) || 
-		( procState_ == StopThenReinit );
+	return doingReinit_;
 }
 
+bool Clock::checkTickNum( const string& funcName, unsigned int i ) const
+{
+	if ( isRunning_ || doingReinit_) {
+		cout << "Warning: Clock::" << funcName << 
+				": Cannot change dt while simulation is running\n";
+		return 0;
+	}
+	if ( i >= Clock::numTicks ) {
+		cout << "Warning: Clock::" << funcName <<
+				"( " i << ", " << v <<
+				" ): Clock has only " << Clock::numTicks << " ticks \n";
+		return 0;
+	}
+}
+
+void Clock:;setTickStep( unsigned int i, unsigned int v )
+{
+	if ( checkTickNum( "setTickStep", i )
+	ticks_[i] = v;
+}
+unsigned int Clock::getTickStep( unsigned int i ) const
+{
+	if ( i < Clock::numTicks )
+		return ticks_[i];
+	return 0;
+}
+
+void Clock:;setTickDt( unsigned int i, double v )
+{
+	if ( checkTickNum( "setTickDt", i )
+	ticks_[i] = round( v / dt_ );
+}
+
+double Clock::getTickDt( unsigned int i ) const
+{
+	if ( i < Clock::numTicks )
+		return ticks_[i] * dt_;
+}
 
 ///////////////////////////////////////////////////
 // Dest function definitions
@@ -386,274 +422,12 @@ bool Clock::isDoingReinit() const
  */
 void Clock::stop()
 {
-	procState_ = StopOnly;
-}
-
-/**
- * This function handles any changes to dt in the ticks. This means
- * it must redo the ordering of the ticks and call a resched on them.
- */
-void Clock::setTickDt( unsigned int i, double dt )
-{
-	if ( i < ticks_.size() ) {
-		ticks_[ i ].setDt( dt ); 
-		isDirty_ = true;
-		// rebuild(); deferred till 'start'.
-	} else {
-		cout << "Clock::setTickDt:: Tick " << i << " not found\n";
-	}
-}
-
-double Clock::getTickDt( unsigned int i ) const
-{
-	if ( i < ticks_.size() ) {
-		return ticks_[ i ].getDt(); 
-	} else {
-		cout << "Clock::getTickDt:: Tick " << i << " not found\n";
-	}
-	return 1.0;
-}
-
-/**
- * This function sets up a new tick, or reassigns an existing one.
- */
-void Clock::setupTick( unsigned int tickNum, double dt )
-{
-	assert( tickNum < Tick::maxTicks );
-	ticks_[ tickNum ].setDt( dt );
-	isDirty_ = true;
-	// rebuild(); deferred till 'start'
-}
-
-///////////////////////////////////////////////////
-// Other function definitions
-///////////////////////////////////////////////////
-
-void Clock::addTick( Tick* t )
-{
-	static const double EPSILON = 1.0e-9;
-
-	if ( t->getDt() < EPSILON )
-		return;
-	if ( !t->hasTickTargets() )
-		return;
-	for ( vector< TickMgr >::iterator j = tickMgr_.begin(); 
-		j != tickMgr_.end(); ++j)
-	{
-		if ( j->addTick( t ) )
-			return;
-	}
-	tickMgr_.push_back( t );
-	// This is messy. The push_back has invalidated all earlier pointers.
-	tickPtr_.clear();
-	for ( vector< TickMgr >::iterator j = tickMgr_.begin(); 
-		j != tickMgr_.end(); ++j)
-	{
-		tickPtr_.push_back( TickPtr( &( *j ) ) );
-	}
-}
-
-void Clock::rebuild()
-{
-	Element* ticke = Id( 2 )();
-	for ( unsigned int i = 0; i < Tick::maxTicks; ++i ) {
-		ticks_[i].setIndex( i );
-		ticks_[i].setElement( ticke );
-	}
-
-	tickPtr_.clear();
-	tickMgr_.clear();
-	for( unsigned int i = 0; i < ticks_.size(); ++i ) {
-		addTick( &( ticks_[i] ) ); // This fills in only ticks that are used
-	}
-	if ( tickPtr_.size() == 0 ) { // Nothing happening in any of the ticks.
-		isDirty_ = false;
-		return;
-	}
-
-	// Here we put in current time so we can resume after changing a 
-	// dt. Given that we are rebuilding and cannot
-	// assume anything about prior dt, we do the simple thing and put
-	// all the tickMgrs at the current time.
-	for( vector< TickMgr >::iterator i = tickMgr_.begin(); 
-		i != tickMgr_.end(); ++i ) {
-		i->setNextTime( currentTime_ + i->getDt() );
-	}
-
-	sort( tickPtr_.begin(), tickPtr_.end() );
-	dt_ = tickPtr_[0].mgr()->getDt();
-
-	isDirty_ = false;
-}
-
-
-///////////////////////////////////////////////////
-// These are the new scheduling base functions. 
-// Here the clock is advanced one step on each cycle of the main loop.
-// This means that a single tick advances one step.
-// The clock advance is whatever is the minimum messaging interval.
-// For typical simulations this is around 1 to 5 msec. The idea is that
-// the major solvers will do their internal updates for this period, and
-// their data interchange can be on this slower timescale. Still longer
-// intervals come out from the slower ticks.
-//
-// The sequence of events is:
-// processPhase1
-// Barrier1
-// processPhase2
-// clearQ
-// Barrier2
-// MPI clearQ
-// Barrier 3
-///////////////////////////////////////////////////
-
-/**
- * The processPhase1 operation is called in the main event 
- * loop, during phase1 of the loop. This has to drive
- * calculations on all scheduled objects.
- */
-void Clock::processPhase1( ProcInfo* info )
-{
-	if ( isRunning_ )
-		advancePhase1( info );
-	else if ( doingReinit_ )
-		reinitPhase1( info );
-	else
-		++countNull1_;
-}
-
-void Clock::processPhase2( ProcInfo* info )
-{
-	if ( isRunning_ )
-		advancePhase2( info );
-	else if ( doingReinit_ )
-		reinitPhase2( info );
-	else
-		++countNull2_;
-}
-
-/**
- * Static function, used to flip flags to start or end a simulation. 
- * It is used as the within-barrier function of barrier 3.
- * This has to be in the barrier as we are altering a Clock field which
- * the 'process' flag depends on.
- * Six cases:
- * 	- Do nothing
- * 	- Reinit only
- *	- Reinit followed by start
- *	- Start only
- *	- Stop only
- *	- Stop followed by Reinit.
- * Some of these cases need additional intermediate steps, since the reinit
- * flag has to turn itself off after one cycle.
- */
-void Clock::checkProcState()
-{
-	/// Handle pending Reduce operations.
-	// Qinfo::clearReduceQ( Shell::numProcessThreads() );
-
-	if ( procState_ == NoChange ) { // Most common 
-		return;
-	}
-
-	Id clockId( 1 );
-	assert( clockId() );
-	Clock* clock = reinterpret_cast< Clock* >( clockId.eref().data() );
-
-	switch ( procState_ ) {
-		case TurnOnReinit:
-			clock->doingReinit_ = 1;
-		//	procState_ = TurnOffReinit;
-		break;
-		case TurnOffReinit:
-			clock->doingReinit_ = 0;
-			procState_ = NoChange;
-		break;
-		case ReinitThenStart:
-			clock->doingReinit_ = 1;
-			procState_ = StartOnly;
-		break;
-		case StartOnly:
-			clock->doingReinit_ = 0;
-			clock->isRunning_ = 1;
-			procState_ = NoChange;
-		break;
-		case StopOnly:
-			clock->isRunning_ = 0;
-			procState_ = NoChange;
-		break;
-		case StopThenReinit:
-			clock->isRunning_ = 0;
-			clock->doingReinit_ = 1;
-		//	procState_ = TurnOffReinit;
-		break;
-		case NoChange:
-		default:
-		break;
-	}
+	isRunning_ = 0;
 }
 
 /////////////////////////////////////////////////////////////////////
-// Scheduling the 'process' operation for scheduled objects.
-// Three functions are involved: the handler for the start function,
-// the advancePhase1 and advancePhase2.
+// Info functions
 /////////////////////////////////////////////////////////////////////
-
-void Clock::process()
-{
-		processPhase1( &info_ );
-		Qinfo::swapQ();
-		processPhase2( &info_ );
-		if ( Shell::numNodes() <= 1 ) {
-			Qinfo::readQ( 0 ); //Deliver all local Msgs
-		} else {
-			for ( unsigned int j = 0; j < Shell::numNodes(); ++j ) {
-#ifdef USE_MPI
-				Qinfo::swapMpiQ;
-#endif
-				Qinfo::readQ( 0 ); //Deliver all Msgs
-			}
-		}
-		Clock::checkProcState();
-}
-
-/**
- * Start has to happen gracefully: If the simulation was stopped for any
- * reason, it has to pick up where it left off.
- * runtime_ is the additional time to run the simulation. This is a little
- * odd when the simulation has stopped halfway through a clock tick.
- * Note that this is executed during the generic phase2 or phase3.
- */
-void Clock::handleStart( double runtime )
-{
-	static const double ROUNDING = 0.9999999999;
-	if ( isRunning_ ) {
-		cout << "Clock::handleStart: Warning: simulation already in progress.\n Command ignored\n";
-		return;
-	}
-	// The currentTime_ check here is just a sanity check in case someone
-	// hard-wired additional messages into the Ticks, bypassing the 
-	// regular clock handling functions which would have set isDirty_.
-	if ( isDirty_ || currentTime_ == 0 )
-		rebuild();
-	if ( tickPtr_.size() == 0 || tickPtr_[0].mgr() == 0 ) {
-		cout << "Clock::handleStart: Warning: Nothing to simulate or simulation not yet initialized.\n Command ignored\n";
-		return;
-	}
-	runTime_ = runtime;
-	endTime_ = runtime * ROUNDING + currentTime_;
-	// isRunning_ = 1; // Can't touch this here, instead defer to barrier3
-	if ( tickPtr_.size() == 0 || tickPtr_.size() != tickMgr_.size() || 
-		!tickPtr_[0].mgr()->isInited() )
-		procState_ = ReinitThenStart;
-	else
-		procState_ = StartOnly;
-
-	isRunning_ = true;
-	while( isRunning_ ) {
-		process();
-	}
-}
 
 /// Static function
 void Clock::reportClock() 
@@ -665,127 +439,89 @@ void Clock::reportClock()
 void Clock::innerReportClock() const
 {
 	cout << "reporting Clock: runTime= " << runTime_ << 
-		", currentTime= " << currentTime_ << ", endTime= " << endTime_ <<
+		", currentTime= " << currentTime_ <<
 		", dt= " << dt_ << ", isRunning = " << isRunning_ << endl;
-	cout << "uniqueDts= ";
-	for ( unsigned int i = 0; i < tickPtr_.size(); ++i ) {
-		cout << "  " << tickPtr_[i].mgr()->getDt() << "(" <<
-		tickPtr_[i].mgr()->ticks().size() << ")";
+	cout << "Dts= ";
+	for ( unsigned int i = 0; i < tick_.size(); ++i ) {
+		cout <<  "tick[" << i << "] = " << tick_[i] << "	" <<
+				tick_[i] * dt_ << endl;
 	}
 	cout << endl;
 }
 
-void Clock::handleStep( unsigned int numSteps )
-{
-	double runtime = dt_ * numSteps;
-	handleStart( runtime );
-}
+/////////////////////////////////////////////////////////////////////
+// Core scheduling functions.
+/////////////////////////////////////////////////////////////////////
 
-// Advance system state by one clock tick. This may be a subset of
-// one timestep, as there may be multiple clock ticks within one dt.
-// This simply distributes the call to all scheduled objects
-void Clock::advancePhase1(  ProcInfo *p )
+void Clock::buildTicks( const Eref& e )
 {
-	tickPtr_[0].mgr()->advancePhase1( p );
-	++countAdvance1_;
-}
-
-// In phase 2 we need to do the updates to the Clock object, especially
-// sorting the TickPtrs. This also is when we find out if the simulation
-// is finished.
-void Clock::advancePhase2(  ProcInfo *p )
-{
-	tickPtr_[0].mgr()->advancePhase2( p );
-	if ( tickPtr_.size() > 1 )
-		sort( tickPtr_.begin(), tickPtr_.end() );
-	currentTime_ = tickPtr_[0].mgr()->getNextTime() - 
-		tickPtr_[0].mgr()->getDt();
-	if ( currentTime_ > endTime_ ) {
-		Id clockId( 1 );
-		procState_ = StopOnly;
-		finished()->send( clockId.eref(), 0 );
-		ack()->send( clockId.eref(), 0, 
-			p->nodeIndexInGroup, OkStatus );
+	activeTicks_.resize(0);
+	for ( unsigned int i = 0; i < ticks_.size(); ++i ) {
+		if ( ticks_[i] > 0 && 
+						e.element()->hasMsgs( process[i].getBindIndex() )
+			activeTicks_.push_back( ticks_[i] );
 	}
-	++countAdvance2_;
 }
 
-/////////////////////////////////////////////////////////////////////
-// Scheduling the 'reinit' operation for scheduled objects.
-// Three functions are involved: the handler for the reinit function,
-// and the reinitPhase1 and reinitPhase2.
-// Like the Process operation, reinit must go sequentially through all
-// Tick Managers in order of increasing dt. Within each TickManager
-// it must do the successive ticks in order of increasing index.
-/////////////////////////////////////////////////////////////////////
+/**
+ * Start has to happen gracefully: If the simulation was stopped for any
+ * reason, it has to pick up where it left off.
+ * The "runtime" argument is the additional time to run the simulation.
+ */
+void Clock::handleStart( double runtime )
+{
+	unsigned int n = round( runtime / dt_ );
+	handleStep( n );
+}
+
+void Clock::handleStep( const Eref& e, unsigned int numSteps )
+{
+	if ( isRunning_ || doingReinit_ ) {
+		cout << "Clock::handleStart: Warning: simulation already in progress.\n Command ignored\n";
+		return;
+	}
+	buildTicks();
+	assert( currentStep_ = nSteps_ );
+	nSteps_ += numSteps;
+	runtime_ = nSteps_ * dt_;
+	for ( isRunning_ = true;
+		isRunning && currentStep_ < nSteps_; ++currentStep_ )
+	{
+		// Curr time is end of current step.
+		info_.currTime = dt_ * (currentStep_ + 1); 
+		for ( vector< unsigned int>  j = 
+			activeTicks_.begin(); j != activeTicks_.end(); ++j ) {
+			if ( currentStep_ % *j == 0 ) {
+				info_.dt = *j * dt_;
+				process[*j].send( e, &info_ );
+			}
+		}
+	}
+	info_.dt = dt_;
+	isRunning_ = false;
+	finished.send( e );
+}
 
 /**
  * This is the dest function that sets off the reinit.
  */
 void Clock::handleReinit()
 {
-	if ( isDirty_ )
-		rebuild();
-	info_.currTime = 0.0;
-	// runTime_ = 0.0;
-	currentTime_ = 0.0;
-	nextTime_ = 0.0;
-	nSteps_ = 0;
-	currentStep_ = 0;
-	currTickPtr_ = 0;
-
-	// Get all the TickMgrs in increasing order of dt for the reinit call.
-	for ( vector< TickMgr >::iterator i = tickMgr_.begin(); 
-		i != tickMgr_.end(); ++i )
-		i->reinitPhase0();
-	if ( tickPtr_.size() > 1 )
-		sort( tickPtr_.begin(), tickPtr_.end() );
-
-	if ( isRunning_ )
-		procState_ = StopThenReinit;
-	else
-		procState_ = TurnOnReinit;
-	while ( isRunning_ )
-		process();
-	do {
-		process();
-	} while ( doingReinit_ );
-}
-
-
-/**
- * Reinit is used to reinit the state of the scheduling system.
- * This version is meant to be done through the scheduling loop.
- * In phase1 it calls reinit on the target Elements.
- */
-void Clock::reinitPhase1( ProcInfo* info )
-{
-	if ( tickPtr_.size() == 0 )
+	if ( isRunning_ || doingReinit_ ) {
+		cout << "Clock::handleStart: Warning: simulation already in progress.\n Command ignored\n";
 		return;
-	assert( currTickPtr_ < tickPtr_.size() );
-	tickPtr_[ currTickPtr_ ].mgr()->reinitPhase1( info );
-	++countReinit1_;
-}
-
-/**
- * In phase2 it advances the internal counter to move to the next tick,
- * and when all ticks for this TickManager are done, to move to the next
- * TickManager.
- */
-void Clock::reinitPhase2( ProcInfo* info )
-{
-	info->currTime = 0.0;
-
-	if ( tickPtr_.size() == 0 || 
-				tickPtr_[ currTickPtr_ ].mgr()->reinitPhase2( info ) ) {
-		++currTickPtr_;
-		if ( currTickPtr_ >= tickPtr_.size() ) {
-			Id clockId( 1 );
-			ack()->send( clockId.eref(), 0,
-				info->nodeIndexInGroup, OkStatus );
-			procState_ = TurnOffReinit;
-			++countReinit2_;
-		}
 	}
+	currentTime_ = 0.0;
+	currentStep_ = 0;
+	buildTicks();
+	doingReinit_ = true;
+	// Curr time is end of current step.
+	info_.currTime = 0.0;
+	for ( vector< unsigned int>  j = 
+		activeTicks_.begin(); j != activeTicks_.end(); ++j ) {
+		info_.dt = *j * dt_;
+		reinit[*j].send( e, &info_ );
+	}
+	info_.dt = dt_;
+	doingReinit_ = false;
 }
-

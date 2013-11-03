@@ -11,8 +11,6 @@ TARGET = _scheduling.o
 
 OBJ = \
 	Clock.o	\
-	Tick.o	\
-	TickMgr.o	\
 	testScheduling.o \
 
 HEADERS = \
@@ -22,10 +20,8 @@ HEADERS = \
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
-Clock.o:	Tick.h TickPtr.h TickMgr.h Clock.h
-Tick.o:	Tick.h TickPtr.h TickMgr.h Clock.h
-TickMgr.o:	Tick.h TickMgr.h
-testScheduling.o:	Tick.h TickPtr.h Clock.h ../basecode/SetGet.h
+Clock.o:	Clock.h
+testScheduling.o:	Clock.h 
 
 
 .cpp.o:
