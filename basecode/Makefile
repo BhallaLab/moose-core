@@ -27,6 +27,8 @@ OBJ = \
 	SrcFinfo.o \
 	ValueFinfo.o \
 	SharedFinfo.o \
+	FieldElementFinfo.o \
+	FieldElement.o \
 	Id.o \
 	ObjId.o \
 	SetGet.o \
@@ -57,12 +59,14 @@ HEADERS = \
 	LookupValueFinfo.h \
 	LookupElementValueFinfo.h \
 	SharedFinfo.h \
+	FieldElementFinfo.h \
+	FieldElement.h \
 	MsgFuncBinding.h \
 
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS) ../shell/Shell.h
-testAsync.o:	SparseMatrix.h SetGet.h ../scheduling/Clock.h ../biophysics/IntFire.h ../biophysics/SynBase.h
+testAsync.o:	SparseMatrix.h SetGet.h ../scheduling/Clock.h ../biophysics/IntFire.h ../biophysics/SpikeRingBuffer.h ../biophysics/SynHandler.h
 SparseMsg.o:	SparseMatrix.h
 SetGet.o:	SetGet.h ../shell/Neutral.h
 

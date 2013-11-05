@@ -45,7 +45,7 @@ class HDF5DataWriter: public HDF5WriterBase
     // void flush();
     void process(const Eref &e, ProcPtr p);
     void reinit(const Eref &e, ProcPtr p);
-    void recvData(const Eref& e, const Qinfo* q, PrepackedBuffer pb);
+    void recvData(const Eref& e, ObjId src, const double* start, unsigned int num );
     virtual void flush();
     static const Cinfo* initCinfo();
   protected:

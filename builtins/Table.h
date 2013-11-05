@@ -34,7 +34,7 @@ class Table: public TableBase
 		void input( double v );
 		void spike( double v );
 
-		void recvData( PrepackedBuffer pb );
+		void recvData( double v );
 
 		//////////////////////////////////////////////////////////////////
 		// Lookup funcs for table

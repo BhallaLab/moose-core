@@ -103,6 +103,8 @@ class Neutral;
 #include "ValueFinfo.h"
 #include "LookupValueFinfo.h"
 #include "SharedFinfo.h"
+#include "FieldElementFinfo.h"
+#include "FieldElement.h"
 #include "../shell/Neutral.h"
 
 #endif // _HEADER_H

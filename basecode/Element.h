@@ -240,6 +240,9 @@ class Element
 		 */
 		void zombieSwap( const Cinfo* newCinfo );
 
+	protected:
+		/// Used by derived classes to zero out Cinfo during destruction.
+		void clearCinfoAndMsgs();
 
 	private:
 		/**
@@ -261,6 +264,11 @@ class Element
 		Id id_; /// Stores the unique identifier for Element.
 
 		/**
+		 * Class information
+		 */
+		const Cinfo* cinfo_;
+
+		/**
 		 * This points to an array holding the data for the Element.
 		 */
 		char* data_;
@@ -271,11 +279,6 @@ class Element
 		 * to other nodes.
 		 */
 		unsigned int numData_;
-
-		/**
-		 * Class information
-		 */
-		const Cinfo* cinfo_;
 
 		/**
 		 * Message vector. This is the low-level messaging information.

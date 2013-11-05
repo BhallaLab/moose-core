@@ -49,7 +49,8 @@ static DestFinfo *recvDataBuf() {
     static DestFinfo recvDataBuf(
             "recvData",
             "Handles data sent back following request",
-            new EpFunc1< HDF5DataWriter, PrepackedBuffer >( &HDF5DataWriter::recvData ));
+            new EpFunc3< HDF5DataWriter, ObjId, 
+			const double*, unsigned int >( &HDF5DataWriter::recvData ));
     return &recvDataBuf;
 }
 
@@ -170,7 +171,7 @@ void HDF5DataWriter::process(const Eref & e, ProcPtr p)
         return;
     }
     // cout << "HDF5DataWriter::process: currentTime=" << p->currTime << endl;
-    requestData()->send(e, p->threadIndexInGroup, recvDataBuf()->getFid());
+    requestData()->send(e, recvDataBuf()->getFid());
     for (map<string, vector < double > >:: iterator data_it = datamap_.begin(); data_it != datamap_.end(); ++data_it){        
         string path = data_it->first;
         // if (data_it->second.size() >= flushLimit_){
@@ -185,7 +186,6 @@ void HDF5DataWriter::process(const Eref & e, ProcPtr p)
         }
         data_it->second.clear();
     }    
-    // clear()->send(e, p->threadIndexInGroup);
 }
 
 void HDF5DataWriter::reinit(const Eref & e, ProcPtr p)
@@ -312,9 +312,10 @@ herr_t HDF5DataWriter::appendToDataset(hid_t dataset_id, const vector< double >&
     return status;
 }
 
-void HDF5DataWriter::recvData(const Eref&e, const Qinfo* q, PrepackedBuffer pb)
+void HDF5DataWriter::recvData(const Eref&e, 
+				ObjId src, const double* start, unsigned int num )
 {
-    string path = q->src().path();
+    string path = src.path();
     if (nodemap_.find(path) == nodemap_.end()){
         // first time call, initialize entries in map
         hid_t dataid =  get_dataset(path);
@@ -324,22 +325,13 @@ void HDF5DataWriter::recvData(const Eref&e, const Qinfo* q, PrepackedBuffer pb)
         nodemap_[path] = dataid;
         datamap_[path] = vector<double>();
     }
-    // for vectors, the PrepackedBuffer has format:
-    // [0] = dataSize (total length)
-    // [1] = 0 - this seems always 0
-    // [2] = vector size
-    // [3 ... dataSize-1] - vector content
-    unsigned vec_size = pb.data()[0];
-    // This is a hack - based on emprical look at PrepackedBuffer
-    // contents for table vectors. I believe when populating
-    // prepackedbuffer with vector<double>, the numEntries, data(),
-    // size() are confusing.
-    const double * start = pb.data() + 1;
-    const double * end = start + vec_size;
+    const double * end = start + num;
     // append only the new data. old_size is guaranteed to be 0 on
     // write and the table vecs will also be cleared.
     datamap_[path].insert(datamap_[path].end(), start, end);
-    SetGet0::set(q->src(), "clearVec");
+
+    SetGet0::set(src, "clearVec"); //Unsure what this is for.
+	
 // #ifndef NDEBUG
 //     // debug leftover entries coming from table
 //     cout << "HDF5DataWriter::recvData: vec_size=" << vec_size << endl;

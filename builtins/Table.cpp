@@ -9,7 +9,6 @@
 
 #include "header.h"
 #include <fstream>
-#include "TableEntry.h"
 #include "TableBase.h"
 #include "Table.h"
 
@@ -21,12 +20,12 @@ static SrcFinfo1< FuncId > *requestData() {
 	return &requestData;
 }
 
-static DestFinfo *recvDataBuf() {
-	static DestFinfo recvDataBuf( "recvData",
-			"Handles data sent back following request",
-			new OpFunc1< Table, PrepackedBuffer >( &Table::recvData )
+static DestFinfo *handleInput() {
+	static DestFinfo input( "input",
+		"Fills data into table. Also handles data sent back following request",
+			new OpFunc1< Table, double >( &Table::input )
 			);
-	return &recvDataBuf;
+	return &input;
 }
 
 const Cinfo* Table::initCinfo()
@@ -44,10 +43,6 @@ const Cinfo* Table::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
-
-		static DestFinfo input( "input",
-			"Fills data into the Table.",
-			new OpFunc1< Table, double >( &Table::input ) );
 
 		static DestFinfo spike( "spike",
 			"Fills spike timings into the Table. Signal has to exceed thresh",
@@ -77,9 +72,8 @@ const Cinfo* Table::initCinfo()
 
 	static Finfo* tableFinfos[] = {
 		&threshold,		// Value
-		&input,			// DestFinfo
+		handleInput(),		// DestFinfo
 		&spike,			// DestFinfo
-		recvDataBuf(),	// DestFinfo
 		requestData(),		// SrcFinfo
 		&proc,			// SharedFinfo
 	};
@@ -116,7 +110,7 @@ void Table::process( const Eref& e, ProcPtr p )
 	lastTime_ = p->currTime;
 	// send out a request for data. This magically comes back in the
 	// RecvDataBuf and is handled.
-	requestData()->send( e, p->threadIndexInGroup, recvDataBuf()->getFid());
+	requestData()->send( e, handleInput()->getFid());
 }
 
 void Table::reinit( const Eref& e, ProcPtr p )
@@ -125,9 +119,13 @@ void Table::reinit( const Eref& e, ProcPtr p )
 	vec().resize( 0 );
 	lastTime_ = 0;
 	// cout << "tabReinit on :" << p->groupId << ":" << p->threadIndexInGroup << endl << flush;
-	requestData()->send( e, p->threadIndexInGroup, recvDataBuf()->getFid());
+	requestData()->send( e, handleInput()->getFid());
 }
 
+//////////////////////////////////////////////////////////////
+// Used to handle direct messages into the table, or 
+// returned plot data from queried objects.
+//////////////////////////////////////////////////////////////
 void Table::input( double v )
 {
 	vec().push_back( v );
@@ -153,20 +151,3 @@ double Table::getThreshold() const
 	return threshold_;
 }
 
-//////////////////////////////////////////////////////////////
-// Element Field Definitions
-//////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////
-// Used to handle returned plot data from queried objects.
-//////////////////////////////////////////////////////////////
-
-void Table::recvData( PrepackedBuffer pb )
-{
-	assert ( pb.dataSize() == 1 );
-	double ret = *reinterpret_cast< const double* >( pb.data() );
-
-	vec().push_back( ret );
-}
-
-//////////////////////////////////////////////////////////////

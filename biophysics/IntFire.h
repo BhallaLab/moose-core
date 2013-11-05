@@ -11,7 +11,7 @@
 #define _INT_FIRE_H
 
 
-class IntFire: public SynBase
+class IntFire: public SynHandler
 {
 	friend void testStandaloneIntFire();
 	friend void testSynapse();
@@ -51,7 +51,6 @@ class IntFire: public SynBase
 		double tau_; // Time course of membrane settling.
 		double refractoryPeriod_; // Minimum time between successive spikes
 		double lastSpike_; // Time of last action potential.
-		priority_queue< Synapse > pendingEvents_;
 };
 
 #endif // _INT_FIRE_H

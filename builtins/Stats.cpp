@@ -8,19 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
-#include "ReduceFinfo.h"
-#include "ReduceBase.h"
 #include "Stats.h"
-
-static ReduceFinfo< Stats, double, ReduceStats > *reduce() {
-	static ReduceFinfo< Stats, double, ReduceStats > reduce(
-			"reduce",
-			"Execute statistics reduction operation on all targets and"
-			"place results in this object",
-			&Stats::digest
-			);
-	return &reduce;
-}
 
 const Cinfo* Stats::initCinfo()
 {
@@ -48,17 +36,8 @@ const Cinfo* Stats::initCinfo()
 			&Stats::getNum
 		);
 		//////////////////////////////////////////////////////////////
-		// Reduce definition
-		//////////////////////////////////////////////////////////////
-		// above: static ReduceFinfo< Stats, double, ReduceStats > reduce
-
-		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
-		static DestFinfo trig( "trig",
-			"Triggers Reduction operation.",
-			new EpFunc0< Stats >( &Stats::trig ) );
-
 		static DestFinfo process( "process",
 			"Handles process call",
 			new ProcOpFunc< Stats >( &Stats::process ) );
@@ -82,8 +61,6 @@ const Cinfo* Stats::initCinfo()
 		&sdev,	// ReadOnlyValue
 		&sum,	// ReadOnlyValue
 		&num,	// ReadOnlyValue
-		reduce(),	// ReduceFinfo
-		&trig,		// DestFinfo
 		&process,		// DestFinfo
 		&reinit,		// DestFinfo
 		&proc		// SharedFinfo
@@ -132,22 +109,6 @@ void Stats::reinit( const Eref& e, ProcPtr p )
 ///////////////////////////////////////////////////////////////////////////
 // DestFinfos
 ///////////////////////////////////////////////////////////////////////////
-
-void Stats::trig( const Eref& e, const Qinfo* q )
-{
-	ProcInfo p;
-	reduce()->send( e, q->threadNum(), 0 );
-}
-///////////////////////////////////////////////////////////////////////////
-// Reduce func
-///////////////////////////////////////////////////////////////////////////
-void Stats::digest( const Eref& er, const ReduceStats* arg )
-{
-	num_ = arg->count();
-	sum_ = arg->sum();
-	mean_ = ( num_ > 0 ) ? sum_/num_ : sum_;
-	sdev_ = sqrt( ( sum_ * sum_ - arg->sumsq() ) / num_ );
-}
 
 ///////////////////////////////////////////////////////////////////////////
 // Fields

@@ -10,9 +10,6 @@
 #include "header.h"
 #include "DiagonalMsg.h"
 #include "OneToAllMsg.h"
-#include "../scheduling/Tick.h"
-#include "../scheduling/TickMgr.h"
-#include "../scheduling/TickPtr.h"
 #include "../scheduling/Clock.h"
 #include "Arith.h"
 #include "TableBase.h"
@@ -24,15 +21,13 @@
 void testArith()
 {
 	Id a1id = Id::nextId();
-	DimInfo diEntry = { 10, 1, false };
-	vector< DimInfo > dims( 1, diEntry );
-	Element* a1 = new Element( a1id, Arith::initCinfo(), "a1", dims, 1, true );
+	unsigned int size = 10;
+	Element* a1 = new Element( a1id, Arith::initCinfo(), "a1", size, true );
 
 	Eref a1_0( a1, 0 );
 	Eref a1_1( a1, 1 );
 
-	Arith* data1_0 = reinterpret_cast< Arith* >( a1->dataHandler()->data( 0 ) );
-//	Arith* data1_1 = reinterpret_cast< Arith* >( a1->data1( 1 ) );
+	Arith* data1_0 = reinterpret_cast< Arith* >( a1->data( 0 ) );
 
 	data1_0->arg1( 1 );
 	data1_0->arg2( 0 );
@@ -63,13 +58,10 @@ void testFibonacci()
 	if ( Shell::numNodes() > 1 )
 		return;
 	unsigned int numFib = 20;
-	DimInfo diEntry = { numFib, 1, false };
-	vector< DimInfo > dims( 1, diEntry );
-
 	Id a1id = Id::nextId();
-	Element* a1 = new Element( a1id, Arith::initCinfo(), "a1", dims, 1, false );
+	Element* a1 = new Element( a1id, Arith::initCinfo(), "a1", numFib, false );
 
-	Arith* data = reinterpret_cast< Arith* >( a1->dataHandler()->data( 0 ) );
+	Arith* data = reinterpret_cast< Arith* >( a1->data( 0 ) );
 	if ( data ) {
 		data->arg1( 0 );
 		data->arg2( 1 );
@@ -98,24 +90,23 @@ void testFibonacci()
 
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	shell->doSetClock( 0, 1.0 );
-	Eref ticker = Id( 2 ).eref();
+	Eref clocker = Id( 1 ).eref();
 
-	const Finfo* proc0Finfo = Tick::initCinfo()->findFinfo( "process0" );
-	OneToAllMsg* otam = new OneToAllMsg( Msg::nextMsgId(), ticker, a1 );
-	ret = proc0Finfo->addMsg( procFinfo, otam->mid(), ticker.element() );
+	const Finfo* proc0Finfo = Clock::initCinfo()->findFinfo( "process0" );
+	OneToAllMsg* otam = new OneToAllMsg( Msg::nextMsgId(), clocker, a1 );
+	ret = proc0Finfo->addMsg( procFinfo, otam->mid(), clocker.element() );
 
-	// ret = OneToAllMsg::add( ticker, "process0", a1, "process" );
 	assert( ret );
 
 	shell->doStart( numFib );
 	unsigned int f1 = 1;
 	unsigned int f2 = 0;
 	for ( unsigned int i = 0; i < numFib; ++i ) {
-		if ( a1->dataHandler()->isDataHere( i ) ) {
-			Arith* data = reinterpret_cast< Arith* >( a1->dataHandler()->data( i ) );
+		// if ( a1->dataHandler()->isDataHere( i ) ) {
+			Arith* data = reinterpret_cast< Arith* >( a1->data( i ) );
 			// cout << Shell::myNode() << ": i = " << i << ", " << data->getOutput() << ", " << f1 << endl;
 			assert( data->getOutput() == f1 );
-		}
+		// }
 		unsigned int temp = f1;
 		f1 = temp + f2;
 		f2 = temp;
@@ -173,9 +164,6 @@ void testMpiFibonacci()
 	*/
 
 	shell->doSetClock( 0, 1.0 );
-	Eref ticker = Id( 2 ).eref();
-//	ret = OneToAllMsg::add( ticker, "process0", a1, "process" );
-//	assert( ret );
 	shell->doUseClock( "/a1", "process", 0 );
 
 	shell->doStart( numFib );
@@ -264,30 +252,17 @@ void testTable()
 	vector< int > dims( 1, 1 );
 	Id tabid = shell->doCreate( "Table", Id(), "tab", dims );
 	assert( tabid != Id() );
-	Id tabentry( tabid.value() + 1 );
 	Table* t = reinterpret_cast< Table* >( tabid.eref().data() );
 	for ( unsigned int i = 0; i < 100; ++i ) {
 		t->input( sqrt((double) i ) );
 	}
-	unsigned int numEntries = Field< unsigned int >::get( 
-		tabid, "num_table" );
-	assert( numEntries == 100 );
-	/// need to sort out this issue with updating maxFieldEntries.
-	FieldDataHandlerBase* fdh = dynamic_cast< FieldDataHandlerBase* >(
-		tabentry.element()->dataHandler() );
-	assert( fdh );
-	fdh->setMaxFieldEntries( numEntries );
+	vector< double > values = Field< vector< double > >::get( tabid, "vec");
+	assert( values.size() == 100 );
 	for ( unsigned int i = 0; i < 100; ++i ) {
-		ObjId temp( tabentry, DataId( i ) );
-		double ret = Field< double >::get( temp, "value" );
-		assert( fabs( ret - sqrt((double) i ) ) < 1e-6 );
+		double ret = LookupField< unsigned int, double >::get( tabid, "y", i );
+		assert( doubleEq( values[i] , sqrt((double) i ) ) );
+		assert( doubleEq( ret , sqrt((double) i ) ) );
 	}
-	/*
-	SetGet2< string, string >::set( 
-		tabid.eref(), "xplot", "testfile", "testplot" );
-		*/
-	// tabentry.destroy();
-	// tabid.destroy();
 	shell->doDelete( tabid );
 	cout << "." << flush;
 }
@@ -317,13 +292,11 @@ void testGetMsg()
 		tabid, "num_table" );
 	assert( numEntries == 0 );
 	shell->doReinit();
-	Qinfo::clearQ( 0 );
 	numEntries = Field< unsigned int >::get( tabid, "num_table" );
 	assert( numEntries == 1 ); // One for reinit call.
 	SetGet1< double >::set( arithid, "arg1", 0.0 );
 	SetGet1< double >::set( arithid, "arg2", 2.0 );
 	shell->doStart( 100 );
-	Qinfo::clearQ( 0 );
 
 	numEntries = Field< unsigned int >::get( tabid, "num_table" );
 	assert( numEntries == 101 ); // One for reinit call, 100 for process.

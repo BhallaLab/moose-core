@@ -14,29 +14,26 @@ class Synapse
 {
 	public:
 		Synapse();
-		Synapse( double w, double d );
-		Synapse( const Synapse& other, double time );
-
-		// This is backward because the syntax of the priority
-		// queue puts the _largest_ element on top.
-		bool operator< ( const Synapse& other ) const {
-			return delay_ > other.delay_;
-		}
-		
-		bool operator== ( const Synapse& other ) const {
-			return delay_ == other.delay_ && weight_ == other.weight_;
-		}
-
 		void setWeight( double v );
 		void setDelay( double v );
 
 		double getWeight() const;
 		double getDelay() const;
+
+		void setBuffer( SpikeRingBuffer* buf );
+
+		void addSpike( double time );
+		static void addMsgCallback( 
+					const Eref& e, const string& finfoName, 
+					ObjId msg, unsigned int msgLookup );
+		static void dropMsgCallback( 
+					const Eref& e, const string& finfoName, 
+					ObjId msg, unsigned int msgLookup );
 		static const Cinfo* initCinfo();
 	private:
-
 		double weight_;
 		double delay_;
+		SpikeRingBuffer* buffer_;
 };
 
 #endif // _SYNAPSE_H
