@@ -868,8 +868,8 @@ extern "C" {
         }
         SHELLPTR->doQuit();
         // Destroy the Shell object
-        Neutral* ns = reinterpret_cast<Neutral*>(shellId.element()->dataHandler()->data(0));
-        ns->destroy( shellId.eref(), 0, 0);
+        Neutral* ns = reinterpret_cast<Neutral*>(shellId.element()->data(0));
+        ns->destroy( shellId.eref(), 0);
 #ifdef USE_MPI
         MPI_Finalize();
 #endif
@@ -1765,20 +1765,6 @@ extern "C" {
         PyErr_SetString(PyExc_TypeError, "Field type not handled.");
         return NULL;
     }
-
-    PyObject * moose_syncDataHandler(PyObject * dummy, PyObject * args)
-    {
-        PyObject * obj = NULL;
-        if (!PyArg_ParseTuple(args, "O:moose.syncDataHandler", &obj)){
-            return NULL;
-        }
-        Id id = ((_Id*)obj)->id_;
-        if (!Id::isValid(id)){
-            RAISE_INVALID_ID(NULL, "moose_syncDataHandler");
-        }
-        SHELLPTR->doSyncDataHandler(id);
-        Py_RETURN_NONE;
-    }
         
     PyDoc_STRVAR(moose_seed_documentation, 
                  "moose.seed(seedvalue) -> None\n"
@@ -2345,11 +2331,6 @@ extern "C" {
         {"getFieldDict", (PyCFunction)moose_getFieldDict, METH_VARARGS, moose_getFieldDict_documentation},
         {"getField", (PyCFunction)moose_getField, METH_VARARGS,
          "getField(element, field, fieldtype) -- Get specified field of specified type from object ematrix."},
-        {"syncDataHandler", (PyCFunction)moose_syncDataHandler, METH_VARARGS,
-         "synchronizes fieldDimension on the DataHandler"
-         " across nodes. Used after function calls that might alter the"
-         " number of Field entries in the table."
-         " The target is the FieldElement whose fieldDimension needs updating."},
         {"seed", (PyCFunction)moose_seed, METH_VARARGS, moose_seed_documentation},
         {"wildcardFind", (PyCFunction)moose_wildcardFind, METH_VARARGS, moose_wildcardFind_documentation},
         {"quit", (PyCFunction)moose_quit, METH_NOARGS, "Finalize MOOSE threads and quit MOOSE. This is made available for"

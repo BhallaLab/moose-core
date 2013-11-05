@@ -41,6 +41,7 @@ bool Shell::doReinit_( 0 );
 bool Shell::isParserIdle_( 0 );
 double Shell::runtime_( 0.0 );
 
+/*
 static SrcFinfo5< string, Id, Id, string, vector< int > > *requestCreate() {
 	static SrcFinfo5< string, Id, Id, string, vector< int > > requestCreate( "requestCreate",
 			"requestCreate( class, parent, newElm, name, dimensions ): "
@@ -50,6 +51,7 @@ static SrcFinfo5< string, Id, Id, string, vector< int > > *requestCreate() {
 			);
 	return &requestCreate;
 }
+*/
 
 static SrcFinfo2< unsigned int, unsigned int >* ack()
 {
@@ -61,6 +63,7 @@ static SrcFinfo2< unsigned int, unsigned int >* ack()
 	return &temp;
 }
 
+/*
 static SrcFinfo1< Id  > *requestDelete() {
 	static SrcFinfo1< Id  > requestDelete( "requestDelete",
 			"requestDelete( doomedElement ):"
@@ -76,6 +79,7 @@ static SrcFinfo0 *requestQuit() {
 			"Emerges from the inner loop, and wraps up. No return value." );
 	return &requestQuit;
 }
+*/
 
 static SrcFinfo1< double > *requestStart() {
 	static SrcFinfo1< double > requestStart( "requestStart",
@@ -127,6 +131,7 @@ static SrcFinfo0 *requestReinit() {
 	return &requestReinit;
 }
 
+/*
 static SrcFinfo6< string, MsgId, ObjId, string, ObjId, string > *requestAddMsg() {
 	static SrcFinfo6< string, MsgId, ObjId, string, ObjId, string > 
 		requestAddMsg( 
@@ -168,6 +173,7 @@ static SrcFinfo3< string, string, unsigned int > *requestUseClock() {
 			);
 	return &requestUseClock;
 }
+*/
 
 static SrcFinfo1< bool > *requestSetParserIdleFlag() {
 	static SrcFinfo1< bool > requestSetParserIdleFlag(
@@ -198,17 +204,6 @@ const Cinfo* Shell::initCinfo()
 ////////////////////////////////////////////////////////////////
 // Dest Finfos: Functions handled by Shell
 ////////////////////////////////////////////////////////////////
-	static DestFinfo handleAck( "handleAck", 
-			"Keeps track of # of acks to a blocking shell command. Arg: Source node num.",
-			new OpFunc2< Shell, unsigned int, unsigned int >( 
-				& Shell::handleAck ) );
-	static Finfo* shellMaster[] = {
-		requestCreate(), requestDelete(),
-		requestAddMsg(), 
-		requestQuit(),
-		requestMove(), requestCopy(), requestUseClock(),
-		requestSetParserIdleFlag(),
-		&handleAck };
 	static DestFinfo handleUseClock( "handleUseClock", 
 			"Deals with assignment of path to a given clock.",
 			new EpFunc3< Shell, string, string, unsigned int >( 
@@ -240,24 +235,7 @@ const Cinfo* Shell::initCinfo()
 			" If the flag copyExtMsgs is true, then all msgs going out are also copied.",
 			new EpFunc5< Shell, vector< Id >, string, unsigned int, bool, bool >( 
 				& Shell::handleCopy ) );
-	static DestFinfo handleSync( "handleSync", 
-			"handleSync( Id Element): "
-			"Synchronizes DataHandler indexing across nodes"
-			"The ElementId is the element being synchronized."
-			"The FuncId is the 'get' function for the synchronized field.",
-			new EpFunc2< Shell, Id, FuncId >( & Shell::handleSync ) );
-	static DestFinfo handleReMesh( "handleReMesh", 
-			"handleReMesh( Id BaseMesh): "
-			"Deals with outcome of resizing the meshing in a cellular"
-			"compartment (the ChemCompt class). The mesh change has to"
-			"propagate down to the molecules and reactions managed by this."
-			"Mesh. The ElementId is the mesh being synchronized.",
-			new OpFunc1< Shell, Id >( & Shell::handleReMesh ) );
-	static DestFinfo handleSetParserIdleFlag( "handleSetParserIdleFlag", 
-			"handleSetParserIdleFlag( bool isParserIdle ): "
-			"When True, tells the ProcessLoop to wait as the Parser is idle.",
-			new OpFunc1< Shell, bool >( & Shell::handleSetParserIdleFlag ) );
-
+	/*
 	static Finfo* shellWorker[] = {
 		&handleCreate, &handleDelete,
 		&handleAddMsg,
@@ -265,15 +243,17 @@ const Cinfo* Shell::initCinfo()
 		&handleMove, &handleCopy, &handleUseClock,
 		&handleSync, &handleReMesh, &handleSetParserIdleFlag,
 		ack() };
+		*/
 	static Finfo* clockControlFinfos[] = 
 	{
 		requestStart(), requestStep(), requestStop(), requestSetupTick(),
-		requestReinit(), &handleAck
+		requestReinit()
 	};
 
 		static DestFinfo setclock( "setclock", 
 			"Assigns clock ticks. Args: tick#, dt",
 			new OpFunc3< Shell, unsigned int, double, bool >( & Shell::doSetClock ) );
+		/*
 		static SharedFinfo master( "master",
 			"Issues commands from master shell to worker shells located "
 			"on different nodes. Also handles acknowledgements from them.",
@@ -285,6 +265,7 @@ const Cinfo* Shell::initCinfo()
 			shellWorker, sizeof( shellWorker ) / sizeof( const Finfo* )
 
 		);
+		*/
 		static SharedFinfo clockControl( "clockControl",
 			"Controls the system Clock",
 			clockControlFinfos, 
@@ -292,13 +273,12 @@ const Cinfo* Shell::initCinfo()
 		);
 	
 	static Finfo* shellFinfos[] = {
-		receiveGet(),
 		&setclock,
 ////////////////////////////////////////////////////////////////
 //  Shared msg
 ////////////////////////////////////////////////////////////////
-		&master,
-		&worker,
+		// &master,
+		// &worker,
 		&clockControl,
 	};
 
@@ -351,11 +331,6 @@ Id Shell::doCreate( string type, Id parent, string name, vector< int > dimension
 	vector< int > dims( dimensions );
 	dims.push_back( isGlobal );
 		innerCreate( type, parent, ret, name, dims );
-	/*
-	initAck(); // Nasty thread stuff happens here for multithread mode.
-		requestCreate()->send( Id().eref(), ScriptThreadNum, type, parent, ret, name, dims );
-	waitForAck();
-	*/
 	return ret;
 }
 
@@ -463,20 +438,12 @@ bool isDoingReinit()
 
 void Shell::doReinit( bool qFlag )
 {
-	if ( !keepLooping() ) {
-		cout << "Error: Shell::doReinit: Should not be called unless ProcessLoop is running\n";
-		return;
-	}
 	Id clockId( 1 );
 	SetGet0::set( clockId, "reinit" );
 }
 
 void Shell::doStop( bool qFlag )
 {
-	if ( !keepLooping() ) {
-		cout << "Error: Shell::doStop: Should not be called unless ProcessLoop is running\n";
-		return;
-	}
 	Id clockId( 1 );
 	SetGet0::set( clockId, "stop" );
 }
@@ -542,13 +509,6 @@ void Shell::doMove( Id orig, Id newParent, bool qFlag )
 		
 	}
 		innerMove( orig, newParent );
-	// Put in check here that newParent is not a child of orig.
-	/*
-	Eref sheller( shelle_, 0 );
-	initAck();
-		requestMove()->send( sheller, ScriptThreadNum, orig, newParent );
-	waitForAck();
-	*/
 }
 
 bool extractIndices( const string& s, vector< unsigned int >& indices )
@@ -726,114 +686,6 @@ ObjId Shell::doFind( const string& path ) const
 	assert( curr.element() );
 	DataId di = 0; // temporary 03 Nov 2013.
 	return ObjId( curr, di );
-}
-
-/// Static func.
-void Shell::clearRestructuringQ()
-{
-	// cout << "o";
-}
-
-/**
- * This function synchronizes lastDimension (i.e., field Dimension)
- * on the DataHandler across 
- * nodes. Used after function calls that might alter the number of
- * Field entries in the table.
- * The tgt is the FieldElement whose lastDimension needs updating.
- * Deprecated
- */
-void Shell::doSyncDataHandler( Id tgt )
-{
-	/*
-	const Finfo* f = tgt()->cinfo()->findFinfo( "get_localNumField" );
-	assert( f );
-	const DestFinfo* df = dynamic_cast< const DestFinfo* >( f );
-	assert( df );
-	FuncId sizeFid = df->getFid();
-
-	FieldDataHandlerBase* fb = 
-		dynamic_cast< FieldDataHandlerBase* >( tgt()->dataHandler() );
-	if ( !fb ) {
-		cout << myNode_ << ": Shell::doSyncDataHandler:Error: target '" <<
-			tgt.path() << "' is not a FieldElement\n";
-		return;
-	}
-	Eref sheller( shelle_, 0 );
-	initAck();
-		requestSync()->send( sheller, ScriptThreadNum, tgt, sizeFid );
-	waitForAck();
-	// Now the data is back, assign the field.
-	// Check: will this function work on all nodes? No, only on master.
-	// So we have to do the ugly but reliable 'set' function.
-	// fv->setFieldDimension( maxIndex_ );
-	Field< unsigned int >::set( ObjId( tgt, 0 ), 
-		"lastDimension", maxIndex_ );
-	*/
-}
-
-/**
- * Tell all attached pools and vols to update themselves: set their
- * array sizes and set their new volumes.
- * Dangerous function, if called elsewhere it will cause all sorts of
- * structuralQ issues.
- */
-void Shell::handleReMesh( Id baseMesh )
-{
-		/*
-	static const Finfo* finfo = MeshEntry::initCinfo()->findFinfo( "get_volume" );
-	static const DestFinfo* df = dynamic_cast< const DestFinfo* >( finfo );
-	assert( df );
-	vector< Id > tgts;
-	unsigned int numTgts = baseMesh()->getNeighbours( tgts, df );
-	assert( tgts.size() == numTgts );
-	unsigned int numMeshEntries = 
-		baseMesh()->dataHandler()->localEntries() ;
-	for ( vector< Id >::iterator i = tgts.begin(); i != tgts.end(); ++i )
-	{
-		unsigned short depth = i->element()->dataHandler()->pathDepth();
-		// Note that the resize command also copies over the data values.
-		// bool ret = i->element()->appendDimension( numMeshEntries );
-		bool ret = i->element()->resize( depth, numMeshEntries );
-		assert( ret );
-		// Now we need to tell each tgt to scale its n, rates etc from vol.
-	}
-	*/
-}
-
-/**
- * This function builds a reac-diffusion mesh starting at the
- * specified ChemCompt, which houses MeshEntry FieldElements.
- * Assumes that the dimensions of the baseCompartment have just been
- * redefined, and we now need to go through and update the child 
- * reaction system.
- */
-
-void Shell::doReacDiffMesh( Id baseCompartment )
-{
-		/*
-	Eref sheller( shelle_, 0 );
-	assert( baseCompartment()->dataHandler()->isGlobal() );
-	assert( baseCompartment()->cinfo()->isA( "ChemCompt" ) );
-	Id baseMesh( baseCompartment.value() + 1 );
-	doSyncDataHandler( baseMesh );
-
-	initAck();
-		requestReMesh()->send( sheller, ScriptThreadNum, baseMesh );
-	waitForAck();
-
-	// Traverse all child compts and do their meshes.
-	vector< Id > kids;
-	Neutral::children( baseCompartment.eref(), kids );
-	for ( vector< Id >::iterator i = kids.begin(); i != kids.end(); ++i)
-	{
-		if ( i->operator()()->cinfo()->isA( "ChemCompt" ) ) {
-			doReacDiffMesh( *i );
-		}
-	}
-
-	// Here we need to check on any non-matching Reacs and enzymes.
-	// */
-	
 }
 
 // We don't need to do this through acks, as it has no effect on processing
@@ -1177,21 +1029,9 @@ void Shell::wildcard( const string& path, vector< Id >& list )
 	wildcardFind( path, list );
 }
 
-const ProcInfo* Shell::getProcInfo( unsigned int index ) const
-{
-	assert( index < threadProcs_.size() );
-	return &( threadProcs_[index] );
-}
-
 ////////////////////////////////////////////////////////////////////////
 // Some static utility functions
 ////////////////////////////////////////////////////////////////////////
-
-// Statid func for returning the pet ProcInfo of the shell.
-const ProcInfo* Shell::procInfo()
-{
-	return &p_;
-}
 
 // Static func
 void Shell::cleanSimulation()

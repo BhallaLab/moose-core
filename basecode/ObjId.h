@@ -27,14 +27,14 @@ class ObjId
 		 * Returns the root Id
 		 */
 		ObjId()
-			: id(), dataId()
+			: id(), dataId( 0 ), fieldIndex( 0 )
 		{;}
 
 		/**
 		 * Creates a ObjId using specified Id and DataId
 		 */
-		ObjId( Id i, DataId d )
-			: id( i ), dataId( d )
+		ObjId( Id i, DataId d, unsigned int f = 0 )
+			: id( i ), dataId( d ), fieldIndex( f )
 		{;}
 
 		ObjId( Id i )
@@ -82,6 +82,7 @@ class ObjId
 		 */
 		Id id; 
 		DataId dataId;
+		unsigned int fieldIndex;
 
 		/// A useful test value
 		static const ObjId bad();
