@@ -9,7 +9,6 @@
 
 #include "header.h"
 #include <fstream>
-#include "TableEntry.h"
 #include "TableBase.h"
 #include "StimulusTable.h"
 
@@ -161,7 +160,7 @@ void StimulusTable::process( const Eref& e, ProcPtr p )
 	double y = interpolate( start_, stop_, lookupPosition );
 	setOutputValue( y );
 
-	output()->send( e, p->threadIndexInGroup, y );
+	output()->send( e, y );
 }
 
 void StimulusTable::reinit( const Eref& e, ProcPtr p )
@@ -169,7 +168,7 @@ void StimulusTable::reinit( const Eref& e, ProcPtr p )
 	stepPosition_ = 0.0;
 	double y = interpolate( start_, stop_, stepPosition_ );
 	setOutputValue( y );
-	output()->send( e, p->threadIndexInGroup, y );
+	output()->send( e, y );
 }
 
 //////////////////////////////////////////////////////////////

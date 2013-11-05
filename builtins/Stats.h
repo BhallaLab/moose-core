@@ -32,15 +32,12 @@ class Stats
 		// Dest Func
 		////////////////////////////////////////////////////////////////
 		
-		void trig( const Eref& e, const Qinfo* q );
 		void process( const Eref& e, ProcPtr p );
 		void reinit( const Eref& e, ProcPtr p );
 
 		////////////////////////////////////////////////////////////////
 		// Reduce func
 		////////////////////////////////////////////////////////////////
-		void digest( const Eref& er, const ReduceStats* arg );
-
 		static const Cinfo* initCinfo();
 	private:
 		double mean_;

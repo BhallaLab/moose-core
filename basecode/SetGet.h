@@ -150,7 +150,7 @@ template< class A > class SetGet1: public SetGet
 		}
 
 		/**
-		 * setVec assigns all the entries in the target ObjId to the
+		 * setVec assigns all the entries in the target Id to the
 		 * specified vector of values. The vector is used as a circular
 		 * buffer: if the number of targets exceeds the vector size, it
 		 * rolls over.
@@ -169,15 +169,62 @@ template< class A > class SetGet1: public SetGet
 			// total # of entries on element and maybe to include fields.
 			// This gets messy as we'll need to filter the data through
 			// the node decomposition
-				unsigned int size = tgt.element()->numData(); 
-				for ( unsigned int i = 0; i < size; ++i ) {
-					// Should also loop over field entries?
-					Eref er( tgt.element(), i );
-					op->op( er, arg[ i % arg.size() ] );
+				Element* e = tgt.element();
+				unsigned int k = 0;
+				unsigned int size = e->numData(); 
+				if ( tgt.element()->hasFields() ) {
+					for ( unsigned int i = 0; i < size; ++i ) {
+						unsigned int numField = e->numField( i );
+						for ( unsigned int j = 0; j < numField; ++j ) {
+							Eref er( tgt.element(), i, j );
+							op->op( er, arg[ k % arg.size() ] );
+							++k;
+						}
+					}
+				} else {
+					for ( unsigned int i = 0; i < size; ++i ) {
+						Eref er( tgt.element(), i );
+						op->op( er, arg[ i % arg.size() ] );
+					}
 				}
-				return 1;
+				return true;
 			}
-			return 0;
+			return false;
+		}
+
+		/**
+		 * This variant assigns fields on a specific data entry within 
+		 * the dest. It is distinguished by an ObjId first argument.
+		 */
+		static bool setVec( ObjId oi, const string& field, 
+			const vector< A >& arg )
+		{
+			if ( arg.size() == 0 ) return 0;
+
+			ObjId tgt( oi );
+			FuncId fid;
+
+			const OpFunc* func = checkSet( field, tgt, fid );
+			const OpFunc1Base< A >* op = dynamic_cast< const OpFunc1Base< A >* >( func );
+			if ( op ) {
+			// total # of entries on element and maybe to include fields.
+			// This gets messy as we'll need to filter the data through
+			// the node decomposition
+				Element* e = tgt.element();
+				unsigned int size = e->numData(); 
+				unsigned int i = oi.dataId;
+				if ( tgt.element()->hasFields() ) {
+					unsigned int numField = e->numField( i );
+					for ( unsigned int j = 0; j < numField; ++j ) {
+						Eref er( tgt.element(), i, j );
+						op->op( er, arg[ j % arg.size() ] );
+					}
+				} else {
+					op->op( tgt.eref(), arg[0] );
+				}
+				return true;
+			}
+			return false;
 		}
 
 		/**
@@ -281,11 +328,21 @@ template< class A > class Field: public SetGet1< A >
 					dynamic_cast< const GetOpFuncBase< A >* >( func );
 			if ( gof ) {
 				Element* elm = dest.element();
-				unsigned int size = vec.size(); // temporary. See SetVec.
-				vec.resize( size );
-				for ( unsigned int i = 0; i < size; ++i ) {
-					Eref e( elm, i );
-					vec[i] = gof->returnOp( e );
+				unsigned int size = elm->numData();
+				if ( tgt.element()->hasFields() ) {
+					for ( unsigned int i = 0; i < size; ++i ) {
+						unsigned int numField = elm->numField( i );
+						for ( unsigned int j = 0; j < numField; ++j ) {
+							Eref er( tgt.element(), i, j );
+							vec.push_back( gof->returnOp( er ) );
+						}
+					}
+				} else {
+					vec.resize( size );
+					for ( unsigned int i = 0; i < size; ++i ) {
+						Eref e( elm, i );
+						vec[i] = gof->returnOp( e );
+					}
 				}
 				return;
 			}
@@ -341,6 +398,8 @@ template< class A1, class A2 > class SetGet2: public SetGet
 		 * of objects. If there are fewer arguments then the index cycles
 		 * back, so as to tile the target array with as many arguments as
 		 * we have.
+		 *
+		 * Not yet implemented correct handling for FieldElements.
 		 */
 		static bool setVec( Id destId, const string& field, 
 			const vector< A1 >& arg1, const vector< A2 >& arg2 )

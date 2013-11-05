@@ -472,11 +472,10 @@ double Interpol2D::getInterpolatedValue(vector <double> xy) const
  * originating object with the looked up value.
  * This should be avoided, instead use the fastGet function.
  */
-void Interpol2D::lookupReturn( const Eref& e, const Qinfo*q, 
-	double v1, double v2 )
+void Interpol2D::lookupReturn( const Eref& e, double v1, double v2 )
 {
 	double ret = innerLookup( v1, v2 );
-	trig()->send( e, q->threadNum(), ret );
+	trig()->send( e, ret );
 }
 
 ////////////////////////////////////////////////////////////////////

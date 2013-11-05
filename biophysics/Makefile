@@ -10,7 +10,8 @@
 TARGET = _biophysics.o
 
 OBJ = \
-	SynBase.o	\
+	SpikeRingBuffer.o	\
+	SynHandler.o	\
 	IntFire.o	\
 	Synapse.o	\
 
@@ -54,8 +55,9 @@ HEADERS = \
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
-SynBase.o:	SynBase.h Synapse.h 
-IntFire.o:	IntFire.h SynBase.h Synapse.h 
+SpikeRingBuffer.o:	SpikeRingBuffer.h
+SynHandler.o:	SpikeRingBuffer.h SynHandler.h Synapse.h 
+IntFire.o:	IntFire.h SpikeRingBuffer.h SynHandler.h Synapse.h 
 #IzhikevichNrn.o: IzhikevichNrn.h
 #LeakyIaF.o: LeakyIaF.h
 #Synapse.o:	SynBase.h Synapse.h

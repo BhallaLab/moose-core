@@ -56,8 +56,7 @@ class Interpol2D
 		 * Looks up table value based on indices v1 and v2, and sends value
 		 * back on the 'trig' message.
 		 */
-		void lookupReturn( const Eref& e, const Qinfo* q,
-			double v1, double v2 );
+		void lookupReturn( const Eref& e, double v1, double v2 );
 		void lookup( double v1, double v2 );
 
 		void appendTableVector( vector< vector< double > > value );

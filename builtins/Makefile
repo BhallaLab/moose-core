@@ -35,10 +35,10 @@ Arith.o:	Arith.h
 Group.o:	Group.h
 Mstring.o:		Mstring.h
 Func.o:	Func.h
-TableBase.o:		TableBase.h TableEntry.h
-Table.o:		TableBase.h Table.h TableEntry.h
-StimulusTable.o:		TableBase.h StimulusTable.h TableEntry.h
-TimeTable.o:	TimeTable.h TableBase.h TableEntry.h
+TableBase.o:		TableBase.h
+Table.o:		TableBase.h Table.h
+StimulusTable.o:		TableBase.h StimulusTable.h
+TimeTable.o:	TimeTable.h TableBase.h
 Stats.o:	Stats.h
 Interpol2D.o:	Interpol2D.h
 HDF5WriterBase.o: HDF5WriterBase.h

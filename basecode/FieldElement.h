@@ -18,13 +18,14 @@
 class FieldElement: public Element
 {
 	public:
-		FieldElement( Id id, const Cinfo* c, const string& name,
-			char* ( *lookupField )( char*, unsigned int ),
-			void( *setNumField )( unsigned int num ),
-			unsigned int ( *getNumField )() const
+		FieldElement( Id parent, Id kid, const Cinfo* c, const string& name,
+			const FieldElementFinfoBase* fef
 		);
 
 		~FieldElement();
+
+		/// Virtual: Returns number of data entries
+		unsigned int numData() const;
 
 		/// Virtual: Returns number of field entries for specified data
 		unsigned int numField( unsigned int rawIndex ) const;
@@ -78,9 +79,7 @@ class FieldElement: public Element
 
 	private:
 		Id parent_;
-		char* ( *lookupField )( char*, unsigned int );
-		void( *setNumField )( unsigned int num );
-		unsigned int ( *getNumField )() const;
+		const FieldElementFinfoBase* fef_;
 };
 
 #endif // _FIELD_ELEMENT_H
