@@ -37,6 +37,7 @@ template<> Neutral* getEpFuncData< Neutral >( const Eref& e )
  * Try externing the template itself.
  */
 template<> Neutral* getEpFuncData< Neutral >( const Eref& e );
+// Function is implemented in EpFunc.cpp.
 
 
 

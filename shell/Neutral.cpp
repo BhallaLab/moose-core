@@ -267,9 +267,19 @@ unsigned int Neutral::getNumData( const Eref& e ) const
 	return e.element()->numData();
 }
 
+void Neutral::setNumData( const Eref& e, unsigned int num )
+{
+	e.element()->resize( num );
+}
+
 unsigned int Neutral::getNumField( const Eref& e ) const
 {
 	return e.element()->numField( e.index() );
+}
+
+void Neutral::setNumField( const Eref& e, unsigned int num )
+{
+	e.element()->resizeField( e.index(), num );
 }
 
 vector< ObjId > Neutral::getOutgoingMsgs( const Eref& e ) const

@@ -385,4 +385,5 @@ Stuck a bit in Table.cpp, figure out what to do with recvDataBuf.
 ===========================================================================
 5 Nov 2013
 Finally cleared first pass of compilation, link still fails with lots of 
-unresolved functions.
+unresolved functions. Checkin 4824.
+Finally compiles. Doesn't run.

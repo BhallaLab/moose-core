@@ -23,6 +23,9 @@
 // Setting up a class for testing scheduling.
 //////////////////////////////////////////////////////////////////////
 
+int TestSched::globalIndex_ = 0;
+bool TestSched::isInitPending_ = true;
+
 static DestFinfo processFinfo( "process",
 	"handles process call",
 	new ProcOpFunc< TestSched >( &TestSched::process ) );
