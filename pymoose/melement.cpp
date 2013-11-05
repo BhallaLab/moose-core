@@ -97,22 +97,21 @@ extern "C" {
         char _id[] = "id";
         char _dataIndex[] = "dataIndex";
         char _fieldIndex[] = "fieldIndex";
-        char _numFieldBits[] = "numFieldBits";
-        static char * kwlist[] = {_id, _dataIndex, _fieldIndex, _numFieldBits, NULL};
+        static char * kwlist[] = {_id, _dataIndex, _fieldIndex, NULL};
         _ObjId * instance = (_ObjId*)self;
-        unsigned int id = 0, data = 0, field = 0, numFieldBits = 0;
+        unsigned int id = 0, data = 0, field = 0;
         PyObject * obj = NULL;
         if ((kwargs && PyArg_ParseTupleAndKeywords(args, kwargs,
                                                    "I|III:moose_ObjId_init",
                                                    kwlist,
-                                                   &id, &data, &field, &numFieldBits))
+                                                   &id, &data, &field ))
             || (!kwargs && PyArg_ParseTuple(args, "I|III:moose_ObjId_init_from_id",
-                                            &id, &data, &field, &numFieldBits))){
+                                            &id, &data, &field ))){
             PyErr_Clear();
             if (!Id::isValid(id)){
                 RAISE_INVALID_ID(-1, "moose_ObjId_init_from_id");
             }
-            instance->oid_ = ObjId(Id(id), DataId(data, field, numFieldBits));
+            instance->oid_ = ObjId(Id(id), data, field );
             return 0;
         }
         PyErr_Clear();
@@ -122,22 +121,21 @@ extern "C" {
                                                    kwlist,
                                                    &obj,
                                                    &data,
-                                                   &field,
-                                                   &numFieldBits)) ||
+                                                   &field
+                                                   )) ||
             (!kwargs && PyArg_ParseTuple(args,
                                          "O|III:moose_ObjId_init_from_id",
                                          &obj,
                                          &data,
-                                         &field,
-                                         &numFieldBits))){
+                                         &field
+                                         ))){
             PyErr_Clear();
             // If first argument is an Id object, construct an ObjId out of it
             if (Id_Check(obj)){
                 if (!Id::isValid(((_Id*)obj)->id_)){
                     RAISE_INVALID_ID(-1, "moose_ObjId_init_from_id");
                 }                    
-                instance->oid_ = ObjId(((_Id*)obj)->id_,
-                                       DataId(data, field, numFieldBits));
+                instance->oid_ = ObjId(((_Id*)obj)->id_, data, field );
                 return 0;
             } else if (PyObject_IsInstance(obj, (PyObject*)&ObjIdType)){
                 if (!Id::isValid(((_ObjId*)obj)->oid_.id)){
@@ -214,7 +212,7 @@ extern "C" {
         
     PyDoc_STRVAR(moose_ObjId_init_documentation,
                  "__init__(path, dims, dtype) or"
-                 " __init__(id, dataIndex, fieldIndex, numFieldBits)\n"
+                 " __init__(id, dataIndex, fieldIndex)\n"
                  "Initialize moose object\n"
                  "Parameters\n"
                  "----------\n"
@@ -250,7 +248,7 @@ extern "C" {
         PyErr_SetString(PyExc_ValueError,
                         "Could not parse arguments. "
                         " Call __init__(path, dims, dtype, parent) or"
-                        " __init__(id, dataIndex, fieldIndex, numFieldBits)");        
+                        " __init__(id, dataIndex, fieldIndex)");        
         return -1;
     }
 
@@ -265,8 +263,8 @@ extern "C" {
         }
         long ret = (long)(self->oid_.id.value());
         ret |= (O32_HOST_ORDER == O32_BIG_ENDIAN)? \
-                ((long)(self->oid_.dataId.value() >> 32))    \
-                :((long)(self->oid_.dataId.value() << 32));
+                ((long)(self->oid_.dataId >> 32))    \
+                :((long)(self->oid_.dataId << 32));
         return ret;
     }
     
@@ -278,7 +276,7 @@ extern "C" {
         ostringstream repr;
         repr << "<moose." << Field<string>::get(self->oid_, "className") << ": "
              << "id=" << self->oid_.id.value() << ", "
-             << "dataId=" << self->oid_.dataId.value() << ", "
+             << "dataId=" << self->oid_.dataId << ", "
              << "path=" << self->oid_.path() << ">";
         return PyString_FromString(repr.str().c_str());
     } // !  moose_ObjId_repr
@@ -1694,7 +1692,7 @@ PyObject* set_destFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type
         if (!Id::isValid(self->oid_.id)){
             RAISE_INVALID_ID(NULL, "moose_ObjId_getDataIndex");
         }        
-        PyObject * ret = Py_BuildValue("I", self->oid_.dataId.value());
+        PyObject * ret = Py_BuildValue("I", self->oid_.dataId);
         return ret;
     }
 
@@ -1706,7 +1704,7 @@ PyObject* set_destFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type
         if (!Id::isValid(self->oid_.id)){
             RAISE_INVALID_ID(NULL, "moose_ObjId_getFieldIndex");
         }
-        PyObject * ret = Py_BuildValue("I", self->oid_.dataId.value());
+        PyObject * ret = Py_BuildValue("I", self->oid_.dataId);
         return ret;
     }
     

@@ -68,6 +68,12 @@ unsigned int Element::numData() const
 	return numData_;
 }
 
+unsigned int Element::numField( unsigned int entry ) const
+{
+	return 1;
+}
+
+
 const Cinfo* Element::cinfo() const
 {
 	return cinfo_;

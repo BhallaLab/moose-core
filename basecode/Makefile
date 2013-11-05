@@ -32,6 +32,7 @@ OBJ = \
 	Id.o \
 	ObjId.o \
 	SetGet.o \
+	EpFunc.o \
 	SparseMatrix.o \
 	doubleEq.o \
 	testAsync.o	\

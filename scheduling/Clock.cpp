@@ -350,6 +350,12 @@ unsigned int Clock::getCurrentStep() const
 	return currentStep_;
 }
 
+unsigned int Clock::getNumTicks() const
+{
+	return numTicks;
+}
+
+
 vector< double > Clock::getDts() const
 {
 	vector< double > ret;

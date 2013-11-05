@@ -73,11 +73,6 @@ unsigned int Shell::numCores()
 	return numCores_;
 }
 
-unsigned int Shell::numProcessThreads()
-{
-	return numProcessThreads_;
-}
-
 unsigned int Shell::numNodes()
 {
 	return numNodes_;
@@ -92,19 +87,3 @@ bool Shell::inBlockingParserCall()
 {
 	return isBlockedOnParser_;
 }
-
-bool Shell::isSingleThreaded()
-{
-	return ( numProcessThreads_ == 0 );
-}
-
-bool Shell::keepLooping()
-{
-	return keepLooping_;
-}
-
-bool Shell::isParserIdle()
-{
-	return Shell::isParserIdle_;
-}
-
