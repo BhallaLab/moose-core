@@ -46,17 +46,7 @@ Element::~Element()
 {
 	// cout << "deleting element " << getName() << endl;
 	cinfo_->dinfo()->destroyData( data_ );
-	cinfo_ = 0; // A flag that the Element is doomed, used to avoid lookups when deleting Msgs.
-	for ( vector< vector< MsgFuncBinding > >::iterator i = msgBinding_.begin(); i != msgBinding_.end(); ++i ) {
-		for ( vector< MsgFuncBinding >::iterator j = i->begin(); j != i->end(); ++j ) {
-			// This call internally protects against double deletion.
-			Msg::deleteMsg( j->mid );
-		}
-	}
-
-	for ( vector< MsgId >::iterator i = m_.begin(); i != m_.end(); ++i )
-		if ( *i ) // Dropped Msgs set this pointer to zero, so skip them.
-			Msg::deleteMsg( *i );
+	clearCinfoAndMsgs();
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -447,4 +437,20 @@ unsigned int Element::getFieldsOfOutgoingMsg( MsgId mid,
 		}
 	}
 	return ret.size();
+}
+
+// Protected function, used only during Element destruction.
+void Element::clearCinfoAndMsgs()
+{
+	cinfo_ = 0; // A flag that the Element is doomed, used to avoid lookups when deleting Msgs.
+	for ( vector< vector< MsgFuncBinding > >::iterator i = msgBinding_.begin(); i != msgBinding_.end(); ++i ) {
+		for ( vector< MsgFuncBinding >::iterator j = i->begin(); j != i->end(); ++j ) {
+			// This call internally protects against double deletion.
+			Msg::deleteMsg( j->mid );
+		}
+	}
+
+	for ( vector< MsgId >::iterator i = m_.begin(); i != m_.end(); ++i )
+		if ( *i ) // Dropped Msgs set this pointer to zero, so skip them.
+			Msg::deleteMsg( *i );
 }

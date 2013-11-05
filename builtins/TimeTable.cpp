@@ -11,7 +11,6 @@
 
 #include "header.h"
 #include <fstream>
-#include "TableEntry.h"
 #include "TableBase.h"
 #include "TimeTable.h"
 
@@ -100,10 +99,10 @@ static const Cinfo* timeTableCinfo = TimeTable::initCinfo();
 
 TimeTable::TimeTable()
   :
+  filename_(""),
   state_( 0.0 ),
   curPos_( 0 ),
-  method_( 4 ),
-  filename_("")
+  method_( 4 )
 { ; }
 
 TimeTable::~TimeTable()
@@ -198,9 +197,8 @@ void TimeTable::process(const Eref& e, ProcPtr p)
 
   if ( curPos_ < vec().size() &&
        p->currTime >= vec()[curPos_] ) {
-      event()->send( e, p->threadIndexInGroup, vec()[curPos_]);
+      event()->send( e, vec()[curPos_]);
       curPos_++;
       state_ = 1;
   }
-  //~ send1< double >( e, stateSlot, state_ );
 }

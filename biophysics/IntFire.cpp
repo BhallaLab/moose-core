@@ -9,8 +9,9 @@
 
 #include <queue>
 #include "header.h"
+#include "SpikeRingBuffer.h"
 #include "Synapse.h"
-#include "SynBase.h"
+#include "SynHandler.h"
 #include "IntFire.h"
 
 static SrcFinfo1< double > *spike() {
@@ -108,7 +109,7 @@ const Cinfo* IntFire::initCinfo()
 
 	static Cinfo intFireCinfo (
 		"IntFire",
-		SynBase::initCinfo(),
+		SynHandler::initCinfo(),
 		intFireFinfos,
 		sizeof( intFireFinfos ) / sizeof ( Finfo* ),
 		new Dinfo< IntFire >()
@@ -133,40 +134,12 @@ IntFire::IntFire( double thresh, double tau )
 
 void IntFire::process( const Eref &e, ProcPtr p )
 {
-	/*
-	if ( e.index().data() % 100 == 0 ) {
-		cout << Shell::myNode() << "." << p->threadIndexInGroup << ":IntFire[" << e.index().data() << "]::process dt = " << p->dt << ", " << " t= " << p->currTime << ", #Pending= " << pendingEvents_.size() << ", Vm= " << Vm_ << endl << flush;
-	}
-	*/
-	/*
-	if ( e.index().data() == 1023 && pendingEvents_.size() > 0 && p->currTime > 0.9 ) {
-		cout << "pending size on " << e.index() << " = " << pendingEvents_.size() << endl;
-		*/
-		/*
-		while ( !pendingEvents_.empty() ) {
-			double v = pendingEvents_.top().getWeight();
-			double d = pendingEvents_.top().getDelay();
-			cout << "(" << v << "," << d << ")	";
-			pendingEvents_.pop();
-		}
-	}
-	*/
-	while ( !pendingEvents_.empty() &&
-		pendingEvents_.top().getDelay() <= p->currTime ) {
-			Vm_ += pendingEvents_.top().getWeight();
-			pendingEvents_.pop();
-	}
+	Vm_ += popBuffer();
 	if (  ( p->currTime - lastSpike_ ) < refractoryPeriod_ )
 		Vm_ = 0.0;
 
 	if ( Vm_ > thresh_ ) {
-		spike()->send( e, p->threadIndexInGroup, p->currTime );
-		// e.sendSpike( spikeSlot, p->currTime );
-		/*
-		if ( e.index().value() % 100 == 0 ) {
-			cout << "IntFire[" << e.index().data() << "]::process, zeroing Vm= " << Vm_ << ", Ptr = " << this << endl;
-		}
-		*/
+		spike()->send( e, p->currTime );
 		Vm_ = -1.0e-7;
 	} else {
 		Vm_ *= ( 1.0 - p->dt / tau_ );
@@ -200,26 +173,9 @@ void IntFire::process( const Eref &e, ProcPtr p )
 */
 }
 
-
-/**
- * Inserts an event into the pendingEvents queue for spikes.
- * Note that this function lives on the Element managing the Synapses,
- * and gets redirected to the IntFire.
- * This is called by UpFunc1< double >
- */
-void IntFire::innerAddSpike( unsigned int index, const double time )
-{
-	assert( index < getNumSynapses() );
-	Synapse s( *getSynapse( index ), time );
-	// cout << index << "	";
-	pendingEvents_.push( s );
-}
-
 void IntFire::reinit( const Eref& e, ProcPtr p )
 {
-	// pendingEvents_.resize( 0 );
-	while( !pendingEvents_.empty() )
-		pendingEvents_.pop();
+	reinitBuffer( p->dt );
 	Vm_ = 0.0;
 }
 

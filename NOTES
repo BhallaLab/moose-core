@@ -312,4 +312,77 @@ I have completely redone the scheduling. Now the Clock does it all, and
 much more simply and possibly faster. Eliminated Tick related objects.
 Now compiles through the scheduling directory, but tests only as placeholders.
 Now compiles through the builtins directory. 
+Now a bit stuck with the Synapse and FieldElement, which I have sidestepped
+so far. 
+
+Desiderata: 
+- Very fast Synapse handling. This requires that both the parent object
+	and the synapse entry are rapidly accessed.
+	I had thought I would do this by returning the base data entry, with
+	the index from eref and lookup func for the Field from EpFunc.
+	Needs an extra lookup compared to the regular Msg because we need to
+		engage the parent class as well as the specific Synapse.
+	addSpike( double time ) {
+		ringBuffer->addEvent( time + delay_, weight_ );
+	}
+	This requires the Synapse to a) have a pointer to the ring buffer,
+		and b) the parent class have a ring buffer in it to use.
+
+	A more complicated one might also look at association with postsyn Vm,
+	but that would be computed at time of arrival, handled by the Receptor.
+	If we do this by passing pointers in from the UpFunc we could refer
+	to the Receptor level:
+	Receptor::addSpike( const Eref& e, double time ) {
+		const Synapse& syn = synapses_[e.fieldIndex()];
+		ringBuffer.addEvent( time + syn.delay(), syn.weight() );
+	}
+	This requires that there be a common base class for the Receptors that
+	all Synapses could use.
+	Or we could refer to the Synapse level:
+	Synapse::addSpike( const Eref& e, double time ) {
+		auto rec = reinterpret_cast< Receptor* >( e.plainData() )
+		rec->ringBuffer.addEvent( time + delay_, weight_ );
+	}
+	This too requires a common base class for the Receptors.
+
+- Easy access to the Field, preferably deal directly with its pointer.
+	This is certainly doable with the lookup, and even more so with
+	the precomputed Msg ptrs, but then how to handle parent?
+	In cases where the parent isn't needed, we could design an EpFunc
+	to directly call the Field.
+	The first option above would do this directly.
+
+The first option is nicest, also fits well with the idea of single precomputed
+target pointers for messages. Costs an extra pointer in each Synapse. Minor.
+This implements very smoothly, but there is another consideration. 
+The synapse class needs to provide a callback so that when additional spike 
+messages come in, the synapse buffer is expanded to match.
+- Callback detects message addition and removal
+- Callback would modify # of synapses.
+- Callback may assign a fieldIndex to the message itself.
+
+This is fine, but in the Synapse we have a problem because the callback
+needs to talk to the parent SynHandler if it wants to resize the Synapse array.
+Easily handled by looking up the parent ObjId of the Synapse.
+
+In the process of setting up the SynHandler. Next:
+Fix up FieldElement stuff to access synapses from Eref
+Fix up FieldElement and Element stuff to deal with callbacks
+Fix up Msgs to use ObjIds to identify
+Fix up Msgs to handle the specification of fieldIndex.
+
 ===========================================================================
+4 Nov 2013.
+Fixing up testAsync.cpp:testSetGetSynapse, now that I've restructured
+the FieldElement stuff.
+
+May need to go back and redefine ObjId so it specifies the fieldIndex too, 
+just like the Eref.
+
+Getting close to compilation completing. Had to go back to TableBase.
+
+Stuck a bit in Table.cpp, figure out what to do with recvDataBuf.
+===========================================================================
+5 Nov 2013
+Finally cleared first pass of compilation, link still fails with lots of 
+unresolved functions.

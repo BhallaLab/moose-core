@@ -112,30 +112,12 @@ const Cinfo* TableBase::initCinfo()
                         "Handles request to clear the data vector",
                         new OpFunc0< TableBase > (&TableBase::clearVec));
 
-		//////////////////////////////////////////////////////////////
-		// SharedMsg Definitions
-		//////////////////////////////////////////////////////////////
-
-		//////////////////////////////////////////////////////////////
-		// Field Element for the vector data
-		// Use a limit of 2^20 entries for the tables, about 1 million.
-		//////////////////////////////////////////////////////////////
-		static FieldElementFinfo< TableBase, double > tableEntryFinfo( 
-			"table", 
-			"Field Element for TableBase entries",
-			TableEntry::initCinfo(),
-			&TableBase::lookupVec,
-			&TableBase::setVecSize,
-			&TableBase::getVecSize,
-			1048576
-		);
 
 	static Finfo* tableBaseFinfos[] = {
 		&vec,			// Value
 		&outputValue,	// ReadOnlyValue
 		&size,			// ReadOnlyValue
 		&y,				// ReadOnlyLookupValue
-		&group,			// DestFinfo
 		&linearTransform,	// DestFinfo
 		&xplot,			// DestFinfo
 		&plainPlot,			// DestFinfo
@@ -145,7 +127,6 @@ const Cinfo* TableBase::initCinfo()
 		&compareXplot,		// DestFinfo
 		&compareVec,		// DestFinfo
                 &clearVec,
-		&tableEntryFinfo,	// FieldElementFinfo
 	};
 
 	static Cinfo tableCinfo (
@@ -477,15 +458,6 @@ double TableBase::interpolate( double xmin, double xmax, double input )
 //////////////////////////////////////////////////////////////
 // Element Field Definitions
 //////////////////////////////////////////////////////////////
-
-double* TableBase::lookupVec( unsigned int index )
-{
-	if ( index < vec_.size() )
-		return &( vec_[index] );
-	cout << "Error: TableBase::lookupTableBaseEntry: Index " << index << 
-		" >= vector size " << vec_.size() << endl;
-	return 0;
-}
 
 void TableBase::setVecSize( unsigned int num )
 {

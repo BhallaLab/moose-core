@@ -7,12 +7,10 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include <queue>
 #include "header.h"
+#include "SpikeRingBuffer.h"
 #include "Synapse.h"
-#include "SynBase.h"
-#include "Dinfo.h"
-#include "UpFunc.h"
+#include "SynHandler.h"
 
 const Cinfo* Synapse::initCinfo()
 {
@@ -31,16 +29,13 @@ const Cinfo* Synapse::initCinfo()
 		);
 
 		static DestFinfo addSpike( "addSpike",
-			"Handles arriving spike messages, by redirecting up to parent "
-			"SynBase object",
-			new UpFunc1< SynBase, double >( &SynBase::addSpike ) );
+			"Handles arriving spike messages, inserts into event queue.",
+			new OpFunc1< Synapse, double >( &Synapse::addSpike ) );
 
 	static Finfo* synapseFinfos[] = {
-		// Fields
-		&weight,
-		&delay,
-		// DestFinfo
-		&addSpike,
+		&weight,		// Field
+		&delay,			// Field
+		&addSpike,		// DestFinfo
 	};
 
 	static Cinfo synapseCinfo (
@@ -57,19 +52,7 @@ const Cinfo* Synapse::initCinfo()
 static const Cinfo* synapseCinfo = Synapse::initCinfo();
 
 Synapse::Synapse()
-	: weight_( 1.0 ), delay_( 0.0 )
-{
-	;
-}
-
-Synapse::Synapse( double w, double d ) 
-	: weight_( w ), delay_( d )
-{
-	;
-}
-
-Synapse::Synapse( const Synapse& other, double time )
-	: weight_( other.weight_ ), delay_( time + other.delay_ )
+	: weight_( 1.0 ), delay_( 0.0 ), buffer_( 0 )
 {
 	;
 }
@@ -93,3 +76,50 @@ double Synapse::getDelay() const
 {
 	return delay_;
 }
+
+void Synapse::setBuffer( SpikeRingBuffer* buf )
+{
+	buffer_ = buf;
+}
+
+
+void Synapse::addSpike( double time )
+{
+	buffer_->addSpike( time + delay_, weight_ );
+}
+
+/////////////////////////////////////////////////////////////
+// Callbacks for message add/drop
+/////////////////////////////////////////////////////////////
+
+// static function, executed by the Synapse Element when a message is
+// added to the Element. Expands the parent synapse array to fit.
+void Synapse::addMsgCallback(
+				const Eref& e, const string& finfoName, 
+			    ObjId msg, unsigned int msgLookup )
+{
+	if ( finfoName == "addSpike" ) {
+		ObjId pa = Neutral::parent( e );
+		SynHandler* sh = reinterpret_cast< SynHandler* >( pa.data() );
+		unsigned int synapseNumber = sh->addSynapse();
+		SetGet2< unsigned int, unsigned int >::set( 
+						msg, "fieldIndex", msgLookup, synapseNumber );
+	}
+}
+
+// static function, executed by the Synapse Element when a message is
+// dropped from the Element. Contracts the parent synapse array to fit.
+// Typically the SynHandler won't resize, easier to just leave an
+// unused entry. Could even reuse if a synapse is added later, but all
+// this policy is independent of the Synapse class.
+void Synapse::dropMsgCallback(
+				const Eref& e, const string& finfoName, 
+			    ObjId msg, unsigned int msgLookup )
+{
+	if ( finfoName == "addSpike" ) {
+		ObjId pa = Neutral::parent( e );
+		SynHandler* sh = reinterpret_cast< SynHandler* >( pa.data() );
+		sh->dropSynapse( msgLookup );
+	}
+}
+
