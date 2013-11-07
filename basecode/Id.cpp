@@ -167,15 +167,6 @@ unsigned int Id::value() const
 	return id_;
 }
 
-// Static function, called by init(). Does nasty reallocation for setup.
-void Id::initIds() 
-{
-	// Fixing up tickId.
-	Id::elements()[2] = Id::elements().back();
-	Id( 2 ).element()->id_ = 2;
-	Id::elements().pop_back();
-}
-
 //////////////////////////////////////////////////////////////
 //	Id utility
 //////////////////////////////////////////////////////////////

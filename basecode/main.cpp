@@ -192,7 +192,6 @@ Id init( int argc, char** argv, bool& doUnitTests, bool& doRegressionTests )
 
 	Id clockId = Id::nextId();
 	assert( clockId.value() == 1 );
-	Id tickId = Id::nextId();
 	Id classMasterId = Id::nextId();
 
 	Shell* s = reinterpret_cast< Shell* >( shellId.eref().data() );
@@ -205,30 +204,15 @@ Id init( int argc, char** argv, bool& doUnitTests, bool& doRegressionTests )
 
 	// Element* clocke = 
 	new Element( clockId, Clock::initCinfo(), "clock", 1, 1 );
-
-	// Some ugly hacks here to shift the Tick object to be Id(2).
-	Id::initIds(); // Shifted the dirty work to the Id class.
-	/*
-	Id::elements()[2] = Id::elements().back();
-	tickId.element()->id_ = 2;
-	Id::elements().pop_back();
-	*/
-
-	// Id tickId( 2 );
-	assert( tickId() != 0 );
-	assert( tickId.value() == 2 );
-	assert( tickId()->getName() == "tick" ) ;
-
 	new Element( classMasterId, Neutral::initCinfo(), "classes", 1, 1 );
 
 	assert ( shellId == Id() );
 	assert( clockId == Id( 1 ) );
-	assert( tickId == Id( 2 ) );
-	assert( classMasterId == Id( 3 ) );
+	assert( classMasterId == Id( 2 ) );
 
 
 
-	s->connectMasterMsg();
+	// s->connectMasterMsg();
 
 	Shell::adopt( shellId, clockId );
 	Shell::adopt( shellId, classMasterId );

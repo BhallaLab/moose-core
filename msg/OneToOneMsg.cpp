@@ -33,31 +33,34 @@ OneToOneMsg::~OneToOneMsg()
 Eref OneToOneMsg::firstTgt( const Eref& src ) const 
 {
 	if ( src.element() == e1_ ) {
-		return Eref( e2_, src.index() );
-		/*
-		if ( e2_->dataHandler()->getFieldArraySize( 0 ) == 0 ) {
-			if ( e2_->dataHandler()->isDataHere( src.index() ) )
-				return Eref( e2_, src.index() );
-		} else {
-			if ( e2_->dataHandler()->getFieldArraySize( 0 ) > 
-				src.index().data() )
-			return Eref( e2_, DataId( 0, src.index().data() ) );
-		}
-		*/
+		return Eref( e2_, src.dataIndex() );
 	} else if ( src.element() == e2_ ) {
-		return Eref( e1_, src.index() );
-		/*
-		if ( e2_->dataHandler()->getFieldArraySize( 0 ) == 0 ) {
-			if ( e1_->dataHandler()->isDataHere( src.index() ) )
-				return Eref( e1_, src.index() );
-		} else {
-			if ( e1_->dataHandler()->getFieldArraySize( 0 ) > 
-				src.index().data() )
-				return Eref( e1_, DataId( 0, src.index().data() ) );
-		}
-		*/
+		return Eref( e1_, src.dataIndex() );
 	}
 	return Eref( 0, 0 );
+}
+
+void OneToOneMsg::sources( vector< vector< Eref > > & v) const
+{
+	v.resize( 0 );
+	unsigned int n = e1_->numData();
+	if ( n > e2_->numData() )
+		n = e2_->numData();
+	v.resize( n );
+	for ( unsigned int i = 0; i < n; ++i ) {
+		v[i].resize( 1, Eref( e1_, i ) );
+	}
+}
+
+void OneToOneMsg::targets( vector< vector< Eref > > & v) const
+{
+	unsigned int n = e1_->numData();
+	if ( n > e2_->numData() )
+		n = e2_->numData();
+	v.resize( n );
+	for ( unsigned int i = 0; i < n; ++i ) {
+		v[i].resize( 1, Eref( e2_, i ) );
+	}
 }
 
 Id OneToOneMsg::managerId() const

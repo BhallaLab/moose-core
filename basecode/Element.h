@@ -10,6 +10,7 @@
 #define _ELEMENT_H
 
 class SrcFinfo;
+class FuncOrder;
 
 /**
  * Base class for all object lookkups. Wrapper for actual data.
@@ -24,7 +25,6 @@ class Element
 	friend void testSynapse();
 	friend void testSyncArray( unsigned int, unsigned int, unsigned int );
 	friend void testSparseMsg();
-	friend void Id::initIds();
 	public:
 		/**
 		 * This is the main constructor, used by Shell::innerCreate
@@ -171,6 +171,19 @@ class Element
 		void showMsg() const;
 
 		/**
+		 * Rebuild digested message array; traverse all messages to do so
+		 */
+		void digestMessages();
+
+		/**
+		 * Inner function that adds targets to a single function in the
+		 * MsgDigest
+		 */
+		void putTargetsInDigest(
+					   	unsigned int srcNum, const MsgFuncBinding& mfb,
+						const FuncOrder& fo );
+
+		/**
 		 * Gets the class information for this Element
 		 */
 		const Cinfo* cinfo() const;
@@ -301,8 +314,20 @@ class Element
 		 * Digested vector of message traversal sets. Each set has a
 		 * Func and element to lead off, followed by a list of target
 		 * indices and fields.
+		 * The indexing is like this:
+		 * msgDigest_[ numSrcMsgs * DataId + srcMsgIndex ][ func# ]
+		 * So we look up a vector of MsgDigests, each with a unique func,
+		 * based on both the DataId and the message number. This is designed
+		 * so that if we expand the number of data entries we don't have
+		 * to redo the ordering.
 		 */
 		vector< vector < MsgDigest > > msgDigest_;
+
+		/**
+		 * Digested targets from all source Msgs. Indexed as
+		 * msgTargets_[ numSrcMsgs * DataId + srcMsgIndex ]
+		 */
+		// vector< vector< Eref > > msgTargets_;
 };
 
 #endif // _ELEMENT_H

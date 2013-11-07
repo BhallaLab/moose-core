@@ -28,14 +28,40 @@ DiagonalMsg::~DiagonalMsg()
 Eref DiagonalMsg::firstTgt( const Eref& src ) const 
 {
 	if ( src.element() == e1_ ) {
-		unsigned int nextData = src.index() + stride_;
+		unsigned int nextData = src.dataIndex() + stride_;
 		return Eref( e2_, nextData );
 	}
 	else if ( src.element() == e2_ ) {
-		unsigned int nextData = src.index() - stride_;
+		unsigned int nextData = src.dataIndex() - stride_;
 		return Eref( e1_, nextData );
 	}
 	return Eref( 0, 0 );
+}
+
+void DiagonalMsg::sources( vector< vector < Eref > >& v ) const
+{
+	v.clear();
+	v.resize( e2_->numData() );
+	int j = -stride_;
+	int numData1 = e1_->numData();
+	for ( unsigned int i = 0; i < e2_->numData(); ++i ) {
+		if ( j >= 0 && j < numData1 )
+			v[i].resize( 1, Eref( e1_, j ) );
+		j++;
+	}
+}
+
+void DiagonalMsg::targets( vector< vector< Eref > >& v ) const
+{
+	v.clear();
+	v.resize( e1_->numData() );
+	int j = stride_;
+	int numData2 = e2_->numData();
+	for ( unsigned int i = 0; i < e1_->numData(); ++i ) {
+		if ( j >= 0 && j < numData2 )
+			v[i].resize( 1, Eref( e2_, j ) );
+		j++;
+	}
 }
 
 Id DiagonalMsg::managerId() const

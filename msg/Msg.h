@@ -46,6 +46,18 @@ class Msg
 		 */
 		virtual Eref firstTgt( const Eref& src ) const = 0;
 
+		 /**
+		  * Return all the sources on e1. ALLDATA used when the targets 
+		  * include all data entries on a target.
+		  */
+		 virtual void sources ( vector< vector< Eref > >& v ) const = 0;
+
+		 /**
+		  * Return all the targets on e2. ALLDATA used when the targets 
+		  * include all data entries on a target.
+		  */
+		 virtual void targets( vector< vector< Eref > >& v ) const = 0;
+
 		/**
 		 * Return the Id of the managing Element. Each derived Msg class
 		 * has its own manager as a static field. This is predefined at
@@ -57,12 +69,6 @@ class Msg
 		 * Return the Eref of the managing object.
 		 */
 		Eref manager() const;
-
-		/**
-		 * Fills in the specified dataId for this msg.
-		 * Deprecated
-		void setDataId( unsigned int di ) const;
-		 */
 
 		/**
 		 * Return the first element
@@ -87,6 +93,7 @@ class Msg
 		 * Return the second element id
 		 */
 		 Id getE2() const;
+
 
 		 /**
 		  * Return names of SrcFinfos for messages going from e1 to e2.
@@ -151,16 +158,6 @@ class Msg
 		bool isForward( const Element* src ) const {
 			return ( e1_ == src );
 		}
-
-		/**
-		 * This function sorts out message direction and whether it should
-		 * be added to the Queue at all. There is a default implementation
-		 * in which it always adds the message to the queue, but this has to
-		 * specialized for any Msg subclass which has specific inputs.
-		virtual void addToQ( const Element* src, Qinfo& q, 
-			const ProcInfo* p, MsgFuncBinding i, const char* arg ) 
-			const;
-		 */
 
 		/**
 		 * Looks up the message on the global vector of Msgs. No checks,

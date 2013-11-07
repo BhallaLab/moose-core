@@ -366,10 +366,14 @@ needs to talk to the parent SynHandler if it wants to resize the Synapse array.
 Easily handled by looking up the parent ObjId of the Synapse.
 
 In the process of setting up the SynHandler. Next:
+Fix up Msgs to do the precompiled fast lookup
 Fix up FieldElement stuff to access synapses from Eref
 Fix up FieldElement and Element stuff to deal with callbacks
 Fix up Msgs to use ObjIds to identify
 Fix up Msgs to handle the specification of fieldIndex.
+Work out how to talk to nodes on parallel machines. Socket?
+Work out how to do SetGet on parallel machines
+Work out parallel messaging.
 
 ===========================================================================
 4 Nov 2013.
@@ -387,3 +391,44 @@ Stuck a bit in Table.cpp, figure out what to do with recvDataBuf.
 Finally cleared first pass of compilation, link still fails with lots of 
 unresolved functions. Checkin 4824.
 Finally compiles. Doesn't run.
+
+Many nasty bugs later, I have now to deal with the MsgDigest for fast 
+messaging. In testAsync::testSendMsg.
+===========================================================================
+6 Nov 2013
+The 'send' command has now taken shape with the MsgDigest. It is far from
+as efficient as envisioned:
+
+1. SrcFinfo->getBindIndex()
+2. Compute offset of specific DataId * specific src func.
+3. Look up MsgDigest vector from Eref.
+4. Iterate through MsgDigest
+5. Lookup function
+6. Iterate through targets
+7. Check if they are ALLDATA
+	8a: Make temp eref
+	8b: lookup numData
+	8c: Create reference k
+	8d: Iterate over ALLDATA
+	8e: call function
+else
+	8a. Call function.
+
+Here are some cases:
+				# ops
+Single object target:		8 + F
+N unique object targets		5 + 3N + NF
+Single Alldata target 
+	with X entries		10+2X + XF
+N Alldata target 
+	with X entries each	5 + 5N + 2X + NXF
+
+F is cost of function.
+
+Immediate goal: Have the Msg do its own digest... No, need to store
+this in Element because there would be a number of targets in each digest.
+
+Now setting up Msg::sources and Msg::targets() to build digest.
+===========================================================================
+7 Nov.
+Seems like some messages are beginning to go...
