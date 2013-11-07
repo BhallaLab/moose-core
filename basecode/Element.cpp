@@ -47,8 +47,10 @@ Element::Element( Id id, const Element* orig, unsigned int n,
 Element::~Element()
 {
 	// cout << "deleting element " << getName() << endl;
-	cinfo_->dinfo()->destroyData( data_ );
-	clearCinfoAndMsgs();
+	if ( cinfo_ ) {
+		cinfo_->dinfo()->destroyData( data_ );
+		clearCinfoAndMsgs();
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////

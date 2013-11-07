@@ -32,7 +32,7 @@ ostream& operator <<( ostream& s, const Eref& e )
 
 char* Eref::data() const
 {
-	return e_->data( i_ );
+	return e_->data( i_, f_ );
 }
 
 bool Eref::isDataHere() const
@@ -42,7 +42,7 @@ bool Eref::isDataHere() const
 
 ObjId Eref::objId() const
 {
-	return ObjId( e_->id(), i_ );
+	return ObjId( e_->id(), i_, f_ );
 }
 
 Id Eref::id() const
