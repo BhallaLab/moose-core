@@ -14,6 +14,7 @@
  * Manages a projection where each entry in source array
  * connects to the corresponding entry (with same index)
  * in dest array.
+ * If there is a mismatch in number of entries, the overhang is ignored.
  */
 class OneToOneMsg: public Msg
 {
@@ -23,6 +24,9 @@ class OneToOneMsg: public Msg
 		~OneToOneMsg();
 
 		Eref firstTgt( const Eref& src ) const;
+
+		void sources( vector< vector< Eref > >& v ) const;
+		void targets( vector< vector< Eref > >& v ) const;
 
 		Id managerId() const;
 

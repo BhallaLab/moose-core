@@ -51,21 +51,36 @@ void testSendMsg()
 
 	Id i1 = Id::nextId();
 	Id i2 = Id::nextId();
-	Element* ret = new Element( i1, ac, "test1", 1, 1 );
+	Element* ret = new Element( i1, ac, "test1", size, 1 );
 	// bool ret = nc->create( i1, "test1", size );
 	assert( ret );
 	// ret = nc->create( i2, "test2", size );
-	ret = new Element( i2, ac, "test2", 1, 1 );
+	ret = new Element( i2, ac, "test2", size, 1 );
 	assert( ret );
 
 	Eref e1 = i1.eref();
 	Eref e2 = i2.eref();
 
 	Msg* m = new OneToOneMsg( Msg::nextMsgId(), e1.element(), e2.element() );
+	vector< vector< Eref > > ver;
+	m->targets( ver );
+	assert( ver.size() == size );
+	assert( ver[0].size() == 1 );
+	assert( ver[0][0].element() == e2.element() );
+	assert( ver[0][0].dataIndex() == e2.dataIndex() );
+	assert( ver[55].size() == 1 );
+	assert( ver[55][0].element() == e2.element() );
+	assert( ver[55][0].dataIndex() == 55 );
 	
 	SrcFinfo1<double> s( "test", "" );
 	s.setBindIndex( 0 );
 	e1.element()->addMsgAndFunc( m->mid(), fid, s.getBindIndex() );
+	e1.element()->digestMessages();
+	const vector< MsgDigest >& md = e1.element()->msgDigest( 0 );
+	assert( md.size() == 1 );
+	assert( md[0].targets.size() == 1 );
+	assert( md[0].targets[0].element() == e2.element() );
+	assert( md[0].targets[0].dataIndex() == e2.dataIndex() );
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		double x = i + i * i;
@@ -91,10 +106,10 @@ void testCreateMsg()
 	unsigned int size = 100;
 	Id i1 = Id::nextId();
 	Id i2 = Id::nextId();
-	Element* temp = new Element( i1, ac, "test1", 1 );
+	Element* temp = new Element( i1, ac, "test1", size, 1 );
 	// bool ret = nc->create( i1, "test1", size );
 	assert( temp );
-	temp = new Element( i2, ac, "test2", 1, 1 );
+	temp = new Element( i2, ac, "test2", size, 1 );
 	assert( temp );
 
 	Eref e1 = i1.eref();
@@ -109,11 +124,14 @@ void testCreateMsg()
 	bool ret = f1->addMsg( f2, m->mid(), e1.element() );
 	
 	assert( ret );
+	e1.element()->digestMessages();
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		const SrcFinfo1< double >* sf = dynamic_cast< const SrcFinfo1< double >* >( f1 );
 		assert( sf != 0 );
 		sf->send( Eref( e1.element(), i ), double( i ) );
+		double val = reinterpret_cast< Arith* >(e2.element()->data( i ) )->getArg1();
+		assert( doubleEq( val, i ) );
 	}
 
 	/*

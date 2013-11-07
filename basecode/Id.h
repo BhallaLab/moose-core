@@ -155,9 +155,6 @@ class Id
         }                
 
 		//////////////////////////////////////////////////////////////
-		//	Special setup functions, used only by init.
-		//////////////////////////////////////////////////////////////
-		static void initIds();
 
 		friend ostream& operator <<( ostream& s, const Id& i );
 		friend istream& operator >>( istream& s, Id& i );

@@ -25,6 +25,8 @@ class OneToAllMsg: public Msg
 
 		Eref firstTgt( const Eref& src ) const;
 
+		void sources( vector< vector< Eref > >& v ) const;
+		void targets( vector< vector< Eref > >& v ) const;
 
 		Id managerId() const;
 

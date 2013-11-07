@@ -1,5 +1,4 @@
 /**********************************************************************
-** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment.
 **           Copyright (C) 2003-2010 Upinder S. Bhalla. and NCBS
 ** It is made available under the terms of the
@@ -35,10 +34,8 @@ class DiagonalMsg: public Msg
 
 		Eref firstTgt( const Eref& src ) const;
 
-		/*
-		static bool add( Element* e1, const string& srcField, 
-			Element* e2, const string& destField, int stride );
-			*/
+		void sources( vector< vector< Eref > >& v ) const;
+		void targets( vector< vector< Eref > >& v ) const;
 
 		Id managerId() const;
 
@@ -67,8 +64,6 @@ class DiagonalMsg: public Msg
 		static const Cinfo* initCinfo();
 	private:
 		int stride_; // Increment between targets.
-		unsigned int numThreads_;
-		unsigned int numNodes_;
 		static Id managerId_;
 };
 

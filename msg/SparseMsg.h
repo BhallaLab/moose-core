@@ -47,6 +47,9 @@ class SparseMsg: public Msg
 		~SparseMsg();
 
 		Eref firstTgt( const Eref& src ) const;
+
+		void sources( vector< vector< Eref > >& v ) const;
+		void targets( vector< vector< Eref > >& v ) const;
 		
 		unsigned int randomConnect( double probability );
 

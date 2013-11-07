@@ -15,6 +15,7 @@ class Eref
 	public:
 
 		friend ostream& operator <<( ostream& s, const Eref& e );
+		Eref();
 		Eref( Element* e, DataId index, unsigned int field = 0 );
 
 		/**
@@ -32,7 +33,7 @@ class Eref
 		/**
 		 * Returns data index, for now typecast to unsigned int.
 		 */
-		DataId index() const {
+		DataId dataIndex() const {
 			return i_;
 		}
 

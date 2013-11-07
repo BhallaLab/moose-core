@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "FuncOrder.h"
 
 Element::Element( Id id, const Cinfo* c, const string& name, 
 	unsigned int numData, bool isGlobal )
@@ -18,6 +19,7 @@ Element::Element( Id id, const Cinfo* c, const string& name,
 {
 	id.bindIdToElement( this );
 	data_ = c->dinfo()->allocData( numData );
+	numData_ = numData;
 	c->postCreationFunc( id, this );
 }
 
@@ -247,10 +249,68 @@ unsigned int Element::findBinding( MsgFuncBinding b ) const
 	return ~0;
 }
 
- const vector< MsgId >& Element::msgIn() const
- {
- 	return m_;
- }
+const vector< MsgId >& Element::msgIn() const
+{
+	return m_;
+}
+
+vector< FuncOrder>  putFuncsInOrder( 
+				const Element* elm, const vector< MsgFuncBinding >& vec )
+{
+	vector< FuncOrder > fo( vec.size() );
+	for ( unsigned int j = 0; j < vec.size(); ++j ) {
+		const MsgFuncBinding& mfb = vec[j];
+		const Msg* msg = Msg::getMsg( mfb.mid );
+		if ( msg->e1() == elm ) {
+			fo[j].set( msg->e2()->cinfo()->getOpFunc( mfb.fid ), j );
+		} else {
+			fo[j].set( msg->e1()->cinfo()->getOpFunc( mfb.fid ), j );
+		}
+	}
+	sort( fo.begin(), fo.end() );
+	return fo;
+}
+
+void Element::putTargetsInDigest( 
+				unsigned int srcNum, const MsgFuncBinding& mfb, 
+				const FuncOrder& fo )
+{
+	const Msg* msg = Msg::getMsg( mfb.mid );
+	vector< vector < Eref > > erefs;
+	if ( msg->e1() == this )
+		msg->targets( erefs );
+	else if ( msg->e2() == this )
+		msg->sources( erefs );
+	else
+		assert( 0 );
+	for ( unsigned int j = 0; j < numData_; ++j ) {
+		vector< MsgDigest >& md = 
+			msgDigest_[ msgBinding_.size() * j + srcNum ];
+		// k->func(); erefs[ j ];
+		if ( md.size() == 0 || md.back().func != fo.func() ) {
+			md.push_back( MsgDigest( fo.func(), erefs[j] ) );
+		} else {
+			md.back().targets.insert( md.back().targets.end(), 
+					erefs[ j ].begin(),
+					erefs[ j ].end() );
+		}
+	}
+}
+
+void Element::digestMessages()
+{
+	msgDigest_.clear();
+	msgDigest_.resize( msgBinding_.size() * numData_ );
+	for ( unsigned int i = 0; i < msgBinding_.size(); ++i ) {
+		// Go through and identify functions with the same ptr.
+		vector< FuncOrder > fo = putFuncsInOrder( this, msgBinding_[i] );
+		for ( vector< FuncOrder >::const_iterator 
+						k = fo.begin(); k != fo.end(); ++k ) {
+			const MsgFuncBinding& mfb = msgBinding_[i][ k->index() ];
+			putTargetsInDigest( i, mfb, *k );
+		}
+	}
+}
 
 /////////////////////////////////////////////////////////////////////////
 // Field Information

@@ -224,82 +224,6 @@ unsigned int rowIndex( const Element* e, const DataId& d )
 	return d;
 }
 
-/*
-void SparseMsg::exec( const Qinfo* q, const double* arg, FuncId fid ) const
-{
-	bool report = 1;
-
-	 // The system is really optimized for data from e1 to e2.
-	if ( q->src().element() == e1_ ) {
-		const OpFunc* f = e2_->cinfo()->getOpFunc( fid );
-		unsigned int row = rowIndex( e1_, q->src().dataId.value() );
-		// unsigned int oldRow = row;
-
-		const unsigned int* fieldIndex = 0;
-		const unsigned int* colIndex = 0;
-		unsigned int n = matrix_.getRow( row, &fieldIndex, &colIndex );
-		assert( fieldIndex != 0 && colIndex != 0 );
-
-		FieldDataHandlerBase* fdh = 
-			dynamic_cast< FieldDataHandlerBase* >( e2_->dataHandler() );
-
-		// if ( e1_->getName() == "test2" )
-			report = 0;
-
-		if ( report )
-			cout << Shell::myNode() << "." << q->threadNum() << 
-				": SparseMsg " << e1_->getName() << "->" << 
-				e2_->getName() << ", row= " << row << ": entries= ";
-		// J counts over all the column entries, i.e., all targets.
-
-
-		if ( fdh ) {
-			for ( unsigned int j = 0; j < n; ++j ) {
-				if ( report ) cout << "(" << colIndex[j] << "," << fieldIndex[j] << ")";
-				if ( e2_->dataHandler()->execThread( 
-					q->threadNum(), colIndex[j] ) )
-				{
-					Eref tgt( e2_, DataId( colIndex[j], fieldIndex[j] , fdh->numFieldBits() ) );
-					// DataHere is checked in the execThread call
-					// if ( tgt.isDataHere() ) 
-					// if ( fdh->parentDataHandler()->isDataHere( colIndex[j] ) )
-						f->op( tgt, q, arg );
-				}
-			}
-		} else {
-			for ( unsigned int j = 0; j < n; ++j ) {
-				if ( report ) cout << "(" << colIndex[j] << "," << fieldIndex[j] << ")";
-				if ( e2_->dataHandler()->execThread( 
-					q->threadNum(), colIndex[j] ) )
-				{
-					Eref tgt( e2_, DataId( colIndex[j] ) );
-					// if ( tgt.isDataHere() ) // execThread checks it.
-					f->op( tgt, q, arg );
-				}
-			}
-		}
-		if ( report ) cout << "\n";
-	} else {
-		// Avoid using this back operation!
-		// Note that we do NOT use the fieldIndex going backward. It is
-		// assumed that e1 does not have fieldArrays.
-		const OpFunc* f = e1_->cinfo()->getOpFunc( fid );
-		unsigned int column = rowIndex( e2_, q->src().dataId.value() );
-		vector< unsigned int > fieldIndex;
-		vector< unsigned int > rowIndex;
-		unsigned int n = matrix_.getColumn( column, fieldIndex, rowIndex );
-		for ( unsigned int j = 0; j < n; ++j ) {
-			if ( e1_->dataHandler()->execThread( 
-				q->threadNum(), rowIndex[j] ) )
-			{
-				Eref tgt( e1_, DataId( rowIndex[j] ) );
-				// if ( tgt.isDataHere() ) // execThread checks it
-					f->op( tgt, q, arg );
-			}
-		}
-	}
-}
-*/
 
 Eref SparseMsg::firstTgt( const Eref& src ) const 
 {
@@ -309,7 +233,7 @@ Eref SparseMsg::firstTgt( const Eref& src ) const
 	if ( src.element() == e1_ ) {
 		const unsigned int* fieldIndex;
 		const unsigned int* colIndex;
-		unsigned int n = matrix_.getRow( src.index(),
+		unsigned int n = matrix_.getRow( src.dataIndex(),
 			&fieldIndex, &colIndex );
 		if ( n != 0 ) {
 			return Eref( e2_, colIndex[0], fieldIndex[0] );
@@ -425,4 +349,35 @@ Msg* SparseMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 		cout << "Error: SparseMsg::copy: SparseSliceMsg not yet implemented\n";
 		return 0;
 	}
+}
+
+void fillErefsFromMatrix( 
+		const SparseMatrix< unsigned int >& matrix, 
+		vector< vector < Eref > >& v, Element* e1, Element* e2 )
+{
+	v.clear();
+	v.resize( e1->numData() );
+	assert( e1->numData() == matrix.nRows() );
+	assert( e2->numData() == matrix.nColumns() );
+	for ( unsigned int i = 0; i < e1->numData(); ++i ) {
+		const unsigned int* entry;
+		const unsigned int* colIndex;
+		unsigned int num = matrix.getRow( i, &entry, &colIndex );
+		v[i].resize( num );
+		for ( unsigned int j = 0; j < num; ++j ) {
+			v[i][j] = Eref( e2, colIndex[j], entry[j] );
+		}
+	}
+}
+
+void SparseMsg::sources( vector< vector < Eref > >& v ) const
+{
+	SparseMatrix< unsigned int > temp( matrix_ );
+	temp.transpose();
+	fillErefsFromMatrix( temp, v, e2_, e1_ );
+}
+
+void SparseMsg::targets( vector< vector< Eref > >& v ) const
+{
+	fillErefsFromMatrix( matrix_, v, e1_, e2_ );
 }

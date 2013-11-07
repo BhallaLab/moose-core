@@ -77,9 +77,9 @@ class SrcFinfo0: public SrcFinfo
 	private:
 };
 
-
 template< class A > class OpFunc1Base;
 // Should specialize for major cases like doubles.
+
 template < class T > class SrcFinfo1: public SrcFinfo
 {
 	public:
@@ -89,7 +89,6 @@ template < class T > class SrcFinfo1: public SrcFinfo
 			: SrcFinfo( name, doc )
 			{ ; }
 
-		// Will need to specialize for strings etc.
 		void send( const Eref& e, T arg ) const 
 		{
 			const vector< MsgDigest >& md = e.msgDigest( getBindIndex() );
@@ -100,7 +99,14 @@ template < class T > class SrcFinfo1: public SrcFinfo
 				assert( f );
 				for ( vector< Eref >::const_iterator
 					j = i->targets.begin(); j != i->targets.end(); ++j ) {
+					if ( j->dataIndex() == ALLDATA ) {
+						Element* e = j->element();
+						unsigned int end = e->numData();
+						for ( DataId k = 0; k < end; ++k )
+							f->op( Eref( e, k ), arg );
+					} else  {
 						f->op( *j, arg );
+					}
 				}
 			}
 		}

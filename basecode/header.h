@@ -53,6 +53,7 @@ typedef unsigned int FuncId;
  * identifies the entry over the entire multinode simulation.
  */
 typedef unsigned int DataId;
+extern const DataId ALLDATA; // Defined in consts.cpp
 
 /**
  * Looks up and uniquely identifies Msgs. This is a global index
