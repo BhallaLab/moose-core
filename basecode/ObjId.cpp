@@ -22,10 +22,12 @@ const ObjId ObjId::bad()
 
 ostream& operator <<( ostream& s, const ObjId& i )
 {
-	if ( i.dataId == 0 )
+	if ( i.dataId == 0 && i.fieldIndex == 0 )
 		s << i.id;
-	else 
+	else if ( i.fieldIndex == 0 )
 		s << i.id << "[" << i.dataId << "]";
+	else
+		s << i.id << "[" << i.dataId << "][" << i.fieldIndex << "]";
 	return s;
 }
 
@@ -48,12 +50,13 @@ ObjId::ObjId( const string& path )
 
 Eref ObjId::eref() const
 {
-	return Eref( id(), dataId );
+	return Eref( id(), dataId, fieldIndex );
 }
 
 bool ObjId::operator==( const ObjId& other ) const
 {
-	return ( id == other.id && dataId == other.dataId );
+	return ( id == other.id && dataId == other.dataId && 
+					fieldIndex == other.fieldIndex );
 }
 
 bool ObjId::isDataHere() const
@@ -63,7 +66,7 @@ bool ObjId::isDataHere() const
 
 char* ObjId::data() const
 {
-	return id.element()->data( dataId );
+	return id.element()->data( dataId, fieldIndex );
 }
 
 string ObjId::path() const

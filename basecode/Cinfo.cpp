@@ -113,6 +113,9 @@ void Cinfo::registerFinfo( Finfo* f )
 		else if ( dynamic_cast< SharedFinfo* >( f ) ) {
 			sharedFinfos_.push_back( f );
 		}
+		else if ( dynamic_cast< FieldElementFinfoBase* >( f ) ) {
+			fieldElementFinfos_.push_back( f );
+		}
 }
 
 void Cinfo::registerPostCreationFinfo( const Finfo* f )
@@ -165,6 +168,7 @@ void Cinfo::makeCinfoElements( Id parent )
 		buildFinfoElement( *j, i->second->valueFinfos_, "valueFinfo" );
 		buildFinfoElement( *j, i->second->lookupFinfos_, "lookupFinfo" );
 		buildFinfoElement( *j, i->second->sharedFinfos_, "sharedFinfo" );
+		buildFinfoElement( *j, i->second->fieldElementFinfos_, "fieldElementFinfo" );
 		j++;
 	}
 }
