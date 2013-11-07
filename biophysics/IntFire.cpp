@@ -73,7 +73,6 @@ const Cinfo* IntFire::initCinfo()
 			"Handles reinit call",
 			new ProcOpFunc< IntFire >( &IntFire::reinit ) );
 
-		/*
 		//////////////////////////////////////////////////////////////
 		// FieldElementFinfo definition for Synapses
 		//////////////////////////////////////////////////////////////
@@ -84,7 +83,6 @@ const Cinfo* IntFire::initCinfo()
 			&IntFire::setNumSynapses,
 			&IntFire::getNumSynapses
 		);
-		*/
 		//////////////////////////////////////////////////////////////
 		// SharedFinfo Definitions
 		//////////////////////////////////////////////////////////////
@@ -104,7 +102,7 @@ const Cinfo* IntFire::initCinfo()
 		// &numSynapses,			// Value
 		&proc,					// SharedFinfo
 		spike(), 		// MsgSrc
-		// &synFinfo		// FieldElementFinfo for synapses.
+		&synFinfo		// FieldElementFinfo for synapses.
 	};
 
 	static Cinfo intFireCinfo (

@@ -354,16 +354,20 @@ void testSetGetSynapse()
 	Id syns( cells.value() + 1 );
 	ret = Field< double >::setVec( syns, "delay", delay );
 	assert( ret );
-	assert( delay.size() == ( size * size - 1 ) / 2 );
+	assert( delay.size() == size * (size - 1 ) / 2 );
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		assert( syns.element()->numField( i ) == i );
+		IntFire* fire = reinterpret_cast< IntFire* >( temp->data( i ) );
+		assert( fire->getNumSynapses() == i );
 		for ( unsigned int j = 0; j < i; ++j ) {
 			// ObjId oid( syns, i, j );
-			ObjId oid( syns, i ); // temporarily: nov 2013: till ObjId fix
+			ObjId oid( syns, i, j );
 			double x = i * 1000 + j ;
 			double d = Field< double >::get( oid, "delay" );
+			double d2 = fire->getSynapse( j )->getDelay();
 			assert( doubleEq( d, x ) );
+			assert( doubleEq( d2, x ) );
 		}
 	}
 	cout << "." << flush;
