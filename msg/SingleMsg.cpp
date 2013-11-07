@@ -18,8 +18,8 @@ Id SingleMsg::managerId_;
 
 SingleMsg::SingleMsg( MsgId mid, Eref e1, Eref e2 )
 	: Msg( mid, e1.element(), e2.element(), SingleMsg::managerId_ ),
-	i1_( e1.index() ), 
-	i2_( e2.index() )
+	i1_( e1.dataIndex() ), 
+	i2_( e2.dataIndex() )
 {
 	;
 }
@@ -32,10 +32,24 @@ SingleMsg::~SingleMsg()
 Eref SingleMsg::firstTgt( const Eref& src ) const 
 {
 	if ( src.element() == e1_ )
-		return Eref( e2_, i2_ );
+		return Eref( e2_, i2_, f2_ );
 	else if ( src.element() == e2_ )
 		return Eref( e1_, i1_ );
 	return Eref( 0, 0 );
+}
+
+void SingleMsg::sources( vector< vector< Eref > >& v ) const
+{
+	v.clear();
+	v.resize( e2_->numData() );
+	v[i1_].resize( 1, Eref( e2_, i2_ ) );
+}
+
+void SingleMsg::targets( vector< vector< Eref > >& v ) const
+{
+	v.clear();
+	v.resize( e1_->numData() );
+	v[i1_].resize( 1, Eref( e2_, i2_, f2_ ) );
 }
 
 
@@ -166,3 +180,14 @@ void SingleMsg::setI2( DataId di )
 {
 	i2_ = di;
 }
+
+void SingleMsg::setTargetField( unsigned int f )
+{
+	f2_ = f;
+}
+
+unsigned int SingleMsg::getTargetField() const
+{
+	return f2_;
+}
+

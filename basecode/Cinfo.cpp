@@ -130,11 +130,13 @@ void Cinfo::postCreationFunc( Id newId, Element* newElm ) const
 
 void buildFinfoElement( Id parent, vector< Finfo* >& f, const string& name )
 {
-	char* data = reinterpret_cast< char* >( &f[0] );
-	Id id = Id::nextId();
-	Element* e = new Element( id, Finfo::initCinfo(), name );
-	Finfo::initCinfo()->dinfo()->assignData( e->data( 0 ), f.size(), data, f.size());
-	Shell::adopt( parent, id );
+	if ( f.size() > 0 ) {
+		char* data = reinterpret_cast< char* >( &f[0] );
+		Id id = Id::nextId();
+		Element* e = new Element( id, Finfo::initCinfo(), name, f.size() );
+		Finfo::initCinfo()->dinfo()->assignData( e->data( 0 ), f.size(), data, f.size());
+		Shell::adopt( parent, id );
+	}
 }
 
 // Static function called by init()
@@ -149,7 +151,7 @@ void Cinfo::makeCinfoElements( Id parent )
 		Id id = Id::nextId();
 		char* data = reinterpret_cast< char* >( i->second );
 		Element* e = new Element( id, Cinfo::initCinfo(), i->first );
-		i->second->dinfo()->assignData( e->data( 0 ), 1, data, 1 );
+		Cinfo::initCinfo()->dinfo()->assignData( e->data( 0 ), 1, data, 1 );
 
 		Shell::adopt( parent, id );
 		cinfoElements.push_back( id );

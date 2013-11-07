@@ -10,6 +10,12 @@
 #ifndef _SINGLE_MSG_H
 #define _SINGLE_MSG_H
 
+/**
+ * This is a message from a single source object to a single target 
+ * object. The source object must be a DataEntry. The target object
+ * may be on a FieldElement, and the target specification includes the
+ * index of the field object.
+ */
 
 class SingleMsg: public Msg
 {
@@ -19,6 +25,9 @@ class SingleMsg: public Msg
 		~SingleMsg();
 
 		Eref firstTgt( const Eref& src ) const;
+
+		void sources( vector< vector< Eref > >& v ) const;
+		void targets( vector< vector< Eref > >& v ) const;
 
 		DataId i1() const;
 		DataId i2() const;
@@ -37,10 +46,14 @@ class SingleMsg: public Msg
 		void setI2( DataId di );
 		DataId getI2() const;
 
+		void setTargetField( unsigned int f );
+		unsigned int getTargetField() const;
+
 		static const Cinfo* initCinfo();
 	private:
 		DataId i1_;
 		DataId i2_;
+		unsigned int f2_; // Field for target. Note asymmetry
 		static Id managerId_;
 };
 

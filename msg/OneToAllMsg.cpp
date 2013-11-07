@@ -15,7 +15,7 @@ Id OneToAllMsg::managerId_;
 OneToAllMsg::OneToAllMsg( MsgId mid, Eref e1, Element* e2 )
 	: 
 		Msg( mid, e1.element(), e2, OneToAllMsg::managerId_ ),
-		i1_( e1.index() )
+		i1_( e1.dataIndex() )
 {
 	;
 }
@@ -25,23 +25,7 @@ OneToAllMsg::~OneToAllMsg()
 	// I cannot do this in the Msg::~Msg destructor because the virtual
 	// functions  for managerId() don't work there.
 	destroyDerivedMsg( managerId_, mid_ );
-	/*
-	cout << "Deleting OneToAllMsg from " << e1_->getName() << " to " <<
-		e2_->getName() << endl;
-	// Here we have a special case: The parent-child messages are
-	// OneToAll. So when cleaning up the whole simulation, it removes the
-	// managerId_.element() while there are still some parent-child
-	// messages present. For protection, don't do the deletion if the
-	// element has gone.
-	if ( managerId_.element() ) {
-		MsgDataHandler * mdh = dynamic_cast< MsgDataHandler* >( 
-			managerId_.element()->dataHandler() );
-		assert( mdh );
-		mdh->dropMid( mid_ );
-	}
-		*/
 }
-
 
 Eref OneToAllMsg::firstTgt( const Eref& src ) const 
 {
@@ -50,6 +34,21 @@ Eref OneToAllMsg::firstTgt( const Eref& src ) const
 	else if ( src.element() == e2_ )
 		return Eref( e1_, i1_ );
 	return Eref( 0, 0 );
+}
+
+void OneToAllMsg::sources( vector< vector < Eref > >& v ) const
+{
+	// Same single source for all targets.
+	v.clear();
+	vector< Eref > temp( 1, Eref( e1_, i1_ ) );
+	v.assign( e2_->numData(), temp  );
+}
+
+void OneToAllMsg::targets( vector< vector< Eref > >& v ) const
+{
+	v.clear();
+	v.resize( e1_->numData() );
+	v[i1_].resize( 1, Eref( e2_, ALLDATA ) );
 }
 
 Id OneToAllMsg::managerId() const

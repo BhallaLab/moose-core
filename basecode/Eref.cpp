@@ -9,6 +9,12 @@
 
 #include "header.h"
 
+Eref::Eref()
+			: e_( 0 ), i_( 0 ), f_( 0 )
+{
+	;
+}
+
 Eref::Eref( Element* e, DataId index, unsigned int field )
 			: e_( e ), i_( index ), f_( field )
 {
