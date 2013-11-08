@@ -200,15 +200,8 @@ SparseMsg::SparseMsg( MsgId mid, Element* e1, Element* e2 )
 {
 	unsigned int nrows = 0;
 	unsigned int ncolumns = 0;
-	if ( e1->hasFields() ) {
-		for ( unsigned int i = 0; i < e1->numData(); ++i )
-			nrows += e1->numField( i );
-	} else {
-		nrows = e1->numData();
-	}
-
-	for ( unsigned int i = 0; i < e2->numData(); ++i )
-		ncolumns += e2->numField( i );
+	nrows = e1->numData();
+	ncolumns = e2->numData();
 	matrix_.setSize( nrows, ncolumns );
 }
 
