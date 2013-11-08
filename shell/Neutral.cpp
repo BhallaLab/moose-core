@@ -468,7 +468,11 @@ string Neutral::path( const Eref& e )
 	pathVec.push_back( curr );
 	while ( curr.id != Id() ) {
 		MsgId mid = curr.eref().element()->findCaller( pafid );
-		assert( mid != Msg::bad );
+		if ( Msg::bad ) {
+			cout << "Error: Unable to traverse path of " <<
+				   	e.objId() << endl;
+			break;
+		}
 		curr = Msg::getMsg( mid )->findOtherEnd( curr );
 		pathVec.push_back( curr );
 	}

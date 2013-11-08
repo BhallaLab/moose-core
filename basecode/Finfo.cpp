@@ -22,33 +22,33 @@ Finfo::Finfo( const string& name, const string& doc )
 
 const Cinfo* Finfo::initCinfo()
 {
-	static ReadOnlyValueFinfo< Finfo, string > name(
+	static ReadOnlyValueFinfo< FinfoWrapper, string > name(
 		"name",
 		"Name of Finfo",
-		&Finfo::getName
+		&FinfoWrapper::getName
 	);
 
-	static ReadOnlyValueFinfo< Finfo, string > docs(
+	static ReadOnlyValueFinfo< FinfoWrapper, string > docs(
 		"docs",
 		"Documentation for Finfo",
-		&Finfo::docs
+		&FinfoWrapper::docs
 	);
 
-	static ReadOnlyValueFinfo< Finfo, string > type(
+	static ReadOnlyValueFinfo< FinfoWrapper, string > type(
 		"type",
 		"RTTI type info for this Finfo",
-		&Finfo::type
+		&FinfoWrapper::type
 	);
 
-	static ReadOnlyValueFinfo< Finfo, vector< string > > src(
+	static ReadOnlyValueFinfo< FinfoWrapper, vector< string > > src(
 		"src",
 		"Subsidiary SrcFinfos. Useful for SharedFinfos",
-		&Finfo::src
+		&FinfoWrapper::src
 	);
-	static ReadOnlyValueFinfo< Finfo, vector< string > > dest(
+	static ReadOnlyValueFinfo< FinfoWrapper, vector< string > > dest(
 		"dest",
 		"Subsidiary DestFinfos. Useful for SharedFinfos",
-		&Finfo::dest
+		&FinfoWrapper::dest
 	);
 
 
@@ -65,7 +65,7 @@ const Cinfo* Finfo::initCinfo()
 		Neutral::initCinfo(),
 		finfoFinfos,
 		sizeof( finfoFinfos ) / sizeof( Finfo* ),
-		new Dinfo< Finfo* > // dummy
+		new Dinfo< Finfo* >
 	);
 
 	return &finfoCinfo;
@@ -80,32 +80,37 @@ const string& Finfo::name( ) const
 	return name_;
 }
 
-// Silly variation needed to handle template expectations for
-// name field.
-string Finfo::getName( ) const
-{
-	return name_;
-}
-
-string Finfo::docs( ) const
+const string& Finfo::docs( ) const
 {
 	return doc_;
 }
 
-
-string Finfo::type( ) const
+////////////////////////////////////////////////////////////////
+// Needed to access as a MOOSE field. Note that the Finfo is stored as a ptr
+string FinfoWrapper::getName( ) const
 {
-	return this->rttiType();
+	return f_->name();
 }
 
-vector< string > Finfo::src( ) const
+string FinfoWrapper::docs( ) const
 {
-	return this->innerSrc();
+	return f_->docs();
 }
 
-vector< string > Finfo::dest( ) const
+
+string FinfoWrapper::type( ) const
 {
-	return this->innerDest();
+	return f_->rttiType();
+}
+
+vector< string > FinfoWrapper::src( ) const
+{
+	return f_->innerSrc();
+}
+
+vector< string > FinfoWrapper::dest( ) const
+{
+	return f_->innerDest();
 }
 
 

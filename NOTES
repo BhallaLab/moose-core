@@ -366,11 +366,11 @@ needs to talk to the parent SynHandler if it wants to resize the Synapse array.
 Easily handled by looking up the parent ObjId of the Synapse.
 
 In the process of setting up the SynHandler. Next:
-Fix up Msgs to do the precompiled fast lookup
-Fix up FieldElement stuff to access synapses from Eref
++Fix up Msgs to do the precompiled fast lookup
++Fix up FieldElement stuff to access synapses from Eref
 Fix up FieldElement and Element stuff to deal with callbacks
 Fix up Msgs to use ObjIds to identify
-Fix up Msgs to handle the specification of fieldIndex.
++Fix up Msgs to handle the specification of fieldIndex.
 Work out how to talk to nodes on parallel machines. Socket?
 Work out how to do SetGet on parallel machines
 Work out parallel messaging.
@@ -433,3 +433,14 @@ Now setting up Msg::sources and Msg::targets() to build digest.
 7 Nov.
 Seems like some messages are beginning to go...
 Now about 10 unit tests in. 
+
+Stuck in SparseMsg.cpp:211. At this point there are no fields allocated,
+so we're not finding any targets.
+===========================================================================
+8 Nov.
+Steady progress. Some things to consider:
+- Should we retain ext fields? Python deals with this kind of use mostly.
+	If not we could simplify the function for checkSetGet.
+- Need to redo the Msg as object tests in the unit tests
+
+Now clears testAsync.

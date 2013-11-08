@@ -19,12 +19,15 @@ class Finfo
 		 * Returns the Finfo name
 		 */
 		const string& name() const;
+		
+		/// Returns documentation string.
+		const string& docs() const;
 
 		/**
 		 * Returns string-ified form to handle template expectations
 		 * for name field
-		 */
 		string getName() const;
+		 */
 
 		/**
 		 * Assign function Ids, bindIndex and so on.
@@ -91,29 +94,28 @@ class Finfo
 		////////////////////////////////////////////////////////////////
 		/**
 		 * Returns the documentation string for the Finfo
-		 */
 		string docs() const;
+		 */
 
 		/**
 		 * Returns the RTTI type string for the finfo by referring
 		 * to an internal virtual function.
-		 */
 		string type() const;
+		 */
 
 		/**
 		 * Returns the list of subsidiary SrcFinfos.
 		 * Used in Shared Finfos, empty otherwise. Goes via 
 		 * internal virtual function.
-		 */
-
 		vector< string > src() const;
+		 */
 
 		/**
 		 * Returns the list of subsidiary destFinfos.
 		 * Used in SharedFinfos and ValueFinfos, empty otherwise. Goes via 
 		 * internal virtual function.
-		 */
 		vector< string > dest() const;
+		 */
 
 		/**
 		 * Returns an RTTI type string for this Finfo.
@@ -138,6 +140,34 @@ class Finfo
 	private:
 		string name_;
 		string doc_;
+};
+
+// Wrapper to handle the access functions to the Finfo objects.
+class FinfoWrapper
+{
+	public:
+			FinfoWrapper( const Finfo* other )
+					: f_( other )
+			{;}
+
+			string getName( ) const;
+			string docs( ) const;
+			string type( ) const;
+		/**
+		 * Returns the list of subsidiary SrcFinfos.
+		 * Used in Shared Finfos, empty otherwise. Goes via 
+		 * internal virtual function.
+		 */
+			vector< string > src( ) const;
+		/**
+		 * Returns the list of subsidiary destFinfos.
+		 * Used in SharedFinfos and ValueFinfos, empty otherwise. Goes via 
+		 * internal virtual function.
+		 */
+			vector< string > dest( ) const;
+		
+	private:
+			const Finfo* f_;
 };
 
 #endif // _FINFO_H
