@@ -20,6 +20,7 @@ TARGET = _basecode.o
 OBJ = \
 	consts.o	\
 	Element.o	\
+	DataElement.o	\
 	Eref.o	\
 	Finfo.o	\
 	DestFinfo.o	\
@@ -45,6 +46,7 @@ HEADERS = \
 	Dinfo.h \
 	MsgDigest.h \
 	Element.h \
+	DataElement.h \
 	Eref.h \
 	Finfo.h \
 	DestFinfo.h \

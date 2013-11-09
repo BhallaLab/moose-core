@@ -10,47 +10,35 @@
 #include "header.h"
 #include "FuncOrder.h"
 
-Element::Element( Id id, const Cinfo* c, const string& name, 
-	unsigned int numData, bool isGlobal )
+const Id doomedId( ~0U );
+Element::Element( Id id, const Cinfo* c, const string& name )
 	:	name_( name ),
 		id_( id ),
 		cinfo_( c ), 
-		msgBinding_( c->numBindIndex() )
+		msgBinding_( c->numBindIndex() ),
+		msgDigest_( c->numBindIndex() )
 {
 	id.bindIdToElement( this );
-	data_ = c->dinfo()->allocData( numData );
-	numData_ = numData;
-	c->postCreationFunc( id, this );
 }
 
-
-/*
- * Used for copies. Note that it does NOT call the postCreation Func,
- * so FieldElements are copied rather than created by the Cinfo when
- * the parent element is created. This allows the copied FieldElements to
- * retain info from the originals.
- */
-Element::Element( Id id, const Element* orig, unsigned int n,
-	bool toGlobal)
-	:	name_( orig->getName() ),
-		id_( id ),
-		cinfo_( orig->cinfo_ ), 
-		msgBinding_( orig->cinfo_->numBindIndex() )
-{
-	if ( n >= 1 ) {
-		data_ = cinfo()->dinfo()->copyData( orig->data_, orig->numData_, n);
-	}
-	id.bindIdToElement( this );
-	// cinfo_->postCreationFunc( id, this );
-}
 
 Element::~Element()
 {
-	// cout << "deleting element " << getName() << endl;
-	if ( cinfo_ ) {
-		cinfo_->dinfo()->destroyData( data_ );
-		clearCinfoAndMsgs();
+	// A flag that the Element is doomed, used to avoid lookups 
+	// when deleting Msgs.
+	id_ = doomedId; 
+	for ( vector< vector< MsgFuncBinding > >::iterator 
+		i = msgBinding_.begin(); i != msgBinding_.end(); ++i ) {
+		for ( vector< MsgFuncBinding >::iterator 
+			j = i->begin(); j != i->end(); ++j ) {
+			// This call internally protects against double deletion.
+			Msg::deleteMsg( j->mid );
+		}
 	}
+
+	for ( vector< MsgId >::iterator i = m_.begin(); i != m_.end(); ++i )
+		if ( *i ) // Dropped Msgs set this pointer to zero, so skip them.
+			Msg::deleteMsg( *i );
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -67,17 +55,6 @@ void Element::setName( const string& val )
 	name_ = val;
 }
 
-unsigned int Element::numData() const
-{
-	return numData_;
-}
-
-unsigned int Element::numField( unsigned int entry ) const
-{
-	return 1;
-}
-
-
 const Cinfo* Element::cinfo() const
 {
 	return cinfo_;
@@ -86,19 +63,6 @@ const Cinfo* Element::cinfo() const
 Id Element::id() const
 {
 	return id_;
-}
-
-char* Element::data( unsigned int rawIndex, unsigned int fieldIndex ) const
-{
-	assert( rawIndex < numData_ );
-	return data_ + ( rawIndex * cinfo()->dinfo()->size() );
-}
-
-void Element::resize( unsigned int newNumData )
-{
-	char* temp = data_;
-	data_ = cinfo()->dinfo()->copyData( temp, numData_, newNumData );
-	cinfo()->dinfo()->destroyData( temp );
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -135,7 +99,7 @@ class matchMid
  */
 void Element::dropMsg( MsgId mid )
 {
-	if ( cinfo_ == 0 ) // Don't need to clear if Element itself is going.
+	if ( id_ == doomedId ) // This is a flag that the Element is doomed.
 		return;
 	// Here we have the spectacularly ugly C++ erase-remove idiot.
 	m_.erase( remove( m_.begin(), m_.end(), mid ), m_.end() );
@@ -285,7 +249,7 @@ void Element::putTargetsInDigest(
 		msg->sources( erefs );
 	else
 		assert( 0 );
-	for ( unsigned int j = 0; j < numData_; ++j ) {
+	for ( unsigned int j = 0; j < numData(); ++j ) {
 		vector< MsgDigest >& md = 
 			msgDigest_[ msgBinding_.size() * j + srcNum ];
 		// k->func(); erefs[ j ];
@@ -302,7 +266,7 @@ void Element::putTargetsInDigest(
 void Element::digestMessages()
 {
 	msgDigest_.clear();
-	msgDigest_.resize( msgBinding_.size() * numData_ );
+	msgDigest_.resize( msgBinding_.size() * numData() );
 	for ( unsigned int i = 0; i < msgBinding_.size(); ++i ) {
 		// Go through and identify functions with the same ptr.
 		vector< FuncOrder > fo = putFuncsInOrder( this, msgBinding_[i] );
@@ -371,7 +335,7 @@ void Element::destroyElementTree( const vector< Id >& tree )
 {
 	for( vector< Id >::const_iterator i = tree.begin(); 
 		i != tree.end(); i++ )
-		i->element()->cinfo_ = 0; // Indicate that Element is doomed
+		i->element()->id_ = doomedId; // Indicate that Element is doomed
 	bool killShell = false;
 
 	// Do not destroy the shell till the very end.
@@ -505,20 +469,4 @@ unsigned int Element::getFieldsOfOutgoingMsg( MsgId mid,
 		}
 	}
 	return ret.size();
-}
-
-// Protected function, used only during Element destruction.
-void Element::clearCinfoAndMsgs()
-{
-	cinfo_ = 0; // A flag that the Element is doomed, used to avoid lookups when deleting Msgs.
-	for ( vector< vector< MsgFuncBinding > >::iterator i = msgBinding_.begin(); i != msgBinding_.end(); ++i ) {
-		for ( vector< MsgFuncBinding >::iterator j = i->begin(); j != i->end(); ++j ) {
-			// This call internally protects against double deletion.
-			Msg::deleteMsg( j->mid );
-		}
-	}
-
-	for ( vector< MsgId >::iterator i = m_.begin(); i != m_.end(); ++i )
-		if ( *i ) // Dropped Msgs set this pointer to zero, so skip them.
-			Msg::deleteMsg( *i );
 }

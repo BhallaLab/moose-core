@@ -14,20 +14,23 @@ FieldElement::FieldElement( Id parent, Id self,
 		const FieldElementFinfoBase* fef
 	)
 	:
-		Element( self, c, name, parent.element()->numData(), 0 ),
+		Element( self, c, name ),
 		parent_( parent ),
 		fef_( fef )
 {;}
 
 /**
- * Here we only clear out the messages, not the data.
- * It is the responsibility of the parent Element and
- * object to clear all the data.
- * Otherwise this function is identical to the destructor for Elements.
+ * Virtual func: leave the clearing of the messages to
+ * ElementBase, the data is cleared by the parent Element of
+ * this field.
  */
 FieldElement::~FieldElement()
+{;}
+
+Element* FieldElement::copyElement( Id newParent, Id newId, 
+				unsigned int n, bool toGlobal ) const
 {
-	clearCinfoAndMsgs();
+	return new FieldElement( newParent, newId, cinfo(), getName(), fef_ );
 }
 
 /////////////////////////////////////////////////////////////////////////
