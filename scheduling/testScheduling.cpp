@@ -28,7 +28,9 @@ bool TestSched::isInitPending_ = true;
 
 static DestFinfo processFinfo( "process",
 	"handles process call",
-	new ProcOpFunc< TestSched >( &TestSched::process ) );
+	new EpFunc1< TestSched, ProcPtr >( &TestSched::process )
+);
+
 const Cinfo* TestSched::initCinfo()
 {
 
@@ -138,7 +140,8 @@ void testClock()
 
 	// Now put in the scheduling tester and messages.
 	Id test = Id::nextId();
-	// Element* teste = new Element( test, testSchedCinfo, "test", 1 );
+	Element* teste = new Element( test, testSchedCinfo, "test", 1 );
+	assert( teste );
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 
 	shell->doAddMsg( "oneToAll", clock, "process0", test, "process" );
@@ -147,6 +150,7 @@ void testClock()
 	shell->doAddMsg( "oneToAll", clock, "process3", test, "process" );
 	shell->doAddMsg( "oneToAll", clock, "process4", test, "process" );
 	shell->doAddMsg( "oneToAll", clock, "process7", test, "process" );
+	clock.element()->digestMessages();
 	cdata->handleReinit( clocker );
 	assert( cdata->activeTicks_.size() == 6 ); // No messages
 	assert( cdata->activeTicks_[0] == 2 );
