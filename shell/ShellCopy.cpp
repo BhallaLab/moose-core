@@ -34,14 +34,16 @@ Id Shell::doCopy( Id orig, ObjId newParent, string newName,
 }
 
 /// Runs in parallel on all nodes.
-Element* innerCopyElements( Id orig, ObjId newParent, Id newElm, 
+Element* innerCopyElements( Id orig, ObjId newParent, Id newId, 
 	unsigned int n, bool toGlobal, map< Id, Id >& tree )
 {
-	Element* e = new Element( newElm, orig.element(), n, toGlobal );
+	// Element* e = new Element( newId, orig.element(), n, toGlobal );
+	Element* e = orig.element()->copyElement( 
+				newParent, newId, n, toGlobal );
 	assert( e );
-	Shell::adopt( newParent, newElm );
+	Shell::adopt( newParent, newId );
 
-	// cout << Shell::myNode() << ": Copy: orig= " << orig << ", newParent = " << newParent << ", newElm = " << newElm << endl;
+	// cout << Shell::myNode() << ": Copy: orig= " << orig << ", newParent = " << newParent << ", newId = " << newId << endl;
 	tree[ orig ] = e->id();
 
 	// cout << Shell::myNode() << ": ice, pa = " << newParent << ", pair= (" << orig << "," << e->id() << ")\n";

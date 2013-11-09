@@ -136,7 +136,8 @@ void buildFinfoElement( Id parent, vector< Finfo* >& f, const string& name )
 	if ( f.size() > 0 ) {
 		char* data = reinterpret_cast< char* >( &f[0] );
 		Id id = Id::nextId();
-		Element* e = new Element( id, Finfo::initCinfo(), name, f.size() );
+		Element* e = new DataElement( 
+						id, Finfo::initCinfo(), name, f.size() );
 		Finfo::initCinfo()->dinfo()->assignData( e->data( 0 ), f.size(), data, f.size());
 		Shell::adopt( parent, id );
 	}
@@ -153,7 +154,7 @@ void Cinfo::makeCinfoElements( Id parent )
 		i != cinfoMap().end(); ++i ) {
 		Id id = Id::nextId();
 		char* data = reinterpret_cast< char* >( i->second );
-		Element* e = new Element( id, Cinfo::initCinfo(), i->first );
+		Element* e = new DataElement( id, Cinfo::initCinfo(), i->first );
 		Cinfo::initCinfo()->dinfo()->assignData( e->data( 0 ), 1, data, 1 );
 
 		Shell::adopt( parent, id );

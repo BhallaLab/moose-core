@@ -289,30 +289,30 @@ void Msg::initMsgManagers()
 
 	// This is to be the parent of all the msg managers.
 	msgManagerId_ = Id::nextId();
-	new Element( msgManagerId_, Neutral::initCinfo(), "Msgs", 1, 1 );
+	new DataElement( msgManagerId_, Neutral::initCinfo(), "Msgs", 1, 1 );
 
 	SingleMsg::managerId_ = Id::nextId();
-	new Element( SingleMsg::managerId_, SingleMsg::initCinfo(), 
+	new DataElement( SingleMsg::managerId_, SingleMsg::initCinfo(), 
 		"singleMsg", 1, true );
 	msgMgrs.push_back( SingleMsg::managerId_ );
 
 	OneToOneMsg::managerId_ = Id::nextId();
-	new Element( OneToOneMsg::managerId_, OneToOneMsg::initCinfo(),
+	new DataElement( OneToOneMsg::managerId_, OneToOneMsg::initCinfo(),
 		"oneToOneMsg", 1, true );
 	msgMgrs.push_back( OneToOneMsg::managerId_ );
 
 	OneToAllMsg::managerId_ = Id::nextId();
-	new Element( OneToAllMsg::managerId_, OneToAllMsg::initCinfo(), 
+	new DataElement( OneToAllMsg::managerId_, OneToAllMsg::initCinfo(), 
 		"oneToAllMsg", 1, true );
 	msgMgrs.push_back( OneToAllMsg::managerId_ );
 
 	DiagonalMsg::managerId_ = Id::nextId();
-	new Element( DiagonalMsg::managerId_, DiagonalMsg::initCinfo(), 
+	new DataElement( DiagonalMsg::managerId_, DiagonalMsg::initCinfo(), 
 		"diagonalMsg", 1, true );
 	msgMgrs.push_back( DiagonalMsg::managerId_ );
 
 	SparseMsg::managerId_ = Id::nextId();
-	new Element( SparseMsg::managerId_, SparseMsg::initCinfo(), 
+	new DataElement( SparseMsg::managerId_, SparseMsg::initCinfo(), 
 		"sparseMsg", 1, true );
 	msgMgrs.push_back( SparseMsg::managerId_ );
 

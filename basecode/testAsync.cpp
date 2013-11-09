@@ -31,7 +31,7 @@ void showFields()
 {
 	const Cinfo* nc = Neutral::initCinfo();
 	Id i1 = Id::nextId();
-	Element* ret = new Element( i1, nc, "test1", 1, 1 );
+	Element* ret = new DataElement( i1, nc, "test1", 1, 1 );
 	assert( ret );
 	// i1.eref().element()->showFields();
 	cout << "." << flush;
@@ -51,11 +51,11 @@ void testSendMsg()
 
 	Id i1 = Id::nextId();
 	Id i2 = Id::nextId();
-	Element* ret = new Element( i1, ac, "test1", size, 1 );
+	Element* ret = new DataElement( i1, ac, "test1", size, 1 );
 	// bool ret = nc->create( i1, "test1", size );
 	assert( ret );
 	// ret = nc->create( i2, "test2", size );
-	ret = new Element( i2, ac, "test2", size, 1 );
+	ret = new DataElement( i2, ac, "test2", size, 1 );
 	assert( ret );
 
 	Eref e1 = i1.eref();
@@ -106,10 +106,10 @@ void testCreateMsg()
 	unsigned int size = 100;
 	Id i1 = Id::nextId();
 	Id i2 = Id::nextId();
-	Element* temp = new Element( i1, ac, "test1", size, 1 );
+	Element* temp = new DataElement( i1, ac, "test1", size, 1 );
 	// bool ret = nc->create( i1, "test1", size );
 	assert( temp );
-	temp = new Element( i2, ac, "test2", size, 1 );
+	temp = new DataElement( i2, ac, "test2", size, 1 );
 	assert( temp );
 
 	Eref e1 = i1.eref();
@@ -151,7 +151,7 @@ void testSetGet()
 
 	string arg;
 	Id i2 = Id::nextId();
-	Element* ret = new Element( i2, ac, "test2", size, 1 );
+	Element* ret = new DataElement( i2, ac, "test2", size, 1 );
 	assert( ret );
 	ProcInfo p;
 	
@@ -183,7 +183,7 @@ void testStrSet()
 
 	string arg;
 	Id i2 = Id::nextId();
-	Element* ret = new Element( i2, ac, "test2", size, 1 );
+	Element* ret = new DataElement( i2, ac, "test2", size, 1 );
 	assert( ret );
 	ProcInfo p;
 
@@ -223,7 +223,7 @@ void testGet()
 	string arg;
 	Id i2 = Id::nextId();
 
-	Element* ret = new Element( i2, ac, "test2", size, 1 );
+	Element* ret = new DataElement( i2, ac, "test2", size, 1 );
 	assert( ret );
 	ProcInfo p;
 
@@ -260,7 +260,7 @@ void testStrGet()
 	string arg;
 	Id i2 = Id::nextId();
 
-	Element* ret = new Element( i2, ac, "test2", size, 1 );
+	Element* ret = new DataElement( i2, ac, "test2", size, 1 );
 	assert( ret );
 	ProcInfo p;
 
@@ -304,7 +304,7 @@ void testSetGetDouble()
 	string arg;
 	Id i2 = Id::nextId();
 	Id i3( i2.value() + 1 );
-	Element* ret = new Element( i2, ic, "test2", size, 1 );
+	Element* ret = new DataElement( i2, ic, "test2", size, 1 );
 	assert( ret );
 	ProcInfo p;
 
@@ -337,7 +337,7 @@ void testSetGetSynapse()
 
 	string arg;
 	Id cells = Id::nextId();
-	Element* temp = new Element( cells, ic, "test2", size, 1 );
+	Element* temp = new DataElement( cells, ic, "test2", size, 1 );
 	assert( temp );
 	vector< unsigned int > ns( size );
 	vector< double > delay;
@@ -383,7 +383,7 @@ void testSetGetVec()
 
 	string arg;
 	Id i2 = Id::nextId();
-	Element* temp = new Element( i2, ic, "test2", size, 1 );
+	Element* temp = new DataElement( i2, ic, "test2", size, 1 );
 	assert( temp );
 
 	vector< unsigned int > numSyn( size, 0 );
@@ -418,7 +418,7 @@ void test2ArgSetVec()
 
 	string arg;
 	Id i2 = Id::nextId();
-	Element* ret = new Element( i2, ac, "test2", size, 1 );
+	Element* ret = new DataElement( i2, ac, "test2", size, 1 );
 	assert( ret );
 
 	vector< double > arg1( size );
@@ -483,7 +483,7 @@ void testSetRepeat()
 	string arg;
 	Id cell = Id::nextId();
 	// bool ret = ic->create( i2, "test2", size );
-	Element* temp = new Element( cell, ic, "cell", size, 1 );
+	Element* temp = new DataElement( cell, ic, "cell", size, 1 );
 	assert( temp );
 	vector< unsigned int > numSyn( size, 0 );
 	for ( unsigned int i = 0; i < size; ++i )
@@ -524,7 +524,7 @@ void testSendSpike()
 	string arg;
 	Id i2 = Id::nextId();
 //	bool ret = ic->create( i2, "test2", size );
-	Element* temp = new Element( i2, ic, "test2", size, 1 );
+	Element* temp = new DataElement( i2, ic, "test2", size, 1 );
 	assert( temp );
 	Eref e2 = i2.eref();
 	for ( unsigned int i = 0; i < size; ++i ) {
@@ -843,7 +843,7 @@ void testSparseMsg()
 
 	Id cells = Id::nextId();
 	// bool ret = ic->create( cells, "test2", size );
-	Element* t2 = new Element( cells, ic, "test2", size, 1 );
+	Element* t2 = new DataElement( cells, ic, "test2", size, 1 );
 	assert( t2 );
 	Id syns( cells.value() + 1 );
 
@@ -987,9 +987,9 @@ void testSharedMsg()
 	Id t2 = Id::nextId();
 	// bool ret = Test::initCinfo()->create( t1, "test1", 1 );
 
-	Element* temp = new Element( t1, Test::initCinfo(), "test1", 1, 1 );
+	Element* temp = new DataElement( t1, Test::initCinfo(), "test1", 1, 1 );
 	assert( temp );
-	temp = new Element( t2, Test::initCinfo(), "test2", 1, 1 );
+	temp = new DataElement( t2, Test::initCinfo(), "test2", 1, 1 );
 	// ret = Test::initCinfo()->create( t2, "test2", 1 );
 	assert( temp );
 
@@ -1153,9 +1153,9 @@ void testMsgField()
 
 	Id i1 = Id::nextId();
 	Id i2 = Id::nextId();
-	Element* ret = new Element( i1, ac, "test1", size, 1 );
+	Element* ret = new DataElement( i1, ac, "test1", size, 1 );
 	assert( ret );
-	ret = new Element( i2, ac, "test2", size, 1 );
+	ret = new DataElement( i2, ac, "test2", size, 1 );
 	assert( ret );
 
 	Eref e1 = i1.eref();
@@ -1224,16 +1224,16 @@ void testSetGetExtField()
 	Id i2( i1.value() + 1 );
 	Id i3( i2.value() + 1 );
 	Id i4( i3.value() + 1 );
-	Element* e1 = new Element( i1, nc, "test", size, 1 );
+	Element* e1 = new DataElement( i1, nc, "test", size, 1 );
 	assert( e1 );
 	Shell::adopt( Id(), i1 );
-	Element* e2 = new Element( i2, rc, "x", size, 1 );
+	Element* e2 = new DataElement( i2, rc, "x", size, 1 );
 	assert( e2 );
 	Shell::adopt( i1, i2 );
-	Element* e3 = new Element( i3, rc, "y", size, 1 );
+	Element* e3 = new DataElement( i3, rc, "y", size, 1 );
 	assert( e3 );
 	Shell::adopt( i1, i3 );
-	Element* e4 = new Element( i4, rc, "z", size, 1 );
+	Element* e4 = new DataElement( i4, rc, "z", size, 1 );
 	assert( e4 );
 	Shell::adopt( i1, i4 );
 	bool ret;
@@ -1318,7 +1318,7 @@ void testLookupSetGet()
 	string arg;
 	Id i2 = Id::nextId();
 
-	Element* elm = new Element( i2, ac, "test2", size, 1 );
+	Element* elm = new DataElement( i2, ac, "test2", size, 1 );
 	assert( elm );
 	ObjId obj( i2, 0 );
 
@@ -1552,10 +1552,10 @@ void testMsgSrcDestFields()
 	Id t1 = Id::nextId();
 	Id t2 = Id::nextId();
 	// bool ret = Test::initCinfo()->create( t1, "test1", 1 );
-	Element* e1 = new Element( t1, Test::initCinfo(), "test1", 1, 1 );
+	Element* e1 = new DataElement( t1, Test::initCinfo(), "test1", 1, 1 );
 	assert( e1 );
 	assert( e1 == t1.element() );
-	Element* e2 = new Element( t2, Test::initCinfo(), "test2", 1, 1 );
+	Element* e2 = new DataElement( t2, Test::initCinfo(), "test2", 1, 1 );
 	// ret = Test::initCinfo()->create( t2, "test2", 1 );
 	assert( e2 );
 	assert( e2 == t2.element() );

@@ -24,6 +24,13 @@ class FieldElement: public Element
 
 		~FieldElement();
 
+		/** 
+		 * Virtual copier. Makes a copy of self.
+		 */
+		Element* copyElement( Id newParent, Id newId, unsigned int n, 
+			bool toGlobal ) const;
+
+		/////////////////////////////////////////////////////////////////
 		/// Virtual: Returns number of data entries
 		unsigned int numData() const;
 

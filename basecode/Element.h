@@ -13,9 +13,9 @@ class SrcFinfo;
 class FuncOrder;
 
 /**
- * Base class for all object lookkups. Wrapper for actual data.
+ * Base class for all object lookups.
  * Provides the MOOSE interface so that it handles messaging, class info,
- * field lookup, memory management and many other things for the data.
+ * and basic fields. Does not do data.
  */
 class Element
 {
@@ -37,21 +37,18 @@ class Element
 		 * The isGlobal flag specifies whether the created objects should
 		 * be replicated on all nodes, or partitioned without replication. 
 		 */
-		Element( Id id, const Cinfo* c, const string& name,
-			unsigned int numData = 1,
-			bool isGlobal = 0 );
-
-		/**
-		 * This constructor copies over the original n times. It is
-		 * used for doing all copies, in Shell::innerCopyElements.
-		 */
-		Element( Id id, const Element* orig, unsigned int n, bool toGlobal);
+		Element( Id id, const Cinfo* c, const string& name );
 
 		/**
 		 * Destructor
 		 */
 		virtual ~Element();
 
+		/**
+		 * Copier
+		 */
+		virtual Element* copyElement( Id newParent, Id newId, 
+					unsigned int n, bool toGlobal ) const = 0;
 		/////////////////////////////////////////////////////////////////
 		// Information access fields
 		/////////////////////////////////////////////////////////////////
@@ -67,10 +64,10 @@ class Element
 		void setName( const string& val );
 
 		/// Returns number of data entries
-		virtual unsigned int numData() const;
+		virtual unsigned int numData() const = 0;
 
 		/// Returns number of field entries for specified data
-		virtual unsigned int numField( unsigned int rawIndex ) const;
+		virtual unsigned int numField( unsigned int rawIndex ) const = 0;
 
 		/**
 		 * Returns the Id on this Elm
@@ -81,9 +78,7 @@ class Element
 		 * True if this is a FieldElement having an array of fields 
 		 * on each data entry. Clearly not true for the base Element.
 		 */
-		virtual bool hasFields() const {
-			return false;
-		}
+		virtual bool hasFields() const = 0;
 
 		/////////////////////////////////////////////////////////////////
 		// data access stuff
@@ -105,21 +100,20 @@ class Element
 		 * Returns 0 if either index is out of range.
 		 */
 		virtual char* data( unsigned int rawIndex, 
-						unsigned int fieldIndex = 0 ) const;
+						unsigned int fieldIndex = 0 ) const = 0;
 
 		/**
 		 * Changes the number of entries in the data. Not permitted for
 		 * FieldElements since they are just fields on the data.
 		 */
-		virtual void resize( unsigned int newNumData );
+		virtual void resize( unsigned int newNumData ) = 0;
 
 		/**
 		 * Changes the number of fields on the specified data entry.
 		 * Doesn't do anything for the regular Element.
 		 */
 		virtual void resizeField( 
-				unsigned int rawIndex, unsigned int newNumField )
-		{;}
+				unsigned int rawIndex, unsigned int newNumField ) = 0;
 
 		/////////////////////////////////////////////////////////////////
 
@@ -280,18 +274,6 @@ class Element
 		 * Class information
 		 */
 		const Cinfo* cinfo_;
-
-		/**
-		 * This points to an array holding the data for the Element.
-		 */
-		char* data_;
-
-		/**
-		 * This is the number of entries in the data. Note that these 
-		 * entries do not have to be sequential, some may be farmed out
-		 * to other nodes.
-		 */
-		unsigned int numData_;
 
 		/**
 		 * Message vector. This is the low-level messaging information.
