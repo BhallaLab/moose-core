@@ -244,7 +244,7 @@ void findBraceContent( const string& path, string& beforeBrace,
 bool matchName( Id parent, Id id, 
 	const string& beforeBrace, const string& insideBrace )
 {
-	string temp = id()->getName();
+	string temp = id.element()->getName();
 	if ( temp.length() <= 0 ){
 	  return 0;
 	}
@@ -288,9 +288,9 @@ bool matchInsideBrace( Id id, const string& inside )
 		
 		bool isEqual;
 		if ( inside.substr( 0, 3 ) == "ISA" ) {
-			isEqual = id()->cinfo()->isA( typeName );
+			isEqual = id.element()->cinfo()->isA( typeName );
 		} else {
-			isEqual = ( typeName == id()->cinfo()->name() );
+			isEqual = ( typeName == id.element()->cinfo()->name() );
 		}
 		/*
 		map< string, string >::const_iterator iter = classNameMap.find( typeName );
@@ -324,7 +324,7 @@ bool matchBeforeBrace( Id id, const string& name, bool bracesInName )
 	if ( name == "#" )
 		return 1;
 
-	string ename = id()->getName();
+	string ename = id.element()->getName();
 	if ( bracesInName ) {
 		string::size_type pos = ename.rfind( '[' );
 		if ( pos == string::npos )
@@ -417,8 +417,8 @@ void wildcardTestFunc( Id* elist, unsigned int ne, const string& path )
 	for ( unsigned int i = 0; i < ne ; i++ ) {
 		if ( elist[ i ] != ret[ i ] ) {
 			cout << "!\nAssert	" << path << ": item " << i << 
-				": " << elist[ i ]()->getName() << " != " <<
-					ret[ i ]()->getName() << "\n";
+				": " << elist[ i ].element()->getName() << " != " <<
+					ret[ i ].element()->getName() << "\n";
 			assert( 0 );
 		}
 	}
@@ -448,12 +448,11 @@ void testWildcard()
 
 
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
-	vector< int > dims( 1, 1 );
-	Id a1 = shell->doCreate( "Neutral", Id(), "a1", dims );
-	Id c1 = shell->doCreate( "Arith", a1, "c1", dims );
-	Id c2 = shell->doCreate( "Arith", a1, "c2", dims );
-	Id c3 = shell->doCreate( "Arith", a1, "c3", dims );
-	Id cIndex = shell->doCreate( "Neutral", a1, "c4[1]", dims );
+	Id a1 = shell->doCreate( "Neutral", Id(), "a1", 1 );
+	Id c1 = shell->doCreate( "Arith", a1, "c1", 1 );
+	Id c2 = shell->doCreate( "Arith", a1, "c2", 1 );
+	Id c3 = shell->doCreate( "Arith", a1, "c3", 1 );
+	Id cIndex = shell->doCreate( "Neutral", a1, "c4[1]", 1 );
 
 	bool ret = matchBeforeBrace( a1, "a1", 0 );
 	assert( ret );
@@ -542,7 +541,7 @@ void testWildcard()
 	for ( i = 0 ; i < 100; i++ ) {
 		char name[10];
 		sprintf( name, "ch%ld", i );
-		el2[i] = shell->doCreate( "Mdouble", c1, name, dims );
+		el2[i] = shell->doCreate( "Mdouble", c1, name, 1 );
 		//el2[i] = Neutral::create( "HHChannel", name, c1->id(), Id::scratchId() );
 		Field< double >::set( ObjId( el2[i], i ), "value", i );
 	}
@@ -559,18 +558,18 @@ void testWildcard()
 	// and then in order of creation.
 	Id el4[12];
 	i = 0;
-	el4[i] = shell->doCreate( "IntFire", el2[0], "g0", dims ); ++i;
-	el4[i] = shell->doCreate( "IntFire", el2[1], "g1", dims ); ++i;
-	el4[i] = shell->doCreate( "IntFire", el2[1], "g2", dims ); ++i;
-	el4[i] = shell->doCreate( "IntFire", el2[2], "g3", dims ); ++i;
-	el4[i] = shell->doCreate( "IntFire", el2[2], "g4", dims ); ++i;
-	el4[i] = shell->doCreate( "IntFire", el2[4], "g5", dims ); ++i;
-	el4[i] = shell->doCreate( "IntFire", el2[5], "g6", dims ); ++i;
-	el4[i] = shell->doCreate( "IntFire", el2[6], "g7", dims ); ++i;
-	el4[i] = shell->doCreate( "IntFire", el2[1], "g8", dims ); ++i;
-	el4[i] = shell->doCreate( "IntFire", el2[1], "g9", dims ); ++i;
-	el4[i] = shell->doCreate( "IntFire", c2, "g10", dims ); ++i;
-	el4[i] = shell->doCreate( "IntFire", c3, "g11", dims ); ++i;
+	el4[i] = shell->doCreate( "IntFire", el2[0], "g0", 1 ); ++i;
+	el4[i] = shell->doCreate( "IntFire", el2[1], "g1", 1 ); ++i;
+	el4[i] = shell->doCreate( "IntFire", el2[1], "g2", 1 ); ++i;
+	el4[i] = shell->doCreate( "IntFire", el2[2], "g3", 1 ); ++i;
+	el4[i] = shell->doCreate( "IntFire", el2[2], "g4", 1 ); ++i;
+	el4[i] = shell->doCreate( "IntFire", el2[4], "g5", 1 ); ++i;
+	el4[i] = shell->doCreate( "IntFire", el2[5], "g6", 1 ); ++i;
+	el4[i] = shell->doCreate( "IntFire", el2[6], "g7", 1 ); ++i;
+	el4[i] = shell->doCreate( "IntFire", el2[1], "g8", 1 ); ++i;
+	el4[i] = shell->doCreate( "IntFire", el2[1], "g9", 1 ); ++i;
+	el4[i] = shell->doCreate( "IntFire", c2, "g10", 1 ); ++i;
+	el4[i] = shell->doCreate( "IntFire", c3, "g11", 1 ); ++i;
 
 	wildcardTestFunc( el4, 12, "/a1/##[TYPE=IntFire]" );
 	wildcardTestFunc( el4, 12, "/##[TYPE=IntFire]" );

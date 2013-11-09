@@ -146,7 +146,7 @@ class Neutral
 		 * Returns parent object
 		 */
 		static ObjId parent( const Eref& e );
-		static Id parent( Id id );
+		static ObjId parent( ObjId id );
 
 		/**
 		 * Checks if 'me' is a descendant of 'ancestor'

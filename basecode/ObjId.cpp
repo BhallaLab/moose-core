@@ -50,13 +50,19 @@ ObjId::ObjId( const string& path )
 
 Eref ObjId::eref() const
 {
-	return Eref( id(), dataId, fieldIndex );
+	return Eref( id.element(), dataId, fieldIndex );
 }
 
 bool ObjId::operator==( const ObjId& other ) const
 {
 	return ( id == other.id && dataId == other.dataId && 
 					fieldIndex == other.fieldIndex );
+}
+
+bool ObjId::operator!=( const ObjId& other ) const
+{
+	return ( id != other.id || dataId != other.dataId || 
+					fieldIndex != other.fieldIndex );
 }
 
 bool ObjId::isDataHere() const

@@ -38,7 +38,7 @@ class ObjId
 		{;}
 
 		ObjId( Id i )
-			: id( i ), dataId( 0 )
+			: id( i ), dataId( 0 ), fieldIndex( 0 )
 		{;}
 
 		/**
@@ -61,6 +61,7 @@ class ObjId
 		 * For equality check
 		 */
 		bool operator==( const ObjId& other ) const;
+		bool operator!=( const ObjId& other ) const;
 
 		/**
 		 * True if the data is present on the current node.

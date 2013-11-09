@@ -58,12 +58,12 @@ Id OneToAllMsg::managerId() const
 
 ObjId OneToAllMsg::findOtherEnd( ObjId f ) const
 {
-	if ( f.id() == e1() ) {
+	if ( f.element() == e1() ) {
 		if ( f.dataId == i1_ )
 			return ObjId( e2()->id(), 0 );
 		else
 		  return ObjId( Id() );
-	} else if ( f.id() == e2() ) {
+	} else if ( f.element() == e2() ) {
 		return ObjId( e1()->id(), i1_ );
 	}
 	
@@ -73,14 +73,16 @@ ObjId OneToAllMsg::findOtherEnd( ObjId f ) const
 Msg* OneToAllMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 			FuncId fid, unsigned int b, unsigned int n ) const
 {
-	const Element* orig = origSrc();
+	const Element* orig = origSrc.element();
 	if ( n <= 1 ) {
 		OneToAllMsg* ret = 0;
 		if ( orig == e1() ) {
-			ret = new OneToAllMsg( Msg::nextMsgId(), Eref( newSrc(), i1_ ), newTgt() );
+			ret = new OneToAllMsg( Msg::nextMsgId(), 
+					Eref( newSrc.element(), i1_ ), newTgt.element() );
 			ret->e1()->addMsgAndFunc( ret->mid(), fid, b );
 		} else if ( orig == e2() ) {
-			ret = new OneToAllMsg( Msg::nextMsgId(), Eref( newTgt(), i1_ ), newSrc() );
+			ret = new OneToAllMsg( Msg::nextMsgId(), 
+					Eref( newTgt.element(), i1_ ), newSrc.element() );
 			ret->e2()->addMsgAndFunc( ret->mid(), fid, b );
 		} else {
 			assert( 0 );

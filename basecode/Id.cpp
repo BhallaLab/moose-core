@@ -82,11 +82,12 @@ string Id::path( const string& separator) const
  * and when this is detected it will put the postmaster ptr and the id
  * into the wrapper element. The wrapper's own id will be zero so it
  * can be safely deleted.
- */
+ * deprecated
 Element* Id::operator()() const
 {
 	return elements()[ id_ ];
 }
+ */
 
 /// Synonym for Id::operator()()
 Element* Id::element() const

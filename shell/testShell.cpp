@@ -32,9 +32,7 @@ void testShellParserCreateDelete()
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 
-	vector< int > dimensions;
-	dimensions.push_back( 1 );
-	Id child = shell->doCreate( "Neutral", Id(), "test", dimensions );
+	Id child = shell->doCreate( "Neutral", Id(), "test", 1 );
 
 	shell->doDelete( child );
 	cout << "." << flush;
@@ -48,22 +46,27 @@ void testTreeTraversal()
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 
-	vector< int > dimensions;
-	dimensions.push_back( 1 );
-	Id f1 = shell->doCreate( "Neutral", Id(), "f1", dimensions );
+	unsigned int i = 0;
+	Id f1 = shell->doCreate( "Neutral", Id(), "f1", 10 );
 	assert( f1 != Id() );
-	Id f2a = shell->doCreate( "Neutral", f1, "f2a", dimensions );
+	Id f2a = shell->doCreate( "Neutral", ObjId(f1, i++), "f2a", 10 );
 	assert( f2a != Id() );
-	Id f2b = shell->doCreate( "Neutral", f1, "f2b", dimensions );
+	Id f2b = shell->doCreate( "Neutral", ObjId(f1, i++), "f2b", 10 );
 	assert( f2b != Id() );
-	Id f2c = shell->doCreate( "Neutral", f1, "f2c", dimensions );
+	Id f2c = shell->doCreate( "Neutral", ObjId(f1, i++), "f2c", 10 );
 	assert( f2c != Id() );
-	Id f3aa = shell->doCreate( "Neutral", f2a, "f3aa", dimensions );
+	Id f3aa = shell->doCreate( "Neutral", ObjId(f2a, i++), "f3aa", 10 );
 	assert( f3aa != Id() );
-	Id f3ab = shell->doCreate( "Neutral", f2a, "f3ab", dimensions );
+	Id f3ab = shell->doCreate( "Neutral", ObjId(f2a, i++), "f3ab", 10 );
 	assert( f3ab != Id() );
-	Id f3ba = shell->doCreate( "Neutral", f2b, "f3ba", dimensions );
+	Id f3ba = shell->doCreate( "Neutral", ObjId(f2b, i++), "f3ba", 10 );
 	assert( f3ba != Id() );
+	Id f4 = shell->doCreate( "IntFire", ObjId(f3ba, i++), "cell", 10 );
+	assert( f4 != Id() );
+	Id syns( f4.value() + 1 );
+	for ( unsigned int i = 0; i < 10; ++i ) {
+		Field< unsigned int >::set( ObjId( f4, i ), "num_synapse", 5 );
+	}
 
 	////////////////////////////////////////////////////////////////
 	// Checking for own Ids
@@ -79,11 +82,11 @@ void testTreeTraversal()
 	// Checking for parent Ids
 	////////////////////////////////////////////////////////////////
 	ObjId pa = Field< ObjId >::get( f3aa, "parent" );
-	assert( pa == ObjId( f2a, 0 ) );
+	assert( pa == ObjId( f2a, 3 ) );
 	pa = Field< ObjId >::get( f3ab, "parent" );
-	assert( pa == ObjId( f2a, 0 ) );
+	assert( pa == ObjId( f2a, 4 ) );
 	pa = Field< ObjId >::get( f2b, "parent" );
-	assert( pa == ObjId( f1, 0 ) );
+	assert( pa == ObjId( f1, 1 ) );
 	pa = Field< ObjId >::get( f1, "parent" );
 	assert( pa == ObjId( Id(), 0 ) );
 
@@ -116,22 +119,30 @@ void testTreeTraversal()
 	// Checking path string generation.
 	////////////////////////////////////////////////////////////////
 	string path = Field< string >::get( f3aa, "path" );
-	assert( path == "/f1/f2a/f3aa" );
+	assert( path == "/f1[0]/f2a[3]/f3aa[0]" );
 	path = Field< string >::get( f3ab, "path" );
-	assert( path == "/f1/f2a/f3ab" );
+	assert( path == "/f1[0]/f2a[4]/f3ab[0]" );
 	path = Field< string >::get( f3ba, "path" );
-	assert( path == "/f1/f2b/f3ba" );
+	assert( path == "/f1[1]/f2b[5]/f3ba[0]" );
+	path = Field< string >::get( f4, "path" );
+	assert( path == "/f1[1]/f2b[5]/f3ba[6]/cell[0]" );
+	path = Field< string >::get( syns, "path" );
+	assert( path == "/f1[1]/f2b[5]/f3ba[6]/cell[0]/synapse[0][0]" );
+	path = Field< string >::get( ObjId( syns, 7, 3 ), "path" );
+	assert( path == "/f1[1]/f2b[5]/f3ba[6]/cell[7]/synapse[7][3]" );
 
-	path = Field< string >::get( f2a, "path" );
-	assert( path == "/f1/f2a" );
-	path = Field< string >::get( f2b, "path" );
-	assert( path == "/f1/f2b" );
+	path = Field< string >::get( ObjId( f2a, 7 ), "path" );
+	assert( path == "/f1[0]/f2a[7]" );
+	path = Field< string >::get( ObjId( f2b, 2 ), "path" );
+	assert( path == "/f1[1]/f2b[2]" );
 	path = Field< string >::get( f2c, "path" );
-	assert( path == "/f1/f2c" );
+	assert( path == "/f1[2]/f2c[0]" );
 	path = Field< string >::get( f1, "path" );
-	assert( path == "/f1" );
+	assert( path == "/f1[0]" );
 	path = Field< string >::get( Id(), "path" );
 	assert( path == "/" );
+
+	path = Field< string >::get( Id(), "path" );
 
 	cout << "." << flush;
 	////////////////////////////////////////////////////////////////
@@ -175,12 +186,10 @@ void testDescendant()
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 
-	vector< int > dimensions;
-	dimensions.push_back( 1 );
-	Id f1 = shell->doCreate( "Neutral", Id(), "f1", dimensions );
-	Id f2a = shell->doCreate( "Neutral", f1, "f2a", dimensions );
-	Id f2b = shell->doCreate( "Neutral", f1, "f2b", dimensions );
-	Id f3aa = shell->doCreate( "Neutral", f2a, "f3aa", dimensions );
+	Id f1 = shell->doCreate( "Neutral", Id(), "f1", 1 );
+	Id f2a = shell->doCreate( "Neutral", f1, "f2a", 1 );
+	Id f2b = shell->doCreate( "Neutral", f1, "f2b", 1 );
+	Id f3aa = shell->doCreate( "Neutral", f2a, "f3aa", 1 );
 
 	assert( Neutral::isDescendant( f3aa, Id() ) );
 	assert( Neutral::isDescendant( f3aa, f1 ) );
@@ -233,14 +242,12 @@ void testChildren()
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 
-	vector< int > dimensions;
-	dimensions.push_back( 1 );
-	Id f1 = shell->doCreate( "Neutral", Id(), "f1", dimensions );
-	Id f2a = shell->doCreate( "Neutral", f1, "f2a", dimensions );
-	Id f2b = shell->doCreate( "Neutral", f1, "f2b", dimensions );
-	Id f3 = shell->doCreate( "Neutral", f2a, "f3", dimensions );
-	Id f4a = shell->doCreate( "Neutral", f3, "f4a", dimensions );
-	Id f4b = shell->doCreate( "Neutral", f3, "f4b", dimensions );
+	Id f1 = shell->doCreate( "Neutral", Id(), "f1", 1 );
+	Id f2a = shell->doCreate( "Neutral", f1, "f2a", 1 );
+	Id f2b = shell->doCreate( "Neutral", f1, "f2b", 1 );
+	Id f3 = shell->doCreate( "Neutral", f2a, "f3", 1 );
+	Id f4a = shell->doCreate( "Neutral", f3, "f4a", 1 );
+	Id f4b = shell->doCreate( "Neutral", f3, "f4b", 1 );
 
 	verifyKids( f1, f2a, f2b, f3, f4a, f4b );
 
@@ -253,21 +260,13 @@ void testMove()
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 
-	vector< int > dimensions;
-	dimensions.push_back( 1 );
-	/*
-	Id f1 = shell->doCreate( "Neutral", Id(), "f1", dimensions );
-	Id f2a = shell->doCreate( "Neutral", f1, "f2a", dimensions );
-	Id f2b = shell->doCreate( "Neutral", f1, "f2b", dimensions );
-	Id f3aa = shell->doCreate( "Neutral", f2a, "f3aa", dimensions );
-	*/
 
-	Id f1 = shell->doCreate( "Neutral", Id(), "f1", dimensions );
-	Id f2a = shell->doCreate( "Neutral", f1, "f2a", dimensions );
-	Id f2b = shell->doCreate( "Neutral", f1, "f2b", dimensions );
-	Id f3 = shell->doCreate( "Neutral", f2a, "f3", dimensions );
-	Id f4a = shell->doCreate( "Neutral", f3, "f4a", dimensions );
-	Id f4b = shell->doCreate( "Neutral", f3, "f4b", dimensions );
+	Id f1 = shell->doCreate( "Neutral", Id(), "f1", 1 );
+	Id f2a = shell->doCreate( "Neutral", f1, "f2a", 1 );
+	Id f2b = shell->doCreate( "Neutral", f1, "f2b", 1 );
+	Id f3 = shell->doCreate( "Neutral", f2a, "f3", 1 );
+	Id f4a = shell->doCreate( "Neutral", f3, "f4a", 1 );
+	Id f4b = shell->doCreate( "Neutral", f3, "f4b", 1 );
 	verifyKids( f1, f2a, f2b, f3, f4a, f4b );
 
 	ObjId pa = Field< ObjId >::get( f4a, "parent" );
@@ -326,14 +325,12 @@ void testCopy()
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 
-	vector< int > dimensions;
-	dimensions.push_back( 1 );
-	Id f1 = shell->doCreate( "Neutral", Id(), "f1", dimensions );
-	Id f2a = shell->doCreate( "Neutral", f1, "f2a", dimensions );
-	Id f2b = shell->doCreate( "Neutral", f1, "f2b", dimensions );
-	Id f3 = shell->doCreate( "Neutral", f2a, "f3", dimensions );
-	Id f4a = shell->doCreate( "Neutral", f3, "f4a", dimensions );
-	Id f4b = shell->doCreate( "Neutral", f3, "f4b", dimensions );
+	Id f1 = shell->doCreate( "Neutral", Id(), "f1", 1 );
+	Id f2a = shell->doCreate( "Neutral", f1, "f2a", 1 );
+	Id f2b = shell->doCreate( "Neutral", f1, "f2b", 1 );
+	Id f3 = shell->doCreate( "Neutral", f2a, "f3", 1 );
+	Id f4a = shell->doCreate( "Neutral", f3, "f4a", 1 );
+	Id f4b = shell->doCreate( "Neutral", f3, "f4b", 1 );
 
 	verifyKids( f1, f2a, f2b, f3, f4a, f4b );
 
@@ -353,12 +350,12 @@ void testCopy()
 	assert( dupf2a != Id() );
 	// pa = Field< ObjId >::get( dupf2a, "parent" );
 	// assert( pa == ObjId( f1, 0 ) );
-	assert( dupf2a()->getName() == "TheElephantsAreLoose" );
+	assert( dupf2a.element()->getName() == "TheElephantsAreLoose" );
 	Neutral* f2aDupData = reinterpret_cast< Neutral* >( dupf2a.eref().data() );
 	Id dupf3 = f2aDupData->child( dupf2a.eref(), "f3" );
 	assert( dupf3 != Id() );
 	assert( dupf3 != f3 );
-	assert( dupf3()->getName() == "f3" );
+	assert( dupf3.element()->getName() == "f3" );
 	vector< Id > kids = f2aDupData->getChildren( dupf2a.eref() );
 	assert( kids.size() == 1 );
 	assert( kids[0] == dupf3 );
@@ -367,8 +364,8 @@ void testCopy()
 	assert( f3DupData->getParent( dupf3.eref() ) == ObjId( dupf2a, 0 ));
 	kids = f3DupData->getChildren( dupf3.eref() );
 	assert( kids.size() == 2 );
-	assert( kids[0]()->getName() == "f4a" );
-	assert( kids[1]()->getName() == "f4b" );
+	assert( kids[0].element()->getName() == "f4a" );
+	assert( kids[1].element()->getName() == "f4b" );
 
 	shell->doDelete( f1 );
 	shell->doDelete( dupf2a );
@@ -380,11 +377,10 @@ void testCopyFieldElement()
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 	unsigned int size = 10;
-	vector< int > dims( 1, size );
-	Id origId = shell->doCreate( "IntFire", Id(), "f1", dims );
+	Id origId = shell->doCreate( "IntFire", Id(), "f1", size );
 	Id origSynId( origId.value() + 1 );
 	
-	Element* syn = origSynId();
+	Element* syn = origSynId.element();
 	assert( syn != 0 );
 	assert( syn->getName() == "synapse" );
 	assert( syn->numData() == 0 );
@@ -416,8 +412,8 @@ void testCopyFieldElement()
 	Id copyId = shell->doCopy( origId, Id(), "dup", 1, false, false );
 	//////////////////////////////////////////////////////////////////
 
-	Eref origEr( origId(), 0 );
-	Eref copyEr( copyId(), 0 );
+	Eref origEr( origId.element(), 0 );
+	Eref copyEr( copyId.element(), 0 );
 	vector< Id > origChildren;
 	vector< Id > copyChildren;
 	Neutral::children( origEr, origChildren );
@@ -427,7 +423,7 @@ void testCopyFieldElement()
 	assert( origChildren.size() == copyChildren.size() );
 	Id copySynId = copyChildren[0];
 
-	Element* copySynElm = copySynId();
+	Element* copySynElm = copySynId.element();
 	
 	// Element should exist even if data doesn't
 	assert ( copySynElm != 0 );
@@ -472,18 +468,12 @@ void testObjIdToAndFromPath()
 	unsigned int s4 = 1;
 	unsigned int s5 = 9; // slower varying
 	unsigned int s5a = 11; // faster varying, rightmost bracket
-	vector< int > dims( 1, s1 );
-	Id level1 = shell->doCreate( "IntFire", Id(), "f1", dims );
+	Id level1 = shell->doCreate( "IntFire", Id(), "f1", s1 );
 	Id origSynId( level1.value() + 1 );
-	dims[0] = s2;
-	Id level2 = shell->doCreate( "Neutral", level1, "f2", dims );
-	dims[0] = s3;
-	Id level3 = shell->doCreate( "Neutral", level2, "f3", dims );
-	dims[0] = s4;
-	Id level4 = shell->doCreate( "Neutral", level3, "f4", dims );
-	dims[0] = s5; // slower varying
-	dims.push_back( s5a ); // faster varying, rightmost bracket
-	Id level5 = shell->doCreate( "Neutral", level4, "f5", dims );
+	Id level2 = shell->doCreate( "Neutral", level1, "f2", s2 );
+	Id level3 = shell->doCreate( "Neutral", level2, "f3", s3 );
+	Id level4 = shell->doCreate( "Neutral", level3, "f4", s4 );
+	Id level5 = shell->doCreate( "Neutral", level4, "f5", s5 );
 
 	unsigned int index1 = 1;
 	unsigned int index2 = 0;
@@ -528,11 +518,9 @@ void testObjIdToAndFromPath()
 	assert( f0 == Id() );
 
 	// Here check what happens with a move.
-	dims.resize( 1 );
-	dims[0] = 1;
-	Id level6 = shell->doCreate( "Neutral", Id(), "foo", dims );
-	Id level7 = shell->doCreate( "Neutral", level6, "bar", dims );
-	Id level8 = shell->doCreate( "Neutral", level7, "zod", dims );
+	Id level6 = shell->doCreate( "Neutral", Id(), "foo", 1 );
+	Id level7 = shell->doCreate( "Neutral", level6, "bar", 1 );
+	Id level8 = shell->doCreate( "Neutral", level7, "zod", 1 );
 
 	shell->doMove( level1, level8 );
 
@@ -568,7 +556,7 @@ void testShellParserStart()
 
 	// testThreadSchedElement tse;
 	Eref ts( tse, 0 );
-	Element* ticke = Id( 2 )();
+	Element* ticke = Id( 2 ).element();
 	Eref er0( ticke, DataId( 0 ) );
 	Eref er1( ticke, DataId( 1 ) );
 	Eref er2( ticke, DataId( 2 ) );
@@ -609,9 +597,8 @@ void testInterNodeOps() // redundant.
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 	Id child;
 	if ( shell->myNode() == 0 ) {
-		vector< int > dimensions;
-		dimensions.push_back( 6139 );
-		child = shell->doCreate( "Neutral", Id(), "test", dimensions );
+		unsigned int size = 6139;
+		child = shell->doCreate( "Neutral", Id(), "test", size );
 	} 
 	// cout << shell->myNode() << ": testInterNodeOps: #entries = " << child()->dataHandler()->numData() << endl;
 
@@ -625,12 +612,10 @@ void testShellSetGet()
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 	const unsigned int size = 100;
-	vector< int > dimensions;
-	dimensions.push_back( size );
 	vector< double > val;
 
 	// Set up the objects.
-	Id a1 = shell->doCreate( "Arith", Id(), "a1", dimensions );
+	Id a1 = shell->doCreate( "Arith", Id(), "a1", size );
 
 	// cout << Shell::myNode() << ": testShellSetGet: data here = (" << a1()->dataHandler()->begin() << " to " << a1()->dataHandler()->end() << ")" << endl;
 	for ( unsigned int i = 0; i < size; ++i ) {
@@ -654,29 +639,6 @@ void testShellSetGet()
 	cout << "." << flush;
 }
 
-void testShellSetGetVec()
-{
-	/*
-	unsigned int numCells = 65535;
-	Eref sheller = Id().eref();
-	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
-	vector< unsigned int > dimensions;
-	dimensions.push_back( numCells );
-	Id child = shell->doCreate( "IntFire", Id(), "test", dimensions );
-	for ( unsigned int i = 0; i < numCells; ++i )
-		numSyn.push_back( i % 32 );
-	shell->doSetUintVec( child, DataId( i ), "numSynapses", numSyn );
-	numSyn.clear();
-	shell->doGetUintVec( child, DataId( i ), "numSynapses", numSyn );
-	for ( unsigned int i = 0; i < numCells; ++i )
-		assert( numSyn[i] == i % 32 );
-	// Also want to assign each of the synapses to a different value.
-	
-	shell->doDelete( child );
-	cout << "." << flush;
-	*/
-}
-
 bool setupSched( Shell* shell, ObjId& tick, Id dest )
 {
 	MsgId ret = shell->doAddMsg( "OneToAll", 
@@ -684,32 +646,32 @@ bool setupSched( Shell* shell, ObjId& tick, Id dest )
 	return ( ret != Msg::bad );
 }
 
-bool checkArg1( Id e, 
+bool checkArg1( Id id, 
 	double v0, double v1, double v2, double v3, double v4 )
 {
 	bool ret = 1;
 	bool report = 0;
-	Eref e0( e(), 0 );
+	Eref e0( id.element(), 0 );
 	double val = reinterpret_cast< Arith* >( e0.data() )->getArg1();
 	ret = ret && ( fabs( val - v0 ) < 1e-6 );
 	if (report) cout << "( " << v0 << ", " << val << " ) ";
 
-	Eref e1( e(), 1 );
+	Eref e1( id.element(), 1 );
 	val = reinterpret_cast< Arith* >( e1.data() )->getArg1();
 	ret = ret && ( fabs( val - v1 ) < 1e-6 );
 	if (report) cout << "( " << v1 << ", " << val << " ) ";
 
-	Eref e2( e(), 2 );
+	Eref e2( id.element(), 2 );
 	val = reinterpret_cast< Arith* >( e2.data() )->getArg1();
 	ret = ret && ( fabs( val - v2 ) < 1e-6 );
 	if (report) cout << "( " << v2 << ", " << val << " ) ";
 
-	Eref e3( e(), 3 );
+	Eref e3( id.element(), 3 );
 	val = reinterpret_cast< Arith* >( e3.data() )->getArg1();
 	ret = ret && ( fabs( val - v3 ) < 1e-6 );
 	if (report) cout << "( " << v3 << ", " << val << " ) ";
 
-	Eref e4( e(), 4 );
+	Eref e4( id.element(), 4 );
 	val = reinterpret_cast< Arith* >( e4.data() )->getArg1();
 	ret = ret && ( fabs( val - v4 ) < 1e-6 );
 	if (report) cout << "( " << v4 << ", " << val << " )\n";
@@ -749,33 +711,32 @@ void testShellAddMsg()
 {
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
-	vector< int > dimensions;
-	dimensions.push_back( 5 );
+	unsigned int size = 5;
 
 
 	///////////////////////////////////////////////////////////
 	// Set up the objects.
 	///////////////////////////////////////////////////////////
-	Id a1 = shell->doCreate( "Arith", Id(), "a1", dimensions );
-	Id a2 = shell->doCreate( "Arith", Id(), "a2", dimensions );
+	Id a1 = shell->doCreate( "Arith", Id(), "a1", size );
+	Id a2 = shell->doCreate( "Arith", Id(), "a2", size );
 
-	Id b1 = shell->doCreate( "Arith", Id(), "b1", dimensions );
-	Id b2 = shell->doCreate( "Arith", Id(), "b2", dimensions );
+	Id b1 = shell->doCreate( "Arith", Id(), "b1", size );
+	Id b2 = shell->doCreate( "Arith", Id(), "b2", size );
 
-	Id c1 = shell->doCreate( "Arith", Id(), "c1", dimensions );
-	Id c2 = shell->doCreate( "Arith", Id(), "c2", dimensions );
+	Id c1 = shell->doCreate( "Arith", Id(), "c1", size );
+	Id c2 = shell->doCreate( "Arith", Id(), "c2", size );
 
-	Id d1 = shell->doCreate( "Arith", Id(), "d1", dimensions );
-	Id d2 = shell->doCreate( "Arith", Id(), "d2", dimensions );
+	Id d1 = shell->doCreate( "Arith", Id(), "d1", size );
+	Id d2 = shell->doCreate( "Arith", Id(), "d2", size );
 
-	Id e1 = shell->doCreate( "Arith", Id(), "e1", dimensions );
-	Id e2 = shell->doCreate( "Arith", Id(), "e2", dimensions );
+	Id e1 = shell->doCreate( "Arith", Id(), "e1", size );
+	Id e2 = shell->doCreate( "Arith", Id(), "e2", size );
 
-	Id f1 = shell->doCreate( "Arith", Id(), "f1", dimensions );
-	Id f2 = shell->doCreate( "Arith", Id(), "f2", dimensions );
+	Id f1 = shell->doCreate( "Arith", Id(), "f1", size );
+	Id f2 = shell->doCreate( "Arith", Id(), "f2", size );
 
-	Id g1 = shell->doCreate( "Arith", Id(), "g1", dimensions );
-	Id g2 = shell->doCreate( "Arith", Id(), "g2", dimensions );
+	Id g1 = shell->doCreate( "Arith", Id(), "g1", size );
+	Id g2 = shell->doCreate( "Arith", Id(), "g2", size );
 
 
 	///////////////////////////////////////////////////////////
@@ -1003,28 +964,27 @@ void testCopyMsgOps()
 {
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
-	vector< int > dimensions;
-	Id pa = shell->doCreate( "Neutral", Id(), "pa", dimensions );
-	dimensions.push_back( 5 );
+	Id pa = shell->doCreate( "Neutral", Id(), "pa", 1 );
+	unsigned int size = 5;
 
 
 	///////////////////////////////////////////////////////////
 	// Set up the objects.
 	///////////////////////////////////////////////////////////
-	Id a1 = shell->doCreate( "Arith", pa, "a1", dimensions );
-	Id a2 = shell->doCreate( "Arith", pa, "a2", dimensions );
+	Id a1 = shell->doCreate( "Arith", pa, "a1", size );
+	Id a2 = shell->doCreate( "Arith", pa, "a2", size );
 
-	Id b1 = shell->doCreate( "Arith", pa, "b1", dimensions );
-	Id b2 = shell->doCreate( "Arith", pa, "b2", dimensions );
+	Id b1 = shell->doCreate( "Arith", pa, "b1", size );
+	Id b2 = shell->doCreate( "Arith", pa, "b2", size );
 
-	Id c1 = shell->doCreate( "Arith", pa, "c1", dimensions );
-	Id c2 = shell->doCreate( "Arith", pa, "c2", dimensions );
+	Id c1 = shell->doCreate( "Arith", pa, "c1", size );
+	Id c2 = shell->doCreate( "Arith", pa, "c2", size );
 
-	Id d1 = shell->doCreate( "Arith", pa, "d1", dimensions );
-	Id d2 = shell->doCreate( "Arith", pa, "d2", dimensions );
+	Id d1 = shell->doCreate( "Arith", pa, "d1", size );
+	Id d2 = shell->doCreate( "Arith", pa, "d2", size );
 
-	Id e1 = shell->doCreate( "Arith", pa, "e1", dimensions );
-	Id e2 = shell->doCreate( "Arith", pa, "e2", dimensions );
+	Id e1 = shell->doCreate( "Arith", pa, "e1", size );
+	Id e2 = shell->doCreate( "Arith", pa, "e2", size );
 
 	///////////////////////////////////////////////////////////
 	// Set up initial conditions and some scheduling.
@@ -1116,16 +1076,16 @@ void testCopyMsgOps()
 	}
 
 	unsigned int j = 0;
-	assert( kids[j]()->getName() == "a1" ); ++j;
-	assert( kids[j]()->getName() == "a2" ); ++j;
-	assert( kids[j]()->getName() == "b1" ); ++j;
-	assert( kids[j]()->getName() == "b2" ); ++j;
-	assert( kids[j]()->getName() == "c1" ); ++j;
-	assert( kids[j]()->getName() == "c2" ); ++j;
-	assert( kids[j]()->getName() == "d1" ); ++j;
-	assert( kids[j]()->getName() == "d2" ); ++j;
-	assert( kids[j]()->getName() == "e1" ); ++j;
-	assert( kids[j]()->getName() == "e2" ); ++j;
+	assert( kids[j].element()->getName() == "a1" ); ++j;
+	assert( kids[j].element()->getName() == "a2" ); ++j;
+	assert( kids[j].element()->getName() == "b1" ); ++j;
+	assert( kids[j].element()->getName() == "b2" ); ++j;
+	assert( kids[j].element()->getName() == "c1" ); ++j;
+	assert( kids[j].element()->getName() == "c2" ); ++j;
+	assert( kids[j].element()->getName() == "d1" ); ++j;
+	assert( kids[j].element()->getName() == "d2" ); ++j;
+	assert( kids[j].element()->getName() == "e1" ); ++j;
+	assert( kids[j].element()->getName() == "e2" ); ++j;
 
 	vector< double > retVec;
 	Field< double >::getVec( kids[0], "arg1Value", retVec );
@@ -1325,10 +1285,9 @@ void testFindModelParent()
 	///////////////////////////////////////////////////////////
 	// Set up the objects.
 	///////////////////////////////////////////////////////////
-	vector< int > dimensions( 1, 1 );
-	Id foo = shell->doCreate( "Neutral", Id(), "foo", dimensions );
-	Id zod = shell->doCreate( "Neutral", Id(), "zod", dimensions );
-	Id foo2 = shell->doCreate( "Neutral", zod, "foo", dimensions );
+	Id foo = shell->doCreate( "Neutral", Id(), "foo", 1 );
+	Id zod = shell->doCreate( "Neutral", Id(), "zod", 1 );
+	Id foo2 = shell->doCreate( "Neutral", zod, "foo", 1 );
 
 	// shell->setCwe( zod );
 
@@ -1398,11 +1357,10 @@ void testSyncSynapseSize()
 	const DestFinfo* df = dynamic_cast< const DestFinfo* >( f );
 	assert( df );
 	unsigned int size = 1000;
-	vector< int > dims( 1, size );
-	Id neuronId = shell->doCreate( "IntFire", Id(), "neurons", dims );
+	Id neuronId = shell->doCreate( "IntFire", Id(), "neurons", size );
 	assert( neuronId != Id() );
 	Id synId( neuronId.value() + 1 );
-	Element* syn = synId();
+	Element* syn = synId.element();
 
 	// Element should exist even if data doesn't
 	assert ( syn != 0 );
@@ -1437,27 +1395,25 @@ void testGetMsgs()
 {
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
-	vector< int > dimensions;
-	dimensions.push_back( 5 );
-
+	unsigned int numData = 5;
 
 	///////////////////////////////////////////////////////////
 	// Set up the objects.
 	///////////////////////////////////////////////////////////
-	Id a1 = shell->doCreate( "Arith", Id(), "a1", dimensions );
-	Id a2 = shell->doCreate( "Arith", Id(), "a2", dimensions );
+	Id a1 = shell->doCreate( "Arith", Id(), "a1", numData );
+	Id a2 = shell->doCreate( "Arith", Id(), "a2", numData );
 
-	Id b1 = shell->doCreate( "Arith", Id(), "b1", dimensions );
-	Id b2 = shell->doCreate( "Arith", Id(), "b2", dimensions );
+	Id b1 = shell->doCreate( "Arith", Id(), "b1", numData );
+	Id b2 = shell->doCreate( "Arith", Id(), "b2", numData );
 
-	Id c1 = shell->doCreate( "Arith", Id(), "c1", dimensions );
-	Id c2 = shell->doCreate( "Arith", Id(), "c2", dimensions );
+	Id c1 = shell->doCreate( "Arith", Id(), "c1", numData );
+	Id c2 = shell->doCreate( "Arith", Id(), "c2", numData );
 
-	Id d1 = shell->doCreate( "Arith", Id(), "d1", dimensions );
-	Id d2 = shell->doCreate( "Arith", Id(), "d2", dimensions );
+	Id d1 = shell->doCreate( "Arith", Id(), "d1", numData );
+	Id d2 = shell->doCreate( "Arith", Id(), "d2", numData );
 
-	Id e1 = shell->doCreate( "Arith", Id(), "e1", dimensions );
-	Id e2 = shell->doCreate( "Arith", Id(), "e2", dimensions );
+	Id e1 = shell->doCreate( "Arith", Id(), "e1", numData );
+	Id e2 = shell->doCreate( "Arith", Id(), "e2", numData );
 
 	///////////////////////////////////////////////////////////
 	// Set up messaging

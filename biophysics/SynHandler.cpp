@@ -42,7 +42,8 @@ const Cinfo* SynHandler::initCinfo()
 
 	//////////////////////////////////////////////////////////////////////
 	static Finfo* synHandlerFinfos[] = {
-		&numSynapses,	// Value
+		// &numSynapses,	// Value
+		&synFinfo,		// FieldElement
 	};
 
 	static Cinfo synHandlerCinfo (

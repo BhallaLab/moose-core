@@ -81,7 +81,7 @@ int DiagonalMsg::getStride() const
 
 ObjId DiagonalMsg::findOtherEnd( ObjId f ) const
 {
-	if ( f.id() == e1() ) {
+	if ( f.id.element() == e1() ) {
 		int i2 = f.dataId + stride_;
 		if ( i2 >= 0 ) {
 			unsigned int ui2 = i2;
@@ -89,7 +89,7 @@ ObjId DiagonalMsg::findOtherEnd( ObjId f ) const
 				return ObjId( e2()->id(), DataId( ui2 ) );
 		}
 		return ObjId( Id() );
-	} else if ( f.id() == e2() ) {
+	} else if ( f.id.element() == e2() ) {
 		int i1 = f.dataId - stride_;
 		if ( i1 >= 0 ) {
 			unsigned int ui1 = i1;
@@ -104,14 +104,16 @@ ObjId DiagonalMsg::findOtherEnd( ObjId f ) const
 Msg* DiagonalMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 			FuncId fid, unsigned int b, unsigned int n ) const
 {
-	const Element* orig = origSrc();
+	const Element* orig = origSrc.element();
 	if ( n <= 1 ) {
 		DiagonalMsg* ret = 0;
 		if ( orig == e1() ) {
-			ret = new DiagonalMsg( Msg::nextMsgId(), newSrc(), newTgt() );
+			ret = new DiagonalMsg( Msg::nextMsgId(), 
+							newSrc.element(), newTgt.element() );
 			ret->e1()->addMsgAndFunc( ret->mid(), fid, b );
 		} else if ( orig == e2() ) {
-			ret = new DiagonalMsg( Msg::nextMsgId(), newTgt(), newSrc() );
+			ret = new DiagonalMsg( Msg::nextMsgId(), newTgt.element(), 
+							newSrc.element() );
 			ret->e2()->addMsgAndFunc( ret->mid(), fid, b );
 		} else {
 			assert( 0 );

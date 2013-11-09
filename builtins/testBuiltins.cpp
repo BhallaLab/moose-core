@@ -123,13 +123,11 @@ void testFibonacci()
 void testMpiFibonacci()
 {
 	unsigned int numFib = 20;
-	vector< int > dims( 1, numFib );
 
 	// Id a1id = Id::nextId();
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 
-	Id a1id = shell->doCreate( "Arith", Id(), "a1", dims );
-	// Element* a1 = new Element( a1id, Arith::initCinfo(), "a1", dims );
+	Id a1id = shell->doCreate( "Arith", ObjId(), "a1", numFib );
 	SetGet1< double >::set( a1id, "arg1", 0 );
 	SetGet1< double >::set( a1id, "arg2", 1 );
 
@@ -249,9 +247,8 @@ void testTable()
 	testUtilsForLoadXplot();
 	testUtilsForCompareXplot();
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
-	vector< int > dims( 1, 1 );
-	Id tabid = shell->doCreate( "Table", Id(), "tab", dims );
-	assert( tabid != Id() );
+	ObjId tabid = shell->doCreate( "Table", ObjId(), "tab", 1 );
+	assert( tabid != ObjId() );
 	Table* t = reinterpret_cast< Table* >( tabid.eref().data() );
 	for ( unsigned int i = 0; i < 100; ++i ) {
 		t->input( sqrt((double) i ) );
@@ -273,11 +270,10 @@ void testTable()
 void testGetMsg()
 {
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
-	vector< int > dims( 1, 1 );
-	Id tabid = shell->doCreate( "Table", Id(), "tab", dims );
-	assert( tabid != Id() );
-	Id arithid = shell->doCreate( "Arith", Id(), "arith", dims );
-	assert( arithid != Id() );
+	ObjId tabid = shell->doCreate( "Table", ObjId(), "tab", 1 );
+	assert( tabid != ObjId() );
+	ObjId arithid = shell->doCreate( "Arith", ObjId(), "arith", 1 );
+	assert( arithid != ObjId() );
 	// Table* t = reinterpret_cast< Table* >( tabid.eref().data() );
 	MsgId ret = shell->doAddMsg( "Single", 
 		tabid.eref().objId(), "requestData",
@@ -301,7 +297,7 @@ void testGetMsg()
 	numEntries = Field< unsigned int >::get( tabid, "num_table" );
 	assert( numEntries == 101 ); // One for reinit call, 100 for process.
 
-	Id tabentry( tabid.value() + 1 );
+	Id tabentry( tabid.id.value() + 1 );
 	for ( unsigned int i = 0; i < 100; ++i ) {
 		ObjId temp( tabentry, DataId( i ) );
 		double ret = Field< double >::get( temp, "value" );

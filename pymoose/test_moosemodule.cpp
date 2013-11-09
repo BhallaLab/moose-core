@@ -105,8 +105,7 @@ extern "C" {
         
         // Id
         Shell * shell = reinterpret_cast< Shell * >(ObjId( Id(), 0).data());
-        vector <int> dims(1, 1);
-        Id id = shell->doCreate("Neutral", Id(), "n", dims);
+        Id id = shell->doCreate("Neutral", Id(), "n", 1);
         pv = to_py((void*)&id, 'x');
         assert(pv != NULL);
         assert(((_Id*)pv)->id_ == id);
