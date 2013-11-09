@@ -9,13 +9,25 @@
 
 #include "header.h"
 #include "../shell/Shell.h"
+#include "../msg/OneToOneMsg.h"
 
 void FieldElementFinfoBase::postCreationFunc( 
 				Id parent, Element* parentElm ) const
 {
+	static const Finfo* pf = Neutral::initCinfo()->findFinfo( "parentMsg" );
+	static const Finfo* f1 = Neutral::initCinfo()->findFinfo( "childMsg" );
+
 	if ( deferCreate_ )
 		return;
 	Id kid = Id::nextId();
-	new FieldElement( parent, kid, fieldCinfo_, name(), this );
-	Shell::adopt( parent, kid );
+	Element* e = new FieldElement( parent, kid, fieldCinfo_, name(), this );
+	Msg* m = new OneToOneMsg( Msg::nextMsgId(), parent.element(), e );
+	assert( m );
+	if ( !f1->addMsg( pf, m->mid(), parent.element() ) ) {
+		cout << "FieldElementFinfoBase::postCreationFunc: Error: \n" <<
+				" unable to add parent->child msg from " <<
+		parent.element()->getName() << " to " << name() << "\n";
+		return;
+	}
+	// Shell::adopt( parent, kid );
 }

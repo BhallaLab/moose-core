@@ -300,7 +300,7 @@ SparseMatrix< unsigned int >& SparseMsg::getMatrix( )
 
 ObjId SparseMsg::findOtherEnd( ObjId f ) const
 {
-	if ( f.id() == e1() ) {
+	if ( f.element() == e1() ) {
 		const unsigned int* entry;
 		const unsigned int* colIndex;
 		unsigned int num = matrix_.getRow( f.dataId, &entry, &colIndex );
@@ -308,7 +308,7 @@ ObjId SparseMsg::findOtherEnd( ObjId f ) const
 			return ObjId( e2()->id(), colIndex[0] );
 		}
 		return ObjId();
-	} else if ( f.id() == e2() ) { // Bad! Slow! Avoid!
+	} else if ( f.element() == e2() ) { // Bad! Slow! Avoid!
 		vector< unsigned int > entry;
 		vector< unsigned int > rowIndex;
 		unsigned int num = matrix_.getColumn( f.dataId, entry, rowIndex );
@@ -322,14 +322,16 @@ ObjId SparseMsg::findOtherEnd( ObjId f ) const
 Msg* SparseMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 			FuncId fid, unsigned int b, unsigned int n ) const
 {
-	const Element* orig = origSrc();
+	const Element* orig = origSrc.element();
 	if ( n <= 1 ) {
 		SparseMsg* ret = 0;
 		if ( orig == e1() ) {
-			ret = new SparseMsg( Msg::nextMsgId(), newSrc(), newTgt() );
+			ret = new SparseMsg( Msg::nextMsgId(), 
+				newSrc.element(), newTgt.element() );
 			ret->e1()->addMsgAndFunc( ret->mid(), fid, b );
 		} else if ( orig == e2() ) {
-			ret = new SparseMsg( Msg::nextMsgId(), newTgt(), newSrc() );
+			ret = new SparseMsg( Msg::nextMsgId(), 
+				newTgt.element(), newSrc.element() );
 			ret->e2()->addMsgAndFunc( ret->mid(), fid, b );
 		} else {
 			assert( 0 );

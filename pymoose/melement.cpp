@@ -201,7 +201,9 @@ extern "C" {
             return -1;
         }
         
-        Id new_id = create_Id_from_path(path, pysequence_to_dimvec(dims), basetype_str);
+		/// Nov 2013: Need Subha to help out here.
+        // Id new_id = create_Id_from_path(path, pysequence_to_dimvec(dims), basetype_str);
+        Id new_id = create_Id_from_path(path, 1, basetype_str);
         if (new_id == Id() && PyErr_Occurred()){
             // Py_XDECREF(self);
             return -1;

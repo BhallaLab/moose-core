@@ -61,13 +61,10 @@ class Shell
 		 * type: Specifies classname of Objects in Element.
 		 * parent: Id of parent element
 		 * name: Name to be used for identifying Element.
-		 * dimensions: Size of array in any # of dimensions.
-		 * Negative entries mean that that dimension is ragged. Each
-		 * array in that dimension may be a different size.
+		 * numData: Size of array.
 		 */
-		Id doCreate( string type, Id parent, string name, 
-			vector< int > dimensions = vector< int >( 1, 1 ),
-			bool isGlobal = 0, bool qFlag = 0 );
+		Id doCreate( string type, ObjId parent, string name, 
+					unsigned int numData, bool isGlobal = false );
 
 		/**
 		 * Delete specified Element and all its children and all 
@@ -132,7 +129,7 @@ class Shell
 		 * shifts orig Element (including offspring) to newParent. All old 
 		 * hierarchy, data, Msgs etc are preserved below the orig.
 		 */
-		void doMove( Id orig, Id newParent, bool qFlag = 0 );
+		void doMove( Id orig, ObjId newParent, bool qFlag = 0 );
 
 		/**
 		 * Copies orig Element to newParent. n specifies how many copies
@@ -140,7 +137,7 @@ class Shell
 		 * copyExtMsgs specifies whether to also copy messages from orig
 		 * to objects outside the copy tree. Usually we don't do this.
 		 */
-		Id doCopy( Id orig, Id newParent, string newName,
+		Id doCopy( Id orig, ObjId newParent, string newName,
 			unsigned int n, bool toGlobal, bool copyExtMsgs );
 
 		/**
@@ -275,14 +272,14 @@ class Shell
 		void handleQuit();
 
 		void handleCreate( const Eref& e,
-			string type, Id parent, Id newElm, string name,
-			vector< int > dimensions );
+			string type, ObjId parent, Id newElm, string name,
+			unsigned int numData, bool isGlobal );
 		void destroy( const Eref& e, Id eid);
-		void innerCreate( string type, Id parent, Id newElm, string name,
-			const vector< int >& dimensions );
+		void innerCreate( string type, ObjId parent, Id newElm, string name,
+			unsigned int numData, bool isGlobal );
 
 		/// Does actual work of copying. Returns true on success.
-		bool innerCopy( const vector< Id >& args, const string& newName,
+		bool innerCopy( const vector< ObjId >& args, const string& newName,
 			unsigned int n, bool toGlobal, bool copyExtMsgs );
 
 		/**
@@ -308,13 +305,13 @@ class Shell
 		/**
 		 * Moves Element orig onto the newParent.
 		 */
-		bool innerMove( Id orig, Id newParent );
+		bool innerMove( Id orig, ObjId newParent );
 
 		/**
 		 * Handler to move Element orig onto the newParent.
 		 */
 		void handleMove( const Eref& e,
-			Id orig, Id newParent );
+			Id orig, ObjId newParent );
 
 		/**
 		 * Handles sync of DataHandler indexing across nodes
@@ -331,7 +328,7 @@ class Shell
 		 * copyExtMsgs is true then it copies external Msgs too.
 		 */
 		void handleCopy( const Eref& e,
-			vector< Id > args, string newName, unsigned int n, 
+			vector< ObjId > args, string newName, unsigned int n, 
 			bool toGlobal, bool copyExtMsgs );
 
 		/**
@@ -441,6 +438,7 @@ class Shell
 		////////////////////////////////////////////////////////////////
 		// Utility functions
 		////////////////////////////////////////////////////////////////
+		static bool adopt( ObjId parent, Id child );
 		static bool adopt( Id parent, Id child );
 
 		static const unsigned int OkStatus;

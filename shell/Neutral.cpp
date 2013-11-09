@@ -429,32 +429,31 @@ Id Neutral::child( const Eref& e, const string& name )
 	return Id();
 }
 
-// static function, needs updates 03 nov 2013.
+// Static function.
 ObjId Neutral::parent( const Eref& e )
 {
-	Id pa = parent( e.id() );
-	return ObjId( pa );
+	return Neutral::parent( e.objId() );
 }
 
-Id Neutral::parent( Id id )
+ObjId Neutral::parent( ObjId oid )
 {
 	static const Finfo* pf = neutralCinfo->findFinfo( "parentMsg" );
 	static const DestFinfo* pf2 = dynamic_cast< const DestFinfo* >( pf );
 	static const FuncId pafid = pf2->getFid();
 
-	if ( id == Id() ) {
+	if ( oid.id == Id() ) {
 		cout << "Warning: Neutral::parent: tried to take parent of root\n";
 		return Id();
 	}
 
-	MsgId mid = id.element()->findCaller( pafid );
+	MsgId mid = oid.element()->findCaller( pafid );
 	assert( mid != Msg::bad );
 
-	Id pa = Msg::getMsg( mid )->findOtherEnd( id ).id;
+	ObjId pa = Msg::getMsg( mid )->findOtherEnd( oid );
 	return pa;
 }
 
-// Static function 03 nov 2013. Needs fixing for parent indices.
+// Static function 
 string Neutral::path( const Eref& e )
 {
 	static const Finfo* pf = neutralCinfo->findFinfo( "parentMsg" );
@@ -468,16 +467,25 @@ string Neutral::path( const Eref& e )
 	pathVec.push_back( curr );
 	while ( curr.id != Id() ) {
 		MsgId mid = curr.eref().element()->findCaller( pafid );
-		if ( Msg::bad ) {
-			cout << "Error: Unable to traverse path of " <<
-				   	e.objId() << endl;
+		if ( mid == Msg::bad ) {
+			cout << "Error: Neutral::path:Cannot follow msg of ObjId: " <<
+				   	e.objId() << " for func: " << pafid << endl;
 			break;
 		}
 		curr = Msg::getMsg( mid )->findOtherEnd( curr );
 		pathVec.push_back( curr );
 	}
-
-	ss << "/";
+	if ( pathVec.size() <= 1 )
+		return "/";
+	for ( unsigned int i = 1; i < pathVec.size(); ++i ) {
+		ss << "/";
+		ObjId& oid = pathVec[ pathVec.size() - i - 1 ];
+		ss << oid.element()->getName();
+		if ( oid.element()->numData() > 1 )
+			ss << "[" << oid.dataId << "]";
+		if ( oid.element()->numField( oid.dataId ) > 1 )
+			ss << "[" << oid.fieldIndex << "]";
+	}
 
 	return ss.str();
 }

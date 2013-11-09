@@ -122,11 +122,12 @@ void checkChildren( Id parent, const string& info )
 {
 	vector< Id > ret;
 	Neutral::children( parent.eref(), ret );
-	cout << info << " checkChildren of " << parent()->getName() << ": " <<
+	cout << info << " checkChildren of " << 
+			parent.element()->getName() << ": " <<
 		ret.size() << " children\n";
 	for ( vector< Id >::iterator i = ret.begin(); i != ret.end(); ++i )
 	{
-		cout << (*i)()->getName() << endl;
+		cout << i->element()->getName() << endl;
 	}
 }
 
@@ -311,7 +312,7 @@ int main( int argc, char** argv )
 	Id shellId = init( argc, argv, doUnitTests, doRegressionTests );
 	// Note that the main loop remains the parser loop, though it may
 	// spawn a lot of other stuff.
-	Element* shelle = shellId();
+	Element* shelle = shellId.element();
 	Shell* s = reinterpret_cast< Shell* >( shelle->data( 0 ) );
 	if ( doUnitTests )
 		nonMpiTests( s ); // These tests do not need the process loop.
