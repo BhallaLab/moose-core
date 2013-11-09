@@ -81,13 +81,13 @@ Id SingleMsg::managerId() const
 
 ObjId SingleMsg::findOtherEnd( ObjId f ) const
 {
-	if ( f.id() == e1() ) {
+	if ( f.element() == e1() ) {
 		if ( f.dataId == i1_ )
 			return ObjId( e2()->id(), i2_ );
 		else
 		  return ObjId( Id() );
 	}
-	else if ( f.id() == e2() ) {
+	else if ( f.element() == e2() ) {
 		if ( f.dataId == i2_ )
 			return ObjId( e1()->id(), i1_ );
 		else
@@ -100,14 +100,18 @@ ObjId SingleMsg::findOtherEnd( ObjId f ) const
 Msg* SingleMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 			FuncId fid, unsigned int b, unsigned int n ) const
 {
-	const Element* orig = origSrc();
+	const Element* orig = origSrc.element();
 	if ( n <= 1 ) {
 		SingleMsg* ret = 0;
 		if ( orig == e1() ) {
-			ret = new SingleMsg( Msg::nextMsgId(), Eref( newSrc(), i1_ ), Eref( newTgt(), i2_ ) );
+			ret = new SingleMsg( Msg::nextMsgId(), 
+				Eref( newSrc.element(), i1_ ), 
+				Eref( newTgt.element(), i2_ ) );
 			ret->e1()->addMsgAndFunc( ret->mid(), fid, b );
 		} else if ( orig == e2() ) {
-			ret = new SingleMsg( Msg::nextMsgId(), Eref( newTgt(), i1_ ), Eref( newSrc(), i2_ ) );
+			ret = new SingleMsg( Msg::nextMsgId(), 
+				Eref( newTgt.element(), i1_ ), 
+				Eref( newSrc.element(), i2_ ) );
 			ret->e2()->addMsgAndFunc( ret->mid(), fid, b );
 		} else {
 			assert( 0 );

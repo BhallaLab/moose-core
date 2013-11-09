@@ -102,7 +102,7 @@ Msg* Msg::safeGetMsg( MsgId m )
 
 Eref Msg::manager() const
 {
-	return Eref( ( this->managerId() )(), DataId( mid_ ) );
+	return Eref( ( this->managerId() ).element(), DataId( mid_ ) );
 }
 
 // Static func

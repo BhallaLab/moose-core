@@ -12,7 +12,7 @@
 #include "Shell.h"
 
 /// Returns the Id of the root of the copied tree upon success.
-Id Shell::doCopy( Id orig, Id newParent, string newName, 
+Id Shell::doCopy( Id orig, ObjId newParent, string newName, 
 	unsigned int n, bool toGlobal, bool copyExtMsg )
 {
 
@@ -23,7 +23,7 @@ Id Shell::doCopy( Id orig, Id newParent, string newName,
 
 	Eref sheller( shelle_, 0 );
 	Id newElm = Id::nextId();
-	vector< Id > args;
+	vector< ObjId > args;
 	args.push_back( orig );
 	args.push_back( newParent );
 	args.push_back( newElm );
@@ -34,10 +34,10 @@ Id Shell::doCopy( Id orig, Id newParent, string newName,
 }
 
 /// Runs in parallel on all nodes.
-Element* innerCopyElements( Id orig, Id newParent, Id newElm, 
+Element* innerCopyElements( Id orig, ObjId newParent, Id newElm, 
 	unsigned int n, bool toGlobal, map< Id, Id >& tree )
 {
-	Element* e = new Element( newElm, orig(), n, toGlobal );
+	Element* e = new Element( newElm, orig.element(), n, toGlobal );
 	assert( e );
 	Shell::adopt( newParent, newElm );
 
@@ -49,7 +49,10 @@ Element* innerCopyElements( Id orig, Id newParent, Id newElm,
 	Neutral::children( orig.eref(), kids );
 
 	for ( vector< Id >::iterator i = kids.begin(); i != kids.end(); ++i ) {
-		innerCopyElements( *i, e->id(), Id::nextId(), n, toGlobal, tree );
+		// Needed in case parent is not on zero dataIndex.
+		ObjId pa = Neutral::parent( *i );
+		ObjId newParent( e->id(), pa.dataId );
+		innerCopyElements( *i, newParent, Id::nextId(), n, toGlobal, tree );
 	}
 	return e;
 }
@@ -72,7 +75,7 @@ void innerCopyMsgs( map< Id, Id >& tree, unsigned int n, bool copyExtMsgs )
 	*/
 	for ( map< Id, Id >::const_iterator i = tree.begin(); 
 		i != tree.end(); ++i ) {
-		Element *e = i->first.operator()();
+		Element *e = i->first.element();
 		unsigned int j = 0;
 		const vector< MsgFuncBinding >* b = e->getMsgAndFunc( j );
 		while ( b ) {
@@ -109,7 +112,7 @@ void innerCopyMsgs( map< Id, Id >& tree, unsigned int n, bool copyExtMsgs )
 }
 
 
-bool Shell::innerCopy( const vector< Id >& args, const string& newName,
+bool Shell::innerCopy( const vector< ObjId >& args, const string& newName,
 	unsigned int n, bool toGlobal, bool copyExtMsgs )
 {
 	map< Id, Id > tree;
@@ -127,8 +130,8 @@ bool Shell::innerCopy( const vector< Id >& args, const string& newName,
 	return 1;
 }
 
-void Shell::handleCopy( const Eref& er, vector< Id > args, string newName,
-	unsigned int n, bool toGlobal, bool copyExtMsgs )
+void Shell::handleCopy( const Eref& er, vector< ObjId > args, 
+	string newName, unsigned int n, bool toGlobal, bool copyExtMsgs )
 {
 	static const Finfo* ackf = 
 		Shell::initCinfo()->findFinfo( "ack" );

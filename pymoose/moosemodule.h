@@ -161,7 +161,7 @@ extern "C" {
     // Methods for Id class
     //////////////////////////////////////////
     int moose_Id_init(_Id * self, PyObject * args, PyObject * kwargs);
-    Id create_Id_from_path(string path, vector<int> dims, string type); // inner function
+    Id create_Id_from_path(string path, unsigned int numData, string type); // inner function
     long moose_Id_hash(_Id * self);
     
     PyObject * moose_Id_repr(_Id * self);

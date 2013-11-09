@@ -26,9 +26,9 @@ const OpFunc* SetGet::checkSet(
 				field << "' was found on\n" << tgt.id.path() << endl;
 		} else {
 			if ( field.substr( 0, 4 ) == "set_" )
-				f = child()->cinfo()->findFinfo( "set_this" );
+				f = child.element()->cinfo()->findFinfo( "set_this" );
 			else if ( field.substr( 0, 4 ) == "get_" )
-				f = child()->cinfo()->findFinfo( "get_this" );
+				f = child.element()->cinfo()->findFinfo( "get_this" );
 			assert( f ); // should always work as Neutral has the field.
 			if ( child.element()->numData() == tgt.element()->numData() ) {
 				tgt = ObjId( child, tgt.dataId, tgt.fieldIndex );

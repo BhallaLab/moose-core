@@ -70,9 +70,9 @@ Id OneToOneMsg::managerId() const
 
 ObjId OneToOneMsg::findOtherEnd( ObjId f ) const
 {
-	if ( f.id() == e1() )
+	if ( f.element() == e1() )
 		return ObjId( e2()->id(), f.dataId );
-	else if ( f.id() == e2() )
+	else if ( f.element() == e2() )
 		return ObjId( e1()->id(), f.dataId );
 	
 	return ObjId::bad();
@@ -81,14 +81,16 @@ ObjId OneToOneMsg::findOtherEnd( ObjId f ) const
 Msg* OneToOneMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 			FuncId fid, unsigned int b, unsigned int n ) const
 {
-	const Element* orig = origSrc();
+	const Element* orig = origSrc.element();
 	// This works both for 1-copy and for n-copies
 	OneToOneMsg* ret = 0;
 	if ( orig == e1() ) {
-		ret = new OneToOneMsg( Msg::nextMsgId(), newSrc(), newTgt() );
+		ret = new OneToOneMsg( Msg::nextMsgId(), 
+						newSrc.element(), newTgt.element() );
 		ret->e1()->addMsgAndFunc( ret->mid(), fid, b );
 	} else if ( orig == e2() ) {
-		ret = new OneToOneMsg( Msg::nextMsgId(), newTgt(), newSrc() );
+		ret = new OneToOneMsg( Msg::nextMsgId(), 
+						newTgt.element(), newSrc.element() );
 		ret->e2()->addMsgAndFunc( ret->mid(), fid, b );
 	} else
 		assert( 0 );

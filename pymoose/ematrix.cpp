@@ -267,7 +267,7 @@ extern "C" {
        Utility function to create objects from full path, dimensions
        and classname.
     */
-    Id create_Id_from_path(string path, vector<int> dims, string type)
+    Id create_Id_from_path(string path, unsigned int numData, string type)
     {
         string parent_path;
         string name;
@@ -300,7 +300,7 @@ extern "C" {
         return SHELLPTR->doCreate(type,
                                   parent_id,
                                   string(name),
-                                  vector<int>(dims));
+                                  numData);
         
     }
     
@@ -355,12 +355,16 @@ extern "C" {
                 trimmed_path == "/root"){
                 return 0;
             }
+			/**
+			 * Need Subha's help here, to get rid of dims.
             vector<int> vec_dims = pysequence_to_dimvec(dims);
             if (vec_dims.size() == 0 && PyErr_Occurred()){
                 Py_XDECREF(self);
                 return -1;
             }
-            self->id_ = create_Id_from_path(path, vec_dims, type);
+			*/
+			unsigned int numData = 1;
+            self->id_ = create_Id_from_path(path, numData, type);
             if (self->id_ == Id() && PyErr_Occurred()){
                 Py_XDECREF(self);
                 return -1;

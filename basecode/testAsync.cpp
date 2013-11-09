@@ -36,7 +36,7 @@ void showFields()
 	// i1.eref().element()->showFields();
 	cout << "." << flush;
 
-	delete i1();
+	delete i1.element();
 }
 
 void testSendMsg()
@@ -94,8 +94,8 @@ void testSendMsg()
 	}
 	cout << "." << flush;
 
-	delete i1();
-	delete i2();
+	delete i1.element();
+	delete i2.element();
 }
 
 // This used to use parent/child msg, but that has other implications
@@ -140,8 +140,8 @@ void testCreateMsg()
 
 */
 	cout << "." << flush;
-	delete i1();
-	delete i2();
+	delete i1.element();
+	delete i2.element();
 }
 
 void testSetGet()
@@ -173,7 +173,7 @@ void testSetGet()
 	}
 
 	cout << "." << flush;
-	delete i2();
+	delete i2.element();
 }
 
 void testStrSet()
@@ -205,14 +205,15 @@ void testStrSet()
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		double temp = sqrt((double) i );
-		double val = reinterpret_cast< Arith* >( Eref( i2(), i ).data() )->getOutput();
+		double val = reinterpret_cast< Arith* >( 
+						Eref( i2.element(), i ).data() )->getOutput();
 		assert( fabs( val - temp ) < 1e-5 );
 		// DoubleEq won't work here because string is truncated.
 	}
 
 	cout << "." << flush;
 
-	delete i2();
+	delete i2.element();
 }
 
 void testGet()
@@ -249,7 +250,7 @@ void testGet()
 	}
 
 	cout << "." << flush;
-	delete i2();
+	delete i2.element();
 }
 
 void testStrGet()
@@ -291,7 +292,7 @@ void testStrGet()
 	}
 
 	cout << "." << flush;
-	delete i2();
+	delete i2.element();
 }
 
 
@@ -325,8 +326,8 @@ void testSetGetDouble()
 	}
 
 	cout << "." << flush;
-	delete i2();
-	delete i3();
+	delete i2.element();
+	delete i3.element();
 }
 
 void testSetGetSynapse()
@@ -348,7 +349,7 @@ void testSetGetSynapse()
 		}
 	}
 
-	bool ret = Field< unsigned int >::setVec( cells, "numSynapses", ns );
+	bool ret = Field< unsigned int >::setVec( cells, "num_synapse", ns );
 	assert( ret );
 	assert( temp->numData() == size );
 	Id syns( cells.value() + 1 );
@@ -389,25 +390,25 @@ void testSetGetVec()
 	for ( unsigned int i = 0; i < size; ++i )
 		numSyn[i] = i;
 	
-	Eref e2( i2(), 0 );
+	Eref e2( i2.element(), 0 );
 	// Here we test setting a 1-D vector
-	bool ret = Field< unsigned int >::setVec( i2, "numSynapses", numSyn );
+	bool ret = Field< unsigned int >::setVec( i2, "num_synapse", numSyn );
 	assert( ret );
 
 	for ( unsigned int i = 0; i < size; ++i ) {
-		IntFire* fire = reinterpret_cast< IntFire* >( i2()->data( i ) );
+		IntFire* fire = reinterpret_cast< IntFire* >( i2.element()->data( i ) );
 		assert( fire->getNumSynapses() == i );
 	}
 
 	vector< unsigned int > getSyn;
 
-	Field< unsigned int >::getVec( i2, "numSynapses", getSyn );
+	Field< unsigned int >::getVec( i2, "num_synapse", getSyn );
 	assert (getSyn.size() == size );
 	for ( unsigned int i = 0; i < size; ++i )
 		assert( getSyn[i] == i );
 
 	cout << "." << flush;
-	delete i2();
+	delete i2.element();
 }
 
 void test2ArgSetVec()
@@ -436,7 +437,7 @@ void test2ArgSetVec()
 		assert( doubleEq( val, x ) );
 	}
 	cout << "." << flush;
-	delete i2();
+	delete i2.element();
 }
 
 
@@ -489,7 +490,7 @@ void testSetRepeat()
 		numSyn[i] = i;
 	
 	// Here we test setting a 1-D vector
-	bool ret = Field< unsigned int >::setVec( cell, "numSynapses", numSyn);
+	bool ret = Field< unsigned int >::setVec( cell, "num_synapse", numSyn);
 	assert( ret );
 	
 	Id synapse( cell.value() + 1 );
@@ -874,7 +875,8 @@ void testSparseMsg()
 	vector< double > delay( size * fieldSize, 0.0 );
 	for ( unsigned int i = 0; i < size; ++i ) {
 		ObjId id( cells, i );
-		unsigned int numSyn = Field< unsigned int >::get( id, "numSynapses" );
+		unsigned int numSyn = 
+				Field< unsigned int >::get( id, "num_synapse" );
 		unsigned int k = i * fieldSize;
 		for ( unsigned int j = 0; j < numSyn; ++j ) {
 			weight[ k + j ] = mtrand() * weightMax;
@@ -898,7 +900,7 @@ void testSparseMsg()
 	}
 	
 	cout << "." << flush;
-	delete cells();
+	delete cells.element();
 }
 
 /**
@@ -1007,9 +1009,9 @@ void testSharedMsg()
 	
 	const Finfo* shareFinfo = Test::initCinfo()->findFinfo( "shared" );
 	assert( shareFinfo != 0 );
-	Msg* m = new OneToOneMsg( Msg::nextMsgId(), t1(), t2() );
+	Msg* m = new OneToOneMsg( Msg::nextMsgId(), t1.element(), t2.element() );
 	assert( m != 0 );
-	bool ret = shareFinfo->addMsg( shareFinfo, m->mid(), t1() );
+	bool ret = shareFinfo->addMsg( shareFinfo, m->mid(), t1.element() );
 	assert( ret );
 
 	t1.element()->digestMessages();
@@ -1462,10 +1464,9 @@ void testCinfoFields()
 
 	unsigned int nvf = neutralCinfo->getNumValueFinfo();
 	assert( nvf == 11 );
-	assert( cinfo->getNumValueFinfo() == 5 + nvf );
-	assert( cinfo->getValueFinfo( 0 + nvf ) == cinfo->findFinfo( "numSynapses" ) );
-	assert( cinfo->getValueFinfo( 1 + nvf ) == cinfo->findFinfo( "Vm" ) );
-	assert( cinfo->getValueFinfo( 2 + nvf ) == cinfo->findFinfo( "tau" ) );
+	assert( cinfo->getNumValueFinfo() == 4 + nvf );
+	assert( cinfo->getValueFinfo( 0 + nvf ) == cinfo->findFinfo( "Vm" ) );
+	assert( cinfo->getValueFinfo( 1 + nvf ) == cinfo->findFinfo( "tau" ) );
 
 	unsigned int nlf = neutralCinfo->getNumLookupFinfo();
 	assert( nlf == 1 ); // Neutral inserts a lookup field for neighbours
@@ -1553,19 +1554,19 @@ void testMsgSrcDestFields()
 	// bool ret = Test::initCinfo()->create( t1, "test1", 1 );
 	Element* e1 = new Element( t1, Test::initCinfo(), "test1", 1, 1 );
 	assert( e1 );
-	assert( e1 == t1() );
+	assert( e1 == t1.element() );
 	Element* e2 = new Element( t2, Test::initCinfo(), "test2", 1, 1 );
 	// ret = Test::initCinfo()->create( t2, "test2", 1 );
 	assert( e2 );
-	assert( e2 == t2() );
+	assert( e2 == t2.element() );
 
 	// Set up message. The actual routine is in Shell.cpp, but here we
 	// do it independently.
 	const Finfo* shareFinfo = Test::initCinfo()->findFinfo( "shared" );
 	assert( shareFinfo != 0 );
-	Msg* m = new OneToOneMsg( Msg::nextMsgId(), t1(), t2() );
+	Msg* m = new OneToOneMsg( Msg::nextMsgId(), t1.element(), t2.element() );
 	assert( m != 0 );
-	bool ret = shareFinfo->addMsg( shareFinfo, m->mid(), t1() );
+	bool ret = shareFinfo->addMsg( shareFinfo, m->mid(), t1.element() );
 	assert( ret );
 
 	//////////////////////////////////////////////////////////////

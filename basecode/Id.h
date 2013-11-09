@@ -93,8 +93,9 @@ class Id
 		 * case the master node IdManager has to figure out where it
 		 * belongs.
 		 * Returns 0 on failure.
-		 */
+		 * Deprecated.
 		Element* operator()() const;
+		 */
 
 		/**
 		 * Returns the Element pointed to by the Id.

@@ -444,3 +444,40 @@ Steady progress. Some things to consider:
 - Need to redo the Msg as object tests in the unit tests
 
 Now clears testAsync.
+Fails in testMsg.cpp, but both those tests require some major pending updates:
+to the ObjIds handling Msg, and for automatic updating of MsgDigest.
+
+So commented them out.
+
+Implemented the ObjId based Element tree structure. This lets individual
+DataEntries have their own child Elements.
+Yet to compile and the check is in testShell.cpp:121
+
+===========================================================================
+9 Nov.
+A design and semantics issue with the capability to have each ObjId be parent
+to a sub-tree: What happens when we replicate the entire tree?
+
+Suppose, on a/b[100], we create a unique element child c[50] on 
+	a/b[23]
+
+Now we use createmap or equivalent to make 10 copies of a. This does:
+	a[10]/b[1000]
+What about c in this? My reading is that we should get
+
+	a[1..10]/b[23,123,223,323,423,523,623,723,823,923]/c
+
+where in each case c is a separate Element. 
+The reason is that we do not permit a given Element to be parented by many
+different objects. One could in principle do even this through sparse msgs,
+but I think the semantics get to be too untidy.
+Other aspect of the semantics is that the parent of any entry in b would be 
+a[0]. So there is a special status given to those Elements parented off zero.
+
+Yet another point: if I have a FieldElement, its parent dataIndex should be
+identical to its own dataIndex. Implemented.
+
+Now the Neutral::path is working well. Also went through and cleaned out
+all uses of Id::operator()() since they were confusing.
+
+===========================================================================
