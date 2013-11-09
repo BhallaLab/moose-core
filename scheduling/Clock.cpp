@@ -460,10 +460,13 @@ void Clock::innerReportClock() const
 void Clock::buildTicks( const Eref& e )
 {
 	activeTicks_.resize(0);
+	activeTicksMap_.resize(0);
 	for ( unsigned int i = 0; i < ticks_.size(); ++i ) {
 		if ( ticks_[i] > 0 && 
-				e.element()->hasMsgs( processVec()[i]->getBindIndex() ) )
+				e.element()->hasMsgs( processVec()[i]->getBindIndex() ) ) {
 			activeTicks_.push_back( ticks_[i] );
+			activeTicksMap_.push_back( i );
+		}
 	}
 }
 
@@ -485,19 +488,21 @@ void Clock::handleStep( const Eref& e, unsigned int numSteps )
 		return;
 	}
 	buildTicks( e );
-	assert( currentStep_ = nSteps_ );
+	assert( currentStep_ == nSteps_ );
 	nSteps_ += numSteps;
 	runTime_ = nSteps_ * dt_;
 	for ( isRunning_ = true;
 		isRunning_ && currentStep_ < nSteps_; ++currentStep_ )
 	{
 		// Curr time is end of current step.
-		info_.currTime = dt_ * (currentStep_ + 1); 
+		unsigned int endStep = currentStep_ + 1;
+		currentTime_ = info_.currTime = dt_ * endStep;
+		vector< unsigned int >::const_iterator k = activeTicksMap_.begin();
 		for ( vector< unsigned int>::iterator j = 
 			activeTicks_.begin(); j != activeTicks_.end(); ++j ) {
-			if ( currentStep_ % *j == 0 ) {
+			if ( endStep % *j == 0 ) {
 				info_.dt = *j * dt_;
-				processVec()[*j]->send( e, &info_ );
+				processVec()[*k++]->send( e, &info_ );
 			}
 		}
 	}
