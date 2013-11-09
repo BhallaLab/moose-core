@@ -189,7 +189,7 @@ Id init( int argc, char** argv, bool& doUnitTests, bool& doRegressionTests )
 	Msg::initNull();
 	Id shellId;
 	Element* shelle = 
-		new Element( shellId, Shell::initCinfo(), "root", 1, 1 );
+		new DataElement( shellId, Shell::initCinfo(), "root", 1, 1 );
 
 	Id clockId = Id::nextId();
 	assert( clockId.value() == 1 );
@@ -204,8 +204,8 @@ Id init( int argc, char** argv, bool& doUnitTests, bool& doRegressionTests )
 	Msg::initMsgManagers();
 
 	// Element* clocke = 
-	new Element( clockId, Clock::initCinfo(), "clock", 1, 1 );
-	new Element( classMasterId, Neutral::initCinfo(), "classes", 1, 1 );
+	new DataElement( clockId, Clock::initCinfo(), "clock", 1, 1 );
+	new DataElement( classMasterId, Neutral::initCinfo(), "classes", 1, 1 );
 
 	assert ( shellId == Id() );
 	assert( clockId == Id( 1 ) );

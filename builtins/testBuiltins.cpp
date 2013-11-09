@@ -22,7 +22,8 @@ void testArith()
 {
 	Id a1id = Id::nextId();
 	unsigned int size = 10;
-	Element* a1 = new Element( a1id, Arith::initCinfo(), "a1", size, true );
+	Element* a1 = new DataElement( 
+					a1id, Arith::initCinfo(), "a1", size, true );
 
 	Eref a1_0( a1, 0 );
 	Eref a1_1( a1, 1 );
@@ -59,7 +60,8 @@ void testFibonacci()
 		return;
 	unsigned int numFib = 20;
 	Id a1id = Id::nextId();
-	Element* a1 = new Element( a1id, Arith::initCinfo(), "a1", numFib, false );
+	Element* a1 = new DataElement( 
+					a1id, Arith::initCinfo(), "a1", numFib, false );
 
 	Arith* data = reinterpret_cast< Arith* >( a1->data( 0 ) );
 	if ( data ) {
@@ -247,6 +249,8 @@ void testTable()
 	testUtilsForLoadXplot();
 	testUtilsForCompareXplot();
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< Id > ret;
+	Neutral::children( Id().eref(), ret );
 	ObjId tabid = shell->doCreate( "Table", ObjId(), "tab", 1 );
 	assert( tabid != ObjId() );
 	Table* t = reinterpret_cast< Table* >( tabid.eref().data() );

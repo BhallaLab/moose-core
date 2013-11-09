@@ -90,6 +90,7 @@ class ObjId;
 #include "Dinfo.h"
 #include "MsgDigest.h"
 #include "Element.h"
+#include "DataElement.h"
 #include "Eref.h"
 #include "Conv.h"
 #include "SrcFinfo.h"

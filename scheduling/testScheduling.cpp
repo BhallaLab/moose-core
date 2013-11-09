@@ -140,7 +140,7 @@ void testClock()
 
 	// Now put in the scheduling tester and messages.
 	Id test = Id::nextId();
-	Element* teste = new Element( test, testSchedCinfo, "test", 1 );
+	Element* teste = new DataElement( test, testSchedCinfo, "test", 1 );
 	assert( teste );
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 

@@ -824,7 +824,7 @@ void Shell::innerCreate( string type, ObjId parent, Id newElm, string name,
 			warning( ss.str() );
 			return;
 		}
-		Element* ret = new Element( newElm, c, name, numData, isGlobal);
+		Element* ret = new DataElement( newElm, c, name, numData, isGlobal);
 		assert( ret );
 		adopt( parent, newElm );
 

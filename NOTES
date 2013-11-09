@@ -482,4 +482,28 @@ all uses of Id::operator()() since they were confusing.
 
 Further progress, now clears testScheduling.
 
+A bit stuck on destroying Elements. Currently cinfo_ is set to zero to tell
+the Elements that they shoult NOT remove the msgs. cinfo_ isn't a good way
+to do this because it is needed later. So we could set the id_ to zero.
+But I may need to bifurcate the Element class so that the base class of 
+FieldElement doesn't try to destroy the data.
+
+Tried it. It was rather elegant: all the messaging stuff went into the
+ElementBase, and the data stuff into Element - just like the FieldElement
+was just doing data. But all the rest of the infrastructure refers to
+Element and assumes that FieldElement is derived from it.
+
+One way out might be to retain the split, but have the base class be Element,
+and have a DataElement as counterpart to FieldElement.
+
+Create functions would refer though to the DataElement and the FieldElement.
+Lots of that.
+I suspect that the DataElement will need considerable expansion with the
+new multinode code. May as well anticipate.
+
+So I redid this with the base class as Element, and DataElement that which
+handles regular object arrays as data. FieldElements stay as is, now
+quite symmetrical with DataElements.
+Compiles and gets a little further with unit tests.
+
 ===========================================================================
