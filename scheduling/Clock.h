@@ -129,6 +129,11 @@ class Clock
 		 * a zero step. Sorted in increasing order of tick index.
 		 */
 		vector< unsigned int > activeTicks_;
+		/**
+		 * Maps the activeTicks_ array to the ticks index so 
+		 * we can trigger the appropriate message.
+		 */
+		vector< unsigned int > activeTicksMap_;
 
 		/**
 		 * number of Ticks.
