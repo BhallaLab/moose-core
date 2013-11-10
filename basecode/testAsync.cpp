@@ -1444,8 +1444,14 @@ void testCinfoFields()
 	unsigned int ndf = neutralCinfo->getNumDestFinfo();
 	assert( ndf == 17 );
 	unsigned int sdf = SynHandler::initCinfo()->getNumDestFinfo();
-	assert( sdf == 19 );
-	assert( cinfo->getNumDestFinfo() == 12 + sdf );
+	assert( sdf == 21 );
+	assert( cinfo->getNumDestFinfo() == 10 + sdf );
+
+	assert( cinfo->getDestFinfo( 0+ndf )->name() == "set_numSynapses" );
+	assert( cinfo->getDestFinfo( 1+ndf )->name() == "get_numSynapses" );
+	assert( cinfo->getDestFinfo( 2+ndf )->name() == "set_num_synapse" );
+	assert( cinfo->getDestFinfo( 3+ndf )->name() == "get_num_synapse" );
+
 	assert( cinfo->getDestFinfo( 0+sdf ) == cinfo->findFinfo( "set_Vm" ) );
 	assert( cinfo->getDestFinfo( 1+sdf ) == cinfo->findFinfo( "get_Vm" ) );
 	assert( cinfo->getDestFinfo( 2+sdf ) == cinfo->findFinfo( "set_tau" ) );
@@ -1458,15 +1464,15 @@ void testCinfoFields()
 	assert( cinfo->getDestFinfo( 8+sdf ) == cinfo->findFinfo( "process" ) );
 	assert( cinfo->getDestFinfo( 9+sdf ) == cinfo->findFinfo( "reinit" ) );
 
-	assert( cinfo->getDestFinfo( 10+sdf )->name() == "set_num_synapse" );
-	assert( cinfo->getDestFinfo( 11+sdf )->name() == "get_num_synapse" );
-	assert( cinfo->getDestFinfo( 12+sdf )->name() == "dummy" );
 
 	unsigned int nvf = neutralCinfo->getNumValueFinfo();
 	assert( nvf == 11 );
-	assert( cinfo->getNumValueFinfo() == 4 + nvf );
-	assert( cinfo->getValueFinfo( 0 + nvf ) == cinfo->findFinfo( "Vm" ) );
-	assert( cinfo->getValueFinfo( 1 + nvf ) == cinfo->findFinfo( "tau" ) );
+	assert( cinfo->getNumValueFinfo() == 5 + nvf );
+	assert( cinfo->getValueFinfo( 0 + nvf ) == cinfo->findFinfo( "numSynapses" ) );
+	assert( cinfo->getValueFinfo( 1 + nvf ) == cinfo->findFinfo( "Vm" ) );
+	assert( cinfo->getValueFinfo( 2 + nvf ) == cinfo->findFinfo( "tau" ) );
+	assert( cinfo->getValueFinfo( 3 + nvf ) == cinfo->findFinfo( "thresh" ) );
+	assert( cinfo->getValueFinfo( 4 + nvf ) == cinfo->findFinfo( "refractoryPeriod" ) );
 
 	unsigned int nlf = neutralCinfo->getNumLookupFinfo();
 	assert( nlf == 1 ); // Neutral inserts a lookup field for neighbours
@@ -1505,7 +1511,7 @@ void testCinfoElements()
 	Id intFireDestFinfoId( "/classes/IntFire/destFinfo" );
 	assert( intFireDestFinfoId != Id() );
 	n = Field< unsigned int >::get( intFireDestFinfoId, "numData" );
-	assert( n == 12 );
+	assert( n == 10 );
 	
 	ObjId temp( intFireSrcFinfoId, DataId( 0 ) );
 	string foo = Field< string >::get( temp, "name" );
