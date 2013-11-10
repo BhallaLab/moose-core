@@ -15,6 +15,7 @@
  * These include process, reinit, and other intermediate stage process ops.
  */
 
+/*
 class ProcOpFuncBase: public OpFunc
 {
 	public:
@@ -67,6 +68,18 @@ template< class T > class ProcOpFunc: public ProcOpFuncBase
 
 	private:
 		void ( T::*func_ )( const Eref& e, ProcPtr ); 
+};
+*/
+template< class T > class ProcOpFunc: public EpFunc1< T, ProcPtr >
+{
+	public:
+		ProcOpFunc( void ( T::*func )( const Eref& e, ProcPtr ) )
+			: EpFunc1< T, ProcPtr >( func )
+			{;}
+
+		string rttiType() const {
+			return "const ProcInfo*";
+		}
 };
 
 #endif //_PROC_OPFUNC_H

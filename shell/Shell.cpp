@@ -450,7 +450,7 @@ void Shell::doStop( bool qFlag )
 
 void Shell::doSetClock( unsigned int tickNum, double dt, bool qFlag )
 {
-		SetGet2< unsigned int, double >::set( ObjId( 1 ), "setupTick", tickNum, dt );
+		LookupField< unsigned int, double >::set( ObjId( 1 ), "tickDt", tickNum, dt );
 }
 
 void Shell::doUseClock( string path, string field, unsigned int tick,
@@ -960,16 +960,16 @@ void Shell::handleMove( const Eref& e, Id orig, ObjId newParent )
 void Shell::addClockMsgs( 
 	const vector< Id >& list, const string& field, unsigned int tick )
 {
-	if ( !Id( 2 ).element() )
+	if ( !Id( 1 ).element() )
 		return;
-	ObjId tickId( Id( 2 ), DataId( tick ) );
+	ObjId clockId( 1 );
 	for ( vector< Id >::const_iterator i = list.begin(); 
 		i != list.end(); ++i ) {
 		if ( i->element() ) {
 			stringstream ss;
 			ss << "proc" << tick;
 			innerAddMsg( "OneToAll", Msg::nextMsgId(), 
-				tickId, ss.str(), 
+				clockId, ss.str(), 
 				ObjId( *i, 0 ), field );
 		}
 	}

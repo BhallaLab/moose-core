@@ -536,3 +536,25 @@ Don't worry about this for now.
 
 Did substantial cleanup on path handling.
 Now completes testShell.
+
+Trying to get clock to run a simulation in testBuiltins. The reinit::send
+command fails because it doesn't find anything in the MsgDigest.
+
+Ran into trouble with requestData calls. These were handled specially, 
+and the new framework doesn't like them. There is the opportunity to do them
+really simply, for example, pass the function a reference to be filled in
+by the target 'get' function. Backward compatibility means that I can't now
+change all the A get() functions to get( A& ), that would have been the 
+simplest.
+I've implemented a skeleton of a very simple GetOpFunc which just takes
+a pointer as an argument, and dumps the value into the pointer. Problem
+comes if I want to call such a function across nodes. Will everything
+grind to a halt while I wait for the request to go and the response to come?
+What if there is a deadlock: two nodes waiting on each others' returns?
+Will have to set up the off-node 'get' call as a loop polling for the
+answer, and updating any calls that the off-nodes make.
+
+In the meantime, carried on with debugging, and now it clears unit tests but
+with a segv at the end.
+
+

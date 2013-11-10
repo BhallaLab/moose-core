@@ -138,6 +138,25 @@ template< class A1, class A2, class A3, class A4, class A5, class A6 >
 /**
  * This is the base class for all GetOpFuncs. 
  */
+template< class A > class GetOpFuncBase: public OpFunc1Base< A* >
+{
+	public: 
+			/*
+		bool checkFinfo( const Finfo* s ) const {
+			return ( dynamic_cast< const SrcFinfo1< A >* >( s )
+			|| dynamic_cast< const SrcFinfo1< FuncId >* >( s ) );
+		}
+		*/
+
+		virtual A returnOp( const Eref& e ) const = 0;
+
+		/*
+		string rttiType() const {
+			return Conv< A >::rttiType();
+		}
+		*/
+};
+/*
 template< class A > class GetOpFuncBase: public OpFunc
 {
 	public: 
@@ -155,6 +174,7 @@ template< class A > class GetOpFuncBase: public OpFunc
 			return Conv< A >::rttiType();
 		}
 };
+*/
 
 /**
  * This is the base class for all LookupGetOpFuncs. 
