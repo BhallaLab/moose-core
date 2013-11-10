@@ -86,11 +86,11 @@ void testClock()
 	assert( ret );
 	ret = LookupField< unsigned int, double >::set( clock, "tickDt", 0, 2.0);
 	assert( ret );
+	ret = LookupField< unsigned int, double >::set( clock, "tickDt", 3, 1.0);
+	assert( ret );
 	ret = LookupField< unsigned int, double >::set( clock, "tickDt", 1, 2.0);
 	assert( ret );
 	ret = LookupField< unsigned int, double >::set( clock, "tickDt", 2, 5.0);
-	assert( ret );
-	ret = LookupField< unsigned int, double >::set( clock, "tickDt", 3, 1.0);
 	assert( ret );
 	ret = LookupField< unsigned int, double >::set( clock, "tickDt", 4, 3.0);
 	assert( ret );
