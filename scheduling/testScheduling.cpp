@@ -38,12 +38,13 @@ const Cinfo* TestSched::initCinfo()
 		&processFinfo
 	};
 
+	static Dinfo< TestSched > dinfo;
 	static Cinfo testSchedCinfo (
 		"testSched",
 		0,
 		testSchedFinfos,
 		sizeof ( testSchedFinfos ) / sizeof( Finfo* ),
-		new Dinfo< TestSched >()
+		&dinfo
 	);
 
 	return &testSchedCinfo;

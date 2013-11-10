@@ -78,12 +78,13 @@ const Cinfo* Table::initCinfo()
 		&proc,			// SharedFinfo
 	};
 
+	static Dinfo< Table > dinfo;
 	static Cinfo tableCinfo (
 		"Table",
 		TableBase::initCinfo(),
 		tableFinfos,
 		sizeof( tableFinfos ) / sizeof ( Finfo* ),
-		new Dinfo< Table >()
+		&dinfo
 	);
 
 	return &tableCinfo;

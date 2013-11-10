@@ -114,6 +114,11 @@ template< class D > class Dinfo: public DinfoBase
 				copyEntries = 1;
 			const D* origData = reinterpret_cast< const D* >( orig );
 			D* tgt = reinterpret_cast< D* >( data );
+			for ( unsigned int i = 0; i < copyEntries; ++i ) {
+				tgt[ i ] = origData[ i % origEntries ];
+			}
+
+			/*
 			for ( unsigned int i = 0; i < copyEntries; i+= origEntries ) {
 				unsigned int numCopies = origEntries;
 				if ( copyEntries - i < origEntries )
@@ -126,6 +131,7 @@ template< class D > class Dinfo: public DinfoBase
 				// various constructor and assignment operations that are
 				// important if D has pointers in it.
 			}
+			*/
 		}
 
 		void destroyData( char* d ) const {

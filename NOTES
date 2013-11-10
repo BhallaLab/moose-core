@@ -555,6 +555,8 @@ Will have to set up the off-node 'get' call as a loop polling for the
 answer, and updating any calls that the off-nodes make.
 
 In the meantime, carried on with debugging, and now it clears unit tests but
-with a segv at the end.
+with a segv at the end. Checkin 4837.
+
+Much work with valgrind later, now it is completely clean. No segv either.
 
 

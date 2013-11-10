@@ -282,12 +282,14 @@ const Cinfo* Shell::initCinfo()
 		&clockControl,
 	};
 
+	static Dinfo< Shell > d;
 	static Cinfo shellCinfo (
 		"Shell",
 		Neutral::initCinfo(),
 		shellFinfos,
 		sizeof( shellFinfos ) / sizeof( Finfo* ),
-		new Dinfo< Shell >()
+		&d
+		//new Dinfo< Shell >()
 	);
 
 	return &shellCinfo;

@@ -163,12 +163,13 @@ const Cinfo* Neutral::initCinfo()
 		"access functions for housekeeping fields and operations, message"
 		"traversal, and so on."
 	};
+	static Dinfo< Neutral > dinfo;
 	static Cinfo neutralCinfo (
 		"Neutral",
 		0, // No base class.
 		neutralFinfos,
 		sizeof( neutralFinfos ) / sizeof( Finfo* ),
-		new Dinfo< Neutral >(),
+		&dinfo,
 		doc, 6
 	);
 

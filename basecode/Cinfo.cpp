@@ -50,10 +50,20 @@ Cinfo::Cinfo( const Cinfo& other )
 			numBindIndex_( 0 )
 {;}
 
-Cinfo::~Cinfo()
+/*
+const Cinfo& Cinfo::operator=( const Cinfo& other )
 {
-	delete dinfo_;
+	name_ = other.name_;
+	baseCinfo_ = other.baseCinfo_;
+	dinfo_ = 0;
+	numBindIndex_ = other.numBindIndex_;
+	doc_ = doc_;
+	finfoMap_ = other
 }
+*/
+
+Cinfo::~Cinfo()
+{;} // The dinfos are statically allocated, we don't free them.
 
 ////////////////////////////////////////////////////////////////////
 // Initialization funcs
@@ -156,6 +166,7 @@ void Cinfo::makeCinfoElements( Id parent )
 		char* data = reinterpret_cast< char* >( i->second );
 		Element* e = new DataElement( id, Cinfo::initCinfo(), i->first );
 		Cinfo::initCinfo()->dinfo()->assignData( e->data( 0 ), 1, data, 1 );
+		// Cinfo* temp = reinterpret_cast< Cinfo* >( e->data( 0 ) );
 
 		Shell::adopt( parent, id );
 		cinfoElements.push_back( id );
@@ -321,12 +332,13 @@ const Cinfo* Cinfo::initCinfo()
 		&baseClass,		// ReadOnlyValue
 	};
 
+	static Dinfo< Cinfo > dinfo;
 	static Cinfo cinfoCinfo (
 		"Cinfo",
 		Neutral::initCinfo(),
 		cinfoFinfos,
 		sizeof( cinfoFinfos ) / sizeof ( Finfo* ),
-		new Dinfo< Cinfo >(),
+		&dinfo,
         doc,
         sizeof(doc)/sizeof(string)        
 	);

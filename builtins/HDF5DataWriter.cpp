@@ -108,12 +108,13 @@ const Cinfo * HDF5DataWriter::initCinfo()
     " data via the `flush` function."
   };
 
+	static Dinfo< HDF5DataWriter > dinfo;
     static Cinfo cinfo(
         "HDF5DataWriter",
         HDF5WriterBase::initCinfo(),
         finfos,
         sizeof(finfos)/sizeof(Finfo*),
-        new Dinfo<HDF5DataWriter>(),
+		&dinfo,
 	doc, sizeof( doc ) / sizeof( string ));
     return &cinfo;
 }

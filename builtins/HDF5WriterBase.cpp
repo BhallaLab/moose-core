@@ -137,12 +137,13 @@ const Cinfo* HDF5WriterBase::initCinfo()
   };
 
 
+	static Dinfo< HDF5WriterBase > dinfo;
   static Cinfo hdf5Cinfo(
       "HDF5WriterBase",
       Neutral::initCinfo(),
       finfos,
       sizeof(finfos)/sizeof(Finfo*),
-      new Dinfo<HDF5WriterBase>(),
+	  &dinfo,
       doc, sizeof(doc)/sizeof(string));
   return &hdf5Cinfo;                
 }

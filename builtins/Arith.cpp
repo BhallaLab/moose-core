@@ -99,12 +99,13 @@ const Cinfo* Arith::initCinfo()
 		&proc		// SharedFinfo
 	};
 
+	static Dinfo< Arith > dinfo;
 	static Cinfo arithCinfo (
 		"Arith",
 		Neutral::initCinfo(),
 		arithFinfos,
 		sizeof( arithFinfos ) / sizeof ( Finfo* ),
-		new Dinfo< Arith >()
+		&dinfo
 	);
 
 	return &arithCinfo;

@@ -286,13 +286,14 @@ const Cinfo* Clock::initCinfo()
 		"",
 	};
 
+	static Dinfo< Clock > dinfo;
 	static Cinfo clockCinfo(
 		"Clock",
 		// "Clock class handles sequencing of operations in simulations",
 		Neutral::initCinfo(),
 		clockFinfos,
 		sizeof(clockFinfos)/sizeof(Finfo *),
-		new Dinfo< Clock >()
+		&dinfo
 	);
 
 	return &clockCinfo;

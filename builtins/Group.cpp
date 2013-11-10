@@ -29,12 +29,13 @@ const Cinfo* Group::initCinfo()
 		group(),	// Value
 	};
 
+	static Dinfo< Group > dinfo;
 	static Cinfo groupCinfo (
 		"Group",
 		Neutral::initCinfo(),
 		groupFinfos,
 		sizeof( groupFinfos ) / sizeof ( Finfo* ),
-		new Dinfo< Group >()
+		&dinfo
 	);
 
 	return &groupCinfo;
