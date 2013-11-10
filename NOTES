@@ -369,8 +369,9 @@ In the process of setting up the SynHandler. Next:
 +Fix up Msgs to do the precompiled fast lookup
 +Fix up FieldElement stuff to access synapses from Eref
 Fix up FieldElement and Element stuff to deal with callbacks
-Fix up Msgs to use ObjIds to identify
++Fix up Msgs to use ObjIds to identify
 +Fix up Msgs to handle the specification of fieldIndex.
+Use ObjIds to identify Msgs, eliminate MsgIds.
 Work out how to talk to nodes on parallel machines. Socket?
 Work out how to do SetGet on parallel machines
 Work out parallel messaging.
@@ -534,3 +535,4 @@ index if queried.
 Don't worry about this for now.
 
 Did substantial cleanup on path handling.
+Now completes testShell.

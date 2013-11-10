@@ -541,17 +541,17 @@ void testWildcard()
 	for ( i = 0 ; i < 100; i++ ) {
 		char name[10];
 		sprintf( name, "ch%ld", i );
-		el2[i] = shell->doCreate( "Mdouble", c1, name, 1 );
+		el2[i] = shell->doCreate( "Annotator", c1, name, 1 );
 		//el2[i] = Neutral::create( "HHChannel", name, c1->id(), Id::scratchId() );
-		Field< double >::set( ObjId( el2[i], i ), "value", i );
+		Field< double >::set( ObjId( el2[i], 0 ), "z", i );
 	}
 
 	wildcardTestFunc( el2, 100, "/a1/c1/##" );
 	wildcardTestFunc( el2, 100, "/a1/c1/#" );
 
 	wildcardTestFunc( el2, 0, "/a1/##[TYPE=IntFire]" );
-	wildcardTestFunc( el2, 100, "/a1/##[TYPE=Mdouble]" );
-	wildcardTestFunc( el2, 50, "/a1/c1/##[TYPE=Mdouble][FIELD(value)<50]" );
+	wildcardTestFunc( el2, 100, "/a1/##[TYPE=Annotator]" );
+	wildcardTestFunc( el2, 50, "/a1/c1/##[TYPE=Annotator][FIELD(z)<50]" );
 
 	// Here we set up some thoroughly ugly nesting.
 	// Note the sequence: The wildcarding goes depth first,
