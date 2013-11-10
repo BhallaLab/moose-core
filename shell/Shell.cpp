@@ -598,27 +598,23 @@ bool Shell::chopString( const string& path, vector< string >& ret,
  * index: { {}, {10}, {3,4,5} }
  */
 bool Shell::chopPath( const string& path, vector< string >& ret, 
-	vector< vector< unsigned int > >& index, Id cwe )
+	vector< vector< unsigned int > >& index, ObjId cwe )
 {
 	bool isAbsolute = chopString( path, ret, '/' );
 	vector< unsigned int > empty;
 	if ( isAbsolute ) {
 		index.clear();
-		index.resize( 1 ); // The zero index is for /root.
 	} else {
-		static vector< vector< unsigned int > > tempIndex( 1 );
-		// index = cwe.element()->pathIndices( 0 );
-		index = tempIndex;
+		index.clear();
 	}
 	for ( unsigned int i = 0; i < ret.size(); ++i )
 	{
+		index.push_back( empty );
 		if ( ret[i] == "." )
 			continue;
 		if ( ret[i] == ".." ) {
-			index.pop_back();
 			continue;
 		}
-		index.push_back( empty );
 		if ( !extractIndices( ret[i], index.back() ) ) {
 			cout << "Error: Shell::chopPath: Failed to parse indices in path '" <<
 				path << "'\n";
@@ -664,27 +660,30 @@ ObjId Shell::doFindWithoutIndexing( const string& path ) const
 /// non-static func. Returns the Id found by traversing the specified path.
 ObjId Shell::doFind( const string& path ) const
 {
-	Id curr = Id();
+	ObjId curr;
 	vector< string > names;
 	vector< vector< unsigned int > > indices;
 	bool isAbsolute = chopPath( path, names, indices, cwe_ );
+	assert( names.size() == indices.size() );
 
 	if ( !isAbsolute )
 		curr = cwe_;
 	
-	for ( vector< string >::iterator i = names.begin(); 
-		i != names.end(); ++i ) {
-		if ( *i == "." ) {
-		} else if ( *i == ".." ) {
+	for ( unsigned int i = 0; i < names.size(); ++i ) {
+		if ( names[i] == "." ) {
+		} else if ( names[i] == ".." ) {
 			curr = Neutral::parent( curr.eref() ).id;
 		} else {
-			curr = Neutral::child( curr.eref(), *i );
+			curr = Neutral::child( curr.eref(), names[i] );
+			if ( indices[i].size() > 0 )
+				curr.dataId = indices[i][0];
+			if ( indices[i].size() > 1 )
+				curr.fieldIndex = indices[i][1];
 		}
 	}
 	
 	assert( curr.element() );
-	DataId di = 0; // temporary 03 Nov 2013.
-	return ObjId( curr, di );
+	return curr;
 }
 
 // We don't need to do this through acks, as it has no effect on processing

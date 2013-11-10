@@ -25,7 +25,7 @@ const Cinfo* SynHandler::initCinfo()
 {
 	static ValueFinfo< SynHandler, unsigned int > numSynapses(
 		"numSynapses",
-		"Number of synapses on SynHandler",
+		"Number of synapses on SynHandler. Duplicate field for num_synapse",
 		&SynHandler::setNumSynapses,
 		&SynHandler::getNumSynapses
 	);
@@ -39,10 +39,9 @@ const Cinfo* SynHandler::initCinfo()
 		&SynHandler::getNumSynapses
 	);
 
-
 	//////////////////////////////////////////////////////////////////////
 	static Finfo* synHandlerFinfos[] = {
-		// &numSynapses,	// Value
+		&numSynapses,	// Value
 		&synFinfo,		// FieldElement
 	};
 

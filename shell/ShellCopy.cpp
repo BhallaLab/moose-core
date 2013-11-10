@@ -20,6 +20,11 @@ Id Shell::doCopy( Id orig, ObjId newParent, string newName,
 		cout << "Error: Shell::doCopy: Cannot copy object to descendant in tree\n";
 		return Id();
 	}
+	if ( n < 1 ) {
+		cout << "Warning: Shell::doCopy( " << orig.path() << " to " << 
+			newParent.path() << " ) : numCopies must be > 0, using 1 \n";
+		return Id();
+	}
 
 	Eref sheller( shelle_, 0 );
 	Id newElm = Id::nextId();

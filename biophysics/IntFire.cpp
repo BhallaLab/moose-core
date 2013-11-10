@@ -76,6 +76,8 @@ const Cinfo* IntFire::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// FieldElementFinfo definition for Synapses
 		//////////////////////////////////////////////////////////////
+		/// Defined in base class SynHandler.
+		/*
 		static FieldElementFinfo< IntFire, Synapse > synFinfo( "synapse",
 			"Sets up field Elements for synapse",
 			Synapse::initCinfo(),
@@ -83,6 +85,7 @@ const Cinfo* IntFire::initCinfo()
 			&IntFire::setNumSynapses,
 			&IntFire::getNumSynapses
 		);
+		*/
 		//////////////////////////////////////////////////////////////
 		// SharedFinfo Definitions
 		//////////////////////////////////////////////////////////////
@@ -102,7 +105,7 @@ const Cinfo* IntFire::initCinfo()
 		// &numSynapses,			// Value
 		&proc,					// SharedFinfo
 		spike(), 		// MsgSrc
-		&synFinfo		// FieldElementFinfo for synapses.
+		// &synFinfo		// FieldElementFinfo for synapses.
 	};
 
 	static Cinfo intFireCinfo (

@@ -507,3 +507,30 @@ quite symmetrical with DataElements.
 Compiles and gets a little further with unit tests.
 
 ===========================================================================
+10 Nov 2013.
+Need to sort out semantics of copying with the provided multiplier.
+
+consider: /a[10]/b[20]
+copy /a /z
+The bare copy should traverse the tree and produce an identical tree:
+	/z/a[10]/b[20]
+
+copy /a /z 5
+Should I reduce a to 5, or make 5 copies of the whole thing? Or just 
+forbid the multiple copy operation and reserve it for createmap type calls?
+
+Clearly any deep copy should preserve the child indexing. So I cannot
+do any reductions, will have to copy integral multiples of the whole tree.
+Should I only allow unit copies? No, keep the feature, and use it for
+more complicated createmap type calls.
+
+Another case. I may need to do a specific object copy:
+
+Copy a[3] /z
+Here the rest of the tree is ignored unless the there is a tree rooted on a[3].
+This precludes doing a copy of a[0] unless I implement a special parental
+message that goes from the element as a whole. But even that would return an
+index if queried.
+Don't worry about this for now.
+
+Did substantial cleanup on path handling.
