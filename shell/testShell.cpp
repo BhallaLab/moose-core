@@ -1376,7 +1376,7 @@ void testSyncSynapseSize()
 	const Finfo* f = Cinfo::find( "IntFire" )->findFinfo( "get_numSynapses" );
 	const DestFinfo* df = dynamic_cast< const DestFinfo* >( f );
 	assert( df );
-	unsigned int size = 1000;
+	unsigned int size = 100;
 	Id neuronId = shell->doCreate( "IntFire", Id(), "neurons", size );
 	assert( neuronId != Id() );
 	Id synId( neuronId.value() + 1 );
@@ -1386,9 +1386,7 @@ void testSyncSynapseSize()
 	assert ( syn != 0 );
 	assert ( syn->getName() == "synapse" ); 
 
-	// assert( syn->dataHandler()->data( 0 ) != 0 ); // Should warn
-
-	assert( syn->numData() == 0 );
+	assert( syn->numData() == size );
 	vector< unsigned int > ns( size, 0 );
 	for ( unsigned int i = 0; i < size; ++i )
 		ns[i] = i;
@@ -1397,7 +1395,23 @@ void testSyncSynapseSize()
 	// Here we check local entries
 
 	assert( Field< unsigned int >::get( neuronId, "numData" ) == size );
-	assert( Field< unsigned int >::get( synId, "numData" ) == size * (size - 1 ) );
+	assert( Field< unsigned int >::get( synId, "numData" ) == size );
+	for ( unsigned int i = 0; i < size; ++i ) {
+		ObjId oi( synId, i );
+		assert( Field< unsigned int >::get( oi, "numField" ) == i );
+		assert( oi.element()->numField( i ) == i );
+		for ( unsigned int j = 0; j < i; ++j ) {
+			ObjId temp( synId, i, j );
+			Field< double >::set( temp, "delay", i * 1000 + j );
+		}
+	}
+	vector< double > delay;
+	Field< double >::getVec( synId, "delay", delay );
+	assert( delay.size() == size * ( size - 1 ) / 2 );
+	unsigned int k = 0;
+	for ( unsigned int i = 0; i < size; ++i )
+		for ( unsigned int j = 0; j < i; ++j )
+			assert( doubleEq( delay[ k++ ], i * 1000 + j ) );
 
 	shell->doDelete( neuronId );
 	cout << "." << flush;
@@ -1724,8 +1738,8 @@ void testMpiShell( )
 
 	testShellSetGet();
 	testInterNodeOps();
-	testShellAddMsg();
-	testCopyMsgOps();
+	// testShellAddMsg(); 10 Nov: defer till rebuild of MsgObjects.
+	// testCopyMsgOps(); This too
 	testWildcard();
 	testSyncSynapseSize();
 
