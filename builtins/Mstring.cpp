@@ -33,12 +33,13 @@ const Cinfo* Mstring::initCinfo()
 		&valueFinfo,	// Value
 	};
 
+	static Dinfo< Mstring > dinfo;
 	static Cinfo mStringCinfo (
 		"Mstring",
 		Neutral::initCinfo(),
 		mStringFinfos,
 		sizeof( mStringFinfos ) / sizeof ( Finfo* ),
-		new Dinfo< Mstring >()
+		&dinfo
 	);
 
 	return &mStringCinfo;

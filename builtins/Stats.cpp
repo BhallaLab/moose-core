@@ -66,12 +66,13 @@ const Cinfo* Stats::initCinfo()
 		&proc		// SharedFinfo
 	};
 
+	static Dinfo< Stats > dinfo;
 	static Cinfo statsCinfo (
 		"Stats",
 		Neutral::initCinfo(),
 		statsFinfos,
 		sizeof( statsFinfos ) / sizeof ( Finfo* ),
-		new Dinfo< Stats >()
+		&dinfo
 	);
 
 	return &statsCinfo;

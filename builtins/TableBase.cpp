@@ -129,12 +129,13 @@ const Cinfo* TableBase::initCinfo()
                 &clearVec,
 	};
 
+	static Dinfo< TableBase > dinfo;
 	static Cinfo tableCinfo (
 		"TableBase",
 		Neutral::initCinfo(),
 		tableBaseFinfos,
 		sizeof( tableBaseFinfos ) / sizeof ( Finfo* ),
-		new Dinfo< TableBase >()
+		&dinfo
 	);
 
 	return &tableCinfo;

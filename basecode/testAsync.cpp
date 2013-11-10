@@ -371,8 +371,9 @@ void testSetGetSynapse()
 			assert( doubleEq( d2, x ) );
 		}
 	}
-	cout << "." << flush;
+	delete syns.element();
 	delete temp;
+	cout << "." << flush;
 }
 
 void testSetGetVec()
@@ -407,108 +408,10 @@ void testSetGetVec()
 	for ( unsigned int i = 0; i < size; ++i )
 		assert( getSyn[i] == i );
 
-	cout << "." << flush;
-	delete i2.element();
-}
-
-void test2ArgSetVec()
-{
-	const Cinfo* ac = Arith::initCinfo();
-	unsigned int size = 100;
-
-	string arg;
-	Id i2 = Id::nextId();
-	Element* ret = new DataElement( i2, ac, "test2", size, 1 );
-	assert( ret );
-
-	vector< double > arg1( size );
-	vector< double > arg2( size );
-	for ( unsigned int i = 0; i < size; ++i ) {
-		arg1[i] = i;
-		arg2[i] = 100 * ( 100 - i );
-	}
-
-	SetGet2< double, double >::setVec( i2, "arg1x2", arg1, arg2 );
-	
-	for ( unsigned int i = 0; i < size; ++i ) {
-		ObjId oid( i2, i );
-		double x = i * 100 * ( 100 - i );
-		double val = reinterpret_cast< Arith* >(oid.data())->getOutput();
-		assert( doubleEq( val, x ) );
-	}
-	cout << "." << flush;
-	delete i2.element();
-}
-
-
-class TestId {
-	public :
-		void setId( Id id ) {
-			id_ = id;
-		}
-		Id getId() const {
-			return id_;
-		}
-		static const Cinfo* initCinfo();
-	private :
-		Id id_ ;
-};
-// Here we test setRepeat using an Id field. This test is added
-// because of a memory leak problem that cropped up much later.
-const Cinfo* TestId::initCinfo()
-{
-		static ValueFinfo< TestId, Id > id(
-			"id",
-			"test",
-			&TestId::setId,
-			&TestId::getId
-		);
-		static Finfo* testIdFinfos[] = {&id};
-		static Cinfo testIdCinfo(
-			"TestIdRepeatAssignment",
-			Neutral::initCinfo(),
-			testIdFinfos,
-			sizeof( testIdFinfos )/ sizeof( Finfo* ),
-			new Dinfo< TestId >()
-		);
-		return &testIdCinfo;
-}
-
-void testSetRepeat()
-{
-	const Cinfo* ic = IntFire::initCinfo();
-	// const Cinfo* sc = Synapse::initCinfo();
-	unsigned int size = 100;
-
-	string arg;
-	Id cell = Id::nextId();
-	// bool ret = ic->create( i2, "test2", size );
-	Element* temp = new DataElement( cell, ic, "cell", size, 1 );
-	assert( temp );
-	vector< unsigned int > numSyn( size, 0 );
-	for ( unsigned int i = 0; i < size; ++i )
-		numSyn[i] = i;
-	
-	// Here we test setting a 1-D vector
-	bool ret = Field< unsigned int >::setVec( cell, "num_synapse", numSyn);
-	assert( ret );
-	
-	Id synapse( cell.value() + 1 );
-	// Here we test setting a 2-D array with different dims on each axis.
-	ret = Field< double >::setRepeat( synapse, "delay", 123.0 );
-	assert( ret );
-	vector< double > delay;
-	Field< double >::getVec( synapse, "delay", delay );
-	assert( delay.size() == ( size * (size - 1) )/2 );
-	unsigned int k = 0;
-	for ( unsigned int i = 0; i < size; ++i ) {
-		for ( unsigned int j = 0; j < i; ++j ) {
-			assert( doubleEq( delay[k++], 123.0 ) );
-		}
-	}
-
-	cout << "." << flush;
+	Id synapse( i2.value() + 1 );
+	delete synapse.element();
 	delete temp;
+	cout << "." << flush;
 }
 
 void testSendSpike()
@@ -892,15 +795,116 @@ void testSparseMsg()
 
 	ProcInfo p;
 	p.dt = timestep;
-
 	for ( unsigned int i = 0; i < runsteps; ++i ) {
 		p.currTime += p.dt;
 		SetGet1< ProcInfo* >::setRepeat( cells, "process", &p );
 		// cells()->process( &p, df->getFid() );
 	}
-	
-	cout << "." << flush;
+
+	delete syns.element();
 	delete cells.element();
+	cout << "." << flush;
+}
+
+void test2ArgSetVec()
+{
+	const Cinfo* ac = Arith::initCinfo();
+	unsigned int size = 100;
+
+	string arg;
+	Id i2 = Id::nextId();
+	Element* ret = new DataElement( i2, ac, "test2", size, 1 );
+	assert( ret );
+
+	vector< double > arg1( size );
+	vector< double > arg2( size );
+	for ( unsigned int i = 0; i < size; ++i ) {
+		arg1[i] = i;
+		arg2[i] = 100 * ( 100 - i );
+	}
+
+	SetGet2< double, double >::setVec( i2, "arg1x2", arg1, arg2 );
+	
+	for ( unsigned int i = 0; i < size; ++i ) {
+		ObjId oid( i2, i );
+		double x = i * 100 * ( 100 - i );
+		double val = reinterpret_cast< Arith* >(oid.data())->getOutput();
+		assert( doubleEq( val, x ) );
+	}
+	cout << "." << flush;
+	delete i2.element();
+}
+
+
+class TestId {
+	public :
+		void setId( Id id ) {
+			id_ = id;
+		}
+		Id getId() const {
+			return id_;
+		}
+		static const Cinfo* initCinfo();
+	private :
+		Id id_ ;
+};
+// Here we test setRepeat using an Id field. This test is added
+// because of a memory leak problem that cropped up much later.
+const Cinfo* TestId::initCinfo()
+{
+		static ValueFinfo< TestId, Id > id(
+			"id",
+			"test",
+			&TestId::setId,
+			&TestId::getId
+		);
+		static Finfo* testIdFinfos[] = {&id};
+		static Cinfo testIdCinfo(
+			"TestIdRepeatAssignment",
+			Neutral::initCinfo(),
+			testIdFinfos,
+			sizeof( testIdFinfos )/ sizeof( Finfo* ),
+			new Dinfo< TestId >()
+		);
+		return &testIdCinfo;
+}
+
+void testSetRepeat()
+{
+	const Cinfo* ic = IntFire::initCinfo();
+	// const Cinfo* sc = Synapse::initCinfo();
+	unsigned int size = 100;
+
+	string arg;
+	Id cell = Id::nextId();
+	// bool ret = ic->create( i2, "test2", size );
+	Element* temp = new DataElement( cell, ic, "cell", size, 1 );
+	assert( temp );
+	vector< unsigned int > numSyn( size, 0 );
+	for ( unsigned int i = 0; i < size; ++i )
+		numSyn[i] = i;
+	
+	// Here we test setting a 1-D vector
+	bool ret = Field< unsigned int >::setVec( cell, "num_synapse", numSyn);
+	assert( ret );
+	
+	Id synapse( cell.value() + 1 );
+	// Here we test setting a 2-D array with different dims on each axis.
+	ret = Field< double >::setRepeat( synapse, "delay", 123.0 );
+	assert( ret );
+	vector< double > delay;
+	Field< double >::getVec( synapse, "delay", delay );
+	assert( delay.size() == ( size * (size - 1) )/2 );
+	unsigned int k = 0;
+	for ( unsigned int i = 0; i < size; ++i ) {
+		for ( unsigned int j = 0; j < i; ++j ) {
+			assert( doubleEq( delay[k++], 123.0 ) );
+		}
+	}
+
+	delete synapse.element();
+	delete temp;
+	cout << "." << flush;
 }
 
 /**
@@ -946,12 +950,13 @@ class Test
 				&shared,
 			};
 
+			static Dinfo< Test > dinfo;
 			static Cinfo testCinfo(
 				"Test",
 				0,
 				testFinfos,
 				sizeof( testFinfos ) / sizeof( Finfo* ),
-				new Dinfo< Test >()
+				&dinfo
 			);
 	
 			return &testCinfo;

@@ -108,12 +108,13 @@ const Cinfo* IntFire::initCinfo()
 		// &synFinfo		// FieldElementFinfo for synapses.
 	};
 
+	static Dinfo< IntFire > dinfo;
 	static Cinfo intFireCinfo (
 		"IntFire",
 		SynHandler::initCinfo(),
 		intFireFinfos,
 		sizeof( intFireFinfos ) / sizeof ( Finfo* ),
-		new Dinfo< IntFire >()
+		&dinfo
 	);
 
 	return &intFireCinfo;

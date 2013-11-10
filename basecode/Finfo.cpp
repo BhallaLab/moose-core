@@ -60,12 +60,13 @@ const Cinfo* Finfo::initCinfo()
 		&dest,		// ReadOnlyValue
 	};
 
+	static Dinfo< Finfo* > dinfo;
 	static Cinfo finfoCinfo (
 		"Finfo",
 		Neutral::initCinfo(),
 		finfoFinfos,
 		sizeof( finfoFinfos ) / sizeof( Finfo* ),
-		new Dinfo< Finfo* >
+		&dinfo
 	);
 
 	return &finfoCinfo;

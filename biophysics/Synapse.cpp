@@ -38,12 +38,13 @@ const Cinfo* Synapse::initCinfo()
 		&addSpike,		// DestFinfo
 	};
 
+	static Dinfo< Synapse > dinfo;
 	static Cinfo synapseCinfo (
 		"Synapse",
 		Neutral::initCinfo(),
 		synapseFinfos,
 		sizeof( synapseFinfos ) / sizeof ( Finfo* ),
-		new Dinfo< Synapse >()
+		&dinfo
 	);
 
 	return &synapseCinfo;

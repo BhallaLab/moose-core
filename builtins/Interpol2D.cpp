@@ -140,11 +140,12 @@ const Cinfo* Interpol2D::initCinfo()
 				"Can either use interpolation or roundoff to the nearest index.",
 	};
 	
+	static Dinfo< Interpol2D > dinfo;
 	static Cinfo interpol2DCinfo(
 		"Interpol2D",
 		Neutral::initCinfo(),
 		interpol2DFinfos, sizeof( interpol2DFinfos ) / sizeof( Finfo * ),
-		new Dinfo< Interpol2D >()
+		&dinfo
 	);
 
 	return &interpol2DCinfo;

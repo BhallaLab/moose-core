@@ -45,12 +45,13 @@ const Cinfo* SynHandler::initCinfo()
 		&synFinfo,		// FieldElement
 	};
 
+	static Dinfo< SynHandler > dinfo;
 	static Cinfo synHandlerCinfo (
 		"SynHandler",
 		Neutral::initCinfo(),
 		synHandlerFinfos,
 		sizeof( synHandlerFinfos ) / sizeof ( Finfo* ),
-		new Dinfo< SynHandler >()
+		&dinfo
 	);
 
 	return &synHandlerCinfo;
