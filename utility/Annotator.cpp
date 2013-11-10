@@ -74,12 +74,13 @@ const Cinfo* Annotator::initCinfo()
 		&icon,	// Value
 	};
 
+	static Dinfo< Annotator > dinfo;
 	static Cinfo annotatorCinfo (
 		"Annotator",
 		Neutral::initCinfo(),
 		annotatorFinfos,
 		sizeof( annotatorFinfos ) / sizeof ( Finfo* ),
-		new Dinfo< Annotator >()
+		&dinfo
 	);
 
 	return &annotatorCinfo;

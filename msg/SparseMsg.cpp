@@ -102,12 +102,13 @@ const Cinfo* SparseMsg::initCinfo()
 		&transpose,			//dest
 	};
 
+	static Dinfo< short > dinfo;
 	static Cinfo sparseMsgCinfo (
 		"SparseMsg",					// name
 		Msg::initCinfo(),			// base class
 		sparseMsgFinfos,
 		sizeof( sparseMsgFinfos ) / sizeof( Finfo* ),	// num Fields
-		new Dinfo< short >()
+		&dinfo
 	);
 
 	return &sparseMsgCinfo;

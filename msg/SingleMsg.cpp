@@ -151,12 +151,13 @@ const Cinfo* SingleMsg::initCinfo()
 		&index2,		// value
 	};
 
+	static Dinfo< short > dinfo;
 	static Cinfo singleMsgCinfo (
 		"SingleMsg",					// name
 		Msg::initCinfo(),		// base class
 		singleMsgFinfos,
 		sizeof( singleMsgFinfos ) / sizeof( Finfo* ),	// num Fields
-		new Dinfo< short >()
+		&dinfo
 	);
 
 	return &singleMsgCinfo;

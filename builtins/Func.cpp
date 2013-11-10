@@ -263,11 +263,12 @@ const Cinfo * Func::initCinfo()
                 "e=2.718281... \n"
             };
     
+	static Dinfo< Func > dinfo;
     static Cinfo funcCinfo("Func",
                             Neutral::initCinfo(),
                             funcFinfos,
                             sizeof(funcFinfos) / sizeof(Finfo*),
-                            new Dinfo<Func>(),
+							&dinfo,
                             doc,
                             sizeof(doc)/sizeof(string));
     return &funcCinfo;

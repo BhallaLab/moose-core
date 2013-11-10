@@ -46,6 +46,7 @@ DataElement::~DataElement()
 {
 	// cout << "deleting element " << getName() << endl;
 	cinfo()->dinfo()->destroyData( data_ );
+	data_ = 0;
 	// The base class destroys the messages.
 }
 

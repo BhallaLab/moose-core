@@ -79,12 +79,13 @@ const Cinfo* TimeTable::initCinfo()
         "at the specified times.",
     };
     
+	static Dinfo< TimeTable > dinfo;
     static Cinfo timeTableCinfo(
         "TimeTable",
         TableBase::initCinfo(),
         timeTableFinfos,
         sizeof( timeTableFinfos )/sizeof(Finfo *),
-        new Dinfo< TimeTable >(),
+		&dinfo,
         doc,
         sizeof(doc)/sizeof(string));
     

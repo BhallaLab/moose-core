@@ -117,12 +117,13 @@ const Cinfo* StimulusTable::initCinfo()
 		&proc,			// SharedFinfo
 	};
 
+	static Dinfo< StimulusTable > dinfo;
 	static Cinfo stimulusTableCinfo (
 		"StimulusTable",
 		TableBase::initCinfo(),
 		stimulusTableFinfos,
 		sizeof( stimulusTableFinfos ) / sizeof ( Finfo* ),
-		new Dinfo< StimulusTable >()
+		&dinfo
 	);
 
 	return &stimulusTableCinfo;
