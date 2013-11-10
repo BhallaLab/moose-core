@@ -178,6 +178,10 @@ template< class T, class A > class GetEpFunc: public GetOpFuncBase< A >
 			: func_( func )
 			{;}
 
+		void op( const Eref& e, A* ret ) const {
+			*ret = returnOp( e );
+		}
+		/*
 		void op( const Eref& e, ObjId recipient, FuncId fid ) const {
 			const OpFunc *f = recipient.element()->cinfo()->getOpFunc( fid);
 			const OpFunc1Base< A >* recvOpFunc =
@@ -185,6 +189,7 @@ template< class T, class A > class GetEpFunc: public GetOpFuncBase< A >
 			assert( recvOpFunc );
 			recvOpFunc->op( recipient.eref(), returnOp( e ) );
 		}
+		*/
 
 		A returnOp( const Eref& e ) const {
 			return ( getEpFuncData< T >( e )->*func_ )( e );
@@ -230,6 +235,5 @@ template< class T, class L, class A > class GetEpFunc1:
 	private:
 		A ( T::*func_ )( const Eref& e, L ) const;
 };
-
 
 #endif //_EPFUNC_H

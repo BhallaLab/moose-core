@@ -245,6 +245,7 @@ const Cinfo* Clock::initCinfo()
 		&isRunning,			// ReadOnlyValue
 		&tickStep,			// LookupValue
 		&tickDt,			// LookupValue
+		&clockControl,		// Shared
 		finished(),			// Src
 		&proc0,				// Src
 		&proc1,				// Src
@@ -403,8 +404,24 @@ unsigned int Clock::getTickStep( unsigned int i ) const
 	return 0;
 }
 
+/**
+ * A little nasty because we want to ensure that the main clock dt is
+ * set intelligently from the assignment here.
+ */
 void Clock::setTickDt( unsigned int i, double v )
 {
+	unsigned int numUsed = 0;
+	for ( unsigned int j = 0; j < numTicks; ++j )
+		numUsed += ( ticks_[j] != 0 );
+	if ( numUsed == 0 ) {
+		dt_ = v;
+	} else if ( dt_ > v ) {
+		for ( unsigned int j = 0; j < numTicks; ++j )
+			if ( ticks_[j] != 0 )
+				ticks_[j] = round( ( ticks_[j] * dt_ ) / v );
+		dt_ = v;
+	}
+
 	if ( checkTickNum( "setTickDt", i ) )
 		ticks_[i] = round( v / dt_ );
 }
@@ -522,14 +539,16 @@ void Clock::handleReinit( const Eref& e )
 	}
 	currentTime_ = 0.0;
 	currentStep_ = 0;
+	nSteps_ = 0;
 	buildTicks( e );
 	doingReinit_ = true;
 	// Curr time is end of current step.
 	info_.currTime = 0.0;
+	vector< unsigned int >::const_iterator k = activeTicksMap_.begin();
 	for ( vector< unsigned int>::iterator j = 
 		activeTicks_.begin(); j != activeTicks_.end(); ++j ) {
 		info_.dt = *j * dt_;
-		reinitVec()[*j]->send( e, &info_ );
+		reinitVec()[*k++]->send( e, &info_ );
 	}
 	info_.dt = dt_;
 	doingReinit_ = false;

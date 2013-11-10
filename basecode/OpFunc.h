@@ -129,6 +129,7 @@ template< class T,
  * FuncId of the function on the object that requested the
  * value. The OpFunc then sends back a message with the info.
  */
+/*
 template< class T, class A > class GetOpFunc: public GetOpFuncBase< A >
 {
 	public:
@@ -142,6 +143,34 @@ template< class T, class A > class GetOpFunc: public GetOpFuncBase< A >
 				dynamic_cast< const OpFunc1Base< A >* >( f );
 			assert( recvOpFunc );
 			recvOpFunc->op( recipient.eref(), returnOp( e ) );
+		}
+
+		A returnOp( const Eref& e ) const {
+			return ( reinterpret_cast< T* >( e.data() )->*func_)();
+		}
+
+	private:
+		A ( T::*func_ )() const;
+};
+*/
+
+/**
+ * This specialized OpFunc is for returning a single field value
+ * It generates an opFunc that takes a single argument, the
+ * address of the variable into which the return value should be passed.
+ * It manages the 'get' function that retrieves the return value.
+ * Note that the 'get' function must be blocking in case the request
+ * goes off node.
+ */
+template< class T, class A > class GetOpFunc: public GetOpFuncBase< A >
+{
+	public:
+		GetOpFunc( A ( T::*func )() const )
+			: func_( func )
+			{;}
+
+		void op( const Eref& e, A* ret ) const {
+			*ret = returnOp( e );
 		}
 
 		A returnOp( const Eref& e ) const {

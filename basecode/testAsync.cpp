@@ -1376,6 +1376,7 @@ void testFinfoFields()
 	const FinfoWrapper vmFinfo = IntFire::initCinfo()->findFinfo( "Vm" );
 	const FinfoWrapper synFinfo = IntFire::initCinfo()->findFinfo( "synapse" );
 	const FinfoWrapper procFinfo = IntFire::initCinfo()->findFinfo( "proc" );
+	const FinfoWrapper processFinfo = IntFire::initCinfo()->findFinfo( "process" );
 	const FinfoWrapper reinitFinfo = IntFire::initCinfo()->findFinfo( "reinit" );
 	const FinfoWrapper spikeFinfo = IntFire::initCinfo()->findFinfo( "spike" );
 	const FinfoWrapper classNameFinfo = Neutral::initCinfo()->findFinfo( "className" );
@@ -1401,15 +1402,22 @@ void testFinfoFields()
 	assert( procFinfo.dest().size() == 2 );
 	assert( procFinfo.dest()[0] == "process" );
 	assert( procFinfo.dest()[1] == "reinit" );
-	// cout << procFinfo->type() << endl;
+	 // cout << "proc " << procFinfo.type() << endl;
 	assert( procFinfo.type() == "void" );
+	
+	assert( processFinfo.getName() == "process" );
+	assert( processFinfo.docs() == "Handles process call" );
+	assert( processFinfo.src().size() == 0 );
+	assert( processFinfo.dest().size() == 0 );
+	// cout << "process " << processFinfo.type() << endl;
+	assert( processFinfo.type() == "const ProcInfo*" );
 
 	assert( reinitFinfo.getName() == "reinit" );
 	assert( reinitFinfo.docs() == "Handles reinit call" );
 	assert( reinitFinfo.src().size() == 0 );
 	assert( reinitFinfo.dest().size() == 0 );
-	// cout << reinitFinfo->type() << endl;
-	assert( reinitFinfo.type() == "void" );
+	// cout << "reinit " << reinitFinfo.type() << endl;
+	assert( reinitFinfo.type() == "const ProcInfo*" );
 
 	assert( spikeFinfo.getName() == "spike" );
 	assert( spikeFinfo.docs() == "Sends out spike events" );
