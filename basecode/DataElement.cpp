@@ -26,6 +26,7 @@ DataElement::DataElement( Id id, const Cinfo* c, const string& name,
  * so FieldElements are copied rather than created by the Cinfo when
  * the parent element is created. This allows the copied FieldElements to
  * retain info from the originals.
+ * Note that n is the number of individual  dataEntries that are made.
  */
 DataElement::DataElement( Id id, const Element* orig, unsigned int n,
 	bool toGlobal)
@@ -34,8 +35,9 @@ DataElement::DataElement( Id id, const Element* orig, unsigned int n,
 {
 	if ( n >= 1 ) {
 		data_ = cinfo()->dinfo()->copyData( 
-						orig->data( 0 ), orig->numData(), n);
+				orig->data( 0 ), orig->numData(), n * orig->numData() );
 	}
+	numData_ = n * orig->numData();
 	// cinfo_->postCreationFunc( id, this );
 }
 

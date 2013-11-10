@@ -377,80 +377,97 @@ void testCopyFieldElement()
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 	unsigned int size = 10;
+	unsigned int size2 = 17;
 	Id origId = shell->doCreate( "IntFire", Id(), "f1", size );
 	Id origSynId( origId.value() + 1 );
+	Id origChild = shell->doCreate( "Neutral", origId, "f2", size2 );
 	
 	Element* syn = origSynId.element();
 	assert( syn != 0 );
 	assert( syn->getName() == "synapse" );
-	assert( syn->numData() == 0 );
+	assert( syn->numData() == size );
+	assert( origChild.element()->numData() == size2 );
+	assert( syn->numField( 0 ) == 0 );
 	vector< unsigned int > vec(size);
 	for ( unsigned int i = 0; i < size; ++i )
 		vec[i] = i;
-	bool ret = Field< unsigned int >::setVec( origId, "numSynapses", vec );
+	bool ret = Field< unsigned int >::setVec( origId, "num_synapse", vec );
 	assert( ret );
 
-	unsigned int numHere = 0;
+	unsigned int origNumSyn = 0;
 	if ( shell->numNodes() == 1 ) {
-		numHere = size * (size - 1) / 2;
+		origNumSyn = size * (size - 1) / 2;
 	} else {
 		assert( 0 );
 	}
 
-	vector< double > delay( size * ( size - 1 ), 0 );
+	vector< double > delay;
 	// unsigned int k = 0;
 	for ( unsigned int i = 0; i < size; ++i ) {
 		for ( unsigned int j = 0; j < i; ++j ) {
 			// delay[ k++ ] = 3.14 * j + i * i;
-			delay[ i * (size - 1 ) + j ] = 3.14 * j + i * i;
+			delay.push_back( 3.14 * j + i * i );
 		}
 	}
 	ret = Field< double >::setVec( origSynId, "delay", delay );
 	assert( ret );
 
+	Eref origEr( origId.element(), 0 );
+	vector< Id > origChildren;
+	Neutral::children( origEr, origChildren );
+	assert( origChildren.size() == 2 );
+
+	unsigned int copyFactor = 2;
+	unsigned int newSize = copyFactor * size;
 	//////////////////////////////////////////////////////////////////
-	Id copyId = shell->doCopy( origId, Id(), "dup", 1, false, false );
+	Id copyId = shell->doCopy( origId, Id(), "dup", copyFactor, false, false);
 	//////////////////////////////////////////////////////////////////
 
-	Eref origEr( origId.element(), 0 );
+	assert( copyId.element()->numData() == newSize );
+	origChildren.resize( 0 );
 	Eref copyEr( copyId.element(), 0 );
-	vector< Id > origChildren;
 	vector< Id > copyChildren;
 	Neutral::children( origEr, origChildren );
 	Neutral::children( copyEr, copyChildren );
-	assert( origChildren.size() == 1 );
+	assert( origChildren.size() == 2 );
 	assert( origChildren[0] == origSynId );
 	assert( origChildren.size() == copyChildren.size() );
 	Id copySynId = copyChildren[0];
+	Id copyChild = copyChildren[1];
 
 	Element* copySynElm = copySynId.element();
 	
 	// Element should exist even if data doesn't
 	assert ( copySynElm != 0 );
 	assert ( copySynElm->getName() == "synapse" );
-	// assert( syn->dataHandler()->data( 0 ) != 0 ); // Should warn
-	// assert( copySynElm->dataHandler()->data( 0 ) != 0 ); // Should warn
-	assert( copySynElm->numData() == numHere );
-	assert( copySynElm->numData() == ( size * (size - 1) ) );
+	assert( copySynElm->numData() == newSize );
+	unsigned int numSyn = 0;
+	for ( unsigned int i = 0; i < newSize; ++i ) {
+		assert( copySynElm->numField( i ) == i % size );
+		numSyn += i % size;
+	}
+
+	assert ( copyChild.element() != 0 );
+	assert ( copyChild.element()->getName() == "f2" );
+	assert( copyChild.element()->numData() == size2 * copyFactor );
 	
 	vector< double > del;
 	Field< double >::getVec( origSynId, "delay", del );
-	assert( del.size() == size * (size - 1 ) );
-	assert( del.size() == delay.size() );
+	assert( del.size() == origNumSyn );
+	assert( delay.size() == origNumSyn );
 
 	for ( unsigned int i = 0; i < del.size(); ++i ) {
 		// cout << i << "	" << del[i] << "	" << delay[i] << endl;
-		assert( doubleEq( del[i], delay[i] ) );
+		assert( doubleEq( del[i], delay[i % origNumSyn ] ) );
 	}
 
 	del.resize( 0 );
 	Field< double >::getVec( copySynId, "delay", del );
-	assert( del.size() == size * (size - 1 ) );
-	assert( del.size() == delay.size() );
+	assert( del.size() == numSyn );
 
 	for ( unsigned int i = 0; i < del.size(); ++i ) {
 		// cout << i << "	" << del[i] << "	" << delay[i] << endl;
-		assert( doubleEq( del[i], delay[i] ) );
+		assert( doubleEq( del[i], delay[i % origNumSyn ] ) );
 	}
 	
 	shell->doDelete( origId );
@@ -466,35 +483,34 @@ void testObjIdToAndFromPath()
 	unsigned int s2 = 1;
 	unsigned int s3 = 23;
 	unsigned int s4 = 1;
-	unsigned int s5 = 9; // slower varying
-	unsigned int s5a = 11; // faster varying, rightmost bracket
-	Id level1 = shell->doCreate( "IntFire", Id(), "f1", s1 );
-	Id origSynId( level1.value() + 1 );
-	Id level2 = shell->doCreate( "Neutral", level1, "f2", s2 );
-	Id level3 = shell->doCreate( "Neutral", level2, "f3", s3 );
-	Id level4 = shell->doCreate( "Neutral", level3, "f4", s4 );
-	Id level5 = shell->doCreate( "Neutral", level4, "f5", s5 );
-
+	unsigned int s5 = 9;
 	unsigned int index1 = 1;
 	unsigned int index2 = 0;
 	unsigned int index3 = 3;
 	unsigned int index4 = 0;
-	unsigned int index5 = 5; // slower varying, closer to root.
-	unsigned int index5a = 6; // faster varying
+	unsigned int index5 = 5;
 
-	unsigned int temp = ( ( ( ( index1 * s2 + index2 ) * 
-		s3 + index3 ) * 
-		s4 + index4 ) *
-		s5 + index5 ) *
-		s5a + index5a;
+	Id level1 = shell->doCreate( "IntFire", Id(), "f1", s1 );
+	Id origSynId( level1.value() + 1 );
+	origSynId.element()->resizeField( 7, 8 );
+	char* origSynData = origSynId.element()->data( 7, 5 );
+	assert( origSynData != 0 );
+	Id level2 = shell->doCreate( "Neutral", 
+					ObjId( level1, index1 ), "f2", s2 );
+	Id level3 = shell->doCreate( "Neutral", 
+					ObjId( level2, index2 ), "f3", s3 );
+	Id level4 = shell->doCreate( "Neutral", 
+					ObjId( level3, index3 ), "f4", s4 );
+	Id level5 = shell->doCreate( "Neutral", 
+					ObjId( level4, index4 ), "f5", s5 );
 
-	ObjId oi( level5, DataId( temp ) );
+	ObjId oi( level5, index5 );
 	string path = oi.path();
-	assert( path == "/f1[1]/f2/f3[3]/f4/f5[5][6]" );
+	assert( path == "/f1[1]/f2/f3[3]/f4/f5[5]" );
 
 	ObjId readPath( path );
 	assert( readPath.id == level5 );
-	assert( readPath.dataId == temp );
+	assert( readPath.dataId == index5 );
 
 	ObjId f4 = Neutral::parent( oi.eref() );
 	path = f4.path();
@@ -524,11 +540,17 @@ void testObjIdToAndFromPath()
 
 	shell->doMove( level1, level8 );
 
-	ObjId noi( "/foo/bar/zod/f1[1]/f2/f3[3]/f4/f5[5][6]" );
-	assert( noi.dataId == temp );
+	ObjId noi( "/foo/bar/zod/f1[1]/f2/f3[3]/f4/f5[5]" );
+	assert( noi.dataId == index5 );
 	assert( noi.id == level5 );
 	assert( noi == oi );
-	// cout << noi.path() << endl;
+
+	ObjId syn( "/foo/bar/zod/f1[7]/synapse[7][5]" );
+	assert( syn.dataId == 7 );
+	assert( syn.fieldIndex == 5 );
+	assert( syn.id == origSynId );
+	assert( syn.data() == origSynData );
+
 
 	shell->doDelete( level6 );
 	cout << "." << flush;
@@ -1239,15 +1261,14 @@ void testChopPath()
 	assert( args[1] == "bar" );
 	assert( args[2] == "zod" );
 
-	assert( index.size() == 4 );
-	assert( index[0].size() == 0 ); // for the root element.
+	assert( index.size() == 3 );
+	assert( index[0].size() == 1 );
 	assert( index[1].size() == 1 );
 	assert( index[2].size() == 1 );
-	assert( index[3].size() == 1 );
 	
-	assert( index[1][0] == 1 );
-	assert( index[2][0] == 2 );
-	assert( index[3][0] == 3 );
+	assert( index[0][0] == 1 );
+	assert( index[1][0] == 2 );
+	assert( index[2][0] == 3 );
 
 	assert( Shell::chopPath( "/foo/bar[1]/zod[2][3]/zung[4][5][6]", 
 		args, index, Id() ) == 1 );
@@ -1257,19 +1278,18 @@ void testChopPath()
 	assert( args[2] == "zod" );
 	assert( args[3] == "zung" );
 
-	assert( index.size() == 5 );
+	assert( index.size() == 4 );
 	assert( index[0].size() == 0 );
-	assert( index[1].size() == 0 );
-	assert( index[2].size() == 1 );
-	assert( index[3].size() == 2 );
-	assert( index[4].size() == 3 );
+	assert( index[1].size() == 1 );
+	assert( index[2].size() == 2 );
+	assert( index[3].size() == 3 );
 	
-	assert( index[2][0] == 1 );
-	assert( index[3][0] == 2 );
-	assert( index[3][1] == 3 );
-	assert( index[4][0] == 4 );
-	assert( index[4][1] == 5 );
-	assert( index[4][2] == 6 );
+	assert( index[1][0] == 1 );
+	assert( index[2][0] == 2 );
+	assert( index[2][1] == 3 );
+	assert( index[3][0] == 4 );
+	assert( index[3][1] == 5 );
+	assert( index[3][2] == 6 );
 
 	cout << "." << flush;
 }
