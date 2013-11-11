@@ -87,17 +87,11 @@ ObjId SingleMsg::findOtherEnd( ObjId f ) const
 	if ( f.element() == e1() ) {
 		if ( f.dataId == i1_ )
 			return ObjId( e2()->id(), i2_ );
-		else
-		  return ObjId( Id() );
-	}
-	else if ( f.element() == e2() ) {
+	} else if ( f.element() == e2() ) {
 		if ( f.dataId == i2_ )
 			return ObjId( e1()->id(), i1_ );
-		else
-		  return ObjId( Id() );
 	}
-	
-	return ObjId::bad();
+	return ObjId();
 }
 
 Msg* SingleMsg::copy( Id origSrc, Id newSrc, Id newTgt,

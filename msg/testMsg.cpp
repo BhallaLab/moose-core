@@ -100,10 +100,6 @@ void testAssortedMsg()
 		m5, "setEntry", 4, 0, 0 );
 	assert( ret );
 
-	/*
-	ret = SetGet1< unsigned int >::set(
-		m5er.objId(), "loadBalance", Shell::numCores() );
-		*/
 	assert( ret );
 
 	///////////////////////////////////////////////////////////
@@ -205,18 +201,6 @@ void testAssortedMsg()
 	// Clean up.
 	///////////////////////////////////////////////////////////
 	shell->doDelete( pa );
-	/*
-	shell->doDelete( a1 );
-	shell->doDelete( a2 );
-	shell->doDelete( b1 );
-	shell->doDelete( b2 );
-	shell->doDelete( c1 );
-	shell->doDelete( c2 );
-	shell->doDelete( d1 );
-	shell->doDelete( d2 );
-	shell->doDelete( e1 );
-	shell->doDelete( e2 );
-	*/
 
 	cout << "." << flush;
 }
@@ -275,13 +259,12 @@ void testMsgElementListing()
 	assert( manager != Id() );
 	vector< Id > children = 
 		Field< vector< Id > >::get( manager, "children" );
-	assert( children.size() == 6 );
+	assert( children.size() == 5 );
 	assert( children[0].element()->getName() == "singleMsg" );
 	assert( children[1].element()->getName() == "oneToOneMsg" );
 	assert( children[2].element()->getName() == "oneToAllMsg" );
 	assert( children[3].element()->getName() == "diagonalMsg" );
 	assert( children[4].element()->getName() == "sparseMsg" );
-	assert( children[5].element()->getName() == "ReduceMsg" );
 
 	/*
 	// A remarkably large number of some message classes, including 645
@@ -303,7 +286,6 @@ void testMsgElementListing()
 	assert( children[2].path() == "/Msgs/oneToAllMsg[0]" );
 	assert( children[3].path() == "/Msgs/diagonalMsg[0]" );
 	assert( children[4].path() == "/Msgs/sparseMsg[0]" );
-	assert( children[5].path() == "/Msgs/ReduceMsg[0]" );
 
 
 	///////////////////////////////////////////////////////////
@@ -387,8 +369,8 @@ void benchmarkMsg( unsigned int n, string msgType )
 
 void testMsg()
 {
-//	testAssortedMsg();
-//	testMsgElementListing();
+	testAssortedMsg();
+	testMsgElementListing();
 }
 
 void testMpiMsg( )
