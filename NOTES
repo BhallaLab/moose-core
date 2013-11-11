@@ -565,7 +565,7 @@ List from 3 Nov, updated here:
 +Fix up Msgs to do the precompiled fast lookup
 +Fix up FieldElement stuff to access synapses from Eref
 Fix up FieldElement and Element stuff to deal with callbacks
-Fix up Msgs to use ObjIds to identify
+*Fix up Msgs to use ObjIds to identify
 Elements should know when to call the MsgDigest.
 +Fix up Msgs to handle the specification of fieldIndex.
 Work out how to talk to nodes on parallel machines. Socket?
@@ -594,5 +594,6 @@ Eventually did by brute force, rather than the recursive removal of objects,
 since the removal of the objects handling messages caused problems with
 subsequent removals.
 Something like an anti-bootstrapping.
-Now terminates cleanly and valgrind is happy.
-
+Now terminates cleanly and valgrind is happy. Checkin 4840.
+Some tests to do with this before going on to automatically deciding when to
+do digestMessages.

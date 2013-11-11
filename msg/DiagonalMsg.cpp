@@ -90,7 +90,6 @@ ObjId DiagonalMsg::findOtherEnd( ObjId f ) const
 			if ( ui2 < e2()->numData() )
 				return ObjId( e2()->id(), DataId( ui2 ) );
 		}
-		return ObjId( Id() );
 	} else if ( f.id.element() == e2() ) {
 		int i1 = f.dataId - stride_;
 		if ( i1 >= 0 ) {
@@ -98,9 +97,8 @@ ObjId DiagonalMsg::findOtherEnd( ObjId f ) const
 			if ( ui1 < e1()->numData() )
 				return ObjId( e1()->id(), DataId( ui1 ));
 		}
-		return ObjId( Id() );
 	}
-	return ObjId::bad();
+	return ObjId();
 }
 
 Msg* DiagonalMsg::copy( Id origSrc, Id newSrc, Id newTgt,
