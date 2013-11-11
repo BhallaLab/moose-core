@@ -566,6 +566,7 @@ List from 3 Nov, updated here:
 +Fix up FieldElement stuff to access synapses from Eref
 Fix up FieldElement and Element stuff to deal with callbacks
 Fix up Msgs to use ObjIds to identify
+Elements should know when to call the MsgDigest.
 +Fix up Msgs to handle the specification of fieldIndex.
 Work out how to talk to nodes on parallel machines. Socket?
 Work out how to do SetGet on parallel machines
@@ -584,5 +585,14 @@ Callbacks
 
 
 Eliminated MsgIds, replaced with ObjIds. The change makes it much easier to
-handle Msgs. Compiled but doesn't clear any tests yet.
+handle Msgs. Compiled but doesn't clear any tests yet. Checkin 4839.
+
+Discrepancy in ptr looked up from mid to created ptr.
+
+Fixed. Then much messing around trying to get the system to quit cleanly.
+Eventually did by brute force, rather than the recursive removal of objects,
+since the removal of the objects handling messages caused problems with
+subsequent removals.
+Something like an anti-bootstrapping.
+Now terminates cleanly and valgrind is happy.
 

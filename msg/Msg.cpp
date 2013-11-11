@@ -22,6 +22,7 @@
 
 // Static field declaration.
 Id Msg::msgManagerId_;
+bool Msg::lastTrump_ = false;
 
 Msg::Msg( ObjId mid, Element* e1, Element* e2 )
 	: mid_( mid), e1_( e1 ), e2_( e2 )
@@ -32,8 +33,10 @@ Msg::Msg( ObjId mid, Element* e1, Element* e2 )
 
 Msg::~Msg()
 {
-	e1_->dropMsg( mid_ );
-	e2_->dropMsg( mid_ );
+	if ( !lastTrump_ ) {
+		e1_->dropMsg( mid_ );
+		e2_->dropMsg( mid_ );
+	}
 
 	/*
 	if ( mid_ > 1 )
@@ -244,7 +247,7 @@ void Msg::initMsgManagers()
 
 	OneToAllMsg::managerId_ = Id::nextId();
 	new MsgElement( OneToAllMsg::managerId_, OneToAllMsg::initCinfo(),
-		"oneToOneMsg", &OneToAllMsg::numMsg, &OneToAllMsg::lookupMsg );
+		"oneToAllMsg", &OneToAllMsg::numMsg, &OneToAllMsg::lookupMsg );
 
 	DiagonalMsg::managerId_ = Id::nextId();
 	new MsgElement( DiagonalMsg::managerId_, DiagonalMsg::initCinfo(), 
@@ -262,4 +265,29 @@ void Msg::initMsgManagers()
 	Shell::adopt( msgManagerId_, OneToAllMsg::managerId_ );
 	Shell::adopt( msgManagerId_, DiagonalMsg::managerId_ );
 	Shell::adopt( msgManagerId_, SparseMsg::managerId_ );
+}
+
+void Msg::clearAllMsgs()
+{
+	lastTrump_ = true;
+	for ( unsigned int i = 0; i < SingleMsg::numMsg(); ++i ) {
+		Msg* m = reinterpret_cast< Msg* >( SingleMsg::lookupMsg( i ) );
+		if ( m ) delete m;
+	}
+	for ( unsigned int i = 0; i < OneToOneMsg::numMsg(); ++i ) {
+		Msg* m = reinterpret_cast< Msg* >( OneToOneMsg::lookupMsg( i ) );
+		if ( m ) delete m;
+	}
+	for ( unsigned int i = 0; i < OneToAllMsg::numMsg(); ++i ) {
+		Msg* m = reinterpret_cast< Msg* >( OneToAllMsg::lookupMsg( i ) );
+		if ( m ) delete m;
+	}
+	for ( unsigned int i = 0; i < DiagonalMsg::numMsg(); ++i ) {
+		Msg* m = reinterpret_cast< Msg* >( DiagonalMsg::lookupMsg( i ) );
+		if ( m ) delete m;
+	}
+	for ( unsigned int i = 0; i < SparseMsg::numMsg(); ++i ) {
+		Msg* m = reinterpret_cast< Msg* >( SparseMsg::lookupMsg( i ) );
+		if ( m ) delete m;
+	}
 }
