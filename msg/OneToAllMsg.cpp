@@ -62,13 +62,11 @@ ObjId OneToAllMsg::findOtherEnd( ObjId f ) const
 	if ( f.element() == e1() ) {
 		if ( f.dataId == i1_ )
 			return ObjId( e2()->id(), 0 );
-		else
-		  return ObjId( Id() );
 	} else if ( f.element() == e2() ) {
 		return ObjId( e1()->id(), i1_ );
 	}
 	
-	return ObjId::bad();
+	return ObjId();
 }
 
 Msg* OneToAllMsg::copy( Id origSrc, Id newSrc, Id newTgt,
