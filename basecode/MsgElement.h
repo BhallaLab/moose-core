@@ -131,19 +131,6 @@ class MsgElement: public Element
 		 * Function to return a pointer to the selected Msg.
 		 */
 		 char* ( *lookupMsg_ )( unsigned int );
-
-		/**
-		 * This points to an array holding the data for the Element.
-		 */
-		char* data_;
-
-		/**
-		 * This is the number of entries in the data. Note that these 
-		 * entries do not have to be sequential, some may be farmed out
-		 * to other nodes.
-		 */
-		unsigned int numData_;
-
 };
 
 #endif // _Msg_ELEMENT_H

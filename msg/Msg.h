@@ -154,6 +154,11 @@ class Msg
 		 */
 		static void initMsgManagers();
 
+		/**
+		 * Clears out the Msg data stored in each Msg subtype.
+		 */
+		static void clearAllMsgs();
+
 	protected:
 		ObjId mid_; /// Index of this Msg on the msg_ vector.
 
@@ -164,6 +169,9 @@ class Msg
 		 * Keeps track of the Id of the parent of all the MsgManager Elms.
 		 */
 		static Id msgManagerId_;
+
+		/// Flag to indicate termination of program.
+		static bool lastTrump_;
 };
 
 #endif // _MSG_H

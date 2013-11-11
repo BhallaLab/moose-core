@@ -163,9 +163,26 @@ void Id::destroy() const
 	}
 }
 
+void Id::zeroOut() const
+{
+	assert ( id_ < elements().size() );
+	elements()[ id_ ] = 0;
+}
+
 unsigned int Id::value() const 
 {
 	return id_;
+}
+
+void Id::clearAllElements()
+{
+	for ( vector< Element* >::iterator
+					i = elements().begin(); i != elements().end(); ++i ) {
+		if ( *i ) {
+			(*i)->clearAllMsgs();
+			delete *i;
+		}
+	}
 }
 
 //////////////////////////////////////////////////////////////
