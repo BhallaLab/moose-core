@@ -14,101 +14,44 @@
 #include "OneToAllMsg.h"
 #include "SparseMatrix.h"
 #include "SparseMsg.h"
+#include "MsgElement.h"
 
 #include "../shell/Shell.h"
 
 ///////////////////////////////////////////////////////////////////////////
 
 // Static field declaration.
-vector< Msg* > Msg::msg_;
-vector< MsgId > Msg::garbageMsg_;
-const MsgId Msg::bad = 0;
-const MsgId Msg::setMsg = 1;
 Id Msg::msgManagerId_;
-vector< Id > msgMgrs;
 
-Msg::Msg( MsgId mid, Element* e1, Element* e2, Id mgrId )
+Msg::Msg( ObjId mid, Element* e1, Element* e2 )
 	: mid_( mid), e1_( e1 ), e2_( e2 )
 {
-	// assert( mid_ < msg_.size() );
-	if ( mid_ >= msg_.size() ) {
-		msg_.resize( mid + 1, 0 );
-	}
-	msg_[mid_] = this;
 	e1->addMsg( mid_ );
 	e2->addMsg( mid_ );
-	/*
-	MsgDataHandler * mdh = dynamic_cast< MsgDataHandler* >( 
-		mgrId.element()->dataHandler() );
-	assert( mdh );
-	mdh->addMid( mid_ );
-	*/
 }
 
 Msg::~Msg()
 {
-	msg_[ mid_ ] = 0;
 	e1_->dropMsg( mid_ );
 	e2_->dropMsg( mid_ );
 
+	/*
 	if ( mid_ > 1 )
 		garbageMsg_.push_back( mid_ );
-}
-
-/**
- * Returns a MsgId for assigning to a new Msg.
- */
-MsgId Msg::nextMsgId()
-{
-	MsgId ret;
-	ret = msg_.size();
-	msg_.push_back( 0 );
-	return ret;
-}
-
-void Msg::deleteMsg( MsgId mid )
-{
-	assert( mid < msg_.size() );
-	Msg* m = msg_[ mid ];
-	if ( m != 0 )
-		delete m;
-	msg_[ mid ] = 0;
-}
-
-/**
- * Initialize the Null location in the Msg vector.
- */
-void Msg::initNull()
-{
-	assert( msg_.size() == 0 );
-	nextMsgId(); // Set aside entry 0 for badMsg;
-	nextMsgId(); // Set aside entry 1 for setMsg;
-}
-
-const Msg* Msg::getMsg( MsgId m )
-{
-	assert( m < msg_.size() );
-	return msg_[ m ];
-}
-
-Msg* Msg::safeGetMsg( MsgId m )
-{
-	if ( m == bad )
-		return 0;
-	if ( m < msg_.size() )
-		return msg_[ m ];
-	return 0;
-}
-
-Eref Msg::manager() const
-{
-	return Eref( ( this->managerId() ).element(), DataId( mid_ ) );
+		*/
 }
 
 // Static func
-unsigned int Msg::numMsgs()
+void Msg::deleteMsg( ObjId mid )
 {
-	return msg_.size();
+	const Msg* msg = getMsg( mid );
+	delete( msg );
+}
+
+// Static func
+const Msg* Msg::getMsg( ObjId m )
+{
+	return reinterpret_cast< const Msg* >( m.data() );
 }
 
 /**
@@ -292,31 +235,24 @@ void Msg::initMsgManagers()
 	new DataElement( msgManagerId_, Neutral::initCinfo(), "Msgs", 1, 1 );
 
 	SingleMsg::managerId_ = Id::nextId();
-	new DataElement( SingleMsg::managerId_, SingleMsg::initCinfo(), 
-		"singleMsg", 1, true );
-	msgMgrs.push_back( SingleMsg::managerId_ );
+	new MsgElement( SingleMsg::managerId_, SingleMsg::initCinfo(), 
+		"singleMsg", &SingleMsg::numMsg, &SingleMsg::lookupMsg );
 
 	OneToOneMsg::managerId_ = Id::nextId();
-	new DataElement( OneToOneMsg::managerId_, OneToOneMsg::initCinfo(),
-		"oneToOneMsg", 1, true );
-	msgMgrs.push_back( OneToOneMsg::managerId_ );
+	new MsgElement( OneToOneMsg::managerId_, OneToOneMsg::initCinfo(),
+		"oneToOneMsg", &OneToOneMsg::numMsg, &OneToOneMsg::lookupMsg );
 
 	OneToAllMsg::managerId_ = Id::nextId();
-	new DataElement( OneToAllMsg::managerId_, OneToAllMsg::initCinfo(), 
-		"oneToAllMsg", 1, true );
-	msgMgrs.push_back( OneToAllMsg::managerId_ );
+	new MsgElement( OneToAllMsg::managerId_, OneToAllMsg::initCinfo(),
+		"oneToOneMsg", &OneToAllMsg::numMsg, &OneToAllMsg::lookupMsg );
 
 	DiagonalMsg::managerId_ = Id::nextId();
-	new DataElement( DiagonalMsg::managerId_, DiagonalMsg::initCinfo(), 
-		"diagonalMsg", 1, true );
-	msgMgrs.push_back( DiagonalMsg::managerId_ );
+	new MsgElement( DiagonalMsg::managerId_, DiagonalMsg::initCinfo(), 
+		"diagonalMsg", &DiagonalMsg::numMsg, &DiagonalMsg::lookupMsg );
 
 	SparseMsg::managerId_ = Id::nextId();
-	new DataElement( SparseMsg::managerId_, SparseMsg::initCinfo(), 
-		"sparseMsg", 1, true );
-	msgMgrs.push_back( SparseMsg::managerId_ );
-
-	msgMgrs.push_back( msgManagerId_ );
+	new MsgElement( SparseMsg::managerId_, SparseMsg::initCinfo(), 
+		"sparseMsg", &SparseMsg::numMsg, &SparseMsg::lookupMsg );
 
 	// Do the 'adopt' only after all the message managers exist - we need
 	// the OneToAll manager for the adoption messages themselves.
@@ -326,29 +262,4 @@ void Msg::initMsgManagers()
 	Shell::adopt( msgManagerId_, OneToAllMsg::managerId_ );
 	Shell::adopt( msgManagerId_, DiagonalMsg::managerId_ );
 	Shell::adopt( msgManagerId_, SparseMsg::managerId_ );
-}
-
-void destroyMsgManagers()
-{
-	for ( vector< Id >::iterator i = msgMgrs.begin(); i != msgMgrs.end(); ++i)
-		i->destroy();
-}
-
-// Static utility func used by derived classes to clean up their msgs
-// Although all use this function we can't put it in the parent ~Msg
-// function because C++ doesn't allow virtual class functions to be 
-// called during the destructor.
-void Msg::destroyDerivedMsg( Id managerId, MsgId mid )
-{
-	// This test is used because it is possible for the deletion order
-	// when cleaning out the simulation to get rid of the msg Manager
-	// before other things, which may have messages still to remove.
-		/*
-	if ( managerId.element() && managerId.element()->cinfo() ) {
-		MsgDataHandler* mdh = dynamic_cast< MsgDataHandler* >(
-			managerId.element()->dataHandler() );
-		assert( mdh );
-		mdh->dropMid( mid );
-	}
-	*/
 }

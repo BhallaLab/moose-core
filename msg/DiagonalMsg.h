@@ -29,7 +29,7 @@ class DiagonalMsg: public Msg
 {
 	friend void Msg::initMsgManagers(); // for initializing Id.
 	public:
-		DiagonalMsg( MsgId mid, Element* e1, Element* e2 );
+		DiagonalMsg( Element* e1, Element* e2 );
 		~DiagonalMsg();
 
 		Eref firstTgt( const Eref& src ) const;
@@ -60,11 +60,16 @@ class DiagonalMsg: public Msg
 		 */
 		int getStride() const;
 
+		/// Msg lookup functions
+		static unsigned int numMsg();
+		static char* lookupMsg( unsigned int index );
+
 		/// Setup function for Element-style access to Msg fields.
 		static const Cinfo* initCinfo();
 	private:
 		int stride_; // Increment between targets.
 		static Id managerId_;
+		static vector< DiagonalMsg* > msg_;
 };
 
 #endif // _DIAGONAL_MSG_H

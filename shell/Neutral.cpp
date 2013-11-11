@@ -294,9 +294,7 @@ vector< ObjId > Neutral::getOutgoingMsgs( const Eref& e ) const
 		if ( v ) {
 			for ( vector< MsgFuncBinding >::const_iterator mb = v->begin();
 				mb != v->end(); ++mb ) {
-				const Msg* m = Msg::getMsg( mb->mid );
-				assert( m );
-				ret.push_back( m->manager().objId() );
+				ret.push_back( mb->mid );
 			}
 		}
 	}
@@ -306,13 +304,13 @@ vector< ObjId > Neutral::getOutgoingMsgs( const Eref& e ) const
 vector< ObjId > Neutral::getIncomingMsgs( const Eref& e ) const
 {
 	vector< ObjId > ret;
-	const vector< MsgId >& msgIn = e.element()->msgIn();
+	const vector< ObjId >& msgIn = e.element()->msgIn();
 
 	for (unsigned int i = 0; i < msgIn.size(); ++i ) {
 		const Msg* m = Msg::getMsg( msgIn[i] );
 			assert( m );
-			if ( m->e2() == e.element() && m->mid() != Msg::setMsg )
-				ret.push_back( m->manager().objId() );
+			if ( m->e2() == e.element() )
+				ret.push_back( m->mid() );
 	}
 	return ret;
 }
@@ -396,8 +394,8 @@ bool Neutral::isDescendant( Id me, Id ancestor )
 	Eref e = me.eref();
 	
 	while ( e.element()->id() != Id() && e.element()->id() != ancestor ) {
-		MsgId mid = e.element()->findCaller( pafid );
-		assert( mid != Msg::bad );
+		ObjId mid = e.element()->findCaller( pafid );
+		assert( mid != ObjId() );
 		ObjId fid = Msg::getMsg( mid )->findOtherEnd( e.objId() );
 		e = fid.eref();
 	}
@@ -447,8 +445,8 @@ ObjId Neutral::parent( ObjId oid )
 		return Id();
 	}
 
-	MsgId mid = oid.element()->findCaller( pafid );
-	assert( mid != Msg::bad );
+	ObjId mid = oid.element()->findCaller( pafid );
+	assert( mid != ObjId() );
 
 	ObjId pa = Msg::getMsg( mid )->findOtherEnd( oid );
 	return pa;
@@ -467,8 +465,8 @@ string Neutral::path( const Eref& e )
 
 	pathVec.push_back( curr );
 	while ( curr.id != Id() ) {
-		MsgId mid = curr.eref().element()->findCaller( pafid );
-		if ( mid == Msg::bad ) {
+		ObjId mid = curr.eref().element()->findCaller( pafid );
+		if ( mid == ObjId() ) {
 			cout << "Error: Neutral::path:Cannot follow msg of ObjId: " <<
 				   	e.objId() << " for func: " << pafid << endl;
 			break;

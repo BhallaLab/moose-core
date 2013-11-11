@@ -186,7 +186,6 @@ Id init( int argc, char** argv, bool& doUnitTests, bool& doRegressionTests )
 	if ( myNode == 0 ) 
 		cout << "on node " << myNode << ", numNodes = " << numNodes << ", numCores = " << numCores << endl;
 
-	Msg::initNull();
 	Id shellId;
 	Element* shelle = 
 		new DataElement( shellId, Shell::initCinfo(), "root", 1, 1 );

@@ -78,7 +78,7 @@ class Shell
 		 * Here the 'args' vector handles whatever arguments we may need
 		 * to pass to the specified msgType.
 		 */
-		MsgId doAddMsg( const string& msgType, 
+		ObjId doAddMsg( const string& msgType, 
 			ObjId src, const string& srcField, 
 			ObjId dest, const string& destField, bool qFlag = 0);
 
@@ -288,8 +288,7 @@ class Shell
 		 * This inner function does NOT send an ack. Returns true on 
 		 * success
 		 */
-		bool innerAddMsg( string msgType, MsgId mid,
-			ObjId src, string srcField, 
+		const Msg* innerAddMsg( string msgType, ObjId src, string srcField, 
 			ObjId dest, string destField);
 
 		/**
@@ -298,7 +297,7 @@ class Shell
 		 * This wrapper function sends the ack back to the master node.
 		 */
 		void handleAddMsg( const Eref& e, 
-			string msgType, MsgId mid,
+			string msgType,
 			ObjId src, string srcField, 
 			ObjId dest, string destField);
 
@@ -514,8 +513,6 @@ class Shell
 		 * number of returned values, especially for getVec.
 		 */
 		unsigned int numGetVecReturns_;
-
-		MsgId latestMsgId_; // Hack to communicate newly made MsgIds.
 
 		/**
 		 * Flag: True when the parser thread is blocked waiting for 

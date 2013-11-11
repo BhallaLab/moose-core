@@ -46,7 +46,7 @@ class SrcFinfo: public Finfo
 		/**
 		 * First checks that the target will work, then adds the Msg.
 		 */
-		bool addMsg( const Finfo* target, MsgId mid, Element* src ) const;
+		bool addMsg( const Finfo* target, ObjId mid, Element* src ) const;
 
 
 

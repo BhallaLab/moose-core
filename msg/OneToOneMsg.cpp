@@ -10,17 +10,20 @@
 #include "header.h"
 #include "OneToOneMsg.h"
 
+// Initializing static variables
 Id OneToOneMsg::managerId_;
+vector< OneToOneMsg* > OneToOneMsg::msg_;
 
-OneToOneMsg::OneToOneMsg( MsgId mid, Element* e1, Element* e2 )
-	: Msg( mid, e1, e2, OneToOneMsg::managerId_ )
+OneToOneMsg::OneToOneMsg( Element* e1, Element* e2 )
+	: Msg( ObjId( managerId_, msg_.size() ), e1, e2 )
 {
-	;
+	msg_.push_back( this );
 }
 
 OneToOneMsg::~OneToOneMsg()
 {
-	destroyDerivedMsg( managerId_, mid_ );
+	assert( mid_.dataId < msg_.size() );
+	msg_[ mid_.dataId ] = 0; // ensure deleted ptr isn't reused.
 }
 
 /**
@@ -85,17 +88,28 @@ Msg* OneToOneMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 	// This works both for 1-copy and for n-copies
 	OneToOneMsg* ret = 0;
 	if ( orig == e1() ) {
-		ret = new OneToOneMsg( Msg::nextMsgId(), 
-						newSrc.element(), newTgt.element() );
+		ret = new OneToOneMsg( newSrc.element(), newTgt.element() );
 		ret->e1()->addMsgAndFunc( ret->mid(), fid, b );
 	} else if ( orig == e2() ) {
-		ret = new OneToOneMsg( Msg::nextMsgId(), 
-						newTgt.element(), newSrc.element() );
+		ret = new OneToOneMsg( newTgt.element(), newSrc.element() );
 		ret->e2()->addMsgAndFunc( ret->mid(), fid, b );
 	} else
 		assert( 0 );
 	// ret->e1()->addMsgAndFunc( ret->mid(), fid, b );
 	return ret;
+}
+
+/// Static function for Msg access
+unsigned int OneToOneMsg::numMsg()
+{
+	return msg_.size();
+}
+
+/// Static function for Msg access
+char* OneToOneMsg::lookupMsg( unsigned int index )
+{
+	assert( index < msg_.size() );
+	return reinterpret_cast< char* >( &msg_[index] );
 }
 
 ///////////////////////////////////////////////////////////////////////
