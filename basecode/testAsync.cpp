@@ -61,7 +61,7 @@ void testSendMsg()
 	Eref e1 = i1.eref();
 	Eref e2 = i2.eref();
 
-	Msg* m = new OneToOneMsg( Msg::nextMsgId(), e1.element(), e2.element() );
+	Msg* m = new OneToOneMsg( e1.element(), e2.element() );
 	vector< vector< Eref > > ver;
 	m->targets( ver );
 	assert( ver.size() == size );
@@ -115,7 +115,7 @@ void testCreateMsg()
 	Eref e1 = i1.eref();
 	Eref e2 = i2.eref();
 
-	OneToOneMsg *m = new OneToOneMsg( Msg::nextMsgId(), e1.element(), e2.element() );
+	OneToOneMsg *m = new OneToOneMsg( e1.element(), e2.element() );
 	assert( m );
 	const Finfo* f1 = ac->findFinfo( "output" );
 	assert( f1 );
@@ -440,7 +440,7 @@ void testSendSpike()
 
 	Eref target( temp, 1 );
 	reinterpret_cast< IntFire* >(target.data())->setWeight( 0, WEIGHT );
-	SingleMsg *m = new SingleMsg( Msg::nextMsgId(), e2, target );
+	SingleMsg *m = new SingleMsg( e2, target );
 	const Finfo* f1 = ic->findFinfo( "spike" );
 	const Finfo* f2 = ic->findFinfo( "addSpike" );
 	bool ret = f1->addMsg( f2, m->mid(), e2.element() );
@@ -750,7 +750,7 @@ void testSparseMsg()
 	assert( t2 );
 	Id syns( cells.value() + 1 );
 
-	SparseMsg* sm = new SparseMsg( Msg::nextMsgId(), t2, syns.element() );
+	SparseMsg* sm = new SparseMsg( t2, syns.element() );
 	assert( sm );
 	const Finfo* f1 = ic->findFinfo( "spike" );
 	const Finfo* f2 = sc->findFinfo( "addSpike" );
@@ -1014,7 +1014,7 @@ void testSharedMsg()
 	
 	const Finfo* shareFinfo = Test::initCinfo()->findFinfo( "shared" );
 	assert( shareFinfo != 0 );
-	Msg* m = new OneToOneMsg( Msg::nextMsgId(), t1.element(), t2.element() );
+	Msg* m = new OneToOneMsg( t1.element(), t2.element() );
 	assert( m != 0 );
 	bool ret = shareFinfo->addMsg( shareFinfo, m->mid(), t1.element() );
 	assert( ret );
@@ -1165,7 +1165,7 @@ void testMsgField()
 
 	Eref e1 = i1.eref();
 
-	Msg* m = new SingleMsg( Msg::nextMsgId(), Eref( i1(), 5 ), Eref( i2(), 3 ) );
+	Msg* m = new SingleMsg( Eref( i1(), 5 ), Eref( i2(), 3 ) );
 	ProcInfo p;
 
 	Id msgElmId = m->managerId();
@@ -1583,7 +1583,7 @@ void testMsgSrcDestFields()
 	// do it independently.
 	const Finfo* shareFinfo = Test::initCinfo()->findFinfo( "shared" );
 	assert( shareFinfo != 0 );
-	Msg* m = new OneToOneMsg( Msg::nextMsgId(), t1.element(), t2.element() );
+	Msg* m = new OneToOneMsg( t1.element(), t2.element() );
 	assert( m != 0 );
 	bool ret = shareFinfo->addMsg( shareFinfo, m->mid(), t1.element() );
 	assert( ret );

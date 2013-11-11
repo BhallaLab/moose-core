@@ -10,23 +10,26 @@
 #include "header.h"
 #include "SingleMsg.h"
 
+// Initializing static variables
 Id SingleMsg::managerId_;
+vector< SingleMsg* > SingleMsg::msg_;
 
 /////////////////////////////////////////////////////////////////////
 // Here is the SingleMsg code
 /////////////////////////////////////////////////////////////////////
 
-SingleMsg::SingleMsg( MsgId mid, Eref e1, Eref e2 )
-	: Msg( mid, e1.element(), e2.element(), SingleMsg::managerId_ ),
+SingleMsg::SingleMsg( Eref e1, Eref e2 )
+	: Msg( ObjId( managerId_, msg_.size() ), e1.element(), e2.element() ),
 	i1_( e1.dataIndex() ), 
 	i2_( e2.dataIndex() )
 {
-	;
+	msg_.push_back( this );
 }
 
 SingleMsg::~SingleMsg()
 {
-	destroyDerivedMsg( managerId_, mid_ );
+	assert( mid_.dataId < msg_.size() );
+	msg_[ mid_.dataId ] = 0; // ensure deleted ptr isn't reused.
 }
 
 Eref SingleMsg::firstTgt( const Eref& src ) const 
@@ -104,13 +107,11 @@ Msg* SingleMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 	if ( n <= 1 ) {
 		SingleMsg* ret = 0;
 		if ( orig == e1() ) {
-			ret = new SingleMsg( Msg::nextMsgId(), 
-				Eref( newSrc.element(), i1_ ), 
+			ret = new SingleMsg( Eref( newSrc.element(), i1_ ), 
 				Eref( newTgt.element(), i2_ ) );
 			ret->e1()->addMsgAndFunc( ret->mid(), fid, b );
 		} else if ( orig == e2() ) {
-			ret = new SingleMsg( Msg::nextMsgId(), 
-				Eref( newTgt.element(), i1_ ), 
+			ret = new SingleMsg( Eref( newTgt.element(), i1_ ), 
 				Eref( newSrc.element(), i2_ ) );
 			ret->e2()->addMsgAndFunc( ret->mid(), fid, b );
 		} else {
@@ -196,3 +197,15 @@ unsigned int SingleMsg::getTargetField() const
 	return f2_;
 }
 
+/// Static function for Msg access
+unsigned int SingleMsg::numMsg()
+{
+	return msg_.size();
+}
+
+/// Static function for Msg access
+char* SingleMsg::lookupMsg( unsigned int index )
+{
+	assert( index < msg_.size() );
+	return reinterpret_cast< char* >( &msg_[index] );
+}

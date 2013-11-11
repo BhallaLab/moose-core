@@ -43,7 +43,7 @@ class SparseMsg: public Msg
 {
 	friend void Msg::initMsgManagers(); // for initializing Id.
 	public:
-		SparseMsg( MsgId mid, Element* e1, Element* e2 );
+		SparseMsg( Element* e1, Element* e2 );
 		~SparseMsg();
 
 		Eref firstTgt( const Eref& src ) const;
@@ -95,6 +95,10 @@ class SparseMsg: public Msg
 		void clear();
 		void transpose();
 
+		/// Msg lookup functions
+		static unsigned int numMsg();
+		static char* lookupMsg( unsigned int index );
+
 		static const Cinfo* initCinfo();
 
 	private:
@@ -104,6 +108,7 @@ class SparseMsg: public Msg
 		double p_;
 		unsigned long seed_;
 		static Id managerId_; // The Element that manages Sparse Msgs.
+		static vector< SparseMsg* > msg_;
 };
 
 #endif // _SPARSE_MSG_H

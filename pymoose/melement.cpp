@@ -1614,20 +1614,18 @@ PyObject* set_destFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type
             msgType = default_msg_type;
         }
         _ObjId * dest = reinterpret_cast<_ObjId*>(destPtr);
-        MsgId mid = SHELLPTR->doAddMsg(msgType,
+        ObjId mid = SHELLPTR->doAddMsg(msgType,
                                        self->oid_,
                                        string(srcField),
                                        dest->oid_,
                                        string(destField));
-        if (mid == Msg::bad){
+        if (mid == ObjId()){
             PyErr_SetString(PyExc_NameError,
                             "connect failed: check field names and type compatibility.");
             return NULL;
         }
-        const Msg* msg = Msg::getMsg(mid);
-        Eref mer = msg->manager();
         _ObjId* msgMgrId = (_ObjId*)PyObject_New(_ObjId, &ObjIdType);        
-        msgMgrId->oid_ = mer.objId();
+        msgMgrId->oid_ = mid;
         return (PyObject*)msgMgrId;
     }
 

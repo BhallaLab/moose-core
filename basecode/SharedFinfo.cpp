@@ -92,7 +92,7 @@ bool SharedFinfo::checkTarget( const Finfo* target ) const
 	return 0;
 }
 
-bool SharedFinfo::addMsg( const Finfo* target, MsgId mid, 
+bool SharedFinfo::addMsg( const Finfo* target, ObjId mid, 
 	Element* srcElm ) const
 {
 	if ( !checkTarget( target ) )
@@ -109,7 +109,8 @@ bool SharedFinfo::addMsg( const Finfo* target, MsgId mid,
 	Element* destElm = m->e2();
 	if ( srcElm == destElm && srcElm->id() != Id() ) {
 		if ( dest_.size() > 0 ) {
-			cout << "Error: SharedFinfo::addMsg: MsgId " << mid << endl <<
+			cout << "Error: SharedFinfo::addMsg: MessageId " << mid << 
+			endl <<
 			"Source Element == DestElement == " << srcElm->getName() <<
 			endl << "Recommend that you individually set up messages for" <<
 			" the components of the SharedFinfo, to ensure that the " <<
@@ -122,7 +123,7 @@ bool SharedFinfo::addMsg( const Finfo* target, MsgId mid,
 	for ( unsigned int i = 0; i < src_.size(); ++i ) {
 		if ( !src_[i]->addMsg( tgt->dest_[i], mid, srcElm ) ) {
 			// Should never happen. The checkTarget should preclude this.
-			cerr << "Error:SharedFinfo::addMsg: Failed on MsgId " <<
+			cerr << "Error:SharedFinfo::addMsg: Failed on MessageId " <<
 				mid << ", unrecoverable\n";
 			exit(0);
 		}
@@ -132,7 +133,7 @@ bool SharedFinfo::addMsg( const Finfo* target, MsgId mid,
 	for ( unsigned int i = 0; i < tgt->src_.size(); ++i ) {
 		if ( !tgt->src_[i]->addMsg( dest_[i], mid, destElm ) ) {
 			// Should never happen. The checkTarget should preclude this.
-			cerr << "Error:SharedFinfo::addMsg: Failed on MsgId " <<
+			cerr << "Error:SharedFinfo::addMsg: Failed on MessageId " <<
 				mid << ", unrecoverable\n";
 			exit( 0 );
 		}

@@ -123,12 +123,12 @@ class Element
 		 * The position on the list does not matter.
 		 * 
 		 */
-		void addMsg( MsgId mid );
+		void addMsg( ObjId mid );
 
 		/**
 		 * Removes the specified msg from the list.
 		 */
-		void dropMsg( MsgId mid );
+		void dropMsg( ObjId mid );
 		
 		/**
 		 * Clears out all Msgs on specified BindIndex. Used in Shell::set
@@ -139,7 +139,7 @@ class Element
 		 * Pushes back the specified Msg and Func pair into the properly
 		 * indexed place on the msgBinding_ vector.
 		 */
-		void addMsgAndFunc( MsgId mid, FuncId fid, BindIndex bindIndex );
+		void addMsgAndFunc( ObjId mid, FuncId fid, BindIndex bindIndex );
 
 		/**
 		 * gets the Msg/Func binding information for specified bindIndex.
@@ -210,20 +210,20 @@ class Element
 		 /**
 		  * Returns all incoming Msgs.
 		  */
-		 const vector< MsgId >& msgIn() const;
+		 const vector< ObjId >& msgIn() const;
 
 		/**
 		 * Returns the first Msg that calls the specified Fid, 
 		 * on current Element.
 		 * Returns 0 on failure.
 		 */
-		 MsgId findCaller( FuncId fid ) const;
+		 ObjId findCaller( FuncId fid ) const;
 
 		/** 
-		 * More general function. Fills up vector of MsgIds that call the
+		 * More general function. Fills up vector of ObjIds that call the
 		 * specified Fid on current Element. Returns # found
 		 */
-		unsigned int getInputMsgs( vector< MsgId >& caller, FuncId fid)
+		unsigned int getInputMsgs( vector< ObjId >& caller, FuncId fid)
 		 	const;
 
 		/**
@@ -240,7 +240,7 @@ class Element
 		 * Dest field is a FuncId on the remote Element.
 		 */
 		unsigned int getFieldsOfOutgoingMsg( 
-			MsgId mid, vector< pair< BindIndex, FuncId > >& ret ) const;
+			ObjId mid, vector< pair< BindIndex, FuncId > >& ret ) const;
 
 		/**
 		 * zombieSwap: replaces the Cinfo of the zombie.
@@ -279,12 +279,12 @@ class Element
 		 * Message vector. This is the low-level messaging information.
 		 * Contains info about incoming as well as outgoing Msgs.
 		 */
-		vector< MsgId > m_;
+		vector< ObjId > m_;
 
 		/**
 		 * Binds an outgoing message to its function.
 		 * Each index (BindIndex) gives a vector of MsgFuncBindings,
-		 * which are just pairs of MsgId, FuncId.
+		 * which are just pairs of ObjId, FuncId.
 		 * SrcFinfo keeps track of the BindIndex to look things up.
 		 * Note that a single BindIndex may refer to multiple Msg/Func
 		 * pairs. This means that a single MsgSrc may dispatch data 

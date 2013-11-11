@@ -73,12 +73,12 @@ void testFibonacci()
 	const Finfo* arg1Finfo = Arith::initCinfo()->findFinfo( "arg1" );
 	const Finfo* arg2Finfo = Arith::initCinfo()->findFinfo( "arg2" );
 	const Finfo* procFinfo = Arith::initCinfo()->findFinfo( "process" );
-	DiagonalMsg* dm1 = new DiagonalMsg( Msg::nextMsgId(), a1, a1 );
+	DiagonalMsg* dm1 = new DiagonalMsg( a1, a1 );
 	bool ret = outFinfo->addMsg( arg1Finfo, dm1->mid(), a1 );
 	assert( ret );
 	dm1->setStride( 1 );
 
-	DiagonalMsg* dm2 = new DiagonalMsg( Msg::nextMsgId(), a1, a1 );
+	DiagonalMsg* dm2 = new DiagonalMsg( a1, a1 );
 	ret = outFinfo->addMsg( arg2Finfo, dm2->mid(), a1 );
 	assert( ret );
 	dm1->setStride( 2 );
@@ -95,7 +95,7 @@ void testFibonacci()
 	Eref clocker = Id( 1 ).eref();
 
 	const Finfo* proc0Finfo = Clock::initCinfo()->findFinfo( "process0" );
-	OneToAllMsg* otam = new OneToAllMsg( Msg::nextMsgId(), clocker, a1 );
+	OneToAllMsg* otam = new OneToAllMsg( clocker, a1 );
 	ret = proc0Finfo->addMsg( procFinfo, otam->mid(), clocker.element() );
 
 	assert( ret );
@@ -142,18 +142,14 @@ void testMpiFibonacci()
 	}
 	*/
 
-	MsgId mid1 = shell->doAddMsg( "Diagonal", 
+	ObjId mid1 = shell->doAddMsg( "Diagonal", 
 		ObjId( a1id, 0 ), "output", ObjId( a1id, 0 ), "arg1" );
-	const Msg* m1 = Msg::getMsg( mid1 );
-	Eref er1 = m1->manager();
-	bool ret = Field< int >::set( er1.objId(), "stride", 1 );
+	bool ret = Field< int >::set( mid1, "stride", 1 );
 	assert( ret );
 
-	MsgId mid2 = shell->doAddMsg( "Diagonal", 
+	ObjId mid2 = shell->doAddMsg( "Diagonal", 
 		ObjId( a1id, 0 ), "output", ObjId( a1id, 0 ), "arg2" );
-	const Msg* m2 = Msg::getMsg( mid2 );
-	Eref er2 = m2->manager();
-	ret = Field< int >::set( er2.objId(), "stride", 2 );
+	ret = Field< int >::set( mid2, "stride", 2 );
 	assert( ret );
 	
 	/*
@@ -279,13 +275,13 @@ void testGetMsg()
 	ObjId arithid = shell->doCreate( "Arith", ObjId(), "arith", 1 );
 	assert( arithid != ObjId() );
 	// Table* t = reinterpret_cast< Table* >( tabid.eref().data() );
-	MsgId ret = shell->doAddMsg( "Single", 
+	ObjId ret = shell->doAddMsg( "Single", 
 		tabid.eref().objId(), "requestData",
 		arithid.eref().objId(), "get_outputValue" );
-	assert( ret != Msg::bad );
+	assert( ret != ObjId() );
 	ret = shell->doAddMsg( "Single", arithid.eref().objId(), "output",
 		arithid.eref().objId(), "arg1" );
-	assert( ret != Msg::bad );
+	assert( ret != ObjId() );
 	shell->doSetClock( 0, 1 );
 	shell->doSetClock( 1, 1 );
 	shell->doUseClock( "/arith", "process", 0 );

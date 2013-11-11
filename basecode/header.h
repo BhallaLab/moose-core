@@ -56,11 +56,6 @@ typedef unsigned int DataId;
 extern const DataId ALLDATA; // Defined in consts.cpp
 
 /**
- * Looks up and uniquely identifies Msgs. This is a global index
- */
-typedef unsigned int MsgId;
-
-/**
  * Index into Element::vector< vector< MsgFuncBinding > > msgBinding_;
  */
 typedef unsigned short BindIndex;

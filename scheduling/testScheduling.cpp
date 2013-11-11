@@ -110,17 +110,17 @@ void testClock()
 	const SrcFinfo* sproc0 = dynamic_cast< const SrcFinfo* >( proc0 );
 	assert( sproc0 );
 	unsigned int b0 = sproc0->getBindIndex();
-	SingleMsg *m0 = new SingleMsg( Msg::nextMsgId(), er0.eref(), ts ); 
+	SingleMsg *m0 = new SingleMsg( er0.eref(), ts ); 
 	er0.element()->addMsgAndFunc( m0->mid(), f, er0.dataId.value()*2 + b0);
-	SingleMsg *m1 = new SingleMsg( Msg::nextMsgId(), er1.eref(), ts ); 
+	SingleMsg *m1 = new SingleMsg( er1.eref(), ts ); 
 	er1.element()->addMsgAndFunc( m1->mid(), f, er1.dataId.value()*2 + b0);
-	SingleMsg *m2 = new SingleMsg( Msg::nextMsgId(), er2.eref(), ts );
+	SingleMsg *m2 = new SingleMsg( er2.eref(), ts );
 	er2.element()->addMsgAndFunc( m2->mid(), f, er2.dataId.value()*2 + b0);
-	SingleMsg *m3 = new SingleMsg( Msg::nextMsgId(), er3.eref(), ts ); 
+	SingleMsg *m3 = new SingleMsg( er3.eref(), ts ); 
 	er3.element()->addMsgAndFunc( m3->mid(), f, er3.dataId.value()*2 + b0);
-	SingleMsg *m4 = new SingleMsg( Msg::nextMsgId(), er4.eref(), ts ); 
+	SingleMsg *m4 = new SingleMsg( er4.eref(), ts ); 
 	er4.element()->addMsgAndFunc( m4->mid(), f, er4.dataId.value()*2 + b0);
-	SingleMsg *m5 = new SingleMsg( Msg::nextMsgId(), er5.eref(), ts ); 
+	SingleMsg *m5 = new SingleMsg( er5.eref(), ts ); 
 	er5.element()->addMsgAndFunc( m5->mid(), f, er5.dataId.value()*2 + b0);
 
 

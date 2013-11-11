@@ -10,21 +10,22 @@
 #include "header.h"
 #include "OneToAllMsg.h"
 
+// Initializing static variables
 Id OneToAllMsg::managerId_;
+vector< OneToAllMsg* > OneToAllMsg::msg_;
 
-OneToAllMsg::OneToAllMsg( MsgId mid, Eref e1, Element* e2 )
+OneToAllMsg::OneToAllMsg( Eref e1, Element* e2 )
 	: 
-		Msg( mid, e1.element(), e2, OneToAllMsg::managerId_ ),
+		Msg( ObjId( managerId_, msg_.size() ), e1.element(), e2 ),
 		i1_( e1.dataIndex() )
 {
-	;
+	msg_.push_back( this );
 }
 
 OneToAllMsg::~OneToAllMsg()
 {
-	// I cannot do this in the Msg::~Msg destructor because the virtual
-	// functions  for managerId() don't work there.
-	destroyDerivedMsg( managerId_, mid_ );
+	assert( mid_.dataId < msg_.size() );
+	msg_[ mid_.dataId ] = 0; // ensure deleted ptr isn't reused.
 }
 
 Eref OneToAllMsg::firstTgt( const Eref& src ) const 
@@ -77,11 +78,11 @@ Msg* OneToAllMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 	if ( n <= 1 ) {
 		OneToAllMsg* ret = 0;
 		if ( orig == e1() ) {
-			ret = new OneToAllMsg( Msg::nextMsgId(), 
+			ret = new OneToAllMsg(
 					Eref( newSrc.element(), i1_ ), newTgt.element() );
 			ret->e1()->addMsgAndFunc( ret->mid(), fid, b );
 		} else if ( orig == e2() ) {
-			ret = new OneToAllMsg( Msg::nextMsgId(), 
+			ret = new OneToAllMsg(
 					Eref( newTgt.element(), i1_ ), newSrc.element() );
 			ret->e2()->addMsgAndFunc( ret->mid(), fid, b );
 		} else {
@@ -134,4 +135,17 @@ static const Cinfo* assignmentMsgCinfo = OneToAllMsg::initCinfo();
 DataId OneToAllMsg::getI1() const
 {
 	return i1_;
+}
+
+/// Static function for Msg access
+unsigned int OneToAllMsg::numMsg()
+{
+	return msg_.size();
+}
+
+/// Static function for Msg access
+char* OneToAllMsg::lookupMsg( unsigned int index )
+{
+	assert( index < msg_.size() );
+	return reinterpret_cast< char* >( &msg_[index] );
 }

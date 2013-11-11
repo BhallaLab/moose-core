@@ -132,8 +132,8 @@ static SrcFinfo0 *requestReinit() {
 }
 
 /*
-static SrcFinfo6< string, MsgId, ObjId, string, ObjId, string > *requestAddMsg() {
-	static SrcFinfo6< string, MsgId, ObjId, string, ObjId, string > 
+static SrcFinfo5< string, ObjId, string, ObjId, string > *requestAddMsg() {
+	static SrcFinfo5< string, ObjId, string, ObjId, string > 
 		requestAddMsg( 
 				"requestAddMsg",
 				"requestAddMsg( type, src, srcField, dest, destField );"
@@ -217,7 +217,7 @@ const Cinfo* Shell::initCinfo()
 			new EpFunc1< Shell, Id >( & Shell::destroy ) );
 	static DestFinfo handleAddMsg( "handleAddMsg", 
 			"Makes a msg",
-			new EpFunc6< Shell, string, MsgId, ObjId, string, ObjId, string >
+			new EpFunc5< Shell, string, ObjId, string, ObjId, string >
 			( & Shell::handleAddMsg ) );
 	static DestFinfo handleQuit( "handleQuit", 
 			"Stops simulation running and quits the simulator",
@@ -342,37 +342,36 @@ bool Shell::doDelete( Id i, bool qFlag )
 	return 1;
 }
 
-MsgId Shell::doAddMsg( const string& msgType, 
+ObjId Shell::doAddMsg( const string& msgType, 
 	ObjId src, const string& srcField, 
 	ObjId dest, const string& destField, bool qFlag )
 {
 	if ( !src.id.element() ) {
 		cout << myNode_ << ": Error: Shell::doAddMsg: src not found" << endl;
-		return Msg::bad;
+		return ObjId();
 	}
 	if ( !dest.id.element() ) {
 		cout << myNode_ << ": Error: Shell::doAddMsg: dest not found" << endl;
-		return Msg::bad;
+		return ObjId();
 	}
 	const Finfo* f1 = src.id.element()->cinfo()->findFinfo( srcField );
 	if ( !f1 ) {
 		cout << myNode_ << ": Shell::doAddMsg: Error: Failed to find field " << srcField << 
 			" on src: " << src.id.element()->getName() << endl;
-		return Msg::bad;
+		return ObjId();
 	}
 	const Finfo* f2 = dest.id.element()->cinfo()->findFinfo( destField );
 	if ( !f2 ) {
 		cout << myNode_ << ": Shell::doAddMsg: Error: Failed to find field " << destField << 
 			" on dest: " << dest.id.element()->getName() << endl;
-		return Msg::bad;
+		return ObjId();
 	}
 	if ( ! f1->checkTarget( f2 ) ) {
 		cout << myNode_ << ": Shell::doAddMsg: Error: Src/Dest Msg type mismatch: " << srcField << "/" << destField << endl;
-		return Msg::bad;
+		return ObjId();
 	}
-		MsgId mid = Msg::nextMsgId();
-		innerAddMsg( msgType, mid, src, srcField, dest, destField );
-	return latestMsgId_;
+	const Msg* m = innerAddMsg( msgType, src, srcField, dest, destField );
+	return m->mid();
 }
 
 /**
@@ -396,7 +395,7 @@ void Shell::connectMasterMsg()
 	}
 
 	Msg* m = 0;
-		m = new OneToOneMsg( Msg::nextMsgId(), shelle, shelle );
+		m = new OneToOneMsg( shelle, shelle );
 	if ( m ) {
 		if ( !f1->addMsg( f2, m->mid(), shelle ) ) {
 			cout << "Error: failed in Shell::connectMasterMsg()\n";
@@ -410,7 +409,7 @@ void Shell::connectMasterMsg()
 
 	Id clockId( 1 );
 	Shell* s = reinterpret_cast< Shell* >( shellId.eref().data() );
-	bool ret = s->innerAddMsg( "Single", Msg::nextMsgId(), 
+	const Msg* ret = s->innerAddMsg( "Single",
 		ObjId( shellId, 0 ), "clockControl", 
 		ObjId( clockId, 0 ), "clockControl" );
 	assert( ret );
@@ -769,7 +768,7 @@ bool Shell::adopt( ObjId parent, Id child ) {
 	assert( !( child == Id() ) );
 	assert( !( parent.element() == 0 ) );
 
-	Msg* m = new OneToAllMsg( Msg::nextMsgId(), parent.eref(), child.element() );
+	Msg* m = new OneToAllMsg( parent.eref(), child.element() );
 	assert( m );
 
 	// cout << myNode_ << ", Shell::adopt: mid = " << m->mid() << ", pa =" << parent << "." << parent()->getName() << ", kid=" << child << "." << child()->getName() << "\n";
@@ -855,10 +854,10 @@ void Shell::destroy( const Eref& e, Id eid)
  * multiple acks.
  */
 void Shell::handleAddMsg( const Eref& e,
-	string msgType, MsgId mid, ObjId src, string srcField, 
+	string msgType, ObjId src, string srcField, 
 	ObjId dest, string destField )
 {
-	if ( innerAddMsg( msgType, mid, src, srcField, dest, destField ) )
+	if ( innerAddMsg( msgType, src, srcField, dest, destField ) )
 		ack()->send( Eref( shelle_, 0 ), Shell::myNode(), OkStatus );
 	else
 		ack()->send( Eref( shelle_, 0), Shell::myNode(), ErrorStatus );
@@ -867,7 +866,7 @@ void Shell::handleAddMsg( const Eref& e,
 /**
  * The actual function that adds messages. Does NOT send an ack.
  */
-bool Shell::innerAddMsg( string msgType, MsgId mid,
+const Msg* Shell::innerAddMsg( string msgType,
 	ObjId src, string srcField, 
 	ObjId dest, string destField )
 {
@@ -879,50 +878,43 @@ bool Shell::innerAddMsg( string msgType, MsgId mid,
 		*/
 	const Finfo* f1 = src.id.element()->cinfo()->findFinfo( srcField );
 	if ( f1 == 0 ) return 0;
-	// assert( f1 != 0 );
 	const Finfo* f2 = dest.id.element()->cinfo()->findFinfo( destField );
 	if ( f2 == 0 ) return 0;
-	// assert( f2 != 0 );
 	
 	// Should have been done before msgs request went out.
 	assert( f1->checkTarget( f2 ) );
 
-	latestMsgId_ = Msg::bad;
-
 	Msg *m = 0;
 	if ( msgType == "diagonal" || msgType == "Diagonal" ) {
-		m = new DiagonalMsg( mid, src.id.element(), dest.id.element() );
+		m = new DiagonalMsg( src.id.element(), dest.id.element() );
 	} else if ( msgType == "sparse" || msgType == "Sparse" ) {
-		m = new SparseMsg( mid, src.id.element(), dest.id.element() );
+		m = new SparseMsg( src.id.element(), dest.id.element() );
 	} else if ( msgType == "Single" || msgType == "single" ) {
-		m = new SingleMsg( mid, src.eref(), dest.eref() );
+		m = new SingleMsg( src.eref(), dest.eref() );
 	} else if ( msgType == "OneToAll" || msgType == "oneToAll" ) {
-		m = new OneToAllMsg( mid, src.eref(), dest.id.element() );
+		m = new OneToAllMsg( src.eref(), dest.id.element() );
 	} else if ( msgType == "AllToOne" || msgType == "allToOne" ) {
-		m = new OneToAllMsg( mid, dest.eref(), src.id.element() ); // Little hack.
+		m = new OneToAllMsg( dest.eref(), src.id.element() ); // Little hack.
 	} else if ( msgType == "OneToOne" || msgType == "oneToOne" ) {
-		m = new OneToOneMsg( mid, src.id.element(), dest.id.element() );
+		m = new OneToOneMsg( src.id.element(), dest.id.element() );
 	} else {
 		cout << myNode_ << 
 			": Error: Shell::handleAddMsg: msgType not known: "
 			<< msgType << endl;
-		// ack()->send( Eref( shelle_, 0 ), &p_, Shell::myNode(), ErrorStatus );
-		return 0;
+		return m;
 	}
 	if ( m ) {
 		if ( f1->addMsg( f2, m->mid(), src.id.element() ) ) {
-			latestMsgId_ = m->mid();
-			// ack()->send( Eref( shelle_, 0 ), &p_, Shell::myNode(), OkStatus );
-			return 1;
+			return m;
 		}
 		delete m;
+		m = 0;
 	}
 	cout << myNode_ << 
 			": Error: Shell::handleAddMsg: Unable to make/connect Msg: "
 			<< msgType << " from " << src.id.element()->getName() <<
 			" to " << dest.id.element()->getName() << endl;
-	return 1;
-//	ack()->send( Eref( shelle_, 0 ), &p_, Shell::myNode(), ErrorStatus );
+	return m;
 }
 
 bool Shell::innerMove( Id orig, ObjId newParent )
@@ -935,11 +927,10 @@ bool Shell::innerMove( Id orig, ObjId newParent )
 	assert( !( orig == Id() ) );
 	assert( !( newParent.element() == 0 ) );
 
-	MsgId mid = orig.element()->findCaller( pafid );
+	ObjId mid = orig.element()->findCaller( pafid );
 	Msg::deleteMsg( mid );
 
-	Msg* m = new OneToAllMsg( Msg::nextMsgId(), 
-					newParent.eref(), orig.element() );
+	Msg* m = new OneToAllMsg( newParent.eref(), orig.element() );
 	assert( m );
 	if ( !f1->addMsg( pf, m->mid(), newParent.element() ) ) {
 		cout << "move: Error: unable to add parent->child msg from " <<
@@ -970,7 +961,7 @@ void Shell::addClockMsgs(
 		if ( i->element() ) {
 			stringstream ss;
 			ss << "proc" << tick;
-			innerAddMsg( "OneToAll", Msg::nextMsgId(), 
+			innerAddMsg( "OneToAll",
 				clockId, ss.str(), 
 				ObjId( *i, 0 ), field );
 		}
