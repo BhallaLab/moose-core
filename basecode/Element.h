@@ -191,6 +191,8 @@ class Element
 		 */
 		static void destroyElementTree( const vector< Id >& tree );
 
+		void markAsDoomed();
+		bool isDoomed() const;
 
 	/////////////////////////////////////////////////////////////////////
 	// Utility functions for message traversal
@@ -247,9 +249,11 @@ class Element
 		 */
 		void zombieSwap( const Cinfo* newCinfo );
 
-	protected:
-		/// Used by derived classes to zero out Cinfo during destruction.
-		void clearCinfoAndMsgs();
+		/** Used upon ending of MOOSE session, to rapidly clear out 
+		 * messages, secure in the knowledge that the data structures 
+		 * will be destroyed separately.
+		 */
+		void clearAllMsgs();
 
 	private:
 		/**

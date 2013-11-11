@@ -156,6 +156,16 @@ class Id
         }                
 
 		//////////////////////////////////////////////////////////////
+		/**
+		 * Used to clean up all Elements when the simulation is terminated
+		 */
+		static void clearAllElements();
+
+		/**
+		 * Used to clean out any specific Id.
+		 */
+		void zeroOut() const;
+		//////////////////////////////////////////////////////////////
 
 		friend ostream& operator <<( ostream& s, const Id& i );
 		friend istream& operator >>( istream& s, Id& i );

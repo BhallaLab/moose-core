@@ -331,8 +331,8 @@ int main( int argc, char** argv )
 		// else 
 			Shell::launchParser(); // Here we set off a little event loop to poll user input. It deals with the doQuit call too.
 	}
-	Neutral* ns = reinterpret_cast< Neutral* >( shelle->data( 0 ) );
-	ns->destroy( shellId.eref(), 0 );
+	Msg::clearAllMsgs();
+	Id::clearAllElements();
 #ifdef USE_MPI
 	MPI_Finalize();
 #endif

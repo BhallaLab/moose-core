@@ -109,7 +109,7 @@ unsigned int OneToOneMsg::numMsg()
 char* OneToOneMsg::lookupMsg( unsigned int index )
 {
 	assert( index < msg_.size() );
-	return reinterpret_cast< char* >( &msg_[index] );
+	return reinterpret_cast< char* >( msg_[index] );
 }
 
 ///////////////////////////////////////////////////////////////////////

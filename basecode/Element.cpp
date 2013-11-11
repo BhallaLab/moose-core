@@ -10,7 +10,6 @@
 #include "header.h"
 #include "FuncOrder.h"
 
-const Id doomedId( ~0U );
 Element::Element( Id id, const Cinfo* c, const string& name )
 	:	name_( name ),
 		id_( id ),
@@ -26,7 +25,8 @@ Element::~Element()
 {
 	// A flag that the Element is doomed, used to avoid lookups 
 	// when deleting Msgs.
-	id_ = doomedId; 
+	id_.zeroOut();
+	markAsDoomed();
 	for ( vector< vector< MsgFuncBinding > >::iterator 
 		i = msgBinding_.begin(); i != msgBinding_.end(); ++i ) {
 		for ( vector< MsgFuncBinding >::iterator 
@@ -98,7 +98,7 @@ class matchMid
  */
 void Element::dropMsg( ObjId mid )
 {
-	if ( id_ == doomedId ) // This is a flag that the Element is doomed.
+	if ( isDoomed() ) // This is a flag that the Element is doomed.
 		return;
 	// Here we have the spectacularly ugly C++ erase-remove idiot.
 	m_.erase( remove( m_.begin(), m_.end(), mid ), m_.end() );
@@ -125,6 +125,15 @@ void Element::clearBinding( BindIndex b )
 		i != temp.end(); ++i ) {
 		Msg::deleteMsg( i->mid );
 	}
+}
+
+/// Used upon ending of MOOSE session, to rapidly clear out messages
+void Element::clearAllMsgs()
+{
+	markAsDoomed();
+	m_.clear();
+	msgBinding_.clear();
+	msgDigest_.clear();
 }
 /////////////////////////////////////////////////////////////////////////
 // Msg Information
@@ -334,7 +343,7 @@ void Element::destroyElementTree( const vector< Id >& tree )
 {
 	for( vector< Id >::const_iterator i = tree.begin(); 
 		i != tree.end(); i++ )
-		i->element()->id_ = doomedId; // Indicate that Element is doomed
+		i->element()->markAsDoomed(); // Indicate that Element is doomed
 	bool killShell = false;
 
 	// Do not destroy the shell till the very end.
@@ -347,6 +356,16 @@ void Element::destroyElementTree( const vector< Id >& tree )
 	}
 	if ( killShell )
 		Id().destroy();
+}
+
+void Element::markAsDoomed()
+{
+	msgDigest_.clear();
+}
+
+bool Element::isDoomed() const
+{
+	return (msgDigest_.size() == 0 );
 }
 
 void Element::zombieSwap( const Cinfo* newCinfo )
