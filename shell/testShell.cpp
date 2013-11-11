@@ -588,17 +588,17 @@ void testShellParserStart()
 
 	// No idea what FuncId to use here. Assume 0.
 	FuncId f( 0 );
-	SingleMsg m0( Msg::nextMsgId(), er0, ts ); 
+	SingleMsg m0( er0, ts ); 
 	er0.element()->addMsgAndFunc( m0.mid(), f, 0 );
-	SingleMsg m1( Msg::nextMsgId(), er1, ts ); 
+	SingleMsg m1( er1, ts ); 
 	er1.element()->addMsgAndFunc( m1.mid(), f, 1 );
-	SingleMsg m2( Msg::nextMsgId(), er2, ts ); 
+	SingleMsg m2( er2, ts ); 
 	er2.element()->addMsgAndFunc( m2.mid(), f, 2 );
-	SingleMsg m3( Msg::nextMsgId(), er3, ts ); 
+	SingleMsg m3( er3, ts ); 
 	er3.element()->addMsgAndFunc( m3.mid(), f, 3 );
-	SingleMsg m4( Msg::nextMsgId(), er4, ts ); 
+	SingleMsg m4( er4, ts ); 
 	er4.element()->addMsgAndFunc( m4.mid(), f, 4 );
-	SingleMsg m5( Msg::nextMsgId(), er5, ts ); 
+	SingleMsg m5( er5, ts ); 
 	er5.element()->addMsgAndFunc( m5.mid(), f, 5 );
 
 	if ( shell->myNode() != 0 )
@@ -663,9 +663,9 @@ void testShellSetGet()
 
 bool setupSched( Shell* shell, ObjId& tick, Id dest )
 {
-	MsgId ret = shell->doAddMsg( "OneToAll", 
+	ObjId ret = shell->doAddMsg( "OneToAll", 
 		tick, "proc0", ObjId( dest, 0 ), "proc" );
-	return ( ret != Msg::bad );
+	return ( ret != ObjId() );
 }
 
 bool checkArg1( Id id, 
@@ -765,68 +765,62 @@ void testShellAddMsg()
 	// Set up messaging
 	///////////////////////////////////////////////////////////
 	// Should give 04000
-	MsgId m1 = shell->doAddMsg( "Single", 
+	ObjId m1 = shell->doAddMsg( "Single", 
 		ObjId( a1, 3 ), "output", ObjId( a2, 1 ), "arg3" );
-	assert( m1 != Msg::bad );
+	assert( m1 != ObjId() );
 
 	// Should give 33333
-	MsgId m2 = shell->doAddMsg( "OneToAll", 
+	ObjId m2 = shell->doAddMsg( "OneToAll", 
 		ObjId( b1, 2 ), "output", ObjId( b2, 0 ), "arg3" );
-	assert( m2 != Msg::bad );
+	assert( m2 != ObjId() );
 
 	// Should give 12345
-	MsgId m3 = shell->doAddMsg( "OneToOne", 
+	ObjId m3 = shell->doAddMsg( "OneToOne", 
 		ObjId( c1, 0 ), "output", ObjId( c2, 0 ), "arg3" );
-	assert( m3 != Msg::bad );
+	assert( m3 != ObjId() );
 
 	// Should give 01234
-	MsgId m4 = shell->doAddMsg( "Diagonal", 
+	ObjId m4 = shell->doAddMsg( "Diagonal", 
 		ObjId( d1, 0 ), "output", ObjId( d2, 0 ), "arg3" );
-	assert( m4 != Msg::bad );
+	assert( m4 != ObjId() );
 
 	// Should give 54321
-	MsgId m5 = shell->doAddMsg( "Sparse", 
+	ObjId m5 = shell->doAddMsg( "Sparse", 
 		ObjId( e1, 0 ), "output", ObjId( e2, 0 ), "arg3" );
-	assert( m5 != Msg::bad );
-
-	const Msg* m5p = Msg::getMsg( m5 );
-	Eref m5er = m5p->manager();
-	ObjId m5oid = m5er.objId();
+	assert( m5 != ObjId() );
 
 	bool ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
-		m5oid, "setEntry", 0, 4, 0 );
+		m5, "setEntry", 0, 4, 0 );
 	assert( ret );
 	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
-		m5oid, "setEntry", 1, 3, 0 );
+		m5, "setEntry", 1, 3, 0 );
 	assert( ret );
 	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
-		m5oid, "setEntry", 2, 2, 0 );
+		m5, "setEntry", 2, 2, 0 );
 	assert( ret );
 	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
-		m5oid, "setEntry", 3, 1, 0 );
+		m5, "setEntry", 3, 1, 0 );
 	assert( ret );
 	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
-		m5oid, "setEntry", 4, 0, 0 );
+		m5, "setEntry", 4, 0, 0 );
 	assert( ret );
 
 	// Should give 15 15 15 15 15
 	for ( unsigned int i = 0; i < 5; ++i ) {
-		MsgId m6 = shell->doAddMsg( "OneToAll", 
+		ObjId m6 = shell->doAddMsg( "OneToAll", 
 			ObjId( f1, i ), "output", ObjId( f2, i ), "arg3" );
-		assert( m6 != Msg::bad );
+		assert( m6 != ObjId() );
 	}
 
 	// Should give 14 13 12 11 10
-	MsgId m7 = shell->doAddMsg( "Sparse", 
+	ObjId m7 = shell->doAddMsg( "Sparse", 
 		ObjId( g1, 0 ), "output", ObjId( g2, 0 ), "arg3" );
-	assert( m7 != Msg::bad );
-	const Msg* m7p = Msg::getMsg( m7 );
-	Eref m7er = m7p->manager();
+	assert( m7 != ObjId() );
 	for ( unsigned int i = 0; i < 5; ++i ) {
 		for ( unsigned int j = 0; j < 5; ++j ) {
 			if ( i != j ) {
 				ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
-				m7er.objId(), "setEntry", i, j, 0 );
+				m7, "setEntry", i, j, 0 );
 				assert( ret );
 			}
 		}
@@ -1033,53 +1027,49 @@ void testCopyMsgOps()
 	// Set up messaging
 	///////////////////////////////////////////////////////////
 	// Should give 04000
-	MsgId m1 = shell->doAddMsg( "Single", 
+	ObjId m1 = shell->doAddMsg( "Single", 
 		ObjId( a1, 3 ), "output", ObjId( a2, 1 ), "arg1" );
-	assert( m1 != Msg::bad );
+	assert( m1 != ObjId() );
 
 	// Should give 33333
-	MsgId m2 = shell->doAddMsg( "OneToAll", 
+	ObjId m2 = shell->doAddMsg( "OneToAll", 
 		ObjId( b1, 2 ), "output", ObjId( b2, 0 ), "arg1" );
-	assert( m2 != Msg::bad );
+	assert( m2 != ObjId() );
 
 	// Should give 12345
-	MsgId m3 = shell->doAddMsg( "OneToOne", 
+	ObjId m3 = shell->doAddMsg( "OneToOne", 
 		ObjId( c1, 0 ), "output", ObjId( c2, 0 ), "arg1" );
-	assert( m3 != Msg::bad );
+	assert( m3 != ObjId() );
 
 	// Should give 01234
-	MsgId m4 = shell->doAddMsg( "Diagonal", 
+	ObjId m4 = shell->doAddMsg( "Diagonal", 
 		ObjId( d1, 0 ), "output", ObjId( d2, 0 ), "arg1" );
-	assert( m4 != Msg::bad );
+	assert( m4 != ObjId() );
 
 	// Should give 54321
-	MsgId m5 = shell->doAddMsg( "Sparse", 
+	ObjId m5 = shell->doAddMsg( "Sparse", 
 		ObjId( e1, 0 ), "output", ObjId( e2, 0 ), "arg1" );
-	assert( m5 != Msg::bad );
-
-	const Msg* m5p = Msg::getMsg( m5 );
-	Eref m5er = m5p->manager();
-	ObjId m5oid = m5er.objId();
+	assert( m5 != ObjId() );
 
 	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
-		m5oid, "setEntry", 0, 4, 0 );
+		m5, "setEntry", 0, 4, 0 );
 	assert( ret );
 	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
-		m5oid, "setEntry", 1, 3, 0 );
+		m5, "setEntry", 1, 3, 0 );
 	assert( ret );
 	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
-		m5oid, "setEntry", 2, 2, 0 );
+		m5, "setEntry", 2, 2, 0 );
 	assert( ret );
 	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
-		m5oid, "setEntry", 3, 1, 0 );
+		m5, "setEntry", 3, 1, 0 );
 	assert( ret );
 	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
-		m5oid, "setEntry", 4, 0, 0 );
+		m5, "setEntry", 4, 0, 0 );
 	assert( ret );
 
 	assert( ret );
 
-	ObjId tick( Id( 2 ), 0 );
+	ObjId clock( Id( 1 ), 0 );
 
 	///////////////////////////////////////////////////////////
 	// Copy it
@@ -1093,7 +1083,7 @@ void testCopyMsgOps()
 	vector< Id > kids = Field< vector< Id > >::get( pa2, "children");
 	assert ( kids.size() == 10 );
 	for ( unsigned int i = 0; i < kids.size(); ++i ) {
-		ret = setupSched( shell, tick, kids[i] ); 
+		ret = setupSched( shell, clock, kids[i] ); 
 		assert( ret );
 	}
 
@@ -1453,29 +1443,29 @@ void testGetMsgs()
 	// Set up messaging
 	///////////////////////////////////////////////////////////
 	// Should give 04000
-	MsgId m1 = shell->doAddMsg( "Single", 
+	ObjId m1 = shell->doAddMsg( "Single", 
 		ObjId( a1, 3 ), "output", ObjId( a2, 1 ), "arg3" );
-	assert( m1 != Msg::bad );
+	assert( m1 != ObjId() );
 
 	// Should give 33333
-	MsgId m2 = shell->doAddMsg( "OneToAll", 
+	ObjId m2 = shell->doAddMsg( "OneToAll", 
 		ObjId( a1, 2 ), "output", ObjId( b2, 0 ), "arg3" );
-	assert( m2 != Msg::bad );
+	assert( m2 != ObjId() );
 
 	// Should give 12345
-	MsgId m3 = shell->doAddMsg( "OneToOne", 
+	ObjId m3 = shell->doAddMsg( "OneToOne", 
 		ObjId( a1, 0 ), "output", ObjId( c2, 0 ), "arg3" );
-	assert( m3 != Msg::bad );
+	assert( m3 != ObjId() );
 
 	// Should give 01234
-	MsgId m4 = shell->doAddMsg( "Diagonal", 
+	ObjId m4 = shell->doAddMsg( "Diagonal", 
 		ObjId( a1, 0 ), "output", ObjId( d2, 0 ), "arg3" );
-	assert( m4 != Msg::bad );
+	assert( m4 != ObjId() );
 
 	// Should give 54321
-	MsgId m5 = shell->doAddMsg( "Sparse", 
+	ObjId m5 = shell->doAddMsg( "Sparse", 
 		ObjId( a1, 0 ), "output", ObjId( e2, 0 ), "arg3" );
-	assert( m5 != Msg::bad );
+	assert( m5 != ObjId() );
 
 	////////////////////////////////////////////////////////////////
 	// Check that the outgoing Msgs are OK.
@@ -1565,9 +1555,9 @@ void testGetMsgs()
 	assert( srcIds.size() == 1 );
 	assert( srcIds[0] == a1 );
 
-	MsgId m6 = shell->doAddMsg( "Single", 
+	ObjId m6 = shell->doAddMsg( "Single", 
 		ObjId( b1, 3 ), "output", ObjId( b2, 1 ), "arg3" );
-	assert( m6 != Msg::bad );
+	assert( m6 != ObjId() );
 	srcIds.resize( 0 );
 	srcIds = LookupField< string, vector< Id > >::get( b2, "neighbours", "arg3" );
 	assert( srcIds.size() == 2 );

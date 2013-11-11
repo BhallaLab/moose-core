@@ -21,7 +21,7 @@ class SingleMsg: public Msg
 {
 	friend void Msg::initMsgManagers(); // for initializing Id.
 	public:
-		SingleMsg( MsgId mid, Eref e1, Eref e2 );
+		SingleMsg( Eref e1, Eref e2 );
 		~SingleMsg();
 
 		Eref firstTgt( const Eref& src ) const;
@@ -49,12 +49,17 @@ class SingleMsg: public Msg
 		void setTargetField( unsigned int f );
 		unsigned int getTargetField() const;
 
+		/// Msg lookup functions
+		static unsigned int numMsg();
+		static char* lookupMsg( unsigned int index );
+
 		static const Cinfo* initCinfo();
 	private:
 		DataId i1_;
 		DataId i2_;
 		unsigned int f2_; // Field for target. Note asymmetry
 		static Id managerId_;
+		static vector< SingleMsg* > msg_;
 };
 
 #endif // _SINGLE_MSG_H

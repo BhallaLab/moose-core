@@ -20,7 +20,7 @@ class OneToAllMsg: public Msg
 	friend void Msg::initMsgManagers(); // for initializing Id.
 	friend void testGetMsgs(); // test func
 	public:
-		OneToAllMsg( MsgId mid, Eref e1, Element* e2 );
+		OneToAllMsg( Eref e1, Element* e2 );
 		~OneToAllMsg();
 
 		Eref firstTgt( const Eref& src ) const;
@@ -38,11 +38,16 @@ class OneToAllMsg: public Msg
 		/// Return the first DataId
 		DataId getI1() const;
 
+		/// Msg lookup functions
+		static unsigned int numMsg();
+		static char* lookupMsg( unsigned int index );
+
 		/// Setup function for Element-style access to Msg fields.
 		static const Cinfo* initCinfo();
 	private:
 		DataId i1_;
 		static Id managerId_;
+		static vector< OneToAllMsg* > msg_;
 };
 
 

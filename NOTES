@@ -369,9 +369,8 @@ In the process of setting up the SynHandler. Next:
 +Fix up Msgs to do the precompiled fast lookup
 +Fix up FieldElement stuff to access synapses from Eref
 Fix up FieldElement and Element stuff to deal with callbacks
-+Fix up Msgs to use ObjIds to identify
+Fix up Msgs to use ObjIds to identify
 +Fix up Msgs to handle the specification of fieldIndex.
-Use ObjIds to identify Msgs, eliminate MsgIds.
 Work out how to talk to nodes on parallel machines. Socket?
 Work out how to do SetGet on parallel machines
 Work out parallel messaging.
@@ -558,5 +557,32 @@ In the meantime, carried on with debugging, and now it clears unit tests but
 with a segv at the end. Checkin 4837.
 
 Much work with valgrind later, now it is completely clean. No segv either.
+Checkin 4838.
 
+List from 3 Nov, updated here:
+*Eliminate multithreading
+*Change to integral ticks for scheduling.
++Fix up Msgs to do the precompiled fast lookup
++Fix up FieldElement stuff to access synapses from Eref
+Fix up FieldElement and Element stuff to deal with callbacks
+Fix up Msgs to use ObjIds to identify
++Fix up Msgs to handle the specification of fieldIndex.
+Work out how to talk to nodes on parallel machines. Socket?
+Work out how to do SetGet on parallel machines
+Work out parallel messaging.
+
+
+Starting on the ObjId identification of Msgs.
+Did a bit in OneToOneMsg.cpp and OneToAll.h
+
+===========================================================================
+11 Nov 2013.
+Callbacks
+	- Message changes: add, drop, reconfigure: need message id.
+	- Scheduling/clockdt changes
+	- Changes in node decomposition (?)
+
+
+Eliminated MsgIds, replaced with ObjIds. The change makes it much easier to
+handle Msgs. Compiled but doesn't clear any tests yet.
 

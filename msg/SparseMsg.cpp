@@ -15,7 +15,9 @@
 #include "../biophysics/Synapse.h"
 #include "../shell/Shell.h"
 
+// Initializing static variables
 Id SparseMsg::managerId_;
+vector< SparseMsg* > SparseMsg::msg_;
 
 //////////////////////////////////////////////////////////////////
 //    MOOSE wrapper functions for field access.
@@ -196,19 +198,21 @@ void SparseMsg::transpose()
 //////////////////////////////////////////////////////////////////
 
 
-SparseMsg::SparseMsg( MsgId mid, Element* e1, Element* e2 )
-	: Msg( mid, e1, e2, SparseMsg::managerId_ )
+SparseMsg::SparseMsg( Element* e1, Element* e2 )
+	: Msg( ObjId( managerId_, msg_.size() ), e1, e2 )
 {
 	unsigned int nrows = 0;
 	unsigned int ncolumns = 0;
 	nrows = e1->numData();
 	ncolumns = e2->numData();
 	matrix_.setSize( nrows, ncolumns );
+	msg_.push_back( this );
 }
 
 SparseMsg::~SparseMsg()
 {
-	destroyDerivedMsg( managerId_, mid_ );
+	assert( mid_.dataId < msg_.size() );
+	msg_[ mid_.dataId ] = 0; // ensure deleted ptr isn't reused.
 }
 
 unsigned int rowIndex( const Element* e, const DataId& d )
@@ -327,12 +331,10 @@ Msg* SparseMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 	if ( n <= 1 ) {
 		SparseMsg* ret = 0;
 		if ( orig == e1() ) {
-			ret = new SparseMsg( Msg::nextMsgId(), 
-				newSrc.element(), newTgt.element() );
+			ret = new SparseMsg( newSrc.element(), newTgt.element() );
 			ret->e1()->addMsgAndFunc( ret->mid(), fid, b );
 		} else if ( orig == e2() ) {
-			ret = new SparseMsg( Msg::nextMsgId(), 
-				newTgt.element(), newSrc.element() );
+			ret = new SparseMsg( newTgt.element(), newSrc.element() );
 			ret->e2()->addMsgAndFunc( ret->mid(), fid, b );
 		} else {
 			assert( 0 );
@@ -376,4 +378,17 @@ void SparseMsg::sources( vector< vector < Eref > >& v ) const
 void SparseMsg::targets( vector< vector< Eref > >& v ) const
 {
 	fillErefsFromMatrix( matrix_, v, e1_, e2_ );
+}
+
+/// Static function for Msg access
+unsigned int SparseMsg::numMsg()
+{
+	return msg_.size();
+}
+
+/// Static function for Msg access
+char* SparseMsg::lookupMsg( unsigned int index )
+{
+	assert( index < msg_.size() );
+	return reinterpret_cast< char* >( &msg_[index] );
 }

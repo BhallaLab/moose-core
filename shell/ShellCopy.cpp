@@ -90,7 +90,7 @@ void innerCopyMsgs( map< Id, Id >& tree, unsigned int n, bool copyExtMsgs )
 				for ( vector< MsgFuncBinding >::const_iterator k = 
 					b->begin();
 					k != b->end(); ++k ) {
-					MsgId mid = k->mid;
+					ObjId mid = k->mid;
 					const Msg* m = Msg::getMsg( mid );
 					assert( m );
 	/*

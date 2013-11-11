@@ -20,7 +20,7 @@ class OneToOneMsg: public Msg
 {
 	friend void Msg::initMsgManagers(); // for initializing Id.
 	public:
-		OneToOneMsg( MsgId mid, Element* e1, Element* e2 );
+		OneToOneMsg( Element* e1, Element* e2 );
 		~OneToOneMsg();
 
 		Eref firstTgt( const Eref& src ) const;
@@ -35,10 +35,15 @@ class OneToOneMsg: public Msg
 		Msg* copy( Id origSrc, Id newSrc, Id newTgt,
 			FuncId fid, unsigned int b, unsigned int n ) const;
 
+		/// Msg lookup functions
+		static unsigned int numMsg();
+		static char* lookupMsg( unsigned int index );
+
 		/// Setup function for Element-style access to Msg fields.
 		static const Cinfo* initCinfo();
 	private:
 		static Id managerId_;
+		static vector< OneToOneMsg* > msg_;
 };
 
 #endif // _ONE_TO_ONE_MSG_H

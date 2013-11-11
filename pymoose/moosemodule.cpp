@@ -1553,15 +1553,13 @@ extern "C" {
         if (!Id::isValid(dest.id) || !Id::isValid(src.id)){
             RAISE_INVALID_ID(NULL, "moose_connect");
         }
-        MsgId mid = SHELLPTR->doAddMsg(msgType, src, string(srcField), dest, string(destField));
-        if (mid == Msg::bad){
+        ObjId mid = SHELLPTR->doAddMsg(msgType, src, string(srcField), dest, string(destField));
+        if ( mid == ObjId() ){
             PyErr_SetString(PyExc_NameError, "check field names and type compatibility.");
             return NULL;
         }
-        const Msg* msg = Msg::getMsg(mid);
-        Eref mer = msg->manager();
         _ObjId * msgMgrId = (_ObjId*)PyObject_New(_ObjId, &ObjIdType);
-        msgMgrId->oid_ = mer.objId();
+        msgMgrId->oid_ = mid;
         return (PyObject*) msgMgrId;
     }
 

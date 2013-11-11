@@ -36,9 +36,8 @@ Element::~Element()
 		}
 	}
 
-	for ( vector< MsgId >::iterator i = m_.begin(); i != m_.end(); ++i )
-		if ( *i ) // Dropped Msgs set this pointer to zero, so skip them.
-			Msg::deleteMsg( *i );
+	for ( vector< ObjId >::iterator i = m_.begin(); i != m_.end(); ++i )
+		Msg::deleteMsg( *i );
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -68,10 +67,10 @@ Id Element::id() const
 /////////////////////////////////////////////////////////////////////////
 // Msg Management
 /////////////////////////////////////////////////////////////////////////
-void Element::addMsg( MsgId m )
+void Element::addMsg( ObjId m )
 {
 	while ( m_.size() > 0 ) {
-		if ( m_.back() == Msg::bad )
+		if ( m_.back() == ObjId() )
 			m_.pop_back();
 		else
 			break;
@@ -82,7 +81,7 @@ void Element::addMsg( MsgId m )
 class matchMid
 {
 	public:
-		matchMid( MsgId mid )
+		matchMid( ObjId mid )
 			: mid_( mid )
 		{;}
 
@@ -90,14 +89,14 @@ class matchMid
 			return m.mid == mid_;
 		}
 	private:
-		MsgId mid_;
+		ObjId mid_;
 };
 
 /**
  * Called from ~Msg. This requires the usual scan through all msgs,
  * and could get inefficient.
  */
-void Element::dropMsg( MsgId mid )
+void Element::dropMsg( ObjId mid )
 {
 	if ( id_ == doomedId ) // This is a flag that the Element is doomed.
 		return;
@@ -110,7 +109,7 @@ void Element::dropMsg( MsgId mid )
 	}
 }
 
-void Element::addMsgAndFunc( MsgId mid, FuncId fid, BindIndex bindIndex )
+void Element::addMsgAndFunc( ObjId mid, FuncId fid, BindIndex bindIndex )
 {
 	if ( msgBinding_.size() < bindIndex + 1U )
 		msgBinding_.resize( bindIndex + 1 );
@@ -163,7 +162,7 @@ void Element::showMsg() const
 			if ( numTgt > 0 ) {
 				for ( unsigned int j = 0; j < numTgt; ++j ) {
 					cout << sf->name() << " bindId=" << sf->getBindIndex() << ": ";
-					cout << j << ": MsgId=" << mb[j].mid << 
+					cout << j << ": MessageId=" << mb[j].mid << 
 					", FuncId=" << mb[j].fid << 
 					", " << Msg::getMsg( mb[j].mid )->e1()->getName() << 
 					" -> " <<
@@ -175,16 +174,16 @@ void Element::showMsg() const
 	cout << "Dest and Src: \n";
 	for ( unsigned int i = 0; i < m_.size(); ++i ) {
 		const Msg* m = Msg::getMsg( m_[i] );
-		cout << i << ": MsgId= " << m_[i] << 
+		cout << i << ": MessageId= " << m_[i] << 
 			", e1= " << m->e1()->name_ <<
 			", e2= " << m->e2()->name_ << endl;
 	}
 }
 
 
-MsgId Element::findCaller( FuncId fid ) const
+ObjId Element::findCaller( FuncId fid ) const
 {
-	for ( vector< MsgId >::const_iterator i = m_.begin(); 
+	for ( vector< ObjId >::const_iterator i = m_.begin(); 
 		i != m_.end(); ++i )
 	{
 		const Msg* m = Msg::getMsg( *i );
@@ -199,7 +198,7 @@ MsgId Element::findCaller( FuncId fid ) const
 			return *i;
 		}
 	}
-	return Msg::bad;
+	return ObjId();
 }
 
 unsigned int Element::findBinding( MsgFuncBinding b ) const
@@ -215,7 +214,7 @@ unsigned int Element::findBinding( MsgFuncBinding b ) const
 	return ~0;
 }
 
-const vector< MsgId >& Element::msgIn() const
+const vector< ObjId >& Element::msgIn() const
 {
 	return m_;
 }
@@ -386,9 +385,9 @@ unsigned int Element::getInputs( vector< Id >& ret, const DestFinfo* finfo )
 	unsigned int oldSize = ret.size();
 	
 	FuncId fid = finfo->getFid();
-	vector< MsgId > caller;
+	vector< ObjId > caller;
 	getInputMsgs( caller, fid );
-	for ( vector< MsgId >::iterator i = caller.begin(); 
+	for ( vector< ObjId >::iterator i = caller.begin(); 
 		i != caller.end(); ++i  ) {
 		const Msg* m = Msg::getMsg( *i );
 		assert( m );
@@ -433,10 +432,10 @@ unsigned int Element::getNeighbours( vector< Id >& ret, const Finfo* finfo )
 }
 
 // May return multiple Msgs.
-unsigned int Element::getInputMsgs( vector< MsgId >& caller, FuncId fid)
+unsigned int Element::getInputMsgs( vector< ObjId >& caller, FuncId fid)
 	const
 {
-	for ( vector< MsgId >::const_iterator i = m_.begin(); 
+	for ( vector< ObjId >::const_iterator i = m_.begin(); 
 		i != m_.end(); ++i )
 	{
 		const Msg* m = Msg::getMsg( *i );
@@ -454,7 +453,7 @@ unsigned int Element::getInputMsgs( vector< MsgId >& caller, FuncId fid)
 	return caller.size();
 }
 
-unsigned int Element::getFieldsOfOutgoingMsg( MsgId mid,
+unsigned int Element::getFieldsOfOutgoingMsg( ObjId mid,
 	vector< pair< BindIndex, FuncId > >& ret ) const
 {
 	ret.resize( 0 );

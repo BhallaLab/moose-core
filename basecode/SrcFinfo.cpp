@@ -47,7 +47,7 @@ bool SrcFinfo::checkTarget( const Finfo* target ) const
 	return 0;
 }
 
-bool SrcFinfo::addMsg( const Finfo* target, MsgId mid, Element* src ) const
+bool SrcFinfo::addMsg( const Finfo* target, ObjId mid, Element* src ) const
 {
 	const DestFinfo* d = dynamic_cast< const DestFinfo* >( target );
 	if ( d ) {

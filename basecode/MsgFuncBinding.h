@@ -8,16 +8,16 @@
 **********************************************************************/
 
 /**
- * Binds MsgIds to FuncIds.
+ * Binds ObjId to FuncIds.
  */
 class MsgFuncBinding
 {
 	public:
 		MsgFuncBinding()
-			: mid( 0 ), fid( 0 )
+			: mid(), fid( 0 )
 		{;}
 
-		MsgFuncBinding( MsgId m, FuncId f )
+		MsgFuncBinding( ObjId m, FuncId f )
 			: mid( m ), fid( f )
 		{;}
 
@@ -25,7 +25,7 @@ class MsgFuncBinding
 			return ( mid == other.mid && fid == other.fid );
 		}
 
-		MsgId mid;
+		ObjId mid;
 		FuncId fid;
 	
 	private:

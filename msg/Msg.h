@@ -19,25 +19,15 @@ class Msg
 {
 	public:
 		/// Constructor
-		Msg( MsgId mid, Element* e1, Element* e2, Id mgrId );
+		Msg( ObjId mid, Element* e1, Element* e2 );
 
 		/// Destructor
 		virtual ~Msg();
 
 		/**
- 		 * Returns a MsgId for assigning to a new Msg.
- 		 */
-		static MsgId nextMsgId();
-
-		/**
 		 * Deletes a message identified by its mid.
 		 */
-		static void deleteMsg( MsgId mid );
-
-		/**
- 		* Initialize the Null location in the Msg vector.
- 		*/
-		static void initNull();
+		static void deleteMsg( ObjId mid );
 
 		/**
 		 * Obtain the first target Eref for the specified Src Eref
@@ -57,18 +47,6 @@ class Msg
 		  * include all data entries on a target.
 		  */
 		 virtual void targets( vector< vector< Eref > >& v ) const = 0;
-
-		/**
-		 * Return the Id of the managing Element. Each derived Msg class
-		 * has its own manager as a static field. This is predefined at
-		 * initialization.
-		 */
-		virtual Id managerId() const = 0;
-
-		/**
-		 * Return the Eref of the managing object.
-		 */
-		Eref manager() const;
 
 		/**
 		 * Return the first element
@@ -118,7 +96,7 @@ class Msg
 		/**
 		 * return the Msg Id.
 		 */
-		MsgId mid() const {
+		ObjId mid() const {
 			return mid_;
 		}
 
@@ -160,32 +138,9 @@ class Msg
 		}
 
 		/**
-		 * Looks up the message on the global vector of Msgs. No checks,
-		 * except assertions in debug mode.
+		 * Looks up the message .
 		 */
-		static const Msg* getMsg( MsgId m );
-
-		/**
-		 * Returns the Msg if the MsgId is valid, otherwise returns 0.
-		 * Utility function to check if Msg is OK. Used by diagnostic
-		 * function Qinfo::reportQ. Normal code uses getMsg above.
-		 */
-		static Msg* safeGetMsg( MsgId m );
-
-		/**
-		 * Reports total # of msgs defined.
-		 */
-		static unsigned int numMsgs();
-
-		/**
-		 * The zero MsgId, used as the error value.
-		 */
-		static const MsgId bad;
-
-		/**
-		 * A special MsgId used for Shell to get/set values
-		 */
-		static const MsgId setMsg;
+		static const Msg* getMsg( ObjId m );
 
 		/**
 		 * Set up the Msg to be accessed like an Element
@@ -199,35 +154,11 @@ class Msg
 		 */
 		static void initMsgManagers();
 
-		/**
-		 * Destroys the reference to specified mid, in its msg manager
-		 * object. Used by destructors of all derived Msg classes.
-		 */
-		static void destroyDerivedMsg( Id managerId, MsgId mid );
 	protected:
-		MsgId mid_; /// Index of this Msg on the msg_ vector.
+		ObjId mid_; /// Index of this Msg on the msg_ vector.
 
 		Element* e1_; /// Element 1 attached to Msg.
 		Element* e2_; /// Element 2 attached to Msg.
-
-		/// Manages all Msgs in the system.
-		static vector< Msg* > msg_;
-
-		/**
-		 * Manages garbage collection for deleted messages. Deleted
-		 * MsgIds are kept here so that they can be reused.
-		 */
-		static vector< MsgId > garbageMsg_;
-
-		/**
-		 * Manages lookup of DataIds from MsgIds. This is the index of
-		 * the MsgManager data entry in the appropriate Element, for the
-		 * specified MsgId.
-		 * Used to find and set
-		 * msg fields. We only need the data part of the DataId, so this
-		 * is just an unsigned int.
-		static vector< unsigned int > lookupDataId_;
-		 */
 
 		/**
 		 * Keeps track of the Id of the parent of all the MsgManager Elms.
