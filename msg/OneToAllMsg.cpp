@@ -103,14 +103,15 @@ const Cinfo* OneToAllMsg::initCinfo()
 	///////////////////////////////////////////////////////////////////
 	// Field definitions.
 	///////////////////////////////////////////////////////////////////
-	static ReadOnlyValueFinfo< OneToAllMsg, DataId > i1(
+	static ValueFinfo< OneToAllMsg, DataId > i1(
 		"i1",
 		"DataId of source Element.",
+		&OneToAllMsg::setI1,
 		&OneToAllMsg::getI1
 	);
 
 	static Finfo* msgFinfos[] = {
-		&i1,		// readonly value
+		&i1,		// value
 	};
 
 	static Dinfo< short > dinfo;
@@ -133,6 +134,13 @@ static const Cinfo* assignmentMsgCinfo = OneToAllMsg::initCinfo();
 DataId OneToAllMsg::getI1() const
 {
 	return i1_;
+}
+
+void OneToAllMsg::setI1( DataId i1 )
+{
+	i1_ = i1;
+	e1()->markRewired();
+	e2()->markRewired();
 }
 
 /// Static function for Msg access

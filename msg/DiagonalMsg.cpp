@@ -74,6 +74,8 @@ Id DiagonalMsg::managerId() const
 void DiagonalMsg::setStride( int stride )
 {
 	stride_ = stride;
+	e1()->markRewired();
+	e2()->markRewired();
 }
 
 int DiagonalMsg::getStride() const

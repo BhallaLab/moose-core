@@ -289,9 +289,9 @@ void testGetMsg()
 	unsigned int numEntries = Field< unsigned int >::get( tabid, "size" );
 	assert( numEntries == 0 );
 	Id clockId( 1 );
-	clockId.element()->digestMessages();
-	tabid.element()->digestMessages();
-	arithid.element()->digestMessages();
+	// clockId.element()->digestMessages();
+	// tabid.element()->digestMessages();
+	// arithid.element()->digestMessages();
 	shell->doReinit();
 	numEntries = Field< unsigned int >::get( tabid, "size" );
 	assert( numEntries == 1 ); // One for reinit call.

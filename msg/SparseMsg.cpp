@@ -191,6 +191,8 @@ void SparseMsg::clear()
 void SparseMsg::transpose()
 {
 	matrix_.transpose();
+	e1()->markRewired();
+	e2()->markRewired();
 }
 
 //////////////////////////////////////////////////////////////////
@@ -285,6 +287,8 @@ unsigned int SparseMsg::randomConnect( double probability )
 
 	// cout << Shell::myNode() << ": sizes.size() = " << sizes.size() << ", ncols = " << nCols << ", startSynapse = " << startSynapse << endl;
 	matrix_.transpose();
+	e1()->markRewired();
+	e2()->markRewired();
 	return totalSynapses;
 }
 

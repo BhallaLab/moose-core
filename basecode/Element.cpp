@@ -15,7 +15,9 @@ Element::Element( Id id, const Cinfo* c, const string& name )
 		id_( id ),
 		cinfo_( c ), 
 		msgBinding_( c->numBindIndex() ),
-		msgDigest_( c->numBindIndex() )
+		msgDigest_( c->numBindIndex() ),
+		isRewired_( false ),
+		isDoomed_( false )
 {
 	id.bindIdToElement( this );
 }
@@ -76,6 +78,7 @@ void Element::addMsg( ObjId m )
 			break;
 	}
 	m_.push_back( m );
+	markRewired();
 }
 
 class matchMid
@@ -107,6 +110,7 @@ void Element::dropMsg( ObjId mid )
 		matchMid match( mid ); 
 		i->erase( remove_if( i->begin(), i->end(), match ), i->end() );
 	}
+	markRewired();
 }
 
 void Element::addMsgAndFunc( ObjId mid, FuncId fid, BindIndex bindIndex )
@@ -114,6 +118,7 @@ void Element::addMsgAndFunc( ObjId mid, FuncId fid, BindIndex bindIndex )
 	if ( msgBinding_.size() < bindIndex + 1U )
 		msgBinding_.resize( bindIndex + 1 );
 	msgBinding_[ bindIndex ].push_back( MsgFuncBinding( mid, fid ) );
+	markRewired();
 }
 
 void Element::clearBinding( BindIndex b )
@@ -125,6 +130,7 @@ void Element::clearBinding( BindIndex b )
 		i != temp.end(); ++i ) {
 		Msg::deleteMsg( i->mid );
 	}
+	markRewired();
 }
 
 /// Used upon ending of MOOSE session, to rapidly clear out messages
@@ -139,9 +145,13 @@ void Element::clearAllMsgs()
 // Msg Information
 /////////////////////////////////////////////////////////////////////////
 
-const vector< MsgDigest >& Element::msgDigest( unsigned int index ) const
+const vector< MsgDigest >& Element::msgDigest( unsigned int index )
 {
 	assert( index < msgDigest_.size() );
+	if ( isRewired_ ) {
+			digestMessages();
+		isRewired_ = false;
+	}
 	return msgDigest_[ index ];
 }
 
@@ -360,12 +370,17 @@ void Element::destroyElementTree( const vector< Id >& tree )
 
 void Element::markAsDoomed()
 {
-	msgDigest_.clear();
+	isDoomed_ = true;
 }
 
 bool Element::isDoomed() const
 {
-	return (msgDigest_.size() == 0 );
+	return isDoomed_;
+}
+
+void Element::markRewired()
+{
+	isRewired_ = true;
 }
 
 void Element::zombieSwap( const Cinfo* newCinfo )
