@@ -55,6 +55,10 @@ class Eref
 		 */
 		Id id() const;
 
+		/**
+		 * Returns the digested version of the specified msgsrc. If the
+		 * message has changed, this call triggers the digestion operation.
+		 */
 		const vector< MsgDigest >& msgDigest(unsigned int bindIndex ) const;
 
 		/**

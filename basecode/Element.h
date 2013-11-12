@@ -191,8 +191,18 @@ class Element
 		 */
 		static void destroyElementTree( const vector< Id >& tree );
 
+		/**
+		 * Set flag to state that Element is due for destruction. Useful to
+		 * avoid following messages that will soon be gone.
+		 */
 		void markAsDoomed();
 		bool isDoomed() const;
+
+		/**
+		 * Set flag to state that the messages on this Element have
+		 * changed, and need to be re-digested.
+		 */
+		void markRewired();
 
 	/////////////////////////////////////////////////////////////////////
 	// Utility functions for message traversal
@@ -200,8 +210,10 @@ class Element
 	
 		/**
 		 * Raw lookup into MsgDigest vector. One for each MsgSrc X ObjEntry.
+		 * If the messages have been rewired, this call triggers the
+		 * re-parsing of all messages before returning the digested msgs.
 		 */
-		const vector< MsgDigest >& msgDigest( unsigned int index ) const;
+		const vector< MsgDigest >& msgDigest( unsigned int index );
 
 		/**
 		 * Returns the binding index of the specified entry.
@@ -309,11 +321,11 @@ class Element
 		 */
 		vector< vector < MsgDigest > > msgDigest_;
 
-		/**
-		 * Digested targets from all source Msgs. Indexed as
-		 * msgTargets_[ numSrcMsgs * DataId + srcMsgIndex ]
-		 */
-		// vector< vector< Eref > > msgTargets_;
+		/// True if messages have been changed and need to digestMessages.
+		bool isRewired_; 
+
+		/// True if the element is marked for destruction.
+		bool isDoomed_;
 };
 
 #endif // _ELEMENT_H

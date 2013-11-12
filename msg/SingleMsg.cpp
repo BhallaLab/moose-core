@@ -169,6 +169,8 @@ DataId SingleMsg::getI1() const
 void SingleMsg::setI1( DataId di )
 {
 	i1_ = di;
+	e1()->markRewired();
+	e2()->markRewired();
 }
 
 DataId SingleMsg::getI2() const
@@ -179,11 +181,14 @@ DataId SingleMsg::getI2() const
 void SingleMsg::setI2( DataId di )
 {
 	i2_ = di;
+	e1()->markRewired();
+	e2()->markRewired();
 }
 
 void SingleMsg::setTargetField( unsigned int f )
 {
 	f2_ = f;
+	e1()->markRewired();
 }
 
 unsigned int SingleMsg::getTargetField() const

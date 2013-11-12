@@ -151,7 +151,7 @@ void testClock()
 	shell->doAddMsg( "oneToAll", clock, "process3", test, "process" );
 	shell->doAddMsg( "oneToAll", clock, "process4", test, "process" );
 	shell->doAddMsg( "oneToAll", clock, "process7", test, "process" );
-	clock.element()->digestMessages();
+	// clock.element()->digestMessages();
 	cdata->handleReinit( clocker );
 	assert( cdata->activeTicks_.size() == 6 ); // No messages
 	assert( cdata->activeTicks_[0] == 2 );
