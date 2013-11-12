@@ -37,6 +37,7 @@ class OneToAllMsg: public Msg
 
 		/// Return the first DataId
 		DataId getI1() const;
+		void setI1( DataId i1 ); /// Assign the first DataId.
 
 		/// Msg lookup functions
 		static unsigned int numMsg();

@@ -597,3 +597,18 @@ Something like an anti-bootstrapping.
 Now terminates cleanly and valgrind is happy. Checkin 4840.
 Some tests to do with this before going on to automatically deciding when to
 do digestMessages.
+Restored a few unit tests for the various msg classes. Not too bad.
+
+For: Elements should know when to call the MsgDigest.
+I'll have it so that the Msgs call each of their target Elements to set
+a 'dirty' flag when the Msgs change. This flag is checked at the time of
+reinit or process, but no. Should not be handled by the Object.
+Options:
+	- put in a conditional in every Send. In fact the act of 
+	getting the MsgDigest vector could do this. e.msgDigest.
+
+Starting with an 'isDirty' flag for messages that change. Need to fill in.
+===========================================================================
+12 Nov 2013.
+Implemented the isDirty flag, but called it isRewired. 
+Reactivated some of the unit tests on message field assignment. All cleared.

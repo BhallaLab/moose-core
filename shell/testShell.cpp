@@ -578,13 +578,13 @@ void testShellParserStart()
 
 	// testThreadSchedElement tse;
 	Eref ts( tse, 0 );
-	Element* ticke = Id( 2 ).element();
-	Eref er0( ticke, DataId( 0 ) );
-	Eref er1( ticke, DataId( 1 ) );
-	Eref er2( ticke, DataId( 2 ) );
-	Eref er3( ticke, DataId( 3 ) );
-	Eref er4( ticke, DataId( 4 ) );
-	Eref er5( ticke, DataId( 5 ) );
+	Element* clocke = Id( 1 ).element();
+	Eref er0( clocke, DataId( 0 ) );
+	Eref er1( clocke, DataId( 1 ) );
+	Eref er2( clocke, DataId( 2 ) );
+	Eref er3( clocke, DataId( 3 ) );
+	Eref er4( clocke, DataId( 4 ) );
+	Eref er5( clocke, DataId( 5 ) );
 
 	// No idea what FuncId to use here. Assume 0.
 	FuncId f( 0 );
@@ -661,10 +661,10 @@ void testShellSetGet()
 	cout << "." << flush;
 }
 
-bool setupSched( Shell* shell, ObjId& tick, Id dest )
+bool setupSched( Shell* shell, ObjId& clock, Id dest )
 {
 	ObjId ret = shell->doAddMsg( "OneToAll", 
-		tick, "proc0", ObjId( dest, 0 ), "proc" );
+		clock, "proc0", ObjId( dest, 0 ), "proc" );
 	return ( ret != ObjId() );
 }
 
@@ -831,31 +831,31 @@ void testShellAddMsg()
 	///////////////////////////////////////////////////////////
 	shell->doSetClock( 0, 1.0 );
 
-	ObjId tick( Id( 2 ), 0 );
+	ObjId clock( Id( 1 ), 0 );
 	// I want to compare the # of process msgs before and after.
 	vector< Id > tgts;
 	const SrcFinfo* sf = dynamic_cast< const SrcFinfo* >(
 		Clock::initCinfo()->findFinfo( "process0" ) );
 	assert( sf );
-	unsigned int numTgts = tick.eref().element()->getNeighbours( tgts, 
+	unsigned int numTgts = clock.eref().element()->getNeighbours( tgts, 
 		sf );
 	assert( numTgts == 0 );
-	ret = setupSched( shell, tick, a1 ); assert( ret );
-	ret = setupSched( shell, tick, a2 ); assert( ret );
-	ret = setupSched( shell, tick, b1 ); assert( ret );
-	ret = setupSched( shell, tick, b2 ); assert( ret );
-	ret = setupSched( shell, tick, c1 ); assert( ret );
-	ret = setupSched( shell, tick, c2 ); assert( ret );
-	ret = setupSched( shell, tick, d1 ); assert( ret );
-	ret = setupSched( shell, tick, d2 ); assert( ret );
-	ret = setupSched( shell, tick, e1 ); assert( ret );
-	ret = setupSched( shell, tick, e2 ); assert( ret );
-	ret = setupSched( shell, tick, f1 ); assert( ret );
-	ret = setupSched( shell, tick, f2 ); assert( ret );
-	ret = setupSched( shell, tick, g1 ); assert( ret );
-	ret = setupSched( shell, tick, g2 ); assert( ret );
+	ret = setupSched( shell, clock, a1 ); assert( ret );
+	ret = setupSched( shell, clock, a2 ); assert( ret );
+	ret = setupSched( shell, clock, b1 ); assert( ret );
+	ret = setupSched( shell, clock, b2 ); assert( ret );
+	ret = setupSched( shell, clock, c1 ); assert( ret );
+	ret = setupSched( shell, clock, c2 ); assert( ret );
+	ret = setupSched( shell, clock, d1 ); assert( ret );
+	ret = setupSched( shell, clock, d2 ); assert( ret );
+	ret = setupSched( shell, clock, e1 ); assert( ret );
+	ret = setupSched( shell, clock, e2 ); assert( ret );
+	ret = setupSched( shell, clock, f1 ); assert( ret );
+	ret = setupSched( shell, clock, f2 ); assert( ret );
+	ret = setupSched( shell, clock, g1 ); assert( ret );
+	ret = setupSched( shell, clock, g2 ); assert( ret );
 
-	numTgts = tick.eref().element()->getNeighbours( tgts, sf );
+	numTgts = clock.eref().element()->getNeighbours( tgts, sf );
 	assert( numTgts == 14 );
 
 	///////////////////////////////////////////////////////////
@@ -1728,8 +1728,8 @@ void testMpiShell( )
 
 	testShellSetGet();
 	testInterNodeOps();
-	// testShellAddMsg(); 10 Nov: defer till rebuild of MsgObjects.
-	// testCopyMsgOps(); This too
+	testShellAddMsg();
+	testCopyMsgOps();
 	testWildcard();
 	testSyncSynapseSize();
 

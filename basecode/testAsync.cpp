@@ -75,7 +75,7 @@ void testSendMsg()
 	SrcFinfo1<double> s( "test", "" );
 	s.setBindIndex( 0 );
 	e1.element()->addMsgAndFunc( m->mid(), fid, s.getBindIndex() );
-	e1.element()->digestMessages();
+	// e1.element()->digestMessages();
 	const vector< MsgDigest >& md = e1.element()->msgDigest( 0 );
 	assert( md.size() == 1 );
 	assert( md[0].targets.size() == 1 );
@@ -124,7 +124,7 @@ void testCreateMsg()
 	bool ret = f1->addMsg( f2, m->mid(), e1.element() );
 	
 	assert( ret );
-	e1.element()->digestMessages();
+	// e1.element()->digestMessages();
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		const SrcFinfo1< double >* sf = dynamic_cast< const SrcFinfo1< double >* >( f1 );
@@ -416,17 +416,15 @@ void testSetGetVec()
 
 void testSendSpike()
 {
-		/*
 	static const double WEIGHT = -1.0;
 	static const double TAU = 1.0;
 	static const double DT = 0.1;
 	const Cinfo* ic = IntFire::initCinfo();
-	// const Cinfo* sc = Synapse::initCinfo();
+	const Cinfo* sc = Synapse::initCinfo();
 	unsigned int size = 100;
 
 	string arg;
 	Id i2 = Id::nextId();
-//	bool ret = ic->create( i2, "test2", size );
 	Element* temp = new DataElement( i2, ic, "test2", size, 1 );
 	assert( temp );
 	Eref e2 = i2.eref();
@@ -437,12 +435,14 @@ void testSendSpike()
 		assert( ret );
 	}
 
+	Id synId( i2.value() + 1 );
+	ObjId target( synId , 1 );
 
-	Eref target( temp, 1 );
-	reinterpret_cast< IntFire* >(target.data())->setWeight( 0, WEIGHT );
-	SingleMsg *m = new SingleMsg( e2, target );
+	reinterpret_cast< Synapse* >(target.data())->setWeight( WEIGHT );
+	reinterpret_cast< Synapse* >(target.data())->setDelay( 0.01 );
+	SingleMsg *m = new SingleMsg( e2, target.eref() );
 	const Finfo* f1 = ic->findFinfo( "spike" );
-	const Finfo* f2 = ic->findFinfo( "addSpike" );
+	const Finfo* f2 = sc->findFinfo( "addSpike" );
 	bool ret = f1->addMsg( f2, m->mid(), e2.element() );
 	assert( ret );
 
@@ -454,15 +454,14 @@ void testSendSpike()
 	// At this stage we have sent the spike, so e2.data::Vm should be -1e-7.
 	double Vm = reinterpret_cast< IntFire* >(e2.data())->getVm();
 	assert( doubleEq( Vm, -1e-7 ) );
-	ObjId targetOid( i2, 1 );
-	reinterpret_cast< IntFire* >(targetOid.data())->setTau( TAU );
+	ObjId targetCell( i2, 1 );
+	reinterpret_cast< IntFire* >(targetCell.data())->setTau( TAU );
 
-	reinterpret_cast< IntFire* >(targetOid.data())->process( targetOid.eref(), &p );
-	Vm = Field< double >::get( targetOid, "Vm" );
+	reinterpret_cast< IntFire* >(targetCell.data())->process( targetCell.eref(), &p );
+	Vm = Field< double >::get( targetCell, "Vm" );
 	assert( doubleEq( Vm , WEIGHT * ( 1.0 - DT / TAU ) ) );
 	cout << "." << flush;
-	delete i2();
-		*/
+	delete i2.element();
 }
 
 void printSparseMatrix( const SparseMatrix< unsigned int >& m)
@@ -1019,8 +1018,8 @@ void testSharedMsg()
 	bool ret = shareFinfo->addMsg( shareFinfo, m->mid(), t1.element() );
 	assert( ret );
 
-	t1.element()->digestMessages();
-	t2.element()->digestMessages();
+	// t1.element()->digestMessages();
+	// t2.element()->digestMessages();
 	// Display stuff. Need to figure out how to unit test this.
 	// t1()->showMsg();
 	// t2()->showMsg();
@@ -1147,7 +1146,6 @@ void testConvVectorOfVectors()
 
 void testMsgField()
 {
-		/*
 	const Cinfo* ac = Arith::initCinfo();
 	unsigned int size = 10;
 
@@ -1165,18 +1163,12 @@ void testMsgField()
 
 	Eref e1 = i1.eref();
 
-	Msg* m = new SingleMsg( Eref( i1(), 5 ), Eref( i2(), 3 ) );
+	Msg* m = new SingleMsg( Eref( i1.element(), 5 ), Eref( i2.element(), 3 ) );
 	ProcInfo p;
 
-	Id msgElmId = m->managerId();
+	assert( m->mid().element()->getName() == "singleMsg" );
 
-	Element *msgElm = msgElmId();
-
-	assert( msgElm->getName() == "singleMsg" );
-
-	Eref msgEr = m->manager();
-
-	SingleMsg* sm = reinterpret_cast< SingleMsg* >( msgEr.data() );
+	SingleMsg* sm = reinterpret_cast< SingleMsg* >( m->mid().data() );
 	assert( sm );
 	assert ( sm == m );
 	assert( sm->getI1() == DataId( 5 ) );
@@ -1192,8 +1184,8 @@ void testMsgField()
 	}
 
 	// Check that regular msgs go through.
-	Eref tgt3( i2(), 3 );
-	Eref tgt8( i2(), 8 );
+	Eref tgt3( i2.element(), 3 );
+	Eref tgt8( i2.element(), 8 );
 	double val = reinterpret_cast< Arith* >( tgt3.data() )->getOutput();
 	assert( doubleEq( val, 5 * 42 ) );
 	val = reinterpret_cast< Arith* >( tgt8.data() )->getOutput();
@@ -1213,9 +1205,8 @@ void testMsgField()
 
 	cout << "." << flush;
 
-	delete i1();
-	delete i2();
-	*/
+	delete i1.element();
+	delete i2.element();
 }
 
 void testSetGetExtField()
@@ -1669,7 +1660,7 @@ void testAsync( )
 	testStrSet();
 	testStrGet();
 	testLookupSetGet();
-	testSendSpike();
+//	testSendSpike();
 	testSparseMatrix();
 	testSparseMatrix2();
 	testSparseMatrixReorder();
