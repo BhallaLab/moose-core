@@ -562,12 +562,12 @@ Checkin 4838.
 List from 3 Nov, updated here:
 *Eliminate multithreading
 *Change to integral ticks for scheduling.
-+Fix up Msgs to do the precompiled fast lookup
-+Fix up FieldElement stuff to access synapses from Eref
+*Fix up Msgs to do the precompiled fast lookup
+*Fix up FieldElement stuff to access synapses from Eref
 Fix up FieldElement and Element stuff to deal with callbacks
 *Fix up Msgs to use ObjIds to identify
-Elements should know when to call the MsgDigest.
-+Fix up Msgs to handle the specification of fieldIndex.
+*Elements should know when to call the MsgDigest.
+*Fix up Msgs to handle the specification of fieldIndex.
 Work out how to talk to nodes on parallel machines. Socket?
 Work out how to do SetGet on parallel machines
 Work out parallel messaging.
@@ -612,3 +612,68 @@ Starting with an 'isDirty' flag for messages that change. Need to fill in.
 12 Nov 2013.
 Implemented the isDirty flag, but called it isRewired. 
 Reactivated some of the unit tests on message field assignment. All cleared.
+
+Considering the callbacks.
+- Bypass altogether. Let the user track changes and ensure that the right
+	number of synapses are defined. Possibly give a helper function.
+	Possibly help with offsets for each incoming SparseMsg so one does
+	not lose all assigned Weights/delays of one when the other changes.
+- Give FieldElements an automatic scan of incoming msgs to check for field
+	size. Activate this whenever the fields are accessed.
+- Put in a function in SparseMsg::randomConnect and its
+	ilk, to assign synapse::numField.
+	Problem is that there may be other messages. Could cobble something
+	together for the SparseMsg objects, but there are other possible Msg
+	types which should not need to know this stuff.
+- There are prototype callback functions in Synapse: 
+	addMsgCallback and dropMsgCallback. But the message involved would
+	have to know what to do with the info about existing synapses.
+
+Summary: Need to provide offsets for each Msg. Rest is up to user. Need use
+	cases.
+
+General things to fix:
+	- Use new 'send' command for all the Srcfinfos.
+
+For now, bypass altogether. Move on to multinode.
+- Fill in send buffers:
+	- Message digest consolidation
+	- Arg conversion.
+- Figure out best design for internode comms. 
+- simple block mapping of DataId to rawIndex.
+- Global objects and synchronization
+- Communication between nodes for setup operations
+- Communication between nodes for Set/Get operations
+- Clock ticks between nodes.
+- Messaging between nodes.
+
+Working on standalone prototype for the MPI. Stuck.
+Some useful tricks for debugging:
+
+mpicxx -g proc2.cpp
+mpirun -np 2 xterm -e gdb a.out
+
+Possibly the problem is that the local node has not filled in any entry
+in recvReq. Yes. Now compiles, but the run goes into an infinite loop.
+===========================================================================
+13 Nov 2013.
+Incremental debugging, now looks close. proc2.cpp.
+Works but it isn't clear to me why there is the present limit on the number
+of nodes it can handle. I would have thought N^2 = numCalls would be the limit.
+But it works for powers of 2 up to 128, which is as far as my laptop will
+manage. Possibly I shouldn't have so many Irecvs dangling at a time.
+
+Next to set up an AllToAll type transfer to see if that goes faster. Certainly
+looks simpler.
+Working in proc3.cpp
+
+Then put in handling for sporadic big mesages.
+
+Then do benchmarking on ghevar and on cluster.
+
+===========================================================================
+14 Nov 2013. proc3 works. The
+time tests are all over the place but proc3 does seem a little slower than
+the proc2. Perhaps I could do another version with non-blocking calls.
+
+===========================================================================
