@@ -16,10 +16,9 @@ DataElement::DataElement( Id id, const Cinfo* c, const string& name,
 		Element( id, c, name )
 {
 	data_ = c->dinfo()->allocData( numData );
-	numData_ = numData;
+	localNumData_ = numData;
 	c->postCreationFunc( id, this );
 }
-
 
 /*
  * Used for copies. Note that it does NOT call the postCreation Func,
@@ -28,8 +27,7 @@ DataElement::DataElement( Id id, const Cinfo* c, const string& name,
  * retain info from the originals.
  * Note that n is the number of individual  dataEntries that are made.
  */
-DataElement::DataElement( Id id, const Element* orig, unsigned int n,
-	bool toGlobal)
+DataElement::DataElement( Id id, const Element* orig, unsigned int n )
 	:	
 		Element( id, orig->cinfo(), orig->getName() )
 {
@@ -37,7 +35,7 @@ DataElement::DataElement( Id id, const Element* orig, unsigned int n,
 		data_ = cinfo()->dinfo()->copyData( 
 				orig->data( 0 ), orig->numData(), n * orig->numData() );
 	}
-	numData_ = n * orig->numData();
+	localNumData_ = n * orig->numData();
 	// cinfo_->postCreationFunc( id, this );
 }
 
@@ -56,15 +54,14 @@ Element* DataElement::copyElement( Id newParent, Id newId, unsigned int n,
 	return new DataElement( newId, this, n, toGlobal );
 }
 
-
 /////////////////////////////////////////////////////////////////////////
 // DataElement info functions
 /////////////////////////////////////////////////////////////////////////
 
 // virtual func.
-unsigned int DataElement::numData() const
+unsigned int DataElement::numLocalData() const
 {
-	return numData_;
+	return numLocalData_;
 }
 
 // virtual func.
@@ -73,21 +70,28 @@ unsigned int DataElement::numField( unsigned int entry ) const
 	return 1;
 }
 
+/////////////////////////////////////////////////////////////////////////
+// Data access functions.
+/////////////////////////////////////////////////////////////////////////
 // virtual func, overridden.
 char* DataElement::data( unsigned int rawIndex, unsigned int fieldIndex ) const
 {
-	assert( rawIndex < numData_ );
+	assert( rawIndex < numLocalData_ );
 	return data_ + ( rawIndex * cinfo()->dinfo()->size() );
 }
 
-// virtual func, overridden.
-void DataElement::resize( unsigned int newNumData )
+/**
+ * virtual func, overridden.
+ * Here we resize the local data. This function would be called by
+ * derived classes to do their own data management as per node 
+ * decomposition.
+ */
+void DataElement::resize( unsigned int newNumLocalData )
 {
+	numLocalData_ = newNumLocalData;
 	char* temp = data_;
-	data_ = cinfo()->dinfo()->copyData( temp, numData_, newNumData );
+	data_ = cinfo()->dinfo()->copyData( 
+					temp, numLocalData_, newNumLocalData );
 	cinfo()->dinfo()->destroyData( temp );
+	numLocalData_ = newNumLocalData;
 }
-
-// Virtual func, does nothing here.
-void DataElement::resizeField( unsigned int rawIndex, unsigned int newNumField )
-{;}

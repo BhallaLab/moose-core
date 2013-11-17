@@ -76,8 +76,20 @@ void SrcFinfo0::send( const Eref& e ) const {
 		assert( f );
 		for ( vector< Eref >::const_iterator
 			j = i->targets.begin(); j != i->targets.end(); ++j ) {
+			if ( j->dataIndex() == ALLDATA ) {
+				Element* e = j->element();
+				unsigned int end = e->numData();
+				for ( DataId k = 0; k < end; ++k )
+					f->op( Eref( e, k ) );
+			} else  {
 				f->op( *j );
+			}
 		}
 	}
+}
+
+void SrcFinfo0::sendBuffer( const Eref& e, const double* buf ) const
+{
+	send( tgt->eref() );
 }
 
