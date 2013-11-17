@@ -9,6 +9,7 @@
 
 #include "header.h"
 #include "FuncOrder.h"
+#include "HopFunc.h"
 
 Element::Element( Id id, const Cinfo* c, const string& name )
 	:	name_( name ),
@@ -255,9 +256,32 @@ vector< FuncOrder>  putFuncsInOrder(
 	return fo;
 }
 
+// Filter out the messages going off-node. Eliminate from erefs and
+// flip flags in targetNodes.
+void filterOffNodeTargets(
+	vector< vector < Eref > >& erefs,
+   	vector< vector< bool > >& targetNodes )
+{
+	for ( unsigned int i = 0; i < erefs.size(); ++i ) {
+		vector< Eref >& vec = erefs[i];
+		vector< Eref > temp;
+		for ( unsigned int j = 0; j < vec.size(); ++j ) {
+			const Eref& er = vec[j];
+			unsigned int node = er.element()->getNode( er.dataIndex() );
+			if ( node == myNode() )
+				targetNodes[i][j] = true;
+			else
+				temp.push_back( er );
+		}
+		erefs[i] = temp; // Swap out the original set with the new one.
+	}
+}
+
 void Element::putTargetsInDigest( 
 				unsigned int srcNum, const MsgFuncBinding& mfb, 
-				const FuncOrder& fo )
+				const FuncOrder& fo, 
+			   vector< vector< bool > >& targetNodes )
+// targetNodes[srcDataId][node]
 {
 	const Msg* msg = Msg::getMsg( mfb.mid );
 	vector< vector < Eref > > erefs;
@@ -267,6 +291,10 @@ void Element::putTargetsInDigest(
 		msg->sources( erefs );
 	else
 		assert( 0 );
+
+	if ( numNodes() > 1 )
+		filterOffNodeTargets( erefs, targetNodes );
+
 	for ( unsigned int j = 0; j < numData(); ++j ) {
 		vector< MsgDigest >& md = 
 			msgDigest_[ msgBinding_.size() * j + srcNum ];
@@ -281,18 +309,59 @@ void Element::putTargetsInDigest(
 	}
 }
 
+// This puts the special HopFuncs into the MsgDigest. Furthermore, the
+// Erefs to which they point are the originating Eref instance on the
+// remote node. This Eref will then invoke its own send call to complete
+// the message transfer.
+void Element::putOffNodeTargetsInDigest(
+		unsigned int srcNum, vector< vector< bool > >& targetNodes )
+// targetNodes[srcDataId][node]
+{
+	if ( msgBinding_[ srcNum ].size() == 0 )
+		return;
+	const MsgFuncBinding& mfb = msgBinding_[ srcNum ][0];
+	const Msg* msg = Msg::getMsg( mfb.mid );
+	const OpFunc* func;
+	if ( msg->e1() == this ) {
+		func = msg->e2()->cinfo()->getOpFunc( mfb.fid );
+	} else {
+		func = msg->e1()->cinfo()->getOpFunc( mfb.fid );
+	}
+	assert( func );
+	// How do I eventually destroy these?
+	const OpFunc* hop = func->makeHopFunc( srcNum );
+	for ( unsigned int i = 0; i < numData(); ++i ) {
+		vector< Eref > tgts;
+		for ( unsigned int j = 0; j < numNodes(); ++j ) {
+			if ( targetNodes[i][j] )
+				tgts.push_back( Eref( this, i, j ) );
+			// This is a hack. I encode the target node # in the FieldIndex
+			// and the originating Eref in the remainder of the Eref.
+			// The HopFunc has to extract both these things to push into
+			// the correct SendBuffer.
+		}
+		vector< MsgDigest >& md = 
+			msgDigest_[ msgBinding_.size() * i + srcNum ];
+		md.push_back( MsgDigest( hop, tgts ) );
+	}
+}
+
 void Element::digestMessages()
 {
 	msgDigest_.clear();
 	msgDigest_.resize( msgBinding_.size() * numData() );
+	vector< bool > temp( numNodes(), false );
+ 	vector< vector< bool > > targetNodes( numData(), temp );
 	for ( unsigned int i = 0; i < msgBinding_.size(); ++i ) {
 		// Go through and identify functions with the same ptr.
 		vector< FuncOrder > fo = putFuncsInOrder( this, msgBinding_[i] );
 		for ( vector< FuncOrder >::const_iterator 
 						k = fo.begin(); k != fo.end(); ++k ) {
 			const MsgFuncBinding& mfb = msgBinding_[i][ k->index() ];
-			putTargetsInDigest( i, mfb, *k );
+			putTargetsInDigest( i, mfb, *k, targetNodes );
 		}
+		if ( numNodes() > 1 )
+			putOffNodeTargetsInDigest( i, targetNodes );
 	}
 }
 

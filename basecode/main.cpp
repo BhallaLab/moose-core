@@ -115,7 +115,18 @@ unsigned int getNumCores()
 	return numCPU;
 }
 
+unsigned int myNode()
+{
+	return Shell::myNode();
+}
+
+unsigned int numNodes()
+{
+	return Shell::numNodes();
+}
+
 bool quitFlag = 0;
+//////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
 
 void checkChildren( Id parent, const string& info )
@@ -188,11 +199,12 @@ Id init( int argc, char** argv, bool& doUnitTests, bool& doRegressionTests )
 
 	Id shellId;
 	Element* shelle = 
-		new DataElement( shellId, Shell::initCinfo(), "root", 1, 1 );
+		new GlobalDataElement( shellId, Shell::initCinfo(), "root", 1, 1 );
 
 	Id clockId = Id::nextId();
 	assert( clockId.value() == 1 );
 	Id classMasterId = Id::nextId();
+	Id postMasterId = Id::nextId();
 
 	Shell* s = reinterpret_cast< Shell* >( shellId.eref().data() );
 	s->setShellElement( shelle );
@@ -202,13 +214,14 @@ Id init( int argc, char** argv, bool& doUnitTests, bool& doRegressionTests )
 	/// Sets up the Elements that represent each class of Msg.
 	Msg::initMsgManagers();
 
-	// Element* clocke = 
-	new DataElement( clockId, Clock::initCinfo(), "clock", 1, 1 );
-	new DataElement( classMasterId, Neutral::initCinfo(), "classes", 1, 1 );
+	new GlobalDataElement( clockId, Clock::initCinfo(), "clock", 1, 1 );
+	new GlobalDataElement( classMasterId, Neutral::initCinfo(), "classes", 1, 1 );
+	new GlobalDataElement( postMasterId, Postmaster::initCinfo(), "postmaster", 1, 1 );
 
 	assert ( shellId == Id() );
 	assert( clockId == Id( 1 ) );
 	assert( classMasterId == Id( 2 ) );
+	assert( postMasterId == Id( 3 ) );
 
 
 
@@ -216,6 +229,7 @@ Id init( int argc, char** argv, bool& doUnitTests, bool& doRegressionTests )
 
 	Shell::adopt( shellId, clockId );
 	Shell::adopt( shellId, classMasterId );
+	Shell::adopt( shellId, postMasterId );
 
 	Cinfo::makeCinfoElements( classMasterId );
 

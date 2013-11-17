@@ -77,7 +77,6 @@ class ObjId;
 #include "ObjId.h"
 #include "Finfo.h"
 #include "DestFinfo.h"
-#include "SimGroup.h"
 #include "ProcInfo.h"
 #include "Cinfo.h"
 #include "MsgFuncBinding.h"
@@ -104,4 +103,6 @@ class Neutral;
 #include "FieldElement.h"
 #include "../shell/Neutral.h"
 
+extern unsigned int myNode();
+extern unsigned int numNodes();
 #endif // _HEADER_H

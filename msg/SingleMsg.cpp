@@ -44,14 +44,14 @@ Eref SingleMsg::firstTgt( const Eref& src ) const
 void SingleMsg::sources( vector< vector< Eref > >& v ) const
 {
 	v.clear();
-	v.resize( e2_->numData() );
+	v.resize( e2_->numLocalData() );
 	v[i1_].resize( 1, Eref( e2_, i2_ ) );
 }
 
 void SingleMsg::targets( vector< vector< Eref > >& v ) const
 {
 	v.clear();
-	v.resize( e1_->numData() );
+	v.resize( e1_->numLocalData() );
 	v[i1_].resize( 1, Eref( e2_, i2_, f2_ ) );
 }
 

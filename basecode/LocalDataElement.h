@@ -6,19 +6,18 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
-#ifndef _DATA_ELEMENT_H
-#define _DATA_ELEMENT_H
+#ifndef _LOCAL_DATA_ELEMENT_H
+#define _LOCAL_DATA_ELEMENT_H
 
 class SrcFinfo;
 class FuncOrder;
 
 /**
- * This is the base class for managing the data in the MOOSE interface.
- * Elaborates on base class for how it handles destruction.
- * Subclasses of this handle special node decomposition.
- * This does basic data management with raw indices.
+ * This is the class for handling the local portion of a data element
+ * that is distributed over many nodes.
+ * Does block-wise partitioning between nodes.
  */
-class DataElement: public Element
+class LocalDataElement: public DataElement
 {
 	public:
 		/**
@@ -29,22 +28,20 @@ class DataElement: public Element
 		 * Cinfo is the class
 		 * name is its name
 		 * numData is the number of data entries, defaults to a singleton.
-		 * The isGlobal flag specifies whether the created objects should
-		 * be replicated on all nodes, or partitioned without replication. 
 		 */
-		DataElement( Id id, const Cinfo* c, const string& name,
-			unsigned int numData = 1 );
+		LocalDataElement( Id id, const Cinfo* c, const string& name,
+			unsigned int numData = 1 )
 
 		/**
 		 * This constructor copies over the original n times. It is
 		 * used for doing all copies, in Shell::innerCopyElements.
 		 */
-		DataElement( Id id, const Element* orig, unsigned int n, bool toGlobal);
+		LocalDataElement( Id id, const Element* orig, unsigned int n, bool toGlobal);
 
 		/**
 		 * Virtual Destructor
 		 */
-		~DataElement();
+		~LocalDataElement();
 
 		/** 
 		 * Virtual copier. Makes a copy of self.
@@ -56,28 +53,16 @@ class DataElement: public Element
 		// Information access fields
 		/////////////////////////////////////////////////////////////////
 
-		/// Defined only in derived classes: unsigned int numData() const;
+		/// Inherited virtual. Returns number of data entries over all nodes
+		unsigned int numData() const;
 
-		/// Inherited virtual. Returns number of data entries on this node
-		unsigned int numLocalData() const;
+		/// Inherited virtual. Returns node location of specified object
+		unsigned int getNode( DataId dataId ) const;
 
-		/// Define only in derived classes: getNode( DataId dataId ) const;
-
-		/// Inherited virtual. Returns number of field entries for specified data
-		unsigned int numField( unsigned int rawIndex ) const;
-
-		/// Do not define getNode() or rawIndex() funcs, those are derived
-
-		/**
-		 * Inherited virtual
-		 * True if this is a FieldElement having an array of fields 
-		 * on each data entry. Clearly not true for the base Element.
-		 */
-		bool hasFields() const {
+		/// Inherited virtual. Reports if this is Global, which it isn't
+		bool isGlobal() const {
 			return false;
 		}
-
-		/// Do not define isGlobal, that is derived.
 
 		/////////////////////////////////////////////////////////////////
 		// data access stuff
@@ -110,29 +95,24 @@ class DataElement: public Element
 		 */
 		void resize( unsigned int newNumData );
 
-		/**
-		 * Inherited virtual.
-		 * Changes the number of fields on the specified data entry.
-		 * Doesn't do anything for the regular Element.
-		 */
-		void resizeField( 
-				unsigned int rawIndex, unsigned int newNumField ) 
-			{;}
-
 		/////////////////////////////////////////////////////////////////
 
 	private:
+		/**
+		 * This is the total number of data entries on this Element, in
+		 * the entire simulation. Note that these 
+		 * entries do not have to be on this node, some may be farmed out
+		 * to other nodes.
+		 */
+		unsigned int numData_;
 
 		/**
-		 * This points to an array holding the data for the Element.
+		 * This is the number of data entries per node, except for possibly
+		 * the last node if they don't divide evenly. Useful for
+		 * intermediate calculations.
 		 */
-		char* data_;
-
-		/**
-		 * This is the number of data entries on the current node.
-		 */
-		unsigned int numLocalData_;
+		unsigned int numPerNode_;
 
 };
 
-#endif // _DATA_ELEMENT_H
+#endif // _LOCAL_DATA_ELEMENT_H

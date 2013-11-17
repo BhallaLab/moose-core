@@ -8,7 +8,7 @@
 **********************************************************************/
 
 /**
- * Binds ObjId to FuncIds.
+ * Binds MsgId to FuncIds.
  */
 class MsgFuncBinding
 {
