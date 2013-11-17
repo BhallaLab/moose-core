@@ -21,6 +21,8 @@ OBJ = \
 	consts.o	\
 	Element.o	\
 	DataElement.o	\
+	GlobalDataElement.o	\
+	LocalDataElement.o	\
 	Eref.o	\
 	Finfo.o	\
 	DestFinfo.o	\
@@ -34,6 +36,7 @@ OBJ = \
 	ObjId.o \
 	SetGet.o \
 	EpFunc.o \
+	HopFunc.o \
 	SparseMatrix.o \
 	doubleEq.o \
 	testAsync.o	\
@@ -47,6 +50,8 @@ HEADERS = \
 	MsgDigest.h \
 	Element.h \
 	DataElement.h \
+	GlobalDataElement.h \
+	LocalDataElement.h \
 	Eref.h \
 	Finfo.h \
 	DestFinfo.h \
@@ -73,6 +78,7 @@ Element.o:	FuncOrder.h
 testAsync.o:	SparseMatrix.h SetGet.h ../scheduling/Clock.h ../biophysics/IntFire.h ../biophysics/SpikeRingBuffer.h ../biophysics/SynHandler.h
 SparseMsg.o:	SparseMatrix.h
 SetGet.o:	SetGet.h ../shell/Neutral.h
+HopFunc.o:	Hopfunc.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -I../msg $< -c

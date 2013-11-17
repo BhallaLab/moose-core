@@ -19,12 +19,6 @@ class FuncOrder;
  */
 class Element
 {
-	friend void testSync();
-	friend void testAsync();
-	friend void testStandaloneIntFire();
-	friend void testSynapse();
-	friend void testSyncArray( unsigned int, unsigned int, unsigned int );
-	friend void testSparseMsg();
 	public:
 		/**
 		 * This is the main constructor, used by Shell::innerCreate
@@ -63,11 +57,23 @@ class Element
 		 */
 		void setName( const string& val );
 
-		/// Returns number of data entries
+		/// Returns number of data entries across all nodesl
 		virtual unsigned int numData() const = 0;
+
+		/// Returns number of local data entries on this node.
+		virtual unsigned int numLocalData() const = 0;
 
 		/// Returns number of field entries for specified data
 		virtual unsigned int numField( unsigned int rawIndex ) const = 0;
+
+		/// Returns location of specified dataId.
+		virtual unsigned int getNode( unsigned int dataId ) const = 0;
+
+		/**
+		 * Converts dataId to index on current node. Returns OFFNODE 
+		 * if not here.
+		 */ 
+		virtual unsigned int rawIndex( unsigned int dataId ) const = 0;
 
 		/**
 		 * Returns the Id on this Elm
@@ -79,6 +85,9 @@ class Element
 		 * on each data entry. Clearly not true for the base Element.
 		 */
 		virtual bool hasFields() const = 0;
+
+		/// True if there is a copy of every dataEntry on all nodes.
+		virtual bool isGlobal() const = 0;
 
 		/////////////////////////////////////////////////////////////////
 		// data access stuff
@@ -175,7 +184,14 @@ class Element
 		 */
 		void putTargetsInDigest(
 					   	unsigned int srcNum, const MsgFuncBinding& mfb,
-						const FuncOrder& fo );
+						const FuncOrder& fo,
+						vector< vector< bool > >& targetNodes
+	   	);
+		/**
+		 * Inner function that adds off-node targets to the MsgDigest
+		 */
+		void putOffNodeTargetsInDigest(
+		   	unsigned int srcNum, vector< vector< bool > >& targetNodes );
 
 		/**
 		 * Gets the class information for this Element

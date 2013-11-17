@@ -294,6 +294,7 @@ SUBDIR = \
 	shell \
 	randnum\
 	scheduling\
+	mpi \
 	builtins\
 	utility \
 	external/muparser \
@@ -312,6 +313,7 @@ OBJLIBS =	\
 	shell/_shell.o \
 	randnum/_randnum.o \
 	scheduling/_scheduling.o \
+	mpi/_mpi.o \
 	builtins/_builtins.o \
 	utility/_utility.o \
 	external/muparser/_muparser.o \

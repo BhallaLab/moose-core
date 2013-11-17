@@ -18,6 +18,8 @@ class OpFunc
 		virtual bool checkFinfo( const Finfo* s) const = 0;
 
 		virtual string rttiType() const = 0;
+
+		virtual const OpFunc* makeHopFunc( unsigned int bindIndex) const =0;
 };
 
 class OpFunc0Base: public OpFunc
@@ -29,11 +31,14 @@ class OpFunc0Base: public OpFunc
 
 		virtual void op( const Eref& e ) const = 0;
 
+		const OpFunc* makeHopFunc( unsigned int bindIndex) const;
+
 		string rttiType() const {
 			return "void";
 		}
 };
 
+template< class A > class HopFunc1;
 template< class A > class OpFunc1Base: public OpFunc
 {
 	public:
@@ -44,11 +49,17 @@ template< class A > class OpFunc1Base: public OpFunc
 
 		virtual void op( const Eref& e, A arg ) const = 0;
 
+		const OpFunc* makeHopFunc( unsigned int bindIndex) const 
+		{
+			return new HopFunc1< A >( bindIndex );
+		}
+
 		string rttiType() const {
 			return Conv< A >::rttiType();
 		}
 };
 
+template < class A1, class A2 > class HopFunc2;
 template< class A1, class A2 > class OpFunc2Base: public OpFunc
 {
 	public:
@@ -59,12 +70,17 @@ template< class A1, class A2 > class OpFunc2Base: public OpFunc
 		virtual void op( const Eref& e, A1 arg1, A2 arg2 ) 
 				const = 0;
 
+		const OpFunc* makeHopFunc( unsigned int bindIndex) const 
+		{
+			return new HopFunc2< A1, A2 >( bindIndex );
+		}
 
 		string rttiType() const {
 			return Conv< A1 >::rttiType() + "," + Conv< A2 >::rttiType(); 
 		}
 };
 
+template< class A1, class A2, class A3 > class HopFunc3;
 template< class A1, class A2, class A3 > class OpFunc3Base: 
 	public OpFunc
 {
@@ -76,12 +92,18 @@ template< class A1, class A2, class A3 > class OpFunc3Base:
 		virtual void op( const Eref& e, A1 arg1, A2 arg2, A3 arg3 ) 
 				const = 0;
 
+		const OpFunc* makeHopFunc( unsigned int bindIndex) const 
+		{
+			return new HopFunc3< A1, A2, A3 >( bindIndex );
+		}
+
 		string rttiType() const {
 			return Conv< A1 >::rttiType() + "," + Conv< A2 >::rttiType() +
 				"," + Conv< A3 >::rttiType();
 		}
 };
 
+template< class A1, class A2, class A3, class A4 > class HopFunc4;
 template< class A1, class A2, class A3, class A4 > 
 	class OpFunc4Base: public OpFunc
 {
@@ -93,12 +115,18 @@ template< class A1, class A2, class A3, class A4 >
 		virtual void op( const Eref& e, 
 						A1 arg1, A2 arg2, A3 arg3, A4 arg4 ) const = 0;
 
+		const OpFunc* makeHopFunc( unsigned int bindIndex) const 
+		{
+			return new HopFunc4< A1, A2, A3, A4 >( bindIndex );
+		}
+
 		string rttiType() const {
 			return Conv< A1 >::rttiType() + "," + Conv< A2 >::rttiType() +
 				"," + Conv<A3>::rttiType() + "," + Conv<A4>::rttiType();
 		}
 };
 
+template< class A1, class A2, class A3, class A4, class A5 > class HopFunc5;
 template< class A1, class A2, class A3, class A4, class A5 > 
 	class OpFunc5Base: public OpFunc
 {
@@ -110,6 +138,11 @@ template< class A1, class A2, class A3, class A4, class A5 >
 		virtual void op( const Eref& e, 
 				A1 arg1, A2 arg2, A3 arg3, A4 arg4, A5 arg5 ) const = 0;
 
+		const OpFunc* makeHopFunc( unsigned int bindIndex) const 
+		{
+			return new HopFunc5< A1, A2, A3, A4, A5 >( bindIndex );
+		}
+
 		string rttiType() const {
 			return Conv< A1 >::rttiType() + "," + Conv< A2 >::rttiType() +
 				"," + Conv<A3>::rttiType() + "," + Conv<A4>::rttiType() +
@@ -117,6 +150,8 @@ template< class A1, class A2, class A3, class A4, class A5 >
 		}
 };
 
+template< class A1, class A2, class A3, class A4, class A5, class A6 > 
+	class HopFunc6;
 template< class A1, class A2, class A3, class A4, class A5, class A6 > 
 		class OpFunc6Base: public OpFunc
 {
@@ -127,6 +162,11 @@ template< class A1, class A2, class A3, class A4, class A5, class A6 >
 
 		virtual void op( const Eref& e, A1 arg1, A2 arg2, A3 arg3, A4 arg4, 
 						A5 arg5, A6 arg6 ) const = 0;
+
+		const OpFunc* makeHopFunc( unsigned int bindIndex) const 
+		{
+			return new HopFunc6< A1, A2, A3, A4, A5, A6 >( bindIndex );
+		}
 
 		string rttiType() const {
 			return Conv< A1 >::rttiType() + "," + Conv< A2 >::rttiType() +
