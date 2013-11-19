@@ -14,6 +14,7 @@
 #include "OneToAllMsg.h"
 #include "SparseMatrix.h"
 #include "SparseMsg.h"
+#include "../shell/Shell.h" // For the myNode() and numNodes() definitions
 #include "MsgElement.h"
 
 #include "../shell/Shell.h"
@@ -235,7 +236,8 @@ void Msg::initMsgManagers()
 
 	// This is to be the parent of all the msg managers.
 	msgManagerId_ = Id::nextId();
-	new DataElement( msgManagerId_, Neutral::initCinfo(), "Msgs", 1, 1 );
+	new GlobalDataElement( 
+					msgManagerId_, Neutral::initCinfo(), "Msgs", 1 );
 
 	SingleMsg::managerId_ = Id::nextId();
 	new MsgElement( SingleMsg::managerId_, SingleMsg::initCinfo(), 

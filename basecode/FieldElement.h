@@ -34,8 +34,17 @@ class FieldElement: public Element
 		/// Virtual: Returns number of data entries
 		unsigned int numData() const;
 
+		/// Virtual: Returns number of data entries on current node.
+		unsigned int numLocalData() const;
+
 		/// Virtual: Returns number of field entries for specified data
 		unsigned int numField( unsigned int rawIndex ) const;
+
+		/// Virtual: Returns location of specified dataId
+		unsigned int getNode( unsigned int dataId ) const;
+
+		/// Virtual: Returns converted dataId to index on current node.
+		unsigned int rawIndex( unsigned int dataId ) const;
 
 		/**
 		 * Virtual: True if this is a FieldElement having an array of
@@ -44,6 +53,9 @@ class FieldElement: public Element
 		bool hasFields() const {
 			return true;
 		}
+
+		/// Virtual. Returns true if global, ie, if its parent is global
+		bool isGlobal() const;
 
 		/////////////////////////////////////////////////////////////////
 		// data access stuff

@@ -61,6 +61,7 @@ HEADERS = \
 	OpFuncBase.h \
 	OpFunc.h \
 	EpFunc.h \
+	HopFunc.h \
 	ProcInfo.h \
 	SrcFinfo.h \
 	ValueFinfo.h \
@@ -78,7 +79,7 @@ Element.o:	FuncOrder.h
 testAsync.o:	SparseMatrix.h SetGet.h ../scheduling/Clock.h ../biophysics/IntFire.h ../biophysics/SpikeRingBuffer.h ../biophysics/SynHandler.h
 SparseMsg.o:	SparseMatrix.h
 SetGet.o:	SetGet.h ../shell/Neutral.h
-HopFunc.o:	Hopfunc.h
+HopFunc.o:	HopFunc.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -I../msg $< -c

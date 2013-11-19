@@ -9,6 +9,7 @@
 
 #include "header.h"
 #include "FuncOrder.h"
+#include "../shell/Shell.h"
 
 LocalDataElement::LocalDataElement( Id id, const Cinfo* c, 
 	const string& name, unsigned int numData )
@@ -40,6 +41,9 @@ Element* LocalDataElement::copyElement( Id newParent, Id newId,
 		unsigned int n, bool toGlobal ) const
 {
 	if ( toGlobal ) {
+		cout << "Don't know yet how to copy LocalDataElement to global\n";
+		assert( 0 );
+		return 0;
 	} else {
 		return new LocalDataElement( newId, this, n );
 	}
@@ -73,10 +77,10 @@ unsigned int LocalDataElement::rawIndex( unsigned int dataId ) const {
 // numPerNode_ helper field.
 unsigned int LocalDataElement::setDataSize( unsigned int numData )
 {
-	numData_ = newNumData;
-	numPerNode_ = 1 + (numData_ -1 ) / numNodes();
+	numData_ = numData;
+	numPerNode_ = 1 + (numData_ -1 ) / Shell::numNodes();
 	unsigned int numLocalData = numPerNode_;
-	if ( myNode() == numNodes() -1 )
+	if ( Shell::myNode() == Shell::numNodes() -1 )
 		numLocalData = numData_ % numPerNode_;
 	return numLocalData;
 }
@@ -84,5 +88,5 @@ unsigned int LocalDataElement::setDataSize( unsigned int numData )
 // virtual func, overridden.
 void LocalDataElement::resize( unsigned int newNumData )
 {
-	DataElement::resize( setDataSize( newNumData );
+	DataElement::resize( setDataSize( newNumData ) ); 
 }

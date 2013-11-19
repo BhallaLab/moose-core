@@ -42,12 +42,34 @@ unsigned int FieldElement::numData() const
 	return parent_.element()->numData();
 }
 
+unsigned int FieldElement::numLocalData() const
+{
+	return parent_.element()->numLocalData();
+}
+
 unsigned int FieldElement::numField( unsigned int rawIndex ) const 
 {
 	const char* data = parent_.element()->data( rawIndex );
 	assert( data );
 	return fef_->getNumField( data );
 }
+
+unsigned int FieldElement::getNode( unsigned int dataId ) const
+{
+	return parent_.element()->getNode( dataId );
+}
+
+unsigned int FieldElement::rawIndex( unsigned int dataId ) const
+{
+	return parent_.element()->rawIndex( dataId );
+}
+
+bool FieldElement::isGlobal() const
+{
+	return parent_.element()->isGlobal();
+}
+
+/////////////////////////////////////////////////////////////////////////
 
 char* FieldElement::data( unsigned int rawIndex, unsigned int fieldIndex ) 
 		const

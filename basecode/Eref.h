@@ -43,7 +43,9 @@ class Eref
 		 * immediate lookup, but to pass to EpFuncs that know
 		 * how to use this for lookup.
 		 */
-		unsigned int fieldIndex() const;
+		unsigned int fieldIndex() const {
+			return f_;
+		}
 
 		/**
 		 * Returns the ObjId corresponding to the Eref. All info is kept.

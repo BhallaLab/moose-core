@@ -18,7 +18,7 @@ class FuncOrder;
  * Elaborates on base class for how it handles destruction.
  * Does block-wise partitioning between nodes.
  */
-class GlobalDataElement: public Element
+class GlobalDataElement: public DataElement
 {
 	public:
 		/**
@@ -33,13 +33,13 @@ class GlobalDataElement: public Element
 		 * be replicated on all nodes, or partitioned without replication. 
 		 */
 		GlobalDataElement( Id id, const Cinfo* c, const string& name,
-			unsigned int numData = 1 )
+			unsigned int numData = 1 );
 
 		/**
 		 * This constructor copies over the original n times. It is
 		 * used for doing all copies, in Shell::innerCopyElements.
 		 */
-		GlobalDataElement( Id id, const Element* orig, unsigned int n, bool toGlobal);
+		GlobalDataElement( Id id, const Element* orig, unsigned int n );
 
 		/**
 		 * Virtual Destructor

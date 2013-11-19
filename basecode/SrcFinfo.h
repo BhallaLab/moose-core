@@ -52,7 +52,8 @@ class SrcFinfo: public Finfo
 		 * Sends contents of buffer on to msg targets
 		 * Buffer has a header with the TgtInfo.
 		 */
-		virtual void sendBuffer( const double* buf ) const = 0;
+		virtual void sendBuffer( const Eref& e, double* buf ) 
+				const = 0;
 
 		static const BindIndex BadBindIndex;
 	private:
@@ -74,7 +75,7 @@ class SrcFinfo0: public SrcFinfo
 		
 		void send( const Eref& e ) const;
 
-		void sendBuffer( const double* buf ) const;
+		void sendBuffer( const Eref& e, double* buf ) const;
 
 		string rttiType() const {
 			return "void";
@@ -122,7 +123,7 @@ template < class T > class SrcFinfo1: public SrcFinfo
 			}
 		}
 
-		void sendBuffer( const Eref& e, const double* buf ) const
+		void sendBuffer( const Eref& e, double* buf ) const
 		{
 			send( e, Conv< T >::buf2val( &buf ) );
 		}
@@ -167,7 +168,7 @@ template < class T1, class T2 > class SrcFinfo2: public SrcFinfo
 			}
 		}
 
-		void sendBuffer( const Eref& e, const double* buf ) const
+		void sendBuffer( const Eref& e, double* buf ) const
 		{
 			send( e, 
 				Conv< T1 >::buf2val( &buf ), Conv< T2 >::buf2val( &buf )
@@ -215,7 +216,7 @@ template < class T1, class T2, class T3 > class SrcFinfo3: public SrcFinfo
 			}
 		}
 
-		void sendBuffer( const Eref& e, const double* buf ) const
+		void sendBuffer( const Eref& e, double* buf ) const
 		{
 			send( e,
 				Conv< T1 >::buf2val( &buf ), Conv< T2 >::buf2val( &buf ),
@@ -267,7 +268,7 @@ template < class T1, class T2, class T3, class T4 > class SrcFinfo4: public SrcF
 			}
 		}
 
-		void sendBuffer( const Eref& e, const double* buf ) const
+		void sendBuffer( const Eref& e, double* buf ) const
 		{
 			send( e,
 				Conv< T1 >::buf2val( &buf ), Conv< T2 >::buf2val( &buf ),
@@ -321,7 +322,7 @@ template < class T1, class T2, class T3, class T4, class T5 > class SrcFinfo5: p
 			}
 		}
 
-		void sendBuffer( const Eref& e, const double* buf ) const
+		void sendBuffer( const Eref& e, double* buf ) const
 		{
 			send( e,
 				Conv< T1 >::buf2val( &buf ), Conv< T2 >::buf2val( &buf ),
@@ -378,7 +379,7 @@ template < class T1, class T2, class T3, class T4, class T5, class T6 > class Sr
 			}
 		}
 
-		void sendBuffer( const Eref& e, const double* buf ) const
+		void sendBuffer( const Eref& e, double* buf ) const
 		{
 			send( e,
 				Conv< T1 >::buf2val( &buf ), Conv< T2 >::buf2val( &buf ),
