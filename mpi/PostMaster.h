@@ -67,12 +67,21 @@
 
 class TgtInfo {
 	public: 
-		TgtInfo();
-				: tgt_(  ), dataSize_( dataSize )
+		TgtInfo()
+				: id_( 0 ), dataIndex_( 0 ), 
+				bindIndex_( 0 ), dataSize_( 0 )
 		{;}
 
 		Eref eref() const {
 			return Eref( id_.element(), dataIndex_, 0 );
+		}
+
+		void set( Id id, DataId dataIndex, unsigned int bindIndex, 
+						unsigned int size ) {
+			id_ = id;
+			dataIndex_ = dataIndex;
+			bindIndex_ = bindIndex;
+			dataSize_ = size;
 		}
 
 		unsigned int dataSize() const {
@@ -89,14 +98,21 @@ class TgtInfo {
 
 class PostMaster {
 	public:
+		PostMaster();
+		unsigned int getNumNodes() const;
+		unsigned int getMyNode() const;
+		unsigned int getBufferSize() const;
+		void setBufferSize( unsigned int size );
 		void reinit( const Eref& e, ProcPtr p );
 		void process( const Eref& e, ProcPtr p );
-		void clearPending();
-		char* addToSendBuf( const Eref& e, 
+		int clearPending();
+		double* addToSendBuf( const Eref& e, 
 				unsigned int bindIndex, unsigned int size );
+		static const Cinfo* initCinfo();
 	private:
-		vector< vector< double > > sendbuf_;
-		vector< vector< double > > recvbuf_;
+		unsigned int recvBufSize_;
+		vector< vector< double > > sendBuf_;
+		vector< vector< double > > recvBuf_;
 		vector< unsigned int > sendSize_;
 };
 

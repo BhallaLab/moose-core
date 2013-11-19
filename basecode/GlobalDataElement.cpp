@@ -9,6 +9,7 @@
 
 #include "header.h"
 #include "FuncOrder.h"
+#include "../shell/Shell.h"
 
 GlobalDataElement::GlobalDataElement( Id id, const Cinfo* c, 
 	const string& name, unsigned int numData )
@@ -25,9 +26,9 @@ GlobalDataElement::GlobalDataElement( Id id, const Cinfo* c,
  * Note that n is the number of individual  dataEntries that are made.
  */
 GlobalDataElement::GlobalDataElement( Id id, const Element* orig, 
-				unsigned int n, bool toGlobal)
+				unsigned int n )
 	:	
-		DataElement( id, orig, n, toGlobal )
+		DataElement( id, orig, n )
 {;}
 
 // Virtual destructor.
@@ -38,7 +39,7 @@ Element* GlobalDataElement::copyElement(
 		Id newParent, Id newId, unsigned int n, bool toGlobal ) const
 {
 	if ( toGlobal )
-			return new GlobalDataElement( newId, this, n, toGlobal );
+		return new GlobalDataElement( newId, this, n );
 	else 
 		return new LocalDataElement( newId, this, n );
 }
@@ -56,7 +57,7 @@ unsigned int GlobalDataElement::numData() const
 
 unsigned int GlobalDataElement::getNode( unsigned int dataId ) const {
 	// Assume numData = 95. DataId = 0-9: 0, DataId=80-89:8, DataId >= 90:9
-	return numNode();
+	return Shell::myNode();
 }
 
 unsigned int GlobalDataElement::rawIndex( unsigned int dataId ) const {

@@ -7,7 +7,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-testMpi()
+void testMpi()
 {
 		;
 }

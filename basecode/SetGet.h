@@ -286,13 +286,13 @@ template< class A > class Field: public SetGet1< A >
 		 * Blocking call using string conversion
 		 */
 		static bool innerStrSet( const ObjId& dest, const string& field, 
-			const string& val )
+			const string& arg )
 		{
-			A arg;
+			A val;
 			// Do NOT add 'set_' to the field name, as the 'set' func
 			// does it anyway.
-			Conv< A >::str2val( arg, val );
-			return set( dest, field, arg );
+			Conv< A >::str2val( val, arg );
+			return set( dest, field, val );
 		}
 
 	//////////////////////////////////////////////////////////////////

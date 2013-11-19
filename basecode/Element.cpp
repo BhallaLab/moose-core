@@ -10,6 +10,7 @@
 #include "header.h"
 #include "FuncOrder.h"
 #include "HopFunc.h"
+#include "../shell/Shell.h"
 
 Element::Element( Id id, const Cinfo* c, const string& name )
 	:	name_( name ),
@@ -268,7 +269,7 @@ void filterOffNodeTargets(
 		for ( unsigned int j = 0; j < vec.size(); ++j ) {
 			const Eref& er = vec[j];
 			unsigned int node = er.element()->getNode( er.dataIndex() );
-			if ( node == myNode() )
+			if ( node == Shell::myNode() )
 				targetNodes[i][j] = true;
 			else
 				temp.push_back( er );
@@ -292,7 +293,7 @@ void Element::putTargetsInDigest(
 	else
 		assert( 0 );
 
-	if ( numNodes() > 1 )
+	if ( Shell::numNodes() > 1 )
 		filterOffNodeTargets( erefs, targetNodes );
 
 	for ( unsigned int j = 0; j < numData(); ++j ) {
@@ -332,7 +333,7 @@ void Element::putOffNodeTargetsInDigest(
 	const OpFunc* hop = func->makeHopFunc( srcNum );
 	for ( unsigned int i = 0; i < numData(); ++i ) {
 		vector< Eref > tgts;
-		for ( unsigned int j = 0; j < numNodes(); ++j ) {
+		for ( unsigned int j = 0; j < Shell::numNodes(); ++j ) {
 			if ( targetNodes[i][j] )
 				tgts.push_back( Eref( this, i, j ) );
 			// This is a hack. I encode the target node # in the FieldIndex
@@ -350,7 +351,7 @@ void Element::digestMessages()
 {
 	msgDigest_.clear();
 	msgDigest_.resize( msgBinding_.size() * numData() );
-	vector< bool > temp( numNodes(), false );
+	vector< bool > temp( Shell::numNodes(), false );
  	vector< vector< bool > > targetNodes( numData(), temp );
 	for ( unsigned int i = 0; i < msgBinding_.size(); ++i ) {
 		// Go through and identify functions with the same ptr.
@@ -360,7 +361,7 @@ void Element::digestMessages()
 			const MsgFuncBinding& mfb = msgBinding_[i][ k->index() ];
 			putTargetsInDigest( i, mfb, *k, targetNodes );
 		}
-		if ( numNodes() > 1 )
+		if ( Shell::numNodes() > 1 )
 			putOffNodeTargetsInDigest( i, targetNodes );
 	}
 }

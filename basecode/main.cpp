@@ -24,6 +24,7 @@
 #include "DiagonalMsg.h"
 #include "SparseMatrix.h"
 #include "SparseMsg.h"
+#include "../mpi/PostMaster.h"
 #ifdef USE_MPI
 #include <mpi.h>
 #endif
@@ -115,16 +116,6 @@ unsigned int getNumCores()
 	return numCPU;
 }
 
-unsigned int myNode()
-{
-	return Shell::myNode();
-}
-
-unsigned int numNodes()
-{
-	return Shell::numNodes();
-}
-
 bool quitFlag = 0;
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
@@ -199,7 +190,7 @@ Id init( int argc, char** argv, bool& doUnitTests, bool& doRegressionTests )
 
 	Id shellId;
 	Element* shelle = 
-		new GlobalDataElement( shellId, Shell::initCinfo(), "root", 1, 1 );
+		new GlobalDataElement( shellId, Shell::initCinfo(), "root", 1 );
 
 	Id clockId = Id::nextId();
 	assert( clockId.value() == 1 );
@@ -214,9 +205,9 @@ Id init( int argc, char** argv, bool& doUnitTests, bool& doRegressionTests )
 	/// Sets up the Elements that represent each class of Msg.
 	Msg::initMsgManagers();
 
-	new GlobalDataElement( clockId, Clock::initCinfo(), "clock", 1, 1 );
-	new GlobalDataElement( classMasterId, Neutral::initCinfo(), "classes", 1, 1 );
-	new GlobalDataElement( postMasterId, Postmaster::initCinfo(), "postmaster", 1, 1 );
+	new GlobalDataElement( clockId, Clock::initCinfo(), "clock", 1 );
+	new GlobalDataElement( classMasterId, Neutral::initCinfo(), "classes", 1);
+	new GlobalDataElement( postMasterId, PostMaster::initCinfo(), "postmaster", 1 );
 
 	assert ( shellId == Id() );
 	assert( clockId == Id( 1 ) );
