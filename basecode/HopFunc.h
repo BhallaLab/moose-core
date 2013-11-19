@@ -23,7 +23,7 @@ class HopFunc0: public OpFunc0Base
 		HopFunc0( unsigned int bindIndex )
 				: bindIndex_( bindIndex )
 		{;}
-		void Op( const Eref& e ) const
+		void op( const Eref& e ) const
 		{
 			addToBuf( e, bindIndex_, 0 );
 		}
@@ -38,14 +38,24 @@ template < class A > class HopFunc1: public OpFunc1Base< A >
 		HopFunc1( unsigned int bindIndex )
 				: bindIndex_( bindIndex )
 		{;}
-		void Op( const Eref& e, A arg ) const
+		void op( const Eref& e, A arg ) const
 		{
 			double* buf = addToBuf( e, bindIndex_, Conv< A >::size( arg ) );
-			Conv< A >::val2buf( arg, buf );
+			Conv< A >::val2buf( arg, &buf );
 		}
 	private:
 		unsigned int bindIndex_;
 };
+
+/**
+ * Deferred specification of function from OpFunc1Base, so it is after 
+ * the declaration of the HopFunc class to which it refers.
+ */
+template< class A > 
+const OpFunc* OpFunc1Base< A >::makeHopFunc( unsigned int bindIndex ) const
+{
+	return new HopFunc1< A >( bindIndex );
+}
 
 // Function to hop across nodes, with two arguments.
 template < class A1, class A2 > class HopFunc2: public OpFunc2Base< A1, A2 >
@@ -54,7 +64,7 @@ template < class A1, class A2 > class HopFunc2: public OpFunc2Base< A1, A2 >
 		HopFunc2( unsigned int bindIndex )
 				: bindIndex_( bindIndex )
 		{;}
-		void Op( const Eref& e, A1 arg1, A2 arg2 ) const
+		void op( const Eref& e, A1 arg1, A2 arg2 ) const
 		{
 			double* buf = addToBuf( e, bindIndex_, 
 				Conv< A1 >::size( arg1 ) + Conv< A2 >::size( arg2 ) );
@@ -74,6 +84,13 @@ template < class A1, class A2 > class HopFunc2: public OpFunc2Base< A1, A2 >
 		unsigned int bindIndex_;
 };
 
+template< class A1, class A2 > 
+const OpFunc* OpFunc2Base< A1, A2 >::makeHopFunc( 
+				unsigned int bindIndex) const 
+{
+	return new HopFunc2< A1, A2 >( bindIndex );
+}
+
 // Function to hop across nodes, with three arguments.
 template < class A1, class A2, class A3 > class HopFunc3: 
 		public OpFunc3Base< A1, A2, A3 >
@@ -83,7 +100,7 @@ template < class A1, class A2, class A3 > class HopFunc3:
 				: bindIndex_( bindIndex )
 		{;}
 
-		void Op( const Eref& e, A1 arg1, A2 arg2, A3 arg3 ) const
+		void op( const Eref& e, A1 arg1, A2 arg2, A3 arg3 ) const
 		{
 			double* buf = addToBuf( e, bindIndex_, 
 				Conv< A1 >::size( arg1 ) + Conv< A2 >::size( arg2 ) +
@@ -96,6 +113,13 @@ template < class A1, class A2, class A3 > class HopFunc3:
 		unsigned int bindIndex_;
 };
 
+template< class A1, class A2, class A3 > 
+const OpFunc* OpFunc3Base< A1, A2, A3 >::makeHopFunc( 
+				unsigned int bindIndex) const 
+{
+	return new HopFunc3< A1, A2, A3 >( bindIndex );
+}
+
 // Function to hop across nodes, with three arguments.
 template < class A1, class A2, class A3, class A4 > class HopFunc4: 
 		public OpFunc4Base< A1, A2, A3, A4 >
@@ -105,7 +129,7 @@ template < class A1, class A2, class A3, class A4 > class HopFunc4:
 				: bindIndex_( bindIndex )
 		{;}
 
-		void Op( const Eref& e, A1 arg1, A2 arg2, A3 arg3, A4 arg4 ) const
+		void op( const Eref& e, A1 arg1, A2 arg2, A3 arg3, A4 arg4 ) const
 		{
 			double* buf = addToBuf( e, bindIndex_, 
 				Conv< A1 >::size( arg1 ) + Conv< A2 >::size( arg2 ) +
@@ -119,6 +143,13 @@ template < class A1, class A2, class A3, class A4 > class HopFunc4:
 		unsigned int bindIndex_;
 };
 
+template< class A1, class A2, class A3, class A4 > 
+const OpFunc* OpFunc4Base< A1, A2, A3, A4 >::makeHopFunc( 
+				unsigned int bindIndex) const 
+{
+	return new HopFunc4< A1, A2, A3, A4 >( bindIndex );
+}
+
 // Function to hop across nodes, with three arguments.
 template < class A1, class A2, class A3, class A4, class A5 >
 	class HopFunc5: public OpFunc5Base< A1, A2, A3, A4, A5 >
@@ -128,7 +159,7 @@ template < class A1, class A2, class A3, class A4, class A5 >
 				: bindIndex_( bindIndex )
 		{;}
 
-		void Op( const Eref& e, A1 arg1, A2 arg2, A3 arg3, 
+		void op( const Eref& e, A1 arg1, A2 arg2, A3 arg3, 
 						A4 arg4, A5 arg5 ) const
 		{
 			double* buf = addToBuf( e, bindIndex_, 
@@ -145,6 +176,13 @@ template < class A1, class A2, class A3, class A4, class A5 >
 		unsigned int bindIndex_;
 };
 
+template< class A1, class A2, class A3, class A4, class A5 > 
+const OpFunc* OpFunc5Base< A1, A2, A3, A4, A5 >::makeHopFunc( 
+				unsigned int bindIndex) const 
+{
+	return new HopFunc5< A1, A2, A3, A4, A5 >( bindIndex );
+}
+
 // Function to hop across nodes, with three arguments.
 template < class A1, class A2, class A3, class A4, class A5, class A6 >
 	class HopFunc6: public OpFunc6Base< A1, A2, A3, A4, A5, A6 >
@@ -154,7 +192,7 @@ template < class A1, class A2, class A3, class A4, class A5, class A6 >
 				: bindIndex_( bindIndex )
 		{;}
 
-		void Op( const Eref& e, A1 arg1, A2 arg2, A3 arg3, 
+		void op( const Eref& e, A1 arg1, A2 arg2, A3 arg3, 
 						A4 arg4, A5 arg5, A6 arg6 ) const
 		{
 			double* buf = addToBuf( e, bindIndex_, 
@@ -171,6 +209,13 @@ template < class A1, class A2, class A3, class A4, class A5, class A6 >
 	private:
 		unsigned int bindIndex_;
 };
+
+template< class A1, class A2, class A3, class A4, class A5, class A6 > 
+const OpFunc* OpFunc6Base< A1, A2, A3, A4, A5, A6 >::makeHopFunc( 
+				unsigned int bindIndex) const 
+{
+	return new HopFunc6< A1, A2, A3, A4, A5, A6 >( bindIndex );
+}
 
 
 #endif // _HOP_FUNC_H

@@ -39,9 +39,9 @@ template< class T > class Conv
 		}
 
 
-		static const T& buf2val( const double** buf ) {
-			T* ret = *reinterpret_cast< const T* >( *buf );
-			*buf += size( *buf );
+		static const T& buf2val( double** buf ) {
+			const T* ret = reinterpret_cast< const T* >( *buf );
+			*buf += size( *ret );
 			return *ret;
 		}
 
@@ -52,7 +52,7 @@ template< class T > class Conv
 		 * types T.
 		 */
 		static void val2buf( const T& val, double** buf ) {
-			**reinterpret_cast< T >( **buf ) = val;
+			*reinterpret_cast< T* >( *buf ) = val;
 			*buf += size( val );
 		}
 
@@ -124,7 +124,7 @@ template<> class Conv< string >
 			return ( 1 + val.length() ) / sizeof( double );
 		}
 
-		static const string& buf2val( const double** buf ) {
+		static const string& buf2val( double** buf ) {
 			static string ret;
 			ret = reinterpret_cast< const char* >( *buf );
 			*buf += size( ret );
@@ -172,7 +172,7 @@ template<> class Conv< double >
 			return 1;
 		}
 
-		static const double buf2val( const double** buf ) {
+		static const double buf2val( double** buf ) {
 			double ret = **buf;
 			(*buf)++;
 			return ret;
@@ -213,7 +213,7 @@ template<> class Conv< float >
 			return 1;
 		}
 
-		static const float buf2val( const double** buf ) {
+		static const float buf2val( double** buf ) {
 			float ret = **buf;
 			(*buf)++;
 			return ret;
@@ -239,9 +239,49 @@ template<> class Conv< float >
 	private:
 };
 
-
 /**
  * The template specialization of Conv< unsigned int > sets up alignment on
+ * word boundaries by storing the data as a double. 
+ */
+template<> class Conv< unsigned int >
+{
+	public:
+		/**
+		 * This is the size used in the serialized form.
+		 */
+		static unsigned int size( int val )
+		{
+			return 1;
+		}
+
+		static const int buf2val( double** buf ) {
+			unsigned int ret = **buf;
+			(*buf)++;
+			return ret;
+		}
+		static void val2buf( unsigned int val, double** buf ) {
+			**buf = val;
+			(*buf)++; 
+		}
+
+		static void str2val( unsigned int& val, const string& s ) {
+			val = atoi( s.c_str() );
+		}
+
+		static void val2str( string& s, const unsigned int& val ) {
+			stringstream ss;
+			ss << val;
+			s = ss.str();
+		}
+
+		static string rttiType() {
+			return "unsigned int";
+		}
+	private:
+};
+
+/**
+ * The template specialization of Conv< int > sets up alignment on
  * word boundaries by storing the data as a double. 
  */
 template<> class Conv< int >
@@ -255,7 +295,7 @@ template<> class Conv< int >
 			return 1;
 		}
 
-		static const int buf2val( const double** buf ) {
+		static const int buf2val( double** buf ) {
 			int ret = **buf;
 			(*buf)++;
 			return ret;
@@ -292,7 +332,7 @@ template<> class Conv< unsigned short >
 			return 1;
 		}
 
-		static const unsigned short buf2val( const double** buf ) {
+		static const unsigned short buf2val( double** buf ) {
 			unsigned short ret = **buf;
 			(*buf)++;
 			return ret;
@@ -329,7 +369,7 @@ template<> class Conv< short >
 			return 1;
 		}
 
-		static const short buf2val( const double** buf ) {
+		static const short buf2val( double** buf ) {
 			short ret = **buf;
 			(*buf)++;
 			return ret;
@@ -366,7 +406,7 @@ template<> class Conv< bool >
 			return 1;
 		}
 
-		static const bool buf2val( const double** buf ) {
+		static const bool buf2val( double** buf ) {
 			bool ret = (**buf > 0.5);
 			(*buf)++;
 			return ret;
@@ -413,7 +453,7 @@ template<> class Conv< Id >
 			return 1;
 		}
 
-		static const Id buf2val( const double** buf ) {
+		static const Id buf2val( double** buf ) {
 			Id ret( **buf );
 			(*buf)++;
 			return ret;
@@ -456,23 +496,21 @@ template< class T > class Conv< vector< vector< T > > >
 	public:
 		static unsigned int size( const vector< vector < T > > & val)
 		{
-			unsigned int ret = 0;
+			unsigned int ret = 1 + val.size();
 			for ( unsigned int i = 0; i < val.size(); ++i )
-				ret += val[i].size();
-			if ( ret > 0 )
-				ret *= Conv< T >::size( val[0][0] );
-			else  {
+			if ( val[i].size() > 0 ) {
+				ret += val[i].size() * Conv< T >::size( val[0][0] );
+			} else  {
 				T temp;
-				ret *= Conv< T >::size( temp );
+				ret += val[i].size() * Conv< T >::size( temp );
 			}
 			return ret;
 		}
-		static const vector< vector< T > >& buf2val( const double** buf )
+		static const vector< vector< T > >& buf2val( double** buf )
 		{
 			static vector< vector< T > > ret;
 			ret.clear();
 			unsigned int numEntries = **buf++; // first entry is vec size
-			unsigned int numDoubles = 1 + numEntries;
 			for ( unsigned int i = 0; i < numEntries; ++i ) {
 				unsigned int rowSize = **buf;
 				(*buf)++;
@@ -486,9 +524,9 @@ template< class T > class Conv< vector< vector< T > > >
 		{
 			double* temp = *buf;
 			*temp++ = val.size();
-			for( int i = 0; i < val.size(); ++i ) {
+			for( unsigned int i = 0; i < val.size(); ++i ) {
 				*temp++ = val[i].size();
-				for ( int j = 0; j < val[i].size(); ++j ) {
+				for ( unsigned int j = 0; j < val[i].size(); ++j ) {
 					Conv< T >::val2buf( val[i][j], &temp );
 				}
 			}
@@ -518,62 +556,35 @@ template< class T > class Conv< vector< vector< T > > >
 template< class T > class Conv< vector< T > >
 {
 	public:
-		Conv( const double* buf )
-		{
-			unsigned int numEntries = *buf;
-			unsigned int numDoubles = 
-				1 + ( sizeof( T ) * numEntries - 1 ) / sizeof( double );
-
-			vec_.insert( vec_.end(), buf, buf + numDoubles + 1 );
-		}
-
-		Conv( const vector< T >& arg )
-		{
-			if ( arg.size() == 0 ) {
-				vec_.resize( 1 );
-				vec_[0] = 0;
-				return;
-			}
-
-			unsigned int entrySize = sizeof( T );
-			unsigned int numDoubles = 
-				1 + ( entrySize * arg.size() - 1 ) / sizeof( double );
-			// One extra for the size field.
-			vec_.resize( 1 + numDoubles );
-			vec_[0] = arg.size();
-			memcpy( &vec_[1], &arg[0], arg.size() * entrySize );
-		}
-
-		/** 
-		 * Returns ptr to entire array
-		 * We rely on the constructors to ensure size is at least 1.
-		 */
-		const double* ptr() const
-		{
-			return &vec_[0];
-		}
-
 		/** 
 		 * Size of returned array in doubles.
 		 */
-		unsigned int size() const
+		static unsigned int size( const vector< T >& val )
 		{
-			return vec_.size();
-		}
-
-		const vector< T > operator*() const {
-			if ( vec_.size() > 0 ) {
-				unsigned int numEntries = vec_[0];
-				vector< T > ret( numEntries );
-				memcpy( &ret[0], &vec_[1], sizeof( T ) * numEntries );
-				return ret;
+			unsigned int ret = 1;
+			for ( unsigned int i = 0; i < val.size(); ++i ) {
+				ret += Conv< T >::size( val[i] );
 			}
-			return vector< T >();
+			return ret;
 		}
 
-		unsigned int val2buf( double* buf ) const {
-			memcpy( buf, &vec_[0], vec_.size() * sizeof( double ) );
-			return vec_.size();
+		static const vector< T >& buf2val( double** buf )
+		{
+			static vector< T > ret;
+			ret.clear();
+			unsigned int numEntries = **buf++; // first entry is vec size
+			for ( unsigned int i = 0; i < numEntries; ++i )
+				ret.push_back( Conv< T >::buf2val( buf ) );
+			return ret;
+		}
+
+		static void val2buf( const vector< T >& val, double**buf )
+		{
+			double* temp = *buf;
+			*temp++ = val.size();
+			for( unsigned int i = 0; i < val.size(); ++i ) {
+				Conv< T >::val2buf( val[i], &temp );
+			}
 		}
 
 		static void str2val( vector< T >& val, const string& s ) {
@@ -588,99 +599,6 @@ template< class T > class Conv< vector< T > >
 			return ret;
 		}
 	private:
-		vector< double > vec_;
 };
-
-/// Here entry 0 is the # of entries, and entry 1 is the total size of
-/// the Conv, including two places for # entry 0 and entry 1.
-template<> class Conv< vector< string > >
-{
-	public:
-		Conv( const double* buf )
-		{
-			// unsigned int numEntries = buf[0];
-			unsigned int size = buf[1];
-			vec_.resize( 0 );
-			vec_.insert( vec_.end(), buf, buf + size );
-		}
-
-		Conv( const vector< string >& arg )
-		{
-			if ( arg.size() == 0 ) {
-				vec_.resize( 0 );
-				return;
-			}
-			unsigned int totNumChars = 0;
-			for ( unsigned int i = 0; i < arg.size(); ++i ) {
-				totNumChars += arg[i].length() + 1;
-			}
-			unsigned int charsInDoubles = 
-				1 + ( totNumChars - 1 )/sizeof( double );
-
-			vec_.resize( 2 + charsInDoubles );
-			vec_[0] = arg.size();
-			vec_[1] = vec_.size();
-			char* ptr = reinterpret_cast< char*> (&vec_[ 2 ] );
-			for (unsigned int i = 0; i < arg.size(); ++i ) {
-				strcpy( ptr, arg[i].c_str() );
-				ptr += arg[i].length() + 1;
-			}
-		}
-
-		/** 
-		 * Returns ptr to entire array
-		 */
-		const double* ptr() const
-		{
-			if ( vec_.size() > 0 )
-				return &vec_[0];
-			return 0;
-		}
-
-		/** 
-		 * Size of returned array in doubles.
-		 */
-		unsigned int size() const
-		{
-			return vec_.size();
-		}
-
-		const vector< string > operator*() const {
-			if ( vec_.size() > 1 ) {
-				unsigned int numEntries = vec_[0];
-				vector< string > ret( numEntries );
-				const char* ptr = reinterpret_cast< const char* > (&vec_[ 2 ] );
-				for (unsigned int i = 0; i < numEntries; ++i ) {
-					ret[i] = ptr;
-					ptr += ret[i].length() + 1;
-				}
-				return ret;
-			}
-			return vector< string >();
-		}
-
-		unsigned int val2buf( double* buf ) const {
-			if ( vec_.size() > 0 ) {
-				memcpy( buf, &vec_[0], vec_.size() * sizeof( double ) );
-				return vec_.size();
-			}
-			return 0;
-		}
-
-		static void str2val( vector< string >& val, const string& s ) {
-			cout << "Specialized Conv< vector< T > >::str2val not done\n";
-		}
-
-		static void val2str( string& s, const vector< string >& val ) {
-			cout << "Specialized Conv< vector< T > >::val2str not done\n";
-		}
-		static string rttiType() {
-			string ret = "vector<" + Conv< string >::rttiType() + ">";
-			return ret;
-		}
-	private:
-		vector< double > vec_;
-};
-
 
 #endif // _CONV_H

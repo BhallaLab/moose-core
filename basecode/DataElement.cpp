@@ -11,12 +11,12 @@
 #include "FuncOrder.h"
 
 DataElement::DataElement( Id id, const Cinfo* c, const string& name, 
-	unsigned int numData, bool isGlobal )
+	unsigned int numData )
 	:	
 		Element( id, c, name )
 {
 	data_ = c->dinfo()->allocData( numData );
-	localNumData_ = numData;
+	numLocalData_ = numData;
 	c->postCreationFunc( id, this );
 }
 
@@ -35,7 +35,7 @@ DataElement::DataElement( Id id, const Element* orig, unsigned int n )
 		data_ = cinfo()->dinfo()->copyData( 
 				orig->data( 0 ), orig->numData(), n * orig->numData() );
 	}
-	localNumData_ = n * orig->numData();
+	numLocalData_ = n * orig->numData();
 	// cinfo_->postCreationFunc( id, this );
 }
 
@@ -46,12 +46,6 @@ DataElement::~DataElement()
 	cinfo()->dinfo()->destroyData( data_ );
 	data_ = 0;
 	// The base class destroys the messages.
-}
-
-Element* DataElement::copyElement( Id newParent, Id newId, unsigned int n,
-		bool toGlobal ) const
-{
-	return new DataElement( newId, this, n, toGlobal );
 }
 
 /////////////////////////////////////////////////////////////////////////

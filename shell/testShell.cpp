@@ -574,7 +574,7 @@ void testShellParserStart()
 
 	const Cinfo* testSchedCinfo = TestSched::initCinfo();
 	Id tsid = Id::nextId();
-	Element* tse = new DataElement( tsid, testSchedCinfo, "tse", 1, true );
+	Element* tse = new GlobalDataElement( tsid, testSchedCinfo, "tse", 1 );
 
 	// testThreadSchedElement tse;
 	Eref ts( tse, 0 );

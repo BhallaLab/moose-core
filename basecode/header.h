@@ -85,6 +85,8 @@ class ObjId;
 #include "MsgDigest.h"
 #include "Element.h"
 #include "DataElement.h"
+#include "GlobalDataElement.h"
+#include "LocalDataElement.h"
 #include "Eref.h"
 #include "Conv.h"
 #include "SrcFinfo.h"
@@ -95,6 +97,7 @@ class Neutral;
 #include "SetGet.h"
 #include "OpFunc.h"
 #include "EpFunc.h"
+#include "HopFunc.h"
 #include "ProcOpFunc.h"
 #include "ValueFinfo.h"
 #include "LookupValueFinfo.h"
@@ -103,6 +106,4 @@ class Neutral;
 #include "FieldElement.h"
 #include "../shell/Neutral.h"
 
-extern unsigned int myNode();
-extern unsigned int numNodes();
 #endif // _HEADER_H

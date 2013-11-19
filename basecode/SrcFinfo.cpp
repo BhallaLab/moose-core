@@ -88,8 +88,8 @@ void SrcFinfo0::send( const Eref& e ) const {
 	}
 }
 
-void SrcFinfo0::sendBuffer( const Eref& e, const double* buf ) const
+void SrcFinfo0::sendBuffer( const Eref& e, double* buf ) const
 {
-	send( tgt->eref() );
+	send( e );
 }
 

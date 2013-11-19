@@ -30,13 +30,13 @@ class LocalDataElement: public DataElement
 		 * numData is the number of data entries, defaults to a singleton.
 		 */
 		LocalDataElement( Id id, const Cinfo* c, const string& name,
-			unsigned int numData = 1 )
+			unsigned int numData = 1 );
 
 		/**
 		 * This constructor copies over the original n times. It is
 		 * used for doing all copies, in Shell::innerCopyElements.
 		 */
-		LocalDataElement( Id id, const Element* orig, unsigned int n, bool toGlobal);
+		LocalDataElement( Id id, const Element* orig, unsigned int n );
 
 		/**
 		 * Virtual Destructor
@@ -58,6 +58,10 @@ class LocalDataElement: public DataElement
 
 		/// Inherited virtual. Returns node location of specified object
 		unsigned int getNode( DataId dataId ) const;
+		
+		/// Converts dataId to index on current node.
+		unsigned int rawIndex( unsigned int dataId ) const;
+
 
 		/// Inherited virtual. Reports if this is Global, which it isn't
 		bool isGlobal() const {
@@ -69,23 +73,8 @@ class LocalDataElement: public DataElement
 		/////////////////////////////////////////////////////////////////
 
 		/**
-		 * Inherited virtual.
-		 * Looks up specified field data entry. On regular objects just
-		 * returns the data entry specified by the rawIndex. 
-		 * On FieldElements like synapses, does a second lookup on the
-		 * field index.
-		 * Note that the index is NOT a
-		 * DataId: it is instead the raw index of the data on the current
-		 * node. Index is also NOT the character offset, but the index
-		 * to the data array in whatever type the data may be.
-		 *
-		 * The DataId has to be filtered through the nodeMap to
-		 * find a) if the entry is here, and b) what its raw index is.
-		 *
-		 * Returns 0 if either index is out of range.
+		 * the data() function is inherited from DataElement and used as is.
 		 */
-		char* data( unsigned int rawIndex, 
-						unsigned int fieldIndex = 0 ) const;
 
 		/**
 		 * Inherited virtual.
@@ -96,6 +85,10 @@ class LocalDataElement: public DataElement
 		void resize( unsigned int newNumData );
 
 		/////////////////////////////////////////////////////////////////
+		// Utility function for figuring out node data assignments when
+		// the data array is resized.
+		/////////////////////////////////////////////////////////////////
+		unsigned int setDataSize( unsigned int numData );
 
 	private:
 		/**

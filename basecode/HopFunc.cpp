@@ -7,6 +7,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 #include "header.h"
+#include "HopFunc.h"
 #include "../mpi/PostMaster.h"
 
 const OpFunc* OpFunc0Base::makeHopFunc( unsigned int bindIndex ) const
@@ -16,7 +17,7 @@ const OpFunc* OpFunc0Base::makeHopFunc( unsigned int bindIndex ) const
 
 double* addToBuf( const Eref& e, unsigned int bindIndex, unsigned int size )
 {
-	static PostMaster* p = reinterpret_cast< PostMaster* >( 
-					ObjId( 3 ).data(0) );
-	return p->addToSendBuf( e, bindIndex_, size );
+	static ObjId oi( 3 );
+	static PostMaster* p = reinterpret_cast< PostMaster* >( oi.data() );
+	return p->addToSendBuf( e, bindIndex, size );
 }

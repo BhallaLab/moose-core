@@ -31,7 +31,7 @@ void showFields()
 {
 	const Cinfo* nc = Neutral::initCinfo();
 	Id i1 = Id::nextId();
-	Element* ret = new DataElement( i1, nc, "test1", 1, 1 );
+	Element* ret = new GlobalDataElement( i1, nc, "test1", 1 );
 	assert( ret );
 	// i1.eref().element()->showFields();
 	cout << "." << flush;
@@ -51,11 +51,11 @@ void testSendMsg()
 
 	Id i1 = Id::nextId();
 	Id i2 = Id::nextId();
-	Element* ret = new DataElement( i1, ac, "test1", size, 1 );
+	Element* ret = new GlobalDataElement( i1, ac, "test1", size );
 	// bool ret = nc->create( i1, "test1", size );
 	assert( ret );
 	// ret = nc->create( i2, "test2", size );
-	ret = new DataElement( i2, ac, "test2", size, 1 );
+	ret = new GlobalDataElement( i2, ac, "test2", size );
 	assert( ret );
 
 	Eref e1 = i1.eref();
@@ -106,10 +106,10 @@ void testCreateMsg()
 	unsigned int size = 100;
 	Id i1 = Id::nextId();
 	Id i2 = Id::nextId();
-	Element* temp = new DataElement( i1, ac, "test1", size, 1 );
+	Element* temp = new GlobalDataElement( i1, ac, "test1", size );
 	// bool ret = nc->create( i1, "test1", size );
 	assert( temp );
-	temp = new DataElement( i2, ac, "test2", size, 1 );
+	temp = new GlobalDataElement( i2, ac, "test2", size );
 	assert( temp );
 
 	Eref e1 = i1.eref();
@@ -151,7 +151,7 @@ void testSetGet()
 
 	string arg;
 	Id i2 = Id::nextId();
-	Element* ret = new DataElement( i2, ac, "test2", size, 1 );
+	Element* ret = new GlobalDataElement( i2, ac, "test2", size );
 	assert( ret );
 	ProcInfo p;
 	
@@ -183,7 +183,7 @@ void testStrSet()
 
 	string arg;
 	Id i2 = Id::nextId();
-	Element* ret = new DataElement( i2, ac, "test2", size, 1 );
+	Element* ret = new GlobalDataElement( i2, ac, "test2", size );
 	assert( ret );
 	ProcInfo p;
 
@@ -223,7 +223,7 @@ void testGet()
 	string arg;
 	Id i2 = Id::nextId();
 
-	Element* ret = new DataElement( i2, ac, "test2", size, 1 );
+	Element* ret = new GlobalDataElement( i2, ac, "test2", size );
 	assert( ret );
 	ProcInfo p;
 
@@ -260,7 +260,7 @@ void testStrGet()
 	string arg;
 	Id i2 = Id::nextId();
 
-	Element* ret = new DataElement( i2, ac, "test2", size, 1 );
+	Element* ret = new GlobalDataElement( i2, ac, "test2", size );
 	assert( ret );
 	ProcInfo p;
 
@@ -304,7 +304,7 @@ void testSetGetDouble()
 	string arg;
 	Id i2 = Id::nextId();
 	Id i3( i2.value() + 1 );
-	Element* ret = new DataElement( i2, ic, "test2", size, 1 );
+	Element* ret = new GlobalDataElement( i2, ic, "test2", size );
 	assert( ret );
 	ProcInfo p;
 
@@ -337,7 +337,7 @@ void testSetGetSynapse()
 
 	string arg;
 	Id cells = Id::nextId();
-	Element* temp = new DataElement( cells, ic, "test2", size, 1 );
+	Element* temp = new GlobalDataElement( cells, ic, "test2", size );
 	assert( temp );
 	vector< unsigned int > ns( size );
 	vector< double > delay;
@@ -384,7 +384,7 @@ void testSetGetVec()
 
 	string arg;
 	Id i2 = Id::nextId();
-	Element* temp = new DataElement( i2, ic, "test2", size, 1 );
+	Element* temp = new GlobalDataElement( i2, ic, "test2", size );
 	assert( temp );
 
 	vector< unsigned int > numSyn( size, 0 );
@@ -425,7 +425,7 @@ void testSendSpike()
 
 	string arg;
 	Id i2 = Id::nextId();
-	Element* temp = new DataElement( i2, ic, "test2", size, 1 );
+	Element* temp = new GlobalDataElement( i2, ic, "test2", size );
 	assert( temp );
 	Eref e2 = i2.eref();
 	for ( unsigned int i = 0; i < size; ++i ) {
@@ -745,7 +745,7 @@ void testSparseMsg()
 
 	Id cells = Id::nextId();
 	// bool ret = ic->create( cells, "test2", size );
-	Element* t2 = new DataElement( cells, ic, "test2", size, 1 );
+	Element* t2 = new GlobalDataElement( cells, ic, "test2", size );
 	assert( t2 );
 	Id syns( cells.value() + 1 );
 
@@ -812,7 +812,7 @@ void test2ArgSetVec()
 
 	string arg;
 	Id i2 = Id::nextId();
-	Element* ret = new DataElement( i2, ac, "test2", size, 1 );
+	Element* ret = new GlobalDataElement( i2, ac, "test2", size );
 	assert( ret );
 
 	vector< double > arg1( size );
@@ -877,7 +877,7 @@ void testSetRepeat()
 	string arg;
 	Id cell = Id::nextId();
 	// bool ret = ic->create( i2, "test2", size );
-	Element* temp = new DataElement( cell, ic, "cell", size, 1 );
+	Element* temp = new GlobalDataElement( cell, ic, "cell", size );
 	assert( temp );
 	vector< unsigned int > numSyn( size, 0 );
 	for ( unsigned int i = 0; i < size; ++i )
@@ -991,9 +991,9 @@ void testSharedMsg()
 	Id t2 = Id::nextId();
 	// bool ret = Test::initCinfo()->create( t1, "test1", 1 );
 
-	Element* temp = new DataElement( t1, Test::initCinfo(), "test1", 1, 1 );
+	Element* temp = new GlobalDataElement( t1, Test::initCinfo(), "test1", 1 );
 	assert( temp );
-	temp = new DataElement( t2, Test::initCinfo(), "test2", 1, 1 );
+	temp = new GlobalDataElement( t2, Test::initCinfo(), "test2", 1 );
 	// ret = Test::initCinfo()->create( t2, "test2", 1 );
 	assert( temp );
 
@@ -1066,21 +1066,28 @@ void testConvVector()
 		intVec.push_back( i * i );
 	
 	double buf[500];
+	double* tempBuf = buf;
 
-	Conv< vector< unsigned int > > intConv( intVec );
-	assert( intConv.size() == 2 + ( intVec.size() * sizeof( unsigned int ) - 1) / sizeof( double ) );
-	unsigned int ret = intConv.val2buf( buf );
-	assert( ret == 4 );
+	Conv< vector< unsigned int > > intConv;
+	assert( intConv.size( intVec ) == 1 + intVec.size() );
+	intConv.val2buf( intVec, &tempBuf );
+	assert( tempBuf == buf + 6 );
 	assert( buf[0] == intVec.size() );
+	assert( static_cast< unsigned int >( buf[1] ) == intVec[0] );
+	assert( static_cast< unsigned int >( buf[2] ) == intVec[1] );
+	assert( static_cast< unsigned int >( buf[3] ) == intVec[2] );
+	assert( static_cast< unsigned int >( buf[4] ) == intVec[3] );
+	assert( static_cast< unsigned int >( buf[5] ) == intVec[4] );
 
-	Conv< vector< unsigned int > > testIntConv( buf );
-	assert( intConv.size() == testIntConv.size() );
-	vector< unsigned int > testIntVec = *testIntConv;
+	tempBuf = buf;
+	const vector< unsigned int >& testIntVec = intConv.buf2val( &tempBuf );
+
 	assert( intVec.size() == testIntVec.size() );
 	for ( unsigned int i = 0; i < intVec.size(); ++i ) {
 		assert( intVec[ i ] == testIntVec[i] );
 	}
 
+	/*
 	vector< string > strVec;
 	strVec.push_back( "one" );
 	strVec.push_back( "two" );
@@ -1098,6 +1105,7 @@ void testConvVector()
 	assert( tgtStr.size() == 4 );
 	for ( unsigned int i = 0; i < 4; ++i )
 		assert( tgtStr[i] == strVec[i] );
+		*/
 
 	cout << "." << flush;
 }
@@ -1119,26 +1127,35 @@ void testConvVectorOfVectors()
 	vec[4].insert( vec[4].end(), row4, row4 + 4 );
 	vec[5].insert( vec[5].end(), row5, row5 + 5 );
 
-	double expected[] = { 6, 
-		0, 1, 2, 3, 4, 5 };
+	double expected[] = { 
+		6,  // Number of sub-vectors
+   		0,		// No entries on first sub-vec
+		1,		1,
+		2,		2,3,
+		3,		4,5,6,
+		4,		7,8,9,10,
+		5,		11,12,13,14,15
+	};
 
-	double buf[500];
+	double origBuf[500];
+	double* buf = origBuf;
 
-	Conv< vector< vector< short > > > conv( vec );
+	Conv< vector< vector< short > > > conv;
 
-	assert( conv.size() == 1 + 6 + 0 + 1 + 1 + 1 + 1 + 2 );
-	unsigned int ret = conv.val2buf( buf );
-	assert( ret == 13 );
-	for ( unsigned int i = 0; i < 7; ++i )
-		assert( doubleEq( buf[i], expected[i] ) );
+	assert( conv.size( vec ) == 1 + 6 + 0 + 1 + 2 + 3 + 4 + 5 ); // 21
+	conv.val2buf( vec, &buf );
+	assert( buf == 21 + origBuf );
+	for ( unsigned int i = 0; i < 21; ++i )
+		assert( doubleEq( origBuf[i], expected[i] ) );
 	
-	Conv< vector< vector< short > >  > returnConv( buf );
-	vector< vector< short > > rc = *returnConv;
+	double* buf2 = origBuf;
+	const vector< vector< short > >& rc = conv.buf2val( &buf2 );
+	
 	assert( rc.size() == 6 );
 	for ( unsigned int i = 0; i < 6; ++i ) {
 		assert( rc[i].size() == i );
 		for ( unsigned int j = 0; j < i; ++j )
-			assert( rc[i][j] = vec[i][j] );
+			assert( rc[i][j] == vec[i][j] );
 	}
 
 	cout << "." << flush;
@@ -1156,9 +1173,9 @@ void testMsgField()
 
 	Id i1 = Id::nextId();
 	Id i2 = Id::nextId();
-	Element* ret = new DataElement( i1, ac, "test1", size, 1 );
+	Element* ret = new GlobalDataElement( i1, ac, "test1", size );
 	assert( ret );
-	ret = new DataElement( i2, ac, "test2", size, 1 );
+	ret = new GlobalDataElement( i2, ac, "test2", size );
 	assert( ret );
 
 	Eref e1 = i1.eref();
@@ -1220,16 +1237,16 @@ void testSetGetExtField()
 	Id i2( i1.value() + 1 );
 	Id i3( i2.value() + 1 );
 	Id i4( i3.value() + 1 );
-	Element* e1 = new DataElement( i1, nc, "test", size, 1 );
+	Element* e1 = new GlobalDataElement( i1, nc, "test", size );
 	assert( e1 );
 	Shell::adopt( Id(), i1 );
-	Element* e2 = new DataElement( i2, rc, "x", size, 1 );
+	Element* e2 = new GlobalDataElement( i2, rc, "x", size );
 	assert( e2 );
 	Shell::adopt( i1, i2 );
-	Element* e3 = new DataElement( i3, rc, "y", size, 1 );
+	Element* e3 = new GlobalDataElement( i3, rc, "y", size );
 	assert( e3 );
 	Shell::adopt( i1, i3 );
-	Element* e4 = new DataElement( i4, rc, "z", size, 1 );
+	Element* e4 = new GlobalDataElement( i4, rc, "z", size );
 	assert( e4 );
 	Shell::adopt( i1, i4 );
 	bool ret;
@@ -1314,7 +1331,7 @@ void testLookupSetGet()
 	string arg;
 	Id i2 = Id::nextId();
 
-	Element* elm = new DataElement( i2, ac, "test2", size, 1 );
+	Element* elm = new GlobalDataElement( i2, ac, "test2", size );
 	assert( elm );
 	ObjId obj( i2, 0 );
 
@@ -1562,10 +1579,10 @@ void testMsgSrcDestFields()
 	Id t1 = Id::nextId();
 	Id t2 = Id::nextId();
 	// bool ret = Test::initCinfo()->create( t1, "test1", 1 );
-	Element* e1 = new DataElement( t1, Test::initCinfo(), "test1", 1, 1 );
+	Element* e1 = new GlobalDataElement( t1, Test::initCinfo(), "test1" );
 	assert( e1 );
 	assert( e1 == t1.element() );
-	Element* e2 = new DataElement( t2, Test::initCinfo(), "test2", 1, 1 );
+	Element* e2 = new GlobalDataElement( t2, Test::initCinfo(), "test2", 1 );
 	// ret = Test::initCinfo()->create( t2, "test2", 1 );
 	assert( e2 );
 	assert( e2 == t2.element() );

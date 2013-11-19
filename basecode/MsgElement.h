@@ -62,10 +62,28 @@ class MsgElement: public Element
 			return numMsg_();
 		}
 
+		/// Inherited virtual. Returns number of data entries
+		unsigned int numLocalData() const
+		{
+			return numMsg_();
+		}
+
 		/// Inherited virtual. Returns number of field entries for specified data
 		unsigned int numField( unsigned int rawIndex ) const
 		{
 				return 0;
+		}
+
+		/// Inherited virtual. Just returns current node.
+		unsigned int getNode( unsigned int dataIndex ) const
+		{
+				return Shell::myNode();
+		}
+
+		/// Inherited virtual. Just returns index
+		unsigned int rawIndex( unsigned int dataIndex ) const
+		{
+				return dataIndex;
 		}
 
 		/**
@@ -75,6 +93,10 @@ class MsgElement: public Element
 		 */
 		bool hasFields() const {
 			return false;
+		}
+
+		bool isGlobal() const {
+			return true;
 		}
 
 		/////////////////////////////////////////////////////////////////
