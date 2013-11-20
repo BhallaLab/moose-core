@@ -121,7 +121,8 @@ template<> class Conv< string >
 		 */
 		static unsigned int size( const string& val )
 		{
-			return ( 1 + val.length() ) / sizeof( double );
+			// extra char for termination of the string.
+			return 1 + val.length() / sizeof( double );
 		}
 
 		static const string& buf2val( double** buf ) {
@@ -140,7 +141,7 @@ template<> class Conv< string >
 		static void val2buf( const string& val, double** buf ) {
 			char* temp = reinterpret_cast< char* >( *buf );
 			strcpy( temp, val.c_str() );
-			*buf += val.length();
+			*buf += size( val );
 		}
 
 		static void str2val( string& val, const string& s ) {
@@ -177,16 +178,16 @@ template<> class Conv< double >
 			(*buf)++;
 			return ret;
 		}
-		static void val2buf( float val, double** buf ) {
+		static void val2buf( double val, double** buf ) {
 			**buf = val;
 			(*buf)++; 
 		}
 
-		static void str2val( float val, const string& s ) {
+		static void str2val( double &val, const string& s ) {
 			val = atof( s.c_str() );
 		}
 
-		static void val2str( string& s, float val ) {
+		static void val2str( string& s, double val ) {
 			stringstream ss;
 			ss << val;
 			s = ss.str();
@@ -223,7 +224,7 @@ template<> class Conv< float >
 			(*buf)++; 
 		}
 
-		static void str2val( float val, const string& s ) {
+		static void str2val( float& val, const string& s ) {
 			val = atof( s.c_str() );
 		}
 
@@ -254,7 +255,7 @@ template<> class Conv< unsigned int >
 			return 1;
 		}
 
-		static const int buf2val( double** buf ) {
+		static const unsigned int buf2val( double** buf ) {
 			unsigned int ret = **buf;
 			(*buf)++;
 			return ret;
@@ -268,7 +269,7 @@ template<> class Conv< unsigned int >
 			val = atoi( s.c_str() );
 		}
 
-		static void val2str( string& s, const unsigned int& val ) {
+		static void val2str( string& s, unsigned int val ) {
 			stringstream ss;
 			ss << val;
 			s = ss.str();
@@ -309,7 +310,7 @@ template<> class Conv< int >
 			val = atoi( s.c_str() );
 		}
 
-		static void val2str( string& s, const int& val ) {
+		static void val2str( string& s, int val ) {
 			stringstream ss;
 			ss << val;
 			s = ss.str();
@@ -346,7 +347,7 @@ template<> class Conv< unsigned short >
 			val = atoi( s.c_str() );
 		}
 
-		static void val2str( string& s, const unsigned short& val ) {
+		static void val2str( string& s, unsigned short val ) {
 			stringstream ss;
 			ss << val;
 			s = ss.str();
@@ -383,7 +384,7 @@ template<> class Conv< short >
 			val = atoi( s.c_str() );
 		}
 
-		static void val2str( string& s, const short& val ) {
+		static void val2str( string& s, short val ) {
 			stringstream ss;
 			ss << val;
 			s = ss.str();
@@ -423,7 +424,7 @@ template<> class Conv< bool >
 				val = 1;
 		}
 
-		static void val2str( string& s, const bool& val ) {
+		static void val2str( string& s, bool val ) {
 			if ( val > 0.5 )
 				s = "1";
 			else
@@ -468,7 +469,7 @@ template<> class Conv< Id >
 			val = temp;
 		}
 
-		static void val2str( string& s, const Id& val ) {
+		static void val2str( string& s, Id val ) {
 			s = val.path();
 		}
 
@@ -499,7 +500,7 @@ template< class T > class Conv< vector< vector< T > > >
 			unsigned int ret = 1 + val.size();
 			for ( unsigned int i = 0; i < val.size(); ++i )
 			if ( val[i].size() > 0 ) {
-				ret += val[i].size() * Conv< T >::size( val[0][0] );
+				ret += val[i].size() * Conv< T >::size( val[i][0] );
 			} else  {
 				T temp;
 				ret += val[i].size() * Conv< T >::size( temp );
@@ -510,7 +511,9 @@ template< class T > class Conv< vector< vector< T > > >
 		{
 			static vector< vector< T > > ret;
 			ret.clear();
-			unsigned int numEntries = **buf++; // first entry is vec size
+			unsigned int numEntries = **buf; // first entry is vec size
+			ret.resize( numEntries );
+			(*buf)++;
 			for ( unsigned int i = 0; i < numEntries; ++i ) {
 				unsigned int rowSize = **buf;
 				(*buf)++;
@@ -530,6 +533,7 @@ template< class T > class Conv< vector< vector< T > > >
 					Conv< T >::val2buf( val[i][j], &temp );
 				}
 			}
+			*buf = temp;
 		}
 
 		static void str2val( vector< vector< T > >& val, const string& s ) {
@@ -572,7 +576,8 @@ template< class T > class Conv< vector< T > >
 		{
 			static vector< T > ret;
 			ret.clear();
-			unsigned int numEntries = **buf++; // first entry is vec size
+			unsigned int numEntries = **buf; // first entry is vec size
+			(*buf)++;
 			for ( unsigned int i = 0; i < numEntries; ++i )
 				ret.push_back( Conv< T >::buf2val( buf ) );
 			return ret;
@@ -585,6 +590,7 @@ template< class T > class Conv< vector< T > >
 			for( unsigned int i = 0; i < val.size(); ++i ) {
 				Conv< T >::val2buf( val[i], &temp );
 			}
+			*buf = temp;
 		}
 
 		static void str2val( vector< T >& val, const string& s ) {

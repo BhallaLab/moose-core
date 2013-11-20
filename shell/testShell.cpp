@@ -417,13 +417,12 @@ void testCopyFieldElement()
 	Neutral::children( origEr, origChildren );
 	assert( origChildren.size() == 2 );
 
-	unsigned int copyFactor = 2;
-	unsigned int newSize = copyFactor * size;
+	unsigned int numCopy = 2;
 	//////////////////////////////////////////////////////////////////
-	Id copyId = shell->doCopy( origId, Id(), "dup", copyFactor, false, false);
+	Id copyId = shell->doCopy( origId, Id(), "dup", numCopy, false, false);
 	//////////////////////////////////////////////////////////////////
 
-	assert( copyId.element()->numData() == newSize );
+	assert( copyId.element()->numData() == numCopy * size );
 	origChildren.resize( 0 );
 	Eref copyEr( copyId.element(), 0 );
 	vector< Id > copyChildren;
@@ -440,16 +439,16 @@ void testCopyFieldElement()
 	// Element should exist even if data doesn't
 	assert ( copySynElm != 0 );
 	assert ( copySynElm->getName() == "synapse" );
-	assert( copySynElm->numData() == newSize );
+	assert( copySynElm->numData() == numCopy * size );
 	unsigned int numSyn = 0;
-	for ( unsigned int i = 0; i < newSize; ++i ) {
+	for ( unsigned int i = 0; i < numCopy * size; ++i ) {
 		assert( copySynElm->numField( i ) == i % size );
 		numSyn += i % size;
 	}
 
 	assert ( copyChild.element() != 0 );
 	assert ( copyChild.element()->getName() == "f2" );
-	assert( copyChild.element()->numData() == size2 * copyFactor );
+	assert( copyChild.element()->numData() == numCopy * size2 );
 	
 	vector< double > del;
 	Field< double >::getVec( origSynId, "delay", del );

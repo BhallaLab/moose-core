@@ -790,4 +790,10 @@ a runtime problem.
 I've now put together most of the code. Compilation in progress.
 Checkin 4851.
 ===========================================================================
-18 Nov 2013. Trying to compiel HopFunc.cpp.
+18 Nov 2013. Trying to compile HopFunc.cpp.
+19 Nov 2013. Compiled. Trying to debug in testConvVectorOfFcetors.
+20 Nov 2013. going through unit tests. Convs were messy but now OK.
+	Need to handle copy of Msgs to n targets.
+
+Other than that pending matter, the unit tests clear.
+===========================================================================
