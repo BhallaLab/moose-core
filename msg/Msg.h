@@ -124,6 +124,8 @@ class Msg
 		 * and have the function fid, on bindIndex b.
 		 * The copy may have to be a higher-order
 		 * Msg type to handle arrays if n > 1.
+		 * Note that n is not the number of msgs, but the multiplier
+		 * by which numData will be scaled.
 		 */
 		virtual Msg* copy( Id origSrc, Id newSrc, Id newTgt,
 			FuncId fid, unsigned int b, unsigned int n ) const = 0;

@@ -23,7 +23,7 @@ LocalDataElement::LocalDataElement( Id id, const Cinfo* c,
  * so FieldElements are copied rather than created by the Cinfo when
  * the parent element is created. This allows the copied FieldElements to
  * retain info from the originals.
- * Note that n is the number of individual  dataEntries that are made.
+ * n is the number of new entries made.
  */
 LocalDataElement::LocalDataElement( Id id, const Element* orig, 
 				unsigned int n )
@@ -81,7 +81,7 @@ unsigned int LocalDataElement::setDataSize( unsigned int numData )
 	numPerNode_ = 1 + (numData_ -1 ) / Shell::numNodes();
 	unsigned int numLocalData = numPerNode_;
 	if ( Shell::myNode() == Shell::numNodes() -1 )
-		numLocalData = numData_ % numPerNode_;
+		numLocalData = numData_ - numPerNode_ * ( Shell::numNodes() - 1 );
 	return numLocalData;
 }
 

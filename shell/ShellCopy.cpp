@@ -38,13 +38,17 @@ Id Shell::doCopy( Id orig, ObjId newParent, string newName,
 		return Id();
 }
 
-/// Runs in parallel on all nodes.
+/** Runs in parallel on all nodes.
+ * Note that 'n' is the number of complete duplicates. If there were
+ * 10 dataEntries in the original, there will now be 10 x n.
+ */
 Element* innerCopyElements( Id orig, ObjId newParent, Id newId, 
 	unsigned int n, bool toGlobal, map< Id, Id >& tree )
 {
 	// Element* e = new Element( newId, orig.element(), n, toGlobal );
+	unsigned int newNumData = orig.element()->numData() * n;
 	Element* e = orig.element()->copyElement( 
-				newParent, newId, n, toGlobal );
+				newParent, newId, newNumData, toGlobal );
 	assert( e );
 	Shell::adopt( newParent, newId );
 
