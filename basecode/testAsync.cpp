@@ -1087,25 +1087,25 @@ void testConvVector()
 		assert( intVec[ i ] == testIntVec[i] );
 	}
 
-	/*
 	vector< string > strVec;
 	strVec.push_back( "one" );
 	strVec.push_back( "two" );
 	strVec.push_back( "three and more and more and more" );
 	strVec.push_back( "four and yet more" );
 
-	Conv< vector< string > > strConv( strVec );
-	ret = strConv.val2buf( buf );
-	assert( ret = strConv.size() );
+	tempBuf = buf;
+	Conv< vector< string > >::val2buf( strVec, &tempBuf );
+	unsigned int sz = Conv< vector< string > >::size( strVec );
+	assert( sz == 1 + 2 + ( strVec[2].length() + 8) /8 + ( strVec[3].length() + 8 )/8 );
 	assert( buf[0] == 4 );
-	assert( buf[1] == ret );
-	Conv< vector< string > > strConvTgt( buf );
+	assert( strcmp( reinterpret_cast< char* >( buf + 1 ), "one" ) == 0 );
 	
-	vector< string > tgtStr = *strConvTgt;
+	tempBuf = buf;
+	const vector< string >& tgtStr = 
+			Conv< vector< string > >::buf2val( &tempBuf );
 	assert( tgtStr.size() == 4 );
 	for ( unsigned int i = 0; i < 4; ++i )
 		assert( tgtStr[i] == strVec[i] );
-		*/
 
 	cout << "." << flush;
 }
@@ -1144,8 +1144,8 @@ void testConvVectorOfVectors()
 
 	assert( conv.size( vec ) == 1 + 6 + 0 + 1 + 2 + 3 + 4 + 5 ); // 21
 	conv.val2buf( vec, &buf );
-	assert( buf == 21 + origBuf );
-	for ( unsigned int i = 0; i < 21; ++i )
+	assert( buf == 22 + origBuf );
+	for ( unsigned int i = 0; i < 22; ++i )
 		assert( doubleEq( origBuf[i], expected[i] ) );
 	
 	double* buf2 = origBuf;
