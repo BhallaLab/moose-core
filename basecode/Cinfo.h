@@ -171,7 +171,7 @@ class Cinfo
 			/**
 			 * Return the specified SrcFinfo
 			 */
-			Finfo* getSrcFinfo( unsigned int i );
+			Finfo* getSrcFinfo( unsigned int i ) const;
 
 			/**
 			 * Return number of SrcFinfos

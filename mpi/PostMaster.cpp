@@ -10,20 +10,43 @@
 #include "header.h"
 #include "PostMaster.h"
 #include "../shell/Shell.h"
-#ifdef USE_MPI
-#include <mpi.h>
-#endif
 
 const unsigned int TgtInfo::headerSize = 
 		1 + ( sizeof( TgtInfo ) - 1 )/sizeof( double );
 
+const unsigned int PostMaster::reserveBufSize = 4096;
+const int PostMaster::MSGTAG = 1;
+const int PostMaster::SETTAG = 2;
+const int PostMaster::CONTROLTAG = 3;
+const int PostMaster::DIETAG = 4;
 PostMaster::PostMaster()
 		: 
-				recvBufSize_( 1 ),
+				recvBufSize_( reserveBufSize ),
 				sendBuf_( Shell::numNodes() ),
 				recvBuf_( Shell::numNodes() ),
-				sendSize_( Shell::numNodes(), 0 )
-{;}
+				sendSize_( Shell::numNodes(), 0 ),
+				doneIndices_( Shell::numNodes(), 0 )
+{
+	for ( unsigned int i = 0; i < Shell::numNodes(); ++i ) {
+		sendBuf_[i].resize( reserveBufSize, 0 );
+	}
+#ifdef USE_MPI
+	for ( unsigned int i = 0; i < Shell::numNodes(); ++i ) {
+		// Set up the Recv already for later sends. This might be a problem
+		// for some polling-based implementations, but let's try for now.
+		MPI_Status temp;
+		temp.MPI_SOURCE = temp.MPI_TAG = temp.MPI_ERROR = 0;
+		doneStatus_.resize( Shell::numNodes(), temp );
+		if ( i != Shell::myNode() ) {
+			recvBuf_[i].resize( recvBufSize_, 0 );
+			MPI_Irecv( &recvBuf_[i][0], recvBufSize_, MPI_DOUBLE,
+				i, MSGTAG, MPI_COMM_WORLD,
+				&recvReq_[i]
+			);
+		}
+	}
+#endif
+}
 
 ///////////////////////////////////////////////////////////////
 // Moose class stuff.
@@ -92,70 +115,92 @@ const Cinfo* PostMaster::initCinfo()
 //
 /**
  * PostMaster class: handles cross-node messaging using MPI.
+ * Identical to the Process call: sends out what needs to go, and then
+ * waits for any incoming messages and passes them on.
  */
 void PostMaster::reinit( const Eref& e, ProcPtr p )
 {
 #ifdef USE_MPI
+	unsigned int numDone = 0;
 	for ( unsigned int i = 0; i < Shell::numNodes(); ++i )
 	{
 		if ( i == Shell::myNode() ) continue;
-		MPI_IRecv( recvBuf_[i], recvBufSize_, MPI_DOUBLE,
-			i, WORKTAG, MPI_COMM_WORLD,
-			recvReq[i]
-	}
 		// MPI_scatter would have been better but it doesn't allow
 		// one to post larger recvs than the actual data sent.
-
-		while ( numDone < Shell::numNodes() )
-			numDone += clearPending();
+		MPI_Isend( 
+			&sendBuf_[i][0], sendSize_[i], MPI_DOUBLE,
+			i, 		// Where to send to.
+			MSGTAG, MPI_COMM_WORLD,
+			&sendReq_[i]
+		);
+		numDone += clearPending(); // Try to interleave communications.
 	}
+	while ( numDone < Shell::numNodes() )
+		numDone += clearPending();
 #endif
 }
 
 void PostMaster::process( const Eref& e, ProcPtr p )
 {
 #ifdef USE_MPI
+	unsigned int numDone = 0;
 	for ( unsigned int i = 0; i < Shell::numNodes(); ++i )
 	{
 		if ( i == Shell::myNode() ) continue;
-		MPI_Isend( sendBuf_[i], sendSize_[i], MPI_DOUBLE,
-			i, WORKTAG, MPI_COMM_WORLD,
-			&sendReq[i]
-		);
 		// MPI_scatter would have been better but it doesn't allow
 		// one to post larger recvs than the actual data sent.
-
-		while ( numDone < Shell::numNodes() )
-			numDone += clearPending();
+		MPI_Isend( 
+			&sendBuf_[i][0], sendSize_[i], MPI_DOUBLE,
+			i, 		// Where to send to.
+			MSGTAG, MPI_COMM_WORLD,
+			&sendReq_[i]
+		);
+		numDone += clearPending(); // Try to interleave communications.
 	}
+	while ( numDone < Shell::numNodes() )
+		numDone += clearPending();
 #endif
 }
 
-int PostMaster::clearPending()
+unsigned int PostMaster::clearPending()
 {
 	int done = 0;
+	if ( Shell::numNodes() == 1 )
+		return 0;
 #ifdef USE_MPI
-	MPI_Testsome( Shell::numNodes() -1, recvReq_, &done, 
-					doneIndices, doneStatus );
-	if ( done = MPI_UNDEFINED )
+	MPI_Testsome( Shell::numNodes() -1, &recvReq_[0], &done, 
+					&doneIndices_[0], &doneStatus_[0] );
+	if ( done == MPI_UNDEFINED )
 		return 0;
 	for ( int i = 0; i < done; ++i ) {
-		int recvNode = doneIndices[i];
-		if ( recvNode >= myrank )
-			recvNode += 1; // Skip myrank
-
-		// Here we go through the recvBuf to deliver the received msgs.
-		int recvSize = foo;
+		unsigned int recvNode = doneIndices_[i];
+		if ( recvNode >= Shell::myNode() )
+			recvNode += 1; // Skip myNode
+		int recvSize = 0;
+		MPI_Get_count( &doneStatus_[i], MPI_DOUBLE, &recvSize );
+		int j = 0;
+		assert( recvSize <= static_cast< int >( recvBufSize_ ) );
 		double* buf = &recvBuf_[ recvNode ][0];
-		while ( ) {
+		while ( j < recvSize ) {
 			const TgtInfo* tgt = reinterpret_cast< const TgtInfo * >( buf );
 			const Eref& e = tgt->eref();
 			const Finfo *f = 
-				e.element()->cinfo()->getSrcFinfo( tgt->srcFid );
+				e.element()->cinfo()->getSrcFinfo( tgt->bindIndex() );
 			buf += TgtInfo::headerSize;
-			f->sendBuffer( e, buf );
+			const SrcFinfo* sf = dynamic_cast< const SrcFinfo* >( f );
+			assert( sf );
+			sf->sendBuffer( e, buf );
 			buf += tgt->dataSize();
+			j += TgtInfo::headerSize + tgt->dataSize();
+			assert( buf - &recvBuf_[recvNode][0] == j );
 		}
+		// Post the next Irecv.
+		MPI_Irecv( &recvBuf_[recvNode][0],
+						recvBufSize_, MPI_DOUBLE, 
+						recvNode,
+						MSGTAG, MPI_COMM_WORLD,
+						&recvReq_[ recvNode ] 
+				 );
 	}
 #endif
 	return done;
@@ -166,11 +211,19 @@ double* PostMaster::addToSendBuf( const Eref& e, unsigned int bindIndex,
 {
 	unsigned int node = e.fieldIndex(); // nasty evil wicked hack
 	unsigned int end = sendSize_[node];
+	if ( end + TgtInfo::headerSize + size > recvBufSize_ ) {
+		// Here we need to activate the fallback second send which will
+		// deal with the big block. Also various routines for tracking
+		// send size so we don't get too big or small.
+		cerr << "Error: PostMaster::addToSendBuf on node " << 
+				Shell::myNode() << 
+				": Data size (" << size << ") goes past end of buffer\n";
+		assert( 0 );
+	}
 	TgtInfo* tgt = reinterpret_cast< TgtInfo* >( &sendBuf_[node][end] );
 	tgt->set( e.id(), e.dataIndex(), bindIndex, size );
 	end += TgtInfo::headerSize;
 	sendSize_[node] = end + size;
-	// Need to do stuff here when sendSize gets bigger than the buffer.
 	return &sendBuf_[node][end];
 }
 
