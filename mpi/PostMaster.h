@@ -65,6 +65,10 @@
 #ifndef _POST_MASTER_H
 #define _POST_MASTER_H
 
+#ifdef USE_MPI
+#include <mpi.h>
+#endif
+
 class TgtInfo {
 	public: 
 		TgtInfo()
@@ -88,6 +92,10 @@ class TgtInfo {
 			return dataSize_;
 		}
 
+		unsigned int bindIndex() const {
+			return bindIndex_;
+		}
+
 		static const unsigned int headerSize;
 	private:
 		Id id_;
@@ -105,15 +113,26 @@ class PostMaster {
 		void setBufferSize( unsigned int size );
 		void reinit( const Eref& e, ProcPtr p );
 		void process( const Eref& e, ProcPtr p );
-		int clearPending();
+		unsigned int clearPending();
 		double* addToSendBuf( const Eref& e, 
 				unsigned int bindIndex, unsigned int size );
+		static const unsigned int reserveBufSize;
+		static const int MSGTAG;
+		static const int SETTAG;
+		static const int CONTROLTAG;
+		static const int DIETAG;
 		static const Cinfo* initCinfo();
 	private:
 		unsigned int recvBufSize_;
 		vector< vector< double > > sendBuf_;
 		vector< vector< double > > recvBuf_;
 		vector< unsigned int > sendSize_;
+#ifdef USE_MPI
+		vector< MPI_Request > recvReq_;
+		vector< MPI_Request > sendReq_;
+		vector< MPI_Status > doneStatus_;
+#endif // USE_MPI
+		vector< int > doneIndices_;
 };
 
 #endif	// _POST_MASTER_H

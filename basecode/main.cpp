@@ -136,8 +136,8 @@ void checkChildren( Id parent, const string& info )
 Id init( int argc, char** argv, bool& doUnitTests, bool& doRegressionTests )
 {
 	unsigned int numCores = getNumCores();
-	unsigned int numNodes = 1;
-	unsigned int myNode = 0;
+	int numNodes = 1;
+	int myNode = 0;
 	bool isInfinite = 0;
 	int opt;
 #ifdef USE_MPI
