@@ -117,14 +117,14 @@ endif
 
 # MPI mode:
 ifeq ($(BUILD),mpi)
-CXXFLAGS  = -g -Wall -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
+CXXFLAGS = -g -fpermissive -fno-strict-aliasing -fPIC -fno-inline-functions -Wall -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
 USE_MPI = 1
 USE_GSL = 1
 endif
 
 # optimized MPI mode:
 ifeq ($(BUILD),ompi)
-CXXFLAGS  = -O3 -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER
+CXXFLAGS  = -O3 -fpermissive -fno-strict-aliasing -fPIC -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER
 USE_MPI = 1
 USE_GSL = 1
 endif

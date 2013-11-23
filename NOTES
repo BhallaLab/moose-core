@@ -795,5 +795,32 @@ Checkin 4851.
 20 Nov 2013. going through unit tests. Convs were messy but now OK.
 	Need to handle copy of Msgs to n targets.
 
-Other than that pending matter, the unit tests clear.
+Other than that pending matter, the unit tests clear. Checkin 4856.
+
 ===========================================================================
+22 Nov: See if the mpi_scatter will work with larger recv buffers than send
+sizes. The documentation isn't hugely clear on this.
+Tried it out in proc4.cpp, which is based on the scatter code in proc3.cpp. 
+Seems to work at first, but then fails once up to 16 nodes and higher.
+Let me check the mpirecv can handle this asymmetry. In proc5.cpp, which is
+based on proc2.cpp. Yes, this works. It is documented too.
+
+From the 12 Nov list:
+* Fill in send buffers:
+	- Message digest consolidation
+	- Arg conversion.
++ Figure out best design for internode comms. 
+* simple block mapping of DataId to rawIndex.
+- Global objects and synchronization
+- Communication between nodes for setup operations
+- Communication between nodes for Set/Get operations
+- Clock ticks between nodes.
++ Messaging between nodes.
+	- MPI implementation
+
+Next is to apply the MPI implementation, use the MPI_Irecv approach as the
+MPI_Scatter won't handle variable-length messages.
+
+Added most of code for PostMaster MPI stuff, yet to compile.
+
+

@@ -383,15 +383,16 @@ string Cinfo::getBaseClass() const
 // the indices of the new finfos, but I shouldn't be looking them up 
 // by index anyway.
 ////////////////////////////////////////////////////////////////////
-Finfo* Cinfo::getSrcFinfo( unsigned int i )
+Finfo* Cinfo::getSrcFinfo( unsigned int i ) const
 {
 	if ( i >= getNumSrcFinfo() )
-		return &dummy;
+		return 0;
 	if ( baseCinfo_ ) {
 		if ( i >= baseCinfo_->getNumSrcFinfo() )
 			return srcFinfos_[ i - baseCinfo_->getNumSrcFinfo() ];
 		else
-			return const_cast< Cinfo* >( baseCinfo_ )->getSrcFinfo( i );
+			return baseCinfo_->getSrcFinfo( i );
+			//return const_cast< Cinfo* >( baseCinfo_ )->getSrcFinfo( i );
 	}
 
 	return srcFinfos_[i];

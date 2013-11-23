@@ -71,6 +71,7 @@ class Cinfo;
 class SetGet;
 class FuncBarrier;
 class ObjId;
+class SrcFinfo;
 
 #include "doubleEq.h"
 #include "Id.h"
