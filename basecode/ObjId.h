@@ -64,9 +64,16 @@ class ObjId
 		bool operator!=( const ObjId& other ) const;
 
 		/**
-		 * True if the data is present on the current node.
+		 * True if the data is present on the current node. Always true for
+		 * globals, which confuses the matter somewhat.
 		 */
 		bool isDataHere() const;
+
+		/// Returns true if the Element is global.
+		bool isGlobal() const;
+
+		/// Returns true if we need to go off-node for calling operations
+		bool isOffNode() const;
 
 		/**
 		 * Returns data entry for this object
@@ -87,6 +94,7 @@ class ObjId
 
 		/// A useful test value
 		static const ObjId bad();
+
 	private:
 };
 

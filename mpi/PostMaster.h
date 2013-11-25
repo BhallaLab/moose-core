@@ -113,9 +113,23 @@ class PostMaster {
 		void setBufferSize( unsigned int size );
 		void reinit( const Eref& e, ProcPtr p );
 		void process( const Eref& e, ProcPtr p );
-		unsigned int clearPending();
+
+		/// All arrived messages and set calls are handled and cleared.
+		void clearPending();
+		/// Clears arrived set calls
+		void clearPendingSet();
+		/// Clears arrived messages.
+		void clearPendingSend();
+
+		/// Returns pointer to Send buffer for filling in arguments.
 		double* addToSendBuf( const Eref& e, 
 				unsigned int bindIndex, unsigned int size );
+		/// Returns pointer to Set buffer for filling in arguments.
+		double* addToSetBuf( const Eref& e, 
+				unsigned int opIndex, unsigned int size );
+		/// Sends off contets of Set buffer.
+		void dispatchSetBuf( const Eref& e );
+
 		static const unsigned int reserveBufSize;
 		static const int MSGTAG;
 		static const int SETTAG;
@@ -124,15 +138,26 @@ class PostMaster {
 		static const Cinfo* initCinfo();
 	private:
 		unsigned int recvBufSize_;
+		// Used on master for sending, on others for receiving.
+		vector< double > setSendBuf_; 
+		vector< double > setRecvBuf_; 
 		vector< vector< double > > sendBuf_;
 		vector< vector< double > > recvBuf_;
 		vector< unsigned int > sendSize_;
 #ifdef USE_MPI
+		MPI_Request setSendReq_;
+		MPI_Request setRecvReq_;
+		MPI_Status setSendStatus_;
+		MPI_Status setRecvStatus_;
 		vector< MPI_Request > recvReq_;
 		vector< MPI_Request > sendReq_;
 		vector< MPI_Status > doneStatus_;
 #endif // USE_MPI
 		vector< int > doneIndices_;
+		int isSetSent_;
+		int isSetRecv_;
+		int setSendSize_;
+		unsigned int numSendDone_;
 };
 
 #endif	// _POST_MASTER_H

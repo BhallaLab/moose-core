@@ -67,6 +67,9 @@ class Eref
 		 * True if the data are on the current node
 		 */
 		bool isDataHere() const;
+
+		/// Returns node upon which specified data entry resides .
+		unsigned int getNode() const;
 	private:
 		Element* e_;
 		DataId i_;

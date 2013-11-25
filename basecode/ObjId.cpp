@@ -67,7 +67,20 @@ bool ObjId::operator!=( const ObjId& other ) const
 
 bool ObjId::isDataHere() const
 {
-	return true; // Later look up Element.
+	return ( id.element()->getNode( dataId ) == Shell::myNode() );
+}
+
+bool ObjId::isGlobal() const
+{
+	return ( id.element()->isGlobal() );
+}
+
+bool ObjId::isOffNode() const
+{
+	return ( Shell::numNodes() > 1 && 
+		( id.element()->isGlobal() || 
+		  id.element()->getNode( dataId ) != Shell::myNode() )
+	);
 }
 
 char* ObjId::data() const

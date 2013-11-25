@@ -35,6 +35,7 @@ OBJ = \
 	Id.o \
 	ObjId.o \
 	SetGet.o \
+	OpFuncBase.o \
 	EpFunc.o \
 	HopFunc.o \
 	SparseMatrix.o \
