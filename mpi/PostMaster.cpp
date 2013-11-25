@@ -22,15 +22,23 @@ const int PostMaster::DIETAG = 4;
 PostMaster::PostMaster()
 		: 
 				recvBufSize_( reserveBufSize ),
+				setSendBuf_( reserveBufSize, 0 ),
+				setRecvBuf_( reserveBufSize, 0 ),
 				sendBuf_( Shell::numNodes() ),
 				recvBuf_( Shell::numNodes() ),
 				sendSize_( Shell::numNodes(), 0 ),
-				doneIndices_( Shell::numNodes(), 0 )
+				doneIndices_( Shell::numNodes(), 0 ),
+				isSetSent_( 1 ), // Flag. Have any pending 'set' gone?
+				isSetRecv_( 0 ), // Flag. Has some data come in?
+				setSendSize_( 0 ),
+				numSendDone_( 0 )
 {
 	for ( unsigned int i = 0; i < Shell::numNodes(); ++i ) {
 		sendBuf_[i].resize( reserveBufSize, 0 );
 	}
 #ifdef USE_MPI
+	recvReq_.resize( Shell::numNodes() );
+	sendReq_.resize( Shell::numNodes() );
 	for ( unsigned int i = 0; i < Shell::numNodes(); ++i ) {
 		// Set up the Recv already for later sends. This might be a problem
 		// for some polling-based implementations, but let's try for now.
@@ -121,7 +129,6 @@ const Cinfo* PostMaster::initCinfo()
 void PostMaster::reinit( const Eref& e, ProcPtr p )
 {
 #ifdef USE_MPI
-	unsigned int numDone = 0;
 	for ( unsigned int i = 0; i < Shell::numNodes(); ++i )
 	{
 		if ( i == Shell::myNode() ) continue;
@@ -133,17 +140,17 @@ void PostMaster::reinit( const Eref& e, ProcPtr p )
 			MSGTAG, MPI_COMM_WORLD,
 			&sendReq_[i]
 		);
-		numDone += clearPending(); // Try to interleave communications.
+		clearPending(); // Try to interleave communications.
 	}
-	while ( numDone < Shell::numNodes() )
-		numDone += clearPending();
+	while ( numSendDone_ < Shell::numNodes() )
+		clearPending();
+	numSendDone_ = 0;
 #endif
 }
 
 void PostMaster::process( const Eref& e, ProcPtr p )
 {
 #ifdef USE_MPI
-	unsigned int numDone = 0;
 	for ( unsigned int i = 0; i < Shell::numNodes(); ++i )
 	{
 		if ( i == Shell::myNode() ) continue;
@@ -153,25 +160,63 @@ void PostMaster::process( const Eref& e, ProcPtr p )
 			&sendBuf_[i][0], sendSize_[i], MPI_DOUBLE,
 			i, 		// Where to send to.
 			MSGTAG, MPI_COMM_WORLD,
-			&sendReq_[i]
+			&setSendReq_
 		);
-		numDone += clearPending(); // Try to interleave communications.
+		clearPending(); // Try to interleave communications.
 	}
-	while ( numDone < Shell::numNodes() )
-		numDone += clearPending();
+	while ( numSendDone_ < Shell::numNodes() )
+		clearPending();
+	numSendDone_ = 0;
 #endif
 }
 
-unsigned int PostMaster::clearPending()
+void PostMaster::clearPending()
 {
-	int done = 0;
 	if ( Shell::numNodes() == 1 )
-		return 0;
+		return;
+	clearPendingSet();
+	clearPendingSend();
+}
+
+void PostMaster::clearPendingSet()
+{
 #ifdef USE_MPI
+	// isSetSent_ is checked before doing another x-node set operation
+	// in dispatchSetBuf.
+	if ( !isSetSent_ ) {
+		MPI_Test( &setSendReq_, &isSetSent_, &setSendStatus_ );
+		assert ( isSetSent_ != MPI_UNDEFINED );
+	}
+
+	MPI_Test( &setRecvReq_, &isSetRecv_, &setRecvStatus_ );
+	if ( isSetRecv_ && isSetRecv_ != MPI_UNDEFINED )
+	{
+		// Handle arrived Set call
+		const TgtInfo* tgt = 
+				reinterpret_cast< const TgtInfo * >( &setRecvBuf_[0] );
+		const Eref& e = tgt->eref();
+		const OpFunc *op = OpFunc::lookop( tgt->bindIndex() );
+		assert( op );
+		op->opBuffer( e, &setRecvBuf_[ TgtInfo::headerSize ] );
+		// Now the operation is done. Re-post recv.
+		MPI_Irecv( &setRecvBuf_[0], recvBufSize_, MPI_DOUBLE,
+						MPI_ANY_SOURCE,
+						SETTAG, MPI_COMM_WORLD,
+						&setRecvReq_
+		);
+		isSetRecv_ = 0;
+	}
+#endif // USE_MPI
+}
+
+void PostMaster::clearPendingSend()
+{
+#ifdef USE_MPI
+	int done = 0;
 	MPI_Testsome( Shell::numNodes() -1, &recvReq_[0], &done, 
 					&doneIndices_[0], &doneStatus_[0] );
 	if ( done == MPI_UNDEFINED )
-		return 0;
+		return;
 	for ( int i = 0; i < done; ++i ) {
 		unsigned int recvNode = doneIndices_[i];
 		if ( recvNode >= Shell::myNode() )
@@ -202,9 +247,13 @@ unsigned int PostMaster::clearPending()
 						&recvReq_[ recvNode ] 
 				 );
 	}
+	numSendDone_ += done;
 #endif
-	return done;
 }
+
+///////////////////////////////////////////////////////////////
+// Data transfer and fillup operations.
+///////////////////////////////////////////////////////////////
 
 double* PostMaster::addToSendBuf( const Eref& e, unsigned int bindIndex,
 		unsigned int size )
@@ -225,6 +274,62 @@ double* PostMaster::addToSendBuf( const Eref& e, unsigned int bindIndex,
 	end += TgtInfo::headerSize;
 	sendSize_[node] = end + size;
 	return &sendBuf_[node][end];
+}
+
+double* PostMaster::addToSetBuf( const Eref& e, unsigned int opIndex, 
+						unsigned int size )
+{
+	unsigned int node = e.getNode(); // The Eref is an offnode one.
+	assert( node != Shell::myNode() );
+	if ( TgtInfo::headerSize + size > recvBufSize_ ) {
+		// Here we need to activate the fallback second send which will
+		// deal with the big block. Also various routines for tracking
+		// send size so we don't get too big or small.
+		cerr << "Error: PostMaster::addToSetBuf on node " << 
+				Shell::myNode() << 
+				": Data size (" << size << ") goes past end of buffer\n";
+		assert( 0 );
+	}
+	TgtInfo* tgt = reinterpret_cast< TgtInfo* >( &setSendBuf_[0] );
+	tgt->set( e.id(), e.dataIndex(), opIndex, size );
+	unsigned int end = TgtInfo::headerSize;
+	setSendSize_ = end + size;
+	return &setSendBuf_[end];
+}
+
+void PostMaster::dispatchSetBuf( const Eref& e )
+{
+	assert ( e.element()->isGlobal() || e.getNode() != Shell::myNode() );
+	while ( isSetSent_ == 0 ) { // Can't add a set while old set is pending
+		clearPending();
+	}
+	isSetSent_ = 0;
+#ifdef USE_MPI
+	if ( e.element()->isGlobal() ) {
+		for ( unsigned int i = 0; i < Shell::numNodes(); ++i ) {
+			if ( i != Shell::myNode() ) {
+			// A bcast would be marginally more efficient, but would need
+			// us to inform all target nodes to expect one. So just do
+			// multiple sends.
+				MPI_Isend( 
+					&setSendBuf_[0], setSendSize_, MPI_DOUBLE,
+					i, 		// Where to send to.
+					SETTAG, MPI_COMM_WORLD,
+					&setSendReq_
+		// Need to monitor all the sends to make sure they all complete 
+		// before permitting another 'set'
+				);
+			}
+		}
+	} else {
+		MPI_Isend( 
+			&setSendBuf_[0], setSendSize_, MPI_DOUBLE,
+				e.getNode(), 		// Where to send to.
+				SETTAG, MPI_COMM_WORLD,
+				&setSendReq_
+		);
+	}
+#endif
 }
 
 ///////////////////////////////////////////////////////////////

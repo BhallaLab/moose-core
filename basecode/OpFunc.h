@@ -20,7 +20,6 @@ template< class T > class OpFunc0: public OpFunc0Base
 		void op( const Eref& e ) const {
 			(reinterpret_cast< T* >( e.data() )->*func_)();
 		}
-
 	private:
 		void ( T::*func_ )( ); 
 };
