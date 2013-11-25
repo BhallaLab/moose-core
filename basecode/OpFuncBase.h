@@ -10,16 +10,56 @@
 #ifndef _OPFUNCBASE_H
 #define _OPFUNCBASE_H
 
+extern const unsigned char MooseSendHop;
+extern const unsigned char MooseSetHop;
+extern const unsigned char MooseGetHop;
+extern const unsigned char MooseReturnHop;
+
+class HopIndex
+{
+	public:
+		HopIndex( unsigned short bindIndex, 
+				unsigned char hopType = MooseSendHop)
+				: bindIndex_( bindIndex ),
+				hopType_( hopType )
+		{;}
+
+		unsigned short bindIndex() {
+			return bindIndex_;
+		}
+
+		unsigned char hopType() {
+			return hopType_;
+		}
+	private:
+		unsigned short bindIndex_;
+		unsigned char hopType_;
+};
+
 class OpFunc
 {
 	public:
+		OpFunc();
+
 		virtual ~OpFunc()
 		{;}
 		virtual bool checkFinfo( const Finfo* s) const = 0;
 
 		virtual string rttiType() const = 0;
 
-		virtual const OpFunc* makeHopFunc( unsigned int bindIndex) const =0;
+		virtual const OpFunc* makeHopFunc( HopIndex hopIndex) const =0;
+
+		/// Executes the OpFunc by converting args.
+		virtual void opBuffer( const Eref& e, double* buf ) const = 0;
+
+		static const OpFunc* lookop( unsigned int opIndex );
+
+		unsigned int opIndex() const {
+			return opIndex_;
+		}
+	private:
+		unsigned int opIndex_;
+		static vector< OpFunc* >& ops();
 };
 
 class OpFunc0Base: public OpFunc
@@ -31,7 +71,9 @@ class OpFunc0Base: public OpFunc
 
 		virtual void op( const Eref& e ) const = 0;
 
-		const OpFunc* makeHopFunc( unsigned int bindIndex) const;
+		const OpFunc* makeHopFunc( HopIndex hopIndex) const;
+
+		void opBuffer( const Eref& e, double* buf ) const;
 
 		string rttiType() const {
 			return "void";
@@ -48,7 +90,11 @@ template< class A > class OpFunc1Base: public OpFunc
 
 		virtual void op( const Eref& e, A arg ) const = 0;
 
-		const OpFunc* makeHopFunc( unsigned int bindIndex) const;
+		const OpFunc* makeHopFunc( HopIndex hopIndex) const;
+
+		void opBuffer( const Eref& e, double* buf ) const {
+			op( e, Conv< A >::buf2val( &buf ) );
+		}
 
 		string rttiType() const {
 			return Conv< A >::rttiType();
@@ -65,7 +111,12 @@ template< class A1, class A2 > class OpFunc2Base: public OpFunc
 		virtual void op( const Eref& e, A1 arg1, A2 arg2 ) 
 				const = 0;
 
-		const OpFunc* makeHopFunc( unsigned int bindIndex) const;
+		const OpFunc* makeHopFunc( HopIndex hopIndex) const;
+
+		void opBuffer( const Eref& e, double* buf ) const {
+			op( e, 		Conv< A1 >::buf2val( &buf ),
+						Conv< A2 >::buf2val( &buf ) );
+		}
 
 		string rttiType() const {
 			return Conv< A1 >::rttiType() + "," + Conv< A2 >::rttiType(); 
@@ -83,7 +134,13 @@ template< class A1, class A2, class A3 > class OpFunc3Base:
 		virtual void op( const Eref& e, A1 arg1, A2 arg2, A3 arg3 ) 
 				const = 0;
 
-		const OpFunc* makeHopFunc( unsigned int bindIndex) const;
+		const OpFunc* makeHopFunc( HopIndex hopIndex) const;
+
+		void opBuffer( const Eref& e, double* buf ) const {
+			op( e, 		Conv< A1 >::buf2val( &buf ),
+						Conv< A2 >::buf2val( &buf ),
+						Conv< A3 >::buf2val( &buf ) );
+		}
 
 		string rttiType() const {
 			return Conv< A1 >::rttiType() + "," + Conv< A2 >::rttiType() +
@@ -102,7 +159,14 @@ template< class A1, class A2, class A3, class A4 >
 		virtual void op( const Eref& e, 
 						A1 arg1, A2 arg2, A3 arg3, A4 arg4 ) const = 0;
 
-		const OpFunc* makeHopFunc( unsigned int bindIndex) const;
+		const OpFunc* makeHopFunc( HopIndex hopIndex) const;
+
+		void opBuffer( const Eref& e, double* buf ) const {
+			op( e, 		Conv< A1 >::buf2val( &buf ),
+						Conv< A2 >::buf2val( &buf ),
+						Conv< A3 >::buf2val( &buf ),
+						Conv< A4 >::buf2val( &buf ) );
+		}
 
 		string rttiType() const {
 			return Conv< A1 >::rttiType() + "," + Conv< A2 >::rttiType() +
@@ -121,7 +185,15 @@ template< class A1, class A2, class A3, class A4, class A5 >
 		virtual void op( const Eref& e, 
 				A1 arg1, A2 arg2, A3 arg3, A4 arg4, A5 arg5 ) const = 0;
 
-		const OpFunc* makeHopFunc( unsigned int bindIndex) const;
+		const OpFunc* makeHopFunc( HopIndex hopIndex) const;
+
+		void opBuffer( const Eref& e, double* buf ) const {
+			op( e, 		Conv< A1 >::buf2val( &buf ),
+						Conv< A2 >::buf2val( &buf ),
+						Conv< A3 >::buf2val( &buf ),
+						Conv< A4 >::buf2val( &buf ),
+						Conv< A5 >::buf2val( &buf ) );
+		}
 
 		string rttiType() const {
 			return Conv< A1 >::rttiType() + "," + Conv< A2 >::rttiType() +
@@ -141,7 +213,16 @@ template< class A1, class A2, class A3, class A4, class A5, class A6 >
 		virtual void op( const Eref& e, A1 arg1, A2 arg2, A3 arg3, A4 arg4, 
 						A5 arg5, A6 arg6 ) const = 0;
 
-		const OpFunc* makeHopFunc( unsigned int bindIndex) const;
+		const OpFunc* makeHopFunc( HopIndex hopIndex) const;
+
+		void opBuffer( const Eref& e, double* buf ) const {
+			op( e, 		Conv< A1 >::buf2val( &buf ),
+						Conv< A2 >::buf2val( &buf ),
+						Conv< A3 >::buf2val( &buf ),
+						Conv< A4 >::buf2val( &buf ),
+						Conv< A5 >::buf2val( &buf ),
+						Conv< A6 >::buf2val( &buf ) );
+		}
 
 		string rttiType() const {
 			return Conv< A1 >::rttiType() + "," + Conv< A2 >::rttiType() +
@@ -165,10 +246,14 @@ template< class A > class GetOpFuncBase: public OpFunc1Base< A* >
 
 		virtual A returnOp( const Eref& e ) const = 0;
 
-		const OpFunc* makeHopFunc( unsigned int bindIndex) const 
+		const OpFunc* makeHopFunc( HopIndex hopIndex) const 
 		{
 			// Perhaps later we can put in something for x-node gets.
 			return 0;
+		}
+
+		void opBuffer( const Eref& e, double* buf ) const {
+				// Later figure out how to handle.
 		}
 
 		/*
@@ -213,10 +298,14 @@ template< class L, class A > class LookupGetOpFuncBase: public OpFunc
 
 		virtual A returnOp( const Eref& e, const L& index ) const = 0;
 
-		const OpFunc* makeHopFunc( unsigned int bindIndex) const 
+		const OpFunc* makeHopFunc( HopIndex hopIndex) const 
 		{
 			// Perhaps later we can put in something for x-node gets.
 			return 0;
+		}
+
+		void opBuffer( const Eref& e, double* buf ) const {
+				// Later figure out how to handle.
 		}
 
 		string rttiType() const {

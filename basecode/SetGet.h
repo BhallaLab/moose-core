@@ -106,8 +106,20 @@ class SetGet0: public SetGet
 			const OpFunc0Base* op = 
 					dynamic_cast< const OpFunc0Base* >( func );
 			if ( op ) {
-				op->op( tgt.eref() );
-				return 1;
+				if ( tgt.isOffNode() ) {
+					if ( tgt.isGlobal() )
+						op->op( tgt.eref() );
+					const OpFunc* op2 = op->makeHopFunc( 
+						HopIndex( op->opIndex(), MooseSetHop ) );
+					const OpFunc0Base* hop = 
+						dynamic_cast< const OpFunc0Base* >( op2 );
+					hop->op( tgt.eref() );
+					delete op2;
+					return true;
+				} else {
+					op->op( tgt.eref() );
+					return true;
+				}
 			}
 			return 0;
 		}
@@ -143,10 +155,22 @@ template< class A > class SetGet1: public SetGet
 			const OpFunc1Base< A >* op = 
 					dynamic_cast< const OpFunc1Base< A >* >( func );
 			if ( op ) {
-				op->op( tgt.eref(), arg );
-				return 1;
+				if ( tgt.isOffNode() ) {
+					if ( tgt.isGlobal() )
+						op->op( tgt.eref(), arg );
+					const OpFunc* op2 = op->makeHopFunc( 
+						HopIndex( op->opIndex(), MooseSetHop ) );
+					const OpFunc1Base< A >* hop = 
+						dynamic_cast< const OpFunc1Base< A >* >( op2 );
+					hop->op( tgt.eref(), arg );
+					delete op2;
+					return true;
+				} else {
+					op->op( tgt.eref(), arg );
+					return true;
+				}
 			}
-			return 0;
+			return false;
 		}
 
 		/**
@@ -385,8 +409,23 @@ template< class A1, class A2 > class SetGet2: public SetGet
 			if ( op ) {
 				op->op( tgt.eref(), arg1, arg2 );
 				return 1;
+
+				if ( tgt.isOffNode() ) {
+					if ( tgt.isGlobal() )
+						op->op( tgt.eref(), arg1, arg2 );
+					const OpFunc* op2 = op->makeHopFunc( 
+						HopIndex( op->opIndex(), MooseSetHop ) );
+					const OpFunc2Base< A1, A2 >* hop = 
+						dynamic_cast< const OpFunc2Base< A1, A2 >* >( op2 );
+					hop->op( tgt.eref(), arg1, arg2 );
+					delete op2;
+					return true;
+				} else {
+					op->op( tgt.eref(), arg1, arg2 );
+					return true;
+				}
 			}
-			return 0;
+			return false;
 		}
 
 		/**

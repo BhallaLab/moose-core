@@ -824,3 +824,84 @@ MPI_Scatter won't handle variable-length messages.
 Added most of code for PostMaster MPI stuff, yet to compile.
 
 
+===========================================================================
+22 Nov: Compiles.  Checkin 4857.
+Beginning unit tests. Goes OK until it has to issue a Set call to an off-node
+data entry in testShell. Will need to fix SetGet. Also looks like unit
+tests are not going across nodes.
+
+Looking at SetGet. While the use of a HopFunc takes us most of the way,
+there are 5 issues remaining:
+- I may set a field. The hack in the send command knows that the src eref 
+	is not a field, so it uses the fieldIndex as the node identifier.
+	As I can just query the eref about the target node, this is can be
+	handled provided the system knows it is a SetGet operation.
+* PostMasteraddToSendBuf doesn't know that this is a SetGet rather than msg.
+	Subclasses of the HopFunc? Switch statements off a flag passed in by
+	bindIndex?
+	Created a HopIndex class that lets met track both.
++ How to set up the bindIndex to refer to the correct SetGet operation on the
+	target node?
+	Make a static global vector of all OpFuncs, refer to this.
+	Need to be sure that the dynamically assigned OpFuncs come strictly 
+	after the statically assigned ones.
++ On the target node, SrcFinfo::sendBuffer was used to convert back. Here it
+	won't work as the sendBuffer refers to the regular send call.
+	Need to refer to something quite different. This could be handled
+	if the TAG on the mpi msg tells the target node to do something else.
+	I would need to get the OpFuncBase or Hopfunc to convert buffer to 
+	arguments and call the OpFunc->op().
+- How to handle return values for get funcs?
+
+Stages in off-node 'set':
+1. call SetGet::set. Checks if isDataHere(). If so, easy. If not, make a 
+	HopFunc with the flag to say it is a Set operation. Call hop->op.
+2. hop->op does the generic addToBuf.
+3. The postmaster sees the special flag to tell it that it is a Set operation
+	in p->addToSendBuf.
+4. PostMaster sends the data off immediately [and polls for return]. 
+	Appropriate SETTAG.
+5. Tgt PostMaster is polling for any SETTAG from any source. Gets it.
+6. Uses TgtInfo to look up appropriate OpFunc from BindIndex, and Eref.
+7. Calls OpFunc1Base<A>::op->opBuffer( Eref, buf). This does the 
+	conversion from the buffer and calls the virtual OpFunc with the 
+	converted argument.
+
+This would be it for the Set unless I wanted to make it a blocking Set.
+
+Stages in off-node 'get':
+Same as 1 to 6 but the originating PostMaster has to do polling for the return.
+7. Calls GetOpFunc1Base< A >::op->opBuffer. This creates a temporary A field
+	for the return value and gets it.
+8. Converts into a buffer explicitly.
+9. Sends back using yet another tag.
+10. The return poll harvests the value. The GetOpFuncBase knows what type to 
+	expect back and use in the buffer.
+
+This is going to be tough. First things first with the set. Perhaps should
+separate out the messaging in the unit tests, too.
+
+For the Shell operations, I think it should be yet another SHELLTAG or maybe
+even separate tags for the various shell ops. There are only about a dozen
+of them. They all seem to be forward only ops, no returns.
+Could we use a variant of Set?
+
+I also need to figure out how to do setVec and getVec.
+===========================================================================
+
+Week 1: Threading out
+Week 2: Messaging refactoring
+Week 3: Element and field indexing refactoring. Data Handler out.
+Week 4: Scheduling refactoring, recompile and unit tests. 
+	Copy refactoring.
+Week 4.5: MsgIds replaced with ObjIds. Automatic message compilation.
+Week 5: Standalone tests on mpi framework
+Week 6: Multinode messaging design, implementation, compilation, no tests.
+Week 7: Multinode Set/Get. Compile and test.
+
+
+25 Nov 2013: Starting to compile with the Set calls included. But this is a
+bad way to develop. Should instead do multinode messaging separately,
+and then do the MPI-based real test.
+
+

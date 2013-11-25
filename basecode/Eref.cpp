@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "../shell/Shell.h"
 
 Eref::Eref()
 			: e_( 0 ), i_( 0 ), f_( 0 )
@@ -37,7 +38,12 @@ char* Eref::data() const
 
 bool Eref::isDataHere() const
 {
-	return true;
+	return ( e_->getNode( i_ ) == Shell::myNode() );
+}
+
+unsigned int Eref::getNode() const
+{
+	return e_->getNode( i_ );
 }
 
 ObjId Eref::objId() const
