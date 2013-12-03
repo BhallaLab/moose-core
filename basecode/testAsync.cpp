@@ -26,6 +26,7 @@
 #include "../scheduling/Clock.h"
 
 #include "../shell/Shell.h"
+#include "../mpi/PostMaster.h"
 
 void showFields()
 {
@@ -1663,6 +1664,43 @@ void testMsgSrcDestFields()
 	cout << "." << flush;
 }
 
+void testHopFunc()
+{
+	extern const double* checkHopFuncTestBuffer();
+
+	HopIndex hop2( 1234, MooseTestHop );
+	HopFunc2< string, double > two( hop2 );
+
+	two.op( Id(3).eref(), "two", 2468.0 );
+	const double* buf = checkHopFuncTestBuffer();
+	const TgtInfo* tgt = reinterpret_cast< const TgtInfo* >( buf );
+	assert( tgt->bindIndex() == 1234 );
+	assert( tgt->dataSize() == 2 );
+	const char* c = reinterpret_cast< const char* >( buf + 2 );
+	assert( strcmp( c, "two" ) == 0 );
+	assert( doubleEq( buf[3], 2468.0 ) );
+
+	HopIndex hop3( 36912, MooseTestHop );
+	HopFunc3< string, int, vector< double > > three( hop3 );
+	vector< double > temp( 3 );
+	temp[0] = 11222;
+	temp[1] = 24332;
+	temp[2] = 234232342;
+	three.op( Id(3).eref(), "three", 3333, temp );
+
+	assert( tgt->bindIndex() == 36912 );
+	assert( tgt->dataSize() == 6 );
+	c = reinterpret_cast< const char* >( buf + 2 );
+	assert( strcmp( c, "three" ) == 0 );
+	assert( doubleEq( buf[3], 3333.0 ) );
+	assert( doubleEq( buf[4], 3.0 ) ); // Size of array.
+	assert( doubleEq( buf[5], temp[0] ) );
+	assert( doubleEq( buf[6], temp[1] ) );
+	assert( doubleEq( buf[7], temp[2] ) );
+
+	cout << "." << flush;
+}
+
 void testAsync( )
 {
 	showFields();
@@ -1692,4 +1730,5 @@ void testAsync( )
 	testCinfoFields();
 	testCinfoElements();
 	testMsgSrcDestFields();
+	testHopFunc();
 }

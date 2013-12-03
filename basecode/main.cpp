@@ -335,6 +335,11 @@ int main( int argc, char** argv )
 		// if ( benchmarkTests( argc, argv ) || quitFlag ) s->doQuit();
 		// else 
 			Shell::launchParser(); // Here we set off a little event loop to poll user input. It deals with the doQuit call too.
+	} else {
+		PostMaster* p = reinterpret_cast< PostMaster* >( ObjId( 3 ).data());
+		while ( Shell::keepLooping() ) {
+			p->clearPending();
+		}
 	}
 	Msg::clearAllMsgs();
 	Id::clearAllElements();

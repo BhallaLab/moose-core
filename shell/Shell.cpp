@@ -30,7 +30,7 @@ const unsigned int Shell::OkStatus = ~0;
 const unsigned int Shell::ErrorStatus = ~1;
 
 bool Shell::isBlockedOnParser_ = 0;
-bool Shell::keepLooping_ = 0;
+bool Shell::keepLooping_ = 1;
 unsigned int Shell::numCores_;
 unsigned int Shell::numNodes_;
 unsigned int Shell::myNode_;
@@ -279,6 +279,7 @@ const Cinfo* Shell::initCinfo()
 ////////////////////////////////////////////////////////////////
 		// &master,
 		// &worker,
+		&handleCreate,
 		&clockControl,
 	};
 
@@ -331,7 +332,17 @@ Id Shell::doCreate( string type, ObjId parent, string name,
 				unsigned int numData, bool isGlobal )
 {
 	Id ret = Id::nextId();
-	innerCreate( type, parent, ret, name, numData, isGlobal );
+	SetGet6< string, ObjId, Id, string, unsigned int, bool >::set(
+		ObjId(), // Apply command to Shell
+		"create",	// Function to call.
+		type, 		// class of new object
+		parent,		// Parent
+		ret,		// id of new object
+		name,		// name of new object
+		numData,	// Number of entries in new object array
+		isGlobal	// is it a global.
+	);
+	// innerCreate( type, parent, ret, name, numData, isGlobal );
 	return ret;
 }
 
@@ -1006,6 +1017,12 @@ void Shell::handleUseClock( const Eref& e,
 void Shell::handleQuit()
 {
 	Shell::keepLooping_ = 0;
+}
+
+// Static function
+bool Shell::keepLooping()
+{
+	return keepLooping_;
 }
 
 void Shell::warning( const string& text )

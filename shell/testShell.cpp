@@ -378,9 +378,9 @@ void testCopyFieldElement()
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 	unsigned int size = 10;
 	unsigned int size2 = 17;
-	Id origId = shell->doCreate( "IntFire", Id(), "f1", size );
+	Id origId = shell->doCreate( "IntFire", Id(), "f1", size, true );
 	Id origSynId( origId.value() + 1 );
-	Id origChild = shell->doCreate( "Neutral", origId, "f2", size2 );
+	Id origChild = shell->doCreate( "Neutral", origId, "f2", size2, true );
 	
 	Element* syn = origSynId.element();
 	assert( syn != 0 );
@@ -395,11 +395,14 @@ void testCopyFieldElement()
 	assert( ret );
 
 	unsigned int origNumSyn = 0;
+	origNumSyn = size * (size - 1) / 2;
+	/*
 	if ( shell->numNodes() == 1 ) {
 		origNumSyn = size * (size - 1) / 2;
 	} else {
 		assert( 0 );
 	}
+	*/
 
 	vector< double > delay;
 	// unsigned int k = 0;

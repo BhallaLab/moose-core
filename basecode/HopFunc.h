@@ -13,6 +13,7 @@
 double* addToBuf( 
 			const Eref& e, HopIndex hopIndex, unsigned int size );
 void dispatchBuffers( const Eref& e, HopIndex hopIndex );
+double* remoteGet( const Eref& e , unsigned int bindIndex );
 
 /**
  * Function to hop across nodes. This one has no arguments, just tells the
@@ -224,5 +225,31 @@ const OpFunc* OpFunc6Base< A1, A2, A3, A4, A5, A6 >::makeHopFunc(
 	return new HopFunc6< A1, A2, A3, A4, A5, A6 >( hopIndex );
 }
 
+
+// Function to Get value after hop across nodes, with one argument.
+template < class A > class GetHopFunc: public OpFunc1Base< A* >
+{
+	public:
+		GetHopFunc( HopIndex hopIndex )
+				: hopIndex_( hopIndex )
+		{;}
+		void op( const Eref& e, A* ret ) const
+		{
+			double* buf = remoteGet( e, hopIndex_.bindIndex() );
+			*ret = Conv< A >::buf2val( &buf );
+		}
+	private:
+		HopIndex hopIndex_;
+};
+
+/**
+ * Deferred specification of function from OpFunc1Base, so it is after 
+ * the declaration of the HopFunc class to which it refers.
+ */
+template< class A > 
+const OpFunc* GetOpFuncBase< A >::makeHopFunc( HopIndex hopIndex ) const
+{
+	return new GetHopFunc< A >( hopIndex );
+}
 
 #endif // _HOP_FUNC_H

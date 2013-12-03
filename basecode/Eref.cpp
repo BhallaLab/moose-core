@@ -33,7 +33,7 @@ ostream& operator <<( ostream& s, const Eref& e )
 
 char* Eref::data() const
 {
-	return e_->data( i_, f_ );
+	return e_->data( e_->rawIndex( i_ ), f_ );
 }
 
 bool Eref::isDataHere() const
