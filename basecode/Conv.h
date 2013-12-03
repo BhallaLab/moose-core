@@ -125,7 +125,9 @@ template<> class Conv< string >
 			return 1 + val.length() / sizeof( double );
 		}
 
-		static const string& buf2val( double** buf ) {
+		// The return cannot be a reference, because the function may
+		// be called many times in succession.
+		static const string buf2val( double** buf ) {
 			static string ret;
 			ret = reinterpret_cast< const char* >( *buf );
 			*buf += size( ret );
@@ -507,7 +509,8 @@ template< class T > class Conv< vector< vector< T > > >
 			}
 			return ret;
 		}
-		static const vector< vector< T > >& buf2val( double** buf )
+
+		static const vector< vector< T > > buf2val( double** buf )
 		{
 			static vector< vector< T > > ret;
 			ret.clear();
@@ -572,7 +575,7 @@ template< class T > class Conv< vector< T > >
 			return ret;
 		}
 
-		static const vector< T >& buf2val( double** buf )
+		static const vector< T > buf2val( double** buf )
 		{
 			static vector< T > ret;
 			ret.clear();

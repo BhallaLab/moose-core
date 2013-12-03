@@ -80,6 +80,10 @@ class TgtInfo {
 			return Eref( id_.element(), dataIndex_, 0 );
 		}
 
+		Eref fullEref() const {
+			return Eref( id_.element(), dataIndex_, dataSize_ );
+		}
+
 		void set( Id id, DataId dataIndex, unsigned int bindIndex, 
 						unsigned int size ) {
 			id_ = id;
@@ -101,7 +105,7 @@ class TgtInfo {
 		Id id_;
 		DataId dataIndex_;
 		unsigned int bindIndex_;
-		unsigned int dataSize_;
+		unsigned int dataSize_; // Does double duty as fieldIndex.
 };
 
 class PostMaster {
@@ -118,6 +122,8 @@ class PostMaster {
 		void clearPending();
 		/// Clears arrived set calls
 		void clearPendingSet();
+		/// Clears arrived get calls
+		void clearPendingGet();
 		/// Clears arrived messages.
 		void clearPendingSend();
 
@@ -130,9 +136,14 @@ class PostMaster {
 		/// Sends off contets of Set buffer.
 		void dispatchSetBuf( const Eref& e );
 
+		/// Blocking call to get a value from a remote node.
+		double* remoteGet( const Eref& e, unsigned int bindIndex );
+
 		static const unsigned int reserveBufSize;
 		static const int MSGTAG;
 		static const int SETTAG;
+		static const int GETTAG;
+		static const int RETURNTAG;
 		static const int CONTROLTAG;
 		static const int DIETAG;
 		static const Cinfo* initCinfo();
@@ -144,9 +155,11 @@ class PostMaster {
 		vector< vector< double > > sendBuf_;
 		vector< vector< double > > recvBuf_;
 		vector< unsigned int > sendSize_;
+		vector< double > getHandlerBuf_; // Just enough for one TgtInfo.
 #ifdef USE_MPI
 		MPI_Request setSendReq_;
 		MPI_Request setRecvReq_;
+		MPI_Request getHandlerReq_;
 		MPI_Status setSendStatus_;
 		MPI_Status setRecvStatus_;
 		vector< MPI_Request > recvReq_;

@@ -482,8 +482,11 @@ string Neutral::path( const Eref& e )
 		ss << oid.element()->getName();
 		if ( oid.element()->numData() > 1 )
 			ss << "[" << oid.dataId << "]";
-		if ( oid.element()->numField( oid.dataId ) > 1 )
-			ss << "[" << oid.fieldIndex << "]";
+	}
+	// Append braces if Eref was for a fieldElement. This should
+	// work even if it is off-node.
+	if ( e.element()->hasFields() ) {
+		ss << "[" << e.fieldIndex() << "]";
 	}
 
 	return ss.str();
