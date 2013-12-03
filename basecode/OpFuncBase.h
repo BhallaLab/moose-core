@@ -14,6 +14,7 @@ extern const unsigned char MooseSendHop;
 extern const unsigned char MooseSetHop;
 extern const unsigned char MooseGetHop;
 extern const unsigned char MooseReturnHop;
+extern const unsigned char MooseTestHop;
 
 class HopIndex
 {
@@ -24,11 +25,11 @@ class HopIndex
 				hopType_( hopType )
 		{;}
 
-		unsigned short bindIndex() {
+		unsigned short bindIndex() const {
 			return bindIndex_;
 		}
 
-		unsigned char hopType() {
+		unsigned char hopType() const {
 			return hopType_;
 		}
 	private:
@@ -114,8 +115,9 @@ template< class A1, class A2 > class OpFunc2Base: public OpFunc
 		const OpFunc* makeHopFunc( HopIndex hopIndex) const;
 
 		void opBuffer( const Eref& e, double* buf ) const {
-			op( e, 		Conv< A1 >::buf2val( &buf ),
-						Conv< A2 >::buf2val( &buf ) );
+			const A1& arg1 = Conv< A1 >::buf2val( &buf );
+			op( e, 		
+				arg1, Conv< A2 >::buf2val( &buf ) );
 		}
 
 		string rttiType() const {
@@ -137,9 +139,10 @@ template< class A1, class A2, class A3 > class OpFunc3Base:
 		const OpFunc* makeHopFunc( HopIndex hopIndex) const;
 
 		void opBuffer( const Eref& e, double* buf ) const {
-			op( e, 		Conv< A1 >::buf2val( &buf ),
-						Conv< A2 >::buf2val( &buf ),
-						Conv< A3 >::buf2val( &buf ) );
+			const A1& arg1 = Conv< A1 >::buf2val( &buf );
+			const A2& arg2 = Conv< A2 >::buf2val( &buf );
+			op( e, 		
+				arg1, arg2, Conv< A3 >::buf2val( &buf ) );
 		}
 
 		string rttiType() const {
@@ -162,10 +165,11 @@ template< class A1, class A2, class A3, class A4 >
 		const OpFunc* makeHopFunc( HopIndex hopIndex) const;
 
 		void opBuffer( const Eref& e, double* buf ) const {
-			op( e, 		Conv< A1 >::buf2val( &buf ),
-						Conv< A2 >::buf2val( &buf ),
-						Conv< A3 >::buf2val( &buf ),
-						Conv< A4 >::buf2val( &buf ) );
+			const A1& arg1 = Conv< A1 >::buf2val( &buf );
+			const A2& arg2 = Conv< A2 >::buf2val( &buf );
+			const A3& arg3 = Conv< A3 >::buf2val( &buf );
+			op( e,
+				arg1, arg2, arg3, Conv< A4 >::buf2val( &buf ) );
 		}
 
 		string rttiType() const {
@@ -188,11 +192,12 @@ template< class A1, class A2, class A3, class A4, class A5 >
 		const OpFunc* makeHopFunc( HopIndex hopIndex) const;
 
 		void opBuffer( const Eref& e, double* buf ) const {
-			op( e, 		Conv< A1 >::buf2val( &buf ),
-						Conv< A2 >::buf2val( &buf ),
-						Conv< A3 >::buf2val( &buf ),
-						Conv< A4 >::buf2val( &buf ),
-						Conv< A5 >::buf2val( &buf ) );
+			const A1& arg1 = Conv< A1 >::buf2val( &buf );
+			const A2& arg2 = Conv< A2 >::buf2val( &buf );
+			const A3& arg3 = Conv< A3 >::buf2val( &buf );
+			const A4& arg4 = Conv< A4 >::buf2val( &buf );
+			op( e,
+				arg1, arg2, arg3, arg4, Conv< A5 >::buf2val( &buf ) );
 		}
 
 		string rttiType() const {
@@ -216,12 +221,13 @@ template< class A1, class A2, class A3, class A4, class A5, class A6 >
 		const OpFunc* makeHopFunc( HopIndex hopIndex) const;
 
 		void opBuffer( const Eref& e, double* buf ) const {
-			op( e, 		Conv< A1 >::buf2val( &buf ),
-						Conv< A2 >::buf2val( &buf ),
-						Conv< A3 >::buf2val( &buf ),
-						Conv< A4 >::buf2val( &buf ),
-						Conv< A5 >::buf2val( &buf ),
-						Conv< A6 >::buf2val( &buf ) );
+			const A1& arg1 = Conv< A1 >::buf2val( &buf );
+			const A2& arg2 = Conv< A2 >::buf2val( &buf );
+			const A3& arg3 = Conv< A3 >::buf2val( &buf );
+			const A4& arg4 = Conv< A4 >::buf2val( &buf );
+			const A5& arg5 = Conv< A5 >::buf2val( &buf );
+			op( e, 		
+				arg1, arg2, arg3, arg4, arg5, Conv< A6 >::buf2val( &buf ) );
 		}
 
 		string rttiType() const {
@@ -246,14 +252,17 @@ template< class A > class GetOpFuncBase: public OpFunc1Base< A* >
 
 		virtual A returnOp( const Eref& e ) const = 0;
 
-		const OpFunc* makeHopFunc( HopIndex hopIndex) const 
-		{
-			// Perhaps later we can put in something for x-node gets.
-			return 0;
-		}
+		// This returns an OpFunc1< A* > so we can pass back the arg A
+		const OpFunc* makeHopFunc( HopIndex hopIndex) const;
 
+		// This is called on the target node when a remoteGet happens.
+		// It needs to do the 'get' function and stuff the data into the
+		// buffer for sending back.
 		void opBuffer( const Eref& e, double* buf ) const {
-				// Later figure out how to handle.
+			A ret = returnOp( e );
+			buf[0] = Conv<A>::size( ret );
+			buf++;
+			Conv< A >::val2buf( ret, &buf );
 		}
 
 		/*

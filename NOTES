@@ -899,9 +899,210 @@ Week 5: Standalone tests on mpi framework
 Week 6: Multinode messaging design, implementation, compilation, no tests.
 Week 7: Multinode Set/Get. Compile and test.
 
+Major changes in MOOSE:
+1. Refactored messaging and eliminated queueing. Messages now use the same 
+high-level structure, but at runtime they do not dump 'send' calls and
+arguments to a queue. Instead the messages are compiled into function-object
+pairs and use these to directly call the target objects with the arguments.
+This permits the use of pointers as arguments in messages.
+This means that message calls are not synchronized by the queue - they occur
+as called.
+This means that the stack can be traversed to find what called what.
+This is likely to be much faster, haven't yet benchmarked.
+2 Eliminated threading.  As a necessary precondition for the above, threading
+was eliminated. In addition to obviating the need for queues, this greatly 
+simplified the process loop and scheculing.
+3. Used integral scheduling. Earlier the clock emitted ticks which could have
+arbitrary doubles for the timestep. Now there is a base clock dt, and all
+tick events are integral multiples of this base. There is no ambiguity about
+ordering nor any issue with rounding. Much simpler too.
+4. Indexing of data is simplified. There are three integers to look up data:
+	Id -> Identifies the Element which is a wrapper for data and messages.
+	DataId or DataIndex -> Identifies a data entry in the Element. A simple
+		one-dimensional array, can have a single entry.
+	FieldIndex -> Identifies a FieldObject on a data entry. The Field Object
+		must be associated with a FieldElement. Most objects do not
+		have any field objects. Cases which do include synapses, which
+		are subsidiary objects sitting on each receptor.
+	A corollary of this is that there is no more multidimensional indexing
+	of data entries. No more field masks.
+5. MsgIds are no more. Instead Msgs are identified by ObjIds just like any other
+	object.
+
+6. The Set commands now directly call functions on the target object to assign
+	values.
+7. The Get commands now directly call functions on the target object to obtain.
+	values.
+
+8. Any DataEntry can now be the parent of an Element. Earlier this was a bit
+	ambiguous and many parts of the code required instead that only Elements
+	could be parents.
+9. Synapses now use a ring buffer instead of a sorted queue to handle spike 
+	arrival times.
+
+In addition to these changes which are evident in serial code, there are many
+changes to enable parallelization.
+10. There are multiple Element classes, all derived from Element. Each has its
+own rules for node decomposition. This is automatic: upon creation the 
+appropriate data entries are put on the appropriate nodes. Note that every
+node has the full Element tree, but only subsets of the DataEntries are 
+put on different nodes.
+11. Parallel messaging is implemented by using special flags during the 
+'compilation' of messages. This intercepts off-node messages and puts the
+message request and arguments into a buffer such that any given node only
+gets a single request for the message, even if there are a hundred targets for
+the message on the remote node. The buffer for each node is sent off at the
+end of each clock tick in a non-blocking manner. Arriving buffers are digested
+and the messages sent out to all targets on the local node.
+12. Parallel field assignment and once-off function calls (set) is implemented
+by detecting if target is off-node, and if so, putting into a different buffer.
+This is dispatched in a non-blocking manner, but only after clearing all 
+pending incoming field assignment calls.
+13. Shell simulation control operations are implemented through 'set' calls.
+14. Get calls are not yet implemented.
+
+===========================================================================
 
 25 Nov 2013: Starting to compile with the Set calls included. But this is a
 bad way to develop. Should instead do multinode messaging separately,
 and then do the MPI-based real test.
+Compiled, clears single-node unit tests. Checkin 4858.
+Now to separate out the MPI-based tests.
 
 
+Setting up cross-node Shell::doCreate by going through the newly
+implemented SetGet functions.
+Need to unit check the argument passing and fitting into buffers,
+by HopFunc.
+
+Compiled, too sleepy to tackle furter.
+===========================================================================
+26 Nov 2013.
+Finally tracked down the problem with off-node Set calls. The
+order of evaluation of the Conv functions in OpFunc6Base::opBuffer()
+is backwards. The last argument, arg6, gets evaluated first, and so on.
+Presumably backwards in all cases. Need to redo conversion syntax.
+Turns out C++ explicitly does NOT specify an evaluation order.
+
+So did the less elegant but simple code to extract arguments. Now seems to
+work for creating objects, but the unit tests don't seem to go all the way 
+through.
+===========================================================================
+27 Nov 2013.
+MPI is being difficult about reporting where it croaks. By stepping through
+it looks like it is testShell.cpp:1718, testTreeTraversal()
+From what I can see it looks like an innocuous call to Shell::doCreate 
+of a Neutral on line 50.
+Turns out i was being careless with the indexing of the MPI_Request array,
+which is continguous rather than indexed by node number. Fixed. 
+
+Next bug is with path traversal. This croaks on both nodes. I think 
+what is happening is:
+
+Node 0: The path traversal does not handle the rawIndex/DataIndex properly
+Node 1: The 'get' call is sent across as the baseclass 'set' and this 
+causes problems. (This possibility is somewhat of a guess).
+
+So I need to tackle both the 'get' call and the path traversal logic.
+But it would be good to have the 'set' call properly unit tested.
+
+Worked on the path traversal. Should now be able to do it without having to
+inquire across nodes.
+Clears the path unit test. Now fails in testShell.cpp::testCopyFieldElement
+which needs to assign the vector of sizes just to set up the system.
+All very well, but at this point I don't have the capability to copy except
+from Globals.
+
+Some pending cross-node things:
+Proper unit test for Set across nodes. I think it works.
+Get. If I get this to work I can check the 'set' call too.
+SetVec + unit test. Try the testCopyFieldElement with the objects created as
+	locals.
+GetVec
+The whole list of Shell commands.
+
+
+===========================================================================
+30 Nov 2013
+Subha suggests having elements which put contents on specific nodes.
+Perhaps a better thing to do for automation is to have Elements which keep
+the entire contents on one node. I would prefer to be able to do models without
+reference to size of computer.
+
+Now working on Get. In Postmaster.cpp.
+===========================================================================
+1 Dec 2013.
+Some input on handling random numbers.
+Hi,
+  Got some answers to the second problem: (1) if the number of random
+numbers to be created for each node is known beforehand "jump ahead"
+will work (just mailed Upi about it)
+(http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/JUMP/index.html)
+  (2) And for the online case, there seem to be methods for this
+(http://software.intel.com/en-us/forums/topic/283349): MT2203 gives up
+to 6024 independent streams and Charles Leiserson (the one who wrote
+"Introduction to Algorithms" with Cormen, and Rivest) published a
+paper on another system for this:
+http://supertech.csail.mit.edu/papers/dprng.pdf
+
+I believe Pritish will have more insight into what is best suited for
+our purpose.
+
+Best,
+  Subha
+
+On Sat, Nov 30, 2013 at 4:14 PM, Upinder S. Bhalla <bhalla@ncbs.res.in> wrote:
+> Hi, Pritish,
+>     Good to hear from you. It is good timing and we could use your inputs.
+>
+> Based in good part on the discussions we had during your visit, I've redone
+> the MOOSE basecode to be single-threaded and done lots of other pending
+> fixes along the way. I'm desiging at present for a simple MPI interface,
+> easily adapted to Charm++.
+>
+> Couple of key design questions have come up, again motivated by our earlier
+> discussions, and I don't remember the suggestions you had on them.
+>
+> 1. The python/scripting interface to MOOSE. With the current design, we need
+> to have node zero talk to the Python script on the one hand, and to all the
+> other nodes via MPI. The other nodes do not need to know Python. As I
+> recall, you had suggested an alternative architecture where there was some
+> kind of socket communication to one node. In principle we could have the
+> Python-aware node outside the cluster, but then I'm not sure how one would
+> tunnel MPI through to the cluster nodes. Do advise.
+>
+> 2. Parallel random numbers. Suppose synaptic weights need to be assigned by
+> a random seed across all nodes. Each node knows what to do with its own
+> subset of numbers, but the problem is that we may have to grind through a
+> few million numbers in the random sequence before we get there. Even worse
+> is how to handle random numbers emitted at runtime for node-specific
+> calculations. How does one ensure that the outcome is the same independent
+> of number of nodes? I'm sure this is a classic problem in parallel
+> simulations.
+>
+> Best,
+>     Upi
+
+Now compiles but doesn't even start to clear unit tests.
+===========================================================================
+2 Dec 2013
+Now clears serial unit tests. Fails on target node when called from 
+remoteGet in parallel unit tests. Indexing issue.
+Oddly, the other node croaked in clearPendingSet.
+
+===========================================================================
+3 Dec 2013.
+Understood bug, now to fix. I was trying to use 'get' for the path of
+an object that was off-node. The good news is that it does indeed
+correctly do most of the work of going off-node to get the object.
+The bad news is that it loses the fieldIndex somewhere along the way.
+
+Put in a bit of a hack so that the TgtInfo puts the fieldIndex into
+the 'size' field for Sets and Gets, which do not use the size field.
+
+Now carries on to Shell::testCopyFieldElement.
+Lots of errors on Node01, for inability to create objects. Line 401
+in Shell::testCopyFieldElement.
+Fixed the cpoy at that point, but a few lines later it goes bad.
+
+===========================================================================
