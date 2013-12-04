@@ -130,11 +130,11 @@ extern Id init(int argc, char ** argv, bool& doUnitTests, bool& doRegressionTest
 
 extern void initMsgManagers();
 extern void destroyMsgManagers();
-extern void speedTestMultiNodeIntFireNetwork( 
-    unsigned int size, unsigned int runsteps );
-extern void regressionTests();
-extern bool benchmarkTests( int argc, char** argv );
-extern int getNumCores();
+// extern void speedTestMultiNodeIntFireNetwork( 
+//     unsigned int size, unsigned int runsteps );
+// extern void regressionTests();
+// extern bool benchmarkTests( int argc, char** argv );
+// extern int getNumCores();
 
 
 // C-wrapper to be used by Python
@@ -151,12 +151,12 @@ extern "C" {
     // Module globals 
     /////////////////////////////////////////////////////////////////
     static int verbosity = 1;
-    static int isSingleThreaded = 0;
+    // static int isSingleThreaded = 0;
     static int isInfinite = 0;
     static unsigned int numNodes = 1;
     static unsigned int numCores = 1;
     static unsigned int myNode = 0;
-    static unsigned int numProcessThreads = 0;
+    // static unsigned int numProcessThreads = 0;
     static int doUnitTests = 0;
     static int doRegressionTests = 0;
     static int quitFlag = 0;
@@ -727,13 +727,13 @@ extern "C" {
         vector<string> args;
         args.push_back("moose");
         map<string, string>::const_iterator it;
-        it = argmap.find("SINGLETHREADED");
-        if (it != argmap.end()){
-            istringstream(it->second) >> isSingleThreaded;
-            if (isSingleThreaded){
-                args.push_back("-s");
-            }
-        }
+        // it = argmap.find("SINGLETHREADED");
+        // if (it != argmap.end()){
+        //     istringstream(it->second) >> isSingleThreaded;
+        //     if (isSingleThreaded){
+        //         args.push_back("-s");
+        //     }
+        // }
         it = argmap.find("INFINITE");
         if (it != argmap.end()){
             istringstream(it->second) >> isInfinite;
@@ -751,12 +751,12 @@ extern "C" {
         if (it != argmap.end()){
             istringstream(it->second) >> numCores;
         }
-        it = argmap.find("NUMPTHREADS");
-        if (it != argmap.end()){
-            istringstream(it->second) >> numProcessThreads;
-            args.push_back("-t");
-            args.push_back(it->second);	            
-        }
+        // it = argmap.find("NUMPTHREADS");
+        // if (it != argmap.end()){
+        //     istringstream(it->second) >> numProcessThreads;
+        //     args.push_back("-t");
+        //     args.push_back(it->second);	            
+        // }
         it = argmap.find("QUIT");
         if (it != argmap.end()){
             istringstream(it->second) >> quitFlag;
@@ -768,25 +768,25 @@ extern "C" {
         if (it != argmap.end()){
             istringstream(it->second) >> verbosity;            
         }
-        it = argmap.find("DOUNITTESTS");
-        if (it != argmap.end()){
-            istringstream(it->second) >> doUnitTests;            
-        }
-        it = argmap.find("DOREGRESSIONTESTS");
-        if (it != argmap.end()){
-            istringstream(it->second) >> doRegressionTests;            
-        }
+        // it = argmap.find("DOUNITTESTS");
+        // if (it != argmap.end()){
+        //     istringstream(it->second) >> doUnitTests;            
+        // }
+        // it = argmap.find("DOREGRESSIONTESTS");
+        // if (it != argmap.end()){
+        //     istringstream(it->second) >> doRegressionTests;            
+        // }
         
         if (verbosity > 0){
             cout << "ENVIRONMENT: " << endl
                  << "----------------------------------------" << endl
-                 << "   SINGLETHREADED = " << isSingleThreaded << endl
+                 // << "   SINGLETHREADED = " << isSingleThreaded << endl
                  << "   INFINITE = " << isInfinite << endl
                  << "   NUMNODES = " << numNodes << endl
-                 << "   NUMPTHREADS = " << numProcessThreads << endl
+                 // << "   NUMPTHREADS = " << numProcessThreads << endl
                  << "   VERBOSITY = " << verbosity << endl
-                 << "   DOUNITTESTS = " << doUnitTests << endl
-                 << "   DOREGRESSIONTESTS = " << doRegressionTests << endl
+                 // << "   DOUNITTESTS = " << doUnitTests << endl
+                 // << "   DOREGRESSIONTESTS = " << doRegressionTests << endl
                  << "========================================" << endl;
         }
         return args;
@@ -810,23 +810,23 @@ extern "C" {
         Id shellId = init(argc, argv, dounit, doregress);
         inited = 1;
         Shell * shellPtr = reinterpret_cast<Shell*>(shellId.eref().data());
-        if (dounit){
-            nonMpiTests( shellPtr ); // These tests do not need the process loop.
-        }
+        // if (dounit){
+        //     nonMpiTests( shellPtr ); // These tests do not need the process loop.
+        // }
 
-        if (!shellPtr->isSingleThreaded()){
-            shellPtr->launchThreads();
-        }
-        if ( shellPtr->myNode() == 0 ) {
-            if (dounit){
-                mpiTests();
-                processTests( shellPtr );
-                regressionTests();
-            }
-            if ( benchmarkTests( argc, argv ) || quitFlag ){
-                shellPtr->doQuit();
-            }
-        }
+        // if (!shellPtr->isSingleThreaded()){
+        //     shellPtr->launchThreads();
+        // }
+        // if ( shellPtr->myNode() == 0 ) {
+        //     if (dounit){
+        //         mpiTests();
+        //         processTests( shellPtr );
+        //         regressionTests();
+        //     }
+        //     if ( benchmarkTests( argc, argv ) || quitFlag ){
+        //         shellPtr->doQuit();
+        //     }
+        // }
         return shellId;
     } //! create_shell()
 
@@ -2478,10 +2478,10 @@ extern "C" {
         Py_INCREF(&moose_DestField);
         PyModule_AddObject(moose_module, "DestField", (PyObject*)&moose_DestField);
         
-        PyModule_AddIntConstant(moose_module, "SINGLETHREADED", isSingleThreaded);
+        // PyModule_AddIntConstant(moose_module, "SINGLETHREADED", isSingleThreaded);
         PyModule_AddIntConstant(moose_module, "NUMCORES", numCores);
         PyModule_AddIntConstant(moose_module, "NUMNODES", numNodes);
-        PyModule_AddIntConstant(moose_module, "NUMPTHREADS", numProcessThreads);
+        // PyModule_AddIntConstant(moose_module, "NUMPTHREADS", numProcessThreads);
         PyModule_AddIntConstant(moose_module, "MYNODE", myNode);
         PyModule_AddIntConstant(moose_module, "INFINITE", isInfinite);
         PyModule_AddStringConstant(moose_module, "__version__", SHELLPTR->doVersion().c_str());

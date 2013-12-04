@@ -267,7 +267,7 @@ extern "C" {
        Utility function to create objects from full path, dimensions
        and classname.
     */
-    Id create_Id_from_path(string path, unsigned int numData, string type)
+    Id create_Id_from_path(string path, unsigned int numData, unsigned int isGlobal, string type)
     {
         string parent_path;
         string name;
@@ -300,7 +300,7 @@ extern "C" {
         return SHELLPTR->doCreate(type,
                                   parent_id,
                                   string(name),
-                                  numData);
+                                  numData, isGlobal);
         
     }
     
@@ -309,6 +309,7 @@ extern "C" {
         extern PyTypeObject IdType;
         PyObject * src = NULL;
         unsigned int id = 0;
+        unsigned int isGlobal = 0;
         // first try parsing the arguments as (path, dimes, classname)
         char _path[] = "path";
         char _dtype[] = "dtype";
@@ -329,10 +330,11 @@ extern "C" {
             }
         } else if (PyArg_ParseTupleAndKeywords(args,
                                                kwargs,
-                                               "s|Os:moose_Id_init",
+                                               "s|OIs:moose_Id_init",
                                                kwlist,
                                                &path,
                                                &dims,
+                                               &isGlobal,
                                                &type)){
             parse_success = true;
         }
@@ -363,8 +365,8 @@ extern "C" {
                 return -1;
             }
 			*/
-			unsigned int numData = 1;
-            self->id_ = create_Id_from_path(path, numData, type);
+            unsigned int numData = 1;
+            self->id_ = create_Id_from_path(path, numData, isGlobal, type);
             if (self->id_ == Id() && PyErr_Occurred()){
                 Py_XDECREF(self);
                 return -1;
