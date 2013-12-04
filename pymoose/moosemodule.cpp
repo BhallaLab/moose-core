@@ -914,12 +914,12 @@ extern "C" {
         string classInfoPath("/classes/" + className);
         Id classId(classInfoPath);
         assert (classId != Id());
-        unsigned int numFinfos = Field<unsigned int>::get(ObjId(classId, 0), "num_" + finfoType);
+        // unsigned int numFinfos = Field<unsigned int>::get(ObjId(classId, 0), "num_" + finfoType);
         Id fieldId(classId.path() + "/" + finfoType);
-        for (unsigned int ii = 0; ii < numFinfos; ++ii){
-            string _fieldName = Field<string>::get(ObjId(fieldId, DataId(0, ii, 0)), "name");
+        for (unsigned int ii = 0; ii < Field<unsigned int>::get(fieldId, "numData"); ++ii){
+            string _fieldName = Field<string>::get(ObjId(fieldId, ii, 0), "name");
             if (fieldName == _fieldName){                
-                fieldType = Field<string>::get(ObjId(fieldId, DataId(0, ii, 0)), "type");
+                fieldType = Field<string>::get(ObjId(fieldId, ii, 0), "type");
                 break;
             }
         }
