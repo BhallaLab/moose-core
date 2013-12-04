@@ -157,6 +157,7 @@ extern "C" {
         char _path[] = "path";
         char _dtype[] = "dtype";
         char _dims[] = "dims";
+        unsigned int isGlobal = 0;
         static char * kwlist [] = {_path, _dims, _dtype, NULL};
         _ObjId * instance = (_ObjId*)self;
         instance->oid_ = ObjId::bad();
@@ -165,18 +166,20 @@ extern "C" {
         bool parse_success = false;
         if (kwargs == NULL){
             if (PyArg_ParseTuple(args,
-                                 "s|Os:moose_ObjId_init_from_path",
+                                 "s|OIs:moose_ObjId_init_from_path",
                                  &path,
                                  &dims,
+                                 &isGlobal,
                                  &type)){
                 parse_success = true;
             }
         } else if (PyArg_ParseTupleAndKeywords(args,
                                                kwargs,
-                                               "s|Os:moose_ObjId_init_from_path",
+                                               "s|OIs:moose_ObjId_init_from_path",
                                                kwlist,
                                                &path,
                                                &dims,
+                                               &isGlobal,
                                                &type)){\
             parse_success = true;
         }
@@ -203,7 +206,7 @@ extern "C" {
         
 		/// Nov 2013: Need Subha to help out here.
         // Id new_id = create_Id_from_path(path, pysequence_to_dimvec(dims), basetype_str);
-        Id new_id = create_Id_from_path(path, 1, basetype_str);
+        Id new_id = create_Id_from_path(path, 1, isGlobal, basetype_str);
         if (new_id == Id() && PyErr_Occurred()){
             // Py_XDECREF(self);
             return -1;
