@@ -189,9 +189,14 @@ extern "C" {
         }    
         // First see if there is an existing object with at path
         instance->oid_ = ObjId(path);
-        if (!(ObjId::bad() == instance->oid_)){
+        if (instance->oid_ == ObjId()){
+            if (string(path) == "/" ){
+                return 0;
+            }
+        } else {
             return 0;
         }
+            
         string basetype_str;
         if (type == NULL){
             basetype_str = get_baseclass_name(self);
