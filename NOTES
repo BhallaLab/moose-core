@@ -1120,3 +1120,12 @@ testShell::testObjidToAndFromPath()
 Easy to fix one part of it in line 511, but would be good to
 have a general solution.
 ===========================================================================
+5 Dec 2013. Checkin 4878.
+Now it is a heisenbug. I'm trying to do a simple set/get on an offnode field,
+works when I step through it using gdb, fails when run without stepping.
+In testShell.cpp:517.
+
+Possibly the set is not complete when I ask for the 'get'.
+
+Redid SetGet a bit so that both use the same MPI tag. As hoped, this fixes
+the sequencing problem of set and then get.

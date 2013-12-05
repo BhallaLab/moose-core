@@ -192,12 +192,27 @@ void PostMaster::clearPending()
 {
 	if ( Shell::numNodes() == 1 )
 		return;
-	clearPendingSet();
-	clearPendingGet();
+	clearPendingSetGet();
 	clearPendingSend();
 }
 
-void PostMaster::clearPendingSet()
+void PostMaster::handleRemoteGet( 
+				const Eref& e, const OpFunc* op, int requestingNode )
+{
+	static double getReturnBuf[reserveBufSize];
+#ifdef USE_MPI
+	op->opBuffer( e, &getReturnBuf[0] ); // stuff return value into buf.
+	// Send out the data. Blocking. Don't want any other gets till done
+	int size = getReturnBuf[0];
+	MPI_Send( 
+		&getReturnBuf[1], size, MPI_DOUBLE,
+		requestingNode, 		// Where to send to.
+		RETURNTAG, MPI_COMM_WORLD
+	);
+#endif // USE_MPI
+}
+
+void PostMaster::clearPendingSetGet()
 {
 #ifdef USE_MPI
 	// isSetSent_ is checked before doing another x-node set operation
@@ -213,10 +228,16 @@ void PostMaster::clearPendingSet()
 		// Handle arrived Set call
 		const TgtInfo* tgt = 
 				reinterpret_cast< const TgtInfo * >( &setRecvBuf_[0] );
-		const Eref& e = tgt->fullEref();
+		const Eref& e = tgt->eref();
 		const OpFunc *op = OpFunc::lookop( tgt->bindIndex() );
 		assert( op );
-		op->opBuffer( e, &setRecvBuf_[ TgtInfo::headerSize ] );
+		if ( tgt->dataSize() == RemoteSet ) {
+			op->opBuffer( e, &setRecvBuf_[ TgtInfo::headerSize ] );
+		} else if ( tgt->dataSize() == RemoteGet ) {
+			int requestingNode = setRecvStatus_.MPI_SOURCE;
+			handleRemoteGet( e, op, requestingNode );
+		}
+
 		// Now the operation is done. Re-post recv.
 		MPI_Irecv( &setRecvBuf_[0], recvBufSize_, MPI_DOUBLE,
 						MPI_ANY_SOURCE,
@@ -228,6 +249,7 @@ void PostMaster::clearPendingSet()
 #endif // USE_MPI
 }
 
+/*
 // Handles incoming 'get' request and posts stuff back to requestor.
 void PostMaster::clearPendingGet()
 {
@@ -262,6 +284,7 @@ void PostMaster::clearPendingGet()
 	}
 #endif // USE_MPI
 }
+*/
 
 void PostMaster::clearPendingSend()
 {
@@ -328,7 +351,7 @@ double* PostMaster::addToSendBuf( const Eref& e, unsigned int bindIndex,
 		assert( 0 );
 	}
 	TgtInfo* tgt = reinterpret_cast< TgtInfo* >( &sendBuf_[node][end] );
-	tgt->set( e.id(), e.dataIndex(), bindIndex, size );
+	tgt->set( e.objId(), bindIndex, size );
 	end += TgtInfo::headerSize;
 	sendSize_[node] = end + size;
 	return &sendBuf_[node][end];
@@ -351,7 +374,8 @@ double* PostMaster::addToSetBuf( const Eref& e, unsigned int opIndex,
 	}
 	isSetSent_ = 0;
 	TgtInfo* tgt = reinterpret_cast< TgtInfo* >( &setSendBuf_[0] );
-	tgt->set( e.id(), e.dataIndex(), opIndex, e.fieldIndex() );
+	// tgt->set( e.id(), e.dataIndex(), opIndex, e.fieldIndex() );
+	tgt->set( e.objId(), opIndex, RemoteSet );
 	unsigned int end = TgtInfo::headerSize;
 	setSendSize_ = end + size;
 	return &setSendBuf_[end];
@@ -397,8 +421,14 @@ double* PostMaster::remoteGet( const Eref& e, unsigned int bindIndex )
 	static MPI_Request getSendReq;
 	static MPI_Request getRecvReq;
 	static MPI_Status getSendStatus;
+
+	while ( isSetSent_ == 0 ) { 
+			// Can't request a 'get' while old set is 
+			// pending, lest the 'get' depend on the 'set'.
+		clearPending();
+	}
 	TgtInfo* tgt = reinterpret_cast< TgtInfo* >( &getSendBuf[0] );
-	tgt->set( e.id(), e.dataIndex(), bindIndex, e.fieldIndex() );
+	tgt->set( e.objId(), bindIndex, RemoteGet );
 	assert ( !e.element()->isGlobal() && e.getNode() != Shell::myNode() );
 #ifdef USE_MPI
 	// Post receive for return value.
@@ -412,7 +442,7 @@ double* PostMaster::remoteGet( const Eref& e, unsigned int bindIndex )
 	MPI_Isend( 
 		&getSendBuf[0], TgtInfo::headerSize, MPI_DOUBLE,
 			e.getNode(), 		// Where to send to.
-			GETTAG, MPI_COMM_WORLD,
+			SETTAG, MPI_COMM_WORLD,
 			&getSendReq
 	);
 	int complete = 0;

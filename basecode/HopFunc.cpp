@@ -15,7 +15,7 @@ static double* addToTestBuf( const Eref& e, unsigned int i,
 				unsigned int size )
 {
 	TgtInfo* tgt = reinterpret_cast< TgtInfo* >( &testBuf[0] );
-	tgt->set( e.id(), e.dataIndex(), i, size );
+	tgt->set( e.objId(), i, size );
 	return &testBuf[ TgtInfo::headerSize ];
 }
 
@@ -32,7 +32,7 @@ double* addToBuf( const Eref& e, HopIndex hopIndex, unsigned int size )
 	if ( hopIndex.hopType() == MooseSendHop )
 		return p->addToSendBuf( e, hopIndex.bindIndex(), size );
 	else if ( hopIndex.hopType() == MooseSetHop ) {
-		p->clearPendingSet(); // Cannot touch set buffer if pending.
+		p->clearPendingSetGet(); // Cannot touch set buffer if pending.
 		return p->addToSetBuf( e, hopIndex.bindIndex(), size );
 	} else if ( hopIndex.hopType() == MooseTestHop ) {
 		return addToTestBuf( e, hopIndex.bindIndex(), size );
