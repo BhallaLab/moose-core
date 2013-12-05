@@ -508,9 +508,15 @@ void testObjIdToAndFromPath()
 
 	Id level1 = shell->doCreate( "IntFire", Id(), "f1", s1 );
 	Id origSynId( level1.value() + 1 );
-	origSynId.element()->resizeField( 7, 8 );
-	char* origSynData = origSynId.element()->data( 7, 5 );
-	assert( origSynData != 0 );
+
+	// origSynId.element()->resizeField( 7, 8 );
+	Field< unsigned int >::set( ObjId( origSynId, 7 ), "numField", 8 );
+	ObjId origSynObj( origSynId, 7, 5 );
+	Field< double >::set( origSynObj, "weight", 1999.0 );
+	double wt = Field< double >::get( origSynObj, "weight" );
+	assert( doubleEq( wt, 1999.0 ) );
+	// char* origSynData = origSynId.element()->data( 7, 5 );
+	// assert( origSynData != 0 );
 	Id level2 = shell->doCreate( "Neutral", 
 					ObjId( level1, index1 ), "f2", s2 );
 	Id level3 = shell->doCreate( "Neutral", 
@@ -565,8 +571,9 @@ void testObjIdToAndFromPath()
 	assert( syn.dataId == 7 );
 	assert( syn.fieldIndex == 5 );
 	assert( syn.id == origSynId );
-	assert( syn.data() == origSynData );
-
+	// assert( syn.data() == origSynData );
+	wt = Field< double >::get( syn, "weight" );
+	assert( doubleEq( wt, 1999.0 ) );
 
 	shell->doDelete( level6 );
 	cout << "." << flush;
