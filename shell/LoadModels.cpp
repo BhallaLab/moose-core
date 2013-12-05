@@ -113,7 +113,7 @@ bool findModelParent( Id cwe, const string& path,
 }
 
 /// Returns the Id of the loaded model.
-Id Shell::doLoadModel( const string& fileName, const string& modelPath, const string& solverClass, bool qFlag )
+Id Shell::doLoadModel( const string& fileName, const string& modelPath, const string& solverClass )
 {
 	ifstream fin( fileName.c_str() );
 	if ( !fin ) {

@@ -226,7 +226,7 @@ const Cinfo* Shell::initCinfo()
 			"handleMove( Id orig, Id newParent ): "
 			"moves an Element to a new parent",
 			new EpFunc2< Shell, Id, ObjId >( & Shell::handleMove ) );
-	static DestFinfo handleCopy( "handleCopy", 
+	static DestFinfo handleCopy( "copy", 
 			"handleCopy( vector< Id > args, string newName, unsigned int nCopies, bool toGlobal, bool copyExtMsgs ): "
 			" The vector< Id > has Id orig, Id newParent, Id newElm. " 
 			"This function copies an Element and all its children to a new parent."
@@ -252,7 +252,7 @@ const Cinfo* Shell::initCinfo()
 
 		static DestFinfo setclock( "setclock", 
 			"Assigns clock ticks. Args: tick#, dt",
-			new OpFunc3< Shell, unsigned int, double, bool >( & Shell::doSetClock ) );
+			new OpFunc2< Shell, unsigned int, double >( & Shell::doSetClock ) );
 		/*
 		static SharedFinfo master( "master",
 			"Issues commands from master shell to worker shells located "
@@ -280,6 +280,8 @@ const Cinfo* Shell::initCinfo()
 		// &master,
 		// &worker,
 		&handleCreate,
+		&handleDelete,
+		&handleCopy,
 		&clockControl,
 	};
 
@@ -346,16 +348,19 @@ Id Shell::doCreate( string type, ObjId parent, string name,
 	return ret;
 }
 
-bool Shell::doDelete( Id i, bool qFlag )
+bool Shell::doDelete( Id id )
 {
+	SetGet1< Id >::set( ObjId(), "delete", id );
+	/*
 	Neutral n;
 	n.destroy( i.eref(), 0 );
-	return 1;
+	*/
+	return true;
 }
 
 ObjId Shell::doAddMsg( const string& msgType, 
 	ObjId src, const string& srcField, 
-	ObjId dest, const string& destField, bool qFlag )
+	ObjId dest, const string& destField )
 {
 	if ( !src.id.element() ) {
 		cout << myNode_ << ": Error: Shell::doAddMsg: src not found" << endl;
@@ -427,12 +432,12 @@ void Shell::connectMasterMsg()
 	// innerAddMsg( string msgType, ObjId src, string srcField, ObjId dest, string destField )
 }
 
-void Shell::doQuit( bool qFlag )
+void Shell::doQuit()
 {
 		Shell::keepLooping_ = 0;
 }
 
-void Shell::doStart( double runtime, bool qFlag )
+void Shell::doStart( double runtime )
 {
 	Id clockId( 1 );
 	SetGet1< double >::set( clockId, "start", runtime );
@@ -447,26 +452,25 @@ bool isDoingReinit()
 		clockId.eref().data() ) )->isDoingReinit();
 }
 
-void Shell::doReinit( bool qFlag )
+void Shell::doReinit( )
 {
 	Id clockId( 1 );
 	SetGet0::set( clockId, "reinit" );
 }
 
-void Shell::doStop( bool qFlag )
+void Shell::doStop( )
 {
 	Id clockId( 1 );
 	SetGet0::set( clockId, "stop" );
 }
 ////////////////////////////////////////////////////////////////////////
 
-void Shell::doSetClock( unsigned int tickNum, double dt, bool qFlag )
+void Shell::doSetClock( unsigned int tickNum, double dt )
 {
 		LookupField< unsigned int, double >::set( ObjId( 1 ), "tickDt", tickNum, dt );
 }
 
-void Shell::doUseClock( string path, string field, unsigned int tick,
-	bool qFlag )
+void Shell::doUseClock( string path, string field, unsigned int tick )
 {
 	innerUseClock( path, field, tick);
 }
@@ -474,8 +478,7 @@ void Shell::doUseClock( string path, string field, unsigned int tick,
 /**
  * Write given model to SBML file. Returns success value.
  */
-int Shell::doWriteSBML( const string& fname, const string& modelpath,
-	bool qFlag )
+int Shell::doWriteSBML( const string& fname, const string& modelpath )
 {
 #ifdef USE_SBML
 	SbmlWriter sw;
@@ -488,8 +491,7 @@ int Shell::doWriteSBML( const string& fname, const string& modelpath,
 /**
  * read given SBML model to moose. Returns success value.
  */
-Id Shell::doReadSBML( const string& fname, const string& modelpath, const string& solverclass,
-	bool qFlag )
+Id Shell::doReadSBML( const string& fname, const string& modelpath, const string& solverclass )
 {
 #ifdef USE_SBML
 	SbmlReader sr;
@@ -503,7 +505,7 @@ Id Shell::doReadSBML( const string& fname, const string& modelpath, const string
 
 ////////////////////////////////////////////////////////////////////////
 
-void Shell::doMove( Id orig, ObjId newParent, bool qFlag )
+void Shell::doMove( Id orig, ObjId newParent )
 {
 	if ( orig == Id() ) {
 		cout << "Error: Shell::doMove: Cannot move root Element\n";
@@ -859,7 +861,7 @@ void Shell::destroy( const Eref& e, Id eid)
 	if ( cwe_ == eid )
 		cwe_ = Id();
 
-	ack()->send( e, Shell::myNode(), OkStatus );
+	// ack()->send( e, Shell::myNode(), OkStatus );
 }
 
 
@@ -872,10 +874,13 @@ void Shell::handleAddMsg( const Eref& e,
 	string msgType, ObjId src, string srcField, 
 	ObjId dest, string destField )
 {
+	innerAddMsg( msgType, src, srcField, dest, destField );
+	/*
 	if ( innerAddMsg( msgType, src, srcField, dest, destField ) )
 		ack()->send( Eref( shelle_, 0 ), Shell::myNode(), OkStatus );
 	else
 		ack()->send( Eref( shelle_, 0), Shell::myNode(), ErrorStatus );
+	*/
 }
 
 /**
@@ -959,10 +964,13 @@ bool Shell::innerMove( Id orig, ObjId newParent )
 void Shell::handleMove( const Eref& e, Id orig, ObjId newParent )
 {
 	
+	innerMove( orig, newParent );
+	/*
 	if ( innerMove( orig, newParent ) )
 		ack()->send( Eref( shelle_, 0 ), Shell::myNode(), OkStatus );
 	else
 		ack()->send( Eref( shelle_, 0 ), Shell::myNode(), ErrorStatus );
+		*/
 }
 
 void Shell::addClockMsgs( 
@@ -1006,12 +1014,15 @@ void Shell::handleUseClock( const Eref& e,
 	string path, string field, unsigned int tick)
 {
 	// cout << q->getProcInfo()->threadIndexInGroup << ": in Shell::handleUseClock with path " << path << endl << flush;
+	innerUseClock( path, field, tick );
+	/*
 	if ( innerUseClock( path, field, tick ) )
 		ack()->send( Eref( shelle_, 0 ), 
 			Shell::myNode(), OkStatus );
 	else
 		ack()->send( Eref( shelle_, 0 ), 
 			Shell::myNode(), ErrorStatus );
+			*/
 }
 
 void Shell::handleQuit()
