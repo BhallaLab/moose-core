@@ -325,12 +325,12 @@ void testCopy()
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 
-	Id f1 = shell->doCreate( "Neutral", Id(), "f1", 1 );
-	Id f2a = shell->doCreate( "Neutral", f1, "f2a", 1 );
-	Id f2b = shell->doCreate( "Neutral", f1, "f2b", 1 );
-	Id f3 = shell->doCreate( "Neutral", f2a, "f3", 1 );
-	Id f4a = shell->doCreate( "Neutral", f3, "f4a", 1 );
-	Id f4b = shell->doCreate( "Neutral", f3, "f4b", 1 );
+	Id f1 = shell->doCreate( "Neutral", Id(), "f1", 1, true );
+	Id f2a = shell->doCreate( "Neutral", f1, "f2a", 1, true );
+	Id f2b = shell->doCreate( "Neutral", f1, "f2b", 1, true );
+	Id f3 = shell->doCreate( "Neutral", f2a, "f3", 1, true );
+	Id f4a = shell->doCreate( "Neutral", f3, "f4a", 1, true );
+	Id f4b = shell->doCreate( "Neutral", f3, "f4b", 1, true );
 
 	verifyKids( f1, f2a, f2b, f3, f4a, f4b );
 
@@ -388,11 +388,20 @@ void testCopyFieldElement()
 	assert( syn->numData() == size );
 	assert( origChild.element()->numData() == size2 );
 	assert( syn->numField( 0 ) == 0 );
+	assert( syn->isGlobal() );
 	vector< unsigned int > vec(size);
+	/*
 	for ( unsigned int i = 0; i < size; ++i )
 		vec[i] = i;
 	bool ret = Field< unsigned int >::setVec( origId, "num_synapse", vec );
 	assert( ret );
+	*/
+	bool ret;
+	for ( unsigned int i = 0; i < size; ++i ) {
+		ret = Field< unsigned int >::set( ObjId( origId, i ), 
+						"num_synapse", i );
+		assert( ret );
+	}
 
 	unsigned int origNumSyn = 0;
 	origNumSyn = size * (size - 1) / 2;
@@ -445,7 +454,10 @@ void testCopyFieldElement()
 	assert( copySynElm->numData() == numCopy * size );
 	unsigned int numSyn = 0;
 	for ( unsigned int i = 0; i < numCopy * size; ++i ) {
-		assert( copySynElm->numField( i ) == i % size );
+		// assert( copySynElm->numField( i ) == i % size );
+		unsigned int nf = Field< unsigned int >::get( 
+						ObjId( copySynId, i ), "numField" );
+		assert( nf == i % size );
 		numSyn += i % size;
 	}
 
@@ -463,6 +475,7 @@ void testCopyFieldElement()
 		assert( doubleEq( del[i], delay[i % origNumSyn ] ) );
 	}
 
+	/*
 	del.resize( 0 );
 	Field< double >::getVec( copySynId, "delay", del );
 	assert( del.size() == numSyn );
@@ -471,6 +484,7 @@ void testCopyFieldElement()
 		// cout << i << "	" << del[i] << "	" << delay[i] << endl;
 		assert( doubleEq( del[i], delay[i % origNumSyn ] ) );
 	}
+	*/
 	
 	shell->doDelete( origId );
 	shell->doDelete( copyId );
