@@ -867,9 +867,11 @@ extern "C" {
             Py_XDECREF(it->second);
         }
         SHELLPTR->doQuit();
-        // Destroy the Shell object
-        Neutral* ns = reinterpret_cast<Neutral*>(shellId.element()->data(0));
-        ns->destroy( shellId.eref(), 0);
+        // // Destroy the Shell object
+        // Neutral* ns = reinterpret_cast<Neutral*>(shellId.element()->data(0));
+        // ns->destroy( shellId.eref(), 0);
+        Msg::clearAllMsgs();
+        Id::clearAllElements();
 #ifdef USE_MPI
         MPI_Finalize();
 #endif
