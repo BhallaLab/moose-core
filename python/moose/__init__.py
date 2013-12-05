@@ -235,5 +235,6 @@ elements under current working element
 
 __version__ = '$Revision: 4454$'
 # $Source$
-
+import ctypes
+ctypes.CDLL('libmpi.so.0', ctypes.RTLD_GLOBAL)
 from .moose import *
