@@ -160,6 +160,10 @@ class Msg
 		 */
 		static void clearAllMsgs();
 
+		/**
+		 * Returns the most recently constructed msg.
+		 */
+		static const Msg* lastMsg();
 	protected:
 		ObjId mid_; /// Index of this Msg on the msg_ vector.
 
@@ -173,6 +177,9 @@ class Msg
 
 		/// Flag to indicate termination of program.
 		static bool lastTrump_;
+
+	private:
+		static const Msg* lastMsg_;
 };
 
 #endif // _MSG_H
