@@ -263,19 +263,25 @@ extern "C" {
     }
 
     /**
-       This function simple returns the python hash of the unique path
-       of this object.
+       This function combines Id, DataId and fieldIndex to construct
+       the hash of this object. Here we assume 32 most significant
+       bits for Id, next 16 bits for dataId and the least significant
+       16 bits for fieldIndex. If these criteria are not met, the hash
+       function will cause collissions.
     */
     long moose_ObjId_hash(_ObjId * self)
     {
         if (!Id::isValid(self->oid_.id)){
             RAISE_INVALID_ID(-1, "moose_ObjId_hash");
         }
-        long ret = (long)(self->oid_.id.value());
-        ret |= (O32_HOST_ORDER == O32_BIG_ENDIAN)? \
-                ((long)(self->oid_.dataId >> 32))    \
-                :((long)(self->oid_.dataId << 32));
-        return ret;
+        long id = (long)(self->oid_.id.value());
+        long dataId = self->oid_.dataId;
+        long fieldIndex = self->oid_.fieldIndex;
+        if (O32_HOST_ORDER == O32_BIG_ENDIAN){
+            return id >> 32 | dataId >> 48 | fieldIndex;
+        } else {
+            return id << 32 | dataId << 48 | fieldIndex;
+        }
     }
     
     PyObject * moose_ObjId_repr(_ObjId * self)
