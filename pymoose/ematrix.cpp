@@ -166,11 +166,10 @@ extern "C" {
                  "\narray element. For that to succeed everything until the last `/`"
                  "\ncharacter must exist or an error is raised"
                  "\n"
-                 "\ndims : int/tuple of ints"
-                 "\nThis is a tuple of integers specifying the size of the array element"
-                 "\nto be created along each dimension. Thus dims=(2,3) will create an"
-                 "\narray element with 2 rows and 3 columns. If a single integer is"
-                 "\nspecified, a one dimensional array element of that length is created."
+                 "\nn : positive int"
+                 "\nThis is a positive integers specifying the size of the array element"
+                 "\nto be created. Thus n=2 will create an"
+                 "\nematrix with 2 elements."
                  "\n"
                  "\n__init__(self, id)"
                  "\n"
@@ -227,7 +226,7 @@ extern "C" {
     };
 
     
-
+    extern PyTypeObject ObjIdType;
 
     //////////////////////////////////////////////////
     // Id functions
@@ -364,7 +363,7 @@ extern "C" {
                 trimmed_path == "/" ||
                 trimmed_path == "/root"){
                 if ((numData > 0) && (numData != Field<unsigned int>::get(self->id_, "numData"))){
-                    PyErr_WarnEx(NULL, "moose_Id_init_: Dimensions specified do not match that of existing object.", 1);
+                    PyErr_WarnEx(NULL, "moose_Id_init_: Length specified does not match that of existing object.", 1);
                 }
                 return 0;
             }
@@ -389,8 +388,15 @@ extern "C" {
         // The arguments could not be parsed as (path, dims, class),
         // try to parse it as an existing Id
         PyErr_Clear();        
-        if (PyArg_ParseTuple(args, "O:moose_Id_init", &src) && Id_Check(src)){
+        if (PyArg_ParseTuple(args, "O:moose_Id_init", &src) && Id_SubtypeCheck(src)){
             self->id_ = ((_Id*)src)->id_;
+            return 0;
+        }
+        // The arguments could not be parsed as (path, dims, class), or Id
+        // try to parse it as an existing ObjId
+        PyErr_Clear();        
+        if (PyArg_ParseTuple(args, "O:moose_Id_init", &src) && ObjId_SubtypeCheck(src)){
+            self->id_ = ((_ObjId*)src)->oid_.id;
             return 0;
         }
         // Next try to parse it as an integer value for an existing Id
@@ -418,15 +424,9 @@ extern "C" {
     // 2011-03-28 13:44:49 (+0530)
     PyObject * deleteId(_Id * obj)
     {
-        vector< unsigned int> dims = Field< vector <unsigned int> >::get(ObjId(obj->id_), "objectDimensions");
-        Py_ssize_t length;
-        if (dims.empty()){
-            length = (Py_ssize_t)1; // this is a bug in basecode - dimension 1 is returned as an empty vector
-        } else {
-            length = (Py_ssize_t)dims[0];
-        }
+        unsigned int numData = Field<unsigned int>::get(obj->id_, "numData");
         // clean up the maps containing initialized lookup/dest/element fields
-        for (unsigned int ii = 0; ii < length; ++ii){
+        for (unsigned int ii = 0; ii < numData; ++ii){
             ObjId el(obj->id_, ii);
             map<string, PyObject *>::iterator it = get_inited_lookupfields().begin();
             while( it != get_inited_lookupfields().end()){
@@ -534,12 +534,7 @@ extern "C" {
         if (!Id::isValid(self->id_)){
             RAISE_INVALID_ID(-1, "moose_Id_getLength");
         }        
-        vector< unsigned int> dims = Field< vector <unsigned int> >::get(ObjId(self->id_), "numData");
-        if (dims.empty()){
-            return (Py_ssize_t)1; // this is a bug in basecode - dimension 1 is returned as an empty vector
-        } else {
-            return (Py_ssize_t)dims[0];
-        }
+        return (Py_ssize_t)Field <unsigned int >::get(self->id_, "numData");
     }
     
     PyObject * moose_Id_getShape(_Id * self)
@@ -547,9 +542,11 @@ extern "C" {
         if (!Id::isValid(self->id_)){
             RAISE_INVALID_ID(NULL, "moose_Id_getShape");
         }
+        unsigned int numData = Field < unsigned int >::get(self->id_, "numData");
         PyObject * ret = PyTuple_New((Py_ssize_t)1);        
-        if (PyTuple_SetItem(ret, (Py_ssize_t)1, Py_BuildValue("I", Field < unsigned int >::get(self->id_, "numData")))){
+        if (PyTuple_SetItem(ret, (Py_ssize_t)0, Py_BuildValue("I", numData))){
                 Py_XDECREF(ret);
+                PyErr_SetString(PyExc_RuntimeError, "moose_Id_getShape: could not set tuple entry.");
                 return NULL;
         }        
         return ret;
