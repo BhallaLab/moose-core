@@ -310,21 +310,29 @@ extern "C" {
         PyObject * src = NULL;
         unsigned int id = 0;
         unsigned int isGlobal = 0;
-        // first try parsing the arguments as (path, dimes, classname)
+        char * type = NULL;
+        // first try parsing the arguments as (path, size, classname)
         char _path[] = "path";
         char _dtype[] = "dtype";
-        char _dims[] = "dims";
-        static char * kwlist[] = {_path, _dims, _dtype, NULL};
+        char _size[] = "n";
+        static char * kwlist[] = {_path, _size, _dtype, NULL};
         char * path = NULL;
         char _default_type[] = "Neutral";
-        char *type = _default_type;
-        PyObject * dims = NULL;
+        unsigned int numData = 0; // set it to 0 for unspecified value
+        // char *type = _default_type;
         bool parse_success = false;
+        /* The expected arguments are:
+           string path, 
+           [unsigned int numData] - default: 1
+           [unsigned int isGlobal] - default: 0
+           [string type] - default: Neutral
+        */
         if (kwargs == NULL){
             if(PyArg_ParseTuple(args,
-                                "s|Os:moose_Id_init",
+                                "s|IIs:moose_Id_init",
                                 &path,
-                                &dims,
+                                &numData,
+                                &isGlobal,
                                 &type)){
                 parse_success = true;
             }
@@ -333,7 +341,7 @@ extern "C" {
                                                "s|OIs:moose_Id_init",
                                                kwlist,
                                                &path,
-                                               &dims,
+                                               &numData,
                                                &isGlobal,
                                                &type)){
             parse_success = true;
@@ -355,6 +363,9 @@ extern "C" {
             if (self->id_ != Id() ||
                 trimmed_path == "/" ||
                 trimmed_path == "/root"){
+                if ((numData > 0) && (numData != Field<unsigned int>::get(self->id_, "numData"))){
+                    PyErr_WarnEx(NULL, "moose_Id_init_: Dimensions specified do not match that of existing object.", 1);
+                }
                 return 0;
             }
 			/**
@@ -365,7 +376,9 @@ extern "C" {
                 return -1;
             }
 			*/
-            unsigned int numData = 1;
+            if (type == NULL){
+                type = _default_type;
+            }
             self->id_ = create_Id_from_path(path, numData, isGlobal, type);
             if (self->id_ == Id() && PyErr_Occurred()){
                 Py_XDECREF(self);
@@ -521,7 +534,7 @@ extern "C" {
         if (!Id::isValid(self->id_)){
             RAISE_INVALID_ID(-1, "moose_Id_getLength");
         }        
-        vector< unsigned int> dims = Field< vector <unsigned int> >::get(ObjId(self->id_), "objectDimensions");
+        vector< unsigned int> dims = Field< vector <unsigned int> >::get(ObjId(self->id_), "numData");
         if (dims.empty()){
             return (Py_ssize_t)1; // this is a bug in basecode - dimension 1 is returned as an empty vector
         } else {
@@ -529,27 +542,20 @@ extern "C" {
         }
     }
     
-     PyObject * moose_Id_getShape(_Id * self)
+    PyObject * moose_Id_getShape(_Id * self)
     {
-        vector< unsigned int> dims = Field< vector <unsigned int> >::get(self->id_, "objectDimensions");
         if (!Id::isValid(self->id_)){
             RAISE_INVALID_ID(NULL, "moose_Id_getShape");
-        }        
-        if (dims.empty()){
-            dims.push_back(1);
         }
-        PyObject * ret = PyTuple_New((Py_ssize_t)dims.size());
-        
-        for (unsigned int ii = 0; ii < dims.size(); ++ii){
-            if (PyTuple_SetItem(ret, (Py_ssize_t)ii, Py_BuildValue("I", dims[ii]))){
+        PyObject * ret = PyTuple_New((Py_ssize_t)1);        
+        if (PyTuple_SetItem(ret, (Py_ssize_t)1, Py_BuildValue("I", Field < unsigned int >::get(self->id_, "numData")))){
                 Py_XDECREF(ret);
                 return NULL;
-            }
-        }
+        }        
         return ret;
     }
     
-     PyObject * moose_Id_getItem(_Id * self, Py_ssize_t index)
+    PyObject * moose_Id_getItem(_Id * self, Py_ssize_t index)
     {
         if (!Id::isValid(self->id_)){
             RAISE_INVALID_ID(NULL, "moose_Id_getItem");
@@ -567,7 +573,7 @@ extern "C" {
         return (PyObject*)ret;
     }
     
-     PyObject * moose_Id_getSlice(_Id * self, PyObject * args)
+    PyObject * moose_Id_getSlice(_Id * self, PyObject * args)
     {
         if (!Id::isValid(self->id_)){
             RAISE_INVALID_ID(NULL, "moose_Id_getSlice");
@@ -612,42 +618,6 @@ extern "C" {
             Py_ssize_t value = PyInt_AsLong(op);
             return moose_Id_getItem(self, value);
         }
-        vector< unsigned int> dims = Field< vector <unsigned int> >::get(self->id_, "objectDimensions");
-        if (dims.size() > 1 &&
-            PyTuple_Check(op) && PyTuple_Size(op) == dims.size()){
-            ostringstream path;
-            path << self->id_.path();
-            for (Py_ssize_t ii = 0; ii < dims.size(); ++ii){
-                PyObject * index = PyTuple_GetItem(op, ii);
-                if (!PyInt_Check(index)){
-                    PyErr_SetString(PyExc_TypeError, "subscript must be integer.");
-                    return NULL;
-                }
-                unsigned int ix = PyInt_AsUnsignedLongMask(index);
-                if (ix >= dims[ii]){
-                    PyErr_SetString(PyExc_IndexError, "subscript out of range.");
-                    return NULL;
-                }
-                path << "[" << ix << "]";
-            }
-            ObjId oid(path.str());
-            if (oid == ObjId::bad()){
-                PyErr_SetString(PyExc_SystemError, "bad ObjId at specified index.");
-                return NULL;
-            }
-            string class_name = Field<string>::get(oid, "className");
-            map<string, PyTypeObject*>::iterator it = get_moose_classes().find(class_name);
-            if (it == get_moose_classes().end()){
-                PyErr_SetString(PyExc_SystemError, "moose_Id_subscript: unknown class");
-                return NULL;
-            }
-            PyObject * ret = (PyObject*)PyObject_New(_ObjId, it->second);
-            Py_XINCREF(ret);
-            return ret;
-        } else {
-            PyErr_SetString(PyExc_IndexError, "invalid subscript");
-            return NULL;
-        }    
     }
     
      PyObject * moose_Id_richCompare(_Id * self, PyObject * other, int op)
