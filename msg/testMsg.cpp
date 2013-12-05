@@ -346,13 +346,13 @@ void benchmarkMsg( unsigned int n, string msgType )
 			"setRandomConnectivity", 1.0, 1234 );
 	} 
 
-	shell->doUseClock( "/a1", "proc", 0, false );
+	shell->doUseClock( "/a1", "proc", 0 );
 	for ( unsigned int i = 0; i < 10; ++i )
-		shell->doSetClock( i, 0, false );
-	shell->doSetClock( 0, 1, false );
-	shell->doReinit( false );
+		shell->doSetClock( i, 0 );
+	shell->doSetClock( 0, 1 );
+	shell->doReinit();
 	SetGet1< double >::setVec( a1, "arg1", init );
-	shell->doStart( 100, false );
+	shell->doStart( 100 );
 	for ( unsigned int i = 0; i < n; ++i )
 		init[i] = 0; // be sure we don't retain old info.
 	init.clear();

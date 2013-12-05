@@ -32,10 +32,16 @@ Id Shell::doCopy( Id orig, ObjId newParent, string newName,
 	args.push_back( orig );
 	args.push_back( newParent );
 	args.push_back( newElm );
+	SetGet5< vector < ObjId >, string, unsigned int, bool, bool >::set(
+			ObjId(), "copy",
+			args, newName, n, toGlobal, copyExtMsg );
+	/*
 	if ( innerCopy( args, newName, n, toGlobal, copyExtMsg ) )
 		return newElm;
 	else
 		return Id();
+	*/
+	return newElm;
 }
 
 /** Runs in parallel on all nodes.
@@ -144,6 +150,11 @@ bool Shell::innerCopy( const vector< ObjId >& args, const string& newName,
 void Shell::handleCopy( const Eref& er, vector< ObjId > args, 
 	string newName, unsigned int n, bool toGlobal, bool copyExtMsgs )
 {
+	if ( !innerCopy( args, newName, n, toGlobal, copyExtMsgs ) ) {
+		cout << "Error on Shell::myNode()::Shell::handleCopy for " <<
+				newName << ", " << n << endl;
+	}
+	/*
 	static const Finfo* ackf = 
 		Shell::initCinfo()->findFinfo( "ack" );
 	static const SrcFinfo2< unsigned int, unsigned int >* 
@@ -155,4 +166,5 @@ void Shell::handleCopy( const Eref& er, vector< ObjId > args,
 		ack->send( Eref( shelle_, 0 ), Shell::myNode(), ErrorStatus );
 	else
 		ack->send( Eref( shelle_, 0 ), Shell::myNode(), OkStatus );
+	*/
 }

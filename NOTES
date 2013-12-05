@@ -1105,4 +1105,18 @@ Lots of errors on Node01, for inability to create objects. Line 401
 in Shell::testCopyFieldElement.
 Fixed the cpoy at that point, but a few lines later it goes bad.
 
+Problems start in testShell.cpp::testChildren.
+Seems that I need to fix up Shell:::doDelete.
+Did that. Now there is a problem in testShell.cpp:450, all I'm doing
+is trying a 'get' on numField.
+===========================================================================
+4 Dec 2013.
+Incrementally going through unit tests. 
+Currently a bit stuck in testShell.cpp::copyFieldElement, not because
+of real errors but because SetVec and GetVec are not yet implemented.
+
+Next error is due to trying low-level functions to look up values, in 
+testShell::testObjidToAndFromPath()
+Easy to fix one part of it in line 511, but would be good to
+have a general solution.
 ===========================================================================
