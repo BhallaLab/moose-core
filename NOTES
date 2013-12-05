@@ -1129,3 +1129,12 @@ Possibly the set is not complete when I ask for the 'get'.
 
 Redid SetGet a bit so that both use the same MPI tag. As hoped, this fixes
 the sequencing problem of set and then get.
+
+Next problem in testShellSetGet is another SetVec issue. Postpone.
+On now to the message tests. This requires further fixing of the
+Shell commands.
+
+Man Shell commands now fixed. The program now goes on till 
+testShell.cpp:912, where again it runs into the SetVec problem.
+
+===========================================================================
