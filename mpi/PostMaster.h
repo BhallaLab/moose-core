@@ -69,25 +69,21 @@
 #include <mpi.h>
 #endif
 
+enum RemoteSetOps {RemoteSet, RemoteGet, RemoteSetVec, RemoteGetVec};
+
 class TgtInfo {
 	public: 
 		TgtInfo()
-				: id_( 0 ), dataIndex_( 0 ), 
+				: id_(),
 				bindIndex_( 0 ), dataSize_( 0 )
 		{;}
 
 		Eref eref() const {
-			return Eref( id_.element(), dataIndex_, 0 );
+			return Eref( id_.eref() );
 		}
 
-		Eref fullEref() const {
-			return Eref( id_.element(), dataIndex_, dataSize_ );
-		}
-
-		void set( Id id, DataId dataIndex, unsigned int bindIndex, 
-						unsigned int size ) {
+		void set( ObjId id, unsigned int bindIndex, unsigned int size ) {
 			id_ = id;
-			dataIndex_ = dataIndex;
 			bindIndex_ = bindIndex;
 			dataSize_ = size;
 		}
@@ -102,10 +98,9 @@ class TgtInfo {
 
 		static const unsigned int headerSize;
 	private:
-		Id id_;
-		DataId dataIndex_;
+		ObjId id_;
 		unsigned int bindIndex_;
-		unsigned int dataSize_; // Does double duty as fieldIndex.
+		unsigned int dataSize_; // Does double duty for SetGet operations as a flag to indicate type of operation.
 };
 
 class PostMaster {
@@ -120,12 +115,14 @@ class PostMaster {
 
 		/// All arrived messages and set calls are handled and cleared.
 		void clearPending();
-		/// Clears arrived set calls
-		void clearPendingSet();
-		/// Clears arrived get calls
-		void clearPendingGet();
+		/// Clears arrived set and get calls
+		void clearPendingSetGet();
 		/// Clears arrived messages.
 		void clearPendingSend();
+
+		/// Handles 'get' calls from another node, to an object on mynode.
+		void handleRemoteGet( const Eref& e, 
+						const OpFunc* op, int requestingNode );
 
 		/// Returns pointer to Send buffer for filling in arguments.
 		double* addToSendBuf( const Eref& e, 

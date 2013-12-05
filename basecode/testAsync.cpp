@@ -1676,9 +1676,10 @@ void testHopFunc()
 	const TgtInfo* tgt = reinterpret_cast< const TgtInfo* >( buf );
 	assert( tgt->bindIndex() == 1234 );
 	assert( tgt->dataSize() == 2 );
-	const char* c = reinterpret_cast< const char* >( buf + 2 );
+	const char* c = reinterpret_cast< const char* >( 
+					buf + TgtInfo::headerSize );
 	assert( strcmp( c, "two" ) == 0 );
-	assert( doubleEq( buf[3], 2468.0 ) );
+	assert( doubleEq( buf[TgtInfo::headerSize + 1], 2468.0 ) );
 
 	HopIndex hop3( 36912, MooseTestHop );
 	HopFunc3< string, int, vector< double > > three( hop3 );
@@ -1690,13 +1691,14 @@ void testHopFunc()
 
 	assert( tgt->bindIndex() == 36912 );
 	assert( tgt->dataSize() == 6 );
-	c = reinterpret_cast< const char* >( buf + 2 );
+	c = reinterpret_cast< const char* >( buf + TgtInfo::headerSize );
 	assert( strcmp( c, "three" ) == 0 );
-	assert( doubleEq( buf[3], 3333.0 ) );
-	assert( doubleEq( buf[4], 3.0 ) ); // Size of array.
-	assert( doubleEq( buf[5], temp[0] ) );
-	assert( doubleEq( buf[6], temp[1] ) );
-	assert( doubleEq( buf[7], temp[2] ) );
+	int i = TgtInfo::headerSize + 1;
+	assert( doubleEq( buf[i++], 3333.0 ) );
+	assert( doubleEq( buf[i++], 3.0 ) ); // Size of array.
+	assert( doubleEq( buf[i++], temp[0] ) );
+	assert( doubleEq( buf[i++], temp[1] ) );
+	assert( doubleEq( buf[i++], temp[2] ) );
 
 	cout << "." << flush;
 }

@@ -80,7 +80,7 @@ Element.o:	FuncOrder.h
 testAsync.o:	SparseMatrix.h SetGet.h ../scheduling/Clock.h ../biophysics/IntFire.h ../biophysics/SpikeRingBuffer.h ../biophysics/SynHandler.h
 SparseMsg.o:	SparseMatrix.h
 SetGet.o:	SetGet.h ../shell/Neutral.h
-HopFunc.o:	HopFunc.h
+HopFunc.o:	HopFunc.h ../mpi/PostMaster.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -I../msg $< -c
