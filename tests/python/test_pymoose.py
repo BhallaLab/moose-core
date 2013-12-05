@@ -4,7 +4,7 @@ import sys
 import unittest
 import uuid
 
-sys.path.append('../python')
+sys.path.append('../../python')
 try:
     import moose
 except ImportError:    
@@ -18,13 +18,12 @@ class TestNeutral(unittest.TestCase):
         self.c_path = '/neutral%d' % (uuid.uuid4().int)
         self.d_path = self.c_path + '/d'
         self.c_len = 3
-        self.d_dim = (4, 3)
         self.a = moose.Neutral(self.a_path)
         self.b = moose.Neutral(self.b_path)
         self.c = moose.Neutral(self.c_path, self.c_len)
-        self.d = moose.Neutral(self.d_path, self.d_dim)
-        print self.a_path, self.b_path
-        print self.a.path, self.b.path
+        # print self.a_path, self.b_path
+        # print self.a.path, self.b.path
+        # print len(self.c.id_), self.c_len
                 
     def testNew(self):
         self.assertTrue(moose.exists(self.a_path))
@@ -35,22 +34,23 @@ class TestNeutral(unittest.TestCase):
     def testNewChildWithSingleDim(self):
         self.assertTrue(moose.exists(self.c_path))    
 
-    def testNewChildWithTupleDim(self):
-        self.assertTrue(moose.exists(self.d_path))
-
     def testDimension(self):
-        self.assertEqual(self.d.getId().shape[0], self.c_len)
-        self.assertEqual(self.d.getId().shape[1], self.d_dim[0])
-        self.assertEqual(self.d.getId().shape[2], self.d_dim[1])
+        self.assertEqual(self.c.getId().shape[0], self.c_len)
+
+    def testLen(self):
+        self.assertEqual(len(self.c.id_), self.c_len)
 
     def testPath(self):
-        self.assertEqual(self.b.path, '/' + self.b_path)
-        self.assertEqual(self.c.path, self.c_path + '[0]')
-        self.assertEqual(self.d.path, self.c_path + '[0]/d[0][0]')
+        # Unfortunately the indexing in path seems unstable - in
+        # async13 it is switched to have [0] for the first element,
+        # breaking old code which was supposed to skip the [0] and
+        # include the index only for second entry onwards.
+        self.assertEqual(self.b.path, '/%s[0]/%s[0]' % (self.a_path, 'b'))
+        em = moose.ematrix(self.c)
+        self.assertEqual(em[1].path, self.c_path + '[1]')
 
     def testName(self):
         self.assertEqual(self.b.name, 'b')
-        self.assertEqual(self.d.name, 'd')
 
     def testPathEndingWithSlash(self):
         self.assertRaises(ValueError, moose.Neutral, 'test/')
@@ -59,18 +59,22 @@ class TestNeutral(unittest.TestCase):
         self.assertRaises(ValueError, moose.Neutral, '/nonexistent_parent/invalid_child')
 
     def testDeletedCopyException(self):
-        moose.delete(self.d.getId())
-        self.assertRaises(ValueError, moose.Neutral, self.d)
+        moose.delete(self.c.getId())
+        self.assertRaises(ValueError, moose.Neutral, self.c)
 
     def testDeletedGetFieldException(self):
-        moose.delete(self.d.getId())
+        moose.delete(self.c.getId())
         with self.assertRaises(ValueError):
-            s = self.d.name
+            s = self.c.name
 
     def testDeletedParentException(self):
         moose.delete(self.a.getId())
         with self.assertRaises(ValueError):
             s = self.b.name
+
+    def testIdObjId(self):
+        id_ = moose.ematrix(self.a)
+        self.assertEqual(id_, self.a.id_)
         
 # class TestPyMooseGlobals(unittest.TestCase):
 #     def setUp(self):
@@ -158,17 +162,17 @@ class TestDelete(unittest.TestCase):
         with self.assertRaises(ValueError):
             print(self.oid.name)
 
-class TestValueFieldTypes(unittest.TestCase):
-    def setUp(self):
-        self.id_ = uuid.uuid4().int
-        self.container = moose.Neutral('/test%d' % (self.id_))
-        cwe = moose.getCwe()
-        self.model = moose.loadModel('../Demos/Genesis_files/Kholodenko.g', '%s/kholodenko' % (self.container.path))
-        moose.setCwe(cwe)
+# class TestValueFieldTypes(unittest.TestCase):
+#     def setUp(self):
+#         self.id_ = uuid.uuid4().int
+#         self.container = moose.Neutral('/test%d' % (self.id_))
+#         cwe = moose.getCwe()
+#         self.model = moose.loadModel('../Demos/Genesis_files/Kholodenko.g', '%s/kholodenko' % (self.container.path))
+#         moose.setCwe(cwe)
     
-    def testVecUnsigned(self):
-        x = moose.element('%s/kinetics' % (self.model.path))
-        self.assertTrue(len(x.meshToSpace) > 0)
+#     def testVecUnsigned(self):
+#         x = moose.element('%s/kinetics' % (self.model.path))
+#         self.assertTrue(len(x.meshToSpace) > 0)
         
 if __name__ == '__main__':
     print 'PyMOOSE Regression Tests:'

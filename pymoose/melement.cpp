@@ -151,14 +151,14 @@ extern "C" {
     int moose_ObjId_init_from_path(PyObject * self, PyObject * args,
                                    PyObject * kwargs)
     {
-        PyObject * dims = NULL;
+        unsigned int numData;
         char * path = NULL;
         char * type = NULL;
         char _path[] = "path";
         char _dtype[] = "dtype";
-        char _dims[] = "dims";
+        char _size[] = "n";
         unsigned int isGlobal = 0;
-        static char * kwlist [] = {_path, _dims, _dtype, NULL};
+        static char * kwlist [] = {_path, _size, _dtype, NULL};
         _ObjId * instance = (_ObjId*)self;
         instance->oid_ = ObjId::bad();
 
@@ -166,34 +166,36 @@ extern "C" {
         bool parse_success = false;
         if (kwargs == NULL){
             if (PyArg_ParseTuple(args,
-                                 "s|OIs:moose_ObjId_init_from_path",
+                                 "s|IIs:moose_ObjId_init_from_path",
                                  &path,
-                                 &dims,
+                                 &numData,
                                  &isGlobal,
                                  &type)){
                 parse_success = true;
             }
         } else if (PyArg_ParseTupleAndKeywords(args,
                                                kwargs,
-                                               "s|OIs:moose_ObjId_init_from_path",
+                                               "s|IIs:moose_ObjId_init_from_path",
                                                kwlist,
                                                &path,
-                                               &dims,
+                                               &numData,
                                                &isGlobal,
-                                               &type)){\
+                                               &type)){
             parse_success = true;
         }
         PyErr_Clear();
         if (!parse_success){
             return -2;
-        }    
+        }
         // First see if there is an existing object with at path
         instance->oid_ = ObjId(path);
         if (instance->oid_ == ObjId()){
+            // is this the root element?
             if (string(path) == "/" ){
                 return 0;
             }
-        } else {
+            // no - so we need to create a new element
+        } else { // this is a non-root existing element
             return 0;
         }
             
@@ -209,9 +211,7 @@ extern "C" {
             return -1;
         }
         
-		/// Nov 2013: Need Subha to help out here.
-        // Id new_id = create_Id_from_path(path, pysequence_to_dimvec(dims), basetype_str);
-        Id new_id = create_Id_from_path(path, 1, isGlobal, basetype_str);
+        Id new_id = create_Id_from_path(path, numData, isGlobal, basetype_str);
         if (new_id == Id() && PyErr_Occurred()){
             // Py_XDECREF(self);
             return -1;
