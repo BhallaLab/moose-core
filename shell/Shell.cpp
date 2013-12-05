@@ -53,6 +53,7 @@ static SrcFinfo5< string, Id, Id, string, vector< int > > *requestCreate() {
 }
 */
 
+/*
 static SrcFinfo2< unsigned int, unsigned int >* ack()
 {
 	static SrcFinfo2< unsigned int, unsigned int > temp( "ack",
@@ -62,6 +63,7 @@ static SrcFinfo2< unsigned int, unsigned int >* ack()
 			);
 	return &temp;
 }
+*/
 
 /*
 static SrcFinfo1< Id  > *requestDelete() {
@@ -204,8 +206,9 @@ const Cinfo* Shell::initCinfo()
 ////////////////////////////////////////////////////////////////
 // Dest Finfos: Functions handled by Shell
 ////////////////////////////////////////////////////////////////
-	static DestFinfo handleUseClock( "handleUseClock", 
-			"Deals with assignment of path to a given clock.",
+	static DestFinfo handleUseClock( "useClock", 
+			"Deals with assignment of path to a given clock."
+			" Arguments: path, field, tick number. ",
 			new EpFunc3< Shell, string, string, unsigned int >( 
 				&Shell::handleUseClock )
 			);
@@ -215,11 +218,12 @@ const Cinfo* Shell::initCinfo()
 	static DestFinfo handleDelete( "delete", 
 			"Destroys Element, all its messages, and all its children. Args: Id",
 			new EpFunc1< Shell, Id >( & Shell::destroy ) );
-	static DestFinfo handleAddMsg( "handleAddMsg", 
-			"Makes a msg",
+	static DestFinfo handleAddMsg( "addMsg", 
+			"Makes a msg. Arguments are:"
+			" msgtype, src object, src field, dest object, dest field",
 			new EpFunc5< Shell, string, ObjId, string, ObjId, string >
 			( & Shell::handleAddMsg ) );
-	static DestFinfo handleQuit( "handleQuit", 
+	static DestFinfo handleQuit( "quit", 
 			"Stops simulation running and quits the simulator",
 			new OpFunc0< Shell >( & Shell::handleQuit ) );
 	static DestFinfo handleMove( "move", 
@@ -282,6 +286,10 @@ const Cinfo* Shell::initCinfo()
 		&handleCreate,
 		&handleDelete,
 		&handleCopy,
+		&handleMove,
+		&handleAddMsg,
+		&handleQuit,
+		&handleUseClock,
 		&clockControl,
 	};
 
@@ -386,8 +394,20 @@ ObjId Shell::doAddMsg( const string& msgType,
 		cout << myNode_ << ": Shell::doAddMsg: Error: Src/Dest Msg type mismatch: " << srcField << "/" << destField << endl;
 		return ObjId();
 	}
-	const Msg* m = innerAddMsg( msgType, src, srcField, dest, destField );
-	return m->mid();
+
+	SetGet5< string, ObjId, string, ObjId, string >::set(
+		ObjId(), // Apply command to Shell
+		"addMsg",	// Function to call.
+		msgType,
+		src,
+		srcField,
+		dest,
+		destField
+	);
+
+	// const Msg* m = innerAddMsg( msgType, src, srcField, dest, destField );
+	// return m->mid();
+	return Msg::lastMsg()->mid();
 }
 
 /**
@@ -434,7 +454,8 @@ void Shell::connectMasterMsg()
 
 void Shell::doQuit()
 {
-		Shell::keepLooping_ = 0;
+	SetGet0::set( ObjId(), "quit" );
+	// Shell::keepLooping_ = 0;
 }
 
 void Shell::doStart( double runtime )
@@ -472,7 +493,9 @@ void Shell::doSetClock( unsigned int tickNum, double dt )
 
 void Shell::doUseClock( string path, string field, unsigned int tick )
 {
-	innerUseClock( path, field, tick);
+	SetGet3< string, string, unsigned int >::set( ObjId(), 
+		"useClock", path, field, tick );
+	// innerUseClock( path, field, tick);
 }
 
 /**
@@ -521,7 +544,9 @@ void Shell::doMove( Id orig, ObjId newParent )
 		return;
 		
 	}
-		innerMove( orig, newParent );
+
+	SetGet2< Id, ObjId >::set( ObjId(), "move", orig, newParent );
+	// innerMove( orig, newParent );
 }
 
 bool extractIndices( const string& s, vector< unsigned int >& indices )
@@ -856,8 +881,9 @@ void Shell::destroy( const Eref& e, Id eid)
 {
 	Neutral *n = reinterpret_cast< Neutral* >( e.data() );
 	assert( n );
+	cout << myNode_ << ": Shell::destroy done for element id: " << eid << 
+			", name = " << eid.element()->getName() << endl;
 	n->destroy( eid.eref(), 0 );
-	// cout << myNode_ << ": Shell::destroy done for element id " << eid << endl;
 	if ( cwe_ == eid )
 		cwe_ = Id();
 

@@ -24,12 +24,14 @@
 // Static field declaration.
 Id Msg::msgManagerId_;
 bool Msg::lastTrump_ = false;
+const Msg* Msg::lastMsg_ = 0;
 
 Msg::Msg( ObjId mid, Element* e1, Element* e2 )
 	: mid_( mid), e1_( e1 ), e2_( e2 )
 {
 	e1->addMsg( mid_ );
 	e2->addMsg( mid_ );
+	lastMsg_ = this;
 }
 
 Msg::~Msg()
@@ -292,4 +294,13 @@ void Msg::clearAllMsgs()
 		Msg* m = reinterpret_cast< Msg* >( SparseMsg::lookupMsg( i ) );
 		if ( m ) delete m;
 	}
+}
+
+/**
+ * Static utility function, provided so that the shell function doing
+ * message creation can retrieve the most recent message made.
+ */
+const Msg* Msg::lastMsg()
+{
+	return lastMsg_;
 }
