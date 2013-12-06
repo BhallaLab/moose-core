@@ -157,11 +157,15 @@ extern "C" {
         char _path[] = "path";
         char _dtype[] = "dtype";
         char _size[] = "n";
+        char _global[] = "g";
         unsigned int isGlobal = 0;
-        static char * kwlist [] = {_path, _size, _dtype, NULL};
+        static char * kwlist [] = {_path, _size, _global, _dtype, NULL};
+        static const string default_type = "Neutral";
         _ObjId * instance = (_ObjId*)self;
         instance->oid_ = ObjId::bad();
-
+        PyTypeObject * mytype = Py_TYPE(self);
+        string mytypename(mytype->tp_name);
+        
         // First try to parse the arguments as (path, dims, class)
         bool parse_success = false;
         if (kwargs == NULL){
@@ -169,8 +173,7 @@ extern "C" {
                                  "s|IIs:moose_ObjId_init_from_path",
                                  &path,
                                  &numData,
-                                 &isGlobal,
-                                 &type)){
+                                 &isGlobal)){
                 parse_success = true;
             }
         } else if (PyArg_ParseTupleAndKeywords(args,
@@ -179,24 +182,44 @@ extern "C" {
                                                kwlist,
                                                &path,
                                                &numData,
-                                               &isGlobal,
-                                               &type)){
+                                               &isGlobal)){
             parse_success = true;
         }
         PyErr_Clear();
         if (!parse_success){
             return -2;
         }
+        ostringstream err;
         // First see if there is an existing object with at path
         instance->oid_ = ObjId(path);
+        string realtypename = "moose." + Field<string>::get(instance->oid_, "className");
         if (instance->oid_ == ObjId()){
             // is this the root element?
-            if (string(path) == "/" ){
-                return 0;
+            string p(path);
+            if ((p == "/") || (p == "/root")){
+                if ((mytypename == realtypename )
+                    || (mytypename == "moose.Neutral")){
+                    return 0;
+                }
+                err << "cannot convert "
+                    << Field<string>::get(instance->oid_, "className")
+                    << " to "
+                    << mytypename;
+                PyErr_SetString(PyExc_TypeError, err.str().c_str());
+                return -1;
             }
             // no - so we need to create a new element
         } else { // this is a non-root existing element
-            return 0;
+            if (mytypename == realtypename){
+                return 0;
+            }
+            err << "cannot convert "
+                << Field<string>::get(instance->oid_, "className")
+                << " to "
+                << mytypename
+                << ". To get the existing object use `moose.element(obj)` instead.";
+            PyErr_SetString(PyExc_TypeError, err.str().c_str());
+            return -1;
         }
             
         string basetype_str;
@@ -257,7 +280,7 @@ extern "C" {
         }
         PyErr_SetString(PyExc_ValueError,
                         "Could not parse arguments. "
-                        " Call __init__(path, dims, dtype, parent) or"
+                        " Call __init__(path, n, g, dtype) or"
                         " __init__(id, dataIndex, fieldIndex)");        
         return -1;
     }

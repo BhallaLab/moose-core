@@ -111,3 +111,11 @@ int testTrim()
     return success?1:0;    
 }
 
+
+bool endswith(const string & full, const string & ending)
+{
+    if (full.length() < ending.length()){
+        return false;
+    }
+    return (0 == full.compare(full.length() - ending.length(), ending.length(), ending));
+}

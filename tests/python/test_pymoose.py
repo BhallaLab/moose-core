@@ -11,7 +11,38 @@ except ImportError:
     print 'Please include the directory containing moose.py and _moose.so in your PYTHONPATH environmental variable.'
     sys.exit(1)
 
+class TestEmatrix(unittest.TestCase):
+    """Test pymoose basics"""
+    def testCreate(self):
+        em = moose.ematrix('test', 10, 0, 'Neutral')
+        self.assertEqual(em.path, 'test')
+
+    def testCreateKW(self):
+        em = moose.ematrix(path='/testCreateKW', n=10, g=1, dtype='Neutral')
+        self.assertEqual(em.path, '/testCreateKW')
+
+    def testGetItem(self):
+        em = moose.ematrix('testGetItem', n=10, g=1, dtype='Neutral')
+        el = em[5]
+        self.assertEqual(el.path,'/%s[5]' % (em.name))
+
+    def testIndexError(self):
+        em = moose.ematrix('testIndexError', n=3, g=1, dtype='Neutral')
+        with self.assertRaises(IndexError):
+            el = em[5]
+        
+    def testSlice(self):
+        em = moose.ematrix('/testSlice', n=10, g=1, dtype='Neutral')
+        sl = em[5:8]
+        for ii, el in enumerate(sl):
+            self.assertEqual(el.path,  '/testSlice[%d]' % (ii+5))
+
 class TestNeutral(unittest.TestCase):
+    def testPath(self):
+        a = moose.Neutral('a')
+        self.assertEqual(a.path, '/a[0]')
+
+class TestNeutral1(unittest.TestCase):
     def setUp(self):
         self.a_path = 'neutral%d' % (uuid.uuid4().int)
         self.b_path = self.a_path + '/b'
@@ -21,9 +52,9 @@ class TestNeutral(unittest.TestCase):
         self.a = moose.Neutral(self.a_path)
         self.b = moose.Neutral(self.b_path)
         self.c = moose.Neutral(self.c_path, self.c_len)
-        # print self.a_path, self.b_path
-        # print self.a.path, self.b.path
-        # print len(self.c.id_), self.c_len
+        print self.a_path, self.b_path
+        print self.a.path, self.b.path
+        print len(self.c.id_), self.c_len
                 
     def testNew(self):
         self.assertTrue(moose.exists(self.a_path))
@@ -35,7 +66,7 @@ class TestNeutral(unittest.TestCase):
         self.assertTrue(moose.exists(self.c_path))    
 
     def testDimension(self):
-        self.assertEqual(self.c.getId().shape[0], self.c_len)
+        self.assertEqual(self.c.id_.shape[0], self.c_len)
 
     def testLen(self):
         self.assertEqual(len(self.c.id_), self.c_len)
@@ -59,22 +90,43 @@ class TestNeutral(unittest.TestCase):
         self.assertRaises(ValueError, moose.Neutral, '/nonexistent_parent/invalid_child')
 
     def testDeletedCopyException(self):
-        moose.delete(self.c.getId())
+        moose.delete(self.c.id_)
         self.assertRaises(ValueError, moose.Neutral, self.c)
 
     def testDeletedGetFieldException(self):
-        moose.delete(self.c.getId())
+        moose.delete(self.c.id_)
         with self.assertRaises(ValueError):
             s = self.c.name
 
     def testDeletedParentException(self):
-        moose.delete(self.a.getId())
+        moose.delete(self.a.id_)
         with self.assertRaises(ValueError):
             s = self.b.name
 
     def testIdObjId(self):
         id_ = moose.ematrix(self.a)
         self.assertEqual(id_, self.a.id_)
+
+    def testCompareId(self):
+        """Test the rich comparison between ids"""
+        id1 = moose.ematrix('A', n=2, dtype='Neutral')
+        id2 = moose.ematrix('B', n=4, dtype='Neutral')
+        id3 = moose.ematrix('A')
+        self.assertTrue(id1 < id2)
+        self.assertEqual(id1, id3)
+        self.assertTrue(id2 > id1)
+        self.assertTrue(id2 >= id1)
+        self.assertTrue(id1 <= id2)
+    
+    def testRename(self):
+        """Rename an element in a Id and check if that was effective. This
+        tests for setting values also."""
+        id1 = moose.ematrix(path='/alpha', n=1, dtype='Neutral')
+        id2 = moose.ematrix('alpha')
+        id1[0].name = 'bravo'
+        self.assertEqual(id1.path, '/bravo')
+        self.assertEqual(id2.path, '/bravo')
+        
         
 # class TestPyMooseGlobals(unittest.TestCase):
 #     def setUp(self):
@@ -152,7 +204,7 @@ class TestNeutral(unittest.TestCase):
 class TestDelete(unittest.TestCase):
     def setUp(self):
         self.oid = moose.Neutral('a')
-        moose.delete(self.oid.getId())
+        moose.delete(self.oid.id_)
 
     def testRepr(self):
         with self.assertRaises(ValueError):
