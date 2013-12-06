@@ -236,6 +236,9 @@ extern "C" {
     {
         if (attribute == "path"){
             return moose_Id_getPath(id);
+        } else if (attribute == "name"){
+            string name = Field<string>::get(id->id_, "name");
+            return Py_BuildValue("s", name.c_str());
         } else if (attribute == "value"){
             return moose_Id_getValue(id);
         } else if (attribute == "shape"){
@@ -314,7 +317,8 @@ extern "C" {
         char _path[] = "path";
         char _dtype[] = "dtype";
         char _size[] = "n";
-        static char * kwlist[] = {_path, _size, _dtype, NULL};
+        char _global[] = "g";
+        static char * kwlist[] = {_path, _size,  _global, _dtype,NULL};
         char * path = NULL;
         char _default_type[] = "Neutral";
         unsigned int numData = 0; // set it to 0 for unspecified value
@@ -337,7 +341,7 @@ extern "C" {
             }
         } else if (PyArg_ParseTupleAndKeywords(args,
                                                kwargs,
-                                               "s|OIs:moose_Id_init",
+                                               "s|IIs:moose_Id_init",
                                                kwlist,
                                                &path,
                                                &numData,
@@ -570,16 +574,12 @@ extern "C" {
         return (PyObject*)ret;
     }
     
-    PyObject * moose_Id_getSlice(_Id * self, PyObject * args)
+    PyObject * moose_Id_getSlice(_Id * self, Py_ssize_t start, Py_ssize_t end)
     {
         if (!Id::isValid(self->id_)){
             RAISE_INVALID_ID(NULL, "moose_Id_getSlice");
         }        
         extern PyTypeObject ObjIdType;
-        Py_ssize_t start, end;
-        if (!PyArg_ParseTuple(args, "ii:moose_Id_getSlice", &start, &end)){
-            return NULL;
-        }
         Py_ssize_t len = moose_Id_getLength(self);
         while (start < 0){
             start += len;
@@ -597,7 +597,7 @@ extern "C" {
         for (unsigned int ii = start; ii < end; ++ii){
             _ObjId * value = PyObject_New(_ObjId, &ObjIdType);
             value->oid_ = ObjId(self->id_, ii);
-            if (PyTuple_SetItem(ret, (Py_ssize_t)ii, (PyObject*)value)){
+            if (PyTuple_SetItem(ret, (Py_ssize_t)(ii-start), (PyObject*)value)){
                 Py_XDECREF(ret);
                 Py_XDECREF(value);
                 return NULL;

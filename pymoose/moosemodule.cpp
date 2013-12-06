@@ -1026,7 +1026,7 @@ extern "C" {
        Utility function to traverse python class hierarchy to reach closest base class.
        Ideally we should go via mro
     */
- string get_baseclass_name(PyObject * self)
+    string get_baseclass_name(PyObject * self)
     {
         extern PyTypeObject ObjIdType;
         string basetype_str = "";
@@ -1046,7 +1046,7 @@ extern "C" {
         }
         return basetype_str;
     }
-    
+
     ////////////////////////////////////////////
     // Module functions
     ////////////////////////////////////////////
