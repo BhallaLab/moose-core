@@ -21,7 +21,7 @@ void FieldElementFinfoBase::postCreationFunc(
 		return;
 	Id kid = Id::nextId();
 	Element* e = new FieldElement( parent, kid, fieldCinfo_, name(), this );
-	Msg* m = new OneToOneMsg( parent.element(), e );
+	Msg* m = new OneToOneMsg( parent.element(), e, 0 );
 	assert( m );
 	if ( !f1->addMsg( pf, m->mid(), parent.element() ) ) {
 		cout << "FieldElementFinfoBase::postCreationFunc: Error: \n" <<
@@ -29,5 +29,4 @@ void FieldElementFinfoBase::postCreationFunc(
 		parent.element()->getName() << " to " << name() << "\n";
 		return;
 	}
-	// Shell::adopt( parent, kid );
 }

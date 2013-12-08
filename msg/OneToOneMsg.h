@@ -18,9 +18,9 @@
  */
 class OneToOneMsg: public Msg
 {
-	friend void Msg::initMsgManagers(); // for initializing Id.
+	friend unsigned int Msg::initMsgManagers(); // for initializing Id.
 	public:
-		OneToOneMsg( Element* e1, Element* e2 );
+		OneToOneMsg( Element* e1, Element* e2, unsigned int msgIndex );
 		~OneToOneMsg();
 
 		Eref firstTgt( const Eref& src ) const;

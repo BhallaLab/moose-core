@@ -191,27 +191,12 @@ template< class A > class SetGet1: public SetGet
 			const OpFunc* func = checkSet( field, tgt, fid );
 			const OpFunc1Base< A >* op = dynamic_cast< const OpFunc1Base< A >* >( func );
 			if ( op ) {
-			// total # of entries on element and maybe to include fields.
-			// This gets messy as we'll need to filter the data through
-			// the node decomposition
-				Element* e = tgt.element();
-				unsigned int k = 0;
-				unsigned int size = e->numData(); 
-				if ( tgt.element()->hasFields() ) {
-					for ( unsigned int i = 0; i < size; ++i ) {
-						unsigned int numField = e->numField( i );
-						for ( unsigned int j = 0; j < numField; ++j ) {
-							Eref er( tgt.element(), i, j );
-							op->op( er, arg[ k % arg.size() ] );
-							++k;
-						}
-					}
-				} else {
-					for ( unsigned int i = 0; i < size; ++i ) {
-						Eref er( tgt.element(), i );
-						op->op( er, arg[ i % arg.size() ] );
-					}
-				}
+				const OpFunc* op2 = op->makeHopFunc( 
+					HopIndex( op->opIndex(), MooseSetVecHop ) );
+				const OpFunc1Base< A >* hop = 
+					dynamic_cast< const OpFunc1Base< A >* >( op2 );
+				hop->opVec( tgt.eref(), arg, op );
+				delete op2;
 				return true;
 			}
 			return false;
@@ -460,6 +445,7 @@ template< class A1, class A2 > class SetGet2: public SetGet
 			const OpFunc2Base< A1, A2 >* op = 
 					dynamic_cast< const OpFunc2Base< A1, A2 >* >( func );
 			if ( op ) {
+				/*
 				unsigned int size = tgt.element()->numData(); 
 				// total # of entries on element and maybe to include fields
 				for ( unsigned int i = 0; i < size; ++i ) {
@@ -467,9 +453,17 @@ template< class A1, class A2 > class SetGet2: public SetGet
 					op->op( er, arg1[ i % arg1.size() ], 
 									arg2[ i % arg2.size() ] );
 				}
-				return 1;
+				return true;
+				*/
+				const OpFunc* op2 = op->makeHopFunc( 
+					HopIndex( op->opIndex(), MooseSetVecHop ) );
+				const OpFunc2Base< A1, A2 >* hop = 
+					dynamic_cast< const OpFunc2Base< A1, A2 >* >( op2 );
+				hop->opVec( tgt.eref(), arg1, arg2, op );
+				delete op2;
+				return true;
 			}
-			return 0;
+			return false;
 		}
 
 		/**

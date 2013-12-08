@@ -200,7 +200,7 @@ void SparseMsg::transpose()
 //////////////////////////////////////////////////////////////////
 
 
-SparseMsg::SparseMsg( Element* e1, Element* e2 )
+SparseMsg::SparseMsg( Element* e1, Element* e2, unsigned int msgIndex )
 	: Msg( ObjId( managerId_, msg_.size() ), e1, e2 )
 {
 	unsigned int nrows = 0;
@@ -208,7 +208,15 @@ SparseMsg::SparseMsg( Element* e1, Element* e2 )
 	nrows = e1->numData();
 	ncolumns = e2->numData();
 	matrix_.setSize( nrows, ncolumns );
-	msg_.push_back( this );
+	if ( msgIndex == 0 ) {
+		msg_.push_back( this );
+	} else {
+		if ( msg_.size() <= msgIndex )
+			msg_.resize( msgIndex + 1 );
+		msg_[ msgIndex ] = this;
+	}
+
+	// cout << Shell::myNode() << ": SparseMsg constructor between " << e1->getName() << " and " << e2->getName() << endl;
 }
 
 SparseMsg::~SparseMsg()
@@ -335,10 +343,10 @@ Msg* SparseMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 	if ( n <= 1 ) {
 		SparseMsg* ret = 0;
 		if ( orig == e1() ) {
-			ret = new SparseMsg( newSrc.element(), newTgt.element() );
+			ret = new SparseMsg( newSrc.element(), newTgt.element(), 0 );
 			ret->e1()->addMsgAndFunc( ret->mid(), fid, b );
 		} else if ( orig == e2() ) {
-			ret = new SparseMsg( newTgt.element(), newSrc.element() );
+			ret = new SparseMsg( newTgt.element(), newSrc.element(), 0 );
 			ret->e2()->addMsgAndFunc( ret->mid(), fid, b );
 		} else {
 			assert( 0 );

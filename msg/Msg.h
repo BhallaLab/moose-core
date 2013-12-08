@@ -153,7 +153,7 @@ class Msg
 		/**
 		 * Sets up the Element managers for each of the Msg classes
 		 */
-		static void initMsgManagers();
+		static unsigned int initMsgManagers();
 
 		/**
 		 * Clears out the Msg data stored in each Msg subtype.

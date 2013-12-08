@@ -59,6 +59,11 @@ class GlobalDataElement: public DataElement
 		/// Inherited virtual. Returns number of data entries
 		unsigned int numData() const;
 
+		/// Inherited virtual. Returns index of first entry on this node
+		unsigned int localDataStart() const {
+			return 0;
+		}
+
 		/// Inherited virtual. Returns node location of specified object
 		unsigned int getNode( DataId dataId ) const;
 
@@ -68,6 +73,9 @@ class GlobalDataElement: public DataElement
 		bool isGlobal() const {
 			return true;
 		}
+
+		/// Inherited virtual.
+		unsigned int getNumOnNode( unsigned int node ) const;
 
 		/////////////////////////////////////////////////////////////////
 		// data access stuff: All is just inherited.

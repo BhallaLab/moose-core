@@ -64,6 +64,12 @@ class DataElement: public Element
 		/// Inherited virtual. Returns number of field entries for specified data
 		unsigned int numField( unsigned int rawIndex ) const;
 
+		/**
+		 * Inherited virtual: Returns number of field entries on 
+		 * current node, same as numLocalData().
+		 */
+		unsigned int totNumLocalField() const;
+
 		/// Do not define getNode() or rawIndex() funcs, those are derived
 
 		/**
@@ -74,8 +80,6 @@ class DataElement: public Element
 		bool hasFields() const {
 			return false;
 		}
-
-		/// Do not define isGlobal, that is derived.
 
 		/////////////////////////////////////////////////////////////////
 		// data access stuff

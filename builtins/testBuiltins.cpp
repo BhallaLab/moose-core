@@ -73,12 +73,12 @@ void testFibonacci()
 	const Finfo* arg1Finfo = Arith::initCinfo()->findFinfo( "arg1" );
 	const Finfo* arg2Finfo = Arith::initCinfo()->findFinfo( "arg2" );
 	const Finfo* procFinfo = Arith::initCinfo()->findFinfo( "process" );
-	DiagonalMsg* dm1 = new DiagonalMsg( a1, a1 );
+	DiagonalMsg* dm1 = new DiagonalMsg( a1, a1, 0 );
 	bool ret = outFinfo->addMsg( arg1Finfo, dm1->mid(), a1 );
 	assert( ret );
 	dm1->setStride( 1 );
 
-	DiagonalMsg* dm2 = new DiagonalMsg( a1, a1 );
+	DiagonalMsg* dm2 = new DiagonalMsg( a1, a1, 0 );
 	ret = outFinfo->addMsg( arg2Finfo, dm2->mid(), a1 );
 	assert( ret );
 	dm1->setStride( 2 );
@@ -95,7 +95,7 @@ void testFibonacci()
 	Eref clocker = Id( 1 ).eref();
 
 	const Finfo* proc0Finfo = Clock::initCinfo()->findFinfo( "process0" );
-	OneToAllMsg* otam = new OneToAllMsg( clocker, a1 );
+	OneToAllMsg* otam = new OneToAllMsg( clocker, a1, 0 );
 	ret = proc0Finfo->addMsg( procFinfo, otam->mid(), clocker.element() );
 
 	assert( ret );

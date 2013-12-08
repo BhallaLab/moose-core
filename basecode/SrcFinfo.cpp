@@ -78,8 +78,9 @@ void SrcFinfo0::send( const Eref& e ) const {
 			j = i->targets.begin(); j != i->targets.end(); ++j ) {
 			if ( j->dataIndex() == ALLDATA ) {
 				Element* e = j->element();
-				unsigned int end = e->numData();
-				for ( DataId k = 0; k < end; ++k )
+				unsigned int start = e->localDataStart();
+				unsigned int end = start + e->numData();
+				for ( DataId k = start; k < end; ++k )
 					f->op( Eref( e, k ) );
 			} else  {
 				f->op( *j );

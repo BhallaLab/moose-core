@@ -19,9 +19,9 @@
 
 class SingleMsg: public Msg
 {
-	friend void Msg::initMsgManagers(); // for initializing Id.
+	friend unsigned int Msg::initMsgManagers(); // for initializing Id.
 	public:
-		SingleMsg( Eref e1, Eref e2 );
+		SingleMsg( Eref e1, Eref e2, unsigned int msgIndex );
 		~SingleMsg();
 
 		Eref firstTgt( const Eref& src ) const;

@@ -14,12 +14,21 @@
 Id OneToAllMsg::managerId_;
 vector< OneToAllMsg* > OneToAllMsg::msg_;
 
-OneToAllMsg::OneToAllMsg( Eref e1, Element* e2 )
+OneToAllMsg::OneToAllMsg( Eref e1, Element* e2, unsigned int msgIndex )
 	: 
-		Msg( ObjId( managerId_, msg_.size() ), e1.element(), e2 ),
+		Msg( 
+			ObjId( managerId_, (msgIndex != 0) ? msgIndex: msg_.size() ), 
+			e1.element(), e2
+		   ),
 		i1_( e1.dataIndex() )
 {
-	msg_.push_back( this );
+	if ( msgIndex == 0 ) {
+		msg_.push_back( this );
+	} else {
+		if ( msg_.size() <= msgIndex )
+			msg_.resize( msgIndex + 1 );
+		msg_[ msgIndex ] = this;
+	}
 }
 
 OneToAllMsg::~OneToAllMsg()
@@ -77,11 +86,11 @@ Msg* OneToAllMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 		OneToAllMsg* ret = 0;
 		if ( orig == e1() ) {
 			ret = new OneToAllMsg(
-					Eref( newSrc.element(), i1_ ), newTgt.element() );
+					Eref( newSrc.element(), i1_ ), newTgt.element(), 0 );
 			ret->e1()->addMsgAndFunc( ret->mid(), fid, b );
 		} else if ( orig == e2() ) {
 			ret = new OneToAllMsg(
-					Eref( newTgt.element(), i1_ ), newSrc.element() );
+					Eref( newTgt.element(), i1_ ), newSrc.element(), 0 );
 			ret->e2()->addMsgAndFunc( ret->mid(), fid, b );
 		} else {
 			assert( 0 );

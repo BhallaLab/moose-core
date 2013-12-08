@@ -149,7 +149,7 @@ void buildFinfoElement( Id parent, vector< Finfo* >& f, const string& name )
 		Element* e = new GlobalDataElement( 
 						id, Finfo::initCinfo(), name, f.size() );
 		Finfo::initCinfo()->dinfo()->assignData( e->data( 0 ), f.size(), data, f.size());
-		Shell::adopt( parent, id );
+		Shell::adopt( parent, id, 0 );
 	}
 }
 
@@ -169,7 +169,7 @@ void Cinfo::makeCinfoElements( Id parent )
 		Cinfo::initCinfo()->dinfo()->assignData( e->data( 0 ), 1, data, 1 );
 		// Cinfo* temp = reinterpret_cast< Cinfo* >( e->data( 0 ) );
 
-		Shell::adopt( parent, id );
+		Shell::adopt( parent, id, 0 );
 		cinfoElements.push_back( id );
 		// cout << "Cinfo::makeCinfoElements: parent= " << parent << ", Id = " << id << ", name = " << i->first << endl;
 	}

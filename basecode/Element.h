@@ -57,14 +57,23 @@ class Element
 		 */
 		void setName( const string& val );
 
-		/// Returns number of data entries across all nodesl
+		/// Returns number of data entries across all nodes
 		virtual unsigned int numData() const = 0;
 
 		/// Returns number of local data entries on this node.
 		virtual unsigned int numLocalData() const = 0;
 
+		/// Returns index of first data entry on this node.
+		virtual unsigned int localDataStart() const = 0;
+
 		/// Returns number of field entries for specified data
 		virtual unsigned int numField( unsigned int rawIndex ) const = 0;
+
+		/**
+		 * Returns number of field entries on local node. If this is not
+		 * a FieldElement, returns numLocalData, assuming 1 field per data.
+		 */
+		virtual unsigned int totNumLocalField() const = 0;
 
 		/// Returns location of specified dataId.
 		virtual unsigned int getNode( unsigned int dataId ) const = 0;
@@ -88,6 +97,10 @@ class Element
 
 		/// True if there is a copy of every dataEntry on all nodes.
 		virtual bool isGlobal() const = 0;
+
+		/// Returns number of data (or, if relevant, field) entries on 
+		///specified node. 
+		virtual unsigned int getNumOnNode( unsigned int node ) const = 0;
 
 		/////////////////////////////////////////////////////////////////
 		// data access stuff
