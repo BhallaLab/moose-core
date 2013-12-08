@@ -231,8 +231,8 @@ const Cinfo* Msg::initCinfo()
 
 static const Cinfo* msgCinfo = Msg::initCinfo();
 
-// Static func
-void Msg::initMsgManagers()
+// Static func. Returns the index to use for msgIndex.
+unsigned int Msg::initMsgManagers()
 {
 	Dinfo< short > dummyDinfo;
 
@@ -263,12 +263,16 @@ void Msg::initMsgManagers()
 
 	// Do the 'adopt' only after all the message managers exist - we need
 	// the OneToAll manager for the adoption messages themselves.
-	Shell::adopt( Id(), msgManagerId_ );
-	Shell::adopt( msgManagerId_, SingleMsg::managerId_ );
-	Shell::adopt( msgManagerId_, OneToOneMsg::managerId_ );
-	Shell::adopt( msgManagerId_, OneToAllMsg::managerId_ );
-	Shell::adopt( msgManagerId_, DiagonalMsg::managerId_ );
-	Shell::adopt( msgManagerId_, SparseMsg::managerId_ );
+	assert( OneToAllMsg::numMsg() == 0 );
+	unsigned int n = 1;
+	Shell::adopt( Id(), msgManagerId_, n++ );
+	Shell::adopt( msgManagerId_, SingleMsg::managerId_, n++ );
+	Shell::adopt( msgManagerId_, OneToOneMsg::managerId_, n++ );
+	Shell::adopt( msgManagerId_, OneToAllMsg::managerId_, n++ );
+	Shell::adopt( msgManagerId_, DiagonalMsg::managerId_, n++ );
+	Shell::adopt( msgManagerId_, SparseMsg::managerId_, n++ );
+
+	return n;
 }
 
 void Msg::clearAllMsgs()

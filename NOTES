@@ -930,9 +930,9 @@ ordering nor any issue with rounding. Much simpler too.
 	object.
 
 6. The Set commands now directly call functions on the target object to assign
-	values.
+	values. But see parallel specialization.
 7. The Get commands now directly call functions on the target object to obtain.
-	values.
+	values. But see parallel specialization.
 
 8. Any DataEntry can now be the parent of an Element. Earlier this was a bit
 	ambiguous and many parts of the code required instead that only Elements
@@ -959,7 +959,8 @@ by detecting if target is off-node, and if so, putting into a different buffer.
 This is dispatched in a non-blocking manner, but only after clearing all 
 pending incoming field assignment calls.
 13. Shell simulation control operations are implemented through 'set' calls.
-14. Get calls are not yet implemented.
+14. Get calls work in a similar manner to 'set', except that data also gets
+	sent back.
 
 ===========================================================================
 
@@ -1136,5 +1137,59 @@ Shell commands.
 
 Man Shell commands now fixed. The program now goes on till 
 testShell.cpp:912, where again it runs into the SetVec problem.
+Checkin 4880.
+
+Working on SetVec. In SetGet.h and HopFunc.h: 60 ish.
+Pending:
+- What to do with globals
+- Propagate changes through to the dispatchBuffers call and the postmaster
+- Handle stuff on remote nodes.
 
 ===========================================================================
+6 Dec 2013.
+Working in FieldElement.cpp:85 to put in the skeleton for getNumOnNode.
+The serious version of this function sould look up remote nodes to get
+the values.
+===========================================================================
+7 Dec 2013.
+
+Compiling the changes in for the SetVec.
+
+Discussions with the MOOSE team, seems like there is a feeling that the
+path semantics need to change for the FieldElements. Specifically, use only 
+the fieldIndex part to index the FieldElement, since they are always children
+of an Element whose DataIndex applies both to the base element and to the
+FieldElement value.
+pare
+the FieldElements as always a child of a regular Element 
+
+Silly bug in unit tests, the messages maintain their own indexing for
+lookup. and this is incremented when a new message is created. But the
+unit tests on the master node make and delete several messages, leaving
+their indices different from those on the slave nodes.
+
+split the unit tests into nonmpi and mpi parts,
+Provide a global index when creating messages.
+Clear out the indices after each block of unit tests.
+
+Messy thing comes up with msgs. The DataId for look up of the msg objects
+can get misaligned on different nodes, already does due to unit tests on
+node 0. I've implemented a hack to use the DataId for the msgs as generated
+by the master node. Unfortunately all the Msg::copy functions and likely 
+many others need to make msgs on the fly, they are not able to use something
+generated centrally. Current messy solution is to let the copy operations use
+automatic incrementing.
+
+===========================================================================
+8 Dec.
+Accumulating issues
+'send' from a global: the MsgDigest needs to only do stuff to local node.
+'send' to all: Need to use ALLDATA for targets on local node, and then 
+send single calls to remote ones.
+
+Major cleanup done on the MsgId generation, not perfect but the key commands
+issue a direct specification of the mid on all nodes and the rest of the time
+it does an increment which should happen identically on all nodes.
+
+In the meantime, on with the unit tests to testShell.cpp:942 at which point
+we need getVec.

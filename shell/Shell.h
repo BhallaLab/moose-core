@@ -18,6 +18,18 @@ enum AssignmentType { SINGLE, VECTOR, REPEAT };
 extern DestFinfo* receiveGet();
 //extern SrcFinfo2< unsigned int, unsigned int >* ack(); // Not currently used.
 
+enum NodePolicy { MooseGlobal, MooseBlockBalance, MooseSingleNode };
+class NodeBalance {
+	public:
+		NodeBalance( unsigned int nd, NodePolicy np, unsigned int node )
+				: numData( nd ), policy( np ), preferredNode( node )
+		{;}
+
+		unsigned int numData;
+		NodePolicy policy;
+		unsigned int preferredNode;
+};
+
 class Shell
 {
 	public:
@@ -64,7 +76,9 @@ class Shell
 		 * numData: Size of array.
 		 */
 		Id doCreate( string type, ObjId parent, string name, 
-					unsigned int numData, bool isGlobal = false );
+				unsigned int numData, 
+				NodePolicy nodePolicy = MooseBlockBalance,
+				unsigned int preferredNode = 1 );
 
 		/**
 		 * Delete specified Element and all its children and all 
@@ -271,10 +285,19 @@ class Shell
 
 		void handleCreate( const Eref& e,
 			string type, ObjId parent, Id newElm, string name,
-			unsigned int numData, bool isGlobal );
+			NodeBalance nb, unsigned int parentMsgIndex );
 		void destroy( const Eref& e, Id eid);
+
+		/**
+		 * Function that does the actual work of creating a new Element.
+		 * The Class of the Moose objects formed is specified by type.
+		 * The NodeBalance specifies how many entries and how they are
+		 * distributed across nodes.
+		 * The parentMsgIndex specifies the index for the 
+		 * parent-child message.
+		 */
 		void innerCreate( string type, ObjId parent, Id newElm, string name,
-			unsigned int numData, bool isGlobal );
+			const NodeBalance& nb, unsigned int parentMsgIndex );
 
 		/// Does actual work of copying. Returns true on success.
 		bool innerCopy( const vector< ObjId >& args, const string& newName,
@@ -287,7 +310,7 @@ class Shell
 		 * success
 		 */
 		const Msg* innerAddMsg( string msgType, ObjId src, string srcField, 
-			ObjId dest, string destField);
+			ObjId dest, string destField, unsigned int msgIndex );
 
 		/**
 		 * Connects src to dest on appropriate fields, with specified
@@ -297,7 +320,8 @@ class Shell
 		void handleAddMsg( const Eref& e, 
 			string msgType,
 			ObjId src, string srcField, 
-			ObjId dest, string destField);
+			ObjId dest, string destField, 
+			unsigned int msgIndex );
 
 		/**
 		 * Moves Element orig onto the newParent.
@@ -331,16 +355,18 @@ class Shell
 		/**
 		 * Sets up scheduling for elements on the path.
 		 */
-		bool innerUseClock( string path, string field, unsigned int tick);
+		bool innerUseClock( string path, string field, 
+						unsigned int tick, unsigned int msgIndex);
 		void handleUseClock( const Eref& e,
-			string path, string field, unsigned int tick );
+			string path, string field, unsigned int tick, 
+			unsigned int msgIndex );
 
 		/**
 		 * Utility function to set up messages to schedule a list of Ids 
 		 * using the specified field and tick
 		 */
 		void addClockMsgs( const vector< Id >& list, const string& field, 
-			unsigned int tick );
+			unsigned int tick, unsigned int msgIndex );
 
 		/**
  		 * Tell all attached pools and vols to update themselves: set their
@@ -352,12 +378,7 @@ class Shell
 		////////////////////////////////////////////////////////////////
 		// Thread and MPI handling functions
 		////////////////////////////////////////////////////////////////
-
-		/**
-		 * Sets up master message that interconnects all shells on all
-		 * nodes, and other initialization of basic messages.
-		 */
-		static void connectMasterMsg();
+		
 		/**
 		 * Assigns the hardware availability. Assumes that each node will
 		 * have the same number of cores available.
@@ -435,8 +456,8 @@ class Shell
 		////////////////////////////////////////////////////////////////
 		// Utility functions
 		////////////////////////////////////////////////////////////////
-		static bool adopt( ObjId parent, Id child );
-		static bool adopt( Id parent, Id child );
+		static bool adopt( ObjId parent, Id child, unsigned int msgIndex );
+		static bool adopt( Id parent, Id child, unsigned int msgIndex );
 
 		static const unsigned int OkStatus;
 		static const unsigned int ErrorStatus;

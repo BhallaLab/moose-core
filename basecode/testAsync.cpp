@@ -62,7 +62,7 @@ void testSendMsg()
 	Eref e1 = i1.eref();
 	Eref e2 = i2.eref();
 
-	Msg* m = new OneToOneMsg( e1.element(), e2.element() );
+	Msg* m = new OneToOneMsg( e1.element(), e2.element(), 0 );
 	vector< vector< Eref > > ver;
 	m->targets( ver );
 	assert( ver.size() == size );
@@ -116,7 +116,7 @@ void testCreateMsg()
 	Eref e1 = i1.eref();
 	Eref e2 = i2.eref();
 
-	OneToOneMsg *m = new OneToOneMsg( e1.element(), e2.element() );
+	OneToOneMsg *m = new OneToOneMsg( e1.element(), e2.element(), 0 );
 	assert( m );
 	const Finfo* f1 = ac->findFinfo( "output" );
 	assert( f1 );
@@ -441,7 +441,7 @@ void testSendSpike()
 
 	reinterpret_cast< Synapse* >(target.data())->setWeight( WEIGHT );
 	reinterpret_cast< Synapse* >(target.data())->setDelay( 0.01 );
-	SingleMsg *m = new SingleMsg( e2, target.eref() );
+	SingleMsg *m = new SingleMsg( e2, target.eref(), 0 );
 	const Finfo* f1 = ic->findFinfo( "spike" );
 	const Finfo* f2 = sc->findFinfo( "addSpike" );
 	bool ret = f1->addMsg( f2, m->mid(), e2.element() );
@@ -750,7 +750,7 @@ void testSparseMsg()
 	assert( t2 );
 	Id syns( cells.value() + 1 );
 
-	SparseMsg* sm = new SparseMsg( t2, syns.element() );
+	SparseMsg* sm = new SparseMsg( t2, syns.element(), 0 );
 	assert( sm );
 	const Finfo* f1 = ic->findFinfo( "spike" );
 	const Finfo* f2 = sc->findFinfo( "addSpike" );
@@ -1014,7 +1014,7 @@ void testSharedMsg()
 	
 	const Finfo* shareFinfo = Test::initCinfo()->findFinfo( "shared" );
 	assert( shareFinfo != 0 );
-	Msg* m = new OneToOneMsg( t1.element(), t2.element() );
+	Msg* m = new OneToOneMsg( t1.element(), t2.element(), 0 );
 	assert( m != 0 );
 	bool ret = shareFinfo->addMsg( shareFinfo, m->mid(), t1.element() );
 	assert( ret );
@@ -1181,7 +1181,7 @@ void testMsgField()
 
 	Eref e1 = i1.eref();
 
-	Msg* m = new SingleMsg( Eref( i1.element(), 5 ), Eref( i2.element(), 3 ) );
+	Msg* m = new SingleMsg( Eref( i1.element(), 5 ), Eref( i2.element(), 3 ), 0 );
 	ProcInfo p;
 
 	assert( m->mid().element()->getName() == "singleMsg" );
@@ -1240,16 +1240,16 @@ void testSetGetExtField()
 	Id i4( i3.value() + 1 );
 	Element* e1 = new GlobalDataElement( i1, nc, "test", size );
 	assert( e1 );
-	Shell::adopt( Id(), i1 );
+	Shell::adopt( Id(), i1, 0 );
 	Element* e2 = new GlobalDataElement( i2, rc, "x", size );
 	assert( e2 );
-	Shell::adopt( i1, i2 );
+	Shell::adopt( i1, i2, 0 );
 	Element* e3 = new GlobalDataElement( i3, rc, "y", size );
 	assert( e3 );
-	Shell::adopt( i1, i3 );
+	Shell::adopt( i1, i3, 0 );
 	Element* e4 = new GlobalDataElement( i4, rc, "z", size );
 	assert( e4 );
-	Shell::adopt( i1, i4 );
+	Shell::adopt( i1, i4, 0 );
 	bool ret;
 
 	vector< double > vec;
@@ -1592,7 +1592,7 @@ void testMsgSrcDestFields()
 	// do it independently.
 	const Finfo* shareFinfo = Test::initCinfo()->findFinfo( "shared" );
 	assert( shareFinfo != 0 );
-	Msg* m = new OneToOneMsg( t1.element(), t2.element() );
+	Msg* m = new OneToOneMsg( t1.element(), t2.element(), 0 );
 	assert( m != 0 );
 	bool ret = shareFinfo->addMsg( shareFinfo, m->mid(), t1.element() );
 	assert( ret );

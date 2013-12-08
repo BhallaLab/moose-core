@@ -61,7 +61,7 @@ extern void testMpiMsg();
 // extern void testSigNeur();
 // extern void testSigNeurProcess();
 
-extern void initMsgManagers();
+extern unsigned int initMsgManagers();
 extern void destroyMsgManagers();
 // void regressionTests();
 #endif
@@ -203,7 +203,7 @@ Id init( int argc, char** argv, bool& doUnitTests, bool& doRegressionTests )
 	s->loadBalance();
 
 	/// Sets up the Elements that represent each class of Msg.
-	Msg::initMsgManagers();
+	unsigned int numMsg = Msg::initMsgManagers();
 
 	new GlobalDataElement( clockId, Clock::initCinfo(), "clock", 1 );
 	new GlobalDataElement( classMasterId, Neutral::initCinfo(), "classes", 1);
@@ -218,9 +218,11 @@ Id init( int argc, char** argv, bool& doUnitTests, bool& doRegressionTests )
 
 	// s->connectMasterMsg();
 
-	Shell::adopt( shellId, clockId );
-	Shell::adopt( shellId, classMasterId );
-	Shell::adopt( shellId, postMasterId );
+	Shell::adopt( shellId, clockId, numMsg++ );
+	Shell::adopt( shellId, classMasterId, numMsg++ );
+	Shell::adopt( shellId, postMasterId, numMsg++ );
+
+	assert( numMsg == 10 ); // Must be the same on all nodes.
 
 	Cinfo::makeCinfoElements( classMasterId );
 

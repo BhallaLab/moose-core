@@ -60,6 +60,11 @@ unsigned int LocalDataElement::numData() const
 	return numData_;
 }
 
+unsigned int LocalDataElement::localDataStart() const
+{
+	return numPerNode_ * Shell::myNode();
+}
+
 // localNumData() is inherited from DataElement.
 
 unsigned int LocalDataElement::getNode( unsigned int dataId ) const {
@@ -89,4 +94,12 @@ unsigned int LocalDataElement::setDataSize( unsigned int numData )
 void LocalDataElement::resize( unsigned int newNumData )
 {
 	DataElement::resize( setDataSize( newNumData ) ); 
+}
+
+unsigned int LocalDataElement::getNumOnNode( unsigned int node ) const
+{
+	if ( Shell::myNode() == Shell::numNodes() -1 )
+		return numData_ - numPerNode_ * ( Shell::numNodes() - 1 );
+
+	return numPerNode_;
 }

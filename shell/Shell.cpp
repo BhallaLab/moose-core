@@ -209,19 +209,19 @@ const Cinfo* Shell::initCinfo()
 	static DestFinfo handleUseClock( "useClock", 
 			"Deals with assignment of path to a given clock."
 			" Arguments: path, field, tick number. ",
-			new EpFunc3< Shell, string, string, unsigned int >( 
+			new EpFunc4< Shell, string, string, unsigned int, unsigned int >( 
 				&Shell::handleUseClock )
 			);
 	static DestFinfo handleCreate( "create", 
 			"create( class, parent, newElm, name, numData, isGlobal )",
-			new EpFunc6< Shell, string, ObjId, Id, string, unsigned int, bool >( &Shell::handleCreate ) );
+			new EpFunc6< Shell, string, ObjId, Id, string, NodeBalance, unsigned int >( &Shell::handleCreate ) );
 	static DestFinfo handleDelete( "delete", 
 			"Destroys Element, all its messages, and all its children. Args: Id",
 			new EpFunc1< Shell, Id >( & Shell::destroy ) );
 	static DestFinfo handleAddMsg( "addMsg", 
 			"Makes a msg. Arguments are:"
 			" msgtype, src object, src field, dest object, dest field",
-			new EpFunc5< Shell, string, ObjId, string, ObjId, string >
+			new EpFunc6< Shell, string, ObjId, string, ObjId, string, unsigned int >
 			( & Shell::handleAddMsg ) );
 	static DestFinfo handleQuit( "quit", 
 			"Stops simulation running and quits the simulator",
@@ -339,18 +339,24 @@ void Shell::setShellElement( Element* shelle )
  *
  */
 Id Shell::doCreate( string type, ObjId parent, string name, 
-				unsigned int numData, bool isGlobal )
+				unsigned int numData, 
+				NodePolicy nodePolicy,
+				unsigned int preferredNode )
 {
+	// Get the new Id ahead of time and pass to all nodes.
 	Id ret = Id::nextId();
-	SetGet6< string, ObjId, Id, string, unsigned int, bool >::set(
+	NodeBalance nb( numData, nodePolicy, preferredNode );
+	// Get the parent MsgIndex ahead of time and pass to all nodes.
+	unsigned int parentMsgIndex = OneToAllMsg::numMsg();
+	SetGet6< string, ObjId, Id, string, NodeBalance, unsigned int >::set(
 		ObjId(), // Apply command to Shell
 		"create",	// Function to call.
 		type, 		// class of new object
 		parent,		// Parent
 		ret,		// id of new object
 		name,		// name of new object
-		numData,	// Number of entries in new object array
-		isGlobal	// is it a global.
+		nb,			// Node balance configuration
+		parentMsgIndex	// Message index of child-parent msg.
 	);
 	// innerCreate( type, parent, ret, name, numData, isGlobal );
 	return ret;
@@ -395,61 +401,24 @@ ObjId Shell::doAddMsg( const string& msgType,
 		return ObjId();
 	}
 
-	SetGet5< string, ObjId, string, ObjId, string >::set(
+	const Msg* m = innerAddMsg( msgType, src, srcField, dest, destField, 0 );
+
+	SetGet6< string, ObjId, string, ObjId, string, unsigned int >::set(
 		ObjId(), // Apply command to Shell
 		"addMsg",	// Function to call.
 		msgType,
 		src,
 		srcField,
 		dest,
-		destField
+		destField,
+		m->mid().dataId
 	);
+
+	return m->mid();
 
 	// const Msg* m = innerAddMsg( msgType, src, srcField, dest, destField );
 	// return m->mid();
-	return Msg::lastMsg()->mid();
-}
-
-/**
- * Static function, sets up the master message that connects
- * all shells on all nodes to each other. Uses low-level calls to
- * do so.
- */
-void Shell::connectMasterMsg()
-{
-	Id shellId( 0 );
-	Element* shelle = shellId.element();
-	const Finfo* f1 = shelle->cinfo()->findFinfo( "master" );
-	if ( !f1 ) {
-		cout << "Error: Shell::connectMasterMsg: failed to find 'master' msg\n";
-		exit( 0 ); // Bad!
-	}
-	const Finfo* f2 = shelle->cinfo()->findFinfo( "worker" );
-	if ( !f2 ) {
-		cout << "Error: Shell::connectMasterMsg: failed to find 'worker' msg\n";
-		exit( 0 ); // Bad!
-	}
-
-	Msg* m = 0;
-		m = new OneToOneMsg( shelle, shelle );
-	if ( m ) {
-		if ( !f1->addMsg( f2, m->mid(), shelle ) ) {
-			cout << "Error: failed in Shell::connectMasterMsg()\n";
-			delete m; // Nasty, but rare.
-		}
-	} else {
-		cout << Shell::myNode() << ": Error: failed in Shell::connectMasterMsg()\n";
-		exit( 0 );
-	}
-	// cout << Shell::myNode() << ": Shell::connectMasterMsg gave id: " << m->mid() << "\n";
-
-	Id clockId( 1 );
-	Shell* s = reinterpret_cast< Shell* >( shellId.eref().data() );
-	const Msg* ret = s->innerAddMsg( "Single",
-		ObjId( shellId, 0 ), "clockControl", 
-		ObjId( clockId, 0 ), "clockControl" );
-	assert( ret );
-	// innerAddMsg( string msgType, ObjId src, string srcField, ObjId dest, string destField )
+	// return Msg::lastMsg()->mid();
 }
 
 void Shell::doQuit()
@@ -493,8 +462,9 @@ void Shell::doSetClock( unsigned int tickNum, double dt )
 
 void Shell::doUseClock( string path, string field, unsigned int tick )
 {
-	SetGet3< string, string, unsigned int >::set( ObjId(), 
-		"useClock", path, field, tick );
+	unsigned int msgIndex = OneToAllMsg::numMsg();
+	SetGet4< string, string, unsigned int, unsigned int >::set( ObjId(), 
+		"useClock", path, field, tick, msgIndex );
 	// innerUseClock( path, field, tick);
 }
 
@@ -783,10 +753,9 @@ bool Shell::isRunning() const
  */
 void Shell::handleCreate( const Eref& e,
 	string type, ObjId parent, Id newElm, string name, 
-	unsigned int numData, bool isGlobal )
+	NodeBalance nb, unsigned int parentMsgIndex )
 {
-	innerCreate( type, parent, newElm, name, numData, isGlobal );
-	// ack()->send( e, Shell::myNode(), OkStatus );
+	innerCreate( type, parent, newElm, name, nb, parentMsgIndex );
 }
 
 
@@ -795,8 +764,10 @@ void Shell::handleCreate( const Eref& e,
  * Static utility function. Attaches child element to parent element.
  * Must only be called from functions executing in parallel on all nodes,
  * as it does a local message addition
+ * MsgIndex is needed to be sure that the same msg identifies parent-child
+ * connection on all nodes.
  */
-bool Shell::adopt( ObjId parent, Id child ) {
+bool Shell::adopt( ObjId parent, Id child, unsigned int msgIndex ) {
 	static const Finfo* pf = Neutral::initCinfo()->findFinfo( "parentMsg" );
 	// static const DestFinfo* pf2 = dynamic_cast< const DestFinfo* >( pf );
 	// static const FuncId pafid = pf2->getFid();
@@ -806,7 +777,7 @@ bool Shell::adopt( ObjId parent, Id child ) {
 	assert( !( child == Id() ) );
 	assert( !( parent.element() == 0 ) );
 
-	Msg* m = new OneToAllMsg( parent.eref(), child.element() );
+	Msg* m = new OneToAllMsg( parent.eref(), child.element(), msgIndex );
 	assert( m );
 
 	// cout << myNode_ << ", Shell::adopt: mid = " << m->mid() << ", pa =" << parent << "." << parent()->getName() << ", kid=" << child << "." << child()->getName() << "\n";
@@ -820,31 +791,17 @@ bool Shell::adopt( ObjId parent, Id child ) {
 	return 1;
 }
 
-bool Shell::adopt( Id parent, Id child ) {
-	return adopt( ObjId( parent ), child );
-}
-
-unsigned int cleanDimensions( vector< int >& dims )
-{
-	vector< int > temp = dims;
-	dims.resize( 0 );
-	unsigned int raggedStart = 0; // Can't have the root being ragged!
-	for ( unsigned int i = 0; i < temp.size(); ++i ) {
-		if ( temp[i] > 1 )
-			dims.push_back( temp[i] );
-		else if ( temp[i] < -1 ) {
-			dims.push_back( -temp[i] );
-			raggedStart = i;
-		}
-	}
-	return raggedStart;
+/// Adaptor for above function. Also static function.
+bool Shell::adopt( Id parent, Id child, unsigned int msgIndex ) {
+	return adopt( ObjId( parent ), child, msgIndex );
 }
 
 /**
  * This function actually creates the object. Runs on all nodes.
  */
 void Shell::innerCreate( string type, ObjId parent, Id newElm, string name,
-	unsigned int numData, bool isGlobal )
+	const NodeBalance& nb, unsigned int msgIndex )
+	// unsigned int numData, bool isGlobal
 {
 	const Cinfo* c = Cinfo::find( type );
 	if ( c ) {
@@ -863,13 +820,20 @@ void Shell::innerCreate( string type, ObjId parent, Id newElm, string name,
 			return;
 		}
 		Element* ret;
-		if ( isGlobal )
-			ret = new GlobalDataElement( newElm, c, name, numData );
-		else 
-			ret = new LocalDataElement( newElm, c, name, numData );
+		switch ( nb.policy ) {
+			case MooseGlobal:
+				ret = new GlobalDataElement( newElm, c, name, nb.numData );
+				break;
+			case MooseBlockBalance:
+				ret = new LocalDataElement( newElm, c, name, nb.numData );
+				break;
+			case MooseSingleNode:
+				cout << "Error: Shell::innerCreate: Yet to implement SingleNodeDataElement\n";
+				// ret = new SingleNodeDataElement( newElm, c, name, numData, nb.preferredNode );
+				break;
+		};
 		assert( ret );
-		adopt( parent, newElm );
-
+		adopt( parent, newElm, msgIndex );
 	} else {
 		stringstream ss;
 		ss << "innerCreate: Class '" << type << "' not known. No Element created";
@@ -881,8 +845,7 @@ void Shell::destroy( const Eref& e, Id eid)
 {
 	Neutral *n = reinterpret_cast< Neutral* >( e.data() );
 	assert( n );
-	cout << myNode_ << ": Shell::destroy done for element id: " << eid << 
-			", name = " << eid.element()->getName() << endl;
+	// cout << myNode_ << ": Shell::destroy done for element id: " << eid << ", name = " << eid.element()->getName() << endl;
 	n->destroy( eid.eref(), 0 );
 	if ( cwe_ == eid )
 		cwe_ = Id();
@@ -898,9 +861,11 @@ void Shell::destroy( const Eref& e, Id eid)
  */
 void Shell::handleAddMsg( const Eref& e,
 	string msgType, ObjId src, string srcField, 
-	ObjId dest, string destField )
+	ObjId dest, string destField, unsigned int msgIndex )
 {
-	innerAddMsg( msgType, src, srcField, dest, destField );
+		// Node 0 will have already called innerAddMsg to get the msgIndex
+	if ( myNode() != 0 )
+		innerAddMsg( msgType, src, srcField, dest, destField, msgIndex );
 	/*
 	if ( innerAddMsg( msgType, src, srcField, dest, destField ) )
 		ack()->send( Eref( shelle_, 0 ), Shell::myNode(), OkStatus );
@@ -911,10 +876,12 @@ void Shell::handleAddMsg( const Eref& e,
 
 /**
  * The actual function that adds messages. Does NOT send an ack.
+ * The msgIndex specifies the index on which to place this message. If the
+ * value is zero it does an automatic placement.
  */
 const Msg* Shell::innerAddMsg( string msgType,
 	ObjId src, string srcField, 
-	ObjId dest, string destField )
+	ObjId dest, string destField, unsigned int msgIndex )
 {
 	/*
 	cout << myNode_ << ", Shell::handleAddMsg: " << 
@@ -932,17 +899,18 @@ const Msg* Shell::innerAddMsg( string msgType,
 
 	Msg *m = 0;
 	if ( msgType == "diagonal" || msgType == "Diagonal" ) {
-		m = new DiagonalMsg( src.id.element(), dest.id.element() );
+		m = new DiagonalMsg( src.id.element(), dest.id.element(), 
+						msgIndex );
 	} else if ( msgType == "sparse" || msgType == "Sparse" ) {
-		m = new SparseMsg( src.id.element(), dest.id.element() );
+		m = new SparseMsg( src.id.element(), dest.id.element(), msgIndex );
 	} else if ( msgType == "Single" || msgType == "single" ) {
-		m = new SingleMsg( src.eref(), dest.eref() );
+		m = new SingleMsg( src.eref(), dest.eref(), msgIndex );
 	} else if ( msgType == "OneToAll" || msgType == "oneToAll" ) {
-		m = new OneToAllMsg( src.eref(), dest.id.element() );
+		m = new OneToAllMsg( src.eref(), dest.id.element(), msgIndex );
 	} else if ( msgType == "AllToOne" || msgType == "allToOne" ) {
-		m = new OneToAllMsg( dest.eref(), src.id.element() ); // Little hack.
+		m = new OneToAllMsg( dest.eref(), src.id.element(), msgIndex ); // Little hack.
 	} else if ( msgType == "OneToOne" || msgType == "oneToOne" ) {
-		m = new OneToOneMsg( src.id.element(), dest.id.element() );
+		m = new OneToOneMsg( src.id.element(), dest.id.element(), msgIndex );
 	} else {
 		cout << myNode_ << 
 			": Error: Shell::handleAddMsg: msgType not known: "
@@ -976,7 +944,7 @@ bool Shell::innerMove( Id orig, ObjId newParent )
 	ObjId mid = orig.element()->findCaller( pafid );
 	Msg::deleteMsg( mid );
 
-	Msg* m = new OneToAllMsg( newParent.eref(), orig.element() );
+	Msg* m = new OneToAllMsg( newParent.eref(), orig.element(), 0 );
 	assert( m );
 	if ( !f1->addMsg( pf, m->mid(), newParent.element() ) ) {
 		cout << "move: Error: unable to add parent->child msg from " <<
@@ -1000,7 +968,8 @@ void Shell::handleMove( const Eref& e, Id orig, ObjId newParent )
 }
 
 void Shell::addClockMsgs( 
-	const vector< Id >& list, const string& field, unsigned int tick )
+	const vector< Id >& list, const string& field, unsigned int tick,
+   	unsigned int msgIndex	)
 {
 	if ( !Id( 1 ).element() )
 		return;
@@ -1012,12 +981,13 @@ void Shell::addClockMsgs(
 			ss << "proc" << tick;
 			innerAddMsg( "OneToAll",
 				clockId, ss.str(), 
-				ObjId( *i, 0 ), field );
+				ObjId( *i, 0 ), field, msgIndex++ );
 		}
 	}
 }
 
-bool Shell::innerUseClock( string path, string field, unsigned int tick)
+bool Shell::innerUseClock( string path, string field, unsigned int tick,
+				unsigned int msgIndex )
 {
 	vector< Id > list;
 	wildcard( path, list ); // By default scans only Elements.
@@ -1032,15 +1002,15 @@ bool Shell::innerUseClock( string path, string field, unsigned int tick)
 	if ( field.substr( 0, 4 ) == "init" || field.substr( 0, 4 ) == "Init" )
 		field = "init"; 
 	
-	addClockMsgs( list, field, tick );
+	addClockMsgs( list, field, tick, msgIndex );
 	return 1;
 }
 
 void Shell::handleUseClock( const Eref& e, 
-	string path, string field, unsigned int tick)
+	string path, string field, unsigned int tick, unsigned int msgIndex )
 {
 	// cout << q->getProcInfo()->threadIndexInGroup << ": in Shell::handleUseClock with path " << path << endl << flush;
-	innerUseClock( path, field, tick );
+	innerUseClock( path, field, tick, msgIndex );
 	/*
 	if ( innerUseClock( path, field, tick ) )
 		ack()->send( Eref( shelle_, 0 ), 

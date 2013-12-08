@@ -108,8 +108,9 @@ template < class T > class SrcFinfo1: public SrcFinfo
 					j = i->targets.begin(); j != i->targets.end(); ++j ) {
 					if ( j->dataIndex() == ALLDATA ) {
 						Element* e = j->element();
-						unsigned int end = e->numData();
-						for ( DataId k = 0; k < end; ++k )
+						unsigned int start = e->localDataStart();
+						unsigned int end = start + e->numLocalData();
+						for ( DataId k = start; k < end; ++k )
 							f->op( Eref( e, k ), arg );
 					} else  {
 						f->op( *j, arg );
@@ -158,8 +159,9 @@ template < class T1, class T2 > class SrcFinfo2: public SrcFinfo
 					j = i->targets.begin(); j != i->targets.end(); ++j ) {
 					if ( j->dataIndex() == ALLDATA ) {
 						Element* e = j->element();
-						unsigned int end = e->numData();
-						for ( DataId k = 0; k < end; ++k )
+						unsigned int start = e->localDataStart();
+						unsigned int end = start + e->numData();
+						for ( DataId k = start; k < end; ++k )
 							f->op( Eref( e, k ), arg1, arg2 );
 					} else  {
 						f->op( *j, arg1, arg2 );
@@ -206,8 +208,9 @@ template < class T1, class T2, class T3 > class SrcFinfo3: public SrcFinfo
 					j = i->targets.begin(); j != i->targets.end(); ++j ) {
 					if ( j->dataIndex() == ALLDATA ) {
 						Element* e = j->element();
-						unsigned int end = e->numData();
-						for ( DataId k = 0; k < end; ++k )
+						unsigned int start = e->localDataStart();
+						unsigned int end = start + e->numData();
+						for ( DataId k = start; k < end; ++k )
 							f->op( Eref( e, k ), arg1, arg2, arg3 );
 					} else  {
 						f->op( *j, arg1, arg2, arg3 );
@@ -258,8 +261,9 @@ template < class T1, class T2, class T3, class T4 > class SrcFinfo4: public SrcF
 					j = i->targets.begin(); j != i->targets.end(); ++j ) {
 					if ( j->dataIndex() == ALLDATA ) {
 						Element* e = j->element();
-						unsigned int end = e->numData();
-						for ( DataId k = 0; k < end; ++k )
+						unsigned int start = e->localDataStart();
+						unsigned int end = start + e->numData();
+						for ( DataId k = start; k < end; ++k )
 							f->op( Eref( e, k ), arg1, arg2, arg3, arg4 );
 					} else  {
 						f->op( *j, arg1, arg2, arg3, arg4 );
@@ -311,8 +315,9 @@ template < class T1, class T2, class T3, class T4, class T5 > class SrcFinfo5: p
 					j = i->targets.begin(); j != i->targets.end(); ++j ) {
 					if ( j->dataIndex() == ALLDATA ) {
 						Element* e = j->element();
-						unsigned int end = e->numData();
-						for ( DataId k = 0; k < end; ++k )
+						unsigned int start = e->localDataStart();
+						unsigned int end = start + e->numData();
+						for ( DataId k = start; k < end; ++k )
 							f->op( Eref( e, k ), 
 											arg1, arg2, arg3, arg4, arg5 );
 					} else  {
@@ -368,8 +373,9 @@ template < class T1, class T2, class T3, class T4, class T5, class T6 > class Sr
 					j = i->targets.begin(); j != i->targets.end(); ++j ) {
 					if ( j->dataIndex() == ALLDATA ) {
 						Element* e = j->element();
-						unsigned int end = e->numData();
-						for ( DataId k = 0; k < end; ++k )
+						unsigned int start = e->localDataStart();
+						unsigned int end = start + e->numData();
+						for ( DataId k = start; k < end; ++k )
 							f->op( Eref( e, k ), 
 									arg1, arg2, arg3, arg4, arg5, arg6 );
 					} else  {

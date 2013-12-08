@@ -17,10 +17,10 @@
 
 class OneToAllMsg: public Msg
 {
-	friend void Msg::initMsgManagers(); // for initializing Id.
+	friend unsigned int Msg::initMsgManagers(); // for initializing Id.
 	friend void testGetMsgs(); // test func
 	public:
-		OneToAllMsg( Eref e1, Element* e2 );
+		OneToAllMsg( Eref e1, Element* e2, unsigned int msgIndex );
 		~OneToAllMsg();
 
 		Eref firstTgt( const Eref& src ) const;

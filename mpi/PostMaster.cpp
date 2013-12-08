@@ -231,9 +231,11 @@ void PostMaster::clearPendingSetGet()
 		const Eref& e = tgt->eref();
 		const OpFunc *op = OpFunc::lookop( tgt->bindIndex() );
 		assert( op );
-		if ( tgt->dataSize() == RemoteSet ) {
+		if ( tgt->dataSize() == MooseSetHop ) {
 			op->opBuffer( e, &setRecvBuf_[ TgtInfo::headerSize ] );
-		} else if ( tgt->dataSize() == RemoteGet ) {
+		} else if ( tgt->dataSize() == MooseSetVecHop ) {
+			op->opVecBuffer( e, &setRecvBuf_[ TgtInfo::headerSize ] );
+		} else if ( tgt->dataSize() == MooseGetHop ) {
 			int requestingNode = setRecvStatus_.MPI_SOURCE;
 			handleRemoteGet( e, op, requestingNode );
 		}
@@ -358,7 +360,7 @@ double* PostMaster::addToSendBuf( const Eref& e, unsigned int bindIndex,
 }
 
 double* PostMaster::addToSetBuf( const Eref& e, unsigned int opIndex, 
-						unsigned int size )
+						unsigned int size, unsigned int hopType )
 {
 	if ( TgtInfo::headerSize + size > recvBufSize_ ) {
 		// Here we need to activate the fallback second send which will
@@ -375,7 +377,7 @@ double* PostMaster::addToSetBuf( const Eref& e, unsigned int opIndex,
 	isSetSent_ = 0;
 	TgtInfo* tgt = reinterpret_cast< TgtInfo* >( &setSendBuf_[0] );
 	// tgt->set( e.id(), e.dataIndex(), opIndex, e.fieldIndex() );
-	tgt->set( e.objId(), opIndex, RemoteSet );
+	tgt->set( e.objId(), opIndex, hopType );
 	unsigned int end = TgtInfo::headerSize;
 	setSendSize_ = end + size;
 	return &setSendBuf_[end];
@@ -428,7 +430,7 @@ double* PostMaster::remoteGet( const Eref& e, unsigned int bindIndex )
 		clearPending();
 	}
 	TgtInfo* tgt = reinterpret_cast< TgtInfo* >( &getSendBuf[0] );
-	tgt->set( e.objId(), bindIndex, RemoteGet );
+	tgt->set( e.objId(), bindIndex, MooseGetHop );
 	assert ( !e.element()->isGlobal() && e.getNode() != Shell::myNode() );
 #ifdef USE_MPI
 	// Post receive for return value.

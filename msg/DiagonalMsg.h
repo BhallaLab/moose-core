@@ -27,9 +27,9 @@
  */
 class DiagonalMsg: public Msg
 {
-	friend void Msg::initMsgManagers(); // for initializing Id.
+	friend unsigned int Msg::initMsgManagers(); // for initializing Id.
 	public:
-		DiagonalMsg( Element* e1, Element* e2 );
+		DiagonalMsg( Element* e1, Element* e2, unsigned int msgIndex );
 		~DiagonalMsg();
 
 		Eref firstTgt( const Eref& src ) const;

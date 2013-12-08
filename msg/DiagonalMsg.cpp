@@ -14,11 +14,17 @@
 Id DiagonalMsg::managerId_;
 vector< DiagonalMsg* > DiagonalMsg::msg_;
 
-DiagonalMsg::DiagonalMsg( Element* e1, Element* e2 )
+DiagonalMsg::DiagonalMsg( Element* e1, Element* e2, unsigned int msgIndex )
 	: Msg( ObjId( managerId_, msg_.size() ), e1, e2 ), 
 	stride_( 1 )
 {
-	msg_.push_back( this );
+	if ( msgIndex == 0 ) {
+		msg_.push_back( this );
+	} else {
+		if ( msg_.size() <= msgIndex )
+			msg_.resize( msgIndex + 1 );
+		msg_[ msgIndex ] = this;
+	}
 }
 
 DiagonalMsg::~DiagonalMsg()
@@ -110,10 +116,10 @@ Msg* DiagonalMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 	if ( n <= 1 ) {
 		DiagonalMsg* ret = 0;
 		if ( orig == e1() ) {
-			ret = new DiagonalMsg( newSrc.element(), newTgt.element() );
+			ret = new DiagonalMsg( newSrc.element(), newTgt.element(), 0 );
 			ret->e1()->addMsgAndFunc( ret->mid(), fid, b );
 		} else if ( orig == e2() ) {
-			ret = new DiagonalMsg( newTgt.element(), newSrc.element() );
+			ret = new DiagonalMsg( newTgt.element(), newSrc.element(), 0 );
 			ret->e2()->addMsgAndFunc( ret->mid(), fid, b );
 		} else {
 			assert( 0 );

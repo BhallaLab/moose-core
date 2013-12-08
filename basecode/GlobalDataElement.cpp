@@ -63,3 +63,8 @@ unsigned int GlobalDataElement::getNode( unsigned int dataId ) const {
 unsigned int GlobalDataElement::rawIndex( unsigned int dataId ) const {
 	return dataId;
 }
+
+unsigned int GlobalDataElement::getNumOnNode( unsigned int node ) const
+{
+	return numLocalData();
+}

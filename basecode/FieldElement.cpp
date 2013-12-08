@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "../shell/Shell.h"
 
 FieldElement::FieldElement( Id parent, Id self, 
 		const Cinfo* c, const string& name, 
@@ -47,11 +48,25 @@ unsigned int FieldElement::numLocalData() const
 	return parent_.element()->numLocalData();
 }
 
+unsigned int FieldElement::localDataStart() const
+{
+	return parent_.element()->localDataStart();
+}
+
 unsigned int FieldElement::numField( unsigned int rawIndex ) const 
 {
 	const char* data = parent_.element()->data( rawIndex );
 	assert( data );
 	return fef_->getNumField( data );
+}
+
+unsigned int FieldElement::totNumLocalField() const 
+{
+	unsigned int ret = 0;
+	unsigned int nd = numLocalData();
+	for ( unsigned int i = 0; i < nd; ++i )
+		ret += numField( i );
+	return ret;
 }
 
 unsigned int FieldElement::getNode( unsigned int dataId ) const
@@ -67,6 +82,16 @@ unsigned int FieldElement::rawIndex( unsigned int dataId ) const
 bool FieldElement::isGlobal() const
 {
 	return parent_.element()->isGlobal();
+}
+
+unsigned int FieldElement::getNumOnNode( unsigned int node ) const
+{
+	if ( node == Shell::myNode() || parent_.element()->isGlobal() ) {
+		return totNumLocalField();
+	}
+	// Here we need to refer to a postmaster function to get the
+	// number of field entries on specified node. For now, a dummy.
+	return totNumLocalField();
 }
 
 /////////////////////////////////////////////////////////////////////////

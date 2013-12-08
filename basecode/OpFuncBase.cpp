@@ -11,8 +11,10 @@
 
 const unsigned char MooseSendHop = 0;
 const unsigned char MooseSetHop = 1;
-const unsigned char MooseGetHop = 2;
-const unsigned char MooseReturnHop = 3;
+const unsigned char MooseSetVecHop = 2;
+const unsigned char MooseGetHop = 4;
+const unsigned char MooseGetVecHop = 5;
+const unsigned char MooseReturnHop = 8;
 const unsigned char MooseTestHop = 255;
 
 vector< OpFunc* >& OpFunc::ops()

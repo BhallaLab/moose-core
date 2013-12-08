@@ -56,7 +56,7 @@ Element* innerCopyElements( Id orig, ObjId newParent, Id newId,
 	Element* e = orig.element()->copyElement( 
 				newParent, newId, newNumData, toGlobal );
 	assert( e );
-	Shell::adopt( newParent, newId );
+	Shell::adopt( newParent, newId, 0 );
 
 	// cout << Shell::myNode() << ": Copy: orig= " << orig << ", newParent = " << newParent << ", newId = " << newId << endl;
 	tree[ orig ] = e->id();
