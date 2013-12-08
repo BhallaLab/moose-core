@@ -14,6 +14,8 @@ double* addToBuf(
 			const Eref& e, HopIndex hopIndex, unsigned int size );
 void dispatchBuffers( const Eref& e, HopIndex hopIndex );
 double* remoteGet( const Eref& e , unsigned int bindIndex );
+unsigned int mooseNumNodes();
+unsigned int mooseMyNode();
 
 /**
  * Function to hop across nodes. This one has no arguments, just tells the
@@ -46,6 +48,48 @@ template < class A > class HopFunc1: public OpFunc1Base< A >
 			double* buf = addToBuf( e, hopIndex_, Conv< A >::size( arg ) );
 			Conv< A >::val2buf( arg, &buf );
 			dispatchBuffers( e, hopIndex_ );
+		}
+		
+		void opVec( const Eref& e, const vector< A >& arg,
+				 const OpFunc1Base< A >* op ) const
+		{
+			Element* elm = e.element();
+			unsigned int k = 0; // counter for index to arg vector.
+			if ( elm->isGlobal() ) {
+				// Need to ensure that all nodes get the same args,
+				// as opposed to below, where they are serial.
+			}
+			for ( unsigned int i = 0; i < mooseNumNodes(); ++i ) {
+				if ( i == mooseMyNode() ) {
+					unsigned int numData = elm->numLocalData();
+					for ( unsigned int p = 0; p < numData; ++p ) {
+						unsigned int numField = elm->numField( p );
+						for ( unsigned int q = 0; q < numField; ++q ) {
+							Eref er( elm, p, q );
+							op->op( er, arg[ k % arg.size() ] );
+							k++;
+						}
+					}
+				} else {
+					unsigned int dataIndex = k;
+					// nn includes dataIndices and if present fieldIndices
+					// too. It may involve a query to the remote node.
+					unsigned int nn = elm->getNumOnNode( i );
+					vector< A > temp( nn );
+					// Have to do the insertion entry by entry because the
+					// argument vector may wrap around.
+					for ( unsigned int j = 0; j < nn; ++j ) {
+						unsigned int x = k % arg.size();
+						temp[j] = arg[x];
+						k++;
+					}
+					double* buf = addToBuf( e, hopIndex_, 
+							Conv< vector< A > >::size( temp ) );
+					Conv< vector< A > >::val2buf( temp, &buf );
+					dispatchBuffers( Eref( elm, dataIndex ), hopIndex_ ); 
+					// HopIndex says that it is a SetVec call.
+				}
+			}
 		}
 	private:
 		HopIndex hopIndex_;
@@ -83,6 +127,57 @@ template < class A1, class A2 > class HopFunc2: public OpFunc2Base< A1, A2 >
 			Conv< A1 >::val2buf( arg1, &buf );
 			Conv< A2 >::val2buf( arg2, &buf );
 			dispatchBuffers( e, hopIndex_ );
+		}
+
+		void opVec( const Eref& e, 
+						const vector< A1 >& arg1,
+						const vector< A1 >& arg2,
+				 		const OpFunc2Base< A1, A2 >* op ) const
+		{
+			Element* elm = e.element();
+			unsigned int k = 0; // counter for index to arg vector.
+			if ( elm->isGlobal() ) {
+				// Need to ensure that all nodes get the same args,
+				// as opposed to below, where they are serial.
+			}
+			for ( unsigned int i = 0; i < mooseNumNodes(); ++i ) {
+				if ( i == mooseMyNode() ) {
+					unsigned int numData = elm->numLocalData();
+					for ( unsigned int p = 0; p < numData; ++p ) {
+						unsigned int numField = elm->numField( p );
+						for ( unsigned int q = 0; q < numField; ++q ) {
+							Eref er( elm, p, q );
+							unsigned int x = k % arg1.size();
+							unsigned int y = k % arg2.size();
+							op->op( er, arg1[x], arg2[y] );
+							k++;
+						}
+					}
+				} else {
+					unsigned int dataIndex = k;
+					// nn includes dataIndices and if present fieldIndices
+					// too. It may involve a query to the remote node.
+					unsigned int nn = elm->getNumOnNode( i );
+					vector< A1 > temp1( nn );
+					vector< A2 > temp2( nn );
+					// Have to do the insertion entry by entry because the
+					// argument vectors may wrap around.
+					for ( unsigned int j = 0; j < nn; ++j ) {
+						unsigned int x = k % arg1.size();
+						unsigned int y = k % arg2.size();
+						temp1[j] = arg1[x];
+						temp2[j] = arg2[y];
+						k++;
+					}
+					double* buf = addToBuf( e, hopIndex_, 
+							Conv< vector< A1 > >::size( temp1 ) +
+						   Conv< vector< A2 > >::size( temp2 ) );
+					Conv< vector< A1 > >::val2buf( temp1, &buf );
+					Conv< vector< A2 > >::val2buf( temp2, &buf );
+					dispatchBuffers( Eref( elm, dataIndex ), hopIndex_ ); 
+					// HopIndex says that it is a SetVec call.
+				}
+			}
 		}
 	private:
 		HopIndex hopIndex_;

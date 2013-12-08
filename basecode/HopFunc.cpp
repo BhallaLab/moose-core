@@ -9,6 +9,7 @@
 #include "header.h"
 #include "HopFunc.h"
 #include "../mpi/PostMaster.h"
+#include "../shell/Shell.h"
 
 static double testBuf[4096];
 static double* addToTestBuf( const Eref& e, unsigned int i, 
@@ -29,11 +30,13 @@ double* addToBuf( const Eref& e, HopIndex hopIndex, unsigned int size )
 {
 	static ObjId oi( 3 );
 	static PostMaster* p = reinterpret_cast< PostMaster* >( oi.data() );
-	if ( hopIndex.hopType() == MooseSendHop )
+	if ( hopIndex.hopType() == MooseSendHop ) {
 		return p->addToSendBuf( e, hopIndex.bindIndex(), size );
-	else if ( hopIndex.hopType() == MooseSetHop ) {
+	} else if ( hopIndex.hopType() == MooseSetHop ||
+			 hopIndex.hopType() == MooseSetVecHop ) {
 		p->clearPendingSetGet(); // Cannot touch set buffer if pending.
-		return p->addToSetBuf( e, hopIndex.bindIndex(), size );
+		return p->addToSetBuf( e, hopIndex.bindIndex(), 
+						size, hopIndex.hopType() );
 	} else if ( hopIndex.hopType() == MooseTestHop ) {
 		return addToTestBuf( e, hopIndex.bindIndex(), size );
 	}
@@ -49,6 +52,9 @@ void dispatchBuffers( const Eref& e, HopIndex hopIndex )
 	  	hopIndex.hopType() == MooseGetHop ) {
 		p->dispatchSetBuf( e );
 	}
+	if ( hopIndex.hopType() == MooseSetVecHop ) {
+		p->dispatchSetBuf( e );
+	}
 	// More complicated stuff for get operations.
 }
 
@@ -57,4 +63,14 @@ double* remoteGet( const Eref& e, unsigned int bindIndex )
 	static ObjId oi( 3 );
 	static PostMaster* p = reinterpret_cast< PostMaster* >( oi.data() );
 	return p->remoteGet( e, bindIndex );
+}
+
+unsigned int mooseNumNodes()
+{
+	return Shell::numNodes();
+}
+
+unsigned int mooseMyNode()
+{
+	return Shell::myNode();
 }

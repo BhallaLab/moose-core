@@ -37,8 +37,14 @@ class FieldElement: public Element
 		/// Virtual: Returns number of data entries on current node.
 		unsigned int numLocalData() const;
 
+		/// Virtual: Returns index of first data entry on this node.
+		unsigned int localDataStart() const;
+
 		/// Virtual: Returns number of field entries for specified data
 		unsigned int numField( unsigned int rawIndex ) const;
+
+		/// Virtual: Returns number of field entries on current node.
+		unsigned int totNumLocalField() const;
 
 		/// Virtual: Returns location of specified dataId
 		unsigned int getNode( unsigned int dataId ) const;
@@ -56,6 +62,9 @@ class FieldElement: public Element
 
 		/// Virtual. Returns true if global, ie, if its parent is global
 		bool isGlobal() const;
+
+		/// Inherited virtual.
+		unsigned int getNumOnNode( unsigned int node ) const;
 
 		/////////////////////////////////////////////////////////////////
 		// data access stuff

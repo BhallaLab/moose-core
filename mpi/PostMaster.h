@@ -69,8 +69,6 @@
 #include <mpi.h>
 #endif
 
-enum RemoteSetOps {RemoteSet, RemoteGet, RemoteSetVec, RemoteGetVec};
-
 class TgtInfo {
 	public: 
 		TgtInfo()
@@ -129,7 +127,7 @@ class PostMaster {
 				unsigned int bindIndex, unsigned int size );
 		/// Returns pointer to Set buffer for filling in arguments.
 		double* addToSetBuf( const Eref& e, 
-				unsigned int opIndex, unsigned int size );
+			unsigned int opIndex, unsigned int size, unsigned int hopType );
 		/// Sends off contets of Set buffer.
 		void dispatchSetBuf( const Eref& e );
 

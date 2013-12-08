@@ -67,6 +67,12 @@ unsigned int DataElement::numField( unsigned int entry ) const
 	return 1;
 }
 
+// virtual func.
+unsigned int DataElement::totNumLocalField() const
+{
+	return numLocalData_;
+}
+
 /////////////////////////////////////////////////////////////////////////
 // Data access functions.
 /////////////////////////////////////////////////////////////////////////

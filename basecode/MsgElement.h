@@ -68,10 +68,21 @@ class MsgElement: public Element
 			return numMsg_();
 		}
 
+		/// Inherited virtual. Returns index of first data entry on node.
+		unsigned int localDataStart() const
+		{
+			return 0;
+		}
+
 		/// Inherited virtual. Returns number of field entries for specified data
 		unsigned int numField( unsigned int rawIndex ) const
 		{
-				return 0;
+				return 1;
+		}
+
+		unsigned int totNumLocalField() const
+		{
+			return numMsg_();
 		}
 
 		/// Inherited virtual. Just returns current node.
@@ -97,6 +108,10 @@ class MsgElement: public Element
 
 		bool isGlobal() const {
 			return true;
+		}
+
+		unsigned int getNumOnNode( unsigned int node ) const {
+			return numMsg_();
 		}
 
 		/////////////////////////////////////////////////////////////////

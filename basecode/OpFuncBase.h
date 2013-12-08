@@ -12,7 +12,9 @@
 
 extern const unsigned char MooseSendHop;
 extern const unsigned char MooseSetHop;
+extern const unsigned char MooseSetVecHop;
 extern const unsigned char MooseGetHop;
+extern const unsigned char MooseGetVecHop;
 extern const unsigned char MooseReturnHop;
 extern const unsigned char MooseTestHop;
 
@@ -52,6 +54,10 @@ class OpFunc
 
 		/// Executes the OpFunc by converting args.
 		virtual void opBuffer( const Eref& e, double* buf ) const = 0;
+
+		/// Executes the OpFunc for all data by converting a vector of args.
+		virtual void opVecBuffer( const Eref& e, double* buf ) const
+		{;}
 
 		static const OpFunc* lookop( unsigned int opIndex );
 
@@ -97,6 +103,24 @@ template< class A > class OpFunc1Base: public OpFunc
 			op( e, Conv< A >::buf2val( &buf ) );
 		}
 
+		void opVecBuffer( const Eref& e, double* buf ) const {
+			vector< A > temp = Conv< vector< A > >::buf2val( &buf );
+			Element* elm = e.element();
+			assert( temp.size() >= elm->numLocalData() );
+			unsigned int k = 0;
+			for ( unsigned int i = 0; i < elm->numLocalData(); ++i) {
+				for ( unsigned int j = 0; j < elm->numField( i ); ++j) {
+					Eref er( elm, i, j );
+					op( er, temp[ k % temp.size() ] );
+					++k;
+				}
+			}
+		}
+
+		virtual void opVec( const Eref& e, const vector< A >& arg,
+						const OpFunc1Base< A >* op ) const
+	   	{ ; } // overridden in HopFuncs.
+
 		string rttiType() const {
 			return Conv< A >::rttiType();
 		}
@@ -119,6 +143,28 @@ template< class A1, class A2 > class OpFunc2Base: public OpFunc
 			op( e, 		
 				arg1, Conv< A2 >::buf2val( &buf ) );
 		}
+
+		void opVecBuffer( const Eref& e, double* buf ) const {
+			vector< A1 > temp1 = Conv< vector< A1 > >::buf2val( &buf );
+			vector< A2 > temp2 = Conv< vector< A2 > >::buf2val( &buf );
+			Element* elm = e.element();
+			assert( temp1.size() >= elm->numLocalData() );
+			unsigned int k = 0;
+			for ( unsigned int i = 0; i < elm->numLocalData(); ++i) {
+				for ( unsigned int j = 0; j < elm->numField( i ); ++j) {
+					Eref er( elm, i, j );
+					op( er, temp1[ k % temp1.size() ], 
+						temp2[ k % temp2.size() ] );
+					++k;
+				}
+			}
+		}
+
+		virtual void opVec( const Eref& e, 
+						const vector< A1 >& arg1,
+						const vector< A2 >& arg2,
+						const OpFunc2Base< A1, A2 >* op ) const
+	   	{ ; } // overridden in HopFuncs.
 
 		string rttiType() const {
 			return Conv< A1 >::rttiType() + "," + Conv< A2 >::rttiType(); 

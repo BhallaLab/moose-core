@@ -14,10 +14,16 @@
 Id OneToOneMsg::managerId_;
 vector< OneToOneMsg* > OneToOneMsg::msg_;
 
-OneToOneMsg::OneToOneMsg( Element* e1, Element* e2 )
+OneToOneMsg::OneToOneMsg( Element* e1, Element* e2, unsigned int msgIndex )
 	: Msg( ObjId( managerId_, msg_.size() ), e1, e2 )
 {
-	msg_.push_back( this );
+	if ( msgIndex == 0 ) {
+		msg_.push_back( this );
+	} else {
+		if ( msg_.size() <= msgIndex )
+			msg_.resize( msgIndex + 1 );
+		msg_[ msgIndex ] = this;
+	}
 }
 
 OneToOneMsg::~OneToOneMsg()
@@ -88,10 +94,10 @@ Msg* OneToOneMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 	// This works both for 1-copy and for n-copies
 	OneToOneMsg* ret = 0;
 	if ( orig == e1() ) {
-		ret = new OneToOneMsg( newSrc.element(), newTgt.element() );
+		ret = new OneToOneMsg( newSrc.element(), newTgt.element(), 0 );
 		ret->e1()->addMsgAndFunc( ret->mid(), fid, b );
 	} else if ( orig == e2() ) {
-		ret = new OneToOneMsg( newTgt.element(), newSrc.element() );
+		ret = new OneToOneMsg( newTgt.element(), newSrc.element(), 0 );
 		ret->e2()->addMsgAndFunc( ret->mid(), fid, b );
 	} else
 		assert( 0 );

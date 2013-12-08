@@ -302,7 +302,8 @@ extern "C" {
         return SHELLPTR->doCreate(type,
                                   parent_id,
                                   string(name),
-                                  numData, isGlobal);
+                                  numData, 
+								  static_cast< NodePolicy >( isGlobal ) );
         
     }
     

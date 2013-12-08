@@ -127,9 +127,9 @@ void testTreeTraversal()
 	path = Field< string >::get( f4, "path" );
 	assert( path == "/f1[1]/f2b[5]/f3ba[6]/cell[0]" );
 	path = Field< string >::get( syns, "path" );
-	assert( path == "/f1[1]/f2b[5]/f3ba[6]/cell[0]/synapse[0][0]" );
+	assert( path == "/f1[1]/f2b[5]/f3ba[6]/cell[0]/synapse[0]" );
 	path = Field< string >::get( ObjId( syns, 7, 3 ), "path" );
-	assert( path == "/f1[1]/f2b[5]/f3ba[6]/cell[7]/synapse[7][3]" );
+	assert( path == "/f1[1]/f2b[5]/f3ba[6]/cell[7]/synapse[3]" );
 
 	path = Field< string >::get( ObjId( f2a, 7 ), "path" );
 	assert( path == "/f1[0]/f2a[7]" );
@@ -325,12 +325,12 @@ void testCopy()
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 
-	Id f1 = shell->doCreate( "Neutral", Id(), "f1", 1, true );
-	Id f2a = shell->doCreate( "Neutral", f1, "f2a", 1, true );
-	Id f2b = shell->doCreate( "Neutral", f1, "f2b", 1, true );
-	Id f3 = shell->doCreate( "Neutral", f2a, "f3", 1, true );
-	Id f4a = shell->doCreate( "Neutral", f3, "f4a", 1, true );
-	Id f4b = shell->doCreate( "Neutral", f3, "f4b", 1, true );
+	Id f1 = shell->doCreate( "Neutral", Id(), "f1", 1, MooseGlobal );
+	Id f2a = shell->doCreate( "Neutral", f1, "f2a", 1, MooseGlobal );
+	Id f2b = shell->doCreate( "Neutral", f1, "f2b", 1, MooseGlobal );
+	Id f3 = shell->doCreate( "Neutral", f2a, "f3", 1, MooseGlobal );
+	Id f4a = shell->doCreate( "Neutral", f3, "f4a", 1, MooseGlobal );
+	Id f4b = shell->doCreate( "Neutral", f3, "f4b", 1, MooseGlobal );
 
 	verifyKids( f1, f2a, f2b, f3, f4a, f4b );
 
@@ -378,9 +378,9 @@ void testCopyFieldElement()
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 	unsigned int size = 10;
 	unsigned int size2 = 17;
-	Id origId = shell->doCreate( "IntFire", Id(), "f1", size, true );
+	Id origId = shell->doCreate( "IntFire", Id(), "f1", size, MooseGlobal );
 	Id origSynId( origId.value() + 1 );
-	Id origChild = shell->doCreate( "Neutral", origId, "f2", size2, true );
+	Id origChild = shell->doCreate( "Neutral", origId, "f2", size2, MooseGlobal );
 	
 	Element* syn = origSynId.element();
 	assert( syn != 0 );
@@ -594,11 +594,22 @@ void testShellParserStart()
 	shell->doSetClock( 4, 3.0 );
 	shell->doSetClock( 5, 5.0 );
 
+	Id tsid = shell->doCreate( "testSched", ObjId(), "tse", 1, MooseGlobal );
 
+	/*
 	const Cinfo* testSchedCinfo = TestSched::initCinfo();
 	Id tsid = Id::nextId();
 	Element* tse = new GlobalDataElement( tsid, testSchedCinfo, "tse", 1 );
+	*/
+	shell->doUseClock( "/tse", "process", 0 );
+	shell->doUseClock( "/tse", "process", 1 );
+	shell->doUseClock( "/tse", "process", 2 );
+	shell->doUseClock( "/tse", "process", 3 );
+	shell->doUseClock( "/tse", "process", 4 );
+	shell->doUseClock( "/tse", "process", 5 );
 
+
+	/*
 	// testThreadSchedElement tse;
 	Eref ts( tse, 0 );
 	Element* clocke = Id( 1 ).element();
@@ -608,7 +619,9 @@ void testShellParserStart()
 	Eref er3( clocke, DataId( 3 ) );
 	Eref er4( clocke, DataId( 4 ) );
 	Eref er5( clocke, DataId( 5 ) );
+	*/
 
+	/*
 	// No idea what FuncId to use here. Assume 0.
 	FuncId f( 0 );
 	SingleMsg m0( er0, ts ); 
@@ -623,6 +636,7 @@ void testShellParserStart()
 	er4.element()->addMsgAndFunc( m4.mid(), f, 4 );
 	SingleMsg m5( er5, ts ); 
 	er5.element()->addMsgAndFunc( m5.mid(), f, 5 );
+	*/
 
 	if ( shell->myNode() != 0 )
 		return;
@@ -674,13 +688,11 @@ void testShellSetGet()
 	}
 	bool ret = SetGet1< double >::setVec( a1, "set_outputValue", val );
 	assert( ret );
-	/*
 	for ( unsigned int i = 0; i < size; ++i ) {
 		double x = Field< double >::get( ObjId( a1, i ), "outputValue" );
 		// cout << i << "	x=" << x << "	i^3=" << i * i * i << endl;
 		assert( doubleEq( x, i * i * i ) );
 	}
-	*/
 
 	shell->doDelete( a1 );
 	cout << "." << flush;
@@ -1628,101 +1640,6 @@ void testGetMsgSrcAndTarget()
 {
 	// cout << "." << flush;
 }
-
-/*
-void testShellMesh()
-{
-	Eref sheller = Id().eref();
-	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
-	vector< int > dimensions(1,1);
-
-	///////////////////////////////////////////////////////////
-	// Set up the objects.
-	///////////////////////////////////////////////////////////
-	Id compt = shell->doCreate( "CubeMesh", Id(), "compt", dimensions );
-	Id mesh( compt.value() + 1 );
-	Id pool = shell->doCreate( "Pool", compt, "pool", dimensions );
-	shell->doAddMsg( "OneToOne",
-		ObjId( pool, 0 ), "requestVolume",
-		ObjId( mesh, 0 ), "get_volume" );
-
-	vector< double > meshCoords( 9, 0.0 );
-	meshCoords[3] = meshCoords[4] = meshCoords[5] = 10.0;
-	meshCoords[6] = meshCoords[7] = meshCoords[8] = 1.0;
-
-	bool ret = Field< bool >::set( compt, "preserveNumEntries", 0 );
-	assert( ret );
-	
-	ret = Field< vector< double > >::set( compt, "coords", meshCoords );
-	assert( ret );
-
-	double testN = 123.0;
-	ret = Field< double >::set( pool, "n", testN );
-	assert( ret );
-	
-	unsigned int size = Field< unsigned int >::get( mesh, "localNumField");
-	assert( size == 1000 );
-
-	size = Field< unsigned int >::get( pool, "linearSize" );
-	assert( size == 1 );
-	shell->handleReMesh( mesh );
-	size = Field< unsigned int >::get( pool, "linearSize" );
-	assert( size == 1000 );
-
-	vector< double > numMols;
-	Field< double >::getVec( pool, "n", numMols );
-	assert( numMols.size() == size );
-	for ( unsigned int i = 0; i < size; ++i )
-		assert( doubleEq( numMols[i] , testN ) );
-	
-	///////////////////////////////////////////////////////////////////
-	// Here we preserve the numEntries but change sizes to 1/1000 of orig.
-	///////////////////////////////////////////////////////////////////
-	meshCoords.resize( 6 );
-	ret = Field< bool >::set( compt, "preserveNumEntries", 1 );
-	meshCoords[3] = meshCoords[4] = meshCoords[5] = 1.0;
-	ret = Field< vector< double > >::set( compt, "coords", meshCoords );
-	assert( ret );
-	meshCoords = Field< vector< double > >::get( compt, "coords" );
-	assert( doubleEq( meshCoords[6], 0.1 ) );
-	assert( doubleEq( meshCoords[7], 0.1 ) );
-	assert( doubleEq( meshCoords[8], 0.1 ) );
-
-	shell->handleReMesh( mesh );
-	size = Field< unsigned int >::get( pool, "linearSize" );
-	assert( size == 1000 );
-
-	// vector< double > temp( size, testN );
-	// Field< double >::setVec( pool, "conc", temp );
-	ret = Field< double >::setRepeat( pool, "conc", testN );
-	assert( ret );
-	Field< double >::getVec( pool, "n", numMols );
-
-	// This comes from scaling testN to the 0.1x0.1x0.1 metre mesh size.
-	double numShouldBe = NA * testN * 1e-3;
-	for ( unsigned int i = 0; i < size; ++i )
-		assert( doubleEq( numMols[i] , numShouldBe ) );
-
-	meshCoords[3] = meshCoords[4] = meshCoords[5] = 10.0;
-	meshCoords.resize( 6 ); // Make it preserveNumEntries.
-	ret = Field< vector< double > >::set( compt, "coords", meshCoords );
-	assert( ret );
-	vector< double > conc;
-	Field< double >::getVec( pool, "conc", conc );
-	assert( conc.size() == size );
-	// Here we make the size of the mesh 10x bigger. We've set the field
-	// 'preserveNumEntries', so making the whole volume bigger increases
-	// voxel size accordingly. Voxel size is now 1x1x1.
-	// Conc was testN.
-	// Num mols in 1e-3 m^3 was NA * testN * 1e-3. 
-	// Expanding the mesh preserves numMols. So conc is now 1e-3 smaller
-	for ( unsigned int i = 0; i < size; ++i )
-		assert( doubleEq( conc[i], testN * 1e-3 ) );
-
-	shell->doDelete( compt );
-	cout << "." << flush;
-}
-*/
 
 void testShell( )
 {
