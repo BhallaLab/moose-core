@@ -527,6 +527,10 @@ extern "C" {
             RAISE_INVALID_ID(NULL, "moose_Id_getPath");
         }        
         string path = self->id_.path();
+        string default_end("[0]");
+        if (endswith(path, default_end)){
+            path.erase(path.length() - default_end.length(), default_end.length());
+        }
         PyObject * ret = Py_BuildValue("s", path.c_str());
         return ret;
     }

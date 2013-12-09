@@ -14,12 +14,12 @@ except ImportError:
 class TestEmatrix(unittest.TestCase):
     """Test pymoose basics"""
     def testCreate(self):
-        em = moose.ematrix('test', 10, 0, 'Neutral')
-        self.assertEqual(em.path, 'test')
+        em = moose.ematrix('/test', 10, 0, 'Neutral')
+        self.assertEqual(em.path, 'test[0]')
 
     def testCreateKW(self):
         em = moose.ematrix(path='/testCreateKW', n=10, g=1, dtype='Neutral')
-        self.assertEqual(em.path, '/testCreateKW')
+        self.assertEqual(em.path, '/testCreateKW[0]')
 
     def testGetItem(self):
         em = moose.ematrix('testGetItem', n=10, g=1, dtype='Neutral')
@@ -41,6 +41,24 @@ class TestNeutral(unittest.TestCase):
     def testPath(self):
         a = moose.Neutral('a')
         self.assertEqual(a.path, '/a[0]')
+
+    def testHash(self):
+        """Test if our hash function for ObjId is doing the right thing - the
+        hash should be 16 lsb of Id value, 32 lsb of dataIndex and 16
+        lsb of fieldIndex.
+
+        I do not have a system to test this - but I would like to check ii
+        up to 2**17 and n=2**33
+
+        """
+        oidlist = [moose.Neutral('x_%d' % (ii), n=2**10) for ii in range(2**6)]
+        if sys.byteorder == 'little':
+            for oid in oidlist:
+                self.assertEqual(hash(oid), oid.id_.value  << 48 | oid.dindex << 16 | oid.findex)
+        else:
+            for oid in oidlist:
+                self.assertEqual(hash(oid), oid.id_.value  >> 48 | oid.dindex >> 16 | oid.findex)
+            
 
 class TestNeutral1(unittest.TestCase):
     def setUp(self):
