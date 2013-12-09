@@ -287,10 +287,12 @@ extern "C" {
 
     /**
        This function combines Id, DataId and fieldIndex to construct
-       the hash of this object. Here we assume 32 most significant
-       bits for Id, next 16 bits for dataId and the least significant
+       the hash of this object. Here we assume 16 most significant
+       bits for Id, next 32 bits for dataId and the least significant
        16 bits for fieldIndex. If these criteria are not met, the hash
-       function will cause collissions.
+       function will cause collissions. Note that the bitshift
+       opeartions are byte order independent - so they should give the
+       same result on both little- and big-endian systems.
     */
     long moose_ObjId_hash(_ObjId * self)
     {
@@ -300,11 +302,7 @@ extern "C" {
         long id = (long)(self->oid_.id.value());
         long dataId = self->oid_.dataId;
         long fieldIndex = self->oid_.fieldIndex;
-        if (O32_HOST_ORDER == O32_BIG_ENDIAN){
-            return id >> 32 | dataId >> 48 | fieldIndex;
-        } else {
-            return id << 32 | dataId << 48 | fieldIndex;
-        }
+        return id << 48 | dataId << 16 | fieldIndex;
     }
     
     PyObject * moose_ObjId_repr(_ObjId * self)

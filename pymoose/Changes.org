@@ -1,7 +1,9 @@
-* Changes in async13 branch - Dec 2013
-  - path always includes index
-  - Id.name returns a single string in stead of list of identical string for each element
-  - slicing of Id implemented
+* Changes in async13 branch
+** Dec 2013
+   - path always includes index
+   - Id.name returns a single string in stead of list of identical string for each element
+   - slicing of Id implemented
+   - Hash of an ObjId is 16 lsb of Id, 32 lsb of dataId, 16 lsb of fieldIndex, in that order from msb to lsb
 
 
 * Issues in async13 branch - Dec 2013
