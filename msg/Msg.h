@@ -37,14 +37,21 @@ class Msg
 		virtual Eref firstTgt( const Eref& src ) const = 0;
 
 		 /**
-		  * Return all the sources on e1. ALLDATA used when the targets 
-		  * include all data entries on a target.
+		  * Return all the sources of e2 from e1, that is, all the msgs
+		  * coming into specified entries on e2 from e1. 
+		  *
+		  * ALLDATA used when the
+		  * sources include all data entries on a source.
+		  * Indexing is v[dataId in range e2.numData][src list]
 		  */
 		 virtual void sources ( vector< vector< Eref > >& v ) const = 0;
 
 		 /**
-		  * Return all the targets on e2. ALLDATA used when the targets 
-		  * include all data entries on a target.
+		  * Return all the targets of e1 on e2, that is, all the msgs
+		  * going from specified entries on e1 to e2. 
+		  * ALLDATA used when the 
+		  * targets include all data entries on a target.
+		  * Indexing is v[dataId in range e1.numData][tgt list]
 		  */
 		 virtual void targets( vector< vector< Eref > >& v ) const = 0;
 
