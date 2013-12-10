@@ -141,16 +141,21 @@ Id init( int argc, char** argv, bool& doUnitTests, bool& doRegressionTests )
 	bool isInfinite = 0;
 	int opt;
 #ifdef USE_MPI
-	int provided;
+	/*
 	// OpenMPI does not use argc or argv.
 	// unsigned int temp_argc = 1;
+	int provided;
 	MPI_Init_thread( &argc, &argv, MPI_THREAD_SERIALIZED, &provided );
+	*/
+	MPI_Init( &argc, &argv );
 
 	MPI_Comm_size( MPI_COMM_WORLD, &numNodes );
 	MPI_Comm_rank( MPI_COMM_WORLD, &myNode );
+	/*
 	if ( provided < MPI_THREAD_SERIALIZED && myNode == 0 ) {
 		cout << "Warning: This MPI implementation does not like multithreading: " << provided << "\n";
 	}
+	*/
 	// myNode = MPI::COMM_WORLD.Get_rank();
 #endif
 	/**

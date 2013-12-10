@@ -19,7 +19,8 @@ vector< SingleMsg* > SingleMsg::msg_;
 /////////////////////////////////////////////////////////////////////
 
 SingleMsg::SingleMsg( Eref e1, Eref e2, unsigned int msgIndex )
-	: Msg( ObjId( managerId_, msg_.size() ), e1.element(), e2.element() ),
+	: Msg( ObjId( managerId_, (msgIndex != 0 ) ? msgIndex: msg_.size() ), 
+					e1.element(), e2.element() ),
 	i1_( e1.dataIndex() ), 
 	i2_( e2.dataIndex() )
 {
@@ -50,14 +51,14 @@ Eref SingleMsg::firstTgt( const Eref& src ) const
 void SingleMsg::sources( vector< vector< Eref > >& v ) const
 {
 	v.clear();
-	v.resize( e2_->numLocalData() );
-	v[i1_].resize( 1, Eref( e2_, i2_ ) );
+	v.resize( e2_->numData() );
+	v[i2_].resize( 1, Eref( e1_, i1_ ) );
 }
 
 void SingleMsg::targets( vector< vector< Eref > >& v ) const
 {
 	v.clear();
-	v.resize( e1_->numLocalData() );
+	v.resize( e1_->numData() );
 	v[i1_].resize( 1, Eref( e2_, i2_, f2_ ) );
 }
 

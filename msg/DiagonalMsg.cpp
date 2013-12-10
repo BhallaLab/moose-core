@@ -15,7 +15,8 @@ Id DiagonalMsg::managerId_;
 vector< DiagonalMsg* > DiagonalMsg::msg_;
 
 DiagonalMsg::DiagonalMsg( Element* e1, Element* e2, unsigned int msgIndex )
-	: Msg( ObjId( managerId_, msg_.size() ), e1, e2 ), 
+	: Msg( ObjId( managerId_, (msgIndex != 0) ? msgIndex: msg_.size() ),
+					e1, e2 ), 
 	stride_( 1 )
 {
 	if ( msgIndex == 0 ) {
