@@ -694,6 +694,14 @@ void testShellSetGet()
 		assert( doubleEq( x, i * i * i ) );
 	}
 
+	/*
+	val.clear();
+	Field< double >::getVec( a1, "outputValue", val );
+	for ( unsigned int i = 0; i < size; ++i ) {
+		assert( doubleEq( val[i], i * i * i ) );
+	}
+	*/
+
 	shell->doDelete( a1 );
 	cout << "." << flush;
 }
@@ -750,6 +758,16 @@ bool checkOutput( Id e,
 	correct.push_back( v2 );
 	correct.push_back( v3 );
 	correct.push_back( v4 );
+
+	for ( unsigned int i = 0; i < 5; ++i ) {
+		double x = Field< double >::get( ObjId( e, i ), "outputValue" );
+		ret = ret && doubleEq( x, correct[i] );
+		if (report) 
+				cout << "( " << correct[i] << ", " << x << " ) ";
+		if ( !ret )
+			cout << "( " << correct[i] << ", " << x << " ) ";
+	}
+	/*
 	vector< double > retVec;
 	Field< double >::getVec( e, "outputValue", retVec );
 	assert( retVec.size() == 5 );
@@ -763,6 +781,7 @@ bool checkOutput( Id e,
 			cout << "( " << correct[i] << ", " << retVec[i] << " ) ";
 		}
 	}
+	*/
 	return ret;
 }
 
@@ -874,9 +893,9 @@ void testShellAddMsg()
 	const SrcFinfo* sf = dynamic_cast< const SrcFinfo* >(
 		Clock::initCinfo()->findFinfo( "process0" ) );
 	assert( sf );
-	unsigned int numTgts = clock.eref().element()->getNeighbours( tgts, 
-		sf );
+	unsigned int numTgts = clock.eref().element()->getNeighbours( tgts, sf );
 	assert( numTgts == 0 );
+	/*
 	ret = setupSched( shell, clock, a1 ); assert( ret );
 	ret = setupSched( shell, clock, a2 ); assert( ret );
 	ret = setupSched( shell, clock, b1 ); assert( ret );
@@ -891,7 +910,9 @@ void testShellAddMsg()
 	ret = setupSched( shell, clock, f2 ); assert( ret );
 	ret = setupSched( shell, clock, g1 ); assert( ret );
 	ret = setupSched( shell, clock, g2 ); assert( ret );
+	*/
 
+	shell->doUseClock( "a1,a2,b1,b2,c1,c2,d1,d2,e1,e2,f1,f2,g1,g2", "process", 0 );
 	numTgts = clock.eref().element()->getNeighbours( tgts, sf );
 	assert( numTgts == 14 );
 
@@ -936,6 +957,15 @@ void testShellAddMsg()
 	val = Field< double >::get( ObjId( a1, 4 ), "arg1Value" );
 	assert( doubleEq( val, 5 ) );
 
+	for ( unsigned int i = 0; i < 5; ++i ) {
+		double x = Field< double >::get( ObjId( a1, i ), "arg1Value" );
+		assert( doubleEq( x, i + 1 ) );
+		x = Field< double >::get( ObjId( b1, i ), "arg1Value" );
+		assert( doubleEq( x, i + 1 ) );
+		x = Field< double >::get( ObjId( c1, i ), "arg1Value" );
+		assert( doubleEq( x, i + 1 ) );
+	}
+	/*
 	vector< double > retVec( 0 );
 	Field< double >::getVec( a1, "arg1Value", retVec );
 	for ( unsigned int i = 0; i < 5; ++i )
@@ -950,6 +980,7 @@ void testShellAddMsg()
 	Field< double >::getVec( c1, "arg1Value", retVec );
 	for ( unsigned int i = 0; i < 5; ++i )
 		assert( doubleEq( retVec[i], i + 1 ) );
+		*/
 
 
 	///////////////////////////////////////////////////////////
@@ -1641,6 +1672,72 @@ void testGetMsgSrcAndTarget()
 	// cout << "." << flush;
 }
 
+// Defined in Element.cpp.
+extern void filterOffNodeTargets( 
+				unsigned int start,
+				unsigned int end,
+				bool isSrcGlobal,
+				unsigned int myNode,
+				vector< vector < Eref > >& erefs,
+				vector< vector< bool > >& targetNodes );
+
+void testFilterOffNodeTargets()
+{
+	Eref sheller = Id().eref();
+	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+	unsigned int numData = 6;
+
+	vector< vector< Eref > > origErefs( numData );
+	// erefs[ srcDataId ][entries]: targets for each dataId.
+	vector< vector< bool > > origTargetNodes( numData );
+	// targetNodes[srcDataId][node]
+
+	Id neuronId = shell->doCreate( "IntFire", Id(), "neurons", numData,
+				   MooseBlockBalance );
+	Element* elm = neuronId.element();
+
+	for ( unsigned int i = 0; i < numData; ++i ) {
+		origTargetNodes[i].resize( Shell::numNodes(), false );
+		for ( unsigned int j = 0; j < i; ++j )
+			origErefs[i].push_back( Eref (elm, j ) );
+	}
+
+	for ( unsigned int myNode = 0; myNode < Shell::numNodes(); ++myNode ){
+		vector< vector< Eref > > erefs = origErefs;
+		vector< vector< bool > > targetNodes = origTargetNodes;
+
+		filterOffNodeTargets( 
+						0, numData,
+						false, myNode, erefs, targetNodes );
+		unsigned int numPerNode = 1 + ( numData - 1 ) / Shell::numNodes();
+		for ( unsigned int i = 0; i < numData; ++i ) {
+			unsigned int sz = 0;
+			// cout << endl << i << ":	";
+			if ( i > numPerNode * myNode ) {
+				unsigned int j = i - numPerNode * myNode;
+				if ( j > numPerNode )
+					sz = numPerNode;
+				else
+					sz = j;
+			}
+			assert( erefs[i].size() == sz );
+			// cout << "(" << sz << ", " << erefs[i].size() << "),	";
+			for ( unsigned int j = 0; j < erefs[i].size(); ++j )
+				assert( erefs[i][j].getNode() == myNode );
+
+			for ( unsigned int j = 0; j < Shell::numNodes(); ++j ) {
+				if ( j == myNode )
+					assert( targetNodes[i][j] == false );
+				else
+					assert( targetNodes[i][j] == ( i > j * numPerNode ) );
+			}
+		}
+	}
+	cout << "." << flush;
+
+	shell->doDelete( neuronId );
+}
+
 void testShell( )
 {
 	testExtractIndices();
@@ -1651,12 +1748,16 @@ void testShell( )
 	testGetMsgs();	// Tests getting Msg info from Neutral.
 	testGetMsgSrcAndTarget();
 	// testShellMesh();
+	
+	// This is a multinode test, but only needs to run on master node.
+	testFilterOffNodeTargets();
 }
 
 extern void testWildcard();
 
 void testMpiShell( )
 {
+	testFilterOffNodeTargets();
 	testShellParserCreateDelete();
 	testTreeTraversal();
 	testChildren();

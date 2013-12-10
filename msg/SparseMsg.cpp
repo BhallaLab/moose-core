@@ -201,7 +201,8 @@ void SparseMsg::transpose()
 
 
 SparseMsg::SparseMsg( Element* e1, Element* e2, unsigned int msgIndex )
-	: Msg( ObjId( managerId_, msg_.size() ), e1, e2 )
+	: Msg( ObjId( managerId_, (msgIndex != 0) ? msgIndex: msg_.size() ),
+					e1, e2 )
 {
 	unsigned int nrows = 0;
 	unsigned int ncolumns = 0;

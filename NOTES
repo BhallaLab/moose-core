@@ -1191,5 +1191,35 @@ Major cleanup done on the MsgId generation, not perfect but the key commands
 issue a direct specification of the mid on all nodes and the rest of the time
 it does an increment which should happen identically on all nodes.
 
+Checkin 4890.
 In the meantime, on with the unit tests to testShell.cpp:942 at which point
 we need getVec.
+
+Bypassed that using a loop of 'get' calls. Now it starts messaging, which
+of course crashes.
+===========================================================================
+9 Dec
+Spent a lot of time adding a unit test for filterOffNodeTargets. Which works,
+but doesn't fix the problem with the messages not going out.
+
+Two bugs now: 
+- in testShell.cpp::testCopyFieldElement:460. Number of copies
+is wrong for 4 nodes, but OK for 2.
+- in testShell.cpp::testShellAddMsg:1001. Basically the messages don't go.
+
+Seems that the Clock does not have any messages to go out.
+
+
+===========================================================================
+10 Dec
+Sorted outgoing messages of clock. The ALLDATA flag in the targets had 
+confused it regarding which node to send to.
+
+Now it seems that although there is a message from a1 to a2, the msgDigest
+doesn't show any outgoing node.
+
+Nasty. Tracked down to error in how SingleMsg was handling sources() and
+targets().
+
+More subtleties needed fixing in how the off-node targets were identified.
+===========================================================================

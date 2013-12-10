@@ -69,6 +69,13 @@ unsigned int LocalDataElement::localDataStart() const
 
 unsigned int LocalDataElement::getNode( unsigned int dataId ) const {
 	// Assume numData = 95. DataId = 0-9: 0, DataId=80-89:8, DataId >= 90:9
+	if ( dataId == ALLDATA ) {
+		if ( numLocalData() > 0 ) {
+			return Shell::myNode();
+		} else {
+			return 0; // Sure to have some data on node 0.
+		}
+	}
 	return dataId / numPerNode_;
 }
 

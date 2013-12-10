@@ -15,7 +15,8 @@ Id OneToOneMsg::managerId_;
 vector< OneToOneMsg* > OneToOneMsg::msg_;
 
 OneToOneMsg::OneToOneMsg( Element* e1, Element* e2, unsigned int msgIndex )
-	: Msg( ObjId( managerId_, msg_.size() ), e1, e2 )
+	: Msg( ObjId( managerId_, (msgIndex != 0) ? msgIndex: msg_.size() ),
+					e1, e2 )
 {
 	if ( msgIndex == 0 ) {
 		msg_.push_back( this );
@@ -55,7 +56,7 @@ void OneToOneMsg::sources( vector< vector< Eref > > & v) const
 	unsigned int n = e1_->numData();
 	if ( n > e2_->numData() )
 		n = e2_->numData();
-	v.resize( n );
+	v.resize( e2_->numData() );
 	for ( unsigned int i = 0; i < n; ++i ) {
 		v[i].resize( 1, Eref( e1_, i ) );
 	}
@@ -66,7 +67,7 @@ void OneToOneMsg::targets( vector< vector< Eref > > & v) const
 	unsigned int n = e1_->numData();
 	if ( n > e2_->numData() )
 		n = e2_->numData();
-	v.resize( n );
+	v.resize( e1_->numData() );
 	for ( unsigned int i = 0; i < n; ++i ) {
 		v[i].resize( 1, Eref( e2_, i ) );
 	}

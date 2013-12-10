@@ -149,11 +149,11 @@ void Element::clearAllMsgs()
 
 const vector< MsgDigest >& Element::msgDigest( unsigned int index )
 {
-	assert( index < msgDigest_.size() );
 	if ( isRewired_ ) {
 			digestMessages();
 		isRewired_ = false;
 	}
+	assert( index < msgDigest_.size() );
 	return msgDigest_[ index ];
 }
 
@@ -259,20 +259,32 @@ vector< FuncOrder>  putFuncsInOrder(
 
 // Filter out the messages going off-node. Eliminate from erefs and
 // flip flags in targetNodes.
+// Do not set any flags for messages originating from off-node, though.
+// We're not interested in setting up targets that are the responsibility
+// of other nodes.
 void filterOffNodeTargets(
+	unsigned int start, // This specifies the range of dataIndex of parent
+	unsigned int end,	// Element that are present on current node.
+	bool isSrcGlobal,
+	unsigned int myNode, // I pass this in to help with debugging.
 	vector< vector < Eref > >& erefs,
-   	vector< vector< bool > >& targetNodes )
+   	vector< vector< bool > >& targetNodes ) // targetNodes[srcDataId][node]
 {
-	for ( unsigned int i = 0; i < erefs.size(); ++i ) {
-		vector< Eref >& vec = erefs[i];
+	for ( unsigned int i = start; i < end; ++i ) {
 		vector< Eref > temp;
+		vector< Eref >& vec = erefs[i];
 		for ( unsigned int j = 0; j < vec.size(); ++j ) {
 			const Eref& er = vec[j];
-			unsigned int node = er.element()->getNode( er.dataIndex() );
-			if ( node == Shell::myNode() )
-				targetNodes[i][j] = true;
-			else
+			unsigned int node = er.getNode();
+			if ( node != myNode ||
+					( er.dataIndex() == ALLDATA && 
+				  	(end - start) < erefs.size() )
+			) {
+				if ( !isSrcGlobal )
+					targetNodes[i][node] = true;
+			} else {
 				temp.push_back( er );
+			}
 		}
 		erefs[i] = temp; // Swap out the original set with the new one.
 	}
@@ -294,9 +306,13 @@ void Element::putTargetsInDigest(
 		assert( 0 );
 
 	if ( Shell::numNodes() > 1 )
-		filterOffNodeTargets( erefs, targetNodes );
+		filterOffNodeTargets( 
+						localDataStart(), 
+						localDataStart() + numLocalData(),
+						isGlobal(), Shell::myNode(), 
+						erefs, targetNodes );
 
-	for ( unsigned int j = 0; j < numData(); ++j ) {
+	for ( unsigned int j = 0; j < erefs.size(); ++j ) {
 		vector< MsgDigest >& md = 
 			msgDigest_[ msgBinding_.size() * j + srcNum ];
 		// k->func(); erefs[ j ];
@@ -341,18 +357,34 @@ void Element::putOffNodeTargetsInDigest(
 			// The HopFunc has to extract both these things to push into
 			// the correct SendBuffer.
 		}
-		vector< MsgDigest >& md = 
-			msgDigest_[ msgBinding_.size() * i + srcNum ];
-		md.push_back( MsgDigest( hop, tgts ) );
+		if ( tgts.size() > 0 ) {
+			vector< MsgDigest >& md = 
+				msgDigest_[ msgBinding_.size() * i + srcNum ];
+			md.push_back( MsgDigest( hop, tgts ) );
+		}
 	}
+}
+
+unsigned int findNumDigest( const vector< vector< MsgDigest > > & md,
+	   unsigned int totFunc, unsigned int numData, unsigned int funcNum	)
+{
+	unsigned int ret = 0;
+	for ( unsigned int i = 0; i < numData; ++i ) {
+		ret += md[ totFunc * i + funcNum ].size();
+	}
+	return ret;
 }
 
 void Element::digestMessages()
 {
+	bool report = 0; // for debugging
 	msgDigest_.clear();
 	msgDigest_.resize( msgBinding_.size() * numData() );
 	vector< bool > temp( Shell::numNodes(), false );
  	vector< vector< bool > > targetNodes( numData(), temp );
+	// targetNodes[srcDataId][node]. The idea is that if any dataEntry has
+	// a target off-node, it should flag the entry here so that it can
+	// send the message request to the proxy on that node.
 	for ( unsigned int i = 0; i < msgBinding_.size(); ++i ) {
 		// Go through and identify functions with the same ptr.
 		vector< FuncOrder > fo = putFuncsInOrder( this, msgBinding_[i] );
@@ -361,8 +393,28 @@ void Element::digestMessages()
 			const MsgFuncBinding& mfb = msgBinding_[i][ k->index() ];
 			putTargetsInDigest( i, mfb, *k, targetNodes );
 		}
-		if ( Shell::numNodes() > 1 )
-			putOffNodeTargetsInDigest( i, targetNodes );
+		if ( Shell::numNodes() > 1 ) {
+			if ( report ) {
+				unsigned int numPre = findNumDigest( msgDigest_, 
+								msgBinding_.size(), numData(), i );
+				putOffNodeTargetsInDigest( i, targetNodes );
+				unsigned int numPost = findNumDigest( msgDigest_, 
+								msgBinding_.size(), numData(), i );
+				cout << "\nfor Element " << name_;
+				cout << ", Func: " << i << ", numFunc = " << fo.size() <<
+					   ", numPre= " << numPre << 
+					   ", numPost= " << numPost << endl;
+				for ( unsigned int j = 0; j < numData(); ++j ) {
+					cout << endl << j << "	";
+					for ( unsigned int node = 0; node < Shell::numNodes(); ++node) {
+						cout << (int)targetNodes[j][node];
+					}
+				}
+				cout << endl;
+			} else {
+				putOffNodeTargetsInDigest( i, targetNodes );
+			}
+		}
 	}
 }
 
