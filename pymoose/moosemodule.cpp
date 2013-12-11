@@ -910,21 +910,24 @@ extern "C" {
        string -- value of type field of the Finfo object. This is a
        comma separated list of C++ template arguments
     */
-    string getFieldType(string className, string fieldName, string finfoType)
+    string getFieldType(string className, string fieldName, string finfoType="")
     {
         string fieldType = "";
-        string classInfoPath("/classes/" + className);
-        Id classId(classInfoPath);
-        assert (classId != Id());
-        // unsigned int numFinfos = Field<unsigned int>::get(ObjId(classId, 0), "num_" + finfoType);
-        Id fieldId(classId.path() + "/" + finfoType);
-        for (unsigned int ii = 0; ii < Field<unsigned int>::get(fieldId, "numData"); ++ii){
-            string _fieldName = Field<string>::get(ObjId(fieldId, ii, 0), "name");
-            if (fieldName == _fieldName){                
-                fieldType = Field<string>::get(ObjId(fieldId, ii, 0), "type");
-                break;
-            }
+        const Cinfo * cinfo = Cinfo::find(className);        
+        if (cinfo == NULL){
+            // if (verbose){
+            //     cerr << "Unknown class " << className << endl;
+            // }
+            return fieldType;
         }
+        Finfo * finfo = cinfo->findFinfo(fieldName);
+        if (finfo == NULL){
+            // if (verbose){
+            //     cerr << "Unknown field " << fieldName << endl;
+            // }
+            return fieldType;
+        }
+        fieldType = finfo->rttiType();
         return fieldType;        
     }
 
@@ -955,35 +958,46 @@ extern "C" {
     }
 
     /**
-       Return a pair containing (field name, finfo type). 
-    */
-    pair < string, string > getFieldFinfoTypePair(string className, string fieldName)
-    {
-        for (const char ** finfoType = getFinfoTypes(); *finfoType; ++finfoType){
-            string ftype = getFieldType(className, fieldName, string(*finfoType));
-            if (!ftype.empty()) {
-                return pair < string, string > (ftype, string(*finfoType));
-            }
-        }
-        return pair <string, string>("", "");
-    }
-
-    /**
        Return a vector of field names of specified finfo type.
     */
     vector<string> getFieldNames(string className, string finfoType)
     {
         vector <string> ret;
-        Id classId("/classes/" + className);
-        assert(classId != Id());
-        unsigned int numFinfos = Field<unsigned int>::get(ObjId(classId), "num_" + finfoType);
-        Id fieldId(classId.path() + "/" + finfoType);
-        if (fieldId == Id()){
+        Cinfo * cinfo = Cinfo::find(className);
+        if (cinfo == NULL){
+            cerr << "Invalid class name." << endl;
             return ret;
         }
-        for (unsigned int ii = 0; ii < numFinfos; ++ii){
-            string fieldName = Field<string>::get(ObjId(fieldId, DataId(0, ii, 0)), "name");
-            ret.push_back(fieldName);
+        // Finfo * (Cinfo:: * getFinfo)(unsigned int); // causes : warning: ISO C++ forbids taking the address of a bound member function to form a pointer to member function. 
+        if (finfoType == "valueFinfo"){
+            for (unsigned int ii = 0; ii < cinfo->getNumValueFinfo(); ++ii){
+                Finfo * finfo = cinfo->getValueFinfo(ii);
+                ret.push_back(finfo->name());
+            }
+        } else if (finfoType == "srcFinfo"){
+            for (unsigned int ii = 0; ii < cinfo->getNumSrcFinfo();  ++ii){
+                Finfo * finfo = cinfo->getSrcFinfo(ii);
+            }
+        }else if (finfoType == "destFinfo"){
+            for (unsigned int ii = 0; ii < cinfo->getNumDestFinfo(); ++ii){
+                Finfo * finfo = cinfo->getDestFinfo(ii);
+                ret.push_back(finfo->name());
+            }
+        } else if (finfoType == "lookupFinfo"){
+            for (unsigned int ii = 0; ii < cinfo->getNumLookupFinfo(); ++ii){
+                Finfo * finfo = cinfo->getLookupFinfo(ii);
+                ret.push_back(finfo->name());
+            }
+        } else if (finfoType == "sharedFinfo"){
+            for (unsigned int ii = 0; ii < cinfo->getNumSrcFinfo(); ++ii){
+                Finfo * finfo = cinfo->getSrcFinfo(ii);
+                ret.push_back(finfo->name());
+            }
+        } else if (finfoType == "fieldElementFinfo"){
+            for (unsigned int ii = 0; ii < cinfo->getNumFieldElementFinfo(); ++ii){
+                Finfo * finfo = cinfo->getFieldElementFinfo(ii);
+                ret.push_back(finfo->name());
+            }
         }
         return ret;
     }
@@ -995,21 +1009,50 @@ extern "C" {
        Populate the `fieldTypes` vector with corresponding C++ data
        type string (Finfo.type).
     */
-    int getFieldDict(Id classId, string finfoType,
+    int getFieldDict(string className, string finfoType,
                      vector<string>& fieldNames, vector<string>&fieldTypes)
     {
-        unsigned int numFinfos =
-                Field<unsigned int>::get(ObjId(classId),
-                                         "num_" + string(finfoType));
-        Id fieldId(classId.path() + "/" + string(finfoType));
-        if (fieldId == Id()){
+        Cinfo * cinfo = Cinfo::find(className);
+        if (cinfo == NULL){
+            cerr << "Invalid class." << endl;
             return 0;
         }
-        for (unsigned int ii = 0; ii < numFinfos; ++ii){
-            string fieldName = Field<string>::get(ObjId(fieldId, DataId(0, ii, 0)), "name");
-            fieldNames.push_back(fieldName);
-            string fieldType = Field<string>::get(ObjId(fieldId, DataId(0, ii, 0)), "type");
-            fieldTypes.push_back(fieldType);
+        if (finfoType == "valueFinfo"){
+            for (unsigned int ii = 0; ii < cinfo->getNumValueFinfo(); ++ii){
+                Finfo * finfo = cinfo->getValueFinfo(ii);
+                fieldNames.push_back(finfo->name());
+                fieldTypes.push_back(finfo->rttiType());
+            }
+        } else if (finfoType == "srcFinfo"){
+            for (unsigned int ii = 0; ii < cinfo->getNumSrcFinfo();  ++ii){
+                Finfo * finfo = cinfo->getSrcFinfo(ii);
+                fieldNames.push_back(finfo->name());
+                fieldTypes.push_back(finfo->rttiType());
+            }
+        }else if (finfoType == "destFinfo"){
+            for (unsigned int ii = 0; ii < cinfo->getNumDestFinfo(); ++ii){
+                Finfo * finfo = cinfo->getDestFinfo(ii);
+                fieldNames.push_back(finfo->name());
+                fieldTypes.push_back(finfo->rttiType());
+            }
+        } else if (finfoType == "lookupFinfo"){
+            for (unsigned int ii = 0; ii < cinfo->getNumLookupFinfo(); ++ii){
+                Finfo * finfo = cinfo->getLookupFinfo(ii);
+                fieldNames.push_back(finfo->name());
+                fieldTypes.push_back(finfo->rttiType());
+            }
+        } else if (finfoType == "sharedFinfo"){
+            for (unsigned int ii = 0; ii < cinfo->getNumSrcFinfo(); ++ii){
+                Finfo * finfo = cinfo->getSrcFinfo(ii);
+                fieldNames.push_back(finfo->name());
+                fieldTypes.push_back(finfo->rttiType());
+            }
+        } else if (finfoType == "fieldElementFinfo"){
+            for (unsigned int ii = 0; ii < cinfo->getNumFieldElementFinfo(); ++ii){
+                Finfo * finfo = cinfo->getFieldElementFinfo(ii);
+                fieldNames.push_back(finfo->name());
+                fieldTypes.push_back(finfo->rttiType());
+            }
         }
         return 1;
     }
@@ -1610,13 +1653,13 @@ extern "C" {
         static const char * finfoTypes [] = {"valueFinfo", "lookupFinfo", "srcFinfo", "destFinfo", "sharedFinfo", NULL};
         vector <string> fields, types;
         if (fieldType && strlen(fieldType) > 0){
-            if (getFieldDict(classId, string(fieldType), fields, types) == 0){
+            if (getFieldDict(className, string(fieldType), fields, types) == 0){
                 PyErr_SetString(PyExc_ValueError, "Invalid finfo type.");
                 return NULL;
             }
         } else {
             for (const char ** ptr = finfoTypes; *ptr != NULL; ++ptr){
-                if (getFieldDict(classId, string(*ptr), fields, types) == 0){
+                if (getFieldDict(className, string(*ptr), fields, types) == 0){
                     string message = "No such finfo type: ";
                     message += string(*ptr);
                     PyErr_SetString(PyExc_ValueError, message.c_str());
