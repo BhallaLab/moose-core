@@ -4,7 +4,7 @@ import sys
 import unittest
 import uuid
 
-sys.path.append('../../python')
+sys.path = ['../../python'] + sys.path
 try:
     import moose
 except ImportError:    
@@ -231,6 +231,12 @@ class TestDelete(unittest.TestCase):
     def testGetField(self):
         with self.assertRaises(ValueError):
             print(self.oid.name)
+
+class TestFieldAccess(unittest.TestCase):
+    def testSetGet(self):
+        a = moose.IntFire('alpha')
+        a.Vm = 2.0
+        self.assertAlmostEqual(a.Vm, 2.0)
 
 # class TestValueFieldTypes(unittest.TestCase):
 #     def setUp(self):

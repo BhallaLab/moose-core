@@ -278,8 +278,6 @@ extern "C" {
     vector<string> getFieldNames(string className, string finfoType);
     PyObject * get_ObjId_attr(_ObjId * oid, string attribute);
     const char ** getFinfoTypes();
-    int inner_getFieldDict(Id classId, string finfoType, vector<string>& fields, vector<string>& types); 
-
     /**
        Convert PyObject to C++ object. Returns a pointer to the
        converted object. Deallocation is caller responsibility
