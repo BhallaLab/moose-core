@@ -107,8 +107,6 @@ class SetGet0: public SetGet
 					dynamic_cast< const OpFunc0Base* >( func );
 			if ( op ) {
 				if ( tgt.isOffNode() ) {
-					if ( tgt.isGlobal() )
-						op->op( tgt.eref() );
 					const OpFunc* op2 = op->makeHopFunc( 
 						HopIndex( op->opIndex(), MooseSetHop ) );
 					const OpFunc0Base* hop = 
@@ -116,6 +114,8 @@ class SetGet0: public SetGet
 					assert( hop );
 					hop->op( tgt.eref() );
 					delete op2;
+					if ( tgt.isGlobal() )
+						op->op( tgt.eref() );
 					return true;
 				} else {
 					op->op( tgt.eref() );
@@ -157,14 +157,14 @@ template< class A > class SetGet1: public SetGet
 					dynamic_cast< const OpFunc1Base< A >* >( func );
 			if ( op ) {
 				if ( tgt.isOffNode() ) {
-					if ( tgt.isGlobal() )
-						op->op( tgt.eref(), arg );
 					const OpFunc* op2 = op->makeHopFunc( 
 						HopIndex( op->opIndex(), MooseSetHop ) );
 					const OpFunc1Base< A >* hop = 
 						dynamic_cast< const OpFunc1Base< A >* >( op2 );
 					hop->op( tgt.eref(), arg );
 					delete op2;
+					if ( tgt.isGlobal() )
+						op->op( tgt.eref(), arg );
 					return true;
 				} else {
 					op->op( tgt.eref(), arg );
@@ -407,14 +407,14 @@ template< class A1, class A2 > class SetGet2: public SetGet
 					dynamic_cast< const OpFunc2Base< A1, A2 >* >( func );
 			if ( op ) {
 				if ( tgt.isOffNode() ) {
-					if ( tgt.isGlobal() )
-						op->op( tgt.eref(), arg1, arg2 );
 					const OpFunc* op2 = op->makeHopFunc( 
 						HopIndex( op->opIndex(), MooseSetHop ) );
 					const OpFunc2Base< A1, A2 >* hop = 
 						dynamic_cast< const OpFunc2Base< A1, A2 >* >( op2 );
 					hop->op( tgt.eref(), arg1, arg2 );
 					delete op2;
+					if ( tgt.isGlobal() )
+						op->op( tgt.eref(), arg1, arg2 );
 					return true;
 				} else {
 					op->op( tgt.eref(), arg1, arg2 );
@@ -644,8 +644,6 @@ template< class A1, class A2, class A3 > class SetGet3: public SetGet
 					dynamic_cast< const OpFunc3Base< A1, A2, A3 >* >( func);
 			if ( op ) {
 				if ( tgt.isOffNode() ) {
-					if ( tgt.isGlobal() )
-						op->op( tgt.eref(), arg1, arg2, arg3 );
 					const OpFunc* op2 = op->makeHopFunc( 
 						HopIndex( op->opIndex(), MooseSetHop ) );
 					const OpFunc3Base< A1, A2, A3 >* hop = 
@@ -653,6 +651,8 @@ template< class A1, class A2, class A3 > class SetGet3: public SetGet
 										op2 );
 					hop->op( tgt.eref(), arg1, arg2, arg3 );
 					delete op2;
+					if ( tgt.isGlobal() )
+						op->op( tgt.eref(), arg1, arg2, arg3 );
 					return true;
 				} else {
 					op->op( tgt.eref(), arg1, arg2, arg3 );
@@ -705,14 +705,14 @@ template< class A1, class A2, class A3, class A4 > class SetGet4: public SetGet
 				dynamic_cast< const OpFunc4Base< A1, A2, A3, A4 >* >( func);
 			if ( op ) {
 				if ( tgt.isOffNode() ) {
-					if ( tgt.isGlobal() )
-						op->op( tgt.eref(), arg1, arg2, arg3, arg4 );
 					const OpFunc* op2 = op->makeHopFunc( 
 						HopIndex( op->opIndex(), MooseSetHop ) );
 					const OpFunc4Base< A1, A2, A3, A4 >* hop = 
 						dynamic_cast< const OpFunc4Base< A1, A2, A3, A4 >* >( op2 );
 					hop->op( tgt.eref(), arg1, arg2, arg3, arg4 );
 					delete op2;
+					if ( tgt.isGlobal() )
+						op->op( tgt.eref(), arg1, arg2, arg3, arg4 );
 					return true;
 				} else {
 					op->op( tgt.eref(), arg1, arg2, arg3, arg4 );
@@ -767,14 +767,14 @@ template< class A1, class A2, class A3, class A4, class A5 > class SetGet5:
 				dynamic_cast< const OpFunc5Base< A1, A2, A3, A4, A5 >* >( func);
 			if ( op ) {
 				if ( tgt.isOffNode() ) {
-					if ( tgt.isGlobal() )
-						op->op( tgt.eref(), arg1, arg2, arg3, arg4, arg5 );
 					const OpFunc* op2 = op->makeHopFunc( 
 						HopIndex( op->opIndex(), MooseSetHop ) );
 					const OpFunc5Base< A1, A2, A3, A4, A5 >* hop = 
 						dynamic_cast< const OpFunc5Base< A1, A2, A3, A4, A5 >* >( op2 );
 					hop->op( tgt.eref(), arg1, arg2, arg3, arg4, arg5 );
 					delete op2;
+					if ( tgt.isGlobal() )
+						op->op( tgt.eref(), arg1, arg2, arg3, arg4, arg5 );
 					return true;
 				} else {
 					op->op( tgt.eref(), arg1, arg2, arg3, arg4, arg5 );
@@ -836,14 +836,14 @@ template< class A1, class A2, class A3, class A4, class A5, class A6 > class Set
 				dynamic_cast< const OpFunc6Base< A1, A2, A3, A4, A5, A6 >* >( func);
 			if ( op ) {
 				if ( tgt.isOffNode() ) {
-					if ( tgt.isGlobal() )
-						op->op( tgt.eref(), arg1, arg2, arg3, arg4, arg5, arg6 );
 					const OpFunc* op2 = op->makeHopFunc( 
 						HopIndex( op->opIndex(), MooseSetHop ) );
 					const OpFunc6Base< A1, A2, A3, A4, A5, A6 >* hop = 
 						dynamic_cast< const OpFunc6Base< A1, A2, A3, A4, A5, A6 >* >( op2 );
 					hop->op( tgt.eref(), arg1, arg2, arg3, arg4, arg5, arg6 );
 					delete op2;
+					if ( tgt.isGlobal() )
+						op->op( tgt.eref(), arg1, arg2, arg3, arg4, arg5, arg6 );
 					return true;
 				} else {
 					op->op( tgt.eref(), arg1, arg2, arg3, arg4, arg5, arg6);

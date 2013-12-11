@@ -257,11 +257,22 @@ vector< FuncOrder>  putFuncsInOrder(
 	return fo;
 }
 
+/**
+ * Picks which messages we retain in the MsgDigest. Does so at two levels:
+ * - Builds an array[][] of bools to indicate messages sourced here that 
+ *   go off-node. These will have special HopFuncs added.
+ * - Retains entries in erefs that are sourced anywhere, but targetted here.
+ *   Need to be able to handle off-node messages landing here, as well as
+ *   the entirely local messages.
+ */
+
 // Filter out the messages going off-node. Eliminate from erefs and
 // flip flags in targetNodes.
 // Do not set any flags for messages originating from off-node, though.
 // We're not interested in setting up targets that are the responsibility
-// of other nodes.
+// of other nodes. 
+// Retain Erefs sourced from off-node that go to current node, but eliminate
+// those sourced and going off-node.
 void filterOffNodeTargets(
 	unsigned int start, // This specifies the range of dataIndex of parent
 	unsigned int end,	// Element that are present on current node.
@@ -270,21 +281,27 @@ void filterOffNodeTargets(
 	vector< vector < Eref > >& erefs,
    	vector< vector< bool > >& targetNodes ) // targetNodes[srcDataId][node]
 {
-	for ( unsigned int i = start; i < end; ++i ) {
+	// i is index of src dataid
+	for ( unsigned int i = 0; i < erefs.size(); ++i ) { 
 		vector< Eref > temp;
 		vector< Eref >& vec = erefs[i];
-		for ( unsigned int j = 0; j < vec.size(); ++j ) {
+		for ( unsigned int j = 0; j < vec.size(); ++j ) { // list of tgts.
 			const Eref& er = vec[j];
 			unsigned int node = er.getNode();
-			if ( node != myNode ||
-					( er.dataIndex() == ALLDATA && 
-				  	(end - start) < erefs.size() )
-			) {
-				if ( !isSrcGlobal )
+			if ( !isSrcGlobal && // Don't send any  msgs
+				// off-node, as it will be dealt with by the off-node src.
+				i >= start && i < end )   // Sourced from current node.
+			{
+				if ( node != myNode )				// Target is off-node
 					targetNodes[i][node] = true;
-			} else {
-				temp.push_back( er );
+				if ( er.dataIndex() == ALLDATA || er.element()->isGlobal()){
+					for ( unsigned int k = 0; k < Shell::numNodes(); ++k )
+						if ( k != myNode )
+							targetNodes[i][k] = true;
+				}
 			}
+			if ( node == myNode ) // Regardless of source, target is onNode.
+				temp.push_back( er );
 		}
 		erefs[i] = temp; // Swap out the original set with the new one.
 	}

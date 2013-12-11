@@ -1222,4 +1222,23 @@ Nasty. Tracked down to error in how SingleMsg was handling sources() and
 targets().
 
 More subtleties needed fixing in how the off-node targets were identified.
+
+Now it is down to getting the postmaster to schedule message sending.
+First problem is that the reinit call isn't propagating to the off-node
+clocks.
+
+Much struggling later, turned out to be just that I needed to make clean
+and recompile. But now it is hanging in a confusing way, in a section 
+before the 'start'. Also it thinks reinit has been called twice on the
+worker node.
 ===========================================================================
+11 Dec.
+Fixed an issue with the clearPending() command so that it can safely be
+called recursively. This helps.
+
+Now it is trying to send a message on node 1 but the list of targets includes
+off-node entries.
+
+Much painful debugging of the filterOffNodeTargets later, now it clears
+the message sending. Hooray! But it promptly fails in the next unit test,
+where I copy messages.

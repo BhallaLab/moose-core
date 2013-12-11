@@ -110,3 +110,14 @@ unsigned int LocalDataElement::getNumOnNode( unsigned int node ) const
 
 	return numPerNode_;
 }
+
+/*
+// virtual func, overridden.
+char* LocalDataElement::dataFromDataId( unsigned int dataId, unsigned int fieldIndex ) const
+{
+	assert( dataId >= localDataStart() );
+	dataId -= localDataStart();
+	assert( dataId < numLocalData_ );
+	return data_ + ( dataId * cinfo()->dinfo()->size() );
+}
+*/
