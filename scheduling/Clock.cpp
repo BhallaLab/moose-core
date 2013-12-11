@@ -535,7 +535,7 @@ void Clock::handleStep( const Eref& e, unsigned int numSteps )
 void Clock::handleReinit( const Eref& e )
 {
 	if ( isRunning_ || doingReinit_ ) {
-		cout << "Clock::handleStart: Warning: simulation already in progress.\n Command ignored\n";
+		cout << "Clock::handleReinit: Warning: simulation already in progress.\n Command ignored\n";
 		return;
 	}
 	currentTime_ = 0.0;
