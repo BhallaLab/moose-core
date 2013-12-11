@@ -912,9 +912,9 @@ void testShellAddMsg()
 	ret = setupSched( shell, clock, g2 ); assert( ret );
 	*/
 
-	shell->doUseClock( "a1,a2,b1,b2,c1,c2,d1,d2,e1,e2,f1,f2,g1,g2", "process", 0 );
+	shell->doUseClock( "a1,a2,b1,b2,c1,c2,d1,d2,e1,e2,f1,f2,g1,g2,postmaster", "process", 0 );
 	numTgts = clock.eref().element()->getNeighbours( tgts, sf );
-	assert( numTgts == 14 );
+	assert( numTgts == 15 );
 
 	///////////////////////////////////////////////////////////
 	// Set up initial conditions
@@ -1685,20 +1685,23 @@ void testFilterOffNodeTargets()
 {
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
-	unsigned int numData = 6;
+	unsigned int numSrcData = 6; // # entries in src of msg.
+	unsigned int numData = 6; // Number of entries in msg destination elm.
 
-	vector< vector< Eref > > origErefs( numData );
+	vector< vector< Eref > > origErefs( numSrcData );
 	// erefs[ srcDataId ][entries]: targets for each dataId.
-	vector< vector< bool > > origTargetNodes( numData );
+	vector< vector< bool > > origTargetNodes( numSrcData );
 	// targetNodes[srcDataId][node]
 
 	Id neuronId = shell->doCreate( "IntFire", Id(), "neurons", numData,
 				   MooseBlockBalance );
 	Element* elm = neuronId.element();
+	unsigned int numPerSrcNode = 1 + ( numSrcData - 1 ) / Shell::numNodes();
+	unsigned int numPerNode = 1 + ( numData - 1 ) / Shell::numNodes();
 
-	for ( unsigned int i = 0; i < numData; ++i ) {
+	for ( unsigned int i = 0; i < numSrcData; ++i ) {
 		origTargetNodes[i].resize( Shell::numNodes(), false );
-		for ( unsigned int j = 0; j < i; ++j )
+		for ( unsigned int j = 0; j < i && j < numData; ++j )
 			origErefs[i].push_back( Eref (elm, j ) );
 	}
 
@@ -1707,13 +1710,12 @@ void testFilterOffNodeTargets()
 		vector< vector< bool > > targetNodes = origTargetNodes;
 
 		filterOffNodeTargets( 
-						0, numData,
+						0, numSrcData,
 						false, myNode, erefs, targetNodes );
-		unsigned int numPerNode = 1 + ( numData - 1 ) / Shell::numNodes();
-		for ( unsigned int i = 0; i < numData; ++i ) {
+		for ( unsigned int i = 0; i < numSrcData; ++i ) {
 			unsigned int sz = 0;
 			// cout << endl << i << ":	";
-			if ( i > numPerNode * myNode ) {
+			if ( i > numPerSrcNode * myNode ) {
 				unsigned int j = i - numPerNode * myNode;
 				if ( j > numPerNode )
 					sz = numPerNode;
@@ -1733,6 +1735,47 @@ void testFilterOffNodeTargets()
 			}
 		}
 	}
+
+	for ( unsigned int i = 0; i < numSrcData; ++i ) {
+		origTargetNodes[i].clear();
+		origTargetNodes[i].resize( Shell::numNodes(), false );
+		origErefs[i].clear();
+		origErefs[i].push_back( Eref (elm, ALLDATA ) );
+	}
+	for ( unsigned int myNode = 0; myNode < Shell::numNodes(); ++myNode ){
+		vector< vector< Eref > > erefs = origErefs;
+		vector< vector< bool > > targetNodes = origTargetNodes;
+		// cout << "\nmyNode = " << myNode << endl;
+
+		unsigned int start = numPerSrcNode * myNode;
+		unsigned int end = start + 1+ (numSrcData-1) % numPerSrcNode;
+		filterOffNodeTargets( 
+						start, end,
+						false, myNode, erefs, targetNodes );
+		for ( unsigned int i = 0; i < numData; ++i ) {
+			// assert( erefs[i].size() == 1 );
+			// The above should be true, except that this test always
+			// runs on node 0 and Erefs refer to the system myNode to
+			// find where they are.
+			assert( erefs[i].size() == ( myNode == 0 ) );
+			// cout << "\n i = " << i << ", sz=" << erefs[i].size();
+			for ( unsigned int j = 0; j < erefs[i].size(); ++j )
+				assert( erefs[i][j].getNode() == myNode );
+
+			// Rule is : msgs sourced here that go off-node.
+			// This works despite the system myNode, because in ALLDATA
+			// we do a special lookup.
+			for ( unsigned int j = 0; j < Shell::numNodes(); ++j ) {
+				// sourced here: i / numPerNode == myNode
+				if ( i / numPerNode == myNode && j != myNode )
+					assert( targetNodes[i][j] == true );
+				else
+					assert( targetNodes[i][j] == false );
+				// cout << "\ntargetNodes[" << i << "][" << j << "] = " << targetNodes[i][j];
+			}
+		}
+	}
+
 	cout << "." << flush;
 
 	shell->doDelete( neuronId );
@@ -1775,7 +1818,6 @@ void testMpiShell( )
 	testCopyMsgOps();
 	testWildcard();
 	testSyncSynapseSize();
-
 	// Stuff for doLoadModel
 	testFindModelParent();
 }

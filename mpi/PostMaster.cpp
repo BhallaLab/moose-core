@@ -160,7 +160,7 @@ void PostMaster::reinit( const Eref& e, ProcPtr p )
 		);
 		clearPending(); // Try to interleave communications.
 	}
-	while ( numSendDone_ < Shell::numNodes() )
+	while ( numSendDone_ < Shell::numNodes() -1 )
 		clearPending();
 	numSendDone_ = 0;
 #endif
@@ -182,7 +182,7 @@ void PostMaster::process( const Eref& e, ProcPtr p )
 		);
 		clearPending(); // Try to interleave communications.
 	}
-	while ( numSendDone_ < Shell::numNodes() )
+	while ( numSendDone_ < Shell::numNodes() -1 )
 		clearPending();
 	numSendDone_ = 0;
 #endif
@@ -225,28 +225,34 @@ void PostMaster::clearPendingSetGet()
 	MPI_Test( &setRecvReq_, &isSetRecv_, &setRecvStatus_ );
 	if ( isSetRecv_ && isSetRecv_ != MPI_UNDEFINED )
 	{
-		// Handle arrived Set call
-		const TgtInfo* tgt = 
-				reinterpret_cast< const TgtInfo * >( &setRecvBuf_[0] );
-		const Eref& e = tgt->eref();
-		const OpFunc *op = OpFunc::lookop( tgt->bindIndex() );
-		assert( op );
-		if ( tgt->dataSize() == MooseSetHop ) {
-			op->opBuffer( e, &setRecvBuf_[ TgtInfo::headerSize ] );
-		} else if ( tgt->dataSize() == MooseSetVecHop ) {
-			op->opVecBuffer( e, &setRecvBuf_[ TgtInfo::headerSize ] );
-		} else if ( tgt->dataSize() == MooseGetHop ) {
-			int requestingNode = setRecvStatus_.MPI_SOURCE;
-			handleRemoteGet( e, op, requestingNode );
-		}
-
-		// Now the operation is done. Re-post recv.
+		isSetRecv_ = 0;
+		int requestingNode = setRecvStatus_.MPI_SOURCE;
+		int count = 0;
+		MPI_Get_count( &setRecvStatus_, MPI_DOUBLE, &count );
+		// Immediately post another Recv. Needed because we may call
+		// the clearPendingSetGet() function recursively. So copy 
+		// data to another buffer first.
+		vector< double > temp( setRecvBuf_.begin(), 
+						setRecvBuf_.begin() + count );
 		MPI_Irecv( &setRecvBuf_[0], recvBufSize_, MPI_DOUBLE,
 						MPI_ANY_SOURCE,
 						SETTAG, MPI_COMM_WORLD,
 						&setRecvReq_
 		);
-		isSetRecv_ = 0;
+
+		double* buf = &temp[0];
+		// Handle arrived Set call
+		const TgtInfo* tgt = reinterpret_cast< const TgtInfo * >( buf );
+		const Eref& e = tgt->eref();
+		const OpFunc *op = OpFunc::lookop( tgt->bindIndex() );
+		assert( op );
+		if ( tgt->dataSize() == MooseSetHop ) {
+			op->opBuffer( e, buf + TgtInfo::headerSize );
+		} else if ( tgt->dataSize() == MooseSetVecHop ) {
+			op->opVecBuffer( e, buf + TgtInfo::headerSize );
+		} else if ( tgt->dataSize() == MooseGetHop ) {
+			handleRemoteGet( e, op, requestingNode );
+		}
 	}
 #endif // USE_MPI
 }

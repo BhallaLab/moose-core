@@ -108,8 +108,11 @@ template< class A > class OpFunc1Base: public OpFunc
 			Element* elm = e.element();
 			assert( temp.size() >= elm->numLocalData() );
 			unsigned int k = 0;
-			for ( unsigned int i = 0; i < elm->numLocalData(); ++i) {
-				for ( unsigned int j = 0; j < elm->numField( i ); ++j) {
+			unsigned int start = elm->localDataStart();
+			unsigned int end = start + elm->numLocalData();
+			for ( unsigned int i = start; i < end; ++i) {
+				unsigned int nf = elm->numField( i - start );
+				for ( unsigned int j = 0; j < nf; ++j) {
 					Eref er( elm, i, j );
 					op( er, temp[ k % temp.size() ] );
 					++k;
@@ -150,8 +153,11 @@ template< class A1, class A2 > class OpFunc2Base: public OpFunc
 			Element* elm = e.element();
 			assert( temp1.size() >= elm->numLocalData() );
 			unsigned int k = 0;
-			for ( unsigned int i = 0; i < elm->numLocalData(); ++i) {
-				for ( unsigned int j = 0; j < elm->numField( i ); ++j) {
+			unsigned int start = elm->localDataStart();
+			unsigned int end = start + elm->numLocalData();
+			for ( unsigned int i = start; i < end; ++i) {
+				unsigned int nf = elm->numField( i - start );
+				for ( unsigned int j = 0; j < nf; ++j) {
 					Eref er( elm, i, j );
 					op( er, temp1[ k % temp1.size() ], 
 						temp2[ k % temp2.size() ] );
