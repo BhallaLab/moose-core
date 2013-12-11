@@ -199,8 +199,8 @@ void PostMaster::clearPending()
 void PostMaster::handleRemoteGet( 
 				const Eref& e, const OpFunc* op, int requestingNode )
 {
-	static double getReturnBuf[reserveBufSize];
 #ifdef USE_MPI
+	static double getReturnBuf[reserveBufSize];
 	op->opBuffer( e, &getReturnBuf[0] ); // stuff return value into buf.
 	// Send out the data. Blocking. Don't want any other gets till done
 	int size = getReturnBuf[0];
@@ -424,8 +424,9 @@ void PostMaster::dispatchSetBuf( const Eref& e )
 // that come into the current node.
 double* PostMaster::remoteGet( const Eref& e, unsigned int bindIndex )
 {
-	static double getSendBuf[TgtInfo::headerSize];
 	static double getRecvBuf[reserveBufSize];
+#ifdef USE_MPI
+	static double getSendBuf[TgtInfo::headerSize];
 	static MPI_Request getSendReq;
 	static MPI_Request getRecvReq;
 	static MPI_Status getSendStatus;
@@ -438,7 +439,6 @@ double* PostMaster::remoteGet( const Eref& e, unsigned int bindIndex )
 	TgtInfo* tgt = reinterpret_cast< TgtInfo* >( &getSendBuf[0] );
 	tgt->set( e.objId(), bindIndex, MooseGetHop );
 	assert ( !e.element()->isGlobal() && e.getNode() != Shell::myNode() );
-#ifdef USE_MPI
 	// Post receive for return value.
 	MPI_Irecv( 		&getRecvBuf[0],
 					recvBufSize_, MPI_DOUBLE, 
@@ -462,8 +462,8 @@ double* PostMaster::remoteGet( const Eref& e, unsigned int bindIndex )
 		assert ( complete != MPI_UNDEFINED );
 		clearPending();
 	}
-	return &getRecvBuf[0];
 #endif
+	return &getRecvBuf[0];
 }
 
 ///////////////////////////////////////////////////////////////
