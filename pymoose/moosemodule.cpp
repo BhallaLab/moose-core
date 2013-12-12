@@ -150,7 +150,7 @@ extern "C" {
     /////////////////////////////////////////////////////////////////
     // Module globals 
     /////////////////////////////////////////////////////////////////
-    static int verbosity = 1;
+    int verbosity = 1;
     // static int isSingleThreaded = 0;
     static int isInfinite = 0;
     static unsigned int numNodes = 1;
@@ -911,16 +911,16 @@ extern "C" {
         string fieldType = "";
         const Cinfo * cinfo = Cinfo::find(className);        
         if (cinfo == NULL){
-            // if (verbose){
-            //     cerr << "Unknown class " << className << endl;
-            // }
+            if (verbosity > 0){
+                cerr << "Unknown class " << className << endl;
+            }
             return fieldType;
         }
-        Finfo * finfo = cinfo->findFinfo(fieldName);
+        const Finfo * finfo = cinfo->findFinfo(fieldName);
         if (finfo == NULL){
-            // if (verbose){
-            //     cerr << "Unknown field " << fieldName << endl;
-            // }
+            if (verbosity > 0){
+                cerr << "Unknown field " << fieldName << endl;
+            }
             return fieldType;
         }
         fieldType = finfo->rttiType();
@@ -973,6 +973,7 @@ extern "C" {
         } else if (finfoType == "srcFinfo"){
             for (unsigned int ii = 0; ii < cinfo->getNumSrcFinfo();  ++ii){
                 Finfo * finfo = cinfo->getSrcFinfo(ii);
+                ret.push_back(finfo->name());
             }
         }else if (finfoType == "destFinfo"){
             for (unsigned int ii = 0; ii < cinfo->getNumDestFinfo(); ++ii){
@@ -1885,8 +1886,10 @@ extern "C" {
         }
         return ret;
     }
-    // This should not be required or accessible to the user. Put here
-    // for debugging threading issue.
+    /**
+       This should not be required or accessible to the user. Put here
+       for debugging threading issue.
+    */
     PyObject * moose_quit(PyObject * dummy)
     {
         finalize();
@@ -1894,14 +1897,19 @@ extern "C" {
         Py_RETURN_NONE;
     }
 
-    /// Go through all elements under /classes and ask for defining a
-    /// Python class for it.
+    /**
+       Go through all elements under /classes and ask for defining a
+       Python class for it.
+    */
     int defineAllClasses(PyObject * module_dict)
     {
         static vector <Id> classes(Field< vector<Id> >::get(ObjId("/classes"),
                                                             "children"));
         for (unsigned ii = 0; ii < classes.size(); ++ii){
             const string& class_name = classes[ii].element()->getName();
+            if (verbosity > 0){
+                cout << "\nCreating " << class_name << endl;
+            }
             const Cinfo * cinfo = Cinfo::find(class_name);
             if (!cinfo){
                 cerr << "Error: no cinfo found with name " << class_name << endl;
@@ -1913,12 +1921,13 @@ extern "C" {
         }
         return 1;
     }
-
-    // An attempt to define classes dynamically
-    // http://stackoverflow.com/questions/8066438/how-to-dynamically-create-a-derived-type-in-the-python-c-api
-    // gives a clue We pass class_name in stead of class_id because we
-    // have to recursively call this function using the base class
-    // string.
+    /**
+      An attempt to define classes dynamically
+      http://stackoverflow.com/questions/8066438/how-to-dynamically-create-a-derived-type-in-the-python-c-api
+      gives a clue We pass class_name in stead of class_id because we
+      have to recursively call this function using the base class
+      string.
+    */
     PyDoc_STRVAR(moose_Class_documentation,
                  "*-----------------------------------------------------------------*\n"
                  "* This is Python generated documentation.                         *\n"
@@ -1938,6 +1947,11 @@ extern "C" {
             return 1;
         }
         const Cinfo* base = cinfo->baseCinfo();
+#ifndef NDEBUG
+        if (verbosity > 1){
+            cout << "Defining class " << class_name << endl; //" with base=" << base->name() << endl;
+        }
+#endif
         if (base && !define_class(module_dict, base)){
             return 0;
         }
@@ -1945,23 +1959,25 @@ extern "C" {
                 (PyTypeObject*)PyType_Type.tp_alloc(&PyType_Type, 0);
         // Py_TYPE(new_class) = &PyType_Type;
         new_class->tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
-        // should we avoid Py_TPFLAGS_HEAPTYPE as it imposes certain
-        // limitations:
-        // http://mail.python.org/pipermail/python-dev/2009-July/090921.html
-        // But otherwise somehow GC tries tp_traverse on these classes
-        // (even when I unset Py_TPFLAGS_HAVE_GC) and fails the
-        // assertion in debug build of Python:
-        //
-        // python: Objects/typeobject.c:2683: type_traverse: Assertion `type->tp_flags & Py_TPFLAGS_HEAPTYPE' failed.
-        //
-        // In released versions of Python there is a crash at
-        // Py_Finalize().
-        //
-        // Also if HEAPTYPE is true, then help(classname) causes a
-        // segmentation fault as it tries to convert the class object
-        // to a heaptype object (resulting in an invalid pointer). If
-        // heaptype is not set it uses tp_name to print the help.
-        // Py_SIZE(new_class) = sizeof(_ObjId);        
+        /*
+        should we avoid Py_TPFLAGS_HEAPTYPE as it imposes certain
+        limitations:
+        http://mail.python.org/pipermail/python-dev/2009-July/090921.html
+        But otherwise somehow GC tries tp_traverse on these classes
+        (even when I unset Py_TPFLAGS_HAVE_GC) and fails the
+        assertion in debug build of Python:
+        
+        python: Objects/typeobject.c:2683: type_traverse: Assertion `type->tp_flags & Py_TPFLAGS_HEAPTYPE' failed.
+        
+        In released versions of Python there is a crash at
+        Py_Finalize().
+        
+        Also if HEAPTYPE is true, then help(classname) causes a
+        segmentation fault as it tries to convert the class object
+        to a heaptype object (resulting in an invalid pointer). If
+        heaptype is not set it uses tp_name to print the help.
+        Py_SIZE(new_class) = sizeof(_ObjId);        
+        */
         string str = "moose." + class_name;
         new_class->tp_name = (char *)calloc(str.length()+1,
                                             sizeof(char));
@@ -2007,9 +2023,12 @@ extern "C" {
         PyGetSetDef empty;
         empty.name = NULL;
         get_getsetdefs()[class_name].push_back(empty);
+        get_getsetdefs()[class_name].back().name = NULL;
         new_class->tp_getset = &(get_getsetdefs()[class_name][0]);
-        // Cannot do this for HEAPTYPE ?? but pygobject.c does this in
-        // pygobject_register_class
+        /*
+          Cannot do this for HEAPTYPE ?? but pygobject.c does this in
+          pygobject_register_class
+        */
         if (PyType_Ready(new_class) < 0){
             cerr << "Fatal error: Could not initialize class '" << class_name
                  << "'" << endl;
@@ -2017,6 +2036,10 @@ extern "C" {
         }
         get_moose_classes().insert(pair<string, PyTypeObject*> (class_name, new_class));
         Py_INCREF(new_class);
+        if (verbosity > 0){
+            cout << "Created class " << new_class->tp_name << endl
+                 << "\tbase=" << new_class->tp_base->tp_name << endl;
+        }
         // PyDict_SetItemString(new_class->tp_dict, "__module__", PyString_FromString("moose"));
         // string doc = const_cast<Cinfo*>(cinfo)->getDocs();
         // PyDict_SetItemString(new_class->tp_dict, "__doc__", PyString_FromString(" \0"));
@@ -2057,8 +2080,8 @@ extern "C" {
         _Field * ret = PyObject_New(_Field, &moose_DestField);
         if (moose_DestField.tp_init((PyObject*)ret, args, NULL) == 0){
             Py_XDECREF(args);
-            // I thought PyObject_New creates a new ref, but without
-            // the following XINCREF, the destinfo gets gc-ed.
+            /* I thought PyObject_New creates a new ref, but without
+               the following XINCREF, the destinfo gets gc-ed. */
             Py_XINCREF(ret);
             get_inited_destfields()[full_name] =  (PyObject*)ret;
             return (PyObject*)ret;
@@ -2073,20 +2096,25 @@ extern "C" {
     {
         static char * doc = "Destination field";
         const string& class_name = cinfo->name();
-        // Create methods for destFinfos. The tp_dict is initialized by
-        // PyType_Ready. So we insert the dynamically generated
-        // methods after that.        
+#ifndef NDEBUG
+        if (verbosity > 1){
+            cout << "\tCreating destField attributes for " << class_name << endl;
+        }
+#endif
         vector <PyGetSetDef>& vec = get_getsetdefs()[class_name];
-
-        // We do not know the final number of user-accessible
-        // destFinfos as we have to ignore the destFinfos starting
-        // with get/set. So use a vector instead of C array.
+        /*
+          We do not know the final number of user-accessible
+          destFinfos as we have to ignore the destFinfos starting
+          with get/set. So use a vector instead of C array.
+        */
         size_t curr_index = vec.size();
         for (unsigned int ii = 0; ii < cinfo->getNumDestFinfo(); ++ii){
             Finfo * destFinfo = const_cast<Cinfo*>(cinfo)->getDestFinfo(ii);
             const string& destFinfo_name = destFinfo->name();
-            // get_{xyz} and set_{xyz} are internal destFinfos for
-            // accessing valueFinfos. Ignore them.
+            /*
+              get_{xyz} and set_{xyz} are internal destFinfos for
+              accessing valueFinfos. Ignore them.
+            */
             if (destFinfo_name.find("get_") == 0 || destFinfo_name.find("set_") == 0){
                 continue;
             }
@@ -2098,14 +2126,18 @@ extern "C" {
                     destFinfo_name.size());
             vec[curr_index].doc = doc;
             vec[curr_index].get = (getter)moose_ObjId_get_destField_attr;
-            PyObject * args = PyTuple_New(1);
-            
+            PyObject * args = PyTuple_New(1);            
             if (args == NULL){
                 cerr << "moosemodule.cpp: define_destFinfos: Failed to allocate tuple" << endl;
                 return 0;
             }
             PyTuple_SetItem(args, 0, PyString_FromString(destFinfo_name.c_str()));
             vec[curr_index].closure = (void*)args;
+#ifndef NDEBUG
+        if (verbosity > 1){
+            cout << "\tCreated destField " << vec[curr_index].name << endl;
+        }
+#endif
             ++curr_index;
         } // ! for
         
@@ -2149,12 +2181,9 @@ extern "C" {
             Py_XINCREF(it->second);
             return it->second;
         }
-        
-        // Create a new instance of LookupField `name` and set it as
-        // an attribute of the object self.
-
-        // Create the argument for init method of LookupField.  Thisx
-        // will be (fieldname, self)
+        /* Create a new instance of LookupField `name` and set it as
+         * an attribute of the object self. Create the argument for
+         * init method of LookupField.  This will be (fieldname, self) */
         PyObject * args = PyTuple_New(2);
                 
         PyTuple_SetItem(args, 0, self);
@@ -2164,14 +2193,130 @@ extern "C" {
         if (moose_LookupField.tp_init((PyObject*)ret, args, NULL) == 0){
             Py_XDECREF(args);
             get_inited_lookupfields()[full_name] =  (PyObject*)ret;
-            // I thought PyObject_New creates a new ref, but without
-            // the following XINCREF, the lookupfinfo gets gc-ed.
+            /* I thought PyObject_New creates a new ref, but without
+             * the following XINCREF, the lookupfinfo gets gc-ed. */
             Py_XINCREF(ret);
             return (PyObject*)ret;
         }
         Py_XDECREF((PyObject*)ret);
         Py_XDECREF(args);
         return NULL;
+    }
+    
+    int define_lookupFinfos(const Cinfo * cinfo)
+    {
+        static char * doc = "Lookup field";
+        const string & class_name = cinfo->name();
+#ifndef NDEBUG
+        if (verbosity > 1){
+            cout << "\tDefining lookupFields for " << class_name << endl;
+        }
+#endif
+        unsigned int num_lookupFinfos = cinfo->getNumLookupFinfo();
+        unsigned int curr_index = get_getsetdefs()[class_name].size();
+        for (unsigned int ii = 0; ii < num_lookupFinfos; ++ii){
+            const string& lookupFinfo_name = const_cast<Cinfo*>(cinfo)->getLookupFinfo(ii)->name();
+            PyGetSetDef getset;
+            get_getsetdefs()[class_name].push_back(getset);
+            get_getsetdefs()[class_name][curr_index].name = (char*)calloc(lookupFinfo_name.size() + 1, sizeof(char));
+            strncpy(get_getsetdefs()[class_name][curr_index].name, const_cast<char*>(lookupFinfo_name.c_str()), lookupFinfo_name.size());
+            get_getsetdefs()[class_name][curr_index].doc = doc; //moose_LookupField_documentation;
+            get_getsetdefs()[class_name][curr_index].get = (getter)moose_ObjId_get_lookupField_attr;
+            PyObject * args = PyTuple_New(1);
+            PyTuple_SetItem(args, 0, PyString_FromString(lookupFinfo_name.c_str()));
+            get_getsetdefs()[class_name][curr_index].closure = (void*)args;
+#ifndef NDEBUG
+        if (verbosity > 1){
+            cout << "\tDefined lookupField " << get_getsetdefs()[class_name][curr_index].name << endl;
+        }
+#endif
+            
+            ++curr_index;
+        }
+        return 1;
+    }
+
+    PyObject * moose_ObjId_get_elementField_attr(PyObject * self,
+                                                        void * closure)
+    {
+        // if (!PyObject_IsInstance(self, (PyObject*)&ObjIdType)){
+        //       PyErr_SetString(PyExc_TypeError,
+        //                       "First argument must be an instance of element");
+        //       return NULL;
+        //   }
+        _ObjId * obj = (_ObjId*)self;
+        if (!Id::isValid(obj->oid_.id)){
+            RAISE_INVALID_ID(NULL, "moose_ObjId_get_elementField_attr");
+        }
+        char * name = NULL;
+        if (!PyArg_ParseTuple((PyObject *)closure,
+                              "s:moose_ObjId_get_elementField_attr: expected a string in getter closure.",
+                              &name)){
+            return NULL;
+        }
+        // If the ElementField already exists, return it
+        string full_name = obj->oid_.path() + "." + string(name);
+        // cout << "ElementField fullname: " << full_name << endl;
+        map<string, PyObject * >::iterator it = get_inited_elementfields().find(full_name);
+        if (it != get_inited_elementfields().end()){
+            Py_XINCREF(it->second);
+            return it->second;
+        }
+        
+        // Create a new instance of ElementField `name` and set it as
+        // an attribute of the object `self`.
+        // 1. Create the argument for init method of ElementField.  This
+        //   will be (fieldname, self)
+        PyObject * args = PyTuple_New(2);                
+        PyTuple_SetItem(args, 0, self);
+        Py_XINCREF(self); // compensate for stolen ref
+        PyTuple_SetItem(args, 1, PyString_FromString(name));
+        _Field * ret = PyObject_New(_Field, &moose_ElementField);
+        // 2. Now use this arg to actually create the element field.
+        if (moose_ElementField.tp_init((PyObject*)ret, args, NULL) == 0){
+            Py_XDECREF(args);
+            get_inited_elementfields()[full_name] =  (PyObject*)ret;
+            // I thought PyObject_New creates a new ref, but without
+            // the following XINCREF, the finfo gets gc-ed.
+            Py_XINCREF(ret);
+            return (PyObject*)ret;
+        }
+        Py_XDECREF((PyObject*)ret);
+        Py_XDECREF(args);
+        return NULL;
+    }
+
+    int define_elementFinfos(const Cinfo * cinfo)
+    {
+        static char doc[] = "Element field\0";
+        const string & class_name = cinfo->name();
+#ifndef NDEBUG
+        if (verbosity > 1){
+            cout << "\tDefining elementFields for " << class_name << endl;
+        }
+#endif
+        unsigned int num_fieldElementFinfo = cinfo->getNumFieldElementFinfo();
+        unsigned int curr_index = get_getsetdefs()[class_name].size();
+        for (unsigned int ii = 0; ii < num_fieldElementFinfo; ++ii){
+            const string& finfo_name = const_cast<Cinfo*>(cinfo)->getFieldElementFinfo(ii)->name();
+            PyGetSetDef getset;
+            get_getsetdefs()[class_name].push_back(getset);
+            get_getsetdefs()[class_name][curr_index].name = (char*)calloc(finfo_name.size() + 1, sizeof(char));
+            strncpy(get_getsetdefs()[class_name][curr_index].name, const_cast<char*>(finfo_name.c_str()), finfo_name.size());
+            get_getsetdefs()[class_name][curr_index].doc = doc;
+            get_getsetdefs()[class_name][curr_index].get = (getter)moose_ObjId_get_elementField_attr;
+            PyObject * args = PyTuple_New(1);
+            PyTuple_SetItem(args, 0, PyString_FromString(finfo_name.c_str()));
+            get_getsetdefs()[class_name][curr_index].closure = (void*)args;
+#ifndef NDEBUG
+        if (verbosity > 1){
+            cout << "\tDefined elementField " << get_getsetdefs()[class_name][curr_index].name << endl;
+        }
+#endif
+            
+            ++curr_index;
+        }
+        return 1;
     }
 
     PyObject * oid_to_element(ObjId oid)
@@ -2245,101 +2390,6 @@ extern "C" {
         }
         return new_obj;
     }
-    
-    int define_lookupFinfos(const Cinfo * cinfo)
-    {
-        static char * doc = "Lookup field";
-        const string & class_name = cinfo->name();
-        unsigned int num_lookupFinfos = cinfo->getNumLookupFinfo();
-        unsigned int curr_index = get_getsetdefs()[class_name].size();
-        for (unsigned int ii = 0; ii < num_lookupFinfos; ++ii){
-            const string& lookupFinfo_name = const_cast<Cinfo*>(cinfo)->getLookupFinfo(ii)->name();
-            PyGetSetDef getset;
-            get_getsetdefs()[class_name].push_back(getset);
-            get_getsetdefs()[class_name][curr_index].name = (char*)calloc(lookupFinfo_name.size() + 1, sizeof(char));
-            strncpy(get_getsetdefs()[class_name][curr_index].name, const_cast<char*>(lookupFinfo_name.c_str()), lookupFinfo_name.size());
-            get_getsetdefs()[class_name][curr_index].doc = doc; //moose_LookupField_documentation;
-            get_getsetdefs()[class_name][curr_index].get = (getter)moose_ObjId_get_lookupField_attr;
-            PyObject * args = PyTuple_New(1);
-            PyTuple_SetItem(args, 0, PyString_FromString(lookupFinfo_name.c_str()));
-            get_getsetdefs()[class_name][curr_index].closure = (void*)args;
-            ++curr_index;
-        }
-        return 1;
-    }
-
-    PyObject * moose_ObjId_get_elementField_attr(PyObject * self,
-                                                        void * closure)
-    {
-        // if (!PyObject_IsInstance(self, (PyObject*)&ObjIdType)){
-        //       PyErr_SetString(PyExc_TypeError,
-        //                       "First argument must be an instance of element");
-        //       return NULL;
-        //   }
-        _ObjId * obj = (_ObjId*)self;
-        if (!Id::isValid(obj->oid_.id)){
-            RAISE_INVALID_ID(NULL, "moose_ObjId_get_elementField_attr");
-        }
-        char * name = NULL;
-        if (!PyArg_ParseTuple((PyObject *)closure,
-                              "s:moose_ObjId_get_elementField_attr: expected a string in getter closure.",
-                              &name)){
-            return NULL;
-        }
-        // If the ElementField already exists, return it
-        string full_name = obj->oid_.path() + "." + string(name);
-        // cout << "ElementField fullname: " << full_name << endl;
-        map<string, PyObject * >::iterator it = get_inited_elementfields().find(full_name);
-        if (it != get_inited_elementfields().end()){
-            Py_XINCREF(it->second);
-            return it->second;
-        }
-        
-        // Create a new instance of ElementField `name` and set it as
-        // an attribute of the object `self`.
-        // 1. Create the argument for init method of ElementField.  This
-        //   will be (fieldname, self)
-        PyObject * args = PyTuple_New(2);                
-        PyTuple_SetItem(args, 0, self);
-        Py_XINCREF(self); // compensate for stolen ref
-        PyTuple_SetItem(args, 1, PyString_FromString(name));
-        _Field * ret = PyObject_New(_Field, &moose_ElementField);
-        // 2. Now use this arg to actually create the element field.
-        if (moose_ElementField.tp_init((PyObject*)ret, args, NULL) == 0){
-            Py_XDECREF(args);
-            get_inited_elementfields()[full_name] =  (PyObject*)ret;
-            // I thought PyObject_New creates a new ref, but without
-            // the following XINCREF, the finfo gets gc-ed.
-            Py_XINCREF(ret);
-            return (PyObject*)ret;
-        }
-        Py_XDECREF((PyObject*)ret);
-        Py_XDECREF(args);
-        return NULL;
-    }
-
-    int define_elementFinfos(const Cinfo * cinfo)
-    {
-        static char * doc = "Element field\0";
-        const string & class_name = cinfo->name();
-        unsigned int num_fieldElementFinfo = cinfo->getNumFieldElementFinfo();
-        unsigned int curr_index = get_getsetdefs()[class_name].size();
-        for (unsigned int ii = 0; ii < num_fieldElementFinfo; ++ii){
-            const string& finfo_name = const_cast<Cinfo*>(cinfo)->getFieldElementFinfo(ii)->name();
-            PyGetSetDef getset;
-            get_getsetdefs()[class_name].push_back(getset);
-            get_getsetdefs()[class_name][curr_index].name = (char*)calloc(finfo_name.size() + 1, sizeof(char));
-            strncpy(get_getsetdefs()[class_name][curr_index].name, const_cast<char*>(finfo_name.c_str()), finfo_name.size());
-            get_getsetdefs()[class_name][curr_index].doc = doc;
-            get_getsetdefs()[class_name][curr_index].get = (getter)moose_ObjId_get_elementField_attr;
-            PyObject * args = PyTuple_New(1);
-            PyTuple_SetItem(args, 0, PyString_FromString(finfo_name.c_str()));
-            get_getsetdefs()[class_name][curr_index].closure = (void*)args;
-            ++curr_index;
-        }
-        return 1;
-    }
-
 
 
     /////////////////////////////////////////////////////////////////////
