@@ -28,9 +28,11 @@ DataElement::DataElement( Id id, const Cinfo* c, const string& name,
  * Note that n is the number of DataEntries made. This may be _less_ than
  * the starting number of entries. If you want to copy an element tree
  * then you have to pre-multiply n by the original size.
+ * startEntry is the starting index. It is expected that the subset used
+ * will be contiguous from this index.
  */
 DataElement::DataElement( Id id, const Element* orig, 
-				unsigned int n )
+				unsigned int n, unsigned int startEntry )
 	:	
 		Element( id, orig->cinfo(), orig->getName() )
 {
@@ -38,7 +40,7 @@ DataElement::DataElement( Id id, const Element* orig,
 		n = 1;
 	numLocalData_ = n;
 	data_ = cinfo()->dinfo()->copyData( orig->data( 0 ), orig->numData(), 
-					numLocalData_ );
+					numLocalData_, startEntry );
 	// cinfo_->postCreationFunc( id, this );
 }
 
@@ -94,7 +96,7 @@ void DataElement::resize( unsigned int newNumLocalData )
 	numLocalData_ = newNumLocalData;
 	char* temp = data_;
 	data_ = cinfo()->dinfo()->copyData( 
-					temp, numLocalData_, newNumLocalData );
+					temp, numLocalData_, newNumLocalData, 0 );
 	cinfo()->dinfo()->destroyData( temp );
 	numLocalData_ = newNumLocalData;
 }

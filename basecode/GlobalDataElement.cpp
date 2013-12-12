@@ -28,7 +28,7 @@ GlobalDataElement::GlobalDataElement( Id id, const Cinfo* c,
 GlobalDataElement::GlobalDataElement( Id id, const Element* orig, 
 				unsigned int n )
 	:	
-		DataElement( id, orig, n )
+		DataElement( id, orig, n, 0 )
 {;}
 
 // Virtual destructor.

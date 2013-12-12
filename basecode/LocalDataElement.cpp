@@ -28,7 +28,8 @@ LocalDataElement::LocalDataElement( Id id, const Cinfo* c,
 LocalDataElement::LocalDataElement( Id id, const Element* orig, 
 				unsigned int n )
 	:	
-		DataElement( id, orig, setDataSize( n ) )
+		DataElement( id, orig, setDataSize( n ), 
+		( 1 + (n - 1 ) / Shell::numNodes() ) * Shell::myNode() )
 {;}
 
 // Virtual destructor, but the base DataElement does the needful
