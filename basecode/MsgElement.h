@@ -44,7 +44,9 @@ class MsgElement: public Element
 		{;}
 
 		/** 
-		 * Virtual copier. Doesn't do anything here.
+		 * Virtual copier. Doesn't do anything. The copy
+		 * happens at the lower level, involving the Msg classes
+		 * and the MsgElement just manages them.
 		 */
 		Element* copyElement( Id newParent, Id newId, unsigned int n, 
 			bool toGlobal ) const

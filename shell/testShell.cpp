@@ -1027,7 +1027,7 @@ void testCopyMsgOps()
 {
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
-	Id pa = shell->doCreate( "Neutral", Id(), "pa", 1 );
+	Id pa = shell->doCreate( "Neutral", Id(), "pa", 1, MooseGlobal );
 	unsigned int size = 5;
 
 

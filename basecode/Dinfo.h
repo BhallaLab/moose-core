@@ -32,7 +32,7 @@ class DinfoBase
 		 * original data as many times as possible.
 		 */
 		virtual char* copyData( const char* orig, unsigned int origEntries,
-			unsigned int copyEntries ) const = 0;
+			unsigned int copyEntries, unsigned int startEntry ) const = 0;
 
 		/**
 		 * Assigns data contents from 'orig' over to 'copy'. Tiles the
@@ -76,7 +76,7 @@ template< class D > class Dinfo: public DinfoBase
 		}
 
 		char* copyData( const char* orig, unsigned int origEntries,
-			unsigned int copyEntries ) const
+			unsigned int copyEntries, unsigned int startEntry ) const
 		{
 			if ( origEntries == 0 )
 				return 0;
@@ -88,7 +88,7 @@ template< class D > class Dinfo: public DinfoBase
 				return 0;
 			const D* origData = reinterpret_cast< const D* >( orig );
 			for ( unsigned int i = 0; i < copyEntries; ++i ) {
-				ret[ i ] = origData[ i % origEntries ];
+				ret[ i ] = origData[ ( i + startEntry ) % origEntries ];
 			}
 
 			/*

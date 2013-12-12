@@ -39,7 +39,8 @@ class DataElement: public Element
 		 * This constructor copies over the original n times. It is
 		 * used for doing all copies, in Shell::innerCopyElements.
 		 */
-		DataElement( Id id, const Element* orig, unsigned int n );
+		DataElement( Id id, const Element* orig, unsigned int n, 
+						unsigned int startEntry );
 
 		/**
 		 * Virtual Destructor
