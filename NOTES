@@ -1265,6 +1265,8 @@ the send buffer isn't being cleared either.
 Fixed it up. The send buffer was not being cleared and also there was no
 check that all sends had completed, before going on to the next cycle.
 With this we advance further till the next instance of getVec.
-Actually the problem is with the copy command.
+Actually the problem is with the copy command. 
+Turns out I was not correctly offsetting the original data when doing the
+copy. Now clears that test.
 
 ===========================================================================
