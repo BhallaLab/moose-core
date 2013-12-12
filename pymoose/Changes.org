@@ -1,14 +1,26 @@
 * Changes in async13 branch
 ** Dec 2013
+   - Everything is 1D now. So, instead of dims=(n1, n2, ...) we have
+     n=numData for __init__ methods.
+   - Added isGlobal flag with keyword argument g=n (n is an unsigned int) in __init__ method.
    - path always includes index
    - Id.name returns a single string in stead of list of identical string for each element
    - slicing of Id implemented
    - Hash of an ObjId is 16 lsb of Id, 32 lsb of dataId, 16 lsb of fieldIndex, in that order from msb to lsb
+   - Initialization and object deletion now prints a lot more info in debug compile if VERBOSITY is set to 2.
 
 
 * Issues in async13 branch - Dec 2013
-  - [ ] Too slow in interactive python - effect of mpi?
-  - [ ] Floating point error in ipython interactive console when trying to print path:
+  - [X] Too slow in interactive python - effect of mpi?
+    - [X] This was possibly due to uninitialized numData in
+      ObjId_init_from_path which caused ematrix with extraordinarily
+      large number of data elements to be created unless numData was
+      explicitly specified.
+  - [X] Floating point error in ipython interactive console when trying to print path:
+    - [X] This was possibly due to uninitialized numData in
+      ObjId_init_from_path which caused ematrix with extraordinarily
+      large number of data elements to be created unless numData was
+      explicitly specified.
 #+begin_src text
 subha@chamcham:~/src/moose_async13/tests/python$ ipython 
 /usr/local/lib/python2.7/dist-packages/IPython/utils/path.py:471: UserWarning: Found old IPython config file u'/home/subha/.ipython/ipy_user_conf.py' (modified by user)
