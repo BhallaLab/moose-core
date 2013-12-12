@@ -1267,6 +1267,13 @@ check that all sends had completed, before going on to the next cycle.
 With this we advance further till the next instance of getVec.
 Actually the problem is with the copy command. 
 Turns out I was not correctly offsetting the original data when doing the
-copy. Now clears that test.
+copy. Now clears that test. Checkin 4907.
+Next, in testSyncSynapseSize: Fixed a low-level lookup that would only work
+on a single-node calculation. Then yet another getVec is commented out.
+With this it clears all unit tests on 2 nodes. Major milestone.
+On 4 nodes it croaks in testShellAddMsg:968, which is our old friend where
+it starts off the little test of all the different message types.
+Fails on 2 of the 4 nodes: one with a bad msg index in Arith::send, and 
+another trying to finish up a SetVec. Perhaps we're not synced properly?
 
 ===========================================================================
