@@ -706,13 +706,6 @@ void testShellSetGet()
 	cout << "." << flush;
 }
 
-bool setupSched( Shell* shell, ObjId& clock, Id dest )
-{
-	ObjId ret = shell->doAddMsg( "OneToAll", 
-		clock, "proc0", ObjId( dest, 0 ), "proc" );
-	return ( ret != ObjId() );
-}
-
 bool checkArg1( Id id, 
 	double v0, double v1, double v2, double v3, double v4 )
 {
@@ -886,6 +879,7 @@ void testShellAddMsg()
 	// Set up scheduling
 	///////////////////////////////////////////////////////////
 	shell->doSetClock( 0, 1.0 );
+	shell->doSetClock( 9, 1.0 ); // Postmaster uses clock 9, always.
 
 	ObjId clock( Id( 1 ), 0 );
 	// I want to compare the # of process msgs before and after.
@@ -895,26 +889,10 @@ void testShellAddMsg()
 	assert( sf );
 	unsigned int numTgts = clock.eref().element()->getNeighbours( tgts, sf );
 	assert( numTgts == 0 );
-	/*
-	ret = setupSched( shell, clock, a1 ); assert( ret );
-	ret = setupSched( shell, clock, a2 ); assert( ret );
-	ret = setupSched( shell, clock, b1 ); assert( ret );
-	ret = setupSched( shell, clock, b2 ); assert( ret );
-	ret = setupSched( shell, clock, c1 ); assert( ret );
-	ret = setupSched( shell, clock, c2 ); assert( ret );
-	ret = setupSched( shell, clock, d1 ); assert( ret );
-	ret = setupSched( shell, clock, d2 ); assert( ret );
-	ret = setupSched( shell, clock, e1 ); assert( ret );
-	ret = setupSched( shell, clock, e2 ); assert( ret );
-	ret = setupSched( shell, clock, f1 ); assert( ret );
-	ret = setupSched( shell, clock, f2 ); assert( ret );
-	ret = setupSched( shell, clock, g1 ); assert( ret );
-	ret = setupSched( shell, clock, g2 ); assert( ret );
-	*/
 
-	shell->doUseClock( "a1,a2,b1,b2,c1,c2,d1,d2,e1,e2,f1,f2,g1,g2,postmaster", "process", 0 );
+	shell->doUseClock( "a1,a2,b1,b2,c1,c2,d1,d2,e1,e2,f1,f2,g1,g2", "process", 0 );
 	numTgts = clock.eref().element()->getNeighbours( tgts, sf );
-	assert( numTgts == 15 );
+	assert( numTgts == 14 );
 
 	///////////////////////////////////////////////////////////
 	// Set up initial conditions
@@ -1044,6 +1022,7 @@ void testShellAddMsg()
 }
 
 // Very similar to above, except that the tests are done on a copy.
+// For now we can only copy from globals.
 void testCopyMsgOps()
 {
 	Eref sheller = Id().eref();
@@ -1055,20 +1034,20 @@ void testCopyMsgOps()
 	///////////////////////////////////////////////////////////
 	// Set up the objects.
 	///////////////////////////////////////////////////////////
-	Id a1 = shell->doCreate( "Arith", pa, "a1", size );
-	Id a2 = shell->doCreate( "Arith", pa, "a2", size );
+	Id a1 = shell->doCreate( "Arith", pa, "a1", size, MooseGlobal );
+	Id a2 = shell->doCreate( "Arith", pa, "a2", size, MooseGlobal );
 
-	Id b1 = shell->doCreate( "Arith", pa, "b1", size );
-	Id b2 = shell->doCreate( "Arith", pa, "b2", size );
+	Id b1 = shell->doCreate( "Arith", pa, "b1", size, MooseGlobal );
+	Id b2 = shell->doCreate( "Arith", pa, "b2", size, MooseGlobal );
 
-	Id c1 = shell->doCreate( "Arith", pa, "c1", size );
-	Id c2 = shell->doCreate( "Arith", pa, "c2", size );
+	Id c1 = shell->doCreate( "Arith", pa, "c1", size, MooseGlobal );
+	Id c2 = shell->doCreate( "Arith", pa, "c2", size, MooseGlobal );
 
-	Id d1 = shell->doCreate( "Arith", pa, "d1", size );
-	Id d2 = shell->doCreate( "Arith", pa, "d2", size );
+	Id d1 = shell->doCreate( "Arith", pa, "d1", size, MooseGlobal );
+	Id d2 = shell->doCreate( "Arith", pa, "d2", size, MooseGlobal );
 
-	Id e1 = shell->doCreate( "Arith", pa, "e1", size );
-	Id e2 = shell->doCreate( "Arith", pa, "e2", size );
+	Id e1 = shell->doCreate( "Arith", pa, "e1", size, MooseGlobal );
+	Id e2 = shell->doCreate( "Arith", pa, "e2", size, MooseGlobal );
 
 	///////////////////////////////////////////////////////////
 	// Set up initial conditions and some scheduling.
@@ -1150,10 +1129,7 @@ void testCopyMsgOps()
 	///////////////////////////////////////////////////////////
 	vector< Id > kids = Field< vector< Id > >::get( pa2, "children");
 	assert ( kids.size() == 10 );
-	for ( unsigned int i = 0; i < kids.size(); ++i ) {
-		ret = setupSched( shell, clock, kids[i] ); 
-		assert( ret );
-	}
+	shell->doUseClock( "/pa2/#", "process", 0 );
 
 	unsigned int j = 0;
 	assert( kids[j].element()->getName() == "a1" ); ++j;
@@ -1167,11 +1143,16 @@ void testCopyMsgOps()
 	assert( kids[j].element()->getName() == "e1" ); ++j;
 	assert( kids[j].element()->getName() == "e2" ); ++j;
 
+	/*
 	vector< double > retVec;
 	Field< double >::getVec( kids[0], "arg1Value", retVec );
 	assert( retVec.size() == 5 );
-	for (unsigned int i = 0; i < 5; ++i )
-		assert( doubleEq( retVec[i], init[i] ) );
+	assert( doubleEq( retVec[i], init[i] ) );
+	*/
+	for (unsigned int i = 0; i < 5; ++i ) {
+		double x = Field< double >::get( ObjId( kids[0], i ), "arg1Value");
+		assert( doubleEq( x, init[i] ) );
+	}
 
 	///////////////////////////////////////////////////////////
 	// Run it

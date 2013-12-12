@@ -282,7 +282,14 @@ const Cinfo* Clock::initCinfo()
 		"6. Stimulus tables"
 		"7. More stimulus tables"
 		"8. Plots"
-		"9. Slower graphics like cell arrays or 3-D displays"
+		"9. Postmaster. This must be called last of all and nothing else "
+		"should use this Tick. The Postmaster is automatically scheduled "
+		"at set up time. The Tick should be given the longest possible "
+		"value, typically but not always equal to one of the other ticks, "
+		"so as to batch the "
+		"communications. For spiking-only communications, it is usually "
+		"possible to space the communication tick by as much as 1-2 ms "
+		"which is the axonal + synaptic delay. "
 		"",
 	};
 
