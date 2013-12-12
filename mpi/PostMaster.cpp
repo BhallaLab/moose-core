@@ -34,7 +34,7 @@ PostMaster::PostMaster()
 				isSetSent_( 1 ), // Flag. Have any pending 'set' gone?
 				isSetRecv_( 0 ), // Flag. Has some data come in?
 				setSendSize_( 0 ),
-				numSendDone_( 0 )
+				numRecvDone_( 0 )
 {
 	for ( unsigned int i = 0; i < Shell::numNodes(); ++i ) {
 		sendBuf_[i].resize( reserveBufSize, 0 );
@@ -138,6 +138,21 @@ const Cinfo* PostMaster::initCinfo()
 	return &postMasterCinfo;
 }
 
+/**
+ * Finalize all outgoing messages, clear the sendSize vector so that we
+ * can handle another round of messages.
+ */
+void PostMaster::finalizeSends()
+{
+#ifdef USE_MPI
+	static vector< MPI_Status > status( Shell::numNodes() );
+	MPI_Waitall( Shell::numNodes() -1, &sendReq_[0], &status[0] );
+	for (unsigned int i = 0; i < Shell::numNodes(); ++i ) {
+		sendSize_[i] = 0;
+	}
+#endif
+}
+
 //
 /**
  * PostMaster class: handles cross-node messaging using MPI.
@@ -147,6 +162,7 @@ const Cinfo* PostMaster::initCinfo()
 void PostMaster::reinit( const Eref& e, ProcPtr p )
 {
 #ifdef USE_MPI
+	unsigned int reqIndex = 0;
 	for ( unsigned int i = 0; i < Shell::numNodes(); ++i )
 	{
 		if ( i == Shell::myNode() ) continue;
@@ -156,19 +172,21 @@ void PostMaster::reinit( const Eref& e, ProcPtr p )
 			&sendBuf_[i][0], sendSize_[i], MPI_DOUBLE,
 			i, 		// Where to send to.
 			MSGTAG, MPI_COMM_WORLD,
-			&sendReq_[i]
+			&sendReq_[ reqIndex++ ]
 		);
 		clearPending(); // Try to interleave communications.
 	}
-	while ( numSendDone_ < Shell::numNodes() -1 )
+	while ( numRecvDone_ < Shell::numNodes() -1 )
 		clearPending();
-	numSendDone_ = 0;
+	finalizeSends();
+	numRecvDone_ = 0;
 #endif
 }
 
 void PostMaster::process( const Eref& e, ProcPtr p )
 {
 #ifdef USE_MPI
+	unsigned int reqIndex = 0;
 	for ( unsigned int i = 0; i < Shell::numNodes(); ++i )
 	{
 		if ( i == Shell::myNode() ) continue;
@@ -178,13 +196,14 @@ void PostMaster::process( const Eref& e, ProcPtr p )
 			&sendBuf_[i][0], sendSize_[i], MPI_DOUBLE,
 			i, 		// Where to send to.
 			MSGTAG, MPI_COMM_WORLD,
-			&setSendReq_
+			&sendReq_[ reqIndex++ ]
 		);
 		clearPending(); // Try to interleave communications.
 	}
-	while ( numSendDone_ < Shell::numNodes() -1 )
+	while ( numRecvDone_ < Shell::numNodes() -1 )
 		clearPending();
-	numSendDone_ = 0;
+	finalizeSends();
+	numRecvDone_ = 0;
 #endif
 }
 
@@ -193,7 +212,7 @@ void PostMaster::clearPending()
 	if ( Shell::numNodes() == 1 )
 		return;
 	clearPendingSetGet();
-	clearPendingSend();
+	clearPendingRecv();
 }
 
 void PostMaster::handleRemoteGet( 
@@ -294,7 +313,7 @@ void PostMaster::clearPendingGet()
 }
 */
 
-void PostMaster::clearPendingSend()
+void PostMaster::clearPendingRecv()
 {
 #ifdef USE_MPI
 	int done = 0;
@@ -336,7 +355,7 @@ void PostMaster::clearPendingSend()
 						// Ensure we have contiguous entries in recvReq_
 				 );
 	}
-	numSendDone_ += done;
+	numRecvDone_ += done;
 #endif
 }
 

@@ -116,7 +116,9 @@ class PostMaster {
 		/// Clears arrived set and get calls
 		void clearPendingSetGet();
 		/// Clears arrived messages.
-		void clearPendingSend();
+		void clearPendingRecv();
+		/// Checks that all sends have gone out
+		void finalizeSends();
 
 		/// Handles 'get' calls from another node, to an object on mynode.
 		void handleRemoteGet( const Eref& e, 
@@ -165,7 +167,7 @@ class PostMaster {
 		int isSetSent_;
 		int isSetRecv_;
 		int setSendSize_;
-		unsigned int numSendDone_;
+		unsigned int numRecvDone_;
 };
 
 #endif	// _POST_MASTER_H

@@ -329,6 +329,13 @@ int main( int argc, char** argv )
 		nonMpiTests( s ); // These tests do not need the process loop.
 
 	if ( Shell::myNode() == 0 ) {
+		if ( Shell::numNodes() > 1 ) {
+			// Use the last clock for the postmaster, so that it is called
+			// after everything else has been processed and all messages
+			// are ready to send out.
+			s->doUseClock( "/postmaster", "process", 9 );
+			s->doSetClock( 9, 1.0 ); // Use a sensible default.
+		}
 #ifdef DO_UNIT_TESTS
 		if ( doUnitTests ) {
 			mpiTests();

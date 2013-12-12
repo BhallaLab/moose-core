@@ -1242,3 +1242,29 @@ off-node entries.
 Much painful debugging of the filterOffNodeTargets later, now it clears
 the message sending. Hooray! But it promptly fails in the next unit test,
 where I copy messages. Checkin 4900.
+
+Next place of failure seems to be when the system tries to send messages
+to nonexistent objects, deleted when the testShell::testShellAddMsg
+function ended, but accessed by the next unit test testCopyMsgOps
+in Shell::doReinit. Somewhere in clearPendingSend.
+===========================================================================
+12 Dec.
+Turns out we're accessing objects a1 and b1: these were the msg sources of
+messages on the respective nodes. So it seems likely that the postmaster is
+reprising the old message calls. Similar to what happened with SetGet.
+
+Step 1: Put Postmaster on Clock 9, guaranteed to be the last called. Doesn't
+fix it, but this was a necessary cleanup anyway.
+Question is, do the deleted objects somehow send out stuff on the originating 
+node, or is it something left over in the recvBuf on the target node?
+
+Since the thing croaks on doReinit, which does NOT trigger a send call on the
+Arith object, it is most likely something in the recvBuf. But possibly
+the send buffer isn't being cleared either.
+
+Fixed it up. The send buffer was not being cleared and also there was no
+check that all sends had completed, before going on to the next cycle.
+With this we advance further till the next instance of getVec.
+Actually the problem is with the copy command.
+
+===========================================================================
