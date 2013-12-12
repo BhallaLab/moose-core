@@ -15,11 +15,11 @@ class TestEmatrix(unittest.TestCase):
     """Test pymoose basics"""
     def testCreate(self):
         em = moose.ematrix('/test', 10, 0, 'Neutral')
-        self.assertEqual(em.path, 'test[0]')
+        self.assertEqual(em.path, '/test')
 
     def testCreateKW(self):
         em = moose.ematrix(path='/testCreateKW', n=10, g=1, dtype='Neutral')
-        self.assertEqual(em.path, '/testCreateKW[0]')
+        self.assertEqual(em.path, '/testCreateKW')
 
     def testGetItem(self):
         em = moose.ematrix('testGetItem', n=10, g=1, dtype='Neutral')
@@ -221,7 +221,7 @@ class TestNeutral1(unittest.TestCase):
                       
 class TestDelete(unittest.TestCase):
     def setUp(self):
-        self.oid = moose.Neutral('a')
+        self.oid = moose.Neutral('testDelete')
         moose.delete(self.oid.id_)
 
     def testRepr(self):
@@ -234,7 +234,11 @@ class TestDelete(unittest.TestCase):
 
 class TestFieldAccess(unittest.TestCase):
     def testSetGet(self):
-        a = moose.IntFire('alpha')
+        a = moose.IntFire('TestFieldAccess_IntFire', g=0)
+        print 'a:', a
+        sys.stdout.flush()
+        print 'Vm=',
+        print a.Vm
         a.Vm = 2.0
         self.assertAlmostEqual(a.Vm, 2.0)
 

@@ -71,6 +71,7 @@
 
 using namespace std;
 
+extern int verbosity;
 extern "C" {
     ///////////////////////////////////////////////
     // Python method lists for PyObject of Id
@@ -429,43 +430,48 @@ extern "C" {
     // 2011-03-28 13:44:49 (+0530)
     PyObject * deleteId(_Id * obj)
     {
+#ifndef NDEBUG
+        if (verbosity > 1){
+            cout << "Deleting Id " << obj->id_ << endl;
+        }
+#endif
+        string class_name = Field<string >::get(obj->id_, "className");
+        vector <string> destFields = getFieldNames(class_name, "destFinfo");
+        vector <string> lookupFields = getFieldNames(class_name, "lookupFinfo");
+        vector <string> elementFields = getFieldNames(class_name, "elementFinfo");
         unsigned int numData = Field<unsigned int>::get(obj->id_, "numData");
         // clean up the maps containing initialized lookup/dest/element fields
         for (unsigned int ii = 0; ii < numData; ++ii){
             ObjId el(obj->id_, ii);
-            map<string, PyObject *>::iterator it = get_inited_lookupfields().begin();
-            while( it != get_inited_lookupfields().end()){
-                if (it->first.find(el.path() + ".") == 0){
-                    map< string, PyObject * >::iterator toErase = it;
-                    ++it;
-                    Py_XDECREF(toErase->second);
-                    get_inited_lookupfields().erase(toErase);                    
-                } else {
-                    ++it;
+#ifndef NDEBUG
+            if (verbosity > 1){
+                cout << "\tDeleting ObjId " << el << endl;
+            }
+#endif
+            for (unsigned int fidx = 0; fidx < lookupFields.size(); ++fidx){
+                map<string, PyObject *>::iterator it =
+                        get_inited_lookupfields().find(el.path() + "." + lookupFields[fidx]);
+                if( it != get_inited_lookupfields().end()){
+                    Py_XDECREF(it->second);
+                    get_inited_lookupfields().erase(it);                    
                 }
             }
-            it = get_inited_destfields().begin();
-            while( it != get_inited_destfields().end()){
-                if (it->first.find(el.path() + ".") == 0){
-                    map< string, PyObject * >::iterator toErase = it;
-                    ++it;
-                    Py_XDECREF(toErase->second);
-                    get_inited_destfields().erase(toErase);                    
-                } else {
-                    ++it;
+            for (unsigned int fidx = 0; fidx < destFields.size(); ++fidx){
+                map<string, PyObject *>::iterator it =
+                        get_inited_destfields().find(el.path() + "." + destFields[fidx]);
+                if( it != get_inited_destfields().end()){
+                    Py_XDECREF(it->second);
+                    get_inited_destfields().erase(it);
                 }
             }
-            it = get_inited_elementfields().begin();
-            while( it != get_inited_elementfields().end()){
-                if (it->first.find(el.path() + ".") == 0){
-                    map< string, PyObject * >::iterator toErase = it;
-                    ++it;
-                    Py_XDECREF(toErase->second);
-                    get_inited_elementfields().erase(toErase);                    
-                } else {
-                    ++it;
+            for (unsigned int fidx = 0; fidx < elementFields.size(); ++fidx){
+                map<string, PyObject *>::iterator it =
+                        get_inited_elementfields().find(el.path() + "." + elementFields[fidx]);
+                if( it != get_inited_elementfields().end()){
+                    Py_XDECREF(it->second);
+                    get_inited_elementfields().erase(it);
                 }
-            }            
+            }    
         }
         SHELLPTR->doDelete(obj->id_);
         obj->id_ = Id();
