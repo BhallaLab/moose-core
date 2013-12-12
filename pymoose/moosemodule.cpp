@@ -768,14 +768,14 @@ extern "C" {
         if (it != argmap.end()){
             istringstream(it->second) >> verbosity;            
         }
-        // it = argmap.find("DOUNITTESTS");
-        // if (it != argmap.end()){
-        //     istringstream(it->second) >> doUnitTests;            
-        // }
-        // it = argmap.find("DOREGRESSIONTESTS");
-        // if (it != argmap.end()){
-        //     istringstream(it->second) >> doRegressionTests;            
-        // }
+        it = argmap.find("DOUNITTESTS");
+        if (it != argmap.end()){
+            istringstream(it->second) >> doUnitTests;            
+        }
+        it = argmap.find("DOREGRESSIONTESTS");
+        if (it != argmap.end()){
+            istringstream(it->second) >> doRegressionTests;            
+        }
         
         if (verbosity > 0){
             cout << "ENVIRONMENT: " << endl
@@ -785,8 +785,8 @@ extern "C" {
                  << "   NUMNODES = " << numNodes << endl
                  // << "   NUMPTHREADS = " << numProcessThreads << endl
                  << "   VERBOSITY = " << verbosity << endl
-                 // << "   DOUNITTESTS = " << doUnitTests << endl
-                 // << "   DOREGRESSIONTESTS = " << doRegressionTests << endl
+                 << "   DOUNITTESTS = " << doUnitTests << endl
+                 << "   DOREGRESSIONTESTS = " << doRegressionTests << endl
                  << "========================================" << endl;
         }
         return args;
@@ -810,23 +810,19 @@ extern "C" {
         Id shellId = init(argc, argv, dounit, doregress);
         inited = 1;
         Shell * shellPtr = reinterpret_cast<Shell*>(shellId.eref().data());
-        // if (dounit){
-        //     nonMpiTests( shellPtr ); // These tests do not need the process loop.
-        // }
+        if (dounit){
+            nonMpiTests( shellPtr ); // These tests do not need the process loop.
+        }
 
         // if (!shellPtr->isSingleThreaded()){
         //     shellPtr->launchThreads();
         // }
-        // if ( shellPtr->myNode() == 0 ) {
-        //     if (dounit){
-        //         mpiTests();
-        //         processTests( shellPtr );
-        //         regressionTests();
-        //     }
-        //     if ( benchmarkTests( argc, argv ) || quitFlag ){
-        //         shellPtr->doQuit();
-        //     }
-        // }
+        if ( shellPtr->myNode() == 0 ) {
+            if (dounit){
+                mpiTests();
+                processTests( shellPtr );
+            }
+        }
         return shellId;
     } //! create_shell()
 
