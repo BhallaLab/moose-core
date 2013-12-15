@@ -65,6 +65,15 @@ double* remoteGet( const Eref& e, unsigned int bindIndex )
 	return p->remoteGet( e, bindIndex );
 }
 
+void remoteGetVec( const Eref& e, unsigned int bindIndex, 
+				vector< vector< double > >& getRecvBuf, 
+				vector< unsigned int >& numOnNode )
+{
+	static ObjId oi( 3 );
+	static PostMaster* p = reinterpret_cast< PostMaster* >( oi.data() );
+	p->remoteGetVec( e, bindIndex, getRecvBuf, numOnNode );
+}
+
 unsigned int mooseNumNodes()
 {
 	return Shell::numNodes();
