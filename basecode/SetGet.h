@@ -263,6 +263,12 @@ template< class A > class SetGet1: public SetGet
 		}
 };
 
+/*
+// forward declaration for the GetHopFunc
+template< class A > class GetHopFunc;
+template< class A > void  GetHopFunc< A >::opGetVec( const Eref& e, 
+				const vector< A >& arg, const OpFunc1Base< A >* op ) const;
+				*/
 template< class A > class Field: public SetGet1< A >
 {
 	public:
@@ -342,6 +348,7 @@ template< class A > class Field: public SetGet1< A >
 		 */
 		static void getVec( Id dest, const string& field, vector< A >& vec)
 		{
+
 			vec.resize( 0 );
 			ObjId tgt( dest );
 			FuncId fid;
@@ -350,23 +357,12 @@ template< class A > class Field: public SetGet1< A >
 			const GetOpFuncBase< A >* gof = 
 					dynamic_cast< const GetOpFuncBase< A >* >( func );
 			if ( gof ) {
-				Element* elm = dest.element();
-				unsigned int size = elm->numData();
-				if ( tgt.element()->hasFields() ) {
-					for ( unsigned int i = 0; i < size; ++i ) {
-						unsigned int numField = elm->numField( i );
-						for ( unsigned int j = 0; j < numField; ++j ) {
-							Eref er( tgt.element(), i, j );
-							vec.push_back( gof->returnOp( er ) );
-						}
-					}
-				} else {
-					vec.resize( size );
-					for ( unsigned int i = 0; i < size; ++i ) {
-						Eref e( elm, i );
-						vec[i] = gof->returnOp( e );
-					}
-				}
+				const OpFunc* op2 = gof->makeHopFunc( 
+					HopIndex( gof->opIndex(), MooseGetVecHop ) );
+				const GetHopFunc< A >* hop = 
+					dynamic_cast< const GetHopFunc< A >* >( op2 );
+				hop->opGetVec( tgt.eref(), vec, gof );
+				delete op2;
 				return;
 			}
 			cout << "Warning: Field::getVec conversion error for " <<

@@ -1271,9 +1271,32 @@ copy. Now clears that test. Checkin 4907.
 Next, in testSyncSynapseSize: Fixed a low-level lookup that would only work
 on a single-node calculation. Then yet another getVec is commented out.
 With this it clears all unit tests on 2 nodes. Major milestone.
+Checkin 4908.
 On 4 nodes it croaks in testShellAddMsg:968, which is our old friend where
 it starts off the little test of all the different message types.
 Fails on 2 of the 4 nodes: one with a bad msg index in Arith::send, and 
 another trying to finish up a SetVec. Perhaps we're not synced properly?
 
+Working on GetVec. Mostly there with the code framework. Still need to
+tie the Field< A >::getVec function to HopFunc.h::GetHopFunc::opVec.
 ===========================================================================
+13 Dec
+Trying to compile with the getVec. Issue with how the class is derived from
+OpFunc1Base< A* >, where the pointer causes friction in the definition of 
+opVec.
+
+Trying to compile.
+
+===========================================================================
+14 Dec.
+Trying to clean up the mess with GetVec. Compiled but buggy.
+Turns out this is a bit of a dead-end. I had earlier subclassed 
+GetOpFuncBase< A > off OpFunc1Base< A* > which was very clean and elegant for
+returning values. In trying to do GetVec I've done it off opFuncBase1< A >,
+but that has messed up the earlier return structure and seems to be unnecessary
+anyway. I may need to revert back to 4908
+===========================================================================
+15 Dec.
+
+GetVec now works on 2 nodes, and the whole unit test clear. 
+But GetVec still does not work for 4-node tests.

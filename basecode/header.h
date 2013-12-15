@@ -95,10 +95,10 @@ class SrcFinfo;
 extern DestFinfo* receiveGet();
 class Neutral;
 #include "OpFuncBase.h"
+#include "HopFunc.h"
 #include "SetGet.h"
 #include "OpFunc.h"
 #include "EpFunc.h"
-#include "HopFunc.h"
 #include "ProcOpFunc.h"
 #include "ValueFinfo.h"
 #include "LookupValueFinfo.h"

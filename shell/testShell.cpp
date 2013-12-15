@@ -694,13 +694,11 @@ void testShellSetGet()
 		assert( doubleEq( x, i * i * i ) );
 	}
 
-	/*
 	val.clear();
 	Field< double >::getVec( a1, "outputValue", val );
 	for ( unsigned int i = 0; i < size; ++i ) {
 		assert( doubleEq( val[i], i * i * i ) );
 	}
-	*/
 
 	shell->doDelete( a1 );
 	cout << "." << flush;
@@ -943,7 +941,6 @@ void testShellAddMsg()
 		x = Field< double >::get( ObjId( c1, i ), "arg1Value" );
 		assert( doubleEq( x, i + 1 ) );
 	}
-	/*
 	vector< double > retVec( 0 );
 	Field< double >::getVec( a1, "arg1Value", retVec );
 	for ( unsigned int i = 0; i < 5; ++i )
@@ -958,7 +955,6 @@ void testShellAddMsg()
 	Field< double >::getVec( c1, "arg1Value", retVec );
 	for ( unsigned int i = 0; i < 5; ++i )
 		assert( doubleEq( retVec[i], i + 1 ) );
-		*/
 
 
 	///////////////////////////////////////////////////////////
