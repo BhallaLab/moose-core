@@ -367,10 +367,11 @@ template < class A > class GetHopFunc: public OpFunc1Base< A* >
 					getLocalVec( elm, ret, op );
 				} else {
 					vector< double >& temp = buf[i];
-					// unsigned int k = 0;
-					double* val = &temp[0];
+					assert( static_cast< unsigned int >( temp[0] ) ==
+											numOnNode[i] );
+					double* val = &temp[1]; // zeroth entry is numOnNode.
 					for ( unsigned int j = 0; j < numOnNode[i]; ++j ) {
-						val++; // Skip the index.
+					// val++; // Skip the index.
 					// ret.push_back( Conv< A >::buf2val( &temp[k + 1] ) );
 						ret.push_back( Conv< A >::buf2val( &val ) );
 					}
