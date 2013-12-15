@@ -1300,3 +1300,8 @@ anyway. I may need to revert back to 4908
 
 GetVec now works on 2 nodes, and the whole unit test clear. 
 But GetVec still does not work for 4-node tests.
+
+Some more fixing, now getVec does seem to work but again there are problems in
+testShellAddmsg.
+
+===========================================================================
