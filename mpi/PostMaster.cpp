@@ -231,23 +231,38 @@ void PostMaster::handleRemoteGet(
 #endif // USE_MPI
 }
 
+/**
+ * Collects all the field values and stuffs into getReturnBuf.
+ * Returns size of all contents of getReturnBuf, in doubles.
+ * Note that getReturnBuf[0] contains the total number of fields
+ * on the current node.
+ */
 int innerGetVec( const Eref& e, const OpFunc* op, 
 			   double* getReturnBuf	)
 {
+	static double buf[PostMaster::reserveBufSize];
 	// Would like to use eref iterator here.
 	Element* elm = e.element();
 	unsigned int start = elm->localDataStart();
 	unsigned int end = start + elm->numLocalData();
-	int k = 0;
+	int k = 1; // first entry is for numOnNode;
+	unsigned int numOnNode = 0;
 	for ( unsigned int i = start; i < end; ++i ) {
 		unsigned int numField = elm->numField( i - start );
+		numOnNode += numField;
 		for ( unsigned int j = 0; j < numField; ++j ) {
 			Eref er( elm, i, j );
 			// stuff return value into buf.
-			op->opBuffer( er, &getReturnBuf[k] ); 
-			k += getReturnBuf[k] + 1; // One for self, one for size of data.
+			op->opBuffer( er, buf ); 
+			unsigned int size = buf[0];
+			memcpy( &getReturnBuf[k], &buf[1], size * sizeof( double ) );
+			k += size;
+
+			// op->opBuffer( er, &getReturnBuf[k] ); 
+			// k += getReturnBuf[k] + 1; // One for self, one for size of data.
 		}
 	}
+	getReturnBuf[0] = numOnNode;
 	return k;
 }
 
@@ -359,11 +374,12 @@ void PostMaster::clearPendingRecv()
 	if ( done == MPI_UNDEFINED )
 		return;
 	for ( int i = 0; i < done; ++i ) {
-		unsigned int recvNode = doneIndices_[i];
+		int doneIndex = doneIndices_[i];
+		unsigned int recvNode = doneIndex;
 		if ( recvNode >= Shell::myNode() )
 			recvNode += 1; // Skip myNode
 		int recvSize = 0;
-		MPI_Get_count( &doneStatus_[i], MPI_DOUBLE, &recvSize );
+		MPI_Get_count( &doneStatus_[doneIndex], MPI_DOUBLE, &recvSize );
 		int j = 0;
 		assert( recvSize <= static_cast< int >( recvBufSize_ ) );
 		double* buf = &recvBuf_[ recvNode ][0];
@@ -527,7 +543,8 @@ double* PostMaster::remoteGet( const Eref& e, unsigned int bindIndex )
 // getRecvBuf and size are already sized at numNodes.
 // But getRecvBuf individual entries need to be sized.
 void PostMaster::remoteGetVec( const Eref& e, unsigned int bindIndex,
-	vector< vector< double > >& getRecvBuf, vector< unsigned int >& size )
+	vector< vector< double > >& getRecvBuf, 
+	vector< unsigned int >& numOnNode )
 {
 #ifdef USE_MPI
 	static double getSendBuf[TgtInfo::headerSize];
@@ -536,8 +553,8 @@ void PostMaster::remoteGetVec( const Eref& e, unsigned int bindIndex,
 	static vector< MPI_Status > doneStatus( Shell::numNodes() );
 #endif
 	static vector< double > temp( reserveBufSize, 0 );
-	size.clear();
-	size.resize( Shell::numNodes(), 0 );
+	numOnNode.clear();
+	numOnNode.resize( Shell::numNodes(), 0 );
 	getRecvBuf.clear();
 	getRecvBuf.resize( Shell::numNodes(), temp );
 
@@ -576,20 +593,25 @@ void PostMaster::remoteGetVec( const Eref& e, unsigned int bindIndex,
 	// While polling be sure to handle any other requests to avoid deadlock
 	int done = 0;
 	unsigned int received = 0;
-	vector< int > doneIndices( Shell::numNodes(), 0 );
+	vector< int > getDoneIndices( Shell::numNodes(), 0 );
 	while( received < Shell::numNodes() - 1 ) {
 		MPI_Testsome( Shell::numNodes() -1, &getRecvReq[0], &done, 
-					&doneIndices[0], &doneStatus[0] );
+					&getDoneIndices[0], &doneStatus[0] );
 		if ( done == MPI_UNDEFINED )
 			continue;
 		received += done;
 		for ( int i = 0; i < done; ++i ) {
-			unsigned int recvNode = doneIndices_[i];
+			int doneIndex = getDoneIndices[i];
+			unsigned int recvNode = doneIndex;
 			if ( recvNode >= Shell::myNode() )
 				recvNode += 1; // Skip myNode
+			/*
 			int recvSize = 0;
-			MPI_Get_count( &doneStatus[i], MPI_DOUBLE, &recvSize );
+			MPI_Get_count( &doneStatus[doneIndex], 
+							MPI_DOUBLE, &recvSize );
 			size[recvNode] = recvSize;
+							*/
+			numOnNode[recvNode] = getRecvBuf[recvNode][0];
 		}
 		clearPending();
 	}
