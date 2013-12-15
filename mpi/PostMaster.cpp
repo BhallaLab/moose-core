@@ -231,6 +231,41 @@ void PostMaster::handleRemoteGet(
 #endif // USE_MPI
 }
 
+int innerGetVec( const Eref& e, const OpFunc* op, 
+			   double* getReturnBuf	)
+{
+	// Would like to use eref iterator here.
+	Element* elm = e.element();
+	unsigned int start = elm->localDataStart();
+	unsigned int end = start + elm->numLocalData();
+	int k = 0;
+	for ( unsigned int i = start; i < end; ++i ) {
+		unsigned int numField = elm->numField( i - start );
+		for ( unsigned int j = 0; j < numField; ++j ) {
+			Eref er( elm, i, j );
+			// stuff return value into buf.
+			op->opBuffer( er, &getReturnBuf[k] ); 
+			k += getReturnBuf[k] + 1; // One for self, one for size of data.
+		}
+	}
+	return k;
+}
+
+void PostMaster::handleRemoteGetVec( 
+				const Eref& e, const OpFunc* op, int requestingNode )
+{
+#ifdef USE_MPI
+	static double getReturnBuf[reserveBufSize];
+	int k = innerGetVec( e, op, getReturnBuf );
+	// Send out the data. Blocking. Don't want any other gets till done
+	MPI_Send( 
+		&getReturnBuf[0], k, MPI_DOUBLE,
+		requestingNode, 		// Where to send to.
+		RETURNTAG, MPI_COMM_WORLD
+	);
+#endif // USE_MPI
+}
+
 void PostMaster::clearPendingSetGet()
 {
 #ifdef USE_MPI
@@ -271,6 +306,8 @@ void PostMaster::clearPendingSetGet()
 			op->opVecBuffer( e, buf + TgtInfo::headerSize );
 		} else if ( tgt->dataSize() == MooseGetHop ) {
 			handleRemoteGet( e, op, requestingNode );
+		} else if ( tgt->dataSize() == MooseGetVecHop ) {
+			handleRemoteGetVec( e, op, requestingNode );
 		}
 	}
 #endif // USE_MPI
@@ -483,6 +520,81 @@ double* PostMaster::remoteGet( const Eref& e, unsigned int bindIndex )
 	}
 #endif
 	return &getRecvBuf[0];
+}
+
+/// This is a blocking call. However, it must still handle other 
+//requests that come into the current node.
+// getRecvBuf and size are already sized at numNodes.
+// But getRecvBuf individual entries need to be sized.
+void PostMaster::remoteGetVec( const Eref& e, unsigned int bindIndex,
+	vector< vector< double > >& getRecvBuf, vector< unsigned int >& size )
+{
+#ifdef USE_MPI
+	static double getSendBuf[TgtInfo::headerSize];
+	static vector< MPI_Request > getSendReq( Shell::numNodes() );
+	static vector< MPI_Request > getRecvReq( Shell::numNodes() );
+	static vector< MPI_Status > doneStatus( Shell::numNodes() );
+#endif
+	static vector< double > temp( reserveBufSize, 0 );
+	size.clear();
+	size.resize( Shell::numNodes(), 0 );
+	getRecvBuf.clear();
+	getRecvBuf.resize( Shell::numNodes(), temp );
+
+#ifdef USE_MPI
+	while ( isSetSent_ == 0 ) { 
+			// Can't request a 'get' while old set is 
+			// pending, lest the 'get' depend on the 'set'.
+		clearPending();
+	}
+	TgtInfo* tgt = reinterpret_cast< TgtInfo* >( &getSendBuf[0] );
+	tgt->set( e.objId(), bindIndex, MooseGetVecHop );
+	assert ( !e.element()->isGlobal() );
+
+	unsigned int k = 0;
+	for ( unsigned int i = 0; i < Shell::numNodes(); ++i ) {
+		if ( i != Shell::myNode() ) {
+			// Post receive for return value.
+			MPI_Irecv( 	&getRecvBuf[i][0],
+					reserveBufSize, MPI_DOUBLE, 
+					i,
+					RETURNTAG, MPI_COMM_WORLD,
+					&getRecvReq[k] 
+			);
+			// Now post send to send the data out.
+			MPI_Isend( 
+				&getSendBuf[0], TgtInfo::headerSize, MPI_DOUBLE,
+				i, 			// Where to send to.
+				SETTAG, MPI_COMM_WORLD,
+				&getSendReq[k]
+			);
+			k++;
+		}
+	}
+	// Poll till the value comes back. We don't bother to
+	// check what happened with the send.
+	// While polling be sure to handle any other requests to avoid deadlock
+	int done = 0;
+	unsigned int received = 0;
+	vector< int > doneIndices( Shell::numNodes(), 0 );
+	while( received < Shell::numNodes() - 1 ) {
+		MPI_Testsome( Shell::numNodes() -1, &getRecvReq[0], &done, 
+					&doneIndices[0], &doneStatus[0] );
+		if ( done == MPI_UNDEFINED )
+			continue;
+		received += done;
+		for ( int i = 0; i < done; ++i ) {
+			unsigned int recvNode = doneIndices_[i];
+			if ( recvNode >= Shell::myNode() )
+				recvNode += 1; // Skip myNode
+			int recvSize = 0;
+			MPI_Get_count( &doneStatus[i], MPI_DOUBLE, &recvSize );
+			size[recvNode] = recvSize;
+		}
+		clearPending();
+	}
+	// Now we have the whole mess back.
+#endif
 }
 
 ///////////////////////////////////////////////////////////////

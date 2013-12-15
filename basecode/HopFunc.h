@@ -14,6 +14,9 @@ double* addToBuf(
 			const Eref& e, HopIndex hopIndex, unsigned int size );
 void dispatchBuffers( const Eref& e, HopIndex hopIndex );
 double* remoteGet( const Eref& e , unsigned int bindIndex );
+void remoteGetVec( const Eref& e, unsigned int bindIndex, 
+				vector< vector< double > >& getRecvBuf, 
+				vector< unsigned int >& numOnNode );
 unsigned int mooseNumNodes();
 unsigned int mooseMyNode();
 
@@ -328,10 +331,64 @@ template < class A > class GetHopFunc: public OpFunc1Base< A* >
 		GetHopFunc( HopIndex hopIndex )
 				: hopIndex_( hopIndex )
 		{;}
+
 		void op( const Eref& e, A* ret ) const
 		{
 			double* buf = remoteGet( e, hopIndex_.bindIndex() );
 			*ret = Conv< A >::buf2val( &buf );
+		}
+
+		void getLocalVec( Element *elm, vector< A >& ret, 
+				 const GetOpFuncBase< A >* op ) const
+		{
+			unsigned int start = elm->localDataStart();
+			unsigned int end = start + elm->numLocalData();
+			for ( unsigned int p = start; p < end; ++p ) {
+				unsigned int numField = elm->numField( p - start );
+				for ( unsigned int q = 0; q < numField; ++q ) {
+					Eref er( elm, p, q );
+					ret.push_back( op->returnOp( er ) );
+				}
+			}
+		}
+
+		void getMultiNodeVec( const Eref& e, vector< A >& ret, 
+				 const GetOpFuncBase< A >* op ) const
+		{
+			Element* elm = e.element();
+			vector< vector< double > > buf;
+			vector< unsigned int > numOnNode;
+			remoteGetVec( e, hopIndex_.bindIndex(), buf, numOnNode );
+			assert( numOnNode.size() == mooseNumNodes() );
+			assert( buf.size() == mooseNumNodes() );
+			assert( buf.size() == numOnNode.size() );
+			for ( unsigned int i = 0; i < mooseNumNodes(); ++i ) {
+				if ( i == mooseMyNode() ) {
+					getLocalVec( elm, ret, op );
+				} else {
+					vector< double >& temp = buf[i];
+					// unsigned int k = 0;
+					double* val = &temp[0];
+					for ( unsigned int j = 0; j < numOnNode[i]; ++j ) {
+						val++; // Skip the index.
+					// ret.push_back( Conv< A >::buf2val( &temp[k + 1] ) );
+						ret.push_back( Conv< A >::buf2val( &val ) );
+					}
+				}
+			}
+		}
+
+		void opGetVec( const Eref& e, vector< A >& ret, 
+				 const GetOpFuncBase< A >* op ) const
+		{
+			Element* elm = e.element();
+			ret.clear();
+			ret.reserve( elm->numData() );
+			if ( mooseNumNodes() == 1 || elm->isGlobal() ) {
+				getLocalVec( elm, ret, op );
+			} else {
+				getMultiNodeVec( e, ret, op );
+			}
 		}
 	private:
 		HopIndex hopIndex_;

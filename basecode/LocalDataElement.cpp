@@ -92,10 +92,13 @@ unsigned int LocalDataElement::setDataSize( unsigned int numData )
 {
 	numData_ = numData;
 	numPerNode_ = 1 + (numData_ -1 ) / Shell::numNodes();
-	unsigned int numLocalData = numPerNode_;
-	if ( Shell::myNode() == Shell::numNodes() -1 )
-		numLocalData = numData_ - numPerNode_ * ( Shell::numNodes() - 1 );
-	return numLocalData;
+
+	unsigned int lastUsedNode = numData / numPerNode_;
+	if ( lastUsedNode > Shell::myNode() )
+		return numPerNode_;
+	if ( lastUsedNode == Shell::myNode() )
+		return numData - Shell::myNode() * numPerNode_;
+	return 0;
 }
 
 // virtual func, overridden.
@@ -106,10 +109,12 @@ void LocalDataElement::resize( unsigned int newNumData )
 
 unsigned int LocalDataElement::getNumOnNode( unsigned int node ) const
 {
-	if ( Shell::myNode() == Shell::numNodes() -1 )
-		return numData_ - numPerNode_ * ( Shell::numNodes() - 1 );
-
-	return numPerNode_;
+	unsigned int lastUsedNode = numData_ / numPerNode_;
+	if ( lastUsedNode > node )
+		return numPerNode_;
+	if ( lastUsedNode == node )
+		return numData() - node * numPerNode_;
+	return 0;
 }
 
 /*

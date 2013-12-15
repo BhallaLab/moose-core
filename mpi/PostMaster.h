@@ -124,6 +124,9 @@ class PostMaster {
 		void handleRemoteGet( const Eref& e, 
 						const OpFunc* op, int requestingNode );
 
+		void handleRemoteGetVec( const Eref& e, 
+						const OpFunc* op, int requestingNode );
+
 		/// Returns pointer to Send buffer for filling in arguments.
 		double* addToSendBuf( const Eref& e, 
 				unsigned int bindIndex, unsigned int size );
@@ -135,6 +138,9 @@ class PostMaster {
 
 		/// Blocking call to get a value from a remote node.
 		double* remoteGet( const Eref& e, unsigned int bindIndex );
+		void remoteGetVec( const Eref& e, unsigned int bindIndex,
+				vector< vector< double > >& getRecvBuf, 
+				vector< unsigned int >& size );
 
 		static const unsigned int reserveBufSize;
 		static const int MSGTAG;
