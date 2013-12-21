@@ -36,8 +36,10 @@ DataElement::DataElement( Id id, const Element* orig,
 	:	
 		Element( id, orig->cinfo(), orig->getName() )
 {
-	if ( n == 0 ) 
-		n = 1;
+	// Unsure why I put this here. It is erroneous since in multinode
+	// simulations it is quite likely that many nodes will have zero 
+	// data entries for a given element.
+	// if ( n == 0 ) n = 1;
 	numLocalData_ = n;
 	data_ = cinfo()->dinfo()->copyData( orig->data( 0 ), orig->numData(), 
 					numLocalData_, startEntry );
