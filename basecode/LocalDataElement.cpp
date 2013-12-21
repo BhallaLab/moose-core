@@ -80,6 +80,15 @@ unsigned int LocalDataElement::getNode( unsigned int dataId ) const {
 	return dataId / numPerNode_;
 }
 
+/// Inherited virtual. Returns start DataId on specified node 
+DataId LocalDataElement::startDataId( unsigned int node ) const
+{
+	if ( numPerNode_ * node < numData_ )
+		return numPerNode_ * node;
+	else
+		return numData_; // error.
+}
+
 unsigned int LocalDataElement::rawIndex( unsigned int dataId ) const {
 	return dataId % numPerNode_;
 }

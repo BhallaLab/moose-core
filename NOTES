@@ -1302,6 +1302,89 @@ GetVec now works on 2 nodes, and the whole unit test clear.
 But GetVec still does not work for 4-node tests.
 
 Some more fixing, now getVec does seem to work but again there are problems in
-testShellAddmsg.
+testShellAddmsg. Chekin 4919.
+
+I think there may be a problem with setVec on multiple nodes.
+
+===========================================================================
+18 Dec.
+SetVec it is. Still to track down. I'm concerned it isn't even
+getting caught at HopFunc.h:103. Is the control flow bypassing this?
+
+===========================================================================
+19 Dec
+Found two problems on the 'send' side when trying to send a 5-entry
+array to 4 nodes in the subdivision 2, 2, 1, 0.
+1. The e.getNode() reports node 2 as the target for e={elm, 5, 0}
+	Should either be node 3, or no node.
+2. The setSendSize is 4, but reports a dataSize of 2. Actually
+	both should be zero as nothing is to be transmitted. In fact
+	the system should flag this and not even attempt to send anything.
+
+Huge mess in HopFunc.h:OpVec and co. There is a confusion between 
+serial index of FieldElements, between DataId and FieldIndex.
+
+Sort of fixed. Now it fails in some of the messaging calls on 4 nodes,
+typically on the last entry, but in other cases too.
+===========================================================================
+21 Dec
+The ones that fail are: bdefg
+b: OneToAll. Fails on last entry
+d: Diagonal. Fails on last entry.
+e: Sparse. Fails on first and last entry.
+f: OneToAll, where all entries go to all others. Fails on all.
+g: Sparse, where all entries go to all others, except self. Fails on all.
+
+All these could be explained if the last entry, which is on node 2, has
+problems both sending and receiving.
+Look at what happens on its postMaster.
+
+From Process on PostMaster on Node 2:
+(gdb) p *(TgtInfo*)(&sendBuf_[0][0])
+$47 = {static headerSize = 3, id_ = {id = {id_ = 264}, dataId = 4, 
+    fieldIndex = 0}, bindIndex_ = 1, dataSize_ = 1}
+(gdb) p *(TgtInfo*)(&sendBuf_[0][4])
+$48 = {static headerSize = 3, id_ = {id = {id_ = 266}, dataId = 4, 
+    fieldIndex = 0}, bindIndex_ = 1, dataSize_ = 1}
+(gdb) p *(TgtInfo*)(&sendBuf_[0][8])
+$49 = {static headerSize = 3, id_ = {id = {id_ = 268}, dataId = 4, 
+    fieldIndex = 0}, bindIndex_ = 1, dataSize_ = 1}
+(gdb) p *(TgtInfo*)(&sendBuf_[1][0])
+$50 = {static headerSize = 3, id_ = {id = {id_ = 266}, dataId = 4, 
+    fieldIndex = 1}, bindIndex_ = 1, dataSize_ = 1}
+(gdb) p *(TgtInfo*)(&sendBuf_[1][4])
+$51 = {static headerSize = 3, id_ = {id = {id_ = 268}, dataId = 4, 
+    fieldIndex = 1}, bindIndex_ = 1, dataSize_ = 1}
+(gdb) p *(TgtInfo*)(&sendBuf_[3][0])
+$52 = {static headerSize = 3, id_ = {id = {id_ = 266}, dataId = 4, 
+    fieldIndex = 3}, bindIndex_ = 1, dataSize_ = 1}
+
+Looks very reasonable. The sendSize in all cases is also reasonable
+Stepped through, looks like node zero didn't get the data that was sent
+by node 2. I was monitoring in PostMaster::clearPendingRecv.
+
+Turned out an error in how I understood the MPI_TestSome arguments. The 
+status index I was using was wrong.
+
+With this fixed, I now clear the testShell.cpp:testShellAddMsg function
+which is the crucial test of message passing. But now stuck in 
+testCopyMsgOps.
+
+This bug is because I don't let DataElement start with zero entries. I 
+force it to be 1. Let's examine this logic. No, seems bad. I should
+permit zero entries on the DataElement.
+
+With that it clears unit tests on 4 nodes. Hooray! But the quit call does
+not succeed in getting it to quit.
+
+Also fails on 5 nodes now. in testShell.cpp:925
+This is due to my trying to do a direct access to a data entry on the
+master 0 node. The data is not on this node.
+
+Fixed this little bug. 
+Now it fails again in testShellAddMsg. That is turning out to be
+the most definitive unit test.
+
+Just for completeness, ran on 3 nodes. Clears unit tests there too.
 
 ===========================================================================

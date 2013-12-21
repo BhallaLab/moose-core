@@ -75,8 +75,11 @@ class Element
 		 */
 		virtual unsigned int totNumLocalField() const = 0;
 
-		/// Returns location of specified dataId.
+		/// Returns node number of specified dataId.
 		virtual unsigned int getNode( unsigned int dataId ) const = 0;
+
+		/// Returns start dataId on specified node
+		virtual DataId startDataId( unsigned int nodeNum ) const = 0;
 
 		/**
 		 * Converts dataId to index on current node. Returns OFFNODE 

@@ -379,7 +379,7 @@ void PostMaster::clearPendingRecv()
 		if ( recvNode >= Shell::myNode() )
 			recvNode += 1; // Skip myNode
 		int recvSize = 0;
-		MPI_Get_count( &doneStatus_[doneIndex], MPI_DOUBLE, &recvSize );
+		MPI_Get_count( &doneStatus_[i], MPI_DOUBLE, &recvSize );
 		int j = 0;
 		assert( recvSize <= static_cast< int >( recvBufSize_ ) );
 		double* buf = &recvBuf_[ recvNode ][0];

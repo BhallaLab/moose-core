@@ -26,19 +26,19 @@ const double* checkHopFuncTestBuffer()
 }
 
 
-double* addToBuf( const Eref& e, HopIndex hopIndex, unsigned int size )
+double* addToBuf( const Eref& er, HopIndex hopIndex, unsigned int size )
 {
 	static ObjId oi( 3 );
 	static PostMaster* p = reinterpret_cast< PostMaster* >( oi.data() );
 	if ( hopIndex.hopType() == MooseSendHop ) {
-		return p->addToSendBuf( e, hopIndex.bindIndex(), size );
+		return p->addToSendBuf( er, hopIndex.bindIndex(), size );
 	} else if ( hopIndex.hopType() == MooseSetHop ||
 			 hopIndex.hopType() == MooseSetVecHop ) {
 		p->clearPendingSetGet(); // Cannot touch set buffer if pending.
-		return p->addToSetBuf( e, hopIndex.bindIndex(), 
+		return p->addToSetBuf( er, hopIndex.bindIndex(), 
 						size, hopIndex.hopType() );
 	} else if ( hopIndex.hopType() == MooseTestHop ) {
-		return addToTestBuf( e, hopIndex.bindIndex(), size );
+		return addToTestBuf( er, hopIndex.bindIndex(), size );
 	}
 	assert( 0 ); // Should not get here.
 	return 0;
