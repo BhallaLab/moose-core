@@ -52,45 +52,87 @@ template < class A > class HopFunc1: public OpFunc1Base< A >
 			Conv< A >::val2buf( arg, &buf );
 			dispatchBuffers( e, hopIndex_ );
 		}
-		
+
+		/// Executes the local vector assignment. Returns current arg index
+		unsigned int localOpVec( Element* elm, 
+					const vector< A >& arg,
+					const OpFunc1Base< A >* op,
+					unsigned int k ) const
+		{
+			unsigned int numLocalData = elm->numLocalData();
+			unsigned int start = elm->localDataStart();
+			for ( unsigned int p = 0; p < numLocalData; ++p ) {
+				unsigned int numField = elm->numField( p );
+				for ( unsigned int q = 0; q < numField; ++q ) {
+					Eref er( elm, p + start, q );
+					op->op( er, arg[ k % arg.size() ] );
+					k++;
+				}
+			}
+			return k;
+		}
+
+		/// Dispatches remote vector assignment. start and end are arg index
+		unsigned int remoteOpVec( const Eref& er, 
+					const vector< A >& arg,
+					const OpFunc1Base< A >* op,
+					unsigned int start, unsigned int end ) const
+		{
+			unsigned int k = start;
+			unsigned int nn = end - start;
+			if ( nn > 0 ) {
+				// nn includes dataIndices and if present fieldIndices
+				// too. It may involve a query to the remote node.
+					vector< A > temp( nn );
+				// Have to do the insertion entry by entry because the
+				// argument vector may wrap around.
+				for ( unsigned int j = 0; j < nn; ++j ) {
+					unsigned int x = k % arg.size();
+					temp[j] = arg[x];
+					k++;
+				}
+				double* buf = addToBuf( er, hopIndex_, 
+						Conv< vector< A > >::size( temp ) );
+				double* orig = buf;	
+				Conv< vector< A > >::val2buf( temp, &buf );
+				assert( static_cast< unsigned int >( orig[0] ) == nn );
+				dispatchBuffers( er, hopIndex_ ); 
+				// HopIndex says that it is a SetVec call.
+			}
+			return k;
+		}
+
 		void opVec( const Eref& e, const vector< A >& arg,
 				 const OpFunc1Base< A >* op ) const
 		{
 			Element* elm = e.element();
-			unsigned int k = 0; // counter for index to arg vector.
-			if ( elm->isGlobal() ) {
-				// Need to ensure that all nodes get the same args,
-				// as opposed to below, where they are serial.
+			vector< unsigned int > startOnNode( mooseNumNodes(), 0 );
+			vector< unsigned int > endOnNode( mooseNumNodes(), 0 );
+			unsigned int lastEnd = 0;
+			for ( unsigned int i = 0; i < mooseNumNodes(); ++i ) {
+				startOnNode[i] = lastEnd;
+				endOnNode[i] = elm->getNumOnNode(i) + lastEnd;
+				lastEnd = endOnNode[i];
 			}
+			unsigned int k = 0; // counter for index to arg vector.
+			// The global case just sends all entries to all nodes.
 			for ( unsigned int i = 0; i < mooseNumNodes(); ++i ) {
 				if ( i == mooseMyNode() ) {
-					unsigned int numData = elm->numLocalData();
-					for ( unsigned int p = 0; p < numData; ++p ) {
-						unsigned int numField = elm->numField( p );
-						for ( unsigned int q = 0; q < numField; ++q ) {
-							Eref er( elm, p, q );
-							op->op( er, arg[ k % arg.size() ] );
-							k++;
+					k = localOpVec( elm, arg, op, k );
+					assert( k == endOnNode[i] );
+				} else {
+					if ( elm->isGlobal() ) {
+						Eref starter( elm,  0 );
+						remoteOpVec( starter, arg, op, 0, elm->numData() );
+					} else {
+						assert( k == startOnNode[i] );
+						DataId start = elm->startDataId( i );
+						if ( start < elm->numData() ) {
+							Eref starter( elm,  start );
+							assert( elm->getNode( starter.dataIndex() ) == i );
+							k = remoteOpVec( starter, arg, op, k, endOnNode[i]);
 						}
 					}
-				} else {
-					unsigned int dataIndex = k;
-					// nn includes dataIndices and if present fieldIndices
-					// too. It may involve a query to the remote node.
-					unsigned int nn = elm->getNumOnNode( i );
-					vector< A > temp( nn );
-					// Have to do the insertion entry by entry because the
-					// argument vector may wrap around.
-					for ( unsigned int j = 0; j < nn; ++j ) {
-						unsigned int x = k % arg.size();
-						temp[j] = arg[x];
-						k++;
-					}
-					double* buf = addToBuf( e, hopIndex_, 
-							Conv< vector< A > >::size( temp ) );
-					Conv< vector< A > >::val2buf( temp, &buf );
-					dispatchBuffers( Eref( elm, dataIndex ), hopIndex_ ); 
-					// HopIndex says that it is a SetVec call.
 				}
 			}
 		}

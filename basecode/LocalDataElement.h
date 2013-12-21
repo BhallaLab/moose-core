@@ -61,6 +61,9 @@ class LocalDataElement: public DataElement
 
 		/// Inherited virtual. Returns node location of specified object
 		unsigned int getNode( DataId dataId ) const;
+
+		/// Inherited virtual. Returns start DataId on specified node 
+		DataId startDataId( unsigned int node ) const;
 		
 		/// Converts dataId to index on current node.
 		unsigned int rawIndex( unsigned int dataId ) const;

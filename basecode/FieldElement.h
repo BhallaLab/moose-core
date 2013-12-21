@@ -49,6 +49,9 @@ class FieldElement: public Element
 		/// Virtual: Returns location of specified dataId
 		unsigned int getNode( unsigned int dataId ) const;
 
+		/// Virtual: Returns start DataId on specified node.
+		DataId startDataId ( unsigned int node ) const;
+
 		/// Virtual: Returns converted dataId to index on current node.
 		unsigned int rawIndex( unsigned int dataId ) const;
 

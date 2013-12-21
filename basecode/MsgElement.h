@@ -93,6 +93,12 @@ class MsgElement: public Element
 				return Shell::myNode();
 		}
 
+		/// Inherited virtual. As this is a global we always return zero.
+		DataId startDataId( unsigned int node ) const
+		{
+				return 0;
+		}
+
 		/// Inherited virtual. Just returns index
 		unsigned int rawIndex( unsigned int dataIndex ) const
 		{
