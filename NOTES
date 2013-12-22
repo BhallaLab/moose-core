@@ -1427,5 +1427,29 @@ worked.
 
 Put in a barrier in PostMaster::reinit and process, after all the loops
 and operations. With this it clears unit tests for 1 through to 16 nodes.
+Also quits cleanly. Checkin 4925.
+
+So this is how long it took:
+Week 1: Oct 12-19: Threading out
+Week 2: Oct 19-26 Messaging refactoring
+Week 3: Oct 26-Nov02: Element and field indexing refactoring. Data Handler out.
+Week 4: Nov 02-12. Scheduling refactoring, recompile and unit tests. 
+	Copy refactoring. MsgIds replaced with ObjIds. Automatic message compilation.
+Week 4.5-5: Nov12-15 Standalone tests on mpi framework
+Week 6: Nov 16-23 Multinode messaging design, implementation, compilation, 
+	no tests.
+Week 7: Nov 23-30 Multinode Set. Compile and test.
+Week 8: Nov 30-Dec 7. Multinode Get. Most of the Shell commands work. SetVec.
+Week 9: Dec 7-14. Multinode messaging. Much cleanup. Clears all unit tests 
+	for 2 nodes. Began GetVec.
+Week 10: Dec 14-21: GetVec works. Much bug stomping through scaling up to 
+	any number of nodes. 
+Dec 22: Clears all unit tests on any number of nodes from 1 to 16.
+
+Did a valgrind on the single node. Looks quite filthy. All seems to be in MPI.
+Uninitialized variables, leaks, the works.
+
+Now to look ahead. One minor item is to have Id::path return a string without
+trailing braces.  Done.
 
 ===========================================================================
