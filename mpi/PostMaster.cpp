@@ -40,6 +40,7 @@ PostMaster::PostMaster()
 		sendBuf_[i].resize( reserveBufSize, 0 );
 	}
 #ifdef USE_MPI
+	MPI_Barrier( MPI_COMM_WORLD );
 	// Post recv for set calls
 	MPI_Irecv( &setRecvBuf_[0], recvBufSize_, MPI_DOUBLE,
 					MPI_ANY_SOURCE,
@@ -162,6 +163,7 @@ void PostMaster::finalizeSends()
 void PostMaster::reinit( const Eref& e, ProcPtr p )
 {
 #ifdef USE_MPI
+	// MPI_Barrier( MPI_COMM_WORLD );
 	unsigned int reqIndex = 0;
 	for ( unsigned int i = 0; i < Shell::numNodes(); ++i )
 	{
@@ -179,6 +181,7 @@ void PostMaster::reinit( const Eref& e, ProcPtr p )
 	while ( numRecvDone_ < Shell::numNodes() -1 )
 		clearPending();
 	finalizeSends();
+	MPI_Barrier( MPI_COMM_WORLD );
 	numRecvDone_ = 0;
 #endif
 }
@@ -203,6 +206,7 @@ void PostMaster::process( const Eref& e, ProcPtr p )
 	while ( numRecvDone_ < Shell::numNodes() -1 )
 		clearPending();
 	finalizeSends();
+	MPI_Barrier( MPI_COMM_WORLD );
 	numRecvDone_ = 0;
 #endif
 }
