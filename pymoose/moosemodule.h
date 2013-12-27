@@ -202,6 +202,9 @@ extern "C" {
     PyObject * moose_ObjId_getId(_ObjId * self);
     PyObject * moose_ObjId_connect(_ObjId * self, PyObject * args);
     PyObject * moose_ObjId_richcompare(_ObjId * self, PyObject * args, int op);
+    PyObject * moose_ObjId_getItem(_ObjId * self, Py_ssize_t index);
+    PyObject * moose_ObjId_getSlice(_ObjId * self, Py_ssize_t start, Py_ssize_t end);
+    Py_ssize_t moose_ObjId_getLength(_ObjId * self);
 
     ////////////////////////////////////////////
     // Methods for LookupField
