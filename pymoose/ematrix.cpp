@@ -599,8 +599,10 @@ extern "C" {
             end += len;
         }
         if (start > end){
-            PyErr_SetString(PyExc_IndexError, "Start index must be less than end.");
-            return NULL;
+            // PyErr_SetString(PyExc_IndexError, "Start index must be less than end.");
+            // return NULL;
+            // Python itself returns empty tuple in such cases, follow that
+            return PyTuple_New(0);
         }
         PyObject * ret = PyTuple_New((Py_ssize_t)(end - start));
         
@@ -611,6 +613,7 @@ extern "C" {
             if (PyTuple_SetItem(ret, (Py_ssize_t)(ii-start), (PyObject*)value)){
                 Py_XDECREF(ret);
                 Py_XDECREF(value);
+                PyErr_SetString(PyExc_RuntimeError, "Could assign tuple entry.");
                 return NULL;
             }
         }
