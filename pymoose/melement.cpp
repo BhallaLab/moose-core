@@ -886,7 +886,78 @@ extern "C" {
         }
     } // moose_ObjId_setattro
 
+    PyObject * moose_ObjId_getItem(_ObjId * self, Py_ssize_t index)
+    {
+        if (index < 0){
+            index += moose_ObjId_getLength(self);
+        }
+        if ((index < 0) || (index >= moose_ObjId_getLength(self))){
+            PyErr_SetString(PyExc_IndexError, "Index out of bounds.");
+            return NULL;
+        }
+        // Here I am assuming the user can start with any ObjId and
+        // ask for an index - which will be field index.
+        // Thus if syn[0...9] correspond to chan[0...9], then syn[0] is still a valid ObjId.
+        // For example, syn has Id X, dataId 0...9, and under dataId=0, we have 5 field elements f[0...5]
+        // Then syn = Id(X)
+        // syn[0] = ObjId(X, 0, 0) = syn[0][0]
+        // assign s0 <- syn[0]
+        // what is s0[1]? ObjId(X
+        // syn[0][1]->ObjId(X, 0, 1) =syn[0][0][0] - which is an ObjId.
+        // Now, what is syn[0][1][2] ?
+        
+        // In PyMOOSE, user is allowed to directly put in the numbers
+        // for Id, dataId and fieldIndex directly and construct an
+        // ObjId. 
+        _ObjId * ret = PyObject_New(_ObjId, &ObjIdType);
+        ret->oid_ = ObjId(self->oid_.id, self->oid_.dataId, index);
+        return (PyObject*)ret;
+    }
+
+    PyObject * moose_ObjId_getSlice(_ObjId * self, Py_ssize_t start, Py_ssize_t end)
+    {
+        Py_ssize_t len = moose_ObjId_getLength(self);
+        while (start < 0){
+            start += len;
+        }
+        while (end < 0){
+            end += len;
+        }
+        if (start > end){
+            // PyErr_SetString(PyExc_IndexError, "Start index must be less than end.");
+            // python itself returns empty tuple - follow that
+            return PyTuple_New(0);
+        }
+        PyObject * ret = PyTuple_New((Py_ssize_t)(end - start));
+        
+        // Py_XINCREF(ret);        
+        for (unsigned int ii = start; ii < end; ++ii){
+            _ObjId * value = PyObject_New(_ObjId, &ObjIdType);
+            value->oid_ = ObjId(self->oid_.id, self->oid_.dataId, ii);
+            if (PyTuple_SetItem(ret, (Py_ssize_t)(ii-start), (PyObject*)value)){
+                Py_XDECREF(ret);
+                Py_XDECREF(value);
+                PyErr_SetString(PyExc_RuntimeError, "Could assign tuple entry.");
+                return NULL;
+            }
+        }
+        return ret;
+    }
+
     
+    Py_ssize_t moose_ObjId_getLength(_ObjId * self)
+    {
+        Element * el = self->oid_.element();
+        if (!el->hasFields()){
+            return 0;
+        }
+        FieldElement * fe = reinterpret_cast< FieldElement* >(el);
+        if (fe == NULL){
+            return 0;
+        }
+        return (Py_ssize_t)(fe->numData());
+    }
+   
     /// Inner function for looking up value from LookupField on object
     /// with ObjId target.
     ///
@@ -1777,6 +1848,30 @@ PyObject* set_destFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type
          moose_ObjId_setDestField_documentation},
         {NULL, NULL, 0, NULL},        /* Sentinel */        
     };
+
+    static PySequenceMethods ObjIdSequenceMethods = {
+        (lenfunc)moose_ObjId_getLength, // sq_length
+        0, //sq_concat
+        0, //sq_repeat
+        (ssizeargfunc)moose_ObjId_getItem, //sq_item
+#ifndef PY3K
+        (ssizessizeargfunc)moose_ObjId_getSlice, // getslice
+#endif
+        0, //sq_ass_item
+#ifndef PY3K
+        0, // setslice
+#endif
+        0, //(objobjproc)moose_Id_contains, // sq_contains
+        0, // sq_inplace_concat
+        0 // sq_inplace_repeat
+    };
+
+    // static PyMappingMethods IdMappingMethods = {
+    //     (lenfunc)moose_Id_getLength, //mp_length
+    //     (binaryfunc)moose_Id_subscript, // mp_subscript
+    //     0 // mp_ass_subscript
+    // };
+
 
     ///////////////////////////////////////////////
     // Type defs for PyObject of ObjId
