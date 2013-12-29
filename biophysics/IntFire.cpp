@@ -55,6 +55,13 @@ const Cinfo* IntFire::initCinfo()
 			&IntFire::getRefractoryPeriod
 		);
 
+		static ValueFinfo< IntFire, double > bufferTime(
+			"bufferTime",
+			"Duration of spike buffer.",
+			&IntFire::setBufferTime,
+			&IntFire::getBufferTime
+		);
+
 		/*
 		static ValueFinfo< IntFire, unsigned int > numSynapses(
 			"numSynapses",
@@ -102,7 +109,8 @@ const Cinfo* IntFire::initCinfo()
 		&tau,	// Value
 		&thresh,				// Value
 		&refractoryPeriod,		// Value
-		// &numSynapses,			// Value
+		&bufferTime,		// Value
+		// &numSynapses,			// Value, defined in base class
 		&proc,					// SharedFinfo
 		spike(), 		// MsgSrc
 		// &synFinfo		// FieldElementFinfo for synapses.
@@ -123,13 +131,15 @@ const Cinfo* IntFire::initCinfo()
 static const Cinfo* intFireCinfo = IntFire::initCinfo();
 
 IntFire::IntFire()
-	: Vm_( 0.0 ), thresh_( 0.0 ), tau_( 1.0 ), refractoryPeriod_( 0.1 ), lastSpike_( -0.1 )
+	: Vm_( 0.0 ), thresh_( 0.0 ), tau_( 1.0 ), 
+		refractoryPeriod_( 0.1 ), lastSpike_( -0.1 ),
+		bufferTime_( 0.01 ) // 10 ms should be plenty.
 {
 	;
 }
 
 IntFire::IntFire( double thresh, double tau )
-	: Vm_( 0.0 ), thresh_( thresh ), tau_( tau ), refractoryPeriod_( 0.1 ), lastSpike_( -0.1 )
+	: Vm_( 0.0 ), thresh_( thresh ), tau_( tau ), refractoryPeriod_( 0.1 ), lastSpike_( -1.0 )
 {
 	;
 }
@@ -137,12 +147,15 @@ IntFire::IntFire( double thresh, double tau )
 void IntFire::process( const Eref &e, ProcPtr p )
 {
 	Vm_ += popBuffer();
-	if (  ( p->currTime - lastSpike_ ) < refractoryPeriod_ )
+	if (  ( p->currTime - lastSpike_ ) < refractoryPeriod_ ) {
 		Vm_ = 0.0;
+		return;
+	}
 
 	if ( Vm_ > thresh_ ) {
 		spike()->send( e, p->currTime );
 		Vm_ = -1.0e-7;
+		lastSpike_ = p->currTime;
 	} else {
 		Vm_ *= ( 1.0 - p->dt / tau_ );
 	}
@@ -177,7 +190,7 @@ void IntFire::process( const Eref &e, ProcPtr p )
 
 void IntFire::reinit( const Eref& e, ProcPtr p )
 {
-	reinitBuffer( p->dt );
+	reinitBuffer( p->dt, bufferTime_ );
 	Vm_ = 0.0;
 }
 
@@ -220,4 +233,14 @@ double IntFire::getThresh() const
 double IntFire::getRefractoryPeriod() const
 {
 	return refractoryPeriod_;
+}
+
+void IntFire::setBufferTime( const double v )
+{
+	bufferTime_ = v;
+}
+
+double IntFire::getBufferTime() const
+{
+	return bufferTime_;
 }

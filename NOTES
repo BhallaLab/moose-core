@@ -1450,6 +1450,61 @@ Did a valgrind on the single node. Looks quite filthy. All seems to be in MPI.
 Uninitialized variables, leaks, the works.
 
 Now to look ahead. One minor item is to have Id::path return a string without
-trailing braces.  Done.
+trailing braces.  Done. Checkin 4926.
+
+Next steps:
+	- Get it working with python
+	- Benchmarks
 
 ===========================================================================
+25 Dec 2013.
+Tried to get a script-based test model to go. Very awkward, no luck.
+Resurrected a benchmark/unit test for and int fire network. This is now in 
+testBiophysics.cpp::testIntFireNetwork. Doesn't match values accurately for
+the basic run test. Also, fails even with 2 nodes.
+===========================================================================
+26 Dec 2013.
+
+Fixed issue with SparseMsg::randomConnect: It now more properly figures out
+which matrix entries need to be filled on local node.
+Next issue is that of overflow of the send/recv buffers when setting a very
+large matrix for the synaptic weights.
+
+Fixed that simply by making it bigger. But now I need to do something about the
+get command and it isn't so simple because we need one buffer per node.
+
+===========================================================================
+27 Dec 2013
+in testIntFireNetwork (runsteps=5)
+    at testBiophysics.cpp:125
+
+Getting the weight vec fails for 4 nodes, values are wrong.
+
+===========================================================================
+28 Dec
+Traced the problem with getvec to the setvec most likely. But this reveals
+a more fundamental issue: What range should the set/getVec calls span for
+FieldElements? Currently I'm trying to scan everything. 
+Given that the Python interface treats FieldElements as equivalent to the
+regular Elements (with the proviso that the DataId is pre-specified), we
+should use the set/getVec calls only spanning the FieldIndex for FieldElements.
+Not as handy as being able to access all the entries in a single call. But
+perhaps that kind of access should be a separate function that uses a wildcard.
+
+Put in a little fix so that objects cannot be renamed if there is an existing
+object with the same name. Unfortunately one of the unit tests creates
+a parentless object... testAsync.cpp:192
+===========================================================================
+29 Dec.
+Easily fixed, arranged adoption of the parentless object. Clears unit tests.
+Valgrind is not so happy, but I think most of this is MPI being awful.
+For the SetVec, I'll change call semantics so it only goes to one array.
+If it is a FieldElement, then it is indexed by the FieldIndex. If it is
+a DataElement, it is indexed by the DataIndex.
+As a more general Set call I should look into having a specification of an
+ObjId list with provision for a specific or an 'all' entry.
+
+Some more cleanup on the name change and also on the Shell::doCreate, so that
+the tests are done at the start of the function rather than after it has
+been dispatched to the nodes. Now correctly returns Id() on failure.
+Added unit tests for this.

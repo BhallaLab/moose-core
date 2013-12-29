@@ -14,6 +14,8 @@ OBJ = \
 	SynHandler.o	\
 	IntFire.o	\
 	Synapse.o	\
+	SpikeGen.o	\
+	testBiophysics.o	\
 
 # IzhikevichNrn.o	\
 	LeakyIaF.o	\
@@ -25,7 +27,6 @@ OBJ = \
 	HHGate.o	\
 	SynChan.o	\
 	GapJunction.o	\
-	SpikeGen.o	\
 	CaConc.o	\
 	Nernst.o	\
 	Neuron.o	\
@@ -43,7 +44,6 @@ OBJ = \
 	MarkovSolver.o	\
 	ReadCell.o	\
 	VClamp.o	\
-	testBiophysics.o	\
 
 # GSL_LIBS = -L/usr/lib -lgsl
 
@@ -58,6 +58,7 @@ $(OBJ)	: $(HEADERS)
 SpikeRingBuffer.o:	SpikeRingBuffer.h
 SynHandler.o:	SpikeRingBuffer.h SynHandler.h Synapse.h 
 IntFire.o:	IntFire.h SpikeRingBuffer.h SynHandler.h Synapse.h 
+SpikeGen.o: SpikeGen.h
 #IzhikevichNrn.o: IzhikevichNrn.h
 #LeakyIaF.o: LeakyIaF.h
 #Synapse.o:	SynBase.h Synapse.h
@@ -70,7 +71,6 @@ IntFire.o:	IntFire.h SpikeRingBuffer.h SynHandler.h Synapse.h
 #SynChan.o: SynBase.h ChanBase.h Synapse.h SynChan.h
 #GapJunction.o: GapJunction.h
 #NMDAChan.o: NMDAChan.h SynBase.h ChanBase.h Synapse.h SynChan.h
-#SpikeGen.o: SpikeGen.h
 #CaConc.o:	CaConc.h
 #Nernst.o:	Nernst.h
 #Neuron.o:	Neuron.h

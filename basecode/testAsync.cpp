@@ -188,6 +188,8 @@ void testStrSet()
 	assert( ret );
 	ProcInfo p;
 
+	Shell::adopt( Id(), i2, 0 );
+
 	assert( ret->getName() == "test2" );
 	bool ok = SetGet::strSet( ObjId( i2, 0 ), "name", "NewImprovedTest" );
 	assert( ok );
@@ -1467,7 +1469,7 @@ void testCinfoFields()
 	assert( ndf == 17 );
 	unsigned int sdf = SynHandler::initCinfo()->getNumDestFinfo();
 	assert( sdf == 21 );
-	assert( cinfo->getNumDestFinfo() == 10 + sdf );
+	assert( cinfo->getNumDestFinfo() == 12 + sdf );
 
 	assert( cinfo->getDestFinfo( 0+ndf )->name() == "set_numSynapses" );
 	assert( cinfo->getDestFinfo( 1+ndf )->name() == "get_numSynapses" );
@@ -1483,18 +1485,21 @@ void testCinfoFields()
 	assert( cinfo->getDestFinfo( 5+sdf ) == cinfo->findFinfo( "get_thresh" ) );
 	assert( cinfo->getDestFinfo( 6+sdf ) == cinfo->findFinfo( "set_refractoryPeriod" ) );
 	assert( cinfo->getDestFinfo( 7+sdf ) == cinfo->findFinfo( "get_refractoryPeriod" ) );
-	assert( cinfo->getDestFinfo( 8+sdf ) == cinfo->findFinfo( "process" ) );
-	assert( cinfo->getDestFinfo( 9+sdf ) == cinfo->findFinfo( "reinit" ) );
+	assert( cinfo->getDestFinfo( 8+sdf ) == cinfo->findFinfo( "set_bufferTime" ) );
+	assert( cinfo->getDestFinfo( 9+sdf ) == cinfo->findFinfo( "get_bufferTime" ) );
+	assert( cinfo->getDestFinfo( 10+sdf ) == cinfo->findFinfo( "process" ) );
+	assert( cinfo->getDestFinfo( 11+sdf ) == cinfo->findFinfo( "reinit" ) );
 
 
 	unsigned int nvf = neutralCinfo->getNumValueFinfo();
 	assert( nvf == 11 );
-	assert( cinfo->getNumValueFinfo() == 5 + nvf );
+	assert( cinfo->getNumValueFinfo() == 6 + nvf );
 	assert( cinfo->getValueFinfo( 0 + nvf ) == cinfo->findFinfo( "numSynapses" ) );
 	assert( cinfo->getValueFinfo( 1 + nvf ) == cinfo->findFinfo( "Vm" ) );
 	assert( cinfo->getValueFinfo( 2 + nvf ) == cinfo->findFinfo( "tau" ) );
 	assert( cinfo->getValueFinfo( 3 + nvf ) == cinfo->findFinfo( "thresh" ) );
 	assert( cinfo->getValueFinfo( 4 + nvf ) == cinfo->findFinfo( "refractoryPeriod" ) );
+	assert( cinfo->getValueFinfo( 5 + nvf ) == cinfo->findFinfo( "bufferTime" ) );
 
 	unsigned int nlf = neutralCinfo->getNumLookupFinfo();
 	assert( nlf == 1 ); // Neutral inserts a lookup field for neighbours
@@ -1525,7 +1530,7 @@ void testCinfoElements()
 	Id intFireValueFinfoId( "/classes/IntFire/valueFinfo" );
 	unsigned int n = Field< unsigned int >::get( 
 		intFireValueFinfoId, "numData" );
-	assert( n == 4 );
+	assert( n == 5 );
 	Id intFireSrcFinfoId( "/classes/IntFire/srcFinfo" );
 	assert( intFireSrcFinfoId != Id() );
 	n = Field< unsigned int >::get( intFireSrcFinfoId, "numData" );
@@ -1533,7 +1538,7 @@ void testCinfoElements()
 	Id intFireDestFinfoId( "/classes/IntFire/destFinfo" );
 	assert( intFireDestFinfoId != Id() );
 	n = Field< unsigned int >::get( intFireDestFinfoId, "numData" );
-	assert( n == 10 );
+	assert( n == 12 );
 	
 	ObjId temp( intFireSrcFinfoId, DataId( 0 ) );
 	string foo = Field< string >::get( temp, "name" );
@@ -1548,7 +1553,7 @@ void testCinfoElements()
 	temp = ObjId( intFireDestFinfoId, DataId( 7 ) );
 	string str = Field< string >::get( temp, "name" );
 	assert( str == "get_refractoryPeriod");
-	temp = ObjId( intFireDestFinfoId, DataId( 9 ) );
+	temp = ObjId( intFireDestFinfoId, DataId( 11 ) );
 	str = Field< string >::get( temp, "name" );
 	assert( str == "reinit" );
 	cout << "." << flush;
