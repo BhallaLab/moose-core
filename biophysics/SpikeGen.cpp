@@ -103,11 +103,12 @@ const Cinfo* SpikeGen::initCinfo()
 		"The threshold detection can work in multiple modes.\n "
 		"If the refractT < 0.0, then it fires an event only at the rising edge of the "
 	};
+	static Dinfo< SpikeGen > dinfo;
 	static Cinfo spikeGenCinfo(
 		"SpikeGen",
 		Neutral::initCinfo(),
 		spikeGenFinfos, sizeof( spikeGenFinfos ) / sizeof( Finfo* ),
-		new Dinfo< SpikeGen >()
+		&dinfo
 	);
 
 	return &spikeGenCinfo;
