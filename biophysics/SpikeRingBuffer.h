@@ -22,13 +22,14 @@ class SpikeRingBuffer
 		SpikeRingBuffer();
 
 		/// Sets up buffer parameters
-		void reinit( double dt );
+		void reinit( double dt, double bufferTime );
 
 		/// Adds spike into the buffer.
 		void addSpike( double timestamp, double weight );
 		/// Advances the buffer one step, returns the current weight
 		double pop();
 	private:
+		static const unsigned int MAXBIN;
 		double dt_;
 		unsigned int currentBin_;
 		vector< double > weightSum_;

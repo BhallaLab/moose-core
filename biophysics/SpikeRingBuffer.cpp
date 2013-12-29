@@ -10,30 +10,48 @@
 #include <math.h>
 #include <vector>
 #include <cassert>
+#include <iostream>
 using namespace std;
 #include "SpikeRingBuffer.h"
+
+const unsigned int SpikeRingBuffer::MAXBIN = 1000;
 
 SpikeRingBuffer::SpikeRingBuffer()
 		: dt_( 1e-4 ), currentBin_( 0 ), weightSum_( 20, 0.0 )
 {;}
 
-void SpikeRingBuffer::reinit( double dt )
+void SpikeRingBuffer::reinit( double dt, double bufferTime )
 {
 	dt_ = dt;
 	currentBin_ = 0;
-	weightSum_.assign( weightSum_.size(), 0.0 );
+	unsigned int newsize = bufferTime / dt;
+	if ( newsize > MAXBIN ) {
+		cout << "Warning: SpikeRingBuffer::reinit: buffer size too big: " <<
+			newsize << " = " << bufferTime << " / " << 
+				dt << ", using " << MAXBIN << endl;
+		newsize = MAXBIN;
+	}
+	if ( newsize == 0 ) {
+		cout << "Warning: SpikeRingBuffer::reinit: buffer size too small: " <<
+			newsize << " = " << bufferTime << " / " << 
+				dt << ", using " << 10 << endl;
+		newsize = 10;
+	}
+	weightSum_.clear();
+	weightSum_.resize( newsize, 0.0 );
 }
 
 void SpikeRingBuffer::addSpike( double t, double w )
 {
-	static const unsigned int MAXBIN = 1000;
 	assert( t > 0.0 );
 	unsigned int bin = round( t / dt_ );
+	/*
 	// Replace this with a catch-throw
 	if ( bin >= weightSum_.size() ) {
 		assert( bin < MAXBIN );
 		weightSum_.resize( bin + 1 );
 	}
+	*/
 	// Replace the % with a bitwise operation.
 	weightSum_[ ( bin + currentBin_ ) % weightSum_.size() ] += w;
 }

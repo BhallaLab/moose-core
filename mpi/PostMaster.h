@@ -143,6 +143,7 @@ class PostMaster {
 				vector< unsigned int >& size );
 
 		static const unsigned int reserveBufSize;
+		static const unsigned int setRecvBufSize;
 		static const int MSGTAG;
 		static const int SETTAG;
 		static const int GETTAG;

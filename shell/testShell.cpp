@@ -270,6 +270,17 @@ void testChildren()
 
 	verifyKids( f1, f2a, f2b, f3, f4a, f4b );
 
+	// Should fail.
+	cout << "\nTesting warning for creating element with existing name\n";
+	Id fx1 = shell->doCreate( "Neutral", f1, "f2b", 1 );
+	assert( fx1 == Id() );
+
+	// Should succeed
+	Field< string >::set( f4a, "name", "hippo" );
+	// Should fail, because same name already exists.
+	cout << "\nTesting warning for name change to existing name\n";
+	Field< string >::set( f4a, "name", "f4b" );
+
 	shell->doDelete( f1 );
 	cout << "." << flush;
 }

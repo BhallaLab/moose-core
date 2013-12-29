@@ -332,7 +332,7 @@ void Shell::setShellElement( Element* shelle )
 /**
  * This is the version used by the parser. Acts as a blocking,
  * serial-like interface to a potentially multithread, multinode call.
- * Returns the new Id index.
+ * Returns the new Id index upon success, otherwise returns Id().
  * The data of the new Element is not necessarily allocated at this point,
  * that can be deferred till the global Instantiate or Reset calls.
  * Idea is that the model should be fully defined before load balancing.
@@ -343,23 +343,45 @@ Id Shell::doCreate( string type, ObjId parent, string name,
 				NodePolicy nodePolicy,
 				unsigned int preferredNode )
 {
-	// Get the new Id ahead of time and pass to all nodes.
-	Id ret = Id::nextId();
-	NodeBalance nb( numData, nodePolicy, preferredNode );
-	// Get the parent MsgIndex ahead of time and pass to all nodes.
-	unsigned int parentMsgIndex = OneToAllMsg::numMsg();
-	SetGet6< string, ObjId, Id, string, NodeBalance, unsigned int >::set(
-		ObjId(), // Apply command to Shell
-		"create",	// Function to call.
-		type, 		// class of new object
-		parent,		// Parent
-		ret,		// id of new object
-		name,		// name of new object
-		nb,			// Node balance configuration
-		parentMsgIndex	// Message index of child-parent msg.
-	);
-	// innerCreate( type, parent, ret, name, numData, isGlobal );
-	return ret;
+	const Cinfo* c = Cinfo::find( type );
+	if ( c ) {
+		Element* pa = parent.element();
+		if ( !pa ) {
+			stringstream ss;
+			ss << "Shell::doCreate: Parent Element'" << parent << "' not found. No Element created";
+			warning( ss.str() );
+			return Id();
+		}
+		if ( Neutral::child( parent.eref(), name ) != Id() ) {
+			stringstream ss;
+			ss << "Shell::doCreate: Object with same name already present: '"
+				   	<< parent.path() << "/" << name << "'. No Element created";
+			warning( ss.str() );
+			return Id();
+		}
+		// Get the new Id ahead of time and pass to all nodes.
+		Id ret = Id::nextId();
+		NodeBalance nb( numData, nodePolicy, preferredNode );
+		// Get the parent MsgIndex ahead of time and pass to all nodes.
+		unsigned int parentMsgIndex = OneToAllMsg::numMsg();
+		SetGet6< string, ObjId, Id, string, NodeBalance, unsigned int >::set(
+			ObjId(), // Apply command to Shell
+			"create",	// Function to call.
+			type, 		// class of new object
+			parent,		// Parent
+			ret,		// id of new object
+			name,		// name of new object
+			nb,			// Node balance configuration
+			parentMsgIndex	// Message index of child-parent msg.
+		);
+		// innerCreate( type, parent, ret, name, numData, isGlobal );
+		return ret;
+	} else {
+		stringstream ss;
+		ss << "Shell::doCreate: Class '" << type << "' not known. No Element created";
+		warning( ss.str() );
+	}
+	return Id();
 }
 
 bool Shell::doDelete( Id id )
@@ -798,6 +820,7 @@ bool Shell::adopt( Id parent, Id child, unsigned int msgIndex ) {
 
 /**
  * This function actually creates the object. Runs on all nodes.
+ * Assumes we've already done all the argument checking.
  */
 void Shell::innerCreate( string type, ObjId parent, Id newElm, string name,
 	const NodeBalance& nb, unsigned int msgIndex )
@@ -805,20 +828,6 @@ void Shell::innerCreate( string type, ObjId parent, Id newElm, string name,
 {
 	const Cinfo* c = Cinfo::find( type );
 	if ( c ) {
-		Element* pa = parent.element();
-		if ( !pa ) {
-			stringstream ss;
-			ss << "innerCreate: Parent Element'" << parent << "' not found. No Element created";
-			warning( ss.str() );
-			return;
-		}
-		if ( Neutral::child( parent.eref(), name ) != Id() ) {
-			stringstream ss;
-			ss << "innerCreate: Object with same name already present: '"
-				   	<< parent.path() << "/" << name << "'. No Element created";
-			warning( ss.str() );
-			return;
-		}
 		Element* ret;
 		switch ( nb.policy ) {
 			case MooseGlobal:
@@ -828,16 +837,15 @@ void Shell::innerCreate( string type, ObjId parent, Id newElm, string name,
 				ret = new LocalDataElement( newElm, c, name, nb.numData );
 				break;
 			case MooseSingleNode:
-				cout << "Error: Shell::innerCreate: Yet to implement SingleNodeDataElement\n";
+				cout << "Error: Shell::innerCreate: Yet to implement SingleNodeDataElement. Making BlockBalance.\n";
+				ret = new LocalDataElement( newElm, c, name, nb.numData );
 				// ret = new SingleNodeDataElement( newElm, c, name, numData, nb.preferredNode );
 				break;
 		};
 		assert( ret );
 		adopt( parent, newElm, msgIndex );
-	} else {
-		stringstream ss;
-		ss << "innerCreate: Class '" << type << "' not known. No Element created";
-		warning( ss.str() );
+	} else{
+		assert( 0 );
 	}
 }
 

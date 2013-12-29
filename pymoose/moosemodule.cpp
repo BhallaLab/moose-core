@@ -2491,7 +2491,7 @@ extern "C" {
             argv[ii] = (char*)(calloc(args[ii].length()+1, sizeof(char)));
             strncpy(argv[ii], args[ii].c_str(), args[ii].length()+1);            
         }
-        PyEval_InitThreads();
+        // Should not call. No pthreads now. PyEval_InitThreads();
         Id shellId = get_shell(argc, argv);
         for (int ii = 1; ii < argc; ++ii){
             free(argv[ii]);
