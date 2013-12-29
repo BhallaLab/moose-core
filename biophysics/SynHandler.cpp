@@ -89,9 +89,9 @@ Synapse* SynHandler::getSynapse( unsigned int i )
 	return &dummy;
 }
 
-void SynHandler::reinitBuffer( double dt )
+void SynHandler::reinitBuffer( double dt, double bufferTime )
 {
-		buf_.reinit( dt );
+		buf_.reinit( dt, bufferTime );
 }
 
 double SynHandler::popBuffer()

@@ -14,7 +14,8 @@
 const unsigned int TgtInfo::headerSize = 
 		1 + ( sizeof( TgtInfo ) - 1 )/sizeof( double );
 
-const unsigned int PostMaster::reserveBufSize = 4096;
+const unsigned int PostMaster::reserveBufSize = 1048576;
+const unsigned int PostMaster::setRecvBufSize = 1048576;
 const int PostMaster::MSGTAG = 1;
 const int PostMaster::SETTAG = 2;
 const int PostMaster::GETTAG = 3;
@@ -24,8 +25,8 @@ const int PostMaster::DIETAG = 100;
 PostMaster::PostMaster()
 		: 
 				recvBufSize_( reserveBufSize ),
-				setSendBuf_( reserveBufSize, 0 ),
-				setRecvBuf_( reserveBufSize, 0 ),
+				setSendBuf_( setRecvBufSize, 0 ),
+				setRecvBuf_( setRecvBufSize, 0 ),
 				sendBuf_( Shell::numNodes() ),
 				recvBuf_( Shell::numNodes() ),
 				sendSize_( Shell::numNodes(), 0 ),
@@ -42,7 +43,7 @@ PostMaster::PostMaster()
 #ifdef USE_MPI
 	MPI_Barrier( MPI_COMM_WORLD );
 	// Post recv for set calls
-	MPI_Irecv( &setRecvBuf_[0], recvBufSize_, MPI_DOUBLE,
+	MPI_Irecv( &setRecvBuf_[0], setRecvBufSize, MPI_DOUBLE,
 					MPI_ANY_SOURCE,
 					SETTAG, MPI_COMM_WORLD,
 					&setRecvReq_
@@ -307,7 +308,7 @@ void PostMaster::clearPendingSetGet()
 		// data to another buffer first.
 		vector< double > temp( setRecvBuf_.begin(), 
 						setRecvBuf_.begin() + count );
-		MPI_Irecv( &setRecvBuf_[0], recvBufSize_, MPI_DOUBLE,
+		MPI_Irecv( &setRecvBuf_[0], setRecvBufSize, MPI_DOUBLE,
 						MPI_ANY_SOURCE,
 						SETTAG, MPI_COMM_WORLD,
 						&setRecvReq_
@@ -444,7 +445,7 @@ double* PostMaster::addToSendBuf( const Eref& e, unsigned int bindIndex,
 double* PostMaster::addToSetBuf( const Eref& e, unsigned int opIndex, 
 						unsigned int size, unsigned int hopType )
 {
-	if ( TgtInfo::headerSize + size > recvBufSize_ ) {
+	if ( TgtInfo::headerSize + size > setRecvBufSize ) {
 		// Here we need to activate the fallback second send which will
 		// deal with the big block. Also various routines for tracking
 		// send size so we don't get too big or small.
@@ -500,7 +501,7 @@ void PostMaster::dispatchSetBuf( const Eref& e )
 // that come into the current node.
 double* PostMaster::remoteGet( const Eref& e, unsigned int bindIndex )
 {
-	static double getRecvBuf[reserveBufSize];
+	static double getRecvBuf[setRecvBufSize];
 #ifdef USE_MPI
 	static double getSendBuf[TgtInfo::headerSize];
 	static MPI_Request getSendReq;
@@ -517,7 +518,7 @@ double* PostMaster::remoteGet( const Eref& e, unsigned int bindIndex )
 	assert ( !e.element()->isGlobal() && e.getNode() != Shell::myNode() );
 	// Post receive for return value.
 	MPI_Irecv( 		&getRecvBuf[0],
-					recvBufSize_, MPI_DOUBLE, 
+					setRecvBufSize, MPI_DOUBLE, 
 					e.getNode(),
 					RETURNTAG, MPI_COMM_WORLD,
 					&getRecvReq 

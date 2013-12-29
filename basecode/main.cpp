@@ -51,8 +51,8 @@ extern void testMpiMsg();
 // extern void testKinetics();
 // extern void testKineticSolvers();
 // extern void	testKineticSolversProcess();
-// extern void testBiophysics();
-// extern void testBiophysicsProcess();
+extern void testBiophysics();
+extern void testBiophysicsProcess();
 // extern void testHSolve();
 // extern void testKineticsProcess();
 // extern void testGeom();
@@ -268,7 +268,7 @@ void nonMpiTests( Shell* s )
 		testBuiltins();
 		// testKinetics();
 		// testKineticSolvers();
-		// testBiophysics();
+		testBiophysics();
 		// testHSolve();
 		// testGeom();
 		// testMesh();
@@ -291,7 +291,7 @@ void processTests( Shell* s )
 	testSchedulingProcess();
 	testBuiltinsProcess();
 	// testKineticsProcess();
-	// testBiophysicsProcess();
+	testBiophysicsProcess();
 	// testKineticSolversProcess();
 	// testSimManager();
 	// testSigNeurProcess();

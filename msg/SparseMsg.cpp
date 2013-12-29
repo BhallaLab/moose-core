@@ -255,6 +255,8 @@ Eref SparseMsg::firstTgt( const Eref& src ) const
 
 /**
  * Should really have a seed argument
+ * Later need a way to fast-forward mtrand to just the entries we
+ * need to fill.
  */
 unsigned int SparseMsg::randomConnect( double probability )
 {
@@ -263,10 +265,11 @@ unsigned int SparseMsg::randomConnect( double probability )
 	matrix_.clear();
 	unsigned int totalSynapses = 0;
 	vector< unsigned int > sizes( nCols, 0 );
-	bool isFirstRound = 1;
 	unsigned int totSynNum = 0;
-
 	Element* syn = e2_;
+	unsigned int startData = syn->localDataStart();
+	unsigned int endData = startData + syn->numLocalData();
+
 	assert( nCols == syn->numData() );
 
 	for ( unsigned int i = 0; i < nCols; ++i ) {
@@ -276,22 +279,24 @@ unsigned int SparseMsg::randomConnect( double probability )
 		unsigned int synNum = 0;
 		for ( unsigned int j = 0; j < nRows; ++j ) {
 			double r = mtrand(); // Want to ensure it is called each time round the loop.
-			if ( isFirstRound ) {
-				isFirstRound = 0;
-			}
 			if ( r < probability ) {
 				synIndex.push_back( synNum );
 				++synNum;
+				++totSynNum;
 			} else {
 				synIndex.push_back( ~0 );
 			}
-			if ( r < probability )
-				++totSynNum;
 		}
 			
-		e2_->resizeField( i, synNum );
-		totalSynapses += synNum;
-		matrix_.addRow( i, synIndex );
+		if ( i >= startData && i < endData ) {
+			e2_->resizeField( i - startData, synNum );
+			totalSynapses += synNum;
+			matrix_.addRow( i, synIndex );
+		} else {
+			synIndex.resize( 0 );
+			synIndex.assign( nRows, ~0 );
+			matrix_.addRow( i, synIndex );
+		}
 	}
 
 	// cout << Shell::myNode() << ": sizes.size() = " << sizes.size() << ", ncols = " << nCols << ", startSynapse = " << startSynapse << endl;

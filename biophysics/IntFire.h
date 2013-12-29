@@ -37,6 +37,8 @@ class IntFire: public SynHandler
 		double getThresh() const;
 		void setRefractoryPeriod( double v );
 		double getRefractoryPeriod() const;
+		void setBufferTime( double v );
+		double getBufferTime() const;
 
 		////////////////////////////////////////////////////////////////
 		// Dest Func
@@ -51,6 +53,7 @@ class IntFire: public SynHandler
 		double tau_; // Time course of membrane settling.
 		double refractoryPeriod_; // Minimum time between successive spikes
 		double lastSpike_; // Time of last action potential.
+		double bufferTime_; // size of ring buffer.
 };
 
 #endif // _INT_FIRE_H

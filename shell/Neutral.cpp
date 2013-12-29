@@ -202,7 +202,19 @@ Neutral Neutral::getThis() const
 
 void Neutral::setName( const Eref& e, string name )
 {
-	e.element()->setName( name );
+	if ( e.id().value() <= 3 ) {
+		cout << "Warning: Neutral::setName on '" << e.id().path() << 
+			   "'.Cannot rename core objects\n";
+		return;
+	}
+	ObjId pa = parent( e );
+	Id sibling = Neutral::child( pa.eref(), name );
+	if ( sibling == Id() ) { // OK, no existing object with same name.
+		e.element()->setName( name );
+	} else {
+		cout << "Warning: Neutral::setName: an object with the name '" <<
+			name << "'\n already exists on the same parent. Not changed\n";
+	}
 }
 
 string Neutral::getName( const Eref& e ) const

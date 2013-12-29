@@ -49,7 +49,7 @@ class SynHandler
 		/**
 		 * Sets up the buffer with 'size' entries and dt time for each bin.
 		 */
-		void reinitBuffer( double dt );
+		void reinitBuffer( double dt, double bufferTime = 0.005 );
 
 		/**
 		 * Returns the current buffer entry, and advances it.
