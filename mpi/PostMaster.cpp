@@ -237,10 +237,14 @@ void PostMaster::handleRemoteGet(
 }
 
 /**
- * Collects all the field values and stuffs into getReturnBuf.
+ * Collects all the values and stuffs into getReturnBuf.
  * Returns size of all contents of getReturnBuf, in doubles.
- * Note that getReturnBuf[0] contains the total number of fields
- * on the current node.
+ * Puts number of returned values in getReturnBuf[0]. Note that these
+ * are likely to differ if the values returned are not doubles.
+ * Examines the eref to decide if this is a DataElement or a 
+ * FieldElement. If a DataElement, scans through all data entries to fill
+ * the returnBuf. If a FieldElement, fills in field entries only of the
+ * one specified DataId on this eref.
  */
 int innerGetVec( const Eref& e, const OpFunc* op, 
 			   double* getReturnBuf	)
@@ -249,25 +253,31 @@ int innerGetVec( const Eref& e, const OpFunc* op,
 	// Would like to use eref iterator here.
 	Element* elm = e.element();
 	unsigned int start = elm->localDataStart();
-	unsigned int end = start + elm->numLocalData();
 	int k = 1; // first entry is for numOnNode;
-	unsigned int numOnNode = 0;
-	for ( unsigned int i = start; i < end; ++i ) {
-		unsigned int numField = elm->numField( i - start );
-		numOnNode += numField;
+	if ( elm->hasFields() ) {
+		DataId di = e.dataIndex();
+		unsigned int numField = elm->numField( di - start );
+		getReturnBuf[0] = numField;
 		for ( unsigned int j = 0; j < numField; ++j ) {
-			Eref er( elm, i, j );
+			Eref er( elm, di, j );
 			// stuff return value into buf.
 			op->opBuffer( er, buf ); 
 			unsigned int size = buf[0];
 			memcpy( &getReturnBuf[k], &buf[1], size * sizeof( double ) );
 			k += size;
-
-			// op->opBuffer( er, &getReturnBuf[k] ); 
-			// k += getReturnBuf[k] + 1; // One for self, one for size of data.
+		}
+	} else {
+		unsigned int end = start + elm->numLocalData();
+		getReturnBuf[0] = elm->numLocalData();
+		for ( unsigned int i = start; i < end; ++i ) {
+			Eref er( elm, i, 0 );
+			// stuff return value into buf.
+			op->opBuffer( er, buf ); 
+			unsigned int size = buf[0];
+			memcpy( &getReturnBuf[k], &buf[1], size * sizeof( double ) );
+			k += size;
 		}
 	}
-	getReturnBuf[0] = numOnNode;
 	return k;
 }
 
@@ -523,7 +533,7 @@ double* PostMaster::remoteGet( const Eref& e, unsigned int bindIndex )
 					RETURNTAG, MPI_COMM_WORLD,
 					&getRecvReq 
 			 );
-	// Now post send to send the data out.
+	// Now post send to request the data
 	MPI_Isend( 
 		&getSendBuf[0], TgtInfo::headerSize, MPI_DOUBLE,
 			e.getNode(), 		// Where to send to.
@@ -541,6 +551,61 @@ double* PostMaster::remoteGet( const Eref& e, unsigned int bindIndex )
 	}
 #endif
 	return &getRecvBuf[0];
+}
+
+/// This is a blocking call. However, it must still handle other 
+//requests that come into the current node.
+//  Here we request data only from the one node that holds the data,
+//  since all field data is on a single DataEntry.
+void PostMaster::remoteFieldGetVec( const Eref& e, unsigned int bindIndex,
+	vector< double >& getRecvBuf )	
+{
+#ifdef USE_MPI
+	static double getSendBuf[TgtInfo::headerSize];
+	static MPI_Request getSendReq;
+	static MPI_Request getRecvReq;
+	static MPI_Status doneStatus;
+#endif
+	unsigned int targetNode = e.getNode();
+	assert( targetNode != Shell::myNode() );
+	getRecvBuf.clear();
+	getRecvBuf.resize( reserveBufSize );
+
+#ifdef USE_MPI
+	while ( isSetSent_ == 0 ) { 
+			// Can't request a 'get' while old set is 
+			// pending, lest the 'get' depend on the 'set'.
+		clearPending();
+	}
+	TgtInfo* tgt = reinterpret_cast< TgtInfo* >( &getSendBuf[0] );
+	tgt->set( e.objId(), bindIndex, MooseGetVecHop );
+	assert ( !e.element()->isGlobal() );
+
+	// Post receive for return value.
+	MPI_Irecv( 	&getRecvBuf[0],
+				reserveBufSize, MPI_DOUBLE, 
+				targetNode,
+				RETURNTAG, MPI_COMM_WORLD,
+				&getRecvReq 
+			);
+	// Now post send to request the data
+	MPI_Isend( 
+				&getSendBuf[0], TgtInfo::headerSize, MPI_DOUBLE,
+				targetNode, 			// Where to send to.
+				SETTAG, MPI_COMM_WORLD,
+				&getSendReq
+			);
+	// Poll till the value comes back. We don't bother to
+	// check what happened with the send.
+	// While polling be sure to handle any other requests to avoid deadlock
+	int done = 0;
+	while( !done ) {
+		MPI_Test( &getRecvReq, &done, &doneStatus );
+		assert ( done != MPI_UNDEFINED );
+		clearPending();
+	}
+	// Now we have the data back.
+#endif
 }
 
 /// This is a blocking call. However, it must still handle other 
@@ -583,7 +648,7 @@ void PostMaster::remoteGetVec( const Eref& e, unsigned int bindIndex,
 					RETURNTAG, MPI_COMM_WORLD,
 					&getRecvReq[k] 
 			);
-			// Now post send to send the data out.
+			// Now post send to request the data
 			MPI_Isend( 
 				&getSendBuf[0], TgtInfo::headerSize, MPI_DOUBLE,
 				i, 			// Where to send to.

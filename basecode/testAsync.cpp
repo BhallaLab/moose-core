@@ -343,12 +343,12 @@ void testSetGetSynapse()
 	Element* temp = new GlobalDataElement( cells, ic, "test2", size );
 	assert( temp );
 	vector< unsigned int > ns( size );
-	vector< double > delay;
+	vector< vector< double > > delay( size );
 	for ( unsigned int i = 0; i < size; ++i ) {
 		ns[i] = i;
 		for ( unsigned int j = 0; j < i; ++j ) {
 			double temp = i * 1000 + j;
-			delay.push_back( temp );
+			delay[i].push_back( temp );
 		}
 	}
 
@@ -356,9 +356,12 @@ void testSetGetSynapse()
 	assert( ret );
 	assert( temp->numData() == size );
 	Id syns( cells.value() + 1 );
-	ret = Field< double >::setVec( syns, "delay", delay );
-	assert( ret );
-	assert( delay.size() == size * (size - 1 ) / 2 );
+	for ( unsigned int i = 0; i < size; ++i ) {
+		ret = Field< double >::
+				setVec( ObjId( syns, i ), "delay", delay[i] );
+		if ( i > 0 )
+			assert( ret );
+	}
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		assert( syns.element()->numField( i ) == i );
@@ -892,15 +895,17 @@ void testSetRepeat()
 	
 	Id synapse( cell.value() + 1 );
 	// Here we test setting a 2-D array with different dims on each axis.
-	ret = Field< double >::setRepeat( synapse, "delay", 123.0 );
-	assert( ret );
-	vector< double > delay;
-	Field< double >::getVec( synapse, "delay", delay );
-	assert( delay.size() == ( size * (size - 1) )/2 );
-	unsigned int k = 0;
 	for ( unsigned int i = 0; i < size; ++i ) {
+		ret = Field< double >::
+				setRepeat( ObjId( synapse, i ), "delay", 123.0 );
+		assert( ret );
+	}
+	for ( unsigned int i = 0; i < size; ++i ) {
+		vector< double > delay;
+		Field< double >::getVec( ObjId( synapse, i ), "delay", delay );
+		assert( delay.size() == i );
 		for ( unsigned int j = 0; j < i; ++j ) {
-			assert( doubleEq( delay[k++], 123.0 ) );
+			assert( doubleEq( delay[j], 123.0 ) );
 		}
 	}
 
