@@ -104,25 +104,29 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
 		numTotSyn += numSynVec[i];
 	assert( numTotSyn == NUM_TOT_SYN );
 
-	vector< double > weight( NUM_TOT_SYN, 0.0 );
-	vector< double > delay( NUM_TOT_SYN, 0.0 );
-
-	for ( unsigned int i = 0; i < NUM_TOT_SYN; ++i ) {
-		weight[ i ] = mtrand() * weightMax;
-		delay[ i ] = mtrand() * delayMax;
+	vector< vector< double > > weight( size );
+	for ( unsigned int i = 0; i < size; ++i ) {
+		weight[i].resize( numSynVec[i], 0.0 );
+		vector< double > delay( numSynVec[i], 0.0 );
+		for ( unsigned int j = 0; j < numSynVec[i]; ++j ) {
+			weight[i][ j ] = mtrand() * weightMax;
+			delay[ j ] = mtrand() * delayMax;
+		}
+		ret = Field< double >::
+				setVec( ObjId( synId, i ), "weight", weight[i] );
+		assert( ret );
+		ret = Field< double >::setVec( ObjId( synId, i ), "delay", delay );
+		assert( ret );
 	}
 
-	ret = Field< double >::setVec( synId, "weight", weight );
-	assert( ret );
-	ret = Field< double >::setVec( synId, "delay", delay );
-	assert( ret );
-
-	vector< double > retVec;
-	Field< double >::getVec( synId, "weight", retVec );
-	assert( retVec.size() == NUM_TOT_SYN );
-
-	for ( unsigned int i = 0; i < NUM_TOT_SYN; ++i )
-		 assert( retVec[i] == weight[i] );
+	for ( unsigned int i = 0; i < size; ++i ) {
+		vector< double > retVec(0);
+		Field< double >::getVec( ObjId( synId, i ), "weight", retVec );
+		assert( retVec.size() == numSynVec[i] );
+		for ( unsigned int j = 0; j < numSynVec[i]; ++j ) {
+			assert( doubleEq( retVec[j], weight[i][j] ) );
+		}
+	}
 
 	shell->doUseClock("/network", "process", 0 );
 	shell->doSetClock( 0, timestep );
