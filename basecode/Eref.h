@@ -68,7 +68,10 @@ class Eref
 		 */
 		bool isDataHere() const;
 
-		/// Returns node upon which specified data entry resides .
+		/**
+		 * Returns node upon which specified data entry resides .
+		 * If this is a GlobalElement then it returns the local node.
+		 */
 		unsigned int getNode() const;
 	private:
 		Element* e_;

@@ -106,16 +106,24 @@ template< class A > class OpFunc1Base: public OpFunc
 		void opVecBuffer( const Eref& e, double* buf ) const {
 			vector< A > temp = Conv< vector< A > >::buf2val( &buf );
 			Element* elm = e.element();
-			assert( temp.size() >= elm->numLocalData() );
-			unsigned int k = 0;
-			unsigned int start = elm->localDataStart();
-			unsigned int end = start + elm->numLocalData();
-			for ( unsigned int i = start; i < end; ++i) {
-				unsigned int nf = elm->numField( i - start );
-				for ( unsigned int j = 0; j < nf; ++j) {
-					Eref er( elm, i, j );
+			if ( elm->hasFields() ) { // Assignment is to field array.
+				unsigned int k = 0;
+				DataId di = e.dataIndex();
+				unsigned int nf = elm->numField( di - 
+								elm->localDataStart() );
+				for ( unsigned int i = 0; i < nf; ++i) {
+					Eref er( elm, di, i );
 					op( er, temp[ k % temp.size() ] );
-					++k;
+						++k;
+				}
+			} else { // Assignment is to data entries.
+				unsigned int k = 0;
+				unsigned int start = elm->localDataStart();
+				unsigned int end = start + elm->numLocalData();
+				for ( unsigned int i = start; i < end; ++i) {
+					Eref er( elm, i, 0 );
+					op( er, temp[ k % temp.size() ] );
+						++k;
 				}
 			}
 		}

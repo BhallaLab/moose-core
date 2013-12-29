@@ -141,6 +141,8 @@ class PostMaster {
 		void remoteGetVec( const Eref& e, unsigned int bindIndex,
 				vector< vector< double > >& getRecvBuf, 
 				vector< unsigned int >& size );
+		void remoteFieldGetVec( const Eref& e, unsigned int bindIndex,
+				vector< double >& getRecvBuf ); 
 
 		static const unsigned int reserveBufSize;
 		static const unsigned int setRecvBufSize;

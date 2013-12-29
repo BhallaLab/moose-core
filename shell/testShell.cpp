@@ -433,26 +433,15 @@ void testCopyFieldElement()
 		assert( ret );
 	}
 
-	unsigned int origNumSyn = 0;
-	origNumSyn = size * (size - 1) / 2;
-	/*
-	if ( shell->numNodes() == 1 ) {
-		origNumSyn = size * (size - 1) / 2;
-	} else {
-		assert( 0 );
-	}
-	*/
-
-	vector< double > delay;
-	// unsigned int k = 0;
 	for ( unsigned int i = 0; i < size; ++i ) {
+		vector< double > delay;
 		for ( unsigned int j = 0; j < i; ++j ) {
-			// delay[ k++ ] = 3.14 * j + i * i;
 			delay.push_back( 3.14 * j + i * i );
 		}
+		ret = Field< double >::
+				setVec( ObjId( origSynId, i ), "delay", delay );
+		assert( ret == ( i > 0 ) );
 	}
-	ret = Field< double >::setVec( origSynId, "delay", delay );
-	assert( ret );
 
 	Eref origEr( origId.element(), 0 );
 	vector< Id > origChildren;
@@ -495,26 +484,18 @@ void testCopyFieldElement()
 	assert ( copyChild.element()->getName() == "f2" );
 	assert( copyChild.element()->numData() == numCopy * size2 );
 	
-	vector< double > del;
-	Field< double >::getVec( origSynId, "delay", del );
-	assert( del.size() == origNumSyn );
-	assert( delay.size() == origNumSyn );
-
-	for ( unsigned int i = 0; i < del.size(); ++i ) {
-		// cout << i << "	" << del[i] << "	" << delay[i] << endl;
-		assert( doubleEq( del[i], delay[i % origNumSyn ] ) );
+	for ( unsigned int i = 0; i < numCopy * size; ++i ) {
+		unsigned int k = i % size;
+		vector< double > delay;
+		vector< double > delay2;
+		Field< double >::getVec( ObjId( origSynId, k ), "delay", delay );
+		Field< double >::getVec( ObjId( copySynId, i ), "delay", delay2 );
+		assert( delay == delay2 );
+		assert( delay.size() == k );
+		for ( unsigned int j = 0; j < k; ++j ) {
+			assert( doubleEq( delay[j], 3.14 * j + k * k ) );
+		}
 	}
-
-	/*
-	del.resize( 0 );
-	Field< double >::getVec( copySynId, "delay", del );
-	assert( del.size() == numSyn );
-
-	for ( unsigned int i = 0; i < del.size(); ++i ) {
-		// cout << i << "	" << del[i] << "	" << delay[i] << endl;
-		assert( doubleEq( del[i], delay[i % origNumSyn ] ) );
-	}
-	*/
 	
 	shell->doDelete( origId );
 	shell->doDelete( copyId );

@@ -176,16 +176,19 @@ template< class A > class SetGet1: public SetGet
 
 		/**
 		 * setVec assigns all the entries in the target Id to the
-		 * specified vector of values. The vector is used as a circular
+		 * specified vector of values. If the target is a FieldElement
+		 * it assigns the entries on the specific DataId provided in the
+		 * ObjId argument.
+		 * The vector is used as a circular
 		 * buffer: if the number of targets exceeds the vector size, it
 		 * rolls over.
 		 */
-		static bool setVec( Id destId, const string& field, 
+		static bool setVec( ObjId destId, const string& field, 
 			const vector< A >& arg )
 		{
 			if ( arg.size() == 0 ) return 0;
 
-			ObjId tgt( destId, 0 );
+			ObjId tgt( destId );
 			FuncId fid;
 
 			const OpFunc* func = checkSet( field, tgt, fid );
@@ -205,7 +208,6 @@ template< class A > class SetGet1: public SetGet
 		/**
 		 * This variant assigns fields on a specific data entry within 
 		 * the dest. It is distinguished by an ObjId first argument.
-		 */
 		static bool setVec( ObjId oi, const string& field, 
 			const vector< A >& arg )
 		{
@@ -236,11 +238,12 @@ template< class A > class SetGet1: public SetGet
 			}
 			return false;
 		}
+		 */
 
 		/**
 		 * Sets all target array values to the single value
 		 */
-		static bool setRepeat( Id destId, const string& field, 
+		static bool setRepeat( ObjId destId, const string& field, 
 			const A& arg )
 		{
 			vector< A >temp ( 1, arg );
@@ -284,14 +287,14 @@ template< class A > class Field: public SetGet1< A >
 			return SetGet1< A >::set( dest, temp, arg );
 		}
 
-		static bool setVec( Id destId, const string& field, 
+		static bool setVec( ObjId destId, const string& field, 
 			const vector< A >& arg )
 		{
 			string temp = "set_" + field;
 			return SetGet1< A >::setVec( destId, temp, arg );
 		}
 
-		static bool setRepeat( Id destId, const string& field, 
+		static bool setRepeat( ObjId destId, const string& field, 
 			A arg )
 		{
 			string temp = "set_" + field;
@@ -346,7 +349,7 @@ template< class A > class Field: public SetGet1< A >
 		/**
 		 * Returns a vector of values
 		 */
-		static void getVec( Id dest, const string& field, vector< A >& vec)
+		static void getVec( ObjId dest, const string& field, vector< A >& vec)
 		{
 
 			vec.resize( 0 );

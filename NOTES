@@ -1510,3 +1510,20 @@ been dispatched to the nodes. Now correctly returns Id() on failure.
 Added unit tests for this.
 Checkin 4937. After a minor fix for the back-ported SpikeGen, 
 Valgrind seems clean.
+
+Things to do to clean up the SetVec etc.
+
+- Iterator for Erefs/elements.
+- Add the node-specific Element class
+- Redo HopFunc::opVec.
+- Redo SetGet::setVec to take ObjId argument.
+
+I've examined the iterator options. Currently not worth it.
+
+Reimplemented the SetGet::vec functions for the updated semantics, where
+the vector returned is the last array. For DataElements it is the
+array of values from all DataEntries, and for FieldElements it is the
+array of values from all FieldEntries on a particular DataIndex. Many
+unit tests need fixing now.
+
+Cleared unit tests on single node. Fails on 2.

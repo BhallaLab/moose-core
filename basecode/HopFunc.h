@@ -17,6 +17,8 @@ double* remoteGet( const Eref& e , unsigned int bindIndex );
 void remoteGetVec( const Eref& e, unsigned int bindIndex, 
 				vector< vector< double > >& getRecvBuf, 
 				vector< unsigned int >& numOnNode );
+void remoteFieldGetVec( const Eref& e, unsigned int bindIndex, 
+				vector< double >& getRecvBuf ); 
 unsigned int mooseNumNodes();
 unsigned int mooseMyNode();
 
@@ -72,6 +74,24 @@ template < class A > class HopFunc1: public OpFunc1Base< A >
 			return k;
 		}
 
+		/// Executes the local vector assignment. Returns number of entries
+		unsigned int localFieldOpVec( const Eref& er, 
+					const vector< A >& arg,
+					const OpFunc1Base< A >* op )
+				const
+		{
+			assert( er.getNode() == mooseMyNode() );
+			DataId di = er.dataIndex();
+			Element* elm = er.element();
+			unsigned int numField = 
+					elm->numField( di - er.element()->localDataStart()  );
+			for ( unsigned int q = 0; q < numField; ++q ) {
+				Eref temp( elm, di, q );
+				op->op( temp, arg[ q % arg.size() ] );
+			}
+			return numField;
+		}
+
 		/// Dispatches remote vector assignment. start and end are arg index
 		unsigned int remoteOpVec( const Eref& er, 
 					const vector< A >& arg,
@@ -81,8 +101,8 @@ template < class A > class HopFunc1: public OpFunc1Base< A >
 			unsigned int k = start;
 			unsigned int nn = end - start;
 			if ( nn > 0 ) {
-				// nn includes dataIndices and if present fieldIndices
-				// too. It may involve a query to the remote node.
+				// nn includes dataIndices. FieldIndices are handled by 
+				// other functions.
 					vector< A > temp( nn );
 				// Have to do the insertion entry by entry because the
 				// argument vector may wrap around.
@@ -102,15 +122,13 @@ template < class A > class HopFunc1: public OpFunc1Base< A >
 			return k;
 		}
 
-		void opVec( const Eref& e, const vector< A >& arg,
+		void dataOpVec( const Eref& e, const vector< A >& arg,
 				 const OpFunc1Base< A >* op ) const
 		{
 			Element* elm = e.element();
-			vector< unsigned int > startOnNode( mooseNumNodes(), 0 );
 			vector< unsigned int > endOnNode( mooseNumNodes(), 0 );
 			unsigned int lastEnd = 0;
 			for ( unsigned int i = 0; i < mooseNumNodes(); ++i ) {
-				startOnNode[i] = lastEnd;
 				endOnNode[i] = elm->getNumOnNode(i) + lastEnd;
 				lastEnd = endOnNode[i];
 			}
@@ -125,7 +143,6 @@ template < class A > class HopFunc1: public OpFunc1Base< A >
 						Eref starter( elm,  0 );
 						remoteOpVec( starter, arg, op, 0, elm->numData() );
 					} else {
-						assert( k == startOnNode[i] );
 						DataId start = elm->startDataId( i );
 						if ( start < elm->numData() ) {
 							Eref starter( elm,  start );
@@ -134,6 +151,25 @@ template < class A > class HopFunc1: public OpFunc1Base< A >
 						}
 					}
 				}
+			}
+		}
+
+		void opVec( const Eref& er, const vector< A >& arg,
+				 const OpFunc1Base< A >* op ) const
+		{
+			Element* elm = er.element();
+			if ( elm->hasFields() ) { 
+				if ( er.getNode() == mooseMyNode() ) {
+			// True for globals as well as regular objects on current node
+					localFieldOpVec( er, arg, op );
+				}
+				if ( elm->isGlobal() || er.getNode() != mooseMyNode() ) {
+					// Go just to the node where the fields reside, and
+					// assign the vector there. May be all nodes if global.
+					remoteOpVec( er, arg, op, 0, arg.size() );
+				}
+			} else {
+				dataOpVec( er, arg, op );
 			}
 		}
 	private:
@@ -380,17 +416,40 @@ template < class A > class GetHopFunc: public OpFunc1Base< A* >
 			*ret = Conv< A >::buf2val( &buf );
 		}
 
+		void getLocalFieldVec( const Eref& er, vector< A >& ret, 
+				 const GetOpFuncBase< A >* op ) const
+		{
+			DataId p = er.dataIndex();
+			Element* elm = er.element();
+			unsigned int numField = elm->numField( 
+							p - elm->localDataStart() );
+			for ( unsigned int q = 0; q < numField; ++q ) {
+				Eref temp( elm, p, q );
+				ret.push_back( op->returnOp( temp ) );
+			}
+		}
+
+		void getRemoteFieldVec( const Eref& e, vector< A >& ret, 
+				 const GetOpFuncBase< A >* op ) const
+		{
+			vector< double > buf;
+			remoteFieldGetVec( e, hopIndex_.bindIndex(), buf );
+			assert( buf.size() > 0 );
+			unsigned int numField = buf[0];
+			double* val = &buf[1]; // zeroth entry is numField.
+			for ( unsigned int j = 0; j < numField; ++j ) {
+				ret.push_back( Conv< A >::buf2val( &val ) );
+			}
+		}
+
 		void getLocalVec( Element *elm, vector< A >& ret, 
 				 const GetOpFuncBase< A >* op ) const
 		{
 			unsigned int start = elm->localDataStart();
 			unsigned int end = start + elm->numLocalData();
 			for ( unsigned int p = start; p < end; ++p ) {
-				unsigned int numField = elm->numField( p - start );
-				for ( unsigned int q = 0; q < numField; ++q ) {
-					Eref er( elm, p, q );
-					ret.push_back( op->returnOp( er ) );
-				}
+				Eref er( elm, p, 0 );
+				ret.push_back( op->returnOp( er ) );
 			}
 		}
 
@@ -427,10 +486,18 @@ template < class A > class GetHopFunc: public OpFunc1Base< A* >
 			Element* elm = e.element();
 			ret.clear();
 			ret.reserve( elm->numData() );
-			if ( mooseNumNodes() == 1 || elm->isGlobal() ) {
-				getLocalVec( elm, ret, op );
+			if ( elm->hasFields() ) {
+				if ( e.getNode() == mooseMyNode() ) {
+					getLocalFieldVec( e, ret, op );
+				} else {
+					getRemoteFieldVec( e, ret, op );
+				}
 			} else {
-				getMultiNodeVec( e, ret, op );
+				if ( mooseNumNodes() == 1 || elm->isGlobal() ) {
+					getLocalVec( elm, ret, op );
+				} else {
+					getMultiNodeVec( e, ret, op );
+				}
 			}
 		}
 	private:
