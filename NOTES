@@ -1508,3 +1508,5 @@ Some more cleanup on the name change and also on the Shell::doCreate, so that
 the tests are done at the start of the function rather than after it has
 been dispatched to the nodes. Now correctly returns Id() on failure.
 Added unit tests for this.
+Checkin 4937. After a minor fix for the back-ported SpikeGen, 
+Valgrind seems clean.
