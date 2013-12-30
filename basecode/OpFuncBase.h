@@ -107,14 +107,12 @@ template< class A > class OpFunc1Base: public OpFunc
 			vector< A > temp = Conv< vector< A > >::buf2val( &buf );
 			Element* elm = e.element();
 			if ( elm->hasFields() ) { // Assignment is to field array.
-				unsigned int k = 0;
 				DataId di = e.dataIndex();
 				unsigned int nf = elm->numField( di - 
 								elm->localDataStart() );
 				for ( unsigned int i = 0; i < nf; ++i) {
 					Eref er( elm, di, i );
-					op( er, temp[ k % temp.size() ] );
-						++k;
+					op( er, temp[ i % temp.size() ] );
 				}
 			} else { // Assignment is to data entries.
 				unsigned int k = 0;
@@ -123,7 +121,7 @@ template< class A > class OpFunc1Base: public OpFunc
 				for ( unsigned int i = start; i < end; ++i) {
 					Eref er( elm, i, 0 );
 					op( er, temp[ k % temp.size() ] );
-						++k;
+					++k;
 				}
 			}
 		}

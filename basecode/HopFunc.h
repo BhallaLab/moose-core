@@ -100,7 +100,7 @@ template < class A > class HopFunc1: public OpFunc1Base< A >
 		{
 			unsigned int k = start;
 			unsigned int nn = end - start;
-			if ( nn > 0 ) {
+			if ( mooseNumNodes() > 1 && nn > 0 ) {
 				// nn includes dataIndices. FieldIndices are handled by 
 				// other functions.
 					vector< A > temp( nn );
@@ -139,10 +139,7 @@ template < class A > class HopFunc1: public OpFunc1Base< A >
 					k = localOpVec( elm, arg, op, k );
 					assert( k == endOnNode[i] );
 				} else {
-					if ( elm->isGlobal() ) {
-						Eref starter( elm,  0 );
-						remoteOpVec( starter, arg, op, 0, elm->numData() );
-					} else {
+					if ( !elm->isGlobal() ) {
 						DataId start = elm->startDataId( i );
 						if ( start < elm->numData() ) {
 							Eref starter( elm,  start );
@@ -151,6 +148,10 @@ template < class A > class HopFunc1: public OpFunc1Base< A >
 						}
 					}
 				}
+			}
+			if ( elm->isGlobal() ) {
+				Eref starter( elm,  0 );
+				remoteOpVec( starter, arg, op, 0, arg.size() );
 			}
 		}
 
