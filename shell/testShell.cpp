@@ -441,6 +441,9 @@ void testCopyFieldElement()
 		ret = Field< double >::
 				setVec( ObjId( origSynId, i ), "delay", delay );
 		assert( ret == ( i > 0 ) );
+		ret = Field< double >::
+				setRepeat( ObjId( origSynId, i ), "weight", i + 100 );
+		assert( ret );
 	}
 
 	Eref origEr( origId.element(), 0 );
@@ -488,10 +491,16 @@ void testCopyFieldElement()
 		unsigned int k = i % size;
 		vector< double > delay;
 		vector< double > delay2;
+		/*
+		if ( k > 0 ) {
+			double x = Field< double >::get( ObjId( copySynId, i, 0 ), "delay" );
+			cout << endl << i << ": x = " << x << endl;
+		}
+		*/
 		Field< double >::getVec( ObjId( origSynId, k ), "delay", delay );
 		Field< double >::getVec( ObjId( copySynId, i ), "delay", delay2 );
-		assert( delay == delay2 );
 		assert( delay.size() == k );
+		assert( delay == delay2 );
 		for ( unsigned int j = 0; j < k; ++j ) {
 			assert( doubleEq( delay[j], 3.14 * j + k * k ) );
 		}

@@ -48,6 +48,8 @@ void dispatchBuffers( const Eref& e, HopIndex hopIndex )
 {
 	static ObjId oi( 3 );
 	static PostMaster* p = reinterpret_cast< PostMaster* >( oi.data() );
+	if ( Shell::numNodes() == 1 )
+		return;
 	if ( hopIndex.hopType() == MooseSetHop || 
 	  	hopIndex.hopType() == MooseGetHop ) {
 		p->dispatchSetBuf( e );

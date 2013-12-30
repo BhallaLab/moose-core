@@ -1526,4 +1526,24 @@ array of values from all DataEntries, and for FieldElements it is the
 array of values from all FieldEntries on a particular DataIndex. Many
 unit tests need fixing now.
 
-Cleared unit tests on single node. Fails on 2.
+Checkin 4939.
+Cleared unit tests on single node. Fails on 2, doing testShell.cpp::testCopy. 
+I think the copy itself fails, not the setget. But possibly the values oon
+the remote node were not set in the first place.
+
+===========================================================================
+30 Dec
+In Python, 'element' refers to a single object. A bit like GENESIS.
+There is 'ematrix' for the vector of data or the vector of fields: in each
+case a one-dimensional vector of objects. Suggest to rename the Python 
+'ematrix' to evec elevec elmarray earray erray elmtab etab elmvec wrapper
+eptr elmptr emulti elmulti multielm etuple elmtuple elmvec eset elmset 
+elmatrix arrayelm multielm elmarray elmindex elmdex elemdex elemulti elookup
+
+
+Traced the problem for the testCopy. As far as I can see the copy itself is
+OK, but the original assignment of values to the Global has failed on the
+remote node.
+
+Now clears unit tests with up to 8 nodes.
+===========================================================================
