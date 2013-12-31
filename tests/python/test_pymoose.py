@@ -11,28 +11,28 @@ except ImportError:
     print 'Please include the directory containing moose.py and _moose.so in your PYTHONPATH environmental variable.'
     sys.exit(1)
 
-class TestEmatrix(unittest.TestCase):
+class TestVec(unittest.TestCase):
     """Test pymoose basics"""
     def testCreate(self):
-        em = moose.ematrix('/test', 10, 0, 'Neutral')
+        em = moose.vec('/test', 10, 0, 'Neutral')
         self.assertEqual(em.path, '/test')
 
     def testCreateKW(self):
-        em = moose.ematrix(path='/testCreateKW', n=10, g=1, dtype='Neutral')
+        em = moose.vec(path='/testCreateKW', n=10, g=1, dtype='Neutral')
         self.assertEqual(em.path, '/testCreateKW')
 
     def testGetItem(self):
-        em = moose.ematrix('testGetItem', n=10, g=1, dtype='Neutral')
+        em = moose.vec('testGetItem', n=10, g=1, dtype='Neutral')
         el = em[5]
         self.assertEqual(el.path,'/%s[5]' % (em.name))
 
     def testIndexError(self):
-        em = moose.ematrix('testIndexError', n=3, g=1, dtype='Neutral')
+        em = moose.vec('testIndexError', n=3, g=1, dtype='Neutral')
         with self.assertRaises(IndexError):
             el = em[5]
         
     def testSlice(self):
-        em = moose.ematrix('/testSlice', n=10, g=1, dtype='Neutral')
+        em = moose.vec('/testSlice', n=10, g=1, dtype='Neutral')
         sl = em[5:8]
         for ii, el in enumerate(sl):
             self.assertEqual(el.path,  '/testSlice[%d]' % (ii+5))
@@ -95,7 +95,7 @@ class TestNeutral1(unittest.TestCase):
         # breaking old code which was supposed to skip the [0] and
         # include the index only for second entry onwards.
         self.assertEqual(self.b.path, '/%s[0]/%s[0]' % (self.a_path, 'b'))
-        em = moose.ematrix(self.c)
+        em = moose.vec(self.c)
         self.assertEqual(em[1].path, self.c_path + '[1]')
 
     def testName(self):
@@ -122,14 +122,14 @@ class TestNeutral1(unittest.TestCase):
             s = self.b.name
 
     def testIdObjId(self):
-        id_ = moose.ematrix(self.a)
+        id_ = moose.vec(self.a)
         self.assertEqual(id_, self.a.id_)
 
     def testCompareId(self):
         """Test the rich comparison between ids"""
-        id1 = moose.ematrix('A', n=2, dtype='Neutral')
-        id2 = moose.ematrix('B', n=4, dtype='Neutral')
-        id3 = moose.ematrix('A')
+        id1 = moose.vec('A', n=2, dtype='Neutral')
+        id2 = moose.vec('B', n=4, dtype='Neutral')
+        id3 = moose.vec('A')
         self.assertTrue(id1 < id2)
         self.assertEqual(id1, id3)
         self.assertTrue(id2 > id1)
@@ -139,8 +139,8 @@ class TestNeutral1(unittest.TestCase):
     def testRename(self):
         """Rename an element in a Id and check if that was effective. This
         tests for setting values also."""
-        id1 = moose.ematrix(path='/alpha', n=1, dtype='Neutral')
-        id2 = moose.ematrix('alpha')
+        id1 = moose.vec(path='/alpha', n=1, dtype='Neutral')
+        id2 = moose.vec('alpha')
         id1[0].name = 'bravo'
         self.assertEqual(id1.path, '/bravo')
         self.assertEqual(id2.path, '/bravo')

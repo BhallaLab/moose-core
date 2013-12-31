@@ -139,7 +139,7 @@ extern void destroyMsgManagers();
 
 // C-wrapper to be used by Python
 extern "C" {
-    // IdType and ObjIdType are defined in ematrix.cpp and
+    // IdType and ObjIdType are defined in vec.cpp and
     // melement.cpp respectively.
     extern PyTypeObject IdType;
     extern PyTypeObject ObjIdType;
@@ -1129,9 +1129,9 @@ extern "C" {
                  "Make copies of a moose object.\n"
                  "Parameters\n"
                  "----------\n"
-                 "src : ematrix, element or str\n"
+                 "src : vec, element or str\n"
                  "\tsource object.\n"
-                 "dest : ematrix, element or str\n"
+                 "dest : vec, element or str\n"
                  "\tDestination object to copy into.\n"
                  "name : str\n"
                  "\tName of the new object. If omitted, name of the original will be used.\n"
@@ -1145,7 +1145,7 @@ extern "C" {
                  "\n"
                  "Returns\n"
                  "-------\n"
-                 "ematrix of the copied object\n"
+                 "vec of the copied object\n"
                  );
     PyObject * moose_copy(PyObject * dummy, PyObject * args, PyObject * kwargs)
     {
@@ -1164,7 +1164,7 @@ extern "C" {
         } else if (PyString_Check(src)){
             _src = Id(PyString_AsString(src));
         } else {
-            PyErr_SetString(PyExc_TypeError, "Source must be instance of ematrix, element or string.");
+            PyErr_SetString(PyExc_TypeError, "Source must be instance of vec, element or string.");
             return NULL;
         }
         if (_src == Id()){
@@ -1178,7 +1178,7 @@ extern "C" {
         } else if (PyString_Check(dest)){
             _dest = Id(PyString_AsString(dest));
         } else {
-            PyErr_SetString(PyExc_TypeError, "destination must be instance of ematrix, element or string.");
+            PyErr_SetString(PyExc_TypeError, "destination must be instance of vec, element or string.");
             return NULL;
         }
         if (!Id::isValid(_src) || !Id::isValid(_dest)){
@@ -1217,13 +1217,13 @@ extern "C" {
                  "moose.delete(id)"
                  "\n"
                  "\nDelete the underlying moose object. This does not delete any of the"
-                 "\nPython objects referring to this ematrix but does invalidate them. Any"
+                 "\nPython objects referring to this vec but does invalidate them. Any"
                  "\nattempt to access them will raise a ValueError."
                  "\n"
                  "\nParameters\n"
                  "\n----------"
-                 "\nid : ematrix"
-                 "\n\tematrix of the object to be deleted."
+                 "\nid : vec"
+                 "\n\tvec of the object to be deleted."
                  "\n");
     PyObject * moose_delete(PyObject * dummy, PyObject * args)
     {
@@ -1232,7 +1232,7 @@ extern "C" {
             return NULL;
         }
         if (!PyObject_IsInstance(obj, (PyObject*)&IdType)){
-            PyErr_SetString(PyExc_TypeError, "ematrix instance expected");
+            PyErr_SetString(PyExc_TypeError, "vec instance expected");
             return NULL;
         }
         if (((_Id*)obj)->id_ == Id()){
@@ -1388,7 +1388,7 @@ extern "C" {
     }
 
     PyDoc_STRVAR(moose_loadModel_documentation,
-                 "loadModel(filename, modelpath, solverclass) -> moose.ematrix\n"
+                 "loadModel(filename, modelpath, solverclass) -> moose.vec\n"
                  "\n"
                  "Load model from a file to a specified path.\n"
                  "\n"
@@ -1403,7 +1403,7 @@ extern "C" {
                  "\n"
                  "Returns\n"
                  "-------\n"
-                 "ematrix instance refering to the loaded model container.\n"
+                 "vec instance refering to the loaded model container.\n"
                  );
     
     PyObject * moose_loadModel(PyObject * dummy, PyObject * args)
@@ -1436,7 +1436,7 @@ extern "C" {
                  "\n"
                  "\nParameters\n"
                  "----------\n"
-                 "source: ematrix or element or str\n"
+                 "source: vec or element or str\n"
                  "\troot of the model tree\n"
                  "\n"
                  "filename: str\n"
@@ -1466,7 +1466,7 @@ extern "C" {
         } else if (ObjId_SubtypeCheck(source)){
             model = ((_ObjId*)source)->oid_.id;
         } else {
-            PyErr_SetString(PyExc_TypeError, "moose_saveModel: need an ematrix, element or string for first argument.");
+            PyErr_SetString(PyExc_TypeError, "moose_saveModel: need an vec, element or string for first argument.");
             return NULL;
         }
         SHELLPTR->doSaveModel(model, filename);
@@ -1489,7 +1489,7 @@ extern "C" {
             } else if (PyObject_IsInstance(element, (PyObject*)&ObjIdType)){
                 id = (reinterpret_cast<_ObjId*>(element))->oid_.id;                    
             } else {
-                PyErr_SetString(PyExc_NameError, "setCwe: Argument must be an ematrix or element");
+                PyErr_SetString(PyExc_NameError, "setCwe: Argument must be an vec or element");
                 return NULL;
             }
         } else {
@@ -1521,12 +1521,12 @@ extern "C" {
                  "\n"
                  "Parameters\n"
                  "----------\n"
-                 "src : element, ematrix or string\n"
+                 "src : element, vec or string\n"
                  "\tthe source object\n"
                  "src_field : str\n"
                  "\tthe source field name. Fields listed under `srcFinfo` and\n"
                  "`sharedFinfo` qualify for this.\n"
-                 "dest : element, ematrix or string/\n"
+                 "dest : element, vec or string/\n"
                  "\tthe destination object.\n"
                  "dest_field : str\n"
                  "\tthe destination field name. Fields listed under `destFinfo`\n"
@@ -1874,7 +1874,7 @@ extern "C" {
             _Id * entry = PyObject_New(_Id, &IdType);                       
             if (!entry){
                 Py_XDECREF(ret);
-                PyErr_SetString(PyExc_RuntimeError, "moose.wildcardFind: failed to allocate new ematrix.");
+                PyErr_SetString(PyExc_RuntimeError, "moose.wildcardFind: failed to allocate new vec.");
                 return NULL;
             }
             entry->id_ = objects[ii];
@@ -2333,6 +2333,18 @@ extern "C" {
         return (PyObject*)new_obj;
     }
 
+    // int isValid(ObjId oid){
+    //         if (!oid.id_.isValid()){
+    //             PyErr_SetString(PyExc_ValueError, "Invalid id specified");
+    //             return 0;
+    //         }
+    //         numData = Field<unsigned int>::get(oid, "numData");
+    //         if 
+    //         if (numData <= did){
+    //             PyErr_SetString(PyExc_IndexError, "dataId out of range.");
+    //             return 0;
+    //         }
+    // }
     PyDoc_STRVAR(moose_element_documentation,
                  "moose.element(arg) -> moose object\n"
                  "\n"
@@ -2340,7 +2352,7 @@ extern "C" {
                  "instance\n"
                  "Parameters\n"
                  "----------\n"
-                 "arg: str or ematrix or moose object\n"
+                 "arg: str or vec or moose object\n"
                  "path of the moose element to be converted or another element (possibly\n"
                  "available as a superclass instance).\n"
                  "\n"
@@ -2354,6 +2366,9 @@ extern "C" {
         char * path = NULL;
         PyObject * obj = NULL;
         ObjId oid;
+        unsigned nid = 0, did = 0, fidx = 0;
+        Id id;
+        unsigned int numData = 0;
         if (PyArg_ParseTuple(args, "s", &path)){
             oid = ObjId(path);
             //            cout << "Original Path " << path << ", Element Path: " << oid.path() << endl;
@@ -2369,14 +2384,25 @@ extern "C" {
             return NULL;
         }
         PyErr_Clear();
-        if (!PyArg_ParseTuple(args, "O", &obj)){
-            PyErr_SetString(PyExc_TypeError, "moose_element: argument must be a path or an existing element or an ematrix");
+        if (PyArg_ParseTuple(args, "I|II", &nid, &did, &fidx)){
+            oid = ObjId(id, did, fidx);
+            // Todo: test for validity
+            PyObject * new_obj = oid_to_element(oid);
+            if (!new_obj){
+                PyErr_SetString(PyExc_RuntimeError, "moose_element: not a moose class.");
+            }
+            return new_obj;
+        } 
+        PyErr_Clear();
+        if (!PyArg_ParseTuple(args, "O|II", &obj, &did, &fidx)){
+            PyErr_SetString(PyExc_TypeError, "moose_element: argument must be a path or an existing element or an vec");
             return NULL;
         }
+        PyErr_Clear();                
         if (PyObject_IsInstance(obj, (PyObject*)&ObjIdType)){
             oid = ((_ObjId*)obj)->oid_;
         } else if (PyObject_IsInstance(obj, (PyObject*)&IdType)){
-            oid = ObjId(((_Id*)obj)->id_);
+            oid = ObjId(((_Id*)obj)->id_, did, fidx); // TODO: check for validity
         } else if (ElementField_SubtypeCheck(obj)){
             oid = ObjId(((_Id*)moose_ElementField_getId((_Field*)obj, NULL))->id_);
         }
@@ -2399,7 +2425,7 @@ extern "C" {
         {"element", (PyCFunction)moose_element, METH_VARARGS, moose_element_documentation},
         {"getFieldNames", (PyCFunction)moose_getFieldNames, METH_VARARGS, moose_getFieldNames_documentation},
         {"copy", (PyCFunction)moose_copy, METH_VARARGS|METH_KEYWORDS, moose_copy_documentation},
-        {"move", (PyCFunction)moose_move, METH_VARARGS, "Move a ematrix object to a destination."},
+        {"move", (PyCFunction)moose_move, METH_VARARGS, "Move a vec object to a destination."},
         {"delete", (PyCFunction)moose_delete, METH_VARARGS, moose_delete_documentation},
         {"useClock", (PyCFunction)moose_useClock, METH_VARARGS, "Schedule objects on a specified clock"},
         {"setClock", (PyCFunction)moose_setClock, METH_VARARGS, "Set the dt of a clock."},
@@ -2419,7 +2445,7 @@ extern "C" {
         // {"ce", (PyCFunction)moose_setCwe, METH_VARARGS, "Set the current working element. setCwe is an alias of this function."},
         {"getFieldDict", (PyCFunction)moose_getFieldDict, METH_VARARGS, moose_getFieldDict_documentation},
         {"getField", (PyCFunction)moose_getField, METH_VARARGS,
-         "getField(element, field, fieldtype) -- Get specified field of specified type from object ematrix."},
+         "getField(element, field, fieldtype) -- Get specified field of specified type from object vec."},
         {"seed", (PyCFunction)moose_seed, METH_VARARGS, moose_seed_documentation},
         {"wildcardFind", (PyCFunction)moose_wildcardFind, METH_VARARGS, moose_wildcardFind_documentation},
         {"quit", (PyCFunction)moose_quit, METH_NOARGS, "Finalize MOOSE threads and quit MOOSE. This is made available for"
@@ -2528,7 +2554,7 @@ extern "C" {
             exit(-1);
         };            
         Py_INCREF(&IdType);
-        PyModule_AddObject(moose_module, "ematrix", (PyObject*)&IdType);
+        PyModule_AddObject(moose_module, "vec", (PyObject*)&IdType);
 
         // Add ObjId type
         // Py_TYPE(&ObjIdType) = &PyType_Type; // unnecessary - filled in by PyType_Ready
