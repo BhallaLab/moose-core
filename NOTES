@@ -1545,5 +1545,16 @@ Traced the problem for the testCopy. As far as I can see the copy itself is
 OK, but the original assignment of values to the Global has failed on the
 remote node.
 
-Now clears unit tests with up to 8 nodes.
+Now clears unit tests with up to 8 nodes. But the IntFire test isn't
+complete yet. Looking at the output values. They do not match. One systematic
+thing: the values for Vm get steadily smaller with larger numbers of nodes.
+1. Check if off-node IntFires are clocked.		Yes
+2. Check if off-node IntFires get off-node msgs.	No.
 ===========================================================================
+31 Dec.
+Now this is strange. The smaller scale test for multinode message worked,
+see testShellAddMsg.
+
+
+Made fixes to path and doFind functions to convert to and from string paths.
+This is to fix things with the pymoose code and conventions.

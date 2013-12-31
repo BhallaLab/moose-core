@@ -541,17 +541,17 @@ void Shell::doMove( Id orig, ObjId newParent )
 	// innerMove( orig, newParent );
 }
 
-bool extractIndices( const string& s, vector< unsigned int >& indices )
+bool extractIndex( const string& s, unsigned int& index )
 {
 	vector< unsigned int > open;
 	vector< unsigned int > close;
 
-	indices.clear();
+	index = 0;
 	if ( s.length() == 0 ) // a plain slash is OK
-		return 1;
+		return true;
 
 	if ( s[0] == '[' ) // Cannot open with a brace
-		return 0;
+		return false;
 
 	for ( unsigned int i = 0; i < s.length(); ++i ) {
 		if ( s[i] == '[' )
@@ -561,26 +561,15 @@ bool extractIndices( const string& s, vector< unsigned int >& indices )
 	}
 
 	if ( open.size() != close.size() )
-		return 0;
-
-	const char* str = s.c_str();
-	for ( unsigned int i = 0; i < open.size(); ++i ) {
-		if ( open[i] > close[i] ) {
-			indices.clear();
-			return 0;
-		} else if ( open[i] == close[i] ) {
-			indices.push_back( ~1U ); // []: Indicate any index.
-		} else {
-			int j = atoi( str + open[i] );
-			if ( j >= 0 ) {
-				indices.push_back( j );
-			} else {
-				indices.clear();
-				return 0;
-			}
-		}
+		return false;
+	if ( open.size() == 0 )
+		return true; // the index was set already to zero.
+	int j = atoi( s.c_str() + open[0] );
+	if ( j >= 0 ) {
+		index = j;
+		return true;
 	}
-	return 1;
+	return false;
 }
 
 /**
@@ -624,15 +613,14 @@ bool Shell::chopString( const string& path, vector< string >& ret,
 /**
  * static func.
  *
- * Example: /foo/bar[10]/zod[3][4][5] would return:
+ * Example: /foo/bar[10]/zod[3] would return:
  * ret: {"foo", "bar", "zod" }
- * index: { {}, {10}, {3,4,5} }
+ * index: { 0, 10, 3 }
  */
 bool Shell::chopPath( const string& path, vector< string >& ret, 
-	vector< vector< unsigned int > >& index, ObjId cwe )
+	vector< unsigned int >& index, ObjId cwe )
 {
 	bool isAbsolute = chopString( path, ret, '/' );
-	vector< unsigned int > empty;
 	if ( isAbsolute ) {
 		index.clear();
 	} else {
@@ -640,20 +628,19 @@ bool Shell::chopPath( const string& path, vector< string >& ret,
 	}
 	for ( unsigned int i = 0; i < ret.size(); ++i )
 	{
-		index.push_back( empty );
+		index.push_back( 0 );
 		if ( ret[i] == "." )
 			continue;
 		if ( ret[i] == ".." ) {
 			continue;
 		}
-		if ( !extractIndices( ret[i], index.back() ) ) {
+		if ( !extractIndex( ret[i], index[i] ) ) {
 			cout << "Error: Shell::chopPath: Failed to parse indices in path '" <<
 				path << "'\n";
 		}
-		if ( index.back().size() > 0 ) {
-			unsigned int pos = ret[i].find_first_of( '[' );
+		unsigned int pos = ret[i].find_first_of( '[' );
+		if ( pos != string::npos )
 			ret[i] = ret[i].substr( 0, pos );
-		}
 	}
 
 	return isAbsolute;
@@ -693,7 +680,7 @@ ObjId Shell::doFind( const string& path ) const
 {
 	ObjId curr;
 	vector< string > names;
-	vector< vector< unsigned int > > indices;
+	vector< unsigned int > indices;
 	bool isAbsolute = chopPath( path, names, indices, cwe_ );
 	assert( names.size() == indices.size() );
 
@@ -705,11 +692,14 @@ ObjId Shell::doFind( const string& path ) const
 		} else if ( names[i] == ".." ) {
 			curr = Neutral::parent( curr.eref() ).id;
 		} else {
+			ObjId pa = curr;
 			curr = Neutral::child( curr.eref(), names[i] );
-			if ( indices[i].size() > 0 )
-				curr.dataId = indices[i][0];
-			if ( indices[i].size() > 1 )
-				curr.fieldIndex = indices[i][1];
+			if ( curr.element()->hasFields() ) {
+				curr.dataId = pa.dataId;
+				curr.fieldIndex = indices[i];
+			} else {
+				curr.dataId = indices[i];
+			}
 		}
 	}
 	

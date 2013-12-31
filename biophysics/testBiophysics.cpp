@@ -144,7 +144,7 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
 	retVm100 = Field< double >::get( ObjId( i2, 100 ), "Vm" );
 	retVm900 = Field< double >::get( ObjId( i2, 900 ), "Vm" );
 
-	// cout << "MultiNodeIntFireNetwork: Vm100 = " << retVm100 << ", " << Vm100 << "; Vm900 = " << retVm900 << ", " << Vm900 << endl;
+	cout << "testIntFireNetwork: Vm100 = " << retVm100 << ", " << Vm100 << "; Vm900 = " << retVm900 << ", " << Vm900 << endl;
 	/*
 	if ( runsteps == 5 ) { // the default value.
 		assert( fabs( retVm100 - Vm100 ) < 1e-6 );

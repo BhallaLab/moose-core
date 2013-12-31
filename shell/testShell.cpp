@@ -304,7 +304,7 @@ void testMove()
 	pa = Field< ObjId >::get( f2a, "parent" );
 	assert( pa == ObjId( f1, 0 ) );
 	string path = Field< string >::get( f4a, "path" );
-	assert( path == "/f1/f2a/f3/f4a" );
+	assert( path == "/f1[0]/f2a[0]/f3[0]/f4a[0]" );
 	Neutral* f1data = reinterpret_cast< Neutral* >( f1.eref().data() );
 
 	vector< Id > kids = f1data->getChildren( f1.eref() );
@@ -340,7 +340,7 @@ void testMove()
 	pa = Field< ObjId >::get( f2a, "parent" );
 	assert( pa == ObjId( f4a, 0 ) );
 	path = Field< string >::get( f4b, "path" );
-	assert( path == "/f1/f4a/f2a/f3/f4b" );
+	assert( path == "/f1[0]/f4a[0]/f2a[0]/f3[0]/f4b[0]" );
 
 	kids = f1data->getChildren( f1.eref() );
 	assert( kids[0] == f2b );
@@ -369,7 +369,7 @@ void testCopy()
 	pa = Field< ObjId >::get( f2a, "parent" );
 	assert( pa == ObjId( f1, 0 ) );
 	string path = Field< string >::get( f3, "path" );
-	assert( path == "/f1/f2a/f3" );
+	assert( path == "/f1[0]/f2a[0]/f3[0]" );
 
 	//////////////////////////////////////////////////////////////////
 	Id dupf2a = shell->doCopy( f2a, Id(), "TheElephantsAreLoose", 1, false, false );
@@ -548,7 +548,7 @@ void testObjIdToAndFromPath()
 
 	ObjId oi( level5, index5 );
 	string path = oi.path();
-	assert( path == "/f1[1]/f2/f3[3]/f4/f5[5]" );
+	assert( path == "/f1[1]/f2[0]/f3[3]/f4[0]/f5[5]" );
 
 	ObjId readPath( path );
 	assert( readPath.id == level5 );
@@ -556,15 +556,15 @@ void testObjIdToAndFromPath()
 
 	ObjId f4 = Neutral::parent( oi.eref() );
 	path = f4.path();
-	assert( path == "/f1[1]/f2/f3[3]/f4" );
+	assert( path == "/f1[1]/f2[0]/f3[3]/f4[0]" );
 
 	ObjId f3 = Neutral::parent( f4.eref() );
 	path = f3.path();
-	assert( path == "/f1[1]/f2/f3[3]" );
+	assert( path == "/f1[1]/f2[0]/f3[3]" );
 
 	ObjId f2 = Neutral::parent( f3.eref() );
 	path = f2.path();
-	assert( path == "/f1[1]/f2" );
+	assert( path == "/f1[1]/f2[0]" );
 
 	ObjId f1 = Neutral::parent( f2.eref() );
 	path = f1.path();
@@ -582,12 +582,12 @@ void testObjIdToAndFromPath()
 
 	shell->doMove( level1, level8 );
 
-	ObjId noi( "/foo/bar/zod/f1[1]/f2/f3[3]/f4/f5[5]" );
+	ObjId noi( "/foo/bar/zod/f1[1]/f2[0]/f3[3]/f4[0]/f5[5]" );
 	assert( noi.dataId == index5 );
 	assert( noi.id == level5 );
 	assert( noi == oi );
 
-	ObjId syn( "/foo/bar/zod/f1[7]/synapse[7][5]" );
+	ObjId syn( "/foo/bar/zod/f1[7]/synapse[5]" );
 	assert( syn.dataId == 7 );
 	assert( syn.fieldIndex == 5 );
 	assert( syn.id == origSynId );
@@ -1217,47 +1217,43 @@ void testShellParserQuit()
 }
 
 extern bool 
-	extractIndices( const string& s, vector< unsigned int >& indices );
+	extractIndex( const string& s, unsigned int& index );
 
 void testExtractIndices()
 {
-	vector< unsigned int > ret;
+	unsigned int ret;
 
-	bool ok = extractIndices( "foo", ret );
+	bool ok = extractIndex( "foo", ret );
 	assert( ok );
-	assert( ret.size() == 0 );
+	assert( ret == 0 );
 
-	ok = extractIndices( "..", ret );
+	ok = extractIndex( "..", ret );
 	assert( ok );
-	assert( ret.size() == 0 );
+	assert( ret == 0 );
 
-	ok = extractIndices( "a1[2]", ret );
+	ok = extractIndex( "a1[2]", ret );
 	assert( ok );
-	assert( ret.size() == 1 );
-	assert( ret[0] == 2 );
+	assert( ret == 2 );
 
-	ok = extractIndices( "be451[0]", ret );
+	ok = extractIndex( "be451[0]", ret );
 	assert( ok );
-	assert( ret.size() == 1 );
-	assert( ret[0] == 0 );
+	assert( ret == 0 );
 
-	ok = extractIndices( "be[0", ret );
+	ok = extractIndex( "be[0", ret );
 	assert( !ok );
-	assert( ret.size() == 0 );
+	assert( ret == 0 );
 
-	ok = extractIndices( "[0]be", ret );
+	ok = extractIndex( "[0]be", ret );
 	assert( !ok );
-	assert( ret.size() == 0 );
+	assert( ret == 0 );
 
-	ok = extractIndices( "oops[0]]", ret );
+	ok = extractIndex( "oops[0]]", ret );
 	assert( !ok );
-	assert( ret.size() == 0 );
+	assert( ret == 0 );
 
-	ok = extractIndices( "fine[0] [ 123 ]", ret );
+	ok = extractIndex( "fine [ 123 ]", ret );
 	assert( ok );
-	assert( ret.size() == 2 );
-	assert( ret[0] == 0 );
-	assert( ret[1] == 123 );
+	assert( ret == 123 );
 
 	cout << "." << flush;
 }
@@ -1314,7 +1310,7 @@ void testChopString()
 void testChopPath()
 {
 	vector< string > args;
-	vector< vector< unsigned int > > index;
+	vector< unsigned int > index;
 
 	assert( Shell::chopPath( "foo[1]/bar[2]/zod[3]", args, index, Id() ) == 0 );
 	assert( args.size() == 3 );
@@ -1323,15 +1319,12 @@ void testChopPath()
 	assert( args[2] == "zod" );
 
 	assert( index.size() == 3 );
-	assert( index[0].size() == 1 );
-	assert( index[1].size() == 1 );
-	assert( index[2].size() == 1 );
 	
-	assert( index[0][0] == 1 );
-	assert( index[1][0] == 2 );
-	assert( index[2][0] == 3 );
+	assert( index[0] == 1 );
+	assert( index[1] == 2 );
+	assert( index[2] == 3 );
 
-	assert( Shell::chopPath( "/foo/bar[1]/zod[2][3]/zung[4][5][6]", 
+	assert( Shell::chopPath( "/foo/bar[1]/zod[2]/zung[3]", 
 		args, index, Id() ) == 1 );
 	assert( args.size() == 4 );
 	assert( args[0] == "foo" );
@@ -1340,17 +1333,11 @@ void testChopPath()
 	assert( args[3] == "zung" );
 
 	assert( index.size() == 4 );
-	assert( index[0].size() == 0 );
-	assert( index[1].size() == 1 );
-	assert( index[2].size() == 2 );
-	assert( index[3].size() == 3 );
 	
-	assert( index[1][0] == 1 );
-	assert( index[2][0] == 2 );
-	assert( index[2][1] == 3 );
-	assert( index[3][0] == 4 );
-	assert( index[3][1] == 5 );
-	assert( index[3][2] == 6 );
+	assert( index[0] == 0 );
+	assert( index[1] == 1 );
+	assert( index[2] == 2 );
+	assert( index[3] == 3 );
 
 	cout << "." << flush;
 }

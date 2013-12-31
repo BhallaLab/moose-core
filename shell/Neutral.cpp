@@ -496,7 +496,7 @@ string Neutral::path( const Eref& e )
 		ss << "/";
 		ObjId& oid = pathVec[ pathVec.size() - i - 1 ];
 		ss << oid.element()->getName();
-		if ( !oid.element()->hasFields() && oid.element()->numData() > 1 )
+		if ( !oid.element()->hasFields() )
 			ss << "[" << oid.dataId << "]";
 		/*
 		if ( !oid.element()->hasFields() )
