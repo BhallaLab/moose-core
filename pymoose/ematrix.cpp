@@ -1,6 +1,6 @@
-// ematrix.cpp --- 
+// vec.cpp --- 
 // 
-// Filename: ematrix.cpp
+// Filename: vec.cpp
 // Description: 
 // Author: 
 // Maintainer: 
@@ -77,7 +77,7 @@ extern "C" {
     // Python method lists for PyObject of Id
     ///////////////////////////////////////////////
     PyDoc_STRVAR(moose_Id_delete_doc,
-                 "ematrix.delete()"
+                 "vec.delete()"
                  "\n"
                  "\nDelete the underlying moose object. This will invalidate all"
                  "\nreferences to this object and any attempt to access it will raise a"
@@ -87,7 +87,7 @@ extern "C" {
     PyDoc_STRVAR(moose_Id_setField_doc,
                  "setField(fieldname, value_vector)\n"
                  "\n"
-                 "Set the value of `fieldname` in all elements under this ematrix.\n"
+                 "Set the value of `fieldname` in all elements under this vec.\n"
                  "\n"
                  "Parameters\n"
                  "----------\n"
@@ -95,7 +95,7 @@ extern "C" {
                  "\tfield to be set.\n"
                  "value: sequence of values\n"
                  "\tsequence of values corresponding to individual elements under this\n"
-                 "ematrix.\n"
+                 "vec.\n"
                  "\n"
                  "NOTE: This is an interface to SetGet::setVec\n"
                  );
@@ -108,9 +108,9 @@ extern "C" {
         {"getValue", (PyCFunction)moose_Id_getValue, METH_NOARGS,
          "Return integer representation of the id of the element."},
         {"getPath", (PyCFunction)moose_Id_getPath, METH_NOARGS,
-         "Return the path of this ematrix object."},
+         "Return the path of this vec object."},
         {"getShape", (PyCFunction)moose_Id_getShape, METH_NOARGS,
-         "Get the shape of the ematrix object as a tuple."},
+         "Get the shape of the vec object as a tuple."},
         {"setField", (PyCFunction)moose_Id_setField, METH_VARARGS,
          moose_Id_setField_doc},
         {NULL, NULL, 0, NULL},        /* Sentinel */        
@@ -146,14 +146,14 @@ extern "C" {
     PyDoc_STRVAR(moose_Id_doc,
                  "An object uniquely identifying a moose element. moose elements are"
                  "\narray-like objects which can have one or more single-objects within"
-                 "\nthem. ematrix can be traversed like a Python sequence and is item is an"
+                 "\nthem. vec can be traversed like a Python sequence and is item is an"
                  "\nelement identifying single-objects contained in the array element."
                  "\n"
-                 "\nField access to ematrices are vectorized. For example, ematrix.name returns a"
+                 "\nField access to ematrices are vectorized. For example, vec.name returns a"
                  "\ntuple containing the names of all the single-elements in this"
-                 "\nematrix. There are a few special fields that are unique for ematrix and are not"
+                 "\nvec. There are a few special fields that are unique for vec and are not"
                  "\nvectorized. These are `path`, `value`, `shape` and `className`."
-                 "\nThere are two ways an ematrix can be initialized, (1) create a new array"
+                 "\nThere are two ways an vec can be initialized, (1) create a new array"
                  "\nelement or (2) create a reference to an existing object."
                  "\n"
                  "\n__init__(self, path=path, dims=dimesions, dtype=className)"
@@ -170,7 +170,7 @@ extern "C" {
                  "\nn : positive int"
                  "\nThis is a positive integers specifying the size of the array element"
                  "\nto be created. Thus n=2 will create an"
-                 "\nematrix with 2 elements."
+                 "\nvec with 2 elements."
                  "\n"
                  "\n__init__(self, id)"
                  "\n"
@@ -178,15 +178,15 @@ extern "C" {
                  "\n"
                  "\nParameters"
                  "\n----------"
-                 "\nid : ematrix/int"
-                 "\nematrix of an existing array object. The new object will be another"
+                 "\nid : vec/int"
+                 "\nvec of an existing array object. The new object will be another"
                  "\nreference to this object."
                  "\n"
                  );
     
     PyTypeObject IdType = { 
         PyVarObject_HEAD_INIT(NULL, 0)               /* tp_head */
-        "moose.ematrix",                  /* tp_name */
+        "moose.vec",                  /* tp_name */
         sizeof(_Id),                    /* tp_basicsize */
         0,                                  /* tp_itemsize */
         0,                    /* tp_dealloc */
@@ -498,7 +498,7 @@ extern "C" {
             RAISE_INVALID_ID(NULL, "moose_Id_repr");
         }
         ostringstream repr;
-        repr << "<moose.ematrix: class="
+        repr << "<moose.vec: class="
              << Field<string>::get(self->id_, "className") << ", "
              << "id=" << self->id_.value() << ","
              << "path=" << self->id_.path() << ">";
@@ -511,7 +511,7 @@ extern "C" {
         if (!Id::isValid(self->id_)){
             RAISE_INVALID_ID(NULL, "moose_Id_str");
         }        
-        return PyString_FromFormat("<moose.ematrix: class=%s, id=%u, path=%s>",
+        return PyString_FromFormat("<moose.vec: class=%s, id=%u, path=%s>",
                                    Field<string>::get(self->id_, "className").c_str(),
                                    self->id_.value(), self->id_.path().c_str());
     } // !  moose_Id_str
@@ -810,7 +810,7 @@ extern "C" {
             // Python. Then we allow normal Pythonic behaviour and
             // consider such mistakes user's responsibility.
             string class_name = ((PyTypeObject*)PyObject_Type((PyObject*)self))->tp_name;
-            if (class_name != "ematrix"){
+            if (class_name != "vec"){
                 Py_INCREF(attr);
                 ret = PyObject_GenericSetAttr((PyObject*)self, attr, value);
                 Py_DECREF(attr);
@@ -1003,4 +1003,4 @@ extern "C" {
 } // end extern "C"
 
 // 
-// ematrix.cpp ends here
+// vec.cpp ends here

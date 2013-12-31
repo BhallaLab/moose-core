@@ -609,7 +609,7 @@ PyObject* set_destFinfo1(ObjId obj, string fieldName, PyObject* arg1, char type1
             // if (Id_SubtypeCheck(arg1)){
                 _Id * id = (_Id*)(arg1);
                 if (id == NULL){
-                    error << "argument should be an ematrix or an melement";
+                    error << "argument should be an vec or an melement";
                     PyErr_SetString(PyExc_TypeError, error.str().c_str());
                     return NULL;                                
                 }
@@ -617,7 +617,7 @@ PyObject* set_destFinfo1(ObjId obj, string fieldName, PyObject* arg1, char type1
             // } else if (ObjId_SubtypeCheck(arg)){
             //     _ObjId * oid = (_ObjId*)(arg);
             //     if (oid == NULL){
-            //         error << "argument should be an ematrix or an melement";
+            //         error << "argument should be an vec or an melement";
             //         PyErr_SetString(PyExc_TypeError, error.str().c_str());
             //         return NULL;                                
             //     }
@@ -631,7 +631,7 @@ PyObject* set_destFinfo1(ObjId obj, string fieldName, PyObject* arg1, char type1
             // if (Id_SubtypeCheck(arg)){
             //     _Id * id = (_Id*)(arg);
             //     if (id == NULL){
-            //         error << "argument should be an ematrix or an melement";
+            //         error << "argument should be an vec or an melement";
             //         PyErr_SetString(PyExc_TypeError, error.str().c_str());
             //         return NULL;                                
             //     }
@@ -639,7 +639,7 @@ PyObject* set_destFinfo1(ObjId obj, string fieldName, PyObject* arg1, char type1
             // } else if (ObjId_SubtypeCheck(arg)){
                 _ObjId * oid = (_ObjId*)(arg1);
                 if (oid == NULL){
-                    error << "argument should be an ematrix or an melement";
+                    error << "argument should be an vec or an melement";
                     PyErr_SetString(PyExc_TypeError, error.str().c_str());
                     return NULL;                                
                 }
