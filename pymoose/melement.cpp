@@ -257,7 +257,7 @@ extern "C" {
                  " an integer for 1D objects). Default: (1,)\n"
                  "dtype : string\n"
                  "the MOOSE class name to be created.\n"
-                 "id : ematrix or integer\n"
+                 "id : vec or integer\n"
                  "id of an existing element.\n"
                  "\n");
         
@@ -322,7 +322,7 @@ extern "C" {
     PyDoc_STRVAR(moose_ObjId_getId_documentation,
                  "getId()\n"
                  "\n"
-                 "Get the ematrix of this object\n"
+                 "Get the vec of this object\n"
                  "\n");
     PyObject* moose_ObjId_getId(_ObjId * self)
     {
@@ -690,7 +690,7 @@ extern "C" {
                 if (value){
                     ret = Field<Id>::set(self->oid_, string(field), ((_Id*)value)->id_);
                 } else {
-                    PyErr_SetString(PyExc_ValueError, "Null pointer passed as ematrix Id value.");
+                    PyErr_SetString(PyExc_ValueError, "Null pointer passed as vec Id value.");
                     return -1;
                 }
                 break;
@@ -699,7 +699,7 @@ extern "C" {
                 if (value){
                     ret = Field<ObjId>::set(self->oid_, string(field), ((_ObjId*)value)->oid_);
                 } else {
-                    PyErr_SetString(PyExc_ValueError, "Null pointer passed as ematrix Id value.");
+                    PyErr_SetString(PyExc_ValueError, "Null pointer passed as vec Id value.");
                     return -1;
                 }
                 break;
@@ -1358,7 +1358,7 @@ extern "C" {
             // if (Id_SubtypeCheck(arg)){
                 _Id * id = (_Id*)(arg);
                 if (id == NULL){
-                    error << "argument should be an ematrix or an melement";
+                    error << "argument should be an vec or an melement";
                     PyErr_SetString(PyExc_TypeError, error.str().c_str());
                     return NULL;                                
                 }
@@ -1366,7 +1366,7 @@ extern "C" {
             // } else if (ObjId_SubtypeCheck(arg)){
             //     _ObjId * oid = (_ObjId*)(arg);
             //     if (oid == NULL){
-            //         error << "argument should be an ematrix or an melement";
+            //         error << "argument should be an vec or an melement";
             //         PyErr_SetString(PyExc_TypeError, error.str().c_str());
             //         return NULL;                                
             //     }
@@ -1380,7 +1380,7 @@ extern "C" {
             // if (Id_SubtypeCheck(arg)){
             //     _Id * id = (_Id*)(arg);
             //     if (id == NULL){
-            //         error << "argument should be an ematrix or an melement";
+            //         error << "argument should be an vec or an melement";
             //         PyErr_SetString(PyExc_TypeError, error.str().c_str());
             //         return NULL;                                
             //     }
@@ -1388,7 +1388,7 @@ extern "C" {
             // } else if (ObjId_SubtypeCheck(arg)){
                 _ObjId * oid = (_ObjId*)(arg);
                 if (oid == NULL){
-                    error << "argument should be an ematrix or an melement";
+                    error << "argument should be an vec or an melement";
                     PyErr_SetString(PyExc_TypeError, error.str().c_str());
                     return NULL;                                
                 // }
@@ -1507,7 +1507,7 @@ PyObject* set_destFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type
             // if (Id_SubtypeCheck(arg)){
                 _Id * id = (_Id*)(arg2);
                 if (id == NULL){
-                    error << "argument should be an ematrix or an melement";
+                    error << "argument should be an vec or an melement";
                     PyErr_SetString(PyExc_TypeError, error.str().c_str());
                     return NULL;                                
                 }
@@ -1515,7 +1515,7 @@ PyObject* set_destFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type
             // } else if (ObjId_SubtypeCheck(arg)){
             //     _ObjId * oid = (_ObjId*)(arg);
             //     if (oid == NULL){
-            //         error << "argument should be an ematrix or an melement";
+            //         error << "argument should be an vec or an melement";
             //         PyErr_SetString(PyExc_TypeError, error.str().c_str());
             //         return NULL;                                
             //     }
@@ -1528,7 +1528,7 @@ PyObject* set_destFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type
             // if (Id_SubtypeCheck(arg)){
             //     _Id * id = (_Id*)(arg);
             //     if (id == NULL){
-            //         error << "argument should be an ematrix or an melement";
+            //         error << "argument should be an vec or an melement";
             //         PyErr_SetString(PyExc_TypeError, error.str().c_str());
             //         return NULL;                                
             //     }
@@ -1536,7 +1536,7 @@ PyObject* set_destFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type
             // } else if (ObjId_SubtypeCheck(arg)){
                 _ObjId * oid = (_ObjId*)(arg2);
                 if (oid == NULL){
-                    error << "argument should be an ematrix or an melement";
+                    error << "argument should be an vec or an melement";
                     PyErr_SetString(PyExc_TypeError, error.str().c_str());
                     return NULL;                                
                 }
@@ -1832,8 +1832,8 @@ PyObject* set_destFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type
          moose_ObjId_setLookupField_documentation},
         {"getId", (PyCFunction)moose_ObjId_getId, METH_NOARGS,
          moose_ObjId_getId_documentation},
-        {"ematrix", (PyCFunction)moose_ObjId_getId, METH_NOARGS,
-         "Return the ematrix this element belongs to."},
+        {"vec", (PyCFunction)moose_ObjId_getId, METH_NOARGS,
+         "Return the vec this element belongs to."},
         {"getFieldNames", (PyCFunction)moose_ObjId_getFieldNames, METH_VARARGS,
          moose_ObjId_getFieldNames_documenation},
         {"getNeighbors", (PyCFunction)moose_ObjId_getNeighbors, METH_VARARGS,
@@ -1878,11 +1878,11 @@ PyObject* set_destFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type
     ///////////////////////////////////////////////
     PyDoc_STRVAR(moose_ObjId_documentation,
                  "Individual moose element contained in an array-type object\n"
-                 "(ematrix). Each element has a unique path, possibly with its index in\n"
-                 "the ematrix. These are identified by three components: id_ and\n"
-                 "dindex. id_ is the Id of the containing ematrix, it has a unique\n"
+                 "(vec). Each element has a unique path, possibly with its index in\n"
+                 "the vec. These are identified by three components: id_ and\n"
+                 "dindex. id_ is the Id of the containing vec, it has a unique\n"
                  "numerical value (field `value`). `dindex` is the index of the current\n"
-                 "item in the containing ematrix. `dindex` is 0 for single elements.");
+                 "item in the containing vec. `dindex` is 0 for single elements.");
     PyTypeObject ObjIdType = { 
         PyVarObject_HEAD_INIT(NULL, 0)            /* tp_head */
         "moose.melement",                      /* tp_name */
