@@ -144,19 +144,27 @@ extern "C" {
 
     typedef struct {
         PyObject_HEAD
-        ObjId owner;
         char * name;
+        ObjId owner;
+        ObjId myoid; // This is a placeholder for {Id, dataId} combo with fieldIndex=0, used only for fieldelements
     } _Field;
     //////////////////////////////////////////
     // Methods for ElementField class
     //////////////////////////////////////////
+    int moose_ElementField_init(_Field * self, PyObject * args, PyObject * kwargs);
     int moose_ElementField_setNum(_Field * self, PyObject * num, void * closure);
     PyObject* moose_ElementField_getNum(_Field * self, void * closure);
     Py_ssize_t moose_ElementField_getLen(_Field * self, void * closure);
     PyObject * moose_ElementField_getItem(_Field * self, Py_ssize_t index);
     PyObject * moose_ElementField_getPath(_Field * self, void * closure);
     PyObject * moose_ElementField_getId(_Field * self, void * closure);
-    
+    PyObject * moose_ElementField_getName(_Field * self, void * closure);
+    PyObject * moose_ElementField_getOwner(_Field * self, void * closure);
+    PyObject * moose_ElementField_getDataId(_Field * self, void * closure);
+    PyObject * moose_ElementField_getSlice(_Field * self, Py_ssize_t start, Py_ssize_t end);
+    PyObject * moose_ElementField_getattro(_Field * self, PyObject * attr);
+    PyObject * moose_ElementField_setattro(_Field * self, PyObject * attr, PyObject * value);
+    /* PyObject * moose_ElementField_richcmp(_Field * self, void * closure); */
     //////////////////////////////////////////
     // Methods for Id class
     //////////////////////////////////////////
