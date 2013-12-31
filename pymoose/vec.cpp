@@ -475,7 +475,7 @@ extern "C" {
         }
         SHELLPTR->doDelete(obj->id_);
         obj->id_ = Id();
-
+        Py_RETURN_NONE;
     }
     
     PyObject * moose_Id_delete(_Id * self)

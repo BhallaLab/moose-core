@@ -1849,29 +1849,6 @@ PyObject* set_destFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type
         {NULL, NULL, 0, NULL},        /* Sentinel */        
     };
 
-    static PySequenceMethods ObjIdSequenceMethods = {
-        (lenfunc)moose_ObjId_getLength, // sq_length
-        0, //sq_concat
-        0, //sq_repeat
-        (ssizeargfunc)moose_ObjId_getItem, //sq_item
-#ifndef PY3K
-        (ssizessizeargfunc)moose_ObjId_getSlice, // getslice
-#endif
-        0, //sq_ass_item
-#ifndef PY3K
-        0, // setslice
-#endif
-        0, //(objobjproc)moose_Id_contains, // sq_contains
-        0, // sq_inplace_concat
-        0 // sq_inplace_repeat
-    };
-
-    // static PyMappingMethods IdMappingMethods = {
-    //     (lenfunc)moose_Id_getLength, //mp_length
-    //     (binaryfunc)moose_Id_subscript, // mp_subscript
-    //     0 // mp_ass_subscript
-    // };
-
 
     ///////////////////////////////////////////////
     // Type defs for PyObject of ObjId

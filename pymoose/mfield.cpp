@@ -406,7 +406,7 @@ extern "C" {
         {dataId,
          (getter)moose_ElementField_getDataId,
          NULL,
-         "",
+         moose_ElementField_dataId_documentation,
          NULL},
         {NULL}, /* sentinel */
     };
@@ -479,6 +479,7 @@ extern "C" {
         string path = self->owner.path()+"/";
         path += string(self->name);
         self->myoid = ObjId(path);
+        return 0;
     }
 
     PyObject * moose_ElementField_getNum(_Field * self, void * closure)
@@ -501,7 +502,7 @@ extern "C" {
             return -1;
         }
         num = PyInt_AsUnsignedLongMask(args);
-        if (!Field<unsigned int>::set(self->myoid, "num", num)){
+        if (!Field<unsigned int>::set(self->myoid, "numField", num)){
             PyErr_SetString(PyExc_RuntimeError, "moose.ElementField.setNum : Field::set returned False.");
             return -1;
         }
@@ -625,7 +626,7 @@ extern "C" {
         }
         char * field = PyString_AsString(attr);
         string class_name = Field<string>::get(self->myoid, "className");
-        string type = getFieldType(class_name, string(field), "valueFinfo");
+        string type = getFieldType(class_name, field, "valueFinfo");
         if (type.empty()){
             // Check if this field name is aliased and update fieldname and type if so.
             map<string, string>::const_iterator it = get_field_alias().find(string(field));
@@ -717,22 +718,25 @@ extern "C" {
         
     }
     
-    PyObject * moose_ElementField_setattro(_Field * self, PyObject * attr, PyObject * value)
+    int moose_ElementField_setattro(_Field * self, PyObject * attr, PyObject * value)
     {
         if (!Id::isValid(self->myoid)){
             RAISE_INVALID_ID(-1, "moose_ElementField_setattro");
         }
-        char * fieldname = NULL;
         int ret = -1;
+        string field;
         if (PyString_Check(attr)){
-            fieldname = PyString_AsString(attr);
+            field = string(PyString_AsString(attr));
         } else {
             PyErr_SetString(PyExc_TypeError, "Attribute name must be a string");
             return -1;
         }
         string moose_class = Field<string>::get(self->myoid, "className");
-        string fieldtype = getFieldType(moose_class, string(fieldname), "valueFinfo");
+        string fieldtype = getFieldType(moose_class, field, "valueFinfo");
         if (fieldtype.length() == 0){
+            if (field == "num"){
+                return PyObject_GenericSetAttr((PyObject*)self, attr, value);
+            }
             PyErr_SetString(PyExc_AttributeError, "cannot add new field to ElementField objects");
             return -1;
         }
@@ -757,7 +761,7 @@ extern "C" {
                     double v = PyFloat_AsDouble(value);
                     _value.assign(length, v);
                 }
-                ret = Field<double>::setVec(self->myoid, string(fieldname), _value);
+                ret = Field<double>::setVec(self->myoid, field, _value);
                 break;
             }                
             case 's': {
@@ -771,7 +775,7 @@ extern "C" {
                     char * v = PyString_AsString(value);
                     _value.assign(length, string(v));
                 }                    
-                ret = Field<string>::setVec(self->myoid, string(fieldname), _value);
+                ret = Field<string>::setVec(self->myoid, field, _value);
                 break;
             }
             case 'i': {
@@ -785,7 +789,7 @@ extern "C" {
                     int v = PyInt_AsLong(value);
                     _value.assign(length, v);
                 }
-                ret = Field< int >::setVec(self->myoid, string(fieldname), _value);
+                ret = Field< int >::setVec(self->myoid, field, _value);
                 break;
             }
             case 'I': {//SET_VECFIELD(unsigned int, I)
@@ -799,7 +803,7 @@ extern "C" {
                     unsigned int v = PyInt_AsUnsignedLongMask(value);
                     _value.assign(length, v);
                 }
-                ret = Field< unsigned int >::setVec(self->myoid, string(fieldname), _value);                
+                ret = Field< unsigned int >::setVec(self->myoid, field, _value);                
                 break;
             }
             case 'l': {//SET_VECFIELD(long, l)
@@ -813,7 +817,7 @@ extern "C" {
                     long v = PyInt_AsLong(value);
                     _value.assign(length, v);                    
                 }
-                ret = Field<long>::setVec(self->myoid, string(fieldname), _value);
+                ret = Field<long>::setVec(self->myoid, field, _value);
                 break;
             }
             case 'k': {//SET_VECFIELD(unsigned long, k)
@@ -827,7 +831,7 @@ extern "C" {
                     unsigned long v = PyInt_AsUnsignedLongMask(value);
                     _value.assign(length, v);
                 }
-                ret = Field< unsigned long >::setVec(self->myoid, string(fieldname), _value);                
+                ret = Field< unsigned long >::setVec(self->myoid, field, _value);                
                 break;
             }
             case 'b': {
@@ -842,7 +846,7 @@ extern "C" {
                     bool v = (Py_True ==value) || (PyInt_AsLong(value) != 0);
                     _value.assign(length, v);
                 }
-                ret = Field< bool >::setVec(self->myoid, string(fieldname), _value);
+                ret = Field< bool >::setVec(self->myoid, field, _value);
                 break;
             }
             case 'c': {
@@ -869,7 +873,7 @@ extern "C" {
                         return -1;
                     }
                 }                    
-                ret = Field< char >::setVec(self->myoid, string(fieldname), _value);
+                ret = Field< char >::setVec(self->myoid, field, _value);
                 break;
             }
             case 'h': {
@@ -883,7 +887,7 @@ extern "C" {
                     short v = PyInt_AsLong(value);
                     _value.assign(length, v);
                 }
-                ret = Field< short >::setVec(self->myoid, string(fieldname), _value);
+                ret = Field< short >::setVec(self->myoid, field, _value);
                 break;
             }
             case 'f': {//SET_VECFIELD(float, f)
@@ -897,7 +901,7 @@ extern "C" {
                     float v = PyFloat_AsDouble(value);                    
                     _value.assign(length, v);
                 }
-                ret = Field<float>::setVec(self->myoid, string(fieldname), _value);
+                ret = Field<float>::setVec(self->myoid, field, _value);
                 break;
             }
             default:                
