@@ -233,7 +233,7 @@ extern "C" {
     // Id functions
     //////////////////////////////////////////////////
 
-     PyObject* get_Id_attr(_Id * id, string attribute)
+    PyObject* get_Id_attr(_Id * id, string attribute)
     {
         if (attribute == "path"){
             return moose_Id_getPath(id);
@@ -628,6 +628,9 @@ extern "C" {
         if (PyInt_Check(op) || PyLong_Check(op)){
             Py_ssize_t value = PyInt_AsLong(op);
             return moose_Id_getItem(self, value);
+        } else {
+            PyErr_SetString(PyExc_KeyError, "invalid index.");
+            return NULL;
         }
     }
     
