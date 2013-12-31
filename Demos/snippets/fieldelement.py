@@ -35,13 +35,22 @@ IndexError: moose.ElementField.getItem: index out of bounds.
 
 
 """
+import sys
+import os
+sys.path.append('../../python')
 import moose
 
 a = moose.IntFire('alpha', 10)
+x = a.synapse
+print x
+print x.num
 a.synapse.num = 3
+x.num = 4
 print a.synapse[0], a.synapse[1] # The fieldIndex should change, not dataId
 b = moose.element('alpha[0]/synapse[1]')
 c = moose.element('alpha[1]/synapse[2]')
+b.numData
+c.numData
 print b, c
 # The fieldIndex should change, not dataId
 x = moose.element(a.id_, 0, 1)

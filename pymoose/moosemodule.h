@@ -35,6 +35,7 @@
 #include <string>
 #include "../basecode/Id.h"
 extern char shortType(string);
+extern char innerType(char); // declared in utility.h, defined in utility/types.cpp
 extern "C" {
 
     // This had to be defined for py3k, but does not harm 2.
@@ -74,7 +75,7 @@ extern "C" {
 #define GETSTATE(m) ((struct module_state*)PyModule_GetState(m))
 #else // Python 2
     PyMODINIT_FUNC init_moose();    
-    static struct module_state _state;    
+    /* static struct module_state _state;     */
 #define GETSTATE(m) (&_state)
 #endif // if PY_MAJOR_VERSION
 
@@ -163,7 +164,7 @@ extern "C" {
     PyObject * moose_ElementField_getDataId(_Field * self, void * closure);
     PyObject * moose_ElementField_getSlice(_Field * self, Py_ssize_t start, Py_ssize_t end);
     PyObject * moose_ElementField_getattro(_Field * self, PyObject * attr);
-    PyObject * moose_ElementField_setattro(_Field * self, PyObject * attr, PyObject * value);
+    int moose_ElementField_setattro(_Field * self, PyObject * attr, PyObject * value);
     /* PyObject * moose_ElementField_richcmp(_Field * self, void * closure); */
     //////////////////////////////////////////
     // Methods for Id class
