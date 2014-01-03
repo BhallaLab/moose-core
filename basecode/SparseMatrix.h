@@ -27,16 +27,28 @@ extern const unsigned int SM_RESERVE;
 
 template< class T > class Triplet {
 	public:
+		Triplet()
+		{;}
+
 		Triplet( T a, unsigned int b, unsigned int c )
 			: a_( a ), b_( b ), c_( c )
 		{;}
 		bool operator< ( const Triplet< T >& other ) const {
 			return ( c_ < other.c_ );
 		}
+		static bool cmp( const Triplet< T >& p, const Triplet< T >& q ) {
+			if ( p.b_ == q.b_ )
+				return ( p.c_ < q.c_ );
+			else if ( p.b_ < q.b_ ) 
+				return true;
+			return false;
+		}
+
 		T a_;
-		unsigned int b_;
-		unsigned int c_;
+		unsigned int b_; // row
+		unsigned int c_; // col
 };
+
 
 typedef vector< class T >::const_iterator constTypeIter;
 template < class T > class SparseMatrix
@@ -399,6 +411,50 @@ template < class T > class SparseMatrix
 			nrows_ = ncolumns_;
 			ncolumns_ = j;
 			assert( rowStart_.size() == nrows_ + 1 );
+		}
+
+		void tripletFill( const vector< unsigned int >& row, 
+						const vector< unsigned int >& col,
+						const vector< T >& z )
+		{
+			unsigned int len = row.size();
+			if ( len > col.size() ) len = col.size();
+			if ( len > z.size() ) len = z.size();
+			vector< Triplet< T > > trip( len );
+			for ( unsigned int i = 0; i < len; ++i )
+				trip[i]= Triplet< T >(z[i], row[i], col[i] );
+			sort( trip.begin(), trip.end(), Triplet< T >::cmp );
+			unsigned int nr = trip.back().b_ + 1;
+			unsigned int nc = 0;
+			for ( typename vector< Triplet< T > >::iterator i = 
+				trip.begin(); i != trip.end(); ++i ) {
+				if ( nc < i->c_ ) 
+					nc = i->c_;
+			}
+			nc++;
+			setSize( nr, nc );
+
+			vector< unsigned int > colIndex( nc );
+			vector< T > entry( nc );
+
+			typename vector< Triplet< T > >::iterator j = trip.begin();
+			for ( unsigned int i = 0; i < nr; ++i ) {
+				colIndex.clear();
+				entry.clear();
+				while( j != trip.end() && j->b_ == i ) {
+					colIndex.push_back( j->c_ );
+					entry.push_back( j->a_ );
+					j++;
+				}
+				addRow( i, entry, colIndex );
+			}
+		}
+
+		void pairFill( const vector< unsigned int >& row, 
+						const vector< unsigned int >& col, T value )
+		{
+			vector< T > z( row.size(), value );
+			tripletFill( row, col, z );
 		}
 
 		/**
