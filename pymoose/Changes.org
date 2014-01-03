@@ -8,6 +8,9 @@
    - slicing of Id implemented
    - Hash of an ObjId is 16 lsb of Id, 32 lsb of dataId, 16 lsb of fieldIndex, in that order from msb to lsb
    - Initialization and object deletion now prints a lot more info in debug compile if VERBOSITY is set to 2.
+** Jan 2013
+   - melement.id_ renamed melement.vec
+
 
 
 * Issues in async13 branch - Dec 2013

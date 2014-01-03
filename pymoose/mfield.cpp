@@ -374,7 +374,7 @@ extern "C" {
     static char name[] = "name";
     static char numfield[] = "num";
     static char path[] = "path";
-    static char id[] = "id_";
+    static char id[] = "vec";
     static char owner[] = "owner";
     static char dataId[] = "dataId";
     static PyGetSetDef ElementFieldGetSetters[] = {

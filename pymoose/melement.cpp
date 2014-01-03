@@ -80,7 +80,7 @@ extern "C" {
     
     PyObject * get_ObjId_attr(_ObjId * oid, string attribute)
     {
-        if (attribute == "id_"){
+        if (attribute == "vec"){
             return moose_ObjId_getId(oid);
         } else if (attribute == "dindex"){
             return moose_ObjId_getDataIndex(oid);
