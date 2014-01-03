@@ -40,19 +40,55 @@ import os
 sys.path.append('../../python')
 import moose
 
+# Create an IntFire vec containing 10 elements, a refers to alpha[0]
 a = moose.IntFire('alpha', 10)
-x = a.synapse
-print x
-print x.num
-a.synapse.num = 3
-x.num = 4
-print a.synapse[0], a.synapse[1] # The fieldIndex should change, not dataId
-b = moose.element('alpha[0]/synapse[1]')
-c = moose.element('alpha[1]/synapse[2]')
-b.numData
-c.numData
-print b, c
+print 'a=', a
+###############################
+# FieldElement identity
+###############################
+x = a.synapse # x is an ElementField alpha[0].synapse
+print 'x=',x 
+print 'x.num=', x.num # Initially there are no synapses, so this will be 0
+a.synapse.num = 3 # We set number of field elements to 3
+print 'x.num=', x.num  # x refers to a.synapse, so this should be 3
+b = moose.element('alpha[0]/synapse[1]') # We access x[1]
+print 'b=',b
+print 'x[1]=', x[1]
+print 'b==x[1]?', b == x[1]
+
+###############################
+# Check fieldIndex and dataId
+###############################
+print 'a.synapse[0]=', a.synapse[0]
+print 'a.synapse[1]=', a.synapse[1] # The fieldIndex should change, not dataId
+
+#########################
+# setVec call example
+#########################
+print 'alpha[0].synapse.delay=', x.delay
+x.delay = [1.0, 2.0, 3.0] # This sets `delay` field in all elements via setVec call
+print 'alpha[0].synapse.delay=', x.delay
+x.delay = [1.141592] * len(x) # This is a Pythonic way of replicating the values in a list - ensures same length
+print 'alpha[0].synapse.delay=', x.delay
+
+#####################################################
+# Play a little more with ObjId, FieldElement, Id
+#####################################################
+c = moose.element('alpha[1]/synapse[2]') # This should throw an error - alpha[1] does not have 3 synapses. 
+print 'b=', b, 'numData=', b.numData
+print 'c=', c, 'numData=', c.numData
+try:
+    print 'len(c)=', len(c)
+except TypeError, e:
+    print e
+d = moose.element('/alpha[1]')
+try:
+    print d.synapse[1]
+except IndexError, e:
+    print e
+else:
+    print 'Expected an IndexError. Length of synapse=', len(d.synapse)
 # The fieldIndex should change, not dataId
-x = moose.element(a.id_, 0, 1)
-y = moose.element(a.id_, 1, 2)
+x = moose.element(a.vec, 0, 1)
+y = moose.element(a.vec, 1, 2)
 print x, y
