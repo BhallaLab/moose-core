@@ -217,6 +217,8 @@ void SparseMsg::pairFill( vector< unsigned int > src,
 			vector< unsigned int> dest )
 {
 	matrix_.pairFill( src, dest, 0 );
+	e1()->markRewired();
+	e2()->markRewired();
 }
 
 void SparseMsg::tripletFill( vector< unsigned int > src,
@@ -224,6 +226,8 @@ void SparseMsg::tripletFill( vector< unsigned int > src,
 			vector< unsigned int> destFieldIndex )
 {
 	matrix_.tripletFill( src, destDataIndex, destFieldIndex );
+	e1()->markRewired();
+	e2()->markRewired();
 }
 
 //////////////////////////////////////////////////////////////////
