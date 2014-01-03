@@ -213,12 +213,26 @@ void SparseMsg::transpose()
 	e2()->markRewired();
 }
 
+void SparseMsg::updateAfterFill()
+{
+	unsigned int startData = e2_->localDataStart();
+	unsigned int endData = startData + e2_->numLocalData();
+	for ( unsigned int i = 0; i < matrix_.nRows(); ++ i ) {
+		const unsigned int* colIndex;
+		const unsigned int* entry;
+		unsigned int num = matrix_.getRow( i, &entry, &colIndex );
+		if ( i >= startData && i < endData ) {
+			e2_->resizeField( i - startData, num );
+		}
+	}
+	e1()->markRewired();
+	e2()->markRewired();
+}
 void SparseMsg::pairFill( vector< unsigned int > src,
 			vector< unsigned int> dest )
 {
 	matrix_.pairFill( src, dest, 0 );
-	e1()->markRewired();
-	e2()->markRewired();
+	updateAfterFill();
 }
 
 void SparseMsg::tripletFill( vector< unsigned int > src,
@@ -226,8 +240,7 @@ void SparseMsg::tripletFill( vector< unsigned int > src,
 			vector< unsigned int> destFieldIndex )
 {
 	matrix_.tripletFill( src, destDataIndex, destFieldIndex );
-	e1()->markRewired();
-	e2()->markRewired();
+	updateAfterFill();
 }
 
 //////////////////////////////////////////////////////////////////
