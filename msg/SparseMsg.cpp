@@ -254,7 +254,11 @@ Eref SparseMsg::firstTgt( const Eref& src ) const
 }
 
 /**
- * Should really have a seed argument
+ * Returns number of synapses formed.
+ * Fills it in transpose form, because we need to count and index the 
+ * number of synapses on the target, so we need to iterate over the sources
+ * in the inner loop. Once full, does the transpose.
+ * Should really have a seed argument for the random number.
  * Later need a way to fast-forward mtrand to just the entries we
  * need to fill.
  */
@@ -290,6 +294,14 @@ unsigned int SparseMsg::randomConnect( double probability )
 			
 		if ( i >= startData && i < endData ) {
 			e2_->resizeField( i - startData, synNum );
+		}
+			totalSynapses += synNum;
+			matrix_.addRow( i, synIndex );
+		/*
+		 * This is the correct form, but I need to implement something
+		 * to check up for target nodes in order to use this.
+		if ( i >= startData && i < endData ) {
+			e2_->resizeField( i - startData, synNum );
 			totalSynapses += synNum;
 			matrix_.addRow( i, synIndex );
 		} else {
@@ -297,6 +309,7 @@ unsigned int SparseMsg::randomConnect( double probability )
 			synIndex.assign( nRows, ~0 );
 			matrix_.addRow( i, synIndex );
 		}
+		*/
 	}
 
 	// cout << Shell::myNode() << ": sizes.size() = " << sizes.size() << ", ncols = " << nCols << ", startSynapse = " << startSynapse << endl;

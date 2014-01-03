@@ -146,13 +146,18 @@ IntFire::IntFire( double thresh, double tau )
 
 void IntFire::process( const Eref &e, ProcPtr p )
 {
-	Vm_ += popBuffer();
+	static bool report = false;
+	static unsigned int reportIndex = 0;
+	if ( report && e.dataIndex() == reportIndex )
+		cout << "	" << p->currTime << "," << Vm_;
+	Vm_ += popBuffer( p->currTime );
 	if (  ( p->currTime - lastSpike_ ) < refractoryPeriod_ ) {
 		Vm_ = 0.0;
 		return;
 	}
 
 	if ( Vm_ > thresh_ ) {
+		// spike()->send( e, e.dataIndex() );
 		spike()->send( e, p->currTime );
 		Vm_ = -1.0e-7;
 		lastSpike_ = p->currTime;

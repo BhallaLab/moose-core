@@ -1555,6 +1555,337 @@ thing: the values for Vm get steadily smaller with larger numbers of nodes.
 Now this is strange. The smaller scale test for multinode message worked,
 see testShellAddMsg.
 
-
 Made fixes to path and doFind functions to convert to and from string paths.
 This is to fix things with the pymoose code and conventions.
+
+Examining the message passing. Turns out no data was passing from node 0 to
+node 1, though the postmaster functions were indeed called.
+
+OK, I think I have it. When the SparseMsg sets up using randomConnect, it
+only fills up local node messages. So there is no info of off-node msgs for
+Element::disgestMsgs to work on.
+
+What I need to do is recode this a bit so that the msgs themselves generate
+a list of nodes to which they project, and have this used by digestMsgs.
+
+As a quick test, I reinstated the entire SparseMatrix so all the messages
+are represented. Outcome is a bit puzzling. The node 0 response is identical
+to the single-node version, but the last node value isn't and it varies with
+number of nodes. I wonder if this is related to the problem with the match
+to the previous version.
+Scaled the above run up to 12 nodes, at which the Vm100 moves over to other
+than node 0. Now the response changes.
+
+Tried increasing the synaptic delay so that it is at least one timestep long.
+Otherwise we might get within-timestep delivery of spikes to node0, but not
+to any other node. Doesn't work.
+
+So the clue here is that the node0 value Vm100 is independent of # nodes, 
+whereas the last node value Vm900 changes every time. Are the local
+messages going out correctly on non-node-zero?
+
+Tried a number of values from node0. Turns out that at least one of them
+(Vm101) goes back and forth between a couple of values depending on numNodes. 
+None of the other node0 reported values changes.
+All of the node1 reported values change. Is there node misdirection?
+
+Tried on 3 nodes. Each node is receivng the same number of bytes as was
+sent, respectively to the other nodes. So it doesn't look like we're missing
+on one message or another.
+
+Something wrong about what is sent, it seems.
+
+===========================================================================
+1 Jan 2014.
+Things to try:
+- Send the DataId and node of the sender instead of the timestamp. Work 
+backwards to figure out what is missing in different node configurations.
+
+Here it is with only node 0:
+        11      14      22      23      28      34      36      38      45     48       50      51      56      60      66      67      71      73      77     84       86      96      99      107     109     112     117     124     126    127      135     145     149     150     156     157     160     172     175    178      183     185     192     198     205     213     216     237     244    245      246     248     264     269     270     273     274     281     291    297      300     304     316     318     324     325     331     341     348    349      353     357     358     365     369     375     383     390     397    400      402     412     414     421     427     430     435     448     450    454      456     473     474     475     488     490     491     492     495    497      498     501     506     514     517     522     526     530     533    539      546     547     556     566     570     582     586     587     594    596      604     607     613     614     622     627     634     636     639    650      654     655     656     668     671     676     682     686     690    692      700     701     704     710     713     714     719     722     724    725      726     730     734     735     737     738     739     740     741    745      748     750     754     756     762     769     783     788     792    793      798     801     811     815     818     824     833     837     841    843      845     854     856     857     865     866     876     880     888    892      899     902     903     906     908     911     912     915     917    929      932     965     968     980     982     983     987     992     994    998      1000    1001    1006    1009    1011    1012    1021
+
+Then: Confirmed we get same set when split into 2 nodes.
+Then: Check what arrives. 
+	a. The value of what arrives (dataId) matches the
+	dataId of the sender. As it should.
+	b. The arrivals seem to match all the ones that were sent.
+Then:	Check that the arrivals go to the right targets OK.
+	Check that the locals go to the right targets OK.
+	Check that the weights and delays get set correctly.
+
+Here are some debug prints to check these. Each entry is the dataId,FieldIndex:
+The call args are the func#, srcDataId.
+(gdb) call e.e_->printMsgDigest( 1, 0 )
+0:      0:              9,0     10,0    14,0    20,0    53,0    54,0    55,0   66,0     67,0    72,0    74,0    80,0    81,0    89,0    105,0   124,0   132,0  134,0    135,0   138,0   139,0   140,0   162,0   189,0   197,0   208,0   222,0  233,0    243,0   245,0   248,0   261,0   286,0   324,0   337,0   355,0   369,0  375,0    378,0   381,0   392,0   394,0   415,0   421,0   426,0   442,0   451,0  458,0    473,0   476,0   483,0   501,0   503,0   507,0   530,0   540,0   543,0  546,0    590,0   593,0   618,0   632,0   636,0   638,0   655,0   671,0   688,0  690,0    696,0   703,0   711,0   717,0   732,0   751,0   755,0   764,0   770,0  778,0    781,0   786,0   807,0   826,0   868,0   896,0   907,0   921,0   924,0  925,0    927,0   934,0   941,0   950,0   959,0   963,0   970,0   976,0
+(gdb) call e.e_->printMsgDigest( 1, 1 )
+1:      0:              3,0     26,0    30,0    38,0    58,0    60,0    106,0  108,0    109,0   110,0   129,0   142,0   143,0   147,0   157,0   166,0   172,0  176,0    177,0   198,0   206,0   215,0   217,0   225,0   235,0   265,0   267,0  269,0    278,0   289,0   291,0   303,0   311,0   327,0   328,0   353,0   357,0  391,0    399,0   406,0   408,0   412,0   425,0   468,0   476,1   478,0   487,0  489,0    490,0   501,1   502,0   507,1   509,0   536,0   540,1   568,0   576,0  578,0    579,0   591,0   597,0   603,0   624,0   625,0   655,1   658,0   664,0  698,0    713,0   729,0   747,0   749,0   753,0   765,0   771,0   802,0   803,0  806,0    820,0   829,0   841,0   847,0   857,0   860,0   874,0   881,0   885,0  893,0    894,0   900,0   912,0   915,0   919,0   922,0   923,0   924,1   929,0  944,0    947,0   951,0   959,1   960,0   965,0   966,0   975,0   979,0   987,0  1002,0   1017,0  1018,0
+(gdb) call e.e_->printMsgDigest( 1, 2 )
+2:      0:              2,0     7,0     8,0     19,0    35,0    36,0    43,0   47,0     58,1    60,1    61,0    70,0    79,0    88,0    90,0    108,1   115,0  120,0    124,1   125,0   130,0   149,0   156,0   157,1   158,0   162,1   181,0  190,0    192,0   196,0   199,0   202,0   203,0   221,0   223,0   264,0   288,0  300,0    319,0   320,0   325,0   353,1   359,0   371,0   382,0   383,0   393,0  399,1    421,1   423,0   425,1   427,0   442,1   446,0   450,0   454,0   455,0  466,0    476,2   487,1   497,0   507,2   514,0   516,0   518,0   526,0   533,0  534,0    548,0   560,0   568,1   570,0   572,0   578,1   581,0   606,0   631,0  638,1    651,0   671,1   673,0   674,0   678,0   680,0   697,0   704,0   706,0  727,0    738,0   745,0   752,0   779,0   785,0   789,0   796,0   800,0   850,0  858,0    866,0   868,1   872,0   885,1   899,0   905,0   913,0   923,1   955,0  958,0    974,0   976,1   997,0   1004,0  1007,0
+(gdb) call e.e_->printMsgDigest( 1, 900 )
+900:    0:              18,91   26,95   29,91   33,82   43,108  45,87   49,94  78,97    81,98   89,96   91,84   110,88  133,88  140,103 143,92  166,81  176,86 180,84   190,83  192,94  197,84  230,101 237,95  243,94  249,74  256,88  259,99 269,93   277,86  303,83  311,104 312,83  314,94  322,78  332,86  347,89  393,101402,87   417,90  458,99  474,95  483,98  485,90  500,87  523,76  525,100 536,86 539,96   544,91  546,99  583,96  584,102 610,74  620,91  623,89  638,80  644,82 645,97   648,85  662,118 666,82  689,85  691,101 692,96  697,79  716,101 719,94 730,83   742,65  751,82  756,92  757,81  760,86  768,97  769,102 796,83  797,65 800,87   811,97  813,92  824,81  825,87  844,94  858,86  870,95  874,107 875,88 895,100  911,88  917,88  927,88  928,77  933,77  940,97  967,74  988,82  995,98
+(gdb) call e.e_->printMsgDigest( 1, 901 )
+901:    0:              22,77   24,97   46,102  67,81   81,99   86,102  91,85  99,80    112,95  136,90  155,82  171,90  181,84  234,93  238,98  250,88  269,94 278,94   287,95  311,105 313,87  323,84  348,98  349,87  357,89  361,76  377,84 378,91   399,87  406,80  422,92  438,117 446,90  453,80  459,81  466,83  477,70 486,103  493,106 497,85  500,88  505,82  513,100 518,95  529,100 531,103 535,93 537,97   542,82  544,92  556,83  559,87  563,96  565,91  567,87  583,97  588,78 596,83   600,65  612,87  635,99  641,91  715,88  743,83  748,84  766,76  791,83 792,72   794,92  799,82  801,100 804,101 841,88  846,86  865,96  868,101 874,108877,100  903,89  933,78  938,89  952,82  983,92  985,89  1002,95 1015,107       1019,85  1021,81
+(gdb) call e.e_->printMsgDigest( 1, 902 )
+902:    0:              0,81    10,91   16,104  39,89   50,106  57,86   61,76  69,89    75,91   82,88   83,70   91,86   96,90   101,91  102,89  103,92  106,92 108,85   110,89  118,87  132,87  141,89  153,106 158,106 160,98  166,82  169,83 185,105  228,81  231,99  249,75  267,86  280,78  287,96  289,82  321,96  322,79 325,84   328,120 342,103 380,95  387,81  388,104 401,82  405,81  420,83  424,80 434,99   471,93  476,82  482,90  486,104 488,92  504,76  517,83  522,89  525,101526,78   539,97  542,83  548,102 564,94  566,101 570,79  577,82  584,103 592,87 593,90   595,119 605,88  612,88  622,95  623,90  644,83  647,94  654,91  670,92 694,100  703,74  705,86  711,104 722,83  728,92  734,96  750,107 757,82  762,83 769,103  786,103 790,87  808,72  819,97  828,109 832,93  833,82  846,87  847,97 852,96   871,88  888,101 893,78  901,98  904,84  914,101 934,94  940,98  980,72 991,94   995,99  1005,86 1020,85
+
+Now to see what happens on the nodes in a 2-node simulation.
+Node 0:
+(gdb) call e.e_->printMsgDigest(1,0)
+0:      0:              9,0     10,0    14,0    20,0    53,0    54,0    55,0   66,0     67,0    72,0    74,0    80,0    81,0    89,0    105,0   124,0   132,0  134,0    135,0   138,0   139,0   140,0   162,0   189,0   197,0   208,0   222,0  233,0    243,0   245,0   248,0   261,0   286,0   324,0   337,0   355,0   369,0  375,0    378,0   381,0   392,0   394,0   415,0   421,0   426,0   442,0   451,0  458,0    473,0   476,0   483,0   501,0   503,0   507,01:         0,1
+(gdb) call e.e_->printMsgDigest(1,1)
+1:      0:              3,0     26,0    30,0    38,0    58,0    60,0    106,0  108,0    109,0   110,0   129,0   142,0   143,0   147,0   157,0   166,0   172,0  176,0    177,0   198,0   206,0   215,0   217,0   225,0   235,0   265,0   267,0  269,0    278,0   289,0   291,0   303,0   311,0   327,0   328,0   353,0   357,0  391,0    399,0   406,0   408,0   412,0   425,0   468,0   476,1   478,0   487,0  489,0    490,0   501,1   502,0   507,1   509,01:         1,1
+(gdb) call e.e_->printMsgDigest(1,2)
+2:      0:              2,0     7,0     8,0     19,0    35,0    36,0    43,0   47,0     58,1    60,1    61,0    70,0    79,0    88,0    90,0    108,1   115,0  120,0    124,1   125,0   130,0   149,0   156,0   157,1   158,0   162,1   181,0  190,0    192,0   196,0   199,0   202,0   203,0   221,0   223,0   264,0   288,0  300,0    319,0   320,0   325,0   353,1   359,0   371,0   382,0   383,0   393,0  399,1    421,1   423,0   425,1   427,0   442,1   446,0   450,0   454,0   455,0  466,0    476,2   487,1   497,0   507,21:         2,1
+(gdb) call e.e_->printMsgDigest(1,900)
+900:    0:              18,91   26,95   29,91   33,82   43,108  45,87   49,94  78,97    81,98   89,96   91,84   110,88  133,88  140,103 143,92  166,81  176,86 180,84   190,83  192,94  197,84  230,101 237,95  243,94  249,74  256,88  259,99 269,93   277,86  303,83  311,104 312,83  314,94  322,78  332,86  347,89  393,101402,87   417,90  458,99  474,95  483,98  485,90  500,87
+(gdb) call e.e_->printMsgDigest(1,901)
+901:    0:              22,77   24,97   46,102  67,81   81,99   86,102  91,85  99,80    112,95  136,90  155,82  171,90  181,84  234,93  238,98  250,88  269,94 278,94   287,95  311,105 313,87  323,84  348,98  349,87  357,89  361,76  377,84 378,91   399,87  406,80  422,92  438,117 446,90  453,80  459,81  466,83  477,70 486,103  493,106 497,85  500,88  505,82
+(gdb) call e.e_->printMsgDigest(1,902)
+902:    0:              0,81    10,91   16,104  39,89   50,106  57,86   61,76  69,89    75,91   82,88   83,70   91,86   96,90   101,91  102,89  103,92  106,92 108,85   110,89  118,87  132,87  141,89  153,106 158,106 160,98  166,82  169,83 185,105  228,81  231,99  249,75  267,86  280,78  287,96  289,82  321,96  322,79 325,84   328,120 342,103 380,95  387,81  388,104 401,82  405,81  420,83  424,80 434,99   471,93  476,82  482,90  486,104 488,92  504,76
+
+Node 1:
+(gdb) call e.e_->printMsgDigest(1,0)
+0:      0:              530,0   540,0   543,0   546,0   590,0   593,0   618,0  632,0    636,0   638,0   655,0   671,0   688,0   690,0   696,0   703,0   711,0  717,0    732,0   751,0   755,0   764,0   770,0   778,0   781,0   786,0   807,0  826,0    868,0   896,0   907,0   921,0   924,0   925,0   927,0   934,0   941,0  950,0    959,0   963,0   970,0   976,0
+(gdb) call e.e_->printMsgDigest(1,1)
+1:      0:              536,0   540,1   568,0   576,0   578,0   579,0   591,0  597,0    603,0   624,0   625,0   655,1   658,0   664,0   698,0   713,0   729,0  747,0    749,0   753,0   765,0   771,0   802,0   803,0   806,0   820,0   829,0  841,0    847,0   857,0   860,0   874,0   881,0   885,0   893,0   894,0   900,0  912,0    915,0   919,0   922,0   923,0   924,1   929,0   944,0   947,0   951,0  959,1    960,0   965,0   966,0   975,0   979,0   987,0   1002,0  1017,0  1018,0
+(gdb) call e.e_->printMsgDigest(1,2)
+2:      0:              514,0   516,0   518,0   526,0   533,0   534,0   548,0  560,0    568,1   570,0   572,0   578,1   581,0   606,0   631,0   638,1   651,0  671,1    673,0   674,0   678,0   680,0   697,0   704,0   706,0   727,0   738,0  745,0    752,0   779,0   785,0   789,0   796,0   800,0   850,0   858,0   866,0  868,1    872,0   885,1   899,0   905,0   913,0   923,1   955,0   958,0   974,0  976,1    997,0   1004,0  1007,0
+(gdb) call e.e_->printMsgDigest(1,900)
+900:    0:              523,76  525,100 536,86  539,96  544,91  546,99  583,96 584,102  610,74  620,91  623,89  638,80  644,82  645,97  648,85  662,118 666,82 689,85   691,101 692,96  697,79  716,101 719,94  730,83  742,65  751,82  756,92 757,81   760,86  768,97  769,102 796,83  797,65  800,87  811,97  813,92  824,81 825,87   844,94  858,86  870,95  874,107 875,88  895,100 911,88  917,88  927,88 928,77   933,77  940,97  967,74  988,82  995,981:                900,0
+(gdb) call e.e_->printMsgDigest(1,901)
+901:    0:              513,100 518,95  529,100 531,103 535,93  537,97  542,82 544,92   556,83  559,87  563,96  565,91  567,87  583,97  588,78  596,83  600,65 612,87   635,99  641,91  715,88  743,83  748,84  766,76  791,83  792,72  794,92 799,82   801,100 804,101 841,88  846,86  865,96  868,101 874,108 877,100 903,89 933,78   938,89  952,82  983,92  985,89  1002,95 1015,107        1019,85 1021,811:               901,0
+(gdb) call e.e_->printMsgDigest(1,902)
+902:    0:              517,83  522,89  525,101 526,78  539,97  542,83  548,102564,94   566,101 570,79  577,82  584,103 592,87  593,90  595,119 605,88  612,88 622,95   623,90  644,83  647,94  654,91  670,92  694,100 703,74  705,86  711,104722,83   728,92  734,96  750,107 757,82  762,83  769,103 786,103 790,87  808,72 819,97   828,109 832,93  833,82  846,87  847,97  852,96  871,88  888,101 893,78 901,98   904,84  914,101 934,94  940,98  980,72  991,94  995,99  1005,86 1020,851:               902,0
+
+
+Well, even this looks OK. That leaves assignment of weights and delays. The
+weights at least are checked already as part of the unit tests.
+Another thing I can think of is there being an error in how the 
+SpikeRingBuffer handles incoming at different times. Nothing apparent, the code
+is really simple.
+
+Next: monitor what the spikeRingBuffers contain on each cycle.
+Here is the buffer on node 0 for IntFire0 at time = 0.4:
+(gdb) p *(&buf_.weightSum_[0])@20
+$6 = {0, 0, 0, 0, 0.0011231906618922949, 0.028195377006195489, 0, 0, 0, 
+  0.011927361548878253, 0.012636251500807702, 0.011373002212494612, 
+  0.02413556597195566, 0.030104355947114525, 0.014308227128349244, 
+  0.0051488068467006086, 0, 0, 0.0080248786695301527, 0}
+
+Here it is for IntFire900:
+(gdb) p *(&buf_.weightSum_[0])@20
+$9 = {0.0039365481445565818, 0, 0.019248148943297565, 0.0095276742568239578, 
+  0.012616655579768122, 0.015804447340779008, 0.031027889060787857, 
+  0.020450418312102557, 0, 0.018955300822854043, 0.029514752686955036, 
+  0.025616842862218617, 0.010785101428627968, 0, 0.023539618398062886, 0, 
+  0.013914890796877443, 0.029127159682102499, 0.0079548832122236495, 
+  0.022189490515738725}
+
+Here we are on 2 nodes:
+IntFire0: (on node 0)
+(gdb)  p *(&buf_.weightSum_[0])@20
+$3 = {0, 0, 0, 0, 0.0011231906618922949, 0.028195377006195489, 0, 0, 0, 
+  0.011927361548878253, 0.012636251500807702, 0.011373002212494612, 
+  0.02413556597195566, 0.030104355947114525, 0.014308227128349244, 
+  0.0051488068467006086, 0, 0, 0.0080248786695301527, 0}
+
+IntFire900: (on node 1)
+ p *(&buf_.weightSum_[0])@20
+$6 = {0.0039365481445565818, 0, 0.019248148943297565, 0.008282735007815064, 
+  0.001244939249008894, 0.012616655579768122, 0.013555899155326187, 
+  0.020450418312102557, 0, 0.018955300822854043, 0, 0.046050151288509367, 
+  0.019866545689292251, 0, 0.023539618398062886, 0, 0, 0.015623985570855439, 
+  0.035372948120348156, 0.022189490515738725}
+
+OK, finally we see some differences. Interestingly, it is all-or-none. Many
+values are identical. Suggests that individual messages are not getting 
+through. Now the problem is to trace these back to where they came from.
+See the one which has zero in one and nonzero in another, should be able
+to find the offending weight.
+Given that many of the entries are correct, it seems that the weights are
+probably OK. It is just messages not arriving.
+
+Added yet another printf debug the Synapse::addSpike call, to see what
+arguments come through. Specifically, some of these seem to be missing.
+
+============================================================================
+2 Jan 2014
+On one node, reporting src DataId, dest FieldIndex.
+monitoring synapses on IntFire 100:
+        28,3    34,4    51,6    216,18  248,21  297,28  383,36  454,43  495,45 498,46   586,51  734,71  750,73  783,75
+
+monitoring 900:
+        157,14  172,15  178,16  300,27  375,33  435,39  450,41  475,45  498,46 582,51   607,53  650,58  682,65  722,69  724,70  737,73  748,74  762,76  793,78 801,79   837,83  845,86  857,87  865,88  908,91  911,92  929,95  1011,103
+
+On 2 nodes,  monitoring IntFire 100: (output only on node 0):
+        28,3    34,4    51,6    216,18  248,21  297,28  383,36  454,43  495,45 498,46   586,51  734,71  750,73  783,75
+
+On 2 nodes, monitoring IntFire 900: (Output only on node 1):
+582,51  607,53  650,58  722,69  724,70  737,73  762,76  793,78  801,79 837,83   845,86  857,87  865,88  908,91  911,92  929,95  1011,103
+157,14 172,15   178,16  300,27  375,33  435,39  450,41  475,45  498,46
+
+There are two incoming events missing on node1, 900. Importantly, they are
+missing from what should be the local set of activities on node 1. 
+The events coming from the sub-512 set are all there.
+The missing events are: 682,65 and 748,74
+
+Better directly check that all Vms and other values are set correctly.
+Should print out the time-series for 682 and 748.
+
+One node:
+Here it is for 100:
+0.2,0.00710756  0.4,0.00568605  0.6,0.00454884  0.8,0.0138681   1,0.0110945
+For 682:
+0.2,0.783242    0.4,-1e-07      0.6,0   0.8,0.0247299   1,0.0417334
+For 748:
+ 0.2,0.778782    0.4,-1e-07      0.6,0   0.8,0   1,0
+For 900:
+0.2,0.276274    0.4,0.221019    0.6,0.176816    0.8,0.156851    1,0.133103
+
+Two Nodes:
+For 100: 
+0.2,0.00710756  0.4,0.00568605  0.6,0.00454884  0.8,0.0138681   1,0.0110945
+For 682:
+0.2,0.783242    0.4,0.626594    0.6,0.515236    0.8,0.420256    1,0.365541
+For 748:
+0.2,0.778782    0.4,0.623026    0.6,0.51831     0.8,0.422253    1,0.337803
+For 900:
+0.2,0.276274    0.4,0.221019    0.6,0.176816    0.8,0.156851    1,0.132107
+
+Differences: 682 and 748 seem to have spiked and rebounded on 1 nodes and not
+on 2. There is a subtle difference for the 900 final value as well.
+
+Let's look at other values on the IntFire:
+On 2 nodes:
+For 100:
+Vm_ = 0.0071075635496526957, thresh_ = 0.80000000000000004, tau_ = 1, 
+  refractoryPeriod_ = 0.40000000000000002, lastSpike_ = -0.40000000000000002, 
+  bufferTime_ = 4
+(gdb) p synapses_[0]
+$3 = (Synapse &) @0x34e54d0: {weight_ = 0.0083155348012223847, 
+  delay_ = 1.4613027032464743, buffer_ = 0x34af128}
+
+For 682:
+Vm_ = 0.78324243589304388, thresh_ = 0.80000000000000004, tau_ = 1, 
+  refractoryPeriod_ = 0.40000000000000002, lastSpike_ = -0.40000000000000002, 
+  bufferTime_ = 4
+(gdb) p synapses_[0]
+$4 = (Synapse &) @0x2c8ee60: {weight_ = 0.011778635610826314, 
+  delay_ = 0.78097819723188877, buffer_ = 0x2c5a868}
+
+On 1 node:
+For 100:
+Vm_ = 0.0071075635496526957, thresh_ = 0.80000000000000004, tau_ = 1, 
+  refractoryPeriod_ = 0.40000000000000002, lastSpike_ = -0.40000000000000002, 
+  bufferTime_ = 4}
+(gdb) p synapses_[0]
+$2 = (Synapse &) @0x2cc1ff0: {weight_ = 0.0083155348012223847, 
+  delay_ = 1.4613027032464743, buffer_ = 0x2c6c0d8}
+
+For 682
+Vm_ = 0.78324243589304388, thresh_ = 0.80000000000000004, tau_ = 1, 
+  refractoryPeriod_ = 0.40000000000000002, lastSpike_ = -0.40000000000000002, 
+  bufferTime_ = 4}
+(gdb) p synapses_[0]
+$5 = (Synapse &) @0x2dafe30: {weight_ = 0.011778635610826314, 
+  delay_ = 0.78097819723188877, buffer_ = 0x2c7d1a8}
+
+I don't see any difference. Worrying. Why are they behaving so differently?
+Is there something different in the buffers that causes it to fire on one
+node but not on two?
+
+On single node, looking at 682:
+(gdb) p synapses_[65]
+$2 = (Synapse &) @0x2db0448: {weight_ = 0.011979404771700501, 
+  delay_ = 2.7584519190713763, buffer_ = 0x2c7d1a8}
+(gdb) p *(&synapses_[65].buffer_->weightSum_[0])@20
+$6 = {0.017451648577116431, 0, 0.020829295343719426, 0.027436947519890967, 
+  0.011310790828429163, 0.0075863821897655731, 0.0028163404529914261, 0, 
+  0.0060605108505114918, 0.0035257226461544635, 0, 0.0042454327363520864, 
+  0.017304209023714066, 0, 0, 0.030237772795371709, 0, 0, 0, 
+  0.018134191795252264}
+Current bin is zero. 
+
+On 2 nodes, looking at 682:
+$2 = (Synapse &) @0x2c8f478: {weight_ = 0.011979404771700501, 
+  delay_ = 2.7584519190713763, buffer_ = 0x2c5a868}
+(gdb)  p *(&synapses_[65].buffer_->weightSum_[0])@20
+$3 = {0, 0, 0, 0.015841135480441155, 0, 0, 0, 0, 0.0060605108505114918, 
+  0 <repeats 11 times>}
+Current bin is zero. 
+ 
+So, at start, there are a whole lot of values in the spike queue in the 
+one-node case that are absent in the two-node case. Key point is that some
+are present in zero delay bins, where they should not be allowed as the
+delay value is 2.something. Presumably some of these were going to be 
+delivered later. I wonder if this is aliasing, going all around the delay
+buffer for some long delays. As a quick check, I've doubled the buffer time.
+One node:
+ Vm100 = 0.00232901, 0.241473, 0.182856, 0.0102305, 0.0857292
+Vm900 = 0.105924, 0.259907, 0.0230763, 0.107449
+Two nodes:
+Vm100 = 0.00232901, 0.241473, 0.182856, 0.0102305, 0.0857292
+Vm900 = 0.0958305, 0.260413, 0.0324635, 0.107449
+
+Still not fixed. Actually even the old buffer time was longer than the 
+simulation run itself, so there should never have been any entries on the
+first few bins.
+
+Just realized that there was a hack where the 'time' field was used to 
+send out the DataIndex of the calling object. Fixed.
+1 node case:
+ Vm100 = 0.00734036, 0.243398, 0.196683, 0, 0.0857292
+Vm900 = 0.115276, 0.290259, 0.00774015, 0.107449
+Two nodes:
+ Vm100 = 0.00734036, 0.243398, 0.196683, 0, 0.0857292
+Vm900 = 0.116182, 0.294987, 0.00774015, 0.107449
+
+Nope, note the first and second entry in Vm900 don't quite match. So
+on with the debugging.
+Here is the buffer on Vm900 for 1 node:
+(gdb) p *(&weightSum_[0])@40
+$7 = {0, 0, 0.020633713547140359, 0.020450418312102557, 0, 
+  0.0090267524495720869, 0, 0.016535398601554334, 0.027418064908124505, 
+  0.0091998224612325433, 0.01710238739848137, 0.017760914247483016, 0, 0, 
+  0.008282735007815064, 0.022528946460224686, 0.01175383843947202, 
+  0.015918520665727555, 0, 0, 0.028642979008145629, 0 <repeats 19 times>}
+
+Here it is for 2 nodes:
+$4 = {0, 0, 0.013555899155326187, 0.020450418312102557, 0, 
+  0.0090267524495720869, 0, 0.016535398601554334, 0, 0.0079548832122236495, 
+  0.01710238739848137, 0, 0, 0, 0.008282735007815064, 0.022528946460224686, 0, 
+  0, 0, 0, 0.016026323428377509, 0 <repeats 19 times>}
+
+Actually this isn't a good test, because the time of the sample is after
+all messaging for lower entry values in the first case, but before the
+node0 entries reach the IntFire in the second.
+
+Nevertheless, when I trace through (on 2 nodes) till the point where the 
+first nonzero entry is actually used, it is still 0.013555899155326187.
+So some spikes are just not reaching.
+
+Perhaps I should change the nature of the problem and set it up so that
+the IntFire calculations are independent of update order. At this point
+this is supposedly done by the delay time but that is fragile. If the delay
+is less than the timestep then it will fail. The ring buffer is also fragile,
+not to mention wasteful and clumsy in how it is implemented.
+
+For the IntFire, the obvious solution is to split the Vm computations off
+from the message sending. It would be
+	Init: Harvest the ring buffer for incoming spikes.
+	Process: send if needed.
+	Clock 9: exchange with nodes.
+
+============================================================================
+3 Jan 2014
+I think I may have identified a (the?) problem. The spike gets delivered to
+a different bin depending on whether it arrives before or after the 'pop'
+of the ring buffer. Let's fix by passing in the current time to the ring
+buffer upon pop, so that all incoming spikes have an absolute time reference.
+This will also enable automatic buffer resizing, highly desirable.
+
+This seems to work. Don't have to do the separation into init and process.
+Also the ring buffer is much more robust now. The only thing we need to
+guarantee is that the delay exceeds the step-size for the internode sync.
+
+============================================================================

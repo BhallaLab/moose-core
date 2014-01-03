@@ -54,7 +54,7 @@ class SynHandler
 		/**
 		 * Returns the current buffer entry, and advances it.
 		 */
-		double popBuffer();
+		double popBuffer( double currentTime );
 		////////////////////////////////////////////////////////////////
 		/// Adds a new synapse, returns its index.
 		unsigned int addSynapse();
