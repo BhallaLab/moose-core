@@ -95,16 +95,26 @@ class SparseMsg: public Msg
 		void clear();
 		void transpose();
 
-		// Fills up the entire message based on pairs of src,dest (i.e.,
-		// row,column) values. All filled entries are set to zero.
+		/**
+		 * Fills up the entire message based on pairs of src,dest (i.e.,
+		 * row,column) values. All filled entries are set to zero.
+		 */
 		void pairFill( vector< unsigned int > src, 
 						vector< unsigned int> dest );
 
-		// Fills up the entire message based on triplets of 
-		// src,destDataIndex,destFieldIndex
+		/**
+		 * Fills up the entire message based on triplets of 
+		 * src,destDataIndex,destFieldIndex
+		 */
 		void tripletFill( vector< unsigned int > src, 
 					vector< unsigned int> dest,
 					vector< unsigned int > field );
+		
+		/**
+		 * Utility function to update all sorts of values after we've
+		 * rebuilt the matrix.
+		 */
+		void updateAfterFill();
 
 		/// Msg lookup functions
 		static unsigned int numMsg();
