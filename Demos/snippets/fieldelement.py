@@ -74,6 +74,7 @@ print 'alpha[0].synapse.delay=', x.delay
 #####################################################
 # Play a little more with ObjId, FieldElement, Id
 #####################################################
+print 'Length of alpha[1]/synapse=', len(moose.element('/alpha[1]').synapse)
 c = moose.element('alpha[1]/synapse[2]') # This should throw an error - alpha[1] does not have 3 synapses. 
 print 'b=', b, 'numData=', b.numData
 print 'c=', c, 'numData=', c.numData
