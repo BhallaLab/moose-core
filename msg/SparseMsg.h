@@ -95,6 +95,17 @@ class SparseMsg: public Msg
 		void clear();
 		void transpose();
 
+		// Fills up the entire message based on pairs of src,dest (i.e.,
+		// row,column) values. All filled entries are set to zero.
+		void pairFill( vector< unsigned int > src, 
+						vector< unsigned int> dest );
+
+		// Fills up the entire message based on triplets of 
+		// src,destDataIndex,destFieldIndex
+		void tripletFill( vector< unsigned int > src, 
+					vector< unsigned int> dest,
+					vector< unsigned int > field );
+
 		/// Msg lookup functions
 		static unsigned int numMsg();
 		static char* lookupMsg( unsigned int index );

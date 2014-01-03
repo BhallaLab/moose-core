@@ -698,6 +698,43 @@ void testSparseMatrixReorder()
 		assert( n.get( i, 0 ) == static_cast< int >( i * 10 + 3 ) );
 		assert( n.get( i, 1 ) == static_cast< int >( i * 10 + 2 ) );
 	}
+	cout << "." << flush;
+}
+
+void testSparseMatrixFill()
+{
+	SparseMatrix< int > n;
+	unsigned int nrow = 5;
+	unsigned int ncol = 7;
+	vector< unsigned int > row;
+	vector< unsigned int > col;
+	vector< int > val;
+	unsigned int num = 0;
+	for ( unsigned int i = 0; i < nrow; ++i ) {
+		for ( unsigned int j = 0; j < ncol; ++j ) {
+			if ( j == 0 || i + j == 6 || ( j - i) == 2 ) {
+				row.push_back( i );
+				col.push_back( j );
+				val.push_back( 100 + i * 10 + j );
+				++num;
+			}
+		}
+	}
+	n.tripletFill( row, col, val );
+	// n.print();
+	assert( n.nRows() == nrow );
+	assert( n.nColumns() == ncol );
+	assert( n.nEntries() == num );
+	for ( unsigned int i = 0; i < nrow; ++i ) {
+		for ( unsigned int j = 0; j < ncol; ++j ) {
+			int val = n.get( i, j );
+			if ( j == 0 || i + j == 6 || ( j - i) == 2 )
+				assert( static_cast< unsigned int >( val ) == 100 + i * 10 + j );
+			else
+				assert( val == 0 );
+		}
+	}
+	cout << "." << flush;
 }
 
 void printGrid( Element* e, const string& field, double min, double max )
@@ -1731,6 +1768,7 @@ void testAsync( )
 	testSparseMatrix();
 	testSparseMatrix2();
 	testSparseMatrixReorder();
+	testSparseMatrixFill();
 	testSparseMsg();
 	testSharedMsg();
 	testConvVector();
