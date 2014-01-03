@@ -2650,7 +2650,7 @@ int main(int argc, char* argv[])
     Py_SetProgramName(warg);
     Py_Initialize();
     MODINIT(_moose);
-#if PY3K
+#ifdef PY3K
     free(warg);
 #endif
     return 0;
