@@ -236,6 +236,11 @@ class Element
 		 */
 		void markRewired();
 
+		/**
+		 * Utility function for debugging
+		 */
+		void printMsgDigest( unsigned int srcIndex, unsigned int dataId ) const;
+
 	/////////////////////////////////////////////////////////////////////
 	// Utility functions for message traversal
 	/////////////////////////////////////////////////////////////////////

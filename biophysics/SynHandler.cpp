@@ -94,9 +94,9 @@ void SynHandler::reinitBuffer( double dt, double bufferTime )
 		buf_.reinit( dt, bufferTime );
 }
 
-double SynHandler::popBuffer()
+double SynHandler::popBuffer( double currentTime )
 {
-	return buf_.pop();
+	return buf_.pop( currentTime );
 }
 
 unsigned int SynHandler::addSynapse()

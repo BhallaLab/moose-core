@@ -384,6 +384,7 @@ void PostMaster::clearPendingRecv()
 {
 #ifdef USE_MPI
 	int done = 0;
+	bool report = false; // for debugging
 	MPI_Testsome( Shell::numNodes() -1, &recvReq_[0], &done, 
 					&doneIndices_[0], &doneStatus_[0] );
 	if ( done == MPI_UNDEFINED )
@@ -398,6 +399,13 @@ void PostMaster::clearPendingRecv()
 		int j = 0;
 		assert( recvSize <= static_cast< int >( recvBufSize_ ) );
 		double* buf = &recvBuf_[ recvNode ][0];
+		if ( report ) {
+			for ( int j = 0; j < recvSize; j += 4 ) {
+				TgtInfo* tgt = reinterpret_cast< TgtInfo * >(buf + j);
+				cout << j / 4 << ": " << tgt->eref().dataIndex() << ", " <<
+					   	buf[j+3] << endl;
+			}
+		}
 		while ( j < recvSize ) {
 			const TgtInfo* tgt = reinterpret_cast< const TgtInfo * >( buf );
 			const Eref& e = tgt->eref();

@@ -35,12 +35,13 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
 	// Known value from single-thread run, at t = 1 sec.
 	static const double Vm100 = 0.0857292;
 	static const double Vm900 = 0.107449;
-	static const double thresh = 0.2;
+	static const double thresh = 0.8;
 	static const double Vmax = 1.0;
 	static const double refractoryPeriod = 0.4;
 	static const double weightMax = 0.02;
-	static const double delayMax = 4;
 	static const double timestep = 0.2;
+	static const double delayMax = 4;
+	static const double delayMin = 0;
 	static const double connectionProbability = 0.1;
 	static const unsigned int NUM_TOT_SYN = 104576;
 	unsigned int size = 1024;
@@ -50,7 +51,7 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
 
 	Id i2 = shell->doCreate( "IntFire", Id(), "network", size );
 	assert( i2.element()->getName() == "network" );
-	Field< double >::setRepeat( i2, "bufferTime", delayMax );
+	Field< double >::setRepeat( i2, "bufferTime", delayMax *2 );
 
 	Id synId( i2.value() + 1 );
 	Element* syn = synId.element();
@@ -111,7 +112,7 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
 		vector< double > delay( numSynVec[i], 0.0 );
 		for ( unsigned int j = 0; j < numSynVec[i]; ++j ) {
 			weight[i][ j ] = mtrand() * weightMax;
-			delay[ j ] = mtrand() * delayMax;
+			delay[ j ] = delayMin + mtrand() * ( delayMax - delayMin );
 		}
 		ret = Field< double >::
 				setVec( ObjId( synId, i ), "weight", weight[i] );
@@ -131,6 +132,7 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
 
 	shell->doUseClock("/network", "process", 0 );
 	shell->doSetClock( 0, timestep );
+	shell->doSetClock( 9, timestep );
 	shell->doReinit();
 	ret = Field< double >::setVec( i2, "Vm", origVm );
 	assert( ret );
@@ -142,9 +144,18 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
 
 	shell->doStart( static_cast< double >( timestep * runsteps) + 0.0 );
 	retVm100 = Field< double >::get( ObjId( i2, 100 ), "Vm" );
+	double retVm101 = Field< double >::get( ObjId( i2, 101 ), "Vm" );
+	double retVm102 = Field< double >::get( ObjId( i2, 102 ), "Vm" );
+	double retVm99 = Field< double >::get( ObjId( i2, 99 ), "Vm" );
 	retVm900 = Field< double >::get( ObjId( i2, 900 ), "Vm" );
+	double retVm901 = Field< double >::get( ObjId( i2, 901 ), "Vm" );
+	double retVm902 = Field< double >::get( ObjId( i2, 902 ), "Vm" );
 
-	cout << "testIntFireNetwork: Vm100 = " << retVm100 << ", " << Vm100 << "; Vm900 = " << retVm900 << ", " << Vm900 << endl;
+	cout << "testIntFireNetwork: Vm100 = " << retVm100 << ", " <<
+			retVm101 << ", " << retVm102 << ", " << retVm99 <<
+			", " << Vm100 << endl;
+	cout << "Vm900 = " << retVm900 << ", "<< retVm901 << ", " <<
+			retVm902 << ", " << Vm900 << endl;
 	/*
 	if ( runsteps == 5 ) { // the default value.
 		assert( fabs( retVm100 - Vm100 ) < 1e-6 );

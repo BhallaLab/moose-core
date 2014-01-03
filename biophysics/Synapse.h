@@ -22,7 +22,7 @@ class Synapse
 
 		void setBuffer( SpikeRingBuffer* buf );
 
-		void addSpike( double time );
+		void addSpike( const Eref& e, double time );
 		static void addMsgCallback( 
 					const Eref& e, const string& finfoName, 
 					ObjId msg, unsigned int msgLookup );
