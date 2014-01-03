@@ -637,6 +637,9 @@ bool Shell::chopPath( const string& path, vector< string >& ret,
 		if ( !extractIndex( ret[i], index[i] ) ) {
 			cout << "Error: Shell::chopPath: Failed to parse indices in path '" <<
 				path << "'\n";
+				ret.resize( 0 );
+				index.resize( 0 );
+				return isAbsolute;
 		}
 		unsigned int pos = ret[i].find_first_of( '[' );
 		if ( pos != string::npos )
@@ -699,11 +702,18 @@ ObjId Shell::doFind( const string& path ) const
 				curr.fieldIndex = indices[i];
 			} else {
 				curr.dataId = indices[i];
+				if ( curr.element()->numData() <= curr.dataId  )
+					return ObjId();
 			}
 		}
 	}
 	
 	assert( curr.element() );
+	if ( curr.element()->numData() <= curr.dataId )
+		return ObjId();
+	if ( curr.fieldIndex > 0 && !curr.element()->hasFields() )
+		return ObjId();
+
 	return curr;
 }
 

@@ -169,6 +169,10 @@ void testTreeTraversal()
 	////////////////////////////////////////////////////////////////
 
 	shell->setCwe( Id() );
+	assert( shell->doFind( "/f1/f2a/tralalalala" ) == ObjId() );
+	assert( shell->doFind( "/f1/f2a[723]/f3aa" ) == ObjId() );
+	assert( shell->doFind( "/f1/f2a/f3aa[12]" ) == ObjId() );
+	assert( shell->doFind( "/f1/f2a/f3aa[-1]" ) == ObjId() );
 	assert( shell->doFind( "/f1/f2a/f3aa" ) == f3aa );
 	assert( shell->doFind( "/f1/f2a/f3ab" ) == f3ab );
 	assert( shell->doFind( "/f1/f2b/f3ba" ) == f3ba );

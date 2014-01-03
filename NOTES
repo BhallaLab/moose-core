@@ -1916,8 +1916,8 @@ Next steps.
 - Work with subha to get the Python interface up to speed
 	+ Need to add a field to use vector of pairs of xy values, for filling 
 		in the Sparse matrix.
-	- Write python version of IntFire test.
-- Fix Obj creation so one can't make up an invalid ObjId that way.
+	+ Write python version of IntFire test.
++ Fix Obj creation so one can't make up an invalid ObjId that way.
 - Naming conventions. Need to dig up and redo.
 
 ============================================================================
