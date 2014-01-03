@@ -522,6 +522,31 @@ void Element::markRewired()
 	isRewired_ = true;
 }
 
+void Element::printMsgDigest( unsigned int srcIndex, unsigned int dataId ) const
+{
+	unsigned int numSrcMsgs = msgBinding_.size();
+	unsigned int start = 0;
+	unsigned int end = numData();
+	if ( dataId < numData() ) {
+		start = dataId;
+		end = dataId + 1;
+	}
+	for (unsigned int i = start; i < end; ++i ) {
+		cout << i << ":	";
+		const vector< MsgDigest> & md = 
+				msgDigest_[numSrcMsgs * i + srcIndex];
+		for ( unsigned int j = 0; j < md.size(); ++j ) {
+			cout << j << ":	";
+			for ( unsigned int k = 0; k < md[j].targets.size(); ++k ) {
+				cout << "	" <<
+					md[j].targets[k].dataIndex() << "," <<
+					md[j].targets[k].fieldIndex();
+			}
+		}
+		cout << endl;
+	}
+}
+
 void Element::zombieSwap( const Cinfo* newCinfo )
 {
 	cinfo_ = newCinfo;

@@ -14,15 +14,19 @@
 using namespace std;
 #include "SpikeRingBuffer.h"
 
-const unsigned int SpikeRingBuffer::MAXBIN = 1000;
+const unsigned int SpikeRingBuffer::MAXBIN = 128;
 
 SpikeRingBuffer::SpikeRingBuffer()
-		: dt_( 1e-4 ), currentBin_( 0 ), weightSum_( 20, 0.0 )
+		: dt_( 1e-4 ), 
+		currTime_( 0 ),
+		currentBin_( 0 ), 
+		weightSum_( 20, 0.0 )
 {;}
 
 void SpikeRingBuffer::reinit( double dt, double bufferTime )
 {
 	dt_ = dt;
+	currTime_ = 0.0;
 	currentBin_ = 0;
 	unsigned int newsize = bufferTime / dt;
 	if ( newsize > MAXBIN ) {
@@ -43,21 +47,28 @@ void SpikeRingBuffer::reinit( double dt, double bufferTime )
 
 void SpikeRingBuffer::addSpike( double t, double w )
 {
-	assert( t > 0.0 );
-	unsigned int bin = round( t / dt_ );
-	/*
-	// Replace this with a catch-throw
-	if ( bin >= weightSum_.size() ) {
-		assert( bin < MAXBIN );
+	unsigned int bin = round( ( t - currTime_ ) / dt_ );
+	// Should do catch-throw here
+	if ( bin < 0 ) {
+		cout << "Warning: SpikeRingBuffer: handling spike too late: " <<
+			t << " <  " << currTime_ << ", using currTime\n";
+		bin = 0;
+	} else if ( bin >= MAXBIN ) {
+		cout << "Warning: SpikeRingBuffer: bin number exceeds limit: " <<
+			bin << " >=  " << MAXBIN << ", terminating\n";
+			assert( 0 );
+	} 
+	if ( bin > weightSum_.size() ) {
 		weightSum_.resize( bin + 1 );
 	}
-	*/
+
 	// Replace the % with a bitwise operation.
 	weightSum_[ ( bin + currentBin_ ) % weightSum_.size() ] += w;
 }
 
-double SpikeRingBuffer::pop()
+double SpikeRingBuffer::pop( double currTime )
 {
+	currTime_ = currTime;
 	double ret = weightSum_[ currentBin_ ];
 	weightSum_[ currentBin_++ ] = 0.0;
 	return ret;

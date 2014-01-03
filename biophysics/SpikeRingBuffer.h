@@ -27,10 +27,11 @@ class SpikeRingBuffer
 		/// Adds spike into the buffer.
 		void addSpike( double timestamp, double weight );
 		/// Advances the buffer one step, returns the current weight
-		double pop();
+		double pop( double currTime );
 	private:
 		static const unsigned int MAXBIN;
 		double dt_;
+		double currTime_;
 		unsigned int currentBin_;
 		vector< double > weightSum_;
 };

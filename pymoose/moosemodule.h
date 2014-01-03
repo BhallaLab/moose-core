@@ -75,7 +75,7 @@ extern "C" {
 #define GETSTATE(m) ((struct module_state*)PyModule_GetState(m))
 #else // Python 2
     PyMODINIT_FUNC init_moose();    
-    /* static struct module_state _state;     */
+    static struct module_state _state;
 #define GETSTATE(m) (&_state)
 #endif // if PY_MAJOR_VERSION
 

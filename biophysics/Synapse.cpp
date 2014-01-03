@@ -30,7 +30,7 @@ const Cinfo* Synapse::initCinfo()
 
 		static DestFinfo addSpike( "addSpike",
 			"Handles arriving spike messages, inserts into event queue.",
-			new OpFunc1< Synapse, double >( &Synapse::addSpike ) );
+			new EpFunc1< Synapse, double >( &Synapse::addSpike ) );
 
 	static Finfo* synapseFinfos[] = {
 		&weight,		// Field
@@ -84,8 +84,14 @@ void Synapse::setBuffer( SpikeRingBuffer* buf )
 }
 
 
-void Synapse::addSpike( double time )
+void Synapse::addSpike( const Eref& e, double time )
 {
+	static bool report = false;
+	static unsigned int tgtDataIndex = 0;
+	// static unsigned int tgtFieldIndex = 0;
+	if ( report && e.dataIndex() == tgtDataIndex ) {
+		cout << "	" << time << "," << e.fieldIndex();
+	}
 	buffer_->addSpike( time + delay_, weight_ );
 }
 
