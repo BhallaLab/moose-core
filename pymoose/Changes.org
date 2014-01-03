@@ -112,3 +112,7 @@ Floating point exception
 ** No more individual xmin xmax and xdivs fields of the gate tables. 
    They are clubbed in min, max and divs.
 
+* Python 3
+
+** python3: symbol lookup error: /usr/lib/openmpi/lib/openmpi/mca_paffinity_linux.so: undefined symbol: mca_base_param_reg_int
+   See: http://us.generation-nt.com/answer/bug-696420-python-gmsh-undefined-symbol-mca-base-param-reg-int-help-209879272.html
