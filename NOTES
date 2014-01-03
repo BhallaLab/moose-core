@@ -1888,4 +1888,36 @@ This seems to work. Don't have to do the separation into init and process.
 Also the ring buffer is much more robust now. The only thing we need to
 guarantee is that the delay exceeds the step-size for the internode sync.
 
+Checkin 4950.
+If we revisit the time this took, it looks like this:
+Week 1: Oct 12-19: Threading out
+Week 2: Oct 19-26 Messaging refactoring
+Week 3: Oct 26-Nov02: Element and field indexing refactoring. Data Handler out.
+Week 4: Nov 02-12. Scheduling refactoring, recompile and unit tests. 
+	Copy refactoring. MsgIds replaced with ObjIds. Automatic message compilation.
+Week 4.5-5: Nov12-15 Standalone tests on mpi framework
+Week 6: Nov 16-23 Multinode messaging design, implementation, compilation, 
+	no tests.
+Week 7: Nov 23-30 Multinode Set. Compile and test.
+Week 8: Nov 30-Dec 7. Multinode Get. Most of the Shell commands work. SetVec.
+Week 9: Dec 7-14. Multinode messaging. Much cleanup. Clears all unit tests 
+	for 2 nodes. Began GetVec.
+Week 10: Dec 14-21: GetVec works. Much bug stomping through scaling up to 
+	any number of nodes. 
+Dec 22: Clears all unit tests on any number of nodes from 1 to 16.
+Week 11-12: Key semantic change that affected paths as well as SetVec and 
+	GetVec: All element 'arrays' are treated as indexing of the last vector
+	only. Thus FieldElements use fieldIndex and regular Elements use
+	dataIndex. Many bugfixes. Set up unit test with IntFire array, 
+	horrendous debugging, but it finally works on multiple nodes. The
+	Python interface also updated to reflect all of these.
+
+Next steps.
+- Work with subha to get the Python interface up to speed
+	+ Need to add a field to use vector of pairs of xy values, for filling 
+		in the Sparse matrix.
+	- Write python version of IntFire test.
+- Fix Obj creation so one can't make up an invalid ObjId that way.
+- Naming conventions. Need to dig up and redo.
+
 ============================================================================

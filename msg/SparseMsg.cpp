@@ -87,6 +87,22 @@ const Cinfo* SparseMsg::initCinfo()
 		new OpFunc0< SparseMsg >( 
 		&SparseMsg::transpose ) );
 
+	static DestFinfo pairFill( "pairFill",
+		"Fills entire matrix using pairs of (x,y) indices to indicate "
+		"presence of a connection. If the target is a FieldElement it"
+		"automagically assigns FieldIndices.",
+		new OpFunc2< SparseMsg, 
+			vector< unsigned int >, vector< unsigned int> >( 
+		&SparseMsg::pairFill ) );
+
+	static DestFinfo tripletFill( "tripletFill",
+		"Fills entire matrix using triplets of (x,y,fieldIndex) to fully "
+		"specify every connection in the sparse matrix.",
+		new OpFunc3< SparseMsg, 
+			vector< unsigned int >, vector< unsigned int>,
+			vector< unsigned int >	>( 
+		&SparseMsg::tripletFill ) );
+
 ////////////////////////////////////////////////////////////////////////
 // Assemble it all.
 ////////////////////////////////////////////////////////////////////////
@@ -102,6 +118,8 @@ const Cinfo* SparseMsg::initCinfo()
 		&unsetEntry,		//dest
 		&clear,				//dest
 		&transpose,			//dest
+		&pairFill,			//dest
+		&tripletFill,		//dest
 	};
 
 	static Dinfo< short > dinfo;
@@ -193,6 +211,19 @@ void SparseMsg::transpose()
 	matrix_.transpose();
 	e1()->markRewired();
 	e2()->markRewired();
+}
+
+void SparseMsg::pairFill( vector< unsigned int > src,
+			vector< unsigned int> dest )
+{
+	matrix_.pairFill( src, dest, 0 );
+}
+
+void SparseMsg::tripletFill( vector< unsigned int > src,
+			vector< unsigned int> destDataIndex,
+			vector< unsigned int> destFieldIndex )
+{
+	matrix_.tripletFill( src, destDataIndex, destFieldIndex );
 }
 
 //////////////////////////////////////////////////////////////////
