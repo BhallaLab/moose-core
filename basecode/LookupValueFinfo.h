@@ -44,13 +44,15 @@ template < class T, class L, class F > class LookupValueFinfo: public LookupValu
 			F ( T::*getFunc )( L ) const )
 			: LookupValueFinfoBase( name, doc )
 		{
-				string setname = "set_" + name;
+				string setname = "set" + name;
+				setname[3] = toupper( setname[3] );
 				set_ = new DestFinfo(
 					setname,
 					"Assigns field value.",
 					new OpFunc2< T, L, F >( setFunc ) );
 
-				string getname = "get_" + name;
+				string getname = "get" + name;
+				getname[3] = toupper( getname[3] );
 				get_ = new DestFinfo(
 					getname,
 					"Requests field value. The requesting Element must "
@@ -100,7 +102,8 @@ template < class T, class L, class F > class ReadOnlyLookupValueFinfo: public Lo
 			F ( T::*getFunc )( L ) const )
 			: LookupValueFinfoBase( name, doc )
 		{
-				string getname = "get_" + name;
+				string getname = "get" + name;
+				getname[3] = toupper( getname[3] );
 				get_ = new DestFinfo(
 					getname,
 					"Requests field value. The requesting Element must "

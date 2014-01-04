@@ -46,7 +46,7 @@ void testSendMsg()
 	unsigned int size = 100;
 
 	const DestFinfo* df = dynamic_cast< const DestFinfo* >(
-		ac->findFinfo( "set_outputValue" ) );
+		ac->findFinfo( "setOutputValue" ) );
 	assert( df != 0 );
 	FuncId fid = df->getFid();
 
@@ -203,7 +203,7 @@ void testStrSet()
 		ss << setw( 10 ) << x;
 		ok = SetGet::strSet( dest, "outputValue", ss.str() );
 		assert( ok );
-		// SetGet1< double >::set( dest, "set_outputValue", x );
+		// SetGet1< double >::set( dest, "setOutputValue", x );
 	}
 
 	for ( unsigned int i = 0; i < size; ++i ) {
@@ -352,7 +352,7 @@ void testSetGetSynapse()
 		}
 	}
 
-	bool ret = Field< unsigned int >::setVec( cells, "num_synapse", ns );
+	bool ret = Field< unsigned int >::setVec( cells, "numSynapse", ns );
 	assert( ret );
 	assert( temp->numData() == size );
 	Id syns( cells.value() + 1 );
@@ -399,7 +399,7 @@ void testSetGetVec()
 	
 	Eref e2( i2.element(), 0 );
 	// Here we test setting a 1-D vector
-	bool ret = Field< unsigned int >::setVec( i2, "num_synapse", numSyn );
+	bool ret = Field< unsigned int >::setVec( i2, "numSynapse", numSyn );
 	assert( ret );
 
 	for ( unsigned int i = 0; i < size; ++i ) {
@@ -409,7 +409,7 @@ void testSetGetVec()
 
 	vector< unsigned int > getSyn;
 
-	Field< unsigned int >::getVec( i2, "num_synapse", getSyn );
+	Field< unsigned int >::getVec( i2, "numSynapse", getSyn );
 	assert (getSyn.size() == size );
 	for ( unsigned int i = 0; i < size; ++i )
 		assert( getSyn[i] == i );
@@ -821,7 +821,7 @@ void testSparseMsg()
 	for ( unsigned int i = 0; i < size; ++i ) {
 		ObjId id( cells, i );
 		unsigned int numSyn = 
-				Field< unsigned int >::get( id, "num_synapse" );
+				Field< unsigned int >::get( id, "numSynapse" );
 		unsigned int k = i * fieldSize;
 		for ( unsigned int j = 0; j < numSyn; ++j ) {
 			weight[ k + j ] = mtrand() * weightMax;
@@ -927,7 +927,7 @@ void testSetRepeat()
 		numSyn[i] = i;
 	
 	// Here we test setting a 1-D vector
-	bool ret = Field< unsigned int >::setVec( cell, "num_synapse", numSyn);
+	bool ret = Field< unsigned int >::setVec( cell, "numSynapse", numSyn);
 	assert( ret );
 	
 	Id synapse( cell.value() + 1 );
@@ -1212,7 +1212,7 @@ void testMsgField()
 	unsigned int size = 10;
 
 	const DestFinfo* df = dynamic_cast< const DestFinfo* >(
-		ac->findFinfo( "set_outputValue" ) );
+		ac->findFinfo( "setOutputValue" ) );
 	assert( df != 0 );
 	FuncId fid = df->getFid();
 
@@ -1443,8 +1443,8 @@ void testFinfoFields()
 	assert( vmFinfo.docs() == "Membrane potential" );
 	assert( vmFinfo.src().size() == 0 );
 	assert( vmFinfo.dest().size() == 2 );
-	assert( vmFinfo.dest()[0] == "set_Vm" );
-	assert( vmFinfo.dest()[1] == "get_Vm" );
+	assert( vmFinfo.dest()[0] == "setVm" );
+	assert( vmFinfo.dest()[1] == "getVm" );
 	assert( vmFinfo.type() == "double" );
 
 	assert( synFinfo.getName() == "synapse" );
@@ -1513,22 +1513,22 @@ void testCinfoFields()
 	assert( sdf == 21 );
 	assert( cinfo->getNumDestFinfo() == 12 + sdf );
 
-	assert( cinfo->getDestFinfo( 0+ndf )->name() == "set_numSynapses" );
-	assert( cinfo->getDestFinfo( 1+ndf )->name() == "get_numSynapses" );
-	assert( cinfo->getDestFinfo( 2+ndf )->name() == "set_num_synapse" );
-	assert( cinfo->getDestFinfo( 3+ndf )->name() == "get_num_synapse" );
+	assert( cinfo->getDestFinfo( 0+ndf )->name() == "setNumSynapses" );
+	assert( cinfo->getDestFinfo( 1+ndf )->name() == "getNumSynapses" );
+	assert( cinfo->getDestFinfo( 2+ndf )->name() == "setNumSynapse" );
+	assert( cinfo->getDestFinfo( 3+ndf )->name() == "getNumSynapse" );
 
-	assert( cinfo->getDestFinfo( 0+sdf ) == cinfo->findFinfo( "set_Vm" ) );
-	assert( cinfo->getDestFinfo( 1+sdf ) == cinfo->findFinfo( "get_Vm" ) );
-	assert( cinfo->getDestFinfo( 2+sdf ) == cinfo->findFinfo( "set_tau" ) );
-	assert( cinfo->getDestFinfo( 3+sdf ) == cinfo->findFinfo( "get_tau" ) );
+	assert( cinfo->getDestFinfo( 0+sdf ) == cinfo->findFinfo( "setVm" ) );
+	assert( cinfo->getDestFinfo( 1+sdf ) == cinfo->findFinfo( "getVm" ) );
+	assert( cinfo->getDestFinfo( 2+sdf ) == cinfo->findFinfo( "setTau" ) );
+	assert( cinfo->getDestFinfo( 3+sdf ) == cinfo->findFinfo( "getTau" ) );
 
-	assert( cinfo->getDestFinfo( 4+sdf ) == cinfo->findFinfo( "set_thresh" ) );
-	assert( cinfo->getDestFinfo( 5+sdf ) == cinfo->findFinfo( "get_thresh" ) );
-	assert( cinfo->getDestFinfo( 6+sdf ) == cinfo->findFinfo( "set_refractoryPeriod" ) );
-	assert( cinfo->getDestFinfo( 7+sdf ) == cinfo->findFinfo( "get_refractoryPeriod" ) );
-	assert( cinfo->getDestFinfo( 8+sdf ) == cinfo->findFinfo( "set_bufferTime" ) );
-	assert( cinfo->getDestFinfo( 9+sdf ) == cinfo->findFinfo( "get_bufferTime" ) );
+	assert( cinfo->getDestFinfo( 4+sdf ) == cinfo->findFinfo( "setThresh" ) );
+	assert( cinfo->getDestFinfo( 5+sdf ) == cinfo->findFinfo( "getThresh" ) );
+	assert( cinfo->getDestFinfo( 6+sdf ) == cinfo->findFinfo( "setRefractoryPeriod" ) );
+	assert( cinfo->getDestFinfo( 7+sdf ) == cinfo->findFinfo( "getRefractoryPeriod" ) );
+	assert( cinfo->getDestFinfo( 8+sdf ) == cinfo->findFinfo( "setBufferTime" ) );
+	assert( cinfo->getDestFinfo( 9+sdf ) == cinfo->findFinfo( "getBufferTime" ) );
 	assert( cinfo->getDestFinfo( 10+sdf ) == cinfo->findFinfo( "process" ) );
 	assert( cinfo->getDestFinfo( 11+sdf ) == cinfo->findFinfo( "reinit" ) );
 
@@ -1594,7 +1594,7 @@ void testCinfoElements()
 
 	temp = ObjId( intFireDestFinfoId, DataId( 7 ) );
 	string str = Field< string >::get( temp, "name" );
-	assert( str == "get_refractoryPeriod");
+	assert( str == "getRefractoryPeriod");
 	temp = ObjId( intFireDestFinfoId, DataId( 11 ) );
 	str = Field< string >::get( temp, "name" );
 	assert( str == "reinit" );
