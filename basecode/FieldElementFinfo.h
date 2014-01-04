@@ -111,7 +111,8 @@ template < class T, class F > class FieldElementFinfo: public FieldElementFinfoB
 				setNumField_( setNumField ),
 				getNumField_( getNumField )
 		{
-				string setname = "set_num_" + name;
+				string setname = "setNum" + name;
+				setname[6] = toupper( setname[6] );
 				// setNumField is a tricky operation, because it may require
 				// cross-node rescaling of the 
 				// FieldDataHandler::fieldDimension. To acheive this we
@@ -122,7 +123,8 @@ template < class T, class F > class FieldElementFinfo: public FieldElementFinfoB
 					"Assigns number of field entries in field array.",
 					new OpFunc1< T, unsigned int >( setNumField ) );
 
-				string getname = "get_num_" + name;
+				string getname = "getNum" + name;
+				getname[6] = toupper( getname[6] );
 				getNum_ = new DestFinfo(
 					getname,
 					"Requests number of field entries in field array."

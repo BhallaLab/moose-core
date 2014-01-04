@@ -65,7 +65,7 @@ void testTreeTraversal()
 	assert( f4 != Id() );
 	Id syns( f4.value() + 1 );
 	for ( unsigned int i = 0; i < 10; ++i ) {
-		Field< unsigned int >::set( ObjId( f4, i ), "num_synapse", 5 );
+		Field< unsigned int >::set( ObjId( f4, i ), "numSynapse", 5 );
 	}
 
 	////////////////////////////////////////////////////////////////
@@ -427,13 +427,13 @@ void testCopyFieldElement()
 	/*
 	for ( unsigned int i = 0; i < size; ++i )
 		vec[i] = i;
-	bool ret = Field< unsigned int >::setVec( origId, "num_synapse", vec );
+	bool ret = Field< unsigned int >::setVec( origId, "numSynapse", vec );
 	assert( ret );
 	*/
 	bool ret;
 	for ( unsigned int i = 0; i < size; ++i ) {
 		ret = Field< unsigned int >::set( ObjId( origId, i ), 
-						"num_synapse", i );
+						"numSynapse", i );
 		assert( ret );
 	}
 
@@ -703,14 +703,14 @@ void testShellSetGet()
 	// cout << Shell::myNode() << ": testShellSetGet: data here = (" << a1()->dataHandler()->begin() << " to " << a1()->dataHandler()->end() << ")" << endl;
 	for ( unsigned int i = 0; i < size; ++i ) {
 		val.push_back( i * i * i ); // use i^3 as a simple test.
-		bool ret = SetGet1< double >::set( ObjId( a1, i ), "set_outputValue", i * i );
+		bool ret = SetGet1< double >::set( ObjId( a1, i ), "setOutputValue", i * i );
 		assert( ret );
 	}
 	for ( unsigned int i = 0; i < size; ++i ) {
 		double x = Field< double >::get( ObjId( a1, i ), "outputValue" );
 		assert( doubleEq( x, i * i ) );
 	}
-	bool ret = SetGet1< double >::setVec( a1, "set_outputValue", val );
+	bool ret = SetGet1< double >::setVec( a1, "setOutputValue", val );
 	assert( ret );
 	for ( unsigned int i = 0; i < size; ++i ) {
 		double x = Field< double >::get( ObjId( a1, i ), "outputValue" );
@@ -1425,7 +1425,7 @@ void testSyncSynapseSize()
 {
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
-	const Finfo* f = Cinfo::find( "IntFire" )->findFinfo( "get_numSynapses" );
+	const Finfo* f = Cinfo::find( "IntFire" )->findFinfo( "getNumSynapses" );
 	const DestFinfo* df = dynamic_cast< const DestFinfo* >( f );
 	assert( df );
 	unsigned int size = 100;

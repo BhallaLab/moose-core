@@ -1918,6 +1918,20 @@ Next steps.
 		in the Sparse matrix.
 	+ Write python version of IntFire test.
 + Fix Obj creation so one can't make up an invalid ObjId that way.
+	Checkin 4958.
 - Naming conventions. Need to dig up and redo.
 
 ============================================================================
+4 Jan.
+	Here are the naming conventions as noted by Niraj:
+ - CamelCase, as before.
+ - Append src fields with "Out".
+ - Don't do anything special for dest fields and shared fields.
+ - For set/get fields, start with 'set'/'get', followed by the field name exactly the way it is. For example, 'getn' for 'n', and 'getVm' for 'Vm'.
+
+I don't remember the thought behind the last one: is the idea that I should
+remove the automatic insertion of an underscore by the ValueFinfo code?
+
+Confirmed this. Also put in code to automatically change the first char of the
+field name to upper case, i.e., staty with camel case. Many unit test
+fixes after this.
