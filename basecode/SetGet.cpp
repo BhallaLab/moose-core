@@ -19,16 +19,16 @@ const OpFunc* SetGet::checkSet(
 	const Finfo* f = tgt.element()->cinfo()->findFinfo( field );
 	if ( !f ) { // Could be a child element? Note that field name will 
 		// change from set_<name> to just <name>
-		string f2 = field.substr( 4 );
+		string f2 = field.substr( 3 );
 		Id child = Neutral::child( tgt.eref(), f2 );
 		if ( child == Id() ) {
 			cout << "Error: SetGet:checkSet:: No field or child named '" <<
 				field << "' was found on\n" << tgt.id.path() << endl;
 		} else {
-			if ( field.substr( 0, 4 ) == "set_" )
-				f = child.element()->cinfo()->findFinfo( "set_this" );
-			else if ( field.substr( 0, 4 ) == "get_" )
-				f = child.element()->cinfo()->findFinfo( "get_this" );
+			if ( field.substr( 0, 3 ) == "set" )
+				f = child.element()->cinfo()->findFinfo( "setThis" );
+			else if ( field.substr( 0, 3 ) == "get" )
+				f = child.element()->cinfo()->findFinfo( "getThis" );
 			assert( f ); // should always work as Neutral has the field.
 			if ( child.element()->numData() == tgt.element()->numData() ) {
 				tgt = ObjId( child, tgt.dataId, tgt.fieldIndex );
