@@ -76,7 +76,7 @@ Element* innerCopyElements( Id orig, ObjId newParent, Id newId,
 
 void innerCopyMsgs( map< Id, Id >& tree, unsigned int n, bool copyExtMsgs )
 {
-	static const Finfo* cf = Neutral::initCinfo()->findFinfo( "childMsg" );
+	static const Finfo* cf = Neutral::initCinfo()->findFinfo( "childOut" );
 	static const SrcFinfo1< int >* cf2 = 
 		dynamic_cast< const SrcFinfo1< int >* >( cf );
 	assert( cf );

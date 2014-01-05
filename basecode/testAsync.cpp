@@ -447,7 +447,7 @@ void testSendSpike()
 	reinterpret_cast< Synapse* >(target.data())->setWeight( WEIGHT );
 	reinterpret_cast< Synapse* >(target.data())->setDelay( 0.01 );
 	SingleMsg *m = new SingleMsg( e2, target.eref(), 0 );
-	const Finfo* f1 = ic->findFinfo( "spike" );
+	const Finfo* f1 = ic->findFinfo( "spikeOut" );
 	const Finfo* f2 = sc->findFinfo( "addSpike" );
 	bool ret = f1->addMsg( f2, m->mid(), e2.element() );
 	assert( ret );
@@ -794,7 +794,7 @@ void testSparseMsg()
 
 	SparseMsg* sm = new SparseMsg( t2, syns.element(), 0 );
 	assert( sm );
-	const Finfo* f1 = ic->findFinfo( "spike" );
+	const Finfo* f1 = ic->findFinfo( "spikeOut" );
 	const Finfo* f2 = sc->findFinfo( "addSpike" );
 	assert( f1 && f2 );
 	f1->addMsg( f2, sm->mid(), t2 );
@@ -1436,7 +1436,7 @@ void testFinfoFields()
 	const FinfoWrapper procFinfo = IntFire::initCinfo()->findFinfo( "proc" );
 	const FinfoWrapper processFinfo = IntFire::initCinfo()->findFinfo( "process" );
 	const FinfoWrapper reinitFinfo = IntFire::initCinfo()->findFinfo( "reinit" );
-	const FinfoWrapper spikeFinfo = IntFire::initCinfo()->findFinfo( "spike" );
+	const FinfoWrapper spikeFinfo = IntFire::initCinfo()->findFinfo( "spikeOut" );
 	const FinfoWrapper classNameFinfo = Neutral::initCinfo()->findFinfo( "className" );
 
 	assert( vmFinfo.getName() == "Vm" );
@@ -1477,7 +1477,7 @@ void testFinfoFields()
 	// cout << "reinit " << reinitFinfo.type() << endl;
 	assert( reinitFinfo.type() == "const ProcInfo*" );
 
-	assert( spikeFinfo.getName() == "spike" );
+	assert( spikeFinfo.getName() == "spikeOut" );
 	assert( spikeFinfo.docs() == "Sends out spike events" );
 	assert( spikeFinfo.src().size() == 0 );
 	assert( spikeFinfo.dest().size() == 0 );
@@ -1505,7 +1505,7 @@ void testCinfoFields()
 	unsigned int nsf = neutralCinfo->getNumSrcFinfo();
 	assert( nsf == 1 );
 	assert( cinfo->getNumSrcFinfo() == 1 + nsf );
-	assert( cinfo->getSrcFinfo( 0 + nsf ) == cinfo->findFinfo( "spike" ) );
+	assert( cinfo->getSrcFinfo( 0 + nsf ) == cinfo->findFinfo( "spikeOut" ) );
 
 	unsigned int ndf = neutralCinfo->getNumDestFinfo();
 	assert( ndf == 17 );
@@ -1584,7 +1584,7 @@ void testCinfoElements()
 	
 	ObjId temp( intFireSrcFinfoId, DataId( 0 ) );
 	string foo = Field< string >::get( temp, "name" );
-	assert( foo == "spike" );
+	assert( foo == "spikeOut" );
 
 	foo = Field< string >::get( temp, "type" );
 	assert( foo == "double" );

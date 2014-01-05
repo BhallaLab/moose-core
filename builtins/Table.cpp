@@ -12,12 +12,12 @@
 #include "TableBase.h"
 #include "Table.h"
 
-static SrcFinfo1< double* > *requestData() {
-	static SrcFinfo1< double* > requestData(
-			"requestData",
+static SrcFinfo1< double* > *requestOut() {
+	static SrcFinfo1< double* > requestOut(
+			"requestOut",
 			"Sends request for a field to target object"
 			);
-	return &requestData;
+	return &requestOut;
 }
 
 static DestFinfo *handleInput() {
@@ -74,7 +74,7 @@ const Cinfo* Table::initCinfo()
 		&threshold,		// Value
 		handleInput(),		// DestFinfo
 		&spike,			// DestFinfo
-		requestData(),		// SrcFinfo
+		requestOut(),		// SrcFinfo
 		&proc,			// SharedFinfo
 	};
 
@@ -111,9 +111,9 @@ void Table::process( const Eref& e, ProcPtr p )
 	lastTime_ = p->currTime;
 	// send out a request for data. This magically comes back in the
 	// RecvDataBuf and is handled.
-	// requestData()->send( e, handleInput()->getFid());
+	// requestOut()->send( e, handleInput()->getFid());
 	double ret;
-	requestData()->send( e, &ret );
+	requestOut()->send( e, &ret );
 	input( ret );
 }
 
@@ -123,9 +123,9 @@ void Table::reinit( const Eref& e, ProcPtr p )
 	vec().resize( 0 );
 	lastTime_ = 0;
 	// cout << "tabReinit on :" << p->groupId << ":" << p->threadIndexInGroup << endl << flush;
-	// requestData()->send( e, handleInput()->getFid());
+	// requestOut()->send( e, handleInput()->getFid());
 	double ret;
-	requestData()->send( e, &ret );
+	requestOut()->send( e, &ret );
 	input( ret );
 }
 
