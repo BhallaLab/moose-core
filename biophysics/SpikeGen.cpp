@@ -13,10 +13,10 @@
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
-static SrcFinfo1< double > *event() {
-	static SrcFinfo1< double > event( "event", 
+static SrcFinfo1< double > *spikeOut() {
+	static SrcFinfo1< double > spikeOut( "spikeOut", 
 			"Sends out a trigger for an event.");
-	return &event;
+	return &spikeOut;
 }
 
 const Cinfo* SpikeGen::initCinfo()
@@ -84,7 +84,7 @@ const Cinfo* SpikeGen::initCinfo()
 
 	static Finfo* spikeGenFinfos[] = 
 	{
-		event(),	// SrcFinfo
+		spikeOut(),	// SrcFinfo
 		&proc,		// Shared
 		&Vm,		// Dest
 		&threshold,	// Value
@@ -101,7 +101,8 @@ const Cinfo* SpikeGen::initCinfo()
 		"Author", "Upi Bhalla",
 		"Description", "SpikeGen object, for detecting threshold crossings."
 		"The threshold detection can work in multiple modes.\n "
-		"If the refractT < 0.0, then it fires an event only at the rising edge of the "
+		"If the refractT < 0.0, then it fires an event only at the rising "
+		"edge of the input voltage waveform"
 	};
 	static Dinfo< SpikeGen > dinfo;
 	static Cinfo spikeGenCinfo(
@@ -115,11 +116,6 @@ const Cinfo* SpikeGen::initCinfo()
 }
 
 static const Cinfo* spikeGenCinfo = SpikeGen::initCinfo();
-
-/*
-static const Slot eventSlot =
-	initSpikeGenCinfo()->getSlot( "event" );
-	*/
 
 SpikeGen::SpikeGen()
 	: threshold_(0.0),
@@ -197,7 +193,7 @@ void SpikeGen::process( const Eref& e, ProcPtr p )
 	if ( V_ > threshold_ ) {
 		if ((t + p->dt/2.0) >= (lastEvent_ + refractT_)) {
 			if ( !( edgeTriggered_ && fired_ ) ) {
-				event()->send( e, t );
+				spikeOut()->send( e, t );
 				lastEvent_ = t;
 				fired_ = true;                    
 			}

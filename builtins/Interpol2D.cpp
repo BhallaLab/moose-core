@@ -15,11 +15,11 @@
 
 const unsigned int Interpol2D::MAX_DIVS = 100000;
 
-static SrcFinfo1< double >* trig()
+static SrcFinfo1< double >* lookupOut()
 {
-	static SrcFinfo1< double > trig( "trig",
+	static SrcFinfo1< double > lookupOut( "lookupOut",
 		"respond to a request for a value lookup" );
-	return &trig;
+	return &lookupOut;
 }
 
 const Cinfo* Interpol2D::initCinfo()
@@ -30,12 +30,12 @@ const Cinfo* Interpol2D::initCinfo()
 
 	static DestFinfo lookup( "lookup", 
 		"Looks up table value based on indices v1 and v2, and sends"
-		"value back using the 'trig' message",
+		"value back using the 'lookupOut' message",
 		new EpFunc2< Interpol2D, double, double >( &Interpol2D::lookupReturn )
 	);
 	static Finfo* lookupReturnShared[] =
 	{
-		trig(), &lookup
+		lookupOut(), &lookup
 	};
 
 	static SharedFinfo lookupReturn2D( "lookupReturn2D",
@@ -153,7 +153,7 @@ const Cinfo* Interpol2D::initCinfo()
 
 static const Cinfo* interpol2DCinfo = Interpol2D::initCinfo();
 
-// static const Slot lookupReturnSlot = initInterpol2DCinfo()->getSlot( "lookupReturn2D.trig" );
+// static const Slot lookupReturnSlot = initInterpol2DCinfo()->getSlot( "lookupReturn2D.lookupOut" );
 ////////////////////////////////////////////////////////////////////
 // Constructors
 ////////////////////////////////////////////////////////////////////
@@ -476,7 +476,7 @@ double Interpol2D::getInterpolatedValue(vector <double> xy) const
 void Interpol2D::lookupReturn( const Eref& e, double v1, double v2 )
 {
 	double ret = innerLookup( v1, v2 );
-	trig()->send( e, ret );
+	lookupOut()->send( e, ret );
 }
 
 ////////////////////////////////////////////////////////////////////

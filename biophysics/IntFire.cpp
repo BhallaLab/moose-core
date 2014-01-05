@@ -14,12 +14,12 @@
 #include "SynHandler.h"
 #include "IntFire.h"
 
-static SrcFinfo1< double > *spike() {
-	static SrcFinfo1< double > spike( 
-			"spike", 
+static SrcFinfo1< double > *spikeOut() {
+	static SrcFinfo1< double > spikeOut( 
+			"spikeOut", 
 			"Sends out spike events"
 			);
-	return &spike;
+	return &spikeOut;
 }
 
 const Cinfo* IntFire::initCinfo()
@@ -112,7 +112,7 @@ const Cinfo* IntFire::initCinfo()
 		&bufferTime,		// Value
 		// &numSynapses,			// Value, defined in base class
 		&proc,					// SharedFinfo
-		spike(), 		// MsgSrc
+		spikeOut(), 		// MsgSrc
 		// &synFinfo		// FieldElementFinfo for synapses.
 	};
 
@@ -157,8 +157,8 @@ void IntFire::process( const Eref &e, ProcPtr p )
 	}
 
 	if ( Vm_ > thresh_ ) {
-		// spike()->send( e, e.dataIndex() );
-		spike()->send( e, p->currTime );
+		// spikeOut()->send( e, e.dataIndex() );
+		spikeOut()->send( e, p->currTime );
 		Vm_ = -1.0e-7;
 		lastSpike_ = p->currTime;
 	} else {

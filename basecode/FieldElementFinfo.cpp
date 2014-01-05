@@ -15,7 +15,7 @@ void FieldElementFinfoBase::postCreationFunc(
 				Id parent, Element* parentElm ) const
 {
 	static const Finfo* pf = Neutral::initCinfo()->findFinfo( "parentMsg" );
-	static const Finfo* f1 = Neutral::initCinfo()->findFinfo( "childMsg" );
+	static const Finfo* f1 = Neutral::initCinfo()->findFinfo( "childOut" );
 
 	if ( deferCreate_ )
 		return;

@@ -172,6 +172,7 @@ void testTreeTraversal()
 	assert( shell->doFind( "/f1/f2a/tralalalala" ) == ObjId() );
 	assert( shell->doFind( "/f1/f2a[723]/f3aa" ) == ObjId() );
 	assert( shell->doFind( "/f1/f2a/f3aa[12]" ) == ObjId() );
+	cout << "\nTesting warning for bad path indexing: ";
 	assert( shell->doFind( "/f1/f2a/f3aa[-1]" ) == ObjId() );
 	assert( shell->doFind( "/f1/f2a/f3aa" ) == f3aa );
 	assert( shell->doFind( "/f1/f2a/f3ab" ) == f3ab );
@@ -275,14 +276,14 @@ void testChildren()
 	verifyKids( f1, f2a, f2b, f3, f4a, f4b );
 
 	// Should fail.
-	cout << "\nTesting warning for creating element with existing name\n";
+	cout << "\nTesting warning for creating element with existing name: ";
 	Id fx1 = shell->doCreate( "Neutral", f1, "f2b", 1 );
 	assert( fx1 == Id() );
 
 	// Should succeed
 	Field< string >::set( f4a, "name", "hippo" );
 	// Should fail, because same name already exists.
-	cout << "\nTesting warning for name change to existing name\n";
+	cout << "\nTesting warning for name change to existing name: ";
 	Field< string >::set( f4a, "name", "f4b" );
 
 	shell->doDelete( f1 );
