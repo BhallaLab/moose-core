@@ -60,7 +60,7 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
 	DataId di( 1 ); // DataId( data, field )
 	Eref syne( syn, di );
 
-	ObjId mid = shell->doAddMsg( "Sparse", i2, "spike",
+	ObjId mid = shell->doAddMsg( "Sparse", i2, "spikeOut",
 		ObjId( synId, 0 ), "addSpike" );
 	
 	SetGet2< double, long >::set( mid, "setRandomConnectivity", 
@@ -1234,11 +1234,11 @@ void testSynChan()
 	assert( syne->dataHandler()->sizeOfDim( 0 ) == size * 65536 );
 
 	MsgId mid = shell->doAddMsg( "single", 
-		ObjId( sgId1, DataId( 0 ) ), "event",
+		ObjId( sgId1, DataId( 0 ) ), "spikeOut",
 		ObjId( synId, DataId( 0 ) ), "addSpike" );
 	assert( mid != Msg::bad );
 	mid = shell->doAddMsg( "single", 
-		ObjId( sgId2, DataId( 0 ) ), "event",
+		ObjId( sgId2, DataId( 0 ) ), "spikeOut",
 		ObjId( synId, DataId( 1 ) ), "addSpike" );
 	assert( mid != Msg::bad );
 	
@@ -1351,7 +1351,7 @@ void testNMDAChan()
 	assert( syne->dataHandler()->sizeOfDim( 0 ) == 1 );
 
 	MsgId mid = shell->doAddMsg( "single", 
-		ObjId( sgId1, DataId( 0 ) ), "event",
+		ObjId( sgId1, DataId( 0 ) ), "spikeOut",
 		ObjId( synId, DataId( 0 ) ), "addSpike" );
 	assert( mid != Msg::bad );
 	

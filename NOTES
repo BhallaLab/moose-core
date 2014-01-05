@@ -1927,11 +1927,21 @@ Next steps.
  - CamelCase, as before.
  - Append src fields with "Out".
  - Don't do anything special for dest fields and shared fields.
- - For set/get fields, start with 'set'/'get', followed by the field name exactly the way it is. For example, 'getn' for 'n', and 'getVm' for 'Vm'.
+ * For set/get fields, start with 'set'/'get', followed by the field name exactly the way it is. For example, 'getn' for 'n', and 'getVm' for 'Vm'.
 
 I don't remember the thought behind the last one: is the idea that I should
 remove the automatic insertion of an underscore by the ValueFinfo code?
 
 Confirmed this. Also put in code to automatically change the first char of the
 field name to upper case, i.e., staty with camel case. Many unit test
-fixes after this.
+fixes after this. Checkin as 4959.
+
+============================================================================
+5 Jan
+Implemented change in name for src fields. I'm leaving 'output' as is though.
+Went through cleaning out legacy naming and patching up the unit tests to
+match. Now clears unit tests on 1-5 nodes.
+Two other legacy SrcFinfo names are retained: 'process' and 'reinit'.
+
+
+============================================================================

@@ -276,7 +276,7 @@ void testGetMsg()
 	assert( arithid != ObjId() );
 	// Table* t = reinterpret_cast< Table* >( tabid.eref().data() );
 	ObjId ret = shell->doAddMsg( "Single", 
-		tabid.eref().objId(), "requestData",
+		tabid.eref().objId(), "requestOut",
 		arithid.eref().objId(), "getOutputValue" );
 	assert( ret != ObjId() );
 	ret = shell->doAddMsg( "Single", arithid.eref().objId(), "output",

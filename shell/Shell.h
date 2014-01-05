@@ -368,13 +368,6 @@ class Shell
 		void addClockMsgs( const vector< Id >& list, const string& field, 
 			unsigned int tick, unsigned int msgIndex );
 
-		/**
- 		 * Tell all attached pools and vols to update themselves: set their
- 		 * array sizes and set their new volumes.
- 		 */
-		void handleReMesh( Id baseMesh );
-
-		void handleSetParserIdleFlag( bool isParserIdle );
 		////////////////////////////////////////////////////////////////
 		// Thread and MPI handling functions
 		////////////////////////////////////////////////////////////////

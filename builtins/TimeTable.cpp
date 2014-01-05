@@ -14,11 +14,11 @@
 #include "TableBase.h"
 #include "TimeTable.h"
 
-static SrcFinfo1< double > *event() {
-    static SrcFinfo1< double > event(
-        "event",
+static SrcFinfo1< double > *eventOut() {
+    static SrcFinfo1< double > eventOut(
+        "eventOut",
         "Sends out spike time if it falls in current timestep.");
-    return &event;
+    return &eventOut;
 }
         
 const Cinfo* TimeTable::initCinfo()
@@ -68,14 +68,14 @@ const Cinfo* TimeTable::initCinfo()
         &filename,
         &method,
         &state,
-        event(),
+        eventOut(),
         &proc,
     };
     
     static string doc[] = {
         "Name", "TimeTable",
         "Author", "Johannes Hjorth, 2008, KTH, Stockholm. Ported to buildQ branch using new API by Subhasis Ray, NCBS, Bangalore, 2013.",
-        "Description", "TimeTable: Read in spike times from file and send out event messages\n"
+        "Description", "TimeTable: Read in spike times from file and send out eventOut messages\n"
         "at the specified times.",
     };
     
@@ -198,7 +198,7 @@ void TimeTable::process(const Eref& e, ProcPtr p)
 
   if ( curPos_ < vec().size() &&
        p->currTime >= vec()[curPos_] ) {
-      event()->send( e, vec()[curPos_]);
+      eventOut()->send( e, vec()[curPos_]);
       curPos_++;
       state_ = 1;
   }

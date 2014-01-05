@@ -41,152 +41,6 @@ bool Shell::doReinit_( 0 );
 bool Shell::isParserIdle_( 0 );
 double Shell::runtime_( 0.0 );
 
-/*
-static SrcFinfo5< string, Id, Id, string, vector< int > > *requestCreate() {
-	static SrcFinfo5< string, Id, Id, string, vector< int > > requestCreate( "requestCreate",
-			"requestCreate( class, parent, newElm, name, dimensions ): "
-			"creates a new Element on all nodes with the specified Id. "
-			"Initiates a callback to indicate completion of operation. "
-			"Goes to all nodes including self."
-			);
-	return &requestCreate;
-}
-*/
-
-/*
-static SrcFinfo2< unsigned int, unsigned int >* ack()
-{
-	static SrcFinfo2< unsigned int, unsigned int > temp( "ack",
-			"ack( unsigned int node#, unsigned int status ):"
-			"Acknowledges receipt and completion of a command on a worker node."
-			"Goes back only to master node."
-			);
-	return &temp;
-}
-*/
-
-/*
-static SrcFinfo1< Id  > *requestDelete() {
-	static SrcFinfo1< Id  > requestDelete( "requestDelete",
-			"requestDelete( doomedElement ):"
-			"Deletes specified Element on all nodes."
-			"Initiates a callback to indicate completion of operation."
-			"Goes to all nodes including self." ); 
-	return &requestDelete;
-}
-
-static SrcFinfo0 *requestQuit() {
-	static SrcFinfo0 requestQuit( "requestQuit",
-			"requestQuit():"
-			"Emerges from the inner loop, and wraps up. No return value." );
-	return &requestQuit;
-}
-*/
-
-static SrcFinfo1< double > *requestStart() {
-	static SrcFinfo1< double > requestStart( "requestStart",
-			"requestStart( runtime ):"
-			"Starts a simulation. Goes to all nodes including self."
-			"Initiates a callback to indicate completion of run."
-			);
-	return &requestStart;
-}
-
-static SrcFinfo1< unsigned int > *requestStep() {
-	static SrcFinfo1< unsigned int > requestStep( "requestStep",
-			"requestStep():"
-			"Advances a simulation for the specified # of steps."
-			"Goes to all nodes including self."
-			);
-	return &requestStep;
-}
-
-static SrcFinfo0 *requestStop() {
-	static SrcFinfo0 requestStop( "requestStop",
-			"requestStop():"
-			"Gently stops a simulation after completing current ops."
-			"After this op it is save to do 'start' again, and it will"
-			"resume where it left off"
-			"Goes to all nodes including self."
-			);
-	return &requestStop;
-}
-
-static SrcFinfo2< unsigned int, double > *requestSetupTick() {
-	static SrcFinfo2< unsigned int, double > requestSetupTick( 
-			"requestSetupTick",
-			"requestSetupTick():"
-			"Asks the Clock to coordinate the assignment of a specific"
-			"clock tick. Args: Tick#, dt."
-			"Goes to all nodes including self."
-			);
-	return &requestSetupTick;
-}
-
-static SrcFinfo0 *requestReinit() {
-	static SrcFinfo0 requestReinit( "requestReinit",
-			"requestReinit():"
-			"Reinits a simulation: sets to time 0."
-			"If simulation is running it stops it first."
-			"Goes to all nodes including self."
-			);
-	return &requestReinit;
-}
-
-/*
-static SrcFinfo5< string, ObjId, string, ObjId, string > *requestAddMsg() {
-	static SrcFinfo5< string, ObjId, string, ObjId, string > 
-		requestAddMsg( 
-				"requestAddMsg",
-				"requestAddMsg( type, src, srcField, dest, destField );"
-				"Creates specified Msg between specified Element on all nodes."
-				"Initiates a callback to indicate completion of operation."
-				"Goes to all nodes including self."
-			     ); 
-	return &requestAddMsg;
-}
-
-static SrcFinfo2< Id, Id > *requestMove() {
-	static SrcFinfo2< Id, Id > requestMove(
-			"move",
-			"move( origId, newParent);"
-			"Moves origId to become a child of newParent"
-			);
-	return &requestMove;
-}
-
-static SrcFinfo5< vector< Id >, string, unsigned int, bool, bool > *requestCopy() {
-	static SrcFinfo5< vector< Id >, string, unsigned int, bool, bool > requestCopy(
-			"copy",
-			"copy( origId, newParent, numRepeats, toGlobal, copyExtMsg );"
-			"Copies origId to become a child of newParent"
-			);
-	return &requestCopy;
-}
-
-static SrcFinfo3< string, string, unsigned int > *requestUseClock() {
-	static SrcFinfo3< string, string, unsigned int > requestUseClock(
-			"useClock",
-			"useClock( path, field, tick# );"
-			"Specifies which clock tick to use for all elements in Path."
-			"The 'field' is typically process, but some cases need to send"
-			"updates to the 'init' field."
-			"Tick # specifies which tick to be attached to the objects."
-			);
-	return &requestUseClock;
-}
-*/
-
-static SrcFinfo1< bool > *requestSetParserIdleFlag() {
-	static SrcFinfo1< bool > requestSetParserIdleFlag(
-			"requestSetParserIdleFlag",
-			"SetParserIdleFlag( bool isParserIdle );"
-			"When True, the main ProcessLoop waits a little each cycle"
-			"so as to avoid pounding on the CPU."
-			);
-	return &requestSetParserIdleFlag;
-}
-
 const Cinfo* Shell::initCinfo()
 {
 ////////////////////////////////////////////////////////////////
@@ -239,42 +93,10 @@ const Cinfo* Shell::initCinfo()
 			" If the flag copyExtMsgs is true, then all msgs going out are also copied.",
 			new EpFunc5< Shell, vector< ObjId >, string, unsigned int, bool, bool >( 
 				& Shell::handleCopy ) );
-	/*
-	static Finfo* shellWorker[] = {
-		&handleCreate, &handleDelete,
-		&handleAddMsg,
-		&handleQuit,
-		&handleMove, &handleCopy, &handleUseClock,
-		&handleSync, &handleReMesh, &handleSetParserIdleFlag,
-		ack() };
-		*/
-	static Finfo* clockControlFinfos[] = 
-	{
-		requestStart(), requestStep(), requestStop(), requestSetupTick(),
-		requestReinit()
-	};
 
 		static DestFinfo setclock( "setclock", 
 			"Assigns clock ticks. Args: tick#, dt",
 			new OpFunc2< Shell, unsigned int, double >( & Shell::doSetClock ) );
-		/*
-		static SharedFinfo master( "master",
-			"Issues commands from master shell to worker shells located "
-			"on different nodes. Also handles acknowledgements from them.",
-			shellMaster, sizeof( shellMaster ) / sizeof( const Finfo* )
-		);
-		static SharedFinfo worker( "worker",
-			"Handles commands arriving from master shell on node 0."
-			"Sends out acknowledgements from them.",
-			shellWorker, sizeof( shellWorker ) / sizeof( const Finfo* )
-
-		);
-		*/
-		static SharedFinfo clockControl( "clockControl",
-			"Controls the system Clock",
-			clockControlFinfos, 
-			sizeof( clockControlFinfos ) / sizeof( const Finfo* )
-		);
 	
 	static Finfo* shellFinfos[] = {
 		&setclock,
@@ -290,7 +112,6 @@ const Cinfo* Shell::initCinfo()
 		&handleAddMsg,
 		&handleQuit,
 		&handleUseClock,
-		&clockControl,
 	};
 
 	static Dinfo< Shell > d;
@@ -717,20 +538,6 @@ ObjId Shell::doFind( const string& path ) const
 	return curr;
 }
 
-// We don't need to do this through acks, as it has no effect on processing
-// other than to slow it down or speed it up.
-void Shell::doSetParserIdleFlag( bool isParserIdle )
-{
-	Eref sheller( shelle_, 0 );
-	requestSetParserIdleFlag()->send( sheller, isParserIdle);
-}
-
-void Shell::handleSetParserIdleFlag( bool isParserIdle )
-{
-	Shell::isParserIdle_ = isParserIdle;
-}
-
-
 ////////////////////////////////////////////////////////////////
 // DestFuncs
 ////////////////////////////////////////////////////////////////
@@ -793,7 +600,7 @@ bool Shell::adopt( ObjId parent, Id child, unsigned int msgIndex ) {
 	static const Finfo* pf = Neutral::initCinfo()->findFinfo( "parentMsg" );
 	// static const DestFinfo* pf2 = dynamic_cast< const DestFinfo* >( pf );
 	// static const FuncId pafid = pf2->getFid();
-	static const Finfo* f1 = Neutral::initCinfo()->findFinfo( "childMsg" );
+	static const Finfo* f1 = Neutral::initCinfo()->findFinfo( "childOut" );
 
 	assert( !( child.element() == 0 ) );
 	assert( !( child == Id() ) );
@@ -944,7 +751,7 @@ bool Shell::innerMove( Id orig, ObjId newParent )
 	static const Finfo* pf = Neutral::initCinfo()->findFinfo( "parentMsg" );
 	static const DestFinfo* pf2 = dynamic_cast< const DestFinfo* >( pf );
 	static const FuncId pafid = pf2->getFid();
-	static const Finfo* f1 = Neutral::initCinfo()->findFinfo( "childMsg" );
+	static const Finfo* f1 = Neutral::initCinfo()->findFinfo( "childOut" );
 
 	assert( !( orig == Id() ) );
 	assert( !( newParent.element() == 0 ) );

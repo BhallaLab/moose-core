@@ -37,12 +37,12 @@
 
 #include "HDF5DataWriter.h"
 
-static SrcFinfo1< FuncId > *requestData() {
-	static SrcFinfo1< FuncId > requestData(
-			"requestData",
+static SrcFinfo1< FuncId > *requestOut() {
+	static SrcFinfo1< FuncId > requestOut(
+			"requestOut",
 			"Sends request for a field to target object"
 			);
-	return &requestData;
+	return &requestOut;
 }
 
 static DestFinfo *recvDataBuf() {
@@ -83,7 +83,7 @@ const Cinfo * HDF5DataWriter::initCinfo()
       "Shared message to receive process and reinit",
       processShared, sizeof( processShared ) / sizeof( Finfo* ));
   static Finfo * finfos[] = {
-    requestData(),
+    requestOut(),
     clear(),
     recvDataBuf(),        
     &proc,
@@ -93,7 +93,7 @@ const Cinfo * HDF5DataWriter::initCinfo()
     "Name", "HDF5DataWriter",
     "Author", "Subhasis Ray",
     "Description", "HDF5 file writer for saving data tables. It saves the tables connected"
-    " to it via `requestData` field into an HDF5 file.  The path of the"
+    " to it via `requestOut` field into an HDF5 file.  The path of the"
     " table is maintained in the HDF5 file, with a HDF5 group for each"
     " element above the table."
     "\n"
@@ -172,7 +172,7 @@ void HDF5DataWriter::process(const Eref & e, ProcPtr p)
         return;
     }
     // cout << "HDF5DataWriter::process: currentTime=" << p->currTime << endl;
-    requestData()->send(e, recvDataBuf()->getFid());
+    requestOut()->send(e, recvDataBuf()->getFid());
     for (map<string, vector < double > >:: iterator data_it = datamap_.begin(); data_it != datamap_.end(); ++data_it){        
         string path = data_it->first;
         // if (data_it->second.size() >= flushLimit_){

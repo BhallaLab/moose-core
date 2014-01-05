@@ -98,7 +98,7 @@ const Cinfo* Neutral::initCinfo()
 	/////////////////////////////////////////////////////////////////
 	// SrcFinfos
 	/////////////////////////////////////////////////////////////////
-	static SrcFinfo1< int > childMsg( "childMsg", 
+	static SrcFinfo1< int > childOut( "childOut", 
 		"Message to child Elements");
 
 	/////////////////////////////////////////////////////////////////
@@ -135,7 +135,7 @@ const Cinfo* Neutral::initCinfo()
 	// Setting up the Finfo list.
 	/////////////////////////////////////////////////////////////////
 	static Finfo* neutralFinfos[] = {
-		&childMsg,				// SrcFinfo
+		&childOut,				// SrcFinfo
 		&parentMsg,				// DestFinfo
 		&thisFinfo,				// Value
 		&name,					// Value
@@ -248,7 +248,7 @@ void Neutral::children( const Eref& e, vector< Id >& ret )
 	static const Finfo* pf = neutralCinfo->findFinfo( "parentMsg" );
 	static const DestFinfo* pf2 = dynamic_cast< const DestFinfo* >( pf );
 	static const FuncId pafid = pf2->getFid();
-	static const Finfo* cf = neutralCinfo->findFinfo( "childMsg" );
+	static const Finfo* cf = neutralCinfo->findFinfo( "childOut" );
 	static const SrcFinfo* cf2 = dynamic_cast< const SrcFinfo* >( cf );
 	static const BindIndex bi = cf2->getBindIndex();
 	
@@ -424,7 +424,7 @@ Id Neutral::child( const Eref& e, const string& name )
 	static const Finfo* pf = neutralCinfo->findFinfo( "parentMsg" );
 	static const DestFinfo* pf2 = dynamic_cast< const DestFinfo* >( pf );
 	static const FuncId pafid = pf2->getFid();
-	static const Finfo* cf = neutralCinfo->findFinfo( "childMsg" );
+	static const Finfo* cf = neutralCinfo->findFinfo( "childOut" );
 	static const SrcFinfo* cf2 = dynamic_cast< const SrcFinfo* >( cf );
 	static const BindIndex bi = cf2->getBindIndex();
 	
