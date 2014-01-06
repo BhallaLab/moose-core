@@ -36,10 +36,6 @@ DataElement::DataElement( Id id, const Element* orig,
 	:	
 		Element( id, orig->cinfo(), orig->getName() )
 {
-	// Unsure why I put this here. It is erroneous since in multinode
-	// simulations it is quite likely that many nodes will have zero 
-	// data entries for a given element.
-	// if ( n == 0 ) n = 1;
 	numLocalData_ = n;
 	data_ = cinfo()->dinfo()->copyData( orig->data( 0 ), orig->numData(), 
 					numLocalData_, startEntry );
@@ -101,4 +97,15 @@ void DataElement::resize( unsigned int newNumLocalData )
 					temp, numLocalData_, newNumLocalData, 0 );
 	cinfo()->dinfo()->destroyData( temp );
 	numLocalData_ = newNumLocalData;
+}
+
+/////////////////////////////////////////////////////////////////////////
+// Zombie stuff
+/////////////////////////////////////////////////////////////////////////
+
+void DataElement::zombieSwap( const Cinfo* zCinfo )
+{
+	cinfo()->dinfo()->destroyData( data_ );
+	data_ = zCinfo->dinfo()->allocData( numLocalData_ );
+	replaceCinfo( zCinfo );
 }

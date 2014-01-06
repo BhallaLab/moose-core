@@ -107,6 +107,12 @@ class FieldElement: public Element
 		void resizeField( 
 				unsigned int rawIndex, unsigned int newNumField );
 
+		/**
+		 * Virtual: after replacing Cinfo of parent, we need to 
+		 * replace Cinfo and fef here. The zCinfo is the new Cinfo for this
+		 * FieldElement.
+		 */
+		void zombieSwap( const Cinfo* zCinfo );
 
 	private:
 		Id parent_;

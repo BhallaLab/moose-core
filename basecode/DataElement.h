@@ -123,6 +123,10 @@ class DataElement: public Element
 			{;}
 
 		/////////////////////////////////////////////////////////////////
+		// Zombie stuff.
+
+		/// Virtual func.
+		void zombieSwap( const Cinfo* newCinfo );
 
 	private:
 
