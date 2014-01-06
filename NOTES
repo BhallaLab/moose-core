@@ -1989,3 +1989,6 @@ the new class, destroys the old data, and replaces the Cinfo on the Element,
 all without touching any of the messaging. Perhaps should put in a test to
 make sure that the swapped classes are message-compatible.
 
+Checkin 4961.
+
+Went through and cleaned up SrcFinfo names.

@@ -13,20 +13,20 @@
 #include "EnzBase.h"
 #include "CplxEnzBase.h"
 
-static SrcFinfo2< double, double > *toEnz() {
-	static SrcFinfo2< double, double > toEnz( 
-			"toEnz", 
+static SrcFinfo2< double, double > *enzOut() {
+	static SrcFinfo2< double, double > enzOut( 
+			"enzOut", 
 			"Sends out increment of molecules on product each timestep"
 			);
-	return &toEnz;
+	return &enzOut;
 }
 
-static SrcFinfo2< double, double > *toCplx() {
-	static SrcFinfo2< double, double > toCplx( 
-			"toCplx", 
+static SrcFinfo2< double, double > *cplxOut() {
+	static SrcFinfo2< double, double > cplxOut( 
+			"cplxOut", 
 			"Sends out increment of molecules on product each timestep"
 			);
-	return &toCplx;
+	return &cplxOut;
 }
 
 DestFinfo* enzDest()
@@ -117,10 +117,10 @@ const Cinfo* CplxEnzBase::initCinfo()
 		// Shared Msg Definitions
 		//////////////////////////////////////////////////////////////
 		static Finfo* enzShared[] = {
-			toEnz(), enzDest()
+			enzOut(), enzDest()
 		};
 		static Finfo* cplxShared[] = {
-			toCplx(), &cplxDest
+			cplxOut(), &cplxDest
 		};
 
 		static SharedFinfo enz( "enz",

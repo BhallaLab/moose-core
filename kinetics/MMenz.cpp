@@ -42,13 +42,13 @@ const Cinfo* MMenz::initCinfo()
 
 static const Cinfo* mmEnzCinfo = MMenz::initCinfo();
 
-static const SrcFinfo2< double, double >* toSub = 
+static const SrcFinfo2< double, double >* subOut = 
     dynamic_cast< const SrcFinfo2< double, double >* >(
-	mmEnzCinfo->findFinfo( "toSub" ) );
+	mmEnzCinfo->findFinfo( "subOut" ) );
 
-static const SrcFinfo2< double, double >* toPrd = 
+static const SrcFinfo2< double, double >* prdOut = 
 	dynamic_cast< const SrcFinfo2< double, double >* >(
-	mmEnzCinfo->findFinfo( "toPrd" ) );
+	mmEnzCinfo->findFinfo( "prdOut" ) );
 
 
 //////////////////////////////////////////////////////////////
@@ -82,8 +82,8 @@ void MMenz::vEnz( double n )
 void MMenz::vProcess( const Eref& e, ProcPtr p )
 {
 	double rate = kcat_ * enz_ * sub_ / ( numKm_ + sub_ );
-	toSub->send( e, 0, rate );
-	toPrd->send( e, rate, 0 );
+	subOut->send( e, 0, rate );
+	prdOut->send( e, rate, 0 );
 	
 	sub_ = 1.0;
 }
@@ -97,7 +97,7 @@ void MMenz::vReinit( const Eref& e, ProcPtr p )
 void MMenz::vRemesh( const Eref& e )
 {
 //	cout << "MMenz::remesh for " << e << endl;
-	double volScale = convertConcToNumRateUsingMesh( e, toSub, 1 );
+	double volScale = convertConcToNumRateUsingMesh( e, subOut, 1 );
 	numKm_ = Km_ * volScale;
 }
 
@@ -108,7 +108,7 @@ void MMenz::vRemesh( const Eref& e )
 void MMenz::vSetKm( const Eref& enz, double v )
 {
 	Km_ = v;
-	double volScale = convertConcToNumRateUsingMesh( enz, toSub, 1 );
+	double volScale = convertConcToNumRateUsingMesh( enz, subOut, 1 );
 	numKm_ = v * volScale;
 }
 
@@ -119,14 +119,14 @@ double MMenz::vGetKm( const Eref& enz ) const
 
 void MMenz::vSetNumKm( const Eref& enz, double v )
 {
-	double volScale = convertConcToNumRateUsingMesh( enz, toSub, 1 );
+	double volScale = convertConcToNumRateUsingMesh( enz, subOut, 1 );
 	numKm_ = v;
 	Km_ = v / volScale;
 }
 
 double MMenz::vGetNumKm( const Eref& enz ) const
 {
-	double volScale = convertConcToNumRateUsingMesh( enz, toSub, 1 );
+	double volScale = convertConcToNumRateUsingMesh( enz, subOut, 1 );
 	return Km_ * volScale;
 }
 

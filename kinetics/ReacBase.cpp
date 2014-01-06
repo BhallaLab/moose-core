@@ -14,20 +14,20 @@
 
 #define EPSILON 1e-15
 
-static SrcFinfo2< double, double > *toSub() {
-	static SrcFinfo2< double, double > toSub( 
-			"toSub", 
+static SrcFinfo2< double, double > *subOut() {
+	static SrcFinfo2< double, double > subOut( 
+			"subOut", 
 			"Sends out increment of molecules on product each timestep"
 			);
-	return &toSub;
+	return &subOut;
 }
 
-static SrcFinfo2< double, double > *toPrd() {
-	static SrcFinfo2< double, double > toPrd( 
-			"toPrd", 
+static SrcFinfo2< double, double > *prdOut() {
+	static SrcFinfo2< double, double > prdOut( 
+			"prdOut", 
 			"Sends out increment of molecules on product each timestep"
 			);
-	return &toPrd;
+	return &prdOut;
 }
 
 const Cinfo* ReacBase::initCinfo()
@@ -85,16 +85,6 @@ const Cinfo* ReacBase::initCinfo()
 			"Handles reinit call",
 			new ProcOpFunc< ReacBase >( &ReacBase::reinit ) );
 
-		/*
-		static DestFinfo group( "group",
-			"Handle for group msgs. Doesn't do anything",
-			new OpFuncDummy() );
-			*/
-
-		static DestFinfo remesh( "remesh",
-			"Tells the reac to recompute its numRates, as remeshing has happened",
-			new EpFunc0< ReacBase >( & ReacBase::remesh ) );
-
 		//////////////////////////////////////////////////////////////
 		// Shared Msg Definitions
 		//////////////////////////////////////////////////////////////
@@ -106,10 +96,10 @@ const Cinfo* ReacBase::initCinfo()
 				"Handles # of molecules of product",
 				new OpFunc1< ReacBase, double >( &ReacBase::prd ) );
 		static Finfo* subShared[] = {
-			toSub(), &subDest
+			subOut(), &subDest
 		};
 		static Finfo* prdShared[] = {
-			toPrd(), &prdDest
+			prdOut(), &prdDest
 		};
 		static SharedFinfo sub( "sub",
 			"Connects to substrate pool",
@@ -138,7 +128,6 @@ const Cinfo* ReacBase::initCinfo()
 		&sub,				// SharedFinfo
 		&prd,				// SharedFinfo
 		&proc,				// SharedFinfo
-		&remesh,	// DestFinfo
 	};
 
 	static string doc[] = 
@@ -286,7 +275,7 @@ double ReacBase::getConcKb( const Eref& e ) const
 unsigned int ReacBase::getNumSub( const Eref& e ) const
 {
 	const vector< MsgFuncBinding >* mfb = 
-		e.element()->getMsgAndFunc( toSub()->getBindIndex() );
+		e.element()->getMsgAndFunc( subOut()->getBindIndex() );
 	assert( mfb );
 	return ( mfb->size() );
 }
@@ -294,7 +283,7 @@ unsigned int ReacBase::getNumSub( const Eref& e ) const
 unsigned int ReacBase::getNumPrd( const Eref& e ) const
 {
 	const vector< MsgFuncBinding >* mfb = 
-		e.element()->getMsgAndFunc( toPrd()->getBindIndex() );
+		e.element()->getMsgAndFunc( prdOut()->getBindIndex() );
 	assert( mfb );
 	return ( mfb->size() );
 }

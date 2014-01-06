@@ -10,12 +10,12 @@
 #include "header.h"
 #include "Species.h"
 
-static SrcFinfo1< double > *sendMolWt() {
-	static SrcFinfo1< double > sendMolWt( 
-			"sendMolWt", 
+static SrcFinfo1< double > *molWtOut() {
+	static SrcFinfo1< double > molWtOut( 
+			"molWtOut", 
 			"returns molWt."
 			);
-	return &sendMolWt;
+	return &molWtOut;
 }
 
 const Cinfo* Species::initCinfo()
@@ -43,7 +43,7 @@ const Cinfo* Species::initCinfo()
 		//////////////////////////////////////////////////////////////
 
 		static Finfo* poolShared[] = {
-			&handleMolWtRequest, sendMolWt()
+			&handleMolWtRequest, molWtOut()
 		};
 
 		static SharedFinfo pool( "pool",
@@ -86,7 +86,7 @@ Species::Species()
 
 void Species::handleMolWtRequest( const Eref& e )
 {
-	sendMolWt()->send( e, molWt_ );
+	molWtOut()->send( e, molWt_ );
 }
 
 //////////////////////////////////////////////////////////////
