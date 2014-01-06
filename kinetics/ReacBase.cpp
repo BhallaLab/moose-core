@@ -295,25 +295,28 @@ unsigned int ReacBase::getNumPrd( const Eref& e ) const
 
 void ReacBase::zombify( Element* orig, const Cinfo* zClass, Id solver )
 {
-		/*
 	if ( orig->cinfo() == zClass )
 		return;
-	DataHandler* origHandler = orig->dataHandler();
-	DataHandler* dh = origHandler->copyUsingNewDinfo( zClass->dinfo() );
-	Element temp( orig->id(), zClass, dh );
-	Eref zombier( &temp, 0 );
-
-	ReacBase* z = reinterpret_cast< ReacBase* >( zombier.data() );
-	Eref oer( orig, 0 );
-
-	const ReacBase* m = reinterpret_cast< ReacBase* >( oer.data() );
-	z->setSolver( solver, orig->id() ); // call virtual func to assign solver info.
-	// May need to extend to entire array.
-	z->vSetConcKf( oer, 0, m->vGetConcKf( oer, 0 ) );
-	z->vSetConcKb( oer, 0, m->vGetConcKb( oer, 0 ) );
-	orig->zombieSwap( zClass, dh );
-	delete origHandler;
-	*/
+	unsigned int start = orig->localDataStart();
+	unsigned int num = orig->numLocalData();
+	if ( num == 0 )
+			return;
+	vector< double > concKf( num, 0.0 );
+	vector< double > concKb( num, 0.0 );
+	for ( unsigned int i = 0; i < num; ++i ) {
+		Eref er( orig, i + start );
+		const ReacBase* rb = 
+			reinterpret_cast< const ReacBase* >( er.data() );
+		concKf[ i ] = rb->getConcKf( er );
+		concKb[ i ] = rb->getConcKb( er );
+	}
+	orig->zombieSwap( zClass );
+	for ( unsigned int i = 0; i < num; ++i ) {
+		Eref er( orig, i + start );
+		ReacBase* rb = reinterpret_cast< ReacBase* >( er.data() );
+		rb->setConcKf( er, concKf[i] );
+		rb->setConcKb( er, concKb[i] );
+	}
 }
 
 // Virtual func: default does nothing.
