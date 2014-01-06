@@ -60,13 +60,6 @@ class Pool: public PoolBase
 		void vProcess( const Eref& e, ProcPtr p );
 		void vReinit( const Eref& e, ProcPtr p );
 		void vReac( double A, double B );
-		/*
-		void vRemesh( const Eref& e, 
-			double oldvol,
-			unsigned int numTotalEntries, unsigned int startEntry, 
-			const vector< unsigned int >& localIndices, 
-			const vector< double >& vols );
-			*/
 
 		//////////////////////////////////////////////////////////////////
 		// Novel Dest funcs not present in Pool base class.

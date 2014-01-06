@@ -124,10 +124,6 @@ class PoolBase
 		void reac( double A, double B );
 		void handleMolWt( const Eref& e, double v );
 
-		void remesh( const Eref& e, 
-			double oldVol,
-			unsigned int numTotalEntries, unsigned int startEntry, 
-			vector< unsigned int > localIndices, vector< double > vols );
 		//////////////////////////////////////////////////////////////////
 		// Virtual Dest funcs. Most of these have a generic do-nothing
 		// function here, as most of the derived classes don't need to
@@ -137,12 +133,6 @@ class PoolBase
 		virtual void vReinit( const Eref& e, ProcPtr p );
 		virtual void vReac( double A, double B );
 		virtual void vHandleMolWt( const Eref& e, double v);
-
-		virtual void vRemesh( const Eref& e, 
-			double oldVol,
-			unsigned int numTotalEntries, unsigned int startEntry, 
-			const vector< unsigned int >& localIndices, 
-			const vector< double >& vols );
 
 		//////////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();

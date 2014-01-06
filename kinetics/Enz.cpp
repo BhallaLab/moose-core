@@ -40,21 +40,21 @@ const Cinfo* Enz::initCinfo()
 //////////////////////////////////////////////////////////////
 
 static const Cinfo* enzCinfo = Enz::initCinfo();
-static const SrcFinfo2< double, double >* toSub =
+static const SrcFinfo2< double, double >* subOut =
 	dynamic_cast< const SrcFinfo2< double, double >* >(
-	enzCinfo->findFinfo( "toSub" ) );
+	enzCinfo->findFinfo( "subOut" ) );
 
-static const SrcFinfo2< double, double >* toPrd =
+static const SrcFinfo2< double, double >* prdOut =
 	dynamic_cast< const SrcFinfo2< double, double >* >(
-	enzCinfo->findFinfo( "toPrd" ) );
+	enzCinfo->findFinfo( "prdOut" ) );
 
-static const SrcFinfo2< double, double >* toEnz =
+static const SrcFinfo2< double, double >* enzOut =
 	dynamic_cast< const SrcFinfo2< double, double >* >(
-	enzCinfo->findFinfo( "toEnz" ) );
+	enzCinfo->findFinfo( "enzOut" ) );
 
-static const SrcFinfo2< double, double >* toCplx =
+static const SrcFinfo2< double, double >* cplxOut =
 	dynamic_cast< const SrcFinfo2< double, double >* >(
-	enzCinfo->findFinfo( "toCplx" ) );
+	enzCinfo->findFinfo( "cplxOut" ) );
 
 
 //////////////////////////////////////////////////////////////
@@ -91,10 +91,10 @@ void Enz::vCplx( double n )
 
 void Enz::vProcess( const Eref& e, ProcPtr p )
 {
-	toSub->send( e, r2_, r1_ );
-	toPrd->send( e, r3_, 0 );
-	toEnz->send( e, r3_ + r2_, r1_ );
-	toCplx->send( e, r1_, r3_ + r2_ );
+	subOut->send( e, r2_, r1_ );
+	prdOut->send( e, r3_, 0 );
+	enzOut->send( e, r3_ + r2_, r1_ );
+	cplxOut->send( e, r1_, r3_ + r2_ );
 
 	// cout << "	proc: " << r1_ << ", " << r2_ << ", " << r3_ << endl;
 	
@@ -119,7 +119,7 @@ void Enz::vSetK1( const Eref& e, double v )
 {
 	r1_ = k1_ = v;
 	double volScale = 
-		convertConcToNumRateUsingMesh( e, toSub, 1 );
+		convertConcToNumRateUsingMesh( e, subOut, 1 );
 	Km_ = ( k2_ + k3_ ) / ( k1_ * volScale );
 }
 
@@ -163,7 +163,7 @@ void Enz::vSetKm( const Eref& e, double v )
 {
 	Km_ = v;
 	double volScale = 
-		convertConcToNumRateUsingMesh( e, toSub, 1 );
+		convertConcToNumRateUsingMesh( e, subOut, 1 );
 	k1_ = ( k2_ + k3_ ) / ( v * volScale );
 }
 
@@ -174,14 +174,14 @@ double Enz::vGetKm( const Eref& e ) const
 
 void Enz::vSetNumKm( const Eref& e, double v )
 {
-	double volScale = convertConcToNumRateUsingMesh( e, toSub, 1 );
+	double volScale = convertConcToNumRateUsingMesh( e, subOut, 1 );
 	k1_ = ( k2_ + k3_ ) / v;
 	Km_ = v / volScale;
 }
 
 double Enz::vGetNumKm( const Eref& e ) const
 {
-	double volScale = convertConcToNumRateUsingMesh( e, toSub, 1 );
+	double volScale = convertConcToNumRateUsingMesh( e, subOut, 1 );
 	return Km_ * volScale;
 }
 
@@ -189,7 +189,7 @@ void Enz::vSetRatio( const Eref& e, double v )
 {
 	k2_ = v * k3_;
 	double volScale = 
-		convertConcToNumRateUsingMesh( e, toSub, 1 );
+		convertConcToNumRateUsingMesh( e, subOut, 1 );
 
 	k1_ = ( k2_ + k3_ ) / ( Km_ * volScale );
 }
@@ -201,14 +201,14 @@ double Enz::vGetRatio( const Eref& e ) const
 
 void Enz::vSetConcK1( const Eref& e, double v )
 {
-	double volScale = convertConcToNumRateUsingMesh( e, toSub, 1 );
+	double volScale = convertConcToNumRateUsingMesh( e, subOut, 1 );
 	r1_ = k1_ = v * volScale;
 	Km_ = ( k2_ + k3_ ) / ( k1_ * volScale );
 }
 
 double Enz::vGetConcK1( const Eref& e ) const
 {
-	double volScale = convertConcToNumRateUsingMesh( e, toSub, 1 );
+	double volScale = convertConcToNumRateUsingMesh( e, subOut, 1 );
 	return k1_ * volScale;
 }
 
