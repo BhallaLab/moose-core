@@ -298,29 +298,32 @@ unsigned int PoolBase::getSpecies( const Eref& e ) const
 // static func
 void PoolBase::zombify( Element* orig, const Cinfo* zClass, Id solver )
 {
-		/*
 	if ( orig->cinfo() == zClass )
 		return;
-	DataHandler* origHandler = orig->dataHandler();
-	DataHandler* dh = origHandler->copyUsingNewDinfo( zClass->dinfo() );
-	Element temp( orig->id(), zClass, dh );
-	Eref zombier( &temp, 0 );
-
-	PoolBase* z = reinterpret_cast< PoolBase* >( zombier.data() );
-	Eref oer( orig, 0 );
-
-	z->setSolver( solver ); // call virtual func to assign solver info.
-
-	PoolBase* m = reinterpret_cast< PoolBase* >( oer.data() );
-	// May need to extend to entire array.
-	z->vSetSpecies( zombier, 0, m->vGetSpecies( oer, 0 ) );
-//	z->vSetConcInit( zombier, 0, m->vGetConcInit( oer, 0 ) );
-	z->vSetN( zombier, 0, m->vGetN( oer, 0 ) );
-	z->vSetNinit( zombier, 0, m->vGetNinit( oer, 0 ) );
-	z->vSetDiffConst( zombier, 0, m->vGetDiffConst( oer, 0 ) );
-	orig->zombieSwap( zClass, dh );
-	delete origHandler;
-	*/
+	unsigned int start = orig->localDataStart();
+	unsigned int num = orig->numLocalData();
+	if ( num == 0 )
+		return;
+	vector< unsigned int > species( num, 0 );
+	vector< double > concInit( num, 0.0 );
+	vector< double > diffConst( num, 0.0 );
+	for ( unsigned int i = 0; i < num; ++i ) {
+		Eref er( orig, i + start );
+		const PoolBase* pb = 
+			reinterpret_cast< const PoolBase* >( er.data() );
+		species[ i ] = pb->getSpecies( er );
+		concInit[ i ] = pb->getConcInit( er );
+		diffConst[ i ] = pb->getDiffConst( er );
+	}
+	orig->zombieSwap( zClass );
+	for ( unsigned int i = 0; i < num; ++i ) {
+		Eref er( orig, i + start );
+		PoolBase* pb = reinterpret_cast< PoolBase* >( er.data() );
+		pb->setSolver( solver );
+		pb->setSpecies( er, species[i] );
+		pb->setConcInit( er, concInit[i] );
+		pb->setDiffConst( er, diffConst[i] );
+	}
 }
 
 // Virtual func: default does nothing.
