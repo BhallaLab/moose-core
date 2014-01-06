@@ -293,16 +293,23 @@ class Element
 		unsigned int getFieldsOfOutgoingMsg( 
 			ObjId mid, vector< pair< BindIndex, FuncId > >& ret ) const;
 
-		/**
-		 * zombieSwap: replaces the Cinfo of the zombie.
-		 */
-		void zombieSwap( const Cinfo* newCinfo );
 
 		/** Used upon ending of MOOSE session, to rapidly clear out 
 		 * messages, secure in the knowledge that the data structures 
 		 * will be destroyed separately.
 		 */
 		void clearAllMsgs();
+
+		/**
+		 * zombieSwap: replaces the Cinfo and data of the zombie.
+		 * Allocates a new data block using zCinfo,
+		 * that matches the number of entries of the old data block.
+		 * Deletes old data.
+		 */
+		virtual void zombieSwap( const Cinfo* zCinfo ) = 0;
+	protected:
+		/// Support function for zombieSwap, replaces Cinfo.
+		void replaceCinfo( const Cinfo* newCinfo );
 
 	private:
 		/**
