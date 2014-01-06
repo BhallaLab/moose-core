@@ -14,20 +14,20 @@
 
 #define EPSILON 1e-15
 
-static SrcFinfo2< double, double > *toSub() {
-	static SrcFinfo2< double, double > toSub( 
-			"toSub", 
+static SrcFinfo2< double, double > *subOut() {
+	static SrcFinfo2< double, double > subOut( 
+			"subOut", 
 			"Sends out increment of molecules on product each timestep"
 			);
-	return &toSub;
+	return &subOut;
 }
 
-static SrcFinfo2< double, double > *toPrd() {
-	static SrcFinfo2< double, double > toPrd( 
-			"toPrd", 
+static SrcFinfo2< double, double > *prdOut() {
+	static SrcFinfo2< double, double > prdOut( 
+			"prdOut", 
 			"Sends out increment of molecules on product each timestep"
 			);
-	return &toPrd;
+	return &prdOut;
 }
 
 const Cinfo* EnzBase::initCinfo()
@@ -98,11 +98,11 @@ const Cinfo* EnzBase::initCinfo()
 				"Handles # of molecules of product. Dummy.",
 				new OpFunc1< EnzBase, double >( &EnzBase::prd ) );
 		static Finfo* subShared[] = {
-			toSub(), &subDest
+			subOut(), &subDest
 		};
 
 		static Finfo* prdShared[] = {
-			toPrd(), &prdDest
+			prdOut(), &prdDest
 		};
 		static SharedFinfo sub( "sub",
 			"Connects to substrate molecule",
@@ -245,7 +245,7 @@ double EnzBase::getKcat( const Eref& e ) const
 unsigned int EnzBase::getNumSub( const Eref& e ) const
 {
 	const vector< MsgFuncBinding >* mfb = 
-		e.element()->getMsgAndFunc( toSub()->getBindIndex() );
+		e.element()->getMsgAndFunc( subOut()->getBindIndex() );
 	assert( mfb );
 	return ( mfb->size() );
 }

@@ -14,7 +14,6 @@
 #define DO_CSPACE_DEBUG 0
 
 #include "ReadCspace.h"
-#include "../manager/SimManager.h"
 
 const double ReadCspace::SCALE = 1.0;
 const double ReadCspace::DEFAULT_CONC = 1.0;

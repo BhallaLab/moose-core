@@ -15,14 +15,6 @@
 
 const SpeciesId DefaultSpeciesId = 0;
 
-static SrcFinfo1< double >* requestVolume() {
-	static SrcFinfo1< double > requestVolume( 
-		"requestVolume", 
-		"Requests Volume of pool from matching mesh entry"
-	);
-	return &requestVolume;
-}
-
 const Cinfo* PoolBase::initCinfo()
 {
 		//////////////////////////////////////////////////////////////
@@ -68,8 +60,10 @@ const Cinfo* PoolBase::initCinfo()
 			"Volume of compartment. Units are SI. "
 			"Utility field, the actual volume info is "
 			"stored on a volume mesh entry in the parent compartment."
-			"This is hooked up by a message. If the message isn't"
-			"available volume is just taken as 1",
+			"This mapping is implicit: the parent compartment must be "
+			"somewhere up the element tree, and must have matching mesh "
+			"entries. If the compartment isn't"
+			"available the volume is just taken as 1",
 			&PoolBase::setVolume,
 			&PoolBase::getVolume
 		);
@@ -100,12 +94,6 @@ const Cinfo* PoolBase::initCinfo()
 			"Separate finfo to assign molWt, and consequently diffusion const."
 			"Should only be used in SharedMsg with species.",
 			new EpFunc1< PoolBase, double >( &PoolBase::handleMolWt )
-		);
-
-		static DestFinfo remesh( "remesh",
-			"Handle commands to remesh the pool. This may involve changing "
-			"the number of pool entries, as well as changing their volumes",
-			new EpFunc5< PoolBase, double, unsigned int, unsigned int, vector< unsigned int >, vector< double > >( &PoolBase::remesh )
 		);
 
 		//////////////////////////////////////////////////////////////
@@ -149,15 +137,6 @@ const Cinfo* PoolBase::initCinfo()
 			speciesShared, sizeof( speciesShared ) / sizeof ( const Finfo* )
 		);
 
-		static Finfo* meshShared[] = {
-			&remesh, requestVolume()
-		};
-
-		static SharedFinfo mesh( "mesh",
-			"Shared message for dealing with mesh operations",
-			meshShared, sizeof( meshShared ) / sizeof ( const Finfo* )
-		);
-
 	static Finfo* poolFinfos[] = {
 		&n,			// Value
 		&nInit,		// Value
@@ -169,7 +148,6 @@ const Cinfo* PoolBase::initCinfo()
 		&reac,				// SharedFinfo
 		&proc,				// SharedFinfo
 		&species,			// SharedFinfo
-		&mesh,				// SharedFinfo
 	};
 
 	static ZeroSizeDinfo< int > dinfo;
@@ -219,23 +197,6 @@ void PoolBase::handleMolWt( const Eref& e, double v )
 	vHandleMolWt( e, v );
 }
 
-void PoolBase::remesh( const Eref& e, 
-	double oldvol,
-	unsigned int numTotalEntries, unsigned int startEntry, 
-	vector< unsigned int > localIndices, vector< double > vols )
-{
-	// cout << "PoolBase::remesh for " << e.element()->getName() << endl;
-	vRemesh( e, oldvol, numTotalEntries, startEntry, localIndices, vols);
-}
-
-// Dummy function, not sure if needed any more.
-void PoolBase::vRemesh( const Eref& e, 
-			double oldVol,
-			unsigned int numTotalEntries, unsigned int startEntry, 
-			const vector< unsigned int >& localIndices, 
-			const vector< double >& vols )
-{;}
-
 //////////////////////////////////////////////////////////////
 // virtual MsgDest Definitions
 //////////////////////////////////////////////////////////////
@@ -251,8 +212,6 @@ void PoolBase::vReac( double A, double B )
 
 void PoolBase::vHandleMolWt( const Eref& e, double v )
 {;}
-
-// void PoolBase::vRemesh(...) is a pure virtual
 
 //////////////////////////////////////////////////////////////
 // Field Definitions
