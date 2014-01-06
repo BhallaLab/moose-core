@@ -1942,6 +1942,50 @@ Implemented change in name for src fields. I'm leaving 'output' as is though.
 Went through cleaning out legacy naming and patching up the unit tests to
 match. Now clears unit tests on 1-5 nodes.
 Two other legacy SrcFinfo names are retained: 'process' and 'reinit'.
+Checkin 4960.
 
+Now porting over the ghastly kinetics directory. In the process redid the
+Zombie function, this will need significant fix-ups in the code.
+
+On the semantics of the mesh handling: 
+- I want to be able to access volume reasonably fast, but not necessarily at
+	 msg rates.
+- I may need to have the mesh update all contained pools and reactions,
+	including changing parameters and telling them to expand their arrays.
+
+Msg-based handling:
+	explicit
+	immediate completion of operations as soon as mesh changed
+	need to always set up messages when pools created, won't work without.
+	Could end up with odd tree arrangement
+	Coding needed now.
+
+tree-based handling
+	Implicit
+	Would need to implement an internal traversal if mesh changes.
+	A bit slower to get vols from pool.
+	Dont' need the pool messages, could handle without.
+	Could get funny scaling if pool moved to another compartment
+	Coding deferred somewhat.
+	Will need some nasty node-specific ops, perhaps new implementation?
+
+I should really avoid having two ways to do things. If we wish to have a
+	guarantee that all pools are within their parent compartment then
+	the tree handling should apply.
 
 ============================================================================
+6 Jan 2014
+Discussed preferences on compartment policy with Harsha. She prefers the
+tree handling. So let's go with that. It will break a lot of scripts.
+
+Implemented this, relatively easy since all volume and compartment queries
+were going through the lookupVolumeFromMesh set of commands.
+
+Managed to compile all of the kinetics directory. Unfortunately there are 
+rather a lot of dependencies on things like mesh and SimManager. Would
+prefer to avoid. In doing so I fixed up the zombie handling code. The
+policy is very simple now: the zombieSwap function allocates the data for
+the new class, destroys the old data, and replaces the Cinfo on the Element,
+all without touching any of the messaging. Perhaps should put in a test to
+make sure that the swapped classes are message-compatible.
+

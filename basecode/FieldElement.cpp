@@ -119,3 +119,17 @@ void FieldElement::resizeField(
 	char* data = parent_.element()->data( rawIndex );
 	fef_->setNumField( data, newNumField );
 }
+
+/////////////////////////////////////////////////////////////////////////
+
+void FieldElement::zombieSwap( const Cinfo* zCinfo )
+{
+	const Finfo* f = zCinfo->findFinfo( getName() );
+	assert( f );
+
+	const FieldElementFinfoBase* zfef = dynamic_cast< 
+			const FieldElementFinfoBase* >( f );
+	assert( zfef );
+	fef_ = zfef;
+	replaceCinfo( zCinfo );
+}

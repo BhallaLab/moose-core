@@ -547,10 +547,10 @@ void Element::printMsgDigest( unsigned int srcIndex, unsigned int dataId ) const
 	}
 }
 
-void Element::zombieSwap( const Cinfo* newCinfo )
+void Element::replaceCinfo( const Cinfo* newCinfo )
 {
 	cinfo_ = newCinfo;
-	// Stuff to be done here for data.
+	// Stuff to be done for data is handled by derived classes in ZombeSwap.
 }
 
 //////////////////////////////////////////////////////////////////////////

@@ -208,41 +208,6 @@ template< class A > class SetGet1: public SetGet
 		}
 
 		/**
-		 * This variant assigns fields on a specific data entry within 
-		 * the dest. It is distinguished by an ObjId first argument.
-		static bool setVec( ObjId oi, const string& field, 
-			const vector< A >& arg )
-		{
-			if ( arg.size() == 0 ) return 0;
-
-			ObjId tgt( oi );
-			FuncId fid;
-
-			const OpFunc* func = checkSet( field, tgt, fid );
-			const OpFunc1Base< A >* op = dynamic_cast< const OpFunc1Base< A >* >( func );
-			if ( op ) {
-			// total # of entries on element and maybe to include fields.
-			// This gets messy as we'll need to filter the data through
-			// the node decomposition
-				Element* e = tgt.element();
-				unsigned int size = e->numData(); 
-				unsigned int i = oi.dataId;
-				if ( tgt.element()->hasFields() ) {
-					unsigned int numField = e->numField( i );
-					for ( unsigned int j = 0; j < numField; ++j ) {
-						Eref er( tgt.element(), i, j );
-						op->op( er, arg[ j % arg.size() ] );
-					}
-				} else {
-					op->op( tgt.eref(), arg[0] );
-				}
-				return true;
-			}
-			return false;
-		}
-		 */
-
-		/**
 		 * Sets all target array values to the single value
 		 */
 		static bool setRepeat( ObjId destId, const string& field, 
@@ -268,12 +233,6 @@ template< class A > class SetGet1: public SetGet
 		}
 };
 
-/*
-// forward declaration for the GetHopFunc
-template< class A > class GetHopFunc;
-template< class A > void  GetHopFunc< A >::opGetVec( const Eref& e, 
-				const vector< A >& arg, const OpFunc1Base< A >* op ) const;
-				*/
 template< class A > class Field: public SetGet1< A >
 {
 	public:
