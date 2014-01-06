@@ -1991,4 +1991,5 @@ make sure that the swapped classes are message-compatible.
 
 Checkin 4961.
 
-Went through and cleaned up SrcFinfo names.
+Went through and cleaned up SrcFinfo names. Checkin 4962.
+Went through and implemented the zombify functions.

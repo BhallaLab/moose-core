@@ -253,26 +253,30 @@ double CplxEnzBase::getConcK1( const Eref& e ) const
  */
 void CplxEnzBase::zombify( Element* orig, const Cinfo* zClass, Id solver )
 {
-		/*
 	if ( orig->cinfo() == zClass )
 		return;
-	DataHandler* origHandler = orig->dataHandler();
-	DataHandler* dh = origHandler->copyUsingNewDinfo( zClass->dinfo() );
-	Element temp( orig->id(), zClass, dh );
-	Eref zombier( &temp, 0 );
-
-	CplxEnzBase* z = reinterpret_cast< CplxEnzBase* >( zombier.data() );
-	Eref oer( orig, 0 );
-
-	const CplxEnzBase* m = reinterpret_cast< CplxEnzBase* >( oer.data() );
-	z->setSolver( solver, orig->id() ); // call virtual func to assign solver info.
-	// May need to extend to entire array.
-	z->vSetConcK1( oer, 0, m->vGetConcK1( oer, 0 ) );
-	// z->vSetConcK1( zombier, 0, m->vGetConcK1( oer, 0 ) );
-	z->vSetK2( zombier, 0, m->vGetK2( oer, 0 ) );
-	z->vSetKcat( zombier, 0, m->vGetKcat( oer, 0 ) );
-	orig->zombieSwap( zClass, dh );
-	delete origHandler;
-	*/
+	unsigned int start = orig->localDataStart();
+	unsigned int num = orig->numLocalData();
+	if ( num == 0 )
+			return;
+	vector< double > concK1( num, 0.0 );
+	vector< double > k2( num, 0.0 );
+	vector< double > kcat( num, 0.0 );
+	for ( unsigned int i = 0; i < num; ++i ) {
+		Eref er( orig, i + start );
+		const CplxEnzBase* ceb = 
+			reinterpret_cast< const CplxEnzBase* >( er.data() );
+		concK1[ i ] = ceb->getConcK1( er );
+		k2[ i ] = ceb->getK2( er );
+		kcat[ i ] = ceb->getKcat( er );
+	}
+	orig->zombieSwap( zClass );
+	for ( unsigned int i = 0; i < num; ++i ) {
+		Eref er( orig, i + start );
+		CplxEnzBase* ceb = reinterpret_cast< CplxEnzBase* >( er.data() );
+		ceb->setSolver( solver, orig->id() );
+		ceb->setKcat( er, kcat[i] );
+		ceb->setConcK1( er, concK1[i] );
+		ceb->setK2( er, k2[i] );
+	}
 }
-
