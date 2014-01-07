@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-
+"""This is a tutorial based on an example Upi suggested. The code is
+exported from an ipython notebook and the comments present the
+markdown version of teh tutorial text."""
 
 
 import moose
