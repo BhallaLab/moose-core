@@ -548,22 +548,32 @@ extern "C" {
     {
         if (!Id::isValid(self->id_)){
             RAISE_INVALID_ID(-1, "moose_Id_getLength");
-        }        
-        return (Py_ssize_t)Field <unsigned int >::get(self->id_, "numData");
+        }
+        if (self->id_.element()->hasFields()){
+            return (Py_ssize_t)(Field < unsigned int >::get(self->id_, "numField"));
+        } else {
+            return (Py_ssize_t)(self->id_.element()->numData());
+        }
     }
     
     PyObject * moose_Id_getShape(_Id * self)
     {
         if (!Id::isValid(self->id_)){
             RAISE_INVALID_ID(NULL, "moose_Id_getShape");
+        }       
+        unsigned int numData = 1;
+        if (self->id_.element()->hasFields()){
+            numData = Field < unsigned int >::get(self->id_, "numField");
+        } else {
+            //            numData = Field < unsigned int >::get(self->id_, "numData");
+            numData = self->id_.element()->numData();
         }
-        unsigned int numData = Field < unsigned int >::get(self->id_, "numData");
         PyObject * ret = PyTuple_New((Py_ssize_t)1);        
         if (PyTuple_SetItem(ret, (Py_ssize_t)0, Py_BuildValue("I", numData))){
                 Py_XDECREF(ret);
                 PyErr_SetString(PyExc_RuntimeError, "moose_Id_getShape: could not set tuple entry.");
                 return NULL;
-        }        
+        }
         return ret;
     }
     
@@ -581,7 +591,14 @@ extern "C" {
             return NULL;
         }
         _ObjId * ret = PyObject_New(_ObjId, &ObjIdType);
-        ret->oid_ = ObjId(self->id_, index);
+        ObjId oid(self->id_.path()); // This is just to get the dataId of parent
+        if (self->id_.element()->hasFields()){
+            // How to efficiently get the dataId of parent element
+            // without creating ObjId from path?
+            ret->oid_ = ObjId(self->id_, oid.dataId, index);
+        } else {
+            ret->oid_ = ObjId(self->id_, index, 0);
+        }
         return (PyObject*)ret;
     }
     
@@ -605,16 +622,29 @@ extern "C" {
             return PyTuple_New(0);
         }
         PyObject * ret = PyTuple_New((Py_ssize_t)(end - start));
-        
-        // Py_XINCREF(ret);        
-        for (unsigned int ii = start; ii < end; ++ii){
-            _ObjId * value = PyObject_New(_ObjId, &ObjIdType);
-            value->oid_ = ObjId(self->id_, ii);
-            if (PyTuple_SetItem(ret, (Py_ssize_t)(ii-start), (PyObject*)value)){
-                Py_XDECREF(ret);
-                Py_XDECREF(value);
-                PyErr_SetString(PyExc_RuntimeError, "Could assign tuple entry.");
-                return NULL;
+        ObjId oid(self->id_.path());
+        // Py_XINCREF(ret);
+        if (self->id_.element()->hasFields()){ // FieldElement - fieldIndex changing index
+            for (unsigned int ii = start; ii < end; ++ii){
+                _ObjId * value = PyObject_New(_ObjId, &ObjIdType);
+                value->oid_ = ObjId(self->id_, oid.dataId, ii);
+                if (PyTuple_SetItem(ret, (Py_ssize_t)(ii-start), (PyObject*)value)){
+                    Py_XDECREF(ret);
+                    Py_XDECREF(value);
+                    PyErr_SetString(PyExc_RuntimeError, "Could assign tuple entry.");
+                    return NULL;
+                }
+            }
+        } else { // Ordinary element - dataId changing index
+            for (unsigned int ii = start; ii < end; ++ii){
+                _ObjId * value = PyObject_New(_ObjId, &ObjIdType);
+                value->oid_ = ObjId(self->id_, ii);
+                if (PyTuple_SetItem(ret, (Py_ssize_t)(ii-start), (PyObject*)value)){
+                    Py_XDECREF(ret);
+                    Py_XDECREF(value);
+                    PyErr_SetString(PyExc_RuntimeError, "Could assign tuple entry.");
+                    return NULL;
+                }
             }
         }
         return ret;
