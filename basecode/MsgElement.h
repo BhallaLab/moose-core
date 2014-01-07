@@ -165,6 +165,14 @@ class MsgElement: public Element
 		{;}
 
 		/////////////////////////////////////////////////////////////////
+		/**
+		 * Virtual func. The parent does the data swap part, so here it is 
+		 * just the Cinfo we replace.
+		 */
+		void zombieSwap( const Cinfo* newCinfo ) {
+			replaceCinfo( newCinfo );
+		}
+
 
 	private:
 		/**
