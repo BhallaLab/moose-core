@@ -1992,4 +1992,10 @@ make sure that the swapped classes are message-compatible.
 Checkin 4961.
 
 Went through and cleaned up SrcFinfo names. Checkin 4962.
-Went through and implemented the zombify functions.
+Went through and implemented the zombify functions. Checkin 4963.
+
+Ported back the Mesh classes. Trying to compile.
+
+============================================================================
+6 Jan 2014
+Fixed but in MsgElement.h: had not implemented zombieSwap.
