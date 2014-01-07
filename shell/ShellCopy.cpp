@@ -68,7 +68,7 @@ Element* innerCopyElements( Id orig, ObjId newParent, Id newId,
 	for ( vector< Id >::iterator i = kids.begin(); i != kids.end(); ++i ) {
 		// Needed in case parent is not on zero dataIndex.
 		ObjId pa = Neutral::parent( *i );
-		ObjId newParent( e->id(), pa.dataId );
+		ObjId newParent( e->id(), pa.dataIndex );
 		innerCopyElements( *i, newParent, Id::nextId(), n, toGlobal, tree );
 	}
 	return e;

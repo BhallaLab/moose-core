@@ -29,8 +29,8 @@ OneToOneMsg::OneToOneMsg( Element* e1, Element* e2, unsigned int msgIndex )
 
 OneToOneMsg::~OneToOneMsg()
 {
-	assert( mid_.dataId < msg_.size() );
-	msg_[ mid_.dataId ] = 0; // ensure deleted ptr isn't reused.
+	assert( mid_.dataIndex < msg_.size() );
+	msg_[ mid_.dataIndex ] = 0; // ensure deleted ptr isn't reused.
 }
 
 /**
@@ -81,11 +81,11 @@ Id OneToOneMsg::managerId() const
 ObjId OneToOneMsg::findOtherEnd( ObjId f ) const
 {
 	if ( f.element() == e1() )
-		return ObjId( e2()->id(), f.dataId );
+		return ObjId( e2()->id(), f.dataIndex );
 	else if ( f.element() == e2() )
-		return ObjId( e1()->id(), f.dataId );
+		return ObjId( e1()->id(), f.dataIndex );
 	
-	return ObjId::bad();
+	return ObjId( 0, BADINDEX );
 }
 
 Msg* OneToOneMsg::copy( Id origSrc, Id newSrc, Id newTgt,

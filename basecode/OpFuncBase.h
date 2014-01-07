@@ -107,7 +107,7 @@ template< class A > class OpFunc1Base: public OpFunc
 			vector< A > temp = Conv< vector< A > >::buf2val( &buf );
 			Element* elm = e.element();
 			if ( elm->hasFields() ) { // Assignment is to field array.
-				DataId di = e.dataIndex();
+				unsigned int di = e.dataIndex();
 				unsigned int nf = elm->numField( di - 
 								elm->localDataStart() );
 				for ( unsigned int i = 0; i < nf; ++i) {
@@ -379,40 +379,5 @@ template< class L, class A > class LookupGetOpFuncBase: public OpFunc
 			return Conv< A >::rttiType();
 		}
 };
-
-#if 0
-// Should I template these off an integer for generating a family?
-class OpFuncDummy: public OpFunc
-{
-	public:
-		OpFuncDummy();
-		bool checkFinfo( const Finfo* s) const;
-		bool checkSet( const SetGet* s) const;
-
-		bool strSet( const Eref& tgt, 
-			const string& field, const string& arg ) const;
-
-		void op( const Eref& e, const Qinfo* q, const double* buf ) const;
-		string rttiType() const;
-};
-
-/**
- * This class is used in the forall call to extract a list of all DataIds
- * on the DataHandler.
- */
-class DataIdExtractor: public OpFuncDummy
-{
-	public:
-		DataIdExtractor( vector< DataId >* vec )
-			: vec_( vec )
-		{;}
-		void op( const Eref& e, const Qinfo* q, const double* buf) const
-		{
-			vec_->push_back( e.index() );
-		}
-	private:
-		vector< DataId >* vec_;
-};
-#endif
 
 #endif // _OPFUNCBASE_H

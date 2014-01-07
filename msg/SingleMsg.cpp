@@ -35,8 +35,8 @@ SingleMsg::SingleMsg( Eref e1, Eref e2, unsigned int msgIndex )
 
 SingleMsg::~SingleMsg()
 {
-	assert( mid_.dataId < msg_.size() );
-	msg_[ mid_.dataId ] = 0; // ensure deleted ptr isn't reused.
+	assert( mid_.dataIndex < msg_.size() );
+	msg_[ mid_.dataIndex ] = 0; // ensure deleted ptr isn't reused.
 }
 
 Eref SingleMsg::firstTgt( const Eref& src ) const 
@@ -92,13 +92,13 @@ Id SingleMsg::managerId() const
 ObjId SingleMsg::findOtherEnd( ObjId f ) const
 {
 	if ( f.element() == e1() ) {
-		if ( f.dataId == i1_ )
+		if ( f.dataIndex == i1_ )
 			return ObjId( e2()->id(), i2_ );
 	} else if ( f.element() == e2() ) {
-		if ( f.dataId == i2_ )
+		if ( f.dataIndex == i2_ )
 			return ObjId( e1()->id(), i1_ );
 	}
-	return ObjId();
+	return ObjId( 0, BADINDEX );
 }
 
 Msg* SingleMsg::copy( Id origSrc, Id newSrc, Id newTgt,

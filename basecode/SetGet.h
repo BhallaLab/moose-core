@@ -179,7 +179,7 @@ template< class A > class SetGet1: public SetGet
 		/**
 		 * setVec assigns all the entries in the target Id to the
 		 * specified vector of values. If the target is a FieldElement
-		 * it assigns the entries on the specific DataId provided in the
+		 * it assigns the entries on the specific DataIndex provided in the
 		 * ObjId argument.
 		 * The vector is used as a circular
 		 * buffer: if the number of targets exceeds the vector size, it

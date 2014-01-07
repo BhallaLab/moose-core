@@ -74,9 +74,9 @@ unsigned int FieldElement::getNode( unsigned int dataId ) const
 	return parent_.element()->getNode( dataId );
 }
 
-DataId FieldElement::startDataId( unsigned int node ) const
+unsigned int FieldElement::startDataIndex( unsigned int node ) const
 {
-	return parent_.element()->startDataId( node );
+	return parent_.element()->startDataIndex( node );
 }
 
 unsigned int FieldElement::rawIndex( unsigned int dataId ) const

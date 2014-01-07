@@ -497,12 +497,12 @@ string Neutral::path( const Eref& e )
 		ObjId& oid = pathVec[ pathVec.size() - i - 1 ];
 		ss << oid.element()->getName();
 		if ( !oid.element()->hasFields() )
-			ss << "[" << oid.dataId << "]";
+			ss << "[" << oid.dataIndex << "]";
 		/*
 		if ( !oid.element()->hasFields() )
-			ss << "[" << oid.dataId << "]";
+			ss << "[" << oid.dataIndex << "]";
 		if ( oid.element()->numData() > 1 )
-			ss << "[" << oid.dataId << "]";
+			ss << "[" << oid.dataIndex << "]";
 			*/
 	}
 	// Append braces if Eref was for a fieldElement. This should

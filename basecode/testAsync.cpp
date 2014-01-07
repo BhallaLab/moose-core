@@ -1233,8 +1233,8 @@ void testMsgField()
 	SingleMsg* sm = reinterpret_cast< SingleMsg* >( m->mid().data() );
 	assert( sm );
 	assert ( sm == m );
-	assert( sm->getI1() == DataId( 5 ) );
-	assert( sm->getI2() == DataId( 3 ) );
+	assert( sm->getI1() == 5 );
+	assert( sm->getI2() == 3 );
 	
 	SrcFinfo1<double> s( "test", "" );
 	s.setBindIndex( 0 );
@@ -1582,7 +1582,7 @@ void testCinfoElements()
 	n = Field< unsigned int >::get( intFireDestFinfoId, "numData" );
 	assert( n == 12 );
 	
-	ObjId temp( intFireSrcFinfoId, DataId( 0 ) );
+	ObjId temp( intFireSrcFinfoId, 0 );
 	string foo = Field< string >::get( temp, "name" );
 	assert( foo == "spikeOut" );
 
@@ -1592,10 +1592,10 @@ void testCinfoElements()
 	n = Field< unsigned int >::get( intFireDestFinfoId, "numField" );
 	assert( n == 1 );
 
-	temp = ObjId( intFireDestFinfoId, DataId( 7 ) );
+	temp = ObjId( intFireDestFinfoId, 7 );
 	string str = Field< string >::get( temp, "name" );
 	assert( str == "getRefractoryPeriod");
-	temp = ObjId( intFireDestFinfoId, DataId( 11 ) );
+	temp = ObjId( intFireDestFinfoId, 11 );
 	str = Field< string >::get( temp, "name" );
 	assert( str == "reinit" );
 	cout << "." << flush;

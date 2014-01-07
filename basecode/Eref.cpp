@@ -16,7 +16,7 @@ Eref::Eref()
 	;
 }
 
-Eref::Eref( Element* e, DataId index, unsigned int field )
+Eref::Eref( Element* e, unsigned int index, unsigned int field )
 			: e_( e ), i_( index ), f_( field )
 {
 	;

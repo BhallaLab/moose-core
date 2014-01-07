@@ -94,7 +94,7 @@ class MsgElement: public Element
 		}
 
 		/// Inherited virtual. As this is a global we always return zero.
-		DataId startDataId( unsigned int node ) const
+		unsigned int startDataIndex( unsigned int node ) const
 		{
 				return 0;
 		}
@@ -133,11 +133,11 @@ class MsgElement: public Element
 		 * On FieldElements like synapses, does a second lookup on the
 		 * field index.
 		 * Note that the index is NOT a
-		 * DataId: it is instead the raw index of the data on the current
+		 * DataIndex: it is instead the raw index of the data on the current
 		 * node. Index is also NOT the character offset, but the index
 		 * to the data array in whatever type the data may be.
 		 *
-		 * The DataId has to be filtered through the nodeMap to
+		 * The DataIndex has to be filtered through the nodeMap to
 		 * find a) if the entry is here, and b) what its raw index is.
 		 *
 		 * Returns 0 if either index is out of range.

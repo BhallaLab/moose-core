@@ -23,7 +23,6 @@
 extern const unsigned int SM_MAX_ROWS;
 extern const unsigned int SM_MAX_COLUMNS;
 extern const unsigned int SM_RESERVE;
-// extern unsigned int rowIndex( const Element* e, const DataId& d );
 
 template< class T > class Triplet {
 	public:

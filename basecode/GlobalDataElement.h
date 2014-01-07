@@ -65,10 +65,10 @@ class GlobalDataElement: public DataElement
 		}
 
 		/// Inherited virtual. Returns node location of specified object
-		unsigned int getNode( DataId dataId ) const;
+		unsigned int getNode( unsigned int dataIndex ) const;
 
-		/// Inherited virtual. Returns start DataId on specified node 
-		DataId startDataId( unsigned int node ) const
+		/// Inherited virtual. Returns start dataIndex on specified node 
+		unsigned int startDataIndex( unsigned int node ) const
 		{
 			return 0;
 		}

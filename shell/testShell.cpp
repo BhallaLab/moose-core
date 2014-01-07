@@ -169,11 +169,11 @@ void testTreeTraversal()
 	////////////////////////////////////////////////////////////////
 
 	shell->setCwe( Id() );
-	assert( shell->doFind( "/f1/f2a/tralalalala" ) == ObjId() );
-	assert( shell->doFind( "/f1/f2a[723]/f3aa" ) == ObjId() );
-	assert( shell->doFind( "/f1/f2a/f3aa[12]" ) == ObjId() );
+	assert( shell->doFind( "/f1/f2a/tralalalala" ).bad() );
+	assert( shell->doFind( "/f1/f2a[723]/f3aa" ).bad() );
+	assert( shell->doFind( "/f1/f2a/f3aa[12]" ).bad() );
 	cout << "\nTesting warning for bad path indexing: ";
-	assert( shell->doFind( "/f1/f2a/f3aa[-1]" ) == ObjId() );
+	assert( shell->doFind( "/f1/f2a/f3aa[-1]" ).bad() );
 	assert( shell->doFind( "/f1/f2a/f3aa" ) == f3aa );
 	assert( shell->doFind( "/f1/f2a/f3ab" ) == f3ab );
 	assert( shell->doFind( "/f1/f2b/f3ba" ) == f3ba );
@@ -557,7 +557,7 @@ void testObjIdToAndFromPath()
 
 	ObjId readPath( path );
 	assert( readPath.id == level5 );
-	assert( readPath.dataId == index5 );
+	assert( readPath.dataIndex == index5 );
 
 	ObjId f4 = Neutral::parent( oi.eref() );
 	path = f4.path();
@@ -588,12 +588,12 @@ void testObjIdToAndFromPath()
 	shell->doMove( level1, level8 );
 
 	ObjId noi( "/foo/bar/zod/f1[1]/f2[0]/f3[3]/f4[0]/f5[5]" );
-	assert( noi.dataId == index5 );
+	assert( noi.dataIndex == index5 );
 	assert( noi.id == level5 );
 	assert( noi == oi );
 
 	ObjId syn( "/foo/bar/zod/f1[7]/synapse[5]" );
-	assert( syn.dataId == 7 );
+	assert( syn.dataIndex == 7 );
 	assert( syn.fieldIndex == 5 );
 	assert( syn.id == origSynId );
 	// assert( syn.data() == origSynData );
@@ -1690,7 +1690,7 @@ void testFilterOffNodeTargets()
 	unsigned int numData = 6; // Number of entries in msg destination elm.
 
 	vector< vector< Eref > > origErefs( numSrcData );
-	// erefs[ srcDataId ][entries]: targets for each dataId.
+	// erefs[ srcDataId ][entries]: targets for each dataIndex.
 	vector< vector< bool > > origTargetNodes( numSrcData );
 	// targetNodes[srcDataId][node]
 

@@ -81,7 +81,7 @@ unsigned int LocalDataElement::getNode( unsigned int dataId ) const {
 }
 
 /// Inherited virtual. Returns start DataId on specified node 
-DataId LocalDataElement::startDataId( unsigned int node ) const
+unsigned int LocalDataElement::startDataIndex( unsigned int node ) const
 {
 	if ( numPerNode_ * node < numData_ )
 		return numPerNode_ * node;
@@ -125,14 +125,3 @@ unsigned int LocalDataElement::getNumOnNode( unsigned int node ) const
 		return numData() - node * numPerNode_;
 	return 0;
 }
-
-/*
-// virtual func, overridden.
-char* LocalDataElement::dataFromDataId( unsigned int dataId, unsigned int fieldIndex ) const
-{
-	assert( dataId >= localDataStart() );
-	dataId -= localDataStart();
-	assert( dataId < numLocalData_ );
-	return data_ + ( dataId * cinfo()->dinfo()->size() );
-}
-*/

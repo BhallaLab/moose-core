@@ -16,4 +16,8 @@ const double NA = 6.0221415e23;
 
 const double FaradayConst =  96485.3415; // s A / mol
 
-const DataId ALLDATA = ~0U;
+/// Used by ObjId and Eref
+const unsigned int ALLDATA = ~0U;
+
+/// Used by ObjId and Eref
+const unsigned int BADINDEX = ~1U;

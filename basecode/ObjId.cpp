@@ -14,20 +14,29 @@
 //	ObjId I/O 
 //////////////////////////////////////////////////////////////
 
-const ObjId ObjId::bad()
+// Doesn't know how to deal with off-node bad fields.
+bool ObjId::bad() const
 {
-  static ObjId bad_( Id(), ~0U );
-  return bad_;
+	Element* elm = id.element();
+	return ( elm == 0 || 
+		dataIndex == BADINDEX || 
+		fieldIndex == BADINDEX ||
+		dataIndex >= elm->numData() ||
+		( 
+		 	elm->getNode( dataIndex ) == Shell::myNode() &&
+		 	fieldIndex >= elm->numField( dataIndex - elm->localDataStart() )
+		)
+	);
 }
 
 ostream& operator <<( ostream& s, const ObjId& i )
 {
-	if ( i.dataId == 0 && i.fieldIndex == 0 )
+	if ( i.dataIndex == 0 && i.fieldIndex == 0 )
 		s << i.id;
 	else if ( i.fieldIndex == 0 )
-		s << i.id << "[" << i.dataId << "]";
+		s << i.id << "[" << i.dataIndex << "]";
 	else
-		s << i.id << "[" << i.dataId << "][" << i.fieldIndex << "]";
+		s << i.id << "[" << i.dataIndex << "][" << i.fieldIndex << "]";
 	return s;
 }
 
@@ -50,24 +59,24 @@ ObjId::ObjId( const string& path )
 
 Eref ObjId::eref() const
 {
-	return Eref( id.element(), dataId, fieldIndex );
+	return Eref( id.element(), dataIndex, fieldIndex );
 }
 
 bool ObjId::operator==( const ObjId& other ) const
 {
-	return ( id == other.id && dataId == other.dataId && 
+	return ( id == other.id && dataIndex == other.dataIndex && 
 					fieldIndex == other.fieldIndex );
 }
 
 bool ObjId::operator!=( const ObjId& other ) const
 {
-	return ( id != other.id || dataId != other.dataId || 
+	return ( id != other.id || dataIndex != other.dataIndex || 
 					fieldIndex != other.fieldIndex );
 }
 
 bool ObjId::isDataHere() const
 {
-	return ( id.element()->getNode( dataId ) == Shell::myNode() );
+	return ( id.element()->getNode( dataIndex ) == Shell::myNode() );
 }
 
 bool ObjId::isGlobal() const
@@ -79,13 +88,13 @@ bool ObjId::isOffNode() const
 {
 	return ( Shell::numNodes() > 1 && 
 		( id.element()->isGlobal() || 
-		  id.element()->getNode( dataId ) != Shell::myNode() )
+		  id.element()->getNode( dataIndex ) != Shell::myNode() )
 	);
 }
 
 char* ObjId::data() const
 {
-	return id.element()->data( id.element()->rawIndex( dataId ), 
+	return id.element()->data( id.element()->rawIndex( dataIndex ), 
 					fieldIndex );
 }
 

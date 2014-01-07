@@ -369,14 +369,14 @@ extern "C" {
     PyDoc_STRVAR(moose_ElementField_id_documentation,
                  "Id of the field element.");
     PyDoc_STRVAR(moose_ElementField_dataId_documentation,
-                 "dataId of the field element");
+                 "dataIndex of the field element");
     /* These static defs are required for compiler complaining about string literals. */
     static char name[] = "name";
     static char numfield[] = "num";
     static char path[] = "path";
     static char id[] = "vec";
     static char owner[] = "owner";
-    static char dataId[] = "dataId";
+    static char dataIndex[] = "dataIndex";
     static PyGetSetDef ElementFieldGetSetters[] = {
         {numfield,
          (getter)moose_ElementField_getNum,
@@ -403,7 +403,7 @@ extern "C" {
          NULL,
          "",
          NULL},
-        {dataId,
+        {dataIndex,
          (getter)moose_ElementField_getDataId,
          NULL,
          moose_ElementField_dataId_documentation,
@@ -555,7 +555,7 @@ extern "C" {
         if (!Id::isValid(self->owner.id)){
             RAISE_INVALID_ID(NULL, "moose_ElementField_getItem");
         }
-        return Py_BuildValue("I", self->owner.dataId);
+        return Py_BuildValue("I", self->owner.dataIndex);
     }
 
     PyObject * moose_ElementField_getItem(_Field * self, Py_ssize_t index)
@@ -580,7 +580,7 @@ extern "C" {
         // stringstream path;
         // path << self->owner.path() << "/" << self->name << "[" << index << "]";
         // cout << "moose_ElementField_getItem:: path=" << path.str();
-        oid->oid_ = ObjId(self->myoid.id, self->myoid.dataId, index);
+        oid->oid_ = ObjId(self->myoid.id, self->myoid.dataIndex, index);
         return (PyObject*)oid;
     }
     
@@ -608,7 +608,7 @@ extern "C" {
         // Py_XINCREF(ret);        
         for (unsigned int ii = start; ii < end; ++ii){
             _ObjId * value = PyObject_New(_ObjId, &ObjIdType);
-            value->oid_ = ObjId(self->myoid.id, self->myoid.dataId, ii);
+            value->oid_ = ObjId(self->myoid.id, self->myoid.dataIndex, ii);
             if (PyTuple_SetItem(ret, (Py_ssize_t)(ii-start), (PyObject*)value)){
                 Py_XDECREF(ret);
                 Py_XDECREF(value);
