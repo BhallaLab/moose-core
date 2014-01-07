@@ -60,7 +60,7 @@ class DataElement: public Element
 		/// Inherited virtual. Returns number of data entries on this node
 		unsigned int numLocalData() const;
 
-		/// Define only in derived classes: getNode( DataId dataId ) const;
+		/// Define only in derived classes: getNode( unsigned int dataIndex ) const;
 
 		/// Inherited virtual. Returns number of field entries for specified data
 		unsigned int numField( unsigned int rawIndex ) const;
@@ -93,11 +93,11 @@ class DataElement: public Element
 		 * On FieldElements like synapses, does a second lookup on the
 		 * field index.
 		 * Note that the index is NOT a
-		 * DataId: it is instead the raw index of the data on the current
+		 * DataIndex: it is instead the raw index of the data on the current
 		 * node. Index is also NOT the character offset, but the index
 		 * to the data array in whatever type the data may be.
 		 *
-		 * The DataId has to be filtered through the nodeMap to
+		 * The DataIndex has to be filtered through the nodeMap to
 		 * find a) if the entry is here, and b) what its raw index is.
 		 *
 		 * Returns 0 if either index is out of range.

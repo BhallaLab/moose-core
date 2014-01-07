@@ -49,8 +49,8 @@ class FieldElement: public Element
 		/// Virtual: Returns location of specified dataId
 		unsigned int getNode( unsigned int dataId ) const;
 
-		/// Virtual: Returns start DataId on specified node.
-		DataId startDataId ( unsigned int node ) const;
+		/// Virtual: Returns start DataIndex on specified node.
+		unsigned int startDataIndex ( unsigned int node ) const;
 
 		/// Virtual: Returns converted dataId to index on current node.
 		unsigned int rawIndex( unsigned int dataId ) const;
@@ -81,11 +81,11 @@ class FieldElement: public Element
 		 * Returns the data entry specified by the rawIndex, fieldIndex. 
 		 *
 		 * Note that the index is NOT a
-		 * DataId: it is instead the raw index of the data on the current
+		 * DataIndex: it is instead the raw index of the data on the current
 		 * node. Index is also NOT the character offset, but the index
 		 * to the data array in whatever type the data may be.
 		 *
-		 * The DataId has to be filtered through the nodeMap to
+		 * The DataIndex has to be filtered through the nodeMap to
 		 * find a) if the entry is here, and b) what its raw index is.
 		 *
 		 * Returns 0 if either index is out of range.

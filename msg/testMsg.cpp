@@ -62,27 +62,27 @@ void testAssortedMsg()
 	// Should give 04000
 	ObjId m1 = shell->doAddMsg( "Single", 
 		ObjId( a1, 3 ), "output", ObjId( a2, 1 ), "arg1" );
-	assert( m1 != ObjId() );
+	assert( !m1.bad() );
 
 	// Should give 33333
 	ObjId m2 = shell->doAddMsg( "OneToAll", 
 		ObjId( b1, 2 ), "output", ObjId( b2, 0 ), "arg1" );
-	assert( m2 != ObjId() );
+	assert( !m2.bad() );
 
 	// Should give 12345
 	ObjId m3 = shell->doAddMsg( "OneToOne", 
 		ObjId( c1, 0 ), "output", ObjId( c2, 0 ), "arg1" );
-	assert( m3 != ObjId() );
+	assert( !m3.bad() );
 
 	// Should give 01234
 	ObjId m4 = shell->doAddMsg( "Diagonal", 
 		ObjId( d1, 0 ), "output", ObjId( d2, 0 ), "arg1" );
-	assert( m4 != ObjId() );
+	assert( !m4.bad() );
 
 	// Should give 54321
 	ObjId m5 = shell->doAddMsg( "Sparse", 
 		ObjId( e1, 0 ), "output", ObjId( e2, 0 ), "arg1" );
-	assert( m5 != ObjId() );
+	assert( !m5.bad() );
 
 	ret = SetGet3< unsigned int, unsigned int, unsigned int >::set(
 		m5, "setEntry", 0, 4, 0 );
@@ -113,13 +113,13 @@ void testAssortedMsg()
 	assert( f == ObjId( a1, 3 ) );
 
 	f = Msg::getMsg( m1 )->findOtherEnd( ObjId( a1, 0 ) );
-	assert( f == ObjId() );
+	assert( f.bad() );
 
 	f = Msg::getMsg( m1 )->findOtherEnd( ObjId( a2, 0 ) );
-	assert( f == ObjId() );
+	assert( f.bad() );
 
 	f = Msg::getMsg( m1 )->findOtherEnd( ObjId( b2, 1 ) );
-	assert( f == ObjId() );
+	assert( f.bad() );
 
 	// OneToAll
 	f = Msg::getMsg( m2 )->findOtherEnd( ObjId( b1, 2 ) );
@@ -137,10 +137,10 @@ void testAssortedMsg()
 	assert( f == ObjId( b1, 2 ) );
 
 	f = Msg::getMsg( m2 )->findOtherEnd( ObjId( b1, 0 ) );
-	assert( f == ObjId() );
+	assert( f.bad() );
 
 	f = Msg::getMsg( m2 )->findOtherEnd( ObjId( a2, 1 ) );
-	assert( f == ObjId() );
+	assert( f.bad() );
 
 	// OneToOne
 	for ( unsigned int i = 0; i < 5; ++i ) {
@@ -150,7 +150,7 @@ void testAssortedMsg()
 		assert( f == ObjId( c1, i ) );
 	}
 	f = Msg::getMsg( m3 )->findOtherEnd( ObjId( a2, 1 ) );
-	assert( f == ObjId::bad() );
+	assert( f.bad() );
 
 	// Diagonal
 	for ( unsigned int i = 0; i < 4; ++i ) {
@@ -160,12 +160,12 @@ void testAssortedMsg()
 		assert( f == ObjId( d1, i ) );
 	}
 	f = Msg::getMsg( m4 )->findOtherEnd( ObjId( d1, 4 ) );
-	assert( f == ObjId() );
+	assert( f.bad() );
 	f = Msg::getMsg( m4 )->findOtherEnd( ObjId( d2, 0 ) );
-	assert( f == ObjId() );
+	assert( f.bad() );
 
 	f = Msg::getMsg( m4 )->findOtherEnd( ObjId( a2, 1 ) );
-	assert( f == ObjId() );
+	assert( f.bad() );
 
 	// Sparse
 	for ( unsigned int i = 0; i < 5; ++i ) {
@@ -176,7 +176,7 @@ void testAssortedMsg()
 	}
 
 	f = Msg::getMsg( m5 )->findOtherEnd( ObjId( a2, 1 ) );
-	assert( f == ObjId() );
+	assert( f.bad() );
 
 	cout << "." << flush;
 
@@ -238,19 +238,19 @@ void testMsgElementListing()
 	///////////////////////////////////////////////////////////
 	ObjId m1 = shell->doAddMsg( "Single", 
 		ObjId( a1, 3 ), "output", ObjId( a2, 1 ), "arg1" );
-	assert( m1 != ObjId() );
+	assert( !m1.bad() );
 	ObjId m2 = shell->doAddMsg( "OneToAll", 
 		ObjId( b1, 2 ), "output", ObjId( b2, 0 ), "arg1" );
-	assert( m2 != ObjId() );
+	assert( !m2.bad() );
 	ObjId m3 = shell->doAddMsg( "OneToOne", 
 		ObjId( c1, 0 ), "output", ObjId( c2, 0 ), "arg1" );
-	assert( m3 != ObjId() );
+	assert( !m3.bad() );
 	ObjId m4 = shell->doAddMsg( "Diagonal", 
 		ObjId( d1, 0 ), "output", ObjId( d2, 0 ), "arg1" );
-	assert( m4 != ObjId() );
+	assert( !m4.bad() );
 	ObjId m5 = shell->doAddMsg( "Sparse", 
 		ObjId( e1, 0 ), "output", ObjId( e2, 0 ), "arg1" );
-	assert( m5 != ObjId() );
+	assert( !m5.bad() );
 
 	///////////////////////////////////////////////////////////
 	// List messages
@@ -317,20 +317,20 @@ void benchmarkMsg( unsigned int n, string msgType )
 			for ( unsigned int j = 0; j < n; ++j ) {
 				ObjId m1 = shell->doAddMsg( "Single", 
 					ObjId( a1, i ), "output", ObjId( a1, j ), "arg3" );
-				assert( m1 != ObjId() );
+				assert( !m1.bad() );
 			}
 		}
 	} else if ( msgType == "OneToAll" ) {
 		for ( unsigned int i = 0; i < n; ++i ) {
 			ObjId m1 = shell->doAddMsg( "OneToAll", 
 				ObjId( a1, i ), "output", ObjId( a1, 0 ), "arg3" );
-			assert( m1 != ObjId() );
+			assert( !m1.bad() );
 		}
 	} else if ( msgType == "OneToOne" ) {
 		for ( unsigned int i = 0; i < n; ++i ) { // just repeat it n times
 			ObjId m1 = shell->doAddMsg( "OneToOne", 
 				ObjId( a1, 0 ), "output", ObjId( a1, 0 ), "arg3" );
-			assert( m1 != ObjId() );
+			assert( !m1.bad() );
 		}
 	} else if ( msgType == "Diagonal" ) {
 		for ( unsigned int i = 0; i < 2 * n; ++i ) { // Set up all offsets

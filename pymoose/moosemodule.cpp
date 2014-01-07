@@ -2372,7 +2372,7 @@ extern "C" {
         if (PyArg_ParseTuple(args, "s", &path)){
             oid = ObjId(path);
             //            cout << "Original Path " << path << ", Element Path: " << oid.path() << endl;
-            if (ObjId::bad() == oid){
+            if ( oid.bad() ){
                 PyErr_SetString(PyExc_ValueError, "moose_element: path does not exist");
                 return NULL;
             }
@@ -2406,7 +2406,7 @@ extern "C" {
         } else if (ElementField_SubtypeCheck(obj)){
             oid = ObjId(((_Id*)moose_ElementField_getId((_Field*)obj, NULL))->id_);
         }
-        if (oid == ObjId::bad()){
+        if (oid.bad() ){
             PyErr_SetString(PyExc_TypeError, "moose_element: cannot convert to moose element.");
             return NULL;
         }
