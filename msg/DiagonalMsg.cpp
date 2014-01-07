@@ -30,8 +30,8 @@ DiagonalMsg::DiagonalMsg( Element* e1, Element* e2, unsigned int msgIndex )
 
 DiagonalMsg::~DiagonalMsg()
 {
-	assert( mid_.dataId < msg_.size() );
-	msg_[ mid_.dataId ] = 0; // ensure deleted ptr isn't reused.
+	assert( mid_.dataIndex < msg_.size() );
+	msg_[ mid_.dataIndex ] = 0; // ensure deleted ptr isn't reused.
 }
 
 Eref DiagonalMsg::firstTgt( const Eref& src ) const 
@@ -93,21 +93,21 @@ int DiagonalMsg::getStride() const
 ObjId DiagonalMsg::findOtherEnd( ObjId f ) const
 {
 	if ( f.id.element() == e1() ) {
-		int i2 = f.dataId + stride_;
+		int i2 = f.dataIndex + stride_;
 		if ( i2 >= 0 ) {
 			unsigned int ui2 = i2;
 			if ( ui2 < e2()->numData() )
 				return ObjId( e2()->id(), DataId( ui2 ) );
 		}
 	} else if ( f.id.element() == e2() ) {
-		int i1 = f.dataId - stride_;
+		int i1 = f.dataIndex - stride_;
 		if ( i1 >= 0 ) {
 			unsigned int ui1 = i1;
 			if ( ui1 < e1()->numData() )
 				return ObjId( e1()->id(), DataId( ui1 ));
 		}
 	}
-	return ObjId();
+	return ObjId( 0, BADINDEX );
 }
 
 Msg* DiagonalMsg::copy( Id origSrc, Id newSrc, Id newTgt,

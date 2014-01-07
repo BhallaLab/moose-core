@@ -31,7 +31,7 @@ const OpFunc* SetGet::checkSet(
 				f = child.element()->cinfo()->findFinfo( "getThis" );
 			assert( f ); // should always work as Neutral has the field.
 			if ( child.element()->numData() == tgt.element()->numData() ) {
-				tgt = ObjId( child, tgt.dataId, tgt.fieldIndex );
+				tgt = ObjId( child, tgt.dataIndex, tgt.fieldIndex );
 				if ( !tgt.isDataHere() )
 					return 0;
 			} else if ( child.element()->numData() <= 1 ) {

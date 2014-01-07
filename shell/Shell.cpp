@@ -225,23 +225,23 @@ ObjId Shell::doAddMsg( const string& msgType,
 	}
 	if ( !dest.id.element() ) {
 		cout << myNode_ << ": Error: Shell::doAddMsg: dest not found" << endl;
-		return ObjId();
+		return ObjId(0, BADINDEX );
 	}
 	const Finfo* f1 = src.id.element()->cinfo()->findFinfo( srcField );
 	if ( !f1 ) {
 		cout << myNode_ << ": Shell::doAddMsg: Error: Failed to find field " << srcField << 
 			" on src: " << src.id.element()->getName() << endl;
-		return ObjId();
+		return ObjId(0, BADINDEX );
 	}
 	const Finfo* f2 = dest.id.element()->cinfo()->findFinfo( destField );
 	if ( !f2 ) {
 		cout << myNode_ << ": Shell::doAddMsg: Error: Failed to find field " << destField << 
 			" on dest: " << dest.id.element()->getName() << endl;
-		return ObjId();
+		return ObjId( 0, BADINDEX );
 	}
 	if ( ! f1->checkTarget( f2 ) ) {
 		cout << myNode_ << ": Shell::doAddMsg: Error: Src/Dest Msg type mismatch: " << srcField << "/" << destField << endl;
-		return ObjId();
+		return ObjId( 0, BADINDEX );
 	}
 
 	const Msg* m = innerAddMsg( msgType, src, srcField, dest, destField, 0 );
@@ -254,7 +254,7 @@ ObjId Shell::doAddMsg( const string& msgType,
 		srcField,
 		dest,
 		destField,
-		m->mid().dataId
+		m->mid().dataIndex
 	);
 
 	return m->mid();
@@ -502,7 +502,7 @@ ObjId Shell::doFindWithoutIndexing( const string& path ) const
 /// non-static func. Returns the Id found by traversing the specified path.
 ObjId Shell::doFind( const string& path ) const
 {
-	ObjId curr;
+	ObjId curr( 0, BADINDEX );
 	vector< string > names;
 	vector< unsigned int > indices;
 	bool isAbsolute = chopPath( path, names, indices, cwe_ );
@@ -518,22 +518,24 @@ ObjId Shell::doFind( const string& path ) const
 		} else {
 			ObjId pa = curr;
 			curr = Neutral::child( curr.eref(), names[i] );
+			if ( curr == ObjId() ) // Neutral::child returned Id(), ie, bad.
+				return ObjId( 0, BADINDEX );
 			if ( curr.element()->hasFields() ) {
-				curr.dataId = pa.dataId;
+				curr.dataIndex = pa.dataIndex;
 				curr.fieldIndex = indices[i];
 			} else {
-				curr.dataId = indices[i];
-				if ( curr.element()->numData() <= curr.dataId  )
-					return ObjId();
+				curr.dataIndex = indices[i];
+				if ( curr.element()->numData() <= curr.dataIndex  )
+					return ObjId( 0, BADINDEX );
 			}
 		}
 	}
 	
 	assert( curr.element() );
-	if ( curr.element()->numData() <= curr.dataId )
-		return ObjId();
+	if ( curr.element()->numData() <= curr.dataIndex )
+		return ObjId( 0, BADINDEX );
 	if ( curr.fieldIndex > 0 && !curr.element()->hasFields() )
-		return ObjId();
+		return ObjId( 0, BADINDEX );
 
 	return curr;
 }

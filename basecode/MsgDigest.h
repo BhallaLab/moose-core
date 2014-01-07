@@ -14,8 +14,8 @@
  * This class manages digested Messages. Each entry is boiled down to the
  * function, and an array of targets. The targets are actually stored
  * on the Msg, but they referenced in the MsgDigest.
- * As a further refinement, if the target DataId is ALLDATA, then it means
- * that all data entries in the target are to be iterated over. Note
+ * As a further refinement, if the target DataIndex is ALLDATA, then it
+ * means that all data entries in the target are to be iterated over. Note
  * that this does not extend to Field targets.
  */
 class MsgDigest

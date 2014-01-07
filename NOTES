@@ -1997,5 +1997,22 @@ Went through and implemented the zombify functions. Checkin 4963.
 Ported back the Mesh classes. Trying to compile.
 
 ============================================================================
-6 Jan 2014
-Fixed but in MsgElement.h: had not implemented zombieSwap.
+7 Jan 2014
+Fixed but in MsgElement.h: had not implemented zombieSwap. Checkin 4965.
+
+Discussion with Subha. Things to fix.
+- Implement bool ObjId::bad() const.
+This handles cases of returning a bad ObjId (rather than root) and also cases
+where a user makes an ObjId using direct indexing, and needs to check if it 
+is valid.
+- Fix up ShowMsg functions in Msg handler classes
+- Clearly specify message semantics, particularly as they relate to 
+	FieldElements. Single and Sparse are OK, but others need work.
+		OneToAll: should traverse both the dataIndex and fieldIndex.
+		OneToOne: Should go to only the last index: data or field as
+			case may be.
+		Diagonal: Also to last index.
+
+OK, implemented bool ObjId::bad. 
+Also replaced ObjId::dataId with ObjId::dataIndex for consistency.
+============================================================================

@@ -162,7 +162,7 @@ extern "C" {
         static char * kwlist [] = {_path, _size, _global, _dtype, NULL};
         static const string default_type = "Neutral";
         _ObjId * instance = (_ObjId*)self;
-        instance->oid_ = ObjId::bad();
+        instance->oid_ = ObjId( 0, BADINDEX );
         PyTypeObject * mytype = Py_TYPE(self);
         string mytypename(mytype->tp_name);
         
@@ -289,7 +289,7 @@ extern "C" {
     /**
        This function combines Id, DataId and fieldIndex to construct
        the hash of this object. Here we assume 16 most significant
-       bits for Id, next 32 bits for dataId and the least significant
+       bits for Id, next 32 bits for dataIndex and the least significant
        16 bits for fieldIndex. If these criteria are not met, the hash
        function will cause collissions. Note that the bitshift
        opeartions are byte order independent - so they should give the
@@ -301,9 +301,9 @@ extern "C" {
             RAISE_INVALID_ID(-1, "moose_ObjId_hash");
         }
         long id = (long)(self->oid_.id.value());
-        long dataId = self->oid_.dataId;
+        long dataIndex = self->oid_.dataIndex;
         long fieldIndex = self->oid_.fieldIndex;
-        return id << 48 | dataId << 16 | fieldIndex;
+        return id << 48 | dataIndex << 16 | fieldIndex;
     }
     
     PyObject * moose_ObjId_repr(_ObjId * self)
@@ -314,7 +314,7 @@ extern "C" {
         ostringstream repr;
         repr << "<moose." << Field<string>::get(self->oid_, "className") << ": "
              << "id=" << self->oid_.id.value() << ", "
-             << "dataId=" << self->oid_.dataId << ", "
+             << "dataIndex=" << self->oid_.dataIndex << ", "
              << "path=" << self->oid_.path() << ">";
         return PyString_FromString(repr.str().c_str());
     } // !  moose_ObjId_repr
@@ -432,7 +432,7 @@ extern "C" {
             return _ret;
         }
 
-	if (self->oid_ == ObjId::bad()){
+	if (self->oid_.bad()){
             PyErr_SetString(PyExc_RuntimeError, "bad ObjId.");
             return NULL;
 	}
@@ -898,7 +898,7 @@ extern "C" {
         // Here I am assuming the user can start with any ObjId and
         // ask for an index - which will be field index.
         // Thus if syn[0...9] correspond to chan[0...9], then syn[0] is still a valid ObjId.
-        // For example, syn has Id X, dataId 0...9, and under dataId=0, we have 5 field elements f[0...5]
+        // For example, syn has Id X, dataIndex 0...9, and under dataIndex=0, we have 5 field elements f[0...5]
         // Then syn = Id(X)
         // syn[0] = ObjId(X, 0, 0) = syn[0][0]
         // assign s0 <- syn[0]
@@ -907,10 +907,10 @@ extern "C" {
         // Now, what is syn[0][1][2] ?
         
         // In PyMOOSE, user is allowed to directly put in the numbers
-        // for Id, dataId and fieldIndex directly and construct an
+        // for Id, dataIndex and fieldIndex directly and construct an
         // ObjId. 
         _ObjId * ret = PyObject_New(_ObjId, &ObjIdType);
-        ret->oid_ = ObjId(self->oid_.id, self->oid_.dataId, index);
+        ret->oid_ = ObjId(self->oid_.id, self->oid_.dataIndex, index);
         return (PyObject*)ret;
     }
 
@@ -933,7 +933,7 @@ extern "C" {
         // Py_XINCREF(ret);        
         for (unsigned int ii = start; ii < end; ++ii){
             _ObjId * value = PyObject_New(_ObjId, &ObjIdType);
-            value->oid_ = ObjId(self->oid_.id, self->oid_.dataId, ii);
+            value->oid_ = ObjId(self->oid_.id, self->oid_.dataIndex, ii);
             if (PyTuple_SetItem(ret, (Py_ssize_t)(ii-start), (PyObject*)value)){
                 Py_XDECREF(ret);
                 Py_XDECREF(value);
@@ -1799,7 +1799,7 @@ PyObject* set_destFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type
         if (!Id::isValid(self->oid_.id)){
             RAISE_INVALID_ID(NULL, "moose_ObjId_getDataIndex");
         }        
-        PyObject * ret = Py_BuildValue("I", self->oid_.dataId);
+        PyObject * ret = Py_BuildValue("I", self->oid_.dataIndex);
         return ret;
     }
 
@@ -1811,7 +1811,7 @@ PyObject* set_destFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type
         if (!Id::isValid(self->oid_.id)){
             RAISE_INVALID_ID(NULL, "moose_ObjId_getFieldIndex");
         }
-        PyObject * ret = Py_BuildValue("I", self->oid_.dataId);
+        PyObject * ret = Py_BuildValue("I", self->oid_.dataIndex);
         return ret;
     }
     

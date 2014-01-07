@@ -33,8 +33,8 @@ OneToAllMsg::OneToAllMsg( Eref e1, Element* e2, unsigned int msgIndex )
 
 OneToAllMsg::~OneToAllMsg()
 {
-	assert( mid_.dataId < msg_.size() );
-	msg_[ mid_.dataId ] = 0; // ensure deleted ptr isn't reused.
+	assert( mid_.dataIndex < msg_.size() );
+	msg_[ mid_.dataIndex ] = 0; // ensure deleted ptr isn't reused.
 }
 
 Eref OneToAllMsg::firstTgt( const Eref& src ) const 
@@ -69,13 +69,13 @@ Id OneToAllMsg::managerId() const
 ObjId OneToAllMsg::findOtherEnd( ObjId f ) const
 {
 	if ( f.element() == e1() ) {
-		if ( f.dataId == i1_ )
+		if ( f.dataIndex == i1_ )
 			return ObjId( e2()->id(), 0 );
 	} else if ( f.element() == e2() ) {
 		return ObjId( e1()->id(), i1_ );
 	}
 	
-	return ObjId();
+	return ObjId( 0, BADINDEX );
 }
 
 Msg* OneToAllMsg::copy( Id origSrc, Id newSrc, Id newTgt,

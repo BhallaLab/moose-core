@@ -98,8 +98,6 @@ template< class T > class Conv
 				return "Id";
 			if ( typeid( T ) == typeid( ObjId ) )
 				return "ObjId";
-			if ( typeid( T ) == typeid( DataId ) )
-				return "DataId";
 			return typeid( T ).name(); // this is not portable but may be more useful than "bad"
 		}
 

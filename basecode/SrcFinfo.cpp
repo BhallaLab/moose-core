@@ -80,7 +80,7 @@ void SrcFinfo0::send( const Eref& e ) const {
 				Element* e = j->element();
 				unsigned int start = e->localDataStart();
 				unsigned int end = start + e->numData();
-				for ( DataId k = start; k < end; ++k )
+				for ( unsigned int k = start; k < end; ++k )
 					f->op( Eref( e, k ) );
 			} else  {
 				f->op( *j );

@@ -47,13 +47,20 @@ using namespace std;
  */
 typedef unsigned int FuncId;
 
+/** 
+ * Looks up data entries.
+ */
+typedef unsigned int DataId;
+
 /**
  * Identifies data entry on an Element. This is a global index,
  * in that it does not refer to the array on any given node, but uniquely
  * identifies the entry over the entire multinode simulation.
  */
-typedef unsigned int DataId;
-extern const DataId ALLDATA; // Defined in consts.cpp
+extern const unsigned int ALLDATA; // Defined in consts.cpp
+
+/// Identifies bad DataIndex or FieldIndex in ObjId.
+extern const unsigned int BADINDEX; // Defined in consts.cpp
 
 /**
  * Index into Element::vector< vector< MsgFuncBinding > > msgBinding_;

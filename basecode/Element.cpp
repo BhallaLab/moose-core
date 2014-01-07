@@ -74,7 +74,7 @@ Id Element::id() const
 void Element::addMsg( ObjId m )
 {
 	while ( m_.size() > 0 ) {
-		if ( m_.back() == ObjId() )
+		if ( m_.back().bad() )
 			m_.pop_back();
 		else
 			break;
@@ -219,7 +219,7 @@ ObjId Element::findCaller( FuncId fid ) const
 			return *i;
 		}
 	}
-	return ObjId();
+	return ObjId( 0, BADINDEX );
 }
 
 unsigned int Element::findBinding( MsgFuncBinding b ) const

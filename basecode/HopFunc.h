@@ -81,7 +81,7 @@ template < class A > class HopFunc1: public OpFunc1Base< A >
 				const
 		{
 			assert( er.getNode() == mooseMyNode() );
-			DataId di = er.dataIndex();
+			unsigned int di = er.dataIndex();
 			Element* elm = er.element();
 			unsigned int numField = 
 					elm->numField( di - er.element()->localDataStart()  );
@@ -113,9 +113,7 @@ template < class A > class HopFunc1: public OpFunc1Base< A >
 				}
 				double* buf = addToBuf( er, hopIndex_, 
 						Conv< vector< A > >::size( temp ) );
-				double* orig = buf;	
 				Conv< vector< A > >::val2buf( temp, &buf );
-				assert( static_cast< unsigned int >( orig[0] ) == nn );
 				dispatchBuffers( er, hopIndex_ ); 
 				// HopIndex says that it is a SetVec call.
 			}
@@ -140,7 +138,7 @@ template < class A > class HopFunc1: public OpFunc1Base< A >
 					assert( k == endOnNode[i] );
 				} else {
 					if ( !elm->isGlobal() ) {
-						DataId start = elm->startDataId( i );
+						unsigned int start = elm->startDataIndex( i );
 						if ( start < elm->numData() ) {
 							Eref starter( elm,  start );
 							assert( elm->getNode( starter.dataIndex() ) == i );
@@ -420,7 +418,7 @@ template < class A > class GetHopFunc: public OpFunc1Base< A* >
 		void getLocalFieldVec( const Eref& er, vector< A >& ret, 
 				 const GetOpFuncBase< A >* op ) const
 		{
-			DataId p = er.dataIndex();
+			unsigned int p = er.dataIndex();
 			Element* elm = er.element();
 			unsigned int numField = elm->numField( 
 							p - elm->localDataStart() );

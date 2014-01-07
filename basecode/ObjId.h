@@ -13,7 +13,7 @@
 /**
  * This class manages lookups for specific data entries in elements,
  * in a node-independent manner.
- * It is basically a composite of Id and DataId.
+ * It is basically a composite of Id and DataIndex.
  */
 class ObjId
 {
@@ -27,18 +27,18 @@ class ObjId
 		 * Returns the root Id
 		 */
 		ObjId()
-			: id(), dataId( 0 ), fieldIndex( 0 )
+			: id(), dataIndex( 0 ), fieldIndex( 0 )
 		{;}
 
 		/**
-		 * Creates a ObjId using specified Id and DataId
+		 * Creates a ObjId using specified Id and DataIndex
 		 */
-		ObjId( Id i, DataId d, unsigned int f = 0 )
-			: id( i ), dataId( d ), fieldIndex( f )
+		ObjId( Id i, unsigned int d, unsigned int f = 0 )
+			: id( i ), dataIndex( d ), fieldIndex( f )
 		{;}
 
 		ObjId( Id i )
-			: id( i ), dataId( 0 ), fieldIndex( 0 )
+			: id( i ), dataIndex( 0 ), fieldIndex( 0 )
 		{;}
 
 		/**
@@ -89,11 +89,16 @@ class ObjId
 		 * Here are the data values.
 		 */
 		Id id; 
-		DataId dataId;
+		unsigned int dataIndex;
 		unsigned int fieldIndex;
 
-		/// A useful test value
-		static const ObjId bad();
+		/**
+		 * True if the return value is bad: either returning a failure, 
+		 * or the DataIndex or FieldIndex is out of range. However, this
+		 * is a node-local funtion so it can't report the FieldIndex status
+		 * in all cases.
+		 */
+		bool bad() const;
 
 	private:
 };

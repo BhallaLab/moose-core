@@ -75,17 +75,16 @@ class Element
 		 */
 		virtual unsigned int totNumLocalField() const = 0;
 
-		/// Returns node number of specified dataId.
-		virtual unsigned int getNode( unsigned int dataId ) const = 0;
+		/// Returns node number of specified dataIndex.
+		virtual unsigned int getNode( unsigned int dataIndex ) const = 0;
 
-		/// Returns start dataId on specified node
-		virtual DataId startDataId( unsigned int nodeNum ) const = 0;
+		/// Returns start dataIndex on specified node
+		virtual unsigned int startDataIndex( unsigned int nodeNum ) const = 0;
 
 		/**
-		 * Converts dataId to index on current node. Returns OFFNODE 
-		 * if not here.
+		 * Converts dataIndex to index on current node. No error check.
 		 */ 
-		virtual unsigned int rawIndex( unsigned int dataId ) const = 0;
+		virtual unsigned int rawIndex( unsigned int dataIndex ) const = 0;
 
 		/**
 		 * Returns the Id on this Elm
@@ -115,11 +114,11 @@ class Element
 		 * On FieldElements like synapses, does a second lookup on the
 		 * field index.
 		 * Note that the index is NOT a
-		 * DataId: it is instead the raw index of the data on the current
+		 * DataIndex: it is instead the raw index of the data on the current
 		 * node. Index is also NOT the character offset, but the index
 		 * to the data array in whatever type the data may be.
 		 *
-		 * The DataId has to be filtered through the nodeMap to
+		 * The DataIndex has to be filtered through the nodeMap to
 		 * find a) if the entry is here, and b) what its raw index is.
 		 *
 		 * Returns 0 if either index is out of range.
@@ -239,7 +238,7 @@ class Element
 		/**
 		 * Utility function for debugging
 		 */
-		void printMsgDigest( unsigned int srcIndex, unsigned int dataId ) const;
+		void printMsgDigest( unsigned int srcIndex, unsigned int dataIndex ) const;
 
 	/////////////////////////////////////////////////////////////////////
 	// Utility functions for message traversal
@@ -357,9 +356,10 @@ class Element
 		 * Func and element to lead off, followed by a list of target
 		 * indices and fields.
 		 * The indexing is like this:
-		 * msgDigest_[ numSrcMsgs * DataId + srcMsgIndex ][ func# ]
+		 * msgDigest_[ numSrcMsgs * dataIndex + srcMsgIndex ][ func# ]
 		 * So we look up a vector of MsgDigests, each with a unique func,
-		 * based on both the DataId and the message number. This is designed
+		 * based on both the dataIndex and the message number. This is 
+		 * designed
 		 * so that if we expand the number of data entries we don't have
 		 * to redo the ordering.
 		 */
