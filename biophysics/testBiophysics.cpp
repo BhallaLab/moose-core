@@ -77,6 +77,47 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
 	else if ( Shell::numNodes() == 4 )
 		assert( nd == 26381 );
 
+	//////////////////////////////////////////////////////////////////
+	// Checking access to message info through SparseMsg on many nodes.
+	//////////////////////////////////////////////////////////////////
+	vector< ObjId > tgts;
+	vector< string > funcs;
+	ObjId oi( i2, 123 );
+	tgts = LookupField< string, vector< ObjId > >::
+			get( oi, "msgDests", "spikeOut" );
+	funcs = LookupField< string, vector< string > >::
+			get( oi, "msgDestFunctions", "spikeOut" );
+	assert( tgts.size() == funcs.size() );
+	assert( tgts.size() == 116  );
+	assert( tgts[0] == ObjId( synId, 20, 11 ) );
+	assert( tgts[1] == ObjId( synId, 27, 15 ) );
+	assert( tgts[2] == ObjId( synId, 57, 14 ) );
+	assert( tgts[90] == ObjId( synId, 788, 15 ) );
+	assert( tgts[91] == ObjId( synId, 792, 12 ) );
+	assert( tgts[92] == ObjId( synId, 801, 17 ) );
+	for ( unsigned int i = 0; i < funcs.size(); ++i )
+		assert( funcs[i] == "addSpike" );
+
+	/*
+	 * The LookupField doesn't yet work in parallel.
+	oi = ObjId( i2, 900 );
+	tgts = LookupField< string, vector< ObjId > >::
+			get( oi, "msgDests", "spikeOut" );
+	funcs = LookupField< string, vector< string > >::
+			get( oi, "msgDestFunctions", "spikeOut" );
+	assert( tgts.size() == funcs.size() );
+	assert( tgts.size() == 97  );
+	assert( tgts[0] == ObjId( synId, 18, 91 ) );
+	assert( tgts[1] == ObjId( synId, 26, 95 ) );
+	assert( tgts[2] == ObjId( synId, 29, 91 ) );
+	assert( tgts[90] == ObjId( synId, 927, 88 ) );
+	assert( tgts[91] == ObjId( synId, 928, 77 ) );
+	assert( tgts[92] == ObjId( synId, 933, 77 ) );
+	for ( unsigned int i = 0; i < funcs.size(); ++i )
+		assert( funcs[i] == "addSpike" );
+		*/
+
+	//////////////////////////////////////////////////////////////////
 	// Here we have an interesting problem. The mtRand might be called
 	// by multiple threads if the above Set call is not complete.
 
