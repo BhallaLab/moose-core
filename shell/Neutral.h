@@ -65,6 +65,20 @@ class Neutral
 		 */
 		vector< Id > getNeighbours( const Eref& e, string field ) const;
 
+		/**
+		 * Return vector of target ObjIds
+		 * called by the specified SrcFinfo, by the current object.
+		 * Twin function to getMsgDestFunctions.
+		 */
+		vector< ObjId > getMsgDests( const Eref& e, string src ) const;
+
+		/**
+		 * Return vector of function names called on each target ObjId
+		 * of the specified SrcFinfo, by the current object.
+		 * Twin function to getMsgDests.
+		 */
+		vector< string > getMsgDestFunctions( 
+						const Eref& e, string src ) const;
 
 		/**
 		 * Simply returns own ObjId
@@ -109,6 +123,12 @@ class Neutral
 		void setNumField( const Eref& e, unsigned int num );
 		unsigned int getNumField( const Eref& e ) const;
 
+		/// Information function to return names of all value Finfos.
+		vector< string > getValueFields( const Eref& e ) const;
+		/// Information function to return names of all SrcFinfos.
+		vector< string > getSourceFields( const Eref& e ) const;
+		/// Information function to return names of all DestFinfos.
+		vector< string > getDestFields( const Eref& e ) const;
 		////////////////////////////////////////////////////////////
 		// DestFinfo functions
 		////////////////////////////////////////////////////////////

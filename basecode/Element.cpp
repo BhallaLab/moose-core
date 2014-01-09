@@ -576,6 +576,53 @@ unsigned int Element::getOutputs( vector< Id >& ret, const SrcFinfo* finfo )
 	return ret.size() - oldSize;
 }
 
+unsigned int Element::getMsgTargetAndFunctions( DataId srcDataId,
+				const SrcFinfo* finfo ,
+				vector< ObjId >& tgt, 
+				vector< string >& func
+				) const
+{
+	assert( finfo ); // would like to check that finfo is on this.
+	assert( srcDataId < this->numData() );
+
+	tgt.resize( 0 );
+	func.resize( 0 );
+	
+	const vector< MsgFuncBinding >* msgVec =
+		getMsgAndFunc( finfo->getBindIndex() );
+	for ( unsigned int i = 0; i < msgVec->size(); ++i ) {
+		const Msg* m = Msg::getMsg( (*msgVec)[i].mid );
+		assert( m );
+		FuncId fid = (*msgVec)[i].fid;
+		if ( m->e1() == this ) { // regular direction message.
+			string name = m->e2()->cinfo()->destFinfoName( fid );
+			vector< vector< Eref > > t;
+			m->targets( t );
+			assert( t.size() == this->numData() );
+			vector< Eref >& row = t[srcDataId];
+			for ( vector< Eref >::const_iterator 
+							e = row.begin(); e != row.end(); ++e ) {
+				tgt.push_back( e->objId() );
+				func.push_back( name );
+			}
+		} else if ( m->e2() == this ) {
+			string name = m->e1()->cinfo()->destFinfoName( fid );
+			vector< vector< Eref > > t;
+			m->sources( t );
+			assert( t.size() == this->numData() );
+			vector< Eref >& row = t[srcDataId];
+			for ( vector< Eref >::const_iterator 
+							e = row.begin(); e != row.end(); ++e ) {
+				tgt.push_back( e->objId() );
+				func.push_back( name );
+			}
+		} else {
+			assert( 0 );
+		}
+	}
+	return tgt.size();
+}
+
 unsigned int Element::getInputs( vector< Id >& ret, const DestFinfo* finfo )
 	const
 {

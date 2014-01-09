@@ -1508,9 +1508,9 @@ void testCinfoFields()
 	assert( cinfo->getSrcFinfo( 0 + nsf ) == cinfo->findFinfo( "spikeOut" ) );
 
 	unsigned int ndf = neutralCinfo->getNumDestFinfo();
-	assert( ndf == 17 );
+	assert( ndf == 22 );
 	unsigned int sdf = SynHandler::initCinfo()->getNumDestFinfo();
-	assert( sdf == 21 );
+	assert( sdf == 26 );
 	assert( cinfo->getNumDestFinfo() == 12 + sdf );
 
 	assert( cinfo->getDestFinfo( 0+ndf )->name() == "setNumSynapses" );
@@ -1534,7 +1534,7 @@ void testCinfoFields()
 
 
 	unsigned int nvf = neutralCinfo->getNumValueFinfo();
-	assert( nvf == 11 );
+	assert( nvf == 14 );
 	assert( cinfo->getNumValueFinfo() == 6 + nvf );
 	assert( cinfo->getValueFinfo( 0 + nvf ) == cinfo->findFinfo( "numSynapses" ) );
 	assert( cinfo->getValueFinfo( 1 + nvf ) == cinfo->findFinfo( "Vm" ) );
@@ -1544,7 +1544,7 @@ void testCinfoFields()
 	assert( cinfo->getValueFinfo( 5 + nvf ) == cinfo->findFinfo( "bufferTime" ) );
 
 	unsigned int nlf = neutralCinfo->getNumLookupFinfo();
-	assert( nlf == 1 ); // Neutral inserts a lookup field for neighbours
+	assert( nlf == 3 ); // Neutral inserts a lookup field for neighbours
 	assert( cinfo->getNumLookupFinfo() == 0 + nlf );
 	assert( cinfo->getLookupFinfo( 0 + nlf )->name() == "dummy");
 
@@ -1702,6 +1702,28 @@ void testMsgSrcDestFields()
 	assert( fieldNames[0] == "d0" );
 	assert( fieldNames[1] == "d1" );
 	assert( fieldNames[2] == "d2" );
+
+	//////////////////////////////////////////////////////////////
+	// getMsgTargetAndFunctions
+	//////////////////////////////////////////////////////////////
+	vector< ObjId > tgt;
+	vector< string > func;
+	unsigned int numTgt = e1->getMsgTargetAndFunctions( 0, 
+					dynamic_cast< SrcFinfo* >(Test::sharedVec[0] ),
+					tgt, func );
+	assert( numTgt == tgt.size() );
+	assert( tgt.size() == 1 );
+	assert( tgt[0] == ObjId( t2, 0 ) );
+	assert( func[0] == "d0" );
+
+	// Note that the srcFinfo #2 is in sharedVec[4]
+	numTgt = e2->getMsgTargetAndFunctions( 0, 
+					dynamic_cast< SrcFinfo* >(Test::sharedVec[4] ),
+					tgt, func );
+	assert( numTgt == tgt.size() );
+	assert( tgt.size() == 1 );
+	assert( tgt[0] == ObjId( t1, 0 ) );
+	assert( func[0] == "d2" );
 
 	//////////////////////////////////////////////////////////////
 	// Clean up.

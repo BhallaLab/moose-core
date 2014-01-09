@@ -292,6 +292,18 @@ class Element
 		unsigned int getFieldsOfOutgoingMsg( 
 			ObjId mid, vector< pair< BindIndex, FuncId > >& ret ) const;
 
+		/**
+		 * Fills in matching vectors of destination ObjIds and the
+		 * destination function, for the specified source Finfo and
+		 * dataId on this Element. 
+		 * Used in Neutral::msgDests and Neutral::msgDestFunctions.
+		 * Returns number of dests found.
+		 */
+		unsigned int getMsgTargetAndFunctions( DataId srcDataId,
+				const SrcFinfo* finfo ,
+				vector< ObjId >& tgt, 
+				vector< string >& func
+				) const;
 
 		/** Used upon ending of MOOSE session, to rapidly clear out 
 		 * messages, secure in the knowledge that the data structures 

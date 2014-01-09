@@ -181,7 +181,7 @@ class Cinfo
 			/**
 			 * Return the specified DestFinfo
 			 */
-			Finfo* getDestFinfo( unsigned int i );
+			Finfo* getDestFinfo( unsigned int i ) const;
 
 			/**
 			 * Return number of DestFinfo
@@ -191,7 +191,7 @@ class Cinfo
 			/**
 			 * Return the specified ValueFinfo
 			 */
-			Finfo* getValueFinfo( unsigned int i );
+			Finfo* getValueFinfo( unsigned int i ) const;
 
 			/**
 			 * Return number of ValueFinfo
