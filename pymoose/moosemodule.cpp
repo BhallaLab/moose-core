@@ -1596,7 +1596,7 @@ extern "C" {
             RAISE_INVALID_ID(NULL, "moose_connect");
         }
         ObjId mid = SHELLPTR->doAddMsg(msgType, src, string(srcField), dest, string(destField));
-        if ( mid == ObjId() ){
+        if ( mid.bad() ){
             PyErr_SetString(PyExc_NameError, "check field names and type compatibility.");
             return NULL;
         }
