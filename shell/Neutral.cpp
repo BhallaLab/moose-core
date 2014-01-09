@@ -55,21 +55,47 @@ const Cinfo* Neutral::initCinfo()
 
 	static ElementValueFinfo< Neutral, unsigned int > numData( 
 		"numData",
-		"# of entries on Element: product of all dimensions."
-		"Note that on a FieldElement this includes field entries."
-		"If field entries form a ragged array, then the linearSize may be"
-		"greater than the actual number of allocated entries, since the"
-		"lastDimension is at least as big as the largest ragged array.",
+		"# of Data entries on Element."
+		"Note that on a FieldElement this does NOT refer to field entries,"
+		"but to the number of DataEntries on the parent of the "
+		"FieldElement.",
 			&Neutral::setNumData,
 			&Neutral::getNumData );
 
 	static ElementValueFinfo< Neutral, unsigned int > 
 		numField( 
 		"numField",
-		"For a FieldElement: number of entries of self"
-		"For a regular Element: zero.",
+		"For a FieldElement: number of entries of self."
+		"For a regular Element: One.",
 			&Neutral::setNumField,
 			&Neutral::getNumField );
+
+	static ReadOnlyElementValueFinfo< Neutral, vector< string > > 
+			valueFields(
+			"valueFields",
+			"List of all value fields on Element."
+			"These fields are accessed through the assignment operations "
+			"in the Python interface."
+			"These fields may also be accessed as functions through the "
+			"set<FieldName> and get<FieldName> commands.",
+			&Neutral::getValueFields
+	);
+
+	static ReadOnlyElementValueFinfo< Neutral, vector< string > > 
+			sourceFields(
+			"sourceFields",
+			"List of all source fields on Element, that is fields that "
+			"can act as message sources. ",
+			&Neutral::getSourceFields
+	);
+
+	static ReadOnlyElementValueFinfo< Neutral, vector< string > > 
+			destFields(
+			"destFields",
+			"List of all destination fields on Element, that is, fields"
+			"that are accessed as Element functions.",
+			&Neutral::getDestFields
+	);
 
 	static ReadOnlyElementValueFinfo< Neutral, vector< ObjId > > msgOut( 
 		"msgOut",
@@ -85,6 +111,17 @@ const Cinfo* Neutral::initCinfo()
 		"neighbours",
 		"Ids of Elements connected this Element on specified field.", 
 			&Neutral::getNeighbours );
+
+	static ReadOnlyLookupElementValueFinfo< Neutral, string, vector< ObjId > > msgDests( 
+		"msgDests",
+		"ObjIds receiving messages from the specified SrcFinfo", 
+			&Neutral::getMsgDests );
+
+	static ReadOnlyLookupElementValueFinfo< Neutral, string, vector< string > > msgDestFunctions( 
+		"msgDestFunctions",
+		"Matching function names for each ObjId receiving a msg from "
+		"the specified SrcFinfo", 
+			&Neutral::getMsgDestFunctions );
 
 	/////////////////////////////////////////////////////////////////
 	// Value Finfos
@@ -146,9 +183,14 @@ const Cinfo* Neutral::initCinfo()
 		&className,				// ReadOnlyValue
 		&numData,				// Value
 		&numField,				// Value
+		&valueFields,			// ReadOnlyValue
+		&sourceFields,			// ReadOnlyValue
+		&destFields,			// ReadOnlyValue
 		&msgOut,				// ReadOnlyValue
 		&msgIn,					// ReadOnlyValue
 		&neighbours,			// ReadOnlyLookupValue
+		&msgDests,				// ReadOnlyLookupValue
+		&msgDestFunctions,		// ReadOnlyLookupValue
 	};
 
 	/////////////////////////////////////////////////////////////////
@@ -299,6 +341,42 @@ void Neutral::setNumField( const Eref& e, unsigned int num )
 	e.element()->resizeField( rawIndex, num );
 }
 
+vector< string > Neutral::getValueFields( const Eref& e ) const
+{
+	unsigned int num = e.element()->cinfo()->getNumValueFinfo();
+	vector< string > ret( num );
+	for ( unsigned int i = 0; i < num; ++i ) {
+		const Finfo *f = e.element()->cinfo()->getValueFinfo( i );
+		assert( f );
+		ret[i] = f->name();
+	}
+	return ret;
+}
+
+vector< string > Neutral::getSourceFields( const Eref& e ) const
+{
+	unsigned int num = e.element()->cinfo()->getNumSrcFinfo();
+	vector< string > ret( num );
+	for ( unsigned int i = 0; i < num; ++i ) {
+		const Finfo *f = e.element()->cinfo()->getSrcFinfo( i );
+		assert( f );
+		ret[i] = f->name();
+	}
+	return ret;
+}
+
+vector< string > Neutral::getDestFields( const Eref& e ) const
+{
+	unsigned int num = e.element()->cinfo()->getNumDestFinfo();
+	vector< string > ret( num );
+	for ( unsigned int i = 0; i < num; ++i ) {
+		const Finfo *f = e.element()->cinfo()->getDestFinfo( i );
+		assert( f );
+		ret[i] = f->name();
+	}
+	return ret;
+}
+
 vector< ObjId > Neutral::getOutgoingMsgs( const Eref& e ) const
 {
 	vector< ObjId > ret;
@@ -341,6 +419,44 @@ vector< Id > Neutral::getNeighbours( const Eref& e, string field ) const
 		cout << "Warning: Neutral::getNeighbours: Id.Field '" << 
 				e.id().path() << "." << field <<
 				"' not found\n";
+	return ret;
+}
+
+vector< ObjId > Neutral::getMsgDests( const Eref& e, string field ) const
+{
+	const Finfo* finfo = e.element()->cinfo()->findFinfo( field );
+	const SrcFinfo* sf = dynamic_cast< const SrcFinfo* >( finfo );
+	if ( sf ) {
+		vector< ObjId > tgt;
+		vector< string > func;
+		e.element()->getMsgTargetAndFunctions( e.dataIndex(), sf,
+			tgt, func );
+		return tgt;
+	} else {
+		cout << "Warning: Neutral::getMsgDests: Id.Field '" << 
+				e.id().path() << "." << field <<
+				"' not found or not a SrcFinfo\n";
+	}
+	static vector< ObjId > ret( 0 );
+	return ret;
+}
+
+vector< string > Neutral::getMsgDestFunctions( const Eref& e, string field ) const
+{
+	vector< string > ret( 0 );
+	const Finfo* finfo = e.element()->cinfo()->findFinfo( field );
+	const SrcFinfo* sf = dynamic_cast< const SrcFinfo* >( finfo );
+	if ( sf ) {
+		vector< ObjId > tgt;
+		vector< string > func;
+		e.element()->getMsgTargetAndFunctions( e.dataIndex(), sf,
+			tgt, func );
+		return func;
+	} else {
+		cout << "Warning: Neutral::getMsgDestFunctions: Id.Field '" << 
+				e.id().path() << "." << field <<
+				"' not found or not a SrcFinfo\n";
+	}
 	return ret;
 }
 

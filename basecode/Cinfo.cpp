@@ -407,7 +407,7 @@ unsigned int Cinfo::getNumSrcFinfo() const
 }
 
 ////////////////////////////////////////////////////////////////////
-Finfo* Cinfo::getDestFinfo( unsigned int i )
+Finfo* Cinfo::getDestFinfo( unsigned int i ) const
 {
 	if ( i >= getNumDestFinfo() )
 		return &dummy;
@@ -430,7 +430,7 @@ unsigned int Cinfo::getNumDestFinfo() const
 }
 
 ////////////////////////////////////////////////////////////////////
-Finfo* Cinfo::getValueFinfo( unsigned int i )
+Finfo* Cinfo::getValueFinfo( unsigned int i ) const
 {
 	if ( i >= getNumValueFinfo() )
 		return &dummy;
