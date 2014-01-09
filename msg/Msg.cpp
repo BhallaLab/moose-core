@@ -11,6 +11,7 @@
 #include "SingleMsg.h"
 #include "DiagonalMsg.h"
 #include "OneToOneMsg.h"
+#include "OneToOneDataIndexMsg.h"
 #include "OneToAllMsg.h"
 #include "SparseMatrix.h"
 #include "SparseMsg.h"
@@ -260,6 +261,13 @@ unsigned int Msg::initMsgManagers()
 	SparseMsg::managerId_ = Id::nextId();
 	new MsgElement( SparseMsg::managerId_, SparseMsg::initCinfo(), 
 		"sparseMsg", &SparseMsg::numMsg, &SparseMsg::lookupMsg );
+
+	OneToOneDataIndexMsg::managerId_ = Id::nextId();
+	new MsgElement( OneToOneDataIndexMsg::managerId_, 
+					OneToOneDataIndexMsg::initCinfo(),
+					"oneToOneDataIndexMsg", 
+					&OneToOneDataIndexMsg::numMsg, 
+					&OneToOneDataIndexMsg::lookupMsg );
 
 	// Do the 'adopt' only after all the message managers exist - we need
 	// the OneToAll manager for the adoption messages themselves.

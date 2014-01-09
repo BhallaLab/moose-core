@@ -9,7 +9,7 @@
 
 #include "header.h"
 #include "../shell/Shell.h"
-#include "../msg/OneToOneMsg.h"
+#include "../msg/OneToOneDataIndexMsg.h"
 
 void FieldElementFinfoBase::postCreationFunc( 
 				Id parent, Element* parentElm ) const
@@ -21,7 +21,7 @@ void FieldElementFinfoBase::postCreationFunc(
 		return;
 	Id kid = Id::nextId();
 	Element* e = new FieldElement( parent, kid, fieldCinfo_, name(), this );
-	Msg* m = new OneToOneMsg( parent.element(), e, 0 );
+	Msg* m = new OneToOneDataIndexMsg( parent.eref(), Eref( e, 0 ), 0 );
 	assert( m );
 	if ( !f1->addMsg( pf, m->mid(), parent.element() ) ) {
 		cout << "FieldElementFinfoBase::postCreationFunc: Error: \n" <<

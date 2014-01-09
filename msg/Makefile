@@ -16,6 +16,7 @@ OBJ = \
 	OneToOneMsg.o	\
 	SingleMsg.o	\
 	SparseMsg.o	\
+	OneToOneDataIndexMsg.o	\
 	testMsg.o	\
 
 HEADERS = \
@@ -28,9 +29,10 @@ $(OBJ)	: $(HEADERS)
 DiagonalMsg.o:	DiagonalMsg.h
 OneToAll.o:	OneToAll.h
 OneToOne.o:	OneToOne.h
+OneToOneDataIndex.o:	OneToOneDataIndex.h
 SingleMsg.o:	SingleMsg.h
 SparseMsg.o:	SparseMsg.h
-testMsg.o: DiagonalMsg.h OneToAllMsg.h OneToOneMsg.h SingleMsg.h SparseMsg.h ../basecode/SetGet.h
+testMsg.o: DiagonalMsg.h OneToAllMsg.h OneToOneMsg.h SingleMsg.h SparseMsg.h OneToOneDataIndexMsg.h ../basecode/SetGet.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I. -I../basecode $< -c
