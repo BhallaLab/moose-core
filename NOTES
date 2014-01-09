@@ -2016,3 +2016,7 @@ is valid.
 OK, implemented bool ObjId::bad. 
 Also replaced ObjId::dataId with ObjId::dataIndex for consistency.
 ============================================================================
+8 Jan 2014.
+
+Fixed up OneToOne to deal with fieldElement targets. This may already be useful
+in mapping mol pools to MeshEntries. yet to compile

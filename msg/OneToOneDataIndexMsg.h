@@ -7,59 +7,46 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifndef _SINGLE_MSG_H
-#define _SINGLE_MSG_H
+#ifndef _ONE_TO_ONE_DATA_INDEX_MSG_H
+#define _ONE_TO_ONE_DATA_INDEX_MSG_H
 
 /**
- * This is a message from a single source object to a single target 
- * object. The source object must be a DataEntry. The target object
- * may be on a FieldElement, and the target specification includes the
- * index of the field object.
+ * Manages a projection where each entry in source array
+ * connects to the corresponding entry (with same index)
+ * in dest array.
+ * If there is a mismatch in number of entries, the overhang is ignored.
+ * This differs from the regular OneToOne msg because even
+ * if the dest array is a FieldElement, it still does a mapping between
+ * the DataIndex of src and dest.
  */
-
-class SingleMsg: public Msg
+class OneToOneDataIndexMsg: public Msg
 {
 	friend unsigned int Msg::initMsgManagers(); // for initializing Id.
 	public:
-		SingleMsg( const Eref& e1, const Eref& e2, unsigned int msgIndex );
-		~SingleMsg();
+		OneToOneDataIndexMsg( const Eref& e1, const Eref& e2, unsigned int msgIndex);
+		~OneToOneDataIndexMsg();
 
 		Eref firstTgt( const Eref& src ) const;
 
 		void sources( vector< vector< Eref > >& v ) const;
 		void targets( vector< vector< Eref > >& v ) const;
 
-		DataId i1() const;
-		DataId i2() const;
-
-		// returns the id of the managing Element.
 		Id managerId() const;
 
 		ObjId findOtherEnd( ObjId end ) const;
 
 		Msg* copy( Id origSrc, Id newSrc, Id newTgt,
 			FuncId fid, unsigned int b, unsigned int n ) const;
-		
-		void setI1( DataId di );
-		DataId getI1() const;
-
-		void setI2( DataId di );
-		DataId getI2() const;
-
-		void setTargetField( unsigned int f );
-		unsigned int getTargetField() const;
 
 		/// Msg lookup functions
 		static unsigned int numMsg();
 		static char* lookupMsg( unsigned int index );
 
+		/// Setup function for Element-style access to Msg fields.
 		static const Cinfo* initCinfo();
 	private:
-		DataId i1_;
-		DataId i2_;
-		unsigned int f2_; // Field for target. Note asymmetry
 		static Id managerId_;
-		static vector< SingleMsg* > msg_;
+		static vector< OneToOneDataIndexMsg* > msg_;
 };
 
-#endif // _SINGLE_MSG_H
+#endif // _ONE_TO_ONE_DATA_INDEX_MSG_H
