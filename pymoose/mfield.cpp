@@ -484,7 +484,7 @@ extern "C" {
 
     PyObject * moose_ElementField_getNum(_Field * self, void * closure)
     {
-        if (!Id::isValid(self->owner.id)){
+        if (self->owner.bad()){
             RAISE_INVALID_ID(NULL, "moose_ElementField_getNum");
         }
         unsigned int num = Field<unsigned int>::get(self->owner, "num_" + string(self->name));
@@ -493,7 +493,7 @@ extern "C" {
 
     int moose_ElementField_setNum(_Field * self, PyObject * args, void * closure)
     {
-        if (!Id::isValid(self->owner.id)){
+        if (self->owner.bad()){
             RAISE_INVALID_ID(-1, "moose_ElementField_setNum");
         }
         unsigned int num;
@@ -511,7 +511,7 @@ extern "C" {
 
     Py_ssize_t moose_ElementField_getLen(_Field * self, void * closure)
     {
-        if (!Id::isValid(self->owner.id)){
+        if (self->owner.bad()){
             RAISE_INVALID_ID(-1, "moose_ElementField_getLen");
         }
         unsigned int num = Field<unsigned int>::get(self->myoid, "numField");
@@ -531,7 +531,7 @@ extern "C" {
 
     PyObject * moose_ElementField_getId(_Field * self, void * closure)
     {
-        if (!Id::isValid(self->owner.id)){
+        if (self->owner.bad()){
             RAISE_INVALID_ID(NULL, "moose_ElementField_setNum");
         }
         Id myId(self->owner.path() + "/" + string(self->name));
@@ -552,7 +552,7 @@ extern "C" {
     }
     PyObject * moose_ElementField_getDataId(_Field * self, void * closure)
     {
-        if (!Id::isValid(self->owner.id)){
+        if (self->owner.bad()){
             RAISE_INVALID_ID(NULL, "moose_ElementField_getItem");
         }
         return Py_BuildValue("I", self->owner.dataIndex);
@@ -560,7 +560,7 @@ extern "C" {
 
     PyObject * moose_ElementField_getItem(_Field * self, Py_ssize_t index)
     {
-        if (!Id::isValid(self->owner.id)){
+        if (self->owner.bad()){
             RAISE_INVALID_ID(NULL, "moose_ElementField_getItem");
         }
         unsigned int len = Field<unsigned int>::get(self->myoid, "numField");
@@ -586,7 +586,7 @@ extern "C" {
     
     PyObject * moose_ElementField_getSlice(_Field * self, Py_ssize_t start, Py_ssize_t end)
     {
-        if (!Id::isValid(self->owner.id)){
+        if (self->owner.bad()){
             RAISE_INVALID_ID(NULL, "moose_ElementField_getSlice");
         }        
         extern PyTypeObject ObjIdType;
@@ -621,7 +621,7 @@ extern "C" {
 
     PyObject * moose_ElementField_getattro(_Field * self, PyObject * attr)
     {
-        if (!Id::isValid(self->owner.id)){
+        if (self->owner.bad()){
             RAISE_INVALID_ID(NULL, "moose_ElementField_getSlice");
         }
         char * field = PyString_AsString(attr);

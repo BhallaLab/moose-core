@@ -112,6 +112,10 @@ extern "C" {
                 RAISE_INVALID_ID(-1, "moose_ObjId_init_from_id");
             }
             instance->oid_ = ObjId(Id(id), data, field );
+            if (instance->oid_.bad()){
+                PyErr_SetString(PyExc_ValueError, "Invalid ObjId");
+                return -1;
+            }
             return 0;
         }
         PyErr_Clear();
@@ -136,12 +140,20 @@ extern "C" {
                     RAISE_INVALID_ID(-1, "moose_ObjId_init_from_id");
                 }                    
                 instance->oid_ = ObjId(((_Id*)obj)->id_, data, field );
+                if (instance->oid_.bad()){
+                    PyErr_SetString(PyExc_ValueError, "Invalid dataIndex/fieldIndex.");
+                    return -1;
+                }
                 return 0;
             } else if (PyObject_IsInstance(obj, (PyObject*)&ObjIdType)){
                 if (!Id::isValid(((_ObjId*)obj)->oid_.id)){
                     RAISE_INVALID_ID(-1, "moose_ObjId_init_from_id");
                 }                    
                 instance->oid_ = ((_ObjId*)obj)->oid_;
+                if (instance->oid_.bad()){
+                    PyErr_SetString(PyExc_ValueError, "Invalid ObjId");
+                    return -1;
+                }
                 return 0;
             }
         }
@@ -193,7 +205,7 @@ extern "C" {
         // First see if there is an existing object with at path
         instance->oid_ = ObjId(path);
         string realtypename = "moose." + Field<string>::get(instance->oid_, "className");
-        if (instance->oid_ == ObjId()){
+        if (instance->oid_.bad()){
             // is this the root element?
             string p(path);
             if ((p == "/") || (p == "/root")){
@@ -415,7 +427,7 @@ extern "C" {
     */
     PyObject * moose_ObjId_getattro(_ObjId * self, PyObject * attr)
     {
-        if (!Id::isValid(self->oid_.id)){
+        if (self->oid_.bad()){
             RAISE_INVALID_ID(NULL, "moose_ObjId_getattro");
         }
         extern PyTypeObject IdType;
@@ -431,11 +443,6 @@ extern "C" {
         if (_ret != NULL){
             return _ret;
         }
-
-	if (self->oid_.bad()){
-            PyErr_SetString(PyExc_RuntimeError, "bad ObjId.");
-            return NULL;
-	}
         string class_name = Field<string>::get(self->oid_, "className");
         string type = getFieldType(class_name, string(field), "valueFinfo");
         if (type.empty()){
@@ -1726,7 +1733,7 @@ PyObject* set_destFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type
                                        string(srcField),
                                        dest->oid_,
                                        string(destField));
-        if (mid == ObjId()){
+        if (mid.bad()){
             PyErr_SetString(PyExc_NameError,
                             "connect failed: check field names and type compatibility.");
             return NULL;
