@@ -62,7 +62,7 @@ void testSendMsg()
 	Eref e1 = i1.eref();
 	Eref e2 = i2.eref();
 
-	Msg* m = new OneToOneMsg( e1.element(), e2.element(), 0 );
+	Msg* m = new OneToOneMsg( e1, e2, 0 );
 	vector< vector< Eref > > ver;
 	m->targets( ver );
 	assert( ver.size() == size );
@@ -116,7 +116,7 @@ void testCreateMsg()
 	Eref e1 = i1.eref();
 	Eref e2 = i2.eref();
 
-	OneToOneMsg *m = new OneToOneMsg( e1.element(), e2.element(), 0 );
+	OneToOneMsg *m = new OneToOneMsg( e1, e2, 0 );
 	assert( m );
 	const Finfo* f1 = ac->findFinfo( "output" );
 	assert( f1 );
@@ -1058,7 +1058,7 @@ void testSharedMsg()
 	
 	const Finfo* shareFinfo = Test::initCinfo()->findFinfo( "shared" );
 	assert( shareFinfo != 0 );
-	Msg* m = new OneToOneMsg( t1.element(), t2.element(), 0 );
+	Msg* m = new OneToOneMsg( t1.eref(), t2.eref(), 0 );
 	assert( m != 0 );
 	bool ret = shareFinfo->addMsg( shareFinfo, m->mid(), t1.element() );
 	assert( ret );
@@ -1639,7 +1639,7 @@ void testMsgSrcDestFields()
 	// do it independently.
 	const Finfo* shareFinfo = Test::initCinfo()->findFinfo( "shared" );
 	assert( shareFinfo != 0 );
-	Msg* m = new OneToOneMsg( t1.element(), t2.element(), 0 );
+	Msg* m = new OneToOneMsg( t1.eref(), t2.eref(), 0 );
 	assert( m != 0 );
 	bool ret = shareFinfo->addMsg( shareFinfo, m->mid(), t1.element() );
 	assert( ret );

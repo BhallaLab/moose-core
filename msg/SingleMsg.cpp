@@ -18,7 +18,7 @@ vector< SingleMsg* > SingleMsg::msg_;
 // Here is the SingleMsg code
 /////////////////////////////////////////////////////////////////////
 
-SingleMsg::SingleMsg( Eref e1, Eref e2, unsigned int msgIndex )
+SingleMsg::SingleMsg( const Eref& e1, const Eref& e2, unsigned int msgIndex)
 	: Msg( ObjId( managerId_, (msgIndex != 0 ) ? msgIndex: msg_.size() ), 
 					e1.element(), e2.element() ),
 	i1_( e1.dataIndex() ), 

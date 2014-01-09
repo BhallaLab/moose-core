@@ -727,7 +727,7 @@ const Msg* Shell::innerAddMsg( string msgType,
 	} else if ( msgType == "AllToOne" || msgType == "allToOne" ) {
 		m = new OneToAllMsg( dest.eref(), src.id.element(), msgIndex ); // Little hack.
 	} else if ( msgType == "OneToOne" || msgType == "oneToOne" ) {
-		m = new OneToOneMsg( src.id.element(), dest.id.element(), msgIndex );
+		m = new OneToOneMsg( src.eref(), dest.eref(), msgIndex );
 	} else {
 		cout << myNode_ << 
 			": Error: Shell::handleAddMsg: msgType not known: "

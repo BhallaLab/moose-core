@@ -15,12 +15,15 @@
  * connects to the corresponding entry (with same index)
  * in dest array.
  * If there is a mismatch in number of entries, the overhang is ignored.
+ * If the dest array is a FieldElement, then it uses its internal DataId
+ * i2_ to fill in the DataIndex for the dest. The OneToOne matching is 
+ * assumed to be between DataIndex on e1 and FieldIndex on e2.
  */
 class OneToOneMsg: public Msg
 {
 	friend unsigned int Msg::initMsgManagers(); // for initializing Id.
 	public:
-		OneToOneMsg( Element* e1, Element* e2, unsigned int msgIndex );
+		OneToOneMsg( const Eref& e1, const Eref& e2, unsigned int msgIndex);
 		~OneToOneMsg();
 
 		Eref firstTgt( const Eref& src ) const;
@@ -42,6 +45,8 @@ class OneToOneMsg: public Msg
 		/// Setup function for Element-style access to Msg fields.
 		static const Cinfo* initCinfo();
 	private:
+		DataId i1_;
+		DataId i2_;
 		static Id managerId_;
 		static vector< OneToOneMsg* > msg_;
 };
