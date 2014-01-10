@@ -528,8 +528,9 @@ template< class L, class A > class LookupField: public SetGet2< L, A >
 		 * Gets a value on a specific object, looking it up using the
 		 * provided index.
 		 */
-		static A get( const ObjId& dest, const string& field, L index)
-		{ 
+		// Returns a field value.
+		static A get( const ObjId& dest, const string& field, L index )
+		{
 			ObjId tgt( dest );
 			FuncId fid;
 			string fullFieldName = "get" + field;
@@ -538,10 +539,27 @@ template< class L, class A > class LookupField: public SetGet2< L, A >
 			const LookupGetOpFuncBase< L, A >* gof = 
 				dynamic_cast< const LookupGetOpFuncBase< L, A >* >( func );
 			if ( gof ) {
-				return gof->returnOp( tgt.eref(), index );
+				if ( tgt.isDataHere() ) {
+					return gof->returnOp( tgt.eref(), index );
+				} else {
+					const OpFunc* op2 = gof->makeHopFunc( 
+						HopIndex( gof->opIndex(), MooseGetHop ), index );
+					const OpFunc1Base< A* >* hop = 
+						dynamic_cast< const OpFunc1Base< A* >* >( op2 );
+					cout << "Warning: LookupField::get: cannot cross nodes yet\n";
+					A ret; 
+					return ret;
+					/*
+					assert( hop );
+					// Blocking function.
+					hop->op( tgt.eref(), &ret );
+					delete op2;
+					return ret;
+					*/
+				}
 			}
-			cout << "Warning: LookupField::Get conversion error for " << 
-				dest.id.path() << endl;
+			cout << "Warning: Field::Get conversion error for " << 
+					dest.id.path() << endl;
 			return A();
 		}
 

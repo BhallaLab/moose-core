@@ -371,6 +371,13 @@ template< class L, class A > class LookupGetOpFuncBase: public OpFunc
 			return 0;
 		}
 
+		const OpFunc* makeHopFunc( HopIndex hopIndex, const L& index ) const
+		{
+			// We need to convert the index and pass it into the HopFunc
+			// to pass on to target node.
+			return 0;
+		}
+
 		void opBuffer( const Eref& e, double* buf ) const {
 				// Later figure out how to handle.
 		}

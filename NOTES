@@ -2029,4 +2029,12 @@ Put in code to report all targets of a given SrcFinfo: both the object targets
 and the functions they call. Works but not in parallel.
 Also added Neutral fields to report a list of Value, Src and Dest Finfos.
 Checkin 4973.
+
+Now looking at Hines numbering and setting up to do the efficient linear
+diffusion in dendrites.
+
 ============================================================================
+10 Jan 2014
+Checked in some updates to help the LookupField function. Also added
+the snippet for a test IntFire network.
+
