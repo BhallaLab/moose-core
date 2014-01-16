@@ -54,10 +54,10 @@ class TestNeutral(unittest.TestCase):
         oidlist = [moose.Neutral('x_%d' % (ii), n=2**10) for ii in range(2**6)]
         if sys.byteorder == 'little':
             for oid in oidlist:
-                self.assertEqual(hash(oid), oid.id_.value  << 48 | oid.dindex << 16 | oid.findex)
+                self.assertEqual(hash(oid), oid.vec.value  << 48 | oid.dindex << 16 | oid.findex)
         else:
             for oid in oidlist:
-                self.assertEqual(hash(oid), oid.id_.value  >> 48 | oid.dindex >> 16 | oid.findex)
+                self.assertEqual(hash(oid), oid.vec.value  >> 48 | oid.dindex >> 16 | oid.findex)
             
 
 class TestNeutral1(unittest.TestCase):
@@ -72,7 +72,7 @@ class TestNeutral1(unittest.TestCase):
         self.c = moose.Neutral(self.c_path, self.c_len)
         print self.a_path, self.b_path
         print self.a.path, self.b.path
-        print len(self.c.id_), self.c_len
+        print len(self.c.vec), self.c_len
                 
     def testNew(self):
         self.assertTrue(moose.exists(self.a_path))
@@ -84,10 +84,10 @@ class TestNeutral1(unittest.TestCase):
         self.assertTrue(moose.exists(self.c_path))    
 
     def testDimension(self):
-        self.assertEqual(self.c.id_.shape[0], self.c_len)
+        self.assertEqual(self.c.vec.shape[0], self.c_len)
 
     def testLen(self):
-        self.assertEqual(len(self.c.id_), self.c_len)
+        self.assertEqual(len(self.c.vec), self.c_len)
 
     def testPath(self):
         # Unfortunately the indexing in path seems unstable - in
@@ -108,22 +108,22 @@ class TestNeutral1(unittest.TestCase):
         self.assertRaises(ValueError, moose.Neutral, '/nonexistent_parent/invalid_child')
 
     def testDeletedCopyException(self):
-        moose.delete(self.c.id_)
+        moose.delete(self.c.vec)
         self.assertRaises(ValueError, moose.Neutral, self.c)
 
     def testDeletedGetFieldException(self):
-        moose.delete(self.c.id_)
+        moose.delete(self.c.vec)
         with self.assertRaises(ValueError):
             s = self.c.name
 
     def testDeletedParentException(self):
-        moose.delete(self.a.id_)
+        moose.delete(self.a.vec)
         with self.assertRaises(ValueError):
             s = self.b.name
 
     def testIdObjId(self):
-        id_ = moose.vec(self.a)
-        self.assertEqual(id_, self.a.id_)
+        vec = moose.vec(self.a)
+        self.assertEqual(vec, self.a.vec)
 
     def testCompareId(self):
         """Test the rich comparison between ids"""
@@ -166,7 +166,7 @@ class TestNeutral1(unittest.TestCase):
 #         x = moose.element(self.src1.path)
 #         self.assertTrue(isinstance(x, moose.Neutral))
 #         self.assertEqual(x.path, self.src1.path)
-#         x = moose.element(self.src1.id_)
+#         x = moose.element(self.src1.vec)
 #         self.assertTrue(isinstance(x, moose.Neutral))
 #         self.assertEqual(x.path, self.src1.path)
 #         x = moose.element(self.src1[0].oid_)
@@ -222,7 +222,7 @@ class TestNeutral1(unittest.TestCase):
 class TestDelete(unittest.TestCase):
     def setUp(self):
         self.oid = moose.Neutral('testDelete')
-        moose.delete(self.oid.id_)
+        moose.delete(self.oid.vec)
 
     def testRepr(self):
         with self.assertRaises(ValueError):
@@ -244,8 +244,8 @@ class TestFieldAccess(unittest.TestCase):
 
 # class TestValueFieldTypes(unittest.TestCase):
 #     def setUp(self):
-#         self.id_ = uuid.uuid4().int
-#         self.container = moose.Neutral('/test%d' % (self.id_))
+#         self.vec = uuid.uuid4().int
+#         self.container = moose.Neutral('/test%d' % (self.vec))
 #         cwe = moose.getCwe()
 #         self.model = moose.loadModel('../Demos/Genesis_files/Kholodenko.g', '%s/kholodenko' % (self.container.path))
 #         moose.setCwe(cwe)
