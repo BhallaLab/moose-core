@@ -590,16 +590,15 @@ extern "C" {
             PyErr_SetString(PyExc_IndexError, "Index out of bounds.");
             return NULL;
         }
-        _ObjId * ret = PyObject_New(_ObjId, &ObjIdType);
         ObjId oid(self->id_.path()); // This is just to get the dataIndex of parent
         if (self->id_.element()->hasFields()){
             // How to efficiently get the dataIndex of parent element
             // without creating ObjId from path?
-            ret->oid_ = ObjId(self->id_, oid.dataIndex, index);
+            oid = ObjId(self->id_, oid.dataIndex, index);
         } else {
-            ret->oid_ = ObjId(self->id_, index, 0);
+            oid = ObjId(self->id_, index, 0);
         }
-        return (PyObject*)ret;
+        return oid_to_element(oid);
     }
     
     PyObject * moose_Id_getSlice(_Id * self, Py_ssize_t start, Py_ssize_t end)
@@ -622,13 +621,12 @@ extern "C" {
             return PyTuple_New(0);
         }
         PyObject * ret = PyTuple_New((Py_ssize_t)(end - start));
-        ObjId oid(self->id_.path());
         // Py_XINCREF(ret);
         if (self->id_.element()->hasFields()){ // FieldElement - fieldIndex changing index
             for (unsigned int ii = start; ii < end; ++ii){
-                _ObjId * value = PyObject_New(_ObjId, &ObjIdType);
-                value->oid_ = ObjId(self->id_, oid.dataIndex, ii);
-                if (PyTuple_SetItem(ret, (Py_ssize_t)(ii-start), (PyObject*)value)){
+                ObjId oid(self->id_.path());
+                PyObject * value = oid_to_element(ObjId(self->id_, oid.dataIndex, ii));
+                if (PyTuple_SetItem(ret, (Py_ssize_t)(ii-start), value)){
                     Py_XDECREF(ret);
                     Py_XDECREF(value);
                     PyErr_SetString(PyExc_RuntimeError, "Could assign tuple entry.");
@@ -637,9 +635,8 @@ extern "C" {
             }
         } else { // Ordinary element - dataIndex changing index
             for (unsigned int ii = start; ii < end; ++ii){
-                _ObjId * value = PyObject_New(_ObjId, &ObjIdType);
-                value->oid_ = ObjId(self->id_, ii);
-                if (PyTuple_SetItem(ret, (Py_ssize_t)(ii-start), (PyObject*)value)){
+                PyObject * value = oid_to_element(ObjId(self->id_, ii));
+                if (PyTuple_SetItem(ret, (Py_ssize_t)(ii-start), value)){
                     Py_XDECREF(ret);
                     Py_XDECREF(value);
                     PyErr_SetString(PyExc_RuntimeError, "Could assign tuple entry.");
