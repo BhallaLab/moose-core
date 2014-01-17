@@ -1,7 +1,60 @@
-# -*- coding: utf-8 -*-
-"""This is a tutorial based on an example Upi suggested. The code is
-exported from an ipython notebook and the comments present the
-markdown version of teh tutorial text."""
+# synapse_tutorial.py --- 
+# 
+# Filename: synapse_tutorial.py
+# Description: 
+# Author: Subhasis Ray
+# Maintainer: 
+# Created: Fri Jan 17 09:43:51 2014 (+0530)
+# Version: 
+# Last-Updated: 
+#           By: 
+#     Update #: 0
+# URL: 
+# Keywords: 
+# Compatibility: 
+# 
+# 
+
+# Commentary: 
+# 
+# This is a tutorial based on an example Upi suggested. The code is
+# exported from an ipython notebook and the comments present the
+# markdown version of the tutorial text.
+# 
+
+# Change log:
+# 
+# 
+# 
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation; either version 3, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street, Fifth
+# Floor, Boston, MA 02110-1301, USA.# -*- coding: utf-8 -*-
+
+# 
+# 
+
+# Code:
+
+"""In this example we walk through creation of a vector of IntFire
+elements and setting up synaptic connection between them. Synapse on
+IntFire elements is an example of ElementField - elements that do not
+exist on their own, but only as part of another element. This example
+also illustrates various operations on `vec` objects and
+ElementFields."""
+
+
 
 
 import moose
@@ -98,8 +151,7 @@ print net.synapse.weight
 
 import random # We need this for random number generation
 from numpy import random as nprand
-for item in net.vec:
-    neuron = moose.element(item) # You have to convert each entry of a `vec` into corresponding IntFire element in order to access class-specific fields
+for neuron in net.vec:
     neuron.synapse.num = random.randint(1,10) # create synapse fields with random size between 1 and 10, end points included
     # Below is one (inefficient) way of setting the individual weights of the elements in 'synapse'
     for ii in range(len(neuron.synapse)):
@@ -116,11 +168,13 @@ for item in net.vec:
 
 
 
-for item in net.vec[:5]:
-    neuron = moose.element(item)
+for neuron in net.vec[:5]:
     print 'Delays for synapses on ', neuron.path, ':', neuron.synapse.delay
     print 'Weights for synapses on ', neuron.path, ':', neuron.synapse.weight
 
 
 
+
+# 
+# synapse_tutorial.py ends here
 
