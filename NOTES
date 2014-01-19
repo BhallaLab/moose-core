@@ -2165,4 +2165,42 @@ Trying to compile in features needed to test multinode. Stuck.
 Progress on getting old kinetics stuff to work. Various models load and
 work but not the Kholodenko oscillatory model.
 
+Compared oscillatory trafficking model (which does work) with the same model
+in GENESIS. Output is essentially identical, and speed of MOOSE is within
+about 10% of GENESIS. Tried to run with profiling but the python interface 
+confuses Gprof and it doesn't emit the profiling file gmon.out. My feeling is 
+that 10% should be reachable with some optimization. This would make MOOSE 
+messaging as fast as the super-optmized messaging in the kinetics code in 
+GENESIS - a very good sign.
+
+Did some optimizations of MOOSE, got it to the desired 10% faster. Then reran 
+with the GENESIS graphics turned off. Alas, now the GENESIS version runs 4x
+faster: 5.6 seconds vs. 24.5 seconds.
+Ran in various configs, still get same ratio: GENESIS kkit is about
+4.5 times faster. Confirmed plot output is essentially identical.
+If I look at the gprof logs in bench2.txt, it seems like the Pool::vProcess
+from MOOSE alone takes almost half the time of the entire GENESIS run.
+The other thing of note is that a whole lot of small functions follow
+in MOOSE that are each called between 2 and 100 million times, each
+contributing just a little to a total time of about 15 sec.
+The main Process steps together take just 5.05 sec. Add the clock loop
+(surprisingly large at 1.78 sec) and we're at 6.83sec. 
+The key difference then is that in the optimized GENESIS code, the pointer
+lookups to other objects are an essentially zero time operation. Despite all
+the effort I've put in to the MOOSE messaging, there is a whole lot of lookup
+and function shuffing, which adds up. I can only hope it scales well on many
+nodes.
+Compiling the buildQ branch with optimization to compare.
+This takes about 23.5 sec to do just 1000 sec of runtime. So the
+new version is about 9x faster. Of this almost all is messaging.
+
+Tried to do a similar thing for the recurrent IntFire network.
+Unfortunately, the system throws an error when I increase the runtime.
+
+Currently two errors to tackle:
+- Kholodenko model
+- recurrentIntFire.py set to run for 10 seconds. Suspect the synapse
+event handling again.
+After that, should implement the LookupGet across nodes.
+Then back to the diffusion handler.
 ============================================================================

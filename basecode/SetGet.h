@@ -547,8 +547,7 @@ template< class L, class A > class LookupField: public SetGet2< L, A >
 					const OpFunc1Base< A* >* hop = 
 						dynamic_cast< const OpFunc1Base< A* >* >( op2 );
 					cout << "Warning: LookupField::get: cannot cross nodes yet\n";
-					A ret; 
-					return ret;
+					return A();
 					/*
 					assert( hop );
 					// Blocking function.

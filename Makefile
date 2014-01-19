@@ -301,6 +301,7 @@ SUBDIR = \
 	biophysics \
 	kinetics \
 	mesh \
+	benchmarks \
 	$(SMOLDYN_DIR) \
 	$(SBML_DIR) \
 	$(HCUDA_DIR) \
@@ -322,6 +323,7 @@ OBJLIBS =	\
 	biophysics/_biophysics.o \
 	kinetics/_kinetics.o \
 	mesh/_mesh.o \
+	benchmarks/_benchmarks.o \
 	$(SMOLDYN_LIB) \
 	$(SBML_LIB) \
 	$(HCUDA_LIB) \

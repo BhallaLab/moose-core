@@ -73,6 +73,8 @@ extern void speedTestMultiNodeIntFireNetwork(
 #endif
 // bool benchmarkTests( int argc, char** argv );
 
+extern void mooseBenchmarks( unsigned int option );
+
 //////////////////////////////////////////////////////////////////
 // System-dependent function here
 //////////////////////////////////////////////////////////////////
@@ -133,13 +135,15 @@ void checkChildren( Id parent, const string& info )
 	}
 }
 
-Id init( int argc, char** argv, bool& doUnitTests, bool& doRegressionTests )
+Id init( int argc, char** argv, bool& doUnitTests, bool& doRegressionTests,
+	  unsigned int& benchmark )
 {
 	unsigned int numCores = getNumCores();
 	int numNodes = 1;
 	int myNode = 0;
 	bool isInfinite = 0;
 	int opt;
+	benchmark = 0; // Default, means don't do any benchmarks.
 #ifdef USE_MPI
 	/*
 	// OpenMPI does not use argc or argv.
@@ -170,7 +174,8 @@ Id init( int argc, char** argv, bool& doUnitTests, bool& doRegressionTests )
 			case 'n': // Multiple nodes
 			  numNodes = (unsigned int)atoi( optarg );
 				break;
-			case 'b': // Benchmark: handle later.
+			case 'b': // Benchmark:
+				benchmark = atoi( optarg );
 				break;
 			case 'B': // Benchmark plus dump data: handle later.
 				break;
@@ -320,7 +325,8 @@ int main( int argc, char** argv )
 {
 	bool doUnitTests = 0;
 	bool doRegressionTests = 0;
-	Id shellId = init( argc, argv, doUnitTests, doRegressionTests );
+	unsigned int benchmark = 0;
+	Id shellId = init( argc, argv, doUnitTests, doRegressionTests, benchmark );
 	// Note that the main loop remains the parser loop, though it may
 	// spawn a lot of other stuff.
 	Element* shelle = shellId.element();
@@ -346,9 +352,14 @@ int main( int argc, char** argv )
 		// These are outside unit tests because they happen in optimized
 		// mode, using a command-line argument. As soon as they are done
 		// the system quits, in order to estimate timing.
-		// if ( benchmarkTests( argc, argv ) || quitFlag ) s->doQuit();
-		// else 
-			Shell::launchParser(); // Here we set off a little event loop to poll user input. It deals with the doQuit call too.
+		if ( benchmark != 0 ) {
+			mooseBenchmarks( benchmark );
+			s->doQuit();
+		} else {
+			// Here we set off a little event loop to poll user input. 
+			// It deals with the doQuit call too.
+			Shell::launchParser(); 
+		}
 	} else {
 		PostMaster* p = reinterpret_cast< PostMaster* >( ObjId( 3 ).data());
 		while ( Shell::keepLooping() ) {
