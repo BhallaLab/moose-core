@@ -126,7 +126,7 @@ extern void test_moosemodule();
     
 
 
-extern Id init(int argc, char ** argv, bool& doUnitTests, bool& doRegressionTests);
+extern Id init(int argc, char ** argv, bool& doUnitTests, bool& doRegressionTests, unsigned int& benchmark );
 
 extern void initMsgManagers();
 extern void destroyMsgManagers();
@@ -806,8 +806,9 @@ extern "C" {
         }
         bool dounit = doUnitTests != 0;
         bool doregress = doRegressionTests != 0;
+		unsigned int doBenchmark = 0;
         // Utilize the main::init function which has friend access to Id
-        Id shellId = init(argc, argv, dounit, doregress);
+        Id shellId = init(argc, argv, dounit, doregress, doBenchmark );
         inited = 1;
         Shell * shellPtr = reinterpret_cast<Shell*>(shellId.eref().data());
         if (dounit){

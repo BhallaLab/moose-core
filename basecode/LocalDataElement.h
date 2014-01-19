@@ -115,6 +115,10 @@ class LocalDataElement: public DataElement
 		 */
 		unsigned int numPerNode_;
 
+		/**
+		 * Precomputed value for start index of data on this node.
+		 */
+		unsigned int localDataStart_;
 };
 
 #endif // _LOCAL_DATA_ELEMENT_H

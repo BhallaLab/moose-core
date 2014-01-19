@@ -80,12 +80,14 @@ void Pool::vProcess( const Eref& e, ProcPtr p )
 {
 	// double A = e.sumBuf( aSlot );
 	// double B = e.sumBuf( bSlot );
+		/*
 	if ( n_ < 0 )
 		cout << "nugh" << e.objId().path() << endl;
 	if ( B_ < 0 )
 		cout << "bugh" << e.objId().path() << endl;
 	if ( p->dt < 0 )
 		cout << "tugh" << e.objId().path() << endl;
+		*/
 
 	if ( n_ > EPSILON && B_ > EPSILON ) {
 		double C = exp( -B_ * p->dt / n_ );
