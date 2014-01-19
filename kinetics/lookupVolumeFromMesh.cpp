@@ -39,7 +39,7 @@ double lookupVolumeFromMesh( const Eref& e )
 	if ( compt == ObjId() )
 		return 1.0;
 	return LookupField< unsigned int, double >::
-			get( compt, "meshVolume", e.dataIndex() );
+			get( compt, "voxelVolume", e.dataIndex() );
 }
 
 /**
@@ -126,10 +126,10 @@ double convertConcToNumRateUsingMesh( const Eref& e, const SrcFinfo* pools,
 		conv *= vols[i] * NA;
 	}
 	if ( !doPartialConversion ) {
-		if ( pools->name() == "toSub" ) {
+		if ( pools->name() == "subOut" ) {
 			conv /= vols[0] * NA;
 		} else {
-			const Finfo* f = e.element()->cinfo()->findFinfo( "toSub" );
+			const Finfo* f = e.element()->cinfo()->findFinfo( "subOut" );
 			assert( f );
 			const SrcFinfo* toSub = dynamic_cast< const SrcFinfo* >( f );
 			assert( toSub );
