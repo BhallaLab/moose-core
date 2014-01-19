@@ -58,9 +58,10 @@ const map<string, string>& getArgMap()
         if (isInfinite != NULL){
          argmap.insert(pair<string, string>("INFINITE", string(isInfinite)));
         }
-        else {
-            argmap.insert(pair<string, string>("INFINITE", "0"));
-        }   
+        // else {
+        //     argmap.insert(pair<string, string>("INFINITE", "0"));
+        // }
+        
         char * numCores = getenv("NUMCORES");
         if (numCores != NULL){
             argmap.insert(pair<string, string>("NUMCORES", string(numCores)));
@@ -73,9 +74,9 @@ const map<string, string>& getArgMap()
         char * numNodes = getenv("NUMNODES");
         if (numNodes != NULL){
             argmap.insert(pair<string, string>("NUMNODES", string(numNodes)));
-        } else {
-            argmap.insert(pair<string, string>("NUMNODES", "1"));
-        }
+        } // else {
+        //     argmap.insert(pair<string, string>("NUMNODES", "1"));
+        // }
         char * numProcessThreads = getenv("NUMPTHREADS");
         if (numProcessThreads != NULL){
             argmap.insert(pair<string, string>("NUMPTHREADS", string(numProcessThreads)));
@@ -83,21 +84,21 @@ const map<string, string>& getArgMap()
         char * doQuit = getenv("QUIT");
         if (doQuit != NULL){
             argmap.insert(pair<string, string>("QUIT", string(doQuit)));
-        } else {
-            argmap.insert(pair<string, string>("QUIT", "0"));
-        }
+        } // else {
+        //     argmap.insert(pair<string, string>("QUIT", "0"));
+        // }
         char * doUnitTests = getenv("DOUNITTESTS");
         if (doUnitTests != NULL){
             argmap.insert(pair<string, string>("DOUNITTESTS", string(doUnitTests)));
-        } else {
-            argmap.insert(pair<string, string>("DOUNITTESTS", "0"));
-        }
+        } // else {
+        //     argmap.insert(pair<string, string>("DOUNITTESTS", "0"));
+        // }
         char * doRegressionTests = getenv("DOREGRESSIONTESTS");
         if (doRegressionTests != NULL){
             argmap.insert(pair<string, string>("DOREGRESSIONTESTS", string(doRegressionTests)));
-        } else {
-            argmap.insert(pair<string, string>("DOREGRESSIONTESTS", "0"));
-        }
+        } // else {
+        //     argmap.insert(pair<string, string>("DOREGRESSIONTESTS", "0"));
+        // }
         
     }
     return argmap;

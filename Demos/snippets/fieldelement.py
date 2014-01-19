@@ -33,6 +33,56 @@ IndexError: moose.ElementField.getItem: index out of bounds.
 <moose.Synapse: id=124, dataId=1, path=/a/synapse[0]>
 >>> 
 
+----------------------
+Subha, Tue Jan  7 11:58:10 IST 2014
+
+Documentation/discussion on accessing synapses (ElementField):
+
+A `synapse` is an ElementField of an IntFire element. The following
+example is taken from Upi and modified to reflect the current API::
+
+   network = moose.IntFire('/network', size)
+   network.vec.buffferTime = [delayMax * 2] * size   # `vec` allows vectorized access to fields on all `element`s
+
+
+IntFire elements have an ElementField called `synapse`. You can access
+the first `synapse` element on the first IntFire element with the
+following::
+
+   synapse = moose.element('/network/synapse') 
+
+This is equivalent to::
+
+   synapse = moose.element('/network[0]/synapse[0]')
+
+`synapse` is just another element but by default its length is 0
+unless you set the number of elements in it either explicitly::
+
+   synapse.num = 10
+
+or in an indirect way::
+
+mid = moose.connect( network, 'spike', synapse, 'addSpike', 'Sparse' )
+
+mid.setRandomConnectivity( connectionProbability, 5489 )
+network.vec.Vm = [(Vmax*random.random()) for r in range(size)]
+network.vec.thresh = thresh
+network.vec.refractoryPeriod = refractoryPeriod
+numSynVec = network.numSynapses
+numTotSym = sum( numSynVec )
+netvec = network.vec
+for i in range( size ):
+        synvec = netvec[i].synapse.vec
+        synvec.weight = [ (random.random() * weightMax) for r in range( synvec.len )]
+        synvec.delay = [ (delayMin + random.random() * delayMax) for r in range( synvec.len )]
+
+moose.useClock( '/network', 'process', 0 )
+moose.setClock( 0, timestep )
+moose.setClock( 9, timestep )
+moose.reinit()
+network.vec.Vm = [(Vmax*random.random()) for r in range(size)]
+moose.start(runtime)
+print network.vec[100].Vm, network.vec[900].Vm
 
 """
 import sys
