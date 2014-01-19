@@ -140,6 +140,12 @@ class DataElement: public Element
 		 */
 		unsigned int numLocalData_;
 
+		/**
+		 * This is the size of the data. Can get from cinfo()->dinfo(),
+		 * but this is called so often than it makes a measurable 
+		 * difference.
+		 */
+		unsigned int size_;
 };
 
 #endif // _DATA_ELEMENT_H

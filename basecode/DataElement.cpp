@@ -17,6 +17,7 @@ DataElement::DataElement( Id id, const Cinfo* c, const string& name,
 {
 	data_ = c->dinfo()->allocData( numData );
 	numLocalData_ = numData;
+	size_ = cinfo()->dinfo()->size();
 	c->postCreationFunc( id, this );
 }
 
@@ -37,6 +38,7 @@ DataElement::DataElement( Id id, const Element* orig,
 		Element( id, orig->cinfo(), orig->getName() )
 {
 	numLocalData_ = n;
+	size_ = cinfo()->dinfo()->size();
 	data_ = cinfo()->dinfo()->copyData( orig->data( 0 ), orig->numData(), 
 					numLocalData_, startEntry );
 	// cinfo_->postCreationFunc( id, this );
@@ -80,7 +82,8 @@ unsigned int DataElement::totNumLocalField() const
 char* DataElement::data( unsigned int rawIndex, unsigned int fieldIndex ) const
 {
 	assert( rawIndex < numLocalData_ );
-	return data_ + ( rawIndex * cinfo()->dinfo()->size() );
+	// return data_ + ( rawIndex * cinfo()->dinfo()->size() );
+	return data_ + rawIndex * size_;
 }
 
 /**
@@ -108,4 +111,5 @@ void DataElement::zombieSwap( const Cinfo* zCinfo )
 	cinfo()->dinfo()->destroyData( data_ );
 	data_ = zCinfo->dinfo()->allocData( numLocalData_ );
 	replaceCinfo( zCinfo );
+	size_ = zCinfo->dinfo()->size();
 }
