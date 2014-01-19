@@ -2038,3 +2038,131 @@ diffusion in dendrites.
 Checked in some updates to help the LookupField function. Also added
 the snippet for a test IntFire network.
 
+subha@chamcham:~/src/moose_async13/tests/python$ mpiexec -host localhost -np 2 /usr/bin/python test_pymoose.py : -np 1 ../../moose
+
+Tried lots of variations on this, none were able to launch it properly.
+============================================================================
+11 Jan 2014.
+
+Estimating balancing
+Say 1 micron compt, so total of 5000 compts.
+Say 10 molecules diffuse in all. So 50K updates per dt.
+Say 1/dt = D/dx^2, so 1/dt = 10e-12/1e-12. So dt = 0.1. 
+Say 100 compts have reac systems with 250 mols in each. So 25K updates per dt.
+Comparable. But reaction dt may be longer.
+
+Designing MeshEntries.
+	Current design uses DataIndex for entry arrays.
+	Could better use FieldIndex. But this would force the model
+	to be on a single node. Unless we separate the meshing info from the
+	chemical solver.
+
+============================================================================
+12 Jan 2014.
+
+Multi-solver design.
+1. elec dt <= diffusion dt < chem dt.
+2. I'm coupling elec and chem solvers through adaptors plus the regular
+	object structure. Should try to do same for chem and diffusion.
+3. The object decomposition should favour the more intensive solver. In
+	this case diffusion. 
+4. How does one define an object that is hosted by more than one solver?
+	a) Have the solvers talk to each other directly, and only one solver
+	talks to the object. There should be a unique representation of object.
+	b)  Have multiple representations of the object coupled by adaptors
+		or even regular messages.
+	c) Have object proxies: equivalent to b) with implicit adaptors.
+	d) Have zombies that talk to two solvers at once.
+
+Specific use case
+- Put diffusion solver so that each node does subset of molecules.
+- Put chem solver so that each node does subset of spatial compts
+- Put zombie molecules decomposed as per diffusion.
+	- Each zombie has pointer to solver.
+		Should I derive all chem solvers from PoolSolverBase which is 
+		required to know how to talk to pools?
+		Should I derive the solver from the PoolBase?
+	- Use a special Element class that puts the contents on a specific
+		node, and has just a single pointer for the data. This
+		pointer is a subclass of PoolBase and it wraps the mesh, 
+		with the additional index to identify which species it is.
+		So all access functions are directed eventually to the mesh.
+		Nodes lacking data don't need any pointer at all, as the
+		access functions should never be called for them. But
+		perhaps the mesh base should specify this.
+	- How do I provide the extra fields in the Zombie, for xyz etc? The
+		subclass of PoolBase could do this.
+	- I should perhaps separate the mesh definition from the diffusion 
+		solver?
+		Or are the two so closely dependent that it doesn't make sense?
+		- I would want to have a different numerical method for
+		voxelized stochastic reac-diff.
+		- Could derive a compartment mesh class from a base that 
+		provides all the mols and vols. This is all that the zombie 
+		needs to know.
+	- Note that this arrangement will mean very straightforward volume
+		conversions for pools. Reacs will remain messy.
+- The chem solver matrix set up needs only elements and msgs.
+	- The chem solver rate parameters need only the reac rates which are
+- The core chem solver just solves chemical kinetics for a single compt.
+	- It needs to take updates for changes due to diffusion.
+	- It needs to solve stuff for cross-compt reactions. 
+- The chem multicompt solver just runs the core solver through many compartments
+- MeshEntries as FieldElements vs DataElements
+	- They depend on what the Compartment is doing
+	- They only have volume and xyz, and diffusion related parameters,
+		possibly other things that can be
+		computed rather than stored. But most of the diffusion terms
+		are now used internally when we do derived classes for diffn.
+	- The parent Compartment may scale them up and down as per need.
+	- They don't send or receive any messages any more.
+
+- Updates for changes due to diffusion:
+	- Gather: kinetic solver on each node needs to pick up concs for all
+	species, for the compts that the solver handles. Best done as a 
+	'send' call from the molecules. The messaging system knows how to
+	partition.
+	- Compute: Kinetic solver could take latest concs or average with 
+	previous concs, compute value at next step.
+	- Scatter: Kinetic solver now sends values back.
+	This design assumes that the kinetic solver has its own entire
+	grue of zombies to act as a front for all these messages.
+		
+What it comes down to is that either the solvers have specialized messages,
+	or they each manage the entire slew of zombies.
+	- For specialized messages, it would have to be something like:
+		- Vector of slice of indices/molecules for that node
+		- Ability to send to specific node, preferably with node# as
+			argument to the 'send' command.
+			
+
+Summary:
+- Have only the compartment manage the zombies.
+- Later derive diffusion engines from the compartment class.
+- Build special Element class to put contents on specific nodes, and use
+	single pointer for the data. 
+- Build Pool and other zombies
+- Port over chem solver
+- Add in math expression evaluator
+- Implement node-specific messages.
+- Add in messages between compartment and kinetic solvers that scale to
+	multinode diffusion.
+- Not entirely clear what the MeshEntries do anymore. Just readonly volume 
+	terms, possibly some interface to the display etc. But that should
+	really be done by the geometry.
+
+
+.....................................................................
+Minor progress, began compilation of mesh directory. Most files are still
+not compiled. But I can start with kinetic setup now.
+
+============================================================================
+14 Jan 2014
+Trying to compile in features needed to test multinode. Stuck.
+
+============================================================================
+19 Jan 2014
+Progress on getting old kinetics stuff to work. Various models load and
+work but not the Kholodenko oscillatory model.
+
+============================================================================

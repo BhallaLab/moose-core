@@ -23,6 +23,7 @@ def makeModel():
 		compartment = moose.CubeMesh( '/model/compartment' )
 		compartment.volume = 1e-15
 		# the mesh is created automatically by the compartment
+		moose.le( '/model/compartment' )
 		mesh = moose.element( '/model/compartment/mesh' ) 
 
 		# create molecules and reactions

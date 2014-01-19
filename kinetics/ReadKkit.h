@@ -176,11 +176,6 @@ class ReadKkit
 		 */
 		string cleanPath( const string& path ) const;
 
-		/**
-		 * make kinetics and graphs elements.
-		 */
-		void makeStandardElements();
-
 	private:
 		string basePath_; /// Base path into which entire kkit model will go
 		Id baseId_; /// Base Id onto which entire kkit model will go.

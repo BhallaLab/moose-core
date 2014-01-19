@@ -14,9 +14,9 @@
 #include "LoadModels.h" // For the ModelType enum.
 /*
 #include "../biophysics/ReadCell.h"
+*/
 #include "../kinetics/ReadKkit.h"
 #include "../kinetics/ReadCspace.h"
-*/
 
 ModelType findModelType( string filename, ifstream& fin, string& line )
 {
@@ -138,29 +138,18 @@ Id Shell::doLoadModel( const string& fileName, const string& modelPath, const st
 		case KKIT: 
 			{
 				string sc = solverClass;
-				/*
-				if ( solverClass == "" || solverClass == "gsl" )
-					sc = "Stoich";
-					*/
-		//		ReadKkit rk;
-		//		Id ret = rk.read( fileName, modelName, parentId, sc);
-				/*
-				if ( solverClass == "gsl" ) { // set up kkit run
-					rk.setupGslRun();
-				}
+				ReadKkit rk;
+				Id ret = rk.read( fileName, modelName, parentId, sc);
 				return ret;
-				*/
-				return Id();
 			}
 			break;
 		case CSPACE:
 			{
 				string sc = solverClass;
-		//		ReadCspace rc;
-		//		Id ret = rc.readModelString( line, modelName, parentId, sc);
-		//		rc.makePlots( 1.0 );
-		//		return ret;
-				return Id();
+				ReadCspace rc;
+				Id ret = rc.readModelString( line, modelName, parentId, sc);
+				rc.makePlots( 1.0 );
+				return ret;
 			}
 		case UNKNOWN:
 		default:
