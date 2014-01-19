@@ -52,7 +52,7 @@ import moose
 
 def test_one_to_one(size=2):
     pg = moose.PulseGen('pulsegen', size)
-    for ix, ii in enumerate(pg.id_):
+    for ix, ii in enumerate(pg.vec):
         pulse = moose.element(ii)
         pulse.delay[0] = 1.0
         pulse.width[0] = 2.0
@@ -62,7 +62,7 @@ def test_one_to_one(size=2):
     moose.setClock(0, 0.1)
     moose.useClock(0, '/##', 'process')
     moose.start(5)
-    for ii in tab.id_:
+    for ii in tab.vec:
         t = moose.Table(ii).vec
         pylab.plot(t)
     pylab.show()

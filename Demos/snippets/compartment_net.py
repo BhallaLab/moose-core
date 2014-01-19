@@ -281,15 +281,15 @@ if __name__ == '__main__':
     moose.reinit()
     moose.start(simtime)
     plt.subplot(221)
-    for oid in vm_a.id_:
+    for oid in vm_a.vec:
         plt.plot(oid.vec, label=oid.path)
     plt.legend()
     plt.subplot(223)
-    for oid in vm_b.id_:
+    for oid in vm_b.vec:
         plt.plot(oid.vec, label=oid.path)
     plt.legend()
     plt.subplot(224)
-    for ii in gksyn_b.id_:
+    for ii in gksyn_b.vec:
         plt.plot(ii.vec, label=ii.path)
     plt.legend()
     plt.show()
