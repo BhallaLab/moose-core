@@ -300,6 +300,7 @@ SUBDIR = \
 	external/muparser \
 	biophysics \
 	kinetics \
+	mesh \
 	$(SMOLDYN_DIR) \
 	$(SBML_DIR) \
 	$(HCUDA_DIR) \
@@ -320,6 +321,7 @@ OBJLIBS =	\
 	external/muparser/_muparser.o \
 	biophysics/_biophysics.o \
 	kinetics/_kinetics.o \
+	mesh/_mesh.o \
 	$(SMOLDYN_LIB) \
 	$(SBML_LIB) \
 	$(HCUDA_LIB) \

@@ -18,6 +18,7 @@
 #include "BufPool.h"
 #include "ReacBase.h"
 #include "EnzBase.h"
+#include "lookupVolumeFromMesh.h"
 
 #include "../shell/Shell.h"
 
@@ -108,6 +109,27 @@ void ReadKkit::setMoveOntoCompartment( bool v )
 //////////////////////////////////////////////////////////////////
 // The read functions.
 //////////////////////////////////////////////////////////////////
+Id  makeStandardElements( Id pa, const string& modelname )
+{
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	Id mgr = shell->doCreate( "Neutral", pa, modelname, 1, MooseGlobal );
+	Id kinetics = 
+		shell->doCreate( "CubeMesh", mgr, "kinetics", 1,  MooseGlobal );
+		SetGet2< double, unsigned int >::set( kinetics, "buildDefaultMesh", 1e-15, 1 );
+	assert( kinetics != Id() );
+
+	Id graphs = shell->doCreate( "Neutral", mgr, "graphs", 1, MooseGlobal);
+	assert( graphs != Id() );
+	Id moregraphs = shell->doCreate( "Neutral", mgr, "moregraphs", 1, MooseGlobal );
+
+	Id geometry = shell->doCreate( "Neutral", mgr, "geometry", 1, MooseGlobal );
+	assert( geometry != Id() );
+
+	Id groups = 
+		shell->doCreate( "Neutral", mgr, "groups", 1, MooseGlobal );
+	assert( groups != Id() );
+	return mgr;
+}
 /**
  * The readcell function implements the old GENESIS cellreader
  * functionality. Although it is really a parser operation, I
@@ -129,12 +151,9 @@ Id ReadKkit::read(
 		moveOntoCompartment_ = true;
 	}
 
-	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
-	Id mgr = s->doCreate( "SimManager", pa, modelname, 1, MooseGlobal );
+	Shell* s = reinterpret_cast< Shell* >( ObjId().data() );
+	Id mgr = makeStandardElements( pa, modelname );
 	assert( mgr != Id() );
-	SetGet1< string >::set( mgr, "makeStandardElements", "CubeMesh" );
-	Id moregraphs = s->doCreate( "Neutral", mgr, "moregraphs", 1, MooseGlobal );
-	assert( moregraphs != Id() );
 
 	baseId_ = mgr;
 	basePath_ = mgr.path();
@@ -149,12 +168,23 @@ Id ReadKkit::read(
 
 	convertParametersToConcUnits();
 
+	s->doSetClock( 4, simdt_ );
+	s->doSetClock( 8, plotdt_ );
+	
+	string simpath = basePath_ + "/kinetics/##[]";
+	s->doUseClock( simpath, "process", 4 );
+	string plotpath = basePath_ + "/graphs/##[TYPE=Table]," +
+			basePath_ + "/moregraphs/##[TYPE=Table]";
+	s->doUseClock( plotpath, "process", 8 );
+
+	/*
 	s->setCwe( mgr );
 	Field< double >::set( mgr, "plotDt", plotdt_ );
 	Field< double >::set( mgr, "simDt", simdt_ );
 	Field< double >::set( mgr, "runTime", maxtime_ );
 	Field< double >::set( mgr, "version", version_ );
 	SetGet1< string >::set( mgr, "build", method );
+	*/
 	s->doReinit();
 	return mgr;
 }
@@ -598,45 +628,17 @@ void ReadKkit::assignPoolCompartments()
 		// compartments_.push_back( comptId );
 		for ( vector< Id >::iterator j = volCategories_[i].begin();
 			j != volCategories_[i].end(); ++j ) {
-			// get the group Ids that have a different vol in them
-			ObjId ret = shell_->doAddMsg( "OneToOne", 
-				ObjId( *j, 0 ), "mesh",
-				ObjId( meshId, 0 ), "mesh" );
-			assert( ret != ObjId() );
 			if ( moveOntoCompartment_ )
-				shell_->innerMove( *j, comptId );
+				shell_->doMove( *j, comptId );
 		}
-	}
-
-	// Patch up mesh entries for enz cplx molecules.
-	// Don't have to moveOntoCompartment: 
-	// They should already have moved to the correct place when the
-	// parent enzyme molecule was moved, above.
-	for ( unsigned int i = 0 ; i < enzCplxMols_.size(); ++i ) {
-		Id pa = enzCplxMols_[i].first;
-		const Finfo* meshMsgFinfo = 
-			pa.element()->cinfo()->findFinfo( "requestVolume" );
-		vector< Id > meshVec;
-		unsigned int numMesh = pa.element()->getNeighbours( meshVec,
-			meshMsgFinfo );
-		assert( numMesh == 1 );
-		Id meshId = meshVec[0];
-		ObjId ret = shell_->doAddMsg( "OneToOne", 
-			ObjId( enzCplxMols_[i].second, 0 ), "mesh",
-			ObjId( meshId, 0 ), "mesh" );
-		assert( ret != ObjId() );
 	}
 }
 
-Id findMeshOfReac( Id reac )
+Id findParentComptOfReac( Id reac )
 {
 	static const Finfo* subFinfo =
-		   	ReacBase::initCinfo()->findFinfo( "toSub" );
+		   	ReacBase::initCinfo()->findFinfo( "subOut" );
 	assert( subFinfo );
-
-	static const Finfo* meshEntryFinfo =
-		   	PoolBase::initCinfo()->findFinfo( "requestVolume" );
-	assert( meshEntryFinfo );
 
 		vector< Id > subVec;
 		unsigned int numSub = 
@@ -644,16 +646,7 @@ Id findMeshOfReac( Id reac )
 		assert( numSub > 0 );
 		// For now just put the reac in the compt belonging to the 
 		// first substrate
-		vector< Id > meshEntries;
-		subVec[0].element()->getNeighbours( meshEntries, meshEntryFinfo );
-		assert (meshEntries.size() > 0 );
-
-		/*
-		ObjId mesh = Neutral::parent( meshEntries[0].eref() );
-
-		return mesh.id;
-		*/
-		return meshEntries[0];
+		return getCompt( subVec[0] );
 }
 
 /**
@@ -664,24 +657,11 @@ Id findMeshOfReac( Id reac )
  */
 void ReadKkit::assignReacCompartments()
 {
-	// Temporarily just assign them to the base compartment.
-	// Possibly use compartments_ vector later.
-		/*
-	Id kinId = Neutral::child( baseId_.eref(), "kinetics" );
-	assert( kinId != Id() );
-	Id meshId = Neutral::child( kinId.eref(), "mesh" );
-	assert( meshId != Id() );
-	*/
 	for ( map< string, Id >::iterator i = reacIds_.begin(); 
 		i != reacIds_.end(); ++i ) {
-		Id meshId = findMeshOfReac( i->second );
-		ObjId ret = shell_->doAddMsg( "Single", 
-			ObjId( meshId, 0 ), "remeshReacs",
-			ObjId( i->second, 0 ), "remesh" );
-		assert( ret != ObjId() );
+		Id compt = findParentComptOfReac( i->second );
 		if ( moveOntoCompartment_ ) {
-			Id compt = Neutral::parent( meshId );
-			shell_->innerMove( i->second, compt );
+			shell_->doMove( i->second, compt );
 		}
 	}
 }
@@ -695,27 +675,15 @@ void ReadKkit::assignReacCompartments()
 Id findMeshOfEnz( Id enz )
 {
 	static const Finfo* enzFinfo =
-		   	EnzBase::initCinfo()->findFinfo( "enzDest" );
+		   	EnzBase::initCinfo()->findFinfo( "enzOut" );
 	assert( enzFinfo );
-
-	static const Finfo* meshEntryFinfo =
-		   	PoolBase::initCinfo()->findFinfo( "requestVolume" );
-	assert( meshEntryFinfo );
 
 		vector< Id > enzVec;
 		unsigned int numEnz = 
 				enz.element()->getNeighbours( enzVec, enzFinfo );
 		assert( numEnz == 1 );
 		vector< Id > meshEntries;
-		enzVec[0].element()->getNeighbours( meshEntries, meshEntryFinfo );
-		assert (meshEntries.size() > 0 );
-
-		/*
-		ObjId mesh = Neutral::parent( meshEntries[0].eref() );
-
-		return mesh.id;
-		*/
-		return meshEntries[0];
+		return getCompt( enzVec[0] );
 }
 
 /**
@@ -725,24 +693,7 @@ Id findMeshOfEnz( Id enz )
  * be informed.
  */
 void ReadKkit::assignEnzCompartments()
-{
-	// Temporarily just assign them to the base compartment.
-	// Possibly use compartments_ vector later.
-		/*
-	Id kinId = Neutral::child( baseId_.eref(), "kinetics" );
-	assert( kinId != Id() );
-	Id meshId = Neutral::child( kinId.eref(), "mesh" );
-	assert( meshId != Id() );
-	*/
-	for ( map< string, Id >::iterator i = enzIds_.begin(); 
-		i != enzIds_.end(); ++i ) {
-		Id meshId = findMeshOfEnz( i->second );
-		ObjId ret = shell_->doAddMsg( "Single", 
-			ObjId( meshId, 0 ), "remeshReacs",
-			ObjId( i->second, 0 ), "remesh" );
-		assert( ret != ObjId() );
-		// Should not have to move compartments, the parent pool will move.
-	}
+{;
 }
 
 /**
@@ -752,20 +703,7 @@ void ReadKkit::assignEnzCompartments()
  * be informed.
  */
 void ReadKkit::assignMMenzCompartments()
-{
-	// Temporarily just assign them to the base compartment.
-	// Possibly use compartments_ vector later.
-	Id kinId = Neutral::child( baseId_.eref(), "kinetics" );
-	assert( kinId != Id() );
-	Id meshId = Neutral::child( kinId.eref(), "mesh" );
-	assert( meshId != Id() );
-	for ( map< string, Id >::iterator i = mmEnzIds_.begin(); 
-		i != mmEnzIds_.end(); ++i ) {
-		ObjId ret = shell_->doAddMsg( "Single", 
-			ObjId( meshId, 0 ), "remeshReacs",
-			ObjId( i->second, 0 ), "remesh" );
-		assert( ret != ObjId() );
-	}
+{;
 }
 
 Id ReadKkit::buildEnz( const vector< string >& args )
@@ -1300,11 +1238,11 @@ void ReadKkit::addmsg( const vector< string >& args)
 
 		if ( args[4] == "Co" || args[4] == "CoComplex" ) {
 			ObjId ret = shell_->doAddMsg( "Single",
-				plot, "requestData", pool, "get_conc" );
+				plot, "requestOut", pool, "getConc" );
 			assert( ret != ObjId() );
 		} else if ( args[4] == "n" || args[4] == "nComplex") {
 			ObjId ret = shell_->doAddMsg( "Single",
-				plot, "requestData", pool, "get_n" );
+				plot, "requestOut", pool, "getN" );
 			assert( ret != ObjId() );
 		} else {
 			cout << "Unknown PLOT msg field '" << args[4] << "'\n";
