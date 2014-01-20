@@ -67,6 +67,24 @@ def make_network():
 	t1 = time.time()
 	print 'starting'
 	moose.start(runtime)
+	print 'starting 2'
+	moose.start(runtime)
+	print 'starting 3'
+	moose.start(runtime)
+	print 'starting 4'
+	moose.start(runtime)
+	print 'starting 5'
+	moose.start(runtime)
+	print 'starting 6'
+	moose.start(runtime)
+	print 'starting 7'
+	moose.start(runtime)
+	print 'starting 8'
+	moose.start(runtime)
+	print 'starting 9'
+	moose.start(runtime)
+	print 'starting 10'
+	#moose.start(runtime)
 	print 'runtime, t = ', time.time() - t1
 	print network.vec.Vm[100:103], network.vec.Vm[900:903]
 
