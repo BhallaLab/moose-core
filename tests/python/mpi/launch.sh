@@ -1,2 +1,2 @@
-mpirun -np 2 xterm -e gdb python
+mpirun -np 1 xterm -e gdb --args python recurrentIntFire.py : -np 1 xterm -e gdb ../../../moose
 

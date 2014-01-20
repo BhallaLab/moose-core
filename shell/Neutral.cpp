@@ -108,7 +108,7 @@ const Cinfo* Neutral::initCinfo()
 			&Neutral::getIncomingMsgs );
 
 	static ReadOnlyLookupElementValueFinfo< Neutral, string, vector< Id > > neighbours( 
-		"neighbours",
+		"neighbors",
 		"Ids of Elements connected this Element on specified field.", 
 			&Neutral::getNeighbours );
 
