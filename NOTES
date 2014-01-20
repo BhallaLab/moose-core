@@ -2196,11 +2196,24 @@ new version is about 9x faster. Of this almost all is messaging.
 
 Tried to do a similar thing for the recurrent IntFire network.
 Unfortunately, the system throws an error when I increase the runtime.
+Checkin 4995.
 
 Currently two errors to tackle:
-- Kholodenko model
-- recurrentIntFire.py set to run for 10 seconds. Suspect the synapse
-event handling again.
-After that, should implement the LookupGet across nodes.
-Then back to the diffusion handler.
+- Kholodenko model doesn't work: wrong output.
+- recurrentIntFire.py crashes when set to run for 10 seconds. Suspect the 
+	synapse event handling again.
+Implementation things to handle:
+- LookupGet across nodes.
+- Diffusion handler.
+- Element that puts everything on one, specified node
+- GlobalFields: things that need to be updated on all nodes even if
+	the Element is local.
+- Getting specific values in a vector across all nodes. For example,
+	the # of elements.
+- Moving objects between nodes.
+Porting:
+- Ksolver
+- Biophysics directory
+- Hsolver.
+
 ============================================================================
