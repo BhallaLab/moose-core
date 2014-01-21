@@ -52,7 +52,7 @@ ReadKkit::ReadKkit()
 	defaultVol_( 1 ),
 	version_( 11 ),
 	initdumpVersion_( 3 ),
-	moveOntoCompartment_( false ),
+	moveOntoCompartment_( true ),
 	numCompartments_( 0 ),
 	numPools_( 0 ),
 	numReacs_( 0 ),
