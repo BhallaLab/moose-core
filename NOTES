@@ -2217,3 +2217,7 @@ Porting:
 - Hsolver.
 
 ============================================================================
+20 Jan 2013
+Subha has gotten Pymoose to start up on multiple nodes. But the
+test recurrentIntFireNetwork.py fails due to an Id on node 1 not
+having its Element yet defined.
