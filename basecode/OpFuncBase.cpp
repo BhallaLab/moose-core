@@ -44,3 +44,28 @@ const OpFunc* OpFunc::lookop( unsigned int opIndex )
 	assert ( opIndex < ops().size() );
 	return ops()[ opIndex ];
 }
+
+// Static function
+unsigned int OpFunc::rebuildOpIndex()
+{
+	for( vector< OpFunc* >::iterator 
+		i = ops().begin(); i != ops().end(); ++i ) {
+		(*i)->opIndex_ = ~0U;
+	}
+	return ops().size();
+}
+
+bool OpFunc::setIndex( unsigned int i ) // Should only be called by Cinfo.
+{
+	if( opIndex_ == ~0U ) {
+		opIndex_ = i;
+		ops()[i] = this;
+		return true;
+	}
+	/*
+	cout << " OpFunc " << rttiType() << 
+			" already setup. (old,new) index = (" << 
+			opIndex_ << ", " << i << " )\n";
+			*/
+	return false;
+}

@@ -11,6 +11,9 @@
 #include "../shell/Shell.h"
 #include "Dinfo.h"
 
+// Static declaration.
+unsigned int Cinfo::numCoreOpFunc_ = 0;
+
 Cinfo::Cinfo( const string& name,
 				const Cinfo* baseCinfo,
 				Finfo** finfoArray,
@@ -559,3 +562,26 @@ const string& Cinfo::destFinfoName( FuncId fid ) const
 	return err;
 }
 
+////////////////////////////////////////////////////////////////////
+
+// Static function. Should be called soonest after static initialization.
+void Cinfo::rebuildOpIndex()
+{
+	numCoreOpFunc_ = OpFunc::rebuildOpIndex();
+	unsigned int num = 0;
+	for ( map< string, Cinfo* >::iterator
+					i = cinfoMap().begin(); i != cinfoMap().end(); ++i )
+	{
+		vector< const OpFunc* >& vec = i->second->funcs_;
+		for( vector< const OpFunc* >::iterator
+				j = vec.begin(); j != vec.end(); ++j )
+		{
+			OpFunc* of = const_cast< OpFunc* >( *j );
+			num += of->setIndex( num );
+		}
+	}
+	cout << "on node " << Shell::myNode() << ": oldNumOpFunc = " <<
+			numCoreOpFunc_ << ", new = " << num << endl;
+	// assert( num == numCoreOpFunc_ );
+	numCoreOpFunc_ = num;
+}

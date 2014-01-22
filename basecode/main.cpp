@@ -144,6 +144,7 @@ Id init( int argc, char** argv, bool& doUnitTests, bool& doRegressionTests,
 	bool isInfinite = 0;
 	int opt;
 	benchmark = 0; // Default, means don't do any benchmarks.
+	Cinfo::rebuildOpIndex();
 #ifdef USE_MPI
 	/*
 	// OpenMPI does not use argc or argv.
@@ -326,6 +327,8 @@ int main( int argc, char** argv )
 	bool doUnitTests = 0;
 	bool doRegressionTests = 0;
 	unsigned int benchmark = 0;
+	// This reorders the OpFunc to Fid mapping to ensure it is node and
+	// compiler independent.
 	Id shellId = init( argc, argv, doUnitTests, doRegressionTests, benchmark );
 	// Note that the main loop remains the parser loop, though it may
 	// spawn a lot of other stuff.
