@@ -1662,7 +1662,7 @@ PyObject* set_destFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type
         if (!PyArg_ParseTuple(args, "s:moose_ObjId_getNeighbors", &field)){
             return NULL;
         }
-        vector< Id > val = LookupField< string, vector< Id > >::get(self->oid_, "neighbours", string(field));
+        vector< Id > val = LookupField< string, vector< Id > >::get(self->oid_, "neighbors", string(field));
     
         PyObject * ret = PyTuple_New((Py_ssize_t)val.size());
                 
