@@ -21,7 +21,7 @@ def make_network():
 	nprand.seed( 456 )
 	t0 = time.time()
 
-	network = moose.IntFire( 'network', size );
+	network = moose.IntFire( 'network', size, 1 );
 	network.vec.bufferTime = [delayMax * 2] * size
 	moose.le( '/network' )
 	network.vec.numSynapses = [1] * size

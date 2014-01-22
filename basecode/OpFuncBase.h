@@ -64,6 +64,11 @@ class OpFunc
 		unsigned int opIndex() const {
 			return opIndex_;
 		}
+
+		/// Used when rebuilding the Fid->OpFunc mapping.
+		bool setIndex( unsigned int i );
+		/// cleans out the entire Ops vector. Returns size of orig vector.
+		static unsigned int rebuildOpIndex();
 	private:
 		unsigned int opIndex_;
 		static vector< OpFunc* >& ops();

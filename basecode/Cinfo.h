@@ -255,6 +255,13 @@ class Cinfo
 			static void makeCinfoElements( Id parent );
 
 			/**
+			 * Ensures that the Func Ids are always in a fixed order,
+			 * regardless of the sequence of static initialization of
+			 * Cinfos.
+			 */
+			static void rebuildOpIndex();
+
+			/**
 			 * Initializer for the MOOSE fields for Cinfo
 			 */
 			static const Cinfo* initCinfo();
@@ -300,6 +307,10 @@ class Cinfo
 			 */
 			vector< const Finfo* > postCreationFinfos_;
 			vector< const OpFunc* > funcs_;
+
+			// Useful to know in case we have transient OpFuncs made and
+			//destroyed.
+			static unsigned int numCoreOpFunc_;
 //			map< string, FuncId > opFuncNames_;
 
 			static map< string, Cinfo* >& cinfoMap();
