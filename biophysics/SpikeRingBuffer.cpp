@@ -69,7 +69,9 @@ void SpikeRingBuffer::addSpike( double t, double w )
 double SpikeRingBuffer::pop( double currTime )
 {
 	currTime_ = currTime;
-	double ret = weightSum_[ currentBin_ ];
+	if ( currentBin_ == weightSum_.size() )
+		currentBin_ = 0;
+	double ret = weightSum_[ currentBin_ ]; 
 	weightSum_[ currentBin_++ ] = 0.0;
 	return ret;
 }
