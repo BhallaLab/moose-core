@@ -2230,6 +2230,8 @@ a recurring problem. I tried to forcibly set up a specified static init
 sequence but this got stuck. The alternative is to do a clean sorting of
 Function Ids. Trying that now. Working on compile.
 
+============================================================================
+22 Jan 2014
 A couple more fixes later and we now have it run with the python interface.
 But the outcome is not correct.
 From 1 node:
@@ -2241,4 +2243,36 @@ From 2 nodes:
 for 3 nodes:
 [ 0.09717813  0.12748211  0.03540703] [ 0.21894769  0.          0.13110393]
 
+============================================================================
+23 Jan 2014.
+Put in some printf debugging to check that weights and delays are assigned
+the same, and also numSynapses, on different numbers of nodes. Seems OK.
+Possibilities:
+	- printing stuff out before the run has completed on all nodes
+	Unlikely. I have a barrier to synchronize all nodes within the 
+	PostMaster::process.
+	- Messages not set up properly
+	Here to check the numSynVec. Seems OK.
+	- Messages not sent properly.
+	- Messages being processed in a funny order.
+	Unlikely, given that the same code works from C++
+
+Subha has the good idea to try the C++ unit test run with the same combo of
+pymoose wrapper and bare moose code.
+This needs me to do 
+setenv DOUNITTESTS 1
+Ran with
+ mpirun -np 1 python testu.py : -np 1 ../../../moose
+and it rewarded me with an error in testShell.cpp:1016 which is in
+testShellAddMsg, indicating a problem with the messaging.
+Is the postmaster on the remote node not getting clocked?
+
+Tracked it down. The postmaster was not getting scheduled at all. If I sched
+the postmaster in the script it works. Let's try to move the scheduling call
+into the 'init' function of main.cpp, since this is also used by the
+python initializer.
+This doesn't work, it clashes with one of the pre-existing unit tests.
+Subha will do something in the moosemodule initializer instead.
+Done, this works.
+Some cleanup on testing and reporting of unit tests.
 ============================================================================

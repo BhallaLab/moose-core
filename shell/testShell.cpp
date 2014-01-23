@@ -22,6 +22,7 @@
 #include "OneToAllMsg.h"
 #include "Wildcard.h"
 
+const bool TEST_WARNING = false;
 
 /**
  * Tests Create and Delete calls issued through the parser interface,
@@ -172,8 +173,10 @@ void testTreeTraversal()
 	assert( shell->doFind( "/f1/f2a/tralalalala" ).bad() );
 	assert( shell->doFind( "/f1/f2a[723]/f3aa" ).bad() );
 	assert( shell->doFind( "/f1/f2a/f3aa[12]" ).bad() );
-	cout << "\nTesting warning for bad path indexing: ";
-	assert( shell->doFind( "/f1/f2a/f3aa[-1]" ).bad() );
+	if ( TEST_WARNING ) {
+		cout << "\nTesting warning for bad path indexing: ";
+		assert( shell->doFind( "/f1/f2a/f3aa[-1]" ).bad() );
+	}
 	assert( shell->doFind( "/f1/f2a/f3aa" ) == f3aa );
 	assert( shell->doFind( "/f1/f2a/f3ab" ) == f3ab );
 	assert( shell->doFind( "/f1/f2b/f3ba" ) == f3ba );
@@ -275,16 +278,20 @@ void testChildren()
 
 	verifyKids( f1, f2a, f2b, f3, f4a, f4b );
 
-	// Should fail.
-	cout << "\nTesting warning for creating element with existing name: ";
-	Id fx1 = shell->doCreate( "Neutral", f1, "f2b", 1 );
-	assert( fx1 == Id() );
+	if ( TEST_WARNING ) {
+		// Should fail.
+		cout << "\nTesting warning for creating element with existing name: ";
+		Id fx1 = shell->doCreate( "Neutral", f1, "f2b", 1 );
+		assert( fx1 == Id() );
+	}
 
 	// Should succeed
 	Field< string >::set( f4a, "name", "hippo" );
-	// Should fail, because same name already exists.
-	cout << "\nTesting warning for name change to existing name: ";
-	Field< string >::set( f4a, "name", "f4b" );
+	if ( TEST_WARNING ) {
+		// Should fail, because same name already exists.
+		cout << "\nTesting warning for name change to existing name: ";
+		Field< string >::set( f4a, "name", "f4b" );
+	}
 
 	shell->doDelete( f1 );
 	cout << "." << flush;
