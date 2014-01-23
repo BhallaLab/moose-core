@@ -21,6 +21,7 @@ def make_network():
 	nprand.seed( 456 )
 	t0 = time.time()
 
+	clock = moose.element( '/clock' )
 	network = moose.IntFire( 'network', size, 1 );
 	network.vec.bufferTime = [delayMax * 2] * size
 	moose.le( '/network' )
@@ -42,12 +43,12 @@ def make_network():
 	network.vec.refractoryPeriod = refractoryPeriod
 	numSynVec = network.vec.numSynapses
 	print 'Middle of setup, t = ', time.time() - t0
-	numTotSym = sum( numSynVec )
+	numTotSyn = sum( numSynVec )
 	for item in network.vec:
 		neuron = moose.element( item )
 		neuron.synapse.delay = [ (delayMin + random.random() * delayMax) for r in range( len( neuron.synapse ) ) ] 
 		neuron.synapse.weight = nprand.rand( len( neuron.synapse ) ) * weightMax
-	print 'after setup, t = ', time.time() - t0
+	print 'after setup, t = ', time.time() - t0, ", numTotSyn = ", numTotSyn
 
 	"""
 
@@ -58,6 +59,7 @@ def make_network():
 		synvec.delay = [ (delayMin + random.random() * delayMax) for r in range( synvec.len )] 
 	"""
 
+	#moose.useClock( 9, '/postmaster', 'process' )
 	moose.useClock( 0, '/network', 'process' )
 	moose.setClock( 0, timestep )
 	moose.setClock( 9, timestep )
@@ -70,6 +72,9 @@ def make_network():
 	print 'starting'
 	moose.start(runtime)
 	print 'runtime, t = ', time.time() - t1
-	print network.vec.Vm[100:103], network.vec.Vm[900:903]
+	print 'Vm100:103', network.vec.Vm[100:103]
+	print 'Vm900:903', network.vec.Vm[900:903]
+	print 'weights 100:', network.vec[100].synapse.delay[0:5]
+	print 'weights 900:', network.vec[900].synapse.delay[0:5]
 
 make_network()

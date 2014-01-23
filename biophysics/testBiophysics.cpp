@@ -32,9 +32,6 @@ extern void testMarkovSolver();		//Defined in MarkovSolver.cpp
 // Use a larger value of runsteps when benchmarking
 void testIntFireNetwork( unsigned int runsteps = 5 )
 {
-	// Known value from single-thread run, at t = 1 sec.
-	static const double Vm100 = 0.0857292;
-	static const double Vm900 = 0.107449;
 	static const double thresh = 0.8;
 	static const double Vmax = 1.0;
 	static const double refractoryPeriod = 0.4;
@@ -192,17 +189,20 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
 	double retVm901 = Field< double >::get( ObjId( i2, 901 ), "Vm" );
 	double retVm902 = Field< double >::get( ObjId( i2, 902 ), "Vm" );
 
+	assert( doubleEq( retVm100, 0.00734036 ) );
+	assert( doubleEq( retVm101, 0.246818 ) );
+	assert( doubleEq( retVm102, 0.200087 ) );
+	assert( doubleEq( retVm99, 0.00957795 ) );
+	assert( doubleEq( retVm900, 0.1150573482 ) );
+	assert( doubleEq( retVm901, 0.289322 ) );
+	assert( doubleEq( retVm902, 0.0101117658 ) );
+	/*
 	cout << "testIntFireNetwork: Vm100 = " << retVm100 << ", " <<
 			retVm101 << ", " << retVm102 << ", " << retVm99 <<
 			", " << Vm100 << endl;
 	cout << "Vm900 = " << retVm900 << ", "<< retVm901 << ", " <<
 			retVm902 << ", " << Vm900 << endl;
-	/*
-	if ( runsteps == 5 ) { // the default value.
-		assert( fabs( retVm100 - Vm100 ) < 1e-6 );
-		assert( fabs( retVm900 - Vm900 ) < 1e-6 );
-	}
-	*/
+			*/
 
 	cout << "." << flush;
 	shell->doDelete( i2 );
