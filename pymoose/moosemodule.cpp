@@ -101,7 +101,7 @@
 using namespace std;
 
 //////////////////////// External functions /////////////////////////
-
+#ifdef DO_UNIT_TESTS
 extern void testSync();
 extern void testAsync();
 extern void testSyncArray( unsigned int size,
@@ -123,18 +123,19 @@ extern void nonMpiTests(Shell *);
 extern void mpiTests();
 extern void processTests( Shell* );
 extern void test_moosemodule();
-    
+#endif
 
 
 extern Id init(int argc, char ** argv, bool& doUnitTests, bool& doRegressionTests, unsigned int& benchmark );
 
 extern void initMsgManagers();
 extern void destroyMsgManagers();
-// extern void speedTestMultiNodeIntFireNetwork( 
-//     unsigned int size, unsigned int runsteps );
-// extern void regressionTests();
-// extern bool benchmarkTests( int argc, char** argv );
-// extern int getNumCores();
+extern void speedTestMultiNodeIntFireNetwork( 
+	unsigned int size, unsigned int runsteps );
+#ifdef USE_SMOLDYN
+	extern void testSmoldyn();
+#endif
+extern void mooseBenchmarks( unsigned int option );
 
 
 // C-wrapper to be used by Python
@@ -806,7 +807,7 @@ extern "C" {
         }
         bool dounit = doUnitTests != 0;
         bool doregress = doRegressionTests != 0;
-		unsigned int doBenchmark = 0;
+        unsigned int doBenchmark = 0;
         // Utilize the main::init function which has friend access to Id
         Id shellId = init(argc, argv, dounit, doregress, doBenchmark );
         inited = 1;
@@ -814,15 +815,27 @@ extern "C" {
         if (dounit){
             nonMpiTests( shellPtr ); // These tests do not need the process loop.
         }
-
-        // if (!shellPtr->isSingleThreaded()){
-        //     shellPtr->launchThreads();
-        // }
         if ( shellPtr->myNode() == 0 ) {
-            if (dounit){
-                mpiTests();
-                processTests( shellPtr );
-            }
+		if ( Shell::numNodes() > 1 ) {
+			// Use the last clock for the postmaster, so that it is called
+			// after everything else has been processed and all messages
+			// are ready to send out.
+			shellPtr->doUseClock( "/postmaster", "process", 9 );
+			shellPtr->doSetClock( 9, 1.0 ); // Use a sensible default.
+		}
+#ifdef DO_UNIT_TESTS
+		if ( dounit ) {
+			mpiTests();
+			processTests( shellPtr );
+		}
+		// if ( doRegressionTests ) regressionTests();
+#endif
+		// These are outside unit tests because they happen in optimized
+		// mode, using a command-line argument. As soon as they are done
+		// the system quits, in order to estimate timing.
+		if ( doBenchmark != 0 ) {
+			mooseBenchmarks( doBenchmark );
+                }
         }
         return shellId;
     } //! create_shell()
