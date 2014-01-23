@@ -2282,4 +2282,10 @@ gratifying: it gives the same answer from 1 to 5 nodes, and the
 runtime goes down from about 8.2 sec to 5 sec with 2 nodes on my 2-core
 laptop.
 Had to update the model so that it exhibits sustained activity.
+
+Just for fun, redid with optimization. Now 3.26:1.95sec,
+and for a 500 sec run it is 16.8:9.97 sec. Roughly the same factor speedup.
+Did some fixes in moosemodule to be able to compile.
+It would be interesting to compare this with the buildQ branch.
+
 ============================================================================
