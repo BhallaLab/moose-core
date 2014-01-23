@@ -9,13 +9,16 @@ import moose
 def make_network():
 	size = 1024
 	timestep = 0.2
-	runtime = 1.0
+	runtime = 100.0
 	delayMin = timestep
 	delayMax = 4
 	weightMax = 0.02
 	Vmax = 1.0
-	thresh = 0.8
-	refractoryPeriod = 0.4
+	thresh = 0.2
+	tau = 1  # Range of tau
+	tau0 = 0.5 # minimum tau
+	refr = 0.3
+	refr0 = 0.2
 	connectionProbability = 0.1
 	random.seed( 123 )
 	nprand.seed( 456 )
@@ -40,7 +43,8 @@ def make_network():
 	print 'after setting connectivity, t = ', time.time() - t0
 	network.vec.Vm = [(Vmax*random.random()) for r in range(size)]
 	network.vec.thresh = thresh
-	network.vec.refractoryPeriod = refractoryPeriod
+	network.vec.refractoryPeriod = [( refr0 + refr * random.random()) for r in range( size) ]
+	network.vec.tau = [(tau0 + tau*random.random()) for r in range(size)]
 	numSynVec = network.vec.numSynapses
 	print 'Middle of setup, t = ', time.time() - t0
 	numTotSyn = sum( numSynVec )
