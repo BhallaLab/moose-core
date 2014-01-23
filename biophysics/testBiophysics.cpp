@@ -192,10 +192,10 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
 	assert( doubleEq( retVm100, 0.00734036 ) );
 	assert( doubleEq( retVm101, 0.246818 ) );
 	assert( doubleEq( retVm102, 0.200087 ) );
-	assert( doubleEq( retVm99, 0.00957795 ) );
+	assert( doubleEq( retVm99, 0.0095779083 ) );
 	assert( doubleEq( retVm900, 0.1150573482 ) );
-	assert( doubleEq( retVm901, 0.289322 ) );
-	assert( doubleEq( retVm902, 0.0101117658 ) );
+	assert( doubleEq( retVm901, 0.289321534 ) );
+	assert( doubleEq( retVm902, 0.01011172486 ) );
 	/*
 	cout << "testIntFireNetwork: Vm100 = " << retVm100 << ", " <<
 			retVm101 << ", " << retVm102 << ", " << retVm99 <<

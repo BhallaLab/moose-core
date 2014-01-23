@@ -2275,4 +2275,11 @@ This doesn't work, it clashes with one of the pre-existing unit tests.
 Subha will do something in the moosemodule initializer instead.
 Done, this works.
 Some cleanup on testing and reporting of unit tests.
+
+Tackled the bug in recurrentIntFire: was a problem in spikeRingBuffer.
+With this ran some benchmarks with the recurrentIntFire.py model. Very
+gratifying: it gives the same answer from 1 to 5 nodes, and the
+runtime goes down from about 8.2 sec to 5 sec with 2 nodes on my 2-core
+laptop.
+Had to update the model so that it exhibits sustained activity.
 ============================================================================

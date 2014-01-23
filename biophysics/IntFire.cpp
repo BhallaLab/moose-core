@@ -151,12 +151,14 @@ void IntFire::process( const Eref &e, ProcPtr p )
 	if ( report && e.dataIndex() == reportIndex )
 		cout << "	" << p->currTime << "," << Vm_;
 	Vm_ += popBuffer( p->currTime );
+	/*
 	if (  ( p->currTime - lastSpike_ ) < refractoryPeriod_ ) {
 		Vm_ = 0.0;
 		return;
 	}
+	*/
 
-	if ( Vm_ > thresh_ ) {
+	if ( Vm_ > thresh_ && (p->currTime - lastSpike_) > refractoryPeriod_ ) {
 		// spikeOut()->send( e, e.dataIndex() );
 		spikeOut()->send( e, p->currTime );
 		Vm_ = -1.0e-7;
