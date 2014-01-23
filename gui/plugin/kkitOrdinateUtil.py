@@ -40,18 +40,23 @@ def setupMeshObj(modelRoot):
             # since wildcardFind is not searching with indexing
             #e.g /Kholodenko[0]/kinetics[0] or /Kholodenko[0]/kinetics or /kholodenko/kinetics[0]
             # will not give the result but works with out index /kholodenko/kinetics
-            #untill Upi fix's I am going with test case for kholodenko
+            #untill Upi fix's I am going with 'test' case for kholodenko
             
-            #stimulus table is pending,cplxEnzBase is pending
+            #stimulus table is pending
 
-            test ='/Kholodenko/kinetics'
-            mollist = wildcardFind(test+'/##[ISA=PoolBase]')
+            test ='/acc33/kinetics'
+            for mol in wildcardFind(test+'/##[ISA=PoolBase]'):
+                if isinstance(element(mol[0].parent),CplxEnzBase):
+                    cplxlist.append(mol)
+                    objInfo = mol[0].parent.path+'/info'
+                elif isinstance(element(mol[0]),moose.PoolBase):
+                    mollist.append(mol)
+                    objInfo =mol.path+'/info'
+                xcord.append(xyPosition(objInfo,'x'))
+                ycord.append(xyPosition(objInfo,'y')) 
+            
             enzlist = wildcardFind(test+'/##[ISA=EnzBase]')
             realist = wildcardFind(test+'/##[ISA=ReacBase]')
-            for mol in mollist:
-                objInfo = mol.path+'/info'
-                xcord.append(xyPosition(objInfo,'x'))
-                ycord.append(xyPosition(objInfo,'y'))
             for enz in enzlist:
                 objInfo = enz.path+'/info'
                 xcord.append(xyPosition(objInfo,'x'))
@@ -61,17 +66,6 @@ def setupMeshObj(modelRoot):
                 xcord.append(xyPosition(objInfo,'x'))
                 ycord.append(xyPosition(objInfo,'y'))
         '''
-        for mitem in Neutral(meshEnt).getNeighbors('remesh'):
-            """ getNeighbors(remesh) has eliminating GSLStoich """
-            if isinstance(element(mitem[0].parent),CplxEnzBase):
-                cplxlist.append(mitem)
-                objInfo = (mitem[0].parent).path+'/info'
-            elif isinstance(element(mitem),moose.PoolBase):
-                mollist.append(mitem)
-                objInfo = mitem.path+'/info'
-            xcord.append(xyPosition(objInfo,'x'))
-            ycord.append(xyPosition(objInfo,'y'))
-       
         compt = meshEnt.parent[0].path+'/##[TYPE=StimulusTable]'
         for table in wildcardFind(compt):
             tablist.append(table)
@@ -141,7 +135,7 @@ def setupItem(modelPath,cntDict):
                 uniqItem,countuniqItem = countitems(items[0],'input')
                 for inpt in uniqItem:
                     inputlist.append((inpt,'st',countuniqItem[inpt]))
-                for funcbase in items[0].getNeighbors('output'): 
+                for funcbase in items[0].neighbors['output']: 
                     funplist.append(funcbase)
                 if(len(funplist) > 1): print "SumFunPool has multiple Funpool"
                 else:  cntDict[funplist[0]] = inputlist
