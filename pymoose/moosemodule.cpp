@@ -119,11 +119,11 @@ extern void testMpiShell();
 extern void testMsg();
 extern void testMpiMsg();
 extern void testKinetics();
-extern void nonMpiTests(Shell *);
+#endif
 extern void mpiTests();
 extern void processTests( Shell* );
+extern void nonMpiTests(Shell *);
 extern void test_moosemodule();
-#endif
 
 
 extern Id init(int argc, char ** argv, bool& doUnitTests, bool& doRegressionTests, unsigned int& benchmark );
