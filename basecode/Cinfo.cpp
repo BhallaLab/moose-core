@@ -580,8 +580,6 @@ void Cinfo::rebuildOpIndex()
 			num += of->setIndex( num );
 		}
 	}
-	cout << "on node " << Shell::myNode() << ": oldNumOpFunc = " <<
-			numCoreOpFunc_ << ", new = " << num << endl;
-	// assert( num == numCoreOpFunc_ );
+	// cout << "on node " << Shell::myNode() << ": oldNumOpFunc = " << numCoreOpFunc_ << ", new = " << num << endl;
 	numCoreOpFunc_ = num;
 }
