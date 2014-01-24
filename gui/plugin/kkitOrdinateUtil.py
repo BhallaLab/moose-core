@@ -41,8 +41,8 @@ def setupMeshObj(modelRoot):
             #e.g /Kholodenko[0]/kinetics[0] or /Kholodenko[0]/kinetics or /kholodenko/kinetics[0]
             # will not give the result but works with out index /kholodenko/kinetics
             #untill Upi fix's I am going with 'test' case for each model that I load
-            # need to ask what message connect stimulus table
-            test ='/acc33/kinetics'
+
+            test ='/test/kinetics'
             for mol in wildcardFind(test+'/##[ISA=PoolBase]'):
                 if isinstance(element(mol[0].parent),CplxEnzBase):
                     cplxlist.append(mol)
@@ -80,7 +80,6 @@ def setupMeshObj(modelRoot):
         xmax = max(xcord)
         ymin = min(ycord)
         ymax = max(ycord)
-        print " min and max ",xmin,xmax,ymin,ymax
         noPositionInfo = len(np.nonzero(xcord)[0]) == 0 \
             and len(np.nonzero(ycord)[0]) == 0
     return(meshEntry,xmin,xmax,ymin,ymax,noPositionInfo)
@@ -122,7 +121,6 @@ def setupItem(modelPath,cntDict):
                         sublist.append((enzpar,'t',countuniqItem[enzpar]))
                 cntDict[items] = sublist,prdlist
         elif baseObj == 'FuncBase':
-            print path
             #ZombieSumFunc adding inputs
             for items in wildcardFind(path):
                 inputlist = []
@@ -140,7 +138,6 @@ def setupItem(modelPath,cntDict):
             for tab in wildcardFind(path):
                 tablist = []
                 uniqItem,countuniqItem = countitems(tab[0],'output')
-                print " table ",tab, "  ",tab[0],uniqItem,countuniqItem
                 for tabconnect in uniqItem:
                     tablist.append((tabconnect,'tab',countuniqItem[tabconnect]))
                 cntDict[tab] = tablist
@@ -188,7 +185,7 @@ def autoCoordinates(meshEntry,srcdesConnection):
                     G.add_edge(inn[0].path,element(items[0]).getField('path'))
         elif isinstance(out,list):
             if len(out) == 0:
-                print "Func pool doesn't have sumtotal"
+                print "Func pool "+inn[0]+" doesn't have sumtotal"
             else:
                 for items in (items for items in out ):
                     G.add_edge(element(items[0]).getField('path'),inn[0].path)
