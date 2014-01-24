@@ -603,7 +603,7 @@ if __name__ == "__main__":
     size = QtCore.QSize(1024 ,768)
     modelPath = 'Kholodenko'
     modelPath = 'enz_classical_explicit'
-    modelPath = 'acc33'
+    modelPath = 'test'
     #modelPath = 'acc61'
     ##modelPath = 'acc8'
     #modelPath = '3ARECB'
