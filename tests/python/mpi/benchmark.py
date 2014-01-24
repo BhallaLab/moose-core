@@ -99,9 +99,9 @@ def run(script, scriptargs=[], hostfile='hostfile', np=2, ni=1, oversubscribe=Fa
             avg[ii] += d1
             print 'Time to run ', args
             print '            =', d1.days * 86400 + d1.seconds + 1e-6 * d1.microseconds
-        e0 = datetime.now()
-        d0 = e0 - s0
-        avg['all'] += d0
+    e0 = datetime.now()
+    d0 = e0 - s0
+    avg['all'] += d0
     for ii in sorted(procs):
         print 'Time to run using', ii, 'additional moose processes: '
         print '            =', (avg[ii].days * 86400 + avg[ii].seconds + 1e-6 * avg[ii].microseconds) / ni
