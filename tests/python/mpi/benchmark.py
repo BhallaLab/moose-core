@@ -105,7 +105,7 @@ def run(script, scriptargs=[], hostfile='hostfile', np=2, ni=1, oversubscribe=Fa
     for ii in sorted(procs):
         print 'Time to run using', ii, 'additional moose processes: '
         print '            =', (avg[ii].days * 86400 + avg[ii].seconds + 1e-6 * avg[ii].microseconds) / ni
-    print 'Total time for all different process counts averaged over all' (ni), 'iterations:', (avg['all'].days * 86400 + avg['all'].seconds + 1e-6 * avg['all'].microseconds) / ni
+    print 'Total time for all different process counts averaged over all', ni, 'iterations:', (avg['all'].days * 86400 + avg['all'].seconds + 1e-6 * avg['all'].microseconds) / ni
 
 def print_usage(argv0):
     print '''Usage: %s [-s slotcount]  [-f hostfile] [-n maxprocess] [-i iterations] {script} [script arguments]
