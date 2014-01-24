@@ -40,10 +40,8 @@ def setupMeshObj(modelRoot):
             # since wildcardFind is not searching with indexing
             #e.g /Kholodenko[0]/kinetics[0] or /Kholodenko[0]/kinetics or /kholodenko/kinetics[0]
             # will not give the result but works with out index /kholodenko/kinetics
-            #untill Upi fix's I am going with 'test' case for kholodenko
-            
-            #stimulus table is pending
-
+            #untill Upi fix's I am going with 'test' case for each model that I load
+            # need to ask what message connect stimulus table
             test ='/acc33/kinetics'
             for mol in wildcardFind(test+'/##[ISA=PoolBase]'):
                 if isinstance(element(mol[0].parent),CplxEnzBase):
@@ -54,9 +52,11 @@ def setupMeshObj(modelRoot):
                     objInfo =mol.path+'/info'
                 xcord.append(xyPosition(objInfo,'x'))
                 ycord.append(xyPosition(objInfo,'y')) 
-            
+
             enzlist = wildcardFind(test+'/##[ISA=EnzBase]')
             realist = wildcardFind(test+'/##[ISA=ReacBase]')
+            tablist = wildcardFind(test+'/##[ISA=StimulusTable]')
+
             for enz in enzlist:
                 objInfo = enz.path+'/info'
                 xcord.append(xyPosition(objInfo,'x'))
@@ -65,14 +65,10 @@ def setupMeshObj(modelRoot):
                 objInfo = rea.path+'/info'
                 xcord.append(xyPosition(objInfo,'x'))
                 ycord.append(xyPosition(objInfo,'y'))
-        '''
-        compt = meshEnt.parent[0].path+'/##[TYPE=StimulusTable]'
-        for table in wildcardFind(compt):
-            tablist.append(table)
-            objInfo = table.path+'/info'
-            xcord.append(xyPosition(objInfo,'x'))
-            ycord.append(xyPosition(objInfo,'y'))
-        '''
+            for tab in tablist:
+                objInfo = tab.path+'/info'
+                xcord.append(xyPosition(objInfo,'x'))
+                ycord.append(xyPosition(objInfo,'y'))
 
         meshEntry[meshEnt] = {'enzyme':enzlist,
                               'reaction':realist,
@@ -126,6 +122,7 @@ def setupItem(modelPath,cntDict):
                         sublist.append((enzpar,'t',countuniqItem[enzpar]))
                 cntDict[items] = sublist,prdlist
         elif baseObj == 'FuncBase':
+            print path
             #ZombieSumFunc adding inputs
             for items in wildcardFind(path):
                 inputlist = []
@@ -143,6 +140,7 @@ def setupItem(modelPath,cntDict):
             for tab in wildcardFind(path):
                 tablist = []
                 uniqItem,countuniqItem = countitems(tab[0],'output')
+                print " table ",tab, "  ",tab[0],uniqItem,countuniqItem
                 for tabconnect in uniqItem:
                     tablist.append((tabconnect,'tab',countuniqItem[tabconnect]))
                 cntDict[tab] = tablist

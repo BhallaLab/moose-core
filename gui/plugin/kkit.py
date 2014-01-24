@@ -282,7 +282,7 @@ class  KineticsWidget(EditorWidgetBase):
 
             for tabObj in find_index(memb,'table'):
                 tabinfo = tabObj.path+'/info'
-                tabItem = PoolItem(tabObj,self.qGraCompt[cmpt])
+                tabItem = TableItem(tabObj,self.qGraCompt[cmpt])
                 self.setupDisplay(tabinfo,tabItem,"tab")
                 self.setupSlot(tabObj,tabItem)
         # compartment's rectangle size is calculated depending on children 
@@ -436,7 +436,7 @@ class  KineticsWidget(EditorWidgetBase):
 
             elif isinstance(out,list):
                 if len(out) == 0:
-                    print "Func pool doesn't have sumtotal"
+                    print "Func pool ",inn.name," doesn't have sumtotal"
                 else:
                     src = self.mooseId_GObj[element(inn).getId()]
                     for items in (items for items in out ):
@@ -602,6 +602,8 @@ if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     size = QtCore.QSize(1024 ,768)
     modelPath = 'Kholodenko'
+    modelPath = 'enz_classical_explicit'
+    modelPath = 'acc33'
     #modelPath = 'acc61'
     ##modelPath = 'acc8'
     #modelPath = '3ARECB'
@@ -609,13 +611,13 @@ if __name__ == "__main__":
     #modelPath = '5AreacB'
     itemignoreZooming = False
     try:
-        filepath = '../../Demos/Genesis_files/'+modelPath+'.g'
-        #filepath = '/home/harsha/genesis_files/gfile/'+modelPath+'.g'
+        #filepath = '../../Demos/Genesis_files/'+modelPath+'.g'
+        filepath = '/home/harsha/genesis_files/gfile/'+modelPath+'.g'
         print filepath
         f = open(filepath, "r")
         loadModel(filepath,'/'+modelPath)
         
-        moose.le('/'+modelPath+'/kinetics')
+        #moose.le('/'+modelPath+'/kinetics')
         dt = KineticsWidget()
         dt.modelRoot ='/'+modelPath
         ''' Loading moose signalling model in python '''
