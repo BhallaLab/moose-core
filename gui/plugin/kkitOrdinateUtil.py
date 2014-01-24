@@ -5,6 +5,7 @@ import numpy as np
 import networkx as nx
 from collections import Counter
 #import matplotlib.pyplot as plt
+import re
 
 def xyPosition(objInfo,xory):
     try:
@@ -38,12 +39,10 @@ def setupMeshObj(modelRoot):
         tablist = []
         for m in meshEnt:
             # since wildcardFind is not searching with indexing
-            #e.g /Kholodenko[0]/kinetics[0] or /Kholodenko[0]/kinetics or /kholodenko/kinetics[0]
-            # will not give the result but works with out index /kholodenko/kinetics
-            #untill Upi fix's I am going with 'test' case for each model that I load
-
-            test ='/test/kinetics'
-            for mol in wildcardFind(test+'/##[ISA=PoolBase]'):
+            #e.g when we load kholodenko.g, /Kholodenko[0]/kinetics[0] or /Kholodenko[0]/kinetics or /kholodenko/kinetics[0]
+            # will not give the result but works with out index /kholodenko/kinetics or /kholodenko[]/kinetics[]
+            m = re.sub('\[0\]', '', m.path)
+            for mol in wildcardFind(m+'/##[ISA=PoolBase]'):
                 if isinstance(element(mol[0].parent),CplxEnzBase):
                     cplxlist.append(mol)
                     objInfo = mol[0].parent.path+'/info'
@@ -53,9 +52,9 @@ def setupMeshObj(modelRoot):
                 xcord.append(xyPosition(objInfo,'x'))
                 ycord.append(xyPosition(objInfo,'y')) 
 
-            enzlist = wildcardFind(test+'/##[ISA=EnzBase]')
-            realist = wildcardFind(test+'/##[ISA=ReacBase]')
-            tablist = wildcardFind(test+'/##[ISA=StimulusTable]')
+            enzlist = wildcardFind(m+'/##[ISA=EnzBase]')
+            realist = wildcardFind(m+'/##[ISA=ReacBase]')
+            tablist = wildcardFind(m+'/##[ISA=StimulusTable]')
 
             for enz in enzlist:
                 objInfo = enz.path+'/info'
