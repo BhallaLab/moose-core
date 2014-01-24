@@ -1288,10 +1288,10 @@ void ReadKkit::setupSlaveMsg( const string& src, const string& dest )
 	map< Id, int >::iterator i = poolFlags_.find( destId );
 	if ( i == poolFlags_.end() || !( i->second & 2 ) ) {
 		innerAddMsg( src, *nameMap, output, dest, poolIds_, 
-			"set_nInit" );
+			"setNInit" );
 	} else {
 		innerAddMsg( src, *nameMap, output, dest, poolIds_,
-			"set_concInit" );
+			"setConcInit" );
 
 		double CONCSCALE = 0.001;
 		// Rescale from uM to millimolar.

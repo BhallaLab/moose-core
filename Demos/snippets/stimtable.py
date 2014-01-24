@@ -63,7 +63,7 @@ def stimulus_table_demo():
     # This is the stimulus generator
     stimtable = moose.StimulusTable('/model/stim')
     recorded = moose.Table('/data/stim')
-    moose.connect(recorded, 'requestData', stimtable, 'get_outputValue')
+    moose.connect(recorded, 'requestOut', stimtable, 'getOutputValue')
     simtime = 100
     simdt = 1e-3
     # Inter-stimulus-intervals with rate=20/s

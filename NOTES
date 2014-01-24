@@ -2200,7 +2200,7 @@ Checkin 4995.
 
 Currently two errors to tackle:
 - Kholodenko model doesn't work: wrong output.
-- recurrentIntFire.py crashes when set to run for 10 seconds. Suspect the 
+* recurrentIntFire.py crashes when set to run for 10 seconds. Suspect the 
 	synapse event handling again.
 Implementation things to handle:
 - LookupGet across nodes.
@@ -2287,5 +2287,6 @@ Just for fun, redid with optimization. Now 3.26:1.95sec,
 and for a 500 sec run it is 16.8:9.97 sec. Roughly the same factor speedup.
 Did some fixes in moosemodule to be able to compile.
 It would be interesting to compare this with the buildQ branch.
+Checkin 5006.
 
 ============================================================================
