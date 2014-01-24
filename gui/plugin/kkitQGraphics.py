@@ -103,7 +103,65 @@ class PoolItem(KineticsDisplayItem):
 
     def returnColor(self):
         return (self.bg.brush().color())
+
+class TableItem(KineticsDisplayItem):
+    defaultWidth = 30
+    defaultHeight = 30
+    defaultPenWidth = 2
+
+    def __init__(self, *args, **kwargs):
+        KineticsDisplayItem.__init__(self, *args, **kwargs)
+        points = [QtCore.QPointF(0,TableItem.defaultWidth/2),
+                  QtCore.QPointF(TableItem.defaultHeight/2-2,0),
+                  QtCore.QPointF(TableItem.defaultWidth/2+2,0),
+                  QtCore.QPointF(TableItem.defaultWidth,TableItem.defaultHeight/2),
+                  ]
+
+        path = QtGui.QPainterPath()
+        path.moveTo(points[0])
+        for p in points[1:]:
+            path.lineTo(p)
+            path.moveTo(p)
+        path.moveTo(0,0)
+        path.lineTo(TableItem.defaultWidth,0)
+        path.moveTo(-(TableItem.defaultWidth/3),TableItem.defaultHeight/4)
+        path.lineTo((TableItem.defaultWidth+10),TableItem.defaultHeight/4)
+
+        self.gobj = QtGui.QGraphicsPathItem(path, self)
+        self.gobj.setPen(QtGui.QPen(QtCore.Qt.black, 2,Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin))
     
+    def refresh( self,scale):
+        defaultWidth = TableItem.defaultWidth*scale
+        defaultHeight = TableItem.defaultHeight*scale
+        points = [QtCore.QPointF(0,defaultWidth/2),
+                  QtCore.QPointF(defaultHeight/2-2,0),
+                  QtCore.QPointF(defaultWidth/2+2,0),
+                  QtCore.QPointF(defaultWidth,defaultHeight/2)
+                  ]
+        path = QtGui.QPainterPath()
+        path.moveTo(points[0])
+        for p in points[1:]:
+            path.lineTo(p)
+            path.moveTo(p)
+        path.moveTo(0,0)
+        path.lineTo(defaultWidth,0)
+        path.moveTo(-(defaultWidth/3),defaultHeight/4)
+        path.lineTo((defaultWidth+10),defaultHeight/4)
+        self.gobj.setPath(path)
+        TablePen = self.gobj.pen()
+        defaultpenwidth = TableItem.defaultPenWidth
+        tableWidth =  TableItem.defaultPenWidth*scale
+        TablePen.setWidth(tableWidth)
+        self.gobj.setPen(TablePen)
+
+    def setDisplayProperties(self, x,y,textcolor,bgcolor):
+        #TODO check the table bounding reactangle b'cos selection looks ugly
+        """Set the display properties of this item."""
+        self.setGeometry(x,y, 
+                         self.gobj.boundingRect().width(), 
+                         self.gobj.boundingRect().height())
+
+
 class ReacItem(KineticsDisplayItem):
     defaultWidth = 30
     defaultHeight = 30
