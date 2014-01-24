@@ -254,7 +254,7 @@ class  KineticsWidget(EditorWidgetBase):
         for cmpt,memb in self.meshEntry.items():
             for enzObj in find_index(memb,'enzyme'):
                 enzinfo = enzObj.path+'/info'
-                if enzObj.className == 'ZEnz':
+                if enzObj.className == 'Enz':
                     enzItem = EnzItem(enzObj,self.qGraCompt[cmpt])
                 else:
                     enzItem = MMEnzItem(enzObj,self.qGraCompt[cmpt])
@@ -326,6 +326,7 @@ class  KineticsWidget(EditorWidgetBase):
                 x,y = self.autoCordinatepos[parent]
             ypos = (y-self.ymin)*self.yratio
         else:
+            #print "kkit ",iteminfo,"\n",element(iteminfo)
             x = float(element(iteminfo).getField('x'))
             y = float(element(iteminfo).getField('y'))
             #Qt origin is at the top-left corner. The x values increase to the right and the y values increase downwards \
@@ -603,7 +604,7 @@ if __name__ == "__main__":
     size = QtCore.QSize(1024 ,768)
     modelPath = 'Kholodenko'
     modelPath = 'enz_classical_explicit'
-    modelPath = 'test'
+    modelPath = 'acc34'
     #modelPath = 'acc61'
     ##modelPath = 'acc8'
     #modelPath = '3ARECB'
