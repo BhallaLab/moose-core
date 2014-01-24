@@ -53,7 +53,7 @@ def calcArrow(srcdes_list,itemignoreZooming,iconScale):
             b0 = b0*2
         
         if(order %2 == 0):
-            print "or",order
+            #print "or",order
             srcCentera0 = srcRect.center().x()-a0
             srcCenterb0 = srcRect.center().y()-b0
             desCentera0 = desRect.center().x()-a0
