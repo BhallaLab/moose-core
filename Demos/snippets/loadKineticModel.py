@@ -5,6 +5,7 @@
 # saved version into saveReaction.g
 
 import moose
+import os
 def main():
 		# This command loads the file into the path '/model', and tells
 		# the system to use the gsl solver.
@@ -20,6 +21,8 @@ def main():
 		moose.start( 100.0 ) # Run the model for 100 seconds.
 
 		# Iterate through all plots, dump their contents to data.plot.
+		if ( os.path.exists( 'data.plot' ) ):
+			os.remove( 'data.plot' )
 		for x in moose.wildcardFind( '/model/graphs/conc#/#' ):
 				moose.element( x[0] ).xplot( 'data.plot', x[0].name )
 
