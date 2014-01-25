@@ -117,7 +117,8 @@ extern "C" {
         pv = to_py((void*)&oid, 'y');
         assert(pv != NULL);
         assert(((_ObjId*)pv)->oid_.id == oid.id);
-        assert(((_ObjId*)pv)->oid_.dataId == oid.dataId);
+	//Harsha: commeted this line to compile moose in debug mode
+        //assert(((_ObjId*)pv)->oid_.dataId == oid.dataId);
         Py_XDECREF(pv);
         cout << "." << flush;
 
