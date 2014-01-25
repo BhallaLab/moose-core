@@ -2290,3 +2290,37 @@ It would be interesting to compare this with the buildQ branch.
 Checkin 5006.
 
 ============================================================================
+24 Jan
+>>> moose.showfield( '/model/kinetics/Reac1' )
+
+[ /model[0]/kinetics[0]/Reac1[0] ]
+kb                = 0.1
+name              = Reac1
+Kb                = 0.1
+numSubstrates     = 2
+numProducts       = 1
+numField          = 1
+numData           = 1
+className         = Reac
+Kf                = 0.199264663575
+path              = /model[0]/kinetics[0]/Reac1[0]
+kf                = 0.199264663575
+
+The kf and Kf  (num and conc) are equal even though the vol should lead to a 
+scaling. 
+
+This turns out to be a messy one. The automatic camel-case ification is
+converting 'get_kf' to 'getKf' which clashes with the 'get_Kf' for the 
+conc-dependent version.
+
+Should I call it numKf? That is probably cleanest since it clearly separates
+it from the default Kf.
+
+============================================================================
+25 Jan
+Did this. Fixes the problem and now the test on the Genesis script 
+	kkit_objects_example.g
+works except for the sumtotal.
+Also the Kholodenko model now works too.
+
+============================================================================

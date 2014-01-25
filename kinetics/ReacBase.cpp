@@ -36,14 +36,14 @@ const Cinfo* ReacBase::initCinfo()
 		// Field Definitions
 		//////////////////////////////////////////////////////////////
 		static ElementValueFinfo< ReacBase, double > kf(
-			"kf",
+			"numKf",
 			"Forward rate constant, in # units",
 			&ReacBase::setNumKf,
 			&ReacBase::getNumKf
 		);
 
 		static ElementValueFinfo< ReacBase, double > kb(
-			"kb",
+			"numKb",
 			"Reverse rate constant, in # units",
 			&ReacBase::setNumKb,
 			&ReacBase::getNumKb
