@@ -2321,6 +2321,6 @@ it from the default Kf.
 Did this. Fixes the problem and now the test on the Genesis script 
 	kkit_objects_example.g
 works except for the sumtotal.
-Also the Kholodenko model now works too.
-
+Also the Kholodenko model now works too.  Checkin 5019.
+Fixed the sumtotal too.
 ============================================================================
