@@ -71,7 +71,8 @@ void FuncPool::vReinit( const Eref& e, ProcPtr p )
 
 void FuncPool::input( const Eref& e, double v )
 {
-	Pool::vSetConcInit( e, v );
+	Pool::vSetN( e, v );
+	Pool::vSetNinit( e, v );
 }
 
 //////////////////////////////////////////////////////////////
