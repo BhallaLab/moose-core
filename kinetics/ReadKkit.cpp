@@ -541,8 +541,8 @@ Id ReadKkit::buildReac( const vector< string >& args )
 	reacIds_[ clean.substr( 10 ) ] = reac; 
 	// Here is another hack: The native values stored in the reac are
 	// Kf and Kb, in conc units. However the 'clean' values from kkit
-	// are the number values kf and kb with a lower case. In the 
-	// function convertReacRatesToNumUnits we take the kf and kb and
+	// are the number values numKf and numKb. In the 
+	// function convertReacRatesToNumUnits we take the numKf and numKb and
 	// do proper conc scaling.
 	Field< double >::set( reac, "Kf", kf );
 	Field< double >::set( reac, "Kb", kb );
@@ -1366,10 +1366,10 @@ void ReadKkit::convertReacRatesToConcUnits()
 		if ( numPrd > 1 )
 			kb *= pow( NA_RATIO, numPrd - 1.0 );
 
-		// Now we have the correct kf and kb, plug them into the reac, and
-		// let it internally fix up the Kf and Kb.
-		Field< double >::set( reac, "kf", kf );
-		Field< double >::set( reac, "kb", kb );
+		// Now we have the correct numKf and numKb, plug them into the 
+		// reac, and let it internally fix up the Kf and Kb.
+		Field< double >::set( reac, "numKf", kf );
+		Field< double >::set( reac, "numKb", kb );
 	}
 }
 
