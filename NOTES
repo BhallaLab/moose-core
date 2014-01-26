@@ -2353,4 +2353,8 @@ Now working on setting up a test case.
 ============================================================================
 26 Jan
 Fixed minor bug with Shell::doFind, wasn't handling the root element.
+
+Back to the matrix elimination. Some fixes and debug printfs.
+Now to put in the computations on the output vector.
+Done that. 
 ============================================================================
