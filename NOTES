@@ -2203,6 +2203,7 @@ Currently two errors to tackle:
 * recurrentIntFire.py crashes when set to run for 10 seconds. Suspect the 
 	synapse event handling again.
 Implementation things to handle:
+- Wildcard handling of full paths with indices.
 - LookupGet across nodes.
 - The Msg information functions for src msgs: msgSrcs and MsgSrcFunctions.
 - Diffusion handler.
@@ -2356,5 +2357,45 @@ Fixed minor bug with Shell::doFind, wasn't handling the root element.
 
 Back to the matrix elimination. Some fixes and debug printfs.
 Now to put in the computations on the output vector.
-Done that. 
+Done that.  Checked in as 5025.
+Now to put in comparison with GSL solution.
+Put it in. My code is wrong somewhere. Doing simple test case.
+Fixed a bug. Now the answer for the bigger matrix is close but
+not a perfect match to the GSL version. I guess the best test is to do a
+back-multiplication.
+This revealed a bug, tracked down eventually and fixed. Now values match
+for the bigger 11x11 test case above. To put the calculations in perspective,
+there are only 10 forward-elimination steps and 11 backward substitution steps
+in the solution for the 11x11 case.
+
+Next: 
+- Package into a standalone class that can plug into CylMesh and NeuroMesh.
+- Implement with NeuroMesh 
+	- Simplify NeuroMesh, eliminate the separate spine and PSD meshes.
+		The Mesh is basically a diffusive zone.
+	- Handle numbering
+	- Bring in enough biophysics that the model morphology can be loaded.
+	- Handle multiple instances for range of DiffConsts and molecules.
+	- include active transport
+	- Separate between nodes
+From 19 Jan:
+* Kholodenko model doesn't work: wrong output.
+* recurrentIntFire.py crashes when set to run for 10 seconds. Suspect the 
+	synapse event handling again.
+Implementation things to handle:
+- Wildcard handling of full paths with indices.
+- LookupGet across nodes.
+- The Msg information functions for src msgs: msgSrcs and MsgSrcFunctions.
+- Diffusion handler.
+- Element that puts everything on one, specified node
+- GlobalFields: things that need to be updated on all nodes even if
+	the Element is local.
+- Getting specific values in a vector across all nodes. For example,
+	the # of elements.
+- Moving objects between nodes.
+Porting:
+- Ksolver
+- Biophysics directory
+- Hsolver.
+
 ============================================================================
