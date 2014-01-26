@@ -502,6 +502,9 @@ ObjId Shell::doFindWithoutIndexing( const string& path ) const
 /// non-static func. Returns the Id found by traversing the specified path.
 ObjId Shell::doFind( const string& path ) const
 {
+	if ( path == "/" || path == "/root" )
+		return ObjId();
+
 	ObjId curr( 0, BADINDEX );
 	vector< string > names;
 	vector< unsigned int > indices;
@@ -511,6 +514,7 @@ ObjId Shell::doFind( const string& path ) const
 	if ( !isAbsolute )
 		curr = cwe_;
 	
+
 	for ( unsigned int i = 0; i < names.size(); ++i ) {
 		if ( names[i] == "." ) {
 		} else if ( names[i] == ".." ) {
