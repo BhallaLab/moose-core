@@ -21,6 +21,7 @@
 #include "lookupVolumeFromMesh.h"
 
 #include "../shell/Shell.h"
+#include "../shell/Wildcard.h"
 
 #include "ReadKkit.h"
 
@@ -218,11 +219,12 @@ void ReadKkit::run()
 void ReadKkit::dumpPlots( const string& filename )
 {
 	// ofstream fout ( filename.c_str() );
-	vector< Id > plots;
+	vector< ObjId > plots;
 	string plotpath = basePath_ + "/graphs/##[TYPE=Table]," + 
 		basePath_ + "/moregraphs/##[TYPE=Table]";
-	Shell::wildcard( plotpath, plots );
-	for ( vector< Id >::iterator i = plots.begin(); i != plots.end(); ++i )
+	wildcardFind( plotpath, plots );
+	for ( vector< ObjId >::iterator 
+					i = plots.begin(); i != plots.end(); ++i )
 		SetGet2< string, string >::set( *i, "xplot",
 			filename, i->element()->getName() );
 }

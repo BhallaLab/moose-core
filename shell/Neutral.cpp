@@ -287,6 +287,16 @@ vector< Id > Neutral::getChildren( const Eref& e ) const
 // Static function
 void Neutral::children( const Eref& e, vector< Id >& ret )
 {
+		/*
+	vector< Id > temp;
+	getNeighbours( ret, neutralCinfo->findFinfo( "childOut" ) );
+	for ( vector< Id >::iterator i = temp.begin(); i != temp.end(); ++i ) {
+		if ( ret
+	}
+	*/
+
+
+
 	static const Finfo* pf = neutralCinfo->findFinfo( "parentMsg" );
 	static const DestFinfo* pf2 = dynamic_cast< const DestFinfo* >( pf );
 	static const FuncId pafid = pf2->getFid();
@@ -301,7 +311,21 @@ void Neutral::children( const Eref& e, vector< Id >& ret )
 		if ( i->fid == pafid ) {
 			const Msg* m = Msg::getMsg( i->mid );
 			assert( m );
-			ret.push_back( m->e2()->id() );
+			vector< vector< Eref > > kids;
+			m->targets( kids );
+			if ( e.dataIndex() == ALLDATA ) {
+				for ( vector< vector< Eref > >::iterator
+					i = kids.begin(); i != kids.end(); ++i ) {
+					for ( vector< Eref >::iterator
+						j = i->begin(); j != i->end(); ++j )
+						ret.push_back( j->id() );
+				}
+			} else {
+				const vector< Eref >& temp = kids[e.dataIndex()];
+				for ( vector< Eref >::const_iterator
+							i = temp.begin(); i != temp.end(); ++i )
+					ret.push_back( i->id() );
+			}
 		}
 	}
 }

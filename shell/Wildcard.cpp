@@ -14,19 +14,18 @@
 #include "Wildcard.h"
 // #define NOINDEX (UINT_MAX - 2)
 
-static int wildcardRelativeFind( Id start, const vector< string >& path, 
-		unsigned int depth, vector< Id >& ret );
+static int wildcardRelativeFind( ObjId start, const vector< string >& path, 
+		unsigned int depth, vector< ObjId >& ret );
 
-static void findBraceContent( const string& path, string& beforeBrace, 
-	string& insideBrace );
+static unsigned int findBraceContent( const string& path, 
+				string& beforeBrace, string& insideBrace );
 
-static bool matchName( Id parent, Id id, 
+static bool matchName( ObjId id, unsigned int index,
 	const string& beforeBrace, const string& insideBrace ); 
 
-static bool matchBeforeBrace( Id id, const string& name,
-	bool bracesInName );
+static bool matchBeforeBrace( ObjId id, const string& name );
 
-static bool matchInsideBrace( Id id, const string& inside );
+static bool matchInsideBrace( ObjId id, const string& inside );
 /**
  * wildcardFieldComparison returns true if the value of the
  * specified field matches the value in the comparsion string mid.
@@ -87,7 +86,7 @@ static bool wildcardFieldComparison( Id id, const string& mid )
 /**
  * Does the wildcard find on a single path
  */
-static int innerFind( const string& path, vector< Id >& ret)
+static int innerFind( const string& path, vector< ObjId >& ret)
 {
 	if ( path == "/" || path == "/root") {
 		ret.push_back( Id() );
@@ -97,9 +96,9 @@ static int innerFind( const string& path, vector< Id >& ret)
 	vector< string > names;
 	vector< vector< unsigned int > > indices;
 	bool isAbsolute = Shell::chopString( path, names, '/' );
-	Id start; // set to root id.
+	ObjId start; // set to root id.
 	if ( !isAbsolute ) {
-		Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+		Shell* s = reinterpret_cast< Shell* >( ObjId().data() );
 		start = s->getCwe();
 	}
 		
@@ -133,7 +132,7 @@ static int wildcardRelativeFind( Id start, const vector< string >& path,
  *
  * It returns the number of Ids found here.
  */
-int simpleWildcardFind( const string& path, vector<Id>& ret)
+int simpleWildcardFind( const string& path, vector< ObjId >& ret)
 {
 	if ( path.length() == 0 )
 		return 0;
@@ -148,7 +147,7 @@ int simpleWildcardFind( const string& path, vector<Id>& ret)
 	return ret.size() - n;
 }
 
-static void myUnique(vector<Id>& ret)
+static void myUnique(vector<ObjId>& ret)
 {
 	sort(ret.begin(), ret.end());
 	unsigned int i, j;
@@ -163,7 +162,7 @@ static void myUnique(vector<Id>& ret)
 		ret.resize(j);
 }
 
-int wildcardFind(const string& path, vector<Id>& ret) 
+int wildcardFind(const string& path, vector<ObjId>& ret) 
 {
 	ret.resize( 0 );
 	simpleWildcardFind( path, ret );
@@ -177,7 +176,7 @@ int wildcardFind(const string& path, vector<Id>& ret)
  * 	into child elements.
  * 	Returns # of ids found.
  */
-int singleLevelWildcard( Id start, const string& path, vector< Id >& ret )
+int singleLevelWildcard( ObjId start, const string& path, vector< ObjId >& ret )
 {
 	if ( path.length() == 0 )
 		return 0;
@@ -186,15 +185,16 @@ int singleLevelWildcard( Id start, const string& path, vector< Id >& ret )
 	string beforeBrace;
 	string insideBrace;
 	// This has to handle ghastly cases like foo[][FIELD(x)=12.3]
-	findBraceContent( path, beforeBrace, insideBrace );
+	unsigned int index = findBraceContent( path, beforeBrace, insideBrace );
 	if ( beforeBrace == "##" )
-		return allChildren( start, insideBrace, ret ); // recursive.
+		// recursive.
+		return allChildren( ObjId( start.id, ALLDATA ), insideBrace, ret ); 
 
 	vector< Id > kids;
 	Neutral::children( start.eref(), kids );
 	vector< Id >::iterator i;
 	for ( i = kids.begin(); i != kids.end(); i++ ) {
-		if ( matchName( start, *i, beforeBrace, insideBrace ) )
+		if ( matchName( ObjId( *i, ALLDATA ), index, beforeBrace, insideBrace ) )
 			ret.push_back( *i );
 	}
 
@@ -204,34 +204,47 @@ int singleLevelWildcard( Id start, const string& path, vector< Id >& ret )
 /**
  * Parses the name and separates out the stuff before the brace, 
  * the stuff inside it, and if present, the index which is also in a 
- * brace.
- * Assume order is foo[index][insideBrace]
+ * brace. Returns the index, and if not found, zero.
+ * Assume order is 
+ * foo[index][insideBrace] 
+ * or foo[index]
+ * or foo[insideBrace]
+ * or foo
+ *
+ * Note that for the index, an empty [] means ALLDATA, but the 
+ * absence of the braces altogether means zero.
  */
-void findBraceContent( const string& path, string& beforeBrace, 
+unsigned int findBraceContent( const string& path, string& beforeBrace, 
 	string& insideBrace )
 {
+	int index = 0;
 	beforeBrace = "";
 	insideBrace = "";
 
 	if ( path.length() == 0 )
-		return;
+		return 0;
 	vector< string > names;
 	Shell::chopString( path, names, '[' );
 	if ( names.size() == 0 )
-		return;
+		return 0;
 	if ( names.size() >= 1 )
 		beforeBrace = names[0];
 	if ( names.size() >= 2 ) {
-		if ( names[1].find_first_not_of( " 	]" ) == string::npos ) {
-			// look up numerical index which lives in first brace.
-		} else {
-			string n1 = names[1].substr( 0, names[1].length() - 1 );
+		const string& n = names[1];
+		if ( n == "]" ) { // A [] construct means use all indices.
+			index = ALLDATA;
+		} else if ( isdigit( n[0] ) ) {
+			index = atoi( n.c_str() );
+		} else { // some complicated text construct for the brace
+			insideBrace = n.substr( 0, n.length() - 1 );
+			return 0; // Even if there is another brace, we can't handle it.
+		}
+		if ( names.size() == 3 ) { // name[number][another_string]
+			string n1 = names[2].substr( 0, names[2].length() - 1 );
 			insideBrace = n1;
 		}
 	}
-	if ( names.size() >= 3 ) {
-		insideBrace = names[2].substr( 0, names[2].length() - 1 );
-	}
+	return index;
 }
 
 /**
@@ -241,22 +254,21 @@ void findBraceContent( const string& path, string& beforeBrace,
  * - Wildcards within the braces
  * - Simple elements with index as part of their names.
  */
-bool matchName( Id parent, Id id, 
+bool matchName( ObjId id, unsigned int index,
 	const string& beforeBrace, const string& insideBrace )
 {
 	string temp = id.element()->getName();
 	if ( temp.length() <= 0 ){
-	  return 0;
+	  return false;
 	}
-	bool bracesInName = 
-		( temp.length() > 3 && 
-		temp[temp.length() - 1] == ']' );
 
-	if ( matchBeforeBrace( id, beforeBrace, bracesInName ) ) {
-		if ( insideBrace.length() == 0 ) {
-			return 1;
-		} else {
-			return matchInsideBrace( id, insideBrace );
+	if ( index == ALLDATA || index == id.dataIndex || id.dataIndex == ALLDATA ) {
+		if ( matchBeforeBrace( id, beforeBrace ) ) {
+			if ( insideBrace.length() == 0 ) {
+				return true;
+			} else {
+				return matchInsideBrace( id, insideBrace );
+			}
 		}
 	}
 	return 0;
@@ -266,10 +278,12 @@ bool matchName( Id parent, Id id,
  * matchInsideBrace checks for element property matches
  * Still has some legacy hacks for reading GENESIS code.
  */
-bool matchInsideBrace( Id id, const string& inside )
+bool matchInsideBrace( ObjId id, const string& inside )
 {
 	/* Map from Genesis class names to Moose class names */
 	// const map< string, string >& classNameMap = sliClassNameConvert();
+	if ( inside == "" )
+		return true; // empty means that there is no condition to apply.
 	
 	if ( inside.substr(0, 4 ) == "TYPE" ||
 		inside.substr(0, 5 ) == "CLASS" ||
@@ -277,7 +291,7 @@ bool matchInsideBrace( Id id, const string& inside )
 	{
 		string::size_type pos = inside.rfind( "=" );
 		if ( pos == string::npos ) 
-			return 0;
+			return false;
 		bool isEquality = ( inside[ pos - 1 ] != '!' );
 		string typeName = inside.substr( pos + 1 );
 		if ( typeName == "membrane" )
@@ -304,7 +318,8 @@ bool matchInsideBrace( Id id, const string& inside )
 	} else if ( inside.substr( 0, 6 ) == "FIELD(" ) {
 		return wildcardFieldComparison( id, inside.substr( 6 ) );
 	}
-	return 0;
+
+	return false;
 }
 
 /**
@@ -319,22 +334,12 @@ bool matchInsideBrace( Id id, const string& inside )
  *
  * 		If bracesInName, then the Id name itself includes braces.
  */
-bool matchBeforeBrace( Id id, const string& name, bool bracesInName )
+bool matchBeforeBrace( ObjId id, const string& name )
 {
-	if ( name == "#" )
+	if ( name == "#" || name == "##" )
 		return 1;
 
 	string ename = id.element()->getName();
-	if ( bracesInName ) {
-		string::size_type pos = ename.rfind( '[' );
-		if ( pos == string::npos )
-			return 0;
-		if ( pos == 0 )
-			return 0;
-		ename = ename.substr( 0, pos );
-	}
-	
-
 	if ( name == ename )
 		return 1;
 
@@ -363,16 +368,16 @@ bool matchBeforeBrace( Id id, const string& name, bool bracesInName )
  * Recursive function to compare all descendants and cram matches into ret.
  * Returns number of matches.
  */
-int allChildren( Id start, const string& insideBrace, vector< Id >& ret )
+int allChildren( ObjId start, const string& insideBrace, vector< ObjId >& ret )
 {
 	unsigned int nret = ret.size();
 	vector< Id > kids;
 	Neutral::children( start.eref(), kids );
 	vector< Id >::iterator i;
 	for ( i = kids.begin(); i != kids.end(); i++ ) {
-		if ( matchName( start, *i, "#", insideBrace ) )
+		if ( matchInsideBrace( *i, insideBrace ) )
 			ret.push_back( *i );
-		allChildren( *i, insideBrace, ret );
+		allChildren( ObjId( *i, ALLDATA ), insideBrace, ret );
 	}
 	return ret.size() - nret;
 }
@@ -381,32 +386,33 @@ int allChildren( Id start, const string& insideBrace, vector< Id >& ret )
  * This is the main recursive function of the wildcarding scheme.
  * It builds a wildcard list based on path. Puts found Ids into ret,
  * and returns # found.
- * The start id is one that already matches.
+ * The start ObjId is one that already matches.
  * depth is the position on the path.
- * Note that this is a single-node function: does not work for 
- * multi-node wildcard searches.
+ * This should work for multi-node wildcard searches since it only
+ * refers to messaging and basic Element information that is present on
+ * all nodes.
  */
-int wildcardRelativeFind( Id start, const vector< string >& path, 
-		unsigned int depth, vector< Id >& ret )
+int wildcardRelativeFind( ObjId start, const vector< string >& path, 
+		unsigned int depth, vector< ObjId >& ret )
 {
 	int nret = 0;
-	vector< Id > currentLevelIds;
+	vector< ObjId > currentLevelIds;
 	if ( depth == path.size() ) {
 		ret.push_back( start );
 		return 1;
 	}
 
 	if ( singleLevelWildcard( start, path[depth], currentLevelIds ) > 0 ) {
-		vector< Id >::iterator i;
+		vector< ObjId >::iterator i;
 		for ( i = currentLevelIds.begin(); i != currentLevelIds.end(); ++i )
 			nret += wildcardRelativeFind( *i, path, depth + 1, ret );
 	}
 	return nret;
 }
 
-void wildcardTestFunc( Id* elist, unsigned int ne, const string& path )
+void wildcardTestFunc( ObjId* elist, unsigned int ne, const string& path )
 {
-	vector< Id > ret;
+	vector< ObjId > ret;
 	simpleWildcardFind( path, ret );
 	if ( ne != ret.size() ) {
 		cout << "!\nAssert	'" << path << "' : expected " <<
@@ -417,8 +423,8 @@ void wildcardTestFunc( Id* elist, unsigned int ne, const string& path )
 	for ( unsigned int i = 0; i < ne ; i++ ) {
 		if ( elist[ i ] != ret[ i ] ) {
 			cout << "!\nAssert	" << path << ": item " << i << 
-				": " << elist[ i ].element()->getName() << " != " <<
-					ret[ i ].element()->getName() << "\n";
+				": " << elist[i].element()->getName() << " != " <<
+					ret[i].element()->getName() << "\n";
 			assert( 0 );
 		}
 	}
@@ -430,21 +436,26 @@ void testWildcard()
 	unsigned long i;
 	string bb;
 	string ib;
-	findBraceContent( "foo[23][TYPE=Compartment]", bb, ib );
+	i = findBraceContent( "foo[23][TYPE=Compartment]", bb, ib );
 	assert( bb == "foo" );
+	assert( i == 23 );
 	assert( ib == "TYPE=Compartment" );
-	findBraceContent( "foo[][TYPE=Channel]", bb, ib );
+	i = findBraceContent( "foo[][TYPE=Channel]", bb, ib );
+	assert( i == ALLDATA );
 	assert( bb == "foo" );
 	assert( ib == "TYPE=Channel" );
-	findBraceContent( "foo[TYPE=membrane]", bb, ib );
+	i = findBraceContent( "foo[TYPE=membrane]", bb, ib );
+	assert( i == 0 );
 	assert( bb == "foo" );
 	assert( ib == "TYPE=membrane" );
-	findBraceContent( "bar[]", bb, ib );
+	i = findBraceContent( "bar[]", bb, ib );
+	assert( i == ALLDATA );
 	assert( bb == "bar" );
 	assert( ib == "" );
-	findBraceContent( "zod[24]", bb, ib );
+	i = findBraceContent( "zod[24]", bb, ib );
+	assert( i == 24 );
 	assert( bb == "zod" );
-	assert( ib == "24" );
+	assert( ib == "" );
 
 
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
@@ -452,39 +463,41 @@ void testWildcard()
 	Id c1 = shell->doCreate( "Arith", a1, "c1", 1 );
 	Id c2 = shell->doCreate( "Arith", a1, "c2", 1 );
 	Id c3 = shell->doCreate( "Arith", a1, "c3", 1 );
-	Id cIndex = shell->doCreate( "Neutral", a1, "c4[1]", 1 );
+	Id cIndex = shell->doCreate( "Neutral", a1, "c4", 1 );
 
-	bool ret = matchBeforeBrace( a1, "a1", 0 );
+	bool ret = matchBeforeBrace( a1, "a1" );
 	assert( ret );
-	ret = matchBeforeBrace( a1, "a2", 0 );
+	ret = matchBeforeBrace( a1, "a2" );
 	assert( ret == 0 );
-	ret = matchBeforeBrace( a1, "a?", 0 );
+	ret = matchBeforeBrace( a1, "a?" );
 	assert( ret == 1 );
-	ret = matchBeforeBrace( a1, "?1", 0 );
+	ret = matchBeforeBrace( a1, "?1" );
 	assert( ret == 1 );
-	ret = matchBeforeBrace( a1, "??", 0 );
+	ret = matchBeforeBrace( a1, "??" );
 	assert( ret == 1 );
-	ret = matchBeforeBrace( a1, "#", 0 );
+	ret = matchBeforeBrace( a1, "#" );
 	assert( ret == 1 );
-	ret = matchBeforeBrace( a1, "a#", 0 );
+	ret = matchBeforeBrace( a1, "a#" );
 	assert( ret == 1 );
-	ret = matchBeforeBrace( a1, "#1", 0 );
+	ret = matchBeforeBrace( a1, "#1" );
 	assert( ret == 1 );
 
-	ret = matchBeforeBrace( cIndex, "c4", 1 );
+	ret = matchBeforeBrace( cIndex, "c4" );
 	assert( ret == 1 );
-	ret = matchBeforeBrace( cIndex, "c4", 1 );
+	ret = matchBeforeBrace( cIndex, "##" );
 	assert( ret == 1 );
-	ret = matchBeforeBrace( cIndex, "#4", 1 );
+	ret = matchBeforeBrace( cIndex, "#4" );
 	assert( ret == 1 );
-	ret = matchBeforeBrace( cIndex, "#", 1 );
+	ret = matchBeforeBrace( cIndex, "#" );
 	assert( ret == 1 );
-	ret = matchBeforeBrace( cIndex, "?4", 1 );
+	ret = matchBeforeBrace( cIndex, "?4" );
 	assert( ret == 1 );
-	ret = matchBeforeBrace( cIndex, "c1", 1 );
+	ret = matchBeforeBrace( cIndex, "c1" );
 	assert( ret == 0 );
-	ret = matchBeforeBrace( cIndex, "c4", 0 );
-	assert( ret == 0 );
+	ret = matchBeforeBrace( cIndex, "c?" );
+	assert( ret == 1 );
+	ret = matchBeforeBrace( cIndex, "??" );
+	assert( ret == 1 );
 
 
 	ret = matchInsideBrace( a1, "TYPE=Neutral" );
@@ -529,15 +542,19 @@ void testWildcard()
 	assert( ret );
 	ret = matchInsideBrace( c3, "FIELD(outputValue)<=123.5" );
 	assert( ret );
+	ret = matchInsideBrace( c3, "FIELD(outputValue)==123.4" );
+	assert( !ret );
+	ret = matchInsideBrace( c3, "FIELD(outputValue)<123.4" );
+	assert( !ret );
 
 
-	Id el1[] = { Id(), a1, c1 };
+	ObjId el1[] = { ObjId(), a1, c1 };
 	wildcardTestFunc( el1, 3, "/,/a1,/a1/c1" );
-	Id el3[] = { c1, c2, c3, cIndex };
+	ObjId el3[] = { c1, c2, c3, cIndex };
 	wildcardTestFunc( el3, 4, "/a1/c#" );
 	wildcardTestFunc( el3, 3, "/a1/c#[TYPE=Arith]" );
 
-	Id el2[ 100 ];
+	ObjId el2[ 100 ];
 	for ( i = 0 ; i < 100; i++ ) {
 		char name[10];
 		sprintf( name, "ch%ld", i );
@@ -551,12 +568,12 @@ void testWildcard()
 
 	wildcardTestFunc( el2, 0, "/a1/##[TYPE=IntFire]" );
 	wildcardTestFunc( el2, 100, "/a1/##[TYPE=Annotator]" );
-	wildcardTestFunc( el2, 50, "/a1/c1/##[TYPE=Annotator][FIELD(z)<50]" );
+	wildcardTestFunc( el2, 50, "/a1/c1/##[][FIELD(z)<50]" );
 
 	// Here we set up some thoroughly ugly nesting.
 	// Note the sequence: The wildcarding goes depth first,
 	// and then in order of creation.
-	Id el4[12];
+	ObjId el4[12];
 	i = 0;
 	el4[i] = shell->doCreate( "IntFire", el2[0], "g0", 1 ); ++i;
 	el4[i] = shell->doCreate( "IntFire", el2[1], "g1", 1 ); ++i;

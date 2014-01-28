@@ -2367,6 +2367,7 @@ This revealed a bug, tracked down eventually and fixed. Now values match
 for the bigger 11x11 test case above. To put the calculations in perspective,
 there are only 10 forward-elimination steps and 11 backward substitution steps
 in the solution for the 11x11 case.
+Checkin 5026
 
 Next: 
 - Package into a standalone class that can plug into CylMesh and NeuroMesh.
@@ -2398,4 +2399,51 @@ Porting:
 - Biophysics directory
 - Hsolver.
 
+============================================================================
+27 Jan 2014
+Planning design for diffusion solver and parallelization
+- Implement separate diffusion solver, talks to mesh but independent
+- Array of entries on diffusion solver put different molecules on different
+	nodes. Each entry does entire diffusion matrix for that molecule.
+- Molecules will need to be placed on Elements that can be assigned to specific
+	nodes, to match those used by the diffusion solver. Molecules will be
+	'solved' by the diff solver.
+- Kinetic solver ksolve will also form an array, in this case one per diffusion
+	compartment. Each ksolve will handle all the molecules in the reaction
+	system in that compartment. The ksolve entries will be distributed
+	between a bunch of nodes
+- Ksolves will communicate with their molecules via messages. It will be 
+	'push' messages on either side, the molecules sending 'nout' as 
+	computed by the diffusion solver, and the ksolve sending back an update
+	value of 'n' to go to the respective solver. This will be on the usual
+	update clock of the system, ie, 1-10 ms.
+- Need a 'Transpose' msg class to handle this: transposes the compartment-vs-
+	molecule slices of the diffusion and ksolvers on each node. This 
+	consolidates all data going to each node into a vector to avoid there
+	being a huge mass of single messages.
+
+
+GSOC project outline.
+
+The MOOSE team (Upinder S. Bhalla, Harsha Rani, Subhasis Ray, Aditya Gilra, 
+Aviral Goel, Niraj Dudani)
+at NCBS Bangalore offer a project on 
+"Optimization of parallel computation in MOOSE"
+
+Project overview:
+The Multiscale Object-Oriented Simulation Environment, 
+(MOOSE, http://moose.ncbs.res.in) has recently implemented a new 
+MPI-based parallelization scheme that supports automatic setup-time 
+load balancing and transparent object access across nodes. There are 
+several optimizations that could be developed from the current 
+design. These include improved scaling with large numbers of nodes, 
+GPU implementations of numerical engines, and run-time load balancing.
+Due to the modular nature of the MOOSE code, such optimizations can be
+carried out on tightly focussed portions of the code yet be tested with and
+be useful for complex simulations. Thus, with a relatively quick learning
+curve, this project should have substantial value for the MOOSE project,
+and give the participant an insight into the design of a large neuronal
+and systems biology simulator.
+
+Request to fix wildcards with defined indices.
 ============================================================================

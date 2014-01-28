@@ -64,6 +64,11 @@ class ObjId
 		bool operator!=( const ObjId& other ) const;
 
 		/**
+		 * For sorting
+		 */
+		bool operator<( const ObjId& other ) const;
+
+		/**
 		 * True if the data is present on the current node. Always true for
 		 * globals, which confuses the matter somewhat.
 		 */

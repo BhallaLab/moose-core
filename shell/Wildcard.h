@@ -43,7 +43,7 @@
  *   [ISA!=<string>]
  *   [FIELD(<fieldName)=<string>]
  */
-int simpleWildcardFind( const string& path, vector<Id>& ret);
+int simpleWildcardFind( const string& path, vector<ObjId>& ret);
 
 
 /**
@@ -51,12 +51,12 @@ int simpleWildcardFind( const string& path, vector<Id>& ret);
  * This behaves the same as simpleWildcardFind, except that it eliminates
  * non-unique entries, and in the process will scramble the ordering.
  */
-int wildcardFind(const string& n, vector<Id>& ret);
+int wildcardFind(const string& n, vector<ObjId>& ret);
 
 /**
  * Recursive function to compare all descendants and cram matches into ret.
  * Returns number of matches.
  */
-int allChildren( Id start, const string& insideBrace, vector< Id >& ret );
+int allChildren( ObjId start, const string& insideBrace, vector< ObjId >& ret );
 
 #endif // _WILDCARD_H
