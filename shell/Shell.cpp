@@ -51,7 +51,7 @@ const Cinfo* Shell::initCinfo()
 			"Flag: Checks if simulation is in progress",
 			&Shell::isRunning );
 
-	static ValueFinfo< Shell, Id > cwe( 
+	static ValueFinfo< Shell, ObjId > cwe( 
 			"cwe",
 			"Current working Element",
 			&Shell::setCwe,
@@ -134,7 +134,7 @@ Shell::Shell()
 	: 
 		gettingVector_( 0 ),
 		numGetVecReturns_( 0 ),
-		cwe_( Id() )
+		cwe_( ObjId() )
 {
 	getBuf_.resize( 1, 0 );
 }
@@ -165,6 +165,14 @@ Id Shell::doCreate( string type, ObjId parent, string name,
 				unsigned int preferredNode )
 {
 	const Cinfo* c = Cinfo::find( type );
+	if ( name.find_first_of( "[] #?\"/\\" ) != string::npos ) {
+		stringstream ss;
+		ss << "Shell::doCreate: bad character in name'" << name << 
+				"'. No Element created";
+		warning( ss.str() );
+		return Id();
+	}
+
 	if ( c ) {
 		Element* pa = parent.element();
 		if ( !pa ) {
@@ -439,7 +447,7 @@ bool Shell::chopString( const string& path, vector< string >& ret,
  * index: { 0, 10, 3 }
  */
 bool Shell::chopPath( const string& path, vector< string >& ret, 
-	vector< unsigned int >& index, ObjId cwe )
+	vector< unsigned int >& index )
 {
 	bool isAbsolute = chopString( path, ret, '/' );
 	if ( isAbsolute ) {
@@ -508,12 +516,11 @@ ObjId Shell::doFind( const string& path ) const
 	ObjId curr( 0, BADINDEX );
 	vector< string > names;
 	vector< unsigned int > indices;
-	bool isAbsolute = chopPath( path, names, indices, cwe_ );
+	bool isAbsolute = chopPath( path, names, indices );
 	assert( names.size() == indices.size() );
 
 	if ( !isAbsolute )
 		curr = cwe_;
-	
 
 	for ( unsigned int i = 0; i < names.size(); ++i ) {
 		if ( names[i] == "." ) {
@@ -558,12 +565,12 @@ string Shell::doRevision()
     return SVN_REVISION;
 }
 
-void Shell::setCwe( Id val )
+void Shell::setCwe( ObjId val )
 {
 	cwe_ = val;
 }
 
-Id Shell::getCwe() const
+ObjId Shell::getCwe() const
 {
 	return cwe_;
 }
@@ -668,8 +675,8 @@ void Shell::destroy( const Eref& e, Id eid)
 	assert( n );
 	// cout << myNode_ << ": Shell::destroy done for element id: " << eid << ", name = " << eid.element()->getName() << endl;
 	n->destroy( eid.eref(), 0 );
-	if ( cwe_ == eid )
-		cwe_ = Id();
+	if ( cwe_.id == eid )
+		cwe_ = ObjId();
 
 	// ack()->send( e, Shell::myNode(), OkStatus );
 }
@@ -789,20 +796,20 @@ void Shell::handleMove( const Eref& e, Id orig, ObjId newParent )
 }
 
 void Shell::addClockMsgs( 
-	const vector< Id >& list, const string& field, unsigned int tick,
+	const vector< ObjId >& list, const string& field, unsigned int tick,
    	unsigned int msgIndex	)
 {
 	if ( !Id( 1 ).element() )
 		return;
 	ObjId clockId( 1 );
-	for ( vector< Id >::const_iterator i = list.begin(); 
+	for ( vector< ObjId >::const_iterator i = list.begin(); 
 		i != list.end(); ++i ) {
 		if ( i->element() ) {
 			stringstream ss;
 			ss << "proc" << tick;
 			innerAddMsg( "OneToAll",
 				clockId, ss.str(), 
-				ObjId( *i, 0 ), field, msgIndex++ );
+				*i, field, msgIndex++ );
 		}
 	}
 }
@@ -810,8 +817,8 @@ void Shell::addClockMsgs(
 bool Shell::innerUseClock( string path, string field, unsigned int tick,
 				unsigned int msgIndex )
 {
-	vector< Id > list;
-	wildcard( path, list ); // By default scans only Elements.
+	vector< ObjId > list;
+	wildcardFind( path, list ); // By default scans only Elements.
 	if ( list.size() == 0 ) {
 		cout << "Warning: no Elements found on path " << path << endl;
 		return 0;
@@ -863,10 +870,12 @@ void Shell::error( const string& text )
 	cout << "Error: Shell:: " << text << endl;
 }
 
-void Shell::wildcard( const string& path, vector< Id >& list )
+/*
+void Shell::wildcard( const string& path, vector< ObjId >& list )
 {
 	wildcardFind( path, list );
 }
+*/
 
 ////////////////////////////////////////////////////////////////////////
 // Some static utility functions

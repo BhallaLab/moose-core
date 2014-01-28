@@ -96,18 +96,31 @@ void testTreeTraversal()
 	////////////////////////////////////////////////////////////////
 	// Checking for child Id lists
 	////////////////////////////////////////////////////////////////
-	vector< Id > kids = Field< vector< Id > >::get( f1, "children" );
+	vector< Id > kids = 
+			Field< vector< Id > >::get( ObjId( f1, 0 ), "children" );
+	assert( kids.size() == 1 );
+	assert( kids[0] == f2a );
+	kids = Field< vector< Id > >::get( ObjId( f1, 1 ), "children" );
+	assert( kids.size() == 1 );
+	assert( kids[0] == f2b );
+	kids = Field< vector< Id > >::get( ObjId( f1, 2 ), "children" );
+	assert( kids.size() == 1 );
+	assert( kids[0] == f2c );
+
+	kids = Field< vector< Id > >::get( ObjId( f1, ALLDATA ), "children" );
 	assert( kids.size() == 3 );
 	assert( kids[0] == f2a );
 	assert( kids[1] == f2b );
 	assert( kids[2] == f2c );
 
-	kids = Field< vector< Id > >::get( f2a, "children" );
+	kids = Field< vector< Id > >::get( ObjId( f2a, ALLDATA ), "children" );
 	assert( kids.size() == 2 );
 	assert( kids[0] == f3aa );
 	assert( kids[1] == f3ab );
 	
-	kids = Field< vector< Id > >::get( f2b, "children" );
+	kids = Field< vector< Id > >::get( ObjId( f2b, 0 ), "children" );
+	assert( kids.size() == 0 );
+	kids = Field< vector< Id > >::get( ObjId( f2b, 5 ), "children" );
 	assert( kids.size() == 1 );
 	assert( kids[0] == f3ba );
 
@@ -1324,7 +1337,7 @@ void testChopPath()
 	vector< string > args;
 	vector< unsigned int > index;
 
-	assert( Shell::chopPath( "foo[1]/bar[2]/zod[3]", args, index, Id() ) == 0 );
+	assert( Shell::chopPath( "foo[1]/bar[2]/zod[3]", args, index ) == 0 );
 	assert( args.size() == 3 );
 	assert( args[0] == "foo" );
 	assert( args[1] == "bar" );
@@ -1337,7 +1350,7 @@ void testChopPath()
 	assert( index[2] == 3 );
 
 	assert( Shell::chopPath( "/foo/bar[1]/zod[2]/zung[3]", 
-		args, index, Id() ) == 1 );
+		args, index ) == 1 );
 	assert( args.size() == 4 );
 	assert( args[0] == "foo" );
 	assert( args[1] == "bar" );

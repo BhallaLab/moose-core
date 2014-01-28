@@ -52,12 +52,12 @@ class Shell
 		/**
 		 * Assigns the current working Element of the Shell
 		 */
-		void setCwe( Id cwe );
+		void setCwe( ObjId cwe );
 
 		/**
 		 * Returns the current working Element of the Shell
 		 */
-		Id getCwe() const;
+		ObjId getCwe() const;
 
 		/**
 		 * Returns flag to indicate whether simulation is still running
@@ -365,8 +365,8 @@ class Shell
 		 * Utility function to set up messages to schedule a list of Ids 
 		 * using the specified field and tick
 		 */
-		void addClockMsgs( const vector< Id >& list, const string& field, 
-			unsigned int tick, unsigned int msgIndex );
+		void addClockMsgs( const vector< ObjId >& list, 
+			const string& field, unsigned int tick, unsigned int msgIndex );
 
 		////////////////////////////////////////////////////////////////
 		// Thread and MPI handling functions
@@ -487,9 +487,9 @@ class Shell
  		 * index: { {}, {10}, {3,4,5} }
  		 */
 		static bool chopPath( const string& path, vector< string >& ret,
-			vector< unsigned int >& index, ObjId cwe ); 
+			vector< unsigned int >& index ); 
 
-		static void wildcard( const string& path, vector< Id >& list );
+		// static void wildcard( const string& path, vector< Id >& list );
 
 		/**
 		 * Cleans up all Elements except /root itself, /clock, /classes,
