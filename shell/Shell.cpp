@@ -513,7 +513,7 @@ ObjId Shell::doFind( const string& path ) const
 	if ( path == "/" || path == "/root" )
 		return ObjId();
 
-	ObjId curr( 0, BADINDEX );
+	ObjId curr;
 	vector< string > names;
 	vector< unsigned int > indices;
 	bool isAbsolute = chopPath( path, names, indices );
@@ -525,7 +525,7 @@ ObjId Shell::doFind( const string& path ) const
 	for ( unsigned int i = 0; i < names.size(); ++i ) {
 		if ( names[i] == "." ) {
 		} else if ( names[i] == ".." ) {
-			curr = Neutral::parent( curr.eref() ).id;
+			curr = Neutral::parent( curr.eref() );
 		} else {
 			ObjId pa = curr;
 			curr = Neutral::child( curr.eref(), names[i] );
