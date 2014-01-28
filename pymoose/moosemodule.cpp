@@ -95,6 +95,7 @@
 #include "../utility/utility.h"
 #include "../randnum/randnum.h"
 #include "../shell/Shell.h"
+#include "../shell/Wildcard.h"
 
 #include "moosemodule.h"
 
@@ -1872,12 +1873,12 @@ extern "C" {
                  "\n");
     PyObject * moose_wildcardFind(PyObject * dummy, PyObject * args)
     {
-        vector <Id> objects;
+        vector <ObjId> objects;
         char * wildcard_path = NULL;
         if (!PyArg_ParseTuple(args, "s:moose.wildcardFind", &wildcard_path)){
             return NULL;
         }
-        SHELLPTR->wildcard(string(wildcard_path), objects);
+        wildcardFind(string(wildcard_path), objects);
         PyObject * ret = PyTuple_New(objects.size());
         if (ret == NULL){
             PyErr_SetString(PyExc_RuntimeError, "moose.wildcardFind: failed to allocate new tuple.");
@@ -1885,13 +1886,13 @@ extern "C" {
         }
             
         for (unsigned int ii = 0; ii < objects.size(); ++ii){
-            _Id * entry = PyObject_New(_Id, &IdType);                       
+            _ObjId * entry = PyObject_New(_ObjId, &ObjIdType);                       
             if (!entry){
                 Py_XDECREF(ret);
                 PyErr_SetString(PyExc_RuntimeError, "moose.wildcardFind: failed to allocate new vec.");
                 return NULL;
             }
-            entry->id_ = objects[ii];
+            entry->oid_ = objects[ii];
             if (PyTuple_SetItem(ret, (Py_ssize_t)ii, (PyObject*)entry)){
                 Py_XDECREF(entry);
                 Py_XDECREF(ret);
