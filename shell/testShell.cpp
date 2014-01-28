@@ -190,31 +190,39 @@ void testTreeTraversal()
 		cout << "\nTesting warning for bad path indexing: ";
 		assert( shell->doFind( "/f1/f2a/f3aa[-1]" ).bad() );
 	}
-	assert( shell->doFind( "/f1/f2a/f3aa" ) == f3aa );
-	assert( shell->doFind( "/f1/f2a/f3ab" ) == f3ab );
-	assert( shell->doFind( "/f1/f2b/f3ba" ) == f3ba );
-	assert( shell->doFind( "/f1/f2b/f3ba/" ) == f3ba );
-	assert( shell->doFind( "/f1/f2b/f3ba/.." ) == f2b );
-	assert( shell->doFind( "f1/f2b/f3ba" ) == f3ba );
-	assert( shell->doFind( "./f1/f2b/f3ba" ) == f3ba );
-	assert( shell->doFind( "./f1/f2b/../f2a/f3aa" ) == f3aa );
+	ObjId ret = shell->doFind( "/f1/f2a[3]/f3aa" );
+	assert( ret == f3aa );
+	ret = shell->doFind( "/f1/f2a[4]/f3ab" );
+	assert( ret == f3ab );
+	ret = shell->doFind( "/f1[1]/f2b[5]/f3ba" );
+	assert( ret == f3ba );
+	ret = shell->doFind( "/f1[1]/f2b[5]/f3ba[6]" );
+	assert( ret == ObjId( f3ba, 6 ) );
+	ret = shell->doFind( "/f1[1]/f2b[5]/f3ba/.." );
+	assert( ret == ObjId( f2b, 5 ) );
+	assert( shell->doFind( "f1[1]/f2b[5]/f3ba" ) == f3ba );
+	assert( shell->doFind( "./f1[1]/f2b[5]/f3ba" ) == f3ba );
+	assert( shell->doFind( "./f1[1]/f2b/.." ) == ObjId( f1, 1 ) );
 
-	shell->setCwe( f2b );
-	assert( shell->doFind( "." ) == f2b );
+	shell->setCwe( ObjId( f2b, 5 ) );
+	assert( shell->doFind( "." ) == ObjId( f2b, 5 ) );
 	assert( shell->doFind( "f3ba" ) == f3ba );
+	assert( shell->doFind( "f3ba[7]" ) == ObjId( f3ba, 7 ) );
 	assert( shell->doFind( "f3ba/" ) == f3ba );
-	assert( shell->doFind( "f3ba/.." ) == f2b );
-	assert( shell->doFind( "f3ba/../../f2a/f3aa" ) == f3aa );
-	assert( shell->doFind( "../f2a/f3ab" ) == f3ab );
+	assert( shell->doFind( "f3ba/.." ) == ObjId( f2b, 5 ) );
+	// assert( shell->doFind( "f3ba/../../f2a[3]/f3aa" ) == f3aa );
+	assert( shell->doFind( "f3ba/../../" ) == ObjId( f1, 1 ) );
+	assert( shell->doFind( "../../f1/f2a[4]/f3ab" ) == f3ab );
+	// assert( shell->doFind( "../f2a[4]/f3ab" ) == f3ab );
 	
 	cout << "." << flush;
 	////////////////////////////////////////////////////////////////
 	// Checking getChild
 	////////////////////////////////////////////////////////////////
 	// Neutral* f1data = reinterpret_cast< Neutral* >( f1.eref().data() );
-	assert( f2a == Neutral::child( f1.eref(), "f2a" ) );
-	assert( f2b == Neutral::child( f1.eref(), "f2b" ) );
-	assert( f2c == Neutral::child( f1.eref(), "f2c" ) );
+	assert( f2a == Neutral::child( Eref( f1.element(), 0 ), "f2a" ) );
+	assert( f2b == Neutral::child( Eref( f1.element(), 1 ), "f2b" ) );
+	assert( f2c == Neutral::child( Eref( f1.element(), 2 ), "f2c" ) );
         shell->setCwe( Id() );
 	shell->doDelete( f1 );
 	cout << "." << flush;

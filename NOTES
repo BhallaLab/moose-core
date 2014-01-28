@@ -2447,3 +2447,20 @@ and systems biology simulator.
 
 Request to fix wildcards with defined indices.
 ============================================================================
+28 Jan 2014
+Fixing wildcards turned out to be a huge operation. Basically had to
+clean up lots of wildcard code to use ObjIds instead of Ids. This had 
+ramifications all over the place including the Python API. Still issues
+remain. For example:
+
+a = moose.Neutral( '/a', 22 )
+b = moose.Neutral( '/a[2]/b', 5 )
+c = moose.Neutral( '/a[2]/b[2]/c', 10 )
+x = moose.wildcardFind( '/a/##' )
+>>> x
+(<moose.Neutral: id=188, dataIndex=0, path=/a[2]/b[0]>, <moose.Neutral: id=189, dataIndex=0, path=/a[2]/b[2]/c[0]>)
+
+This should instead give a whole lot of ObjIds.
+
+Much pain later, fixed. Added unit tests for it.
+============================================================================

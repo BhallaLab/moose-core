@@ -577,8 +577,18 @@ Id Neutral::child( const Eref& e, const string& name )
 		if ( i->fid == pafid ) {
 			const Msg* m = Msg::getMsg( i->mid );
 			assert( m );
-			if ( m->e2()->getName() == name )
-				return m->e2()->id();
+			Element* e2 = m->e2();
+			if ( e2->getName() == name ) {
+				if ( e.dataIndex() == ALLDATA ) {// Child of any index is OK
+					return e2->id();
+				} else {
+					ObjId parent = m->findOtherEnd( m->getE2() );
+					// If child is a fieldElement, then all parent indices
+					// are permitted. Otherwise insist parent dataIndex OK.
+					if ( e2->hasFields() || parent == e.objId() )
+						return e2->id();
+				}
+			}
 		}
 	}
 	return Id();

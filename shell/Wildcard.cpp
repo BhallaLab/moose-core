@@ -32,7 +32,7 @@ static bool matchInsideBrace( ObjId id, const string& inside );
  * Format is FIELD(name)=val
  * If the format or the value does not match, return 0
  */
-static bool wildcardFieldComparison( Id id, const string& mid )
+static bool wildcardFieldComparison( ObjId oid, const string& mid )
 {
 	// where = could be the usual comparison operators and val
 	// could be a number. No strings yet
@@ -61,7 +61,7 @@ static bool wildcardFieldComparison( Id id, const string& mid )
 	*/
 	string actualValue;
 
-	bool ret = SetGet::strGet( ObjId( id, 0 ), fieldName, actualValue );
+	bool ret = SetGet::strGet( oid, fieldName, actualValue );
 	if ( ret == 0 )
 		return 0;
 	if ( op == "==" || op == "=" )
@@ -188,14 +188,21 @@ int singleLevelWildcard( ObjId start, const string& path, vector< ObjId >& ret )
 	unsigned int index = findBraceContent( path, beforeBrace, insideBrace );
 	if ( beforeBrace == "##" )
 		// recursive.
-		return allChildren( ObjId( start.id, ALLDATA ), insideBrace, ret ); 
+		return allChildren( start, insideBrace, ret ); 
 
 	vector< Id > kids;
 	Neutral::children( start.eref(), kids );
 	vector< Id >::iterator i;
 	for ( i = kids.begin(); i != kids.end(); i++ ) {
-		if ( matchName( ObjId( *i, ALLDATA ), index, beforeBrace, insideBrace ) )
-			ret.push_back( *i );
+		if ( matchName( ObjId( *i, ALLDATA ), 
+								index, beforeBrace, insideBrace ) ) {
+			if ( index == ALLDATA ) {
+				for ( unsigned int j = 0; j < i->element()->numData(); ++j )
+					ret.push_back( ObjId( *i, j ) );
+			} else {
+				ret.push_back( *i );
+			}
+		}
 	}
 
 	return ret.size() - nret;
@@ -375,9 +382,20 @@ int allChildren( ObjId start, const string& insideBrace, vector< ObjId >& ret )
 	Neutral::children( start.eref(), kids );
 	vector< Id >::iterator i;
 	for ( i = kids.begin(); i != kids.end(); i++ ) {
-		if ( matchInsideBrace( *i, insideBrace ) )
-			ret.push_back( *i );
-		allChildren( ObjId( *i, ALLDATA ), insideBrace, ret );
+		if ( i->element()->hasFields() ) {
+			if ( matchInsideBrace( *i, insideBrace ) ) {
+				ObjId oid( *i, start.dataIndex );
+				ret.push_back( oid );
+			}
+		} else {
+			for ( unsigned int j = 0; j < i->element()->numData(); ++j )
+		   	{
+				ObjId oid( *i, j );
+				allChildren( oid, insideBrace, ret );
+				if ( matchInsideBrace( oid, insideBrace ) )
+					ret.push_back( oid );
+			}
+		}
 	}
 	return ret.size() - nret;
 }
@@ -591,7 +609,19 @@ void testWildcard()
 	wildcardTestFunc( el4, 12, "/a1/##[TYPE=IntFire]" );
 	wildcardTestFunc( el4, 12, "/##[TYPE=IntFire]" );
 
+	// Here I test wildcards with array Elements.
+	Id x = shell->doCreate( "Arith", a1, "x", 5 );
+	Id y = shell->doCreate( "Arith", ObjId( x, 2 ), "y", 5 );
+	Id z = shell->doCreate( "Arith", ObjId( y, 3 ), "z", 5 );
+	vector< ObjId > vec;
+	simpleWildcardFind( "/a1/x[]/##", vec );
+	assert( vec.size() == 10 );
+	vec.clear();
+	simpleWildcardFind( "/a1/x[]/##,/a1/x[]", vec );
+	assert( vec.size() == 15 );
+
 	//a1.destroy();
 	shell->doDelete( a1 );
+	cout << "." << flush;
 }
 
