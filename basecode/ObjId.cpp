@@ -74,6 +74,18 @@ bool ObjId::operator!=( const ObjId& other ) const
 					fieldIndex != other.fieldIndex );
 }
 
+bool ObjId::operator<( const ObjId& other ) const
+{
+	return ( id < other.id || 
+		(id == other.id && ( 
+			dataIndex < other.dataIndex  ||
+			( dataIndex == other.dataIndex &&
+					fieldIndex < other.fieldIndex )
+			)
+		)
+	);
+}
+
 bool ObjId::isDataHere() const
 {
 	return ( id.element()->getNode( dataIndex ) == Shell::myNode() );

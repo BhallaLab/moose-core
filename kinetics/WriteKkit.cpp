@@ -596,7 +596,7 @@ double estimateDefaultVol( Id model )
 
 void writeKkit( Id model, const string& fname )
 {
-		vector< Id > ids;
+		vector< ObjId > ids;
 		vector< string > msgs;
 		unsigned int num = simpleWildcardFind( model.path() + "/##", ids );
 		if ( num == 0 ) {
@@ -619,8 +619,9 @@ void writeKkit( Id model, const string& fname )
 		double y = 0;
 		double side = floor( 1.0 + sqrt( static_cast< double >( num ) ) );
 		double dx = side / num;
-		for( vector< Id >::iterator i = ids.begin(); i != ids.end(); ++i ) {
-			getInfoFields( *i, bg, fg, x, y , side, dx );
+		for( vector< ObjId >::iterator 
+						i = ids.begin(); i != ids.end(); ++i ) {
+			getInfoFields( i->id, bg, fg, x, y , side, dx );
 			if ( i->element()->cinfo()->isA( "PoolBase" ) ) {
 				ObjId pa = Neutral::parent( i->eref() );
 				// Check that it isn't an enz cplx.
