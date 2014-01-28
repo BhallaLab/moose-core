@@ -1844,6 +1844,28 @@ extern "C" {
         Py_RETURN_NONE;
     }
 
+    /**
+       Utility function to get all the individual elements when ALLDATA is dataIndex.
+    */
+    vector<ObjId> all_elements(Id id)
+    {
+        vector<ObjId> ret;
+        unsigned int ii = 0; // storage for dataIndex
+        unsigned int jj = 0; // storage for fieldIndex
+        unsigned int * iptr = &ii; // this will point to the fastest changing index
+        unsigned int length;
+        if (id.element()->hasFields()){
+            iptr = &jj;
+            length = Field< unsigned int>::get(id, "numField");
+        } else {
+            length = id.element()->numData();
+        }
+        for (*iptr = 0; *iptr < length; ++(*iptr)){
+            ret.push_back(ObjId(id, ii, jj));
+        }
+        return ret;
+    }
+    
     PyDoc_STRVAR(moose_wildcardFind_documentation,
                  "moose.wildcardFind(expression) -> tuple of ematrices.\n"
                  "\n"
@@ -1871,6 +1893,7 @@ extern "C" {
                  "\tFor example, /mymodel/##[FIELD(Vm)>=-65] will return a list of all\n"
                  "\tthe objects under /mymodel whose Vm field is >= -65.\n"
                  "\n");
+
     PyObject * moose_wildcardFind(PyObject * dummy, PyObject * args)
     {
         vector <ObjId> objects;
@@ -1879,20 +1902,29 @@ extern "C" {
             return NULL;
         }
         wildcardFind(string(wildcard_path), objects);
-        PyObject * ret = PyTuple_New(objects.size());
+        vector <ObjId> allElements;
+        for (unsigned int ii = 0; ii < objects.size(); ++ii){
+            if (objects[ii].dataIndex == ALLDATA){
+                vector<ObjId> all = all_elements(objects[ii].id);
+                allElements.insert(allElements.end(), all.begin(), all.end());
+            } else {
+                allElements.push_back(objects[ii]);
+            }
+        }
+        PyObject * ret = PyTuple_New(allElements.size());
         if (ret == NULL){
             PyErr_SetString(PyExc_RuntimeError, "moose.wildcardFind: failed to allocate new tuple.");
             return NULL;
         }
             
-        for (unsigned int ii = 0; ii < objects.size(); ++ii){
+        for (unsigned int ii = 0; ii < allElements.size(); ++ii){
             _ObjId * entry = PyObject_New(_ObjId, &ObjIdType);                       
             if (!entry){
                 Py_XDECREF(ret);
                 PyErr_SetString(PyExc_RuntimeError, "moose.wildcardFind: failed to allocate new vec.");
                 return NULL;
             }
-            entry->oid_ = objects[ii];
+            entry->oid_ = allElements[ii];
             if (PyTuple_SetItem(ret, (Py_ssize_t)ii, (PyObject*)entry)){
                 Py_XDECREF(entry);
                 Py_XDECREF(ret);
