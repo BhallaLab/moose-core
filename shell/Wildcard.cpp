@@ -200,7 +200,7 @@ int singleLevelWildcard( ObjId start, const string& path, vector< ObjId >& ret )
 				for ( unsigned int j = 0; j < i->element()->numData(); ++j )
 					ret.push_back( ObjId( *i, j ) );
 			} else {
-				ret.push_back( *i );
+				ret.push_back( ObjId( *i, index ) );
 			}
 		}
 	}
@@ -619,6 +619,9 @@ void testWildcard()
 	vec.clear();
 	simpleWildcardFind( "/a1/x[]/##,/a1/x[]", vec );
 	assert( vec.size() == 15 );
+	vec.clear();
+	simpleWildcardFind( "/a1/x[2]/y[]", vec );
+	assert( vec.size() == 5 );
 
 	//a1.destroy();
 	shell->doDelete( a1 );
