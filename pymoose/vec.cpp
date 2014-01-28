@@ -293,8 +293,8 @@ extern "C" {
         } else if (parent_path.empty()){
             parent_path = "/";
         }
-        Id parent_id(parent_path);
-        if (parent_id == Id() && parent_path != "/" && parent_path != "/root") {
+        ObjId parent_id(parent_path);
+        if (parent_id.bad() ) {
             string message = "Parent element does not exist: ";
             message += parent_path;
             PyErr_SetString(PyExc_ValueError, message.c_str());
