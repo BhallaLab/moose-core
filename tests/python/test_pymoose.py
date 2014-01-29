@@ -144,6 +144,40 @@ class TestNeutral1(unittest.TestCase):
         id1[0].name = 'bravo'
         self.assertEqual(id1.path, '/bravo')
         self.assertEqual(id2.path, '/bravo')
+
+class TestWildcardFind(unittest.TestCase):
+    def setUp(self):
+        self.x = moose.Neutral('/x', 10)
+        self.y = moose.IntFire('/x[5]/y', 10)
+        self.z = moose.Neutral('/x[5]/z', 3)
+        self.u = moose.IntFire('/x[5]/z[2]/u', 10)
+
+    def testAllData(self):
+        alldata = moose.wildcardFind('/x[5]/y[]')
+        set_all = set(alldata)
+        set_y = set(self.y.vec)
+        self.assertEqual(set_all, set_y)
+
+    def testIsA(self):
+        yset = set(moose.wildcardFind('/x[5]/#[ISA=IntFire]'))
+        zset = set(moose.wildcardFind('/x[5]/#[ISA=Neutral]'))
+        self.assertEqual(yset, set(self.y.vec))
+        self.assertEqual(zset, set(self.z.vec))
+
+    def testRecursiveIsA(self):
+        ifset = set(moose.wildcardFind('/x[5]/##[ISA=IntFire]'))
+        origset = set(self.y.vec)
+        origset.update(self.u.vec)
+        self.assertEqual(ifset, origset)
+
+    def testLessThan(self):
+        for ii in range(5):
+            self.y.vec[ii].Vm = -10
+        # This causes a lot of error message from SetGet::strGet - can
+        # we combine conditions with logical operators?
+        # '/x[]/##[(ISA=IntFire) AND (FIELD(Vm)<0)]'
+        yless = moose.wildcardFind('/x[]/##[FIELD(Vm)<0]') 
+        self.assertEqual(set(yless), set(self.y.vec[:5]))
         
         
 # class TestPyMooseGlobals(unittest.TestCase):
@@ -244,8 +278,8 @@ class TestFieldAccess(unittest.TestCase):
 
 # class TestValueFieldTypes(unittest.TestCase):
 #     def setUp(self):
-#         self.vec = uuid.uuid4().int
-#         self.container = moose.Neutral('/test%d' % (self.vec))
+#         self.id_ = uuid.uuid4().int
+#         self.container = moose.Neutral('/test%d' % (self.id_))
 #         cwe = moose.getCwe()
 #         self.model = moose.loadModel('../Demos/Genesis_files/Kholodenko.g', '%s/kholodenko' % (self.container.path))
 #         moose.setCwe(cwe)
