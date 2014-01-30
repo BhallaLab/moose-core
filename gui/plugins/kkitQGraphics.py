@@ -44,7 +44,7 @@ class PoolItem(KineticsDisplayItem):
     def __init__(self, *args, **kwargs):
         KineticsDisplayItem.__init__(self, *args, **kwargs)
         self.bg = QtGui.QGraphicsRectItem(self)
-        self.gobj = QtGui.QGraphicsSimpleTextItem(self.mobj[0].name, self.bg)        
+        self.gobj = QtGui.QGraphicsSimpleTextItem(self.mobj.name, self.bg)        
         self.gobj.setFont(PoolItem.font)
         self.bgColor = QtGui.QGraphicsEllipseItem(self)
         self.bgColor.setFlag(QtGui.QGraphicsItem.ItemStacksBehindParent,True)
@@ -160,8 +160,7 @@ class TableItem(KineticsDisplayItem):
         self.setGeometry(x,y, 
                          self.gobj.boundingRect().width(), 
                          self.gobj.boundingRect().height())
-
-
+    
 class ReacItem(KineticsDisplayItem):
     defaultWidth = 30
     defaultHeight = 30

@@ -5,7 +5,7 @@ import re
 from PyQt4 import QtGui, QtCore, Qt
 #import pygraphviz as pgv
 import networkx as nx
-sys.path.insert(0, '/home/harsha/async/gui')
+#sys.path.insert(0, '/home/harsha/async/gui')
 import numpy as np
 import config
 import pickle 
@@ -226,10 +226,12 @@ class  KineticsWidget(EditorWidgetBase):
             self.object2line = defaultdict(list)
             
             # Compartment and its members are put on the qgraphicsscene
+            
             self.mooseObjOntoscene()
             
             # All the moose Object are connected for visualization 
             self.drawLine_arrow(itemignoreZooming=False)
+            
             createdItem = {}
             if hasattr(self, 'view') and isinstance(self.view, QtGui.QWidget):
                 self.layout().removeWidget(self.view)
@@ -260,7 +262,7 @@ class  KineticsWidget(EditorWidgetBase):
                     enzItem = MMEnzItem(enzObj,self.qGraCompt[cmpt])
                 self.setupDisplay(enzinfo,enzItem,"enzyme")
                 self.setupSlot(enzObj,enzItem)
-
+        
         for cmpt,memb in self.meshEntry.items():
             for poolObj in find_index(memb,'pool'):
                 poolinfo = poolObj.path+'/info'
@@ -269,22 +271,23 @@ class  KineticsWidget(EditorWidgetBase):
                 self.setupSlot(poolObj,poolItem)
             
             for cplxObj in find_index(memb,'cplx'):
-                cplxinfo = (cplxObj[0].parent).path+'/info'
-                cplxItem = CplxItem(cplxObj,self.mooseId_GObj[element(cplxObj[0]).parent.getId()])
+                cplxinfo = (cplxObj.parent).path+'/info'
+                cplxItem = CplxItem(cplxObj,self.mooseId_GObj[element(cplxObj).parent.getId()])
                 self.setupDisplay(cplxinfo,cplxItem,"cplx")
                 self.setupSlot(cplxObj,cplxItem)
-
+            
             for reaObj in find_index(memb,'reaction'):
                 reainfo = reaObj.path+'/info'
                 reaItem = ReacItem(reaObj,self.qGraCompt[cmpt])
                 self.setupDisplay(reainfo,reaItem,"reaction")
                 self.setupSlot(reaObj,reaItem)
-
+                
             for tabObj in find_index(memb,'table'):
                 tabinfo = tabObj.path+'/info'
                 tabItem = TableItem(tabObj,self.qGraCompt[cmpt])
                 self.setupDisplay(tabinfo,tabItem,"tab")
                 self.setupSlot(tabObj,tabItem)
+        
         # compartment's rectangle size is calculated depending on children 
         for k, v in self.qGraCompt.items():
             rectcompt = v.childrenBoundingRect()
@@ -326,7 +329,6 @@ class  KineticsWidget(EditorWidgetBase):
                 x,y = self.autoCordinatepos[parent]
             ypos = (y-self.ymin)*self.yratio
         else:
-            #print "kkit ",iteminfo,"\n",element(iteminfo)
             x = float(element(iteminfo).getField('x'))
             y = float(element(iteminfo).getField('y'))
             #Qt origin is at the top-left corner. The x values increase to the right and the y values increase downwards \
@@ -421,23 +423,21 @@ class  KineticsWidget(EditorWidgetBase):
             #src = self.mooseId_GObj[inn]
             if isinstance(out,tuple):
                 if len(out[0])== 0:
-                    print inn.className + ':' +inn[0].name+ " doesn't output message"
+                    print inn.className + ':' +inn.name+ " doesn't output message"
                 else:
-                    src = self.mooseId_GObj[inn]
+                    src = self.mooseId_GObj[inn.getId()]
                     for items in (items for items in out[0] ):
                         des = self.mooseId_GObj[element(items[0]).getId()]
-                        
                         self.lineCord(src,des,items,itemignoreZooming)
                 if len(out[1]) == 0:
-                    print inn.className + ':' +inn[0].name+ " doesn't output message"
+                    print inn.className + ':' +inn.name+ " doesn't output message"
                 else:
                     for items in (items for items in out[1] ):
                         des = self.mooseId_GObj[element(items[0]).getId()]
                         self.lineCord(src,des,items,itemignoreZooming)
-
             elif isinstance(out,list):
                 if len(out) == 0:
-                    print "Func pool ",inn.name," doesn't have sumtotal"
+                    print "Func pool doesn't have sumtotal"
                 else:
                     src = self.mooseId_GObj[element(inn).getId()]
                     for items in (items for items in out ):
@@ -602,17 +602,15 @@ class  KineticsWidget(EditorWidgetBase):
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     size = QtCore.QSize(1024 ,768)
-    modelPath = 'Kholodenko'
-    modelPath = 'enz_classical_explicit'
-    modelPath = 'acc34'
-    #modelPath = 'acc61'
-    ##modelPath = 'acc8'
+    #modelPath = 'Kholodenko'
+    modelPath = 'acc23'
+    #modelPath = 'acc8'
     #modelPath = '3ARECB'
     #modelPath = '3AreacB'
     #modelPath = '5AreacB'
     itemignoreZooming = False
     try:
-        #filepath = '../../Demos/Genesis_files/'+modelPath+'.g'
+        filepath = '../../Demos/Genesis_files/'+modelPath+'.g'
         filepath = '/home/harsha/genesis_files/gfile/'+modelPath+'.g'
         print filepath
         f = open(filepath, "r")

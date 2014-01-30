@@ -5,7 +5,6 @@ import numpy as np
 import networkx as nx
 from collections import Counter
 #import matplotlib.pyplot as plt
-import re
 
 def xyPosition(objInfo,xory):
     try:
@@ -29,7 +28,7 @@ def setupMeshObj(modelRoot):
     meshEntryWildcard = '/##[ISA=ChemCompt]'
     if modelRoot != '/':
         meshEntryWildcard = modelRoot+meshEntryWildcard
-        
+
     for meshEnt in wildcardFind(meshEntryWildcard):
         print meshEnt
         mollist = []
@@ -37,37 +36,25 @@ def setupMeshObj(modelRoot):
         enzlist = []
         cplxlist = []
         tablist = []
-        for m in meshEnt:
-            # since wildcardFind is not searching with indexing
-            #e.g when we load kholodenko.g, /Kholodenko[0]/kinetics[0] or /Kholodenko[0]/kinetics or /kholodenko/kinetics[0]
-            # will not give the result but works with out index /kholodenko/kinetics or /kholodenko[]/kinetics[]
-            m = re.sub('\[0\]', '', m.path)
-            for mol in wildcardFind(m+'/##[ISA=PoolBase]'):
-                if isinstance(element(mol[0].parent),CplxEnzBase):
-                    cplxlist.append(mol)
-                    objInfo = mol[0].parent.path+'/info'
-                elif isinstance(element(mol[0]),moose.PoolBase):
-                    mollist.append(mol)
-                    objInfo =mol.path+'/info'
-                xcord.append(xyPosition(objInfo,'x'))
-                ycord.append(xyPosition(objInfo,'y')) 
 
-            enzlist = wildcardFind(m+'/##[ISA=EnzBase]')
-            realist = wildcardFind(m+'/##[ISA=ReacBase]')
-            tablist = wildcardFind(m+'/##[ISA=StimulusTable]')
+        mol_cpl = wildcardFind(meshEnt.path+'/##[ISA=PoolBase]')
+        enzlist = wildcardFind(meshEnt.path+'/##[ISA=EnzBase]')
+        realist = wildcardFind(meshEnt.path+'/##[ISA=ReacBase]')
+        tablist = wildcardFind(meshEnt.path+'/##[ISA=StimulusTable]')
+    
+        for m in mol_cpl:
+            if isinstance(element(m.parent),CplxEnzBase):
+                cplxlist.append(m)
+                objInfo = m.parent.path+'/info'
+            elif isinstance(element(m),moose.PoolBase):
+                mollist.append(m)
+                objInfo =m.path+'/info'
+            xcord.append(xyPosition(objInfo,'x'))
+            ycord.append(xyPosition(objInfo,'y')) 
 
-            for enz in enzlist:
-                objInfo = enz.path+'/info'
-                xcord.append(xyPosition(objInfo,'x'))
-                ycord.append(xyPosition(objInfo,'y'))
-            for rea in realist:
-                objInfo = rea.path+'/info'
-                xcord.append(xyPosition(objInfo,'x'))
-                ycord.append(xyPosition(objInfo,'y'))
-            for tab in tablist:
-                objInfo = tab.path+'/info'
-                xcord.append(xyPosition(objInfo,'x'))
-                ycord.append(xyPosition(objInfo,'y'))
+        getxyCord(xcord,ycord,enzlist)
+        getxyCord(xcord,ycord,realist)
+        getxyCord(xcord,ycord,tablist)
 
         meshEntry[meshEnt] = {'enzyme':enzlist,
                               'reaction':realist,
@@ -83,6 +70,12 @@ def setupMeshObj(modelRoot):
             and len(np.nonzero(ycord)[0]) == 0
     return(meshEntry,xmin,xmax,ymin,ymax,noPositionInfo)
 
+def getxyCord(xcord,ycord,list):
+    for item in list:
+        objInfo = item.path+'/info'
+        xcord.append(xyPosition(objInfo,'x'))
+        ycord.append(xyPosition(objInfo,'y'))
+
 def setupItem(modelPath,cntDict):
     '''This function collects information of what is connected to what. \
     eg. substrate and product connectivity to reaction's and enzyme's \
@@ -97,25 +90,25 @@ def setupItem(modelPath,cntDict):
             for items in wildcardFind(path):
                 sublist = []
                 prdlist = []
-                uniqItem,countuniqItem = countitems(items[0],'subOut')
+                uniqItem,countuniqItem = countitems(items,'subOut')
                 for sub in uniqItem: 
                     sublist.append((sub,'s',countuniqItem[sub]))
 
-                uniqItem,countuniqItem = countitems(items[0],'prd')
+                uniqItem,countuniqItem = countitems(items,'prd')
                 for prd in uniqItem:
                     prdlist.append((prd,'p',countuniqItem[prd]))
                 
                 if (baseObj == 'CplxEnzBase') :
-                    uniqItem,countuniqItem = countitems(items[0],'toEnz')
+                    uniqItem,countuniqItem = countitems(items,'toEnz')
                     for enzpar in uniqItem:
                         sublist.append((enzpar,'t',countuniqItem[enzpar]))
                     
-                    uniqItem,countuniqItem = countitems(items[0],'cplxDest')
+                    uniqItem,countuniqItem = countitems(items,'cplxDest')
                     for cplx in uniqItem:
                         prdlist.append((cplx,'cplx',countuniqItem[cplx]))
 
                 if (baseObj == 'EnzBase'):
-                    uniqItem,countuniqItem = countitems(items[0],'enzDest')
+                    uniqItem,countuniqItem = countitems(items,'enzDest')
                     for enzpar in uniqItem:
                         sublist.append((enzpar,'t',countuniqItem[enzpar]))
                 cntDict[items] = sublist,prdlist
@@ -126,23 +119,23 @@ def setupItem(modelPath,cntDict):
                 outputlist = []
                 funplist = []
                 nfunplist = []
-                uniqItem,countuniqItem = countitems(items[0],'input')
+                uniqItem,countuniqItem = countitems(items,'input')
                 for inpt in uniqItem:
                     inputlist.append((inpt,'st',countuniqItem[inpt]))
-                for funcbase in items[0].neighbors['output']: 
+                for funcbase in moose.element(items).neighbors['output']: 
                     funplist.append(funcbase)
                 if(len(funplist) > 1): print "SumFunPool has multiple Funpool"
                 else:  cntDict[funplist[0]] = inputlist
         else:
             for tab in wildcardFind(path):
                 tablist = []
-                uniqItem,countuniqItem = countitems(tab[0],'output')
+                uniqItem,countuniqItem = countitems(tab,'output')
                 for tabconnect in uniqItem:
                     tablist.append((tabconnect,'tab',countuniqItem[tabconnect]))
                 cntDict[tab] = tablist
 def countitems(mitems,objtype):
     items = []
-    items = mitems.neighbors[objtype]
+    items = element(mitems).neighbors[objtype]
     uniqItems = set(items)
     countuniqItems = Counter(items)
     return(uniqItems,countuniqItems)
@@ -163,7 +156,7 @@ def autoCoordinates(meshEntry,srcdesConnection):
             G.add_node(poolObj.path)
         for cplxObj in find_index(memb,'cplx'):
             G.add_node(cplxObj.path)
-            G.add_edge((cplxObj[0].parent).path,cplxObj.path)
+            G.add_edge((cplxObj.parent).path,cplxObj.path)
         for reaObj in find_index(memb,'reaction'):
             G.add_node(reaObj.path)
         
@@ -176,18 +169,18 @@ def autoCoordinates(meshEntry,srcdesConnection):
                 print inn.className + ':' +inn[0].name + "  doesn't have input message"
             else:
                 for items in (items for items in out[0] ):
-                    G.add_edge(element(items[0]).getField('path'),inn[0].path)
+                    G.add_edge(element(items[0]).path,inn.path)
             if len(out[1]) == 0:
                 print inn.className + ':' + inn[0].name + "doesn't have output mssg"
             else:
                 for items in (items for items in out[1] ):
-                    G.add_edge(inn[0].path,element(items[0]).getField('path'))
+                    G.add_edge(inn.path,element(items[0]).path)
         elif isinstance(out,list):
             if len(out) == 0:
-                print "Func pool "+inn[0]+" doesn't have sumtotal"
+                print "Func pool doesn't have sumtotal"
             else:
                 for items in (items for items in out ):
-                    G.add_edge(element(items[0]).getField('path'),inn[0].path)
+                    G.add_edge(element(items[0]).path,inn.path)
     
     nx.draw(G,pos=nx.spring_layout(G))
     #plt.savefig('/home/harsha/Desktop/netwrokXtest.png')
