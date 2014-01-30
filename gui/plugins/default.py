@@ -577,7 +577,7 @@ class SchedulingWidget(QtGui.QWidget):
         layout.setRowStretch(0, 1)
         # Create one row for each tick. Somehow ticks.shape is
         # (16,) while only 10 valid ticks exist. The following is a hack
-        ticks = moose.ematrix('/clock/tick')
+        ticks = moose.vec('/clock/tick')
         for ii in range(ticks[0].localNumField):
             tt = ticks[ii]
             layout.addWidget(QtGui.QLabel(tt.path), ii+1, 0)
@@ -603,14 +603,14 @@ class SchedulingWidget(QtGui.QWidget):
         self.currentTimeLabel.setText('%f' % (moose.Clock('/clock').currentTime))
 
     def updateTextFromTick(self, tickNo):
-        tick = moose.ematrix('/clock/tick')[tickNo]
+        tick = moose.vec('/clock/tick')[tickNo]
         widget = self.tickListWidget.layout().itemAtPosition(tickNo + 1, 1).widget()
         if widget is not None and isinstance(widget, QtGui.QLineEdit):
             widget.setText(str(tick.dt))
 
     def updateFromMoose(self):
         """Update the tick dt from the tick objects"""
-        ticks = moose.ematrix('/clock/tick')
+        ticks = moose.vec('/clock/tick')
         # Items at position 0 are the column headers, hence ii+1
         for ii in range(ticks[0].localNumField):
             self.updateTextFromTick(ii)
@@ -717,6 +717,7 @@ class PlotWidget(QtGui.QWidget):
         modelroot = moose.element(self.modelRoot).path
         time = moose.Clock('/clock').currentTime
         tabList = []
+	#print " default ",path
         for tabId in moose.wildcardFind('%s/##[TYPE=Table]' % (path)):
             tab = moose.Table(tabId)
             tableObject = tab.neighbours['requestData']
