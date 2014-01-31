@@ -575,13 +575,15 @@ extern "C" {
             PyErr_SetString(PyExc_IndexError, "moose.ElementField.getItem: invalid index.");
             return NULL;
         }
-        _ObjId * oid = PyObject_New(_ObjId, &ObjIdType);
+        // _ObjId * oid = PyObject_New(_ObjId, &ObjIdType);
         // cout << "Element field: " << self->name << ", owner: " << self->owner.path() << endl;
         // stringstream path;
         // path << self->owner.path() << "/" << self->name << "[" << index << "]";
         // cout << "moose_ElementField_getItem:: path=" << path.str();
-        oid->oid_ = ObjId(self->myoid.id, self->myoid.dataIndex, index);
-        return (PyObject*)oid;
+        // oid->oid_ = ObjId(self->myoid.id, self->myoid.dataIndex, index);
+        // return (PyObject*)oid;
+        ObjId oid(self->myoid.id, self->myoid.dataIndex, index);
+        return oid_to_element(oid);
     }
     
     PyObject * moose_ElementField_getSlice(_Field * self, Py_ssize_t start, Py_ssize_t end)
@@ -607,9 +609,9 @@ extern "C" {
         
         // Py_XINCREF(ret);        
         for (unsigned int ii = start; ii < end; ++ii){
-            _ObjId * value = PyObject_New(_ObjId, &ObjIdType);
-            value->oid_ = ObjId(self->myoid.id, self->myoid.dataIndex, ii);
-            if (PyTuple_SetItem(ret, (Py_ssize_t)(ii-start), (PyObject*)value)){
+            ObjId oid(self->myoid.id, self->myoid.dataIndex, ii);
+            PyObject * value = oid_to_element(oid);
+            if (PyTuple_SetItem(ret, (Py_ssize_t)(ii-start), value)){
                 Py_XDECREF(ret);
                 Py_XDECREF(value);
                 PyErr_SetString(PyExc_RuntimeError, "Could assign tuple entry.");
