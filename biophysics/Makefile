@@ -15,11 +15,11 @@ OBJ = \
 	IntFire.o	\
 	Synapse.o	\
 	SpikeGen.o	\
+	Compartment.o	\
 	testBiophysics.o	\
 
 # IzhikevichNrn.o	\
 	LeakyIaF.o	\
-	Compartment.o	\
 	SymCompartment.o	\
 	ChanBase.o	\
 	SynChanBase.o	\
