@@ -114,7 +114,7 @@ extern "C" {
     
     
     // Macro to create the Shell * out of shellId
-#define SHELLPTR (reinterpret_cast<Shell*>(get_shell(0, NULL).eref().data()))
+#define SHELLPTR (reinterpret_cast<Shell*>(getShell(0, NULL).eref().data()))
 
     
     /**
@@ -264,18 +264,18 @@ extern "C" {
     //////////////////////////////////////////////////////////////
     PyObject * getLookupField(ObjId oid, char * fieldName, PyObject * key);
     int setLookupField(ObjId oid, char * fieldName, PyObject * key, PyObject * value);
-    int define_class(PyObject * module_dict, const Cinfo * cinfo);
-    int define_destFinfos(const Cinfo * cinfo);
+    int defineClass(PyObject * module_dict, const Cinfo * cinfo);
+    int defineDestFinfos(const Cinfo * cinfo);
     int defineAllClasses(PyObject* module_dict);
-    int define_lookupFinfos(const Cinfo * cinfo);
-    int define_elementFinfos(const Cinfo * cinfo);
+    int defineLookupFinfos(const Cinfo * cinfo);
+    int defineElementFinfos(const Cinfo * cinfo);
     PyObject * moose_ObjId_get_lookupField_attr(PyObject * self, void * closure);
     PyObject * moose_ObjId_get_elementField_attr(PyObject * self, void * closure);
     PyObject * moose_ObjId_get_destField_attr(PyObject * self, void * closure);
     // PyObject * _setDestField(ObjId oid, PyObject * args);
-    PyObject * set_destFinfo(ObjId obj, string fieldName, PyObject *arg, string argType);
-    PyObject * set_destFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type1, PyObject * arg2, char type2);
-    Id get_shell(int argc, char **argv);
+    PyObject * setDestFinfo(ObjId obj, string fieldName, PyObject *arg, string argType);
+    PyObject * setDestFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type1, PyObject * arg2, char type2);
+    Id getShell(int argc, char **argv);
     vector<int> pysequence_to_dimvec(PyObject * dims);
     map<string, PyObject *>& get_inited_lookupfields();
     map< string, PyObject * >& get_inited_destfields();
@@ -283,12 +283,12 @@ extern "C" {
     map<string, PyTypeObject *>& get_moose_classes();
     map< string, PyObject *>& get_inited_elementfields();
     int get_npy_typenum(const type_info& ctype);
-    string getFieldType(string className, string fieldName, string finfoType);
+    string getFieldType(string className, string fieldName);
     const map<string, string>& get_field_alias();
-    string get_baseclass_name(PyObject * self);
-    int parse_Finfo_type(string className, string finfoType, string fieldName, vector<string> & typeVec);
+    string getBaseClassName(PyObject * self);
+    int parseFinfoType(string className, string finfoType, string fieldName, vector<string> & typeVec);
     vector<string> getFieldNames(string className, string finfoType);
-    PyObject * get_ObjId_attr(_ObjId * oid, string attribute);
+    PyObject * getObjIdAttr(_ObjId * oid, string attribute);
     const char ** getFinfoTypes();
     /**
        Convert PyObject to C++ object. Returns a pointer to the
@@ -569,11 +569,11 @@ PyObject* _set_vector_destFinfo(ObjId obj, string fieldName, PyObject * value, c
    Set destFinfo for 2 argument destination field functions.
 */
 template <class A>
-PyObject* set_destFinfo1(ObjId obj, string fieldName, PyObject* arg1, char type1, A arg2)
+PyObject* setDestFinfo1(ObjId obj, string fieldName, PyObject* arg1, char type1, A arg2)
 {
     bool ret;
     ostringstream error;
-    error << "moose.set_destFinfo1: ";
+    error << "moose.setDestFinfo1: ";
     switch (type1){
         case 'f': case 'd': {
             double param = PyFloat_AsDouble(arg1);
