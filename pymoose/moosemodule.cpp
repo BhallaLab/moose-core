@@ -800,7 +800,7 @@ extern "C" {
 
        Return the Id of the Shell object.
     */
-    Id get_shell(int argc, char ** argv)
+    Id getShell(int argc, char ** argv)
     {
         static int inited = 0;
         if (inited){
@@ -851,7 +851,7 @@ extern "C" {
             return;
         }
         finalized = true;
-        Id shellId = get_shell(0, NULL);
+        Id shellId = getShell(0, NULL);
         for (map<string, PyObject *>::iterator it =
                      get_inited_lookupfields().begin();
              it != get_inited_lookupfields().end();
@@ -913,15 +913,12 @@ extern "C" {
        
        fieldName -- field to look for
        
-       finfoType -- finfo type to look in (can be valueFinfo,
-       destFinfo, srcFinfo, lookupFinfo etc.
-       
        Return:
        
        string -- value of type field of the Finfo object. This is a
        comma separated list of C++ template arguments
     */
-    string getFieldType(string className, string fieldName, string finfoType="")
+    string getFieldType(string className, string fieldName)
     {
         string fieldType = "";
         const Cinfo * cinfo = Cinfo::find(className);        
@@ -949,9 +946,9 @@ extern "C" {
        arguments. We populate `typeVec` with the individual
        type strings.
     */
-    int parse_Finfo_type(string className, string finfoType, string fieldName, vector<string> & typeVec)
+    int parseFinfoType(string className, string finfoType, string fieldName, vector<string> & typeVec)
     {
-        string typestring = getFieldType(className, fieldName, finfoType);
+        string typestring = getFieldType(className, fieldName);
         if (typestring.empty()){
             return -1;
         }
@@ -980,32 +977,32 @@ extern "C" {
             return ret;
         }
         // Finfo * (Cinfo:: * getFinfo)(unsigned int); // causes : warning: ISO C++ forbids taking the address of a bound member function to form a pointer to member function. 
-        if (finfoType == "valueFinfo"){
+        if (finfoType == "valueFinfo" || finfoType == "value"){
             for (unsigned int ii = 0; ii < cinfo->getNumValueFinfo(); ++ii){
                 Finfo * finfo = cinfo->getValueFinfo(ii);
                 ret.push_back(finfo->name());
             }
-        } else if (finfoType == "srcFinfo"){
+        } else if (finfoType == "srcFinfo" || finfoType == "src"){
             for (unsigned int ii = 0; ii < cinfo->getNumSrcFinfo();  ++ii){
                 Finfo * finfo = cinfo->getSrcFinfo(ii);
                 ret.push_back(finfo->name());
             }
-        }else if (finfoType == "destFinfo"){
+        }else if (finfoType == "destFinfo" || finfoType == "dest"){
             for (unsigned int ii = 0; ii < cinfo->getNumDestFinfo(); ++ii){
                 Finfo * finfo = cinfo->getDestFinfo(ii);
                 ret.push_back(finfo->name());
             }
-        } else if (finfoType == "lookupFinfo"){
+        } else if (finfoType == "lookupFinfo" || finfoType == "lookup"){
             for (unsigned int ii = 0; ii < cinfo->getNumLookupFinfo(); ++ii){
                 Finfo * finfo = cinfo->getLookupFinfo(ii);
                 ret.push_back(finfo->name());
             }
-        } else if (finfoType == "sharedFinfo"){
+        } else if (finfoType == "sharedFinfo" || finfoType == "shared"){
             for (unsigned int ii = 0; ii < cinfo->getNumSrcFinfo(); ++ii){
                 Finfo * finfo = cinfo->getSrcFinfo(ii);
                 ret.push_back(finfo->name());
             }
-        } else if (finfoType == "fieldElementFinfo"){
+        } else if (finfoType == "fieldElementFinfo" || finfoType == "fieldElement"){
             for (unsigned int ii = 0; ii < cinfo->getNumFieldElementFinfo(); ++ii){
                 Finfo * finfo = cinfo->getFieldElementFinfo(ii);
                 ret.push_back(finfo->name());
@@ -1081,7 +1078,7 @@ extern "C" {
        Utility function to traverse python class hierarchy to reach closest base class.
        Ideally we should go via mro
     */
-    string get_baseclass_name(PyObject * self)
+    string getBaseClassName(PyObject * self)
     {
         extern PyTypeObject ObjIdType;
         string basetype_str = "";
@@ -1953,16 +1950,16 @@ extern "C" {
         static vector <Id> classes(Field< vector<Id> >::get(ObjId("/classes"),
                                                             "children"));
         for (unsigned ii = 0; ii < classes.size(); ++ii){
-            const string& class_name = classes[ii].element()->getName();
+            const string& className = classes[ii].element()->getName();
             if (verbosity > 0){
-                cout << "\nCreating " << class_name << endl;
+                cout << "\nCreating " << className << endl;
             }
-            const Cinfo * cinfo = Cinfo::find(class_name);
+            const Cinfo * cinfo = Cinfo::find(className);
             if (!cinfo){
-                cerr << "Error: no cinfo found with name " << class_name << endl;
+                cerr << "Error: no cinfo found with name " << className << endl;
                 return 0;
             }
-            if (!define_class(module_dict, cinfo)){
+            if (!defineClass(module_dict, cinfo)){
                 return 0;
             }
         }
@@ -1985,21 +1982,21 @@ extern "C" {
                  "*-----------------------------------------------------------------*\n"
                  );
 
-    int define_class(PyObject * module_dict, const Cinfo * cinfo)
+    int defineClass(PyObject * module_dict, const Cinfo * cinfo)
     {
-        const string& class_name = cinfo->name();
+        const string& className = cinfo->name();
         map <string, PyTypeObject * >::iterator existing =
-                get_moose_classes().find(class_name);
+                get_moose_classes().find(className);
         if (existing != get_moose_classes().end()){
             return 1;
         }
         const Cinfo* base = cinfo->baseCinfo();
 #ifndef NDEBUG
         if (verbosity > 1){
-            cout << "Defining class " << class_name << endl; //" with base=" << base->name() << endl;
+            cout << "Defining class " << className << endl; //" with base=" << base->name() << endl;
         }
 #endif
-        if (base && !define_class(module_dict, base)){
+        if (base && !defineClass(module_dict, base)){
             return 0;
         }
         PyTypeObject * new_class =
@@ -2025,7 +2022,7 @@ extern "C" {
         heaptype is not set it uses tp_name to print the help.
         Py_SIZE(new_class) = sizeof(_ObjId);        
         */
-        string str = "moose." + class_name;
+        string str = "moose." + className;
         new_class->tp_name = (char *)calloc(str.length()+1,
                                             sizeof(char));
         strncpy(const_cast<char*>(new_class->tp_name), str.c_str(),
@@ -2041,47 +2038,47 @@ extern "C" {
         }
         Py_INCREF(new_class->tp_base);
         // Define all the lookupFields
-        if (!define_lookupFinfos(cinfo)){            
+        if (!defineLookupFinfos(cinfo)){            
             return 0;
         }
         // Define the destFields
-        if (!define_destFinfos(cinfo)){
+        if (!defineDestFinfos(cinfo)){
             return 0;
         }
 
         // Define the element fields
-        if (!define_elementFinfos(cinfo)){
+        if (!defineElementFinfos(cinfo)){
             return 0;
         }
         // #ifndef NDEBUG
-        //         cout << "Get set defs:" << class_name << endl;
-        //         for (unsigned int ii = 0; ii < get_getsetdefs()[class_name].size(); ++ii){
+        //         cout << "Get set defs:" << className << endl;
+        //         for (unsigned int ii = 0; ii < get_getsetdefs()[className].size(); ++ii){
         //             cout << ii;
-        //             if (get_getsetdefs()[class_name][ii].name != NULL){
-        //                 cout << ": " << get_getsetdefs()[class_name][ii].name;
+        //             if (get_getsetdefs()[className][ii].name != NULL){
+        //                 cout << ": " << get_getsetdefs()[className][ii].name;
         //             } else {
         //                 cout << "Empty";
         //             }
         //             cout << endl;
         //         }
-        //         cout << "End getsetdefs: " << class_name << endl;
+        //         cout << "End getsetdefs: " << className << endl;
         // #endif
         // The getsetdef array must be terminated with empty objects.
         PyGetSetDef empty;
         empty.name = NULL;
-        get_getsetdefs()[class_name].push_back(empty);
-        get_getsetdefs()[class_name].back().name = NULL;
-        new_class->tp_getset = &(get_getsetdefs()[class_name][0]);
+        get_getsetdefs()[className].push_back(empty);
+        get_getsetdefs()[className].back().name = NULL;
+        new_class->tp_getset = &(get_getsetdefs()[className][0]);
         /*
           Cannot do this for HEAPTYPE ?? but pygobject.c does this in
           pygobject_register_class
         */
         if (PyType_Ready(new_class) < 0){
-            cerr << "Fatal error: Could not initialize class '" << class_name
+            cerr << "Fatal error: Could not initialize class '" << className
                  << "'" << endl;
             return 0;
         }
-        get_moose_classes().insert(pair<string, PyTypeObject*> (class_name, new_class));
+        get_moose_classes().insert(pair<string, PyTypeObject*> (className, new_class));
         Py_INCREF(new_class);
         if (verbosity > 0){
             cout << "Created class " << new_class->tp_name << endl
@@ -2090,7 +2087,7 @@ extern "C" {
         // PyDict_SetItemString(new_class->tp_dict, "__module__", PyString_FromString("moose"));
         // string doc = const_cast<Cinfo*>(cinfo)->getDocs();
         // PyDict_SetItemString(new_class->tp_dict, "__doc__", PyString_FromString(" \0"));
-        // PyDict_SetItemString(module_dict, class_name.c_str(), (PyObject *)new_class);
+        // PyDict_SetItemString(module_dict, className.c_str(), (PyObject *)new_class);
         return 1;                
     }
     
@@ -2139,53 +2136,57 @@ extern "C" {
     }
     
     
-    int define_destFinfos(const Cinfo * cinfo)
+    int defineDestFinfos(const Cinfo * cinfo)
     {
         static char * doc = "Destination field";
-        const string& class_name = cinfo->name();
+        const string& className = cinfo->name();
 #ifndef NDEBUG
         if (verbosity > 1){
-            cout << "\tCreating destField attributes for " << class_name << endl;
+            cout << "\tCreating destField attributes for " << className << endl;
         }
 #endif
-        vector <PyGetSetDef>& vec = get_getsetdefs()[class_name];
+        vector <PyGetSetDef>& vec = get_getsetdefs()[className];
         /*
           We do not know the final number of user-accessible
           destFinfos as we have to ignore the destFinfos starting
           with get/set. So use a vector instead of C array.
         */
-        size_t curr_index = vec.size();
+        size_t currIndex = vec.size();
         for (unsigned int ii = 0; ii < cinfo->getNumDestFinfo(); ++ii){
             Finfo * destFinfo = const_cast<Cinfo*>(cinfo)->getDestFinfo(ii);
-            const string& destFinfo_name = destFinfo->name();
+            const string& name = destFinfo->name();
             /*
               get_{xyz} and set_{xyz} are internal destFinfos for
               accessing valueFinfos. Ignore them.
-            */
-            if (destFinfo_name.find("get_") == 0 || destFinfo_name.find("set_") == 0){
-                continue;
-            }
+              
+              With the '_' removed from internal get/set for value
+              fields, we cannot separate them out. - Subha Fri Jan 31
+              16:43:51 IST 2014
+             */
+            // if (name.find("get") == 0 || name.find("set") == 0){
+            //     continue;
+            // }
             PyGetSetDef destFieldGetSet;
             vec.push_back(destFieldGetSet);
-            vec[curr_index].name = (char*)calloc(destFinfo_name.size() + 1, sizeof(char));
-            strncpy(vec[curr_index].name,
-                    const_cast<char*>(destFinfo_name.c_str()),
-                    destFinfo_name.size());
-            vec[curr_index].doc = doc;
-            vec[curr_index].get = (getter)moose_ObjId_get_destField_attr;
+            vec[currIndex].name = (char*)calloc(name.size() + 1, sizeof(char));
+            strncpy(vec[currIndex].name,
+                    const_cast<char*>(name.c_str()),
+                    name.size());
+            vec[currIndex].doc = doc;
+            vec[currIndex].get = (getter)moose_ObjId_get_destField_attr;
             PyObject * args = PyTuple_New(1);            
             if (args == NULL){
-                cerr << "moosemodule.cpp: define_destFinfos: Failed to allocate tuple" << endl;
+                cerr << "moosemodule.cpp: defineDestFinfos: Failed to allocate tuple" << endl;
                 return 0;
             }
-            PyTuple_SetItem(args, 0, PyString_FromString(destFinfo_name.c_str()));
-            vec[curr_index].closure = (void*)args;
+            PyTuple_SetItem(args, 0, PyString_FromString(name.c_str()));
+            vec[currIndex].closure = (void*)args;
 #ifndef NDEBUG
         if (verbosity > 1){
-            cout << "\tCreated destField " << vec[curr_index].name << endl;
+            cout << "\tCreated destField " << vec[currIndex].name << endl;
         }
 #endif
-            ++curr_index;
+            ++currIndex;
         } // ! for
         
         return 1;
@@ -2250,35 +2251,35 @@ extern "C" {
         return NULL;
     }
     
-    int define_lookupFinfos(const Cinfo * cinfo)
+    int defineLookupFinfos(const Cinfo * cinfo)
     {
         static char * doc = "Lookup field";
-        const string & class_name = cinfo->name();
+        const string & className = cinfo->name();
 #ifndef NDEBUG
         if (verbosity > 1){
-            cout << "\tDefining lookupFields for " << class_name << endl;
+            cout << "\tDefining lookupFields for " << className << endl;
         }
 #endif
-        unsigned int num_lookupFinfos = cinfo->getNumLookupFinfo();
-        unsigned int curr_index = get_getsetdefs()[class_name].size();
-        for (unsigned int ii = 0; ii < num_lookupFinfos; ++ii){
-            const string& lookupFinfo_name = const_cast<Cinfo*>(cinfo)->getLookupFinfo(ii)->name();
+        unsigned int num = cinfo->getNumLookupFinfo();
+        unsigned int currIndex = get_getsetdefs()[className].size();
+        for (unsigned int ii = 0; ii < num; ++ii){
+            const string& name = const_cast<Cinfo*>(cinfo)->getLookupFinfo(ii)->name();
             PyGetSetDef getset;
-            get_getsetdefs()[class_name].push_back(getset);
-            get_getsetdefs()[class_name][curr_index].name = (char*)calloc(lookupFinfo_name.size() + 1, sizeof(char));
-            strncpy(get_getsetdefs()[class_name][curr_index].name, const_cast<char*>(lookupFinfo_name.c_str()), lookupFinfo_name.size());
-            get_getsetdefs()[class_name][curr_index].doc = doc; //moose_LookupField_documentation;
-            get_getsetdefs()[class_name][curr_index].get = (getter)moose_ObjId_get_lookupField_attr;
+            get_getsetdefs()[className].push_back(getset);
+            get_getsetdefs()[className][currIndex].name = (char*)calloc(name.size() + 1, sizeof(char));
+            strncpy(get_getsetdefs()[className][currIndex].name, const_cast<char*>(name.c_str()), name.size());
+            get_getsetdefs()[className][currIndex].doc = doc; //moose_LookupField_documentation;
+            get_getsetdefs()[className][currIndex].get = (getter)moose_ObjId_get_lookupField_attr;
             PyObject * args = PyTuple_New(1);
-            PyTuple_SetItem(args, 0, PyString_FromString(lookupFinfo_name.c_str()));
-            get_getsetdefs()[class_name][curr_index].closure = (void*)args;
+            PyTuple_SetItem(args, 0, PyString_FromString(name.c_str()));
+            get_getsetdefs()[className][currIndex].closure = (void*)args;
 #ifndef NDEBUG
         if (verbosity > 1){
-            cout << "\tDefined lookupField " << get_getsetdefs()[class_name][curr_index].name << endl;
+            cout << "\tDefined lookupField " << get_getsetdefs()[className][currIndex].name << endl;
         }
 #endif
             
-            ++curr_index;
+            ++currIndex;
         }
         return 1;
     }
@@ -2333,35 +2334,35 @@ extern "C" {
         return NULL;
     }
 
-    int define_elementFinfos(const Cinfo * cinfo)
+    int defineElementFinfos(const Cinfo * cinfo)
     {
         static char doc[] = "Element field\0";
-        const string & class_name = cinfo->name();
+        const string & className = cinfo->name();
 #ifndef NDEBUG
         if (verbosity > 1){
-            cout << "\tDefining elementFields for " << class_name << endl;
+            cout << "\tDefining elementFields for " << className << endl;
         }
 #endif
-        unsigned int num_fieldElementFinfo = cinfo->getNumFieldElementFinfo();
-        unsigned int curr_index = get_getsetdefs()[class_name].size();
-        for (unsigned int ii = 0; ii < num_fieldElementFinfo; ++ii){
-            const string& finfo_name = const_cast<Cinfo*>(cinfo)->getFieldElementFinfo(ii)->name();
+        unsigned int num = cinfo->getNumFieldElementFinfo();
+        unsigned int currIndex = get_getsetdefs()[className].size();
+        for (unsigned int ii = 0; ii < num; ++ii){
+            const string& name = const_cast<Cinfo*>(cinfo)->getFieldElementFinfo(ii)->name();
             PyGetSetDef getset;
-            get_getsetdefs()[class_name].push_back(getset);
-            get_getsetdefs()[class_name][curr_index].name = (char*)calloc(finfo_name.size() + 1, sizeof(char));
-            strncpy(get_getsetdefs()[class_name][curr_index].name, const_cast<char*>(finfo_name.c_str()), finfo_name.size());
-            get_getsetdefs()[class_name][curr_index].doc = doc;
-            get_getsetdefs()[class_name][curr_index].get = (getter)moose_ObjId_get_elementField_attr;
+            get_getsetdefs()[className].push_back(getset);
+            get_getsetdefs()[className][currIndex].name = (char*)calloc(name.size() + 1, sizeof(char));
+            strncpy(get_getsetdefs()[className][currIndex].name, const_cast<char*>(name.c_str()), name.size());
+            get_getsetdefs()[className][currIndex].doc = doc;
+            get_getsetdefs()[className][currIndex].get = (getter)moose_ObjId_get_elementField_attr;
             PyObject * args = PyTuple_New(1);
-            PyTuple_SetItem(args, 0, PyString_FromString(finfo_name.c_str()));
-            get_getsetdefs()[class_name][curr_index].closure = (void*)args;
+            PyTuple_SetItem(args, 0, PyString_FromString(name.c_str()));
+            get_getsetdefs()[className][currIndex].closure = (void*)args;
 #ifndef NDEBUG
         if (verbosity > 1){
-            cout << "\tDefined elementField " << get_getsetdefs()[class_name][curr_index].name << endl;
+            cout << "\tDefined elementField " << get_getsetdefs()[className][currIndex].name << endl;
         }
 #endif
             
-            ++curr_index;
+            ++currIndex;
         }
         return 1;
     }
@@ -2565,7 +2566,7 @@ extern "C" {
             strncpy(argv[ii], args[ii].c_str(), args[ii].length()+1);            
         }
         // Should not call. No pthreads now. PyEval_InitThreads();
-        Id shellId = get_shell(argc, argv);
+        Id shellId = getShell(argc, argv);
         for (int ii = 1; ii < argc; ++ii){
             free(argv[ii]);
         }

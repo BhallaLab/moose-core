@@ -236,7 +236,7 @@ extern "C" {
             
         string basetype_str;
         if (type == NULL){
-            basetype_str = get_baseclass_name(self);
+            basetype_str = getBaseClassName(self);
         } else {
             basetype_str = string(type);
         }
@@ -348,7 +348,7 @@ extern "C" {
     }
 
     PyDoc_STRVAR(moose_ObjId_getFieldType_documentation,
-                 "getFieldType(fieldName, finfoType='valueFinfo')\n"
+                 "getFieldType(fieldName')\n"
                  "\n"
                  "Get the string representation of the type of this field.\n"
                  "\n"
@@ -356,9 +356,6 @@ extern "C" {
                  "----------\n"
                  "fieldName : string\n"
                  "\tName of the field to be queried.\n"
-                 "finfoType : string\n"
-                 "\tFinfotype the field should be looked in for (can be \n"
-                 "valueFinfo, srcFinfo, destFinfo, lookupFinfo)\n"
                  "\n");
     
     PyObject * moose_ObjId_getFieldType(_ObjId * self, PyObject * args)
@@ -367,19 +364,11 @@ extern "C" {
             RAISE_INVALID_ID(NULL, "moose_ObjId_getFieldType");
         }
         char * fieldName = NULL;
-        char * finfoType = NULL;
-        if (!PyArg_ParseTuple(args, "s|s:moose_ObjId_getFieldType", &fieldName,
-                              &finfoType)){
+        if (!PyArg_ParseTuple(args, "s:moose_ObjId_getFieldType", &fieldName)){
             return NULL;
         }
-        string finfoTypeStr = "";
-        if (finfoType != NULL){
-            finfoTypeStr = finfoType;
-        } else {
-            finfoTypeStr = "valueFinfo";
-        }
         string typeStr = getFieldType(Field<string>::get(self->oid_, "className"),
-                                      string(fieldName), finfoTypeStr);
+                                      string(fieldName));
         if (typeStr.length() <= 0){
             PyErr_SetString(PyExc_ValueError,
                             "Empty string for field type. "
@@ -443,88 +432,88 @@ extern "C" {
         if (_ret != NULL){
             return _ret;
         }
-        string fieldname(field);
-        string class_name = Field<string>::get(self->oid_, "className");
-        vector<string> valueFinfos = getFieldNames(class_name, "valueFinfo");
+        string fieldName(field);
+        string className = Field<string>::get(self->oid_, "className");
+        vector<string> valueFinfos = getFieldNames(className, "valueFinfo");
         bool isValueField = false;
         for (unsigned int ii = 0; ii < valueFinfos.size(); ++ii){
-            if (fieldname == valueFinfos[ii]){
+            if (fieldName == valueFinfos[ii]){
                 isValueField = true;
                 break;
             }
         }
                 
-        string type = getFieldType(class_name, fieldname, "valueFinfo");
+        string type = getFieldType(className, fieldName);
         if (type.empty() || !isValueField ){
-            // Check if this field name is aliased and update fieldname and type if so.
-            map<string, string>::const_iterator it = get_field_alias().find(fieldname);
+            // Check if this field name is aliased and update fieldName and type if so.
+            map<string, string>::const_iterator it = get_field_alias().find(fieldName);
             if (it != get_field_alias().end()){
-                fieldname = it->second;
-                field = fieldname.c_str();
+                fieldName = it->second;
+                field = fieldName.c_str();
                 isValueField = false;
                 for (unsigned int ii = 0; ii < valueFinfos.size(); ++ii){
-                    if (fieldname == valueFinfos[ii]){
+                    if (fieldName == valueFinfos[ii]){
                         isValueField = true;
                         break;
                     }
                 }
-                type = getFieldType(Field<string>::get(self->oid_, "className"), fieldname, "valueFinfo");
+                type = getFieldType(Field<string>::get(self->oid_, "className"), fieldName);
                 // Update attr for next level (PyObject_GenericGetAttr) in case.
                 Py_XDECREF(attr);
                 attr = PyString_FromString(field);
             }
         }
-        if (type.empty() | !isValueField){
+        if (type.empty() || !isValueField){
             return PyObject_GenericGetAttr((PyObject*)self, attr);            
         }
         ftype = shortType(type);
         if (!ftype){
             return PyObject_GenericGetAttr((PyObject*)self, attr);
         }
-                 fieldname= string(field);
+                 fieldName= string(field);
         switch(ftype){
             case 's': {
-                string _s = Field<string>::get(self->oid_, fieldname);
+                string _s = Field<string>::get(self->oid_, fieldName);
                 return Py_BuildValue("s", _s.c_str());
             }
             case 'd': {
-                double value = Field< double >::get(self->oid_, fieldname);
+                double value = Field< double >::get(self->oid_, fieldName);
                 return to_py(&value, ftype);
             }
             case 'i': {
-                int value = Field<int>::get(self->oid_, fieldname);
+                int value = Field<int>::get(self->oid_, fieldName);
                 return to_py(&value, ftype);
             }
             case 'I': {
-                unsigned int value = Field<unsigned int>::get(self->oid_, fieldname);
+                unsigned int value = Field<unsigned int>::get(self->oid_, fieldName);
                 return to_py(&value, ftype);
             }
             case 'l': {
-                long value = Field<long>::get(self->oid_, fieldname);
+                long value = Field<long>::get(self->oid_, fieldName);
                 return to_py(&value, ftype);
             }
             case 'L': {
-                long long value = Field<long long>::get(self->oid_, fieldname);
+                long long value = Field<long long>::get(self->oid_, fieldName);
                 return to_py(&value, ftype);
             }
             case 'k': {
-                unsigned long value = Field<unsigned long>::get(self->oid_, fieldname);
+                unsigned long value = Field<unsigned long>::get(self->oid_, fieldName);
                 return to_py(&value, ftype);
             }
             case 'K': {
-                unsigned long long value = Field<unsigned long long>::get(self->oid_, fieldname);
+                unsigned long long value = Field<unsigned long long>::get(self->oid_, fieldName);
                 return to_py(&value, ftype);
             }
             case 'f': {
-                float value = Field<float>::get(self->oid_, fieldname);
+                float value = Field<float>::get(self->oid_, fieldName);
                 return to_py(&value, ftype);
             }
             case 'x': {                    
-                Id value = Field<Id>::get(self->oid_, fieldname);
+                Id value = Field<Id>::get(self->oid_, fieldName);
                 return to_py(&value, ftype);
             }
             case 'y': {                    
-                ObjId value = Field<ObjId>::get(self->oid_, fieldname);
+                ObjId value = Field<ObjId>::get(self->oid_, fieldName);
                 return to_py(&value, ftype);
             }
             case 'z': {
@@ -532,76 +521,76 @@ extern "C" {
                 return NULL;
             }
             case 'D': {
-                vector< double > value = Field< vector < double > >::get(self->oid_, fieldname);
+                vector< double > value = Field< vector < double > >::get(self->oid_, fieldName);
                 return to_py(&value, ftype);
             }
             case 'X': { // vector<Id>
-                vector < Id > value = Field<vector <Id> >::get(self->oid_, fieldname);
+                vector < Id > value = Field<vector <Id> >::get(self->oid_, fieldName);
                 return to_py(&value, ftype);
             } 
             case 'Y': { // vector<ObjId>
-                vector < ObjId > value = Field<vector <ObjId> >::get(self->oid_, fieldname);
+                vector < ObjId > value = Field<vector <ObjId> >::get(self->oid_, fieldName);
                 return to_py(&value, ftype);
             } 
             case 'M': {
-                vector< long > value = Field< vector <long> >::get(self->oid_, fieldname);
+                vector< long > value = Field< vector <long> >::get(self->oid_, fieldName);
                 return to_py(&value, ftype);
             }
             case 'P': {
-                vector < unsigned long > value = Field< vector < unsigned long > >::get(self->oid_, fieldname);
+                vector < unsigned long > value = Field< vector < unsigned long > >::get(self->oid_, fieldName);
                 return to_py(&value, ftype);
             }
             case 'S': {
-                vector < string > value = Field<vector <string> >::get(self->oid_, fieldname);
+                vector < string > value = Field<vector <string> >::get(self->oid_, fieldName);
                 return to_py(&value, ftype);
             }
             case 'v': {
-                vector < int > value = Field<vector <int> >::get(self->oid_, fieldname);
+                vector < int > value = Field<vector <int> >::get(self->oid_, fieldName);
                 return to_py(&value, ftype);
             }
             case 'N': {
-                vector <unsigned int > value = Field< vector < unsigned int> >::get(self->oid_, fieldname);
+                vector <unsigned int > value = Field< vector < unsigned int> >::get(self->oid_, fieldName);
                 return to_py(&value, ftype);
             }
             case 'T': { // vector<vector < unsigned int >>
-                vector < vector < unsigned int > > value = Field<vector <vector < unsigned int > > >::get(self->oid_, fieldname);
+                vector < vector < unsigned int > > value = Field<vector <vector < unsigned int > > >::get(self->oid_, fieldName);
                 return to_py(&value, ftype);
             } 
             case 'Q': { // vector< vector < int > >
-                vector <  vector < int >  > value = Field<vector < vector < int > > >::get(self->oid_, fieldname);
+                vector <  vector < int >  > value = Field<vector < vector < int > > >::get(self->oid_, fieldName);
                 return to_py(&value, ftype);
             } 
             case 'R': { // vector< vector < double > >
-                vector <  vector < double >  > value = Field<vector < vector < double > > >::get(self->oid_, fieldname);
+                vector <  vector < double >  > value = Field<vector < vector < double > > >::get(self->oid_, fieldName);
                 return to_py(&value, ftype);
             }
             case 'F': {
-                vector <float> value = Field< vector < float > >::get(self->oid_, fieldname);
+                vector <float> value = Field< vector < float > >::get(self->oid_, fieldName);
                 return to_py(&value, ftype);
             }
             case 'c': {
-                char value = Field<char>::get(self->oid_, fieldname);
+                char value = Field<char>::get(self->oid_, fieldName);
                 return to_py(&value, ftype);
             }
             case 'h': {
-                short value = Field<short>::get(self->oid_, fieldname);
+                short value = Field<short>::get(self->oid_, fieldName);
                 return to_py(&value, ftype);
             }
             case 'H': {
-                unsigned short value = Field<unsigned short>::get(self->oid_, fieldname);
+                unsigned short value = Field<unsigned short>::get(self->oid_, fieldName);
                 return to_py(&value, ftype);
             }
             case 'w': {
-                vector < short > value = Field<vector <short> >::get(self->oid_, fieldname);
+                vector < short > value = Field<vector <short> >::get(self->oid_, fieldName);
                 return to_py(&value, ftype);
             }
             case 'C': {
-                vector < char > value = Field<vector <char> >::get(self->oid_, fieldname);
+                vector < char > value = Field<vector <char> >::get(self->oid_, fieldName);
                 return to_py(&value, ftype);
             }
 
             case 'b': {
-                bool value = Field<bool>::get(self->oid_, fieldname);
+                bool value = Field<bool>::get(self->oid_, fieldName);
                 if (value){
                     Py_RETURN_TRUE;
                 } else {
@@ -658,19 +647,19 @@ extern "C" {
             PyErr_SetString(PyExc_TypeError, "Attribute name must be a string");
             return -1;
         }
-        string fieldtype = getFieldType(Field<string>::get(self->oid_, "className"), string(field), "valueFinfo");
+        string fieldtype = getFieldType(Field<string>::get(self->oid_, "className"), string(field));
         if (fieldtype.length() == 0){
             // If it is instance of a MOOSE built-in class then throw
             // error (to avoid silently creating new attributes due to
             // typos). Otherwise, it must have been subclassed in
             // Python. Then we allow normal Pythonic behaviour and
             // consider such mistakes user's responsibility.
-            string class_name = ((PyTypeObject*)PyObject_Type((PyObject*)self))->tp_name;            
-            if (get_moose_classes().find(class_name) == get_moose_classes().end()){
+            string className = ((PyTypeObject*)PyObject_Type((PyObject*)self))->tp_name;            
+            if (get_moose_classes().find(className) == get_moose_classes().end()){
                 return PyObject_GenericSetAttr((PyObject*)self, PyString_FromString(field), value);
             }
             ostringstream msg;
-            msg << "'" << class_name << "' class has no field '" << field << "'" << endl;
+            msg << "'" << className << "' class has no field '" << field << "'" << endl;
             PyErr_SetString(PyExc_AttributeError, msg.str().c_str());
             return -1;
         }
@@ -991,7 +980,7 @@ extern "C" {
     {
         extern PyTypeObject ObjIdType;
         vector<string> type_vec;
-        if (parse_Finfo_type(Field<string>::get(target, "className"), "lookupFinfo", string(fieldName), type_vec) < 0){
+        if (parseFinfoType(Field<string>::get(target, "className"), "lookupFinfo", string(fieldName), type_vec) < 0){
             ostringstream error;
             error << "Cannot handle key type for LookupField `" << Field<string>::get(target, "className") << "." << fieldName << "`.";
             PyErr_SetString(PyExc_TypeError, error.str().c_str());
@@ -1145,7 +1134,7 @@ extern "C" {
     int setLookupField(ObjId target, char * fieldName, PyObject * key, PyObject * value)
     {
         vector<string> type_vec;
-        if (parse_Finfo_type(Field<string>::get(target, "className"), "lookupFinfo", string(fieldName), type_vec) < 0){
+        if (parseFinfoType(Field<string>::get(target, "className"), "lookupFinfo", string(fieldName), type_vec) < 0){
             ostringstream error;
             error << "Cannot handle key type for LookupField `" << Field<string>::get(target, "className") << "." << fieldName << "`.";
             PyErr_SetString(PyExc_TypeError, error.str().c_str());
@@ -1304,7 +1293,7 @@ extern "C" {
         
         // Try to parse the arguments.
         vector< string > argType;
-        if (parse_Finfo_type(Field<string>::get(oid, "className"),
+        if (parseFinfoType(Field<string>::get(oid, "className"),
                              "destFinfo", string(fieldName), argType) < 0){
             error << "Arguments not handled: " << fieldName << "(";
             for (unsigned int ii = 0; ii < argType.size(); ++ii){
@@ -1323,21 +1312,21 @@ extern "C" {
                     Py_RETURN_FALSE;
                 }
             }
-            return set_destFinfo(oid, string(fieldName), arglist[1], argType[0]);
+            return setDestFinfo(oid, string(fieldName), arglist[1], argType[0]);
         } else if (argType.size() == 2){
-            return set_destFinfo2(oid, string(fieldName), arglist[1], shortType(argType[0]), arglist[2], shortType(argType[1]));
+            return setDestFinfo2(oid, string(fieldName), arglist[1], shortType(argType[0]), arglist[2], shortType(argType[1]));
         } else {
             error << "Can handle only up to 2 arguments" << endl;
             return NULL;
         }
     } // moose_ObjId_setDestField
 
-    PyObject * set_destFinfo(ObjId obj, string fieldName, PyObject *arg, string argType)
+    PyObject * setDestFinfo(ObjId obj, string fieldName, PyObject *arg, string argType)
     {
         char typecode = shortType(argType);
         bool ret;
         ostringstream error;
-        error << "moose.set_destFinfo: ";
+        error << "moose.setDestFinfo: ";
 
     switch (typecode){                    
         case 'f': case 'd': {
@@ -1488,22 +1477,22 @@ extern "C" {
    Set destFinfo for 2 argument destination field functions.
 */
 // template <class A>
-PyObject* set_destFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type1, PyObject * arg2, char type2)
+PyObject* setDestFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type1, PyObject * arg2, char type2)
 {
     ostringstream error;
-    error << "moose.set_destFinfo2: ";
+    error << "moose.setDestFinfo2: ";
     switch (type2){
         case 'f': case 'd': {
             double param = PyFloat_AsDouble(arg2);
             if (type2 == 'f'){
-                return set_destFinfo1<float>(obj, fieldName, arg1, type1, (float)param);
+                return setDestFinfo1<float>(obj, fieldName, arg1, type1, (float)param);
             } else {
-                return set_destFinfo1<double>(obj, fieldName, arg1, type1, param);
+                return setDestFinfo1<double>(obj, fieldName, arg1, type1, param);
             }
         }
         case 's': {
             char * param = PyString_AsString(arg2);
-            return set_destFinfo1<string>(obj, fieldName, arg1, type1, string(param));
+            return setDestFinfo1<string>(obj, fieldName, arg1, type1, string(param));
         }
         case 'i': case 'l': {
             long param = PyInt_AsLong(arg2);
@@ -1511,9 +1500,9 @@ PyObject* set_destFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type
                 return NULL;
             }
             if (type2 == 'i'){
-                return set_destFinfo1< int>(obj, fieldName, arg1, type1, (int)param);
+                return setDestFinfo1< int>(obj, fieldName, arg1, type1, (int)param);
             } else {
-                return set_destFinfo1< long>(obj, fieldName, arg1, type1, param);
+                return setDestFinfo1< long>(obj, fieldName, arg1, type1, param);
             }
         }
         case 'I': case 'k':{
@@ -1522,9 +1511,9 @@ PyObject* set_destFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type
                 return NULL;
             }
             if (type2 == 'I'){
-                return set_destFinfo1< unsigned int>(obj, fieldName, arg1, type1, (unsigned int)param);
+                return setDestFinfo1< unsigned int>(obj, fieldName, arg1, type1, (unsigned int)param);
             } else {
-                return set_destFinfo1< unsigned long>(obj, fieldName, arg1, type1, param);
+                return setDestFinfo1< unsigned long>(obj, fieldName, arg1, type1, param);
             }
         }
         case 'x': {
@@ -1546,7 +1535,7 @@ PyObject* set_destFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type
             //     }
             //     param = oid->oid_.id;
             // }
-            return set_destFinfo1< Id>(obj, fieldName, arg1, type1, param);
+            return setDestFinfo1< Id>(obj, fieldName, arg1, type1, param);
         }
         case 'y': {
             ObjId param;
@@ -1567,7 +1556,7 @@ PyObject* set_destFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type
                 }
                 param = oid->oid_;
             // }
-            return set_destFinfo1< ObjId>(obj, fieldName, arg1, type1, param);
+            return setDestFinfo1< ObjId>(obj, fieldName, arg1, type1, param);
         }
         case 'c': {
             char * param = PyString_AsString(arg2);
@@ -1580,7 +1569,7 @@ PyObject* set_destFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type
                 PyErr_SetString(PyExc_ValueError, error.str().c_str());
                 return NULL;
             }
-            return set_destFinfo1< char>(obj, fieldName, arg1, type1, param[0]);
+            return setDestFinfo1< char>(obj, fieldName, arg1, type1, param[0]);
         }
         default: {
             error << "Unhandled argument 2 type (shortType=" << type2 << ")";
