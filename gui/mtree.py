@@ -57,7 +57,7 @@ class MooseTreeModel(QtCore.QAbstractItemModel):
     
     This is not going to work as the MOOSE tree nodes are
     inhomogeneous. The parent of a node is an melement, but the
-    children of an melement are ematrix objects.
+    children of an melement are vec objects.
 
     Qt can handle only homogeneous tere nodes.
     """
@@ -201,7 +201,7 @@ class MooseTreeWidget(QtGui.QTreeWidget):
         
         Parameter
         ---------
-        root: str or melement or ematrix 
+        root: str or melement or vec 
               New root element of the tree. Use current rootElement if `None`
         """        
         self.clear()
@@ -249,7 +249,8 @@ class MooseTreeWidget(QtGui.QTreeWidget):
 def main():
     """Test main: load a model and display the tree for it"""
     model = moose.Neutral('/model')
-    moose.loadModel('../Demos/Genesis_files/Kholodenko.g', '/model/Kholodenko')
+    #moose.loadModel('../Demos/Genesis_files/Kholodenko.g', '/model/Kholodenko')
+    moose.loadModel('/home/harsha/genesis_files/gfile/acc42.g','/model/acc42')
     # tab = moose.element('/model/Kholodenko/graphs/conc1/MAPK_PP.Co')
     # print tab
     # for t in tab.children:
@@ -258,7 +259,7 @@ def main():
     mainwin = QtGui.QMainWindow()
     mainwin.setWindowTitle('Model tree test')
     tree = MooseTreeWidget()
-    tree.recreateTree(root='/model/Kholodenko')
+    tree.recreateTree(root='/model/')
     mainwin.setCentralWidget(tree)
     mainwin.show()
     sys.exit(app.exec_())
