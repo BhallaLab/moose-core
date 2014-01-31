@@ -16,15 +16,15 @@ OBJ = \
 	Synapse.o	\
 	SpikeGen.o	\
 	Compartment.o	\
+	ChanBase.o	\
+	HHChannel.o	\
+	HHGate.o	\
 	testBiophysics.o	\
 
 # IzhikevichNrn.o	\
 	LeakyIaF.o	\
 	SymCompartment.o	\
-	ChanBase.o	\
 	SynChanBase.o	\
-	HHChannel.o	\
-	HHGate.o	\
 	SynChan.o	\
 	GapJunction.o	\
 	CaConc.o	\
@@ -59,14 +59,14 @@ SpikeRingBuffer.o:	SpikeRingBuffer.h
 SynHandler.o:	SpikeRingBuffer.h SynHandler.h Synapse.h 
 IntFire.o:	IntFire.h SpikeRingBuffer.h SynHandler.h Synapse.h 
 SpikeGen.o: SpikeGen.h
+Compartment.o: Compartment.h
+ChanBase.o: ChanBase.h
+HHChannel.o: ChanBase.h HHChannel.h HHGate.h
+HHGate.o: HHGate.h
 #IzhikevichNrn.o: IzhikevichNrn.h
 #LeakyIaF.o: LeakyIaF.h
 #Synapse.o:	SynBase.h Synapse.h
-#Compartment.o: Compartment.h
 #SymCompartment.o: Compartment.h SymCompartment.h
-#ChanBase.o: ChanBase.h
-#HHChannel.o: ChanBase.h HHChannel.h HHGate.h
-#HHGate.o: HHGate.h
 #SynChanBase.o: Synapse.h SynBase.h ChanBase.h
 #SynChan.o: SynBase.h ChanBase.h Synapse.h SynChan.h
 #GapJunction.o: GapJunction.h
