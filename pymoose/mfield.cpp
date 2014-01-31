@@ -625,14 +625,14 @@ extern "C" {
             RAISE_INVALID_ID(NULL, "moose_ElementField_getSlice");
         }
         char * field = PyString_AsString(attr);
-        string class_name = Field<string>::get(self->myoid, "className");
-        string type = getFieldType(class_name, field, "valueFinfo");
+        string className = Field<string>::get(self->myoid, "className");
+        string type = getFieldType(className, field);
         if (type.empty()){
             // Check if this field name is aliased and update fieldname and type if so.
             map<string, string>::const_iterator it = get_field_alias().find(string(field));
             if (it != get_field_alias().end()){
                 field = const_cast<char*>((it->second).c_str());
-                type = getFieldType(Field<string>::get(self->myoid, "className"), it->second, "valueFinfo");
+                type = getFieldType(Field<string>::get(self->myoid, "className"), it->second);
                 // Update attr for next level (PyObject_GenericGetAttr) in case.
                 Py_XDECREF(attr);
                 attr = PyString_FromString(field);
@@ -732,7 +732,7 @@ extern "C" {
             return -1;
         }
         string moose_class = Field<string>::get(self->myoid, "className");
-        string fieldtype = getFieldType(moose_class, field, "valueFinfo");
+        string fieldtype = getFieldType(moose_class, field);
         if (fieldtype.length() == 0){
             if (field == "num"){
                 return PyObject_GenericSetAttr((PyObject*)self, attr, value);

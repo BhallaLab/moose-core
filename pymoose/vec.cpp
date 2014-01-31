@@ -435,10 +435,10 @@ extern "C" {
             cout << "Deleting Id " << obj->id_ << endl;
         }
 #endif
-        string class_name = Field<string >::get(obj->id_, "className");
-        vector <string> destFields = getFieldNames(class_name, "destFinfo");
-        vector <string> lookupFields = getFieldNames(class_name, "lookupFinfo");
-        vector <string> elementFields = getFieldNames(class_name, "elementFinfo");
+        string className = Field<string >::get(obj->id_, "className");
+        vector <string> destFields = getFieldNames(className, "destFinfo");
+        vector <string> lookupFields = getFieldNames(className, "lookupFinfo");
+        vector <string> elementFields = getFieldNames(className, "elementFinfo");
         unsigned int numData = Field<unsigned int>::get(obj->id_, "numData");
         // clean up the maps containing initialized lookup/dest/element fields
         for (unsigned int ii = 0; ii < numData; ++ii){
@@ -710,14 +710,14 @@ extern "C" {
         if (_ret != NULL){
             return _ret;
         }
-        string class_name = Field<string>::get(self->id_, "className");
-        string type = getFieldType(class_name, string(field), "valueFinfo");
+        string className = Field<string>::get(self->id_, "className");
+        string type = getFieldType(className, string(field));
         if (type.empty()){
             // Check if this field name is aliased and update fieldname and type if so.
             map<string, string>::const_iterator it = get_field_alias().find(string(field));
             if (it != get_field_alias().end()){
                 field = const_cast<char*>((it->second).c_str());
-                type = getFieldType(Field<string>::get(self->id_, "className"), it->second, "valueFinfo");
+                type = getFieldType(Field<string>::get(self->id_, "className"), it->second);
                 // Update attr for next level (PyObject_GenericGetAttr) in case.
                 Py_XDECREF(attr);
                 attr = PyString_FromString(field);
@@ -832,15 +832,15 @@ extern "C" {
             return -1;
         }
         string moose_class = Field<string>::get(self->id_, "className");
-        string fieldtype = getFieldType(moose_class, string(fieldname), "valueFinfo");
+        string fieldtype = getFieldType(moose_class, string(fieldname));
         if (fieldtype.length() == 0){
             // If it is instance of a MOOSE Id then throw
             // error (to avoid silently creating new attributes due to
             // typos). Otherwise, it must have been subclassed in
             // Python. Then we allow normal Pythonic behaviour and
             // consider such mistakes user's responsibility.
-            string class_name = ((PyTypeObject*)PyObject_Type((PyObject*)self))->tp_name;
-            if (class_name != "vec"){
+            string className = ((PyTypeObject*)PyObject_Type((PyObject*)self))->tp_name;
+            if (className != "vec"){
                 Py_INCREF(attr);
                 ret = PyObject_GenericSetAttr((PyObject*)self, attr, value);
                 Py_DECREF(attr);
