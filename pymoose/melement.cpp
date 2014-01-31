@@ -443,27 +443,45 @@ extern "C" {
         if (_ret != NULL){
             return _ret;
         }
+        string fieldname(field);
         string class_name = Field<string>::get(self->oid_, "className");
-        string type = getFieldType(class_name, string(field), "valueFinfo");
-        if (type.empty()){
+        vector<string> valueFinfos = getFieldNames(class_name, "valueFinfo");
+        bool isValueField = false;
+        for (unsigned int ii = 0; ii < valueFinfos.size(); ++ii){
+            if (fieldname == valueFinfos[ii]){
+                isValueField = true;
+                break;
+            }
+        }
+                
+        string type = getFieldType(class_name, fieldname, "valueFinfo");
+        if (type.empty() || !isValueField ){
             // Check if this field name is aliased and update fieldname and type if so.
-            map<string, string>::const_iterator it = get_field_alias().find(string(field));
+            map<string, string>::const_iterator it = get_field_alias().find(fieldname);
             if (it != get_field_alias().end()){
-                field = (it->second).c_str();
-                type = getFieldType(Field<string>::get(self->oid_, "className"), it->second, "valueFinfo");
+                fieldname = it->second;
+                field = fieldname.c_str();
+                isValueField = false;
+                for (unsigned int ii = 0; ii < valueFinfos.size(); ++ii){
+                    if (fieldname == valueFinfos[ii]){
+                        isValueField = true;
+                        break;
+                    }
+                }
+                type = getFieldType(Field<string>::get(self->oid_, "className"), fieldname, "valueFinfo");
                 // Update attr for next level (PyObject_GenericGetAttr) in case.
                 Py_XDECREF(attr);
                 attr = PyString_FromString(field);
             }
         }
-        if (type.empty()){
+        if (type.empty() | !isValueField){
             return PyObject_GenericGetAttr((PyObject*)self, attr);            
         }
         ftype = shortType(type);
         if (!ftype){
             return PyObject_GenericGetAttr((PyObject*)self, attr);
         }
-        string fieldname(field);
+                 fieldname= string(field);
         switch(ftype){
             case 's': {
                 string _s = Field<string>::get(self->oid_, fieldname);
