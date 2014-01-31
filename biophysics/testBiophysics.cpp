@@ -12,14 +12,15 @@
 #include "header.h"
 #include "../shell/Shell.h"
 #include "../randnum/randnum.h"
-/*
 #include "Compartment.h"
+/*
 #include "HHGate.h"
 #include "ChanBase.h"
 #include "HHChannel.h"
-
+*/
 extern void testCompartment(); // Defined in Compartment.cpp
 extern void testCompartmentProcess(); // Defined in Compartment.cpp
+/*
 extern void testSpikeGen(); // Defined in SpikeGen.cpp
 extern void testCaConc(); // Defined in CaConc.cpp
 extern void testNernst(); // Defined in Nernst.cpp
@@ -1465,8 +1466,8 @@ void testNMDAChan()
 // This tests stuff without using the messaging.
 void testBiophysics()
 {
-#if 0
 	testCompartment();
+#if 0
 	testHHGateCreation();
 	testHHGateLookup();
 	testHHGateSetup();
@@ -1483,8 +1484,8 @@ void testBiophysics()
 void testBiophysicsProcess()
 {
 	testIntFireNetwork();
-#if 0
 	testCompartmentProcess();
+#if 0
 	testHHChannel();
 //	testMarkovGslSolver();
 //	testMarkovChannel();
