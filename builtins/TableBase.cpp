@@ -18,7 +18,7 @@ const Cinfo* TableBase::initCinfo()
 		// Field Definitions
 		//////////////////////////////////////////////////////////////
 		static ValueFinfo< TableBase, vector< double > > vec(
-			"vec",
+			"vector",
 			"vector with all table entries",
 			&TableBase::setVec,
 			&TableBase::getVec
