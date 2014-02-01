@@ -319,11 +319,11 @@ class SquidModel(moose.Neutral):
         print 'Current clamp connected:', moose.connect(self.current_clamp, 'outputOut', self.squid_axon, 'injectMsg')
 
         self.Vm_table = moose.Table('%s/Vm' % (self.path))
-        moose.connect(self.Vm_table, 'requestData', self.squid_axon, 'get_Vm')
+        moose.connect(self.Vm_table, 'requestOut', self.squid_axon, 'getVm')
         self.gK_table = moose.Table('%s/gK' % (self.path))
-        moose.connect(self.gK_table, 'requestData', self.squid_axon.K_channel, 'get_Gk')
+        moose.connect(self.gK_table, 'requestOut', self.squid_axon.K_channel, 'getGk')
         self.gNa_table = moose.Table('%s/gNa' % (self.path))
-        moose.connect(self.gNa_table, 'requestData', self.squid_axon.Na_channel, 'get_Gk')
+        moose.connect(self.gNa_table, 'requestOut', self.squid_axon.Na_channel, 'getGk')
         self.clocks_assigned = False
         
     def run(self, runtime, simdt=1e-6):
