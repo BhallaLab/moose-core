@@ -213,16 +213,16 @@ These neurons show bursting in response to inhibitory input."""
         except KeyError, e:
             Vm = moose.Table(self.data_container.path + '/' + key + '_Vm')
             nrn = self.neurons[key]
-            moose.connect(Vm, 'requestData', nrn, 'get_Vm')
+            moose.connect(Vm, 'requestOut', nrn, 'getVm')
             utable = moose.Table(self.data_container.path + '/' + key + '_u')
-            utable.connect('requestData', self.neurons[key], 'get_u')
+            utable.connect('requestOut', self.neurons[key], 'getU')
             self.Vm_tables[key] = Vm
             self.u_tables[key] = utable
         try:
             Im = self.inject_tables[key]
         except KeyError, e:
             Im = moose.Table(self.data_container.path + '/' + key + '_inject') # May be different for non-pulsegen sources.
-            Im.connect('requestData', self._get_neuron(key), 'get_Im')
+            Im.connect('requestOut', self._get_neuron(key), 'getIm')
             self.inject_tables[key] = Im
         self.simtime = IzhikevichDemo.parameters[key][7] * 1e-3
         for obj in moose.wildcardFind('%s/##' % (self.model_container.path)):
@@ -237,7 +237,7 @@ These neurons show bursting in response to inhibitory input."""
         moose.start(self.simtime)
         while moose.isRunning():
             time.sleep(100)
-        time = linspace(0, IzhikevichDemo.parameters[key][7], len(Vm.vec))
+        time = linspace(0, IzhikevichDemo.parameters[key][7], len(Vm.vector))
         # DEBUG
         nrn = self._get_neuron(key)
         print 'a = %g, b = %g, c = %g, d = %g, initVm = %g, initU = %g' % (nrn.a,nrn.b, nrn.c, nrn.d, nrn.initVm, nrn.initU)
@@ -378,7 +378,7 @@ These neurons show bursting in response to inhibitory input."""
         nrn = self._get_neuron(key)
         moose.connect(pulsegen, 'outputOut', nrn, 'injectDest')
         # self.stimulus_table = moose.Table(self.data_container.path + '/stimulus')
-        # self.stimulus_table.connect('requestData', pulsegen, 'get_output')
+        # self.stimulus_table.connect('requestOut', pulsegen, 'getOutput')
         return pulsegen    
         
     def _make_Class_1_input(self):
@@ -388,7 +388,7 @@ These neurons show bursting in response to inhibitory input."""
         input_table.stopTime = IzhikevichDemo.parameters['Class_1'][7] * 1e-3
         # matlab code: if (t>T1) I=(0.075*(t-T1)); else I=0;
         input_vec = np.arange(0, int(ceil((input_table.stopTime - input_table.startTime) / input_table.stepSize)), 1.0) * 0.075 * self.dt * 1e3 * 1e-9
-        input_table.vec = input_vec
+        input_table.vector = input_vec
         input_table.connect('output', self._get_neuron('Class_1'), 'injectDest')
         self.stimulus_table = moose.Table(self.data_container.path + '/stimulus')
         moose.connect(input_table, 'output', self.stimulus_table, 'input')        
@@ -403,7 +403,7 @@ These neurons show bursting in response to inhibitory input."""
         # The matlab code is: if (t>T1) I=-0.5+(0.015*(t-T1)); else I=-0.5
         # convert dt from s to ms, and convert total current from nA to A.
         input_vec = np.arange(0, int(ceil((input_table.stopTime - input_table.startTime) / input_table.stepSize)), 1.0) * 0.015 * self.dt * 1e3 * 1e-9 - 0.05*1e-9
-        input_table.vec = input_vec
+        input_table.vector = input_vec
         input_table.connect('output', self._get_neuron(key), 'injectDest')
         return input_table
 
@@ -421,7 +421,7 @@ These neurons show bursting in response to inhibitory input."""
                                            np.logical_and(t > t2, t < t2+5e-3)),
                              1.24e-9,
                              0.24e-9)
-        input_table.vec = input_vec
+        input_table.vector = input_vec
         input_table.connect('output', self._get_neuron(key), 'injectDest')
         return input_table
 
@@ -442,7 +442,7 @@ These neurons show bursting in response to inhibitory input."""
                   ((t > t3) & (t < t3 + 4e-3)) |
                   ((t > t4) & (t < t4 + 4e-3)))[0]
         input_vec[idx] = 0.65e-9
-        input_table.vec = input_vec
+        input_table.vector = input_vec
         input_table.connect('output', self._get_neuron(key), 'injectDest')
         return input_table
         
@@ -463,7 +463,7 @@ These neurons show bursting in response to inhibitory input."""
                              ((t > t4) & (t < t4 + 2e-3)),
                              9e-9, 
                              0.0)
-        input_table.vec = input_vec
+        input_table.vector = input_vec
         input_table.connect('output', self._get_neuron(key), 'injectDest')
         return input_table
         
@@ -485,7 +485,7 @@ These neurons show bursting in response to inhibitory input."""
             else:
                 input_vec[ii] = 0.0
             t = t + self.dt
-        input_table.vec = input_vec
+        input_table.vector = input_vec
         input_table.connect('output', self._get_neuron(key), 'injectDest')
         return input_table
         
@@ -499,7 +499,7 @@ These neurons show bursting in response to inhibitory input."""
         input_vec = np.zeros(t.shape)
         input_vec[((t > 10e-3) & (t < 15e-3)) | ((t > 80e-3) & (t < 85e-3))] = 1e-9
         input_vec[(t > 70e-3) & (t < 75e-3)] = -6e-9
-        input_table.vec = input_vec
+        input_table.vector = input_vec
         nrn = self._get_neuron(key)
         input_table.connect('output', nrn, 'injectDest')
         return input_table
@@ -520,9 +520,9 @@ try:
         (time, Vm, Im) = demo.simulate(key)
         title(IzhikevichDemo.parameters[key][0] + '. ' + key)
         subplot(3,1,1)
-        plot(time, array(Vm.vec))
+        plot(time, array(Vm.vector))
         subplot(3,1,2)
-        plot(time, array(Im.vec))
+        plot(time, array(Im.vector))
         subplot(3,1,3)
         show()
         # data.dumpFile(data.name + '.plot')

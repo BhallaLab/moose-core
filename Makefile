@@ -301,6 +301,7 @@ SUBDIR = \
 	biophysics \
 	kinetics \
 	mesh \
+	device \
 	benchmarks \
 	$(SMOLDYN_DIR) \
 	$(SBML_DIR) \
@@ -323,6 +324,7 @@ OBJLIBS =	\
 	biophysics/_biophysics.o \
 	kinetics/_kinetics.o \
 	mesh/_mesh.o \
+	device/_device.o \
 	benchmarks/_benchmarks.o \
 	$(SMOLDYN_LIB) \
 	$(SBML_LIB) \
