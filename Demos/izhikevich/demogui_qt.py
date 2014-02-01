@@ -129,8 +129,8 @@ be obtained from the latter by any choice of a and b.'))
             mbox.show()
             return
         (time, Vm, Im) = self.demo.simulate(key)
-        Vm = numpy.array(Vm.vec) * 1e3
-        Im = numpy.array(Im.vec) * 1e9
+        Vm = numpy.array(Vm.vector) * 1e3
+        Im = numpy.array(Im.vector) * 1e9
         self.VmPlot.clear()
         self.ImPlot.clear()
         curve = Qwt.QwtPlotCurve(self.tr(key + '_Vm'))

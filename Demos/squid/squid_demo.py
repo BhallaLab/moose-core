@@ -372,13 +372,13 @@ class SquidGui(QtGui.QMainWindow):
     def __get_stateplot_data(self, name):
         data = []
         if name == 'V':
-            data = self.squid_setup.vm_table.vec
+            data = self.squid_setup.vm_table.vector
         elif name == 'm':
-            data = self.squid_setup.m_table.vec
+            data = self.squid_setup.m_table.vector
         elif name == 'h':
-            data = self.squid_setup.h_table.vec
+            data = self.squid_setup.h_table.vector
         elif name == 'n':
-            data = self.squid_setup.n_table.vec
+            data = self.squid_setup.n_table.vector
         else:
             raise ValueError('Unrecognized selection: %s' % (name))
         return numpy.asarray(data)
@@ -541,16 +541,16 @@ class SquidGui(QtGui.QMainWindow):
         self._updateStatePlot()
 
     def _updatePlots(self):
-        if len(self.squid_setup.vm_table.vec) <= 0:
+        if len(self.squid_setup.vm_table.vector) <= 0:
             return        
-        vm = numpy.asarray(self.squid_setup.vm_table.vec)
-        cmd = numpy.asarray(self.squid_setup.cmd_table.vec)
-        ik = numpy.asarray(self.squid_setup.ik_table.vec)
-        ina = numpy.asarray(self.squid_setup.ina_table.vec)
-        iclamp = numpy.asarray(self.squid_setup.iclamp_table.vec)
-        vclamp = numpy.asarray(self.squid_setup.vclamp_table.vec)
-        gk = numpy.asarray(self.squid_setup.gk_table.vec)
-        gna = numpy.asarray(self.squid_setup.gna_table.vec)
+        vm = numpy.asarray(self.squid_setup.vm_table.vector)
+        cmd = numpy.asarray(self.squid_setup.cmd_table.vector)
+        ik = numpy.asarray(self.squid_setup.ik_table.vector)
+        ina = numpy.asarray(self.squid_setup.ina_table.vector)
+        iclamp = numpy.asarray(self.squid_setup.iclamp_table.vector)
+        vclamp = numpy.asarray(self.squid_setup.vclamp_table.vector)
+        gk = numpy.asarray(self.squid_setup.gk_table.vector)
+        gna = numpy.asarray(self.squid_setup.gna_table.vector)
         time_series = numpy.linspace(0, self._plotdt * len(vm), len(vm))        
         self._vm_plot.set_data(time_series, vm)
         time_series = numpy.linspace(0, self._plotdt * len(cmd), len(cmd))        
@@ -583,7 +583,7 @@ class SquidGui(QtGui.QMainWindow):
         self._plotCanvas.draw()
 
     def _updateStatePlot(self):
-        if len(self.squid_setup.vm_table.vec) <= 0:
+        if len(self.squid_setup.vm_table.vector) <= 0:
             return
         sx = str(self._stateplot_xvar_combo.currentText())
         sy = str(self._stateplot_yvar_combo.currentText())
