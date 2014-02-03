@@ -45,8 +45,8 @@ plotdt = testutils.PLOTDT
 class TestKDR(ChannelTestBase):
     channelname = 'KDR'
     params = run_single_channel(channelname, 1e-9, simtime)
-    vm = np.array(params['Vm'].vec)
-    gk = np.array(params['Gk'].vec)
+    vm = np.array(params['Vm'].vector)
+    gk = np.array(params['Gk'].vector)
     tseries = np.arange(0, len(vm), 1.0) * simdt
     
     def testKDR_Vm_Neuron(self):
@@ -63,8 +63,8 @@ class TestKDR(ChannelTestBase):
 class TestKDR_FS(ChannelTestBase):
     channelname = 'KDR_FS'
     params = run_single_channel(channelname, 1e-9, simtime)
-    vm = np.array(params['Vm'].vec)
-    gk = np.array(params['Gk'].vec)
+    vm = np.array(params['Vm'].vector)
+    gk = np.array(params['Gk'].vector)
     tseries = np.arange(0, len(vm), 1.0) * simdt
     
     def testKDR_FS_Vm_Neuron(self):
@@ -82,8 +82,8 @@ class TestKDR_FS(ChannelTestBase):
 class TestKA(ChannelTestBase):
     channelname = 'KA'
     params = run_single_channel(channelname, 1e-9, simtime)
-    vm = np.array(params['Vm'].vec)
-    gk = np.array(params['Gk'].vec)
+    vm = np.array(params['Vm'].vector)
+    gk = np.array(params['Gk'].vector)
     tseries = np.arange(0, len(vm), 1.0) * simdt
     
     def testKA_Vm_Neuron(self):
@@ -100,8 +100,8 @@ class TestKA(ChannelTestBase):
 class TestKA_IB(ChannelTestBase):
     channelname = 'KA_IB'
     params = run_single_channel(channelname, 1e-9, simtime)
-    vm = np.array(params['Vm'].vec)
-    gk = np.array(params['Gk'].vec)
+    vm = np.array(params['Vm'].vector)
+    gk = np.array(params['Gk'].vector)
     tseries = np.arange(0, len(vm), 1.0) * simdt
     
     def testKA_IB_Vm_Neuron(self):
@@ -119,8 +119,8 @@ class TestKA_IB(ChannelTestBase):
 class TestK2(ChannelTestBase):
     channelname = 'K2'
     params = run_single_channel(channelname, 1e-9, simtime)
-    vm = np.array(params['Vm'].vec)
-    gk = np.array(params['Gk'].vec)
+    vm = np.array(params['Vm'].vector)
+    gk = np.array(params['Gk'].vector)
     tseries = np.arange(0, len(vm), 1.0) * simdt
     
     def testK2_Vm_Neuron(self):
@@ -137,8 +137,8 @@ class TestK2(ChannelTestBase):
 class TestKM(ChannelTestBase):
     channelname = 'KM'
     params = run_single_channel(channelname, 1e-9, simtime)
-    vm = np.array(params['Vm'].vec)
-    gk = np.array(params['Gk'].vec)
+    vm = np.array(params['Vm'].vector)
+    gk = np.array(params['Gk'].vector)
     tseries = np.arange(0, len(vm), 1.0) * simdt
     
     def testKM_Vm_Neuron(self):
@@ -157,7 +157,7 @@ def setup_cadep_channel(model_container, data_container, channel_proto, Gbar, ca
     """Setup a test compartment with [Ca2+] dependent channel."""
     params = setup_single_compartment(model_container, data_container, channel_proto, Gbar)
     ca_table = moose.StimulusTable(model_container.path + '/CaStim')    
-    ca_table.vec = np.linspace(ca_start, ca_stop, 1000)
+    ca_table.vector = np.linspace(ca_start, ca_stop, 1000)
     ca_table.doLoop = True
     ca_recorder = moose.Table(data_container.path + '/Ca')
     moose.connect(ca_table, 'output', ca_recorder, 'input')
@@ -195,15 +195,15 @@ def run_cadep_channel(channelname, Gbar, simtime):
     gk_file = 'data/%s_Gk.dat' % (channelname)
     ik_file = 'data/%s_Ik.dat' % (channelname)
     ca_file = 'data/%s_Ca.dat' % (channelname)
-    tseries = np.array(range(len(vm_data.vec))) * simdt
-    print 'Vm:', len(vm_data.vec), 'Gk', len(gk_data.vec), 'Ik', len(ik_data.vec)
-    data = np.c_[tseries, vm_data.vec]
+    tseries = np.array(range(len(vm_data.vector))) * simdt
+    print 'Vm:', len(vm_data.vector), 'Gk', len(gk_data.vector), 'Ik', len(ik_data.vector)
+    data = np.c_[tseries, vm_data.vector]
     np.savetxt(vm_file, data)
     print 'Saved Vm in', vm_file
-    data = np.c_[tseries, gk_data.vec]
+    data = np.c_[tseries, gk_data.vector]
     np.savetxt(gk_file, data)
     print 'Saved Gk in', gk_file
-    data = np.c_[tseries, ik_data.vec]
+    data = np.c_[tseries, ik_data.vector]
     np.savetxt(ik_file, data)
     print 'Saved Ik in', ik_file
     np.savetxt(ca_file, data)
@@ -214,8 +214,8 @@ def run_cadep_channel(channelname, Gbar, simtime):
 class TestKAHP(ChannelTestBase):
     channelname = 'KAHP'
     params = run_cadep_channel(channelname, 1e-9, simtime)
-    vm = np.array(params['Vm'].vec)
-    gk = np.array(params['Gk'].vec)
+    vm = np.array(params['Vm'].vector)
+    gk = np.array(params['Gk'].vector)
     tseries = np.arange(0, len(vm), 1.0) * simdt
     
     def testKAHP_Vm_Neuron(self):        
@@ -232,8 +232,8 @@ class TestKAHP(ChannelTestBase):
 class TestKAHP_SLOWER(ChannelTestBase):
     channelname = 'KAHP_SLOWER'
     params = run_cadep_channel(channelname, 1e-9, simtime)
-    vm = np.array(params['Vm'].vec)
-    gk = np.array(params['Gk'].vec)
+    vm = np.array(params['Vm'].vector)
+    gk = np.array(params['Gk'].vector)
     tseries = np.arange(0, len(vm), 1.0) * simdt
     
     def testKAHP_SLOWER_Vm_Neuron(self):        
@@ -250,8 +250,8 @@ class TestKAHP_SLOWER(ChannelTestBase):
 class TestKAHP_DP(ChannelTestBase):
     channelname = 'KAHP_DP'
     params = run_cadep_channel(channelname, 1e-9, simtime)
-    vm = np.array(params['Vm'].vec)
-    gk = np.array(params['Gk'].vec)
+    vm = np.array(params['Vm'].vector)
+    gk = np.array(params['Gk'].vector)
     tseries = np.arange(0, len(vm), 1.0) * simdt
     
     def testKAHP_DP_Vm_Neuron(self):        
@@ -268,8 +268,8 @@ class TestKAHP_DP(ChannelTestBase):
 class TestKC(ChannelTestBase):
     channelname = 'KC'
     params = run_cadep_channel(channelname, 1e-9, simtime)
-    vm = np.array(params['Vm'].vec)
-    gk = np.array(params['Gk'].vec)
+    vm = np.array(params['Vm'].vector)
+    gk = np.array(params['Gk'].vector)
     tseries = np.arange(0, len(vm), 1.0) * simdt
     
     def testKC_Vm_Neuron(self):        
@@ -286,8 +286,8 @@ class TestKC(ChannelTestBase):
 class TestKC_FAST(ChannelTestBase):
     channelname = 'KC_FAST'
     params = run_cadep_channel(channelname, 1e-9, simtime)
-    vm = np.array(params['Vm'].vec)
-    gk = np.array(params['Gk'].vec)
+    vm = np.array(params['Vm'].vector)
+    gk = np.array(params['Gk'].vector)
     tseries = np.arange(0, len(vm), 1.0) * simdt
     
     def testKC_FAST_Vm_Neuron(self):        

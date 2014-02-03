@@ -141,7 +141,7 @@ class TestSingleComp(unittest.TestCase):
         self.tables = {}
         tab = moose.Table('%s/Vm' % (self.data.path))
         self.tables['Vm'] = tab
-        moose.connect(tab, 'requestData', self.soma, 'get_Vm')
+        moose.connect(tab, 'requestOut', self.soma, 'getVm')
         for channelname, conductance in channel_density.items():
             chanclass = eval(channelname)
             channel = insert_channel(self.soma, chanclass, conductance, density=True)
@@ -154,18 +154,18 @@ class TestSingleComp(unittest.TestCase):
             elif issubclass(chanclass, AR):
                 channel.Ek = erev['AR']
             tab = moose.Table('%s/%s' % (self.data.path, channelname))
-            moose.connect(tab, 'requestData', channel, 'get_Gk')
+            moose.connect(tab, 'requestOut', channel, 'getGk')
             self.tables['Gk_'+channel.name] = tab
         archan = moose.HHChannel(self.soma.path + '/AR')
         archan.X = 0.0
         ca = insert_ca(self.soma, 2.6e7, 50e-3)
         tab = moose.Table('%s/Ca' % (self.data.path))
         self.tables['Ca'] = tab
-        moose.connect(tab, 'requestData', ca, 'get_Ca')
+        moose.connect(tab, 'requestOut', ca, 'getCa')
         self.pulsegen = moose.PulseGen('%s/inject' % (self.model.path))
         moose.connect(self.pulsegen, 'outputOut', self.soma, 'injectMsg')
         tab = moose.Table('%s/injection' % (self.data.path))
-        moose.connect(tab, 'requestData', self.pulsegen, 'get_output')
+        moose.connect(tab, 'requestOut', self.pulsegen, 'getOutput')
         self.tables['pulsegen'] = tab
         self.pulsegen.count = len(stimulus)
         for ii in range(len(stimulus)):
@@ -191,28 +191,28 @@ class TestSingleComp(unittest.TestCase):
             ca_axis.plot(nrndata[:,0], nrndata[:,2], label='Ca (mM) - nrn')
         except IOError, e:
             print e
-        tseries = np.linspace(0, simtime, len(self.tables['Vm'].vec)) * 1e3
+        tseries = np.linspace(0, simtime, len(self.tables['Vm'].vector)) * 1e3
         # plotcount = len(channel_density) + 1
         # rows = int(np.sqrt(plotcount) + 0.5)
         # columns = int(plotcount * 1.0/rows + 0.5)
         # print plotcount, rows, columns
         # plt.subplot(rows, columns, 1)
-        vm_axis.plot(tseries, self.tables['Vm'].vec * 1e3, label='Vm (mV) - moose')
-        vm_axis.plot(tseries, self.tables['pulsegen'].vec * 1e12, label='inject (pA)')
-        ca_axis.plot(tseries, self.tables['Ca'].vec, label='Ca (mM) - moose')
+        vm_axis.plot(tseries, self.tables['Vm'].vector * 1e3, label='Vm (mV) - moose')
+        vm_axis.plot(tseries, self.tables['pulsegen'].vector * 1e12, label='inject (pA)')
+        ca_axis.plot(tseries, self.tables['Ca'].vector, label='Ca (mM) - moose')
         vm_axis.legend()
         ca_axis.legend()
         # ii = 2
         # for key, value in self.tables.items():
         #     if key.startswith('Gk'):
         #         plt.subplot(rows, columns, ii)
-        #         plt.plot(tseries, value.vec, label=key)                
+        #         plt.plot(tseries, value.vector, label=key)                
         #         ii += 1
         #         plt.legend()
         plt.show()
         data = np.vstack((tseries*1e-3, 
-                          self.tables['Vm'].vec, 
-                          self.tables['Ca'].vec))
+                          self.tables['Vm'].vector, 
+                          self.tables['Ca'].vector))
         np.savetxt('data/singlecomp_Vm.dat', 
                    np.transpose(data))
 

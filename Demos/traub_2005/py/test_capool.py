@@ -62,7 +62,7 @@ def run_capool(poolname, Gbar, simtime):
     # beta = 1/tau (ms) = 0.02 => tau = 50 ms
     capool.tau = 50e-3
     ca_data = moose.Table('%s/Ca' % (data.path))
-    moose.connect(ca_data, 'requestData', capool, 'get_Ca')
+    moose.connect(ca_data, 'requestOut', capool, 'getCa')
     setup_clocks(simdt, plotdt)
     assign_clocks(model, data)
     vm_data = params['Vm']
@@ -77,19 +77,19 @@ def run_capool(poolname, Gbar, simtime):
     gk_file = 'data/%s_Gk.dat' % (poolname)
     ik_file = 'data/%s_Ik.dat' % (poolname)
     ca_file = 'data/%s_Ca.dat' % (poolname)
-    tseries = np.array(range(len(vm_data.vec))) * simdt
-    print 'Vm:', len(vm_data.vec), 'Gk', len(gk_data.vec), 'Ik', len(ik_data.vec)
-    data = np.c_[tseries, vm_data.vec]
+    tseries = np.array(range(len(vm_data.vector))) * simdt
+    print 'Vm:', len(vm_data.vector), 'Gk', len(gk_data.vector), 'Ik', len(ik_data.vector)
+    data = np.c_[tseries, vm_data.vector]
     np.savetxt(vm_file, data)
     print 'Saved Vm in', vm_file
-    data = np.c_[tseries, gk_data.vec]
+    data = np.c_[tseries, gk_data.vector]
     np.savetxt(gk_file, data)
     print 'Saved Gk in', gk_file
-    data = np.c_[tseries, ik_data.vec]
+    data = np.c_[tseries, ik_data.vector]
     np.savetxt(ik_file, data)
     print 'Saved Ik in', ik_file
-    print '>>', len(ca_data.vec)
-    data = np.c_[tseries, ca_data.vec]
+    print '>>', len(ca_data.vector)
+    data = np.c_[tseries, ca_data.vector]
     np.savetxt(ca_file, data)
     print 'Saved [Ca2+] in', ca_file
     return params
@@ -99,9 +99,9 @@ class TestCaPool(ChannelTestBase):
     channelname = 'CaL'
     poolname = 'CaPool'    
     params = run_capool(poolname, 1e-9, 350e-3)
-    vm = np.array(params['Vm'].vec)
-    gk = np.array(params['Gk'].vec)
-    ca = np.array(params['Ca'].vec)
+    vm = np.array(params['Vm'].vector)
+    gk = np.array(params['Gk'].vector)
+    ca = np.array(params['Ca'].vector)
     print len(ca)
     tseries = np.arange(0, len(vm), 1.0) * simdt
     

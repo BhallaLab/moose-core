@@ -42,8 +42,8 @@ plotdt = testutils.PLOTDT
 class TestCaL(ChannelTestBase):
     channelname = 'CaL'
     params = run_single_channel(channelname, 1e-9, simtime)
-    vm = np.array(params['Vm'].vec)
-    gk = np.array(params['Gk'].vec)
+    vm = np.array(params['Vm'].vector)
+    gk = np.array(params['Gk'].vector)
     tseries = np.arange(0, len(vm), 1.0) * simdt
     
     def testCAL_Vm_Neuron(self):
@@ -60,8 +60,8 @@ class TestCaL(ChannelTestBase):
 class TestCaT(ChannelTestBase):
     channelname = 'CaT'
     params = run_single_channel(channelname, 1e-9, simtime)
-    vm = np.array(params['Vm'].vec)
-    gk = np.array(params['Gk'].vec)
+    vm = np.array(params['Vm'].vector)
+    gk = np.array(params['Gk'].vector)
     tseries = np.arange(0, len(vm), 1.0) * simdt
     
     def testCaT_Vm_Neuron(self):
@@ -78,8 +78,8 @@ class TestCaT(ChannelTestBase):
 class TestCaT_A(ChannelTestBase):
     channelname = 'CaT_A'
     params = run_single_channel(channelname, 1e-9, simtime)
-    vm = np.array(params['Vm'].vec)
-    gk = np.array(params['Gk'].vec)
+    vm = np.array(params['Vm'].vector)
+    gk = np.array(params['Gk'].vector)
     tseries = np.arange(0, len(vm), 1.0) * simdt
     
     def testCaT_Vm_Neuron(self):
