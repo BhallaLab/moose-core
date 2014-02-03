@@ -19,15 +19,13 @@ OBJ = \
 	ChanBase.o	\
 	HHChannel.o	\
 	HHGate.o	\
+	CaConc.o	\
 	testBiophysics.o	\
 
 # IzhikevichNrn.o	\
 	LeakyIaF.o	\
 	SymCompartment.o	\
-	SynChanBase.o	\
-	SynChan.o	\
 	GapJunction.o	\
-	CaConc.o	\
 	Nernst.o	\
 	Neuron.o	\
 	GHK.o		\
@@ -63,15 +61,13 @@ Compartment.o: Compartment.h
 ChanBase.o: ChanBase.h
 HHChannel.o: ChanBase.h HHChannel.h HHGate.h
 HHGate.o: HHGate.h
+CaConc.o:	CaConc.h
 #IzhikevichNrn.o: IzhikevichNrn.h
 #LeakyIaF.o: LeakyIaF.h
 #Synapse.o:	SynBase.h Synapse.h
 #SymCompartment.o: Compartment.h SymCompartment.h
-#SynChanBase.o: Synapse.h SynBase.h ChanBase.h
-#SynChan.o: SynBase.h ChanBase.h Synapse.h SynChan.h
 #GapJunction.o: GapJunction.h
 #NMDAChan.o: NMDAChan.h SynBase.h ChanBase.h Synapse.h SynChan.h
-#CaConc.o:	CaConc.h
 #Nernst.o:	Nernst.h
 #Neuron.o:	Neuron.h
 #MgBlock.o:	MgBlock.h

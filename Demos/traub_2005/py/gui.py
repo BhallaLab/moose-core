@@ -378,9 +378,9 @@ class CellView(QtGui.QWidget):
         te = datetime.now()
         td = te - ts
         print 'Simulating %g s took %g s of computer time' % (simtime, td.days * 86400 + td.seconds + td.microseconds * 1e-6)
-        ts = np.linspace(0, simtime, len(params['somaVm'].vec))
-        vm = params['somaVm'].vec
-        stim = params['injectionCurrent'].vec
+        ts = np.linspace(0, simtime, len(params['somaVm'].vector))
+        vm = params['somaVm'].vector
+        stim = params['injectionCurrent'].vector
         self.vmAxes.clear()       
         self.vmAxes.set_title('membrane potential at soma')
         self.vmAxes.set_ylabel('mV')            

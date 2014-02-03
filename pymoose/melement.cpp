@@ -75,7 +75,7 @@ extern "C" {
 
     extern PyTypeObject ObjIdType;
     extern PyTypeObject IdType;
-
+    extern int PyType_IsSubtype(PyTypeObject *, PyTypeObject *);
 
     
     PyObject * get_ObjId_attr(_ObjId * oid, string attribute)
@@ -204,25 +204,37 @@ extern "C" {
         ostringstream err;
         // First see if there is an existing object with at path
         instance->oid_ = ObjId(path);
-        string realtypename = "moose." + Field<string>::get(instance->oid_, "className");
+        PyTypeObject * basetype = NULL;
+        string basetype_str;
+        if (type == NULL){
+            basetype = getBaseClass(self);
+            basetype_str = string(basetype->tp_name).substr(6); // remove `moose.` prefix from type name
+        } else {
+            basetype_str = string(type);
+        }
+        if (basetype == NULL){
+            PyErr_SetString(PyExc_TypeError, "Unknown class. Need a valid MOOSE class or subclass thereof.");
+            // Py_XDECREF(self);
+            return -1;
+        }
         if (instance->oid_.bad()){
             // is this the root element?
             string p(path);
             if ((p == "/") || (p == "/root")){
-                if ((mytypename == realtypename )
-                    || (mytypename == "moose.Neutral")){
+                if (PyType_IsSubtype(mytype, basetype)){
                     return 0;
                 }
                 err << "cannot convert "
                     << Field<string>::get(instance->oid_, "className")
                     << " to "
-                    << mytypename;
+                    << mytypename
+                    << "To get the existing object use `moose.element(obj)` instead.";
                 PyErr_SetString(PyExc_TypeError, err.str().c_str());
                 return -1;
             }
             // no - so we need to create a new element
         } else { // this is a non-root existing element
-            if (mytypename == realtypename){
+            if (PyType_IsSubtype(mytype, basetype)){
                 return 0;
             }
             err << "cannot convert "
@@ -234,17 +246,6 @@ extern "C" {
             return -1;
         }
             
-        string basetype_str;
-        if (type == NULL){
-            basetype_str = getBaseClassName(self);
-        } else {
-            basetype_str = string(type);
-        }
-        if (basetype_str.length() == 0){
-            PyErr_SetString(PyExc_TypeError, "Unknown class. Need a valid MOOSE class or subclass thereof.");
-            // Py_XDECREF(self);
-            return -1;
-        }
         
         Id new_id = create_Id_from_path(path, numData, isGlobal, basetype_str);
         cout << "Created " << new_id << " path=" << path << " numData=" << numData << " isGlobal=" << isGlobal << " baseType=" << basetype_str << endl;
