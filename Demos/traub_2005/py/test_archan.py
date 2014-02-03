@@ -42,8 +42,8 @@ plotdt = testutils.PLOTDT
 class TestAR(ChannelTestBase):
     channelname = 'AR'
     params = run_single_channel(channelname, 1e-9, simtime)
-    vm = np.array(params['Vm'].vec)
-    gk = np.array(params['Gk'].vec)
+    vm = np.array(params['Vm'].vector)
+    gk = np.array(params['Gk'].vector)
     tseries = np.arange(0, len(vm), 1.0) * simdt
     
     def testAR_Vm_Neuron(self):

@@ -96,16 +96,16 @@ def vclamptest(compartment, vclamp, duration=50e-3, delay=150e-3, solver='ee', v
         command.width[ii] = duration
         command.level[ii] = clamping_voltage
     injected = moose.Table('%s/Iinject' % (dc.path))
-    moose.connect(injected, 'requestData', clamp, 'get_current')
+    moose.connect(injected, 'requestData', clamp, 'getCurrent')
     voltage = moose.Table('%s/Vcommand' % (dc.path))
-    moose.connect(voltage, 'requestData', command, 'get_output')
+    moose.connect(voltage, 'requestData', command, 'getOutput')
     vm = moose.Table('%s/Vm' % (dc.path))
-    moose.connect(vm, 'requestData', compartment, 'get_Vm')
+    moose.connect(vm, 'requestData', compartment, 'getVm')
     utils.resetSim([mc.path, dc.path], simdt, plotdt, simmethod=solver)
     moose.start(simtime)
-    ivec = np.asarray(injected.vec)
-    vvec = np.asarray(voltage.vec)
-    vmvec = np.asarray(vm.vec)
+    ivec = np.asarray(injected.vector)
+    vvec = np.asarray(voltage.vector)
+    vmvec = np.asarray(vm.vector)
     ts = np.linspace(0, simtime, len(vvec))
     sidx = np.nonzero(np.diff(vvec) > 0)[0]
     eidx = np.nonzero(np.diff(vvec) < 0)[0]

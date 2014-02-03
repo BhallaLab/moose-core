@@ -114,7 +114,7 @@ class ChannelMeta(type):
         # abstract classes. Others will have the prototype insatntiated.
         if  'abstract' in cdict and cdict['abstract'] == True:
             return type.__new__(cls, name, bases, cdict)
-        proto = moose.HHChannel('%s/%s' % (config.modelSettings.libpath, name))
+        proto = moose.HHChannel('%s/%s' % (config.library.path, name))
         xpower = get_class_field(name, cdict, bases, 'Xpower', default=0.0)
         if xpower > 0:
             proto.Xpower = xpower
@@ -167,6 +167,8 @@ class ChannelBase(moose.HHChannel):
     abstract = True
     __metaclass__ = ChannelMeta
     def __init__(self, path, xpower=1, ypower=0, Ek=0.0):
+        print '####', self
+        print '####', path
         moose.HHChannel.__init__(self, path)
 
 

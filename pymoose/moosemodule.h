@@ -285,7 +285,7 @@ extern "C" {
     int get_npy_typenum(const type_info& ctype);
     string getFieldType(string className, string fieldName);
     const map<string, string>& get_field_alias();
-    string getBaseClassName(PyObject * self);
+    PyTypeObject * getBaseClass(PyObject * self);
     int parseFinfoType(string className, string finfoType, string fieldName, vector<string> & typeVec);
     vector<string> getFieldNames(string className, string finfoType);
     PyObject * getObjIdAttr(_ObjId * oid, string attribute);

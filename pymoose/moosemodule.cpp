@@ -1078,7 +1078,7 @@ extern "C" {
        Utility function to traverse python class hierarchy to reach closest base class.
        Ideally we should go via mro
     */
-    string getBaseClassName(PyObject * self)
+    PyTypeObject * getBaseClass(PyObject * self)
     {
         extern PyTypeObject ObjIdType;
         string basetype_str = "";
@@ -1090,13 +1090,10 @@ extern "C" {
             basetype_str = basetype_str.substr(dot+1);
             if (get_moose_classes().find(basetype_str) !=
                 get_moose_classes().end()){
-                return basetype_str;
+                return base;
             }
         }
-        if (base == Py_TYPE(self)){
-            return "Neutral";
-        }
-        return basetype_str;
+        return NULL;
     }
 
     ////////////////////////////////////////////

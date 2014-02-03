@@ -75,9 +75,9 @@ def setup_model(root='/', hsolve=True):
     pulse = moose.PulseGen('%s/stimulus' % (model.path))
     moose.connect(pulse, 'outputOut', soma, 'injectMsg')
     tab_vm = moose.Table('%s/spinystellate_soma_Vm' % (data.path))
-    moose.connect(tab_vm, 'requestData', soma, 'get_Vm')
+    moose.connect(tab_vm, 'requestOut', soma, 'getVm')
     tab_stim = moose.Table('%s/spinystellate_soma_inject' % (data.path))
-    moose.connect(tab_stim, 'requestData', pulse, 'get_output')
+    moose.connect(tab_stim, 'requestOut', pulse, 'getOutput')
     utils.setDefaultDt(elecdt=simdt, plotdt2=plotdt)
     utils.assignDefaultTicks(model, data)
     return {'stimulus': pulse,
@@ -97,8 +97,8 @@ def main():
     model_dict = setup_model()
     do_sim(model_dict['stimulus'], amp)   
     config.logger.info('##### %d' % (model_dict['tab_vm'].size))
-    vm = model_dict['tab_vm'].vec * 1e3
-    inject = model_dict['tab_stim'].vec.copy()
+    vm = model_dict['tab_vm'].vector * 1e3
+    inject = model_dict['tab_stim'].vector.copy()
     t = np.linspace(0, simtime, len(vm))
     fname = 'data_fig_a2_FS.txt'
     np.savetxt(fname,

@@ -76,14 +76,14 @@ class TestTCR(SingleCellCurrentStepTest):
         self.pulsegen.delay[0] = 100e-3
         self.pulsegen.width[0] = 100e-3
         self.pulsegen.level[0] = -10e-3
-        moose.connect(self.pulsegen, 'outputOut', clamp, 'set_command')
+        moose.connect(self.pulsegen, 'outputOut', clamp, 'setCommand')
         tab = moose.Table('%s/command' % (self.data_container.path))
-        moose.connect(tab, 'requestData', clamp, 'get_command')
+        moose.connect(tab, 'requestOut', clamp, 'getCommand')
         for ii in moose.wildcardFind('/##[TYPE=VClamp]'):
             print ii.path
         self.runsim(simtime)
-        print tab, len(tab.vec)
-        pylab.plot(pylab.linspace(0, simtime, len(tab.vec)), tab.vec, 'kx')
+        print tab, len(tab.vector)
+        pylab.plot(pylab.linspace(0, simtime, len(tab.vector)), tab.vector, 'kx')
         self.plot_vm()
 
     # def testChannelDensities(self):

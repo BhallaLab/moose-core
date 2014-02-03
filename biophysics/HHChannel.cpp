@@ -124,24 +124,24 @@ const Cinfo* HHChannel::initCinfo()
 			HHGate::initCinfo(),
 			&HHChannel::getXgate,
 			&HHChannel::setNumGates,
-			&HHChannel::getNumXgates,
-			1
+			&HHChannel::getNumXgates
+			// 1
 		);
 		static FieldElementFinfo< HHChannel, HHGate > gateY( "gateY",
 			"Sets up HHGate Y for channel",
 			HHGate::initCinfo(),
 			&HHChannel::getYgate,
 			&HHChannel::setNumGates,
-			&HHChannel::getNumYgates,
-			1
+			&HHChannel::getNumYgates
+			// 1
 		);
 		static FieldElementFinfo< HHChannel, HHGate > gateZ( "gateZ",
 			"Sets up HHGate Z for channel",
 			HHGate::initCinfo(),
 			&HHChannel::getZgate,
 			&HHChannel::setNumGates,
-			&HHChannel::getNumZgates,
-			1
+			&HHChannel::getNumZgates
+			// 1
 		);
 	
 ///////////////////////////////////////////////////////
@@ -194,31 +194,31 @@ static const Cinfo* hhChannelCinfo = HHChannel::initCinfo();
 ///////////////////////////////////////////////////
 HHChannel::HHChannel()
 			: Xpower_( 0.0 ), Ypower_( 0.0 ), Zpower_( 0.0 ),
-			conc_( 0.0 ),
-			instant_( 0 ),
-			X_( 0.0 ), Y_( 0.0 ), Z_( 0.0 ),
-            xInited_( false ), yInited_( false ), zInited_( false ),
-			g_( 0.0 ),
-			useConcentration_( 0 ),
-			xGate_( 0 ),
-			yGate_( 0 ),
-			zGate_( 0 ),
-			myId_()
+                          conc_( 0.0 ),
+                          instant_( 0 ),
+                          X_( 0.0 ), Y_( 0.0 ), Z_( 0.0 ),
+                          xInited_( false ), yInited_( false ), zInited_( false ),
+                          g_( 0.0 ),
+                          useConcentration_( 0 ),
+                          xGate_( 0 ),
+                          yGate_( 0 ),
+                          zGate_( 0 ),
+                          myId_()
 {
 	;
 }
 
 HHChannel::~HHChannel()
 {
-	if ( xGate_ && reinterpret_cast< char* >( this ) == 
-		ObjId( xGate_->originalChannelId(), 0 ).data() )
-		delete xGate_;
-	if ( yGate_ && reinterpret_cast< char* >( this ) == 
-		ObjId( yGate_->originalChannelId(), 0 ).data() )
-		delete yGate_;
-	if ( zGate_ && reinterpret_cast< char* >( this ) == 
-		ObjId( zGate_->originalChannelId(), 0 ).data() )
-		delete zGate_;
+	// if ( xGate_ && reinterpret_cast< char* >( this ) == 
+	// 	ObjId( xGate_->originalChannelId(), 0 ).data() )
+	// 	delete xGate_;
+	// if ( yGate_ && reinterpret_cast< char* >( this ) == 
+	// 	ObjId( yGate_->originalChannelId(), 0 ).data() )
+	// 	delete yGate_;
+	// if ( zGate_ && reinterpret_cast< char* >( this ) == 
+	// 	ObjId( zGate_->originalChannelId(), 0 ).data() )
+	// 	delete zGate_;
 }
 
 bool HHChannel::setGatePower( const Eref& e, double power,
@@ -236,7 +236,7 @@ bool HHChannel::setGatePower( const Eref& e, double power,
 	if ( doubleEq( *assignee, 0.0 ) && power > 0 ) {
 		createGate( e, gateType );
 	} else if ( doubleEq( power, 0.0 ) ) {
-		destroyGate( e, gateType );
+		// destroyGate( e, gateType );
 	}
 	
 	*assignee = power;
