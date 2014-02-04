@@ -28,7 +28,7 @@ Brief overview of PyMOOSE
 
 Classes:
 
-ematrix
+vec
 ----------------
 
 this is the unique identifier of a MOOSE object. Note that you can
@@ -38,23 +38,23 @@ entity in MOOSE.
 
 Constructor:
 
-You can create a new ematrix using the constructor:
+You can create a new vec using the constructor:
 
-ematrix(path, dimension, classname)
+vec(path, dimension, classname)
 
 Fields:
 
-value -- unsigned integer representation of id of this ematrix
+value -- unsigned integer representation of id of this vec
 
-path -- string representing the path corresponding this ematrix
+path -- string representing the path corresponding this vec
 
-shape -- tuple containing the dimensions of this ematrix
+shape -- tuple containing the dimensions of this vec
 
 
-Apart from these, every ematrix exposes the fields of all its elements
+Apart from these, every vec exposes the fields of all its elements
 in a vectorized form. For example:
 
->>> iaf = moose.ematrix('/iaf', (10), 'IntFire')
+>>> iaf = moose.vec('/iaf', (10), 'IntFire')
 >>> iaf.Vm = range(10) 
 >>> print iaf[5].Vm 
 5.0
@@ -64,7 +64,7 @@ array([ 0.,  1.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9.])
 
 Methods:
 
-ematrix implements part of the sequence protocol:
+vec implements part of the sequence protocol:
 
 len(em) -- the first dimension of em.
 
@@ -81,9 +81,9 @@ melement
 
 Single moose object. It has three numbers to uniquely identify it:
 
-id - id of the ematrix containing this element
+id - id of the vec containing this element
 
-dataIndex - index of this element in the container ematrix
+dataIndex - index of this element in the container vec
 
 fieldIndex - if this is a tertiary object, i.e. acts
 as a field in another element (like synapse[0] in IntFire[1]), then
@@ -91,8 +91,8 @@ the index of this field in the containing element.
 
 Methods:
 
-getId -- ematrix object containing this element.
-ematrix() -- ematrix object containing this element.
+getId -- vec object containing this element.
+vec() -- vec object containing this element.
 
 getDataIndex() -- unsigned integer representing the index of this
 element in containing MOOSE object.
@@ -220,10 +220,10 @@ loadModel(filepath, modelpath) -- load file in <filepath> into node
 
 setCwe(obj) -- set the current working element to <obj> - which can be
 either a string representing the path of the object in the moose
-model-tree, or an ematrix.
+model-tree, or an vec.
 ce(obj) -- an alias for setCwe.
 
-getCwe() -- returns ematrix containing the current working element.
+getCwe() -- returns vec containing the current working element.
 pwe() -- an alias for getCwe.
 
 showfields(obj) -- print the fields in object in human readable format

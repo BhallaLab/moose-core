@@ -394,7 +394,6 @@ Id ReadCell::buildCompartment(
 	} else {
 		string parentPath = currCell_.path() + "/" + parent;
 		ObjId parentObjId = ObjId( parentPath );
-		cout << "****" << parentPath << " != " << parentId.path() << endl;
 		if ( parentObjId.bad() ) {
 			cerr << "Error: ReadCell: could not find parent compt '"
 				<< parent

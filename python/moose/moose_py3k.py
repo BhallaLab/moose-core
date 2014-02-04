@@ -56,7 +56,7 @@ known_types = ['void',
                'long',
                'unsigned long',
                'string',
-               'ematrix',
+               'vec',
                'element'] + sequence_types
 
 ######################################################################
@@ -73,8 +73,8 @@ def to_el(path):
     """Return a reference to an existing object as an instance of the
     appropriate class. If path does not exist, raises NameError.
 
-    ematrix or element can be provided in stead of path"""
-    if isinstance(path, ematrix) or isinstance(path, element):
+    vec or element can be provided in stead of path"""
+    if isinstance(path, vec) or isinstance(path, element):
         classObj = eval(path.className)
     elif isinstance(path, str):
         if not _moose.exists(path):
@@ -82,20 +82,20 @@ def to_el(path):
         oid = _moose.element(path)
         classObj = eval(oid.className)
     else:
-        raise TypeError('expected argument: ematrix/element/str')
+        raise TypeError('expected argument: vec/element/str')
     return classObj(path)
 
 def arrayelement(path, className='Neutral'):
     """Return a reference to an existing object as an instance of the
     right class. If path does not exist, className is used for
     creating an instance of that class with the given path"""
-    warnings.warn('use element.ematrix() to retrieve its container. \
-ematrix instances can be used directly for getting \
+    warnings.warn('use element.vec() to retrieve its container. \
+vec instances can be used directly for getting \
 tuple of the field values of its elements.', 
                   DeprecationWarning)
     if not exists(path):
         raise NameError('Object %s not defined' % (path))
-    return ematrix(path)
+    return vec(path)
 
 ################################################################
 # Wrappers for global functions
@@ -114,7 +114,7 @@ def le(el=None):
         if not exists(el):
             raise ValueError('no such element')
         el = element(el)
-    elif isinstance(el, ematrix):
+    elif isinstance(el, vec):
         el = el[0]
     print('Elements under', el.path)
     for ch in el.children:
@@ -126,14 +126,14 @@ def syncDataHandler(target):
     """Synchronize data handlers for target.
 
     Parameter:
-    target -- target element or path or ematrix.
+    target -- target element or path or vec.
     """
     raise NotImplementedError('The implementation is not working for IntFire - goes to invalid objects. \
 First fix that issue with SynBase or something in that line.')
     if isinstance(target, str):
         if not _moose.exists(target):
             raise ValueError('%s: element does not exist.' % (target))
-        target = ematrix(target)
+        target = vec(target)
         _moose.syncDataHandler(target)
 
 def showfield(elem, field='*', showtype=False):
@@ -198,9 +198,9 @@ def doc(arg):
         else:
             print('No such class:', tokens[0])
             return
-    class_id = ematrix('/classes/%s' % (tokens[0]))
+    class_id = vec('/classes/%s' % (tokens[0]))
     num_finfo = getField(class_id[0], 'num_valueFinfo', 'unsigned')
-    finfo = ematrix('/classes/%s/valueFinfo' % (tokens[0]))
+    finfo = vec('/classes/%s/valueFinfo' % (tokens[0]))
     print('\n* Value Field *\n')
     for ii in range(num_finfo):
         oid = element(finfo, 0, ii, 0)
@@ -211,7 +211,7 @@ def doc(arg):
         else:
             print(oid.name, ':', oid.docs, '\n')            
     num_finfo = getField(class_id[0], 'num_srcFinfo', 'unsigned')
-    finfo = ematrix('/classes/%s/srcFinfo' % (tokens[0]))
+    finfo = vec('/classes/%s/srcFinfo' % (tokens[0]))
     print('\n* Source Field *\n')
     for ii in range(num_finfo):
         oid = element(finfo, 0, ii, 0)
@@ -222,7 +222,7 @@ def doc(arg):
         else:
             print(oid.name, ':', oid.docs, '\n')            
     num_finfo = getField(class_id[0], 'num_destFinfo', 'unsigned')
-    finfo = ematrix('/classes/%s/destFinfo' % (tokens[0]))
+    finfo = vec('/classes/%s/destFinfo' % (tokens[0]))
     print('\n* Destination Field *\n')
     for ii in range(num_finfo):
         oid = element(finfo, 0, ii, 0)
@@ -233,7 +233,7 @@ def doc(arg):
         else:
             print(oid.name, ':', oid.docs, '\n')
     num_finfo = getField(class_id[0], 'num_lookupFinfo', 'unsigned')    
-    finfo = ematrix('/classes/%s/lookupFinfo' % (tokens[0]))
+    finfo = vec('/classes/%s/lookupFinfo' % (tokens[0]))
     print('\n* Lookup Field *\n')
     for ii in range(num_finfo):
         oid = element(finfo, 0, ii, 0)
