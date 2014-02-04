@@ -79,7 +79,7 @@ class ClampCircuit(moose.Neutral):
         moose.connect(compartment, "VmOut", self.pid, "sensedIn")
         moose.connect(self.pid, "outputOut", compartment, "injectMsg")
         current_table = moose.Table("/data/Im")
-        moose.connect(current_table, "requestData", compartment, "get_Im")
+        moose.connect(current_table, "requestOut", compartment, "getIm")
 
     def configure_pulses(self, baseLevel=0.0, firstLevel=0.1, firstDelay=5.0, firstWidth=40.0, secondLevel=0.0, secondDelay=1e6, secondWidth=0.0, singlePulse=True):
         """Set up the pulse generator."""        
