@@ -76,9 +76,9 @@ def setup_current_step_model(model_container,
     pulsegen = moose.PulseGen('%s/pulse' % (model_container.path))
     print '121221211', pulsegen.path
     pulsegen.count = len(pulsearray)
-    print '7777777', pulsegen.count, pulsegen.id_
+    print '7777777', pulsegen.count, pulsegen.vec
     for ii in range(len(pulsearray)):
-        print '999999', pulsegen.id_, pulsegen.count
+        print '999999', pulsegen.vec, pulsegen.count
         print '-', pulsegen.delay[ii]
         pulsegen.delay[ii] = pulsearray[ii][0]
         pulsegen.width[ii] = pulsearray[ii][1]
@@ -126,9 +126,9 @@ class SingleCellCurrentStepTest(unittest.TestCase):
             self.pulse_array)
         self.cell = params['cell']       
         for ch in moose.wildcardFind(self.cell.soma.path + '/##[ISA=ChanBase]'):
-            config.logger.debug('%s Ek = %g' % (ch.path, ch[0].Ek))
+            config.logger.debug('%s Ek = %g' % (ch.path, ch.Ek))
         for ch in moose.wildcardFind(self.cell.soma.path + '/##[ISA=CaConc]'):
-            config.logger.debug('%s tau = %g' % (ch.path, ch[0].tau))
+            config.logger.debug('%s tau = %g' % (ch.path, ch.tau))
                                 
         self.somaVmTab = params['somaVm']
         self.presynVmTab = params['presynVm']

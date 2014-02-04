@@ -32,9 +32,9 @@
 # need a change in the API to make all internal variables accessible
 # in a generic manner?
 #
-# TODO: How do we translate MOOSE tree to HDF5? MOOSE has ematrix and
-# elements. ematrix is a container and each element belongs to an
-# ematrix. 
+# TODO: How do we translate MOOSE tree to HDF5? MOOSE has vec and
+# elements. vec is a container and each element belongs to an
+# vec. 
 #
 #                    em-0
 #              el-00 el-01 el-02
@@ -49,7 +49,7 @@
 #
 #
 # Serializing MOOSE tree structure into an HDF5 tree structure has
-# some issues to be resolved.  Each ematrix is saved as a HDF
+# some issues to be resolved.  Each vec is saved as a HDF
 # group. All the elements inside it as a HDF dataset.  But the problem
 # is that HDF datasets cannot have children. But in MOOSE the
 # parent-child relation is opposite, each element can have one or more
@@ -174,7 +174,7 @@ def savetree(moosenode, hdfnode):
             fields = []
             for fname in dtype.names:
                 f = obj.getField(fname)
-                if isinstance(f, moose.ematrix) or isinstance(f, moose.element):
+                if isinstance(f, moose.vec) or isinstance(f, moose.element):
                     fields.append(f.path)
                 else:
                     fields.append(f)
@@ -186,8 +186,8 @@ def savetree(moosenode, hdfnode):
     # now save the remaining records (length < size_step)
     for classname, rec in obj_rec.items():
         save_dataset(classname, rec, dtype_table[classname], hdfnode)
-    ematrix = hdfnode.create_dataset('ematrix', shape=(len(em_rec),), dtype=em_dtype)
-    ematrix[:] = em_rec
+    vec = hdfnode.create_dataset('vec', shape=(len(em_rec),), dtype=em_dtype)
+    vec[:] = em_rec
 
 def loadtree(hdfnode, moosenode):
     """Load the element tree saved under the group `hdfnode` into `moosenode`"""    
@@ -195,7 +195,7 @@ def loadtree(hdfnode, moosenode):
     basepath = hdfnode.attr['path']
     if basepath != '/':
         basepath = basepath + '/'
-    emdata = hdfnode['ematrix'][:]
+    emdata = hdfnode['vec'][:]
     sorted_paths = sorted(emdata['path'], key=lambda x: x.count('/'))
     dims = dict(emdata['path', 'dims'])
     classes = dict(emdata['path', 'class'])
@@ -206,7 +206,7 @@ def loadtree(hdfnode, moosenode):
         rpath = path[len(basepath):]
         classname = classes[path]
         shape = dims[path]
-        em = moose.ematrix(rpath, shape, classname)
+        em = moose.vec(rpath, shape, classname)
     wfields = {}
     for cinfo in moose__.element('/classes').children:
         cname = cinfo[0].name
@@ -277,7 +277,7 @@ def savestate(filename=None):
                 for f in ds.dtype.names:
                     print 'getting field:', f
                     entry.getField(f)
-                fields = [f.path if isinstance(f, moose__.ematrix) or isinstance(f, moose__.element) else f for f in fields]
+                fields = [f.path if isinstance(f, moose__.vec) or isinstance(f, moose__.element) else f for f in fields]
                 class_array_dict[obj.className].append(fields)
                 # print 'fields:'
                 # print fields
@@ -315,7 +315,7 @@ def restorestate(filename):
         sorted_paths = sorted(typeinfo['path'], key=lambda x: x.count('/'))
         for path in sorted_paths:
             name = path.rpartition('/')[-1].partition('[')[0]
-            moose__.ematrix(parentdict[path] + '/' + name, eval(dimsdict[path]), classdict[path])
+            moose__.vec(parentdict[path] + '/' + name, eval(dimsdict[path]), classdict[path])
         for key in fd['/elements']:
             dset = fd['/elements/'][key][:]
             fieldnames = dset.dtype.names
