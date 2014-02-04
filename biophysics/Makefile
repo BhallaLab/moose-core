@@ -16,18 +16,19 @@ OBJ = \
 	Synapse.o	\
 	SpikeGen.o	\
 	Compartment.o	\
+	SymCompartment.o	\
 	ChanBase.o	\
 	HHChannel.o	\
 	HHGate.o	\
 	CaConc.o	\
+	Neuron.o	\
+	ReadCell.o	\
 	testBiophysics.o	\
 
 # IzhikevichNrn.o	\
 	LeakyIaF.o	\
-	SymCompartment.o	\
 	GapJunction.o	\
 	Nernst.o	\
-	Neuron.o	\
 	GHK.o		\
 	NMDAChan.o	\
 	HHGate2D.o	\
@@ -40,7 +41,6 @@ OBJ = \
 	MatrixOps.o	\
 	MarkovSolverBase.o	\
 	MarkovSolver.o	\
-	ReadCell.o	\
 	VClamp.o	\
 
 # GSL_LIBS = -L/usr/lib -lgsl
@@ -58,18 +58,19 @@ SynHandler.o:	SpikeRingBuffer.h SynHandler.h Synapse.h
 IntFire.o:	IntFire.h SpikeRingBuffer.h SynHandler.h Synapse.h 
 SpikeGen.o: SpikeGen.h
 Compartment.o: Compartment.h
+SymCompartment.o: Compartment.h SymCompartment.h
 ChanBase.o: ChanBase.h
 HHChannel.o: ChanBase.h HHChannel.h HHGate.h
 HHGate.o: HHGate.h
 CaConc.o:	CaConc.h
+Neuron.o:	Neuron.h
+ReadCell.o: ReadCell.h ../shell/Shell.h ../utility/utility.h
 #IzhikevichNrn.o: IzhikevichNrn.h
 #LeakyIaF.o: LeakyIaF.h
 #Synapse.o:	SynBase.h Synapse.h
-#SymCompartment.o: Compartment.h SymCompartment.h
 #GapJunction.o: GapJunction.h
 #NMDAChan.o: NMDAChan.h SynBase.h ChanBase.h Synapse.h SynChan.h
 #Nernst.o:	Nernst.h
-#Neuron.o:	Neuron.h
 #MgBlock.o:	MgBlock.h
 #GHK.o:	GHK.h
 #HHGate2D.o:	../builtins/Interpol2D.h HHGate2D.h
@@ -81,7 +82,6 @@ CaConc.o:	CaConc.h
 #MarkovSolverBase.o : MarkovSolver.h MatrixOps.h MarkovRateTable.h
 #MarkovSolver.o : MarkovSolverBase.h MarkovSolver.h
 #MarkovChannel.o : VectorTable.h ../builtins/Interpol2D.h MarkovRateTable.h ChanBase.h MarkovChannel.h 
-#ReadCell.o: ReadCell.h ../shell/Shell.h ../utility/utility.h
 #VClamp.o: VClamp.h
 #testBiophysics.o: SynBase.h IntFire.h Synapse.h Compartment.h HHChannel.h HHGate.h 
 
