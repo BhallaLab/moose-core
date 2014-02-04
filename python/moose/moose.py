@@ -62,7 +62,7 @@ known_types = ['void',
                'long',
                'unsigned long',
                'string',
-               'ematrix',
+               'vec',
                'melement'] + sequence_types
 
 ################################################################
@@ -85,7 +85,7 @@ def le(el=None):
     
     Parameters
     ----------
-    el : str/melement/ematrix/None
+    el : str/melement/vec/None
         The element or the path under which to look. If `None`, children
          of current working element are displayed.
 
@@ -100,7 +100,7 @@ def le(el=None):
         if not exists(el):
             raise ValueError('no such element')
         el = element(el)
-    elif isinstance(el, ematrix):
+    elif isinstance(el, vec):
         el = el[0]    
     print 'Elements under', el.path
     for ch in el.children:
@@ -113,8 +113,8 @@ def syncDataHandler(target):
 
     Parameters
     ----------
-    target : melement/ematrix/str
-        Target element or ematrix or path string.
+    target : melement/vec/str
+        Target element or vec or path string.
 
     Raises
     ------
@@ -131,7 +131,7 @@ First fix that issue with SynBase or something in that line.')
     if isinstance(target, str):
         if not _moose.exists(target):
             raise ValueError('%s: element does not exist.' % (target))
-        target = ematrix(target)
+        target = vec(target)
         _moose.syncDataHandler(target)
 
 def showfield(el, field='*', showtype=False):
@@ -201,7 +201,7 @@ def listmsg(el):
 
     Parameters
     ----------
-    el : melement/ematrix/str
+    el : melement/vec/str
         MOOSE object or path of the object to look into.
 
     Returns
@@ -224,7 +224,7 @@ def showmsg(el):
 
     Parameters
     ----------
-    el : melement/ematrix/str
+    el : melement/vec/str
         Object whose messages are to be displayed.
 
     Returns
@@ -312,14 +312,14 @@ def getmoosedoc(tokens):
             docstring.write('%s\n' % (Cinfo(class_path).docs))
     else:
         raise NameError('name \'%s\' not defined.' % (tokens[0]))
-    class_id = ematrix('/classes/%s' % (tokens[0]))
+    class_id = vec('/classes/%s' % (tokens[0]))
     if len(tokens) > 1:
         docstring.write(getfielddoc(tokens))
     else:
         for ftype, rname in finfotypes:
             docstring.write('\n*%s*\n' % (rname.capitalize()))
             numfinfo = getField(class_id[0], 'num_'+ftype, 'unsigned')
-            finfo = ematrix('/classes/%s/%s' % (tokens[0], ftype))
+            finfo = vec('/classes/%s/%s' % (tokens[0], ftype))
             for ii in range(numfinfo):
                 oid = melement(finfo, 0, ii, 0)
                 docstring.write('%s%s: %s\n' % 
@@ -339,13 +339,13 @@ def doc(arg, paged=False):
     
     Parameters
     ----------
-    arg : str/class/melement/ematrix
+    arg : str/class/melement/vec
         A a string specifying a moose class name and a field name
         separated by a dot. e.g., 'Neutral.name'. Prepending `moose.`
         is allowed. Thus moose.doc('moose.Neutral.name') is equivalent
         to the above.    
         It can also be string specifying just a moose class name or a
-        moose class or a moose object (instance of melement or ematrix
+        moose class or a moose object (instance of melement or vec
         or there subclasses). In that case, the builtin documentation
         for the corresponding moose class is displayed.
 
@@ -380,7 +380,7 @@ def doc(arg, paged=False):
             tokens = tokens[1:]
     elif isinstance(arg, type):
         tokens = [arg.__name__]
-    elif isinstance(arg, melement) or isinstance(arg, ematrix):
+    elif isinstance(arg, melement) or isinstance(arg, vec):
         text = '%s: %s\n\n' % (arg.path, arg.className)
         tokens = [arg.className]
     if tokens:

@@ -221,7 +221,7 @@ def printtree(root, vchar='|', hchar='__', vcount=1, depth=0, prefix='', is_last
     is_last - for internal use - should not be explicitly passed.
 
     """
-    if isinstance(root, str) or isinstance(root, _moose.ematrix) or isinstance(root, _moose.melement):
+    if isinstance(root, str) or isinstance(root, _moose.vec) or isinstance(root, _moose.melement):
         root = _moose.Neutral(root)
 
     for i in range(vcount):
@@ -388,7 +388,7 @@ def assignTicks(tickTargetMap):
             _moose.useClock(tickNo, target, 'process')
 
     # # This is a hack, we need saner way of scheduling
-    # ticks = _moose.ematrix('/clock/tick')
+    # ticks = _moose.vec('/clock/tick')
     # valid = []
     # for ii in range(ticks[0].localNumField):
     #     if ticks[ii].dt > 0:
@@ -427,9 +427,9 @@ def setDefaultDt(elecdt=1e-5, chemdt=0.01, tabdt=1e-5, plotdt1=1.0, plotdt2=0.25
 
 def assignDefaultTicks(modelRoot='/model', dataRoot='/data', solver='hsolve'):
     print 'assignDefaultTicks'
-    if isinstance(modelRoot, _moose.melement) or isinstance(modelRoot, _moose.ematrix):
+    if isinstance(modelRoot, _moose.melement) or isinstance(modelRoot, _moose.vec):
         modelRoot = modelRoot.path
-    if isinstance(dataRoot, _moose.melement) or isinstance(dataRoot, _moose.ematrix):
+    if isinstance(dataRoot, _moose.melement) or isinstance(dataRoot, _moose.vec):
         dataRoot = dataRoot.path
     if solver != 'hsolve' or len(_moose.wildcardFind('%s/##[ISA=HSolve]' % (modelRoot))) == 0:
         _moose.useClock(0, '%s/##[ISA=Compartment]' % (modelRoot), 'init')
@@ -498,8 +498,7 @@ def stepRun(simtime, steptime, verbose=True, logger=None):
         _moose.start(remaining)
     te = datetime.now()
     td = te - ts
-    dt = _moose.ematrix('/clock/tick').dt
-    dt = min([t for t in dt if t > 0.0])
+    dt = min([t for t in _moose.element('/clock').dts if t > 0.0])
     if verbose:
         msg = 'Finished simulation of %g with minimum dt=%g in %g s' % (simtime, dt, td.days * 86400 + td.seconds + 1e-6 * td.microseconds)
         if logger is None:
