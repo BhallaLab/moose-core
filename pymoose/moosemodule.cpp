@@ -1165,7 +1165,8 @@ extern "C" {
         if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OO|sIII", const_cast<char**>(kwlist), &src, &dest, &newName, &num, &toGlobal, &copyExtMsgs)){
             return NULL;
         }
-        Id _src, _dest;
+        Id _src;
+        ObjId _dest;
         if (PyObject_IsInstance(src, (PyObject*)&IdType)){
             _src = ((_Id*)src)->id_;
         } else if (PyObject_IsInstance(src, (PyObject*)&ObjIdType)){
@@ -1181,17 +1182,19 @@ extern "C" {
             return NULL;
         } 
         if (PyObject_IsInstance(dest, (PyObject*)&IdType)){
-            _dest = ((_Id*)dest)->id_;
+            _dest = ObjId(((_Id*)dest)->id_);
         } else if (PyObject_IsInstance(dest, (PyObject*)&ObjIdType)){
-            _dest = ((_ObjId*)dest)->oid_.id;
+            _dest = ((_ObjId*)dest)->oid_;
         } else if (PyString_Check(dest)){
-            _dest = Id(PyString_AsString(dest));
+            _dest = ObjId(PyString_AsString(dest));
         } else {
             PyErr_SetString(PyExc_TypeError, "destination must be instance of vec, element or string.");
             return NULL;
         }
-        if (!Id::isValid(_src) || !Id::isValid(_dest)){
-            RAISE_INVALID_ID(NULL, "moose_copy");
+        if (!Id::isValid(_src)){
+            RAISE_INVALID_ID(NULL, "moose_copy: invalid source Id.");
+        } else if (_dest.bad()){
+            RAISE_INVALID_ID(NULL, "moose_copy: invalid destination.");
         }
         string name;
         if (newName == NULL){
@@ -1214,11 +1217,38 @@ extern "C" {
         if (!PyArg_ParseTuple(args, "OO:moose_move", &src, &dest)){
             return NULL;
         }
-        if (((_Id*)src)->id_ == Id()){
-            PyErr_SetString(PyExc_ValueError, "cannot move moose shell");
+        Id _src;
+        ObjId _dest;
+        if (PyObject_IsInstance(src, (PyObject*)&IdType)){
+            _src = ((_Id*)src)->id_;
+        } else if (PyObject_IsInstance(src, (PyObject*)&ObjIdType)){
+            _src = ((_ObjId*)src)->oid_.id;
+        } else if (PyString_Check(src)){
+            _src = Id(PyString_AsString(src));
+        } else {
+            PyErr_SetString(PyExc_TypeError, "Source must be instance of vec, element or string.");
             return NULL;
         }
-        SHELLPTR->doMove(((_Id*)src)->id_, ((_Id*)dest)->id_);
+        if (_src == Id()){
+            PyErr_SetString(PyExc_ValueError, "Cannot make move moose shell.");
+            return NULL;
+        } 
+        if (PyObject_IsInstance(dest, (PyObject*)&IdType)){
+            _dest = ObjId(((_Id*)dest)->id_);
+        } else if (PyObject_IsInstance(dest, (PyObject*)&ObjIdType)){
+            _dest = ((_ObjId*)dest)->oid_;
+        } else if (PyString_Check(dest)){
+            _dest = ObjId(PyString_AsString(dest));
+        } else {
+            PyErr_SetString(PyExc_TypeError, "destination must be instance of vec, element or string.");
+            return NULL;
+        }
+        if (!Id::isValid(_src)){
+            RAISE_INVALID_ID(NULL, "moose_copy: invalid source Id.");
+        } else if (_dest.bad()){
+            RAISE_INVALID_ID(NULL, "moose_copy: invalid destination.");
+        }
+        SHELLPTR->doMove(_src, _dest);
         Py_RETURN_NONE;
     }
 
