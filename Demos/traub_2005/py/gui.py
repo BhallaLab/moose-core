@@ -292,8 +292,12 @@ class CellView(QtGui.QWidget):
             self.delayText = QtGui.QLineEdit('20')
             self.widthLabel = QtGui.QLabel('Duration (ms)')
             self.widthText = QtGui.QLineEdit('50')
-            self.ampLabel = QtGui.QLabel('Amplitude (pA)')
-            self.ampText = QtGui.QLineEdit('100')
+            self.ampMinLabel = QtGui.QLabel('Starting amplitude (pA)')
+            self.ampMinText = QtGui.QLineEdit('0')
+            self.ampMaxLabel = QtGui.QLabel('Maximum amplitude (pA)')
+            self.ampMaxText = QtGui.QLineEdit('100')
+            self.ampStepLabel = QtGui.QLabel('Amplitude steps (pA)')
+            self.ampStepText = QtGui.QLineEdit('10')
             title = QtGui.QLabel('Current pulse')
             layout = QtGui.QGridLayout()
             layout.addWidget(title, 0, 0, 1, 2)
@@ -301,8 +305,12 @@ class CellView(QtGui.QWidget):
             layout.addWidget(self.delayText, 1, 1, 1, 1)
             layout.addWidget(self.widthLabel, 2, 0, 1, 1)
             layout.addWidget(self.widthText, 2, 1, 1, 1)
-            layout.addWidget(self.ampLabel, 3, 0, 1, 1)
-            layout.addWidget(self.ampText, 3, 1, 1, 1)
+            layout.addWidget(self.ampMinLabel, 3, 0, 1, 1)
+            layout.addWidget(self.ampMinText, 3, 1, 1, 1)
+            layout.addWidget(self.ampMaxLabel, 4, 0, 1, 1)
+            layout.addWidget(self.ampMaxText, 4, 1, 1, 1)
+            layout.addWidget(self.ampStepLabel, 5, 0, 1, 1)
+            layout.addWidget(self.ampStepText, 5, 1, 1, 1)
             self.currentClampWidget.setLayout(layout)
         return self.currentClampWidget
 
@@ -364,35 +372,50 @@ class CellView(QtGui.QWidget):
         mutils.assignDefaultTicks(modelRoot=params['modelRoot'],
                                   dataRoot=params['dataRoot'],
                                   solver='hsolve')
-        delay = float(str(self.delayText.text()))
-        width =  float(str(self.widthText.text()))
-        level =  float(str(self.ampText.text()))
-        params['stimulus'].delay[0] = delay * 1e-3
-        params['stimulus'].width[0] = width * 1e-3
-        params['stimulus'].level[0] = level * 1e-12
+        delay = float(str(self.delayText.text())) * 1e-3
+        width =  float(str(self.widthText.text())) * 1e-3
+        levelMin =  float(str(self.ampMinText.text())) * 1e-12
+        levelMax =  float(str(self.ampMaxText.text())) * 1e-12
+        levelStep =  float(str(self.ampStepText.text())) * 1e-12
+        params['stimulus'].delay[0] = delay 
+        params['stimulus'].width[0] = width 
+        params['stimulus'].level[0] = levelMin
         moose.reinit()
         simtime = float(str(self.simtimeEdit.text()))*1e-3
-        ts = datetime.now()
-        moose.start(simtime)
-        te = datetime.now()
-        td = te - ts
-        print 'Simulating %g s took %g s of computer time' % (simtime, td.days * 86400 + td.seconds + td.microseconds * 1e-6)
-        ts = np.linspace(0, simtime, len(params['somaVm'].vector))
-        vm = params['somaVm'].vector
-        stim = params['injectionCurrent'].vector
+        tdlist = []
         self.vmAxes.clear()       
         self.vmAxes.set_title('membrane potential at soma')
         self.vmAxes.set_ylabel('mV')            
-        self.vmAxes.plot(ts * 1e3, vm * 1e3, 'b-', label='Vm (mV)')
         self.vmAxes.get_xaxis().set_visible(False)
         self.stimAxes.clear()
         self.stimAxes.set_title('current injected at soma')
         self.stimAxes.set_ylabel('pA')
         self.stimAxes.set_xlabel('ms')
-        self.stimAxes.plot(ts * 1e3, stim * 1e12, 'r-', label='Current (pA)')
+        styles = ['-', '--', '-.', ':']
+        colors = defaultdict(int)
+        while params['stimulus'].level[0] < levelMax:
+            tstart = datetime.now()
+            moose.reinit()
+            moose.start(simtime)
+            tend = datetime.now()
+            td = tend - tstart
+            tdlist.append(td.days * 86400 + td.seconds + td.microseconds * 1e-6)
+            ts = np.linspace(0, simtime, len(params['somaVm'].vector))
+            vm = params['somaVm'].vector
+            stim = params['injectionCurrent'].vector
+            alpha = 0.1 + 0.9 * params['stimulus'].level[0] / levelMax            
+            lines = self.vmAxes.plot(ts * 1e3, vm * 1e3, label='%g pA' % (params['stimulus'].level[0]), alpha=0.8)
+            lines += self.stimAxes.plot(ts * 1e3, stim * 1e12, lines[0].get_color(), label='Current (pA)')
+            for ll in lines:
+                ll.set_ls(styles[colors[lines[0].get_color()] % len(styles)])
+            colors[lines[0].get_color()] += 1
+            self.plotCanvas.draw()
+            params['stimulus'].level[0] += levelStep
         self.gs.tight_layout(self.plotFigure)
+        self.vmAxes.legend()
+        td = np.mean(tdlist)
+        print 'Simulating %g s took %g s of computer time' % (simtime, td)
         # self.plotFigure.tight_layout()
-        self.plotCanvas.draw()
 
     def getPlotWidget(self):
         try:
