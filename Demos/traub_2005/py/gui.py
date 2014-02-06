@@ -58,7 +58,7 @@ from matplotlib import mlab
 # but does not help after the first instance when displaying cell
 from matplotlib.figure import Figure
 from matplotlib import patches
-
+from pylab import cm
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 
@@ -70,6 +70,8 @@ from cell_test_util import setup_current_step_model
 import matplotlib.gridspec as gridspec
 import moose
 from moose import utils as mutils
+
+cmap = cm.jet
 
 simdt = 0.025e-3
 plotdt = 1e-4
@@ -380,7 +382,6 @@ class CellView(QtGui.QWidget):
         params['stimulus'].delay[0] = delay 
         params['stimulus'].width[0] = width 
         params['stimulus'].level[0] = levelMin
-        moose.reinit()
         simtime = float(str(self.simtimeEdit.text()))*1e-3
         tdlist = []
         self.vmAxes.clear()       
@@ -392,7 +393,8 @@ class CellView(QtGui.QWidget):
         self.stimAxes.set_ylabel('pA')
         self.stimAxes.set_xlabel('ms')
         styles = ['-', '--', '-.', ':']
-        colors = defaultdict(int)
+        cnt = int((levelMax - levelMin)/levelStep)
+        ii = 0
         while params['stimulus'].level[0] < levelMax:
             tstart = datetime.now()
             moose.reinit()
@@ -403,16 +405,16 @@ class CellView(QtGui.QWidget):
             ts = np.linspace(0, simtime, len(params['somaVm'].vector))
             vm = params['somaVm'].vector
             stim = params['injectionCurrent'].vector
-            alpha = 0.1 + 0.9 * params['stimulus'].level[0] / levelMax            
-            lines = self.vmAxes.plot(ts * 1e3, vm * 1e3, label='%g pA' % (params['stimulus'].level[0]), alpha=0.8)
-            lines += self.stimAxes.plot(ts * 1e3, stim * 1e12, lines[0].get_color(), label='Current (pA)')
-            for ll in lines:
-                ll.set_ls(styles[colors[lines[0].get_color()] % len(styles)])
-            colors[lines[0].get_color()] += 1
+            alpha = 0.1 + 0.9 * params['stimulus'].level[0] / levelMax
+            color = cmap(ii*1.0/cnt, cnt)
+            self.vmAxes.plot(ts * 1e3, vm * 1e3, color=color, label='%g pA' % (params['stimulus'].level[0]*1e12), alpha=0.8)
+            self.stimAxes.plot(ts * 1e3, stim * 1e12, color=color, label='Current (pA)')
             self.plotCanvas.draw()
             params['stimulus'].level[0] += levelStep
+            ii += 1
         self.gs.tight_layout(self.plotFigure)
         self.vmAxes.legend()
+        self.plotCanvas.draw()
         td = np.mean(tdlist)
         print 'Simulating %g s took %g s of computer time' % (simtime, td)
         # self.plotFigure.tight_layout()
