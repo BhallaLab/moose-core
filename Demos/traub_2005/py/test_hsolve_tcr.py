@@ -45,7 +45,6 @@
 
 # Code:
 import sys
-sys.path.append('/home/subha/src/moose/python')
 import os
 from datetime import datetime
 import unittest

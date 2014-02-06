@@ -54,7 +54,7 @@ class TestDeepAxoaxonic(SingleCellCurrentStepTest):
         SingleCellCurrentStepTest.__init__(self, *args, **kwargs)
         self.pulse_array = [(100e-3, 100e-3, 1e-9),
                             (1e9, 0, 0)]
-        self.solver = 'hsolve'
+        # self.solver = 'ee'
         self.simdt = simdt
         self.plotdt = plotdt
 

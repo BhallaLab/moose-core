@@ -37,7 +37,7 @@ from moose import utils
 
 simdt = 5e-6
 plotdt = 0.25e-3
-simtime = 1.0
+simtime = 0.05
     
 
 # pulsearray = [[1.0, 100e-3, 1e-9],
@@ -54,7 +54,7 @@ class TestSupPyrRS(SingleCellCurrentStepTest):
         SingleCellCurrentStepTest.__init__(self, *args, **kwargs)
         self.pulse_array = [(100e-3, 100e-3, 1e-9),
                             (1e9, 0, 0)]
-        self.solver = 'hsolve'
+        # self.solver = 'hsolve'
         self.simdt = simdt
         self.plotdt = plotdt
 

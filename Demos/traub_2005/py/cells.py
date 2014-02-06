@@ -204,8 +204,6 @@ class CellBase(moose.Neuron):
         
     def comp(self, number):
         path = '%s/comp_%d' % (self.path, number)
-        print '*****', path
-        moose.le(self.path)
         return moose.element(path)
 
     @property

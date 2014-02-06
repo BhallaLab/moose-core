@@ -70,31 +70,23 @@ def setup_current_step_model(model_container,
 
     solver: str - numerical method to use, can be `hsolve` or `ee`
     """
-    cell_class = eval('cells.%s' % (celltype))
+    classname = 'cells.%s' % (celltype)
+    print 'mc=', model_container, 'dc=', data_container, 'ct=', celltype, 'pa=', pulsearray, 'classname=', classname
+    cell_class = eval(classname)
     cell = cell_class('%s/%s' % (model_container.path, celltype))
-    print '111111', cell.path
     pulsegen = moose.PulseGen('%s/pulse' % (model_container.path))
-    print '121221211', pulsegen.path
     pulsegen.count = len(pulsearray)
-    print '7777777', pulsegen.count, pulsegen.vec
     for ii in range(len(pulsearray)):
-        print '999999', pulsegen.vec, pulsegen.count
-        print '-', pulsegen.delay[ii]
         pulsegen.delay[ii] = pulsearray[ii][0]
         pulsegen.width[ii] = pulsearray[ii][1]
         pulsegen.level[ii] = pulsearray[ii][2]
-        print '8888888', ii, pulsegen.delay[ii]
     moose.connect(pulsegen, 'outputOut', cell.soma, 'injectMsg')
-    print '22222'
     presyn_vm = moose.Table('%s/presynVm' % (data_container.path))
-    print '33333'
     soma_vm =  moose.Table('%s/somaVm' % (data_container.path))
-    print '44444'
     moose.connect(presyn_vm, 'requestOut', cell.presynaptic, 'getVm')
     moose.connect(soma_vm, 'requestOut', cell.soma, 'getVm')
     pulse_table = moose.Table('%s/injectCurrent' % (data_container.path))
     moose.connect(pulse_table, 'requestOut', pulsegen, 'getOutput')
-    print '55555'
     return {'cell': cell,
             'stimulus': pulsegen,
             'presynVm': presyn_vm,
@@ -109,7 +101,7 @@ class SingleCellCurrentStepTest(unittest.TestCase):
         unittest.TestCase.__init__(self, *args, **kwargs)        
         self.pulse_array =  [[100e-3, 100e-3, 1e-9],
                              [1e9, 0, 0]]
-        self.solver = None
+        self.solver = config.simulationSettings.method
         self.simdt = None
         self.plotdt = None
         self.tseries = []
