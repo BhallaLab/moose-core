@@ -1,6 +1,6 @@
-# trbutil.py --- 
+# settings.py --- 
 # 
-# Filename: trbutil.py
+# Filename: settings.py
 # Description: 
 # Author: 
 # Maintainer: 
@@ -58,7 +58,7 @@ class SimulationSettings(Settings):
         self.endTime = 1.0
         self.simulationDt = 25e-6
         self.outputDt = 0.25e-3
-        self.method = 'hsolve'
+        self.method = 'ee'
         self.moose_seed = 0
     
 
@@ -97,4 +97,4 @@ class ChangeSettings(Settings):
 
 
 # 
-# trbutil.py ends here
+# settings.py ends here
