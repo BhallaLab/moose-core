@@ -167,8 +167,6 @@ class ChannelBase(moose.HHChannel):
     abstract = True
     __metaclass__ = ChannelMeta
     def __init__(self, path, xpower=1, ypower=0, Ek=0.0):
-        print '####', self
-        print '####', path
         moose.HHChannel.__init__(self, path)
 
 

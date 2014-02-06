@@ -258,7 +258,7 @@ class CellView(QtGui.QWidget):
             root = moose.element(root)
         cells = []
         for cell in moose.wildcardFind('%s/#[ISA=Neuron]' % (root.path)):
-            cells.append(cell.path.rpartition('/')[-1])
+            cells.append(cell.name)
         return cells
         
     def getUpdatedCellListWidget(self):
@@ -322,8 +322,8 @@ class CellView(QtGui.QWidget):
     def createCell(self, name):
         model_container = moose.Neutral('/model')
         data_container = moose.Neutral('/data')        
-        moose.le(model_container)
-        moose.le(data_container)
+        # moose.le(model_container)
+        # moose.le(data_container)
         for ch in model_container.children:            
             moose.delete(ch)
         for ch in data_container.children:
@@ -356,10 +356,10 @@ class CellView(QtGui.QWidget):
         assert(len(cellnames) == 1)        
         name = cellnames[0]
         params = self.createCell(name)
-        print 'Here ......'
-        hsolve = moose.HSolve('%s/solver' % (params['cell'].path))
-        hsolve.dt = simdt
-        hsolve.target = params['cell'].path
+        # print 'Here ......'
+        # hsolve = moose.HSolve('%s/solver' % (params['cell'].path))
+        # hsolve.dt = simdt
+        # hsolve.target = params['cell'].path
         mutils.setDefaultDt(elecdt=simdt, plotdt2=plotdt)
         mutils.assignDefaultTicks(modelRoot=params['modelRoot'],
                                   dataRoot=params['dataRoot'],
