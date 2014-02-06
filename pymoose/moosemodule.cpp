@@ -1925,30 +1925,20 @@ extern "C" {
             return NULL;
         }
         wildcardFind(string(wildcard_path), objects);
-        vector <ObjId> allElements;
-        for (unsigned int ii = 0; ii < objects.size(); ++ii){
-            if (objects[ii].dataIndex == ALLDATA){
-                vector<ObjId> all = all_elements(objects[ii].id);
-                allElements.insert(allElements.end(), all.begin(), all.end());
-            } else {
-                allElements.push_back(objects[ii]);
-            }
-        }
-        PyObject * ret = PyTuple_New(allElements.size());
+        PyObject * ret = PyTuple_New(objects.size());
         if (ret == NULL){
             PyErr_SetString(PyExc_RuntimeError, "moose.wildcardFind: failed to allocate new tuple.");
             return NULL;
         }
             
-        for (unsigned int ii = 0; ii < allElements.size(); ++ii){
-            _ObjId * entry = PyObject_New(_ObjId, &ObjIdType);                       
+        for (unsigned int ii = 0; ii < objects.size(); ++ii){
+            PyObject * entry = oid_to_element(objects[ii]);                       
             if (!entry){
                 Py_XDECREF(ret);
                 PyErr_SetString(PyExc_RuntimeError, "moose.wildcardFind: failed to allocate new vec.");
                 return NULL;
             }
-            entry->oid_ = allElements[ii];
-            if (PyTuple_SetItem(ret, (Py_ssize_t)ii, (PyObject*)entry)){
+            if (PyTuple_SetItem(ret, (Py_ssize_t)ii, entry)){
                 Py_XDECREF(entry);
                 Py_XDECREF(ret);
                 return NULL;
