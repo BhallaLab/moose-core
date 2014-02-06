@@ -1026,37 +1026,37 @@ extern "C" {
             cerr << "Invalid class." << endl;
             return 0;
         }
-        if (finfoType == "valueFinfo"){
+        if (finfoType == "valueFinfo" || finfoType == "value"){
             for (unsigned int ii = 0; ii < cinfo->getNumValueFinfo(); ++ii){
                 Finfo * finfo = cinfo->getValueFinfo(ii);
                 fieldNames.push_back(finfo->name());
                 fieldTypes.push_back(finfo->rttiType());
             }
-        } else if (finfoType == "srcFinfo"){
+        } else if (finfoType == "srcFinfo" || finfoType == "src"){
             for (unsigned int ii = 0; ii < cinfo->getNumSrcFinfo();  ++ii){
                 Finfo * finfo = cinfo->getSrcFinfo(ii);
                 fieldNames.push_back(finfo->name());
                 fieldTypes.push_back(finfo->rttiType());
             }
-        }else if (finfoType == "destFinfo"){
+        }else if (finfoType == "destFinfo" || finfoType == "dest"){
             for (unsigned int ii = 0; ii < cinfo->getNumDestFinfo(); ++ii){
                 Finfo * finfo = cinfo->getDestFinfo(ii);
                 fieldNames.push_back(finfo->name());
                 fieldTypes.push_back(finfo->rttiType());
             }
-        } else if (finfoType == "lookupFinfo"){
+        } else if (finfoType == "lookupFinfo" || finfoType == "lookup"){
             for (unsigned int ii = 0; ii < cinfo->getNumLookupFinfo(); ++ii){
                 Finfo * finfo = cinfo->getLookupFinfo(ii);
                 fieldNames.push_back(finfo->name());
                 fieldTypes.push_back(finfo->rttiType());
             }
-        } else if (finfoType == "sharedFinfo"){
+        } else if (finfoType == "sharedFinfo" || finfoType == "shared"){
             for (unsigned int ii = 0; ii < cinfo->getNumSrcFinfo(); ++ii){
                 Finfo * finfo = cinfo->getSrcFinfo(ii);
                 fieldNames.push_back(finfo->name());
                 fieldTypes.push_back(finfo->rttiType());
             }
-        } else if (finfoType == "fieldElementFinfo"){
+        } else if (finfoType == "fieldElementFinfo" || finfoType == "field" || finfoType == "fieldElement"){
             for (unsigned int ii = 0; ii < cinfo->getNumFieldElementFinfo(); ++ii){
                 Finfo * finfo = cinfo->getFieldElementFinfo(ii);
                 fieldNames.push_back(finfo->name());
@@ -1516,17 +1516,17 @@ extern "C" {
     {
         PyObject * element = NULL;
         char * path = NULL;
-        Id id;
+        ObjId oid;
         if (PyTuple_Size(args) == 0){
-            id = Id("/");
+            oid = Id("/");
         } else if(PyArg_ParseTuple(args, "s:moose_setCwe", &path)){
-            id = Id(string(path));
+            oid = ObjId(string(path));
         } else if (PyArg_ParseTuple(args, "O:moose_setCwe", &element)){
             PyErr_Clear();
             if (PyObject_IsInstance(element, (PyObject*)&IdType)){
-                id = (reinterpret_cast<_Id*>(element))->id_;
+                oid = (reinterpret_cast<_Id*>(element))->id_;
             } else if (PyObject_IsInstance(element, (PyObject*)&ObjIdType)){
-                id = (reinterpret_cast<_ObjId*>(element))->oid_.id;                    
+                oid = (reinterpret_cast<_ObjId*>(element))->oid_;
             } else {
                 PyErr_SetString(PyExc_NameError, "setCwe: Argument must be an vec or element");
                 return NULL;
@@ -1534,10 +1534,10 @@ extern "C" {
         } else {
             return NULL;
         }
-        if (!Id::isValid(id)){
+        if (oid.bad()){
             RAISE_INVALID_ID(NULL, "moose_setCwe");
         }
-        SHELLPTR->setCwe(id);
+        SHELLPTR->setCwe(oid);
         Py_RETURN_NONE;
     }
 
@@ -1546,10 +1546,11 @@ extern "C" {
         if (!PyArg_ParseTuple(args, ":moose_getCwe")){
             return NULL;
         }
-        _Id * cwe = (_Id*)PyObject_New(_Id, &IdType);
-        cwe->id_ = SHELLPTR->getCwe();        
-        PyObject * ret = (PyObject*)cwe;
-        return ret;
+        // _Id * cwe = (_Id*)PyObject_New(_Id, &IdType);
+        // cwe->id_ = SHELLPTR->getCwe();        
+        // PyObject * ret = (PyObject*)cwe;
+        // return ret;
+        return oid_to_element(SHELLPTR->getCwe());
     }
 
     PyDoc_STRVAR(moose_connect_documentation,
@@ -1639,9 +1640,7 @@ extern "C" {
             PyErr_SetString(PyExc_NameError, "check field names and type compatibility.");
             return NULL;
         }
-        _ObjId * msgMgrId = (_ObjId*)PyObject_New(_ObjId, &ObjIdType);
-        msgMgrId->oid_ = mid;
-        return (PyObject*) msgMgrId;
+        return oid_to_element(mid);
     }
 
     
