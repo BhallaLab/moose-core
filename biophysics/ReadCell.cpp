@@ -401,6 +401,7 @@ Id ReadCell::buildCompartment(
 			cerr << "File: " << fileName_ << " Line: " << lineNum_ << endl;
 			return ObjId(0, BADINDEX);
 		}
+                parentId = parentObjId;
 	}
 	
 	//~ Id childId;
