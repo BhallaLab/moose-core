@@ -23,6 +23,8 @@ OBJ = \
 	CaConc.o	\
 	Neuron.o	\
 	ReadCell.o	\
+	SynChanBase.o	\
+	SynChan.o	\
 	testBiophysics.o	\
 
 # IzhikevichNrn.o	\

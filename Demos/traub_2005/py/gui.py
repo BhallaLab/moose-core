@@ -101,8 +101,7 @@ class HHChanView(QtGui.QWidget):
     def getChannels(self, root='/library'):
         if isinstance(root, str):
             root = moose.element(root)
-        for chan in moose.wildcardFind('%s/#[ISA=HHChannel]' % (root.path)):
-            channel = moose.element(chan)
+        for channel in moose.wildcardFind('%s/#[ISA=HHChannel]' % (root.path)):
             self.channels[channel.name] = channel
         return self.channels
         
@@ -259,7 +258,7 @@ class CellView(QtGui.QWidget):
             root = moose.element(root)
         cells = []
         for cell in moose.wildcardFind('%s/#[ISA=Neuron]' % (root.path)):
-            cells.append(cell[0].path.rpartition('/')[-1])
+            cells.append(cell.path.rpartition('/')[-1])
         return cells
         
     def getUpdatedCellListWidget(self):

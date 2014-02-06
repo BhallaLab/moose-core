@@ -13,12 +13,12 @@ Individual model components can be assigned ticks by
 `moose.useClock(tickNo, targetPath, targetFinfo)`. Commonly used
 target finfo is `process`, which causes the function of the same name
 in the ematrix at target path to be called at each ticking event of
-tick `tickNo`. Thus displaying the neighbours of `process` finfo of an
+tick `tickNo`. Thus displaying the neighbors of `process` finfo of an
 element will show the tick assigned to it.
 
 On the other hand, the tick ematrix has 10 finfos, `proc0` ... `proc9`
 which connect to all the targets of the corresponding `tickNo`. You
-can display the neighbours of these finfos also to see what is
+can display the neighbors of these finfos also to see what is
 scheduled on each tick.
 
 """
@@ -36,35 +36,35 @@ moose.useClock(1, '/##[ISA=Compartment]', 'process')
 
 # List the ticks connected to an element.
 print 'Ticks connected to `process` method of', comp.path
-for tick in comp.neighbours['process']:
+for tick in comp.neighbors['process']:
     print ' ->',tick.path
 
 # Different ticks can be connected to different fields.
 print 'Ticks connected to `init` method of', comp.path
-for tick in comp.neighbours['init']:
+for tick in comp.neighbors['init']:
     print ' ->',tick.path
 
 # View the scheduled elements using the tick nos.
 t = moose.element('/clock/tick')
 print 'Elements on tick 0'
-for e in t.neighbours['proc0']:
+for e in t.neighbors['proc0']:
     print ' ->', e.path
 print 'Elements on tick 1'
-for e in t.neighbours['proc1']:
+for e in t.neighbors['proc1']:
     print ' ->', e.path    
 
 ch = moose.HHChannel('/comp/chan')
 moose.useClock(1, ch.path, 'process')
 print ch.path, 'has been scheduled'
 print 'Elements on tick 1'
-for e in t.neighbours['proc1']:
+for e in t.neighbors['proc1']:
     print ' ->', e.path
 
 # Go through elements by wildcard search and list the ticks connected.
 # This can be slow when the model is too big.
 for el in moose.wildcardFind('/##[ISA=Compartment]'):
     print 'Ticks connected to `process` method of', el.path
-    for t in moose.element(el).neighbours['process']:
+    for t in moose.element(el).neighbors['process']:
         print ' ->', t.path
 
 # <codecell>

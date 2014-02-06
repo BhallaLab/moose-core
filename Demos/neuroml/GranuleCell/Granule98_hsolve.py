@@ -40,18 +40,18 @@ def loadGran98NeuroML_L123(filename):
     print "Running ... "
     moose.start(runtime)
     tvec = arange(0.0,runtime*2.0,plotdt)
-    tvec = tvec[ : somaVm.vec.size ]
-    plot(tvec,somaVm.vec)
+    tvec = tvec[ : somaVm.vector.size ]
+    plot(tvec,somaVm.vector)
     title('Soma Vm')
     xlabel('time (s)')
     ylabel('Voltage (V)')
     figure()
-    plot(tvec,somaCa.vec)
+    plot(tvec,somaCa.vector)
     title('Soma Ca')
     xlabel('time (s)')
     ylabel('Ca conc (mol/m^3)')
     figure()
-    plot(tvec,somaIKCa.vec)
+    plot(tvec,somaIKCa.vector)
     title('soma KCa current')
     xlabel('time (s)')
     ylabel('KCa current (A)')

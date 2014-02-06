@@ -90,7 +90,7 @@ def timetable_nparray():
     times = generate_poisson_times(rate=20, simtime=simtime, seed=1)
     model = moose.Neutral('/model')
     tt = moose.TimeTable('%s/tt_array' % (model.path))
-    tt.vec = times
+    tt.vector = times
     return tt, times,
 
 def timetable_file(filename='timetable.txt'):
@@ -124,11 +124,11 @@ def timetable_demo():
     # using array.
     data = moose.Neutral('/data')
     tab_array = moose.Table('/data/tab_array')
-    moose.connect(tab_array, 'requestData', tt_array, 'get_state')
+    moose.connect(tab_array, 'requestOut', tt_array, 'getState')
     # Record the synaptic conductance for the other time table, which
     # is filled from a text file and sends spike events to a synchan.
     tab_file = moose.Table('/data/tab_file')
-    moose.connect(tab_file, 'requestData', synchan, 'get_Gk')
+    moose.connect(tab_file, 'requestOut', synchan, 'getGk')
 
     # Scheduling
     moose.setClock(0, simdt)
@@ -141,11 +141,11 @@ def timetable_demo():
     # Plotting
     pylab.subplot(2,1,1)
     pylab.plot(sp_array, np.ones(len(sp_array)), 'rx', label='spike times from numpy array')
-    pylab.plot(np.linspace(0, simtime, len(tab_array.vec)), tab_array.vec, 'b-', label='TimeTable state')
+    pylab.plot(np.linspace(0, simtime, len(tab_array.vector)), tab_array.vector, 'b-', label='TimeTable state')
     pylab.legend()
     pylab.subplot(2,1,2)
     pylab.plot(sp_file, np.ones(len(sp_file)), 'rx', label='spike times from file')
-    pylab.plot(np.linspace(0, simtime, len(tab_file.vec)), tab_file.vec*1e6, 'b-', label='Syn Gk (uS)')
+    pylab.plot(np.linspace(0, simtime, len(tab_file.vector)), tab_file.vector*1e6, 'b-', label='Syn Gk (uS)')
     pylab.legend()
     pylab.show()
 

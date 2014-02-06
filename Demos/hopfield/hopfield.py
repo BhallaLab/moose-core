@@ -67,7 +67,7 @@ class HopfieldNetwork():
         pg = moose.PulseGen('/hopfield/inPulGen')
 
         pgTable = moose.Table('/hopfield/inPulGen/pgTable')
-        moose.connect(pgTable, 'requestData', pg, 'get_output')
+        moose.connect(pgTable, 'requestOut', pg, 'getOutput')
 
         pg.firstDelay = 10e-3
         pg.firstWidth = 2e-03
@@ -86,7 +86,7 @@ class HopfieldNetwork():
             cell.synapse[i].delay = 0.0 #1e-3 #instantaneous
 
             #VmVals = moose.Table(cellPath+'/Vm_cell_'+str(i))
-            #moose.connect(VmVals, 'requestData', cell, 'get_Vm')
+            #moose.connect(VmVals, 'requestOut', cell, 'getVm')
             spikeVals = moose.Table(cellPath+'/spike_cell_'+str(i))
             moose.connect(cell, 'spike', spikeVals, 'input')
 
@@ -95,7 +95,7 @@ class HopfieldNetwork():
             inSpkGen.setField('threshold', 2.0)
             moose.connect(pg, 'outputOut', inSpkGen, 'Vm')
             #inTable = moose.Table(cellPath+'/inSpkGen/inTable')
-            #moose.connect(inTable, 'requestData', inSpkGen, 'get_hasFired')
+            #moose.connect(inTable, 'requestOut', inSpkGen, 'getHasFired')
             moose.connect(inSpkGen, 'event', cell.synapse[i] ,'addSpike') #self connection is the input 
             self.inSpike.append(inSpkGen)
             #self.inTables.append(inTable)
@@ -163,14 +163,14 @@ def test(runtime=0.2):
         ySpike = ySet
         plt.subplot(211)    
         if pattern1[ySet] == 1:
-            plt.scatter(Vm.vec[1:],ySpike*np.ones(len(Vm.vec[1:])),color='blue')
+            plt.scatter(Vm.vector[1:],ySpike*np.ones(len(Vm.vector[1:])),color='blue')
         else:
-            plt.scatter(Vm.vec[1:],ySpike*np.ones(len(Vm.vec[1:])),color='red')
+            plt.scatter(Vm.vector[1:],ySpike*np.ones(len(Vm.vector[1:])),color='red')
         plt.subplot(212)
         if pattern2[ySet] == 1:
-            plt.scatter(Vm.vec[1:],ySpike*np.ones(len(Vm.vec[1:])),color='blue')
+            plt.scatter(Vm.vector[1:],ySpike*np.ones(len(Vm.vector[1:])),color='blue')
         else:
-            plt.scatter(Vm.vec[1:],ySpike*np.ones(len(Vm.vec[1:])),color='red')
+            plt.scatter(Vm.vector[1:],ySpike*np.ones(len(Vm.vector[1:])),color='red')
     
     plt.subplot(211)
     plt.xlim(0,0.25)

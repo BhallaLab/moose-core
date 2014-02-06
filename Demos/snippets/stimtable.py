@@ -86,14 +86,14 @@ def stimulus_table_demo():
     # magnitude. And still we shall be off by at least one time step.
     indices = np.concatenate((stimidx-1, stimidx, stimidx+1))
     stim[indices] = 1.0    
-    stimtable.vec = stim
+    stimtable.vector = stim
     stimtable.stepSize = 0 # This forces use of current time as x value for interpolation
     stimtable.stopTime = simtime
     moose.setClock(0, simdt)
     moose.useClock(0, '/model/##,/data/##', 'process')
     moose.reinit()
     moose.start(simtime)
-    plt.plot(np.linspace(0, simtime, len(recorded.vec)), recorded.vec, 'r-+', label='generated stimulus')
+    plt.plot(np.linspace(0, simtime, len(recorded.vector)), recorded.vector, 'r-+', label='generated stimulus')
     plt.plot(ts, stim, 'b-x', label='originally assigned values')
     plt.ylim((-1, 2))
     plt.legend()

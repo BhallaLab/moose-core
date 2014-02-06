@@ -65,7 +65,7 @@ def addPlot( objpath, field, plot ):
 	if ( moose.exists( objpath ) ):
 		tab = moose.Table( '/graphs/' + plot )
 		obj = moose.element( objpath )
-		moose.connect( tab, 'requestData', obj, field )
+		moose.connect( tab, 'requestOut', obj, field )
 
 
 def dumpPlots( fname ):
@@ -296,7 +296,7 @@ def makeNeuroMeshModel():
 		path = '/model/elec/spine_head_14_' + str( i + 1 ) + '/NMDA_Ca_conc'
 		elecCa = moose.element( path )
 		moose.connect( elecCa, 'concOut', adaptCa[i], 'input', 'Single' )
-	moose.connect( adaptCa, 'outputSrc', chemCa, 'set_conc', 'OneToOne' )
+	moose.connect( adaptCa, 'outputSrc', chemCa, 'setConc', 'OneToOne' )
 	adaptCa.inputOffset = 0.0		# 
 	adaptCa.outputOffset = 80e-6	# 80 nM offset in chem.
    	adaptCa.scale = 1e-5	# 520 to 0.0052 mM
@@ -306,54 +306,54 @@ def makeNeuroMeshModel():
 def makeElecPlots():
     graphs = moose.Neutral( '/graphs' )
     elec = moose.Neutral( '/graphs/elec' )
-    addPlot( '/model/elec/soma', 'get_Vm', 'elec/somaVm' )
-    addPlot( '/model/elec/soma/Ca_conc', 'get_Ca', 'elec/somaCa' )
-    addPlot( '/model/elec/basal_3', 'get_Vm', 'elec/basal3Vm' )
-    addPlot( '/model/elec/apical_14', 'get_Vm', 'elec/apical_14Vm' )
-    addPlot( '/model/elec/apical_14/Ca_conc', 'get_Ca', 'elec/apical_14Ca' )
-    addPlot( '/model/elec/spine_head_14_7', 'get_Vm', 'elec/spine_7Vm' )
-    addPlot( '/model/elec/spine_head_14_7/NMDA_Ca_conc', 'get_Ca', 'elec/spine_7Ca' )
-    addPlot( '/model/elec/spine_head_14_13/NMDA_Ca_conc', 'get_Ca', 'elec/spine_13Ca' )
+    addPlot( '/model/elec/soma', 'getVm', 'elec/somaVm' )
+    addPlot( '/model/elec/soma/Ca_conc', 'getCa', 'elec/somaCa' )
+    addPlot( '/model/elec/basal_3', 'getVm', 'elec/basal3Vm' )
+    addPlot( '/model/elec/apical_14', 'getVm', 'elec/apical_14Vm' )
+    addPlot( '/model/elec/apical_14/Ca_conc', 'getCa', 'elec/apical_14Ca' )
+    addPlot( '/model/elec/spine_head_14_7', 'getVm', 'elec/spine_7Vm' )
+    addPlot( '/model/elec/spine_head_14_7/NMDA_Ca_conc', 'getCa', 'elec/spine_7Ca' )
+    addPlot( '/model/elec/spine_head_14_13/NMDA_Ca_conc', 'getCa', 'elec/spine_13Ca' )
 
 def makeChemPlots():
 	spineMesh = moose.element( '/model/chem/spineMesh' )
 	middleSpine = 6
 	midSpineVoxel = spineMesh.parentVoxel[middleSpine]
 	graphs = moose.Neutral( '/graphs' )
-	addPlot( '/model/chem/psdMesh/PSD/Ca[0]', 'get_conc', 'pCa0' )
-	addPlot( '/model/chem/psdMesh/PSD/Ca[6]', 'get_conc', 'pCa6' )
-	addPlot( '/model/chem/psdMesh/PSD/Ca[12]', 'get_conc', 'pCa12' )
+	addPlot( '/model/chem/psdMesh/PSD/Ca[0]', 'getConc', 'pCa0' )
+	addPlot( '/model/chem/psdMesh/PSD/Ca[6]', 'getConc', 'pCa6' )
+	addPlot( '/model/chem/psdMesh/PSD/Ca[12]', 'getConc', 'pCa12' )
 
-	addPlot( '/model/chem/spineMesh/SPINE/Ca[0]', 'get_conc', 'sCa0' )
-	addPlot( '/model/chem/spineMesh/SPINE/Ca[6]', 'get_conc', 'sCa6' )
-	addPlot( '/model/chem/spineMesh/SPINE/Ca[12]', 'get_conc', 'sCa12' )
+	addPlot( '/model/chem/spineMesh/SPINE/Ca[0]', 'getConc', 'sCa0' )
+	addPlot( '/model/chem/spineMesh/SPINE/Ca[6]', 'getConc', 'sCa6' )
+	addPlot( '/model/chem/spineMesh/SPINE/Ca[12]', 'getConc', 'sCa12' )
 
-	addPlot( '/model/chem/neuroMesh/DEND/Ca[0]', 'get_conc', 'dend0Ca' )
-	addPlot( '/model/chem/neuroMesh/DEND/Ca[' + str( midSpineVoxel ) + ']', 'get_conc', 'dendMidCa' )
-	addPlot( '/model/chem/neuroMesh/DEND/Ca[' + str( midSpineVoxel+2 ) + ']', 'get_conc', 'dendMid2' )
-	addPlot( '/model/chem/neuroMesh/DEND/Ca[' + str( midSpineVoxel+4 ) + ']', 'get_conc', 'dendMid4' )
-	addPlot( '/model/chem/neuroMesh/DEND/Ca[' + str( midSpineVoxel+6 ) + ']', 'get_conc', 'dendMid6' )
-	addPlot( '/model/chem/neuroMesh/DEND/Ca[144]', 'get_conc', 'dend144Ca' )
+	addPlot( '/model/chem/neuroMesh/DEND/Ca[0]', 'getConc', 'dend0Ca' )
+	addPlot( '/model/chem/neuroMesh/DEND/Ca[' + str( midSpineVoxel ) + ']', 'getConc', 'dendMidCa' )
+	addPlot( '/model/chem/neuroMesh/DEND/Ca[' + str( midSpineVoxel+2 ) + ']', 'getConc', 'dendMid2' )
+	addPlot( '/model/chem/neuroMesh/DEND/Ca[' + str( midSpineVoxel+4 ) + ']', 'getConc', 'dendMid4' )
+	addPlot( '/model/chem/neuroMesh/DEND/Ca[' + str( midSpineVoxel+6 ) + ']', 'getConc', 'dendMid6' )
+	addPlot( '/model/chem/neuroMesh/DEND/Ca[144]', 'getConc', 'dend144Ca' )
 
-	addPlot( '/model/chem/psdMesh/PSD/CaM[0]', 'get_conc', 'pCaM0' )
-	addPlot( '/model/chem/psdMesh/PSD/CaM[6]', 'get_conc', 'pCaM6' )
-	addPlot( '/model/chem/psdMesh/PSD/CaM[12]', 'get_conc', 'pCaM12' )
+	addPlot( '/model/chem/psdMesh/PSD/CaM[0]', 'getConc', 'pCaM0' )
+	addPlot( '/model/chem/psdMesh/PSD/CaM[6]', 'getConc', 'pCaM6' )
+	addPlot( '/model/chem/psdMesh/PSD/CaM[12]', 'getConc', 'pCaM12' )
 
-	addPlot( '/model/chem/spineMesh/SPINE/CaM[0]', 'get_conc', 'sCaM0' )
-	addPlot( '/model/chem/spineMesh/SPINE/CaM[6]', 'get_conc', 'sCaM6' )
-	addPlot( '/model/chem/spineMesh/SPINE/CaM[12]', 'get_conc', 'sCaM12' )
+	addPlot( '/model/chem/spineMesh/SPINE/CaM[0]', 'getConc', 'sCaM0' )
+	addPlot( '/model/chem/spineMesh/SPINE/CaM[6]', 'getConc', 'sCaM6' )
+	addPlot( '/model/chem/spineMesh/SPINE/CaM[12]', 'getConc', 'sCaM12' )
 
-	addPlot( '/model/chem/psdMesh/PSD/Ca_CaM[0]', 'get_conc', 'pCaCaM0' )
-	addPlot( '/model/chem/psdMesh/PSD/Ca_CaM[6]', 'get_conc', 'pCaCaM6' )
-	addPlot( '/model/chem/psdMesh/PSD/Ca_CaM[12]', 'get_conc', 'pCaCaM12' )
+	addPlot( '/model/chem/psdMesh/PSD/Ca_CaM[0]', 'getConc', 'pCaCaM0' )
+	addPlot( '/model/chem/psdMesh/PSD/Ca_CaM[6]', 'getConc', 'pCaCaM6' )
+	addPlot( '/model/chem/psdMesh/PSD/Ca_CaM[12]', 'getConc', 'pCaCaM12' )
 
-	addPlot( '/model/chem/spineMesh/SPINE/Ca_CaM[0]', 'get_conc', 'sCaCaM0' )
-	addPlot( '/model/chem/spineMesh/SPINE/Ca_CaM[6]', 'get_conc', 'sCaCaM6' )
-	addPlot( '/model/chem/spineMesh/SPINE/Ca_CaM[12]', 'get_conc', 'sCaCaM12' )
+	addPlot( '/model/chem/spineMesh/SPINE/Ca_CaM[0]', 'getConc', 'sCaCaM0' )
+	addPlot( '/model/chem/spineMesh/SPINE/Ca_CaM[6]', 'getConc', 'sCaCaM6' )
+	addPlot( '/model/chem/spineMesh/SPINE/Ca_CaM[12]', 'getConc', 'sCaCaM12' )
 
-	addPlot( '/model/chem/neuroMesh/DEND/Ca_CaM[0]', 'get_conc', 'dCaCaM0' )
-	addPlot( '/model/chem/neuroMesh/DEND/Ca_CaM[' + str( midSpineVoxel ) + ']', 'get_conc', 'dendMidCaCaM' )
-	addPlot( '/model/chem/neuroMesh/DEND/Ca_CaM[144]', 'get_conc', 'dCaCaM144' )
+	addPlot( '/model/chem/neuroMesh/DEND/Ca_CaM[0]', 'getConc', 'dCaCaM0' )
+	addPlot( '/model/chem/neuroMesh/DEND/Ca_CaM[' + str( midSpineVoxel ) + ']', 'getConc', 'dendMidCaCaM' )
+	addPlot( '/model/chem/neuroMesh/DEND/Ca_CaM[144]', 'getConc', 'dCaCaM144' )
 
 def testNeuroMeshMultiscale():
 	elecDt = 50e-6
@@ -369,8 +369,8 @@ def testNeuroMeshMultiscale():
 			paname = i.parent[0].name + '/'
 			print grandpaname + paname + i[0].name, i[0].diffConst
 	moose.le( '/model/chem/spineMesh/ksolve' )
-	print 'Neighbours:'
-	for t in moose.element( '/model/chem/spineMesh/ksolve/junction' ).neighbours['masterJunction']:
+	print 'Neighbors:'
+	for t in moose.element( '/model/chem/spineMesh/ksolve/junction' ).neighbors['masterJunction']:
 		print 'masterJunction <-', t.path
 	for t in moose.wildcardFind( '/model/chem/#Mesh/ksolve' ):
 		k = moose.element( t[0] )

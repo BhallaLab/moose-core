@@ -57,7 +57,7 @@ class WorkerThread(threading.Thread):
         moose.start(self.runtime)
         while moose.isRunning():
             time.sleep(1.0)
-            print self.name, 'Table length', len(moose.Table('/tab').vec)
+            print self.name, 'Table length', len(moose.Table('/tab').vector)
         print self.name, 'Finishing simulation'
         worker_queue.put(self.name)
 
@@ -77,12 +77,12 @@ class StatusThread(threading.Thread):
         while True:
             try:
                 value = worker_queue.get(False)
-                print self.name, 'Received queue entry: ', value, '. Final table length:', len(self.table.vec), ' ... now Finishing'
+                print self.name, 'Received queue entry: ', value, '. Final table length:', len(self.table.vector), ' ... now Finishing'
                 status_queue.put(self.name)
                 return
             except Queue.Empty:
                 time.sleep(1.0)
-                print self.name, 'Queue is empty. Current table length:', len(self.table.vec)
+                print self.name, 'Queue is empty. Current table length:', len(self.table.vector)
         
 if __name__ == '__main__':
     pg = moose.PulseGen('pg')
@@ -90,7 +90,7 @@ if __name__ == '__main__':
     pg.firstLevel = 10.0
     pg.firstWidth = 5.0
     tab = moose.Table('tab')
-    moose.connect(tab, 'requestData', pg, 'get_output')
+    moose.connect(tab, 'requestOut', pg, 'getOutput')
     moose.setClock(0, 1.0)
     moose.useClock(0, 'pg,tab', 'process')
     t1 = WorkerThread(10000)
@@ -99,7 +99,7 @@ if __name__ == '__main__':
     t1.start()
     status_queue.get(True)
     tab.xplot('threading_demo.dat', 'pulsegen_output')
-    print 'Ending threading_demo: final length of table', len(tab.vec) 
+    print 'Ending threading_demo: final length of table', len(tab.vector) 
 
 # 
 # threading_demo.py ends here

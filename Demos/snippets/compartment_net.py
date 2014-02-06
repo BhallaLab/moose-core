@@ -260,13 +260,13 @@ if __name__ == '__main__':
     moose.connect(pulse, 'outputOut', pop_a['compartment'][0], 'injectMsg')
     data = moose.Neutral('/data')
     vm_a = moose.Table('/data/Vm_A', size)
-    moose.connect(vm_a, 'requestData', pop_a['compartment'], 'get_Vm', 'OneToOne')
+    moose.connect(vm_a, 'requestOut', pop_a['compartment'], 'getVm', 'OneToOne')
     vm_b = moose.Table('/data/Vm_B', size)
-    moose.connect(vm_b, 'requestData', pop_b['compartment'], 'get_Vm', 'OneToOne')
+    moose.connect(vm_b, 'requestOut', pop_b['compartment'], 'getVm', 'OneToOne')
     gksyn_b = moose.Table('/data/Gk_syn_b', size)
-    moose.connect(gksyn_b, 'requestData', pop_b['synchan'], 'get_Gk', 'OneToOne')
+    moose.connect(gksyn_b, 'requestOut', pop_b['synchan'], 'getGk', 'OneToOne')
     pulsetable = moose.Table('/data/pulse')
-    pulsetable.connect('requestData', pulse, 'get_output')
+    pulsetable.connect('requestOut', pulse, 'getOutput')
     moose.setClock(0, simdt)
     moose.setClock(1, simdt)
     moose.setClock(2, simdt)
@@ -281,16 +281,16 @@ if __name__ == '__main__':
     moose.reinit()
     moose.start(simtime)
     plt.subplot(221)
-    for oid in vm_a.vec:
-        plt.plot(oid.vec, label=oid.path)
+    for oid in vm_a.vector:
+        plt.plot(oid.vector, label=oid.path)
     plt.legend()
     plt.subplot(223)
-    for oid in vm_b.vec:
-        plt.plot(oid.vec, label=oid.path)
+    for oid in vm_b.vector:
+        plt.plot(oid.vector, label=oid.path)
     plt.legend()
     plt.subplot(224)
-    for ii in gksyn_b.vec:
-        plt.plot(ii.vec, label=ii.path)
+    for ii in gksyn_b.vector:
+        plt.plot(ii.vector, label=ii.path)
     plt.legend()
     plt.show()
     

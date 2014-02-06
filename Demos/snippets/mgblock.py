@@ -95,24 +95,24 @@ def test_mgblock():
     nmda_noMg.synapse.num = 1
     moose.connect(spikegen, 'event', moose.element(nmda_noMg.synapse.path), 'addSpike')
     Gnmda = moose.Table('/data/Gnmda')
-    moose.connect(Gnmda, 'requestData', mgblock, 'get_Gk')
+    moose.connect(Gnmda, 'requestOut', mgblock, 'getGk')
     Gnmda_noMg = moose.Table('/data/Gnmda_noMg')
-    moose.connect(Gnmda_noMg, 'requestData', nmda_noMg, 'get_Gk')
+    moose.connect(Gnmda_noMg, 'requestOut', nmda_noMg, 'getGk')
     Vm = moose.Table('/data/Vm')
-    moose.connect(Vm, 'requestData', soma, 'get_Vm')
+    moose.connect(Vm, 'requestOut', soma, 'getVm')
     utils.setDefaultDt(elecdt=simdt, plotdt2=plotdt)
     utils.assignDefaultTicks(modelRoot='/model', dataRoot='/data')
     moose.reinit()
     utils.stepRun(simtime, simtime/10)
     for ii in range(10):
-        for n in moose.element('/clock/tick').neighbours['proc%d' % (ii)]:
+        for n in moose.element('/clock/tick').neighbors['proc%d' % (ii)]:
             print ii, n.path
-    t = pylab.linspace(0, simtime*1e3, len(Vm.vec))
-    pylab.plot(t, Vm.vec*1e3, label='Vm (mV)')
-    pylab.plot(t, Gnmda.vec * 1e9, label='Gnmda (nS)')
-    pylab.plot(t, Gnmda_noMg.vec * 1e9, label='Gnmda no Mg (nS)')
+    t = pylab.linspace(0, simtime*1e3, len(Vm.vector))
+    pylab.plot(t, Vm.vector*1e3, label='Vm (mV)')
+    pylab.plot(t, Gnmda.vector * 1e9, label='Gnmda (nS)')
+    pylab.plot(t, Gnmda_noMg.vector * 1e9, label='Gnmda no Mg (nS)')
     pylab.legend()
-    data = pylab.vstack((t, Gnmda.vec, Gnmda_noMg.vec)).transpose()
+    data = pylab.vstack((t, Gnmda.vector, Gnmda_noMg.vector)).transpose()
     pylab.savetxt('mgblock.dat', data)
     pylab.show()
     

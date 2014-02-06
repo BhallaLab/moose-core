@@ -119,8 +119,7 @@ def insert_ca(compartment, phi, tau):
     ca.B = phi / (np.pi * compartment.length * compartment.diameter)
     ca.tau = tau
     print ca.path, ca.B, ca.tau
-    for channel in moose.wildcardFind('%s/#[TYPE=HHChannel]' % (compartment.path)):
-        chan = channel[0]
+    for chan in moose.wildcardFind('%s/#[TYPE=HHChannel]' % (compartment.path)):
         if chan.name.startswith('KC') or chan.name.startswith('KAHP'):
             moose.connect(ca, 'concOut', chan, 'concen')
         elif chan.name.startswith('CaL'):

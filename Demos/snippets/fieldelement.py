@@ -19,7 +19,7 @@ Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
 AttributeError: 'moose.IntFire' object has no attribute 'numSynapse'
 >>> dir(a)
-['__class__', '__delattr__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__gt__', '__hash__', '__init__', '__le__', '__lt__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', 'connect', 'ematrix', 'getDataIndex', 'getField', 'getFieldIndex', 'getFieldNames', 'getFieldType', 'getId', 'getLookupField', 'getNeighbors', 'neighbours', 'parentMsg', 'process', 'reinit', 'setDestField', 'setField', 'setLookupField', 'synapse']
+['__class__', '__delattr__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__gt__', '__hash__', '__init__', '__le__', '__lt__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', 'connect', 'ematrix', 'getDataIndex', 'getField', 'getFieldIndex', 'getFieldNames', 'getFieldType', 'getId', 'getLookupField', 'getNeighbors', 'neighbors', 'parentMsg', 'process', 'reinit', 'setDestField', 'setField', 'setLookupField', 'synapse']
 >>> a.synapse
 /a.synapse
 >>> a.synapse[0]

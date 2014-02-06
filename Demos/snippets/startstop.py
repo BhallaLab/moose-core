@@ -59,7 +59,7 @@ def setup_model():
     pulse.delay[0] = 0.5
     pulse.width[0] = 0.5
     table = moose.Table('%s/tab' % (pulse.path))
-    moose.connect(table, 'requestData', pulse, 'get_output')
+    moose.connect(table, 'requestOut', pulse, 'getOutput')
     moose.setClock(0, 0.1)
     moose.setClock(1, 0.1)
     moose.setClock(2, 0.1)
@@ -81,14 +81,14 @@ def startstop_demo():
     print 'Running simulation for', t, 'seconds'
     moose.start(t)
     # moose.stop() # Somehow this does not work in single threaded Python script
-    pylab.plot(pylab.linspace(0, clock.currentTime, len(table.vec)), table.vec)    
+    pylab.plot(pylab.linspace(0, clock.currentTime, len(table.vector)), table.vector)    
     pylab.show()
     print 'Simulator time:', clock.currentTime
     # How much of the total simulation time is left?
     time_left_to_run = simtime - clock.currentTime
     moose.start(time_left_to_run)
     print 'Simulator time at end of simulation', clock.currentTime
-    pylab.plot(pylab.linspace(0, clock.currentTime, len(table.vec)), table.vec)    
+    pylab.plot(pylab.linspace(0, clock.currentTime, len(table.vector)), table.vector)    
     pylab.show()
 
 if __name__ == '__main__':

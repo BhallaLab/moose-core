@@ -58,9 +58,9 @@ if __name__ == '__main__':
     moose.connect(spikeGen,'event',IF1spikesTable,'input')
 
     run_LIF()
-    print "Spiketimes :",IF1spikesTable.vec
+    print "Spiketimes :",IF1spikesTable.vector
     ## plot the membrane potential of the neuron
     timevec = arange(0.0,RUNTIME+PLOTDT/2.0,PLOTDT)
     figure(facecolor='w')
-    plot(timevec, IF1vmTable.vec)
+    plot(timevec, IF1vmTable.vector)
     show()
