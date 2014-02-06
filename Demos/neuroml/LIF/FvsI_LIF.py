@@ -42,7 +42,7 @@ for currenti in currentvec:
     moose.reinit()
     IF1.inject = currenti
     moose.start(RUNTIME)
-    spikesList = array(IF1spikesTable.vec)
+    spikesList = array(IF1spikesTable.vector)
     if len(spikesList)>0:
         spikesList = spikesList[where(spikesList>0.0)[0]]
         spikesNow = len(spikesList)

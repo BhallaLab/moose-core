@@ -58,12 +58,12 @@ def test_one_to_one(size=2):
         pulse.width[0] = 2.0
         pulse.level[0] = (-1)**ix
     tab = moose.Table('pulseamp', size)
-    moose.connect(tab, 'requestData', pg, 'get_output', 'OneToOne')
+    moose.connect(tab, 'requestOut', pg, 'getOutput', 'OneToOne')
     moose.setClock(0, 0.1)
     moose.useClock(0, '/##', 'process')
     moose.start(5)
     for ii in tab.vec:
-        t = moose.Table(ii).vec
+        t = moose.Table(ii).vector
         pylab.plot(t)
     pylab.show()
 

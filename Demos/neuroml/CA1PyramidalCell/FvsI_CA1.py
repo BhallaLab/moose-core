@@ -58,7 +58,7 @@ for currenti in currentvec:
     moose.reinit()
     CA1CellSoma.inject = currenti
     moose.start(RUNTIME)
-    spikesList = array(CA1CellSpikesTable.vec)
+    spikesList = array(CA1CellSpikesTable.vector)
     if len(spikesList)>0:
         spikesList = spikesList[where(spikesList>0.0)[0]]
         spikesNow = len(spikesList)

@@ -202,32 +202,32 @@ def addPlot( objpath, field, plot ):
     assert moose.exists( objpath )
     tab = moose.Table( '/graphs/' + plot )
     obj = moose.element( objpath )
-    moose.connect( tab, 'requestData', obj, field )
+    moose.connect( tab, 'requestOut', obj, field )
     return tab
 
 def makeElecPlots():
     graphs = moose.Neutral( '/graphs' )
     elec = moose.Neutral( '/graphs/elec' )
-    addPlot( '/model/elec/compt', 'get_Vm', 'elec/dendVm' )
-    #addPlot( '/n/compt/Na', 'get_Gbar', 'elec/NaGbar' )
-    addPlot( '/model/elec/compt/K', 'get_Gbar', 'elec/KGbar' )
-    #addPlot( '/n/compt/Na', 'get_Ik', 'elec/NaIk' )
-    #addPlot( '/n/compt/K', 'get_Ik', 'elec/KIk' )
-    #addPlot( '/n/compt/Na', 'get_Ek', 'elec/NaEk' )
-    #addPlot( '/n/compt/K', 'get_Ek', 'elec/KEk' )
-    addPlot( '/model/elec/head0', 'get_Vm', 'elec/head0Vm' )
-    addPlot( '/model/elec/head2', 'get_Vm', 'elec/head2Vm' )
-    #addPlot( '/n/head2', 'get_Im', 'elec/head2Im' )
-    addPlot( '/model/elec/head0/ca', 'get_Ca', 'elec/head0Ca' )
-    addPlot( '/model/elec/head1/ca', 'get_Ca', 'elec/head1Ca' )
-    addPlot( '/model/elec/head2/ca', 'get_Ca', 'elec/head2Ca' )
-    addPlot( '/model/elec/head0/gluR', 'get_Ik', 'elec/head0Ik' )
-    addPlot( '/model/elec/head1/gluR', 'get_Ik', 'elec/head1Ik' )
-    addPlot( '/model/elec/head2/gluR', 'get_Ik', 'elec/head2Ik' )
-    addPlot( '/model/elec/head1/gluR', 'get_Gbar', 'elec/head1Gbar' )
-    addPlot( '/model/elec/head2/gluR', 'get_Gbar', 'elec/head2Gbar' )
-    #addPlot( '/n/head0/gluR', 'get_Gk', 'elec/head0Gk' )
-    #addPlot( '/n/head2/gluR', 'get_Gk', 'elec/head2Gk' )
+    addPlot( '/model/elec/compt', 'getVm', 'elec/dendVm' )
+    #addPlot( '/n/compt/Na', 'getGbar', 'elec/NaGbar' )
+    addPlot( '/model/elec/compt/K', 'getGbar', 'elec/KGbar' )
+    #addPlot( '/n/compt/Na', 'getIk', 'elec/NaIk' )
+    #addPlot( '/n/compt/K', 'getIk', 'elec/KIk' )
+    #addPlot( '/n/compt/Na', 'getEk', 'elec/NaEk' )
+    #addPlot( '/n/compt/K', 'getEk', 'elec/KEk' )
+    addPlot( '/model/elec/head0', 'getVm', 'elec/head0Vm' )
+    addPlot( '/model/elec/head2', 'getVm', 'elec/head2Vm' )
+    #addPlot( '/n/head2', 'getIm', 'elec/head2Im' )
+    addPlot( '/model/elec/head0/ca', 'getCa', 'elec/head0Ca' )
+    addPlot( '/model/elec/head1/ca', 'getCa', 'elec/head1Ca' )
+    addPlot( '/model/elec/head2/ca', 'getCa', 'elec/head2Ca' )
+    addPlot( '/model/elec/head0/gluR', 'getIk', 'elec/head0Ik' )
+    addPlot( '/model/elec/head1/gluR', 'getIk', 'elec/head1Ik' )
+    addPlot( '/model/elec/head2/gluR', 'getIk', 'elec/head2Ik' )
+    addPlot( '/model/elec/head1/gluR', 'getGbar', 'elec/head1Gbar' )
+    addPlot( '/model/elec/head2/gluR', 'getGbar', 'elec/head2Gbar' )
+    #addPlot( '/n/head0/gluR', 'getGk', 'elec/head0Gk' )
+    #addPlot( '/n/head2/gluR', 'getGk', 'elec/head2Gk' )
 
 def dumpPlots( fname ):
     if ( os.path.exists( fname ) ):
@@ -441,7 +441,7 @@ def makeCubeMultiscale():
         path = '/model/elec/head' + str( i ) + '/ca'
         elecCa = moose.element( path )
         moose.connect( elecCa, 'concOut', adaptCa, 'input', 'Single' )
-    moose.connect( adaptCa, 'outputSrc', headCa, 'set_conc' )
+    moose.connect( adaptCa, 'outputSrc', headCa, 'setConc' )
     adaptCa.outputOffset = 0.0001    # 100 nM offset in chem.
     adaptCa.scale = 0.05             # 0.06 to 0.003 mM
 
@@ -452,33 +452,33 @@ def makeCubeMultiscale():
     elec1R = moose.element( '/model/elec/head1/gluR' )
     elec2R = moose.element( '/model/elec/head2/gluR' )
     elec3R = moose.element( '/model/elec/head3/gluR' )
-    moose.connect( adaptGluR, 'requestField', chemR, 'get_n', 'OneToAll' )
-    moose.connect( adaptGluR, 'outputSrc', elec1R, 'set_Gbar', 'OneToAll' )
-    moose.connect( adaptGluR, 'outputSrc', elec2R, 'set_Gbar', 'OneToAll' )
-    moose.connect( adaptGluR, 'outputSrc', elec3R, 'set_Gbar', 'OneToAll' )
+    moose.connect( adaptGluR, 'requestField', chemR, 'getN', 'OneToAll' )
+    moose.connect( adaptGluR, 'outputSrc', elec1R, 'setGbar', 'OneToAll' )
+    moose.connect( adaptGluR, 'outputSrc', elec2R, 'setGbar', 'OneToAll' )
+    moose.connect( adaptGluR, 'outputSrc', elec3R, 'setGbar', 'OneToAll' )
     adaptGluR.outputOffset = 1e-9    # pS
     adaptGluR.scale = 1e-8 / 100    # from n to pS
 
     adaptK = moose.Adaptor( '/model/chem/neuroMesh/adaptK' )
     chemK = moose.element( '/model/chem/neuroMesh/kChan' )
     elecK = moose.element( '/model/elec/compt/K' )
-    moose.connect( adaptK, 'requestField', chemK, 'get_conc', 'OneToAll' )
-    moose.connect( adaptK, 'outputSrc', elecK, 'set_Gbar', 'OneToAll' )
+    moose.connect( adaptK, 'requestField', chemK, 'getConc', 'OneToAll' )
+    moose.connect( adaptK, 'outputSrc', elecK, 'setGbar', 'OneToAll' )
     adaptK.scale = 0.3               # from mM to Siemens
 
 
 def makeChemPlots():
     graphs = moose.Neutral( '/graphs' )
-    addPlot( '/model/chem/psdMesh/psdGluR', 'get_n', 'psd0R' )
-    addPlot( '/model/chem/spineMesh/Ca', 'get_conc', 'spine0Ca' )
-    addPlot( '/model/chem/neuroMesh/Ca', 'get_conc', 'dend0Ca' )
-    addPlot( '/model/chem/neuroMesh/kChan_p', 'get_conc', 'kChan_p' )
-    addPlot( '/model/chem/neuroMesh/kChan', 'get_conc', 'kChan' )
-    addPlot( '/model/chem/neuroMesh/Ca.kinase', 'get_conc', 'dendKinase' )
-    addPlot( '/model/chem/spineMesh/toPsd', 'get_conc', 'toPsd0' )
-    #addPlot( '/n/neuroMesh/Ca', 'get_conc', 'dendCa' )
-    #addPlot( '/n/neuroMesh/inact_kinase', 'get_conc', 'inactDendKinase' )
-    #addPlot( '/n/psdMesh/psdGluR', 'get_n', 'psdGluR' )
+    addPlot( '/model/chem/psdMesh/psdGluR', 'getN', 'psd0R' )
+    addPlot( '/model/chem/spineMesh/Ca', 'getConc', 'spine0Ca' )
+    addPlot( '/model/chem/neuroMesh/Ca', 'getConc', 'dend0Ca' )
+    addPlot( '/model/chem/neuroMesh/kChan_p', 'getConc', 'kChan_p' )
+    addPlot( '/model/chem/neuroMesh/kChan', 'getConc', 'kChan' )
+    addPlot( '/model/chem/neuroMesh/Ca.kinase', 'getConc', 'dendKinase' )
+    addPlot( '/model/chem/spineMesh/toPsd', 'getConc', 'toPsd0' )
+    #addPlot( '/n/neuroMesh/Ca', 'getConc', 'dendCa' )
+    #addPlot( '/n/neuroMesh/inact_kinase', 'getConc', 'inactDendKinase' )
+    #addPlot( '/n/psdMesh/psdGluR', 'getN', 'psdGluR' )
 
 def testCubeMultiscale( useSolver ):
     elecDt = 10e-6

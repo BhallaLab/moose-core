@@ -24,12 +24,12 @@ import moose
 c = moose.Compartment('c')
 t = moose.Table('t')
 t1 = moose.Table('t1')
-moose.connect(t, 'requestData', c, 'get_Vm')
-moose.connect(t1, 'requestData', c, 'get_Im')
+moose.connect(t, 'requestOut', c, 'getVm')
+moose.connect(t1, 'requestOut', c, 'getIm')
 h = moose.HDF5DataWriter('h')
 h.mode = 2 # Truncate existing file
-moose.connect(h, 'requestData', t, 'get_vec')
-moose.connect(h, 'requestData', t1, 'get_vec')
+moose.connect(h, 'requestOut', t, 'getVec')
+moose.connect(h, 'requestOut', t1, 'getVec')
 h.filename = 'output.h5'
 h.chunkSize = 10000
 h.compressor = 'zlib'
@@ -50,6 +50,6 @@ c.inject = 0.1
 moose.start(30.0)
 h.close()
 print 'Finished simulation. Data was saved in', h.filename
-# print numpy.array(t.vec)
+# print numpy.array(t.vector)
 # moose.start(0.5)
-# print numpy.array(t.vec)
+# print numpy.array(t.vector)

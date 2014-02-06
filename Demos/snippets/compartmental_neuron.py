@@ -73,7 +73,7 @@ moose.connect(soma, 'raxial', axon, 'axial')
 # Setup data recording
 data = moose.Neutral('/data')
 axon_Vm = moose.Table('/data/axon_Vm')
-moose.connect(axon_Vm, 'requestData', axon, 'get_Vm')
+moose.connect(axon_Vm, 'requestOut', axon, 'getVm')
 
 # Now schedule the sequence of operations and time resolutions
 moose.setClock(0, 0.025e-3)
@@ -107,7 +107,7 @@ soma.inject = 0.0
 # Run for 500 ms
 moose.start(500e-3)
 clock = moose.Clock('/clock') # Get a handle to the global clock
-pylab.plot(pylab.linspace(0, clock.currentTime, len(axon_Vm.vec)), axon_Vm.vec, label='Vm of axon')
+pylab.plot(pylab.linspace(0, clock.currentTime, len(axon_Vm.vector)), axon_Vm.vector, label='Vm of axon')
 pylab.legend()
 pylab.show()
 

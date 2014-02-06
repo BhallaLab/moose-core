@@ -70,8 +70,8 @@ def makeModel():
 		outputB = moose.Table ( '/model/graphs/concB' )
 
 		# connect up the tables
-		moose.connect( outputA, 'requestData', a, 'get_conc' );
-		moose.connect( outputB, 'requestData', b, 'get_conc' );
+		moose.connect( outputA, 'requestOut', a, 'getConc' );
+		moose.connect( outputB, 'requestOut', b, 'getConc' );
 
 		# Schedule the whole lot
 		moose.setClock( 4, 0.01 ) # for the computational objects

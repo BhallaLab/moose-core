@@ -51,7 +51,7 @@ for currenti in currentvec:
     moose.reinit()
     granCellSoma.inject = currenti
     moose.start(RUNTIME)
-    spikesList = array(granCellSpikesTable.vec)
+    spikesList = array(granCellSpikesTable.vector)
     if len(spikesList)>0:
         spikesList = spikesList[where(spikesList>0.0)[0]]
         spikesNow = len(spikesList)

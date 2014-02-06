@@ -35,9 +35,9 @@ tab = moose.Table( '/graphs/soma' )
 catab = moose.Table( '/graphs/ca' )
 soma = moose.element( '/cell/soma' )
 soma.inject = 2e-10
-moose.connect( tab, 'requestData', soma, 'get_Vm' )
+moose.connect( tab, 'requestOut', soma, 'getVm' )
 capool = moose.element( '/cell/soma/Ca_conc' )
-moose.connect( catab, 'requestData', capool, 'get_Ca' )
+moose.connect( catab, 'requestOut', capool, 'getCa' )
 print 1
 dt = 50e-6
 moose.setClock( 0, dt )
