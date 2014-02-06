@@ -22,9 +22,9 @@ def displayPlots():
 		totR = moose.element( '/model/graphs/conc1/tot_PSD_R.Co' )
 		PP1 = moose.element( '/model/moregraphs/conc4/PP1_dash_active.Co' )
 		Ca = moose.element( '/model/graphs/conc1/Ca.Co' )
-		pylab.plot( pylab.linspace( 0, clock.currentTime, len( totR.vec )), totR.vec, label='membrane Receptor' )
-		pylab.plot( pylab.linspace( 0, clock.currentTime, len( PP1.vec ) ), PP1.vec, label='active PP1' )
-		pylab.plot( pylab.linspace( 0, clock.currentTime, len( Ca.vec ) ), Ca.vec, label='Ca' )
+		pylab.plot( pylab.linspace( 0, clock.currentTime, len( totR.vector )), totR.vector, label='membrane Receptor' )
+		pylab.plot( pylab.linspace( 0, clock.currentTime, len( PP1.vector ) ), PP1.vector, label='active PP1' )
+		pylab.plot( pylab.linspace( 0, clock.currentTime, len( Ca.vector ) ), Ca.vector, label='Ca' )
 		pylab.legend()
 		pylab.show()
 

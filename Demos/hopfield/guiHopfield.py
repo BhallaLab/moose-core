@@ -79,7 +79,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
         if self.runCount == 0:
             for i in range(100):
-                if np.any((self.hop.allSpikes[i].vec>0.0)&(self.hop.allSpikes[i].vec<0.0310)):
+                if np.any((self.hop.allSpikes[i].vector>0.0)&(self.hop.allSpikes[i].vector<0.0310)):
                     exec(('self.pushButton_%s.setChecked(True)' %i))
                 else:
                     exec(('self.pushButton_%s.setChecked(False)' %i))
@@ -88,7 +88,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             self.hop.runMooseHopfield(0.02)
             #print 0.0310+(0.02*(self.runCount-1)),(0.0310+(0.02*self.runCount))
             for i in range(100):
-                if np.any((self.hop.allSpikes[i].vec>(0.0301+(0.02*(self.runCount-1))))&(self.hop.allSpikes[i].vec<(0.0301+(0.02*self.runCount)))):
+                if np.any((self.hop.allSpikes[i].vector>(0.0301+(0.02*(self.runCount-1))))&(self.hop.allSpikes[i].vector<(0.0301+(0.02*self.runCount)))):
                     exec(('self.pushButton_%s.setChecked(True)' %i))
                 else:
                     exec(('self.pushButton_%s.setChecked(False)' %i))

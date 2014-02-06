@@ -155,9 +155,9 @@ def setup_electronics(model_container, data_container, compartment):
     moose.connect(compartment, 'VmOut', pid, 'sensedIn')
     moose.connect(pid, 'outputOut', compartment, 'injectMsg')
     command_table = moose.Table('%s/command' % (data_container.path))
-    moose.connect(command_table, 'requestData', command, 'get_output')
+    moose.connect(command_table, 'requestOut', command, 'getOutput')
     inject_table = moose.Table('%s/inject' % (data_container.path))
-    moose.connect(inject_table, 'requestData', compartment, 'get_Im')
+    moose.connect(inject_table, 'requestOut', compartment, 'getIm')
     return {'command_tab': command_table,
             'inject_tab': inject_table,
             'iclamp': iclamp,
@@ -185,9 +185,9 @@ def setup_model():
     comp = create_compartment(model.path, 'soma')
     ret = setup_electronics(model, data, comp)
     vmtab = moose.Table('%s/Vm' % (data.path))
-    moose.connect(vmtab, 'requestData', comp, 'get_Vm')    
+    moose.connect(vmtab, 'requestOut', comp, 'getVm')    
     gktab = moose.Table('%s/Gk' % (data.path))
-    moose.connect(gktab, 'requestData', moose.element(comp.path + '/NaF'), 'get_Gk')    
+    moose.connect(gktab, 'requestOut', moose.element(comp.path + '/NaF'), 'getGk')    
     ret.update({'model': model, 'data': data, 'vm_tab': vmtab, 'gk_tab': gktab})
     return ret
 
@@ -256,10 +256,10 @@ def run_clamp(model_dict, clamp, levels, holding=0.0, simtime=100e-3):
         model_dict['command'].baseLevel = holding
         print 'Running %s with holding=%g, level=%g' % (clamp, holding, model_dict['command'].level[0])
         run_sim(model_dict['model'], model_dict['data'], simtime)
-        ivec.append(np.asarray(model_dict['inject_tab'].vec))
-        cvec.append(np.asarray(model_dict['command_tab'].vec))
-        vvec.append(np.asarray(model_dict['vm_tab'].vec))
-        gvec.append(np.asarray(model_dict['gk_tab'].vec))
+        ivec.append(np.asarray(model_dict['inject_tab'].vector))
+        cvec.append(np.asarray(model_dict['command_tab'].vector))
+        vvec.append(np.asarray(model_dict['vm_tab'].vector))
+        gvec.append(np.asarray(model_dict['gk_tab'].vector))
         tvec.append(np.linspace(0, simtime, len(vvec[-1])))
     return {'command': cvec,
             'inject': ivec,

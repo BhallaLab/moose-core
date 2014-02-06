@@ -203,7 +203,10 @@ class CellBase(moose.Neuron):
         moose.Neutral.__init__(self, path)
         
     def comp(self, number):
-        return moose.element('%s/comp_%d' % (self.path, number))
+        path = '%s/comp_%d' % (self.path, number)
+        print '*****', path
+        moose.le(self.path)
+        return moose.element(path)
 
     @property
     def soma(self):

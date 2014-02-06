@@ -64,7 +64,7 @@ def addPlot( objpath, field, plot ):
 			return moose.element( '/' )
 		else:
 			#print "object was found: ", objpath, obj.className
-			moose.connect( tab, 'requestData', obj, field )
+			moose.connect( tab, 'requestOut', obj, field )
 			return tab
 	else:
 		print "addPlot failed: object not found: ", objpath
@@ -240,7 +240,7 @@ def makeNeuroMeshModel():
 		path = '/model/elec/spine_head_14_' + str( i + 1 ) + '/NMDA_Ca_conc'
 		elecCa = moose.element( path )
 		moose.connect( elecCa, 'concOut', adaptCa[i], 'input', 'Single' )
-	moose.connect( adaptCa, 'outputSrc', chemCa, 'set_conc', 'OneToOne' )
+	moose.connect( adaptCa, 'outputSrc', chemCa, 'setConc', 'OneToOne' )
 	adaptCa.inputOffset = 0.0	# 
 	adaptCa.outputOffset = 0.00008	# 80 nM offset in chem.
    	adaptCa.scale = 1e-5	# 520 to 0.0052 mM
@@ -255,32 +255,32 @@ def makeNeuroMeshModel():
 	for i in range( 5 ):
     	path = '/model/elec/head' + str( i ) + '/gluR'
 		elecR = moose.element( path )
-			moose.connect( adaptGluR[i], 'outputSrc', elecR, 'set_Gbar', 'Single' )
+			moose.connect( adaptGluR[i], 'outputSrc', elecR, 'setGbar', 'Single' )
     #moose.connect( chemR, 'nOut', adaptGluR, 'input', 'OneToOne' )
 	# Ksolve isn't sending nOut. Not good. So have to use requestField.
-    moose.connect( adaptGluR, 'requestField', chemR, 'get_n', 'OneToOne' )
+    moose.connect( adaptGluR, 'requestField', chemR, 'getN', 'OneToOne' )
     adaptGluR.outputOffset = 1e-7    # pS
     adaptGluR.scale = 1e-6 / 100     # from n to pS
 
     adaptK = moose.Adaptor( '/model/chem/neuroMesh/adaptK' )
     chemK = moose.element( '/model/chem/neuroMesh/kChan' )
     elecK = moose.element( '/model/elec/compt/K' )
-	moose.connect( adaptK, 'requestField', chemK, 'get_conc', 'OneToAll' )
-	moose.connect( adaptK, 'outputSrc', elecK, 'set_Gbar', 'Single' )
+	moose.connect( adaptK, 'requestField', chemK, 'getConc', 'OneToAll' )
+	moose.connect( adaptK, 'outputSrc', elecK, 'setGbar', 'Single' )
 	adaptK.scale = 0.3               # from mM to Siemens
 	"""
 
 def makeElecPlots():
     graphs = moose.Neutral( '/graphs' )
     elec = moose.Neutral( '/graphs/elec' )
-    addPlot( '/model/elec/soma', 'get_Vm', 'elec/somaVm' )
-    addPlot( '/model/elec/soma/Ca_conc', 'get_Ca', 'elec/somaCa' )
-    addPlot( '/model/elec/basal_3', 'get_Vm', 'elec/basal3Vm' )
-    addPlot( '/model/elec/apical_14', 'get_Vm', 'elec/apical_14Vm' )
-    addPlot( '/model/elec/apical_14/Ca_conc', 'get_Ca', 'elec/apical_14Ca' )
-    addPlot( '/model/elec/spine_head_14_7', 'get_Vm', 'elec/spine_7Vm' )
-    addPlot( '/model/elec/spine_head_14_7/NMDA_Ca_conc', 'get_Ca', 'elec/spine_7Ca' )
-    addPlot( '/model/elec/spine_head_14_13/NMDA_Ca_conc', 'get_Ca', 'elec/spine_13Ca' )
+    addPlot( '/model/elec/soma', 'getVm', 'elec/somaVm' )
+    addPlot( '/model/elec/soma/Ca_conc', 'getCa', 'elec/somaCa' )
+    addPlot( '/model/elec/basal_3', 'getVm', 'elec/basal3Vm' )
+    addPlot( '/model/elec/apical_14', 'getVm', 'elec/apical_14Vm' )
+    addPlot( '/model/elec/apical_14/Ca_conc', 'getCa', 'elec/apical_14Ca' )
+    addPlot( '/model/elec/spine_head_14_7', 'getVm', 'elec/spine_7Vm' )
+    addPlot( '/model/elec/spine_head_14_7/NMDA_Ca_conc', 'getCa', 'elec/spine_7Ca' )
+    addPlot( '/model/elec/spine_head_14_13/NMDA_Ca_conc', 'getCa', 'elec/spine_13Ca' )
 
 def makeChemPlots():
 	spineMesh = moose.element( '/model/chem/spineMesh' )
@@ -289,43 +289,43 @@ def makeChemPlots():
 	midSpineVoxel = spineMesh.parentVoxel[middleSpine]
 	graphs = moose.Neutral( '/graphs' )
 	#moose.le( '/model/chem/psdMesh/PSD' )
-	addPlot( '/model/chem/psdMesh/PSD/tot_PSD_R[0]', 'get_n', 'psd0R' )
-	addPlot( '/model/chem/psdMesh/PSD/tot_PSD_R[1]', 'get_n', 'psd1R' )
-	addPlot( '/model/chem/psdMesh/PSD/tot_PSD_R[2]', 'get_n', 'psd2R' )
-	addPlot( '/model/chem/psdMesh/PSD/CaM/CaM_dash_Ca4[0]', 'get_conc', 'psdCaM0' )
-	addPlot( '/model/chem/psdMesh/PSD/CaM/CaM_dash_Ca4[6]', 'get_conc', 'psdCaM6' )
-	addPlot( '/model/chem/psdMesh/PSD/CaM_CaN[0]', 'get_conc', 'CaM_CaN' )
-	addPlot( '/model/chem/psdMesh/PSD/PP1_PSD/PP1_dash_active[0]', 'get_conc', 'PP1_active0' )
-	addPlot( '/model/chem/psdMesh/PSD/PP1_PSD/PP1_dash_active[6]', 'get_conc', 'psdPP1_active6' )
-	addPlot( '/model/chem/psdMesh/PSD/actCaMKII[6]', 'get_conc', 'psdCaMKII6' )
-	addPlot( '/model/chem/spineMesh/SPINE/actCaMKII[6]', 'get_conc', 'spineCaMKII6' )
+	addPlot( '/model/chem/psdMesh/PSD/tot_PSD_R[0]', 'getN', 'psd0R' )
+	addPlot( '/model/chem/psdMesh/PSD/tot_PSD_R[1]', 'getN', 'psd1R' )
+	addPlot( '/model/chem/psdMesh/PSD/tot_PSD_R[2]', 'getN', 'psd2R' )
+	addPlot( '/model/chem/psdMesh/PSD/CaM/CaM_dash_Ca4[0]', 'getConc', 'psdCaM0' )
+	addPlot( '/model/chem/psdMesh/PSD/CaM/CaM_dash_Ca4[6]', 'getConc', 'psdCaM6' )
+	addPlot( '/model/chem/psdMesh/PSD/CaM_CaN[0]', 'getConc', 'CaM_CaN' )
+	addPlot( '/model/chem/psdMesh/PSD/PP1_PSD/PP1_dash_active[0]', 'getConc', 'PP1_active0' )
+	addPlot( '/model/chem/psdMesh/PSD/PP1_PSD/PP1_dash_active[6]', 'getConc', 'psdPP1_active6' )
+	addPlot( '/model/chem/psdMesh/PSD/actCaMKII[6]', 'getConc', 'psdCaMKII6' )
+	addPlot( '/model/chem/spineMesh/SPINE/actCaMKII[6]', 'getConc', 'spineCaMKII6' )
 	#moose.le( '/model/chem/spineMesh/SPINE' )
 	#moose.le( '/model/chem/neuroMesh/DEND' )
-	addPlot( '/model/chem/psdMesh/PSD/CaM/Ca[0]', 'get_conc', 'psd0Ca' )
-	addPlot( '/model/chem/psdMesh/PSD/CaM/Ca[6]', 'get_conc', 'psd6Ca' )
-	addPlot( '/model/chem/psdMesh/PSD/CaM/Ca[12]', 'get_conc', 'psd12Ca' )
+	addPlot( '/model/chem/psdMesh/PSD/CaM/Ca[0]', 'getConc', 'psd0Ca' )
+	addPlot( '/model/chem/psdMesh/PSD/CaM/Ca[6]', 'getConc', 'psd6Ca' )
+	addPlot( '/model/chem/psdMesh/PSD/CaM/Ca[12]', 'getConc', 'psd12Ca' )
 
-	addPlot( '/model/chem/spineMesh/SPINE/CaM/Ca[0]', 'get_conc', 'spine0Ca' )
-	addPlot( '/model/chem/spineMesh/SPINE/CaM/Ca[6]', 'get_conc', 'spine6Ca' )
-	addPlot( '/model/chem/spineMesh/SPINE/CaM/Ca[12]', 'get_conc', 'spine12Ca' )
+	addPlot( '/model/chem/spineMesh/SPINE/CaM/Ca[0]', 'getConc', 'spine0Ca' )
+	addPlot( '/model/chem/spineMesh/SPINE/CaM/Ca[6]', 'getConc', 'spine6Ca' )
+	addPlot( '/model/chem/spineMesh/SPINE/CaM/Ca[12]', 'getConc', 'spine12Ca' )
 
 	path = '/model/chem/neuroMesh/DEND/Ca['
-	addPlot( '/model/chem/neuroMesh/DEND/Ca[0]', 'get_conc', 'dend0Ca' )
-	addPlot( path + str( midSpineVoxel ) + ']', 'get_conc', 'dendMidCa' )
-	addPlot( path + str( midSpineVoxel+2 ) + ']', 'get_conc', 'dendMid2Ca' )
-	addPlot( path + str( midSpineVoxel+4 ) + ']', 'get_conc', 'dendMid4Ca' )
-	addPlot( path + str( midSpineVoxel+6 ) + ']', 'get_conc', 'dendMid6Ca' )
-	addPlot( '/model/chem/neuroMesh/DEND/Ca[144]', 'get_conc', 'dend144Ca' )
+	addPlot( '/model/chem/neuroMesh/DEND/Ca[0]', 'getConc', 'dend0Ca' )
+	addPlot( path + str( midSpineVoxel ) + ']', 'getConc', 'dendMidCa' )
+	addPlot( path + str( midSpineVoxel+2 ) + ']', 'getConc', 'dendMid2Ca' )
+	addPlot( path + str( midSpineVoxel+4 ) + ']', 'getConc', 'dendMid4Ca' )
+	addPlot( path + str( midSpineVoxel+6 ) + ']', 'getConc', 'dendMid6Ca' )
+	addPlot( '/model/chem/neuroMesh/DEND/Ca[144]', 'getConc', 'dend144Ca' )
 
-	#addPlot( '/n/neuroMesh/Ca', 'get_conc', 'dendCa' )
-	#addPlot( '/n/neuroMesh/inact_kinase', 'get_conc', 'inactDendKinase' )
-	#addPlot( '/n/psdMesh/psdGluR', 'get_n', 'psdGluR' )
-	addPlot( '/model/chem/psdMesh/PSD/CaMKII_PSD/CaMKII_dash_CaM[6]', 'get_conc', 'psdCaM_CaMKII6' )
-	addPlot( '/model/chem/spineMesh/SPINE/CaMKII_BULK/CaMKII_dash_CaM[6]', 'get_conc', 'spineCaM_CaMKII6' )
-	addPlot( '/model/chem/spineMesh/SPINE/CaMKII_BULK/NMDAR[6]', 'get_conc', 'psd_NMDAR6' )
+	#addPlot( '/n/neuroMesh/Ca', 'getConc', 'dendCa' )
+	#addPlot( '/n/neuroMesh/inact_kinase', 'getConc', 'inactDendKinase' )
+	#addPlot( '/n/psdMesh/psdGluR', 'getN', 'psdGluR' )
+	addPlot( '/model/chem/psdMesh/PSD/CaMKII_PSD/CaMKII_dash_CaM[6]', 'getConc', 'psdCaM_CaMKII6' )
+	addPlot( '/model/chem/spineMesh/SPINE/CaMKII_BULK/CaMKII_dash_CaM[6]', 'getConc', 'spineCaM_CaMKII6' )
+	addPlot( '/model/chem/spineMesh/SPINE/CaMKII_BULK/NMDAR[6]', 'getConc', 'psd_NMDAR6' )
 
-	addPlot( '/model/chem/psdMesh/PSD/CaMKII_PSD/bar[6]', 'get_conc', 'psd_bar' )
-	addPlot( '/model/chem/spineMesh/SPINE/CaMKII_BULK/foo[6]', 'get_conc', 'spine_foo' )
+	addPlot( '/model/chem/psdMesh/PSD/CaMKII_PSD/bar[6]', 'getConc', 'psd_bar' )
+	addPlot( '/model/chem/spineMesh/SPINE/CaMKII_BULK/foo[6]', 'getConc', 'spine_foo' )
 	bar = moose.element( '/model/chem/psdMesh/PSD/CaMKII_PSD/bar[6]' )
 	foo = moose.element( '/model/chem/spineMesh/SPINE/CaMKII_BULK/foo[6]' )
 	print "bar,foo vols = ", bar.volume, foo.volume, bar.concInit, foo.concInit
@@ -350,8 +350,8 @@ def testNeuroMeshMultiscale():
 			paname = i.parent[0].name + '/'
 			print grandpaname + paname + i[0].name, i[0].diffConst
 	moose.le( '/model/chem/spineMesh/ksolve' )
-	print 'Neighbours:'
-	for t in moose.element( '/model/chem/spineMesh/ksolve/junction' ).neighbours['masterJunction']:
+	print 'Neighbors:'
+	for t in moose.element( '/model/chem/spineMesh/ksolve/junction' ).neighbors['masterJunction']:
 		print 'masterJunction <-', t.path
 	for t in moose.wildcardFind( '/model/chem/#Mesh/ksolve' ):
 		k = moose.element( t[0] )

@@ -40,10 +40,10 @@ def loadSTGNeuroML_L123(filename):
     print "Running ... "
     moose.start(runtime)
     tvec = arange(0.0,runtime+2*plotdt,plotdt)
-    tvec = tvec[ : soma1Vm.vec.size ]
-    plot(tvec,soma1Vm.vec,label='AB_PD',color='g',linestyle='dashed')
-    plot(tvec,soma2Vm.vec,label='LP',color='r',linestyle='solid')
-    plot(tvec,soma3Vm.vec,label='PY',color='b',linestyle='dashed')
+    tvec = tvec[ : soma1Vm.vector.size ]
+    plot(tvec,soma1Vm.vector,label='AB_PD',color='g',linestyle='dashed')
+    plot(tvec,soma2Vm.vector,label='LP',color='r',linestyle='solid')
+    plot(tvec,soma3Vm.vector,label='PY',color='b',linestyle='dashed')
     legend()
     title('Soma Vm')
     xlabel('time (s)')

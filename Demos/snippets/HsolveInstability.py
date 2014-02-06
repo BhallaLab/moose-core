@@ -209,14 +209,14 @@ def add_plot( objpath, field, plot ):
     if moose.exists( objpath ):
         tab = moose.Table( '/graphs/' + plot )
         obj = moose.element( objpath )
-        moose.connect( tab, 'requestData', obj, field )
+        moose.connect( tab, 'requestOut', obj, field )
         return tab
 
 def make_plots():
     graphs = moose.Neutral( '/graphs' )
-    add_plot( '/n/compt', 'get_Vm', 'dendVm' )
-    add_plot( '/n/head2', 'get_Vm', 'head2Vm' )
-    add_plot( '/n/head2/ca', 'get_Ca', 'head2Ca' )
+    add_plot( '/n/compt', 'getVm', 'dendVm' )
+    add_plot( '/n/head2', 'getVm', 'head2Vm' )
+    add_plot( '/n/head2/ca', 'getCa', 'head2Ca' )
 
 def dump_plots( fname ):
     if ( os.path.exists( fname ) ):

@@ -66,17 +66,30 @@ def cell_to_graph(cell, label=False):
     """Convert a MOOSE compartmental neuron into a graph describing
     the topology of the compartments
 
-    """        
+    """
+    for comp in moose.wildcardFind('%s/##[ISA=Compartment]' % cell.path):
+        print comp, type(comp)
+        print comp.neighbors['raxial']
+        print comp.neighbors['axial']
     soma = moose.element('%s/comp_1' % (cell.path))
-    if len(soma.neighbours['axial']) > 0:
-        msg = 'raxial'
-    elif len(soma.neighbours['distal']) > 0:
-        msg = 'distal'
+    print soma
+    moose.showmsg(soma)    
+    print 'raxial', soma.neighbors['raxial']
+    print 'raxialOut', soma.neighbors['raxialOut']
+    print 'axialOut', soma.neighbors['axialOut']
+    print 'distal', soma.neighbors['distal']
+    print 'proximal', soma.neighbors['proximal']
+    print 'distalOut', soma.neighbors['distalOut']
+    print 'proximalOut', soma.neighbors['proximalOut']
+    if len(soma.neighbors['axialOut']) > 0:
+        msg = 'raxialOut'
+    elif len(soma.neighbors['distalOut']) > 0:
+        msg = 'distalOut'
     else:
-        raise Exception('No neighbours on raxial or distal')
+        raise Exception('No neighbors on raxial or distal')
     es = [(c1.path, c2.path, {'weight': 2/ (moose.Compartment(c1).Ra + moose.Compartment(c2).Ra)}) \
               for c1 in moose.wildcardFind('%s/##[ISA=Compartment]' % (cell.path)) \
-              for c2 in moose.Compartment(c1).neighbours[msg]]
+              for c2 in moose.Compartment(c1).neighbors[msg]]
     g = nx.Graph()
     g.add_edges_from(es)
     if label:

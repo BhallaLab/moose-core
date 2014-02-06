@@ -199,16 +199,16 @@ def add_plot( objpath, field, plot ):
     assert moose.exists( objpath )
     tab = moose.Table( '/graphs/' + plot )
     obj = moose.element( objpath )
-    moose.connect( tab, 'requestData', obj, field )
+    moose.connect( tab, 'requestOut', obj, field )
     return tab
 
 def make_elec_plots():
     graphs = moose.Neutral( '/graphs' )
     elec = moose.Neutral( '/graphs/elec' )
-    add_plot( '/n/compt', 'get_Vm', 'elec/dendVm' )
-    add_plot( '/n/head0', 'get_Vm', 'elec/head0Vm' )
-    add_plot( '/n/head2', 'get_Vm', 'elec/head2Vm' )
-    add_plot( '/n/head2/ca', 'get_Ca', 'elec/head2Ca' )
+    add_plot( '/n/compt', 'getVm', 'elec/dendVm' )
+    add_plot( '/n/head0', 'getVm', 'elec/head0Vm' )
+    add_plot( '/n/head2', 'getVm', 'elec/head2Vm' )
+    add_plot( '/n/head2/ca', 'getCa', 'elec/head2Ca' )
 
 def dump_plots( fname ):
     if ( os.path.exists( fname ) ):

@@ -100,14 +100,14 @@ if __name__ == '__main__':
     # Setup data recording
     data_container = moose.Neutral(datapath)
     vm_table = moose.Table('%s/vm' % (data_container.path))
-    moose.connect(vm_table, 'requestData', setup['iaf'], 'get_Vm')
+    moose.connect(vm_table, 'requestOut', setup['iaf'], 'getVm')
     spike_table = moose.Table('%s/spike' % (data_container.path))
-    moose.connect(spike_table, 'requestData', setup['spikegen'], 'get_hasFired')
+    moose.connect(spike_table, 'requestOut', setup['spikegen'], 'getHasFired')
     # moose.connect(setup['iaf'], 'VmOut', spike_table, 'spike')
     pulse_table = moose.Table('%s/pulse' % (data_container.path))
-    moose.connect(pulse_table, 'requestData', setup['pulsegen'], 'get_output')
+    moose.connect(pulse_table, 'requestOut', setup['pulsegen'], 'getOutput')
     gsyn_table = moose.Table('%s/gk' % (datapath))
-    moose.connect(gsyn_table, 'requestData', setup['synchan'], 'get_Ik')
+    moose.connect(gsyn_table, 'requestOut', setup['synchan'], 'getIk')
     # Schedule model components for simulation
     moose.setClock(0, 1e-4)
     moose.setClock(1, 1e-4)
@@ -120,10 +120,10 @@ if __name__ == '__main__':
     # Initialize and run simulation
     moose.reinit()
     moose.start(simtime)
-    t = np.linspace(0, simtime, len(pulse_table.vec))
-    plt.plot(t, pulse_table.vec, 'r', label='Input pulse')
-    plt.plot(t, vm_table.vec, 'b', label='Vm')
-    plt.plot(t, gsyn_table.vec, 'c', label='Isyn')
+    t = np.linspace(0, simtime, len(pulse_table.vector))
+    plt.plot(t, pulse_table.vector, 'r', label='Input pulse')
+    plt.plot(t, vm_table.vector, 'b', label='Vm')
+    plt.plot(t, gsyn_table.vector, 'c', label='Isyn')
     plt.legend()
     plt.show()
 

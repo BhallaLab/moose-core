@@ -172,23 +172,23 @@ def test_compartment():
     moose.connect(pg, 'outputOut', comp, 'injectMsg')
     d = moose.Neutral('/data')
     vm = moose.Table('/data/Vm')
-    moose.connect(vm, 'requestData', comp, 'get_Vm')
+    moose.connect(vm, 'requestOut', comp, 'getVm')
     gK = moose.Table('/data/gK')
-    moose.connect(gK, 'requestData', moose.element('%s/k' % (comp.path)), 'get_Gk')
+    moose.connect(gK, 'requestOut', moose.element('%s/k' % (comp.path)), 'getGk')
     gNa = moose.Table('/data/gNa')
-    moose.connect(gNa, 'requestData', moose.element('%s/na' % (comp.path)), 'get_Gk')
+    moose.connect(gNa, 'requestOut', moose.element('%s/na' % (comp.path)), 'getGk')
     # utils.resetSim(['/model', '/data'], 1e-6, 1e-4, simmethod='ee')
     assign_clocks(['/model'], 1e-6, 1e-4)
     simtime = 100e-3
     moose.start(simtime)
-    t = np.linspace(0, simtime, len(vm.vec))
+    t = np.linspace(0, simtime, len(vm.vector))
     plt.subplot(221)
     plt.title('Vm')
-    plt.plot(t, vm.vec)
+    plt.plot(t, vm.vector)
     plt.subplot(222)
     plt.title('Conductance')
-    plt.plot(t, gK.vec, label='GK')
-    plt.plot(t, gNa.vec, label='GNa')
+    plt.plot(t, gK.vector, label='GK')
+    plt.plot(t, gNa.vector, label='GNa')
     plt.legend()
     plt.subplot(223)
     ma = moose.element('%s/na/gateX' % (comp.path)).tableA
@@ -279,18 +279,18 @@ def two_populations(size=2):
     data = moose.Neutral('/data')
     vm_a = [moose.Table('/data/net2_Vm_A_%d' % (ii)) for ii in range(size)]
     for tab, comp in zip(vm_a, pop_a['compartment']):
-        moose.connect(tab, 'requestData', comp, 'get_Vm')
+        moose.connect(tab, 'requestOut', comp, 'getVm')
     vm_b = [moose.Table('/data/net2_Vm_B_%d' % (ii)) for ii in range(size)]
     for tab, comp in zip(vm_b, pop_b['compartment']):
-        moose.connect(tab, 'requestData', comp, 'get_Vm')
+        moose.connect(tab, 'requestOut', comp, 'getVm')
     gksyn_a = [moose.Table('/data/net2_Gk_syn_a_%d' % (ii)) for ii in range(size)]
     for tab, synchan in zip(gksyn_a, pop_a['synchan']):
-        moose.connect(tab, 'requestData', synchan, 'get_Gk')
+        moose.connect(tab, 'requestOut', synchan, 'getGk')
     gksyn_b = [moose.Table('/data/net2_Gk_syn_b_%d' % (ii)) for ii in range(size)]
     for tab, synchan in zip(gksyn_b, pop_b['synchan']):
-        moose.connect(tab, 'requestData', synchan, 'get_Gk')
+        moose.connect(tab, 'requestOut', synchan, 'getGk')
     pulsetable = moose.Table('/data/net2_pulse')
-    pulsetable.connect('requestData', pulse, 'get_output')
+    pulsetable.connect('requestOut', pulse, 'getOutput')
     return {'vm_a': vm_a,
             'vm_b': vm_b,
             'gksyn_a': gksyn_a,
@@ -315,12 +315,12 @@ def single_population(size=2):
     data = moose.Neutral('/data')
     vm = [moose.Table('/data/net1_Vm_%d' % (ii)) for ii in range(size)]
     for tab, comp in zip(vm, pop['compartment']):
-        moose.connect(tab, 'requestData', comp, 'get_Vm')
+        moose.connect(tab, 'requestOut', comp, 'getVm')
     gksyn = [moose.Table('/data/net1_Gk_syn_%d' % (ii)) for ii in range(size)]
     for tab, synchan in zip(gksyn, pop['synchan']):
-        moose.connect(tab, 'requestData', synchan, 'get_Gk')
+        moose.connect(tab, 'requestOut', synchan, 'getGk')
     pulsetable = moose.Table('/data/net1_pulse')
-    pulsetable.connect('requestData', pulse, 'get_output')
+    pulsetable.connect('requestOut', pulse, 'getOutput')
     return {'vm': vm,
             'gksyn': gksyn,
             'pulse': pulsetable,}
@@ -367,37 +367,37 @@ if __name__ == '__main__':
     plt.suptitle('Single population')
     plt.subplot(211)
     for vm in data1['vm']:
-        t = np.linspace(0, simtime, len(vm.vec))
-        plt.plot(t, vm.vec, label=vm.path)
-    plt.plot(np.linspace(0, simtime, len(data1['pulse'].vec)), data1['pulse'].vec * 1e6, label='Inject(uA)')
+        t = np.linspace(0, simtime, len(vm.vector))
+        plt.plot(t, vm.vector, label=vm.path)
+    plt.plot(np.linspace(0, simtime, len(data1['pulse'].vector)), data1['pulse'].vector * 1e6, label='Inject(uA)')
     plt.legend()
     plt.subplot(212)    
     for gk in data1['gksyn']:
-        t = np.linspace(0, simtime, len(gk.vec))
-        plt.plot(t, gk.vec, label=gk.path)
+        t = np.linspace(0, simtime, len(gk.vector))
+        plt.plot(t, gk.vector, label=gk.path)
     plt.legend()
     plt.figure(2)
     plt.suptitle('Two populations')
     plt.subplot(221)
     for vm in data2['vm_a']:
-        t = np.linspace(0, simtime, len(vm.vec))
-        plt.plot(t, vm.vec, label=vm.path)
-    plt.plot(np.linspace(0, simtime, len(data2['pulse'].vec)), data2['pulse'].vec*1e6, label='Inject(uA)')
+        t = np.linspace(0, simtime, len(vm.vector))
+        plt.plot(t, vm.vector, label=vm.path)
+    plt.plot(np.linspace(0, simtime, len(data2['pulse'].vector)), data2['pulse'].vector*1e6, label='Inject(uA)')
     plt.legend()
     plt.subplot(223)
     for vm in data2['vm_b']:
-        t = np.linspace(0, simtime, len(vm.vec))
-        plt.plot(t, vm.vec, label=vm.path)
+        t = np.linspace(0, simtime, len(vm.vector))
+        plt.plot(t, vm.vector, label=vm.path)
     plt.legend()
     plt.subplot(222)
     for gk in data2['gksyn_a']:
-        t = np.linspace(0, simtime, len(gk.vec))
-        plt.plot(t, gk.vec, label=gk.path)
+        t = np.linspace(0, simtime, len(gk.vector))
+        plt.plot(t, gk.vector, label=gk.path)
     plt.legend()
     plt.subplot(224)
     for gk in data2['gksyn_b']:
-        t = np.linspace(0, simtime, len(gk.vec))
-        plt.plot(t, gk.vec, label=gk.path)
+        t = np.linspace(0, simtime, len(gk.vector))
+        plt.plot(t, gk.vector, label=gk.path)
     plt.legend()
     plt.show()
     

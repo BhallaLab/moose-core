@@ -211,15 +211,15 @@ def makeModelInCubeMesh():
     adaptK = moose.Adaptor( '/n/chem/neuroMesh/adaptK' )
     chemK = moose.element( '/n/chem/neuroMesh/kChan' )
     elecK = moose.element( '/n/elec/compt/K' )
-    moose.connect( adaptK, 'requestField', chemK, 'get_conc', 'OneToAll' )
-    moose.connect( adaptK, 'outputSrc', elecK, 'set_Gbar', 'OneToAll' )
+    moose.connect( adaptK, 'requestField', chemK, 'getConc', 'OneToAll' )
+    moose.connect( adaptK, 'outputSrc', elecK, 'setGbar', 'OneToAll' )
     adaptK.scale = 0.3               # from mM to Siemens
 
     adaptCa = moose.Adaptor( '/n/chem/neuroMesh/adaptCa' )
     chemCa = moose.element( '/n/chem/neuroMesh/Ca' )
     elecCa = moose.element( '/n/elec/compt/ca' )
     moose.connect( elecCa, 'concOut', adaptCa, 'input', 'OneToAll' )
-    moose.connect( adaptCa, 'outputSrc', chemCa, 'set_conc', 'OneToAll' )
+    moose.connect( adaptCa, 'outputSrc', chemCa, 'setConc', 'OneToAll' )
     adaptCa.outputOffset = 0.0001      # 100 nM offset in chem conc
     adaptCa.scale = 0.05               # Empirical: 0.06 max to 0.003 mM
 
@@ -227,7 +227,7 @@ def addPlot( objpath, field, plot ):
     assert moose.exists( objpath )
     tab = moose.Table( '/graphs/' + plot )
     obj = moose.element( objpath )
-    moose.connect( tab, 'requestData', obj, field )
+    moose.connect( tab, 'requestOut', obj, field )
     return tab
 
 def dumpPlots( fname ):
@@ -239,16 +239,16 @@ def dumpPlots( fname ):
 def makeElecPlots():
     graphs = moose.Neutral( '/graphs' )
     elec = moose.Neutral( '/graphs/elec' )
-    addPlot( '/n/elec/compt', 'get_Vm', 'elec/Vm' )
-    addPlot( '/n/elec/compt/ca', 'get_Ca', 'elec/Ca' )
-    addPlot( '/n/elec/compt/K', 'get_Gk', 'elec/K_Gk' )
+    addPlot( '/n/elec/compt', 'getVm', 'elec/Vm' )
+    addPlot( '/n/elec/compt/ca', 'getCa', 'elec/Ca' )
+    addPlot( '/n/elec/compt/K', 'getGk', 'elec/K_Gk' )
 
 def makeChemPlots():
     graphs = moose.Neutral( '/graphs' )
-    addPlot( '/n/chem/neuroMesh/Ca', 'get_conc', 'chemCa' )
-    addPlot( '/n/chem/neuroMesh/kChan_p', 'get_conc', 'chemkChan_p' )
-    addPlot( '/n/chem/neuroMesh/kChan', 'get_conc', 'chemkChan' )
-    addPlot( '/n/chem/neuroMesh/Ca.kinase', 'get_conc', 'activeKinase' )
+    addPlot( '/n/chem/neuroMesh/Ca', 'getConc', 'chemCa' )
+    addPlot( '/n/chem/neuroMesh/kChan_p', 'getConc', 'chemkChan_p' )
+    addPlot( '/n/chem/neuroMesh/kChan', 'getConc', 'chemkChan' )
+    addPlot( '/n/chem/neuroMesh/Ca.kinase', 'getConc', 'activeKinase' )
 
 def testCubeMultiscale( useSolver ):
     elecDt = 10e-6

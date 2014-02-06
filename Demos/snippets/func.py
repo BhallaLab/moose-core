@@ -102,7 +102,7 @@ def test_func():
     
     simdt = xarr[1] - xarr[0]
     input = moose.StimulusTable('%s/xtab' % (model.path))
-    input.vec = xarr
+    input.vector = xarr
     input.startTime = 0.0
     input.stepPosition = xarr[0]
     input.stopTime = xarr[-1] - xarr[0]
@@ -111,13 +111,13 @@ def test_func():
     moose.connect(input, 'output', func_1, 'xIn')
 
     x_tab = moose.Table('/data/xtab')
-    moose.connect(x_tab, 'requestData', input, 'get_outputValue')
+    moose.connect(x_tab, 'requestOut', input, 'getOutputValue')
 
     y_tab = moose.Table('%s/y' % (data.path))
-    moose.connect(y_tab, 'requestData', func_1, 'get_value')
+    moose.connect(y_tab, 'requestOut', func_1, 'getValue')
     yprime_tab = moose.Table('%s/yprime' % (data.path))
-    moose.connect(yprime_tab, 'requestData',
-                  func_1, 'get_derivative')
+    moose.connect(yprime_tab, 'requestOut',
+                  func_1, 'getDerivative')
     func_1.mode = 3 # This forces both f ad f' to be computed and sent out
     moose.setClock(0, simdt)
     moose.setClock(1, simdt)
@@ -131,10 +131,10 @@ def test_func():
     t = xarr[-1] - xarr[0]
     print 'Run for', t
     moose.start(t)
-    y = np.asarray(y_tab.vec)
-    yp = np.asarray(yprime_tab.vec)
-    pylab.plot(x_tab.vec, y, 'r-.', label='f(x)')
-    pylab.plot(x_tab.vec, yp/1000, 'b--', label="1e-3 * f'(x)")
+    y = np.asarray(y_tab.vector)
+    yp = np.asarray(yprime_tab.vector)
+    pylab.plot(x_tab.vector, y, 'r-.', label='f(x)')
+    pylab.plot(x_tab.vector, yp/1000, 'b--', label="1e-3 * f'(x)")
     pylab.legend()
     pylab.show()
 

@@ -42,7 +42,7 @@ def createNetwork(synWeights,inputGiven):
     data = moose.Neutral('/data')
     pg = moose.PulseGen('/hopfield/inPulGen')
     pgTable = moose.Table('/hopfield/inPulGen/pgTable')
-    moose.connect(pgTable, 'requestData', pg, 'get_output')
+    moose.connect(pgTable, 'requestOut', pg, 'getOutput')
 #    pg.firstDelay = 10e-3
 #    pg.firstWidth = 2e-03
 #    pg.firstLevel = 3
@@ -61,7 +61,7 @@ def createNetwork(synWeights,inputGiven):
         cell[ii].synapse[ii].weight = 1.0
         cell[ii].setField('thresh', 0.98)
         vmtable.append(moose.Table('/data/Vm_%d' % (ii)))
-        moose.connect(vmtable[ii], 'requestData', cell[ii], 'get_Vm')
+        moose.connect(vmtable[ii], 'requestOut', cell[ii], 'getVm')
         spikegen.append(moose.SpikeGen('/hopfield/inSpkGen_%d' % (ii)))
         if inputGiven[ii] == 0:
             spikegen[ii].threshold = 4.0
@@ -72,7 +72,7 @@ def createNetwork(synWeights,inputGiven):
         moose.connect(pg, 'outputOut', spikegen[ii], 'Vm')
         # No self connection - so we can use the synapse [ii] for input delivery
         moose.connect(spikegen[ii], 'event', cell[ii].synapse[ii], 'addSpike')
-        moose.connect(intable[ii], 'requestData', spikegen[ii], 'get_hasFired')
+        moose.connect(intable[ii], 'requestOut', spikegen[ii], 'getHasFired')
 #    end1 = datetime.now()
     for ii in range(numberOfCells):
         for jj in range(numberOfCells):
@@ -118,13 +118,13 @@ if __name__ == '__main__':
     moose.start(0.2)
     ii = 0
     for vm in vmtable:
-        plot(np.linspace(0, 0.2, len(vm.vec)), vm.vec + ii*1.5e-7, label=vm.name)
+        plot(np.linspace(0, 0.2, len(vm.vector)), vm.vector + ii*1.5e-7, label=vm.name)
         ii += 1
     show()
-# #plot(pgTable.vec[1:])
+# #plot(pgTable.vector[1:])
 # #for yset,inTable in enumerate(inTables):
-# #    plot(float(yset)+inTable.vec[1:])
+# #    plot(float(yset)+inTable.vector[1:])
 # for ySet,Vm in enumerate(Vms):
-#     plot(float(2*ySet)/(1e+7)+Vm.vec[1:])
-# #plot(Vms[0].vec[1:])
+#     plot(float(2*ySet)/(1e+7)+Vm.vector[1:])
+# #plot(Vms[0].vector[1:])
 # show()
