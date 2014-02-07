@@ -58,7 +58,7 @@ class LIFComp(moose.Compartment):
         moose.Compartment.__init__(self, *args)
         self.spikegen = moose.SpikeGen('%s/spike' % (self.path))
         self.dynamics = moose.Func('%s/dynamics' % (self.path))
-        self.dynamics.expression = 'x > Vthreshold? Vreset: x'
+        self.dynamics.expr = 'x > Vthreshold? Vreset: x'
         moose.connect(self, 'VmOut', self.dynamics, 'xIn')
         moose.connect(self, 'VmOut', self.spikegen, 'Vm')
 
@@ -97,9 +97,10 @@ def setup_two_cells():
     b2.Vthreshold = -20e-3
     b2.Vreset = -70e-3
     syn = moose.SynChan('%s/syn' % (b2.path))
-    moose.connnect(b2, 'channel', syn, 'channel')
+    syn.synapse.num = 1
+    moose.connect(b2, 'channel', syn, 'channel')
     moose.connect(a1.spikegen, 'spikeOut',
-                  syn, 'addSpike')
+                  syn.synapse.vec, 'addSpike')
     stim = moose.PulseGen('stim')
     stim.delay[0] = 100e-3
     stim.width[0] = 10e-3
