@@ -517,8 +517,8 @@ def resetSim(simpaths, simdt, plotdt, simmethod='hsolve'):
     _moose.setClock(INITCLOCK, simdt)
     _moose.setClock(ELECCLOCK, simdt) # The hsolve and ee methods use clock 1
     _moose.setClock(CHANCLOCK, simdt) # hsolve uses clock 2 for mg_block, nmdachan and others.
-    _moose.setClock(POOLCLOCK, simdt) # Ca/ion pools use clock 3
-    _moose.setClock(STIMCLOCK, simdt) # Ca/ion pools use clock 3
+    _moose.setClock(POOLCLOCK, simdt) # Ca/ion pools & funcs use clock 3
+    _moose.setClock(STIMCLOCK, simdt) # Ca/ion pools & funcs use clock 3
     _moose.setClock(PLOTCLOCK, plotdt) # for tables
     for simpath in simpaths:
         _moose.useClock(PLOTCLOCK, simpath+'/##[TYPE=Table]', 'process')
@@ -540,6 +540,7 @@ def resetSim(simpaths, simdt, plotdt, simmethod='hsolve'):
             _moose.useClock(ELECCLOCK, simpath+'/##[TYPE=Compartment]', 'process')
             _moose.useClock(CHANCLOCK, simpath+'/##[TYPE=HHChannel]', 'process')
             _moose.useClock(POOLCLOCK, simpath+'/##[TYPE=CaConc]', 'process')
+            _moose.useClock(POOLCLOCK, simpath+'/##[TYPE=Func]', 'process')
         else: # use hsolve, one hsolve for each Neuron
             print 'Using hsolve'
             element = _moose.Neutral(simpath)
@@ -564,7 +565,7 @@ def setupTable(name, obj, qtyname, tables_path=None):
     vmTable = _moose.Table(tables_path+'/'+name)
     ## stepMode no longer supported, connect to 'input'/'spike' message dest to record Vm/spiktimes
     # vmTable.stepMode = TAB_BUF 
-    _moose.connect( vmTable, "requestData", obj, 'get_'+qtyname)
+    _moose.connect( obj, qtyname+'Out', vmTable, "input")
     return vmTable
 
 def connectSynapse(context, compartment, synname, gbar_factor):
