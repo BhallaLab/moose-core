@@ -51,15 +51,19 @@ crossing and resetting the Vm."""
 
 import moose
 from moose import utils
+from pylab import *
+
 class LIFComp(moose.Compartment):
     """Leaky integrate and fire neuron using regular compartments,
     spikegen and Func."""
     def __init__(self, *args):
         moose.Compartment.__init__(self, *args)
         self.spikegen = moose.SpikeGen('%s/spike' % (self.path))
+        self.spikegen.edgeTriggered = 1 # This ensures that spike is generated only on leading edge.
         self.dynamics = moose.Func('%s/dynamics' % (self.path))
         self.dynamics.expr = 'x > Vthreshold? Vreset: x'
         moose.connect(self, 'VmOut', self.dynamics, 'xIn')
+        moose.connect(self.dynamics, 'valueOut', self, 'setVm')
         moose.connect(self, 'VmOut', self.spikegen, 'Vm')
 
     @property
@@ -88,35 +92,44 @@ def setup_two_cells():
     b1 = LIFComp('/model/b1')
     b2 = LIFComp('/model/b2')
     moose.connect(b1, 'raxial', b2, 'axial')
-    a1.Vthreshold = -20e-3
+    a1.Vthreshold = -55e-3
     a1.Vreset = -70e-3
-    a2.Vthreshold = -20e-3
+    a2.Vthreshold = -55e-3
     a2.Vreset = -70e-3
-    b1.Vthreshold = -20e-3
+    b1.Vthreshold = -55e-3
     b1.Vreset = -70e-3
-    b2.Vthreshold = -20e-3
+    b2.Vthreshold = -55e-3
     b2.Vreset = -70e-3
+    ## Adding a SynChan gives a core dump
     syn = moose.SynChan('%s/syn' % (b2.path))
     syn.synapse.num = 1
     moose.connect(b2, 'channel', syn, 'channel')
-    moose.connect(a1.spikegen, 'spikeOut',
-                  syn.synapse.vec, 'addSpike')
+    ## below gives a core dump on running
+    #moose.connect(a1.spikegen, 'spikeOut',
+    #              syn.synapse.vec, 'addSpike')
     stim = moose.PulseGen('stim')
     stim.delay[0] = 100e-3
     stim.width[0] = 10e-3
     stim.level[0] = 1e-9
-    moose.connect(stim, 'output', a1, 'injectMsg')
+    ## below gives error: NameError: check field names and type compatibility.
+    #moose.connect(stim, 'output', a1, 'injectMsg')
+    tables = []
     for c in moose.wildcardFind('/##[ISA=Compartment]'):
         c.Rm = 1e6
         c.Ra = 1e4
         c.Cm = 1e-9
-    syn.synapse[0].delay = 1e-3
-    syn.Gk = 1e-9
+        c.inject = 5.1e-9
+        tables.append( utils.setupTable("vmTable",a1,'Vm') )
+    #syn.synapse[0].delay = 1e-3
+    #syn.Gk = 1e-9
+    return tables
 
 if __name__ == '__main__':
-    setup_two_cells()
+    tables = setup_two_cells()
     utils.setDefaultDt()
     utils.assignDefaultTicks(solver='ee')
     utils.stepRun(1.0, 100e-3)    
+    plot(tables[0].vector)
+    show()
 # 
 # lifcomp.py ends here
