@@ -220,6 +220,12 @@ int singleLevelWildcard( ObjId start, const string& path, vector< ObjId >& ret )
  *
  * Note that for the index, an empty [] means ALLDATA, but the 
  * absence of the braces altogether means zero.
+ *
+ * Note also that if the name ends in the wildcard '#', then we assume
+ * that all indices are OK, unless overridden by a subsequent specific
+ * index via braces. 
+ * So foo# gives all indices
+ * but foo#[3] only gives index == 3.
  */
 unsigned int findBraceContent( const string& path, string& beforeBrace, 
 	string& insideBrace )
@@ -236,6 +242,9 @@ unsigned int findBraceContent( const string& path, string& beforeBrace,
 		return 0;
 	if ( names.size() >= 1 )
 		beforeBrace = names[0];
+	unsigned int len = beforeBrace.length();
+	if ( len > 0 && beforeBrace[len -1] == '#' )
+		index = ALLDATA;
 	if ( names.size() >= 2 ) {
 		const string& n = names[1];
 		if ( n == "]" ) { // A [] construct means use all indices.
@@ -244,7 +253,7 @@ unsigned int findBraceContent( const string& path, string& beforeBrace,
 			index = atoi( n.c_str() );
 		} else { // some complicated text construct for the brace
 			insideBrace = n.substr( 0, n.length() - 1 );
-			return 0; // Even if there is another brace, we can't handle it.
+			return index; 
 		}
 		if ( names.size() == 3 ) { // name[number][another_string]
 			string n1 = names[2].substr( 0, names[2].length() - 1 );
@@ -269,7 +278,8 @@ bool matchName( ObjId id, unsigned int index,
 	  return false;
 	}
 
-	if ( index == ALLDATA || index == id.dataIndex || id.dataIndex == ALLDATA ) {
+	if ( index == ALLDATA || index == id.dataIndex || 
+			id.dataIndex == ALLDATA ) {
 		if ( matchBeforeBrace( id, beforeBrace ) ) {
 			if ( insideBrace.length() == 0 ) {
 				return true;
@@ -473,6 +483,27 @@ void testWildcard()
 	i = findBraceContent( "zod[24]", bb, ib );
 	assert( i == 24 );
 	assert( bb == "zod" );
+	assert( ib == "" );
+
+	i = findBraceContent( "zod#", bb, ib );
+	assert( i == ALLDATA );
+	assert( bb == "zod#" );
+	assert( ib == "" );
+	i = findBraceContent( "zod#[]", bb, ib );
+	assert( i == ALLDATA );
+	assert( bb == "zod#" );
+	assert( ib == "" );
+	i = findBraceContent( "zod#[ISA=hippo]", bb, ib );
+	assert( i == ALLDATA );
+	assert( bb == "zod#" );
+	assert( ib == "ISA=hippo" );
+	i = findBraceContent( "zod#[3]", bb, ib );
+	assert( i == 3 );
+	assert( bb == "zod#" );
+	assert( ib == "" );
+	i = findBraceContent( "zod##", bb, ib );
+	assert( i == ALLDATA );
+	assert( bb == "zod##" );
 	assert( ib == "" );
 
 
