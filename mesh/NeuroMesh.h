@@ -111,6 +111,8 @@ class NeuroMesh: public MeshCompt
 
 		unsigned int innerGetDimensions() const;
 
+		vector< unsigned int > getParentVoxel() const;
+
 		//////////////////////////////////////////////////////////////////
 		// FieldElement assignment stuff for MeshEntries
 		//////////////////////////////////////////////////////////////////

@@ -2384,7 +2384,7 @@ From 19 Jan:
 * recurrentIntFire.py crashes when set to run for 10 seconds. Suspect the 
 	synapse event handling again.
 Implementation things to handle:
-- Wildcard handling of full paths with indices.
++ Wildcard handling of full paths with indices.
 - LookupGet across nodes.
 - The Msg information functions for src msgs: msgSrcs and MsgSrcFunctions.
 - Diffusion handler.
@@ -2397,6 +2397,7 @@ Implementation things to handle:
 Porting:
 - Ksolver
 - Biophysics directory
+	HHGate is not working as an element field of HHChannel - somehow it gets a wrong Id. Are we supposed to replicate the FieldElementFinfoBase::postCreate function in createGate function because deferCreate is true?
 - Hsolver.
 
 ============================================================================
@@ -2463,5 +2464,57 @@ x = moose.wildcardFind( '/a/##' )
 This should instead give a whole lot of ObjIds.
 
 Much pain later, fixed. Added unit tests for it.
-Subha has uncovered another bug. Fixed. Added unit test.
+Subha has uncovered another bug. Fixed. Added unit test. Checkin 5033.
+
+The way to handle the NeuroMesh is to use getStencil to build up the
+structure before reordering.
+============================================================================
+29 Jan.
+- Find twigs
+- Find first-order junctions joining 2 or more twigs
+- Find 2nd order junctions
+etc.
+- Go through entire sparse matrix, count numCols on each row.
+- Those with just 2 entries are twigs. Note them.
+- Start from a twig. Iterate down to connected rows till you hit a row with
+	> 3 entries . Stop. Note the branch entries, two or more of them.
+- Start from another twig. Likewise.
+- Count each 'hit' on each noted branch entry.
+- Now go through branch entries. On each noted branch entry, check if it 
+	has been hit by as many twigs as the branch entry has columns. If so,
+	start off a sequence with this in the same manner.
+- 
+- Now go through branch entries 
+4 Feb.
+Trying to compile. Something wrong with 
+g++  -lgsl -lgslcblas fastElim.cpp
+
+============================================================================
+6 Feb.
+Turned out to be easy: the compile line was the wrong way around.
+g++ fastElim.cpp -lgsl -lgslcblas 
+
+Now looking at algorithm for sorting tree. The use of the matrix for doing this
+is horribly inefficient. A tree structure would be the right way to do it.
+Working with a parents vector.
+
+Implemented, compiles, crashes when run. Progress!
+============================================================================
+7 Feb,
+Parents vector test works. Now to try with a much more mangled tree.
+
+I suspect now the solver itself is wrong. The mangled test had more cross-
+terms.
+============================================================================
+9 Feb
+Finally defeated it. The solver was wrong, enormously so. Logical errors both 
+in the forward substitution and backward elimination stages. The amazing
+thing is that it actually gave the correct solution for the earlier examples.
+
+For a 11x11 matrix, (11 compartment) model, it does 24 (a -= b*c) operations
+and 11 multiplications. So pretty efficient. For a linear cable it is
+2(N-2) of the (a -= b*c) operations, and N multiplications.
+I think the calculation is 2( B + (N-2) ) where B is # of branch points,
+N is number of compartments.
+.
 ============================================================================

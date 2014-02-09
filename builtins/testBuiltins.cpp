@@ -253,7 +253,7 @@ void testTable()
 	for ( unsigned int i = 0; i < 100; ++i ) {
 		t->input( sqrt((double) i ) );
 	}
-	vector< double > values = Field< vector< double > >::get( tabid, "vec");
+	vector< double > values = Field< vector< double > >::get( tabid, "vector");
 	assert( values.size() == 100 );
 	for ( unsigned int i = 0; i < 100; ++i ) {
 		double ret = LookupField< unsigned int, double >::get( tabid, "y", i );
@@ -301,7 +301,7 @@ void testGetMsg()
 
 	numEntries = Field< unsigned int >::get( tabid, "size" );
 	assert( numEntries == 101 ); // One for reinit call, 100 for process.
-	vector< double > temp = Field< vector< double > >::get( tabid, "vec" );
+	vector< double > temp = Field< vector< double > >::get( tabid, "vector" );
 
 	for ( unsigned int i = 0; i < 100; ++i ) {
 		double ret = LookupField< unsigned int, double >::get( tabid, "y", i );
