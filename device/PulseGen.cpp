@@ -34,7 +34,7 @@
 
 static SrcFinfo1< double >* outputOut()
 {
-    static SrcFinfo1< double > outputOut( "outputOut",
+    static SrcFinfo1< double > outputOut( "output",
                                           "Current output level.");
     return &outputOut;
 }
@@ -44,7 +44,7 @@ const Cinfo* PulseGen::initCinfo()
     ///////////////////////////////////////////////////////
     // Field definitions
     ///////////////////////////////////////////////////////
-    static ReadOnlyValueFinfo< PulseGen, double > output("output",
+    static ReadOnlyValueFinfo< PulseGen, double > output("outputValue",
                                                  "Output amplitude",
                                                  &PulseGen::getOutput);
     static ValueFinfo< PulseGen, double > baseLevel("baseLevel",
