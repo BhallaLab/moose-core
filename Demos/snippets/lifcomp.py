@@ -49,10 +49,12 @@
 compartment using regular compartment and Func to check for thresold
 crossing and resetting the Vm."""
 
+
 import moose
 from moose import utils
 from pylab import *
 
+delayMax = 0.1
 class LIFComp(moose.Compartment):
     """Leaky integrate and fire neuron using regular compartments,
     spikegen and Func."""
@@ -102,34 +104,39 @@ def setup_two_cells():
     b2.Vreset = -70e-3
     ## Adding a SynChan gives a core dump
     syn = moose.SynChan('%s/syn' % (b2.path))
-    syn.synapse.num = 1
+    syn.bufferTime = delayMax * 2
+    syn.numSynapses = 1
+    syn.synapse.delay = delayMax
     moose.connect(b2, 'channel', syn, 'channel')
     ## below gives a core dump on running
-    #moose.connect(a1.spikegen, 'spikeOut',
-    #              syn.synapse.vec, 'addSpike')
+    m = moose.connect(a1.spikegen, 'spikeOut',
+                  syn.synapse.vec, 'addSpike', 'Sparse')
+    m.setRandomConnectivity(1.0, 1)
     stim = moose.PulseGen('stim')
     stim.delay[0] = 100e-3
     stim.width[0] = 10e-3
     stim.level[0] = 1e-9
     ## below gives error: NameError: check field names and type compatibility.
-    #moose.connect(stim, 'output', a1, 'injectMsg')
+    moose.connect(stim, 'output', a1, 'injectMsg')
     tables = []
     for c in moose.wildcardFind('/##[ISA=Compartment]'):
         c.Rm = 1e6
         c.Ra = 1e4
         c.Cm = 1e-9
         c.inject = 5.1e-9
-        tables.append( utils.setupTable("vmTable",a1,'Vm') )
-    #syn.synapse[0].delay = 1e-3
-    #syn.Gk = 1e-9
+        tables.append( utils.setupTable(c.name, c, 'Vm') )
+    syn.synapse[0].delay = 1e-3
+    syn.Gk = 1e-9
     return tables
 
 if __name__ == '__main__':
     tables = setup_two_cells()
     utils.setDefaultDt()
     utils.assignDefaultTicks(solver='ee')
-    utils.stepRun(1.0, 100e-3)    
-    plot(tables[0].vector)
+    utils.stepRun(1.0, 100e-3)
+    for t in tables:
+        plot(t.vector, label=t.name)
+    legend()
     show()
 # 
 # lifcomp.py ends here
