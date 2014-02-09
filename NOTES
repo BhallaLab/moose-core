@@ -2514,7 +2514,11 @@ thing is that it actually gave the correct solution for the earlier examples.
 For a 11x11 matrix, (11 compartment) model, it does 24 (a -= b*c) operations
 and 11 multiplications. So pretty efficient. For a linear cable it is
 2(N-2) of the (a -= b*c) operations, and N multiplications.
-I think the calculation is 2( B + (N-2) ) where B is # of branch points,
-N is number of compartments.
-.
+I think the full figure for # of operations is 
+2( B + (N-2) ) where B is # of branch points, N is number of compartments.
+
+Checkin 5068.
+
+Next steps:
+
 ============================================================================
