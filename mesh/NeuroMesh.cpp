@@ -117,6 +117,11 @@ const Cinfo* NeuroMesh::initCinfo()
 			"Number of diffusive compartments in model",
 			&NeuroMesh::getNumDiffCompts
 		);
+		static ReadOnlyValueFinfo< NeuroMesh, vector< unsigned int > > parentVoxel(
+			"parentVoxel",
+			"Vector of indices of parents of each voxel.",
+			&NeuroMesh::getParentVoxel
+		);
 
 		static ValueFinfo< NeuroMesh, double > diffLength(
 			"diffLength",
@@ -646,6 +651,12 @@ unsigned int NeuroMesh::getNumDiffCompts() const
 {
 	return nodeIndex_.size();
 }
+
+vector< unsigned int > NeuroMesh::getParentVoxel() const
+{
+	return parent_;
+}
+
 
 // Deprecated
 vector< Id > spineVec( const vector< Id >& head )
