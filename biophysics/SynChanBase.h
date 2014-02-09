@@ -45,7 +45,10 @@ class SynChanBase: public SynHandler
 		/// Ik is read-only for MOOSE, but we provide the set 
 		/// func for derived classes to update it.
 		void setIk( double Ic );
-		double getIk() const;
+                double getIk() const;
+
+		void setBufferTime( double v );
+		double getBufferTime() const;
 
 		/////////////////////////////////////////////////////////////
 		// Dest function definitions
@@ -76,7 +79,11 @@ class SynChanBase: public SynHandler
 		// Here is the ChanBase data. Can't use Multiple ineritance here
 		ChanBase cb;
 
-	static const Cinfo* initCinfo();
+                static const Cinfo* initCinfo();
+
+          protected:
+                double bufferTime_; // size of ring buffer.
+
 };
 
 
