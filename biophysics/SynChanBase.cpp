@@ -47,6 +47,13 @@ static SrcFinfo1< double >* IkOut()
 
 const Cinfo* SynChanBase::initCinfo()
 {
+	static ValueFinfo< SynChanBase, double > bufferTime(
+		"bufferTime",
+		"Duration of spike buffer.",
+		&SynChanBase::setBufferTime,
+		&SynChanBase::getBufferTime
+	);
+
 	/////////////////////////////////////////////////////////////////////
 	// Shared messages
 	/////////////////////////////////////////////////////////////////////
@@ -122,6 +129,7 @@ const Cinfo* SynChanBase::initCinfo()
 		&Ek,				// Value
 		&Gk,				// Value
 		&Ik,				// ReadOnlyValue
+		&bufferTime,				// Value
 		IkOut(),				// Src
 	};
 	
@@ -152,7 +160,7 @@ static const Cinfo* synChanBaseCinfo = SynChanBase::initCinfo();
 // Constructor
 ///////////////////////////////////////////////////
 
-SynChanBase::SynChanBase()
+SynChanBase::SynChanBase():bufferTime_(0.01)
 { ; }
 
 SynChanBase::~SynChanBase()
@@ -229,6 +237,7 @@ void SynChanBase::process(  const Eref& e, const ProcPtr info )
 
 void SynChanBase::reinit(  const Eref& e, const ProcPtr info )
 {
+	reinitBuffer( info->dt, bufferTime_ );
 	channelOut()->send( e, cb.getGk(), cb.getEk() );
 	// Needed by GHK-type objects
 	permeability()->send( e, cb.getGk() );
@@ -242,4 +251,14 @@ void SynChanBase::updateIk()
 double SynChanBase::getVm() const
 {
 	return cb.getVm();
+}
+
+void SynChanBase::setBufferTime( const double v )
+{
+	bufferTime_ = v;
+}
+
+double SynChanBase::getBufferTime() const
+{
+	return bufferTime_;
 }

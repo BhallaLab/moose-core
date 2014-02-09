@@ -114,15 +114,15 @@ SynChan::SynChan()
 	: 
 	tau1_( 1.0e-3 ), tau2_( 1.0e-3 ),
 	normalizeWeights_( 0 ),
-    xconst1_(0.0),
-    yconst1_(1.0),
-    xconst2_(1.0),
-    yconst2_(0.0),
-    norm_(1.0),
-    activation_(0.0),
-    modulation_(1.0),
-    X_(0.0),
-    Y_(0.0)    
+        xconst1_(0.0),
+        yconst1_(1.0),
+        xconst2_(1.0),
+        yconst2_(0.0),
+        norm_(1.0),
+        activation_(0.0),
+        modulation_(1.0),
+        X_(0.0),
+        Y_(0.0)    
 { ; }
 
 SynChan::~SynChan()
@@ -259,6 +259,7 @@ void SynChan::reinit( const Eref& e, ProcPtr info )
 	*/
 	// while ( !pendingEvents_.empty() )
 	// 	pendingEvents_.pop();
+        SynChanBase::reinit(e, info);
 }
 
 void SynChan::activation( double val )
