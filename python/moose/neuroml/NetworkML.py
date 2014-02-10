@@ -329,15 +329,21 @@ class NetworkML():
                 precomp = moose.Compartment(pre_path)
                 ## if spikegen for this synapse doesn't exist in this compartment, create it
                 ## spikegens for different synapse_types can have different thresholds
-                if not moose.exists(pre_path+'/'+syn_name+'_spikegen'):
+                ## but an integrate and fire spikegen supercedes all other spikegens
+                if not moose.exist(pre_path+'/IaF_spikegen'):
+                    if not moose.exists(pre_path+'/'+syn_name+'_spikegen'):
+                        ## create new spikegen
+                        spikegen = moose.SpikeGen(pre_path+'/'+syn_name+'_spikegen')
+                        ## connect the compartment Vm to the spikegen
+                        moose.connect(precomp,"VmOut",spikegen,"Vm")
+                        ## spikegens for different synapse_types can have different thresholds
+                        spikegen.threshold = threshold
+                        spikegen.edgeTriggered = 1 # This ensures that spike is generated only on leading edge.
+                        #spikegen.refractT = 0.25e-3 ## usually events are raised at every time step that Vm > Threshold, can set either edgeTriggered as above or refractT
+                    ## wrap the existing or newly created spikegen in this compartment
                     spikegen = moose.SpikeGen(pre_path+'/'+syn_name+'_spikegen')
-                    ## connect the compartment Vm to the spikegen
-                    moose.connect(precomp,"VmOut",spikegen,"Vm")
-                    ## spikegens for different synapse_types can have different thresholds
-                    spikegen.threshold = threshold
-                    spikegen.edgeTriggered = 1 # This ensures that spike is generated only on leading edge.
-                    #spikegen.refractT = 0.25e-3 ## usually events are raised at every time step that Vm > Threshold, can set either edgeTriggered as above or refractT
-                spikegen = moose.SpikeGen(pre_path+'/'+syn_name+'_spikegen') # wrap the spikegen in this compartment
+                else:
+                    spikegen = moose.SpikeGen(pre_path+'/IaF_spikegen')
                 ## connect the spikegen to the synapse
                 ## note that you need to use Synapse (auto-created) under SynChan
                 ## to get/set weights , addSpike-s etc.
