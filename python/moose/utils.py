@@ -562,11 +562,14 @@ def setupTable(name, obj, qtyname, tables_path=None):
         tables_path = obj.path+'/data'
     ## in case tables_path does not exist, below wrapper will create it
     _moose.Neutral(tables_path)
-    vmTable = _moose.Table(tables_path+'/'+name)
+    qtyTable = _moose.Table(tables_path+'/'+name)
     ## stepMode no longer supported, connect to 'input'/'spike' message dest to record Vm/spiktimes
-    # vmTable.stepMode = TAB_BUF 
-    _moose.connect( obj, qtyname+'Out', vmTable, "input")
-    return vmTable
+    # qtyTable.stepMode = TAB_BUF 
+    ## below is wrong! reads qty twice every clock tick!
+    #_moose.connect( obj, qtyname+'Out', qtyTable, "input")
+    ## this is the correct method
+    _moose.connect( qtyTable, "requestOut", obj, 'get'+qtyname)
+    return qtyTable
 
 def connectSynapse(context, compartment, synname, gbar_factor):
     """
@@ -611,6 +614,7 @@ def printCellTree(cell):
         #    print "    |---", outmsg
         printRecursiveTree(compartmentid, level=2) # for channels and synapses and recursively lower levels
 
+## Use printCellTree which calls this
 def printRecursiveTree(elementid, level):
     """ Recursive helper function for printCellTree,
     specify depth/'level' to recurse and print subelements under MOOSE 'elementid'. """
@@ -631,6 +635,12 @@ def printRecursiveTree(elementid, level):
         elif classname in ['Mg_block']:
             childobj = _moose.Mg_block(childid)
             print spacefill+"|--", childobj.name, childobj.className, 'CMg',childobj.CMg, 'KMg_A',childobj.KMg_A, 'KMg_B',childobj.KMg_B
+        elif classname in ['SpikeGen']:
+            childobj = _moose.SpikeGen(childid)
+            print spacefill+"|--", childobj.name, childobj.className, 'threshold',childobj.threshold
+        elif classname in ['Func']:
+            childobj = _moose.Func(childid)
+            print spacefill+"|--", childobj.name, childobj.className, 'expr',childobj.expr
         elif classname in ['Table']: # Table gives segfault if printRecursiveTree is called on it
             return # so go no deeper
         #for inmsg in childobj.inMessages():
