@@ -16,7 +16,7 @@ sys.path.append('../../../python')
 SIMDT = 5e-5 # seconds
 PLOTDT = 5e-5 # seconds
 RUNTIME = 2.0 # seconds
-injectI = 2.5e-12 # Amperes
+injectI = 1e-8#2.5e-12 # Amperes
 
 ## moose imports
 import moose
@@ -32,7 +32,7 @@ def create_LIF():
     neuromlR.readNeuroMLFromFile('cells_channels/LIF.morph.xml')
     libcell = moose.Neuron('/library/LIF')
     LIFCellid = moose.copy(libcell,moose.Neutral('/cells'),'IF1')
-    LIFCell = moose.LeakyIaF(LIFCellid)
+    LIFCell = moose.Neuron(LIFCellid)
     return LIFCell
 
 def run_LIF():
@@ -45,22 +45,27 @@ def run_LIF():
 
 if __name__ == '__main__':
     IF1 = create_LIF()
-    IF1.inject = injectI
-    IF1vmTable = setupTable("vmTableIF1",IF1,'Vm')
+    printCellTree(IF1)
+    IF1Soma = moose.Compartment(IF1.path+'/soma_0')
+    ## setting inject in Compartment gives this error!
+    ## *** glibc detected *** python: corrupted double-linked list: 0x00000000038f9aa0 ***
+    IF1Soma.inject = injectI
+    IF1vmTable = setupTable("vmTableIF1",IF1Soma,'Vm')
 
     ## edge-detect the spikes using spike-gen (table does not have edge detect)
-    spikeGen = moose.SpikeGen(IF1.path+'/spikeGen')
-    spikeGen.threshold = IF1.Vthreshold
-    moose.connect(IF1,'VmOut',spikeGen,'Vm')
-    ## save spikes in table
-    table_path = moose.Neutral(IF1.path+'/data').path
+    ## IaF_spikegen is already present for compartments having IaF mechanisms
+    spikeGen = moose.SpikeGen(IF1Soma.path+'/IaF_spikeGen')
+    ## save spikes in table -- but some crazy spiketimes are printed
+    table_path = moose.Neutral(IF1Soma.path+'/data').path
     IF1spikesTable = moose.Table(table_path+'/spikesTable')
-    moose.connect(spikeGen,'event',IF1spikesTable,'input')
+    moose.connect(spikeGen,'spikeOut',IF1spikesTable,'input') ## spikeGen gives spiketimes
 
     run_LIF()
     print "Spiketimes :",IF1spikesTable.vector
     ## plot the membrane potential of the neuron
     timevec = arange(0.0,RUNTIME+PLOTDT/2.0,PLOTDT)
+    ## Something is crazy! Why twice the number of table entries compared to time!!??
     figure(facecolor='w')
+    print IF1vmTable
     plot(timevec, IF1vmTable.vector)
     show()
