@@ -463,7 +463,14 @@ def assignDefaultTicks(modelRoot='/model', dataRoot='/data', solver='hsolve'):
         # _moose.useClock(5, '%s/##[ISA==PoolBase]' % (kinetics[0].path), 'process')
         # _moose.useClock(8, '%s/##[ISA=Table]' % (dataRoot), 'process')
     else:
-        _moose.useClock(9, '%s/##[ISA=Table]' % (dataRoot), 'process')
+        # input() function is called in Table.process() wwhich gets
+        # called at each timestep. When a message is connected
+        # explicitly to input() dest field, it is driven by the sender
+        # and process() adds garbage value to the vector. Hence not to
+        # be scheduled.
+        for tab in '%s/##[ISA=Table]' % (dataRoot):
+            if len(tab.neighbors['input']) == 0:
+                _moose.useClock(9, tab.path, 'process')
 
 def stepRun(simtime, steptime, verbose=True, logger=None):
     """Run the simulation in steps of `steptime` for `simtime`."""
@@ -521,7 +528,14 @@ def resetSim(simpaths, simdt, plotdt, simmethod='hsolve'):
     _moose.setClock(STIMCLOCK, simdt) # Ca/ion pools & funcs use clock 3
     _moose.setClock(PLOTCLOCK, plotdt) # for tables
     for simpath in simpaths:
-        _moose.useClock(PLOTCLOCK, simpath+'/##[TYPE=Table]', 'process')
+        # input() function is called in Table.process() wwhich gets
+        # called at each timestep. When a message is connected
+        # explicitly to input() dest field, it is driven by the sender
+        # and process() adds garbage value to the vector. Hence not to
+        # be scheduled.
+        for tab in _moose.wildcardFind(simpath+'/##[TYPE=Table]'):
+            if len(tab.neighbors['input']) == 0:
+                _moose.useClock(PLOTCLOCK, tab.path, 'process')
         _moose.useClock(ELECCLOCK, simpath+'/##[TYPE=PulseGen]', 'process')
         _moose.useClock(STIMCLOCK, simpath+'/##[TYPE=DiffAmp]', 'process')
         _moose.useClock(STIMCLOCK, simpath+'/##[TYPE=VClamp]', 'process')
@@ -529,6 +543,7 @@ def resetSim(simpaths, simdt, plotdt, simmethod='hsolve'):
         _moose.useClock(STIMCLOCK, simpath+'/##[TYPE=RC]', 'process')
         _moose.useClock(ELECCLOCK, simpath+'/##[TYPE=LeakyIaF]', 'process')
         _moose.useClock(ELECCLOCK, simpath+'/##[TYPE=IntFire]', 'process')
+        _moose.useClock(ELECCLOCK, simpath+'/##[TYPE=SpikeGen]', 'process')
         _moose.useClock(CHANCLOCK, simpath+'/##[TYPE=HHChannel2D]', 'process')
         _moose.useClock(CHANCLOCK, simpath+'/##[TYPE=SynChan]', 'process')
         ## If simmethod is not hsolve, set clocks for the biophysics,
