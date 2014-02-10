@@ -124,6 +124,7 @@ def setup_two_cells():
     b2.Vreset = -70e-3
     ## Adding a SynChan gives a core dump
     syn = moose.SynChan('%s/syn' % (b2.path))
+    print '####', syn.path
     syn.bufferTime = delayMax * 2
     syn.numSynapses = 1
     syn.synapse.delay = delayMax
@@ -131,10 +132,10 @@ def setup_two_cells():
     m = moose.connect(a1.spikegen, 'spikeOut',
                   syn.synapse.vec, 'addSpike', 'Sparse')
     m.setRandomConnectivity(1.0, 1)
-    stim = moose.PulseGen('stim')
+    stim = moose.PulseGen('/model/stim')
     stim.delay[0] = 10e-3
     stim.width[0] = 10e-3
-    stim.level[0] = 0.0 # 1e-9
+    stim.level[0] = 1e-9
     ## current injection doesn't seem to work.
     moose.connect(stim, 'output', a1, 'injectMsg')
     tables = []
@@ -156,7 +157,7 @@ def setup_two_cells():
 if __name__ == '__main__':
     tables = setup_two_cells()
     utils.setDefaultDt(elecdt=simdt, plotdt2=plotdt)
-    utils.assignDefaultTicks(solver='ee')
+    utils.assignDefaultTicks(modelRoot='/model', dataRoot='/data', solver='ee')
     moose.reinit()
     utils.stepRun(simtime, stepsize)
     for ii, tab in enumerate(tables):
