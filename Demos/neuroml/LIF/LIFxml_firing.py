@@ -47,15 +47,12 @@ if __name__ == '__main__':
     IF1 = create_LIF()
     printCellTree(IF1)
     IF1Soma = moose.Compartment(IF1.path+'/soma_0')
-    ## setting inject in Compartment gives this error!
-    ## *** glibc detected *** python: corrupted double-linked list: 0x00000000038f9aa0 ***
     IF1Soma.inject = injectI
     IF1vmTable = setupTable("vmTableIF1",IF1Soma,'Vm')
 
     ## edge-detect the spikes using spike-gen (table does not have edge detect)
     ## IaF_spikegen is already present for compartments having IaF mechanisms
-    spikeGen = moose.SpikeGen(IF1Soma.path+'/IaF_spikeGen')
-    ## save spikes in table -- but some crazy spiketimes are printed
+    spikeGen = moose.SpikeGen(IF1Soma.path+'/IaF_spikegen')
     table_path = moose.Neutral(IF1Soma.path+'/data').path
     IF1spikesTable = moose.Table(table_path+'/spikesTable')
     moose.connect(spikeGen,'spikeOut',IF1spikesTable,'input') ## spikeGen gives spiketimes
@@ -69,3 +66,6 @@ if __name__ == '__main__':
     print IF1vmTable
     plot(timevec, IF1vmTable.vector)
     show()
+
+    ## At the end, some issue with Func (as per Subha) gives below or core dump error
+    ## *** glibc detected *** python: corrupted double-linked list: 0x00000000038f9aa0 ***

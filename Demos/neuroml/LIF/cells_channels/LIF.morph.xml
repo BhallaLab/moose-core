@@ -23,9 +23,10 @@
                     <bio:parameter name="gmax" value="31">
                       <bio:group>all</bio:group>
                     </bio:parameter>
-                </bio:mechanism>            <!--Adding the biophysical parameters-->
-
-            <biophysics units="SI Units">
+                    <bio:parameter name="e" value="-0.065">
+                      <bio:group>all</bio:group>
+                    </bio:parameter>
+                </bio:mechanism>
 
                 <bio:mechanism name="IaF" type="Channel Mechanism">
                     <!-- setting Rm, Cm, Em, etc to match the Cerebellar Granule Cell 1998
@@ -63,7 +64,6 @@
                   <bio:group>all</bio:group>
                 </bio:parameter>
                 </bio:init_memb_potential>
-                </biophysics>
 
             </biophysics>
 
