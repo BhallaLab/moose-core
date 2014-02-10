@@ -54,7 +54,12 @@ import moose
 from moose import utils
 from pylab import *
 
-delayMax = 0.1
+simtime = 500e-3 # Total simulation time
+stepsize = 100e-3 # Time step for pauses between runs
+simdt = 1e-4 # time step for numerical integration
+plotdt = 0.25e-3 # time step for plotting
+
+delayMax = 0.1 # Maximum synaptic delay 
 
 class LIFComp(moose.Compartment):
     """Leaky integrate and fire neuron using regular compartments,
@@ -71,6 +76,8 @@ class LIFComp(moose.Compartment):
 
     @property
     def Vreset(self):
+        """Reset voltage. The cell's membrane potential is set to this value
+        after spiking."""
         return self.dynamics.var['Vreset']
 
     @Vreset.setter
@@ -79,6 +86,8 @@ class LIFComp(moose.Compartment):
 
     @property
     def Vthreshold(self):
+        """Threshold voltage. The cell spikes if its membrane potential goes
+        above this value."""
         return self.dynamics.var['Vthreshold']
 
     @Vthreshold.setter
@@ -87,6 +96,16 @@ class LIFComp(moose.Compartment):
         self.spikegen.threshold = value
 
 def setup_two_cells():
+    """Create two cells with leaky integrate and fire compartments. The
+    first cell is composed of two compartments a1 and a2 and the
+    second cell is composed of compartments b1 and b2. Each pair is
+    connected via raxial message so that the voltage of one
+    compartment influences the other through axial resistance Ra. 
+
+    The compartment a1 of the first neuron is connected to the
+    compartment b2 of the second neuron through a synaptic channel.
+
+    """
     model = moose.Neutral('/model')
     data = moose.Neutral('/data')
     a1 = LIFComp('/model/a1')
@@ -115,7 +134,7 @@ def setup_two_cells():
     stim = moose.PulseGen('stim')
     stim.delay[0] = 10e-3
     stim.width[0] = 10e-3
-    stim.level[0] = 1e-9
+    stim.level[0] = 0.0 # 1e-9
     ## current injection doesn't seem to work.
     moose.connect(stim, 'output', a1, 'injectMsg')
     tables = []
@@ -124,7 +143,9 @@ def setup_two_cells():
         c.Rm = 1e6
         c.Ra = 1e4
         c.Cm = 1e-9
-        c.inject = 5.1e-9
+        c.Em = -65e-3
+        c.initVm = c.Em
+        # c.inject = 5.1e-9
         tab = moose.Table('%s/%s' % (data.path, c.name))
         moose.connect(tab, 'requestOut', c, 'getVm')
         tables.append( tab )
@@ -134,13 +155,15 @@ def setup_two_cells():
 
 if __name__ == '__main__':
     tables = setup_two_cells()
-    utils.setDefaultDt()
+    utils.setDefaultDt(elecdt=simdt, plotdt2=plotdt)
     utils.assignDefaultTicks(solver='ee')
     moose.reinit()
-    utils.stepRun(1.0, 100e-3)
-    for t in tables:
-        plot(t.vector, label=t.name)
-    legend()
+    utils.stepRun(simtime, stepsize)
+    for ii, tab in enumerate(tables):
+        subplot(len(tables), 1, ii+1)
+        t = np.linspace(0, simtime, len(tab.vector))*1e3
+        plot(t, tab.vector*1e3, label=tab.name)
+        legend()
     show()
 # 
 # lifcomp.py ends here
