@@ -59,7 +59,7 @@ stepsize = 100e-3 # Time step for pauses between runs
 simdt = 1e-4 # time step for numerical integration
 plotdt = 0.25e-3 # time step for plotting
 
-delayMax = 0.1 # Maximum synaptic delay 
+delayMax = 10e-3 # Maximum synaptic delay 
 
 class LIFComp(moose.Compartment):
     """Leaky integrate and fire neuron using regular compartments,
@@ -69,7 +69,17 @@ class LIFComp(moose.Compartment):
         self.spikegen = moose.SpikeGen('%s/spike' % (self.path))
         self.spikegen.edgeTriggered = 1 # This ensures that spike is generated only on leading edge.
         self.dynamics = moose.Func('%s/dynamics' % (self.path))
-        self.dynamics.expr = 'x > Vthreshold? Vreset: x'
+        self.initVm = 0.0
+        self.Rm = 10e6
+        self.Ra = 1e4
+        self.Cm = 100e-9
+        self.Em = 0 #-65e-3
+        self.initVm = 0 #self.Em
+        
+        # Note that the result is dependent on exact order of
+        # execution of SpikeGen and Func. If Func gets executed first
+        # SpikeGen will never cross threshold.
+        self.dynamics.expr = 'x >= y? z: x'
         moose.connect(self, 'VmOut', self.dynamics, 'xIn')
         moose.connect(self.dynamics, 'valueOut', self, 'setVm')
         moose.connect(self, 'VmOut', self.spikegen, 'Vm')
@@ -78,21 +88,21 @@ class LIFComp(moose.Compartment):
     def Vreset(self):
         """Reset voltage. The cell's membrane potential is set to this value
         after spiking."""
-        return self.dynamics.var['Vreset']
+        return self.dynamics.z
 
     @Vreset.setter
     def Vreset(self, value):
-        self.dynamics.var['Vreset'] = value
+        self.dynamics.z = value
 
     @property
     def Vthreshold(self):
         """Threshold voltage. The cell spikes if its membrane potential goes
         above this value."""
-        return self.dynamics.var['Vthreshold']
+        return self.dynamics.y
 
     @Vthreshold.setter
     def Vthreshold(self, value):
-        self.dynamics.var['Vthreshold'] = value
+        self.dynamics.y = value
         self.spikegen.threshold = value
 
 def setup_two_cells():
@@ -109,21 +119,24 @@ def setup_two_cells():
     model = moose.Neutral('/model')
     data = moose.Neutral('/data')
     a1 = LIFComp('/model/a1')
-    a2 = LIFComp('/model/a2')
-    moose.connect(a1, 'raxial', a2, 'axial')
-    b1 = LIFComp('/model/b1')
+    # a2 = LIFComp('/model/a2')
+    # moose.connect(a1, 'raxial', a2, 'axial')
+    # b1 = LIFComp('/model/b1')
     b2 = LIFComp('/model/b2')
-    moose.connect(b1, 'raxial', b2, 'axial')
-    a1.Vthreshold = -55e-3
-    a1.Vreset = -70e-3
-    a2.Vthreshold = -59e-3
-    a2.Vreset = -70e-3
-    b1.Vthreshold = -58e-3
-    b1.Vreset = -70e-3
-    b2.Vthreshold = -57e-3
-    b2.Vreset = -70e-3
+    # moose.connect(b1, 'raxial', b2, 'axial')
+    a1.Vthreshold = 10e-3
+    a1.Vreset = 0
+    # a2.Vthreshold = -55e-3
+    # a2.Vreset = -70e-3
+    # b1.Vthreshold = -55e-3
+    # b1.Vreset = -70e-3
+    b2.Vthreshold = 10e-3
+    b2.Vreset = 0
     ## Adding a SynChan gives a core dump
     syn = moose.SynChan('%s/syn' % (b2.path))
+    syn.tau1 = 1e-3
+    syn.tau2 = 5e-3
+    syn.Ek = 90e-3
     print '####', syn.path
     syn.bufferTime = delayMax * 2
     syn.numSynapses = 1
@@ -133,29 +146,30 @@ def setup_two_cells():
                   syn.synapse.vec, 'addSpike', 'Sparse')
     m.setRandomConnectivity(1.0, 1)
     stim = moose.PulseGen('/model/stim')
-    stim.delay[0] = 10e-3
-    stim.width[0] = 10e-3
-    stim.level[0] = 1e-9
+    stim.delay[0] = 100e-3
+    stim.width[0] = 1e3
+    stim.level[0] = 11e-9
     ## current injection doesn't seem to work.
     moose.connect(stim, 'output', a1, 'injectMsg')
     tables = []
     data = moose.Neutral('/data')    
     for c in moose.wildcardFind('/##[ISA=Compartment]'):
-        c.Rm = 1e6
-        c.Ra = 1e4
-        c.Cm = 1e-9
-        c.Em = -65e-3
-        c.initVm = c.Em
-        # c.inject = 5.1e-9
         tab = moose.Table('%s/%s' % (data.path, c.name))
         moose.connect(tab, 'requestOut', c, 'getVm')
-        tables.append( tab )
+        tables.append(tab)
+        # t1 = moose.Table('%s/%s' % (data.path, c.name))
+        # moose.connect(t1, 'requestOut', moose.element('%s/dynamics' % (c.path)), 'getX')
+        # tables.append(t1)
+    syntab = moose.Table('%s/%s' % (data.path, 'Gk'))
+    moose.connect(syntab, 'requestOut', syn, 'getGk')
+    tables.append(syntab)
     syn.synapse[0].delay = 1e-3
-    syn.Gk = 1e-9
+    syn.Gbar = 1e-6
     return tables
 
 if __name__ == '__main__':
     tables = setup_two_cells()
+    
     utils.setDefaultDt(elecdt=simdt, plotdt2=plotdt)
     utils.assignDefaultTicks(modelRoot='/model', dataRoot='/data', solver='ee')
     moose.reinit()
