@@ -55,6 +55,7 @@ from moose import utils
 from pylab import *
 
 delayMax = 0.1
+
 class LIFComp(moose.Compartment):
     """Leaky integrate and fire neuron using regular compartments,
     spikegen and Func."""
@@ -119,12 +120,15 @@ def setup_two_cells():
     ## below gives error: NameError: check field names and type compatibility.
     moose.connect(stim, 'output', a1, 'injectMsg')
     tables = []
+    data = moose.Neutral('/data')    
     for c in moose.wildcardFind('/##[ISA=Compartment]'):
         c.Rm = 1e6
         c.Ra = 1e4
         c.Cm = 1e-9
         c.inject = 5.1e-9
-        tables.append( utils.setupTable(c.name, c, 'Vm') )
+        tab = moose.Table('%s/%s' % (data.path, c.name))
+        moose.connect(tab, 'requestOut', c, 'getVm')
+        tables.append( tab )
     syn.synapse[0].delay = 1e-3
     syn.Gk = 1e-9
     return tables
@@ -133,6 +137,7 @@ if __name__ == '__main__':
     tables = setup_two_cells()
     utils.setDefaultDt()
     utils.assignDefaultTicks(solver='ee')
+    moose.reinit()
     utils.stepRun(1.0, 100e-3)
     for t in tables:
         plot(t.vector, label=t.name)
