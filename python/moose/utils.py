@@ -463,12 +463,12 @@ def assignDefaultTicks(modelRoot='/model', dataRoot='/data', solver='hsolve'):
         # _moose.useClock(5, '%s/##[ISA==PoolBase]' % (kinetics[0].path), 'process')
         # _moose.useClock(8, '%s/##[ISA=Table]' % (dataRoot), 'process')
     else:
-        # input() function is called in Table.process() wwhich gets
+        # input() function is called in Table. process() which gets
         # called at each timestep. When a message is connected
         # explicitly to input() dest field, it is driven by the sender
         # and process() adds garbage value to the vector. Hence not to
         # be scheduled.
-        for tab in '%s/##[ISA=Table]' % (dataRoot):
+        for tab in _moose.wildcardFind('%s/##[ISA=Table]' % (dataRoot)):
             if len(tab.neighbors['input']) == 0:
                 _moose.useClock(9, tab.path, 'process')
 
@@ -528,14 +528,15 @@ def resetSim(simpaths, simdt, plotdt, simmethod='hsolve'):
     _moose.setClock(STIMCLOCK, simdt) # Ca/ion pools & funcs use clock 3
     _moose.setClock(PLOTCLOCK, plotdt) # for tables
     for simpath in simpaths:
-        # input() function is called in Table.process() wwhich gets
-        # called at each timestep. When a message is connected
-        # explicitly to input() dest field, it is driven by the sender
-        # and process() adds garbage value to the vector. Hence not to
-        # be scheduled.
-        for tab in _moose.wildcardFind(simpath+'/##[TYPE=Table]'):
-            if len(tab.neighbors['input']) == 0:
-                _moose.useClock(PLOTCLOCK, tab.path, 'process')
+        ## User can connect [qty]Out of an element to input of Table or
+        ## requestOut of Table to get[qty] of the element.
+        ## Scheduling the Table to a clock tick, will call process() of the Table
+        ## which will send a requestOut and overwrite any value set by input(),
+        ## thus adding garbage value to the vector. Hence schedule only if
+        ## input message is not connected to the Table.
+        for table in _moose.wildcardFind(simpath+'/##[TYPE=Table]'):
+            if len(table.neighbors['input']) == 0:
+                _moose.useClock(PLOTCLOCK, table.path, 'process')
         _moose.useClock(ELECCLOCK, simpath+'/##[TYPE=PulseGen]', 'process')
         _moose.useClock(STIMCLOCK, simpath+'/##[TYPE=DiffAmp]', 'process')
         _moose.useClock(STIMCLOCK, simpath+'/##[TYPE=VClamp]', 'process')

@@ -97,11 +97,11 @@ def setup_two_cells():
     moose.connect(b1, 'raxial', b2, 'axial')
     a1.Vthreshold = -55e-3
     a1.Vreset = -70e-3
-    a2.Vthreshold = -55e-3
+    a2.Vthreshold = -59e-3
     a2.Vreset = -70e-3
-    b1.Vthreshold = -55e-3
+    b1.Vthreshold = -58e-3
     b1.Vreset = -70e-3
-    b2.Vthreshold = -55e-3
+    b2.Vthreshold = -57e-3
     b2.Vreset = -70e-3
     ## Adding a SynChan gives a core dump
     syn = moose.SynChan('%s/syn' % (b2.path))
@@ -109,15 +109,14 @@ def setup_two_cells():
     syn.numSynapses = 1
     syn.synapse.delay = delayMax
     moose.connect(b2, 'channel', syn, 'channel')
-    ## below gives a core dump on running
     m = moose.connect(a1.spikegen, 'spikeOut',
                   syn.synapse.vec, 'addSpike', 'Sparse')
     m.setRandomConnectivity(1.0, 1)
     stim = moose.PulseGen('stim')
-    stim.delay[0] = 100e-3
+    stim.delay[0] = 10e-3
     stim.width[0] = 10e-3
     stim.level[0] = 1e-9
-    ## below gives error: NameError: check field names and type compatibility.
+    ## current injection doesn't seem to work.
     moose.connect(stim, 'output', a1, 'injectMsg')
     tables = []
     data = moose.Neutral('/data')    
