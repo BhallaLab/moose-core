@@ -143,8 +143,7 @@ def setup_two_cells():
     syn.synapse.delay = delayMax
     moose.connect(b2, 'channel', syn, 'channel')
     m = moose.connect(a1.spikegen, 'spikeOut',
-                  syn.synapse.vec, 'addSpike', 'Sparse')
-    m.setRandomConnectivity(1.0, 1)
+                  syn.synapse.vec, 'addSpike')
     stim = moose.PulseGen('/model/stim')
     stim.delay[0] = 100e-3
     stim.width[0] = 1e3
