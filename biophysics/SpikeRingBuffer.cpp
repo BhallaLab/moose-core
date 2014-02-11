@@ -48,18 +48,19 @@ void SpikeRingBuffer::reinit( double dt, double bufferTime )
 void SpikeRingBuffer::addSpike( double t, double w )
 {
 	unsigned int bin = round( ( t - currTime_ ) / dt_ );
-	// Should do catch-throw here
-	if ( bin < 0 ) {
-		cout << "Warning: SpikeRingBuffer: handling spike too late: " <<
-			t << " <  " << currTime_ << ", using currTime\n";
-		bin = 0;
-	} else if ( bin >= MAXBIN ) {
-		cout << "Warning: SpikeRingBuffer: bin number exceeds limit: " <<
-			bin << " >=  " << MAXBIN << ", terminating\n";
-			assert( 0 );
-	} 
 	if ( bin > weightSum_.size() ) {
-		weightSum_.resize( bin + 1 );
+	// Should do catch-throw here
+		if ( t < currTime_ ) {
+			cout << "Warning: SpikeRingBuffer: handling spike too late: " <<
+				t << " <  " << currTime_ << ", using currTime\n";
+			bin = 0;
+		} else if ( bin >= MAXBIN ) {
+			cout << "Warning: SpikeRingBuffer: bin number exceeds limit: "<<
+				bin << " >=  " << MAXBIN << ", terminating\n";
+				assert( 0 );
+		} else {
+			weightSum_.resize( bin + 1 );
+		}
 	}
 
 	// Replace the % with a bitwise operation.

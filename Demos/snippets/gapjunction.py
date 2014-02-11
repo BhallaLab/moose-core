@@ -72,7 +72,7 @@ def gapjunction_demo():
     pulse.delay[0] = 50e-3
     pulse.width[0] = 20e-3
     pulse.delay[1] = 1e9
-    moose.connect(pulse, 'outputOut', comp1, 'injectMsg')
+    moose.connect(pulse, 'output', comp1, 'injectMsg')
     gj = moose.GapJunction('%s/gj' % (model.path))
     gj.Gk = 1e-6
     moose.connect(gj, 'channel1', comp1, 'channel')

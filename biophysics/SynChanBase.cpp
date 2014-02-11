@@ -237,6 +237,7 @@ void SynChanBase::process(  const Eref& e, const ProcPtr info )
 
 void SynChanBase::reinit(  const Eref& e, const ProcPtr info )
 {
+	setBufferOnAllSynapses(); // Expensive, may wish to optimize later
 	reinitBuffer( info->dt, bufferTime_ );
 	channelOut()->send( e, cb.getGk(), cb.getEk() );
 	// Needed by GHK-type objects
