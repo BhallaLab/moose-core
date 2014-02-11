@@ -1,6 +1,6 @@
-# lifcomp.py --- 
+# multicomp_lif.py --- 
 # 
-# Filename: lifcomp.py
+# Filename: multicomp_lif.py
 # Description: Leaky Integrate and Fire using regular neuronal compartment
 # Author: subha
 # Maintainer: 
@@ -106,20 +106,30 @@ class LIFComp(moose.Compartment):
         self.spikegen.threshold = value
 
 def setup_two_cells():
-    """Create two cells with leaky integrate and fire compartments. Each
-    cell is a single compartment a1 and b2. a1 is stimulated by a step
-    current injection.
+    """Create two cells with leaky integrate and fire compartments. The
+    first cell is composed of two compartments a1 and a2 and the
+    second cell is composed of compartments b1 and b2. Each pair is
+    connected via raxial message so that the voltage of one
+    compartment influences the other through axial resistance Ra. 
 
-    The compartment a1 is connected to the compartment b2 through a
-    synaptic channel.
+    The compartment a1 of the first neuron is connected to the
+    compartment b2 of the second neuron through a synaptic channel.
 
     """
     model = moose.Neutral('/model')
     data = moose.Neutral('/data')
     a1 = LIFComp('/model/a1')
+    a2 = LIFComp('/model/a2')
+    moose.connect(a1, 'raxial', a2, 'axial')
+    b1 = LIFComp('/model/b1')
     b2 = LIFComp('/model/b2')
+    moose.connect(b1, 'raxial', b2, 'axial')
     a1.Vthreshold = 10e-3
     a1.Vreset = 0
+    a2.Vthreshold = 10e-3
+    a2.Vreset = 0
+    b1.Vthreshold = 10e-3
+    b1.Vreset = 0
     b2.Vthreshold = 10e-3
     b2.Vreset = 0
     syn = moose.SynChan('%s/syn' % (b2.path))
@@ -149,9 +159,12 @@ def setup_two_cells():
     tables = []
     data = moose.Neutral('/data')    
     for c in moose.wildcardFind('/##[ISA=Compartment]'):
-        tab = moose.Table('%s/%s_Vm' % (data.path, c.name))
+        tab = moose.Table('%s/%s' % (data.path, c.name))
         moose.connect(tab, 'requestOut', c, 'getVm')
         tables.append(tab)
+        # t1 = moose.Table('%s/%s' % (data.path, c.name))
+        # moose.connect(t1, 'requestOut', moose.element('%s/dynamics' % (c.path)), 'getX')
+        # tables.append(t1)
     syntab = moose.Table('%s/%s' % (data.path, 'Gk'))
     moose.connect(syntab, 'requestOut', syn, 'getGk')
     tables.append(syntab)
@@ -173,4 +186,4 @@ if __name__ == '__main__':
         legend()
     show()
 # 
-# lifcomp.py ends here
+# multicomp_lif.py ends here
