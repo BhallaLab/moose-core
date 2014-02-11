@@ -2536,4 +2536,5 @@ Next:
 ============================================================================
 11 Feb.
 Minor fixes to synapses so that they are less likely to point to an empty 
-buffer.
+buffer. Checkin 5081
+============================================================================
