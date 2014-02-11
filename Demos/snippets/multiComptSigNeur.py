@@ -261,14 +261,13 @@ def makeSpinyCompt():
         r = createSpineWithReceptor( compt, cell, i, i/float(numSpines) )
         r.synapse.num = 1
         syn = moose.element( r.path + '/synapse' )
-        moose.connect( synInput, 'event', syn, 'addSpike', 'Single' )
+        moose.connect( synInput, 'spikeOut', syn, 'addSpike', 'Single' )
         syn.weight = 0.2 * i * ( 4 - i )
         syn.delay = i * 1.0e-3
 
 def createPool( compt, name, concInit ):
     meshEntries = moose.element( compt.path + '/mesh' )
     pool = moose.Pool( compt.path + '/' + name )
-    moose.connect( pool, 'mesh', meshEntries, 'mesh', 'Single' )
     pool.concInit = concInit
     pool.diffConst = 1e-11
     return pool

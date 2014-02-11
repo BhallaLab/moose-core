@@ -2519,6 +2519,21 @@ I think the full figure for # of operations is
 
 Checkin 5068.
 
-Next steps:
+Minor diversion: fixed a bug in wildcarding that Subha and Harsha had pointed
+out a while ago. Checkin 5069.
+
+Next: 
+- Check if NeuroMesh still works, see if it properly generates 
+	the 'parents' vector and sparse matrix for data.
+- Build production diffusion solver for 1 node, M molecules
+- Rebuild production ksolve for 1 node
+- Rebuild production ksolve coupling to diffusion solver, 1 node
+- Build production diffusion solver for N nodes, M molecules.
+- Set up production ksolve for N nodes with diffusion
+- Build production diffusion solver for N nodes, M molecules.
+- Rebuild production GSSA solver for 1 node
 
 ============================================================================
+11 Feb.
+Minor fixes to synapses so that they are less likely to point to an empty 
+buffer.

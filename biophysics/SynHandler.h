@@ -56,6 +56,11 @@ class SynHandler
 		 */
 		double popBuffer( double currentTime );
 		////////////////////////////////////////////////////////////////
+		// Used to ensure all synapses point to the correct buffer
+		////////////////////////////////////////////////////////////////
+		void setBufferOnAllSynapses();
+		
+		////////////////////////////////////////////////////////////////
 		/// Adds a new synapse, returns its index.
 		unsigned int addSynapse();
 		void dropSynapse( unsigned int droppedSynNumber );
