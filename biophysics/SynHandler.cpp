@@ -94,6 +94,13 @@ void SynHandler::reinitBuffer( double dt, double bufferTime )
 		buf_.reinit( dt, bufferTime );
 }
 
+void SynHandler::setBufferOnAllSynapses()
+{
+	for ( vector< Synapse >::iterator 
+					i = synapses_.begin(); i != synapses_.end(); ++i )
+		i->setBuffer( &buf_ );
+}
+
 double SynHandler::popBuffer( double currentTime )
 {
 	return buf_.pop( currentTime );
@@ -101,8 +108,10 @@ double SynHandler::popBuffer( double currentTime )
 
 unsigned int SynHandler::addSynapse()
 {
-	synapses_.resize( synapses_.size() + 1 );
-	return synapses_.size() - 1;
+	unsigned int newSynIndex = synapses_.size();
+	synapses_.resize( newSynIndex + 1 );
+	synapses_[newSynIndex].setBuffer( &buf_ );
+	return newSynIndex;
 }
 
 
