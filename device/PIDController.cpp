@@ -44,7 +44,7 @@
 
 static SrcFinfo1< double > * outputOut()
 {
-    static SrcFinfo1 <double> outputOut("outputOut", 
+    static SrcFinfo1 <double> outputOut("output", 
                                         "Sends the output of the PIDController. This is known as manipulated"
                                         " variable (MV) in control theory. This should be fed into the process"
                                         " which we are trying to control.");
@@ -97,7 +97,7 @@ const Cinfo* PIDController::initCinfo()
                                                " and may lead to instability.",
                                                &PIDController::setTauD,
                                                &PIDController::getTauD);
-        static ReadOnlyValueFinfo<PIDController, double> output( "output", 
+        static ReadOnlyValueFinfo<PIDController, double> outputValue( "outputValue", 
                                                        "Output of the PIDController. This is given by:"
                                                        "      gain * ( error + INTEGRAL[ error dt ] / tau_i   + tau_d * d(error)/dt )\n"
                                                        "Where gain = proportional gain (Kp), tau_i = integral gain (Kp/Ki) and"
@@ -149,7 +149,7 @@ const Cinfo* PIDController::initCinfo()
 		&sensed,
 		&tauI,
 		&tauD,
-		&output,
+		&outputValue,
 		&error,
 		&integral,
 		&derivative,
