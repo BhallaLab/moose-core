@@ -51,7 +51,7 @@ import pickle
 import os
 from collections import defaultdict
 import numpy as np
-
+import re
 from PyQt4 import QtGui, QtCore
 from PyQt4.Qt import Qt
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
@@ -456,12 +456,19 @@ class SchedulingWidget(QtGui.QWidget):
     def __init__(self, *args, **kwargs):
         QtGui.QWidget.__init__(self, *args, **kwargs)
         layout = QtGui.QVBoxLayout()
+        self.advanceOptiondisplayed = False
         self.simtimeWidget = self.__getSimtimeWidget()
         self.tickListWidget = self.__getTickListWidget()
         self.runControlWidget = self.__getRunControlWidget()
+        self.advanceOpt = self.__getAdvanceOptionsWidget()
         layout.addWidget(self.runControlWidget)
         layout.addWidget(self.simtimeWidget)
-        #layout.addWidget(self.tickListWidget)
+        layout.addWidget(self.advanceOpt)
+        layout.addWidget(self.tickListWidget)
+
+        if not self.advanceOptiondisplayed:
+            self.tickListWidget.hide()
+
         self.updateInterval = 100e-3 # This will be made configurable with a textbox
         self.__getUpdateIntervalWidget()
         #layout.addWidget(self.__getUpdateIntervalWidget())
@@ -474,7 +481,27 @@ class SchedulingWidget(QtGui.QWidget):
         self.continueRun.connect(self.runner.continueRun)
         self.stopButton.clicked.connect(self.runner.stop)
         self.runner.update.connect(self.updateCurrentTime)
+    def updateTickswidget(self):
 
+        if self.advanceOptiondisplayed:
+            self.tickListWidget.hide()
+            self.advanceOptiondisplayed = False
+        else:
+            self.tickListWidget.show()
+            self.advanceOptiondisplayed = True
+
+    def __getAdvanceOptionsWidget(self):
+        widget = QtGui.QWidget()
+        layout = QtGui.QVBoxLayout()
+        icon = QtGui.QIcon(os.path.join(config.settings[config.KEY_ICON_DIR],'arrow.png'))
+        self.advancedOption = QtGui.QToolButton()
+        self.advancedOption.setText("Advance Options")
+        self.advancedOption.setIcon(QtGui.QIcon(icon))
+        self.advancedOption.setToolButtonStyle( Qt.ToolButtonTextBesideIcon );
+        self.advancedOption.clicked.connect(self.updateTickswidget)
+        layout.addWidget(self.advancedOption)
+        widget.setLayout(layout)
+        return widget
     def __getUpdateIntervalWidget(self):
         label = QtGui.QLabel('Plot update interval')
         self.updateIntervalText = QtGui.QLineEdit(str(self.updateInterval))
@@ -487,7 +514,7 @@ class SchedulingWidget(QtGui.QWidget):
         widget = QtGui.QWidget()
         widget.setLayout(layout)
         return widget
-
+    
     def __getRunControlWidget(self):
         widget = QtGui.QWidget()
         layout = QtGui.QVBoxLayout()
@@ -577,13 +604,22 @@ class SchedulingWidget(QtGui.QWidget):
         layout.setRowStretch(0, 1)
         # Create one row for each tick. Somehow ticks.shape is
         # (16,) while only 10 valid ticks exist. The following is a hack
-        ticks = moose.vec('/clock/tick')
+        clock = moose.element('/clock')
+        numticks = clock.numTicks
+        for ii in range(numticks):
+            tt = clock.tickDt[ii]
+            layout.addWidget(QtGui.QLabel("(\'"+clock.path+'\').tickDt['+str(ii)+']'), ii+1, 0)
+            layout.addWidget(QtGui.QLineEdit(str(tt)), ii+1, 1)
+            layout.addWidget(QtGui.QLineEdit(''), ii+1, 2, 1, 2)
+            layout.setRowStretch(ii+1, 1)
+        '''
         for ii in range(ticks[0].localNumField):
             tt = ticks[ii]
             layout.addWidget(QtGui.QLabel(tt.path), ii+1, 0)
             layout.addWidget(QtGui.QLineEdit(str(tt.dt)), ii+1, 1)
             layout.addWidget(QtGui.QLineEdit(''), ii+1, 2, 1, 2)
-            layout.setRowStretch(ii+1, 1)            
+            layout.setRowStretch(ii+1, 1)
+        '''
         # We add spacer items to the last row so that expansion
         # happens at bottom. All other rows have stretch = 1, and
         # the last one has 0 (default) so that is the one that
@@ -603,14 +639,14 @@ class SchedulingWidget(QtGui.QWidget):
         self.currentTimeLabel.setText('%f' % (moose.Clock('/clock').currentTime))
 
     def updateTextFromTick(self, tickNo):
-        tick = moose.vec('/clock/tick')[tickNo]
+        tick = moose.vector('/clock/tick')[tickNo]
         widget = self.tickListWidget.layout().itemAtPosition(tickNo + 1, 1).widget()
         if widget is not None and isinstance(widget, QtGui.QLineEdit):
             widget.setText(str(tick.dt))
 
     def updateFromMoose(self):
         """Update the tick dt from the tick objects"""
-        ticks = moose.vec('/clock/tick')
+        ticks = moose.vector('/clock/tick')
         # Items at position 0 are the column headers, hence ii+1
         for ii in range(ticks[0].localNumField):
             self.updateTextFromTick(ii)
@@ -720,7 +756,7 @@ class PlotWidget(QtGui.QWidget):
 	#print " default ",path
         for tabId in moose.wildcardFind('%s/##[TYPE=Table]' % (path)):
             tab = moose.Table(tabId)
-            tableObject = tab.neighbours['requestData']
+            tableObject = tab.neighbors['requestOut']
             if len(tableObject) > 0:
                 # This is the default case: we do not plot the same
                 # table twice. But in special cases we want to have
@@ -761,10 +797,10 @@ class PlotWidget(QtGui.QWidget):
                         xSrc = moose.element(dataSrc.x)
                         ySrc = moose.element(dataSrc.y)
                         if isinstance(xSrc, moose.Clock):
-                            ts = np.linspace(0, time, len(tab.vec))
+                            ts = np.linspace(0, time, len(tab.vector))
                         elif isinstance(xSrc, moose.Table):
-                            ts = xSrc.vec.copy()
-                        line.set_data(ts, tab.vec.copy())
+                            ts = xSrc.vector.copy()
+                        line.set_data(ts, tab.vector.copy())
                 tabList.append(tab)
         if len(tabList) > 0:
             #self.canvas.callAxesFn('legend')
@@ -772,21 +808,21 @@ class PlotWidget(QtGui.QWidget):
         self.canvas.draw()
                 
     def addTimeSeries(self, table, *args, **kwargs):        
-        ts = np.linspace(0, moose.Clock('/clock').currentTime, len(table.vec))
-        return self.canvas.plot(ts, table.vec, *args, **kwargs)
+        ts = np.linspace(0, moose.Clock('/clock').currentTime, len(table.vector))
+        return self.canvas.plot(ts, table.vector, *args, **kwargs)
         
     def addRasterPlot(self, eventtable, yoffset=0, *args, **kwargs):
         """Add raster plot of events in eventtable.
 
         yoffset - offset along Y-axis.
         """
-        y = np.ones(len(eventtable.vec)) * yoffset
-        return self.canvas.plot(eventtable.vec, y, '|')
+        y = np.ones(len(eventtable.vector)) * yoffset
+        return self.canvas.plot(eventtable.vector, y, '|')
 
     def updatePlots(self):
         for path, lines in self.pathToLine.items():            
             tab = moose.Table(path)
-            data = tab.vec
+            data = tab.vector
             ts = np.linspace(0, moose.Clock('/clock').currentTime, len(data))
             for line in lines:
                 line.set_data(ts, data)
@@ -815,11 +851,11 @@ class PlotWidget(QtGui.QWidget):
         src = self.lineToDataSource[line]
         xSrc = moose.element(src.x)
         ySrc = moose.element(src.y)
-        y = ySrc.vec.copy()
+        y = ySrc.vector.copy()
         if isinstance(xSrc, moose.Clock):
             x = np.linspace(0, xSrc.currentTime, len(y))
         elif isinstance(xSrc, moose.Table):
-            x = xSrc.vec.copy()
+            x = xSrc.vector.copy()
         filename = str(directory)+'/'+'%s.csv' % (ySrc.name)
         np.savetxt(filename, np.vstack((x, y)).transpose())
         print 'Saved data from %s and %s in %s' % (xSrc.path, ySrc.path, filename)
@@ -955,7 +991,6 @@ class PlotView(PlotBase):
     def setupRecording(self):
         """Create the tables for recording selected data and connect them."""
         for element, field in self.getCentralWidget().getSelectedFields():
-	    print "element and filed",element,field
             self.createRecordingTable(element, field)
 
 
@@ -976,22 +1011,35 @@ class PlotView(PlotBase):
         # /model/test/object will map to same table. So we
         # check for existing table without element field
         # path in recording dict.
-        relativePath = element.path.partition('/model/')[-1]
+        relativePath = element.path.partition('/model[0]/')[-1]
         if relativePath.startswith('/'):
             relativePath = relativePath[1:]
-        tablePath = self.dataRoot + '/' + relativePath.replace('/', '_') + '.' + field
+        #to convert to camelCase
+        if field == "concInit":
+            field = "ConcInit"
+        elif field == "conc":
+            field = "Conc"
+        elif field == "nInit":
+            field = "NInit"
+        elif field == "n":
+            field = "N"
+        elif field == "volume":
+            field = "Volume"
+        elif field == "diffConst":
+            field ="DiffConst"
+
+        tablePath =  relativePath.replace('/', '_') + '.' + field
+        tablePath = re.sub('.', lambda m: {'[':'_', ']':'_'}.get(m.group(), m.group()),tablePath)
+        tablePath = self.dataRoot + '/' +tablePath
         if moose.exists(tablePath):
-            tablePath = '%s_%d' % (tablePath, element.id_.value)
+            tablePath = '%s_%d' % (tablePath, element.getid().value)
         if not moose.exists(tablePath):
-	    print "tablePath",tablePath            
             table = moose.Table(tablePath)
             print 'Created', table.path, 'for plotting', '%s.%s' % (element.path, field)
             target = element
-	    print "\t \t target",target,"type",type(target),"field",field		
-            moose.connect(table, 'requestData', target, 'get_%s' % (field))
+            moose.connect(table, 'requestOut', target, 'get%s' % (field))
             self._recordingDict[(target, field)] = table
             self._reverseDict[table] = (target, field)
-
 
 class PlotSelectionWidget(QtGui.QScrollArea):
     """Widget showing the fields of specified elements and their plottable
