@@ -1587,7 +1587,7 @@ extern "C" {
                  "~~~~\n"
                  ">>> pulsegen = moose.PulseGen('pulsegen')\n"
                  ">>> spikegen = moose.SpikeGen('spikegen')\n"
-                 ">>> moose.connect(pulsegen, 'outputOut', spikegen, 'Vm')\n"
+                 ">>> moose.connect(pulsegen, 'output', spikegen, 'Vm')\n"
                  "1\n"
                  "~~~~\n"
                  "\n"

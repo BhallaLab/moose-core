@@ -43,7 +43,7 @@
 
 static SrcFinfo1< double >* outputOut()
 {
-    static SrcFinfo1< double > outputOut( "outputOut",
+    static SrcFinfo1< double > outputOut( "output",
                                           "Current output level.");
     return &outputOut;
 }

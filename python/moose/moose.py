@@ -95,7 +95,7 @@ def le(el=None):
 
     """
     if el is None:
-        el = getCwe()[0]
+        el = getCwe()
     elif isinstance(el, str):
         if not exists(el):
             raise ValueError('no such element')
