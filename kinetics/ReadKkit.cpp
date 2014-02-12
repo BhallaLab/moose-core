@@ -1279,7 +1279,7 @@ void ReadKkit::setupSlaveMsg( const string& src, const string& dest )
 		nameMap = &tabIds_;
 	} else if ( srcId.element()->cinfo()->isA( "PulseGen" ) ) {
 		nameMap = &stimIds_;
-		output = "outputOut";
+		output = "output";
 	} else {
 		cout << "Error: Unknown source for SLAVE msg: (" << src << 
 			", " << dest << ")\n";

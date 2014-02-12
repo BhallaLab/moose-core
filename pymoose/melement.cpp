@@ -1602,7 +1602,7 @@ PyObject* setDestFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type1
                  "List names of all the source fields in PulseGen class:\n"
                  "~~~~\n"
                  ">>> moose.getFieldNames('PulseGen', 'srcFinfo')\n"
-                 "('childMsg', 'outputOut')\n"
+                 "('childMsg', 'output')\n"
                  "~~~~\n"
                  "\n");
     // 2011-03-23 15:28:26 (+0530)

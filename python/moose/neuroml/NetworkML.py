@@ -109,7 +109,7 @@ class NetworkML():
                     ## do not set count to 1, let it be at 2 by default
                     ## else it will set secondDelay to 0.0 and repeat the first pulse!
                     #pulsegen.count = 1
-                    moose.connect(pulsegen,'outputOut',iclamp,'plusIn')
+                    moose.connect(pulsegen,'output',iclamp,'plusIn')
                     target = inputelem.find(".//{"+nml_ns+"}target")
                     population = target.attrib['population']
                     for site in target.findall(".//{"+nml_ns+"}site"):
@@ -120,12 +120,12 @@ class NetworkML():
                         cell_name = self.populationDict[population][0]
                         if cell_name == 'LIF':
                             LIF = self.populationDict[population][1][int(cell_id)]
-                            moose.connect(iclamp,'outputOut',LIF,'injectDest')
+                            moose.connect(iclamp,'output',LIF,'injectDest')
                         else:
                             segment_path = self.populationDict[population][1][int(cell_id)].path+'/'+\
                                 self.cellSegmentDict[cell_name][segment_id][0]
                             compartment = moose.Compartment(segment_path)
-                            moose.connect(iclamp,'outputOut',compartment,'injectMsg')
+                            moose.connect(iclamp,'output',compartment,'injectMsg')
 
     def createPopulations(self):
         self.populationDict = {}
