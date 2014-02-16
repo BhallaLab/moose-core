@@ -63,7 +63,7 @@ class ChannelML():
         ### delay and weight are arrays: multiple event messages can be connected to a single synapse
         moosesynapse_graded = moose.Mstring(moosesynapse.path+'/graded')
         moosesynapse_graded.value = 'False'
-        moosesynapse_mgblock = moose.Mstring(moosesynapse.path+'/mgblock')
+        moosesynapse_mgblock = moose.Mstring(moosesynapse.path+'/mgblockStr')
         moosesynapse_mgblock.value = 'False'
       
     def readChannelML(self,channelElement,params={},units="SI units"):

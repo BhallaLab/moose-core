@@ -542,6 +542,7 @@ def resetSim(simpaths, simdt, plotdt, simmethod='hsolve'):
         _moose.useClock(STIMCLOCK, simpath+'/##[TYPE=VClamp]', 'process')
         _moose.useClock(STIMCLOCK, simpath+'/##[TYPE=PIDController]', 'process')
         _moose.useClock(STIMCLOCK, simpath+'/##[TYPE=RC]', 'process')
+        _moose.useClock(STIMCLOCK, simpath+'/##[TYPE=TimeTable]', 'process')
         _moose.useClock(ELECCLOCK, simpath+'/##[TYPE=LeakyIaF]', 'process')
         _moose.useClock(ELECCLOCK, simpath+'/##[TYPE=IntFire]', 'process')
         _moose.useClock(ELECCLOCK, simpath+'/##[TYPE=SpikeGen]', 'process')
@@ -571,7 +572,7 @@ def resetSim(simpaths, simdt, plotdt, simmethod='hsolve'):
                     _moose.useClock(INITCLOCK, h.path, 'process')
     _moose.reinit()
 
-def setupTable(name, obj, qtyname, tables_path=None):
+def setupTable(name, obj, qtyname, tables_path=None, threshold=None):
     """ Sets up a table with 'name' which stores 'qtyname' field from 'obj'.
     The table is created under tables_path if not None, else under obj.path . """
     if tables_path is None:
@@ -581,22 +582,34 @@ def setupTable(name, obj, qtyname, tables_path=None):
     qtyTable = _moose.Table(tables_path+'/'+name)
     ## stepMode no longer supported, connect to 'input'/'spike' message dest to record Vm/spiktimes
     # qtyTable.stepMode = TAB_BUF 
-    ## below is wrong! reads qty twice every clock tick!
-    #_moose.connect( obj, qtyname+'Out', qtyTable, "input")
-    ## this is the correct method
-    _moose.connect( qtyTable, "requestOut", obj, 'get'+qtyname)
+    if threshold is None:
+        ## below is wrong! reads qty twice every clock tick!
+        #_moose.connect( obj, qtyname+'Out', qtyTable, "input")
+        ## this is the correct method
+        _moose.connect( qtyTable, "requestOut", obj, 'get'+qtyname)
+        print qtyTable.path, obj.path
+    else:
+        ## create new spikegen
+        spikegen = _moose.SpikeGen(tables_path+'/'+name+'_spikegen')
+        ## connect the compartment Vm to the spikegen
+        _moose.connect(obj,"VmOut",spikegen,"Vm")
+        ## spikegens for different synapse_types can have different thresholds
+        spikegen.threshold = threshold
+        spikegen.edgeTriggered = 1 # This ensures that spike is generated only on leading edge.
+        _moose.connect(spikegen,'spikeOut',qtyTable,'input') ## spikeGen gives spiketimes
     return qtyTable
 
-def connectSynapse(context, compartment, synname, gbar_factor):
+def connectSynapse(compartment, synname, gbar_factor):
     """
     Creates a synname synapse under compartment, sets Gbar*gbar_factor, and attaches to compartment.
     synname must be a synapse in /library of MOOSE.
     """
-    synapseid = context.deepCopy(context.pathToId('/library/'+synname),\
-        context.pathToId(compartment.path),synname)
+    synapseid = _moose.copy(_moose.SynChan('/library/'+synname),\
+                            _moose.Compartment(compartment.path),synname)
     synapse = _moose.SynChan(synapseid)
     synapse.Gbar = synapse.Gbar*gbar_factor
-    if synapse.getField('mgblock')=='True': # If NMDA synapse based on mgblock, connect to mgblock
+    synapse_mgblock = _moose.Mstring(synapse.path+'/mgblockStr')
+    if synapse_mgblock.value=='True': # If NMDA synapse based on mgblock, connect to mgblock
         mgblock = _moose.Mg_block(synapse.path+'/mgblock')
         compartment.connect("channel", mgblock, "channel")
     else:
@@ -641,7 +654,8 @@ def printRecursiveTree(elementid, level):
         classname = childobj.className
         if classname in ['SynChan','KinSynChan']:
             childobj = _moose.SynChan(childid)
-            print spacefill+"|--", childobj.name, childobj.className, 'Gbar=',childobj.Gbar
+            print spacefill+"|--", childobj.name, childobj.className, 'Gbar=',childobj.Gbar, 'numSynapses=', childobj.numSynapses
+            return # Have yet to figure out the children of SynChan, currently not going deeper
         elif classname in ['HHChannel', 'HHChannel2D']:
             childobj = _moose.HHChannel(childid)
             print spacefill+"|--", childobj.name, childobj.className, 'Gbar=',childobj.Gbar, 'Ek=',childobj.Ek
@@ -736,8 +750,8 @@ def setup_iclamp(compartment, name, delay1, width1, level1):
     pulsegen.secondDelay = 1e6 # to avoid repeat
     pulsegen.secondLevel = 0.0
     pulsegen.secondWidth = 0.0
-    pulsegen.connect('outputSrc',iclamp,'plusDest')
-    iclamp.connect('outputSrc',compartment,'injectMsg')
+    pulsegen.connect('output',iclamp,'plusIn')
+    iclamp.connect('output',compartment,'injectMsg')
     return pulsegen
 
 def get_matching_children(parent, names):
@@ -752,8 +766,11 @@ def get_matching_children(parent, names):
     return matchlist
 
 def underscorize(path):
-    """ Returns: / replaced by underscores in 'path' """
-    return string.join(string.split(path,'/'),'_')
+    """ Returns: / replaced by underscores in 'path'.
+    But async13 branch has indices in the path like [0],
+    so just replacing / by _ is not enough,
+    should replace [ and ] also by _ """
+    return path.replace('/','_').replace('[','-').replace(']','-')
 
 def blockChannels(cell, channel_list):
     """
@@ -772,8 +789,7 @@ def blockChannels(cell, channel_list):
                         chan.Gbar = 0.0
 
 def get_child_Mstring(mooseobject,mstring):
-    for childid in mooseobject.children:
-        child = _moose.Neutral(childid)
+    for child in mooseobject.children:
         if child.className=='Mstring' and child.name==mstring:
             child = _moose.Mstring(child)
             return child
