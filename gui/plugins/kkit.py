@@ -399,10 +399,11 @@ class  KineticsWidget(EditorWidgetBase):
         #If the item position changes, the corresponding arrow's are calculated
         if isinstance(element(mooseObject),CubeMesh):
             for k, v in self.qGraCompt.items():
-                mesh = mooseObject.path+'/mesh[0]'
-                if k.path == mesh:
-                    for rectChilditem in v.childItems():
-                        self.updateArrow(rectChilditem)
+                #mesh = mooseObject.path+'/mesh[0]'
+                #print " mesh ",mesh,k.path
+                #if k.path == mesh:
+                for rectChilditem in v.childItems():
+                    self.updateArrow(rectChilditem)
         else:
             mobj = self.mooseId_GObj[mooseObject.getId()]
             self.updateArrow(mobj)
