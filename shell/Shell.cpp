@@ -23,7 +23,7 @@
 
 #ifdef USE_SBML
 #include "../sbml/SbmlWriter.h"
-#include "../sbml/SbmlReader.h"
+//#include "../sbml/SbmlReader.h"
 #endif
 
 const unsigned int Shell::OkStatus = ~0;
@@ -335,6 +335,7 @@ int Shell::doWriteSBML( const string& fname, const string& modelpath )
 /**
  * read given SBML model to moose. Returns success value.
  */
+/*
 Id Shell::doReadSBML( const string& fname, const string& modelpath, const string& solverclass )
 {
 #ifdef USE_SBML
@@ -345,7 +346,7 @@ Id Shell::doReadSBML( const string& fname, const string& modelpath, const string
     return Id();
 #endif
 }
-
+*/
 
 ////////////////////////////////////////////////////////////////////////
 
