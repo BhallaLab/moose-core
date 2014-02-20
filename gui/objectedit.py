@@ -250,6 +250,7 @@ class ObjectEditView(QtGui.QTableView):
     def __init__(self, mobject, undolen=defaults.OBJECT_EDIT_UNDO_LENGTH, parent=None):
         QtGui.QTableView.__init__(self, parent)
         #self.setEditTriggers(self.DoubleClicked | self.SelectedClicked | self.EditKeyPressed)
+        print "\n mobject which is passed ",mobject
         vh = self.verticalHeader()
         vh.setVisible(False)
         hh = self.horizontalHeader()

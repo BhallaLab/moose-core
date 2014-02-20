@@ -1014,7 +1014,7 @@ class PlotView(PlotBase):
         relativePath = element.path.partition('/model[0]/')[-1]
         if relativePath.startswith('/'):
             relativePath = relativePath[1:]
-        #to convert to camelCase
+        #Convert to camelcase
         if field == "concInit":
             field = "ConcInit"
         elif field == "conc":
