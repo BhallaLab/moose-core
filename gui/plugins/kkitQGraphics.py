@@ -255,7 +255,7 @@ class CplxItem(KineticsDisplayItem):
 class ComptItem(QtGui.QGraphicsRectItem):
     def __init__(self,parent,x,y,w,h,item):
         self.cmptEmitter = QtCore.QObject()
-        iParent = item.parent
+        iParent = item
         if hasattr(iParent, "__iter__"):
             self.mooseObj_ = iParent[0]
         else:
