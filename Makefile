@@ -53,14 +53,14 @@
 #
 # USE_MPI - compile with support for parallel computing through MPICH library
 #
-# USE_SBML (default value: 1) - compile with support for the Systems Biology
+# USE_SBML (default value: 0) - compile with support for the Systems Biology
 # 		Markup Language (SBML). This allows you to read and write chemical 
 # 		kinetic models in the simulator-indpendent SBML format.
 # 
 
 # Default values for flags. The operator ?= assigns the given value only if the
 # variable is not already defined.
-USE_SBML?=0
+USE_SBML?=1
 USE_HDF5?=1
 USE_CUDA?=0
 PYTHON?=2
