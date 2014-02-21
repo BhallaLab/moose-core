@@ -206,8 +206,8 @@ class Shell
 		 * Write given model to SBML file. Returns success value.
 		 */
 		 int doWriteSBML( const string& fname, const string& modelpath );
-		 //Id doReadSBML( const string& fname, const string& modelpath, const string& solverclass=""
-		 //);
+		 Id doReadSBML( const string& fname, const string& modelpath, const string& solverclass=""
+		 );
 		 
 		/**
  		 * This function synchronizes fieldDimension on the DataHandler 
