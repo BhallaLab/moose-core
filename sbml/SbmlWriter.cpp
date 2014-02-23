@@ -77,7 +77,7 @@ int SbmlWriter::write( string filepath,string target )
   
   //cout << " filepath " << filepath << " " << filename << endl;
   
-  SBMLDocument sbmlDoc = 0;
+  SBMLDocument sbmlDoc;
   bool SBMLok = false;
   createModel( filename,sbmlDoc,target ); 
   SBMLok  = validateModel( &sbmlDoc );
