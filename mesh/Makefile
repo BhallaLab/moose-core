@@ -14,6 +14,9 @@ OBJ = \
 	MeshCompt.o	\
 	MeshEntry.o	\
 	CubeMesh.o	\
+	CylBase.o	\
+	NeuroNode.o	\
+	NeuroMesh.o	\
 	testMesh.o	\
 
 HEADERS = \
