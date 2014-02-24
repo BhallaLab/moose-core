@@ -15,7 +15,7 @@
 #include "ChemCompt.h"
 #include "MeshCompt.h"
 #include "CubeMesh.h"
-#include "Vec.h"
+#include "../utility/Vec.h"
 #include "CylBase.h"
 #include "NeuroNode.h"
 
@@ -325,13 +325,15 @@ void NeuroNode::innerTraverse(
  * static function.
  */
 void NeuroNode::buildTree( 
-				vector< NeuroNode >& nodes, vector< Id > elist )
+				vector< NeuroNode >& nodes, vector< ObjId > elist )
 {
 	nodes.clear();
 	map< Id, unsigned int > nodeMap;
-	for ( vector< Id >::iterator i = elist.begin(); i != elist.end(); ++i )
+	for ( vector< ObjId >::iterator 
+		i = elist.begin(); i != elist.end(); ++i ) {
 		if ( i->element()->cinfo()->isA( "Compartment" ) )
 			nodes.push_back( NeuroNode( *i ) );
+	}
 	if ( nodes.size() <= 1 )
 		return;
 	for ( unsigned int i = 0; i < nodes.size(); ++i )

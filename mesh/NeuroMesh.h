@@ -73,7 +73,7 @@ class NeuroMesh: public MeshCompt
 		 * Assigns a group of compartments to be used for the mesh.
 		 */
 		void setCellPortion( const Eref& e, 
-							Id cell, vector< Id > portion );
+							Id cell, vector< ObjId > portion );
 
 		/**
 		 * Separates out the spines attached to the selected groups of
@@ -311,7 +311,12 @@ class NeuroMesh: public MeshCompt
 		 */
 		vector< Id > shaft_; /// Id of shaft compartment.
 		vector< Id > head_;	/// Id of head compartment
-		vector< unsigned int > parent_; /// Index of parent voxel
+		vector< unsigned int > parent_; /// Index of parent voxel of spines
+		/**
+		 * Index of parent voxel of each voxel. The root voxel has a 
+		 * parent of -1.
+		 */
+		vector< unsigned int > parentVoxel_; 
 };
 
 

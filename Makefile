@@ -60,7 +60,7 @@
 
 # Default values for flags. The operator ?= assigns the given value only if the
 # variable is not already defined.
-USE_SBML?=1
+USE_SBML?=0
 USE_HDF5?=1
 USE_CUDA?=0
 PYTHON?=2
@@ -300,7 +300,9 @@ SUBDIR = \
 	external/muparser \
 	biophysics \
 	kinetics \
+	ksolve \
 	mesh \
+	diffusion \
 	device \
 	benchmarks \
 	$(SMOLDYN_DIR) \
@@ -323,7 +325,9 @@ OBJLIBS =	\
 	external/muparser/_muparser.o \
 	biophysics/_biophysics.o \
 	kinetics/_kinetics.o \
+	ksolve/_ksolve.o \
 	mesh/_mesh.o \
+	diffusion/_diffusion.o \
 	device/_device.o \
 	benchmarks/_benchmarks.o \
 	$(SMOLDYN_LIB) \
