@@ -10,7 +10,7 @@
 #include <cctype>
 #include "header.h"
 #include "SparseMatrix.h"
-#include "Vec.h"
+#include "../utility/Vec.h"
 
 #include "ElementValueFinfo.h"
 #include "Boundary.h"
@@ -202,6 +202,7 @@ const Cinfo* NeuroMesh::initCinfo()
 		&separateSpines,	// Value
 		&numSegments,		// ReadOnlyValue
 		&numDiffCompts,		// ReadOnlyValue
+		&parentVoxel,			// ReadOnlyValue
 		&diffLength,			// Value
 		&geometryPolicy,		// Value
 		&setCellPortion,			// DestFinfo
@@ -501,7 +502,7 @@ bool NeuroMesh::filterSpines( Id compt )
 // I assume 'cell' is the parent of the compartment tree.
 void NeuroMesh::setCell( const Eref& e, Id cell )
 {
-	vector< Id > compts;
+	vector< ObjId > compts;
 	wildcardFind( cell.path() + "/##", compts );
 	setCellPortion( e, cell, compts );
 }
@@ -520,7 +521,7 @@ void NeuroMesh::setCell( const Eref& e, Id cell )
 void NeuroMesh::setCellPortion( const Eref& e, Id cell,
 	string path	)
 {
-	vector< Id > compts;
+	vector< ObjId > compts;
 	wildcardFind( path, compts );
 	setCellPortion( e, cell, compts );
 }
@@ -529,7 +530,7 @@ void NeuroMesh::setCellPortion( const Eref& e, Id cell,
 // Here we set a portion of a cell, specified by a vector of Ids. We
 // also need to define the cell parent.
 void NeuroMesh::setCellPortion( const Eref& e,
-					Id cell, vector< Id > portion )
+					Id cell, vector< ObjId > portion )
 {
 	double oldVol = getMeshEntryVolume( 0 );
 	cell_ = cell;
@@ -551,6 +552,7 @@ void NeuroMesh::setCellPortion( const Eref& e,
 
 void NeuroMesh::separateOutSpines( const Eref& e )
 {
+		/*
 		vector< Id > ids;
 		e.element()->getNeighbours( ids, spineListOut() );
 		if ( ids.size() > 0 ) {
@@ -578,6 +580,7 @@ void NeuroMesh::separateOutSpines( const Eref& e )
 			SetGet3< Id, vector< double >, vector< unsigned int > >::set( 
 					ids[0], "psdList", cell_, psdCoords, index );
 		}
+		*/
 }
 
 /** 
@@ -654,7 +657,7 @@ unsigned int NeuroMesh::getNumDiffCompts() const
 
 vector< unsigned int > NeuroMesh::getParentVoxel() const
 {
-	return parent_;
+	return parentVoxel_;
 }
 
 
@@ -851,6 +854,7 @@ void NeuroMesh::innerHandleNodeInfo(
 			const Eref& e,
 			unsigned int numNodes, unsigned int numThreads )
 {
+		/*
 	unsigned int numEntries = nodeIndex_.size();
 	vector< double > vols( numEntries, 0.0 );
 	double oldVol = getMeshEntryVolume( 0 );
@@ -868,6 +872,7 @@ void NeuroMesh::innerHandleNodeInfo(
 		oldVol,
 		vols, localEntries,
 		outgoingEntries, incomingEntries );
+		*/
 }
 //////////////////////////////////////////////////////////////////
 
@@ -966,6 +971,7 @@ void NeuroMesh::innerBuildDefaultMesh( const Eref& e,
 
 void NeuroMesh::transmitChange( const Eref& e, double oldVol )
 {
+		/*
 	Id meshEntry( e.id().value() + 1 );
 	assert( 
 		meshEntry.eref().data() == reinterpret_cast< char* >( lookupEntry( 0 ) )
@@ -1004,6 +1010,7 @@ void NeuroMesh::transmitChange( const Eref& e, double oldVol )
 	// Reacs to deal with the new mesh. They then update the stoich.
 	lookupEntry( 0 )->triggerRemesh( meshEntry.eref(),
 		oldVol, startEntry, localIndices, vols );
+		*/
 }
 
 //////////////////////////////////////////////////////////////////
@@ -1021,8 +1028,10 @@ double NeuroMesh::getAdx( unsigned int i, unsigned int& parentFid ) const
 		// We're at the start of the node, need to refer to parent for L
 		const NeuroNode* realParent = pa;
 		if ( pa->isDummyNode() ) {
-			if ( pa->parent() == ~0U )
+			if ( pa->parent() == ~0U ) {
+				parentFid = -1;
 				return -1; // No diffusion, bail out.
+			}
 			assert( pa->parent() < nodes_.size() );
 			realParent = &nodes_[ realParent->parent() ];
 			if ( realParent->isDummyNode() ) {
@@ -1045,6 +1054,7 @@ double NeuroMesh::getAdx( unsigned int i, unsigned int& parentFid ) const
 void NeuroMesh::buildStencil()
 {
 // stencil_[0] = new NeuroStencil( nodes_, nodeIndex_, vs_, area_);
+	parentVoxel_.clear();
 	setStencilSize( nodeIndex_.size(), nodeIndex_.size() );
 	SparseMatrix< double > sm( nodeIndex_.size(), nodeIndex_.size() );
 	vector< vector< double > > paEntry( nodeIndex_.size() );
@@ -1054,6 +1064,7 @@ void NeuroMesh::buildStencil()
 	for ( unsigned int i = 0; i < nodeIndex_.size(); ++i ) {
 		unsigned int parentFid;
 		double adx = getAdx( i, parentFid );
+		parentVoxel_.push_back( parentFid );
 		if ( adx < 0.0 ) // No diffusion, so don't put in any entry.
 				continue;
 		/*

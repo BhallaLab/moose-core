@@ -157,7 +157,7 @@ class NeuroNode: public CylBase
 		* compartments.
  		*/
 		static void buildTree( vector< NeuroNode >& nodes, 
-						vector< Id > elist );
+						vector< ObjId > elist );
 
 		/**
 		 * Trims off all spines from tree. Does so by identifying a set of

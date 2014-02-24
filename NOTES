@@ -2523,7 +2523,7 @@ Minor diversion: fixed a bug in wildcarding that Subha and Harsha had pointed
 out a while ago. Checkin 5069.
 
 Next: 
-- Check if NeuroMesh still works, see if it properly generates 
+* Check if NeuroMesh still works, see if it properly generates 
 	the 'parents' vector and sparse matrix for data.
 - Build production diffusion solver for 1 node, M molecules
 - Rebuild production ksolve for 1 node
@@ -2537,4 +2537,129 @@ Next:
 11 Feb.
 Minor fixes to synapses so that they are less likely to point to an empty 
 buffer. Checkin 5081
+
+To get started with NeuroMesh, implemented a small snippet to load and
+run a model defined in a dotp file. This is neuronFromDotp.py.
+
+Compiled NeuroMesh, extracted its array of parents, seems reasonable.
+============================================================================
+13 Feb
+Designing interface between mesh, diffusion solver, and ksolver. The volume has
+8 voxels and 6 molecular species, of which 4 diffuse.
+
+				Node#
+dsolve:	A [0,1,2,3,4,5,6,7]	0
+dsolve:	B [0,1,2,3,4,5,6,7]	1
+dsolve:	C [0,1,2,3,4,5,6,7]	2
+dsolve:	D [0,1,2,3,4,5,6,7]	3
+Mesh:	E [0,1,2,3,4,5,6,7]	Any, doesn't matter as there is no compute load
+Mesh:	F [0,1,2,3,4,5,6,7]	Any, doesn't matter as there is no compute load
+
+Ksolves:
+           0 1 2 3 4 5 6 7 
+           A
+           B
+           C
+           D
+           E
+           F
+Node #     0 0 1 1 2 2 3 3
+
+
+So I can't just rely on the Dsolve providing an interface to the ksolve. The
+bare mesh will have to do so too. 
+Alternative is for the ksolve to talk via the MOOSE object API. Lots of 
+messages, but the outcome would not depend at all on how the object was
+zombified. The ksolve would have to get values, and correspondingly update,
+every pool on every timestep. Saving grace is the low frequency of timesteps.
+This would be trivial to do over messaging so the parallel decomposition would
+be easy enough. Question is the comm cost.
+
+Ops would be: Diffusion calculations: 0.1 ms
+reac calculations: 1-10 ms: Takes the latest diffn values, puts them back.
+Harvest needed from many nodes.
+If no diffusion, then just needs to insert mesh values unless there is an 
+update. 
+
+Approach:
+If we are going to do any diffusion at all, then dsolve is used for every
+molecule even if it does not diffuse. We simply don't do any calculations 
+for the non-diffusion cases. Mesh does not do any zombification.
+If we don't have a ksolver then the kinetics won't work on the dsolve.
+
+The dsolver zombie therefore can be set up to assume the existence of a 
+ksolve affiliated with each compt.
+
+ksolver cannot simply work by adding another pointer to the dsolver zombie,
+because its job is both to get values and to set them. The pointer wont
+help to get the values.
+
+So the ksolver has to use messages. Basic set and get would seem to be
+sufficient. Best case is to have an array of ksolves and do a one-to-one
+message to the zombie.
+
+Issue 1:
+When a value is assigned to the pool or reac: Need to inform solver if it is
+'n' or 'conc' on a pool. Or solver samples all values at each dt, which is
+what it does for the diffusion case where it knows that all values will change.
+	Could implement a msg triggered by setN and setConc, in poolBase.
+	Poor design as it puts in a base class something needed only 
+	in special cases. 
+
+Issue 2:
+What happens to clock of zombies of ksolve? Will need to unsched.
+
+Option 2:
+Pool maintains 2 pointers, one for ksolve and one for dsolve. Updates both
+when a field changes. 
+Ksolve has its ptrs to the pools, and requests for values as needed by its
+(ksolve's) clock.
+
+Either option:
+	- Need to implement a 2-tier ksolve class: Single parent with stoich
+	matrix and messaging to offspring, and array of kids each with 
+	its voxel values.
+	- Need to revisit cross-compt reactions and do in a much simpler,
+	cleaner manner. Possibly exp-Euler reacn or RK45. Separate set from
+	main body reactions, so that we don't have multiple stoichs for the
+	different voxels.
+
+
+============================================================================
+20 Feb.
+Working on the zombie handler structures for pools. Dsolve, DiffPoolVec,
+and soon the Ksolve, Gsolve, and VoxSolve
+
+============================================================================
+21 Feb. Try to put skeleton code together for ksolve and diffusion directories.
+
+Trying now to compile.
+============================================================================
+23 Feb.
+Compiles. With this I can now begin to put in the ksolver and dsolver.
+
+Immediate interface to the zombies is the VoxelPools class, which is
+subclassed off ZombiePoolInterface.
+
+There is an array of VoxelPools on the Ksolve, one for each voxel it handles.
+Note that this could be done as a separate object, which would then take care
+of node assignments. But the VoxelPools doesn't really have anything to 
+interface with the rest of MOOSE, so we do it within the Ksolve.
+
+Ksolve handles everything.
+	Ksolve contains a Stoich. Used to be StoichCore.
+	Ksolve contains the OdeSystem which defines the GSL structures.
+	Ksolve contains a vector of VoxelPools.
+		VoxelPools contain all the stuff to do reactions for one voxel:
+		- S_, Sinit_, y_ vectors for each molecule
+		- a process function to do this.
+	Ksolve contains info about mapping of local VoxelPools to the global
+		indices.
+	Ksolve contains info about how to get and set updates for all 
+		voxelPools, including those whose diffusion calculations are
+		performed off-node. It assembles node-specific stuff into
+		vectors for sending and receiving.
+
+For starters, we need to build the Ksolve, Stoich and OdeSystem.
+
 ============================================================================
