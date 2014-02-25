@@ -1,6 +1,0 @@
-<xsd xmlns="http://moose.ncbs.res.in">
-  <generateClasses language='CS' namespace='moose'>
-    <schema>NeuroML_v2beta1.xsd</schema>
-    <schema>multiscale.xsd</schema>
-  </generateClasses>
-</xsd>
