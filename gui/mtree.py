@@ -217,13 +217,15 @@ class MooseTreeWidget(QtGui.QTreeWidget):
         under currently selected element in the model tree."""
         # print 'Inserting element ...', class_name
         current = self.currentItem()
+        print 'CLASS NAME:', class_name
         self.insertChildElement(current, class_name)
 
     def insertChildElement(self, item, class_name, name=''):
         if len(name) == 0:
             name = class_name
-        path = '%s/%s' % (item.mobj.path, name)
-        mclass = eval('moose.'+class_name)
+        path = '%s/%s' % (item.mobj.path, str(name))
+        mclassname = 'moose.%s' % (str(class_name))
+        mclass = eval(mclassname)
         obj = mclass(path)
         newitem = MooseTreeItem(item)
         newitem.setObject(obj)
