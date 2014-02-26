@@ -2648,11 +2648,15 @@ interface with the rest of MOOSE, so we do it within the Ksolve.
 
 Ksolve handles everything.
 	Ksolve contains a Stoich. Used to be StoichCore.
-	Ksolve contains the OdeSystem which defines the GSL structures.
+		Stoich contains the gsl_odeiv2_system which is shared by all 
+			the voxels.
 	Ksolve contains a vector of VoxelPools.
 		VoxelPools contain all the stuff to do reactions for one voxel:
-		- S_, Sinit_, y_ vectors for each molecule
-		- a process function to do this.
+		- S_, Sinit_, vectors for each molecule
+			(I don't think y is needed)
+		- The gsl_odeiv2_driver which is used ineternally and has to be 
+			separate, as far as I can see, for each voxel.
+		- a process function to advance the simulation.
 	Ksolve contains info about mapping of local VoxelPools to the global
 		indices.
 	Ksolve contains info about how to get and set updates for all 
@@ -2661,5 +2665,66 @@ Ksolve handles everything.
 		vectors for sending and receiving.
 
 For starters, we need to build the Ksolve, Stoich and OdeSystem.
+
+Next: build the ksolve and Stoich to control the VoxelPools. 
+
+============================================================================
+24 Feb
+Issue with zombification of pools. ZombiePools have two solvers, one for
+diff and one for kinetics. The PoolBase zombification function takes a single
+Id. 
+
+Options:
+	PoolBase::zombify: Take 2 ids.
+	PoolBase::zombify: Take 2 ZombiePoolInterface ptrs.
+	PoolBase::zombify: Take only the ksolver Id
+	PoolBase::zombify: Take only the dsolver Id. If needed, put in a
+		dummy. Do kinetics later, by explicitly setting 
+		ZombiePool::setKineticSolver
+	PoolBase::zombify: Don't take any Ids at all. Always have a dummy
+		Dsolver available for the ZombiePool. Later replace with the
+		real one in an explicit assignment. Likewise do kinetics later,
+		by explicitly setting ZombiePool::setKineticSolver
+	Don't even bother to zombify the pool.
+	
+How would we use it?
+	Case 1: I have only a single-compt reac system, no diffusion.
+		Here I don't have a dsolve. The zombification can use the
+		Id of the ksolve to derive the one and only VoxelPool, and
+		assign it for the zombie.
+	Case 2: I have a reac-diff system. We first configure the diffusion,
+		since it is simpler. By now the things are already zombies...
+		We then set up the ksolve. Here we need to make suitable 
+		numbers of the VoxelPools for each node, and assign them
+		to the appropriate zombies as their parent.
+
+OK, so the approach is:
+	1. If Dsolve is present, zombify the pools already. Tell the ksolve
+		how many voxels to use.
+	2. Ksolve passes itself (or its Id) to the Stoich for assigning to the
+		zombie. Only one pool entry exists, so assignment is easy.
+		Here we can do the zombification call anyway, which ignores
+		it if the pool is already a zombie.
+	3. I had put the VoxelPool as the ZombiePoolInterface, but this
+		won't work for diffusion arrays where only a single entry 
+		for the ZombiePool needs to look up each pool on each voxel.
+		So the ksolve has to be the ZombiePoolInterface.
+	4. Don't worry about ordering, just put the ZombiePoolInterface
+		pointer into the first available slot.
+	5. Set up an unschedule function from Shell, also fix scheduling
+		so useclock only ever sets up one msg.
+
+
+============================================================================
+25 Feb
+Compiling stuff. Need to decide if all my vectors (other than those just from
+the wildcard) should remain as vector< Id > or become vector< ObjId >
+The use case: Should always be as Ids.
+The wildcards: generate vector< ObjId >
+
+============================================================================
+26 Feb
+Finally compiled it, most things are currently just placeholders.
+No tests applied yet.
 
 ============================================================================

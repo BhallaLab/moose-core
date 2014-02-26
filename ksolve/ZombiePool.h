@@ -59,8 +59,9 @@ class ZombiePool: public PoolBase
 		//////////////////////////////////////////////////////////////////
 		// utility funcs
 		//////////////////////////////////////////////////////////////////
-		void setKineticSolver( ZombiePoolInterface* k );
-		void setDiffSolver( ZombiePoolInterface* d );
+		void setSolver( Id s );
+		// void setKineticSolver( ZombiePoolInterface* k );
+		// void setDiffSolver( ZombiePoolInterface* d );
 
 		static const Cinfo* initCinfo();
 	protected:
