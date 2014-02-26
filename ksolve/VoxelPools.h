@@ -10,7 +10,8 @@
 #ifndef _VOXEL_POOLS_H
 #define _VOXEL_POOLS_H
 
-class VoxelPools: public ZombiePoolInterface
+class Stoich;
+class VoxelPools
 {
 	public: 
 		VoxelPools();
@@ -59,19 +60,19 @@ class VoxelPools: public ZombiePoolInterface
 		//////////////////////////////////////////////////////////////////
 		// Solver interface functions
 		//////////////////////////////////////////////////////////////////
-		void setSolver( const Ksolve* ksolve_ );
-		unsigned int getPoolIndex( const Eref& e );
+		void setStoich( const Stoich* stoich, const OdeSystem* ode );
+		void advance( const ProcInfo* p );
 		
 		//////////////////////////////////////////////////////////////////
 		// Field assignment functions
 		//////////////////////////////////////////////////////////////////
 
-		void setN( const Eref& e, double v );
-		double getN( const Eref& e ) const;
-		void setNinit( const Eref& e, double v );
-		double getNinit( const Eref& e ) const;
-		void setDiffConst( const Eref& e, double v );
-		double getDiffConst( const Eref& e ) const;
+		void setN( unsigned int i, double v );
+		double getN( unsigned int ) const;
+		void setNinit( unsigned int, double v );
+		double getNinit( unsigned int ) const;
+		void setDiffConst( unsigned int, double v );
+		double getDiffConst( unsigned int ) const;
 
 	private:
 		/**
@@ -102,9 +103,9 @@ class VoxelPools: public ZombiePoolInterface
 		 * molecules.
 		 */
 		vector< double > Sinit_;
-
-		/// Identifies solver to use for this set of pools. 
-		const Ksolve* ksolve_;
+#ifdef USE_GSL
+		gsl_odeiv2_driver* driver_;
+#endif
 };
 
 #endif	// _VOXEL_POOLS_H

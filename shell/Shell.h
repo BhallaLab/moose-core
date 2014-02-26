@@ -368,6 +368,12 @@ class Shell
 		void addClockMsgs( const vector< ObjId >& list, 
 			const string& field, unsigned int tick, unsigned int msgIndex );
 
+		/**
+		 * Utility function to unschedule the specified elist operating
+		 * on the specified field, typically 'process'
+		 */
+		static void dropClockMsgs(
+			const vector< ObjId >& list, const string& field );
 		////////////////////////////////////////////////////////////////
 		// Thread and MPI handling functions
 		////////////////////////////////////////////////////////////////
