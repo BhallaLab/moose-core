@@ -12,7 +12,6 @@
 #include "ZombiePoolInterface.h"
 #include "ZombiePool.h"
 #include "lookupVolumeFromMesh.h"
-#include "ElementValueFinfo.h"
 
 #define EPSILON 1e-15
 

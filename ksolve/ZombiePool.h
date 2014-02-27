@@ -46,16 +46,6 @@ class ZombiePool: public PoolBase
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
 
-		// void vProcess( const Eref& e, ProcPtr p );
-		// void vReinit( const Eref& e, ProcPtr p );
-		// void vReac( double A, double B );
-		// void vHandleMolWt( const Eref& e, double v );
-		void vRemesh( const Eref& e,
-			double oldvol,
-			unsigned int numTotalEntries, unsigned int startEntry, 
-			const vector< unsigned int >& localIndices, 
-			const vector< double >& vols );
-
 		//////////////////////////////////////////////////////////////////
 		// utility funcs
 		//////////////////////////////////////////////////////////////////

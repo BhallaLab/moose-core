@@ -2648,8 +2648,14 @@ interface with the rest of MOOSE, so we do it within the Ksolve.
 
 Ksolve handles everything.
 	Ksolve contains a Stoich. Used to be StoichCore.
+		Stoich defines the reaction system.
+		Stoich has the Stoichiometry matrix
 		Stoich contains the gsl_odeiv2_system which is shared by all 
 			the voxels.
+		Stoich does NOT deal with pools.
+		Stoich can also be used as a standalone class
+			For getting steady states
+			For doing GSSA calculations
 	Ksolve contains a vector of VoxelPools.
 		VoxelPools contain all the stuff to do reactions for one voxel:
 		- S_, Sinit_, vectors for each molecule
@@ -2725,6 +2731,15 @@ The wildcards: generate vector< ObjId >
 ============================================================================
 26 Feb
 Finally compiled it, most things are currently just placeholders.
-No tests applied yet.
+No tests applied yet. Checkin 5114.
+
+Next:
+- Implement other zombies
+- Implement test model, probably one already exists in unit tests.
+
+============================================================================
+27 Feb
+Implemented ZombieBufPool. This was trivial.
+Implemented ZombieReac. This entailed substantial fixups of Stoich and Ksolve.
 
 ============================================================================

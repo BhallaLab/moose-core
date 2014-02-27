@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "ElementValueFinfo.h"
 #include "PoolBase.h"
 #include "ReacBase.h"
 #include "EnzBase.h"
@@ -28,6 +29,85 @@
 #endif
 
 #define EPSILON 1e-15
+
+const Cinfo* Stoich::initCinfo()
+{
+		//////////////////////////////////////////////////////////////
+		// Field Definitions
+		//////////////////////////////////////////////////////////////
+		static ElementValueFinfo< Stoich, string > path(
+			"path",
+			"Wildcard path for reaction system handled by Stoich",
+			&Stoich::setPath,
+			&Stoich::getPath
+		);
+
+		static ReadOnlyValueFinfo< Stoich, double > estimatedDt(
+			"estimatedDt",
+			"Estimated timestep for reac system based on Euler error",
+			&Stoich::getEstimatedDt
+		);
+
+		static ReadOnlyValueFinfo< Stoich, unsigned int > numVarPools(
+			"numVarPools",
+			"Number of time-varying pools to be computed by the "
+			"numerical engine",
+			&Stoich::getNumVarPools
+		);
+
+		static ReadOnlyValueFinfo< Stoich, unsigned int > numAllPools(
+			"numAllPools",
+			"Total number of pools handled by the numerical engine. "
+			"This includes variable ones, buffered ones, and functions",
+			&Stoich::getNumAllPools
+		);
+
+		static ReadOnlyValueFinfo< Stoich, unsigned int > numRates(
+			"numRates",
+			"Total number of rate terms in the reaction system.",
+			&Stoich::getNumRates
+		);
+		// Stuff here for getting Stoichiometry matrix to manipulate in
+		// Python.
+
+		//////////////////////////////////////////////////////////////
+		// MsgDest Definitions
+		//////////////////////////////////////////////////////////////
+
+		//////////////////////////////////////////////////////////////
+		// SrcFinfo Definitions
+		//////////////////////////////////////////////////////////////
+
+		//////////////////////////////////////////////////////////////
+		// SharedMsg Definitions
+		//////////////////////////////////////////////////////////////
+
+	static Finfo* stoichFinfos[] = {
+		&path,				// ElementValue
+		&estimatedDt,		// ReadOnlyValue
+		&numVarPools,		// ReadOnlyValue
+		&numAllPools,		// ReadOnlyValue
+		&numRates,			// ReadOnlyValue
+	};
+
+	static Dinfo< Stoich > dinfo;
+	static Cinfo stoichCinfo (
+		"Stoich",
+		Neutral::initCinfo(),
+		stoichFinfos,
+		sizeof( stoichFinfos ) / sizeof ( Finfo* ),
+		&dinfo
+	);
+
+	return &stoichCinfo;
+}
+
+//////////////////////////////////////////////////////////////
+// Class definitions
+//////////////////////////////////////////////////////////////
+static const Cinfo* stoichCinfo = Stoich::initCinfo();
+
+//////////////////////////////////////////////////////////////
 
 Stoich::Stoich()
 	: 
@@ -587,7 +667,43 @@ unsigned int Stoich::convertIdToFuncIndex( Id id ) const
 	return i;
 }
 
-void Stoich::installReaction( ZeroOrder* forward, ZeroOrder* reverse, Id reacId )
+ZeroOrder* makeHalfReaction(
+	double rate, const Stoich* sc, const vector< Id >& reactants )
+{
+	ZeroOrder* rateTerm = 0;
+	if ( reactants.size() == 1 ) {
+		rateTerm =  new FirstOrder( 
+			rate, sc->convertIdToPoolIndex( reactants[0] ) );
+	} else if ( reactants.size() == 2 ) {
+		rateTerm = new SecondOrder( rate,
+			sc->convertIdToPoolIndex( reactants[0] ),
+			sc->convertIdToPoolIndex( reactants[1] ) );
+	} else if ( reactants.size() > 2 ) {
+		vector< unsigned int > temp;
+		for ( unsigned int i = 0; i < reactants.size(); ++i )
+			temp.push_back( sc->convertIdToPoolIndex( reactants[i] ) );
+		rateTerm = new NOrder( rate, temp );
+	} else {
+		cout << "Error: GslStoichZombies::makeHalfReaction: no reactants\n";
+	}
+	return rateTerm;
+}
+
+/**
+ * This takes the specified forward and reverse half-reacs belonging
+ * to the specified Reac, and builds them into the Stoich.
+ */
+void Stoich::installReaction( Id reacId,
+		const vector< Id >& subs, 
+		const vector< Id >& prds )
+{
+	ZeroOrder* forward = makeHalfReaction( 0, this, subs );
+	ZeroOrder* reverse = makeHalfReaction( 0, this, prds );
+	installReaction( reacId, forward, reverse );
+}
+
+void Stoich::installReaction( Id reacId, 
+				ZeroOrder* forward, ZeroOrder* reverse )
 {
 	unsigned int rateIndex = convertIdToReacIndex( reacId );
 	unsigned int revRateIndex = rateIndex;

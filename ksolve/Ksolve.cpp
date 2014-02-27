@@ -22,6 +22,7 @@
 #include "SparseMatrix.h"
 #include "KinSparseMatrix.h"
 #include "Stoich.h"
+
 #include "Ksolve.h"
 
 const unsigned int OFFNODE = ~0;
@@ -32,7 +33,7 @@ const unsigned int OFFNODE = ~0;
 
 Ksolve::Ksolve()
 	: startVoxel_( 0 ),
-		stoich_( 0 )
+		stoich_()
 {;}
 
 Ksolve::~Ksolve()
@@ -47,7 +48,7 @@ Ksolve::~Ksolve()
 
 unsigned int Ksolve::getPoolIndex( const Eref& e ) const
 {
-	return stoich_->convertIdToReacIndex( e.id() );
+	return stoichPtr_->convertIdToPoolIndex( e.id() );
 }
 
 unsigned int Ksolve::getVoxelIndex( const Eref& e ) const
@@ -56,6 +57,17 @@ unsigned int Ksolve::getVoxelIndex( const Eref& e ) const
 	if ( ret < startVoxel_  || ret >= startVoxel_ + pools_.size() ) 
 		return OFFNODE;
 	return ret - startVoxel_;
+}
+
+Id Ksolve::getStoich() const
+{
+	return stoich_;
+}
+
+void Ksolve::setStoich( Id stoich )
+{
+	stoich_ = stoich;
+	stoichPtr_ = reinterpret_cast< const Stoich* >( stoich.eref().data() );
 }
 
 //////////////////////////////////////////////////////////////
