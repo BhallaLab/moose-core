@@ -13,6 +13,7 @@ OBJ = \
 	KinSparseMatrix.o	\
 	ZombiePool.o \
 	ZombieBufPool.o \
+	ZombieFuncPool.o \
 	ZombieReac.o \
 	ZombieEnz.o \
 	ZombieMMenz.o \
@@ -51,6 +52,7 @@ $(OBJ)	: $(HEADERS)
 KinSparseMatrix.o:	KinSparseMatrix.h ../basecode/SparseMatrix.h
 ZombiePool.o:	../kinetics/PoolBase.h ZombiePoolInterface.h ZombiePool.h ../kinetics/lookupVolumeFromMesh.h
 ZombieBufPool.o:	../kinetics/PoolBase.h ZombiePoolInterface.h ZombiePool.h ZombieBufPool.h ../kinetics/lookupVolumeFromMesh.h
+ZombieBufPool.o:	../kinetics/PoolBase.h ZombiePoolInterface.h ZombiePool.h ZombieFuncPool.h
 VoxelPools.o:	VoxelPools.h RateTerm.h Stoich.h
 RateTerm.o:		RateTerm.h
 Stoich.o:		RateTerm.h ../kinetics/FuncTerm.h ../kinetics/SumTotalTerm.h Stoich.h ../kinetics/PoolBase.h ../kinetics/ReacBase.h ../kinetics/EnzBase.h ../kinetics/CplxEnzBase.h ../kinetics/FuncBase.h ../basecode/SparseMatrix.h KinSparseMatrix.h
