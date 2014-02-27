@@ -12,6 +12,8 @@ TARGET = _ksolve.o
 OBJ = \
 	KinSparseMatrix.o	\
 	ZombiePool.o \
+	ZombieBufPool.o \
+	ZombieReac.o \
 	VoxelPools.o \
 	RateTerm.o \
 	Stoich.o \
@@ -45,7 +47,8 @@ default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
 KinSparseMatrix.o:	KinSparseMatrix.h ../basecode/SparseMatrix.h
-ZombiePool.o:	../kinetics/PoolBase.h ZombiePool.h
+ZombiePool.o:	../kinetics/PoolBase.h ZombiePoolInterface.h ZombiePool.h ../kinetics/lookupVolumeFromMesh.h
+ZombieBufPool.o:	../kinetics/PoolBase.h ZombiePoolInterface.h ZombiePool.h ZombieBufPool.h ../kinetics/lookupVolumeFromMesh.h
 VoxelPools.o:	VoxelPools.h RateTerm.h Stoich.h
 RateTerm.o:		RateTerm.h
 Stoich.o:		RateTerm.h ../kinetics/FuncTerm.h ../kinetics/SumTotalTerm.h Stoich.h ../kinetics/PoolBase.h ../kinetics/ReacBase.h ../kinetics/EnzBase.h ../kinetics/CplxEnzBase.h ../kinetics/FuncBase.h
