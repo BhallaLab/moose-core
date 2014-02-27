@@ -2741,5 +2741,6 @@ Next:
 27 Feb
 Implemented ZombieBufPool. This was trivial.
 Implemented ZombieReac. This entailed substantial fixups of Stoich and Ksolve.
+Implemented ZombieEnz and ZombieMMenz, with more fixups of Stoich.
 
 ============================================================================
