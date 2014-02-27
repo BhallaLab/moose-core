@@ -749,6 +749,34 @@ void Stoich::installReaction( Id reacId,
 	}
 }
 
+/**
+ * This takes the baseclass for an MMEnzyme and builds the
+ * MMenz into the Stoich.
+ */
+void Stoich::installMMenz( Id enzId, Id enzMolId,
+	const vector< Id >& subs, const vector< Id >& prds )
+{
+	MMEnzymeBase* meb;
+	unsigned int enzIndex = convertIdToPoolIndex( enzMolId );
+	unsigned int enzSiteIndex = convertIdToReacIndex( enzId );
+	if ( subs.size() == 1 ) {
+		unsigned int subIndex = convertIdToPoolIndex( subs[0] );
+		meb = new MMEnzyme1( 1, 1, enzIndex, subIndex );
+	} else if ( subs.size() > 1 ) {
+		vector< unsigned int > v;
+		for ( unsigned int i = 0; i < subs.size(); ++i )
+			v.push_back( convertIdToPoolIndex( subs[i] ) );
+		ZeroOrder* rateTerm = new NOrder( 1.0, v );
+		meb = new MMEnzyme( 1, 1, enzIndex, rateTerm );
+	} else {
+		cout << "Error: GslStoich::installEnzyme: No substrates for "  <<
+			enzId.path() << endl;
+		return;
+	}
+	installMMenz( meb, enzSiteIndex, subs, prds );
+}
+
+/// This is the internal variant to install the MMenz.
 void Stoich::installMMenz( MMEnzymeBase* meb, unsigned int rateIndex,
 	const vector< Id >& subs, const vector< Id >& prds )
 {
@@ -764,6 +792,21 @@ void Stoich::installMMenz( MMEnzymeBase* meb, unsigned int rateIndex,
 		int temp = N_.get( poolIndex, rateIndex );
 		N_.set( poolIndex, rateIndex, temp + 1 );
 	}
+}
+
+
+void Stoich::installEnzyme( Id enzId, Id enzMolId, Id cplxId,
+	const vector< Id >& subs, const vector< Id >& prds )
+{
+	vector< Id > temp( subs );
+	temp.insert( temp.begin(), enzMolId );
+	ZeroOrder* r1 = makeHalfReaction( 0, this, temp );
+	temp.clear();
+	temp.resize( 1, cplxId );
+	ZeroOrder* r2 = makeHalfReaction( 0, this, temp );
+	ZeroOrder* r3 = makeHalfReaction( 0, this, temp );
+
+	installEnzyme( r1, r2, r3, enzId, enzMolId, prds );
 }
 
 void Stoich::installEnzyme( ZeroOrder* r1, ZeroOrder* r2, ZeroOrder* r3,
@@ -912,6 +955,11 @@ void Stoich::setMMenzKm( const Eref& e, double v ) const
 	enz->setR1( v * vols[0] * NA );
 }
 
+double Stoich::getMMenzNumKm( const Eref& e ) const
+{
+	return getR1( e );
+}
+
 void Stoich::setMMenzKcat( const Eref& e, double v ) const
 {
 	RateTerm* rt = rates_[ convertIdToReacIndex( e.id() ) ];
@@ -919,6 +967,11 @@ void Stoich::setMMenzKcat( const Eref& e, double v ) const
 	assert( enz );
 
 	enz->setR2( v );
+}
+
+double Stoich::getMMenzKcat( const Eref& e ) const
+{
+	return getR2( e );
 }
 
 /// Later handle all the volumes when this conversion is done.
@@ -948,6 +1001,27 @@ void Stoich::setEnzK3( const Eref& e, double v ) const
 		rates_[ convertIdToReacIndex( e.id() ) + 2 ]->setR1( v );
 	else
 		rates_[ convertIdToReacIndex( e.id() ) + 1 ]->setR1( v );
+}
+
+double Stoich::getEnzNumK1( const Eref& e ) const
+{
+	return getR1( e );
+}
+
+double Stoich::getEnzK2( const Eref& e ) const
+{
+	if ( useOneWay_ )
+		return getR1offset1( e );
+	else
+		return getR2( e );
+}
+
+double Stoich::getEnzK3( const Eref& e ) const
+{
+	if ( useOneWay_ )
+		return getR1offset2( e );
+	else
+		return getR1offset1( e );
 }
 
 /**

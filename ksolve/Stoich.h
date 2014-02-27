@@ -138,17 +138,30 @@ class Stoich
 		 */
 		void installReaction( Id reacId, 
 				ZeroOrder* forward, ZeroOrder* reverse );
+
 		/**
 		 * This takes the baseclass for an MMEnzyme and builds the
 		 * MMenz into the Stoich.
 		 */
+		void installMMenz( Id enzId, Id enzMolId,
+			const vector< Id >& subs, const vector< Id >& prds );
+		/**
+		 * This is the inner function to do the installation.
+		 */
 		void installMMenz( MMEnzymeBase* meb, unsigned int rateIndex,
 			const vector< Id >& subs, const vector< Id >& prds );
 
+		/*
+		 * This takes the specified Reac and its substrate and product
+		 * list, and installs them into the Stoich. This is the high-level
+		 * interface function.
+		 */
+		void installEnzyme( Id enzId, Id enzMolId, Id cplxId,
+				const vector< Id >& subs, const vector< Id >& prds );
 		/**
 		 * This takes the forward, backward and product formation half-reacs
 		 * belonging to the specified Enzyme, and builds them into the
-		 * Stoich
+		 * Stoich. This is the low-level function.
 		 */
 		void installEnzyme( ZeroOrder* r1, ZeroOrder* r2, ZeroOrder* r3,
 			Id enzId, Id enzMolId, const vector< Id >& prds );
@@ -197,11 +210,13 @@ class Stoich
 		 * in case there are different volumes.
 		 */
 		void setMMenzKm( const Eref& e, double v ) const;
+		double getMMenzNumKm( const Eref& e ) const;
 
 		/**
 		 * Sets the kcat for MMenz. No conversions needed.
 		 */
 		void setMMenzKcat( const Eref& e, double v ) const;
+		double getMMenzKcat( const Eref& e ) const;
 
 		/**
 		 * Sets the rate v (given in millimoloar concentration units)
@@ -212,11 +227,17 @@ class Stoich
 		 * voxel, and scaling accordingly.
 		 */
 		void setEnzK1( const Eref& e, double v ) const;
+		double getEnzNumK1( const Eref& e ) const;
 
 		/// Set rate k2 (1/sec) for enzyme
 		void setEnzK2( const Eref& e, double v ) const;
+		/// Get rate k2 (1/sec) for enzyme
+		double getEnzK2( const Eref& e ) const;
+
 		/// Set rate k3 (1/sec) for enzyme
 		void setEnzK3( const Eref& e, double v ) const;
+		/// Get rate k3, aka kcat, for enzyme
+		double getEnzK3( const Eref& e ) const;
 
 		/**
 		 * Returns the internal rate in #/voxel, for R1, for the specified
