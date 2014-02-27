@@ -26,7 +26,8 @@ class Ksolve: public ZombiePoolInterface
 		//////////////////////////////////////////////////////////////////
 		unsigned int getPoolIndex( const Eref& e ) const;
 		unsigned int getVoxelIndex( const Eref& e ) const;
-		void setSolver( const Stoich* s );
+		Id getStoich() const;
+		void setStoich( Id stoich );
 		
 		//////////////////////////////////////////////////////////////////
 		// ZombiePoolInterface inherited functions
@@ -56,7 +57,10 @@ class Ksolve: public ZombiePoolInterface
 		 * Stoich is the class that sets up the reaction system and
 		 * manages the stoichiometry matrix
 		 */
-		Stoich* stoich_;
+		Id stoich_;
+
+		/// Utility ptr used to help Pool Id lookups by the Ksolve.
+		const Stoich* stoichPtr_;
 };
 
 #endif	// _KSOLVE_H

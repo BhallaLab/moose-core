@@ -124,11 +124,20 @@ class Stoich
 		unsigned int convertIdToFuncIndex( Id id ) const;
 		// unsigned int convertIdToComptIndex( Id id ) const;
 
-		/**
+		/*
+		 * This takes the specified Reac and its substrate and product
+		 * list, and installs them into the Stoich. This is the high-level
+		 * interface function.
+		 */
+		void installReaction( Id reacId,
+				const vector< Id >& subs, const vector< Id >& prds );
+		/*
 		 * This takes the specified forward and reverse half-reacs belonging
 		 * to the specified Reac, and builds them into the Stoich.
+		 * It is a low-level function used internally.
 		 */
-		void installReaction( ZeroOrder* forward, ZeroOrder* reverse, Id reacId );
+		void installReaction( Id reacId, 
+				ZeroOrder* forward, ZeroOrder* reverse );
 		/**
 		 * This takes the baseclass for an MMEnzyme and builds the
 		 * MMenz into the Stoich.
