@@ -148,11 +148,12 @@ void ZombieReac::setSolver( Id stoich, Id orig )
 {
 	assert( stoich != Id() );
 
-	stoich_ = reinterpret_cast< Stoich* >( stoich.eref().data( ) );
 	vector< Id > sub;
 	vector< Id > prd;
 	orig.element()->getNeighbours( sub, toSub );
 	orig.element()->getNeighbours( prd, toPrd );
 
+	assert( stoich.element()->cinfo()->isA( "Stoich" ) );
+	stoich_ = reinterpret_cast< Stoich* >( stoich.eref().data( ) );
 	stoich_->installReaction( orig, sub, prd );
 }
