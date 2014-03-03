@@ -314,6 +314,7 @@ void ReacBase::zombify( Element* orig, const Cinfo* zClass, Id solver )
 	for ( unsigned int i = 0; i < num; ++i ) {
 		Eref er( orig, i + start );
 		ReacBase* rb = reinterpret_cast< ReacBase* >( er.data() );
+		rb->setSolver( solver, orig->id() );
 		rb->setConcKf( er, concKf[i] );
 		rb->setConcKb( er, concKb[i] );
 	}
