@@ -115,6 +115,21 @@ void VoxelPools::advance( const ProcInfo* p )
 #endif
 }
 
+// static func. This is the function that goes into the Gsl solver.
+int VoxelPools::gslFunc( double t, const double* y, double *dydt, 
+						void* params )
+{
+	Stoich* s = reinterpret_cast< Stoich* >( params );
+	double* q = const_cast< double* >( y ); // Assign the func portion.
+	s->updateFuncs( q, t );
+	s->updateRates( y, dydt );
+#ifdef USE_GSL
+	return GSL_SUCCESS;
+#else
+	return 0;
+#endif
+}
+
 //////////////////////////////////////////////////////////////
 // Zombie Pool Access functions
 //////////////////////////////////////////////////////////////

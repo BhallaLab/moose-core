@@ -25,6 +25,7 @@ class Ksolve: public ZombiePoolInterface
 
 		unsigned int getNumLocalVoxels() const;
 		unsigned int getNumAllVoxels() const;
+		void setNumAllVoxels( unsigned int num );
 		//////////////////////////////////////////////////////////////////
 		// Dest Finfos
 		//////////////////////////////////////////////////////////////////
