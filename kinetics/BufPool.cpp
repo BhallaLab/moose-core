@@ -11,6 +11,7 @@
 #include "PoolBase.h"
 #include "Pool.h"
 #include "BufPool.h"
+#include "lookupVolumeFromMesh.h"
 
 #define EPSILON 1e-15
 
@@ -67,6 +68,32 @@ BufPool::BufPool()
 
 BufPool::~BufPool()
 {;}
+
+//////////////////////////////////////////////////////////////
+// Field definitions
+//////////////////////////////////////////////////////////////
+
+void BufPool::vSetN( const Eref& e, double v )
+{
+	Pool::vSetN( e, v );
+	Pool::vSetNinit( e, v );
+}
+
+void BufPool::vSetNinit( const Eref& e, double v )
+{
+	vSetN( e, v );
+}
+
+void BufPool::vSetConc( const Eref& e, double conc )
+{
+	double n = NA * conc * lookupVolumeFromMesh( e );
+	vSetN( e, n );
+}
+
+void BufPool::vSetConcInit( const Eref& e, double conc )
+{
+	vSetConc( e, conc );
+}
 
 
 //////////////////////////////////////////////////////////////

@@ -62,6 +62,10 @@ class VoxelPools
 		//////////////////////////////////////////////////////////////////
 		void setStoich( const Stoich* stoich, const OdeSystem* ode );
 		void advance( const ProcInfo* p );
+
+		/// This is the function which evaluates the rates.
+		static int gslFunc( double t, const double* y, double *dydt, 
+						void* params );
 		
 		//////////////////////////////////////////////////////////////////
 		// Field assignment functions

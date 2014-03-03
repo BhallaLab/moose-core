@@ -23,7 +23,7 @@ class OdeSystem {
 		// GSL stuff
 #ifdef USE_GSL
 		gsl_odeiv2_system gslSys;
-		gsl_odeiv2_step_type* gslStep;
+		const gsl_odeiv2_step_type* gslStep;
 #endif
 		double initStepSize;
 
