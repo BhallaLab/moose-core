@@ -15,7 +15,7 @@ class ZombieFuncPool: public ZombiePool
 	public: 
 		ZombieFuncPool();
 
-		void input( double v );
+		void input( const Eref& e, double v );
 
 		static const Cinfo* initCinfo();
 	private:

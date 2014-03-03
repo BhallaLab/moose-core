@@ -21,6 +21,7 @@ OBJ = \
 	RateTerm.o \
 	Stoich.o \
 	Ksolve.o \
+	testKsolve.o \
 
 HEADERS = \
 	../basecode/header.h \
@@ -60,7 +61,7 @@ ZombieReac.o:		RateTerm.h ../kinetics/FuncTerm.h Stoich.h ../kinetics/ReacBase.h
 ZombieEnz.o:		RateTerm.h ../kinetics/FuncTerm.h Stoich.h ../kinetics/EnzBase.h ../kinetics/CplxEnzBase.h ../kinetics/lookupVolumeFromMesh.h ../basecode/SparseMatrix.h KinSparseMatrix.h ZombieEnz.h
 ZombieMMenz.o:		RateTerm.h ../kinetics/FuncTerm.h Stoich.h ../kinetics/EnzBase.h ../kinetics/lookupVolumeFromMesh.h ../basecode/SparseMatrix.h KinSparseMatrix.h ZombieMMenz.h
 Ksolve.o:		RateTerm.h Stoich.h Ksolve.h
-
+testKsolve.o:	../shell/Shell.h
 
 #KineticHub.o:	KineticHub.h
 
