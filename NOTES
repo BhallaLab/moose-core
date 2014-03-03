@@ -2767,4 +2767,8 @@ Added a zombie field.
 Now looks like it sets up the system, but there is a problem when 
 deleting because the stoich tries to unzombify things that may
 already be gone.
+Fixed. Now clears unit tests. Checkin 5136.
 ============================================================================
+4 March:
+Implemented the framework for the numerical solutions. Nothing works yet
+but it clears unit tests without croaking.

@@ -120,6 +120,7 @@ Id Ksolve::getStoich() const
 
 void Ksolve::setStoich( Id stoich )
 {
+	assert( stoich.element()->cinfo()->isA( "Stoich" ) );
 	stoich_ = stoich;
 	stoichPtr_ = reinterpret_cast< const Stoich* >( stoich.eref().data() );
 }
@@ -132,6 +133,32 @@ unsigned int Ksolve::getNumLocalVoxels() const
 unsigned int Ksolve::getNumAllVoxels() const
 {
 	return pools_.size(); // Need to redo.
+}
+
+void Ksolve::setNumAllVoxels( unsigned int num )
+{
+	// Later do the node allocations.
+	if ( num == 0 ) {
+		pools_.clear();
+		return;
+	}
+	pools_.resize( num );
+	assert( stoichPtr_ );
+	OdeSystem ode;
+#ifdef USE_GSL
+	ode.gslSys.function = &VoxelPools::gslFunc;
+   	ode.gslSys.jacobian = 0;
+	ode.gslSys.dimension = stoichPtr_->getNumVarPools();
+	// This cast is needed because the C interface for GSL doesn't 
+	// use const void here.
+   	ode.gslSys.params = const_cast< Stoich* >( stoichPtr_ );
+	if ( ode.method == "rk5" ) {
+		ode.gslStep = gsl_odeiv2_step_rkf45;
+	}
+#endif
+	for ( unsigned int i = 0 ; i < num; ++i ) {
+		pools_[i].setStoich( stoichPtr_, &ode );
+	}
 }
 
 //////////////////////////////////////////////////////////////
