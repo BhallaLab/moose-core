@@ -2743,5 +2743,17 @@ Implemented ZombieBufPool. This was trivial.
 Implemented ZombieReac. This entailed substantial fixups of Stoich and Ksolve.
 Implemented ZombieEnz and ZombieMMenz, with more fixups of Stoich.
 Checkin 5120.
+Implemented the ZombieFuncPool, which is itself a placeholder.
 
+Next step: Make a test. In demos there is a reasonable test of different
+reacs and enzymes and sumtotals and tables. Should implement as C++ code
+so it can be a self-contained unit test.
+
+First pass: model created, not yet tested that it is built properly or runs.
 ============================================================================
+3 March: 
+Basic test model in testKsolve working, compare with the Genesis model 
+kkit_objects_example.g
+Currently tested only using Exp Euler, but now ready to deploy using
+the ksolver.
+
