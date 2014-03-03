@@ -27,6 +27,76 @@
 
 const unsigned int OFFNODE = ~0;
 
+const Cinfo* Ksolve::initCinfo()
+{
+		///////////////////////////////////////////////////////
+		// Field definitions
+		///////////////////////////////////////////////////////
+		
+		static ValueFinfo< Ksolve, Id > stoich (
+			"stoich",
+			"Stoichiometry object for handling this reaction system.",
+			&Ksolve::setStoich,
+			&Ksolve::getStoich
+		);
+
+		static ReadOnlyValueFinfo< Ksolve, unsigned int > numLocalVoxels(
+			"numLocalVoxels",
+			"Number of voxels in the core reac-diff system, on the current "
+			"solver. ",
+			&Ksolve::getNumLocalVoxels
+		);
+		static ReadOnlyValueFinfo< Ksolve, unsigned int > numAllVoxels(
+			"numAllVoxels",
+			"Number of voxels in the entire reac-diff system, "
+			"including proxy voxels to represent abutting compartments.",
+			&Ksolve::getNumAllVoxels
+		);
+
+		///////////////////////////////////////////////////////
+		// DestFinfo definitions
+		///////////////////////////////////////////////////////
+
+		static DestFinfo process( "process",
+			"Handles process call",
+			new ProcOpFunc< Ksolve >( &Ksolve::process ) );
+		static DestFinfo reinit( "reinit",
+			"Handles reinit call",
+			new ProcOpFunc< Ksolve >( &Ksolve::reinit ) );
+		
+		///////////////////////////////////////////////////////
+		// Shared definitions
+		///////////////////////////////////////////////////////
+		static Finfo* procShared[] = {
+			&process, &reinit
+		};
+		static SharedFinfo proc( "proc",
+			"Shared message for process and reinit",
+			procShared, sizeof( procShared ) / sizeof( const Finfo* )
+		);
+
+	static Finfo* ksolveFinfos[] =
+	{
+		&stoich,			// Value
+		&numLocalVoxels,	// ReadOnlyValue
+		&numAllVoxels,		// ReadOnlyValue
+		&proc,				// SharedFinfo
+	};
+	
+	static Dinfo< Ksolve > dinfo;
+	static  Cinfo ksolveCinfo(
+		"Ksolve",
+		Neutral::initCinfo(),
+		ksolveFinfos,
+		sizeof(ksolveFinfos)/sizeof(Finfo *),
+		&dinfo
+	);
+
+	return &ksolveCinfo;
+}
+
+static const Cinfo* ksolveCinfo = Ksolve::initCinfo();
+
 //////////////////////////////////////////////////////////////
 // Class definitions
 //////////////////////////////////////////////////////////////
@@ -40,8 +110,40 @@ Ksolve::~Ksolve()
 {;}
 
 //////////////////////////////////////////////////////////////
-// Access functions
+// Field Access functions
 //////////////////////////////////////////////////////////////
+
+Id Ksolve::getStoich() const
+{
+	return stoich_;
+}
+
+void Ksolve::setStoich( Id stoich )
+{
+	stoich_ = stoich;
+	stoichPtr_ = reinterpret_cast< const Stoich* >( stoich.eref().data() );
+}
+
+unsigned int Ksolve::getNumLocalVoxels() const
+{
+	return pools_.size();
+}
+
+unsigned int Ksolve::getNumAllVoxels() const
+{
+	return pools_.size(); // Need to redo.
+}
+
+//////////////////////////////////////////////////////////////
+// Process operations.
+//////////////////////////////////////////////////////////////
+void Ksolve::process( const Eref& e, ProcPtr p )
+{
+}
+
+void Ksolve::reinit( const Eref& e, ProcPtr p )
+{
+}
 //////////////////////////////////////////////////////////////
 // Solver ops
 //////////////////////////////////////////////////////////////
@@ -57,17 +159,6 @@ unsigned int Ksolve::getVoxelIndex( const Eref& e ) const
 	if ( ret < startVoxel_  || ret >= startVoxel_ + pools_.size() ) 
 		return OFFNODE;
 	return ret - startVoxel_;
-}
-
-Id Ksolve::getStoich() const
-{
-	return stoich_;
-}
-
-void Ksolve::setStoich( Id stoich )
-{
-	stoich_ = stoich;
-	stoichPtr_ = reinterpret_cast< const Stoich* >( stoich.eref().data() );
 }
 
 //////////////////////////////////////////////////////////////
@@ -104,12 +195,12 @@ double Ksolve::getNinit( const Eref& e ) const
 	return 0.0;
 }
 
-void Ksolve::setDiffConst( const Eref& e, double v )
+void Ksolve::setDiffConst( double v )
 {
 		; // Do nothing.
 }
 
-double Ksolve::getDiffConst( const Eref& e ) const
+double Ksolve::getDiffConst() const
 {
 		return 0;
 }

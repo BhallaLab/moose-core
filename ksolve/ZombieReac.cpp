@@ -50,13 +50,13 @@ const Cinfo* ZombieReac::initCinfo()
 //////////////////////////////////////////////////////////////
 static const Cinfo* zombieReacCinfo = ZombieReac::initCinfo();
 
-static const SrcFinfo2< double, double >* toSub = 
+static const SrcFinfo2< double, double >* subOut = 
  	dynamic_cast< const SrcFinfo2< double, double >* >(
-					zombieReacCinfo->findFinfo( "toSub" ) );
+					zombieReacCinfo->findFinfo( "subOut" ) );
 
-static const SrcFinfo2< double, double >* toPrd = 
+static const SrcFinfo2< double, double >* prdOut = 
  	dynamic_cast< const SrcFinfo2< double, double >* >(
-					zombieReacCinfo->findFinfo( "toPrd" ) );
+					zombieReacCinfo->findFinfo( "prdOut" ) );
 
 ZombieReac::ZombieReac()
 		: stoich_( 0 )
@@ -85,7 +85,7 @@ void ZombieReac::vRemesh( const Eref& e )
 // This conversion is deprecated, used mostly for kkit conversions.
 void ZombieReac::vSetNumKf( const Eref& e, double v )
 {
-	double volScale = convertConcToNumRateUsingMesh( e, toSub, 0 );
+	double volScale = convertConcToNumRateUsingMesh( e, subOut, 0 );
 	concKf_ = v * volScale;
 	stoich_->setReacKf( e, concKf_ );
 }
@@ -96,21 +96,21 @@ double ZombieReac::vGetNumKf( const Eref& e ) const
 	// DataId part to specify which voxel to use, but that isn't in the
 	// current definition for Reacs as being a single entity for the entire
 	// compartment.
-	double volScale = convertConcToNumRateUsingMesh( e, toSub, 0 );
+	double volScale = convertConcToNumRateUsingMesh( e, subOut, 0 );
 	return concKf_ / volScale;
 }
 
 // Deprecated, used for kkit conversion backward compatibility
 void ZombieReac::vSetNumKb( const Eref& e, double v )
 {
-	double volScale = convertConcToNumRateUsingMesh( e, toPrd, 0 );
+	double volScale = convertConcToNumRateUsingMesh( e, prdOut, 0 );
 	concKb_ = v * volScale;
 	stoich_->setReacKb( e, concKb_ );
 }
 
 double ZombieReac::vGetNumKb( const Eref& e ) const
 {
-	double volScale = convertConcToNumRateUsingMesh( e, toSub, 0 );
+	double volScale = convertConcToNumRateUsingMesh( e, subOut, 0 );
 	return concKb_ / volScale;
 }
 
@@ -133,7 +133,7 @@ void ZombieReac::vSetConcKb( const Eref& e, double v )
 
 double ZombieReac::vGetConcKb( const Eref& e ) const
 {
-	// double volScale = convertConcToNumRateUsingMesh( e, toPrd, 0 );
+	// double volScale = convertConcToNumRateUsingMesh( e, prdOut, 0 );
 	// double kb = stoich_->getReacNumKb( e );
 	// return kb / volScale;
 	return concKb_;
@@ -150,8 +150,8 @@ void ZombieReac::setSolver( Id stoich, Id orig )
 
 	vector< Id > sub;
 	vector< Id > prd;
-	orig.element()->getNeighbours( sub, toSub );
-	orig.element()->getNeighbours( prd, toPrd );
+	orig.element()->getNeighbours( sub, subOut );
+	orig.element()->getNeighbours( prd, prdOut );
 
 	assert( stoich.element()->cinfo()->isA( "Stoich" ) );
 	stoich_ = reinterpret_cast< Stoich* >( stoich.eref().data( ) );

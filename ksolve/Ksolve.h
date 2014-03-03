@@ -20,14 +20,22 @@ class Ksolve: public ZombiePoolInterface
 		//////////////////////////////////////////////////////////////////
 		// Field assignment stuff
 		//////////////////////////////////////////////////////////////////
+		Id getStoich() const;
+		void setStoich( Id stoich );
+
+		unsigned int getNumLocalVoxels() const;
+		unsigned int getNumAllVoxels() const;
+		//////////////////////////////////////////////////////////////////
+		// Dest Finfos
+		//////////////////////////////////////////////////////////////////
+		void process( const Eref& e, ProcPtr p );
+		void reinit( const Eref& e, ProcPtr p );
 
 		//////////////////////////////////////////////////////////////////
 		// Solver interface functions
 		//////////////////////////////////////////////////////////////////
 		unsigned int getPoolIndex( const Eref& e ) const;
 		unsigned int getVoxelIndex( const Eref& e ) const;
-		Id getStoich() const;
-		void setStoich( Id stoich );
 		
 		//////////////////////////////////////////////////////////////////
 		// ZombiePoolInterface inherited functions
@@ -37,9 +45,10 @@ class Ksolve: public ZombiePoolInterface
 		double getN( const Eref& e ) const;
 		void setNinit( const Eref& e, double v );
 		double getNinit( const Eref& e ) const;
-		void setDiffConst( const Eref& e, double v );
-		double getDiffConst( const Eref& e ) const;
+		void setDiffConst( double v );
+		double getDiffConst() const;
 
+		static const Cinfo* initCinfo();
 	private:
 		/**
 		 * Each VoxelPools entry handles all the pools in a single voxel.
