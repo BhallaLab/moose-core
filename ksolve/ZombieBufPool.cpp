@@ -49,8 +49,8 @@ ZombieBufPool::~ZombieBufPool()
 
 void ZombieBufPool::vSetN( const Eref& e, double v )
 {
-	ZombiePool::setN( e, v );
-	ZombiePool::setNinit( e, v );
+	ZombiePool::vSetN( e, v );
+	ZombiePool::vSetNinit( e, v );
 }
 
 void ZombieBufPool::vSetNinit( const Eref& e, double v )

@@ -46,6 +46,9 @@ class Stoich
 		void setPath( const Eref& e, string path );
 		string getPath( const Eref& e ) const;
 
+		void setPoolInterface( Id v );
+		Id getPoolInterface() const;
+
 		/**
 		 * This does a quick and dirty estimate of the timestep suitable 
 		 * for this sytem
@@ -318,7 +321,12 @@ class Stoich
 		 */
 		bool useOneWay_;
 		string path_;
-		Id stoichId_;
+
+		/** 
+		 * This contains the Id of the object that handles the storage and
+		 * arrays for the zombie pools.
+		 */
+		Id poolInterface_;
 
 		/**
 		 * Lookup from each molecule to its Species identifer

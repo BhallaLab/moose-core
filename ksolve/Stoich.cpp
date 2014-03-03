@@ -42,6 +42,16 @@ const Cinfo* Stoich::initCinfo()
 			&Stoich::getPath
 		);
 
+		static ValueFinfo< Stoich, Id > poolInterface(
+			"poolInterface",
+			"Accessory class that provides interface for accessing all "
+		    " the pools that are present in this reaction system."
+		    " Must be of class Ksolve or Dsolve (at present) "
+			" Must be assigned before the path is set.",
+			&Stoich::setPoolInterface,
+			&Stoich::getPoolInterface
+		);
+
 		static ReadOnlyValueFinfo< Stoich, double > estimatedDt(
 			"estimatedDt",
 			"Estimated timestep for reac system based on Euler error",
@@ -84,6 +94,7 @@ const Cinfo* Stoich::initCinfo()
 
 	static Finfo* stoichFinfos[] = {
 		&path,				// ElementValue
+		&poolInterface,		// Value
 		&estimatedDt,		// ReadOnlyValue
 		&numVarPools,		// ReadOnlyValue
 		&numAllPools,		// ReadOnlyValue
@@ -113,6 +124,7 @@ Stoich::Stoich()
 	: 
 		useOneWay_( 0 ),
 		path_( "" ),
+		poolInterface_(), // Must be reassigned to build stoich system.
 		objMapStart_( 0 ),
 		numVarPools_( 0 ),
 		numVarPoolsBytes_( 0 ),
@@ -159,9 +171,9 @@ void Stoich::setPath( const Eref& e, string v )
 		return;
 	}
 	vector< ObjId > elist;
+	path_ = v;
 	wildcardFind( path_, elist );
 	setElist( e, elist );
-	path_ = v;
 }
 
 void convWildcards( vector< Id >& ret, const vector< ObjId >& elist )
@@ -171,13 +183,26 @@ void convWildcards( vector< Id >& ret, const vector< ObjId >& elist )
 		ret[i] = elist[i].id;
 }
 
+void filterWildcards( vector< Id >& ret, const vector< ObjId >& elist )
+{
+	ret.clear();
+	ret.reserve( elist.size() );
+	for ( vector< ObjId >::const_iterator 
+			i = elist.begin(); i != elist.end(); ++i ) {
+		if ( i->element()->cinfo()->isA( "PoolBase" ) ||
+			i->element()->cinfo()->isA( "ReacBase" ) ||
+			i->element()->cinfo()->isA( "EnzBase" ) ||
+			i->element()->cinfo()->isA( "FuncBase" ) )
+		ret.push_back( i->id );
+	}
+}
 
 void Stoich::setElist( const Eref& e, const vector< ObjId >& elist )
 {
 	path_ = "elist";
 	ObjId myCompt = getCompt( e.id() );
 	vector< Id > temp;
-   convWildcards( temp, elist );
+	filterWildcards( temp, elist );
 
 	locateOffSolverReacs( myCompt, temp );
 	allocateObjMap( temp );
@@ -188,6 +213,24 @@ void Stoich::setElist( const Eref& e, const vector< ObjId >& elist )
 string Stoich::getPath( const Eref& e ) const
 {
 	return path_;
+}
+
+void Stoich::setPoolInterface( Id zpi ) {
+	if ( ! ( 
+			zpi.element()->cinfo()->isA( "Ksolve" )  ||
+			zpi.element()->cinfo()->isA( "Dsolve" ) 
+		   )
+	   ) {
+		cout << "Error: Stoich::setPoolInterface: invalid class assigned,"
+				" should be either Ksolve or Dsolve\n";
+		return;
+	}
+	poolInterface_ = zpi;
+}
+
+Id Stoich::getPoolInterface() const
+{
+	return poolInterface_;
 }
 
 double Stoich::getEstimatedDt() const
@@ -238,9 +281,9 @@ static bool isOffSolverReac( const Element* e, Id myCompt,
 	assert( myCompt.element()->cinfo()->isA( "ChemCompt" ) );
 	bool ret = false;
 	vector< Id > neighbours;
-	e->getNeighbours( neighbours, e->cinfo()->findFinfo( "toSub" ));
+	e->getNeighbours( neighbours, e->cinfo()->findFinfo( "subOut" ));
 	vector< Id > n2;
-	e->getNeighbours( n2, e->cinfo()->findFinfo( "toPrd" ));
+	e->getNeighbours( n2, e->cinfo()->findFinfo( "prdOut" ));
 	neighbours.insert( neighbours.end(), n2.begin(), n2.end() );
 	for ( vector< Id >::const_iterator 
 			j = neighbours.begin(); j != neighbours.end(); ++j )
@@ -361,6 +404,9 @@ void Stoich::allocateObjMap( const vector< Id >& elist )
 	 * compartments may be incompatible with the generation of the lists
 	 * of off-compartment pools. It is up to the upstream code to
 	 * ensure that this is done properly.
+	 *
+	 * This assertion also fails if the Ids concerned had a dimension
+	 * greater than 1.
 	 */
 	assert( objMap_.size() >= temp.size() );
 }
@@ -526,13 +572,16 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 		Shell::dropClockMsgs( unsched, "process" );
 		Element* ei = i->element();
 		if ( ei->cinfo() == poolCinfo ) {
-			PoolBase::zombify( i->element(), zombiePoolCinfo, e.id() );
+			PoolBase::zombify( i->element(), zombiePoolCinfo, 
+							poolInterface_ );
 		}
 		else if ( ei->cinfo() == bufPoolCinfo ) {
-			PoolBase::zombify( i->element(), zombieBufPoolCinfo, e.id() );
+			PoolBase::zombify( i->element(), zombieBufPoolCinfo, 
+							poolInterface_ );
 		}
 		else if ( ei->cinfo() == funcPoolCinfo ) {
-			PoolBase::zombify( i->element(), zombieFuncPoolCinfo, e.id() );
+			PoolBase::zombify( i->element(), zombieFuncPoolCinfo, 
+							poolInterface_ );
 			// Has also got to zombify the Func.
 			Id funcId = Neutral::child( i->eref(), "func" );
 			assert( funcId != Id() );
@@ -886,11 +935,11 @@ void Stoich::installEnzyme( ZeroOrder* r1, ZeroOrder* r2, ZeroOrder* r3,
 void Stoich::setReacKf( const Eref& e, double v ) const
 {
 	static const Cinfo* zombieReacCinfo = Cinfo::find( "ZombieReac");
-	static const SrcFinfo* toSub = dynamic_cast< const SrcFinfo* > (
-		zombieReacCinfo->findFinfo( "toSub" ) );
-	assert( toSub );
+	static const SrcFinfo* subOut = dynamic_cast< const SrcFinfo* > (
+		zombieReacCinfo->findFinfo( "subOut" ) );
+	assert( subOut );
 
-	double volScale = convertConcToNumRateUsingMesh( e, toSub, false );
+	double volScale = convertConcToNumRateUsingMesh( e, subOut, false );
 	unsigned int i = convertIdToReacIndex( e.id() );
 	if ( i != ~0U )
 		rates_[ i ]->setR1( v / volScale );
@@ -902,20 +951,20 @@ void Stoich::setReacKf( const Eref& e, double v ) const
 void Stoich::setReacKb( const Eref& e, double v ) const
 {
 	static const Cinfo* zombieReacCinfo = Cinfo::find( "ZombieReac");
-	static const SrcFinfo* toPrd = static_cast< const SrcFinfo* > (
-		zombieReacCinfo->findFinfo( "toPrd" ) );
-	static const SrcFinfo* toSub = dynamic_cast< const SrcFinfo* > (
-		zombieReacCinfo->findFinfo( "toSub" ) );
+	static const SrcFinfo* prdOut = static_cast< const SrcFinfo* > (
+		zombieReacCinfo->findFinfo( "prdOut" ) );
+	static const SrcFinfo* subOut = dynamic_cast< const SrcFinfo* > (
+		zombieReacCinfo->findFinfo( "subOut" ) );
 
-	assert( toPrd );
-	assert( toSub );
-	double volScale = convertConcToNumRateUsingMesh( e, toPrd, false );
+	assert( prdOut );
+	assert( subOut );
+	double volScale = convertConcToNumRateUsingMesh( e, prdOut, false );
 	// cout << "Id=" << e.id() << ", Kb = " << v << ", volScale = " << volScale << endl;
 	/*
 	 * This rescaling is now done in the convertConc func itself.
 	// Assume first substrate is the reference volume. Scale down by this.
 	vector< double > vols;
-	getReactantVols( e, toSub, vols );
+	getReactantVols( e, subOut, vols );
 	assert( vols.size() > 0 );
 	assert( vols[0] > 0.0 );
 	volScale /= vols[0] * NA;
@@ -933,8 +982,8 @@ void Stoich::setReacKb( const Eref& e, double v ) const
 void Stoich::setMMenzKm( const Eref& e, double v ) const
 {
 	static const Cinfo* zombieMMenzCinfo = Cinfo::find( "ZombieMMenz");
-	static const SrcFinfo* toSub = dynamic_cast< const SrcFinfo* > (
-		zombieMMenzCinfo->findFinfo( "toSub" ) );
+	static const SrcFinfo* subOut = dynamic_cast< const SrcFinfo* > (
+		zombieMMenzCinfo->findFinfo( "subOut" ) );
 	// Identify MMenz rate term
 	RateTerm* rt = rates_[ convertIdToReacIndex( e.id() ) ];
 	MMEnzymeBase* enz = dynamic_cast< MMEnzymeBase* >( rt );
@@ -945,7 +994,7 @@ void Stoich::setMMenzKm( const Eref& e, double v ) const
 
 	// This function can be replicated to handle multiple different voxels.
 	vector< double > vols;
-	getReactantVols( e, toSub, vols );
+	getReactantVols( e, subOut, vols );
 	if ( vols.size() == 0 ) {
 		cerr << "Error: Stoich::setMMenzKm: no substrates for enzyme " <<
 			e << endl;
@@ -978,11 +1027,11 @@ double Stoich::getMMenzKcat( const Eref& e ) const
 void Stoich::setEnzK1( const Eref& e, double v ) const
 {
 	static const Cinfo* zombieEnzCinfo = Cinfo::find( "ZombieEnz");
-	static const SrcFinfo* toSub = dynamic_cast< const SrcFinfo* > (
-		zombieEnzCinfo->findFinfo( "toSub" ) );
-	assert( toSub );
+	static const SrcFinfo* subOut = dynamic_cast< const SrcFinfo* > (
+		zombieEnzCinfo->findFinfo( "subOut" ) );
+	assert( subOut );
 
-	double volScale = convertConcToNumRateUsingMesh( e, toSub, true );
+	double volScale = convertConcToNumRateUsingMesh( e, subOut, true );
 
 	rates_[ convertIdToReacIndex( e.id() ) ]->setR1( v / volScale );
 }

@@ -803,13 +803,18 @@ void Shell::dropClockMsgs(
 	vector< ObjId > msgs; // These are the messages to delete.
 	for ( vector< ObjId >::const_iterator
 					i = list.begin(); i != list.end(); ++i ) {
-		const Finfo* f = i->element()->cinfo()->findFinfo( field );
-		const DestFinfo* df = dynamic_cast< const DestFinfo *>( f );
-		if ( df ) {
-			FuncId fid = df->getFid();
-			vector< ObjId > caller; // These are the messages to be zapped
-			if ( i->element()->getInputMsgs( caller, fid ) > 0 ) {
-				msgs.insert( msgs.end(), caller.begin(), caller.end() );
+		// Sanity check: shouldn't try to operate on already deleted objects
+		if ( i->element() ) {
+			const Finfo* f = i->element()->cinfo()->findFinfo( field );
+			const DestFinfo* df = dynamic_cast< const DestFinfo *>( f );
+			if ( df ) {
+				FuncId fid = df->getFid();
+
+				// These are the messages to be zapped
+				vector< ObjId > caller; 
+				if ( i->element()->getInputMsgs( caller, fid ) > 0 ) {
+					msgs.insert( msgs.end(), caller.begin(), caller.end() );
+				}
 			}
 		}
 	}

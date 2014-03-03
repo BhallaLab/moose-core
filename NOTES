@@ -2755,5 +2755,16 @@ First pass: model created, not yet tested that it is built properly or runs.
 Basic test model in testKsolve working, compare with the Genesis model 
 kkit_objects_example.g
 Currently tested only using Exp Euler, but now ready to deploy using
-the ksolver.
+the ksolver. Checkin 5128.
 
+Working through Stoich setup test. Currently stuck in ZombiePool::setSolver
+which is being passed a Stoich though it expects a ksolve.
+
+Given that i want to use the Stoich in several non-ksolve contexts, I need
+to find a way around this.
+
+Added a zombie field.
+Now looks like it sets up the system, but there is a problem when 
+deleting because the stoich tries to unzombify things that may
+already be gone.
+============================================================================
