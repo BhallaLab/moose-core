@@ -17,7 +17,7 @@ const Cinfo* ZombieFuncPool::initCinfo()
 {
 	static DestFinfo input( "input",
 		"Handles input to control value of n_",
-		new OpFunc1< ZombieFuncPool, double >( &ZombieFuncPool::input ) );
+		new EpFunc1< ZombieFuncPool, double >( &ZombieFuncPool::input ) );
 	
 	static Finfo* zombieFuncPoolFinfos[] = {
 		&input,             // DestFinfo
@@ -42,6 +42,9 @@ static const Cinfo* zombieFuncPoolCinfo = ZombieFuncPool::initCinfo();
 ZombieFuncPool::ZombieFuncPool()
 {;}
 
-void ZombieFuncPool::input( double v )
-{;}
+void ZombieFuncPool::input( const Eref& e, double v )
+{
+	ZombiePool::vSetN( e, v );
+	ZombiePool::vSetNinit( e, v );
+}
 

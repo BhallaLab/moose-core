@@ -61,7 +61,7 @@ FuncPool::~FuncPool()
 
 void FuncPool::vProcess( const Eref& e, ProcPtr p )
 {
-	;
+	Pool::vProcess( e, p );
 }
 
 void FuncPool::vReinit( const Eref& e, ProcPtr p )
