@@ -60,7 +60,7 @@
 
 # Default values for flags. The operator ?= assigns the given value only if the
 # variable is not already defined.
-USE_SBML?=0
+USE_SBML?=1
 USE_HDF5?=1
 USE_CUDA?=0
 PYTHON?=2
@@ -224,8 +224,8 @@ endif
 # To use SBML, pass USE_SBML=1 in make command line
 ifeq ($(USE_SBML),1)
 LIBS+= -lsbml
-CXXFLAGS+=-DUSE_SBML 
-LDFLAGS += -L/usr/lib
+CXXFLAGS+=-DUSE_SBML
+LDFLAGS += -L/usr/lib64 -Wl,--rpath='/usr/lib64'
 SBML_DIR = sbml
 SBML_LIB = sbml/_sbml.o 
 endif

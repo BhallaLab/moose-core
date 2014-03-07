@@ -79,7 +79,7 @@ int SbmlWriter::write( string filepath,string target )
   
   SBMLDocument sbmlDoc;
   bool SBMLok = false;
-  createModel( filename,sbmlDoc,target ); 
+  createModel( filename,sbmlDoc,target );
   SBMLok  = validateModel( &sbmlDoc );
   if ( SBMLok ) 
     writeModel( &sbmlDoc, filepath );
@@ -94,31 +94,25 @@ int SbmlWriter::write( string filepath,string target )
 }
 #ifdef USE_SBML
 
-//* Check : first will put a model in according to l2v4 later will see what changes to the latest stable version l3v1 **/
+//* Check : first will put a model in according to l3v1 with libsbml5.9.0 **/
 
-//* Create an SBML model in the SBML Level 2 version 4 specification **/
+//* Create an SBML model in the SBML Level 3 version 1 specification **/
 void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 { 
   XMLNamespaces  xmlns;
-  xmlns.add("http://www.sbml.org/sbml/level2/version4");
+  xmlns.add("http://www.sbml.org/sbml/level3/version1");
   xmlns.add("http://www.moose.ncbs.res.in","moose");
   xmlns.add("http://www.w3.org/1999/xhtml","xhtml");
   sbmlDoc.setNamespaces(&xmlns);
-
   cremodel_ = sbmlDoc.createModel();
   cremodel_->setId(filename);
   Id baseId(path);
-  /*
-  SimManager* sm = reinterpret_cast< SimManager* >(baseId.eref().data());
-  double runtime = sm->getRunTime();
-  double simdt = sm->getSimDt();
-  double plotdt = sm->getPlotDt();
-  */
-  vector< ObjId > graphs;
+    vector< ObjId > graphs;
   string plots;
   wildcardFind(path+"/##[TYPE=Table]",graphs);
+  
   for ( vector< ObjId >::iterator itrgrp = graphs.begin(); itrgrp != graphs.end();itrgrp++)
-    { 
+    {  
       vector< Id > graphsrc =LookupField< string, vector< Id > >::get(*itrgrp, "neighbors", "requestOut" );
       for (vector <Id> :: iterator itrsrc = graphsrc.begin();itrsrc != graphsrc.end();itrsrc++)
 	{  string species = nameString(Field<string> :: get(*itrsrc,"name"));
@@ -146,12 +140,14 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
   XMLNode* xnode =XMLNode::convertStringToXMLNode( modelAnno.str() ,&xmlns);
   cremodel_->setAnnotation( xnode );	
   */
+  
   UnitDefinition *ud1 = cremodel_->createUnitDefinition();
   ud1->setId("volume");
   Unit * u = ud1->createUnit();
   u->setKind(UNIT_KIND_LITRE);
   u->setMultiplier(1.0);
   u->setExponent(1.0);
+  u->setScale(0);
   
   UnitDefinition * unitdef;
   Unit* unit;
@@ -160,13 +156,13 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
   unit = unitdef->createUnit();
   unit->setKind( UNIT_KIND_ITEM );
   unit->setMultiplier(1);
-
-  cout << "Writing to SBML started "<<endl;
-//Getting Compartment from moose
+  unit->setExponent(1.0);
+  unit->setScale(0);
+  //Getting Compartment from moose
   vector< ObjId > chemCompt;
   wildcardFind(path+"/##[ISA=ChemCompt]",chemCompt);
   for ( vector< ObjId >::iterator itr = chemCompt.begin(); itr != chemCompt.end();itr++)
-    { cout << "itr " << *itr << "name " << itr->eref() <<endl;
+    { //cout << "itr " << *itr << "name " << itr->eref() <<endl;
       //TODO: CHECK need to check how do I get ObjectDimensions
       vector < unsigned int>dims;
       unsigned int dims_size;
@@ -200,6 +196,7 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	  compt->setName(comptName);
 	  compt->setSpatialDimensions(ndim);
 	  compt->setUnits("volume");
+	  compt->setConstant(true);
 	  if(ndim == 3)
 	    // Unit for Compartment in moose is cubic meter
 	    //   Unit for Compartment in SBML is lts 
@@ -275,9 +272,12 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 		{sp->setBoundaryCondition(true);
 		  sp->setConstant(true);
 		}//zbufpool
-	      
+	      else
+		{ sp->setBoundaryCondition(false);
+		  sp->setConstant(false);
+		}
 	      // Funpool need to get SumFunPool 
-	      
+	      //Funpool is not set, setConstant
 	      if (objclass == "FuncPool")
 		{ 
 		  vector< Id > funpoolChildren = Field< vector< Id > >::get( *itrp, "children" );
@@ -312,6 +312,7 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 		    }
 		} //zfunPool
 	    } //itrp
+	  
 	  vector< ObjId > Compt_Reac;
 	  wildcardFind(comptPath+"/##[ISA=ReacBase]",Compt_Reac);
 	  //vector< Id > Compt_Reac = LookupField< string, vector< Id > >::get(*itr, "neighbours", "remeshReacs" );
@@ -346,7 +347,7 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 		reaction->setReversible( false );
 	      else
 		reaction->setReversible( true );
-	      
+	      reaction->setFast( false );
 	      // Reaction's Reactant are Written 
 	      ostringstream rate_law,kfparm,kbparm;
 	      double rct_order = 0.0;
@@ -406,6 +407,8 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 		{// Complex Formation S+E -> SE*;
 		   reaction->setId( cleanEnzname);
 		   reaction->setName( objname);
+		   reaction->setFast ( false );
+		   reaction->setReversible( true);
 		   string enzname = Field<string> :: get(*itrE,"name");
 		   ostringstream enzid;
 		   enzid << (*itrE) <<"_"<<index;
@@ -456,13 +459,15 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 		   reaction = cremodel_->createReaction(); 
 		   reaction->setId( enzName1 );
 		   reaction->setName( objname);
+		   reaction->setFast( false );
+		   reaction->setReversible( false );
+		   
 		   if (notesE != ""){
 		     string cleanNotesE = nameString1(notesE);
 		     string notesStringE = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t"+
 		       cleanNotesE + "\n\t </body>"; 
 		     reaction->setNotes(notesStringE);
 		   }
-		   reaction->setReversible( false );
 		   double k3 = Field<double>::get(*itrE,"k3");
 		   double erct_order = 0.0,eprd_order = 0.0;
 		   ostringstream enzrate_law;
@@ -488,6 +493,7 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 		   kl = reaction->createKineticLaw();
 		   kl->setFormula( enzrate_law.str() );
 		   printParameters( kl,"k3",k3,"per_second" );
+
 		} //enzclass = Enz
 	      else if (enzClass == "MMenz")
 		{ reaction->setId( cleanEnzname);
@@ -495,6 +501,7 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 		  double Km = Field<double>::get(*itrE,"numKm");
 		  double kcat = Field<double>::get(*itrE,"kcat");
 		  reaction->setReversible( false );
+		  reaction->setFast( false );
 		  // Substrate 
 		  ostringstream rate_law,sRate_law,fRate_law;
 		  double rct_order = 0.0,prd_order=0.0;
@@ -521,11 +528,13 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 		   string kcatUnit = parmUnit( 0 );
 		   printParameters( kl,"kcat",kcat,kcatUnit );
 		}
+	      
 	    } //itrE
 	  // Enzyme End
 	}//index
     }//itr
   //return sbmlDoc;
+
 }//createModel
 #endif
 
@@ -583,17 +592,26 @@ void SbmlWriter::getSubPrd(Reaction* rec,string type,string enztype,Id itrRE, in
       string objname = Field<string> :: get(*rRctPrd,"name");
       string cleanObjname = nameString(objname);
       string clean_name = cleanNameId(*rRctPrd,index);
-      string fname;
+      string objClass = Field<string> :: get(*rRctPrd,"className");
+
       if (type == "sub" or (type == "enzOut" and enztype == "sub" ) or (type == "cplxDest" and enztype == "sub")) 
 	{ spr = rec->createReactant();
 	  spr->setSpecies(clean_name);
 	  spr->setStoichiometry( stoch );
+	  if (objClass == "BufPool")
+	    spr->setConstant( true );
+	  else
+	    spr->setConstant( false);
 	}
       else if(type == "prd" or (type == "enzOut" and enztype == "prd" ) or (type == "cplxDest" and enztype == "prd"))
 	{
 	  spr = rec->createProduct();
 	  spr->setSpecies( clean_name );
 	  spr->setStoichiometry( stoch );
+	  if (objClass == "BufPool")
+	    spr->setConstant( true );
+	  else
+	    spr->setConstant( false);
 	}
       else if(type == "enzDest")
 	{
@@ -806,11 +824,14 @@ string SbmlWriter::parmUnit( double rct_order )
 	unit->setKind( UNIT_KIND_ITEM );
 	unit->setExponent( -order );
 	unit->setMultiplier(1);
+	unit->setScale( 0 );
       }
 
     unit = unitdef->createUnit();
     unit->setKind( UNIT_KIND_SECOND );
     unit->setExponent( -1 );
+    unit->setMultiplier( 1 );
+    unit->setScale ( 0 );
   }
   return unit_stream.str();
 }
