@@ -30,6 +30,8 @@ class DiffPoolVec: public ZombiePoolInterface
 		double getDiffConst() const;
 		void setDiffConst( double value );
 
+		void setNumPools( unsigned int num );
+
 		/////////////////////////////////////////////////
 		Id getPool() const; /// Returns pool.
 		void setPool( Id pool ); /// Assigns pool id.
