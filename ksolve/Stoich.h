@@ -26,6 +26,9 @@ class Stoich
 		/// Returns number of local pools that are updated by solver
 		unsigned int getNumVarPools() const;
 
+		/// Returns number of local buffered pools.
+		unsigned int getNumBufPools() const;
+
 		/**
 		 *  Returns total number of local pools. Leaves out the pools whose
 		 *  actual calculations happen on another solver, but are given a
@@ -69,6 +72,10 @@ class Stoich
 
 		/// Utility function to return a rates_ entry
 		const RateTerm* rates( unsigned int i ) const;
+
+		vector< int > getMatrixEntry() const;
+		vector< unsigned int > getColIndex() const;
+		vector< unsigned int > getRowStart() const;
 
 		//////////////////////////////////////////////////////////////////
 		// Model traversal and building functions

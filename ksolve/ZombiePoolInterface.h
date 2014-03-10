@@ -23,6 +23,8 @@ class ZombiePoolInterface
 		virtual double getN( const Eref& e ) const = 0;
 		virtual void setDiffConst( double val ) = 0;
 		virtual double getDiffConst() const = 0;
+
+		virtual void setNumPools( unsigned int num ) = 0;
 };
 
 #endif	// _ZOMBIE_POOL_INTERFACE_H

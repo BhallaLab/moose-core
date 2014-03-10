@@ -77,8 +77,33 @@ const Cinfo* Stoich::initCinfo()
 			"Total number of rate terms in the reaction system.",
 			&Stoich::getNumRates
 		);
+
 		// Stuff here for getting Stoichiometry matrix to manipulate in
 		// Python.
+		static ReadOnlyValueFinfo< Stoich, vector< int > >
+				matrixEntry(
+			"matrixEntry",
+			"The non-zero matrix entries in the sparse matrix. Their"
+			"column indices are in a separate vector and the row"
+			"informatino in a third",
+			&Stoich::getMatrixEntry
+		);
+		// Stuff here for getting Stoichiometry matrix to manipulate in
+		// Python.
+		static ReadOnlyValueFinfo< Stoich, vector< unsigned int > >
+				columnIndex(
+			"columnIndex",
+			"Column Index of each matrix entry",
+			&Stoich::getColIndex
+		);
+		// Stuff here for getting Stoichiometry matrix to manipulate in
+		// Python.
+		static ReadOnlyValueFinfo< Stoich, vector< unsigned int > >
+				rowStart(
+			"rowStart",
+			"Row start for each block of entries and column indices",
+			&Stoich::getRowStart
+		);
 
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
@@ -99,6 +124,9 @@ const Cinfo* Stoich::initCinfo()
 		&numVarPools,		// ReadOnlyValue
 		&numAllPools,		// ReadOnlyValue
 		&numRates,			// ReadOnlyValue
+		&matrixEntry,		// ReadOnlyValue
+		&columnIndex,		// ReadOnlyValue
+		&rowStart,			// ReadOnlyValue
 	};
 
 	static Dinfo< Stoich > dinfo;
@@ -168,6 +196,11 @@ void Stoich::setPath( const Eref& e, string v )
 	if ( path_ != "" && path_ != v ) {
 		// unzombify( path_ );
 		cout << "Stoich::setPath: need to clear old path.\n";
+		return;
+	}
+	if ( poolInterface_ == Id() )
+	{
+		cout << "Stoich::setPath: need to first set poolInterface.\n";
 		return;
 	}
 	vector< ObjId > elist;
@@ -243,6 +276,11 @@ unsigned int Stoich::getNumVarPools() const
 	return numVarPools_;
 }
 
+unsigned int Stoich::getNumBufPools() const
+{
+	return numBufPools_;
+}
+
 unsigned int Stoich::getNumAllPools() const
 {
 	return numVarPools_ + numBufPools_ + numFuncPools_;
@@ -262,6 +300,21 @@ const RateTerm* Stoich::rates( unsigned int i ) const
 {
 	assert( i < rates_.size() );
 	return rates_[i];
+}
+
+vector< int > Stoich::getMatrixEntry() const
+{
+	return N_.matrixEntry();
+}
+
+vector< unsigned int > Stoich::getColIndex() const
+{
+	return N_.colIndex();
+}
+
+vector< unsigned int > Stoich::getRowStart() const
+{
+	return N_.rowStart();
 }
 
 //////////////////////////////////////////////////////////////
@@ -465,12 +518,17 @@ void Stoich::resizeArrays()
 {
 	assert( idMap_.size() == numVarPools_ + numBufPools_ + numFuncPools_ +
 					offSolverPools_.size() );
+	unsigned int totNumPools = numVarPools_ + numBufPools_ + numFuncPools_;
 
-	species_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0 );
+	species_.resize( totNumPools, 0 );
 	rates_.resize( numReac_ );
 	// v_.resize( numReac_, 0.0 ); // v is now allocated dynamically
 	funcs_.resize( numFuncPools_ );
 	N_.setSize( idMap_.size(), numReac_ );
+	if ( poolInterface_ != Id() ) { 
+		Field< unsigned int >::set( poolInterface_, "numPools", 
+						totNumPools );
+	}
 }
 
 /// Calculate sizes of all arrays, and allocate them.
@@ -1178,6 +1236,8 @@ void Stoich::updateRates( const double* s, double* yprime )
 
 	for (unsigned int i = 0; i < numVarPools_ + offSolverPools_.size(); ++i)
 		*yprime++ = N_.computeRowRate( i , v );
+	for (unsigned int i = 0; i < numBufPools_ + numFuncPools_; ++i)
+		*yprime++ = 0.0;
 }
 
 // s is the array of pools, S_[meshIndex][0]
