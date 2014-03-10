@@ -122,6 +122,11 @@ Id DiffPoolVec::getPool() const
 	return pool_;
 }
 
+void DiffPoolVec::setNumPools( unsigned int num )
+{
+		;
+}
+
 void DiffPoolVec::setOps(const vector< Triplet< double > >& ops,
 	const vector< double >& diagVal )
 {
