@@ -91,13 +91,12 @@ unsigned int VoxelPools::size() const
 //////////////////////////////////////////////////////////////
 void VoxelPools::setStoich( const Stoich* s, const OdeSystem* ode )
 {
-	S_.resize( s->getNumAllPools(), 0.0 );
-	Sinit_.resize( s->getNumAllPools(), 0.0);
 #ifdef USE_GSL
+	sys_ = ode->gslSys;
 	if ( driver_ )
 		gsl_odeiv2_driver_free( driver_ );
 	driver_ = gsl_odeiv2_driver_alloc_y_new( 
-		&ode->gslSys, ode->gslStep, ode->initStepSize, 
+		&sys_, ode->gslStep, ode->initStepSize, 
 		ode->epsAbs, ode->epsRel );
 #endif
 }
@@ -105,8 +104,8 @@ void VoxelPools::setStoich( const Stoich* s, const OdeSystem* ode )
 void VoxelPools::advance( const ProcInfo* p )
 {
 #ifdef USE_GSL
-	double t = p->currTime;
-	int status = gsl_odeiv2_driver_apply( driver_, &t, p->dt, &S_[0] );
+	double t = p->currTime - p->dt;
+	int status = gsl_odeiv2_driver_apply( driver_, &t, p->currTime, &S_[0]);
 	if ( status != GSL_SUCCESS ) {
 		cout << "Error: VoxelPools::advance: GSL integration error at time "
 			 << t << "\n";
@@ -121,6 +120,17 @@ int VoxelPools::gslFunc( double t, const double* y, double *dydt,
 {
 	Stoich* s = reinterpret_cast< Stoich* >( params );
 	double* q = const_cast< double* >( y ); // Assign the func portion.
+
+	// Assign the buffered pools
+	// Not possible because this is a static function
+	// Not needed because dydt = 0;
+	/*
+	double* b = q + s->getNumVarPools();
+	vector< double >::const_iterator sinit = Sinit_.begin() + s->getNumVarPools();
+	for ( unsigned int i = 0; i < s->getNumBufPools(); ++i )
+		*b++ = *sinit++;
+		*/
+
 	s->updateFuncs( q, t );
 	s->updateRates( y, dydt );
 #ifdef USE_GSL

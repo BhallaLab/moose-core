@@ -58,6 +58,11 @@ class KinSparseMatrix: public SparseMatrix< int >
         * molecules, only those that are variable.
         */
         void truncateRow( unsigned int maxColumnIndex );
+
+		/// Here we expose the sparse matrix for MOOSE use.
+		vector< int > matrixEntry() const;
+		vector< unsigned int > colIndex() const;
+		vector< unsigned int > rowStart() const;
 	private:
  		/**
          * End colIndex for rows (molecules in the transposed matrix)

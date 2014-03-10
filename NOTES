@@ -2772,3 +2772,109 @@ Fixed. Now clears unit tests. Checkin 5136.
 4 March:
 Implemented the framework for the numerical solutions. Nothing works yet
 but it clears unit tests without croaking.
+Next: 
+- Put in vector 
+- Check entries from unit test
+- Run and test
+============================================================================
+6 March.
+Solver taking shape. The Stoich matrix is well-formed, reinit happens, but
+there is a crash when we run things. The Stoich::updateRates function 
+never gets called.
+
+Now that is better, but there is an error with the reinit: the values are
+not all set.
+============================================================================
+8 March
+
+We have a problem with interdependent ordering in initiatlizing the
+reac system.
+We need pools defined before stoich in order for the zombification to be 
+able to assign concInits.
+
+We need the stoich assigned before pools in order for the ode system to be
+reasonable.
+
+OK found a bug. I need to set the # of pool species. Working on this,
+there is a problem because I also need to set the initConcs of each.
+
+Sort through the dependencies:
+ZombiePool depends on ptrs to dsolve or ksolve: ZombiePoolInterface*,
+	to access its n and nInit.
+	It needs these right away, as soon as zombification happens,
+	in order to do the field conversion.
+Stoich depends on Id to the poolInterface (ie, the ksolve) to assign numPools,
+	and to do zombification calls for pools. Note the numPools assignment
+	is redundant.
+	Can it be deferred? No.
+Ksolve stores Id as well as ptr to Stoich, but uses the stoichPtr_ only.
+	Uses it for setting the ode.gslSys terms:
+		getNumVarPools, params, and to set
+	the stoich term for the VoxelPools in setNumAllVoxels.
+	Also needed at runtime to do all the n/nInit field accesses voxelPools.
+VoxelPools does a redundant resize of S_ and Sinit at the time of setStoich, 
+	separate from the call from Stoich via ksolve. 
+
+Ideally we would like to do these assignments at the last minute or in a 
+single call.
+There is also the general problem of handling concInit when voxelPools
+are resized.
+
+Suggested sequence is:
+	Ksolve should know how many voxels it has. This does not need
+	to depend on anything yet. Can start with a default of 1.
+	Ksolve should be able to assign the base storage for all the 
+	voxel bpools. This just needs to know how many pools (species) there 
+	are. However, the only thing it needs from the stoich at this time
+	is the number of var pools, it could set up the ODE stuff already
+	Stoich needs to have the VoxelPools ready before it does the 
+	zombification. So it needs to tell Ksolve the number of pools at the 
+	time of resizeArrays, which happens during allocateModel.
+	Then it does the zombification.
+		This is when the nInit should be set.
+
+	If we ever resize the number of voxels, we should do so at a level
+		which can extract the concInit from the already established
+		zombiePools.
+
+0: no dependence.
+0. Ksolve gets numVoxels (Optional if default of 1 is OK) 
+0. Stoich is assigned Ksolve Id.
+0. Ksolve is assigned Stoich Id.
+1. Stoich::path is set. The model building starts.
+2. Stoich tells Ksolve the value of numPools. Ksolve builds the VoxelPools.
+	Can also assigne ode system at this time.
+3. Stoich completes the zombification. The concInits are converted.
+
+(4): only if needed: Can resize numVoxels, but have to do this with reference
+	to the pool Ids so that we can extract concInit for scaling.
+
+One issue found: I was using a temporary to store gslSys.
+Next: the y vector used in the VoxelPools::gslFunc differs from &S_[0].
+This means that I probably should not touch the pool entries for funcs.
+
+Even if I comment this out, I get negative values in the gsl function after
+one timestep. They are 'small', that is < 1e-5 of the other values,
+but I don't know if this is something that will clean up with the 
+integrator.
+
+Progress: I eliminated the assertion for negative values, and it actually
+runs. Gets stuck on the integration for a long time, I suspect that the
+absolute error should be eliminated. Tried this, didn't help. I think the issue
+may be again the problem with assigning S vs y. Have to figure out how
+to assign y.
+
+ Answers are wrong but not off-scale.
+I think the assignment of the external table needs to go both to S and to y.
+The sumtot is of course not working.
+
+Some more relatively minor fixes. Now all ops are go. The main compromise is 
+making the y vector the same size as numAllPools, with a dydt of zero. Still 
+runs a trifle slow, will analyze.
+
+Next steps:
+- Do in a diffusion array, without diffusion, but different init concs.
+- Get diffusion engine going.
+- Resurrect SteadyStateSolver.
+
+============================================================================
