@@ -60,7 +60,7 @@
 
 # Default values for flags. The operator ?= assigns the given value only if the
 # variable is not already defined.
-USE_SBML?=1
+USE_SBML?=0
 USE_HDF5?=1
 USE_CUDA?=0
 PYTHON?=2
