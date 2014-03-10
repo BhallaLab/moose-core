@@ -62,7 +62,7 @@ def multilevel_pulsegen():
         pg.width[ii] = 0.1
         pg.delay[ii] = 0.5 * (ii+1)
     tab = moose.Table('tab')
-    moose.connect(tab, 'requestOut', pg, 'getOutput')
+    moose.connect(tab, 'requestOut', pg, 'getOutputValue')
     moose.setClock(0, 0.01)
     moose.useClock(0, '%s,%s' % (pg.path, tab.path), 'process')
     moose.reinit()
