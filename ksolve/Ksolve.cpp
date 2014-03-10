@@ -46,11 +46,20 @@ const Cinfo* Ksolve::initCinfo()
 			"solver. ",
 			&Ksolve::getNumLocalVoxels
 		);
-		static ReadOnlyValueFinfo< Ksolve, unsigned int > numAllVoxels(
+		static ValueFinfo< Ksolve, unsigned int > numAllVoxels(
 			"numAllVoxels",
 			"Number of voxels in the entire reac-diff system, "
 			"including proxy voxels to represent abutting compartments.",
+			&Ksolve::setNumAllVoxels,
 			&Ksolve::getNumAllVoxels
+		);
+
+		static ValueFinfo< Ksolve, unsigned int > numPools(
+			"numPools",
+			"Number of molecular pools in the entire reac-diff system, "
+			"including variable, function and buffered.",
+			&Ksolve::setNumPools,
+			&Ksolve::getNumPools
 		);
 
 		///////////////////////////////////////////////////////
@@ -80,6 +89,7 @@ const Cinfo* Ksolve::initCinfo()
 		&stoich,			// Value
 		&numLocalVoxels,	// ReadOnlyValue
 		&numAllVoxels,		// ReadOnlyValue
+		&numPools,			// Value
 		&proc,				// SharedFinfo
 	};
 	
@@ -102,8 +112,11 @@ static const Cinfo* ksolveCinfo = Ksolve::initCinfo();
 //////////////////////////////////////////////////////////////
 
 Ksolve::Ksolve()
-	: startVoxel_( 0 ),
-		stoich_()
+	: 
+		pools_( 1 ),
+		startVoxel_( 0 ),
+		stoich_(),
+		stoichPtr_( 0 )
 {;}
 
 Ksolve::~Ksolve()
@@ -135,15 +148,34 @@ unsigned int Ksolve::getNumAllVoxels() const
 	return pools_.size(); // Need to redo.
 }
 
-void Ksolve::setNumAllVoxels( unsigned int num )
+// If we're going to do this, should be done before the zombification.
+void Ksolve::setNumAllVoxels( unsigned int numVoxels )
 {
-	// Later do the node allocations.
-	if ( num == 0 ) {
-		pools_.clear();
+	if ( numVoxels == 0 ) {
 		return;
 	}
-	pools_.resize( num );
-	assert( stoichPtr_ );
+	pools_.resize( numVoxels );
+}
+/*
+void Ksolve::setNumAllVoxels( unsigned int numVoxels )
+{
+	if ( numVoxels == 0 ) {
+		return;
+	}
+	// Preserve the number of pool species.
+	unsigned int numPoolSpecies = pools_[0].size();
+	// Preserve the concInit.
+	vector< double > nInit( numPoolSpecies );
+	for ( unsigned int i = 0; i < numPoolSpecies; ++i ) {
+		nInit[i] = pools_[0].Sinit()[i]; 
+	}
+	
+	// Later do the node allocations.
+	pools_.clear();
+	pools_.resize( numVoxels );
+	if ( !stoichPtr_ )
+		return;
+	// assert( stoichPtr_ );
 	OdeSystem ode;
 #ifdef USE_GSL
 	ode.gslSys.function = &VoxelPools::gslFunc;
@@ -156,20 +188,33 @@ void Ksolve::setNumAllVoxels( unsigned int num )
 		ode.gslStep = gsl_odeiv2_step_rkf45;
 	}
 #endif
-	for ( unsigned int i = 0 ; i < num; ++i ) {
+	for ( unsigned int i = 0 ; i < numVoxels; ++i ) {
+		pools_[i].resizeArrays( numPoolSpecies );
 		pools_[i].setStoich( stoichPtr_, &ode );
+		for ( unsigned int j = 0; j < numPoolSpecies; ++j ) {
+			pools_[i].varSinit()[j] = nInit[j];
+		}
 	}
 }
+*/
 
 //////////////////////////////////////////////////////////////
 // Process operations.
 //////////////////////////////////////////////////////////////
 void Ksolve::process( const Eref& e, ProcPtr p )
 {
+	for ( vector< VoxelPools >::iterator 
+					i = pools_.begin(); i != pools_.end(); ++i ) {
+		i->advance( p );
+	}
 }
 
 void Ksolve::reinit( const Eref& e, ProcPtr p )
 {
+	for ( vector< VoxelPools >::iterator 
+					i = pools_.begin(); i != pools_.end(); ++i ) {
+		i->reinit();
+	}
 }
 //////////////////////////////////////////////////////////////
 // Solver ops
@@ -232,3 +277,31 @@ double Ksolve::getDiffConst() const
 		return 0;
 }
 
+void Ksolve::setNumPools( unsigned int numPoolSpecies )
+{
+	assert( stoichPtr_ );
+	OdeSystem ode;
+#ifdef USE_GSL
+	ode.gslSys.function = &VoxelPools::gslFunc;
+   	ode.gslSys.jacobian = 0;
+	ode.gslSys.dimension = stoichPtr_->getNumAllPools();
+	// This cast is needed because the C interface for GSL doesn't 
+	// use const void here.
+   	ode.gslSys.params = const_cast< Stoich* >( stoichPtr_ );
+	if ( ode.method == "rk5" ) {
+		ode.gslStep = gsl_odeiv2_step_rkf45;
+	}
+#endif
+	unsigned int numVoxels = pools_.size();
+	for ( unsigned int i = 0 ; i < numVoxels; ++i ) {
+		pools_[i].resizeArrays( numPoolSpecies );
+		pools_[i].setStoich( stoichPtr_, &ode );
+	}
+}
+
+unsigned int Ksolve::getNumPools() const
+{
+	if ( pools_.size() > 0 )
+		return pools_[0].size();
+	return 0;
+}

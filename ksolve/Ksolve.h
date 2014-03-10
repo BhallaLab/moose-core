@@ -25,7 +25,17 @@ class Ksolve: public ZombiePoolInterface
 
 		unsigned int getNumLocalVoxels() const;
 		unsigned int getNumAllVoxels() const;
+		/**
+		 * Assigns the number of voxels used in the entire reac-diff 
+		 * system. Note that fewer than this may be used on any given node.
+		 */
 		void setNumAllVoxels( unsigned int num );
+
+		/**
+		 * Assigns number of different pools (chemical species) present in
+		 * each voxel.
+		 */
+		void setNumAllPools( unsigned int num );
 		//////////////////////////////////////////////////////////////////
 		// Dest Finfos
 		//////////////////////////////////////////////////////////////////
@@ -49,6 +59,14 @@ class Ksolve: public ZombiePoolInterface
 		void setDiffConst( double v );
 		double getDiffConst() const;
 
+		/**
+		 * Assigns number of different pools (chemical species) present in
+		 * each voxel.
+		 */
+		void setNumPools( unsigned int num );
+		unsigned int getNumPools() const;
+
+		//////////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();
 	private:
 		/**

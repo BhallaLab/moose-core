@@ -134,7 +134,7 @@ class MMEnzyme1: public MMEnzymeBase
 		}
 
 		double operator() ( const double* S ) const {
-			assert( S[ sub_ ] >= -EPSILON );
+		//	assert( S[ sub_ ] >= -EPSILON );
 			return ( kcat_ * S[ sub_ ] * S[ enz_ ] ) / ( Km_ + S[ sub_ ] );
 		}
 

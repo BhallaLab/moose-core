@@ -109,6 +109,7 @@ class VoxelPools
 		vector< double > Sinit_;
 #ifdef USE_GSL
 		gsl_odeiv2_driver* driver_;
+		gsl_odeiv2_system sys_;
 #endif
 };
 
