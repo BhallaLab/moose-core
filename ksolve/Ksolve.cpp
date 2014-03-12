@@ -42,9 +42,16 @@ const Cinfo* Ksolve::initCinfo()
 
 		static ReadOnlyValueFinfo< Ksolve, unsigned int > numLocalVoxels(
 			"numLocalVoxels",
-			"Number of voxels in the core reac-diff system, on the current "
-			"solver. ",
+			"Number of voxels in the core reac-diff system, on the "
+			"current solver. ",
 			&Ksolve::getNumLocalVoxels
+		);
+		static LookupValueFinfo< 
+				Ksolve, unsigned int, vector< double > > nVec(
+			"nVec",
+			"vector of pool counts",
+			&Ksolve::setNvec,
+			&Ksolve::getNvec
 		);
 		static ValueFinfo< Ksolve, unsigned int > numAllVoxels(
 			"numAllVoxels",
@@ -88,6 +95,7 @@ const Cinfo* Ksolve::initCinfo()
 	{
 		&stoich,			// Value
 		&numLocalVoxels,	// ReadOnlyValue
+		&nVec,				// LookupValue
 		&numAllVoxels,		// ReadOnlyValue
 		&numPools,			// Value
 		&proc,				// SharedFinfo
@@ -155,6 +163,28 @@ void Ksolve::setNumAllVoxels( unsigned int numVoxels )
 		return;
 	}
 	pools_.resize( numVoxels );
+}
+
+vector< double > Ksolve::getNvec( unsigned int voxel) const
+{
+	static vector< double > dummy;
+	if ( voxel < pools_.size() )
+		return pools_[ voxel ].Svec();
+	return dummy;
+}
+
+void Ksolve::setNvec( unsigned int voxel, vector< double > nVec )
+{
+	if ( voxel < pools_.size() ) {
+		if ( nVec.size() != pools_[voxel].size() ) {
+			cout << "Warning: Ksolve::setNvec: size mismatch ( " <<
+				nVec.size() << ", " << pools_[voxel].size() << ")\n";
+			return;
+		}
+		double* s = pools_[voxel].varS();
+		for ( unsigned int i = 0; i < nVec.size(); ++i )
+			s[i] = nVec[i];
+	}
 }
 /*
 void Ksolve::setNumAllVoxels( unsigned int numVoxels )

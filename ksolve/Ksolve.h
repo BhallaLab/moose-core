@@ -36,6 +36,10 @@ class Ksolve: public ZombiePoolInterface
 		 * each voxel.
 		 */
 		void setNumAllPools( unsigned int num );
+
+		/// Returns the vector of pool Num at the specified voxel.
+		vector< double > getNvec( unsigned int voxel) const;
+		void setNvec( unsigned int voxel, vector< double > vec );
 		//////////////////////////////////////////////////////////////////
 		// Dest Finfos
 		//////////////////////////////////////////////////////////////////

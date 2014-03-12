@@ -21,6 +21,7 @@ OBJ = \
 	RateTerm.o \
 	Stoich.o \
 	Ksolve.o \
+	SteadyState.o \
 	testKsolve.o \
 
 HEADERS = \
@@ -61,6 +62,7 @@ ZombieReac.o:		RateTerm.h ../kinetics/FuncTerm.h Stoich.h ../kinetics/ReacBase.h
 ZombieEnz.o:		RateTerm.h ../kinetics/FuncTerm.h Stoich.h ../kinetics/EnzBase.h ../kinetics/CplxEnzBase.h ../kinetics/lookupVolumeFromMesh.h ../basecode/SparseMatrix.h KinSparseMatrix.h ZombieEnz.h
 ZombieMMenz.o:		RateTerm.h ../kinetics/FuncTerm.h Stoich.h ../kinetics/EnzBase.h ../kinetics/lookupVolumeFromMesh.h ../basecode/SparseMatrix.h KinSparseMatrix.h ZombieMMenz.h
 Ksolve.o:		RateTerm.h Stoich.h Ksolve.h
+SteadyState.o:	SteadyState.h ../basecode/SparseMatrix.h KinSparseMatrix.h RateTerm.h ../kinetics/FuncTerm.h Stoich.h ../randnum/randnum.h
 testKsolve.o:	../shell/Shell.h
 
 #KineticHub.o:	KineticHub.h
@@ -69,7 +71,6 @@ ifeq ($(USE_GSL),1)
 #Optional: Comment out the following two items if not using GSL.
 $(GSL_OBJ) : $(HEADERS)
 #GslIntegrator.o:	GslIntegrator.h Stoich.h RateTerm.h KinSparseMatrix.h ../basecode/SparseMatrix.h ../shell/Shell.h
-#SteadyState.o:	SteadyState.h RateTerm.h KinSparseMatrix.h 
 #StateScanner.o:	StateScanner.h
 endif # !USE_GSL
 
