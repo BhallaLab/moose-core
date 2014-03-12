@@ -1240,6 +1240,25 @@ void Stoich::updateRates( const double* s, double* yprime )
 		*yprime++ = 0.0;
 }
 
+/**
+ * updateVels computes the velocity *v* of each reaction.
+ * This is a utility function for programs like SteadyState that need
+ * to analyze velocity.
+ */
+void Stoich::updateReacVelocities( const double* s, vector< double >& v )
+{
+	vector< RateTerm* >::const_iterator i;
+	v.clear();
+	v.resize( numReac_, 0.0 );
+	vector< double >::iterator j = v.begin();
+	assert( numReac_ == rates_.size() );
+
+	for ( i = rates_.begin(); i != rates_.end(); i++) {
+		*j++ = (**i)( s );
+		assert( !isnan( *( j-1 ) ) );
+	}
+}
+
 // s is the array of pools, S_[meshIndex][0]
 void Stoich::updateFuncs( double* s, double t )
 {

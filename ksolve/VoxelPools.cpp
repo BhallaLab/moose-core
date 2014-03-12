@@ -66,6 +66,11 @@ const double* VoxelPools::S() const
 	return &S_[0];
 }
 
+vector< double > VoxelPools::Svec() const
+{
+	return S_;
+}
+
 double* VoxelPools::varS()
 {
 	return &S_[0];

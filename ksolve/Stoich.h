@@ -294,6 +294,9 @@ class Stoich
 
 		/// Updates the yprime array, rate of change of each molecule
 		void updateRates( const double* s, double* yprime );
+		
+		/// Computes the velocity of each reaction, vel.
+		void updateReacVelocities( const double* s, vector< double >& vel );
 
 		/// Updates the function values, within s.
 		void updateFuncs( double* s, double t );
