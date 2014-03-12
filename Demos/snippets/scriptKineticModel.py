@@ -51,8 +51,8 @@ def makeModel():
 		moose.connect( reac, 'prd', b, 'reac' )
 
 		# connect them up to the compartment for volumes
-		for x in ( a, b, c, cplx1, cplx2 ):
-					moose.connect( x, 'mesh', mesh, 'mesh' )
+		#for x in ( a, b, c, cplx1, cplx2 ):
+		#			moose.connect( x, 'mesh', mesh, 'mesh' )
 
 		# Assign parameters
 		a.concInit = 1
@@ -103,7 +103,7 @@ def main():
 
 		# Iterate through all plots, dump their contents to data.plot.
 		for x in moose.wildcardFind( '/model/graphs/conc#' ):
-				moose.element( x[0] ).xplot( 'scriptKineticModel.plot', x[0].name )
+				x.xplot( 'scriptKineticModel.plot', x.name )
 
 		quit()
 
