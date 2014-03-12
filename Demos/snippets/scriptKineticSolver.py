@@ -15,6 +15,9 @@
 # One of the enzymes is autocatalytic.
 # The model is set up to run using Exponential Euler integration.
 
+import math
+import pylab
+import numpy
 import moose
 
 def makeModel():
@@ -50,8 +53,8 @@ def makeModel():
 		moose.connect( reac, 'prd', b, 'reac' )
 
 		# connect them up to the compartment for volumes
-		for x in ( a, b, c, cplx1, cplx2 ):
-					moose.connect( x, 'mesh', mesh, 'mesh' )
+		#for x in ( a, b, c, cplx1, cplx2 ):
+		#			moose.connect( x, 'mesh', mesh, 'mesh' )
 
 		# Assign parameters
 		a.concInit = 1
@@ -80,16 +83,26 @@ def makeModel():
 		moose.useClock( 4, '/model/compartment/##', 'process' )
 		moose.useClock( 8, '/model/graphs/#', 'process' )
 
+def displayPlots():
+		for x in moose.wildcardFind( '/model/graphs/conc#' ):
+				t = numpy.arange( 0, x.vector.size, 1 ) #sec
+				pylab.plot( t, x.vector, label=x.name )
+		pylab.legend()
+		pylab.show()
 
 def main():
 		makeModel()
-		solver = moose.GslStoich( '/model/compartment/solver' )
-		solver.path = "/model/compartment/##"
-		solver.method = "rk5"
-		mesh = moose.element( "/model/compartment/mesh" )
-		moose.connect( mesh, "remesh", solver, "remesh" )
+		ksolve = moose.Ksolve( '/model/compartment/ksolve' )
+		stoich = moose.Stoich( '/model/compartment/stoich' )
+		ksolve.numAllVoxels = 1
+		stoich.poolInterface = ksolve
+		ksolve.stoich = stoich
+		stoich.path = "/model/compartment/##"
+		#solver.method = "rk5"
+		#mesh = moose.element( "/model/compartment/mesh" )
+		#moose.connect( mesh, "remesh", solver, "remesh" )
 		moose.setClock( 5, 1.0 ) # clock for the solver
-		moose.useClock( 5, '/model/compartment/solver', 'process' )
+		moose.useClock( 5, '/model/compartment/ksolve', 'process' )
 
 		moose.reinit()
 		moose.start( 100.0 ) # Run the model for 100 seconds.
@@ -108,8 +121,7 @@ def main():
 		moose.start( 100.0 ) # Run the model for 100 seconds.
 
 		# Iterate through all plots, dump their contents to data.plot.
-		for x in moose.wildcardFind( '/model/graphs/conc#' ):
-				moose.element( x[0] ).xplot( 'scriptKineticSolver.plot', x[0].name )
+		displayPlots()
 
 		quit()
 
