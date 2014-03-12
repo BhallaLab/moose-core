@@ -34,6 +34,9 @@ class VoxelPools
 		 */
 		const double* S() const;
 
+		/// Returns all the mol #s but as a vector.
+		vector< double > Svec() const;
+
 		/**
 		 * Returns the array of doubles of current mol #s at the specified
 		 * mesh index. Dangerous, allows one to modify the values.
