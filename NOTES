@@ -2892,3 +2892,9 @@ Compiled SteadyState. Yet to test. Checkin 5158.
 to the correct values, though they do fit the conservation laws. Repeat runs 
 from a given starting point give the same result. Nearby starts give nearby
 answers, so it isn't totally random.
+============================================================================
+14 March 2014.
+Got steady state solver to work. Some cleanup needed but basics in place.
+Test script running in testSteadyState.py
+
+============================================================================

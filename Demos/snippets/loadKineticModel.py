@@ -24,7 +24,7 @@ def main():
 		if ( os.path.exists( 'data.plot' ) ):
 			os.remove( 'data.plot' )
 		for x in moose.wildcardFind( '/model/graphs/conc#/#' ):
-				moose.element( x[0] ).xplot( 'data.plot', x[0].name )
+				x.xplot( 'data.plot', x.name )
 
 		# moose.saveModel( modelId, 'saveReaction.g' )
 		quit()
