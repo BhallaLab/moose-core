@@ -340,8 +340,8 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	      // Reaction 
 	      reaction->setId( cleanReacname);
 	      reaction->setName( objname);
-	      double Kf = Field<double>::get(*itrR,"kf");
-	      double Kb = Field<double>::get(*itrR,"kb");
+	      double Kf = Field<double>::get(*itrR,"numKf");
+	      double Kb = Field<double>::get(*itrR,"numKb");
 	      
 	      if (Kb == 0.0)
 		reaction->setReversible( false );
@@ -598,10 +598,12 @@ void SbmlWriter::getSubPrd(Reaction* rec,string type,string enztype,Id itrRE, in
 	{ spr = rec->createReactant();
 	  spr->setSpecies(clean_name);
 	  spr->setStoichiometry( stoch );
+	  
 	  if (objClass == "BufPool")
 	    spr->setConstant( true );
 	  else
 	    spr->setConstant( false);
+	  
 	}
       else if(type == "prd" or (type == "enzOut" and enztype == "prd" ) or (type == "cplxDest" and enztype == "prd"))
 	{
