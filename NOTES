@@ -2888,3 +2888,7 @@ SteadyState compilation starting to take shape.
 12 March 2014
 Compiled SteadyState. Yet to test. Checkin 5158.
 ============================================================================
+13 March 2014. SteadyState tests in progress. Runs etc but does not converge
+to the correct values, though they do fit the conservation laws. Repeat runs 
+from a given starting point give the same result. Nearby starts give nearby
+answers, so it isn't totally random.
