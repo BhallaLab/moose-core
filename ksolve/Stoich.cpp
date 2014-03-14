@@ -108,6 +108,10 @@ const Cinfo* Stoich::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
+		static DestFinfo unzombify( "unzombify",
+			"Restore all zombies to their native state",
+			new OpFunc0< Stoich >( &Stoich::unZombifyModel )
+		);
 
 		//////////////////////////////////////////////////////////////
 		// SrcFinfo Definitions
@@ -127,6 +131,7 @@ const Cinfo* Stoich::initCinfo()
 		&matrixEntry,		// ReadOnlyValue
 		&columnIndex,		// ReadOnlyValue
 		&rowStart,			// ReadOnlyValue
+		&unzombify,			// DestFinfo
 	};
 
 	static Dinfo< Stoich > dinfo;
@@ -163,7 +168,10 @@ Stoich::Stoich()
 
 Stoich::~Stoich()
 {
-	unZombifyModel();
+	// unZombifyModel();
+	// Note that we cannot do the unZombify here, because it is too
+	// prone to problems with the ordering of the delete operations
+	// relative to the zombies.
 	for ( vector< RateTerm* >::iterator i = rates_.begin();
 		i != rates_.end(); ++i )
 		delete *i;
