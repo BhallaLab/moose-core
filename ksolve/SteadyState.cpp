@@ -234,6 +234,7 @@ const Cinfo* SteadyState::initCinfo()
 					*/
 
 	static Finfo * steadyStateFinfos[] = {
+			&stoich,				// Value
 			&badStoichiometry,		// ReadOnlyValue
 			&isInitialized,			// ReadOnlyValue
 			&nIter,					// ReadOnlyValue
@@ -301,9 +302,11 @@ SteadyState::SteadyState()
 		isInitialized_( 0 ),
 		isSetup_( 0 ),
 		convergenceCriterion_( 1e-7 ),
+#ifdef USE_GSL
 		LU_( 0 ),
 		Nr_( 0 ),
 		gamma_( 0 ),
+#endif
 		stoich_(),
 		numVarPools_( 0 ),
 		nReacs_( 0 ),
@@ -518,18 +521,22 @@ void SteadyState::setupSSmatrix()
 	vector< unsigned int > rowStart = Field< vector< unsigned int > >::get(
 					stoich_, "rowStart" );
 
+	cout << endl << endl;
 	for ( unsigned int i = 0; i < numVarPools_; ++i ) {
 		gsl_matrix_set (LU_, i, i + nReacs_, 1 );
 		unsigned int k = rowStart[i];
+		cout << endl << i << ":	";
 		for ( unsigned int j = 0; j < nReacs_; ++j ) {
 			double x = 0;
-			if ( j == colIndex[k] ) {
+			if ( j == colIndex[k] && k < rowStart[i+1] ) {
 				x = entry[k++];
 			}
+			cout << "	" << x;
 			gsl_matrix_set (N, i, j, x);
 			gsl_matrix_set (LU_, i, j, x );
 		}
 	}
+	cout << endl << endl;
 
 	rank_ = myGaussianDecomp( LU_ );
 
@@ -671,8 +678,8 @@ void SteadyState::classifyState( const double* T )
 	// negative values.
 	double tot = 0.0;
 	Stoich* s = reinterpret_cast< Stoich* >( stoich_.eref().data() );
-	vector< double > nVec = Field< vector< double > >::get(
-		s->getPoolInterface(), "nVec" );
+	vector< double > nVec = LookupField< unsigned int, vector< double > >::get(
+		s->getPoolInterface(), "nVec", 0 );
 	for ( unsigned int i = 0; i < numVarPools_; ++i ) {
 		tot += nVec[i];
 	}
@@ -755,6 +762,8 @@ void SteadyState::classifyState( const double* T )
 void SteadyState::settle( bool forceSetup )
 {
 #ifdef USE_GSL
+	gsl_set_error_handler_off();
+	
 	if ( !isInitialized_ ) {
 		cout << "Error: SteadyState object has not been initialized. No calculations done\n";
 		return;
@@ -807,6 +816,8 @@ void SteadyState::settle( bool forceSetup )
 	nIter_ = ri.nIter;
 	if ( status == GSL_SUCCESS ) {
 		solutionStatus_ = 0; // Good solution
+		LookupField< unsigned int, vector< double > >::set(
+			ksolve,"nVec", 0, ri.nVec );
 		classifyState( T );
 		/*
 		 * Should happen in the ss_func.
@@ -820,6 +831,8 @@ void SteadyState::settle( bool forceSetup )
 		for ( unsigned int j = 0; j < numVarPools_; ++j )
 			ri.nVec[j] = repair[j];
 		solutionStatus_ = 1; // Steady state failed.
+		LookupField< unsigned int, vector< double > >::set(
+			ksolve,"nVec", 0, ri.nVec );
 	}
 
 	// Clean up.
@@ -1012,7 +1025,7 @@ void SteadyState::randomizeInitialCondition( const Eref& me )
 		for ( unsigned int j = 0; j < numVarPools_; ++j ) {
 			tot += y[j] * gsl_matrix_get( gamma_, i, j );
 		}
-		assert( fabs( tot - total_[i] ) < EPSILON );
+		assert( fabs( tot - total_[i] ) / tot < EPSILON );
 	}
 
 	// Put the new values into S.
