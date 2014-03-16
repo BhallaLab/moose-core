@@ -542,10 +542,12 @@ template< class L, class A > class LookupField: public SetGet2< L, A >
 				if ( tgt.isDataHere() ) {
 					return gof->returnOp( tgt.eref(), index );
 				} else {
+						/*
 					const OpFunc* op2 = gof->makeHopFunc( 
 						HopIndex( gof->opIndex(), MooseGetHop ), index );
 					const OpFunc1Base< A* >* hop = 
 						dynamic_cast< const OpFunc1Base< A* >* >( op2 );
+						*/
 					cout << "Warning: LookupField::get: cannot cross nodes yet\n";
 					return A();
 					/*

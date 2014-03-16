@@ -2897,4 +2897,14 @@ answers, so it isn't totally random.
 Got steady state solver to work. Some cleanup needed but basics in place.
 Test script running in testSteadyState.py
 
+Fixed crash on exit for Stoich.
+============================================================================
+16 Mar 2014.
+A bit of a diversion: The unit tests were failing in testCompartment.cpp
+on multiple nodes. Nans. I suspected a problem with internode messaging. 
+Turned out to be quite subtle. The order of arguments was swapped in the Raxial
+message. This was due to the known problem of order of evaluation of 
+arguments in a multi-argument function call. I had fixed this in some
+cases, but not in the handling of internode message buffers. 
+With this corrected it clears unit tests from 1 to 8 nodes.
 ============================================================================
