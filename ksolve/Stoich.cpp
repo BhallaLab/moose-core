@@ -1226,14 +1226,14 @@ const vector< Id >& Stoich::offSolverPoolMap( Id compt ) const
  * uses this to compute the rate of change, *yprime*, for each pool
  */
 
-void Stoich::updateRates( const double* s, double* yprime )
+void Stoich::updateRates( const double* s, double* yprime ) const
 {
-	vector< RateTerm* >::const_iterator i;
 	vector< double > v( numReac_, 0.0 );
 	vector< double >::iterator j = v.begin();
 	assert( numReac_ == rates_.size() );
 
-	for ( i = rates_.begin(); i != rates_.end(); i++) {
+	for ( vector< RateTerm* >::const_iterator
+		i = rates_.begin(); i != rates_.end(); i++) {
 		*j++ = (**i)( s );
 		assert( !isnan( *( j-1 ) ) );
 	}
@@ -1250,6 +1250,7 @@ void Stoich::updateRates( const double* s, double* yprime )
  * to analyze velocity.
  */
 void Stoich::updateReacVelocities( const double* s, vector< double >& v )
+		const
 {
 	vector< RateTerm* >::const_iterator i;
 	v.clear();
@@ -1263,12 +1264,17 @@ void Stoich::updateReacVelocities( const double* s, vector< double >& v )
 	}
 }
 
+double Stoich::getReacVelocity( unsigned int r, const double* s ) const
+{
+	return rates_[r]->operator()( s );
+}
+
 // s is the array of pools, S_[meshIndex][0]
-void Stoich::updateFuncs( double* s, double t )
+void Stoich::updateFuncs( double* s, double t ) const
 {
 	double* j = s + numVarPools_ + numBufPools_;
 
-	for ( vector< FuncTerm* >::iterator i = funcs_.begin();
+	for ( vector< FuncTerm* >::const_iterator i = funcs_.begin();
 					i != funcs_.end(); ++i ) {
 		*j++ = (**i)( s, t );
 		assert( !isnan( *(j-1) ) );
