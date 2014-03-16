@@ -1,5 +1,7 @@
-#include <header.h>
-#include <Example.h>
+#include "header.h"
+#include "Example.h"
+#include "ElementValueFinfo.h"
+#include "LookupElementValueFinfo.h"
 #include <stdio.h>
 
 static SrcFinfo1< double > *output() {
@@ -39,10 +41,18 @@ const Cinfo* Example::initCinfo(){
 
     static DestFinfo process( "process",
         "Handles process call",
-        new ProcOpFunc< Example >( &Example::process ) );
+        new ProcOpFunc< Example >( &Example::process ) 
+    );
     static DestFinfo reinit( "reinit",
         "Handles reinit call",
-        new ProcOpFunc< Example >( &Example::reinit ) );
+        new ProcOpFunc< Example >( &Example::reinit ) 
+    );
+        
+    
+    static ReadOnlyLookupElementValueFinfo< Example, string, vector< Id > > fieldNeighbours( 
+		"fieldNeighbors",
+		"Ids of Elements connected this Element on specified field.", 
+			&Example::getNeighbours );
 
     //////////////////////////////////////////////////////////////
     // SharedFinfo Definitions
@@ -63,7 +73,8 @@ const Cinfo* Example::initCinfo(){
         &handleX,   //DestFinfo
         &handleY,   //DestFinfo
         output(),   // SrcFinfo
-        &proc       //SharedFinfo
+        &proc,      //SharedFinfo
+        &fieldNeighbours,		// ReadOnlyLookupValue
     };
 
     static Cinfo exampleCinfo(
@@ -126,4 +137,17 @@ double Example::getY() const
 void Example::setY(double y)
 {
     y_ = y;
+}
+
+vector< Id > Example::getNeighbours( const Eref& e, string field ) const
+{
+	vector< Id > ret;
+	const Finfo* finfo = e.element()->cinfo()->findFinfo( field );
+	if ( finfo )
+		e.element()->getNeighbours( ret, finfo );
+	else
+		cout << "Warning: Example::getNeighbours: Id.Field '" << 
+				e.id().path() << "." << field <<
+				"' not found\n";
+	return ret;
 }

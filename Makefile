@@ -240,8 +240,8 @@ endif
 
 # To compile examples, pass EXAMPLES=true ( anything on the right will do) in make command line
 ifdef EXAMPLES
-EXAMPLES_DIR = examples/trials
-EXAMPLES_LIB = examples/trials/_trials.o
+EXAMPLES_DIR = examples
+EXAMPLES_LIB = examples/_trials.o
 endif
 
 # To use Smoldyn, pass USE_SMOLDYN=true ( anything on the right will do) in make command line
