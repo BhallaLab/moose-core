@@ -14,6 +14,7 @@
 #endif
 
 #include "OdeSystem.h"
+#include "VoxelPoolsBase.h"
 #include "VoxelPools.h"
 #include "RateTerm.h"
 #include "FuncTerm.h"
@@ -26,9 +27,6 @@
 //////////////////////////////////////////////////////////////
 
 VoxelPools::VoxelPools()
-	: 
-		S_(1),
-		Sinit_(1)
 {
 #ifdef USE_GSL
 		driver_ = 0;
@@ -41,54 +39,6 @@ VoxelPools::~VoxelPools()
 	if ( driver_ )
 		gsl_odeiv2_driver_free( driver_ );
 #endif
-}
-
-//////////////////////////////////////////////////////////////
-// Array ops
-//////////////////////////////////////////////////////////////
-/// Using the computed array sizes, now allocate space for them.
-void VoxelPools::resizeArrays( unsigned int totNumPools )
-{
-	S_.resize( totNumPools, 0.0 );
-	Sinit_.resize( totNumPools, 0.0);
-}
-
-void VoxelPools::reinit()
-{
-	S_ = Sinit_;
-}
-
-//////////////////////////////////////////////////////////////
-// Access functions
-//////////////////////////////////////////////////////////////
-const double* VoxelPools::S() const
-{
-	return &S_[0];
-}
-
-vector< double > VoxelPools::Svec() const
-{
-	return S_;
-}
-
-double* VoxelPools::varS()
-{
-	return &S_[0];
-}
-
-const double* VoxelPools::Sinit() const
-{
-	return &Sinit_[0];
-}
-
-double* VoxelPools::varSinit()
-{
-	return &Sinit_[0];
-}
-
-unsigned int VoxelPools::size() const
-{
-	return Sinit_.size();
 }
 
 //////////////////////////////////////////////////////////////
@@ -110,7 +60,7 @@ void VoxelPools::advance( const ProcInfo* p )
 {
 #ifdef USE_GSL
 	double t = p->currTime - p->dt;
-	int status = gsl_odeiv2_driver_apply( driver_, &t, p->currTime, &S_[0]);
+	int status = gsl_odeiv2_driver_apply( driver_, &t, p->currTime, varS());
 	if ( status != GSL_SUCCESS ) {
 		cout << "Error: VoxelPools::advance: GSL integration error at time "
 			 << t << "\n";
@@ -144,38 +94,3 @@ int VoxelPools::gslFunc( double t, const double* y, double *dydt,
 	return 0;
 #endif
 }
-
-//////////////////////////////////////////////////////////////
-// Zombie Pool Access functions
-//////////////////////////////////////////////////////////////
-
-void VoxelPools::setN( unsigned int i, double v )
-{
-	S_[i] = v;
-}
-
-double VoxelPools::getN( unsigned int i ) const
-{
-	return S_[i];
-}
-
-void VoxelPools::setNinit( unsigned int i, double v )
-{
-	Sinit_[i] = v;
-}
-
-double VoxelPools::getNinit( unsigned int i ) const
-{
-	return Sinit_[i];
-}
-
-void VoxelPools::setDiffConst( unsigned int i, double v )
-{
-		; // Do nothing.
-}
-
-double VoxelPools::getDiffConst( unsigned int i ) const
-{
-		return 0;
-}
-
