@@ -668,12 +668,10 @@ void Compartment::cable()
 
 void testCompartment()
 {
-	const Cinfo* comptCinfo = Compartment::initCinfo();
 	unsigned int size = 1;
 	Eref sheller( Id().eref() );
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
         Id comptId = shell->doCreate("Compartment", Id(), "compt", size);
-	// Element* n = new Element( comptId, comptCinfo, "compt", dims, 1, true );
 	assert( Id::isValid(comptId));
 	Compartment* c = reinterpret_cast< Compartment* >( comptId.eref().data() );
 	ProcInfo p;
@@ -761,6 +759,9 @@ void testCompartmentProcess()
 #ifdef DO_SPATIAL_TESTS
 	shell->doSetClock( 0, dt );
 	shell->doSetClock( 1, dt );
+	// Ensure that the inter_compt msgs go between nodes once every dt.
+	shell->doSetClock( 9, dt ); 
+
 	shell->doUseClock( "/compt", "init", 0 );
 	shell->doUseClock( "/compt", "process", 1 );
 
@@ -772,7 +773,7 @@ void testCompartmentProcess()
 	double delta = 0.0;
 	// We measure only the first 50 compartments as later we 
 	// run into end effects because it is not an infinite cable
-	for ( unsigned int i = 0; i < 50; i++ ) {
+	for ( unsigned int i = 0; i < size; i++ ) {
 		double Vm = Field< double >::get( ObjId( cid, i ), "Vm" );
 		double x = Vmax * exp( - static_cast< double >( i ) / lambda );
 		delta += ( Vm - x ) * ( Vm - x );

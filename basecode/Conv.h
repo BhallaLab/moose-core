@@ -498,12 +498,13 @@ template< class T > class Conv< vector< vector< T > > >
 		static unsigned int size( const vector< vector < T > > & val)
 		{
 			unsigned int ret = 1 + val.size();
-			for ( unsigned int i = 0; i < val.size(); ++i )
-			if ( val[i].size() > 0 ) {
-				ret += val[i].size() * Conv< T >::size( val[i][0] );
-			} else  {
-				T temp;
-				ret += val[i].size() * Conv< T >::size( temp );
+			for ( unsigned int i = 0; i < val.size(); ++i ) {
+				if ( val[i].size() > 0 ) {
+					ret += val[i].size() * Conv< T >::size( val[i][0] );
+				} else  {
+					T temp;
+					ret += val[i].size() * Conv< T >::size( temp );
+				}
 			}
 			return ret;
 		}
