@@ -169,8 +169,9 @@ void Ksolve::setNumAllVoxels( unsigned int numVoxels )
 vector< double > Ksolve::getNvec( unsigned int voxel) const
 {
 	static vector< double > dummy;
-	if ( voxel < pools_.size() )
-		return pools_[ voxel ].Svec();
+	if ( voxel < pools_.size() ) {
+		return const_cast< VoxelPools* >( &( pools_[ voxel ] ) )->Svec();
+	}
 	return dummy;
 }
 
