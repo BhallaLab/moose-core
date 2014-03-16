@@ -293,17 +293,21 @@ class Stoich
 		//////////////////////////////////////////////////////////////////
 
 		/// Updates the yprime array, rate of change of each molecule
-		void updateRates( const double* s, double* yprime );
+		void updateRates( const double* s, double* yprime ) const;
 		
 		/// Computes the velocity of each reaction, vel.
-		void updateReacVelocities( const double* s, vector< double >& vel );
+		void updateReacVelocities( const double* s, vector< double >& vel ) const;
 
 		/// Updates the function values, within s.
-		void updateFuncs( double* s, double t );
+		void updateFuncs( double* s, double t ) const;
 
 		/// Updates the rates for cross-compartment reactions.
 		void updateJunctionRates( const double* s,
 			   const vector< unsigned int >& reacTerms, double* yprime );
+
+		double getReacVelocity( unsigned int r, const double* s ) const;
+
+		const KinSparseMatrix& getStoichiometryMatrix() const;
 		//////////////////////////////////////////////////////////////////
 		// Access functions for cross-node reactions.
 		//////////////////////////////////////////////////////////////////

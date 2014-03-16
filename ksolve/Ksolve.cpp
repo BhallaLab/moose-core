@@ -14,6 +14,7 @@
 #endif
 
 #include "OdeSystem.h"
+#include "VoxelPoolsBase.h"
 #include "VoxelPools.h"
 #include "ZombiePoolInterface.h"
 
