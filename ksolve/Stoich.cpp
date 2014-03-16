@@ -24,10 +24,6 @@
 #include "../shell/Shell.h"
 #include "../shell/Wildcard.h"
 
-#ifdef USE_GSL
-#include <gsl/gsl_errno.h>
-#endif
-
 #define EPSILON 1e-15
 
 const Cinfo* Stoich::initCinfo()
@@ -375,7 +371,7 @@ pair< Id, Id > extractCompts( const vector< Id >& compts )
 			if ( ret.second == Id() )
 				ret.second = *i;
 			else {
-				cout << "Error: extractCompts: more than 2 compartments\n";
+				cout << "Error: Stoich::extractCompts: more than 2 compartments\n";
 				assert( 0 );
 			}
 		}
@@ -799,7 +795,7 @@ ZeroOrder* makeHalfReaction(
 			temp.push_back( sc->convertIdToPoolIndex( reactants[i] ) );
 		rateTerm = new NOrder( rate, temp );
 	} else {
-		cout << "Error: GslStoichZombies::makeHalfReaction: no reactants\n";
+		cout << "Error: Stoich::makeHalfReaction: no reactants\n";
 	}
 	return rateTerm;
 }
@@ -884,7 +880,7 @@ void Stoich::installMMenz( Id enzId, Id enzMolId,
 		ZeroOrder* rateTerm = new NOrder( 1.0, v );
 		meb = new MMEnzyme( 1, 1, enzIndex, rateTerm );
 	} else {
-		cout << "Error: GslStoich::installEnzyme: No substrates for "  <<
+		cout << "Error: Stoich::installMMenz: No substrates for "  <<
 			enzId.path() << endl;
 		return;
 	}
