@@ -19,6 +19,7 @@ OBJ = \
 	ZombieMMenz.o \
 	VoxelPoolsBase.o \
 	VoxelPools.o \
+	GssaVoxelPools.o \
 	RateTerm.o \
 	Stoich.o \
 	Ksolve.o \
@@ -57,13 +58,14 @@ ZombiePool.o:	../kinetics/PoolBase.h ZombiePoolInterface.h ZombiePool.h ../kinet
 ZombieBufPool.o:	../kinetics/PoolBase.h ZombiePoolInterface.h ZombiePool.h ZombieBufPool.h ../kinetics/lookupVolumeFromMesh.h
 ZombieBufPool.o:	../kinetics/PoolBase.h ZombiePoolInterface.h ZombiePool.h ZombieFuncPool.h
 VoxelPoolsBase.o:	VoxelPoolsBase.h
-VoxelPools.o:	VoxelPoolsBase.h VoxelPools.h RateTerm.h Stoich.h
+VoxelPools.o:	VoxelPoolsBase.h VoxelPools.h OdeSystem.h RateTerm.h Stoich.h
+GssaVoxelPools.o:	VoxelPoolsBase.h GssaVoxelPools.h ../basecode/SparseMatrix.h KinSparseMatrix.h GssaSystem.h RateTerm.h Stoich.h
 RateTerm.o:		RateTerm.h
 Stoich.o:		RateTerm.h ../kinetics/FuncTerm.h ../kinetics/SumTotalTerm.h Stoich.h ../kinetics/PoolBase.h ../kinetics/ReacBase.h ../kinetics/EnzBase.h ../kinetics/CplxEnzBase.h ../kinetics/FuncBase.h ../basecode/SparseMatrix.h KinSparseMatrix.h
 ZombieReac.o:		RateTerm.h ../kinetics/FuncTerm.h Stoich.h ../kinetics/ReacBase.h ../kinetics/lookupVolumeFromMesh.h ../basecode/SparseMatrix.h KinSparseMatrix.h ZombieReac.h
 ZombieEnz.o:		RateTerm.h ../kinetics/FuncTerm.h Stoich.h ../kinetics/EnzBase.h ../kinetics/CplxEnzBase.h ../kinetics/lookupVolumeFromMesh.h ../basecode/SparseMatrix.h KinSparseMatrix.h ZombieEnz.h
 ZombieMMenz.o:		RateTerm.h ../kinetics/FuncTerm.h Stoich.h ../kinetics/EnzBase.h ../kinetics/lookupVolumeFromMesh.h ../basecode/SparseMatrix.h KinSparseMatrix.h ZombieMMenz.h
-Ksolve.o:		RateTerm.h Stoich.h Ksolve.h
+Ksolve.o:		RateTerm.h Stoich.h Ksolve.h VoxelPoolsBase.h VoxelPools.h
 SteadyState.o:	SteadyState.h ../basecode/SparseMatrix.h KinSparseMatrix.h RateTerm.h ../kinetics/FuncTerm.h Stoich.h ../randnum/randnum.h
 testKsolve.o:	../shell/Shell.h
 

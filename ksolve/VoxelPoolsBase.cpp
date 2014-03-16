@@ -46,7 +46,7 @@ const double* VoxelPoolsBase::S() const
 	return &S_[0];
 }
 
-vector< double > VoxelPoolsBase::Svec() const
+vector< double >& VoxelPoolsBase::Svec()
 {
 	return S_;
 }
