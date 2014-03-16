@@ -172,9 +172,13 @@ template < class T1, class T2 > class SrcFinfo2: public SrcFinfo
 
 		void sendBuffer( const Eref& e, double* buf ) const
 		{
-			send( e, 
-				Conv< T1 >::buf2val( &buf ), Conv< T2 >::buf2val( &buf )
-		   	);
+			// Note that buf2val alters the buf ptr as a side-effect, in
+			// order to advance to the next argument. However, the order
+			// in which argument evaluation is called within a multi-
+			// argument function is undefined. So we have to explicitly
+			// ensure the ordering of argument calls.
+			const T1& arg1 = Conv< T1 >::buf2val( &buf );
+			send( e, arg1, Conv< T2 >::buf2val( &buf ) );
 		}
 
 		string rttiType() const {
@@ -221,10 +225,9 @@ template < class T1, class T2, class T3 > class SrcFinfo3: public SrcFinfo
 
 		void sendBuffer( const Eref& e, double* buf ) const
 		{
-			send( e,
-				Conv< T1 >::buf2val( &buf ), Conv< T2 >::buf2val( &buf ),
-				Conv< T3 >::buf2val( &buf )
-		   	);
+			const T1& arg1 = Conv< T1 >::buf2val( &buf );
+			const T2& arg2 = Conv< T2 >::buf2val( &buf );
+			send( e, arg1, arg2, Conv< T3 >::buf2val( &buf ) );
 		}
 
 		string rttiType() const {
@@ -274,10 +277,10 @@ template < class T1, class T2, class T3, class T4 > class SrcFinfo4: public SrcF
 
 		void sendBuffer( const Eref& e, double* buf ) const
 		{
-			send( e,
-				Conv< T1 >::buf2val( &buf ), Conv< T2 >::buf2val( &buf ),
-				Conv< T3 >::buf2val( &buf ), Conv< T4 >::buf2val( &buf )
-		   	);
+			const T1& arg1 = Conv< T1 >::buf2val( &buf );
+			const T2& arg2 = Conv< T2 >::buf2val( &buf );
+			const T3& arg3 = Conv< T3 >::buf2val( &buf );
+			send( e, arg1, arg2, arg3, Conv< T4 >::buf2val( &buf ) );
 		}
 
 		string rttiType() const {
@@ -329,11 +332,11 @@ template < class T1, class T2, class T3, class T4, class T5 > class SrcFinfo5: p
 
 		void sendBuffer( const Eref& e, double* buf ) const
 		{
-			send( e,
-				Conv< T1 >::buf2val( &buf ), Conv< T2 >::buf2val( &buf ),
-				Conv< T3 >::buf2val( &buf ), Conv< T4 >::buf2val( &buf ),
-				Conv< T5 >::buf2val( &buf )
-		   	);
+			const T1& arg1 = Conv< T1 >::buf2val( &buf );
+			const T2& arg2 = Conv< T2 >::buf2val( &buf );
+			const T3& arg3 = Conv< T3 >::buf2val( &buf );
+			const T4& arg4 = Conv< T4 >::buf2val( &buf );
+			send( e, arg1, arg2, arg3, arg4, Conv< T5 >::buf2val( &buf ) );
 		}
 
 		string rttiType() const {
@@ -387,11 +390,12 @@ template < class T1, class T2, class T3, class T4, class T5, class T6 > class Sr
 
 		void sendBuffer( const Eref& e, double* buf ) const
 		{
-			send( e,
-				Conv< T1 >::buf2val( &buf ), Conv< T2 >::buf2val( &buf ),
-				Conv< T3 >::buf2val( &buf ), Conv< T4 >::buf2val( &buf ),
-				Conv< T5 >::buf2val( &buf ), Conv< T6 >::buf2val( &buf )
-		   	);
+			const T1& arg1 = Conv< T1 >::buf2val( &buf );
+			const T2& arg2 = Conv< T2 >::buf2val( &buf );
+			const T3& arg3 = Conv< T3 >::buf2val( &buf );
+			const T4& arg4 = Conv< T4 >::buf2val( &buf );
+			const T5& arg5 = Conv< T5 >::buf2val( &buf );
+			send( e, arg1, arg2, arg3, arg4, arg5, Conv< T6 >::buf2val( &buf ) );
 		}
 
 		string rttiType() const {

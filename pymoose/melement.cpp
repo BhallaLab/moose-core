@@ -420,8 +420,8 @@ extern "C" {
         if (self->oid_.bad()){
             RAISE_INVALID_ID(NULL, "moose_ObjId_getattro");
         }
-        extern PyTypeObject IdType;
-        extern PyTypeObject ObjIdType;
+        // extern PyTypeObject IdType;
+        // extern PyTypeObject ObjIdType;
         const char * field;
         char ftype;
         if (PyString_Check(attr)){
@@ -979,7 +979,6 @@ extern "C" {
     /// args should be a tuple (lookupFieldName, key)
     PyObject * getLookupField(ObjId target, char * fieldName, PyObject * key)
     {
-        extern PyTypeObject ObjIdType;
         vector<string> type_vec;
         if (parseFinfoType(Field<string>::get(target, "className"), "lookupFinfo", string(fieldName), type_vec) < 0){
             ostringstream error;
