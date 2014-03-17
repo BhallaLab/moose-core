@@ -2921,4 +2921,11 @@ Gsolve compiles. Now to test.
 After some fixing, now it seems good for most of the testRunGsolve test,
 but doesn't yet handle sumtotals.
 
+Implemented a snippet to show its use: scriptGssaSolver.py.
+Almost identical to scriptKineticSolver.py, just replace Ksolve with Gsolve
+and tweak volumes.
+
+At this point there is no propagation of volume rescaling into pools and
+reacs.
+
 ============================================================================
