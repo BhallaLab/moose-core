@@ -262,7 +262,7 @@ void testRunGsolve()
 	// double plotDt = 0.1;
 	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
 	Id kin = makeReacTest();
-	double volume = 1e-22;
+	double volume = 1e-21;
 	Field< double >::set( kin, "volume", volume );
 	Field< double >::set( ObjId( "/kinetics/A" ), "concInit", 1 );
 	Field< double >::set( ObjId( "/kinetics/e1Pool" ), "concInit", 1 );
