@@ -42,7 +42,7 @@ const Cinfo* Stoich::initCinfo()
 			"poolInterface",
 			"Accessory class that provides interface for accessing all "
 		    " the pools that are present in this reaction system."
-		    " Must be of class Ksolve or Dsolve (at present) "
+		    " Must be of class Ksolve, Gsolve, or Dsolve (at present) "
 			" Must be assigned before the path is set.",
 			&Stoich::setPoolInterface,
 			&Stoich::getPoolInterface
@@ -255,11 +255,12 @@ string Stoich::getPath( const Eref& e ) const
 void Stoich::setPoolInterface( Id zpi ) {
 	if ( ! ( 
 			zpi.element()->cinfo()->isA( "Ksolve" )  ||
+			zpi.element()->cinfo()->isA( "Gsolve" )  ||
 			zpi.element()->cinfo()->isA( "Dsolve" ) 
 		   )
 	   ) {
 		cout << "Error: Stoich::setPoolInterface: invalid class assigned,"
-				" should be either Ksolve or Dsolve\n";
+				" should be either Ksolve, Gsolve, or Dsolve\n";
 		return;
 	}
 	poolInterface_ = zpi;
