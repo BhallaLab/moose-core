@@ -2907,4 +2907,11 @@ message. This was due to the known problem of order of evaluation of
 arguments in a multi-argument function call. I had fixed this in some
 cases, but not in the handling of internode message buffers. 
 With this corrected it clears unit tests from 1 to 8 nodes.
+
+ 
+Steadily incorporating the components for the GssaSolver. Using a common
+base class VoxelPoolBase.
+
+Compiling the main Gsolve class. 
+
 ============================================================================
