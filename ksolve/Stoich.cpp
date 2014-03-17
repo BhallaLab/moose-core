@@ -322,7 +322,7 @@ vector< unsigned int > Stoich::getRowStart() const
 }
 
 //////////////////////////////////////////////////////////////
-// Model zombification functions
+// Model setup functions
 //////////////////////////////////////////////////////////////
 
 /**
@@ -608,6 +608,35 @@ void Stoich::installAndUnschedFunc( Id func, Id Pool )
 	funcs_[ funcIndex ] = ft;
 	// Somewhere I have to tie the output of the FuncTerm to the funcPool.
 }
+
+void Stoich::convertRatesToStochasticForm()
+{
+	for ( unsigned int i = 0; i < rates_.size(); ++i ) {
+		vector< unsigned int > molIndex;
+		if ( rates_[i]->getReactants( molIndex ) > 1 ) {
+			if ( molIndex.size() == 2 && molIndex[0] == molIndex[1] ) {
+				RateTerm* oldRate = rates_[i];
+				rates_[ i ] = new StochSecondOrderSingleSubstrate(
+					oldRate->getR1(), molIndex[ 0 ]
+				);
+				delete oldRate;
+			} else if ( molIndex.size() > 2 ) {
+				RateTerm* oldRate = rates_[ i ];
+				rates_[ i ] = new StochNOrder( oldRate->getR1(), molIndex);
+				delete oldRate;
+			}
+		}
+	}
+}
+
+const KinSparseMatrix& Stoich::getStoichiometryMatrix() const
+{
+	return N_;
+}
+
+//////////////////////////////////////////////////////////////
+// Model zombification functions
+//////////////////////////////////////////////////////////////
 
 // e is the stoich Eref, elist is list of all Ids to zombify.
 void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )

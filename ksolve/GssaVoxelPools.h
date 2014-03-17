@@ -17,10 +17,6 @@ class GssaVoxelPools: public VoxelPoolsBase
 		GssaVoxelPools();
 		virtual ~GssaVoxelPools();
 
-		/**
-		 * Assigns S = Sinit.
-		 */
-		void reinit();
 
 		//////////////////////////////////////////////////////////////////
 		// Solver interface functions
@@ -31,7 +27,10 @@ class GssaVoxelPools: public VoxelPoolsBase
 			const vector< unsigned int >& deps, const Stoich* stoich );
 		unsigned int pickReac() const;
 		void advance( const ProcInfo* p, const GssaSystem* g );
-		void reinit( const ProcInfo* p, const GssaSystem* g );
+		/**
+		 * Builds the gssa system as needed.
+		 */
+		void reinit( const GssaSystem* g );
 
 	private:
 		/// Time at which next event will occur.

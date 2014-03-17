@@ -15,15 +15,19 @@
  * GSSA calculations.
  */
 
+class Stoich;
 class GssaSystem
 {
 	public: 
+		GssaSystem()
+			: stoich( 0 ), useRandInit( true ), isReady( false )
+		{;}
 		vector< vector< unsigned int > > dependency;
 		vector< vector< unsigned int > > dependentMathExpn;
 		vector< vector< unsigned int > > ratesDependentOnPool;
 
 		/// Transpose of stoichiometry matrix.
-		KinSparseMatrix transposeStoich;
+		KinSparseMatrix transposeN;
 		const Stoich* stoich;
 
 		/**
@@ -38,6 +42,11 @@ class GssaSystem
 		 * the flag is true.
 		 */
 		bool useRandInit;
+
+		/**
+		 * Flag: True when all initialization is done.
+		 */
+		bool isReady;
 };
 
 #endif	// _GSSA_SYSTEM_H
