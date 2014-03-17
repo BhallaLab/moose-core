@@ -111,6 +111,20 @@ class Stoich
 		void allocateModel( const vector< Id >& elist );
 
 		/**
+		 * This function is used when the stoich class is employed by a 
+		 * Gsolver for doing stochastic calculations.
+		 * Here we fix the issue of having a single substrate at
+		 * more than first order. As the first molecule of the substrate is
+		 * consumed, the number is depleted by one and so its forward rate 
+		 * is reduced. And so on. This also protects against going negative
+		 * in mol number or concentration.
+		 */
+		void convertRatesToStochasticForm();
+		//////////////////////////////////////////////////////////////////
+		// Zombification functions.
+		//////////////////////////////////////////////////////////////////
+
+		/**
 		 * zombifyModel marches through the specified id list and 
 		 * converts all entries into zombies. The first arg e is the
 		 * Eref of the Stoich itself.
@@ -305,8 +319,13 @@ class Stoich
 		void updateJunctionRates( const double* s,
 			   const vector< unsigned int >& reacTerms, double* yprime );
 
+		/** 
+		 * Get the rate for a single reaction specified by r, as per all 
+		 * the mol numbers in s.
+		 */
 		double getReacVelocity( unsigned int r, const double* s ) const;
 
+		/// Returns the stoich matrix. Used by gsolve.
 		const KinSparseMatrix& getStoichiometryMatrix() const;
 		//////////////////////////////////////////////////////////////////
 		// Access functions for cross-node reactions.

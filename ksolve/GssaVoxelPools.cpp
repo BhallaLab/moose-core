@@ -121,7 +121,7 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
 			atot_ *= SAFETY_FACTOR;
 		}
 
-		g->transposeStoich.fireReac( rindex, Svec() );
+		g->transposeN.fireReac( rindex, Svec() );
 		updateDependentMathExpn( t_, rindex );
 		// atot_ = g->updateDependentRates( atot_, rinidex );
 		updateDependentRates( g->dependency[ rindex ], g->stoich );
@@ -135,7 +135,7 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
 	}
 }
 
-void GssaVoxelPools::reinit( const ProcInfo* p, const GssaSystem* g )
+void GssaVoxelPools::reinit( const GssaSystem* g )
 {
 	VoxelPoolsBase::reinit(); // Assigns S = Sinit;
 	g->stoich->updateFuncs( varS(), 0 );
