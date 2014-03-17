@@ -259,6 +259,10 @@ void Gsolve::rebuildGssaSystem()
 	fillMmEnzDep();
 	fillMathDep();
 	makeReacDepsUnique();
+	for ( vector< GssaVoxelPools >::iterator 
+					i = pools_.begin(); i != pools_.end(); ++i ) {
+		i->setNumReac( stoichPtr_->getNumRates() );
+	}
 	sys_.isReady = true;
 }
 

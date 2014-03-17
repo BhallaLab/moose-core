@@ -227,7 +227,7 @@ void testBuildStoich()
 	cout << "." << flush;
 }
 
-void testRunStoich()
+void testRunKsolve()
 {
 	double simDt = 0.1;
 	// double plotDt = 0.1;
@@ -256,11 +256,53 @@ void testRunStoich()
 	cout << "." << flush;
 }
 
+void testRunGsolve()
+{
+	double simDt = 0.1;
+	// double plotDt = 0.1;
+	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	Id kin = makeReacTest();
+	double volume = 1e-22;
+	Field< double >::set( kin, "volume", volume );
+	Field< double >::set( ObjId( "/kinetics/A" ), "concInit", 1 );
+	Field< double >::set( ObjId( "/kinetics/e1Pool" ), "concInit", 1 );
+	Field< double >::set( ObjId( "/kinetics/e2Pool" ), "concInit", 1 );
+	vector< double > stim( 100, 0.0 );
+	for ( unsigned int i = 0; i< 100; ++i ) {
+		stim[i] = volume * NA * (1.0 + sin( i * 2.0 * PI / 100.0 ) );
+	}
+	Field< vector< double > >::set( ObjId( "/kinetics/tab" ), "vector", stim );
+
+
+	Id gsolve = s->doCreate( "Gsolve", kin, "gsolve", 1 );
+	Id stoich = s->doCreate( "Stoich", gsolve, "stoich", 1 );
+	Field< unsigned int >::set( gsolve, "numAllVoxels", 1 );
+	Field< Id >::set( stoich, "poolInterface", gsolve );
+	Field< Id >::set( gsolve, "stoich", stoich );
+	
+	Field< string >::set( stoich, "path", "/kinetics/##" );
+	s->doUseClock( "/kinetics/gsolve", "process", 4 ); 
+	s->doSetClock( 4, simDt );
+
+	s->doReinit();
+	s->doStart( 20.0 );
+	Id plots( "/kinetics/plots" );
+	for ( unsigned int i = 0; i < 7; ++i ) {
+		stringstream ss;
+		ss << "plot." << i;
+		SetGet2< string, string >::set( ObjId( plots, i ), "xplot", 
+						"tsr3.plot", ss.str() );
+	}
+	s->doDelete( kin );
+	cout << "." << flush;
+}
+
 void testKsolve()
 {
 	testSetupReac();
 	testBuildStoich();
-	testRunStoich();
+	testRunKsolve();
+	testRunGsolve();
 }
 
 void testKsolveProcess()

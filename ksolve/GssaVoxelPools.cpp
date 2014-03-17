@@ -101,6 +101,12 @@ unsigned int GssaVoxelPools::pickReac() const
 	return v_.size();
 }
 
+void GssaVoxelPools::setNumReac( unsigned int n )
+{
+	v_.clear();
+	v_.resize( n, 0.0 );
+}
+
 void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
 {
 	double nextt = p->currTime;
@@ -113,7 +119,7 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
 		if ( rindex >= g->stoich->getNumRates() ) {
 			// probably cumulative roundoff error here. 
 			// Recalculate atot to avoid, and redo.
-			g->stoich->updateRates( S(), &v_[0] );
+			g->stoich->updateReacVelocities( S(), v_ );
 			atot_ = 0;
 			for ( vector< double >::const_iterator 
 					i = v_.begin(); i != v_.end(); ++i )
@@ -160,10 +166,13 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
 		}
 	}
 	t_ = 0.0;
-	g->stoich->updateRates( S(), &v_[0] );
+	// vector< double > yprime( g->stoich->getNumAllPools(), 0.0 );
+				// i = yprime.begin(); i != yprime.end(); ++i )
+	g->stoich->updateReacVelocities( S(), v_ );
 	atot_ = 0;
 	for ( vector< double >::const_iterator 
-				i = v_.begin(); i != v_.end(); ++i )
+		i = v_.begin(); i != v_.end(); ++i ) {
 		atot_ += *i;
+	}
 	atot_ *= SAFETY_FACTOR;
 }
