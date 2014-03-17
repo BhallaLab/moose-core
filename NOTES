@@ -2915,3 +2915,10 @@ base class VoxelPoolBase.
 Compiling the main Gsolve class. 
 
 ============================================================================
+17 Mar 2014.
+Gsolve compiles. Now to test.
+
+After some fixing, now it seems good for most of the testRunGsolve test,
+but doesn't yet handle sumtotals.
+
+============================================================================

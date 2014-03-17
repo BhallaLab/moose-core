@@ -26,6 +26,8 @@ class GssaVoxelPools: public VoxelPoolsBase
 		void updateDependentRates( 
 			const vector< unsigned int >& deps, const Stoich* stoich );
 		unsigned int pickReac() const;
+		void setNumReac( unsigned int n );
+
 		void advance( const ProcInfo* p, const GssaSystem* g );
 		/**
 		 * Builds the gssa system as needed.
@@ -35,14 +37,6 @@ class GssaVoxelPools: public VoxelPoolsBase
 	private:
 		/// Time at which next event will occur.
 		double t_; 
-
-
-		// Some common fields here
-		/// Transpose of stoichiometry matrix. Main copy stored on gssasolve
-		KinSparseMatrix transN_;
-		vector< vector< unsigned int > > dependency_;
-		vector< vector< unsigned int > > dependentMathExpn_;
-		vector< vector< unsigned int > > ratesDependentOnPool_;
 
 		/**
 		 * Total propensity of all the reactions in the system
