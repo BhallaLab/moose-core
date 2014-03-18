@@ -317,6 +317,20 @@ void Gsolve::fillMmEnzDep()
  */
 void Gsolve::fillMathDep()
 {
+		/*
+	// Look up index of funcs that depend on specified molecule.
+	vector< vector< unsigned int > > funcMap( stoichPtr_->getNumAllPools());
+	unsigned int numFuncs = stoichPtr_->getNumFuncs();
+	for ( unsigned int i = 0; i < numFuncs; ++i ) {
+		const FuncTerm *f = stoichPtr_->funcs( i );
+		vector< unsigned int > molIndex;
+		unsigned int numMols = f->getReactants( molIndex );
+		for ( unsigned int j = 0; j < numMols; ++j )
+			funcMap[ molIndex[j] ].push_back( i );
+	}
+	// The output of the funcs is a mol indexed as 
+	// numVarMols + numBufMols + i
+
 	unsigned int numRates = stoichPtr_->getNumRates();
 	sys_.dependentMathExpn.resize( numRates );
 	vector< unsigned int > indices;
@@ -324,31 +338,32 @@ void Gsolve::fillMathDep()
 		vector< unsigned int >& dep = sys_.dependentMathExpn[ i ];
 		dep.resize( 0 );
 		// Extract the row of all molecules that depend on the reac.
-		// However, the sumTotals and other math dep stuff needs to be
-		// redefined to use the math object.
-		/*
 		const int* entry;
 		const unsigned int* colIndex;
-		unsigned int numInRow = transN_.getRow( i, &entry, &colIndex );
-		for ( unsigned int j = 0; j < sumTotals_.size(); ++j ) {
-			if ( sumTotals_[ j ].hasInput( colIndex, S_ ) ) {
+		unsigned int numInRow = 
+				sys_.transposeN.getRow( i, &entry, &colIndex );
+		for ( unsigned int j = 0; j < numInRow; ++j ) {
+			unsigned int molIndex = colIndex[j];
+			vector< unsigned int >& funcs = funcMap[ molIndex ];
+			dep.insert( dep.end(), funcs.begin(), funcs.end() );
+			for ( unsigned int k = 0; k < funcs.size(); ++k ) {
+				// unsigned int outputMol = funcs[k] + stuff;
+				// Insert reac deps here.
+
+			}
+			funcIndex = funcMap[ molIndex ]
+
+			FuncTerm *f = stoichPtr_->funcs( j );
+			vector< unsigned int > molIndex;
+			unsigned int numMols = f->getReactants( molIndex );
+			if ( 
+			if ( numMols > 0 ) {
+			}
 				insertMathDepReacs( j, i );
 				dep.push_back( j );
-			}
 		}
-		*/
-		/*
-		transN_.getRowIndices( i, indices );
-		// This looks like N^2, but usually there will be very few
-		// SumTots, so a simple linear scan should do.
-		for ( unsigned int j = 0; j < sumTotals_.size(); ++j ) {
-			if ( sumTotals_[ j ].hasInput( indices, S_ ) ) {
-				insertMathDepReacs( j, i );
-				dep.push_back( j );
-			}
-		}
-		*/
 	}
+	*/
 }
 
 /**
