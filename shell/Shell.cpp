@@ -366,6 +366,14 @@ void Shell::doMove( Id orig, ObjId newParent )
 		return;
 		
 	}
+	const string& name = orig.element()->getName();
+	if ( Neutral::child( newParent.eref(), name ) != Id() ) {
+			stringstream ss;
+			ss << "Shell::doMove: Object with same name already present: '"
+			   	<< newParent.path() << "/" << name << "'. Move failed.";
+			warning( ss.str() );
+			return;
+	}
 
 	SetGet2< Id, ObjId >::set( ObjId(), "move", orig, newParent );
 	// innerMove( orig, newParent );
