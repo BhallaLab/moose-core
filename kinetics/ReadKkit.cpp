@@ -630,8 +630,10 @@ void ReadKkit::assignPoolCompartments()
 		// compartments_.push_back( comptId );
 		for ( vector< Id >::iterator j = volCategories_[i].begin();
 			j != volCategories_[i].end(); ++j ) {
-			if ( moveOntoCompartment_ )
-				shell_->doMove( *j, comptId );
+			if ( moveOntoCompartment_ ) {
+				if ( ! (getCompt( *j ).id == comptId ) )
+					shell_->doMove( *j, comptId );
+			}
 		}
 	}
 }
@@ -663,7 +665,8 @@ void ReadKkit::assignReacCompartments()
 		i != reacIds_.end(); ++i ) {
 		Id compt = findParentComptOfReac( i->second );
 		if ( moveOntoCompartment_ ) {
-			shell_->doMove( i->second, compt );
+			if ( ! (getCompt( i->second ).id == compt ) )
+				shell_->doMove( i->second, compt );
 		}
 	}
 }
