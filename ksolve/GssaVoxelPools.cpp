@@ -50,25 +50,17 @@ GssaVoxelPools::~GssaVoxelPools()
 // Solver ops
 //////////////////////////////////////////////////////////////
 
-/*
-double GssaSystem::updateDependentRates( unsigned int rindex, double atot, 
-			   double* v, const double* S )
+void GssaVoxelPools::updateDependentMathExpn( 
+				const GssaSystem* g, unsigned int rindex )
 {
-	const vector< unsigned int >& deps = dependency_[ rindex ];
-	for ( vector< unsigned int >::const_iterator
+	const vector< unsigned int >& deps = g->dependentMathExpn[ rindex ];
+	unsigned int offset = g->stoich->getNumVarPools() + 
+			g->stoich->getNumBufPools();
+	for( vector< unsigned int >::const_iterator 
 			i = deps.begin(); i != deps.end(); ++i ) {
-		atot -= v[ *i ];
-		// atot_ += ( v[ *i ] = ( *rates_[ *i ] )( S() );
-		atot += ( v[ *i ] = stoich_->getReacVelocity( *i, ( S() ) );
+		varS()[ *i + offset] = g->stoich->funcs( *i )->operator()( S(), t_);
 	}
-	return atot;
 }
-*/
-
-void GssaVoxelPools::updateDependentMathExpn( double t, unsigned int index )
-{
-}
-
 
 void GssaVoxelPools::updateDependentRates( 
 	const vector< unsigned int >& deps, const Stoich* stoich )
@@ -128,7 +120,7 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
 		}
 
 		g->transposeN.fireReac( rindex, Svec() );
-		updateDependentMathExpn( t_, rindex );
+		updateDependentMathExpn( g, rindex );
 		// atot_ = g->updateDependentRates( atot_, rinidex );
 		updateDependentRates( g->dependency[ rindex ], g->stoich );
 		// double r = gsl_rng_uniform( rng );

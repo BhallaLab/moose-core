@@ -307,6 +307,17 @@ const RateTerm* Stoich::rates( unsigned int i ) const
 	return rates_[i];
 }
 
+unsigned int Stoich::getNumFuncs() const
+{
+	return funcs_.size();
+}
+
+const FuncTerm* Stoich::funcs( unsigned int i ) const
+{
+	assert( i < funcs_.size() );
+	return funcs_[i];
+}
+
 vector< int > Stoich::getMatrixEntry() const
 {
 	return N_.matrixEntry();
