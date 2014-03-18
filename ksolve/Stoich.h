@@ -73,6 +73,9 @@ class Stoich
 		/// Utility function to return a rates_ entry
 		const RateTerm* rates( unsigned int i ) const;
 
+		unsigned int getNumFuncs() const;
+		const FuncTerm* funcs( unsigned int i ) const;
+
 		vector< int > getMatrixEntry() const;
 		vector< unsigned int > getColIndex() const;
 		vector< unsigned int > getRowStart() const;

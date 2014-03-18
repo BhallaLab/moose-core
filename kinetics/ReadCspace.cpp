@@ -86,6 +86,8 @@ void ReadCspace::printEnz( Id id, Id cplx, double k1, double k2, double k3)
 Id ReadCspace::readModelString( const string& model,
 	const string& modelname, Id pa, const string& solverClass )
 {
+	// Defined in ReadKkit.cpp
+	extern Id makeStandardElements( Id pa, const string& modelname );
 	unsigned long pos = model.find_first_of( "|" );
 	if ( pos == string::npos ) {
 		cerr << "ReadCspace::readModelString: Error: model undefined in\n";
@@ -97,17 +99,14 @@ Id ReadCspace::readModelString( const string& model,
 	reac_.resize( 0 );
 	molparms_.resize( 0 );
 	parms_.resize( 0 );
-	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
-	base_ = s->doCreate( "SimManager", pa, modelname, 1 );
+	// Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	base_ = makeStandardElements( pa, modelname );
 	assert( base_ != Id() );
-	SetGet1< string >::set( base_, "makeStandardElements", "CubeMesh" );
 	string modelpath = base_.path();
-	compt_ = Id("/" + modelpath + "/kinetics");
+	compt_ = Id( modelpath + "/kinetics");
 	assert( compt_ != Id() );
-	SetGet2< double, unsigned int >::set( compt_, "buildDefaultMesh",     1e-18, 1 );
-	mesh_ = Neutral::child( compt_.eref(), "mesh" );
-	assert( mesh_ != Id() );
-
+	Field< double >::set( compt_, "volume", 1e-18 );
+	// SetGet2< double, unsigned int >::set( compt_, "buildDefaultMesh",     1e-18, 1 );
 	string temp = model.substr( pos + 1 );
 	pos = temp.find_first_of( " 	\n" );
 	
@@ -133,9 +132,7 @@ Id ReadCspace::readModelString( const string& model,
 
 	deployParameters();
 
-	Field< double >::set( base_, "plotDt", 1 );
-	SetGet1< string >::set( base_, "build", solverClass );
-	Field< double >::set( base_, "runTime", 10 );
+	// SetGet1< string >::set( base_, "build", solverClass );
 	return base_;
 }
 
@@ -155,18 +152,14 @@ void ReadCspace::makePlots( double plotdt )
 			assert( tab != Id() );
 			// cout << "ReadCspace made plot " << plotname << endl;
 			ObjId mid = shell->doAddMsg( "Single", 
-				tab, "requestData", children[i], "get_conc" );
+				tab, "requestOut", children[i], "getConc" );
 			assert( mid != ObjId() );
 		}
 	}
-
-    shell->doSetClock( 0, plotdt );
-    shell->doSetClock( 1, plotdt );
-    shell->doSetClock( 2, plotdt );
-    shell->doSetClock( 3, 0 ); 
+    shell->doSetClock( 8, plotdt );
 
     string plotpath = basepath + "/graphs/##[TYPE=Table]";
-    shell->doUseClock( plotpath, "process", 2 ); 
+    shell->doUseClock( plotpath, "process", 8 ); 
 }
 
 
@@ -333,20 +326,18 @@ void ReadCspace::makeMolecule( char name )
 
 void ReadCspace::deployParameters( )
 {
-	static Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	// static Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	unsigned long i, j;
 	if ( parms_.size() != mol_.size() + 2 * reac_.size() ) {
 		cerr << "ReadCspace::deployParameters: Error: # of parms mismatch\n";
 		return;
 	}
 	for ( i = 0; i < mol_.size(); i++ ) {
-		ObjId ret = shell->doAddMsg( "OneToOne", mol_[i], "mesh", mesh_, "mesh" );
-		assert( ret != ObjId() );
 		// SetField(mol_[ i ], "volscale", volscale );
 		// SetField(mol_[ molseq_[i] ], "ninit", parms_[ i ] );
 
 		// Parameters are in micromolar, but the conc units are millimolar.
-		Field< double >::set( mol_[i], "nInit", parms_[i] * 1e-18 * NA *1e-3);
+		Field< double >::set( mol_[i], "concInit", parms_[i] *  1e-3 );
 	}
 	for ( j = 0; j < reac_.size(); j++ ) {
 		if ( reac_[ j ].element()->cinfo()->isA( "Reac" ) ) {
@@ -361,13 +352,7 @@ void ReadCspace::deployParameters( )
 			vector< Id > cplx( 0 );
 			Neutral::children( reac_[j].eref(), cplx );
 			assert( cplx.size() == 1 );
-			ObjId ret = shell->doAddMsg( "OneToOne", cplx[0], "mesh", mesh_, "mesh" );
-			assert( ret != ObjId() );
 		}
-		ObjId ret = shell->doAddMsg( "Single", 
-			ObjId( mesh_, 0 ), "remeshReacs",
-			ObjId( reac_[j], 0 ), "remesh" );
-		assert( ret != ObjId() );
 	}
 }
 
