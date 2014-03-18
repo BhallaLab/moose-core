@@ -53,6 +53,7 @@ GssaVoxelPools::~GssaVoxelPools()
 void GssaVoxelPools::updateDependentMathExpn( 
 				const GssaSystem* g, unsigned int rindex )
 {
+		/*
 	const vector< unsigned int >& deps = g->dependentMathExpn[ rindex ];
 	unsigned int offset = g->stoich->getNumVarPools() + 
 			g->stoich->getNumBufPools();
@@ -60,6 +61,7 @@ void GssaVoxelPools::updateDependentMathExpn(
 			i = deps.begin(); i != deps.end(); ++i ) {
 		varS()[ *i + offset] = g->stoich->funcs( *i )->operator()( S(), t_);
 	}
+	*/
 }
 
 void GssaVoxelPools::updateDependentRates( 
