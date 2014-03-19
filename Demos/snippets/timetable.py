@@ -119,7 +119,7 @@ def timetable_demo():
     synchan.Ek = 0.0
     moose.connect(synchan, 'channel', comp, 'channel')
     synchan.synapse.num = 1
-    moose.connect(tt_file, 'event', moose.element(synchan.path + '/synapse'), 'addSpike')
+    moose.connect(tt_file, 'eventOut', moose.element(synchan.path + '/synapse'), 'addSpike')
     # Data recording: record the `state` of the time table filled
     # using array.
     data = moose.Neutral('/data')

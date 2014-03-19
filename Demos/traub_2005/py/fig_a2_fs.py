@@ -73,11 +73,11 @@ def setup_model(root='/', hsolve=True):
         solver.dt = simdt
         solver.target = cell.path
     pulse = moose.PulseGen('%s/stimulus' % (model.path))
-    moose.connect(pulse, 'outputOut', soma, 'injectMsg')
+    moose.connect(pulse, 'output', soma, 'injectMsg')
     tab_vm = moose.Table('%s/spinystellate_soma_Vm' % (data.path))
     moose.connect(tab_vm, 'requestOut', soma, 'getVm')
     tab_stim = moose.Table('%s/spinystellate_soma_inject' % (data.path))
-    moose.connect(tab_stim, 'requestOut', pulse, 'getOutput')
+    moose.connect(tab_stim, 'requestOut', pulse, 'getOutputValue')
     utils.setDefaultDt(elecdt=simdt, plotdt2=plotdt)
     utils.assignDefaultTicks(model, data)
     return {'stimulus': pulse,

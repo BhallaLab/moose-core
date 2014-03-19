@@ -316,7 +316,7 @@ class SquidModel(moose.Neutral):
         self.current_clamp.firstWidth = 40 # ms
         self.current_clamp.firstLevel = 0.1 # uA
         self.current_clamp.secondDelay = 1e9
-        print 'Current clamp connected:', moose.connect(self.current_clamp, 'outputOut', self.squid_axon, 'injectMsg')
+        print 'Current clamp connected:', moose.connect(self.current_clamp, 'output', self.squid_axon, 'injectMsg')
 
         self.Vm_table = moose.Table('%s/Vm' % (self.path))
         moose.connect(self.Vm_table, 'requestOut', self.squid_axon, 'getVm')

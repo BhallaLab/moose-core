@@ -169,7 +169,7 @@ def test_compartment():
     pg.firstDelay = 50e-3
     pg.firstWidth = 40e-3
     pg.firstLevel = 1e-9
-    moose.connect(pg, 'outputOut', comp, 'injectMsg')
+    moose.connect(pg, 'output', comp, 'injectMsg')
     d = moose.Neutral('/data')
     vm = moose.Table('/data/Vm')
     moose.connect(vm, 'requestOut', comp, 'getVm')
@@ -216,7 +216,7 @@ def create_population(container, size):
     setting up synapses later."""
     path = container.path
     # Contrast this with     
-    # comps = moose.ematrix(path+'/soma', size, 'Compartment')    
+    # comps = moose.vec(path+'/soma', size, 'Compartment')    
     comps = [create_compartment(path+'/soma_%d' % (ii)) for ii in range(size)]
     spikegens = []
     synchans = []
@@ -262,7 +262,7 @@ def make_synapses(spikegen, synchan, delay=5e-3):
             # Connect all spikegens to this synchan except that from
             # same compartment - we assume if parents are same the two belong to the same compartment
             if s.parent.path != spikegen[jj].parent.path:
-                m = moose.connect(spikegen[jj], 'event', moose.element(s.path + '/synapse'),  'addSpike')
+                m = moose.connect(spikegen[jj], 'spikeOut', moose.element(s.path + '/synapse'),  'addSpike')
             
 def two_populations(size=2):
     """An example with two population connected via synapses."""
@@ -275,7 +275,7 @@ def two_populations(size=2):
     pulse.firstLevel = 1e-9
     pulse.firstDelay = 0.05 # disable the pulsegen
     pulse.firstWidth = 0.02
-    moose.connect(pulse, 'outputOut', pop_a['compartment'][0], 'injectMsg')
+    moose.connect(pulse, 'output', pop_a['compartment'][0], 'injectMsg')
     data = moose.Neutral('/data')
     vm_a = [moose.Table('/data/net2_Vm_A_%d' % (ii)) for ii in range(size)]
     for tab, comp in zip(vm_a, pop_a['compartment']):
@@ -290,7 +290,7 @@ def two_populations(size=2):
     for tab, synchan in zip(gksyn_b, pop_b['synchan']):
         moose.connect(tab, 'requestOut', synchan, 'getGk')
     pulsetable = moose.Table('/data/net2_pulse')
-    pulsetable.connect('requestOut', pulse, 'getOutput')
+    pulsetable.connect('requestOut', pulse, 'getOutputValue')
     return {'vm_a': vm_a,
             'vm_b': vm_b,
             'gksyn_a': gksyn_a,
@@ -311,7 +311,7 @@ def single_population(size=2):
     pulse.firstLevel = 1e-9
     pulse.firstDelay = 0.05
     pulse.firstWidth = 0.02
-    moose.connect(pulse, 'outputOut', pop['compartment'][0], 'injectMsg')
+    moose.connect(pulse, 'output', pop['compartment'][0], 'injectMsg')
     data = moose.Neutral('/data')
     vm = [moose.Table('/data/net1_Vm_%d' % (ii)) for ii in range(size)]
     for tab, comp in zip(vm, pop['compartment']):
@@ -320,7 +320,7 @@ def single_population(size=2):
     for tab, synchan in zip(gksyn, pop['synchan']):
         moose.connect(tab, 'requestOut', synchan, 'getGk')
     pulsetable = moose.Table('/data/net1_pulse')
-    pulsetable.connect('requestOut', pulse, 'getOutput')
+    pulsetable.connect('requestOut', pulse, 'getOutputValue')
     return {'vm': vm,
             'gksyn': gksyn,
             'pulse': pulsetable,}

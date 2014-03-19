@@ -68,7 +68,7 @@ def many_ematrix_to_one_element():
     num_spikegen = 5
     spikegens = [moose.SpikeGen('/model/spikegen_%d' % (ii)) for ii in range(num_spikegen)]
     for ii in range(num_spikegen):
-        msg = moose.connect(spikegens[ii], 'event', synchan.synapse[ii%2], 'addSpike')
+        msg = moose.connect(spikegens[ii], 'spikeOut', synchan.synapse[ii%2], 'addSpike')
         # synchan.synapse[ii].delay = ii  * 1e-3
         # synchan.synapse[ii].weight = (ii+1) * 0.1
     for sg in spikegens:

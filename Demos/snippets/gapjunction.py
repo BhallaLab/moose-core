@@ -82,7 +82,7 @@ def gapjunction_demo():
     vm2_tab = moose.Table('%s/Vm2' % (data.path))
     moose.connect(vm2_tab, 'requestOut', comp2, 'getVm')
     pulse_tab = moose.Table('%s/inject' % (data.path))
-    moose.connect(pulse_tab, 'requestOut', pulse, 'getOutput')
+    moose.connect(pulse_tab, 'requestOut', pulse, 'getOutputValue')
     utils.setDefaultDt(elecdt=simdt, plotdt2=simdt)
     utils.assignDefaultTicks()
     utils.stepRun(simtime, 10000*simdt)

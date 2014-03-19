@@ -64,7 +64,7 @@ const Cinfo* DiffAmp::initCinfo()
                                                     &DiffAmp::setSaturation,
                                                     &DiffAmp::getSaturation);
     
-    static ReadOnlyValueFinfo<DiffAmp, double> output( "output",
+    static ReadOnlyValueFinfo<DiffAmp, double> output( "outputValue",
                                                "Output of the amplifier, i.e. gain * (plus - minus)." ,
                                                &DiffAmp::getOutput);
     ///////////////////////////////////////////////////////////////

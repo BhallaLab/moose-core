@@ -66,14 +66,14 @@ def test_crossing_single():
     """
     size = 2
     pg = moose.PulseGen('pulsegen', size)
-    for ix, ii in enumerate(pg.vector):
+    for ix, ii in enumerate(pg.vec):
         pulse = moose.element(ii)
         pulse.delay[0] = 1.0
         pulse.width[0] = 2.0
         pulse.level[0] = (-1)**ix
     tab = moose.Table('table', size)
-    moose.connect(tab.vec[0], 'requestOut', pg.vec[1], 'getOutput', 'Single')
-    moose.connect(tab.vec[1], 'requestOut', pg.vec[0], 'getOutput', 'Single')
+    moose.connect(tab.vec[0], 'requestOut', pg.vec[1], 'getOutputValue', 'Single')
+    moose.connect(tab.vec[1], 'requestOut', pg.vec[0], 'getOutputValue', 'Single')
     print 'Neighbors:'
     for t in tab.vec:
         print t.path

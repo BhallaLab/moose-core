@@ -209,9 +209,9 @@ def test_hhcomp():
     pg.firstWidth = 40e-3
     pg.firstLevel = 1e-9
     pg.secondDelay = 1e9
-    moose.connect(pg, 'outputOut', comp, 'injectMsg')
+    moose.connect(pg, 'output', comp, 'injectMsg')
     inj = moose.Table('%s/pulse' % (data.path))
-    moose.connect(inj, 'requestOut', pg, 'getOutput')
+    moose.connect(inj, 'requestOut', pg, 'getOutputValue')
     vm = moose.Table('%s/Vm' % (data.path))
     moose.connect(vm, 'requestOut', comp, 'getVm')
     gK = moose.Table('%s/gK' % (data.path))
