@@ -138,7 +138,7 @@ def createSynapseOnCompartment( compt ):
     synInput.edgeTriggered = 0
     synInput.Vm( 0 )
     syn = moose.element( gluR.path + '/synapse' )
-    moose.connect( synInput, 'event', syn, 'addSpike', 'Single' )
+    moose.connect( synInput, 'spikeOut', syn, 'addSpike', 'Single' )
     syn.weight = 0.2
     syn.delay = 1.0e-3
     return gluR

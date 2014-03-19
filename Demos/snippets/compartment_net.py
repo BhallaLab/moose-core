@@ -188,7 +188,7 @@ def create_population(container, size):
     objects connected to these which can act as plug points for
     setting up synapses later."""
     path = container.path
-    comps = moose.ematrix(path+'/soma', size, 'Compartment')    
+    comps = moose.vec(path=path+'/soma', n=size, dtype='Compartment')    
     Em = EREST_ACT+10.613e-3
     comps.Em = np.random.normal(Em, np.abs(Em) * 0.1, size)
     comps.initVm = np.random.normal(EREST_ACT, np.abs(EREST_ACT) * 0.1, size)
@@ -203,7 +203,7 @@ def create_population(container, size):
     kchan.Gbar = [0.2836e-4] * size
     kchan.Ek = [-12e-3+EREST_ACT] * size
     moose.connect(kchan, 'channel', comps, 'channel', 'OneToOne')
-    synchan = moose.ematrix(path + '/synchan', size, 'SynChan')
+    synchan = moose.vec(path=path + '/synchan', n=size, dtype='SynChan')
     synchan.Gbar = [1e-8] * size
     synchan.tau1 = [2e-3] * size
     synchan.tau2 = [2e-3] * size
@@ -214,7 +214,7 @@ def create_population(container, size):
 
     ## Or would this have been the correct approach?
     # for c in comps: moose.connect(c, 'channel', moose.SynChan(c.path+'/synchan'), 'channel', 'Single')
-    spikegen = moose.ematrix(path + '/spikegen', size, 'SpikeGen')
+    spikegen = moose.vec(path=path + '/spikegen', n=size, dtype='SpikeGen')
     spikegen.threshold = [0.0] * size
     m = moose.connect(comps, 'VmOut', spikegen, 'Vm', 'OneToOne')
     return {'compartment': comps,
@@ -235,7 +235,7 @@ def make_synapses(spikegen, synchan, connprob=1.0, delay=5e-3):
         s.synapse.num = scount
         delay_list = np.random.normal(delay, delay*0.1, scount)
         for jj in range(scount): s.synapse[jj].delay = delay_list[jj]
-    m = moose.connect(spikegen, 'event', moose.element(synchan.path + '/synapse'),  'addSpike', 'Sparse')
+    m = moose.connect(spikegen, 'spikeOut', moose.element(synchan.path + '/synapse'),  'addSpike', 'Sparse')
     # The sparse message maintains an adjacency matrix. In the special
     # case of synapses on synchan objects, entry a[i][j] = k means
     # that source object no i (say spikegen[i] connects to synapse
@@ -257,7 +257,7 @@ if __name__ == '__main__':
     pulse.firstLevel = 1e-9
     pulse.firstDelay = 0.05e10 # disable the pulsegen
     pulse.firstWidth = 1e9
-    moose.connect(pulse, 'outputOut', pop_a['compartment'][0], 'injectMsg')
+    moose.connect(pulse, 'output', pop_a['compartment'][0], 'injectMsg')
     data = moose.Neutral('/data')
     vm_a = moose.Table('/data/Vm_A', size)
     moose.connect(vm_a, 'requestOut', pop_a['compartment'], 'getVm', 'OneToOne')
@@ -266,7 +266,7 @@ if __name__ == '__main__':
     gksyn_b = moose.Table('/data/Gk_syn_b', size)
     moose.connect(gksyn_b, 'requestOut', pop_b['synchan'], 'getGk', 'OneToOne')
     pulsetable = moose.Table('/data/pulse')
-    pulsetable.connect('requestOut', pulse, 'getOutput')
+    pulsetable.connect('requestOut', pulse, 'getOutputValue')
     moose.setClock(0, simdt)
     moose.setClock(1, simdt)
     moose.setClock(2, simdt)

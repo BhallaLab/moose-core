@@ -156,7 +156,7 @@ extern "C" {
                  "\nThere are two ways an vec can be initialized, (1) create a new array"
                  "\nelement or (2) create a reference to an existing object."
                  "\n"
-                 "\n__init__(self, path=path, dims=dimesions, dtype=className)"
+                 "\n__init__(self, path=path, n=size, g=isGlobal, dtype=className)"
                  "\n"
                  "\nParameters"
                  "\n----------"                 
@@ -171,6 +171,15 @@ extern "C" {
                  "\nThis is a positive integers specifying the size of the array element"
                  "\nto be created. Thus n=2 will create an"
                  "\nvec with 2 elements."
+                 "\n"
+                 "\n"
+                 "\ng : int"
+                 "\nSpecify if this is a global or local element. Global elements are"
+                 "\nshared between nodes in a computing cluster."
+                 "\n"
+                 "\ndtype: string"
+                 "\nThe vector will be of this moose-class."
+                 "\n"
                  "\n"
                  "\n__init__(self, id)"
                  "\n"
@@ -323,7 +332,12 @@ extern "C" {
         static char * kwlist[] = {_path, _size,  _global, _dtype,NULL};
         char * path = NULL;
         char _default_type[] = "Neutral";
-        unsigned int numData = 0; // set it to 0 for unspecified value
+        // set it to 0 for unspecified value in case the user tries to
+        // get an existing id without specifying it. If the user is
+        // specifying it but the existing vec does not have same
+        // numData we warn the user about the misconception. If it is
+        // nonexisting vec, we change the unspecifed numData to 1.
+        unsigned int numData = 0; 
         // char *type = _default_type;
         bool parse_success = false;
         /* The expected arguments are:
@@ -373,16 +387,11 @@ extern "C" {
                 }
                 return 0;
             }
-			/**
-			 * Need Subha's help here, to get rid of dims.
-            vector<int> vec_dims = pysequence_to_dimvec(dims);
-            if (vec_dims.size() == 0 && PyErr_Occurred()){
-                Py_XDECREF(self);
-                return -1;
-            }
-			*/
             if (type == NULL){
                 type = _default_type;
+            }
+            if (numData <= 0){
+                numData = 1;
             }
             self->id_ = create_Id_from_path(path, numData, isGlobal, type);
             if (self->id_ == Id() && PyErr_Occurred()){

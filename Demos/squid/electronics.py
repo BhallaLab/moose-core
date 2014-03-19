@@ -54,7 +54,7 @@ class ClampCircuit(moose.Neutral):
         self.gate.level[0] = 1.0
         self.gate.delay[0] = 0.0
         self.gate.width[0] = 1e9
-        moose.connect(self.gate, 'outputOut', self.pulsegen, 'input')
+        moose.connect(self.gate, 'output', self.pulsegen, 'input')
         self.lowpass = moose.RC(path+"/lowpass") # lowpass filter
         self.lowpass.R = 1.0
         self.lowpass.C = 0.03
@@ -70,14 +70,14 @@ class ClampCircuit(moose.Neutral):
         self.pid.tauD = 0.005
         self.pid.saturation = 1e10
         # Connect current clamp circuitry
-        moose.connect(self.pulsegen, "outputOut", self.iclamp, "plusIn")
-        moose.connect(self.iclamp, "outputOut", compartment, "injectMsg")
+        moose.connect(self.pulsegen, "output", self.iclamp, "plusIn")
+        moose.connect(self.iclamp, "output", compartment, "injectMsg")
         # Connect voltage clamp circuitry
-        moose.connect(self.pulsegen, "outputOut", self.lowpass, "injectIn")
-        moose.connect(self.lowpass, "outputOut", self.vclamp, "plusIn")
-        moose.connect(self.vclamp, "outputOut", self.pid, "commandIn")
+        moose.connect(self.pulsegen, "output", self.lowpass, "injectIn")
+        moose.connect(self.lowpass, "output", self.vclamp, "plusIn")
+        moose.connect(self.vclamp, "output", self.pid, "commandIn")
         moose.connect(compartment, "VmOut", self.pid, "sensedIn")
-        moose.connect(self.pid, "outputOut", compartment, "injectMsg")
+        moose.connect(self.pid, "output", compartment, "injectMsg")
         current_table = moose.Table("/data/Im")
         moose.connect(current_table, "requestOut", compartment, "getIm")
 
