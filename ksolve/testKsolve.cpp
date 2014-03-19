@@ -79,7 +79,7 @@ Id makeReacTest()
 	s->doAddMsg( "Single", e2, "prd", E, "reac" );
 
 	// Set parameters.
-	Field< double >::set( A, "concInit", 1 );
+	Field< double >::set( A, "concInit", 2 );
 	Field< double >::set( e1Pool, "concInit", 1 );
 	Field< double >::set( e2Pool, "concInit", 1 );
 	Field< double >::set( r1, "Kf", 0.2 );
@@ -87,10 +87,10 @@ Id makeReacTest()
 	Field< double >::set( r2, "Kf", 0.1 );
 	Field< double >::set( r2, "Kb", 0.0 );
 	Field< double >::set( e1, "Km", 5 );
-	Field< double >::set( e1, "kcat", 0.1 );
+	Field< double >::set( e1, "kcat", 1 );
 	Field< double >::set( e1, "ratio", 4 );
 	Field< double >::set( e2, "Km", 5 );
-	Field< double >::set( e2, "kcat", 0.1 );
+	Field< double >::set( e2, "kcat", 1 );
 	vector< double > stim( 100, 0.0 );
 	double vol = Field< double >::get( kin, "volume" );
 	for ( unsigned int i = 0; i< 100; ++i ) {
@@ -264,9 +264,12 @@ void testRunGsolve()
 	Id kin = makeReacTest();
 	double volume = 1e-21;
 	Field< double >::set( kin, "volume", volume );
-	Field< double >::set( ObjId( "/kinetics/A" ), "concInit", 1 );
+	Field< double >::set( ObjId( "/kinetics/A" ), "concInit", 2 );
 	Field< double >::set( ObjId( "/kinetics/e1Pool" ), "concInit", 1 );
 	Field< double >::set( ObjId( "/kinetics/e2Pool" ), "concInit", 1 );
+	Id e1( "/kinetics/e1Pool/e1" );
+	Field< double >::set( e1, "Km", 5 );
+	Field< double >::set( e1, "kcat", 1 );
 	vector< double > stim( 100, 0.0 );
 	for ( unsigned int i = 0; i< 100; ++i ) {
 		stim[i] = volume * NA * (1.0 + sin( i * 2.0 * PI / 100.0 ) );

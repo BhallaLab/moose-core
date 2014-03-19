@@ -2929,3 +2929,6 @@ At this point there is no propagation of volume rescaling into pools and
 reacs.
 
 ============================================================================
+
+19 Mar. I think I've fixed sumtotals, but there is something wrong with the
+enzymes in the unit tests for stochastic stuff.

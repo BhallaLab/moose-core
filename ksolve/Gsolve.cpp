@@ -317,8 +317,7 @@ void Gsolve::fillMmEnzDep()
  */
 void Gsolve::fillMathDep()
 {
-		/*
-	// Look up index of funcs that depend on specified molecule.
+	// create map of funcs that depend on specified molecule.
 	vector< vector< unsigned int > > funcMap( stoichPtr_->getNumAllPools());
 	unsigned int numFuncs = stoichPtr_->getNumFuncs();
 	for ( unsigned int i = 0; i < numFuncs; ++i ) {
@@ -328,9 +327,10 @@ void Gsolve::fillMathDep()
 		for ( unsigned int j = 0; j < numMols; ++j )
 			funcMap[ molIndex[j] ].push_back( i );
 	}
-	// The output of the funcs is a mol indexed as 
+	// The output of each func is a mol indexed as 
 	// numVarMols + numBufMols + i
-
+	unsigned int funcOffset = 
+			stoichPtr_->getNumVarPools() + stoichPtr_->getNumBufPools();
 	unsigned int numRates = stoichPtr_->getNumRates();
 	sys_.dependentMathExpn.resize( numRates );
 	vector< unsigned int > indices;
@@ -347,23 +347,18 @@ void Gsolve::fillMathDep()
 			vector< unsigned int >& funcs = funcMap[ molIndex ];
 			dep.insert( dep.end(), funcs.begin(), funcs.end() );
 			for ( unsigned int k = 0; k < funcs.size(); ++k ) {
-				// unsigned int outputMol = funcs[k] + stuff;
-				// Insert reac deps here.
-
+				unsigned int outputMol = funcs[k] + funcOffset;
+				// Insert reac deps here. Columns are reactions.
+				vector< int > e; // Entries: we don't need.
+				vector< unsigned int > c; // Column index: the reactions.
+				stoichPtr_->getStoichiometryMatrix().
+						getRow( outputMol, e, c );
+				// Each of the reacs (col entries) depend on this func.
+				vector< unsigned int > rdep = sys_.dependency[i];
+				rdep.insert( rdep.end(), c.begin(), c.end() );
 			}
-			funcIndex = funcMap[ molIndex ]
-
-			FuncTerm *f = stoichPtr_->funcs( j );
-			vector< unsigned int > molIndex;
-			unsigned int numMols = f->getReactants( molIndex );
-			if ( 
-			if ( numMols > 0 ) {
-			}
-				insertMathDepReacs( j, i );
-				dep.push_back( j );
 		}
 	}
-	*/
 }
 
 /**
