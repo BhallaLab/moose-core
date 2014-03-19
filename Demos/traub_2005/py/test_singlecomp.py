@@ -162,9 +162,9 @@ class TestSingleComp(unittest.TestCase):
         self.tables['Ca'] = tab
         moose.connect(tab, 'requestOut', ca, 'getCa')
         self.pulsegen = moose.PulseGen('%s/inject' % (self.model.path))
-        moose.connect(self.pulsegen, 'outputOut', self.soma, 'injectMsg')
+        moose.connect(self.pulsegen, 'output', self.soma, 'injectMsg')
         tab = moose.Table('%s/injection' % (self.data.path))
-        moose.connect(tab, 'requestOut', self.pulsegen, 'getOutput')
+        moose.connect(tab, 'requestOut', self.pulsegen, 'getOutputValue')
         self.tables['pulsegen'] = tab
         self.pulsegen.count = len(stimulus)
         for ii in range(len(stimulus)):

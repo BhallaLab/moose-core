@@ -191,7 +191,7 @@ def setup_single_compartment(model_container, data_container, channel_proto, Gba
     moose.connect(channel, 'channel', comp, 'channel')
     channel.Gbar = Gbar
     pulsegen = make_pulsegen(model_container.path)
-    moose.connect(pulsegen, 'outputOut', comp, 'injectMsg')
+    moose.connect(pulsegen, 'output', comp, 'injectMsg')
     vm_table = moose.Table('%s/Vm' % (data_container.path))
     moose.connect(vm_table, 'requestOut', comp, 'getVm')
     gk_table = moose.Table('%s/Gk' % (data_container.path))

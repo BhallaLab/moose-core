@@ -1,4 +1,23 @@
 * Changes in async13 branch
+** Mar 2014 - changes in naming
+   - SpikeGen.event renamed SpikeGen.spikeOut
+   - TimeTable.spikeOut renamed TimeTable.eventOut
+   - All sourceFinfos named 'outputOut' are just 'output'
+   - All value fields named 'output' which had an outputOut srcFinfo
+     counterpart are now renamed 'outputValue'.
+   - fields named `vec` renamed to `vector` in order avoid name
+     collision with `moose.vec`
+   - For each valueFinfo the getter and setter destFinfos are
+     `getValueFinfo` and `setValueFinfo` in stead of `get_valueFinfo`
+     and `set_valueFinfo`.
+   - Ticks are not separate objects now. But their individual dt have
+     become field elements of `/clock`: `clock.tickDt[0...9]` where
+     each tickDt must be either 0 or an integral multiple of
+     `clock.dt`, which is the minimum granularity of timesteps. There
+     is also `clock.tickStep[0...9]` which can be any positive
+     integer. The relation between tickStep and tickDt is `tickDt[n] =
+     tickStep[n] * dt`.
+   
 ** Dec 2013
    - Everything is 1D now. So, instead of dims=(n1, n2, ...) we have
      n=numData for __init__ methods.
@@ -116,3 +135,4 @@ Floating point exception
 
 ** python3: symbol lookup error: /usr/lib/openmpi/lib/openmpi/mca_paffinity_linux.so: undefined symbol: mca_base_param_reg_int
    See: http://us.generation-nt.com/answer/bug-696420-python-gmsh-undefined-symbol-mca-base-param-reg-int-help-209879272.html
+   

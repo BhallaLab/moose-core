@@ -140,8 +140,8 @@ def setup_electronics(model_container, data_container, compartment):
     pid.saturation = 1e10
     # Current clamp circuit: connect command output to iclamp amplifier
     # and the output of the amplifier to compartment.
-    moose.connect(command, 'outputOut', iclamp, 'plusIn')
-    moose.connect(iclamp, 'outputOut', compartment, 'injectMsg')
+    moose.connect(command, 'output', iclamp, 'plusIn')
+    moose.connect(iclamp, 'output', compartment, 'injectMsg')
     # Setup voltage clamp circuit: 
     # 1. Connect command output (which is now command) to lowpass
     # filter.
@@ -149,13 +149,13 @@ def setup_electronics(model_container, data_container, compartment):
     # 3. Connect amplifier output to PID's command input.  
     # 4. Connect Vm of compartment to PID's sensed input. 
     # 5. Connect PID output to compartment's injectMsg.
-    moose.connect(command, 'outputOut', lowpass, 'injectIn')
-    moose.connect(lowpass, 'outputOut', vclamp, 'plusIn')
-    moose.connect(vclamp, 'outputOut', pid, 'commandIn')
+    moose.connect(command, 'output', lowpass, 'injectIn')
+    moose.connect(lowpass, 'output', vclamp, 'plusIn')
+    moose.connect(vclamp, 'output', pid, 'commandIn')
     moose.connect(compartment, 'VmOut', pid, 'sensedIn')
-    moose.connect(pid, 'outputOut', compartment, 'injectMsg')
+    moose.connect(pid, 'output', compartment, 'injectMsg')
     command_table = moose.Table('%s/command' % (data_container.path))
-    moose.connect(command_table, 'requestOut', command, 'getOutput')
+    moose.connect(command_table, 'requestOut', command, 'getOutputValue')
     inject_table = moose.Table('%s/inject' % (data_container.path))
     moose.connect(inject_table, 'requestOut', compartment, 'getIm')
     return {'command_tab': command_table,

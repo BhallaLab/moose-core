@@ -84,7 +84,7 @@ def vclamptest(compartment, vclamp, duration=50e-3, delay=150e-3, solver='ee', v
     electronics = moose.Neutral('%s/electronics' % (mc.path))
     command = moose.PulseGen('%s/command_source' % (electronics.path))
     clamp = moose.VClamp('%s/vclamp' % (electronics.path))
-    moose.connect(command, 'outputOut', clamp, 'commandIn')
+    moose.connect(command, 'output', clamp, 'commandIn')
     moose.connect(compartment, 'VmOut', clamp, 'sensedIn')
     moose.connect(clamp, 'currentOut', compartment, 'injectMsg')
     simtime = 0
@@ -98,7 +98,7 @@ def vclamptest(compartment, vclamp, duration=50e-3, delay=150e-3, solver='ee', v
     injected = moose.Table('%s/Iinject' % (dc.path))
     moose.connect(injected, 'requestData', clamp, 'getCurrent')
     voltage = moose.Table('%s/Vcommand' % (dc.path))
-    moose.connect(voltage, 'requestData', command, 'getOutput')
+    moose.connect(voltage, 'requestData', command, 'getOutputValue')
     vm = moose.Table('%s/Vm' % (dc.path))
     moose.connect(vm, 'requestData', compartment, 'getVm')
     utils.resetSim([mc.path, dc.path], simdt, plotdt, simmethod=solver)

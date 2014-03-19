@@ -213,11 +213,11 @@ def setupCurrentStepModel(testId, celltype, pulsearray, dt):
         pulsegen.delay[ii] = pulsearray[ii][0]
         pulsegen.width[ii] = pulsearray[ii][1]
         pulsegen.level[ii] = pulsearray[ii][2]
-    moose.connect(pulsegen, 'outputOut', cell.soma, 'injectMsg')
+    moose.connect(pulsegen, 'output', cell.soma, 'injectMsg')
     somaVm = moose.Table('%s/vm' % (dataContainer.path))
     moose.connect(somaVm, 'requestOut', cell.soma, 'getVm')
     pulseTable = moose.Table('%s/pulse' % (dataContainer.path))
-    moose.connect(pulseTable, 'requestOut', pulsegen, 'getOutput')
+    moose.connect(pulseTable, 'requestOut', pulsegen, 'getOutputValue')
     setupClocks(dt)
     moose.useClock(0, '%s/##[ISA=Compartment]' % (cell.path), 'init')
     moose.useClock(1, '%s/##[ISA=Compartment]' % (cell.path), 'process')

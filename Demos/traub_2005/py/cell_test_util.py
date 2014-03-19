@@ -80,13 +80,13 @@ def setup_current_step_model(model_container,
         pulsegen.delay[ii] = pulsearray[ii][0]
         pulsegen.width[ii] = pulsearray[ii][1]
         pulsegen.level[ii] = pulsearray[ii][2]
-    moose.connect(pulsegen, 'outputOut', cell.soma, 'injectMsg')
+    moose.connect(pulsegen, 'output', cell.soma, 'injectMsg')
     presyn_vm = moose.Table('%s/presynVm' % (data_container.path))
     soma_vm =  moose.Table('%s/somaVm' % (data_container.path))
     moose.connect(presyn_vm, 'requestOut', cell.presynaptic, 'getVm')
     moose.connect(soma_vm, 'requestOut', cell.soma, 'getVm')
     pulse_table = moose.Table('%s/injectCurrent' % (data_container.path))
-    moose.connect(pulse_table, 'requestOut', pulsegen, 'getOutput')
+    moose.connect(pulse_table, 'requestOut', pulsegen, 'getOutputValue')
     return {'cell': cell,
             'stimulus': pulsegen,
             'presynVm': presyn_vm,

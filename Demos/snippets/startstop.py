@@ -59,7 +59,7 @@ def setup_model():
     pulse.delay[0] = 0.5
     pulse.width[0] = 0.5
     table = moose.Table('%s/tab' % (pulse.path))
-    moose.connect(table, 'requestOut', pulse, 'getOutput')
+    moose.connect(table, 'requestOut', pulse, 'getOutputValue')
     moose.setClock(0, 0.1)
     moose.setClock(1, 0.1)
     moose.setClock(2, 0.1)
@@ -72,7 +72,7 @@ def startstop_demo():
     table = setup_model()
     moose.reinit()
     clock = moose.element('/clock')
-    dt = clock.tick[0].dt
+    dt = clock.tickDt[0]
     print dt
     steps = 100
     simtime = dt * steps

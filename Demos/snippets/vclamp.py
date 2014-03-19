@@ -72,13 +72,13 @@ def vclamp_demo(simtime=50.0, dt=1e-2):
     command.width[0] = 20.0
     command.level[0] = 50.0
     command.delay[1] = 1e9
-    moose.connect(command, 'outputOut', clamp, 'commandIn')
+    moose.connect(command, 'output', clamp, 'commandIn')
     ## Connect the Voltage Clamp to the compartemnt
     moose.connect(clamp, 'currentOut', comp, 'injectMsg')
     moose.connect(comp, 'VmOut', clamp, 'sensedIn')
     ## setup stimulus recroding - this is the command pulse
     stimtab = moose.Table('/vClampDemo/vclamp_command')
-    moose.connect(stimtab, 'requestOut', command, 'getOutput')
+    moose.connect(stimtab, 'requestOut', command, 'getOutputValue')
     ## Set up Vm recording
     vmtab = moose.Table('/vClampDemo/vclamp_Vm')
     moose.connect(vmtab, 'requestOut', comp, 'getVm')
