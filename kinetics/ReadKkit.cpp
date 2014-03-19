@@ -113,6 +113,7 @@ void ReadKkit::setMoveOntoCompartment( bool v )
 Id  makeStandardElements( Id pa, const string& modelname )
 {
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	cout << " kkit read " << pa << " " << modelname << " "<< MooseGlobal;
 	Id mgr = shell->doCreate( "Neutral", pa, modelname, 1, MooseGlobal );
 	Id kinetics = 
 		shell->doCreate( "CubeMesh", mgr, "kinetics", 1,  MooseGlobal );
@@ -195,7 +196,7 @@ void ReadKkit::run()
 	shell_->doSetClock( 4, simdt_ );
 	shell_->doSetClock( 5, simdt_ );
 	shell_->doSetClock( 8, plotdt_ );
-    shell_->doSetClock( 7, 0 );
+	shell_->doSetClock( 7, 0 );
 	string poolpath = basePath_ + "/kinetics/##[ISA=Pool]";
 	string reacpath = basePath_ + "/kinetics/##[ISA!=Pool]";
 	string plotpath = basePath_ + "/graphs/##[TYPE=Table]," + 
@@ -619,7 +620,6 @@ void ReadKkit::assignPoolCompartments()
 			name = ss.str();
 			comptId = shell_->doCreate( "CubeMesh", baseId_, name, 1 ) ;
 		}
-		// cout << j << ", " << i << ", " << comptId << ", " << comptId.element()->getName() << ", " << vols_[i] << endl;
 		Id meshId = Neutral::child( comptId.eref(), "mesh" );
 		assert( meshId != Id() );
 		double side = pow( vols_[i], 1.0 / 3.0 );
@@ -1125,7 +1125,7 @@ unsigned int ReadKkit::loadTab( const vector< string >& args )
 	for ( unsigned int i = start; i < args.size(); ++i ) {
 		tabEntries_.push_back( atof( args[i].c_str() ) );
 	}
-	bool ok = Field< vector< double > >::set( tab, "vec", tabEntries_ );
+	bool ok = Field< vector< double > >::set( tab, "vector", tabEntries_ );
 	assert( ok );
 
 	// cout << "Loading table for " << args[0] << "," << args[1] << "," << clean << endl;
