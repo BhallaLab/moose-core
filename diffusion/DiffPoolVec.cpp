@@ -62,30 +62,26 @@ DiffPoolVec::DiffPoolVec()
 	: n_( 1, 0.0 ), nInit_( 1, 0.0 ), diffConst_( 1.0e-12 )
 {;}
 
-double DiffPoolVec::getNinit( const Eref& e ) const
+double DiffPoolVec::getNinit( unsigned int voxel ) const
 {
-	unsigned int voxel = e.dataIndex();
 	assert( voxel < nInit_.size() );
 	return nInit_[ voxel ];
 }
 
-void DiffPoolVec::setNinit( const Eref& e, double v )
+void DiffPoolVec::setNinit( unsigned int voxel, double v )
 {
-	unsigned int voxel = e.dataIndex();
 	assert( voxel < nInit_.size() );
 	nInit_[ voxel ] = v;
 }
 
-double DiffPoolVec::getN( const Eref& e ) const
+double DiffPoolVec::getN( unsigned int voxel ) const
 {
-	unsigned int voxel = e.dataIndex();
 	assert( voxel < n_.size() );
 	return n_[ voxel ];
 }
 
-void DiffPoolVec::setN( const Eref& e, double v )
+void DiffPoolVec::setN( unsigned int voxel, double v )
 {
-	unsigned int voxel = e.dataIndex();
 	assert( voxel < n_.size() );
 	n_[ voxel ] = v;
 }
@@ -122,9 +118,10 @@ Id DiffPoolVec::getPool() const
 	return pool_;
 }
 
-void DiffPoolVec::setNumPools( unsigned int num )
+void DiffPoolVec::setNumVoxels( unsigned int num ) 
 {
-		;
+	nInit_.resize( num, 0.0 );
+	n_.resize( num, 0.0 );
 }
 
 void DiffPoolVec::setOps(const vector< Triplet< double > >& ops,

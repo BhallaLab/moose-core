@@ -2932,3 +2932,28 @@ reacs.
 
 19 Mar. I think I've fixed sumtotals, but there is something wrong with the
 enzymes in the unit tests for stochastic stuff.
+
+Fixed it. The problem wasn't the solver, it was the volume scaling again.
+
+Next: Fix volume scaling. The parent ChemCompt should traverse all children
+and redo volumes, rates and so on.
+
+============================================================================
+20 Mar.
+From Jan, here are the steps
+Week	Date		Steps
+1	Jan1-5		Naming policy stuff
+2	Jan 5-11	Kinetics brought in. Volument handling revisited.
+			Msg fixes.
+3-4	Jan 12-25	Kinetics works, mostly. Fixes to Python/MPI stuff.
+5-6	Jan 26-Feb7	Standalone fast matrix elimination. Fixing wildcards.
+7-8	Feb8-21		Ksolve skeleton in place.		
+9-10	Feb22-Mar8	Ksolve works
+11	Mar9-14		Steady State solver ported and works.
+12	Mar 15-20	GSSA ported and works.
+
+
+Starting with cleaning out Dsolve and co. Probably don't even need to have
+DiffPoolVecs exposed as FieldElements.
+Done.
+============================================================================

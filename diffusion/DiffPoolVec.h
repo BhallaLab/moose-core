@@ -15,22 +15,22 @@
  * a specific pool, and the pool maintains a pointer to it. For accessing
  * volumes, this maintains a pointer to the relevant ChemCompt.
  */
-class DiffPoolVec: public ZombiePoolInterface
+class DiffPoolVec
 {
 	public:
 		DiffPoolVec();
 		void process();
 		void reinit();
 		void advance();
-		// Inherited virtual funcs from ZombiePoolInterface
-		double getNinit( const Eref& e ) const;
-		void setNinit( const Eref& e, double value );
-		double getN( const Eref& e ) const;
-		void setN( const Eref& e, double value );
+		double getNinit( unsigned int vox ) const;
+		void setNinit( unsigned int vox, double value );
+		double getN( unsigned int vox ) const;
+		void setN( unsigned int vox, double value );
+
 		double getDiffConst() const;
 		void setDiffConst( double value );
 
-		void setNumPools( unsigned int num );
+		void setNumVoxels( unsigned int num );
 
 		/////////////////////////////////////////////////
 		Id getPool() const; /// Returns pool.
