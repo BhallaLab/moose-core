@@ -26,7 +26,7 @@
  * Some DiffPoolVecs are for molecules that don't diffuse. These
  * simply have an empty opvec.
  */
-class Dsolve
+class Dsolve: public ZombiePoolInterface
 {
 	public: 
 		Dsolve();
@@ -43,12 +43,22 @@ class Dsolve
 		unsigned int getNumVoxels() const;
 
 		//////////////////////////////////////////////////////////////////
-		// Dest funcs
+		// Inherited virtual funcs from ZombiePoolInterface
 		//////////////////////////////////////////////////////////////////
+		double getNinit( const Eref& e ) const;
+		void setNinit( const Eref& e, double value );
+		double getN( const Eref& e ) const;
+		void setN( const Eref& e, double value );
+		double getDiffConst( const Eref& e ) const;
+		void setDiffConst( const Eref& e, double value );
+
+		void setNumPools( unsigned int num );
 
 		//////////////////////////////////////////////////////////////////
 		// Model traversal and building functions
 		//////////////////////////////////////////////////////////////////
+		unsigned int getNumPools() const;
+		unsigned int convertIdToPoolIndex( const Eref& e ) const;
 
 		/**
 		 * zombifyModel marches through the specified id list and 
@@ -79,7 +89,18 @@ class Dsolve
 		static const Cinfo* initCinfo();
 	private:
 		string path_;
+
+		unsigned int numTotPools_;
+		unsigned int numLocalPools_;
+		unsigned int poolStartIndex_;
+		unsigned int numVoxels_;
 		vector< DiffPoolVec > pools_;
+
+		/// smallest Id value for pools managed by Dsolve. Used for lookup.
+		unsigned int poolMapStart_;
+
+		/// Looks up pool# from pool Id, using poolMapStart_ as offset.
+		vector< unsigned int > poolMap_;
 };
 
 
