@@ -444,12 +444,12 @@ double Gsolve::getNinit( const Eref& e ) const
 	return 0.0;
 }
 
-void Gsolve::setDiffConst( double v )
+void Gsolve::setDiffConst( const Eref& e, double v )
 {
 		; // Do nothing.
 }
 
-double Gsolve::getDiffConst() const
+double Gsolve::getDiffConst( const Eref& e ) const
 {
 		return 0;
 }

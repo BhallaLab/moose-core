@@ -299,12 +299,12 @@ double Ksolve::getNinit( const Eref& e ) const
 	return 0.0;
 }
 
-void Ksolve::setDiffConst( double v )
+void Ksolve::setDiffConst( const Eref& e, double v )
 {
 		; // Do nothing.
 }
 
-double Ksolve::getDiffConst() const
+double Ksolve::getDiffConst( const Eref& e ) const
 {
 		return 0;
 }
