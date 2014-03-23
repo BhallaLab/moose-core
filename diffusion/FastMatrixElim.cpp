@@ -25,6 +25,14 @@ const unsigned int SM_MAX_COLUMNS = 200000;
 const unsigned int SM_RESERVE = 8;
 */
 
+FastMatrixElim::FastMatrixElim()
+	: SparseMatrix< double >()
+{;}
+
+FastMatrixElim::FastMatrixElim( const SparseMatrix< double >& orig )
+	: SparseMatrix< double >( orig )
+{;}
+
 void sortByColumn( 
 			vector< unsigned int >& col, vector< double >& entry );
 void testSorting();
@@ -33,13 +41,65 @@ void testSorting();
 //	static unsigned int parents[] = { 1,6,3,6,5,8,7,8,9,10,-1};
 //	unsigned int numKids[] = {0,1,0,1,0,2,
 
+static const unsigned int EMPTY_VOXEL(-1);
+
+bool FastMatrixElim::checkSymmetricShape() const
+{
+	return true; // dummy for now
+}
+
+/**
+ * Scans the current matrix starting from index 0, to build tree of parent
+ * voxels using the contents of the sparase matrix to indicate 
+ * connectivity. Emits warning noises and returns an empty vector if 
+ * the entire tree cannot be traversed, or
+ * if the current matrix is not tree-like.
+ * This still doesn't work. Fails because it cannot detect branches in
+ * the tree, where sibling compartments would have cross talk.
+ * So we still rely on getParentVoxel function.
+bool FastMatrixElim::buildTree( unsigned int parentRow,
+				vector< unsigned int >& parentVoxel ) const
+{
+	assert( nRows() == nColumns() );
+	if ( parentRow == 0 ) {
+		parentVoxel.assign( nRows, EMPTY_VOXEL );
+		if ( !checkSymmetricShape() ) 
+			return false; // shape of matrix should be symmetric. 
+	}
+	const double* entry;
+	const unsigned int* colIndex;
+	unsigned int numEntries = getRow( parentRow, &entry, &colIndex );
+	for ( unsigned int j = 0; j < numEntries; ++j ) {
+		if ( colIndex[j] <= parentRow ) continue; // ignore lower diagonal
+		if ( parentVoxel[ colIndex[j] ] == EMPTY_VOXEL ) {
+			parentVoxel[ colIndex[j] ] = parentRow;
+		} else {
+			if ( parentVoxel[ colIndex[j] ] == parentVoxel[ parentRow ] )
+				continue; // OK, these are sibling compartments
+			return false; // Error: the matrix isn't a clean tree.
+		}
+	}
+	for ( unsigned int j = 0; j < numEntries; ++j ) {
+		if ( colIndex[j] <= parentRow ) continue;
+		if !buildTree( colIndex[j], parentVoxel )
+			return false; // Propagate error from child row.
+	}
+	if ( parentRow > 0 )
+		return true;
+	// Now done with all child branches, test if whole matrix is in tree.
+	for ( unsigned int j = 1; j < nRows(); ++j )
+		if ( parentVoxel[j] == EMPTY_VOXEL )
+			return false; // One or more rows is disconnected from tree
+
+	return true; // All is well, have yourself a nice parentVoxel tree.
+}
+ */
+
 /**
  * Reorders rows and columns to put the matrix in the form suitable for 
  * rapid single-pass inversion. Returns 0 on failure, but at this
  * point I don't have a proper test for this.
  */
-
-static const unsigned int EMPTY_VOXEL(-1);
 bool FastMatrixElim::hinesReorder( const vector< unsigned int >& parentVoxel )
 {
 	// First we fill in the vector that specifies the old row number 
@@ -60,7 +120,7 @@ bool FastMatrixElim::hinesReorder( const vector< unsigned int >& parentVoxel )
 				rowPending[i] = false;
 				numDone++;
 				unsigned int pa = parentVoxel[i];
-				// Unsure what the root parent is. Assume it is -1
+				// root parent is EMPTY_VOXEL
 				while ( pa != EMPTY_VOXEL && numKids[pa] == 1 ) {
 					assert( rowPending[pa] );
 					rowPending[pa] = false;
@@ -76,16 +136,19 @@ bool FastMatrixElim::hinesReorder( const vector< unsigned int >& parentVoxel )
 		}
 	}
 
+	/*
 	cout << setprecision(4);
 	cout << "oldRowFromNew= {" ;
 	for ( unsigned int i = 0; i < nrows_; ++i )
 		cout << lookupOldRowFromNew[i] << ", ";
 	cout << "}\n";
+	*/
 	// Then we fill in the reordered matrix. Note we need to reorder
 	// columns too.
 	shuffleRows( lookupOldRowFromNew );
 	return true;
 }
+
 
 // Fill in the reordered matrix. Note we need to reorder columns too.
 void FastMatrixElim::shuffleRows( 
@@ -212,6 +275,7 @@ void FastMatrixElim::buildForwardElim( vector< unsigned int >& diag,
 			fops.push_back( Triplet< double >( ratio, i, erow) );
 		}
 	}
+	/*
 	for ( unsigned int i = 0; i < rowsToElim.size(); ++i ) {
 		cout << i << " :		";
 		for ( unsigned int j = 0; j < rowsToElim[i].size(); ++j ) {
@@ -223,7 +287,6 @@ void FastMatrixElim::buildForwardElim( vector< unsigned int >& diag,
 		cout << "fops[" << i << "]=		" << fops[i].b_ << "	" << fops[i].c_ << 
 				"	" << fops[i].a_ << endl;
 	}
-	/*
 	*/
 }
 
@@ -254,6 +317,7 @@ void FastMatrixElim::buildBackwardSub( vector< unsigned int >& diag,
 			rowsToSub[ k ].push_back( i );
 		}
 	}
+	/*
 	for ( unsigned int i = 0; i < rowsToSub.size(); ++i ) {
 		cout << i << " :		";
 		for ( unsigned int j = 0; j < rowsToSub[i].size(); ++j ) {
@@ -261,6 +325,7 @@ void FastMatrixElim::buildBackwardSub( vector< unsigned int >& diag,
 		}
 		cout << endl;
 	}
+	*/
 
 	diagVal.resize( 0 );
 	// Fill in the diagonal terms. Here we do all entries.
@@ -277,6 +342,7 @@ void FastMatrixElim::buildBackwardSub( vector< unsigned int >& diag,
 		}
 	}
 
+	/*
 	for ( unsigned int i = 0; i < bops.size(); ++i ) {
 		cout << i << ":		" << bops[i].a_ << "	" << 
 				bops[i].b_ << "	" <<  // diagonal index
@@ -284,8 +350,36 @@ void FastMatrixElim::buildBackwardSub( vector< unsigned int >& diag,
 				1.0 / diagVal[bops[i].b_] << // diagonal value.
 				endl;
 	}
+	*/
 }
 
+void FastMatrixElim::setDiffusionAndTransport( 
+			const vector< unsigned int >& parentVoxel,
+			double diffConst, double motorConst )
+{
+	for ( unsigned int i = 0; i < nrows_; ++i ) {
+		for ( unsigned int j = rowStart_[i]; j < rowStart_[i+1]; ++j ) {
+			if ( colIndex_[j] != i ) {
+				double scale = 1.0;
+				// Treat transport as something either to or from soma.
+				// The motor direction is based on this.
+				// Assume no transport between sibling compartments.
+				if ( parentVoxel[colIndex_[j]] == i )
+					scale = diffConst + motorConst;
+				else if ( parentVoxel[i] == colIndex_[j] )
+					scale = diffConst - motorConst;
+				N_[j] *= scale;
+			}
+		}
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////
+// All the rest was setup. This function does the work, in a tight
+// inner loop called many times. Doesn't even depend on matrix contents,
+// but the data layout is built by the matrix so it is set as a
+// static function of it.
+//////////////////////////////////////////////////////////////////////////
 // Static function.
 void FastMatrixElim::advance( vector< double >& y,
 		const vector< Triplet< double > >& ops, // has both fops and bops.

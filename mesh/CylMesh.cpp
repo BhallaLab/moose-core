@@ -607,6 +607,17 @@ void CylMesh::innerBuildDefaultMesh( const Eref& e,
 	setCoords( e, coords );
 }
 
+vector< unsigned int > CylMesh::getParentVoxel() const
+{
+	vector< unsigned int > ret( numEntries_ );
+	if ( numEntries_ > 0 )
+		ret[0] = static_cast< unsigned int >( -1 );
+	for (unsigned int i = 1; i < numEntries_; ++i )
+		ret[i] = i-1;
+
+	return ret;
+}
+
 //////////////////////////////////////////////////////////////////
 // Utility function to transmit any changes to target nodes.
 //////////////////////////////////////////////////////////////////
