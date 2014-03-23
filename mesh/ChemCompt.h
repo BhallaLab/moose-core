@@ -267,7 +267,7 @@ class ChemCompt
 		 * branching.
 		 * For a CylMesh there are 2 except at boundaries.
 		 */
-		virtual unsigned int getStencil( unsigned int meshIndex,
+		virtual unsigned int getStencilRow( unsigned int meshIndex,
 				const double** entry, const unsigned int** colIndex )
 			   	const = 0;
 

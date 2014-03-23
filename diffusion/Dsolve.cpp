@@ -12,40 +12,233 @@
 #include "KinSparseMatrix.h"
 #include "ZombiePoolInterface.h"
 #include "DiffPoolVec.h"
+#include "FastMatrixElim.h"
 #include "Dsolve.h"
+#include "../mesh/Boundary.h"
+#include "../mesh/MeshEntry.h"
+#include "../mesh/ChemCompt.h"
+#include "../mesh/MeshCompt.h"
 
+const Cinfo* Dsolve::initCinfo()
+{
+		///////////////////////////////////////////////////////
+		// Field definitions
+		///////////////////////////////////////////////////////
+		
+		static ValueFinfo< Dsolve, Id > stoich (
+			"stoich",
+			"Stoichiometry object for handling this reaction system.",
+			&Dsolve::setStoich,
+			&Dsolve::getStoich
+		);
+
+		static ReadOnlyValueFinfo< Dsolve, unsigned int > numVoxels(
+			"numVoxels",
+			"Number of voxels in the core reac-diff system, on the "
+			"current diffusion solver. ",
+			&Dsolve::getNumVoxels
+		);
+		static LookupValueFinfo< 
+				Dsolve, unsigned int, vector< double > > nVec(
+			"nVec",
+			"vector of # of molecules along diffusion length, "
+			"looked up by pool index",
+			&Dsolve::setNvec,
+			&Dsolve::getNvec
+		);
+
+		static ValueFinfo< Dsolve, unsigned int > numPools(
+			"numPools",
+			"Number of molecular pools in the entire reac-diff system, "
+			"including variable, function and buffered.",
+			&Dsolve::setNumPools,
+			&Dsolve::getNumPools
+		);
+
+		static ValueFinfo< Dsolve, Id > compartment (
+			"compartment",
+			"Reac-diff compartment in which this diffusion system is "
+			"embedded.",
+			&Dsolve::setCompartment,
+			&Dsolve::getCompartment
+		);
+
+
+		///////////////////////////////////////////////////////
+		// DestFinfo definitions
+		///////////////////////////////////////////////////////
+
+		static DestFinfo process( "process",
+			"Handles process call",
+			new ProcOpFunc< Dsolve >( &Dsolve::process ) );
+		static DestFinfo reinit( "reinit",
+			"Handles reinit call",
+			new ProcOpFunc< Dsolve >( &Dsolve::reinit ) );
+		
+		///////////////////////////////////////////////////////
+		// Shared definitions
+		///////////////////////////////////////////////////////
+		static Finfo* procShared[] = {
+			&process, &reinit
+		};
+		static SharedFinfo proc( "proc",
+			"Shared message for process and reinit",
+			procShared, sizeof( procShared ) / sizeof( const Finfo* )
+		);
+
+	static Finfo* dsolveFinfos[] =
+	{
+		&stoich,			// Value
+		&compartment,		// Value
+		&numVoxels,			// ReadOnlyValue
+		&nVec,				// LookupValue
+		&numPools,			// Value
+		&proc,				// SharedFinfo
+	};
+	
+	static Dinfo< Dsolve > dinfo;
+	static  Cinfo ksolveCinfo(
+		"Dsolve",
+		Neutral::initCinfo(),
+		dsolveFinfos,
+		sizeof(dsolveFinfos)/sizeof(Finfo *),
+		&dinfo
+	);
+
+	return &ksolveCinfo;
+}
+
+static const Cinfo* ksolveCinfo = Dsolve::initCinfo();
+
+//////////////////////////////////////////////////////////////
+// Class definitions
+//////////////////////////////////////////////////////////////
 Dsolve::Dsolve()
 {;}
 
 Dsolve::~Dsolve()
 {;}
 
+//////////////////////////////////////////////////////////////
+// Field access functions
+//////////////////////////////////////////////////////////////
+
+void Dsolve::setNvec( unsigned int pool, vector< double > vec )
+{
+	if ( pool < pools_.size() ) {
+		if ( vec.size() != pools_[pool].getNumVoxels() ) {
+			cout << "Warning: Dsolve::setNvec: pool index out of range\n";
+		} else {
+			pools_[ pool ].setNvec( vec );
+		}
+	}
+}
+
+vector< double > Dsolve::getNvec( unsigned int pool ) const
+{
+	static vector< double > ret;
+	if ( pool <  pools_.size() )
+		return pools_[pool].getNvec();
+
+	cout << "Warning: Dsolve::setNvec: pool index out of range\n";
+	return ret;
+}
+
+//////////////////////////////////////////////////////////////
+// Process operations.
+//////////////////////////////////////////////////////////////
+void Dsolve::process( const Eref& e, ProcPtr p )
+{
+	for ( vector< DiffPoolVec >::iterator 
+					i = pools_.begin(); i != pools_.end(); ++i ) {
+		i->advance( p->dt );
+	}
+}
+
+void Dsolve::reinit( const Eref& e, ProcPtr p )
+{
+	for ( vector< DiffPoolVec >::iterator 
+					i = pools_.begin(); i != pools_.end(); ++i ) {
+		i->reinit();
+	}
+}
+//////////////////////////////////////////////////////////////
+// Solver coordination and setup functions
+//////////////////////////////////////////////////////////////
+
+void Dsolve::setStoich( Id id )
+{
+	stoich_ = id; 
+}
+
+Id Dsolve::getStoich() const
+{
+	return stoich_;
+}
+
+void Dsolve::setCompartment( Id id )
+{
+	const Cinfo* c = id.element()->cinfo();
+	if ( c->isA( "NeuroMesh" ) || c->isA( "CylMesh" ) ) {
+		compartment_ = id;
+		const MeshCompt* m = reinterpret_cast< const MeshCompt* >( 
+						id.eref().data() );
+		numVoxels_ = m->getStencil().nRows();
+	} else {
+		cout << "Warning: Dsolve::setCompartment:: compartment must be "
+				"NeuroMesh or CylMesh, you tried :" << c->name() << endl;
+	}
+}
+
+Id Dsolve::getCompartment() const
+{
+	return compartment_;
+}
+/////////////////////////////////////////////////////////////
+// Solver building
+//////////////////////////////////////////////////////////////
+
+// Happens at reinit, long after all pools are built.
+// By this point the diffusion consts etc will be assigned to the
+// poolVecs.
+void Dsolve::build()
+{
+	const MeshCompt* m = reinterpret_cast< const MeshCompt* >( 
+						compartment_.eref().data() );
+	// For now start with local pools only.
+	numLocalPools_ = Field< unsigned int >::get( stoich_, "numAllPools" );
+	pools_.resize( numLocalPools_ );
+
+	for ( unsigned int i = 0; i < numLocalPools_; ++i ) {
+		FastMatrixElim elim( m->getStencil() );
+		vector< unsigned int > parentVoxel = m->getParentVoxel();
+		elim.setDiffusionAndTransport( parentVoxel,
+			pools_[i].getDiffConst(), pools_[i].getMotorConst() );
+		elim.hinesReorder( parentVoxel );
+		vector< unsigned int > diagIndex;
+		vector< double > diagVal;
+		vector< Triplet< double > > fops;
+
+		pools_[i].setNumVoxels( numVoxels_ );
+		elim.buildForwardElim( diagIndex, fops );
+		elim.buildBackwardSub( diagIndex, fops, diagVal );
+		pools_[i].setOps( fops, diagVal );
+	}
+}
+
+/////////////////////////////////////////////////////////////
+// Zombie Pool Access functions
+//////////////////////////////////////////////////////////////
+//
 unsigned int Dsolve::getNumVarPools() const
 {
 	return 0;
 }
 
-void Dsolve::setPath( const Eref& e, string v )
-{;}
-
-string Dsolve::getPath( const Eref& e ) const
+unsigned int Dsolve::getNumVoxels() const
 {
-	return "foo";
+	return numVoxels_;
 }
-
-void zombifyModel( const Eref& e, const vector< Id >& elist )
-{
-	;
-}
-
-
-void unZombifyModel( const Eref& e )
-{
-		;
-}
-//////////////////////////////////////////////////////////////
-// Zombie Pool Access functions
-//////////////////////////////////////////////////////////////
 
 unsigned int Dsolve::convertIdToPoolIndex( const Eref& e ) const
 {

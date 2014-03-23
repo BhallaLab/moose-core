@@ -922,6 +922,13 @@ void CubeMesh::innerSetNumEntries( unsigned int n )
 	cout << "Warning: CubeMesh::innerSetNumEntries is readonly.\n";
 }
 
+vector< unsigned int > CubeMesh::getParentVoxel() const
+{
+	static vector< unsigned int > ret;
+	return ret;
+}
+
+
 //////////////////////////////////////////////////////////////////
 
 bool CubeMesh::isInsideCuboid( double x, double y, double z ) const

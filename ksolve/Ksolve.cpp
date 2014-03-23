@@ -50,7 +50,7 @@ const Cinfo* Ksolve::initCinfo()
 		static LookupValueFinfo< 
 				Ksolve, unsigned int, vector< double > > nVec(
 			"nVec",
-			"vector of pool counts",
+			"vector of pool counts. Index specifies which voxel.",
 			&Ksolve::setNvec,
 			&Ksolve::getNvec
 		);

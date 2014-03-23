@@ -224,6 +224,9 @@ class CubeMesh: public MeshCompt
 		//  Stuff for diffusion
 		//////////////////////////////////////////////////////////////////
 
+		/// Inherited virtual, do nothing for now.
+		vector< unsigned int > getParentVoxel() const;
+
 		/**
 		 * Sets up the stencil that defines how to combine neighbouring
 		 * mesh elements to set up the diffusion du/dt term, using the

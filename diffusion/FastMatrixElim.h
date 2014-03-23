@@ -10,7 +10,23 @@
 class FastMatrixElim: public SparseMatrix< double >
 {
 	public:
+		FastMatrixElim();
+		FastMatrixElim( const SparseMatrix< double >& orig );
+
 		void makeTestMatrix( const double* test, unsigned int numCompts );
+
+		/**
+ 		* Recursively scans the current matrix, to build tree of parent
+ 		* voxels using the contents of the sparase matrix to indicate 
+ 		* connectivity. Emits warning noises and returns an empty vector if 
+ 		* the entire tree cannot be traversed, or
+ 		* if the current matrix is not tree-like.
+		* Assumes row 0 is root row. User should always call with 
+		* parentRow == 0;
+		* Doesn't work yet. 
+		bool buildTree( unsigned int parentRow,
+				vector< unsigned int >& parentVoxel ) const;
+ 		*/
 
 		/** 
 		 * Reduces the forward elimination phase into a series of operations
@@ -45,6 +61,20 @@ class FastMatrixElim: public SparseMatrix< double >
 		 */
 		void shuffleRows( 
 				const vector< unsigned int >& lookupOldRowFromNew );
+
+		/**
+		 * Checks that the matrix shape (but not necessarily values)
+		 * are symmetric, returns true if symmetric.
+		 */
+		bool checkSymmetricShape() const;
+
+		/**
+		 * This function incorporates molecule-specific diffusion and
+		 * motor transport terms into the matrix.
+		 */
+		void setDiffusionAndTransport( 
+			const vector< unsigned int >& parentVoxel,
+			double diffConst, double motorConst );
 
 		/**
 		 * Does the actual computation of the matrix inversion, which is

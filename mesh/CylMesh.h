@@ -92,6 +92,8 @@ class CylMesh: public MeshCompt
 		/// Inherited virtual func.
 		void innerSetNumEntries( unsigned int n );
 		
+		/// Inherited virtual, do nothing for now.
+		vector< unsigned int > getParentVoxel() const;
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////

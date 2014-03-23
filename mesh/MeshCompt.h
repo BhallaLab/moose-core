@@ -38,8 +38,11 @@ class MeshCompt: public ChemCompt
 
 		/// Derived function to return SparseMatrix-style row info for
 		/// specified mesh entry. 
-		unsigned int getStencil( unsigned int meshIndex,
+		unsigned int getStencilRow( unsigned int meshIndex,
 				const double** entry, const unsigned int** colIndex ) const;
+
+		/// Returns entire sparse matrix of mesh. Used by diffusion solver.
+		const SparseMatrix< double >& getStencil() const;
 
 		/// Looks up stencil to return vector of indices of coupled voxels.
 		vector< unsigned int > getNeighbors( unsigned int fid ) const;
@@ -60,6 +63,8 @@ class MeshCompt: public ChemCompt
 		/// Add boundary voxels to stencil for cross-solver junctions
 		void extendStencil(
 				const ChemCompt* other, const vector< VoxelJunction >& vj );
+
+		virtual vector< unsigned int > getParentVoxel() const = 0;
 
 	private:
 
