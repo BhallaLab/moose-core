@@ -2957,3 +2957,24 @@ Starting with cleaning out Dsolve and co. Probably don't even need to have
 DiffPoolVecs exposed as FieldElements.
 Done.
 ============================================================================
+21 Mar.
+Next steps:
+- Assign either NeuroMesh or CylMesh to solver, using a SparseMatrix interface.
+- Parse Sparse Matrix.
+	- Handle regular diffusion with per-molecule diffusion consts
+	- Handle motor transport overlay.
+- Build test cases
+	- Simple diffusion
+	- Reac-diff with propagating waves
+- Build inter-compartment reactions
+- Set up adaptors and other multiscale effects
+- Set up RDesigneur
+- Set up interface to Mumbl
+
+============================================================================
+23 Mar.
+Set up code for Dsolve to take NeuroMesh or CylMesh. Long way from testing,
+but it compiles. Also the FastMatrixElim tests are now being performed
+in the unit tests.
+
+============================================================================

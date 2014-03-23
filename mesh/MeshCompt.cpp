@@ -51,10 +51,15 @@ void MeshCompt::innerResetStencil()
 	m_ = coreStencil_;
 }
 
-unsigned int MeshCompt::getStencil( unsigned int meshIndex,
+unsigned int MeshCompt::getStencilRow( unsigned int meshIndex,
 			const double** entry, const unsigned int** colIndex ) const
 {
 		return m_.getRow( meshIndex, entry, colIndex );
+}
+
+const SparseMatrix< double >& MeshCompt::getStencil() const
+{
+		return coreStencil_;
 }
 
 

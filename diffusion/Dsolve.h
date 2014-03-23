@@ -37,10 +37,21 @@ class Dsolve: public ZombiePoolInterface
 		//////////////////////////////////////////////////////////////////
 		unsigned int getNumVarPools() const;
 
-		void setPath( const Eref& e, string v );
-		string getPath( const Eref& e ) const;
+		void setStoich( Id id );
+		Id getStoich() const;
+		void setCompartment( Id id );
+		Id getCompartment() const;
 
 		unsigned int getNumVoxels() const;
+
+		vector< double > getNvec( unsigned int pool ) const;
+		void setNvec( unsigned int pool, vector< double > vec );
+
+		//////////////////////////////////////////////////////////////////
+		// Dest Finfos
+		//////////////////////////////////////////////////////////////////
+		void process( const Eref& e, ProcPtr p );
+		void reinit( const Eref& e, ProcPtr p );
 
 		//////////////////////////////////////////////////////////////////
 		// Inherited virtual funcs from ZombiePoolInterface
@@ -53,42 +64,27 @@ class Dsolve: public ZombiePoolInterface
 		void setDiffConst( const Eref& e, double value );
 
 		void setNumPools( unsigned int num );
+		unsigned int getNumPools() const;
 
 		//////////////////////////////////////////////////////////////////
 		// Model traversal and building functions
 		//////////////////////////////////////////////////////////////////
-		unsigned int getNumPools() const;
 		unsigned int convertIdToPoolIndex( const Eref& e ) const;
 
-		/**
-		 * zombifyModel marches through the specified id list and 
-		 * converts all entries into zombies. The first arg e is the
-		 * Eref of the Stoich itself.
-		 */
-		void zombifyModel( const Eref& e, const vector< Id >& elist );
-
-		/**
-		 * Converts back to ExpEuler type basic kinetic Elements.
-		 */
-		void unZombifyModel();
-
+		// This key function does the work. Should be called after 
+		// all the stoich and compartment stuff is assigned.
+		void build();
 
 		/**
 		 * Utility func for debugging: Prints N_ matrix
 		 */
 		void print() const;
 
-#ifdef USE_GSL
-		static int gslFunc( double t, const double* y, double* yprime, void* s );
-		int innerGslFunc( double t, const double* y, double* yprime,
-			unsigned int meshIndex );
-#endif // USE_GSL
-
-
 		//////////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();
 	private:
-		string path_;
+		Id compartment_;
+		Id stoich_;
 
 		unsigned int numTotPools_;
 		unsigned int numLocalPools_;

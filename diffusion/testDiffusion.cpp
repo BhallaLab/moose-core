@@ -175,8 +175,7 @@ Linear cable, 12 segments.
 	FastMatrixElim fe;
 	vector< Triplet< double > > fops;
 	fe.makeTestMatrix( test, numCompts );
-	fe.print();
-	cout << endl << endl;
+	// fe.print();
 	vector< unsigned int > parentVoxel;
 	parentVoxel.insert( parentVoxel.begin(), &parents[0], &parents[numCompts] );
 	fe.hinesReorder( parentVoxel );
@@ -190,20 +189,21 @@ Linear cable, 12 segments.
 	shuf[1] = 0;
 	fe.shuffleRows( shuf );
 	*/
-	fe.print();
-	cout << endl << endl;
+	// fe.print();
 	FastMatrixElim foo = fe;
 
 	vector< unsigned int > diag;
 	vector< double > diagVal;
 	fe.buildForwardElim( diag, fops );
-	fe.print();
+	// fe.print();
 	fe.buildBackwardSub( diag, fops, diagVal );
 	vector< double > y( numCompts, 1.0 );
 	vector< double > ones( numCompts, 1.0 );
 	FastMatrixElim::advance( y, fops, diagVal );
+	/*
 	for ( unsigned int i = 0; i < numCompts; ++i )
 		cout << "y" << i << "]=	" << y[i] << endl;
+		*/
 
 	// Here we verify the answer
 	
@@ -213,10 +213,9 @@ Linear cable, 12 segments.
 			alle.push_back( foo.get( i, j ) );
 		}
 	}
-	cout << "myCode: " << 
-			checkAns( &alle[0], numCompts, &y[0], &ones[0] ) << endl;
+	// cout << "myCode: " << checkAns( &alle[0], numCompts, &y[0], &ones[0] ) << endl;
 
-
+	assert(	checkAns( &alle[0], numCompts, &y[0], &ones[0] ) < 1e-25 );
 
 	/////////////////////////////////////////////////////////////////////
 	// Here we do the gsl test.
@@ -233,14 +232,13 @@ Linear cable, 12 segments.
 	vector< double > gslAns( numCompts );
 	for ( unsigned int i = 0; i < numCompts; ++i ) {
 		gslAns[i] = gsl_vector_get( x, i );
-		cout << "x[" << i << "]=	" << gslAns[i] << endl;
+		// cout << "x[" << i << "]=	" << gslAns[i] << endl;
 	}
-	/*
-	*/
-	cout << "GSL: " << checkAns( test, numCompts, &gslAns[0], &ones[0] ) << endl;
+	// cout << "GSL: " << checkAns( test, numCompts, &gslAns[0], &ones[0] ) << endl;
+	assert( checkAns( test, numCompts, &gslAns[0], &ones[0] ) < 1e-25 );
 	gsl_vector_free( x );
 
-
+	cout << "." << flush;
 }
 
 void testSorting()
@@ -252,13 +250,88 @@ void testSorting()
 	vector< double > entry;
 	entry.insert( entry.begin(), d, d+10);
 	sortByColumn( col, entry );
+
+	for ( unsigned int i = 0; i < col.size(); ++i )
+		assert( col[i] == (i + 1) * 10 );
+
+	assert( entry[0] == 6 );
+	assert( entry[1] == 1 );
+	assert( entry[2] == 7 );
+	assert( entry[3] == 2 );
+	assert( entry[4] == 8 );
+	assert( entry[5] == 3 );
+	assert( entry[6] == 9 );
+	assert( entry[7] == 4 );
+	assert( entry[8] == 10 );
+	assert( entry[9] == 5 );
+
+	/*
 	cout << "testing sorting\n";
 	for ( unsigned int i = 0; i < col.size(); ++i ) {
 		cout << "d[" << i << "]=	" << k[i] << 
 		   ", col[" << i << "]= " <<	col[i] << ", e=" << entry[i] << endl;
 	}
 	cout << endl;
+	*/
+	cout << "." << flush;
 }
+
+#if 0
+void testBuildTree()
+{
+	static double test[] = {
+		1,  2,  3,  4,  0,  0,  0,  0,  0,  0,  0,
+		5,  6,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+		7,  0,  8,  9,  0,  0,  0,  0, 10,  0,  0,
+		11, 0, 12, 13,  0,  0,  0,  0,  0,  0, 14,
+		0,  0,  0,  0, 15, 16,  0,  0, 17, 18,  0,
+		0,  0,  0,  0, 19, 20, 21,  0, 22,  0,  0,
+		0,  0,  0,  0,  0, 23, 24, 25,  0,  0,  0,
+		0,  0,  0,  0,  0,  0, 26, 27,  0,  0,  0,
+		0,  0, 28,  0, 29, 30,  0,  0, 31,  0,  0,
+		0,  0,  0,  0, 32,  0,  0,  0,  0, 33,  0,
+		0,  0,  0, 34,  0,  0,  0,  0,  0,  0, 35,
+	};
+	const unsigned int numCompts = 11;
+	FastMatrixElim fe;
+	fe.makeTestMatrix( test, numCompts );
+	fe.print();
+	vector< unsigned int > parentVoxel;
+	bool ret = fe.buildTree( 0, parentVoxel );
+	assert( ret );
+	assert( parentVoxel[0] == static_cast< unsigned int >( -1 ) );
+	assert( parentVoxel[1] == 0 );
+	assert( parentVoxel[2] == 0 );
+	assert( parentVoxel[3] == 0 );
+	assert( parentVoxel[8] == 2 );
+	assert( parentVoxel[10] == 3 );
+	assert( parentVoxel[5] == 4 );
+	assert( parentVoxel[9] == 4 );
+	assert( parentVoxel[6] == 5 );
+	assert( parentVoxel[7] == 6 );
+
+	assert( parentVoxel[10] == 2 );
+
+	/*
+	 * This is the sequence of traversal. x means empty, s means sibling,
+	 * . means below diagonal. The numbers are the sequence.
+	static double traverseIndex[] = {
+	// col  1   2   3   4   5   6   7   8   9   10
+		#,  1,  2,  3,  x,  x,  x,  x,  x,  x,  x,
+		.,  #,  x,  x,  x,  x,  x,  x,  x,  x,  x,
+		.,  x,  #,  s,  x,  x,  x,  x,  4,  x,  x,
+		.,  x,  .,  #,  x,  x,  x,  x,  x,  x,  5,
+		x,  x,  x,  x,  #,  6,  x,  x,  s,  7,  x,
+		x,  x,  x,  x,  .,  #,  8,  x,  s,  x,  x,
+		x,  x,  x,  x,  x,  .,  #,  9,  x,  x,  x,
+		x,  x,  x,  x,  x,  x,  .,  #,  x,  x,  x,
+		x,  x,  .,  x,  .,  .,  x,  x,  #,  x,  x,
+		x,  x,  x,  x,  .,  x,  x,  x,  x,  #,  x,
+		x,  x,  x,  .,  x,  x,  x,  x,  x,  x,  #,
+	};
+	*/
+}
+#endif
 
 void testDiffusion()
 {

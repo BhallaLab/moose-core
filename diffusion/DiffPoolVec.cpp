@@ -6,52 +6,16 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
-#include "header.h"
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <cassert>
+#include <string>
+#include <iostream>
+using namespace std;
+
 #include "SparseMatrix.h"
-#include "ZombiePoolInterface.h"
-#include "KinSparseMatrix.h"
 #include "DiffPoolVec.h"
-
-#define EPSILON 1e-15
-
-/*
-const Cinfo* DiffPoolVec::initCinfo()
-{
-		//////////////////////////////////////////////////////////////
-		// Field Definitions:
-		//////////////////////////////////////////////////////////////
-		Static ReadOnlyValueFinfo< DiffPoolVec, Id > poolId(
-			"poolId",
-			"Identifies which pool is handled by this DiffPoolVec"
-			&DiffPoolVec::getPoolId
-		);
-
-		//////////////////////////////////////////////////////////////
-		// MsgDest Definitions:
-		//////////////////////////////////////////////////////////////
-		//////////////////////////////////////////////////////////////
-		// SrcFinfo Definitions: All inherited.
-		//////////////////////////////////////////////////////////////
-		//////////////////////////////////////////////////////////////
-		// SharedMsg Definitions: All inherited.
-		//////////////////////////////////////////////////////////////
-	static Finfo* poolFinfos[] = {
-		&increment,			// DestFinfo
-		&decrement,			// DestFinfo
-	};
-
-	static Dinfo< Pool > dinfo;
-	static Cinfo poolCinfo (
-		"Pool",
-		PoolBase::initCinfo(),
-		poolFinfos,
-		sizeof( poolFinfos ) / sizeof ( Finfo* ),
-		&dinfo
-	);
-
-	return &poolCinfo;
-}
-*/
 
 /**
  * Default is to create it with a single compartment, independent of any
@@ -86,6 +50,17 @@ void DiffPoolVec::setN( unsigned int voxel, double v )
 	n_[ voxel ] = v;
 }
 
+const vector< double >& DiffPoolVec::getNvec() const
+{
+	return n_;
+}
+
+void DiffPoolVec::setNvec( const vector< double >& vec )
+{
+	assert( vec.size() == n_.size() );
+	n_ = vec;
+}
+
 double DiffPoolVec::getDiffConst() const
 {
 	return diffConst_;
@@ -96,32 +71,25 @@ void DiffPoolVec::setDiffConst( double v )
 	diffConst_ = v;
 }
 
-void DiffPoolVec::process() // Not called by the clock, but by parent.
+double DiffPoolVec::getMotorConst() const
 {
-	if ( ops_.size() > 0 )
-		advance();
+	return motorConst_;
 }
 
-void DiffPoolVec::reinit() // Not called by the clock, but by parent.
+void DiffPoolVec::setMotorConst( double v )
 {
-	assert( n_.size() == nInit_.size() );
-	n_ = nInit_;
-}
-
-void DiffPoolVec::setPool( Id pool )
-{
-	pool_ = pool;
-}
-
-Id DiffPoolVec::getPool() const
-{
-	return pool_;
+	motorConst_ = v;
 }
 
 void DiffPoolVec::setNumVoxels( unsigned int num ) 
 {
 	nInit_.resize( num, 0.0 );
 	n_.resize( num, 0.0 );
+}
+
+unsigned int DiffPoolVec::getNumVoxels() const
+{
+	return n_.size();
 }
 
 void DiffPoolVec::setOps(const vector< Triplet< double > >& ops,
@@ -132,15 +100,21 @@ void DiffPoolVec::setOps(const vector< Triplet< double > >& ops,
 	diagVal_ = diagVal;
 }
 
-void DiffPoolVec::advance()
+void DiffPoolVec::advance( double dt )
 {
 	for ( vector< Triplet< double > >::const_iterator
 				i = ops_.begin(); i != ops_.end(); ++i )
-		n_[i->c_] -= n_[i->b_] * i->a_;
+		n_[i->c_] -= n_[i->b_] * i->a_ * dt;
 
 	assert( n_.size() == diagVal_.size() );
 	vector< double >::iterator iy = n_.begin();
 	for ( vector< double >::const_iterator
 				i = diagVal_.begin(); i != diagVal_.end(); ++i )
 		*iy++ *= *i;
+}
+
+void DiffPoolVec::reinit() // Not called by the clock, but by parent.
+{
+	assert( n_.size() == nInit_.size() );
+	n_ = nInit_;
 }

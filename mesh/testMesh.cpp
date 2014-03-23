@@ -687,13 +687,13 @@ void testCubeMeshExtendStencil()
 
 	const double* entry;
 	const unsigned int* colIndex;
-	unsigned int num = cm0.getStencil( 0, &entry, &colIndex );
+	unsigned int num = cm0.getStencilRow( 0, &entry, &colIndex );
 	assert( num == 3 );
 	assert( colIndex[0] == 1 );
 	assert( colIndex[1] == 2 );
 	assert( colIndex[2] == 8 );
 
-	num = cm0.getStencil( 56, &entry, &colIndex );
+	num = cm0.getStencilRow( 56, &entry, &colIndex );
 	assert( num == 3 );
 	assert( colIndex[0] == 48 );
 	assert( colIndex[1] == 57 );
@@ -705,7 +705,7 @@ void testCubeMeshExtendStencil()
 	}
 	cm0.extendStencil( &cm1, vj );
 
-	num = cm0.getStencil( 56, &entry, &colIndex );
+	num = cm0.getStencilRow( 56, &entry, &colIndex );
 	assert( num == 4 );
 	assert( colIndex[0] == 48 );
 	assert( colIndex[1] == 57 );
@@ -713,7 +713,7 @@ void testCubeMeshExtendStencil()
 	assert( colIndex[3] == 64 );
 
 	for ( unsigned int i = 0; i < 8; ++i ) {
-		num = cm0.getStencil( 64 + i, &entry, &colIndex );
+		num = cm0.getStencilRow( 64 + i, &entry, &colIndex );
 		assert( num == 1 );
 		assert( colIndex[0] == 56 + i );
 	}
@@ -978,7 +978,7 @@ void testNeuroMeshLinear()
 	for ( unsigned int i = 0; i < numCompts; ++i ) {
 		const double* entry; 
 		const unsigned int* colIndex; 
-		unsigned int numAbut =  mc->getStencil( i, &entry, &colIndex );
+		unsigned int numAbut =  mc->getStencilRow( i, &entry, &colIndex );
 		if ( i == 0 ) {
 			assert( numAbut == 1 );
 			assert( doubleEq( entry[0], adx ) );
@@ -1103,7 +1103,7 @@ void testNeuroMeshBranching()
 			const double* entry;
 			const unsigned int* colIndex;
 			unsigned int numEntries = 
-					neuro->getStencil( i, &entry, &colIndex);
+					neuro->getStencilRow( i, &entry, &colIndex);
 			for ( unsigned int j = 0; j < numEntries; ++j ) {
 				unsigned int k = colIndex[j];
 				double delta = ( S[k]/vol[k] - S[i]/vol[i] ) * entry[j];
