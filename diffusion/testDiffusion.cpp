@@ -6,17 +6,23 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
+/*
 #include <vector>
 #include <algorithm>
 #include <cassert>
 #include <functional>
 #include <iostream>
 #include <iomanip>
-#include <gsl/gsl_linalg.h>
 //#include "/usr/include/gsl/gsl_linalg.h"
 using namespace std;
+*/
+#ifdef USE_GSL
+#include <gsl/gsl_linalg.h>
+#endif
+#include "header.h"
 #include "../basecode/SparseMatrix.h"
 #include "FastMatrixElim.h"
+#include "../shell/Shell.h"
 
 
 
@@ -276,6 +282,36 @@ void testSorting()
 	cout << "." << flush;
 }
 
+void testCellDiffn()
+{
+	Id makeCompt( Id parentCompt, Id parentObj,
+		string name, double len, double dia, double theta );
+	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	double len = 40e-6;
+	double dia = 10e-6;
+	double diffLength = 1e-6;
+	Id model = s->doCreate( "Neutral", Id(), "model", 1 );
+	Id soma = makeCompt( Id(), model, "soma", dia, dia, 90 );
+	Id dend = makeCompt( soma, model, "dend", len, 3e-6, 0 );
+	Id branch1 = makeCompt( dend, model, "branch1", len, 2e-6, 45.0 );
+	Id branch2 = makeCompt( dend, model, "branch2", len, 2e-6, -45.0 );
+	Id twig1 = makeCompt( branch1, model, "twig1", len, 1.5e-6, 90.0 );
+	Id twig2 = makeCompt( branch1, model, "twig2", len, 1.5e-6, 0.0 );
+
+	Id nm = s->doCreate( "NeuroMesh", model, "neuromesh", 1 );
+	Field< double >::set( nm, "diffLength", diffLength );
+	Field< string >::set( nm, "geometryPolicy", "cylinder" );
+	Field< Id >::set( nm, "cell", model );
+	unsigned int ns = Field< unsigned int >::get( nm, "numSegments" );
+	assert( ns == 6 );
+	unsigned int ndc = Field< unsigned int >::get( nm, "numDiffCompts" );
+	assert( ndc == 210  );
+
+	Id dsolve = s->doCreate( "Dsolve", model, "dsolve", 1 );
+
+	s->doDelete( model );
+	cout << "." << flush;
+}
 #if 0
 void testBuildTree()
 {
@@ -337,4 +373,5 @@ void testDiffusion()
 {
 	testSorting();
 	testFastMatrixElim();
+	testCellDiffn();
 }

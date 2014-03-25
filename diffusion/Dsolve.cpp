@@ -181,9 +181,12 @@ void Dsolve::setCompartment( Id id )
 	const Cinfo* c = id.element()->cinfo();
 	if ( c->isA( "NeuroMesh" ) || c->isA( "CylMesh" ) ) {
 		compartment_ = id;
+		numVoxels_ = Field< unsigned int >::get( id, "numDiffCompts" );
+		/*
 		const MeshCompt* m = reinterpret_cast< const MeshCompt* >( 
 						id.eref().data() );
 		numVoxels_ = m->getStencil().nRows();
+		*/
 	} else {
 		cout << "Warning: Dsolve::setCompartment:: compartment must be "
 				"NeuroMesh or CylMesh, you tried :" << c->name() << endl;
