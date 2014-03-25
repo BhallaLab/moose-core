@@ -2975,6 +2975,11 @@ Next steps:
 23 Mar.
 Set up code for Dsolve to take NeuroMesh or CylMesh. Long way from testing,
 but it compiles. Also the FastMatrixElim tests are now being performed
-in the unit tests.
+in the unit tests. Checkin 5190.
+
+Starting on code in testDiffusion: testCellDiffn
+============================================================================
+25 Mar. Implemented volume rescaling in ChemCompt: propagates down to child
+pools, reacs and enzs.
 
 ============================================================================
