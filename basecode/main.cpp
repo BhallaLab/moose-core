@@ -57,7 +57,7 @@ extern void testDiffusion();
 // extern void testHSolve();
 // extern void testKineticsProcess();
 // extern void testGeom();
-// extern void testMesh();
+extern void testMesh();
 // extern void testSimManager();
 // extern void testSigNeur();
 // extern void testSigNeurProcess();
@@ -280,7 +280,7 @@ void nonMpiTests( Shell* s )
 		testDiffusion();
 		// testHSolve();
 		// testGeom();
-		// testMesh();
+		testMesh();
 		// testSigNeur();
 #ifdef USE_SMOLDYN
 		// testSmoldyn();
