@@ -27,6 +27,30 @@
 #include "SpineMesh.h"
 #include "PsdMesh.h"
 
+/**
+ * This tests how volume changes in a mesh propagate to all
+ * child pools, reacs, and enzymes.
+ */
+void testVolScaling()
+{
+	extern Id makeReacTest();
+	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+
+	Id kin = makeReacTest();
+	Id subCompt =  s->doCreate( "CubeMesh", kin, "subCompt", 1 );
+	Field< double >::set( subCompt, "volume", 1e-16 );
+	Id SP = s->doCreate( "Pool", subCompt, "SP", 1 );
+	Field< double >::set( SP, "concInit", 2 );
+
+	double vol = Field< double >::get( kin, "volume" );
+
+	vol *= 10;
+	Field< double >::set( kin, "volume", vol );
+
+	s->doDelete( kin );
+	cout << "." << flush;
+}
+
 #if 0
 /**
  * Low-level test for Cylbase, no MOOSE calls
@@ -2074,6 +2098,7 @@ void testCellPortion()
 void testMesh()
 {
 	testVec();
+	testVolScaling();
 	// testCylBase();
 	// testNeuroNode();
 	// testNeuroNodeTree();

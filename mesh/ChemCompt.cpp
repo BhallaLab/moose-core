@@ -284,9 +284,62 @@ double ChemCompt::getEntireVolume( const Eref& e ) const
 	return volume_;
 }
 
+void ChemCompt::getChildConcs( const Eref& e, vector< double >& childConcs )
+	   	const
+{
+	vector< Id > kids;
+	Neutral::children( e, kids );
+	for ( vector < Id >::iterator i = kids.begin(); i != kids.end(); ++i )
+	{
+		if ( i->element()->cinfo()->isA( "Pool" ) ) {
+			childConcs.push_back( Field< double >::get( *i, "conc" ) );
+			childConcs.push_back( Field< double >::get( *i, "concInit" ) );
+		} else if ( i->element()->cinfo()->isA( "Reac" ) ) {
+			childConcs.push_back( Field< double >::get( *i, "Kf" ) );
+			childConcs.push_back( Field< double >::get( *i, "Kb" ) );
+		} else if ( i->element()->cinfo()->isA( "Enz" ) ) {
+			childConcs.push_back( Field< double >::get( *i, "Km" ) );
+		} else if ( i->element()->cinfo()->isA( "ChemCompt" ) ) {
+			// Do NOT traverse into child ChemCompts, they look after their
+			// own volumes.
+			continue;
+		}
+		getChildConcs( i->eref(), childConcs );
+	}
+}
+
+void ChemCompt::setChildConcs( const Eref& e, 
+		vector< double >::const_iterator& conc ) const
+{
+	vector< Id > kids;
+	Neutral::children( e, kids );
+	for ( vector < Id >::iterator i = kids.begin(); i != kids.end(); ++i )
+	{
+		if ( i->element()->cinfo()->isA( "Pool" ) ) {
+			Field< double >::set( *i, "conc", *conc++ );
+			Field< double >::set( *i, "concInit", *conc++ );
+		} else if ( i->element()->cinfo()->isA( "Reac" ) ) {
+			Field< double >::set( *i, "Kf", *conc++ );
+			Field< double >::set( *i, "Kb", *conc++ );
+		} else if ( i->element()->cinfo()->isA( "Enz" ) ) {
+			Field< double >::set( *i, "Km", *conc++ );
+		} else if ( i->element()->cinfo()->isA( "ChemCompt" ) ) {
+			// Do NOT traverse into child ChemCompts, they look after their
+			// own volumes.
+			continue;
+		}
+		setChildConcs( i->eref(), conc );
+	}
+}
+
 void ChemCompt::setEntireVolume( const Eref& e, double volume )
 {
+	vector< double > childConcs;
+	getChildConcs( e, childConcs );
 	buildDefaultMesh( e, volume, getNumEntries() );
+	vector< double >::const_iterator conc = childConcs.begin();
+	setChildConcs( e, conc );
+	assert( conc == childConcs.end() );
 }
 
 double ChemCompt::getVoxelVolume( const Eref& e, unsigned int dataIndex ) const

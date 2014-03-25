@@ -146,6 +146,31 @@ class ChemCompt
 		static double distance( double x, double y, double z );
 
 		//////////////////////////////////////////////////////////////////
+		// Utility function for volume rescaling
+		//////////////////////////////////////////////////////////////////
+		/**
+		 * Recursively traverses all children, depth_first, scooping up 
+		 * concentration terms: 
+		 * conc and concInit for pools, Kf and Kb for Reacs, and
+		 * Km for enzymes. These are inserted in order into the vector
+		 * of childConcs. Does not traverse into children of other
+		 * ChemCompts
+		 */
+		void getChildConcs( const Eref& e, vector< double >& childConcs ) 
+				const;
+
+		/**
+		 * Recursively traverses all children, depth_first, restoring
+		 * concentration terms as scooped up by getChildConcs. Does 
+		 * conc and concInit for pools, Kf and Kb for Reacs, and
+		 * Km for enzymes. These are restored in order into the vector
+		 * of childConcs. Does not traverse into children of other
+		 * ChemCompts. 
+		 */
+		void setChildConcs( const Eref& e, 
+					vector< double >::const_iterator& childConcs ) const;
+
+		//////////////////////////////////////////////////////////////////
 		// Utility function for diffusion handling
 		//////////////////////////////////////////////////////////////////
 		/**
