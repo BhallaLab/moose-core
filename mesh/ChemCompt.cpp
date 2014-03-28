@@ -291,13 +291,13 @@ void ChemCompt::getChildConcs( const Eref& e, vector< double >& childConcs )
 	Neutral::children( e, kids );
 	for ( vector < Id >::iterator i = kids.begin(); i != kids.end(); ++i )
 	{
-		if ( i->element()->cinfo()->isA( "Pool" ) ) {
+		if ( i->element()->cinfo()->isA( "PoolBase" ) ) {
 			childConcs.push_back( Field< double >::get( *i, "conc" ) );
 			childConcs.push_back( Field< double >::get( *i, "concInit" ) );
-		} else if ( i->element()->cinfo()->isA( "Reac" ) ) {
+		} else if ( i->element()->cinfo()->isA( "ReacBase" ) ) {
 			childConcs.push_back( Field< double >::get( *i, "Kf" ) );
 			childConcs.push_back( Field< double >::get( *i, "Kb" ) );
-		} else if ( i->element()->cinfo()->isA( "Enz" ) ) {
+		} else if ( i->element()->cinfo()->isA( "EnzBase" ) ) {
 			childConcs.push_back( Field< double >::get( *i, "Km" ) );
 		} else if ( i->element()->cinfo()->isA( "ChemCompt" ) ) {
 			// Do NOT traverse into child ChemCompts, they look after their
@@ -315,13 +315,13 @@ void ChemCompt::setChildConcs( const Eref& e,
 	Neutral::children( e, kids );
 	for ( vector < Id >::iterator i = kids.begin(); i != kids.end(); ++i )
 	{
-		if ( i->element()->cinfo()->isA( "Pool" ) ) {
+		if ( i->element()->cinfo()->isA( "PoolBase" ) ) {
 			Field< double >::set( *i, "conc", *conc++ );
 			Field< double >::set( *i, "concInit", *conc++ );
-		} else if ( i->element()->cinfo()->isA( "Reac" ) ) {
+		} else if ( i->element()->cinfo()->isA( "ReacBase" ) ) {
 			Field< double >::set( *i, "Kf", *conc++ );
 			Field< double >::set( *i, "Kb", *conc++ );
-		} else if ( i->element()->cinfo()->isA( "Enz" ) ) {
+		} else if ( i->element()->cinfo()->isA( "EnzBase" ) ) {
 			Field< double >::set( *i, "Km", *conc++ );
 		} else if ( i->element()->cinfo()->isA( "ChemCompt" ) ) {
 			// Do NOT traverse into child ChemCompts, they look after their

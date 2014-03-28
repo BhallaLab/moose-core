@@ -250,6 +250,7 @@ void FastMatrixElim::buildForwardElim( vector< unsigned int >& diag,
 			}
 		}
 	}
+	assert( diag.size() == nrows_ );
 	for ( unsigned int i = 0; i < nrows_; ++i ) {
 		double d = N_[diag[i]];
 		unsigned int diagend = rowStart_[ i + 1 ];
@@ -353,25 +354,73 @@ void FastMatrixElim::buildBackwardSub( vector< unsigned int >& diag,
 	*/
 }
 
+/**
+ * Put in diff and transport terms and also fill in the diagonal
+ * The terms are:
+ * n-1:    dt*(D+M)*adx(-)
+ * n:   1 -dt*[ D*adx(-) +D*adx(+) + M*adx(+) ]
+ * n+1:    dt*D*adx(+)
+ * Note that there will be only one parent term but possibly many
+ * distal terms.
+ */
 void FastMatrixElim::setDiffusionAndTransport( 
 			const vector< unsigned int >& parentVoxel,
-			double diffConst, double motorConst )
+			double diffConst, double motorConst,
+		   	double dt )
 {
+	FastMatrixElim m; 
+	m.nrows_ = m.ncolumns_ = nrows_;
+	m.rowStart_.resize( nrows_ + 1 );
+	m.rowStart_[0] = 0;
+	for ( unsigned int i = 1; i <= nrows_; ++i ) {
+		// Insert an entry for diagonal in each.
+		m.rowStart_[i] = rowStart_[i] + i; 
+	}
 	for ( unsigned int i = 0; i < nrows_; ++i ) {
+		double proximalTerms = 0.0;
+		double distalTerms = 0.0;
+		double term = 0.0;
+		bool pendingDiagonal = true;
+		unsigned int diagonalIndex = EMPTY_VOXEL;
 		for ( unsigned int j = rowStart_[i]; j < rowStart_[i+1]; ++j ) {
-			if ( colIndex_[j] != i ) {
-				double scale = 1.0;
-				// Treat transport as something either to or from soma.
-				// The motor direction is based on this.
-				// Assume no transport between sibling compartments.
-				if ( parentVoxel[colIndex_[j]] == i )
-					scale = diffConst + motorConst;
-				else if ( parentVoxel[i] == colIndex_[j] )
-					scale = diffConst - motorConst;
-				N_[j] *= scale;
+			// Treat transport as something either to or from soma.
+			// The motor direction is based on this.
+			// Assume no transport between sibling compartments.
+			if ( parentVoxel[colIndex_[j]] == i ) {
+				term = N_[j] * dt * ( diffConst + motorConst );
+				proximalTerms += N_[j];
+			} else {
+				term = N_[j] * dt * diffConst;
+				distalTerms += N_[j];
+			}
+			if ( colIndex_[j] < i ) {
+				m.colIndex_.push_back( colIndex_[j] );
+				m.N_.push_back( term );
+			} else if ( colIndex_[j] == i ) {
+				assert( 0 );
+			} else {
+				if ( pendingDiagonal ) {
+					pendingDiagonal = false;
+					diagonalIndex = m.N_.size();
+					m.colIndex_.push_back( i ); // diagonal
+					m.N_.push_back( 0 ); // placeholder
+				}
+				m.colIndex_.push_back( colIndex_[j] );
+				m.N_.push_back( term );
 			}
 		}
+		if ( pendingDiagonal ) {
+			diagonalIndex = m.N_.size();
+			m.colIndex_.push_back( i ); // diagonal
+			m.N_.push_back( 0 ); // placeholder
+		}
+		assert( diagonalIndex != EMPTY_VOXEL );
+		m.N_[diagonalIndex] = 1.0 - dt * ( 
+				diffConst * ( proximalTerms + distalTerms ) +
+				motorConst * distalTerms 
+			);
 	}
+	*this = m;
 }
 
 //////////////////////////////////////////////////////////////////////////
