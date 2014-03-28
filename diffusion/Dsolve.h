@@ -73,7 +73,7 @@ class Dsolve: public ZombiePoolInterface
 
 		// This key function does the work. Should be called after 
 		// all the stoich and compartment stuff is assigned.
-		void build();
+		void build( double dt );
 
 		/**
 		 * Utility func for debugging: Prints N_ matrix

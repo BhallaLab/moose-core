@@ -74,7 +74,7 @@ class FastMatrixElim: public SparseMatrix< double >
 		 */
 		void setDiffusionAndTransport( 
 			const vector< unsigned int >& parentVoxel,
-			double diffConst, double motorConst );
+			double diffConst, double motorConst, double dt );
 
 		/**
 		 * Does the actual computation of the matrix inversion, which is
