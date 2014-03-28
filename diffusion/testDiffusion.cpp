@@ -282,6 +282,59 @@ void testSorting()
 	cout << "." << flush;
 }
 
+void testSetDiffusionAndTransport()
+{
+	static double test[] = {
+		0,  2,  0,  0,  0,  0,
+		1,  0,  2,  0,  0,  0,
+		0,  1,  0,  2,  0,  0,
+		0,  0,  1,  0,  2,  0,
+		0,  0,  0,  1,  0,  2,
+		0,  0,  0,  0,  1,  0,
+	};
+	const unsigned int numCompts = 6;
+	FastMatrixElim fm;
+	fm.makeTestMatrix( test, numCompts );
+	vector< unsigned int > parentVoxel( numCompts );
+	parentVoxel[0] = -1;
+	parentVoxel[1] = 0;
+	parentVoxel[2] = 1;
+	parentVoxel[3] = 2;
+	parentVoxel[4] = 3;
+	parentVoxel[5] = 4;
+
+	// cout << endl;
+	// fm.print();
+	// cout << endl;
+	// fm.printInternal();
+	fm.setDiffusionAndTransport( parentVoxel, 1, 10, 0.1 );
+	// cout << endl;
+	// fm.print();
+	// cout << endl;
+	// fm.printInternal();
+
+	for( unsigned int i =0; i < numCompts; ++i ) {
+		unsigned int start = 0;
+		if ( i > 0 )
+			start = i - 1;
+		for( unsigned int j = start ; j < i+1 && j < numCompts ; ++j ) {
+			if ( i == j + 1 )
+				assert( doubleEq( fm.get( i, j ), 0.1 ) );
+			else if ( i + 1 == j ) {
+				assert( doubleEq( fm.get( i, j ), 2.2 ) );
+			} else if ( i == j ) {
+				if ( i == 0 )
+					assert( doubleEq( fm.get( i, j ), 0.8 ) );
+				else if ( i == numCompts - 1 )
+					assert( doubleEq( fm.get( i, j ), -0.1 ) );
+				else 
+					assert( doubleEq( fm.get( i, j ), -0.3 ) );
+			}
+		}
+	}
+	cout << "." << flush;
+}
+
 void testCellDiffn()
 {
 	Id makeCompt( Id parentCompt, Id parentObj,
@@ -308,6 +361,12 @@ void testCellDiffn()
 	assert( ndc == 210  );
 
 	Id dsolve = s->doCreate( "Dsolve", model, "dsolve", 1 );
+	Field< Id >::set( dsolve, "compartment", nm );
+	// Next: build by doing reinit
+	s->doUseClock( "/model/dsolve", "process", 1 );
+	s->doSetClock( 1, 1e-3 );
+	// Then find a way to test it.
+	s->doReinit();
 
 	s->doDelete( model );
 	cout << "." << flush;
@@ -373,5 +432,6 @@ void testDiffusion()
 {
 	testSorting();
 	testFastMatrixElim();
+	testSetDiffusionAndTransport();
 	testCellDiffn();
 }

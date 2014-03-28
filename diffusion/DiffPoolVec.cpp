@@ -95,7 +95,7 @@ unsigned int DiffPoolVec::getNumVoxels() const
 void DiffPoolVec::setOps(const vector< Triplet< double > >& ops,
 	const vector< double >& diagVal )
 {
-	assert( diagVal_.size() == n_.size() );
+	assert( diagVal.size() == n_.size() );
 	ops_ = ops;
 	diagVal_ = diagVal;
 }

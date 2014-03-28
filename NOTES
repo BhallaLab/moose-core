@@ -2982,4 +2982,25 @@ Starting on code in testDiffusion: testCellDiffn
 25 Mar. Implemented volume rescaling in ChemCompt: propagates down to child
 pools, reacs and enzs.
 
+Tested in snippet, oddly it doesn't work there.
+
+============================================================================
+28 Mar. This turned out to be really silly. I had not scanned through base
+classes for Pools, Reacs and Enz. So the objects were invisible when zombified.
+
+Now on to diffusion.
+
+Working through setup. There is a problem in how the mesh sets up the
+stencil sparse matrix for the diffusion connectivity: It has an empty diagonal.
+
+nC(t) = nC(t+1) - dt*[(D - M)*(n+1)C(t+1)*adx(+) + (D + M)*(n-1)C(t+1)*adx(-) -
+ nC(t+1)*D*(adx(+)+adx(-)]
+
+So the terms are:
+n-1:    dt*(D+M)*adx(-)
+n:   1 -dt*[ D*adx(-) +D*adx(+) + M*adx(+) ]
+n+1:    dt*D*adx(+)
+
+Implemented this, now the matrices are made but yet to test.
+
 ============================================================================
