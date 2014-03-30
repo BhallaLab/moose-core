@@ -96,6 +96,12 @@ const Cinfo* CylMesh::initCinfo()
 			&CylMesh::getLambda
 		);
 
+		static ReadOnlyValueFinfo< CylMesh, unsigned int > numDiffCompts(
+			"numDiffCompts",
+			"Number of diffusive compartments in model",
+			&CylMesh::innerGetNumEntries
+		);
+
 		static ReadOnlyValueFinfo< CylMesh, double > totLength(
 			"totLength",
 			"Total length of cylinder",
@@ -121,6 +127,7 @@ const Cinfo* CylMesh::initCinfo()
 		&r1,			// Value
 		&lambda,			// Value
 		&coords,		// Value
+		&numDiffCompts,		// ReadOnlyValue
 		&totLength,		// ReadOnlyValue
 	};
 
@@ -556,10 +563,12 @@ void CylMesh::innerHandleNodeInfo(
 	vector< vector< unsigned int > > outgoingEntries;
 	vector< vector< unsigned int > > incomingEntries;
 	double oldvol = getMeshEntryVolume( 0 );
+	/*
 	meshSplit()->send( e,
 		oldvol,
 		vols, localEntries,
 		outgoingEntries, incomingEntries );
+		*/
 }
 //////////////////////////////////////////////////////////////////
 
@@ -618,12 +627,42 @@ vector< unsigned int > CylMesh::getParentVoxel() const
 	return ret;
 }
 
+const vector< double >& CylMesh::getVoxelVolume() const
+{
+	static vector< double > vol;
+	vol.resize( numEntries_ );
+	for ( unsigned int i = 0; i < numEntries_; ++i )
+		vol[i] = getMeshEntryVolume( i );
+	return vol;
+}
+
+const vector< double >& CylMesh::getVoxelArea() const
+{
+	static vector< double > area;
+	area.resize( numEntries_ );
+	for ( unsigned int i = 0; i < numEntries_; ++i ) {
+		double frac = ( 0.5 + static_cast< double >( i ) ) / 
+			static_cast< double >( numEntries_ );
+		double r = r0_ * ( 1.0 - frac ) + r1_ * frac;
+		area[i] = r * r * PI;
+	}
+	return area;
+}
+
+const vector< double >& CylMesh::getVoxelLength() const
+{
+	static vector< double > length;
+	length.assign( numEntries_, totLen_ / numEntries_ );
+	return length;
+}
+
 //////////////////////////////////////////////////////////////////
 // Utility function to transmit any changes to target nodes.
 //////////////////////////////////////////////////////////////////
 
 void CylMesh::transmitChange( const Eref& e )
 {
+		/*
 	Id meshEntry( e.id().value() + 1 );
 	assert( 
 		meshEntry.eref().data() == reinterpret_cast< char* >( lookupEntry( 0 ) )
@@ -659,6 +698,7 @@ void CylMesh::transmitChange( const Eref& e )
 	// Reacs to deal with the new mesh. They then update the stoich.
 	lookupEntry( 0 )->triggerRemesh( meshEntry.eref(), 
 		oldvol, startEntry, localIndices, vols );
+		*/
 }
 
 //////////////////////////////////////////////////////////////////

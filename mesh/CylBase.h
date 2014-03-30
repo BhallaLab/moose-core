@@ -69,6 +69,13 @@ class CylBase
 		double getDiffusionArea( 
 			const CylBase& parent, unsigned int index ) const;
 
+		/// Return cross-section area of middle of specified voxel.
+		double getMiddleArea( 
+			const CylBase& parent, unsigned int index ) const;
+
+		/// Return length of voxel. All are equal.
+		double getVoxelLength() const;
+
 		/**
 		 * Utility commands for building interface to cube mesh
 		 */

@@ -335,6 +335,75 @@ void testSetDiffusionAndTransport()
 	cout << "." << flush;
 }
 
+void testCylDiffn()
+{
+	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	double len = 25e-6;
+	double r0 = 1e-6;
+	double r1 = 1e-6;
+	double diffLength = 1e-6; // 1e-6 is the highest dx for which error is OK
+	double runtime = 10.0;
+	double dt = 0.1; // 0.2 is the highest dt for which the error is in bounds
+	// Should set explicitly, currently during creation of DiffPoolVec
+	double diffConst = 1.0e-12; 
+	Id model = s->doCreate( "Neutral", Id(), "model", 1 );
+	Id cyl = s->doCreate( "CylMesh", model, "cyl", 1 );
+	Field< double >::set( cyl, "r0", r0 );
+	Field< double >::set( cyl, "r1", r1 );
+	Field< double >::set( cyl, "x0", 0 );
+	Field< double >::set( cyl, "x1", len );
+	Field< double >::set( cyl, "lambda", diffLength );
+	unsigned int ndc = Field< unsigned int >::get( cyl, "numMesh" );
+	assert( ndc == static_cast< unsigned int >( round( len / diffLength )));
+
+	Id dsolve = s->doCreate( "Dsolve", model, "dsolve", 1 );
+	Field< Id >::set( dsolve, "compartment", cyl );
+	// Next: build by doing reinit
+	s->doUseClock( "/model/dsolve", "process", 1 );
+	s->doSetClock( 1, dt );
+	// Then find a way to test it.
+	s->doReinit();
+
+	vector< double > nvec = 
+		LookupField< unsigned int, vector< double > >::get( 
+						dsolve, "nVec", 0);
+	assert( nvec.size() == ndc );
+	nvec[0] = 1;
+	LookupField< unsigned int, vector< double > >::set( dsolve, "nVec", 
+					0, nvec);
+
+	s->doStart( runtime );
+
+	nvec = LookupField< unsigned int, vector< double > >::get( 
+						dsolve, "nVec", 0);
+	cout << endl;
+	for ( unsigned int i = 0; i < nvec.size(); ++i )
+		cout << nvec[i] << "	";
+	cout << endl;
+
+	double dx = diffLength;
+	double err = 0.0;
+	double analyticTot = 0.0;
+	double myTot = 0.0;
+	for ( unsigned int i = 0; i < nvec.size(); ++i ) {
+		double x = i * dx + dx * 0.5;
+		// This part is the solution as a func of x,t.
+		double y = dx *  // This part represents the init n of 1 in dx
+			( 1.0 / sqrt( PI * diffConst * runtime ) ) * 
+			exp( -x * x / ( 4 * diffConst * runtime ) ); 
+		err += ( y - nvec[i] ) * ( y - nvec[i] );
+		//cout << i << "	" << x << "	" << y << "	" << conc[i] << endl;
+		analyticTot += y;
+		myTot += nvec[i];
+	} 
+	cout << "analyticTot= " << analyticTot << ", myTot= " << myTot << endl;
+	assert( err < 1.0e-5 );
+
+
+	s->doDelete( model );
+	cout << "." << flush;
+}
+
 void testCellDiffn()
 {
 	Id makeCompt( Id parentCompt, Id parentObj,
@@ -367,6 +436,24 @@ void testCellDiffn()
 	s->doSetClock( 1, 1e-3 );
 	// Then find a way to test it.
 	s->doReinit();
+
+	vector< double > nvec = 
+		LookupField< unsigned int, vector< double > >::get( 
+						dsolve, "nVec", 0);
+	assert( nvec.size() == ndc );
+	nvec[0] = 1;
+	LookupField< unsigned int, vector< double > >::set( dsolve, "nVec", 
+					0, nvec);
+
+	s->doStart( 10.0 );
+
+	nvec = LookupField< unsigned int, vector< double > >::get( 
+						dsolve, "nVec", 0);
+	cout << endl;
+	for ( unsigned int i = 0; i < nvec.size(); ++i )
+		cout << nvec[i] << "	";
+	cout << endl;
+
 
 	s->doDelete( model );
 	cout << "." << flush;
@@ -433,5 +520,6 @@ void testDiffusion()
 	testSorting();
 	testFastMatrixElim();
 	testSetDiffusionAndTransport();
+	testCylDiffn();
 	testCellDiffn();
 }

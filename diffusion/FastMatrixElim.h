@@ -11,6 +11,7 @@ class FastMatrixElim: public SparseMatrix< double >
 {
 	public:
 		FastMatrixElim();
+		FastMatrixElim( unsigned int nrows, unsigned int ncolumns );
 		FastMatrixElim( const SparseMatrix< double >& orig );
 
 		void makeTestMatrix( const double* test, unsigned int numCompts );
@@ -74,6 +75,17 @@ class FastMatrixElim: public SparseMatrix< double >
 		 */
 		void setDiffusionAndTransport( 
 			const vector< unsigned int >& parentVoxel,
+			double diffConst, double motorConst, double dt );
+
+		/**
+		 * This function makes the matrix for computing diffusion and
+		 * transport equations.
+		 */
+		void buildForDiffusion( 
+			const vector< unsigned int >& parentVoxel,
+			const vector< double >& volume,
+			const vector< double >& area,
+			const vector< double >& length,
 			double diffConst, double motorConst, double dt );
 
 		/**

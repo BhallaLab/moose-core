@@ -219,6 +219,23 @@ double CylBase::getDiffusionArea(
 	return PI * r0 * r0;
 }
 
+/// Return the cross section area of the middle of the specified voxel.
+double CylBase::getMiddleArea( 
+				const CylBase& parent, unsigned int fid ) const
+{
+	assert( fid < numDivs_ );
+	if ( isCylinder_ )
+			return PI * dia_ * dia_ / 4.0;
+ 	double frac0 = ( 0.5 + static_cast< double >( fid ) ) / 
+				static_cast< double >( numDivs_ );
+	double r0 = 0.5 * ( parent.dia_ * ( 1.0 - frac0 ) + dia_ * frac0 );
+	return PI * r0 * r0;
+}
+
+double CylBase::getVoxelLength() const 
+{
+	return length_ / numDivs_;
+}
 
 
 // Select grid size. Ideally the meshes should be comparable.

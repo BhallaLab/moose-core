@@ -312,14 +312,16 @@ void NeuroMesh::updateCoords()
 	// Assign volumes and areas
 	vs_.resize( startFid );
 	area_.resize( startFid );
+	length_.resize( startFid );
 	for ( unsigned int i = 0; i < nodes_.size(); ++i ) {
 		const NeuroNode& nn = nodes_[i];
 		if ( !nn.isDummyNode() ) {
 			assert( nn.parent() < nodes_.size() );
 			const NeuroNode& parent = nodes_[ nn.parent() ];
 			for ( unsigned int j = 0; j < nn.getNumDivs(); ++j ) {
-				vs_[j + nn.startFid()] = NA * nn.voxelVolume( parent, j );
-				area_[j + nn.startFid()] = nn.getDiffusionArea( parent, j );
+				vs_[j + nn.startFid()] = nn.voxelVolume( parent, j );
+				area_[j + nn.startFid()] = nn.getMiddleArea( parent, j);
+				length_[j + nn.startFid()] = nn.getVoxelLength();
 			}
 		}
 	}
@@ -660,6 +662,20 @@ vector< unsigned int > NeuroMesh::getParentVoxel() const
 	return parentVoxel_;
 }
 
+const vector< double >& NeuroMesh::getVoxelVolume() const
+{
+	return vs_;
+}
+
+const vector< double >& NeuroMesh::getVoxelArea() const
+{
+	return area_;
+}
+
+const vector< double >& NeuroMesh::getVoxelLength() const
+{
+	return length_;
+}
 
 // Deprecated
 vector< Id > spineVec( const vector< Id >& head )

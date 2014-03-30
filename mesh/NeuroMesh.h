@@ -112,6 +112,9 @@ class NeuroMesh: public MeshCompt
 		unsigned int innerGetDimensions() const;
 
 		vector< unsigned int > getParentVoxel() const;
+		const vector< double >& getVoxelVolume() const;
+		const vector< double >& getVoxelArea() const;
+		const vector< double >& getVoxelLength() const;
 
 		//////////////////////////////////////////////////////////////////
 		// FieldElement assignment stuff for MeshEntries
@@ -272,10 +275,12 @@ class NeuroMesh: public MeshCompt
 
 		/**
 		 * Mesh junction area pre-calculations for each MeshEntry.
-		 * If we consider the Entry specified by the Index, the area
-		 * specified is the one more proximal, that is, closer to soma.
+		 * This is the cross-section area of the middle of each voxel.
 		 */
 		vector< double > area_;
+		
+		/// Pre-calculation of length of each MeshEntry
+		vector< double > length_;
 
 		double size_; /// Total Volume
 		double diffLength_;	/// Max permitted length constant for diffusion
