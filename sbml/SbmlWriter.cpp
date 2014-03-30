@@ -21,6 +21,7 @@
 #include <set>
 #include <sstream>
 #include "../shell/Shell.h"
+#include "../kinetics/lookupVolumeFromMesh.h"
 //#include "../manager/SimManager.h"
 /**
 *  write a Model after validation
@@ -106,6 +107,7 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
   sbmlDoc.setNamespaces(&xmlns);
   cremodel_ = sbmlDoc.createModel();
   cremodel_->setId(filename);
+  //cremodel_->setUnits(time);
   Id baseId(path);
     vector< ObjId > graphs;
   string plots;
@@ -116,30 +118,24 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
       vector< Id > graphsrc =LookupField< string, vector< Id > >::get(*itrgrp, "neighbors", "requestOut" );
       for (vector <Id> :: iterator itrsrc = graphsrc.begin();itrsrc != graphsrc.end();itrsrc++)
 	{  string species = nameString(Field<string> :: get(*itrsrc,"name"));
-	  //TODO: Check For graph how to I get compartment that it belongs
-	  /*vector< Id > comptplot = LookupField<string, vector< Id > > ::get(*itrsrc,"neighbours","requestVolume");
-	  for (vector <Id> :: iterator comptp = comptplot.begin();comptp != comptplot.end();comptp++)
-	    { 
-	      ObjId meshParent = Neutral::parent( comptp->eref() );
-	      cout << " if " << meshParent;
-	      string speciesCompt = nameString(Field<string>::get(ObjId(meshParent),"name") );
-	      plots += "/"+speciesCompt+"/"+species+";";
-	      cout << "plots "<<plots<<endl;
-	    }
-	  */
+	   Id comptId = getCompt(*itrsrc).id;
+	   string speciesCompt = nameString(Field<string> :: get(comptId,"name"));
+	   plots += "/"+speciesCompt+"/"+species+";";
+	   
 	}
     }
-  /*
+  
   ostringstream modelAnno;
   modelAnno << "<moose:ModelAnnotation>\n";
-  modelAnno << "<moose:runTime> " << runtime << " </moose:runTime>\n";
+  /*modelAnno << "<moose:runTime> " << runtime << " </moose:runTime>\n";
   modelAnno << "<moose:simdt> " << simdt << " </moose:simdt>\n";
   modelAnno << "<moose:plotdt> " << plotdt << " </moose:plotdt>\n";
+  */
+  //cout << " runtime " << runtime << " " << simdt << " "<<plotdt;
   modelAnno << "<moose:plots> "<< plots<< "</moose:plots>\n";
   modelAnno << "</moose:ModelAnnotation>";
   XMLNode* xnode =XMLNode::convertStringToXMLNode( modelAnno.str() ,&xmlns);
   cremodel_->setAnnotation( xnode );	
-  */
   
   UnitDefinition *ud1 = cremodel_->createUnitDefinition();
   ud1->setId("volume");
@@ -166,6 +162,7 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
       //TODO: CHECK need to check how do I get ObjectDimensions
       vector < unsigned int>dims;
       unsigned int dims_size;
+      
       /*vector <unsigned int>dims = Field <vector <unsigned int> > :: get(ObjId(*itr),"objectDimensions");
 
       if (dims.size() == 0){
