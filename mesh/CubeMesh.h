@@ -226,6 +226,9 @@ class CubeMesh: public MeshCompt
 
 		/// Inherited virtual, do nothing for now.
 		vector< unsigned int > getParentVoxel() const;
+		const vector< double >& getVoxelVolume() const;
+		const vector< double >& getVoxelArea() const;
+		const vector< double >& getVoxelLength() const;
 
 		/**
 		 * Sets up the stencil that defines how to combine neighbouring

@@ -7,6 +7,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+#include <math.h>
 #include <vector>
 #include <algorithm>
 #include <cassert>
@@ -27,6 +28,10 @@ const unsigned int SM_RESERVE = 8;
 
 FastMatrixElim::FastMatrixElim()
 	: SparseMatrix< double >()
+{;}
+
+FastMatrixElim::FastMatrixElim( unsigned int nrows, unsigned int ncolumns )
+	: SparseMatrix< double >( nrows, ncolumns )
 {;}
 
 FastMatrixElim::FastMatrixElim( const SparseMatrix< double >& orig )
@@ -445,3 +450,95 @@ void FastMatrixElim::advance( vector< double >& y,
 		*iy++ *= *i;
 }
 
+// Build up colIndices for each row.
+void buildColIndex( unsigned int nrows,
+			const vector< unsigned int >& parentVoxel,
+			vector< vector< unsigned int > >& colIndex
+	)
+{
+	colIndex.clear();
+	colIndex.resize( nrows );
+	for ( unsigned int i = 0; i < nrows; ++i ) {
+		if ( parentVoxel[i] != EMPTY_VOXEL ) {
+			colIndex[i].push_back( parentVoxel[i] ); // parent
+			colIndex[ parentVoxel[i] ].push_back( i ); // children
+		}
+		colIndex[i].push_back( i ); // diagonal: self
+	}
+	for ( unsigned int i = 0; i < nrows; ++i ) {
+		vector< unsigned int >& c = colIndex[i];
+		sort( c.begin(), c.end() );
+		// Should check that there are no duplicates.
+		for ( unsigned int j = 1; j < c.size(); ++j ) {
+			assert( c[j -1 ] != c[j] );
+		}
+	}
+}
+
+void FastMatrixElim::buildForDiffusion( 
+			const vector< unsigned int >& parentVoxel,
+			const vector< double >& volume,
+			const vector< double >& area,
+			const vector< double >& length,
+			double diffConst, double motorConst, double dt )
+{
+	// Too slow to matter.
+	if ( diffConst < 1e-18 && fabs( motorConst ) < 1e-12 ) 
+		return;
+	assert( nrows_ == parentVoxel.size() );
+	assert( nrows_ == volume.size() );
+	assert( nrows_ == area.size() );
+	assert( nrows_ == length.size() );
+	vector< vector< unsigned int > > colIndex;
+
+	buildColIndex( nrows_, parentVoxel, colIndex );
+
+	// Fill in the matrix entries for each colIndex
+	for ( unsigned int i = 0; i < nrows_; ++i ) {
+		vector< unsigned int >& c = colIndex[i];
+		vector< double > e( c.size(), 0.0 );
+		for ( unsigned int j = 0; j < c.size(); ++j ) {
+			unsigned int k = c[j]; // This is the colIndex, in order.
+			double vol = volume[k];
+			double a = area[k];
+			double len = length[k];
+			if ( k == i ) { // Diagonal term
+				e[j] = 0.0 ;
+				// Fill in diffusion from all connected voxels.
+				for ( unsigned int p = 0; p < c.size(); ++p ) {
+					unsigned int q = c[p];
+					if ( q != i ) { // Skip self
+						e[j] -= (area[q] + a)/(length[q] + len )/vol;
+					}
+				}
+				e[j] *= diffConst;
+				// Fill in motor transport
+				for ( unsigned int p = 0; p < c.size(); ++p ) {
+					unsigned int q = c[p];
+					if ( q != i ) { // Skip self
+						if ( q == parentVoxel[i] && motorConst < 0 )
+						// Handle transport toward soma
+							e[j] += motorConst * 2.0/(length[q] + len );
+						if ( p != parentVoxel[i] && motorConst > 0 )
+						// Handle transport away from soma, to children
+							e[j] -= motorConst * 2.0/(length[q] + len );
+					}
+				}
+				e[j] *= -dt; // The previous lot is the rate, so scale by dt
+				e[j] += 1.0; // term for self.
+			} else { // Not diagonal.
+				// Fill in diffusion from this entry to i.
+				e[j] = diffConst * 
+						(area[k] + a)/(length[k] + len )/volume[k];
+				// Fill in motor transport from this entry to i
+				if ( k == parentVoxel[i] && motorConst > 0 )
+					e[j] += motorConst * 2.0 / ( length[k] + len );
+				else if ( k != parentVoxel[i] && motorConst < 0 )
+					e[j] -= motorConst * 2.0 / ( length[k] + len );
+				e[j] *= -dt; // Scale the whole thing by dt.
+			}
+		}
+		// Now put it all in the sparase matrix.
+		addRow( i, e, c );
+	}
+}

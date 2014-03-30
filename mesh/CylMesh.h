@@ -94,6 +94,9 @@ class CylMesh: public MeshCompt
 		
 		/// Inherited virtual, do nothing for now.
 		vector< unsigned int > getParentVoxel() const;
+		const vector< double >& getVoxelVolume() const;
+		const vector< double >& getVoxelArea() const;
+		const vector< double >& getVoxelLength() const;
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////

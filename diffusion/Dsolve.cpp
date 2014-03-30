@@ -229,12 +229,19 @@ void Dsolve::build( double dt )
 	else
 		numLocalPools_ = 1;
 	pools_.resize( numLocalPools_ );
+	unsigned int numVoxels = m->getNumEntries();
 
 	for ( unsigned int i = 0; i < numLocalPools_; ++i ) {
-		FastMatrixElim elim( m->getStencil() );
+		bool debugFlag = false;
+		FastMatrixElim elim( numVoxels, numVoxels );
+		elim.buildForDiffusion( m->getParentVoxel(), m->getVoxelVolume(), 
+			m->getVoxelArea(), m->getVoxelLength(), 
+		   pools_[i].getDiffConst(), pools_[i].getMotorConst(), dt );
 		vector< unsigned int > parentVoxel = m->getParentVoxel();
+		/*
 		elim.setDiffusionAndTransport( parentVoxel,
 			pools_[i].getDiffConst(), pools_[i].getMotorConst(), dt );
+			*/
 		elim.hinesReorder( parentVoxel );
 		vector< unsigned int > diagIndex;
 		vector< double > diagVal;
@@ -244,6 +251,8 @@ void Dsolve::build( double dt )
 		elim.buildForwardElim( diagIndex, fops );
 		elim.buildBackwardSub( diagIndex, fops, diagVal );
 		pools_[i].setOps( fops, diagVal );
+		if (debugFlag )
+			elim.print();
 	}
 }
 

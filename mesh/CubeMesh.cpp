@@ -928,6 +928,27 @@ vector< unsigned int > CubeMesh::getParentVoxel() const
 	return ret;
 }
 
+const vector< double >& CubeMesh::getVoxelVolume() const
+{
+	static vector< double > vol;
+	assert( 0 ); // Not yet operational
+	return vol;
+}
+
+const vector< double >& CubeMesh::getVoxelArea() const
+{
+	static vector< double > area;
+	assert( 0 ); // Not yet operational
+	return area;
+}
+
+const vector< double >& CubeMesh::getVoxelLength() const
+{
+	static vector< double > length;
+	assert( 0 ); // Not yet operational
+	return length;
+}
+
 
 //////////////////////////////////////////////////////////////////
 
