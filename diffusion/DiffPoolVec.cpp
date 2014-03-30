@@ -23,7 +23,8 @@ using namespace std;
  * work on in single-compartment models.
  */
 DiffPoolVec::DiffPoolVec()
-	: n_( 1, 0.0 ), nInit_( 1, 0.0 ), diffConst_( 1.0e-12 )
+	: n_( 1, 0.0 ), nInit_( 1, 0.0 ), 
+		diffConst_( 1.0e-12 ), motorConst_( 0.0 )
 {;}
 
 double DiffPoolVec::getNinit( unsigned int voxel ) const
@@ -104,7 +105,7 @@ void DiffPoolVec::advance( double dt )
 {
 	for ( vector< Triplet< double > >::const_iterator
 				i = ops_.begin(); i != ops_.end(); ++i )
-		n_[i->c_] -= n_[i->b_] * i->a_ * dt;
+		n_[i->c_] -= n_[i->b_] * i->a_;
 
 	assert( n_.size() == diagVal_.size() );
 	vector< double >::iterator iy = n_.begin();

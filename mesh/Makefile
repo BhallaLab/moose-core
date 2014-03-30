@@ -15,6 +15,7 @@ OBJ = \
 	MeshEntry.o	\
 	CubeMesh.o	\
 	CylBase.o	\
+	CylMesh.o	\
 	NeuroNode.o	\
 	NeuroMesh.o	\
 	testMesh.o	\

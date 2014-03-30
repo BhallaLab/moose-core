@@ -3002,5 +3002,55 @@ n:   1 -dt*[ D*adx(-) +D*adx(+) + M*adx(+) ]
 n+1:    dt*D*adx(+)
 
 Implemented this, now the matrices are made but yet to test.
+Checkin 5205.
 
+The matrices cruise happily through the solution, and it isn't exploding,
+but very little diffusion seems to be taking place.
+
+============================================================================
+29 Mar.
+Re-derived the diffusion and motor calculations.
+
+Taking the compartments in order as -, 0, + from proximal to distal, we have
+
+dn0.dt|t+1 =
+	D*n-/(h-*a-)*(a0+a-)/(h0+h-) + M+*2*n-/(h0+h-)		// n- terms
+	-D*n0/(h0a0)*[(a0+a-)/(h0+h-) + (a0+a+)/(h0+h+)]	// n0 diff terms
+	-M+*n0*2*[1/(h0+h+) + 1/(h0+h-)]			// n0 motor
+	+D*n+/(h+*a+)*(a0+a+)/(h0+h+) + M-*2*n+/(h0+h+)		// n+ terms
+
+And n0(t) = n0(t+1) - delta_t*dn0/dt|t+1
+In this calculation, M+ is motor speed in the + direction, away from soma, and
+M- is motor speed toward soma.
+a is measured at the middle of each compartment.
+h is the length of each compartment.
+n-, n0, n+ are the numbers of molecules in the respective compartments.
+
+So the stencil is not enough. Will need a and h terms for all compartments. 
+Simplest is to generate vectors of them and discard the whole stencil
+business. Will have to rethink how we handle cube mesh, but this will be
+OK for NeuroMesh and for CylMesh.
+
+There is a slightly more accurate version for tapering cylinders, which uses
+the internal calculation for voxel volume as a section of a cone.
+
+dn0.dt|t+1 =
+	D*n-/(V-)*(a0+a-)/(h0+h-) + M+*2*n-/(h0+h-)		// n- terms
+	-D*n0/(V0)*[(a0+a-)/(h0+h-) + (a0+a+)/(h0+h+)]	// n0 diff terms
+	-M+*n0*2*[1/(h0+h+) + 1/(h0+h-)]			// n0 motor
+	+D*n+/(V+)*(a0+a+)/(h0+h+) + M-*2*n+/(h0+h+)		// n+ terms
+
+Since we already have these volumes pre-calculated, we can use them too.
+
+
+Implemented most of this. Now going through the compilation.
+============================================================================
+30 Mar.
+Testing proceeds, not yet working. Incorporated testCylMesh to try to 
+track down the problems in a simpler system.
+============================================================================
+31 March.
+
+Got diffusion calculations to work for CylMesh, confirmed against 
+analytical solution. Only issue now is how accurate to make it.
 ============================================================================
