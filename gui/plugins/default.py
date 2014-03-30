@@ -1032,7 +1032,7 @@ class PlotView(PlotBase):
         tablePath = re.sub('.', lambda m: {'[':'_', ']':'_'}.get(m.group(), m.group()),tablePath)
         tablePath = self.dataRoot + '/' +tablePath
         if moose.exists(tablePath):
-            tablePath = '%s_%d' % (tablePath, element.getid().value)
+            tablePath = '%s_%d' % (tablePath, element.getId().value)
         if not moose.exists(tablePath):
             table = moose.Table(tablePath)
             print 'Created', table.path, 'for plotting', '%s.%s' % (element.path, field)

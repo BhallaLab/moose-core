@@ -6,8 +6,8 @@
 # Maintainer:
 # Created: Wed Jun 30 11:18:34 2010 (+0530) 
 # Version:
-# Last-Updated: Wed May 22 14:26:59 2013 (+0530)
-#           By: subha
+# Last-Updated: Wed Mar 28 14:26:59 2014 (+0530)
+#           By: Harsha
 #     Update #: 917
 # URL:
 # Keywords:
@@ -76,7 +76,6 @@ extra_fields = ['this',
                 'me',
                 'parent',
                 'path',
-                # 'class',
                 'children',
                 'linearSize',
                 'objectDimensions',
@@ -116,7 +115,12 @@ extra_fields = ['this',
                 'spaceToMesh',
                 'surface',
                 'method',
-                'alwaysDiffuse'
+                'alwaysDiffuse',
+                'numData',
+                'numField',
+                'valueFields',
+                'sourceFields',
+                'destFields'
                 ]
         
 
@@ -206,8 +210,13 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
         if not index.isValid():
             return None
         # Replacing the `outrageous` up stuff with something sensible
-        setter = 'set_%s' % (self.fields[index.row()])
-        #print "setter",setter, "object",self.mooseObject, " ",self.mooseObject.getFieldNames('destFinfo');
+        field = self.fields[index.row()]
+        newstr = field[0]
+        newstr = newstr.upper()
+        field_string = newstr + field[1:]
+        setter = 'set%s' %(field_string)
+        #setter = 'set_%s' % (self.fields[index.row()])
+        #print " from Object setter",setter, "object",self.mooseObject, " ",self.mooseObject.getFieldNames('destFinfo');
         if index.column() == 1 and setter in self.mooseObject.getFieldNames('destFinfo'):
             flag |= QtCore.Qt.ItemIsEditable
         # !! Replaced till here
@@ -250,7 +259,6 @@ class ObjectEditView(QtGui.QTableView):
     def __init__(self, mobject, undolen=defaults.OBJECT_EDIT_UNDO_LENGTH, parent=None):
         QtGui.QTableView.__init__(self, parent)
         #self.setEditTriggers(self.DoubleClicked | self.SelectedClicked | self.EditKeyPressed)
-        print "\n mobject which is passed ",mobject
         vh = self.verticalHeader()
         vh.setVisible(False)
         hh = self.horizontalHeader()
@@ -279,7 +287,6 @@ class ObjectEditDockWidget(QtGui.QDockWidget):
     def __init__(self, mobj='/', parent=None, flags=None):
         QtGui.QDockWidget.__init__(self, parent=parent)
         mobj = moose.element(mobj)
-        print " object ",mobj
         view = ObjectEditView(mobj)
         self.view_dict = {mobj: view}
         self.setWidget(view)
