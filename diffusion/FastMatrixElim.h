@@ -52,7 +52,17 @@ class FastMatrixElim: public SparseMatrix< double >
 		 * Returns true if it succeeded in doing this; many matrices will
 		 * not reorder correctly.
 		 */
-		bool hinesReorder( const vector< unsigned int >& parentVoxel );
+		bool hinesReorder( const vector< unsigned int >& parentVoxel,
+					   vector< unsigned int >& lookupOldRowsFromNew	);
+
+		/**
+ 		 * static function. Reorders the ops and diagVal vectors so as to
+ 		 * restore the original indexing of the input vectors.
+ 		 */
+		static void opsReorder( 
+				const vector< unsigned int >& lookupOldRowsFromNew,
+				vector< Triplet< double > >& ops,
+				vector< double >& diagVal );
 
 		/**
 		 * Reorders rows of the matrix according to the vector 
@@ -68,6 +78,9 @@ class FastMatrixElim: public SparseMatrix< double >
 		 * are symmetric, returns true if symmetric.
 		 */
 		bool checkSymmetricShape() const;
+
+		bool operator==( const FastMatrixElim& other ) const;
+		bool isSymmetric() const;
 
 		/**
 		 * This function incorporates molecule-specific diffusion and

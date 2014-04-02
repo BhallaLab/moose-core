@@ -53,6 +53,9 @@ typedef vector< class T >::const_iterator constTypeIter;
 template < class T > class SparseMatrix
 {
 	public:
+		//////////////////////////////////////////////////////////////////
+		// Constructors
+		//////////////////////////////////////////////////////////////////
 		SparseMatrix()
 			: nrows_( 0 ), ncolumns_( 0 ), rowStart_( 1, 0 )
 		{
@@ -67,6 +70,42 @@ template < class T > class SparseMatrix
 			setSize( nrows, ncolumns );
 		}
 
+		//////////////////////////////////////////////////////////////////
+		// Information operations.
+		//////////////////////////////////////////////////////////////////
+
+		unsigned int nRows() const {
+			return nrows_;
+		}
+
+		unsigned int nColumns() const {
+			return ncolumns_;
+		}
+
+		unsigned int nEntries() const {
+			return N_.size();
+		}
+
+		/*
+		bool operator==()( const SparseMatrix& other ) {
+			if ( 
+				nrows_ == other.nrows_ && 
+				ncolumns_ == other.ncolumns_ &&
+				&& N_.size() == other.N_.size() &&
+				rowStart_ == other.rowStart_ &&
+				colIndex_ == other.colIndex_ ) {
+				for ( unsigned int i = 0; i < N_.size(); ++i )
+					if ( !doubleEq( N_[i], other.N_[i] ) )
+						return false;
+				return true;
+			}
+			return false;
+		}
+		*/
+
+		//////////////////////////////////////////////////////////////////
+		// Individual entry Access operations.
+		//////////////////////////////////////////////////////////////////
 		/**
 		 * Should be called only at the start. Subsequent resizing destroys
 		 * the contents.
@@ -184,6 +223,9 @@ template < class T > class SparseMatrix
 				return N_[ rowStart_[row] + (i - begin) ];
 			}
 		}
+		//////////////////////////////////////////////////////////////////
+		// Row/Column Access operations.
+		//////////////////////////////////////////////////////////////////
 
 		/**
 		 * Used to get an entire row of entries. 
@@ -281,25 +323,6 @@ template < class T > class SparseMatrix
 				f( *i );
 		}
 
-		unsigned int nRows() const {
-			return nrows_;
-		}
-
-		unsigned int nColumns() const {
-			return ncolumns_;
-		}
-
-		unsigned int nEntries() const {
-			return N_.size();
-		}
-
-		void clear() {
-			N_.resize( 0 );
-			colIndex_.resize( 0 );
-			assert( rowStart_.size() == (nrows_ + 1) );
-			rowStart_.assign( nrows_ + 1, 0 );
-		}
-
 		/**
 		 * Adds a row to the sparse matrix, must go strictly in row order.
 		 * This is dangerous as there is a test for an empty entry ~0.
@@ -337,14 +360,17 @@ template < class T > class SparseMatrix
 				colIndexArg.begin(), colIndexArg.end() );
 			rowStart_[rowNum + 1] = N_.size();
 		}
+		//////////////////////////////////////////////////////////////////
+		// Operations on entire matrix.
+		//////////////////////////////////////////////////////////////////
 
-		void printTriplet( const vector< Triplet< T > >& t )
-		{
-			for ( unsigned int i = 0; i < t.size(); ++i ) {
-				cout << i << "	" << t[i].a_ << "	" << t[i].b_ <<
-					"	" << t[i].c_ << endl;
-			}
+		void clear() {
+			N_.resize( 0 );
+			colIndex_.resize( 0 );
+			assert( rowStart_.size() == (nrows_ + 1) );
+			rowStart_.assign( nrows_ + 1, 0 );
 		}
+
 
 		/**
 		 * Does a transpose, using as workspace a vector of size 3 N_
@@ -412,93 +438,6 @@ template < class T > class SparseMatrix
 			assert( rowStart_.size() == nrows_ + 1 );
 		}
 
-		void tripletFill( const vector< unsigned int >& row, 
-						const vector< unsigned int >& col,
-						const vector< T >& z )
-		{
-			unsigned int len = row.size();
-			if ( len > col.size() ) len = col.size();
-			if ( len > z.size() ) len = z.size();
-			vector< Triplet< T > > trip( len );
-			for ( unsigned int i = 0; i < len; ++i )
-				trip[i]= Triplet< T >(z[i], row[i], col[i] );
-			sort( trip.begin(), trip.end(), Triplet< T >::cmp );
-			unsigned int nr = trip.back().b_ + 1;
-			unsigned int nc = 0;
-			for ( typename vector< Triplet< T > >::iterator i = 
-				trip.begin(); i != trip.end(); ++i ) {
-				if ( nc < i->c_ ) 
-					nc = i->c_;
-			}
-			nc++;
-			setSize( nr, nc );
-
-			vector< unsigned int > colIndex( nc );
-			vector< T > entry( nc );
-
-			typename vector< Triplet< T > >::iterator j = trip.begin();
-			for ( unsigned int i = 0; i < nr; ++i ) {
-				colIndex.clear();
-				entry.clear();
-				while( j != trip.end() && j->b_ == i ) {
-					colIndex.push_back( j->c_ );
-					entry.push_back( j->a_ );
-					j++;
-				}
-				addRow( i, entry, colIndex );
-			}
-		}
-
-		void pairFill( const vector< unsigned int >& row, 
-						const vector< unsigned int >& col, T value )
-		{
-			vector< T > z( row.size(), value );
-			tripletFill( row, col, z );
-		}
-
-		/**
-		 * Prints out the contents in matrix form
-		 */
-		void print() const {
-			for ( unsigned int i = 0; i < nrows_; ++i ) {
-				unsigned int k = rowStart_[i];
-				unsigned int end = rowStart_[i + 1];
-				unsigned int nextColIndex = colIndex_[k];
-				for ( unsigned int j = 0; j < ncolumns_; ++j ) {
-					if ( j < nextColIndex ) {
-						cout << "0	";
-					} else if ( k < end ) {
-						cout << N_[k] << "	";
-						++k;
-						nextColIndex = colIndex_[k];
-					} else {
-						cout << "0	";
-					}
-				}
-				cout << endl;
-			}
-		}
-
-		/**
-		 * Prints out the contents in internal form
-		 */
-		void printInternal() const {
-			unsigned int max = (nrows_ < N_.size() ) ? N_.size() : nrows_+1;
-			cout << "#	";
-			for ( unsigned int i = 0; i < max; ++i )
-				cout << i << "	";
-			cout << "\nrs	";
-			for ( unsigned int i = 0; i < rowStart_.size(); ++i )
-				cout << rowStart_[i] << "	";
-			cout << "\ncol	";
-			for ( unsigned int i = 0; i < N_.size(); ++i )
-				cout << colIndex_[i] << "	";
-			cout << "\nN	";
-			for ( unsigned int i = 0; i < N_.size(); ++i )
-				cout << N_[i] << "	";
-			cout << endl;
-		}
-
 		/**
 		 * Reorder columns from the matrix based on a map of old to new
 		 * column indices. 
@@ -546,6 +485,110 @@ template < class T > class SparseMatrix
 				addRow( i, sparseEntry, sparseCols );
 			}
 		}
+
+		//////////////////////////////////////////////////////////////////
+		// Utility operations.
+		//////////////////////////////////////////////////////////////////
+
+		void tripletFill( const vector< unsigned int >& row, 
+						const vector< unsigned int >& col,
+						const vector< T >& z )
+		{
+			unsigned int len = row.size();
+			if ( len > col.size() ) len = col.size();
+			if ( len > z.size() ) len = z.size();
+			vector< Triplet< T > > trip( len );
+			for ( unsigned int i = 0; i < len; ++i )
+				trip[i]= Triplet< T >(z[i], row[i], col[i] );
+			sort( trip.begin(), trip.end(), Triplet< T >::cmp );
+			unsigned int nr = trip.back().b_ + 1;
+			unsigned int nc = 0;
+			for ( typename vector< Triplet< T > >::iterator i = 
+				trip.begin(); i != trip.end(); ++i ) {
+				if ( nc < i->c_ ) 
+					nc = i->c_;
+			}
+			nc++;
+			setSize( nr, nc );
+
+			vector< unsigned int > colIndex( nc );
+			vector< T > entry( nc );
+
+			typename vector< Triplet< T > >::iterator j = trip.begin();
+			for ( unsigned int i = 0; i < nr; ++i ) {
+				colIndex.clear();
+				entry.clear();
+				while( j != trip.end() && j->b_ == i ) {
+					colIndex.push_back( j->c_ );
+					entry.push_back( j->a_ );
+					j++;
+				}
+				addRow( i, entry, colIndex );
+			}
+		}
+
+		void pairFill( const vector< unsigned int >& row, 
+						const vector< unsigned int >& col, T value )
+		{
+			vector< T > z( row.size(), value );
+			tripletFill( row, col, z );
+		}
+
+		//////////////////////////////////////////////////////////////////
+		// Printing operations.
+		//////////////////////////////////////////////////////////////////
+		
+		void printTriplet( const vector< Triplet< T > >& t )
+		{
+			for ( unsigned int i = 0; i < t.size(); ++i ) {
+				cout << i << "	" << t[i].a_ << "	" << t[i].b_ <<
+					"	" << t[i].c_ << endl;
+			}
+		}
+
+		/**
+		 * Prints out the contents in matrix form
+		 */
+		void print() const {
+			for ( unsigned int i = 0; i < nrows_; ++i ) {
+				unsigned int k = rowStart_[i];
+				unsigned int end = rowStart_[i + 1];
+				unsigned int nextColIndex = colIndex_[k];
+				for ( unsigned int j = 0; j < ncolumns_; ++j ) {
+					if ( j < nextColIndex ) {
+						cout << "0	";
+					} else if ( k < end ) {
+						cout << N_[k] << "	";
+						++k;
+						nextColIndex = colIndex_[k];
+					} else {
+						cout << "0	";
+					}
+				}
+				cout << endl;
+			}
+		}
+
+		/**
+		 * Prints out the contents in internal form
+		 */
+		void printInternal() const {
+			unsigned int max = (nrows_ < N_.size() ) ? N_.size() : nrows_+1;
+			cout << "#	";
+			for ( unsigned int i = 0; i < max; ++i )
+				cout << i << "	";
+			cout << "\nrs	";
+			for ( unsigned int i = 0; i < rowStart_.size(); ++i )
+				cout << rowStart_[i] << "	";
+			cout << "\ncol	";
+			for ( unsigned int i = 0; i < N_.size(); ++i )
+				cout << colIndex_[i] << "	";
+			cout << "\nN	";
+			for ( unsigned int i = 0; i < N_.size(); ++i )
+				cout << N_[i] << "	";
+			cout << endl;
+		}
+
 
 	protected:
 		unsigned int nrows_;
