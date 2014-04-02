@@ -18,6 +18,7 @@
 //#include "/usr/include/gsl/gsl_linalg.h"
 using namespace std;
 #include "../basecode/SparseMatrix.h"
+#include "../basecode/doubleEq.h"
 #include "FastMatrixElim.h"
 
 /*
@@ -50,7 +51,38 @@ static const unsigned int EMPTY_VOXEL(-1);
 
 bool FastMatrixElim::checkSymmetricShape() const
 {
-	return true; // dummy for now
+	FastMatrixElim temp = *this;
+	temp.transpose();
+	return (
+		nrows_ == temp.nrows_ && 
+		ncolumns_ == temp.ncolumns_ &&
+		N_.size() == temp.N_.size() &&
+		rowStart_ == temp.rowStart_ &&
+		colIndex_ == temp.colIndex_ 
+	);
+}
+
+bool FastMatrixElim::operator==( const FastMatrixElim& other ) const
+{
+	if ( 
+		nrows_ == other.nrows_ && 
+		ncolumns_ == other.ncolumns_ &&
+		N_.size() == other.N_.size() &&
+		rowStart_ == other.rowStart_ &&
+		colIndex_ == other.colIndex_ ) {
+		for ( unsigned int i = 0; i < N_.size(); ++i )
+			if ( !doubleEq( N_[i], other.N_[i] ) )
+				return false;
+		return true;
+	}
+	return false;
+}
+
+bool FastMatrixElim::isSymmetric() const 
+{
+	FastMatrixElim temp = *this;
+	temp.transpose();
+	return ( temp == *this );
 }
 
 /**
@@ -105,13 +137,16 @@ bool FastMatrixElim::buildTree( unsigned int parentRow,
  * rapid single-pass inversion. Returns 0 on failure, but at this
  * point I don't have a proper test for this.
  */
-bool FastMatrixElim::hinesReorder( const vector< unsigned int >& parentVoxel )
+bool FastMatrixElim::hinesReorder( 
+		const vector< unsigned int >& parentVoxel,
+		vector< unsigned int >& lookupOldRowFromNew
+   	)
 {
 	// First we fill in the vector that specifies the old row number 
 	// assigned to each row of the reordered matrix.
 	assert( parentVoxel.size() == nrows_ );
+	lookupOldRowFromNew.clear();
 	vector< unsigned int > numKids( nrows_, 0 );
-	vector< unsigned int > lookupOldRowFromNew;
 	vector< bool > rowPending( nrows_, true );
 	unsigned int numDone = 0;
 	for ( unsigned int i = 0; i < nrows_; ++i ) {
@@ -450,6 +485,28 @@ void FastMatrixElim::advance( vector< double >& y,
 		*iy++ *= *i;
 }
 
+/**
+ * static function. Reorders the ops and diagVal vectors so as to restore
+ * the original indexing of the input vectors.
+ */
+void FastMatrixElim::opsReorder( 
+		const vector< unsigned int >& lookupOldRowsFromNew,
+		vector< Triplet< double > >& ops,
+		vector< double >& diagVal )
+{
+	vector< double > oldDiag = diagVal;
+
+	for ( unsigned int i = 0; i < ops.size(); ++i ) {
+		ops[i].b_ = lookupOldRowsFromNew[ ops[i].b_ ];
+		ops[i].c_ = lookupOldRowsFromNew[ ops[i].c_ ];
+	}
+
+	for ( unsigned int i = 0; i < diagVal.size(); ++i ) {
+		diagVal[ lookupOldRowsFromNew[i] ] = oldDiag[i];
+	}
+}
+
+
 // Build up colIndices for each row.
 void buildColIndex( unsigned int nrows,
 			const vector< unsigned int >& parentVoxel,
@@ -473,6 +530,20 @@ void buildColIndex( unsigned int nrows,
 			assert( c[j -1 ] != c[j] );
 		}
 	}
+}
+
+double calcTransport( double motorConst, double lenSum,
+				unsigned int parentVoxel, unsigned int row )
+{
+	if ( row == parentVoxel && motorConst < 0 ) {
+		// Handle transport toward soma
+		return motorConst * 2.0 / lenSum ;
+	}
+	if ( row != parentVoxel && motorConst > 0 ) {
+		// Handle transport away from soma, to children
+		return -motorConst * 2.0 / lenSum;
+	}
+	return 0.0;
 }
 
 void FastMatrixElim::buildForDiffusion( 
@@ -516,12 +587,8 @@ void FastMatrixElim::buildForDiffusion(
 				for ( unsigned int p = 0; p < c.size(); ++p ) {
 					unsigned int q = c[p];
 					if ( q != i ) { // Skip self
-						if ( q == parentVoxel[i] && motorConst < 0 )
-						// Handle transport toward soma
-							e[j] += motorConst * 2.0/(length[q] + len );
-						if ( p != parentVoxel[i] && motorConst > 0 )
-						// Handle transport away from soma, to children
-							e[j] -= motorConst * 2.0/(length[q] + len );
+						e[j] += calcTransport( motorConst, 
+							length[q] + len, parentVoxel[i], q );
 					}
 				}
 				e[j] *= -dt; // The previous lot is the rate, so scale by dt
@@ -530,11 +597,8 @@ void FastMatrixElim::buildForDiffusion(
 				// Fill in diffusion from this entry to i.
 				e[j] = diffConst * 
 						(area[k] + a)/(length[k] + len )/volume[k];
-				// Fill in motor transport from this entry to i
-				if ( k == parentVoxel[i] && motorConst > 0 )
-					e[j] += motorConst * 2.0 / ( length[k] + len );
-				else if ( k != parentVoxel[i] && motorConst < 0 )
-					e[j] -= motorConst * 2.0 / ( length[k] + len );
+				e[j] += calcTransport( motorConst, 
+					length[k] + len, parentVoxel[i], k );
 				e[j] *= -dt; // Scale the whole thing by dt.
 			}
 		}

@@ -3053,4 +3053,62 @@ track down the problems in a simpler system.
 
 Got diffusion calculations to work for CylMesh, confirmed against 
 analytical solution. Only issue now is how accurate to make it.
+This has taken a while, not least because my earlier math was off.
+Next steps:
+* Assign either NeuroMesh or CylMesh to solver, using a SparseMatrix interface.
+x Parse Sparse Matrix.
+	- Handle regular diffusion with per-molecule diffusion consts
+	- Handle motor transport overlay.
+* Redid with correct mathematical expressions.
+- Fix ordering after Hines reordering. Take cylMesh vectors and shuffle, figure
+	out how to reorder back to original voxel indices.
++ Build test cases
+	* Simple diffusion
+	- Reac-diff with propagating waves
+	- Motor transport alone, in either direction.
+- Connect to Stoich. Generate Pool arrays.
+- Build inter-compartment reactions
+- Set up adaptors and other multiscale effects
+- Set up RDesigneur
+- Set up interface to Mumbl
+
+============================================================================
+1 April. 
+Thinking about reordering issue. We start with
+
+M.[A] = [a]
+  [B]   [b]
+  [C]   [c]
+  [D]   [d]
+  [E]   [e]
+
+Following the reordering with lookupOldRowFromNew = [3,2,1,0,4]
+we would have
+
+M'.[D] = [d]
+   [C]   [c]
+   [B]   [b]
+   [A]   [a]
+   [E]   [e]
+
+Rather than redo the vectors, I can munge the indices of all the entries in the
+opvec. The matrix remains as M' but due to the redoing of the indices in the
+opvec, every referece to the vectors now is back to the original ordering.
+
+So what I need to do to the opvec is to apply lookupOldRowFromNew to its 
+indices. I'll also need to redo the DiagVal.
+
+============================================================================
+2 April.
+Working on the reordering. Implemented something, seems reasonable.
+A bit more testing shows a problem with the branching neuron diffusion.
+Did a simple test on mass conservation, it fails. It gets worse at longer
+times, presumably molecules are reaching a junction where there is an error.
+The reordering changes this error, but it is wrong either way. I won't
+revisit the reordering yet because I don't know where the error is from.
+
+Implementing test for symmetry because I suspect this may be an issue.
+Implemented. This symmetry test catches a discrepancy.
+Next: Narrow down with a small test cell.
+
 ============================================================================
