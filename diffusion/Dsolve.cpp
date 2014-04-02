@@ -238,11 +238,17 @@ void Dsolve::build( double dt )
 			m->getVoxelArea(), m->getVoxelLength(), 
 		   pools_[i].getDiffConst(), pools_[i].getMotorConst(), dt );
 		vector< unsigned int > parentVoxel = m->getParentVoxel();
+		assert( elim.checkSymmetricShape() );
 		/*
 		elim.setDiffusionAndTransport( parentVoxel,
 			pools_[i].getDiffConst(), pools_[i].getMotorConst(), dt );
 			*/
-		elim.hinesReorder( parentVoxel );
+		vector< unsigned int > lookupOldRowsFromNew;
+		elim.hinesReorder( parentVoxel, lookupOldRowsFromNew );
+		assert( elim.checkSymmetricShape() );
+		// True only if motorConst == 0:
+		if ( pools_[i].getMotorConst() == 0 )
+			assert( elim.isSymmetric() );
 		vector< unsigned int > diagIndex;
 		vector< double > diagVal;
 		vector< Triplet< double > > fops;
@@ -250,6 +256,7 @@ void Dsolve::build( double dt )
 		pools_[i].setNumVoxels( numVoxels_ );
 		elim.buildForwardElim( diagIndex, fops );
 		elim.buildBackwardSub( diagIndex, fops, diagVal );
+		elim.opsReorder( lookupOldRowsFromNew, fops, diagVal );
 		pools_[i].setOps( fops, diagVal );
 		if (debugFlag )
 			elim.print();
