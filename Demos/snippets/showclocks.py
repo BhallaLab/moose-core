@@ -45,7 +45,7 @@ for tick in comp.neighbors['init']:
     print ' ->',tick.path
 
 # View the scheduled elements using the tick nos.
-t = moose.element('/clock/tick')
+t = moose.element('/clock')
 print 'Elements on tick 0'
 for e in t.neighbors['proc0']:
     print ' ->', e.path
