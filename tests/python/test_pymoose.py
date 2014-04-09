@@ -37,7 +37,13 @@ class TestVec(unittest.TestCase):
         em = moose.vec('/testSlice', n=10, g=1, dtype='Neutral')
         sl = em[5:8]
         for ii, el in enumerate(sl):
-            self.assertEqual(el.path,  '/testSlice[%d]' % (ii+5))
+            self.assertEqual(el.path,  '/testSlice[%d]' % (5 + ii))
+
+    def testExtendedSlice(self):
+        em = moose.vec('/testSlice', n=10, g=1, dtype='Neutral')
+        sl = em[2:12:3]
+        for ii, el in enumerate(sl):
+            self.assertEqual(el.path,  '/testSlice[%d]' % (2 + ii*3))
 
 class TestNeutral(unittest.TestCase):
     def testPath(self):
