@@ -53,8 +53,11 @@ prototype includes.
 """
 
 from __future__ import print_function
+try:
+    from future_builtins import zip, map
+except ImportError:
+    pass
 import sys, os
-from itertools import izip
 from urllib2 import urlopen
 import numpy as np
 import moose
@@ -213,9 +216,9 @@ class NML2Reader(object):
                     p0 = parent.distal
                 else:
                     raise Exception('No proximal point and no parent segment for segment: name=%s, id=%s' % (segment.name, segment.id))
-            comp.x0, comp.y0, comp.z0 = map(lambda x: x * self.lunit, map(float, (p0.x, p0.y, p0.z)))            
+            comp.x0, comp.y0, comp.z0 = (x * self.lunit for x in map(float, (p0.x, p0.y, p0.z)))
             p1 = segment.distal
-            comp.x, comp.y, comp.z = map(lambda x: x * self.lunit, map(float, (p1.x, p1.y, p1.z)))
+            comp.x, comp.y, comp.z = (x * self.lunit for x in map(float, (p1.x, p1.y, p1.z)))
             comp.length = np.sqrt((comp.x - comp.x0)**2
                                   + (comp.y - comp.y0)**2
                                   + (comp.z - comp.z0)**2)
@@ -363,7 +366,7 @@ class NML2Reader(object):
                 mchan = moose.HHChannel('%s/%s' % (self.lib.path, chan.id))
                 mgates = map(moose.element, (mchan.gateX, mchan.gateY, mchan.gateZ))
                 assert(len(chan.gate) <= 3) # We handle only up to 3 gates in HHCHannel
-                for ngate, mgate in izip(chan.gate, mgates):
+                for ngate, mgate in zip(chan.gate, mgates):
                     if mgate.name.endswith('X'):
                         mchan.Xpower = ngate.instances
                     elif mgate.name.endswith('Y'):

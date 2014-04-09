@@ -1,4 +1,8 @@
 from __future__ import print_function
+try:
+    from future_builtins import zip
+except ImportError:
+    pass
 from . import moose as _moose
 
 _tick = 8
