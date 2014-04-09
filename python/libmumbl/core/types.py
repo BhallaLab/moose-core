@@ -75,4 +75,4 @@ if __name__ == "__main__":
     for s in b:
         a.insertUniqueVal(s)
 
-    print a
+    print(a)

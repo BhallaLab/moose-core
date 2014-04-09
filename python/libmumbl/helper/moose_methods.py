@@ -131,7 +131,7 @@ def dumpMatchingPaths(path, pat='/##'):
 
 
 def dumpFieldName(path, whichInfo='valueF'):
-    print path.getFieldNames(whichInfo+'info')
+    print(path.getFieldNames(whichInfo+'info'))
 
 def writeGraphviz(pat='/##', filename=None, filterList=[]):
     '''This is  a generic function. It takes the the pattern, search for paths

@@ -51,6 +51,8 @@ TODO: handle include statements (start with simple ion channel
 prototype includes.
 
 """
+
+from __future__ import print_function
 import sys, os
 from itertools import izip
 from urllib2 import urlopen
@@ -235,7 +237,7 @@ class NML2Reader(object):
         according to NeuroML2 cell `nmlcell`."""
         bp = nmlcell.biophysicalProperties
         if bp is None:
-            print 'Warning: %s in %s has no biophysical properties' % (nmlcell.id, self.filename)
+            print('Warning: %s in %s has no biophysical properties' % (nmlcell.id, self.filename))
             return
         self.importMembraneProperties(nmlcell, moosecell, bp.membraneProperties)
         self.importIntracellularProperties(nmlcell, moosecell, bp.intracellularProperties)
@@ -302,7 +304,7 @@ class NML2Reader(object):
             try:
                 ionChannel = self.id_to_ionChannel[chdens.ionChannel]
             except KeyError:
-                print 'No channel with id', chdens.ionChannel
+                print('No channel with id', chdens.ionChannel)
                 continue
             if ionChannel.type_ == 'ionChannelPassive':
                 for seg in segments:
@@ -351,7 +353,7 @@ class NML2Reader(object):
                     error = None
                     break
             if error:
-                print 'Last exception:', error
+                print('Last exception:', error)
                 raise IOError('Could not read any of the locations: %s' % (paths))
 
     def importIonChannels(self, doc, vmin=-120e-3, vmax=40e-3, vdivs=3000):
@@ -411,9 +413,9 @@ class NML2Reader(object):
         else:
             name = concModel.id
         ca = moose.CaConc('%s/%s' % (self.lib.path, id))
-        print '11111', concModel.restingConc
-        print '2222', concModel.decayConstant
-        print '33333', concModel.shellThickness
+        print('11111', concModel.restingConc)
+        print('2222', concModel.decayConstant)
+        print('33333', concModel.shellThickness)
 
         ca.CaBasal = SI(concModel.restingConc)
         ca.tau = SI(concModel.decayConstant)

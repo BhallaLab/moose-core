@@ -15,6 +15,7 @@
 ## latter in the former, including mapping entities like calcium and
 ## channel conductances, between them.
 ##########################################################################
+from __future__ import print_function
 import imp
 import os
 import moose
@@ -86,7 +87,7 @@ class rdesigneur:
         self.stealCellFromLibrary = stealCellFromLibrary
         self.diffusionLength= diffusionLength
         if meshLambda > 0.0:
-            print "Warning: meshLambda argument is deprecated. Please use 'diffusionLength' instead.\nFor now rdesigneur will accept this argument."
+            print("Warning: meshLambda argument is deprecated. Please use 'diffusionLength' instead.\nFor now rdesigneur will accept this argument.")
             self.diffusionLength = meshLambda
         self.temperature = temperature
         self.chemDt= chemDt
@@ -115,29 +116,29 @@ class rdesigneur:
 
     ################################################################
     def _printModelStats( self ):
-        print "Rdesigneur: Elec model has", \
-            self.elecid.numCompartments, "compartments and", \
-            self.elecid.numSpines, "spines on", \
-            len( self.cellPortionElist ), "compartments."
+        print("Rdesigneur: Elec model has",
+            self.elecid.numCompartments, "compartments and",
+            self.elecid.numSpines, "spines on",
+            len( self.cellPortionElist ), "compartments.")
         if hasattr( self , 'chemid' ):
             dmstoich = moose.element( self.dendCompt.path + '/stoich' )
-            print "Chem part of model has ", \
-                self.dendCompt.mesh.num, "dendrite voxels X", \
-                dmstoich.numAllPools, "pools,\n    "
+            print("Chem part of model has ",
+                self.dendCompt.mesh.num, "dendrite voxels X",
+                dmstoich.numAllPools, "pools,\n    ")
             if hasattr( self , 'spineCompt' ):
                 smstoich = moose.element( self.spineCompt.path + '/stoich')
                 pmstoich = moose.element( self.psdCompt.path + '/stoich' )
-                print self.spineCompt.mesh.num, "spine voxels X", \
-                    smstoich.numAllPools, "pools,", \
-                    self.psdCompt.mesh.num, "psd voxels X", \
-                    pmstoich.numAllPools, "pools."
+                print(self.spineCompt.mesh.num, "spine voxels X",
+                    smstoich.numAllPools, "pools,",
+                    self.psdCompt.mesh.num, "psd voxels X",
+                    pmstoich.numAllPools, "pools.")
 
     def buildModel( self, modelPath = '/model' ):
         if not moose.exists( '/library' ):
             library = moose.Neutral( '/library' )
         if moose.exists( modelPath ):
-            print "rdesigneur::buildModel: Build failed. Model '", \
-                modelPath, "' already exists."
+            print("rdesigneur::buildModel: Build failed. Model '",
+                modelPath, "' already exists.")
             return
         self.model = moose.Neutral( modelPath )
         self.modelPath = modelPath
@@ -162,7 +163,7 @@ class rdesigneur:
             self._printModelStats()
 
         except BuildError, msg:
-            print "Error: rdesigneur: model build failed: ", msg
+            print("Error: rdesigneur: model build failed:", msg)
             moose.delete( self.model )
 
     def installCellFromProtos( self ):
@@ -272,7 +273,7 @@ class rdesigneur:
                 return True
             if moose.exists( '/library/' + protoVec[0] ):
                 #moose.copy('/library/' + protoVec[0], '/library/', protoVec[1])
-                print 'renaming /library/' + protoVec[0] + ' to ' + protoVec[1]
+                print('renaming /library/' + protoVec[0] + ' to ' + protoVec[1])
                 moose.element( '/library/' + protoVec[0]).name = protoVec[1]
                 #moose.le( '/library' )
                 return True
@@ -385,12 +386,12 @@ class rdesigneur:
                 # Backward compat hack here
                 bcKeys = [ j for j in i[2:] if j in argKeys ]
                 if len( bcKeys ) > 0: # Looks like we have an old arg str
-                    print 'Rdesigneur::buildSpineDistrib: Warning: Deprecated argument format.\nWill accept for now.'
-                    print usageStr
+                    print('Rdesigneur::buildSpineDistrib: Warning: Deprecated argument format.\nWill accept for now.')
+                    print(usageStr)
                     temp.extend( i + [''] )
                 elif len( i ) > len( defaults ):
-                    print 'Rdesigneur::buildSpineDistrib: Warning: too many arguments in spine definition'
-                    print usageStr
+                    print('Rdesigneur::buildSpineDistrib: Warning: too many arguments in spine definition')
+                    print(usageStr)
                 else:
                     optArg = i[2:] + defaults[ len(i):]
                     assert( len( optArg ) == len( argKeys ) )
@@ -467,7 +468,7 @@ class rdesigneur:
         # Put in stuff to go through fields if the target is a chem object
         field = plotSpec[3]
         if not field in knownFields:
-            print "Warning: Rdesigneur::_parseComptField: Unknown field '", field, "'"
+            print("Warning: Rdesigneur::_parseComptField: Unknown field '", field, "'")
             return (), ""
 
         kf = knownFields[field] # Find the field to decide type.
@@ -698,9 +699,9 @@ class rdesigneur:
         nmdarList = moose.wildcardFind( ep + '/##[ISA=NMDAChan]' )
 
         self.comptList = moose.wildcardFind( ep + '/#[ISA=CompartmentBase]')
-        print "Rdesigneur: Elec model has ", len( self.comptList ), \
-            " compartments and ", len( self.spineList ), \
-            " spines with ", len( nmdarList ), " NMDARs"
+        print("Rdesigneur: Elec model has ", len( self.comptList ),
+            " compartments and ", len( self.spineList ),
+            " spines with ", len( nmdarList ), " NMDARs")
 
 
         self._buildNeuroMesh()
@@ -708,7 +709,7 @@ class rdesigneur:
 
         self._configureSolvers()
         for i in self.adaptorList:
-            print i
+            print(i)
             self._buildAdaptor( i[0],i[1],i[2],i[3],i[4],i[5],i[6] )
 
     ################################################################
@@ -787,7 +788,7 @@ class rdesigneur:
         args = []
         for i in self.addSpineList:
             if not moose.exists( '/library/' + i[0] ):
-                print 'Warning: _decorateWithSpines: spine proto ', i[0], ' not found.'
+                print('Warning: _decorateWithSpines: spine proto ', i[0], ' not found.')
                 continue
             s = ""
             for j in range( 9 ):
@@ -801,12 +802,12 @@ class rdesigneur:
     def _loadElec( self, efile, elecname ):
         if ( efile[ len( efile ) - 2:] == ".p" ):
             self.elecid = moose.loadModel( efile, '/library/' + elecname)[0]
-            print self.elecid
+            print(self.elecid)
         elif ( efile[ len( efile ) - 4:] == ".swc" ):
             self.elecid = moose.loadModel( efile, '/library/' + elecname)[0]
         else:
             nm = NeuroML()
-            print "in _loadElec, combineSegments = ", self.combineSegments
+            print("in _loadElec, combineSegments = ", self.combineSegments)
             nm.readNeuroMLFromFile( efile, \
                     params = {'combineSegments': self.combineSegments, \
                     'createPotentialSynapses': True } )
@@ -845,7 +846,7 @@ class rdesigneur:
         # Sort comptlist in decreasing order of volume
         sortedComptlist = sorted( comptlist, key=lambda x: -x.volume )
         if ( len( sortedComptlist ) != 3 ):
-            print cpath, sortedComptlist
+            print(cpath, sortedComptlist)
             raise BuildError( "validateChem: Require 3 chem compartments, have: " + str( len( sortedComptlist ) ) )
         '''
         if not( sortedComptlist[0].name.lower() == 'dend' and \
@@ -942,13 +943,13 @@ class rdesigneur:
         modelId = moose.loadModel( fname, chem.path, 'ee' )
         comptlist = moose.wildcardFind( chem.path + '/#[ISA=ChemCompt]' )
         if len( comptlist ) == 0:
-            print "loadChem: No compartment found in file: ", fname
+            print("loadChem: No compartment found in file: ", fname)
             return
         # Sort comptlist in decreasing order of volume
         sortedComptlist = sorted( comptlist, key=lambda x: -x.volume )
         if ( len( sortedComptlist ) != 3 ):
-            print "loadChem: Require 3 chem compartments, have: ",\
-                len( sortedComptlist )
+            print("loadChem: Require 3 chem compartments, have: ",\
+                len( sortedComptlist ))
             return False
         sortedComptlist[0].name = 'dend'
         sortedComptlist[1].name = 'spine'
@@ -1034,5 +1035,3 @@ class rdesigneur:
                 for j in range( i[1], i[2] ):
                     moose.connect( i[3], 'requestOut', chemVec[j], chemFieldSrc)
                 msg = moose.connect( i[3], 'output', elObj, elecFieldDest )
-
-

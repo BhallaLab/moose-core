@@ -11,6 +11,7 @@ while still including certain others.
 indent(...) is an in-place prettyprint formatter copied from http://effbot.org/zone/element-lib.htm
 """
 
+from __future__ import print_function
 from xml.etree import cElementTree as ET
 from xml.etree import ElementTree as slowET
 from math import *

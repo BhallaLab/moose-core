@@ -201,7 +201,7 @@ def transformNMDAR( path ):
         moose.connect( pa, 'channel', nmdar, 'channel' )
         caconc = moose.wildcardFind( pa.path + '/#[ISA=CaConcBase]' )
         if ( len( caconc ) < 1 ):
-            print 'no caconcs found on ', pa.path
+            print('no caconcs found on ', pa.path)
         else:
             moose.connect( nmdar, 'ICaOut', caconc[0], 'current' )
             moose.connect( caconc[0], 'concOut', nmdar, 'assignIntCa' )

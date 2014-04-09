@@ -5,6 +5,7 @@
 # Generated Sun Jul 28 10:18:38 2013 by generateDS.py version 2.10a.
 #
 
+from __future__ import print_function
 import sys
 import getopt
 import re as re_
@@ -14143,7 +14144,7 @@ Usage: python <Parser>.py [ -s ] <in_xml_file>
 
 
 def usage():
-    print USAGE_TEXT
+    print(USAGE_TEXT)
     sys.exit(1)
 
 

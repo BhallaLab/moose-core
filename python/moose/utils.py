@@ -364,7 +364,7 @@ def printtree(root, vchar='|', hchar='__', vcount=1, depth=0, prefix='', is_last
     else:
         prefix = prefix + vchar
 
-    print((root.name))
+    print(root.name)
     children = []
     for child_vec in root.children:
         try:

@@ -557,7 +557,7 @@ class NetworkML(object):
         except KeyError as e:
             utils.dump("ERR", "Failed find key {0}".format(e)
                     , frame = inspect.currentframe())
-            print self.projectionDict.keys()
+            print(self.projectionDict.keys())
             sys.exit(0)
 
         properties = connection.findall('./{'+nmu.nml_ns+'}properties')

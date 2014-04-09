@@ -59,7 +59,7 @@ def write( modelpath, filename,sceneitems=None):
 			if not positionInfoExist:
 				#incase of SBML or cspace or python Annotator is not populated then positionInfoExist= False
 				#print " x and y cordinates doesn't exist so auto cordinates"
-				print " auto co-ordinates needs to be applied"
+				print(" auto co-ordinates needs to be applied")
 				pass
 		else:
 			#This is when it comes from Gui where the objects are already layout on to scene
@@ -81,7 +81,7 @@ def write( modelpath, filename,sceneitems=None):
 		writeFooter(f)
 		return True
 	else:
-		print "Warning: writeKkit:: No model found on " , modelpath
+		print("Warning: writeKkit:: No model found on " , modelpath)
 		return False
 
 def storeCplxEnzMsgs( enz, f ):
@@ -137,7 +137,7 @@ def writeEnz( modelpath,f):
 		conc = 0;
 		enzParent = enz.parent
 		if (isinstance(enzParent.className,Pool)) or (isinstance(enzParent.className,ZombiePool)):
-			print " raise exception enz doesn't have pool as parent"
+			print(" raise exception enz doesn't have pool as parent")
 			return False
 		else:	
 			vol = enzParent.volume * NA * 1e-3; 
@@ -245,7 +245,7 @@ def trimPath(mobj):
 		mobj = element(mobj.parent)
 		found = True
 	if mobj.path == "/":
-		print "compartment is not found with the given path and the path has reached root ",original
+		print("compartment is not found with the given path and the path has reached root ",original)
 		return
 	#other than the kinetics compartment, all the othername are converted to group in Genesis which are place under /kinetics
 	# Any moose object comes under /kinetics then one level down the path is taken.
@@ -587,6 +587,6 @@ if __name__ == "__main__":
 	output = filename.g
 	written = write('/'+modelpath,output)
 	if written:
-		print " file written to ",output
+		print(" file written to ",output)
 	else:
-		print " could be written to kkit format"
+		print(" could be written to kkit format")

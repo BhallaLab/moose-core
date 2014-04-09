@@ -14,6 +14,7 @@ It is assumed that any channels and synapses referred to by above MorphML
 have already been loaded under that same name in /library in MOOSE (use ChannelML loader).
 """
 
+from __future__ import print_function
 from xml.etree import cElementTree as ET # cELementTree is mostly API-compatible but faster than ElementTree
 import string
 import sys
