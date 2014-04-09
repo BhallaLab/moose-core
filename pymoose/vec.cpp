@@ -509,7 +509,7 @@ extern "C" {
         ostringstream repr;
         repr << "<moose.vec: class="
              << Field<string>::get(self->id_, "className") << ", "
-             << "id=" << self->id_.value() << ","
+             << "id=" << self->id_.value() << ", "
              << "path=" << self->id_.path() << ">";
         return PyString_FromString(repr.str().c_str());
     } // !  moose_Id_repr
