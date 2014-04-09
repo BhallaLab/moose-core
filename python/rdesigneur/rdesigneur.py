@@ -162,7 +162,7 @@ class rdesigneur:
             self._configureClocks()
             self._printModelStats()
 
-        except BuildError, msg:
+        except BuildError as msg:
             print("Error: rdesigneur: model build failed:", msg)
             moose.delete( self.model )
 

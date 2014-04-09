@@ -343,7 +343,7 @@ class NML2Reader(object):
             for path in paths:
                 try:
                     inner.read(path)                    
-                except IOError, e:
+                except IOError as e:
                     error = e
                 else:
                     self.includes[include.href] = inner
