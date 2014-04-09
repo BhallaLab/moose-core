@@ -167,10 +167,10 @@ def showfield(el, field='*', showtype=False):
         el = element(el)
     if field == '*':        
         value_field_dict = getFieldDict(el.className, 'valueFinfo')
-        max_type_len = max([len(dtype) for dtype in list(value_field_dict.values())])
-        max_field_len = max([len(dtype) for dtype in list(value_field_dict.keys())])
+        max_type_len = max(len(dtype) for dtype in value_field_dict.values())
+        max_field_len = max(len(dtype) for dtype in value_field_dict.keys())
         print('\n[', el.path, ']')
-        for key, dtype in list(value_field_dict.items()):
+        for key, dtype in value_field_dict.items():
             if dtype == 'bad' or key == 'this' or key == 'dummy' or key == 'me' or dtype.startswith('vector') or 'ObjId' in dtype:
                 continue
             value = el.getField(key)

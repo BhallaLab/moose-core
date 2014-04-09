@@ -198,7 +198,7 @@ class ChannelML():
             self.gate_name = gate.attrib['name']
             for q10settings in IVrelation.findall('./{'+self.cml+'}q10_settings'):
                 ## self.temperature from neuro.utils
-                if 'gate' in list(q10settings.attrib.keys()):
+                if 'gate' in q10settings.attrib:
                     if q10settings.attrib['gate'] == self.gate_name:
                         self.setQ10(q10settings)
                         break
@@ -345,10 +345,10 @@ class ChannelML():
                 #moosegate.dyB = dCa*concfactor
 
     def setQ10(self,q10settings):
-        if 'q10_factor' in list(q10settings.attrib.keys()):
+        if 'q10_factor' in q10settings.attrib:
             self.q10factor = float(q10settings.attrib['q10_factor'])\
                 **((self.temperature-float(q10settings.attrib['experimental_temp']))/10.0)
-        elif 'fixed_q10' in list(q10settings.attrib.keys()):
+        elif 'fixed_q10' in q10settings.attrib:
             self.q10factor = float(q10settings.attrib['fixed_q10'])
 
 
