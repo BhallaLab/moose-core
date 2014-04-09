@@ -2179,16 +2179,21 @@ extern "C" {
         if (base && !defineClass(module_dict, base)){
             return 0;
         }
+
+        string str = "moose." + className;
+
         PyTypeObject * new_class =
                 (PyTypeObject*)PyType_Type.tp_alloc(&PyType_Type, 0);
-        // Py_TYPE(new_class) = &PyType_Type;
 // Python3 does not like it without heaptype: aborts on import 
 // Fatal Python error:
 // type_traverse() called for non-heap type 'moose.Neutral'
 #ifdef PY3K
         new_class->tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HEAPTYPE;
+        PyHeapTypeObject* et = (PyHeapTypeObject*)new_class;
+        et->ht_name = PyUnicode_FromString(className.c_str());
+        et->ht_qualname = PyUnicode_FromString(str.c_str());
 #else
-        new_class->tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE; // | Py_TPFLAGS_HEAPTYPE;
+        new_class->tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
 #endif
         /*
           Thu Jul 9 09:58:09 IST 2015 - commenting out
@@ -2217,12 +2222,7 @@ extern "C" {
         heaptype is not set it uses tp_name to print the help.
         Py_SIZE(new_class) = sizeof(_ObjId);        
         */
-        string str = "moose." + className;
-        new_class->tp_name = (char *)calloc(str.length()+1,
-                                            sizeof(char));
-        strncpy(const_cast<char*>(new_class->tp_name), str.c_str(),
-                str.length());
-
+        new_class->tp_name = strdup(str.c_str());
         new_class->tp_doc = moose_Class_documentation;
 
         // strncpy(new_class->tp_doc, moose_Class_documentation, strlen(moose_Class_documentation));
@@ -2281,7 +2281,9 @@ extern "C" {
             cout << "Created class " << new_class->tp_name << endl
                  << "\tbase=" << new_class->tp_base->tp_name << endl;
         }
-        // PyDict_SetItemString(new_class->tp_dict, "__module__", PyString_FromString("moose"));
+#ifdef PY3K
+        PyDict_SetItemString(new_class->tp_dict, "__module__", PyUnicode_InternFromString("moose"));
+#endif
         // string doc = const_cast<Cinfo*>(cinfo)->getDocs();
         // PyDict_SetItemString(new_class->tp_dict, "__doc__", PyString_FromString(" \0"));
         // PyDict_SetItemString(module_dict, className.c_str(), (PyObject *)new_class);
