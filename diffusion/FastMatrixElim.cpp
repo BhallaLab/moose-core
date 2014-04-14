@@ -568,6 +568,19 @@ void FastMatrixElim::buildForDiffusion(
 	for ( unsigned int i = 0; i < nrows_; ++i ) {
 		vector< unsigned int >& c = colIndex[i];
 		vector< double > e( c.size(), 0.0 );
+		/*
+		// Find diagonal term
+		unsigned int diagIndex = EMPTY_VOXEL;
+		for ( unsigned int j = 0; j < c.size(); ++j ) {
+			if ( c[j] == i )
+				diagIndex = j;
+		}
+		assert( diagIndex != EMPTY_VOXEL );
+		double vol = volume[i];
+		double a = area[i];
+		double len = length[i];
+		*/
+
 		for ( unsigned int j = 0; j < c.size(); ++j ) {
 			unsigned int k = c[j]; // This is the colIndex, in order.
 			double vol = volume[k];
@@ -596,7 +609,7 @@ void FastMatrixElim::buildForDiffusion(
 			} else { // Not diagonal.
 				// Fill in diffusion from this entry to i.
 				e[j] = diffConst * 
-						(area[k] + a)/(length[k] + len )/volume[k];
+						(area[i] + a)/(length[i] + len )/vol;
 				e[j] += calcTransport( motorConst, 
 					length[k] + len, parentVoxel[i], k );
 				e[j] *= -dt; // Scale the whole thing by dt.

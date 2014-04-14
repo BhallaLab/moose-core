@@ -80,6 +80,10 @@ class Gsolve: public ZombiePoolInterface
 		void setNumPools( unsigned int num );
 		unsigned int getNumPools() const;
 
+		void getBlock( vector< double >& values ) const;
+		void setBlock( const vector< double >& values );
+
+		//////////////////////////////////////////////////////////////////
 		/// Flag: returns true if randomized round to integers is done.
 		bool getRandInit() const;
 		/// Flag: set true if randomized round to integers is to be done.
