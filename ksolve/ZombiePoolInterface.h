@@ -38,6 +38,27 @@ class ZombiePoolInterface
 		virtual void setNumPools( unsigned int num ) = 0;
 		/// gets number of pools (species) handled by system.
 		virtual unsigned int getNumPools() const = 0;
+
+		/**
+		 * Gets block of data. The first 4 entries are passed in 
+		 * on the 'values' vector: the start voxel, numVoxels, 
+		 * start pool#, numPools.
+		 * These are followed by numVoxels * numPools of data values
+		 * which are filled in by the function.
+		 * We assert that the entire requested block is present in 
+		 * this ZombiePoolInterface.
+		 * The block is organized as an array of arrays of voxels;
+		 * values[pool#][voxel#]
+		 */
+		virtual void getBlock( vector< double >& values ) const = 0;
+
+		/**
+		 * Sets block of data. The first 4 entries 
+		 * on the 'values' vector are the start voxel, numVoxels, 
+		 * start pool#, numPools. These are 
+		 * followed by numVoxels * numPools of data values.
+		 */
+		virtual void setBlock( const vector< double >& values ) = 0;
 };
 
 #endif	// _ZOMBIE_POOL_INTERFACE_H

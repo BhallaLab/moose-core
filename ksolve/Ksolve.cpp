@@ -337,3 +337,44 @@ unsigned int Ksolve::getNumPools() const
 		return pools_[0].size();
 	return 0;
 }
+
+void Ksolve::getBlock( vector< double >& values ) const
+{
+	unsigned int startVoxel = values[0];
+	unsigned int numVoxels = values[1];
+	unsigned int startPool = values[2];
+	unsigned int numPools = values[3];
+
+	assert( startVoxel >= startVoxel_ );
+	assert( numVoxels <= pools_.size() );
+	assert( pools_.size() > 0 );
+	assert( numPools + startPool <= pools_[0].size() );
+	values.resize( 4 + numVoxels * numPools );
+
+	for ( unsigned int i = 0; i < numVoxels; ++i ) {
+		const double* v = pools_[ startVoxel + i ].S();
+		for ( unsigned int j = 0; j < numPools; ++j ) {
+			values[ 4 + j * numVoxels + i]  = v[ j + startPool ];
+		}
+	}
+}
+
+void Ksolve::setBlock( const vector< double >& values )
+{
+	unsigned int startVoxel = values[0];
+	unsigned int numVoxels = values[1];
+	unsigned int startPool = values[2];
+	unsigned int numPools = values[3];
+
+	assert( startVoxel >= startVoxel_ );
+	assert( numVoxels <= pools_.size() );
+	assert( pools_.size() > 0 );
+	assert( numPools + startPool <= pools_[0].size() );
+
+	for ( unsigned int i = 0; i < numVoxels; ++i ) {
+		double* v = pools_[ startVoxel + i ].varS();
+		for ( unsigned int j = 0; j < numPools; ++j ) {
+			v[ j + startPool ] = values[ 4 + j * numVoxels + i ];
+		}
+	}
+}

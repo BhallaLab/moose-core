@@ -247,8 +247,10 @@ void Dsolve::build( double dt )
 		elim.hinesReorder( parentVoxel, lookupOldRowsFromNew );
 		assert( elim.checkSymmetricShape() );
 		// True only if motorConst == 0:
+		/*
 		if ( pools_[i].getMotorConst() == 0 )
 			assert( elim.isSymmetric() );
+			*/
 		vector< unsigned int > diagIndex;
 		vector< double > diagVal;
 		vector< Triplet< double > > fops;
@@ -353,4 +355,49 @@ void Dsolve::setNumPools( unsigned int numPoolSpecies )
 unsigned int Dsolve::getNumPools() const
 {
 	return numTotPools_;
+}
+
+void Dsolve::getBlock( vector< double >& values ) const
+{
+	unsigned int startVoxel = values[0];
+	unsigned int numVoxels = values[1];
+	unsigned int startPool = values[2];
+	unsigned int numPools = values[3];
+
+	assert( startVoxel + numVoxels <= numVoxels_ );
+	assert( startPool >= poolStartIndex_ );
+	assert( numPools + startPool <= numLocalPools_ );
+	values.resize( 4 );
+
+	for ( unsigned int i = 0; i < numPools; ++i ) {
+		unsigned int j = i + startPool;
+		if ( j >= poolStartIndex_ && j < poolStartIndex_ + numLocalPools_ ){
+			vector< double >::const_iterator q =
+				pools_[ j - poolStartIndex_ ].getNvec().begin();
+				
+			values.insert( values.end(),
+				q + startVoxel, q + startVoxel + numVoxels );
+		}
+	}
+}
+
+void Dsolve::setBlock( const vector< double >& values )
+{
+	unsigned int startVoxel = values[0];
+	unsigned int numVoxels = values[1];
+	unsigned int startPool = values[2];
+	unsigned int numPools = values[3];
+
+	assert( startVoxel + numVoxels <= numVoxels_ );
+	assert( startPool >= poolStartIndex_ );
+	assert( numPools + startPool <= numLocalPools_ );
+
+	for ( unsigned int i = 0; i < numPools; ++i ) {
+		unsigned int j = i + startPool;
+		if ( j >= poolStartIndex_ && j < poolStartIndex_ + numLocalPools_ ){
+			vector< double >::const_iterator 
+				q = values.begin() + 4 + i * numVoxels;
+			pools_[ j - poolStartIndex_ ].setNvec( startVoxel, numVoxels, q );
+		}
+	}
 }

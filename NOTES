@@ -3112,3 +3112,55 @@ Implemented. This symmetry test catches a discrepancy.
 Next: Narrow down with a small test cell.
 
 ============================================================================
+5 April.
+Looked at code. On reflection it doesn't seem like we need the matrix to
+be symmetric, since we can have diffusion between compartments with different
+volumes. But we do need the terms on either side of the compartments to match
+to ensure mass conservation.
+
+I need to expand out the test small cell by hand to figure out where the
+calc is going wrong.
+
+============================================================================
+13 April.
+Fixed some indexing issues, to my surprise this fixes the error in mass 
+conservation that was causing current unit tests to fail. Still would like to 
+have an analytic expression to test for a branching cell. Possibly a 
+symmetrically branching cell would behave like an equivalent cylinder.
+
+============================================================================
+14 April.
+To coordinate Dsolve and Ksolve. There needs to be a 'transfer' function
+that if needed uses direct MPI calls to do a bidirectional transfer of
+values between them, organized by node and the data resident on each. I think
+there is a high-level MPI operation to do this. 
+If possible map through the ZombiePoolInterface.
+In each case, we construct a vector destined for a specified target node.
+Aim to consolidate all entries due to go to the specified node.
+
+During operation we call the transfer with a special clock tick. For example,
+we might have
+Hsolve process: Tick 0, dt 50 us
+Dsolve process: tick 2, dt 10 ms
+Dsolve transfer to Ksolve: tick 3, dt 100 ms
+Ksolve process: tick 4, dt 100 ms
+Ksolve transfer to Dsolve: tick 5, dt 100 ms
+Hsolve adaptor to pools, e.g. Ca: Tick 6, dt 100 ms
+Spikegen adaptor to pools, e.g. Glu for mGluRs: Tick 6, dt 100 ms
+Ksolve adaptor to Hsolve: Tick 7, dt 100 ms
+
+For now, just deal with Ksolve to and from Dsolve.
+
+Set up a couple of functions in ZombiePoolInterface, getBlock and setBlock.
+These do just that - get and set blocks of pool #s. Meant to be used by
+a handler that knows which pools and voxels on each node, and that deals
+with internode transfer as per need.
+
+Next: 
+Figure out how Ksolve knows # of voxels. It has a numAllVoxels field.
+We already know how Dsolve knows # of pools: gets it from the Stoich.
+Set up a toy reac-diff model using stoich to set up reac system.
+Figure out how to call the transfer functions. Possibly a ZombiePool Proces?
+
+============================================================================
+
