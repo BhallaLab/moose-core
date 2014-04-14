@@ -408,6 +408,155 @@ void testCylDiffn()
 	cout << "." << flush;
 }
 
+void testTaperingCylDiffn()
+{
+	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	double len = 25e-6;
+	double r0 = 2e-6;
+	double r1 = 1e-6;
+	double diffLength = 1e-6; // 1e-6 is the highest dx for which error is OK
+	double runtime = 10.0;
+	double dt = 0.1; // 0.2 is the highest dt for which the error is in bounds
+	// Should set explicitly, currently during creation of DiffPoolVec
+	//double diffConst = 1.0e-12; 
+	Id model = s->doCreate( "Neutral", Id(), "model", 1 );
+	Id cyl = s->doCreate( "CylMesh", model, "cyl", 1 );
+	Field< double >::set( cyl, "r0", r0 );
+	Field< double >::set( cyl, "r1", r1 );
+	Field< double >::set( cyl, "x0", 0 );
+	Field< double >::set( cyl, "x1", len );
+	Field< double >::set( cyl, "lambda", diffLength );
+	unsigned int ndc = Field< unsigned int >::get( cyl, "numMesh" );
+	assert( ndc == static_cast< unsigned int >( round( len / diffLength )));
+
+	Id dsolve = s->doCreate( "Dsolve", model, "dsolve", 1 );
+	Field< Id >::set( dsolve, "compartment", cyl );
+	// Next: build by doing reinit
+	s->doUseClock( "/model/dsolve", "process", 1 );
+	s->doSetClock( 1, dt );
+	// Then find a way to test it.
+	s->doReinit();
+
+	vector< double > nvec = 
+		LookupField< unsigned int, vector< double > >::get( 
+						dsolve, "nVec", 0);
+	assert( nvec.size() == ndc );
+	nvec[0] = 1;
+	LookupField< unsigned int, vector< double > >::set( dsolve, "nVec", 
+					0, nvec);
+
+	s->doStart( runtime );
+
+	nvec = LookupField< unsigned int, vector< double > >::get( 
+						dsolve, "nVec", 0);
+	/*
+	cout << endl;
+	for ( unsigned int i = 0; i < nvec.size(); ++i )
+		cout << nvec[i] << "	";
+	cout << endl;
+	*/
+
+	double myTot = 0.0;
+	for ( unsigned int i = 0; i < nvec.size(); ++i ) {
+		myTot += nvec[i];
+	} 
+	assert( doubleEq( myTot, 1.0 ) );
+
+	s->doDelete( model );
+	cout << "." << flush;
+}
+
+/**
+ * Cell looks like:
+ *                soma
+ *                dend[0]
+ *                dend[1]
+ *             b1[0]    b2[0]
+ *            b1[1]      b2[1]
+ *         t1[0]   t2[0]
+ *        t1[1]      t2[1]
+ *
+ *
+ * The matrix should look like:
+ *
+ *		s	d0	d1	b10	b11	t10	t11	t20	t21	b20	b21
+ * s	#	1	0	0	0	0	0	0	0	0	0
+ * d0	1	#	1	0	0	0	0	0	0	0	0
+ * d1	0	1	#	1	0	0	0	0	0	1	0
+ * b10	0	0	1	#	1	0	0	0	0	c	0
+ * b11	0	0	0	1	#	1	0	1	0	0	0
+ * t10	0	0	0	0	1	#	1	c	0	0	0
+ * t11	0	0	0	0	0	1	#	0	0	0	0
+ * t20	0	0	0	0	1	c	0	#	1	0	0
+ * t21	0	0	0	0	0	0	0	1	#	0	0
+ * b20	0	0	1	c	0	0	0	0	0	#	1
+ * b21	0	0	0	0	0	0	0	0	0	1	#
+ *                
+ */
+void testSmallCellDiffn()
+{
+	Id makeCompt( Id parentCompt, Id parentObj,
+		string name, double len, double dia, double theta );
+	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	double len = 20e-6;
+	double dia = 10e-6;
+	double diffLength = 10e-6;
+	double dt = 1.0e-1;
+	double runtime = 1000.0;
+	Id model = s->doCreate( "Neutral", Id(), "model", 1 );
+	Id soma = makeCompt( Id(), model, "soma", dia, dia, 90 );
+	Id dend = makeCompt( soma, model, "dend", len, 3e-6, 0 );
+	Id branch1 = makeCompt( dend, model, "branch1", len, 2e-6, 45.0 );
+	Id branch2 = makeCompt( dend, model, "branch2", len, 2e-6, -45.0 );
+	Id twig1 = makeCompt( branch1, model, "twig1", len, 1.5e-6, 90.0 );
+	Id twig2 = makeCompt( branch1, model, "twig2", len, 1.5e-6, 0.0 );
+
+	Id nm = s->doCreate( "NeuroMesh", model, "neuromesh", 1 );
+	Field< double >::set( nm, "diffLength", diffLength );
+	Field< string >::set( nm, "geometryPolicy", "cylinder" );
+	Field< Id >::set( nm, "cell", model );
+	unsigned int ns = Field< unsigned int >::get( nm, "numSegments" );
+	assert( ns == 6 );
+	unsigned int ndc = Field< unsigned int >::get( nm, "numDiffCompts" );
+	assert( ndc == 11  );
+
+	Id dsolve = s->doCreate( "Dsolve", model, "dsolve", 1 );
+	Field< Id >::set( dsolve, "compartment", nm );
+	// Next: build by doing reinit
+	s->doUseClock( "/model/dsolve", "process", 1 );
+	s->doSetClock( 1, dt );
+	// Then find a way to test it.
+	s->doReinit();
+
+	vector< double > nvec = 
+		LookupField< unsigned int, vector< double > >::get( 
+						dsolve, "nVec", 0);
+	assert( nvec.size() == ndc );
+	nvec[0] = 1;
+	LookupField< unsigned int, vector< double > >::set( dsolve, "nVec", 
+					0, nvec);
+
+	s->doStart( runtime );
+
+	nvec = LookupField< unsigned int, vector< double > >::get( 
+						dsolve, "nVec", 0);
+	double myTot = 0;
+	for ( unsigned int i = 0; i < nvec.size(); ++i )
+		myTot += nvec[i];
+	assert( doubleEq( myTot, 1.0 ) );
+
+	cout << "Small cell: " << endl;
+	for ( unsigned int i = 0; i < nvec.size(); ++i )
+		cout << nvec[i] << "	";
+	cout << endl;
+	/*
+	*/
+
+
+	s->doDelete( model );
+	cout << "." << flush;
+}
+
 void testCellDiffn()
 {
 	Id makeCompt( Id parentCompt, Id parentObj,
@@ -460,11 +609,12 @@ void testCellDiffn()
 		myTot += nvec[i];
 	assert( doubleEq( myTot, 1.0 ) );
 
-	/*
 	cout << endl;
+	cout << "Big cell: " << endl;
 	for ( unsigned int i = 0; i < nvec.size(); ++i )
 		cout << nvec[i] << "	";
 	cout << endl;
+	/*
 	*/
 
 
@@ -534,5 +684,7 @@ void testDiffusion()
 	testFastMatrixElim();
 	testSetDiffusionAndTransport();
 	testCylDiffn();
-	// breaks at this point. testCellDiffn();
+	testTaperingCylDiffn();
+	testSmallCellDiffn();
+	testCellDiffn();
 }

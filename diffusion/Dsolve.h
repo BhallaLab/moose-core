@@ -66,6 +66,9 @@ class Dsolve: public ZombiePoolInterface
 		void setNumPools( unsigned int num );
 		unsigned int getNumPools() const;
 
+		void getBlock( vector< double >& values ) const;
+		void setBlock( const vector< double >& values );
+
 		//////////////////////////////////////////////////////////////////
 		// Model traversal and building functions
 		//////////////////////////////////////////////////////////////////

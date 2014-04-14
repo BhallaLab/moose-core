@@ -62,6 +62,15 @@ void DiffPoolVec::setNvec( const vector< double >& vec )
 	n_ = vec;
 }
 
+void DiffPoolVec::setNvec( unsigned int start, unsigned int num,
+				vector< double >::const_iterator q )
+{
+	assert( start + num <= n_.size() );
+	vector< double >::iterator p = n_.begin() + start;
+	for ( unsigned int i = 0; i < num; ++i )
+		*p++ = *q++;
+}
+
 double DiffPoolVec::getDiffConst() const
 {
 	return diffConst_;
