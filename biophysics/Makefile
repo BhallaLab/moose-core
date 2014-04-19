@@ -26,24 +26,25 @@ OBJ = \
 	SynChanBase.o	\
 	SynChan.o	\
 	testBiophysics.o	\
+	IzhikevichNrn.o	\
 
-# IzhikevichNrn.o	\
-	LeakyIaF.o	\
-	GapJunction.o	\
-	Nernst.o	\
-	GHK.o		\
-	NMDAChan.o	\
-	HHGate2D.o	\
-	HHChannel2D.o	\
-	MgBlock.o	\
-	VectorTable.o	\
-	MarkovRateTable.o	\
-	MarkovChannel.o	\
-	MarkovGslSolver.o	\
-	MatrixOps.o	\
-	MarkovSolverBase.o	\
-	MarkovSolver.o	\
-	VClamp.o	\
+
+	# LeakyIaF.o	\
+	# GapJunction.o	\
+	# Nernst.o	\
+	# GHK.o		\
+	# NMDAChan.o	\
+	# HHGate2D.o	\
+	# HHChannel2D.o	\
+	# MgBlock.o	\
+	# VectorTable.o	\
+	# MarkovRateTable.o	\
+	# MarkovChannel.o	\
+	# MarkovGslSolver.o	\
+	# MatrixOps.o	\
+	# MarkovSolverBase.o	\
+	# MarkovSolver.o	\
+	# VClamp.o	\
 
 # GSL_LIBS = -L/usr/lib -lgsl
 
@@ -67,7 +68,7 @@ HHGate.o: HHGate.h
 CaConc.o:	CaConc.h
 Neuron.o:	Neuron.h
 ReadCell.o: ReadCell.h ../shell/Shell.h ../utility/utility.h
-#IzhikevichNrn.o: IzhikevichNrn.h
+IzhikevichNrn.o: IzhikevichNrn.h
 #LeakyIaF.o: LeakyIaF.h
 #Synapse.o:	SynBase.h Synapse.h
 #GapJunction.o: GapJunction.h
