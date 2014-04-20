@@ -354,7 +354,7 @@ void testCylMesh()
 	coords[6] = 1; // R0
 	coords[7] = 2; // R1
 
-	coords[8] = 1; // lambda
+	coords[8] = 1; // DiffLength
 
 	cm.innerSetCoords( coords );
 
@@ -368,7 +368,7 @@ void testCylMesh()
 	assert( doubleEq( cm.getZ1(), 7 ) );
 	assert( doubleEq( cm.getR1(), 2 ) );
 
-	assert( doubleEq( cm.getLambda(), sqrt( 29.0 ) / 5.0 ) );
+	assert( doubleEq( cm.getDiffLength(), sqrt( 29.0 ) / 5.0 ) );
 
 	cm.setX0( 2 );
 	cm.setY0( 3 );
@@ -380,20 +380,20 @@ void testCylMesh()
 	cm.setZ1( 8 );
 	cm.setR1( 3 );
 
-	cm.setLambda( 2.0 );
+	cm.setDiffLength( 2.0 );
 
 	vector< double > temp = cm.getCoords( Id().eref(), 0 );
 	assert( temp.size() == 9 );
-	// Can't check on the last coord as it is lambda, it changes.
+	// Can't check on the last coord as it is DiffLength, it changes.
 	for ( unsigned int i = 0; i < temp.size() - 1; ++i )
 		assert( doubleEq( temp[i], coords[i] + 1 ) );
 	
 	double totLen = sqrt( 29.0 );
 	assert( doubleEq( cm.getTotLength() , totLen ) );
 
-	cm.setLambda( 1.0 );
+	cm.setDiffLength( 1.0 );
 	assert( cm.getNumEntries() == 5 );
-	assert( doubleEq( cm.getLambda(), totLen / 5 ) );
+	assert( doubleEq( cm.getDiffLength(), totLen / 5 ) );
 
 	///////////////////////////////////////////////////////////////
 	assert( doubleEq( cm.getMeshEntryVolume( 2 ), 2.5 * 2.5 * PI * totLen / 5 ) );
@@ -469,7 +469,7 @@ void testCylMesh()
 
 	///////////////////////////////////////////////////////////////
 	dist = cm.selectGridVolume( 10.0 );
-	assert( doubleEq( dist, 0.1 * cm.getLambda() ) ); 
+	assert( doubleEq( dist, 0.1 * cm.getDiffLength() ) ); 
 	dist = cm.selectGridVolume( 0.1 );
 	assert( dist <= 0.01 );
 
@@ -496,8 +496,8 @@ void testCylMesh()
 		assert( ret[i].second == 0 ); // Only one cube entry
 		double r = cm.getR0() + 
 				( cm.getR1() - cm.getR0() ) * 
-				cm.getLambda() * ( 0.5 + i ) / cm.getTotLength(); 
-		double a = r * cm.getLambda() * 2 * PI;
+				cm.getDiffLength() * ( 0.5 + i ) / cm.getTotLength(); 
+		double a = r * cm.getDiffLength() * 2 * PI;
 		//assert( doubleApprox( ret[i].diffScale, a ) );
 		// cout << i << ". mesh: " << ret[i].diffScale << ", calc: " << a << endl;
 		assert( fabs( ret[i].diffScale - a ) < 0.5 );
@@ -514,17 +514,17 @@ void testCylMesh()
 	coords[2] -= 10; // x and y stay put, it is a vertical cylinder.
 	coords[6] = 1; // R0
 	coords[7] = 1; // R1
-	coords[8] = 1; // Lambda
+	coords[8] = 1; // DiffLength
 	CylMesh cm2;
 	cm2.innerSetCoords( coords );
-	assert( doubleEq( cm2.getLambda(), 1 ) );
+	assert( doubleEq( cm2.getDiffLength(), 1 ) );
 	assert( cm2.getNumEntries() == 10 );
 	vector< VoxelJunction > vj;
 	cm.matchMeshEntries( &cm2, vj );
 	assert( vj.size() == 1 );
 	assert( vj[0].first == 0 );
 	assert( vj[0].second == cm2.getNumEntries() - 1 );
-	double xda = 2.0 * 1 * 1 * PI / ( cm.getLambda() + cm2.getLambda() );
+	double xda = 2.0 * 1 * 1 * PI / ( cm.getDiffLength() + cm2.getDiffLength() );
 	assert( doubleEq( vj[0].diffScale, xda ) );
 
 	cout << "." << flush;
@@ -553,7 +553,7 @@ void testMidLevelCylMesh()
 	coords[6] = 1; // R0
 	coords[7] = 2; // R1
 
-	coords[8] = 1; // lambda
+	coords[8] = 1; // DiffLength
 
 	bool ret = Field< vector< double > >::set( cylId, "coords", coords );
 	assert( ret );
@@ -567,7 +567,7 @@ void testMidLevelCylMesh()
 	assert( doubleEq( Field< double >::get( cylId, "r0" ), 1 ) );
 	assert( doubleEq( Field< double >::get( cylId, "r1" ), 2 ) );
 
-	ret = Field< double >::set( cylId, "lambda", 1 );
+	ret = Field< double >::set( cylId, "diffLength", 1 );
 	assert( ret );
 	meshId.element()->syncFieldDim();
 
@@ -1272,8 +1272,8 @@ void testNeuroMeshBranching()
 		/*
 		double r = cm.getR0() + 
 				( cm.getR1() - cm.getR0() ) * 
-				cm.getLambda() * ( 0.5 + i ) / cm.getTotLength(); 
-		double a = r * cm.getLambda() * 2 * PI;
+				cm.getDiffLength() * ( 0.5 + i ) / cm.getTotLength(); 
+		double a = r * cm.getDiffLength() * 2 * PI;
 		//assert( doubleApprox( vj[i].diffScale, a ) );
 		// cout << i << ". mesh: " << vj[i].diffScale << ", calc: " << a << endl;
 		assert( fabs( vj[i].diffScale - a ) < 0.5 );

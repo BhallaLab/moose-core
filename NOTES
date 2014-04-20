@@ -3156,6 +3156,8 @@ These do just that - get and set blocks of pool #s. Meant to be used by
 a handler that knows which pools and voxels on each node, and that deals
 with internode transfer as per need.
 
+Checkin 5247.
+
 Next: 
 Figure out how Ksolve knows # of voxels. It has a numAllVoxels field.
 We already know how Dsolve knows # of pools: gets it from the Stoich.
@@ -3163,4 +3165,6 @@ Set up a toy reac-diff model using stoich to set up reac system.
 Figure out how to call the transfer functions. Possibly a ZombiePool Proces?
 
 ============================================================================
-
+20 April
+Worked on script for diffusion in cylindrical compartment with 25 voxels.
+Does everything but doesn't diffuse.

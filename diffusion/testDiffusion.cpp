@@ -353,7 +353,7 @@ void testCylDiffn()
 	Field< double >::set( cyl, "r1", r1 );
 	Field< double >::set( cyl, "x0", 0 );
 	Field< double >::set( cyl, "x1", len );
-	Field< double >::set( cyl, "lambda", diffLength );
+	Field< double >::set( cyl, "diffLength", diffLength );
 	unsigned int ndc = Field< unsigned int >::get( cyl, "numMesh" );
 	assert( ndc == static_cast< unsigned int >( round( len / diffLength )));
 
@@ -425,7 +425,7 @@ void testTaperingCylDiffn()
 	Field< double >::set( cyl, "r1", r1 );
 	Field< double >::set( cyl, "x0", 0 );
 	Field< double >::set( cyl, "x1", len );
-	Field< double >::set( cyl, "lambda", diffLength );
+	Field< double >::set( cyl, "diffLength", diffLength );
 	unsigned int ndc = Field< unsigned int >::get( cyl, "numMesh" );
 	assert( ndc == static_cast< unsigned int >( round( len / diffLength )));
 
