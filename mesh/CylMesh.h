@@ -57,8 +57,8 @@ class CylMesh: public MeshCompt
 		void setCoords( const Eref& e, vector< double > v );
 		vector< double > getCoords( const Eref& e ) const;
 
-		void setLambda( double v );
-		double getLambda() const;
+		void setDiffLength( double v );
+		double getDiffLength() const;
 
 		double getTotLength() const;
 
@@ -168,10 +168,10 @@ class CylMesh: public MeshCompt
 		double r0_;	/// Radius at one end
 		double r1_; /// Radius at other end
 
-		double lambda_;	/// Length constant for diffusion. Equal to dx.
+		double diffLength_;	/// Length constant for diffusion. Equal to dx.
 
 		/**
-		 * surfaceGranularity_ decides how finely to subdivide lambda 
+		 * surfaceGranularity_ decides how finely to subdivide DiffLength 
 		 * or cubic mesh side, when computing surface area of intersections
 		 * between them when diffusing. Defaults to 0.1
 		 */

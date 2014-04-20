@@ -665,8 +665,10 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 	static const Cinfo* zombieReacCinfo = Cinfo::find( "ZombieReac");
 	static const Cinfo* zombieMMenzCinfo = Cinfo::find( "ZombieMMenz");
 	static const Cinfo* zombieEnzCinfo = Cinfo::find( "ZombieEnz");
-	vector< Id > meshEntries;
+	// vector< Id > meshEntries;
 	vector< Id > temp = elist;
+	unsigned int numVoxels = 
+		Field< unsigned int >::get( poolInterface_, "numAllVoxels" ); 
 
 	temp.insert( temp.end(), offSolverReacs_.begin(), offSolverReacs_.end() );
 
@@ -677,14 +679,17 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 		if ( ei->cinfo() == poolCinfo ) {
 			PoolBase::zombify( i->element(), zombiePoolCinfo, 
 							poolInterface_ );
+			ei->resize( numVoxels );
 		}
 		else if ( ei->cinfo() == bufPoolCinfo ) {
 			PoolBase::zombify( i->element(), zombieBufPoolCinfo, 
 							poolInterface_ );
+			ei->resize( numVoxels );
 		}
 		else if ( ei->cinfo() == funcPoolCinfo ) {
 			PoolBase::zombify( i->element(), zombieFuncPoolCinfo, 
 							poolInterface_ );
+			ei->resize( numVoxels );
 			// Has also got to zombify the Func.
 			Id funcId = Neutral::child( i->eref(), "func" );
 			assert( funcId != Id() );
