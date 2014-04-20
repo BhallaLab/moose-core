@@ -78,22 +78,22 @@ const Cinfo* CylMesh::initCinfo()
 		);
 		static ElementValueFinfo< CylMesh, vector< double > > coords(
 			"coords",
-			"All the coords as a single vector: x0 y0 z0  x1 y1 z1  r0 r1 lambda",
+			"All the coords as a single vector: x0 y0 z0  x1 y1 z1  r0 r1 diffLength",
 			&CylMesh::setCoords,
 			&CylMesh::getCoords
 		);
 
-		static ValueFinfo< CylMesh, double > lambda(
-			"lambda",
+		static ValueFinfo< CylMesh, double > diffLength(
+			"diffLength",
 			"Length constant to use for subdivisions"
 			"The system will attempt to subdivide using compartments of"
-			"length lambda on average. If the cylinder has different end"
+			"length diffLength on average. If the cylinder has different end"
 			"diameters r0 and r1, it will scale to smaller lengths"
 			"for the smaller diameter end and vice versa."
-			"Once the value is set it will recompute lambda as "
+			"Once the value is set it will recompute diffLength as "
 			"totLength/numEntries",
-			&CylMesh::setLambda,
-			&CylMesh::getLambda
+			&CylMesh::setDiffLength,
+			&CylMesh::getDiffLength
 		);
 
 		static ReadOnlyValueFinfo< CylMesh, unsigned int > numDiffCompts(
@@ -125,7 +125,7 @@ const Cinfo* CylMesh::initCinfo()
 		&y1,			// Value
 		&z1,			// Value
 		&r1,			// Value
-		&lambda,			// Value
+		&diffLength,			// Value
 		&coords,		// Value
 		&numDiffCompts,		// ReadOnlyValue
 		&totLength,		// ReadOnlyValue
@@ -165,7 +165,7 @@ CylMesh::CylMesh()
 		z1_( 0.0 ),
 		r0_( 1.0 ),
 		r1_( 1.0 ),
-		lambda_( 1.0 ),
+		diffLength_( 1.0 ),
 		surfaceGranularity_( 0.1 ),
 		totLen_( 1.0 ),
 		rSlope_( 0.0 ),
@@ -184,8 +184,8 @@ CylMesh::~CylMesh()
 //////////////////////////////////////////////////////////////////
 
 /**
- * This assumes that lambda is the quantity to preserve, over numEntries.
- * So when the compartment changes volume, numEntries changes. Lambda will
+ * This assumes that diffLength is the quantity to preserve, over numEntries.
+ * So when the compartment changes volume, numEntries changes. diffLength will
  * be fine-tuned to be a clean multiple.
  */
 void CylMesh::updateCoords()
@@ -204,19 +204,19 @@ void CylMesh::updateCoords()
 	totLen_ = temp;
 
 
-	temp = totLen_ / lambda_;
+	temp = totLen_ / diffLength_;
 	if ( temp < 1.0 ) {
-		lambda_ = totLen_;
+		diffLength_ = totLen_;
 		numEntries_ = 1;
 	} else {
 		numEntries_ = static_cast< unsigned int >( round ( temp ) );
-		lambda_ = totLen_ / numEntries_;
+		diffLength_ = totLen_ / numEntries_;
 	}
 	rSlope_ = ( r1_ - r0_ ) / numEntries_;
-	lenSlope_ = lambda_ * rSlope_ * 2 / ( r0_ + r1_ );
+	lenSlope_ = diffLength_ * rSlope_ * 2 / ( r0_ + r1_ );
 
-	// dx2_[0] = lambda_;
-	// dx2_[1] = lambda_;
+	// dx2_[0] = diffLength_;
+	// dx2_[1] = diffLength_;
 	buildStencil();
 }
 
@@ -322,7 +322,7 @@ void CylMesh::innerSetCoords( const vector< double >& v )
 	r0_ = v[6];
 	r1_ = v[7];
 
-	lambda_ = v[8];
+	diffLength_ = v[8];
 
 	updateCoords();
 }
@@ -351,20 +351,20 @@ vector< double > CylMesh::getCoords( const Eref& e ) const
 	ret[6] = r0_;
 	ret[7] = r1_;
 
-	ret[8] = lambda_;
+	ret[8] = diffLength_;
 	return ret;
 }
 
 
-void CylMesh::setLambda( double v )
+void CylMesh::setDiffLength( double v )
 {
-	lambda_ = v;
+	diffLength_ = v;
 	updateCoords();
 }
 
-double CylMesh::getLambda() const
+double CylMesh::getDiffLength() const
 {
-	return lambda_;
+	return diffLength_;
 }
 
 
@@ -398,15 +398,15 @@ unsigned int CylMesh::getMeshDimensions( unsigned int fid ) const
 }
 
 /**
- * lambda = length constant for diffusive spread
+ * diffLength = length constant for diffusive spread
  * len = length of each mesh entry
  * totLen = total length of cylinder
- * lambda = k * r^2
- * Each entry has the same number of lambdas, L = len/lambda.
- * Thinner entries have shorter lambda.
+ * diffLength = k * r^2
+ * Each entry has the same number of diffLengths, L = len/diffLength.
+ * Thinner entries have shorter diffLength.
  * This gives a moderately nasty quadratic.
- * However, as len(i) is prop to lambda(i),
- * and lambda(i) is prop to r(i)^2
+ * However, as len(i) is prop to diffLength(i),
+ * and diffLength(i) is prop to r(i)^2
  * and the cyl-mesh is assumed a gently sloping cone
  * we get len(i) is prop to (r0 + slope.x)^2
  * and ignoring the 2nd-order term we have
@@ -425,10 +425,10 @@ unsigned int CylMesh::getMeshDimensions( unsigned int fid ) const
  * Simple definition of rSlope:
  * rSlope is measured per meshEntry, not per length:
  * rSlope = ( r1 - r0 ) / numEntries;
- * Let's just compute len0 from r0 and lambda.
- * len0/lambda = 2 * r0 / (r0 + r1)
- * so len0 = lambda * 2 * r0 / (r0 + r1)
- * and dlen/dx = lenSlope = lambda * rSlope * 2/(r0 + r1)
+ * Let's just compute len0 from r0 and diffLength.
+ * len0/diffLength = 2 * r0 / (r0 + r1)
+ * so len0 = diffLength * 2 * r0 / (r0 + r1)
+ * and dlen/dx = lenSlope = diffLength * rSlope * 2/(r0 + r1)
  *
  * Drop the following calculations:
  * // dlen/dx = dr/dx * dlen/dr = ( (r1-r0)/len ) * 2k.r
@@ -441,7 +441,7 @@ unsigned int CylMesh::getMeshDimensions( unsigned int fid ) const
 /// Virtual function to return volume of mesh Entry.
 double CylMesh::getMeshEntryVolume( unsigned int fid ) const
 {
- 	double len0 = lambda_ * 2 * r0_ / ( r0_ + r1_ );
+ 	double len0 = diffLength_ * 2 * r0_ / ( r0_ + r1_ );
 
 	double ri = r0_ + (fid + 0.5) * rSlope_;
 	double leni = len0 + ( fid + 0.5 ) * lenSlope_;
@@ -454,8 +454,8 @@ double CylMesh::getMeshEntryVolume( unsigned int fid ) const
 vector< double > CylMesh::getCoordinates( unsigned int fid ) const
 {
 	vector< double > ret(10, 0.0);
- 	double len0 = lambda_ * 2 * r0_ / ( r0_ + r1_ );
- 	// double len0 = lambda_ * 2 * ( r0_ + rSlope_ / 0.5) / ( r0_ + r1_ );
+ 	double len0 = diffLength_ * 2 * r0_ / ( r0_ + r1_ );
+ 	// double len0 = diffLength_ * 2 * ( r0_ + rSlope_ / 0.5) / ( r0_ + r1_ );
 	double lenStart = len0 + lenSlope_ * 0.5;
 
 	double axialStart = fid * lenStart + ( ( fid * (fid - 1 ) )/2 ) * lenSlope_;
@@ -593,9 +593,9 @@ void CylMesh::innerSetNumEntries( unsigned int n )
 	}
 	assert( n > 0 );
 	numEntries_ = n;
-	lambda_ = totLen_ / n;
+	diffLength_ = totLen_ / n;
 	rSlope_ = ( r1_ - r0_ ) / numEntries_;
-	lenSlope_ = lambda_ * rSlope_ * 2 / ( r0_ + r1_ );
+	lenSlope_ = diffLength_ * rSlope_ * 2 / ( r0_ + r1_ );
 
 	buildStencil();
 }
@@ -716,26 +716,26 @@ void CylMesh::buildStencil()
 		vector< unsigned int > colIndex;
 		if ( i == 0 ) {
 			colIndex.push_back( 1 );
-			entry.push_back( aHigh / lambda_ );
+			entry.push_back( aHigh / diffLength_ );
 			if ( isToroid_ ) {
 				colIndex.push_back( numEntries_ - 1 );
-				entry.push_back( aLow / lambda_ );
+				entry.push_back( aLow / diffLength_ );
 			}
 		} else if ( i == numEntries_ - 1 ) {
 			if ( isToroid_ ) {
 				colIndex.push_back( 0 );
 				if ( r0_ < r1_ )
-					entry.push_back( r0_ * r0_ * PI / lambda_ );
+					entry.push_back( r0_ * r0_ * PI / diffLength_ );
 				else
-					entry.push_back( r1_ * r1_ * PI / lambda_ );
+					entry.push_back( r1_ * r1_ * PI / diffLength_ );
 			}
 			colIndex.push_back( numEntries_ - 2 );
-			entry.push_back( aLow / lambda_ );
+			entry.push_back( aLow / diffLength_ );
 		} else { // Mostly it is in the middle.
 			colIndex.push_back( i - 1 );
-			entry.push_back( aLow / lambda_ );
+			entry.push_back( aLow / diffLength_ );
 			colIndex.push_back( i + 1 );
-			entry.push_back( aHigh / lambda_ );
+			entry.push_back( aHigh / diffLength_ );
 		}
 		addRow( i, entry, colIndex );
 	}
@@ -795,20 +795,20 @@ vector< VoxelJunction >& ret ) const
 		if ( ( dr1/totLen_ < EPSILON && dr1/other->totLen_ < EPSILON ) ) {
 			double xda;
 			if ( r0_ < other->r0_ )
-				xda = 2 * r0_ * r0_ * PI / ( lambda_ + other->lambda_ );
+				xda = 2 * r0_ * r0_ * PI / ( diffLength_ + other->diffLength_ );
 			else 
 				xda = 2 * other->r0_ * other->r0_ * PI / 
-						( lambda_ + other->lambda_ );
+						( diffLength_ + other->diffLength_ );
 			ret.push_back( VoxelJunction( 0, 0, xda ) );
 		}
 	} else if ( dr2 <= dr3 && dr2 <= dr4 ) {
 		if ( ( dr2/totLen_ < EPSILON && dr2/other->totLen_ < EPSILON ) ) {
 			double xda;
 			if ( r1_ < other->r1_ )
-				xda = 2 * r1_ * r1_ * PI / ( lambda_ + other->lambda_ );
+				xda = 2 * r1_ * r1_ * PI / ( diffLength_ + other->diffLength_ );
 			else 
 				xda = 2 * other->r1_ * other->r1_ * PI / 
-						( lambda_ + other->lambda_ );
+						( diffLength_ + other->diffLength_ );
 			ret.push_back( VoxelJunction( numEntries_ - 1, 
 						other->numEntries_ - 1, xda ) );
 		}
@@ -816,20 +816,20 @@ vector< VoxelJunction >& ret ) const
 		if ( ( dr3/totLen_ < EPSILON && dr3/other->totLen_ < EPSILON ) ) {
 			double xda;
 			if ( r1_ < other->r0_ )
-				xda = 2 * r1_ * r1_ * PI / ( lambda_ + other->lambda_ );
+				xda = 2 * r1_ * r1_ * PI / ( diffLength_ + other->diffLength_ );
 			else 
 				xda = 2 * other->r0_ * other->r0_ * PI / 
-						( lambda_ + other->lambda_ );
+						( diffLength_ + other->diffLength_ );
 			ret.push_back( VoxelJunction( numEntries_ - 1, 0, xda ) );
 		}
 	} else {
 		if ( ( dr4/totLen_ < EPSILON && dr4/other->totLen_ < EPSILON ) ) {
 			double xda;
 			if ( r0_ < other->r1_ )
-				xda = 2 * r0_ * r0_ * PI / ( lambda_ + other->lambda_ );
+				xda = 2 * r0_ * r0_ * PI / ( diffLength_ + other->diffLength_ );
 			else 
 				xda = 2 * other->r1_ * other->r1_ * PI / 
-						( lambda_ + other->lambda_ );
+						( diffLength_ + other->diffLength_ );
 			ret.push_back( VoxelJunction( 0, other->numEntries_ - 1, xda ));
 		}
 	}
@@ -838,15 +838,15 @@ vector< VoxelJunction >& ret ) const
 // Select grid volume. Ideally the meshes should be comparable.
 double CylMesh::selectGridVolume( double h ) const
 {
-	if ( h > lambda_ )
-		h = lambda_;
+	if ( h > diffLength_ )
+		h = diffLength_;
 	if ( h > r0_ )
 		h = r0_;
 	if ( h > r1_ )
 		h = r1_;
 	h *= surfaceGranularity_;
-	unsigned int num = ceil( lambda_ / h );
-	h = lambda_ / num;
+	unsigned int num = ceil( diffLength_ / h );
+	h = diffLength_ / num;
 
 	return h;
 }
@@ -890,7 +890,7 @@ vector< VoxelJunction >& ret ) const
 
 	double h = selectGridVolume( other->getDx() );
 
-	unsigned int num = floor( 0.1 + lambda_ / h );
+	unsigned int num = floor( 0.1 + diffLength_ / h );
 	// March along axis of cylinder.
 	// q is the location of the point along axis.
 	for ( unsigned int i = 0; i < numEntries_; ++i ) {

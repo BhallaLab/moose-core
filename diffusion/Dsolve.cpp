@@ -38,6 +38,12 @@ const Cinfo* Dsolve::initCinfo()
 			"current diffusion solver. ",
 			&Dsolve::getNumVoxels
 		);
+		static ReadOnlyValueFinfo< Dsolve, unsigned int > numAllVoxels(
+			"numAllVoxels",
+			"Number of voxels in the core reac-diff system, on the "
+			"current diffusion solver. ",
+			&Dsolve::getNumVoxels
+		);
 		static LookupValueFinfo< 
 				Dsolve, unsigned int, vector< double > > nVec(
 			"nVec",
@@ -91,6 +97,7 @@ const Cinfo* Dsolve::initCinfo()
 		&stoich,			// Value
 		&compartment,		// Value
 		&numVoxels,			// ReadOnlyValue
+		&numAllVoxels,			// ReadOnlyValue
 		&nVec,				// LookupValue
 		&numPools,			// Value
 		&proc,				// SharedFinfo
