@@ -265,16 +265,13 @@ def getfielddoc(tokens, indent=''):
         If the specified fieldName is not present in the specified class.
     """
     assert(len(tokens) > 1)
-    for ftype, rtype in finfotypes:
-        cel = _moose.element('/classes/'+tokens[0])
-        numfinfo = getField(cel, 'num_'+ftype, 'unsigned')
-        finfo = element('/classes/%s/%s' % (tokens[0], ftype))
-        for ii in range(numfinfo):
-            oid = melement(finfo.getId(), 0, ii, 0)
-            if oid.name == tokens[1]:
+    class_element = _moose.element('/classes/'+tokens[0])
+    for finfo in class_element.children:
+        for field_element in finfo:
+            if field_element.name == tokens[1]: # TODO - this name clashes with Neutral.name.
                 return '%s%s.%s: %s - %s\n\t%s\n' % \
                     (indent, tokens[0], tokens[1], 
-                     oid.type, rtype, oid.docs)    
+                     field_element.type, field_element.path.split('/')[-1].split('[')[0], field_element.docs)    
     raise NameError('`%s` has no field called `%s`' 
                     % (tokens[0], tokens[1]))
                     
@@ -340,7 +337,7 @@ def doc(arg, paged=False):
     Parameters
     ----------
     arg : str/class/melement/vec
-        A a string specifying a moose class name and a field name
+        A string specifying a moose class name and a field name
         separated by a dot. e.g., 'Neutral.name'. Prepending `moose.`
         is allowed. Thus moose.doc('moose.Neutral.name') is equivalent
         to the above.    
