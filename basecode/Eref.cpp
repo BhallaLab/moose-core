@@ -24,10 +24,17 @@ Eref::Eref( Element* e, unsigned int index, unsigned int field )
 
 ostream& operator <<( ostream& s, const Eref& e )
 {
-	if ( e.i_ == 0 )
-		s << e.e_->getName();
-	else
-		s << e.e_->getName() << "[" << e.i_ << "]";
+	if ( e.i_ == 0 ) {
+		if ( e.f_ == 0 )
+			s << e.e_->getName();
+		else
+			s << e.e_->getName() << "[0][" << e.f_ << "]";
+	} else {
+		if ( e.f_ == 0 )
+			s << e.e_->getName() << "[" << e.i_ << "]";
+		else
+			s << e.e_->getName() << "[" << e.i_ << "][" << e.f_ << "]";
+	}
 	return s;
 }
 
