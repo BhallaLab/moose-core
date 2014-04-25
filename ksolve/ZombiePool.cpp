@@ -164,7 +164,7 @@ double ZombiePool::vGetVolume( const Eref& e ) const
 // Zombie conversion functions.
 //////////////////////////////////////////////////////////////
 
-void ZombiePool::setSolver( Id s )
+void ZombiePool::vSetSolver( Id s )
 {
 	// Nasty unsafe typecast. I would have preferred to pass in a 
 	// safely typed pointer but that would have exposed a low-level
@@ -179,6 +179,11 @@ void ZombiePool::setSolver( Id s )
 		dsolve_ = zpi;
 	else
 		ksolve_ = zpi;
+}
+
+Id ZombiePool::vGetSolver() const
+{
+		return Id();
 }
 
 /*

@@ -335,6 +335,13 @@ void Element::putTargetsInDigest(
 		// k->func(); erefs[ j ];
 		if ( md.size() == 0 || md.back().func != fo.func() ) {
 			md.push_back( MsgDigest( fo.func(), erefs[j] ) );
+			/*
+			if ( md.back().targets.size() > 0 )
+				cout << "putTargetsInDigest: " << md.back().targets[0] << 
+					", eref = " << erefs[j][0] << endl;
+			else
+				cout << "putTargetsInDigest: empty\n";
+			*/
 		} else {
 			md.back().targets.insert( md.back().targets.end(), 
 					erefs[ j ].begin(),

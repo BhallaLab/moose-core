@@ -22,7 +22,8 @@ SingleMsg::SingleMsg( const Eref& e1, const Eref& e2, unsigned int msgIndex)
 	: Msg( ObjId( managerId_, (msgIndex != 0 ) ? msgIndex: msg_.size() ), 
 					e1.element(), e2.element() ),
 	i1_( e1.dataIndex() ), 
-	i2_( e2.dataIndex() )
+	i2_( e2.dataIndex() ),
+	f2_( e2.fieldIndex() )
 {
 	if ( msgIndex == 0 ) {
 		msg_.push_back( this );

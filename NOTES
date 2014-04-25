@@ -3168,3 +3168,22 @@ Figure out how to call the transfer functions. Possibly a ZombiePool Proces?
 20 April
 Worked on script for diffusion in cylindrical compartment with 25 voxels.
 Does everything but doesn't diffuse.
+Perhaps the Dsolve isn't properly assigned to the ZombiePool.
+Yes, that is the problem. 
+
+============================================================================
+23 April. Trying to compile.
+============================================================================
+24 April. Compiled, just needed a cleanout.
+
+Lots of stepping through the script and gdb later, turns out that I can
+get the solver to set up the diffusion calculations but:
+- The Zombie solver used by the pools should be set up automatically.
+- The assignment Dsolve::setInit for assigning concInit from the
+	script fails for poolNum > 0 because convertIdToPoolIndex fails.
+	This fails because Dsolve::poolMap_ isn't set anywhere.
+- The diffusion constant needs to be transferred into the 
+	DiffPoolVec array on Dsolve, but before the pool is zombified.
+- The non-diffusing pools need to be identified and their diffusion ops 
+	ignored.
+- The two solvers need to talk.
