@@ -42,6 +42,9 @@ class ZombiePool: public PoolBase
 		void vSetSpecies( const Eref& e, unsigned int v );
 		unsigned int vGetSpecies( const Eref& e ) const;
 
+		void vSetSolver( Id v );
+		Id vGetSolver() const;
+
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////

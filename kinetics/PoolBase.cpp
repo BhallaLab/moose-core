@@ -75,6 +75,13 @@ const Cinfo* PoolBase::initCinfo()
 			&PoolBase::getSpecies
 		);
 
+		static ValueFinfo< PoolBase, Id > solver(
+			"setSolver",
+			"Access the Id for the solver that handles this pool",
+			&PoolBase::setSolver,
+			&PoolBase::getSolver
+		);
+
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
@@ -145,6 +152,7 @@ const Cinfo* PoolBase::initCinfo()
 		&concInit,	// Value
 		&volume,	// Readonly Value
 		&speciesId,	// Value
+		&solver,			// Value
 		&reac,				// SharedFinfo
 		&proc,				// SharedFinfo
 		&species,			// SharedFinfo
@@ -289,6 +297,18 @@ unsigned int PoolBase::getSpecies( const Eref& e ) const
 	return vGetSpecies( e );
 }
 
+// Virtual func: default does nothing.
+Id PoolBase::getSolver() const
+{
+	return vGetSolver();
+}
+
+// Virtual func: default does nothing.
+void PoolBase::setSolver( Id solver )
+{
+	vSetSolver( solver );
+}
+
 //////////////////////////////////////////////////////////////
 // Zombie conversion routine: Converts Pool subclasses. There
 // will typically be a target specific follow-up function, for example,
@@ -325,9 +345,14 @@ void PoolBase::zombify( Element* orig, const Cinfo* zClass, Id solver )
 		pb->setDiffConst( er, diffConst[i] );
 	}
 }
+// Virtual func: default does nothing.
+Id PoolBase::vGetSolver() const
+{
+	return Id();
+}
 
 // Virtual func: default does nothing.
-void PoolBase::setSolver( Id solver )
+void PoolBase::vSetSolver( Id solver )
 {
 	;
 }

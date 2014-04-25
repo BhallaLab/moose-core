@@ -66,6 +66,9 @@ class PoolBase
 
 		void setSpecies( const Eref& e, SpeciesId v );
 		SpeciesId getSpecies( const Eref& e ) const;
+
+		void setSolver( Id solver );
+		Id getSolver() const;
 		
 		//////////////////////////////////////////////////////////////////
 		// Here are the inner virtual funcs for fields. 
@@ -87,6 +90,14 @@ class PoolBase
 		virtual void vSetVolume( const Eref& e, double v ) = 0;
 		virtual void vSetSpecies( const Eref& e, SpeciesId v ) = 0;
 		virtual SpeciesId vGetSpecies( const Eref& e ) const = 0;
+		/**
+		 * Assign whatever info is needed by the zombie based on the
+		 * solver Element. Encapsulates some unpleasant field extraction,
+		 * casting, and assignment. Default version of this function does
+		 * nothing.
+		 */
+		virtual void vSetSolver( Id solver );
+		virtual Id vGetSolver() const;
 		
 		//////////////////////////////////////////////////////////////////
 		/**
@@ -107,14 +118,6 @@ class PoolBase
 		 */
 		static void zombify( Element* original, const Cinfo* zClass, 
 			Id solver );
-		
-		/**
-		 * Assign whatever info is needed by the zombie based on the
-		 * solver Element. Encapsulates some unpleasant field extraction,
-		 * casting, and assignment. Default version of this function does
-		 * nothing.
-		 */
-		virtual void setSolver( Id solver );
 
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
