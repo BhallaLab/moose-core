@@ -1583,7 +1583,7 @@ void testCinfoElements()
 	assert( n == 12 );
 	
 	ObjId temp( intFireSrcFinfoId, 0 );
-	string foo = Field< string >::get( temp, "name" );
+	string foo = Field< string >::get( temp, "fieldName" );
 	assert( foo == "spikeOut" );
 
 	foo = Field< string >::get( temp, "type" );
@@ -1593,10 +1593,10 @@ void testCinfoElements()
 	assert( n == 1 );
 
 	temp = ObjId( intFireDestFinfoId, 7 );
-	string str = Field< string >::get( temp, "name" );
+	string str = Field< string >::get( temp, "fieldName" );
 	assert( str == "getRefractoryPeriod");
 	temp = ObjId( intFireDestFinfoId, 11 );
-	str = Field< string >::get( temp, "name" );
+	str = Field< string >::get( temp, "fieldName" );
 	assert( str == "reinit" );
 	cout << "." << flush;
 }
