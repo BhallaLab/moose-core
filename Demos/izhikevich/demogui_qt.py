@@ -118,16 +118,16 @@ class IzhikevichGui(QtGui.QMainWindow):
         doc = IzhikevichDemo.documentation[key].replace('\n', '<br/>')
         text = '<b>%s:</b> %s<p><b>Equation:</b><br/> %s' % (key, doc, equationText)
         self.descriptionWidget.setText(self.tr(text))
-        if key == 'accommodation':
-            mbox = QtGui.QMessageBox(self)
-            mbox.setText(self.tr('Accommodation cannot be shown with regular Izhikevich model.'))
-            mbox.setDetailedText(self.tr('\
-Equation for u for the accommodating neuron is: \
-u\' = a * b * (V + 65)\n Which is different from \
-the regular equation u\' = a * (b*V - u) and cannot \
-be obtained from the latter by any choice of a and b.'))
-            mbox.show()
-            return
+#         if key == 'accommodation':
+#             mbox = QtGui.QMessageBox(self)
+#             mbox.setText(self.tr('Accommodation cannot be shown with regular Izhikevich model.'))
+#             mbox.setDetailedText(self.tr('\
+# Equation for u for the accommodating neuron is: \
+# u\' = a * b * (V + 65)\n Which is different from \
+# the regular equation u\' = a * (b*V - u) and cannot \
+# be obtained from the latter by any choice of a and b.'))
+#             mbox.show()
+#             return
         (time, Vm, Im) = self.demo.simulate(key)
         Vm = numpy.array(Vm.vector) * 1e3
         Im = numpy.array(Im.vector) * 1e9

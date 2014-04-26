@@ -127,7 +127,8 @@ const Cinfo* IzhikevichNrn::initCinfo()
     
     static ValueFinfo<IzhikevichNrn, double> alpha(
             "alpha",
-            "Coefficient of v^2 in Izhikevich equation. Defaults to 0.04 in physiological unit. In SI it should be 40000.0. Unit is V^-1 s^{-1}",
+            "Coefficient of v^2 in Izhikevich equation. Defaults to 0.04 in "
+            "physiological unit. In SI it should be 40000.0. Unit is V^-1 s^{-1}",
             &IzhikevichNrn::setAlpha,
             &IzhikevichNrn::getAlpha);
 
@@ -149,6 +150,20 @@ const Cinfo* IzhikevichNrn::initCinfo()
             &IzhikevichNrn::setRm,
             &IzhikevichNrn::getRm);
 
+    static ValueFinfo<IzhikevichNrn, bool> accommodating(
+            "accommodating",
+            "True of this neuron is an accommodating one. The equation for recovery"
+            " variable u is special in this case.",
+            &IzhikevichNrn::setAccommodating,
+            &IzhikevichNrn::getAccommodating);
+    
+    static ValueFinfo<IzhikevichNrn, double> u0(
+            "u0",
+            "This is used for accommodating neurons where recovery variables u is"
+            " computed as: u += tau*a*(b*(Vm-u0))",
+            &IzhikevichNrn::setU0,
+            &IzhikevichNrn::getU0);
+    
     ///////////////////////////////
     // MsgDest definition
     ///////////////////////////////
@@ -188,6 +203,8 @@ const Cinfo* IzhikevichNrn::initCinfo()
         &Vm,
         &Im,
         &Rm,
+        &accommodating,
+        &u0,
         &initVm,
         &initU,
         &alpha,
@@ -214,14 +231,15 @@ const Cinfo* IzhikevichNrn::initCinfo()
         " if Vm >= Vmax then Vm = c and u = u + d\n"
         " Vmax = 30 mV in the paper."
     };
-
+    static Dinfo< IzhikevichNrn > dinfo;
     static Cinfo IzhikevichNrnCinfo(
-            "IzhikevichNrn",
-            Neutral::initCinfo(),
-            IzhikevichNrnFinfos,
-            sizeof( IzhikevichNrnFinfos ) / sizeof( Finfo* ),
-            new Dinfo< IzhikevichNrn >()
-                                    );
+        "IzhikevichNrn",
+        Neutral::initCinfo(),
+        IzhikevichNrnFinfos,
+        sizeof( IzhikevichNrnFinfos ) / sizeof( Finfo* ),
+        &dinfo,
+        doc,
+        sizeof(doc)/sizeof(string));
 
     return &IzhikevichNrnCinfo;
 }
@@ -245,7 +263,9 @@ IzhikevichNrn::IzhikevichNrn():
         initU_(-13.0), 
         sum_inject_(0.0),
         Im_(0.0),
-        savedVm_(-0.065)
+        savedVm_(-0.065),
+        accommodating_(false),
+        u0_(-0.065)
 {
     ;
 }
@@ -386,11 +406,35 @@ double IzhikevichNrn::getInitU() const
     return initU_;
 }
 
+void IzhikevichNrn::setAccommodating( bool value)    
+{
+    accommodating_ = value;
+}
+
+bool IzhikevichNrn::getAccommodating() const
+{
+    return accommodating_;
+}
+
+void IzhikevichNrn::setU0( double value)    
+{
+    u0_ = value;
+}
+
+double IzhikevichNrn::getU0() const
+{
+    return u0_;
+}
+
 void IzhikevichNrn::process(const Eref& eref, ProcPtr proc)
 {    
     Vm_ += proc->dt * ((alpha_ * Vm_ + beta_) * Vm_
-                 + gamma_ - u_ + 1e3 * Rm_ * sum_inject_);
-    u_ += proc->dt * a_ * (b_ * Vm_ - u_);
+                       + gamma_ - u_ + 1e3 * Rm_ * sum_inject_);
+    if (accommodating_){
+        u_ += proc->dt * a_ * b_ * (Vm_ - u0_);
+    } else {
+        u_ += proc->dt * a_ * (b_ * Vm_ - u_);
+    }
     Im_ = sum_inject_;
     sum_inject_ = 0.0;
     // This check is to ensure that checking Vm field will always
@@ -413,6 +457,7 @@ void IzhikevichNrn::reinit(const Eref& eref, ProcPtr proc)
     Vm_ = initVm_;
     u_ = initU_;
     Im_ = 0.0;
+    savedVm_ = Vm_;
     VmOut()->send(eref, Vm_);    
 }
 

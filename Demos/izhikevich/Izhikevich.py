@@ -200,9 +200,6 @@ These neurons show bursting in response to inhibitory input."""
             print key, 'Not implemented.'
             
     def simulate(self, key):
-        if key == 'accommodation':
-            raise NotImplementedError('Not Implemented', 'Equation for u for the accommodating neuron is:\n u\' = a * b * (V + 65)\n Which is different from the regular equation and cannot be obtained from the latter by any choice of a and b.')
-            return
         self.setup(key)
         return self.run(key)
 
@@ -247,21 +244,24 @@ These neurons show bursting in response to inhibitory input."""
 
     def _get_neuron(self, key):
         try:
-            neuron = self.neurons[key]
-            return neuron
-        except KeyError, e:
-            pass
-        try:
             params = IzhikevichDemo.parameters[key]
-        except KeyError, e:
+        except KeyError as e:
             print ' %s : Invalid neuron type. The valid types are:' % (key)
             for key in IzhikevichDemo.parameters:
                 print key
-            raise
-        neuron = moose.IzhikevichNrn(self.model_container.path + '/' + key)
+            raise e
+        try:
+            neuron = self.neurons[key]
+            return neuron
+        except KeyError, e:
+            neuron = moose.IzhikevichNrn(self.model_container.path + '/' + key)
+
         if key == 'integrator' or key == 'Class_1': # Integrator has different constants
             neuron.beta = 4.1e3
             neuron.gamma = 108.0
+        if key == 'accommodation':
+            neuron.accommodating = True
+            neuron.u0 = -0.065
         self.neuron = neuron
         neuron.a = params[1] * 1e3 # ms^-1 -> s^-1
         neuron.b = params[2] * 1e3 # ms^-1 -> s^-1
@@ -273,6 +273,7 @@ These neurons show bursting in response to inhibitory input."""
             neuron.initU = neuron.initVm * neuron.b
         else:
             neuron.initU = -16.0 # u is in mV/ms = V/s
+            moose.showfield(neuron)
         self.neurons[key] = neuron
         return neuron
 
@@ -376,9 +377,9 @@ These neurons show bursting in response to inhibitory input."""
         pulsegen.secondWidth = secondWidth
         pulsegen.baseLevel = baseLevel
         nrn = self._get_neuron(key)
-        moose.connect(pulsegen, 'outputOut', nrn, 'injectDest')
+        moose.connect(pulsegen, 'output', nrn, 'injectDest')
         # self.stimulus_table = moose.Table(self.data_container.path + '/stimulus')
-        # self.stimulus_table.connect('requestOut', pulsegen, 'getOutput')
+        # self.stimulus_table.connect('requestOut', pulsegen, 'getOutputValue')
         return pulsegen    
         
     def _make_Class_1_input(self):
@@ -477,11 +478,11 @@ These neurons show bursting in response to inhibitory input."""
         t = 0.0
         for ii in range(len(input_vec)):
             if t < 200e-3:
-                input_vec[ii] = t * 1e-9/25
+                input_vec[ii] = t * 1e-6/25
             elif t < 300e-3:
                 input_vec[ii] = 0.0
             elif t < 312.5e-3:
-                input_vec[ii] = 4e-9 * (t-300e-3)/12.5
+                input_vec[ii] = 4e-6 * (t-300e-3)/12.5 
             else:
                 input_vec[ii] = 0.0
             t = t + self.dt
@@ -506,7 +507,10 @@ These neurons show bursting in response to inhibitory input."""
 
     def getEquation(self, key):
         params = IzhikevichDemo.parameters[key]
-        equationText = "<i>v' = 0.04v^2 + 5v + 140 - u + I</i><br><i>u' = a(bv - u)</i><p>If <i>v >= 30 mV, v = c</i> and <i>u = u + d</i><br>where <i>a = %g</i>, <i>b = %g</i>, <i>c = %g</i> and <i>d = %g</i>."  % (params[1], params[2], params[3], params[4])
+        if key != 'accommodation':
+            equationText = "<i>v' = 0.04v^2 + 5v + 140 - u + I</i><br><i>u' = a(bv - u)</i><p>If <i>v >= 30 mV, v = c</i> and <i>u = u + d</i><br>where <i>a = %g</i>, <i>b = %g</i>, <i>c = %g</i> and <i>d = %g</i>."  % (params[1], params[2], params[3], params[4])
+        else:
+            equationText = "<i>v' = 0.04v^2 + 5v + 140 - u + I</i><br><i>u' = ab(v + 65)</i><p>If <i>v >= 30 mV, v = c</i> and <i>u = u + d</i><br>where <i>a = %g</i>, <i>b = %g</i>, <i>c = %g</i> and <i>d = %g</i>."  % (params[1], params[2], params[3], params[4])
         return equationText
         
 import sys
@@ -520,13 +524,11 @@ try:
         (time, Vm, Im) = demo.simulate(key)
         title(IzhikevichDemo.parameters[key][0] + '. ' + key)
         subplot(3,1,1)
-        plot(time, array(Vm.vector))
+        plot(time, Vm.vector)
         subplot(3,1,2)
-        plot(time, array(Im.vector))
+        plot(time, Im.vector)
         subplot(3,1,3)
         show()
-        # data.dumpFile(data.name + '.plot')
-        # demo.inject_table.dumpFile(demo.inject_table.name + '.plot')
         print 'Finished simulation.'
 except ImportError:
     print 'Matplotlib not installed.'
