@@ -22,9 +22,9 @@ Finfo::Finfo( const string& name, const string& doc )
 
 const Cinfo* Finfo::initCinfo()
 {
-	static ReadOnlyValueFinfo< FinfoWrapper, string > name(
-		"name",
-		"Name of Finfo",
+	static ReadOnlyValueFinfo< FinfoWrapper, string > fieldName(
+		"fieldName",
+		"Name of field handled by Finfo",
 		&FinfoWrapper::getName
 	);
 
@@ -53,7 +53,7 @@ const Cinfo* Finfo::initCinfo()
 
 
 	static Finfo* finfoFinfos[] = {
-		&name,	// ReadOnlyValue
+		&fieldName,	// ReadOnlyValue
 		&docs,		// ReadOnlyValue
 		&type,		// ReadOnlyValue
 		&src,		// ReadOnlyValue
