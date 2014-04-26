@@ -77,6 +77,12 @@ class IzhikevichNrn
     void setRm(double value );
     double getRm() const;
 
+    void setAccommodating( bool value );
+    bool getAccommodating() const;
+
+    void setU0( double value );
+    double getU0() const;
+
     void process(const Eref& eref, ProcPtr proc );
     void reinit(const Eref& eref, ProcPtr proc );
 
@@ -100,6 +106,8 @@ class IzhikevichNrn
     double sum_inject_;
     double Im_;
     double savedVm_;
+    bool accommodating_;
+    double u0_;
 };
 
 #endif
