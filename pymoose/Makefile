@@ -10,7 +10,7 @@ HEADERS = moosemodule.h
 
 OBJ = moosemodule.o mfield.o vec.o melement.o test_moosemodule.o
 
-$(TARGET): $(OBJ) $(HEADERS) ../basecode/main.cpp ../utility/_utility.o ../basecode/_basecode_pymoose.o
+$(TARGET): $(OBJ) $(HEADERS) ../basecode/main.cpp ../utility/_utility.o ../basecode/_basecode.o
 	$(LD) -r -o $(TARGET) $(OBJ) $(LDFLAGS)
 
 .cpp.o: $(HEADERS)

@@ -380,19 +380,15 @@ endif
 # There are some unix/gcc specific paths here. Should be cleaned up in future.
 pymoose: python/moose/_moose.so
 pymoose: CXXFLAGS += -DPYMOOSE $(PYTHON_CFLAGS)
-pymoose: OBJLIBS += pymoose/_pymoose.o basecode/_basecode_pymoose.o
-pymoose: OBJLIBS := $(filter-out basecode/_basecode.o,$(OBJLIBS))
+pymoose: OBJLIBS += pymoose/_pymoose.o
 pymoose: LDFLAGS += $(PYTHON_LDFLAGS)
 export CXXFLAGS
-python/moose/_moose.so: libs $(OBJLIBS) basecode/_basecode_pymoose.o
+python/moose/_moose.so: libs $(OBJLIBS)
 	$(MAKE) -C pymoose
 	$(CXX) -shared $(LDFLAGS) $(CXXFLAGS) -o $@ $(OBJLIBS) $(LIBS)
 	@echo "pymoose module built."
 
 # This will generate an object file without main
-basecode/_basecode_pymoose.o: 	
-	$(MAKE) -C basecode pymoose 
-	@echo "_basecode_pymoose.o built"
 libs:
 	@(for i in $(SUBDIR) $(PARALLEL_DIR); do $(MAKE) -C $$i; done)
 	@echo "All Libs compiled"
