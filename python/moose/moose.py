@@ -268,7 +268,7 @@ def getfielddoc(tokens, indent=''):
     class_element = _moose.element('/classes/'+tokens[0])
     for finfo in class_element.children:
         for field_element in finfo:
-            if field_element.name == tokens[1]: # TODO - this name clashes with Neutral.name.
+            if field_element.fieldName == tokens[1]: # TODO - this name clashes with Neutral.name.
                 return '%s%s.%s: %s - %s\n\t%s\n' % \
                     (indent, tokens[0], tokens[1], 
                      field_element.type, field_element.path.split('/')[-1].split('[')[0], field_element.docs)    
