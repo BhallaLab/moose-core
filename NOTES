@@ -3178,11 +3178,11 @@ Yes, that is the problem.
 
 Lots of stepping through the script and gdb later, turns out that I can
 get the solver to set up the diffusion calculations but:
-- The Zombie solver used by the pools should be set up automatically.
-- The assignment Dsolve::setInit for assigning concInit from the
+* The Zombie solver used by the pools should be set up automatically.
+* The assignment Dsolve::setInit for assigning concInit from the
 	script fails for poolNum > 0 because convertIdToPoolIndex fails.
 	This fails because Dsolve::poolMap_ isn't set anywhere.
-- The diffusion constant needs to be transferred into the 
+* The diffusion constant needs to be transferred into the 
 	DiffPoolVec array on Dsolve, but before the pool is zombified.
 - The non-diffusing pools need to be identified and their diffusion ops 
 	ignored.
@@ -3196,6 +3196,8 @@ Ksolve maintains ptr to a ZPI. If set, then all field value ops are forwarded.
 	the diffusion term gets handed over.
 Stoich doesn't know about Dsolve, just talks to the Ksolve.
 
+============================================================================
+27 April.
 Or:
 * Dsolve::setStoich extracts poolMap. Must happen _after_ Stoich::path is set.
 * Zombie pools maintain their own diffConst, to be used to set up the Dsolve.
@@ -3212,4 +3214,10 @@ snippet.
 Also if there is a pool with diffConst = 0, it will fail. 
 - Need to put in dummy calculations for diffConst=0, buffering, and sumtots.
 
+Checkin 5283.
 
+Implemented dummy calculations for diffConst=0. I'm not dealing with 
+buffering here, in principle we could have a buffered diffusing molecule so
+I will let the usual diffConst deal with the diffusibility of buffers.
+
+============================================================================

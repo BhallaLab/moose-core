@@ -379,35 +379,28 @@ void Dsolve::build( double dt )
 
 	for ( unsigned int i = 0; i < numLocalPools_; ++i ) {
 		bool debugFlag = false;
-		FastMatrixElim elim( numVoxels, numVoxels );
-		elim.buildForDiffusion( m->getParentVoxel(), m->getVoxelVolume(), 
-			m->getVoxelArea(), m->getVoxelLength(), 
-		   pools_[i].getDiffConst(), pools_[i].getMotorConst(), dt );
-		vector< unsigned int > parentVoxel = m->getParentVoxel();
-		assert( elim.checkSymmetricShape() );
-		/*
-		elim.setDiffusionAndTransport( parentVoxel,
-			pools_[i].getDiffConst(), pools_[i].getMotorConst(), dt );
-			*/
-		vector< unsigned int > lookupOldRowsFromNew;
-		elim.hinesReorder( parentVoxel, lookupOldRowsFromNew );
-		assert( elim.checkSymmetricShape() );
-		// True only if motorConst == 0:
-		/*
-		if ( pools_[i].getMotorConst() == 0 )
-			assert( elim.isSymmetric() );
-			*/
 		vector< unsigned int > diagIndex;
 		vector< double > diagVal;
 		vector< Triplet< double > > fops;
-
-		pools_[i].setNumVoxels( numVoxels_ );
-		elim.buildForwardElim( diagIndex, fops );
-		elim.buildBackwardSub( diagIndex, fops, diagVal );
-		elim.opsReorder( lookupOldRowsFromNew, fops, diagVal );
+		FastMatrixElim elim( numVoxels, numVoxels );
+		if ( elim.buildForDiffusion( 
+			m->getParentVoxel(), m->getVoxelVolume(), 
+			m->getVoxelArea(), m->getVoxelLength(), 
+		    pools_[i].getDiffConst(), pools_[i].getMotorConst(), dt ) ) 
+		{
+			vector< unsigned int > parentVoxel = m->getParentVoxel();
+			assert( elim.checkSymmetricShape() );
+			vector< unsigned int > lookupOldRowsFromNew;
+			elim.hinesReorder( parentVoxel, lookupOldRowsFromNew );
+			assert( elim.checkSymmetricShape() );
+			pools_[i].setNumVoxels( numVoxels_ );
+			elim.buildForwardElim( diagIndex, fops );
+			elim.buildBackwardSub( diagIndex, fops, diagVal );
+			elim.opsReorder( lookupOldRowsFromNew, fops, diagVal );
+			if (debugFlag )
+				elim.print();
+		}
 		pools_[i].setOps( fops, diagVal );
-		if (debugFlag )
-			elim.print();
 	}
 }
 
