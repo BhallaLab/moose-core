@@ -3187,3 +3187,29 @@ get the solver to set up the diffusion calculations but:
 - The non-diffusing pools need to be identified and their diffusion ops 
 	ignored.
 - The two solvers need to talk.
+============================================================================
+26 April.
+Try this:
+ZombiePool just has a single ZPI.
+Ksolve maintains ptr to a ZPI. If set, then all field value ops are forwarded.
+	Else Ksolve does its own diffusion. If ZPI is subsequently set then
+	the diffusion term gets handed over.
+Stoich doesn't know about Dsolve, just talks to the Ksolve.
+
+Or:
+* Dsolve::setStoich extracts poolMap. Must happen _after_ Stoich::path is set.
+* Zombie pools maintain their own diffConst, to be used to set up the Dsolve.
+* Dsolve::build should be moved over to setStoich. 
+	* Need to get dt somehow.
+	* Should avoid losing concInit values.
+* Dsolve::reinint needs to reinit values.
+Also: Implemented a Dsolve::path field which gives an alternative way to
+	set multiple pools to diffuse.
+
+At this point the unit tests clear. I haven't tested the use of the stoich
+in setting the pools to diffuse. Nor have I put the new interface into the
+snippet.
+Also if there is a pool with diffConst = 0, it will fail. 
+- Need to put in dummy calculations for diffConst=0, buffering, and sumtots.
+
+

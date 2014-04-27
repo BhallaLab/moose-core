@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "ElementValueFinfo.h"
 #include "SparseMatrix.h"
 #include "KinSparseMatrix.h"
 #include "ZombiePoolInterface.h"
@@ -18,6 +19,14 @@
 #include "../mesh/MeshEntry.h"
 #include "../mesh/ChemCompt.h"
 #include "../mesh/MeshCompt.h"
+#include "../shell/Wildcard.h"
+#include "../kinetics/PoolBase.h"
+#include "../kinetics/Pool.h"
+#include "../kinetics/BufPool.h"
+#include "../kinetics/FuncPool.h"
+#include "../ksolve/ZombiePool.h"
+#include "../ksolve/ZombieBufPool.h"
+#include "../ksolve/ZombieFuncPool.h"
 
 const Cinfo* Dsolve::initCinfo()
 {
@@ -25,11 +34,20 @@ const Cinfo* Dsolve::initCinfo()
 		// Field definitions
 		///////////////////////////////////////////////////////
 		
-		static ValueFinfo< Dsolve, Id > stoich (
+		static ElementValueFinfo< Dsolve, Id > stoich (
 			"stoich",
 			"Stoichiometry object for handling this reaction system.",
 			&Dsolve::setStoich,
 			&Dsolve::getStoich
+		);
+		
+		static ElementValueFinfo< Dsolve, string > path (
+			"path",
+			"Path of reaction system. Must include all the pools that "
+			"are to be handled by the Dsolve, can also include other "
+			"random objects, which will be ignored.",
+			&Dsolve::setPath,
+			&Dsolve::getPath
 		);
 
 		static ReadOnlyValueFinfo< Dsolve, unsigned int > numVoxels(
@@ -94,7 +112,8 @@ const Cinfo* Dsolve::initCinfo()
 
 	static Finfo* dsolveFinfos[] =
 	{
-		&stoich,			// Value
+		&stoich,			// ElementValue
+		&path,				// ElementValue
 		&compartment,		// Value
 		&numVoxels,			// ReadOnlyValue
 		&numAllVoxels,			// ReadOnlyValue
@@ -104,7 +123,7 @@ const Cinfo* Dsolve::initCinfo()
 	};
 	
 	static Dinfo< Dsolve > dinfo;
-	static  Cinfo ksolveCinfo(
+	static  Cinfo dsolveCinfo(
 		"Dsolve",
 		Neutral::initCinfo(),
 		dsolveFinfos,
@@ -112,10 +131,10 @@ const Cinfo* Dsolve::initCinfo()
 		&dinfo
 	);
 
-	return &ksolveCinfo;
+	return &dsolveCinfo;
 }
 
-static const Cinfo* ksolveCinfo = Dsolve::initCinfo();
+static const Cinfo* dsolveCinfo = Dsolve::initCinfo();
 
 //////////////////////////////////////////////////////////////
 // Class definitions
@@ -168,7 +187,6 @@ void Dsolve::process( const Eref& e, ProcPtr p )
 
 void Dsolve::reinit( const Eref& e, ProcPtr p )
 {
-	build( p->dt );
 	for ( vector< DiffPoolVec >::iterator 
 					i = pools_.begin(); i != pools_.end(); ++i ) {
 		i->reinit();
@@ -178,12 +196,58 @@ void Dsolve::reinit( const Eref& e, ProcPtr p )
 // Solver coordination and setup functions
 //////////////////////////////////////////////////////////////
 
-void Dsolve::setStoich( Id id )
+double Dsolve::findDt( const Eref& e )
 {
-	stoich_ = id; 
+	// Here is the horrible stuff to traverse the message to get the dt.
+	const Finfo* f = Dsolve::initCinfo()->findFinfo( "reinit" );
+	const DestFinfo* df = dynamic_cast< const DestFinfo* >( f );
+	assert( df );
+	unsigned int fid = df->getFid();
+	ObjId caller = e.element()->findCaller( fid );
+	const Msg* m = Msg::getMsg( caller );
+	assert( m );
+	vector< string > src = m->getSrcFieldsOnE1();
+	assert( src.size() > 0 );
+	string temp = src[0].substr( src[0].length() - 1 ); // reinitxx
+	unsigned int tick = atoi( temp.c_str() );
+	assert( tick < 10 );
+	Id clock( 1 );
+	assert( clock.element() == m->e1() );
+	double dt = LookupField< unsigned int, double >::
+			get( clock, "tickDt", tick );
+	return dt;
 }
 
-Id Dsolve::getStoich() const
+void Dsolve::setStoich( const Eref& e, Id id )
+{
+	if ( !id.element()->cinfo()->isA( "Stoich" ) ) {
+		cout << "Dsolve::setStoich::( " << id << " ): Error: provided Id is not a Stoich\n";
+		return;
+	}
+
+	stoich_ = id;
+	poolMap_ = Field< vector< unsigned int > >::get( stoich_, "poolIdMap" );
+	poolMapStart_ = poolMap_.back();
+	poolMap_.pop_back();
+
+	path_ = Field< string >::get( stoich_, "path" );
+
+	numLocalPools_ = Field< unsigned int >::get( stoich_, "numAllPools" );
+	setNumPools( numLocalPools_ );
+	for ( unsigned int i = 0; i < poolMap_.size(); ++i ) {
+		if ( poolMap_[i] != ~0U ) {
+			Id pid( i + poolMapStart_ );
+			assert( pid.element()->cinfo()->isA( "PoolBase" ) );
+			double diffConst = Field< double >::get( pid, "diffConst" );
+			pools_[ poolMap_[i] ].setDiffConst( diffConst );
+		}
+	}
+	
+	double dt = findDt( e );
+	build( dt );
+}
+
+Id Dsolve::getStoich( const Eref& e ) const
 {
 	return stoich_;
 }
@@ -209,33 +273,108 @@ Id Dsolve::getCompartment() const
 {
 	return compartment_;
 }
+
+void Dsolve::makePoolMapFromElist( const vector< ObjId >& elist, 
+				vector< Id >& temp )
+{
+	unsigned int minId;
+	unsigned int maxId;
+	temp.resize( 0 );
+	for ( vector< ObjId >::const_iterator 
+			i = elist.begin(); i != elist.end(); ++i ) {
+		if ( i->element()->cinfo()->isA( "PoolBase" ) ) {
+			temp.push_back( i->id );
+			if ( minId == 0 ) 
+				maxId = minId = i->id.value();
+			else if ( i->id.value() < minId )
+				minId = i->id.value();
+			else if ( i->id.value() > maxId )
+				maxId = i->id.value();
+		}
+	}
+
+	if ( temp.size() == 0 ) {
+		cout << "Dsolve::makePoolMapFromElist::( " << path_ << 
+				" ): Error: path is has no pools\n";
+		return;
+	}
+
+	stoich_ = Id();
+	poolMapStart_ = minId;
+	poolMap_.resize( 1 + maxId - minId );
+	for ( unsigned int i = 0; i < temp.size(); ++i ) {
+		unsigned int idValue = temp[i].value();
+		assert( idValue >= minId );
+		assert( idValue - minId < poolMap_.size() );
+		poolMap_[ idValue - minId ] = i;
+	}
+}
+
+void Dsolve::setPath( const Eref& e, string path )
+{
+	vector< ObjId > elist;
+	simpleWildcardFind( path, elist );
+	if ( elist.size() == 0 ) {
+		cout << "Dsolve::setPath::( " << path << " ): Error: path is empty\n";
+		return;
+	}
+	vector< Id > temp;
+	makePoolMapFromElist( elist, temp );
+
+	setNumPools( temp.size() );
+	for ( unsigned int i = 0; i < temp.size(); ++i ) {
+	 	Id id = temp[i];
+		double diffConst = Field< double >::get( id, "diffConst" );
+		const Cinfo* c = id.element()->cinfo();
+		if ( c == Pool::initCinfo() )
+			PoolBase::zombify( id.element(), ZombiePool::initCinfo(), e.id() );
+		else if ( c == BufPool::initCinfo() )
+			PoolBase::zombify( id.element(), ZombieBufPool::initCinfo(), e.id() );
+		else if ( c == FuncPool::initCinfo() )
+			PoolBase::zombify( id.element(), ZombieFuncPool::initCinfo(), e.id() );
+		else
+			cout << "Error: Dsolve::setPath( " << path << " ): unknown pool class:" << c->name() << endl; 
+		id.element()->resize( numVoxels_ );
+
+		unsigned int j = temp[i].value() - poolMapStart_;
+		assert( j < poolMap_.size() );
+		pools_[ poolMap_[j] ].setDiffConst( diffConst );
+	}
+	
+	double dt = findDt( e );
+	build( dt );
+}
+
+string Dsolve::getPath( const Eref& e ) const
+{
+	return path_;
+}
+
 /////////////////////////////////////////////////////////////
 // Solver building
 //////////////////////////////////////////////////////////////
 
-// Happens at reinit, long after all pools are built.
-// By this point the diffusion consts etc will be assigned to the
-// poolVecs.
-// This requires
-// - Stoich should be assigned
-// - compartment should be assigned so we know how many voxels.
-// - Stoich should have had the path set so we know numPools. It needs
-// 		to know the numVoxels from the compartment. AT the time of
-// 		path setting the zombification is done, which takes the Id of
-// 		the solver.
-// - After this build can be done. Just reinit doesn't make sense since
-// 		the build does a lot of things which should not be repeated for
-// 		each reinit.
+/** 
+ * build: This function is called either by setStoich or setPath.
+ * By this point the diffusion consts etc will be assigned to the
+ * poolVecs.
+ * This requires
+ * - Stoich should be assigned, OR
+ * - A 'path' should be assigned which has been traversed to find pools.
+ * - compartment should be assigned so we know how many voxels.
+ * - If Stoich, its 'path' should be set so we know numPools. It needs
+ * to know the numVoxels from the compartment. At the time of
+ * path setting the zombification is done, which takes the Id of
+ * the solver.
+ * - After this build can be done. Just reinit doesn't make sense since
+ * the build does a lot of things which should not be repeated for
+ * each reinit.
+ */
+
 void Dsolve::build( double dt )
 {
 	const MeshCompt* m = reinterpret_cast< const MeshCompt* >( 
 						compartment_.eref().data() );
-	// For now start with local pools only.
-	if ( stoich_ != Id() )
-		numLocalPools_ = Field< unsigned int >::get( stoich_, "numAllPools" );
-	else
-		numLocalPools_ = 1;
-	pools_.resize( numLocalPools_ );
 	unsigned int numVoxels = m->getNumEntries();
 
 	for ( unsigned int i = 0; i < numLocalPools_; ++i ) {

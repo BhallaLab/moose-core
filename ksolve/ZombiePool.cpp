@@ -130,9 +130,9 @@ double ZombiePool::vGetConcInit( const Eref& e ) const
 
 void ZombiePool::vSetDiffConst( const Eref& e, double v )
 {
+	diffConst_ = v;
 	if ( dsolve_ )
 		dsolve_->setDiffConst( e, v );
-	diffConst_ = v;
 }
 
 double ZombiePool::vGetDiffConst( const Eref& e ) const
