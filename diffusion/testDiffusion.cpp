@@ -345,7 +345,6 @@ void testCylDiffn()
 	double diffLength = 1e-6; // 1e-6 is the highest dx for which error is OK
 	double runtime = 10.0;
 	double dt = 0.1; // 0.2 is the highest dt for which the error is in bounds
-	// Should set explicitly, currently during creation of DiffPoolVec
 	double diffConst = 1.0e-12; 
 	Id model = s->doCreate( "Neutral", Id(), "model", 1 );
 	Id cyl = s->doCreate( "CylMesh", model, "cyl", 1 );
@@ -356,27 +355,37 @@ void testCylDiffn()
 	Field< double >::set( cyl, "diffLength", diffLength );
 	unsigned int ndc = Field< unsigned int >::get( cyl, "numMesh" );
 	assert( ndc == static_cast< unsigned int >( round( len / diffLength )));
+	Id pool = s->doCreate( "Pool", cyl, "pool", 1 );
+	Field< double >::set( pool, "diffConst", diffConst );
 
 	Id dsolve = s->doCreate( "Dsolve", model, "dsolve", 1 );
 	Field< Id >::set( dsolve, "compartment", cyl );
 	// Next: build by doing reinit
 	s->doUseClock( "/model/dsolve", "process", 1 );
 	s->doSetClock( 1, dt );
+	Field< string >::set( dsolve, "path", "/model/cyl/pool" );
 	// Then find a way to test it.
-	s->doReinit();
+	vector< double > poolVec;
+	Field< double >::set( ObjId( pool, 0 ), "nInit", 1.0 );
+   	Field< double >::getVec( pool, "nInit", poolVec );
+	assert( poolVec.size() == ndc );
+	assert( doubleEq( poolVec[0], 1.0 ) );
+	assert( doubleEq( poolVec[1], 0.0 ) );
 
 	vector< double > nvec = 
 		LookupField< unsigned int, vector< double > >::get( 
 						dsolve, "nVec", 0);
 	assert( nvec.size() == ndc );
-	nvec[0] = 1;
-	LookupField< unsigned int, vector< double > >::set( dsolve, "nVec", 
-					0, nvec);
 
+	s->doReinit();
 	s->doStart( runtime );
 
 	nvec = LookupField< unsigned int, vector< double > >::get( 
 						dsolve, "nVec", 0);
+   	Field< double >::getVec( pool, "n", poolVec );
+	assert( nvec.size() == poolVec.size() );
+	for ( unsigned int i = 0; i < nvec.size(); ++i )
+		assert( doubleEq( nvec[i], poolVec[i] ) );
 	/*
 	cout << endl;
 	for ( unsigned int i = 0; i < nvec.size(); ++i )
@@ -417,6 +426,7 @@ void testTaperingCylDiffn()
 	double diffLength = 1e-6; // 1e-6 is the highest dx for which error is OK
 	double runtime = 10.0;
 	double dt = 0.1; // 0.2 is the highest dt for which the error is in bounds
+	double diffConst = 1.0e-12; 
 	// Should set explicitly, currently during creation of DiffPoolVec
 	//double diffConst = 1.0e-12; 
 	Id model = s->doCreate( "Neutral", Id(), "model", 1 );
@@ -428,37 +438,27 @@ void testTaperingCylDiffn()
 	Field< double >::set( cyl, "diffLength", diffLength );
 	unsigned int ndc = Field< unsigned int >::get( cyl, "numMesh" );
 	assert( ndc == static_cast< unsigned int >( round( len / diffLength )));
+	Id pool = s->doCreate( "Pool", cyl, "pool", 1 );
+	Field< double >::set( pool, "diffConst", diffConst );
 
 	Id dsolve = s->doCreate( "Dsolve", model, "dsolve", 1 );
 	Field< Id >::set( dsolve, "compartment", cyl );
-	// Next: build by doing reinit
 	s->doUseClock( "/model/dsolve", "process", 1 );
 	s->doSetClock( 1, dt );
+	// Next: build by setting the path of the dsolve.
+	Field< string >::set( dsolve, "path", "/model/cyl/pool" );
 	// Then find a way to test it.
+	assert( pool.element()->numData() == ndc );
+	Field< double >::set( ObjId( pool, 0 ), "nInit", 1.0 );
+
 	s->doReinit();
-
-	vector< double > nvec = 
-		LookupField< unsigned int, vector< double > >::get( 
-						dsolve, "nVec", 0);
-	assert( nvec.size() == ndc );
-	nvec[0] = 1;
-	LookupField< unsigned int, vector< double > >::set( dsolve, "nVec", 
-					0, nvec);
-
 	s->doStart( runtime );
 
-	nvec = LookupField< unsigned int, vector< double > >::get( 
-						dsolve, "nVec", 0);
-	/*
-	cout << endl;
-	for ( unsigned int i = 0; i < nvec.size(); ++i )
-		cout << nvec[i] << "	";
-	cout << endl;
-	*/
-
 	double myTot = 0.0;
-	for ( unsigned int i = 0; i < nvec.size(); ++i ) {
-		myTot += nvec[i];
+	vector< double > poolVec;
+   	Field< double >::getVec( pool, "n", poolVec );
+	for ( unsigned int i = 0; i < poolVec.size(); ++i ) {
+		myTot += poolVec[i];
 	} 
 	assert( doubleEq( myTot, 1.0 ) );
 
@@ -502,7 +502,8 @@ void testSmallCellDiffn()
 	double dia = 10e-6;
 	double diffLength = 10e-6;
 	double dt = 1.0e-1;
-	double runtime = 1000.0;
+	double runtime = 100.0;
+	double diffConst = 1.0e-12; 
 	Id model = s->doCreate( "Neutral", Id(), "model", 1 );
 	Id soma = makeCompt( Id(), model, "soma", dia, dia, 90 );
 	Id dend = makeCompt( soma, model, "dend", len, 3e-6, 0 );
@@ -519,37 +520,57 @@ void testSmallCellDiffn()
 	assert( ns == 6 );
 	unsigned int ndc = Field< unsigned int >::get( nm, "numDiffCompts" );
 	assert( ndc == 11  );
+	Id pool1 = s->doCreate( "Pool", nm, "pool1", 1 );
+	Field< double >::set( pool1, "diffConst", diffConst );
+	Id pool2 = s->doCreate( "Pool", nm, "pool2", 1 );
+	Field< double >::set( pool2, "diffConst", diffConst );
 
 	Id dsolve = s->doCreate( "Dsolve", model, "dsolve", 1 );
 	Field< Id >::set( dsolve, "compartment", nm );
-	// Next: build by doing reinit
 	s->doUseClock( "/model/dsolve", "process", 1 );
 	s->doSetClock( 1, dt );
-	// Then find a way to test it.
-	s->doReinit();
+	// Next: build diffusion by setting path
+	Field< string >::set( dsolve, "path", "/model/neuromesh/pool#" );
 
 	vector< double > nvec = 
 		LookupField< unsigned int, vector< double > >::get( 
 						dsolve, "nVec", 0);
 	assert( nvec.size() == ndc );
-	nvec[0] = 1;
-	LookupField< unsigned int, vector< double > >::set( dsolve, "nVec", 
-					0, nvec);
+	assert( pool1.element()->numData() == ndc );
+	Field< double >::set( ObjId( pool1, 0 ), "nInit", 1.0 );
+	Field< double >::set( ObjId( pool2, ndc - 1 ), "nInit", 2.0 );
 
+	s->doReinit();
+	nvec = LookupField< unsigned int, vector< double > >::get( 
+						dsolve, "nVec", 0);
+	assert( doubleEq( nvec[0], 1.0 ) );
+	assert( doubleEq( nvec[1], 0.0 ) );
 	s->doStart( runtime );
 
 	nvec = LookupField< unsigned int, vector< double > >::get( 
 						dsolve, "nVec", 0);
-	double myTot = 0;
-	for ( unsigned int i = 0; i < nvec.size(); ++i )
-		myTot += nvec[i];
-	assert( doubleEq( myTot, 1.0 ) );
+	vector< double > pool1Vec;
+	Field< double >::getVec( pool1, "n", pool1Vec );
+	assert( pool1Vec.size() == ndc );
 
+	vector< double > pool2Vec;
+	Field< double >::getVec( pool2, "n", pool2Vec );
+	assert( pool2Vec.size() == ndc );
+	double myTot1 = 0;
+	double myTot2 = 0;
+	for ( unsigned int i = 0; i < nvec.size(); ++i ) {
+		assert( doubleEq( pool1Vec[i], nvec[i] ) );
+		myTot1 += nvec[i];
+		myTot2 += pool2Vec[i];
+	}
+	assert( doubleEq( myTot1, 1.0 ) );
+	assert( doubleEq( myTot2, 2.0 ) );
+
+	/*
 	cout << "Small cell: " << endl;
 	for ( unsigned int i = 0; i < nvec.size(); ++i )
-		cout << nvec[i] << "	";
+		cout << nvec[i] << ", " << pool2Vec[i] << endl;
 	cout << endl;
-	/*
 	*/
 
 
@@ -566,7 +587,8 @@ void testCellDiffn()
 	double dia = 10e-6;
 	double diffLength = 1e-6;
 	double dt = 1.0e-1;
-	double runtime = 1000.0;
+	double runtime = 100.0;
+	double diffConst = 1.0e-12; 
 	Id model = s->doCreate( "Neutral", Id(), "model", 1 );
 	Id soma = makeCompt( Id(), model, "soma", dia, dia, 90 );
 	Id dend = makeCompt( soma, model, "dend", len, 3e-6, 0 );
@@ -583,38 +605,54 @@ void testCellDiffn()
 	assert( ns == 6 );
 	unsigned int ndc = Field< unsigned int >::get( nm, "numDiffCompts" );
 	assert( ndc == 210  );
+	Id pool1 = s->doCreate( "Pool", nm, "pool1", 1 );
+	Field< double >::set( pool1, "diffConst", diffConst );
+	Id pool2 = s->doCreate( "Pool", nm, "pool2", 1 );
+	Field< double >::set( pool2, "diffConst", diffConst );
 
 	Id dsolve = s->doCreate( "Dsolve", model, "dsolve", 1 );
 	Field< Id >::set( dsolve, "compartment", nm );
-	// Next: build by doing reinit
 	s->doUseClock( "/model/dsolve", "process", 1 );
 	s->doSetClock( 1, dt );
-	// Then find a way to test it.
-	s->doReinit();
+	// Next: build by setting path
+	Field< string >::set( dsolve, "path", "/model/neuromesh/pool#" );
 
 	vector< double > nvec = 
 		LookupField< unsigned int, vector< double > >::get( 
 						dsolve, "nVec", 0);
 	assert( nvec.size() == ndc );
-	nvec[0] = 1;
-	LookupField< unsigned int, vector< double > >::set( dsolve, "nVec", 
-					0, nvec);
+	assert( pool1.element()->numData() == ndc );
+	Field< double >::set( ObjId( pool1, 0 ), "nInit", 1.0 );
+	Field< double >::set( ObjId( pool2, ndc - 1 ), "nInit", 2.0 );
 
+	s->doReinit();
 	s->doStart( runtime );
 
 	nvec = LookupField< unsigned int, vector< double > >::get( 
 						dsolve, "nVec", 0);
-	double myTot = 0;
-	for ( unsigned int i = 0; i < nvec.size(); ++i )
-		myTot += nvec[i];
-	assert( doubleEq( myTot, 1.0 ) );
+	vector< double > pool1Vec;
+	Field< double >::getVec( pool1, "n", pool1Vec );
+	assert( pool1Vec.size() == ndc );
 
+	vector< double > pool2Vec;
+	Field< double >::getVec( pool2, "n", pool2Vec );
+	assert( pool2Vec.size() == ndc );
+	double myTot1 = 0;
+	double myTot2 = 0;
+	for ( unsigned int i = 0; i < nvec.size(); ++i ) {
+		assert( doubleEq( pool1Vec[i], nvec[i] ) );
+		myTot1 += nvec[i];
+		myTot2 += pool2Vec[i];
+	}
+	assert( doubleEq( myTot1, 1.0 ) );
+	assert( doubleEq( myTot2, 2.0 ) );
+
+	/*
 	cout << endl;
 	cout << "Big cell: " << endl;
 	for ( unsigned int i = 0; i < nvec.size(); ++i )
-		cout << nvec[i] << "	";
+		cout << nvec[i] << ", " << pool2Vec[i] << endl;
 	cout << endl;
-	/*
 	*/
 
 

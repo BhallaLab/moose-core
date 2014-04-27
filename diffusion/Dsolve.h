@@ -37,10 +37,13 @@ class Dsolve: public ZombiePoolInterface
 		//////////////////////////////////////////////////////////////////
 		unsigned int getNumVarPools() const;
 
-		void setStoich( Id id );
-		Id getStoich() const;
+		void setStoich( const Eref& e, Id id );
+		Id getStoich( const Eref& e ) const;
 		void setCompartment( Id id );
 		Id getCompartment() const;
+
+		void setPath( const Eref& e, string path );
+		string getPath( const Eref& e ) const;
 
 		unsigned int getNumVoxels() const;
 
@@ -74,9 +77,29 @@ class Dsolve: public ZombiePoolInterface
 		//////////////////////////////////////////////////////////////////
 		unsigned int convertIdToPoolIndex( const Eref& e ) const;
 
-		// This key function does the work. Should be called after 
-		// all the stoich and compartment stuff is assigned.
+		/** 
+		 * Fills in poolMap_ using elist of objects found when the 
+		 * 'setPath' function is executed. temp is returned with the
+		 * list of PoolBase objects that exist on the path.
+		 */
+		void makePoolMapFromElist( const vector< ObjId >& elist,
+						vector< Id >& temp );
+
+		/**
+		 * Does nasty message traversal to look up the clock tick that
+		 * sends the Process/reinit message to the Dsolve (specified by e)
+		 * and then figure out the dt used.
+		 */
+		double findDt( const Eref& e );
+
+		/** 
+		 * This key function does the work of setting up the Dsolve. 
+		 * Should be called after the compartment has been attached to
+		 * the Dsolve, and the stoich is assigned.
+		 * Called during the setStoich function.
+		 */
 		void build( double dt );
+		void rebuildPools();
 
 		/**
 		 * Utility func for debugging: Prints N_ matrix
@@ -86,16 +109,31 @@ class Dsolve: public ZombiePoolInterface
 		//////////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();
 	private:
+		/**
+		 * Id of compartment object that specifies the diffusion space
+		 * of the Dsolve. Must be either a CylMesh or a NeuroMesh.
+		 */
 		Id compartment_;
+
+		/** 
+		 * Id of stoich object for reac system whose pools are being
+		 * diffused by this Dsolve. Optional, the path below can also be
+		 * used.
+		 */
 		Id stoich_;
+
+		/// Path of pools managed by Dsolve, may include other classes too.
+		string path_; 
 
 		unsigned int numTotPools_;
 		unsigned int numLocalPools_;
 		unsigned int poolStartIndex_;
 		unsigned int numVoxels_;
+
+		/// Internal vector, one for each pool species managed by Dsolve.
 		vector< DiffPoolVec > pools_;
 
-		/// smallest Id value for pools managed by Dsolve. Used for lookup.
+		/// smallest Id value for poolMap_
 		unsigned int poolMapStart_;
 
 		/// Looks up pool# from pool Id, using poolMapStart_ as offset.
