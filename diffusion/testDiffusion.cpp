@@ -524,6 +524,8 @@ void testSmallCellDiffn()
 	Field< double >::set( pool1, "diffConst", diffConst );
 	Id pool2 = s->doCreate( "Pool", nm, "pool2", 1 );
 	Field< double >::set( pool2, "diffConst", diffConst );
+	Id pool3 = s->doCreate( "Pool", nm, "pool3", 1 );
+	Field< double >::set( pool3, "diffConst", 0.0 );
 
 	Id dsolve = s->doCreate( "Dsolve", model, "dsolve", 1 );
 	Field< Id >::set( dsolve, "compartment", nm );
@@ -539,6 +541,7 @@ void testSmallCellDiffn()
 	assert( pool1.element()->numData() == ndc );
 	Field< double >::set( ObjId( pool1, 0 ), "nInit", 1.0 );
 	Field< double >::set( ObjId( pool2, ndc - 1 ), "nInit", 2.0 );
+	Field< double >::set( ObjId( pool3, 0 ), "nInit", 3.0 );
 
 	s->doReinit();
 	nvec = LookupField< unsigned int, vector< double > >::get( 
@@ -556,15 +559,23 @@ void testSmallCellDiffn()
 	vector< double > pool2Vec;
 	Field< double >::getVec( pool2, "n", pool2Vec );
 	assert( pool2Vec.size() == ndc );
+
+	vector< double > pool3Vec;
+	Field< double >::getVec( pool3, "n", pool3Vec );
+	assert( pool3Vec.size() == ndc );
 	double myTot1 = 0;
 	double myTot2 = 0;
+	double myTot3 = 0;
 	for ( unsigned int i = 0; i < nvec.size(); ++i ) {
 		assert( doubleEq( pool1Vec[i], nvec[i] ) );
 		myTot1 += nvec[i];
 		myTot2 += pool2Vec[i];
+		myTot3 += pool3Vec[i];
 	}
 	assert( doubleEq( myTot1, 1.0 ) );
 	assert( doubleEq( myTot2, 2.0 ) );
+	assert( doubleEq( myTot3, 3.0 ) );
+	assert( doubleEq( pool3Vec[0], 3.0 ) );
 
 	/*
 	cout << "Small cell: " << endl;
