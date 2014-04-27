@@ -42,6 +42,15 @@ class Stoich
 		 */
 		unsigned int getNumProxyPools() const;
 
+		/** 
+		 * Map to look up the index of the pool from its Id.  
+		 * poolIndex = poolIdMap[ Id::value() - poolOffset ] 
+		 * where the poolOffset is the smallest Id::value.  
+		 * poolOffset is passed back as the last entry of this vector.  
+		 * Any Ids that are not pools return EMPTY=~0. 
+		 */
+		vector< unsigned int > getPoolIdMap() const;
+
 		/**
 		 * Take the provided wildcard path to build the list of elements
 		 * managed by this solver.

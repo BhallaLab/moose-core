@@ -68,6 +68,17 @@ const Cinfo* Stoich::initCinfo()
 			&Stoich::getNumAllPools
 		);
 
+		static ReadOnlyValueFinfo< Stoich, vector< unsigned int > > 
+			poolIdMap(
+			"poolIdMap",
+			"Map to look up the index of the pool from its Id."
+			"poolIndex = poolIdMap[ Id::value() - poolOffset ] "
+			"where the poolOffset is the smallest Id::value. "
+			"poolOffset is passed back as the last entry of this vector."
+			" Any Ids that are not pools return EMPTY=~0. ",
+			&Stoich::getPoolIdMap
+		);
+
 		static ReadOnlyValueFinfo< Stoich, unsigned int > numRates(
 			"numRates",
 			"Total number of rate terms in the reaction system.",
@@ -123,6 +134,7 @@ const Cinfo* Stoich::initCinfo()
 		&estimatedDt,		// ReadOnlyValue
 		&numVarPools,		// ReadOnlyValue
 		&numAllPools,		// ReadOnlyValue
+		&poolIdMap,		// ReadOnlyValue
 		&numRates,			// ReadOnlyValue
 		&matrixEntry,		// ReadOnlyValue
 		&columnIndex,		// ReadOnlyValue
@@ -294,6 +306,20 @@ unsigned int Stoich::getNumAllPools() const
 unsigned int Stoich::getNumProxyPools() const
 {
 	return offSolverPools_.size();
+}
+
+vector< unsigned int > Stoich::getPoolIdMap() const
+{
+	vector< unsigned int > ret( objMap_.size() + 1, 0 );
+	for ( unsigned int i = 0; i < objMap_.size(); ++i ) {
+		Id id( i + objMapStart_ );
+		if ( id.element()->cinfo()->isA( "PoolBase" ) ) 
+			ret[i] = objMap_[i];
+		else
+			ret[i] = ~0U;
+	}
+	ret[ objMap_.size() ] = objMapStart_;
+	return ret;
 }
 
 unsigned int Stoich::getNumRates() const
