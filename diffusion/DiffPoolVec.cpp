@@ -105,13 +105,19 @@ unsigned int DiffPoolVec::getNumVoxels() const
 void DiffPoolVec::setOps(const vector< Triplet< double > >& ops,
 	const vector< double >& diagVal )
 {
-	assert( diagVal.size() == n_.size() );
-	ops_ = ops;
-	diagVal_ = diagVal;
+	if ( ops.size() > 0 ) {
+		assert( diagVal.size() == n_.size() );
+		ops_ = ops;
+		diagVal_ = diagVal;
+	} else {
+		ops_.clear();
+		diagVal_.clear();
+	}
 }
 
 void DiffPoolVec::advance( double dt )
 {
+	if ( ops_.size() == 0 ) return;
 	for ( vector< Triplet< double > >::const_iterator
 				i = ops_.begin(); i != ops_.end(); ++i )
 		n_[i->c_] -= n_[i->b_] * i->a_;

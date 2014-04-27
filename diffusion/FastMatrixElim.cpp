@@ -546,7 +546,7 @@ double calcTransport( double motorConst, double lenSum,
 	return 0.0;
 }
 
-void FastMatrixElim::buildForDiffusion( 
+bool FastMatrixElim::buildForDiffusion( 
 			const vector< unsigned int >& parentVoxel,
 			const vector< double >& volume,
 			const vector< double >& area,
@@ -555,7 +555,7 @@ void FastMatrixElim::buildForDiffusion(
 {
 	// Too slow to matter.
 	if ( diffConst < 1e-18 && fabs( motorConst ) < 1e-12 ) 
-		return;
+		return false;
 	assert( nrows_ == parentVoxel.size() );
 	assert( nrows_ == volume.size() );
 	assert( nrows_ == area.size() );
@@ -618,4 +618,5 @@ void FastMatrixElim::buildForDiffusion(
 		// Now put it all in the sparase matrix.
 		addRow( i, e, c );
 	}
+	return true;
 }

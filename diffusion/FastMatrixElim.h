@@ -94,7 +94,7 @@ class FastMatrixElim: public SparseMatrix< double >
 		 * This function makes the matrix for computing diffusion and
 		 * transport equations.
 		 */
-		void buildForDiffusion( 
+		bool buildForDiffusion( 
 			const vector< unsigned int >& parentVoxel,
 			const vector< double >& volume,
 			const vector< double >& area,
