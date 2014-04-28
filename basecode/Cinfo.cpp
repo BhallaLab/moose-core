@@ -457,7 +457,7 @@ unsigned int Cinfo::getNumValueFinfo() const
 
 
 ////////////////////////////////////////////////////////////////////
-Finfo* Cinfo::getLookupFinfo( unsigned int i )
+Finfo* Cinfo::getLookupFinfo( unsigned int i ) const
 {
 	if ( i >= getNumLookupFinfo() )
 		return &dummy;
@@ -503,7 +503,7 @@ unsigned int Cinfo::getNumSharedFinfo() const
 }
 
 ////////////////////////////////////////////////////////////////////
-Finfo* Cinfo::getFieldElementFinfo( unsigned int i )
+Finfo* Cinfo::getFieldElementFinfo( unsigned int i ) const
 {
 	if ( i >= getNumFieldElementFinfo() )
 		return &dummy;

@@ -188,6 +188,8 @@ const OpFunc* OpFunc1Base< A >::makeHopFunc( HopIndex hopIndex ) const
 // Function to hop across nodes, with two arguments.
 template < class A1, class A2 > class HopFunc2: public OpFunc2Base< A1, A2 >
 {
+        using OpFunc2Base<A1, A2>::opVec;
+
 	public:
 		HopFunc2( HopIndex hopIndex )
 				: hopIndex_( hopIndex )
