@@ -670,6 +670,104 @@ void testCellDiffn()
 	s->doDelete( model );
 	cout << "." << flush;
 }
+
+void testCylDiffnWithStoich()
+{
+	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	double len = 25e-6;
+	double r0 = 1e-6;
+	double r1 = 1e-6;
+	double diffLength = 1e-6; // 1e-6 is the highest dx for which error is OK
+	double runtime = 10.0;
+	double dt0 = 0.1; // Used for diffusion. 0.2 is the highest dt for which the error is in bounds
+	double dt1 = 1; // Used for chem.
+	double diffConst = 1.0e-12; 
+	Id model = s->doCreate( "Neutral", Id(), "model", 1 );
+	Id cyl = s->doCreate( "CylMesh", model, "cyl", 1 );
+	Field< double >::set( cyl, "r0", r0 );
+	Field< double >::set( cyl, "r1", r1 );
+	Field< double >::set( cyl, "x0", 0 );
+	Field< double >::set( cyl, "x1", len );
+	Field< double >::set( cyl, "diffLength", diffLength );
+	unsigned int ndc = Field< unsigned int >::get( cyl, "numMesh" );
+	assert( ndc == static_cast< unsigned int >( round( len / diffLength )));
+	Id pool1 = s->doCreate( "Pool", cyl, "pool1", 1 );
+	Id pool2 = s->doCreate( "Pool", cyl, "pool2", 1 );
+	Field< double >::set( pool1, "diffConst", diffConst );
+	Field< double >::set( pool2, "diffConst", diffConst/2 );
+
+	Id stoich = s->doCreate( "Stoich", model, "stoich", 1 );
+	Id ksolve = s->doCreate( "Ksolve", model, "ksolve", 1 );
+
+	Id dsolve = s->doCreate( "Dsolve", model, "dsolve", 1 );
+	Field< Id >::set( dsolve, "compartment", cyl );
+	// Next: build by doing reinit
+	s->doUseClock( "/model/dsolve", "process", 0 );
+	s->doUseClock( "/model/ksolve", "process", 1 );
+	s->doSetClock( 0, dt0 );
+	s->doSetClock( 1, dt1 );
+	Field< unsigned int >::set( ksolve, "numAllVoxels", ndc );
+	Field< Id >::set( ksolve, "stoich", stoich );
+	Field< Id >::set( stoich, "poolInterface", ksolve );
+	Field< string >::set( stoich, "path", "/model/cyl/#" );
+	Field< Id >::set( dsolve, "stoich", stoich );
+	Field< Id >::set( ksolve, "dsolve", dsolve );
+	assert( pool1.element()->numData() == ndc );
+
+	//Field< string >::set( dsolve, "path", "/model/cyl/pool" );
+	// Then find a way to test it.
+	vector< double > poolVec;
+	Field< double >::set( ObjId( pool1, 0 ), "nInit", 1.0 );
+	Field< double >::set( ObjId( pool2, 0 ), "nInit", 1.0 );
+   	Field< double >::getVec( pool1, "nInit", poolVec );
+	assert( poolVec.size() == ndc );
+	assert( doubleEq( poolVec[0], 1.0 ) );
+	assert( doubleEq( poolVec[1], 0.0 ) );
+
+	vector< double > nvec = 
+		LookupField< unsigned int, vector< double > >::get( 
+						dsolve, "nVec", 0);
+	assert( nvec.size() == ndc );
+
+	s->doReinit();
+	s->doStart( runtime );
+
+	nvec = LookupField< unsigned int, vector< double > >::get( 
+						dsolve, "nVec", 0);
+   	Field< double >::getVec( pool1, "n", poolVec );
+	assert( nvec.size() == poolVec.size() );
+	for ( unsigned int i = 0; i < nvec.size(); ++i )
+		assert( doubleEq( nvec[i], poolVec[i] ) );
+	/*
+	cout << endl;
+	for ( unsigned int i = 0; i < nvec.size(); ++i )
+		cout << nvec[i] << "	";
+	cout << endl;
+	*/
+
+	double dx = diffLength;
+	double err = 0.0;
+	double analyticTot = 0.0;
+	double myTot = 0.0;
+	for ( unsigned int i = 0; i < nvec.size(); ++i ) {
+		double x = i * dx + dx * 0.5;
+		// This part is the solution as a func of x,t.
+		double y = dx *  // This part represents the init n of 1 in dx
+			( 1.0 / sqrt( PI * diffConst * runtime ) ) * 
+			exp( -x * x / ( 4 * diffConst * runtime ) ); 
+		err += ( y - nvec[i] ) * ( y - nvec[i] );
+		//cout << i << "	" << x << "	" << y << "	" << conc[i] << endl;
+		analyticTot += y;
+		myTot += nvec[i];
+	} 
+	assert( doubleEq( myTot, 1.0 ) );
+	// cout << "analyticTot= " << analyticTot << ", myTot= " << myTot << endl;
+	assert( err < 1.0e-5 );
+
+
+	s->doDelete( model );
+	cout << "." << flush;
+}
 #if 0
 void testBuildTree()
 {
@@ -736,4 +834,5 @@ void testDiffusion()
 	testTaperingCylDiffn();
 	testSmallCellDiffn();
 	testCellDiffn();
+	testCylDiffnWithStoich();
 }

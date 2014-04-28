@@ -238,7 +238,11 @@ void Dsolve::setStoich( const Eref& e, Id id )
 		if ( poolMap_[i] != ~0U ) {
 			Id pid( i + poolMapStart_ );
 			assert( pid.element()->cinfo()->isA( "PoolBase" ) );
-			double diffConst = Field< double >::get( pid, "diffConst" );
+			PoolBase* pb = 
+					reinterpret_cast< PoolBase* >( pid.eref().data());
+			double diffConst = pb->getDiffConst( pid.eref() );
+			pb->setSolver( e.id() );
+			// double diffConst = Field< double >::get( pid, "diffConst" );
 			pools_[ poolMap_[i] ].setDiffConst( diffConst );
 		}
 	}
