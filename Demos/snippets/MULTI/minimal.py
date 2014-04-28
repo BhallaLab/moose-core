@@ -28,7 +28,7 @@
 # Code:
 
 import sys
-sys.path.append('../../python')
+sys.path.append('../../../python')
 import os
 os.environ['NUMPTHREADS'] = '1'
 import math

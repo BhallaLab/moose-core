@@ -327,9 +327,9 @@ void mpiTests()
 #ifndef PYMOOSE
 int main( int argc, char** argv )
 {
-	bool doUnitTests = 0;
-	bool doRegressionTests = 0;
-	unsigned int benchmark = 0;
+	bool doUnitTests = 1;
+	bool doRegressionTests = 1;
+	unsigned int benchmark = 1;
 	// This reorders the OpFunc to Fid mapping to ensure it is node and
 	// compiler independent.
 	Id shellId = init( argc, argv, doUnitTests, doRegressionTests, benchmark );
