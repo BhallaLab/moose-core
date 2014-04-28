@@ -3220,4 +3220,36 @@ Implemented dummy calculations for diffConst=0. I'm not dealing with
 buffering here, in principle we could have a buffered diffusing molecule so
 I will let the usual diffConst deal with the diffusibility of buffers.
 
+Tried out the script version. Works with direct path assignment (which
+I have done in the unit tests). Doesn't crash but doesn't work with
+the stoich assignment. Perhaps need another unit test here.
+
+Some more fixing later. Stoich assignment seems to work and give a
+reasonable output, but since it isn't talking to the other solver it
+isn't visible from the pool either.
+
+Next step: Dsolve extracts id of poolInterface from Stoich when the
+Stoich is being assigned, and the two ZombiePoolInterfaces set up
+pointers to each other to transfer blocks of data at the timestep of
+the slower solver. In practice, the Ksolver would request the updated
+concs, do an interpolation (trapezoidal) to get its start,
+do an integration timestep. Then get the delta from its start, add it to
+the latest concs, and send those back to the Dsolver.
+
+For now trying the simple addition to the latest diffusion values.
+Fails in Dsolve::getBlock around 514.
+============================================================================
+28 April.
+Fixed it, trivial matter of passign the wrong range.
+After a bit of schedule juggling it works.
+In principle we're now OK to do reac-diff. 
+I would prefer to have the pools reporting values from the dsolve by default
+as it is usually going to have the faster rates.
+
+For now, let's give it a nice reac-diff problem to chew on, preferably in
+the script.
+
+Done, works insofar as mass conservation goes. Added script to snippets,
+cylinderDiffusion.py.
+
 ============================================================================
