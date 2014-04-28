@@ -20,8 +20,14 @@ class Ksolve: public ZombiePoolInterface
 		//////////////////////////////////////////////////////////////////
 		// Field assignment stuff
 		//////////////////////////////////////////////////////////////////
+		
+		/// Assigns Stoich object to Ksolve.
 		Id getStoich() const;
 		void setStoich( Id stoich );
+
+		/// Assigns Dsolve object to Ksolve.
+		Id getDsolve() const;
+		void setDsolve( Id dsolve );
 
 		unsigned int getNumLocalVoxels() const;
 		unsigned int getNumAllVoxels() const;
@@ -96,6 +102,15 @@ class Ksolve: public ZombiePoolInterface
 
 		/// Utility ptr used to help Pool Id lookups by the Ksolve.
 		const Stoich* stoichPtr_;
+
+		/**
+		 * Id of diffusion solver, needed for coordinating numerics.
+		 */
+		Id dsolve_;
+
+		/// Pointer to diffusion solver
+		ZombiePoolInterface* dsolvePtr_;
+
 };
 
 #endif	// _KSOLVE_H

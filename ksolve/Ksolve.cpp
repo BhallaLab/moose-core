@@ -41,6 +41,13 @@ const Cinfo* Ksolve::initCinfo()
 			&Ksolve::getStoich
 		);
 
+		static ValueFinfo< Ksolve, Id > dsolve (
+			"dsolve",
+			"Diffusion solver object handling this reactin system.",
+			&Ksolve::setDsolve,
+			&Ksolve::getDsolve
+		);
+
 		static ReadOnlyValueFinfo< Ksolve, unsigned int > numLocalVoxels(
 			"numLocalVoxels",
 			"Number of voxels in the core reac-diff system, on the "
@@ -95,6 +102,7 @@ const Cinfo* Ksolve::initCinfo()
 	static Finfo* ksolveFinfos[] =
 	{
 		&stoich,			// Value
+		&dsolve,			// Value
 		&numLocalVoxels,	// ReadOnlyValue
 		&nVec,				// LookupValue
 		&numAllVoxels,		// ReadOnlyValue
@@ -125,7 +133,9 @@ Ksolve::Ksolve()
 		pools_( 1 ),
 		startVoxel_( 0 ),
 		stoich_(),
-		stoichPtr_( 0 )
+		stoichPtr_( 0 ),
+		dsolve_(),
+		dsolvePtr_( 0 )
 {;}
 
 Ksolve::~Ksolve()
@@ -145,6 +155,19 @@ void Ksolve::setStoich( Id stoich )
 	assert( stoich.element()->cinfo()->isA( "Stoich" ) );
 	stoich_ = stoich;
 	stoichPtr_ = reinterpret_cast< const Stoich* >( stoich.eref().data() );
+}
+
+Id Ksolve::getDsolve() const
+{
+	return dsolve_;
+}
+
+void Ksolve::setDsolve( Id dsolve )
+{
+	assert( dsolve.element()->cinfo()->isA( "Dsolve" ) );
+	dsolve_ = dsolve;
+	dsolvePtr_ = 
+		reinterpret_cast< ZombiePoolInterface* >( dsolve.eref().data() );
 }
 
 unsigned int Ksolve::getNumLocalVoxels() const
@@ -235,9 +258,36 @@ void Ksolve::setNumAllVoxels( unsigned int numVoxels )
 //////////////////////////////////////////////////////////////
 void Ksolve::process( const Eref& e, ProcPtr p )
 {
-	for ( vector< VoxelPools >::iterator 
+	if ( dsolvePtr_ ) {
+		vector< double > dvalues( 4 );
+		vector< double > kvalues( 4 );
+		kvalues[0] = dvalues[0] = 0;
+		kvalues[1] = dvalues[1] = getNumLocalVoxels();
+		kvalues[2] = dvalues[2] = 0;
+		kvalues[3] = dvalues[3] = stoichPtr_->getNumAllPools();
+		dsolvePtr_->getBlock( dvalues );
+		/*
+		getBlock( kvalues );
+		vector< double >::iterator d = dvalues.begin() + 4;
+		for ( vector< double >::iterator 
+				k = kvalues.begin() + 4; k != kvalues.end(); ++k )
+				*k++ = ( *k + *d )/2.0
+		setBlock( kvalues );
+		*/
+		setBlock( dvalues );
+		for ( vector< VoxelPools >::iterator 
 					i = pools_.begin(); i != pools_.end(); ++i ) {
-		i->advance( p );
+			i->advance( p );
+		}
+		getBlock( kvalues );
+	
+		dsolvePtr_->setBlock( kvalues );
+	} else {
+
+		for ( vector< VoxelPools >::iterator 
+					i = pools_.begin(); i != pools_.end(); ++i ) {
+			i->advance( p );
+		}
 	}
 }
 
