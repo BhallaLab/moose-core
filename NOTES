@@ -3184,9 +3184,9 @@ get the solver to set up the diffusion calculations but:
 	This fails because Dsolve::poolMap_ isn't set anywhere.
 * The diffusion constant needs to be transferred into the 
 	DiffPoolVec array on Dsolve, but before the pool is zombified.
-- The non-diffusing pools need to be identified and their diffusion ops 
+* The non-diffusing pools need to be identified and their diffusion ops 
 	ignored.
-- The two solvers need to talk.
+* The two solvers need to talk.
 ============================================================================
 26 April.
 Try this:
@@ -3251,5 +3251,28 @@ the script.
 
 Done, works insofar as mass conservation goes. Added script to snippets,
 cylinderDiffusion.py.
+
+Also implemented a 1-D Turing pattern model. Relatively easy to set up.
+Not terribly fast, has to run for 200 sec to build up.
+
+From Jan, here are the steps
+Week	Date		Steps
+1	Jan1-5		Naming policy stuff
+2	Jan 5-11	Kinetics brought in. Volume handling revisited.
+			Msg fixes.
+3-4	Jan 12-25	Kinetics works, mostly. Fixes to Python/MPI stuff.
+5-6	Jan 26-Feb7	Standalone fast matrix elimination. Fixing wildcards.
+7-8	Feb8-21		Ksolve skeleton in place.		
+9-10	Feb22-Mar8	Ksolve works
+11	Mar9-14		Steady State solver ported and works.
+12	Mar 15-20	GSSA ported and works.
+13-17	Mar 21-Apr28	Dsolver implemented, set up ReacDiff with Ksolve.
+			Not to mention almost 3 weeks of travel too.
+
+Next:
+- Build inter-compartment reactions
+- Set up adaptors and other multiscale effects
+- Set up RDesigneur
+- Set up interface to Mumbl
 
 ============================================================================
