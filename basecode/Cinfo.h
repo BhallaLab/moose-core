@@ -201,7 +201,7 @@ class Cinfo
 			/**
 			 * Return the specified LookupFinfo
 			 */
-			Finfo* getLookupFinfo( unsigned int i );
+			Finfo* getLookupFinfo( unsigned int i ) const;
 			/**
 			 * Return number of LookupFinfo
 			 */
@@ -220,7 +220,7 @@ class Cinfo
 			/**
 			 * Return the specified FieldElementFinfo
 			 */
-			Finfo* getFieldElementFinfo( unsigned int i );
+			Finfo* getFieldElementFinfo( unsigned int i ) const;
 
 			/**
 			 * Return number of FieldElementFinfos
