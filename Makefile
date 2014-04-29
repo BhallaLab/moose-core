@@ -376,8 +376,14 @@ ifneq ($(BUILD),debug)
 PYTHON_CFLAGS := $(shell python-config --cflags)
 PYTHON_LDFLAGS := $(shell python-config --ldflags)
 else 
-PYTHON_CFLAGS := $(shell python-config --includes) -fno-strict-aliasing -fwrapv -Wstrict-prototypes -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -Werror=format-security
-PYTHON_LDFLAGS := -L/usr/lib/$(INSTALLED_PYTHON)  -Xlinker -export-dynamic -Wl,-O1 -Wl,-Bsymbolic-functions
+PYTHON_CFLAGS := $(shell python-config --includes) \
+    -fno-strict-aliasing -fwrapv \
+    # -Wstrict-prototypes  \ # This option is not supported by g++-4.8
+    -Wformat -Wformat-security -Werror=format-security \
+    -fstack-protector --param=ssp-buffer-size=4 
+
+PYTHON_LDFLAGS := -L/usr/lib/$(INSTALLED_PYTHON) \
+    -Xlinker -export-dynamic -Wl,-O1 -Wl,-Bsymbolic-functions
 endif # ifneq ($(BUILD),debug)
 endif # ifeq ($(PYTHON),3)
 PYTHON_VERSION_MAJOR := $(word 1,${PYTHON_VERSION})
@@ -385,8 +391,19 @@ PYTHON_VERSION_MINOR := $(word 2,${PYTHON_VERSION})
 INSTALLED_PYTHON := python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}
 endif
 
+# For developer build and strict checking
+ifeq ($(BUILD),developer)
+    PYTHON_CFLAGS := $(PYTHON_CFLAGS) -Wall -Werror -Wno-unused-function -Wno-unused-variable
+endif  # ifeq(${BUILD},developer)
+
 ifndef PYTHON_CFLAGS
-PYTHON_CFLAGS := -I/usr/include/$(INSTALLED_PYTHON) -fno-strict-aliasing -fwrapv -Wstrict-prototypes -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -Werror=format-security
+PYTHON_CFLAGS := -I/usr/include/$(INSTALLED_PYTHON) -fno-strict-aliasing \
+    -fwrapv \
+     -fstack-protector \
+    #-Wstrict-prototypes \ # This option is obsolete for g++-4.8
+    --param=ssp-buffer-size=4 \
+    -Wformat -Wformat-security -Werror=format-security
+
 PYTHON_LDFLAGS := -L/usr/lib/$(INSTALLED_PYTHON)  -Xlinker -export-dynamic -Wl,-O1 -Wl,-Bsymbolic-functions
 endif
 # There are some unix/gcc specific paths here. Should be cleaned up in future.

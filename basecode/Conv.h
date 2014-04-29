@@ -502,7 +502,7 @@ template< class T > class Conv< vector< vector< T > > >
 				if ( val[i].size() > 0 ) {
 					ret += val[i].size() * Conv< T >::size( val[i][0] );
 				} else  {
-					T temp;
+					T temp = T();
 					ret += val[i].size() * Conv< T >::size( temp );
 				}
 			}

@@ -4,6 +4,7 @@
 # Created: 2011-03-10 12:10:32 (+0530)
 TARGET = _pymoose.o
 # CXXFLAGS += -I../basecode -I../msg -I../shell
+NUMPY_WARNING_FLAG = -DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION
 .PHONY: clean
 
 HEADERS = moosemodule.h
@@ -14,8 +15,7 @@ $(TARGET): $(OBJ) $(HEADERS) ../basecode/main.cpp ../utility/_utility.o ../basec
 	$(LD) -r -o $(TARGET) $(OBJ) $(LDFLAGS)
 
 .cpp.o: $(HEADERS)
-	$(CXX) $(CXXFLAGS) $< -c
-
+	$(CXX) $(CXXFLAGS) $(NUMPY_WARNING_FLAG) $< -c
 clean: 
 	-rm -f *.o
 

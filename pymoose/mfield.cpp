@@ -377,6 +377,7 @@ extern "C" {
     static char id[] = "vec";
     static char owner[] = "owner";
     static char dataIndex[] = "dataIndex";
+    char emptyString[] = "";
     static PyGetSetDef ElementFieldGetSetters[] = {
         {numfield,
          (getter)moose_ElementField_getNum,
@@ -396,12 +397,12 @@ extern "C" {
         {name,
          (getter)moose_ElementField_getName,
          NULL,
-         "",
+         emptyString,
          NULL},
         {owner,
          (getter)moose_ElementField_getOwner,
          NULL,
-         "",
+         emptyString,
          NULL},
         {dataIndex,
          (getter)moose_ElementField_getDataId,
@@ -563,7 +564,8 @@ extern "C" {
         if (self->owner.bad()){
             RAISE_INVALID_ID(NULL, "moose_ElementField_getItem");
         }
-        unsigned int len = Field<unsigned int>::get(self->myoid, "numField");
+        int len = Field<unsigned int>::get(self->myoid, "numField");
+        assert(len >= 0);
         if (index >= len){
             PyErr_SetString(PyExc_IndexError, "moose.ElementField.getItem: index out of bounds.");
             return NULL;
@@ -588,6 +590,9 @@ extern "C" {
     
     PyObject * moose_ElementField_getSlice(_Field * self, Py_ssize_t start, Py_ssize_t end)
     {
+        assert(start >= 0);
+        assert(end >= 0);
+
         if (self->owner.bad()){
             RAISE_INVALID_ID(NULL, "moose_ElementField_getSlice");
         }        
@@ -608,7 +613,7 @@ extern "C" {
         PyObject * ret = PyTuple_New((Py_ssize_t)(end - start));
         
         // Py_XINCREF(ret);        
-        for (unsigned int ii = start; ii < end; ++ii){
+        for ( int ii = start; ii < end; ++ii){
             ObjId oid(self->myoid.id, self->myoid.dataIndex, ii);
             PyObject * value = oid_to_element(oid);
             if (PyTuple_SetItem(ret, (Py_ssize_t)(ii-start), value)){
@@ -751,11 +756,13 @@ extern "C" {
             PyErr_SetString(PyExc_IndexError, "Length of the sequence on the right hand side does not match Id size.");
             return -1;
         }
+
+        assert(length >= 0);
         switch(ftype){
             case 'd': {//SET_VECFIELD(double, d)
                 vector<double> _value;
                 if (is_seq){
-                    for (unsigned int ii = 0; ii < length; ++ii){
+                    for ( int ii = 0; ii < length; ++ii){
                         double v = PyFloat_AsDouble(PySequence_GetItem(value, ii));
                         _value.push_back(v);
                     }
@@ -769,7 +776,7 @@ extern "C" {
             case 's': {
                 vector<string> _value;
                 if (is_seq){
-                    for (unsigned int ii = 0; ii < length; ++ii){
+                    for ( int ii = 0; ii < length; ++ii){
                         char * v = PyString_AsString(PySequence_GetItem(value, ii));
                         _value.push_back(string(v));
                     }
@@ -783,7 +790,7 @@ extern "C" {
             case 'i': {
                 vector<int> _value;
                 if (is_seq){
-                    for (unsigned int ii = 0; ii < length; ++ii){
+                    for ( int ii = 0; ii < length; ++ii){
                         int v = PyInt_AsLong(PySequence_GetItem(value, ii));
                         _value.push_back(v);
                     }
@@ -797,7 +804,7 @@ extern "C" {
             case 'I': {//SET_VECFIELD(unsigned int, I)
                 vector<unsigned int> _value;
                 if (is_seq){
-                    for (unsigned int ii = 0; ii < length; ++ii){
+                    for ( int ii = 0; ii < length; ++ii){
                         unsigned int v = PyInt_AsUnsignedLongMask(PySequence_GetItem(value, ii));
                         _value.push_back(v);
                     }
@@ -811,7 +818,7 @@ extern "C" {
             case 'l': {//SET_VECFIELD(long, l)
                 vector<long> _value;
                 if (is_seq){
-                    for (unsigned int ii = 0; ii < length; ++ii){
+                    for ( int ii = 0; ii < length; ++ii){
                         long v = PyInt_AsLong(PySequence_GetItem(value, ii));
                         _value.push_back(v);
                     }
@@ -825,7 +832,7 @@ extern "C" {
             case 'k': {//SET_VECFIELD(unsigned long, k)
                 vector<unsigned long> _value;
                 if (is_seq){
-                    for (unsigned int ii = 0; ii < length; ++ii){
+                    for ( int ii = 0; ii < length; ++ii){
                         unsigned long v = PyInt_AsUnsignedLongMask(PySequence_GetItem(value, ii));
                         _value.push_back(v);
                     }
@@ -839,7 +846,7 @@ extern "C" {
             case 'b': {
                 vector<bool> _value;
                 if (is_seq){
-                    for (unsigned int ii = 0; ii < length; ++ii){
+                    for ( int ii = 0; ii < length; ++ii){
                         PyObject * _v = PySequence_GetItem(value, ii);
                         bool v = (Py_True ==_v) || (PyInt_AsLong(_v) != 0);
                         _value.push_back(v);
@@ -854,7 +861,7 @@ extern "C" {
             case 'c': {
                 vector<char> _value;
                 if (is_seq){
-                    for (unsigned int ii = 0; ii < length; ++ii){
+                    for ( int ii = 0; ii < length; ++ii){
                         PyObject * _v = PySequence_GetItem(value, ii);
                         char * v = PyString_AsString(_v);
                         if (v && v[0]){
@@ -881,7 +888,7 @@ extern "C" {
             case 'h': {
                 vector<short> _value;
                 if (is_seq){
-                    for (unsigned int ii = 0; ii < length; ++ii){
+                    for ( int ii = 0; ii < length; ++ii){
                         short v = PyInt_AsLong(PySequence_GetItem(value, ii));
                         _value.push_back(v);
                     }
@@ -895,7 +902,7 @@ extern "C" {
             case 'f': {//SET_VECFIELD(float, f)
                 vector<float> _value;
                 if (is_seq){
-                    for (unsigned int ii = 0; ii < length; ++ii){
+                    for ( int ii = 0; ii < length; ++ii){
                         float v = PyFloat_AsDouble(PySequence_GetItem(value, ii));
                         _value.push_back(v);
                     }
