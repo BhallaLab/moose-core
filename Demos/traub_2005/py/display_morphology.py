@@ -39,6 +39,7 @@ command line options (all are optional):
 -h,--help      : show this help
 """
 import sys
+sys.path.append('../../../python')
 import os
 import numpy as np
 import matplotlib.pyplot as plt
@@ -77,8 +78,6 @@ def cell_to_graph(cell, label=False):
     es = [(c1.path, c2[0].path, {'weight': 2/ (moose.Compartment(c1).Ra + moose.Compartment(c2).Ra)}) \
               for c1 in moose.wildcardFind('%s/##[ISA=Compartment]' % (cell.path)) \
               for c2 in moose.Compartment(c1).neighbors[msg]]
-    for edge in es:
-        print edge
     g = nx.Graph()
     g.add_edges_from(es)
     if label:
@@ -107,9 +106,13 @@ def plot_cell_topology(cell, label=False):
     axon, sd = axon_dendrites(g)
     node_size = node_sizes(g)
     weights = np.array([g.edge[e[0]][e[1]]['weight'] for e in g.edges()])
-    # print min(weights), max(weights)
-    pos = nx.graphviz_layout(g,prog='twopi',root=cell.path + '/comp_1')
-    # pos = nx.spring_layout(g)
+    try:
+        pos = nx.graphviz_layout(g,prog='twopi',root=cell.path + '/comp_1')
+    except NameError:
+        # this is the best networkx can do by itself. Its Furchtman
+        # Reingold layout ends up with overlapping edges even for a
+        # tree. igraph does much better.
+        pos = nx.spectral_layout(g)
     nx.draw_networkx_edges(g, pos, width=10*weights/max(weights), edge_color='gray', alpha=0.8)
     nx.draw_networkx_nodes(g, pos, with_labels=False,
                            nnode_size=node_size * 500, 
@@ -155,7 +158,7 @@ if __name__ == '__main__':
             fig = plt.figure()
             figures.append(fig)
             cell = cells.init_prototypes()[celltype]
-            print 'Label', label
+            # print 'Label', label
             plot_cell_topology(cell, label=label)
         except KeyError:
             print '%s: no such cell type. Available are:' % (celltype)
