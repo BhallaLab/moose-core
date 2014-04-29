@@ -981,7 +981,7 @@ void SbmlReader::getGlobalParameter()
       if ( prm->isSetId() ){
 	id = prm->getId();
       }
-      double value;		
+      double value = 0.0;		
       if ( prm->isSetValue() ){		
 	value=prm->getValue();	
       }

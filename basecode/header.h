@@ -18,6 +18,8 @@
  *  computed by increamenting the counter.
  *-----------------------------------------------------------------------------*/
 #include "../external/debug/current_function.hpp"
+#include "../external/debug/print_function.h"
+
 extern unsigned int totalTests;
 #define tbegin cerr << endl << "Test(" << totalTests << "): " << BOOST_CURRENT_FUNCTION;
 #define tend totalTests++; \

@@ -329,7 +329,7 @@ unsigned int PulseGen::getCount() const
 
 double PulseGen::getLevel(unsigned int index) const
 {
-    if (index >= 0 && index < level_.size()){
+    if (index < level_.size()){
         return level_[index];
     } else {
         cout << "WARNING: PulseGen::getLevel - invalid index." << endl;
@@ -339,7 +339,7 @@ double PulseGen::getLevel(unsigned int index) const
     
 void PulseGen::setLevel( unsigned int index, double level)
 {
-    if (index >= 0 && index < level_.size()){
+    if (index < level_.size()){
         level_[index] = level;
     } else {
         cout << "WARNING: PulseGen::setLevel - invalid index. First set the number of pulses by setting 'count' field." << endl;
@@ -348,7 +348,7 @@ void PulseGen::setLevel( unsigned int index, double level)
 
 double PulseGen::getWidth(unsigned int index) const
 {
-    if (index >= 0 && index < width_.size()){
+    if (index < width_.size()){
         return width_[index];
     } else {
         cout << "WARNING: PulseGen::getWidth - invalid index." << endl;
@@ -357,7 +357,7 @@ double PulseGen::getWidth(unsigned int index) const
 }
 void PulseGen::setWidth(unsigned int index, double width)
 {
-    if (index >= 0 && index < width_.size()){
+    if ( index < width_.size()){
         width_[index] = width;
     } else {
         cout << "WARNING: PulseGen::setWidth - invalid index. First set the number of pulses by setting 'count' field." << endl;
@@ -365,7 +365,7 @@ void PulseGen::setWidth(unsigned int index, double width)
 }
 double PulseGen::getDelay(unsigned int index) const
 {
-    if (index >= 0 && index < delay_.size()){
+    if ( index < delay_.size()){
         return delay_[index];
     } else {
         cout << "WARNING: PulseGen::getDelay - invalid index." << endl;
@@ -375,7 +375,7 @@ double PulseGen::getDelay(unsigned int index) const
 
 void PulseGen::setDelay(unsigned int index, double delay)
 {
-    if ( index >= 0 && index < delay_.size() ){
+    if (  index < delay_.size() ){
         delay_[index] = delay;
     } else {
         cout << "WARNING: PulseGen::setDelay - invalid index. First set the number of pulses by setting 'count' field." << endl;
