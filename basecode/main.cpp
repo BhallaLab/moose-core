@@ -274,11 +274,11 @@ void nonMpiTests( Shell* s )
 		testScheduling();
 		testBuiltins();
 		// testKinetics();
-		testKsolve();
-		testKsolveProcess();
-		testBiophysics();
-		testDiffusion();
-		testHSolve();
+                testKsolve();
+//		testKsolveProcess();
+//		testBiophysics();
+//		testDiffusion();
+                testHSolve();
 		// testGeom();
 		testMesh();
 		// testSigNeur();
