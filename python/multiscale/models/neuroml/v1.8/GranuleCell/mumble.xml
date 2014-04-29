@@ -1,0 +1,121 @@
+<?xml version="1.0"?>
+<!--
+    All comments by : Dilawar, dilawars@ncbs.res.in
+
+    This is the main top-level XML file to do multiscale modelling.
+    We parse it after mapping neuroML to moose.
+ -->
+<mumbl>
+
+    <!-- 
+        Locals can override them.
+    -->
+    <global elec_dt="50e-6" chem_dt="50e-6"/>
+
+    <!-- 
+        Model. Electrical models are usually described in neuroml. Other models
+        can also be specified. By default, neuroml is assumed.
+    -->
+    <model id="0" domain_type="electrical" 
+        sub_type = "compartments"
+        already_loaded="true" 
+        language="neuroml" version="1.8" 
+        />
+
+    <!-- Not sure if solver should be part of this -->
+    <model id="1"
+        domain_type="electrical" 
+        already_loaded="false"
+        language="genesis" 
+        file_path="ca1_asym.p" 
+        solver="hsolver" 
+        />
+
+    <!-- This model is not loaded by moose. We have to run an external script to
+        load it.
+
+        TODO: For moose, we should not use an external script.
+        if load_using_external_script is false then do not use 'loader_script'
+        attribute.
+
+        Sub-element comapatments contains the compartment in which this model 
+        should be injected.
+    -->
+    <model id="2" 
+        domain_type="chemical" 
+        model_type="miscellenous"
+        lad_using_external_script="false"
+        loader_script="proto8.py" diff_length="20e-6" file_path="dumpreac.g" >
+        <compartments geometry='cylinder'>
+            <compartment id="1">
+                <pool species="Ca" conc="1e-3" />
+                <pool species="Na" conc="1e-16" />
+            </compartment>
+            <compartment id="2">
+                <pool species="K" conc="1e-10" />
+            </compartment>
+            <compartment path="" id="3" />
+        </compartments>
+    </model>
+
+    <!-- Here are mappings from compartment to compartment. -->
+    <!-- if mapping_type is source and this compartment influence others, if it
+        is target than this compartment gets influenced by other compartments.
+    -->
+    <!-- id is moose like path, it can influence either a single compartment of
+        a group of compartments depending on the nature of paths.
+        TODO: It should be more generic than this.
+
+        If electrical model was speficied in NeuroML then we can make use of 
+        paths
+     -->
+    <domain population="Granule_98" 
+        segment="Soma" 
+        instance_id="0"
+        >
+        <!-- These are currently moose-specific.
+            TODO: Make them generic.
+         -->
+
+         <!-- If direction is "out" then this mapping influences parameters in
+              other compartments. Attribute "input" reads a variable from this
+              compartment and  set a adaptor to update variable "output" in
+              target compartment
+          -->
+        <mapping direction="out">
+            <!-- This target modifies conc of Ca in comparment 2 based on value
+                 of Vm in current compartment
+            -->
+            <target type="chemical"  compartment_id="2" species="Ca" >
+                <relation input="Rm" output="conc">
+                    <scale>0.3e10</scale>
+                    <offset>-0.9</offset>
+                </relation>
+            </target>
+
+            <!-- This target modifies conc of Na in compartment id 2 based on
+                 value of Cm in current compartment
+            -->
+            <target type="chemical" species="Na" compartment_id="2" >
+                <relation input="Cm" output="conc">
+                    <scale>0.3</scale>
+                    <offset>0.1</offset>
+                </relation>
+            </target>
+        </mapping>
+        <mapping direction="in" type="one_to_one" >
+            <source type="chemical" species="Na" compartment_id = "1" >
+                <relation input="conc" output="Rm">
+                    <scale>1.5e16</scale>
+                    <offset>1e-16</offset>
+                </relation>
+            </source>
+            <source type="chemical" species="Ca" compartment_id = "1" >
+                <relation input="conc" output="Cm">
+                    <scale>1.5e1</scale>
+                    <offset>1e-16</offset>
+                </relation>
+            </source>
+        </mapping>
+    </domain>
+</mumbl>

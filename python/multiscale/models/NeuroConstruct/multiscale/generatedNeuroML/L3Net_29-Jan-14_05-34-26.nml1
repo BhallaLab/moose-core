@@ -1,0 +1,1238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<neuroml xmlns="http://morphml.org/neuroml/schema" xmlns:meta="http://morphml.org/metadata/schema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mml="http://morphml.org/morphml/schema" xmlns:cml="http://morphml.org/channelml/schema" xmlns:bio="http://morphml.org/biophysics/schema" xmlns:net="http://morphml.org/networkml/schema" xsi:schemaLocation="http://morphml.org/neuroml/schema http://www.neuroml.org/NeuroMLValidator/NeuroMLFiles/Schemata/v1.8.1/Level3/NeuroML_Level3_v1.8.1.xsd" lengthUnits="micrometer">
+
+<meta:notes>
+
+Complete network structure generated with project: multiscale saved with neuroConstruct v1.7.0 on: 05:34:26, 29-Jan-14
+
+Cell Group: PurkinjeGroup contains 1 cells
+Cell Group: SimpleCellGroup contains 1 cells
+
+Network connection: NetConn_SimpleCellGroup_PurkinjeGroup contains 1 individual synaptic connections
+Network connection: NetConn_SimpleCellGroup_PurkinjeGroup_1 contains 1 individual synaptic connections
+
+</meta:notes>
+
+<meta:properties>
+    <meta:property tag="neuroConstruct_random_seed" value="-549625903"/>
+
+    <meta:property tag="neuroConstruct_sim_config" value="Default Simulation Configuration"/>
+
+    <meta:property tag="neuroConstruct_sim_duration" value="100.0"/>
+
+    <meta:property tag="neuroConstruct_sim_time_step" value="0.02"/>
+
+    <meta:property tag="neuroConstruct_temperature" value="6.3"/>
+</meta:properties>
+
+    <!--Note: the annotation below contains data to facilitate the reloading of this file into an empty neuroConstruct project.
+This information should be ignored by any other NeuroML Level 3 compliant application-->
+
+
+<meta:annotation>
+    
+
+<java version="1.7.0_51" class="java.beans.XMLDecoder">
+ <object class="ucl.physiol.neuroconstruct.project.BasicProjectInfo">
+  <void property="projectDescription">
+   <string>This is a simple project with a single cell placed randomly in a 3D rectangular box.
+
+Go to tab Generate, press Generate Cell Positions and Connections, and then to visualise the results, go to tab Visualisation and press View, with Latest Generated Positions selected in the drop down box.
+
+If NEURON or GENESIS are installed, the cell can be simulated via tab Export.</string>
+  </void>
+  <void property="projectFileVersion">
+   <string>neuroConstruct v1.7.0</string>
+  </void>
+  <void property="projectName">
+   <string>multiscale</string>
+  </void>
+ </object>
+ <object class="ucl.physiol.neuroconstruct.project.RegionsInfo">
+  <void property="internalData">
+   <void method="get">
+    <string>Name</string>
+    <void method="add">
+     <string>Regions_1</string>
+    </void>
+   </void>
+   <void method="get">
+    <string>Colour</string>
+    <void method="add">
+     <object class="java.awt.Color">
+      <int>255</int>
+      <int>255</int>
+      <int>255</int>
+      <int>255</int>
+     </object>
+    </void>
+   </void>
+   <void method="get">
+    <string>Description</string>
+    <void method="add">
+     <object class="ucl.physiol.neuroconstruct.project.RectangularBox">
+      <void property="parameterList">
+       <void id="InternalParameter0" index="3">
+        <void class="ucl.physiol.neuroconstruct.project.InternalParameter" method="getField">
+         <string>value</string>
+         <void method="set">
+          <object idref="InternalParameter0"/>
+          <float>120.0</float>
+         </void>
+        </void>
+       </void>
+       <void id="InternalParameter1" index="4">
+        <void class="ucl.physiol.neuroconstruct.project.InternalParameter" method="getField">
+         <string>value</string>
+         <void method="set">
+          <object idref="InternalParameter1"/>
+          <float>50.0</float>
+         </void>
+        </void>
+       </void>
+       <void id="InternalParameter2" index="5">
+        <void class="ucl.physiol.neuroconstruct.project.InternalParameter" method="getField">
+         <string>value</string>
+         <void method="set">
+          <object idref="InternalParameter2"/>
+          <float>120.0</float>
+         </void>
+        </void>
+       </void>
+      </void>
+     </object>
+    </void>
+   </void>
+  </void>
+ </object>
+ <object class="ucl.physiol.neuroconstruct.project.CellGroupsInfo">
+  <void property="internalData">
+   <void method="get">
+    <string>Cell Packing Adapter</string>
+    <void method="add">
+     <object class="ucl.physiol.neuroconstruct.project.packing.RandomCellPackingAdapter"/>
+    </void>
+    <void method="add">
+     <object class="ucl.physiol.neuroconstruct.project.packing.RandomCellPackingAdapter"/>
+    </void>
+   </void>
+   <void method="get">
+    <string>Cell Type</string>
+    <void method="add">
+     <string>CellA</string>
+    </void>
+    <void method="add">
+     <string>CellB</string>
+    </void>
+   </void>
+   <void method="get">
+    <string>Priority</string>
+    <void method="add">
+     <int>10</int>
+    </void>
+    <void method="add">
+     <int>9</int>
+    </void>
+   </void>
+   <void method="get">
+    <string>Colour</string>
+    <void method="add">
+     <object class="java.awt.Color">
+      <int>84</int>
+      <int>233</int>
+      <int>210</int>
+      <int>255</int>
+     </object>
+    </void>
+    <void method="add">
+     <object class="java.awt.Color">
+      <int>243</int>
+      <int>112</int>
+      <int>128</int>
+      <int>255</int>
+     </object>
+    </void>
+   </void>
+   <void method="get">
+    <string>Region Name</string>
+    <void method="add">
+     <string>Regions_1</string>
+    </void>
+    <void method="add">
+     <string>Regions_1</string>
+    </void>
+   </void>
+   <void method="get">
+    <string>Cell Group Name</string>
+    <void method="add">
+     <string>SimpleCellGroup</string>
+    </void>
+    <void method="add">
+     <string>PurkinjeGroup</string>
+    </void>
+   </void>
+  </void>
+ </object>
+ <object class="ucl.physiol.neuroconstruct.project.ElecInputInfo"/>
+ <object class="ucl.physiol.neuroconstruct.project.SimpleNetworkConnectionsInfo">
+  <void property="internalData">
+   <void method="get">
+    <string>Name</string>
+    <void method="add">
+     <string>NetConn_SimpleCellGroup_PurkinjeGroup_1</string>
+    </void>
+    <void method="add">
+     <string>NetConn_SimpleCellGroup_PurkinjeGroup</string>
+    </void>
+   </void>
+   <void method="get">
+    <string>AP speed</string>
+    <void method="add">
+     <float>3.4028235E38</float>
+    </void>
+    <void method="add">
+     <float>3.4028235E38</float>
+    </void>
+   </void>
+   <void method="get">
+    <string>Synapse Type</string>
+    <void method="add">
+     <object class="java.util.Vector">
+      <void method="add">
+       <object class="ucl.physiol.neuroconstruct.project.SynapticProperties">
+        <void property="delayGenerator">
+         <object class="ucl.physiol.neuroconstruct.utils.NumberGenerator" id="NumberGenerator0">
+          <void class="ucl.physiol.neuroconstruct.utils.NumberGenerator" method="getField">
+           <string>numberType</string>
+           <void method="set">
+            <object idref="NumberGenerator0"/>
+            <int>11</int>
+           </void>
+          </void>
+          <void property="fixedNum">
+           <float>5.0</float>
+          </void>
+         </object>
+        </void>
+        <void property="synapseType">
+         <string>DoubExpSyn</string>
+        </void>
+        <void property="threshold">
+         <double>-20.0</double>
+        </void>
+        <void property="weightsGenerator">
+         <object class="ucl.physiol.neuroconstruct.utils.WeightGenerator" id="WeightGenerator0">
+          <void class="ucl.physiol.neuroconstruct.utils.NumberGenerator" method="getField">
+           <string>numberType</string>
+           <void method="set">
+            <object idref="WeightGenerator0"/>
+            <int>11</int>
+           </void>
+          </void>
+         </object>
+        </void>
+       </object>
+      </void>
+     </object>
+    </void>
+    <void method="add">
+     <object class="java.util.Vector">
+      <void method="add">
+       <object class="ucl.physiol.neuroconstruct.project.SynapticProperties">
+        <void property="delayGenerator">
+         <object class="ucl.physiol.neuroconstruct.utils.NumberGenerator" id="NumberGenerator1">
+          <void class="ucl.physiol.neuroconstruct.utils.NumberGenerator" method="getField">
+           <string>numberType</string>
+           <void method="set">
+            <object idref="NumberGenerator1"/>
+            <int>11</int>
+           </void>
+          </void>
+          <void property="fixedNum">
+           <float>5.0</float>
+          </void>
+         </object>
+        </void>
+        <void property="synapseType">
+         <string>DoubExpSyn</string>
+        </void>
+        <void property="threshold">
+         <double>-20.0</double>
+        </void>
+        <void property="weightsGenerator">
+         <object class="ucl.physiol.neuroconstruct.utils.WeightGenerator" id="WeightGenerator1">
+          <void class="ucl.physiol.neuroconstruct.utils.NumberGenerator" method="getField">
+           <string>numberType</string>
+           <void method="set">
+            <object idref="WeightGenerator1"/>
+            <int>11</int>
+           </void>
+          </void>
+         </object>
+        </void>
+       </object>
+      </void>
+     </object>
+    </void>
+   </void>
+   <void method="get">
+    <string>Max/min</string>
+    <void method="add">
+     <object class="ucl.physiol.neuroconstruct.project.MaxMinLength"/>
+    </void>
+    <void method="add">
+     <object class="ucl.physiol.neuroconstruct.project.MaxMinLength"/>
+    </void>
+   </void>
+   <void method="get">
+    <string>Search Pattern</string>
+    <void method="add">
+     <object class="ucl.physiol.neuroconstruct.project.SearchPattern" id="SearchPattern0">
+      <void class="ucl.physiol.neuroconstruct.project.SearchPattern" method="getField">
+       <string>type</string>
+       <void method="set">
+        <object idref="SearchPattern0"/>
+        <int>0</int>
+       </void>
+      </void>
+     </object>
+    </void>
+    <void method="add">
+     <object class="ucl.physiol.neuroconstruct.project.SearchPattern" id="SearchPattern1">
+      <void class="ucl.physiol.neuroconstruct.project.SearchPattern" method="getField">
+       <string>type</string>
+       <void method="set">
+        <object idref="SearchPattern1"/>
+        <int>0</int>
+       </void>
+      </void>
+     </object>
+    </void>
+   </void>
+   <void method="get">
+    <string>Source</string>
+    <void method="add">
+     <string>SimpleCellGroup</string>
+    </void>
+    <void method="add">
+     <string>SimpleCellGroup</string>
+    </void>
+   </void>
+   <void method="get">
+    <string>Connectivity Conditions</string>
+    <void method="add">
+     <object class="ucl.physiol.neuroconstruct.project.ConnectivityConditions">
+      <void property="allowAutapses">
+       <boolean>false</boolean>
+      </void>
+     </object>
+    </void>
+    <void method="add">
+     <object class="ucl.physiol.neuroconstruct.project.ConnectivityConditions">
+      <void property="allowAutapses">
+       <boolean>false</boolean>
+      </void>
+     </object>
+    </void>
+   </void>
+   <void method="get">
+    <string>Target</string>
+    <void method="add">
+     <string>PurkinjeGroup</string>
+    </void>
+    <void method="add">
+     <string>PurkinjeGroup</string>
+    </void>
+   </void>
+  </void>
+ </object>
+ <object class="ucl.physiol.neuroconstruct.project.SimPlotInfo">
+  <void property="allSimPlots">
+   <void method="add">
+    <object class="ucl.physiol.neuroconstruct.project.SimPlot">
+     <void property="cellGroup">
+      <string>SampleCellGroup</string>
+     </void>
+     <void property="cellNumber">
+      <string>*</string>
+     </void>
+     <void property="graphWindow">
+      <string>SampleGraph</string>
+     </void>
+     <void property="maxValue">
+      <float>50.0</float>
+     </void>
+     <void property="minValue">
+      <float>-90.0</float>
+     </void>
+     <void property="plotAndOrSave">
+      <string>Plot and save</string>
+     </void>
+     <void property="plotReference">
+      <string>SamplePlot</string>
+     </void>
+     <void property="segmentId">
+      <string>0</string>
+     </void>
+    </object>
+   </void>
+   <void method="add">
+    <object class="ucl.physiol.neuroconstruct.project.SimPlot">
+     <void property="cellGroup">
+      <string>Gran</string>
+     </void>
+     <void property="cellNumber">
+      <string>*</string>
+     </void>
+     <void property="graphWindow">
+      <string>Gran_v</string>
+     </void>
+     <void property="maxValue">
+      <float>50.0</float>
+     </void>
+     <void property="minValue">
+      <float>-90.0</float>
+     </void>
+     <void property="plotAndOrSave">
+      <string>Plot and save</string>
+     </void>
+     <void property="plotReference">
+      <string>Gran_v</string>
+     </void>
+     <void property="segmentId">
+      <string>0</string>
+     </void>
+    </object>
+   </void>
+   <void method="add">
+    <object class="ucl.physiol.neuroconstruct.project.SimPlot">
+     <void property="cellGroup">
+      <string>CellGroup_2</string>
+     </void>
+     <void property="cellNumber">
+      <string>*</string>
+     </void>
+     <void property="graphWindow">
+      <string>CellGroup_2_v</string>
+     </void>
+     <void property="maxValue">
+      <float>50.0</float>
+     </void>
+     <void property="minValue">
+      <float>-90.0</float>
+     </void>
+     <void property="plotAndOrSave">
+      <string>Plot and save</string>
+     </void>
+     <void property="plotReference">
+      <string>CellGroup_2_v</string>
+     </void>
+     <void property="segmentId">
+      <string>0</string>
+     </void>
+    </object>
+   </void>
+   <void method="add">
+    <object class="ucl.physiol.neuroconstruct.project.SimPlot">
+     <void property="cellGroup">
+      <string>SimpleCellGroup</string>
+     </void>
+     <void property="cellNumber">
+      <string>*</string>
+     </void>
+     <void property="graphWindow">
+      <string>SimpleCellGroup_v</string>
+     </void>
+     <void property="maxValue">
+      <float>50.0</float>
+     </void>
+     <void property="minValue">
+      <float>-90.0</float>
+     </void>
+     <void property="plotAndOrSave">
+      <string>Plot and save</string>
+     </void>
+     <void property="plotReference">
+      <string>SimpleCellGroup_v</string>
+     </void>
+     <void property="segmentId">
+      <string>0</string>
+     </void>
+    </object>
+   </void>
+   <void method="add">
+    <object class="ucl.physiol.neuroconstruct.project.SimPlot">
+     <void property="cellGroup">
+      <string>PurkinjeGroup</string>
+     </void>
+     <void property="cellNumber">
+      <string>*</string>
+     </void>
+     <void property="graphWindow">
+      <string>PurkinjeGroup_v</string>
+     </void>
+     <void property="maxValue">
+      <float>50.0</float>
+     </void>
+     <void property="minValue">
+      <float>-90.0</float>
+     </void>
+     <void property="plotAndOrSave">
+      <string>Plot and save</string>
+     </void>
+     <void property="plotReference">
+      <string>PurkinjeGroup_v</string>
+     </void>
+     <void property="segmentId">
+      <string>0</string>
+     </void>
+    </object>
+   </void>
+  </void>
+ </object>
+ <object class="ucl.physiol.neuroconstruct.project.SimConfigInfo">
+  <void property="allSimConfigs">
+   <void method="add">
+    <object class="ucl.physiol.neuroconstruct.project.SimConfig">
+     <void property="cellGroups">
+      <void method="add">
+       <string>PurkinjeGroup</string>
+      </void>
+      <void method="add">
+       <string>SimpleCellGroup</string>
+      </void>
+     </void>
+     <void property="description">
+      <string>This is the default configuration of the Cell Groups, stimulations, plots, etc for this project</string>
+     </void>
+     <void property="name">
+      <string>Default Simulation Configuration</string>
+     </void>
+     <void property="netConns">
+      <void method="add">
+       <string>NetConn_SimpleCellGroup_PurkinjeGroup_1</string>
+      </void>
+      <void method="add">
+       <string>NetConn_SimpleCellGroup_PurkinjeGroup</string>
+      </void>
+     </void>
+     <void property="plots">
+      <void method="add">
+       <string>CellGroup_2_v</string>
+      </void>
+      <void method="add">
+       <string>Gran_v</string>
+      </void>
+      <void method="add">
+       <string>PurkinjeGroup_v</string>
+      </void>
+      <void method="add">
+       <string>SamplePlot</string>
+      </void>
+      <void method="add">
+       <string>SimpleCellGroup_v</string>
+      </void>
+     </void>
+     <void property="simDuration">
+      <float>100.0</float>
+     </void>
+    </object>
+   </void>
+  </void>
+ </object>
+ <object class="ucl.physiol.neuroconstruct.neuron.NeuronSettings">
+  <void property="showShapePlot">
+   <boolean>true</boolean>
+  </void>
+ </object>
+ <object class="ucl.physiol.neuroconstruct.genesis.GenesisSettings"/>
+</java>
+
+    </meta:annotation>
+
+
+
+<cells>
+    <cell name="CellB">
+
+            <meta:notes>A very simplified Purkinje Cell for testing purposes only</meta:notes>
+
+            <mml:segments>
+
+                <mml:segment id="0" name="Soma" cable="0">
+                    <mml:proximal x="0.0" y="0.0" z="0.0" diameter="30.0"/>
+                    <mml:distal x="0.0" y="0.0" z="0.0" diameter="30.0"/>
+                </mml:segment>
+
+                <mml:segment id="1" name="mainAxon" parent="0" cable="1">
+                    <mml:proximal x="0.0" y="0.0" z="0.0" diameter="2.0"/>
+                    <mml:distal x="0.0" y="-240.0" z="0.0" diameter="2.0"/>
+                </mml:segment>
+
+                <mml:segment id="2" name="axon1" parent="1" cable="2">
+                    <mml:proximal x="0.0" y="-240.0" z="0.0" diameter="2.0"/>
+                    <mml:distal x="-5.0" y="-260.0" z="0.0" diameter="2.0"/>
+                </mml:segment>
+
+                <mml:segment id="3" name="axon2" parent="1" cable="3">
+                    <mml:proximal x="0.0" y="-240.0" z="0.0" diameter="2.0"/>
+                    <mml:distal x="5.0" y="-260.0" z="0.0" diameter="2.0"/>
+                </mml:segment>
+
+                <mml:segment id="4" name="root" parent="0" cable="4">
+                    <mml:proximal x="0.0" y="0.0" z="0.0" diameter="3.0"/>
+                    <mml:distal x="0.0" y="30.0" z="0.0" diameter="3.0"/>
+                </mml:segment>
+
+                <mml:segment id="5" name="mainDend1" parent="4" cable="5">
+                    <mml:proximal x="0.0" y="30.0" z="0.0" diameter="3.0"/>
+                    <mml:distal x="0.0" y="50.0" z="0.0" diameter="3.0"/>
+                </mml:segment>
+
+                <mml:segment id="6" name="mainDend2" parent="4" cable="6">
+                    <mml:proximal x="0.0" y="30.0" z="0.0" diameter="3.0"/>
+                    <mml:distal x="0.0" y="50.0" z="-40.0" diameter="3.0"/>
+                </mml:segment>
+
+                <mml:segment id="7" name="mainDend3" parent="4" cable="7">
+                    <mml:proximal x="0.0" y="30.0" z="0.0" diameter="3.0"/>
+                    <mml:distal x="0.0" y="50.0" z="40.0" diameter="3.0"/>
+                </mml:segment>
+
+                <mml:segment id="8" name="Dend_4" parent="5" cable="8">
+                    <mml:proximal x="0.0" y="50.0" z="0.0" diameter="3.0"/>
+                    <mml:distal x="0.0" y="80.0" z="-10.0" diameter="1.8000001"/>
+                </mml:segment>
+
+                <mml:segment id="9" name="Dend_5" parent="5" cable="9">
+                    <mml:proximal x="0.0" y="50.0" z="0.0" diameter="3.0"/>
+                    <mml:distal x="0.0" y="80.0" z="10.0" diameter="1.8000001"/>
+                </mml:segment>
+
+                <mml:segment id="10" name="Dend_6" parent="5" cable="10">
+                    <mml:proximal x="0.0" y="50.0" z="0.0" diameter="3.0"/>
+                    <mml:distal x="0.0" y="85.0" z="0.0" diameter="1.8000001"/>
+                </mml:segment>
+
+                <mml:segment id="11" name="Dend_7" parent="6" cable="11">
+                    <mml:proximal x="0.0" y="50.0" z="-40.0" diameter="3.0"/>
+                    <mml:distal x="0.0" y="70.0" z="-50.0" diameter="1.8000001"/>
+                </mml:segment>
+
+                <mml:segment id="12" name="Dend_8" parent="6" cable="12">
+                    <mml:proximal x="0.0" y="50.0" z="-40.0" diameter="3.0"/>
+                    <mml:distal x="0.0" y="70.0" z="-30.0" diameter="1.8000001"/>
+                </mml:segment>
+
+                <mml:segment id="13" name="Dend_9" parent="6" cable="13">
+                    <mml:proximal x="0.0" y="50.0" z="-40.0" diameter="3.0"/>
+                    <mml:distal x="0.0" y="75.0" z="-40.0" diameter="1.8000001"/>
+                </mml:segment>
+
+                <mml:segment id="14" name="Dend_10" parent="7" cable="14">
+                    <mml:proximal x="0.0" y="50.0" z="40.0" diameter="3.0"/>
+                    <mml:distal x="0.0" y="70.0" z="30.0" diameter="1.8000001"/>
+                </mml:segment>
+
+                <mml:segment id="15" name="Dend_11" parent="7" cable="15">
+                    <mml:proximal x="0.0" y="50.0" z="40.0" diameter="3.0"/>
+                    <mml:distal x="0.0" y="70.0" z="50.0" diameter="1.8000001"/>
+                </mml:segment>
+
+                <mml:segment id="16" name="Dend_12" parent="7" cable="16">
+                    <mml:proximal x="0.0" y="50.0" z="40.0" diameter="3.0"/>
+                    <mml:distal x="0.0" y="75.0" z="40.0" diameter="1.8000001"/>
+                </mml:segment>
+
+                <mml:segment id="17" name="Dend_13" parent="8" cable="17">
+                    <mml:proximal x="0.0" y="80.0" z="-10.0" diameter="1.8000001"/>
+                    <mml:distal x="5.0" y="130.0" z="-24.0" diameter="1.08"/>
+                </mml:segment>
+
+                <mml:segment id="18" name="Dend_14" parent="8" cable="18">
+                    <mml:proximal x="0.0" y="80.0" z="-10.0" diameter="1.8000001"/>
+                    <mml:distal x="0.0" y="130.0" z="-10.0" diameter="1.08"/>
+                </mml:segment>
+
+                <mml:segment id="19" name="Dend_15" parent="8" cable="19">
+                    <mml:proximal x="0.0" y="80.0" z="-10.0" diameter="1.8000001"/>
+                    <mml:distal x="-5.0" y="130.0" z="4.0" diameter="1.08"/>
+                </mml:segment>
+
+                <mml:segment id="20" name="Dend_16" parent="9" cable="20">
+                    <mml:proximal x="0.0" y="80.0" z="10.0" diameter="1.8000001"/>
+                    <mml:distal x="5.0" y="130.0" z="-4.0" diameter="1.08"/>
+                </mml:segment>
+
+                <mml:segment id="21" name="Dend_17" parent="9" cable="21">
+                    <mml:proximal x="0.0" y="80.0" z="10.0" diameter="1.8000001"/>
+                    <mml:distal x="0.0" y="130.0" z="10.0" diameter="1.08"/>
+                </mml:segment>
+
+                <mml:segment id="22" name="Dend_18" parent="9" cable="22">
+                    <mml:proximal x="0.0" y="80.0" z="10.0" diameter="1.8000001"/>
+                    <mml:distal x="-5.0" y="130.0" z="24.0" diameter="1.08"/>
+                </mml:segment>
+
+                <mml:segment id="23" name="Dend_19" parent="10" cable="23">
+                    <mml:proximal x="0.0" y="85.0" z="0.0" diameter="1.8000001"/>
+                    <mml:distal x="5.0" y="135.0" z="-14.0" diameter="1.08"/>
+                </mml:segment>
+
+                <mml:segment id="24" name="Dend_20" parent="10" cable="24">
+                    <mml:proximal x="0.0" y="85.0" z="0.0" diameter="1.8000001"/>
+                    <mml:distal x="0.0" y="135.0" z="0.0" diameter="1.08"/>
+                </mml:segment>
+
+                <mml:segment id="25" name="Dend_21" parent="10" cable="25">
+                    <mml:proximal x="0.0" y="85.0" z="0.0" diameter="1.8000001"/>
+                    <mml:distal x="-5.0" y="135.0" z="14.0" diameter="1.08"/>
+                </mml:segment>
+
+                <mml:segment id="26" name="Dend_22" parent="11" cable="26">
+                    <mml:proximal x="0.0" y="70.0" z="-50.0" diameter="1.8000001"/>
+                    <mml:distal x="5.0" y="120.0" z="-64.0" diameter="1.08"/>
+                </mml:segment>
+
+                <mml:segment id="27" name="Dend_23" parent="11" cable="27">
+                    <mml:proximal x="0.0" y="70.0" z="-50.0" diameter="1.8000001"/>
+                    <mml:distal x="0.0" y="120.0" z="-50.0" diameter="1.08"/>
+                </mml:segment>
+
+                <mml:segment id="28" name="Dend_24" parent="11" cable="28">
+                    <mml:proximal x="0.0" y="70.0" z="-50.0" diameter="1.8000001"/>
+                    <mml:distal x="-5.0" y="120.0" z="-36.0" diameter="1.08"/>
+                </mml:segment>
+
+                <mml:segment id="29" name="Dend_25" parent="12" cable="29">
+                    <mml:proximal x="0.0" y="70.0" z="-30.0" diameter="1.8000001"/>
+                    <mml:distal x="5.0" y="120.0" z="-44.0" diameter="1.08"/>
+                </mml:segment>
+
+                <mml:segment id="30" name="Dend_26" parent="12" cable="30">
+                    <mml:proximal x="0.0" y="70.0" z="-30.0" diameter="1.8000001"/>
+                    <mml:distal x="0.0" y="120.0" z="-30.0" diameter="1.08"/>
+                </mml:segment>
+
+                <mml:segment id="31" name="Dend_27" parent="12" cable="31">
+                    <mml:proximal x="0.0" y="70.0" z="-30.0" diameter="1.8000001"/>
+                    <mml:distal x="-5.0" y="120.0" z="-16.0" diameter="1.08"/>
+                </mml:segment>
+
+                <mml:segment id="32" name="Dend_28" parent="13" cable="32">
+                    <mml:proximal x="0.0" y="75.0" z="-40.0" diameter="1.8000001"/>
+                    <mml:distal x="5.0" y="125.0" z="-54.0" diameter="1.08"/>
+                </mml:segment>
+
+                <mml:segment id="33" name="Dend_29" parent="13" cable="33">
+                    <mml:proximal x="0.0" y="75.0" z="-40.0" diameter="1.8000001"/>
+                    <mml:distal x="0.0" y="125.0" z="-40.0" diameter="1.08"/>
+                </mml:segment>
+
+                <mml:segment id="34" name="Dend_30" parent="13" cable="34">
+                    <mml:proximal x="0.0" y="75.0" z="-40.0" diameter="1.8000001"/>
+                    <mml:distal x="-5.0" y="125.0" z="-26.0" diameter="1.08"/>
+                </mml:segment>
+
+                <mml:segment id="35" name="Dend_31" parent="14" cable="35">
+                    <mml:proximal x="0.0" y="70.0" z="30.0" diameter="1.8000001"/>
+                    <mml:distal x="5.0" y="120.0" z="16.0" diameter="1.08"/>
+                </mml:segment>
+
+                <mml:segment id="36" name="Dend_32" parent="14" cable="36">
+                    <mml:proximal x="0.0" y="70.0" z="30.0" diameter="1.8000001"/>
+                    <mml:distal x="0.0" y="120.0" z="30.0" diameter="1.08"/>
+                </mml:segment>
+
+                <mml:segment id="37" name="Dend_33" parent="14" cable="37">
+                    <mml:proximal x="0.0" y="70.0" z="30.0" diameter="1.8000001"/>
+                    <mml:distal x="-5.0" y="120.0" z="44.0" diameter="1.08"/>
+                </mml:segment>
+
+                <mml:segment id="38" name="Dend_34" parent="15" cable="38">
+                    <mml:proximal x="0.0" y="70.0" z="50.0" diameter="1.8000001"/>
+                    <mml:distal x="5.0" y="120.0" z="36.0" diameter="1.08"/>
+                </mml:segment>
+
+                <mml:segment id="39" name="Dend_35" parent="15" cable="39">
+                    <mml:proximal x="0.0" y="70.0" z="50.0" diameter="1.8000001"/>
+                    <mml:distal x="0.0" y="120.0" z="50.0" diameter="1.08"/>
+                </mml:segment>
+
+                <mml:segment id="40" name="Dend_36" parent="15" cable="40">
+                    <mml:proximal x="0.0" y="70.0" z="50.0" diameter="1.8000001"/>
+                    <mml:distal x="-5.0" y="120.0" z="64.0" diameter="1.08"/>
+                </mml:segment>
+
+                <mml:segment id="41" name="Dend_37" parent="16" cable="41">
+                    <mml:proximal x="0.0" y="75.0" z="40.0" diameter="1.8000001"/>
+                    <mml:distal x="5.0" y="125.0" z="26.0" diameter="1.08"/>
+                </mml:segment>
+
+                <mml:segment id="42" name="Dend_38" parent="16" cable="42">
+                    <mml:proximal x="0.0" y="75.0" z="40.0" diameter="1.8000001"/>
+                    <mml:distal x="0.0" y="125.0" z="40.0" diameter="1.08"/>
+                </mml:segment>
+
+                <mml:segment id="43" name="Dend_39" parent="16" cable="43">
+                    <mml:proximal x="0.0" y="75.0" z="40.0" diameter="1.8000001"/>
+                    <mml:distal x="-5.0" y="125.0" z="54.0" diameter="1.08"/>
+                </mml:segment>
+
+                
+            </mml:segments>
+
+            <mml:cables>
+
+                <mml:cable id="0" name="Soma">
+                    <meta:group>all</meta:group>
+                    <meta:group>soma_group</meta:group>
+                </mml:cable>
+
+                <mml:cable id="1" name="AxonSec" fract_along_parent="0.5">
+                    <meta:group>all</meta:group>
+                    <meta:group>axon_group</meta:group>
+                </mml:cable>
+
+                <mml:cable id="2" name="AxonSec1">
+                    <meta:group>all</meta:group>
+                    <meta:group>axon_group</meta:group>
+                </mml:cable>
+
+                <mml:cable id="3" name="AxonSec2">
+                    <meta:group>all</meta:group>
+                    <meta:group>axon_group</meta:group>
+                </mml:cable>
+
+                <mml:cable id="4" name="DendRootSec" fract_along_parent="0.5">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                </mml:cable>
+
+                <mml:cable id="5" name="DendSec1">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                </mml:cable>
+
+                <mml:cable id="6" name="DendSec2">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                </mml:cable>
+
+                <mml:cable id="7" name="DendSec3">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                </mml:cable>
+
+                <mml:cable id="8" name="Dend_4_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                </mml:cable>
+
+                <mml:cable id="9" name="Dend_5_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                </mml:cable>
+
+                <mml:cable id="10" name="Dend_6_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                </mml:cable>
+
+                <mml:cable id="11" name="Dend_7_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                </mml:cable>
+
+                <mml:cable id="12" name="Dend_8_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                </mml:cable>
+
+                <mml:cable id="13" name="Dend_9_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                </mml:cable>
+
+                <mml:cable id="14" name="Dend_10_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                </mml:cable>
+
+                <mml:cable id="15" name="Dend_11_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                </mml:cable>
+
+                <mml:cable id="16" name="Dend_12_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                </mml:cable>
+
+                <mml:cable id="17" name="Dend_13_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>main_dends</meta:group>
+                </mml:cable>
+
+                <mml:cable id="18" name="Dend_14_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>main_dends</meta:group>
+                </mml:cable>
+
+                <mml:cable id="19" name="Dend_15_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>main_dends</meta:group>
+                </mml:cable>
+
+                <mml:cable id="20" name="Dend_16_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>main_dends</meta:group>
+                </mml:cable>
+
+                <mml:cable id="21" name="Dend_17_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>main_dends</meta:group>
+                </mml:cable>
+
+                <mml:cable id="22" name="Dend_18_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>main_dends</meta:group>
+                </mml:cable>
+
+                <mml:cable id="23" name="Dend_19_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>main_dends</meta:group>
+                </mml:cable>
+
+                <mml:cable id="24" name="Dend_20_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>main_dends</meta:group>
+                </mml:cable>
+
+                <mml:cable id="25" name="Dend_21_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>main_dends</meta:group>
+                </mml:cable>
+
+                <mml:cable id="26" name="Dend_22_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>main_dends</meta:group>
+                </mml:cable>
+
+                <mml:cable id="27" name="Dend_23_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>main_dends</meta:group>
+                </mml:cable>
+
+                <mml:cable id="28" name="Dend_24_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>main_dends</meta:group>
+                </mml:cable>
+
+                <mml:cable id="29" name="Dend_25_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>main_dends</meta:group>
+                </mml:cable>
+
+                <mml:cable id="30" name="Dend_26_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>main_dends</meta:group>
+                </mml:cable>
+
+                <mml:cable id="31" name="Dend_27_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>main_dends</meta:group>
+                </mml:cable>
+
+                <mml:cable id="32" name="Dend_28_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>main_dends</meta:group>
+                </mml:cable>
+
+                <mml:cable id="33" name="Dend_29_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>main_dends</meta:group>
+                </mml:cable>
+
+                <mml:cable id="34" name="Dend_30_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>main_dends</meta:group>
+                </mml:cable>
+
+                <mml:cable id="35" name="Dend_31_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>main_dends</meta:group>
+                </mml:cable>
+
+                <mml:cable id="36" name="Dend_32_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>main_dends</meta:group>
+                </mml:cable>
+
+                <mml:cable id="37" name="Dend_33_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>main_dends</meta:group>
+                </mml:cable>
+
+                <mml:cable id="38" name="Dend_34_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>main_dends</meta:group>
+                </mml:cable>
+
+                <mml:cable id="39" name="Dend_35_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>main_dends</meta:group>
+                </mml:cable>
+
+                <mml:cable id="40" name="Dend_36_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>main_dends</meta:group>
+                </mml:cable>
+
+                <mml:cable id="41" name="Dend_37_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>main_dends</meta:group>
+                </mml:cable>
+
+                <mml:cable id="42" name="Dend_38_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>main_dends</meta:group>
+                </mml:cable>
+
+                <mml:cable id="43" name="Dend_39_Sec">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>main_dends</meta:group>
+                </mml:cable>
+
+            </mml:cables>
+
+                <!--Adding the biophysical parameters-->
+
+            <biophysics units="Physiological Units">
+
+                <bio:spec_capacitance>
+                    <bio:parameter value="1.0">
+                        <bio:group>all</bio:group>
+                    </bio:parameter>
+                </bio:spec_capacitance>
+
+                <bio:spec_axial_resistance>
+                    <bio:parameter value="0.03">
+                        <bio:group>all</bio:group>
+                    </bio:parameter>
+                </bio:spec_axial_resistance>
+
+                <bio:init_memb_potential>
+                    <bio:parameter value="-60.0">
+                        <bio:group>all</bio:group>
+                    </bio:parameter>
+                </bio:init_memb_potential></biophysics>
+
+            <connectivity>
+                <net:potential_syn_loc synapse_type="DoubExpSyn" synapse_direction="preAndOrPost">
+                    <net:group>soma_group</net:group>
+                </net:potential_syn_loc>
+            </connectivity>
+
+        </cell>
+    <cell name="CellA">
+
+            <meta:notes>A Simple cell for testing purposes</meta:notes>
+
+            <mml:segments>
+
+                <mml:segment id="0" name="Soma" cable="0">
+                    <mml:proximal x="0.0" y="0.0" z="0.0" diameter="16.0"/>
+                    <mml:distal x="0.0" y="0.0" z="0.0" diameter="16.0"/>
+                </mml:segment>
+
+                <mml:segment id="1" name="mainDend" parent="0" cable="1">
+                    <mml:proximal x="0.0" y="0.0" z="0.0" diameter="2.0"/>
+                    <mml:distal x="20.0" y="0.0" z="0.0" diameter="2.0"/>
+                </mml:segment>
+
+                <mml:segment id="2" name="subDend1" parent="1" cable="2">
+                    <mml:proximal x="20.0" y="0.0" z="0.0" diameter="2.0"/>
+                    <mml:distal x="40.0" y="15.0" z="0.0" diameter="2.0"/>
+                </mml:segment>
+
+                <mml:segment id="3" name="subDend2" parent="1" cable="3">
+                    <mml:proximal x="20.0" y="0.0" z="0.0" diameter="2.0"/>
+                    <mml:distal x="45.0" y="0.0" z="0.0" diameter="2.0"/>
+                </mml:segment>
+
+                <mml:segment id="4" name="subDend3" parent="1" cable="4">
+                    <mml:proximal x="20.0" y="0.0" z="0.0" diameter="2.0"/>
+                    <mml:distal x="40.0" y="-15.0" z="0.0" diameter="2.0"/>
+                </mml:segment>
+
+                <mml:segment id="5" name="mainAxon" parent="0" cable="5">
+                    <mml:proximal x="0.0" y="0.0" z="0.0" diameter="1.0"/>
+                    <mml:distal x="-30.0" y="0.0" z="0.0" diameter="1.0"/>
+                </mml:segment>
+
+                
+            </mml:segments>
+
+            <mml:cables>
+
+                <mml:cable id="0" name="Soma">
+                    <meta:group>all</meta:group>
+                    <meta:group>soma_group</meta:group>
+                </mml:cable>
+
+                <mml:cable id="1" name="mainDendSec" fract_along_parent="0.5">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                </mml:cable>
+
+                <mml:cable id="2" name="subDendSec1">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                </mml:cable>
+
+                <mml:cable id="3" name="subDendSec2">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                </mml:cable>
+
+                <mml:cable id="4" name="subDendSec3">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                </mml:cable>
+
+                <mml:cable id="5" name="mainAxonSec" fract_along_parent="0.5">
+                    <meta:group>all</meta:group>
+                    <meta:group>axon_group</meta:group>
+                </mml:cable>
+
+            </mml:cables>
+
+                <!--Adding the biophysical parameters-->
+
+            <biophysics units="Physiological Units">
+
+                <bio:spec_capacitance>
+                    <bio:parameter value="1.0">
+                        <bio:group>all</bio:group>
+                    </bio:parameter>
+                </bio:spec_capacitance>
+
+                <bio:spec_axial_resistance>
+                    <bio:parameter value="0.03">
+                        <bio:group>all</bio:group>
+                    </bio:parameter>
+                </bio:spec_axial_resistance>
+
+                <bio:init_memb_potential>
+                    <bio:parameter value="-60.0">
+                        <bio:group>all</bio:group>
+                    </bio:parameter>
+                </bio:init_memb_potential></biophysics>
+
+            <connectivity>
+                <net:potential_syn_loc synapse_type="DoubExpSyn">
+                    <net:group>all</net:group>
+                </net:potential_syn_loc>
+            </connectivity>
+
+        </cell>
+</cells>
+
+<channels units="Physiological Units">
+    <synapse_type name="DoubExpSyn" xmlns="http://morphml.org/channelml/schema">
+        
+        <status value="stable">
+            <meta:contributor>
+                <meta:name>Padraig Gleeson</meta:name>
+            </meta:contributor>
+        </status>
+    
+        <meta:notes>Simple example of a synaptic mechanism, which consists of a postsynaptic conductance which changes as 
+        double exponential function of time. Mappings exist for NEURON and GENESIS.</meta:notes>
+        
+        <meta:neuronDBref>
+            <meta:modelName>Receptor properties</meta:modelName>
+            <meta:uri>http://senselab.med.yale.edu/senselab/NeuronDB/receptors2.asp</meta:uri>
+        </meta:neuronDBref>
+        
+        <doub_exp_syn max_conductance="1.0E-5" rise_time="1" decay_time="2" reversal_potential="0"/>
+    
+    </synapse_type>
+</channels>
+
+<populations xmlns="http://morphml.org/networkml/schema">
+    <population name="PurkinjeGroup" cell_type="CellB">
+        <meta:properties>
+            <meta:property tag="color" value="0.94921875 0.4375 0.5"/>
+
+        </meta:properties>
+        <instances size="1">
+            <instance id="0">
+                <location x="81.8759" y="28.93155" z="72.17151"/>
+            </instance>
+        </instances>
+    </population>
+    <population name="SimpleCellGroup" cell_type="CellA">
+        <meta:properties>
+            <meta:property tag="color" value="0.328125 0.91015625 0.8203125"/>
+
+        </meta:properties>
+        <instances size="1">
+            <instance id="0">
+                <location x="93.825905" y="22.38415" z="37.38508"/>
+            </instance>
+        </instances>
+    </population>
+</populations>
+
+<projections units="SI Units" xmlns="http://morphml.org/networkml/schema">
+    <projection name="NetConn_SimpleCellGroup_PurkinjeGroup" source="SimpleCellGroup" target="PurkinjeGroup">
+        <synapse_props synapse_type="DoubExpSyn" internal_delay="0.005" weight="1.0" threshold="-0.02">
+        </synapse_props>
+        <connections size="1">
+            <connection id="0" pre_cell_id="0" pre_segment_id="5" pre_fraction_along="0.5292632" post_cell_id="0">
+            </connection>
+        </connections>
+    </projection>
+    <projection name="NetConn_SimpleCellGroup_PurkinjeGroup_1" source="SimpleCellGroup" target="PurkinjeGroup">
+        <synapse_props synapse_type="DoubExpSyn" internal_delay="0.005" weight="1.0" threshold="-0.02">
+        </synapse_props>
+        <connections size="1">
+            <connection id="0" pre_cell_id="0" pre_segment_id="5" pre_fraction_along="0.2681897" post_cell_id="0">
+            </connection>
+        </connections>
+    </projection>
+</projections>
+
+    <!--There are no electrical inputs present in the network-->
+
+
+</neuroml>

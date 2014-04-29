@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<networkml xmlns="http://morphml.org/networkml/schema" xmlns:meta="http://morphml.org/metadata/schema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://morphml.org/networkml/schema  http://www.neuroml.org/NeuroMLValidator/NeuroMLFiles/Schemata/v1.8.1/Level3/NetworkML_v1.8.1.xsd" lengthUnits="micrometer">
+
+    <meta:notes>
+
+Network structure (NeuroML 1.x) for project: multiscale saved with neuroConstruct v1.7.0 on: 06:39:57, 25-Jan-14
+
+Cell Group: SampleCellGroup contains 1 cells
+
+
+
+    </meta:notes>
+
+<meta:properties>
+    <meta:property tag="neuroConstruct_random_seed" value="-1879933281"/>
+
+    <meta:property tag="neuroConstruct_sim_config" value="Default Simulation Configuration"/>
+
+    <meta:property tag="neuroConstruct_sim_duration" value="100.0"/>
+
+    <meta:property tag="neuroConstruct_sim_time_step" value="0.02"/>
+
+    <meta:property tag="neuroConstruct_temperature" value="6.3"/>
+</meta:properties>
+
+        <populations>
+    <population name="SampleCellGroup" cell_type="SampleCell">
+        <meta:properties>
+            <meta:property tag="color" value="0.99609375 0.0 0.0"/>
+
+        </meta:properties>
+        <instances size="1">
+            <instance id="0">
+                <location x="18.760502" y="29.756588" z="65.056984"/>
+            </instance>
+        </instances>
+    </population>
+</populations>
+
+
+
+            <!--There are no synaptic connections present in the network-->
+
+
+        <inputs units="Physiological Units">
+    <input name="SampleIClamp">
+        <pulse_input delay="20.0" duration="60.0" amplitude="2.0E-4"/>
+        <target population="SampleCellGroup">
+            <sites size="1">
+            <site cell_id="0" segment_id="0" fraction_along="0.5"/>
+        </sites>
+        </target>
+    </input>
+</inputs>
+
+
+
+
+
+</networkml>
