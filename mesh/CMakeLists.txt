@@ -7,6 +7,7 @@ add_library(mesh
     MeshEntry.cpp	
     CubeMesh.cpp	
     CylBase.cpp	
+    CylMesh.cpp
     NeuroNode.cpp	
     NeuroMesh.cpp	
     testMesh.cpp	

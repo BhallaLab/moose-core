@@ -1,7 +1,12 @@
-file(GLOB shellcode_SRC 
-    "*.h"
-    "*.cpp"
-)
 include_directories(../basecode ../msg ../external/debug )
-add_library(shell ${shellcode_SRC})
+add_library(shell 
+	Shell.cpp	
+	ShellCopy.cpp	
+	ShellThreads.cpp	
+	LoadModels.cpp 
+	SaveModels.cpp 
+	Neutral.cpp	
+	Wildcard.cpp	
+	testShell.cpp	
+    )
 target_link_libraries(shell basecode utility biophysics kinetics debug_print)
