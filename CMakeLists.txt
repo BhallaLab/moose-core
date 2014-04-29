@@ -63,7 +63,6 @@ endif()
 # Use clang++ as default compiler for time being
 set(CMAKE_CXX_COMPILER "clang++")
 
-
 ## Turn warning to error
 add_definitions(-Wall
     -Wno-return-type-c-linkage
@@ -159,7 +158,7 @@ add_subdirectory(external/muparser)
 add_subdirectory(external/debug/)
 add_subdirectory(mesh)
 add_subdirectory(mpi)
-add_subdirectory(signeur)
+#add_subdirectory(signeur)
 add_subdirectory(ksolve)
 add_subdirectory(hsolve)
 add_subdirectory(diffusion)
@@ -176,7 +175,7 @@ target_link_libraries(moose
     moose_mpi
     msg 
     diffusion
-    signeur
+    #signeur
     mesh
     ksolve
     hsolve
@@ -202,8 +201,11 @@ target_link_libraries(moose ${LOCAL_GSL_LIBRARIES})
 find_package(LibXML2 REQUIRED)
 target_link_libraries(moose ${LibXML2_LIBRARIES})
 
+################################################################################
+## PYTHON related stuff.
+################################################################################
 
-## Build pymoose 
+######################### BUILD PYMOOSE ########################################
 set(BUILD_PYMOOSE 1)
 if(BUILD_PYMOOSE)
     find_package(NumpyHeaders REQUIRED)
@@ -246,7 +248,7 @@ if(BUILD_PYMOOSE)
         basecode
         msg
         scheduling
-        signeur
+        #signeur
         shell
         randnum
         moose_mpi
@@ -267,7 +269,35 @@ if(BUILD_PYMOOSE)
         )
 endif(BUILD_PYMOOSE)
 
-## Keep tests here
+if(BUILD_PYMOOSE)
+    # This macro compiles each python file and store them in BUILD_DIRECTORY
+    macro(add_python_target tgt)
+        foreach(file ${ARGN})
+            GET_FILENAME_COMPONENT(FilePath ${file} PATH)
+            GET_FILENAME_COMPONENT(FileNameWE ${file} NAME_WE)
+            set(FileName "${FilePath}/${FileNameWE}.pyc")
+            list(APPEND OUT_FILES ${FileName})
+            add_custom_command(OUTPUT ${FileName}
+                COMMAND python -m py_compile ${CMAKE_SOURCE_DIR}/${file}
+                COMMAND ${CMAKE_COMMAND} -E copy 
+                    ${CMAKE_SOURCE_DIR}/${FileName} ${CMAKE_BINARY_DIR}/${FileName})
+        endforeach()
+
+        add_custom_target(${tgt} ALL
+            DEPENDS ${OUT_FILES}
+            )
+    endmacro()
+    
+    # Search files using glob
+    FILE(GLOB_RECURSE Python_Src RELATIVE ${CMAKE_SOURCE_DIR} python/*.py)
+    add_python_target(python_src_compiled
+        ${Python_Src}
+        )
+endif()
+
+################################################################################
+## Keep CTEST here.
+################################################################################
 include(CTest)
 find_package(PythonInterp REQUIRED)
 add_test(NAME run_moose_with_enable_test
