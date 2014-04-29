@@ -34,6 +34,7 @@ OBJ = \
 	FieldElement.o \
 	Id.o \
 	ObjId.o \
+	global.o \
 	SetGet.o \
 	OpFuncBase.o \
 	EpFunc.o \
