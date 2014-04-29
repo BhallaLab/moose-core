@@ -9,6 +9,8 @@
 #ifndef _CONV_H
 #define _CONV_H
 
+#include <string>
+
 /**
  * This set of templates defines converters. The conversions are from
  * string to object, object to string, and 
