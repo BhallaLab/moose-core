@@ -23,7 +23,7 @@
 extern unsigned int totalTests;
 #define tbegin cerr << endl << "Test(" << totalTests << "): " << BOOST_CURRENT_FUNCTION;
 #define tend totalTests++; \
-    cerr << setw(80) << "test of " << BOOST_CURRENT_FUNCTION << " finished."; 
+    cerr << std::right <<  setw(20) << "test of " << BOOST_CURRENT_FUNCTION << " finished."; 
 
 #include <math.h>
 #include <algorithm>

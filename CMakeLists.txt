@@ -36,7 +36,7 @@ Please clean the source directory.")
 endif()
 
 # These are CMAKE macros. Must be on the top.
-set(CMAKE_VERBOSE_MAKEFILE OFF)
+set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
 set(INSTALL_LIB_DIR lib CACHE PATH "/usr/local/lib")
 set(INSTALL_BIN_DIR bin CACHE PATH "/usr/local/bin")
@@ -168,20 +168,24 @@ add_subdirectory(kinetics)
 
 # Links our libraries 
 target_link_libraries(moose 
-    scheduling
-    builtins
-    muparser
-    device
-    moose_mpi
-    msg 
-    diffusion
-    #signeur
-    mesh
-    ksolve
-    hsolve
-    debug_print
-    benchmarks
+    basecode
+    msg
     shell
+    randnum
+    scheduling
+    moose_mpi
+    moose_builtins
+    utility 
+    muparser
+    debug_print
+    biophysics 
+    kinetics 
+    ksolve
+    hsolve 
+    mesh
+    diffusion 
+    device
+    benchmarks
     )
 
 if(LIBSBML_FOUND)
@@ -244,23 +248,22 @@ if(BUILD_PYMOOSE)
     target_link_libraries(_moose 
         "-Wl,--whole-archive"
         moosepython
-        ksolve
         basecode
         msg
-        scheduling
-        #signeur
         shell
         randnum
+        scheduling
         moose_mpi
-        builtins
-        utility
-        diffusion
-        hsolve
+        moose_builtins
+        utility 
         muparser
-        biophysics
-        kinetics
-        mesh
         debug_print
+        biophysics 
+        kinetics 
+        ksolve
+        hsolve 
+        mesh
+        diffusion 
         device
         benchmarks
         pthread
