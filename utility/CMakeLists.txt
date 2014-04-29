@@ -1,7 +1,10 @@
-file(GLOB files_SRC 
-    "*.h"
-    "*.cpp"
-)
 include_directories(../msg)
 include_directories(../basecode)
-add_library(utility ${files_SRC})
+add_library(utility 
+    strutil.cpp
+    types.cpp
+    setupenv.cpp
+    numutil.cpp
+    Annotator.cpp
+    Vec.cpp
+    )
