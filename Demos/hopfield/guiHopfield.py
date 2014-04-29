@@ -1,6 +1,3 @@
-import sys
-sys.path.append("/home/saeed/src/cuda-workspace/moose-code/moose/branches/async13/python")
-
 import os
 os.environ['NUMPTHREADS'] = '1'
 from PyQt4 import QtCore,QtGui
