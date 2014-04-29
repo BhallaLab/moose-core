@@ -2,7 +2,6 @@ include_directories(../msg)
 include_directories(../basecode)
 include_directories(../external/muparser)
 add_library(builtins
-    ../basecode/header.h
     Arith.cpp
     Group.cpp
     Mstring.cpp
