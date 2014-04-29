@@ -313,7 +313,7 @@ extern "C" {
         if (!Id::isValid(self->oid_.id)){
             RAISE_INVALID_ID(-1, "moose_ObjId_hash");
         }
-        long id = (long)(self->oid_.id.value());
+        long long id = (long long)(self->oid_.id.value());
         long dataIndex = self->oid_.dataIndex;
         long fieldIndex = self->oid_.fieldIndex;
         return id << 48 | dataIndex << 16 | fieldIndex;
@@ -725,7 +725,7 @@ extern "C" {
                 } else {
                     Py_ssize_t length = PySequence_Length(value);
                     vector<double> _value;
-                    for (unsigned int ii = 0; ii < length; ++ii){
+                    for ( int ii = 0; ii < length; ++ii){
                         double v = PyFloat_AsDouble(PySequence_GetItem(value, ii));
                         _value.push_back(v);
                     }
@@ -769,7 +769,7 @@ extern "C" {
                 }
                 Py_ssize_t length = PySequence_Length(value);
                 vector<int> _value;
-                for (unsigned int ii = 0; ii < length; ++ii){
+                for ( int ii = 0; ii < length; ++ii){
                     int v = PyInt_AsLong(PySequence_GetItem(value, ii));
                     _value.push_back(v);
                 }
@@ -782,7 +782,7 @@ extern "C" {
                 } else {
                     Py_ssize_t length = PySequence_Length(value);
                     vector<short> _value;
-                    for (unsigned int ii = 0; ii < length; ++ii){
+                    for ( int ii = 0; ii < length; ++ii){
                         short v = PyInt_AsLong(PySequence_GetItem(value, ii));
                         _value.push_back(v);
                     }
@@ -797,7 +797,7 @@ extern "C" {
                 } else {
                     Py_ssize_t length = PySequence_Length(value);
                     vector<long> _value;
-                    for (unsigned int ii = 0; ii < length; ++ii){
+                    for ( int ii = 0; ii < length; ++ii){
                         long v = PyInt_AsLong(PySequence_GetItem(value, ii));
                         _value.push_back(v);
                     }
@@ -811,7 +811,7 @@ extern "C" {
                 } else {
                     Py_ssize_t length = PySequence_Length(value);
                     vector<unsigned int> _value;
-                    for (unsigned int ii = 0; ii < length; ++ii){
+                    for ( int ii = 0; ii < length; ++ii){
                         unsigned int v = PyInt_AsUnsignedLongMask(PySequence_GetItem(value, ii));
                         _value.push_back(v);
                     }
@@ -825,7 +825,7 @@ extern "C" {
                 } else {
                     Py_ssize_t length = PySequence_Length(value);
                     vector<unsigned long> _value;
-                    for (unsigned int ii = 0; ii < length; ++ii){
+                    for ( int ii = 0; ii < length; ++ii){
                         unsigned long v = PyInt_AsUnsignedLongMask(PySequence_GetItem(value, ii));
                         _value.push_back(v);
                     }
@@ -839,7 +839,7 @@ extern "C" {
                 } else {
                     Py_ssize_t length = PySequence_Length(value);
                     vector<float> _value;
-                    for (unsigned int ii = 0; ii < length; ++ii){
+                    for ( int ii = 0; ii < length; ++ii){
                         float v = PyFloat_AsDouble(PySequence_GetItem(value, ii));
                         _value.push_back(v);
                     }
@@ -853,7 +853,7 @@ extern "C" {
                 } else {
                     Py_ssize_t length = PySequence_Length(value);
                     vector<string> _value;
-                    for (unsigned int ii = 0; ii < length; ++ii){
+                    for ( int ii = 0; ii < length; ++ii){
                         char * v = PyString_AsString(PySequence_GetItem(value, ii));
                         _value.push_back(string(v));
                     }
@@ -946,7 +946,7 @@ extern "C" {
         PyObject * ret = PyTuple_New((Py_ssize_t)(end - start));
         
         // Py_XINCREF(ret);        
-        for (unsigned int ii = start; ii < end; ++ii){
+        for ( int ii = start; ii < end; ++ii){
             _ObjId * value = PyObject_New(_ObjId, &ObjIdType);
             value->oid_ = ObjId(self->oid_.id, self->oid_.dataIndex, ii);
             if (PyTuple_SetItem(ret, (Py_ssize_t)(ii-start), (PyObject*)value)){

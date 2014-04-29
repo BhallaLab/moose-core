@@ -149,7 +149,8 @@ void HSolvePassive::initialize()
             GmThev   += GmLeak;
             EmGmThev += EmLeak * GmLeak;
         }
-        RmThev = 1.0 / GmThev;
+
+//        RmThev = 1.0 / GmThev;
 
         CompartmentStruct compartment;
         compartment.CmByDt = 2.0 * Cm / dt_;

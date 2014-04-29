@@ -437,8 +437,8 @@ void HSolveActive::createLookupTables()
         {
             // Use one of the optimized forms below, instead of A and B
             // directly. Also updated reinit() accordingly (for gate state).
-            a = *ia;
-            b = *ib;
+//            a = *ia;
+//            b = *ib;
 
             // *ia = ( 2.0 - dt_ * b ) / ( 2.0 + dt_ * b );
             // *ib = dt_ * a / ( 1.0 + dt_ * b / 2.0 );
@@ -473,8 +473,8 @@ void HSolveActive::createLookupTables()
         {
             // Use one of the optimized forms below, instead of A and B
             // directly. Also updated reinit() accordingly (for gate state).
-            a = *ia;
-            b = *ib;
+//            a = *ia;
+//            b = *ib;
 
             // *ia = ( 2.0 - dt_ * b ) / ( 2.0 + dt_ * b );
             // *ib = dt_ * a / ( 1.0 + dt_ * b / 2.0 );

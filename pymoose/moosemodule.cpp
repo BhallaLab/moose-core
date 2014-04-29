@@ -971,7 +971,7 @@ extern "C" {
     vector<string> getFieldNames(string className, string finfoType)
     {
         vector <string> ret;
-        Cinfo * cinfo = Cinfo::find(className);
+        const Cinfo * cinfo = Cinfo::find(className);
         if (cinfo == NULL){
             cerr << "Invalid class name." << endl;
             return ret;
@@ -1021,7 +1021,7 @@ extern "C" {
     int getFieldDict(string className, string finfoType,
                      vector<string>& fieldNames, vector<string>&fieldTypes)
     {
-        Cinfo * cinfo = Cinfo::find(className);
+        const Cinfo * cinfo = Cinfo::find(className);
         if (cinfo == NULL){
             cerr << "Invalid class." << endl;
             return 0;
@@ -2166,7 +2166,7 @@ extern "C" {
     
     int defineDestFinfos(const Cinfo * cinfo)
     {
-        static char * doc = "Destination field";
+        static string doc = "Destination field";
         const string& className = cinfo->name();
 #ifndef NDEBUG
         if (verbosity > 1){
@@ -2196,11 +2196,10 @@ extern "C" {
             // }
             PyGetSetDef destFieldGetSet;
             vec.push_back(destFieldGetSet);
-            vec[currIndex].name = (char*)calloc(name.size() + 1, sizeof(char));
-            strncpy(vec[currIndex].name,
-                    const_cast<char*>(name.c_str()),
-                    name.size());
-            vec[currIndex].doc = doc;
+
+            strncpy(vec[currIndex].name, name.c_str(), name.size());
+            strncpy(vec[currIndex].doc, doc.c_str(), doc.size());
+
             vec[currIndex].get = (getter)moose_ObjId_get_destField_attr;
             PyObject * args = PyTuple_New(1);            
             if (args == NULL){
@@ -2281,7 +2280,7 @@ extern "C" {
     
     int defineLookupFinfos(const Cinfo * cinfo)
     {
-        static char * doc = "Lookup field";
+        static string doc = "Lookup field";
         const string & className = cinfo->name();
 #ifndef NDEBUG
         if (verbosity > 1){
@@ -2296,7 +2295,9 @@ extern "C" {
             get_getsetdefs()[className].push_back(getset);
             get_getsetdefs()[className][currIndex].name = (char*)calloc(name.size() + 1, sizeof(char));
             strncpy(get_getsetdefs()[className][currIndex].name, const_cast<char*>(name.c_str()), name.size());
-            get_getsetdefs()[className][currIndex].doc = doc; //moose_LookupField_documentation;
+
+            strncpy(get_getsetdefs()[className][currIndex].doc, doc.c_str(), doc.size()); //moose_LookupField_documentation;
+
             get_getsetdefs()[className][currIndex].get = (getter)moose_ObjId_get_lookupField_attr;
             PyObject * args = PyTuple_New(1);
             PyTuple_SetItem(args, 0, PyString_FromString(name.c_str()));
