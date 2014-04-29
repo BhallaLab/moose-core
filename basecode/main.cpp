@@ -54,7 +54,7 @@ extern void testKsolveProcess();
 extern void testBiophysics();
 extern void testBiophysicsProcess();
 extern void testDiffusion();
-// extern void testHSolve();
+extern void testHSolve();
 // extern void testKineticsProcess();
 // extern void testGeom();
 extern void testMesh();
@@ -278,7 +278,7 @@ void nonMpiTests( Shell* s )
 		testKsolveProcess();
 		testBiophysics();
 		testDiffusion();
-		// testHSolve();
+		testHSolve();
 		// testGeom();
 		testMesh();
 		// testSigNeur();
