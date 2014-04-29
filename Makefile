@@ -141,6 +141,13 @@ CXXFLAGS = -g -Wall -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSE
 USE_GSL = 1
 endif
 
+# Use a strict compilation
+ifeq ($(BUILD),developer)
+    CXXFLAGS=-g \
+	     -Wall -Werror -Wno-unused-variable -Wno-unused-function \
+	     -DDO_UNIT_TESTS -DDEVELOPER -DDEBUG 
+    USE_GSL = 1
+endif
 ##########################################################################
 #
 # MAC OS X compilation, Debug mode:
@@ -395,7 +402,9 @@ python/moose/_moose.so: libs $(OBJLIBS)
 
 # This will generate an object file without main
 libs:
-	@(for i in $(SUBDIR) $(PARALLEL_DIR); do $(MAKE) -C $$i; done)
+	@for i in $(SUBDIR) $(PARALLEL_DIR); do \
+	    $(MAKE) -C $$i || exit $$?; \
+	done
 	@echo "All Libs compiled"
 
 clean:
