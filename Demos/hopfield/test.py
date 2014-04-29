@@ -1,3 +1,5 @@
+import sys
+sys.path.append("/home/saeed/src/cuda-workspace/moose-code/moose/branches/async13/python")
 import moose
 from pylab import *
 from moose.utils import *
