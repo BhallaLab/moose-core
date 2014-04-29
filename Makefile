@@ -309,7 +309,6 @@ SUBDIR = \
 	biophysics \
 	kinetics \
 	ksolve \
-	hsolve \
 	mesh \
 	hsolve \
 	diffusion \
