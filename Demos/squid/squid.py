@@ -28,10 +28,7 @@
 
 # Code:
 import sys
-sys.path.append("/home/saeed/src/cuda-workspace/moose-code/moose/branches/async13/python")
-# sys.path.append('../../python')
-import os
-os.environ['NUMPTHREADS'] = '1'
+sys.path.append('../../python')
 
 import numpy
 import moose
@@ -367,11 +364,11 @@ class SquidModel(moose.Neutral):
 def test(runtime=100.0, simdt=1e-2):
     model = SquidModel('model')
     model.run(runtime, simdt)
-    # model.save_data()
+    model.save_data()
 
 if __name__ == '__main__':
     # unittest.main()
-    test(100000)
+    test()
     
                                                                              
     

@@ -241,15 +241,15 @@ def make_spiny_compt():
         r.synapse.num = 1
         syn = moose.element( r.path + '/synapse' )
         moose.connect( synInput, 'event', syn, 'addSpike', 'Single' )
-        # syn.weight = 0.2
-        # syn.delay = i * 1.0e-4
-        # """
-        # path = '/n/head' + str(i)
-        # sib1 = moose.element( path )
-        # for j in range( i - 1 ):
-        #      sib2 = moose.element( '/n/head' + str(j) )
-        #      moose.connect( sib1, 'sibling', sib2, 'sibling', 'Single' )
-        # """
+        syn.weight = 0.2
+        syn.delay = i * 1.0e-4
+        """
+        path = '/n/head' + str(i)
+        sib1 = moose.element( path )
+        for j in range( i - 1 ):
+             sib2 = moose.element( '/n/head' + str(j) )
+             moose.connect( sib1, 'sibling', sib2, 'sibling', 'Single' )
+        """
 
 def create_pool( compt, name, concInit ):
     meshEntries = moose.element( compt.path + '/mesh' )
@@ -263,32 +263,32 @@ def test_elec_alone():
     hSolveDt = 2e-5
 
     make_spiny_compt()
-    # make_elec_plots()
-    # head2 = moose.element( '/n/head2' )
-    # moose.setClock( 0, 2e-6 )
-    # moose.setClock( 1, 2e-6 )
-    # moose.setClock( 2, 2e-6 )
-    # moose.setClock( 8, 0.1e-3 )
-    # moose.useClock( 0, '/n/##[ISA=Compartment]', 'init' )
-    # moose.useClock( 1, '/n/##[ISA=Compartment]', 'process' )
-    # moose.useClock( 2, '/n/##[ISA=ChanBase],/n/##[ISA=SynBase],/n/##[ISA=CaConc],/n/##[ISA=SpikeGen]','process')
-    # # moose.useClock( 8, '/graphs/elec/#', 'process' )
-    # moose.reinit()
-    # moose.start( 0.1 )
-    # dump_plots( 'instab.plot' )
-    # # make Hsolver and rerun
-    # hsolve = moose.HSolve( '/n/hsolve' )
-    # moose.useClock( 1, '/n/hsolve', 'process' )
-    # for dt in ( 20e-6, 50e-6, 100e-6 ):
-    #     print 'running at dt =', dt
-    #     moose.setClock( 0, dt )
-    #     moose.setClock( 1, dt )
-    #     moose.setClock( 2, dt )
-    #     hsolve.dt = dt
-    #     hsolve.target = '/n/compt'
-    #     moose.re0init()
-    #     moose.start( 0.1 )
-    #     dump_plots( 'h_instab' + str( dt ) + '.plot' )
+    make_elec_plots()
+    head2 = moose.element( '/n/head2' )
+    moose.setClock( 0, 2e-6 )
+    moose.setClock( 1, 2e-6 )
+    moose.setClock( 2, 2e-6 )
+    moose.setClock( 8, 0.1e-3 )
+    moose.useClock( 0, '/n/##[ISA=Compartment]', 'init' )
+    moose.useClock( 1, '/n/##[ISA=Compartment]', 'process' )
+    moose.useClock( 2, '/n/##[ISA=ChanBase],/n/##[ISA=SynBase],/n/##[ISA=CaConc],/n/##[ISA=SpikeGen]','process')
+    # moose.useClock( 8, '/graphs/elec/#', 'process' )
+    moose.reinit()
+    moose.start( 0.1 )
+    dump_plots( 'instab.plot' )
+    # make Hsolver and rerun
+    hsolve = moose.HSolve( '/n/hsolve' )
+    moose.useClock( 1, '/n/hsolve', 'process' )
+    for dt in ( 20e-6, 50e-6, 100e-6 ):
+        print 'running at dt =', dt
+        moose.setClock( 0, dt )
+        moose.setClock( 1, dt )
+        moose.setClock( 2, dt )
+        hsolve.dt = dt
+        hsolve.target = '/n/compt'
+        moose.re0init()
+        moose.start( 0.1 )
+        dump_plots( 'h_instab' + str( dt ) + '.plot' )
 
 def main():
     test_elec_alone()
