@@ -11,6 +11,18 @@
 #ifndef _HEADER_H
 #define _HEADER_H
 
+
+/*-----------------------------------------------------------------------------
+ *  This macro prints the output of a test function onto console. It also keep
+ *  track of index of the current test. The index of test is automatically
+ *  computed by increamenting the counter.
+ *-----------------------------------------------------------------------------*/
+#include "../external/debug/current_function.hpp"
+extern unsigned int totalTests;
+#define tbegin cerr << endl << "Test(" << totalTests << "): " << BOOST_CURRENT_FUNCTION;
+#define tend totalTests++; \
+    cerr << setw(80) << "test of " << BOOST_CURRENT_FUNCTION << " finished."; 
+
 #include <math.h>
 #include <algorithm>
 #include <vector>

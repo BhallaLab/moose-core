@@ -100,6 +100,8 @@ def make_synapse(path):
     moose.connect(spike_stim, 'output', spikegen, 'Vm')
     m = moose.connect(spikegen, 'spikeOut', syn.synapse.vec, 'addSpike', 'Sparse')
     m.setRandomConnectivity(1.0, 1)
+
+    # Dilawar: Following does not cause seg-fault with revision 52
     # m = moose.connect(spikegen, 'spikeOut', syn.synapse[0], 'addSpike') # this causes segfault
     return syn, spikegen
 
