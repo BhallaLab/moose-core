@@ -35,6 +35,7 @@ elif [ "$1" = "t" ]; then
     runTest
     exit
 else
+    makeMoose developer
     echo "Running python test only"
     runPythonTest
 fi
