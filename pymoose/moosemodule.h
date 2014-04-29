@@ -31,7 +31,6 @@
 #ifndef _MOOSEMODULE_H
 #define _MOOSEMODULE_H
 
-
 #include <string>
 #include "../basecode/Id.h"
 extern char shortType(string);

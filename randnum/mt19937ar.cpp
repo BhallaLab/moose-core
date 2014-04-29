@@ -107,7 +107,7 @@ void init_genrand(unsigned long s)
 /* init_key is the array for initializing keys */
 /* key_length is its length */
 /* slight change for C++, 2004/2/26 */
-void init_by_array(unsigned long init_key[], int key_length)
+void init_by_array(long int init_key[], int key_length)
 {
     int i, j, k;
     init_genrand(19650218UL);
@@ -238,8 +238,8 @@ void mtseed(long seed = 0)
 			tv.tv_usec += *hostname * i * i * 16;
                     }
                 }
-		unsigned long init[2] = {tv.tv_sec, tv.tv_usec};
-		unsigned long length = 2;
+		long int init[2] = {tv.tv_sec, tv.tv_usec};
+		long int length = 2;
 		init_by_array(init, length);
 	} else {
 		// unsigned long init[1] = {seed};
