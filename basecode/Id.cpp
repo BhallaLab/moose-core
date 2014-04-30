@@ -73,12 +73,16 @@ string Id::path( const string& separator) const
 	// Trim off trailing []
 	assert( ret.length() > 0 );
 	// the 'back' operation is not supported by pre 2011 compilers
+
+#if  0     /* ----- #if 0 : If0Label_1 ----- */
 	while ( ret[ ret.length() - 1 ] == ']' ) {
 		size_t pos = ret.find_last_of( '[' );
 		if ( pos != string::npos && pos > 0 ) {
 			ret = ret.substr( 0, pos );
 		}
 	}
+#endif     /* ----- #if 0 : If0Label_1 ----- */
+
 	return ret;
 }
 
