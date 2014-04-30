@@ -10,7 +10,7 @@
 #ifndef _HSOLVE_UTILS_H
 #define _HSOLVE_UTILS_H
 
-#include "header.h"
+#include "../basecode/header.h"
 #include "../external/debug/print_function.h"
 
 #include "../biophysics/HHGate.h"

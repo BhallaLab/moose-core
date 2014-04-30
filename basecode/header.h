@@ -14,7 +14,6 @@
 /* Some of these headers are from boost library */
 #include "../external/debug/current_function.hpp"
 #include "../external/debug/assert.hpp"
-#include "../external/debug/static_assert.hpp"
 
 #include "../external/debug/print_function.h"
 
@@ -26,9 +25,9 @@
  *  computed by increamenting the counter.
  *-----------------------------------------------------------------------------*/
 extern unsigned int totalTests;
-#define tbegin cerr << endl << "Test(" << totalTests << "): " << BOOST_CURRENT_FUNCTION;
+#define tbegin cerr << endl << "Test(" << totalTests << "): " << MOOSE_CURRENT_FUNCTION;
 #define tend totalTests++; \
-    cerr << std::right <<  setw(20) << "test of " << BOOST_CURRENT_FUNCTION << " finished."; 
+    cerr << std::right <<  setw(20) << "test of " << MOOSE_CURRENT_FUNCTION << " finished."; 
 
 #include <math.h>
 #include <algorithm>
@@ -48,7 +47,7 @@ extern unsigned int totalTests;
 #include <cassert>
 
 using namespace std;
-using namespace boost;
+using namespace moose;
 
 // MOOSE version is hard coded here. Can be overridden from a
 // makefile.
