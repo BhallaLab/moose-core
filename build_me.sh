@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e 
 
 function runPythonTest
 {
@@ -36,7 +37,8 @@ elif [ "$1" = "t" ]; then
     exit
 else
     makeMoose developer
-    echo "Running python test only"
-    runPythonTest
+    #runTest
+    #echo "Running python test only"
+    #runPythonTest
 fi
 

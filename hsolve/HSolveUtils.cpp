@@ -78,6 +78,7 @@ int HSolveUtils::gates(
 	vector< Id >& ret,
 	bool getOriginals )
 {
+        dump("HSolveUtils::gates() is not tested with new hsolve api", "FIXME");
 	unsigned int oldSize = ret.size();
 	
 	static string gateName[] = {
@@ -91,34 +92,28 @@ int HSolveUtils::gates(
 		string( "Ypower" ),
 		string( "Zpower" )
 	};
-	
-	unsigned int nGates = 3; // Number of possible gates
-#ifdef  OLD_API
-        
-            for ( unsigned int i = 0; i < nGates; i++ ) {
-                double power  = HSolveUtils::get< HHChannel, double >(
-                        channel, powerField[ i ] );
 
-                if ( power > 0.0 ) {
-                    string gatePath = channel.path() + "/" + gateName[ i ];
+        unsigned int nGates = 3; // Number of possible gates
+        for ( unsigned int i = 0; i < nGates; i++ ) {
+            double power  = HSolveUtils::get< HHChannel, double >(
+                    channel, powerField[ i ] );
 
-                    Id gate( gatePath );
-                    assert( gate.path() == gatePath );
+            if ( power > 0.0 ) {
+                string gatePath = channel.path() + "/" + gateName[ i ];
 
-                    if ( getOriginals ) {
-                        HHGate* g = reinterpret_cast< HHGate* >( gate.eref().data() );
-                        gate = g->originalGateId();
-                    }
+                Id gate( gatePath );
+                assert( gate.path() == gatePath );
 
-                    ret.push_back( gate );
+                if ( getOriginals ) {
+                    HHGate* g = reinterpret_cast< HHGate* >( gate.eref().data() );
+                    gate = g->originalGateId();
                 }
+
+                ret.push_back( gate );
             }
+        }
 
         return ret.size() - oldSize;
-#else      /* -----  not OLD_API  ----- */
-        dump("This function is incomplete", "TODO");
-        throw logic_error("TODO: Incomplete API");
-#endif     /* -----  not OLD_API  ----- */
 }
 
 int HSolveUtils::spikegens( Id compartment, vector< Id >& ret )
@@ -210,7 +205,7 @@ void HSolveUtils::rates(
 	vector< double >& A,
 	vector< double >& B )
 {
-#ifdef  OLD_API
+    dump("HSolveUtils::rates*() is not tested with new api", "FIXME");
     double min = HSolveUtils::get< HHGate, double >( gateId, "min" );
     double max = HSolveUtils::get< HHGate, double >( gateId, "max" );
     unsigned int divs = HSolveUtils::get< HHGate, unsigned int >(
@@ -240,8 +235,7 @@ void HSolveUtils::rates(
     bool useInterpolation = HSolveUtils::get< HHGate, bool >
         ( gateId, "useInterpolation" );
     //~ HSolveUtils::set< HHGate, bool >( gateId, "useInterpolation", true );
-    Qinfo* qDummy = NULL;
-    gate->setUseInterpolation( gateId.eref(), qDummy, true );
+    gate->setUseInterpolation( gateId.eref(), true );
 
     unsigned int igrid;
     double* ia = &A[ 0 ];
@@ -255,10 +249,7 @@ void HSolveUtils::rates(
     // Setting interpolation flag back to its original value.
     //~ HSolveUtils::set< HHGate, bool >
     //~ ( gateId, "useInterpolation", useInterpolation );
-    gate->setUseInterpolation( gateId.eref(), qDummy, useInterpolation );
-#else      /* -----  not OLD_API  ----- */
-    dump("TODO", "Function HSolveUtils::rates is not implemented for new API");
-#endif     /* -----  not OLD_API  ----- */
+    gate->setUseInterpolation( gateId.eref(), useInterpolation );
 }
 
 //~ int HSolveUtils::modes( Id gate, int& AMode, int& BMode )
@@ -334,11 +325,7 @@ int HSolveUtils::targets(
 		target.insert( target.end(), all.begin(), all.end() );
 	else
 		for ( ia = all.begin(); ia != all.end(); ++ia ) {
-#ifdef  OLD_API
-			string className = (*ia)()->cinfo()->name();
-#else      /* -----  not OLD_API  ----- */
 			string className = (*ia).element()->cinfo()->name();
-#endif     /* -----  not OLD_API  ----- */
 			bool hit =
 				find(
 					filter.begin(),
