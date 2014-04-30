@@ -20,6 +20,7 @@ OBJ = \
 	HSolveInterface.o \
 	HSolve.o \
 	HSolveUtils.o \
+	RallPacks.o \
 	testHSolve.o \
 	ZombieCompartment.o \
 	ZombieCaConc.o \
@@ -42,7 +43,7 @@ HSolve.o:	../biophysics/Compartment.h ZombieCompartment.h ../biophysics/CaConc.h
 ZombieCompartment.o:	ZombieCompartment.h ../randnum/randnum.h ../biophysics/Compartment.h HSolve.h HSolveActive.h RateLookup.h HSolvePassive.h HinesMatrix.h HSolveStruct.h ../basecode/ElementValueFinfo.h
 ZombieCaConc.o:	ZombieCaConc.h ../biophysics/CaConc.h HSolve.h HSolveActive.h RateLookup.h HSolvePassive.h HinesMatrix.h HSolveStruct.h ../basecode/ElementValueFinfo.h
 ZombieHHChannel.o:	ZombieHHChannel.h ../biophysics/HHChannel.h ../biophysics/ChanBase.h ../biophysics/HHGate.h HSolve.h HSolveActive.h RateLookup.h HSolvePassive.h HinesMatrix.h HSolveStruct.h ../basecode/ElementValueFinfo.h
-
+RallPacks.o: RallPacks.h 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I. -I../basecode -I../msg $< -c
 
