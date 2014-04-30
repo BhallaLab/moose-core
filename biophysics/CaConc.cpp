@@ -159,7 +159,9 @@ const Cinfo* CaConc::initCinfo()
 		Neutral::initCinfo(),
 		CaConcFinfos,
 		sizeof( CaConcFinfos )/sizeof(Finfo *),
-                &dinfo
+                &dinfo,
+                doc,
+                sizeof(doc)/sizeof(string)
 	);
 
 	return &CaConcCinfo;

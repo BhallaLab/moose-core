@@ -147,6 +147,7 @@ def read_prototype(celltype, cdict):
             raise Exception('Depth set must have only one entry.')
         depthdict[level] = depthset.pop()
     assign_depths(proto, depthdict, leveldict)
+    config.logger.debug('Read %s with %d compartments' % (celltype, len(moose.wildcardFind('%s/#[TYPE=Compartment]' % (proto.path)))))
     return proto
 
 def assign_depths(cell, depthdict, leveldict):

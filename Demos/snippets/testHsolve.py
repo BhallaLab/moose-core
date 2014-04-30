@@ -240,7 +240,7 @@ def make_spiny_compt():
         r = create_spine_with_receptor( compt, cell, i, i/float(numSpines) )
         r.synapse.num = 1
         syn = moose.element( r.path + '/synapse' )
-        moose.connect( synInput, 'event', syn, 'addSpike', 'Single' )
+        moose.connect( synInput, 'spikeOut', syn, 'addSpike', 'Single' )
         syn.weight = 0.2
         syn.delay = i * 1.0e-4
         """

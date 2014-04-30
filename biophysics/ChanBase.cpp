@@ -127,7 +127,9 @@ const Cinfo* ChanBase::initCinfo()
 		Neutral::initCinfo(),
 		ChanBaseFinfos,
 		sizeof( ChanBaseFinfos )/sizeof(Finfo *),
-                &dinfo
+                &dinfo,
+                doc,
+                sizeof(doc)/sizeof(string)
 	);
 
 	return &ChanBaseCinfo;

@@ -112,7 +112,10 @@ const Cinfo* RC::initCinfo()
                          Neutral::initCinfo(),
                          rcFinfos,
                          sizeof( rcFinfos ) / sizeof( Finfo* ),
-                         &dinfo);
+                         &dinfo,
+                         doc,
+                         sizeof(doc)/sizeof(string)
+                         );
     return &rcCinfo;
 }
 

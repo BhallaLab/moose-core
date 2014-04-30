@@ -32,6 +32,7 @@
 # Code:
 
 import cStringIO
+from contextlib import closing
 import warnings
 import platform
 import pydoc
@@ -276,7 +277,7 @@ def getfielddoc(tokens, indent=''):
                     % (tokens[0], tokens[1]))
                     
     
-def getmoosedoc(tokens):
+def getmoosedoc(tokens, inherited=False):
     """Return MOOSE builtin documentation.
   
     Parameters
@@ -284,6 +285,9 @@ def getmoosedoc(tokens):
     tokens : (className, [fieldName])
         tuple containing one or two strings specifying class name
         and field name (optional) to get documentation for.
+
+    inherited: bool (default: False)
+        include inherited fields.
 
     Returns
     -------
@@ -300,38 +304,51 @@ def getmoosedoc(tokens):
     
     """
     indent = '    '
-    docstring = cStringIO.StringIO()
-    if not tokens:
-        return ""
-    class_path = '/classes/%s' % (tokens[0])
-    if exists(class_path):
-        if len(tokens) == 1:
-            docstring.write('%s\n' % (Cinfo(class_path).docs))
-    else:
-        raise NameError('name \'%s\' not defined.' % (tokens[0]))
-    class_id = vec('/classes/%s' % (tokens[0]))
-    if len(tokens) > 1:
-        docstring.write(getfielddoc(tokens))
-    else:
-        for ftype, rname in finfotypes:
-            docstring.write('\n*%s*\n' % (rname.capitalize()))
-            numfinfo = getField(class_id[0], 'num_'+ftype, 'unsigned')
-            finfo = vec('/classes/%s/%s' % (tokens[0], ftype))
-            for ii in range(numfinfo):
-                oid = melement(finfo, 0, ii, 0)
-                docstring.write('%s%s: %s\n' % 
-                                (indent, oid.name, oid.type))
-    ret = docstring.getvalue()
-    docstring.close()
-    return ret
+    with closing(cStringIO.StringIO()) as docstring:
+        if not tokens:
+            return ""
+        try:
+            class_element = _moose.element('/classes/%s' % (tokens[0]))
+            docstring.write('%s\n' % (class_element.docs))
+        except ValueError:
+            raise NameError('name \'%s\' not defined.' % (tokens[0]))
+        if len(tokens) > 1:
+            docstring.write(getfielddoc(tokens))
+        else:
+            append_finfodocs(tokens[0], docstring, indent)
+            if inherited:
+                for class_ in eval('_moose.%s' % (tokens[0])).mro():
+                    docstring.write('\n\n#Inherited from %s#\n' % (class_.__name__))
+                    append_finfodocs(class_.__name__, docstring, indent)
+                    if class_ == _moose.Neutral:    # Neutral is the toplevel moose class
+                        break
+        return docstring.getvalue()
 
+
+def append_finfodocs(classname, docstring, indent):
+    """Append list of finfos in class name to docstring"""
+    try:
+        class_element = _moose.element('/classes/%s' % (classname))
+    except ValueError:
+        raise NameError('class \'%s\' not defined.' % (classname))
+    for ftype, rname in finfotypes:
+        docstring.write('\n*%s*\n' % (rname.capitalize()))
+        try:
+            finfo = _moose.element('%s/%s' % (class_element.path, ftype))
+            for field in finfo.vec:
+                docstring.write('%s%s: %s\n' % 
+                            (indent, field.fieldName, field.type))
+        except ValueError:
+            docstring.write('%sNone\n' % (indent))
+    
+    
 # the global pager is set from pydoc even if the user asks for paged
 # help once. this is to strike a balance between GENESIS user's
 # expectation of control returning to command line after printing the
 # help and python user's expectation of seeing the help via more/less.
 pager=None
 
-def doc(arg, paged=False):
+def doc(arg, inherited=False, paged=False):
     """Display the documentation for class or field in a class.
     
     Parameters
@@ -381,7 +398,7 @@ def doc(arg, paged=False):
         text = '%s: %s\n\n' % (arg.path, arg.className)
         tokens = [arg.className]
     if tokens:
-        text += getmoosedoc(tokens)
+        text += getmoosedoc(tokens, inherited=inherited)
     else:
         text += pydoc.gethelp(arg)
     if pager:

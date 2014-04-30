@@ -79,12 +79,12 @@ def setupmodel(modelpath, iaf_Rm, iaf_Cm, pulse_interval):
     moose.connect(iaf, 'VmOut', syn, 'Vm')
     sg = moose.SpikeGen('%s/spike' % (modelpath))
     sg.threshold = 0.1
-    moose.connect(sg, 'event', syn.synapse[0], 'addSpike')
+    moose.connect(sg, 'spikeOut', syn.synapse[0], 'addSpike')
     pg = moose.PulseGen('%s/pulse' % (modelpath))
     pg.delay[0] = pulse_interval
     pg.width[0] = 1e-3
     pg.level[0] = 0.5
-    moose.connect(pg, 'outputOut', sg, 'Vm')    
+    moose.connect(pg, 'output', sg, 'Vm')    
     return {
         'model': model_container,
         'iaf': iaf,
@@ -105,7 +105,7 @@ if __name__ == '__main__':
     moose.connect(spike_table, 'requestOut', setup['spikegen'], 'getHasFired')
     # moose.connect(setup['iaf'], 'VmOut', spike_table, 'spike')
     pulse_table = moose.Table('%s/pulse' % (data_container.path))
-    moose.connect(pulse_table, 'requestOut', setup['pulsegen'], 'getOutput')
+    moose.connect(pulse_table, 'requestOut', setup['pulsegen'], 'getOutputValue')
     gsyn_table = moose.Table('%s/gk' % (datapath))
     moose.connect(gsyn_table, 'requestOut', setup['synchan'], 'getIk')
     # Schedule model components for simulation

@@ -117,7 +117,7 @@ def setup_two_cells():
     model = moose.Neutral('/model')
     data = moose.Neutral('/data')
     a1 = LIFComp('/model/a1')
-    b2 = LIFComp('/model/b2')
+    b2 = moose.copy(a1, '/modelb2')
     a1.Vthreshold = 10e-3
     a1.Vreset = 0
     b2.Vthreshold = 10e-3
@@ -127,7 +127,8 @@ def setup_two_cells():
     syn.tau2 = 5e-3
     syn.Ek = 90e-3
     syn.bufferTime = delayMax * 2
-    syn.numSynapses = 1
+    syn.synapse.num += 1
+    # syn.numSynapses = 1
     syn.synapse.delay = delayMax
     moose.connect(b2, 'channel', syn, 'channel')
     ## Single message works most of the time but occassionally gives a

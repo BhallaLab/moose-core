@@ -29,6 +29,7 @@
 
 # Code:
 import settings
+import os
 
 # These settings are to imitate sedml entities for configuring simulation
 simulationSettings = settings.SimulationSettings()
@@ -41,7 +42,7 @@ simulationSettings.endTime = 10.0
 
 modelSettings.container = '/network'
 modelSettings.libpath = '/library'
-modelSettings.protodir = 'proto'
+modelSettings.protodir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'proto')
 
 modelSettings.morph_has_postion = False
 modelSettings.populationSize['SupPyrRS'] = 1000
@@ -107,7 +108,6 @@ spikeRecordingSettings.fields = {
 #---------------------------------------------------------------------
 # Logging
 #---------------------------------------------------------------------
-import os
 from datetime import datetime
 import logging
 
