@@ -88,9 +88,10 @@ if(ENABLE_UNIT_TESTS)
     add_definitions(-DDEBUG)
 endif()
 
-set(VERIFY 0)
+set(VERIFY 1)
 if(VERIFY)
-    add_definitions(-DSANITY_CHECK -DARGS_CHECK -DRESULT_CHECK -DVALUE_CHECK)
+    add_definitions(-DSANITY_CHECK -DARGS_CHECK -DRESULT_CHECK -DVALUE_CHECK
+        -DVERBOSITY=1)
 endif(VERIFY)
 
 # Default macros
@@ -166,10 +167,11 @@ add_subdirectory(benchmarks)
 add_subdirectory(kinetics)
 
 ###################################### LINKING #################################
-set_target_properties(moose PROPERTIES LINK_SEARCH_START_STATIC 1)
-set_target_properties(moose PROPERTIES LINK_SEARCH_END_STATIC 1)
-set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
-set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+
+#set_target_properties(moose PROPERTIES LINK_SEARCH_START_STATIC 1)
+#set_target_properties(moose PROPERTIES LINK_SEARCH_END_STATIC 1)
+#set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
+#set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 # Links our libraries 
 target_link_libraries(moose 
     "-Wl,--whole-archive"
@@ -310,8 +312,8 @@ endif()
 include(CTest)
 find_package(PythonInterp REQUIRED)
 add_test(NAME run_moose_with_enable_test
-    COMMAND ./moose 
+    COMMAND echo "q" | ./moose 
     )
 add_test(NAME load_moose_into_python
-    COMMAND ${PYTHON_EXECUTABLE} "python/moose/test.py"
+    COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_BINARY_DIR}/python/moose/test.pyc"
     )
