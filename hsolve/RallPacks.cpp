@@ -20,9 +20,7 @@
  * ==============================================================================
  */
 
-
 #include "RallPacks.h"
-
 
 /*
  *-------------------------------------------------------------------------------
@@ -80,8 +78,17 @@ RallPacks& RallPacks::operator = ( const RallPacks &other )
  *  Description:  Function which runs Rallpack.
  * ==============================================================================
  */
+
+#include "../shell/Shell.h"
 void runRallpackBenchmarks()
 {
     tbegin;
+
+    Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+    BOOST_ASSERT_MSG(shell, "Error: I can't create shell.");
+
+
+    
+
     tend;
 }

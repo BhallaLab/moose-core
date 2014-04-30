@@ -443,13 +443,8 @@ void ZombieHHChannel::zombify( Element* solver, Element* orig )
 
     const DestFinfo* df = dynamic_cast< const DestFinfo* >( procDest );
     assert( df );
-#ifdef  OLD_API
-    MsgId mid = orig->findCaller( df->getFid() );
-    if ( mid != Msg::bad )
-#else      /* -----  not OLD_API  ----- */
     ObjId mid = orig->findCaller( df->getFid() );
     if ( ! mid.bad() )
-#endif     /* -----  not OLD_API  ----- */
         Msg::deleteMsg( mid );
 
     // NOTE: the following line can be uncommented to remove messages
@@ -457,41 +452,36 @@ void ZombieHHChannel::zombify( Element* solver, Element* orig )
     // maintain a datastructure for putting back the messages at
     // unzombify.
 
+    dump("WARN", "Not tested: ZombieHHChannel::zombify.");
+
     HSolve::deleteIncomingMessages(orig, "concen");
     HSolve::deleteIncomingMessages(orig, "Vm");
 
-#ifdef  OLD_API
     // Create zombie.
-    DataHandler* dh = orig->dataHandler()->copyUsingNewDinfo(
-            ZombieHHChannel::initCinfo()->dinfo() );
+    const DinfoBase* pDinfo = ZombieHHChannel::initCinfo()->dinfo();
+
     Eref oer( orig, 0 );
     Eref ser( solver, 0 );
-    ZombieHHChannel* zd = reinterpret_cast< ZombieHHChannel* >( dh->data( 0 ) );
-    //~ HHChannel* od = reinterpret_cast< HHChannel* >( oer.data() );
+    ZombieHHChannel* zd = new ZombieHHChannel();
     HSolve* sd = reinterpret_cast< HSolve* >( ser.data() );
     zd->hsolve_ = sd;
     zd->copyFields( oer.id(), sd );
-    orig->zombieSwap( zombieHHChannelCinfo, dh );
-#else      /* -----  not OLD_API  ----- */
-    
-#endif     /* -----  not OLD_API  ----- */
+    orig->zombieSwap( zombieHHChannelCinfo);
+
 }
 
 // static func
 void ZombieHHChannel::unzombify( Element* zombie )
 {
-#ifdef  OLD_API
-    Element temp( zombie->id(), zombie->cinfo(), zombie->dataHandler() );
+    dump("WARN", "Not implemented: ZombieHHChannel::unzombify ");
+
+    /* fixme: Element is an abstract class, it can not instantiated. Need to
+     * write a new Class e.g. Element1 which can call Element constructor.
+     */
+#if 0
+    Element temp( zombie->id(), zombie->cinfo(), zombie->cinfo()->name() );
     Eref zer( &temp, 0 );
     Eref oer( zombie, 0 );
-
-    //~ ZombieHHChannel* z = reinterpret_cast< ZombieHHChannel* >( zer.data() );
-
-    // Creating data handler for original left for later.
-    DataHandler* dh = 0;
-
-    zombie->zombieSwap( HHChannel::initCinfo(), dh );
-#else      /* -----  not OLD_API  ----- */
-    dump("TODO", "Not implemented: ZombieHHChannel::unzombify ");
-#endif     /* -----  not OLD_API  ----- */
+    zombie->zombieSwap( HHChannel::initCinfo());
+#endif
 }

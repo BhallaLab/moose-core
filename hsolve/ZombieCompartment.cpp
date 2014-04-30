@@ -117,7 +117,6 @@ const Cinfo* ZombieCompartment::initCinfo()
                            );
 
     ///////////////////////////////////////////////////////////////////
-#ifdef  OLD_API
 
     static DestFinfo handleChannel( "handleChannel",
                                     "Handles conductance and Reversal potential arguments from Channel",
@@ -135,8 +134,6 @@ const Cinfo* ZombieCompartment::initCinfo()
                                 "as args. The second entry is a MsgSrc sending Vm ",
                                 channelShared, sizeof( channelShared ) / sizeof( Finfo* )
                               );
-#else      /* -----  not OLD_API  ----- */
-#endif     /* -----  not OLD_API  ----- */
     ///////////////////////////////////////////////////////////////////
     // axialOut declared above as it is needed in file scope
     static DestFinfo handleRaxial( "handleRaxial",
@@ -773,32 +770,13 @@ void ZombieCompartment::zombify( Element* solver, Element* orig )
 
     const DestFinfo* df = dynamic_cast< const DestFinfo* >( procDest );
     assert( df );
-#ifdef  OLD_API
-    MsgId mid = orig->findCaller( df->getFid() );
-    if ( mid != Msg::bad )
-#else      /* -----  not OLD_API  ----- */
     ObjId mid = orig->findCaller( df->getFid() );
     if ( ! mid.bad() )
-#endif     /* -----  not OLD_API  ----- */
         Msg::deleteMsg( mid );
-
-    // Create zombie.
-    //~ Element ze( orig->id(), zombieCompartmentCinfo, solver->dataHandler() );
-    //~ Eref zer( &ze, 0 );
-#ifdef  OLD_API
-    DataHandler* dh = orig->dataHandler()->copyUsingNewDinfo(
-                          ZombieCompartment::initCinfo()->dinfo()
-                      );
-#else      /* -----  not OLD_API  ----- */
-    /* NOTE: DataHandler is gone.  */
-
-#endif     /* -----  not OLD_API  ----- */
 
     Eref oer( orig, 0 );
     Eref ser( solver, 0 );
 
-    //~ ZombieCompartment* zd = reinterpret_cast< ZombieCompartment* >( zer.data() );
-//    ZombieCompartment* zd = reinterpret_cast< ZombieCompartment* >( dh->data( 0 ) );
     static ZombieCompartment* zd = new ZombieCompartment();
 
     Compartment* od = reinterpret_cast< Compartment* >( oer.data() );
@@ -828,7 +806,12 @@ void ZombieCompartment::zombify( Element* solver, Element* orig )
 // static func
 void ZombieCompartment::unzombify( Element* zombie )
 {
-#ifdef  OLD_API
+    stringstream ss;
+    ss << "Not implemented " << __FUNCTION__;
+    dump(ss.str(), "FIXME");
+
+#if 0
+    /* Element is an Abstract class. Can't instantiate! */
     Element temp( zombie->id(), zombie->cinfo());
     Eref zer( &temp, 0 );
     Eref oer( zombie, 0 );
@@ -837,9 +820,5 @@ void ZombieCompartment::unzombify( Element* zombie )
 
     // Creating data handler for original left for later.
     zombie->zombieSwap( Compartment::initCinfo());
-#else      /* -----  not OLD_API  ----- */
-    stringstream ss;
-    ss << "Not implemented " << __FUNCTION__;
-    dump(ss.str(), "ERROR");
-#endif     /* -----  not OLD_API  ----- */
+#endif
 }
