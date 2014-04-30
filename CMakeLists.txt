@@ -296,14 +296,17 @@ include(CTest)
 find_package(PythonInterp REQUIRED)
 set(ENV{PYTHONPATH} "${CMAKE_BINARY_DIR}/python")
 message("++ PYTHONPATH is set to $ENV{PYTHONPATH}")
-set(CTEST_OUTPUT_ON_FAILURE ON)
+
 add_test(NAME run_moose_with_enable_test
     COMMAND echo "q" | ./moose 
     )
+
 add_test(NAME load_moose_into_python
     COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_BINARY_DIR}/python/moose/test.pyc"
     )
 
-add_test(NAME test_hsolve_in_python 
-    COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_BINARY_DIR}/Demos/snippets/testHsolve.pyc"
+# Python demos
+add_custom_target(rundemo
+    COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_BINARY_DIR}/Demos/snippets/testHsolve.pyc" --output-on-failure
+    COMMENT "Demo: python hsolve" VERBATIM
     )
