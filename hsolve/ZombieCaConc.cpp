@@ -326,7 +326,9 @@ void ZombieCaConc::zombify( Element* solver, Element* orig )
 // static func
 void ZombieCaConc::unzombify( Element* zombie )
 {
-#ifdef  OLD_API
+    dump("ZombieCaConc::unzombify is not implemented", "FIXME");
+#if 0
+    /* Abstract class. Can't instantiate. */
     Element temp( zombie->id(), zombie->cinfo(), zombie->dataHandler() );
     Eref zer( &temp, 0 );
     Eref oer( zombie, 0 );
@@ -334,10 +336,6 @@ void ZombieCaConc::unzombify( Element* zombie )
     //~ ZombieCaConc* z = reinterpret_cast< ZombieCaConc* >( zer.data() );
 
     // Creating data handler for original left for later.
-    DataHandler* dh = 0;
-
-    zombie->zombieSwap( CaConc::initCinfo(), dh );
-#else      /* -----  not OLD_API  ----- */
-    
-#endif     /* -----  not OLD_API  ----- */
+    zombie->zombieSwap( CaConc::initCinfo());
+#endif
 }
