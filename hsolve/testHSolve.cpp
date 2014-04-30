@@ -25,7 +25,6 @@ void testHSolve()
 	testHSolveUtils();
 	testHinesMatrix();
 	testHSolvePassive();
-        runRallpackBenchmarks();
 }
 
 //////////////////////////////////////////////////////////////////////////////
