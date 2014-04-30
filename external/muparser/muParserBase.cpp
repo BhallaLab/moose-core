@@ -864,10 +864,10 @@ namespace mu
           break;
     default:
           stringstream ss;
-          ss << "In function: " << BOOST_CURRENT_FUNCTION << " case statment " 
+          ss << "In function: " << MOOSE_CURRENT_FUNCTION << " case statment " 
               << " has incomplete defination "
               << " Case " << funTok.GetCode() << " is not handled. " << endl;
-#ifdef  DEVELOPER
+#ifdef  DEBUG
           dump(ss.str(), "WARN");
 #endif     /* -----  DEBUG  ----- */
           break;
