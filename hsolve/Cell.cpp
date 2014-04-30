@@ -297,25 +297,16 @@ Id Cell::findCompt( Id cell )
 void Cell::setupSolver( Id cell, Id seed ) const
 {
     Id solver = Id::nextId();
-#ifdef  OLD_API
-    vector< int > dims( 1, 1 );
-    dims.push_back( 0 ); // isGlobal
-
-    shell_->innerCreate( "HSolve", cell, solver, solverName_, dims, 0 );
-
-    //~ Id solver = shell_->doCreate( "HSolve", cell, solverName_ );
-    HSolve* data = reinterpret_cast< HSolve* >( solver.eref().data() );
-    data->setSeed( seed );
-    //~ shell_->doUseClock( solver.path(), "proc", solverClock_ );
-#else      /* -----  not OLD_API  ----- */
-    dump("WARNING"
+    dump("FIXME"
          , "Using 0 for parentMsgIndex in function call Shell::innerCreate"
-         "0 in first and third argument to NodeBalance"
+         "0 in first and third argument to NodeBalance. "
+         "I am not sure if I should be doing this here in this function."
+         " -- Dilawar"
         );
     NodeBalance nb(0, MooseBlockBalance, 0);
     shell_->innerCreate("HSolve", cell, solver, solverName_, nb, 0);
-
-#endif     /* -----  not OLD_API  ----- */
+    HSolve* data = reinterpret_cast< HSolve* >( solver.eref().data() );
+    data->setSeed( seed );
 }
 
 ///////////////////////////////////////////////////
