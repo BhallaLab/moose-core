@@ -16,6 +16,7 @@ add_library(basecode
 	FieldElementFinfo.cpp 
 	FieldElement.cpp 
 	Id.cpp 
+        PrepackedBuffer.cpp
 	ObjId.cpp 
 	global.cpp 
 	SetGet.cpp 
