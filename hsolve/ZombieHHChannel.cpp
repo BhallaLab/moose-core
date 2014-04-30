@@ -452,7 +452,7 @@ void ZombieHHChannel::zombify( Element* solver, Element* orig )
     // maintain a datastructure for putting back the messages at
     // unzombify.
 
-    dump("WARN", "Not tested: ZombieHHChannel::zombify.");
+    dump("Not tested: ZombieHHChannel::zombify.", "FIXME");
 
     HSolve::deleteIncomingMessages(orig, "concen");
     HSolve::deleteIncomingMessages(orig, "Vm");

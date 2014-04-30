@@ -287,7 +287,7 @@ def test_elec_alone():
         moose.setClock( 2, dt )
         hsolve.dt = dt
         hsolve.target = '/n/compt'
-        moose.re0init()
+        moose.reinit()
         moose.start( )
         dump_plots( 'h_instab' + str( dt ) + '.plot' )
 
