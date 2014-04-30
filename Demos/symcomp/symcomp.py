@@ -76,7 +76,7 @@ def test_symcompartment():
     pg.width[0] = 20e-3
     pg.level[0] = 1e-6
     pg.delay[1] = 1e9
-    moose.connect(pg, 'outputOut', d1, 'injectMsg')
+    moose.connect(pg, 'output', d1, 'injectMsg')
     data = moose.Neutral('/data')
     tab_soma = moose.Table('%s/soma_Vm' % (data.path))
     tab_d1 = moose.Table('%s/d1_Vm' % (data.path))

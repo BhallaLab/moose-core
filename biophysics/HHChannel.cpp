@@ -179,7 +179,9 @@ const Cinfo* HHChannel::initCinfo()
 		ChanBase::initCinfo(),
 		HHChannelFinfos,
 		sizeof( HHChannelFinfos )/sizeof(Finfo *),
-                &dinfo
+                &dinfo,
+                doc,
+                sizeof(doc)/sizeof(string)
 	);
 
 	return &HHChannelCinfo;

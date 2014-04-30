@@ -175,7 +175,9 @@ const Cinfo* PIDController::initCinfo()
             Neutral::initCinfo(),
             pidFinfos,
             sizeof( pidFinfos ) / sizeof( Finfo* ),
-            &dinfo);
+            &dinfo,
+            doc,
+            sizeof(doc)/sizeof(string));
     return &pidCinfo;
 }
 

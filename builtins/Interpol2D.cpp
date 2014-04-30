@@ -145,7 +145,9 @@ const Cinfo* Interpol2D::initCinfo()
 		"Interpol2D",
 		Neutral::initCinfo(),
 		interpol2DFinfos, sizeof( interpol2DFinfos ) / sizeof( Finfo * ),
-		&dinfo
+		&dinfo,
+                doc,
+                sizeof(doc)/sizeof(string)
 	);
 
 	return &interpol2DCinfo;

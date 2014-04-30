@@ -212,7 +212,8 @@ const Cinfo* Neutral::initCinfo()
 		neutralFinfos,
 		sizeof( neutralFinfos ) / sizeof( Finfo* ),
 		&dinfo,
-		doc, 6
+                doc,
+                sizeof(doc)/sizeof(string)
 	);
 
 	return &neutralCinfo;

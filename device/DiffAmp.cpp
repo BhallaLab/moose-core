@@ -135,7 +135,10 @@ const Cinfo* DiffAmp::initCinfo()
             Neutral::initCinfo(),
             diffAmpFinfos,
             sizeof(diffAmpFinfos)/sizeof(Finfo*),
-            &dinfo);
+            &dinfo,
+            doc,
+            sizeof(doc)/sizeof(string)
+);
     
     return &diffAmpCinfo;    
 }
