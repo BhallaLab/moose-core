@@ -31,7 +31,10 @@ Cinfo::Cinfo( const string& name,
 	init( finfoArray, nFinfos );
 	cinfoMap()[ name ] = this;
 	doc_.clear();
-	// cout << "Doing initCinfo for " << name << " with numDoc = " << numDoc << endl;
+
+#if  DEBUG
+	cout << "Doing initCinfo for " << name << " with numDoc = " << numDoc << endl;
+#endif     /* -----  not DEBUG  ----- */
 	if ( doc && numDoc ) {
 		for ( unsigned int i = 0; i < numDoc - 1; i += 2 ) {
 			const string argName = doc[i];

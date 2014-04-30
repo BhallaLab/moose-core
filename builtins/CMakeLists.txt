@@ -8,11 +8,11 @@ add_library(moose_builtins
     Func.cpp
     TableBase.cpp
     Table.cpp
-    StimulusTable.cpp
     TimeTable.cpp
     Stats.cpp
     Interpol2D.cpp
     HDF5WriterBase.cpp
+    StimulusTable.cpp
     HDF5DataWriter.cpp
     testBuiltins.cpp
     )
