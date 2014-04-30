@@ -38,6 +38,7 @@ elif [ "$1" = "t" ]; then
 else
     makeMoose developer
     #runTest
+    ( cd tests && ./test_hsolve_in_python.sh )
     #echo "Running python test only"
     #runPythonTest
 fi

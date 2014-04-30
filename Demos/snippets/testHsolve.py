@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # testHsolve.py --- 
 # Upi Bhalla, NCBS Bangalore, 9 June 2013.
 #
@@ -214,7 +215,8 @@ def dump_plots( fname ):
     if ( os.path.exists( fname ) ):
         os.remove( fname )
     for x in moose.wildcardFind( '/graphs/##[ISA=Table]' ):
-        moose.element( x[0] ).xplot( fname, x[0].name )
+        print x
+        #moose.element( x[0] ).xplot( fname, x[0].name )
 
 def make_spiny_compt():
     comptLength = 100e-6
@@ -272,9 +274,9 @@ def test_elec_alone():
     moose.useClock( 0, '/n/##[ISA=Compartment]', 'init' )
     moose.useClock( 1, '/n/##[ISA=Compartment]', 'process' )
     moose.useClock( 2, '/n/##[ISA=ChanBase],/n/##[ISA=SynBase],/n/##[ISA=CaConc],/n/##[ISA=SpikeGen]','process')
-    # moose.useClock( 8, '/graphs/elec/#', 'process' )
+    moose.useClock( 8, '/graphs/elec/#', 'process' )
     moose.reinit()
-    moose.start( 0.1 )
+    moose.start( 10e-4 )
     dump_plots( 'instab.plot' )
     # make Hsolver and rerun
     hsolve = moose.HSolve( '/n/hsolve' )
@@ -287,7 +289,7 @@ def test_elec_alone():
         hsolve.dt = dt
         hsolve.target = '/n/compt'
         moose.re0init()
-        moose.start( 0.1 )
+        moose.start( )
         dump_plots( 'h_instab' + str( dt ) + '.plot' )
 
 def main():

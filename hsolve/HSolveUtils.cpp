@@ -8,7 +8,6 @@
 **********************************************************************/
 
 #include "HSolveUtils.h"
-#include <stdexcept>
 
 void HSolveUtils::initialize( Id object )
 {
@@ -102,7 +101,10 @@ int HSolveUtils::gates(
                 string gatePath = channel.path() + "/" + gateName[ i ];
 
                 Id gate( gatePath );
-                assert( gate.path() == gatePath );
+
+                stringstream ss;
+                ss << "Wrong path " << gate.path() << " expected " << gatePath;
+                MOOSE_ASSERT_MSG(gate.path() == gatePath, ss.str().c_str());
 
                 if ( getOriginals ) {
                     HHGate* g = reinterpret_cast< HHGate* >( gate.eref().data() );
