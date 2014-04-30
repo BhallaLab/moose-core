@@ -217,7 +217,7 @@ if(BUILD_PYMOOSE)
     #add_library(_moose SHARED pymoose/moosemodule.cpp)
     set_target_properties(_moose PROPERTIES COMPILE_DEFINITIONS "PYMOOSE")
     set_target_properties(_moose PROPERTIES 
-        LIBRARY_OUTPUT_DIRECTORY "./python/moose"
+        LIBRARY_OUTPUT_DIRECTORY "#{CMAKE_SOURCE_DIR}/python/moose"
         PREFIX ""
         )
 
@@ -260,53 +260,21 @@ if(BUILD_PYMOOSE)
         )
 endif(BUILD_PYMOOSE)
 
-if(BUILD_PYMOOSE)
-    # This macro compiles each python file and store them in BUILD_DIRECTORY
-    macro(add_python_target tgt)
-        foreach(file ${ARGN})
-            GET_FILENAME_COMPONENT(FilePath ${file} PATH)
-            GET_FILENAME_COMPONENT(FileNameWE ${file} NAME_WE)
-            set(FileName "${FilePath}/${FileNameWE}.pyc")
-            list(APPEND OUT_FILES ${FileName})
-            add_custom_command(OUTPUT ${FileName}
-                COMMAND python -m py_compile ${CMAKE_SOURCE_DIR}/${file}
-                COMMAND ${CMAKE_COMMAND} -E copy 
-                    ${CMAKE_SOURCE_DIR}/${FileName} ${CMAKE_BINARY_DIR}/${FileName})
-        endforeach()
-
-        add_custom_target(${tgt} ALL
-            DEPENDS ${OUT_FILES}
-            )
-    endmacro()
-    
-    # Search files using glob
-    FILE(GLOB_RECURSE Python_Src RELATIVE ${CMAKE_SOURCE_DIR} python/*.py)
-    add_python_target(python_src_compiled
-        ${Python_Src}
-        )
-    # Search for demos
-    FILE(GLOB_RECURSE Python_Demos RELATIVE ${CMAKE_SOURCE_DIR} Demos/*.py)
-    add_python_target(python_demos_compiled 
-        ${Python_Demos}
-        )
-endif()
-
 ######################  TESTING  ###############################################
 include(CTest)
 find_package(PythonInterp REQUIRED)
 set(ENV{PYTHONPATH} "${CMAKE_BINARY_DIR}/python")
 message("++ PYTHONPATH is set to $ENV{PYTHONPATH}")
 
-add_test(NAME run_moose_with_enable_test
-    COMMAND echo "q" | ./moose 
+add_custom_target(check_moose
+    COMMAND ${CMAKE_BINARY_DIR}/tests/run_moose.sh --output-on-failure
+    COMMENT "Checking: moose with test-enabled" VERBATIM 
     )
 
-add_test(NAME load_moose_into_python
-    COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_BINARY_DIR}/python/moose/test.pyc"
+add_custom_target(check_python
+    COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_SOURCE_DIR}/python/moose/test.py"
+    COMMENT "Checking: loading moose into python" VERBATIM
+    COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_SOURCE_DIR}/Demos/snippets/testHsolve.py" --output-on-failure
+    COMMENT "Checking: running hsolve in python" VERBATIM
     )
 
-# Python demos
-add_custom_target(rundemo
-    COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_BINARY_DIR}/Demos/snippets/testHsolve.pyc" --output-on-failure
-    COMMENT "Demo: python hsolve" VERBATIM
-    )
