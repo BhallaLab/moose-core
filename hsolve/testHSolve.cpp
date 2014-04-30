@@ -18,12 +18,14 @@ using namespace std;
 extern void testHinesMatrix(); // Defined in HinesMatrix.cpp
 extern void testHSolvePassive(); // Defined in HSolvePassive.cpp
 extern void testHSolveUtils(); // Defined in HSolveUtils.cpp
+extern void runRallpackBenchmarks();                 /* Defined in RallPacks.cpp */
 
 void testHSolve()
 {
 	testHSolveUtils();
 	testHinesMatrix();
 	testHSolvePassive();
+        runRallpackBenchmarks();
 }
 
 //////////////////////////////////////////////////////////////////////////////
