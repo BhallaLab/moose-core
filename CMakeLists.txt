@@ -42,6 +42,7 @@ set(INSTALL_LIB_DIR lib CACHE PATH "/usr/local/lib")
 set(INSTALL_BIN_DIR bin CACHE PATH "/usr/local/bin")
 set(INSTALL_INCLUDE_DIR include CACHE PATH "/usr/local/include/")
 
+############# MACROS AND ALL ###################################################
 # Do the gsl first
 set(LOCAL_GSL 0)
 if(LOCAL_GSL)
@@ -61,7 +62,7 @@ else()
 endif()
 
 # Use clang++ as default compiler for time being
-set(CMAKE_CXX_COMPILER "clang++")
+set(CMAKE_CXX_COMPILER "g++")
 
 ## Turn warning to error
 add_definitions(-Wall
@@ -80,16 +81,14 @@ if(ENABLE_STD_2011)
 endif(ENABLE_STD_2011)
 
 # Strick checking 
-set(DEVELOPER 1)
-if(DEVELOPER)
+set(ENABLE_UNIT_TESTS 1)
+if(ENABLE_UNIT_TESTS)
     MESSAGE("++ Enabled unit tests")
     add_definitions(-DDO_UNIT_TESTS -DENABLE_TESTS)
-    add_definitions(-DDEBUG -DDEVELOPER -fPIC)
-else()
-    add_definitions(-UDO_UNIT_TESTS)
+    add_definitions(-DDEBUG)
 endif()
 
-set(VERIFY 1)
+set(VERIFY 0)
 if(VERIFY)
     add_definitions(-DSANITY_CHECK -DARGS_CHECK -DRESULT_CHECK -DVALUE_CHECK)
 endif(VERIFY)
@@ -166,15 +165,21 @@ add_subdirectory(device)
 add_subdirectory(benchmarks)
 add_subdirectory(kinetics)
 
+###################################### LINKING #################################
+set_target_properties(moose PROPERTIES LINK_SEARCH_START_STATIC 1)
+set_target_properties(moose PROPERTIES LINK_SEARCH_END_STATIC 1)
+set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
+set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 # Links our libraries 
 target_link_libraries(moose 
+    "-Wl,--whole-archive"
+    moose_builtins
     basecode
     msg
     shell
     randnum
     scheduling
     moose_mpi
-    moose_builtins
     utility 
     muparser
     debug_print
@@ -186,6 +191,7 @@ target_link_libraries(moose
     diffusion 
     device
     benchmarks
+    "-Wl,--no-whole-archive"
     )
 
 if(LIBSBML_FOUND)
