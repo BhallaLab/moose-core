@@ -89,17 +89,8 @@ HopFunc.o:	HopFunc.h ../mpi/PostMaster.h
 .PHONY: pymoose
 
 pymoose: CXXFLAGS += -DPYMOOSE
-pymoose: OBJ := $(filter-out main.o,$(OBJ))
-pymoose: OBJ += main_pymoose.o
-pymoose: _basecode_pymoose.o main_pymoose.o
-_basecode_pymoose.o: $(OBJ) main_pymoose.o
-	$(LD) -r -o _basecode_pymoose.o $(OBJ)
 
-main_pymoose.o: main.cpp
-	$(CXX) -c -o $@ $(CXXFLAGS) -I../msg $<
-	@echo "Compiled version of main file for pymoose."
-
-$(TARGET):		$(OBJ) $(HEADERS) 
+$(TARGET): $(OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ)
 
 clean:

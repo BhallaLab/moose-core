@@ -146,8 +146,9 @@ const Cinfo* SynChanBase::initCinfo()
 		SynHandler::initCinfo(),
 		SynChanBaseFinfos,
 		sizeof( SynChanBaseFinfos )/sizeof(Finfo *),
-                &dinfo
-	);
+                &dinfo,
+                doc,
+                sizeof(doc)/sizeof(string));
 
 	return &SynChanBaseCinfo;
 }

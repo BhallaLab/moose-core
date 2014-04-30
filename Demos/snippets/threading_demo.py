@@ -90,7 +90,7 @@ if __name__ == '__main__':
     pg.firstLevel = 10.0
     pg.firstWidth = 5.0
     tab = moose.Table('tab')
-    moose.connect(tab, 'requestOut', pg, 'getOutput')
+    moose.connect(tab, 'requestOut', pg, 'getOutputValue')
     moose.setClock(0, 1.0)
     moose.useClock(0, 'pg,tab', 'process')
     t1 = WorkerThread(10000)

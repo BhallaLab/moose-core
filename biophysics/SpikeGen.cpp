@@ -109,7 +109,9 @@ const Cinfo* SpikeGen::initCinfo()
 		"SpikeGen",
 		Neutral::initCinfo(),
 		spikeGenFinfos, sizeof( spikeGenFinfos ) / sizeof( Finfo* ),
-		&dinfo
+		&dinfo,
+                doc,
+                sizeof(doc)/sizeof(string)                
 	);
 
 	return &spikeGenCinfo;
