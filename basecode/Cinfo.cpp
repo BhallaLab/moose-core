@@ -32,8 +32,8 @@ Cinfo::Cinfo( const string& name,
 	cinfoMap()[ name ] = this;
 	doc_.clear();
 
-#if  DEBUG
-	cout << "Doing initCinfo for " << name << " with numDoc = " << numDoc << endl;
+#if  VERBOSITY > 2
+	cerr << setw(VERBOSITY) << "Doing initCinfo for " << name << " with numDoc = " << numDoc << endl;
 #endif     /* -----  not DEBUG  ----- */
 	if ( doc && numDoc ) {
 		for ( unsigned int i = 0; i < numDoc - 1; i += 2 ) {
