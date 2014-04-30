@@ -38,7 +38,6 @@ sys.path.append('../../python')
 import os
 os.environ['NUMPTHREADS'] = '1'
 import math
-
 import moose
 
 EREST_ACT = -70e-3
