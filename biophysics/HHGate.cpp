@@ -193,7 +193,9 @@ const Cinfo* HHGate::initCinfo()
 		"HHGate",
 		Neutral::initCinfo(),
 		HHGateFinfos, sizeof(HHGateFinfos)/sizeof(Finfo *),
-                &dinfo
+                &dinfo,
+                doc,
+                sizeof(doc)/sizeof(string)
 	);
 
 	return &HHGateCinfo;

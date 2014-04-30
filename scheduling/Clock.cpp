@@ -300,7 +300,9 @@ const Cinfo* Clock::initCinfo()
 		Neutral::initCinfo(),
 		clockFinfos,
 		sizeof(clockFinfos)/sizeof(Finfo *),
-		&dinfo
+		&dinfo,
+                doc,
+                sizeof(doc)/sizeof(string)
 	);
 
 	return &clockCinfo;

@@ -88,12 +88,12 @@ def test_mgblock():
     pulse.delay[0] = 10e-3
     pulse.level[0] = 1.0
     pulse.width[0] = 50e-3
-    moose.connect(pulse, 'outputOut', spikegen, 'Vm')
+    moose.connect(pulse, 'output', spikegen, 'Vm')
     nmda.synapse.num = 1
     syn = moose.element(nmda.synapse.path)
-    moose.connect(spikegen, 'event', syn, 'addSpike')
+    moose.connect(spikegen, 'spikeOut', syn, 'addSpike')
     nmda_noMg.synapse.num = 1
-    moose.connect(spikegen, 'event', moose.element(nmda_noMg.synapse.path), 'addSpike')
+    moose.connect(spikegen, 'spikeOut', moose.element(nmda_noMg.synapse.path), 'addSpike')
     Gnmda = moose.Table('/data/Gnmda')
     moose.connect(Gnmda, 'requestOut', mgblock, 'getGk')
     Gnmda_noMg = moose.Table('/data/Gnmda_noMg')
