@@ -41,6 +41,8 @@ set -e
 #    #echo "Running python test only"
 #    #runPythonTest
 #fi
+echo "WARNING: This script builds using cmake. If you want to use Makefile
+version, run make only. You might like to change some varibales in Makefile."
 
 ( cd ./buildMooseUsingCmake && ./build_me.sh )
 
