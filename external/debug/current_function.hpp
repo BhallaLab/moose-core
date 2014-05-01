@@ -18,7 +18,8 @@
 //
 //  http://www.boost.org/libs/utility/current_function.html
 //
-// LOG: Modified by Dilawar Singh. It's part of moose now.
+// LOG: Orginal from boost libraries.
+// Modified by Dilawar Singh. It's part of moose now.
 
 namespace moose
 {

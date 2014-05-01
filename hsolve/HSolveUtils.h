@@ -11,6 +11,7 @@
 #define _HSOLVE_UTILS_H
 
 #include "../basecode/header.h"
+#include "../basecode/global.h"
 #include "../external/debug/print_function.h"
 
 #include "../biophysics/HHGate.h"
