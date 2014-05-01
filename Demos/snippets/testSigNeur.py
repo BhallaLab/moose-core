@@ -252,7 +252,7 @@ def makeSpinyCompt():
         r = createSpineWithReceptor( compt, cell, i, i/float(numSpines) )
         r.synapse.num = 1
         syn = moose.element( r.path + '/synapse' )
-        moose.connect( synInput, 'event', syn, 'addSpike', 'Single' )
+        moose.connect( synInput, 'spikeOut', syn, 'addSpike', 'Single' )
         syn.weight = 0.2 * i * ( 4 - i )
         syn.delay = i * 1.0e-3
 
@@ -409,19 +409,19 @@ def makeNeuroMeshModel():
     smksolve.addJunction( pmksolve )
     #print "psd: nv=", pmksolve.numLocalVoxels, ", nav=", pmksolve.numAllVoxels, pmksolve.numVarPools, pmksolve.numAllPools
     # Have to pass a message between the various solvers.
-    foo = moose.ematrix( '/model/chem/spineMesh/headGluR' )
+    foo = moose.vec( '/model/chem/spineMesh/headGluR' )
 
     # oddly, numLocalFields does not work.
     ca = moose.element( '/model/chem/neuroMesh/Ca' )
     assert( ca.lastDimension == ndc )
 
-    moose.ematrix( '/model/chem/spineMesh/headGluR' ).nInit = 100
-    moose.ematrix( '/model/chem/psdMesh/psdGluR' ).nInit = 0
+    moose.vec( '/model/chem/spineMesh/headGluR' ).nInit = 100
+    moose.vec( '/model/chem/psdMesh/psdGluR' ).nInit = 0
 
     # set up adaptors
     aCa = moose.Adaptor( '/model/chem/spineMesh/adaptCa', 5 )
-    adaptCa = moose.ematrix( '/model/chem/spineMesh/adaptCa' )
-    chemCa = moose.ematrix( '/model/chem/spineMesh/Ca' )
+    adaptCa = moose.vec( '/model/chem/spineMesh/adaptCa' )
+    chemCa = moose.vec( '/model/chem/spineMesh/Ca' )
     assert( len( adaptCa ) == 5 )
     for i in range( 5 ):
         path = '/model/elec/head' + str( i ) + '/ca'
@@ -432,8 +432,8 @@ def makeNeuroMeshModel():
     adaptCa.scale = 0.05             # 0.06 to 0.003 mM
 
     aGluR = moose.Adaptor( '/model/chem/psdMesh/adaptGluR', 5 )
-    adaptGluR = moose.ematrix( '/model/chem/psdMesh/adaptGluR' )
-    chemR = moose.ematrix( '/model/chem/psdMesh/psdGluR' )
+    adaptGluR = moose.vec( '/model/chem/psdMesh/adaptGluR' )
+    chemR = moose.vec( '/model/chem/psdMesh/psdGluR' )
     assert( len( adaptGluR ) == 5 )
     for i in range( 5 ):
         path = '/model/elec/head' + str( i ) + '/gluR'

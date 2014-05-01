@@ -85,7 +85,7 @@ def moveCompt( path, oldParent, newParent ):
 		moose.connect( meshEntries, 'mesh', x, 'mesh', 'OneToOne' )
 	orig = moose.element( path )
 	moose.move( orig, newParent )
-	moose.delete( moose.ematrix( oldParent.path ) )
+	moose.delete( moose.vec( oldParent.path ) )
 	chem = moose.element( '/model/chem' )
 	moose.move( newParent, chem )
 
@@ -142,7 +142,7 @@ def makeNeuroMeshModel():
 		r = moose.element( name + '/glu' )
 		r.synapse.num = 1 
 		syn = moose.element( r.path + '/synapse' )
-		moose.connect( synInput, 'event', syn, 'addSpike', 'Single' )
+		moose.connect( synInput, 'spikeOut', syn, 'addSpike', 'Single' )
 		syn.weight = 0.2 * i * ( numSyn - 1 - i )
 		syn.delay = i * 1.0e-3
 
@@ -207,9 +207,9 @@ def makeNeuroMeshModel():
 	assert( pdc == 13 )
 	#print 'mesh nums ( neuro, spine, psd ) = ', ndc, sdc, pdc, ', numSeg = ', ns
 
-	mesh = moose.ematrix( '/model/chem/neuroMesh/mesh' )
-	mesh2 = moose.ematrix( '/model/chem/spineMesh/mesh' )
-	mesh = moose.ematrix( '/model/chem/psdMesh/mesh' )
+	mesh = moose.vec( '/model/chem/neuroMesh/mesh' )
+	mesh2 = moose.vec( '/model/chem/spineMesh/mesh' )
+	mesh = moose.vec( '/model/chem/psdMesh/mesh' )
 
 	# We need to use the spine solver as the master for the purposes of
 	# these calculations. This will handle the diffusion calculations
@@ -224,16 +224,16 @@ def makeNeuroMeshModel():
 	ca = moose.element( '/model/chem/neuroMesh/DEND/Ca' )
 	assert( ca.lastDimension == ndc )
 	"""
-	CaNpsd = moose.ematrix( '/model/chem/psdMesh/PSD/PP1_PSD/CaN' )
+	CaNpsd = moose.vec( '/model/chem/psdMesh/PSD/PP1_PSD/CaN' )
 	print 'numCaN in PSD = ', CaNpsd.nInit, ', vol = ', CaNpsd.volume
-	CaNspine = moose.ematrix( '/model/chem/spineMesh/SPINE/CaN_BULK/CaN' )
+	CaNspine = moose.vec( '/model/chem/spineMesh/SPINE/CaN_BULK/CaN' )
 	print 'numCaN in spine = ', CaNspine.nInit, ', vol = ', CaNspine.volume
 	"""
 
 	# set up adaptors
 	aCa = moose.Adaptor( '/model/chem/psdMesh/adaptCa', pdc )
-	adaptCa = moose.ematrix( '/model/chem/psdMesh/adaptCa' )
-	chemCa = moose.ematrix( '/model/chem/psdMesh/PSD/CaM/Ca' )
+	adaptCa = moose.vec( '/model/chem/psdMesh/adaptCa' )
+	chemCa = moose.vec( '/model/chem/psdMesh/PSD/CaM/Ca' )
 	assert( len( adaptCa ) == pdc )
 	assert( len( chemCa ) == pdc )
 	for i in range( pdc ):
@@ -249,8 +249,8 @@ def makeNeuroMeshModel():
 
 	"""
 	aGluR = moose.Adaptor( '/model/chem/psdMesh/adaptGluR', 5 )
-    adaptGluR = moose.ematrix( '/model/chem/psdMesh/adaptGluR' )
-	chemR = moose.ematrix( '/model/chem/psdMesh/psdGluR' )
+    adaptGluR = moose.vec( '/model/chem/psdMesh/adaptGluR' )
+	chemR = moose.vec( '/model/chem/psdMesh/psdGluR' )
 	assert( len( adaptGluR ) == 5 )
 	for i in range( 5 ):
     	path = '/model/elec/head' + str( i ) + '/gluR'
@@ -384,21 +384,21 @@ def testNeuroMeshMultiscale():
 	moose.reinit()
 	"""
 	print 'pre'
-	eca = moose.ematrix( '/model/chem/psdMesh/PSD/CaM/Ca' )
+	eca = moose.vec( '/model/chem/psdMesh/PSD/CaM/Ca' )
 	for i in range( 3 ):
 		print eca[i].concInit, eca[i].conc, eca[i].nInit, eca[i].n, eca[i].volume
 	print 'dend'
-	eca = moose.ematrix( '/model/chem/neuroMesh/DEND/Ca' )
+	eca = moose.vec( '/model/chem/neuroMesh/DEND/Ca' )
 	#for i in ( 0, 1, 2, 30, 60, 90, 120, 144 ):
 	for i in range( 13 ):
 		print i, eca[i].concInit, eca[i].conc, eca[i].nInit, eca[i].n, eca[i].volume
 
 	print 'PSD'
-	eca = moose.ematrix( '/model/chem/psdMesh/PSD/CaM/Ca' )
+	eca = moose.vec( '/model/chem/psdMesh/PSD/CaM/Ca' )
 	for i in range( 3 ):
 		print eca[i].concInit, eca[i].conc, eca[i].nInit, eca[i].n, eca[i].volume
 	print 'spine'
-	eca = moose.ematrix( '/model/chem/spineMesh/SPINE/CaM/Ca' )
+	eca = moose.vec( '/model/chem/spineMesh/SPINE/CaM/Ca' )
 	for i in range( 3 ):
 		print eca[i].concInit, eca[i].conc, eca[i].nInit, eca[i].n, eca[i].volume
 	"""
