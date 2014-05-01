@@ -1,6 +1,8 @@
 #  Build folder 
 buildMooseUsingCmake
 tags
+*.plot
+*.gnuplot
 
 # Compiled Object files
 *.slo
