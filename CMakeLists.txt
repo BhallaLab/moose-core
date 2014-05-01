@@ -214,10 +214,9 @@ if(BUILD_PYMOOSE)
     include_directories(${PYTHON_INCLUDE_DIRS})
     add_subdirectory(pymoose)
     add_library(_moose SHARED pymoose/moosemodule.cpp)
-    #add_library(_moose SHARED pymoose/moosemodule.cpp)
     set_target_properties(_moose PROPERTIES COMPILE_DEFINITIONS "PYMOOSE")
     set_target_properties(_moose PROPERTIES 
-        LIBRARY_OUTPUT_DIRECTORY "#{CMAKE_SOURCE_DIR}/python/moose"
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/python/moose"
         PREFIX ""
         )
 
@@ -263,7 +262,7 @@ endif(BUILD_PYMOOSE)
 ######################  TESTING  ###############################################
 include(CTest)
 find_package(PythonInterp REQUIRED)
-set(ENV{PYTHONPATH} "${CMAKE_BINARY_DIR}/python")
+set(ENV{PYTHONPATH} "${CMAKE_SOURCE_DIR}/python")
 message("++ PYTHONPATH is set to $ENV{PYTHONPATH}")
 
 add_custom_target(check_moose
@@ -274,7 +273,8 @@ add_custom_target(check_moose
 add_custom_target(check_python
     COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_SOURCE_DIR}/python/moose/test.py"
     COMMENT "Checking: loading moose into python" VERBATIM
-    COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_SOURCE_DIR}/Demos/snippets/testHsolve.py" --output-on-failure
+    COMMAND ${PYTHON_EXECUTABLE} testHsolve.py --output-on-failure
     COMMENT "Checking: running hsolve in python" VERBATIM
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/Demos/snippets"
     )
 

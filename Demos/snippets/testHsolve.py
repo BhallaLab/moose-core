@@ -288,7 +288,7 @@ def test_elec_alone():
         hsolve.dt = dt
         hsolve.target = '/n/compt'
         moose.reinit()
-        moose.start( )
+        moose.start(10e-4 )
         dump_plots( 'h_instab' + str( dt ) + '.plot' )
 
 def main():
