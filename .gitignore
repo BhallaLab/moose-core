@@ -1,5 +1,6 @@
 #  Build folder 
 buildMooseUsingCmake
+tags
 
 # Compiled Object files
 *.slo

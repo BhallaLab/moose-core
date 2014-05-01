@@ -266,7 +266,7 @@ set(ENV{PYTHONPATH} "${CMAKE_SOURCE_DIR}/python")
 message("++ PYTHONPATH is set to $ENV{PYTHONPATH}")
 
 add_custom_target(check_moose
-    COMMAND ${CMAKE_BINARY_DIR}/tests/run_moose.sh --output-on-failure
+    COMMAND ${CMAKE_BINARY_DIR}/run_moose.sh --output-on-failure
     COMMENT "Checking: moose with test-enabled" VERBATIM 
     )
 

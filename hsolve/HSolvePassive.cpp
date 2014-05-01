@@ -448,6 +448,7 @@ bool isClose( T a, T b, T tolerance )
 
 #include <sstream>
 #include "../shell/Shell.h"
+#include "../basecode/global.h"
 #include "TestHSolve.h"
 void testHSolvePassive()
 {
