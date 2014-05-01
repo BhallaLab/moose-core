@@ -214,8 +214,7 @@ def dump_plots( fname ):
     if ( os.path.exists( fname ) ):
         os.remove( fname )
     for x in moose.wildcardFind( '/graphs/##[ISA=Table]' ):
-        print x
-        #moose.element( x[0] ).xplot( fname, x[0].name )
+        print x.vector
 
 def make_spiny_compt():
     comptLength = 100e-6
