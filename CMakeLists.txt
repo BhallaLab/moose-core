@@ -52,7 +52,6 @@ add_definitions(-Wall
     -Wno-unused-variable
     -Wno-unused-function
     -Wno-unused-private-field
-    -Werror
     )
 
 ## Enable/Disable 2011 stupport.
@@ -191,8 +190,8 @@ set(LOCAL_GSL_LIBRARIES  gsl gslcblas m)
 target_link_libraries(moose ${LOCAL_GSL_LIBRARIES})
 
 # Libxml2 is required.
-find_package(LibXML2 REQUIRED)
-target_link_libraries(moose ${LibXML2_LIBRARIES})
+#find_package(LibXML REQUIRED)
+#target_link_libraries(moose ${LibXML_LIBRARIES})
 
 
 ######################### BUILD PYMOOSE ########################################
@@ -222,7 +221,6 @@ if(BUILD_PYMOOSE)
 
     set(LIBRARIES ${PYTHON_LIBRARY} ${LibBZip2_LIBRARIES} 
         ${LOCAL_GSL_LIBRARIES}
-        ${LibXML2_LIBRARIES}
         )
     if(HDF5_FOUND)
         list(APPEND LIBRARIES ${HDF5_LIBRARY})
