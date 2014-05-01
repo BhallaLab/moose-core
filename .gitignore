@@ -3,6 +3,10 @@ buildMooseUsingCmake
 tags
 *.plot
 *.gnuplot
+*.ps
+*.eps
+*.png
+*.pdf
 
 # Compiled Object files
 *.slo
