@@ -41,6 +41,14 @@ const Cinfo* PoolBase::initCinfo()
 			&PoolBase::getDiffConst
 		);
 
+		static ElementValueFinfo< PoolBase, double > motorConst(
+			"motorConst",
+			"Motor transport rate molecule. + is away from soma, - is "
+			"towards soma. Only relevant for ZombiePool subclasses.",
+			&PoolBase::setMotorConst,
+			&PoolBase::getMotorConst
+		);
+
 		static ElementValueFinfo< PoolBase, double > conc(
 			"conc",
 			"Concentration of molecules in this pool",
@@ -148,6 +156,7 @@ const Cinfo* PoolBase::initCinfo()
 		&n,			// Value
 		&nInit,		// Value
 		&diffConst,	// Value
+		&motorConst,	// Value
 		&conc,		// Value
 		&concInit,	// Value
 		&volume,	// Readonly Value
@@ -277,6 +286,16 @@ double PoolBase::getDiffConst(const Eref& e ) const
 	return vGetDiffConst( e );
 }
 
+void PoolBase::setMotorConst( const Eref& e, double v )
+{
+	vSetMotorConst( e, v );
+}
+
+double PoolBase::getMotorConst(const Eref& e ) const
+{
+	return vGetMotorConst( e );
+}
+
 void PoolBase::setVolume( const Eref& e, double v )
 {
 	vSetVolume( e, v );
@@ -310,6 +329,19 @@ void PoolBase::setSolver( Id solver )
 }
 
 //////////////////////////////////////////////////////////////
+// Virtual Field Definitions
+//////////////////////////////////////////////////////////////
+
+/// Dummy MotorConst field for most Pool subclasses.
+void PoolBase::vSetMotorConst( const Eref& e, double v )
+{;}
+
+double PoolBase::vGetMotorConst(const Eref& e ) const
+{
+	return 0.0;
+}
+
+//////////////////////////////////////////////////////////////
 // Zombie conversion routine: Converts Pool subclasses. There
 // will typically be a target specific follow-up function, for example,
 // to assign a pointer to the stoichiometry class.
@@ -327,6 +359,7 @@ void PoolBase::zombify( Element* orig, const Cinfo* zClass, Id solver )
 	vector< unsigned int > species( num, 0 );
 	vector< double > concInit( num, 0.0 );
 	vector< double > diffConst( num, 0.0 );
+	vector< double > motorConst( num, 0.0 );
 	for ( unsigned int i = 0; i < num; ++i ) {
 		Eref er( orig, i + start );
 		const PoolBase* pb = 
@@ -334,6 +367,7 @@ void PoolBase::zombify( Element* orig, const Cinfo* zClass, Id solver )
 		species[ i ] = pb->getSpecies( er );
 		concInit[ i ] = pb->getConcInit( er );
 		diffConst[ i ] = pb->getDiffConst( er );
+		motorConst[ i ] = pb->getMotorConst( er );
 	}
 	orig->zombieSwap( zClass );
 	for ( unsigned int i = 0; i < num; ++i ) {
@@ -343,6 +377,7 @@ void PoolBase::zombify( Element* orig, const Cinfo* zClass, Id solver )
 		pb->setSpecies( er, species[i] );
 		pb->setConcInit( er, concInit[i] );
 		pb->setDiffConst( er, diffConst[i] );
+		pb->setMotorConst( er, motorConst[i] );
 	}
 }
 // Virtual func: default does nothing.

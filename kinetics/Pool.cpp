@@ -65,7 +65,7 @@ const SrcFinfo1< double >& nOut =
 	poolCinfo->findFinfo( "nOut" ) );
 
 Pool::Pool()
-	: n_( 0.0 ), nInit_( 0.0 ), diffConst_( 0.0 ),
+	: n_( 0.0 ), nInit_( 0.0 ), diffConst_( 0.0 ), motorConst_( 0.0 ),
 		A_( 0.0 ), B_( 0.0 ), species_( 0 )
 {;}
 
@@ -216,6 +216,16 @@ void Pool::vSetDiffConst( const Eref& e, double v )
 double Pool::vGetDiffConst( const Eref& e ) const
 {
 	return diffConst_;
+}
+
+void Pool::vSetMotorConst( const Eref& e, double v )
+{
+	motorConst_ = v;
+}
+
+double Pool::vGetMotorConst( const Eref& e ) const
+{
+	return motorConst_;
 }
 
 void Pool::vSetVolume( const Eref& e,  double v )
