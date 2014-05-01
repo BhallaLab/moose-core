@@ -107,7 +107,7 @@ string mapToString(const map<A, B>& m, bool value=true)
     ss.str("");
     
     int i = 0;
-    for(int ii = 0; ii < row.size(); ii++)
+    for(unsigned int ii = 0; ii < row.size(); ii++)
     {
         if(i < colums)
         {

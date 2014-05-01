@@ -53,6 +53,7 @@ add_definitions(-Wall
     -Wno-unused-function
     -Wno-unused-private-field
     )
+add_definitions(-fPIC)
 
 ## Enable/Disable 2011 stupport.
 set(ENABLE_STD_2011 0)
