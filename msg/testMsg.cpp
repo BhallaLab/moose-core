@@ -281,11 +281,11 @@ void testMsgElementListing()
 		children[0].element()->dataHandler()->localEntries() << endl;
 	assert( path == "/Msgs/singleMsg[0]" );
 	*/
-	assert( children[0].path() == "/Msgs[0]/singleMsg" );
-	assert( children[1].path() == "/Msgs[0]/oneToOneMsg" );
-	assert( children[2].path() == "/Msgs[0]/oneToAllMsg" );
-	assert( children[3].path() == "/Msgs[0]/diagonalMsg" );
-	assert( children[4].path() == "/Msgs[0]/sparseMsg" );
+	assert( children[0].path() == "/Msgs[0]/singleMsg[0]" );
+	assert( children[1].path() == "/Msgs[0]/oneToOneMsg[0]" );
+	assert( children[2].path() == "/Msgs[0]/oneToAllMsg[0]" );
+	assert( children[3].path() == "/Msgs[0]/diagonalMsg[0]" );
+	assert( children[4].path() == "/Msgs[0]/sparseMsg[0]" );
 
 
 	///////////////////////////////////////////////////////////

@@ -344,10 +344,10 @@ def createChemModel( neuroCompt, spineCompt, psdCompt ):
 def printMolVecs( title ):
     print title
     """    
-    nCa = moose.ematrix( '/model/chem/neuroMesh/Ca' )
-    sCa = moose.ematrix( '/model/chem/spineMesh/Ca' )
-    sR = moose.ematrix( '/model/chem/spineMesh/headGluR' )
-    pR = moose.ematrix( '/model/chem/psdMesh/psdGluR' )
+    nCa = moose.vec( '/model/chem/neuroMesh/Ca' )
+    sCa = moose.vec( '/model/chem/spineMesh/Ca' )
+    sR = moose.vec( '/model/chem/spineMesh/headGluR' )
+    pR = moose.vec( '/model/chem/psdMesh/psdGluR' )
     print 'sizes: nCa, sCa, sR, pR = ', len(nCa), len(sCa), len(sR), len(pR) 
     #print 'nCa=', nCa.conc, ', sCa=', sCa.conc, ', sR=', sR.n, ', pR=', pR.n
     print 'nCaConcInit=', nCa.concInit, ', sCa=', sCa.concInit
