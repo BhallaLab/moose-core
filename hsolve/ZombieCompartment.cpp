@@ -799,17 +799,14 @@ void ZombieCompartment::zombify( Element* solver, Element* orig )
     assert(zd->hsolve_);
 
     stringstream ss;
-    ss << "ZombieCompartment::zombify is not tested yet ";
+    ss << "ZombieCompartment::zombify() has not been tested yet ";
     dump(ss.str(), "WARN");
 }
 
 // static func
 void ZombieCompartment::unzombify( Element* zombie )
 {
-    stringstream ss;
-    ss << "Not implemented " << __FUNCTION__;
-    dump(ss.str(), "FIXME");
-
+    MOOSE_ASSERT_MSG(0, "This function is not implemented.");
 #if 0
     /* Element is an Abstract class. Can't instantiate! */
     Element temp( zombie->id(), zombie->cinfo());
