@@ -7,6 +7,7 @@ __date__ = '21 November 2012'
 import types, parser, token, symbol, string, os, math
 from datetime import datetime
 import _moose
+import plot_utils
 
 ## for Ca Pool
 #FARADAY = 96154.0 # Coulombs # from cadecay.mod : 1/(2*96154.0) = 5.2e-6 which is the Book of Genesis / readcell value
