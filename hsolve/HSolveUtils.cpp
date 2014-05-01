@@ -98,13 +98,13 @@ int HSolveUtils::gates(
                     channel, powerField[ i ] );
 
             if ( power > 0.0 ) {
-                string gatePath = channel.path() + "/" + gateName[ i ];
-
+                string gatePath = moose::joinPath(channel.path(), gateName[i]);
                 Id gate( gatePath );
 
-                stringstream ss;
-                ss << "Wrong path " << gate.path() << " expected " << gatePath;
-                MOOSE_ASSERT_MSG(gate.path() == gatePath, ss.str().c_str());
+                string gPath = moose::fixPath(gate.path());
+                errorSS.str("");
+                errorSS << "Got " << gatePath << " expected " << gPath;
+                MOOSE_ASSERT_MSG(gPath == gatePath, errorSS.str().c_str());
 
                 if ( getOriginals ) {
                     HHGate* g = reinterpret_cast< HHGate* >( gate.eref().data() );

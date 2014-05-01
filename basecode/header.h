@@ -1,5 +1,5 @@
 /**********************************************************************
-** This program is part of 'MOOSE', the
+*r This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment,
 ** also known as GENESIS 3 base code.
 **           copyright (C) 2003-2004 Upinder S. Bhalla. and NCBS
@@ -14,20 +14,7 @@
 /* Some of these headers are from boost library */
 #include "../external/debug/current_function.hpp"
 #include "../external/debug/assert.hpp"
-
 #include "../external/debug/print_function.h"
-
-
-
-/*-----------------------------------------------------------------------------
- *  This macro prints the output of a test function onto console. It also keep
- *  track of index of the current test. The index of test is automatically
- *  computed by increamenting the counter.
- *-----------------------------------------------------------------------------*/
-extern unsigned int totalTests;
-#define tbegin cerr << endl << "Test(" << totalTests << "): " << MOOSE_CURRENT_FUNCTION;
-#define tend totalTests++; \
-    cerr << std::right <<  setw(20) << "test of " << MOOSE_CURRENT_FUNCTION << " finished."; 
 
 #include <math.h>
 #include <algorithm>

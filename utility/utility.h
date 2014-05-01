@@ -31,9 +31,11 @@
 
 #ifndef _UTILITY_H
 
+
 char shortType(std::string type);
 char innerType(char typecode);
 char shortFinfo(std::string ftype);
+
 #include "strutil.h"
 const map<std::string, std::string>& getArgMap();
 
