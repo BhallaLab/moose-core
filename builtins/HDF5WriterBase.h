@@ -56,7 +56,7 @@ class HDF5WriterBase
     double getFAttr(string name) const;
     long getIAttr(string name) const;            
     virtual void flush();
-    void close();
+    virtual void close();
     
     static const Cinfo* initCinfo();
     
