@@ -215,7 +215,7 @@ def dump_plots( fname ):
     if ( os.path.exists( fname ) ):
         os.remove( fname )
     for x in moose.wildcardFind( '/graphs/##[ISA=Table]' ):
-        moose.utils.plotAscii(x.vector)
+        moose.utils.plotAscii(x.vector, file=fname)
 
 def make_spiny_compt():
     comptLength = 100e-6
@@ -262,6 +262,7 @@ def create_pool( compt, name, concInit ):
 def test_elec_alone():
     eeDt = 2e-6
     hSolveDt = 2e-5
+    runTime = 1e-2
 
     make_spiny_compt()
     make_elec_plots()
@@ -275,7 +276,7 @@ def test_elec_alone():
     moose.useClock( 2, '/n/##[ISA=ChanBase],/n/##[ISA=SynBase],/n/##[ISA=CaConc],/n/##[ISA=SpikeGen]','process')
     moose.useClock( 8, '/graphs/elec/#', 'process' )
     moose.reinit()
-    moose.start( 10e-4 )
+    moose.start( runTime )
     dump_plots( 'instab.plot' )
     # make Hsolver and rerun
     hsolve = moose.HSolve( '/n/hsolve' )
@@ -288,7 +289,7 @@ def test_elec_alone():
         hsolve.dt = dt
         hsolve.target = '/n/compt'
         moose.reinit()
-        moose.start(10e-4 )
+        moose.start( runTime )
         dump_plots( 'h_instab' + str( dt ) + '.plot' )
 
 def main():
