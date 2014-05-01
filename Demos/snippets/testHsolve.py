@@ -39,6 +39,7 @@ import os
 os.environ['NUMPTHREADS'] = '1'
 import math
 import moose
+import moose.utils
 
 EREST_ACT = -70e-3
 
@@ -214,7 +215,7 @@ def dump_plots( fname ):
     if ( os.path.exists( fname ) ):
         os.remove( fname )
     for x in moose.wildcardFind( '/graphs/##[ISA=Table]' ):
-        print x.vector
+        moose.utils.plotAscii(x.vector)
 
 def make_spiny_compt():
     comptLength = 100e-6
