@@ -67,7 +67,7 @@ class HopfieldNetwork():
         pg = moose.PulseGen('/hopfield/inPulGen')
 
         pgTable = moose.Table('/hopfield/inPulGen/pgTable')
-        moose.connect(pgTable, 'requestOut', pg, 'getOutput')
+        moose.connect(pgTable, 'requestOut', pg, 'getOutputValue')
 
         pg.firstDelay = 10e-3
         pg.firstWidth = 2e-03
@@ -93,10 +93,10 @@ class HopfieldNetwork():
             inSpkGen = moose.SpikeGen(cellPath+'/inSpkGen')
             inSpkGen.setField('edgeTriggered', True)
             inSpkGen.setField('threshold', 2.0)
-            moose.connect(pg, 'outputOut', inSpkGen, 'Vm')
+            moose.connect(pg, 'output', inSpkGen, 'Vm')
             #inTable = moose.Table(cellPath+'/inSpkGen/inTable')
             #moose.connect(inTable, 'requestOut', inSpkGen, 'getHasFired')
-            moose.connect(inSpkGen, 'event', cell.synapse[i] ,'addSpike') #self connection is the input 
+            moose.connect(inSpkGen, 'spikeOut', cell.synapse[i] ,'addSpike') #self connection is the input 
             self.inSpike.append(inSpkGen)
             #self.inTables.append(inTable)
             #self.Vms.append(VmVals)

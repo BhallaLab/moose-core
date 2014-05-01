@@ -7,7 +7,7 @@ inputGiven = 1
 moose.Neutral('/elec')
 pg = moose.PulseGen('/elec/inPulGen')
 pgTable = moose.Table('/elec/inPulGen/pgTable')
-moose.connect(pgTable, 'requestOut', pg, 'getOutput')
+moose.connect(pgTable, 'requestOut', pg, 'getOutputValue')
 
 pg.firstDelay = 10e-3
 pg.firstWidth = 2e-03
@@ -46,12 +46,12 @@ inSpkGen.setField('threshold', 2.0)
 inSpkGen.setField('edgeTriggered', True)
 
 if inputGiven == 1:
-    print 'pulse>spike:', moose.connect(pg, 'outputOut', moose.element(cellPath+'/inSpkGen'), 'Vm')
+    print 'pulse>spike:', moose.connect(pg, 'output', moose.element(cellPath+'/inSpkGen'), 'Vm')
     inTable = moose.Table(cellPath+'/inSpkGen/inTable')
     print 'table>spike:',moose.connect(inTable, 'requestOut', inSpkGen, 'getHasFired')
 
-print 'spike>cell:', moose.connect(inSpkGen, 'event', cell.synapse[0] ,'addSpike')
-#print 'spike>cell:', moose.connect(pg, 'outputOut', cell ,'injectDest')
+print 'spike>cell:', moose.connect(inSpkGen, 'spikeOut', cell.synapse[0] ,'addSpike')
+#print 'spike>cell:', moose.connect(pg, 'output', cell ,'injectDest')
 
 moose.setClock(0, 1e-4)
 moose.useClock(0, '/cell,/cell/##,/elec/##','process')

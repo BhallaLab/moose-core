@@ -42,7 +42,7 @@ def createNetwork(synWeights,inputGiven):
     data = moose.Neutral('/data')
     pg = moose.PulseGen('/hopfield/inPulGen')
     pgTable = moose.Table('/hopfield/inPulGen/pgTable')
-    moose.connect(pgTable, 'requestOut', pg, 'getOutput')
+    moose.connect(pgTable, 'requestOut', pg, 'getOutputValue')
 #    pg.firstDelay = 10e-3
 #    pg.firstWidth = 2e-03
 #    pg.firstLevel = 3
@@ -69,9 +69,9 @@ def createNetwork(synWeights,inputGiven):
             spikegen[ii].threshold = 2.0
         spikegen[ii].edgeTriggered = True # Redundant
         intable[ii] = moose.Table('/data/inTable_%d' % (ii))
-        moose.connect(pg, 'outputOut', spikegen[ii], 'Vm')
+        moose.connect(pg, 'output', spikegen[ii], 'Vm')
         # No self connection - so we can use the synapse [ii] for input delivery
-        moose.connect(spikegen[ii], 'event', cell[ii].synapse[ii], 'addSpike')
+        moose.connect(spikegen[ii], 'spikeOut', cell[ii].synapse[ii], 'addSpike')
         moose.connect(intable[ii], 'requestOut', spikegen[ii], 'getHasFired')
 #    end1 = datetime.now()
     for ii in range(numberOfCells):
