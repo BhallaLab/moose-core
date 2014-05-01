@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "../basecode/global.h"
 #include "HinesMatrix.h"
 #include <sstream>
 #include <iomanip>

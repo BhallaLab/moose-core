@@ -1,4 +1,3 @@
-//
 //  moose/assert.hpp - MOOSE_ASSERT(expr)
 //                     MOOSE_ASSERT_MSG(expr, msg)
 //                     MOOSE_VERIFY(expr)
@@ -6,10 +5,11 @@
 //  Copyright (c) 2001, 2002 Peter Dimov and Multi Media Ltd.
 //  Copyright (c) 2007 Peter Dimov
 //  Copyright (c) Beman Dawes 2011
+//  Copyright (c) Dilawar Singh 2013
 //
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at
-// http://www.moose.org/LICENSE_1_0.txt)
+// http://www.boost.org/LICENSE_1_0.txt)
 //
 //  Note: There are no include guards. This is intentional.
 //
@@ -21,7 +21,11 @@
 //
 // mooseinspect:naassert_macro
 //
-// Log: Changed.
+// Log: 
+// Thursday 01 May 2014 01:18:02 PM IST
+//
+// This files is a modified version of boost/assert.hpp file. The names of
+// macros have been changed.
 //
 
 //--------------------------------------------------------------------------------------//
