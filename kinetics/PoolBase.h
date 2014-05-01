@@ -49,6 +49,8 @@ class PoolBase
 		double getNinit( const Eref& e ) const;
 		void setDiffConst( const Eref& e, double v );
 		double getDiffConst( const Eref& e ) const;
+		void setMotorConst( const Eref& e, double v );
+		double getMotorConst( const Eref& e ) const;
 
 		void setConc( const Eref& e, double v );
 		double getConc( const Eref& e ) const;
@@ -81,6 +83,8 @@ class PoolBase
 		virtual double vGetNinit( const Eref& e ) const = 0;
 		virtual void vSetDiffConst( const Eref& e, double v ) = 0;
 		virtual double vGetDiffConst( const Eref& e ) const = 0;
+		virtual void vSetMotorConst( const Eref& e, double v );
+		virtual double vGetMotorConst( const Eref& e ) const;
 
 		virtual void vSetConc( const Eref& e, double v ) = 0;
 		virtual double vGetConc( const Eref& e ) const = 0;

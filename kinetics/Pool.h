@@ -33,6 +33,8 @@ class Pool: public PoolBase
 		double vGetNinit( const Eref& e ) const;
 		void vSetDiffConst( const Eref& e, double v );
 		double vGetDiffConst( const Eref& e ) const;
+		void vSetMotorConst( const Eref& e, double v );
+		double vGetMotorConst( const Eref& e ) const;
 
 		void vSetConc( const Eref& e, double v );
 		double vGetConc( const Eref& e ) const;
@@ -73,6 +75,7 @@ class Pool: public PoolBase
 		double n_; /// Number of molecules in pool
 		double nInit_; /// initial number of molecules.
 		double diffConst_;	/// Diffusion constant
+		double motorConst_;	/// Motor transport constant
 		double A_; /// Internal state variables, used only in explict mode
 		double B_;
 

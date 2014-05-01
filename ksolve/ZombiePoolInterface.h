@@ -34,6 +34,11 @@ class ZombiePoolInterface
 		/// Diffusion constant: Only one per pool, voxel number is ignored.
 		virtual double getDiffConst( const Eref& e ) const = 0;
 
+		/// Motor constant: Only one per pool, voxel number is ignored.
+		/// Used only in Dsolves, so here I put in a dummy.
+		virtual void setMotorConst( const Eref& e, double val )
+		{;}
+
 		/// Specifies number of pools (species) handled by system.
 		virtual void setNumPools( unsigned int num ) = 0;
 		/// gets number of pools (species) handled by system.

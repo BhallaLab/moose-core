@@ -56,7 +56,7 @@ const Cinfo* ZombiePool::initCinfo()
 static const Cinfo* zombiePoolCinfo = ZombiePool::initCinfo();
 
 ZombiePool::ZombiePool()
-	: dsolve_( 0 ), ksolve_( 0 ), diffConst_( 1e-12 )
+	: dsolve_( 0 ), ksolve_( 0 ), diffConst_( 1e-12 ), motorConst_( 0.0 )
 {;}
 
 ZombiePool::~ZombiePool()
@@ -140,6 +140,18 @@ double ZombiePool::vGetDiffConst( const Eref& e ) const
 	return diffConst_;
 }
 
+double ZombiePool::vGetMotorConst( const Eref& e ) const
+{
+	return motorConst_;
+}
+
+void ZombiePool::vSetMotorConst( const Eref& e, double v )
+{
+	motorConst_ = v;
+	if ( dsolve_ )
+		dsolve_->setMotorConst( e, v );
+}
+
 void ZombiePool::vSetSpecies( const Eref& e, unsigned int v )
 {
 	;
@@ -175,7 +187,7 @@ void ZombiePool::vSetSolver( Id s )
 	ZombiePoolInterface* zpi = reinterpret_cast< ZombiePoolInterface *>(
 					ObjId( s, 0 ).data() );
 
-	if ( dsolve_ == 0 )
+	if ( s.element()->cinfo()->isA( "Dsolve" ) )
 		dsolve_ = zpi;
 	else
 		ksolve_ = zpi;

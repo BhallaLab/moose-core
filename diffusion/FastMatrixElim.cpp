@@ -532,20 +532,6 @@ void buildColIndex( unsigned int nrows,
 	}
 }
 
-double calcTransport( double motorConst, double lenSum,
-				unsigned int parentVoxel, unsigned int row )
-{
-	if ( row == parentVoxel && motorConst < 0 ) {
-		// Handle transport toward soma
-		return motorConst * 2.0 / lenSum ;
-	}
-	if ( row != parentVoxel && motorConst > 0 ) {
-		// Handle transport away from soma, to children
-		return -motorConst * 2.0 / lenSum;
-	}
-	return 0.0;
-}
-
 bool FastMatrixElim::buildForDiffusion( 
 			const vector< unsigned int >& parentVoxel,
 			const vector< double >& volume,
@@ -563,23 +549,16 @@ bool FastMatrixElim::buildForDiffusion(
 	vector< vector< unsigned int > > colIndex;
 
 	buildColIndex( nrows_, parentVoxel, colIndex );
+	vector< bool > isTwig( nrows_, true );
+	for ( unsigned int i = 0; i < nrows_; ++i ) {
+		if ( parentVoxel[i] != EMPTY_VOXEL )
+			isTwig[ parentVoxel[i] ] = false;
+	}
 
 	// Fill in the matrix entries for each colIndex
 	for ( unsigned int i = 0; i < nrows_; ++i ) {
 		vector< unsigned int >& c = colIndex[i];
 		vector< double > e( c.size(), 0.0 );
-		/*
-		// Find diagonal term
-		unsigned int diagIndex = EMPTY_VOXEL;
-		for ( unsigned int j = 0; j < c.size(); ++j ) {
-			if ( c[j] == i )
-				diagIndex = j;
-		}
-		assert( diagIndex != EMPTY_VOXEL );
-		double vol = volume[i];
-		double a = area[i];
-		double len = length[i];
-		*/
 
 		for ( unsigned int j = 0; j < c.size(); ++j ) {
 			unsigned int k = c[j]; // This is the colIndex, in order.
@@ -597,12 +576,11 @@ bool FastMatrixElim::buildForDiffusion(
 				}
 				e[j] *= diffConst;
 				// Fill in motor transport
-				for ( unsigned int p = 0; p < c.size(); ++p ) {
-					unsigned int q = c[p];
-					if ( q != i ) { // Skip self
-						e[j] += calcTransport( motorConst, 
-							length[q] + len, parentVoxel[i], q );
-					}
+				if ( i > 0 && motorConst < 0 ) { // Towards soma
+					e[j] += motorConst / len;
+				}
+				if ( !isTwig[i] && motorConst > 0 ) { // Toward twigs
+					e[j] -= motorConst / len;
 				}
 				e[j] *= -dt; // The previous lot is the rate, so scale by dt
 				e[j] += 1.0; // term for self.
@@ -610,8 +588,14 @@ bool FastMatrixElim::buildForDiffusion(
 				// Fill in diffusion from this entry to i.
 				e[j] = diffConst * 
 						(area[i] + a)/(length[i] + len )/vol;
-				e[j] += calcTransport( motorConst, 
-					length[k] + len, parentVoxel[i], k );
+
+				// Fill in motor transport
+				if ( k == parentVoxel[i] && motorConst > 0 ) { //toward twig
+					e[j] += motorConst / len;
+				}
+				if ( i == parentVoxel[k] && motorConst < 0 ) { //toward soma
+					e[j] -= motorConst / length[i];
+				}
 				e[j] *= -dt; // Scale the whole thing by dt.
 			}
 		}

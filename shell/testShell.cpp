@@ -133,18 +133,18 @@ void testTreeTraversal()
 	// Checking Id::path and ObjId::path
 	////////////////////////////////////////////////////////////////
 	string path = syns.path();
-	assert( path == "/f1[1]/f2b[5]/f3ba[6]/cell[0]/synapse[0]" );
+	assert( path == "/f1[1]/f2b[5]/f3ba[6]/cell[0]/synapse" );
 	ObjId oi( syns, 7, 3 );
 	path = oi.path();
 	assert( path == "/f1[1]/f2b[5]/f3ba[6]/cell[7]/synapse[3]" );
 	path = oi.id.path();
-	assert( path == "/f1[1]/f2b[5]/f3ba[6]/cell[0]/synapse[0]" );
+	assert( path == "/f1[1]/f2b[5]/f3ba[6]/cell[0]/synapse" );
 
 	ObjId oi2( f4, 4 );
 	path = oi2.path();
 	assert( path == "/f1[1]/f2b[5]/f3ba[6]/cell[4]" );
 	path = oi2.id.path();
-	assert( path == "/f1[1]/f2b[5]/f3ba[6]/cell[0]" );
+	assert( path == "/f1[1]/f2b[5]/f3ba[6]/cell" );
 
 	cout << "." << flush;
 
