@@ -3276,3 +3276,14 @@ Next:
 - Set up interface to Mumbl
 
 ============================================================================
+30 April
+Working on motors. After a sign fix things are better, but the molecules
+march off the end of the compartments. Should pile up instead.
+
+Still confused about motors.
+============================================================================
+1 May
+Revisited math for setting up motors. Did so. Now it works. Added snippet
+cylinderMotor.py.
+
+============================================================================
