@@ -37,6 +37,8 @@ import sys
 sys.path.append('../../python')
 import os
 os.environ['NUMPTHREADS'] = '1'
+import pylab
+import numpy
 import math
 import moose
 import moose.utils
@@ -215,14 +217,18 @@ def dump_plots( fname ):
     if ( os.path.exists( fname ) ):
         os.remove( fname )
     for x in moose.wildcardFind( '/graphs/##[ISA=Table]' ):
-        moose.utils.plotAscii(x.vector, file=fname)
+        t = numpy.arange( 0, x.vector.size, 1 )
+        pylab.plot( t, x.vector, label=x.name )
+    pylab.legend()
+    pylab.show()
+    #moose.utils.plotAscii(x.vector, file=fname)
 
 def make_spiny_compt():
     comptLength = 100e-6
     comptDia = 4e-6
     numSpines = 5
     compt = create_squid()
-    compt.inject = 0
+    compt.inject = 1e-7
     compt.x0 = 0
     compt.y0 = 0
     compt.z0 = 0
@@ -262,7 +268,7 @@ def create_pool( compt, name, concInit ):
 def test_elec_alone():
     eeDt = 2e-6
     hSolveDt = 2e-5
-    runTime = 1e-2
+    runTime = 0.02
 
     make_spiny_compt()
     make_elec_plots()
