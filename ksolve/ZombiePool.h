@@ -45,6 +45,8 @@ class ZombiePool: public PoolBase
 		void vSetSolver( Id v );
 		Id vGetSolver() const;
 
+		void vSetMotorConst( const Eref& e, double v );
+		double vGetMotorConst( const Eref& e ) const;
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
@@ -61,6 +63,7 @@ class ZombiePool: public PoolBase
 		ZombiePoolInterface* dsolve_;
 		ZombiePoolInterface* ksolve_;
 		double diffConst_;
+		double motorConst_;
 };
 
 #endif	// _ZOMBIE_POOL_H

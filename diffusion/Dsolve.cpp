@@ -241,9 +241,11 @@ void Dsolve::setStoich( const Eref& e, Id id )
 			PoolBase* pb = 
 					reinterpret_cast< PoolBase* >( pid.eref().data());
 			double diffConst = pb->getDiffConst( pid.eref() );
+			double motorConst = pb->getMotorConst( pid.eref() );
 			pb->setSolver( e.id() );
 			// double diffConst = Field< double >::get( pid, "diffConst" );
 			pools_[ poolMap_[i] ].setDiffConst( diffConst );
+			pools_[ poolMap_[i] ].setMotorConst( motorConst );
 		}
 	}
 	
@@ -329,6 +331,7 @@ void Dsolve::setPath( const Eref& e, string path )
 	for ( unsigned int i = 0; i < temp.size(); ++i ) {
 	 	Id id = temp[i];
 		double diffConst = Field< double >::get( id, "diffConst" );
+		double motorConst = Field< double >::get( id, "motorConst" );
 		const Cinfo* c = id.element()->cinfo();
 		if ( c == Pool::initCinfo() )
 			PoolBase::zombify( id.element(), ZombiePool::initCinfo(), e.id() );
@@ -343,6 +346,7 @@ void Dsolve::setPath( const Eref& e, string path )
 		unsigned int j = temp[i].value() - poolMapStart_;
 		assert( j < poolMap_.size() );
 		pools_[ poolMap_[j] ].setDiffConst( diffConst );
+		pools_[ poolMap_[j] ].setMotorConst( motorConst );
 	}
 	
 	double dt = findDt( e );
@@ -478,6 +482,11 @@ void Dsolve::setDiffConst( const Eref& e, double v )
 double Dsolve::getDiffConst( const Eref& e ) const
 {
 	return pools_[ convertIdToPoolIndex( e ) ].getDiffConst();
+}
+
+void Dsolve::setMotorConst( const Eref& e, double v )
+{
+	pools_[ convertIdToPoolIndex( e ) ].setMotorConst( v );
 }
 
 void Dsolve::setNumPools( unsigned int numPoolSpecies )

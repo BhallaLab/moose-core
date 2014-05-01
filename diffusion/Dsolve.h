@@ -65,6 +65,7 @@ class Dsolve: public ZombiePoolInterface
 		void setN( const Eref& e, double value );
 		double getDiffConst( const Eref& e ) const;
 		void setDiffConst( const Eref& e, double value );
+		void setMotorConst( const Eref& e, double value );
 
 		void setNumPools( unsigned int num );
 		unsigned int getNumPools() const;
