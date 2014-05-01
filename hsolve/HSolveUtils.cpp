@@ -207,7 +207,7 @@ void HSolveUtils::rates(
 	vector< double >& A,
 	vector< double >& B )
 {
-    dump("HSolveUtils::rates*() is not tested with new api", "FIXME");
+    dump("HSolveUtils::rates() has not been tested yet.", "WARN");
     double min = HSolveUtils::get< HHGate, double >( gateId, "min" );
     double max = HSolveUtils::get< HHGate, double >( gateId, "max" );
     unsigned int divs = HSolveUtils::get< HHGate, unsigned int >(
