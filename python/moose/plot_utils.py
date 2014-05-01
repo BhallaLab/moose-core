@@ -17,10 +17,10 @@ __status__           = "Development"
 
 def plotAscii(yvec, xvec = None):
     """docstring for plotAscii"""
-    assert type(yvec) == type(xvec)
-    if xvec in None:
+    if xvec is None:
         plotInTerminal(yvec, xvec = range( len(yvec) ))
     else:
+        assert type(yvec) == type(xvec)
         plotInTerminal(yvec, xvec)
 
 def plotInTerminal(yvec, xvec = None):
