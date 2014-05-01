@@ -1,0 +1,6 @@
+cache: apt
+before_script: 
+    - sudo apt-get install libhdf5-openmpi-dev
+    - sudo apt-get install libgsl0-dev
+    - sudo apt-get install python-numpy
+script: "./build_me.sh"
