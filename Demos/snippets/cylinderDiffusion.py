@@ -14,6 +14,8 @@
 # Molecule C does not move: diffConst = 0.0
 # Molecule D does not move: diffConst = 1.0e-12 but it is buffered.
 
+import sys
+sys.path.append('../../python')
 import math
 import pylab
 import numpy
@@ -22,6 +24,7 @@ import moose
 import os
 import signal 
 PID = os.getpid()
+
 
 def doNothing( *args ):
 		pass
