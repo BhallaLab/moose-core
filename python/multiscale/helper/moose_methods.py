@@ -190,6 +190,3 @@ def setupTable(name, obj, qtyname, tablePath=None, threshold=None):
     else:
         raise UserWarning("TODO: Table with threshold is not implemented yet")
     return table
-
-    
-

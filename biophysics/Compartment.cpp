@@ -556,7 +556,11 @@ double Compartment::getZ() const
 
 void Compartment::process( const Eref& e, ProcPtr p )
 {
-	// cout << "Compartment " << e.id().path() << ":: process: A = " << A_ << ", B = " << B_ << endl;
+
+#if VERBOSITY > 1
+	cout << "Compartment " << e.id().path() 
+            << ":: process: A = " << A_ << ", B = " << B_ << endl;
+#endif
 	A_ += Inject_ + sumInject_ + Em_ * invRm_; 
 	if ( B_ > EPSILON ) {
 		double x = exp( -B_ * p->dt / Cm_ );
