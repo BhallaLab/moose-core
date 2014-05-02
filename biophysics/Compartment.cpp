@@ -556,11 +556,7 @@ double Compartment::getZ() const
 
 void Compartment::process( const Eref& e, ProcPtr p )
 {
-
-#if VERBOSITY > 1
-	cout << "Compartment " << e.id().path() 
-            << ":: process: A = " << A_ << ", B = " << B_ << endl;
-#endif
+        //cout << "Compartment " << e.id().path() << ":: process: A = " << A_ << ", B = " << B_ << endl;
 	A_ += Inject_ + sumInject_ + Em_ * invRm_; 
 	if ( B_ > EPSILON ) {
 		double x = exp( -B_ * p->dt / Cm_ );
@@ -608,7 +604,6 @@ void Compartment::innerInitProc( const Eref& e, ProcPtr p )
 {
 	// Send out the axial messages
 	axialOut()->send( e, Vm_ );
-
 	// Send out the raxial messages
 	raxialOut()->send( e, Ra_, Vm_ );
 }
