@@ -85,11 +85,13 @@ class SpineMesh: public MeshCompt
 		void innerBuildDefaultMesh( const Eref& e,
 			double volume, unsigned int numEntries );
 
+		/*
 		void innerHandleRequestMeshStats(
 			const Eref& e,
 			const SrcFinfo2< unsigned int, vector< double > >*
 				meshStatsFinfo
 		);
+			*/
 
 		void innerHandleNodeInfo(
 			const Eref& e, 
@@ -135,6 +137,9 @@ class SpineMesh: public MeshCompt
 		void indexToSpace( unsigned int index, 
 						double& x, double& y, double& z ) const;
 		
+		const vector< double >& getVoxelVolume() const;
+		const vector< double >& getVoxelArea() const;
+		const vector< double >& getVoxelLength() const;
 		//////////////////////////////////////////////////////////////////
 		// Utility function for tests
 		const vector< SpineEntry >& spines() const;
@@ -155,6 +160,22 @@ class SpineMesh: public MeshCompt
 		 * CubeMesh. Defaults to 0.1.
 		 */
 		double surfaceGranularity_;
+
+		/**
+		 * Volscale pre-calculations for each MeshEntry. 
+		 * vs = #molecules / vol
+		 * where vol is expressed in m^3.
+		 */
+		vector< double > vs_;
+
+		/**
+		 * Mesh junction area pre-calculations for each MeshEntry.
+		 * This is the cross-section area of the middle of each voxel.
+		 */
+		vector< double > area_;
+		
+		/// Pre-calculation of length of each MeshEntry
+		vector< double > length_;
 };
 
 

@@ -12,7 +12,7 @@
 #include "MeshEntry.h"
 #include "VoxelJunction.h"
 #include "ChemCompt.h"
-#include "Vec.h"
+#include "../utility/Vec.h"
 #include "CylBase.h"
 #include "SpineEntry.h"
 
