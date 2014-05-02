@@ -43,6 +43,8 @@ class RallPacks():
             compList.append(moose.Compartment('/cable/comp{}'.format(i)))
 
         # Connect these compartments linearly.
+        from IPython import embed
+        embed()
 
 if __name__ == "__main__":
     rallpacks = RallPacks()
