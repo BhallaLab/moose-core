@@ -3286,4 +3286,10 @@ Still confused about motors.
 Revisited math for setting up motors. Did so. Now it works. Added snippet
 cylinderMotor.py.
 
+Checkin 5337.
+
+Some fixes in the problems with SpikeRingBuffer. Latest issue was that
+it wasn't scheduled, so it didn't know CurrTime. When fixed I get
+spiking but need to see how it matches.
+
 ============================================================================

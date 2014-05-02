@@ -10,7 +10,7 @@
 #include <cctype>
 #include "header.h"
 #include "SparseMatrix.h"
-#include "Vec.h"
+#include "../utility/Vec.h"
 
 #include "ElementValueFinfo.h"
 #include "Boundary.h"
@@ -155,8 +155,7 @@ unsigned int SpineMesh::innerGetDimensions() const
 
 // Here we set up the spines. We don't permit heads without shafts.
 void SpineMesh::handleSpineList( 
-		const Eref& e, const Qinfo* q, 
-		Id cell,
+		const Eref& e, Id cell,
 		vector< Id > shaft, vector< Id > head, 
 		vector< unsigned int > parentVoxel )
 {
@@ -189,8 +188,7 @@ void SpineMesh::handleSpineList(
 		}
 		vector< vector< unsigned int > > outgoingEntries;
 		vector< vector< unsigned int > > incomingEntries;
-		meshSplit()->fastSend( e, oldVol, vols,
-						localIndices, outgoingEntries, incomingEntries );
+		// meshSplit()->send( e, oldVol, vols, localIndices, outgoingEntries, incomingEntries );
 		lookupEntry( 0 )->triggerRemesh( meshEntry.eref(),
 						oldVol, 0, localIndices, vols );
 }
@@ -261,20 +259,43 @@ double SpineMesh::extendedMeshEntryVolume( unsigned int fid ) const
 // Dest funcsl
 //////////////////////////////////////////////////////////////////
 
+/*
 /// More inherited virtual funcs: request comes in for mesh stats
 /// Not clear what this does.
-void SpineMesh::innerHandleRequestMeshStats( const Eref& e, const Qinfo* q, 
+void SpineMesh::innerHandleRequestMeshStats( const Eref& e,
 		const SrcFinfo2< unsigned int, vector< double > >* meshStatsFinfo
 	)
 {
 		;
 }
+*/
 
 void SpineMesh::innerHandleNodeInfo(
-			const Eref& e, const Qinfo* q, 
+			const Eref& e,
 			unsigned int numNodes, unsigned int numThreads )
 {
+
+
 }
+//////////////////////////////////////////////////////////////////
+// Inherited virtual funcs
+//////////////////////////////////////////////////////////////////
+
+const vector< double >& SpineMesh::getVoxelVolume() const
+{
+	return vs_;
+}
+
+const vector< double >& SpineMesh::getVoxelArea() const
+{
+	return area_;
+}
+
+const vector< double >& SpineMesh::getVoxelLength() const
+{
+	return length_;
+}
+
 //////////////////////////////////////////////////////////////////
 
 /**
@@ -297,7 +318,7 @@ void SpineMesh::innerSetNumEntries( unsigned int n )
 /**
  * Not allowed.
  */
-void SpineMesh::innerBuildDefaultMesh( const Eref& e, const Qinfo* q,
+void SpineMesh::innerBuildDefaultMesh( const Eref& e,
 	double volume, unsigned int numEntries )
 {
 	cout << "Warning: attempt to build a default spine: not permitted\n";
