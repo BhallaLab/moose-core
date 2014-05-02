@@ -87,6 +87,10 @@ class PsdMesh: public MeshCompt
 		/// Returns # of dimensions, always 3 here. Inherited pure virt func
 		unsigned int innerGetDimensions() const;
 		
+		vector< unsigned int > getParentVoxel() const;
+		const vector< double >& getVoxelVolume() const;
+		const vector< double >& getVoxelArea() const;
+		const vector< double >& getVoxelLength() const;
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
@@ -168,6 +172,10 @@ class PsdMesh: public MeshCompt
 		 * CubeMesh. Defaults to 0.1.
 		 */
 		double surfaceGranularity_;
+
+		vector< double > vs_; /// Vol
+		vector< double > area_; /// area
+		vector< double > length_; /// length
 };
 
 
