@@ -10,6 +10,7 @@ import _moose
 import plot_utils
 
 plotAscii = plot_utils.plotAscii
+plotTable = plot_utils.plotTable
 
 ## for Ca Pool
 #FARADAY = 96154.0 # Coulombs # from cadecay.mod : 1/(2*96154.0) = 5.2e-6 which is the Book of Genesis / readcell value

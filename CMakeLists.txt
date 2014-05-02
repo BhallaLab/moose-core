@@ -66,7 +66,7 @@ endif(ENABLE_STD_2011)
 set(ENABLE_UNIT_TESTS 1)
 if(ENABLE_UNIT_TESTS)
     MESSAGE("++ Unit testing enabled.")
-    add_definitions(-DDO_UNIT_TESTS -DVERBOSITY=1)
+    add_definitions(-DDO_UNIT_TESTS)
 endif()
 
 set(VERIFY 1)
@@ -75,7 +75,7 @@ if(VERIFY)
 endif(VERIFY)
 
 # VERBOSITY OF OUTPUT
-set(VERBOSITY 1)
+set(VERBOSITY "1" CACHE STRING "0")
 if(VERBOSITY)
     message("++ Verbosity of output is ${VERBOSITY}")
     add_definitions(-DVERBOSITY=${VERBOSITY})
