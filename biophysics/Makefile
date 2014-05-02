@@ -21,6 +21,7 @@ OBJ = \
 	HHChannel.o	\
 	HHGate.o	\
 	CaConc.o	\
+	MgBlock.o	\
 	Neuron.o	\
 	ReadCell.o	\
 	SynChanBase.o	\
@@ -66,6 +67,7 @@ ChanBase.o: ChanBase.h
 HHChannel.o: ChanBase.h HHChannel.h HHGate.h
 HHGate.o: HHGate.h
 CaConc.o:	CaConc.h
+MgBlock.o:	MgBlock.h ChanBase.h
 Neuron.o:	Neuron.h
 ReadCell.o: ReadCell.h ../shell/Shell.h ../utility/utility.h
 IzhikevichNrn.o: IzhikevichNrn.h

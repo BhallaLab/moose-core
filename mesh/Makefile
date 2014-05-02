@@ -18,6 +18,9 @@ OBJ = \
 	CylMesh.o	\
 	NeuroNode.o	\
 	NeuroMesh.o	\
+	SpineEntry.o	\
+	SpineMesh.o	\
+	PsdMesh.o	\
 	testMesh.o	\
 
 HEADERS = \

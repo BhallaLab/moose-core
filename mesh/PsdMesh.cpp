@@ -10,7 +10,7 @@
 #include <cctype>
 #include "header.h"
 #include "SparseMatrix.h"
-#include "Vec.h"
+#include "../utility/Vec.h"
 
 #include "ElementValueFinfo.h"
 #include "Boundary.h"
@@ -184,8 +184,7 @@ void PsdMesh::handlePsdList(
 		}
 		vector< vector< unsigned int > > outgoingEntries;
 		vector< vector< unsigned int > > incomingEntries;
-		meshSplit()->fastSend( e, oldVol, vols,
-						localIndices, outgoingEntries, incomingEntries );
+		// meshSplit()->send( e, oldVol, vols, localIndices, outgoingEntries, incomingEntries );
 		lookupEntry( 0 )->triggerRemesh( meshEntry.eref(),
 						oldVol, 0, localIndices, vols );
 
@@ -423,3 +422,29 @@ void PsdMesh::matchCubeMeshEntries( const ChemCompt* other,
 		i, surfaceGranularity_, ret, false, true );
 	}
 }
+
+
+////////////////////////////////////////////////////////////////////////
+// Inherited Virtual funcs for getting voxel info.
+////////////////////////////////////////////////////////////////////////
+
+vector< unsigned int > PsdMesh::getParentVoxel() const
+{
+	return parent_;
+}
+
+const vector< double >& PsdMesh::getVoxelVolume() const
+{
+	return vs_;
+}
+
+const vector< double >& PsdMesh::getVoxelArea() const
+{
+	return area_;
+}
+
+const vector< double >& PsdMesh::getVoxelLength() const
+{
+	return length_;
+}
+
