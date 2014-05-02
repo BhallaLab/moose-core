@@ -50,6 +50,9 @@ compartment using regular compartment and Func to check for thresold
 crossing and resetting the Vm."""
 
 
+import sys
+sys.path.append('../../python')
+
 import moose
 from moose import utils
 from pylab import *

@@ -15,6 +15,8 @@ __maintainer__       = "Dilawar Singh"
 __email__            = "dilawars@iitb.ac.in"
 __status__           = "Development"
 
+import pylab 
+
 def plotAscii(yvec, xvec = None, file=None):
     """Plot two list-like object in terminal using gnuplot.
     If file is given then save data to file as well.
@@ -78,3 +80,14 @@ def saveAsGnuplot( yvec, xvec, file):
     with open(file+".gnuplot","w") as gnuplotF:
         gnuplotF.write("\n".join(text))
 
+
+def plotTable(table, subfig=True, file=None):
+    ''' Plot a given table '''
+    if not subfig:
+        pylab.figure()
+    vector = table.vector 
+    xvector = range(len(vector))
+    pylab.plot(xvector, vector)
+    if file:
+        print("[UTIL] Saving plot to {}".format(file))
+        pylab.savefig(file)
