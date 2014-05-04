@@ -285,7 +285,20 @@ Id Stoich::getPoolInterface() const
 
 double Stoich::getEstimatedDt() const
 {
-	return 1; // Dummy
+	vector< double > s( getNumAllPools(), 1.0 );
+	vector< double > v( numReac_, 0.0 );
+	double maxVel = 0.0;
+	if ( rates_.size() > 0 && rates_[0] ) {
+		updateReacVelocities( &s[0], v );
+		for ( vector< double >::iterator 
+						i = v.begin(); i != v.end(); ++i )
+				if ( maxVel < *i )
+					maxVel = *i;
+	}
+	if ( maxVel < EPSILON )
+	 	return 0.1; // Based on typical sig pathway reac rates.
+	// Heuristic: the largest velocity times dt should be 10% of mol conc.
+	return 0.1 / maxVel; 
 }
 
 unsigned int Stoich::getNumVarPools() const

@@ -313,6 +313,7 @@ SUBDIR = \
 	hsolve \
 	diffusion \
 	device \
+	signeur \
 	benchmarks \
 	$(SMOLDYN_DIR) \
 	$(SBML_DIR) \
@@ -340,6 +341,7 @@ OBJLIBS =	\
 	mesh/_mesh.o \
 	diffusion/_diffusion.o \
 	device/_device.o \
+	signeur/_signeur.o \
 	benchmarks/_benchmarks.o \
 	$(SMOLDYN_LIB) \
 	$(SBML_LIB) \

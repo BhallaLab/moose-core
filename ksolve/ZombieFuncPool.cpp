@@ -23,12 +23,13 @@ const Cinfo* ZombieFuncPool::initCinfo()
 		&input,             // DestFinfo
 	};
 
+	static Dinfo< ZombieFuncPool > dinfo( true );
 	static Cinfo zombieFuncPoolCinfo (
 		"ZombieFuncPool",
 		ZombiePool::initCinfo(),
 		zombieFuncPoolFinfos,
 		sizeof( zombieFuncPoolFinfos ) / sizeof( const Finfo* ),
-		new Dinfo< ZombieFuncPool >()
+		&dinfo
 	);
 
 	return &zombieFuncPoolCinfo;

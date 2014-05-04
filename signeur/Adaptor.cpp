@@ -34,15 +34,17 @@ static SrcFinfo0 *requestInput()
 	return &requestInput;
 }
 
-static SrcFinfo1< FuncId >  *requestField()
+static SrcFinfo1< double* >  *requestField()
 {
-	static SrcFinfo1< FuncId > requestField( "requestField", 
+	static SrcFinfo1< double* > requestField( "requestField", 
 			"Sends out a request to a generic double field. "
 			"Issued from the process call."
+			"Only works for a single target."
 	);
 	return &requestField;
 }
 
+/*
 static DestFinfo* handleInput() {
 	static DestFinfo handleInput( "handleInput", 
 			"Handle the returned value, which is in a prepacked buffer.",
@@ -50,6 +52,7 @@ static DestFinfo* handleInput() {
 	);
 	return &handleInput;
 }
+*/
 
 const Cinfo* Adaptor::initCinfo()
 {
@@ -136,7 +139,6 @@ const Cinfo* Adaptor::initCinfo()
 			"Handle the returned value.",
 			new OpFunc1< Adaptor, double >( &Adaptor::input )
 	);
-	*/
 
 	static Finfo* inputRequestShared[] =
 	{
@@ -149,6 +151,7 @@ const Cinfo* Adaptor::initCinfo()
 		inputRequestShared, 
 		sizeof( inputRequestShared ) / sizeof( Finfo* )
 	);
+	*/
 
 	//////////////////////////////////////////////////////////////////////
 	// Now set it all up.
@@ -161,9 +164,10 @@ const Cinfo* Adaptor::initCinfo()
 		&output,					// ReadOnlyValue
 		&input,						// DestFinfo
 		outputSrc(),				// SrcFinfo
+		requestInput(),				// SrcFinfo
 		requestField(),				// SrcFinfo
 		&proc,						// SharedFinfo
-		&inputRequest,				// SharedFinfo
+	//	&inputRequest,				// SharedFinfo
 	};
 	
 	static string doc[] =
@@ -250,6 +254,7 @@ void Adaptor::input( double v )
 	++counter_;
 }
 
+/*
 void Adaptor::handleBufInput( PrepackedBuffer pb )
 {
 	assert( pb.dataSize() == 1 );
@@ -257,6 +262,7 @@ void Adaptor::handleBufInput( PrepackedBuffer pb )
 	sum_ += v;
 	++counter_;
 }
+*/
 
 // separated out to help with unit tests.
 void Adaptor::innerProcess()
@@ -273,9 +279,12 @@ void Adaptor::innerProcess()
 
 void Adaptor::process( const Eref& e, ProcPtr p )
 {
-	static FuncId fid = handleInput()->getFid(); 
+	// static FuncId fid = handleInput()->getFid(); 
 	requestInput()->send( e );
-	requestField()->send( e, fid );
+	double v;
+	requestField()->send( e, &v );
+	sum_ += v;
+	counter_ = 1;
 	innerProcess();
 	outputSrc()->send( e, output_ );
 }

@@ -488,7 +488,9 @@ extern "C" {
         if (self->owner.bad()){
             RAISE_INVALID_ID(NULL, "moose_ElementField_getNum");
         }
-        unsigned int num = Field<unsigned int>::get(self->owner, "num_" + string(self->name));
+		string name = self->name;
+		name[0] = toupper( name[0] );
+        unsigned int num = Field<unsigned int>::get(self->owner, "num" + name);
         return Py_BuildValue("I", num);
     }
 
