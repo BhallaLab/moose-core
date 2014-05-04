@@ -39,6 +39,14 @@ unsigned int chopLine( const string& line, vector< string >& ret )
 	return ret.size();
 }
 
+string lower( const string& input )
+{
+	string ret = input;
+	for ( unsigned int i = 0; i < input.length(); ++i )
+		ret[i] = tolower( ret[i] );
+	return ret;
+}
+
 ////////////////////////////////////////////////////////////////////////
 
 ReadKkit::ReadKkit()
@@ -113,7 +121,7 @@ void ReadKkit::setMoveOntoCompartment( bool v )
 Id  makeStandardElements( Id pa, const string& modelname )
 {
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
-	cout << " kkit read " << pa << " " << modelname << " "<< MooseGlobal;
+	//cout << " kkit read " << pa << " " << modelname << " "<< MooseGlobal;
 	Id mgr = shell->doCreate( "Neutral", pa, modelname, 1, MooseGlobal );
 	Id kinetics = 
 		shell->doCreate( "CubeMesh", mgr, "kinetics", 1,  MooseGlobal );
@@ -131,6 +139,54 @@ Id  makeStandardElements( Id pa, const string& modelname )
 		shell->doCreate( "Neutral", mgr, "groups", 1, MooseGlobal );
 	assert( groups != Id() );
 	return mgr;
+}
+
+void setMethod( Shell* s, Id mgr, double simdt, double plotdt, 
+				const string& method )
+{
+	Id compt( mgr.path() + "/kinetics" );
+	assert( compt != Id() );
+	string cpath = compt.path();
+	string simpath = cpath + "/##[]";
+	string simpath2 = cpath + "/##[ISA=StimulusTable]," +
+			cpath + "/##[ISA=PulseGen]";
+
+	string m = lower( method );
+	if ( m == "rk4" ) {
+		cout << "Warning, not yet implemented. Using rk5 instead\n";
+		m = "rk5";
+	}	
+	if ( m == "ksolve" || m == "gsl" || 
+		m == "rk5" || m == "rkf" || m == "rk" ) {
+			Id ksolve = s->doCreate( "Ksolve", compt, "ksolve", 1 );
+			Id stoich = s->doCreate( "Stoich", compt, "stoich", 1 );
+			Field< unsigned int >::set( ksolve, "numAllVoxels", 1 );
+			Field< Id >::set( stoich, "poolInterface", ksolve );
+			Field< Id >::set( ksolve, "stoich", stoich );
+			Field< string >::set( stoich, "path", simpath );
+			simpath2 += "," + cpath + "/ksolve";
+			s->doUseClock( simpath2, "process", 4 );
+			s->doSetClock( 4, plotdt );
+	} else if ( m == "gssa" || m == "gsolve" || 
+		m == "gillespie" || m == "stochastic" ) {
+			Id gsolve = s->doCreate( "Gsolve", compt, "gsolve", 1 );
+			Id stoich = s->doCreate( "Stoich", compt, "stoich", 1 );
+			Field< unsigned int >::set( gsolve, "numAllVoxels", 1 );
+			Field< Id >::set( stoich, "poolInterface", gsolve );
+			Field< Id >::set( gsolve, "stoich", stoich );
+			Field< string >::set( stoich, "path", simpath );
+			simpath2 += "," + cpath + "/gsolve";
+			s->doUseClock( simpath2, "process", 4 );
+			s->doSetClock( 4, plotdt );
+	} else if ( m == "ee" || m == "neutral" ) {
+			s->doUseClock( simpath, "process", 4 );
+			s->doSetClock( 4, simdt );
+	} else {
+			cout << "ReadKkit::setMethod: option " << method <<
+					" not known, using Exponential Euler (ee)\n";
+			s->doUseClock( simpath, "process", 4 );
+			s->doSetClock( 4, simdt );
+	}
 }
 /**
  * The readcell function implements the old GENESIS cellreader
@@ -170,23 +226,14 @@ Id ReadKkit::read(
 
 	convertParametersToConcUnits();
 
-	s->doSetClock( 4, simdt_ );
 	s->doSetClock( 8, plotdt_ );
 	
-	string simpath = basePath_ + "/kinetics/##[]";
-	s->doUseClock( simpath, "process", 4 );
 	string plotpath = basePath_ + "/graphs/##[TYPE=Table]," +
 			basePath_ + "/moregraphs/##[TYPE=Table]";
 	s->doUseClock( plotpath, "process", 8 );
 
-	/*
-	s->setCwe( mgr );
-	Field< double >::set( mgr, "plotDt", plotdt_ );
-	Field< double >::set( mgr, "simDt", simdt_ );
-	Field< double >::set( mgr, "runTime", maxtime_ );
-	Field< double >::set( mgr, "version", version_ );
-	SetGet1< string >::set( mgr, "build", method );
-	*/
+	setMethod( s, mgr, simdt_, plotdt_, method );
+
 	s->doReinit();
 	return mgr;
 }

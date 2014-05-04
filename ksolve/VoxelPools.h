@@ -22,6 +22,7 @@ class VoxelPools: public VoxelPoolsBase
 		//////////////////////////////////////////////////////////////////
 		void setStoich( const Stoich* stoich, const OdeSystem* ode );
 		void advance( const ProcInfo* p );
+		void setInitDt( double dt );
 
 		/// This is the function which evaluates the rates.
 		static int gslFunc( double t, const double* y, double *dydt, 

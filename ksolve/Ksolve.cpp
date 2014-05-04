@@ -293,8 +293,10 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 
 void Ksolve::reinit( const Eref& e, ProcPtr p )
 {
+	double initDt = stoichPtr_->getEstimatedDt();
 	for ( vector< VoxelPools >::iterator 
 					i = pools_.begin(); i != pools_.end(); ++i ) {
+		i->setInitDt( initDt );
 		i->reinit();
 	}
 }
@@ -363,6 +365,9 @@ void Ksolve::setNumPools( unsigned int numPoolSpecies )
 {
 	assert( stoichPtr_ );
 	OdeSystem ode;
+	// Can't do this here as Stoich will not have had its path set yet.
+	// ode.initStepSize = stoichPtr_->getEstimatedDt();
+	ode.initStepSize = 0.1;
 #ifdef USE_GSL
 	ode.gslSys.function = &VoxelPools::gslFunc;
    	ode.gslSys.jacobian = 0;
