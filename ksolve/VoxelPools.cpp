@@ -69,6 +69,13 @@ void VoxelPools::advance( const ProcInfo* p )
 #endif
 }
 
+void VoxelPools::setInitDt( double dt )
+{
+#ifdef USE_GSL
+	gsl_odeiv2_driver_reset_hstart( driver_, dt );
+#endif
+}
+
 // static func. This is the function that goes into the Gsl solver.
 int VoxelPools::gslFunc( double t, const double* y, double *dydt, 
 						void* params )

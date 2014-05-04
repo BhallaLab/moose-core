@@ -554,15 +554,17 @@ void NeuroMesh::setCellPortion( const Eref& e,
 
 void NeuroMesh::separateOutSpines( const Eref& e )
 {
-		/*
 		vector< Id > ids;
+		/*
 		e.element()->getNeighbours( ids, spineListOut() );
 		if ( ids.size() > 0 ) {
 			SetGet4< Id, vector< Id >, vector< Id >, 
 					vector< unsigned int > >::set( 
 					ids[0], "spineList", cell_, shaft_, head_, parent_ );
 		}
-		// spineListOut()->send( e, thread, cell_, shaft_, head_, parent_ );
+		*/
+		spineListOut()->send( e, cell_, shaft_, head_, parent_ );
+
 		vector< double > ret;
 		vector< double > psdCoords;
 		vector< unsigned int > index( head_.size(), 0 );
@@ -578,11 +580,12 @@ void NeuroMesh::separateOutSpines( const Eref& e )
 			}
 			ids.clear();
 			e.element()->getNeighbours( ids, psdListOut() );
-			// psdListOut()->send( e, thread, cell_, psdCoords, index );
+			psdListOut()->send( e, cell_, psdCoords, index );
+			/*
 			SetGet3< Id, vector< double >, vector< unsigned int > >::set( 
 					ids[0], "psdList", cell_, psdCoords, index );
+					*/
 		}
-		*/
 }
 
 /** 
