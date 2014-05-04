@@ -366,6 +366,8 @@ bool matchBeforeBrace( ObjId id, const string& name )
 	// # may only be used once in the wildcard, but substitutes for any
 	// number of characters.
 	if ( pre != string::npos && post == pre ) {
+		if ( ename.length() < ( name.length() - post - 1 ) )
+				return false;
 		unsigned int epos = ename.length() - ( name.length() - post - 1 );
 		return ( name.substr( 0, pre ) == ename.substr( 0, pre ) &&
 			name.substr( post + 1 ) == ename.substr( epos ) );
@@ -377,8 +379,8 @@ bool matchBeforeBrace( ObjId id, const string& name )
 		return 0;
 	for ( unsigned int i = 0; i < name.length(); i++ )
 		if ( name[i] != '?' && name[i] != ename[i] )
-			return 0;
-	return 1;
+			return false;
+	return true;
 }
 
 /**

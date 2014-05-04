@@ -1,8 +1,7 @@
-# This example illustrates loading, running, and saving a kinetic model 
-# defined in kkit format. We use the gsl solver here. The model already
-# defines a couple of plots and sets the runtime to 100 seconds. The
-# script dumps the output into an xplot file called data.plot and the
-# saved version into saveReaction.g
+# This example illustrates loading, running, and displaying a kinetic model 
+# defined in kkit format, using the entire range of Kkit objects. 
+# We use the gsl solver here. The model already
+# defines a couple of plots and sets the runtime to 100 seconds. 
 
 import moose
 import os

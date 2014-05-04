@@ -3293,3 +3293,24 @@ it wasn't scheduled, so it didn't know CurrTime. When fixed I get
 spiking but need to see how it matches.
 
 ============================================================================
+2 May
+Working on adaptors. Now compiles and clears unit tests but need to 
+incorporate it and figure out what to do with requestField msg - do I
+really want this?
+
+============================================================================
+3 May.
+Working through loadMulti snippet. Ran into silly wildcard bug. Fixed.
+Also a silly ZombieFuncPool bug. fixed.
+Stuck now with Stoich calculations.
+Valgrind may help.
+
+Something seriously wrong with the ksolver. I have implemented stuff
+to deal with setting up a reasonable initial dt, but this isn't 
+fixing it. It was working earlier. Symptoms are that there is a mismatch
+between internal vectors of mols and the visible ones.
+
+Will have to fall back to ee for the demo of multiscale models in 
+NeuroHDF
+
+============================================================================

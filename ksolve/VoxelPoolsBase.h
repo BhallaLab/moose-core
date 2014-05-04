@@ -55,7 +55,7 @@ class VoxelPoolsBase
 		double* varSinit();
 
 		/**
-		 * Assigns S = Sinit.
+		 * Assigns S = Sinit and sets up initial dt. 
 		 */
 		void reinit();
 		
