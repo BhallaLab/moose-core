@@ -10,5 +10,8 @@ add_library(mesh
     CylMesh.cpp
     NeuroNode.cpp	
     NeuroMesh.cpp	
+    SpineEntry.cpp
+    SpineMesh.cpp
+    PsdMesh.cpp
     testMesh.cpp	
     )
