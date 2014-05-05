@@ -47,8 +47,8 @@ ifeq ($(USE_GSL),1)
 GSL_OBJ = \
 #	GslIntegrator.o
 
-#GSL_LIBS = -L/usr/lib -lgsl -lgslcblas
-#GSL_FLAGS = -DUSE_GSL
+GSL_LIBS = -L/usr/lib -lgsl -lgslcblas
+GSL_FLAGS = -DUSE_GSL
 endif
 
 default: $(TARGET)
