@@ -117,6 +117,8 @@ if(LIBSBML_FOUND)
     add_definitions(-DUSE_SBML)
     add_subdirectory(sbml)
     include_directories(${LIBSBML_INCLUDE_DIR})
+    # Libxml2 is required.
+    find_package(LibXML2 REQUIRED)
 elseif()
     add_definitions(-UUSE_SBML)
 endif(LIBSBML_FOUND)
@@ -178,22 +180,20 @@ target_link_libraries(moose
     )
 
 if(LIBSBML_FOUND)
-    target_link_libraries(moose moose_sbml ${LIBSBML_LIBRARY})
+    target_link_libraries(moose moose_sbml ${LIBSBML_LIBRARY} z)
     if(BZIP2_FOUND)
         target_link_libraries(moose ${BZIP2_LIBRARIES})
     else()
         target_link_libraries(moose bz2)
+    endif()
+    if(LIBXML2_FOUND)
+        target_link_libraries(moose ${LibXML2_LIBRARIES})
     endif()
 endif()
 
 # Link gsl 
 set(LOCAL_GSL_LIBRARIES  gsl gslcblas m)
 target_link_libraries(moose ${LOCAL_GSL_LIBRARIES})
-
-# Libxml2 is required.
-#find_package(LibXML REQUIRED)
-#target_link_libraries(moose ${LibXML_LIBRARIES})
-
 
 ######################### BUILD PYMOOSE ########################################
 
@@ -226,8 +226,13 @@ if(BUILD_PYMOOSE)
     if(HDF5_FOUND)
         list(APPEND LIBRARIES ${HDF5_LIBRARY})
     endif()
+
     if(LIBSBML_FOUND)
         list(APPEND LIBRARIES moose_sbml ${LIBSBML_LIBRARY})
+    endif()
+
+    if(LIBXML2_FOUND)
+        list(APPEND LIBSBML_FOUND ${LibXML2_LIBRARIES})
     endif()
 
     target_link_libraries(_moose 
