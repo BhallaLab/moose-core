@@ -191,7 +191,25 @@ const Cinfo* IzhikevichNrn::initCinfo()
             "bDest",
             "Destination message to modify parameter b at runtime",            
             new OpFunc1<IzhikevichNrn, double>(&IzhikevichNrn::setB));
+    
+    static OpFunc2<IzhikevichNrn, double, double > opfuncChannel(&IzhikevichNrn::handleChannel);
 
+    static DestFinfo handleChannel("handleChannel",
+                                   "Handles conductance and reversal potential arguments from Channel",
+                                   &opfuncChannel);
+
+    static Finfo * channelShared[] = {
+        &handleChannel,
+        VmOut()
+    };
+
+    static SharedFinfo channel("channel",
+			"This is a shared message from a IzhikevichNrn to channels."
+			"The first entry is a MsgDest for the info coming from "
+			"the channel. It expects Gk and Ek from the channel "
+			"as args. The second entry is a MsgSrc sending Vm ",
+                               channelShared, sizeof( channelShared ) / sizeof( Finfo* )
+	);                               
     static Finfo* IzhikevichNrnFinfos[] = {
         &proc,
         &Vmax,
@@ -217,6 +235,7 @@ const Cinfo* IzhikevichNrn::initCinfo()
         &aDest,
         VmOut(),
         spikeOut(),
+        &channel,
     };
     
     static string doc[] = {
@@ -424,6 +443,11 @@ void IzhikevichNrn::setU0( double value)
 double IzhikevichNrn::getU0() const
 {
     return u0_;
+}
+
+void IzhikevichNrn::handleChannel(double Gk, double Ek)
+{
+    sum_inject_ += Gk * (Ek - Vm_);
 }
 
 void IzhikevichNrn::process(const Eref& eref, ProcPtr proc)

@@ -81,7 +81,7 @@ def make_synapse(path):
     syn = moose.SynChan(path)
     syn.tau1 = 5.0 # ms
     syn.tau2 = 1.0 # ms
-    syn.Gk = 1.0 # mS
+    syn.Gbar = 1.0 # mS
     syn.Ek = 0.0
     syn.synapse.num = 1
     # syn.bufferTime = 1.0 # ms
@@ -106,9 +106,8 @@ def make_model():
     neuron = make_neuron('/model/neuron')
     pulse = make_pulsegen('/model/pulse')
     synapse, spike_in = make_synapse('/model/synapse')
-    moose.connect(pulse, 'output', neuron, 'injectDest')
-    moose.connect(neuron, 'VmOut', synapse, 'Vm')
-    moose.connect(synapse, 'IkOut', neuron, 'injectDest')
+    # moose.connect(pulse, 'output', neuron, 'injectDest')
+    moose.connect(neuron, 'channel', synapse, 'channel')
     return {'neuron': neuron,
             'pulse': pulse,
             'synapse': synapse,
