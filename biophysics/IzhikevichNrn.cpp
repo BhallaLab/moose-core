@@ -192,11 +192,10 @@ const Cinfo* IzhikevichNrn::initCinfo()
             "Destination message to modify parameter b at runtime",            
             new OpFunc1<IzhikevichNrn, double>(&IzhikevichNrn::setB));
     
-    static OpFunc2<IzhikevichNrn, double, double > opfuncChannel(&IzhikevichNrn::handleChannel);
 
     static DestFinfo handleChannel("handleChannel",
                                    "Handles conductance and reversal potential arguments from Channel",
-                                   &opfuncChannel);
+                                   new OpFunc2<IzhikevichNrn, double, double >(&IzhikevichNrn::handleChannel));
 
     static Finfo * channelShared[] = {
         &handleChannel,
