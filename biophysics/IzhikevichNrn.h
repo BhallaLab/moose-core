@@ -83,6 +83,8 @@ class IzhikevichNrn
     void setU0( double value );
     double getU0() const;
 
+    void handleChannel( double Gk, double Ek);
+
     void process(const Eref& eref, ProcPtr proc );
     void reinit(const Eref& eref, ProcPtr proc );
 
