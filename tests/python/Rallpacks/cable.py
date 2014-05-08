@@ -96,7 +96,7 @@ class Cable( ):
         stim.delay[1] = 0.8
 
         # Inject the current from stim to first compartment.
-        moose.connect( stim, 'output', self.cable[0].mooseCompartment, 'injectMsg' )
+        #moose.connect( stim, 'output', self.cable[0].mooseCompartment, 'injectMsg' )
         
         # Fill the data from stim into table.
         inputTable = moose.Table( '{}/inputTable'.format( self.tablePath ) )
@@ -164,19 +164,19 @@ class Cable( ):
         while len(outputTables) > 0:
             t2 = outputTables.pop(0)
             while t2.path == t1.path:
-                printMsg("WARN", "Two tables with same path. Ignoring ...")
+                utils.dump("WARN", "Two tables with same path. Ignoring ...")
                 t2 = outputTables.pop(0)
             y1 = t1.vector
             y2 = t2.vector 
             if np.array_equal(y1, y2):
                 utils.dump("ERROR"
                         , "Something fishy."
-                        , "Same data found at two differenct compartments."
+                          " Same data found at two differenct compartments."
                         )
             elif np.greater( y1, y2 ).all():
                 utils.dump( "ERROR"
-                        , "Something fishy"
-                        , "First table must not be greater than the second one"
+                        , "Something fishy."
+                          " First table must not be greater than the second one"
                         )
             else: 
                 utils.dump("INFO", "Tables looks OK. Go for plotting... ")
@@ -193,7 +193,7 @@ def main( ):
     cable.makeCable( )
     cable.recordAt( index = 0 )
     cable.recordAt( index = -1 )
-    cable.simulate( simTime = 10, simDt = 1e-3 )
+    cable.simulate( simTime = 1, simDt = 1e-3 )
     cable.checkResults( )
     cable.plotTables( ascii = True )
     #cable.solveAnalytically( )

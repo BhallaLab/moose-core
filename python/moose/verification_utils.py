@@ -33,12 +33,15 @@ class MooseTestCase( unittest.TestCase ):
         print('[VERIFY] {:100s}[{}]'.format(msg, caller))
         
     def setUp(self):
+        '''Initialize storehouse
+        '''
         self.compartments = _moose.wildcardFind('/##[TYPE=Compartment]')
         self.tables = _moose.wildcardFind('/##[TYPE=Table]')
         self.pulse_gens = _moose.wildcardFind('/##[TYPE=PulseGen]')
 
     def test_disconnected_compartments(self):
         '''Test if any comparment is not connected '''
+
         self.dump("Checking if any compartment is not connected ...")
         for c in self.compartments:
             if (c.neighbors['axial'] or c.neighbors['raxial']):
@@ -55,10 +58,17 @@ class MooseTestCase( unittest.TestCase ):
         '''
         self.dump('Checking if any pulse-generator is floating')
         for pg in self.pulse_gens:
-            if pg.neighbors['injectMsg']:
+            if pg.neighbors['output']:
                 pass
             else:
-                debug.dump('WARN', '%s is floating' % pg.path)
+                debug.dump(
+                        'FAIL'
+                        , [ 'Current source {} is floating'.format(pg.path)
+                            , 'It is not injecting current to any compartment'
+                            , 'Perhaps you forgot to use `moose.connect`?'
+                            ]
+                        )
+
 
 
 def verify( *args, **kwargs):
