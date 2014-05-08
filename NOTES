@@ -3314,3 +3314,26 @@ Will have to fall back to ee for the demo of multiscale models in
 NeuroHDF
 
 ============================================================================
+5 May
+Working on script in snippets/MULTI/TuringInNeuron.py.
+============================================================================
+6 May
+Even though the numpy plots don't work, I can explicitly scan through the data
+points and save the ones I want. Ran a sim embedded in the regular neuronal
+geometry, examined in xplot. The Turing
+pattern in the first few compts is fine, but then the concs go all over the
+place, apparently in some coordination with the segments of the neuron.
+============================================================================
+7 May
+Confirmed inverse relationship between volume and the concs in the output.
+Concs are not so bad, they can easily be redone and stored in Sinit.
+My intuition is that the rates will also be different in each voxel,
+because they are expressed in # units.
+
+Working on Ksolve.cpp, goal is to extract concInit from each pool and use
+it to fill in the  concInit in all the array entries
+============================================================================
+8 May
+Some fixes to the documentation.
+Further fixes on Ksolve.
+============================================================================
