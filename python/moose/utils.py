@@ -34,6 +34,9 @@ plotTable = plot_utils.plotTable
 dump = print_utils.dump
 verify = verification_utils.verify
 
+# Some verification tests
+verify = verification_utils.verify
+
 ## for Ca Pool
 #FARADAY = 96154.0 # Coulombs # from cadecay.mod : 1/(2*96154.0) = 5.2e-6 which is the Book of Genesis / readcell value
 FARADAY = 96485.3415 # Coulombs/mol # from Wikipedia
@@ -985,10 +988,6 @@ cell1
             self.assertAlmostEqual(comp.x, 0.0, sigfig)
             self.assertAlmostEqual(comp.y, 0.0, sigfig)
             self.assertAlmostEqual(comp.z, soma.diameter/2.0 + (ii + 1) * 100e-6, sigfig)
-        
-            
-            
-        
         
 
 if __name__ == "__main__": # test printtree

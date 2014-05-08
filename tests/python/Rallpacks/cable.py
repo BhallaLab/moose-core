@@ -129,6 +129,7 @@ class Cable( ):
                     ]
                 )
         moose.reinit( )
+        moose.verify( )
         moose.start( simTime )
 
     def plotTables( self, ascii = False ):
@@ -155,7 +156,7 @@ class Cable( ):
             pylab.xlabel( 'Time (sec)' )
             pylab.legend( '{}'.format(table.path) )
         else:
-            moose.utils.plotAscii( yvec, xvec )
+            utils.plotAscii( yvec, xvec )
 
     def checkResults( self ):
         ''' Check if tables make any sense '''
@@ -189,7 +190,7 @@ class Cable( ):
                 "function of 1 nA of current."
                 )
 def main( ):
-    cable = Cable( length = 1e-3, compartmentSize = 1e-4 )
+    cable = Cable( length = 1e-3, compartmentSize = 1e-6 )
     cable.makeCable( )
     cable.recordAt( index = 0 )
     cable.recordAt( index = -1 )
