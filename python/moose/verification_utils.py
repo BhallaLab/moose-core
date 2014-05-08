@@ -41,7 +41,6 @@ class MooseTestCase( unittest.TestCase ):
 
     def test_disconnected_compartments(self):
         '''Test if any comparment is not connected '''
-
         self.dump("Checking if any compartment is not connected ...")
         for c in self.compartments:
             if (c.neighbors['axial'] or c.neighbors['raxial']):
@@ -69,6 +68,10 @@ class MooseTestCase( unittest.TestCase ):
                             ]
                         )
 
+            if pg.neighbors['injectMsg']:
+                pass
+            else:
+                debug.dump('WARN', '%s is floating' % pg.path)
 
 
 def verify( *args, **kwargs):
