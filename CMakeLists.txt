@@ -114,7 +114,9 @@ endif(HDF5_FOUND)
 find_package(BZip2)
 find_package(LIBSBML)
 if(LIBSBML_FOUND)
+    # If LIBSBML_FOUND then we'll probably also need the LibXML2.
     add_definitions(-DUSE_SBML)
+    find_package(LibXML2 REQUIRED)
     add_subdirectory(sbml)
     include_directories(${LIBSBML_INCLUDE_DIR})
     # Libxml2 is required.
@@ -196,7 +198,6 @@ set(LOCAL_GSL_LIBRARIES  gsl gslcblas m)
 target_link_libraries(moose ${LOCAL_GSL_LIBRARIES})
 
 ######################### BUILD PYMOOSE ########################################
-
 set(BUILD_PYMOOSE 1)
 if(BUILD_PYMOOSE)
     find_package(NumpyHeaders REQUIRED)
