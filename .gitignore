@@ -1,4 +1,5 @@
 #  Build folder 
+.svn
 buildMooseUsingCmake
 tags
 *.plot
