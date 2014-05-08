@@ -44,12 +44,16 @@ class MooseTestCase( unittest.TestCase ):
         self.dump("Checking if any compartment is not connected ...")
         for c in self.compartments:
             if (c.neighbors['axial'] or c.neighbors['raxial']):
-                pass
+                continue
             elif c.neighbors['injectMsg']:
-                pass
+                continue
             else:
                 msg = '%s is not connected with any other compartment' % c.path
-                self.dump('WARN', msg)
+                self.dump('FAILED'
+                        , [ msg
+                            , 'Did you forget to use `moose.connect`?'
+                            ]
+                        )
 
     def test_isolated_pulse_gen(self):
         ''' Test if any pulse-generator is not injecting current to a
@@ -61,17 +65,12 @@ class MooseTestCase( unittest.TestCase ):
                 pass
             else:
                 debug.dump(
-                        'FAIL'
+                        'FAILED'
                         , [ 'Current source {} is floating'.format(pg.path)
                             , 'It is not injecting current to any compartment'
                             , 'Perhaps you forgot to use `moose.connect`?'
                             ]
                         )
-
-            if pg.neighbors['injectMsg']:
-                pass
-            else:
-                debug.dump('WARN', '%s is floating' % pg.path)
 
 
 def verify( *args, **kwargs):
