@@ -251,7 +251,7 @@ const Cinfo * Func::initCinfo()
                 "Name", "Func",
                 "Author", "Subhasis Ray",
                 "Description",
-                "Func: general purpose function funculator using real numbers. It can\n"
+                "Func: general purpose function calculator using real numbers. It can\n"
                 "parse mathematical expression defining a function and evaluate it\n"                
                 "and/or its derivative for specified variable values.\n"
                 "The variables can be input from other moose objects. In case of\n"
@@ -286,6 +286,35 @@ Func::Func():_x(NULL), _y(NULL), _z(NULL), _mode(1), _valid(false)
     // Adding pi and e, the defaults are `_pi` and `_e`
     _parser.DefineConst(_T("pi"), (mu::value_type)M_PI);
     _parser.DefineConst(_T("e"), (mu::value_type)M_E);
+}
+
+Func::Func(const Func& rhs): _mode(rhs._mode)
+{
+    _varbuf.reserve(VARMAX);
+    _parser.SetVarFactory(_addVar, this);
+    // Adding pi and e, the defaults are `_pi` and `_e`
+    _parser.DefineConst(_T("pi"), (mu::value_type)M_PI);
+    _parser.DefineConst(_T("e"), (mu::value_type)M_E);
+    setExpr(rhs.getExpr());
+    vector <string> vars = rhs.getVars();
+    for (unsigned int ii = 0; ii < vars.size(); ++ii){
+        setVar(vars[ii], rhs.getVar(vars[ii]));
+    }
+}
+
+Func& Func::operator=(const Func rhs)
+{
+    _clearBuffer();
+    _mode = rhs._mode;
+    // Adding pi and e, the defaults are `_pi` and `_e`
+    _parser.DefineConst(_T("pi"), (mu::value_type)M_PI);
+    _parser.DefineConst(_T("e"), (mu::value_type)M_E);
+    setExpr(rhs.getExpr());
+    vector <string> vars = rhs.getVars();
+    for (unsigned int ii = 0; ii < vars.size(); ++ii){
+        setVar(vars[ii], rhs.getVar(vars[ii]));
+    }
+    return *this;
 }
 
 Func::~Func()
