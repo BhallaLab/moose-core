@@ -62,10 +62,10 @@ class MooseTestCase( unittest.TestCase ):
         self.dump('Checking if any pulse-generator is floating')
         for pg in self.pulse_gens:
             if pg.neighbors['output']:
-                pass
+                continue
             else:
                 debug.dump(
-                        'FAILED'
+                        'FAIL'
                         , [ 'Current source {} is floating'.format(pg.path)
                             , 'It is not injecting current to any compartment'
                             , 'Perhaps you forgot to use `moose.connect`?'
