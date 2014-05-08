@@ -1,5 +1,5 @@
 /**
-\page AppProgInterface Applications Programming Interface, API.
+\page AppProgInterface Applications Programming Interface, API. Async13 branch.
 
 \section DataStructs Key Data structures
 \subsection DataStructOverview	Overview
@@ -28,27 +28,64 @@ across all nodes and threads of a multiprocessor simulation. Ids are
 basically indices to a master array of all Elements. Ids are used by
 the Python system too.
 
-\subsection DataStructDataAccess	DataHandlers: Handles for Objects within elements.
-The \b DataHandler is a virtual base class that contains and access data
-belonging to an Element. It deals with creation, resizing, lookup and
-destruction of the data. It also provides a 'forall' function to
-efficiently iterate through all data entries and operate upon them. The
-partitioning of data entries between threads and nodes is done by the
-DataHandler. The 'forall' call on worker threads only operates on the 
-subset of data entries assigned to that thread. It is safe and recommended
-to call 'forall' on all worker threads.
+\subsection DataStructElementClasses	Element classes: Handling Objects within elements.
+The \b Element is a virtual base class that manages objects.
+It deals with creation, resizing, lookup and
+destruction of the data. It handles load balancing. It manages fields. 
+It manages messages.
 
-\subsection DataStructObjectAccess	DataId: Identifiers for Objects within elements.
+\subsection DataStructObjectClasses	Object classes: Computational and data entities in MOOSE.
+\b Objects in MOOSE do the actual work of computation and data structures. They
+are insulated from the housekeeping jobs of creation, interfacing to scripts
+and to messaging. To do this they present a very stereotyped interface to
+the MOOSE Element wrapper. The following are the essential components of this
+interface. These are discussed in more detail in the document 
+"Building New MOOSE Classes."
+\subsubsection ObjectsInMooseConstructor	Object Constructors
+All MOOSE classes need a constructor \b Object() that correctly initializes 
+all fields. This constructor does not take any arguments. It can be omitted
+only if the default C++ constructor will guarantee initialization.
+\subsubsection ObjectsInMooseAssignment		Object assignment operator
+MOOSE needs to know how to copy objects. By default it does a bit-copy.
+If this is not what you need, then you must explicitly specify an assignment
+operator. For example, if you set up pointers and do not want your objects
+to share the data in the pointers, you will want to specify an assignment 
+operator to rebuild the contents of the pointers.
+\subsubsection ObjectsInMooseFinfo	Object fields.
+MOOSE needs to know what fields an object has. Fields can be of three main
+kinds: value fields, message source fields, and message destination 
+(aka function) fields. All these fields are managed by \b Finfo objects 
+(Field infos), which are in turn organized by the Cinfo (Class Info) objects
+as described below. In a nutshell, all fields are associated with a name,
+access functions, and some documentation by creating Finfos for them, and
+all the Finfos are stored in the Cinfo.
+\subsubsection ObjectsInMooseCinfo	Object class information.
+Every MOOSE class is managed by a \b Cinfo (Class Info) object. This is defined
+in a static initializer function in every class. The Cinfo stores 
+the class name and documentation, how to look up fields, how to 
+handle data, and so on. 
+\subsubsection ObjectsInMooseMsgs	Object message sending.
+Any MOOSE object can call any function in any other object. This is managed
+by the message source fields: \b SrcFinfos.  SrcFinfos defined as above all
+present a \b send() function, which traverses all targets of the message and
+calls the target function with the specified arguments. SrcFinfos are typed, so
+precisely the correct number and type of arguments are always sent. Messages
+can go across nodes, the user does not need to do anything special to
+arrange this.
 
-The \b DataId specifies a specific object within the Element. It is used
-by the DataHandler to look up the data.
-The DataId contains an unsigned long long, which acts like a very large
-linear index. This linear index is partitioned by the DataHandlers in
-various complicated ways. For programmer purposes it is important to note
-that the linear index is not always contiguous. 
-When an Element or its DataHandler is resized, this invalidates all DataIds
-previously found for that Element. This is because the indexing will have
-changed.
+\subsection DataStructObjectAccess	ObjId: Identifiers for Objects within elements.
+
+The \b ObjId specifies a specific object within the Element. All Elements
+manage a linear array of identical objects, which can have any number of 
+entries greater than zero, up to the limits of memory. The ObjId::dataIndex
+field is the index into this array.
+In addition, the ObjId has a field ObjId::fieldIndex that comes into use in a 
+subset of objects. This is used when each object has to manage arrays of 
+fields, which are made visible as FieldElements. For example, one could have 
+an array of receptor channels, each of which manages an array of synapses. 
+Thus to fully specify a synapse, one uses both the ObjId::dataIndex to
+specify the parent receptor, and the ObjId::fieldIndex to specify the synapse
+on that receptor.
 
 \subsection DataStructObjId	ObjId: Fully specified handle for objects.
 
@@ -63,46 +100,49 @@ The string path of an object can be looked up from its ObjId.
 Elements are organized into a tree hierarchy, much like a Unix file
 system. This is similar to the organization in GENESIS. Since every
 Element has a name, it is possible to traverse the hierarchy by specifying
-a path. For example, you might access a specific dendrite in a cell as 
+a path. For example, you might access a specific dendrite on cell 72 as 
 follows: 
 
 \verbatim
-/network/cell/dendrite[50]
+/network/cell[72]/dendrite[50]
 \endverbatim
 
 Note that this path specifier maps onto a single ObjId.
+Every object can be indexed, and if no index is given then it assumed
+that it refers to index zero. For example, the above path is identical
+to: 
+
+\verbatim
+/network[0]/cell[72]/dendrite[50]
+\endverbatim
 
 Path specifiers can be arbitrarily nested. Additionally, one can have
-multidimensional arrays at any level of nesting. Here is an example 
+single dimensional arrays at any level of nesting. Here is an example 
 path with nested arrays:
 
 \verbatim
-/network/layerIV/cell[23][34]/dendrite[50]/synchan/synapse[1234]
+/network/layerIV/cell[23]/dendrite[50]/synchan/synapse[1234]
 \endverbatim
 
 \subsection ObjIdAndPaths	ObjIds, paths, and dimensions.
+Objects sit on the Elements, which follow a tree hierarchy. There are
+two ways to find an object. 
+First, the ObjId completely identifies an object no matter where it is in 
+the object tree. 
+Second, one can traverse the Element tree using indices to identify 
+specific Objects. This too uniquely identifies each Object.
+Every ObjId has a 'parent' ObjId, the exception being the root ObjId
+which is its own parent.
+Any ObjId can have its own 'child' objects in the tree.
+The tree cannot loop back onto itself.
+Objects are always stored as linear arrays. 
 
-This section refers to the unit test \e testShell.cpp:testObjIdToAndFromPath().
-
-Suppose we create an Element tree with the following dimensions:
 \verbatim
-f1[0..9]
-f2
-f3[0..22]
-f4
-f5[0..8][0..10]
+/foo[0]/bar
 \endverbatim
-
-To do this, we need to first create f1 with dims = {10}, then f2 upon f1 with
-dims = {} (or equivalently, using dims = {1}), then f3 upon f2 with dims = {23} and so on.
-Note that when you create f2 with dims = {} on f1 with dims = {10}, 
-there are actually 10 instances of f2 created. You would access them as
-
+is a different object from 
 \verbatim
-/f1[0]/f2
-/f1[1]/f2
-/f1[2]/f2
-...
+/foo[1]/bar
 \endverbatim
 
 Some useful API calls for dealing with the path:
@@ -112,43 +152,24 @@ ObjId::ObjId( const string& path ): Creates the ObjId pointing to an
 
 string ObjId::path(): Returns the path string for the specified ObjId.
 
-The next few API calls use the DataHandler, which is accessed from the
-ObjId using:
-
-const DataHandler* ObjId::element()->dataHandler().
-
-unsigned int DataHandler::totalEntries(): Returns total size of object
-array on specified DataHandler. This is the product of all dimensions.
-
 \verbatim
 ObjId f2( "/f1[2]/f2" );
-assert( f2.element()->dataHandler()->totalEntries() == 10 );
+assert( f2.path() == "/f1[2]/f2[0]" );
 \endverbatim
 
-Note that some dimensions may be ragged, that is, they might not have the
-same number of entries on all indices. This is commonly the case for 
-synapses, in which each SynChan may receive different numbers of inputs.
-In this case the dimension is larger than the largest SynChan array.
-In the example above, we might have
-
-unsigned int DataHandler::sizeOfDim( unsigned int dim ): Returns the size
-of the specified dimension.
-
-unsigned int DataHandler::pathDepth(): Returns the depth of the current DataHandler in the element tree. Root is zero.
-
-
-vector< vector< unsigned int > > pathIndices( DataId di ) const: 
-Returns a vector of array indices for the specified DataId.
-In the above example:
+There is a special meaning for the path for synapses. Recall that the 
+ObjId for synapses (which are FieldElements of SynChans) has two
+indices, the DataIndex and the FieldIndex. The DataIndex of the
+synapse is identical to that of its parent SynChan.
+This is illustrated as follows:
 
 \verbatim
-ObjId f5( "/f1[1]/f2/f3[3]/f4/f5[5][6]" );
-vector< vector< unsigned int pathIndices = f5.element()->dataHandler()->pathIndices( f5.dataId );
-assert( pathIndices.size() == 6 ); // The zero index is the root element.
+ObjId synchan( "/cell/synchan[20] );
+assert( synchan.dataIndex == 20 );
 
-// Vectors at each level are:
-//	root	f1	f2	f3	f4	f5
-// 	{}	{1}	{}	{3}	{}	{5,6}
+ObjId synapse( "/cell/synchan[20]/synapse[5]" );
+assert( synapse.dataIndex == 20 );
+assert( synapse.fieldIndex == 5 );
 \endverbatim
 
 \subsection Wildcard_paths	Wildcard paths
@@ -160,6 +181,7 @@ number of ObjIds. Some example wildcards are
 /network/#		// All children of network, only one level.
 /network/ce#	// All children of network whose name starts with 'ce'
 /network/cell/dendrite[]	// All dendrites, regardless of index
+/network/##[ISA=CaConc] 	// All descendants of network of class CaConc
 /soma,/axon		// The elements soma and axon
 \endverbatim
 
@@ -244,17 +266,14 @@ the list of functions:
 \li MsgId doAddMsg( const string& msgType, ObjId src, const string& srcField, ObjId dest, const string& destField);
 \li void doQuit();
 \li void doStart( double runtime );
-\li void doNonBlockingStart( double runtime );
 \li void doReinit();
 \li void doStop();
-\li void doTerminate();
 \li void doMove( Id orig, Id newParent );
 \li Id doCopyId orig, Id newParent, string newName, unsigned int n, bool copyExtMsgs);
 \li Id doFind( const string& path ) const
 \li void doSetClock( unsigned int tickNum, double dt )
 \li void doUseClock( string path, string field, unsigned int tick );
 \li Id doLoadModel( const string& fname, const string& modelpath );
-\li void doSyncDataHandler( Id elm, const string& sizeField, Id tgt );
 
 
 
@@ -322,15 +341,15 @@ The API for setting up scheduling is as follows:\n
 	doSetClock( TickNumber, dt ).
 \endverbatim
 
-	In many cases it is necessary to have a precise sequence of events
-	ocurring at the same time interval. In this case, set up two or more
-	Clock Ticks with the same dt but successive TickNumbers. They will
-	execute in the same order as their TickNumber. \n
-	Note that TickNumbers are unique. If you reuse a TickNumber, all that
-	will happen is that its previous value of dt will be overridden.
-	
-	Note also that dt can be any positive decimal number, and does not 
-	have to be a multiple of any other dt.
+In many cases it is necessary to have a precise sequence of events
+ocurring at the same time interval. In this case, set up two or more
+Clock Ticks with the same dt but successive TickNumbers. They will
+execute in the same order as their TickNumber. \n
+Note that TickNumbers are unique. If you reuse a TickNumber, all that
+will happen is that its previous value of dt will be overridden.
+
+Note also that dt can be any positive decimal number, and does not 
+have to be a multiple of any other dt.
 
 3. Connect up the scheduled objects to their clock ticks:
 
