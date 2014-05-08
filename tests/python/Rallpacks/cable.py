@@ -128,7 +128,7 @@ class Cable( ):
                     ]
                 )
         moose.reinit( )
-        moose.verify( )
+        utils.verify( )
         moose.start( simTime )
 
     def plotTables( self, ascii = False ):
@@ -195,7 +195,7 @@ def main( ):
     cable.recordAt( index = -1 )
     cable.simulate( simTime = 10, simDt = 1e-3 )
     cable.checkResults( )
-    cable.plotTables( ascii = False )
+    cable.plotTables( ascii = True )
     #cable.solveAnalytically( )
 
 if __name__ == '__main__':
