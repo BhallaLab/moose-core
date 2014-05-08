@@ -60,6 +60,7 @@ class Func
   public:
     static const int VARMAX;
     Func();
+    Func(const Func& rhs);
     ~Func();
     void setExpr(string expr);
     string getExpr() const;
@@ -95,6 +96,8 @@ class Func
     void setXYZ(double x, double y, double z);
 
     double getDerivative() const;
+
+    Func& operator=(const Func rhs);
 
     void process(const Eref& e, ProcPtr p);
     void reinit(const Eref& e, ProcPtr p);
