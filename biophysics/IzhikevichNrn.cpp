@@ -146,13 +146,13 @@ const Cinfo* IzhikevichNrn::initCinfo()
             &IzhikevichNrn::getGamma);
     static ValueFinfo<IzhikevichNrn, double> Rm(
             "Rm",
-            "Hidden cefficient of input current term (I) in Izhikevich model. Defaults to 1e6 Ohm.",
+            "Hidden coefficient of input current term (I) in Izhikevich model. Defaults to 1e6 Ohm.",
             &IzhikevichNrn::setRm,
             &IzhikevichNrn::getRm);
 
     static ValueFinfo<IzhikevichNrn, bool> accommodating(
             "accommodating",
-            "True of this neuron is an accommodating one. The equation for recovery"
+            "True if this neuron is an accommodating one. The equation for recovery"
             " variable u is special in this case.",
             &IzhikevichNrn::setAccommodating,
             &IzhikevichNrn::getAccommodating);
@@ -242,7 +242,7 @@ const Cinfo* IzhikevichNrn::initCinfo()
         "Author", "Subhasis Ray",
         "Description", "Izhikevich model of spiking neuron "
         "(Izhikevich,EM. 2003. Simple model of spiking neurons. Neural"
-        " Networks, IEEE Transactions on 14(6). pp 1569–1572).\n"
+        " Networks, IEEE Transactions on 14(6). pp 1569-1572).\n"
         " This class obeys the equations (in physiological units):\n"
         "  dVm/dt = 0.04 * Vm^2 + 5 * Vm + 140 - u + inject\n"
         "  du/dt = a * (b * Vm - u)\n"
