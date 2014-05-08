@@ -43,6 +43,7 @@ prefixDict = dict(
     , DEBUG = DEBUG
     , STEP = INFO
     , FAIL = ERR
+    , FAILED = ERR
     )
 
 def colored(msg, label="INFO") :
