@@ -81,10 +81,12 @@ def saveAsGnuplot( yvec, xvec, file):
         gnuplotF.write("\n".join(text))
 
 
-def plotTable(table, subfig=True, file=None):
+def plotTable(table, subfig=False, file=None):
     ''' Plot a given table '''
     if not subfig:
         pylab.figure()
+    else:
+        pylab.subplot()
     vector = table.vector 
     xvector = range(len(vector))
     pylab.plot(xvector, vector)
