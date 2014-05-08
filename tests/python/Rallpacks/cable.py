@@ -20,16 +20,10 @@ import compartment as comp
 import sys
 sys.path.append('../../python/')
 import moose
-import moose.utils
+import moose.utils as utils
 import os
 import pylab
 import numpy as np
-
-def dump(type, *args ):
-    ''' Print msg onto console '''
-    msg = "\n\t|- ".join( args )
-    o = "[{}] {}".format(type, msg)
-    print( o )
 
 class Cable( ):
     ''' Class representing a cable '''
@@ -38,11 +32,11 @@ class Cable( ):
         ''' Initialize the cable '''
         self.length = length
         self.compartmentSize = compartmentSize
-
-        dump("INFO"
-                , "Creating a cable."
-                , "length: %s" % self.length
-                , "size: %s" % self.compartmentSize 
+        utils.dump("INFO"
+                , [ "Creating a cable."
+                    , "length: %s" % self.length
+                    , "size: %s" % self.compartmentSize 
+                    ]
                 )
         self.size = int(self.length / self.compartmentSize)
         self.cablePath = '/cable'
@@ -64,13 +58,13 @@ class Cable( ):
             c.createCompartment( path = '%s/comp_%s' % ( self.cablePath , i) )
             self.cable.append( c )
         self.connect( )
-        dump( "INFO"
+        utils.dump( "INFO"
                 , "Passive cable is connected and ready for simulation." 
                 )
 
     def connect( self ):
         ''' Connect the cable '''
-        dump('STEP', 'Connecting cable ...')
+        utils.dump('STEP', 'Connecting cable ...')
         for i, c1 in enumerate( self.cable[:-1] ):
             c2 = self.cable[i+1].mooseCompartment
             #c1.mooseCompartment.connect('raxial', c2.mooseCompartment, 'axial')
@@ -80,7 +74,7 @@ class Cable( ):
         ''' Parameter index is python list-like index. Index -1 is the last
         elements in the list 
         '''
-        dump( "RECORD", "Setting up a probe at compartment no %s " % index )
+        utils.dump( "RECORD", "Setting up a probe at compartment no %s " % index )
         if index < 0:
             index = len( self.cable ) + index
         if( index >= len( self.cable ) ):
@@ -120,7 +114,7 @@ class Cable( ):
         self.setupDUT( )
  
         # Setup clocks 
-        dump("STEP", "Setting up the clocks ... ")
+        utils.dump("STEP", "Setting up the clocks ... ")
         moose.setClock( 0, self.simDt )
         moose.setClock( 1, self.plotDt )
 
@@ -129,9 +123,10 @@ class Cable( ):
         moose.useClock( 0, '/##'.format(self.cablePath), 'init' )
         #moose.useClock( 0, '{}/##'.format(self.tablePath), 'process' )
 
-        dump("STEP"
-                ,  "Simulating cable for {} sec".format(simTime)
-                , " simDt: %s, plotDt: %s" % ( self.simDt, self.plotDt )
+        utils.dump("STEP"
+                , [ "Simulating cable for {} sec".format(simTime)
+                    , " simDt: %s, plotDt: %s" % ( self.simDt, self.plotDt )
+                    ]
                 )
         moose.reinit( )
         moose.start( simTime )
@@ -174,23 +169,23 @@ class Cable( ):
             y1 = t1.vector
             y2 = t2.vector 
             if np.array_equal(y1, y2):
-                dump("ERROR"
+                utils.dump("ERROR"
                         , "Something fishy."
                         , "Same data found at two differenct compartments."
                         )
             elif np.greater( y1, y2 ).all():
-                dump( "ERROR"
+                utils.dump( "ERROR"
                         , "Something fishy"
                         , "First table must not be greater than the second one"
                         )
             else: 
-                dump("INFO", "Tables looks OK. Go for plotting... ")
+                utils.dump("INFO", "Tables looks OK. Go for plotting... ")
             t2 = t1
 
     def solveAnalytically( self ):
         ''' Solve the cable analytically at a position x for all time t in
         simTime '''
-        dump("WARNING", "This solves it assuming that input is a step "
+        utils.dump("WARNING", "This solves it assuming that input is a step "
                 "function of 1 nA of current."
                 )
 def main( ):
