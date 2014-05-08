@@ -67,7 +67,6 @@ class Cable( ):
         utils.dump('STEP', 'Connecting cable ...')
         for i, c1 in enumerate( self.cable[:-1] ):
             c2 = self.cable[i+1].mooseCompartment
-            #c1.mooseCompartment.connect('raxial', c2.mooseCompartment, 'axial')
             c1.mooseCompartment.connect('raxial', c2, 'axial')
 
     def recordAt( self, index ):
