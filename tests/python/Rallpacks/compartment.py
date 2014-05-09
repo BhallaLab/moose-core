@@ -58,22 +58,21 @@ class MooseCompartment():
         self.Cm = ( self.CM * self.surfaceArea )
         self.Em = self.Em
 
-
-    def createCompartment(self, path = None, **kwargs):
+    def createCompartment(self, path = None, length = 1e-3, diameter = 1e-6 ):
         ''' Create a MooseCompartment in moose '''
 
-        self.length = kwargs.get('length', 0.001)
-        self.diameter = kwargs.get('diameter', 1.0e-6)
+        self.length = length
+        self.diameter = diameter
         self.computeParams( )
 
         try:
             self.mooseCompartment = moose.Compartment(path)
+            self.mooseCompartment.Ra = self.Ra
+            self.mooseCompartment.Rm = self.Rm
+            self.mooseCompartment.Cm = self.Cm
+            self.mooseCompartment.Em = self.Em
         except Exception as e:
             print("[ERROR] Can't create compartment with path %s " % path)
-        self.mooseCompartment.Ra = self.Ra
-        self.mooseCompartment.Rm = self.Rm
-        self.mooseCompartment.Cm = self.Cm
-        self.mooseCompartment.Em = self.Em
 
 class TestCompartment( unittest.TestCase):
     ''' Test class '''
