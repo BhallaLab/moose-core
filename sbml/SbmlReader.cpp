@@ -84,10 +84,8 @@ Id SbmlReader::read( string filename,string location, string solverClass)
       errorFlag_ = true;
       return baseId;
     }
-
   if ( !errorFlag_ )
     getGlobalParameter();
-  
   if ( !errorFlag_ )
     { string modelName;
       Id parentId;
@@ -109,11 +107,12 @@ Id SbmlReader::read( string filename,string location, string solverClass)
       
       if ( !errorFlag_ )
 	getRules();
-
+      
       if ( !errorFlag_ )
 	createReaction( molSidcmptMIdMap );
 	  // or we get
 	  //createReaction (result);
+      
       if ( errorFlag_ )
 	return baseId;
       else
@@ -184,7 +183,6 @@ Id SbmlReader::read( string filename,string location, string solverClass)
 	    }
 	  vector< ObjId > compts;
 	  string comptpath = base_.path() + "/##[ISA=ChemCompt]";
-	  //cout << " comptpath " << comptpath;
 	  wildcardFind( comptpath, compts );
 	  vector< ObjId >::iterator i = compts.begin();
 	  string comptName = nameString(Field<string> :: get(ObjId(*i),"name"));
@@ -352,8 +350,8 @@ const SbmlReader::sbmlStr_mooseId SbmlReader::createMolecule( map< string,Id > &
       Id meshEntry = Neutral::child( comptEl.eref(), "mesh" );
       bool constant = spe->getConstant(); 
       bool boundaryCondition = spe->getBoundaryCondition();
-      if (boundaryCondition == true)
-	cout << "Pool " << name << " boundaryCondition is "<< boundaryCondition<<endl;
+      //if (boundaryCondition == true)
+      //cout << "Pool " << name << " boundaryCondition is "<< boundaryCondition<<endl;
       Id pool; 
       //If constant is true then its equivalent to BuffPool in moose
       if (constant == true) 
@@ -401,7 +399,7 @@ const SbmlReader::sbmlStr_mooseId SbmlReader::createMolecule( map< string,Id > &
 /* Assignment Rule */
 
 void SbmlReader::getRules()
-{
+{ 
   unsigned int nr = model_->getNumRules();
   if (nr > 0)
     cout << "\n ##### Need to populate funcpool and sumtotal which is pending due to equations \n";
@@ -417,8 +415,7 @@ void SbmlReader::getRules()
       v_iter = molSidMIdMap_.find( rule_variable );
       if (v_iter != molSidMIdMap_.end()){
 	Id rVariable = molSidMIdMap_.find(rule_variable)->second;
-	string t = molSidMIdMap_.find(rule_variable)->first;
-	Id sumId = shell->doCreate( "SumFunc", t, "func", 1 );
+	Id sumId = shell->doCreate( "SumFunc", rVariable, "func", 1 );
 	const ASTNode * ast = rule->getMath();
 	vector< string > ruleMembers;
 	ruleMembers.clear();
@@ -428,12 +425,12 @@ void SbmlReader::getRules()
 	   if ( m_iter != molSidMIdMap_.end() ){
 	     Id rMember = molSidMIdMap_.find(ruleMembers[rm])->second;
 	     string test = molSidMIdMap_.find(ruleMembers[rm])->first;
-	     //cout <<rm <<"  "<< rMember << " test " <<test <<endl;
-	  }
-	  else{
+	     cout << " test " << test;
+	   }
+	   else{
 	    cerr << "SbmlReader::getRules: Assignment rule member is not a species" << endl;
-	    // uncomment this, at this time commented as some model has constants in assignment rule instead of molecule which is yet to deal in moose, which give rise error comminting this
-	    //errorFlag_ = true;
+	    // In assignment rule there are constants instead of molecule which is yet to deal in moose.
+	    errorFlag_ = true;
 	    }
 	}
       }
@@ -461,7 +458,7 @@ void SbmlReader::createReaction(const map< string, Id > &molSidcmptMIdMap )
   map< string,double >prdMap;
   map< string,double >::iterator prdMap_iter;
   map< string,EnzymeInfo >enzInfoMap;
-  cout << "Number of reaction " << model_->getNumReactions();
+
   for ( unsigned int r = 0; r < model_->getNumReactions(); r++ ){
     Id reaction_;
     reac = model_->getReaction( r ); 
