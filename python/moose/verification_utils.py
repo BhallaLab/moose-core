@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 
-"""verification_utils.py: Do some verification.
+"""verification_utils.py:
 
-Last modified: Thu May 08, 2014  06:00PM
+    IT contains a class which runs tests on moose internal data-structures to
+    check if it is good for simulation.
+
+Last modified: Fri May 09, 2014  02:10PM
 
 """
     
@@ -30,7 +33,7 @@ class MooseTestCase( unittest.TestCase ):
         caller = inspect.stack()[1][3]
         if type(msg) == list:
             msg = '\n\t|- '.join(msg)
-        print('[VERIFY] {:100s}[{}]'.format(msg, caller))
+        print('[VERIFY] {:80s}[{}]'.format(msg, caller))
         
     def setUp(self):
         '''Initialize storehouse
@@ -71,13 +74,30 @@ class MooseTestCase( unittest.TestCase ):
                             , 'Perhaps you forgot to use `moose.connect`?'
                             ]
                         )
-
+    
+    def test_unused_tables(self):
+        '''Tests if any table is not reading data. Such tables remain empty.
+        '''
+        self.dump('Checking if any table is not connected')
+        for table in self.tables:
+            if table.neighbors['requestOut']:
+                continue
+            else:
+                debug.dump(
+                        'FAIL'
+                        , [ 'Table {} is not reading data.'.format(table.path)
+                            , ' Did you forget to use `moose.connect`?'
+                            ]
+                        )
 
 def verify( *args, **kwargs):
-    '''Verify the current moose setup. Emit errors and warnings '''
+    '''Verify the current moose setup. Emit errors and warnings 
+    '''
     connectivitySuite = unittest.TestSuite()
     connectivitySuite.addTest(MooseTestCase('test_disconnected_compartments'))
     connectivitySuite.addTest(MooseTestCase('test_isolated_pulse_gen'))
+    connectivitySuite.addTest(MooseTestCase('test_unused_tables'))
+
     # We can replace self with run also and collect the result into a result
     # object.
     connectivitySuite.debug()

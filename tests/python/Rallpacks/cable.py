@@ -2,7 +2,7 @@
 
 """cable.py: A passive cable of n compartments.
 
-Last modified: Wed May 07, 2014  11:38PM
+Last modified: Fri May 09, 2014  12:04AM
 
 """
     
@@ -32,7 +32,7 @@ class Cable( ):
         ''' Initialize the cable '''
         self.length = length
         self.compartmentSize = compartmentSize
-        utils.dump("INFO"
+        utils.dump("STEP"
                 , [ "Creating a cable."
                     , "length: %s" % self.length
                     , "size: %s" % self.compartmentSize 
@@ -54,11 +54,11 @@ class Cable( ):
     def makeCable( self ):
         ''' Make a cable out of n compartments '''
         for i in range( self.size ):
-            c = comp.MooseCompartment( )
+            c = comp.MooseCompartment( length = self.compartmentSize  )
             c.createCompartment( path = '%s/comp_%s' % ( self.cablePath , i) )
             self.cable.append( c )
         self.connect( )
-        utils.dump( "INFO"
+        utils.dump( "STEP"
                 , "Passive cable is connected and ready for simulation." 
                 )
 
@@ -78,7 +78,6 @@ class Cable( ):
             index = len( self.cable ) + index
         if( index >= len( self.cable ) ):
             raise UserWarning( "There is no compartment at index %s" % index )
-        #c = self.cable[ index ].mooseCompartment 
         c = self.cable[index].mooseCompartment
         t = moose.Table( '{}/output_at_{}'.format( self.tablePath, index ))
         moose.connect( t, 'requestOut', c, 'getVm' )
@@ -96,7 +95,7 @@ class Cable( ):
         stim.delay[1] = 0.8
 
         # Inject the current from stim to first compartment.
-        #moose.connect( stim, 'output', self.cable[0].mooseCompartment, 'injectMsg' )
+        moose.connect( stim, 'output', self.cable[0].mooseCompartment, 'injectMsg' )
         
         # Fill the data from stim into table.
         inputTable = moose.Table( '{}/inputTable'.format( self.tablePath ) )
@@ -191,11 +190,13 @@ class Cable( ):
 def main( ):
     cable = Cable( length = 1e-3, compartmentSize = 1e-6 )
     cable.makeCable( )
-    cable.recordAt( index = 0 )
-    cable.recordAt( index = -1 )
+    #cable.recordAt( index = 0 )
+    cable.recordAt( index = 1 )
+    cable.recordAt( index = 2 )
+    #cable.recordAt( index = 100 )
     cable.simulate( simTime = 1, simDt = 1e-3 )
     cable.checkResults( )
-    cable.plotTables( ascii = True )
+    cable.plotTables( ascii = False )
     #cable.solveAnalytically( )
 
 if __name__ == '__main__':
