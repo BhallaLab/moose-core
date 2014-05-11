@@ -3500,4 +3500,16 @@ set the absolute tolerance of integration to 1e6. Set it to 1e-4 and all
 is well. Also implemented stuff so that the Ksolve can define the
 numerical method and the tolerances.
 
+Tracked down the problem with TuringInNeuron calculations. Turned out to
+be a whole lot of little problems to do with setting up distinct 
+rateTerm vectors for each compartment volume. One of them was to do with the
+difficulty of doing a doubleEq comparison for tiny values like the voxel
+volumes (in the range 1e-17).
+Now it is working, but the algorithm for finding the volIndex isn't going
+so well. It is currently a brute force search, but there turn out to be
+176 distinct volumes in this model, so an N^2 approach isn't advisable.
+
+Also, even though the answers are coming out well, the python script is
+failing at end.
+
 ============================================================================
