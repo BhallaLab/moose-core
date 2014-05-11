@@ -68,6 +68,14 @@ void VoxelPools::advance( const ProcInfo* p )
 	if ( status != GSL_SUCCESS ) {
 		cout << "Error: VoxelPools::advance: GSL integration error at time "
 			 << t << "\n";
+		cout << "Error info: " << status << ", " << 
+				gsl_strerror( status ) << endl;
+		if ( status == GSL_EMAXITER ) 
+			cout << "Max number of steps exceeded\n";
+		else if ( status == GSL_ENOPROG ) 
+			cout << "Timestep has gotten too small\n";
+		else if ( status == GSL_EBADFUNC ) 
+			cout << "Internal error\n";
 		assert( 0 );
 	}
 #endif
