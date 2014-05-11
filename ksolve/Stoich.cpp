@@ -196,7 +196,7 @@ Stoich::Stoich()
 		kinterface_( 0 ),
 		dinterface_( 0 ),
 		rates_( 1 ), 	// Set up for at least one rate vector
-		uniqueVols_( 1, -1.0 ), // Flag that the vols is not yet inited.
+		uniqueVols_( 1, 1.0 ), 
 		numVoxels_( 1 ),
 		objMapStart_( 0 ),
 		numVarPools_( 0 ),
@@ -413,16 +413,23 @@ void Stoich::setCompartment( Id compartment ) {
 	if ( vols.size() > 0 ) {
 		numVoxels_ = vols.size();
 		sort( vols.begin(), vols.end() );
-		temp.push_back( vols[0] );
+		double bigVol = vols.back();
+		assert( bigVol > 0.0 );
+		temp.push_back( vols[0] / bigVol );
 		for ( vector< double >::iterator 
 						i = vols.begin(); i != vols.end(); ++i ) {
-			if ( !doubleEq( temp.back(), *i ) )
-				temp.push_back( *i );
+			if ( !doubleEq( temp.back(), *i / bigVol ) )
+				temp.push_back( *i / bigVol );
 		}
-	}
-	uniqueVols_.clear();
-	for ( int i = temp.size() - 1; i >= 0; i-- ) {
-		uniqueVols_.push_back( temp[i] );
+		uniqueVols_.clear();
+		for ( int i = temp.size() - 1; i >= 0; i-- ) {
+			uniqueVols_.push_back( temp[i] * bigVol );
+		}
+	} else {
+		uniqueVols_.resize( 1 );
+		uniqueVols_[0] = 1.0;
+		cout << "Warning: Stoich::setCompartment: " << 
+				compartment.path() << ". Compartment has zero voxels\n";
 	}
 }
 
@@ -725,7 +732,6 @@ void Stoich::resizeArrays()
 
 	species_.resize( totNumPools, 0 );
 	rates_[0].resize( numReac_, 0 );
-	uniqueVols_.resize( 1 );
 	// v_.resize( numReac_, 0.0 ); // v is now allocated dynamically
 	funcs_.resize( numFuncPools_, 0 );
 	N_.setSize( idMap_.size(), numReac_ );
@@ -1578,8 +1584,9 @@ unsigned int Stoich::indexOfMatchingVolume( double vol ) const
 	if ( rates_.size() == 1 && uniqueVols_[0] < 0 ) {
 		return 0;
 	}
+	double bigVol = uniqueVols_[0];
 	for ( unsigned int i = 0; i < uniqueVols_.size(); ++i ) {
-		if ( doubleEq( vol, uniqueVols_[i] ) )
+		if ( doubleEq( vol/bigVol, uniqueVols_[i]/bigVol ) )
 			return i;
 	}
 	assert( 0 );
