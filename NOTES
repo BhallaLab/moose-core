@@ -3474,7 +3474,7 @@ not providing the voxel information needed by the Stoich.
 Works for most of the tests, still doesn't work for the Turing pattern
 test in the neuronal morphology.
 
-Checkin 4398.
+Checkin 5398.
 
 Trying to find why the system hangs. Using zug.py with Kholodenko.g
 and a runtime of 5000.
@@ -3508,8 +3508,10 @@ volumes (in the range 1e-17).
 Now it is working, but the algorithm for finding the volIndex isn't going
 so well. It is currently a brute force search, but there turn out to be
 176 distinct volumes in this model, so an N^2 approach isn't advisable.
+Checkin 5400.
 
 Also, even though the answers are coming out well, the python script is
-failing at end.
+failing at end. Fails even to be able to plot the data using matplotlib.
+
 
 ============================================================================
