@@ -327,13 +327,13 @@ void Stoich::setElist( const Eref& e, const vector< ObjId >& elist )
 
 	allocateObjMap( temp );
 	allocateModel( temp );
-	unsigned int n = numVarPools_ + numBufPools_ + numFuncPools_;
+	// unsigned int n = numVarPools_ + numBufPools_ + numFuncPools_;
 	if ( kinterface_ ) {
-		kinterface_->setNumPools( n );
+		// kinterface_->setNumPools( n );
 		kinterface_->setStoich( e.id() );
 	}
 	if ( dinterface_ ) {
-		dinterface_->setNumPools( n );
+		// dinterface_->setNumPools( n );
 		dinterface_->setStoich( e.id() );
 	}
 	zombifyModel( e, temp );

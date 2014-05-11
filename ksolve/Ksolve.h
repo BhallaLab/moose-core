@@ -20,7 +20,18 @@ class Ksolve: public ZombiePoolInterface
 		//////////////////////////////////////////////////////////////////
 		// Field assignment stuff
 		//////////////////////////////////////////////////////////////////
+		/// Assigns integration method
+		string getMethod() const;
+		void setMethod( string method );
+
+		/// Assigns Absolute tolerance for integration
+		double getEpsAbs() const;
+		void setEpsAbs( double val );
 		
+		/// Assigns Relative tolerance for integration
+		double getEpsRel() const;
+		void setEpsRel( double val );
+
 		/// Assigns Stoich object to Ksolve.
 		Id getStoich() const;
 		void setStoich( Id stoich ); /// Inherited from ZombiePoolInterface.
@@ -81,6 +92,9 @@ class Ksolve: public ZombiePoolInterface
 		//////////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();
 	private:
+		string method_;
+		double epsAbs_;
+		double epsRel_;
 		/**
 		 * Each VoxelPools entry handles all the pools in a single voxel.
 		 * Each entry knows how to update itself in order to complete 
