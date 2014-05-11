@@ -94,6 +94,13 @@ class Clock
 		/// Utility func to range-check when Ticks are being changed.
 		bool checkTickNum( const string& funcName, unsigned int i ) const;
 
+		/*
+		 * Does nasty message traversal to look up the clock tick that
+		 * sends the Process/reinit message to the Dsolve (specified by e)
+		 * and then figure out the dt used.
+			static double findDt( const Eref& e );
+		 */
+
 	private:
 		void buildTicks( const Eref& e );
 		double runTime_;

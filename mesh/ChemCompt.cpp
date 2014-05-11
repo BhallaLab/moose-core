@@ -67,12 +67,19 @@ const Cinfo* ChemCompt::initCinfo()
 			&ChemCompt::getEntireVolume
 		);
 
+		static ReadOnlyValueFinfo< ChemCompt, vector< double > > 
+				voxelVolume(
+			"voxelVolume",
+			"Vector of volumes of each of the voxels.",
+			&ChemCompt::getVoxelVolume
+		);
+
 		static ReadOnlyLookupElementValueFinfo< 
 				ChemCompt, unsigned int, double > 
-			voxelVolume(
-			"voxelVolume",
+			oneVoxelVolume(
+			"oneVoxelVolume",
 			"Volume of specified voxel.",
-			&ChemCompt::getVoxelVolume
+			&ChemCompt::getOneVoxelVolume
 		);
 
 		static ReadOnlyValueFinfo< ChemCompt, unsigned int > numDimensions(
@@ -199,6 +206,7 @@ const Cinfo* ChemCompt::initCinfo()
 	static Finfo* chemMeshFinfos[] = {
 		&volume,			// Value
 		&voxelVolume,		// ReadOnlyLookupValue
+		&oneVoxelVolume,	// ReadOnlyLookupValue
 		&numDimensions,	// ReadOnlyValue
 		&method,		// Value
 		&stencilRate,	// ReadOnlyLookupValue
@@ -342,7 +350,12 @@ void ChemCompt::setEntireVolume( const Eref& e, double volume )
 	assert( conc == childConcs.end() );
 }
 
-double ChemCompt::getVoxelVolume( const Eref& e, unsigned int dataIndex ) const
+vector< double > ChemCompt::getVoxelVolume() const
+{
+	return this->vGetVoxelVolume();
+}
+
+double ChemCompt::getOneVoxelVolume( const Eref& e, unsigned int dataIndex ) const
 {
 	return this->getMeshEntryVolume( dataIndex );
 }

@@ -36,6 +36,13 @@ const Cinfo* Gsolve::initCinfo()
 			&Gsolve::getStoich
 		);
 
+		static ValueFinfo< Gsolve, Id > compartment (
+			"compartment",
+			"Compartment that contains this reaction system.",
+			&Gsolve::setCompartment,
+			&Gsolve::getCompartment
+		);
+
 		static ReadOnlyValueFinfo< Gsolve, unsigned int > numLocalVoxels(
 			"numLocalVoxels",
 			"Number of voxels in the core reac-diff system, on the "
@@ -137,7 +144,8 @@ Gsolve::Gsolve()
 		pools_( 1 ),
 		startVoxel_( 0 ),
 		stoich_(),
-		stoichPtr_( 0 )
+		stoichPtr_( 0 ),
+		compartment_()
 {;}
 
 Gsolve::~Gsolve()
@@ -152,13 +160,32 @@ Id Gsolve::getStoich() const
 	return stoich_;
 }
 
+void Gsolve::setCompartment( Id compt )
+{
+	if ( ( compt.element()->cinfo()->isA( "ChemCompt" ) ) ) {
+		compartment_ = compt;
+		vector< double > vols = 
+			Field< vector< double > >::get( compt, "voxelVolume" );
+		if ( vols.size() > 0 ) {
+			pools_.resize( vols.size() );
+			for ( unsigned int i = 0; i < vols.size(); ++i ) {
+				pools_[i].setVolume( vols[i] );
+			}
+		}
+	}
+}
+
+Id Gsolve::getCompartment() const
+{
+	return compartment_;
+}
+
 void Gsolve::setStoich( Id stoich )
 {
 	// This call is done _before_ setting the path on stoich
 	assert( stoich.element()->cinfo()->isA( "Stoich" ) );
 	stoich_ = stoich;
 	stoichPtr_ = reinterpret_cast< Stoich* >( stoich.eref().data() );
-	stoichPtr_->setOneWay( true );
 	sys_.stoich = stoichPtr_;
 	sys_.isReady = false;
 }
@@ -410,6 +437,12 @@ unsigned int Gsolve::getVoxelIndex( const Eref& e ) const
 	return ret - startVoxel_;
 }
 
+void Gsolve::setDsolve( Id dsolve )
+{
+		;
+}
+
+
 //////////////////////////////////////////////////////////////
 // Zombie Pool Access functions
 //////////////////////////////////////////////////////////////
@@ -457,7 +490,6 @@ double Gsolve::getDiffConst( const Eref& e ) const
 void Gsolve::setNumPools( unsigned int numPoolSpecies )
 {
 	sys_.isReady = false;
-	assert( stoichPtr_ );
 	unsigned int numVoxels = pools_.size();
 	for ( unsigned int i = 0 ; i < numVoxels; ++i ) {
 		pools_[i].resizeArrays( numPoolSpecies );

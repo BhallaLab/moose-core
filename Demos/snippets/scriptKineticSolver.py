@@ -94,9 +94,8 @@ def main():
 		makeModel()
 		ksolve = moose.Ksolve( '/model/compartment/ksolve' )
 		stoich = moose.Stoich( '/model/compartment/stoich' )
-		ksolve.numAllVoxels = 1
-		stoich.poolInterface = ksolve
-		ksolve.stoich = stoich
+		stoich.compartment = moose.element( '/model/compartment' )
+		stoich.ksolve = ksolve
 		stoich.path = "/model/compartment/##"
 		#solver.method = "rk5"
 		#mesh = moose.element( "/model/compartment/mesh" )

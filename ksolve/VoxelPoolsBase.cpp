@@ -17,7 +17,8 @@
 VoxelPoolsBase::VoxelPoolsBase()
 	: 
 		S_(1),
-		Sinit_(1)
+		Sinit_(1),
+		volume_(1.0)
 {;}
 
 VoxelPoolsBase::~VoxelPoolsBase()
@@ -69,6 +70,16 @@ double* VoxelPoolsBase::varSinit()
 unsigned int VoxelPoolsBase::size() const
 {
 	return Sinit_.size();
+}
+
+void VoxelPoolsBase::setVolume( double vol )
+{
+	volume_ = vol;
+}
+
+double VoxelPoolsBase::getVolume() const
+{
+	return volume_;
 }
 
 //////////////////////////////////////////////////////////////

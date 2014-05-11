@@ -62,6 +62,12 @@ class RateTerm
 		 */
 		virtual void rescaleVolume( short comptIndex, 
 			const vector< short >& compartmentLookup, double ratio ) = 0;
+
+		/**
+		 * Duplicates rate term and then applies volume scaling.
+		 * Ratio is newVol / oldVol
+		 */
+		virtual RateTerm* copyWithVolScaling( double ratio ) const = 0;
 };
 
 // Base class MMEnzme for the purposes of setting rates
@@ -111,6 +117,7 @@ class MMEnzymeBase: public RateTerm
 		{
 			Km_ *= ratio;
 		}
+
 		unsigned int getEnzIndex() const
 		{
 			return enz_;
@@ -145,6 +152,11 @@ class MMEnzyme1: public MMEnzymeBase
 			return 2;
 		}
 
+		RateTerm* copyWithVolScaling( double ratio ) const
+		{
+			return new MMEnzyme1( ratio * Km_, kcat_, enz_, sub_);
+		}
+
 	private:
 		unsigned int sub_;
 };
@@ -171,6 +183,11 @@ class MMEnzyme: public MMEnzymeBase
 			molIndex.insert( molIndex.begin(), enz_ );
 			return molIndex.size();
 		}
+
+		RateTerm* copyWithVolScaling( double ratio ) const
+		{
+			return new MMEnzyme( ratio * Km_, kcat_, enz_, substrates_ );
+		}
 	private:
 		RateTerm* substrates_;
 };
@@ -180,12 +197,28 @@ class ExternReac: public RateTerm
 	public:
 		// All the terms will have been updated separately, and
 		// a reply obtained to this pointer here:
-		double operator() () const {
+		double operator() ( const double* S ) const {
 			double ret = 0.0;
 			return ret;
 		}
 		void setRates( double k1, double k2 ) {
 			; // Dummy function to keep compiler happy
+		}
+
+		void setR1( double k1 ) {
+			;
+		}
+
+		void setR2( double k2 ) {
+			;
+		}
+
+		double getR1() const {
+			return 0.0;
+		}
+
+		double getR2() const {
+			return 0.0;
 		}
 
 		unsigned int getReactants( vector< unsigned int >& molIndex ) const{
@@ -197,6 +230,11 @@ class ExternReac: public RateTerm
 			const vector< short >& compartmentLookup, double ratio )
 		{
 			return; // Need to figure out what to do here.
+		}
+
+		RateTerm* copyWithVolScaling( double ratio ) const
+		{
+			return new ExternReac();
 		}
 
 	private:
@@ -252,6 +290,11 @@ class ZeroOrder: public RateTerm
 		{
 			return; // Nothing needs to be scaled.
 		}
+
+		RateTerm* copyWithVolScaling( double ratio ) const
+		{
+			return new ZeroOrder( k_ );
+		}
 	protected:
 		double k_;
 };
@@ -285,6 +328,11 @@ class Flux: public ZeroOrder
 			return; // Nothing needs to be scaled.
 		}
 
+		RateTerm* copyWithVolScaling( double ratio ) const
+		{
+			return new Flux( k_, y_ );
+		}
+
 	private:
 		unsigned int y_;
 };
@@ -311,6 +359,11 @@ class FirstOrder: public ZeroOrder
 			const vector< short >& compartmentLookup, double ratio )
 		{
 			return; // Nothing needs to be scaled.
+		}
+
+		RateTerm* copyWithVolScaling( double ratio ) const
+		{
+			return new FirstOrder( k_, y_ );
 		}
 
 	private:
@@ -343,6 +396,11 @@ class SecondOrder: public ZeroOrder
 			if ( comptIndex == compartmentLookup[ y1_ ] || 
 				comptIndex == compartmentLookup[ y2_ ] )
 			k_ /= ratio;
+		}
+
+		RateTerm* copyWithVolScaling( double ratio ) const
+		{
+			return new SecondOrder( k_ / ratio, y1_, y2_ );
 		}
 
 	private:
@@ -384,6 +442,11 @@ class StochSecondOrderSingleSubstrate: public ZeroOrder
 				k_ /= ratio;
 		}
 
+		RateTerm* copyWithVolScaling( double ratio ) const
+		{
+			return new StochSecondOrderSingleSubstrate( k_ / ratio, y_ );
+		}
+
 	private:
 		const unsigned int y_;
 };
@@ -419,6 +482,14 @@ class NOrder: public ZeroOrder
 			}
 		}
 
+		RateTerm* copyWithVolScaling( double ratio ) const
+		{
+			assert( v_.size() > 0 );
+			if ( v_.size() == 1 )
+				return new NOrder( k_, v_ );
+			return new NOrder( k_ * pow( ratio, v_.size() -1 ), v_ );
+		}
+
 	protected:
 		vector< unsigned int > v_;
 };
@@ -436,6 +507,14 @@ class StochNOrder: public NOrder
 		StochNOrder( double k, vector< unsigned int > v );
 
 		double operator() ( const double* S ) const;
+
+		RateTerm* copyWithVolScaling( double ratio ) const
+		{
+			assert( v_.size() > 0 );
+			if ( v_.size() == 1 )
+				return new StochNOrder( k_, v_ );
+			return new StochNOrder( k_ * pow( ratio, v_.size() -1 ), v_ );
+		}
 };
 
 extern class ZeroOrder* 
@@ -496,6 +575,14 @@ class BidirectionalReaction: public RateTerm
 		{
 			forward_->rescaleVolume( comptIndex, compartmentLookup, ratio );
 			backward_->rescaleVolume( comptIndex, compartmentLookup, ratio);
+		}
+		RateTerm* copyWithVolScaling( double ratio ) const
+		{
+			ZeroOrder* f = static_cast< ZeroOrder* >( 
+							forward_->copyWithVolScaling( ratio ) );
+			ZeroOrder* b = static_cast< ZeroOrder* >( 
+							backward_->copyWithVolScaling( ratio ) );
+			return new BidirectionalReaction( f, b );
 		}
 
 	private:

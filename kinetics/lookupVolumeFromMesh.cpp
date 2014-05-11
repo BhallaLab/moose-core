@@ -39,7 +39,7 @@ double lookupVolumeFromMesh( const Eref& e )
 	if ( compt == ObjId() )
 		return 1.0;
 	return LookupField< unsigned int, double >::
-			get( compt, "voxelVolume", e.dataIndex() );
+			get( compt, "oneVoxelVolume", e.dataIndex() );
 }
 
 /**

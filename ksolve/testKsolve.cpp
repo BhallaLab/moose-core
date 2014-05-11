@@ -12,6 +12,7 @@
 #include "FuncTerm.h"
 #include "SparseMatrix.h"
 #include "KinSparseMatrix.h"
+#include "ZombiePoolInterface.h"
 #include "Stoich.h"
 
 /**
@@ -185,9 +186,8 @@ void testBuildStoich()
 	Id kin = makeReacTest();
 	Id ksolve = s->doCreate( "Ksolve", kin, "ksolve", 1 );
 	Id stoich = s->doCreate( "Stoich", ksolve, "stoich", 1 );
-	Field< unsigned int >::set( ksolve, "numAllVoxels", 1 );
-	Field< Id >::set( stoich, "poolInterface", ksolve );
-	Field< Id >::set( ksolve, "stoich", stoich );
+	Field< Id >::set( stoich, "compartment", kin );
+	Field< Id >::set( stoich, "ksolve", ksolve );
 
 	// Used to get at the stoich matrix from gdb.
 	// Stoich* stoichPtr = reinterpret_cast< Stoich* >( stoich.eref().data() );
@@ -235,10 +235,8 @@ void testRunKsolve()
 	Id kin = makeReacTest();
 	Id ksolve = s->doCreate( "Ksolve", kin, "ksolve", 1 );
 	Id stoich = s->doCreate( "Stoich", ksolve, "stoich", 1 );
-	Field< unsigned int >::set( ksolve, "numAllVoxels", 1 );
-	Field< Id >::set( stoich, "poolInterface", ksolve );
-	Field< Id >::set( ksolve, "stoich", stoich );
-	
+	Field< Id >::set( stoich, "compartment", kin );
+	Field< Id >::set( stoich, "ksolve", ksolve );
 	Field< string >::set( stoich, "path", "/kinetics/##" );
 	s->doUseClock( "/kinetics/ksolve", "process", 4 ); 
 	s->doSetClock( 4, simDt );
@@ -279,9 +277,8 @@ void testRunGsolve()
 
 	Id gsolve = s->doCreate( "Gsolve", kin, "gsolve", 1 );
 	Id stoich = s->doCreate( "Stoich", gsolve, "stoich", 1 );
-	Field< unsigned int >::set( gsolve, "numAllVoxels", 1 );
-	Field< Id >::set( stoich, "poolInterface", gsolve );
-	Field< Id >::set( gsolve, "stoich", stoich );
+	Field< Id >::set( stoich, "compartment", kin );
+	Field< Id >::set( stoich, "ksolve", gsolve );
 	
 	Field< string >::set( stoich, "path", "/kinetics/##" );
 	s->doUseClock( "/kinetics/gsolve", "process", 4 ); 

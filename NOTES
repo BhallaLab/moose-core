@@ -3336,4 +3336,141 @@ it to fill in the  concInit in all the array entries
 8 May
 Some fixes to the documentation.
 Further fixes on Ksolve.
+
+Working on building a Turing pattern in neuronal geometry. I thought the
+problem was initial conditions. Turns out that the concs were set
+explicitly, after the reaction system was distributed. The problem is that
+the rates have not been scaled suitably across the voxels.
+
+Options:
+- Put in a volscale vector in the VoxelPools, to multiply each rate
+	This needs changes to the Stoich::updateRates function.
+- Do inline volume scaling to multiply each rate. Only volume is stored in voxel
+	This needs changes to the Stoich::updateRates function.
+	It will involve numerous repeated powers and multiplications.
+	Minimal memory costs.
+- Put in independent Stoich ptrs for each volume in model. 
+	Call Stoich::updateRatesAfterRemesh for each.
+	This needs a Stoich on each Voxel Pool.
+		To make it efficient, could share Stoich Ptrs among all with
+		same volume. 
+	Still very costly.
+- Put in independent RateTerms for each volume in model.
+	Call Stoich::updateRatesAfterRemesh for each.
+	Need a way for Stoich to use specified RateTerms set in updateFuncs.
+	Possibly again share ptrs, here the RateTerm vector, among all with
+		the same volume.
+
+OK let's try the last. It is not horribly memory-expensive, nor is it going 
+	to cost a lot of multiplications each cycle.
+
+Stoich::generateRescaledRates
+Stoich::updateRates using rates as an argument.
+Stoich::updateReacVeolocities. Seems like it should move into the 
+	VoxelPoolsBase.
+
+VoxelPoolsBase::myVol or some other way to map to rates_ vector.
+VoxelPoolsBase::rates_ ptr to vector. Would like to have a reference counter
+	so I avoid having to worry about management. Either that or the
+	master Stoich keeps the original of all of them.
+Something to figure out matching volumes. Probably in Ksolve. Possibly
+on Stoich as it is asked for a ptr for a new volume.
+
+Will need the equivalent changes in GssaVoxelPools.
+Ksolve needs to have the voxel vols assigned to it, to pass to the VoxelPools,
+	so that they can ask the Stoich which volIndex they should use.
+
+Massive code changes to do the above. Some things work but
+the TuringInNeuron test still doesn't give a nice flat line for
+mol concs.
 ============================================================================
+9 May
+Sequence of actions on setup of reac-diff solver system.
+
+0. Compartment is set up to a cell (neuroMesh) or volume (other meshes)
+1. Dsolve and Ksolve both assign compartment. Needed to figure out vols and
+	numVoxels. This doesn't need anything else assigned.
+2. stoich.addPoolInterface fills in the pool interface vector. Just 
+	assigning the Ids at this point, though it might be nice to
+	compute the ptrs since this lets us avoid exposing functions to
+	the MOOSE interface.
+3. Call Stoich::setPath. This builds the whole system.
+	3.1 At an early stage in setPath..resizeArrays it sets numPools on
+	each of the PoolInterfaces. Note that they already know the
+	# of voxels and vols from 1).
+	3.2 at setPath..Stoich::zombify gets numVoxels from the PoolInterface.
+	3.3 After Zombification the Stoich builds the list of unique volumes,
+		and with it the vector< vector< RateTerm* > >.
+	3.4 After this the Stoich calls each of the PoolInterfaces and assigns
+		Stoichs unto them. 
+		- Ksolve uses this to go through each VoxelPool and set up 
+		the volIndex to use for its reac calculations.
+		- Dsolve uses this to get the vector of all pools from the
+		Stoich, and extract DiffConst and MotorConst.
+4. Assign the Dsolve to the Ksolve::dsolve field. This is used during
+	the process function to pass data back and forth between the solvers.
+
+
+To simplify further, 
+- I could assign the compartment to the Stoich.
+	It would use this to get the volumes right up front. I could then
+	use this to fill in the compartment info to the Ksolve and Dsolve.
+- I could also use the ZombiePoolInterface ptrs to do step 4, that is,
+	assign Dsolve to the Ksolve and vice-versa (as a dummy).
+
+Yet to consider:
+	- Dsolves that span multiple Ksolve reac systems
+		e.g., Ca diffusion that goes into spines, where spines have
+		different reacs.
+	- Ksolves that work with different Dsolves
+		e.g., the spine Ksolve that needs to talk to the spine
+		Dsolve as well as the Ca Dsolve.
+	- Ksolve that maps to only a subset of voxels on a Dsolve.
+		Same as above.
+	- Reactions that go between different Ksolves.
+		e.g., Spine to PSD and back again.
+
+Alternatively, and much simpler
+	- Intercompt reacs
+	- intercompt diffusion processes, implemented same as reacs but 
+		set up by examining molecule names between compts.
+
+Decision.
+0. Compartment is set up to a cell (neuroMesh) or volume (other meshes)
+1. Compartment assigned to Stoich. Here it can assign unique vols already.
+2. Dsolve and Ksolve assigned to Stoich using setKsolve and setDsolve.
+	2.1 At this point the Stoich::useOneWay_ flag is set if it is a Gsolve.
+3. Call Stoich::setPath. All the rest happens internally, done by Stoich:
+	3.1 assign compartment to Dsolve and Ksolve.
+	3.2 assign numPools and compts to Dsolve and Ksolve.
+	3.3 During Zombification, zeroth vector< RateTerm* > is built.
+	3.4 afterZombification, stoich builds rateTerm vector for all vols.
+	3.5 Stoich assigns itself to Dsolve and Ksolve. 
+		- Ksolve sets up volIndex on each VoxelPool
+		- Dsolve gets vector of pools, extracts DiffConst and MotorConst
+	3.6 Dsolve assigned to Ksolve::dsolve_ field by the Stoich.
+4. Reinit, 
+	4.1 Dsolve builds matrix, provided dt has changed. It needs dt.
+	4.2 Ksolve builds solvers if not done already, assigning initDt
+
+As seen by the user, this reduces to just 4 stages, all centered on the Stoich.
+
+Need some care with defaults to handle the old-fashioned multi-compartment 
+but non-diffusive reactions.
+Also this approach is terrible for building a reaction system and running it
+on the fly.
+
+I want to reverse the order of the uniqueVols.
+============================================================================
+10 May
+Compiling. The Dsolve::setStoich function needs to be sorted in the new format.
+If the Dsolve can work without a Stoich it needs a suitable fallback too.
+
+============================================================================
+11 May
+Finally got the compilation done. Into testKsolve. Problem with CubeMesh
+not providing the voxel information needed by the Stoich.
+
+Works for most of the tests, still doesn't work for the Turing pattern
+test in the neuronal morphology.
+
