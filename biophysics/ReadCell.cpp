@@ -999,9 +999,11 @@ void ReadCell::addChannelMessage( Id chan )
 		// to set up. So I just bail.
 		if ( src.bad() || dest.bad()) {
 #ifndef NDEBUG
+				/*
 			cout << "ReadCell::addChannelMessage( " << chan.path() << 
 				"): " << name << " " << s << 
 				": Bad src " << src << " or dest " << dest << endl;
+				*/
 #endif
 			continue; 
 		}
