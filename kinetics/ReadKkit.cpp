@@ -160,9 +160,8 @@ void setMethod( Shell* s, Id mgr, double simdt, double plotdt,
 		m == "rk5" || m == "rkf" || m == "rk" ) {
 			Id ksolve = s->doCreate( "Ksolve", compt, "ksolve", 1 );
 			Id stoich = s->doCreate( "Stoich", compt, "stoich", 1 );
-			Field< unsigned int >::set( ksolve, "numAllVoxels", 1 );
-			Field< Id >::set( stoich, "poolInterface", ksolve );
-			Field< Id >::set( ksolve, "stoich", stoich );
+			Field< Id >::set( stoich, "compartment", compt );
+			Field< Id >::set( stoich, "ksolve", ksolve );
 			Field< string >::set( stoich, "path", simpath );
 			simpath2 += "," + cpath + "/ksolve";
 			s->doUseClock( simpath2, "process", 4 );
@@ -171,9 +170,8 @@ void setMethod( Shell* s, Id mgr, double simdt, double plotdt,
 		m == "gillespie" || m == "stochastic" ) {
 			Id gsolve = s->doCreate( "Gsolve", compt, "gsolve", 1 );
 			Id stoich = s->doCreate( "Stoich", compt, "stoich", 1 );
-			Field< unsigned int >::set( gsolve, "numAllVoxels", 1 );
-			Field< Id >::set( stoich, "poolInterface", gsolve );
-			Field< Id >::set( gsolve, "stoich", stoich );
+			Field< Id >::set( stoich, "compartment", compt );
+			Field< Id >::set( stoich, "ksolve", gsolve );
 			Field< string >::set( stoich, "path", simpath );
 			simpath2 += "," + cpath + "/gsolve";
 			s->doUseClock( simpath2, "process", 4 );

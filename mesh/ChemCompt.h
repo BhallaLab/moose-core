@@ -45,7 +45,7 @@ class ChemCompt
 		/**
 		 * Returns volume of specified voxel
 		 */
-		double getVoxelVolume( const Eref& e, unsigned int voxel ) const;
+		double getOneVoxelVolume( const Eref& e, unsigned int voxel ) const;
 
 		/**
 		 * Returns # of dimensions of mesh. 
@@ -79,6 +79,10 @@ class ChemCompt
 		 */
 		vector< unsigned int > getStencilIndex( unsigned int row ) const;
 
+		/// Returns vector of all voxel volumes in compartment.
+		vector< double > getVoxelVolume() const;
+		/// Virtual func so that derived classes can pass voxel volume back.
+		virtual const vector< double >& vGetVoxelVolume() const = 0;
 
 		//////////////////////////////////////////////////////////////////
 		// Dest Finfo

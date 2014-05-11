@@ -665,7 +665,7 @@ vector< unsigned int > NeuroMesh::getParentVoxel() const
 	return parentVoxel_;
 }
 
-const vector< double >& NeuroMesh::getVoxelVolume() const
+const vector< double >& NeuroMesh::vGetVoxelVolume() const
 {
 	return vs_;
 }

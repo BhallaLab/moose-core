@@ -37,10 +37,11 @@ class Dsolve: public ZombiePoolInterface
 		//////////////////////////////////////////////////////////////////
 		unsigned int getNumVarPools() const;
 
-		void setStoich( const Eref& e, Id id );
-		Id getStoich( const Eref& e ) const;
+		void setStoich( Id id );
+		Id getStoich() const;
 		void setCompartment( Id id );
 		Id getCompartment() const;
+		void setDsolve( Id id ); /// Dummy, inherited but not used.
 
 		void setPath( const Eref& e, string path );
 		string getPath( const Eref& e ) const;
@@ -86,13 +87,6 @@ class Dsolve: public ZombiePoolInterface
 		void makePoolMapFromElist( const vector< ObjId >& elist,
 						vector< Id >& temp );
 
-		/**
-		 * Does nasty message traversal to look up the clock tick that
-		 * sends the Process/reinit message to the Dsolve (specified by e)
-		 * and then figure out the dt used.
-		 */
-		double findDt( const Eref& e );
-
 		/** 
 		 * This key function does the work of setting up the Dsolve. 
 		 * Should be called after the compartment has been attached to
@@ -125,6 +119,9 @@ class Dsolve: public ZombiePoolInterface
 
 		/// Path of pools managed by Dsolve, may include other classes too.
 		string path_; 
+
+		/// Timestep used by diffusion calculations.
+		double dt_;
 
 		unsigned int numTotPools_;
 		unsigned int numLocalPools_;

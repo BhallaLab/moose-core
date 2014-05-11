@@ -281,7 +281,7 @@ void SpineMesh::innerHandleNodeInfo(
 // Inherited virtual funcs
 //////////////////////////////////////////////////////////////////
 
-const vector< double >& SpineMesh::getVoxelVolume() const
+const vector< double >& SpineMesh::vGetVoxelVolume() const
 {
 	return vs_;
 }

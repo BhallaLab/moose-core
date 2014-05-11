@@ -64,6 +64,21 @@ class ZombiePoolInterface
 		 * followed by numVoxels * numPools of data values.
 		 */
 		virtual void setBlock( const vector< double >& values ) = 0;
+
+		/**
+		 * Informs the ZPI about the stoich, used during subsequent
+		 * computations.
+		 * Called to wrap up the model building. The Stoich
+		 * does this call after it has set up its own path.
+		 */
+		virtual void setStoich( Id stoich ) = 0;
+
+		/// Assignes the diffusion solver. Used by the reac solvers
+		virtual void setDsolve( Id dsolve ) = 0;
+
+		/// Assigns compartment.
+		virtual void setCompartment( Id compartment ) = 0;
+		virtual Id getCompartment() const = 0;
 };
 
 #endif	// _ZOMBIE_POOL_INTERFACE_H

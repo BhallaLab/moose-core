@@ -11,6 +11,7 @@
 #include "FuncTerm.h"
 #include "SparseMatrix.h"
 #include "KinSparseMatrix.h"
+#include "ZombiePoolInterface.h"
 #include "Stoich.h"
 #include "GssaSystem.h"
 #include "VoxelPoolsBase.h"
@@ -40,7 +41,10 @@ const double SAFETY_FACTOR = 1.0 + 1.0e-9;
 
 GssaVoxelPools::GssaVoxelPools()
 	: 
-			VoxelPoolsBase()
+			VoxelPoolsBase(),
+			t_( 0.0 ),
+			atot_( 0.0 ),
+			volIndex_( 0 )
 {;}
 
 GssaVoxelPools::~GssaVoxelPools()
@@ -69,7 +73,8 @@ void GssaVoxelPools::updateDependentRates(
 			i = deps.begin(); i != deps.end(); ++i ) {
 		atot_ -= v_[ *i ];
 		// atot_ += ( v[ *i ] = ( *rates_[ *i ] )( S() );
-		atot_ += ( v_[ *i ] = stoich->getReacVelocity( *i, S() ) );
+		atot_ += ( v_[ *i ] = 
+						stoich->getReacVelocity( *i, S(), volIndex_ ) );
 	}
 }
 
@@ -111,7 +116,7 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
 		if ( rindex >= g->stoich->getNumRates() ) {
 			// probably cumulative roundoff error here. 
 			// Recalculate atot to avoid, and redo.
-			g->stoich->updateReacVelocities( S(), v_ );
+			g->stoich->updateReacVelocities( S(), v_, volIndex_ );
 			atot_ = 0;
 			for ( vector< double >::const_iterator 
 					i = v_.begin(); i != v_.end(); ++i )
@@ -137,6 +142,7 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
 {
 	VoxelPoolsBase::reinit(); // Assigns S = Sinit;
 	g->stoich->updateFuncs( varS(), 0 );
+	volIndex_ = g->stoich->indexOfMatchingVolume( getVolume() );
 
 	unsigned int numVarPools = g->stoich->getNumVarPools();
 	double* n = varS();
@@ -160,7 +166,7 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
 	t_ = 0.0;
 	// vector< double > yprime( g->stoich->getNumAllPools(), 0.0 );
 				// i = yprime.begin(); i != yprime.end(); ++i )
-	g->stoich->updateReacVelocities( S(), v_ );
+	g->stoich->updateReacVelocities( S(), v_, volIndex_ );
 	atot_ = 0;
 	for ( vector< double >::const_iterator 
 		i = v_.begin(); i != v_.end(); ++i ) {

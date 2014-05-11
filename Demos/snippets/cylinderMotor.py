@@ -32,7 +32,6 @@ PID = os.getpid()
 def doNothing( *args ):
 		pass
 
-runtime = 10.0 # seconds
 signal.signal( signal.SIGUSR1, doNothing )
 
 def makeModel():
@@ -45,8 +44,6 @@ def makeModel():
 		diffConst = 1e-12 # m^2/sec
 		motorConst = 1e-6 # m/sec
 		concA = 1 # millimolar
-		dt4 = 0.01
-		dt5 = 0.01
 
 		model = moose.Neutral( 'model' )
 		compartment = moose.CylMesh( '/model/compartment' )
@@ -88,22 +85,12 @@ def makeModel():
 
 		# Make solvers
 		ksolve = moose.Ksolve( '/model/compartment/ksolve' )
-		dsolve = moose.Dsolve( '/model/dsolve' )
-                # Set up clocks. The dsolver to know before assigning stoich
-		moose.setClock( 4, dt4 )
-		moose.setClock( 5, dt5 )
-		moose.useClock( 4, '/model/dsolve', 'process' )
-                # Ksolve must be scheduled after dsolve.
-		moose.useClock( 5, '/model/compartment/ksolve', 'process' )
-
-		dsolve.compartment = compartment
+		dsolve = moose.Dsolve( '/model/compartment/dsolve' )
 		stoich = moose.Stoich( '/model/compartment/stoich' )
-		ksolve.numAllVoxels = compartment.numDiffCompts
-		stoich.poolInterface = ksolve
-		ksolve.stoich = stoich
+		stoich.compartment = compartment
+		stoich.ksolve = ksolve
+		stoich.dsolve = dsolve
 		stoich.path = "/model/compartment/##"
-		dsolve.stoich = stoich
-		ksolve.dsolve = dsolve
                 assert( dsolve.numPools == 4 )
 		a.vec[0].concInit = concA * 1
 		b.vec[num-1].concInit = concA * 2
@@ -124,8 +111,18 @@ def displayPlots():
                 pylab.show()
 
 def main():
+		dt4 = 0.01
+		dt5 = 0.01
+                runtime = 10.0 # seconds
+                # Set up clocks. The dsolver to know before assigning stoich
+		moose.setClock( 4, dt4 )
+		moose.setClock( 5, dt5 )
+
 		makeModel()
-		dsolve = moose.element( '/model/dsolve' )
+		moose.useClock( 4, '/model/compartment/dsolve', 'process' )
+                # Ksolve must be scheduled after dsolve.
+		moose.useClock( 5, '/model/compartment/ksolve', 'process' )
+
 		moose.reinit()
 		moose.start( runtime ) # Run the model
 

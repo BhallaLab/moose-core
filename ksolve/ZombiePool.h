@@ -42,8 +42,7 @@ class ZombiePool: public PoolBase
 		void vSetSpecies( const Eref& e, unsigned int v );
 		unsigned int vGetSpecies( const Eref& e ) const;
 
-		void vSetSolver( Id v );
-		Id vGetSolver() const;
+		void vSetSolver( Id ksolve, Id dsolve );
 
 		void vSetMotorConst( const Eref& e, double v );
 		double vGetMotorConst( const Eref& e ) const;
@@ -54,12 +53,19 @@ class ZombiePool: public PoolBase
 		//////////////////////////////////////////////////////////////////
 		// utility funcs
 		//////////////////////////////////////////////////////////////////
-		void setSolver( Id s );
-		// void setKineticSolver( ZombiePoolInterface* k );
-		// void setDiffSolver( ZombiePoolInterface* d );
 
 		static const Cinfo* initCinfo();
 	protected:
+		/** 
+		 * The ZombiePoolInterface pointers hold the solvers for the 
+		 * ZombiePool. At least one must be assigned. Field assignments
+		 * propagate from the pool to whichever is assigned. Field 
+		 * lookups first check the dsolve, then the ksolve.
+		 * The ZombiePool may be managed by the diffusion solver without
+		 * the involvement of the Stoich class at all. So instead of 
+		 * routing the zombie operations through the Stoich, we have
+		 * pointers directly into the Dsolve and Ksolve. 
+		 */
 		ZombiePoolInterface* dsolve_;
 		ZombiePoolInterface* ksolve_;
 		double diffConst_;

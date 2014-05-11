@@ -928,10 +928,11 @@ vector< unsigned int > CubeMesh::getParentVoxel() const
 	return ret;
 }
 
-const vector< double >& CubeMesh::getVoxelVolume() const
+const vector< double >& CubeMesh::vGetVoxelVolume() const
 {
 	static vector< double > vol;
-	assert( 0 ); // Not yet operational
+	vol.clear();
+	vol.resize( nx_ * ny_ * nz_, dx_ * dy_ * dz_ );
 	return vol;
 }
 

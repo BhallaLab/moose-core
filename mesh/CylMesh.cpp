@@ -562,8 +562,8 @@ void CylMesh::innerHandleNodeInfo(
 	vector< unsigned int > localEntries( numEntries );
 	vector< vector< unsigned int > > outgoingEntries;
 	vector< vector< unsigned int > > incomingEntries;
-	double oldvol = getMeshEntryVolume( 0 );
 	/*
+	double oldvol = getMeshEntryVolume( 0 );
 	meshSplit()->send( e,
 		oldvol,
 		vols, localEntries,
@@ -627,7 +627,7 @@ vector< unsigned int > CylMesh::getParentVoxel() const
 	return ret;
 }
 
-const vector< double >& CylMesh::getVoxelVolume() const
+const vector< double >& CylMesh::vGetVoxelVolume() const
 {
 	static vector< double > vol;
 	vol.resize( numEntries_ );

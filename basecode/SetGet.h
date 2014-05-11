@@ -307,7 +307,7 @@ template< class A > class Field: public SetGet1< A >
 				}
 			}
 			cout << "Warning: Field::Get conversion error for " << 
-					dest.id.path() << endl;
+					dest.id.path() << "." << field << endl;
 			return A();
 		}
 
@@ -559,8 +559,8 @@ template< class L, class A > class LookupField: public SetGet2< L, A >
 					*/
 				}
 			}
-			cout << "Warning: Field::Get conversion error for " << 
-					dest.id.path() << endl;
+			cout << "LookupField::get: Warning: Field::Get conversion error for " << 
+				dest.id.path() << "." << field << endl;
 			return A();
 		}
 
