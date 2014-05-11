@@ -580,7 +580,7 @@ void SteadyState::setupSSmatrix()
 		cout << s_->Sinit()[ j ] << ", ";
 	cout << ")\n";
 	*/
-	Id ksolve = Field< Id >::get( stoich_, "poolInterface" );
+	Id ksolve = Field< Id >::get( stoich_, "ksolve" );
 	vector< double > nVec = 
 			LookupField< unsigned int, vector< double > >::get(
 			ksolve,"nVec", 0 );
@@ -781,7 +781,7 @@ void SteadyState::settle( bool forceSetup )
 	unsigned int i, j;
 
 
-	Id ksolve = Field< Id >::get( stoich_, "poolInterface" );
+	Id ksolve = Field< Id >::get( stoich_, "ksolve" );
 	struct reac_info ri;
 	ri.rank = rank_;
 	ri.num_reacs = nReacs_;
@@ -992,7 +992,7 @@ void recalcTotal( vector< double >& tot, gsl_matrix* g, const double* S )
 void SteadyState::randomizeInitialCondition( const Eref& me )
 {
 #ifdef USE_GSL
-	Id ksolve = Field< Id >::get( stoich_, "poolInterface" );
+	Id ksolve = Field< Id >::get( stoich_, "ksolve" );
 	vector< double > nVec = 
 			LookupField< unsigned int, vector< double > >::get(
 			ksolve,"nVec", 0 );

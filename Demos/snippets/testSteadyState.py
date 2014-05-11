@@ -111,12 +111,7 @@ def makeModel():
 		moose.connect( outputCplx1, 'requestOut', cplx1, 'getConc' );
 		moose.connect( outputCplx2, 'requestOut', cplx2, 'getConc' );
 
-		# Schedule the whole lot
-		moose.setClock( 4, 0.1 ) # for the computational objects
-		moose.setClock( 8, 1.0 ) # for the plots
-		# The wildcard uses # for single level, and ## for recursive.
-		moose.useClock( 4, '/model/compartment/##', 'process' )
-		moose.useClock( 8, '/model/graphs/#', 'process' )
+                return compartment
 
 def displayPlots():
 		for x in moose.wildcardFind( '/model/graphs/conc#' ):
@@ -138,19 +133,25 @@ def getState( ksolve, state ):
 
 
 def main():
-		makeModel()
+		# Schedule the whole lot
+		moose.setClock( 4, 0.1 ) # for the computational objects
+		moose.setClock( 5, 0.2 ) # clock for the solver
+		moose.setClock( 8, 1.0 ) # for the plots
+		# The wildcard uses # for single level, and ## for recursive.
+		compartment = makeModel()
 		ksolve = moose.Ksolve( '/model/compartment/ksolve' )
 		stoich = moose.Stoich( '/model/compartment/stoich' )
-		ksolve.numAllVoxels = 1
-		stoich.poolInterface = ksolve
+		stoich.compartment = compartment
+		stoich.ksolve = ksolve
 		ksolve.stoich = stoich
 		stoich.path = "/model/compartment/##"
 		state = moose.SteadyState( '/model/compartment/state' )
 		#solver.method = "rk5"
 		#mesh = moose.element( "/model/compartment/mesh" )
 		#moose.connect( mesh, "remesh", solver, "remesh" )
-		moose.setClock( 5, 0.2 ) # clock for the solver
+		#moose.useClock( 4, '/model/compartment/##', 'process' )
 		moose.useClock( 5, '/model/compartment/ksolve', 'process' )
+		moose.useClock( 8, '/model/graphs/#', 'process' )
 
 		moose.reinit()
 		state.stoich = stoich

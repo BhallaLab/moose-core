@@ -33,6 +33,8 @@ HEADERS = \
 	../basecode/ElementValueFinfo.h \
 	RateTerm.h \
 	KinSparseMatrix.h \
+	ZombiePoolInterface.h \
+	Stoich.h \
 	../kinetics/Pool.h \
 	../kinetics/lookupVolumeFromMesh.h \
 
