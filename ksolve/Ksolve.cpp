@@ -48,6 +48,13 @@ const Cinfo* Ksolve::initCinfo()
 			&Ksolve::getDsolve
 		);
 
+		static ValueFinfo< Ksolve, Id > compartment(
+			"compartment",
+			"Compartment in which the Ksolve reaction system lives.",
+			&Ksolve::setCompartment,
+			&Ksolve::getCompartment
+		);
+
 		static ReadOnlyValueFinfo< Ksolve, unsigned int > numLocalVoxels(
 			"numLocalVoxels",
 			"Number of voxels in the core reac-diff system, on the "
@@ -103,6 +110,7 @@ const Cinfo* Ksolve::initCinfo()
 	{
 		&stoich,			// Value
 		&dsolve,			// Value
+		&compartment,		// Value
 		&numLocalVoxels,	// ReadOnlyValue
 		&nVec,				// LookupValue
 		&numAllVoxels,		// ReadOnlyValue
@@ -135,7 +143,9 @@ Ksolve::Ksolve()
 		stoich_(),
 		stoichPtr_( 0 ),
 		dsolve_(),
-		dsolvePtr_( 0 )
+		compartment_(),
+		dsolvePtr_( 0 ),
+		isBuilt_( false )
 {;}
 
 Ksolve::~Ksolve()
@@ -154,7 +164,7 @@ void Ksolve::setStoich( Id stoich )
 {
 	assert( stoich.element()->cinfo()->isA( "Stoich" ) );
 	stoich_ = stoich;
-	stoichPtr_ = reinterpret_cast< const Stoich* >( stoich.eref().data() );
+	stoichPtr_ = reinterpret_cast< Stoich* >( stoich.eref().data() );
 }
 
 Id Ksolve::getDsolve() const
@@ -164,10 +174,39 @@ Id Ksolve::getDsolve() const
 
 void Ksolve::setDsolve( Id dsolve )
 {
-	assert( dsolve.element()->cinfo()->isA( "Dsolve" ) );
-	dsolve_ = dsolve;
-	dsolvePtr_ = 
-		reinterpret_cast< ZombiePoolInterface* >( dsolve.eref().data() );
+	if ( dsolve == Id () ) {
+		dsolvePtr_ = 0;
+		dsolve_ = Id();
+	} else if ( dsolve.element()->cinfo()->isA( "Dsolve" ) ) {
+		dsolve_ = dsolve;
+		dsolvePtr_ = reinterpret_cast< ZombiePoolInterface* >( 
+						dsolve.eref().data() );
+	} else {
+		cout << "Warning: Ksolve::setDsolve: Object '" << dsolve.path() <<
+				"' should be class Dsolve, is: " << 
+				dsolve.element()->cinfo()->name() << endl;
+	}
+}
+
+Id Ksolve::getCompartment() const
+{
+	return compartment_;
+}
+
+void Ksolve::setCompartment( Id compt )
+{
+	isBuilt_ = false; // We will have to now rebuild the whole thing.
+	if ( compt.element()->cinfo()->isA( "ChemCompt" ) ) {
+		compartment_ = compt;
+		vector< double > vols = 
+			Field< vector < double > >::get( compt, "voxelVolume" );
+		if ( vols.size() > 0 ) {
+			pools_.resize( vols.size() );
+			for ( unsigned int i = 0; i < vols.size(); ++i ) {
+				pools_[i].setVolume( vols[i] );
+			}
+		}
+	}
 }
 
 unsigned int Ksolve::getNumLocalVoxels() const
@@ -293,13 +332,34 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 
 void Ksolve::reinit( const Eref& e, ProcPtr p )
 {
-	double initDt = stoichPtr_->getEstimatedDt();
-	for ( vector< VoxelPools >::iterator 
-					i = pools_.begin(); i != pools_.end(); ++i ) {
-		i->setInitDt( initDt );
-		i->reinit();
+	assert( stoichPtr_ );
+	if ( isBuilt_ ) {
+		for ( unsigned int i = 0 ; i < pools_.size(); ++i )
+			pools_[i].reinit();
+	} else {
+		OdeSystem ode;
+		ode.initStepSize = stoichPtr_->getEstimatedDt();
+		if ( ode.initStepSize > p->dt )
+			ode.initStepSize = p->dt;
+#ifdef USE_GSL
+		ode.gslSys.function = &VoxelPools::gslFunc;
+   		ode.gslSys.jacobian = 0;
+		ode.gslSys.dimension = stoichPtr_->getNumAllPools();
+		if ( ode.method == "rk5" ) {
+			ode.gslStep = gsl_odeiv2_step_rkf45;
+		}
+		unsigned int numVoxels = pools_.size();
+		for ( unsigned int i = 0 ; i < numVoxels; ++i ) {
+   			ode.gslSys.params = &pools_[i];
+			pools_[i].setStoich( stoichPtr_, &ode );
+			// pools_[i].setIntDt( ode.initStepSize ); // We're setting it up anyway
+			pools_[i].reinit();
+		}
+		isBuilt_ = true;
 	}
+#endif
 }
+
 //////////////////////////////////////////////////////////////
 // Solver ops
 //////////////////////////////////////////////////////////////
@@ -363,26 +423,9 @@ double Ksolve::getDiffConst( const Eref& e ) const
 
 void Ksolve::setNumPools( unsigned int numPoolSpecies )
 {
-	assert( stoichPtr_ );
-	OdeSystem ode;
-	// Can't do this here as Stoich will not have had its path set yet.
-	// ode.initStepSize = stoichPtr_->getEstimatedDt();
-	ode.initStepSize = 0.1;
-#ifdef USE_GSL
-	ode.gslSys.function = &VoxelPools::gslFunc;
-   	ode.gslSys.jacobian = 0;
-	ode.gslSys.dimension = stoichPtr_->getNumAllPools();
-	// This cast is needed because the C interface for GSL doesn't 
-	// use const void here.
-   	ode.gslSys.params = const_cast< Stoich* >( stoichPtr_ );
-	if ( ode.method == "rk5" ) {
-		ode.gslStep = gsl_odeiv2_step_rkf45;
-	}
-#endif
 	unsigned int numVoxels = pools_.size();
 	for ( unsigned int i = 0 ; i < numVoxels; ++i ) {
 		pools_[i].resizeArrays( numPoolSpecies );
-		pools_[i].setStoich( stoichPtr_, &ode );
 	}
 }
 

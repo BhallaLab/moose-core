@@ -433,7 +433,7 @@ vector< unsigned int > PsdMesh::getParentVoxel() const
 	return parent_;
 }
 
-const vector< double >& PsdMesh::getVoxelVolume() const
+const vector< double >& PsdMesh::vGetVoxelVolume() const
 {
 	return vs_;
 }

@@ -28,7 +28,7 @@ class GssaSystem
 
 		/// Transpose of stoichiometry matrix.
 		KinSparseMatrix transposeN;
-		const Stoich* stoich;
+		Stoich* stoich;
 
 		/**
 		 * Flag: True when using probabilistic (random) rounding.

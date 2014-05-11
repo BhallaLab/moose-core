@@ -21,7 +21,9 @@ class Gsolve: public ZombiePoolInterface
 		// Field assignment stuff
 		//////////////////////////////////////////////////////////////////
 		Id getStoich() const;
-		void setStoich( Id stoich );
+		void setStoich( Id stoich ); /// Inherited from ZombiePoolInterface.
+		Id getCompartment() const;
+		void setCompartment( Id compt );
 
 		unsigned int getNumLocalVoxels() const;
 		unsigned int getNumAllVoxels() const;
@@ -35,7 +37,8 @@ class Gsolve: public ZombiePoolInterface
 		 * Assigns number of different pools (chemical species) present in
 		 * each voxel.
 		 */
-		void setNumAllPools( unsigned int num );
+		void setNumPools( unsigned int num ); /// Inherited.
+		unsigned int getNumPools() const; /// Inherited.
 
 		/// Returns the vector of pool Num at the specified voxel.
 		vector< double > getNvec( unsigned int voxel) const;
@@ -61,6 +64,13 @@ class Gsolve: public ZombiePoolInterface
 		//////////////////////////////////////////////////////////////////
 		unsigned int getPoolIndex( const Eref& e ) const;
 		unsigned int getVoxelIndex( const Eref& e ) const;
+
+		/**
+		 * Inherited. Needed for reac-diff calculations so the Gsolve can
+		 * orchestrate the data transfer between the itself and the 
+		 * diffusion solver.
+		 */
+		void setDsolve( Id dsolve );
 		
 		//////////////////////////////////////////////////////////////////
 		// ZombiePoolInterface inherited functions
@@ -72,13 +82,6 @@ class Gsolve: public ZombiePoolInterface
 		double getNinit( const Eref& e ) const;
 		void setDiffConst( const Eref& e, double v );
 		double getDiffConst( const Eref& e ) const;
-
-		/**
-		 * Assigns number of different pools (chemical species) present in
-		 * each voxel.
-		 */
-		void setNumPools( unsigned int num );
-		unsigned int getNumPools() const;
 
 		void getBlock( vector< double >& values ) const;
 		void setBlock( const vector< double >& values );
@@ -113,6 +116,9 @@ class Gsolve: public ZombiePoolInterface
 
 		/// Utility ptr used to help Pool Id lookups by the Ksolve.
 		Stoich* stoichPtr_;
+
+		/// Used to track which volumes the system uses.
+		Id compartment_;
 };
 
 #endif	// _GSOLVE_H

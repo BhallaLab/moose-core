@@ -112,7 +112,7 @@ class NeuroMesh: public MeshCompt
 		unsigned int innerGetDimensions() const;
 
 		vector< unsigned int > getParentVoxel() const;
-		const vector< double >& getVoxelVolume() const;
+		const vector< double >& vGetVoxelVolume() const;
 		const vector< double >& getVoxelArea() const;
 		const vector< double >& getVoxelLength() const;
 

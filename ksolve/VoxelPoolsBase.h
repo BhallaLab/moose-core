@@ -58,6 +58,9 @@ class VoxelPoolsBase
 		 * Assigns S = Sinit and sets up initial dt. 
 		 */
 		void reinit();
+
+		void setVolume( double vol );
+		double getVolume() const;
 		
 		//////////////////////////////////////////////////////////////////
 		// Field assignment functions
@@ -95,6 +98,11 @@ class VoxelPoolsBase
 		 * molecules.
 		 */
 		vector< double > Sinit_;
+
+		/**
+		 * Volume of voxel.
+		 */
+		double volume_;
 };
 
 #endif	// _VOXEL_POOLS_BASE_H

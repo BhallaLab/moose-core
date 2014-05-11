@@ -34,7 +34,7 @@ const Cinfo* Dsolve::initCinfo()
 		// Field definitions
 		///////////////////////////////////////////////////////
 		
-		static ElementValueFinfo< Dsolve, Id > stoich (
+		static ValueFinfo< Dsolve, Id > stoich (
 			"stoich",
 			"Stoichiometry object for handling this reaction system.",
 			&Dsolve::setStoich,
@@ -140,7 +140,9 @@ static const Cinfo* dsolveCinfo = Dsolve::initCinfo();
 // Class definitions
 //////////////////////////////////////////////////////////////
 Dsolve::Dsolve()
-	: numTotPools_( 0 ),
+	: 
+		dt_( -1.0 ),
+		numTotPools_( 0 ),
 		numLocalPools_( 0 ),
 		poolStartIndex_( 0 ),
 		numVoxels_( 0 )
@@ -187,6 +189,7 @@ void Dsolve::process( const Eref& e, ProcPtr p )
 
 void Dsolve::reinit( const Eref& e, ProcPtr p )
 {
+	build( p->dt );
 	for ( vector< DiffPoolVec >::iterator 
 					i = pools_.begin(); i != pools_.end(); ++i ) {
 		i->reinit();
@@ -196,29 +199,7 @@ void Dsolve::reinit( const Eref& e, ProcPtr p )
 // Solver coordination and setup functions
 //////////////////////////////////////////////////////////////
 
-double Dsolve::findDt( const Eref& e )
-{
-	// Here is the horrible stuff to traverse the message to get the dt.
-	const Finfo* f = Dsolve::initCinfo()->findFinfo( "reinit" );
-	const DestFinfo* df = dynamic_cast< const DestFinfo* >( f );
-	assert( df );
-	unsigned int fid = df->getFid();
-	ObjId caller = e.element()->findCaller( fid );
-	const Msg* m = Msg::getMsg( caller );
-	assert( m );
-	vector< string > src = m->getSrcFieldsOnE1();
-	assert( src.size() > 0 );
-	string temp = src[0].substr( src[0].length() - 1 ); // reinitxx
-	unsigned int tick = atoi( temp.c_str() );
-	assert( tick < 10 );
-	Id clock( 1 );
-	assert( clock.element() == m->e1() );
-	double dt = LookupField< unsigned int, double >::
-			get( clock, "tickDt", tick );
-	return dt;
-}
-
-void Dsolve::setStoich( const Eref& e, Id id )
+void Dsolve::setStoich( Id id )
 {
 	if ( !id.element()->cinfo()->isA( "Stoich" ) ) {
 		cout << "Dsolve::setStoich::( " << id << " ): Error: provided Id is not a Stoich\n";
@@ -232,8 +213,6 @@ void Dsolve::setStoich( const Eref& e, Id id )
 
 	path_ = Field< string >::get( stoich_, "path" );
 
-	numLocalPools_ = Field< unsigned int >::get( stoich_, "numAllPools" );
-	setNumPools( numLocalPools_ );
 	for ( unsigned int i = 0; i < poolMap_.size(); ++i ) {
 		if ( poolMap_[i] != ~0U ) {
 			Id pid( i + poolMapStart_ );
@@ -242,21 +221,20 @@ void Dsolve::setStoich( const Eref& e, Id id )
 					reinterpret_cast< PoolBase* >( pid.eref().data());
 			double diffConst = pb->getDiffConst( pid.eref() );
 			double motorConst = pb->getMotorConst( pid.eref() );
-			pb->setSolver( e.id() );
-			// double diffConst = Field< double >::get( pid, "diffConst" );
 			pools_[ poolMap_[i] ].setDiffConst( diffConst );
 			pools_[ poolMap_[i] ].setMotorConst( motorConst );
 		}
 	}
-	
-	double dt = findDt( e );
-	build( dt );
 }
 
-Id Dsolve::getStoich( const Eref& e ) const
+Id Dsolve::getStoich() const
 {
 	return stoich_;
 }
+
+/// Inherited, defining dummy function here.
+void Dsolve::setDsolve( Id dsolve )
+{;}
 
 void Dsolve::setCompartment( Id id )
 {
@@ -334,11 +312,11 @@ void Dsolve::setPath( const Eref& e, string path )
 		double motorConst = Field< double >::get( id, "motorConst" );
 		const Cinfo* c = id.element()->cinfo();
 		if ( c == Pool::initCinfo() )
-			PoolBase::zombify( id.element(), ZombiePool::initCinfo(), e.id() );
+			PoolBase::zombify( id.element(), ZombiePool::initCinfo(), Id(), e.id() );
 		else if ( c == BufPool::initCinfo() )
-			PoolBase::zombify( id.element(), ZombieBufPool::initCinfo(), e.id() );
+			PoolBase::zombify( id.element(), ZombieBufPool::initCinfo(), Id(), e.id() );
 		else if ( c == FuncPool::initCinfo() )
-			PoolBase::zombify( id.element(), ZombieFuncPool::initCinfo(), e.id() );
+			PoolBase::zombify( id.element(), ZombieFuncPool::initCinfo(), Id(), e.id() );
 		else
 			cout << "Error: Dsolve::setPath( " << path << " ): unknown pool class:" << c->name() << endl; 
 		id.element()->resize( numVoxels_ );
@@ -348,9 +326,6 @@ void Dsolve::setPath( const Eref& e, string path )
 		pools_[ poolMap_[j] ].setDiffConst( diffConst );
 		pools_[ poolMap_[j] ].setMotorConst( motorConst );
 	}
-	
-	double dt = findDt( e );
-	build( dt );
 }
 
 string Dsolve::getPath( const Eref& e ) const
@@ -381,6 +356,10 @@ string Dsolve::getPath( const Eref& e ) const
 
 void Dsolve::build( double dt )
 {
+	if ( doubleEq( dt, dt_ ) )
+		return;
+	dt_ = dt;
+
 	const MeshCompt* m = reinterpret_cast< const MeshCompt* >( 
 						compartment_.eref().data() );
 	unsigned int numVoxels = m->getNumEntries();

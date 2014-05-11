@@ -20,8 +20,17 @@ class VoxelPools: public VoxelPoolsBase
 		//////////////////////////////////////////////////////////////////
 		// Solver interface functions
 		//////////////////////////////////////////////////////////////////
-		void setStoich( const Stoich* stoich, const OdeSystem* ode );
+		/**
+		 * setStoich: Assigns the ODE system and Stoich. 
+		 * Stoich may be modified to create a new RateTerm vector
+		 * in case the volume of this VoxelPools is new.
+		 */
+		void setStoich( Stoich* stoich, const OdeSystem* ode );
+
+		/// Do the numerical integration. Advance the simulation.
 		void advance( const ProcInfo* p );
+
+		/// Set initial timestep to use by the solver.
 		void setInitDt( double dt );
 
 		/// This is the function which evaluates the rates.
@@ -29,6 +38,9 @@ class VoxelPools: public VoxelPoolsBase
 						void* params );
 
 	private:
+		/// Used to identify which Rates_ vector to use for this volume.
+		unsigned int volIndex_;
+		const Stoich* stoichPtr_;
 #ifdef USE_GSL
 		gsl_odeiv2_driver* driver_;
 		gsl_odeiv2_system sys_;
