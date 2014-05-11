@@ -3474,3 +3474,30 @@ not providing the voxel information needed by the Stoich.
 Works for most of the tests, still doesn't work for the Turing pattern
 test in the neuronal morphology.
 
+Checkin 4398.
+
+Trying to find why the system hangs. Using zug.py with Kholodenko.g
+and a runtime of 5000.
+Valgrind says that there is an invalid read of size 8 in the
+RateTerm::FirstOrder. Haven't been able to track this. The entire python
+side of things seems infested with memory issues.
+
+How to put breakpoints in a python script:
+
+import signal
+import os
+PID = os.getpid()
+
+def doNothing( *args ):
+	pass
+signal.signal( signal.SIGUSR1, doNothing )
+
+and for the breakpoint:
+os.kill( PID, signal.SIGUSR1 )
+
+Tracked down the numerical integration problem. It turns out that I had
+set the absolute tolerance of integration to 1e6. Set it to 1e-4 and all
+is well. Also implemented stuff so that the Ksolve can define the
+numerical method and the tolerances.
+
+============================================================================

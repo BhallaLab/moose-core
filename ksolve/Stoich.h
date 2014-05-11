@@ -10,6 +10,42 @@
 #ifndef _STOICH_H
 #define _STOICH_H
 
+/**
+ * Stoich is the class that handles the stoichiometry matrix for a
+ * reaction system, and also setting up the computations for reaction 
+ * rates. It has to coordinate the operation of a number of model 
+ * definition classes, most importantly: Pools, Reacs and Enz(yme)s.
+ * It also coordinates the setup of a large number of numerical solution
+ * engines, or solvers: Ksolve, Gsolve, Dsolve, and SteadyState.
+ * The setup process has to follow a tight order, most of which is
+ * internally manged by the Stoich.
+ * The Stoich itself does not do any 'process' functions. It just sets up
+ * data structures for the other objects that do the crunching.
+ *
+ * 1. Compartment is set up to a cell (neuroMesh) or volume (other meshes)
+ * 2. Compartment assigned to Stoich. Here it assigns unique vols.  
+ * 3. Dsolve and Ksolve assigned to Stoich using setKsolve and setDsolve.
+ * 	 3.1 At this point the Stoich::useOneWay_ flag is set if it is a Gsolve.
+ * 4. Call Stoich::setPath. All the rest happens internally, done by Stoich:
+ * 		4.1 assign compartment to Dsolve and Ksolve.
+ * 		4.2 assign numPools and compts to Dsolve and Ksolve. 
+ * 		4.3 During Zombification, zeroth vector< RateTerm* > is built.  
+ * 		4.4 afterZombification, stoich builds rateTerm vector for all vols.
+ * 		4.5 Stoich assigns itself to Dsolve and Ksolve.  
+ * 			- Ksolve sets up volIndex on each VoxelPool 
+ * 			- Dsolve gets vector of pools, extracts DiffConst and MotorConst
+ * 		4.6 Dsolve assigned to Ksolve::dsolve_ field by the Stoich.
+ * 	5. Reinit, 
+ * 		5.1 Dsolve builds matrix, provided dt has changed. It needs dt.  
+ * 		5.2 Ksolve builds solvers if not done already, assigning initDt 
+ *
+ * As seen by the user, this reduces to just 4 stages:
+ * - Make the objects.
+ * - Assign compartment, Ksolve and Dsolve to stoich.
+ * - Set the stoich path.
+ * - Reinit.
+ */
+
 class Stoich
 {
 	public: 

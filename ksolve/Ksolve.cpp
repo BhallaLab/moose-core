@@ -34,6 +34,33 @@ const Cinfo* Ksolve::initCinfo()
 		// Field definitions
 		///////////////////////////////////////////////////////
 		
+		static ValueFinfo< Ksolve, string > method (
+			"method",
+			"Integration method, using GSL. So far only explict. Options are:"
+			"rk5: The default Runge-Kutta-Fehlberg 5th order adaptive dt method"
+			"gsl: alias for the above"
+			"rk4: The Runge-Kutta 4th order fixed dt method"
+			"rk2: The Runge-Kutta 2,3 embedded fixed dt method"
+			"rkck: The Runge-Kutta Cash-Karp (4,5) method"
+			"rk8: The Runge-Kutta Prince-Dormand (8,9) method" ,
+			&Ksolve::setMethod,
+			&Ksolve::getMethod
+		);
+		
+		static ValueFinfo< Ksolve, double > epsAbs (
+			"epsAbs",
+			"Absolute permissible integration error range.",
+			&Ksolve::setEpsAbs,
+			&Ksolve::getEpsAbs
+		);
+		
+		static ValueFinfo< Ksolve, double > epsRel (
+			"epsRel",
+			"Relative permissible integration error range.",
+			&Ksolve::setEpsRel,
+			&Ksolve::getEpsRel
+		);
+		
 		static ValueFinfo< Ksolve, Id > stoich (
 			"stoich",
 			"Stoichiometry object for handling this reaction system.",
@@ -108,6 +135,9 @@ const Cinfo* Ksolve::initCinfo()
 
 	static Finfo* ksolveFinfos[] =
 	{
+		&method,			// Value
+		&epsAbs,			// Value
+		&epsRel,			// Value
 		&stoich,			// Value
 		&dsolve,			// Value
 		&compartment,		// Value
@@ -138,6 +168,9 @@ static const Cinfo* ksolveCinfo = Ksolve::initCinfo();
 
 Ksolve::Ksolve()
 	: 
+		method_( "rk5" ),
+		epsAbs_( 1e-4 ),
+		epsRel_( 1e-6 ),
 		pools_( 1 ),
 		startVoxel_( 0 ),
 		stoich_(),
@@ -154,6 +187,54 @@ Ksolve::~Ksolve()
 //////////////////////////////////////////////////////////////
 // Field Access functions
 //////////////////////////////////////////////////////////////
+
+string Ksolve::getMethod() const
+{
+	return method_;
+}
+
+void Ksolve::setMethod( string method )
+{
+	if ( method == "rk5" || method == "gsl" ) {
+		method_ = "rk5";
+	} else if ( method == "rk4"  || method == "rk2" || 
+					method == "rk8" || method == "rkck" ) {
+		method_ = method;
+	} else {
+		cout << "Warning: Ksolve::setMethod: '" << method << 
+				"' not known, using rk5\n";
+		method_ = "rk5";
+	}
+}
+
+double Ksolve::getEpsAbs() const
+{
+	return epsAbs_;
+}
+
+void Ksolve::setEpsAbs( double epsAbs )
+{
+	if ( epsAbs < 0 ) {
+			epsAbs_ = 1.0e-4;
+	} else {
+		epsAbs_ = epsAbs;
+	}
+}
+
+
+double Ksolve::getEpsRel() const
+{
+	return epsRel_;
+}
+
+void Ksolve::setEpsRel( double epsRel )
+{
+	if ( epsRel < 0 ) {
+			epsRel_ = 1.0e-6;
+	} else {
+		epsRel_ = epsRel;
+	}
+}
 
 Id Ksolve::getStoich() const
 {
@@ -330,6 +411,26 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 	}
 }
 
+#ifdef USE_GSL
+void innerSetMethod( OdeSystem& ode, const string& method )
+{
+	ode.method = method;
+	if ( method == "rk5" ) {
+		ode.gslStep = gsl_odeiv2_step_rkf45;
+	} else if ( method == "rk4" ) {
+		ode.gslStep = gsl_odeiv2_step_rk4;
+	} else if ( method == "rk2" ) {
+		ode.gslStep = gsl_odeiv2_step_rk2;
+	} else if ( method == "rkck" ) {
+		ode.gslStep = gsl_odeiv2_step_rkck;
+	} else if ( method == "rk8" ) {
+		ode.gslStep = gsl_odeiv2_step_rk8pd;
+	} else {
+		ode.gslStep = gsl_odeiv2_step_rkf45;
+	}
+}
+#endif
+
 void Ksolve::reinit( const Eref& e, ProcPtr p )
 {
 	assert( stoichPtr_ );
@@ -338,16 +439,17 @@ void Ksolve::reinit( const Eref& e, ProcPtr p )
 			pools_[i].reinit();
 	} else {
 		OdeSystem ode;
+		ode.epsAbs = epsAbs_;
+		ode.epsRel = epsRel_;
 		ode.initStepSize = stoichPtr_->getEstimatedDt();
 		if ( ode.initStepSize > p->dt )
 			ode.initStepSize = p->dt;
 #ifdef USE_GSL
+		innerSetMethod( ode, method_ );
 		ode.gslSys.function = &VoxelPools::gslFunc;
    		ode.gslSys.jacobian = 0;
 		ode.gslSys.dimension = stoichPtr_->getNumAllPools();
-		if ( ode.method == "rk5" ) {
-			ode.gslStep = gsl_odeiv2_step_rkf45;
-		}
+		innerSetMethod( ode, method_ );
 		unsigned int numVoxels = pools_.size();
 		for ( unsigned int i = 0 ; i < numVoxels; ++i ) {
    			ode.gslSys.params = &pools_[i];
