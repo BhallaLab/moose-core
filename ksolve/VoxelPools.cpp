@@ -20,6 +20,7 @@
 #include "FuncTerm.h"
 #include "SparseMatrix.h"
 #include "KinSparseMatrix.h"
+#include "ZombiePoolInterface.h"
 #include "Stoich.h"
 
 //////////////////////////////////////////////////////////////
@@ -27,6 +28,7 @@
 //////////////////////////////////////////////////////////////
 
 VoxelPools::VoxelPools()
+	:	volIndex_( 0 )
 {
 #ifdef USE_GSL
 		driver_ = 0;
@@ -44,8 +46,10 @@ VoxelPools::~VoxelPools()
 //////////////////////////////////////////////////////////////
 // Solver ops
 //////////////////////////////////////////////////////////////
-void VoxelPools::setStoich( const Stoich* s, const OdeSystem* ode )
+void VoxelPools::setStoich( Stoich* s, const OdeSystem* ode )
 {
+	volIndex_ = s->indexOfMatchingVolume( getVolume() );
+	stoichPtr_ = s;
 #ifdef USE_GSL
 	sys_ = ode->gslSys;
 	if ( driver_ )
@@ -80,7 +84,8 @@ void VoxelPools::setInitDt( double dt )
 int VoxelPools::gslFunc( double t, const double* y, double *dydt, 
 						void* params )
 {
-	Stoich* s = reinterpret_cast< Stoich* >( params );
+	VoxelPools* vp = reinterpret_cast< VoxelPools* >( params );
+	// Stoich* s = reinterpret_cast< Stoich* >( params );
 	double* q = const_cast< double* >( y ); // Assign the func portion.
 
 	// Assign the buffered pools
@@ -93,8 +98,8 @@ int VoxelPools::gslFunc( double t, const double* y, double *dydt,
 		*b++ = *sinit++;
 		*/
 
-	s->updateFuncs( q, t );
-	s->updateRates( y, dydt );
+	vp->stoichPtr_->updateFuncs( q, t );
+	vp->stoichPtr_->updateRates( y, dydt, vp->volIndex_ );
 #ifdef USE_GSL
 	return GSL_SUCCESS;
 #else

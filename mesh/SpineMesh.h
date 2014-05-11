@@ -137,7 +137,7 @@ class SpineMesh: public MeshCompt
 		void indexToSpace( unsigned int index, 
 						double& x, double& y, double& z ) const;
 		
-		const vector< double >& getVoxelVolume() const;
+		const vector< double >& vGetVoxelVolume() const;
 		const vector< double >& getVoxelArea() const;
 		const vector< double >& getVoxelLength() const;
 		//////////////////////////////////////////////////////////////////

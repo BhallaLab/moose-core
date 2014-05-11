@@ -85,14 +85,13 @@ def makeModel():
                 # Ksolve must be scheduled after dsolve.
 		moose.useClock( 5, '/model/compartment/ksolve', 'process' )
 
-		dsolve.compartment = compartment
 		stoich = moose.Stoich( '/model/compartment/stoich' )
-		ksolve.numAllVoxels = compartment.numDiffCompts
-		stoich.poolInterface = ksolve
-		ksolve.stoich = stoich
+		stoich.compartment = compartment
+		stoich.ksolve = ksolve
+		stoich.dsolve = dsolve
+                print "before set path"
 		stoich.path = "/model/compartment/##"
-		dsolve.stoich = stoich
-		ksolve.dsolve = dsolve
+                print "after set path"
                 assert( dsolve.numPools == 3 )
 		a.vec.concInit = [0.1]*num
                 a.vec[0].concInit += 1

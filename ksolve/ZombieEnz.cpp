@@ -13,6 +13,7 @@
 #include "FuncTerm.h"
 #include "SparseMatrix.h"
 #include "KinSparseMatrix.h"
+#include "ZombiePoolInterface.h"
 #include "Stoich.h"
 
 #include "EnzBase.h"

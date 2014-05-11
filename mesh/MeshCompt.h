@@ -65,7 +65,6 @@ class MeshCompt: public ChemCompt
 				const ChemCompt* other, const vector< VoxelJunction >& vj );
 
 		virtual vector< unsigned int > getParentVoxel() const = 0;
-		virtual const vector< double >& getVoxelVolume() const = 0;
 		virtual const vector< double >& getVoxelArea() const = 0;
 		virtual const vector< double >& getVoxelLength() const = 0;
 

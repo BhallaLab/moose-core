@@ -52,6 +52,9 @@ class GssaVoxelPools: public VoxelPoolsBase
 		vector< double > v_; 
 
 		// Possibly we should put independent RNGS, so save one here.
+		
+		/// Looks up vol-matched Rates from the stoich
+		unsigned int volIndex_;
 };
 
 #endif	// _GSSA_VOXEL_POOLS_H

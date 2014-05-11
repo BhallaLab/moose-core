@@ -94,9 +94,8 @@ def main():
 		makeModel()
 		gsolve = moose.Gsolve( '/model/compartment/gsolve' )
 		stoich = moose.Stoich( '/model/compartment/stoich' )
-		gsolve.numAllVoxels = 1
-		stoich.poolInterface = gsolve
-		gsolve.stoich = stoich
+		stoich.compartment = moose.element( '/model/compartment' )
+		stoich.ksolve = gsolve
 		stoich.path = "/model/compartment/##"
 		#solver.method = "rk5"
 		#mesh = moose.element( "/model/compartment/mesh" )
@@ -110,7 +109,7 @@ def main():
 		a = moose.element( '/model/compartment/a' )
 		b = moose.element( '/model/compartment/b' )
 
-		# move most molecules over to b
+		# move most molecules over to bgsolve
 		b.conc = b.conc + a.conc * 0.9
 		a.conc = a.conc * 0.1
 		moose.start( 100.0 ) # Run the model for 100 seconds.

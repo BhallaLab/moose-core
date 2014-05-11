@@ -23,11 +23,15 @@ class Ksolve: public ZombiePoolInterface
 		
 		/// Assigns Stoich object to Ksolve.
 		Id getStoich() const;
-		void setStoich( Id stoich );
+		void setStoich( Id stoich ); /// Inherited from ZombiePoolInterface.
 
 		/// Assigns Dsolve object to Ksolve.
 		Id getDsolve() const;
-		void setDsolve( Id dsolve );
+		void setDsolve( Id dsolve ); /// Inherited from ZombiePoolInterface.
+
+		/// Assigns Compartment object to Ksolve. Inherited.
+		Id getCompartment() const; 
+		void setCompartment( Id compt );
 
 		unsigned int getNumLocalVoxels() const;
 		unsigned int getNumAllVoxels() const;
@@ -36,12 +40,6 @@ class Ksolve: public ZombiePoolInterface
 		 * system. Note that fewer than this may be used on any given node.
 		 */
 		void setNumAllVoxels( unsigned int num );
-
-		/**
-		 * Assigns number of different pools (chemical species) present in
-		 * each voxel.
-		 */
-		void setNumAllPools( unsigned int num );
 
 		/// Returns the vector of pool Num at the specified voxel.
 		vector< double > getNvec( unsigned int voxel) const;
@@ -72,6 +70,7 @@ class Ksolve: public ZombiePoolInterface
 		/**
 		 * Assigns number of different pools (chemical species) present in
 		 * each voxel.
+		 * Inheritied.
 		 */
 		void setNumPools( unsigned int num );
 		unsigned int getNumPools() const;
@@ -101,15 +100,21 @@ class Ksolve: public ZombiePoolInterface
 		Id stoich_;
 
 		/// Utility ptr used to help Pool Id lookups by the Ksolve.
-		const Stoich* stoichPtr_;
+		Stoich* stoichPtr_;
 
 		/**
 		 * Id of diffusion solver, needed for coordinating numerics.
 		 */
 		Id dsolve_;
 
+		/// Id of Chem compartment used to figure out volumes of voxels.
+		Id compartment_;
+
 		/// Pointer to diffusion solver
 		ZombiePoolInterface* dsolvePtr_;
+
+		/// Flag for when the entire solver is built.
+		bool isBuilt_;
 
 };
 
