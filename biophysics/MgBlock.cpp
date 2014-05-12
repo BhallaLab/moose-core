@@ -116,7 +116,8 @@ MgBlock::MgBlock()
 	:	Zk_( 0.0 ), 
 		KMg_A_( 1.0 ), // These are NOT the same as the A, B state
 		KMg_B_( 1.0 ), // variables used for Exp Euler integration.
-		CMg_( 1.0 ) 	// Conc of Mg in mM
+		CMg_( 1.0 ), 	// Conc of Mg in mM
+                origGk_(0.0)
 {;}
 
 ///////////////////////////////////////////////////
