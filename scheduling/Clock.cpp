@@ -516,6 +516,7 @@ void Clock::handleStep( const Eref& e, unsigned int numSteps )
 	}
 	buildTicks( e );
 	assert( currentStep_ == nSteps_ );
+	assert( activeTicks_.size() == activeTicksMap_.size() );
 	nSteps_ += numSteps;
 	runTime_ = nSteps_ * dt_;
 	for ( isRunning_ = true;
@@ -529,8 +530,9 @@ void Clock::handleStep( const Eref& e, unsigned int numSteps )
 			activeTicks_.begin(); j != activeTicks_.end(); ++j ) {
 			if ( endStep % *j == 0 ) {
 				info_.dt = *j * dt_;
-				processVec()[*k++]->send( e, &info_ );
+				processVec()[*k]->send( e, &info_ );
 			}
+			++k;
 		}
 	}
 	info_.dt = dt_;

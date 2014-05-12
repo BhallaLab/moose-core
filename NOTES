@@ -3514,4 +3514,8 @@ Also, even though the answers are coming out well, the python script is
 failing at end. Fails even to be able to plot the data using matplotlib.
 
 
+Trying to run both the elec and reac-diff models together. Stuck for a
+long time on plots, turned out that there was actually a scheduler bug
+that had laid in wait for all this time. With that fixed I'm getting
+reasonable plots. Next step is to connect the models with an adaptor.
 ============================================================================
