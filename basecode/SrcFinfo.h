@@ -124,6 +124,47 @@ template < class T > class SrcFinfo1: public SrcFinfo
 			}
 		}
 
+		/**
+		 * Each target gets successive entries from the arg vector.
+		 * Rolls over if the # of targets exceeds vector size.
+		 * Fails totally if the targets are off-node.
+		 */
+		void sendVec( const Eref& er, const vector< T >& arg ) const 
+		{
+			if ( arg.size() == 0 )
+				return;
+			const vector< MsgDigest >& md = er.msgDigest( getBindIndex() );
+			unsigned int argPos = 0;
+			for ( vector< MsgDigest >::const_iterator
+				i = md.begin(); i != md.end(); ++i ) {
+				const OpFunc1Base< T >* f = 
+					dynamic_cast< const OpFunc1Base< T >* >( i->func );
+				assert( f );
+				for ( vector< Eref >::const_iterator
+					j = i->targets.begin(); j != i->targets.end(); ++j ) {
+					if ( j->dataIndex() == ALLDATA ) {
+						Element* e = j->element();
+						unsigned int start = e->localDataStart();
+						unsigned int end = start + e->numLocalData();
+						for ( unsigned int k = start; k < end; ++k ) {
+							f->op( Eref( e, k ), arg[ argPos++ ] );
+							if ( argPos >= arg.size() )
+								argPos = 0;
+						}
+					} else  {
+						f->op( *j, arg[ argPos++ ] );
+							if ( argPos >= arg.size() )
+								argPos = 0;
+						// Need to send stuff offnode too here. The 
+						// target in this case is just the src Element.
+						// Its ObjId gets stuffed into the send buf.
+						// On the other node it will execute
+						// its own send command with the passed in args. 
+					}
+				}
+			}
+		}
+
 		void sendBuffer( const Eref& e, double* buf ) const
 		{
 			send( e, Conv< T >::buf2val( &buf ) );

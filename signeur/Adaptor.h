@@ -166,7 +166,10 @@ class Adaptor
 		double scale_;
 		string molName_; /// Used for placeholding in cellreader mode.
 		double sum_;
-		unsigned int counter_;
+		unsigned int counter_; /// Counts number of inputs received.
+
+		/// Counts number of targets of requestField message
+		unsigned int numRequestField_; 
 };
 
 #endif // _Adaptor_h

@@ -630,6 +630,30 @@ unsigned int Element::getMsgTargetAndFunctions( DataId srcDataId,
 	return tgt.size();
 }
 
+unsigned int Element::getNumMsgTargets( DataId srcDataId,
+				const SrcFinfo* finfo  ) const
+{
+	assert( finfo ); // would like to check that finfo is on this.
+	assert( srcDataId < this->numData() );
+
+	unsigned int num = 0;
+	Eref er( const_cast< Element* >( this ), srcDataId );
+
+	const vector< MsgDigest >&md = er.msgDigest( finfo->getBindIndex() );
+	for ( vector< MsgDigest >::const_iterator
+		i = md.begin(); i != md.end(); ++i ) {
+		for ( vector< Eref >::const_iterator
+			j = i->targets.begin(); j != i->targets.end(); ++j ) {
+				if ( j->dataIndex() == ALLDATA ) {
+					num += j->element()->numData();
+				} else {
+					num++;
+				}
+		}
+	}
+	return num;
+}
+
 unsigned int Element::getInputs( vector< Id >& ret, const DestFinfo* finfo )
 	const
 {

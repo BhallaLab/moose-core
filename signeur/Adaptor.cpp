@@ -39,7 +39,7 @@ static SrcFinfo1< double* >  *requestField()
 	static SrcFinfo1< double* > requestField( "requestField", 
 			"Sends out a request to a generic double field. "
 			"Issued from the process call."
-			"Only works for a single target."
+			"Works for any number of targets."
 	);
 	return &requestField;
 }
@@ -203,7 +203,8 @@ Adaptor::Adaptor()
 		scale_( 1.0 ),
 		molName_( "" ),
 		sum_( 0.0 ), 
-		counter_( 0 )
+		counter_( 0 ),
+		numRequestField_( 0 )
 { 
 	;
 }
@@ -281,16 +282,25 @@ void Adaptor::process( const Eref& e, ProcPtr p )
 {
 	// static FuncId fid = handleInput()->getFid(); 
 	requestInput()->send( e );
-	double v;
-	requestField()->send( e, &v );
-	sum_ += v;
-	counter_ = 1;
+	if ( numRequestField_ > 0 ) {
+		vector< double > vals( numRequestField_, 0.0 );
+		vector< double* > args( numRequestField_ );
+		for ( unsigned int i = 0; i < numRequestField_; ++i )
+			args[i] = &vals[i];
+		requestField()->sendVec( e, args );
+		for ( unsigned int i = 0; i < numRequestField_; ++i ) {
+			sum_ += vals[i];
+		}
+		counter_ += numRequestField_;
+	}
 	innerProcess();
 	outputSrc()->send( e, output_ );
 }
 
 void Adaptor::reinit( const Eref& e, ProcPtr p )
 {
+	numRequestField_ = e.element()->getNumMsgTargets( e.dataIndex(),
+					requestField() );
 	process( e, p );
 }
 

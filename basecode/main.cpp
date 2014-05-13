@@ -59,8 +59,8 @@ extern void testHSolve();
 // extern void testGeom();
 extern void testMesh();
 // extern void testSimManager();
-// extern void testSigNeur();
-// extern void testSigNeurProcess();
+extern void testSigNeur();
+extern void testSigNeurProcess();
 
 extern unsigned int initMsgManagers();
 extern void destroyMsgManagers();
@@ -281,7 +281,7 @@ void nonMpiTests( Shell* s )
                 testHSolve();
 		// testGeom();
 		testMesh();
-		// testSigNeur();
+		testSigNeur();
 #ifdef USE_SMOLDYN
 		// testSmoldyn();
 #endif
@@ -303,7 +303,7 @@ void processTests( Shell* s )
 	testBiophysicsProcess();
 	// testKineticSolversProcess();
 	// testSimManager();
-	// testSigNeurProcess();
+	testSigNeurProcess();
 #endif
 }
 

@@ -15,8 +15,7 @@ TARGET = _signeur.o
 
 OBJ = \
 	Adaptor.o	\
-
-#	testSigNeur.o
+	testSigNeur.o
 
 
 HEADERS = \
