@@ -27,12 +27,15 @@ import _moose
 import plot_utils
 import verification_utils
 import print_utils
+import graph_utils
 
 # Import functions from sub-libraries.
-plotAscii = plot_utils.plotAscii
 plotTable = plot_utils.plotTable
 dump = print_utils.dump
 verify = verification_utils.verify
+
+# Topology and graph related functions.
+writeGraphviz  = graph_utils.writeGraphviz
 
 # Some verification tests
 verify = verification_utils.verify
