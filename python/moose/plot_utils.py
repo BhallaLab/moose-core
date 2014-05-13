@@ -81,15 +81,30 @@ def saveAsGnuplot( yvec, xvec, file):
         gnuplotF.write("\n".join(text))
 
 
-def plotTable(table, subfig=False, file=None):
-    ''' Plot a given table '''
+def plotTable(table, subfig=False, file=None, **kwargs):
+    """Plot a given table. It plots table.vector
+
+    This function can scale the x-axis. By default, y-axis and x-axis scaling is
+    done by a factor of 1.  
+
+    Pass 'xscale' and/or 'yscale' argument to function to modify scales.
+    
+    """
+
     if not subfig:
         pylab.figure()
     else:
         pylab.subplot()
     vector = table.vector 
-    xvector = range(len(vector))
-    pylab.plot(xvector, vector)
+    xscale = kwargs.get('xscale', 1.0)
+    yscale = kwargs.get('yscale', 1.0)
+    if xscale != 1.0:
+        xvector = [ xscale*x for x in range(len(vector)) ]
+    if yscale != 1.0:
+        yvector = [ yscale * v for v in vector ]
+    else:
+        yvector = vector
+    pylab.plot(xvector, yvector)
     if file:
         print("[UTIL] Saving plot to {}".format(file))
         pylab.savefig(file)
