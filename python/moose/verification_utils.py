@@ -52,7 +52,7 @@ class MooseTestCase( unittest.TestCase ):
                 continue
             else:
                 msg = '%s is not connected with any other compartment' % c.path
-                self.dump('FAILED'
+                debug.dump('FAIL'
                         , [ msg
                             , 'Did you forget to use `moose.connect`?'
                             ]
