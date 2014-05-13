@@ -2,7 +2,7 @@
 
 """plot_utils.py: Some utility function for plotting data in moose.
 
-Last modified: Sat Jan 18, 2014  05:01PM
+Last modified: Tue May 13, 2014  09:24PM
 
 """
     
@@ -16,6 +16,8 @@ __email__            = "dilawars@iitb.ac.in"
 __status__           = "Development"
 
 import pylab 
+import _moose
+import print_utils as debug
 
 def plotAscii(yvec, xvec = None, file=None):
     """Plot two list-like object in terminal using gnuplot.
@@ -90,6 +92,9 @@ def plotTable(table, subfig=False, file=None, **kwargs):
     Pass 'xscale' and/or 'yscale' argument to function to modify scales.
     
     """
+    if not type(table) == _moose.Table:
+        msg = "Expected moose.Table, got {}".format( type(table) )
+        raise TypeError(msg)
 
     if not subfig:
         pylab.figure()
@@ -108,3 +113,44 @@ def plotTable(table, subfig=False, file=None, **kwargs):
     if file:
         print("[UTIL] Saving plot to {}".format(file))
         pylab.savefig(file)
+
+def recordAt(tablePath, target, field = 'vm', **kwargs):
+    """Setup a table to record at given path.
+
+    Make sure that all root paths in tablePath exists.
+
+    Returns a table.
+    """
+
+    # If target is not an moose object but a string representing intended path
+    # then we need to fetch the object first.
+    if type( target) == str:
+        if not _moose.exists(target):
+            msg = "Given target `{}` does not exists. ".format( target )
+            raise RuntimeError( msg )
+        else:
+            target = _moose.Neutral( target )
+
+    table = _moose.Table( tablePath )
+
+    # Sanities field. 
+    if field == "output":
+        pass
+    elif 'get' not in field:
+        field = 'get'+field[0].upper()+field[1:]
+    else:
+        field = field[:2]+field[3].upper()+field[4:]
+    try:
+        table.connect( 'requestOut', target, field )
+    except Exception as e:
+        debug.dump("ERROR"
+                , [ "Failed to connect table to target"
+                    , e
+                    ]
+                )
+
+             
+    assert table, "Moose is not able to create a recording table"
+    return table
+
+    

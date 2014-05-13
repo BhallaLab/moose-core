@@ -31,6 +31,7 @@ import graph_utils
 
 # Import functions from sub-libraries.
 plotTable = plot_utils.plotTable
+recordAt = plot_utils.recordAt
 dump = print_utils.dump
 verify = verification_utils.verify
 
