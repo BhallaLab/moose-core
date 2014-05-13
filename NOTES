@@ -3519,3 +3519,12 @@ long time on plots, turned out that there was actually a scheduler bug
 that had laid in wait for all this time. With that fixed I'm getting
 reasonable plots. Next step is to connect the models with an adaptor.
 ============================================================================
+12 May. Thinking about how to set off the adaptor to request data from
+a number of targets. I have a variant of send, sendVec, but it isn't 
+mpi-compatible.
+============================================================================
+13 May
+Updated adaptor to use sendVec. Will deal with MPI-compatibility in due 
+course.
+
+============================================================================
