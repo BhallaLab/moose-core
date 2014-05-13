@@ -486,11 +486,11 @@ def make_NMDA_Ca_conc():
 #                        SPIKE DETECTOR
 #=====================================================================
 
+#//addmsg axon/spike axon BUFFER name
 def make_axon():
 	if moose.exists( 'axon' ):
 		return
 	axon = moose.SpikeGen( 'axon' )
-	axon.threshold = -40e-3 				#	V
+	axon.threshold = -40e-3 			#	V
 	axon.abs_refract = 10e-3			# 	sec
-    
-	#//addmsg axon/spike axon BUFFER name
+
