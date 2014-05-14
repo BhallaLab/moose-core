@@ -83,7 +83,7 @@ def saveAsGnuplot( yvec, xvec, file):
         gnuplotF.write("\n".join(text))
 
 
-def plotTable(table, subfig=False, file=None, **kwargs):
+def plotTable(table, standalone=True, file=None, **kwargs):
     """Plot a given table. It plots table.vector
 
     This function can scale the x-axis. By default, y-axis and x-axis scaling is
@@ -95,26 +95,47 @@ def plotTable(table, subfig=False, file=None, **kwargs):
     if not type(table) == _moose.Table:
         msg = "Expected moose.Table, got {}".format( type(table) )
         raise TypeError(msg)
-
-    if not subfig:
+    if standalone:
         pylab.figure()
-    else:
-        pylab.subplot()
     vector = table.vector 
     xscale = kwargs.get('xscale', 1.0)
     yscale = kwargs.get('yscale', 1.0)
+
     if xscale != 1.0:
         xvector = [ xscale*x for x in range(len(vector)) ]
+    else:
+        xvector = range(len(vector))
+
     if yscale != 1.0:
         yvector = [ yscale * v for v in vector ]
     else:
         yvector = vector
     pylab.plot(xvector, yvector)
-    if file:
-        print("[UTIL] Saving plot to {}".format(file))
+    if file and standalone:
+        debug.dump("PLOT", "Saving plot to {}".format(file))
         pylab.savefig(file)
+    elif standalone:
+        pylab.show()
 
-def recordAt(tablePath, target, field = 'vm', **kwargs):
+def plotTables(tables, file=None, **kwargs):
+    """Plot given list of tables onto one figure 
+    """
+    assert type(tables) == list, "Expected a list of moose.Tables"
+    for t in tables:
+        plotTable(t, standalone=False, file=None, **kwargs)
+    if file:
+        debug.dump("PLOT", "Saving plots to file".format(file))
+        try:
+            pylab.savefig(file)
+        except Exception as e:
+            debug.dump("WARN"
+                    , "Failed to save figure, plotting onto a window"
+                    )
+            pylab.show()
+    else:
+        pylab.show()
+
+def recordTarget(tablePath, target, field = 'vm', **kwargs):
     """Setup a table to record at given path.
 
     Make sure that all root paths in tablePath exists.
@@ -124,14 +145,18 @@ def recordAt(tablePath, target, field = 'vm', **kwargs):
 
     # If target is not an moose object but a string representing intended path
     # then we need to fetch the object first.
+
     if type( target) == str:
         if not _moose.exists(target):
             msg = "Given target `{}` does not exists. ".format( target )
             raise RuntimeError( msg )
         else:
             target = _moose.Neutral( target )
+    else:
+        assert target.path, "Target must have a valid moose path."
 
     table = _moose.Table( tablePath )
+    assert table
 
     # Sanities field. 
     if field == "output":
@@ -148,8 +173,7 @@ def recordAt(tablePath, target, field = 'vm', **kwargs):
                     , e
                     ]
                 )
-
-             
+        raise e
     assert table, "Moose is not able to create a recording table"
     return table
 
