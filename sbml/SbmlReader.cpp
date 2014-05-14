@@ -35,6 +35,7 @@
 #include "../shell/Wildcard.h"
 //#include "../manager/SimManager.h"
 #include "SbmlReader.h"
+#include "../kinetics/FuncPool.h"
 
 using namespace std;
 map< string,double > parmValueMap;
@@ -169,7 +170,7 @@ Id SbmlReader::read( string filename,string location, string solverClass)
 	  
 		    } //grandChild
 		  else
-		    cout << "Error: expected exactly ONE child of " << nodeName << endl;
+		    cout << "Warning: expected exactly ONE child of " << nodeName << " but none found "<<endl;
 		} //gchild
 	      } //moose and modelAnnotation
 	    }
@@ -350,8 +351,8 @@ const SbmlReader::sbmlStr_mooseId SbmlReader::createMolecule( map< string,Id > &
       Id meshEntry = Neutral::child( comptEl.eref(), "mesh" );
       bool constant = spe->getConstant(); 
       bool boundaryCondition = spe->getBoundaryCondition();
-      //if (boundaryCondition == true)
-      //cout << "Pool " << name << " boundaryCondition is "<< boundaryCondition<<endl;
+      if (boundaryCondition == true)
+	cout << "Pools having BoundaryCondition true " << name <<endl;
       Id pool; 
       //If constant is true then its equivalent to BuffPool in moose
       if (constant == true) 
@@ -401,8 +402,8 @@ const SbmlReader::sbmlStr_mooseId SbmlReader::createMolecule( map< string,Id > &
 void SbmlReader::getRules()
 { 
   unsigned int nr = model_->getNumRules();
-  if (nr > 0)
-    cout << "\n ##### Need to populate funcpool and sumtotal which is pending due to equations \n";
+  //if (nr > 0)
+  //  cout << "\n ##### Need to populate funcpool and sumtotal which is pending due to equations \n";
   Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
   for ( unsigned int r = 0;r < nr;r++ ){
     
@@ -415,7 +416,13 @@ void SbmlReader::getRules()
       v_iter = molSidMIdMap_.find( rule_variable );
       if (v_iter != molSidMIdMap_.end()){
 	Id rVariable = molSidMIdMap_.find(rule_variable)->second;
+	string rstring =molSidMIdMap_.find(rule_variable)->first;
 	Id sumId = shell->doCreate( "SumFunc", rVariable, "func", 1 );
+	rVariable.element()->zombieSwap( FuncPool::initCinfo() );
+	ObjId ret = shell->doAddMsg( "single", 
+			ObjId( sumId, 0 ), "output",
+			ObjId( rVariable, 0 ), "input" );
+	assert( ret != ObjId() );
 	const ASTNode * ast = rule->getMath();
 	vector< string > ruleMembers;
 	ruleMembers.clear();
@@ -424,8 +431,10 @@ void SbmlReader::getRules()
 	   m_iter = molSidMIdMap_.find( ruleMembers[rm] );
 	   if ( m_iter != molSidMIdMap_.end() ){
 	     Id rMember = molSidMIdMap_.find(ruleMembers[rm])->second;
+	     ObjId ret = shell->doAddMsg( "single", 
+		ObjId( rMember, 0 ), "nOut",
+		ObjId( sumId, 0 ), "input" ); 
 	     string test = molSidMIdMap_.find(ruleMembers[rm])->first;
-	     cout << " test " << test;
 	   }
 	   else{
 	    cerr << "SbmlReader::getRules: Assignment rule member is not a species" << endl;

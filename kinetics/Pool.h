@@ -9,7 +9,7 @@
 
 #ifndef _POOL_H
 #define _POOL_H
-
+#include "PoolBase.h"
 /**
  * The Pool class is a molecular pool. This is a set of molecules of a 
  * given species, in a uniform chemical context. Note that the same
