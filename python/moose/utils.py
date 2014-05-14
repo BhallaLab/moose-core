@@ -31,8 +31,14 @@ import graph_utils
 
 # Import functions from sub-libraries.
 plotTable = plot_utils.plotTable
-recordAt = plot_utils.recordAt
+plotTables = plot_utils.plotTables
+recordAt = plot_utils.recordTarget
+recordTarget = plot_utils.recordTarget
+
+# dump messages onto console
 dump = print_utils.dump
+
+# Verification related function.
 verify = verification_utils.verify
 
 # Topology and graph related functions.
