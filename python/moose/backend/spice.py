@@ -67,7 +67,7 @@ class Spice(Backend):
         model.append("Ra2 inject out1 {Ra/2}")
         model.append("Cm inject in2 {Cm}")
         model.append("Rm inject rmcmnode {Rm}")
-        model.append("VEm out2 rmcmnode dc {Em}")
+        model.append("VEm rmcmnode out2 dc {Em}")
         model.append(".ENDS \n\n")
         return "\n".join(model)
 
@@ -146,7 +146,8 @@ class Spice(Backend):
                     )
         for i, t in enumerate(targets):
             tPath = idPathToObjPath( t.path )
-            spiceLine = 'I{id}{name} n{target}inject GND PULSE'.format(
+            spiceLine = "* Current pulse: N+ N-, N+ is where current enters\n"
+            spiceLine += 'I{id}{name} GND n{target}inject PULSE'.format(
                     id = i
                     , name = pulseName 
                     , target = self.moosePathToSpiceNode( tPath )
