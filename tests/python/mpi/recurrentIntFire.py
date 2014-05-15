@@ -3,13 +3,13 @@ import random
 import time
 from numpy import random as nprand
 import sys
-sys.path.append('/home/subha/src/moose_async13/python')
+sys.path.append('/home/saeed/src/cuda-workspace/moose-code/moose/branches/async13/python')
 import moose
 
 def make_network():
 	size = 1024
 	timestep = 0.2
-	runtime = 100.0
+	runtime = 1000.0
 	delayMin = timestep
 	delayMax = 4
 	weightMax = 0.02
@@ -76,9 +76,9 @@ def make_network():
 	print 'starting'
 	moose.start(runtime)
 	print 'runtime, t = ', time.time() - t1
-	print 'Vm100:103', network.vec.Vm[100:103]
-	print 'Vm900:903', network.vec.Vm[900:903]
-	print 'weights 100:', network.vec[100].synapse.delay[0:5]
-	print 'weights 900:', network.vec[900].synapse.delay[0:5]
+	# print 'Vm100:103', network.vec.Vm[100:103]
+	# print 'Vm900:903', network.vec.Vm[900:903]
+	# print 'weights 100:', network.vec[100].synapse.delay[0:5]
+	# print 'weights 900:', network.vec[900].synapse.delay[0:5]
 
 make_network()
