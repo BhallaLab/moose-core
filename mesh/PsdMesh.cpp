@@ -154,6 +154,9 @@ void PsdMesh::handlePsdList(
 		assert( diskCoords.size() == 8 * parentVoxel.size() );
 		psd_.resize( parentVoxel.size() );
 		pa_.resize( parentVoxel.size() );
+		vs_.resize( parentVoxel.size() );
+		area_.resize( parentVoxel.size() );
+		length_.resize( parentVoxel.size() );
 		cell_ = cell;
 
 		psd_.clear();
@@ -168,7 +171,12 @@ void PsdMesh::handlePsdList(
 			x += 3;
 			psd_.back().setDia( *x++ );
 			psd_.back().setIsCylinder( true );
+			psd_.back().setLength( *x ); // This is an entirely nominal
+						// length, so that the effective vol != 0.
 			parentDist_.push_back( *x++ );
+			vs_[i] = psd_.back().volume( psd_.back() );
+			area_[i] = psd_.back().getDiffusionArea( psd_.back(), 0 );
+			length_[i] = parentDist_.back();
 		}
 		parent_ = parentVoxel;
 
