@@ -66,6 +66,18 @@ void testAdaptorRequestField()
 	double ret = Field< double >::get( adaptor, "output" );
 	assert( doubleEq( ret, ( 1.0 + 50.0 + 5500.0 )/13.0 ) );
 
+	const Finfo *f = adaptor.element()->cinfo()->findFinfo( "requestField" );
+	const SrcFinfo* sf = dynamic_cast< const SrcFinfo* >( f );
+	assert( sf );
+	vector< ObjId > temp;
+	temp = adaptor.element()->getMsgTargets( 0, sf );
+	assert ( temp.size() == 13 );
+	assert( temp[0] == ObjId( onepool, 0 ) );
+	assert( temp[1] == ObjId( twopool, 0 ) );
+	assert( temp[2] == ObjId( twopool, 1 ) );
+	for ( int i = 0; i < 10; ++i )
+		assert( temp[i + 3] == ObjId( tenpool, i ) );
+
 	shell->doDelete( model );
 	cout << "." << flush;
 }
