@@ -3545,6 +3545,6 @@ OK tracked it. The moose.loadModel only loads contents of /kinetics.
 
 Fixed. I added an option to prefix the method with 'old_', in which case
 it turns off the flag to move objects onto their volume-defining compartments.
-With this fix the model runs. 
+With this fix the model runs.  Checkin 5413.
 
 ============================================================================
