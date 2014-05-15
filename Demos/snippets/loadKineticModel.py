@@ -14,6 +14,11 @@
 # defines a couple of plots and sets the runtime to 100 seconds. The
 # script dumps the output into an xplot file called data.plot and the
 # saved version into saveReaction.g
+# Since it is dealing with kkit models which may span compartments, the
+# 'solver' argument is prefixed with 'old_'. This tells the readKkit
+# function to put the entire model tree on the 'kinetics' compartment
+# which confuses the volume scaling but lets the solver handle the
+# entire model.
 
 import moose
 import pylab
@@ -21,7 +26,7 @@ import numpy
 import sys
 
 def main():
-        solver = "gsl"  # Pick any of gsl, gssa, ee..
+        solver = "old_gsl"  # Pick any of gsl, gssa, ee..
 	mfile = '../Genesis_files/kkit_objects_example.g'
 	runtime = 20.0
 	if ( len( sys.argv ) >= 3 ):
@@ -32,19 +37,21 @@ def main():
 	modelId = moose.loadModel( mfile, 'model', solver )
         # Increase volume so that the stochastic solver gssa 
         # gives an interesting output
-        compt = moose.element( '/model/kinetics' )
-        compt.volume = 1e-19 
+        #compt = moose.element( '/model/kinetics' )
+        #compt.volume = 1e-19 
 
 	moose.reinit()
 	moose.start( runtime ) 
 
         # Report parameters
+        '''
 	for x in moose.wildcardFind( '/model/kinetics/##[ISA=PoolBase]' ):
 		print x.name, x.nInit, x.concInit
 	for x in moose.wildcardFind( '/model/kinetics/##[ISA=ReacBase]' ):
 		print x.name, 'num: (', x.numKf, ', ',  x.numKb, '), conc: (', x.Kf, ', ', x.Kb, ')'
 	for x in moose.wildcardFind('/model/kinetics/##[ISA=EnzBase]'):
 		print x.name, '(', x.Km, ', ',  x.numKm, ', ', x.kcat, ')'
+                '''
 
 	# Display all plots.
 	for x in moose.wildcardFind( '/model/#graphs/conc#/#' ):

@@ -3525,6 +3525,26 @@ mpi-compatible.
 ============================================================================
 13 May
 Updated adaptor to use sendVec. Will deal with MPI-compatibility in due 
-course.
+course. Checkin 5405.
+
+A little stuck with this. Seems that the vector of voxelVolumes isn't 
+being filled by the PSD. Need to check what is up with Spine as well.
+
+============================================================================
+Subha wants the vector of ObjIds to help with the value harvesting in 
+sendVec.
+
+Trying to load chem model standalone to figure out why the loadMulti sim
+isn't working.
+Trying with OSC_diff_vols.g as a good test.
+
+The thing has loaded with all parameters set correctly. There is the tiny
+correction for the NA value in MOOSE. Let's see... no, that doesn't
+fix it. Tried lots of variations on it and it doesn't oscillate.
+OK tracked it. The moose.loadModel only loads contents of /kinetics.
+
+Fixed. I added an option to prefix the method with 'old_', in which case
+it turns off the flag to move objects onto their volume-defining compartments.
+With this fix the model runs. 
 
 ============================================================================

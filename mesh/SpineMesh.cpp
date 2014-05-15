@@ -163,6 +163,9 @@ void SpineMesh::handleSpineList(
 		assert( head.size() == parentVoxel.size() );
 		assert( head.size() == shaft.size() );
 		spines_.resize( head.size() );
+		vs_.resize( head.size() );
+		area_.resize( head.size() );
+		length_.resize( head.size() );
 		cell_ = cell;
 
 		vector< double > ret;
@@ -174,6 +177,9 @@ void SpineMesh::handleSpineList(
 			// assert( ret.size() == 8 );
 			// psdCoords.insert( psdCoords.end(), ret.begin(), ret.end() );
 			// index[i] = i;
+			vs_[i] = spines_[i].volume();
+			area_[i] = spines_[i].rootArea();
+			length_[i] = spines_[i].diffusionLength();
 		}
 		// psdListOut()->send( e ), cell_, psdCoords, index );
 
