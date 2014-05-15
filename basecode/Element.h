@@ -306,10 +306,10 @@ class Element
 				) const;
 
 		/**
-		 * Counts the number of msg targets. Will get confused if some
+		 * Enumerates msg targets. Will get confused if some
 		 * are across nodes.
 		 */
-		unsigned int getNumMsgTargets( DataId srcDataId,
+		vector< ObjId > getMsgTargets( DataId srcDataId,
 				const SrcFinfo* finfo  ) const;
 
 		/** Used upon ending of MOOSE session, to rapidly clear out 
