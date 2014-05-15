@@ -195,16 +195,18 @@ void setMethod( Shell* s, Id mgr, double simdt, double plotdt,
 Id ReadKkit::read(
 	const string& filename, 
 	const string& modelname,
-	Id pa, const string& method )
+	Id pa, const string& methodArg )
 {
+	string method = methodArg;
 	ifstream fin( filename.c_str() );
 	if (!fin){
 		cerr << "ReadKkit::read: could not open file " << filename << endl;
 		return Id();
     }
 
-	if ( method.substr(0, 5) == "multi" ) {
-		moveOntoCompartment_ = true;
+	if ( method.substr(0, 4) == "old_" ) {
+		moveOntoCompartment_ = false;
+		method = method.substr( 4 );
 	}
 
 	Shell* s = reinterpret_cast< Shell* >( ObjId().data() );
