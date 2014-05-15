@@ -226,7 +226,7 @@ def dump_plots( fname ):
 def make_spiny_compt():
     comptLength = 100e-6
     comptDia = 4e-6
-    numSpines = 5
+    numSpines = 50
     compt = create_squid()
     compt.inject = 1e-7
     compt.x0 = 0
@@ -268,7 +268,7 @@ def create_pool( compt, name, concInit ):
 def test_elec_alone():
     eeDt = 2e-6
     hSolveDt = 2e-5
-    runTime = 0.02
+    runTime = 0.01
 
     make_spiny_compt()
     make_elec_plots()
