@@ -299,8 +299,8 @@ void Adaptor::process( const Eref& e, ProcPtr p )
 
 void Adaptor::reinit( const Eref& e, ProcPtr p )
 {
-	numRequestField_ = e.element()->getNumMsgTargets( e.dataIndex(),
-					requestField() );
+	numRequestField_ = e.element()->getMsgTargets( e.dataIndex(),
+					requestField() ).size();
 	process( e, p );
 }
 
