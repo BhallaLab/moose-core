@@ -3547,4 +3547,14 @@ Fixed. I added an option to prefix the method with 'old_', in which case
 it turns off the flag to move objects onto their volume-defining compartments.
 With this fix the model runs.  Checkin 5413.
 
+Converted Element::getNumMsgTargets to getMsgTargets. Put in unit test.
+Checkin 5414.
+
+To handle the x-compt reacs, should just put in an exp-Euler calculation
+at the interface between solvers. Likewise for diffusion.
+
+Need now to move on the demos.
 ============================================================================
+16 May 2014.
+Made tutorials directory, especially for course use.
+First demo: Cleaned up and animated the TuringOneDim.py demo. Moved to tutorials.
