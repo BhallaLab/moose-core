@@ -8,12 +8,20 @@
 #########################################################################
 
 # This example illustrates how to set up a Turing pattern in 1-D using
-# reaction diffusion calculations. The runtime is kept short so that the
-# pattern doesn't make it all the way to the end of the system.
+# reaction diffusion calculations.
+# Reaction system is: 
+#   s ---a---> a  // s goes to a, catalyzed by a.
+#   s ---a---> b  // s goes to b, catalyzed by a.
+#   a ---b---> s  // a goes to s, catalyzed by b.
+#   b -------> s  // b is degraded irreversibly to s.
+# in sum, a has a positive feedback onto itself and also forms b.
+# b has a negative feedback onto a.
+# Finally, the diffusion constant for a is 1/10 that of b.
+# Run using python -i if you want the plot to hang around after finishing.
 
 import math
-import pylab
 import numpy
+import matplotlib.pyplot as plt
 import moose
 
 def makeModel():
@@ -109,11 +117,12 @@ def displayPlots():
                 pylab.show()
 
 def main():
-                runtime = 200
+                runtime = 400
+                displayInterval = 2
 		makeModel()
 		dsolve = moose.element( '/model/dsolve' )
 		moose.reinit()
-		moose.start( runtime ) # Run the model for 10 seconds.
+		#moose.start( runtime ) # Run the model for 10 seconds.
 
 		a = moose.element( '/model/compartment/a' )
 		b = moose.element( '/model/compartment/b' )
@@ -122,25 +131,28 @@ def main():
                 atot = sum( a.vec.conc )
                 btot = sum( b.vec.conc )
                 stot = sum( s.vec.conc )
-                print "a = ", a.vec.conc
-                print "b = ", b.vec.conc
-                print "s = ", s.vec.conc
+                #print "a = ", a.vec.conc
+                #print "b = ", b.vec.conc
+                #print "s = ", s.vec.conc
 
-                print 'tot = ', atot, btot, atot + btot + stot
-                displayPlots()
+                #print 'tot = ', atot, btot, atot + btot + stot
+                plt.ion()
+                fig = plt.figure()
+                ax = fig.add_subplot(111)
+                ax.set_ylim( 0, 0.5 )
+                pos = numpy.arange( 0, a.vec.conc.size, 1 )
+                line1, = ax.plot( pos, a.vec.conc, label='a' )
+                line2, = ax.plot( pos, b.vec.conc, label='b' )
+                timeLabel = plt.text(60, 0.4, 'time = 0')
+                fig.canvas.draw()
 
-                """
-		dsolve = moose.element( '/model/dsolve' )
-                
-                print '**************** dsolve.nvecs'
-                x = dsolve.nVec[0]
-                print dsolve.numPools, x, sum(x)
-                print dsolve.nVec[1], sum( dsolve.nVec[1] )
-                print dsolve.nVec[2], sum( dsolve.nVec[2] )
-                print dsolve.nVec[3], sum( dsolve.nVec[3] )
-                """
+                for t in range( displayInterval, runtime, displayInterval ):
+                    moose.start( displayInterval )
+                    line1.set_ydata( a.vec.conc )
+                    line2.set_ydata( b.vec.conc )
+                    timeLabel.set_text( "time = %d" % t )
+                    fig.canvas.draw()
 
-		quit()
 
 
 # Run the 'main' if this script is executed standalone.
