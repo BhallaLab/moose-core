@@ -704,7 +704,9 @@ from collections import namedtuple
 # the time (unless 3D or heatmap plotting).
 
 PlotDataSource = namedtuple('PlotDataSource', ['x', 'y', 'z'], verbose=False)
-
+event = None
+legend = None
+canvas = None
 class PlotWidget(QtGui.QWidget):
     """A wrapper over CanvasWidget to handle additional MOOSE-specific
     stuff.
@@ -727,6 +729,8 @@ class PlotWidget(QtGui.QWidget):
         QtGui.QWidget.__init__(self, *args)
         self.canvas = CanvasWidget()
         self.canvas.setParent(self)
+        #global canvas
+        #canvas = self.canvas
         self.navToolbar = NavigationToolbar(self.canvas, self)
         layout = QtGui.QVBoxLayout()
         layout.addWidget(self.canvas)
@@ -736,7 +740,7 @@ class PlotWidget(QtGui.QWidget):
         self.pathToLine = defaultdict(set)
         self.lineToDataSource = {}
         self.canvas.addSubplot(1, 1)
-
+        self.onclick_count = 0
     @property
     def plotAll(self):
         return len(self.pathToLine) == 0
@@ -756,6 +760,7 @@ class PlotWidget(QtGui.QWidget):
 	#print " default ",path
         for tabId in moose.wildcardFind('%s/##[TYPE=Table]' % (path)):
             tab = moose.Table(tabId)
+            line_list=[]
             tableObject = tab.neighbors['requestOut']
             if len(tableObject) > 0:
                 # This is the default case: we do not plot the same
@@ -802,11 +807,52 @@ class PlotWidget(QtGui.QWidget):
                             ts = xSrc.vector.copy()
                         line.set_data(ts, tab.vector.copy())
                 tabList.append(tab)
+        self.canvas.mpl_connect('pick_event',self.onclick)
         if len(tabList) > 0:
-            #self.canvas.callAxesFn('legend')
-	    self.canvas.callAxesFn('legend',loc='upper center',prop={'size':10}, bbox_to_anchor=(0.5, -0.03),fancybox=True, shadow=True, ncol=3)
+            leg = self.canvas.callAxesFn('legend',loc='upper center',prop={'size':10},bbox_to_anchor=(0.5, -0.03),fancybox=True, shadow=True, ncol=3)
+            #leg = self.canvas.callAxesFn('legend')
+            #leg = self.canvas.callAxesFn('legend',loc='upper left', fancybox=True, shadow=True)
+            global legend
+            legend =leg
+            for legobj in leg.legendHandles:
+                legobj.set_linewidth(4.0)
+                legobj.set_picker(True)
         self.canvas.draw()
-                
+    
+    def onclick(self,event1):
+        #print "onclick",event1.artist.get_label()
+        #harsha:To workout with double-event-registered on onclick event
+        #http://stackoverflow.com/questions/16278358/double-event-registered-on-mouse-click-if-legend-is-outside-axes
+        if self.onclick_count % 2 == 0:
+            legline = event1.artist
+            #vis = event1.artist.get_visible()
+            #self.canvas.figure.get_axes()[0].lines[4].set_visible(True)
+            axes = self.canvas.figure.get_axes()
+            for a in range(len(axes)):
+                #lines =self.canvas.figure.get_axes()[a].lines
+                lines = axes[a].lines
+                for plotline in lines:
+                    if plotline.get_label() == event1.artist.get_label():
+                        vis = not plotline.get_visible()
+                        plotline.set_visible(vis)
+            #global event
+            #event = event1
+            if vis:
+                legline.set_alpha(1.0)
+            else:
+                legline.set_alpha(0.2)
+            self.canvas.draw()
+        self.onclick_count+=1
+
+        '''leg = self.canvas.callAxesFn('legend',loc='upper center',prop={'size':10},bbox_to_anchor=(0.5, -0.03),fancybox=True, shadow=True, ncol=3)
+        print dir(leg)
+        for l in leg.get_lines():
+            l.set_visible(vis)
+        if vis:
+            legline.set_alpha(1.0)
+        else:
+            legline.set_alpha(0.2)
+        '''
     def addTimeSeries(self, table, *args, **kwargs):        
         ts = np.linspace(0, moose.Clock('/clock').currentTime, len(table.vector))
         return self.canvas.plot(ts, table.vector, *args, **kwargs)
