@@ -37,9 +37,9 @@ class SymCompartment: public moose::Compartment
 
 			// These functions override the virtual equivalents from the
 			// Compartment.
-			void innerReinit( const Eref& e, ProcPtr p );
-			void innerInitProc( const Eref& e, ProcPtr p );
-			void innerInitReinit( const Eref& e, ProcPtr p );
+			void vReinit( const Eref& e, ProcPtr p );
+			void vInitProc( const Eref& e, ProcPtr p );
+			void vInitReinit( const Eref& e, ProcPtr p );
 	private:
             // used for storing multiplicative coefficient computed from 
 			// adjacent nodes in star-mesh transformation
