@@ -42,6 +42,7 @@ class Backend(object):
         self.tables = []
         # A set of tuple of sourceCompartment.path and targetCompartment.path
         self.connections = set()
+        self.clock = _moose.wildcardFind('/clock')[0]
 
     def getComparments(self, **kwargs):
         '''Get all compartments in moose '''
@@ -64,5 +65,3 @@ class Backend(object):
         self.getComparments(**kwargs)
         self.getTables(**kwargs)
         self.getPulseGens(**kwargs)
-
-

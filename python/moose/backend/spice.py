@@ -4,7 +4,7 @@
 
     This backend write spice files.
 
-Last modified: Mon May 12, 2014  06:23PM
+Last modified: Wed May 14, 2014  04:48PM
 
 """
     
@@ -38,6 +38,7 @@ class Spice(Backend):
         super(Spice, self).__init__()
         self.args = args
         self.spiceText = [ self.compartmentModel( ) ]
+        self.outfile = None
 
     def moosePathToSpiceNode(self, path):
         """Make moose-path sane for spice """
@@ -49,6 +50,19 @@ class Spice(Backend):
             else:
                 newPath += p
         return newPath
+
+    def toSpiceNode(self, moosePath, type):
+        """Return spice node name for a given moose-path """
+        goodTypes = ["in1", "out1", "inject", 'x']
+        if type not in goodTypes:
+            debug.dump("ERROR"
+                    , "Bad node type: Expecting {}".format(goodTypes)
+                    )
+            raise TypeError("Expecting {}, got {}".format(goodTypes, type))
+
+        moosePath = idPathToObjPath( moosePath )
+        name = self.moosePathToSpiceNode( moosePath )
+        return 'n{}{}'.format(name, type)
 
     def compartmentModel(self):
         """ A default compartment model """
@@ -83,7 +97,12 @@ class Spice(Backend):
         # Add a line for each compartments. To make connection, we add a 0V
         # voltage source. It does nothing to circuit but one can measure current
         # through it.
-        spiceLine += 'X{0} n{0}in1 GND n{0}inject n{0}out1 GND '.format(compName)
+        spiceLine += 'X{name} {in1} GND {inject} {out1} GND'.format(
+                name = compName
+                , in1 = self.toSpiceNode(cPath, 'in1')
+                , inject = self.toSpiceNode(cPath, 'inject')
+                , out1 = self.toSpiceNode(cPath, 'out1')
+                )
         spiceLine += ' moosecompartment '
         spiceLine += 'Ra={Ra} Rm={Rm} Cm={Cm} Em={Em}'.format(
                 Ra = compartment.Ra
@@ -99,9 +118,10 @@ class Spice(Backend):
 
         def spiceLine( src, tgt):
             # Write a line for connections.
-            spiceLine = 'V{src}{tgt} n{src}out1 n{tgt}in1 dc 0'.format(
-                    src = self.moosePathToSpiceNode( src )
-                    , tgt = self.moosePathToSpiceNode( tgt )
+            spiceLine = 'V{name} {src} {tgt} dc 0'.format(
+                    name = self.moosePathToSpiceNode( src+tgt )
+                    , src = self.toSpiceNode( src, 'out1' )
+                    , tgt = self.toSpiceNode( tgt, 'in1' )
                     )
             return spiceLine
 
@@ -145,12 +165,14 @@ class Spice(Backend):
                     , "It seems that pulse `%s` is not connected" % pulsePath
                     )
         for i, t in enumerate(targets):
-            tPath = idPathToObjPath( t.path )
-            spiceLine = "* Current pulse: N+ N-, N+ is where current enters\n"
-            spiceLine += 'I{id}{name} GND n{target}inject PULSE'.format(
+            spiceLine = "* Fist node is where current enters. A voltage \n"
+            spiceLine += "* source is added in series. Useful for reading current\n"
+            vtarget = self.toSpiceNode('%s%s'%(pulseName, i), 'x')
+            target = self.toSpiceNode( t.path, 'inject' )
+            spiceLine += 'I{id}{name} GND {vtarget} dc 0 PULSE'.format(
                     id = i
                     , name = pulseName 
-                    , target = self.moosePathToSpiceNode( tPath )
+                    , vtarget = vtarget
                     )
             spiceLine += '({level1} {level2} {TD} {TR} {TF} {PW} {PER})'.format(
                     level1 = level1
@@ -162,7 +184,50 @@ class Spice(Backend):
                     , PER = td1 + td2 + width
                     )
             self.spiceText.append(spiceLine)
+            # A a voltage source in series
+            self.spiceText.append(
+                    "V{id}{name} {vtarget} {target} dc 0".format(
+                        id = i
+                        , name = pulseName
+                        , vtarget = vtarget
+                        , target = target
+                        )
+                    )
 
+    def addControlLines(self):
+        """Add .CONTROL lines to spice netlist """
+        self.spiceText.append("\n\n** Simulation etc. ")
+        self.spiceText.append(
+            "\n.CONTROL"
+            "\nset hcopydevtype=postscript"
+            "\nset hcopypscolor=true"
+            "\nset color0 = white      ;background"
+            "\nset color1 = black      ;text and grid"
+            "\nset color2 = rgb:f/0/0  ;vector0"
+            "\nset color3 = rgb:0/f/0  ;vector1"
+            "\nset color3 = rgb:0/0/f  ;vector2"
+            "\nop"
+            )
+
+        # Here we get the time of simulation and total steps done by moose.
+        assert self.clock, "Main clock is not foind"
+        simTime = self.clock.runTime 
+        dt = self.clock.dt
+        self.spiceText.append("TRAN {0} {1}".format(dt, simTime))
+
+        plotLine = "HARDCOPY {}.ps ".format(self.outputFile)
+        for t in self.tables:
+            targets = t.neighbors['requestOut']
+            for tgt in targets:
+                if tgt.className == 'PulseGen':
+                    debug.dump("INFO"
+                            , "Stimulus pulse are not plotted by defualt."
+                            )
+                    continue
+                plotLine += "V({}) ".format(self.toSpiceNode(tgt.path,'out1'))
+        self.spiceText.append(plotLine)
+        self.spiceText.append(".ENDC")
+        self.spiceText.append(".END")
 
     def buildModel(self):
         """Build data-stucture to write spice """
@@ -175,16 +240,20 @@ class Spice(Backend):
         for p in self.pulseGens:
             self.spiceLineForPulseGen(p)
 
+        self.addControlLines( )
+
     def writeSpice(self, **kwargs):
         ''' Turn moose into  spice '''
-        debug.dump("STEP", "Writing moose internals to spice")
+
+        self.outputFile = kwargs.get('output', None)
         self.buildModel()
         spiceText = "\n".join( self.spiceText )
 
-        outputFile = kwargs.get('output', None)
-        if outputFile is not None:
-            debug.dump("STEP", "Writing spice netlist to {}".format(outputFile))
-            with open(outputFile, "w") as spiceFile:
+        if self.outputFile is not None:
+            debug.dump("BACKEND"
+                    , "Writing spice netlist to {}".format(self.outputFile)
+                    )
+            with open(self.outputFile, "w") as spiceFile:
                 spiceFile.write( spiceText )
         else:
             return spiceText

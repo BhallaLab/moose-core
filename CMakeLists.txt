@@ -278,8 +278,8 @@ add_custom_target(check_moose
 add_custom_target(check_python
     COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_SOURCE_DIR}/python/moose/test.py"
     COMMENT "Checking: loading moose into python" VERBATIM
-    COMMAND ${PYTHON_EXECUTABLE} testHsolve.py --output-on-failure
-    COMMENT "Checking: running hsolve in python" VERBATIM
-    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/Demos/snippets"
+    COMMAND ${PYTHON_EXECUTABLE} test_pymoose.py 
+    COMMENT "Checking: running test_pymoose in python" VERBATIM
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/tests/python"
     )
 
