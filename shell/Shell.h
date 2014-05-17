@@ -590,6 +590,7 @@ class Shell
 		 * actual operation to the 'process' call for a clean reinit.
 		 */
 		static bool doReinit_;
+
 		/**
 		 * Simulation run time
 		 */

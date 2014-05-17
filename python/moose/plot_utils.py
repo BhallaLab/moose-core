@@ -117,6 +117,7 @@ def plotTable(table, standalone=True, file=None, **kwargs):
     elif standalone:
         pylab.show()
 
+
 def plotTables(tables, file=None, **kwargs):
     """Plot given list of tables onto one figure 
     """
