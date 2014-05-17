@@ -12,6 +12,7 @@
 #include "ReadCell.h"
 #include "../utility/utility.h"
 #include "../utility/numutil.h"
+#include "CompartmentBase.h"
 #include "Compartment.h"
 #include "SymCompartment.h"
 #include <fstream>

@@ -457,9 +457,6 @@ void ZombieHHChannel::zombify( Element* solver, Element* orig )
     HSolve::deleteIncomingMessages(orig, "concen");
     HSolve::deleteIncomingMessages(orig, "Vm");
 
-    // Create zombie.
-    const DinfoBase* pDinfo = ZombieHHChannel::initCinfo()->dinfo();
-
     Eref oer( orig, 0 );
     Eref ser( solver, 0 );
     ZombieHHChannel* zd = new ZombieHHChannel();

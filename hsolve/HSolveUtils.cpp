@@ -94,8 +94,7 @@ int HSolveUtils::gates(
 
         unsigned int nGates = 3; // Number of possible gates
         for ( unsigned int i = 0; i < nGates; i++ ) {
-            double power  = HSolveUtils::get< HHChannel, double >(
-                    channel, powerField[ i ] );
+            double power  = Field< double >::get ( channel, powerField[i] );
 
             if ( power > 0.0 ) {
                 string gatePath = moose::joinPath(channel.path(), gateName[i]);
@@ -208,15 +207,13 @@ void HSolveUtils::rates(
 	vector< double >& B )
 {
     dump("HSolveUtils::rates() has not been tested yet.", "WARN");
-    double min = HSolveUtils::get< HHGate, double >( gateId, "min" );
-    double max = HSolveUtils::get< HHGate, double >( gateId, "max" );
-    unsigned int divs = HSolveUtils::get< HHGate, unsigned int >(
-            gateId, "divs" );
+    double min = Field< double >::get( gateId, "min" );
+    double max = Field< double >::get( gateId, "max" );
+    unsigned int divs = Field< unsigned int >::get( gateId, "divs" );
 
     if ( grid == Grid( min, max, divs ) ) {
-        A = HSolveUtils::get< HHGate, vector< double > >( gateId, "tableA" );
-        B = HSolveUtils::get< HHGate, vector< double > >( gateId, "tableB" );
-
+        A = Field< vector< double > >::get( gateId, "tableA" );
+        B = Field< vector< double > >::get( gateId, "tableB" );
         return;
     }
 
@@ -234,9 +231,7 @@ void HSolveUtils::rates(
      * Setting interpolation flag on. Will set back to its original value once
      * we're done.
      */
-    bool useInterpolation = HSolveUtils::get< HHGate, bool >
-        ( gateId, "useInterpolation" );
-    //~ HSolveUtils::set< HHGate, bool >( gateId, "useInterpolation", true );
+    bool useInterpolation = Field< bool >::get( gateId, "useInterpolation");
     gate->setUseInterpolation( gateId.eref(), true );
 
     unsigned int igrid;

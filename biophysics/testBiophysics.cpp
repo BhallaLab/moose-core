@@ -12,6 +12,7 @@
 #include "header.h"
 #include "../shell/Shell.h"
 #include "../randnum/randnum.h"
+#include "CompartmentBase.h"
 #include "Compartment.h"
 /*
 #include "HHGate.h"

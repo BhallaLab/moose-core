@@ -14,6 +14,7 @@
 #include "ElementValueFinfo.h"
 #include "../external/debug/print_function.h"
 #include "../randnum/randnum.h"
+#include "../biophysics/CompartmentBase.h"
 #include "../biophysics/Compartment.h"
 #include "HinesMatrix.h"
 #include "HSolveStruct.h"
@@ -28,7 +29,7 @@
  */
 //class DataHandler;
 
-class ZombieCompartment
+class ZombieCompartment: public CompartmentBase
 {
 public:
     ZombieCompartment();
@@ -39,41 +40,22 @@ public:
      */
 
     // Fields handled by solver.
-    void setVm( const Eref& e , double Vm );
-    double getVm( const Eref& e  ) const;
-    void setEm( const Eref& e , double Em );
-    double getEm( const Eref& e  ) const;
-    void setCm( const Eref& e , double Cm );
-    double getCm( const Eref& e  ) const;
-    void setRm( const Eref& e , double Rm );
-    double getRm( const Eref& e  ) const;
-    void setRa( const Eref& e , double Ra );
-    double getRa( const Eref& e  ) const;
-    void setIm( const Eref& e , double Im );
-    double getIm( const Eref& e  ) const;
-    void setInject( const Eref& e , double Inject );
-    double getInject( const Eref& e  ) const;
-    void setInitVm( const Eref& e , double initVm );
-    double getInitVm( const Eref& e  ) const;
+    void vSetVm( const Eref& e , double Vm );
+    double vGetVm( const Eref& e  ) const;
+    void vSetEm( const Eref& e , double Em );
+    double vGetEm( const Eref& e  ) const;
+    void vSetCm( const Eref& e , double Cm );
+    double vGetCm( const Eref& e  ) const;
+    void vSetRm( const Eref& e , double Rm );
+    double vGetRm( const Eref& e  ) const;
+    void vSetRa( const Eref& e , double Ra );
+    double vGetRa( const Eref& e  ) const;
+    double vGetIm( const Eref& e  ) const;
+    void vSetInject( const Eref& e , double Inject );
+    double vGetInject( const Eref& e  ) const;
+    void vSetInitVm( const Eref& e , double initVm );
+    double vGetInitVm( const Eref& e  ) const;
 
-
-    // Locally stored fields.
-    void setDiameter( double diameter );
-    double getDiameter() const;
-    void setLength( double length );
-    double getLength() const;
-    void setX0( double value );
-    double getX0() const;
-    void setY0( double value );
-    double getY0() const;
-    void setZ0( double value );
-    double getZ0() const;
-    void setX( double value );
-    double getX() const;
-    void setY( double value );
-    double getY() const;
-    void setZ( double value );
-    double getZ() const;
     // Dest function definitions.
     void dummy( const Eref& e, ProcPtr p );
 
@@ -81,12 +63,12 @@ public:
      * The process function does the object updating and sends out
      * messages to channels, nernsts, and so on.
      */
-    void process( const Eref& e, ProcPtr p );
+    void vProcess( const Eref& e, ProcPtr p );
 
     /**
      * The reinit function reinitializes all fields.
      */
-    void reinit( const Eref& e, ProcPtr p );
+    void vReinit( const Eref& e, ProcPtr p );
 
     /**
      * The initProc function is for a second phase of 'process'
@@ -96,29 +78,29 @@ public:
      * equivalent and there is no calling order dependence in
      * the results.
      */
-    void initProc( const Eref& e, ProcPtr p );
+    void vInitProc( const Eref& e, ProcPtr p );
 
     /**
      * Empty function to do another reinit step out of phase
      * with the main one. Nothing needs doing there.
      */
-    void initReinit( const Eref& e, ProcPtr p );
+    void vInitReinit( const Eref& e, ProcPtr p );
 
     /**
      * handleChannel handles information coming from the channel
      * to the compartment
      */
-    void handleChannel( const Eref& e , double Gk, double Ek);
+    void vHandleChannel( const Eref& e, double Gk, double Ek);
 
     /**
      * handleRaxial handles incoming raxial message data.
      */
-    void handleRaxial( double Ra, double Vm);
+    void vHandleRaxial( double Ra, double Vm);
 
     /**
      * handleAxial handles incoming axial message data.
      */
-    void handleAxial( double Vm);
+    void vHandleAxial( double Vm);
 
     /**
      * Injects a constantly updated current into the compartment.
@@ -127,7 +109,7 @@ public:
      * be used as the destination of a message rather than as a
      * one-time assignment.
      */
-    void injectMsg( const Eref& e , double current);
+    void vInjectMsg( const Eref& e , double current);
 
 
     /**
@@ -137,54 +119,22 @@ public:
      * or absence of the current that is probabilistic.
      */
 
-    void randInject( const Eref& e , double prob, double current);
+    void vRandInject( const Eref& e , double prob, double current);
 
-
-    /**
-     * Dummy function to act as recipient of 'cable' message,
-     * which is just for grouping compartments.
-     */
-    void cable();
-
-    /**
-     * A utility function to check for assignment to fields that
-     * must be > 0
-     */
-    bool rangeWarning( const string& field, double value );
+	/// Assigns the solver to the zombie
+	void vSetSolver( const Eref& e, Id hsolve );
 
     /**
      * Initializes the class info.
      */
     static const Cinfo* initCinfo();
 
-    /**
-     * Virtual function to handle Reinit.
-     */
-    virtual void innerReinit( const Eref& e, ProcPtr p );
-
     //////////////////////////////////////////////////////////////////
     // utility funcs
     //////////////////////////////////////////////////////////////////
-    static void zombify( Element* solver, Element* orig );
-    static void unzombify( Element* zombie );
-
-    /*
-     * This Finfo is used to send out Vm to channels, spikegens, etc.
-     * The original Compartment sends this itself, whereas the HSolve
-     * sends on behalf of the Zombie.
-     */
-    static SrcFinfo1< double >* VmOut();
 private:
     HSolve* hsolve_;
 
-    double diameter_;
-    double length_;
-    double x0_;
-    double y0_;
-    double z0_;
-    double x_;
-    double y_;
-    double z_;
     static const double EPSILON;
 
     void copyFields( moose::Compartment* c );

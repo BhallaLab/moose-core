@@ -97,13 +97,10 @@ def makeModel():
 		stoich.compartment = compartment
 		stoich.ksolve = ksolve
 		stoich.dsolve = dsolve
-                print "before set path"
 		stoich.path = "/model/compartment/##"
-                print "after set path"
                 assert( dsolve.numPools == 3 )
 		a.vec.concInit = [0.1]*num
-                a.vec[0].concInit += 1
-                #a.vec[num/2].concInit -= 0.1
+                a.vec[0].concInit *= 1.2 # slight perturbation at one end.
 		b.vec.concInit = [0.1]*num
 		s.vec.concInit = [1]*num
 

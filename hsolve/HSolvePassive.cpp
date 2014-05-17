@@ -103,7 +103,7 @@ void HSolvePassive::initialize()
 
     double Vm, Cm, Em, Rm, inject;
     double EmLeak, GmLeak;
-    double EmGmThev, GmThev, RmThev;
+    double EmGmThev, GmThev;
 
     vector< Id > leakage;
     vector< Id >::iterator ileakage;
@@ -112,12 +112,11 @@ void HSolvePassive::initialize()
     {
         Id cc = compartmentId_[ ic ];
 
-        Vm = HSolveUtils::get< Compartment, double >( cc, "Vm" );
-        Cm = HSolveUtils::get< Compartment, double >( cc, "Cm" );
-        Em = HSolveUtils::get< Compartment, double >( cc, "Em" );
-        Rm = HSolveUtils::get< Compartment, double >( cc, "Rm" );
-        inject = HSolveUtils::get< Compartment, double >( cc, "inject" );
-
+		Vm = Field< double >::get( cc, "Vm" );
+		Cm = Field< double >::get( cc, "Cm" );
+		Em = Field< double >::get( cc, "Em" );
+		Rm = Field< double >::get( cc, "Rm" );
+		inject = Field< double >::get( cc, "inject" );
         V_.push_back( Vm );
 
         /*
@@ -144,8 +143,8 @@ void HSolvePassive::initialize()
                 ileakage != leakage.end();
                 ileakage++ )
         {
-            EmLeak = HSolveUtils::get< Compartment, double >( *ileakage, "Ek" );
-            GmLeak = HSolveUtils::get< Compartment, double >( *ileakage, "Gk" );
+            EmLeak = Field< double >::get( *ileakage, "Ek" );
+            GmLeak = Field< double >::get( *ileakage, "Gk" );
             GmThev   += GmLeak;
             EmGmThev += EmLeak * GmLeak;
         }
@@ -184,11 +183,11 @@ void HSolvePassive::storeTree()
         childId.clear();
 
         HSolveUtils::children( *ic, childId );
-        Ra = HSolveUtils::get< Compartment, double >( *ic, "Ra" );
-        Cm = HSolveUtils::get< Compartment, double >( *ic, "Cm" );
-        Rm = HSolveUtils::get< Compartment, double >( *ic, "Rm" );
-        Em = HSolveUtils::get< Compartment, double >( *ic, "Em" );
-        initVm = HSolveUtils::get< Compartment, double >( *ic, "initVm" );
+		Ra = Field< double >::get( *ic, "Ra" );
+		Cm = Field< double >::get( *ic, "Cm" );
+		Rm = Field< double >::get( *ic, "Rm" );
+		Em = Field< double >::get( *ic, "Em" );
+		initVm = Field< double >::get( *ic, "initVm" );
 
         TreeNodeStruct node;
         // Push hines' indices of children

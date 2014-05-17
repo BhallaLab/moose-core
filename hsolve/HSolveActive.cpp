@@ -15,6 +15,7 @@
 #include "RateLookup.h"
 #include "HSolveActive.h"
 #include "HSolve.h"
+#include "../biophysics/CompartmentBase.h"
 #include "../biophysics/Compartment.h"
 #include "../biophysics/CaConc.h"
 #include "ZombieCaConc.h"
