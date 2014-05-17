@@ -3557,4 +3557,14 @@ Need now to move on the demos.
 ============================================================================
 16 May 2014.
 Made tutorials directory, especially for course use.
-First demo: Cleaned up and animated the TuringOneDim.py demo. Moved to tutorials.
+First demo: Cleaned up and animated the TuringOneDim.py demo. Moved to 
+tutorials.
+Trying to get oscillatory models in.  To do:
+	- The diagram for the cspace relaxation oscillator
+	- Get the novak-tyson cell cycle oscillator from kkit to work.
+		Loads the model and ee runs ok. So it is something with
+		zombie.
+	- The repressillator
+	- A standard feedback-delay oscillator.
+
+

@@ -36,7 +36,7 @@ const Cinfo* Neuron::initCinfo()
 	static Cinfo neuronCinfo(
 				"Neuron",
 				Neutral::initCinfo(),
-				NULL,
+				neuronFinfos,
 				0,
                                 &dinfo,
                                 doc,

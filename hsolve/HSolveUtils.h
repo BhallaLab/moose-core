@@ -24,59 +24,6 @@ class HSolveUtils
 {
 public:
     static void initialize( Id object );
-
-    template< class T, class A >
-    static void set( Id id, string field, A value )
-    {
-        /*  Capitalize the first character of the given field */
-        field[0] = toupper(field[0]);
-        const Finfo* finfo = id.element()->cinfo()->findFinfo( "set" + field );
-        assert( finfo );
-
-        const DestFinfo* dest = dynamic_cast< const DestFinfo* >( finfo );
-        assert( dest );
-
-        const OpFunc* op = dest->getOpFunc();
-        assert( op );
-
-        const double* vp = reinterpret_cast< const double* >( &value );
-
-        /* NOTE: This is modified by Dilawar */
-        dump("WARNING"
-                , "Check the next line."
-                " Developer is not sure about casting."
-                " OpFunc class has no member function op() therefore it is casted"
-                " to OpFunc0 class."
-            );
-        static_cast<OpFunc0<T>*>(op)->op( id.eref(), vp );
-    }
-
-    template< class T, class A >
-    static A get( Id id, string field )
-    {
-        /*  Capitalize the first character of the given field */
-        field[0] = toupper(field[0]);
-        const Finfo* finfo = id.element()->cinfo()->findFinfo( "get" + field );
-        assert( finfo );
-
-        const DestFinfo* dest = dynamic_cast< const DestFinfo* >( finfo );
-        assert( dest );
-
-        const OpFunc* op = dest->getOpFunc();
-        assert( op );
-
-        const GetOpFunc< T, A >* gop =
-            dynamic_cast< const GetOpFunc< T, A >* >( op );
-        const GetEpFunc< T, A >* gep =
-            dynamic_cast< const GetEpFunc< T, A >* >( op );
-        assert( gop || gep );
-
-        if ( gop )
-            return gop->returnOp( id.eref() );
-        else // gep
-            return gep->returnOp( id.eref() );
-    }
-
     static int adjacent( Id compartment, vector< Id >& ret );
     static int adjacent( Id compartment, Id exclude, vector< Id >& ret );
     static int children( Id compartment, vector< Id >& ret );

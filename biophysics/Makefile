@@ -15,6 +15,8 @@ OBJ = \
 	IntFire.o	\
 	Synapse.o	\
 	SpikeGen.o	\
+	CompartmentDataHolder.o	\
+	CompartmentBase.o	\
 	Compartment.o	\
 	SymCompartment.o	\
 	ChanBase.o	\
@@ -61,16 +63,19 @@ SpikeRingBuffer.o:	SpikeRingBuffer.h
 SynHandler.o:	SpikeRingBuffer.h SynHandler.h Synapse.h 
 IntFire.o:	IntFire.h SpikeRingBuffer.h SynHandler.h Synapse.h 
 SpikeGen.o: SpikeGen.h
-Compartment.o: Compartment.h
-SymCompartment.o: Compartment.h SymCompartment.h
+CompartmentDataHolder.o: CompartmentDataHolder.h
+CompartmentBase.o: CompartmentBase.h CompartmentDataHolder.h
+Compartment.o: CompartmentBase.h Compartment.h
+SymCompartment.o: CompartmentBase.h Compartment.h SymCompartment.h
 ChanBase.o: ChanBase.h
 HHChannel.o: ChanBase.h HHChannel.h HHGate.h
 HHGate.o: HHGate.h
 CaConc.o:	CaConc.h
 MgBlock.o:	MgBlock.h ChanBase.h
 Neuron.o:	Neuron.h
-ReadCell.o: ReadCell.h ../shell/Shell.h ../utility/utility.h
+ReadCell.o: CompartmentBase.h Compartment.h SymCompartment.h ReadCell.h ../shell/Shell.h ../utility/utility.h
 IzhikevichNrn.o: IzhikevichNrn.h
+testBiophysics.o: IntFire.h CompartmentBase.h Compartment.h HHChannel.h HHGate.h 
 #LeakyIaF.o: LeakyIaF.h
 #Synapse.o:	SynBase.h Synapse.h
 #GapJunction.o: GapJunction.h
@@ -88,7 +93,6 @@ IzhikevichNrn.o: IzhikevichNrn.h
 #MarkovSolver.o : MarkovSolverBase.h MarkovSolver.h
 #MarkovChannel.o : VectorTable.h ../builtins/Interpol2D.h MarkovRateTable.h ChanBase.h MarkovChannel.h 
 #VClamp.o: VClamp.h
-#testBiophysics.o: SynBase.h IntFire.h Synapse.h Compartment.h HHChannel.h HHGate.h 
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I. -I../basecode -I../msg $< -c
