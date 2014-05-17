@@ -16,3 +16,4 @@ X_cable_0__b_0_ n_cable_0__b_0_in1 GND n_cable_0__b_0_inject n_cable_0__b_0_out1
 
 ** Current pulses from moose 
 I0_pulse1_0_ n_cable_0__a_0__inject GND PULSE(0.0 1e-09 0.01 0.0 0.0 0.1 0.19)
+   

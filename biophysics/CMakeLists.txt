@@ -6,6 +6,8 @@ add_library(biophysics
 	Synapse.cpp	
 	SpikeGen.cpp	
 	Compartment.cpp	
+        CompartmentBase.cpp
+        CompartmentDataHolder.cpp
 	SymCompartment.cpp	
 	ChanBase.cpp	
 	HHChannel.cpp	

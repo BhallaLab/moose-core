@@ -4,7 +4,7 @@
 
     A compartment in moose.
 
-Last modified: Sat Jan 18, 2014  05:01PM
+Last modified: Tue May 13, 2014  06:03PM
 
 """
     
@@ -24,24 +24,31 @@ sys.path.append('../../../python')
 import moose
 import unittest
 import math
+import moose.utils as utils
 
 class MooseCompartment():
     """A simple class for making MooseCompartment in moose"""
 
     def __init__(self, **kwargs):
-        self.mooseCompartment = None
+        """ Initialize moose-compartment """
+        self.mc_ = None
         self.path = None
-
         # Following values are taken from Upi's chapter on Rallpacks
         self.RM = kwargs.get('RM', 4.0)
         self.RA = kwargs.get('RA', 1.0)
         self.CM = kwargs.get('CM', 0.01)
-        self.Em = kwargs.get('Em', -0.060)
+        self.Em = kwargs.get('Em', -0.065)
 
     def __repr__( self ):
-        msg = '{}: '.format( self.mooseCompartment.path )
-        msg += '\n\t|- Ra:{}, Rm:{}, Cm:{}, Em: {}'.format( 
-                self.Ra, self.Rm, self.Cm, self.Em
+        msg = '{}: '.format( self.mc_.path )
+        msg += '\n\t|- Length: {:1.4e}, Diameter: {:1.4e}'.format( 
+                self.mc_.length, self.mc_.diameter
+                )
+#        msg += '\n\t|- Cross-section: {:1.4e}, SurfaceArea: {:1.4e}'.format(
+#                self.crossSection, self.surfaceArea
+#                )
+        msg += '\n\t|- Ra: {:1.3e}, Rm: {:1.3e}, Cm: {:1.3e}, Em: {:1.3e}'.format( 
+                self.mc_.Ra, self.mc_.Rm, self.mc_.Cm, self.mc_.Em
                 )
         return msg
 
@@ -51,14 +58,13 @@ class MooseCompartment():
     def computeParams( self ):
         '''Compute essentials paramters for compartment. '''
 
-        self.surfaceArea = math.pi * self.diameter * self.length 
+        self.surfaceArea = math.pi * self.length * self.diameter
         self.crossSection = ( math.pi * self.diameter * self.diameter ) / 4.0
         self.Ra = ( self.RA * self.length ) / self.crossSection
         self.Rm = ( self.RM / self.surfaceArea )
-        self.Cm = ( self.CM * self.surfaceArea )
-        self.Em = self.Em
+        self.Cm = ( self.CM * self.surfaceArea ) 
 
-    def createCompartment(self, path = None, length = 1e-3, diameter = 1e-6 ):
+    def createCompartment(self, length, diameter, path = None ):
         ''' Create a MooseCompartment in moose '''
 
         self.length = length
@@ -66,13 +72,24 @@ class MooseCompartment():
         self.computeParams( )
 
         try:
-            self.mooseCompartment = moose.Compartment(path)
-            self.mooseCompartment.Ra = self.Ra
-            self.mooseCompartment.Rm = self.Rm
-            self.mooseCompartment.Cm = self.Cm
-            self.mooseCompartment.Em = self.Em
+            self.mc_ = moose.Compartment(path)
+            self.mc_.length = self.length
+            self.mc_.diameter = self.diameter
+            self.mc_.Ra = self.Ra
+            self.mc_.Rm = self.Rm
+            self.mc_.Cm = self.Cm
+            self.mc_.Em = self.Em
+            self.mc_.initVm = self.Em
+            
         except Exception as e:
-            print("[ERROR] Can't create compartment with path %s " % path)
+            utils.dump("ERROR"
+                    , [ "Can't create compartment with path %s " % path
+                        , "Failed with error %s " % e
+                        ]
+                    )
+            sys.exit(0)
+        utils.dump('DEBUG', [ 'Compartment: {}'.format( self ) ] )
+
 
 class TestCompartment( unittest.TestCase):
     ''' Test class '''
@@ -84,26 +101,26 @@ class TestCompartment( unittest.TestCase):
     def test_creation( self ):
         m = MooseCompartment( )
         m.createCompartment( path = '/compartment1' )
-        self.assertTrue( m.mooseCompartment
+        self.assertTrue( m.mc_
                 , 'Always create compartments when parent is /.'
                 )
 
         m = MooseCompartment( )
         m.createCompartment( path='/model/compartment1' )
-        self.assertFalse ( m.mooseCompartment 
+        self.assertFalse ( m.mc_ 
                 , 'Should not create compartment when parent does not exists.'
                 )
     
     def test_properties( self ):
         m = MooseCompartment()
         m.createCompartment('/comp1')
-        self.assertTrue( m.mooseCompartment.Em <= 0.0
+        self.assertTrue( m.mc_.Em <= 0.0
                 , "Em is initialized to some positive value."
-                " Current value is %s " % m.mooseCompartment.Em 
+                " Current value is %s " % m.mc_.Em 
                 )
-        self.assertTrue( m.mooseCompartment.Rm >= 0.0
+        self.assertTrue( m.mc_.Rm >= 0.0
                 , "Rm should be initialized to non-zero positive float"
-                 " Current value is: {}".format( m.mooseCompartment.Rm )
+                 " Current value is: {}".format( m.mc_.Rm )
                 )
 
     def test_repr ( self ):
