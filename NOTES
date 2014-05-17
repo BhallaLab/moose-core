@@ -3568,3 +3568,7 @@ Trying to get oscillatory models in.  To do:
 	- A standard feedback-delay oscillator.
 
 
+============================================================================
+17 May 2014
+Many fixes to Hsolver. Seems to be doing something reasonable, see 
+testHsolve.py.

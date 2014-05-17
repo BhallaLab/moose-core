@@ -804,6 +804,25 @@ void Shell::handleMove( const Eref& e, Id orig, ObjId newParent )
 		*/
 }
 
+void insertSharedMsgs( const Finfo* f, const Element* e, 
+				vector< ObjId >& msgs )
+{
+	const SharedFinfo* sf = dynamic_cast< const SharedFinfo *>( f );
+	if ( sf ) {
+		for ( vector< Finfo* >::const_iterator j = 
+			sf->dest().begin(); j != sf->dest().end(); ++j ) {
+			DestFinfo* df = dynamic_cast< DestFinfo* >( *j );
+			assert( df );
+			FuncId fid = df->getFid();
+		// These are the messages to be zapped
+			vector< ObjId > caller; 
+			if ( e->getInputMsgs( caller, fid ) > 0 ) {
+				msgs.insert( msgs.end(), caller.begin(), caller.end() );
+			}
+		}
+	}
+}
+
 // Static function
 void Shell::dropClockMsgs(
 	const vector< ObjId >& list, const string& field )
@@ -823,6 +842,8 @@ void Shell::dropClockMsgs(
 				if ( i->element()->getInputMsgs( caller, fid ) > 0 ) {
 					msgs.insert( msgs.end(), caller.begin(), caller.end() );
 				}
+			} else {
+				insertSharedMsgs( f, i->element(), msgs );
 			}
 		}
 	}
