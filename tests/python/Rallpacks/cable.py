@@ -2,7 +2,7 @@
 
 """cable.py: A passive cable of n compartments.
 
-Last modified: Fri May 09, 2014  12:04AM
+Last modified: Thu May 15, 2014  05:49PM
 
 """
     
@@ -28,35 +28,37 @@ import numpy as np
 class Cable( ):
     ''' Class representing a cable '''
 
-    def __init__( self, length = 1e-3, compartmentSize = 1e-6 ):
+    def __init__(self, length, compartmentSize):
         ''' Initialize the cable '''
+        self.save_dir = 'figures'
+        if not os.path.isdir( self.save_dir ):
+            os.makedirs( self.save_dir )
+
         self.length = length
         self.compartmentSize = compartmentSize
-        utils.dump("STEP"
-                , [ "Creating a cable."
-                    , "length: %s" % self.length
-                    , "size: %s" % self.compartmentSize 
-                    ]
-                )
-        self.size = int(self.length / self.compartmentSize)
+        self.nseg = int(self.length / self.compartmentSize)
         self.cablePath = '/cable'
         self.tablePath = '/data'
         moose.Neutral( self.cablePath )
         moose.Neutral( self.tablePath )
-
         # Store all moose-compartments in this list.
         self.cable = []
         # Keep all simulation data in this list of tables.
         self.tables = []
         # keep all stimulus in this list of tables.
         self.stimTables = []
+        self.makeCable()
 
-    def makeCable( self ):
+    def makeCable( self, **compartment_options ):
         ''' Make a cable out of n compartments '''
-        for i in range( self.size ):
-            c = comp.MooseCompartment( length = self.compartmentSize  )
-            c.createCompartment( path = '%s/comp_%s' % ( self.cablePath , i) )
-            self.cable.append( c )
+        for i in range( self.nseg ):
+            c = comp.MooseCompartment( **compartment_options )
+            c.createCompartment( 
+                    length = self.compartmentSize
+                    , diameter = 1e-6
+                    , path = '%s/comp_%s' % ( self.cablePath , i) 
+                    )
+            self.cable.append(c)
         self.connect( )
         utils.dump( "STEP"
                 , "Passive cable is connected and ready for simulation." 
@@ -66,22 +68,8 @@ class Cable( ):
         ''' Connect the cable '''
         utils.dump('STEP', 'Connecting cable ...')
         for i, c1 in enumerate( self.cable[:-1] ):
-            c2 = self.cable[i+1].mooseCompartment
-            c1.mooseCompartment.connect('raxial', c2, 'axial')
-
-    def recordAt( self, index ):
-        ''' Parameter index is python list-like index. Index -1 is the last
-        elements in the list 
-        '''
-        utils.dump( "RECORD", "Setting up a probe at compartment no %s " % index )
-        if index < 0:
-            index = len( self.cable ) + index
-        if( index >= len( self.cable ) ):
-            raise UserWarning( "There is no compartment at index %s" % index )
-        c = self.cable[index].mooseCompartment
-        t = moose.Table( '{}/output_at_{}'.format( self.tablePath, index ))
-        moose.connect( t, 'requestOut', c, 'getVm' )
-        self.tables.append( t )
+            c2 = self.cable[i+1].mc_
+            c1.mc_.connect('axial', c2, 'raxial')
 
     def setupDUT( self ):
         ''' Setup cable for recording '''
@@ -89,13 +77,12 @@ class Cable( ):
         # Create a pulse input
         moose.Neutral( self.tablePath )
         stim = moose.PulseGen( '{}/input'.format( self.tablePath) )
-        stim.level[0] = 1e-9
-        stim.width[0] = 0.2
-        stim.delay[0] = 0.1
-        stim.delay[1] = 0.8
+        stim.level[0] = 0.1e-9
+        stim.width[0] = 0.25
+        stim.delay[0] = 0.0
 
         # Inject the current from stim to first compartment.
-        moose.connect( stim, 'output', self.cable[0].mooseCompartment, 'injectMsg' )
+        moose.connect( stim, 'output', self.cable[0].mc_, 'injectMsg' )
         
         # Fill the data from stim into table.
         inputTable = moose.Table( '{}/inputTable'.format( self.tablePath ) )
@@ -114,12 +101,13 @@ class Cable( ):
         # Setup clocks 
         utils.dump("STEP", "Setting up the clocks ... ")
         moose.setClock( 0, self.simDt )
-        moose.setClock( 1, self.plotDt )
+        moose.setClock( 1, self.simDt )
+        moose.setClock( 2, self.simDt )
 
-        # Use clocks
-        moose.useClock( 0, '/##'.format(self.cablePath), 'process' )
-        moose.useClock( 0, '/##'.format(self.cablePath), 'init' )
-        #moose.useClock( 0, '{}/##'.format(self.tablePath), 'process' )
+        ## Use clocksc
+        moose.useClock( 0, '/cable/##'.format(self.cablePath), 'process' )
+        moose.useClock( 1, '/cable/##'.format(self.cablePath), 'init' )
+        moose.useClock( 2, '{}/##'.format(self.tablePath), 'process' )
 
         utils.dump("STEP"
                 , [ "Simulating cable for {} sec".format(simTime)
@@ -130,74 +118,29 @@ class Cable( ):
         utils.verify( )
         moose.start( simTime )
 
-    def plotTables( self, ascii = False ):
-        ''' Plot all tables: stimulus and recording. '''
-        if not ascii:
-            pylab.figure( )
-        [ self.plotTable(t, self.simDt, ascii=ascii) for t in self.stimTables ]
-        if not ascii:
-            pylab.figure( )
-        [ self.plotTable(t, self.simDt, ascii=ascii) for t in self.tables ]
-        if not ascii:
-            pylab.show( )
-
-    def plotTable( self, table, dt, standalone = False, ascii = False):
-        ''' Plot a single table '''
-        if standalone and not ascii:
-            pylab.figure( )
-        yvec = table.vector
-        # Multiply index with simDt to get the time at which recording was
-        # made.
-        xvec = [ x * dt for x in range(len(table.vector)) ]
-        if not ascii:
-            pylab.plot( xvec, yvec )
-            pylab.xlabel( 'Time (sec)' )
-            pylab.legend( '{}'.format(table.path) )
-        else:
-            utils.plotAscii( yvec, xvec )
-
-    def checkResults( self ):
-        ''' Check if tables make any sense '''
-        outputTables = self.tables[:]
-        t1 = outputTables.pop(0)
-        while len(outputTables) > 0:
-            t2 = outputTables.pop(0)
-            while t2.path == t1.path:
-                utils.dump("WARN", "Two tables with same path. Ignoring ...")
-                t2 = outputTables.pop(0)
-            y1 = t1.vector
-            y2 = t2.vector 
-            if np.array_equal(y1, y2):
-                utils.dump("ERROR"
-                        , "Something fishy."
-                          " Same data found at two differenct compartments."
-                        )
-            elif np.greater( y1, y2 ).all():
-                utils.dump( "ERROR"
-                        , "Something fishy."
-                          " First table must not be greater than the second one"
-                        )
-            else: 
-                utils.dump("INFO", "Tables looks OK. Go for plotting... ")
-            t2 = t1
-
-    def solveAnalytically( self ):
-        ''' Solve the cable analytically at a position x for all time t in
-        simTime '''
-        utils.dump("WARNING", "This solves it assuming that input is a step "
-                "function of 1 nA of current."
-                )
 def main( ):
-    cable = Cable( length = 1e-3, compartmentSize = 1e-6 )
-    cable.makeCable( )
-    #cable.recordAt( index = 0 )
-    cable.recordAt( index = 1 )
-    cable.recordAt( index = 2 )
-    #cable.recordAt( index = 100 )
-    cable.simulate( simTime = 1, simDt = 1e-3 )
-    cable.checkResults( )
-    cable.plotTables( ascii = False )
-    #cable.solveAnalytically( )
+    cableLength = 1.0e-3
+    compNons = int(sys.argv[1])
+    outputFile = None
+    try:
+        outputFile = sys.argv[2]
+    except: pass
+    compartmentSize = cableLength / compNons
+    cable = Cable( cableLength, compartmentSize)
+    first = 0
+    last = cable.nseg - 1
+    middle = ( first + last + 1 ) / 2
+    table1 = utils.recordTarget('/data/table1', cable.cable[first].mc_, 'vm' )
+    table2 = utils.recordTarget('/data/table2', cable.cable[middle].mc_, 'vm' )
+    table3 = utils.recordTarget('/data/table3', cable.cable[last].mc_, 'vm' )
+    sim_dt = 1e-4
+    cable.simulate( simTime = 0.25, simDt = sim_dt )
+    utils.plotTables([table1, table2, table3]
+            , xscale = sim_dt
+            , file = outputFile
+            )
+    import moose.backend.spice as spice
+    spice.toSpiceNetlist( output = 'cable.spice' )
 
 if __name__ == '__main__':
     main()
