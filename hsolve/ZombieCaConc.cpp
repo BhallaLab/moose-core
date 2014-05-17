@@ -289,6 +289,7 @@ void ZombieCaConc::decrease( double I )
 // static func
 void ZombieCaConc::zombify( Element* solver, Element* orig )
 {
+/*
     // Delete "process" msg.
     static const Finfo* procDest = CaConc::initCinfo()->findFinfo( "process");
     assert( procDest );
@@ -296,7 +297,6 @@ void ZombieCaConc::zombify( Element* solver, Element* orig )
     const DestFinfo* df = dynamic_cast< const DestFinfo* >( procDest );
     assert( df );
 
-    /*  mid is not ObjId type. In previous version, it was MsgId type */
     ObjId mid = orig->findCaller( df->getFid() );
     if ( ! mid.bad() )
         Msg::deleteMsg( mid );
@@ -321,6 +321,7 @@ void ZombieCaConc::zombify( Element* solver, Element* orig )
 //    zd->copyFields( od );
 //
 //    orig->zombieSwap( zombieCaConcCinfo, dh );
+*/
 }
 
 // static func

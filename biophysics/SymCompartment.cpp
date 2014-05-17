@@ -9,6 +9,7 @@
 
 #include "header.h"
 
+#include "CompartmentBase.h"
 #include "Compartment.h"
 #include "SymCompartment.h"
 
@@ -292,7 +293,7 @@ SymCompartment::SymCompartment():
 
 
 // Alternates with the 'process' message
-void SymCompartment::innerInitProc( const Eref& e, ProcPtr p )
+void SymCompartment::vInitProc( const Eref& e, ProcPtr p )
 {
 	// cout << "SymCompartment " << e.id().path() << ":: innerInitProc: A = " << A_ << ", B = " << B_ << endl;
 	distalOut()->send( e, Ra_, Vm_ ); // to kids
@@ -301,9 +302,9 @@ void SymCompartment::innerInitProc( const Eref& e, ProcPtr p )
 }
 
 // Virtual func. Must be called after the 'init' phase.
-void SymCompartment::innerReinit( const Eref& e, ProcPtr p )
+void SymCompartment::vReinit( const Eref& e, ProcPtr p )
 {
-	moose::Compartment::innerReinit( e, p );
+	moose::Compartment::vReinit( e, p );
         // We don't want to recalculate these every time step - the request... methods are not required
         // requestSumAxial()->send( e );
         // requestSumAxial2()->send( e );
@@ -316,7 +317,7 @@ void SymCompartment::innerReinit( const Eref& e, ProcPtr p )
 // The Compartment and Symcompartment go through an 'init' and then a 'proc'
 // during each clock tick. Same sequence applies during reinit.
 // This function is called during 'init' phase to send Raxial info around.
-void SymCompartment::innerInitReinit( const Eref& e, ProcPtr p )
+void SymCompartment::vInitReinit( const Eref& e, ProcPtr p )
 {
 	// cout << "SymCompartment " << e.id().path() << ":: innerInitReinit: coeff = " << coeff_ << ", coeff2 = " << coeff2_ << endl;
 	// coeff_ = 0.0;
