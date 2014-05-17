@@ -437,6 +437,7 @@ unsigned int ZombieHHChannel::getNumZgates() const
 // static func
 void ZombieHHChannel::zombify( Element* solver, Element* orig )
 {
+	/*
     // Delete "process" msg.
     static const Finfo* procDest = HHChannel::initCinfo()->findFinfo( "process");
     assert( procDest );
@@ -456,6 +457,7 @@ void ZombieHHChannel::zombify( Element* solver, Element* orig )
 
     HSolve::deleteIncomingMessages(orig, "concen");
     HSolve::deleteIncomingMessages(orig, "Vm");
+	*/
 
     Eref oer( orig, 0 );
     Eref ser( solver, 0 );
