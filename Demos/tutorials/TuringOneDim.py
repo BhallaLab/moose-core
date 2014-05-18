@@ -22,6 +22,7 @@
 import math
 import numpy
 import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
 import moose
 
 def makeModel():
@@ -125,18 +126,18 @@ def main():
 		b = moose.element( '/model/compartment/b' )
 		s = moose.element( '/model/compartment/s' )
 
-                atot = sum( a.vec.conc )
-                btot = sum( b.vec.conc )
-                stot = sum( s.vec.conc )
-                #print "a = ", a.vec.conc
-                #print "b = ", b.vec.conc
-                #print "s = ", s.vec.conc
+                img = mpimg.imread( 'turing_tut.png' )
+                #imgplot = plt.imshow( img )
+                #plt.show()
 
-                #print 'tot = ', atot, btot, atot + btot + stot
                 plt.ion()
-                fig = plt.figure()
-                ax = fig.add_subplot(111)
+                fig = plt.figure( figsize=(12,10) )
+                png = fig.add_subplot(211)
+                imgplot = plt.imshow( img )
+                ax = fig.add_subplot(212)
                 ax.set_ylim( 0, 0.5 )
+                plt.ylabel( 'Conc (mM)' )
+                plt.xlabel( 'Position along cylinder (microns)' )
                 pos = numpy.arange( 0, a.vec.conc.size, 1 )
                 line1, = ax.plot( pos, a.vec.conc, label='a' )
                 line2, = ax.plot( pos, b.vec.conc, label='b' )
@@ -149,6 +150,9 @@ def main():
                     line2.set_ydata( b.vec.conc )
                     timeLabel.set_text( "time = %d" % t )
                     fig.canvas.draw()
+
+                print( "Hit 'enter' to exit" )
+                raw_input()
 
 
 
