@@ -3565,10 +3565,17 @@ Trying to get oscillatory models in.  To do:
 		Loads the model and ee runs ok. So it is something with
 		zombie.
 	- The repressillator
-	- A standard feedback-delay oscillator.
+	- A standard feedback-delay oscillator.: Kholdenko.g
 
 
 ============================================================================
 17 May 2014
 Many fixes to Hsolver. Seems to be doing something reasonable, see 
-testHsolve.py.
+testHsolve.py. Checkin 5424.
+
+Now back to looking at the novak_tyson model. This is now loading and
+running but the output is incorrect. Checked that the FuncPools that are
+set in place to follow a pool conc, are working.
+
+I've set up all the other oscillators:
+repressillator, slowFB (KHoldenko), relaxationOsc, Turing
