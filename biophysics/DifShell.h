@@ -63,6 +63,8 @@ class DifShell
 
                 void process_1(const Eref & e, ProcPtr p );
 
+                void reinit_1(const Eref & e, ProcPtr p ); // dummyFunc
+                
 		void buffer(
 		 double kf,
 		 double kb,
