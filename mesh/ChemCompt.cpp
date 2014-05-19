@@ -475,7 +475,7 @@ void ChemCompt::lookupStoich( ObjId me ) const
 	assert( cm == this );
 	vector< Id > stoichVec;
 	unsigned int num = 
-		me.element()->getNeighbours( stoichVec, meshSplitOut());
+		me.element()->getNeighbors( stoichVec, meshSplitOut());
 	if ( num == 1 ) // The solver has been created
 		cm->stoich_ = stoichVec[0];
 }

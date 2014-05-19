@@ -175,7 +175,7 @@ extern "C" {
     
     PyObject * moose_Id_repr(_Id * self);
     PyObject * moose_Id_str(_Id * self);
-    PyObject * deleteId(_Id * obj); // inner function
+    PyObject * deleteId(Id obj); // inner function
     PyObject * moose_Id_delete(_Id * self);
     PyObject * moose_Id_getValue(_Id * self);
     PyObject * moose_Id_getPath(_Id * self);

@@ -49,10 +49,10 @@ const Cinfo* Example::initCinfo(){
     );
         
     
-    static ReadOnlyLookupElementValueFinfo< Example, string, vector< Id > > fieldNeighbours( 
+    static ReadOnlyLookupElementValueFinfo< Example, string, vector< Id > > fieldNeighbors( 
 		"fieldNeighbors",
 		"Ids of Elements connected this Element on specified field.", 
-			&Example::getNeighbours );
+			&Example::getNeighbors );
 
     //////////////////////////////////////////////////////////////
     // SharedFinfo Definitions
@@ -74,7 +74,7 @@ const Cinfo* Example::initCinfo(){
         &handleY,   //DestFinfo
         output(),   // SrcFinfo
         &proc,      //SharedFinfo
-        &fieldNeighbours,		// ReadOnlyLookupValue
+        &fieldNeighbors,		// ReadOnlyLookupValue
     };
 
     static Cinfo exampleCinfo(
@@ -139,14 +139,14 @@ void Example::setY(double y)
     y_ = y;
 }
 
-vector< Id > Example::getNeighbours( const Eref& e, string field ) const
+vector< Id > Example::getNeighbors( const Eref& e, string field ) const
 {
 	vector< Id > ret;
 	const Finfo* finfo = e.element()->cinfo()->findFinfo( field );
 	if ( finfo )
-		e.element()->getNeighbours( ret, finfo );
+		e.element()->getNeighbors( ret, finfo );
 	else
-		cout << "Warning: Example::getNeighbours: Id.Field '" << 
+		cout << "Warning: Example::getNeighbors: Id.Field '" << 
 				e.id().path() << "." << field <<
 				"' not found\n";
 	return ret;

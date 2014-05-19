@@ -63,7 +63,7 @@ class Neutral
 		 * Field is specified by its name.
 		 * Returns an empty vector if it fails.
 		 */
-		vector< Id > getNeighbours( const Eref& e, string field ) const;
+		vector< Id > getNeighbors( const Eref& e, string field ) const;
 
 		/**
 		 * Return vector of target ObjIds

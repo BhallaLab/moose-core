@@ -543,13 +543,13 @@ static bool isOffSolverReac( const Element* e, Id myCompt,
 	assert( myCompt != Id() );
 	assert( myCompt.element()->cinfo()->isA( "ChemCompt" ) );
 	bool ret = false;
-	vector< Id > neighbours;
-	e->getNeighbours( neighbours, e->cinfo()->findFinfo( "subOut" ));
+	vector< Id > neighbors;
+	e->getNeighbors( neighbors, e->cinfo()->findFinfo( "subOut" ));
 	vector< Id > n2;
-	e->getNeighbours( n2, e->cinfo()->findFinfo( "prdOut" ));
-	neighbours.insert( neighbours.end(), n2.begin(), n2.end() );
+	e->getNeighbors( n2, e->cinfo()->findFinfo( "prdOut" ));
+	neighbors.insert( neighbors.end(), n2.begin(), n2.end() );
 	for ( vector< Id >::const_iterator 
-			j = neighbours.begin(); j != neighbours.end(); ++j )
+			j = neighbors.begin(); j != neighbors.end(); ++j )
 	{
 		Id otherCompt = getCompt( *j );
 		if ( myCompt != otherCompt ) {
@@ -803,7 +803,7 @@ void Stoich::installAndUnschedFunc( Id func, Id Pool )
 	FuncBase* fb = reinterpret_cast< FuncBase* >( func.eref().data() );
 	FuncTerm* ft = fb->func();
 	vector< Id > srcPools;
-	unsigned int numSrc = func.element()->getNeighbours( 
+	unsigned int numSrc = func.element()->getNeighbors( 
 					srcPools, funcSrcFinfo );
 	assert( numSrc > 0 );
 	vector< unsigned int > poolIndex( numSrc, 0 );

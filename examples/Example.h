@@ -22,7 +22,7 @@ class Example {
         void handleX(double arg);
         void handleY(double arg);
         
-        vector< Id > getNeighbours( const Eref& e, string field ) const;
+        vector< Id > getNeighbors( const Eref& e, string field ) const;
 
         static const Cinfo* initCinfo();
 

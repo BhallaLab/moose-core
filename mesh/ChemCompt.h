@@ -206,7 +206,7 @@ class ChemCompt
 		/**
 		 * Wrapper function to buld junction between two meshes, and to
 		 * extend the meshes so that their stencils also handle update to
-		 * the voxels abutting the boundary on the neighbour mesh.
+		 * the voxels abutting the boundary on the neighbor mesh.
 		 */
 		void buildJunction( ChemCompt* other, vector< VoxelJunction >& ret );
 
@@ -304,7 +304,7 @@ class ChemCompt
 		/**
 		 * Function to add voxels for boundaries. This is done so that the
 		 * solver can do reaction-diffusion computations on the entire mesh
-		 * including voxels of neighbouring solvers abutting the boundary.
+		 * including voxels of neighboring solvers abutting the boundary.
 		 * It uses these to stitch together the computations that span
 		 * multiple solvers and compartments.
 		 */
@@ -320,7 +320,7 @@ class ChemCompt
 		Id stoich_; /// Identifier for stoich object doing diffusion.
 
 		/**
-		 * defines how to combine neighbouring
+		 * defines how to combine neighboring
 		 * mesh elements to set up the diffusion du/dt term, using the
 		 * method of lines.
 		vector< const Stencil* > stencil_;
