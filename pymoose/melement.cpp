@@ -726,7 +726,9 @@ extern "C" {
                     Py_ssize_t length = PySequence_Length(value);
                     vector<double> _value;
                     for ( int ii = 0; ii < length; ++ii){
-                        double v = PyFloat_AsDouble(PySequence_GetItem(value, ii));
+                        PyObject * vo = PySequence_GetItem(value, ii);
+                        double v = PyFloat_AsDouble(vo);
+                        Py_XDECREF(vo);
                         _value.push_back(v);
                     }
                     ret = Field< vector < double > >::set(self->oid_, string(field), _value);
@@ -770,7 +772,9 @@ extern "C" {
                 Py_ssize_t length = PySequence_Length(value);
                 vector<int> _value;
                 for ( int ii = 0; ii < length; ++ii){
-                    int v = PyInt_AsLong(PySequence_GetItem(value, ii));
+                    PyObject * vo = PySequence_GetItem(value, ii);
+                    int v = PyInt_AsLong(vo);
+                    Py_XDECREF(vo);
                     _value.push_back(v);
                 }
                 ret = Field< vector < int > >::set(self->oid_, string(field), _value);
@@ -783,7 +787,9 @@ extern "C" {
                     Py_ssize_t length = PySequence_Length(value);
                     vector<short> _value;
                     for ( int ii = 0; ii < length; ++ii){
-                        short v = PyInt_AsLong(PySequence_GetItem(value, ii));
+                        PyObject * vo = PySequence_GetItem(value, ii);
+                        short v = PyInt_AsLong(vo);
+                        Py_XDECREF(vo);
                         _value.push_back(v);
                     }
                     ret = Field< vector < short > >::set(self->oid_, string(field), _value);
@@ -798,7 +804,9 @@ extern "C" {
                     Py_ssize_t length = PySequence_Length(value);
                     vector<long> _value;
                     for ( int ii = 0; ii < length; ++ii){
-                        long v = PyInt_AsLong(PySequence_GetItem(value, ii));
+                        PyObject * vo = PySequence_GetItem(value, ii);
+                        long v = PyInt_AsLong(vo);
+                        Py_XDECREF(vo);
                         _value.push_back(v);
                     }
                     ret = Field< vector < long > >::set(self->oid_, string(field), _value);
@@ -812,7 +820,9 @@ extern "C" {
                     Py_ssize_t length = PySequence_Length(value);
                     vector<unsigned int> _value;
                     for ( int ii = 0; ii < length; ++ii){
-                        unsigned int v = PyInt_AsUnsignedLongMask(PySequence_GetItem(value, ii));
+                        PyObject * vo = PySequence_GetItem(value, ii);
+                        unsigned int v = PyInt_AsUnsignedLongMask(vo);
+                        Py_XDECREF(vo);
                         _value.push_back(v);
                     }
                     ret = Field< vector < unsigned int > >::set(self->oid_, string(field), _value);
@@ -826,7 +836,9 @@ extern "C" {
                     Py_ssize_t length = PySequence_Length(value);
                     vector<unsigned long> _value;
                     for ( int ii = 0; ii < length; ++ii){
-                        unsigned long v = PyInt_AsUnsignedLongMask(PySequence_GetItem(value, ii));
+                        PyObject * vo = PySequence_GetItem(value, ii);
+                        unsigned long v = PyInt_AsUnsignedLongMask(vo);
+                        Py_XDECREF(vo);
                         _value.push_back(v);
                     }
                     ret = Field< vector < unsigned long > >::set(self->oid_, string(field), _value);
@@ -840,7 +852,9 @@ extern "C" {
                     Py_ssize_t length = PySequence_Length(value);
                     vector<float> _value;
                     for ( int ii = 0; ii < length; ++ii){
-                        float v = PyFloat_AsDouble(PySequence_GetItem(value, ii));
+                        PyObject * vo = PySequence_GetItem(value, ii);
+                        float v = PyFloat_AsDouble(vo);
+                        Py_XDECREF(vo);
                         _value.push_back(v);
                     }
                     ret = Field< vector < float > >::set(self->oid_, string(field), _value);
@@ -854,7 +868,9 @@ extern "C" {
                     Py_ssize_t length = PySequence_Length(value);
                     vector<string> _value;
                     for ( int ii = 0; ii < length; ++ii){
-                        char * v = PyString_AsString(PySequence_GetItem(value, ii));
+                        PyObject * vo = PySequence_GetItem(value, ii);
+                        char * v = PyString_AsString(vo);
+                        Py_XDECREF(vo);
                         _value.push_back(string(v));
                     }
                     ret = Field< vector < string > >::set(self->oid_, string(field), _value);
@@ -1645,7 +1661,7 @@ PyObject* setDestFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type1
     }
 
     PyDoc_STRVAR(moose_ObjId_getNeighbors_documentation,
-                 "getNeighbours(fieldName)\n"
+                 "getNeighbors(fieldName)\n"
                  "\n"
                  "Get the objects connected to this element by a message on specified\n"
                  "field.\n"

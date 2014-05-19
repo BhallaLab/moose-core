@@ -312,8 +312,8 @@ void testReacVolumeScaling()
 	cout << "." << flush;
 }
 
-// See what Element::getNeighbours does with 2 sub <----> prd.
-void testTwoReacGetNeighbours()
+// See what Element::getNeighbors does with 2 sub <----> prd.
+void testTwoReacGetNeighbors()
 {
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	Id comptId = shell->doCreate( "CubeMesh", Id(), "cube", 1 );
@@ -338,14 +338,14 @@ void testTwoReacGetNeighbours()
 	assert( ret != ObjId() );
 
 	vector< Id > pools;
-	unsigned int num = reacId.element()->getNeighbours( pools, 
+	unsigned int num = reacId.element()->getNeighbors( pools, 
 		Reac::initCinfo()->findFinfo( "toSub" ) );
 	assert( num == 2 );
 	assert( pools[0] == subId );
 	assert( pools[1] == subId );
 
 	pools.clear();
-	num = reacId.element()->getNeighbours( pools, 
+	num = reacId.element()->getNeighbors( pools, 
 		Reac::initCinfo()->findFinfo( "sub" ) );
 	assert( num == 2 );
 	assert( pools[0] == subId );
@@ -499,7 +499,7 @@ void testVolSort()
 
 void testKinetics()
 {
-	testTwoReacGetNeighbours();
+	testTwoReacGetNeighbors();
 	testMMenz();
 	testMathFunc();
 	testPoolVolumeScaling();

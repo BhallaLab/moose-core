@@ -1544,7 +1544,7 @@ void testCinfoFields()
 	MOOSE_ASSERT( cinfo->getValueFinfo( 5 + nvf ) == cinfo->findFinfo( "bufferTime" ) );
 
 	unsigned int nlf = neutralCinfo->getNumLookupFinfo();
-	MOOSE_ASSERT( nlf == 3 ); // Neutral inserts a lookup field for neighbours
+	MOOSE_ASSERT( nlf == 3 ); // Neutral inserts a lookup field for neighbors
 	MOOSE_ASSERT( cinfo->getNumLookupFinfo() == 0 + nlf );
 	MOOSE_ASSERT( cinfo->getLookupFinfo( 0 + nlf )->name() == "dummy");
 

@@ -384,7 +384,7 @@ Id tryParent( Id id, const string& msgName )
 	if ( !finfo )
 		return Id();
 	vector< Id > ret;
-	id.element()->getNeighbours( ret, finfo );
+	id.element()->getNeighbors( ret, finfo );
 	assert( ret.size() <= 1 );
 	if ( ret.size() == 1 )
 		return ret[0];
@@ -556,7 +556,7 @@ void NeuroMesh::separateOutSpines( const Eref& e )
 {
 		vector< Id > ids;
 		/*
-		e.element()->getNeighbours( ids, spineListOut() );
+		e.element()->getNeighbors( ids, spineListOut() );
 		if ( ids.size() > 0 ) {
 			SetGet4< Id, vector< Id >, vector< Id >, 
 					vector< unsigned int > >::set( 
@@ -579,7 +579,7 @@ void NeuroMesh::separateOutSpines( const Eref& e )
 				index[i] = i;
 			}
 			ids.clear();
-			e.element()->getNeighbours( ids, psdListOut() );
+			e.element()->getNeighbors( ids, psdListOut() );
 			psdListOut()->send( e, cell_, psdCoords, index );
 			/*
 			SetGet3< Id, vector< double >, vector< unsigned int > >::set( 
@@ -697,17 +697,17 @@ vector< Id > spineVec( const vector< Id >& head )
 		vector< Id > ret;
 		const Element* e = i->element();
 		if ( e->cinfo() == ccinfo ) {
-			if ( e->getNeighbours( ret, axialFinfo ) ) {
+			if ( e->getNeighbors( ret, axialFinfo ) ) {
 				spineMap[ *i ] = ret[0];
-			} else if ( e->getNeighbours( ret, raxialFinfo ) ) {
+			} else if ( e->getNeighbors( ret, raxialFinfo ) ) {
 				spineMap[ *i ] = ret[0];
 			} else {
 				assert( 0 );
 			}
 		} else if ( e->cinfo() == scinfo ) {
-			if ( e->getNeighbours( ret, r2Finfo ) ) {
+			if ( e->getNeighbors( ret, r2Finfo ) ) {
 				spineMap[ *i ] = ret[0];
-			} else if ( e->getNeighbours( ret, r1Finfo ) ) {
+			} else if ( e->getNeighbors( ret, r1Finfo ) ) {
 				spineMap[ *i ] = ret[0];
 			} else {
 				assert( 0 );
@@ -738,19 +738,19 @@ Id getSpineParent( Id spine, Id head )
 	Element* se = spine.element();
 	vector< Id > ret;
 	if ( se->cinfo() == ccinfo ) {
-		if ( se->getNeighbours( ret, axialFinfo ) ) {
+		if ( se->getNeighbors( ret, axialFinfo ) ) {
 			if ( ret[0] != head ) {
 				pa = ret[0];
-			} else if ( se->getNeighbours( ret, raxialFinfo ) ) {
+			} else if ( se->getNeighbors( ret, raxialFinfo ) ) {
 				assert( ret[0] != head );
 				pa = ret[0];
 			} 
 		}
 	} else if ( se->cinfo() == scinfo ) {
-		if ( se->getNeighbours( ret, r2Finfo ) ) {
+		if ( se->getNeighbors( ret, r2Finfo ) ) {
 			if ( ret[0] != head ) {
 				pa = ret[0];
-			} else if ( se->getNeighbours( ret, r1Finfo ) ) {
+			} else if ( se->getNeighbors( ret, r1Finfo ) ) {
 				assert( ret[0] != head );
 				pa = ret[0];
 			} 
