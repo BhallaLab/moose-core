@@ -231,7 +231,7 @@ class CubeMesh: public MeshCompt
 		const vector< double >& getVoxelLength() const;
 
 		/**
-		 * Sets up the stencil that defines how to combine neighbouring
+		 * Sets up the stencil that defines how to combine neighboring
 		 * mesh elements to set up the diffusion du/dt term, using the
 		 * method of lines.
 		 * This is a very general function. It uses the information in the

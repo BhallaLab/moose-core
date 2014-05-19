@@ -206,7 +206,7 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	  vector< ObjId > Compt_spe;
 	  wildcardFind(comptPath+"/##[ISA=PoolBase]",Compt_spe);
 
-	  //vector< Id > Compt_spe = LookupField< string, vector< Id > >::get(*itr, "neighbours", "remesh" );
+	  //vector< Id > Compt_spe = LookupField< string, vector< Id > >::get(*itr, "neighbors", "remesh" );
 	  int species_size = 1;
 	  string objname;
 	  for (vector <ObjId> :: iterator itrp = Compt_spe.begin();itrp != Compt_spe.end();itrp++)
@@ -312,7 +312,7 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	  
 	  vector< ObjId > Compt_Reac;
 	  wildcardFind(comptPath+"/##[ISA=ReacBase]",Compt_Reac);
-	  //vector< Id > Compt_Reac = LookupField< string, vector< Id > >::get(*itr, "neighbours", "remeshReacs" );
+	  //vector< Id > Compt_Reac = LookupField< string, vector< Id > >::get(*itr, "neighbors", "remeshReacs" );
 	  for (vector <ObjId> :: iterator itrR= Compt_Reac.begin();itrR != Compt_Reac.end();itrR++)
 	    { string cleanReacname = cleanNameId(*itrR,index);
 	      string recClass = Field<string> :: get(*itrR,"className");

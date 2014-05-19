@@ -209,10 +209,10 @@ extern "C" {
         long dim_value = 1;
         if (dims){
             // First try to use it as a tuple of dimensions
-            if (PySequence_Check(dims)){
-                num_dims = PySequence_Length(dims);
+            if (PyTuple_Check(dims)){
+                num_dims = PyTuple_Size(dims);
                 for (Py_ssize_t ii = 0; ii < num_dims; ++ ii){
-                    PyObject* dim = PySequence_GetItem(dims, ii);
+                    PyObject* dim = PyTuple_GetItem(dims, ii);
                     dim_value = PyInt_AsLong(dim);
                     Py_XDECREF(dim);                    
                     if ((dim_value == -1) && PyErr_Occurred()){
@@ -461,7 +461,7 @@ extern "C" {
         }
         if (PyTuple_SetItem(tuple, (Py_ssize_t)index, item) != 0){
             PyErr_SetString(PyExc_RuntimeError, "convert_and_set_tuple_entry: could not set tuple entry.");
-            Py_XDECREF(tuple);
+            // Py_XDECREF(tuple);
             return NULL;
         }
         return tuple;
@@ -867,10 +867,10 @@ extern "C" {
              it != get_getsetdefs().end();
              ++it){
             vector <PyGetSetDef> &getsets = it->second;
-            for (unsigned int ii = 0; ii < getsets.size()-1; ++ii){ // the -1 is for the empty sentinel entry
-                free(getsets[ii].name);
-                Py_XDECREF(getsets[ii].closure);
-            }
+            // for (unsigned int ii = 0; ii < getsets.size()-1; ++ii){ // the -1 is for the empty sentinel entry
+            //     free(getsets[ii].name);
+            //     Py_XDECREF(getsets[ii].closure);
+            // }
         }
         get_getsetdefs().clear();
         for (map<string, PyObject *>::iterator it = get_inited_destfields().begin();
@@ -1268,21 +1268,37 @@ extern "C" {
     PyObject * moose_delete(PyObject * dummy, PyObject * args)
     {
         PyObject * obj;
+        bool isId_ = false;
         if (!PyArg_ParseTuple(args, "O:moose.delete", &obj)){
             return NULL;
         }
-        if (!PyObject_IsInstance(obj, (PyObject*)&IdType)){
-            PyErr_SetString(PyExc_TypeError, "vec instance expected");
-            return NULL;
-        }
-        if (((_Id*)obj)->id_ == Id()){
+        // if (!PyObject_IsInstance(obj, (PyObject*)&IdType)){
+        //     PyErr_SetString(PyExc_TypeError, "vec instance expected");
+        //     return NULL;
+        // }
+        Id id_;
+        if (PyObject_IsInstance(obj, (PyObject*)&IdType)){
+            id_ = ((_Id*)obj)->id_;
+            isId_ = true;
+        } else if (PyObject_IsInstance(obj, (PyObject*)&ObjIdType)){
+            id_ = (((_ObjId*)obj)->oid_).id;
+        } else if (PyString_Check(obj)){
+            id_ = Id(PyString_AsString(obj));
+        } else {
             PyErr_SetString(PyExc_ValueError, "cannot delete moose shell.");
             return NULL;
         }
-        if (!Id::isValid(((_Id*)obj)->id_)){
+        if (id_ == Id()){
+            PyErr_SetString(PyExc_ValueError, "cannot delete moose shell.");
+            return NULL;
+        }
+        if (!Id::isValid(id_)){
             RAISE_INVALID_ID(NULL, "moose_delete");
         }
-        deleteId((_Id*)obj);
+        deleteId(id_);
+        if (isId_){
+            ((_Id*)obj)->id_ = Id();
+        }
         // SHELLPTR->doDelete(((_Id*)obj)->id_);
         Py_RETURN_NONE;
     }
@@ -2031,7 +2047,7 @@ extern "C" {
         PyTypeObject * new_class =
                 (PyTypeObject*)PyType_Type.tp_alloc(&PyType_Type, 0);
         // Py_TYPE(new_class) = &PyType_Type;
-        new_class->tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
+        new_class->tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HEAPTYPE;
         /*
         should we avoid Py_TPFLAGS_HEAPTYPE as it imposes certain
         limitations:
@@ -2417,7 +2433,7 @@ extern "C" {
         PyTypeObject * pyclass = it->second;
         _ObjId * new_obj = PyObject_New(_ObjId, pyclass);
         new_obj->oid_ = oid;
-        Py_XINCREF(new_obj);
+        // Py_XINCREF(new_obj);  // why? PyObject_New initializes refcnt to 1
         return (PyObject*)new_obj;
     }
 
@@ -2626,7 +2642,7 @@ extern "C" {
         char error[] = "moose.Error";
 	st->error = PyErr_NewException(error, NULL, NULL);
 	if (st->error == NULL){
-            Py_DECREF(moose_module);
+            Py_XDECREF(moose_module);
             INITERROR;
 	}
         int registered = Py_AtExit(&finalize);

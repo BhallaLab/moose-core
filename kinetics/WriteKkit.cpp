@@ -102,9 +102,9 @@ unsigned int getSlaveEnable( Id id )
 	unsigned int ret = 0;
 	vector< Id > src;
 	if ( id.element()->cinfo()->isA( "BufPool" ) ) {
-		if ( id.element()->getNeighbours( src, setConcInitFinfo ) > 0 ) {
+		if ( id.element()->getNeighbors( src, setConcInitFinfo ) > 0 ) {
 				ret = 2;
-		} else if ( id.element()->getNeighbours( src, setNinitFinfo ) > 0 ){
+		} else if ( id.element()->getNeighbors( src, setNinitFinfo ) > 0 ){
 				ret = 4;
 		}
 	} else {
@@ -152,7 +152,7 @@ Id getEnzMol( Id id )
 	static const Finfo* enzFinfo = 
 			EnzBase::initCinfo()->findFinfo( "enzDest" );
 	vector< Id > ret;
-	if ( id.element()->getNeighbours( ret, enzFinfo ) > 0 ) 
+	if ( id.element()->getNeighbors( ret, enzFinfo ) > 0 ) 
 		return ret[0];
 	return Id();
 }
@@ -162,7 +162,7 @@ Id getEnzCplx( Id id )
 	static const Finfo* cplxFinfo = 
 			CplxEnzBase::initCinfo()->findFinfo( "cplxDest" );
 	vector< Id > ret;
-	if ( id.element()->getNeighbours( ret, cplxFinfo ) > 0 )
+	if ( id.element()->getNeighbors( ret, cplxFinfo ) > 0 )
 		return ret[0];
 	return Id();
 }
@@ -359,7 +359,7 @@ void storeReacMsgs( Id reac, vector< string >& msgs )
 			ReacBase::initCinfo()->findFinfo( "toPrd" );
 	vector< Id > targets;
 	
-	reac.element()->getNeighbours( targets, subFinfo );
+	reac.element()->getNeighbors( targets, subFinfo );
 	string reacPath = trimPath( reac.path() );
 	for ( vector< Id >::iterator i = targets.begin(); i != targets.end(); ++i ) {
 		string s = "addmsg " + trimPath( i->path() ) + " " + reacPath +
@@ -371,7 +371,7 @@ void storeReacMsgs( Id reac, vector< string >& msgs )
 	}
 
 	targets.resize( 0 );
-	reac.element()->getNeighbours( targets, prdFinfo );
+	reac.element()->getNeighbors( targets, prdFinfo );
 	for ( vector< Id >::iterator i = targets.begin(); i != targets.end(); ++i ) {
 		string s = "addmsg " + trimPath( i->path() ) + " " + reacPath +
 			   	" PRODUCT n";
@@ -393,7 +393,7 @@ void storeMMenzMsgs( Id enz, vector< string >& msgs )
 	vector< Id > targets;
 	
 	string enzPath = trimPath( enz.path() );
-	enz.element()->getNeighbours( targets, subFinfo );
+	enz.element()->getNeighbors( targets, subFinfo );
 	for ( vector< Id >::iterator i = targets.begin(); i != targets.end(); ++i ) {
 		string tgtPath = trimPath( i->path() );
 		string s = "addmsg " + tgtPath + " " + enzPath + " SUBSTRATE n";
@@ -403,7 +403,7 @@ void storeMMenzMsgs( Id enz, vector< string >& msgs )
 	}
 
 	targets.resize( 0 );
-	enz.element()->getNeighbours( targets, prdFinfo );
+	enz.element()->getNeighbors( targets, prdFinfo );
 	for ( vector< Id >::iterator i = targets.begin(); i != targets.end(); ++i ) {
 		string tgtPath = trimPath( i->path() );
 		string s = "addmsg " + enzPath + " " + tgtPath + " MM_PRD pA";
@@ -411,7 +411,7 @@ void storeMMenzMsgs( Id enz, vector< string >& msgs )
 	}
 
 	targets.resize( 0 );
-	enz.element()->getNeighbours( targets, enzFinfo );
+	enz.element()->getNeighbors( targets, enzFinfo );
 	for ( vector< Id >::iterator i = targets.begin(); i != targets.end(); ++i ) {
 		string tgtPath = trimPath( i->path() );
 		string s = "addmsg " + tgtPath + " " + enzPath + " ENZYME n";
@@ -432,7 +432,7 @@ void storeCplxEnzMsgs( Id enz, vector< string >& msgs )
 	vector< Id > targets;
 	
 	string enzPath = trimPath( enz.path() );
-	enz.element()->getNeighbours( targets, subFinfo );
+	enz.element()->getNeighbors( targets, subFinfo );
 	for ( vector< Id >::iterator i = targets.begin(); i != targets.end(); ++i ) {
 		string tgtPath = trimPath( i->path() );
 		string s = "addmsg " + tgtPath + " " + enzPath + " SUBSTRATE n";
@@ -442,7 +442,7 @@ void storeCplxEnzMsgs( Id enz, vector< string >& msgs )
 	}
 
 	targets.resize( 0 );
-	enz.element()->getNeighbours( targets, prdFinfo );
+	enz.element()->getNeighbors( targets, prdFinfo );
 	for ( vector< Id >::iterator i = targets.begin(); i != targets.end(); ++i ) {
 		string tgtPath = trimPath( i->path() );
 		string s = "addmsg " + enzPath + " " + tgtPath + " MM_PRD pA";
@@ -450,7 +450,7 @@ void storeCplxEnzMsgs( Id enz, vector< string >& msgs )
 	}
 
 	targets.resize( 0 );
-	enz.element()->getNeighbours( targets, enzFinfo );
+	enz.element()->getNeighbors( targets, enzFinfo );
 	for ( vector< Id >::iterator i = targets.begin(); i != targets.end(); ++i ) {
 		string tgtPath = trimPath( i->path() );
 		string s = "addmsg " + tgtPath + " " + enzPath + " ENZYME n";
@@ -487,12 +487,12 @@ void storeFuncPoolMsgs( Id pool, vector< string >& msgs )
 	assert( poolInputFinfo );
 	assert( funcInputFinfo );
 	vector< Id > funcs;
-	pool.element()->getNeighbours( funcs, poolInputFinfo );
+	pool.element()->getNeighbors( funcs, poolInputFinfo );
 	assert( funcs.size() == 1 );
 	
 	// Get the msg sources into this SumFunc.
 	vector< Id > src;
-	funcs[0].element()->getNeighbours( src, funcInputFinfo );
+	funcs[0].element()->getNeighbors( src, funcInputFinfo );
 	assert( src.size() > 0 );
 
 	string poolPath = trimPath( pool.path() );
@@ -515,7 +515,7 @@ void storeStimulusTableMsgs( Id tab, vector< string >& msgs )
 	vector< Id > targets;
 	
 	string tabPath = trimPath( tab.path() );
-	tab.element()->getNeighbours( targets, outputFinfo );
+	tab.element()->getNeighbors( targets, outputFinfo );
 	for ( vector< Id >::iterator i = targets.begin(); i != targets.end(); ++i ) {
 		string tgtPath = trimPath( i->path() );
 		string s = "addmsg " + tabPath + " " + tgtPath + " SLAVE output";
@@ -529,7 +529,7 @@ void storePlotMsgs( Id tab, vector< string >& msgs )
 			Table::initCinfo()->findFinfo( "requestData" );
 	vector< Id > pools;
 	
-	tab.element()->getNeighbours( pools, plotFinfo );
+	tab.element()->getNeighbors( pools, plotFinfo );
 	assert( pools.size() == 1 );
 	string bg;
 	string fg;

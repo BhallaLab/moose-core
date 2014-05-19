@@ -107,10 +107,10 @@ const Cinfo* Neutral::initCinfo()
 		"Messages coming in to this Element", 
 			&Neutral::getIncomingMsgs );
 
-	static ReadOnlyLookupElementValueFinfo< Neutral, string, vector< Id > > neighbours( 
+	static ReadOnlyLookupElementValueFinfo< Neutral, string, vector< Id > > neighbors( 
 		"neighbors",
 		"Ids of Elements connected this Element on specified field.", 
-			&Neutral::getNeighbours );
+			&Neutral::getNeighbors );
 
 	static ReadOnlyLookupElementValueFinfo< Neutral, string, vector< ObjId > > msgDests( 
 		"msgDests",
@@ -188,7 +188,7 @@ const Cinfo* Neutral::initCinfo()
 		&destFields,			// ReadOnlyValue
 		&msgOut,				// ReadOnlyValue
 		&msgIn,					// ReadOnlyValue
-		&neighbours,			// ReadOnlyLookupValue
+		&neighbors,			// ReadOnlyLookupValue
 		&msgDests,				// ReadOnlyLookupValue
 		&msgDestFunctions,		// ReadOnlyLookupValue
 	};
@@ -290,7 +290,7 @@ void Neutral::children( const Eref& e, vector< Id >& ret )
 {
 		/*
 	vector< Id > temp;
-	getNeighbours( ret, neutralCinfo->findFinfo( "childOut" ) );
+	getNeighbors( ret, neutralCinfo->findFinfo( "childOut" ) );
 	for ( vector< Id >::iterator i = temp.begin(); i != temp.end(); ++i ) {
 		if ( ret
 	}
@@ -434,14 +434,14 @@ vector< ObjId > Neutral::getIncomingMsgs( const Eref& e ) const
 	return ret;
 }
 
-vector< Id > Neutral::getNeighbours( const Eref& e, string field ) const
+vector< Id > Neutral::getNeighbors( const Eref& e, string field ) const
 {
 	vector< Id > ret;
 	const Finfo* finfo = e.element()->cinfo()->findFinfo( field );
 	if ( finfo )
-		e.element()->getNeighbours( ret, finfo );
+		e.element()->getNeighbors( ret, finfo );
 	else
-		cout << "Warning: Neutral::getNeighbours: Id.Field '" << 
+		cout << "Warning: Neutral::getNeighbors: Id.Field '" << 
 				e.id().path() << "." << field <<
 				"' not found\n";
 	return ret;

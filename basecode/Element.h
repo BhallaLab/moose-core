@@ -280,7 +280,7 @@ class Element
 		 * Fills in vector of Ids connected to this Finfo on
 		 * this Element. Returns # found
 		 */
-		unsigned int getNeighbours( vector< Id >& ret, const Finfo* finfo )
+		unsigned int getNeighbors( vector< Id >& ret, const Finfo* finfo )
 			const;
 
 		/**
