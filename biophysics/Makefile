@@ -30,7 +30,7 @@ OBJ = \
 	SynChan.o	\
 	testBiophysics.o	\
 	IzhikevichNrn.o	\
-
+	DifShell.o	\
 
 	# LeakyIaF.o	\
 	# GapJunction.o	\
@@ -75,6 +75,7 @@ MgBlock.o:	MgBlock.h ChanBase.h
 Neuron.o:	Neuron.h
 ReadCell.o: CompartmentBase.h Compartment.h SymCompartment.h ReadCell.h ../shell/Shell.h ../utility/utility.h
 IzhikevichNrn.o: IzhikevichNrn.h
+DifShell.o: DifShell.h
 testBiophysics.o: IntFire.h CompartmentBase.h Compartment.h HHChannel.h HHGate.h 
 #LeakyIaF.o: LeakyIaF.h
 #Synapse.o:	SynBase.h Synapse.h
