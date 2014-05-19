@@ -62,7 +62,7 @@ const Cinfo* DifShell::initCinfo()
                                new ProcOpFunc< DifShell >( &DifShell::process_1 ) );
     static DestFinfo reinit1( "reinit", 
                               "Reinit happens only in stage 0",
-                              NULL
+                              new ProcOpFunc< DifShell >( &DifShell::reinit_1)
                               );
     static Finfo* processShared_1[] = {
         &process1, &reinit1        
@@ -465,6 +465,11 @@ void DifShell::process_0( const Eref& e, ProcPtr p )
 void DifShell::process_1(const Eref& e, ProcPtr p )
 {
     localProcess_1( e, p );
+}
+
+void DifShell::reinit_1(const Eref& e, ProcPtr p )
+{
+    ;
 }
 
 void DifShell::buffer(
