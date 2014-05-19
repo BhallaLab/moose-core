@@ -428,7 +428,7 @@ extern "C" {
     {
         return self->id_.value(); // hash is the same as the Id value
     }
-
+    
     
     // 2011-03-23 15:14:11 (+0530)
     // 2011-03-26 17:02:19 (+0530)
@@ -437,21 +437,21 @@ extern "C" {
     // ObjId will destroy the containing element and invalidate all
     // the other ObjId with the same Id.
     // 2011-03-28 13:44:49 (+0530)
-    PyObject * deleteId(_Id * obj)
+    PyObject * deleteId(Id id)
     {
 #ifndef NDEBUG
         if (verbosity > 1){
-            cout << "Deleting Id " << obj->id_ << endl;
+            cout << "Deleting Id " << id << endl;
         }
 #endif
-        string className = Field<string >::get(obj->id_, "className");
+        string className = Field<string >::get(id, "className");
         vector <string> destFields = getFieldNames(className, "destFinfo");
         vector <string> lookupFields = getFieldNames(className, "lookupFinfo");
         vector <string> elementFields = getFieldNames(className, "elementFinfo");
-        unsigned int numData = Field<unsigned int>::get(obj->id_, "numData");
+        unsigned int numData = Field<unsigned int>::get(id, "numData");
         // clean up the maps containing initialized lookup/dest/element fields
         for (unsigned int ii = 0; ii < numData; ++ii){
-            ObjId el(obj->id_, ii);
+            ObjId el(id, ii);
 #ifndef NDEBUG
             if (verbosity > 1){
                 cout << "\tDeleting ObjId " << el << endl;
@@ -482,8 +482,7 @@ extern "C" {
                 }
             }    
         }
-        SHELLPTR->doDelete(obj->id_);
-        obj->id_ = Id();
+        SHELLPTR->doDelete(id);
         Py_RETURN_NONE;
     }
     
@@ -496,7 +495,8 @@ extern "C" {
         if (!Id::isValid(self->id_)){
             RAISE_INVALID_ID(NULL, "moose_Id_delete");
         }
-        deleteId(self);
+        deleteId(self->id_);
+        self->id_ = Id();
         Py_CLEAR(self);
         Py_RETURN_NONE;
     }
@@ -852,7 +852,7 @@ extern "C" {
             if (className != "vec"){
                 Py_INCREF(attr);
                 ret = PyObject_GenericSetAttr((PyObject*)self, attr, value);
-                Py_DECREF(attr);
+                Py_XDECREF(attr);
                 return ret;
             }
             ostringstream msg;
@@ -874,7 +874,9 @@ extern "C" {
                 vector<double> _value;
                 if (is_seq){
                     for ( int ii = 0; ii < length; ++ii){
-                        double v = PyFloat_AsDouble(PySequence_GetItem(value, ii));
+                        PyObject * vo = PySequence_GetItem(value, ii);
+                        double v = PyFloat_AsDouble(vo);
+                        Py_XDECREF(vo);
                         _value.push_back(v);
                     }
                 } else {
@@ -888,7 +890,9 @@ extern "C" {
                 vector<string> _value;
                 if (is_seq){
                     for ( int ii = 0; ii < length; ++ii){
-                        char * v = PyString_AsString(PySequence_GetItem(value, ii));
+                        PyObject * vo = PySequence_GetItem(value, ii);
+                        char * v = PyString_AsString(vo);
+                        Py_XDECREF(v);
                         _value.push_back(string(v));
                     }
                 } else {
@@ -902,7 +906,9 @@ extern "C" {
                 vector<int> _value;
                 if (is_seq){
                     for ( int ii = 0; ii < length; ++ii){
-                        int v = PyInt_AsLong(PySequence_GetItem(value, ii));
+                        PyObject * vo = PySequence_GetItem(value, ii);
+                        int v = PyInt_AsLong(vo);
+                        Py_XDECREF(vo);
                         _value.push_back(v);
                     }
                 } else {
@@ -916,7 +922,9 @@ extern "C" {
                 vector<unsigned int> _value;
                 if (is_seq){
                     for ( int ii = 0; ii < length; ++ii){
-                        unsigned int v = PyInt_AsUnsignedLongMask(PySequence_GetItem(value, ii));
+                        PyObject * vo = PySequence_GetItem(value, ii);
+                        unsigned int v = PyInt_AsUnsignedLongMask(vo);
+                        Py_DECREF(vo);
                         _value.push_back(v);
                     }
                 } else {
@@ -930,7 +938,9 @@ extern "C" {
                 vector<long> _value;
                 if (is_seq){
                     for ( int ii = 0; ii < length; ++ii){
-                        long v = PyInt_AsLong(PySequence_GetItem(value, ii));
+                        PyObject * vo = PySequence_GetItem(value, ii);
+                        long v = PyInt_AsLong(vo);
+                        Py_DECREF(vo);
                         _value.push_back(v);
                     }
                 } else {
@@ -944,7 +954,9 @@ extern "C" {
                 vector<unsigned long> _value;
                 if (is_seq){
                     for ( int ii = 0; ii < length; ++ii){
-                        unsigned long v = PyInt_AsUnsignedLongMask(PySequence_GetItem(value, ii));
+                        PyObject * vo = PySequence_GetItem(value, ii);
+                        unsigned long v = PyInt_AsUnsignedLongMask(vo);
+                        Py_XDECREF(vo);
                         _value.push_back(v);
                     }
                 } else {
@@ -960,6 +972,7 @@ extern "C" {
                     for ( int ii = 0; ii < length; ++ii){
                         PyObject * _v = PySequence_GetItem(value, ii);
                         bool v = (Py_True ==_v) || (PyInt_AsLong(_v) != 0);
+                        Py_XDECREF(_v);
                         _value.push_back(v);
                     }
                 } else {
@@ -975,6 +988,7 @@ extern "C" {
                     for ( int ii = 0; ii < length; ++ii){
                         PyObject * _v = PySequence_GetItem(value, ii);
                         char * v = PyString_AsString(_v);
+                        Py_XDECREF(_v);
                         if (v && v[0]){
                             _value.push_back(v[0]);
                         } else {
@@ -1000,7 +1014,9 @@ extern "C" {
                 vector<short> _value;
                 if (is_seq){
                     for ( int ii = 0; ii < length; ++ii){
-                        short v = PyInt_AsLong(PySequence_GetItem(value, ii));
+                        PyObject * vo = PySequence_GetItem(value, ii);
+                        short v = PyInt_AsLong(vo);
+                        Py_XDECREF(vo);
                         _value.push_back(v);
                     }
                 } else {
@@ -1014,7 +1030,9 @@ extern "C" {
                 vector<float> _value;
                 if (is_seq){
                     for ( int ii = 0; ii < length; ++ii){
-                        float v = PyFloat_AsDouble(PySequence_GetItem(value, ii));
+                        PyObject * vo = PySequence_GetItem(value, ii);
+                        float v = PyFloat_AsDouble(vo);
+                        Py_XDECREF(vo);
                         _value.push_back(v);
                     }
                 } else {

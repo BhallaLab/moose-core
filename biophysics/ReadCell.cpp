@@ -494,7 +494,7 @@ Id ReadCell::buildCompartment(
 			// Now find all sibling compartments on the same parent.
 			// They must be connected up using 'sibling'.
 			vector< Id > sibs;
-			parentId.element()->getNeighbours( sibs, raxial2OutFinfo );
+			parentId.element()->getNeighbors( sibs, raxial2OutFinfo );
 			// Later put in the soma as a sphere, with its special msgs.
 			shell_->doAddMsg( "Single",
 				parentId, "distal", compt, "proximal" );

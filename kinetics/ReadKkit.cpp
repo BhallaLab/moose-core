@@ -693,7 +693,7 @@ Id findParentComptOfReac( Id reac )
 
 		vector< Id > subVec;
 		unsigned int numSub = 
-				reac.element()->getNeighbours( subVec, subFinfo );
+				reac.element()->getNeighbors( subVec, subFinfo );
 		assert( numSub > 0 );
 		// For now just put the reac in the compt belonging to the 
 		// first substrate
@@ -732,7 +732,7 @@ Id findMeshOfEnz( Id enz )
 
 		vector< Id > enzVec;
 		unsigned int numEnz = 
-				enz.element()->getNeighbours( enzVec, enzFinfo );
+				enz.element()->getNeighbors( enzVec, enzFinfo );
 		assert( numEnz == 1 );
 		vector< Id > meshEntries;
 		return getCompt( enzVec[0] );
@@ -1280,7 +1280,7 @@ void ReadKkit::addmsg( const vector< string >& args)
 				return;
 			}
 			vector< Id > enzcplx;
-			i->second.element()->getNeighbours( enzcplx, 
+			i->second.element()->getNeighbors( enzcplx, 
 				i->second.element()->cinfo()->findFinfo( "toCplx" ) );
 			assert( enzcplx.size() == 1 );
 			pool = enzcplx[0];

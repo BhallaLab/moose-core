@@ -678,7 +678,7 @@ unsigned int Element::getInputs( vector< Id >& ret, const DestFinfo* finfo )
 	return ret.size() - oldSize;
 }
 
-unsigned int Element::getNeighbours( vector< Id >& ret, const Finfo* finfo )
+unsigned int Element::getNeighbors( vector< Id >& ret, const Finfo* finfo )
 	const
 {
 	assert( finfo );

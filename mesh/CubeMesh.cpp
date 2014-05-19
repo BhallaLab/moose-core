@@ -1301,7 +1301,7 @@ void setIntersectVoxel(
  * then puts each of the extracted terms into the ret vector. There is
  * a minor efficiency for one and two diffusion terms as they are
  * encoded within the intersect vector. Higher-order surface alignments
- * require an in-line scan of neighbouring voxels.
+ * require an in-line scan of neighboring voxels.
  * In all casesl the function inserts a flag indicating surface direction
  * into the diffScale
  * field of the VoxelJunction. 0 = x; 1 = y; 2 = z.

@@ -204,17 +204,17 @@ void ZombieEnz::setSolver( Id stoich, Id enz )
 	assert( cplxFinfo );
 	vector< Id > temp;
 	unsigned int numReactants;
-	numReactants = enz.element()->getNeighbours( temp, enzFinfo ); 
+	numReactants = enz.element()->getNeighbors( temp, enzFinfo ); 
 	assert( numReactants == 1 );
 	Id enzMol = temp[0];
 	vector< Id > subs;
-	numReactants = enz.element()->getNeighbours( subs, subFinfo ); 
+	numReactants = enz.element()->getNeighbors( subs, subFinfo ); 
 	assert( numReactants > 0 );
-	numReactants = enz.element()->getNeighbours( temp, cplxFinfo ); 
+	numReactants = enz.element()->getNeighbors( temp, cplxFinfo ); 
 	assert( numReactants == 1 );
 	Id cplx = temp[0];
 	vector< Id > prds;
-	numReactants = enz.element()->getNeighbours( prds, prdFinfo ); 
+	numReactants = enz.element()->getNeighbors( prds, prdFinfo ); 
 	assert( numReactants > 0 );
 
 	assert( stoich.element()->cinfo()->isA( "Stoich" ) );

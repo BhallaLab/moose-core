@@ -154,20 +154,20 @@ void NeuroNode::findConnectedCompartments(
 	vector< Id > all;
 	if ( cinfo->isA( "SymCompartment" ) ) { // Check derived first.
 		vector< Id > ret;
-		elecCompt_.element()->getNeighbours( ret, distalOut );
+		elecCompt_.element()->getNeighbors( ret, distalOut );
 		all.insert( all.end(), ret.begin(), ret.end() );
-		elecCompt_.element()->getNeighbours( ret, proximalOut );
+		elecCompt_.element()->getNeighbors( ret, proximalOut );
 		all.insert( all.end(), ret.begin(), ret.end() );
-		elecCompt_.element()->getNeighbours( ret, cylinderOut );
+		elecCompt_.element()->getNeighbors( ret, cylinderOut );
 		all.insert( all.end(), ret.begin(), ret.end() );
-		elecCompt_.element()->getNeighbours( ret, sumRaxialOut );
+		elecCompt_.element()->getNeighbors( ret, sumRaxialOut );
 		all.insert( all.end(), ret.begin(), ret.end() );
 	} else {
 		assert( cinfo->isA( "Compartment" ) );
 		vector< Id > ret;
-		elecCompt_.element()->getNeighbours( ret, axialOut );
+		elecCompt_.element()->getNeighbors( ret, axialOut );
 		all.insert( all.end(), ret.begin(), ret.end() );
-		elecCompt_.element()->getNeighbours( ret, raxialOut );
+		elecCompt_.element()->getNeighbors( ret, raxialOut );
 		all.insert( all.end(), ret.begin(), ret.end() );
 	}
 	sort( all.begin(), all.end() );
