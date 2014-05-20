@@ -29,15 +29,38 @@ import moose.utils as utils
 class MooseCompartment():
     """A simple class for making MooseCompartment in moose"""
 
-    def __init__(self, **kwargs):
+    def __init__(self, path, args):
         """ Initialize moose-compartment """
         self.mc_ = None
-        self.path = None
+        self.path = path
         # Following values are taken from Upi's chapter on Rallpacks
-        self.RM = kwargs.get('RM', 4.0)
-        self.RA = kwargs.get('RA', 1.0)
-        self.CM = kwargs.get('CM', 0.01)
-        self.Em = kwargs.get('Em', -0.065)
+        self.RM = args.get('RM', 4.0)
+        self.RA = args.get('RA', 1.0)
+        self.CM = args.get('CM', 0.01)
+        self.Em = args.get('Em', -0.065)
+        self.diameter = args['diameter']
+        self.compLength = args['length'] / args['ncomp']
+        self.computeParams( )
+
+        try:
+            self.mc_ = moose.Compartment(self.path)
+            self.mc_.length = self.compLength
+            self.mc_.diameter = self.diameter
+            self.mc_.Ra = self.Ra
+            self.mc_.Rm = self.Rm
+            self.mc_.Cm = self.Cm
+            self.mc_.Em = self.Em
+            self.mc_.initVm = self.Em
+            
+        except Exception as e:
+            utils.dump("ERROR"
+                    , [ "Can't create compartment with path %s " % path
+                        , "Failed with error %s " % e
+                        ]
+                    )
+            sys.exit(0)
+        #utils.dump('DEBUG', [ 'Compartment: {}'.format( self ) ] )
+
 
     def __repr__( self ):
         msg = '{}: '.format( self.mc_.path )
@@ -58,37 +81,11 @@ class MooseCompartment():
     def computeParams( self ):
         '''Compute essentials paramters for compartment. '''
 
-        self.surfaceArea = math.pi * self.length * self.diameter
+        self.surfaceArea = math.pi * self.compLength * self.diameter
         self.crossSection = ( math.pi * self.diameter * self.diameter ) / 4.0
-        self.Ra = ( self.RA * self.length ) / self.crossSection
+        self.Ra = ( self.RA * self.compLength ) / self.crossSection
         self.Rm = ( self.RM / self.surfaceArea )
         self.Cm = ( self.CM * self.surfaceArea ) 
-
-    def createCompartment(self, length, diameter, path = None ):
-        ''' Create a MooseCompartment in moose '''
-
-        self.length = length
-        self.diameter = diameter
-        self.computeParams( )
-
-        try:
-            self.mc_ = moose.Compartment(path)
-            self.mc_.length = self.length
-            self.mc_.diameter = self.diameter
-            self.mc_.Ra = self.Ra
-            self.mc_.Rm = self.Rm
-            self.mc_.Cm = self.Cm
-            self.mc_.Em = self.Em
-            self.mc_.initVm = self.Em
-            
-        except Exception as e:
-            utils.dump("ERROR"
-                    , [ "Can't create compartment with path %s " % path
-                        , "Failed with error %s " % e
-                        ]
-                    )
-            sys.exit(0)
-        #utils.dump('DEBUG', [ 'Compartment: {}'.format( self ) ] )
 
 
 class TestCompartment( unittest.TestCase):
