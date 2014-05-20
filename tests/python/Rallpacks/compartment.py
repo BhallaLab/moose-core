@@ -88,7 +88,7 @@ class MooseCompartment():
                         ]
                     )
             sys.exit(0)
-        utils.dump('DEBUG', [ 'Compartment: {}'.format( self ) ] )
+        #utils.dump('DEBUG', [ 'Compartment: {}'.format( self ) ] )
 
 
 class TestCompartment( unittest.TestCase):
