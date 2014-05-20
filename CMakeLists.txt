@@ -45,6 +45,7 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 else()
     message(WARNING "Continuing with unsupported compiler")
 endif()
+set(CMAKE_CXX_COMPILER "clang++")
 
 ## Turn warning to error
 add_definitions(-Wall
@@ -87,6 +88,12 @@ add_definitions(-DUSE_GENESIS_PARSER)
 set(DEBUG 1)
 if(DEBUG)
     set(CMAKE_BUILD_TYPE Debug)
+    # This macro define __FILENAME__ macro. The default __FILE__ macro return
+    # full-path of a file. This macro chops it off and returns the relative path
+    # of file.
+    set(CMAKE_CXX_FLAGS 
+        "${CMAKE_CXX_FLAGS} -D__FILENAME__='\"$(subst ${CMAKE_SOURCE_DIR}/,,$(abspath $<))\"'"
+        )
 endif()
 
 ################################### SETUP BUILD ################################
@@ -168,7 +175,7 @@ target_link_libraries(moose
     moose_mpi
     utility 
     muparser
-    debug_print
+    simpletest
     biophysics 
     kinetics 
     ksolve
@@ -248,7 +255,7 @@ if(BUILD_PYMOOSE)
         moose_builtins
         utility 
         muparser
-        debug_print
+        simpletest
         biophysics 
         kinetics 
         ksolve

@@ -41,6 +41,7 @@
 #elif defined(MOOSE_ENABLE_ASSERT_HANDLER)
 
 #include "current_function.hpp"
+#include <stringstream>
 
 namespace moose
 {
@@ -138,5 +139,21 @@ namespace moose
 #else
 
 # define MOOSE_VERIFY(expr) MOOSE_ASSERT(expr)
+
+/*-----------------------------------------------------------------------------
+ *                                  MOOSE_WARN
+ *
+ *  This macro accepts a stringstream like object as its second argument. First
+ *  arguement is condition which must return a bool.
+ *-----------------------------------------------------------------------------*/
+#define MOOSE_WARN(condition, msg) \
+    if(! (condition) ) { \
+        std::ostringstream ss; \
+        ss << endl << "[WARN] " << msg; \
+        std::cout << ss.str() \
+        << std::endl; \
+        std::cout << "\n\t|- " << "In function: " << MOOSE_CURRENT_FUNCTION \
+            << "\n\t+ In file: " << __FILE__ << ":" << __LINE__ << std::endl; \
+    }
 
 #endif
