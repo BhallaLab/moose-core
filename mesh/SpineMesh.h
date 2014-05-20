@@ -76,6 +76,12 @@ class SpineMesh: public MeshCompt
 
 		/// Returns # of dimensions, always 3 here. Inherited pure virt func
 		unsigned int innerGetDimensions() const;
+
+		/// Inherited virtual func.
+		double vGetEntireVolume() const;
+
+		/// Inherited virtual func
+		bool vSetVolumeNotRates( double volume );
 		
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs

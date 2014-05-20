@@ -262,7 +262,6 @@ NeuroMesh& NeuroMesh::operator=( const NeuroMesh& other )
 	nodeIndex_ = other.nodeIndex_;
 	vs_ = other.vs_;
 	area_ = other.area_;
-	volume_ = other.volume_;
 	diffLength_ = other.diffLength_;
 	cell_ = other.cell_;
 	separateSpines_ = other.separateSpines_;
@@ -680,6 +679,35 @@ const vector< double >& NeuroMesh::getVoxelLength() const
 	return length_;
 }
 
+double NeuroMesh::vGetEntireVolume() const
+{
+	double ret = 0.0;
+	for ( vector< double >::const_iterator i = 
+					vs_.begin(); i != vs_.end(); ++i )
+		ret += *i;
+	return ret;
+}
+
+bool NeuroMesh::vSetVolumeNotRates( double volume )
+{
+	assert( parentVoxel_.size() == nodeIndex_.size() );
+	assert( parentVoxel_.size() == 1 );
+	assert( vs_.size() == 1 );
+	if ( parentVoxel_.size() > 1 ) // Can't handle multicompartments yet.
+		return false;
+	NeuroNode& n = nodes_[0];
+	double oldvol = n.volume( nodes_[0] );
+	double scale = pow( volume / oldvol, 1.0/3.0 );
+	n.setLength( n.getLength() * scale );
+	n.setDia( n.getDia() * scale );
+	vs_[0] *= volume / oldvol;
+	area_[0] *= scale * scale;
+	length_[0] *= scale;
+	diffLength_ = length_[0];
+
+	return true;
+}
+
 // Deprecated
 vector< Id > spineVec( const vector< Id >& head )
 {
@@ -865,7 +893,7 @@ void NeuroMesh::innerHandleRequestMeshStats( const Eref& e,
 		const SrcFinfo2< unsigned int, vector< double > >* meshStatsFinfo
 	)
 {
-	vector< double > ret( volume_ / nodeIndex_.size() ,1 );
+	vector< double > ret( vGetEntireVolume() / nodeIndex_.size() ,1 );
 	meshStatsFinfo->send( e, 1, ret );
 }
 

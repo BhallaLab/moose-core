@@ -126,7 +126,7 @@ def main():
 		b = moose.element( '/model/compartment/b' )
 		s = moose.element( '/model/compartment/s' )
 
-                img = mpimg.imread( 'turing_tut.png' )
+                img = mpimg.imread( 'turingPatternTut.png' )
                 #imgplot = plt.imshow( img )
                 #plt.show()
 
@@ -142,6 +142,7 @@ def main():
                 line1, = ax.plot( pos, a.vec.conc, label='a' )
                 line2, = ax.plot( pos, b.vec.conc, label='b' )
                 timeLabel = plt.text(60, 0.4, 'time = 0')
+                plt.legend()
                 fig.canvas.draw()
 
                 for t in range( displayInterval, runtime, displayInterval ):

@@ -79,6 +79,18 @@ class SpineEntry
 		double diffusionLength() const;
 
 		/**
+		 * Resizes SpineEntry. Takes original shaft base and scales up
+		 * from there. Retains original shaft dimensions, only the
+		 * head is scaled.
+		 */ 
+		void setVolume( double volume );
+
+		/**
+		 * moves Spine entry so that shaft base is now positioned at xyz.
+		 */
+		void positionShaftBase( double x, double y, double z );
+
+		/**
 		 * psdCoords is used to build the PsdMesh. The function returns 8
 		 * coords to define the psd: 
 		 * 	centre xyz

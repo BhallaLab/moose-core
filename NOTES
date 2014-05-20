@@ -3579,3 +3579,40 @@ set in place to follow a pool conc, are working.
 
 I've set up all the other oscillators:
 repressillator, slowFB (KHoldenko), relaxationOsc, Turing
+
+============================================================================
+18 May 2014
+The chem oscillator tutorials are now in a directory of their own, each with a 
+small png to explain what they are about. Would like to bring in the 
+monstrous Novak-Tyson example but it isn't running.
+
+============================================================================
+
+Need to figure out what is happening in the stoich.path assignment
+leading to only 2 entries.
+Turned out I was doing a setCoords on the cylinder, but using CubeMesh
+arguments.
+
+Yet again: Look at volume handling.
+
+- Need to have the volume_ field return the total volume of the compartment.
+	Allow a setVolume too, but only if the compartment has a single voxel.
+	This function rescales all rates and n's.
+- Provide a utility function setVolumeNotRates which changes the volume
+	field if a single voxel, but does not rescale rates and n's.
+
+When loading models from SBML and kkit, use the setVolumeNotRates as needed.
+
+============================================================================
+20 May 2014
+Cleanup for volume handling in meshes. Now it is possible to load a model
+right onto the target mesh.
+With this I have implemented a tutorial for propagating bistables.
+Added a whole series of tutorials for such bistables. Still want to put in 
+a dose-response curve.
+
+There is an issue with setting rates in reaction-diffusion systems. It only
+sets the rate for the largest vol compartment. I know why but it should set
+for all.
+
+============================================================================

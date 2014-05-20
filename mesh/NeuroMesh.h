@@ -142,6 +142,24 @@ class NeuroMesh: public MeshCompt
 		unsigned int innerGetNumEntries() const;
 		/// Inherited virtual func.
 		void innerSetNumEntries( unsigned int n );
+
+		/**
+		 * Inherited virtual func. Returns volume of soma and whole 
+		 * dendritic tree of neuron, excluding spines. Any axonal
+		 * compartments are also included.
+		 */
+		double vGetEntireVolume() const;
+
+		/**
+		 * Inherited virtual func.
+		 * In the NeuroMesh this carries out a rescaling on all dimensions.
+		 * The length and diameter of each compartment are scaled by
+		 * the same factor = volscale^(1/3)
+		 * The rescaling carries through to the spines and PSDs, which
+		 * are also updated. They are not permitted to 
+		 * change their own volumes.
+		 */
+		bool vSetVolumeNotRates( double volume );
 		
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs

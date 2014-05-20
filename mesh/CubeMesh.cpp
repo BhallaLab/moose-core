@@ -412,7 +412,7 @@ void CubeMesh::updateCoords()
 	*/
 	fillThreeDimSurface();
 
-	volume_ = ( x1_ - x0_ ) * ( y1_ - y0_ ) * ( z1_ - z0_ );
+	// volume_ = ( x1_ - x0_ ) * ( y1_ - y0_ ) * ( z1_ - z0_ );
 	assert( size >= 0 );
 
 	buildStencil();
@@ -744,6 +744,11 @@ void CubeMesh::innerHandleNodeInfo(
 		*/
 }
 
+double CubeMesh::vGetEntireVolume() const
+{
+	return fabs( (x1_ - x0_) * (y1_ - y0_) * (z1_ - z0_) );
+}
+
 /////////////////////////////////////////////////////////////////////////
 // Utility function to tell target nodes that something has happened.
 /////////////////////////////////////////////////////////////////////////
@@ -950,6 +955,20 @@ const vector< double >& CubeMesh::getVoxelLength() const
 	return length;
 }
 
+bool CubeMesh::vSetVolumeNotRates( double vol ) 
+{
+	// Leave x0,y0.z0 and nx,ny,nz the same. Do NOT update any rates.
+	double oldvol = vGetEntireVolume();
+	double linscale = pow( vol / oldvol , 1.0 / 3.0 );
+	x1_ *= linscale;
+	y1_ *= linscale;
+	z1_ *= linscale;
+	dx_ *= linscale;
+	dy_ *= linscale;
+	dz_ *= linscale;
+
+	return true;
+}
 
 //////////////////////////////////////////////////////////////////
 

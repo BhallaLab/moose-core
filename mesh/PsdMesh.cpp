@@ -456,3 +456,29 @@ const vector< double >& PsdMesh::getVoxelLength() const
 	return length_;
 }
 
+double PsdMesh::vGetEntireVolume() const
+{
+	double ret = 0.0;
+	for ( vector< double >::const_iterator i = 
+					vs_.begin(); i != vs_.end(); ++i )
+		ret += *i;
+	return ret;
+}
+
+bool PsdMesh::vSetVolumeNotRates( double volume )
+{
+	double volscale = volume / vGetEntireVolume();
+	double linscale = pow( volscale, 1.0/3.0 );
+	assert( vs_.size() == psd_.size() );
+	assert( area_.size() == psd_.size() );
+	assert( length_.size() == psd_.size() );
+	for ( unsigned int i = 0; i < psd_.size(); ++i ) {
+		psd_[i].setLength( psd_[i].getLength() * linscale );
+		psd_[i].setDia( psd_[i].getDia() * linscale );
+		vs_[i] *= volscale;
+		area_[i] *= linscale * linscale;
+		length_[i] *= linscale;
+	}
+	return true;
+}
+
