@@ -28,4 +28,4 @@ add_library(basecode
 	testAsync.cpp	
     )
 
-target_link_libraries(basecode debug_print biophysics)
+target_link_libraries(basecode biophysics)
