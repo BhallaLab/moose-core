@@ -11,6 +11,8 @@
 #include "CompartmentDataHolder.h"
 // static func
 
+using namespace moose;
+
 CompartmentDataHolder::CompartmentDataHolder()
 		:
 			Cm_( 1.0 ),

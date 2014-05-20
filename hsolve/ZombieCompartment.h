@@ -12,7 +12,6 @@
 #define _ZOMBIE_COMPARTMENT_H
 #include "header.h"
 #include "ElementValueFinfo.h"
-#include "../external/debug/print_function.h"
 #include "../randnum/randnum.h"
 #include "../biophysics/CompartmentBase.h"
 #include "../biophysics/Compartment.h"

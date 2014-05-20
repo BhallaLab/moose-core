@@ -561,7 +561,6 @@ void Clock::handleReinit( const Eref& e )
 	for ( vector< unsigned int>::iterator j = 
 		activeTicks_.begin(); j != activeTicks_.end(); ++j ) {
 		info_.dt = *j * dt_;
-                cerr << *j << " : " << *k++ << ", ";
                 reinitVec()[*k++]->send(e, &info_);
 #if 0
                 vector< SrcFinfo1< ProcPtr >* > vec = reinitVec();

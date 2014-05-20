@@ -1,4 +1,4 @@
-include_directories(../msg ../basecode)
+include_directories(../msg ../basecode ../external/debug)
 IF(USE_MPI) 
     find_package(MPI REQUIRED)
     include_directories(MPI_INCLUDE_PATH)

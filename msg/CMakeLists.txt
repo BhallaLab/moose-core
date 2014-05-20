@@ -1,4 +1,4 @@
-include_directories(../basecode)
+include_directories(../basecode ../external/debug)
 add_library(msg 
     Msg.cpp
     DiagonalMsg.cpp

@@ -9,7 +9,6 @@
 
 #include "HSolvePassive.h"
 
-
 extern ostream& operator <<( ostream& s, const HinesMatrix& m );
 
 void HSolvePassive::setup( Id seed, double dt )

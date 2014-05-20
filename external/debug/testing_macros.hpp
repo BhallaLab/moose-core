@@ -24,7 +24,7 @@
 #include <iostream>
 #include <exception>
 #include "current_function.hpp"
-#include "print_function.h"
+#include "print_function.hpp"
 
 using namespace std;
 
@@ -39,99 +39,109 @@ class FatalTestFailure
         FatalTestFailure(string msg)
         {
             msg = msg;
+            dump( msg, "ASSERTION_FAILURE");
         }
 
     public:
         string msg;
 };
 
+static ostringstream assertStream;
+
 #define LOCATION(ss) \
-    ss << "In function: " << MOOSE_CURRENT_FUNCTION; \
-    ss << " file: " << __FILENAME__ << ":" << __LINE__ << endl;  
+    ss << "In function: " << SIMPLE_CURRENT_FUNCTION; \
+    ss << " file: " << __FILE__ << ":" << __LINE__ << endl;  
 
 #define EXPECT_TRUE( condition, msg) \
     if( !(condition) ) {\
-        ostringstream ss; \
-        ss << "[FAILED] " << msg << endl; \
-        cout << ss.str(); \
+        assertStream.str(""); \
+        LOCATION( assertStream ); \
+        assertStream << msg << endl; \
+        dump(assertStream.str(), "EXPECT_FAILURE"); \
     }
 
 #define EXPECT_FALSE( condition, msg) \
     if( (condition) ) {\
-        ostringstream ss; \
-        ss << "[FAILED] " << msg << endl; \
-        cout << ss.str(); \
+        assertStream.str(""); \
+        LOCATION( assertStream ); \
+        assertStream << msg << endl; \
+        dump(assertStream.str(), "EXPECT_FAILURE"); \
     }
 
 #define EXPECT_EQ(a, b, token)  \
     if( (a) != (b)) { \
-        ostringstream ss; \
-        LOCATION(ss); \
-        ss << "Expected " << a << ", received " << b  << endl; \
-        ss << token << endl; \
-        dump(ss.str(), "EXPECT_FAILURE"); \
+        assertStream.str(""); \
+        LOCATION(assertStream) \
+        assertStream << "Expected " << a << ", received " << b  << endl; \
+        assertStream << token << endl; \
+        dump(assertStream.str(), "EXPECT_FAILURE"); \
     }
 
 #define EXPECT_NEQ(a, b, token)  \
     if( (a) == (b)) { \
-        ostringstream ss; \
-        LOCATION(ss); \
-        ss << "Not expected " << a << endl; \
-        ss << token << endl; \
-        dump(ss.str(), "EXPECT_FAILURE"); \
+        assertStream.str(""); \
+        LOCATION(assertStream); \
+        assertStream << "Not expected " << a << endl; \
+        assertStream << token << endl; \
+        dump(assertStream.str(), "EXPECT_FAILURE"); \
     }
 
 #define EXPECT_GT(a, b, token)  \
     if( (a) <= (b)) { \
-        ostringstream ss; \
-        LOCATION(ss); \
-        ss << "Expected greater than " << b << ", received " << a << endl; \
-        ss << token << endl; \
-        dump(ss.str(), "EXPECT_FAILURE"); \
+        assertStream.str(""); \
+        LOCATION(assertStream); \
+        assertStream << "Expected greater than " << a << ", received " << b << endl; \
+        assertStream << token << endl; \
+        dump(assertStream.str(), "EXPECT_FAILURE"); \
     }
 
 #define EXPECT_GTE(a, b, token)  \
     if( (a) < (b)) { \
-        ostringstream ss; \
-        LOCATION(ss); \
-        ss << "Expected greater than or equal to " << b << ", received " << a << endl; \
-        ss << token << endl; \
-        dump(ss.str(), "EXPECT_FAILURE"); \
+        assertStream.str(""); \
+        LOCATION(assertStream); \
+        assertStream << "Expected greater than or equal to " << a  \
+            << ", received " << b << endl; \
+        assertStream << token << endl; \
+        dump(assertStream.str(), "EXPECT_FAILURE"); \
     }
 
 #define EXPECT_LT(a, b, token)  \
     if( (a) >= (b)) { \
-        ostringstream ss; \
-        LOCATION(ss); \
-        ss << "Expected less than " << (b) << ", received " << (a) << endl; \
-        ss << token << endl; \
-        dump(ss.str(), "EXPECT_FAILURE"); \
+        assertStream.str(""); \
+        LOCATION(assertStream); \
+        assertStream << "Expected less than " << a << ", received " << b << endl; \
+        assertStream << token << endl; \
+        dump(assertStream.str(), "EXPECT_FAILURE"); \
     }
 
 #define EXPECT_LTE(a, b, token)  \
-    if( (a) > (b)) { \
-        ostringstream ss; \
-        LOCATION(ss); \
-        ss << "Expected less than or equal to " << b << ", received " << a << endl; \
-        ss << token << endl; \
-        dump(ss.str(), "EXPECT_FAILURE"); \
+    if( (a) < (b)) { \
+        assertStream.str(""); \
+        LOCATION(assertStream); \
+        assertStream << "Expected less than or equal to " << a \
+            << ", received " << b << endl; \
+        assertStream << token << endl; \
+        dump(assertStream.str(), "EXPECT_FAILURE"); \
     }
 
 #define ASSERT_TRUE( condition, msg) \
     if( !(condition) ) {\
-        ostringstream ss; \
-        ss << "[FAILED] " << msg << endl; \
-        cout << ss.str(); \
-        throw FatalTestFailure(ss.str());  \
+        assertStream.str(""); \
+        assertStream << msg << endl; \
+        throw FatalTestFailure(assertStream.str());  \
     }
 
 #define ASSERT_FALSE( condition, msg) \
     if( (condition) ) {\
-        ostringstream ss; \
-        ss << "[FAILED] " << msg << endl; \
-        cout << ss.str(); \
-        throw FatalTestFailure(ss.str()); \
+        assertStream.str(""); \
+        assertStream << msg << endl; \
+        throw FatalTestFailure(assertStream.str()); \
     }
 
+#define ASSERT_LT( a, b, msg) \
+    EXPECT_LT(a, b, msg); \
+    assertStream.str(""); \
+    assertStream << msg; \
+    throw FatalTestFailure( assertStream.str() ); \
 
 #endif   /* ----- #ifndef TESTING_MACROS_INC  ----- */
