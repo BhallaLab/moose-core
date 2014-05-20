@@ -50,6 +50,7 @@
 
 #include "header.h"
 #include "Clock.h"
+#include "../external/debug/testing_macros.hpp"
 
 const unsigned int Clock::numTicks = 10;
 
@@ -560,7 +561,13 @@ void Clock::handleReinit( const Eref& e )
 	for ( vector< unsigned int>::iterator j = 
 		activeTicks_.begin(); j != activeTicks_.end(); ++j ) {
 		info_.dt = *j * dt_;
-		reinitVec()[*k++]->send( e, &info_ );
+                cerr << *j << " : " << *k++ << ", ";
+                reinitVec()[*k++]->send(e, &info_);
+#if 0
+                vector< SrcFinfo1< ProcPtr >* > vec = reinitVec();
+                EXPECT_LT( *k++, vec.size(), "Illegal access in vector");
+		vec[*k++]->send( e, &info_ );
+#endif
 	}
 	info_.dt = dt_;
 	doingReinit_ = false;

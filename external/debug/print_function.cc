@@ -59,9 +59,9 @@ void dump(string msg, string type, bool autoFormat)
     string color = T_GREEN;
     if(type == "WARNING" || type == "WARN" || type == "FIXME")
         color = T_YELLOW;
-    else if(type == "DEBUG")
+    else if(type == "DEBUG" || type == "EXPECT_FAILURE" || type == "EXPECT")
         color = T_CYAN;
-    else if(type == "ERROR")
+    else if(type == "ERROR" || type == "FAIL")
         color = T_RED;
     else if(type == "INFO")
         color = T_BLUE;
