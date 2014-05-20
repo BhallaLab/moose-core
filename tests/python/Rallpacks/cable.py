@@ -89,6 +89,14 @@ class Cable( ):
         self.stimTables.append( inputTable )
         moose.connect( inputTable, 'requestOut', stim, 'getOutputValue' )
 
+    def setupHSolve(self, path='/hsolve'):
+        """ Setup hsolve solver """
+        hsolve = moose.HSolve( path )
+        hsolve.dt = self.simDt
+        moose.useClock(1, path, 'process')
+        hsolve.target = self.cablePath
+
+
     def simulate( self, simTime, simDt = 1e-3, plotDt = None ):
         '''Simulate the cable '''
 
@@ -115,6 +123,7 @@ class Cable( ):
                     ]
                 )
         moose.reinit( )
+        self.setupHSolve( )
         utils.verify( )
         moose.start( simTime )
 
