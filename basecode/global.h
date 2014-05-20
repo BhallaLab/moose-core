@@ -29,9 +29,9 @@ extern unsigned int totalTests;
  * automatically computed by increamenting the counter.
  */
 
-#define tbegin cout << "\nTest(" << totalTests << "): " << MOOSE_CURRENT_FUNCTION << endl;
+#define tbegin cout << "\nTest(" << totalTests << "): " << SIMPLE_CURRENT_FUNCTION << endl;
 #define tend totalTests++; \
-    cout << std::right <<  setw(100) << "test of " << MOOSE_CURRENT_FUNCTION << " finished.\n"; 
+    cout << std::right <<  setw(100) << "test of " << SIMPLE_CURRENT_FUNCTION << " finished.\n"; 
 
 
 /*-----------------------------------------------------------------------------

@@ -1,5 +1,4 @@
-include_directories(../msg)
-include_directories(../basecode)
+include_directories(../msg ../external/debug ../basecode)
 add_library(utility 
     strutil.cpp
     types.cpp

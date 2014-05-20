@@ -1,6 +1,6 @@
 # Find Numpy 
+include_directories(../basecode ../msg ../external/debug external/debug/)
 add_definitions(-DPYMOOSE)
-include_directories(../basecode ../msg)
 add_library(moosepython 
     vec.cpp
     mfield.cpp

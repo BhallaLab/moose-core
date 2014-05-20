@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.6)
 
 include_directories(../msg)
 include_directories(../basecode)
+include_directories(../external/debug)
 add_library(benchmarks 
     benchmarks.cpp
     kineticMarks.cpp

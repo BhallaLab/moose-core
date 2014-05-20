@@ -36,9 +36,7 @@
 #include "muParserToken.h"
 #include "muParserStack.h"
 #include "muParserTemplateMagic.h"
-#include "../debug/current_function.hpp"
-#include "../debug/print_function.h"
-
+#include "simple_assert.hpp"
 
 namespace mu
 {
@@ -307,10 +305,10 @@ namespace mu
               }
               break;
         default:
-              stringstream ss;
-              ss << "In function: " << MOOSE_CURRENT_FUNCTION << " case statment " 
+              std::stringstream ss;
+              ss << "In function: " << SIMPLE_CURRENT_FUNCTION << " case statment " 
                   << " has incomplete defination "
-                  << " Case " << a_Oprt << " is not handled. " << endl;
+                  << " Case " << a_Oprt << " is not handled. " << std::endl;
 #ifdef  DEBUG
               dump(ss.str(), "WARN");
 #endif     /* -----  DEBUG  ----- */
