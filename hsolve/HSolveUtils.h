@@ -12,13 +12,12 @@
 
 #include "../basecode/header.h"
 #include "../basecode/global.h"
-#include "../external/debug/print_function.h"
-
 #include "../biophysics/HHGate.h"
 #include "../biophysics/ChanBase.h"
 #include "../biophysics/HHChannel.h"
 #include "../basecode/OpFunc.h"
 
+#include "simple_test.hpp"
 
 class HSolveUtils
 {

@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "HSolveUtils.h"
+#include "simple_assert.hpp"
 
 void HSolveUtils::initialize( Id object )
 {
@@ -103,7 +104,7 @@ int HSolveUtils::gates(
                 string gPath = moose::fixPath(gate.path());
                 errorSS.str("");
                 errorSS << "Got " << gatePath << " expected " << gPath;
-                MOOSE_ASSERT_MSG(gPath == gatePath, errorSS.str().c_str());
+                SIMPLE_ASSERT_MSG(gPath == gatePath, errorSS.str().c_str());
 
                 if ( getOriginals ) {
                     HHGate* g = reinterpret_cast< HHGate* >( gate.eref().data() );
