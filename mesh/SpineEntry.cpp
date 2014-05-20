@@ -193,3 +193,35 @@ vector< double > SpineEntry::psdCoords() const
 
 	return ret;
 }
+
+
+void SpineEntry::setVolume( double volume )
+{
+	double volscale = volume / head_.volume( shaft_ );
+	double linscale = pow( volscale, 1.0 / 3.0 );
+	head_.setLength( head_.getLength() * linscale );
+	head_.setDia( head_.getDia() * linscale );
+	double dx = head_.getX() - shaft_.getX();
+	double dy = head_.getY() - shaft_.getY();
+	double dz = head_.getZ() - shaft_.getZ();
+	head_.setX( dx * linscale + shaft_.getX() );
+	head_.setY( dy * linscale + shaft_.getY() );
+	head_.setZ( dz * linscale + shaft_.getZ() );
+}
+
+void SpineEntry::positionShaftBase( double x, double y, double z )
+{
+	double dx = x - root_.getX();
+	double dy = y - root_.getY();
+	double dz = y - root_.getZ();
+	root_.setX( x );
+	root_.setY( y );
+	root_.setZ( z );
+	shaft_.setX( dx + shaft_.getX() );
+	shaft_.setY( dy + shaft_.getY() );
+	shaft_.setZ( dz + shaft_.getZ() );
+	head_.setX( dx + head_.getX() );
+	head_.setY( dy + head_.getY() );
+	head_.setZ( dz + head_.getZ() );
+}
+

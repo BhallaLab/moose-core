@@ -7,12 +7,13 @@
 ## See the file COPYING.LIB for the full notice.
 #########################################################################
 # This example illustrates loading, and running a kinetic model 
-# for a relaxation oscillator, defined in kkit format. It uses a default 
-# kkit model but you can
-# specify another using the command line 
-#     python filename runtime solver
+# for a delayed -ve feedback oscillator, defined in kkit format. 
+# The model is one by  Boris N. Kholodenko from 
+# Eur J Biochem. (2000) 267(6):1583-8 
 # We use the gsl solver here. The model already
 # defines some plots and sets the runtime to 4000 seconds.
+# The model does not really play nicely with the GSSA solver, since it
+# involves some really tiny amounts of the MAPKKK.
 
 import moose
 import matplotlib.pyplot as plt
@@ -22,20 +23,12 @@ import numpy
 import sys
 
 def main():
-        #solver = "gsl"  # Pick any of gsl, gssa, ee..
-        solver = "gsl"  # Pick any of gsl, gssa, ee..
-	mfile = '../Genesis_files/Kholodenko.g'
+        solver = "gsl"
+	mfile = '../../Genesis_files/Kholodenko.g'
 	runtime = 5000.0
-	if ( len( sys.argv ) >= 3 ):
-		mfile = '../Genesis_files/' + sys.argv[1]
-		runtime = float( sys.argv[2] )
-	if ( len( sys.argv ) == 4 ):
-                solver = sys.argv[3]
+	if ( len( sys.argv ) >= 2 ):
+                solver = sys.argv[1]
 	modelId = moose.loadModel( mfile, 'model', solver )
-        # Increase volume so that the stochastic solver gssa 
-        # gives an interesting output
-        compt = moose.element( '/model/kinetics' )
-        compt.volume = 1e-19 
         dt = moose.element( '/clock' ).dt
 
 	moose.reinit()

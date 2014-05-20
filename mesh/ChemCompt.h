@@ -34,6 +34,10 @@ class ChemCompt
 		 * dimensionality.
 		 */
 		double getEntireVolume( const Eref& e ) const;
+
+		// Virtual function to get vol of entire compartment.
+		virtual double vGetEntireVolume() const = 0;
+
 		/**
 		 * This is a little nasty. It calls buildDefaultMesh with the 
 		 * current numEntries. Should not be used if the mesh has been
@@ -41,7 +45,7 @@ class ChemCompt
 		 * Perhaps I need to do something like changeVolOfExistingMesh.
 		 */
 		void setEntireVolume( const Eref& e, double volume);
-		
+
 		/**
 		 * Returns volume of specified voxel
 		 */
@@ -87,6 +91,20 @@ class ChemCompt
 		//////////////////////////////////////////////////////////////////
 		// Dest Finfo
 		//////////////////////////////////////////////////////////////////
+		
+		/**
+		 * Returns true on success.
+		 * Changes volume but does not notify any child objects.
+		 * For some classes, this only works if the ChemCompt has 
+		 * just one voxel. It will return false if it can't handle it.
+		 * This function will invalidate any concentration term in 
+		 * the model. If you don't know why you would want to do this, 
+		 * then you shouldn't use this function.",
+		 */
+		void setVolumeNotRates( double volume);
+
+		/// Virtual function for actually doing this.
+		virtual bool vSetVolumeNotRates( double volume) = 0;
 
 		/**
 		 * buildDefaultMesh tells the ChemCompt to make a standard mesh 
@@ -171,28 +189,8 @@ class ChemCompt
 		 * of childConcs. Does not traverse into children of other
 		 * ChemCompts. 
 		 */
-		void setChildConcs( const Eref& e, 
-					vector< double >::const_iterator& childConcs ) const;
-
-		//////////////////////////////////////////////////////////////////
-		// Utility function for diffusion handling
-		//////////////////////////////////////////////////////////////////
-		/**
-		 * Orchestrates diffusion calculations in the connected Stoich,
-		 * if any. Basically acts as a conduit for the execution of the
-		 * process call by subsidiary MeshEntries, and funnels these calls
-		 * to all attached Stoichs with the incorporation of the stencil
-		 * for the actual diffusion calculations.
-		 * In due course this should become a virtual function so that
-		 * we can have this handled by any ChemCompt class.
-		virtual void updateDiffusion( unsigned int meshIndex ) const;
-		 */
-
-		/**
-		 * Looks up Id of the Stoich object to which this mesh should be
-		 * connected. Is called at reinit by the child MeshEntry.
-		void lookupStoich( ObjId me ) const;
-		 */
+		unsigned int setChildConcs( const Eref& e, 
+			const vector< double >& childConcs, unsigned int start ) const;
 
 		//////////////////////////////////////////////////////////////////
 		// Lookup funcs for Boundary
@@ -315,16 +313,6 @@ class ChemCompt
 
 		static const Cinfo* initCinfo();
 
-	protected:
-		double volume_; /// Volume or area
-		Id stoich_; /// Identifier for stoich object doing diffusion.
-
-		/**
-		 * defines how to combine neighboring
-		 * mesh elements to set up the diffusion du/dt term, using the
-		 * method of lines.
-		vector< const Stencil* > stencil_;
-		 */
 	private:
 		MeshEntry entry_; /// Wrapper for self ptr
 

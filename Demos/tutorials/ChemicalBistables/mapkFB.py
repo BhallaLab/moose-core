@@ -7,12 +7,8 @@
 ## See the file COPYING.LIB for the full notice.
 #########################################################################
 # This example illustrates loading, and running a kinetic model 
-# for a relaxation oscillator, defined in kkit format. It uses a default 
-# kkit model but you can
-# specify another using the command line 
-#     python filename runtime solver
-# We use the gsl solver here. The model already
-# defines some plots and sets the runtime to 4000 seconds.
+# for a bistable positive feedback system, defined in kkit format. 
+# This is based on Bhalla, Ram and Iyengar, Science 2002.
 
 import moose
 import matplotlib.pyplot as plt
@@ -22,34 +18,44 @@ import numpy
 import sys
 
 def main():
-        #solver = "gsl"  # Pick any of gsl, gssa, ee..
-        solver = "gssa"  # Pick any of gsl, gssa, ee..
-	mfile = '../../Genesis_files/Repressillator.g'
-	runtime = 6000.0
-	if ( len( sys.argv ) >= 2 ):
+        solver = "gsl"  # Pick any of gsl, gssa, ee..
+        #solver = "gssa"  # Pick any of gsl, gssa, ee..
+	mfile = '../../Genesis_files/acc35.g'
+	runtime = 2000.0
+	if ( len( sys.argv ) == 2 ):
                 solver = sys.argv[1]
 	modelId = moose.loadModel( mfile, 'model', solver )
         # Increase volume so that the stochastic solver gssa 
         # gives an interesting output
         compt = moose.element( '/model/kinetics' )
-        compt.volume = 1e-19 
+        compt.volume = 5e-19 
         dt = moose.element( '/clock' ).dt
 
 	moose.reinit()
-	moose.start( runtime ) 
+	moose.start( 500 ) 
+        moose.element( '/model/kinetics/PDGFR/PDGF' ).concInit = 0.0001
+	moose.start( 400 ) 
+        moose.element( '/model/kinetics/PDGFR/PDGF' ).concInit = 0.0
+	moose.start( 2000 ) 
+        moose.element( '/model/kinetics/Ca' ).concInit = 0.0
+	moose.start( 500 ) 
+        moose.element( '/model/kinetics/Ca' ).concInit = 0.00008
+	moose.start( 2000 ) 
 
 	# Display all plots.
-        img = mpimg.imread( 'repressillatorOsc.png' )
+        img = mpimg.imread( 'mapkFB.png' )
         fig = plt.figure( figsize=(12, 10 ) )
         png = fig.add_subplot( 211 )
         imgplot = plt.imshow( img )
         ax = fig.add_subplot( 212 )
 	x = moose.wildcardFind( '/model/#graphs/conc#/#' )
+        t = numpy.arange( 0, x[0].vector.size, 1 ) * dt
+        ax.plot( t, x[0].vector, 'b-', label=x[0].name )
+        ax.plot( t, x[1].vector, 'c-', label=x[1].name )
+        ax.plot( t, x[2].vector, 'r-', label=x[2].name )
+        ax.plot( t, x[3].vector, 'm-', label=x[3].name )
         plt.ylabel( 'Conc (mM)' )
         plt.xlabel( 'Time (seconds)' )
-	for x in moose.wildcardFind( '/model/#graphs/conc#/#' ):
-            t = numpy.arange( 0, x.vector.size, 1 ) * dt
-            pylab.plot( t, x.vector, label=x.name )
         pylab.legend()
         pylab.show()
 
