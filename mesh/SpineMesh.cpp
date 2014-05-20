@@ -302,6 +302,31 @@ const vector< double >& SpineMesh::getVoxelLength() const
 	return length_;
 }
 
+double SpineMesh::vGetEntireVolume() const
+{
+	double ret = 0.0;
+	for ( vector< double >::const_iterator i = 
+					vs_.begin(); i != vs_.end(); ++i )
+		ret += *i;
+	return ret;
+}
+
+bool SpineMesh::vSetVolumeNotRates( double volume )
+{
+	double volscale = volume / vGetEntireVolume();
+	double linscale = pow( volscale, 1.0/3.0 );
+	assert( vs_.size() == spines_.size() );
+	assert( area_.size() == spines_.size() );
+	assert( length_.size() == spines_.size() );
+	for ( unsigned int i = 0; i < spines_.size(); ++i ) {
+		spines_[i].setVolume( volume );
+		vs_[i] *= volscale;
+		area_[i] *= linscale * linscale;
+		length_[i] *= linscale;
+	}
+	return true;
+}
+
 //////////////////////////////////////////////////////////////////
 
 /**

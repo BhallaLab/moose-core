@@ -91,6 +91,12 @@ class PsdMesh: public MeshCompt
 		const vector< double >& vGetVoxelVolume() const;
 		const vector< double >& getVoxelArea() const;
 		const vector< double >& getVoxelLength() const;
+
+		/// Inherited virtual func.
+		double vGetEntireVolume() const;
+
+		/// Inherited virtual func
+		bool vSetVolumeNotRates( double volume );
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
