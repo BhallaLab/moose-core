@@ -28,49 +28,49 @@ const Cinfo* CylMesh::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// Field Definitions
 		//////////////////////////////////////////////////////////////
-		static ValueFinfo< CylMesh, double > x0(
+		static ElementValueFinfo< CylMesh, double > x0(
 			"x0",
 			"x coord of one end",
 			&CylMesh::setX0,
 			&CylMesh::getX0
 		);
-		static ValueFinfo< CylMesh, double > y0(
+		static ElementValueFinfo< CylMesh, double > y0(
 			"y0",
 			"y coord of one end",
 			&CylMesh::setY0,
 			&CylMesh::getY0
 		);
-		static ValueFinfo< CylMesh, double > z0(
+		static ElementValueFinfo< CylMesh, double > z0(
 			"z0",
 			"z coord of one end",
 			&CylMesh::setZ0,
 			&CylMesh::getZ0
 		);
-		static ValueFinfo< CylMesh, double > r0(
+		static ElementValueFinfo< CylMesh, double > r0(
 			"r0",
 			"Radius of one end",
 			&CylMesh::setR0,
 			&CylMesh::getR0
 		);
-		static ValueFinfo< CylMesh, double > x1(
+		static ElementValueFinfo< CylMesh, double > x1(
 			"x1",
 			"x coord of other end",
 			&CylMesh::setX1,
 			&CylMesh::getX1
 		);
-		static ValueFinfo< CylMesh, double > y1(
+		static ElementValueFinfo< CylMesh, double > y1(
 			"y1",
 			"y coord of other end",
 			&CylMesh::setY1,
 			&CylMesh::getY1
 		);
-		static ValueFinfo< CylMesh, double > z1(
+		static ElementValueFinfo< CylMesh, double > z1(
 			"z1",
 			"z coord of other end",
 			&CylMesh::setZ1,
 			&CylMesh::getZ1
 		);
-		static ValueFinfo< CylMesh, double > r1(
+		static ElementValueFinfo< CylMesh, double > r1(
 			"r1",
 			"Radius of other end",
 			&CylMesh::setR1,
@@ -83,7 +83,7 @@ const Cinfo* CylMesh::initCinfo()
 			&CylMesh::getCoords
 		);
 
-		static ValueFinfo< CylMesh, double > diffLength(
+		static ElementValueFinfo< CylMesh, double > diffLength(
 			"diffLength",
 			"Length constant to use for subdivisions"
 			"The system will attempt to subdivide using compartments of"
@@ -188,7 +188,7 @@ CylMesh::~CylMesh()
  * So when the compartment changes volume, numEntries changes. diffLength will
  * be fine-tuned to be a clean multiple.
  */
-void CylMesh::updateCoords()
+void CylMesh::updateCoords( const Eref& e, const vector< double >& concs )
 {
 	double temp = sqrt( 
 		( x1_ - x0_ ) * ( x1_ - x0_ ) + 
@@ -218,99 +218,118 @@ void CylMesh::updateCoords()
 	// dx2_[0] = diffLength_;
 	// dx2_[1] = diffLength_;
 	buildStencil();
+	setChildConcs( e, concs, 0 );
 }
 
-void CylMesh::setX0( double v )
+void CylMesh::setX0( const Eref& e, double v )
 {
+	vector< double > childConcs;
+	getChildConcs( e, childConcs );
 	x0_ = v;
-	updateCoords();
+	updateCoords( e, childConcs );
 }
 
-double CylMesh::getX0() const
+double CylMesh::getX0( const Eref& e ) const
 {
 	return x0_;
 }
 
-void CylMesh::setY0( double v )
+void CylMesh::setY0( const Eref& e, double v )
 {
+	vector< double > childConcs;
+	getChildConcs( e, childConcs );
 	y0_ = v;
-	updateCoords();
+	updateCoords( e, childConcs );
 }
 
-double CylMesh::getY0() const
+double CylMesh::getY0( const Eref& e ) const
 {
 	return y0_;
 }
 
-void CylMesh::setZ0( double v )
+void CylMesh::setZ0( const Eref& e, double v )
 {
+	vector< double > childConcs;
+	getChildConcs( e, childConcs );
 	z0_ = v;
-	updateCoords();
+	updateCoords( e, childConcs );
 }
 
-double CylMesh::getZ0() const
+double CylMesh::getZ0( const Eref& e ) const
 {
 	return z0_;
 }
 
-void CylMesh::setR0( double v )
+void CylMesh::setR0( const Eref& e, double v )
 {
+	vector< double > childConcs;
+	getChildConcs( e, childConcs );
 	r0_ = v;
-	updateCoords();
+	updateCoords( e, childConcs );
 }
 
-double CylMesh::getR0() const
+double CylMesh::getR0( const Eref& e ) const
 {
 	return r0_;
 }
 
 
-void CylMesh::setX1( double v )
+void CylMesh::setX1( const Eref& e, double v )
 {
+	vector< double > childConcs;
+	getChildConcs( e, childConcs );
 	x1_ = v;
-	updateCoords();
+	updateCoords( e, childConcs );
 }
 
-double CylMesh::getX1() const
+double CylMesh::getX1( const Eref& e ) const
 {
 	return x1_;
 }
 
-void CylMesh::setY1( double v )
+void CylMesh::setY1( const Eref& e, double v )
 {
+	vector< double > childConcs;
+	getChildConcs( e, childConcs );
 	y1_ = v;
-	updateCoords();
+	updateCoords( e, childConcs );
 }
 
-double CylMesh::getY1() const
+double CylMesh::getY1( const Eref& e ) const
 {
 	return y1_;
 }
 
-void CylMesh::setZ1( double v )
+void CylMesh::setZ1( const Eref& e, double v )
 {
+	vector< double > childConcs;
+	getChildConcs( e, childConcs );
 	z1_ = v;
-	updateCoords();
+	updateCoords( e, childConcs );
 }
 
-double CylMesh::getZ1() const
+double CylMesh::getZ1( const Eref& e ) const
 {
 	return z1_;
 }
 
-void CylMesh::setR1( double v )
+void CylMesh::setR1( const Eref& e, double v )
 {
+	vector< double > childConcs;
+	getChildConcs( e, childConcs );
 	r1_ = v;
-	updateCoords();
+	updateCoords( e, childConcs );
 }
 
-double CylMesh::getR1() const
+double CylMesh::getR1( const Eref& e ) const
 {
 	return r1_;
 }
 
-void CylMesh::innerSetCoords( const vector< double >& v )
+void CylMesh::innerSetCoords( const Eref& e, const vector< double >& v )
 {
+	vector< double > childConcs;
+	getChildConcs( e, childConcs );
 	x0_ = v[0];
 	y0_ = v[1];
 	z0_ = v[2];
@@ -324,7 +343,7 @@ void CylMesh::innerSetCoords( const vector< double >& v )
 
 	diffLength_ = v[8];
 
-	updateCoords();
+	updateCoords( e, childConcs );
 }
 
 void CylMesh::setCoords( const Eref& e, vector< double > v )
@@ -332,7 +351,7 @@ void CylMesh::setCoords( const Eref& e, vector< double > v )
 	if ( v.size() < 9 ) {
 		cout << "CylMesh::setCoords: Warning: size of argument vec should be >= 9, was " << v.size() << endl;
 	}
-	innerSetCoords( v );
+	innerSetCoords( e, v );
 	transmitChange( e );
 }
 
@@ -356,13 +375,15 @@ vector< double > CylMesh::getCoords( const Eref& e ) const
 }
 
 
-void CylMesh::setDiffLength( double v )
+void CylMesh::setDiffLength( const Eref& e, double v )
 {
+	vector< double > childConcs;
+	getChildConcs( e, childConcs );
 	diffLength_ = v;
-	updateCoords();
+	updateCoords( e, childConcs );
 }
 
-double CylMesh::getDiffLength() const
+double CylMesh::getDiffLength( const Eref& e ) const
 {
 	return diffLength_;
 }
@@ -549,7 +570,7 @@ void CylMesh::innerHandleRequestMeshStats( const Eref& e,
 		const SrcFinfo2< unsigned int, vector< double > >* meshStatsFinfo
 	)
 {
-	vector< double > ret( volume_ / numEntries_ ,1 );
+	vector< double > ret( vGetEntireVolume() / numEntries_ ,1 );
 	meshStatsFinfo->send( e, 1, ret );
 }
 
@@ -557,11 +578,13 @@ void CylMesh::innerHandleNodeInfo(
 			const Eref& e,
 			unsigned int numNodes, unsigned int numThreads )
 {
+		/*
 	unsigned int numEntries = numEntries_;
 	vector< double > vols( numEntries, volume_ / numEntries );
 	vector< unsigned int > localEntries( numEntries );
 	vector< vector< unsigned int > > outgoingEntries;
 	vector< vector< unsigned int > > incomingEntries;
+	*/
 	/*
 	double oldvol = getMeshEntryVolume( 0 );
 	meshSplit()->send( e,
@@ -604,7 +627,7 @@ void CylMesh::innerSetNumEntries( unsigned int n )
 void CylMesh::innerBuildDefaultMesh( const Eref& e,
 	double volume, unsigned int numEntries )
 {
-	/// Cylinder with diameter = length.
+	/// Single voxel cylinder with diameter = length.
 	/// vol = volume = pi.r^2.len. 
 	/// So len = 2r, volume = pi*r^2*2r = 2pi*r^3 so r = (volume/2pi)^(1/3)
 	double r = pow( ( volume / ( PI * 2 ) ), 1.0 / 3 );
@@ -654,6 +677,29 @@ const vector< double >& CylMesh::getVoxelLength() const
 	static vector< double > length;
 	length.assign( numEntries_, totLen_ / numEntries_ );
 	return length;
+}
+
+double CylMesh::vGetEntireVolume() const
+{
+	double vol = 0.0;
+	for ( unsigned int i = 0; i < numEntries_; ++i )
+		vol += getMeshEntryVolume( i );
+	return vol;
+}
+
+bool CylMesh::vSetVolumeNotRates( double volume )
+{
+	double oldVol = vGetEntireVolume();
+	double linScale = pow( volume/oldVol, 1.0 / 3.0 );
+	x1_ *= linScale;
+	y1_ *= linScale;
+	z1_ *= linScale;
+	r0_ *= linScale;
+	r1_ *= linScale;
+	totLen_ *= linScale;
+	// Have to scale this so numEntries remains the same.
+	diffLength_ = totLen_ / numEntries_; 
+	return true;
 }
 
 //////////////////////////////////////////////////////////////////

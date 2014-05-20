@@ -122,10 +122,15 @@ Id  makeStandardElements( Id pa, const string& modelname )
 {
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	//cout << " kkit read " << pa << " " << modelname << " "<< MooseGlobal;
-	Id mgr = shell->doCreate( "Neutral", pa, modelname, 1, MooseGlobal );
-	Id kinetics = 
+	Id mgr( modelname );
+	if ( mgr == Id() )
+		mgr = shell->doCreate( "Neutral", pa, modelname, 1, MooseGlobal );
+	Id kinetics( modelname + "/kinetics" );
+	if ( kinetics == Id() ) {
+		kinetics = 
 		shell->doCreate( "CubeMesh", mgr, "kinetics", 1,  MooseGlobal );
 		SetGet2< double, unsigned int >::set( kinetics, "buildDefaultMesh", 1e-15, 1 );
+	}
 	assert( kinetics != Id() );
 
 	Id graphs = shell->doCreate( "Neutral", mgr, "graphs", 1, MooseGlobal);
@@ -667,13 +672,15 @@ void ReadKkit::assignPoolCompartments()
 			name = ss.str();
 			comptId = shell_->doCreate( "CubeMesh", baseId_, name, 1 ) ;
 		}
-		Id meshId = Neutral::child( comptId.eref(), "mesh" );
-		assert( meshId != Id() );
-		double side = pow( vols_[i], 1.0 / 3.0 );
-		vector< double > coords( 9, side );
-		coords[0] = coords[1] = coords[2] = 0;
-		// Field< double >::set( comptId, "volume", vols_[i] );
-		Field< vector< double > >::set( comptId, "coords", coords );
+		if ( comptId.element()->cinfo()->isA( "CubeMesh" ) ) {
+			double side = pow( vols_[i], 1.0 / 3.0 );
+			vector< double > coords( 9, side );
+			coords[0] = coords[1] = coords[2] = 0;
+			// Field< double >::set( comptId, "volume", vols_[i] );
+			Field< vector< double > >::set( comptId, "coords", coords );
+		} else {
+			SetGet1< double >::set( comptId, "setVolumeNotRates",vols_[i]);
+		}
 		// compartments_.push_back( comptId );
 		for ( vector< Id >::iterator j = volCategories_[i].begin();
 			j != volCategories_[i].end(); ++j ) {

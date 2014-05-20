@@ -120,6 +120,9 @@ class CubeMesh: public MeshCompt
 			const Eref& e, 
 			unsigned int numNodes, unsigned int numThreads );
 
+		/// Virtual func to get volume of entire compartment.
+		double vGetEntireVolume() const;
+
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
@@ -131,6 +134,9 @@ class CubeMesh: public MeshCompt
 		/// Virtual func to make a mesh with specified Volume and numEntries
 		void innerBuildDefaultMesh( const Eref& e,
 			double volume, unsigned int numEntries );
+
+		/// Virtual func, assigns volume, usually to single voxel.
+		bool vSetVolumeNotRates( double volume );
 
 		//////////////////////////////////////////////////////////////////
 		//  Utility func

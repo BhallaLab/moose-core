@@ -29,36 +29,36 @@ class CylMesh: public MeshCompt
 		 * a change in any of the coord parameters
 		 */
 
-		void updateCoords();
+		void updateCoords( const Eref& e, const vector< double >& childConcs );
 
 		//////////////////////////////////////////////////////////////////
 		// Field assignment stuff
 		//////////////////////////////////////////////////////////////////
 
-		void setX0( double v );
-		double getX0() const;
-		void setY0( double v );
-		double getY0() const;
-		void setZ0( double v );
-		double getZ0() const;
-		void setR0( double v );
-		double getR0() const;
+		void setX0( const Eref& e, double v );
+		double getX0( const Eref& e ) const;
+		void setY0( const Eref& e, double v );
+		double getY0( const Eref& e ) const;
+		void setZ0( const Eref& e, double v );
+		double getZ0( const Eref& e ) const;
+		void setR0( const Eref& e, double v );
+		double getR0( const Eref& e ) const;
 
-		void setX1( double v );
-		double getX1() const;
-		void setY1( double v );
-		double getY1() const;
-		void setZ1( double v );
-		double getZ1() const;
-		void setR1( double v );
-		double getR1() const;
+		void setX1( const Eref& e, double v );
+		double getX1( const Eref& e ) const;
+		void setY1( const Eref& e, double v );
+		double getY1( const Eref& e ) const;
+		void setZ1( const Eref& e, double v );
+		double getZ1( const Eref& e ) const;
+		void setR1( const Eref& e, double v );
+		double getR1( const Eref& e ) const;
 
-		void innerSetCoords( const vector< double >& v);
+		void innerSetCoords( const Eref& e, const vector< double >& v);
 		void setCoords( const Eref& e, vector< double > v );
 		vector< double > getCoords( const Eref& e ) const;
 
-		void setDiffLength( double v );
-		double getDiffLength() const;
+		void setDiffLength( const Eref& e, double v );
+		double getDiffLength( const Eref& e ) const;
 
 		double getTotLength() const;
 
@@ -97,6 +97,12 @@ class CylMesh: public MeshCompt
 		const vector< double >& vGetVoxelVolume() const;
 		const vector< double >& getVoxelArea() const;
 		const vector< double >& getVoxelLength() const;
+
+		/// Inherited virtual. Returns entire volume of compartment.
+		double vGetEntireVolume() const;
+
+		/// Inherited virtual. Resizes len and dia of each voxel.
+		bool vSetVolumeNotRates( double volume );
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
