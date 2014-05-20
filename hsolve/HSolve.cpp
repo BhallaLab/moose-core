@@ -210,24 +210,26 @@ void HSolve::zombify( Eref hsolve ) const
 	vector< ObjId > temp;
 
     for ( i = compartmentId_.begin(); i != compartmentId_.end(); ++i )
-		temp.push_back( ObjId( *i, 0 ) );
-	Shell::dropClockMsgs( temp, "init" );
-	Shell::dropClockMsgs( temp, "process" );
+        temp.push_back( ObjId( *i, 0 ) );
+
+    Shell::dropClockMsgs( temp, "init" );
+    Shell::dropClockMsgs( temp, "process" );
     for ( i = compartmentId_.begin(); i != compartmentId_.end(); ++i )
         CompartmentBase::zombify( i->eref().element(),
 					   ZombieCompartment::initCinfo(), hsolve.id() );
 
-	temp.clear();
+    temp.clear();
     for ( i = caConcId_.begin(); i != caConcId_.end(); ++i )
 		temp.push_back( ObjId( *i, 0 ) );
-	Shell::dropClockMsgs( temp, "process" );
+    Shell::dropClockMsgs( temp, "process" );
     for ( i = caConcId_.begin(); i != caConcId_.end(); ++i )
         ZombieCaConc::zombify( hsolve.element(), i->eref().element() );
 
-	temp.clear();
+    temp.clear();
     for ( i = channelId_.begin(); i != channelId_.end(); ++i )
 		temp.push_back( ObjId( *i, 0 ) );
-	Shell::dropClockMsgs( temp, "process" );
+
+    Shell::dropClockMsgs( temp, "process" );
     for ( i = channelId_.begin(); i != channelId_.end(); ++i )
         ZombieHHChannel::zombify( hsolve.element(), i->eref().element() );
 }
@@ -235,10 +237,10 @@ void HSolve::zombify( Eref hsolve ) const
 void HSolve::setup( Eref hsolve )
 {
     // Setup solver.
-    this->HSolveActive::setup( seed_, dt_ );
-
+    HSolveActive::setup( seed_, dt_ );
     mapIds();
     zombify( hsolve );
+    DUMP("HSolve is all set. ", "HSOLVE");
 }
 
 ///////////////////////////////////////////////////
@@ -277,7 +279,7 @@ void HSolve::setPath( const Eref& hsolve, string path )
              << path << "'.\n";
     else
     {
-        // cout << "HSolve: Seed compartment found at '" << seed_.path() << "'.\n";
+        cout << "HSolve: Seed compartment found at '" << seed_.path() << "'.\n";
         path_ = path;
         setup( hsolve );
     }

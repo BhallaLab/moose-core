@@ -1,5 +1,4 @@
-include_directories(../msg)
-include_directories(../basecode)
+include_directories(../basecode ../msg ../external/debug)
 add_library(device 
     PulseGen.cpp
     DiffAmp.cpp

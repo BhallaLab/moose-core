@@ -1,7 +1,3 @@
-file(GLOB scheduling_SRC 
-    "*.h"
-    "*.cpp"
-)
-include_directories(../msg)
-include_directories(../basecode)
+file(GLOB scheduling_SRC "*.cpp")
+include_directories(../msg ../basecode ../external/debug)
 add_library(scheduling ${scheduling_SRC})

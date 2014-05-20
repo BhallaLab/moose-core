@@ -312,7 +312,6 @@ class ChemCompt
 		//////////////////////////////////////////////////////////////////
 
 		static const Cinfo* initCinfo();
-
 	private:
 		MeshEntry entry_; /// Wrapper for self ptr
 
