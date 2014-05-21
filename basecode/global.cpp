@@ -15,8 +15,8 @@
  *
  * ==============================================================================
  */
-
 #include "global.h"
+#include "../external/debug/print_function.hpp"
 
 /*-----------------------------------------------------------------------------
  *  This variable keep track of how many tests have been performed.

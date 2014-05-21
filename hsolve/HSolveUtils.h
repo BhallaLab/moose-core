@@ -17,8 +17,6 @@
 #include "../biophysics/HHChannel.h"
 #include "../basecode/OpFunc.h"
 
-#include "simple_test.hpp"
-
 class HSolveUtils
 {
 public:

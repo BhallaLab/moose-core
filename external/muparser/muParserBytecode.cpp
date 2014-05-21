@@ -36,7 +36,6 @@
 #include "muParserToken.h"
 #include "muParserStack.h"
 #include "muParserTemplateMagic.h"
-#include "simple_assert.hpp"
 
 namespace mu
 {
@@ -303,15 +302,6 @@ namespace mu
                 m_vRPN.pop_back();
                 bOptimized = true;
               }
-              break;
-        default:
-              std::stringstream ss;
-              ss << "In function: " << SIMPLE_CURRENT_FUNCTION << " case statment " 
-                  << " has incomplete defination "
-                  << " Case " << a_Oprt << " is not handled. " << std::endl;
-#ifdef  DEBUG
-              dump(ss.str(), "WARN");
-#endif     /* -----  DEBUG  ----- */
               break;
               
         } // switch a_Oprt

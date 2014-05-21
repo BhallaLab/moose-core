@@ -1,6 +1,6 @@
-//  moose/assert.hpp - MOOSE_ASSERT(expr)
-//                     MOOSE_ASSERT_MSG(expr, msg)
-//                     MOOSE_VERIFY(expr)
+//  moose/assert.hpp - SIMPLE_ASSERT(expr)
+//                     SIMPLE_ASSERT_MSG(expr, msg)
+//                     SIMPLE_VERIFY(expr)
 //
 //  Copyright (c) 2001, 2002 Peter Dimov and Multi Media Ltd.
 //  Copyright (c) 2007 Peter Dimov
@@ -29,16 +29,16 @@
 //
 
 //--------------------------------------------------------------------------------------//
-//                                     MOOSE_ASSERT                                     //
+//                                     SIMPLE_ASSERT                                     //
 //--------------------------------------------------------------------------------------//
 
-#undef MOOSE_ASSERT
+#undef SIMPLE_ASSERT
 
-#if defined(MOOSE_DISABLE_ASSERTS)
+#if defined(SIMPLE_DISABLE_ASSERTS)
 
-# define MOOSE_ASSERT(expr) ((void)0)
+# define SIMPLE_ASSERT(expr) ((void)0)
 
-#elif defined(MOOSE_ENABLE_ASSERT_HANDLER)
+#elif defined(SIMPLE_ENABLE_ASSERT_HANDLER)
 
 #include "current_function.hpp"
 #include <stringstream>
@@ -49,26 +49,26 @@ namespace moose
                         char const * function, char const * file, long line); // user defined
 } // namespace moose
 
-#define MOOSE_ASSERT(expr) ((expr) \
+#define SIMPLE_ASSERT(expr) ((expr) \
   ? ((void)0) \
-  : ::moose::assertion_failed(#expr, MOOSE_CURRENT_FUNCTION, __FILE__, __LINE__))
+  : ::moose::assertion_failed(#expr, SIMPLE_CURRENT_FUNCTION, __FILE__, __LINE__))
 
 #else
 # include <assert.h> // .h to support old libraries w/o <cassert> - effect is the same
-# define MOOSE_ASSERT(expr) assert(expr)
+# define SIMPLE_ASSERT(expr) assert(expr)
 #endif
 
 //--------------------------------------------------------------------------------------//
-//                                   MOOSE_ASSERT_MSG                                   //
+//                                   SIMPLE_ASSERT_MSG                                   //
 //--------------------------------------------------------------------------------------//
 
-# undef MOOSE_ASSERT_MSG
+# undef SIMPLE_ASSERT_MSG
 
-#if defined(MOOSE_DISABLE_ASSERTS) || defined(NDEBUG)
+#if defined(SIMPLE_DISABLE_ASSERTS) || defined(NDEBUG)
 
-  #define MOOSE_ASSERT_MSG(expr, msg) ((void)0)
+  #define SIMPLE_ASSERT_MSG(expr, msg) ((void)0)
 
-#elif defined(MOOSE_ENABLE_ASSERT_HANDLER)
+#elif defined(SIMPLE_ENABLE_ASSERT_HANDLER)
 
   #include "current_function.hpp"
 
@@ -78,21 +78,21 @@ namespace moose
                               char const * function, char const * file, long line); // user defined
   } // namespace moose
 
-  #define MOOSE_ASSERT_MSG(expr, msg) ((expr) \
+  #define SIMPLE_ASSERT_MSG(expr, msg) ((expr) \
     ? ((void)0) \
-    : ::moose::assertion_failed_msg(#expr, msg, MOOSE_CURRENT_FUNCTION, __FILE__, __LINE__))
+    : ::moose::assertion_failed_msg(#expr, msg, SIMPLE_CURRENT_FUNCTION, __FILE__, __LINE__))
 
 #else
-  #ifndef MOOSE_ASSERT_HPP
-    #define MOOSE_ASSERT_HPP
+  #ifndef SIMPLE_ASSERT_HPP
+    #define SIMPLE_ASSERT_HPP
     #include <cstdlib>
     #include <iostream>
     #include "current_function.hpp"
 
     //  IDE's like Visual Studio perform better if output goes to std::cout or
     //  some other stream, so allow user to configure output stream:
-    #ifndef MOOSE_ASSERT_MSG_OSTREAM
-    # define MOOSE_ASSERT_MSG_OSTREAM std::cerr
+    #ifndef SIMPLE_ASSERT_MSG_OSTREAM
+    # define SIMPLE_ASSERT_MSG_OSTREAM std::cerr
     #endif
 
     namespace moose
@@ -104,7 +104,7 @@ namespace moose
           inline void assertion_failed_msg(char const * expr, char const * msg, char const * function,
             char const * file, long line)
           {
-            MOOSE_ASSERT_MSG_OSTREAM
+            SIMPLE_ASSERT_MSG_OSTREAM
               << "***** Internal Program Error - assertion (" << expr << ") failed in "
               << function << ":\n"
               << file << '(' << line << "): " << msg << std::endl;
@@ -120,39 +120,39 @@ namespace moose
     } // detail
   #endif
 
-  #define MOOSE_ASSERT_MSG(expr, msg) ((expr) \
+  #define SIMPLE_ASSERT_MSG(expr, msg) ((expr) \
     ? ((void)0) \
     : ::moose::assertion::detail::assertion_failed_msg(#expr, msg, \
-          MOOSE_CURRENT_FUNCTION, __FILE__, __LINE__))
+          SIMPLE_CURRENT_FUNCTION, __FILE__, __LINE__))
 #endif
 
 //--------------------------------------------------------------------------------------//
-//                                     MOOSE_VERIFY                                     //
+//                                     SIMPLE_VERIFY                                     //
 //--------------------------------------------------------------------------------------//
 
-#undef MOOSE_VERIFY
+#undef SIMPLE_VERIFY
 
-#if defined(MOOSE_DISABLE_ASSERTS) || ( !defined(MOOSE_ENABLE_ASSERT_HANDLER) && defined(NDEBUG) )
+#if defined(SIMPLE_DISABLE_ASSERTS) || ( !defined(SIMPLE_ENABLE_ASSERT_HANDLER) && defined(NDEBUG) )
 
-# define MOOSE_VERIFY(expr) ((void)(expr))
+# define SIMPLE_VERIFY(expr) ((void)(expr))
 
 #else
 
-# define MOOSE_VERIFY(expr) MOOSE_ASSERT(expr)
+# define SIMPLE_VERIFY(expr) SIMPLE_ASSERT(expr)
 
 /*-----------------------------------------------------------------------------
- *                                  MOOSE_WARN
+ *                                  SIMPLE_WARN
  *
  *  This macro accepts a stringstream like object as its second argument. First
  *  arguement is condition which must return a bool.
  *-----------------------------------------------------------------------------*/
-#define MOOSE_WARN(condition, msg) \
+#define SIMPLE_WARN(condition, msg) \
     if(! (condition) ) { \
         std::ostringstream ss; \
         ss << endl << "[WARN] " << msg; \
         std::cout << ss.str() \
         << std::endl; \
-        std::cout << "\n\t|- " << "In function: " << MOOSE_CURRENT_FUNCTION \
+        std::cout << "\n\t|- " << "In function: " << SIMPLE_CURRENT_FUNCTION \
             << "\n\t+ In file: " << __FILE__ << ":" << __LINE__ << std::endl; \
     }
 
