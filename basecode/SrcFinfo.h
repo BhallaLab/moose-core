@@ -103,6 +103,7 @@ template < class T > class SrcFinfo1: public SrcFinfo
 				i = md.begin(); i != md.end(); ++i ) {
 				const OpFunc1Base< T >* f = 
 					dynamic_cast< const OpFunc1Base< T >* >( i->func );
+				assert( f );
 				for ( vector< Eref >::const_iterator
 					j = i->targets.begin(); j != i->targets.end(); ++j ) {
 					if ( j->dataIndex() == ALLDATA ) {

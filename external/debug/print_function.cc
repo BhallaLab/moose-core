@@ -16,7 +16,7 @@
  * =====================================================================================
  */
 
-#include "print_function.hpp"
+#include "print_function.h"
 
 #include <ctime>
 #include <algorithm>
@@ -59,9 +59,9 @@ void dump(string msg, string type, bool autoFormat)
     string color = T_GREEN;
     if(type == "WARNING" || type == "WARN" || type == "FIXME")
         color = T_YELLOW;
-    else if(type == "DEBUG" || type == "EXPECT_FAILURE" || type == "EXPECT")
+    else if(type == "DEBUG")
         color = T_CYAN;
-    else if(type == "ERROR" || type == "FAIL")
+    else if(type == "ERROR")
         color = T_RED;
     else if(type == "INFO")
         color = T_BLUE;

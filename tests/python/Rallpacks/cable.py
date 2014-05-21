@@ -2,7 +2,7 @@
 
 """cable.py: A passive cable of n compartments.
 
-Last modified: Wed May 21, 2014  04:26AM
+Last modified: Thu May 15, 2014  05:49PM
 
 """
     
@@ -25,14 +25,18 @@ import os
 import pylab
 import numpy as np
 
-class PasiveCable( ):
+class Cable( ):
     ''' Class representing a cable '''
 
-    def __init__(self, args):
+    def __init__(self, length, compartmentSize):
         ''' Initialize the cable '''
-        self.length = args['length']
-        self.ncomp = args['ncomp']
+        self.save_dir = 'figures'
+        if not os.path.isdir( self.save_dir ):
+            os.makedirs( self.save_dir )
 
+        self.length = length
+        self.compartmentSize = compartmentSize
+        self.nseg = int(self.length / self.compartmentSize)
         self.cablePath = '/cable'
         self.tablePath = '/data'
         moose.Neutral( self.cablePath )
@@ -43,15 +47,17 @@ class PasiveCable( ):
         self.tables = []
         # keep all stimulus in this list of tables.
         self.stimTables = []
-        self.makeCable( args )
+        self.makeCable()
 
-    def makeCable( self, args ):
+    def makeCable( self, **compartment_options ):
         ''' Make a cable out of n compartments '''
-        for i in range( self.ncomp ):
-            compPath = '{}/comp{}'.format( self.cablePath, i)
-            l = args['length'] / args['ncomp']
-            d = args['diameter']
-            c = comp.MooseCompartment( compPath, l, d, args )
+        for i in range( self.nseg ):
+            c = comp.MooseCompartment( **compartment_options )
+            c.createCompartment( 
+                    length = self.compartmentSize
+                    , diameter = 1e-6
+                    , path = '%s/comp_%s' % ( self.cablePath , i) 
+                    )
             self.cable.append(c)
         self.connect( )
         utils.dump( "STEP"
@@ -83,14 +89,6 @@ class PasiveCable( ):
         self.stimTables.append( inputTable )
         moose.connect( inputTable, 'requestOut', stim, 'getOutputValue' )
 
-    def setupHSolve(self, path='/hsolve'):
-        """ Setup hsolve solver """
-        hsolve = moose.HSolve( path )
-        hsolve.dt = self.simDt
-        moose.useClock(1, path, 'process')
-        hsolve.target = self.cablePath
-
-
     def simulate( self, simTime, simDt = 1e-3, plotDt = None ):
         '''Simulate the cable '''
 
@@ -117,88 +115,33 @@ class PasiveCable( ):
                     ]
                 )
         moose.reinit( )
-        self.setupHSolve( )
         utils.verify( )
         moose.start( simTime )
 
-def main( args ):
-    cableLength = args['length']
-    compNons = args['ncomp']
+def main( ):
+    cableLength = 1.0e-3
+    compNons = int(sys.argv[1])
+    outputFile = None
+    try:
+        outputFile = sys.argv[2]
+    except: pass
     compartmentSize = cableLength / compNons
-
-    cable = PasiveCable( args )
-
+    cable = Cable( cableLength, compartmentSize)
     first = 0
-    last = int(args['x'] / compartmentSize) - 1
+    last = cable.nseg - 1
+    middle = ( first + last + 1 ) / 2
     table1 = utils.recordTarget('/data/table1', cable.cable[first].mc_, 'vm' )
-    table2 = utils.recordTarget('/data/table2', cable.cable[last].mc_, 'vm' )
-
-    simTime = args['run_time']
-    sim_dt = args['dt']
-    outputFile = args['output']
-
-    cable.simulate( simTime, sim_dt )
-    utils.plotTables([table1, table2]
+    table2 = utils.recordTarget('/data/table2', cable.cable[middle].mc_, 'vm' )
+    table3 = utils.recordTarget('/data/table3', cable.cable[last].mc_, 'vm' )
+    sim_dt = 1e-4
+    cable.simulate( simTime = 0.25, simDt = sim_dt )
+    utils.plotTables([table1, table2, table3]
             , xscale = sim_dt
             , file = outputFile
             )
-    #import moose.backend.spice as spice
-    #spice.toSpiceNetlist( output = 'cable.spice' )
+    import moose.backend.spice as spice
+    spice.toSpiceNetlist( output = 'cable.spice' )
 
 if __name__ == '__main__':
-    import argparse
-    parser = argparse.ArgumentParser(
-            description = 'Rallpacks1: A cable with passive compartments'
-            )
-    parser.add_argument( '--tau'
-            , default = 0.04
-            , help = 'Time constant of membrane'
-            )
-    parser.add_argument( '--run_time'
-            , default = 0.25
-            , help = 'Simulation run time'
-            )
-    parser.add_argument( '--dt'
-            , default = 5e-5
-            , help = 'Step time during simulation'
-            )
-    parser.add_argument( '--Em'
-            , default = -65e-3
-            , help = 'Resting potential of membrane'
-            )
-    parser.add_argument( '--RA'
-            , default = 1.0
-            , help = 'Axial resistivity'
-            )
-    parser.add_argument( '--lambda'
-            , default = 1e-3
-            , help = 'Lambda, what else?'
-            )
-    parser.add_argument( '--x'
-            , default = 1e-3
-            , help = 'You should record membrane potential somewhere, right?'
-            ) 
-    parser.add_argument( '--length'
-            , default = 1e-3
-            , help = 'Length of the cable'
-            )
-    parser.add_argument( '--diameter'
-            , default = 1e-6
-            , help = 'Diameter of cable'
-            )
-    parser.add_argument( '--inj'
-            , default = 1e-10
-            , help = 'Current injected at one end of the cable'
-            )
-    parser.add_argument( '--ncomp'
-            , default = 1000
-            , help = 'No of compartment in cable'
-            )
-    parser.add_argument( '--output'
-            , default = None
-            , help = 'Store simulation results to this file'
-            )
-
-    args = parser.parse_args()
-    main( vars(args) )
+    main()
 

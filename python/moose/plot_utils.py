@@ -2,7 +2,7 @@
 
 """plot_utils.py: Some utility function for plotting data in moose.
 
-Last modified: Wed May 21, 2014  06:13AM
+Last modified: Tue May 13, 2014  09:24PM
 
 """
     
@@ -112,8 +112,8 @@ def plotTable(table, standalone=True, file=None, **kwargs):
         yvector = vector
     pylab.plot(xvector, yvector)
     if file and standalone:
-        debug.dump("PLOT", "Saving plot to {0}".format(file))
-        pylab.savefig(file) 
+        debug.dump("PLOT", "Saving plot to {}".format(file))
+        pylab.savefig(file)
     elif standalone:
         pylab.show()
 
@@ -125,7 +125,7 @@ def plotTables(tables, file=None, **kwargs):
     for t in tables:
         plotTable(t, standalone=False, file=None, **kwargs)
     if file:
-        debug.dump("PLOT", "Saving plots to {}".format(file))
+        debug.dump("PLOT", "Saving plots to file".format(file))
         try:
             pylab.savefig(file)
         except Exception as e:

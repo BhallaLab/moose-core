@@ -1,5 +1,5 @@
 include_directories(../msg)
-include_directories(../basecode ../utility ../external/debug)
+include_directories(../basecode ../utility)
 add_library(kinetics
 	PoolBase.cpp	
 	Pool.cpp	

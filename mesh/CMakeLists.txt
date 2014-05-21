@@ -1,7 +1,6 @@
 include_directories(../msg)
 include_directories(../basecode)
 include_directories(../utility)
-include_directories(../external/debug)
 add_library(mesh 
     ChemCompt.cpp	
     MeshCompt.cpp	
