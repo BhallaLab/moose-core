@@ -21,7 +21,6 @@ class HSolvePassive: public HinesMatrix
 {
 #ifdef DO_UNIT_TESTS
 	friend void testHSolvePassive();
-        friend void testHSolveCable();
 #endif
 	
 public:

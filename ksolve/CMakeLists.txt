@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
 include_directories(../basecode ../utility ../kinetics)
-include_directories(../external/debug)
 add_library(ksolve
 	KinSparseMatrix.cpp	
 	ZombiePool.cpp 
