@@ -50,7 +50,6 @@
 
 #include "header.h"
 #include "Clock.h"
-#include "../external/debug/testing_macros.hpp"
 
 const unsigned int Clock::numTicks = 10;
 

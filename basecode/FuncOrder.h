@@ -11,7 +11,6 @@
  * Used in Element::msgDigest
  */
 
-#include "simple_test.hpp"
 
 class FuncOrder
 {
@@ -28,7 +27,6 @@ class FuncOrder
 			}
 
 			void set( const OpFunc* func, unsigned int index ) {
-                                EXPECT_TRUE(func, "Assigning a NULL pointer");
 				func_ = func;
 			   	index_ = index;
 			}

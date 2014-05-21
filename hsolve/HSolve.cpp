@@ -240,7 +240,6 @@ void HSolve::setup( Eref hsolve )
     HSolveActive::setup( seed_, dt_ );
     mapIds();
     zombify( hsolve );
-    DUMP("HSolve is all set. ", "HSOLVE");
 }
 
 ///////////////////////////////////////////////////
