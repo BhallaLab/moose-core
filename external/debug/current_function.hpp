@@ -1,5 +1,5 @@
-#ifndef SIMPLE_CURRENT_FUNCTION_HPP_INCLUDED
-#define SIMPLE_CURRENT_FUNCTION_HPP_INCLUDED
+#ifndef MOOSE_CURRENT_FUNCTION_HPP_INCLUDED
+#define MOOSE_CURRENT_FUNCTION_HPP_INCLUDED
 
 // MS compatible compilers support #pragma once
 
@@ -8,12 +8,9 @@
 #endif
 
 //
-//  Modified boost/current_function.hpp 
-//
-//  SIMPLE_CURRENT_FUNCTION
+//  boost/current_function.hpp - MOOSE_CURRENT_FUNCTION
 //
 //  Copyright (c) 2002 Peter Dimov and Multi Media Ltd.
-//  Copyright (c) 2013 Dilawar Singh
 //
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at
@@ -35,31 +32,31 @@ inline void current_function_helper()
 
 #if defined(__GNUC__) || (defined(__MWERKS__) && (__MWERKS__ >= 0x3000)) || (defined(__ICC) && (__ICC >= 600)) || defined(__ghs__)
 
-# define SIMPLE_CURRENT_FUNCTION __PRETTY_FUNCTION__
+# define MOOSE_CURRENT_FUNCTION __PRETTY_FUNCTION__
 
 #elif defined(__DMC__) && (__DMC__ >= 0x810)
 
-# define SIMPLE_CURRENT_FUNCTION __PRETTY_FUNCTION__
+# define MOOSE_CURRENT_FUNCTION __PRETTY_FUNCTION__
 
 #elif defined(__FUNCSIG__)
 
-# define SIMPLE_CURRENT_FUNCTION __FUNCSIG__
+# define MOOSE_CURRENT_FUNCTION __FUNCSIG__
 
 #elif (defined(__INTEL_COMPILER) && (__INTEL_COMPILER >= 600)) || (defined(__IBMCPP__) && (__IBMCPP__ >= 500))
 
-# define SIMPLE_CURRENT_FUNCTION __FUNCTION__
+# define MOOSE_CURRENT_FUNCTION __FUNCTION__
 
 #elif defined(__BORLANDC__) && (__BORLANDC__ >= 0x550)
 
-# define SIMPLE_CURRENT_FUNCTION __FUNC__
+# define MOOSE_CURRENT_FUNCTION __FUNC__
 
 #elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901)
 
-# define SIMPLE_CURRENT_FUNCTION __func__
+# define MOOSE_CURRENT_FUNCTION __func__
 
 #else
 
-# define SIMPLE_CURRENT_FUNCTION "(unknown)"
+# define MOOSE_CURRENT_FUNCTION "(unknown)"
 
 #endif
 
@@ -69,5 +66,5 @@ inline void current_function_helper()
 
 } // namespace moose
 
-#endif // #ifndef SIMPLE_CURRENT_FUNCTION_HPP_INCLUDED
+#endif // #ifndef MOOSE_CURRENT_FUNCTION_HPP_INCLUDED
 

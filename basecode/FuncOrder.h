@@ -11,7 +11,6 @@
  * Used in Element::msgDigest
  */
 
-
 class FuncOrder
 {
 	public:

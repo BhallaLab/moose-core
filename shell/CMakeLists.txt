@@ -9,4 +9,4 @@ add_library(shell
 	Wildcard.cpp	
 	testShell.cpp	
     )
-target_link_libraries(shell basecode utility biophysics kinetics)
+target_link_libraries(shell basecode utility biophysics kinetics debug_print)
