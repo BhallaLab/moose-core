@@ -47,6 +47,13 @@ def nextValuePowerOf2Law( d1, power=2.0/3.0  ):
     ''' Given a value, compute the next value using 2^power law '''
     return pow(pow(d1, 1.0/power)/2.0, power)
 
+def testPowerLaw():
+    """Test power law """
+    l = [ 32.0 ]
+    d = [ 16.0 ]
+    print nextValuePowerOf2Law( d[-1] )
+    print nextValuePowerOf2Law( l[-1], 1.0/3.0 )
+
 class BinaryCable( ):
 
     def __init__(self, depth):
@@ -71,15 +78,21 @@ class BinaryCable( ):
                     )
         while len(self.compLengthList) < self.depth:
             self.compLengthList.append(
-                    nextValuePowerOf2Law(self.compLengthList[-1])
+                    nextValuePowerOf2Law(self.compLengthList[-1], 1.0/3.0)
                     )
 
     def buildCable(self, args):
         ''' Build binary cable '''
+        self.args = args
         self.buildParameterLists()
         # Cable is a list of lists.
         self.cable = list()
         for n, (l, d) in enumerate(zip(self.compLengthList, self.compDiamList)):
+            utils.dump("STEP"
+                    , "Binary tree level {}: length {}, diameter {}".format(
+                        n, l, d
+                        )
+                    )
             noOfCompartments = pow(2, n)
             compartmentList = []
             for i in range(noOfCompartments):
@@ -105,9 +118,8 @@ class BinaryCable( ):
         # Create a pulse input
         moose.Neutral( self.tablePath )
         stim = moose.PulseGen( '{}/input'.format( self.tablePath) )
-        stim.level[0] = 0.1e-9
-        stim.width[0] = 0.25
-        stim.delay[0] = 0.0
+        stim.level[0] = self.args['inj']
+        stim.width[0] = self.args['run_time']
 
         # Inject the current from stim to first compartment.
         moose.connect( stim, 'output', self.cable[0][0], 'injectMsg' )
@@ -133,7 +145,8 @@ class BinaryCable( ):
         """Setting up HSolver """
         hsolve = moose.HSolve( path )
         hsolve.dt = self.simDt
-        moose.useClock(0, hsolve.path, 'process')
+        moose.setClock(1, self.simDt)
+        moose.useClock(1, hsolve.path, 'process')
         hsolve.target = self.cablePath
 
     def simulate(self, simTime, simDt, plotDt=None):
@@ -143,7 +156,6 @@ class BinaryCable( ):
         self.setupDUT( )
  
         # Setup clocks 
-        utils.dump("PLOT", "Setting up the clocks ... ")
         moose.setClock( 0, self.simDt )
 
         # Use clocks
@@ -167,7 +179,8 @@ def main( args ):
     binCable = BinaryCable( depth = d )
     binCable.buildCable( args )
     table0 = binCable.recordAt( depth = 0, index = 0 )
-    table1 = binCable.recordAt( depth = d-1, index = -1 )
+    table1 = binCable.recordAt( depth = d-1, index = -1)
+    print("[STIM] Simulating a cable with depth {}".format(d))
     binCable.simulate( simTime = args['run_time'], simDt = args['dt'] )
     utils.plotTables( [ table0, table1 ]
             , file = args['output']
@@ -198,6 +211,10 @@ if __name__ == '__main__':
     parser.add_argument( '--RA'
             , default = 1.0
             , help = 'Axial resistivity'
+            )
+    parser.add_argument( '--RM'
+            , default = 4.0
+            , help = 'Membrane resistivity.'
             )
     parser.add_argument( '--lambda'
             , default = 1e-3
