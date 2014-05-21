@@ -49,7 +49,9 @@ class PasiveCable( ):
         ''' Make a cable out of n compartments '''
         for i in range( self.ncomp ):
             compPath = '{}/comp{}'.format( self.cablePath, i)
-            c = comp.MooseCompartment( compPath, args )
+            l = args['length'] / args['ncomp']
+            d = args['diameter']
+            c = comp.MooseCompartment( compPath, l, d, args )
             self.cable.append(c)
         self.connect( )
         utils.dump( "STEP"
