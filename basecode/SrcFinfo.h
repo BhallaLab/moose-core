@@ -9,9 +9,6 @@
 #ifndef _SRC_FINFO_H
 #define _SRC_FINFO_H
 
-#include "simple_assert.hpp"
-#include "simple_test.hpp"
-
 /**
  * This set of classes define Message Sources. Their main job is to supply 
  * a type-safe send operation, and to provide typechecking for it.
@@ -115,7 +112,6 @@ template < class T > class SrcFinfo1: public SrcFinfo
 						for ( unsigned int k = start; k < end; ++k )
 							f->op( Eref( e, k ), arg );
 					} else  {
-                                                EXPECT_TRUE(f, "Invoking function op() of a NULL pointer");
 						f->op( *j, arg );
 						// Need to send stuff offnode too here. The 
 						// target in this case is just the src Element.

@@ -25,7 +25,6 @@
 
 #include "muParserBase.h"
 #include "muParserTemplateMagic.h"
-#include "simple_test.hpp"
 
 //--- Standard includes ------------------------------------------------------------------------
 #include <cassert>
@@ -860,15 +859,6 @@ namespace mu
             Error(ecTOO_FEW_PARAMS, m_pTokenReader->GetPos(), funTok.GetAsString());
 
           m_vRPN.AddFun(funTok.GetFuncAddr(), (funTok.GetArgCount()==-1) ? -iArgNumerical : iArgNumerical);
-          break;
-    default:
-          stringstream ss;
-          ss << "In function: " << SIMPLE_CURRENT_FUNCTION << " case statment " 
-              << " has incomplete defination "
-              << " Case " << funTok.GetCode() << " is not handled. " << endl;
-#ifdef  DEBUG
-          dump(ss.str(), "WARN");
-#endif     /* -----  DEBUG  ----- */
           break;
     }
 

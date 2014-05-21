@@ -327,7 +327,6 @@ void ZombieCaConc::zombify( Element* solver, Element* orig )
 // static func
 void ZombieCaConc::unzombify( Element* zombie )
 {
-    dump("ZombieCaConc::unzombify is not implemented", "FIXME");
 #if 0
     /* Abstract class. Can't instantiate. */
     Element temp( zombie->id(), zombie->cinfo(), zombie->dataHandler() );

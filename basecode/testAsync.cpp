@@ -8,7 +8,6 @@
 **********************************************************************/
 
 #include "header.h"
-#include "simple_assert.hpp"
 #include <stdio.h>
 #include <iomanip>
 #include "../shell/Neutral.h"
@@ -34,7 +33,7 @@ void showFields()
 	const Cinfo* nc = Neutral::initCinfo();
 	Id i1 = Id::nextId();
 	Element* ret = new GlobalDataElement( i1, nc, "test1", 1 );
-	SIMPLE_ASSERT( ret );
+	assert( ret );
 	// i1.eref().element()->showFields();
 	cout << "." << flush;
 
@@ -48,17 +47,17 @@ void testSendMsg()
 
 	const DestFinfo* df = dynamic_cast< const DestFinfo* >(
 		ac->findFinfo( "setOutputValue" ) );
-	SIMPLE_ASSERT( df != 0 );
+	assert( df != 0 );
 	FuncId fid = df->getFid();
 
 	Id i1 = Id::nextId();
 	Id i2 = Id::nextId();
 	Element* ret = new GlobalDataElement( i1, ac, "test1", size );
 	// bool ret = nc->create( i1, "test1", size );
-	SIMPLE_ASSERT( ret );
+	assert( ret );
 	// ret = nc->create( i2, "test2", size );
 	ret = new GlobalDataElement( i2, ac, "test2", size );
-	SIMPLE_ASSERT( ret );
+	assert( ret );
 
 	Eref e1 = i1.eref();
 	Eref e2 = i2.eref();
@@ -66,23 +65,23 @@ void testSendMsg()
 	Msg* m = new OneToOneMsg( e1, e2, 0 );
 	vector< vector< Eref > > ver;
 	m->targets( ver );
-	SIMPLE_ASSERT( ver.size() == size );
-	SIMPLE_ASSERT( ver[0].size() == 1 );
-	SIMPLE_ASSERT( ver[0][0].element() == e2.element() );
-	SIMPLE_ASSERT( ver[0][0].dataIndex() == e2.dataIndex() );
-	SIMPLE_ASSERT( ver[55].size() == 1 );
-	SIMPLE_ASSERT( ver[55][0].element() == e2.element() );
-	SIMPLE_ASSERT( ver[55][0].dataIndex() == 55 );
+	assert( ver.size() == size );
+	assert( ver[0].size() == 1 );
+	assert( ver[0][0].element() == e2.element() );
+	assert( ver[0][0].dataIndex() == e2.dataIndex() );
+	assert( ver[55].size() == 1 );
+	assert( ver[55][0].element() == e2.element() );
+	assert( ver[55][0].dataIndex() == 55 );
 	
 	SrcFinfo1<double> s( "test", "" );
 	s.setBindIndex( 0 );
 	e1.element()->addMsgAndFunc( m->mid(), fid, s.getBindIndex() );
 	// e1.element()->digestMessages();
 	const vector< MsgDigest >& md = e1.element()->msgDigest( 0 );
-	SIMPLE_ASSERT( md.size() == 1 );
-	SIMPLE_ASSERT( md[0].targets.size() == 1 );
-	SIMPLE_ASSERT( md[0].targets[0].element() == e2.element() );
-	SIMPLE_ASSERT( md[0].targets[0].dataIndex() == e2.dataIndex() );
+	assert( md.size() == 1 );
+	assert( md[0].targets.size() == 1 );
+	assert( md[0].targets[0].element() == e2.element() );
+	assert( md[0].targets[0].dataIndex() == e2.dataIndex() );
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		double x = i + i * i;
@@ -92,7 +91,7 @@ void testSendMsg()
 	for ( unsigned int i = 0; i < size; ++i ) {
 		double temp = i + i * i;
 		double val = reinterpret_cast< Arith* >(e2.element()->data( i ) )->getOutput();
-		SIMPLE_ASSERT( doubleEq( val, temp ) );
+		assert( doubleEq( val, temp ) );
 	}
 	cout << "." << flush;
 
@@ -110,30 +109,30 @@ void testCreateMsg()
 	Id i2 = Id::nextId();
 	Element* temp = new GlobalDataElement( i1, ac, "test1", size );
 	// bool ret = nc->create( i1, "test1", size );
-	SIMPLE_ASSERT( temp );
+	assert( temp );
 	temp = new GlobalDataElement( i2, ac, "test2", size );
-	SIMPLE_ASSERT( temp );
+	assert( temp );
 
 	Eref e1 = i1.eref();
 	Eref e2 = i2.eref();
 
 	OneToOneMsg *m = new OneToOneMsg( e1, e2, 0 );
-	SIMPLE_ASSERT( m );
+	assert( m );
 	const Finfo* f1 = ac->findFinfo( "output" );
-	SIMPLE_ASSERT( f1 );
+	assert( f1 );
 	const Finfo* f2 = ac->findFinfo( "arg1" );
-	SIMPLE_ASSERT( f2 );
+	assert( f2 );
 	bool ret = f1->addMsg( f2, m->mid(), e1.element() );
 	
-	SIMPLE_ASSERT( ret );
+	assert( ret );
 	// e1.element()->digestMessages();
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		const SrcFinfo1< double >* sf = dynamic_cast< const SrcFinfo1< double >* >( f1 );
-		SIMPLE_ASSERT( sf != 0 );
+		assert( sf != 0 );
 		sf->send( Eref( e1.element(), i ), double( i ) );
 		double val = reinterpret_cast< Arith* >(e2.element()->data( i ) )->getArg1();
-		SIMPLE_ASSERT( doubleEq( val, i ) );
+		assert( doubleEq( val, i ) );
 	}
 
 	/*
@@ -154,16 +153,16 @@ void testSetGet()
 	string arg;
 	Id i2 = Id::nextId();
 	Element* ret = new GlobalDataElement( i2, ac, "test2", size );
-	SIMPLE_ASSERT( ret );
+	assert( ret );
 	ProcInfo p;
 	
 	for ( unsigned int i = 0; i < size; ++i ) {
 		ObjId oid( i2, i );
 		double x = i * 3.14;
 		bool ret = Field< double >::set( oid, "outputValue", x );
-		SIMPLE_ASSERT( ret );
+		assert( ret );
 		double val = reinterpret_cast< Arith* >(oid.data())->getOutput();
-		SIMPLE_ASSERT( doubleEq( val, x ) );
+		assert( doubleEq( val, x ) );
 	}
 
 	for ( unsigned int i = 0; i < size; ++i ) {
@@ -171,7 +170,7 @@ void testSetGet()
 		double x = i * 3.14;
 		double ret = Field< double >::get( oid, "outputValue" );
 		ProcInfo p;
-		SIMPLE_ASSERT( doubleEq( ret, x ) );
+		assert( doubleEq( ret, x ) );
 	}
 
 	cout << "." << flush;
@@ -186,15 +185,15 @@ void testStrSet()
 	string arg;
 	Id i2 = Id::nextId();
 	Element* ret = new GlobalDataElement( i2, ac, "test2", size );
-	SIMPLE_ASSERT( ret );
+	assert( ret );
 	ProcInfo p;
 
 	Shell::adopt( Id(), i2, 0 );
 
-	SIMPLE_ASSERT( ret->getName() == "test2" );
+	assert( ret->getName() == "test2" );
 	bool ok = SetGet::strSet( ObjId( i2, 0 ), "name", "NewImprovedTest" );
-	SIMPLE_ASSERT( ok );
-	SIMPLE_ASSERT( ret->getName() == "NewImprovedTest" );
+	assert( ok );
+	assert( ret->getName() == "NewImprovedTest" );
 	
 	for ( unsigned int i = 0; i < size; ++i ) {
 		double x = sqrt((double) i );
@@ -203,7 +202,7 @@ void testStrSet()
 		stringstream ss;
 		ss << setw( 10 ) << x;
 		ok = SetGet::strSet( dest, "outputValue", ss.str() );
-		SIMPLE_ASSERT( ok );
+		assert( ok );
 		// SetGet1< double >::set( dest, "setOutputValue", x );
 	}
 
@@ -211,7 +210,7 @@ void testStrSet()
 		double temp = sqrt((double) i );
 		double val = reinterpret_cast< Arith* >( 
 						Eref( i2.element(), i ).data() )->getOutput();
-		SIMPLE_ASSERT( fabs( val - temp ) < 1e-5 );
+		assert( fabs( val - temp ) < 1e-5 );
 		// DoubleEq won't work here because string is truncated.
 	}
 
@@ -228,16 +227,16 @@ void testGet()
 	Id i2 = Id::nextId();
 
 	Element* ret = new GlobalDataElement( i2, ac, "test2", size );
-	SIMPLE_ASSERT( ret );
+	assert( ret );
 	ProcInfo p;
 
 	ObjId oid( i2, 0 );
 
 	string val = Field< string >::get( oid, "name" );
-	SIMPLE_ASSERT( val == "test2" );
+	assert( val == "test2" );
 	ret->setName( "HupTwoThree" );
 	val = Field< string >::get( oid, "name" );
-	SIMPLE_ASSERT( val == "HupTwoThree" );
+	assert( val == "HupTwoThree" );
 	
 	for ( unsigned int i = 0; i < size; ++i ) {
 		double temp = i * 3;
@@ -250,7 +249,7 @@ void testGet()
 
 		double val = Field< double >::get( dest, "outputValue" );
 		double temp = i * 3;
-		SIMPLE_ASSERT( doubleEq( val, temp ) );
+		assert( doubleEq( val, temp ) );
 	}
 
 	cout << "." << flush;
@@ -265,19 +264,19 @@ void testStrGet()
 	Id i2 = Id::nextId();
 
 	Element* ret = new GlobalDataElement( i2, ac, "test2", size );
-	SIMPLE_ASSERT( ret );
+	assert( ret );
 	ProcInfo p;
 
 	ObjId oid( i2, 0 );
 
 	string val;
 	bool ok = SetGet::strGet( oid, "name", val );
-	SIMPLE_ASSERT( ok );
-	SIMPLE_ASSERT( val == "test2" );
+	assert( ok );
+	assert( val == "test2" );
 	ret->setName( "HupTwoThree" );
 	ok = SetGet::strGet( oid, "name", val );
-	SIMPLE_ASSERT( ok );
-	SIMPLE_ASSERT( val == "HupTwoThree" );
+	assert( ok );
+	assert( val == "HupTwoThree" );
 	
 	for ( unsigned int i = 0; i < size; ++i ) {
 		double temp = i * 3;
@@ -288,10 +287,10 @@ void testStrGet()
 		// Eref dest( e2.element(), i );
 		ObjId dest( i2, i );
 		ok = SetGet::strGet( dest, "outputValue", val );
-		SIMPLE_ASSERT( ok );
+		assert( ok );
 		double conv = atof( val.c_str() );
 		double temp = i * 3;
-		SIMPLE_ASSERT( fabs( conv - temp ) < 1e-5 );
+		assert( fabs( conv - temp ) < 1e-5 );
 		// DoubleEq won't work here because string is truncated.
 	}
 
@@ -309,7 +308,7 @@ void testSetGetDouble()
 	Id i2 = Id::nextId();
 	Id i3( i2.value() + 1 );
 	Element* ret = new GlobalDataElement( i2, ic, "test2", size );
-	SIMPLE_ASSERT( ret );
+	assert( ret );
 	ProcInfo p;
 
 	for ( unsigned int i = 0; i < size; ++i ) {
@@ -317,8 +316,8 @@ void testSetGetDouble()
 		ObjId oid( i2, i );
 		double temp = i;
 		bool ret = Field< double >::set( oid, "Vm", temp );
-		SIMPLE_ASSERT( ret );
-		SIMPLE_ASSERT( 
+		assert( ret );
+		assert( 
 			doubleEq ( reinterpret_cast< IntFire* >(oid.data())->getVm() , temp ) );
 	}
 
@@ -326,7 +325,7 @@ void testSetGetDouble()
 		ObjId oid( i2, i );
 		double temp = i;
 		double ret = Field< double >::get( oid, "Vm" );
-		SIMPLE_ASSERT( doubleEq( temp, ret ) );
+		assert( doubleEq( temp, ret ) );
 	}
 
 	cout << "." << flush;
@@ -342,7 +341,7 @@ void testSetGetSynapse()
 	string arg;
 	Id cells = Id::nextId();
 	Element* temp = new GlobalDataElement( cells, ic, "test2", size );
-	SIMPLE_ASSERT( temp );
+	assert( temp );
 	vector< unsigned int > ns( size );
 	vector< vector< double > > delay( size );
 	for ( unsigned int i = 0; i < size; ++i ) {
@@ -354,28 +353,28 @@ void testSetGetSynapse()
 	}
 
 	bool ret = Field< unsigned int >::setVec( cells, "numSynapse", ns );
-	SIMPLE_ASSERT( ret );
-	SIMPLE_ASSERT( temp->numData() == size );
+	assert( ret );
+	assert( temp->numData() == size );
 	Id syns( cells.value() + 1 );
 	for ( unsigned int i = 0; i < size; ++i ) {
 		ret = Field< double >::
 				setVec( ObjId( syns, i ), "delay", delay[i] );
 		if ( i > 0 )
-			SIMPLE_ASSERT( ret );
+			assert( ret );
 	}
 
 	for ( unsigned int i = 0; i < size; ++i ) {
-		SIMPLE_ASSERT( syns.element()->numField( i ) == i );
+		assert( syns.element()->numField( i ) == i );
 		IntFire* fire = reinterpret_cast< IntFire* >( temp->data( i ) );
-		SIMPLE_ASSERT( fire->getNumSynapses() == i );
+		assert( fire->getNumSynapses() == i );
 		for ( unsigned int j = 0; j < i; ++j ) {
 			// ObjId oid( syns, i, j );
 			ObjId oid( syns, i, j );
 			double x = i * 1000 + j ;
 			double d = Field< double >::get( oid, "delay" );
 			double d2 = fire->getSynapse( j )->getDelay();
-			SIMPLE_ASSERT( doubleEq( d, x ) );
-			SIMPLE_ASSERT( doubleEq( d2, x ) );
+			assert( doubleEq( d, x ) );
+			assert( doubleEq( d2, x ) );
 		}
 	}
 	delete syns.element();
@@ -392,7 +391,7 @@ void testSetGetVec()
 	string arg;
 	Id i2 = Id::nextId();
 	Element* temp = new GlobalDataElement( i2, ic, "test2", size );
-	SIMPLE_ASSERT( temp );
+	assert( temp );
 
 	vector< unsigned int > numSyn( size, 0 );
 	for ( unsigned int i = 0; i < size; ++i )
@@ -401,19 +400,19 @@ void testSetGetVec()
 	Eref e2( i2.element(), 0 );
 	// Here we test setting a 1-D vector
 	bool ret = Field< unsigned int >::setVec( i2, "numSynapse", numSyn );
-	SIMPLE_ASSERT( ret );
+	assert( ret );
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		IntFire* fire = reinterpret_cast< IntFire* >( i2.element()->data( i ) );
-		SIMPLE_ASSERT( fire->getNumSynapses() == i );
+		assert( fire->getNumSynapses() == i );
 	}
 
 	vector< unsigned int > getSyn;
 
 	Field< unsigned int >::getVec( i2, "numSynapse", getSyn );
-	SIMPLE_ASSERT (getSyn.size() == size );
+	assert (getSyn.size() == size );
 	for ( unsigned int i = 0; i < size; ++i )
-		SIMPLE_ASSERT( getSyn[i] == i );
+		assert( getSyn[i] == i );
 
 	Id synapse( i2.value() + 1 );
 	delete synapse.element();
@@ -433,13 +432,13 @@ void testSendSpike()
 	string arg;
 	Id i2 = Id::nextId();
 	Element* temp = new GlobalDataElement( i2, ic, "test2", size );
-	SIMPLE_ASSERT( temp );
+	assert( temp );
 	Eref e2 = i2.eref();
 	for ( unsigned int i = 0; i < size; ++i ) {
 		// Eref er( i2(), i );
 		ObjId oid( i2, i );
 		bool ret = Field< unsigned int >::set( oid, "numSynapses", i );
-		SIMPLE_ASSERT( ret );
+		assert( ret );
 	}
 
 	Id synId( i2.value() + 1 );
@@ -451,7 +450,7 @@ void testSendSpike()
 	const Finfo* f1 = ic->findFinfo( "spikeOut" );
 	const Finfo* f2 = sc->findFinfo( "addSpike" );
 	bool ret = f1->addMsg( f2, m->mid(), e2.element() );
-	SIMPLE_ASSERT( ret );
+	assert( ret );
 
 	reinterpret_cast< IntFire* >(e2.data())->setVm( 1.0 );
 	// ret = SetGet1< double >::set( e2, "Vm", 1.0 );
@@ -460,13 +459,13 @@ void testSendSpike()
 	reinterpret_cast< IntFire* >(e2.data())->process( e2, &p );
 	// At this stage we have sent the spike, so e2.data::Vm should be -1e-7.
 	double Vm = reinterpret_cast< IntFire* >(e2.data())->getVm();
-	SIMPLE_ASSERT( doubleEq( Vm, -1e-7 ) );
+	assert( doubleEq( Vm, -1e-7 ) );
 	ObjId targetCell( i2, 1 );
 	reinterpret_cast< IntFire* >(targetCell.data())->setTau( TAU );
 
 	reinterpret_cast< IntFire* >(targetCell.data())->process( targetCell.eref(), &p );
 	Vm = Field< double >::get( targetCell, "Vm" );
-	SIMPLE_ASSERT( doubleEq( Vm , WEIGHT * ( 1.0 - DT / TAU ) ) );
+	assert( doubleEq( Vm , WEIGHT * ( 1.0 - DT / TAU ) ) );
 	cout << "." << flush;
 	delete i2.element();
 }
@@ -529,29 +528,29 @@ void testSparseMatrix()
 	for ( unsigned int i = 0; i < nRows; ++i ) {
 		unsigned int num = m.getRow( i, &n, &c );
 		for ( unsigned int j = 0; j < num; ++j ) {
-			SIMPLE_ASSERT( n[j] == preN[ k ] );
-			SIMPLE_ASSERT( c[j] == preColIndex[ k ] );
+			assert( n[j] == preN[ k ] );
+			assert( c[j] == preColIndex[ k ] );
 			k++;
 		}
 	}
-	SIMPLE_ASSERT( k == 7 );
+	assert( k == 7 );
 
 	// printSparseMatrix( m );
 
 	m.transpose();
-	SIMPLE_ASSERT( m.nRows() == nCols );
-	SIMPLE_ASSERT( m.nColumns() == nRows );
+	assert( m.nRows() == nCols );
+	assert( m.nColumns() == nRows );
 
 	k = 0;
 	for ( unsigned int i = 0; i < nCols; ++i ) {
 		unsigned int num = m.getRow( i, &n, &c );
 		for ( unsigned int j = 0; j < num; ++j ) {
-			SIMPLE_ASSERT( n[j] == postN[ k ] );
-			SIMPLE_ASSERT( c[j] == postColIndex[ k ] );
+			assert( n[j] == postN[ k ] );
+			assert( c[j] == postColIndex[ k ] );
 			k++;
 		}
 	}
-	SIMPLE_ASSERT( k == 7 );
+	assert( k == 7 );
 
 	// Drop column 1.
 	vector< unsigned int > keepCols( 2 );
@@ -560,19 +559,19 @@ void testSparseMatrix()
 	// cout << endl; m.print();
 	m.reorderColumns( keepCols );
 	// cout << endl; m.print();
-	SIMPLE_ASSERT( m.nRows() == nCols );
-	SIMPLE_ASSERT( m.nColumns() == 2 );
+	assert( m.nRows() == nCols );
+	assert( m.nColumns() == 2 );
 
 	k = 0;
 	for ( unsigned int i = 0; i < nCols; ++i ) {
 		unsigned int num = m.getRow( i, &n, &c );
 		for ( unsigned int j = 0; j < num; ++j ) {
-			SIMPLE_ASSERT( n[j] == dropN[ k ] );
-			SIMPLE_ASSERT( c[j] == dropColIndex[ k ] );
+			assert( n[j] == dropN[ k ] );
+			assert( c[j] == dropColIndex[ k ] );
 			k++;
 		}
 	}
-	SIMPLE_ASSERT( k == 4 );
+	assert( k == 4 );
 
 	cout << "." << flush;
 }
@@ -606,11 +605,11 @@ void testSparseMatrix2()
 	n.transpose();
 	for ( unsigned int i = 0; i < 10; ++i )
 		for ( unsigned int j = 0; j < 10; ++j )
-			SIMPLE_ASSERT (n.get( j, i ) ==  m[i][j] );
+			assert (n.get( j, i ) ==  m[i][j] );
 	n.transpose();
 	for ( unsigned int i = 0; i < 10; ++i )
 		for ( unsigned int j = 0; j < 10; ++j )
-			SIMPLE_ASSERT (n.get( i, j ) ==  m[i][j] );
+			assert (n.get( i, j ) ==  m[i][j] );
 
 	///////////////////////////////////////////////////////////////
 	// Drop columns 2 and 7.
@@ -622,7 +621,7 @@ void testSparseMatrix2()
 	for ( unsigned int i = 0; i < 10; ++i ) {
 		for ( unsigned int j = 0; j < 8; ++j ) {
 			unsigned int k = keepCols[j];
-			SIMPLE_ASSERT (n.get( i, j ) ==  m[i][k] );
+			assert (n.get( i, j ) ==  m[i][k] );
 		}
 	}
 	/*
@@ -647,8 +646,8 @@ void testSparseMatrixReorder()
 	n.set( 1, 0, 1 );
 	vector< unsigned int > colOrder( 1, 0 ); // Keep the original as is
 	n.reorderColumns( colOrder ); // This case failed in an earlier version
-	SIMPLE_ASSERT( n.get( 0, 0 ) == -1 );
-	SIMPLE_ASSERT( n.get( 1, 0 ) == 1 );
+	assert( n.get( 0, 0 ) == -1 );
+	assert( n.get( 1, 0 ) == 1 );
 
 	unsigned int nrows = 4;
 	unsigned int ncolumns = 5;
@@ -670,12 +669,12 @@ void testSparseMatrixReorder()
 	colOrder[3] = 4;
 	colOrder[4] = 1;
 	n.reorderColumns( colOrder );
-	SIMPLE_ASSERT( n.nRows() == nrows );
-	SIMPLE_ASSERT( n.nColumns() == ncolumns );
+	assert( n.nRows() == nrows );
+	assert( n.nColumns() == ncolumns );
 	for ( unsigned int i = 0; i < nrows; ++i ) {
 		for ( unsigned int j = 0; j < ncolumns; ++j ) {
 			int x = i * 10 + colOrder[j];
-			SIMPLE_ASSERT( n.get( i, j ) == x );
+			assert( n.get( i, j ) == x );
 		}
 	}
 
@@ -693,11 +692,11 @@ void testSparseMatrixReorder()
 	colOrder[0] = 3;
 	colOrder[1] = 2;
 	n.reorderColumns( colOrder );
-	SIMPLE_ASSERT( n.nRows() == nrows );
-	SIMPLE_ASSERT( n.nColumns() == 2 );
+	assert( n.nRows() == nrows );
+	assert( n.nColumns() == 2 );
 	for ( unsigned int i = 0; i < nrows; ++i ) {
-		SIMPLE_ASSERT( n.get( i, 0 ) == static_cast< int >( i * 10 + 3 ) );
-		SIMPLE_ASSERT( n.get( i, 1 ) == static_cast< int >( i * 10 + 2 ) );
+		assert( n.get( i, 0 ) == static_cast< int >( i * 10 + 3 ) );
+		assert( n.get( i, 1 ) == static_cast< int >( i * 10 + 2 ) );
 	}
 	cout << "." << flush;
 }
@@ -723,16 +722,16 @@ void testSparseMatrixFill()
 	}
 	n.tripletFill( row, col, val );
 	// n.print();
-	SIMPLE_ASSERT( n.nRows() == nrow );
-	SIMPLE_ASSERT( n.nColumns() == ncol );
-	SIMPLE_ASSERT( n.nEntries() == num );
+	assert( n.nRows() == nrow );
+	assert( n.nColumns() == ncol );
+	assert( n.nEntries() == num );
 	for ( unsigned int i = 0; i < nrow; ++i ) {
 		for ( unsigned int j = 0; j < ncol; ++j ) {
 			int val = n.get( i, j );
 			if ( j == 0 || i + j == 6 || ( j - i) == 2 )
-				SIMPLE_ASSERT( static_cast< unsigned int >( val ) == 100 + i * 10 + j );
+				assert( static_cast< unsigned int >( val ) == 100 + i * 10 + j );
 			else
-				SIMPLE_ASSERT( val == 0 );
+				assert( val == 0 );
 		}
 	}
 	cout << "." << flush;
@@ -777,9 +776,9 @@ void testSparseMsg()
 	const Cinfo* ic = IntFire::initCinfo();
 	const Cinfo* sc = Synapse::initCinfo();
 	const Finfo* procFinfo = ic->findFinfo( "process" );
-	SIMPLE_ASSERT( procFinfo );
+	assert( procFinfo );
 	const DestFinfo* df = dynamic_cast< const DestFinfo* >( procFinfo );
-	SIMPLE_ASSERT( df );
+	assert( df );
 	// const Cinfo* sc = Synapse::initCinfo();
 	unsigned int size = 1024;
 
@@ -790,14 +789,14 @@ void testSparseMsg()
 	Id cells = Id::nextId();
 	// bool ret = ic->create( cells, "test2", size );
 	Element* t2 = new GlobalDataElement( cells, ic, "test2", size );
-	SIMPLE_ASSERT( t2 );
+	assert( t2 );
 	Id syns( cells.value() + 1 );
 
 	SparseMsg* sm = new SparseMsg( t2, syns.element(), 0 );
-	SIMPLE_ASSERT( sm );
+	assert( sm );
 	const Finfo* f1 = ic->findFinfo( "spikeOut" );
 	const Finfo* f2 = sc->findFinfo( "addSpike" );
-	SIMPLE_ASSERT( f1 && f2 );
+	assert( f1 && f2 );
 	f1->addMsg( f2, sm->mid(), t2 );
 	sm->randomConnect( connectionProbability );
 
@@ -806,15 +805,15 @@ void testSparseMsg()
 		temp[i] = mtrand() * Vmax;
 
 	bool ret = Field< double >::setVec( cells, "Vm", temp );
-	SIMPLE_ASSERT( ret );
+	assert( ret );
 	temp.clear();
 	temp.resize( size, thresh );
 	ret = Field< double >::setVec( cells, "thresh", temp );
-	SIMPLE_ASSERT( ret );
+	assert( ret );
 	temp.clear();
 	temp.resize( size, refractoryPeriod );
 	ret = Field< double >::setVec( cells, "refractoryPeriod", temp );
-	SIMPLE_ASSERT( ret );
+	assert( ret );
 
 	unsigned int fieldSize = 5000;
 	vector< double > weight( size * fieldSize, 0.0 );
@@ -830,9 +829,9 @@ void testSparseMsg()
 		}
 	}
 	ret = Field< double >::setVec( syns, "weight", weight );
-	SIMPLE_ASSERT( ret );
+	assert( ret );
 	ret = Field< double >::setVec( syns, "delay", delay );
-	SIMPLE_ASSERT( ret );
+	assert( ret );
 
 	// printGrid( cells(), "Vm", 0, thresh );
 
@@ -857,7 +856,7 @@ void test2ArgSetVec()
 	string arg;
 	Id i2 = Id::nextId();
 	Element* ret = new GlobalDataElement( i2, ac, "test2", size );
-	SIMPLE_ASSERT( ret );
+	assert( ret );
 
 	vector< double > arg1( size );
 	vector< double > arg2( size );
@@ -872,7 +871,7 @@ void test2ArgSetVec()
 		ObjId oid( i2, i );
 		double x = i * 100 * ( 100 - i );
 		double val = reinterpret_cast< Arith* >(oid.data())->getOutput();
-		SIMPLE_ASSERT( doubleEq( val, x ) );
+		assert( doubleEq( val, x ) );
 	}
 	cout << "." << flush;
 	delete i2.element();
@@ -922,28 +921,28 @@ void testSetRepeat()
 	Id cell = Id::nextId();
 	// bool ret = ic->create( i2, "test2", size );
 	Element* temp = new GlobalDataElement( cell, ic, "cell", size );
-	SIMPLE_ASSERT( temp );
+	assert( temp );
 	vector< unsigned int > numSyn( size, 0 );
 	for ( unsigned int i = 0; i < size; ++i )
 		numSyn[i] = i;
 	
 	// Here we test setting a 1-D vector
 	bool ret = Field< unsigned int >::setVec( cell, "numSynapse", numSyn);
-	SIMPLE_ASSERT( ret );
+	assert( ret );
 	
 	Id synapse( cell.value() + 1 );
 	// Here we test setting a 2-D array with different dims on each axis.
 	for ( unsigned int i = 0; i < size; ++i ) {
 		ret = Field< double >::
 				setRepeat( ObjId( synapse, i ), "delay", 123.0 );
-		SIMPLE_ASSERT( ret );
+		assert( ret );
 	}
 	for ( unsigned int i = 0; i < size; ++i ) {
 		vector< double > delay;
 		Field< double >::getVec( ObjId( synapse, i ), "delay", delay );
-		SIMPLE_ASSERT( delay.size() == i );
+		assert( delay.size() == i );
 		for ( unsigned int j = 0; j < i; ++j ) {
-			SIMPLE_ASSERT( doubleEq( delay[j], 123.0 ) );
+			assert( doubleEq( delay[j], 123.0 ) );
 		}
 	}
 
@@ -1038,10 +1037,10 @@ void testSharedMsg()
 	// bool ret = Test::initCinfo()->create( t1, "test1", 1 );
 
 	Element* temp = new GlobalDataElement( t1, Test::initCinfo(), "test1", 1 );
-	SIMPLE_ASSERT( temp );
+	assert( temp );
 	temp = new GlobalDataElement( t2, Test::initCinfo(), "test2", 1 );
 	// ret = Test::initCinfo()->create( t2, "test2", 1 );
-	SIMPLE_ASSERT( temp );
+	assert( temp );
 
 	// Assign initial values
 	Test* tdata1 = reinterpret_cast< Test* >( t1.eref().data() );
@@ -1058,11 +1057,11 @@ void testSharedMsg()
 	// do it independently.
 	
 	const Finfo* shareFinfo = Test::initCinfo()->findFinfo( "shared" );
-	SIMPLE_ASSERT( shareFinfo != 0 );
+	assert( shareFinfo != 0 );
 	Msg* m = new OneToOneMsg( t1.eref(), t2.eref(), 0 );
-	SIMPLE_ASSERT( m != 0 );
+	assert( m != 0 );
 	bool ret = shareFinfo->addMsg( shareFinfo, m->mid(), t1.element() );
-	SIMPLE_ASSERT( ret );
+	assert( ret );
 
 	// t1.element()->digestMessages();
 	// t2.element()->digestMessages();
@@ -1090,14 +1089,14 @@ void testSharedMsg()
 	*/
 	// Check results
 	
-	SIMPLE_ASSERT( tdata1->s_ == " goodbye tdata1" );
-	SIMPLE_ASSERT( tdata2->s_ == " hello TDATA2" );
-	SIMPLE_ASSERT( tdata1->i1_ == 5001  );
-	SIMPLE_ASSERT( tdata1->i2_ == 6002  );
-	SIMPLE_ASSERT( tdata2->i1_ == 1005  );
-	SIMPLE_ASSERT( tdata2->i2_ == 2006  );
-	SIMPLE_ASSERT( tdata1->numAcks_ == 2  );
-	SIMPLE_ASSERT( tdata2->numAcks_ == 2  );
+	assert( tdata1->s_ == " goodbye tdata1" );
+	assert( tdata2->s_ == " hello TDATA2" );
+	assert( tdata1->i1_ == 5001  );
+	assert( tdata1->i2_ == 6002  );
+	assert( tdata2->i1_ == 1005  );
+	assert( tdata2->i2_ == 2006  );
+	assert( tdata1->numAcks_ == 2  );
+	assert( tdata2->numAcks_ == 2  );
 	
 	t1.destroy();
 	t2.destroy();
@@ -1115,22 +1114,22 @@ void testConvVector()
 	double* tempBuf = buf;
 
 	Conv< vector< unsigned int > > intConv;
-	SIMPLE_ASSERT( intConv.size( intVec ) == 1 + intVec.size() );
+	assert( intConv.size( intVec ) == 1 + intVec.size() );
 	intConv.val2buf( intVec, &tempBuf );
-	SIMPLE_ASSERT( tempBuf == buf + 6 );
-	SIMPLE_ASSERT( buf[0] == intVec.size() );
-	SIMPLE_ASSERT( static_cast< unsigned int >( buf[1] ) == intVec[0] );
-	SIMPLE_ASSERT( static_cast< unsigned int >( buf[2] ) == intVec[1] );
-	SIMPLE_ASSERT( static_cast< unsigned int >( buf[3] ) == intVec[2] );
-	SIMPLE_ASSERT( static_cast< unsigned int >( buf[4] ) == intVec[3] );
-	SIMPLE_ASSERT( static_cast< unsigned int >( buf[5] ) == intVec[4] );
+	assert( tempBuf == buf + 6 );
+	assert( buf[0] == intVec.size() );
+	assert( static_cast< unsigned int >( buf[1] ) == intVec[0] );
+	assert( static_cast< unsigned int >( buf[2] ) == intVec[1] );
+	assert( static_cast< unsigned int >( buf[3] ) == intVec[2] );
+	assert( static_cast< unsigned int >( buf[4] ) == intVec[3] );
+	assert( static_cast< unsigned int >( buf[5] ) == intVec[4] );
 
 	tempBuf = buf;
 	const vector< unsigned int >& testIntVec = intConv.buf2val( &tempBuf );
 
-	SIMPLE_ASSERT( intVec.size() == testIntVec.size() );
+	assert( intVec.size() == testIntVec.size() );
 	for ( unsigned int i = 0; i < intVec.size(); ++i ) {
-		SIMPLE_ASSERT( intVec[ i ] == testIntVec[i] );
+		assert( intVec[ i ] == testIntVec[i] );
 	}
 
 	vector< string > strVec;
@@ -1142,16 +1141,16 @@ void testConvVector()
 	tempBuf = buf;
 	Conv< vector< string > >::val2buf( strVec, &tempBuf );
 	unsigned int sz = Conv< vector< string > >::size( strVec );
-	SIMPLE_ASSERT( sz == 1 + 2 + ( strVec[2].length() + 8) /8 + ( strVec[3].length() + 8 )/8 );
-	SIMPLE_ASSERT( buf[0] == 4 );
-	SIMPLE_ASSERT( strcmp( reinterpret_cast< char* >( buf + 1 ), "one" ) == 0 );
+	assert( sz == 1 + 2 + ( strVec[2].length() + 8) /8 + ( strVec[3].length() + 8 )/8 );
+	assert( buf[0] == 4 );
+	assert( strcmp( reinterpret_cast< char* >( buf + 1 ), "one" ) == 0 );
 	
 	tempBuf = buf;
 	const vector< string >& tgtStr = 
 			Conv< vector< string > >::buf2val( &tempBuf );
-	SIMPLE_ASSERT( tgtStr.size() == 4 );
+	assert( tgtStr.size() == 4 );
 	for ( unsigned int i = 0; i < 4; ++i )
-		SIMPLE_ASSERT( tgtStr[i] == strVec[i] );
+		assert( tgtStr[i] == strVec[i] );
 
 	cout << "." << flush;
 }
@@ -1188,20 +1187,20 @@ void testConvVectorOfVectors()
 
 	Conv< vector< vector< short > > > conv;
 
-	SIMPLE_ASSERT( conv.size( vec ) == 1 + 6 + 0 + 1 + 2 + 3 + 4 + 5 ); // 21
+	assert( conv.size( vec ) == 1 + 6 + 0 + 1 + 2 + 3 + 4 + 5 ); // 21
 	conv.val2buf( vec, &buf );
-	SIMPLE_ASSERT( buf == 22 + origBuf );
+	assert( buf == 22 + origBuf );
 	for ( unsigned int i = 0; i < 22; ++i )
-		SIMPLE_ASSERT( doubleEq( origBuf[i], expected[i] ) );
+		assert( doubleEq( origBuf[i], expected[i] ) );
 	
 	double* buf2 = origBuf;
 	const vector< vector< short > >& rc = conv.buf2val( &buf2 );
 	
-	SIMPLE_ASSERT( rc.size() == 6 );
+	assert( rc.size() == 6 );
 	for ( unsigned int i = 0; i < 6; ++i ) {
-		SIMPLE_ASSERT( rc[i].size() == i );
+		assert( rc[i].size() == i );
 		for ( unsigned int j = 0; j < i; ++j )
-			SIMPLE_ASSERT( rc[i][j] == vec[i][j] );
+			assert( rc[i][j] == vec[i][j] );
 	}
 
 	cout << "." << flush;
@@ -1214,28 +1213,28 @@ void testMsgField()
 
 	const DestFinfo* df = dynamic_cast< const DestFinfo* >(
 		ac->findFinfo( "setOutputValue" ) );
-	SIMPLE_ASSERT( df != 0 );
+	assert( df != 0 );
 	FuncId fid = df->getFid();
 
 	Id i1 = Id::nextId();
 	Id i2 = Id::nextId();
 	Element* ret = new GlobalDataElement( i1, ac, "test1", size );
-	SIMPLE_ASSERT( ret );
+	assert( ret );
 	ret = new GlobalDataElement( i2, ac, "test2", size );
-	SIMPLE_ASSERT( ret );
+	assert( ret );
 
 	Eref e1 = i1.eref();
 
 	Msg* m = new SingleMsg( Eref( i1.element(), 5 ), Eref( i2.element(), 3 ), 0 );
 	ProcInfo p;
 
-	SIMPLE_ASSERT( m->mid().element()->getName() == "singleMsg" );
+	assert( m->mid().element()->getName() == "singleMsg" );
 
 	SingleMsg* sm = reinterpret_cast< SingleMsg* >( m->mid().data() );
-	SIMPLE_ASSERT( sm );
-	SIMPLE_ASSERT ( sm == m );
-	SIMPLE_ASSERT( sm->getI1() == 5 );
-	SIMPLE_ASSERT( sm->getI2() == 3 );
+	assert( sm );
+	assert ( sm == m );
+	assert( sm->getI1() == 5 );
+	assert( sm->getI2() == 3 );
 	
 	SrcFinfo1<double> s( "test", "" );
 	s.setBindIndex( 0 );
@@ -1250,9 +1249,9 @@ void testMsgField()
 	Eref tgt3( i2.element(), 3 );
 	Eref tgt8( i2.element(), 8 );
 	double val = reinterpret_cast< Arith* >( tgt3.data() )->getOutput();
-	SIMPLE_ASSERT( doubleEq( val, 5 * 42 ) );
+	assert( doubleEq( val, 5 * 42 ) );
 	val = reinterpret_cast< Arith* >( tgt8.data() )->getOutput();
-	SIMPLE_ASSERT( doubleEq( val, 0 ) );
+	assert( doubleEq( val, 0 ) );
 
 	// Now change I1 and I2, rerun, and check.
 	sm->setI1( 9 );
@@ -1262,9 +1261,9 @@ void testMsgField()
 		s.send( Eref( e1.element(), i ), x );
 	}
 	val = reinterpret_cast< Arith* >( tgt3.data() )->getOutput();
-	SIMPLE_ASSERT( doubleEq( val, 5 * 42 ) );
+	assert( doubleEq( val, 5 * 42 ) );
 	val = reinterpret_cast< Arith* >( tgt8.data() )->getOutput();
-	SIMPLE_ASSERT( doubleEq( val, 9000 ) );
+	assert( doubleEq( val, 9000 ) );
 
 	cout << "." << flush;
 
@@ -1284,16 +1283,16 @@ void testSetGetExtField()
 	Id i3( i2.value() + 1 );
 	Id i4( i3.value() + 1 );
 	Element* e1 = new GlobalDataElement( i1, nc, "test", size );
-	SIMPLE_ASSERT( e1 );
+	assert( e1 );
 	Shell::adopt( Id(), i1, 0 );
 	Element* e2 = new GlobalDataElement( i2, rc, "x", size );
-	SIMPLE_ASSERT( e2 );
+	assert( e2 );
 	Shell::adopt( i1, i2, 0 );
 	Element* e3 = new GlobalDataElement( i3, rc, "y", size );
-	SIMPLE_ASSERT( e3 );
+	assert( e3 );
 	Shell::adopt( i1, i3, 0 );
 	Element* e4 = new GlobalDataElement( i4, rc, "z", size );
-	SIMPLE_ASSERT( e4 );
+	assert( e4 );
 	Shell::adopt( i1, i4, 0 );
 	bool ret;
 
@@ -1305,15 +1304,15 @@ void testSetGetExtField()
 		// Eref b( e1, size - i - 1 );
 		double temp = i;
 		ret = Field< double >::set( a, "x", temp );
-		SIMPLE_ASSERT( ret );
+		assert( ret );
 		double temp2  = temp * temp;
 		ret = Field< double >::set( b, "y", temp2 );
-		SIMPLE_ASSERT( ret );
+		assert( ret );
 		vec.push_back( temp2 - temp );
 	}
 
 	ret = Field< double >::setVec( i1, "z", vec );
-	SIMPLE_ASSERT( ret );
+	assert( ret );
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		/*
@@ -1328,13 +1327,13 @@ void testSetGetExtField()
 		double temp2  = temp * temp;
 
 		double v = reinterpret_cast< Arith* >(a.data() )->getOutput();
-		SIMPLE_ASSERT( doubleEq( v, temp ) );
+		assert( doubleEq( v, temp ) );
 
 		v = reinterpret_cast< Arith* >(b.data() )->getOutput();
-		SIMPLE_ASSERT( doubleEq( v, temp2 ) );
+		assert( doubleEq( v, temp2 ) );
 
 		v = reinterpret_cast< Arith* >( c.data() )->getOutput();
-		SIMPLE_ASSERT( doubleEq( v, temp2 - temp ) );
+		assert( doubleEq( v, temp2 - temp ) );
 	}
 
 	for ( unsigned int i = 0; i < size; ++i ) {
@@ -1346,13 +1345,13 @@ void testSetGetExtField()
 		double temp = i;
 		double temp2  = temp * temp;
 		double ret = Field< double >::get( a, "x" );
-		SIMPLE_ASSERT( doubleEq( temp, ret ) );
+		assert( doubleEq( temp, ret ) );
 		
 		ret = Field< double >::get( b, "y" );
-		SIMPLE_ASSERT( doubleEq( temp2, ret ) );
+		assert( doubleEq( temp2, ret ) );
 
 		ret = Field< double >::get( a, "z" );
-		SIMPLE_ASSERT( doubleEq( temp2 - temp, ret ) );
+		assert( doubleEq( temp2 - temp, ret ) );
 		// cout << i << "	" << ret << "	temp2 = " << temp2 << endl;
 	}
 
@@ -1378,40 +1377,40 @@ void testLookupSetGet()
 	Id i2 = Id::nextId();
 
 	Element* elm = new GlobalDataElement( i2, ac, "test2", size );
-	SIMPLE_ASSERT( elm );
+	assert( elm );
 	ObjId obj( i2, 0 );
 
 	Arith* arith = reinterpret_cast< Arith* >(obj.data() );
 	for ( unsigned int i = 0; i < 4; ++i )
 		arith->setIdentifiedArg( i, 0 );
 	for ( unsigned int i = 0; i < 4; ++i )
-		SIMPLE_ASSERT( doubleEq( 0, arith->getIdentifiedArg( i ) ) );
+		assert( doubleEq( 0, arith->getIdentifiedArg( i ) ) );
 
 	LookupField< unsigned int, double >::set( obj, "anyValue", 0, 100 );
 	LookupField< unsigned int, double >::set( obj, "anyValue", 1, 101 );
 	LookupField< unsigned int, double >::set( obj, "anyValue", 2, 102 );
 	LookupField< unsigned int, double >::set( obj, "anyValue", 3, 103 );
 
-	SIMPLE_ASSERT( doubleEq( arith->getOutput(), 100 ) );
-	SIMPLE_ASSERT( doubleEq( arith->getArg1(), 101 ) );
-	SIMPLE_ASSERT( doubleEq( arith->getIdentifiedArg( 2 ), 102 ) );
-	SIMPLE_ASSERT( doubleEq( arith->getIdentifiedArg( 3 ), 103 ) );
+	assert( doubleEq( arith->getOutput(), 100 ) );
+	assert( doubleEq( arith->getArg1(), 101 ) );
+	assert( doubleEq( arith->getIdentifiedArg( 2 ), 102 ) );
+	assert( doubleEq( arith->getIdentifiedArg( 3 ), 103 ) );
 
 	for ( unsigned int i = 0; i < 4; ++i )
 		arith->setIdentifiedArg( i, 17 * i + 3 );
 
 	double ret = LookupField< unsigned int, double >::get(
 		obj, "anyValue", 0 );
-	SIMPLE_ASSERT( doubleEq( ret, 3 ) );
+	assert( doubleEq( ret, 3 ) );
 
 	ret = LookupField< unsigned int, double >::get( obj, "anyValue", 1 );
-	SIMPLE_ASSERT( doubleEq( ret, 20 ) );
+	assert( doubleEq( ret, 20 ) );
 
 	ret = LookupField< unsigned int, double >::get( obj, "anyValue", 2 );
-	SIMPLE_ASSERT( doubleEq( ret, 37 ) );
+	assert( doubleEq( ret, 37 ) );
 
 	ret = LookupField< unsigned int, double >::get( obj, "anyValue", 3 );
-	SIMPLE_ASSERT( doubleEq( ret, 54 ) );
+	assert( doubleEq( ret, 54 ) );
 	
 	cout << "." << flush;
 	i2.destroy();
@@ -1421,12 +1420,12 @@ void testIsA()
 {
 	const Cinfo* n = Neutral::initCinfo();
 	const Cinfo* a = Arith::initCinfo();
-	SIMPLE_ASSERT( a->isA( "Arith" ) );
-	SIMPLE_ASSERT( a->isA( "Neutral" ) );
-	SIMPLE_ASSERT( !a->isA( "Fish" ) );
-	SIMPLE_ASSERT( !a->isA( "Synapse" ) );
-	SIMPLE_ASSERT( !n->isA( "Arith" ) );
-	SIMPLE_ASSERT( n->isA( "Neutral" ) );
+	assert( a->isA( "Arith" ) );
+	assert( a->isA( "Neutral" ) );
+	assert( !a->isA( "Fish" ) );
+	assert( !a->isA( "Synapse" ) );
+	assert( !n->isA( "Arith" ) );
+	assert( n->isA( "Neutral" ) );
 	cout << "." << flush;
 }
 
@@ -1440,119 +1439,119 @@ void testFinfoFields()
 	const FinfoWrapper spikeFinfo = IntFire::initCinfo()->findFinfo( "spikeOut" );
 	const FinfoWrapper classNameFinfo = Neutral::initCinfo()->findFinfo( "className" );
 
-	SIMPLE_ASSERT( vmFinfo.getName() == "Vm" );
-	SIMPLE_ASSERT( vmFinfo.docs() == "Membrane potential" );
-	SIMPLE_ASSERT( vmFinfo.src().size() == 0 );
-	SIMPLE_ASSERT( vmFinfo.dest().size() == 2 );
-	SIMPLE_ASSERT( vmFinfo.dest()[0] == "setVm" );
-	SIMPLE_ASSERT( vmFinfo.dest()[1] == "getVm" );
-	SIMPLE_ASSERT( vmFinfo.type() == "double" );
+	assert( vmFinfo.getName() == "Vm" );
+	assert( vmFinfo.docs() == "Membrane potential" );
+	assert( vmFinfo.src().size() == 0 );
+	assert( vmFinfo.dest().size() == 2 );
+	assert( vmFinfo.dest()[0] == "setVm" );
+	assert( vmFinfo.dest()[1] == "getVm" );
+	assert( vmFinfo.type() == "double" );
 
-	SIMPLE_ASSERT( synFinfo.getName() == "synapse" );
-	SIMPLE_ASSERT( synFinfo.docs() == "Sets up field Elements for synapse" );
-	SIMPLE_ASSERT( synFinfo.src().size() == 0 );
-	SIMPLE_ASSERT( synFinfo.dest().size() == 0 );
+	assert( synFinfo.getName() == "synapse" );
+	assert( synFinfo.docs() == "Sets up field Elements for synapse" );
+	assert( synFinfo.src().size() == 0 );
+	assert( synFinfo.dest().size() == 0 );
 	// cout <<  synFinfo->type() << endl;
-	SIMPLE_ASSERT( synFinfo.type() == typeid(Synapse).name() );
+	assert( synFinfo.type() == typeid(Synapse).name() );
 
-	SIMPLE_ASSERT( procFinfo.getName() == "proc" );
-	SIMPLE_ASSERT( procFinfo.docs() == "Shared message for process and reinit" );
-	SIMPLE_ASSERT( procFinfo.src().size() == 0 );
-	SIMPLE_ASSERT( procFinfo.dest().size() == 2 );
-	SIMPLE_ASSERT( procFinfo.dest()[0] == "process" );
-	SIMPLE_ASSERT( procFinfo.dest()[1] == "reinit" );
+	assert( procFinfo.getName() == "proc" );
+	assert( procFinfo.docs() == "Shared message for process and reinit" );
+	assert( procFinfo.src().size() == 0 );
+	assert( procFinfo.dest().size() == 2 );
+	assert( procFinfo.dest()[0] == "process" );
+	assert( procFinfo.dest()[1] == "reinit" );
 	 // cout << "proc " << procFinfo.type() << endl;
-	SIMPLE_ASSERT( procFinfo.type() == "void" );
+	assert( procFinfo.type() == "void" );
 	
-	SIMPLE_ASSERT( processFinfo.getName() == "process" );
-	SIMPLE_ASSERT( processFinfo.docs() == "Handles process call" );
-	SIMPLE_ASSERT( processFinfo.src().size() == 0 );
-	SIMPLE_ASSERT( processFinfo.dest().size() == 0 );
+	assert( processFinfo.getName() == "process" );
+	assert( processFinfo.docs() == "Handles process call" );
+	assert( processFinfo.src().size() == 0 );
+	assert( processFinfo.dest().size() == 0 );
 	// cout << "process " << processFinfo.type() << endl;
-	SIMPLE_ASSERT( processFinfo.type() == "const ProcInfo*" );
+	assert( processFinfo.type() == "const ProcInfo*" );
 
-	SIMPLE_ASSERT( reinitFinfo.getName() == "reinit" );
-	SIMPLE_ASSERT( reinitFinfo.docs() == "Handles reinit call" );
-	SIMPLE_ASSERT( reinitFinfo.src().size() == 0 );
-	SIMPLE_ASSERT( reinitFinfo.dest().size() == 0 );
+	assert( reinitFinfo.getName() == "reinit" );
+	assert( reinitFinfo.docs() == "Handles reinit call" );
+	assert( reinitFinfo.src().size() == 0 );
+	assert( reinitFinfo.dest().size() == 0 );
 	// cout << "reinit " << reinitFinfo.type() << endl;
-	SIMPLE_ASSERT( reinitFinfo.type() == "const ProcInfo*" );
+	assert( reinitFinfo.type() == "const ProcInfo*" );
 
-	SIMPLE_ASSERT( spikeFinfo.getName() == "spikeOut" );
-	SIMPLE_ASSERT( spikeFinfo.docs() == "Sends out spike events" );
-	SIMPLE_ASSERT( spikeFinfo.src().size() == 0 );
-	SIMPLE_ASSERT( spikeFinfo.dest().size() == 0 );
+	assert( spikeFinfo.getName() == "spikeOut" );
+	assert( spikeFinfo.docs() == "Sends out spike events" );
+	assert( spikeFinfo.src().size() == 0 );
+	assert( spikeFinfo.dest().size() == 0 );
 	// cout << spikeFinfo->type() << endl;
-	SIMPLE_ASSERT( spikeFinfo.type() == "double" );
+	assert( spikeFinfo.type() == "double" );
 
-	SIMPLE_ASSERT( classNameFinfo.getName() == "className" );
-	SIMPLE_ASSERT( classNameFinfo.type() == "string" );
+	assert( classNameFinfo.getName() == "className" );
+	assert( classNameFinfo.type() == "string" );
 
 	cout << "." << flush;
 }
 
 void testCinfoFields()
 {
-	SIMPLE_ASSERT( IntFire::initCinfo()->getDocs() == "" );
-	SIMPLE_ASSERT( IntFire::initCinfo()->getBaseClass() == "SynHandler" );
+	assert( IntFire::initCinfo()->getDocs() == "" );
+	assert( IntFire::initCinfo()->getBaseClass() == "SynHandler" );
 
 	// We have a little bit of a hack here to cast away
 	// constness, due to the way the FieldElementFinfos
 	// are set up.
 	Cinfo *neutralCinfo = const_cast< Cinfo* >( Neutral::initCinfo() );
-	SIMPLE_ASSERT( neutralCinfo->getNumSrcFinfo() == 1 );
+	assert( neutralCinfo->getNumSrcFinfo() == 1 );
 
 	Cinfo *cinfo = const_cast< Cinfo* >( IntFire::initCinfo() );
 	unsigned int nsf = neutralCinfo->getNumSrcFinfo();
-	SIMPLE_ASSERT( nsf == 1 );
-	SIMPLE_ASSERT( cinfo->getNumSrcFinfo() == 1 + nsf );
-	SIMPLE_ASSERT( cinfo->getSrcFinfo( 0 + nsf ) == cinfo->findFinfo( "spikeOut" ) );
+	assert( nsf == 1 );
+	assert( cinfo->getNumSrcFinfo() == 1 + nsf );
+	assert( cinfo->getSrcFinfo( 0 + nsf ) == cinfo->findFinfo( "spikeOut" ) );
 
 	unsigned int ndf = neutralCinfo->getNumDestFinfo();
-	SIMPLE_ASSERT( ndf == 22 );
+	assert( ndf == 22 );
 	unsigned int sdf = SynHandler::initCinfo()->getNumDestFinfo();
-	SIMPLE_ASSERT( sdf == 26 );
-	SIMPLE_ASSERT( cinfo->getNumDestFinfo() == 12 + sdf );
+	assert( sdf == 26 );
+	assert( cinfo->getNumDestFinfo() == 12 + sdf );
 
-	SIMPLE_ASSERT( cinfo->getDestFinfo( 0+ndf )->name() == "setNumSynapses" );
-	SIMPLE_ASSERT( cinfo->getDestFinfo( 1+ndf )->name() == "getNumSynapses" );
-	SIMPLE_ASSERT( cinfo->getDestFinfo( 2+ndf )->name() == "setNumSynapse" );
-	SIMPLE_ASSERT( cinfo->getDestFinfo( 3+ndf )->name() == "getNumSynapse" );
+	assert( cinfo->getDestFinfo( 0+ndf )->name() == "setNumSynapses" );
+	assert( cinfo->getDestFinfo( 1+ndf )->name() == "getNumSynapses" );
+	assert( cinfo->getDestFinfo( 2+ndf )->name() == "setNumSynapse" );
+	assert( cinfo->getDestFinfo( 3+ndf )->name() == "getNumSynapse" );
 
-	SIMPLE_ASSERT( cinfo->getDestFinfo( 0+sdf ) == cinfo->findFinfo( "setVm" ) );
-	SIMPLE_ASSERT( cinfo->getDestFinfo( 1+sdf ) == cinfo->findFinfo( "getVm" ) );
-	SIMPLE_ASSERT( cinfo->getDestFinfo( 2+sdf ) == cinfo->findFinfo( "setTau" ) );
-	SIMPLE_ASSERT( cinfo->getDestFinfo( 3+sdf ) == cinfo->findFinfo( "getTau" ) );
+	assert( cinfo->getDestFinfo( 0+sdf ) == cinfo->findFinfo( "setVm" ) );
+	assert( cinfo->getDestFinfo( 1+sdf ) == cinfo->findFinfo( "getVm" ) );
+	assert( cinfo->getDestFinfo( 2+sdf ) == cinfo->findFinfo( "setTau" ) );
+	assert( cinfo->getDestFinfo( 3+sdf ) == cinfo->findFinfo( "getTau" ) );
 
-	SIMPLE_ASSERT( cinfo->getDestFinfo( 4+sdf ) == cinfo->findFinfo( "setThresh" ) );
-	SIMPLE_ASSERT( cinfo->getDestFinfo( 5+sdf ) == cinfo->findFinfo( "getThresh" ) );
-	SIMPLE_ASSERT( cinfo->getDestFinfo( 6+sdf ) == cinfo->findFinfo( "setRefractoryPeriod" ) );
-	SIMPLE_ASSERT( cinfo->getDestFinfo( 7+sdf ) == cinfo->findFinfo( "getRefractoryPeriod" ) );
-	SIMPLE_ASSERT( cinfo->getDestFinfo( 8+sdf ) == cinfo->findFinfo( "setBufferTime" ) );
-	SIMPLE_ASSERT( cinfo->getDestFinfo( 9+sdf ) == cinfo->findFinfo( "getBufferTime" ) );
-	SIMPLE_ASSERT( cinfo->getDestFinfo( 10+sdf ) == cinfo->findFinfo( "process" ) );
-	SIMPLE_ASSERT( cinfo->getDestFinfo( 11+sdf ) == cinfo->findFinfo( "reinit" ) );
+	assert( cinfo->getDestFinfo( 4+sdf ) == cinfo->findFinfo( "setThresh" ) );
+	assert( cinfo->getDestFinfo( 5+sdf ) == cinfo->findFinfo( "getThresh" ) );
+	assert( cinfo->getDestFinfo( 6+sdf ) == cinfo->findFinfo( "setRefractoryPeriod" ) );
+	assert( cinfo->getDestFinfo( 7+sdf ) == cinfo->findFinfo( "getRefractoryPeriod" ) );
+	assert( cinfo->getDestFinfo( 8+sdf ) == cinfo->findFinfo( "setBufferTime" ) );
+	assert( cinfo->getDestFinfo( 9+sdf ) == cinfo->findFinfo( "getBufferTime" ) );
+	assert( cinfo->getDestFinfo( 10+sdf ) == cinfo->findFinfo( "process" ) );
+	assert( cinfo->getDestFinfo( 11+sdf ) == cinfo->findFinfo( "reinit" ) );
 
 
 	unsigned int nvf = neutralCinfo->getNumValueFinfo();
-	SIMPLE_ASSERT( nvf == 14 );
-	SIMPLE_ASSERT( cinfo->getNumValueFinfo() == 6 + nvf );
-	SIMPLE_ASSERT( cinfo->getValueFinfo( 0 + nvf ) == cinfo->findFinfo( "numSynapses" ) );
-	SIMPLE_ASSERT( cinfo->getValueFinfo( 1 + nvf ) == cinfo->findFinfo( "Vm" ) );
-	SIMPLE_ASSERT( cinfo->getValueFinfo( 2 + nvf ) == cinfo->findFinfo( "tau" ) );
-	SIMPLE_ASSERT( cinfo->getValueFinfo( 3 + nvf ) == cinfo->findFinfo( "thresh" ) );
-	SIMPLE_ASSERT( cinfo->getValueFinfo( 4 + nvf ) == cinfo->findFinfo( "refractoryPeriod" ) );
-	SIMPLE_ASSERT( cinfo->getValueFinfo( 5 + nvf ) == cinfo->findFinfo( "bufferTime" ) );
+	assert( nvf == 14 );
+	assert( cinfo->getNumValueFinfo() == 6 + nvf );
+	assert( cinfo->getValueFinfo( 0 + nvf ) == cinfo->findFinfo( "numSynapses" ) );
+	assert( cinfo->getValueFinfo( 1 + nvf ) == cinfo->findFinfo( "Vm" ) );
+	assert( cinfo->getValueFinfo( 2 + nvf ) == cinfo->findFinfo( "tau" ) );
+	assert( cinfo->getValueFinfo( 3 + nvf ) == cinfo->findFinfo( "thresh" ) );
+	assert( cinfo->getValueFinfo( 4 + nvf ) == cinfo->findFinfo( "refractoryPeriod" ) );
+	assert( cinfo->getValueFinfo( 5 + nvf ) == cinfo->findFinfo( "bufferTime" ) );
 
 	unsigned int nlf = neutralCinfo->getNumLookupFinfo();
-	SIMPLE_ASSERT( nlf == 3 ); // Neutral inserts a lookup field for neighbors
-	SIMPLE_ASSERT( cinfo->getNumLookupFinfo() == 0 + nlf );
-	SIMPLE_ASSERT( cinfo->getLookupFinfo( 0 + nlf )->name() == "dummy");
+	assert( nlf == 3 ); // Neutral inserts a lookup field for neighbors
+	assert( cinfo->getNumLookupFinfo() == 0 + nlf );
+	assert( cinfo->getLookupFinfo( 0 + nlf )->name() == "dummy");
 
 	unsigned int nshf = neutralCinfo->getNumSharedFinfo();
-	SIMPLE_ASSERT( nshf == 0 );
-	SIMPLE_ASSERT( cinfo->getNumSharedFinfo() == 1 + nshf );
-	SIMPLE_ASSERT( cinfo->getSharedFinfo( 0 + nshf ) == cinfo->findFinfo( "proc" ) );
+	assert( nshf == 0 );
+	assert( cinfo->getNumSharedFinfo() == 1 + nshf );
+	assert( cinfo->getSharedFinfo( 0 + nshf ) == cinfo->findFinfo( "proc" ) );
 
 	cout << "." << flush;
 }
@@ -1566,39 +1565,39 @@ void testCinfoElements()
 	// unsigned int ndf = neutralCinfo->getNumDestFinfo();
 	//unsigned int sdf = SynHandler::initCinfo()->getNumDestFinfo();
 
-	SIMPLE_ASSERT( intFireCinfoId != Id() );
-	SIMPLE_ASSERT( Field< string >::get( intFireCinfoId, "name" ) == "IntFire" );
-	SIMPLE_ASSERT( Field< string >::get( intFireCinfoId, "baseClass" ) == 
+	assert( intFireCinfoId != Id() );
+	assert( Field< string >::get( intFireCinfoId, "name" ) == "IntFire" );
+	assert( Field< string >::get( intFireCinfoId, "baseClass" ) == 
 					"SynHandler" );
 	Id intFireValueFinfoId( "/classes/IntFire/valueFinfo" );
 	unsigned int n = Field< unsigned int >::get( 
 		intFireValueFinfoId, "numData" );
-	SIMPLE_ASSERT( n == 5 );
+	assert( n == 5 );
 	Id intFireSrcFinfoId( "/classes/IntFire/srcFinfo" );
-	SIMPLE_ASSERT( intFireSrcFinfoId != Id() );
+	assert( intFireSrcFinfoId != Id() );
 	n = Field< unsigned int >::get( intFireSrcFinfoId, "numData" );
-	SIMPLE_ASSERT( n == 1 );
+	assert( n == 1 );
 	Id intFireDestFinfoId( "/classes/IntFire/destFinfo" );
-	SIMPLE_ASSERT( intFireDestFinfoId != Id() );
+	assert( intFireDestFinfoId != Id() );
 	n = Field< unsigned int >::get( intFireDestFinfoId, "numData" );
-	SIMPLE_ASSERT( n == 12 );
+	assert( n == 12 );
 	
 	ObjId temp( intFireSrcFinfoId, 0 );
 	string foo = Field< string >::get( temp, "fieldName" );
-	SIMPLE_ASSERT( foo == "spikeOut" );
+	assert( foo == "spikeOut" );
 
 	foo = Field< string >::get( temp, "type" );
-	SIMPLE_ASSERT( foo == "double" );
+	assert( foo == "double" );
 
 	n = Field< unsigned int >::get( intFireDestFinfoId, "numField" );
-	SIMPLE_ASSERT( n == 1 );
+	assert( n == 1 );
 
 	temp = ObjId( intFireDestFinfoId, 7 );
 	string str = Field< string >::get( temp, "fieldName" );
-	SIMPLE_ASSERT( str == "getRefractoryPeriod");
+	assert( str == "getRefractoryPeriod");
 	temp = ObjId( intFireDestFinfoId, 11 );
 	str = Field< string >::get( temp, "fieldName" );
-	SIMPLE_ASSERT( str == "reinit" );
+	assert( str == "reinit" );
 	cout << "." << flush;
 }
 
@@ -1629,80 +1628,80 @@ void testMsgSrcDestFields()
 	Id t2 = Id::nextId();
 	// bool ret = Test::initCinfo()->create( t1, "test1", 1 );
 	Element* e1 = new GlobalDataElement( t1, Test::initCinfo(), "test1" );
-	SIMPLE_ASSERT( e1 );
-	SIMPLE_ASSERT( e1 == t1.element() );
+	assert( e1 );
+	assert( e1 == t1.element() );
 	Element* e2 = new GlobalDataElement( t2, Test::initCinfo(), "test2", 1 );
 	// ret = Test::initCinfo()->create( t2, "test2", 1 );
-	SIMPLE_ASSERT( e2 );
-	SIMPLE_ASSERT( e2 == t2.element() );
+	assert( e2 );
+	assert( e2 == t2.element() );
 
 	// Set up message. The actual routine is in Shell.cpp, but here we
 	// do it independently.
 	const Finfo* shareFinfo = Test::initCinfo()->findFinfo( "shared" );
-	SIMPLE_ASSERT( shareFinfo != 0 );
+	assert( shareFinfo != 0 );
 	Msg* m = new OneToOneMsg( t1.eref(), t2.eref(), 0 );
-	SIMPLE_ASSERT( m != 0 );
+	assert( m != 0 );
 	bool ret = shareFinfo->addMsg( shareFinfo, m->mid(), t1.element() );
-	SIMPLE_ASSERT( ret );
+	assert( ret );
 
 	//////////////////////////////////////////////////////////////
 	// Test Element::getFieldsOfOutgoingMsg
 	//////////////////////////////////////////////////////////////
 	vector< pair< BindIndex, FuncId > > pairs;
 	e1->getFieldsOfOutgoingMsg( m->mid(), pairs );
-	SIMPLE_ASSERT( pairs.size() == 3 );
-	SIMPLE_ASSERT( pairs[0].first == dynamic_cast< SrcFinfo* >(Test::sharedVec[0])->getBindIndex() );
-	SIMPLE_ASSERT( pairs[0].second == dynamic_cast< DestFinfo* >(Test::sharedVec[1])->getFid() );
+	assert( pairs.size() == 3 );
+	assert( pairs[0].first == dynamic_cast< SrcFinfo* >(Test::sharedVec[0])->getBindIndex() );
+	assert( pairs[0].second == dynamic_cast< DestFinfo* >(Test::sharedVec[1])->getFid() );
 
-	SIMPLE_ASSERT( pairs[1].first == dynamic_cast< SrcFinfo* >(Test::sharedVec[2])->getBindIndex() );
-	SIMPLE_ASSERT( pairs[1].second == dynamic_cast< DestFinfo* >(Test::sharedVec[3])->getFid() );
+	assert( pairs[1].first == dynamic_cast< SrcFinfo* >(Test::sharedVec[2])->getBindIndex() );
+	assert( pairs[1].second == dynamic_cast< DestFinfo* >(Test::sharedVec[3])->getFid() );
 
-	SIMPLE_ASSERT( pairs[2].first == dynamic_cast< SrcFinfo* >(Test::sharedVec[4])->getBindIndex() );
-	SIMPLE_ASSERT( pairs[2].second == dynamic_cast< DestFinfo* >(Test::sharedVec[5])->getFid() );
+	assert( pairs[2].first == dynamic_cast< SrcFinfo* >(Test::sharedVec[4])->getBindIndex() );
+	assert( pairs[2].second == dynamic_cast< DestFinfo* >(Test::sharedVec[5])->getFid() );
 
 	e2->getFieldsOfOutgoingMsg( m->mid(), pairs );
-	SIMPLE_ASSERT( pairs.size() == 3 );
+	assert( pairs.size() == 3 );
 
 	//////////////////////////////////////////////////////////////
 	// Test Cinfo::srcFinfoName
 	//////////////////////////////////////////////////////////////
-	SIMPLE_ASSERT( Test::initCinfo()->srcFinfoName( pairs[0].first ) == "s0" );
-	SIMPLE_ASSERT( Test::initCinfo()->srcFinfoName( pairs[1].first ) == "s1" );
-	SIMPLE_ASSERT( Test::initCinfo()->srcFinfoName( pairs[2].first ) == "s2" );
+	assert( Test::initCinfo()->srcFinfoName( pairs[0].first ) == "s0" );
+	assert( Test::initCinfo()->srcFinfoName( pairs[1].first ) == "s1" );
+	assert( Test::initCinfo()->srcFinfoName( pairs[2].first ) == "s2" );
 
 	//////////////////////////////////////////////////////////////
 	// Test Cinfo::destFinfoName
 	//////////////////////////////////////////////////////////////
-	SIMPLE_ASSERT( Test::initCinfo()->destFinfoName( pairs[0].second ) == "d0" );
-	SIMPLE_ASSERT( Test::initCinfo()->destFinfoName( pairs[1].second ) == "d1" );
-	SIMPLE_ASSERT( Test::initCinfo()->destFinfoName( pairs[2].second ) == "d2" );
+	assert( Test::initCinfo()->destFinfoName( pairs[0].second ) == "d0" );
+	assert( Test::initCinfo()->destFinfoName( pairs[1].second ) == "d1" );
+	assert( Test::initCinfo()->destFinfoName( pairs[2].second ) == "d2" );
 	//////////////////////////////////////////////////////////////
 	// Test Msg::getSrcFieldsOnE1 and family
 	//////////////////////////////////////////////////////////////
 	vector< string > fieldNames;
 	fieldNames = m->getSrcFieldsOnE1();
-	SIMPLE_ASSERT( fieldNames.size() == 3 );
-	SIMPLE_ASSERT( fieldNames[0] == "s0" );
-	SIMPLE_ASSERT( fieldNames[1] == "s1" );
-	SIMPLE_ASSERT( fieldNames[2] == "s2" );
+	assert( fieldNames.size() == 3 );
+	assert( fieldNames[0] == "s0" );
+	assert( fieldNames[1] == "s1" );
+	assert( fieldNames[2] == "s2" );
 
 	fieldNames = m->getDestFieldsOnE2();
-	SIMPLE_ASSERT( fieldNames.size() == 3 );
-	SIMPLE_ASSERT( fieldNames[0] == "d0" );
-	SIMPLE_ASSERT( fieldNames[1] == "d1" );
-	SIMPLE_ASSERT( fieldNames[2] == "d2" );
+	assert( fieldNames.size() == 3 );
+	assert( fieldNames[0] == "d0" );
+	assert( fieldNames[1] == "d1" );
+	assert( fieldNames[2] == "d2" );
 
 	fieldNames = m->getSrcFieldsOnE2();
-	SIMPLE_ASSERT( fieldNames.size() == 3 );
-	SIMPLE_ASSERT( fieldNames[0] == "s0" );
-	SIMPLE_ASSERT( fieldNames[1] == "s1" );
-	SIMPLE_ASSERT( fieldNames[2] == "s2" );
+	assert( fieldNames.size() == 3 );
+	assert( fieldNames[0] == "s0" );
+	assert( fieldNames[1] == "s1" );
+	assert( fieldNames[2] == "s2" );
 
 	fieldNames = m->getDestFieldsOnE1();
-	SIMPLE_ASSERT( fieldNames.size() == 3 );
-	SIMPLE_ASSERT( fieldNames[0] == "d0" );
-	SIMPLE_ASSERT( fieldNames[1] == "d1" );
-	SIMPLE_ASSERT( fieldNames[2] == "d2" );
+	assert( fieldNames.size() == 3 );
+	assert( fieldNames[0] == "d0" );
+	assert( fieldNames[1] == "d1" );
+	assert( fieldNames[2] == "d2" );
 
 	//////////////////////////////////////////////////////////////
 	// getMsgTargetAndFunctions
@@ -1712,19 +1711,19 @@ void testMsgSrcDestFields()
 	unsigned int numTgt = e1->getMsgTargetAndFunctions( 0, 
 					dynamic_cast< SrcFinfo* >(Test::sharedVec[0] ),
 					tgt, func );
-	SIMPLE_ASSERT( numTgt == tgt.size() );
-	SIMPLE_ASSERT( tgt.size() == 1 );
-	SIMPLE_ASSERT( tgt[0] == ObjId( t2, 0 ) );
-	SIMPLE_ASSERT( func[0] == "d0" );
+	assert( numTgt == tgt.size() );
+	assert( tgt.size() == 1 );
+	assert( tgt[0] == ObjId( t2, 0 ) );
+	assert( func[0] == "d0" );
 
 	// Note that the srcFinfo #2 is in sharedVec[4]
 	numTgt = e2->getMsgTargetAndFunctions( 0, 
 					dynamic_cast< SrcFinfo* >(Test::sharedVec[4] ),
 					tgt, func );
-	SIMPLE_ASSERT( numTgt == tgt.size() );
-	SIMPLE_ASSERT( tgt.size() == 1 );
-	SIMPLE_ASSERT( tgt[0] == ObjId( t1, 0 ) );
-	SIMPLE_ASSERT( func[0] == "d2" );
+	assert( numTgt == tgt.size() );
+	assert( tgt.size() == 1 );
+	assert( tgt[0] == ObjId( t1, 0 ) );
+	assert( func[0] == "d2" );
 
 	//////////////////////////////////////////////////////////////
 	// Clean up.
@@ -1744,12 +1743,12 @@ void testHopFunc()
 	two.op( Id(3).eref(), "two", 2468.0 );
 	const double* buf = checkHopFuncTestBuffer();
 	const TgtInfo* tgt = reinterpret_cast< const TgtInfo* >( buf );
-	SIMPLE_ASSERT( tgt->bindIndex() == 1234 );
-	SIMPLE_ASSERT( tgt->dataSize() == 2 );
+	assert( tgt->bindIndex() == 1234 );
+	assert( tgt->dataSize() == 2 );
 	const char* c = reinterpret_cast< const char* >( 
 					buf + TgtInfo::headerSize );
-	SIMPLE_ASSERT( strcmp( c, "two" ) == 0 );
-	SIMPLE_ASSERT( doubleEq( buf[TgtInfo::headerSize + 1], 2468.0 ) );
+	assert( strcmp( c, "two" ) == 0 );
+	assert( doubleEq( buf[TgtInfo::headerSize + 1], 2468.0 ) );
 
 	HopIndex hop3( 36912, MooseTestHop );
 	HopFunc3< string, int, vector< double > > three( hop3 );
@@ -1759,16 +1758,16 @@ void testHopFunc()
 	temp[2] = 234232342;
 	three.op( Id(3).eref(), "three", 3333, temp );
 
-	SIMPLE_ASSERT( tgt->bindIndex() == 36912 );
-	SIMPLE_ASSERT( tgt->dataSize() == 6 );
+	assert( tgt->bindIndex() == 36912 );
+	assert( tgt->dataSize() == 6 );
 	c = reinterpret_cast< const char* >( buf + TgtInfo::headerSize );
-	SIMPLE_ASSERT( strcmp( c, "three" ) == 0 );
+	assert( strcmp( c, "three" ) == 0 );
 	int i = TgtInfo::headerSize + 1;
-	SIMPLE_ASSERT( doubleEq( buf[i++], 3333.0 ) );
-	SIMPLE_ASSERT( doubleEq( buf[i++], 3.0 ) ); // Size of array.
-	SIMPLE_ASSERT( doubleEq( buf[i++], temp[0] ) );
-	SIMPLE_ASSERT( doubleEq( buf[i++], temp[1] ) );
-	SIMPLE_ASSERT( doubleEq( buf[i++], temp[2] ) );
+	assert( doubleEq( buf[i++], 3333.0 ) );
+	assert( doubleEq( buf[i++], 3.0 ) ); // Size of array.
+	assert( doubleEq( buf[i++], temp[0] ) );
+	assert( doubleEq( buf[i++], temp[1] ) );
+	assert( doubleEq( buf[i++], temp[2] ) );
 
 	cout << "." << flush;
 }

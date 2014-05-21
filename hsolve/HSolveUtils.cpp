@@ -8,7 +8,6 @@
 **********************************************************************/
 
 #include "HSolveUtils.h"
-#include "simple_assert.hpp"
 
 void HSolveUtils::initialize( Id object )
 {
@@ -78,7 +77,6 @@ int HSolveUtils::gates(
 	vector< Id >& ret,
 	bool getOriginals )
 {
-        dump("HSolveUtils::gates() is not tested with new hsolve api", "FIXME");
 	unsigned int oldSize = ret.size();
 	
 	static string gateName[] = {
@@ -102,9 +100,6 @@ int HSolveUtils::gates(
                 Id gate( gatePath );
 
                 string gPath = moose::fixPath(gate.path());
-                errorSS.str("");
-                errorSS << "Got " << gatePath << " expected " << gPath;
-                SIMPLE_ASSERT_MSG(gPath == gatePath, errorSS.str().c_str());
 
                 if ( getOriginals ) {
                     HHGate* g = reinterpret_cast< HHGate* >( gate.eref().data() );
@@ -207,7 +202,6 @@ void HSolveUtils::rates(
 	vector< double >& A,
 	vector< double >& B )
 {
-    dump("HSolveUtils::rates() has not been tested yet.", "WARN");
     double min = Field< double >::get( gateId, "min" );
     double max = Field< double >::get( gateId, "max" );
     unsigned int divs = Field< unsigned int >::get( gateId, "divs" );
