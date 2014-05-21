@@ -454,7 +454,6 @@ using namespace std;
 
 void testHSolvePassive()
 {
-    tbegin;
     Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 
     vector< int* > childArray;
@@ -985,7 +984,6 @@ void testHSolvePassive()
         shell->doDelete( n );
     }
 
-    tend;
 }
 
 
@@ -999,7 +997,6 @@ void testHSolvePassive()
  *-----------------------------------------------------------------------------*/
 void testHSolveCable()
 {
-    tbegin;
     unsigned int totalCompartmentInCable = 3;
     Shell* pShell = reinterpret_cast< Shell* > ( Id().eref().data() );
 
@@ -1044,6 +1041,5 @@ void testHSolveCable()
 
     HSolvePassive hpSolver;
 
-    tend;
 }
 #endif // DO_UNIT_TESTS
