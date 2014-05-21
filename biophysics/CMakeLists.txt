@@ -1,4 +1,4 @@
-include_directories(../basecode ../external/debug)
+include_directories(../basecode)
 add_library(biophysics 
 	SpikeRingBuffer.cpp	
 	SynHandler.cpp	
@@ -20,3 +20,5 @@ add_library(biophysics
 	testBiophysics.cpp	
 	IzhikevichNrn.cpp	
     )
+
+target_link_libraries(biophysics debug_print)

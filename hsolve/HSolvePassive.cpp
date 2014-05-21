@@ -446,14 +446,12 @@ bool isClose( T a, T b, T tolerance )
 }
 
 #include <sstream>
-#include <vector>
 #include "../shell/Shell.h"
 #include "../basecode/global.h"
 #include "TestHSolve.h"
-using namespace std;
-
 void testHSolvePassive()
 {
+    tbegin;
     Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 
     vector< int* > childArray;
@@ -984,62 +982,7 @@ void testHSolvePassive()
         shell->doDelete( n );
     }
 
+    tend;
 }
 
-
-/*-----------------------------------------------------------------------------
- *  This functon creates a cable of three compartments connected in series.
- *  Apply a current pulse to the first compartment and record from the last
- *  compartment. Use HSolve as solver. 
- *
- *  This tests is intended to be a comprehensive tests of HSolve in passive
- *  conditions.
- *-----------------------------------------------------------------------------*/
-void testHSolveCable()
-{
-    unsigned int totalCompartmentInCable = 3;
-    Shell* pShell = reinterpret_cast< Shell* > ( Id().eref().data() );
-
-    Id n = pShell->doCreate( "Neutral", Id(), "", 1);
-
-    vector< Id > cable( totalCompartmentInCable );
-    for( unsigned int i = 0; i < totalCompartmentInCable; i++)
-    {
-        ostringstream name;
-        name << "compartment" << i;
-        Id cId = pShell->doCreate( "Compartment", n, name.str(), 1);
-        /* Added parameters to compartments. */
-        double ra = 1.0e6;
-        double rm = 1.0e9;
-        double cm = 1.0e-12;
-
-        Field< double >::set( cId, "Ra", ra);
-        Field< double >::set( cId, "Rm", rm);
-        Field< double >::set( cId, "Cm", rm);
-        Field< double >::set( cId, "Em", -65e-3);
-        Field< double >::set( cId, "initVm", -65e-3);
-
-        cable.at(i) = cId;
-    }
-
-    EXPECT_EQ( cable.size(), totalCompartmentInCable
-            , "Failed to create a cable with " << totalCompartmentInCable 
-            << " compartments "
-            );
-
-    /* Now connect the cable */
-    for( vector< Id >::const_iterator it = cable.begin()
-            ; it != cable.end() - 1
-            ; ++it 
-       )
-    {
-        ObjId msgId = pShell->doAddMsg("Single", *it, "axial", *(it+1), "raxial");
-        ASSERT_FALSE( msgId.bad()
-                , "Failed to connect " << it->path() << " to " << (it+1)->path()
-                );
-    }
-
-    HSolvePassive hpSolver;
-
-}
 #endif // DO_UNIT_TESTS

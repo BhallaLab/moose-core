@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-include_directories(../basecode ../utility ../kinetics ../external/debug)
+include_directories(../basecode ../utility ../kinetics)
 add_library(signeur
     Adaptor.cpp
     testSigNeur.cpp
