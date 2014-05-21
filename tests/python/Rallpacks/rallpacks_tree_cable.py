@@ -62,8 +62,6 @@ class BinaryCable( ):
         self.tablePath = '/data'
         moose.Neutral(self.tablePath)
         self.stimTables = []
-        self.tables = []
-        self.save_dir = 'figures'
     
     def buildParameterLists(self):
         ''' Build list of parameters in moose '''
@@ -86,8 +84,7 @@ class BinaryCable( ):
             compartmentList = []
             for i in range(noOfCompartments):
                 compPath = '{}/comp_{}_{}'.format(self.cablePath, n, i)
-                m = comp.MooseCompartment( compPath , args )
-                m.createCompartment( compPath, l, d )
+                m = comp.MooseCompartment( compPath, l, d, args )
                 compartmentList.append( m.mc_ )
             self.cable.append( compartmentList )
         self.connectCable()
@@ -130,80 +127,37 @@ class BinaryCable( ):
         c = self.cable[depth][index]
         t = moose.Table( '{}/output_at_{}'.format( self.tablePath, index ))
         moose.connect( t, 'requestOut', c, 'getVm' )
-        self.tables.append( t )
+        return t
 
-    def plotTables( self, ascii = False, save = True ):
-        ''' Plot all tables: stimulus and recording. '''
-        if not ascii:
-            pylab.figure( )
-        [ self.plotTable(t, self.simDt, ascii=ascii) for t in self.stimTables ]
-        if save:
-            figName = os.path.join(self.save_dir
-                        , 'stim_total_comps_%s.png' % self.size
-                        )
-            utils.dump("PLOT"
-                    , "Input are save to {}".format(figName)
-                    )
-            pylab.savefig(figName)
-
-        if not ascii:
-            pylab.figure( )
-        [ self.plotTable(t, self.simDt, ascii=ascii) for t in self.tables ]
-        if not ascii and not save:
-            pylab.show( )
-
-        elif save:
-            figName = os.path.join( self.save_dir
-                        , 'output_total_comps_%s.png' % self.size 
-                        )
-            utils.dump("INFO"
-                    , "Output are saved to {}".format(figName)
-                    )
-            pylab.savefig(figName)
-
-    def plotTable( self, table, dt, standalone = False, ascii = False):
-        ''' Plot a single table '''
-        if standalone and not ascii:
-            pylab.figure( )
-        yvec = table.vector
-        ymax = np.amax( yvec )
-        # Multiply index with simDt to get the time at which recording was
-        # made.
-        xvec = [ x * dt for x in range(len(table.vector)) ]
-        if not ascii:
-            pylab.plot( xvec, yvec )
-            #pylab.ylim( [0, ymax * 1.1 ] )
-            pylab.xlabel( 'Time (sec)' )
-            pylab.legend( '{}'.format(table.path) )
-        else:
-            utils.plotAscii( yvec, xvec )
+    def setupSolver(self, path = '/hsolve'):
+        """Setting up HSolver """
+        hsolve = moose.HSolve( path )
+        hsolve.dt = self.simDt
+        moose.useClock(0, hsolve.path, 'process')
+        hsolve.target = self.cablePath
 
     def simulate(self, simTime, simDt, plotDt=None):
         '''Simulate the cable 
         '''
-
-        if plotDt is None:
-            plotDt = simDt / 2
         self.simDt = simDt
-        self.plotDt = plotDt
         self.setupDUT( )
-        utils.verify( )
  
         # Setup clocks 
         utils.dump("PLOT", "Setting up the clocks ... ")
         moose.setClock( 0, self.simDt )
-        moose.setClock( 1, self.plotDt )
 
         # Use clocks
-        moose.useClock( 0, '/##'.format(self.cablePath), 'process' )
-        moose.useClock( 0, '/##'.format(self.cablePath), 'init' )
+        moose.useClock( 0, '/##', 'process' )
+        moose.useClock( 0, '/##', 'init' )
 
         utils.dump("STEP"
                 , [ "Simulating cable for {} sec".format(simTime)
-                    , " simDt: %s, plotDt: %s" % ( self.simDt, self.plotDt )
+                    , " simDt: %s" % self.simDt
                     ]
                 )
+        utils.verify( )
         moose.reinit( )
+        self.setupSolver( )
         moose.start( simTime )
 
 def main( args ):
@@ -211,12 +165,14 @@ def main( args ):
     d = args['tree_depth']
     assert d > 0, "Cable depth can not be nagative"
     binCable = BinaryCable( depth = d )
-    binCable.buildCable( )
-    binCable.recordAt( depth = 0, index = 0 )
-    binCable.recordAt( depth = d-1, index = -1 )
-    binCable.simulate( simTime = 0.25, simDt = 1e-3 )
-    binCable.plotTables( )
-    utils.writeGraphviz( filename = os.path.join('figures', 'binary_tree.dot'))
+    binCable.buildCable( args )
+    table0 = binCable.recordAt( depth = 0, index = 0 )
+    table1 = binCable.recordAt( depth = d-1, index = -1 )
+    binCable.simulate( simTime = args['run_time'], simDt = args['dt'] )
+    utils.plotTables( [ table0, table1 ]
+            , file = args['output']
+            , xscale = args['dt']
+            )
 
 if __name__ == '__main__':
     import argparse
