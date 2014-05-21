@@ -29,7 +29,7 @@ import moose.utils as utils
 class MooseCompartment():
     """A simple class for making MooseCompartment in moose"""
 
-    def __init__(self, path, args):
+    def __init__(self, path, length, diameter, args):
         """ Initialize moose-compartment """
         self.mc_ = None
         self.path = path
@@ -38,8 +38,8 @@ class MooseCompartment():
         self.RA = args.get('RA', 1.0)
         self.CM = args.get('CM', 0.01)
         self.Em = args.get('Em', -0.065)
-        self.diameter = args['diameter']
-        self.compLength = args['length'] / args['ncomp']
+        self.diameter = diameter
+        self.compLength = length
         self.computeParams( )
 
         try:
