@@ -8,7 +8,6 @@
 **********************************************************************/
 
 #include "ZombieHHChannel.h"
-#include "simple_assert.hpp"
 
 const Cinfo* ZombieHHChannel::initCinfo()
 {
@@ -454,7 +453,6 @@ void ZombieHHChannel::zombify( Element* solver, Element* orig )
     // maintain a datastructure for putting back the messages at
     // unzombify.
 
-    dump("ZombieHHChannel::zombify() is not tested yet.", "WARN");
 
     HSolve::deleteIncomingMessages(orig, "concen");
     HSolve::deleteIncomingMessages(orig, "Vm");
@@ -473,7 +471,6 @@ void ZombieHHChannel::zombify( Element* solver, Element* orig )
 // static func
 void ZombieHHChannel::unzombify( Element* zombie )
 {
-    SIMPLE_ASSERT_MSG(0, "Not implemented yet.");
 
     /* fixme: Element is an abstract class, it can not instantiated. Need to
      * write a new Class e.g. Element1 which can call Element constructor.
