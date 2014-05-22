@@ -47,7 +47,7 @@
 
 #include <Python.h>
 #include <structmember.h> // This defines the type id macros like T_STRING
-#include "numpy/arrayobject.h"
+// #include "numpy/arrayobject.h"
 
 #include <iostream>
 #include <typeinfo>
@@ -109,10 +109,10 @@ extern "C" {
         }
         self->owner = ((_ObjId*)owner)->oid_;
         if (!Id::isValid(self->owner.id)){
-            Py_XDECREF(owner);
-            Py_XDECREF(self);
+            Py_DECREF(self);
             RAISE_INVALID_ID(-1, "moose_Field_init");
         }
+        Py_INCREF(owner);
         size_t size = strlen(fieldName);
         char * name = (char*)calloc(size+1, sizeof(char));
         strncpy(name, fieldName, size);
@@ -125,6 +125,12 @@ extern "C" {
         // initialization of the MOOSE module.
         return 0;
     }
+
+    // void moose_Field_dealloc(_Field * self)
+    // {
+    //     Py_XDECREF((PyObject*)self->name);
+    //     self->ob_type->tp_free((PyObject*)self);
+    // }
 
     /// Return the hash of the string `{objectpath}.{fieldName}`
     long moose_Field_hash(_Field * self)
@@ -168,7 +174,7 @@ extern "C" {
         "moose.Field",                                  /* tp_name */
         sizeof(_Field),                                 /* tp_basicsize */
         0,                                              /* tp_itemsize */
-        0,// (destructor)moose_Field_dealloc,                /* tp_dealloc */
+        0, //(destructor)moose_Field_dealloc,                /* tp_dealloc */
         0,                                              /* tp_print */
         0,                                              /* tp_getattr */
         0,                                              /* tp_setattr */
@@ -279,32 +285,32 @@ extern "C" {
     PyObject * moose_DestField_call(PyObject * self, PyObject * args,
                                            PyObject * kw)
     {
-        // We copy the name as the first argument into a new argument tuple. 
+        // copy the name as the first argument into a new argument tuple. 
         PyObject * newargs = PyTuple_New(PyTuple_Size(args)+1); // one extra for the field name
         PyObject * name = PyString_FromString(((_Field*)self)->name);
         if (name == NULL){
-            Py_XDECREF(newargs);
+            Py_DECREF(newargs);
             return NULL;
         }
         if (PyTuple_SetItem(newargs, 0, name) != 0){
-            Py_XDECREF(newargs);
+            Py_DECREF(newargs);
+            // Py_DECREF(name);
             return NULL;
         }
-        // We copy the arguments in `args` into the new argument tuple
+        // copy the arguments in `args` into the new argument tuple
         Py_ssize_t argc =  PyTuple_Size(args);
         for (Py_ssize_t ii = 0; ii < argc; ++ii){
             PyObject * arg = PyTuple_GetItem(args, ii);
-            if (arg != NULL){
-                PyTuple_SetItem(newargs, ii+1, arg);
-            } else {
-                Py_XDECREF(newargs);
-                return NULL;
-            }
+            Py_INCREF(arg);
+            PyTuple_SetItem(newargs, ii+1, arg);
+            Py_DECREF(arg);
         }
         // Call ObjId._setDestField with the new arguments
         _ObjId * obj = PyObject_New(_ObjId, &ObjIdType);
         obj->oid_ = ((_Field*)self)->owner;
-        return moose_ObjId_setDestField(obj, newargs);
+        PyObject * ret = moose_ObjId_setDestField(obj, newargs);
+        Py_DECREF((PyObject*)obj);
+        return ret;
     }
 
     PyDoc_STRVAR(moose_DestField_documentation,
@@ -612,16 +618,14 @@ extern "C" {
             // Python itself returns empty tuple in such cases, follow that
             return PyTuple_New(0);
         }
-        PyObject * ret = PyTuple_New((Py_ssize_t)(end - start));
-        
-        // Py_XINCREF(ret);        
+        PyObject * ret = PyTuple_New((Py_ssize_t)(end - start));        
         for ( int ii = start; ii < end; ++ii){
             ObjId oid(self->myoid.id, self->myoid.dataIndex, ii);
             PyObject * value = oid_to_element(oid);
             if (PyTuple_SetItem(ret, (Py_ssize_t)(ii-start), value)){
                 Py_XDECREF(ret);
-                Py_XDECREF(value);
-                PyErr_SetString(PyExc_RuntimeError, "Could assign tuple entry.");
+                // Py_XDECREF(value);
+                PyErr_SetString(PyExc_RuntimeError, "Could not assign tuple entry.");
                 return NULL;
             }
         }
@@ -630,6 +634,8 @@ extern "C" {
 
     PyObject * moose_ElementField_getattro(_Field * self, PyObject * attr)
     {
+        int new_attr = 0;
+        PyObject * ret = NULL;
         if (self->owner.bad()){
             RAISE_INVALID_ID(NULL, "moose_ElementField_getSlice");
         }
@@ -643,88 +649,107 @@ extern "C" {
                 field = const_cast<char*>((it->second).c_str());
                 type = getFieldType(Field<string>::get(self->myoid, "className"), it->second);
                 // Update attr for next level (PyObject_GenericGetAttr) in case.
-                Py_XDECREF(attr);
+                new_attr = 1;
                 attr = PyString_FromString(field);
             }
         }
         if (type.empty()){
-            return PyObject_GenericGetAttr((PyObject*)self, attr);            
+            ret = PyObject_GenericGetAttr((PyObject*)self, attr);
+            if (new_attr){
+                Py_DECREF(attr);
+                return ret;
+            }
         }
         char ftype = shortType(type);
-        if (!ftype){
-            return PyObject_GenericGetAttr((PyObject*)self, attr);
-        }
-
         switch (ftype){
             case 'd': {
                 vector < double > val;
                 Field< double >::getVec(self->myoid, string(field), val);
-                return to_pytuple(&val, ftype);
+                ret = to_pytuple(&val, ftype);
+                break;
             }
             case 's': {
                 vector < string > val;
                 Field< string >::getVec(self->myoid, string(field), val);
-                return to_pytuple(&val, ftype);
+                ret = to_pytuple(&val, ftype);
+                break;
             }
             case 'l': {
                 vector < long > val;
                 Field< long >::getVec(self->myoid, string(field), val);
-                return to_pytuple(&val, ftype);
+                ret = to_pytuple(&val, ftype);
+                break;
             }
             case 'x': {
                 vector < Id > val;
                 Field< Id >::getVec(self->myoid, string(field), val);
-                return to_pytuple(&val, ftype);
+                ret = to_pytuple(&val, ftype);
+                break;
             }
             case 'y': {
                 vector < ObjId > val;
                 Field< ObjId >::getVec(self->myoid, string(field), val);
-                return to_pytuple(&val, ftype);
+                ret = to_pytuple(&val, ftype);
+                break;
             }
             case 'i': {
                 vector < int > val;
                 Field< int >::getVec(self->myoid, string(field), val);
-                return to_pytuple(&val, ftype);
+                ret = to_pytuple(&val, ftype);
+                break;
             }
             case 'I': {
                 vector < unsigned int > val;
                 Field< unsigned int >::getVec(self->myoid, string(field), val);
-                return to_pytuple(&val, ftype);
+                ret = to_pytuple(&val, ftype);
+                break;
             }
             case 'k': {
                 vector < unsigned long > val;
                 Field< unsigned long >::getVec(self->myoid, string(field), val);
-                return to_pytuple(&val, ftype);
+                ret = to_pytuple(&val, ftype);
+                break;
             }
             case 'f': {
                 vector < float > val;
                 Field< float >::getVec(self->myoid, string(field), val);
-                return to_pytuple(&val, ftype);
+                ret = to_pytuple(&val, ftype);
+                break;
             }            
             case 'b': {                                                               
                 vector<bool> val;
                 Field< bool >::getVec(self->myoid, string(field), val);
-                return to_pytuple(&val, ftype);
+                ret = to_pytuple(&val, ftype);
+                break;
             }
             case 'c': {
                 vector < char > val;
                 Field< char >::getVec(self->myoid, string(field), val);
-                return to_pytuple(&val, ftype);
+                ret = to_pytuple(&val, ftype);
+                break;
             }
             case 'h': {
                 vector < short > val;
                 Field< short >::getVec(self->myoid, string(field), val);
-                return to_pytuple(&val, ftype);
+                ret = to_pytuple(&val, ftype);
+                break;
             }
             case 'z': {
                 PyErr_SetString(PyExc_NotImplementedError, "DataId handling not implemented yet.");
-                return NULL;
+                break;
+            }
+            case 0: {
+                ret = PyObject_GenericGetAttr((PyObject*)self, attr);                
+                break;
             }
             default:
                 PyErr_SetString(PyExc_ValueError, "unhandled field type.");
-                return NULL;                
+                break;
         }
-        
+        if (new_attr){
+            Py_DECREF(attr);
+        }
+        return ret;        
     }
     
     int moose_ElementField_setattro(_Field * self, PyObject * attr, PyObject * value)
@@ -921,7 +946,7 @@ extern "C" {
         // MOOSE Field::set returns 1 for success 0 for
         // failure. Python treats return value 0 from setters as
         // success, anything else failure.
-        if (ret || (PyErr_Occurred() == NULL)){
+        if (ret && (PyErr_Occurred() == NULL)){
             return 0;
         } else {
             return -1;
