@@ -13,6 +13,7 @@
 #define  GLOBAL_INC
 
 #include "header.h"
+#include "../external/debug/simple_test.hpp"
 
 /**
  * @brief Global stringstream for message printing.
@@ -29,9 +30,9 @@ extern unsigned int totalTests;
  * automatically computed by increamenting the counter.
  */
 
-#define tbegin cerr << endl << "Test(" << totalTests << "): " << MOOSE_CURRENT_FUNCTION;
+#define tbegin cerr << endl << "Test(" << totalTests << "): " << SIMPLE_CURRENT_FUNCTION;
 #define tend totalTests++; \
-    cerr << std::right <<  setw(20) << "test of " << MOOSE_CURRENT_FUNCTION << " finished."; 
+    cerr << std::right <<  setw(20) << "test of " << SIMPLE_CURRENT_FUNCTION << " finished."; 
 
 
 /*-----------------------------------------------------------------------------
