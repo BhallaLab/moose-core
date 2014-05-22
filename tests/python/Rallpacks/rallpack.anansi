@@ -1,0 +1,12 @@
+:# mydocument.anansi
+:loom anansi.markdown
+:option anansi-pandoc.reader=markdown
+:option anansi-pandoc.write=pandoc
+:option tab-size=4
+
+Rallpack benchmarks in Moose
+===========================
+
+## Rallpack 3
+
+:include rallpack3.anansi
