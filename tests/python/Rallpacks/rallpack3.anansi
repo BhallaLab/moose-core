@@ -1,0 +1,78 @@
+### Objective.
+
+Tests the ability of Moose simulator to evaluate the Hodgkin-Huxley channel models.
+
+### Details
+
+This model consists of the cable from Rallpack1 with the addition of
+squid sodium and potassium channels from Hodgkin and Huxley.
+
+This simulation models a uniform unbranched cable with 1000 identical
+compartments, with a length constant of 1, a diameter of 1 micron, and a total
+length of 1 mm.
+
+The membrane properties are :
+
+    RA = 1.0 ohms meter		= 100 ohms cm
+    RM = 4.0 ohms meter^2		= 40000 ohms cm^2
+    CM = 0.01 Farads/meter^2	= 1.0 uf/cm^2
+    Eleak = ERest = -0.065 V	= -65 mV
+
+The channel properties are as described by Hodkin and Huxley, as follows :
+(We have reversed their sign convention, and take the resting potential to
+be -65 mV)
+
+    ENa = 0.050 V			= 50 mV
+    EK  = -0.077 V			= -77 mV
+    GNa = 1200 Siemens/m^2		= 120 mmho/cm^2
+    GK  = 360 Siemens/m^2		= 36 mmho/cm^2
+    (For each compartment :
+    Gbar_Na= 3.77e-9 Siemens	= 3.77e-6 mmho
+    Gbar_K = 1.131e-9 Siemens	= 1.131e-6 mmho )
+
+    gNa= Gbar_Na * m^3 * h
+    gK = Gbar_K * n^4
+
+    dm/dt = alpha_m*(1-m) - beta_m*m
+    dh/dt = alpha_h*(1-h) - beta_h*h
+
+    dn/dt = alpha_n*(1-n) - beta_n*n
+
+    alpha_m = A (v-V0) / (exp((v-V0)/B) - 1)
+    A = -0.1e6    1/(Volts*sec)	= -0.1	1/(mV*msec)
+    B = -0.01     Volts		= -10	mV
+    V0= -0.040    Volts		= -40	mV
+
+    beta_m = A exp((v-V0)/B)
+    A = 4.0e3     1/sec		= 4.0	1/msec
+    B = -0.018    Volts		= -18	mV
+    V0= -0.065    Volts		= -65	mV
+
+    alpha_h = A exp((v-V0)/B)
+    A = 70.0      1/sec		= 0.07	1/msec
+    B = -0.020    Volts		= -20	mV
+    V0= -0.065    Volts		= -65	mV
+
+    beta_h = A / (exp((v-V0)/B) + 1)
+    A = 1.0e3     1/sec		= 1.0	1/msec
+    B = -0.010    Volts		= -10	mV
+    V0= -0.035    Volts		= -35	mV
+
+
+    alpha_n = A (v-V0) / (exp((v-V0)/B) - 1)
+    A = -10.0e3   1/(Volts*sec)	= -0.01	1/(mV*msec)
+    B = -0.01     Volts		= -10	mV
+    V0= -0.055    Volts		= -55	mV
+
+    beta_n = A exp((v-V0)/B)
+    A = 125.0     1/sec		= 0.125	1/msec
+    B = -0.080    Volts		= -80	mV
+    V0= -0.065    Volts		= -65	mV
+
+A current of 0.1 nA is injected in the first compartment. Membrane voltages
+are recorded for the first and last compartments.
+
+This model is run for a simulated time of 0.25 seconds.
+
+### Model in moose
+
