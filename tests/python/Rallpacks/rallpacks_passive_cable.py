@@ -30,8 +30,9 @@ class PasiveCable( ):
 
     def __init__(self, args):
         ''' Initialize the cable '''
-        self.length = args['length']
-        self.ncomp = args['ncomp']
+        self.length = float(args['length'])
+        self.ncomp = int(args['ncomp'])
+        self.diameter = float(args['diameter'])
 
         self.cablePath = '/cable'
         self.tablePath = '/data'
@@ -49,8 +50,8 @@ class PasiveCable( ):
         ''' Make a cable out of n compartments '''
         for i in range( self.ncomp ):
             compPath = '{}/comp{}'.format( self.cablePath, i)
-            l = args['length'] / args['ncomp']
-            d = args['diameter']
+            l = self.length / self.ncomp
+            d = self.diameter
             c = comp.MooseCompartment( compPath, l, d, args )
             self.cable.append(c)
         self.connect( )
@@ -122,14 +123,12 @@ class PasiveCable( ):
         moose.start( simTime )
 
 def main( args ):
-    cableLength = args['length']
-    compNons = args['ncomp']
+    cableLength = float(args['length'])
+    compNons = int(args['ncomp'])
     compartmentSize = cableLength / compNons
-
     cable = PasiveCable( args )
-
     first = 0
-    last = int(args['x'] / compartmentSize) - 1
+    last = int(int(args['x']) / compartmentSize) - 1
     table1 = utils.recordTarget('/data/table1', cable.cable[first].mc_, 'vm' )
     table2 = utils.recordTarget('/data/table2', cable.cable[last].mc_, 'vm' )
 
@@ -198,7 +197,6 @@ if __name__ == '__main__':
             , default = None
             , help = 'Store simulation results to this file'
             )
-
     args = parser.parse_args()
     main( vars(args) )
 
