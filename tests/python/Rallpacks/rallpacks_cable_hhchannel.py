@@ -27,10 +27,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import compartment as comp
 
+
 EREST_ACT = -65e-3
 per_ms = 1e3
-dt = 5e-4
-
+dt = 5e-5
 cable = []
 
 def alphaM(A, B, V0, v):
@@ -121,7 +121,7 @@ def create_k_chan(parent='/library', name='k', vmin=-120e-3, vmax=40e-3, vdivs=3
     n_gate.tableB = n_alpha + n_beta
     return k
     
-def create_hhcomp(parent='/library', name='hhcomp', diameter=1e-6, length=1e-6):
+def creaetHHComp(parent='/library', name='hhcomp', diameter=1e-6, length=1e-6):
     """Create a compartment with Hodgkin-Huxley type ion channels (Na and
     K).
 
@@ -157,12 +157,13 @@ def create_hhcomp(parent='/library', name='hhcomp', diameter=1e-6, length=1e-6):
     moose.connect(c, 'channel', k, 'channel')
     return (c, na, k)
 
-def makeCable( nsegs = 10 ):
+def makeCable(args):
     global cable
+    ncomp = args['ncomp']
     moose.Neutral('/cable')
-    for i in range( nsegs ):
+    for i in range( ncomp ):
         compName = 'hhcomp{}'.format(i)
-        hhComp = create_hhcomp( '/cable', compName )
+        hhComp = creaetHHComp( '/cable', compName )
         cable.append( hhComp[0] )
 
     # connect the cable.
@@ -201,13 +202,81 @@ def simulate( runTime, dt):
     utils.verify()
     moose.start( runTime )
 
-if __name__ == '__main__':
+def main(args):
     global cable
-    global dt
-    makeCable( 1000 )
+    dt = args['dt']
+    makeCable(args)
     setupDUT( dt )
     table0 = utils.recordAt( '/table0', cable[0], 'vm')
     table1 = utils.recordAt( '/table1', cable[-1], 'vm')
-    simulate( 25e-2, dt )
-    utils.plotTables( [ table0, table1 ], file = 'rallpack3.png', xscale = dt )
-    #test_hhcomp()
+    simulate( args['run_time'], dt )
+    utils.plotTables( [ table0, table1 ], file = args['output'], xscale = dt )
+
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser(
+            description = 'Rallpacks3: A cable with n compartment with HHChannel'
+            )
+    parser.add_argument( '--tau'
+            , default = 0.04
+            , type = float
+            , help = 'Time constant of membrane'
+            )
+    parser.add_argument( '--run_time'
+            , default = 0.25
+            , type = float
+            , help = 'Simulation run time'
+            )
+    parser.add_argument( '--dt'
+            , default = 5e-5
+            , type = float
+            , help = 'Step time during simulation'
+            )
+    parser.add_argument( '--Em'
+            , default = -65e-3
+            , type = float
+            , help = 'Resting potential of membrane'
+            )
+    parser.add_argument( '--RA'
+            , default = 1.0
+            , type = float
+            , help = 'Axial resistivity'
+            )
+    parser.add_argument( '--lambda'
+            , default = 1e-3
+            , type = float
+            , help = 'Lambda, what else?'
+            )
+    parser.add_argument( '--x'
+            , default = 1e-3
+            , type = float
+            , help = 'You should record membrane potential somewhere, right?'
+            ) 
+    parser.add_argument( '--length'
+            , default = 1e-3
+            , type = float
+            , help = 'Length of the cable'
+            )
+    parser.add_argument( '--diameter'
+            , default = 1e-6
+            , type = float
+            , help = 'Diameter of cable'
+            )
+    parser.add_argument( '--inj'
+            , default = 1e-10
+            , type = float
+            , help = 'Current injected at one end of the cable'
+            )
+    parser.add_argument( '--ncomp'
+            , default = 1000
+            , type = int
+            , help = 'No of compartment in cable'
+            )
+    parser.add_argument( '--output'
+            , default = None
+            , type = str
+            , help = 'Store simulation results to this file'
+            )
+    args = parser.parse_args()
+    main( vars(args) )
+
