@@ -1,4 +1,4 @@
-include_directories(../basecode ../msg ../external/debug )
+include_directories(../basecode ../msg  )
 add_library(shell 
 	Shell.cpp	
 	ShellCopy.cpp	
@@ -9,4 +9,4 @@ add_library(shell
 	Wildcard.cpp	
 	testShell.cpp	
     )
-target_link_libraries(shell basecode utility biophysics kinetics debug_print)
+target_link_libraries(shell basecode utility biophysics kinetics)
