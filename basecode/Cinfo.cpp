@@ -20,10 +20,11 @@ Cinfo::Cinfo( const string& name,
 				unsigned int nFinfos,
 				DinfoBase* d,
 				const string* doc,
-				unsigned int numDoc
+				unsigned int numDoc,
+				bool banCreation
 )
 		: name_( name ), baseCinfo_( baseCinfo ), dinfo_( d ),
-			numBindIndex_( 0 )
+			numBindIndex_( 0 ), banCreation_( banCreation )
 {
 	if ( cinfoMap().find( name ) != cinfoMap().end() ) {
 		cout << "Warning: Duplicate Cinfo name " << name << endl;
@@ -48,12 +49,12 @@ Cinfo::Cinfo( const string& name,
 
 Cinfo::Cinfo()
 		: name_( "dummy" ), baseCinfo_( 0 ), dinfo_( 0 ),
-			numBindIndex_( 0 )
+			numBindIndex_( 0 ), banCreation_( false )
 {;}
 
 Cinfo::Cinfo( const Cinfo& other )
 		: name_( "dummy" ), baseCinfo_( 0 ), dinfo_( 0 ),
-			numBindIndex_( 0 )
+			numBindIndex_( 0 ), banCreation_( false )
 {;}
 
 /*
@@ -226,6 +227,11 @@ const Finfo* Cinfo::findFinfo( const string& name ) const
 	if ( i != finfoMap_.end() )
 		return i->second;
 	return 0;
+}
+
+bool Cinfo::banCreation() const
+{
+	return banCreation_;
 }
 
 /**

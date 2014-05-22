@@ -174,6 +174,13 @@ Id Shell::doCreate( string type, ObjId parent, string name,
 	}
 
 	if ( c ) {
+		if ( c->banCreation() ) {
+			stringstream ss;
+			ss << "Shell::doCreate: Cannot create an object of class '" <<
+				type << "' because it is an abstract base class or a FieldElement.\n";
+			warning( ss.str() );
+			return Id();
+		}
 		Element* pa = parent.element();
 		if ( !pa ) {
 			stringstream ss;

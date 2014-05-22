@@ -34,7 +34,7 @@ def makeModel():
 		compartment = moose.CylMesh( '/model/kinetics' )
 
 		# load in model
-                modelId = moose.loadModel( mfile, 'model', 'ee' )
+                modelId = moose.loadModel( mfile, '/model', 'ee' )
 		a = moose.element( '/model/kinetics/a' )
 		b = moose.element( '/model/kinetics/b' )
 		c = moose.element( '/model/kinetics/c' )
@@ -71,9 +71,6 @@ def makeModel():
 		stoich.dsolve = dsolve
 		stoich.path = "/model/kinetics/##"
                 print 'dsolve.numPools, num = ', dsolve.numPools, num
-		a.vec.concInit = [ac]*num
-		b.vec.concInit = [bc]*num
-		c.vec.concInit = [cc]*num
                 b.vec[num-1].concInit *= 1.01 # Break symmetry.
 
 def main():
