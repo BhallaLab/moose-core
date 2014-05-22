@@ -11,10 +11,7 @@
 #ifndef _HEADER_H
 #define _HEADER_H
 
-/* Some of these headers are from boost library */
-#include "../external/debug/current_function.hpp"
-#include "../external/debug/assert.hpp"
-#include "../external/debug/print_function.h"
+#include "../external/debug/print_function.hpp"
 
 #include <math.h>
 #include <algorithm>
@@ -34,7 +31,6 @@
 #include <cassert>
 
 using namespace std;
-using namespace moose;
 
 // MOOSE version is hard coded here. Can be overridden from a
 // makefile.

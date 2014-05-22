@@ -26,7 +26,7 @@
 #include "muParserBase.h"
 #include "muParserTemplateMagic.h"
 #include "../debug/current_function.hpp"
-#include "../debug/print_function.h"
+#include "../debug/print_function.hpp"
 
 //--- Standard includes ------------------------------------------------------------------------
 #include <cassert>
@@ -864,7 +864,7 @@ namespace mu
           break;
     default:
           stringstream ss;
-          ss << "In function: " << MOOSE_CURRENT_FUNCTION << " case statment " 
+          ss << "In function: " << SIMPLE_CURRENT_FUNCTION << " case statment " 
               << " has incomplete defination "
               << " Case " << funTok.GetCode() << " is not handled. " << endl;
 #ifdef  DEBUG

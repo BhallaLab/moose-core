@@ -1,2 +1,4 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
-add_library(debug_print ./print_function.cc ./print_function.h)
+add_library(simpletest STATIC simple_test.hpp)
+set_target_properties(simpletest PROPERTIES LINKER_LANGUAGE CXX)
+

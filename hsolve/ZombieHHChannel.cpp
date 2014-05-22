@@ -472,7 +472,7 @@ void ZombieHHChannel::zombify( Element* solver, Element* orig )
 // static func
 void ZombieHHChannel::unzombify( Element* zombie )
 {
-    MOOSE_ASSERT_MSG(0, "Not implemented yet.");
+    SIMPLE_ASSERT_MSG(0, "Not implemented yet.");
 
     /* fixme: Element is an abstract class, it can not instantiated. Need to
      * write a new Class e.g. Element1 which can call Element constructor.
