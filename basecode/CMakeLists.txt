@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-include_directories(../msg ../external/debug)
+include_directories(../msg)
 add_library(basecode 
 	consts.cpp	
 	Element.cpp	
@@ -28,4 +28,4 @@ add_library(basecode
 	testAsync.cpp	
     )
 
-target_link_libraries(basecode debug_print biophysics)
+target_link_libraries(basecode biophysics)
