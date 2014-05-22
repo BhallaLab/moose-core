@@ -2,6 +2,8 @@
 
 """rallpacks_cable_hhchannel.py: 
 
+    A cable with 1000 compartments with HH-type channels in it.
+
 Last modified: Wed May 21, 2014  09:51AM
 
 """
@@ -25,17 +27,52 @@ import numpy as np
 import matplotlib.pyplot as plt
 import compartment as comp
 
-EREST_ACT = -70e-3
+EREST_ACT = -65e-3
 per_ms = 1e3
-dt = 5e-5
+dt = 5e-4
 
 cable = []
 
+def alphaM(A, B, V0, v):
+    '''Compute alpha_m at point v
+
+    aplha_m = A(v - v0 ) / (exp((v-V0)/B) - 1) 
+    '''
+    return (A*(v-V0) / (np.exp((v - V0)/B) -1 ))
+
+def alphaN(A, B, V0, v):
+    '''Compute alpha_n at point v 
+    aplha_n = A(v-V0) / (exp((v-V0)/B) -1 )
+    '''
+    return alphaM(A, B, V0, v)
+
+def betaM(A, B, V0, v):
+    '''Compute beta_m at point v
+    '''
+    return (A * np.exp((v-V0)/B))
+
+def betaN(A, B, V0, v):
+    return betaM(A, B, V0, v)
+
+def alphaH(A, B, V0, v):
+    '''Compute alpha_h at point v 
+    '''
+    return (A * np.exp(( v - V0) / B))
+
+def behaH(A, B, V0, v):
+    '''Compute beta_h at point v 
+    '''
+    return (A * np.exp((v-V0)/B) + 1)
+
 def createChannel(species, path, **kwargs):
     """Create a channel """
-    A = kwargs['A']
-    B = kwargs['B']
-    V0 = kwargs['V0']
+    if species == 'na':
+        return sodiumChannel( path, **kwargs)
+    elif species == 'ca':
+        channel.Xpower = 4
+    else:
+        utils.dump("FATAL", "Unsupported channel type: {}".format(species))
+        raise RuntimeError("Unsupported species of chanel")
 
 def create_na_chan(parent='/library', name='na', vmin=-110e-3, vmax=50e-3, vdivs=3000):
     """Create a Hodhkin-Huxley Na channel under `parent`.
@@ -100,6 +137,7 @@ def create_hhcomp(parent='/library', name='hhcomp', diameter=1e-6, length=1e-6):
         moose.copy('/library/na', c.path, 'na')
     else:
         create_na_chan(parent = c.path)
+
     na = moose.element('%s/na' % (c.path))
 
     # Na-conductance 120 mS/cm^2
@@ -132,7 +170,7 @@ def makeCable( nsegs = 10 ):
         hhc.connect('axial', cable[i+1], 'raxial')
 
 
-def setupDUT():
+def setupDUT( dt ):
     global cable
     comp = cable[0]
     data = moose.Neutral('/data')
@@ -140,37 +178,36 @@ def setupDUT():
     pg.firstWidth = 25e-3
     pg.firstLevel = 1e-10
     moose.connect(pg, 'output', comp, 'injectMsg')
-    setupClocks()
+    setupClocks( dt )
     
-def setupClocks( ):
+def setupClocks( dt ):
     moose.setClock(0, dt)
     moose.setClock(1, dt)
 
-def setupSolver( hsolveDt = 5e-5 ):
+def setupSolver( hsolveDt ):
     hsolvePath = '/hsolve'
     hsolve = moose.HSolve( hsolvePath )
     hsolve.dt = hsolveDt
     hsolve.target = '/cable'
     moose.useClock(1, hsolvePath, 'process')
 
-def simulate( runTime = 25e-3 ):
+def simulate( runTime, dt):
     """ Simulate the cable """
     moose.useClock(0, '/cable/##', 'process')
     moose.useClock(0, '/cable/##', 'init')
     moose.useClock(1, '/##', 'process')
     moose.reinit()
-    setupSolver()
-    #utils.verify()
+    setupSolver( hsolveDt = dt )
+    utils.verify()
     moose.start( runTime )
 
 if __name__ == '__main__':
     global cable
     global dt
     makeCable( 1000 )
-    setupClocks()
-    setupDUT()
+    setupDUT( dt )
     table0 = utils.recordAt( '/table0', cable[0], 'vm')
     table1 = utils.recordAt( '/table1', cable[-1], 'vm')
-    simulate( 25e-3 )
+    simulate( 25e-2, dt )
     utils.plotTables( [ table0, table1 ], file = 'rallpack3.png', xscale = dt )
     #test_hhcomp()
