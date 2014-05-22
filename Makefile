@@ -305,7 +305,6 @@ SUBDIR = \
 	builtins\
 	utility \
 	external/muparser \
-	external/debug \
 	biophysics \
 	kinetics \
 	ksolve \
@@ -333,7 +332,6 @@ OBJLIBS =	\
 	builtins/_builtins.o \
 	utility/_utility.o \
 	external/muparser/_muparser.o \
-	external/debug/_debug.o \
 	biophysics/_biophysics.o \
 	kinetics/_kinetics.o \
 	ksolve/_ksolve.o \
