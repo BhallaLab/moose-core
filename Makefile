@@ -86,7 +86,7 @@ MACHINE=$(shell uname -m)
 PLATFORM := $(shell uname -s)
 endif
 
-
+USE_NUMPY=1
 # Debug mode:
 
 ifeq ($(BUILD),debug)
@@ -243,6 +243,11 @@ ifeq ($(USE_CUDA),1)
 LIBS+= -L/usr/local/cuda/lib64 -LhsolveCuda/cudaLibrary  -lcuda -lcudart -lm -lmooseCudaLibrary
 HCUDA_DIR = hsolveCuda
 HCUDA_LIB = hsolveCuda/_hsolveCuda.o 
+endif
+
+# To disable numpy pass USE_NUMPY=0
+ifeq ($(USE_NUMPY),1)
+CXXFLAGS+=-DUSE_NUMPY
 endif
 
 # To compile examples, pass EXAMPLES=true ( anything on the right will do) in make command line
