@@ -38,13 +38,22 @@ const Cinfo* Synapse::initCinfo()
 		&addSpike,		// DestFinfo
 	};
 
+	static string doc[] = 
+	{
+		"Name", "Synapse",
+		"Author", "Upi Bhalla",
+		"Description", "Synapse using ring buffer for events.",
+	};
 	static Dinfo< Synapse > dinfo;
 	static Cinfo synapseCinfo (
 		"Synapse",
 		Neutral::initCinfo(),
 		synapseFinfos,
 		sizeof( synapseFinfos ) / sizeof ( Finfo* ),
-		&dinfo
+		&dinfo,
+		doc,
+		sizeof( doc ) / sizeof( string ),
+		true // This is a FieldElement.
 	);
 
 	return &synapseCinfo;

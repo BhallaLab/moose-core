@@ -3615,4 +3615,21 @@ There is an issue with setting rates in reaction-diffusion systems. It only
 sets the rate for the largest vol compartment. I know why but it should set
 for all.
 
+Attempted to update but there were severe problems with the repository
+version. Downgraded back to my version.
+
+Fixed a bug where concInit was not being propagated to all pools when
+an array was created.
+Working through snippets/MULTI/loadmulti
+
 ============================================================================
+22 May. 
+Numerous fixes in ReadKkit to be able to load models onto NeuroMesh,
+SpineMesh and PsdMesh directly, and get volumes right. With this done the
+entire multiscale model loads but doesn't run.
+
+Put in a check in Shell::doCreate to block creation of FieldElements
+or abstract classes.
+
+This is all based on 5439. There was a huge mess with upgrading so I'm taking
+a backup before trying again.

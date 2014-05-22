@@ -132,13 +132,22 @@ const Cinfo* EnzBase::initCinfo()
 		&remesh,			// Destfinfo
 	};
 
+	static string doc[] = 
+	{
+		"Name", "EnzBase",
+		"Author", "Upi Bhalla",
+		"Description", "Abstract base class for enzymes."
+	};
 	static ZeroSizeDinfo< int > dinfo;
 	static Cinfo enzBaseCinfo (
 		"EnzBase",
 		Neutral::initCinfo(),
 		enzBaseFinfos,
 		sizeof( enzBaseFinfos ) / sizeof ( Finfo* ),
-		&dinfo
+		&dinfo,
+		doc,
+		sizeof( doc )/sizeof( string ),
+		true // Don't create it, it is a an astract base class.
 	);
 
 	return &enzBaseCinfo;

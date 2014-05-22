@@ -35,7 +35,8 @@ class Cinfo
 					unsigned int nFinfos,
 					DinfoBase* d,	// A handle to lots of utility functions for the Data class.
 					const string* doc = 0,
-					unsigned int numDoc = 0
+					unsigned int numDoc = 0,
+					bool banCreation = false
 			);
 
 			/**
@@ -93,6 +94,13 @@ class Cinfo
 			 */
 			void registerPostCreationFinfo( const Finfo* f );
 
+			/**
+			 * True if this class should never be instantiated in MOOSE.
+			 * This may happen if it is a pure virtual class, or if
+			 * this Cinfo is for a FieldElement which cannot be created
+			 * in isolation but only as a child of another class.
+			 */
+			bool banCreation() const;
 //////////////////////////////////////////////////////////////////////////
 
 			const OpFunc* getOpFunc( FuncId fid ) const;
@@ -276,6 +284,8 @@ class Cinfo
 
 			BindIndex numBindIndex_;
 			std::map< std::string, std::string > doc_;
+			
+			bool banCreation_;
 
 			/**
 			 * This looks up Finfos by name.

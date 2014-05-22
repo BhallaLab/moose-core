@@ -105,7 +105,8 @@ bool findModelParent( Id cwe, const string& path,
 		modelName = fullPath.substr( pos + 1 );
 		return 1;
 	} else { // Path is an existing element.
-		parentId = paId;
+		parentId = Neutral::parent( paId ).id;
+		modelName = paId.element()->getName();
 		return 1;
 	}
 	return 0;

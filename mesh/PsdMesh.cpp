@@ -91,7 +91,10 @@ PsdMesh::PsdMesh()
 		pa_( 1 ),
 		parentDist_( 1, 1e-6 ),
 		parent_( 1, 0 ),
-		surfaceGranularity_( 0.1 )
+		surfaceGranularity_( 0.1 ),
+		vs_(1, 5.0e-21 ),
+		area_(1, 1.0e-13 ),
+		length_(1, 50.0e-9 )
 {
 	const double defaultLength = 1e-6;
 	psd_[0].setDia( defaultLength );
