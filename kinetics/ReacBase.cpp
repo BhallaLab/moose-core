@@ -145,7 +145,10 @@ const Cinfo* ReacBase::initCinfo()
 		Neutral::initCinfo(),
 		reacFinfos,
 		sizeof( reacFinfos ) / sizeof ( Finfo* ),
-		&dinfo
+		&dinfo,
+		doc,
+		sizeof( doc ) / sizeof( string ),
+		true // Ban creation, this is an abstract base class.
 	);
 
 	return &reacBaseCinfo;

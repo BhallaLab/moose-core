@@ -51,6 +51,8 @@ string lower( const string& input )
 
 ReadKkit::ReadKkit()
 	:
+	basePath_( "" ),
+	baseId_(),
 	fastdt_( 0.001 ),
 	simdt_( 0.01 ),
 	controldt_( 0.1 ),
@@ -122,10 +124,13 @@ Id  makeStandardElements( Id pa, const string& modelname )
 {
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	//cout << " kkit read " << pa << " " << modelname << " "<< MooseGlobal;
-	Id mgr( modelname );
+	string modelPath = pa.path() + "/" + modelname;
+	if ( pa == Id() )
+		modelPath = "/" + modelname;
+	Id mgr( modelPath );
 	if ( mgr == Id() )
 		mgr = shell->doCreate( "Neutral", pa, modelname, 1, MooseGlobal );
-	Id kinetics( modelname + "/kinetics" );
+	Id kinetics( modelPath + "/kinetics" );
 	if ( kinetics == Id() ) {
 		kinetics = 
 		shell->doCreate( "CubeMesh", mgr, "kinetics", 1,  MooseGlobal );
@@ -670,8 +675,12 @@ void ReadKkit::assignPoolCompartments()
 			stringstream ss;
 			ss << "compartment_" << j;
 			name = ss.str();
-			comptId = shell_->doCreate( "CubeMesh", baseId_, name, 1 ) ;
+			comptId = Neutral::child( baseId_.eref(), name );
+			if ( comptId == Id() ) 
+				comptId = shell_->doCreate( "CubeMesh", baseId_, name, 1 );
 		}
+		SetGet1< double >::set( comptId, "setVolumeNotRates",vols_[i]);
+		/*
 		if ( comptId.element()->cinfo()->isA( "CubeMesh" ) ) {
 			double side = pow( vols_[i], 1.0 / 3.0 );
 			vector< double > coords( 9, side );
@@ -679,14 +688,14 @@ void ReadKkit::assignPoolCompartments()
 			// Field< double >::set( comptId, "volume", vols_[i] );
 			Field< vector< double > >::set( comptId, "coords", coords );
 		} else {
-			SetGet1< double >::set( comptId, "setVolumeNotRates",vols_[i]);
 		}
+		*/
 		// compartments_.push_back( comptId );
-		for ( vector< Id >::iterator j = volCategories_[i].begin();
-			j != volCategories_[i].end(); ++j ) {
+		for ( vector< Id >::iterator k = volCategories_[i].begin();
+			k != volCategories_[i].end(); ++k ) {
 			if ( moveOntoCompartment_ ) {
-				if ( ! (getCompt( *j ).id == comptId ) )
-					shell_->doMove( *j, comptId );
+				if ( ! (getCompt( *k ).id == comptId ) )
+					shell_->doMove( *k, comptId );
 			}
 		}
 	}
@@ -752,7 +761,18 @@ Id findMeshOfEnz( Id enz )
  * be informed.
  */
 void ReadKkit::assignEnzCompartments()
-{;
+{
+		/*
+		Should not be needed, because the parent pool will move.
+	for ( map< string, Id >::iterator i = enzIds_.begin(); 
+		i != enzIds_.end(); ++i ) {
+		Id compt = getCompt( Neutral::parent( i->second ).id );
+		if ( moveOntoCompartment_ ) {
+			if ( ! (getCompt( i->second ).id == compt ) )
+				shell_->doMove( i->second, compt );
+		}
+	}
+	*/
 }
 
 /**
@@ -762,7 +782,18 @@ void ReadKkit::assignEnzCompartments()
  * be informed.
  */
 void ReadKkit::assignMMenzCompartments()
-{;
+{
+		/*
+		Should not be needed, because the parent pool will move.
+	for ( map< string, Id >::iterator i = mmEnzIds_.begin(); 
+		i != mmEnzIds_.end(); ++i ) {
+		Id compt = getCompt( Neutral::parent( i->second ).id );
+		if ( moveOntoCompartment_ ) {
+			if ( ! (getCompt( i->second ).id == compt ) )
+				shell_->doMove( i->second, compt );
+		}
+	}
+	*/
 }
 
 Id ReadKkit::buildEnz( const vector< string >& args )

@@ -522,17 +522,17 @@ void SteadyState::setupSSmatrix()
 	vector< unsigned int > rowStart = Field< vector< unsigned int > >::get(
 					stoich_, "rowStart" );
 
-	cout << endl << endl;
+	// cout << endl << endl;
 	for ( unsigned int i = 0; i < numVarPools_; ++i ) {
 		gsl_matrix_set (LU_, i, i + nReacs_, 1 );
 		unsigned int k = rowStart[i];
-		cout << endl << i << ":	";
+		// cout << endl << i << ":	";
 		for ( unsigned int j = 0; j < nReacs_; ++j ) {
 			double x = 0;
 			if ( j == colIndex[k] && k < rowStart[i+1] ) {
 				x = entry[k++];
 			}
-			cout << "	" << x;
+			// cout << "	" << x;
 			gsl_matrix_set (N, i, j, x);
 			gsl_matrix_set (LU_, i, j, x );
 		}

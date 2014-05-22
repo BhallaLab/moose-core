@@ -154,13 +154,22 @@ const Cinfo* MeshEntry::initCinfo()
 		remeshReacsOut(),	// SrcFinfo
 	};
 
+	static string doc[] = 
+	{
+			"Name", "MeshEntry",
+			"Author", "Upi Bhalla",
+			"Description", "One voxel in a chemical reaction compartment",
+	};
 	static Dinfo< MeshEntry > dinfo;
 	static Cinfo meshEntryCinfo (
 		"MeshEntry",
 		Neutral::initCinfo(),
 		meshFinfos,
 		sizeof( meshFinfos ) / sizeof ( Finfo* ),
-		&dinfo
+		&dinfo,
+		doc,
+		sizeof(doc)/sizeof( string ),
+		true // This IS a FieldElement, not be be created directly.
 	);
 
 	return &meshEntryCinfo;
