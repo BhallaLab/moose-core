@@ -159,13 +159,22 @@ const Cinfo* PoolBase::initCinfo()
 		&species,			// SharedFinfo
 	};
 
+	static string doc[] = 
+	{
+		"Name", "PoolBase",
+		"Author", "Upi Bhalla",
+		"Description", "Abstract base class for pools."
+	};
 	static ZeroSizeDinfo< int > dinfo;
 	static Cinfo poolCinfo (
 		"PoolBase",
 		Neutral::initCinfo(),
 		poolFinfos,
 		sizeof( poolFinfos ) / sizeof ( Finfo* ),
-		&dinfo
+		&dinfo,
+		doc,
+		sizeof( doc )/sizeof( string ),
+		true // Ban creation as this is an abstract base class.
 	);
 
 	return &poolCinfo;

@@ -1410,14 +1410,14 @@ void testFindModelParent()
 
 	ok = findModelParent( zod, "/foo", parentId, modelName );
 	assert( ok );
-	assert( parentId == foo );
-	assert( modelName == "model" );
+	assert( parentId == Id() );
+	assert( modelName == "foo" );
 	modelName = "";
 
 	ok = findModelParent( zod, "foo", parentId, modelName );
 	assert( ok );
-	assert( parentId == foo2 );
-	assert( modelName == "model" );
+	assert( parentId == zod );
+	assert( modelName == "foo" );
 	modelName = "";
 
 	//////////////// spec model name too

@@ -239,9 +239,10 @@ void Dsolve::setDsolve( Id dsolve )
 void Dsolve::setCompartment( Id id )
 {
 	const Cinfo* c = id.element()->cinfo();
-	if ( c->isA( "NeuroMesh" ) || c->isA( "CylMesh" ) ) {
+	if ( c->isA( "NeuroMesh" ) || c->isA( "SpineMesh" ) || 
+					c->isA( "PsdMesh" ) || c->isA( "CylMesh" ) ) {
 		compartment_ = id;
-		numVoxels_ = Field< unsigned int >::get( id, "numDiffCompts" );
+		numVoxels_ = Field< unsigned int >::get( id, "numMesh" );
 		/*
 		const MeshCompt* m = reinterpret_cast< const MeshCompt* >( 
 						id.eref().data() );

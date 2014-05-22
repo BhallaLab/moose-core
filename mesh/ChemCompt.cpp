@@ -184,13 +184,22 @@ const Cinfo* ChemCompt::initCinfo()
 		&entryFinfo,	// FieldElementFinfo
 	};
 
+	static string doc[] = {
+		"Name", "ChemCompt",
+		"Author", "Upi Bhalla",
+		"Description", "Pure virtual base class for chemical compartments"
+
+	};
 	static Dinfo< short > dinfo;
 	static Cinfo chemMeshCinfo (
 		"ChemCompt",
 		Neutral::initCinfo(),
 		chemMeshFinfos,
 		sizeof( chemMeshFinfos ) / sizeof ( Finfo* ),
-		&dinfo
+		&dinfo,
+		doc,
+		sizeof(doc)/sizeof( string ),
+		true // This IS a FieldElement, not be be created directly.
 	);
 
 	return &chemMeshCinfo;
