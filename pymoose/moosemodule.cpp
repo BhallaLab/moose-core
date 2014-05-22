@@ -77,7 +77,9 @@
 
 #include <Python.h>
 #include <structmember.h> // This defines the type id macros like T_STRING
+#ifdef USE_NUMPY
 #include "numpy/arrayobject.h"
+#endif
 
 #include <iostream>
 #include <typeinfo>
@@ -165,40 +167,6 @@ extern "C" {
     static int quitFlag = 0;
 
     /**
-       Return numpy typenum for specified type.
-    */
-    int get_npy_typenum(const type_info& ctype)
-    {
-        if (ctype == typeid(float)){
-            return NPY_FLOAT;
-        } else if (ctype == typeid(double)){
-            return NPY_DOUBLE;
-        } else if (ctype == typeid(int)){
-            return NPY_INT;
-        } else if (ctype == typeid(unsigned int)){
-            return NPY_UINT;
-        } else if (ctype == typeid(long)){
-            return NPY_LONG;
-        } else if (ctype == typeid(unsigned long)){
-            return NPY_ULONG;
-        } else if (ctype == typeid(short)){
-            return NPY_SHORT;
-        } else if (ctype == typeid(unsigned short)){
-            return NPY_USHORT;
-        } else if (ctype == typeid(char)){
-            return NPY_CHAR;
-        } else if (ctype == typeid(bool)){
-            return NPY_BOOL;
-        } else if (ctype == typeid(Id) || ctype == typeid(ObjId)){
-            return NPY_OBJECT;
-        } else {
-            cerr << "Cannot handle type: " << ctype.name() << endl;
-            return -1;
-        }
-    }
-
-
-    /**
        Utility function to convert an Python integer or a sequence
        object into a vector of dimensions
     */
@@ -214,7 +182,6 @@ extern "C" {
                 for (Py_ssize_t ii = 0; ii < num_dims; ++ ii){
                     PyObject* dim = PyTuple_GetItem(dims, ii);
                     dim_value = PyInt_AsLong(dim);
-                    Py_XDECREF(dim);                    
                     if ((dim_value == -1) && PyErr_Occurred()){
                         return vec_dims;
                     }
@@ -461,9 +428,13 @@ extern "C" {
         }
         if (PyTuple_SetItem(tuple, (Py_ssize_t)index, item) != 0){
             PyErr_SetString(PyExc_RuntimeError, "convert_and_set_tuple_entry: could not set tuple entry.");
-            // Py_XDECREF(tuple);
             return NULL;
         }
+#ifndef NDEBUG
+        if (verbosity > 2){
+            cout << "Set tuple " << tuple << " entry " << index << " with " << item << endl;
+        }
+#endif
         return tuple;
     }
     
@@ -477,41 +448,81 @@ extern "C" {
             case 'd': { // vector<double>
                 vector< double > * vec = static_cast< vector < double >* >(obj);
                 assert(vec != NULL);
+#ifndef USE_NUMPY
+                ret = PyTuple_New((Py_ssize_t)vec->size());
+                for (unsigned int ii = 0; ii < vec->size(); ++ii){
+                    if (0 != PyTuple_SetItem(ret, ii, PyFloat_FromDouble(vec->at(ii)))){
+                        Py_DECREF(ret);
+                        return NULL;
+                    }
+                }
+#else
                 npy_intp size = (npy_intp)(vec->size());
                 ret = PyArray_SimpleNew(1, &size, NPY_DOUBLE);
                 assert(ret != NULL);
                 char * ptr = PyArray_BYTES((PyArrayObject*)ret);
-                memcpy(ptr, &(*vec)[0], size * sizeof(double));
+                memcpy(ptr, &(*vec)[0], vec->size() * sizeof(double));
+#endif
                 return ret;
             }
             case 'i': { // vector<int>
                 vector< int > * vec = static_cast< vector < int >* >(obj);
                 assert(vec != NULL);
+#ifndef USE_NUMPY                
+                ret = PyTuple_New((Py_ssize_t)vec->size());
+                for (unsigned int ii = 0; ii < vec->size(); ++ii){
+                    if (0 != PyTuple_SetItem(ret, ii, PyInt_FromLong(vec->at(ii)))){
+                        Py_DECREF(ret);
+                        return NULL;
+                    }
+                }
+#else
                 npy_intp size = (npy_intp)(vec->size());
                 ret = PyArray_SimpleNew(1, &size, NPY_INT);
                 assert(ret != NULL);
                 char * ptr = PyArray_BYTES((PyArrayObject*)ret);
                 memcpy(ptr, &(*vec)[0], size * sizeof(int));
+#endif
                 return ret;
             }
             case 'I': { // vector<unsigned int>
                 vector< int > * vec = static_cast< vector < int >* >(obj);
                 assert(vec != NULL);
+#ifndef USE_NUMPY                
+                ret = PyTuple_New((Py_ssize_t)vec->size());
+                for (unsigned int ii = 0; ii < vec->size(); ++ii){
+                    if (0 != PyTuple_SetItem(ret, ii, PyLong_FromLong(vec->at(ii)))){
+                        Py_DECREF(ret);
+                        return NULL;
+                    }
+                }
+#else
                 npy_intp size = (npy_intp)(vec->size());
                 ret = PyArray_SimpleNew(1, &size, NPY_UINT);
                 assert(ret != NULL);
                 char * ptr = PyArray_BYTES((PyArrayObject*)ret);
                 memcpy(ptr, &(*vec)[0], size * sizeof(unsigned int));
+#endif
                 return ret;
             }
             case 'l': { // vector<long>
                 vector< long > * vec = static_cast< vector < long >* >(obj);
                 assert(vec != NULL);
+#ifndef USE_NUMPY                
+                ret = PyTuple_New((Py_ssize_t)vec->size());
+                for (unsigned int ii = 0; ii < vec->size(); ++ii){
+                    if (0 != PyTuple_SetItem(ret, ii, PyLong_FromLong(vec->at(ii)))){
+                        Py_DECREF(ret);
+                        return NULL;
+                    }
+                }
+#else
                 npy_intp size = (npy_intp)(vec->size());
                 ret = PyArray_SimpleNew(1, &size, NPY_INT);
                 assert(ret != NULL);
                 char * ptr = PyArray_BYTES((PyArrayObject*)ret);
                 memcpy(ptr, &(*vec)[0], size * sizeof(long));
+#endif
                 return ret;
             }
             case 'x': { // vector<Id>
@@ -565,41 +576,81 @@ extern "C" {
             case 'k': { // vector<unsigned long>
                 vector< unsigned int > * vec = static_cast< vector < unsigned int >* >(obj);
                 assert(vec != NULL);
+#ifndef USE_NUMPY                
+                ret = PyTuple_New((Py_ssize_t)vec->size());
+                for (unsigned int ii = 0; ii < vec->size(); ++ii){
+                    if (0 != PyTuple_SetItem(ret, ii, PyLong_FromUnsignedLong(vec->at(ii)))){
+                        Py_DECREF(ret);
+                        return NULL;
+                    }
+                }
+#else
                 npy_intp size = (npy_intp)(vec->size());
                 ret = PyArray_SimpleNew(1, &size, NPY_UINT);
                 assert(ret != NULL);
                 char * ptr = PyArray_BYTES((PyArrayObject*)ret);
                 memcpy(ptr, &(*vec)[0], size * sizeof(unsigned int));
+#endif
                 return ret;
             }
             case 'L': { // vector<long long> - this is not used at present
                 vector< long long> * vec = static_cast< vector < long long>* >(obj);
                 assert(vec != NULL);
+                ret = PyTuple_New((Py_ssize_t)vec->size());
+#ifndef USE_NUMPY
+                for (unsigned int ii = 0; ii < vec->size(); ++ii){
+                    if (0 != PyTuple_SetItem(ret, ii, PyLong_FromLongLong(vec->at(ii)))){
+                        Py_DECREF(ret);
+                        return NULL;
+                    }
+                }                
+#else
                 npy_intp size = (npy_intp)(vec->size());
                 ret = PyArray_SimpleNew(1, &size, NPY_LONGLONG);
                 assert(ret != NULL);
                 char * ptr = PyArray_BYTES((PyArrayObject*)ret);
                 memcpy(ptr, &(*vec)[0], size * sizeof(long long));
+#endif
                 return ret;
             }
             case 'K': { // vector<unsigned long long> - this is not used at present
                 vector< unsigned long long> * vec = static_cast< vector < unsigned long long>* >(obj);
                 assert(vec != NULL);
+#ifndef USE_NUMPY
+                ret = PyTuple_New((Py_ssize_t)vec->size());
+                for (unsigned int ii = 0; ii < vec->size(); ++ii){
+                    if (0 != PyTuple_SetItem(ret, ii, PyLong_FromUnsignedLongLong(vec->at(ii)))){
+                        Py_DECREF(ret);
+                        return NULL;
+                    }
+                }                
+#else
                 npy_intp size = (npy_intp)(vec->size());
                 ret = PyArray_SimpleNew(1, &size, NPY_ULONGLONG);
                 assert(ret != NULL);
                 char * ptr = PyArray_BYTES((PyArrayObject*)ret);
                 memcpy(ptr, &(*vec)[0], size * sizeof(unsigned long long));
+#endif
                 return ret;
             }
             case 'F': { // vector<float>
                 vector< float > * vec = static_cast< vector < float >* >(obj);
                 assert(vec != NULL);
+#ifndef USE_NUMPY
+                ret = PyTuple_New((Py_ssize_t)vec->size());
+                for (unsigned int ii = 0; ii < vec->size(); ++ii){
+                    if (0 != PyTuple_SetItem(ret, ii, PyFloat_FromDouble(vec->at(ii)))){
+                        Py_DECREF(ret);
+                        return NULL;
+                    }
+                }
+#else
                 npy_intp size = (npy_intp)(vec->size());
                 ret = PyArray_SimpleNew(1, &size, NPY_FLOAT);
                 assert(ret != NULL);
                 char * ptr = PyArray_BYTES((PyArrayObject*)ret);
                 memcpy(ptr, &(*vec)[0], size * sizeof(float));
+#endif
                 return ret;
             }
             case 's': { // vector<string>
@@ -2047,7 +2098,7 @@ extern "C" {
         PyTypeObject * new_class =
                 (PyTypeObject*)PyType_Type.tp_alloc(&PyType_Type, 0);
         // Py_TYPE(new_class) = &PyType_Type;
-        new_class->tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HEAPTYPE;
+        new_class->tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
         /*
         should we avoid Py_TPFLAGS_HEAPTYPE as it imposes certain
         limitations:
@@ -2160,7 +2211,7 @@ extern "C" {
                 "." + string(name);
         map<string, PyObject * >::iterator it = get_inited_destfields().find(full_name);
         if (it != get_inited_destfields().end()){
-            Py_XINCREF(it->second);
+            Py_INCREF(it->second);
             return it->second;
         }
         PyObject * args = PyTuple_New(2);
@@ -2170,16 +2221,17 @@ extern "C" {
         PyTuple_SetItem(args, 1, PyString_FromString(name));
         _Field * ret = PyObject_New(_Field, &moose_DestField);
         if (moose_DestField.tp_init((PyObject*)ret, args, NULL) == 0){
-            Py_XDECREF(args);
-            /* I thought PyObject_New creates a new ref, but without
-               the following XINCREF, the destinfo gets gc-ed. */
-            Py_XINCREF(ret);
+            /* since we are caching the destinfo in inited_destfields
+             * map, we must protect it by increasing refcount, else
+             * will get gc-ed. */
+            Py_INCREF(ret);
             get_inited_destfields()[full_name] =  (PyObject*)ret;
-            return (PyObject*)ret;
+        } else{
+            Py_XDECREF((PyObject*)ret);
+            ret = NULL;
         }
-        Py_XDECREF((PyObject*)ret);
-        Py_XDECREF(args);
-        return NULL;
+        Py_DECREF(args);
+        return (PyObject*)ret;
     }
     
     
@@ -2278,29 +2330,28 @@ extern "C" {
         string full_name = obj->oid_.path() + "." + string(name);
         map<string, PyObject * >::iterator it = get_inited_lookupfields().find(full_name);
         if (it != get_inited_lookupfields().end()){
-            Py_XINCREF(it->second);
+            Py_INCREF(it->second);
             return it->second;
         }
         /* Create a new instance of LookupField `name` and set it as
          * an attribute of the object self. Create the argument for
          * init method of LookupField.  This will be (fieldname, self) */
-        PyObject * args = PyTuple_New(2);
-                
+        PyObject * args = PyTuple_New(2);                
         PyTuple_SetItem(args, 0, self);
-        Py_XINCREF(self); // compensate for stolen ref
+        Py_INCREF(self); // compensate for stolen ref
         PyTuple_SetItem(args, 1, PyString_FromString(name));
         _Field * ret = PyObject_New(_Field, &moose_LookupField);
         if (moose_LookupField.tp_init((PyObject*)ret, args, NULL) == 0){
-            Py_XDECREF(args);
+            Py_INCREF((PyObject*)ret);
             get_inited_lookupfields()[full_name] =  (PyObject*)ret;
-            /* I thought PyObject_New creates a new ref, but without
-             * the following XINCREF, the lookupfinfo gets gc-ed. */
-            Py_XINCREF(ret);
-            return (PyObject*)ret;
+            /* must protect by increasing refcnt, else the lookupfinfo
+             * gets gc-ed. */
+        } else {
+            Py_XDECREF((PyObject*)ret);
+            ret = NULL;
         }
-        Py_XDECREF((PyObject*)ret);
-        Py_XDECREF(args);
-        return NULL;
+        Py_DECREF(args);
+        return (PyObject*)ret;
     }
     
     int defineLookupFinfos(const Cinfo * cinfo)
@@ -2372,21 +2423,21 @@ extern "C" {
         //   will be (fieldname, self)
         PyObject * args = PyTuple_New(2);                
         PyTuple_SetItem(args, 0, self);
-        Py_XINCREF(self); // compensate for stolen ref
+        Py_INCREF(self); // compensate for stolen ref
         PyTuple_SetItem(args, 1, PyString_FromString(name));
         _Field * ret = PyObject_New(_Field, &moose_ElementField);
         // 2. Now use this arg to actually create the element field.
         if (moose_ElementField.tp_init((PyObject*)ret, args, NULL) == 0){
-            Py_XDECREF(args);
+            // cache the finfo and protect by increasing refcnt, else
+            // the finfo gets gc-ed.
+            Py_INCREF((PyObject*)ret);
             get_inited_elementfields()[full_name] =  (PyObject*)ret;
-            // I thought PyObject_New creates a new ref, but without
-            // the following XINCREF, the finfo gets gc-ed.
-            Py_XINCREF(ret);
-            return (PyObject*)ret;
+        } else {
+            Py_DECREF((PyObject*)ret);
+            ret = NULL;
         }
-        Py_XDECREF((PyObject*)ret);
-        Py_XDECREF(args);
-        return NULL;
+        Py_DECREF(args);
+        return (PyObject*)ret;
     }
 
     int defineElementFinfos(const Cinfo * cinfo)
@@ -2502,7 +2553,7 @@ extern "C" {
             PyErr_SetString(PyExc_TypeError, "moose_element: argument must be a path or an existing element or an vec");
             return NULL;
         }
-        PyErr_Clear();                
+        // PyErr_Clear();                
         if (PyObject_IsInstance(obj, (PyObject*)&ObjIdType)){
             oid = ((_ObjId*)obj)->oid_;
         } else if (PyObject_IsInstance(obj, (PyObject*)&IdType)){
@@ -2510,7 +2561,7 @@ extern "C" {
         } else if (ElementField_SubtypeCheck(obj)){
             oid = ObjId(((_Id*)moose_ElementField_getId((_Field*)obj, NULL))->id_);
         }
-        if (oid.bad() ){
+        if (oid.bad()){
             PyErr_SetString(PyExc_TypeError, "moose_element: cannot convert to moose element.");
             return NULL;
         }
@@ -2649,8 +2700,9 @@ extern "C" {
         if (registered != 0){
             cerr << "Failed to register finalize() to be called at exit. " << endl;
         }
-
+#ifdef USE_NUMPY
         import_array();
+#endif
         // Add Id type
         // Py_TYPE(&IdType) = &PyType_Type; // unnecessary - filled in by PyType_Ready
         IdType.tp_new = PyType_GenericNew;
