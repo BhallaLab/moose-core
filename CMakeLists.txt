@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 2.8)
-
 project(moose)
 
 # This snippet is from LLVM project.
@@ -22,7 +21,7 @@ endif()
 
 ################################# CMKAE MACROS #################################
 
-set(CMAKE_VERBOSE_MAKEFILE OFF)
+set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
 set(INSTALL_LIB_DIR lib CACHE PATH "/usr/local/lib")
 set(INSTALL_BIN_DIR bin CACHE PATH "/usr/local/bin")
@@ -84,7 +83,7 @@ endif()
 # Default macros
 add_definitions(-DUSE_GENESIS_PARSER)
 
-set(DEBUG 1)
+set(DEBUG 0)
 if(DEBUG)
     set(CMAKE_BUILD_TYPE Debug)
 endif()
