@@ -31,6 +31,7 @@ OBJ = \
 	testBiophysics.o	\
 	IzhikevichNrn.o	\
 	DifShell.o	\
+	Leakage.o	\
 
 	# LeakyIaF.o	\
 	# GapJunction.o	\
@@ -68,6 +69,7 @@ CompartmentBase.o: CompartmentBase.h CompartmentDataHolder.h
 Compartment.o: CompartmentBase.h Compartment.h
 SymCompartment.o: CompartmentBase.h Compartment.h SymCompartment.h
 ChanBase.o: ChanBase.h
+Leakage.o: Leakage.h ChanBase.h
 HHChannel.o: ChanBase.h HHChannel.h HHGate.h
 HHGate.o: HHGate.h
 CaConc.o:	CaConc.h
