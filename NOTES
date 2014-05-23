@@ -3633,3 +3633,14 @@ or abstract classes.
 
 This is all based on 5439. There was a huge mess with upgrading so I'm taking
 a backup before trying again.
+
+Checkin 5458.
+============================================================================
+23 May 
+Able to upload the new revision, things compile now. Apparently the hsolve
+is now working well and clearing the Rallpacks.
+
+Sahil has found a problem with the cspace reader. Trying out in 
+ChemicalBistables/foo.py
+This turned out just to be a numerical instability, lowering dt fixed it.
+============================================================================
