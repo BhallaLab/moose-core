@@ -10,6 +10,7 @@ add_library(biophysics
         CompartmentDataHolder.cpp
 	SymCompartment.cpp	
 	ChanBase.cpp	
+        Leakage.cpp
 	HHChannel.cpp	
 	HHGate.cpp	
 	CaConc.cpp	

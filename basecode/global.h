@@ -14,6 +14,9 @@
 
 #include "header.h"
 #include "../external/debug/simple_test.hpp"
+#include <ctime>
+#include <map>
+
 
 /**
  * @brief Global stringstream for message printing.
@@ -30,9 +33,14 @@ extern unsigned int totalTests;
  * automatically computed by increamenting the counter.
  */
 
-#define tbegin cerr << endl << "Test(" << totalTests << "): " << SIMPLE_CURRENT_FUNCTION;
-#define tend totalTests++; \
-    cerr << std::right <<  setw(20) << "test of " << SIMPLE_CURRENT_FUNCTION << " finished."; 
+#define TEST_BEGIN cout << endl << "Test(" << totalTests << "): " << SIMPLE_CURRENT_FUNCTION;
+#define TEST_END totalTests++; \
+    cout << std::right <<  setw(20) << "test of " << SIMPLE_CURRENT_FUNCTION << " finished."; 
+
+
+/*-----------------------------------------------------------------------------
+ *  Global clock in moose.
+ *-----------------------------------------------------------------------------*/
 
 
 /*-----------------------------------------------------------------------------
@@ -56,7 +64,7 @@ namespace moose
      *
      * @return  A fixed path.
      */
-    string fixPath(string path);
+     string fixPath(string path);
 
     /**
      * @brief Checks if given path is correct. 
@@ -66,7 +74,7 @@ namespace moose
      *
      * @return 0 if path is all-right. Negative number if path is not OK.
      */
-    int checkPath( const string& path );
+     int checkPath( const string& path );
 
     /** @brief Append pathB to pathA and return the result. 
      *
@@ -79,7 +87,7 @@ namespace moose
      *
      * @return A string representing moose-path.
      */
-    string joinPath(string pathA, string pathB);
+     string joinPath(string pathA, string pathB);
 }
 
 #endif   /* ----- #ifndef GLOBAL_INC  ----- */

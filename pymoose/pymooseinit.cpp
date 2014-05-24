@@ -112,7 +112,10 @@ unsigned int getNumCores()
 #endif
 	if ( numCPU < 1 )
 	{
+#ifndef QUIET_MODE 
 		cout << "No CPU information available. Assuming single core." << endl;
+#else
+#endif
 		numCPU = 1;
 	}
 	return numCPU;
@@ -197,7 +200,12 @@ Id init( int argc, char** argv, bool& doUnitTests, bool& doRegressionTests,
 		}
 	}
 	if ( myNode == 0 ) 
-		cout << "on node " << myNode << ", numNodes = " << numNodes << ", numCores = " << numCores << endl;
+        {
+#ifndef QUIET_MODE
+		cout << "on node " << myNode << ", numNodes = " 
+                    << numNodes << ", numCores = " << numCores << endl;
+#endif
+        }
 
 	Id shellId;
 	Element* shelle = 

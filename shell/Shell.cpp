@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "global.h"
 #include "SingleMsg.h"
 #include "DiagonalMsg.h"
 #include "OneToOneMsg.h"
@@ -20,6 +21,7 @@
 
 // Want to separate out this search path into the Makefile options
 #include "../scheduling/Clock.h"
+#include "../external/debug/simple_logger.hpp"
 
 #ifdef USE_SBML
 #include "../sbml/SbmlWriter.h"
@@ -43,6 +45,11 @@ double Shell::runtime_( 0.0 );
 
 const Cinfo* Shell::initCinfo()
 {
+
+#ifdef PRINT_STATS
+    clock_t t = clock();
+#endif
+
 ////////////////////////////////////////////////////////////////
 // Value Finfos
 ////////////////////////////////////////////////////////////////
@@ -124,6 +131,11 @@ const Cinfo* Shell::initCinfo()
 		//new Dinfo< Shell >()
 	);
 
+#ifdef PRINT_STATS 
+        float time = (float(clock() - t)/CLOCKS_PER_SEC);
+        logger.initializationTime.push_back( time );
+#endif
+
 	return &shellCinfo;
 }
 
@@ -164,6 +176,9 @@ Id Shell::doCreate( string type, ObjId parent, string name,
 				NodePolicy nodePolicy,
 				unsigned int preferredNode )
 {
+#ifdef PRINT_STATS
+    clock_t t = clock();
+#endif
 	const Cinfo* c = Cinfo::find( type );
 	if ( name.find_first_of( "[] #?\"/\\" ) != string::npos ) {
 		stringstream ss;
@@ -211,12 +226,21 @@ Id Shell::doCreate( string type, ObjId parent, string name,
 			parentMsgIndex	// Message index of child-parent msg.
 		);
 		// innerCreate( type, parent, ret, name, numData, isGlobal );
+
+#ifdef PRINT_STATS 
+        logger.creationTime.push_back((float(clock() - t)/CLOCKS_PER_SEC));
+#endif
+
 		return ret;
 	} else {
 		stringstream ss;
 		ss << "Shell::doCreate: Class '" << type << "' not known. No Element created";
 		warning( ss.str() );
 	}
+
+#ifdef PRINT_STATS 
+        logger.creationTime.push_back((float(clock() - t)/CLOCKS_PER_SEC));
+#endif
 	return Id();
 }
 
@@ -234,6 +258,10 @@ ObjId Shell::doAddMsg( const string& msgType,
 	ObjId src, const string& srcField, 
 	ObjId dest, const string& destField )
 {
+#ifdef PRINT_STATS 
+    clock_t t = clock();
+#endif
+
 	if ( !src.id.element() ) {
 		cout << myNode_ << ": Error: Shell::doAddMsg: src not found" << endl;
 		return ObjId();
@@ -272,6 +300,11 @@ ObjId Shell::doAddMsg( const string& msgType,
 		m->mid().dataIndex
 	);
 
+#ifdef PRINT_STATS
+        logger.updateGlobalCount("Msgs");
+        float time = (float(clock() - t)/ CLOCKS_PER_SEC);
+        logger.creationTime.push_back(time);
+#endif
 	return m->mid();
 
 	// const Msg* m = innerAddMsg( msgType, src, srcField, dest, destField );
@@ -283,12 +316,25 @@ void Shell::doQuit()
 {
 	SetGet0::set( ObjId(), "quit" );
 	// Shell::keepLooping_ = 0;
+#ifdef PRINT_STATS 
+        cout << logger.dumpStats(1);
+        logger.loggerToXML();
+#endif
 }
 
 void Shell::doStart( double runtime )
 {
+#ifdef PRINT_STATS
+        clock_t t = clock();
+#endif
+
 	Id clockId( 1 );
 	SetGet1< double >::set( clockId, "start", runtime );
+
+#ifdef PRINT_STATS
+        float time = (float(clock() - t) / CLOCKS_PER_SEC);
+        logger.simulationTime.push_back(time);
+#endif
 }
 
 bool isDoingReinit()
@@ -302,8 +348,18 @@ bool isDoingReinit()
 
 void Shell::doReinit( )
 {
+
+#ifdef PRINT_STATS
+        clock_t t = clock();
+        cout << logger.dumpStats(0);
+#endif
 	Id clockId( 1 );
 	SetGet0::set( clockId, "reinit" );
+
+#ifdef PRINT_STATS
+       float time = (float(clock() - t)/CLOCKS_PER_SEC);
+       logger.initializationTime.push_back(time);
+#endif
 }
 
 void Shell::doStop( )
@@ -315,7 +371,7 @@ void Shell::doStop( )
 
 void Shell::doSetClock( unsigned int tickNum, double dt )
 {
-		LookupField< unsigned int, double >::set( ObjId( 1 ), "tickDt", tickNum, dt );
+    LookupField< unsigned int, double >::set( ObjId( 1 ), "tickDt", tickNum, dt );
 }
 
 void Shell::doUseClock( string path, string field, unsigned int tick )

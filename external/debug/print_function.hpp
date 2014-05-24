@@ -52,29 +52,6 @@
 
 using namespace std;
 
-
-#if  0     /* ----- #if 0 : If0Label_1 ----- */
-
-inline string debugPrint(string msg, string prefix, string color = T_RESET
-        , unsigned indentLevel = 10);
-
-
-inline string colored(string msg);
-
-inline string colored(string msg, string colorName);
-
-/*  pretty print onto console using colors. */
-inline void dump(string msg, string type="WARNING", bool autoFormat=true);
-
-/*  log to a file and also write to console. */
-inline void log(string msg, string type, bool redirectToConsole=true
-        , bool removeTicks=true);
-
-/* Check if a given character is a backtick ` */
-inline bool isBackTick(char a);
-
-#endif     /* ----- #if 0 : If0Label_1 ----- */
-
 /* 
  * ===  FUNCTION  ==============================================================
  *         Name:  mapToString
@@ -87,7 +64,7 @@ inline bool isBackTick(char a);
     template<typename A, typename B>
 string mapToString(const map<A, B>& m, bool value=true)
 {
-    unsigned int width = 80;
+    unsigned int width = 81;
     unsigned int mapSize = m.size();
     unsigned int size = 0;
 
@@ -101,7 +78,7 @@ string mapToString(const map<A, B>& m, bool value=true)
         ss.str("");
         ss << it->first;
         if(value)
-            ss << ": `" << it->second << '`';
+            ss << ": " << it->second;
         row.push_back(ss.str());
         if(ss.str().size() > size)
             size = ss.str().size()+1;
@@ -115,7 +92,7 @@ string mapToString(const map<A, B>& m, bool value=true)
     {
         if(i < colums)
         {
-            ss << setw(size) << row[ii];
+            ss << setw(size+1) << row[ii];
             i++;
         }
         else
@@ -165,6 +142,9 @@ inline string debugPrint(string msg, string prefix = "DEBUG"
 
 inline void dump(string msg, string type = "DEBUG", bool autoFormat = true)
 {
+#if QUIET_MODE || VERBOSITY < 0
+    return;
+#else
     stringstream ss;
     ss << "[" << type << "] ";
     bool set = false;
@@ -208,6 +188,7 @@ inline void dump(string msg, string type = "DEBUG", bool autoFormat = true)
     if(!reset)
         ss << T_RESET;
     cerr << ss.str() << endl;
+#endif
 }
 
 /* A macro would be cool. */
@@ -226,6 +207,12 @@ inline bool isBackTick(char a)
     return false;
 }
 
+inline string formattedMsg(string& msg)
+{
+    remove_if(msg.begin(), msg.end(), isBackTick);
+    return msg;
+}
+
 inline void log(string msg, string type = "DEBUG"
         , bool redirectToConsole = true
         , bool removeTicks = true 
@@ -235,12 +222,10 @@ inline void log(string msg, string type = "DEBUG"
         dump(msg, type, true);
 
     /* remove any backtick from the string. */
-    if(removeTicks)
-        remove_if(msg.begin(), msg.end(), isBackTick);
+    formattedMsg( msg );
 
     fstream logF;
-    logF.open("__simple__.log", ios::app);
-
+    logF.open( "__moose__.log", ios::app);
     time_t rawtime; time(&rawtime);
     struct tm* timeinfo;
     timeinfo = localtime(&rawtime);
@@ -249,6 +234,5 @@ inline void log(string msg, string type = "DEBUG"
 
     logF.close();
 }
-
 
 #endif   /* ----- #ifndef print_function_INC  ----- */
