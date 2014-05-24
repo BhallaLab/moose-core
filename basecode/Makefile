@@ -55,6 +55,7 @@ HEADERS = \
 	GlobalDataElement.h \
 	LocalDataElement.h \
 	Eref.h \
+	global.h \
 	Finfo.h \
 	DestFinfo.h \
 	Id.h \
@@ -82,6 +83,7 @@ testAsync.o:	SparseMatrix.h SetGet.h ../scheduling/Clock.h ../biophysics/IntFire
 SparseMsg.o:	SparseMatrix.h
 SetGet.o:	SetGet.h ../shell/Neutral.h
 HopFunc.o:	HopFunc.h ../mpi/PostMaster.h
+global.o:       global.h 
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -I../msg $< -c

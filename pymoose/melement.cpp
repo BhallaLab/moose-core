@@ -248,7 +248,11 @@ extern "C" {
             
         
         Id new_id = create_Id_from_path(path, numData, isGlobal, basetype_str);
+#ifndef QUIET_MODE
         cout << "Created " << new_id << " path=" << path << " numData=" << numData << " isGlobal=" << isGlobal << " baseType=" << basetype_str << endl;
+#else
+        cout << "+";
+#endif
         if (new_id == Id() && PyErr_Occurred()){
             // Py_XDECREF(self);
             return -1;

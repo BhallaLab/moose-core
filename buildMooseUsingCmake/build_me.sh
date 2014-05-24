@@ -51,15 +51,11 @@ colorPrint "INFO" "version, run make"
 colorPrint "INFO" "You may like to customize some varibales in Makefile."
 colorPrint "INFO" ""
 
-BUILD_TYPE=Debug
+BUILD_TYPE=debug
 if [ "$1" ]; then
-    colorPrint "STEP" "Building RELEASE version: (y/n?) "
-    read user_input
-    if [ $user_input = "n" ]; then
-        exit
-    fi
-    export CXX_FLAGS=-O3
-    BUILD_TYPE=RELEASE 
+    colorPrint "INPUT" "Building for distribution" 
+    BUILD_TYPE=distribution 
 fi
 cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE ..
 make VERBOSE=1
+make check_python

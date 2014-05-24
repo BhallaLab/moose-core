@@ -7,7 +7,7 @@ TARGET = _pymoose.o
 NUMPY_WARNING_FLAG = -DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION
 .PHONY: clean
 
-HEADERS = moosemodule.h
+HEADERS = moosemodule.h ../basecode/global.h
 
 OBJ = moosemodule.o mfield.o vec.o melement.o test_moosemodule.o
 
