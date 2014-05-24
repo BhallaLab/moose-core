@@ -34,6 +34,8 @@
 #include <string>
 
 #include "../basecode/Id.h"
+#include "../basecode/global.h"
+
 extern char shortType(string);
 extern char innerType(char); // declared in utility.h, defined in utility/types.cpp
 extern "C" {

@@ -345,7 +345,7 @@ int HSolveUtils::targets(
 #include "../shell/Shell.h"
 void testHSolveUtils( )
 {
-        tbegin;
+        TEST_BEGIN;
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	bool success;
 	
@@ -496,7 +496,7 @@ void testHSolveUtils( )
 	
 	// Clean up
 	shell->doDelete( n );
-        tend;
+        TEST_END;
 }
 
 #endif // DO_UNIT_TESTS

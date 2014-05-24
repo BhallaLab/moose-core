@@ -50,6 +50,8 @@
 #include <structmember.h> // This defines the type id macros like T_STRING
 // #include "numpy/arrayobject.h"
 
+#include "../external/debug/simple_logger.hpp"
+
 #include <iostream>
 #include <typeinfo>
 #include <cstring>
@@ -61,6 +63,7 @@
 #endif
 
 #include "../basecode/header.h"
+#include "../basecode/global.h"
 #include "../basecode/Id.h"
 #include "../basecode/ObjId.h"
 #include "../utility/utility.h"
@@ -309,15 +312,20 @@ extern "C" {
             PyErr_SetString(PyExc_ValueError, message.c_str());
             return Id();
         }
-        return SHELLPTR->doCreate(type,
-                                  parent_id,
-                                  string(name),
-                                  numData, 
-								  static_cast< NodePolicy >( isGlobal ) );
-        
+        Id nId =  SHELLPTR->doCreate(type,
+                parent_id,
+                string(name),
+                numData, 
+                static_cast< NodePolicy >( isGlobal ) 
+                );
+
+#ifdef PRINT_STATS
+        logger.updateGlobalCount(type);
+#endif
+        return nId;
     }
     
-     int moose_Id_init(_Id * self, PyObject * args, PyObject * kwargs)
+    int moose_Id_init(_Id * self, PyObject * args, PyObject * kwargs)
     {
         extern PyTypeObject IdType;
         PyObject * src = NULL;
