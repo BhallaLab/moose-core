@@ -44,6 +44,7 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 else()
     message(WARNING "Continuing with unsupported compiler")
 endif()
+set(CMAKE_CXX_COMPILER "clang++")
 
 ## Turn warning to error
 add_definitions(-Wall
@@ -74,10 +75,20 @@ if(VERIFY)
 endif(VERIFY)
 
 # VERBOSITY OF OUTPUT
-set(VERBOSITY "1" CACHE STRING "0")
+set(VERBOSITY 0)
 if(VERBOSITY)
     message("++ Verbosity of output is ${VERBOSITY}")
     add_definitions(-DVERBOSITY=${VERBOSITY})
+else()
+    message("++ Moose will be quiet")
+    add_definitions(-DQUIET_MODE)
+endif()
+
+# STATS INSIDE MOOSE
+set(PRINT_STATS 1)
+if(PRINT_STATS)
+    message("++ Moose will print statistics during simulation")
+    add_definitions(-DPRINT_STATS)
 endif()
 
 # Default macros
@@ -86,6 +97,9 @@ add_definitions(-DUSE_GENESIS_PARSER)
 set(DEBUG 0)
 if(DEBUG)
     set(CMAKE_BUILD_TYPE Debug)
+else()
+    set(CMAKE_BUILD_TYPE distribution)
+    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -O3)
 endif()
 
 ################################### SETUP BUILD ################################
@@ -144,7 +158,8 @@ add_subdirectory(scheduling)
 add_subdirectory(builtins)
 add_subdirectory(utility)
 add_subdirectory(external/muparser)
-add_subdirectory(external/debug/)
+add_subdirectory(external/debug)
+add_subdirectory(external/tinyxml)
 add_subdirectory(mesh)
 add_subdirectory(mpi)
 add_subdirectory(signeur)
@@ -173,6 +188,7 @@ target_link_libraries(moose
     hsolve 
     mesh
     signeur
+    tinyxml
     diffusion 
     device
     benchmarks
@@ -249,6 +265,7 @@ if(BUILD_PYMOOSE)
         biophysics 
         kinetics 
         ksolve
+        tinyxml
         hsolve 
         mesh
         signeur

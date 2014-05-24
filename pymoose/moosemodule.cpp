@@ -95,6 +95,7 @@
 #include "../basecode/Id.h"
 #include "../basecode/ObjId.h"
 #include "../utility/utility.h"
+#include "../external/debug/simple_logger.hpp"
 #include "../randnum/randnum.h"
 #include "../shell/Shell.h"
 #include "../shell/Wildcard.h"
@@ -1415,6 +1416,7 @@ extern "C" {
             PyErr_SetString(PyExc_ValueError, "simulation runtime must be positive.");
             return NULL;
         }
+
         Py_BEGIN_ALLOW_THREADS
                 SHELLPTR->doStart(runtime);
         Py_END_ALLOW_THREADS
@@ -2773,10 +2775,14 @@ extern "C" {
         }
              
         clock_t defclasses_end = clock();
+#ifndef QUIET_MODE
         cout << "Info: Time to define moose classes:" << (defclasses_end - defclasses_start) * 1.0 /CLOCKS_PER_SEC << endl;
+#endif
         PyGILState_Release(gstate);
         clock_t modinit_end = clock();
+#ifndef QUIET_MODE
         cout << "Info: Time to initialize module:" << (modinit_end - modinit_start) * 1.0 /CLOCKS_PER_SEC << endl;
+#endif
         if (doUnitTests){
             test_moosemodule();
         }

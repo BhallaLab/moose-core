@@ -57,4 +57,6 @@ if [ "$1" ]; then
     export CXX_FLAGS=-O3
     BUILD_TYPE=RELEASE 
 fi
-cd ./buildMooseUsingCmake && ./build_me.sh -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+( cd ./buildMooseUsingCmake && \
+    ./build_me.sh -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DQUIET_MODE 
+)
