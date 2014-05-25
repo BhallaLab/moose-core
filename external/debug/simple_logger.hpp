@@ -37,7 +37,7 @@ class SimpleLogger {
         SimpleLogger()
         {
             outputFile = "";
-            currentTime = timeStamp();
+            startTime = timeStamp();
         }
 
         ~SimpleLogger()
@@ -145,7 +145,7 @@ class SimpleLogger {
         {
             string prefix = "";
             for(int i = 0; i < indent; ++i)
-                prefix += "    ";
+                prefix += "\t";
             ss << prefix << "<" << tagName << ">" << endl;
 
             typename map<A, B>::const_iterator it;
@@ -165,14 +165,16 @@ class SimpleLogger {
          *
          * @return A XML string.
          */
-        string loggerToXML( const char* outFile = "__moose__.dat" )
+        string loggerToXML( const char* outFile = "moose_logger.log" )
         {
             logSS.str("");
-            logSS << "<simulation time_stamp=\"" << currentTime << "\">" << endl;
+            logSS << "<simulation simulator=\"moose\">" << endl;
+            logSS << "\t<start_time>" << startTime << "</start_time>" << endl;
             
             mapToXML<string, unsigned long>(logSS, elementsMap, "elements", 1);
             mapToXML<string, float>(logSS, timekeeperMap, "times", 1);
 
+            logSS << "\t<end_time>" << timeStamp() << "</end_time>" << endl;
             logSS << "</simulation>" << endl;
             fstream logF;
             logF.open(outFile, std::fstream::out | std::fstream::app);
@@ -188,7 +190,8 @@ class SimpleLogger {
     public:
 
         string outputFile;
-        string currentTime;
+        string startTime;
+        string endTime;
 
         ostringstream logSS;
 
