@@ -125,7 +125,7 @@ def plotTables(tables, file=None, **kwargs):
     for t in tables:
         plotTable(t, standalone=False, file=None, **kwargs)
     if file:
-        debug.dump("PLOT", "Saving plots to file".format(file))
+        debug.dump("PLOT", "Saving plots to file {}".format(file))
         try:
             pylab.savefig(file)
         except Exception as e:
