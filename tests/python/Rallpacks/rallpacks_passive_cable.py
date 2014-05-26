@@ -141,6 +141,10 @@ def main( args ):
             , xscale = sim_dt
             , file = outputFile
             )
+    utils.saveTables( [table1, table2 ]
+            , xscale = sim_dt
+            , file = 'data/rallpack2_moose.dat'
+            )
     #import moose.backend.spice as spice
     #spice.toSpiceNetlist( output = 'cable.spice' )
 
