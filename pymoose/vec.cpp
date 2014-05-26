@@ -319,7 +319,7 @@ extern "C" {
                 static_cast< NodePolicy >( isGlobal ) 
                 );
 
-#ifdef PRINT_STATS
+#ifdef ENABLE_LOGGER
         logger.updateGlobalCount(type);
 #endif
         return nId;

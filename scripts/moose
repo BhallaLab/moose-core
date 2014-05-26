@@ -1,8 +1,7 @@
 #!/bin/bash
-set -e 
-# Definitions of colors in bash
-RESTORE='\033[0m'
+# This is a wrapper script which runs the moose simulator.
 
+RESTORE='\033[0m'
 RED='\033[00;31m'
 GREEN='\033[00;32m'
 YELLOW='\033[00;33m'
@@ -41,21 +40,16 @@ function colorPrint
             echo -e "[TODO] ${CYAN} $2 ${RESTORE} $3"
             ;;
         *)
-            echo -e "[$1] $2 $3"
+            echo -e "$1$2 $3 ${RESTORE}"
             ;;
     esac
 }
-colorPrint "INFO" "Beware, O unsuspecting developer!" 
-colorPrint "INFO" "This script builds moose using cmake. If you want to use standard "
-colorPrint "INFO" "version, run make"
-colorPrint "INFO" "You may like to customize some varibales in Makefile."
-colorPrint "INFO" ""
 
-BUILD_TYPE=debug
-if [ "$1" ]; then
-    colorPrint "INPUT" "Building for distribution" 
-    BUILD_TYPE=distribution 
+# Check if moose-logging directory exists. If not, create one.
+MOOSE_RUNTIME=$HOME/.moose
+if [ ! -d $MOOSE_RUNTIME ]; then
+    mkdir -p $MOOSE_RUNTIME 
 fi
-cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE ..
-make VERBOSE=1
-make check_python && make install
+BANNER="MOOSE: The neural simulator."
+colorPrint ${LGREEN} "$BANNER"
+moose $*
