@@ -2,7 +2,7 @@
 
 """plot_utils.py: Some utility function for plotting data in moose.
 
-Last modified: Tue May 13, 2014  09:24PM
+Last modified: Mon May 26, 2014  10:18AM
 
 """
     
@@ -18,7 +18,6 @@ __status__           = "Development"
 import pylab 
 import _moose
 import print_utils as debug
-from table import Table
 
 def plotAscii(yvec, xvec = None, file=None):
     """Plot two list-like object in terminal using gnuplot.
@@ -98,8 +97,11 @@ def scaleAxis(xvec, yvec, scaleX, scaleY):
 
 def reformatTable(table, kwargs):
     """ Given a table return x and y vectors with proper scaling """
-    vecY = table.vector 
-    vecX = range(vecY)
+    if type(table) == _moose.Table:
+        vecY = table.vector 
+        vecX = range(len(vecY))
+    elif type(table) == tuple:
+        vecX, vecY = table
     xscale = kwargs.get('xscale', 1.0)
     yscale = kwargs.get('yscale', 1.0)
     return scaleAxis(vecX, vecY, xscale, yscale)
@@ -160,49 +162,8 @@ def saveTables(tables, file=None, **kwargs):
     if file is None:
         print(tableText)
     else:
+        debug.dump("PLOT", "Saving tables data to file {}".format(file))
         with open(file, "w") as f:
             f.write(tableText)
     
-def recordTarget(tablePath, target, field = 'vm', **kwargs):
-    """Setup a table to record at given path.
-
-    Make sure that all root paths in tablePath exists.
-
-    Returns a table.
-    """
-
-    # If target is not an moose object but a string representing intended path
-    # then we need to fetch the object first.
-
-    if type( target) == str:
-        if not _moose.exists(target):
-            msg = "Given target `{}` does not exists. ".format( target )
-            raise RuntimeError( msg )
-        else:
-            target = _moose.Neutral( target )
-    else:
-        assert target.path, "Target must have a valid moose path."
-
-    table = _moose.Table( tablePath )
-    assert table
-
-    # Sanities field. 
-    if field == "output":
-        pass
-    elif 'get' not in field:
-        field = 'get'+field[0].upper()+field[1:]
-    else:
-        field = field[:2]+field[3].upper()+field[4:]
-    try:
-        table.connect( 'requestOut', target, field )
-    except Exception as e:
-        debug.dump("ERROR"
-                , [ "Failed to connect table to target"
-                    , e
-                    ]
-                )
-        raise e
-    assert table, "Moose is not able to create a recording table"
-    return table
-
-    
+   
