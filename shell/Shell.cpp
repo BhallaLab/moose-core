@@ -46,7 +46,7 @@ double Shell::runtime_( 0.0 );
 const Cinfo* Shell::initCinfo()
 {
 
-#ifdef PRINT_STATS
+#ifdef ENABLE_LOGGER
     clock_t t = clock();
 #endif
 
@@ -131,7 +131,7 @@ const Cinfo* Shell::initCinfo()
 		//new Dinfo< Shell >()
 	);
 
-#ifdef PRINT_STATS 
+#ifdef ENABLE_LOGGER 
         float time = (float(clock() - t)/CLOCKS_PER_SEC);
         logger.initializationTime.push_back( time );
 #endif
@@ -176,7 +176,7 @@ Id Shell::doCreate( string type, ObjId parent, string name,
 				NodePolicy nodePolicy,
 				unsigned int preferredNode )
 {
-#ifdef PRINT_STATS
+#ifdef ENABLE_LOGGER
     clock_t t = clock();
 #endif
 	const Cinfo* c = Cinfo::find( type );
@@ -227,7 +227,7 @@ Id Shell::doCreate( string type, ObjId parent, string name,
 		);
 		// innerCreate( type, parent, ret, name, numData, isGlobal );
 
-#ifdef PRINT_STATS 
+#ifdef ENABLE_LOGGER 
         logger.creationTime.push_back((float(clock() - t)/CLOCKS_PER_SEC));
 #endif
 
@@ -238,7 +238,7 @@ Id Shell::doCreate( string type, ObjId parent, string name,
 		warning( ss.str() );
 	}
 
-#ifdef PRINT_STATS 
+#ifdef ENABLE_LOGGER 
         logger.creationTime.push_back((float(clock() - t)/CLOCKS_PER_SEC));
 #endif
 	return Id();
@@ -258,7 +258,7 @@ ObjId Shell::doAddMsg( const string& msgType,
 	ObjId src, const string& srcField, 
 	ObjId dest, const string& destField )
 {
-#ifdef PRINT_STATS 
+#ifdef ENABLE_LOGGER 
     clock_t t = clock();
 #endif
 
@@ -300,7 +300,7 @@ ObjId Shell::doAddMsg( const string& msgType,
 		m->mid().dataIndex
 	);
 
-#ifdef PRINT_STATS
+#ifdef ENABLE_LOGGER
         logger.updateGlobalCount("Msgs");
         float time = (float(clock() - t)/ CLOCKS_PER_SEC);
         logger.creationTime.push_back(time);
@@ -316,22 +316,22 @@ void Shell::doQuit()
 {
 	SetGet0::set( ObjId(), "quit" );
 	// Shell::keepLooping_ = 0;
-#ifdef PRINT_STATS 
+#ifdef ENABLE_LOGGER 
         cout << logger.dumpStats(1);
-        logger.loggerToXML();
+        logger.save();
 #endif
 }
 
 void Shell::doStart( double runtime )
 {
-#ifdef PRINT_STATS
+#ifdef ENABLE_LOGGER
         clock_t t = clock();
 #endif
 
 	Id clockId( 1 );
 	SetGet1< double >::set( clockId, "start", runtime );
 
-#ifdef PRINT_STATS
+#ifdef ENABLE_LOGGER
         float time = (float(clock() - t) / CLOCKS_PER_SEC);
         logger.simulationTime.push_back(time);
 #endif
@@ -349,14 +349,14 @@ bool isDoingReinit()
 void Shell::doReinit( )
 {
 
-#ifdef PRINT_STATS
+#ifdef ENABLE_LOGGER
         clock_t t = clock();
         cout << logger.dumpStats(0);
 #endif
 	Id clockId( 1 );
 	SetGet0::set( clockId, "reinit" );
 
-#ifdef PRINT_STATS
+#ifdef ENABLE_LOGGER
        float time = (float(clock() - t)/CLOCKS_PER_SEC);
        logger.initializationTime.push_back(time);
 #endif

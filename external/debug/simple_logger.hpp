@@ -21,27 +21,62 @@
 
 #include <sstream>
 #include <string>
+#include <cstdlib>
 #include <ctime>
 #include <numeric>
 #include <map>
 #include <vector>
 #include <iostream>
 #include <iomanip>
+#include <sys/stat.h>
 #include <fstream>
 
 using namespace std;
 
+#define T_RESET       "\033[0m"
+#define T_BLACK       "\033[30m"      /* Black */
+#define T_RED         "\033[31m"      /* Red */
+#define T_GREEN       "\033[32m"      /* Green */
+#define T_YELLOW      "\033[33m"      /* Yellow */
+#define T_BLUE        "\033[34m"      /* Blue */
+#define T_MAGENTA     "\033[35m"      /* Magenta */
+#define T_CYAN        "\033[36m"      /* Cyan */
+#define T_WHITE       "\033[37m"      /* White */
+#define T_BOLDBLACK   "\033[1m\033[30m"      /* Bold Black */
+#define T_BOLDRED     "\033[1m\033[31m"      /* Bold Red */
+#define T_BOLDGREEN   "\033[1m\033[32m"      /* Bold Green */
+#define T_BOLDYELLOW  "\033[1m\033[33m"      /* Bold Yellow */
+#define T_BOLDBLUE    "\033[1m\033[34m"      /* Bold Blue */
+#define T_BOLDMAGENTA "\033[1m\033[35m"      /* Bold Magenta */
+#define T_BOLDCYAN    "\033[1m\033[36m"      /* Bold Cyan */
+#define T_BOLDWHITE   "\033[1m\033[37m"      /* Bold White */
+
 class SimpleLogger {
 
     public:
+        /**
+         * @brief Constructor of logger. The wrapper script of moose must make
+         * sure that $HOME/.moose is created. The logger will write to
+         * $HOME/.moose/log.
+         */
         SimpleLogger()
         {
-            outputFile = "";
             startTime = timeStamp();
+            homeDir = getenv("HOME");
+
+            logSS << "<simulation simulator=\"moose\">" << endl;
+            logSS << "\t<start_time>" << startTime << "</start_time>" << endl;
+
+#ifdef OS_WINDOWS 
+            outputFile = homeDir + "\\.moose\\log";
+#else
+            outputFile = homeDir + "/.moose/log";
+#endif
         }
 
         ~SimpleLogger()
         {
+
         }
 
         /**
@@ -136,12 +171,19 @@ class SimpleLogger {
         }
 
 
+        /**
+         * @brief Converts a map to XML like staructure.
+         *
+         * @tparam A
+         * @tparam B
+         * @param ss Input ostringstream.
+         * @param m std::map
+         * @param tagName This is current tag name. Useful when recursing.
+         * @param indent Usually a tag character.
+         */
         template<typename A, typename B>
-        void mapToXML(ostringstream& ss
-                , const map<A, B>& m
-                , const char* tagName
-                , unsigned indent
-                ) const
+        void mapToXML(ostringstream& ss, const map<A, B>& m, const char* tagName
+                , unsigned indent) const
         {
             string prefix = "";
             for(int i = 0; i < indent; ++i)
@@ -165,29 +207,122 @@ class SimpleLogger {
          *
          * @return A XML string.
          */
-        string loggerToXML( const char* outFile = "moose_logger.log" )
+        string save( const char* outFile = "")
         {
-            logSS.str("");
-            logSS << "<simulation simulator=\"moose\">" << endl;
-            logSS << "\t<start_time>" << startTime << "</start_time>" << endl;
-            
+            string logFile = string(outFile);
+            if(logFile.size() == 0)
+                logFile = outputFile;
+
+            // End of messages.
+            logSS << "\t</messages>" << endl;
+
             mapToXML<string, unsigned long>(logSS, elementsMap, "elements", 1);
             mapToXML<string, float>(logSS, timekeeperMap, "times", 1);
 
             logSS << "\t<end_time>" << timeStamp() << "</end_time>" << endl;
+
             logSS << "</simulation>" << endl;
+
             fstream logF;
-            logF.open(outFile, std::fstream::out | std::fstream::app);
+            logF.open(logFile.c_str(), std::fstream::out | std::fstream::app);
             logF << logSS.str();
             logF.close();
             return logSS.str();
         }
         
+        /**
+         * @brief Checks if given directory path exists on system.
+         *
+         * @param name Directory path as string.
+         *
+         * @return true, if directory exists, false otherwise.
+         */
+        bool isDir( const std::string& name )
+        {
+#ifdef OS_WINDOWS
+            struct _stat buf;
+            int result = _stat( name.c_str(), &buf );
+#else
+            struct stat buf;
+            int result = stat( name.c_str(), &buf );
+#endif
+            if(result == 0 && S_ISDIR(buf.st_mode))
+                return true;
+            else
+                return false;
+        }
+
+        /**
+         * @brief Dumps a message to console.
+         *
+         * @param type Type of message e.g. WARN, ERROR, FATAL etc.
+         * @param msg  Message to dump.
+         * @param autoFormat Use ` to demarcate coloring of output.
+         */
+        void dump(string type, string msg, bool autoFormat = true)
+        {
+
+#ifndef ENABLE_LOGGER
+            return;
+#endif
+            stringstream ss;
+            ss << "[" << type << "] ";
+            bool set = false;
+            bool reset = true;
+            string color = T_GREEN;
+            if(type == "WARNING" || type == "WARN" || type == "FIXME")
+                color = T_YELLOW;
+            else if(type == "DEBUG")
+                color = T_CYAN;
+            else if(type == "ERROR" || type == "FAIL" || type == "FATAL" || type == "ASSERT_FAILURE")
+                color = T_RED;
+            else if(type == "INFO" || type == "EXPECT_FAILURE")
+                color = T_MAGENTA;
+            else if(type == "LOG")
+                color = T_BLUE;
+
+            for(unsigned int i = 0; i < msg.size(); ++i)
+            {
+                if('`' == msg[i])
+                {
+                    if(!set and reset) 
+                    {
+                        set = true;
+                        reset = false;
+                        ss << color;
+                    }
+                    else if(set && !reset)
+                    {
+                        reset = true;
+                        set = false;
+                        ss << T_RESET;
+                    }
+                }
+                else if('\n' == msg[i])
+                    ss << "\n + ";
+                else
+                    ss << msg[i];
+            }
+
+            /*  Be safe than sorry */
+            if(!reset)
+                ss << T_RESET;
+
+            logSS << ss.str() << endl;
+#if QUIET_MODE || VERBOSITY < 0
+            return;
+#endif
+            cerr << ss.str() << endl;
+        }
+
     private:
         map<string, unsigned long> elementsMap;
         map<string, float> timekeeperMap;
 
     public:
+
+        string mooseDir;
+        string homeDir;
 
         string outputFile;
         string startTime;
