@@ -28,12 +28,16 @@ import plot_utils
 import verification_utils
 import print_utils
 import graph_utils
+import sim_utils
 
 # Import functions from sub-libraries.
 plotTable = plot_utils.plotTable
 plotTables = plot_utils.plotTables
-recordAt = plot_utils.recordTarget
-recordTarget = plot_utils.recordTarget
+saveTables = plot_utils.saveTables 
+
+# 
+recordAt = sim_utils.recordTarget
+recordTarget = sim_utils.recordTarget
 
 # dump messages onto console
 dump = print_utils.dump
