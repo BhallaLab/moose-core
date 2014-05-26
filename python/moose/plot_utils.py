@@ -18,6 +18,7 @@ __status__           = "Development"
 import pylab 
 import _moose
 import print_utils as debug
+from table import Table
 
 def plotAscii(yvec, xvec = None, file=None):
     """Plot two list-like object in terminal using gnuplot.
@@ -45,7 +46,7 @@ def plotInTerminal(yvec, xvec = None, file=None):
     g.stdin.write("\n")
     g.stdin.flush()
 
-def listsToString( yvec, xvec, sepby = ' '):
+def xyToString( yvec, xvec, sepby = ' '):
     """ Given two list-like objects, returns a text string. 
     """
     textLines = []
@@ -61,7 +62,7 @@ def saveNumpyVec( yvec, xvec, file):
     if file is None:
         return
     print("[INFO] Saving plot data to file {}".format(file))
-    textLines = listsToString( yvec, xvec)
+    textLines = xyToString( yvec, xvec)
     with open(file, "w") as dataF:
         dataF.write(textLines)
 
@@ -70,7 +71,7 @@ def saveAsGnuplot( yvec, xvec, file):
     if file is None:
         return
     print("[INFO] Saving plot data to a gnuplot-script: {}".format(file))
-    dataText = listsToString( yvec, xvec )
+    dataText = xyToString( yvec, xvec )
     text = []
     text.append("#!/bin/bash")
     text.append("gnuplot << EOF")
@@ -82,6 +83,26 @@ def saveAsGnuplot( yvec, xvec, file):
     with open(file+".gnuplot","w") as gnuplotF:
         gnuplotF.write("\n".join(text))
 
+def scaleVector(vec, scaleF):
+    """ Scale a vector by a factor """
+    if scaleF == 1.0 or scaleF is None:
+        return vec
+    else:
+        return [ x*scaleF for x in vec ]
+
+def scaleAxis(xvec, yvec, scaleX, scaleY):
+    """ Multiply each elements by factor """
+    xvec = scaleVector( xvec, scaleX )
+    yvec = scaleVector( yvec, scaleY )
+    return xvec, yvec
+
+def reformatTable(table, kwargs):
+    """ Given a table return x and y vectors with proper scaling """
+    vecY = table.vector 
+    vecX = range(vecY)
+    xscale = kwargs.get('xscale', 1.0)
+    yscale = kwargs.get('yscale', 1.0)
+    return scaleAxis(vecX, vecY, xscale, yscale)
 
 def plotTable(table, standalone=True, file=None, **kwargs):
     """Plot a given table. It plots table.vector
@@ -97,33 +118,21 @@ def plotTable(table, standalone=True, file=None, **kwargs):
         raise TypeError(msg)
     if standalone:
         pylab.figure()
-    vector = table.vector 
-    xscale = kwargs.get('xscale', 1.0)
-    yscale = kwargs.get('yscale', 1.0)
 
-    if xscale != 1.0:
-        xvector = [ xscale*x for x in range(len(vector)) ]
-    else:
-        xvector = range(len(vector))
-
-    if yscale != 1.0:
-        yvector = [ yscale * v for v in vector ]
-    else:
-        yvector = vector
-    pylab.plot(xvector, yvector)
+    vecX, vecY = reformatTable(table, kwargs)
+    pylab.plot(vecX, vecY)
     if file and standalone:
         debug.dump("PLOT", "Saving plot to {}".format(file))
         pylab.savefig(file)
     elif standalone:
         pylab.show()
 
-
 def plotTables(tables, file=None, **kwargs):
-    """Plot given list of tables onto one figure 
+    """Plot a list of tables onto one figure only.
     """
     assert type(tables) == list, "Expected a list of moose.Tables"
     for t in tables:
-        plotTable(t, standalone=False, file=None, **kwargs)
+        plotTable(t, standalone = False, file = None, **kwargs)
     if file:
         debug.dump("PLOT", "Saving plots to file {}".format(file))
         try:
@@ -136,6 +145,24 @@ def plotTables(tables, file=None, **kwargs):
     else:
         pylab.show()
 
+def saveTables(tables, file=None, **kwargs):
+    """Save a list to tables to a data file. """
+    assert type(tables) == list, "Expecting a list of moose.Table"
+    plots = []
+    for t in tables:
+        vecX, vecY = reformatTable(t, kwargs)
+        plots.append(zip(vecX, vecY))
+        tableText = "<table>\n"
+        for p in plots:
+            for x, y in p:
+                tableText += '{} {}\n'.format(x, y)
+        tableText += "\n</table>\n"
+    if file is None:
+        print(tableText)
+    else:
+        with open(file, "w") as f:
+            f.write(tableText)
+    
 def recordTarget(tablePath, target, field = 'vm', **kwargs):
     """Setup a table to record at given path.
 
