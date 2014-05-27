@@ -216,6 +216,12 @@ class SimpleLogger {
             // End of messages.
             logSS << "\t</messages>" << endl;
 
+        string loggerToXML( const char* outFile = "moose_logger.log" )
+        {
+            logSS.str("");
+            logSS << "<simulation simulator=\"moose\">" << endl;
+            logSS << "\t<start_time>" << startTime << "</start_time>" << endl;
+            
             mapToXML<string, unsigned long>(logSS, elementsMap, "elements", 1);
             mapToXML<string, float>(logSS, timekeeperMap, "times", 1);
 

@@ -1,1 +1,5 @@
-This folder contains third party software required for MOOSE. The copyright information should be available in the file headers.
+This folder contains either third-party libraries or those libraries which are
+here only for the development purpose added by some developer. 
+
+The libraries useful of development only is likely to be removed.
+
