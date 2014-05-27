@@ -52,4 +52,4 @@ if [ ! -d $MOOSE_RUNTIME ]; then
 fi
 BANNER="MOOSE: The neural simulator."
 colorPrint ${LGREEN} "$BANNER"
-moose $*
+moose.bin $*

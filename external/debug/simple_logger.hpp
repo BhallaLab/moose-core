@@ -64,7 +64,7 @@ class SimpleLogger {
             startTime = timeStamp();
             homeDir = getenv("HOME");
 
-            logSS << "<simulation simulator=\"moose\">" << endl;
+            logSS << "<log simulator=\"moose\">" << endl;
             logSS << "\t<start_time>" << startTime << "</start_time>" << endl;
 
 #ifdef OS_WINDOWS 
@@ -145,7 +145,7 @@ class SimpleLogger {
             unsigned width = 50;
             ss << endl;
             if(which == 0)
-                ss << mapToString<string, unsigned long>(elementsMap, "Elements");
+                ss << mapToString<string, unsigned long>(elementsMap, "data_structure");
 
             else if( which == 1)
             {
@@ -165,7 +165,7 @@ class SimpleLogger {
                         , 0.0
                         );
 
-                ss << mapToString<string, float>( timekeeperMap, "Simulation stats" );
+                ss << mapToString<string, float>( timekeeperMap, "simulation_stats" );
             }
             return ss.str();
         }
@@ -216,12 +216,12 @@ class SimpleLogger {
             // End of messages.
             logSS << "\t</messages>" << endl;
 
-            mapToXML<string, unsigned long>(logSS, elementsMap, "elements", 1);
+            mapToXML<string, unsigned long>(logSS, elementsMap, "data_structure", 1);
             mapToXML<string, float>(logSS, timekeeperMap, "times", 1);
 
             logSS << "\t<end_time>" << timeStamp() << "</end_time>" << endl;
 
-            logSS << "</simulation>" << endl;
+            logSS << "</log>" << endl;
 
             fstream logF;
             logF.open(logFile.c_str(), std::fstream::out | std::fstream::app);
