@@ -95,7 +95,7 @@ def main( args ):
         results = processProfile( args['input'] )
         plotProfile(results, output=args.get('output', None))
     else:
-        print("[TODO] No input data file given to process. Run rallpack3 here.")
+        print("[TODO] Profile rallpack3")
     
 if __name__ == '__main__':
     import argparse
