@@ -284,7 +284,7 @@ endif(BUILD_PYMOOSE)
 install(TARGETS moose.bin
     RUNTIME DESTINATION bin
     )
-install(FILES ${CMAKE_SOURCE_DIR}/scripts/moose 
+install(PROGRAMS ${CMAKE_SOURCE_DIR}/scripts/moose 
     DESTINATION bin
     )
 
