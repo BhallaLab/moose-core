@@ -151,14 +151,20 @@ def saveTables(tables, file=None, **kwargs):
     """Save a list to tables to a data file. """
     assert type(tables) == list, "Expecting a list of moose.Table"
     plots = []
+    xaxis = None
     for t in tables:
         vecX, vecY = reformatTable(t, kwargs)
-        plots.append(zip(vecX, vecY))
-        tableText = "<table>\n"
-        for p in plots:
-            for x, y in p:
-                tableText += '{} {}\n'.format(x, y)
-        tableText += "\n</table>\n"
+        plots.append(vecY)
+        if xaxis:
+            if xaxis != vecX:
+                raise UserWarning("Tables must have same x-axis")
+        else:
+            xaxis = vecX
+        tableText = ""
+        for i, x in enumerate(xaxis):
+            tableText += "{} ".format(x)
+            tableText += " ".join(['%s'%p[i] for p in plots])
+            tableText += "\n"
     if file is None:
         print(tableText)
     else:
