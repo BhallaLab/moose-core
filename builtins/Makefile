@@ -21,6 +21,7 @@ OBJ = \
 	Stats.o	\
 	Interpol2D.o \
 	HDF5WriterBase.o	\
+	Variable.o	\
 	testBuiltins.o	\
 
 HEADERS = \
@@ -41,6 +42,7 @@ TimeTable.o:	TimeTable.h TableBase.h
 Stats.o:	Stats.h
 Interpol2D.o:	Interpol2D.h
 HDF5WriterBase.o: HDF5WriterBase.h
+Variable.o: Variable.h
 testBuiltins.o:	Group.h Arith.h Stats.h ../msg/DiagonalMsg.h ../basecode/SetGet.h
 
 .cpp.o:
