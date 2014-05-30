@@ -22,6 +22,8 @@ OBJ = \
 	ChanBase.o	\
 	HHChannel.o	\
 	HHGate.o	\
+	HHGate2D.o	\
+	HHChannel2D.o	\
 	CaConc.o	\
 	MgBlock.o	\
 	Neuron.o	\
@@ -72,6 +74,8 @@ ChanBase.o: ChanBase.h
 Leakage.o: Leakage.h ChanBase.h
 HHChannel.o: ChanBase.h HHChannel.h HHGate.h
 HHGate.o: HHGate.h
+HHChannel2D.o: ChanBase.h HHChannel2D.h HHGate2D.h
+HHGate2D.o: HHGate2D.h
 CaConc.o:	CaConc.h
 MgBlock.o:	MgBlock.h ChanBase.h
 Neuron.o:	Neuron.h
