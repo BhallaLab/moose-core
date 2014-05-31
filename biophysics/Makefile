@@ -34,23 +34,21 @@ OBJ = \
 	IzhikevichNrn.o	\
 	DifShell.o	\
 	Leakage.o	\
+	VectorTable.o	\
+	MarkovRateTable.o	\
+	MarkovChannel.o	\
+	VClamp.o	\
 
+
+	# MarkovGslSolver.o	\
+	# MatrixOps.o	\
+	# MarkovSolverBase.o	\
+	# MarkovSolver.o	\
 	# LeakyIaF.o	\
 	# GapJunction.o	\
 	# Nernst.o	\
 	# GHK.o		\
 	# NMDAChan.o	\
-	# HHGate2D.o	\
-	# HHChannel2D.o	\
-	# MgBlock.o	\
-	# VectorTable.o	\
-	# MarkovRateTable.o	\
-	# MarkovChannel.o	\
-	# MarkovGslSolver.o	\
-	# MatrixOps.o	\
-	# MarkovSolverBase.o	\
-	# MarkovSolver.o	\
-	# VClamp.o	\
 
 # GSL_LIBS = -L/usr/lib -lgsl
 
@@ -92,14 +90,14 @@ testBiophysics.o: IntFire.h CompartmentBase.h Compartment.h HHChannel.h HHGate.h
 #GHK.o:	GHK.h
 #HHGate2D.o:	../builtins/Interpol2D.h HHGate2D.h
 #HHChannel2D.o: ChanBase.h HHChannel2D.h HHGate2D.h
-#VectorTable.o : VectorTable.h
-#MarkovGslSolver.o : MarkovGslSolver.h 
-#MatrixOps.o : MatrixOps.h
-#MarkovRateTable.o : VectorTable.h ../builtins/Interpol2D.h MarkovRateTable.h 
-#MarkovSolverBase.o : MarkovSolver.h MatrixOps.h MarkovRateTable.h
-#MarkovSolver.o : MarkovSolverBase.h MarkovSolver.h
-#MarkovChannel.o : VectorTable.h ../builtins/Interpol2D.h MarkovRateTable.h ChanBase.h MarkovChannel.h 
-#VClamp.o: VClamp.h
+VectorTable.o : VectorTable.h
+# MarkovGslSolver.o : MarkovGslSolver.h 
+# MatrixOps.o : MatrixOps.h
+MarkovRateTable.o : VectorTable.h ../builtins/Interpol2D.h MarkovRateTable.h 
+# MarkovSolverBase.o : MarkovSolver.h MatrixOps.h MarkovRateTable.h
+# MarkovSolver.o : MarkovSolverBase.h MarkovSolver.h
+MarkovChannel.o : VectorTable.h ../builtins/Interpol2D.h MarkovRateTable.h ChanBase.h MarkovChannel.h 
+VClamp.o: VClamp.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I. -I../basecode -I../msg $< -c
