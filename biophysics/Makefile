@@ -38,12 +38,12 @@ OBJ = \
 	MarkovRateTable.o	\
 	MarkovChannel.o	\
 	MarkovGslSolver.o	\
+	MatrixOps.o	\
+	MarkovSolverBase.o	\
+	MarkovSolver.o	\
 	VClamp.o	\
 
 
-	# MatrixOps.o	\
-	# MarkovSolverBase.o	\
-	# MarkovSolver.o	\
 	# LeakyIaF.o	\
 	# GapJunction.o	\
 	# Nernst.o	\
@@ -92,10 +92,10 @@ testBiophysics.o: IntFire.h CompartmentBase.h Compartment.h HHChannel.h HHGate.h
 #HHChannel2D.o: ChanBase.h HHChannel2D.h HHGate2D.h
 VectorTable.o : VectorTable.h
 MarkovGslSolver.o : MarkovGslSolver.h 
-# MatrixOps.o : MatrixOps.h
+MatrixOps.o : MatrixOps.h
 MarkovRateTable.o : VectorTable.h ../builtins/Interpol2D.h MarkovRateTable.h 
-# MarkovSolverBase.o : MarkovSolver.h MatrixOps.h MarkovRateTable.h
-# MarkovSolver.o : MarkovSolverBase.h MarkovSolver.h
+MarkovSolverBase.o : MarkovSolver.h MatrixOps.h MarkovRateTable.h
+MarkovSolver.o : MarkovSolverBase.h MarkovSolver.h
 MarkovChannel.o : VectorTable.h ../builtins/Interpol2D.h MarkovRateTable.h ChanBase.h MarkovChannel.h 
 VClamp.o: VClamp.h
 
