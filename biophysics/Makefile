@@ -37,10 +37,10 @@ OBJ = \
 	VectorTable.o	\
 	MarkovRateTable.o	\
 	MarkovChannel.o	\
+	MarkovGslSolver.o	\
 	VClamp.o	\
 
 
-	# MarkovGslSolver.o	\
 	# MatrixOps.o	\
 	# MarkovSolverBase.o	\
 	# MarkovSolver.o	\
@@ -91,7 +91,7 @@ testBiophysics.o: IntFire.h CompartmentBase.h Compartment.h HHChannel.h HHGate.h
 #HHGate2D.o:	../builtins/Interpol2D.h HHGate2D.h
 #HHChannel2D.o: ChanBase.h HHChannel2D.h HHGate2D.h
 VectorTable.o : VectorTable.h
-# MarkovGslSolver.o : MarkovGslSolver.h 
+MarkovGslSolver.o : MarkovGslSolver.h 
 # MatrixOps.o : MatrixOps.h
 MarkovRateTable.o : VectorTable.h ../builtins/Interpol2D.h MarkovRateTable.h 
 # MarkovSolverBase.o : MarkovSolver.h MatrixOps.h MarkovRateTable.h
