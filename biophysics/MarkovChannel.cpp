@@ -50,7 +50,7 @@ const Cinfo* MarkovChannel::initCinfo()
 			&MarkovChannel::getLigandConc
 			);
 
-	static ValueFinfo< MarkovChannel, double > vm( "vm",
+	static ValueFinfo< MarkovChannel, double > vm( "Vm",
 			"Membrane voltage.",
 			&MarkovChannel::setVm,
 			&MarkovChannel::getVm
@@ -122,14 +122,14 @@ const Cinfo* MarkovChannel::initCinfo()
 		"Name", "MarkovChannel",
 		"Author", "Vishaka Datta S, 2011, NCBS",
 		"Description", "MarkovChannel : Multistate ion channel class." 
-		" It deals with ion channels which can be found in one of multiple states,"
-	  "	some of which are conducting. This implementation assumes the occurence "
+		"It deals with ion channels which can be found in one of multiple states, "
+                "some of which are conducting. This implementation assumes the occurence "
 		"of first order kinetics to calculate the probabilities of the channel "
-	  "being found in all states. Further, the rates of transition between these "
+                "being found in all states. Further, the rates of transition between these "
 		"states can be constant, voltage-dependent or ligand dependent (only one "
 		"ligand species). The current flow obtained from the channel is calculated " 
 		"in a deterministic method by solving the system of differential equations "
-	  "obtained from the assumptions above."
+                "obtained from the assumptions above."
 	};
 
 	static Cinfo MarkovChannelCinfo(
@@ -137,7 +137,9 @@ const Cinfo* MarkovChannel::initCinfo()
 		ChanBase::initCinfo(),
 		MarkovChannelFinfos,
 		sizeof( MarkovChannelFinfos )/ sizeof( Finfo* ),
-		new Dinfo< MarkovChannel >()
+		new Dinfo< MarkovChannel >(),
+                doc,
+                sizeof(doc) / sizeof(string)
 		);
 
 	return &MarkovChannelCinfo;
