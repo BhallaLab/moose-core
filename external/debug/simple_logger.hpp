@@ -66,6 +66,7 @@ class SimpleLogger {
 
             logSS << "<log simulator=\"moose\">" << endl;
             logSS << "\t<start_time>" << startTime << "</start_time>" << endl;
+            logSS << "\t<messages>" << endl;
 
 #ifdef OS_WINDOWS 
             outputFile = homeDir + "\\.moose\\log";
