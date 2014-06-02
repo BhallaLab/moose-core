@@ -96,10 +96,6 @@ def loadChem( diffLength ):
 
 def makeNeuroMeshModel():
 	diffLength = 10e-6 # But we only want diffusion over part of the model.
-        dt4 = 0.1
-        dt5 = 0.1
-        moose.setClock( 4, dt4 )
-        moose.setClock( 5, dt5 )
 	numSyn = 13
 	elec = loadElec()
 	synInput = moose.SpikeGen( '/model/elec/synInput' )
@@ -119,8 +115,8 @@ def makeNeuroMeshModel():
 
 	loadChem( diffLength )
         neuroCompt = moose.element( '/model/chem/dend' )
-	neuroCompt.cellPortion( elec, '/model/elec/#' )
 	neuroCompt.diffLength = diffLength
+	neuroCompt.cellPortion( elec, '/model/elec/#' )
 	for x in moose.wildcardFind( '/model/chem/##[ISA=PoolBase]' ):
 		if (x.diffConst > 0):
 			x.diffConst = 1e-11
@@ -247,6 +243,7 @@ def makeChemPlots():
 	middleSpine = 6
 	# handy lookup function to find which voxel # the spine is on.
 	midSpineVoxel = spineMesh.parentVoxel[middleSpine]
+        print spineMesh.parentVoxel
 	graphs = moose.Neutral( '/graphs' )
 	addPlot( '/model/chem/psd/tot_PSD_R[0]', 'getN', 'psd0R' )
 	addPlot( '/model/chem/psd/tot_PSD_R[1]', 'getN', 'psd1R' )
@@ -306,16 +303,19 @@ def testNeuroMeshMultiscale():
 		k = moose.element( t[0] )
 		print k.path + ' localVoxels=', k.numLocalVoxels, ', allVoxels= ', k.numAllVoxels
 	"""
+	"""
         moose.useClock( 4, '/model/chem/dend/dsolve', 'process' )
         moose.useClock( 5, '/model/chem/dend/ksolve', 'process' )
         moose.useClock( 5, '/model/chem/spine/ksolve', 'process' )
         moose.useClock( 5, '/model/chem/psd/ksolve', 'process' )
+	"""
 
 	makeChemPlots()
 	makeElecPlots()
 	moose.setClock( 0, elecDt )
 	moose.setClock( 1, elecDt )
 	moose.setClock( 2, elecDt )
+	moose.setClock( 4, chemDt )
 	moose.setClock( 5, chemDt )
 	moose.setClock( 6, chemDt )
 	moose.setClock( 7, plotDt )
@@ -323,11 +323,11 @@ def testNeuroMeshMultiscale():
 	moose.useClock( 0, '/model/elec/##[ISA=Compartment]', 'init' )
 	moose.useClock( 1, '/model/elec/##[ISA=SpikeGen]', 'process' )
 	moose.useClock( 2, '/model/elec/##[ISA=ChanBase],/model/##[ISA=SynBase],/model/##[ISA=CaConc]','process')
-	moose.useClock( 5, '/model/chem/##[ISA=PoolBase],/model/##[ISA=ReacBase],/model/##[ISA=EnzBase]', 'process' )
-	moose.useClock( 6, '/model/chem/##[ISA=Adaptor]', 'process' )
+	#moose.useClock( 5, '/model/chem/##[ISA=PoolBase],/model/##[ISA=ReacBase],/model/##[ISA=EnzBase]', 'process' )
+	#moose.useClock( 6, '/model/chem/##[ISA=Adaptor]', 'process' )
 	moose.useClock( 7, '/graphs/#', 'process' )
 	moose.useClock( 8, '/graphs/elec/#', 'process' )
-	moose.useClock( 5, '/model/chem/#/ksolve', 'init' )
+	moose.useClock( 5, '/model/chem/#/dsolve', 'process' )
 	moose.useClock( 6, '/model/chem/#/ksolve', 'process' )
 	#hsolve = moose.HSolve( '/model/elec/hsolve' )
 	#moose.useClock( 1, '/model/elec/hsolve', 'process' )

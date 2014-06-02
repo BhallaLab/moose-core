@@ -439,9 +439,18 @@ void PsdMesh::matchCubeMeshEntries( const ChemCompt* other,
 // Inherited Virtual funcs for getting voxel info.
 ////////////////////////////////////////////////////////////////////////
 
+/**
+ * This function returns the diffusively connected parent voxel within
+ * the current (psd) mesh. Since each spine is treated as an independed
+ * voxel, there is no such voxel, so we return -1U for each psd.
+ * Note that there is a separate function that returns the parentVoxel
+ * referred to the NeuroMesh that this spine/psd sits on.
+ */
 vector< unsigned int > PsdMesh::getParentVoxel() const
 {
-	return parent_;
+	vector< unsigned int > ret( parent_.size(), -1U );
+	return ret;
+	// return parent_;
 }
 
 const vector< double >& PsdMesh::vGetVoxelVolume() const

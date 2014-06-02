@@ -3644,3 +3644,59 @@ Sahil has found a problem with the cspace reader. Trying out in
 ChemicalBistables/foo.py
 This turned out just to be a numerical instability, lowering dt fixed it.
 ============================================================================
+24 May.
+Trying to get loadMulti to work. The setDiffLength in the NeuroMesh has
+to be called before the cell path is set, because only the cell Path
+operation sends out the spine and PSD information. Should fix.
+
+There is a nasty crash when the calculations start. Hard to track. Valgrind
+doesn't handle it either, it thinks that my code is writing past the end
+of the heap block.
+
+Two obvious places to look: The adaptor and the dangling reactions at
+the interface between compartments.
+
+Removed all references to adaptor. Still fails. 
+
+Check if file runs as an individual model under a single solver.
+Then check if it fails in a similar way when loaded in the default way under
+multiple solvers.
+
+============================================================================
+30 May
+Loaded in psd_merged31d.g both with separate compartments, and with the 
+solver handling all compts. In both cases the model loads and runs fine.
+Next to assign the solver to a different compt and see what happens.
+Doing.
+============================================================================
+31 May
+Well, it handles the spine portion fine as well.
+And the psd portion too. So something goes wrong with the compartmentalization.
+
+Went back to LoadMulti. Loaded in a version of the cell model that did
+not have any active conductances. Still crashes.
+============================================================================
+1 June. Need to try from scratch. Make a really simple cell with a 
+single soma, spine and PSD. Use a minimal chem model with just Ca binding
+to a single target. Couple Ca directly to the Vm.
+
+minimal.py now works for the following:
+	- Passive charging of spine and soma
+	- Simple reaction in each compt.
+	- Each compt has a single voxel, 
+	- No cross-compt reactions
+	- No active channels.
+
+Next:
+	Active channels: minchan.py.
+	Multiple voxels:
+
+Doing active channels.
+Turns out that the moment I instatiate a vgated channel the system crashes.
+This is even when the vgated channel in question is not loaded.
+Oddly, if I run it with valgrind it is fine.
+Also oddly, I can do an assignment to alpha field of the channel with an
+array, and the system does not crash.
+Looking at HHGate::setupTables as called by HHGate::setupAlpha
+
+============================================================================
