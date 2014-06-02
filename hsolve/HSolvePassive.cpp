@@ -451,7 +451,7 @@ bool isClose( T a, T b, T tolerance )
 #include "TestHSolve.h"
 void testHSolvePassive()
 {
-    TEST_BEGIN;
+//    TEST_BEGIN;
     Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 
     vector< int* > childArray;
@@ -982,7 +982,7 @@ void testHSolvePassive()
         shell->doDelete( n );
     }
 
-    TEST_END;
+//    TEST_END;
 }
 
 #endif // DO_UNIT_TESTS

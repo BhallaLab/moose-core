@@ -128,11 +128,18 @@ SpineMesh::~SpineMesh()
 // Field assignment stuff
 //////////////////////////////////////////////////////////////////
 
+/**
+ * This function returns the diffusively connected parent voxel within
+ * the current (spine) mesh. Since each spine is treated as an independed
+ * voxel, there is no such voxel, so we return -1U for each spine.
+ * Note that there is a separate function that returns the parentVoxel
+ * referred to the NeuroMesh that this spine sits on.
+ */
 vector< unsigned int > SpineMesh::getParentVoxel() const
 {
-	vector< unsigned int > ret( spines_.size() );
-	for ( unsigned int i = 0; i < spines_.size(); ++i )
-		ret[i] = spines_[i].parent();
+	vector< unsigned int > ret( spines_.size(), -1U );
+	// for ( unsigned int i = 0; i < spines_.size(); ++i ) 
+	// 	ret[i] = spines_[i].parent(); // Wrong, returns voxel on NeuroMesh
 	return ret;
 }
 
