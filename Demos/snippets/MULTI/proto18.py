@@ -71,7 +71,8 @@ def make_Ca():
 #// to SI units and entering the A, B, C, D and F parameters, we get:
 #	xgate.alpha( 1.6e3, 0, 1.0, -1.0 * (0.065 + EREST_ACT), -0.01389 )
 #	xgate.beta( -20e3 * (0.0511 + EREST_ACT), 20e3, -1.0, -1.0 * (0.0511 + EREST_ACT), 5.0e-3 )
-	xgate.setupAlpha( xA )
+	#xgate.setupAlpha( xA )
+	xgate.alphaParms = xA
 
 
 #  The Y gate (gCa/r) is not quite of this form.  For V > EREST_ACT, alpha =
@@ -316,7 +317,7 @@ def make_Na():
 		-280e3 * (0.0401 + EREST_ACT), 280e3, -1.0, 
 		-1.0 * (0.0401 + EREST_ACT), 5.0e-3, 
 		3000, -0.1, 0.05 ] )
-	xgate.setupAlpha( xA )
+	xgate.alphaParms = xA
 
 
 	#xgate.alpha( 320e3 * (0.0131 + EREST_ACT), -320e3, -1.0, -1.0 * (0.0131 + EREST_ACT), -0.004 )
@@ -326,7 +327,7 @@ def make_Na():
 	yA = numpy.array( [ 128.0, 0.0, 0.0, -1.0 * (0.017 + EREST_ACT), 0.018,
 		4.0e3, 0.0, 1.0, -1.0 * (0.040 + EREST_ACT), -5.0e-3, 
 		3000, -0.1, 0.05 ] )
-	ygate.setupAlpha( yA )
+	ygate.alphaParms = yA
 
 	#ygate.alpha( 128.0, 0.0, 0.0, -1.0 * (0.017 + EREST_ACT), 0.018 )
 	#ygate.beta( 4.0e3, 0.0, 1.0, -1.0 * (0.040 + EREST_ACT), -5.0e-3 )
@@ -350,7 +351,7 @@ def make_K_DR():
 		-16e3, -1.0, -1.0 * (0.0351 + EREST_ACT), -0.005,
 		250, 0.0, 0.0, -1.0 * (0.02 + EREST_ACT), 0.04,
 		3000, -0.1, 0.05 ] )
-	xgate.setupAlpha( xA )
+	xgate.alphaParms = xA
 	#xgate.alpha( 16e3 * (0.0351 + EREST_ACT), -16e3, -1.0, -1.0 * (0.0351 + EREST_ACT), -0.005 )
 	#xgate.beta( 250, 0.0, 0.0, -1.0 * (0.02 + EREST_ACT), 0.04 )
 
@@ -374,7 +375,7 @@ def make_K_A():
 		-17.5e3 * (0.0401 + EREST_ACT), 
 		17.5e3, -1.0, -1.0 * (0.0401 + EREST_ACT), 0.01,
 		3000, -0.1, 0.05 ] )
-	xgate.setupAlpha( xA )
+	xgate.alphaParms = xA
 	# xgate.alpha( 20e3 * (0.0131 + EREST_ACT), -20e3, -1.0, -1.0 * (0.0131 + EREST_ACT), -0.01 )
 	# xgate.beta( -17.5e3 * (0.0401 + EREST_ACT), 17.5e3, -1.0, -1.0 * (0.0401 + EREST_ACT), 0.01 )
 
@@ -382,7 +383,7 @@ def make_K_A():
 	yA = numpy.array( [ 1.6, 0.0, 0.0, 0.013 - EREST_ACT, 0.018,
 		50.0, 0.0, 1.0, -1.0 * (0.0101 + EREST_ACT), -0.005,
 		3000, -0.1, 0.05 ] )
-	ygate.setupAlpha( yA )
+	ygate.alphaParms = yA
 	# ygate.alpha( 1.6, 0.0, 0.0, 0.013 - EREST_ACT, 0.018 )
 	# ygate.beta( 50.0, 0.0, 1.0, -1.0 * (0.0101 + EREST_ACT), -0.005 )
 #========================================================================
