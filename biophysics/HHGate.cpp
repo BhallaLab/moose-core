@@ -107,6 +107,24 @@ const Cinfo* HHGate::initCinfo()
 			&HHGate::setUseInterpolation,
 			&HHGate::getUseInterpolation
 		);
+
+		static ElementValueFinfo< HHGate, vector< double > > alphaParms( 
+			"alphaParms",
+			"Set up both gates using 13 parameters, as follows:"
+			"setupAlpha AA AB AC AD AF BA BB BC BD BF xdivs xmin xmax"
+			"Here AA-AF are Coefficients A to F of the alpha (forward) term"
+			"Here BA-BF are Coefficients A to F of the beta (reverse) term"
+			"Here xdivs is the number of entries in the table,"
+			"xmin and xmax define the range for lookup."
+			"Outside this range the returned value will be the low [high]"
+			"entry of the table."
+			"The equation describing each table is:"
+			"y(x) = (A + B * x) / (C + exp((x + D) / F))"
+			"The original HH equations can readily be cast into this form",
+			&HHGate::setupAlpha,
+			&HHGate::getAlphaParms
+		);
+
 	///////////////////////////////////////////////////////
 	// DestFinfos
 	///////////////////////////////////////////////////////
@@ -170,6 +188,7 @@ const Cinfo* HHGate::initCinfo()
 		&tableA,	// ElementValue
 		&tableB,	// ElementValue
 		&useInterpolation,	// ElementValue
+		&alphaParms,	// ElementValue
 		&setupAlpha,	// Dest
 		&setupTau,	// Dest
 		&tweakAlpha,	// Dest
@@ -469,11 +488,6 @@ void HHGate::setUseInterpolation( const Eref& e, bool val )
 		lookupByInterpolation_ = val;
 }
 
-///////////////////////////////////////////////////
-// Dest function definitions
-///////////////////////////////////////////////////
-
-// static func
 void HHGate::setupAlpha( const Eref& e, 
 	vector< double > parms )
 {
@@ -482,7 +496,7 @@ void HHGate::setupAlpha( const Eref& e,
 			cout << "HHGate::setupAlpha: Error: parms.size() != 13\n";
 			return;
 		}
-		setupTables( parms, 0 );
+		setupTables( parms, false );
 		alpha_.resize( 5, 0 );
 		beta_.resize( 5, 0 );
 		for ( unsigned int i = 0; i < 5; ++i )
@@ -492,7 +506,21 @@ void HHGate::setupAlpha( const Eref& e,
 	}
 }
 
-// static func
+vector< double > HHGate::getAlphaParms( const Eref& e ) const
+{
+	vector< double > ret = alpha_;
+	ret.insert( ret.end(), beta_.begin(), beta_.end() );
+	ret.push_back( A_.size() );
+	ret.push_back( xmin_ );
+	ret.push_back( xmax_ );
+
+	return ret;
+}
+
+///////////////////////////////////////////////////
+// Dest function definitions
+///////////////////////////////////////////////////
+
 void HHGate::setupTau( const Eref& e,
 	vector< double > parms )
 {
@@ -501,7 +529,7 @@ void HHGate::setupTau( const Eref& e,
 			cout << "HHGate::setupTau: Error: parms.size() != 13\n";
 			return;
 		}
-		setupTables( parms, 1 );
+		setupTables( parms, true );
 	}
 }
 

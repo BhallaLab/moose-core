@@ -3700,3 +3700,13 @@ array, and the system does not crash.
 Looking at HHGate::setupTables as called by HHGate::setupAlpha
 
 ============================================================================
+2 June
+Checkin 5483.
+Now converted the setupAlpha DestFinfo to an ElementValueFinfo. This
+fixes the problems with loading in channels in minchan.py, which tests
+out a minimal model with ion channels.
+
+The main loadMulti file still fails in the gsl calculations.
+Next step is to introduce multiple voxels into the minchan model.
+
+============================================================================

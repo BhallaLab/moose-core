@@ -94,12 +94,12 @@ class HHGate
 		void setUseInterpolation( const Eref& e, bool val );
 		bool getUseInterpolation( const Eref& e) const;
 
+		void setupAlpha( const Eref& e, vector< double > parms );
+		vector< double > getAlphaParms( const Eref& e ) const;
 
 		//////////////////////////////////////////////////////////
 		// DestFinfos
 		//////////////////////////////////////////////////////////
-		void setupAlpha( const Eref& e,
-			vector< double > parms );
 		void setupTau( const Eref& e,
 			vector< double > parms );
 		void tweakAlpha();
