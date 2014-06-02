@@ -143,7 +143,7 @@ class SimpleLogger {
         string dumpStats( int which )
         {
             stringstream ss;
-            unsigned width = 50;
+            // unsigned width = 50;
             ss << endl;
             if(which == 0)
                 ss << mapToString<string, unsigned long>(elementsMap, "data_structure");
