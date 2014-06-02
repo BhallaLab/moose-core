@@ -18,12 +18,12 @@
 ///////////////////////////////////////////////////////
 // MsgSrc definitions
 ///////////////////////////////////////////////////////
-static SrcFinfo1< double > *outputSrc()
+static SrcFinfo1< double > *output()
 {
-	static SrcFinfo1< double > outputSrc( "outputSrc", 
+	static SrcFinfo1< double > output( "output", 
 			"Sends the output value every timestep."
 	);
-	return &outputSrc;
+	return &output;
 }
 
 static SrcFinfo0 *requestInput()
@@ -77,8 +77,8 @@ const Cinfo* Adaptor::initCinfo()
 			&Adaptor::setScale,
 			&Adaptor::getScale
 		);
-	static ReadOnlyValueFinfo< Adaptor, double > output( 
-			"output",
+	static ReadOnlyValueFinfo< Adaptor, double > outputValue( 
+			"outputValue",
 			"This is the linearly transformed output.",
 			&Adaptor::getOutput
 		);
@@ -161,9 +161,9 @@ const Cinfo* Adaptor::initCinfo()
 		&inputOffset,				// Value
 		&outputOffset,				// Value
 		&scale,						// Value
-		&output,					// ReadOnlyValue
+		&outputValue,				// ReadOnlyValue
 		&input,						// DestFinfo
-		outputSrc(),				// SrcFinfo
+		output(),					// SrcFinfo
 		requestInput(),				// SrcFinfo
 		requestField(),				// SrcFinfo
 		&proc,						// SharedFinfo
@@ -294,7 +294,7 @@ void Adaptor::process( const Eref& e, ProcPtr p )
 		counter_ += numRequestField_;
 	}
 	innerProcess();
-	outputSrc()->send( e, output_ );
+	output()->send( e, output_ );
 }
 
 void Adaptor::reinit( const Eref& e, ProcPtr p )

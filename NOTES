@@ -3708,5 +3708,20 @@ out a minimal model with ion channels.
 
 The main loadMulti file still fails in the gsl calculations.
 Next step is to introduce multiple voxels into the minchan model.
+Did this. Just worked.
+
+Next step is to get in some Ca channels
+Did this. Just worked.
+
+Then get adaptors doing something.
+Seem to be doing something, but the Ca trace is not coming over.
+	This was a nasty scheduling issue, where things in a wildcard ##
+	seem to be scheduled for each individual entry, but the message from
+	the Clock is OneToAll so it gets multiplied.
+
+Next step is to deal with cross-compartment diffusion. For now this only
+crops up in NeuroMesh/SpineMesh/PsdMesh, but would like to generalize.
+
+Then cross-compartment reactions.
 
 ============================================================================

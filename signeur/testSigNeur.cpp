@@ -63,7 +63,7 @@ void testAdaptorRequestField()
 				set( ObjId( tenpool, i ), "nInit", (i + 1 ) * 100 );
 	ProcInfo p;
 	SetGet1< ProcPtr >::set( adaptor, "reinit", &p );
-	double ret = Field< double >::get( adaptor, "output" );
+	double ret = Field< double >::get( adaptor, "outputValue" );
 	assert( doubleEq( ret, ( 1.0 + 50.0 + 5500.0 )/13.0 ) );
 
 	const Finfo *f = adaptor.element()->cinfo()->findFinfo( "requestField" );
@@ -862,7 +862,7 @@ Id buildAdaptorsInCubeMesh( vector< Id >& plots )
 	*/
 
 	mid = shell->doAddMsg( "OneToAll", 
-					adaptCa, "outputSrc", chemCa, "set_conc" );
+					adaptCa, "output", chemCa, "set_conc" );
 	assert( ! mid.bad() );
 	Field< double >::set( adaptCa, "outputOffset", 0.0001 ); // 100 nM
 	Field< double >::set( adaptCa, "scale", 0.05 ); // .06 to .003 mM
@@ -872,7 +872,7 @@ Id buildAdaptorsInCubeMesh( vector< Id >& plots )
 					adaptGluR, "requestField", chemGluR, "get_n" );
 	assert( ! mid.bad() );
 	mid = shell->doAddMsg( "OneToAll", 
-					adaptGluR, "outputSrc", elecGluR, "set_Gbar" );
+					adaptGluR, "output", elecGluR, "set_Gbar" );
 	assert( ! mid.bad() );
 	// max n = 100, max Gar = 
 	Field< double >::set( adaptGluR, "scale", 1e-4/100 ); // from n to pS
@@ -882,7 +882,7 @@ Id buildAdaptorsInCubeMesh( vector< Id >& plots )
 					adaptK, "requestField", chemK, "get_conc" );
 	assert( ! mid.bad() );
 	mid = shell->doAddMsg( "OneToAll", 
-					adaptK, "outputSrc", elecK, "set_Gbar" );
+					adaptK, "output", elecK, "set_Gbar" );
 	assert( ! mid.bad() );
 	Field< double >::set( adaptK, "scale", 0.3 ); // from mM to Siemens
 		// The starting Gbar is 0.0002827.
