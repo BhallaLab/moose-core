@@ -72,7 +72,7 @@ def loadChem( diffLength ):
 
 
 def makeNeuroMeshModel():
-	diffLength = 20e-6 # Aim for just 3 compts.
+	diffLength = 6e-6 # Aim for 2 soma compartments.
 	elec = loadElec()
 	loadChem( diffLength )
         neuroCompt = moose.element( '/model/chem/dend' )
@@ -89,8 +89,8 @@ def makeNeuroMeshModel():
 	ndc = neuroCompt.numDiffCompts
         print 'ns = ', ns, ', ndc = ', ndc
         assert( neuroCompt.numDiffCompts == neuroCompt.mesh.num )
-	assert( ns == 1 ) # dend, 5x (shaft+head)
-	assert( ndc == 1 )
+	assert( ns == 1 ) # soma/dend only
+	assert( ndc == 2 ) # split into 2.
 	nmksolve = moose.Ksolve( '/model/chem/dend/ksolve' )
 	nmdsolve = moose.Dsolve( '/model/chem/dend/dsolve' )
         nmstoich = moose.Stoich( '/model/chem/dend/stoich' )
@@ -100,7 +100,7 @@ def makeNeuroMeshModel():
         nmstoich.path = "/model/chem/dend/##"
         print 'done setting path, numPools = ', nmdsolve.numPools
         assert( nmdsolve.numPools == 1 )
-        assert( nmdsolve.numAllVoxels == 1 )
+        assert( nmdsolve.numAllVoxels == 2 )
         assert( nmstoich.numAllPools == 1 )
 	# oddly, numLocalFields does not work.
 	ca = moose.element( '/model/chem/dend/DEND/Ca' )
@@ -148,19 +148,19 @@ def makeNeuroMeshModel():
 	"""
 
 	# set up adaptors
-	aCa = moose.Adaptor( '/model/chem/psd/adaptCa', pdc )
-	adaptCa = moose.vec( '/model/chem/psd/adaptCa' )
-	chemCa = moose.vec( '/model/chem/psd/Ca' )
-	print 'aCa = ', aCa, ' foo = ', foo, "len( ChemCa ) = ", len( chemCa ), ", numData = ", chemCa.numData
-	assert( len( adaptCa ) == pdc )
-	assert( len( chemCa ) == pdc )
-	path = '/model/elec/spine_head'
+	aCa = moose.Adaptor( '/model/chem/dend/DEND/adaptCa', ndc )
+	adaptCa = moose.vec( '/model/chem/dend/DEND/adaptCa' )
+	chemCa = moose.vec( '/model/chem/dend/DEND/Ca' )
+	print 'aCa = ', aCa, ' foo = ', foo, "len( ChemCa ) = ", len( chemCa ), ", numData = ", chemCa.numData, "len( adaptCa ) = ", len( adaptCa )
+	assert( len( adaptCa ) == ndc )
+	assert( len( chemCa ) == ndc )
+	path = '/model/elec/soma/Ca_conc'
 	elecCa = moose.element( path )
-	moose.connect( elecCa, 'VmOut', adaptCa[0], 'input', 'Single' )
-	#moose.connect( adaptCa, 'outputSrc', chemCa, 'setConc', 'OneToOne' )
+	moose.connect( elecCa, 'concOut', adaptCa[0], 'input', 'Single' )
+	moose.connect( adaptCa, 'output', chemCa, 'setConc', 'OneToOne' )
 	adaptCa.inputOffset = 0.0	# 
 	adaptCa.outputOffset = 0.00008	# 80 nM offset in chem.
-   	adaptCa.scale = 1e-5	# 520 to 0.0052 mM
+   	adaptCa.scale = 1e-3	# 520 to 0.0052 mM
 	#print adaptCa.outputOffset
 	#print adaptCa.scale
 
@@ -186,6 +186,7 @@ def makeElecPlots():
     elec = moose.Neutral( '/graphs/elec' )
     addPlot( '/model/elec/soma', 'getVm', 'elec/somaVm' )
     addPlot( '/model/elec/spine_head', 'getVm', 'elec/spineVm' )
+    addPlot( '/model/elec/soma/Ca_conc', 'getCa', 'elec/somaCa' )
 
 def makeChemPlots():
 	graphs = moose.Neutral( '/graphs' )
@@ -198,9 +199,9 @@ def makeChemPlots():
 
 def testNeuroMeshMultiscale():
 	elecDt = 50e-6
-	chemDt = 0.1
+	chemDt = 0.01
 	ePlotDt = 0.5e-3
-	cPlotDt = 0.1
+	cPlotDt = 0.01
 	plotName = 'nm.plot'
 
 	makeNeuroMeshModel()
@@ -243,11 +244,12 @@ def testNeuroMeshMultiscale():
 	moose.useClock( 1, '/model/elec/##[ISA=SpikeGen]', 'process' )
 	moose.useClock( 2, '/model/elec/##[ISA=ChanBase],/model/##[ISA=SynBase],/model/##[ISA=CaConc]','process')
 	#moose.useClock( 5, '/model/chem/##[ISA=PoolBase],/model/##[ISA=ReacBase],/model/##[ISA=EnzBase]', 'process' )
-	#moose.useClock( 6, '/model/chem/##[ISA=Adaptor]', 'process' )
+	#moose.useClock( 4, '/model/chem/##[ISA=Adaptor]', 'process' )
+	moose.useClock( 4, '/model/chem/#/dsolve', 'process' )
+	moose.useClock( 5, '/model/chem/#/ksolve', 'process' )
+	moose.useClock( 6, '/model/chem/dend/DEND/adaptCa', 'process' )
 	moose.useClock( 7, '/graphs/chem/#', 'process' )
 	moose.useClock( 8, '/graphs/elec/#', 'process' )
-	moose.useClock( 5, '/model/chem/#/dsolve', 'process' )
-	moose.useClock( 6, '/model/chem/#/ksolve', 'process' )
 	#hsolve = moose.HSolve( '/model/elec/hsolve' )
 	#moose.useClock( 1, '/model/elec/hsolve', 'process' )
 	#hsolve.dt = elecDt
