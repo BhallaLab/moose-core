@@ -3719,9 +3719,33 @@ Seem to be doing something, but the Ca trace is not coming over.
 	seem to be scheduled for each individual entry, but the message from
 	the Clock is OneToAll so it gets multiplied.
 
+Checkin 5485.
+
 Next step is to deal with cross-compartment diffusion. For now this only
 crops up in NeuroMesh/SpineMesh/PsdMesh, but would like to generalize.
 
+Setting this up in Dsolve.cpp.
+See around line 200
+
 Then cross-compartment reactions.
+
+============================================================================
+3 June.
+Building up the cross-compartment diffusion setup and calculations, yet to 
+compile.
+
+Compilation now coming together. I've set up a separate MOOSE function,
+buildNeuroMeshJunctions, to do the junction setup.
+============================================================================
+4 June
+Compiled, isn't doing anything yet.
+Also realized that I may as well do an implicit solution for the 2-compartment
+diffusion problem at the junction. Let A be conc in one compartment, and
+B be conc in the other. Then:
+
+A(t+1) - A'(t+1) dt = A(t)
+where A'(t+1) = D.( B - A ).xa/L
+
+Later.
 
 ============================================================================

@@ -45,7 +45,20 @@ class SpineMesh: public MeshCompt
 		//////////////////////////////////////////////////////////////////
 		// Field assignment stuff
 		//////////////////////////////////////////////////////////////////
+		/**
+		 * This function returns the diffusively connected parent voxel 
+		 * within the current (spine) mesh. Since each spine is treated 
+		 * as an independed voxel, there is no such voxel, so we return 
+		 * -1U for each spine. Note that there is a separate function 
+		 * that returns the parentVoxel referred to the NeuroMesh that 
+		 * this spine sits on.
+		 */
 		vector< unsigned int > getParentVoxel() const;
+		/**
+ 		 * Returns index of voxel on NeuroMesh to which this spine is 
+		 * connected.
+		 */
+		vector< unsigned int > getNeuronVoxel() const;
 
 		//////////////////////////////////////////////////////////////////
 		// FieldElement assignment stuff for MeshEntries
