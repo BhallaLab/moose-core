@@ -175,6 +175,9 @@ def makeNeuroMeshModel():
         print 'PSD: numfoo = ', foo.numData, 'numbar = ', bar.numData
         print 'PSD: numAllVoxels = ', pmksolve.numAllVoxels
 
+        # Put in junctions between diffusion solvers
+        nmdsolve.buildNeuroMeshJunctions( smdsolve, pmdsolve )
+
 	"""
 	CaNpsd = moose.vec( '/model/chem/psdMesh/PSD/PP1_PSD/CaN' )
 	print 'numCaN in PSD = ', CaNpsd.nInit, ', vol = ', CaNpsd.volume
@@ -185,7 +188,6 @@ def makeNeuroMeshModel():
 	# set up adaptors
 	aCa = moose.Adaptor( '/model/chem/psd/adaptCa', pdc )
 	adaptCa = moose.vec( '/model/chem/psd/adaptCa' )
-	#chemCa = moose.vec( '/model/chem/psd/PSD/CaM/Ca' )
 	chemCa = moose.vec( '/model/chem/psd/Ca' )
 	print 'aCa = ', aCa, ' foo = ', foo, "len( ChemCa ) = ", len( chemCa ), ", numData = ", chemCa.numData
 	assert( len( adaptCa ) == pdc )
@@ -194,10 +196,10 @@ def makeNeuroMeshModel():
 		path = '/model/elec/spine_head_14_' + str( i + 1 ) + '/NMDA_Ca_conc'
 		elecCa = moose.element( path )
 		moose.connect( elecCa, 'concOut', adaptCa[i], 'input', 'Single' )
-	#moose.connect( adaptCa, 'outputSrc', chemCa, 'setConc', 'OneToOne' )
-	adaptCa.inputOffset = 0.0	# 
-	adaptCa.outputOffset = 0.00008	# 80 nM offset in chem.
-   	adaptCa.scale = 1e-5	# 520 to 0.0052 mM
+		moose.connect( adaptCa, 'output', chemCa, 'setConc', 'OneToOne' )
+	        adaptCa[i].inputOffset = 0.0	# 
+	        adaptCa[i].outputOffset = 0.00008  # 80 nM offset in chem.
+   	        adaptCa[i].scale = 1e-5	# 520 to 0.0052 mM
 	#print adaptCa.outputOffset
 	#print adaptCa.scale
         """
@@ -282,7 +284,8 @@ def makeChemPlots():
 def testNeuroMeshMultiscale():
 	elecDt = 50e-6
 	chemDt = 1e-2
-	plotDt = 1e-2
+	cplotDt = 1e-2
+	eplotDt = 1e-3
 	plotName = 'nm.plot'
 
 	makeNeuroMeshModel()
@@ -318,17 +321,17 @@ def testNeuroMeshMultiscale():
 	moose.setClock( 4, chemDt )
 	moose.setClock( 5, chemDt )
 	moose.setClock( 6, chemDt )
-	moose.setClock( 7, plotDt )
-	moose.setClock( 8, plotDt )
+	moose.setClock( 7, cplotDt )
+	moose.setClock( 8, eplotDt )
 	moose.useClock( 0, '/model/elec/##[ISA=Compartment]', 'init' )
+	moose.useClock( 1, '/model/elec/##[ISA=Compartment]', 'process' )
 	moose.useClock( 1, '/model/elec/##[ISA=SpikeGen]', 'process' )
 	moose.useClock( 2, '/model/elec/##[ISA=ChanBase],/model/##[ISA=SynBase],/model/##[ISA=CaConc]','process')
-	#moose.useClock( 5, '/model/chem/##[ISA=PoolBase],/model/##[ISA=ReacBase],/model/##[ISA=EnzBase]', 'process' )
-	#moose.useClock( 6, '/model/chem/##[ISA=Adaptor]', 'process' )
+	moose.useClock( 4, '/model/chem/#/dsolve', 'process' )
+	moose.useClock( 5, '/model/chem/#/ksolve', 'process' )
+	moose.useClock( 6, '/model/chem/psd/adaptCa', 'process' )
 	moose.useClock( 7, '/graphs/#', 'process' )
 	moose.useClock( 8, '/graphs/elec/#', 'process' )
-	moose.useClock( 5, '/model/chem/#/dsolve', 'process' )
-	moose.useClock( 6, '/model/chem/#/ksolve', 'process' )
 	#hsolve = moose.HSolve( '/model/elec/hsolve' )
 	#moose.useClock( 1, '/model/elec/hsolve', 'process' )
 	#hsolve.dt = elecDt
