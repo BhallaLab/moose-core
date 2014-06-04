@@ -1431,45 +1431,25 @@ extern "C" {
             break;
         case 'x': {
             Id param;
-            // if (Id_SubtypeCheck(arg)){
-                _Id * id = (_Id*)(arg);
-                if (id == NULL){
-                    error << "argument should be an vec or an melement";
-                    PyErr_SetString(PyExc_TypeError, error.str().c_str());
-                    return NULL;                                
-                }
-                param = id->id_;
-            // } else if (ObjId_SubtypeCheck(arg)){
-            //     _ObjId * oid = (_ObjId*)(arg);
-            //     if (oid == NULL){
-            //         error << "argument should be an vec or an melement";
-            //         PyErr_SetString(PyExc_TypeError, error.str().c_str());
-            //         return NULL;                                
-            //     }
-            //     param = oid->oid_.id;
-            // }
+            _Id * id = (_Id*)(arg);
+            if (id == NULL){
+                error << "argument should be an vec or an melement";
+                PyErr_SetString(PyExc_TypeError, error.str().c_str());
+                return NULL;                                
+            }
+            param = id->id_;
             ret = SetGet1<Id>::set(obj, fieldName, param);
         }
             break;
         case 'y': {
             ObjId param;
-            // if (Id_SubtypeCheck(arg)){
-            //     _Id * id = (_Id*)(arg);
-            //     if (id == NULL){
-            //         error << "argument should be an vec or an melement";
-            //         PyErr_SetString(PyExc_TypeError, error.str().c_str());
-            //         return NULL;                                
-            //     }
-            //     param = ObjId(id->id_);
-            // } else if (ObjId_SubtypeCheck(arg)){
-                _ObjId * oid = (_ObjId*)(arg);
-                if (oid == NULL){
-                    error << "argument should be an vec or an melement";
-                    PyErr_SetString(PyExc_TypeError, error.str().c_str());
-                    return NULL;                                
-                // }
-                param = oid->oid_;
+            _ObjId * oid = (_ObjId*)(arg);
+            if (oid == NULL){
+                error << "argument should be vec or an melement";
+                PyErr_SetString(PyExc_TypeError, error.str().c_str());
+                return NULL;                                
             }
+            param = oid->oid_;
             ret = SetGet1<ObjId>::set(obj, fieldName, param);
         }
             break;
