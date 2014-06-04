@@ -698,23 +698,13 @@ void testCylDiffnWithStoich()
 
 	Id stoich = s->doCreate( "Stoich", model, "stoich", 1 );
 	Id ksolve = s->doCreate( "Ksolve", model, "ksolve", 1 );
-
 	Id dsolve = s->doCreate( "Dsolve", model, "dsolve", 1 );
-	Field< Id >::set( dsolve, "compartment", cyl );
-	// Next: build by doing reinit
-	s->doUseClock( "/model/dsolve", "process", 0 );
-	s->doUseClock( "/model/ksolve", "process", 1 );
-	s->doSetClock( 0, dt0 );
-	s->doSetClock( 1, dt1 );
-	Field< unsigned int >::set( ksolve, "numAllVoxels", ndc );
-	Field< Id >::set( ksolve, "stoich", stoich );
-	Field< Id >::set( stoich, "poolInterface", ksolve );
+	Field< Id >::set( stoich, "compartment", cyl );
+	Field< Id >::set( stoich, "ksolve", ksolve );
+	Field< Id >::set( stoich, "dsolve", dsolve );
 	Field< string >::set( stoich, "path", "/model/cyl/#" );
-	Field< Id >::set( dsolve, "stoich", stoich );
-	Field< Id >::set( ksolve, "dsolve", dsolve );
 	assert( pool1.element()->numData() == ndc );
 
-	//Field< string >::set( dsolve, "path", "/model/cyl/pool" );
 	// Then find a way to test it.
 	vector< double > poolVec;
 	Field< double >::set( ObjId( pool1, 0 ), "nInit", 1.0 );
@@ -729,6 +719,11 @@ void testCylDiffnWithStoich()
 						dsolve, "nVec", 0);
 	assert( nvec.size() == ndc );
 
+	// Next: build by doing reinit
+	s->doUseClock( "/model/dsolve", "process", 0 );
+	s->doUseClock( "/model/ksolve", "process", 1 );
+	s->doSetClock( 0, dt0 );
+	s->doSetClock( 1, dt1 );
 	s->doReinit();
 	s->doStart( runtime );
 
@@ -825,6 +820,90 @@ void testBuildTree()
 }
 #endif
 
+void testCalcJunction()
+{
+	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	// Make a neuron with same-size dend and spine. PSD is tiny.
+	// Put a, b, c in dend, b, c, d in spine, c, d, f in psd. No reacs.
+	// See settling of all concs by diffusion, pairwise.
+	Id model = s->doCreate( "Neutral", Id(), "model", 1 );
+	Id dend = s->doCreate( "Compartment", model, "dend", 1 );
+	Id neck = s->doCreate( "Compartment", model, "spine_neck", 1 );
+	Id head = s->doCreate( "Compartment", model, "spine_head", 1 );
+	Field< double >::set( dend, "x", 10e-6 );
+	Field< double >::set( dend, "diameter", 2e-6 );
+	Field< double >::set( dend, "length", 10e-6 );
+	Field< double >::set( neck, "x0", 9e-6 );
+	Field< double >::set( neck, "x", 9e-6 );
+	Field< double >::set( neck, "y", 1e-6 );
+	Field< double >::set( neck, "diameter", 0.5e-6 );
+	Field< double >::set( neck, "length", 1.0e-6 );
+	Field< double >::set( head, "x0", 9e-6 );
+	Field< double >::set( head, "x", 9e-6 );
+	Field< double >::set( head, "y0", 1e-6 );
+	Field< double >::set( head, "y", 11e-6 );
+	Field< double >::set( head, "diameter", 2e-6 );
+	Field< double >::set( head, "length", 10e-6 );
+	s->doAddMsg( "Single", ObjId( dend ), "raxial", ObjId( neck ), "axial");
+	s->doAddMsg( "Single", ObjId( neck ), "raxial", ObjId( head ), "axial");
+
+	Id nm = s->doCreate( "NeuroMesh", model, "nm", 1 );
+	Field< double >::set( nm, "diffLength", 10e-6 );
+	Field< bool >::set( nm, "separateSpines", true );
+	Id sm = s->doCreate( "SpineMesh", model, "sm", 1 );
+	Id pm = s->doCreate( "PsdMesh", model, "pm", 1 );
+	ObjId mid = s->doAddMsg( "Single", ObjId( nm ), "spineListOut", ObjId( sm ), "spineList" );
+	assert( !mid.bad() );
+	mid = s->doAddMsg( "Single", ObjId( nm ), "psdListOut", ObjId( pm ), "psdList" );
+	Field< Id >::set( nm, "cell", model );
+
+	vector< Id > pools( 9 );
+	static string names[] = {"a", "b", "c", "b", "c", "d", "c", "d", "e" };
+	static Id parents[] = {nm, nm, nm, sm, sm, sm, pm, pm, pm};
+	for ( unsigned int i = 0; i < 9; ++i ) {
+		pools[i] = s->doCreate( "Pool", parents[i], names[i], 1 );
+		assert( pools[i] != Id() );
+		Field< double >::set( pools[i], "concInit", 1.0 + 1.0 * i );
+		Field< double >::set( pools[i], "diffConst", 1e-11 );
+		if ( i < 6 ) {
+			double vol = Field< double >::get( pools[i], "volume" );
+			assert( doubleEq( vol, 10e-6 * 1e-12 * PI ) );
+		}
+	}
+	Id dendsolve = s->doCreate( "Dsolve", model, "dendsolve", 1 );
+	Id spinesolve = s->doCreate( "Dsolve", model, "spinesolve", 1 );
+	Id psdsolve = s->doCreate( "Dsolve", model, "psdsolve", 1 );
+	Field< Id >::set( dendsolve, "compartment", nm );
+	Field< Id >::set( spinesolve, "compartment", sm );
+	Field< Id >::set( psdsolve, "compartment", pm );
+	Field< string >::set( dendsolve, "path", "/model/nm/#" );
+	Field< string >::set( spinesolve, "path", "/model/sm/#" );
+	Field< string >::set( psdsolve, "path", "/model/pm/#" );
+	assert( Field< unsigned int >::get( dendsolve, "numAllVoxels" ) == 1 );
+	assert( Field< unsigned int >::get( spinesolve, "numAllVoxels" ) == 1 );
+	assert( Field< unsigned int >::get( psdsolve, "numAllVoxels" ) == 1 );
+	assert( Field< unsigned int >::get( dendsolve, "numPools" ) == 3 );
+	assert( Field< unsigned int >::get( spinesolve, "numPools" ) == 3 );
+	assert( Field< unsigned int >::get( psdsolve, "numPools" ) == 3 );
+	SetGet2< Id, Id >::set( dendsolve, "buildNeuroMeshJunctions", 
+					spinesolve, psdsolve );
+	s->doSetClock( 0, 0.01 );
+	s->doUseClock( "/model/#solve", "process", 0 );
+	s->doReinit();
+	s->doStart( 100 );
+
+	for ( unsigned int i = 0; i < 9; ++i ) {
+		double c = Field< double >::get( pools[i], "conc" );
+		double n = Field< double >::get( pools[i], "n" );
+		double v = Field< double >::get( pools[i], "volume" );
+		cout << pools[i].path() << ": " << c << ", " << n << ", " <<
+				n / v << ", " <<
+				v << endl;
+	}
+	s->doDelete( model );
+	cout << "." << flush;
+}
+
 void testDiffusion()
 {
 	testSorting();
@@ -835,4 +914,5 @@ void testDiffusion()
 	testSmallCellDiffn();
 	testCellDiffn();
 	testCylDiffnWithStoich();
+	testCalcJunction();
 }

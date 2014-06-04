@@ -51,7 +51,7 @@ class DiffPoolVec
 
 		// static const Cinfo* initCinfo();
 	private:
-		unsigned int id_;
+		unsigned int id_; /// Integer conversion of Id of pool handled.
 		vector< double > n_; /// Number of molecules of pool in each voxel
 		vector< double > nInit_; /// Boundary condition: Initial 'n'.
 		double diffConst_; /// Diffusion const, assumed uniform
