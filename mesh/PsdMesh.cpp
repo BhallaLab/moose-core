@@ -174,8 +174,10 @@ void PsdMesh::handlePsdList(
 			x += 3;
 			psd_.back().setDia( *x++ );
 			psd_.back().setIsCylinder( true );
-			psd_.back().setLength( *x ); // This is an entirely nominal
-						// length, so that the effective vol != 0.
+				// This is an entirely nominal
+				// length, so that the effective vol != 0.
+			psd_.back().setLength( thickness_ ); 
+
 			parentDist_.push_back( *x++ );
 			vs_[i] = psd_.back().volume( psd_.back() );
 			area_[i] = psd_.back().getDiffusionArea( psd_.back(), 0 );

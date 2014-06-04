@@ -23,7 +23,7 @@ using namespace std;
  * work on in single-compartment models.
  */
 DiffPoolVec::DiffPoolVec()
-	: n_( 1, 0.0 ), nInit_( 1, 0.0 ), 
+	: id_( 0 ), n_( 1, 0.0 ), nInit_( 1, 0.0 ), 
 		diffConst_( 1.0e-12 ), motorConst_( 0.0 )
 {;}
 
