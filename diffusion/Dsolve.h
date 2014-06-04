@@ -57,6 +57,36 @@ class Dsolve: public ZombiePoolInterface
 		void process( const Eref& e, ProcPtr p );
 		void reinit( const Eref& e, ProcPtr p );
 
+		/**
+		 * Builds junctions between Dsolves handling NeuroMesh, SpineMesh,
+		 * and PsdMesh. Must only be called from the one handling the 
+		 * NeuroMesh. 
+		 * These junctions handle diffusion between different meshes.
+		 * Note that a single NeuroMesh may contact many spines which are
+		 * all in a single SpineMesh. Likewise each spine has a single
+		 * PSD, but there are many spines in the SpineMesh and matching
+		 * psds in the PsdMesh. Finally, note that 
+		 * there may be many molecules which diffuse across each diffusion
+		 * junction.
+		 */
+		void buildNeuroMeshJunctions( const Eref& e, Id spineD, Id psdD );
+
+		/**
+		 * buildMeshJunctions is the inner utility function for building 
+		 * the junction between any specified pair of Dsolves.
+		 * Note that it builds the junction on the 'self' Dsolve.
+		 */
+		static void buildMeshJunctions( Id self, Id other );
+
+		/**
+		 * Computes flux through a junction between diffusion solvers.
+		 * Most used at junctions on spines and PSDs, but can also be used
+		 * when a given diff solver is decomposed. At present the lookups
+		 * on the other diffusion solver assume that the data is on the 
+		 * local node. Once this works well I can figure out how to do
+		 * across nodes.
+		 */
+		void calcJunction( const DiffJunction& jn, double dt );
 		//////////////////////////////////////////////////////////////////
 		// Inherited virtual funcs from ZombiePoolInterface
 		//////////////////////////////////////////////////////////////////
@@ -136,6 +166,13 @@ class Dsolve: public ZombiePoolInterface
 
 		/// Looks up pool# from pool Id, using poolMapStart_ as offset.
 		vector< unsigned int > poolMap_;
+
+		/**
+		 * Lists all the diffusion junctions managed by this Dsolve.
+		 * Each junction entry provides the info needed to do the 
+		 * numerical integration for flux between the Dsolves.
+		 */
+		vector< DiffJunction > junctions_;
 };
 
 

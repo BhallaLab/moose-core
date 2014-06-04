@@ -14,6 +14,8 @@
 #include "ZombiePoolInterface.h"
 #include "DiffPoolVec.h"
 #include "FastMatrixElim.h"
+#include "../mesh/VoxelJunction.h"
+#include "DiffJunction.h"
 #include "Dsolve.h"
 #include "../mesh/Boundary.h"
 #include "../mesh/MeshEntry.h"
@@ -98,6 +100,11 @@ const Cinfo* Dsolve::initCinfo()
 		static DestFinfo reinit( "reinit",
 			"Handles reinit call",
 			new ProcOpFunc< Dsolve >( &Dsolve::reinit ) );
+
+		static DestFinfo buildNeuroMeshJunctions( "buildNeuroMeshJunctions",
+			"Builds junctions between NeuroMesh, SpineMesh and PsdMesh",
+			new EpFunc2< Dsolve, Id, Id >( 
+					&Dsolve::buildNeuroMeshJunctions ) );
 		
 		///////////////////////////////////////////////////////
 		// Shared definitions
@@ -119,6 +126,7 @@ const Cinfo* Dsolve::initCinfo()
 		&numAllVoxels,			// ReadOnlyValue
 		&nVec,				// LookupValue
 		&numPools,			// Value
+		&buildNeuroMeshJunctions, 	// DestFinfo
 		&proc,				// SharedFinfo
 	};
 	
@@ -179,11 +187,77 @@ vector< double > Dsolve::getNvec( unsigned int pool ) const
 //////////////////////////////////////////////////////////////
 // Process operations.
 //////////////////////////////////////////////////////////////
+
+static double integ( double myN, double rf, double rb, double dt )
+{
+	const double EPSILON = 1e-12;
+	if ( myN > EPSILON && rf > EPSILON ) {
+		double C = exp( -rf * dt / myN );
+		myN *= C + ( rb / rf ) * ( 1.0 - C );
+	} else {
+		myN += ( rb - rf ) * dt;
+	}
+	if ( myN < 0.0 )
+		return 0.0;
+	return myN;
+}
+
+/**
+ * Computes flux through a junction between diffusion solvers.
+ * Most used at junctions on spines and PSDs, but can also be used
+ * when a given diff solver is decomposed. At present the lookups
+ * on the other diffusion solver assume that the data is on the local
+ * node. Once this works well I can figure out how to do across nodes.
+ */
+void Dsolve::calcJunction( const DiffJunction& jn, double dt )
+{
+	const double EPSILON = 1e-15;
+	Id oid( jn.otherDsolve );
+	assert ( oid == Id() );
+	assert ( oid.element()->cinfo()->isA( "Dsolve" ) );
+
+	Dsolve* other = reinterpret_cast< Dsolve* >( oid.eref().data() );
+
+	assert( jn.otherPools.size() == jn.myPools.size() );
+	for ( unsigned int i = 0; i < jn.myPools.size(); ++i ) {
+		DiffPoolVec& myDv = pools_[ jn.myPools[i] ];
+		if ( myDv.getDiffConst() < EPSILON )
+			continue;
+		DiffPoolVec& otherDv = other->pools_[ jn.otherPools[i] ];
+		for ( vector< VoxelJunction >::const_iterator
+			j = jn.vj.begin(); j != jn.vj.end(); ++j ) {
+			double myN = myDv.getN( j->first );
+			double otherN = otherDv.getN( j->second );
+			// Here we do an exp Euler calculation
+			// rf is rate from self to other.
+			double k = myDv.getDiffConst() * j->diffScale; 
+			double lastN = myN;
+			myN = integ( myN, 
+				k * myN / j->firstVol, 
+				k * otherN / j->secondVol, 
+				dt 
+			);
+			otherN += lastN - myN; // Simple mass conservation
+			if ( otherN < 0.0 ) { // Avoid negatives
+				myN += otherN;
+				otherN = 0.0;
+			}
+			myDv.setN( j->first, myN );
+			otherDv.setN( j->second, otherN );
+		}
+	}
+}
+
 void Dsolve::process( const Eref& e, ProcPtr p )
 {
 	for ( vector< DiffPoolVec >::iterator 
 					i = pools_.begin(); i != pools_.end(); ++i ) {
 		i->advance( p->dt );
+	}
+
+	for ( vector< DiffJunction >::const_iterator
+			i = junctions_.begin(); i != junctions_.end(); ++i ) {
+		calcJunction( *i, p->dt );
 	}
 }
 
@@ -221,6 +295,7 @@ void Dsolve::setStoich( Id id )
 					reinterpret_cast< PoolBase* >( pid.eref().data());
 			double diffConst = pb->getDiffConst( pid.eref() );
 			double motorConst = pb->getMotorConst( pid.eref() );
+			pools_[ poolMap_[i] ].setId( pid.value() );
 			pools_[ poolMap_[i] ].setDiffConst( diffConst );
 			pools_[ poolMap_[i] ].setMotorConst( motorConst );
 		}
@@ -390,6 +465,80 @@ void Dsolve::build( double dt )
 		}
 		pools_[i].setOps( fops, diagVal );
 	}
+}
+
+/**
+ * Should be called only from the Dsolve handling the NeuroMesh.
+ */
+// Would like to permit vectors of spines and psd compartments.
+void Dsolve::buildNeuroMeshJunctions( const Eref& e, Id spineD, Id psdD )
+{
+	if ( !compartment_.element()->cinfo()->isA( "NeuroMesh" ) ) {
+		cout << "Warning: Dsolve::buildNeuroMeshJunction: Compartment '" <<
+				compartment_.path() << "' is not a NeuroMesh\n";
+		return;
+	}
+	Id spineMesh = Field< Id >::get( spineD, "compartment" );
+	if ( !spineMesh.element()->cinfo()->isA( "SpineMesh" ) ) {
+		cout << "Warning: Dsolve::buildNeuroMeshJunction: Compartment '" <<
+				spineMesh.path() << "' is not a SpineMesh\n";
+		return;
+	}
+	Id psdMesh = Field< Id >::get( psdD, "compartment" );
+	if ( !psdMesh.element()->cinfo()->isA( "PsdMesh" ) ) {
+		cout << "Warning: Dsolve::buildNeuroMeshJunction: Compartment '" <<
+				psdMesh.path() << "' is not a PsdMesh\n";
+		return;
+	}
+
+	buildMeshJunctions( spineD, e.id() );
+	buildMeshJunctions( psdD, spineD );
+}
+
+// Static utility func for building junctions
+void Dsolve::buildMeshJunctions( Id self, Id other )
+{
+	DiffJunction jn; // This is based on the Spine Dsolver.
+	jn.otherDsolve = other.value();
+	// Map pools between Dsolves
+	Dsolve* mySolve = reinterpret_cast< Dsolve* >( self.eref().data() );
+	map< string, unsigned int > myPools;
+	for ( unsigned int i = 0; i < mySolve->pools_.size(); ++i ) {
+			Id pool( mySolve->pools_[i].getId() );
+			assert( pool != Id() );
+			myPools[ pool.element()->getName() ] = i;
+	}
+
+	const Dsolve* otherSolve = reinterpret_cast< const Dsolve* >(
+					other.eref().data() );
+	for ( unsigned int i = 0; i < otherSolve->pools_.size(); ++i ) {
+		Id otherPool( otherSolve->pools_[i].getId() );
+		map< string, unsigned int >::iterator p = 
+		myPools.find( otherPool.element()->getName() );
+		if ( p != myPools.end() ) {
+			jn.otherPools.push_back( i );
+			jn.myPools.push_back( p->second );
+		}
+	}
+
+	// Map voxels between meshes.
+	Id myMesh = Field< Id >::get( self, "compartment" );
+	Id otherMesh = Field< Id >::get( other, "compartment" );
+
+	const ChemCompt* myCompt = reinterpret_cast< const ChemCompt* >( 
+					myMesh.eref().data() );
+	const ChemCompt* otherCompt = reinterpret_cast< const ChemCompt* >( 
+					otherMesh.eref().data() );
+	myCompt->matchMeshEntries( otherCompt, jn.vj );
+	vector< double > myVols = myCompt->getVoxelVolume();
+	vector< double > otherVols = otherCompt->getVoxelVolume();
+	for ( vector< VoxelJunction >::iterator 
+		i = jn.vj.begin(); i != jn.vj.end(); ++i ) {
+		i->firstVol = myVols[i->first];
+		i->secondVol = otherVols[i->second];
+	}
+
+	mySolve->junctions_.push_back( jn );
 }
 
 /////////////////////////////////////////////////////////////

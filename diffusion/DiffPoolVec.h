@@ -36,6 +36,9 @@ class DiffPoolVec
 		void setNumVoxels( unsigned int num );
 		unsigned int getNumVoxels() const;
 
+		void setId( unsigned int id );
+		unsigned int getId() const;
+
 		/////////////////////////////////////////////////
 		/// Used by parent solver to manipulate 'n'
 		const vector< double >& getNvec() const; 
@@ -48,6 +51,7 @@ class DiffPoolVec
 
 		// static const Cinfo* initCinfo();
 	private:
+		unsigned int id_;
 		vector< double > n_; /// Number of molecules of pool in each voxel
 		vector< double > nInit_; /// Boundary condition: Initial 'n'.
 		double diffConst_; /// Diffusion const, assumed uniform
