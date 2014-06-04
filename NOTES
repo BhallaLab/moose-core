@@ -3746,6 +3746,9 @@ B be conc in the other. Then:
 A(t+1) - A'(t+1) dt = A(t)
 where A'(t+1) = D.( B - A ).xa/L
 
-Later.
+Later. Checkin 5487.
+
+Implemented a unit test for testing inter-compartment diffusion. Seems
+promising. Lots of fixes ensued. The minchan.py model looks better too.
 
 ============================================================================

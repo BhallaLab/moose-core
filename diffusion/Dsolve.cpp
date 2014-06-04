@@ -213,7 +213,7 @@ void Dsolve::calcJunction( const DiffJunction& jn, double dt )
 {
 	const double EPSILON = 1e-15;
 	Id oid( jn.otherDsolve );
-	assert ( oid == Id() );
+	assert ( oid != Id() );
 	assert ( oid.element()->cinfo()->isA( "Dsolve" ) );
 
 	Dsolve* other = reinterpret_cast< Dsolve* >( oid.eref().data() );
@@ -399,6 +399,7 @@ void Dsolve::setPath( const Eref& e, string path )
 
 		unsigned int j = temp[i].value() - poolMapStart_;
 		assert( j < poolMap_.size() );
+		pools_[ poolMap_[i] ].setId( id.value() );
 		pools_[ poolMap_[j] ].setDiffConst( diffConst );
 		pools_[ poolMap_[j] ].setMotorConst( motorConst );
 	}
@@ -514,7 +515,7 @@ void Dsolve::buildMeshJunctions( Id self, Id other )
 	for ( unsigned int i = 0; i < otherSolve->pools_.size(); ++i ) {
 		Id otherPool( otherSolve->pools_[i].getId() );
 		map< string, unsigned int >::iterator p = 
-		myPools.find( otherPool.element()->getName() );
+			myPools.find( otherPool.element()->getName() );
 		if ( p != myPools.end() ) {
 			jn.otherPools.push_back( i );
 			jn.myPools.push_back( p->second );
