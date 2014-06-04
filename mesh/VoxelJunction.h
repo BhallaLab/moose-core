@@ -19,10 +19,13 @@ class VoxelJunction
 {
 	public:
 		VoxelJunction( unsigned int f, unsigned int s, double d = 1.0 )
-				: first( f ), second( s ), diffScale( d )
+				: first( f ), second( s ), 
+			   firstVol( 0 ), secondVol( 0 ),
+			   diffScale( d )
 		{;}
 		VoxelJunction()
-				: first( ~0 ), second( ~0 ), diffScale( 1.0 )
+				: first( ~0 ), second( ~0 ), firstVol( 0 ), secondVol( 0 ),
+				diffScale( 1.0 )
 		{;}
 
 		// Used for sorting.
@@ -36,6 +39,8 @@ class VoxelJunction
 
 		unsigned int first; /// MeshIndex for first compartment
 		unsigned int second; /// MeshIndex for second compartment
+		double firstVol;
+		double secondVol;
 		double diffScale; /// smaller of the cross-section areas / diffLen
 };
 

@@ -102,6 +102,16 @@ unsigned int DiffPoolVec::getNumVoxels() const
 	return n_.size();
 }
 
+void DiffPoolVec::setId( unsigned int id ) 
+{
+	id_ = id;
+}
+
+unsigned int DiffPoolVec::getId() const
+{
+	return id_;
+}
+
 void DiffPoolVec::setOps(const vector< Triplet< double > >& ops,
 	const vector< double >& diagVal )
 {
