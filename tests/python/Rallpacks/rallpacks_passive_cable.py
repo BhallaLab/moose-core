@@ -117,8 +117,8 @@ class PasiveCable( ):
                     , " simDt: %s, plotDt: %s" % ( self.simDt, self.plotDt )
                     ]
                 )
-        moose.reinit( )
         self.setupHSolve( )
+        moose.reinit( )
         utils.verify( )
         moose.start( simTime )
 
