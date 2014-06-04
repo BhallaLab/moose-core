@@ -315,6 +315,11 @@ extern "C" {
 } //!extern "C"
 
 
+/**
+   Convert a Python sequence into a C++ vector.  This dynamically
+   allocates the vector and it is the caller's responsibility to free
+   it.
+*/
 template <typename T>
 vector< T > * PySequenceToVector(PyObject * seq, char typecode)
 {
@@ -331,7 +336,7 @@ vector< T > * PySequenceToVector(PyObject * seq, char typecode)
             return NULL;
         }
         value = (T*)to_cpp(item, typecode);
-        Py_DECREF(item);
+        Py_DECREF(item); // PySequence_GetItem returns a new reference. Reduce the refcount now.
         if (value == NULL){
             ostringstream error;
             error << "Cannot handle sequence of type " << Py_TYPE(item)->tp_name;
