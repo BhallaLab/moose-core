@@ -36,7 +36,7 @@ const Cinfo* ZombieCompartment::initCinfo()
    	static Dinfo< ZombieCompartment > dinfo;
     static Cinfo zombieCompartmentCinfo(
         "ZombieCompartment",
-        Neutral::initCinfo(),
+        CompartmentBase::initCinfo(),
 		0,
 		0,
         // compartmentFinfos,
