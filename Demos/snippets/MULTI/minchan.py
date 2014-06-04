@@ -140,6 +140,9 @@ def makeNeuroMeshModel():
         print 'PSD: numfoo = ', foo.numData
         print 'PSD: numAllVoxels = ', pmksolve.numAllVoxels
 
+        # Put in junctions between the diffusion solvers
+        nmdsolve.buildNeuroMeshJunctions( smdsolve, pmdsolve )
+
 	"""
 	CaNpsd = moose.vec( '/model/chem/psdMesh/PSD/PP1_PSD/CaN' )
 	print 'numCaN in PSD = ', CaNpsd.nInit, ', vol = ', CaNpsd.volume

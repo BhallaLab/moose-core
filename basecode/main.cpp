@@ -282,8 +282,8 @@ void nonMpiTests( Shell* s )
                 testKsolve();
 //		testKsolveProcess();
 //		testBiophysics();
-//		testDiffusion();
-                testHSolve();
+		testDiffusion();
+        testHSolve();
 		// testGeom();
 		testMesh();
 		testSigNeur();

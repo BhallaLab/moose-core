@@ -33,5 +33,5 @@
 
 soma	none    0  10  0  8.46  Na 150 K_DR 400 Ca_conc 8.96e-3 Ca 50
 
-spine_neck	soma	0.5  0  0  0.1  glu 700
+spine_neck	soma	0.5  0  0  0.2  glu 700
 spine_head	.  		0.5  0  0  0.5  glu 700
