@@ -463,6 +463,6 @@ class Simulator:
                     , tableObj.vec.size
                     )
                 )
-        xvec = xvec[ : tableObj.vector.size ]
+        xvec = xvec[ : len(tableObj.vector) ]
         return tableObj.vector, xvec
 
