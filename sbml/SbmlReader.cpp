@@ -183,7 +183,8 @@ Id SbmlReader::read( string filename,string location, string solverClass)
 	      
 	    }
 	  vector< ObjId > compts;
-	  string comptpath = base_.path() + "/##[ISA=ChemCompt]";
+//	  string comptpath = base_.path() + "/##[ISA=ChemCompt]";
+	  string comptpath = "/##[ISA=ChemCompt]";
 	  wildcardFind( comptpath, compts );
 	  vector< ObjId >::iterator i = compts.begin();
 	  string comptName = nameString(Field<string> :: get(ObjId(*i),"name"));
