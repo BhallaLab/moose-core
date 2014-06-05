@@ -1,5 +1,16 @@
-# This file process mumbl.
-#!/usr/bin/env python 
+# This file is part of MOOSE simulator: http://moose.ncbs.res.in.
+
+# MOOSE is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# MOOSE is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# You should have received a copy of the GNU General Public License
+# along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 
 """mumbl.py: This file reads the mumbl file and load it onto moose. 
 This class is entry point of multiscale modelling.
@@ -11,22 +22,20 @@ Last modified: Fri Jan 24, 2014  05:27PM
 __author__           = "Dilawar Singh"
 __copyright__        = "Copyright 2013, NCBS Bangalore"
 __credits__          = ["NCBS Bangalore", "Bhalla Lab"]
-__license__          = "GPL"
+__license__          = "GNU GPL"
 __version__          = "1.0.0"
 __maintainer__       = "Dilawar Singh"
-__email__            = "dilawars@iitb.ac.in"
+__email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
-import debug.debug as debug
 import inspect
 import os
 import sys
 import moose
+import moose.utils as utils
 import helper.moose_methods as moose_methods
-import debug.logger as logger
 import core.types as types
 import core.config as config
-import logging
 import inspect
 
 class Mumble():
@@ -34,7 +43,6 @@ class Mumble():
     """
     def __init__(self, mumbl):
         self.mumblElem = mumbl[0]
-        self.logger = logging.getLogger('mumble')
         self.rootElem = self.mumblElem.getroot()
         self.mumblPath = mumbl[1]
         self.mumblRootPath = os.path.dirname(self.mumblPath)
@@ -79,8 +87,7 @@ class Mumble():
             try:
                 moose.Neutral(paths)
             except Exception as e:
-                print(moose_methods.dumpMoosePaths(self.cellPath+'/##'))
-                debug.printDebug("ERROR"
+                utils.dump("ERROR"
                 , "Path {} does not exists".format(paths)
                 )
                 sys.exit()
@@ -99,7 +106,7 @@ class Mumble():
     def load(self):
         """ Lead mumble element tree
         """
-        debug.printDebug("INFO", "Loading mumble")
+        utils.dump("INFO", "Loading mumble")
         [self.loadModel(model) for model in self.rootElem.findall('model') ]
 
         # Mappings from electrical to chemical and vice versa belongs to
@@ -113,12 +120,12 @@ class Mumble():
         Load additional model to moose.
         """
         if modelXml.get('load_model', 'true') != 'true':
-            logging.debug("No loading model %s" % modelXml)
+            utils.dump("WARN", "No loading model %s" % modelXml)
             return None
 
         modelId = modelXml.get('id')
         if modelId in self.modelList:
-            debug.printDebug("ERROR"
+            utils.dump("ERROR"
                     , "Two models have same id {0}! Ignoring...".format(modelId)
                     )
             return RuntimeError("Two models with same id")
@@ -131,7 +138,7 @@ class Mumble():
         elif modelType == 'chemical':
             self.loadChemicalModel(modelXml)
         else:
-            debug.printDebug("TODO"
+            utils.dump("TODO"
                     , "{0} : Un-supported Mumbl model".format(modelType)
                     , frame = inspect.currentframe()
                     )
@@ -154,7 +161,7 @@ class Mumble():
             modelPath = "/models/electrical/{0}_{1}"
             return modelPath.format("e", self.countElecModels)
         else:
-            debug.printDebug("TODO"
+            utils.dump("TODO"
                     , "Unsupported model type : {0}".format(modelType)
                     )
             raise UserWarning, "Unsupported model type"
@@ -167,7 +174,7 @@ class Mumble():
         if modelXml.get('already_loaded') == "true":
             return 
         self.countElecModels += 1
-        debug.printDebug("TODO"
+        utils.dump("TODO"
                 , "Elec model is not in NML. Ignoring for now..."
                 , frame = inspect.currentframe()
                 )
@@ -187,7 +194,7 @@ class Mumble():
         """
 
         if modelXml.get('already_loaded') == "true":
-            debug.printDebug("USER"
+            utils.dump("USER"
                     , "This model is alreay loaded. Doing nothing..."
                     )
             return
@@ -196,7 +203,7 @@ class Mumble():
         self.countChemModels += 1
 
         if modelXml.get('load_using_external_script') == "yes":
-            debug.printDebug("TODO"
+            utils.dump("TODO"
                     , "Loading user external script is not supported yet."
                     , frame = inspect.currentframe()
                     )
@@ -211,7 +218,7 @@ class Mumble():
 
         # Check if we are referencing to a sbml model
         if modelXml.get('model_type', '') == "sbml":
-            debug.printDebug("DEBUG"
+            utils.dump("DEBUG"
                     , "Got a SBML model describing a chemical compartment"
                     )
             try:
@@ -220,13 +227,14 @@ class Mumble():
                         )
 
             except Exception as e:
-                debug.printDebug("ERROR"
+                utils.dump("ERROR"
                         , [ "Failed to open or parse SBML %s " % modelFilePath
                             , "{}".format(e)
                             ]
                         , frame = inspect.currentframe()
                         )
                 sys.exit(0)
+            utils.dump("STEP", "Done parsing SBML")
                         
                     
         # get compartments and add species to these compartments.
@@ -257,11 +265,10 @@ class Mumble():
             speciesName = p.get('species')
             self.speciesDict.insertUniqueVal(speciesName)
             pool = os.path.join(compPath, speciesName)
-            self.logger.info('Creating pool with path {}'.format(pool))
             try:
                 poolComp = moose.Pool(pool)
             except Exception as e:
-                printDebug("WARN", "Perhaps the compartment_id is wrong!")
+                utils.debug("WARN", "Perhaps the compartment_id is wrong!")
                 raise KeyError("Missing parent path %s" % poolPath)
 
             poolComp.conc = moose_methods.stringToFloat(p.get('conc'))
@@ -312,7 +319,7 @@ class Mumble():
         try:
             mooseSrc = moose.Neutral(moosePath)
         except Exception as e:
-            debug.printDebug("ERROR"
+            utils.dump("ERROR"
                     , "Source compartment %s is not found" % moosePath
                     , frame = inspect.currentframe()
                     )
@@ -322,7 +329,6 @@ class Mumble():
         # Get the target.
         compType = src.get('type', 'chemical')
         if compType == "chemical":
-            self.logger.debug("Adding a source of chemtype")
             # in which compartment and which type of pool
             compId = src.get('compartment_id', None)
             if compId is None:
@@ -334,7 +340,7 @@ class Mumble():
             try:
                 mooseTgt = moose.Pool(poolPath)
             except Exception as e:
-                debug.printDebug("ERROR",
+                utils.dump("ERROR",
                         [ "Perhaps the compartment_id in mumbleML is wrong" 
                             , "Path is {}".format(poolPath)
                             , " Doing nothing ... "
@@ -343,7 +349,7 @@ class Mumble():
                         )
                 sys.exit(0)
         else: 
-            debug.printDebug("TODO", "Unsupported compartment type")
+            utils.dump("TODO", "Unsupported compartment type")
             raise UserWarning("Unsupported compartment type %s" % compType)
        
         # We need to send message now based on relation. This is done using
@@ -364,12 +370,11 @@ class Mumble():
         # Get the source
         compType = tgt.get('type', 'chemical')
         if compType != 'chemical':
-            debug.printDebug("TODO"
+            utils.dump("TODO"
                     , "Unsupported compartment type %s" % compType
                     )
             raise UserWarning("Unsupported feature")
         
-        self.logger.debug('Adding a target of chemtype')
 
         compId = tgt.get('compartment_id')
         if compId is None:
@@ -386,7 +391,7 @@ class Mumble():
             mooseTgt = moose.Pool(poolPath)
         except Exception as e:
             print(moose_methods.dumpMatchingPaths(poolPath))
-            debug.printDebug("ERROR"
+            utils.dump("ERROR"
                     , [ "Perhaps the compartment_id in mumbleML is wrong. "
                         , "Failed to create a pool with path `%s`" % poolPath 
                         , "Check the path list above "
@@ -421,17 +426,10 @@ class Mumble():
                     , 'adapt{}'.format(self.adaptorCount)
                     )
                 )
-        self.logger.debug(
-                "Adaptor: {} to {}, Encoded {}".format(
-                    srcPath
-                    , tgtPath
-                    , adaptorPath
-                    )
-                )
         try:
             adaptor = moose.Adaptor(adaptorPath)
         except Exception as e:
-            debug.printDebug("ERROR"
+            utils.dump("ERROR"
                     , "Failed to set adaptor from `{}` to `{}`".format(
                         srcPath, tgtPath
                         )
@@ -454,7 +452,7 @@ class Mumble():
 
         adaptor.setField('scale', scale)
         adaptor.setField('inputOffset', - offset)
-        debug.printDebug("MUMBLE"
+        utils.dump("ADAPTOR"
                 , 'Setting adaptor between {}/{} and {}/{}'.format(
                     src.path
                     , inputVar
@@ -467,12 +465,12 @@ class Mumble():
         try:
             moose.connect(adaptor, 'requestInput', src, var)
         except Exception as e:
-            debug.printDebug("ERROR"
+            utils.dump("ERROR"
                     , 'Failed to connect var {} of {} with adaptor input'.format(
                         var, src.path
                         )
                     )
-            debug.printDebug("INFO"
+            utils.dump("INFO"
                     , "Avalilable fields are {}".format(moose.showfield(src))
                     )
             sys.exit()
@@ -480,12 +478,12 @@ class Mumble():
             var = self.prefixWithSet(outputVar)
             moose.connect(adaptor, 'outputSrc', tgt, var)
         except Exception as e:
-            debug.printDebug("ERROR"
+            utils.dump("ERROR"
                     , 'Failed to connect var {} of {} with adaptor input'.format(
                         var, tgt.path
                         )
                     )
-            debug.printDebug("INFO"
+            utils.dump("INFO"
                     , "Avalilable fields are {}".format(moose.showfield(tgt))
                     )
             sys.exit()

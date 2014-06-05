@@ -3,7 +3,7 @@
 """moose_methods.py:  Some helper function related with moose to do multiscale
 modelling.
 
-Last modified: Tue Jan 28, 2014  10:31PM
+Last modified: Thu Jun 05, 2014  01:20AM
 
 """
     
@@ -21,7 +21,7 @@ import os
 import moose
 import debug.debug as debug
 
-nameSep = '()'
+nameSep = '_'
 
 def toFloat(string):
     if type(string) == float:

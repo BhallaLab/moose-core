@@ -1,3 +1,18 @@
+# This file is part of MOOSE simulator: http://moose.ncbs.res.in.
+
+# MOOSE is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# MOOSE is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# You should have received a copy of the GNU General Public License
+# along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+
+
 """
 
  Description: class NetworkML for loading NetworkML from file or xml element
@@ -30,22 +45,18 @@ import MorphML
 import ChannelML
 import moose
 import moose.neuroml.utils as nmu
-import moose.utils as mu
-import debug.debug as debug
+import moose.utils as utils
 import inspect
 import helper.xml_methods as xml_methods
 import helper.moose_methods as moose_methods
 import core.stimulus as stimulus
 import core.config as config
-from debug.logger import *
 import debug.bugs as bugs
-import debug.debug as debug
 import matplotlib.pyplot as plt
 import numpy as np
 import re
 
 from math import cos, sin
-import utils
 
 class NetworkML(object):
 
@@ -69,7 +80,7 @@ class NetworkML(object):
         """
         Wrapper around moose.connect 
         """
-        debug.printDebug("INFO"
+        utils.dump("INFO"
                 , "Connecting ({4})`\n\t{0},{1}`\n\t`{2},{3}".format(
                     src.path
                     , srcF
@@ -83,14 +94,14 @@ class NetworkML(object):
             res = moose.connect(src, srcF, dest, destF, messageType)
             assert res, "Failed to connect"
         except Exception as e:
-            debug.printDebug("ERROR", "Failed to connect.")
+            utils.dump("ERROR", "Failed to connect.")
             raise e
 
     def plotVector(self, vector, plotname):
         ''' Saving input vector to a file '''
         name = plotname.replace('/', '_')
         fileName = os.path.join(self.plotPaths, name)+'.eps'
-        debug.printDebug("DEBUG"
+        utils.dump("DEBUG"
                 , "Saving vector to a file {}".format(fileName)
                 )
         plt.vlines(vector, 0, 1)
@@ -126,12 +137,12 @@ class NetworkML(object):
 
         """
 
-        debug.printDebug("INFO", "reading file %s ... " % filename)
+        utils.dump("INFO", "reading file %s ... " % filename)
         tree = ET.parse(filename)
         root_element = tree.getroot()
-        debug.printDebug("INFO", "Tweaking model ... ")
+        utils.dump("INFO", "Tweaking model ... ")
         utils.tweak_model(root_element, params)
-        debug.printDebug("INFO", "Loading model into MOOSE ... ")
+        utils.dump("INFO", "Loading model into MOOSE ... ")
         return self.readNetworkML(
                 root_element
                , cellSegmentDict
@@ -163,14 +174,14 @@ class NetworkML(object):
         self.network = network
         self.cellSegmentDict = cellSegmentDict
         self.params = params
-        debug.printDebug("STEP", "Creating populations ... ")
+        utils.dump("STEP", "Creating populations ... ")
         self.createPopulations() 
 
-        debug.printDebug("STEP", "Creating connections ... ")
+        utils.dump("STEP", "Creating connections ... ")
         self.createProjections() 
 
         # create connections
-        debug.printDebug("STEP", "Creating inputs in %s .. " % self.elecPath)
+        utils.dump("STEP", "Creating inputs in %s .. " % self.elecPath)
 
         # create inputs (only current pulse supported)
         self.createInputs() 
@@ -196,7 +207,7 @@ class NetworkML(object):
                 factors['Tfactor'] = 1e-3 # s from ms
                 factors['Ifactor'] = 1e-6 # A from microA
             else:
-                debug.printDebug("NOTE", "We got {0}".format(units))
+                utils.dump("NOTE", "We got {0}".format(units))
                 factors['Vfactor'] = 1.0
                 factors['Tfactor'] = 1.0
                 factors['Ifactor'] = 1.0
@@ -220,8 +231,8 @@ class NetworkML(object):
         pulse_stim = inElemXml.find('.//{'+nmu.nml_ns+'}pulse_input')
 
         if random_stim is not None:
-            debug.printDebug("INFO", "Generating random stimulous")
-            debug.printDebug("TODO", "Test this Poission spike train table")
+            utils.dump("INFO", "Generating random stimulous")
+            utils.dump("TODO", "Test this Poission spike train table")
     
             # Get the frequency of stimulus
             frequency = moose_methods.toFloat(
@@ -258,7 +269,7 @@ class NetworkML(object):
                # To find the cell name fetch the first element of tuple.
                cell_name = self.populationDict[population][0]
                if cell_name == 'LIF':
-                   debug.printDebug("NOTE",
+                   utils.dump("NOTE",
                            "LIF cell_name. Partial implementation"
                            , frame = inspect.currentframe()
                            )
@@ -286,7 +297,7 @@ class NetworkML(object):
             Tfactor = factors['Tfactor']
             pulseinput = inElemXml.find(".//{"+nmu.nml_ns+"}pulse_input")
             if pulseinput is None:
-                debug.printDebug("WARN"
+                utils.dump("WARN"
                         , "This type of stimulous is not supported."
                         , frame = inspect.currentframe()
                         )
@@ -359,7 +370,7 @@ class NetworkML(object):
         """
         populations =  self.network.findall(".//{"+nmu.nml_ns+"}population")
         if not populations:
-            debug.printDebug("WARN"
+            utils.dump("WARN"
                     , [ 
                         "No population find in model"
                         , "Searching in namespace {}".format(nmu.nml_ns)
@@ -370,12 +381,12 @@ class NetworkML(object):
         for population in populations:
             cellname = population.attrib["cell_type"]
             populationName = population.attrib["name"]
-            debug.printDebug("INFO"
+            utils.dump("INFO"
                     , "Loading population `{0}`".format(populationName)
                     )
             # if cell does not exist in library load it from xml file
             if not moose.exists(self.libraryPath+'/'+cellname):
-                debug.printDebug("DEBUG"
+                utils.dump("DEBUG"
                         , "Searching in subdirectories for cell types" + 
                         " in `{0}.xml` and `{0}.morph.xml` ".format(cellname)
                         )
@@ -465,7 +476,7 @@ class NetworkML(object):
         try:
             path = self.populationDict[populationType][1]
         except KeyError as e:
-            debug.printDebug("ERROR"
+            utils.dump("ERROR"
                     , [ "Population type `{0}` not found".format(populationType)
                         , "Availale population in network are "
                         , self.populationDict.keys()
@@ -482,7 +493,7 @@ class NetworkML(object):
                     populationType
                     , instanceId
                     )
-            debug.printDebug("ERROR"
+            utils.dump("ERROR"
                     , [msg , "Available instances are" , path.keys() ]
                     )
             raise KeyError(msg)
@@ -544,7 +555,7 @@ class NetworkML(object):
                     (synName , pre_segment_path, post_segment_path)
                     )
         except KeyError as e:
-            debug.printDebug("ERR", "Failed find key {0}".format(e)
+            utils.dump("ERR", "Failed find key {0}".format(e)
                     , frame = inspect.currentframe())
             print self.projectionDict.keys()
             sys.exit(0)
@@ -570,7 +581,7 @@ class NetworkML(object):
 
         synapse = props.attrib.get('synapse_type', None)
         if not synapse: 
-            debug.printDebug("WARN"
+            utils.dump("WARN"
                     , "Synapse type {} not found.".format(synapse)
                     , frame = inspect.currentframe()
                     )
@@ -608,7 +619,7 @@ class NetworkML(object):
 
     def createProjection(self, projection):
         projectionName = projection.attrib["name"]
-        debug.printDebug("INFO", "Projection {0}".format(projectionName))
+        utils.dump("INFO", "Projection {0}".format(projectionName))
         source = projection.attrib["source"]
         target = projection.attrib["target"]
         self.projectionDict[projectionName] = (source,target,[])
@@ -659,7 +670,7 @@ class NetworkML(object):
 
         assert isinstance(synapse, moose.SynChan), type(synapse)
 
-        #debug.printDebug("INFO"
+        #utils.dump("INFO"
         #        , "Connecting ({})\n\t`{}`\n\t`{}`".format(
         #                "Sparse"
         #                , spikegen.path
@@ -702,24 +713,24 @@ class NetworkML(object):
         # KinSynChan, we always make a new synapse as KinSynChan is not meant to
         # represent multiple synapses
         libsyn = moose.SynChan(self.libraryPath+'/'+synName)
-        gradedchild = mu.get_child_Mstring(libsyn, 'graded')
+        gradedchild = utils.get_child_Mstring(libsyn, 'graded')
 
         # create a new synapse
         if libsyn.className == 'KinSynChan' or gradedchild.value == 'True': 
             synNameFull = moose_methods.moosePath(synName
-                    , mu.underscorize(prePath)
+                    , utils.underscorize(prePath)
                     )
             synObj = self.makeNewSynapse(synName, postcomp, synNameFull)
         else:
             # See debug/bugs for more details.
             # NOTE: Change the debug/bugs to enable/disable this bug.
             if bugs.BUG_NetworkML_500:
-                debug.printDebug("INFO"
+                utils.dump("INFO"
                         , "See the code. There might be a bug here"
                         , frame = inspect.currentframe()
                         )
                 synNameFull = moose_methods.moosePath(synName
-                        , mu.underscorize(prePath)
+                        , utils.underscorize(prePath)
                         )
                 synObj = self.makeNewSynapse(synName, postcomp, synNameFull)
 
@@ -732,7 +743,7 @@ class NetworkML(object):
         synPath = moose_methods.moosePath(post_path, synNameFull)
         syn = moose.SynChan(synPath)
 
-        gradedchild = mu.get_child_Mstring(syn, 'graded')
+        gradedchild = utils.get_child_Mstring(syn, 'graded')
 
         # weights are set at the end according to whether the synapse is graded
         # or event-based
@@ -860,8 +871,8 @@ class NetworkML(object):
 
         SpikeGen models the pre-synaptic events.
         '''
-        synPath = os.path.join(self.libraryPath, synName)
-        debug.printDebug("SYNAPSE"
+        synPath = "%s/%s" % (self.libraryPath, synName)
+        utils.dump("SYNAPSE"
                 , "Creating {} with path {} onto compartment {}".format(
                     synName
                     , synPath
@@ -870,7 +881,7 @@ class NetworkML(object):
                 )
         # if channel does not exist in library load it from xml file
         if not moose.exists(synPath):
-            debug.printDebug("SYNAPSE"
+            utils.dump("SYNAPSE"
                     , "Synaptic Channel {} does not exists. {}".format(
                         synPath, "Loading is from XML file"
                         )
@@ -881,7 +892,7 @@ class NetworkML(object):
         # deep copies the library synapse to an instance under postcomp named as
         # <arg3>
         if config.disbleCopyingOfObject:
-            debug.printDebug("WARN"
+            utils.dump("WARN"
                     , "Copying existing SynChan ({}) to {}".format(
                         synPath
                         , postcomp
@@ -893,7 +904,7 @@ class NetworkML(object):
         
         syn = moose.SynChan(synid)
         syn = self.configureSynChan(syn, synParams={})
-        childmgblock = mu.get_child_Mstring(syn,'mgblock')
+        childmgblock = utils.get_child_Mstring(syn,'mgblock')
 
         # connect the post compartment to the synapse
         # If NMDA synapse based on mgblock, connect to mgblock
@@ -910,7 +921,7 @@ class NetworkML(object):
 
         '''
         assert(isinstance(synObj, moose.SynChan))
-        debug.printDebug("SYNAPSE"
+        utils.dump("SYNAPSE"
                 , "Configuring SynChan"
                 )
         synObj.tau1 = synParams.get('tau1', 5.0)

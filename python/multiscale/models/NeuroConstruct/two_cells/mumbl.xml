@@ -58,15 +58,15 @@ This is the main top-level XML file to do multiscale modelling.
 
         If electrical model was speficied in NeuroML then we can make use of 
         paths
+    -->
     <domain cell_type="cellB" instance_id="0" segment="Soma">
         <mapping direction="in" type="one_to_one" >
-            <source type="chemical" species="Ca" compartment_id = "1" >
-                <relation input="conc" output="Rm">
+            <source type="chemical" species="calcium" compartment_id = "1" >
+                <relation input="conc" output="Cm">
                     <scale>1.5e14</scale>
                     <offset>1e-16</offset>
                 </relation>
             </source>
         </mapping>
     </domain>
-    -->
 </mumbl>

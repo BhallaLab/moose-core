@@ -39,9 +39,8 @@ import MorphML
 import NetworkML
 import ChannelML
 import moose
-import moose.utils
+import moose.utils as utils
 import moose.neuroml.utils as mnu
-import debug.debug as debug
 import core.config as config
 import logging
 from os import path
@@ -78,7 +77,7 @@ class NeuroML(object):
         see doc string of NetworkML.readNetworkML() for details.
         """
 
-        debug.printDebug("STEP"
+        utils.dump("STEP"
                 , "Loading neuroml file `{0}` ... ".format(filename)
                 )
         # creates /library in MOOSE tree; elif present, wraps
@@ -90,7 +89,7 @@ class NeuroML(object):
         except KeyError:
             self.lengthUnits = root_element.attrib['length_units']
         except:
-            debug.printDebug("WARN"
+            utils.dump("WARN"
                     , "Failed to get length_unit"
                     , sys.exec_info()[0]
                     )
@@ -124,11 +123,6 @@ class NeuroML(object):
                         )
                 self.cellsDict.update(cellDict)
 
-        debug.printDebug("DEBUG"
-                , [ "Calling function to load networkML"
-                    , "{}".format(self.nml_params)
-                    ]
-                )
         nmlR = NetworkML.NetworkML(self.nml_params)
         populationDict, projectionDict = nmlR.readNetworkML(
                 root_element
