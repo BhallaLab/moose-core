@@ -22,6 +22,7 @@ import string
 import os
 import math
 from datetime import datetime
+from collections import defaultdict
 import _moose
 
 import plot_utils
@@ -264,9 +265,8 @@ def printtree(root, vchar='|', hchar='__', vcount=1, depth=0, prefix='', is_last
     is_last - for internal use - should not be explicitly passed.
 
     """
-    if isinstance(root, str) or isinstance(root, _moose.vec) or isinstance(root, _moose.melement):
-        root = _moose.Neutral(root)
-
+    root = _moose.element(root)
+    print '%s: "%s"' % (root, root.children)
     for i in range(vcount):
         print prefix
 
@@ -282,7 +282,7 @@ def printtree(root, vchar='|', hchar='__', vcount=1, depth=0, prefix='', is_last
 
     print root.name
     
-    children = [ _moose.Neutral(child) for child in root.children ]
+    children = [ _moose.element(child) for child in root.children ]
     for i in range(0, len(children) - 1):
         printtree(children[i],
                   vchar, hchar, vcount, depth + 1, 
@@ -343,7 +343,7 @@ def autoposition(root):
     return ret
 
 
-def readcell_scrambled(filename, target):
+def readcell_scrambled(filename, target, method='ee'):
     """A special version for handling cases where a .p file has a line
     with specified parent yet to be defined.
 
@@ -355,26 +355,31 @@ def readcell_scrambled(filename, target):
     data = {}
     error = None
     root = None
+    ccomment_started = False
+    current_compt_params = []
     for line in pfile:
         tmpline = line.strip()
-        if tmpline.startswith("*") or tmpline.startswith("//"):
+        if not tmpline or tmpline.startswith("//"):
             continue
         elif tmpline.startswith("/*"):
-            error = "Handling C style comments not implemented."
-            break
-        node, parent, rest, = tmpline.split(None, 2)
-        print node, parent
+            ccomment_started = True
+        if tmpline.endswith('*/'):
+            ccomment_started = False
+        if ccomment_started:
+            continue
+        if tmpline.startswith('*set_compt_param'):
+            current_compt_params.append(tmpline)
+            continue
+        node, parent, rest, = tmpline.partition(' ')
+        print '22222222', node, parent
         if (parent == "none"):
             if (root is None):
                 root = node
             else:
-                error = "Duplicate root elements: ", root, node, "> Cannot process any further."
+                raise ValueError("Duplicate root elements: ", root, node, "> Cannot process any further.")
                 break
         graph[parent].append(node)
-        data[node] = line
-    if error is not None:
-        print error
-        return None
+        data[node] = '\n'.join(current_compt_params)
 
     tmpfile = open(tmpfilename, "w")
     stack = [root]
@@ -382,10 +387,11 @@ def readcell_scrambled(filename, target):
         current = stack.pop()
         children = graph[current]
         stack.extend(children)
+        print '#########"', current, '": ', data[current]
         tmpfile.write(data[current])
     tmpfile.close()
-    _moose.readCell(tmpfilename, target)
-    return _moose.Cell(target)
+    ret = _moose.loadModel(tmpfilename, target, method)
+    return ret
 
 ## Subha: In many scenarios resetSim is too rigid and focussed on
 ## neuronal simulation.  The setDefaultDt and
@@ -478,6 +484,7 @@ def assignDefaultTicks(modelRoot='/model', dataRoot='/data', solver='hsolve'):
         _moose.useClock(0, '%s/##[ISA=Compartment]' % (modelRoot), 'init')
         _moose.useClock(1, '%s/##[ISA=Compartment]'  % (modelRoot), 'process')
         _moose.useClock(2, '%s/##[ISA=HHChannel]'  % (modelRoot), 'process')
+        # _moose.useClock(2, '%s/##[ISA=ChanBase]'  % (modelRoot), 'process')
     _moose.useClock(0, '%s/##[ISA=IzhikevichNrn]' % (modelRoot), 'process')
     _moose.useClock(0, '%s/##[ISA=GapJunction]' % (modelRoot), 'process')
     _moose.useClock(0, '%s/##[ISA=HSolve]'  % (modelRoot), 'process')
