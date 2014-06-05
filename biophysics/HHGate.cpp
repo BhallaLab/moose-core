@@ -387,9 +387,9 @@ void HHGate::setMin( const Eref& e, double val )
 		unsigned int xdivs = A_.size() - 1;
 		if ( isDirectTable_ && xdivs > 0 ) {
 			// Stuff here to stretch out table using interpolation.
+			invDx_ = static_cast< double >( xdivs ) / ( xmax_ - val );
 			tabFill( A_, xdivs, val, xmax_ );
 			tabFill( B_, xdivs, val, xmax_ );
-			invDx_ = static_cast< double >( xdivs ) / ( xmax_ - val );
 		} else {
 			updateTables();
 		}
@@ -408,9 +408,9 @@ void HHGate::setMax( const Eref& e, double val )
 		unsigned int xdivs = A_.size() - 1;
 		if ( isDirectTable_ && xdivs > 0 ) {
 			// Set up using direct assignment of table values.
+			invDx_ = static_cast< double >( xdivs ) / ( val - xmin_ );
 			tabFill( A_, xdivs, xmin_, val );
 			tabFill( B_, xdivs, xmin_, val );
-			invDx_ = static_cast< double >( xdivs ) / ( val - xmin_ );
 		} else {
 			// Set up using functional form. here we just recalculate.
 			updateTables();
@@ -427,9 +427,9 @@ void HHGate::setDivs( const Eref& e, unsigned int val )
 {
 	if ( checkOriginal( e.id(), "divs" ) ) {
 		if ( isDirectTable_ ) {
+			invDx_ = static_cast< double >( val ) / ( xmax_ - xmin_ );
 			tabFill( A_, val, xmin_, xmax_ );
 			tabFill( B_, val, xmin_, xmax_ );
-			invDx_ = static_cast< double >( val ) / ( xmax_ - xmin_ );
 		} else {
 			/// Stuff here to redo sizes.
 			A_.resize( val + 1 );
