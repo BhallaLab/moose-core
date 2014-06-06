@@ -13,7 +13,6 @@ OBJ = \
 	SpikeRingBuffer.o	\
 	SynHandler.o	\
 	IntFire.o	\
-	AdaptiveThresholdIntFire.o	\
 	Synapse.o	\
 	SpikeGen.o	\
 	CompartmentDataHolder.o	\
@@ -65,7 +64,6 @@ $(OBJ)	: $(HEADERS)
 SpikeRingBuffer.o:	SpikeRingBuffer.h
 SynHandler.o:	SpikeRingBuffer.h SynHandler.h Synapse.h 
 IntFire.o:	IntFire.h SpikeRingBuffer.h SynHandler.h Synapse.h 
-AdaptiveThresholdIntFire.o:	AdaptiveThresholdIntFire.h SpikeRingBuffer.h SynHandler.h Synapse.h
 SpikeGen.o: SpikeGen.h
 CompartmentDataHolder.o: CompartmentDataHolder.h
 CompartmentBase.o: CompartmentBase.h CompartmentDataHolder.h
