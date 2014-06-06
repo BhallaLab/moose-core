@@ -82,8 +82,8 @@ if(VERBOSITY)
     message("++ Verbosity of output is ${VERBOSITY}")
     add_definitions(-DVERBOSITY=${VERBOSITY})
 else()
-    message("++ Moose will be quiet")
-    add_definitions(-DQUIET_MODE)
+    #message("++ Moose will be quiet")
+    #add_definitions(-DQUIET_MODE)
 endif()
 
 # STATS INSIDE MOOSE
@@ -96,7 +96,7 @@ endif()
 # Default macros
 add_definitions(-DUSE_GENESIS_PARSER)
 
-set(DEBUG 0)
+set(DEBUG 1)
 if(DEBUG)
     set(CMAKE_BUILD_TYPE Debug)
 else()
@@ -220,8 +220,10 @@ if(BUILD_PYMOOSE)
     if(PYTHON_NUMPY_FOUND)
         add_definitions(-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
         include_directories(${PYTHON_NUMPY_INCLUDE_DIR})
+        add_definitions(-DUSE_NUMPY)
     else()
-        message(FATAL_ERROR "Could not find numpy/arrayobject.h in usual places")
+        message(WARNING "Could not find numpy/arrayobject.h in usual places")
+        add_definitions(-UUSE_NUMPY)
     endif()
     # Openmpi
     find_package(MPI REQUIRED)
@@ -304,6 +306,8 @@ add_custom_target(check_python
     COMMENT "Checking: loading moose into python" VERBATIM
     COMMAND ${PYTHON_EXECUTABLE} test_pymoose.py 
     COMMENT "Checking: running test_pymoose in python" VERBATIM
+    #COMMAND ${PYTHON_EXECUTABLE} Rallpacks/rallpacks_passive_cable.py
+    #COMMENT "Checking: running rallpack2"
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/tests/python"
     )
 
