@@ -215,6 +215,7 @@ Id Shell::doCreate( string type, ObjId parent, string name,
 		NodeBalance nb( numData, nodePolicy, preferredNode );
 		// Get the parent MsgIndex ahead of time and pass to all nodes.
 		unsigned int parentMsgIndex = OneToAllMsg::numMsg();
+
 		SetGet6< string, ObjId, Id, string, NodeBalance, unsigned int >::set(
 			ObjId(), // Apply command to Shell
 			"create",	// Function to call.
@@ -280,6 +281,9 @@ ObjId Shell::doAddMsg( const string& msgType,
 	if ( !f2 ) {
 		cout << myNode_ << ": Shell::doAddMsg: Error: Failed to find field " << destField << 
 			" on dest: " << dest.id.element()->getName() << endl;
+                cout << "Available fields are : " << endl
+                    << mapToString<string, Finfo*>(dest.id.element()->cinfo()->finfoMap());
+                
 		return ObjId( 0, BADINDEX );
 	}
 	if ( ! f1->checkTarget( f2 ) ) {
