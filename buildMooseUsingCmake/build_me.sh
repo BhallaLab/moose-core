@@ -52,10 +52,10 @@ colorPrint "INFO" "You may like to customize some varibales in Makefile."
 colorPrint "INFO" ""
 
 BUILD_TYPE=debug
-if [ "$1" ]; then
+if [ $# -gt 0 ]; then
     colorPrint "INPUT" "Building for distribution" 
     BUILD_TYPE=distribution 
 fi
 cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE ..
 make VERBOSE=1
-make check_python && make install
+make check_python
