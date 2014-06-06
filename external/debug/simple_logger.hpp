@@ -1,18 +1,33 @@
 /*
  * ==============================================================================
  *
- *       Filename:  moose_logger.h
+ *       Filename:  simple_logger.hpp
  *
- *    Description:  A simple XML based logger for moose.
+ *    Description:  A simple XML based logger.
  *
  *        Version:  1.0
  *        Created:  Saturday 24 May 2014 06:25:10  IST
  *       Revision:  none
  *       Compiler:  gcc
  *
- *         Author:  Dilawar Singh (), dilawar@ee.iitb.ac.in
- *   Organization:  
- *
+ *         Author:  Dilawar Singh (), dilawars@ncbs.res.in
+ *   Organization:  NCBS Bangalore
+ *  
+ *  Copyright (C) 2014, Dilawar Singh, NCBS Bangalore
+ * 
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ * 
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, see <http://www.gnu.org/licenses/>.
+ * 
  * ==============================================================================
  */
 
@@ -54,6 +69,7 @@ using namespace std;
 class SimpleLogger {
 
     public:
+
         /**
          * @brief Constructor of logger. The wrapper script of moose must make
          * sure that $HOME/.moose is created. The logger will write to
@@ -138,7 +154,7 @@ class SimpleLogger {
          * @param which If which is 0 then print elements inside moose, if it is
          * 1 then print total time taken during simulation.
          *
-         * @return 
+         * @return
          */
         string dumpStats( int which )
         {

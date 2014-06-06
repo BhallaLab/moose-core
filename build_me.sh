@@ -52,7 +52,7 @@ colorPrint "INFO" "You may like to customize some varibales in Makefile."
 colorPrint "INFO" ""
 
 BUILD_TYPE=Debug
-if [ "$1" ]; then
+if [ $# -gt 0 ]; then
     colorPrint "STEP" "Building RELEASE version"
     export CXX_FLAGS=-O3
     BUILD_TYPE=RELEASE 
