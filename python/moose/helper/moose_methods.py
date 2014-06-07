@@ -17,8 +17,8 @@ __email__            = "dilawars@iitb.ac.in"
 __status__           = "Development"
 
 import sys
-#sys.path.append("../")
 import _moose
+import print_utils
 import re
 
 nameSep = '_'
@@ -42,6 +42,27 @@ def commonPath(pathA, pathB):
         else: 
             return '/'.join(common)
     return '/'.join(common)
+
+def ifPathsAreValid(paths):
+    ''' Verify if path exists and are readable. '''
+    if not paths:
+        return False
+    paths = vars(paths)
+    for p in paths:
+        if not paths[p] : continue
+        for path in paths[p] :
+            if not path : continue
+            if os.path.isfile(path) : pass
+            else :
+                print_utils.dump("ERROR"
+                        , "Filepath {0} does not exists".format(path))
+                return False
+        # check if file is readable
+        if not os.access(path, os.R_OK):
+            print_utils.dump("ERROR", "File {0} is not readable".format(path))
+            return False
+    return True
+
 
 def moosePath(baseName, append):
     """ 
@@ -159,7 +180,7 @@ def writeGraphviz(pat='/##', filename=None, filterList=[]):
         print(dot)
     else:
         with open(filename, 'w') as graphviz:
-            debug.printDebug("INFO"
+            print_utils.dump("INFO"
                     , "Writing topology to file {}".format(filename)
                     )
             graphviz.write(dot)
@@ -171,12 +192,12 @@ def setupTable(name, obj, qtyname, tablePath=None, threshold=None):
     It stores qtyname from obj.
     '''
     assert qtyname[0].isupper(), "First character must be uppercase character"
-    debug.printDebug("DEBUG"
+    print_utils.dump("DEBUG"
             , "Setting up table for: {} -> get{}".format(obj.path, qtyname)
             )
     if tablePath is None:
         tablePath = '{}/{}'.format(obj.path, 'data')
-        debug.printDebug("WARN"
+        print_utils.dump("WARN"
                 , "Using default table path: {}".format(tablePath)
                 , frame = inspect.currentframe()
                 )
