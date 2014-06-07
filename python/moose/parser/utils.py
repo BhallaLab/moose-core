@@ -14,6 +14,7 @@ indent(...) is an in-place prettyprint formatter copied from http://effbot.org/z
 from xml.etree import cElementTree as ET
 from xml.etree import ElementTree as slowET
 from math import *
+import _moose
 import os
 
 neuroml_debug = False
@@ -138,7 +139,7 @@ def keepOnlyInclude(network, onlyInclude):
     includeCellsDict = {includepopname:includecellids}
     ## projections 'includeProjs' will be pruned later, keeping connections to second order cells.
     includeProjs = []
-    print "removing obviously extra connections in ... "
+    print("removing obviously extra connections in ... ")
     for projection in network.findall(".//{"+nml_ns+"}projection"):
         projname = projection.attrib['name']
         includeProj = False
@@ -152,7 +153,7 @@ def keepOnlyInclude(network, onlyInclude):
             includeProjs.append(projection)
         source = projection.attrib["source"]
         target = projection.attrib["target"]
-        print projname, source, target
+        print(projname, source, target)
         connections = projection.find(".//{"+nml_ns+"}connections")
         if connections is not None:
             for connection in connections.findall(".//{"+nml_ns+"}connection"):
@@ -189,12 +190,12 @@ def keepOnlyInclude(network, onlyInclude):
     for key in includeCellsDict:
         includeCellsDict[key] = set(includeCellsDict[key])
     
-    print "removing extra cells ... "
+    print("removing extra cells ... ")
     ### remove the cells that are not in includeCellsDict
     populations = network.find(".//{"+nml_ns+"}populations")
     for population in network.findall(".//{"+nml_ns+"}population"):
         popname = population.attrib["name"]
-        if popname in includeCellsDict.keys():
+        if popname in list(includeCellsDict.keys()):
             includecellids = includeCellsDict[popname]
             instances = population.find(".//{"+nml_ns+"}instances")
             for instance in instances.findall(".//{"+nml_ns+"}instance"):
@@ -207,8 +208,8 @@ def keepOnlyInclude(network, onlyInclude):
     ### Prune the 'includeProjections' that we skipped pruning before,
     ### while keeping connections to second order cells!
     for projection in includeProjs:
-        print "removing projection",projection.attrib['name'],\
-            "keeping second-order connections."
+        print("removing projection",projection.attrib['name'],\
+            "keeping second-order connections.")
         source = projection.attrib["source"]
         target = projection.attrib["target"]
         ## boolean: True if includeCellsDict has key source
