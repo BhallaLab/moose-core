@@ -17,8 +17,8 @@ __email__            = "dilawars@iitb.ac.in"
 __status__           = "Development"
 
 import sys
-import _moose
-import print_utils
+from .. import  _moose
+from .. import print_utils
 import re
 
 nameSep = '_'
