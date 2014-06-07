@@ -52,7 +52,7 @@ if not os.path.isdir(logDir):
     os.makedirs(logDir)
 
 if os.path.exists(logFile):
-    os.rename(logFile, 'logs/{0}'.format(st))
+    os.rename(logFile, '{}_{}'.format(logFile, st))
 
 logging.basicConfig(filename=logFile, level=logging.DEBUG)
 mooseLogger = logging.getLogger()

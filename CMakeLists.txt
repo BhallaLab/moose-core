@@ -96,7 +96,7 @@ endif()
 # Default macros
 add_definitions(-DUSE_GENESIS_PARSER)
 
-set(DEBUG 1)
+set(DEBUG 0)
 if(DEBUG)
     set(CMAKE_BUILD_TYPE Debug)
 else()
