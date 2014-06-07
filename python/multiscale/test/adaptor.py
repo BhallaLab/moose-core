@@ -44,8 +44,8 @@ def makeModel():
         adapt1 = moose.Adaptor('/model/adaptor/a1')
         adapt1.setField('inputOffset', 0)
         adapt1.setField('scale', 1)
-        moose.connect(adapt1, 'requestField', a, 'get_conc')
-        moose.connect(adapt1, 'outputSrc', b, 'set_conc')
+        moose.connect(adapt1, 'requestField', a, 'getConc')
+        moose.connect(adapt1, 'output', b, 'setConc')
 
 
         # connect them up for reactions
