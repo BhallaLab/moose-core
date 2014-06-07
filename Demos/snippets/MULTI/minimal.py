@@ -136,6 +136,7 @@ def makeNeuroMeshModel():
 
 	# set up adaptors
 	aCa = moose.Adaptor( '/model/chem/psd/adaptCa', pdc )
+
 	adaptCa = moose.vec( '/model/chem/psd/adaptCa' )
 	chemCa = moose.vec( '/model/chem/psd/Ca' )
 	print 'aCa = ', aCa, ' foo = ', foo, "len( ChemCa ) = ", len( chemCa ), ", numData = ", chemCa.numData

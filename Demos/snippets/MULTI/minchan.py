@@ -159,6 +159,10 @@ def makeNeuroMeshModel():
 	assert( len( chemCa ) == ndc )
 	path = '/model/elec/soma/Ca_conc'
 	elecCa = moose.element( path )
+        print "=========="
+        print elecCa
+        print adaptCa
+        print chemCa
 	moose.connect( elecCa, 'concOut', adaptCa[0], 'input', 'Single' )
 	moose.connect( adaptCa, 'output', chemCa, 'setConc', 'OneToOne' )
 	adaptCa.inputOffset = 0.0	# 
@@ -315,6 +319,7 @@ def testNeuroMeshMultiscale():
         pylab.show()
         '''
 
+        pylab.show()
 	print 'All done'
 
 
