@@ -30,6 +30,8 @@ import verification_utils
 import print_utils
 import graph_utils
 import sim_utils
+import multiscale_utils 
+
 
 # Import functions from sub-libraries.
 plotTable = plot_utils.plotTable
@@ -46,11 +48,15 @@ dump = print_utils.dump
 # Verification related function.
 verify = verification_utils.verify
 
+# MUMBL related function
+loadMumbl = multiscale_utils.loadMumbl
+
 # Topology and graph related functions.
 writeGraphviz  = graph_utils.writeGraphviz
 
 # Some verification tests
 verify = verification_utils.verify
+
 
 ## for Ca Pool
 #FARADAY = 96154.0 # Coulombs # from cadecay.mod : 1/(2*96154.0) = 5.2e-6 which is the Book of Genesis / readcell value
