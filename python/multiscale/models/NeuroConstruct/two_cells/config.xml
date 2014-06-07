@@ -20,14 +20,14 @@
                 prefixed_by_element, if not specified, will be treated as true.
             -->
             <variable name="Vm">
-                <target_in_simulator type="Compartment" path="Soma[0]/Vm"
+                <target_in_simulator type="Compartment" path="Soma_0"
                      prefixed_by_element="true" />
                  <plot plot="true" output="" plot_args="">
                     <label x="Time" y="Soma Vm (V)" />
                 </plot>
             </variable>
             <variable name="Cm">
-                <target_in_simulator type="Compartment" path="Soma[0]/Cm" />
+                <target_in_simulator type="Compartment" path="Soma_0" />
                 <plot output="">
                     <label x="Time" y="Soma/data/Cm" title="" />
                 </plot>

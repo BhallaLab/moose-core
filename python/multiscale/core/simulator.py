@@ -18,7 +18,7 @@ __email__            = "dilawars@iitb.ac.in"
 __status__           = "Development"
 
 import moose 
-import debug.debug as debug
+import moose.utils as utils
 import inspect
 import numpy
 import pylab
@@ -75,13 +75,13 @@ class Simulator:
 
         self.elecPath = self.rootElem.get('elec_path', '/neuroml/electrical')
         if not moose.exists(self.elecPath):
-            debug.printDebug("USER", 
+            utils.dump("USER", 
                     [ "Path {} does not exists in mooose.".format(self.elecPath)
                         , "You sure this is a valid elec_path in config.xml"
                         ]
                     , frame = inspect.currentframe()
                     )
-            debug.printDebug("USER", "Not simulating..")
+            utils.dump("USER", "Not simulating..")
             raise UserWarning("Missing moose path {}".format(self.elecPath))
 
         self.globalVar = self.rootElem.find('global')
@@ -130,13 +130,13 @@ class Simulator:
             try:
                 self.setupSomaRecord(recordXml, xmlElem.attrib)
             except Exception as e:
-                debug.printDebug("WARN"
+                utils.dump("WARN"
                         , "Failed to setup record on soma"
                         , frame = inspect.currentframe()
                         )
                 raise e
         else:
-            debug.printDebug("TODO"
+            utils.dump("TODO"
                     , "This type is not implemented yet %s" % elemType 
                     )
             return
@@ -145,7 +145,7 @@ class Simulator:
         """
         Params is a dictionary having attributes to <element>
         """
-        debug.printDebug("STEP", "Setting up records on soma")
+        utils.dump("STEP", "Setting up records on soma")
 
         [self.setupRecordsInMoose(v, params, recordXml.attrib) for 
                 v in recordXml.findall('variable')]
@@ -159,7 +159,7 @@ class Simulator:
         try:
             path = self.popDict[populationType][1]
         except KeyError as e:
-            debug.printDebug("ERROR"
+            utils.dump("ERROR"
                     , [ "Population type `{0}` not found".format(populationType)
                         , "Availale population in network are "
                         , self.popDict.keys()
@@ -176,7 +176,7 @@ class Simulator:
                     populationType
                     , instanceId
                     )
-            debug.printDebug("ERROR"
+            utils.dump("ERROR"
                     , [msg , "Available instances are" , path.keys() ]
                     )
             raise KeyError(msg)
@@ -229,7 +229,7 @@ class Simulator:
         # Path has been set, now attach it to moooooose.
         path = path.strip()
         targetVariable = variableType + varName
-        debug.printDebug("DEBUG"
+        utils.dump("DEBUG"
                 , "Record table: {0} <= {1}".format(targetVariable, path)
                 )
 
@@ -255,7 +255,7 @@ class Simulator:
                     , self.tablePath
                     ), path)
         else:
-            debug.printDebug("WARN"
+            utils.dump("WARN"
                     , "Unsupported type {0}".format(targetVariable)
                     , frame = inspect.currentframe()
                     )
@@ -268,7 +268,7 @@ class Simulator:
         assert self.simDt > 0.0
         assert self.plotDt > 0.0 
 
-        debug.printDebug("STEP"
+        utils.dump("STEP"
                 , "Simulate with simDt({0}), plotDt({1}), simMethod({2})".format(
                     self.simDt
                     , self.plotDt
@@ -285,7 +285,7 @@ class Simulator:
         except Exception as e:
             raise e
         if self.simulate:
-            debug.printDebug("DEBUG"
+            utils.dump("DEBUG"
                     , "Simulating for {0} seconds, Using methods {1}".format(
                             self.runtime
                             , self.simMethod
@@ -300,7 +300,7 @@ class Simulator:
             except Exception as e:
                 raise e
         else:
-            debug.printDebug("WARN"
+            utils.dump("WARN"
                     , "Simulation is set to false. Nothing to do"
                     )
             sys.exit()
@@ -315,7 +315,7 @@ class Simulator:
             self.plotVars(filename, self.plotFiles[filename], plotInASCII)
             if not plotInASCII:
                 if filename != "matplotlib_gui":
-                    debug.printDebug("INFO"
+                    utils.dump("INFO"
                             , "Saving to file {}".format(filename)
                             )
                     pylab.savefig(filename)
@@ -326,7 +326,7 @@ class Simulator:
         ''' Plot these records on one file '''
         self.totalPlots = len(setOfVariables)
         for i, var in enumerate(setOfVariables):
-            debug.printDebug("DEBUG"
+            utils.dump("DEBUG"
                     , "Ploting %s, %s " % (var.name, var.moosePath)
                     )
             variableXml = var.xml
@@ -349,7 +349,7 @@ class Simulator:
             try:
                 pylab.plot(xvec, yvec, plotArgs)
             except Exception as e:
-                debug.printDebug("WARN"
+                utils.dump("WARN"
                         , "Failed to plot with error")
                 raise e
 
@@ -384,7 +384,7 @@ class Simulator:
             return self.configure2DPlot(plotXml)
         else:
             logging.warning("Plot type %s is not supported yet." % plotType)
-            debug.printDebug("TODO"
+            utils.dump("TODO"
                     , [ "Plot type %s is not supported yet " % plotType
                         , "Existing without doing anything ... "
                         ]
@@ -413,7 +413,7 @@ class Simulator:
                 self.step = self.simDt 
             except Exception as e:
                 self.step = 10e-6
-                debug.printDebug("WARN"
+                utils.dump("WARN"
                         , "No step size specified. Using {0}".format(self.step)
                         )
         if self.step <= 0.0:
@@ -451,7 +451,7 @@ class Simulator:
         
         # If there is nothing to plot, quit
         if len(tableObj.vector) < 1:
-            debug.printDebug("WARN", "Empty data-set. Nothing to plot.")
+            utils.dump("WARN", "Empty data-set. Nothing to plot.")
             return None, None
 
         xvec = numpy.arange(self.start, self.stop*10, self.step)
