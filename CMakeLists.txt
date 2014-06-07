@@ -11,8 +11,6 @@ project(moose)
 # (which would end up getting picked up by header search, instead of the correct
 # versions).
 if( CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT MSVC_IDE )
-    MESSAGE("++ Source dir ${CMAKE_SOURCE_DIR}")
-    MESSAGE("++ Binary dir ${CMAKE_BINARY_DIR}")
     message(FATAL_ERROR 
         "In-source builds are not allowed.
         CMake would overwrite the makefiles distributed with Moose.
