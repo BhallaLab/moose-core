@@ -46,8 +46,8 @@ mumblePath = '/mumbl'
 st = time.time()
 st = datetime.datetime.fromtimestamp(st).strftime('%Y-%m-%d-%H%M')
 
-logDir = 'logs'
-logFile = os.path.join(logDir, 'moose.log')
+logDir = os.environ['HOME']
+logFile = os.path.join(logDir, ".moose", 'mumble.log')
 if not os.path.isdir(logDir):
     os.makedirs(logDir)
 
