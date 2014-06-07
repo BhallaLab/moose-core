@@ -17,7 +17,7 @@
 # Variables defined by this module:
 #
 #  PYTHONDEV_FOUND           System has Python dev headers/libraries
-#  PYTHON_INCLUDE_DIR        The Python include directories.
+#  PYTHON_INCLUDE_DIRS        The Python include directories.
 #  PYTHON_LIBRARIES          The Python libraries and linker flags.
 
 include(FindPackageHandleStandardArgs)
@@ -38,26 +38,26 @@ if (PYTHON_CONFIG AND NOT ${CMAKE_SYSTEM_NAME} STREQUAL "OpenBSD")
                     OUTPUT_STRIP_TRAILING_WHITESPACE
                     ERROR_QUIET)
     execute_process(COMMAND "${PYTHON_CONFIG}" --includes
-                    OUTPUT_VARIABLE PYTHON_INCLUDE_DIR
+                    OUTPUT_VARIABLE PYTHON_INCLUDE_DIRS
                     OUTPUT_STRIP_TRAILING_WHITESPACE
                     ERROR_QUIET)
 
-    string(REGEX REPLACE "^[-I]" "" PYTHON_INCLUDE_DIR "${PYTHON_INCLUDE_DIR}")
-    string(REGEX REPLACE "[ ]-I" " " PYTHON_INCLUDE_DIR "${PYTHON_INCLUDE_DIR}")
-    separate_arguments(PYTHON_INCLUDE_DIR)
+    string(REGEX REPLACE "^[-I]" "" PYTHON_INCLUDE_DIRS "${PYTHON_INCLUDE_DIRS}")
+    string(REGEX REPLACE "[ ]-I" " " PYTHON_INCLUDE_DIRS "${PYTHON_INCLUDE_DIRS}")
+    separate_arguments(PYTHON_INCLUDE_DIRS)
 
     find_package_handle_standard_args(PythonDev DEFAULT_MSG
         PYTHON_CONFIG
-        PYTHON_INCLUDE_DIR
+        PYTHON_INCLUDE_DIRS
         PYTHON_LIBRARIES
     )
 else ()
     find_package(PythonLibs)
-    if (PYTHON_INCLUDE_PATH AND NOT PYTHON_INCLUDE_DIR)
-        set(PYTHON_INCLUDE_DIR "${PYTHON_INCLUDE_PATH}")
+    if (PYTHON_INCLUDE_PATH AND NOT PYTHON_INCLUDE_DIRS)
+        set(PYTHON_INCLUDE_DIRS "${PYTHON_INCLUDE_PATH}")
     endif ()
     find_package_handle_standard_args(PythonDev DEFAULT_MSG
-        PYTHON_INCLUDE_DIR
+        PYTHON_INCLUDE_DIRS
         PYTHON_LIBRARIES
     )
 endif ()
