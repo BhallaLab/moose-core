@@ -1,7 +1,6 @@
 #!/bin/bash
 set -e 
-source ./buildMooseUsingCmake/build_me.sh
-
+source scripts/color.sh
 colorPrint "||" "Beware, O unsuspecting developer!" 
 colorPrint "||" "This script builds moose using cmake. If you want to use standard "
 colorPrint "||" "version, run make"
@@ -13,5 +12,6 @@ if [ $# -gt 0 ]; then
     export CXX_FLAGS=-O3
     BUILD_TYPE=RELEASE 
 fi
-( cd ./buildMooseUsingCmake && ./build_me.sh
+(
+    cd ./buildMooseUsingCmake && ./build_me.sh
 )

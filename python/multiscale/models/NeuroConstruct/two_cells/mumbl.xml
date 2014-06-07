@@ -41,11 +41,13 @@ This is the main top-level XML file to do multiscale modelling.
     </model>
 
     <!-- Here is how a sbml model is integrated -->
+    <!--
     <model id="1"
         domain_type="chemical"
         model_type="sbml"
         file_path="chem_model_sbml.xml" 
         />
+    -->
 
     <!-- Here are mappings from compartment to compartment. -->
     <!-- if mapping_type is source and this compartment influence others, if it
@@ -61,7 +63,7 @@ This is the main top-level XML file to do multiscale modelling.
     -->
     <domain cell_type="cellB" instance_id="0" segment="Soma">
         <mapping direction="in" type="one_to_one" >
-            <source type="chemical" species="calcium" compartment_id = "1" >
+            <source type="chemical" species="calcium" compartment_id = "chem_1" >
                 <relation input="conc" output="Cm">
                     <scale>1.5e14</scale>
                     <offset>1e-16</offset>

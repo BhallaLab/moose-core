@@ -268,7 +268,7 @@ class Mumble():
             try:
                 poolComp = moose.Pool(pool)
             except Exception as e:
-                utils.debug("WARN", "Perhaps the compartment_id is wrong!")
+                utils.dump("WARN", "Perhaps the compartment_id is wrong!")
                 raise KeyError("Missing parent path %s" % poolPath)
 
             poolComp.conc = moose_methods.stringToFloat(p.get('conc'))
@@ -340,10 +340,10 @@ class Mumble():
             try:
                 mooseTgt = moose.Pool(poolPath)
             except Exception as e:
-                utils.dump("ERROR",
-                        [ "Perhaps the compartment_id in mumbleML is wrong" 
-                            , "Path is {}".format(poolPath)
-                            , " Doing nothing ... "
+                utils.dump("ERROR"
+                        , [  "%s" % e
+                            , "Given path is {}".format(poolPath) 
+                            , " Doing nothing ... " 
                             ]
                         , frame = inspect.currentframe()
                         )
@@ -420,21 +420,10 @@ class Mumble():
         self.adaptorCount += 1
         srcPath = src.path
         tgtPath = tgt.path
-        adaptorPath = moose.Adaptor(
-                os.path.join(
-                    self.adaptorPath
-                    , 'adapt{}'.format(self.adaptorCount)
-                    )
+        adaptorPath = os.path.join(self.adaptorPath
+                , 'adapt{}'.format(self.adaptorCount)
                 )
-        try:
-            adaptor = moose.Adaptor(adaptorPath)
-        except Exception as e:
-            utils.dump("ERROR"
-                    , "Failed to set adaptor from `{}` to `{}`".format(
-                        srcPath, tgtPath
-                        )
-                    , frame = inspect.currentframe()
-                    )
+        adaptor = moose.Adaptor(adaptorPath)
 
         inputVar = relationXml.get('input')
         outputVar = relationXml.get('output')
@@ -445,15 +434,14 @@ class Mumble():
         if not scale: scale = 1.0
         else: scale = float(scale)
         
-        
         offset = relationXml.find('offset').text
         if not offset: offset = 0.0
         else: offset = float(offset)
 
         adaptor.setField('scale', scale)
         adaptor.setField('inputOffset', - offset)
-        utils.dump("ADAPTOR"
-                , 'Setting adaptor between {}/{} and {}/{}'.format(
+        utils.dump("STEP"
+                , 'Setting adaptor between {},`{}` and {},`{}`'.format(
                     src.path
                     , inputVar
                     , tgt.path
@@ -462,26 +450,33 @@ class Mumble():
                 )
         # Connect
         var = self.prefixWithGet(inputVar)
+        var = inputVar
         try:
-            moose.connect(adaptor, 'requestInput', src, var)
+            moose.connect(src, var, adaptor, 'input')
         except Exception as e:
             utils.dump("ERROR"
-                    , 'Failed to connect var {} of {} with adaptor input'.format(
-                        var, src.path
-                        )
+                    , [ 'Failed to connect var {} of {} with adaptor input'.format(
+                        var, src.path)
+                        , '%s' % e
+                        ]
+            
+                    , frame = inspect.currentframe() 
                     )
             utils.dump("INFO"
-                    , "Avalilable fields are {}".format(moose.showfield(src))
+                    , "Avalilable fields are"
                     )
+            moose.showfields(src)
             sys.exit()
+
+        var = self.prefixWithSet(outputVar)
         try:
-            var = self.prefixWithSet(outputVar)
             moose.connect(adaptor, 'outputSrc', tgt, var)
         except Exception as e:
             utils.dump("ERROR"
                     , 'Failed to connect var {} of {} with adaptor input'.format(
                         var, tgt.path
                         )
+                    , frame = inspect.currentframe()
                     )
             utils.dump("INFO"
                     , "Avalilable fields are {}".format(moose.showfield(tgt))
