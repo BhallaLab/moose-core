@@ -24,6 +24,7 @@
 #ifdef USE_SBML
 
 #include <cmath>
+#include <stdexcept>
 #include <sbml/SBMLTypes.h>
 #include <sbml/UnitDefinition.h>
 #include <sbml/units/UnitFormulaFormatter.h>

@@ -28,6 +28,9 @@
 */
 /* ToDo: Tables should be implemented
  */
+
+using namespace std;
+
 int SbmlWriter::write( string filepath,string target )
 {
   //cout << "Sbml Writer: " << filepath << " ---- " << target << endl;
