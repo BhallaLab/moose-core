@@ -13,9 +13,9 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 
 
-"""multiscale_utils.py: 
+"""test_mumbl.py: 
 
-    Utilities related to multi_scale modeling.
+    A test script to test MUMBL support in MOOSE.
 
 Last modified: Sat Jan 18, 2014  05:01PM
 
@@ -30,34 +30,13 @@ __maintainer__       = "Dilawar Singh"
 __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
-
-import _moose 
-import inspect
-import os
 import sys
-import print_utils
-import helper.moose_methods as moose_methods
-import inspect
-import mumble
-import parser.parser as parser
+sys.path.append('../../python')
+import moose
+import moose.utils as utils 
 
-def parseXML(xmlFile):
-    """ Parse a given xml file """
+def main():
+    utils.loadMumbl("./two_cells_nml_1.8/mumbl.xml")
 
-# Function to call mumble 
-def loadMumbl(mumblFile):
-    """Load mumble into mooose """
-    if not os.path.isfile(mumblFile):
-        print_utils.dump("ERROR"
-                , "File %s does not exists or unreadable" % mumblFile
-                )
-        sys.exit(0)
-    mumblRoot = parser.parseWithoutValidation('mumbl', mumblFile)
-    mumbl = mumble.Mumble( mumblRoot )
-    try:
-        mumbl.load()
-    except Exception as e:
-        print_utils.dump("ERROR", "Failed to load MUMBL: %s " % e)
-        sys.exit()
-    print_utils("STEP", "MUMBL loaded successfully")
-
+if __name__ == '__main__':
+    main()
