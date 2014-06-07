@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.6)
 set(CMAKE_INSTALL_PREFIX /usr/local)
 
 project(moose)
@@ -11,14 +11,16 @@ project(moose)
 # (which would end up getting picked up by header search, instead of the correct
 # versions).
 if( CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT MSVC_IDE )
-  message(FATAL_ERROR 
-    "In-source builds are not allowed.
-    CMake would overwrite the makefiles distributed with Moose.
-    Please create a directory and run cmake from there, passing the path
-    to this source directory as the last argument.
-    This process created the file `CMakeCache.txt' and the directory `CMakeFiles'.
-    Please delete them."
-    )
+    MESSAGE("++ Source dir ${CMAKE_SOURCE_DIR}")
+    MESSAGE("++ Binary dir ${CMAKE_BINARY_DIR}")
+    message(FATAL_ERROR 
+        "In-source builds are not allowed.
+        CMake would overwrite the makefiles distributed with Moose.
+        Please create a directory and run cmake from there, passing the path
+        to this source directory as the last argument.
+        This process created the file `CMakeCache.txt' and the directory `CMakeFiles'.
+        Please delete them."
+        )
 endif()
 
 ################################# CMKAE MACROS #################################
@@ -39,21 +41,21 @@ else()
 endif()
 
 # Compiler 
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    set(CMAKE_CXX_COMPILER "g++")
-elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set(CMAKE_CXX_COMPILER "clang++")
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    set(CMAKE_CXX_COMPILER "g++")
 else()
     message(WARNING "Continuing with unsupported compiler")
 endif()
-set(CMAKE_CXX_COMPILER "clang++")
 
 ## Turn warning to error
 add_definitions(-Wall
-    -Wno-return-type-c-linkage
+    #-Wno-return-type-c-linkage
     -Wno-unused-variable
     -Wno-unused-function
-    -Wno-unused-private-field
+    #-Wno-unused-private-field
     )
 add_definitions(-fPIC)
 
