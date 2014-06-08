@@ -1,3 +1,17 @@
+# This file is part of MOOSE simulator: http://moose.ncbs.res.in.
+
+# MOOSE is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# MOOSE is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# You should have received a copy of the GNU General Public License
+# along with MOOSE.  If not, see <http://www.gnu.org/licenses/>.
+
 """
 NeuroML.py is the preferred interface to read NeuroML files.
 
@@ -39,7 +53,7 @@ import MorphML
 import NetworkML
 import ChannelML
 import _moose
-import utils
+import print_utils
 import helper.neuroml_utils as mnu
 import multiscale_config as config
 import logging
@@ -77,7 +91,7 @@ class NeuroML(object):
         see doc string of NetworkML.readNetworkML() for details.
         """
 
-        utils.dump("STEP"
+        print_utils.dump("STEP"
                 , "Loading neuroml file `{0}` ... ".format(filename)
                 )
         # creates /library in MOOSE tree; elif present, wraps
@@ -88,12 +102,12 @@ class NeuroML(object):
             self.lengthUnits = root_element.attrib['lengthUnits']
         except KeyError:
             self.lengthUnits = root_element.attrib['length_units']
-        except:
-            utils.dump("WARN"
+        except Exception as e:
+            print_utils.dump("WARN"
                     , "Failed to get length_unit"
                     , sys.exec_info()[0]
                     )
-            raise
+            raise e
 
         # gets replaced below if tag for temperature is present
         self.temperature = self._CELSIUS_default
@@ -104,13 +118,13 @@ class NeuroML(object):
                 self.temperature = float(mp.attrib['value'])
                 self.temperature_default = False
         if self.temperature_default:
-            logging.debug(
+            print_debug.dump(
                     "Using default temperature of %s C".format(self.temperature)
                     )
         self.nml_params = {
                 'temperature': self.temperature
                 , 'model_dir': self.modelDir
-        }
+                }
 
         mmlR = MorphML.MorphML(self.nml_params)
         self.cellsDict = {}
@@ -145,7 +159,6 @@ class NeuroML(object):
             cmlR.readSynapseML(synapse, units=self.channelUnits)
         for ionConc in channels.findall('.//{'+mnu.cml_ns+'}ion_concentration'):
             cmlR.readIonConcML(ionConc, units=self.channelUnits)
-
 
     def loadNML(self, nml):
         neuromlR = NeuroML()
