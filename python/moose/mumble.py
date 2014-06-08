@@ -91,7 +91,6 @@ class Mumble():
                 )
                 sys.exit()
 
-        
     def prefixWithSet(self, var):
         assert len(var.strip()) > 0, "Empty variable name"
         var = var[0].upper() + var[1:]
@@ -319,7 +318,9 @@ class Mumble():
             _mooseSrc = _moose.Neutral(moosePath)
         except Exception as e:
             print_utils.dump("ERROR"
-                    , "Source compartment %s is not found" % moosePath
+                    , [ "Source compartment %s is not found" % moosePath
+                        , '%s' % e
+                        ]
                     , frame = inspect.currentframe()
                     )
             print(moose_methods.dumpMatchingPaths(moosePath))
