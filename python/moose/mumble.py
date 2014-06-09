@@ -36,7 +36,7 @@ import inspect
 import print_utils
 import helper.moose_methods as moose_methods
 import helper.types as types
-import multiscale_config as config
+import moose_config as config
 
 class Mumble():
     """ Mumble: Class for loading mumble onto _moose.
