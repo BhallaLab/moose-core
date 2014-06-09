@@ -23,7 +23,7 @@ import inspect
 
 from .. import  _moose
 from .. import print_utils
-from .. import multiscale_config as config
+from .. import moose_config as config
 from ..helper import neuroml_utils as nmu
 
 class ChannelML:
