@@ -10,14 +10,14 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 # You should have received a copy of the GNU General Public License
-# along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+# along with MOOSE.  If not, see <http://www.gnu.org/licenses/>.
 
 
 """test_mumbl.py: 
 
     A test script to test MUMBL support in MOOSE.
 
-Last modified: Sat Jan 18, 2014  05:01PM
+Last modified: Mon Jun 09, 2014  03:42PM
 
 """
     
@@ -31,12 +31,17 @@ __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
 import sys
-sys.path.append('../../python')
 import moose
 import moose.utils as utils 
 
 def main():
+    utils.parser
+    utils.loadNeuroML('./two_cells_nml_1.8/two_cells.nml')
     utils.loadMumbl("./two_cells_nml_1.8/mumbl.xml")
-
+    table = utils.recordTarget('/tableA', '/neuroml/cells/cellA/Dend_37_41', 'vm')
+    moose.reinit()
+    moose.start(0.01)
+    utils.plotTable(table)
+    
 if __name__ == '__main__':
     main()
