@@ -17,7 +17,7 @@ __email__            = "dilawars@iitb.ac.in"
 __status__           = "Development"
 
 import _moose
-import print_utils as debug
+import print_utils
 
 def recordTarget(tablePath, target, field = 'vm', **kwargs):
     """Setup a table to record at given path.
@@ -36,8 +36,8 @@ def recordTarget(tablePath, target, field = 'vm', **kwargs):
             raise RuntimeError( msg )
         else:
             target = _moose.Neutral( target )
-    else:
-        assert target.path, "Target must have a valid moose path."
+
+    assert target.path, "Target must have a valid moose path."
 
     table = _moose.Table( tablePath )
     assert table
@@ -50,6 +50,13 @@ def recordTarget(tablePath, target, field = 'vm', **kwargs):
     else:
         field = field[:2]+field[3].upper()+field[4:]
     try:
+        print_utils.dump("TABLE"
+                , "Connecting table {} to target {} field {}".format(
+                    table.path
+                    , target.path
+                    , field
+                    )
+                )
         table.connect( 'requestOut', target, field )
     except Exception as e:
         debug.dump("ERROR"
