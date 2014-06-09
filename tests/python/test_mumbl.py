@@ -40,7 +40,7 @@ def main():
     utils.loadMumbl("./two_cells_nml_1.8/mumbl.xml")
     table = utils.recordTarget('/tableA', '/neuroml/cells/cellA/Dend_37_41', 'vm')
     moose.reinit()
-    moose.start(0.01)
+    moose.start(0.1)
     utils.plotTable(table)
     
 if __name__ == '__main__':
