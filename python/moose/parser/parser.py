@@ -2,7 +2,6 @@
 import os
 import sys
 import logging
-import debug.debug as debug
 import inspect
 
 logger = logging.getLogger('multiscale')
