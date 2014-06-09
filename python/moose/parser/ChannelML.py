@@ -13,18 +13,18 @@ are misnamed/scattered.  Instantiate ChannelML class, and thence use method:
     xml.etree xml element (could be part of a larger NeuroML file).
 """
 
-from xml.etree import cElementTree as ET
 
-import print_utils as debug
+from xml.etree import cElementTree as ET
 import string
 import os
 import sys
 import math
 import inspect
 
-import _moose
-import helper.neuroml_utils as utils
-import multiscale_config as config
+from .. import  _moose
+from .. import print_utils
+from .. import multiscale_config as config
+from ..helper import neuroml_utils as nmu
 
 class ChannelML:
     """Loads channelML file. Base class. Inherited by NeuroML
@@ -37,12 +37,12 @@ class ChannelML:
         temp = '{0}'.format(nml_params['temperature'])
         if temp is None or len(temp) == 0:
             self.temperature = 32.0
-            debug.printDebug("INFO"
+            print_utils.dump("INFO"
                     , "Using default temp of {0} C".format(self.temperature)
                     )
         else:
             self.temperature = float(temp)
-            debug.printDebug("INFO"
+            print_utils.dump("INFO"
                     , "Using temperature {0}".format(self.temperature)
                     )
 
@@ -85,7 +85,7 @@ class ChannelML:
             Tfactor = 1.0
             Gfactor = 1.0
         else:
-            debug.printDebug("ERROR", "Wrong units {0}".format(units))
+            print_utils.dump("ERROR", "Wrong units {0}".format(units))
             raise UserWarning, "Wrong value or parameter {0}".format(units)
 
         # creates /library in MOOSE tree; elif present, wraps
@@ -93,10 +93,10 @@ class ChannelML:
         # Dilawar Singh
         #_moose.Neutral(self.libraryPath+'')
 
-        if utils.neuroml_debug:
+        if nmu.neuroml_debug:
             synName = synapseElement.attrib['name']
             msg = "Loading synapse : %s into library ." % synName
-            debug.printDebug("INFO", msg)
+            print_utils.dump("INFO", msg)
 
         self.mooseSynp = _moose.SynChan(os.path.join(self.libraryPath
                 , synapseElement.attrib['name']))
@@ -137,7 +137,7 @@ class ChannelML:
             Gfactor = 1.0
             concfactor = 1.0
         else:
-            debug.printDebug("ERR"
+            print_utils.dump("ERR"
                     , "wrong units %s. Existing... " % units
                     , frame = inspect.currentframe()
                     )
@@ -145,10 +145,10 @@ class ChannelML:
 
         # creates /library in MOOSE tree; elif present, wraps
         channel_name = channelElement.attrib['name']
-        if utils.neuroml_debug:
+        if nmu.neuroml_debug:
             msg = "Loading channel {} into {} ".format (channel_name,
                     self.libraryPath)
-            debug.printDebug("INFO", msg)
+            print_utils.dump("INFO", msg)
 
         IVrelation = channelElement.find(
                 './{'+self.cml+'}current_voltage_relation'
@@ -171,7 +171,7 @@ class ChannelML:
                         )
                 channelIonDependency.value = concdep.attrib['ion']
 
-        nernstnote = IVrelation.find('./{'+utils.meta_ns+'}notes')
+        nernstnote = IVrelation.find('./{'+nmu.meta_ns+'}notes')
         if nernstnote is not None:
             # the text in nernstnote is "Nernst,Cout=<float>,z=<int>"
             nernst_params = string.split(nernstnote.text,',')
@@ -185,7 +185,7 @@ class ChannelML:
         if len(gates) > 3:
             msg = "Sorry! Maximum x, y, and z (three) gates are possible in\
                       MOOSE/Genesis"
-            debug.printDebug("ERR", msg, frame=inspect.currentframe())
+            print_utils.dump("ERR", msg, frame=inspect.currentframe())
             raise UserWarning, "Bad value or parameter"
            
         # These are the names that MOOSE uses to create gates.
@@ -204,10 +204,10 @@ class ChannelML:
             # default VMIN, VMAX and dv are in SI convert them to current
             # calculation units used by channel definition while loading into
             # tables, convert them back to SI
-            VMIN_here = utils.VMIN/Vfactor
-            VMAX_here = utils.VMAX/Vfactor
-            NDIVS_here = utils.NDIVS
-            dv_here = utils.dv/Vfactor
+            VMIN_here = nmu.VMIN/Vfactor
+            VMAX_here = nmu.VMAX/Vfactor
+            NDIVS_here = nmu.NDIVS
+            dv_here = nmu.dv/Vfactor
         offset = IVrelation.find('./{'+self.cml+'}offset')
         if offset is None:
             vNegOffset = 0.0
@@ -227,7 +227,7 @@ class ChannelML:
             self.gate_name = gate.attrib['name']
             q10sets = IVrelation.findall('./{'+self.cml+'}q10_settings')
             for q10settings in q10sets:
-                # self.temperature from neuro.utils
+                # self.temperature from neuro.nmu
                 if 'gate' in list(q10settings.attrib.keys()):
                     if q10settings.attrib['gate'] == self.gate_name:
                         self.setQ10(q10settings)
@@ -275,7 +275,7 @@ class ChannelML:
                 if fn_name in ['alpha','beta']:
                     self.make_cml_function(transition, fn_name, concdep)
                 else:
-                    debug.printDebug("ERROR"
+                    print_utils.dump("ERROR"
                             , "Unsupported transition {0}".format(fn_name)
                             )
                     sys.exit()
@@ -433,11 +433,11 @@ class ChannelML:
         if ionSpecies is not None:
             if not 'ca' in ionSpecies.attrib['name']:
                 msg = "Sorry, I cannot handle non-Ca-ion pools. Exiting..."
-                debug.printDebug("ERR", msg, frame=inspect.currentframe())
+                print_utils.dump("ERR", msg, frame=inspect.currentframe())
                 sys.exit(1)
 
         capoolName = ionConcElement.attrib['name']
-        debug.printDebug("INFO"
+        print_utils.dump("INFO"
                 , "Loading Ca pool {} into {}".format(capoolName
                     , self.libraryPath)
                 )
@@ -509,7 +509,7 @@ class ChannelML:
                     , concdep=concdep 
                     )
         else:
-            debug.printDebug("ERR"
+            print_utils.dump("ERR"
                     , "Unsupported function type %s " % fn_type
                     , frame=inspect.currentframe()
                     )
@@ -546,10 +546,10 @@ class ChannelML:
         elif fn_type == 'generic':
             # python cannot evaluate the ternary operator ?:, so evaluate
             # explicitly for security purposes eval() is not allowed any
-            # __builtins__ but only safe functions in utils.safe_dict and only
+            # __builtins__ but only safe functions in nmu.safe_dict and only
             # the local variables/functions v, self
             allowed_locals = {'self':self}
-            allowed_locals.update(utils.safe_dict)
+            allowed_locals.update(nmu.safe_dict)
             def fn(self,v,ca=None):
                 expr_str = kwargs['expr_string']
                 allowed_locals['v'] = v

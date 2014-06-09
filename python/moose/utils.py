@@ -23,6 +23,7 @@ import os
 import math
 from datetime import datetime
 from collections import defaultdict
+
 import _moose
 
 import plot_utils
@@ -31,6 +32,8 @@ import print_utils
 import graph_utils
 import sim_utils
 import multiscale_utils 
+import nml_utils
+from moose_constants import *
 
 
 # Import functions from sub-libraries.
@@ -57,36 +60,8 @@ writeGraphviz  = graph_utils.writeGraphviz
 # Some verification tests
 verify = verification_utils.verify
 
-
-## for Ca Pool
-#FARADAY = 96154.0 # Coulombs # from cadecay.mod : 1/(2*96154.0) = 5.2e-6 which is the Book of Genesis / readcell value
-FARADAY = 96485.3415 # Coulombs/mol # from Wikipedia
-
-## Table step_mode
-TAB_IO=0 # table acts as lookup - default mode
-TAB_ONCE=2 # table outputs value until it reaches the end and then stays at the last value
-TAB_BUF=3 # table acts as a buffer: succesive entries at each time step
-TAB_SPIKE=4 # table acts as a buffer for spike times. Threshold stored in the pymoose 'stepSize' field.
-
-## Table fill modes
-BSplineFill = 0 # B-spline fill (default)
-CSplineFill = 1 # C_Spline fill (not yet implemented)
-LinearFill = 2 # Linear fill
-
-## clock 0 is for init & hsolve
-## The ee method uses clocks 1, 2.
-## hsolve & ee use clock 3 for Ca/ion pools.
-## clocks 4 and 5 are for biochemical simulations.
-## clock 6 for lookup tables, clock 7 for stimuli
-## clocks 8 and 9 for tables for plots.
-INITCLOCK = 0
-ELECCLOCK = 1
-CHANCLOCK = 2
-POOLCLOCK = 3
-LOOKUPCLOCK = 6
-STIMCLOCK = 7
-PLOTCLOCK = 8
-
+# NEUROML related function
+loadNeuroML = nml_utils.loadNeuroML
 
 def readtable(table, filename, separator=None):
     """Reads the file specified by filename to fill the MOOSE table object.
@@ -852,6 +827,7 @@ def get_child_Mstring(mooseobject,mstring):
             return child
     return None
 
+# Note: This function is also moved to helper.moose_methods 
 def connect_CaConc(compartment_list, temperature=None):
     """ Connect the Ca pools and channels within each of the compartments in compartment_list
      Ca channels should have a child Mstring named 'ion' with value set in MOOSE.

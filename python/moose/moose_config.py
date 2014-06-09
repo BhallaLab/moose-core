@@ -10,12 +10,10 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 # You should have received a copy of the GNU General Public License
-# along with MOOSE.  If not, see <http://www.gnu.org/licenses/>.
+# along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 
 
-"""nml_utils.py: 
-
-    Utility function to parse and load neuroml files into moose.
+"""multiscale_config.py: 
 
 Last modified: Sat Jan 18, 2014  05:01PM
 
@@ -30,9 +28,33 @@ __maintainer__       = "Dilawar Singh"
 __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
-import parser.NeuroML as NeuroML
+import logging
+import datetime
+import time
+import os
 
-def loadNeuroML(nmlFile):
-    """ Wrapper around the library function which loads neuroml into MOOSE"""
-    nmlParser = NeuroML.NeuroML()
-    return nmlParser.loadNML(nmlFile)
+# Universal paths 
+nmlPath = '/neuroml'
+nmlCellPath = os.path.join(nmlPath, 'cells')
+libraryPath = os.path.join(nmlPath, 'cells')
+cellPath = nmlCellPath
+elecPath = os.path.join(nmlPath, 'electrical')
+
+mumblePath = '/mumbl'
+
+
+st = time.time()
+st = datetime.datetime.fromtimestamp(st).strftime('%Y-%m-%d-%H%M')
+
+logDir = os.environ['HOME']
+logFile = os.path.join(logDir, ".moose", 'mumble.log')
+if not os.path.isdir(logDir):
+    os.makedirs(logDir)
+
+if os.path.exists(logFile):
+    os.rename(logFile, '{}_{}'.format(logFile, st))
+
+logging.basicConfig(filename=logFile, level=logging.DEBUG)
+mooseLogger = logging.getLogger()
+disbleCopyingOfObject = True
+

@@ -17,18 +17,21 @@ loader).  Note: This has been changed. Default path is now /neuroml/library
 """
 # cELementTree is mostly API-compatible but faster than ElementTree
 
-from xml.etree import cElementTree as ET
 import math
 import sys
-sys.path.append('..')
-import _moose
-import utils 
-import helper.neuroml_utils as neuroml_utils
-import helper.moose_methods as moose_methods
-
-import ChannelML
 import inspect
 import re
+
+import ChannelML
+
+from xml.etree import cElementTree as ET
+from .. import _moose
+from ..helper import neuroml_utils as neuroml_utils
+from ..helper import moose_methods as moose_methods
+
+
+from .. import print_utils
+from .. import moose_config
 
 class MorphML():
 
@@ -43,8 +46,8 @@ class MorphML():
         self.nml_params = nml_params
         self.model_dir = nml_params['model_dir']
         self.temperature = nml_params['temperature']
-        self.libraryPath = config.libraryPath
-        self.cellPath = config.cellPath
+        self.libraryPath = moose_config.libraryPath
+        self.cellPath = moose_config.cellPath
         _moose.Neutral(self.libraryPath)
 
     def stringToFloat(self, tempString):
@@ -61,7 +64,7 @@ class MorphML():
         returns { cellName1 : segDict, ... }
         see readMorphML(...) for segDict
         """
-        debug.printDebug("INFO", "{}".format(filename))
+        print_utils.dump("INFO", "{}".format(filename))
         tree = ET.parse(filename)
         neuroml_element = tree.getroot()
         cellsDict = {}
@@ -85,7 +88,7 @@ class MorphML():
         running_dia_nums = 0
         segmentname = segment.attrib['name']
 
-        debug.printDebug("DEBUG"
+        print_utils.dump("DEBUG"
                 , "Adding segment {} in cell {}".format(segmentname, cellName)
                 )
 
@@ -217,7 +220,7 @@ class MorphML():
             ]
 
             if neuroml_utils.neuroml_debug:
-                debug.printDebug(
+                print_utils.dump(
                     "STEP"
                     , "Set up compartment/section %s" % running_comp.name
                 )
@@ -236,7 +239,7 @@ class MorphML():
         2) later scripts obtain segid from the compartment's name!
         """
 
-        debug.printDebug("DEBUG", "Entered function readMorphML")
+        print_utils.dump("DEBUG", "Entered function readMorphML")
         if lengthUnits in ['micrometer','micron']:
             self.length_factor = 1e-6
         else:
@@ -392,7 +395,7 @@ class MorphML():
         """ Add mechanism to cell.
         """
         mechName = mechanism.attrib["name"]
-        debug.printDebug("STEP", "Loading mechanism {0}".format(mechName))
+        print_utils.dump("STEP", "Loading mechanism {0}".format(mechName))
         passive = False
         if "passive_conductance" in mechanism.attrib:
             if mechanism.attrib['passive_conductance'].lower() == "true":
@@ -428,7 +431,7 @@ class MorphML():
 
         # temperature should be in Kelvin for Nernst
         temperature = self.stringToFloat(self.temperature)
-        utils.connect_CaConc(
+        moose_methods.connectCaConc(
             list(self.cellDictByCableId[cellName][1].values())
             , temperature + neuroml_utils.ZeroCKelvin
         )
@@ -475,7 +478,7 @@ class MorphML():
                     paramName
                     , mechName
                     )
-                debug.printDebug("WARN", msg, frame=inspect.currentframe())
+                print_utils.dump("WARN", msg, frame=inspect.currentframe())
         else:
             if paramName in ['gmax']:
                 gmaxval = float(eval( parameter.attrib["value"]
@@ -517,7 +520,7 @@ class MorphML():
                     paramName
                     , mechName
                     )
-                debug.printDebug("WARN", msg, frame=inspect.currentframe())
+                print_utils.dump("WARN", msg, frame=inspect.currentframe())
 
     def addSpecCapacitance(self, spec_capacitance, cell, cellName):
         """
@@ -573,7 +576,7 @@ class MorphML():
             elif paramName == 't_refrac':
                 # min refractory time before next spike
                 msg = "Use this refractory period in simulation"
-                debug.printDebug("TODO" , msg, frame=inspect.currentframe())
+                print_utils.dump("TODO" , msg, frame=inspect.currentframe())
                 self.mooseCell.refractoryPeriod = \
                         float(parameter.attrib["value"])*self.Tfactor
             elif paramName == 'inject':
@@ -640,7 +643,7 @@ class MorphML():
             compartment.initVm = value
         elif name == 'inject':
             msg = " {0} inject {1} A.".format(compartment.name, value)
-            debug.printDebug("INFO", msg)
+            print_utils.dump("INFO", msg)
             compartment.inject = value
         elif mechName is 'synapse':
 
@@ -682,7 +685,7 @@ class MorphML():
                                         , model_filename
                                         , self.model_dir
                                         )
-                        debug.printDebug("ERROR"
+                        print_utils.dump("ERROR"
                                 , msg
                                 , frame = inspect.currentframe()
                                 )
@@ -763,4 +766,4 @@ class MorphML():
             msg = "Setting {0} for {1} value {2}".format(name, compartment.path
                                                          , value
                                                          )
-            debug.printDebug("DEBUG", msg, frame=inspect.currentframe())
+            print_utils.dump("DEBUG", msg, frame=inspect.currentframe())
