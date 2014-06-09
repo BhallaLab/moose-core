@@ -59,5 +59,5 @@ def loadMumbl(mumblFile):
     except Exception as e:
         print_utils.dump("ERROR", "Failed to load MUMBL: %s " % e)
         sys.exit()
-    print_utils("STEP", "MUMBL loaded successfully")
+    print_utils.dump("STEP", "MUMBL loaded successfully")
 
