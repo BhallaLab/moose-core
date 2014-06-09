@@ -13,26 +13,24 @@
 # along with MOOSE.  If not, see <http://www.gnu.org/licenses/>.
 
 
-"""nml_utils.py: 
-
-    Utility function to parse and load neuroml files into moose.
+"""buglist.py: Keeps the list of bugs here.
 
 Last modified: Sat Jan 18, 2014  05:01PM
 
 """
     
 __author__           = "Dilawar Singh"
-__copyright__        = "Copyright 2013, NCBS Bangalore"
-__credits__          = ["NCBS Bangalore", "Bhalla Lab"]
+__copyright__        = "Copyright 2013, Dilawar Singh and NCBS Bangalore"
+__credits__          = ["NCBS Bangalore"]
 __license__          = "GNU GPL"
 __version__          = "1.0.0"
 __maintainer__       = "Dilawar Singh"
 __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
-import parser.NeuroML as NeuroML
 
-def loadNeuroML(nmlFile):
-    """ Wrapper around the library function which loads neuroml into MOOSE"""
-    nmlParser = NeuroML.NeuroML()
-    return nmlParser.loadNML(nmlFile)
+"""
+Subhasis said addSpike below always adds to the first element in
+syn.synapse So here, create a new SynChan everytime.
+"""
+BUG_NetworkML_500 = False
