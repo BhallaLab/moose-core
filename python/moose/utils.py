@@ -31,10 +31,7 @@ import verification_utils
 import print_utils
 import graph_utils
 import sim_utils
-import multiscale_utils 
-import nml_utils
 from moose_constants import *
-
 
 # Import functions from sub-libraries.
 plotTable = plot_utils.plotTable
@@ -51,17 +48,12 @@ dump = print_utils.dump
 # Verification related function.
 verify = verification_utils.verify
 
-# MUMBL related function
-loadMumbl = multiscale_utils.loadMumbl
-
 # Topology and graph related functions.
 writeGraphviz  = graph_utils.writeGraphviz
 
 # Some verification tests
 verify = verification_utils.verify
 
-# NEUROML related function
-loadNeuroML = nml_utils.loadNeuroML
 
 def readtable(table, filename, separator=None):
     """Reads the file specified by filename to fill the MOOSE table object.
@@ -247,9 +239,9 @@ def printtree(root, vchar='|', hchar='__', vcount=1, depth=0, prefix='', is_last
 
     """
     root = _moose.element(root)
-    print '%s: "%s"' % (root, root.children)
+    print('%s: "%s"' % (root, root.children))
     for i in range(vcount):
-        print prefix
+        print(prefix)
 
     if depth != 0:
         print prefix + hchar,
@@ -261,7 +253,7 @@ def printtree(root, vchar='|', hchar='__', vcount=1, depth=0, prefix='', is_last
     else:
         prefix = prefix + vchar
 
-    print root.name
+    print(root.name)
     
     children = [ _moose.element(child) for child in root.children ]
     for i in range(0, len(children) - 1):
@@ -299,13 +291,13 @@ def autoposition(root):
     """
     compartments = _moose.wildcardFind('%s/##[TYPE=Compartment]' % (root.path))
     stack = [compartment for compartment in map(_moose.element, compartments)
-              if len(compartment.neighbours['axial']) == 0]
+              if len(compartment.neighbors['axial']) == 0]
     if len(stack) != 1:
         raise Exception('There must be one and only one top level compartment. Found %d' % (len(topcomp_list)))
     ret = stack[0]
     while len(stack) > 0:
         comp = stack.pop()        
-        parentlist = comp.neighbours['axial']
+        parentlist = comp.neighbors['axial']
         parent = None
         if len(parentlist) > 0:
             parent = parentlist[0]
@@ -320,7 +312,7 @@ def autoposition(root):
             comp.x, comp.y, comp.z, = comp.x0, comp.y0, comp.z0 + comp.diameter/2.0 
         # We take z == 0 as an indicator that this compartment has not
         # been processed before - saves against inadvertent loops.
-        stack.extend([childcomp for childcomp in map(_moose.element, comp.neighbours['raxial']) if childcomp.z == 0])    
+        stack.extend([childcomp for childcomp in map(_moose.element, comp.neighbors['raxial']) if childcomp.z == 0])    
     return ret
 
 
@@ -894,8 +886,6 @@ from cStringIO import StringIO as _sio
 
 class _TestMooseUtils(unittest.TestCase):
     def test_printtree(self):
-        orig_stdout = sys.stdout
-        sys.stdout = _sio()
         s = _moose.Neutral('/cell')
         soma = _moose.Neutral('%s/soma'% (s.path))
         d1 = _moose.Neutral('%s/d1'% (soma.path))
@@ -903,6 +893,8 @@ class _TestMooseUtils(unittest.TestCase):
         d3 = _moose.Neutral('%s/d3'% (d1.path))
         d4 = _moose.Neutral('%s/d4'% (d1.path))
         d5 = _moose.Neutral('%s/d5'% (s.path))
+        orig_stdout = sys.stdout
+        sys.stdout = _sio()
         printtree(s)                
         expected = """
 cell

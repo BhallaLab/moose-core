@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    This example shows a Level 3 compliant file, containing a number of connected cell models  
+-->
+<neuroml xmlns="http://morphml.org/neuroml/schema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:net="http://morphml.org/networkml/schema" xmlns:mml="http://morphml.org/morphml/schema" xmlns:meta="http://morphml.org/metadata/schema" xmlns:bio="http://morphml.org/biophysics/schema" xmlns:cml="http://morphml.org/channelml/schema" xsi:schemaLocation="http://morphml.org/neuroml/schema http://www.neuroml.org/NeuroMLValidator/NeuroMLFiles/Schemata/v1.8.1/Level3/NeuroML_Level3_v1.8.1.xsd" length_units="micrometer">
+                        
+
+    <meta:notes>A completely specified network in NeuroML Level 3. While this is useful for 
+    exporting/importing/saving from an application, better practice might be to have the cell 
+    definitions, the channel mechanisms, and network specification in separate files.</meta:notes>
+
+    
+                       <!-- The cell types present in the network-->
+                       
+    <cells>
+        <cell name="CellA">
+            <meta:notes>Test cell for showing how channels can be placed on a cell</meta:notes>
+        
+            <segments xmlns="http://morphml.org/morphml/schema">
+                <segment id="0" name="Soma" cable="0">
+                    <proximal x="0" y="0" z="0" diameter="10"/>
+                    <distal x="10" y="0" z="0" diameter="10"/>
+                </segment>
+                <segment id="1" name="Dendrite" parent="0" cable="1">
+                    <proximal x="10" y="0" z="0" diameter="3"/>
+                    <distal x="20" y="0" z="0" diameter="3"/>
+                </segment>
+            </segments>
+
+            <cables xmlns="http://morphml.org/morphml/schema">
+                <cable id="0" name="SomaCable">
+                    <meta:group>soma_group</meta:group>
+                </cable>
+                <cable id="1" name="DendriteCable">
+                    <meta:group>dendrite_group</meta:group>
+                </cable>
+            </cables>
+                    
+            <biophysics units="Physiological Units">  
+                <bio:mechanism name="pas" type="Channel Mechanism">
+                    <bio:parameter name="gmax" value="0.0330033">
+                        <bio:group>all</bio:group>
+                    </bio:parameter>
+                </bio:mechanism>
+                <bio:spec_capacitance>
+                    <bio:parameter value="1.0">
+                        <bio:group>all</bio:group>
+                    </bio:parameter>
+                </bio:spec_capacitance>
+                <bio:spec_axial_resistance>
+                    <bio:parameter value="0.1">
+                        <bio:group>all</bio:group>
+                    </bio:parameter>
+                </bio:spec_axial_resistance>
+            </biophysics>
+               
+            
+            <!-- Note: this doesn't need to be specified in the network instance case, 
+                 but would be used when generating connections in the network template scenario. Can be 
+                 used to limit connections of a particular type to, say, apical dendrites -->
+                     
+            <connectivity>
+                <net:potential_syn_loc synapse_type="DoubExpSynA" synapse_direction="preAndOrPost">
+                    <net:group>soma_group</net:group>
+                </net:potential_syn_loc>               
+                <net:potential_syn_loc synapse_type="DoubExpSynA" synapse_direction="post">
+                    <net:group>dendrite_group</net:group>
+                </net:potential_syn_loc>
+            </connectivity>
+            
+        </cell>
+    </cells>
+    
+    
+                       <!-- The biophysical mechanisms present in the network-->
+    
+    <channels units="Physiological Units">
+
+        <channel_type name="pas" density="yes" xmlns="http://morphml.org/channelml/schema">
+            <meta:notes>Simple example of a leak/passive conductance.</meta:notes>
+            <current_voltage_relation cond_law="ohmic" ion="non_specific" default_erev="-54.3" default_gmax="0.3"/>
+        </channel_type>
+        
+        <synapse_type name="DoubExpSynA" xmlns="http://morphml.org/channelml/schema">
+            <doub_exp_syn max_conductance="1.0E-5" rise_time="1" decay_time="2" reversal_potential="0"/>
+        </synapse_type>
+
+    </channels>
+    
+    
+                       <!-- The cell populations present in the network-->
+
+    <populations xmlns="http://morphml.org/networkml/schema">
+        <population name="CellGroupA" cell_type="CellA">
+            <instances size="3">
+                <instance id="0"><location x="0" y="0" z="0"/></instance>
+                <instance id="1"><location x="50" y="0" z="0"/></instance>
+                <instance id="2"><location x="100" y="0" z="0"/></instance>
+            </instances>
+        </population>
+        <population name="CellGroupB" cell_type="CellA">
+            <instances size="2">
+                <instance id="0"><location x="0" y="100" z="0"/></instance>
+                <instance id="1"><location x="50" y="100" z="0"/></instance>
+            </instances>
+        </population>
+    </populations>
+    
+    
+   <!-- The projections between populations in the network-->
+    <projections units="Physiological Units" xmlns="http://morphml.org/networkml/schema">
+        <projection name="NetworkConnection" source="CellGroupA" target="CellGroupB">
+            
+            <synapse_props synapse_type="DoubExpSynA" internal_delay="5" weight="1" threshold="-20"/>
+            
+            <connections size="3">
+                <connection id="0" pre_cell_id="0" pre_segment_id="0" pre_fraction_along="0.5" post_cell_id="1" post_segment_id="1"/>
+                <connection id="1" pre_cell_id="2" pre_segment_id="0" post_cell_id="0" post_segment_id="0"/>
+                <connection id="2" pre_cell_id="1" pre_segment_id="0" post_cell_id="1" post_segment_id="1">
+                    <properties internal_delay="10" weight="0.5"/>       <!-- adjusted value -->
+                </connection>
+            </connections>
+        </projection>
+    </projections>
+    
+    <!-- The electrical inputs to the cells in the network -->
+    
+    <inputs units="SI Units" xmlns="http://morphml.org/networkml/schema">
+        
+        <input name="RandomInputLow">
+            <random_stim frequency="20" synaptic_mechanism="DoubExpSynA"/>
+            <target population="CellGroupA"> 
+                <sites size="2">
+                    <site cell_id="1"/>    
+                    <site cell_id="2" segment_id="1"/>   
+                </sites>
+            </target>
+        </input>
+        
+        <input name="RandomInputHigh">
+            <random_stim frequency="100" synaptic_mechanism="DoubExpSynA"/>
+            <target population="CellGroupA"> 
+                <sites size="1">
+                    <site cell_id="0"/>
+                </sites>
+            </target>
+        </input>
+        
+    </inputs>
+
+
+</neuroml>
