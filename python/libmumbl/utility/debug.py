@@ -1,3 +1,21 @@
+#!/usr/bin/env python
+
+"""print_utils.py: A library with some print functions. Very useful during
+development.
+
+Last modified: Sat Jan 18, 2014  05:01PM
+
+"""
+    
+__author__           = "Dilawar Singh"
+__copyright__        = "Copyright 2013, NCBS Bangalore"
+__credits__          = ["NCBS Bangalore", "Bhalla Lab"]
+__license__          = "GPL"
+__version__          = "1.0.0"
+__maintainer__       = "Dilawar Singh"
+__email__            = "dilawars@iitb.ac.in"
+__status__           = "Development"
+
 import inspect
 import sys
 
@@ -14,7 +32,7 @@ TODO = OKBLUE
 DEBUG = HEADER
 ERROR = ERR
 
-prefix = dict(
+prefixDict = dict(
     ERR = ERR
     , ERROR = ERR
     , WARN = WARN
@@ -23,6 +41,9 @@ prefix = dict(
     , TODO = TODO
     , NOTE = HEADER
     , DEBUG = DEBUG
+    , STEP = INFO
+    , FAIL = ERR
+    , FAILED = ERR
     )
 
 def colored(msg, label="INFO") :
@@ -32,9 +53,9 @@ def colored(msg, label="INFO") :
     At each ` we toggle the color.
     
     """
-    global prefix
-    if label in prefix :
-        color = prefix[label]
+    global prefixDict
+    if label in prefixDict :
+        color = prefixDict[label]
     else :
         color = ""
     txt = ''
@@ -51,7 +72,7 @@ def colored(msg, label="INFO") :
 def cl(msg, label="INFO"):
     return colored(msg, label)
 
-def printDebug(label, msg, frame=None, exception=None):
+def dump(label, msg, frame=None, exception=None):
     ''' If msg is a list then first msg in list is the main message. Rest are
     sub message which should be printed prefixed by \n\t.
     '''
@@ -69,7 +90,7 @@ def printDebug(label, msg, frame=None, exception=None):
     if type(msg) == list:
         if len(msg) > 1:
             msg = [msg[0]] + ["`|- {0}`".format(x) for x in msg[1:]] 
-        msg = (prefix+"\n\t").join(msg)
+        msg ="\n\t".join(msg)
 
 
     if not frame :
