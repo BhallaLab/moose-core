@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<sbml xmlns="http://www.sbml.org/sbml/level3/version1/core" level="3" version="1">
+    <model>
+        <listOfCompartments>
+            <compartment id="calcium" spatialDimensions="3" 
+                size="2.3" units="litre" constant="true" />
+        </listOfCompartments>
+
+        <listOfSpecies>
+            <species id="ca" compartment="calcium" 
+                initialAmount="4.6"
+                substanceUnits="mole"
+                hasOnlySubstanceUnits="false"
+                boundaryCondition="false"
+                constant="false" />
+        </listOfSpecies>
+    </model>
+</sbml>

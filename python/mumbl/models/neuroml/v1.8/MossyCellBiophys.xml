@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<neuroml xmlns="http://morphml.org/neuroml/schema" xmlns:meta="http://morphml.org/metadata/schema" xmlns:mml="http://morphml.org/morphml/schema" xmlns:bio="http://morphml.org/biophysics/schema" xmlns:cml="http://morphml.org/channelml/schema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://morphml.org/neuroml/schema  http://www.neuroml.org/NeuroMLValidator/NeuroMLFiles/Schemata/v1.8.1/Level2/NeuroML_Level2_v1.8.1.xsd" length_units="micrometer">
+        
+    <meta:notes>Example of NeuroML file containing single Dentate Mossy Cell</meta:notes>
+
+    <cells>
+        <cell name="MossyCell">
+            <meta:notes>An abstracted Mossy Cell morphology from Santhakumar et al 2005 including biophysical parameters</meta:notes>
+                         
+            <meta:authorList>
+                <meta:modelTranslator>
+                    <meta:name>Padraig Gleeson</meta:name>
+                    <meta:institution>UCL</meta:institution>    
+                    <meta:email>p.gleeson - at - ucl.ac.uk</meta:email>
+                </meta:modelTranslator>
+            </meta:authorList>
+            
+            <meta:publication>
+                <meta:fullTitle>Santhakumar, V., Aradi, I., and Soltesz, I. (2005). 
+                    Role of mossy fiber sprouting and mossy cell loss in hyperexcitability: a network model of the 
+                    dentate gyrus incorporating cell types and axonal topography. J Neurophysiol 93, 437-453.</meta:fullTitle>
+                <meta:pubmedRef>http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&amp;db=pubmed&amp;dopt=Abstract&amp;list_uids=15342722</meta:pubmedRef>
+            </meta:publication>
+            
+           
+            <meta:neuronDBref>
+                <meta:modelName>Dentate Gyrus Mossy cell</meta:modelName>
+                <meta:uri>http://senselab.med.yale.edu/senselab/NeuronDB/ndbRegions.asp?sr=1</meta:uri>
+            </meta:neuronDBref>
+                        
+            
+            <mml:segments>
+                <mml:segment id="0" name="soma" cable="0">
+                    <mml:proximal x="0.0" y="0.0" z="0.0" diameter="20.0"/>
+                    <mml:distal x="20.0" y="0.0" z="0.0" diameter="20.0"/>
+                </mml:segment>
+                <mml:segment id="1" name="mcdend1_0_seg" parent="0" cable="1">
+                    <mml:proximal x="20.0" y="0.0" z="0.0" diameter="5.78000020980835"/>  <!-- Note 3D point same as parent, diam different-->
+                    <mml:distal x="66.05305" y="19.470924" z="0.0" diameter="5.78000020980835"/>
+                </mml:segment>
+                <mml:segment id="2" name="mcdend1_1_seg" parent="1" cable="2">
+                    <mml:proximal x="66.05305" y="19.470924" z="0.0" diameter="4.0"/>  <!-- Note 3D point same as parent, diam different-->
+                    <mml:distal x="112.106094" y="38.94185" z="0.0" diameter="4.0"/>
+                </mml:segment>
+                <mml:segment id="3" name="mcdend1_2_seg" parent="2" cable="3">
+                    <mml:proximal x="112.106094" y="38.94185" z="0.0" diameter="2.5"/> <!-- Note 3D point same as parent, diam different-->
+                    <mml:distal x="158.15915" y="58.412773" z="0.0" diameter="2.5"/>
+                </mml:segment>
+                <mml:segment id="4" name="mcdend1_3_seg" parent="3" cable="4">
+                    <mml:proximal x="158.15915" y="58.412773" z="0.0" diameter="1.0"/> <!-- Note 3D point same as parent, diam different-->
+                    <mml:distal x="204.2122" y="77.8837" z="0.0" diameter="1.0"/>
+                </mml:segment>
+                <mml:segment id="5" name="mcdend2_0_seg" parent="0" cable="5">
+                    <mml:proximal x="20.0" y="0.0" z="0.0" diameter="5.78000020980835"/>
+                    <mml:distal x="66.05305" y="-19.470924" z="0.0" diameter="5.78000020980835"/>
+                </mml:segment>
+                <mml:segment id="6" name="mcdend2_1_seg" parent="5" cable="6">
+                    <mml:proximal x="66.05305" y="-19.470924" z="0.0" diameter="4.0"/>
+                    <mml:distal x="112.106094" y="-38.94185" z="0.0" diameter="4.0"/>
+                </mml:segment>
+                <mml:segment id="7" name="mcdend2_2_seg" parent="6" cable="7">
+                    <mml:proximal x="112.106094" y="-38.94185" z="0.0" diameter="2.5"/>
+                    <mml:distal x="158.15915" y="-58.412773" z="0.0" diameter="2.5"/>
+                </mml:segment>
+                <mml:segment id="8" name="mcdend2_3_seg" parent="7" cable="8">
+                    <mml:proximal x="158.15915" y="-58.412773" z="0.0" diameter="1.0"/>
+                    <mml:distal x="204.2122" y="-77.8837" z="0.0" diameter="1.0"/>
+                </mml:segment>
+                <mml:segment id="9" name="mcdend3_0_seg" parent="0" cable="9">
+                    <mml:proximal x="0.0" y="0.0" z="0.0" diameter="5.78000020980835"/>
+                    <mml:distal x="-46.05305" y="-19.470924" z="0.0" diameter="5.78000020980835"/>
+                </mml:segment>
+                <mml:segment id="10" name="mcdend3_1_seg" parent="9" cable="10">
+                    <mml:proximal x="-46.05305" y="-19.470924" z="0.0" diameter="4.0"/>
+                    <mml:distal x="-92.1061" y="-38.94185" z="0.0" diameter="4.0"/>
+                </mml:segment>
+                <mml:segment id="11" name="mcdend3_2_seg" parent="10" cable="11">
+                    <mml:proximal x="-92.1061" y="-38.94185" z="0.0" diameter="2.5"/>
+                    <mml:distal x="-138.15915" y="-58.412773" z="0.0" diameter="2.5"/>
+                </mml:segment>
+                <mml:segment id="12" name="mcdend3_3_seg" parent="11" cable="12">
+                    <mml:proximal x="-138.15915" y="-58.412773" z="0.0" diameter="1.0"/>
+                    <mml:distal x="-184.21219" y="-77.8837" z="0.0" diameter="1.0"/>
+                </mml:segment>
+                <mml:segment id="13" name="mcdend4_0_seg" parent="0" cable="13">
+                    <mml:proximal x="0.0" y="0.0" z="0.0" diameter="5.78000020980835"/>
+                    <mml:distal x="-46.053047" y="19.470926" z="0.0" diameter="5.78000020980835"/>
+                </mml:segment>
+                <mml:segment id="14" name="mcdend4_1_seg" parent="13" cable="14">
+                    <mml:proximal x="-46.053047" y="19.470926" z="0.0" diameter="4.0"/>
+                    <mml:distal x="-92.106094" y="38.941853" z="0.0" diameter="4.0"/>
+                </mml:segment>
+                <mml:segment id="15" name="mcdend4_2_seg" parent="14" cable="15">
+                    <mml:proximal x="-92.106094" y="38.941853" z="0.0" diameter="2.5"/>
+                    <mml:distal x="-138.15915" y="58.41278" z="0.0" diameter="2.5"/>
+                </mml:segment>
+                <mml:segment id="16" name="mcdend4_3_seg" parent="15" cable="16">
+                    <mml:proximal x="-138.15915" y="58.41278" z="0.0" diameter="1.0"/>
+                    <mml:distal x="-184.2122" y="77.88371" z="0.0" diameter="1.0"/>
+                </mml:segment>
+            </mml:segments>
+            <mml:cables>
+                <mml:cable id="0" name="soma">
+                    <meta:group>all</meta:group>
+                    <meta:group>soma_group</meta:group>
+                </mml:cable>
+                <mml:cable id="1" name="mcdend1_0">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>pdend</meta:group>
+                </mml:cable>
+                <mml:cable id="2" name="mcdend1_1">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>ddend3seg</meta:group>
+                </mml:cable>
+                <mml:cable id="3" name="mcdend1_2">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>ddend3seg</meta:group>
+                    <meta:group>mdend</meta:group>
+                </mml:cable>
+                <mml:cable id="4" name="mcdend1_3">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>ddend1seg</meta:group>
+                    <meta:group>ddend3seg</meta:group>
+                </mml:cable>
+                <mml:cable id="5" name="mcdend2_0">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>pdend</meta:group>
+                </mml:cable>
+                <mml:cable id="6" name="mcdend2_1">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>ddend3seg</meta:group>
+                </mml:cable>
+                <mml:cable id="7" name="mcdend2_2">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>ddend3seg</meta:group>
+                    <meta:group>mdend</meta:group>
+                </mml:cable>
+                <mml:cable id="8" name="mcdend2_3">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>ddend1seg</meta:group>
+                    <meta:group>ddend3seg</meta:group>
+                </mml:cable>
+                <mml:cable id="9" name="mcdend3_0">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>pdend</meta:group>
+                </mml:cable>
+                <mml:cable id="10" name="mcdend3_1">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>ddend3seg</meta:group>
+                </mml:cable>
+                <mml:cable id="11" name="mcdend3_2">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>ddend3seg</meta:group>
+                    <meta:group>mdend</meta:group>
+                </mml:cable>
+                <mml:cable id="12" name="mcdend3_3">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>ddend1seg</meta:group>
+                    <meta:group>ddend3seg</meta:group>
+                </mml:cable>
+                <mml:cable id="13" name="mcdend4_0">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>pdend</meta:group>
+                </mml:cable>
+                <mml:cable id="14" name="mcdend4_1">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>ddend3seg</meta:group>
+                </mml:cable>
+                <mml:cable id="15" name="mcdend4_2">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>ddend3seg</meta:group>
+                    <meta:group>mdend</meta:group>
+                </mml:cable>
+                <mml:cable id="16" name="mcdend4_3">
+                    <meta:group>all</meta:group>
+                    <meta:group>dendrite_group</meta:group>
+                    <meta:group>ddend1seg</meta:group>
+                    <meta:group>ddend3seg</meta:group>
+                </mml:cable>
+            </mml:cables>
+<!-- Adding the biophysical parameters -->
+            <biophysics units="Physiological Units">
+                <bio:mechanism name="borgka" type="Channel Mechanism">
+                    <bio:parameter name="gmax" value="0.01">
+                    <bio:group>all</bio:group>
+                    </bio:parameter>
+                </bio:mechanism>
+                <bio:mechanism name="Kf" type="Channel Mechanism">
+                    <bio:parameter name="gmax" value="0.5">
+                    <bio:group>pdend</bio:group>
+                    </bio:parameter>
+                </bio:mechanism>
+                <bio:mechanism name="hyperde3" type="Channel Mechanism">
+                    <bio:parameter name="gmax" value="0.0050">
+                    <bio:group>all</bio:group>
+                    </bio:parameter>
+                </bio:mechanism>
+                <bio:mechanism name="MossyLeakCond" type="Channel Mechanism">
+                    <bio:parameter name="gmax" value="0.044">
+                    <bio:group>dendrite_group</bio:group>
+                    </bio:parameter>
+                </bio:mechanism>
+                <bio:mechanism name="ccanl" type="Channel Mechanism">
+                    <bio:parameter name="gmax" value="100000.0">
+                    <bio:group>all</bio:group>
+                    </bio:parameter>
+                </bio:mechanism>
+                <bio:mechanism name="nca" type="Channel Mechanism">
+                    <bio:parameter name="gmax" value="0.08">
+                    <bio:group>all</bio:group>
+                    </bio:parameter>
+                </bio:mechanism>
+                <bio:mechanism name="lca" type="Channel Mechanism">
+                    <bio:parameter name="gmax" value="0.6">
+                    <bio:group>all</bio:group>
+                    </bio:parameter>
+                </bio:mechanism>
+                <bio:mechanism name="Nat" type="Channel Mechanism">
+                    <bio:parameter name="gmax" value="120.0">
+                    <bio:group>soma_group</bio:group>
+                    </bio:parameter>
+                </bio:mechanism>
+                <bio:mechanism name="MossyLeakCond" type="Channel Mechanism" passive_conductance="true">
+                    <bio:parameter name="gmax" value="0.011">
+                    <bio:group>soma_group</bio:group>
+                    </bio:parameter>
+                </bio:mechanism>
+                <bio:mechanism name="gskch" type="Channel Mechanism">
+                    <bio:parameter name="gmax" value="16.0">
+                    <bio:group>all</bio:group>
+                    </bio:parameter>
+                </bio:mechanism>
+                <bio:mechanism name="cagk" type="Channel Mechanism">
+                    <bio:parameter name="gmax" value="16.5">
+                    <bio:group>all</bio:group>
+                    </bio:parameter>
+                </bio:mechanism>
+                <bio:mechanism name="Nat" type="Channel Mechanism">
+                    <bio:parameter name="gmax" value="120.0">
+                    <bio:group>pdend</bio:group>
+                    </bio:parameter>
+                </bio:mechanism>
+                <bio:mechanism name="Kf" type="Channel Mechanism">
+                    <bio:parameter name="gmax" value="0.5">
+                    <bio:group>soma_group</bio:group>
+                    </bio:parameter>
+                </bio:mechanism>
+                <bio:spec_capacitance>
+                    <bio:parameter value="0.6">
+                        <bio:group>all</bio:group>
+                    </bio:parameter>
+                </bio:spec_capacitance>
+                <bio:spec_axial_resistance>
+                    <bio:parameter value="0.1">
+                        <bio:group>all</bio:group>
+                    </bio:parameter>
+                </bio:spec_axial_resistance>
+                <bio:init_memb_potential>
+                    <bio:parameter value="-60.0">
+                        <bio:group>all</bio:group>
+                    </bio:parameter>
+                </bio:init_memb_potential>
+            </biophysics>
+        </cell>
+    </cells>
+</neuroml>
