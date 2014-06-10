@@ -1,10 +1,9 @@
 # Basic imports
 import os
 import sys
-import logging
 import inspect
+from .. import print_utils
 
-logger = logging.getLogger('multiscale')
 from lxml import etree
 
 import collections
@@ -14,14 +13,14 @@ def parseAndValidateWithSchema(modelName, modelPath) :
     if modelName == 'xml' :
         schemaPath = os.path.join(prefixPath, 'schema/moose/moose.xsd')
         if not os.path.isfile(schemaPath) :
-            debug.printDebug("WARN", "Schema {0} does not exists..".format(schemaPath))
+            print_utils.dump("WARN", "Schema {0} does not exists..".format(schemaPath))
 
     try :
         schemaH = open(schemaPath, "r")
         schemaText = schemaH.read()
         schemaH.close()
     except Exception as e :
-        debug.printDebug("WARN", "Error reading schema for validation."+
+        print_utils.dump("WARN", "Error reading schema for validation."+
           " Falling back to validation-disabled parser."
           + " Failed with error {0}".format(e))
         return parseWithoutValidation(modelName, modelPath)
@@ -36,8 +35,8 @@ def parseWithoutValidation(modelName, modelPath) :
     try :
         xmlRootElem = etree.parse(modelPath, xmlParser)
     except Exception as e :
-        debug.printDebug("ERROR", "Parsing of {0} failed.".format(modelPath))
-        debug.printDebug("DEBUG", "Error: {0}".format(e))
+        print_utils.dump("ERROR", "Parsing of {0} failed.".format(modelPath))
+        print_utils.dump("DEBUG", "Error: {0}".format(e))
         raise RuntimeError, "Failed to parse XML"
     return xmlRootElem
 
@@ -47,7 +46,7 @@ def parseXMLs(commandLineArgs, validate=False) :
     for model in models :
         if models[model] :
             for modelPath in models[model] :
-                debug.printDebug("INFO", "Parsing {0}".format(models[model]))
+                print_utils.dump("INFO", "Parsing {0}".format(models[model]))
                 if validate :
                     # parse model and valid it with schama
                     modelXMLRootElem = parseAndValidateWithSchema(model, modelPath)
