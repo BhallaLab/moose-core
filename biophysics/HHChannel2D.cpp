@@ -128,24 +128,21 @@ const Cinfo* HHChannel2D::initCinfo()
 			HHGate2D::initCinfo(),
 			&HHChannel2D::getXgate,
 			&HHChannel2D::setNumGates,
-			&HHChannel2D::getNumXgates,
-			1
+			&HHChannel2D::getNumXgates
 		);
 		static FieldElementFinfo< HHChannel2D, HHGate2D > gateY( "gateY",
 			"Sets up HHGate Y for channel",
 			HHGate2D::initCinfo(),
 			&HHChannel2D::getYgate,
 			&HHChannel2D::setNumGates,
-			&HHChannel2D::getNumYgates,
-			1
+			&HHChannel2D::getNumYgates
 		);
 		static FieldElementFinfo< HHChannel2D, HHGate2D > gateZ( "gateZ",
 			"Sets up HHGate Z for channel",
 			HHGate2D::initCinfo(),
 			&HHChannel2D::getZgate,
 			&HHChannel2D::setNumGates,
-			&HHChannel2D::getNumZgates,
-			1
+			&HHChannel2D::getNumZgates
 		);
 	static Finfo* HHChannel2DFinfos[] =
 	{
@@ -176,12 +173,15 @@ const Cinfo* HHChannel2D::initCinfo()
 		"a similar interface as hhchan from GENESIS. ",
 	};
 
+        static Dinfo< HHChannel2D > dinfo;
 	static Cinfo HHChannel2DCinfo(
 		"HHChannel2D",
 		ChanBase::initCinfo(),
 		HHChannel2DFinfos,
 		sizeof( HHChannel2DFinfos ) / sizeof(Finfo *),
-		new Dinfo< HHChannel2D >()
+		&dinfo,
+                doc,
+                sizeof(doc) / sizeof(string)
 	);
 
 	return &HHChannel2DCinfo;
