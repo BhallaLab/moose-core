@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<neuroml xmlns="http://morphml.org/neuroml/schema" xmlns:meta="http://morphml.org/metadata/schema" xmlns:mml="http://morphml.org/morphml/schema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://morphml.org/neuroml/schema http://www.neuroml.org/NeuroMLValidator/NeuroMLFiles/Schemata/v1.8.1/Level1/NeuroML_Level1_v1.8.1.xsd" length_units="micrometer">
+    
+    <meta:notes>
+        A single simple cell, using the NeuroML namespace for validation.
+    </meta:notes>
+
+    <populations xmlns="http://morphml.org/networkml/schema">
+        <population name="SimpleCellPop" cell_type="SimpleCell">
+            <meta:properties>
+                <meta:property tag="color" value="0.69921875 0.5703125 0.96484375"/>
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+
+>>>>>>> 159082b3dbaf6c38692379716a69e3b445edfbe5
+=======
+
+>>>>>>> 159082b3dbaf6c38692379716a69e3b445edfbe5
+            </meta:properties>
+            <instances size="1">
+                <instance id="0">
+                    <location x="18.7105" y="50.0" z="0.0"/>
+                </instance>
+<<<<<<< HEAD
+<<<<<<< HEAD
+                <instance id="1">
+                    <location x="50.00" y="50.0" z="0.0" />
+                </instance>
+=======
+>>>>>>> 159082b3dbaf6c38692379716a69e3b445edfbe5
+=======
+>>>>>>> 159082b3dbaf6c38692379716a69e3b445edfbe5
+            </instances>
+        </population>
+    </populations>
+
+    <!--There are no synaptic connections present in the network-->
+<<<<<<< HEAD
+<<<<<<< HEAD
+    <inputs xmlns="http://morphml.org/networkml/schema" units="Physiological Units">
+=======
+    <inputs units="Physiological Units">
+>>>>>>> 159082b3dbaf6c38692379716a69e3b445edfbe5
+=======
+    <inputs units="Physiological Units">
+>>>>>>> 159082b3dbaf6c38692379716a69e3b445edfbe5
+        <input name="Gran_10pA">
+            <!--<pulse_input delay="100.0" duration="500.0" amplitude="1.0E-5"/>-->
+            <!-- injecting directly into soma.inject in the cell's MorphML -->
+            <pulse_input delay="100.0" duration="500.0" amplitude="0.0"/>
+<<<<<<< HEAD
+<<<<<<< HEAD
+            <target population="SimpleCellPop">
+                <sites size="1">
+                    <site cell_id="1" segment_id="0" fraction_along="0.5"/>
+=======
+            <target population="Gran">
+                <sites size="1">
+                    <site cell_id="0" segment_id="0" fraction_along="0.5"/>
+>>>>>>> 159082b3dbaf6c38692379716a69e3b445edfbe5
+=======
+            <target population="Gran">
+                <sites size="1">
+                    <site cell_id="0" segment_id="0" fraction_along="0.5"/>
+>>>>>>> 159082b3dbaf6c38692379716a69e3b445edfbe5
+                </sites>
+            </target>
+        </input>
+    </inputs>
+
+    <cells>
+        <cell name="SimpleCell" >
+            <segments xmlns="http://morphml.org/morphml/schema">
+                <segment id="0" name="Soma" cable="0">
+                            <proximal x="0" y="0" z="0" diameter="10"/>
+                            <distal x="10" y="0" z="0" diameter="10"/>
+                </segment>
+                <segment id="1" name="Dendrite" parent="0" cable="1">
+                            <proximal x="10" y="0" z="0" diameter="3"/> <!-- Note 3D point same as parent, diam different-->
+                            <distal x="20" y="0" z="0" diameter="3"/>
+                </segment>
+            </segments>
+
+            <cables xmlns="http://morphml.org/morphml/schema">
+                <cable id="0" name="SomaCable"/>
+                <cable id="1" name="DendriteCable"/>
+            </cables>
+
+        </cell>
+    </cells>
+
+
+</neuroml>
