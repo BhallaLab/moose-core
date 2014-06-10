@@ -34,25 +34,25 @@ import sim_utils
 from moose_constants import *
 
 # Import functions from sub-libraries.
-plotTable = plot_utils.plotTable
-plotTables = plot_utils.plotTables
-saveTables = plot_utils.saveTables 
+#plotTable = plot_utils.plotTable
+#plotTables = plot_utils.plotTables
+#saveTables = plot_utils.saveTables 
 
 # 
-recordAt = sim_utils.recordTarget
-recordTarget = sim_utils.recordTarget
+#recordAt = sim_utils.recordTarget
+#recordTarget = sim_utils.recordTarget
 
 # dump messages onto console
-dump = print_utils.dump
+#dump = print_utils.dump
 
 # Verification related function.
-verify = verification_utils.verify
+#verify = verification_utils.verify
 
 # Topology and graph related functions.
-writeGraphviz  = graph_utils.writeGraphviz
+#writeGraphviz  = graph_utils.writeGraphviz
 
 # Some verification tests
-verify = verification_utils.verify
+#verify = verification_utils.verify
 
 
 def readtable(table, filename, separator=None):
@@ -569,6 +569,7 @@ def resetSim(simpaths, simdt, plotdt, simmethod='hsolve'):
         _moose.useClock(STIMCLOCK, simpath+'/##[TYPE=TimeTable]', 'process')
         _moose.useClock(ELECCLOCK, simpath+'/##[TYPE=LeakyIaF]', 'process')
         _moose.useClock(ELECCLOCK, simpath+'/##[TYPE=IntFire]', 'process')
+        _moose.useClock(ELECCLOCK, simpath+'/##[TYPE=IzhikevichNrn]', 'process')
         _moose.useClock(ELECCLOCK, simpath+'/##[TYPE=SpikeGen]', 'process')
         _moose.useClock(CHANCLOCK, simpath+'/##[TYPE=HHChannel2D]', 'process')
         _moose.useClock(CHANCLOCK, simpath+'/##[TYPE=SynChan]', 'process')
@@ -596,30 +597,31 @@ def resetSim(simpaths, simdt, plotdt, simmethod='hsolve'):
                     _moose.useClock(INITCLOCK, h.path, 'process')
     _moose.reinit()
 
-def setupTable(name, obj, qtyname, tables_path=None, threshold=None):
+def setupTable(name, obj, qtyname, tables_path=None, threshold=None, spikegen=None):
     """ Sets up a table with 'name' which stores 'qtyname' field from 'obj'.
     The table is created under tables_path if not None, else under obj.path . """
     if tables_path is None:
         tables_path = obj.path+'/data'
     ## in case tables_path does not exist, below wrapper will create it
-    _moose.Neutral(tables_path)
-    qtyTable = _moose.Table(tables_path+'/'+name)
+    tables_path_obj = _moose.Neutral(tables_path)
+    qtyTable = _moose.Table(tables_path_obj.path+'/'+name)
     ## stepMode no longer supported, connect to 'input'/'spike' message dest to record Vm/spiktimes
     # qtyTable.stepMode = TAB_BUF 
-    if threshold is None:
-        ## below is wrong! reads qty twice every clock tick!
-        #_moose.connect( obj, qtyname+'Out', qtyTable, "input")
-        ## this is the correct method
-        _moose.connect( qtyTable, "requestOut", obj, 'get'+qtyname)
-        print qtyTable.path, obj.path
+    if spikegen is None:
+        if threshold is None:
+            ## below is wrong! reads qty twice every clock tick!
+            #_moose.connect( obj, qtyname+'Out', qtyTable, "input")
+            ## this is the correct method
+            _moose.connect( qtyTable, "requestOut", obj, 'get'+qtyname)
+        else:
+            ## create new spikegen
+            spikegen = _moose.SpikeGen(tables_path_obj.path+'/'+name+'_spikegen')
+            ## connect the compartment Vm to the spikegen
+            _moose.connect(obj,"VmOut",spikegen,"Vm")
+            ## spikegens for different synapse_types can have different thresholds
+            spikegen.threshold = threshold
+            spikegen.edgeTriggered = 1 # This ensures that spike is generated only on leading edge.
     else:
-        ## create new spikegen
-        spikegen = _moose.SpikeGen(tables_path+'/'+name+'_spikegen')
-        ## connect the compartment Vm to the spikegen
-        _moose.connect(obj,"VmOut",spikegen,"Vm")
-        ## spikegens for different synapse_types can have different thresholds
-        spikegen.threshold = threshold
-        spikegen.edgeTriggered = 1 # This ensures that spike is generated only on leading edge.
         _moose.connect(spikegen,'spikeOut',qtyTable,'input') ## spikeGen gives spiketimes
     return qtyTable
 
@@ -628,8 +630,7 @@ def connectSynapse(compartment, synname, gbar_factor):
     Creates a synname synapse under compartment, sets Gbar*gbar_factor, and attaches to compartment.
     synname must be a synapse in /library of MOOSE.
     """
-    synapseid = _moose.copy(_moose.SynChan('/library/'+synname),\
-                            _moose.Compartment(compartment.path),synname)
+    synapseid = _moose.copy(_moose.SynChan('/library/'+synname),compartment,synname)
     synapse = _moose.SynChan(synapseid)
     synapse.Gbar = synapse.Gbar*gbar_factor
     synapse_mgblock = _moose.Mstring(synapse.path+'/mgblockStr')
@@ -849,7 +850,11 @@ def connect_CaConc(compartment_list, temperature=None):
                     channel = _moose.HHChannel(child)
                     ## If child Mstring 'ion' is present and is Ca, connect channel current to caconc
                     for childid in channel.children:
-                        child = _moose.Neutral(childid)
+                        try:
+                            child = _moose.element(childid)
+                        except TypeError:  # in async13, gates which have not been created still 'exist'
+                                            # i.e. show up as a child, but cannot be wrapped.
+                            pass
                         if child.className=='Mstring':
                             child = _moose.Mstring(child)
                             if child.name=='ion':
@@ -863,7 +868,7 @@ def connect_CaConc(compartment_list, temperature=None):
                                 nernst.Cout = float(nernst_params[0])
                                 nernst.valence = float(nernst_params[1])
                                 nernst.Temperature = temperature
-                                _moose.connect(nernst,'Eout',channel,'set_Ek')
+                                _moose.connect(nernst,'Eout',channel,'setEk')
                                 _moose.connect(caconc,'concOut',nernst,'ci')
                                 print 'Connected Nernst',nernst.path
                             
