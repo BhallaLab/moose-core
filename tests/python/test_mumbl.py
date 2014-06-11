@@ -32,12 +32,15 @@ __status__           = "Development"
 
 import sys
 import moose
-import moose.utils as utils 
+import moose.neuroml as nml
+import moose.mumbl as mumbl
+import moose.utils as utils
 
 def main():
     utils.parser
-    utils.loadNeuroML('./two_cells_nml_1.8/two_cells.nml')
-    utils.loadMumbl("./two_cells_nml_1.8/mumbl.xml")
+    print dir(nml)
+    nml.loadNeuroML_L123('./two_cells_nml_1.8/two_cells.nml')
+    mumbl.loadMumbl("./two_cells_nml_1.8/mumbl.xml")
     table = utils.recordTarget('/tableA', '/neuroml/cells/cellA/Dend_37_41', 'vm')
     moose.reinit()
     moose.start(0.1)
