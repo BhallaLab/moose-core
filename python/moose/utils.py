@@ -34,25 +34,22 @@ import sim_utils
 from moose_constants import *
 
 # Import functions from sub-libraries.
-#plotTable = plot_utils.plotTable
-#plotTables = plot_utils.plotTables
-#saveTables = plot_utils.saveTables 
+plotTable = plot_utils.plotTable
+plotTables = plot_utils.plotTables
+saveTables = plot_utils.saveTables 
 
 # 
-#recordAt = sim_utils.recordTarget
-#recordTarget = sim_utils.recordTarget
+recordAt = sim_utils.recordTarget
+recordTarget = sim_utils.recordTarget
 
 # dump messages onto console
-#dump = print_utils.dump
+dump = print_utils.dump
 
 # Verification related function.
-#verify = verification_utils.verify
+verify = verification_utils.verify
 
 # Topology and graph related functions.
-#writeGraphviz  = graph_utils.writeGraphviz
-
-# Some verification tests
-#verify = verification_utils.verify
+writeGraphviz  = graph_utils.writeGraphviz
 
 
 def readtable(table, filename, separator=None):
