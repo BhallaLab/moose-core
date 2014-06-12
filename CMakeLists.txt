@@ -302,10 +302,10 @@ add_custom_target(check_moose
     )
 
 add_custom_target(check_python
-    COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_SOURCE_DIR}/python/moose/test.py"
-    COMMENT "Checking: loading moose into python" VERBATIM
-    #COMMAND ${PYTHON_EXECUTABLE} test_pymoose.py 
-    #COMMENT "Checking: running test_pymoose in python" VERBATIM
+    #COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_SOURCE_DIR}/python/moose/test.py"
+    #COMMENT "Checking: loading moose into python" VERBATIM
+    COMMAND ${PYTHON_EXECUTABLE} test_pymoose.py 
+    COMMENT "Checking: running test_pymoose in python" VERBATIM
     COMMAND ${PYTHON_EXECUTABLE} Rallpacks/rallpacks_passive_cable.py
     COMMENT "Checking: running rallpack2"
     #COMMAND ${PYTHON_EXECUTABLE} Rallpacks/rallpacks_passive_cable.py
