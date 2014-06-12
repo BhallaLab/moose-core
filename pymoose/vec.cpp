@@ -381,7 +381,7 @@ extern "C" {
             size_t length = trimmed_path.length();
             if (length <= 0){
                 PyErr_SetString(PyExc_ValueError,
-                                "path must be non-empty string.");
+                                "moose_Id_init: path must be non-empty string.");
                 Py_DECREF(self);
                 return -1;
             }
@@ -497,7 +497,7 @@ extern "C" {
     PyObject * moose_Id_delete(_Id * self)
     {
         if (self->id_ == Id()){
-            PyErr_SetString(PyExc_ValueError, "Cannot delete moose shell.");
+            PyErr_SetString(PyExc_ValueError, "moose_Id_delete: cannot delete moose shell.");
             return NULL;
         }
         if (!Id::isValid(self->id_)){
@@ -604,7 +604,7 @@ extern "C" {
             index += moose_Id_getLength(self);
         }
         if ((index < 0) || (index >= moose_Id_getLength(self))){
-            PyErr_SetString(PyExc_IndexError, "Index out of bounds.");
+            PyErr_SetString(PyExc_IndexError, "index out of bounds.");
             return NULL;
         }
         ObjId oid(self->id_.path()); // This is just to get the dataIndex of parent
@@ -645,8 +645,7 @@ extern "C" {
                 PyObject * value = oid_to_element(ObjId(self->id_, oid.dataIndex, ii));
                 if (PyTuple_SetItem(ret, (Py_ssize_t)(ii-start), value)){
                     Py_XDECREF(ret);
-                    Py_XDECREF(value);
-                    PyErr_SetString(PyExc_RuntimeError, "Could assign tuple entry.");
+                    PyErr_SetString(PyExc_RuntimeError, "moose_Id_getSlice: could not assign tuple entry.");
                     return NULL;
                 }
             }
@@ -655,8 +654,7 @@ extern "C" {
                 PyObject * value = oid_to_element(ObjId(self->id_, ii));
                 if (PyTuple_SetItem(ret, (Py_ssize_t)(ii-start), value)){
                     Py_XDECREF(ret);
-                    Py_XDECREF(value);
-                    PyErr_SetString(PyExc_RuntimeError, "Could assign tuple entry.");
+                    PyErr_SetString(PyExc_RuntimeError, "moose_Id_getSlice: could not assign tuple entry.");
                     return NULL;
                 }
             }
@@ -673,7 +671,7 @@ extern "C" {
             Py_ssize_t value = PyInt_AsLong(op);
             return moose_Id_getItem(self, value);
         } else {
-            PyErr_SetString(PyExc_KeyError, "invalid index.");
+            PyErr_SetString(PyExc_KeyError, "moose_Id_subscript: invalid index.");
             return NULL;
         }
     }
@@ -824,20 +822,25 @@ extern "C" {
                 break;
             }
             case 'z': {
-                PyErr_SetString(PyExc_NotImplementedError, "DataId handling not implemented yet.");
+                PyErr_SetString(PyExc_NotImplementedError,
+                                "moose_Id_getattro: DataId handling not implemented yet.");
                 _ret = NULL;
                 break;
             }
             default:
-                PyErr_SetString(PyExc_ValueError, "unhandled field type.");
-                _ret = NULL;                
+                ostringstream msg;
+                msg << "moose_Id_getattro: unhandled field type '" << type << "'\n"
+                    << "This is a vec object. Perhaps you are trying to access the field in an"
+                    << " element in this. Then use indexing to get the element first.";
+                PyErr_SetString(PyExc_ValueError, msg.str().c_str());
+                _ret = NULL;
                 break;
         }
         if (new_attr){
             Py_DECREF(attr);
         }
         return _ret;
-    }
+     }
     
      PyObject * moose_Id_setField(_Id * self, PyObject * args)
     {
@@ -865,7 +868,7 @@ extern "C" {
         if (PyString_Check(attr)){
             fieldname = PyString_AsString(attr);
         } else {
-            PyErr_SetString(PyExc_TypeError, "Attribute name must be a string");
+            PyErr_SetString(PyExc_TypeError, "moose_Id_setattro: Attribute name must be a string");
             return -1;
         }
         string moose_class = Field<string>::get(self->id_, "className");
@@ -884,7 +887,7 @@ extern "C" {
                 return ret;
             }
             ostringstream msg;
-            msg << "'" << moose_class << "' class has no field '" << fieldname << "'" << endl;
+            msg << "moose_Id_setattro: '" << moose_class << "' class has no field '" << fieldname << "'" << endl;
             PyErr_SetString(PyExc_AttributeError, msg.str().c_str());
             return -1;
         }
@@ -894,7 +897,8 @@ extern "C" {
         if (!PySequence_Check(value)){
             is_seq = false;
         } else if (length != PySequence_Length(value)){
-            PyErr_SetString(PyExc_IndexError, "Length of the sequence on the right hand side does not match Id size.");
+            PyErr_SetString(PyExc_IndexError,
+                            "moose_Id_setattro: length of the sequence on the right hand side does not match Id size.");
             return -1;
         }
         switch(ftype){
@@ -1021,7 +1025,7 @@ extern "C" {
                             _value.push_back(v[0]);
                         } else {
                             ostringstream err;
-                            err << ii << "-th element is NUL";
+                            err << "moose_Id_setattro:" << ii << "-th element is NUL";
                             PyErr_SetString(PyExc_ValueError, err.str().c_str());
                             return -1;
                         }
@@ -1031,7 +1035,7 @@ extern "C" {
                     if (v && v[0]){
                         _value.assign(length, v[0]);
                     } else {
-                        PyErr_SetString(PyExc_ValueError,  "value is an empty string");
+                        PyErr_SetString(PyExc_ValueError,  "moose_Id_setattro: value is an empty string");
                         return -1;
                     }
                 }                    
