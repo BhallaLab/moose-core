@@ -77,7 +77,7 @@ int HSolveUtils::gates(
 	vector< Id >& ret,
 	bool getOriginals )
 {
-        dump("HSolveUtils::gates() is not tested with new hsolve api", "FIXME");
+//        dump("HSolveUtils::gates() is not tested with new hsolve api", "FIXME");
 	unsigned int oldSize = ret.size();
 	
 	static string gateName[] = {

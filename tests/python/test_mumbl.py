@@ -41,10 +41,10 @@ def main():
     print dir(nml)
     nml.loadNeuroML_L123('./two_cells_nml_1.8/two_cells.nml')
     mumbl.loadMumbl("./two_cells_nml_1.8/mumbl.xml")
-    table = utils.recordTarget('/tableA', '/neuroml/cells/cellA/Dend_37_41', 'vm')
+    table = utils.recordTarget('/tableA', '/library/cellA/Dend_37_41', 'vm')
     moose.reinit()
     moose.start(0.1)
-    utils.plotTable(table)
+    utils.plotTables([table])
     
 if __name__ == '__main__':
     main()
