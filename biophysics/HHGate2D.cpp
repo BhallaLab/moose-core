@@ -39,8 +39,7 @@ const Cinfo* HHGate2D::initCinfo()
 			Interpol2D::initCinfo(),
 			&HHGate2D::getTableA,
 			&HHGate2D::setNumTable,
-			&HHGate2D::getNumTable,
-			1 // Only a single entry here.
+			&HHGate2D::getNumTable
 		);
 
 		static FieldElementFinfo< HHGate2D, Interpol2D > tableB( 
@@ -49,8 +48,7 @@ const Cinfo* HHGate2D::initCinfo()
 			Interpol2D::initCinfo(),
 			&HHGate2D::getTableB,
 			&HHGate2D::setNumTable,
-			&HHGate2D::getNumTable,
-			1 // Only a single entry here.
+			&HHGate2D::getNumTable
 		);
 	///////////////////////////////////////////////////////
 	// DestFinfos
@@ -75,11 +73,14 @@ const Cinfo* HHGate2D::initCinfo()
 		"terms are sent right back in a message to the channel.",
 	};
 
+        static Dinfo< HHGate2D > dinfo;
 	static Cinfo HHGate2DCinfo(
 		"HHGate2D",
 		Neutral::initCinfo(),
 		HHGate2DFinfos, sizeof(HHGate2DFinfos)/sizeof(Finfo *),
-		new Dinfo< HHGate2D >()
+                &dinfo,
+                doc,
+                sizeof(doc) / sizeof(string)
 	);
 
 	return &HHGate2DCinfo;
