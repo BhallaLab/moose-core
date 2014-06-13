@@ -38,12 +38,14 @@ import moose.utils as utils
 
 def main():
     utils.parser
-    print dir(nml)
     nml.loadNeuroML_L123('./two_cells_nml_1.8/two_cells.nml')
-    mumbl.loadMumbl("./two_cells_nml_1.8/mumbl.xml")
+    #mumbl.loadMumbl("./two_cells_nml_1.8/mumbl.xml")
     table = utils.recordTarget('/tableA', '/library/cellA/Dend_37_41', 'vm')
+    moose.setClock(0, 5e-6)
+    moose.useClock(0, '/##', 'process')
+    moose.useClock(0, '/##', 'init')
     moose.reinit()
-    moose.start(0.1)
+    utils.run(0.1)
     utils.plotTables([table])
     
 if __name__ == '__main__':
