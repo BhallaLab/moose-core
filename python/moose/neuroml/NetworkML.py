@@ -1,3 +1,17 @@
+# This file is part of MOOSE simulator: http://moose.ncbs.res.in.
+
+# MOOSE is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# MOOSE is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# You should have received a copy of the GNU General Public License
+# along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+
 ## Description: class NetworkML for loading NetworkML from file or xml element into MOOSE
 ## Version 1.0 by Aditya Gilra, NCBS, Bangalore, India, 2011 for serial MOOSE
 ## Version 1.5 by Niraj Dudani, NCBS, Bangalore, India, 2012, ported to parallel MOOSE
@@ -27,13 +41,21 @@ class NetworkML():
         self.cellDictBySegmentId={}
         self.cellDictByCableId={}
         self.nml_params = nml_params
+        self.elecPath = '/elec'
         self.model_dir = nml_params['model_dir']
 
     def readNetworkMLFromFile(self,filename,cellSegmentDict,params={}):
+
         """ 
-        specify tweak params = {'excludePopulations':[popname1,...], 'excludeProjections':[projname1,...], \
-            'onlyInclude':{'includePopulation':(popname,[id1,...]),'includeProjections':(projname1,...)} }
-        If excludePopulations is present, then excludeProjections must also be present:
+        specify tweak params = {'excludePopulations':[popname1,...]
+            , 'excludeProjections':[projname1,...]
+            , 'onlyInclude':{'includePopulation':(popname,[id1,...])
+            ,'includeProjections':(projname1,...)} 
+            }
+
+        If excludePopulations is present, then excludeProjections must also be
+        present:
+
         Thus if you exclude some populations,
             ensure that you exclude projections that refer to those populations also!
         Though for onlyInclude, you may specify only included cells and this reader will
@@ -47,15 +69,23 @@ class NetworkML():
             these synapses receive file based pre-synaptic events,
             not presynaptically connected to a cell.
         """
-        print "reading file ... ", filename
+
+        utils.dump("NEUROML", "Reading file %s " % filename)
         tree = ET.parse(filename)
         root_element = tree.getroot()
-        print "Tweaking model ... "
-        tweak_model(root_element, params)
-        print "Loading model into MOOSE ... "
-        return self.readNetworkML(root_element,cellSegmentDict,params,root_element.attrib['lengthUnits'])
 
-    def readNetworkML(self,network,cellSegmentDict,params={},lengthUnits="micrometer"):
+        utils.dump("INFO", "Tweaking model")
+        tweak_model(root_element, params)
+
+        utils.dump("NEUROML", "Loading NeuroML model into MOOSE.")
+        network = self.readNetworkML(root_element
+                , cellSegmentDict
+                , params
+                , root_element.attrib['lengthUnits']
+                )
+        return network
+
+    def readNetworkML(self, network, cellSegmentDict, params={}, lengthUnits="micrometer"):
         """
         This returns populationDict = { 'populationname1':(cellname,{int(instanceid1):moosecell, ... }) , ... }
         and projectionDict = { 'projectionname1':(source,target,[(syn_name1,pre_seg_path,post_seg_path),...]) , ... }
@@ -67,11 +97,13 @@ class NetworkML():
         self.network = network
         self.cellSegmentDict = cellSegmentDict
         self.params = params
-        print "creating populations ... "
+        utils.dump("NEUROML", "Creating populations ... ")
         self.createPopulations() # create cells
-        print "creating connections ... "
+
+        utils.dump("NEUROML", "Creating connections ... ")
         self.createProjections() # create connections
-        print "creating inputs in /elec ... "
+
+        utils.dump("NEUROML", "Creating inputs in %s ... " % self.elecPath)
         self.createInputs() # create inputs (only current pulse supported)
         return (self.populationDict,self.projectionDict)
 
@@ -90,12 +122,10 @@ class NetworkML():
                 inputname = inputelem.attrib['name']
                 pulseinput = inputelem.find(".//{"+nml_ns+"}pulse_input")
                 if pulseinput is not None:
-                    ## If /elec doesn't exists it creates /elec
-                    ## and returns a reference to it. If it does,
-                    ## it just returns its reference.
-                    moose.Neutral('/elec')
-                    pulsegen = moose.PulseGen('/elec/pulsegen_'+inputname)
-                    iclamp = moose.DiffAmp('/elec/iclamp_'+inputname)
+                    ## If self.elecPath doesn't exists then create it.
+                    moose.Neutral(self.elecPath)
+                    pulsegen = moose.PulseGen(self.elecPath+'/pulsegen_'+inputname)
+                    iclamp = moose.DiffAmp(self.elecPath+'/iclamp_'+inputname)
                     iclamp.saturation = 1e6
                     iclamp.gain = 1.0
                     pulsegen.trigMode = 0 # free run
