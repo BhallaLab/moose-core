@@ -3,7 +3,7 @@
 """sim_utils.py: 
     Helper function related with simulation.
 
-Last modified: Sat Jan 18, 2014  05:01PM
+Last modified: Thu Jun 12, 2014  02:44PM
 
 """
     
@@ -21,6 +21,30 @@ import os
 import re
 import inspect
 import print_utils
+import verification_utils 
+
+##
+# @brief Run the simulation in moose. Run various verification tests before
+# running the simulation.
+#
+# @param runTime. Float. Time to run the simulation.
+# @param verify. Bool, default True. Run some tests before running simulation.
+#
+# @return None
+
+def run(runTime, verify=True):
+    """Run the simulation for runTime """
+    if not verify:
+        _moose.run(runTime)
+        return 
+    try:
+        verification_utils.verify()
+    except Exeption as e:
+        print_utils.dump("INFO", "Failed to simulate with error %s " % e)
+        sys.exit(0)
+    print_utils.dump("INFO", "Running simulation for {} sec".format(runTime))
+    _moose.start(runTime)
+
 
 def recordTarget(tablePath, target, field = 'vm', **kwargs):
     """Setup a table to record at given path.
@@ -118,8 +142,6 @@ def ifPathsAreValid(paths):
 def moosePath(baseName, append):
     """ 
     Append instance index to basename
-
-    TODO: Ideally - should be replace with [ and ]
 
     """
     if append.isdigit():

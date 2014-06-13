@@ -41,6 +41,7 @@ saveTables = plot_utils.saveTables
 # 
 recordAt = sim_utils.recordTarget
 recordTarget = sim_utils.recordTarget
+run = sim_utils.run
 
 # dump messages onto console
 dump = print_utils.dump
