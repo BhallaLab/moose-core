@@ -105,7 +105,7 @@ class NetworkML():
 
         utils.dump("NEUROML", "Creating inputs in %s ... " % self.elecPath)
         self.createInputs() # create inputs (only current pulse supported)
-        return (self.populationDict,self.projectionDict)
+        return (self.populationDict, self.projectionDict)
 
     def createInputs(self):
         for inputs in self.network.findall(".//{"+nml_ns+"}inputs"):
@@ -144,13 +144,20 @@ class NetworkML():
                     population = target.attrib['population']
                     for site in target.findall(".//{"+nml_ns+"}site"):
                         cell_id = site.attrib['cell_id']
-                        if site.attrib.has_key('segment_id'): segment_id = site.attrib['segment_id']
-                        else: segment_id = 0 # default segment_id is specified to be 0
-                        ## population is populationname, self.populationDict[population][0] is cellname
+                        if site.attrib.has_key('segment_id'): 
+                            segment_id = site.attrib['segment_id']
+                        else: 
+                            segment_id = 0 # default segment_id is specified to be 0
+
+                        # population is populationname,
+                        # self.populationDict[population][0] is cellname
                         cell_name = self.populationDict[population][0]
                         segment_path = self.populationDict[population][1][int(cell_id)].path+'/'+\
                             self.cellSegmentDict[cell_name][segment_id][0]
                         compartment = moose.Compartment(segment_path)
+                        utils.dump("DEBUG"
+                                , "Connecting %s and %s" % (iclamp.path, segment_path)
+                                )
                         moose.connect(iclamp,'output',compartment,'injectMsg')
 
     def createPopulations(self):

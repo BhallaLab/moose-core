@@ -22,7 +22,7 @@ For testing, you can also call this from the command line with a neuroML file as
 """
 
 import moose
-from moose.utils import *
+import moose.utils as utils
 from xml.etree import cElementTree as ET
 from ChannelML import ChannelML
 from MorphML import MorphML
@@ -44,8 +44,7 @@ class NeuroML():
         Returns (populationDict,projectionDict),
          see doc string of NetworkML.readNetworkML() for details.
         """
-        print "Loading neuroml file ... ", filename
-        moose.Neutral('/library') # creates /library in MOOSE tree; elif present, wraps
+        utils.dump("STEP", "Loading neuroml file %s " % filename)
         tree = ET.parse(filename)
         root_element = tree.getroot()
         self.model_dir = path.dirname( path.abspath( filename ) )

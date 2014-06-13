@@ -19,7 +19,7 @@ import sys
 import math
 from os import path
 import moose
-from moose import utils as moose_utils
+import moose.utils as utils
 from moose.neuroml import utils as neuroml_utils
 from ChannelML import ChannelML
 
@@ -36,6 +36,7 @@ class MorphML():
         self.nml_params = nml_params
         self.model_dir = nml_params['model_dir']
         self.temperature = nml_params['temperature']
+        self.libpath = '/library'
 
     def readMorphMLFromFile(self,filename,params={}):
         """
@@ -65,12 +66,15 @@ class MorphML():
         else:
             self.length_factor = 1.0
         cellname = cell.attrib["name"]
-        moose.Neutral('/library') # creates /library in MOOSE tree; elif present, wraps
-        print "loading cell :", cellname,"into /library ."
 
-        #~ moosecell = moose.Cell('/library/'+cellname)
+        # creates /library in MOOSE tree; elif present, wraps
+        moose.Neutral(self.libpath) 
+        utils.dump("STEP"
+                , "Loading cell %s into %s " % (cellname, self.libpath)
+                )
+
         #using moose Neuron class - in previous version 'Cell' class Chaitanya
-        moosecell = moose.Neuron('/library/'+cellname)
+        moosecell = moose.Neuron(self.libpath+'/'+cellname)
         self.cellDictBySegmentId[cellname] = [moosecell,{}]
         self.cellDictByCableId[cellname] = [moosecell,{}]
         self.segDict = {}
@@ -297,7 +301,7 @@ class MorphML():
             #### Connect the Ca pools and channels
             #### Am connecting these at the very end so that all channels and pools have been created
             #### Note: this function is in moose.utils not moose.neuroml.utils !
-            moose_utils.connect_CaConc(self.cellDictByCableId[cellname][1].values(),\
+            utils.connect_CaConc(self.cellDictByCableId[cellname][1].values(),\
                 self.temperature+neuroml_utils.ZeroCKelvin) # temperature should be in Kelvin for Nernst
         
         ##########################################################
@@ -391,7 +395,7 @@ class MorphML():
             ## if mechanism is not present in compartment, deep copy from library
             if not moose.exists(compartment.path+'/'+mechanismname):
                 ## if channel does not exist in library load it from xml file
-                if not moose.exists("/library/"+mechanismname):
+                if not moose.exists(self.libpath+"/"+mechanismname):
                     cmlR = ChannelML(self.nml_params)
                     model_filename = mechanismname+'.xml'
                     model_path = neuroml_utils.find_first_file(model_filename,self.model_dir)
@@ -404,9 +408,9 @@ class MorphML():
                             )
                         )
 
-                neutralObj = moose.Neutral("/library/"+mechanismname)
+                neutralObj = moose.Neutral(self.libpath+"/"+mechanismname)
                 if 'CaConc' == neutralObj.className: # Ion concentration pool
-                    libcaconc = moose.CaConc("/library/"+mechanismname)
+                    libcaconc = moose.CaConc(self.libpath+"/"+mechanismname)
                     ## deep copies the library caconc under the compartment
                     caconc = moose.copy(libcaconc,compartment,mechanismname)
                     caconc = moose.CaConc(caconc)
@@ -416,13 +420,13 @@ class MorphML():
                     ## OR based on the Mstring phi under CaConc path.
                     channel = None
                 elif 'HHChannel2D' == neutralObj.className : ## HHChannel2D
-                    libchannel = moose.HHChannel2D("/library/"+mechanismname)
+                    libchannel = moose.HHChannel2D(self.libpath+"/"+mechanismname)
                     ## deep copies the library channel under the compartment
                     channel = moose.copy(libchannel,compartment,mechanismname)
                     channel = moose.HHChannel2D(channel)
                     moose.connect(channel,'channel',compartment,'channel')
                 elif 'HHChannel' == neutralObj.className : ## HHChannel
-                    libchannel = moose.HHChannel("/library/"+mechanismname)
+                    libchannel = moose.HHChannel(self.libpath+"/"+mechanismname)
                     ## deep copies the library channel under the compartment
                     channel = moose.copy(libchannel,compartment,mechanismname)
                     channel = moose.HHChannel(channel)
@@ -443,7 +447,7 @@ class MorphML():
                     ## BUT, value has been multiplied by Gfactor as a Gbar,
                     ## SI or physiological not known here,
                     ## ignoring Gbar for CaConc, instead of passing units here
-                    child = moose_utils.get_child_Mstring(caconc,'phi')
+                    child = utils.get_child_Mstring(caconc,'phi')
                     if child is not None:
                         #child.value = value
                         pass
