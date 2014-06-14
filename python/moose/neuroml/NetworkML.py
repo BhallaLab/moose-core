@@ -18,11 +18,13 @@
 ## Version 1.6 by Aditya Gilra, NCBS, Bangalore, India, 2012, further changes for parallel MOOSE
 ## Version 1.7 by Aditya Gilra, NCBS, Bangalore, India, 2013, further support for NeuroML 1.8.1
 
+
 """
 NeuroML.py is the preferred interface. Use this only if NeuroML L1,L2,L3 files are misnamed/scattered.
 Instantiate NetworlML class, and thence use method:
 readNetworkMLFromFile(...) to load a standalone NetworkML file, OR
 readNetworkML(...) to load from an xml.etree xml element (could be part of a larger NeuroML file).
+
 """
 
 from xml.etree import cElementTree as ET
@@ -56,21 +58,25 @@ class NetworkML():
             ,'includeProjections':(projname1,...)} 
             }
 
+
+        Notes by Aditya:
+
         If excludePopulations is present, then excludeProjections must also be
         present:
 
-        Thus if you exclude some populations,
-            ensure that you exclude projections that refer to those populations also!
-        Though for onlyInclude, you may specify only included cells and this reader will
-            also keep cells connected to those in onlyInclude.
-        This reader first prunes the exclude-s,
-            then keeps the onlyInclude-s and those that are connected.
-        Use 'includeProjections' if you want to keep some projections not connected to
-            the primary 'includePopulation' cells
+        Thus if you exclude some populations, ensure that you exclude
+        projections that refer to those populations also!  Though for
+        `onlyInclude`, you may specify only included cells and this reader will
+        also keep cells connected to those in `onlyInclude`.  
+        
+        This reader first prunes the exclude-s, then keeps the onlyInclude-s and
+        those that are connected.  Use 'includeProjections' if you want to keep
+        some projections not connected to the primary 'includePopulation' cells
         but connected to secondary cells that connected to the primary ones:
-        e.g. baseline synapses on granule cells connected to 'includePopulation' mitrals;
-            these synapses receive file based pre-synaptic events,
-            not presynaptically connected to a cell.
+        e.g.  baseline synapses on granule cells connected to
+        'includePopulation' mitrals; these synapses receive file based
+        pre-synaptic events, not presynaptically connected to a cell.  
+        
         """
 
         utils.dump("NEUROML", "Reading file %s " % filename)
@@ -90,7 +96,7 @@ class NetworkML():
     def readNetworkML(self, network, cellSegmentDict, params={}):
         """
         This returns populationDict = {
-            'populationname1':(cellname,{int(instanceid1):moosecell, ... }) 
+            'populationname1':(cellName,{int(instanceid1):moosecell, ... }) 
             , ... 
             }
 
@@ -112,7 +118,9 @@ class NetworkML():
         self.params = params
 
         utils.dump("NEUROML", "Creating populations ... ")
-        self.createPopulations() # create cells
+        self.populationDict = {}
+        populations = self.network.findall(".//{"+nml_utils.nml_ns+"}population")
+        [self.insertPopulationIntoLibrary(p) for p in populations]
 
         utils.dump("NEUROML", "Creating connections ... ")
         self.createProjections() # create connections
@@ -164,7 +172,7 @@ class NetworkML():
                             segment_id = 0 # default segment_id is specified to be 0
 
                         # population is populationname,
-                        # self.populationDict[population][0] is cellname
+                        # self.populationDict[population][0] is cellName
                         cell_name = self.populationDict[population][0]
                         segment_path = self.populationDict[population][1][int(cell_id)].path+'/'+\
                             self.cellSegmentDict[cell_name][segment_id][0]
@@ -174,86 +182,55 @@ class NetworkML():
                                 )
                         moose.connect(iclamp,'output',compartment,'injectMsg')
 
-    def createPopulations(self):
-        """Create population """
-        self.populationDict = {}
-        populations = self.network.findall(".//{"+nml_utils.nml_ns+"}population")
+    def insertPopulationIntoLibrary(self, population):
+        """Insert a population entry into moose-library """
 
-        for population in populations:
-            cellname = population.attrib["cell_type"]
-            populationname = population.attrib["name"]
-            utils.dump("INFO"
-                    , "Inserting population `%s` into library" % populationname
-                    )
-            ## if cell does not exist in library load it from xml file
-            if not moose.exists(nml_utils.libraryPath+'/'+cellname):
-                mmlR = MorphML(self.nml_params)
-                model_filenames = (cellname+'.xml', cellname+'.morph.xml')
-                success = False
-                for model_filename in model_filenames:
-                    model_path = nml_utils.find_first_file(model_filename,self.model_dir)
-                    if model_path is not None:
-                        cellDict = mmlR.readMorphMLFromFile(model_path)
-                        success = True
-                        break
-                if not success:
-                    raise IOError(
-                        'For cell {0}: files {1} not found under {2}.'.format(
-                            cellname, model_filenames, self.model_dir
-                        )
-                    )
-                self.cellSegmentDict.update(cellDict)
-            libcell = moose.Neuron(nml_utils.libraryPath+'/'+cellname) #added cells as a Neuron class.
-            self.populationDict[populationname] = (cellname,{})
-            moose.Neutral('/cells')
-            for instance in population.findall(".//{"+nml_utils.nml_ns+"}instance"):
-                instanceid = instance.attrib['id']
-                location = instance.find('./{'+nml_utils.nml_ns+'}location')
-                rotationnote = instance.find('./{'+nml_utils.meta_ns+'}notes')
-                if rotationnote is not None:
-                    ## the text in rotationnote is zrotation=xxxxxxx
-                    zrotation = float(string.split(rotationnote.text,'=')[1])
-                else:
-                    zrotation = 0
-                ## deep copies the library cell to an instance under '/cells' named as <arg3>
-                ## /cells is useful for scheduling clocks as all sim elements are in /cells
-                cellid = moose.copy(libcell,moose.Neutral('/cells'),populationname+"_"+instanceid)
-                cell = moose.Neuron(cellid)
-                self.populationDict[populationname][1][int(instanceid)]=cell
-                x = float(location.attrib['x'])*self.length_factor
-                y = float(location.attrib['y'])*self.length_factor
-                z = float(location.attrib['z'])*self.length_factor
-                self.translate_rotate(cell,x,y,z,zrotation)
-                
-    def translate_rotate(self,obj,x,y,z,ztheta): # recursively translate all compartments under obj
-        for childId in obj.children:
-            try:
-                childobj = moose.element(childId)
-            except TypeError:  # in async13, gates which have not been created still 'exist'
-                                # i.e. show up as a child, but cannot be wrapped.
-                pass
-            ## if childobj is a compartment or symcompartment translate, else skip it
-            if childobj.className in ['Compartment','SymCompartment']:
-                ## SymCompartment inherits from Compartment,
-                ## so below wrapping by Compartment() is fine for both Compartment and SymCompartment
-                child = moose.Compartment(childId)
-                x0 = child.x0
-                y0 = child.y0
-                x0new = x0*cos(ztheta)-y0*sin(ztheta)
-                y0new = x0*sin(ztheta)+y0*cos(ztheta)
-                child.x0 = x0new + x
-                child.y0 = y0new + y
-                child.z0 += z
-                x1 = child.x
-                y1 = child.y
-                x1new = x1*cos(ztheta)-y1*sin(ztheta)
-                y1new = x1*sin(ztheta)+y1*cos(ztheta)
-                child.x = x1new + x
-                child.y = y1new + y
-                child.z += z
-            if len(childobj.children)>0:
-                self.translate_rotate(childobj,x,y,z,ztheta) # recursive translation+rotation
+        cellName = population.attrib["cell_type"]
+        popName = population.attrib["name"]
+        utils.dump("INFO", "Inserting population `%s` into library" % popName)
 
+        ## if cell does not exist in library load it from xml file
+        if not moose.exists(nml_utils.libraryPath+'/'+cellName):
+            mmlR = MorphML(self.nml_params)
+            model_filenames = (cellName+'.xml', cellName+'.morph.xml')
+            success = False
+            for model_filename in model_filenames:
+                model_path = nml_utils.find_first_file(model_filename,self.model_dir)
+                if model_path is not None:
+                    cellDict = mmlR.readMorphMLFromFile(model_path)
+                    success = True
+                    break
+            if not success:
+                raise IOError(
+                    'For cell {0}: files {1} not found under {2}.'.format(
+                        cellName, model_filenames, self.model_dir
+                    )
+                )
+            self.cellSegmentDict.update(cellDict)
+
+        #added cells as a Neuron class.
+        libcell = moose.Neuron(nml_utils.libraryPath+'/'+cellName) 
+        self.populationDict[popName] = (cellName,{})
+        moose.Neutral('/cells')
+        for instance in population.findall(".//{"+nml_utils.nml_ns+"}instance"):
+            instanceid = instance.attrib['id']
+            location = instance.find('./{'+nml_utils.nml_ns+'}location')
+            rotationnote = instance.find('./{'+nml_utils.meta_ns+'}notes')
+            if rotationnote is not None:
+                ## the text in rotationnote is zrotation=xxxxxxx
+                zrotation = float(string.split(rotationnote.text,'=')[1])
+            else:
+                zrotation = 0
+            ## deep copies the library cell to an instance under '/cells' named as <arg3>
+            ## /cells is useful for scheduling clocks as all sim elements are in /cells
+            cellid = moose.copy(libcell,moose.Neutral('/cells'),popName+"_"+instanceid)
+            cell = moose.Neuron(cellid)
+            self.populationDict[popName][1][int(instanceid)]=cell
+            x = float(location.attrib['x'])*self.length_factor
+            y = float(location.attrib['y'])*self.length_factor
+            z = float(location.attrib['z'])*self.length_factor
+            nml_utils.translate_rotate(cell,x,y,z,zrotation)
+            
     def createProjections(self):
         self.projectionDict={}
         projections = self.network.find(".//{"+nml_utils.nml_ns+"}projections")
@@ -264,6 +241,7 @@ class NetworkML():
             else:
                 Efactor = 1.0
                 Tfactor = 1.0
+
         for projection in self.network.findall(".//{"+nml_utils.nml_ns+"}projection"):
             projectionname = projection.attrib["name"]
             print "setting",projectionname
