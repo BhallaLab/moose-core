@@ -48,7 +48,9 @@ class NeuroML():
         tree = ET.parse(filename)
         root_element = tree.getroot()
         self.model_dir = path.dirname( path.abspath( filename ) )
+
         self.lengthUnits = root_element.attrib['lengthUnits']
+
         self.temperature = CELSIUS_default # gets replaced below if tag for temperature is present
         self.temperature_default = True
         for meta_property in root_element.findall('.//{'+meta_ns+'}property'):
@@ -79,15 +81,17 @@ class NeuroML():
 
         #print "Loading cell definitions into MOOSE /library ..."
         mmlR = MorphML(self.nml_params)
+
         self.cellsDict = {}
+        params = { 'lengthUnits' : self.lengthUnits }
         for cells in root_element.findall('.//{'+neuroml_ns+'}cells'):
             for cell in cells.findall('.//{'+neuroml_ns+'}cell'):
-                cellDict = mmlR.readMorphML(cell,params={},lengthUnits=self.lengthUnits)
+                cellDict = mmlR.readMorphML(cell, params)
                 self.cellsDict.update(cellDict)
 
         #print "Loading individual cells into MOOSE root ... "
         nmlR = NetworkML(self.nml_params)
-        return nmlR.readNetworkML(root_element,self.cellsDict,params=params,lengthUnits=self.lengthUnits)
+        return nmlR.readNetworkML(root_element, self.cellsDict, params=params)
 
 def loadNeuroML_L123(filename):
     neuromlR = NeuroML()
