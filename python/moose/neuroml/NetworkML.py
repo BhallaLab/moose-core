@@ -20,10 +20,15 @@
 
 
 """
-NeuroML.py is the preferred interface. Use this only if NeuroML L1,L2,L3 files are misnamed/scattered.
+
+NeuroML.py is the preferred interface. Use this only if NeuroML L1,L2,L3 files
+are misnamed/scattered.  
+
 Instantiate NetworlML class, and thence use method:
-readNetworkMLFromFile(...) to load a standalone NetworkML file, OR
-readNetworkML(...) to load from an xml.etree xml element (could be part of a larger NeuroML file).
+
+    readNetworkMLFromFile(...) to load a standalone NetworkML file, OR
+    readNetworkML(...) to load from an xml.etree xml element (could be part of a
+    larger NeuroML file).
 
 """
 
@@ -44,10 +49,15 @@ import utils as nml_utils
 class NetworkML():
 
     def __init__(self, nml_params):
+        """Initialize 
+        """
         self.cellDictBySegmentId={}
         self.cellDictByCableId={}
         self.nml_params = nml_params
         self.model_dir = nml_params['model_dir']
+        self.Efactor = 1.0
+        self.Tfactor = 1.0
+        self.Ifactor = 1.0
 
     def readNetworkMLFromFile(self,filename,cellSegmentDict,params={}):
 
@@ -101,7 +111,7 @@ class NetworkML():
             }
 
         and projectionDict = { 
-            'projectionname1':(source,target,[(syn_name1,pre_seg_path,post_seg_path)
+            'projName1':(source,target,[(syn_name1,pre_seg_path,post_seg_path)
             ,...]) 
             , ... 
             }
@@ -123,64 +133,84 @@ class NetworkML():
         [self.insertPopulationIntoLibrary(p) for p in populations]
 
         utils.dump("NEUROML", "Creating connections ... ")
-        self.createProjections() # create connections
+        self.projectionDict={}
+        projections = self.network.find(".//{"+nml_utils.nml_ns+"}projections")
+        if projections is not None:
+            # see pg 219 (sec 13.2) of Book of Genesis
+            if projections.attrib["units"] == 'Physiological Units': 
+                self.Efactor = 1e-3 # V from mV
+                self.Tfactor = 1e-3 # s from ms
+        [self.addProjection(proj) for proj in projections] 
 
-        utils.dump("NEUROML", "Creating inputs in %s ... " % nml_utils.elecPath)
-        self.createInputs() # create inputs (only current pulse supported)
+        utils.dump("NEUROML", "Creating inputs in %s ..." % nml_utils.elecPath)
+        inputs = self.network.findall(".//{"+nml_utils.nml_ns+"}inputs")
+        [self.addInputs(input) for input in inputs]
+
         return (self.populationDict, self.projectionDict)
 
-    def createInputs(self):
-        for inputs in self.network.findall(".//{"+nml_utils.nml_ns+"}inputs"):
-            units = inputs.attrib['units']
-            if units == 'Physiological Units': # see pg 219 (sec 13.2) of Book of Genesis
-                Vfactor = 1e-3 # V from mV
-                Tfactor = 1e-3 # s from ms
-                Ifactor = 1e-6 # A from microA
-            else:
-                Vfactor = 1.0
-                Tfactor = 1.0
-                Ifactor = 1.0
-            for inputelem in inputs.findall(".//{"+nml_utils.nml_ns+"}input"):
-                inputname = inputelem.attrib['name']
-                pulseinput = inputelem.find(".//{"+nml_utils.nml_ns+"}pulse_input")
-                if pulseinput is not None:
-                    ## If nml_utils.elecPath doesn't exists then create it.
-                    moose.Neutral(nml_utils.elecPath)
-                    pulsegen = moose.PulseGen(nml_utils.elecPath+'/pulsegen_'+inputname)
-                    iclamp = moose.DiffAmp(nml_utils.elecPath+'/iclamp_'+inputname)
-                    iclamp.saturation = 1e6
-                    iclamp.gain = 1.0
-                    pulsegen.trigMode = 0 # free run
-                    pulsegen.baseLevel = 0.0
-                    pulsegen.firstDelay = float(pulseinput.attrib['delay'])*Tfactor
-                    pulsegen.firstWidth = float(pulseinput.attrib['duration'])*Tfactor
-                    pulsegen.firstLevel = float(pulseinput.attrib['amplitude'])*Ifactor
-                    pulsegen.secondDelay = 1e6 # to avoid repeat
-                    pulsegen.secondLevel = 0.0
-                    pulsegen.secondWidth = 0.0
-                    ## do not set count to 1, let it be at 2 by default
-                    ## else it will set secondDelay to 0.0 and repeat the first pulse!
-                    #pulsegen.count = 1
-                    moose.connect(pulsegen,'output',iclamp,'plusIn')
-                    target = inputelem.find(".//{"+nml_utils.nml_ns+"}target")
-                    population = target.attrib['population']
-                    for site in target.findall(".//{"+nml_utils.nml_ns+"}site"):
-                        cell_id = site.attrib['cell_id']
-                        if site.attrib.has_key('segment_id'): 
-                            segment_id = site.attrib['segment_id']
-                        else: 
-                            segment_id = 0 # default segment_id is specified to be 0
+    def sanitizieUnits(self, unit):
+        """If unit are given as Physiological units then we need to use a factor
+        of 1e3.
+        """
+        if unit == 'Physiological Units': 
+            self.Vfactor = 1e-3 # V from mV
+            self.Tfactor = 1e-3 # s from ms
+            self.Ifactor = 1e-6 # A from microA
+        else:
+            self.Vfactor = 1.0 
+            self.Tfactor = 1.0 
+            self.Ifactor = 1.0 
 
-                        # population is populationname,
-                        # self.populationDict[population][0] is cellName
-                        cell_name = self.populationDict[population][0]
-                        segment_path = self.populationDict[population][1][int(cell_id)].path+'/'+\
-                            self.cellSegmentDict[cell_name][segment_id][0]
-                        compartment = moose.Compartment(segment_path)
-                        utils.dump("DEBUG"
-                                , "Connecting %s and %s" % (iclamp.path, segment_path)
-                                )
-                        moose.connect(iclamp,'output',compartment,'injectMsg')
+    def addInputs(self, inputs):
+        """Add a given input """
+        units = inputs.attrib['units']
+        self.sanitizieUnits(units)
+        for inputElem in inputs.findall(".//{"+nml_utils.nml_ns+"}input"):
+            pulseInput = inputElem.find(".//{"+nml_utils.nml_ns+"}pulse_input")
+            if pulseInput is not None:
+                self.addPulseGen(pulseInput, inputElem)
+
+
+    def addPulseGen(self, pulseInput, inputElem):
+        """Add a PulseGen 
+        """
+        moose.Neutral(nml_utils.elecPath)
+        inputName = inputElem.attrib['name']
+        pulsegen = moose.PulseGen(nml_utils.elecPath+'/pulsegen_'+inputName)
+        iclamp = moose.DiffAmp(nml_utils.elecPath+'/iclamp_'+inputName)
+        iclamp.saturation = 1e6
+        iclamp.gain = 1.0
+        pulsegen.trigMode = 0 # free run
+        pulsegen.baseLevel = 0.0
+        pulsegen.firstDelay = float(pulseInput.attrib['delay'])*self.Tfactor
+        pulsegen.firstWidth = float(pulseInput.attrib['duration'])*self.Tfactor
+        pulsegen.firstLevel = float(pulseInput.attrib['amplitude'])*self.Ifactor
+        pulsegen.secondDelay = 1e6 # to avoid repeat
+        pulsegen.secondLevel = 0.0
+        pulsegen.secondWidth = 0.0
+        ## do not set count to 1, let it be at 2 by default
+        ## else it will set secondDelay to 0.0 and repeat the first pulse!
+        #pulsegen.count = 1
+        moose.connect(pulsegen,'output',iclamp,'plusIn')
+        target = inputElem.find(".//{"+nml_utils.nml_ns+"}target")
+        population = target.attrib['population']
+        for site in target.findall(".//{"+nml_utils.nml_ns+"}site"):
+            cell_id = site.attrib['cell_id']
+            if site.attrib.has_key('segment_id'): 
+                segment_id = site.attrib['segment_id']
+            else: 
+                segment_id = 0 # default segment_id is specified to be 0
+
+            # population is populationname,
+            # self.populationDict[population][0] is cellName
+            cell_name = self.populationDict[population][0]
+            segment_path = self.populationDict[population][1][int(cell_id)].path+'/'+\
+                self.cellSegmentDict[cell_name][segment_id][0]
+            compartment = moose.Compartment(segment_path)
+            utils.dump("DEBUG"
+                    , "Connecting %s and %s" % (iclamp.path, segment_path)
+                    )
+            moose.connect(iclamp,'output',compartment,'injectMsg')
 
     def insertPopulationIntoLibrary(self, population):
         """Insert a population entry into moose-library """
@@ -231,83 +261,83 @@ class NetworkML():
             z = float(location.attrib['z'])*self.length_factor
             nml_utils.translate_rotate(cell,x,y,z,zrotation)
             
-    def createProjections(self):
-        self.projectionDict={}
-        projections = self.network.find(".//{"+nml_utils.nml_ns+"}projections")
-        if projections is not None:
-            if projections.attrib["units"] == 'Physiological Units': # see pg 219 (sec 13.2) of Book of Genesis
-                Efactor = 1e-3 # V from mV
-                Tfactor = 1e-3 # s from ms
-            else:
-                Efactor = 1.0
-                Tfactor = 1.0
 
-        for projection in self.network.findall(".//{"+nml_utils.nml_ns+"}projection"):
-            projectionname = projection.attrib["name"]
-            print "setting",projectionname
-            source = projection.attrib["source"]
-            target = projection.attrib["target"]
-            self.projectionDict[projectionname] = (source,target,[])
-            for syn_props in projection.findall(".//{"+nml_utils.nml_ns+"}synapse_props"):
-                syn_name = syn_props.attrib['synapse_type']
-                ## if synapse does not exist in library load it from xml file
-                if not moose.exists("/library/"+syn_name):
-                    cmlR = ChannelML(self.nml_params)
-                    model_filename = syn_name+'.xml'
-                    model_path = nml_utils.find_first_file(model_filename,self.model_dir)
-                    if model_path is not None:
-                        cmlR.readChannelMLFromFile(model_path)
-                    else:
-                        raise IOError(
-                            'For mechanism {0}: files {1} not found under {2}.'.format(
-                                "", model_filename, self.model_dir
-                            )
-                        )
-                weight = float(syn_props.attrib['weight'])
-                threshold = float(syn_props.attrib['threshold'])*Efactor
-                if 'prop_delay' in syn_props.attrib:
-                    prop_delay = float(syn_props.attrib['prop_delay'])*Tfactor
-                elif 'internal_delay' in syn_props.attrib:
-                    prop_delay = float(syn_props.attrib['internal_delay'])*Tfactor
-                else: prop_delay = 0.0
-                for connection in projection.findall(".//{"+nml_utils.nml_ns+"}connection"):
-                    pre_cell_id = connection.attrib['pre_cell_id']
-                    post_cell_id = connection.attrib['post_cell_id']
-                    if 'file' not in pre_cell_id:
-                        # source could be 'mitrals', self.populationDict[source][0] would be 'mitral'
-                        pre_cell_name = self.populationDict[source][0]
-                        if 'pre_segment_id' in connection.attrib:
-                            pre_segment_id = connection.attrib['pre_segment_id']
-                        else: pre_segment_id = "0" # assume default segment 0, usually soma
-                        pre_segment_path = self.populationDict[source][1][int(pre_cell_id)].path+'/'+\
-                            self.cellSegmentDict[pre_cell_name][pre_segment_id][0]
-                    else:
-                        # I've removed extra excitation provided via files, so below comment doesn't apply.
-                        # 'file[+<glomnum>]_<filenumber>' # glomnum is
-                        # for mitral_granule extra excitation from unmodelled sisters.
-                        pre_segment_path = pre_cell_id+'_'+connection.attrib['pre_segment_id']
-                    # target could be 'PGs', self.populationDict[target][0] would be 'PG'
-                    post_cell_name = self.populationDict[target][0]
-                    if 'post_segment_id' in connection.attrib:
-                        post_segment_id = connection.attrib['post_segment_id']
-                    else: post_segment_id = "0" # assume default segment 0, usually soma
-                    post_segment_path = self.populationDict[target][1][int(post_cell_id)].path+'/'+\
-                        self.cellSegmentDict[post_cell_name][post_segment_id][0]
-                    self.projectionDict[projectionname][2].append((syn_name, pre_segment_path, post_segment_path))
-                    properties = connection.findall('./{'+nml_utils.nml_ns+'}properties')
-                    if len(properties)==0:
-                        self.connect(syn_name, pre_segment_path, post_segment_path, weight, threshold, prop_delay)
-                    else:
-                        for props in properties:
-                            synapse_type = props.attrib['synapse_type']
-                            if syn_name in synapse_type:
-                                weight_override = float(props.attrib['weight'])
-                                if 'internal_delay' in props.attrib:
-                                    delay_override = float(props.attrib['internal_delay'])
-                                else: delay_override = prop_delay
-                                if weight_override != 0.0:
-                                    self.connect(syn_name, pre_segment_path, post_segment_path,\
-                                        weight_override, threshold, delay_override)
+    def addProjection(self, projection):
+        """Add a given projection """
+
+        projName = projection.attrib["name"]
+        utils.dump("INFO", "Adding a projection {}".format(projName))
+        source = projection.attrib["source"]
+        target = projection.attrib["target"]
+        self.projectionDict[projName] = (source,target,[])
+        synapseProps = projection.findall(".//{"+nml_utils.nml_ns+"}synapse_props")
+        [self.addSynapseProps(projection, synProp, source, target) 
+                for synProp in synapseProps
+                ]
+
+    def addSynapseProps(self, projection, synProps, source, target):
+        """Add a synpase properties """
+        projName = projection.attrib["name"]
+        syn_name = synProps.attrib['synapse_type']
+        ## if synapse does not exist in library load it from xml file
+        if not moose.exists("/library/"+syn_name):
+            cmlR = ChannelML(self.nml_params)
+            model_filename = syn_name+'.xml'
+            model_path = nml_utils.find_first_file(model_filename,self.model_dir)
+            if model_path is not None:
+                cmlR.readChannelMLFromFile(model_path)
+            else:
+                raise IOError(
+                    'For mechanism {0}: files {1} not found under {2}.'.format(
+                        "", model_filename, self.model_dir
+                    )
+                )
+        weight = float(synProps.attrib['weight'])
+        threshold = float(synProps.attrib['threshold'])*self.Efactor
+        if 'prop_delay' in synProps.attrib:
+            prop_delay = float(synProps.attrib['prop_delay'])*self.Tfactor
+        elif 'internal_delay' in synProps.attrib:
+            prop_delay = float(synProps.attrib['internal_delay'])*self.Tfactor
+        else: prop_delay = 0.0
+        for connection in projection.findall(".//{"+nml_utils.nml_ns+"}connection"):
+            pre_cell_id = connection.attrib['pre_cell_id']
+            post_cell_id = connection.attrib['post_cell_id']
+            if 'file' not in pre_cell_id:
+                # source could be 'mitrals', self.populationDict[source][0] would be 'mitral'
+                pre_cell_name = self.populationDict[source][0]
+                if 'pre_segment_id' in connection.attrib:
+                    pre_segment_id = connection.attrib['pre_segment_id']
+                else: pre_segment_id = "0" # assume default segment 0, usually soma
+                pre_segment_path = self.populationDict[source][1][int(pre_cell_id)].path+'/'+\
+                    self.cellSegmentDict[pre_cell_name][pre_segment_id][0]
+            else:
+                # I've removed extra excitation provided via files, so below comment doesn't apply.
+                # 'file[+<glomnum>]_<filenumber>' # glomnum is
+                # for mitral_granule extra excitation from unmodelled sisters.
+                pre_segment_path = pre_cell_id+'_'+connection.attrib['pre_segment_id']
+            # target could be 'PGs', self.populationDict[target][0] would be 'PG'
+            post_cell_name = self.populationDict[target][0]
+            if 'post_segment_id' in connection.attrib:
+                post_segment_id = connection.attrib['post_segment_id']
+            else: post_segment_id = "0" # assume default segment 0, usually soma
+            post_segment_path = self.populationDict[target][1][int(post_cell_id)].path+'/'+\
+                self.cellSegmentDict[post_cell_name][post_segment_id][0]
+            self.projectionDict[projName][2].append((syn_name, pre_segment_path, post_segment_path))
+            properties = connection.findall('./{'+nml_utils.nml_ns+'}properties')
+            if len(properties)==0:
+                self.connect(syn_name, pre_segment_path, post_segment_path, weight, threshold, prop_delay)
+            else:
+                for props in properties:
+                    synapse_type = props.attrib['synapse_type']
+                    if syn_name in synapse_type:
+                        weight_override = float(props.attrib['weight'])
+                        if 'internal_delay' in props.attrib:
+                            delay_override = float(props.attrib['internal_delay'])
+                        else: delay_override = prop_delay
+                        if weight_override != 0.0:
+                            self.connect(syn_name, pre_segment_path, post_segment_path,\
+                                weight_override, threshold, delay_override)
+
 
     def connect(self, syn_name, pre_path, post_path, weight, threshold, delay):
         postcomp = moose.Compartment(post_path)
