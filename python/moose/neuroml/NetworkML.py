@@ -31,9 +31,13 @@ import os
 from math import cos, sin
 from MorphML import MorphML
 from ChannelML import ChannelML
+
 import moose
-from moose.neuroml.utils import meta_ns, nml_ns, find_first_file, tweak_model
-from moose import utils
+import moose.utils as utils 
+
+import utils as nml_utils
+
+
 
 class NetworkML():
 
@@ -41,7 +45,6 @@ class NetworkML():
         self.cellDictBySegmentId={}
         self.cellDictByCableId={}
         self.nml_params = nml_params
-        self.elecPath = '/elec'
         self.model_dir = nml_params['model_dir']
 
     def readNetworkMLFromFile(self,filename,cellSegmentDict,params={}):
@@ -75,7 +78,7 @@ class NetworkML():
         root_element = tree.getroot()
 
         utils.dump("INFO", "Tweaking model")
-        tweak_model(root_element, params)
+        nml_utils.tweak_model(root_element, params)
 
         utils.dump("NEUROML", "Loading NeuroML model into MOOSE.")
         network = self.readNetworkML(root_element
@@ -103,12 +106,12 @@ class NetworkML():
         utils.dump("NEUROML", "Creating connections ... ")
         self.createProjections() # create connections
 
-        utils.dump("NEUROML", "Creating inputs in %s ... " % self.elecPath)
+        utils.dump("NEUROML", "Creating inputs in %s ... " % nml_utils.elecPath)
         self.createInputs() # create inputs (only current pulse supported)
         return (self.populationDict, self.projectionDict)
 
     def createInputs(self):
-        for inputs in self.network.findall(".//{"+nml_ns+"}inputs"):
+        for inputs in self.network.findall(".//{"+nml_utils.nml_ns+"}inputs"):
             units = inputs.attrib['units']
             if units == 'Physiological Units': # see pg 219 (sec 13.2) of Book of Genesis
                 Vfactor = 1e-3 # V from mV
@@ -118,14 +121,14 @@ class NetworkML():
                 Vfactor = 1.0
                 Tfactor = 1.0
                 Ifactor = 1.0
-            for inputelem in inputs.findall(".//{"+nml_ns+"}input"):
+            for inputelem in inputs.findall(".//{"+nml_utils.nml_ns+"}input"):
                 inputname = inputelem.attrib['name']
-                pulseinput = inputelem.find(".//{"+nml_ns+"}pulse_input")
+                pulseinput = inputelem.find(".//{"+nml_utils.nml_ns+"}pulse_input")
                 if pulseinput is not None:
-                    ## If self.elecPath doesn't exists then create it.
-                    moose.Neutral(self.elecPath)
-                    pulsegen = moose.PulseGen(self.elecPath+'/pulsegen_'+inputname)
-                    iclamp = moose.DiffAmp(self.elecPath+'/iclamp_'+inputname)
+                    ## If nml_utils.elecPath doesn't exists then create it.
+                    moose.Neutral(nml_utils.elecPath)
+                    pulsegen = moose.PulseGen(nml_utils.elecPath+'/pulsegen_'+inputname)
+                    iclamp = moose.DiffAmp(nml_utils.elecPath+'/iclamp_'+inputname)
                     iclamp.saturation = 1e6
                     iclamp.gain = 1.0
                     pulsegen.trigMode = 0 # free run
@@ -140,9 +143,9 @@ class NetworkML():
                     ## else it will set secondDelay to 0.0 and repeat the first pulse!
                     #pulsegen.count = 1
                     moose.connect(pulsegen,'output',iclamp,'plusIn')
-                    target = inputelem.find(".//{"+nml_ns+"}target")
+                    target = inputelem.find(".//{"+nml_utils.nml_ns+"}target")
                     population = target.attrib['population']
-                    for site in target.findall(".//{"+nml_ns+"}site"):
+                    for site in target.findall(".//{"+nml_utils.nml_ns+"}site"):
                         cell_id = site.attrib['cell_id']
                         if site.attrib.has_key('segment_id'): 
                             segment_id = site.attrib['segment_id']
@@ -161,18 +164,23 @@ class NetworkML():
                         moose.connect(iclamp,'output',compartment,'injectMsg')
 
     def createPopulations(self):
+        """Create population """
         self.populationDict = {}
-        for population in self.network.findall(".//{"+nml_ns+"}population"):
+        populations = self.network.findall(".//{"+nml_utils.nml_ns+"}population")
+
+        for population in populations:
             cellname = population.attrib["cell_type"]
             populationname = population.attrib["name"]
-            print "loading", populationname
+            utils.dump("INFO"
+                    , "Inserting population `%s` into library" % populationname
+                    )
             ## if cell does not exist in library load it from xml file
-            if not moose.exists('/library/'+cellname):
+            if not moose.exists(nml_utils.libraryPath+'/'+cellname):
                 mmlR = MorphML(self.nml_params)
                 model_filenames = (cellname+'.xml', cellname+'.morph.xml')
                 success = False
                 for model_filename in model_filenames:
-                    model_path = find_first_file(model_filename,self.model_dir)
+                    model_path = nml_utils.find_first_file(model_filename,self.model_dir)
                     if model_path is not None:
                         cellDict = mmlR.readMorphMLFromFile(model_path)
                         success = True
@@ -184,13 +192,13 @@ class NetworkML():
                         )
                     )
                 self.cellSegmentDict.update(cellDict)
-            libcell = moose.Neuron('/library/'+cellname) #added cells as a Neuron class.
+            libcell = moose.Neuron(nml_utils.libraryPath+'/'+cellname) #added cells as a Neuron class.
             self.populationDict[populationname] = (cellname,{})
             moose.Neutral('/cells')
-            for instance in population.findall(".//{"+nml_ns+"}instance"):
+            for instance in population.findall(".//{"+nml_utils.nml_ns+"}instance"):
                 instanceid = instance.attrib['id']
-                location = instance.find('./{'+nml_ns+'}location')
-                rotationnote = instance.find('./{'+meta_ns+'}notes')
+                location = instance.find('./{'+nml_utils.nml_ns+'}location')
+                rotationnote = instance.find('./{'+nml_utils.meta_ns+'}notes')
                 if rotationnote is not None:
                     ## the text in rotationnote is zrotation=xxxxxxx
                     zrotation = float(string.split(rotationnote.text,'=')[1])
@@ -237,7 +245,7 @@ class NetworkML():
 
     def createProjections(self):
         self.projectionDict={}
-        projections = self.network.find(".//{"+nml_ns+"}projections")
+        projections = self.network.find(".//{"+nml_utils.nml_ns+"}projections")
         if projections is not None:
             if projections.attrib["units"] == 'Physiological Units': # see pg 219 (sec 13.2) of Book of Genesis
                 Efactor = 1e-3 # V from mV
@@ -245,25 +253,25 @@ class NetworkML():
             else:
                 Efactor = 1.0
                 Tfactor = 1.0
-        for projection in self.network.findall(".//{"+nml_ns+"}projection"):
+        for projection in self.network.findall(".//{"+nml_utils.nml_ns+"}projection"):
             projectionname = projection.attrib["name"]
             print "setting",projectionname
             source = projection.attrib["source"]
             target = projection.attrib["target"]
             self.projectionDict[projectionname] = (source,target,[])
-            for syn_props in projection.findall(".//{"+nml_ns+"}synapse_props"):
+            for syn_props in projection.findall(".//{"+nml_utils.nml_ns+"}synapse_props"):
                 syn_name = syn_props.attrib['synapse_type']
                 ## if synapse does not exist in library load it from xml file
                 if not moose.exists("/library/"+syn_name):
                     cmlR = ChannelML(self.nml_params)
                     model_filename = syn_name+'.xml'
-                    model_path = find_first_file(model_filename,self.model_dir)
+                    model_path = nml_utils.find_first_file(model_filename,self.model_dir)
                     if model_path is not None:
                         cmlR.readChannelMLFromFile(model_path)
                     else:
                         raise IOError(
                             'For mechanism {0}: files {1} not found under {2}.'.format(
-                                mechanismname, model_filename, self.model_dir
+                                "", model_filename, self.model_dir
                             )
                         )
                 weight = float(syn_props.attrib['weight'])
@@ -273,7 +281,7 @@ class NetworkML():
                 elif 'internal_delay' in syn_props.attrib:
                     prop_delay = float(syn_props.attrib['internal_delay'])*Tfactor
                 else: prop_delay = 0.0
-                for connection in projection.findall(".//{"+nml_ns+"}connection"):
+                for connection in projection.findall(".//{"+nml_utils.nml_ns+"}connection"):
                     pre_cell_id = connection.attrib['pre_cell_id']
                     post_cell_id = connection.attrib['post_cell_id']
                     if 'file' not in pre_cell_id:
@@ -297,7 +305,7 @@ class NetworkML():
                     post_segment_path = self.populationDict[target][1][int(post_cell_id)].path+'/'+\
                         self.cellSegmentDict[post_cell_name][post_segment_id][0]
                     self.projectionDict[projectionname][2].append((syn_name, pre_segment_path, post_segment_path))
-                    properties = connection.findall('./{'+nml_ns+'}properties')
+                    properties = connection.findall('./{'+nml_utils.nml_ns+'}properties')
                     if len(properties)==0:
                         self.connect(syn_name, pre_segment_path, post_segment_path, weight, threshold, prop_delay)
                     else:
@@ -322,7 +330,7 @@ class NetworkML():
         ## not to 'synapse' message, we make a new synapse everytime
         ## ALSO for a saturating synapse i.e. KinSynChan, we always make a new synapse
         ## as KinSynChan is not meant to represent multiple synapses
-        libsyn = moose.SynChan('/library/'+syn_name)
+        libsyn = moose.SynChan(nml_utils.libraryPath+'/'+syn_name)
         gradedchild = utils.get_child_Mstring(libsyn,'graded')
         if libsyn.className == 'KinSynChan' or gradedchild.value == 'True': # create a new synapse
             syn_name_full = syn_name+'_'+utils.underscorize(pre_path)
@@ -443,11 +451,11 @@ class NetworkML():
 
     def make_new_synapse(self, syn_name, postcomp, syn_name_full):
         ## if channel does not exist in library load it from xml file
-        if not moose.exists('/library/'+syn_name):
+        if not moose.exists(nml_utils.libraryPath+'/'+syn_name):
             cmlR = ChannelML(self.nml_params)
             cmlR.readChannelMLFromFile(syn_name+'.xml')
         ## deep copies the library synapse to an instance under postcomp named as <arg3>
-        synid = moose.copy(moose.Neutral('/library/'+syn_name),postcomp,syn_name_full)
+        synid = moose.copy(moose.Neutral(nml_utils.libraryPath+'/'+syn_name),postcomp,syn_name_full)
         syn = moose.SynChan(synid)
         childmgblock = utils.get_child_Mstring(syn,'mgblockStr')
         #### connect the post compartment to the synapse
