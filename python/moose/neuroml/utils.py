@@ -13,9 +13,9 @@ indent(...) is an in-place prettyprint formatter copied from http://effbot.org/z
 
 from xml.etree import cElementTree as ET
 import os
-
 from math import *
 from config import *
+import moose
 
 def set_neuroml_namespaces_attribs(neuromlroot):
     set_attrib_if_not_found(neuromlroot,"xmlns",neuroml_ns)
@@ -230,3 +230,38 @@ def find_first_file(name, path):
     for root, dirs, files in os.walk(path):
         if name in files:
             return os.path.join(root, name)
+
+
+# recursively translate all compartments under obj
+def translate_rotate(obj, x, y, z, ztheta): 
+    for childId in obj.children:
+        try:
+            childobj = moose.element(childId)
+        except TypeError:  # in async13, gates which have not been created still 'exist'
+                            # i.e. show up as a child, but cannot be wrapped.
+            pass
+        ## if childobj is a compartment or symcompartment translate, else skip it
+        if childobj.className in ['Compartment','SymCompartment']:
+            ## SymCompartment inherits from Compartment,
+            ## so below wrapping by Compartment() is fine for both Compartment and SymCompartment
+            child = moose.Compartment(childId)
+            x0 = child.x0
+            y0 = child.y0
+            x0new = x0*cos(ztheta)-y0*sin(ztheta)
+            y0new = x0*sin(ztheta)+y0*cos(ztheta)
+            child.x0 = x0new + x
+            child.y0 = y0new + y
+            child.z0 += z
+            x1 = child.x
+            y1 = child.y
+            x1new = x1*cos(ztheta)-y1*sin(ztheta)
+            y1new = x1*sin(ztheta)+y1*cos(ztheta)
+            child.x = x1new + x
+            child.y = y1new + y
+            child.z += z
+
+        if len(childobj.children) > 0:
+            # recursive translation+rotation
+            translate_rotate(childobj, x, y, z, ztheta) 
+
+
