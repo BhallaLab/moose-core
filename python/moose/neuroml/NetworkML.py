@@ -84,22 +84,33 @@ class NetworkML():
         network = self.readNetworkML(root_element
                 , cellSegmentDict
                 , params
-                , root_element.attrib['lengthUnits']
                 )
         return network
 
-    def readNetworkML(self, network, cellSegmentDict, params={}, lengthUnits="micrometer"):
+    def readNetworkML(self, network, cellSegmentDict, params={}):
         """
-        This returns populationDict = { 'populationname1':(cellname,{int(instanceid1):moosecell, ... }) , ... }
-        and projectionDict = { 'projectionname1':(source,target,[(syn_name1,pre_seg_path,post_seg_path),...]) , ... }
+        This returns populationDict = {
+            'populationname1':(cellname,{int(instanceid1):moosecell, ... }) 
+            , ... 
+            }
+
+        and projectionDict = { 
+            'projectionname1':(source,target,[(syn_name1,pre_seg_path,post_seg_path)
+            ,...]) 
+            , ... 
+            }
         """
+
+        lengthUnits = network.attrib.get('lengthUnits', 'micron')
         if lengthUnits in ['micrometer','micron']:
             self.length_factor = 1e-6
         else:
             self.length_factor = 1.0
+
         self.network = network
         self.cellSegmentDict = cellSegmentDict
         self.params = params
+
         utils.dump("NEUROML", "Creating populations ... ")
         self.createPopulations() # create cells
 

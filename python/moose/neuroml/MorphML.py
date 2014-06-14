@@ -38,22 +38,25 @@ class MorphML():
         self.temperature = nml_params['temperature']
         self.libpath = '/library'
 
-    def readMorphMLFromFile(self,filename,params={}):
+    def readMorphMLFromFile(self, filename, params={}):
         """
         specify global params as a dict (presently none implemented)
         returns { cellname1 : segDict, ... }
         see readMorphML(...) for segDict 
         """
-        print filename
+        utils.dump("DEBUG", "Reading morphology from {}".format(filename))
         tree = ET.parse(filename)
         neuroml_element = tree.getroot()
+
         cellsDict = {}
         for cell in neuroml_element.findall('.//{'+self.neuroml+'}cell'):
-            cellDict = self.readMorphML(cell,params,neuroml_element.attrib['lengthUnits'])
+            params['lengthUnits'] = neuroml_element.attrib['lengthUnits']
+            cellDict = self.readMorphML(cell, params)
             cellsDict.update(cellDict)
+        
         return cellsDict
 
-    def readMorphML(self,cell,params={},lengthUnits="micrometer"):
+    def readMorphML(self, cell, params={}):
         """
         returns {cellname:segDict}
         where segDict = { segid1 : [ segname,(proximalx,proximaly,proximalz),
@@ -61,10 +64,12 @@ class MorphML():
         segname is "<name>_<segid>" because 1) guarantees uniqueness,
         2) later scripts obtain segid from the compartment's name!
         """
+        lengthUnits = params.get('lengthUnits', 'micron')
         if lengthUnits in ['micrometer','micron']:
             self.length_factor = 1e-6
         else:
             self.length_factor = 1.0
+
         cellname = cell.attrib["name"]
 
         # creates /library in MOOSE tree; elif present, wraps
