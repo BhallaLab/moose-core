@@ -17,7 +17,7 @@
 
     A test script to test MUMBL support in MOOSE.
 
-Last modified: Mon Jun 09, 2014  03:42PM
+Last modified: Fri Jun 13, 2014  06:30PM
 
 """
     
@@ -40,13 +40,14 @@ def main():
     utils.parser
     nml.loadNeuroML_L123('./two_cells_nml_1.8/two_cells.nml')
     #mumbl.loadMumbl("./two_cells_nml_1.8/mumbl.xml")
-    table = utils.recordTarget('/tableA', '/library/cellA/Dend_37_41', 'vm')
+    table1 = utils.recordTarget('/tableA', '/library/cellA/Dend_37_41', 'vm')
+    table2 = utils.recordTarget('/tableB', '/cells/granuleGroup_0/Soma_0', 'vm')
     moose.setClock(0, 5e-6)
     moose.useClock(0, '/##', 'process')
     moose.useClock(0, '/##', 'init')
     moose.reinit()
     utils.run(0.1)
-    utils.plotTables([table])
+    utils.plotTables([table1, table2])
     
 if __name__ == '__main__':
     main()
