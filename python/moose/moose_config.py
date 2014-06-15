@@ -34,13 +34,11 @@ import time
 import os
 
 # Universal paths 
-nmlPath = '/library'
-nmlCellPath = os.path.join(nmlPath, '')
-libraryPath = os.path.join(nmlPath, '')
-cellPath = nmlCellPath
-elecPath = os.path.join(nmlPath, '')
-
+libraryPath = '/library'
+cellPath = '/cells'
 mumblePath = '/mumbl'
+nmlCellPath = '/neuroml{}'.format(cellPath)
+elecPath = '/elec'
 
 
 st = time.time()

@@ -43,8 +43,7 @@ import moose
 import moose.utils as utils 
 
 import utils as nml_utils
-
-
+from .. import moose_config as config
 
 class NetworkML():
 
@@ -241,7 +240,7 @@ class NetworkML():
         #added cells as a Neuron class.
         libcell = moose.Neuron(nml_utils.libraryPath+'/'+cellName) 
         self.populationDict[popName] = (cellName,{})
-        moose.Neutral('/cells')
+        moose.Neutral(config.cellPath)
         for instance in population.findall(".//{"+nml_utils.nml_ns+"}instance"):
             instanceid = instance.attrib['id']
             location = instance.find('./{'+nml_utils.nml_ns+'}location')
@@ -253,13 +252,17 @@ class NetworkML():
                 zrotation = 0
             ## deep copies the library cell to an instance under '/cells' named as <arg3>
             ## /cells is useful for scheduling clocks as all sim elements are in /cells
-            cellid = moose.copy(libcell,moose.Neutral('/cells'),popName+"_"+instanceid)
+            cellid = moose.copy(libcell
+                    , moose.Neutral(config.cellPath)
+                    , popName+"_"+instanceid
+                    )
+
             cell = moose.Neuron(cellid)
-            self.populationDict[popName][1][int(instanceid)]=cell
-            x = float(location.attrib['x'])*self.length_factor
-            y = float(location.attrib['y'])*self.length_factor
-            z = float(location.attrib['z'])*self.length_factor
-            nml_utils.translate_rotate(cell,x,y,z,zrotation)
+            self.populationDict[popName][1][int(instanceid)] = cell
+            x = float(location.attrib['x']) * self.length_factor
+            y = float(location.attrib['y']) * self.length_factor
+            z = float(location.attrib['z']) * self.length_factor
+            nml_utils.translate_rotate(cell, x, y, z, zrotation)
             
 
     def addProjection(self, projection):
