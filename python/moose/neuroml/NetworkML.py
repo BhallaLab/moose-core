@@ -12,12 +12,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 
-## Description: class NetworkML for loading NetworkML from file or xml element into MOOSE
-## Version 1.0 by Aditya Gilra, NCBS, Bangalore, India, 2011 for serial MOOSE
-## Version 1.5 by Niraj Dudani, NCBS, Bangalore, India, 2012, ported to parallel MOOSE
-## Version 1.6 by Aditya Gilra, NCBS, Bangalore, India, 2012, further changes for parallel MOOSE
-## Version 1.7 by Aditya Gilra, NCBS, Bangalore, India, 2013, further support for NeuroML 1.8.1
-
 
 """
 
@@ -29,6 +23,17 @@ Instantiate NetworlML class, and thence use method:
     readNetworkMLFromFile(...) to load a standalone NetworkML file, OR
     readNetworkML(...) to load from an xml.etree xml element (could be part of a
     larger NeuroML file).
+
+Version 1.0 by Aditya Gilra, NCBS, Bangalore, India, 2011 for serial MOOSE
+
+Version 1.5 by Niraj Dudani, NCBS, Bangalore, India, 2012, ported to parallel
+MOOSE
+
+Version 1.6 by Aditya Gilra, NCBS, Bangalore, India, 2012, further changes for
+parallel MOOSE
+
+Version 1.7 by Aditya Gilra, NCBS, Bangalore, India, 2013, further support for
+NeuroML 1.8.1
 
 """
 
@@ -129,7 +134,7 @@ class NetworkML():
         utils.dump("NEUROML", "Creating populations ... ")
         self.populationDict = {}
         populations = self.network.findall(".//{"+nml_utils.nml_ns+"}population")
-        [self.insertPopulationIntoLibrary(p) for p in populations]
+        [self.insertPopulation(p) for p in populations]
 
         utils.dump("NEUROML", "Creating connections ... ")
         self.projectionDict={}
@@ -211,35 +216,44 @@ class NetworkML():
                     )
             moose.connect(iclamp,'output',compartment,'injectMsg')
 
-    def insertPopulationIntoLibrary(self, population):
-        """Insert a population entry into moose-library """
+
+    def readCellFromXMLFile(self, cellName):
+        """Read cell morphology from an XML file. """
+        utils.dump("DEBUG"
+                , "Reading morphology of cell %s from a file" % cellName
+                )
+        mmlR = MorphML(self.nml_params)
+        model_filenames = (cellName+'.xml', cellName+'.morph.xml')
+        for model_filename in model_filenames:
+            model_path = nml_utils.find_first_file(model_filename,self.model_dir)
+            if model_path is not None:
+                cellDict = mmlR.readMorphMLFromFile(model_path)
+                self.cellSegmentDict.update(cellDict)
+                return True
+
+        msg = "I can not find cell morphology. I search for files "
+        msg += "{}".format(",".join(model_filenames))
+        msg += " in directory {}.".format(self.model_dir)
+        utils.dump("FATAL", msg)
+        raise IOError("Unable to find morphology file")
+
+    def insertPopulation(self, population):
+        """Insert a population entry into moose """
 
         cellName = population.attrib["cell_type"]
         popName = population.attrib["name"]
-        utils.dump("INFO", "Inserting population `%s` into library" % popName)
+        utils.dump("DEBUG"
+                , "Inserting cell %s of population %s" % (cellName, popName)
+                )
 
         ## if cell does not exist in library load it from xml file
-        if not moose.exists(nml_utils.libraryPath+'/'+cellName):
-            mmlR = MorphML(self.nml_params)
-            model_filenames = (cellName+'.xml', cellName+'.morph.xml')
-            success = False
-            for model_filename in model_filenames:
-                model_path = nml_utils.find_first_file(model_filename,self.model_dir)
-                if model_path is not None:
-                    cellDict = mmlR.readMorphMLFromFile(model_path)
-                    success = True
-                    break
-            if not success:
-                raise IOError(
-                    'For cell {0}: files {1} not found under {2}.'.format(
-                        cellName, model_filenames, self.model_dir
-                    )
-                )
-            self.cellSegmentDict.update(cellDict)
+        cellInLibrary = nml_utils.libraryPath+'/'+cellName
+        if not moose.exists(cellInLibrary):
+            self.readCellFromXMLFile(cellName)
 
         #added cells as a Neuron class.
         libcell = moose.Neuron(nml_utils.libraryPath+'/'+cellName) 
-        self.populationDict[popName] = (cellName,{})
+        self.populationDict[popName] = (cellName, {})
         moose.Neutral(config.cellPath)
         for instance in population.findall(".//{"+nml_utils.nml_ns+"}instance"):
             instanceid = instance.attrib['id']
@@ -250,13 +264,20 @@ class NetworkML():
                 zrotation = float(string.split(rotationnote.text,'=')[1])
             else:
                 zrotation = 0
-            ## deep copies the library cell to an instance under '/cells' named as <arg3>
-            ## /cells is useful for scheduling clocks as all sim elements are in /cells
+
+            # deep copies the library cell to an instance under '/cells' named
+            # as <arg3> /cells is useful for scheduling clocks as all sim
+            # elements are in /cells
+            utils.dump("INFO"
+                    , "Copying {} from library to path {} recursively".format(
+                        libcell.path
+                        , '%s/%s' % (config.cellPath, popName+'_'+instanceid)
+                        )
+                    )
             cellid = moose.copy(libcell
                     , moose.Neutral(config.cellPath)
                     , popName+"_"+instanceid
                     )
-
             cell = moose.Neuron(cellid)
             self.populationDict[popName][1][int(instanceid)] = cell
             x = float(location.attrib['x']) * self.length_factor

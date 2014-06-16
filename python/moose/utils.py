@@ -29,7 +29,6 @@ import _moose
 import plot_utils
 import verification_utils
 import print_utils
-import graph_utils
 import sim_utils
 from moose_constants import *
 
@@ -48,9 +47,6 @@ dump = print_utils.dump
 
 # Verification related function.
 verify = verification_utils.verify
-
-# Topology and graph related functions.
-writeGraphviz  = graph_utils.writeGraphviz
 
 
 def readtable(table, filename, separator=None):
