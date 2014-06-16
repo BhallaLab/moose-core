@@ -148,13 +148,18 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
         self.headerdata = headerdata
         self.undoStack = deque(maxlen=undolen)
         self.redoStack = deque(maxlen=undolen)
+        self.checkState_ = False
+
         for fieldName in self.mooseObject.getFieldNames('valueFinfo'):
             if fieldName in extra_fields :
                 continue
 
             value = self.mooseObject.getField(fieldName)
             self.fields.append(fieldName)
-        flag = QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
+        if self.mooseObject.className == "Pool":
+            self.fields.append("plot Conc")
+            self.fields.append("plot n")
+        flag = QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable
         self.fieldFlags[fieldName] = flag
 
     def rowCount(self, parent):
@@ -163,20 +168,31 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
     def columnCount(self, parent):
         return len(self.headerdata)
 
-    def setData(self, index, value, role=QtCore.Qt.EditRole):        
+    def setData(self, index, value, role=QtCore.Qt.EditRole): 
+        print "role",role
         if not index.isValid() or index.row () >= len(self.fields) or index.column() != 1:
             return False
-        value = str(value.toString()).strip() # convert Qt datastructure to Python string
-        if len(value) == 0:
-            return False
+        print(value)
         field = self.fields[index.row()]
-        oldValue = self.mooseObject.getField(field)
-        value = type(oldValue)(value)
-        self.mooseObject.setField(field, value)
-        self.undoStack.append((index, oldValue))
-        if field == 'name':
-            self.emit(QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'), self.mooseObject)
-        self.emit(QtCore.SIGNAL('dataChanged(const QModelIndex&, const QModelIndex&)'), index, index)
+        if (role == QtCore.Qt.CheckStateRole):
+            if (index.column() == 1):
+                print "index",index.row(),index.column(),value,index.flags()
+                self.checkState_ = value
+                return True
+                
+        else:
+            value = str(value.toString()).strip() # convert Qt datastructure to Python string
+            if len(value) == 0:
+                return False
+            oldValue = self.mooseObject.getField(field)
+            value = type(oldValue)(value)
+            self.mooseObject.setField(field, value)
+            self.undoStack.append((index, oldValue))
+            if field == 'name':
+                self.emit(QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'), self.mooseObject)
+            return True
+
+        self.dataChanged.emit(index, index)
         return True
     
     def undo(self):
@@ -206,7 +222,7 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
 
     def flags(self, index):
         flag =  QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
-        
+        #flag = QtCore.Qt.NoItemFlags
         if not index.isValid():
             return None
         # Replacing the `outrageous` up stuff with something sensible
@@ -217,9 +233,16 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
         setter = 'set%s' %(field_string)
         #setter = 'set_%s' % (self.fields[index.row()])
         #print " from Object setter",setter, "object",self.mooseObject, " ",self.mooseObject.getFieldNames('destFinfo');
-        if index.column() == 1 and setter in self.mooseObject.getFieldNames('destFinfo'):
-            flag |= QtCore.Qt.ItemIsEditable
+        if index.column() == 1:
+
+            if setter in self.mooseObject.getFieldNames('destFinfo'):
+                flag |= QtCore.Qt.ItemIsEditable
+            
+            if field == "plot Conc" or field == "plot n":
+                flag |= QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEditable
+
         # !! Replaced till here
+
         return flag
 
     def data(self, index, role):
@@ -230,12 +253,18 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
                 ret = QtCore.QVariant(QtCore.QString(field)+' ('+defaults.FIELD_UNITS[field]+')')
             except KeyError:
                 ret = QtCore.QVariant(QtCore.QString(field))
-        elif index.column() == 1 and (role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole):
-            try:
-                ret = self.mooseObject.getField(str(field))
-                ret = QtCore.QVariant(QtCore.QString(str(ret)))
-            except ValueError:
-                ret = None
+        elif index.column() == 1:
+            if role==QtCore.Qt.CheckStateRole:
+                if ((str(field) == "plot Conc") or (str(field) == "plot n") ):
+                    # print index.data(QtCore.Qt. ), str(field)
+                    return self.checkState_
+            elif (role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole):
+                try:
+                    if ((str(field) != "plot Conc") & (str(field) != "plot n") ):
+                        ret = self.mooseObject.getField(str(field))
+                        ret = QtCore.QVariant(QtCore.QString(str(ret)))
+                except ValueError:
+                    ret = None
         return ret 
 
     def headerData(self, col, orientation, role):
@@ -313,7 +342,7 @@ class ObjectEditDockWidget(QtGui.QDockWidget):
 def main():
     app = QtGui.QApplication(sys.argv)
     mainwin = QtGui.QMainWindow()
-    c = moose.Compartment('test_compartment')
+    c = moose.Pool('test_compartment')
     view = ObjectEditView(c, undolen=3)
     mainwin.setCentralWidget(view)
     action = QtGui.QAction('Undo', mainwin)

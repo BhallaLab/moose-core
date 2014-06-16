@@ -369,7 +369,12 @@ class MWindow(QtGui.QMainWindow):
     def getMyToolBars(self):
         if not hasattr(self, 'viewToolBar'):
             self.viewToolBar = QtGui.QToolBar('View')
-            self.viewToolBar.addActions(self.getViewActions())
+            #removing plotView from the ToolBar
+            for t in self.getViewActions():
+                if t.text() != "&Plot view":
+                    self.viewToolBar.addAction(t)   
+            #self.viewToolBar.addActions(self.getViewActions())
+
         return [self.viewToolBar]
 
     def getFileMenu(self):
