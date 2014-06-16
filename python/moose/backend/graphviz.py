@@ -17,25 +17,46 @@ __email__            = "dilawars@iitb.ac.in"
 __status__           = "Development"
 
 import sys
-import _moose
+from .. import _moose
+from .. import print_utils
 import inspect
-import print_utils as debug
 import re
 
 pathPat = re.compile(r'.+?\[\d+\]$')
 
-def getMoosePaths(pat, isRoot=True):
+def getMooseCompartments(pat, ignorePat=None):
     ''' Return a list of paths for a given pattern. '''
+    def ignore(x):
+        if ignorePat.search(x.path):
+            return False
+        return True
+
     if type(pat) != str:
         pat = pat.path
         assert type(pat) == str
-    moose_paths = [x.path for x in _moose.wildcardFind(pat)]
+
+    moose_paths = _moose.wildcardFind(pat)
+    if ignorePat:
+        moose_paths = filter(ignore, moose_paths)
     return moose_paths
 
-def writeGraphviz(filename=None, pat='/##[TYPE=Compartment]'):
+##
+# @brief Write a graphviz topology file.
+#
+# @param filename Name of the output file.
+# @param pat Genesis pattern for searching all compratments; default
+# '/##[TYPE=Compartment'
+# @param Ignore paths containing this pattern. A regular expression. 
+#
+# @return None. 
+def writeGraphviz(filename=None, pat='/##[TYPE=Compartment]', ignore=None):
     '''This is  a generic function. It takes the the pattern, search for paths
     and write a graphviz file.
     '''
+
+    ignorePat = re.compile(r'')
+    if ignore:
+        ignorePat = re.compile(r'%s'%ignore, re.I)
 
     def fix(path):
         '''Fix a given path so it can be written to a graphviz file'''
@@ -46,10 +67,9 @@ def writeGraphviz(filename=None, pat='/##[TYPE=Compartment]'):
         return path
 
         
-    pathList = getMoosePaths(pat)
-    compList = _moose.wildcardFind(pat)
+    compList = getMooseCompartments(pat, ignorePat)
     if not compList:
-        debug.dump("WARN"
+        print_utils.dump("WARN"
                 , "No compartment found"
                 , frame = inspect.currentframe()
                 )
@@ -72,15 +92,17 @@ def writeGraphviz(filename=None, pat='/##[TYPE=Compartment]'):
         else:
             p = fix(c.path)
             dot.append('\t"{}"'.format(p))
-
+    # Filter all lines which matches the ignorePat 
     dot.append('}')
     dot = '\n'.join(dot)
     if not filename:
         print(dot)
     else:
         with open(filename, 'w') as graphviz:
-            debug.dump("INFO"
-                    , "Writing compartment topology to file {}".format(filename)
+            print_utils.dump("GRAPHVIZ"
+                    , [ "Writing compartment topology to file {}".format(filename)
+                        , "Ignoring pattern : {}".format(ignorePat.pattern)
+                        ]
                     )
             graphviz.write(dot)
     return True
