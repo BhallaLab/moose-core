@@ -3,7 +3,7 @@
 """graph_utils.py: Graph related utilties. It does not require networkx library.
 It writes files to be used with graphviz.
 
-Last modified: Sat Jan 18, 2014  05:01PM
+Last modified: Wed Jun 18, 2014  02:20PM
 
 """
     
@@ -21,24 +21,35 @@ from .. import _moose
 from .. import print_utils
 import inspect
 import re
+import backend
 
 pathPat = re.compile(r'.+?\[\d+\]$')
 
-def getMooseCompartments(pat, ignorePat=None):
-    ''' Return a list of paths for a given pattern. '''
-    def ignore(x):
-        if ignorePat.search(x.path):
-            return False
-        return True
-
-    if type(pat) != str:
-        pat = pat.path
-        assert type(pat) == str
-
-    moose_paths = _moose.wildcardFind(pat)
-    if ignorePat:
-        moose_paths = filter(ignore, moose_paths)
-    return moose_paths
+##
+# @brief Given a moose object which is not Compartment, return all possible
+# paths to Compartments.
+#
+# @param obj A moose object.
+#
+# @return 
+def getConnectedCompartments(obj):
+    """List all compartments connected to this obj."""
+    if "moose.Compartment" in obj.__str__():
+        return []
+    paths = []
+    comps = []
+    obj = _moose.Neutral(obj.path)
+    paths.append(obj)
+    while len(paths) > 0:
+        source = _moose.Neutral(paths.pop())
+        targets = source.neighbors['output']
+        for t in targets:
+            t = _moose.Neutral(t)
+            if "moose.Compartment" in t.__str__():
+                comps.append(t)
+            else:
+                paths.append(t)
+    return comps
 
 ##
 # @brief Write a graphviz topology file.
@@ -54,6 +65,9 @@ def writeGraphviz(filename=None, pat='/##[TYPE=Compartment]', ignore=None):
     and write a graphviz file.
     '''
 
+    b = backend.Backend()
+    b.populateStoreHouse()
+
     ignorePat = re.compile(r'')
     if ignore:
         ignorePat = re.compile(r'%s'%ignore, re.I)
@@ -66,8 +80,14 @@ def writeGraphviz(filename=None, pat='/##[TYPE=Compartment]', ignore=None):
             path = path + '[0]'
         return path
 
-        
-    compList = getMooseCompartments(pat, ignorePat)
+    def label(text, length=4):
+        """Create label for a node """
+        text = text.replace("[", '').replace("]", '').replace('_', '')
+        text = text.replace('/', '')
+        return text[-length:]
+
+    compList = b.filterPaths(b.compartments, ignorePat)
+
     if not compList:
         print_utils.dump("WARN"
                 , "No compartment found"
@@ -75,28 +95,65 @@ def writeGraphviz(filename=None, pat='/##[TYPE=Compartment]', ignore=None):
                 )
         return None
 
-    dot = []
-    dot.append("digraph G {")
-    dot.append("\tconcentrate=true;")
+    dot = set()
+    header = "digraph mooseG{"
+    header += "\n\tconcentrate=true;\n"
     for c in compList:
         if c.neighbors['raxial']:
             for n in c.neighbors['raxial']:
                 lhs = fix(c.path)
                 rhs = fix(n.path)
-                dot.append('\t"{}" -> "{}";'.format(lhs, rhs))
+                nodeOption = "shape={},label={}".format("box3d", label(lhs))
+                dot.add('\t"{}"[{}];'.format(lhs, nodeOption))
+
+                nodeOption = "shape={},label={}".format("box3d", label(rhs))
+                dot.add('\t"{}"[{}];'.format(rhs, nodeOption))
+                dot.add('\t"{}" -> "{}";'.format(rhs, lhs))
         elif c.neighbors['axial']:
             for n in c.neighbors['axial']:
                 lhs = fix(c.path)
                 rhs = fix(n.path)
-                dot.append('\t"{}" -> "{}" [dir=back];'.format(lhs, rhs))
+                nodeOption = "shape={},label={}".format("box3d", label(lhs))
+                dot.add('\t"{}"[{}];'.format(lhs, nodeOption))
+
+                nodeOption = "shape={},label={}".format("box3d", label(rhs))
+                dot.add('\t"{}"[{}];'.format(rhs, nodeOption))
+                dot.add('\t"{}" -> "{}" [dir=back];'.format(rhs, lhs))
         else:
             p = fix(c.path)
-            dot.append('\t"{}"'.format(p))
+            nodeOption = "shape={},label={}".format("box3d", label(p))
+            dot.add('\t"{}"[{},color=blue];'.format(p, nodeOption))
+
+    # Now add the pulse-gen 
+    pulseGens = b.pulseGens
+    for p in pulseGens:
+        comps = getConnectedCompartments(p)
+        nodeName = fix(p.path)
+        nodeOption = "shape=invtriangle,label={}".format(label(nodeName))
+        dot.add('\t"{}"[{}];'.format(nodeName, nodeOption))
+        lines = [ '\t"{}" -> "{}"[color=red,label=pulse]'.format(fix(p.path)
+                , fix(c.path)) for c in comps 
+                ]
+        [dot.add(l) for l in lines]
+
+    # Now add tables
+    tables = b.tables 
+    for t in tables:
+        nodeName = fix(t.path)
+        nodeOption = "shape=folder,label={}".format(label(nodeName))
+        dot.add('\t"{}"[{}];'.format(nodeName, nodeOption))
+        sources = t.neighbors['requestOut']
+        lines += [ '\t"{}" -> "{}"[label=table,color=blue]'.format(fix(s.path)
+                , nodeName) for s in sources 
+                ]
+        [dot.add(l) for l in lines]
+
     # Filter all lines which matches the ignorePat 
-    dot.append('}')
     dot = '\n'.join(dot)
+
+    dotFile = header + "\n" + dot + "\n}"
     if not filename:
-        print(dot)
+        print(dotFile)
     else:
         with open(filename, 'w') as graphviz:
             print_utils.dump("GRAPHVIZ"
@@ -104,6 +161,6 @@ def writeGraphviz(filename=None, pat='/##[TYPE=Compartment]', ignore=None):
                         , "Ignoring pattern : {}".format(ignorePat.pattern)
                         ]
                     )
-            graphviz.write(dot)
+            graphviz.write(dotFile)
     return True
 

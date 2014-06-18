@@ -172,32 +172,36 @@ class NetworkML():
         for inputElem in inputs.findall(".//{"+nml_utils.nml_ns+"}input"):
             pulseInput = inputElem.find(".//{"+nml_utils.nml_ns+"}pulse_input")
             if pulseInput is not None:
-                self.addPulseGen(pulseInput, inputElem)
+                self.addPulseGen(pulseInput, inputElem, diffAmp=True)
 
 
-    def addPulseGen(self, pulseInput, inputElem):
-        """Add a PulseGen 
+    def addPulseGen(self, pulseInput, inputElem, diffAmp=False):
+        """ Add a PulseGen to a compartment. If diffAmp is True then insert the
+        DiffAmp between pulseGen and compartment.
+
         """
         moose.Neutral(nml_utils.elecPath)
         inputName = inputElem.attrib['name']
         pulsegen = moose.PulseGen(nml_utils.elecPath+'/pulsegen_'+inputName)
-        iclamp = moose.DiffAmp(nml_utils.elecPath+'/iclamp_'+inputName)
-        iclamp.saturation = 1e6
-        iclamp.gain = 1.0
         pulsegen.trigMode = 0 # free run
         pulsegen.baseLevel = 0.0
-        pulsegen.firstDelay = float(pulseInput.attrib['delay'])*self.Tfactor
-        pulsegen.firstWidth = float(pulseInput.attrib['duration'])*self.Tfactor
-        pulsegen.firstLevel = float(pulseInput.attrib['amplitude'])*self.Ifactor
+        pulsegen.firstDelay = float(pulseInput.attrib['delay']) * self.Tfactor
+        pulsegen.firstWidth = float(pulseInput.attrib['duration']) * self.Tfactor
+        pulsegen.firstLevel = float(pulseInput.attrib['amplitude']) * self.Ifactor
         pulsegen.secondDelay = 1e6 # to avoid repeat
         pulsegen.secondLevel = 0.0
         pulsegen.secondWidth = 0.0
-        ## do not set count to 1, let it be at 2 by default
-        ## else it will set secondDelay to 0.0 and repeat the first pulse!
-        #pulsegen.count = 1
-        moose.connect(pulsegen,'output',iclamp,'plusIn')
+
+        # If diffAmp is True then attach a differential amplifier to pulseGen
+        if diffAmp:
+            iclamp = moose.DiffAmp(nml_utils.elecPath+'/iclamp_'+inputName)
+            iclamp.saturation = 1e6
+            iclamp.gain = 1.0
+            moose.connect(pulsegen, 'output', iclamp, 'plusIn')
+
         target = inputElem.find(".//{"+nml_utils.nml_ns+"}target")
         population = target.attrib['population']
+
         for site in target.findall(".//{"+nml_utils.nml_ns+"}site"):
             cell_id = site.attrib['cell_id']
             if site.attrib.has_key('segment_id'): 
@@ -205,16 +209,21 @@ class NetworkML():
             else: 
                 segment_id = 0 # default segment_id is specified to be 0
 
-            # population is populationname,
-            # self.populationDict[population][0] is cellName
             cell_name = self.populationDict[population][0]
-            segment_path = self.populationDict[population][1][int(cell_id)].path+'/'+\
-                self.cellSegmentDict[cell_name][segment_id][0]
-            compartment = moose.Compartment(segment_path)
-            utils.dump("DEBUG"
-                    , "Connecting %s and %s" % (iclamp.path, segment_path)
-                    )
-            moose.connect(iclamp,'output',compartment,'injectMsg')
+            cellPath = self.populationDict[population][1][int(cell_id)].path
+            segmentName = self.cellSegmentDict[cell_name][segment_id][0]
+            segment_path = cellPath+'/'+segmentName
+            comp = moose.Compartment(segment_path)
+            if diffAmp:
+                utils.dump("DEBUG"
+                        , "Connecting %s and %s" % (iclamp.path, comp.path)
+                        )
+                moose.connect(iclamp,'output', comp,'injectMsg')
+            else:
+                utils.dump("DEBUG"
+                        , "Connecting %s and %s" % (pulsegen.path, comp.path)
+                        )
+                moose.connect(pulsegen, 'output', comp, 'injectMsg')
 
 
     def readCellFromXMLFile(self, cellName):
