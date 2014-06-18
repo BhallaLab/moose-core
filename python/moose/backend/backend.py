@@ -15,7 +15,7 @@
 
 """backend.py: 
 
-Last modified: Sat Jan 18, 2014  05:01PM
+Last modified: Tue Jun 17, 2014  01:59PM
 
 """
     
@@ -31,9 +31,6 @@ __status__           = "Development"
 
 import sys
 import os
-thisDir = os.path.dirname( __file__ )
-sys.path.append( os.path.join( thisDir, '..') )
-
 from .. import _moose 
 from .. import print_utils 
 from collections import defaultdict
@@ -51,24 +48,37 @@ class Backend(object):
         self.connections = set()
         self.clock = _moose.wildcardFind('/clock')[0]
 
+    def filterPaths(self, mooseObjs, ignorePat=None):
+        """Filter paths """
+        def ignore(x):
+            if ignorePat.search(x.path):
+                return False
+            return True
+        if ignorePat:
+            mooseObjs = filter(ignore, mooseObjs)
+        return mooseObjs
+
     def getComparments(self, **kwargs):
         '''Get all compartments in moose '''
         comps = _moose.wildcardFind('/##[TYPE=Compartment]')
         self.compartments = comps
+        return comps
 
     def getPulseGens(self, **kwargs):
         """ Get all the pulse generators """
         self.pulseGens = _moose.wildcardFind('/##[TYPE=PulseGen]')
+        return self.pulseGens
 
     def getTables(self, **kwargs):
         """ Get all table we are recording from"""
         self.tables = _moose.wildcardFind('/##[TYPE=Table]')
+        return self.tables
 
     def populateStoreHouse(self, **kwargs):
         """ Populate all data-structures related with Compartments, Tables, and
         pulse generators.
         """
-        print_utils.dump("INFO", "Populating data-structures to write spice netlist")
+        print_utils.dump("INFO", "Getting moose-datastructure for backend.")
         self.getComparments(**kwargs)
         self.getTables(**kwargs)
         self.getPulseGens(**kwargs)
