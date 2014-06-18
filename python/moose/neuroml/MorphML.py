@@ -416,7 +416,7 @@ class MorphML():
             # has only symcompartments -- so be careful!
 
             # just segmentName is NOT unique - eg: mitral bbmit exported from NEURON
-            mCompname = segmentName+'_'+segmentid 
+            mCompname = segmentName + '_' + segmentid 
             mComppath = self.curCell.path+'/'+mCompname
             mComp = moose.Compartment(mComppath)
             self.cellDictBySegmentId[self.curCellName][1][segmentid] = mComp
@@ -489,7 +489,7 @@ class MorphML():
         self.curComp.length = math.sqrt(
                 (self.curComp.x - self.curComp.x0)**2 + 
                 (self.curComp.y - self.curComp.y0)**2 + 
-                (self.curComp.z-self.curComp.z0)**2
+                (self.curComp.z - self.curComp.z0)**2
                 )
 
         # NeuroML specs say that if (x0,y0,z0)=(x,y,z), then round compartment
