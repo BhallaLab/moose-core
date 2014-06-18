@@ -72,6 +72,18 @@ class MorphML():
         self.temperature = nml_params['temperature']
         self.libpath = moose_config.libraryPath
 
+        # All factors here.
+        self.CMfactor = 1.0
+        self.Cfactor = 1.0
+        self.RAfactor = 1.0
+        self.RMfactor = 1.0
+        self.Rfactor = 1.0
+        self.Efactor = 1.0
+        self.Gfactor = 1.0
+        self.Ifactor = 1.0
+        self.Tfactor = 1.0
+
+
     def readMorphMLFromFile(self, filename, params={}):
         """
         specify global params as a dict (presently none implemented)
@@ -150,124 +162,18 @@ class MorphML():
         # Two ways of specifying cablegroups in neuroml 1.x <cablegroup>s with
         # list of <cable>s
         cablegroups = cell.findall(".//{"+self.mml+"}cablegroup")
-        for cablegroup in cablegroups:
-            cablegroupname = cablegroup.attrib['name']
-            self.cablegroupsDict[cablegroupname] = []
-            for cable in cablegroup.findall(".//{"+self.mml+"}cable"):
-                cableId = cable.attrib['id']
-                self.cablegroupsDict[cablegroupname].append(cableId)        
+        [ self.addCableGroup(cg) for cg in cablegroups ]
+
         ## <cable>s with list of <meta:group>s
         cables = cell.findall(".//{"+self.mml+"}cable")
-        for cable in cables:
-            cableId = cable.attrib['id']
-            cablegroups = cable.findall(".//{"+self.meta+"}group")
-            for cablegroup in cablegroups:
-                cablegroupname = cablegroup.text
-                if cablegroupname in self.cablegroupsDict.keys():
-                    self.cablegroupsDict[cablegroupname].append(cableId)
-                else:
-                    self.cablegroupsDict[cablegroupname] = [cableId]
-
-        ###############################################
+        [ self.addCable(cable) for cable in cables ]
+                ###############################################
         #### load biophysics into the compartments
         biophysics = cell.find(".//{"+self.neuroml+"}biophysics")
         if biophysics is not None:
-            if biophysics.attrib["units"] == 'Physiological Units': # see pg 219 (sec 13.2) of Book of Genesis
-                CMfactor = 1e-2 # F/m^2 from microF/cm^2
-                Cfactor = 1e-6 # F from microF
-                RAfactor = 1e1 # Ohm*m from KOhm*cm
-                RMfactor = 1e-1 # Ohm*m^2 from KOhm*cm^2
-                Rfactor = 1e-3 # Ohm from KOhm
-                Efactor = 1e-3 # V from mV
-                Gfactor = 1e1 # S/m^2 from mS/cm^2
-                Ifactor = 1e-6 # A from microA
-                Tfactor = 1e-3 # s from ms
-            else:
-                CMfactor = 1.0
-                Cfactor = 1.0
-                RAfactor = 1.0
-                RMfactor = 1.0
-                Rfactor = 1.0
-                Efactor = 1.0
-                Gfactor = 1.0
-                Ifactor = 1.0
-                Tfactor = 1.0
+            self.addBiophysics(cell, biophysics)
 
-            spec_capacitance = cell.find(".//{"+self.bio+"}spec_capacitance")
-            for parameter in spec_capacitance.findall(".//{"+self.bio+"}parameter"):
-                self.set_group_compartment_param(cell,  parameter,\
-                 'CM', float(parameter.attrib["value"])*CMfactor, self.bio)
-            spec_axial_resitance = cell.find(".//{"+self.bio+"}spec_axial_resistance")
-            for parameter in spec_axial_resitance.findall(".//{"+self.bio+"}parameter"):
-                self.set_group_compartment_param(cell,  parameter,\
-                 'RA', float(parameter.attrib["value"])*RAfactor, self.bio)
-            init_memb_potential = cell.find(".//{"+self.bio+"}init_memb_potential")
-            for parameter in init_memb_potential.findall(".//{"+self.bio+"}parameter"):
-                self.set_group_compartment_param(cell,  parameter,\
-                 'initVm', float(parameter.attrib["value"])*Efactor, self.bio)
-            for mechanism in cell.findall(".//{"+self.bio+"}mechanism"):
-                mechanismname = mechanism.attrib["name"]
-                passive = False
-                if mechanism.attrib.has_key("passive_conductance"):
-                    if mechanism.attrib['passive_conductance'] in ["true",'True','TRUE']:
-                        passive = True
-                print "Loading mechanism ", mechanismname
-                ## ONLY creates channel if at least one parameter (like gmax) is specified in the xml
-                ## Neuroml does not allow you to specify all default values.
-                ## However, granule cell example in neuroconstruct has Ca ion pool without
-                ## a parameter, applying default values to all compartments!
-                mech_params = mechanism.findall(".//{"+self.bio+"}parameter")
-                ## if no params, apply all default values to all compartments
-                if len(mech_params) == 0:
-                    for compartment in self.cellDictByCableId[self.curCellName][1].values():
-                        self.set_compartment_param(compartment,None,'default',mechanismname)  
-                ## if params are present, apply params to specified cable/compartment groups
-                for parameter in mech_params:
-                    parametername = parameter.attrib['name']
-                    if passive:
-                        if parametername in ['gmax']:
-                            self.set_group_compartment_param(cell,  parameter,\
-                             'RM', RMfactor*1.0/float(parameter.attrib["value"]), self.bio)
-                        elif parametername in ['e','erev']:
-                            self.set_group_compartment_param(cell,  parameter,\
-                             'Em', Efactor*float(parameter.attrib["value"]), self.bio)
-                        elif parametername in ['inject']:
-                            self.set_group_compartment_param(cell,  parameter,\
-                             'inject', Ifactor*float(parameter.attrib["value"]), self.bio)
-                        else:
-                            print "WARNING: Yo programmer of MorphML! You didn't implement parameter ",\
-                             parametername, " in mechanism ",mechanismname
-                    else:
-                        if parametername in ['gmax']:
-                            gmaxval = float(eval(parameter.attrib["value"],{"__builtins__":None},{}))
-                            self.set_group_compartment_param(cell,  parameter,\
-                             'Gbar', Gfactor*gmaxval, self.bio, mechanismname)
-                        elif parametername in ['e','erev']:
-                            self.set_group_compartment_param(cell,  parameter,\
-                             'Ek', Efactor*float(parameter.attrib["value"]), self.bio, mechanismname)
-                        elif parametername in ['depth']: # has to be type Ion Concentration!
-                            self.set_group_compartment_param(cell,  parameter,\
-                             'thick', self.length_factor*float(parameter.attrib["value"]),\
-                             self.bio, mechanismname)
-                        elif parametername in ['v_reset']:
-                            self.set_group_compartment_param(cell,  parameter,\
-                             'v_reset', Efactor*float(parameter.attrib["value"]),\
-                             self.bio, mechanismname)
-                        elif parametername in ['threshold']:
-                            self.set_group_compartment_param(cell,  parameter,\
-                             'threshold', Efactor*float(parameter.attrib["value"]),\
-                             self.bio, mechanismname)
-                        else:
-                            print "WARNING: Yo programmer of MorphML import! You didn't implement parameter ",\
-                             parametername, " in mechanism ",mechanismname
-
-            # Connect the Ca pools and channels
-            # Am connecting these at the very end so that all channels and pools have been created
-            # Note: this function is in moose.utils not moose.neuroml.utils !
-            utils.connect_CaConc(self.cellDictByCableId[self.curCellName][1].values(),\
-                self.temperature+neuroml_utils.ZeroCKelvin) # temperature should be in Kelvin for Nernst
-        
-        #### load connectivity / synapses into the compartments
+        # Load connectivity / synapses into the compartments
         connectivity = cell.find(".//{"+self.neuroml+"}connectivity")
         if connectivity is not None:
             for potential_syn_loc in cell.findall(".//{"+self.nml+"}potential_syn_loc"):
@@ -283,6 +189,197 @@ class MorphML():
                 , "Finished loading cell %s in library" % self.curCellName
                 )
         return {self.curCellName:self.segDict}
+
+    def addBiophysics(self, cell, biophysics):
+        """Add a biophysics """
+        # see pg 219 (sec 13.2) of Book of Genesis
+        if biophysics.attrib["units"] == 'Physiological Units':
+            self.CMfactor = 1e-2    # F/m^2 from microF/cm^2
+            self.Cfactor = 1e-6     # F from microF
+            self.RAfactor = 1e1     # Ohm*m from KOhm*cm
+            self.RMfactor = 1e-1    # Ohm*m^2 from KOhm*cm^2
+            self.Rfactor = 1e-3     # Ohm from KOhm
+            self.Efactor = 1e-3     # V from mV
+            self.Gfactor = 1e1      # S/m^2 from mS/cm^2
+            self.Ifactor = 1e-6     # A from microA
+            self.Tfactor = 1e-3     # s from ms
+
+        spec_capacitance = cell.find(".//{"+self.bio+"}spec_capacitance")
+        for parameter in spec_capacitance.findall(".//{"+self.bio+"}parameter"):
+            self.set_group_compartment_param(
+                    cell
+                    ,  parameter
+                    , 'CM'
+                    , float(parameter.attrib["value"]) * self.CMfactor
+                    , self.bio
+                    )
+
+        spec_axial_resitance = cell.find(".//{"+self.bio+"}spec_axial_resistance")
+        for parameter in spec_axial_resitance.findall(".//{"+self.bio+"}parameter"):
+            self.set_group_compartment_param(
+                    cell
+                    , parameter
+                    , 'RA'
+                    , float(parameter.attrib["value"]) * self.RAfactor
+                    , self.bio
+                    )
+
+        init_memb_potential = cell.find(".//{"+self.bio+"}init_memb_potential")
+        for parameter in init_memb_potential.findall(".//{"+self.bio+"}parameter"):
+            self.set_group_compartment_param(
+                    cell
+                    ,  parameter
+                    , 'initVm'
+                    , float(parameter.attrib["value"]) * self.Efactor
+                    , self.bio
+                    )
+
+        for mechanism in cell.findall(".//{"+self.bio+"}mechanism"):
+            mechanismname = mechanism.attrib["name"]
+            passive = False
+            if mechanism.attrib.has_key("passive_conductance"):
+                if mechanism.attrib['passive_conductance'].lower() is "true":
+                    passive = True
+
+            utils.dump("INFO", "Loading mechanism %s " %  mechanismname)
+
+            # ONLY creates channel if at least one parameter (like gmax) is
+            # specified in the xml Neuroml does not allow you to specify all
+            # default values.  However, granule cell example in neuroconstruct
+            # has Ca ion pool without a parameter, applying default values to
+            # all compartments!
+            mech_params = mechanism.findall(".//{"+self.bio+"}parameter")
+
+            # if no params, apply all default values to all compartments
+            if len(mech_params) == 0:
+                compartments = self.cellDictByCableId[self.curCellName][1].values()
+                for compartment in compartments:
+                    self.set_compartment_param(
+                            compartment
+                            , None
+                            , 'default'
+                            , mechanismname
+                            )  
+            else:
+                [ self.addMechanicalParamter(param, mechanismname, cell, passive) 
+                        for param in mech_params 
+                        ]
+            
+        # Connect the Ca pools and channels
+        # Am connecting these at the very end so that all channels and pools have been created
+        # Note: this function is in moose.utils not moose.neuroml.utils !
+        utils.connect_CaConc(self.cellDictByCableId[self.curCellName][1].values(),\
+            self.temperature+neuroml_utils.ZeroCKelvin) # temperature should be in Kelvin for Nernst
+
+
+    def addMechanicalParamter(self, parameter, mechanismname, cell, passive):
+        """Add mechanical paramter """
+        parametername = parameter.attrib['name']
+        if passive:
+            if parametername in ['gmax']:
+                self.set_group_compartment_param(
+                        cell
+                        ,  parameter
+                        , 'RM'
+                        , self.RMfactor * 1.0/float(parameter.attrib["value"])
+                        , self.bio
+                        )
+
+            elif parametername in ['e','erev']:
+                self.set_group_compartment_param(
+                        cell
+                        ,  parameter
+                        , 'Em'
+                        , self.Efactor * float(parameter.attrib["value"])
+                        , self.bio
+                        )
+
+            elif parametername in ['inject']:
+                self.set_group_compartment_param(
+                        cell
+                        ,  parameter
+                        , 'inject'
+                        , self.Ifactor * float(parameter.attrib["value"])
+                        , self.bio
+                        )
+            else:
+                utils.dump("TODO"
+                        , "Missing support for parameter "
+                        "%s in mechanism %s" % (parametername, mechanismname)
+                        )
+        else:
+            if parametername in ['gmax']:
+                gmaxval = float(parameter.attrib.get("value", "0.0"))
+                self.set_group_compartment_param(
+                        cell
+                        , parameter
+                        , 'Gbar'
+                        , self.Gfactor * gmaxval
+                        , self.bio
+                        , mechanismname
+                        )
+            elif parametername in ['e','erev']:
+                self.set_group_compartment_param(
+                        cell
+                        , parameter
+                        , 'Ek'
+                        , self.Efactor * float(parameter.attrib["value"])
+                        , self.bio
+                        , mechanismname
+                        )
+            # has to be type Ion Concentration!
+            elif parametername in ['depth']: 
+                self.set_group_compartment_param(
+                        cell
+                        , parameter
+                        , 'thick'
+                        , self.length_factor * float(parameter.attrib["value"])
+                        , self.bio
+                        , mechanismname
+                        )
+            elif parametername in ['v_reset']:
+                self.set_group_compartment_param(
+                        cell
+                        , parameter
+                        , 'v_reset'
+                        , self.Efactor * float(parameter.attrib["value"])
+                        , self.bio
+                        , mechanismname
+                        )
+            elif parametername in ['threshold']:
+                self.set_group_compartment_param(
+                        cell
+                        ,  parameter
+                        , 'threshold'
+                        , self.Efactor * float(parameter.attrib["value"])
+                        , self.bio
+                        , mechanismname
+                        )
+            else:
+                utils.dump("TODO"
+                        , "Missing support for parameter "
+                        "%s in mechanism %s" % (parametername, mechanismname)
+                        )
+
+
+    def addCable(self, cable):
+        """Add a cable """
+        cableId = cable.attrib['id']
+        cablegroups = cable.findall(".//{"+self.meta+"}group")
+        for cablegroup in cablegroups:
+            cablegroupname = cablegroup.text
+            if cablegroupname in self.cablegroupsDict.keys():
+                self.cablegroupsDict[cablegroupname].append(cableId)
+            else:
+                self.cablegroupsDict[cablegroupname] = [cableId]
+
+    def addCableGroup(self, cablegroup):
+        """Add all cable groups in NML"""
+        cablegroupname = cablegroup.attrib['name']
+        self.cablegroupsDict[cablegroupname] = []
+        for cable in cablegroup.findall(".//{"+self.mml+"}cable"):
+            cableId = cable.attrib['id']
+            self.cablegroupsDict[cablegroupname].append(cableId)        
 
     def addSegment(self, segnum, segment):
         """Add a segment to cell """
