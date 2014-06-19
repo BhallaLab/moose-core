@@ -44,9 +44,74 @@ const Cinfo* HHGate2D::initCinfo()
 			"tableB",
 			"Table of B entries",
 			&HHGate2D::setTableB,
-			&HHGate2D::getTableB
+			&HHGate2D::getTableB);
+
+		static ElementValueFinfo< HHGate2D, double > xminA( "xminA",
+			"Minimum range for lookup",
+			&HHGate2D::setXminA,
+			&HHGate2D::getXminA
 		);
-	///////////////////////////////////////////////////////
+
+		static ElementValueFinfo< HHGate2D, double > xmaxA( "xmaxA",
+			"Minimum range for lookup",
+			&HHGate2D::setXmaxA,
+			&HHGate2D::getXmaxA
+		);
+
+		static ElementValueFinfo< HHGate2D, unsigned int > xdivsA( "xdivsA",
+			"Divisions for lookup. Zero means to use linear interpolation",
+			&HHGate2D::setXdivsA,
+			&HHGate2D::getXdivsA);
+                
+		static ElementValueFinfo< HHGate2D, double > yminA( "yminA",
+			"Minimum range for lookup",
+			&HHGate2D::setYminA,
+			&HHGate2D::getYminA);
+
+		static ElementValueFinfo< HHGate2D, double > ymaxA( "ymaxA",
+			"Minimum range for lookup",
+			&HHGate2D::setYmaxA,
+			&HHGate2D::getYmaxA);
+
+		static ElementValueFinfo< HHGate2D, unsigned int > ydivsA( "ydivsA",
+			"Divisions for lookup. Zero means to use linear interpolation",
+			&HHGate2D::setYdivsA,
+			&HHGate2D::getYdivsA);
+
+		static ElementValueFinfo< HHGate2D, double > xminB( "xminB",
+			"Minimum range for lookup",
+			&HHGate2D::setXminB,
+			&HHGate2D::getXminB
+		);
+
+		static ElementValueFinfo< HHGate2D, double > xmaxB( "xmaxB",
+			"Minimum range for lookup",
+			&HHGate2D::setXmaxB,
+			&HHGate2D::getXmaxB
+		);
+
+		static ElementValueFinfo< HHGate2D, unsigned int > xdivsB( "xdivsB",
+			"Divisions for lookup. Zero means to use linear interpolation",
+			&HHGate2D::setXdivsB,
+			&HHGate2D::getXdivsB
+		);
+                
+		static ElementValueFinfo< HHGate2D, double > yminB( "yminB",
+			"Minimum range for lookup",
+			&HHGate2D::setYminB,
+			&HHGate2D::getYminB);
+
+		static ElementValueFinfo< HHGate2D, double > ymaxB( "ymaxB",
+			"Minimum range for lookup",
+			&HHGate2D::setYmaxB,
+			&HHGate2D::getYmaxB);
+
+		static ElementValueFinfo< HHGate2D, unsigned int > ydivsB( "ydivsB",
+			"Divisions for lookup. Zero means to use linear interpolation",
+			&HHGate2D::setYdivsB,
+                        &HHGate2D::getYdivsB);
+
+        ///////////////////////////////////////////////////////
 	// DestFinfos
 	///////////////////////////////////////////////////////
 	static Finfo* HHGate2DFinfos[] =
@@ -176,6 +241,127 @@ Id HHGate2D::originalChannelId() const
 {
 	return originalChanId_;
 }
+
+double HHGate2D::getXminA(const Eref& e) const
+{
+    return A_.getXmin();
+}
+
+void HHGate2D::setXminA(const Eref& e, double value)
+{
+    A_.setXmin(value);
+}
+
+double HHGate2D::getXmaxA(const Eref& e) const
+{
+    return A_.getXmax();
+}
+
+void HHGate2D::setXmaxA(const Eref& e, double value)
+{
+    A_.setXmax(value);
+}
+
+unsigned int HHGate2D::getXdivsA(const Eref& e) const
+{
+    return A_.getXdivs();
+}
+
+void HHGate2D::setXdivsA(const Eref& e, unsigned int value)
+{
+    A_.setXdivs(value);
+}
+
+double HHGate2D::getYminA(const Eref& e) const
+{
+    return A_.getYmin();
+}
+
+void HHGate2D::setYminA(const Eref& e, double value)
+{
+    A_.setYmin(value);
+}
+
+double HHGate2D::getYmaxA(const Eref& e) const
+{
+    return A_.getYmax();
+}
+
+void HHGate2D::setYmaxA(const Eref& e, double value)
+{
+    A_.setYmax(value);
+}
+
+unsigned int HHGate2D::getYdivsA(const Eref& e) const
+{
+    return A_.getYdivs();
+}
+
+void HHGate2D::setYdivsA(const Eref& e, unsigned int value)
+{
+    A_.setYdivs(value);
+}
+
+double HHGate2D::getXminB(const Eref& e) const
+{
+    return B_.getXmin();
+}
+
+void HHGate2D::setXminB(const Eref& e, double value)
+{
+    B_.setXmin(value);
+}
+
+double HHGate2D::getXmaxB(const Eref& e) const
+{
+    return B_.getXmax();
+}
+
+void HHGate2D::setXmaxB(const Eref& e, double value)
+{
+    B_.setXmax(value);
+}
+
+unsigned int HHGate2D::getXdivsB(const Eref& e) const
+{
+    return B_.getXdivs();
+}
+
+void HHGate2D::setXdivsB(const Eref& e, unsigned int value)
+{
+    B_.setXdivs(value);
+}
+
+double HHGate2D::getYminB(const Eref& e) const
+{
+    return B_.getYmin();
+}
+
+void HHGate2D::setYminB(const Eref& e, double value)
+{
+    B_.setYmin(value);
+}
+
+double HHGate2D::getYmaxB(const Eref& e) const
+{
+    return B_.getYmax();
+}
+
+void HHGate2D::setYmaxB(const Eref& e, double value)
+{
+    B_.setYmax(value);
+}
+
+unsigned int HHGate2D::getYdivsB(const Eref& e) const
+{
+    return B_.getYdivs();
+}
+
+void HHGate2D::setYdivsB(const Eref& e, unsigned int value)
+{
+    B_.setYdivs(value);
+}
+
 ///////////////////////////////////////////////////
 // Dest function definitions
 ///////////////////////////////////////////////////
