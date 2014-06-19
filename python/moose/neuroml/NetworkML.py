@@ -63,7 +63,16 @@ class NetworkML():
         self.Tfactor = 1.0
         self.Ifactor = 1.0
 
-    def readNetworkMLFromFile(self,filename,cellSegmentDict,params={}):
+    def cell_path(self, cellName, cellId):
+        """Get path of a cell from cell dictionary """
+        return self.populationDict[cellName][1][cellId].path
+
+    def segment_path(self, cellName, segmentId):
+        """Get path of a segment of a cell """
+        return self.cellSegmentDict[cellName][segmentId][0]
+
+
+    def readNetworkMLFromFile(self, filename, cellSegmentDict, params={}):
 
         """ 
         specify tweak params = {'excludePopulations':[popname1,...]
@@ -110,7 +119,7 @@ class NetworkML():
     def readNetworkML(self, network, cellSegmentDict, params={}):
         """
         This returns populationDict = {
-            'populationname1':(cellName,{int(instanceid1):moosecell, ... }) 
+            'populationname1':(cellName,{(instanceid1):moosecell, ... }) 
             , ... 
             }
 
@@ -207,10 +216,11 @@ class NetworkML():
             if site.attrib.has_key('segment_id'): 
                 segment_id = site.attrib['segment_id']
             else: 
-                segment_id = 0 # default segment_id is specified to be 0
+                # default segment_id is specified to be 0
+                segment_id = '0'
 
             cell_name = self.populationDict[population][0]
-            cellPath = self.populationDict[population][1][int(cell_id)].path
+            cellPath = self.populationDict[population][1][(cell_id)].path
             segmentName = self.cellSegmentDict[cell_name][segment_id][0]
             segment_path = cellPath+'/'+segmentName
             comp = moose.Compartment(segment_path)
@@ -288,7 +298,7 @@ class NetworkML():
                     , popName+"_"+instanceid
                     )
             cell = moose.Neuron(cellid)
-            self.populationDict[popName][1][int(instanceid)] = cell
+            self.populationDict[popName][1][instanceid] = cell
             x = float(location.attrib['x']) * self.length_factor
             y = float(location.attrib['y']) * self.length_factor
             z = float(location.attrib['z']) * self.length_factor
@@ -326,39 +336,64 @@ class NetworkML():
                     )
                 )
         weight = float(synProps.attrib['weight'])
-        threshold = float(synProps.attrib['threshold'])*self.Efactor
+        threshold = float(synProps.attrib['threshold']) * self.Efactor
+
         if 'prop_delay' in synProps.attrib:
             prop_delay = float(synProps.attrib['prop_delay'])*self.Tfactor
         elif 'internal_delay' in synProps.attrib:
             prop_delay = float(synProps.attrib['internal_delay'])*self.Tfactor
-        else: prop_delay = 0.0
+        else: 
+            prop_delay = 0.0
         for connection in projection.findall(".//{"+nml_utils.nml_ns+"}connection"):
             pre_cell_id = connection.attrib['pre_cell_id']
             post_cell_id = connection.attrib['post_cell_id']
             if 'file' not in pre_cell_id:
-                # source could be 'mitrals', self.populationDict[source][0] would be 'mitral'
+                # source could be 'mitrals', self.populationDict[source][0]
+                # would be 'mitral'
                 pre_cell_name = self.populationDict[source][0]
                 if 'pre_segment_id' in connection.attrib:
                     pre_segment_id = connection.attrib['pre_segment_id']
-                else: pre_segment_id = "0" # assume default segment 0, usually soma
-                pre_segment_path = self.populationDict[source][1][int(pre_cell_id)].path+'/'+\
-                    self.cellSegmentDict[pre_cell_name][pre_segment_id][0]
+                else:
+                    # assume default segment 0, usually soma
+                    pre_segment_id = "0" 
+                pre_segment_path = '{}/{}'.format( 
+                        self.cell_path(source, pre_cell_id)
+                        , self.segment_path(pre_cell_name, pre_segment_id)
+                        )
             else:
-                # I've removed extra excitation provided via files, so below comment doesn't apply.
-                # 'file[+<glomnum>]_<filenumber>' # glomnum is
-                # for mitral_granule extra excitation from unmodelled sisters.
-                pre_segment_path = pre_cell_id+'_'+connection.attrib['pre_segment_id']
+                # I've removed extra excitation provided via files, so below
+                # comment doesn't apply.  'file[+<glomnum>]_<filenumber>' #
+                # glomnum is for mitral_granule extra excitation from unmodelled
+                # sisters.
+                pre_segment_path = "{}_{}".format(
+                        pre_cell_id
+                        , connection.attrib['pre_segment_id']
+                        )
+
             # target could be 'PGs', self.populationDict[target][0] would be 'PG'
             post_cell_name = self.populationDict[target][0]
             if 'post_segment_id' in connection.attrib:
                 post_segment_id = connection.attrib['post_segment_id']
-            else: post_segment_id = "0" # assume default segment 0, usually soma
-            post_segment_path = self.populationDict[target][1][int(post_cell_id)].path+'/'+\
-                self.cellSegmentDict[post_cell_name][post_segment_id][0]
-            self.projectionDict[projName][2].append((syn_name, pre_segment_path, post_segment_path))
+            else: 
+                # assume default segment 0, usually soma
+                post_segment_id = '0' 
+
+            post_segment_path = "{}/{}".format(
+                    self.cell_path(target, post_cell_id)
+                    , self.segment_path(post_cell_name, post_segment_id)
+                    )
+            self.projectionDict[projName][2].append(
+                    (syn_name, pre_segment_path, post_segment_path)
+                    )
             properties = connection.findall('./{'+nml_utils.nml_ns+'}properties')
             if len(properties)==0:
-                self.connect(syn_name, pre_segment_path, post_segment_path, weight, threshold, prop_delay)
+                self.connectSyn(syn_name
+                        , pre_segment_path
+                        , post_segment_path
+                        , weight
+                        , threshold
+                        , prop_delay
+                        )
             else:
                 for props in properties:
                     synapse_type = props.attrib['synapse_type']
@@ -368,23 +403,31 @@ class NetworkML():
                             delay_override = float(props.attrib['internal_delay'])
                         else: delay_override = prop_delay
                         if weight_override != 0.0:
-                            self.connect(syn_name, pre_segment_path, post_segment_path,\
-                                weight_override, threshold, delay_override)
+                            self.connectSyn(syn_name
+                                    , pre_segment_path
+                                    , post_segment_path
+                                    , weight_override
+                                    , threshold
+                                    , delay_override
+                                    )
 
 
-    def connect(self, syn_name, pre_path, post_path, weight, threshold, delay):
+    def connectSyn(self, syn_name, pre_path, post_path, weight, threshold, delay):
+        """Connect a synapse """
         postcomp = moose.Compartment(post_path)
-        ## We usually try to reuse an existing SynChan -
-        ## event based SynChans have an array of weights and delays and can represent multiple synapses i.e.
-        ## a new element of the weights and delays array is created
-        ## every time a 'synapse' message connects to the SynChan (from 'event' of spikegen)
-        ## BUT for a graded synapse with a lookup table output connected to 'activation' message,
-        ## not to 'synapse' message, we make a new synapse everytime
-        ## ALSO for a saturating synapse i.e. KinSynChan, we always make a new synapse
-        ## as KinSynChan is not meant to represent multiple synapses
+        # We usually try to reuse an existing SynChan - event based SynChans
+        # have an array of weights and delays and can represent multiple
+        # synapses i.e.  a new element of the weights and delays array is
+        # created every time a 'synapse' message connects to the SynChan (from
+        # 'event' of spikegen). BUT for a graded synapse with a lookup table
+        # output connected to 'activation' message, not to 'synapse' message, we
+        # make a new synapse everytime ALSO for a saturating synapse i.e.
+        # KinSynChan, we always make a new synapse as KinSynChan is not meant to
+        # represent multiple synapses
         libsyn = moose.SynChan(nml_utils.libraryPath+'/'+syn_name)
         gradedchild = utils.get_child_Mstring(libsyn,'graded')
-        if libsyn.className == 'KinSynChan' or gradedchild.value == 'True': # create a new synapse
+        # create a new synapse
+        if libsyn.className == 'KinSynChan' or gradedchild.value == 'True': 
             syn_name_full = syn_name+'_'+utils.underscorize(pre_path)
             self.make_new_synapse(syn_name, postcomp, syn_name_full)
         else:
@@ -392,68 +435,80 @@ class NetworkML():
             syn_name_full = syn_name
             if not moose.exists(post_path+'/'+syn_name_full):
                 self.make_new_synapse(syn_name, postcomp, syn_name_full)
-        ## moose.element is a function that checks if path exists,
-        ## and returns the correct object, here SynChan
-        syn = moose.element(post_path+'/'+syn_name_full) # wrap the synapse in this compartment
-        ### SynChan would have created a new synapse if it didn't exist at the given path
-        #syn = moose.SynChan(post_path+'/'+syn_name_full) # wrap the synapse in this compartment
-        gradedchild = utils.get_child_Mstring(syn,'graded')
-        #### weights are set at the end according to whether the synapse is graded or event-based
 
-        #### connect pre-comp Vm (if graded) OR spikegen/timetable (if event-based) to the synapse
-        ## I rely on second term below not being evaluated if first term is None; else None.value gives error.
-        if gradedchild is not None and gradedchild.value=='True': # graded synapse
+        # moose.element is a function that checks if path exists, and returns
+        # the correct object, here SynChan
+        # wrap the synapse in this compartment
+        syn = moose.element(post_path+'/'+syn_name_full) 
+
+        gradedchild = utils.get_child_Mstring(syn,'graded')
+
+        # weights are set at the end according to whether the synapse is graded
+        # or event-based
+
+        # connect pre-comp Vm (if graded) OR spikegen/timetable (if event-based)
+        # to the synapse I rely on second term below not being evaluated if
+        # first term is None; else None.value gives error.
+        if gradedchild is not None and gradedchild.value == 'True':
             table = moose.Table(syn.path+"/graded_table")
-            #### always connect source to input - else 'cannot create message' error.
+
+            # always connect source to input - else 'cannot create message'
+            # error.
             precomp = moose.Compartment(pre_path)
             moose.connect(precomp,"VmOut",table,"msgInput")
-            ## since there is no weight field for a graded synapse
-            ## (no 'synapse' message connected),
-            ## I set the Gbar to weight*Gbar
+
+            # since there is no weight field for a graded synapse (no 'synapse'
+            # message connected), I set the Gbar to weight*Gbar
             syn.Gbar = weight*syn.Gbar
-        else: # Event based synapse
-            ## synapse could be connected to spikegen at pre-compartment OR a file!
+        else: 
+            # Event based synapse: synapse could be connected to spikegen at
+            # pre-compartment OR a file!
             if 'file' not in pre_path:
-                ## element() can return either Compartment() or IzhikevichNrn(),
-                ## since it queries and wraps the actual object
+                # element() can return either Compartment() or IzhikevichNrn(),
+                # since it queries and wraps the actual object
                 precomp = moose.element(pre_path)
-                ## if spikegen for this synapse doesn't exist in this compartment, create it
-                ## spikegens for different synapse_types can have different thresholds
-                ## but an integrate and fire spikegen supercedes all other spikegens
+
+                # if spikegen for this synapse doesn't exist in this
+                # compartment, create it spikegens for different synapse_types
+                # can have different thresholds but an integrate and fire
+                # spikegen supercedes all other spikegens
                 if not moose.exists(pre_path+'/IaF_spikegen'):
                     if not moose.exists(pre_path+'/'+syn_name+'_spikegen'):
-                        ## create new spikegen
+                        # create new spikegen
                         spikegen = moose.SpikeGen(pre_path+'/'+syn_name+'_spikegen')
-                        ## connect the compartment Vm to the spikegen
+                        # connect the compartment Vm to the spikegen
                         moose.connect(precomp,"VmOut",spikegen,"Vm")
-                        ## spikegens for different synapse_types can have different thresholds
+                        # spikegens for different synapse_types can have
+                        # different thresholds
                         spikegen.threshold = threshold
-                        spikegen.edgeTriggered = 1 # This ensures that spike is generated only on leading edge.
-                        ## usually events are raised at every time step that Vm > Threshold,
-                        ## can set either edgeTriggered as above or refractT
-                        #spikegen.refractT = 0.25e-3
-                    ## wrap the existing or newly created spikegen in this compartment
+
+                        # This ensures that spike is generated only on leading edge.
+                        spikegen.edgeTriggered = 1 
+
+                    # wrap the existing or newly created spikegen in this
+                    # compartment
                     spikegen = moose.SpikeGen(pre_path+'/'+syn_name+'_spikegen')
                 else:
                     spikegen = moose.SpikeGen(pre_path+'/IaF_spikegen')
-                ## connect the spikegen to the synapse
-                ## note that you need to use Synapse (auto-created) under SynChan
-                ## to get/set weights , addSpike-s etc.
-                ## can get the Synapse element by moose.Synapse(syn.path+'/synapse') or syn.synapse
-                ## Synpase is an array element, first add to it, to addSpike-s, get/set weights, etc.
+
+                # connect the spikegen to the synapse note that you need to use
+                # Synapse (auto-created) under SynChan to get/set weights ,
+                # addSpike-s etc.  can get the Synapse element by
+                # moose.Synapse(syn.path+'/synapse') or syn.synapse Synpase is
+                # an array element, first add to it, to addSpike-s, get/set
+                # weights, etc.
                 syn.numSynapses += 1
-                ## above works, but below gives me an error sayin getNum_synapse not found
-                ## but both work in Demos/snippets/lifcomp.py
-                #syn.synapse.num += 1
-                ## see Demos/snippets/synapse.py for an example of 
-                ## how to connect multiple SpikeGens to the same SynChan
+
+                # above works, but below gives me an error sayin getNum_synapse
+                # not found but both work in Demos/snippets/lifcomp.py see
+                # Demos/snippets/synapse.py for an example of how to connect
+                # multiple SpikeGens to the same SynChan
                 m = moose.connect(spikegen, 'spikeOut',
                                     syn.synapse[-1], 'addSpike', 'Single')
             else:
-                # if connected to a file, create a timetable,
-                # put in a field specifying the connected filenumbers to this segment,
-                # and leave it for simulation-time connection
-                ## pre_path is 'file[+<glomnum>]_<filenum1>[_<filenum2>...]' i.e. glomnum could be present
+                # if connected to a file, create a timetable, put in a field
+                # specifying the connected filenumbers to this segment, and
+                # leave it for simulation-time connection
                 filesplit = pre_path.split('+')
                 if len(filesplit) == 2:
                     glomsplit = filesplit[1].split('_',1)
@@ -464,55 +519,69 @@ class NetworkML():
                     filenums = pre_path.split('_',1)[1]
                 tt_path = postcomp.path+'/'+syn_name_full+glomstr+'_tt'
                 if not moose.exists(tt_path):
-                    ## if timetable for this synapse doesn't exist in this compartment, create it,
-                    ## and add the field 'fileNumbers'
+                    # if timetable for this synapse doesn't exist in this
+                    # compartment, create it, and add the field 'fileNumbers'
                     tt = moose.TimeTable(tt_path)
                     tt_filenums = moose.Mstring(tt_path+'/fileNumbers')
                     tt_filenums.value = filenums
-                    ## Be careful to connect the timetable only once while creating it as below:
-                    ## note that you need to use Synapse (auto-created) under SynChan
-                    ## to get/set weights , addSpike-s etc.
-                    ## can get the Synapse element by moose.Synapse(syn.path+'/synapse') or syn.synapse
-                    ## Synpase is an array element, first add to it, to addSpike-s, get/set weights, etc.
+
+                    # Be careful to connect the timetable only once while
+                    # creating it as below: note that you need to use Synapse
+                    # (auto-created) under SynChan to get/set weights ,
+                    # addSpike-s etc.  can get the Synapse element by
+                    # moose.Synapse(syn.path+'/synapse') or syn.synapse Synpase
+                    # is an array element, first add to it, to addSpike-s,
+                    # get/set weights, etc.
                     syn.numSynapses += 1
-                    ## above works, but below gives me an error sayin getNum_synapse not found
-                    ## but both work in Demos/snippets/lifcomp.py
-                    #syn.synapse.num += 1
+
+                    # above works, but below gives me an error sayin
+                    # getNum_synapse not found but both work in
+                    # Demos/snippets/lifcomp.py
                     m = moose.connect(tt,"eventOut",syn.synapse[-1],"addSpike","Single")
                 else:
-                    ## if it exists, append file number to the field 'fileNumbers'
-                    ## append filenumbers from 'file[+<glomnum>]_<filenumber1>[_<filenumber2>...]'
+                    # if it exists, append file number to the field
+                    # 'fileNumbers' append filenumbers from
+                    # 'file[+<glomnum>]_<filenumber1>[_<filenumber2>...]'
                     tt_filenums = moose.Mstring(tt_path+'/fileNumbers')
                     tt_filenums.value += '_' + filenums
-            #### syn.Gbar remains the same, but we play with the weight which is a factor to Gbar
-            #### The delay and weight can be set only after connecting a spike event generator.
-            #### delay and weight are arrays: multiple event messages can be connected to a single synapse
-            ## first argument below is the array index, we connect to the latest synapse created above
-            ## But KinSynChan ignores weight of the synapse, so set the Gbar for it
+
+            # syn.Gbar remains the same, but we play with the weight which is a
+            # factor to Gbar The delay and weight can be set only after
+            # connecting a spike event generator.  delay and weight are arrays:
+            # multiple event messages can be connected to a single synapse first
+            # argument below is the array index, we connect to the latest
+            # synapse created above But KinSynChan ignores weight of the
+            # synapse, so set the Gbar for it
             if libsyn.className == 'KinSynChan':
                 syn.Gbar = weight*syn.Gbar
             else:
-                ## note that you need to use Synapse (auto-created) under SynChan
-                ## to get/set weights , addSpike-s etc.
-                ## can get the Synpase element by moose.Synapse(syn.path+'/synapse') or syn.synapse
+                # note that you need to use Synapse (auto-created) under SynChan
+                # to get/set weights , addSpike-s etc.  can get the Synpase
+                # element by moose.Synapse(syn.path+'/synapse') or syn.synapse
                 syn.synapse[-1].weight = weight
             syn.synapse[-1].delay = delay # seconds
-            #print 'len = ',len(syn.synapse)
-            #for i,syn_syn in enumerate(syn.synapse):
-            #    print i,'th weight =',syn_syn.weight,'\n'
 
     def make_new_synapse(self, syn_name, postcomp, syn_name_full):
-        ## if channel does not exist in library load it from xml file
+        # if channel does not exist in library load it from xml file
         if not moose.exists(nml_utils.libraryPath+'/'+syn_name):
             cmlR = ChannelML(self.nml_params)
             cmlR.readChannelMLFromFile(syn_name+'.xml')
-        ## deep copies the library synapse to an instance under postcomp named as <arg3>
-        synid = moose.copy(moose.Neutral(nml_utils.libraryPath+'/'+syn_name),postcomp,syn_name_full)
+
+        # deep copies the library synapse to an instance under postcomp named as
+        # <arg3>
+        synid = moose.copy(
+                moose.Neutral(nml_utils.libraryPath+'/'+syn_name)
+                , postcomp
+                , syn_name_full
+                )
         syn = moose.SynChan(synid)
         childmgblock = utils.get_child_Mstring(syn,'mgblockStr')
-        #### connect the post compartment to the synapse
-        if childmgblock.value=='True': # If NMDA synapse based on mgblock, connect to mgblock
+
+        # connect the post compartment to the synapse
+        # If NMDA synapse based on mgblock, connect to mgblock
+        if childmgblock.value == 'True': 
             mgblock = moose.Mg_block(syn.path+'/mgblock')
             moose.connect(postcomp,"channel", mgblock, "channel")
-        else: # if SynChan or even NMDAChan, connect normally
-            moose.connect(postcomp,"channel", syn, "channel")
+        # if SynChan or even NMDAChan, connect normally
+        else: 
+            moose.connect(postcomp, "channel", syn, "channel")
