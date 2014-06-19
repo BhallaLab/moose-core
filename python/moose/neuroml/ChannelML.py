@@ -108,19 +108,27 @@ class ChannelML():
             nernst_params = string.split(nernstnote.text,',')
             if nernst_params[0] == 'Nernst':
                 nernstMstring = moose.Mstring(moosechannel.path+'/nernst_str')
-                nernstMstring.value = str( float(string.split(nernst_params[1],'=')[1]) * concfactor ) + \
-                                        ',' + str( int(string.split(nernst_params[2],'=')[1]) )
-        
+                nernstMstring.value = '{},{}'.format(
+                        float(nernst_params[1].split('=')[1]) * concfactor
+                        , nernst_params[2].split('=')[2]
+                        )
         gates = IVrelation.findall('./{'+self.cml+'}gate')
-        if len(gates)>3:
-            print "Sorry! Maximum x, y, and z (three) gates are possible in MOOSE/Genesis"
+
+        if len(gates) > 3:
+            utils.dump("FATAL"
+                    , "Maximum x, y, and z (three) gates are possible in MOOSE/Genesis"
+                    , frame = inspect.currentframe()
+                    )
             sys.exit()
-        gate_full_name = [ 'gateX', 'gateY', 'gateZ' ] # These are the names that MOOSE uses to create gates.
-        ## if impl_prefs tag is present change VMIN, VMAX and NDIVS
+
+        # These are the names that MOOSE uses to create gates.
+        gate_full_name = [ 'gateX', 'gateY', 'gateZ' ] 
+
+        # if impl_prefs tag is present change VMIN, VMAX and NDIVS
         impl_prefs = channelElement.find('./{'+self.cml+'}impl_prefs')
         if impl_prefs is not None:
             table_settings = impl_prefs.find('./{'+self.cml+'}table_settings')
-            ## some problem here... disable
+            # some problem here... disable
             VMIN_here = float(table_settings.attrib['min_v'])
             VMAX_here = float(table_settings.attrib['max_v'])
             NDIVS_here = int(table_settings.attrib['table_divisions'])
@@ -133,6 +141,7 @@ class ChannelML():
             VMAX_here = utils.VMAX/Vfactor
             NDIVS_here = utils.NDIVS
             dv_here = utils.dv/Vfactor
+
         offset = IVrelation.find('./{'+self.cml+'}offset')
         if offset is None: vNegOffset = 0.0
         else: vNegOffset = float(offset.attrib['value'])

@@ -61,17 +61,23 @@ from xml.etree import cElementTree as ET
 class MorphML():
 
     def __init__(self,nml_params):
-        self.neuroml='http://morphml.org/neuroml/schema'
-        self.bio='http://morphml.org/biophysics/schema'
-        self.mml='http://morphml.org/morphml/schema'
-        self.nml='http://morphml.org/networkml/schema'
-        self.meta='http://morphml.org/metadata/schema'
-        self.cellDictBySegmentId={}
-        self.cellsInCable={}
+        self.neuroml = 'http://morphml.org/neuroml/schema'
+        self.bio = 'http://morphml.org/biophysics/schema'
+        self.mml = 'http://morphml.org/morphml/schema'
+        self.nml = 'http://morphml.org/networkml/schema'
+        self.meta = 'http://morphml.org/metadata/schema'
+        self.cellDictBySegmentId = {}
+        self.cellsInCable = {}
         self.nml_params = nml_params
         self.model_dir = nml_params['model_dir']
         self.temperature = nml_params['temperature']
         self.libpath = moose_config.libraryPath
+
+        self.curCableId = ''
+        self.curSegId = ''
+        self.curComp = None
+        self.curDiameter = 0.0
+        self.curDiaNums = 0
 
         # All factors here.
         self.CMfactor = 1.0
@@ -100,7 +106,6 @@ class MorphML():
             params['lengthUnits'] = neuroml_element.attrib['lengthUnits']
             cellDict = self.readMorphML(cell, params)
             cellsDict.update(cellDict)
-        
         return cellsDict
 
     def readMorphML(self, cell, params={}):
@@ -134,7 +139,9 @@ class MorphML():
                 )
 
         #using moose Neuron class - in previous version 'Cell' class Chaitanya
-        self.curCell = moose.Neuron(self.libpath+'/'+self.curCellName)
+        self.curCell = moose.Neuron(
+                "{}/{}".format(self.libpath, self.curCellName)
+                )
         
         self.cellDictBySegmentId[self.curCellName] = [self.curCell,{}]
         self.cellsInCable[self.curCellName] = [self.curCell,{}]
@@ -148,14 +155,8 @@ class MorphML():
         # segments of a compartment/section have the same cableId.
         # Function findall() returns elements in document order:
 
-        self.curCableId = ''
-        self.curSegId = ''
-        self.curComp = None
-        self.curDiameter = 0.0
-        self.curDiaNums = 0
         segments = cell.findall(".//{"+self.mml+"}segment")
-        for segnum,segment in enumerate(segments):
-            self.addSegment(segnum, segment)
+        [ self.addSegment(s) for s in segments ]
         
         # load cablegroups into a dictionary
         self.cableGroup = {}
@@ -177,19 +178,41 @@ class MorphML():
         # Load connectivity / synapses into the compartments
         connectivity = cell.find(".//{"+self.neuroml+"}connectivity")
         if connectivity is not None:
-            for potential_syn_loc in cell.findall(".//{"+self.nml+"}potential_syn_loc"):
-                if 'synapse_direction' in potential_syn_loc.attrib.keys():
-                    if potential_syn_loc.attrib['synapse_direction'] in ['post']:
-                        self.set_group_compartment_param(cell,  potential_syn_loc,\
-                         'synapse_type', potential_syn_loc.attrib['synapse_type'], self.nml, mechName='synapse')
-                    if potential_syn_loc.attrib['synapse_direction'] in ['pre']:
-                        self.set_group_compartment_param(cell,  potential_syn_loc,\
-                         'spikegen_type', potential_syn_loc.attrib['synapse_type'], self.nml, mechName='spikegen')
+            potential_syn_locs = cell.findall(".//{"+self.nml+"}potential_syn_loc")
+            [ self.addSynaseLocation(cell, loc) for loc in potential_syn_locs ]
 
         utils.dump("MORPHML"
                 , "Finished loading cell %s in library" % self.curCellName
                 )
         return {self.curCellName:self.segDict}
+
+    
+    def addSynaseLocation(self, cell, potentialSynLoc):
+        """ Add connectivity XML element of NML to moose """
+        if 'synapse_direction' in potentialSynLoc.attrib.keys():
+            if potentialSynLoc.attrib['synapse_direction'] == 'post':
+                self.set_group_compartment_param(cell
+                        , potentialSynLoc
+                        , 'synapse_type'
+                        , potentialSynLoc.attrib['synapse_type']
+                        , self.nml
+                        , mechName='synapse'
+                        )
+            if potentialSynLoc.attrib['synapse_direction'] == 'pre':
+                self.set_group_compartment_param(cell
+                        , potentialSynLoc
+                        , 'spikegen_type'
+                        , potentialSynLoc.attrib['synapse_type']
+                        , self.nml
+                        , mechName='spikegen'
+                        )
+        else:
+            utils.dump("INFO"
+                    , "No synapse_direction is found in potential_syn_loc "
+                    "attributes. "
+                    "Available attributes are : %s " % potentialSynLoc.attrib 
+                    )
+
 
     def addBiophysics(self, cell, biophysics):
         """Add a biophysics """
@@ -263,8 +286,8 @@ class MorphML():
                             )  
             else:
                 [ self.addMechanicalParamter(param, mechName, cell, passive) 
-                        for param in mech_params 
-                        ]
+                    for param in mech_params 
+                    ]
             
         # Connect the Ca pools and channels
         # Am connecting these at the very end so that all channels and pools have been created
@@ -384,7 +407,7 @@ class MorphML():
             cableId = cable.attrib['id']
             self.cableGroup[cableGroup].append(cableId)        
 
-    def addSegment(self, segnum, segment):
+    def addSegment(self, segment):
         """Add a segment to cell """
 
         segmentName = segment.attrib['name']
@@ -574,7 +597,7 @@ class MorphML():
         # synapse being added to the compartment
         elif mechName is 'synapse': 
             # get segment id from compartment name
-            segid = string.split(compartment.name, '_')[-1] 
+            segid = (string.split(compartment.name, '_')[-1]) 
             self.segDict[segid][5].append(value)
             return
 
@@ -675,10 +698,5 @@ class MorphML():
         if neuroml_utils.neuroml_debug: 
             utils.dump("DEBUG"
                     , "Setting %s for %s value %s " % (name, compartment.path, value)
-                    )
-        else:
-            utils.dump("TODO"
-                    , "Implement parameter %s support " % name
-                    , inspect.currentframe()
                     )
 
