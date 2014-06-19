@@ -41,7 +41,7 @@ def main():
     utils.parser
     nml.loadNeuroML_L123('./two_cells_nml_1.8/two_cells.nml')
     #mumbl.loadMumbl("./two_cells_nml_1.8/mumbl.xml")
-    table1 = utils.recordTarget('/tableA', '/library/cellA/Dend_37_41', 'vm')
+    table1 = utils.recordTarget('/tableA', '/cells/purkinjeGroup_0/Dend_37_41', 'vm')
     table2 = utils.recordTarget('/tableB', '/cells/granuleGroup_0/Soma_0', 'vm')
     moose.setClock(0, 5e-6)
     moose.useClock(0, '/##', 'process')
