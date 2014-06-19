@@ -99,6 +99,7 @@ def writeGraphviz(filename=None, pat='/##[TYPE=Compartment]', ignore=None):
     header = "digraph mooseG{"
     header += "\n\tconcentrate=true;\n"
     for c in compList:
+        # Each compartment has neighbours connected by axial resistance.
         if c.neighbors['raxial']:
             for n in c.neighbors['raxial']:
                 lhs = fix(c.path)
@@ -123,6 +124,11 @@ def writeGraphviz(filename=None, pat='/##[TYPE=Compartment]', ignore=None):
             p = fix(c.path)
             nodeOption = "shape={},label={}".format("box3d", label(p))
             dot.add('\t"{}"[{},color=blue];'.format(p, nodeOption))
+
+        # Each comparment might also have a synapse on it.
+        if c.neighbors['channel']:
+            for chan in c.neighbors['channel']:
+                print chan
 
     # Now add the pulse-gen 
     pulseGens = b.pulseGens
