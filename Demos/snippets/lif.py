@@ -90,7 +90,8 @@ def setupmodel(modelpath, iaf_Rm, iaf_Cm, pulse_interval):
         'iaf': iaf,
         'synchan': syn,
         'spikegen': sg,
-        'pulsegen': pg}
+        'pulsegen': pg
+        }
 
 if __name__ == '__main__':
     modelpath = '/lif_demo'

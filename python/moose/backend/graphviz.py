@@ -51,6 +51,35 @@ def getConnectedCompartments(obj):
                 paths.append(t)
     return comps
 
+def addChannel(c, chan, dot):
+    """Find synapse and add to dot."""
+    for sc in chan:
+       if "moose.SynChan" not in sc.__str__():
+           continue
+       for synapse in sc.synapse:
+           spikeSources =  synapse.neighbors['addSpike']
+           for ss in spikeSources:
+               for s in ss:
+                   for vmSource in  s.neighbors['Vm']:
+                       edgeLabel = "color=red,label=synapse,arrowhead=dot"
+                       dot.add('"{}" -> "{}" [{}]'.format(
+                           fix(c.path), fix(vmSource.path), edgeLabel)
+                           )
+
+def fix(path):
+    '''Fix a given path so it can be written to a graphviz file'''
+    # If no [0] is at end of the path then append it.
+    global pathPat
+    if not pathPat.match(path):
+        path = path + '[0]'
+    return path
+
+def label(text, length=4):
+    """Create label for a node """
+    text = text.replace("[", '').replace("]", '').replace('_', '')
+    text = text.replace('/', '')
+    return text[-length:]
+
 ##
 # @brief Write a graphviz topology file.
 #
@@ -71,20 +100,6 @@ def writeGraphviz(filename=None, pat='/##[TYPE=Compartment]', ignore=None):
     ignorePat = re.compile(r'')
     if ignore:
         ignorePat = re.compile(r'%s'%ignore, re.I)
-
-    def fix(path):
-        '''Fix a given path so it can be written to a graphviz file'''
-        # If no [0] is at end of the path then append it.
-        global pathPat
-        if not pathPat.match(path):
-            path = path + '[0]'
-        return path
-
-    def label(text, length=4):
-        """Create label for a node """
-        text = text.replace("[", '').replace("]", '').replace('_', '')
-        text = text.replace('/', '')
-        return text[-length:]
 
     compList = b.filterPaths(b.compartments, ignorePat)
 
@@ -126,9 +141,8 @@ def writeGraphviz(filename=None, pat='/##[TYPE=Compartment]', ignore=None):
             dot.add('\t"{}"[{},color=blue];'.format(p, nodeOption))
 
         # Each comparment might also have a synapse on it.
-        if c.neighbors['channel']:
-            for chan in c.neighbors['channel']:
-                print chan
+        chans = c.neighbors['channel']
+        [addChannel(c, chan, dot) for chan in chans]
 
     # Now add the pulse-gen 
     pulseGens = b.pulseGens
