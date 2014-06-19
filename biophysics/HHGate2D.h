@@ -53,23 +53,15 @@ class HHGate2D
 		/**
 		 * Returns the A interpol
 		 */
-		Interpol2D* getTableA( unsigned int i );
+                vector< vector< double > > getTableA(const Eref& e) const;
+                void setTableA(const Eref& e, vector< vector< double > > value);
 
-		/**
-		 * Dummy access func for Interpols. Always returns 1.
-		 */
-		unsigned int getNumTable() const;
-
-		/**
-		 * Dummy assignment function for the number of interpols:
-		 * We always have both interpols 
-		 */
-		void setNumTable( unsigned int num );
 
 		/**
 		 * Returns the B interpol
 		 */
-		Interpol2D* getTableB( unsigned int i );
+                vector< vector< double > > getTableB( const Eref& e ) const;
+                void setTableB( const Eref& e, vector< vector< double > > value);
 
 		static const Cinfo* initCinfo();
 	private:
