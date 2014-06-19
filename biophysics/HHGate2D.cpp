@@ -120,7 +120,19 @@ const Cinfo* HHGate2D::initCinfo()
 		&B,			// ReadOnlyLookupValue
 		&tableA,	// ElementValue
 		&tableB,	// ElementValue
-	};
+                &xminA,
+                &xmaxA,
+                &xdivsA,
+                &yminA,
+                &ymaxA,
+                &ydivsA,
+                &xminB,
+                &xmaxB,
+                &xdivsB,
+                &yminB,
+                &ymaxB,
+                &ydivsB
+        };
 
 	static string doc[] =
 	{
