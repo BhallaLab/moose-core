@@ -33,22 +33,18 @@ const Cinfo* HHGate2D::initCinfo()
 			"lookupB: Look up B gate value from two doubles in a vector.",
 			&HHGate2D::lookupB );
 
-		static FieldElementFinfo< HHGate2D, Interpol2D > tableA( 
+		static ElementValueFinfo< HHGate2D, vector< vector< double > > > tableA( 
 			"tableA",
 			"Table of A entries",
-			Interpol2D::initCinfo(),
-			&HHGate2D::getTableA,
-			&HHGate2D::setNumTable,
-			&HHGate2D::getNumTable
+                        &HHGate2D::setTableA,
+			&HHGate2D::getTableA
 		);
 
-		static FieldElementFinfo< HHGate2D, Interpol2D > tableB( 
+		static ElementValueFinfo< HHGate2D, vector< vector< double > > > tableB( 
 			"tableB",
 			"Table of B entries",
-			Interpol2D::initCinfo(),
-			&HHGate2D::getTableB,
-			&HHGate2D::setNumTable,
-			&HHGate2D::getNumTable
+			&HHGate2D::setTableB,
+			&HHGate2D::getTableB
 		);
 	///////////////////////////////////////////////////////
 	// DestFinfos
@@ -64,7 +60,7 @@ const Cinfo* HHGate2D::initCinfo()
 	static string doc[] =
 	{
 		"Name", "HHGate2D",
-		"Author", "Niraj Dudani, 2009, NCBS",
+		"Author", "Niraj Dudani, 2009, NCBS. Updated by Subhasis Ray, 2014, NCBS.",
 		"Description", "HHGate2D: Gate for Hodkgin-Huxley type channels, equivalent to the "
 		"m and h terms on the Na squid channel and the n term on K. "
 		"This takes the voltage and state variable from the channel, "
@@ -90,7 +86,7 @@ static const Cinfo* hhGate2DCinfo = HHGate2D::initCinfo();
 ///////////////////////////////////////////////////
 HHGate2D::HHGate2D()
 	: originalChanId_(0),
-		originalGateId_(0)
+          originalGateId_(0)
 {;}
 
 HHGate2D::HHGate2D( Id originalChanId, Id originalGateId )
@@ -143,26 +139,25 @@ void HHGate2D::lookupBoth( double v, double c, double* A, double* B ) const
 // Access functions for Interpols
 ///////////////////////////////////////////////////
 
-Interpol2D* HHGate2D::getTableA( unsigned int i )
+vector< vector< double > > HHGate2D::getTableA( const Eref& e ) const
 {
-	return &A_;
+    return A_.getTableVector();
 }
 
-Interpol2D* HHGate2D::getTableB( unsigned int i )
+void HHGate2D::setTableA(const Eref& e, vector< vector< double > > value )
 {
-	return &B_;
+    A_.setTableVector(value);
 }
 
-unsigned int HHGate2D::getNumTable() const
+vector< vector< double > > HHGate2D::getTableB(const Eref& e) const
 {
-	return 1;
+    return B_.getTableVector();
 }
 
-void HHGate2D::setNumTable( unsigned int i)
+void HHGate2D::setTableB(const Eref& e, vector< vector< double > > value )
 {
-	;
+    B_.setTableVector(value);
 }
-
 
 ///////////////////////////////////////////////////
 // Functions to check if this is original or copy
