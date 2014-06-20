@@ -8,3 +8,4 @@ fi
 script_name="$1"
 python $script_name
 dot -Teps $script_name.dot > $script_name.eps
+evince $script_name.eps &

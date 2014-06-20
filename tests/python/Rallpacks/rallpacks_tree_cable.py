@@ -42,6 +42,7 @@ import moose.utils as utils
 import compartment as comp
 import pylab
 import numpy as np
+import moose.backend.graphviz as graphviz
 
 def nextValuePowerOf2Law( d1, power=2.0/3.0  ):
     ''' Given a value, compute the next value using 2^power law '''
@@ -182,10 +183,11 @@ def main( args ):
     table1 = binCable.recordAt( depth = d-1, index = -1)
     print("[STIM] Simulating a cable with depth {}".format(d))
     binCable.simulate( simTime = args['run_time'], simDt = args['dt'] )
-    utils.plotTables( [ table0, table1 ]
-            , file = args['output']
-            , xscale = args['dt']
-            )
+    #utils.plotTables( [ table0, table1 ]
+    #        , file = args['output']
+    #        , xscale = args['dt']
+    #        )
+    graphviz.writeGraphviz(__file__+".dot") #, compartment_shape='point')
 
 if __name__ == '__main__':
     import argparse
