@@ -60,9 +60,11 @@ class Backend(object):
 
     def getComparments(self, **kwargs):
         '''Get all compartments in moose '''
-        comps = _moose.wildcardFind('/##[TYPE=Compartment]')
-        self.compartments = comps
-        return comps
+        self.compartments = _moose.wildcardFind('/##[TYPE=Compartment]')
+        zombiComps = _moose.wildcardFind('/##[TYPE=ZombieCompartment]')
+        if zombiComps:
+            self.compartments += zombiComps
+        return self.compartments
 
     def getPulseGens(self, **kwargs):
         """ Get all the pulse generators """
