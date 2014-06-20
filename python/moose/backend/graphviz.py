@@ -38,7 +38,7 @@ class DotFile():
 
     def __init__(self):
         self.dot = []
-        self.ignorePath = re.compile(r'')
+        self.ignorePat = re.compile(r'')
         self.compShape = "box3d"
         self.tableShape = "folder"
         self.pulseShape = "invtriangle"
@@ -163,16 +163,21 @@ def getConnectedCompartments(obj):
     """List all compartments connected to this obj."""
     if "moose.Compartment" in obj.__str__():
         return []
+    if "moose.ZombieCompartment" in obj.__str__():
+        return []
+
     paths = []
     comps = []
     obj = _moose.Neutral(obj.path)
     paths.append(obj)
     while len(paths) > 0:
-        source = _moose.Neutral(paths.pop())
+        source =  paths.pop()
         targets = source.neighbors['output']
         for t in targets:
             t = _moose.Neutral(t)
             if "moose.Compartment" in t.__str__():
+                comps.append(t)
+            elif "moose.ZombieCompartment" in t.__str__():
                 comps.append(t)
             else:
                 paths.append(t)
@@ -190,13 +195,19 @@ def writeGraphviz(filename=None, pat='/##[TYPE=Compartment]', ignore=None):
     '''This is  a generic function. It takes the the pattern, search for paths
     and write a graphviz file.
     '''
+
     global dotFile
 
     b = backend.Backend()
     b.populateStoreHouse()
 
+    print_utils.dump("GRAPHVIZ"
+            , "Preparing graphviz file for writing"
+            )
+
+    ignorePat = re.compile(r'^abcd')
     if ignore:
-        ignorePat = re.compile(r'%s'%ignore, re.I)
+        ignorePat = re.compile(r'%s' % ignore, re.I)
         dotFile.setIgnorePat(ignorePat)
 
     compList = b.filterPaths(b.compartments, ignorePat)
@@ -218,7 +229,7 @@ def writeGraphviz(filename=None, pat='/##[TYPE=Compartment]', ignore=None):
         if c.neighbors['raxial']:
             [dotFile.addRAxial(c, n) for n in c.neighbors['raxial']]
         elif c.neighbors['axial']:
-            [dotFile.addAxial(c, n) for n in c.neighbors['raxial']]
+            [dotFile.addAxial(c, n) for n in c.neighbors['axial']]
         else:
             dotFile.addLonelyCompartment(c)
 
@@ -237,5 +248,7 @@ def writeGraphviz(filename=None, pat='/##[TYPE=Compartment]', ignore=None):
     for t in tables:
         sources = t.neighbors['requestOut']
         dotFile.addTable(t, sources)
+
+    dotFile.writeDotFile(filename)
     return True
 
