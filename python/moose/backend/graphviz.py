@@ -26,6 +26,115 @@ import backend
 pathPat = re.compile(r'.+?\[\d+\]$')
 
 ##
+# @brief Write a graphviz file.
+class DotFile():
+
+    def __init__(self):
+        self.dot = []
+        self.ignorePath = re.compile(r'')
+
+    def setIgnorePat(self, ignorePat):
+        self.ignorePat = ignorePat
+
+    def add(self, line):
+        # Add a line to dot 
+        if line in self.dot:
+            return
+        self.dot.append(line)
+
+    def writeDotFile(self, fileName):
+        dotText = '\n'.join(self.dot)
+        dotText =  dotText + "\n}"
+        if not fileName:
+            print(dotText)
+            return
+
+        with open(fileName, 'w') as graphviz:
+            print_utils.dump("GRAPHVIZ"
+                    , [ "Writing compartment topology to file {}".format(fileName)
+                        , "Ignoring pattern : {}".format(self.ignorePat.pattern)
+                        ]
+                    )
+            graphviz.write(dotText)
+
+    def fix(self, path):
+        '''Fix a given path so it can be written to a graphviz file'''
+        # If no [0] is at end of the path then append it.
+        global pathPat
+        if not pathPat.match(path):
+            path = path + '[0]'
+        return path
+
+    def label(self, text, length=4):
+        """Create label for a node """
+        text = text.replace("[", '').replace("]", '').replace('_', '')
+        text = text.replace('/', '')
+        return text[-length:]
+
+    def addRAxial(self, compA, compB):
+        """Connect compA with compB """
+        lhs = self.fix(compA.path)
+        rhs = self.fix(compB.path)
+        nodeOption = "shape={},label={}".format("box3d", self.label(lhs))
+        self.add('\t"{}"[{}];'.format(lhs, nodeOption))
+
+        nodeOption = "shape={},label={}".format("box3d", self.label(rhs))
+        self.add('\t"{}"[{}];'.format(rhs, nodeOption))
+        self.add('\t"{}" -> "{}";'.format(rhs, lhs))
+
+    def addAxial(self, compA, compB):
+        """Add compA and compB axially. """
+        self.addRAxial(compB, compA)
+
+    def addLonelyCompartment(self, c):
+        """Add a compartment which has not Axial and RAxial connection """
+        p = self.fix(c.path)
+        nodeOption = "shape={},label={}".format("box3d", self.label(p))
+        self.add('\t"{}"[{},color=blue];'.format(p, nodeOption))
+
+    def addChannel(self, c, chan):
+        """Find synapses in channels and add to dot."""
+        for sc in chan:
+           if "moose.SynChan" not in sc.__str__():
+               continue
+           for synapse in sc.synapse:
+               spikeSources =  synapse.neighbors['addSpike']
+               for ss in spikeSources:
+                   for s in ss:
+                       for vmSource in  s.neighbors['Vm']:
+                           edgeLabel = "color=red,label=synapse,arrowhead=dot"
+                           self.add('"{}" -> "{}" [{}];'.format(
+                               self.fix(c.path), self.fix(vmSource.path), edgeLabel)
+                               )
+
+    def addPulseGen(self, pulseGen, compartments):
+        """Add a pulse-generator to dotfile """
+        nodeName = self.fix(pulseGen.path)
+        nodeOption = "shape=invtriangle,label={}".format(self.label(nodeName))
+        self.add('\t"{}"[{}];'.format(nodeName, nodeOption))
+        lines = [ '\t"{}" -> "{}"[color=red,label=pulse]'.format(
+                        self.fix(pulseGen.path)
+                        , self.fix(c.path)) for c in compartments
+                        ]
+        [self.add(l) for l in lines]
+
+    def addTable(self, table, sources):
+        """Add sources to table """
+        nodeName = self.fix(table.path)
+        nodeOption = "shape=folder,label={}".format(self.label(nodeName))
+        self.add('\t"{}"[{}];'.format(nodeName, nodeOption))
+        lines = [ '\t"{}" -> "{}"[label=table,color=blue]'.format(
+                    self.fix(s.path), nodeName
+                    ) for s in sources 
+                 ]
+        [self.add(l) for l in lines]
+
+
+##
+# @brief Object of DotFile.
+dotFile = DotFile()
+
+##
 # @brief Given a moose object which is not Compartment, return all possible
 # paths to Compartments.
 #
@@ -50,36 +159,6 @@ def getConnectedCompartments(obj):
             else:
                 paths.append(t)
     return comps
-
-def addChannel(c, chan, dot):
-    """Find synapse and add to dot."""
-    for sc in chan:
-       if "moose.SynChan" not in sc.__str__():
-           continue
-       for synapse in sc.synapse:
-           spikeSources =  synapse.neighbors['addSpike']
-           for ss in spikeSources:
-               for s in ss:
-                   for vmSource in  s.neighbors['Vm']:
-                       edgeLabel = "color=red,label=synapse,arrowhead=dot"
-                       dot.add('"{}" -> "{}" [{}]'.format(
-                           fix(c.path), fix(vmSource.path), edgeLabel)
-                           )
-
-def fix(path):
-    '''Fix a given path so it can be written to a graphviz file'''
-    # If no [0] is at end of the path then append it.
-    global pathPat
-    if not pathPat.match(path):
-        path = path + '[0]'
-    return path
-
-def label(text, length=4):
-    """Create label for a node """
-    text = text.replace("[", '').replace("]", '').replace('_', '')
-    text = text.replace('/', '')
-    return text[-length:]
-
 ##
 # @brief Write a graphviz topology file.
 #
@@ -93,13 +172,14 @@ def writeGraphviz(filename=None, pat='/##[TYPE=Compartment]', ignore=None):
     '''This is  a generic function. It takes the the pattern, search for paths
     and write a graphviz file.
     '''
+    global dotFile
 
     b = backend.Backend()
     b.populateStoreHouse()
 
-    ignorePat = re.compile(r'')
     if ignore:
         ignorePat = re.compile(r'%s'%ignore, re.I)
+        dotFile.setIgnorePat(ignorePat)
 
     compList = b.filterPaths(b.compartments, ignorePat)
 
@@ -110,77 +190,34 @@ def writeGraphviz(filename=None, pat='/##[TYPE=Compartment]', ignore=None):
                 )
         return None
 
-    dot = set()
     header = "digraph mooseG{"
     header += "\n\tconcentrate=true;\n"
+
+    dotFile.add(header)
+
     for c in compList:
         # Each compartment has neighbours connected by axial resistance.
         if c.neighbors['raxial']:
-            for n in c.neighbors['raxial']:
-                lhs = fix(c.path)
-                rhs = fix(n.path)
-                nodeOption = "shape={},label={}".format("box3d", label(lhs))
-                dot.add('\t"{}"[{}];'.format(lhs, nodeOption))
-
-                nodeOption = "shape={},label={}".format("box3d", label(rhs))
-                dot.add('\t"{}"[{}];'.format(rhs, nodeOption))
-                dot.add('\t"{}" -> "{}";'.format(rhs, lhs))
+            [dotFile.addRAxial(c, n) for n in c.neighbors['raxial']]
         elif c.neighbors['axial']:
-            for n in c.neighbors['axial']:
-                lhs = fix(c.path)
-                rhs = fix(n.path)
-                nodeOption = "shape={},label={}".format("box3d", label(lhs))
-                dot.add('\t"{}"[{}];'.format(lhs, nodeOption))
-
-                nodeOption = "shape={},label={}".format("box3d", label(rhs))
-                dot.add('\t"{}"[{}];'.format(rhs, nodeOption))
-                dot.add('\t"{}" -> "{}" [dir=back];'.format(rhs, lhs))
+            [dotFile.addAxial(c, n) for n in c.neighbors['raxial']]
         else:
-            p = fix(c.path)
-            nodeOption = "shape={},label={}".format("box3d", label(p))
-            dot.add('\t"{}"[{},color=blue];'.format(p, nodeOption))
+            dotFile.addLonelyCompartment(c)
 
         # Each comparment might also have a synapse on it.
         chans = c.neighbors['channel']
-        [addChannel(c, chan, dot) for chan in chans]
+        [dotFile.addChannel(c, chan) for chan in chans]
 
     # Now add the pulse-gen 
     pulseGens = b.pulseGens
     for p in pulseGens:
         comps = getConnectedCompartments(p)
-        nodeName = fix(p.path)
-        nodeOption = "shape=invtriangle,label={}".format(label(nodeName))
-        dot.add('\t"{}"[{}];'.format(nodeName, nodeOption))
-        lines = [ '\t"{}" -> "{}"[color=red,label=pulse]'.format(fix(p.path)
-                , fix(c.path)) for c in comps 
-                ]
-        [dot.add(l) for l in lines]
-
+        dotFile.addPulseGen(p, comps)
+        
     # Now add tables
     tables = b.tables 
     for t in tables:
-        nodeName = fix(t.path)
-        nodeOption = "shape=folder,label={}".format(label(nodeName))
-        dot.add('\t"{}"[{}];'.format(nodeName, nodeOption))
         sources = t.neighbors['requestOut']
-        lines += [ '\t"{}" -> "{}"[label=table,color=blue]'.format(fix(s.path)
-                , nodeName) for s in sources 
-                ]
-        [dot.add(l) for l in lines]
-
-    # Filter all lines which matches the ignorePat 
-    dot = '\n'.join(dot)
-
-    dotFile = header + "\n" + dot + "\n}"
-    if not filename:
-        print(dotFile)
-    else:
-        with open(filename, 'w') as graphviz:
-            print_utils.dump("GRAPHVIZ"
-                    , [ "Writing compartment topology to file {}".format(filename)
-                        , "Ignoring pattern : {}".format(ignorePat.pattern)
-                        ]
-                    )
-            graphviz.write(dotFile)
+        dotFile.addTable(t, sources)
     return True
 
