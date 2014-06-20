@@ -25,6 +25,13 @@ import backend
 
 pathPat = re.compile(r'.+?\[\d+\]$')
 
+def dictToString(**kwargs):
+    """Convert a dictionary to a valid graphviz option line """
+    txt = []
+    for k in kwargs:
+        txt.append('{}="{}"'.format(k, kwargs[k]))
+    return ','.join(txt)
+
 ##
 # @brief Write a graphviz file.
 class DotFile():
@@ -32,9 +39,29 @@ class DotFile():
     def __init__(self):
         self.dot = []
         self.ignorePath = re.compile(r'')
+        self.compShape = "box3d"
+        self.tableShape = "folder"
+        self.pulseShape = "invtriangle"
 
     def setIgnorePat(self, ignorePat):
         self.ignorePat = ignorePat
+
+    def addNode(self, nodeName, **kwargs):
+        """Return a line of dot for given node """
+        nodeName = self.fix(nodeName)
+        if 'label' not in kwargs.keys():
+            kwargs['label'] = self.label(nodeName)
+        nodeText = '"{}" [{}];'.format(nodeName, dictToString(**kwargs))
+        self.add(nodeText)
+        return nodeText
+
+    def addEdge(self, node1, node2, **kwargs):
+        """Add an edge line to graphviz file """
+        node1 = self.fix(node1)
+        node2 = self.fix(node2)
+        txt = '"{}" -> "{}" [{}];'.format(node1, node2, dictToString(**kwargs))
+        self.add(txt)
+        return txt
 
     def add(self, line):
         # Add a line to dot 
@@ -73,24 +100,20 @@ class DotFile():
 
     def addRAxial(self, compA, compB):
         """Connect compA with compB """
-        lhs = self.fix(compA.path)
-        rhs = self.fix(compB.path)
-        nodeOption = "shape={},label={}".format("box3d", self.label(lhs))
-        self.add('\t"{}"[{}];'.format(lhs, nodeOption))
-
-        nodeOption = "shape={},label={}".format("box3d", self.label(rhs))
-        self.add('\t"{}"[{}];'.format(rhs, nodeOption))
-        self.add('\t"{}" -> "{}";'.format(rhs, lhs))
+        lhs = compA.path
+        self.addNode(lhs, shape=self.compShape)
+        rhs = compB.path
+        self.addNode(rhs, shape=self.compShape)
+        self.addEdge(rhs, lhs)
 
     def addAxial(self, compA, compB):
         """Add compA and compB axially. """
         self.addRAxial(compB, compA)
 
-    def addLonelyCompartment(self, c):
+    def addLonelyCompartment(self, compartment):
         """Add a compartment which has not Axial and RAxial connection """
-        p = self.fix(c.path)
-        nodeOption = "shape={},label={}".format("box3d", self.label(p))
-        self.add('\t"{}"[{},color=blue];'.format(p, nodeOption))
+        p = compartment.path
+        self.addNode(p, shape=self.compShape, color='blue')
 
     def addChannel(self, c, chan):
         """Find synapses in channels and add to dot."""
@@ -102,32 +125,27 @@ class DotFile():
                for ss in spikeSources:
                    for s in ss:
                        for vmSource in  s.neighbors['Vm']:
-                           edgeLabel = "color=red,label=synapse,arrowhead=dot"
-                           self.add('"{}" -> "{}" [{}];'.format(
-                               self.fix(c.path), self.fix(vmSource.path), edgeLabel)
-                               )
+                           self.addEdge(c.path
+                                   , vmSource.path
+                                   , color = 'red'
+                                   , label = 'synapse'
+                                   , arrowhead = 'dot'
+                                   )
 
     def addPulseGen(self, pulseGen, compartments):
         """Add a pulse-generator to dotfile """
-        nodeName = self.fix(pulseGen.path)
-        nodeOption = "shape=invtriangle,label={}".format(self.label(nodeName))
-        self.add('\t"{}"[{}];'.format(nodeName, nodeOption))
-        lines = [ '\t"{}" -> "{}"[color=red,label=pulse]'.format(
-                        self.fix(pulseGen.path)
-                        , self.fix(c.path)) for c in compartments
-                        ]
-        [self.add(l) for l in lines]
+        nodeName = pulseGen.path
+        self.addNode(nodeName, shape=self.pulseShape)
+        for c in compartments:
+            self.addEdge(pulseGen.path, c.path, color='red', label='pulse') 
+
 
     def addTable(self, table, sources):
         """Add sources to table """
-        nodeName = self.fix(table.path)
-        nodeOption = "shape=folder,label={}".format(self.label(nodeName))
-        self.add('\t"{}"[{}];'.format(nodeName, nodeOption))
-        lines = [ '\t"{}" -> "{}"[label=table,color=blue]'.format(
-                    self.fix(s.path), nodeName
-                    ) for s in sources 
-                 ]
-        [self.add(l) for l in lines]
+        nodeName = table.path
+        self.addNode(nodeName, shape=self.tableShape)
+        for s in sources:
+            self.addEdge(s.path, nodeName, label='table', color='blue')
 
 
 ##
