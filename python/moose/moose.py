@@ -348,7 +348,7 @@ def append_finfodocs(classname, docstring, indent):
 # help and python user's expectation of seeing the help via more/less.
 pager=None
 
-def doc(arg, inherited=False, paged=False):
+def doc(arg, inherited=True, paged=True):
     """Display the documentation for class or field in a class.
     
     Parameters
