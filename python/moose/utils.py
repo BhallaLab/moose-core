@@ -29,24 +29,30 @@ import _moose
 import plot_utils
 import verification_utils
 import print_utils
+import graph_utils
 import sim_utils
 from moose_constants import *
 
 # Import functions from sub-libraries.
-plotTable = plot_utils.plotTable
-plotTables = plot_utils.plotTables
-saveTables = plot_utils.saveTables 
+#plotTable = plot_utils.plotTable
+#plotTables = plot_utils.plotTables
+#saveTables = plot_utils.saveTables 
 
 # 
-recordAt = sim_utils.recordTarget
-recordTarget = sim_utils.recordTarget
-run = sim_utils.run
+#recordAt = sim_utils.recordTarget
+#recordTarget = sim_utils.recordTarget
 
 # dump messages onto console
-dump = print_utils.dump
+#dump = print_utils.dump
 
 # Verification related function.
-verify = verification_utils.verify
+#verify = verification_utils.verify
+
+# Topology and graph related functions.
+#writeGraphviz  = graph_utils.writeGraphviz
+
+# Some verification tests
+#verify = verification_utils.verify
 
 
 def readtable(table, filename, separator=None):
@@ -844,38 +850,44 @@ def connect_CaConc(compartment_list, temperature=None):
                     channel = _moose.HHChannel(child)
                     ## If child Mstring 'ion' is present and is Ca, connect channel current to caconc
                     for childid in channel.children:
+                        # in async13, gates which have not been created still 'exist'
+                        # i.e. show up as a child, but cannot be wrapped, so ignore those errors.
                         try:
                             child = _moose.element(childid)
-                        except TypeError:  # in async13, gates which have not been created still 'exist'
-                                            # i.e. show up as a child, but cannot be wrapped.
+                            if child.className=='Mstring':
+                                child = _moose.Mstring(child)
+                                if child.name=='ion':
+                                    if child.value in ['Ca','ca']:
+                                        _moose.connect(channel,'IkOut',caconc,'current')
+                                        print 'Connected IkOut of',channel.path,'to current of',caconc.path
+                                ## temperature is used only by Nernst part here...
+                                if child.name=='nernst_str':
+                                    nernst = _moose.Nernst(channel.path+'/nernst')
+                                    nernst_params = string.split(child.value,',')
+                                    nernst.Cout = float(nernst_params[0])
+                                    nernst.valence = float(nernst_params[1])
+                                    nernst.Temperature = temperature
+                                    _moose.connect(nernst,'Eout',channel,'setEk')
+                                    _moose.connect(caconc,'concOut',nernst,'ci')
+                                    print 'Connected Nernst',nernst.path
+                        except TypeError:
                             pass
-                        if child.className=='Mstring':
-                            child = _moose.Mstring(child)
-                            if child.name=='ion':
-                                if child.value in ['Ca','ca']:
-                                    _moose.connect(channel,'IkOut',caconc,'current')
-                                    print 'Connected IkOut of',channel.path,'to current of',caconc.path
-                            ## temperature is used only by Nernst part here...
-                            if child.name=='nernst_str':
-                                nernst = _moose.Nernst(channel.path+'/nernst')
-                                nernst_params = string.split(child.value,',')
-                                nernst.Cout = float(nernst_params[0])
-                                nernst.valence = float(nernst_params[1])
-                                nernst.Temperature = temperature
-                                _moose.connect(nernst,'Eout',channel,'setEk')
-                                _moose.connect(caconc,'concOut',nernst,'ci')
-                                print 'Connected Nernst',nernst.path
                             
                 if neutralwrap.className == 'HHChannel2D':
                     channel = _moose.HHChannel2D(child)
                     ## If child Mstring 'ionDependency' is present, connect caconc Ca conc to channel
                     for childid in channel.children:
-                        child = _moose.Neutral(childid)
-                        if child.className=='Mstring' and child.name=='ionDependency':
-                            child = _moose.Mstring(child)
-                            if child.value in ['Ca','ca']:
-                                _moose.connect(caconc,'concOut',channel,'concen')
-                                print 'Connected concOut of',caconc.path,'to concen of',channel.path
+                        # in async13, gates which have not been created still 'exist'
+                        # i.e. show up as a child, but cannot be wrapped, so ignore those errors.
+                        try:
+                            child = _moose.element(childid)
+                            if child.className=='Mstring' and child.name=='ionDependency':
+                                child = _moose.Mstring(child)
+                                if child.value in ['Ca','ca']:
+                                    _moose.connect(caconc,'concOut',channel,'concen')
+                                    print 'Connected concOut of',caconc.path,'to concen of',channel.path
+                        except TypeError: 
+                            pass
 
 ############# added by Aditya Gilra -- end ################
 import uuid
