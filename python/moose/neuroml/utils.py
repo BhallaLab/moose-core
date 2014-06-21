@@ -12,10 +12,51 @@ indent(...) is an in-place prettyprint formatter copied from http://effbot.org/z
 """
 
 from xml.etree import cElementTree as ET
-import os
+from xml.etree import ElementTree as slowET
 from math import *
-from config import *
-import moose
+import os
+
+neuroml_debug = False
+
+neuroml_ns='http://morphml.org/neuroml/schema'
+nml_ns='http://morphml.org/networkml/schema'
+mml_ns='http://morphml.org/morphml/schema'
+bio_ns='http://morphml.org/biophysics/schema'
+cml_ns='http://morphml.org/channelml/schema'
+meta_ns='http://morphml.org/metadata/schema'
+xsi_ns='http://www.w3.org/2001/XMLSchema-instance'
+
+### ElementTree parse works an order of magnitude or more faster than minidom
+### BUT it doesn't keep the original namespaces,
+## from http://effbot.org/zone/element-namespaces.htm , I got _namespace_map
+## neuroml_ns, bio_ns, mml_ns, etc are defined above
+slowET._namespace_map[neuroml_ns] = 'neuroml'
+slowET._namespace_map[nml_ns] = 'nml'
+slowET._namespace_map[mml_ns] = 'mml'
+slowET._namespace_map[bio_ns] = 'bio'
+slowET._namespace_map[cml_ns] = 'cml'
+slowET._namespace_map[meta_ns] = 'meta'
+slowET._namespace_map[xsi_ns] = 'xsi'
+
+### cElementTree is much faster than ElementTree and is API compatible with the latter,
+### but instead of _namespace_map above, use register_namespace below ...
+### but this works only with python2.7 onwards, so stick to above,
+### with import elementtree.ElementTree alongwith importing cElementTree as at
+### http://dev.blogs.nuxeo.com/2006/02/elementtree-serialization-namespace-prefixes.html
+#ET.register_namespace('neuroml',neuroml_ns)
+#ET.register_namespace('nml',nml_ns)
+#ET.register_namespace('mml',mml_ns)
+#ET.register_namespace('bio',bio_ns)
+#ET.register_namespace('cml',cml_ns)
+#ET.register_namespace('meta',meta_ns)
+#ET.register_namespace('xsi',xsi_ns)
+
+CELSIUS_default = 32.0 # deg C # default temperature if meta:property tag for temperature is not present
+ZeroCKelvin = 273.15 # zero dec C in Kelvin
+VMIN = -0.1 # Volts
+VMAX = 0.1 # Volts
+NDIVS = 200 # number
+dv = ( VMAX - VMIN ) / NDIVS # Volts
 
 def set_neuroml_namespaces_attribs(neuromlroot):
     set_attrib_if_not_found(neuromlroot,"xmlns",neuroml_ns)
@@ -230,38 +271,3 @@ def find_first_file(name, path):
     for root, dirs, files in os.walk(path):
         if name in files:
             return os.path.join(root, name)
-
-
-# recursively translate all compartments under obj
-def translate_rotate(obj, x, y, z, ztheta): 
-    for childId in obj.children:
-        try:
-            childobj = moose.element(childId)
-        except TypeError:  # in async13, gates which have not been created still 'exist'
-                            # i.e. show up as a child, but cannot be wrapped.
-            pass
-        ## if childobj is a compartment or symcompartment translate, else skip it
-        if childobj.className in ['Compartment','SymCompartment']:
-            ## SymCompartment inherits from Compartment,
-            ## so below wrapping by Compartment() is fine for both Compartment and SymCompartment
-            child = moose.Compartment(childId)
-            x0 = child.x0
-            y0 = child.y0
-            x0new = x0*cos(ztheta)-y0*sin(ztheta)
-            y0new = x0*sin(ztheta)+y0*cos(ztheta)
-            child.x0 = x0new + x
-            child.y0 = y0new + y
-            child.z0 += z
-            x1 = child.x
-            y1 = child.y
-            x1new = x1*cos(ztheta)-y1*sin(ztheta)
-            y1new = x1*sin(ztheta)+y1*cos(ztheta)
-            child.x = x1new + x
-            child.y = y1new + y
-            child.z += z
-
-        if len(childobj.children) > 0:
-            # recursive translation+rotation
-            translate_rotate(childobj, x, y, z, ztheta) 
-
-
