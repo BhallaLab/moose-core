@@ -239,7 +239,6 @@ subtypes = {
 }
 
 
-## Added Double dictionaries. Used in MUMBL interface.
 
 # 
 # mtypes.py ends here

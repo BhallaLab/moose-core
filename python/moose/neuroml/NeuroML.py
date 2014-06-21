@@ -22,7 +22,7 @@ For testing, you can also call this from the command line with a neuroML file as
 """
 
 import moose
-import moose.utils as utils
+from moose.utils import *
 from xml.etree import cElementTree as ET
 from ChannelML import ChannelML
 from MorphML import MorphML
@@ -37,22 +37,20 @@ class NeuroML():
     def __init__(self):
         pass
 
-    def readNeuroMLFromFile(self, filename, params={}):
-        """ For the format of params required to tweak what cells are loaded,
+    def readNeuroMLFromFile(self,filename,params={}):
+        """
+        For the format of params required to tweak what cells are loaded,
          refer to the doc string of NetworkML.readNetworkMLFromFile().
-
         Returns (populationDict,projectionDict),
          see doc string of NetworkML.readNetworkML() for details.
         """
-        utils.dump("STEP", "Loading neuroml file %s " % filename)
+        print "Loading neuroml file ... ", filename
+        moose.Neutral('/library') # creates /library in MOOSE tree; elif present, wraps
         tree = ET.parse(filename)
         root_element = tree.getroot()
         self.model_dir = path.dirname( path.abspath( filename ) )
-
         self.lengthUnits = root_element.attrib['lengthUnits']
-
-        # gets replaced below if tag for temperature is present
-        self.temperature = CELSIUS_default 
+        self.temperature = CELSIUS_default # gets replaced below if tag for temperature is present
         self.temperature_default = True
         for meta_property in root_element.findall('.//{'+meta_ns+'}property'):
             tagname = meta_property.attrib['tag']
@@ -60,40 +58,37 @@ class NeuroML():
                 self.temperature = float(meta_property.attrib['value'])
                 self.temperature_default = False
         if self.temperature_default:
-            utils.dump("INFO"
-                    , "Default temperature: %s deg Celsius" % self.temperature
-                    )
+            print "Using default temperature of", self.temperature,"degrees Celsius."
         self.nml_params = {
-                'temperature' : self.temperature
-                , 'model_dir' : self.model_dir
-                }
+                'temperature':self.temperature,
+                'model_dir':self.model_dir,
+        }
 
         #print "Loading channels and synapses into MOOSE /library ..."
         cmlR = ChannelML(self.nml_params)
         for channels in root_element.findall('.//{'+neuroml_ns+'}channels'):
             self.channelUnits = channels.attrib['units']
             for channel in channels.findall('.//{'+cml_ns+'}channel_type'):
-                # Ideally I should read in extra params from within the
-                # channel_type element and put those in also.  Global params
-                # should override local ones.
+                ## ideally I should read in extra params
+                ## from within the channel_type element and put those in also.
+                ## Global params should override local ones.
                 cmlR.readChannelML(channel,params={},units=self.channelUnits)
             for synapse in channels.findall('.//{'+cml_ns+'}synapse_type'):
                 cmlR.readSynapseML(synapse,units=self.channelUnits)
             for ionConc in channels.findall('.//{'+cml_ns+'}ion_concentration'):
                 cmlR.readIonConcML(ionConc,units=self.channelUnits)
 
+        #print "Loading cell definitions into MOOSE /library ..."
         mmlR = MorphML(self.nml_params)
-
         self.cellsDict = {}
-        params = { 'lengthUnits' : self.lengthUnits }
         for cells in root_element.findall('.//{'+neuroml_ns+'}cells'):
             for cell in cells.findall('.//{'+neuroml_ns+'}cell'):
-                cellDict = mmlR.readMorphML(cell, params)
+                cellDict = mmlR.readMorphML(cell,params={},lengthUnits=self.lengthUnits)
                 self.cellsDict.update(cellDict)
 
         #print "Loading individual cells into MOOSE root ... "
         nmlR = NetworkML(self.nml_params)
-        return nmlR.readNetworkML(root_element, self.cellsDict, params=params)
+        return nmlR.readNetworkML(root_element,self.cellsDict,params=params,lengthUnits=self.lengthUnits)
 
 def loadNeuroML_L123(filename):
     neuromlR = NeuroML()
