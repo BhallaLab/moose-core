@@ -851,7 +851,7 @@ def connect_CaConc(compartment_list, temperature=None):
                     ## If child Mstring 'ion' is present and is Ca, connect channel current to caconc
                     for childid in channel.children:
                         # in async13, gates which have not been created still 'exist'
-                        # i.e. show up as a child, but cannot be wrapped, so ignore those errors.
+                        # i.e. show up as a child, but cannot be wrapped.
                         try:
                             child = _moose.element(childid)
                             if child.className=='Mstring':
@@ -878,7 +878,7 @@ def connect_CaConc(compartment_list, temperature=None):
                     ## If child Mstring 'ionDependency' is present, connect caconc Ca conc to channel
                     for childid in channel.children:
                         # in async13, gates which have not been created still 'exist'
-                        # i.e. show up as a child, but cannot be wrapped, so ignore those errors.
+                        # i.e. show up as a child, but cannot be wrapped.
                         try:
                             child = _moose.element(childid)
                             if child.className=='Mstring' and child.name=='ionDependency':
@@ -886,7 +886,7 @@ def connect_CaConc(compartment_list, temperature=None):
                                 if child.value in ['Ca','ca']:
                                     _moose.connect(caconc,'concOut',channel,'concen')
                                     print 'Connected concOut of',caconc.path,'to concen of',channel.path
-                        except TypeError: 
+                        except TypeError:
                             pass
 
 ############# added by Aditya Gilra -- end ################
