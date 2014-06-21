@@ -45,15 +45,15 @@ Sourceforge project page: https://sourceforge.net/projects/moose/
    - gnu make
    - Python development headers and libraries
    - GNU Scientific Library (GSL) development packages latest 1.16
-   - pthreads library
    - HDF5 development library   
    - libsbml (if you want SBML support).
    - numpy development libraries
+   - OpenMPI (if you want to run it in parallel).
 
 
      On Debian based distributions these can be obtained by the command:
 
-     sudo apt-get install g++ make python-dev libgsl0-dev libpthread-stubs0-dev python-numpy libhdf5-serial-dev
+     sudo apt-get install g++ make python-dev libgsl0-dev python-numpy libhdf5-serial-dev
 
      These names are for Ubuntu 12.04, the exact package names may
      vary depending on your distribution.
