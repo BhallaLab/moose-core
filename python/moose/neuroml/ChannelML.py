@@ -108,27 +108,19 @@ class ChannelML():
             nernst_params = string.split(nernstnote.text,',')
             if nernst_params[0] == 'Nernst':
                 nernstMstring = moose.Mstring(moosechannel.path+'/nernst_str')
-                nernstMstring.value = '{},{}'.format(
-                        float(nernst_params[1].split('=')[1]) * concfactor
-                        , nernst_params[2].split('=')[2]
-                        )
+                nernstMstring.value = str( float(string.split(nernst_params[1],'=')[1]) * concfactor ) + \
+                                        ',' + str( int(string.split(nernst_params[2],'=')[1]) )
+        
         gates = IVrelation.findall('./{'+self.cml+'}gate')
-
-        if len(gates) > 3:
-            utils.dump("FATAL"
-                    , "Maximum x, y, and z (three) gates are possible in MOOSE/Genesis"
-                    , frame = inspect.currentframe()
-                    )
+        if len(gates)>3:
+            print "Sorry! Maximum x, y, and z (three) gates are possible in MOOSE/Genesis"
             sys.exit()
-
-        # These are the names that MOOSE uses to create gates.
-        gate_full_name = [ 'gateX', 'gateY', 'gateZ' ] 
-
-        # if impl_prefs tag is present change VMIN, VMAX and NDIVS
+        gate_full_name = [ 'gateX', 'gateY', 'gateZ' ] # These are the names that MOOSE uses to create gates.
+        ## if impl_prefs tag is present change VMIN, VMAX and NDIVS
         impl_prefs = channelElement.find('./{'+self.cml+'}impl_prefs')
         if impl_prefs is not None:
             table_settings = impl_prefs.find('./{'+self.cml+'}table_settings')
-            # some problem here... disable
+            ## some problem here... disable
             VMIN_here = float(table_settings.attrib['min_v'])
             VMAX_here = float(table_settings.attrib['max_v'])
             NDIVS_here = int(table_settings.attrib['table_divisions'])
@@ -141,7 +133,6 @@ class ChannelML():
             VMAX_here = utils.VMAX/Vfactor
             NDIVS_here = utils.NDIVS
             dv_here = utils.dv/Vfactor
-
         offset = IVrelation.find('./{'+self.cml+'}offset')
         if offset is None: vNegOffset = 0.0
         else: vNegOffset = float(offset.attrib['value'])
@@ -280,33 +271,28 @@ class ChannelML():
                     v += dv_here
 
                 ## Presently HHGate2D doesn't allow the setting of tables as 2D vectors directly
-                #moosegate.tableA = tableA
-                #moosegate.tableB = tableB
+                moosegate.tableA = tableA
+                moosegate.tableB = tableB
 
-                ## Instead, I wrap the interpol2D objects inside HHGate2D and set the tables
-                moosegate_tableA = moose.Interpol2D(moosegate.path+'/tableA')
                 ## set SI values inside MOOSE
-                moosegate_tableA.xmin = VMIN_here*Vfactor
-                moosegate_tableA.xmax = VMAX_here*Vfactor
-                moosegate_tableA.xdivs = NDIVS_here
-                #moosegate_tableA.dx = dv_here*Vfactor
-                moosegate_tableA.ymin = CaMIN*concfactor
-                moosegate_tableA.ymax = CaMAX*concfactor
-                moosegate_tableA.ydivs = CaNDIVS
-                #moosegate_tableA.dy = dCa*concfactor
-                moosegate_tableA.tableVector2D = tableA
+                moosegate.xminA = VMIN_here*Vfactor
+                moosegate.xmaxA = VMAX_here*Vfactor
+                moosegate.xdivsA = NDIVS_here
+                #moosegate.dxA = dv_here*Vfactor
+                moosegate.yminA = CaMIN*concfactor
+                moosegate.ymaxA = CaMAX*concfactor
+                moosegate.ydivsA = CaNDIVS
+                #moosegate.dyB = dCa*concfactor
 
-                moosegate_tableB = moose.Interpol2D(moosegate.path+'/tableB')
                 ## set SI values inside MOOSE
-                moosegate_tableB.xmin = VMIN_here*Vfactor
-                moosegate_tableB.xmax = VMAX_here*Vfactor
-                moosegate_tableB.xdivs = NDIVS_here
-                #moosegate_tableB.dx = dv_here*Vfactor
-                moosegate_tableB.ymin = CaMIN*concfactor
-                moosegate_tableB.ymax = CaMAX*concfactor
-                moosegate_tableB.ydivs = CaNDIVS
-                #moosegate_tableB.dy = dCa*concfactor
-                moosegate_tableB.tableVector2D = tableB
+                moosegate.xminB = VMIN_here*Vfactor
+                moosegate.xmaxB = VMAX_here*Vfactor
+                moosegate.xdivsB = NDIVS_here
+                #moosegate.dxB = dv_here*Vfactor
+                moosegate.yminB = CaMIN*concfactor
+                moosegate.ymaxB = CaMAX*concfactor
+                moosegate.ydivsB = CaNDIVS
+                #moosegate.dyB = dCa*concfactor
 
     def setQ10(self,q10settings):
         if 'q10_factor' in q10settings.attrib.keys():
