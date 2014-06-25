@@ -66,6 +66,7 @@ class Interpol: public TableBase
     double getXmin() const;
     void setXmax( double value );
     double getXmax() const;
+    double getY() const;
     ////////////////////////////////////////////////////////////
     // Here are the Interpol Destination functions
     ////////////////////////////////////////////////////////////
