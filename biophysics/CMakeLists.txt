@@ -32,10 +32,9 @@ add_library(biophysics
 	MarkovSolverBase.cpp	
 	MarkovSolver.cpp	
 	VClamp.cpp	
-
 	# LeakyIaF.cpp	
 	# GapJunction.cpp	
-	# Nernst.cpp	
+	Nernst.cpp	
 	# GHK.cpp		
 	# NMDAChan.cpp	
     )
