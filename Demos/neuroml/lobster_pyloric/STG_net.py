@@ -10,11 +10,18 @@ The soma name below is hard coded for gran98, else any other file can be used by
 import os
 os.environ['NUMPTHREADS'] = '1'
 import sys
-sys.path.append('../../../python')
+sys.path.extend(['../../../python','synapses'])
 
 import moose
 from moose.utils import *
 from moose.neuroml.NeuroML import NeuroML
+
+from load_synapses import load_synapses
+moose.Neutral('/library')
+# comment below line to use event based synapses
+#  if commented, neuroml event-based gets searched for and loaded
+# uncomment for loading graded synapses
+#load_synapses()
 
 from pylab import *
 
@@ -25,6 +32,19 @@ cells_path = '/cells' # neuromlR.readNeuroMLFromFile creates cells in '/cells'
 
 def loadSTGNeuroML_L123(filename):
     neuromlR = NeuroML()
+    ## readNeuroMLFromFile below returns:
+    # This returns
+    # populationDict = {
+    #     'populationname1':('cellName',{('instanceid1'):moosecell, ... }) 
+    #     , ... 
+    #     }
+    # (cellName and instanceid are strings, mooosecell is a moose.Neuron object instance)
+    # and
+    # projectionDict = { 
+    #     'projName1':('source','target',[('syn_name1','pre_seg_path','post_seg_path')
+    #     ,...]) 
+    #     , ... 
+    #     }
     populationDict, projectionDict = \
         neuromlR.readNeuroMLFromFile(filename)
     soma1_path = populationDict['AB_PD'][1][0].path+'/Soma_0'
@@ -34,13 +54,31 @@ def loadSTGNeuroML_L123(filename):
     soma3_path = populationDict['PY'][1][0].path+'/Soma_0'
     soma3Vm = setupTable('somaVm',moose.Compartment(soma3_path),'Vm')
 
+    # monitor channel current
+    channel_path = soma1_path + '/KCa_STG'
+    channel_Ik = setupTable('KCa_Ik',moose.element(channel_path),'Ik')
+    # monitor Ca
+    capool_path = soma1_path + '/CaPool_STG'
+    capool_Ca = setupTable('CaPool_Ca',moose.element(capool_path),'Ca')
+
+    # monitor synaptic current
+    soma1 = moose.element(soma1_path)
+    print "Children of",soma1_path,"are:"
+    for child in soma1.children:
+        print child.className, child.path
+    syn_path = soma1_path+'/DoubExpSyn_Glu'
+    #syn_path = soma1_path+'/DoubExpSyn_Glu__cells-0-_LP_0-0-_Soma_0'
+    syn_Ik = setupTable('DoubExpSyn_Glu_Ik',moose.element(syn_path),'Ik')
+
     print "Reinit MOOSE ... "
-    resetSim(['/elec',cells_path], simdt, plotdt, simmethod='hsolve')
+    resetSim(['/elec',cells_path], simdt, plotdt, simmethod='ee')
 
     print "Running ... "
     moose.start(runtime)
     tvec = arange(0.0,runtime+2*plotdt,plotdt)
     tvec = tvec[ : soma1Vm.vector.size ]
+    
+    figure(facecolor='w')
     plot(tvec,soma1Vm.vector,label='AB_PD',color='g',linestyle='dashed')
     plot(tvec,soma2Vm.vector,label='LP',color='r',linestyle='solid')
     plot(tvec,soma3Vm.vector,label='PY',color='b',linestyle='dashed')
@@ -48,6 +86,22 @@ def loadSTGNeuroML_L123(filename):
     title('Soma Vm')
     xlabel('time (s)')
     ylabel('Voltage (V)')
+
+    figure(facecolor='w')
+    plot(tvec,channel_Ik.vector,color='b',linestyle='solid')
+    title('KCa current; Ca conc')
+    xlabel('time (s)')
+    ylabel('Ik (Amp)')
+    twinx()
+    plot(tvec,capool_Ca.vector,color='r',linestyle='solid')
+    ylabel('Ca (mol/m^3)')
+
+    figure(facecolor='w')
+    plot(tvec,syn_Ik.vector,color='b',linestyle='solid')
+    title('Glu syn current in '+soma1_path)
+    xlabel('time (s)')
+    ylabel('Ik (Amp)')
+
     print "Showing plots ..."
     show()
 
