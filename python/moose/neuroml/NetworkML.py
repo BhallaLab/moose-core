@@ -309,7 +309,15 @@ class NetworkML():
             table = moose.Table(syn.path+"/graded_table")
             #### always connect source to input - else 'cannot create message' error.
             precomp = moose.Compartment(pre_path)
-            moose.connect(precomp,"VmOut",table,"msgInput")
+            moose.connect(precomp,"VmOut",table,"input")
+            try:
+                tau_table = moose.element(syn.path+'/tau_table')
+                tau_table_present = True
+            except ValueError:
+                tau_table_present = False
+            # if tau_table is not found, don't connect it
+            if tau_table_present:
+                moose.connect(precomp,'VmOut',tau_table,'input')
             ## since there is no weight field for a graded synapse
             ## (no 'synapse' message connected),
             ## I set the Gbar to weight*Gbar
@@ -412,6 +420,7 @@ class NetworkML():
         ## deep copies the library synapse to an instance under postcomp named as <arg3>
         synid = moose.copy(moose.Neutral('/library/'+syn_name),postcomp,syn_name_full)
         syn = moose.SynChan(synid)
+        # mgblock connections if required
         childmgblock = utils.get_child_Mstring(syn,'mgblockStr')
         #### connect the post compartment to the synapse
         if childmgblock.value=='True': # If NMDA synapse based on mgblock, connect to mgblock
