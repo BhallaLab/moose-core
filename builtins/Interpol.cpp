@@ -76,6 +76,10 @@ const Cinfo * Interpol::initCinfo()
         &Interpol::setXmax,
         &Interpol::getXmax);
 
+    static ReadOnlyValueFinfo< Interpol, double > y(
+        "y",
+        "Looked up value.",
+        &Interpol::getY);
     //////////////////////////////////////////////////////////////
     // MsgDest Definitions
     //////////////////////////////////////////////////////////////
@@ -109,6 +113,7 @@ const Cinfo * Interpol::initCinfo()
     static Finfo* interpolFinfos[] = {
         &xmin,		// Value
         &xmax,		// Value
+        &y,
         // &xdivs,		// Value
         lookupOut(),
         &input,		// DestFinfo
@@ -175,6 +180,11 @@ void Interpol::setXmax(double value)
 double Interpol::getXmax() const
 {
     return xmax_;
+}
+
+double Interpol::getY() const
+{
+    return y_;
 }
 
 //////////////////////////////////////////////////////////////
