@@ -16,6 +16,7 @@ OBJ = \
 	Func.o \
 	TableBase.o	\
 	Table.o	\
+	Interpol.o	\
 	StimulusTable.o	\
 	TimeTable.o	\
 	Stats.o	\
@@ -37,6 +38,7 @@ Mstring.o:		Mstring.h
 Func.o:	Func.h
 TableBase.o:		TableBase.h
 Table.o:		TableBase.h Table.h
+Interpol.o:		TableBase.h Interpol.h
 StimulusTable.o:		TableBase.h StimulusTable.h
 TimeTable.o:	TimeTable.h TableBase.h
 Stats.o:	Stats.h
