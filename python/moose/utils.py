@@ -571,6 +571,8 @@ def resetSim(simpaths, simdt, plotdt, simmethod='hsolve'):
         _moose.useClock(ELECCLOCK, simpath+'/##[TYPE=IntFire]', 'process')
         _moose.useClock(ELECCLOCK, simpath+'/##[TYPE=IzhikevichNrn]', 'process')
         _moose.useClock(ELECCLOCK, simpath+'/##[TYPE=SpikeGen]', 'process')
+        _moose.useClock(ELECCLOCK, simpath+'/##[TYPE=Interpol]', 'process')
+        _moose.useClock(ELECCLOCK, simpath+'/##[TYPE=Interpol2D]', 'process')
         _moose.useClock(CHANCLOCK, simpath+'/##[TYPE=HHChannel2D]', 'process')
         _moose.useClock(CHANCLOCK, simpath+'/##[TYPE=SynChan]', 'process')
         ## If simmethod is not hsolve, set clocks for the biophysics,

@@ -39,7 +39,7 @@ moose.connect(granCellSoma,'VmOut',spikeGen,'Vm')
 ## save spikes in table
 table_path = moose.Neutral(granCell.path+'/data').path
 granCellSpikesTable = moose.Table(table_path+'/spikesTable')
-moose.connect(spikeGen,'event',granCellSpikesTable,'input')
+moose.connect(spikeGen,'spikeOut',granCellSpikesTable,'input')
 
 ## from moose_utils.py sets clocks and resets/reinits
 resetSim(['/cells'], SIMDT, PLOTDT, simmethod='hsolve')
