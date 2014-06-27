@@ -7,8 +7,8 @@
 ## Modification Date: 2012-06-08
 ########################################################################################
 
-import os
-os.environ['NUMPTHREADS'] = '1'
+#import os
+#os.environ['NUMPTHREADS'] = '1'
 import sys
 sys.path.append('../../../python')
 
@@ -50,7 +50,7 @@ if __name__ == '__main__':
     IF1Soma.inject = injectI
     IF2Soma = moose.element(populationDict['LIFs'][1][1].path+'/soma_0')
     IF2Soma.inject = 0.0#injectI*2.0
-    IF2Soma.inject = injectI
+    #IF2Soma.inject = injectI
     IF1vmTable = setupTable("vmTableIF1",IF1Soma,'Vm')
     IF2vmTable = setupTable("vmTableIF2",IF2Soma,'Vm')
 

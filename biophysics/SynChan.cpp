@@ -141,6 +141,13 @@ void SynChan::innerSetGbar( double Gbar )
 void SynChan::setTau1( double tau1 )
 {
 	tau1_ = tau1;
+    // Aditya added
+    // required if changing tau1 during a simulation
+    // (eg. Marder pyloric networks).
+    double dt = 25e-6;
+	xconst1_ = tau1_ * ( 1.0 - exp( -dt / tau1_ ) );
+	xconst2_ = exp( -dt / tau1_ );
+    normalizeGbar();
 }
 
 double SynChan::getTau1() const
@@ -151,6 +158,19 @@ double SynChan::getTau1() const
 void SynChan::setTau2( double tau2 )
 {
     tau2_ = tau2;
+    // Aditya added
+    // required if changing tau1 during a simulation
+    // (eg. Marder pyloric networks).
+    double dt = 25e-6;
+    if ( doubleEq( tau2_, 0.0 ) ) {
+            yconst1_ = 1.0;
+            yconst2_ = 0.0;
+    } else {
+            yconst1_ = tau2_ * ( 1.0 - exp( -dt / tau2_ ) );
+            yconst2_ = exp( -dt / tau2_ );
+    }
+    normalizeGbar();
+
 }
 
 double SynChan::getTau2() const
@@ -222,6 +242,8 @@ void SynChan::reinit( const Eref& e, ProcPtr info )
 	SynChanBase::setIk( 0.0 );
 	X_ = 0.0;
 	Y_ = 0.0;
+    // These below statements are also called when setting tau1 and tau2
+    // (required when changing tau1 and tau2 during a simulation).
 	xconst1_ = tau1_ * ( 1.0 - exp( -dt / tau1_ ) );
 	xconst2_ = exp( -dt / tau1_ );
 
