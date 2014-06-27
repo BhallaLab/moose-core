@@ -306,10 +306,10 @@ class NetworkML():
         #### connect pre-comp Vm (if graded) OR spikegen/timetable (if event-based) to the synapse
         ## I rely on second term below not being evaluated if first term is None; else None.value gives error.
         if gradedchild is not None and gradedchild.value=='True': # graded synapse
-            table = moose.Table(syn.path+"/graded_table")
+            interpol = moose.element(syn.path+"/graded_table")
             #### always connect source to input - else 'cannot create message' error.
             precomp = moose.Compartment(pre_path)
-            moose.connect(precomp,"VmOut",table,"input")
+            moose.connect(precomp,"VmOut",interpol,"input")
             try:
                 tau_table = moose.element(syn.path+'/tau_table')
                 tau_table_present = True

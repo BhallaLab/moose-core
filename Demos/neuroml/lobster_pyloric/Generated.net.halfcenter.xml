@@ -43,7 +43,7 @@ Network connection: PD_PY contains 1 individual synaptic connections
             </instance>
         </instances>
     </population>
-    <population name="PY" cell_type="PY">
+    <population name="PY" cell_type="LP_highH"> <!-- LP cell with high H -->
         <meta:properties>
             <meta:property tag="color" value="0.0 0.0 0.796875"/>
 
@@ -54,7 +54,7 @@ Network connection: PD_PY contains 1 individual synaptic connections
             </instance>
         </instances>
     </population>
-    <population name="LP" cell_type="LP">
+    <population name="LP" cell_type="LP_highH2"> <!-- LP cell with high H and different initVm -->
         <meta:properties>
             <meta:property tag="color" value="0.796875 0.0 0.796875"/>
 
@@ -68,10 +68,11 @@ Network connection: PD_PY contains 1 individual synaptic connections
 </populations>
 
 
-
-<projections units="Physiological Units">
+    <!-- Only synapses between LP and PY are present. -->
+    <!-- When both weights are 0.6, we get half-centers; when both are 0.2, we get spike synchronization! -->
+        <projections units="Physiological Units">
     <projection name="PD_LP" source="AB_PD" target="LP">
-        <synapse_props synapse_type="DoubExpSyn_Ach" internal_delay="0.0" weight="20.0" threshold="-35.0">
+        <synapse_props synapse_type="DoubExpSyn_Ach" internal_delay="0.0" weight="0.0" threshold="-35.0">
         </synapse_props>
         <connections size="1">
             <connection id="0" pre_cell_id="0" pre_fraction_along="0.3273732" post_cell_id="0" post_fraction_along="0.52766025">
@@ -79,7 +80,7 @@ Network connection: PD_PY contains 1 individual synaptic connections
         </connections>
     </projection>
     <projection name="PY_LP" source="PY" target="LP">
-        <synapse_props synapse_type="DoubExpSyn_Glu" internal_delay="0.0" weight="2.0" threshold="-35.0">
+        <synapse_props synapse_type="DoubExpSyn_Glu" internal_delay="0.0" weight="0.6" threshold="-35.0">
         </synapse_props>
         <connections size="1">
             <connection id="0" pre_cell_id="0" pre_fraction_along="0.52467185" post_cell_id="0" post_fraction_along="0.7308613">
@@ -87,7 +88,7 @@ Network connection: PD_PY contains 1 individual synaptic connections
         </connections>
     </projection>
     <projection name="AB_PY" source="AB_PD" target="PY">
-        <synapse_props synapse_type="DoubExpSyn_Glu" internal_delay="0.0" weight="2.0" threshold="-35.0">
+        <synapse_props synapse_type="DoubExpSyn_Glu" internal_delay="0.0" weight="0.0" threshold="-35.0">
         </synapse_props>
         <connections size="1">
             <connection id="0" pre_cell_id="0" pre_fraction_along="0.52363473" post_cell_id="0" post_fraction_along="0.48390448">
@@ -95,7 +96,7 @@ Network connection: PD_PY contains 1 individual synaptic connections
         </connections>
     </projection>
     <projection name="AB_LP" source="AB_PD" target="LP">
-        <synapse_props synapse_type="DoubExpSyn_Glu" internal_delay="0.0" weight="0.6" threshold="-35.0">
+        <synapse_props synapse_type="DoubExpSyn_Glu" internal_delay="0.0" weight="0.0" threshold="-35.0">
         </synapse_props>
         <connections size="1">
             <connection id="0" pre_cell_id="0" pre_fraction_along="0.27374882" post_cell_id="0" post_fraction_along="0.49563748">
@@ -103,7 +104,7 @@ Network connection: PD_PY contains 1 individual synaptic connections
         </connections>
     </projection>
     <projection name="LP_PY" source="LP" target="PY">
-        <synapse_props synapse_type="DoubExpSyn_Glu" internal_delay="0.0" weight="2.0" threshold="-35.0"><!-- 0.6 as per paper -->
+        <synapse_props synapse_type="DoubExpSyn_Glu" internal_delay="0.0" weight="0.6" threshold="-35.0">
         </synapse_props>
         <connections size="1">
             <connection id="0" pre_cell_id="0" pre_fraction_along="0.2146715" post_cell_id="0" post_fraction_along="0.44370753">
@@ -111,7 +112,7 @@ Network connection: PD_PY contains 1 individual synaptic connections
         </connections>
     </projection>
     <projection name="LP_ABPD" source="LP" target="AB_PD">
-        <synapse_props synapse_type="DoubExpSyn_Glu" internal_delay="0.0" weight="0.5" threshold="-35.0"><!-- 2.0 as per paper -->
+        <synapse_props synapse_type="DoubExpSyn_Glu" internal_delay="0.0" weight="0.0" threshold="-35.0">
         </synapse_props>
         <connections size="1">
             <connection id="0" pre_cell_id="0" pre_fraction_along="0.6073083" post_cell_id="0" post_fraction_along="0.64504874">
@@ -119,7 +120,7 @@ Network connection: PD_PY contains 1 individual synaptic connections
         </connections>
     </projection>
     <projection name="PD_PY" source="AB_PD" target="PY">
-        <synapse_props synapse_type="DoubExpSyn_Ach" internal_delay="0.0" weight="0.2" threshold="-35.0">
+        <synapse_props synapse_type="DoubExpSyn_Ach" internal_delay="0.0" weight="0.0" threshold="-35.0">
         </synapse_props>
         <connections size="1">
             <connection id="0" pre_cell_id="0" pre_fraction_along="0.49393272" post_cell_id="0" post_fraction_along="0.92773134">
@@ -129,5 +130,6 @@ Network connection: PD_PY contains 1 individual synaptic connections
 </projections>
 
             <!--There are no electrical inputs present in the network-->
+
 
 </networkml>

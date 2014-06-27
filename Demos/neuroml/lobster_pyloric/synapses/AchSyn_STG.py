@@ -14,16 +14,16 @@ except ImportError:
 
 from moose.utils import * # for BSplineFill
 
-class GluSyn_STG(moose.SynChan):
-    """Glutamate graded synapse"""
+class AchSyn_STG(moose.SynChan):
+    """Acetylcholine graded synapse"""
     def __init__(self, *args):
         moose.SynChan.__init__(self,*args)
-        self.Ek = -70e-3 # V
+        self.Ek = -80e-3 # V
         # For event based synapses, I had a strength of 5e-6 S
         #    to compensate for event-based,
         # but for the original graded synapses, 5e-9 S is correct.
         self.Gbar = 5e-9 # S # set weight on connecting the network
-        self.tau1 = 40e-3 # s # this is Vpre dependent (see below)
+        self.tau1 = 100e-3 # s # this is Vpre dependent (see below)
         self.tau2 = 0.0 # single first order equation
 
         Vth = -35e-3 # V
@@ -34,7 +34,7 @@ class GluSyn_STG(moose.SynChan):
         graded.value = 'True'
         mgblock = moose.Mstring(self.path+'/mgblockStr')
         mgblock.value = 'False'
-        
+
         # ds/dt = s_inf/tau - s/tau = A - Bs
         # where A=s_inf/tau is activation, B is 1/tau
         # Fill up the activation and tau tables

@@ -7,8 +7,8 @@ python STG_net.py
 The soma name below is hard coded for gran98, else any other file can be used by modifying this script.
 """
 
-import os
-os.environ['NUMPTHREADS'] = '1'
+#import os
+#os.environ['NUMPTHREADS'] = '1'
 import sys
 sys.path.extend(['../../../python','synapses'])
 
@@ -16,19 +16,23 @@ import moose
 from moose.utils import *
 from moose.neuroml.NeuroML import NeuroML
 
-from load_synapses import load_synapses
-moose.Neutral('/library')
-# comment below line to use event based synapses
-#  if commented, neuroml event-based gets searched for and loaded
-# uncomment for loading graded synapses
-#load_synapses()
-
 from pylab import *
 
 simdt = 25e-6 # s
 plotdt = 25e-6 # s
 runtime = 10.0 # s
 cells_path = '/cells' # neuromlR.readNeuroMLFromFile creates cells in '/cells'
+
+# for graded synapses, else NeuroML event-based are used
+from load_synapses import load_synapses
+moose.Neutral('/library')
+# set graded to False to use event based synapses
+#  if False, neuroml event-based synapses get searched for and loaded
+# True to load graded synapses
+graded_syn = True
+#graded_syn = False
+if graded_syn:
+    load_synapses()
 
 def loadSTGNeuroML_L123(filename):
     neuromlR = NeuroML()
@@ -62,13 +66,17 @@ def loadSTGNeuroML_L123(filename):
     capool_Ca = setupTable('CaPool_Ca',moose.element(capool_path),'Ca')
 
     # monitor synaptic current
-    soma1 = moose.element(soma1_path)
-    print "Children of",soma1_path,"are:"
-    for child in soma1.children:
+    soma2 = moose.element(soma2_path)
+    print "Children of",soma2_path,"are:"
+    for child in soma2.children:
         print child.className, child.path
-    syn_path = soma1_path+'/DoubExpSyn_Glu'
-    #syn_path = soma1_path+'/DoubExpSyn_Glu__cells-0-_LP_0-0-_Soma_0'
-    syn_Ik = setupTable('DoubExpSyn_Glu_Ik',moose.element(syn_path),'Ik')
+    if graded_syn:
+        syn_path = soma2_path+'/DoubExpSyn_Ach__cells-0-_AB_PD_0-0-_Soma_0'
+        syn = moose.element(syn_path)
+    else:
+        syn_path = soma2_path+'/DoubExpSyn_Ach'
+        syn = moose.element(syn_path)
+    syn_Ik = setupTable('DoubExpSyn_Ach_Ik',syn,'Ik')
 
     print "Reinit MOOSE ... "
     resetSim(['/elec',cells_path], simdt, plotdt, simmethod='ee')
@@ -79,9 +87,9 @@ def loadSTGNeuroML_L123(filename):
     tvec = tvec[ : soma1Vm.vector.size ]
     
     figure(facecolor='w')
-    plot(tvec,soma1Vm.vector,label='AB_PD',color='g',linestyle='dashed')
+    plot(tvec,soma1Vm.vector,label='AB_PD',color='g',linestyle='solid')
     plot(tvec,soma2Vm.vector,label='LP',color='r',linestyle='solid')
-    plot(tvec,soma3Vm.vector,label='PY',color='b',linestyle='dashed')
+    plot(tvec,soma3Vm.vector,label='PY',color='b',linestyle='solid')
     legend()
     title('Soma Vm')
     xlabel('time (s)')
@@ -97,11 +105,10 @@ def loadSTGNeuroML_L123(filename):
     ylabel('Ca (mol/m^3)')
 
     figure(facecolor='w')
-    plot(tvec,syn_Ik.vector,color='b',linestyle='solid')
-    title('Glu syn current in '+soma1_path)
+    plot(tvec,syn_Ik.vector,color='b',linestyle='solid')    
+    title('Ach syn current in '+soma2_path)
     xlabel('time (s)')
-    ylabel('Ik (Amp)')
-
+    ylabel('Isyn (S)')
     print "Showing plots ..."
     show()
 
@@ -109,4 +116,4 @@ filename = "Generated.net.xml"
 if __name__ == "__main__":
     if len(sys.argv)>=2:
         filename = sys.argv[1]
-loadSTGNeuroML_L123(filename)
+    loadSTGNeuroML_L123(filename)
