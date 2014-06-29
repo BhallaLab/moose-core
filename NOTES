@@ -3751,4 +3751,12 @@ Later. Checkin 5487.
 Implemented a unit test for testing inter-compartment diffusion. Seems
 promising. Lots of fixes ensued. The minchan.py model looks better too.
 
+The loadMulti still fails. I'll do a midchan.py derived from 
+minchan.py to see where things fall apart.
+
+midchan loads in entire cell model quite happily. I've set up the 
+adaptors for Ca on the spines. Try to figure out how to do this for dends.
+
+Then: Put in a more complicated chem model. Different ones in spine and PSD.
+
 ============================================================================
