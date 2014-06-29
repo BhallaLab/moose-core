@@ -89,21 +89,22 @@ def displayPlots():
 
 def main():
 		makeModel()
+                moose.seed( 11111 )
 		gsolve = moose.Gsolve( '/model/compartment/gsolve' )
 		stoich = moose.Stoich( '/model/compartment/stoich' )
-		gsolve.numAllVoxels = 1
-		stoich.poolInterface = gsolve
-		gsolve.stoich = stoich
+		#gsolve.numAllVoxels = 1
+		compt = moose.element( '/model/compartment' );
+                stoich.compartment = compt
+                stoich.ksolve = gsolve
 		stoich.path = "/model/compartment/##"
 		#solver.method = "rk5"
 		#mesh = moose.element( "/model/compartment/mesh" )
 		#moose.connect( mesh, "remesh", solver, "remesh" )
 		moose.setClock( 5, 1.0 ) # clock for the solver
 		moose.useClock( 5, '/model/compartment/gsolve', 'process' )
-		compt = moose.element( '/model/compartment' );
 		a = moose.element( '/model/compartment/a' )
 
-		for vol in ( 1e-19, 1e-20, 1e-21, 1e-22 ):
+		for vol in ( 1e-19, 1e-20, 1e-21, 3e-22, 1e-22, 3e-23, 1e-23 ):
 			# Set the volume
 			#print 'vol = ', vol, ', a.concInit = ', a.concInit, ', a.nInit = ', a.nInit
 			compt.volume = vol
@@ -127,9 +128,10 @@ def main():
 
 			# Iterate through all plots, dump their contents to data.plot.
 			displayPlots()
-
-		pylab.legend()
-		pylab.show()
+                        #pylab.legend()
+                        pylab.show( block=False )
+                        print 'vol = ', vol, 'hit enter to go to next plot'
+                        raw_input()
 
 		quit()
 
