@@ -81,23 +81,20 @@ def extract_ftype_doc(cinfo, finfotype, docio):
     docio: StringIO
 	IO object to write the documentation into
     """
-    numfinfo = moose.getField(cinfo, 'num_'+finfotype, 'unsigned')
-    finfo = moose.ematrix('%s/%s' % (cinfo.path, finfotype))
     data = []
     inf = float( 'Inf' )
     max_width_name = -inf
     max_width_type = -inf
-    for ii in range(numfinfo):
-	fid = moose.melement(finfo, 0, ii, 0)
-	
-	if finfotype == 'destFinfo' and (fid.name.startswith('get_') or
-					 fid.name.startswith('set_')):
-	    continue
-	
-	dtype = type_mangling_regex.sub('', fid.type)
-	name = '**`{0}`**'.format( fid.name )
+    for fieldname in cinfo.getFieldNames(finfotype):
+        print cinfo, fieldname
+        try:
+            field_element = moose.element('%s/%s' % (cinfo.path, fieldname))
+        except ValueError:
+            continue
+	dtype = type_mangling_regex.sub('', field_element.type)
+	name = '**`{0}`**'.format( field_element.name )
 	dtype = '`{0}`'.format( dtype )
-	doc = fid.docs
+	doc = field_element.docs
 	
 	data.append( [ name, dtype, doc ] )
 	
