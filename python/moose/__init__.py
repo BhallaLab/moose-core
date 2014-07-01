@@ -13,12 +13,12 @@ function::
 ...
 
 The documentation built into main C++ code of MOOSE can be accessed
-via the module function ``doc``:
+via the module function ``doc``::
 
 >>> moose.doc('Neutral')
 ...
 
-To get documentation about a particular field:
+To get documentation about a particular field::
 
 >>> moose.doc('Neutral.childMsg')
 
