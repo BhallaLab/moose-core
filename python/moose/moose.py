@@ -319,6 +319,8 @@ def getmoosedoc(tokens, inherited=False):
             if inherited:
                 mro = eval('_moose.%s' % (tokens[0])).mro()
                 for class_ in mro[1:]:
+                    if class_ == _moose.melement:
+                        break
                     docstring.write('\n\n#Inherited from %s#\n' % (class_.__name__))
                     append_finfodocs(class_.__name__, docstring, indent)
                     if class_ == _moose.Neutral:    # Neutral is the toplevel moose class
@@ -401,7 +403,7 @@ def doc(arg, inherited=True, paged=True):
     if tokens:
         text += getmoosedoc(tokens, inherited=inherited)
     else:
-        text += pydoc.gethelp(arg)
+        text += pydoc.getdoc(arg)
     if pager:
         pager(text)
     else:

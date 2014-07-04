@@ -3,14 +3,15 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to MOOSE documentation!
-=================================
+the Multiscale Object-Oriented Simulation Environment
+=====================================================
 
 Contents:
 
 .. toctree::
    :maxdepth: 2
-
+	
+   moose_overview
    moose_builtins
    moose_classes
 
