@@ -1892,7 +1892,8 @@ PyObject* setDestFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type1
         {"getId", (PyCFunction)moose_ObjId_getId, METH_NOARGS,
          moose_ObjId_getId_documentation},
         {"vec", (PyCFunction)moose_ObjId_getId, METH_NOARGS,
-         "Return the vec this element belongs to."},
+         "Return the vec this element belongs to. This is overridden by the"
+         " attribute of the same name for quick access."},
         {"getFieldNames", (PyCFunction)moose_ObjId_getFieldNames, METH_VARARGS,
          moose_ObjId_getFieldNames_documenation},
         {"getNeighbors", (PyCFunction)moose_ObjId_getNeighbors, METH_VARARGS,
@@ -1918,7 +1919,26 @@ PyObject* setDestFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type1
                  "the vec. These are identified by three components: id_ and\n"
                  "dindex. id_ is the Id of the containing vec, it has a unique\n"
                  "numerical value (field `value`). `dindex` is the index of the current\n"
-                 "item in the containing vec. `dindex` is 0 for single elements.");
+                 "item in the containing vec. `dindex` is 0 for single elements."
+                 "\n"
+                 "\n"
+                 "    __init__(path, dims, dtype) or\n"
+                 "    __init__(id, dataIndex, fieldIndex)\n"
+                 "    Initialize moose object\n"
+                 "\n"
+                 "    Parameters\n"
+                 "    ----------\n"
+                 "    path : string\n"
+                 "        Target element path.\n"
+                 "    dims : tuple or int\n"
+                 "        dimensions along each axis (can be"
+                 "        an integer for 1D objects). Default: (1,)\n"
+                 "    dtype : string\n"
+                 "        the MOOSE class name to be created.\n"
+                 "    id : vec or integer\n"
+                 "        id of an existing element.\n"
+                 "\n"
+                 );
     PyTypeObject ObjIdType = { 
         PyVarObject_HEAD_INIT(NULL, 0)            /* tp_head */
         "moose.melement",                      /* tp_name */

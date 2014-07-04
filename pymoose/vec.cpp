@@ -80,7 +80,7 @@ extern "C" {
     // Python method lists for PyObject of Id
     ///////////////////////////////////////////////
     PyDoc_STRVAR(moose_Id_delete_doc,
-                 "vec.delete()"
+                 "vec.delete() -> None"
                  "\n"
                  "\nDelete the underlying moose object. This will invalidate all"
                  "\nreferences to this object and any attempt to access it will raise a"
@@ -88,19 +88,21 @@ extern "C" {
                  "\n");
 
     PyDoc_STRVAR(moose_Id_setField_doc,
-                 "setField(fieldname, value_vector)\n"
+                 "setField(fieldname, value_vector) -> None\n"
                  "\n"
                  "Set the value of `fieldname` in all elements under this vec.\n"
                  "\n"
                  "Parameters\n"
                  "----------\n"
                  "fieldname: str\n"
-                 "\tfield to be set.\n"
+                 "    field to be set.\n"
                  "value: sequence of values\n"
-                 "\tsequence of values corresponding to individual elements under this\n"
-                 "vec.\n"
+                 "    sequence of values corresponding to individual elements under this\n"
+                 "    vec.\n"
                  "\n"
-                 "NOTE: This is an interface to SetGet::setVec\n"
+                 "Notes\n"
+                 "-----\n"
+                 "    This is an interface to SetGet::setVec\n"
                  );
     
     static PyMethodDef IdMethods[] = {
@@ -158,6 +160,7 @@ extern "C" {
                  "\nvectorized. These are `path`, `value`, `shape` and `className`."
                  "\nThere are two ways an vec can be initialized, (1) create a new array"
                  "\nelement or (2) create a reference to an existing object."
+                 "\n"
                  "\n"
                  "\n__init__(self, path=path, n=size, g=isGlobal, dtype=className)"
                  "\n"
@@ -462,7 +465,7 @@ extern "C" {
             ObjId el(id, ii);
 #ifndef NDEBUG
             if (verbosity > 1){
-                cout << "\tDeleting ObjId " << el << endl;
+                cout << "    Deleting ObjId " << el << endl;
             }
 #endif
             for (unsigned int fidx = 0; fidx < lookupFields.size(); ++fidx){
