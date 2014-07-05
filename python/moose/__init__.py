@@ -26,99 +26,133 @@ To get documentation about a particular field::
 Brief overview of PyMOOSE
 =========================
 
-Classes:
+Special classes
+---------------
 
 vec
-----------------
 
-this is the unique identifier of a MOOSE object. Note that you can
-create multiple references to the same MOOSE object in Python, but as
-long as they have the same path/id value, they all point to the same
-entity in MOOSE.
+    this is the unique identifier of a MOOSE object. Note that you can
+    create multiple references to the same MOOSE object in Python, but as
+    long as they have the same path/id value, they all point to the same
+    entity in MOOSE.
 
-Constructor:
+    Constructor:
 
-You can create a new vec using the constructor:
+    You can create a new vec using the constructor:
 
-vec(path, dimension, classname)
+    vec(path, dimension, classname)
 
-Fields:
+    Fields:
 
-value -- unsigned integer representation of id of this vec
+        value
 
-path -- string representing the path corresponding this vec
+            unsigned integer representation of id of this vec
 
-shape -- tuple containing the dimensions of this vec
+        path
 
+            string representing the path corresponding this vec
 
-Apart from these, every vec exposes the fields of all its elements
-in a vectorized form. For example:
+        shape
 
->>> iaf = moose.vec('/iaf', (10), 'IntFire')
->>> iaf.Vm = range(10) 
->>> print iaf[5].Vm 
-5.0
->>> print iaf.Vm
-array([ 0.,  1.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9.])
+            tuple containing the dimensions of this vec
 
 
-Methods:
+    Apart from these, every vec exposes the fields of all its elements
+    in a vectorized form. For example:
 
-vec implements part of the sequence protocol:
+        >>> iaf = moose.vec('/iaf', (10), 'IntFire')
+        >>> iaf.Vm = range(10) 
+        >>> print iaf[5].Vm 
+        5.0
+        >>> print iaf.Vm
+        array([ 0.,  1.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9.])
 
-len(em) -- the first dimension of em.
 
-em[n] -- the n-th element in em.
+    Methods:
 
-em[n1:n2] -- a tuple containing n1 to n2-th (exclusive) element in em.
+        vec implements part of the sequence protocol:
 
-elem in em -- True if elem is contained in em.
+        len(em)
+
+            the first dimension of em.
+
+        em[n]
+
+            the n-th element in em.
+
+        em[n1:n2]
+
+            a tuple containing n1 to n2-th (exclusive) element in em.
+
+        elem in em
+
+            True if elem is contained in em.
 
 
 
 melement
-----------------
 
-Single moose object. It has three numbers to uniquely identify it:
+    Single moose object. It has three numbers to uniquely identify it:
 
-id - id of the vec containing this element
+    vec 
 
-dataIndex - index of this element in the container vec
+        the vec containing this element
 
-fieldIndex - if this is a tertiary object, i.e. acts
-as a field in another element (like synapse[0] in IntFire[1]), then
-the index of this field in the containing element.
+    dataIndex
+    
+        index of this element in the container vec
 
-Methods:
+    fieldIndex 
 
-getId -- vec object containing this element.
-vec() -- vec object containing this element.
+        if this is a tertiary object, i.e. acts
+        as a field in another element (like synapse[0] in IntFire[1]), then
+        the index of this field in the containing element.
 
-getDataIndex() -- unsigned integer representing the index of this
-element in containing MOOSE object.
+    Methods:
 
-getFieldIndex() -- unsigned integer representing the index of this
-element as a field in the containing Element.
+        getId() 
 
-getFieldType(field) -- human readable datatype information of field
+            vec object containing this element.
 
-getField(field) -- get value of field
+        getDataIndex() 
+    
+            unsigned integer representing the index of this
+            element in containing MOOSE object.
 
-setField(field, value) -- assign value to field
+        getFieldIndex() 
 
-getFieldNames(fieldType) -- tuple containing names of all the fields
-of type fieldType. fieldType can be valueFinfo, lookupFinfo, srcFinfo,
-destFinfo and sharedFinfo. If nothing is passed, a union of all of the
-above is used and all the fields are returned.
+            unsigned integer representing the index of this
+            element as a field in the containing Element.
 
-connect(srcField, destObj, destField, msgType) -- connect srcField of
-this element to destField of destObj.
+        getFieldType(field)
 
-melement is something like an abstract base class in C++. The concrete
-base class is Neutral. However you do not need to cast objects down to
-access their fields. The PyMOOSE interface will automatically do the
-check for you and raise an exception if the specified field does not
-exist for the current element.
+            human readable datatype information of field
+
+        getField(field)
+
+            get value of field
+
+        setField(field, value)
+
+            assign value to field
+
+        getFieldNames(fieldType)
+
+            tuple containing names of all the fields
+            of type fieldType. fieldType can be valueFinfo, lookupFinfo, srcFinfo,
+            destFinfo and sharedFinfo. If nothing is passed, a union of all of the
+            above is used and all the fields are returned.
+
+        connect(srcField, destObj, destField, msgType)
+
+            connect srcField of
+            this element to destField of destObj.
+
+    melement is something like an abstract base class in C++. The concrete
+    base class is Neutral. However you do not need to cast objects down to
+    access their fields. The PyMOOSE interface will automatically do the
+    check for you and raise an exception if the specified field does not
+    exist for the current element.
 
 Creating melements
 ------------------
@@ -135,15 +169,21 @@ named `b` under element `a`. Note that if `a` does not exist, this
 will raise an error. However, if `parent` is specified, `path` should
 contain only the name of the element.
 
-dims: (optional) tuple specifying the dimension of the containing melement to be
-created. It is (1,) by default.
+dims: (optional) tuple 
 
-dtype: string specifying the class name of the element to be created.
+    the dimension of the containing melement to be
+    created. It is (1,) by default.
 
-parent: (optional) string specifying the path of the parent element or
-the Id or the ObjId of the parent element or a reference to the parent
-element. If this is specified, the first argument `path` is treated as
-the name of the element to be created.
+dtype: string 
+    
+    the class name of the element to be created.
+
+parent: (optional) string 
+ 
+    specifying the path of the parent element or
+    the Id or the ObjId of the parent element or a reference to the parent
+    element. If this is specified, the first argument `path` is treated as
+    the name of the element to be created.
 
 All arguments can be passed as keyword arguments.
 
@@ -160,21 +200,29 @@ d = DiffAmp('delta', parent='alpha/beta') # creates element `delta` under `beta`
 module functions
 ----------------
 
-element(path) - returns a reference to an existing object converted to
-the right class. Raises ValueError if path does not exist.
+element(path)
+
+    returns a reference to an existing object converted to
+    the right class. Raises ValueError if path does not exist.
 
 copy(src=<src>, dest=<dest>, name=<name_of_the_copy>, n=<num_copies>,
-copyMsg=<whether_to_copy_messages) -- make a copy of source object as
-a child of the destination object.
+copyMsg=<whether_to_copy_messages) 
+
+    make a copy of source object as a child of the destination object.
 
 
-move(src, dest) -- move src object under dest object.
+move(src, dest) 
 
-useClock(tick, path, update_function) -- schedule <update_function> of
-every object that matches <path> on clock no. <tick>. Most commonly
-the function is 'process'.  NOTE: unlike earlier versions, now
-autoschedule is not available. You have to call useClock for every
-element that should be updated during the simulation. 
+    move src object under dest object.
+
+
+useClock(tick, path, update_function) 
+
+    schedule <update_function> of every object that matches <path> on clock no. <tick>. Most commonly
+    the function is 'process'.  NOTE: unlike earlier versions, now
+    autoschedule is not available. You have to call useClock for every
+    element that should be updated during the simulation. 
+
 
 The sequence of clockticks with the same dt is according to their
 number. This is utilized for controlling the order of updates in
@@ -203,33 +251,60 @@ Example:
 moose.useClock(0, '/model/compartment_1', 'init')
 moose.useClock(1, '/model/compartment_1', 'process')
 
-setClock(tick, dt) -- set dt of clock no <tick>.
+setClock(tick, dt) 
+    
+    set dt of clock no `tick`.
 
-start(runtime) -- start simulation of <runtime> time.
+start(runtime) 
+    
+    start simulation of `runtime` time.
 
-reinit() -- reinitialize simulation.
+reinit() 
 
-stop() -- stop simulation
+    reinitialize simulation.
 
-isRunning() -- true if simulation is in progress, false otherwise.
+stop() 
 
-exists(path) -- true if there is a pre-existing object with the specified path.
+    stop simulation
 
-loadModel(filepath, modelpath) -- load file in <filepath> into node
-<modelpath> of the moose model-tree.
+isRunning() 
 
-setCwe(obj) -- set the current working element to <obj> - which can be
-either a string representing the path of the object in the moose
-model-tree, or an vec.
-ce(obj) -- an alias for setCwe.
+    true if simulation is in progress, false otherwise.
 
-getCwe() -- returns vec containing the current working element.
-pwe() -- an alias for getCwe.
+exists(path) 
 
-showfields(obj) -- print the fields in object in human readable format
+    true if there is a pre-existing object with the specified path.
 
-le(obj) -- list element under object, if no parameter specified, list
-elements under current working element
+loadModel(filepath, modelpath) 
+    
+    load file in `filepath` into node `modelpath` of the moose model-tree.
+
+setCwe(obj) 
+
+    set the current working element to `obj` - which can be
+    either a string representing the path of the object in the moose
+    model-tree, or an vec.
+
+ce(obj) 
+
+    an alias for setCwe.
+
+getCwe()
+
+    returns vec containing the current working element.
+
+pwe() 
+
+    an alias for getCwe.
+
+showfields(obj) 
+    
+    print the fields in object in human readable format
+
+le(obj) 
+    
+    list element under object, if no parameter specified, list
+    elements under current working element
 
 """
 
