@@ -26,7 +26,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="MOOSE 3.0 documentation" href="index.html" />
-    <link rel="prev" title="MOOSE builtins" href="moose_builtins.html" /> 
+    <link rel="prev" title="MOOSE Classes" href="moose_builtins.html" /> 
   </head>
   <body>
     <div class="related">
@@ -36,12 +36,12 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="moose_builtins.html" title="MOOSE builtins"
+          <a href="moose_builtins.html" title="MOOSE Classes"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">MOOSE 3.0 documentation</a> &raquo;</li> 
+    <li><a href="http://moose.ncbs.res.in/">MOOSE Homepage</a> &raquo;</li>
+        
+        <li><a href="index.html">MOOSE 3.0 documentation</a> &raquo;</li>
+ 
       </ul>
     </div>  
 
@@ -3606,6 +3606,97 @@ have any variable named z, this the third variable in the sequence <cite>vars</c
 
 </dd></dl>
 
+<dl class="class">
+<dt id="GapJunction">
+<em class="property">class </em><tt class="descname">GapJunction</tt><a class="headerlink" href="#GapJunction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implementation of gap junction between two compartments. The shared</p>
+<p>fields, &#8216;channel1&#8217; and &#8216;channel2&#8217; can be connected to the &#8216;channel&#8217;</p>
+<p>message of the compartments at either end of the gap junction. The</p>
+<p>compartments will send their Vm to the gap junction and receive the</p>
+<p>conductance &#8216;Gk&#8217; of the gap junction and the Vm of the other</p>
+<p>compartment.</p>
+<dl class="attribute">
+<dt id="GapJunction.channel1">
+<tt class="descname">channel1</tt><a class="headerlink" href="#GapJunction.channel1" title="Permalink to this definition">¶</a></dt>
+<dd><p>void (<em>shared message field</em>) This is a shared message to couple the conductance and Vm from</p>
+</dd></dl>
+
+</dd></dl>
+
+<p>terminal 2 to the compartment at terminal 1. The first entry is source
+sending out Gk and Vm2, the second entry is destination for Vm1.</p>
+<blockquote>
+<div><dl class="attribute">
+<dt id="channel2">
+<tt class="descname">channel2</tt><a class="headerlink" href="#channel2" title="Permalink to this definition">¶</a></dt>
+<dd><p>void (<em>shared message field</em>) This is a shared message to couple the conductance and Vm from</p>
+</dd></dl>
+
+</div></blockquote>
+<p>terminal 1 to the compartment at terminal 2. The first entry is source
+sending out Gk and Vm1, the second entry is destination for Vm2.</p>
+<blockquote>
+<div><dl class="attribute">
+<dt id="proc">
+<tt class="descname">proc</tt><a class="headerlink" href="#proc" title="Permalink to this definition">¶</a></dt>
+<dd><p>void (<em>shared message field</em>) This is a shared message to receive Process messages from the scheduler objects. The Process should be called _second_ in each clock tick, after the Init message.The first entry in the shared msg is a MsgDest for the Process operation. It has a single argument, ProcInfo, which holds lots of information about current time, thread, dt and so on. The second entry is a MsgDest for the Reinit operation. It also uses ProcInfo.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Vm1">
+<tt class="descname">Vm1</tt><big>(</big><big>)</big><a class="headerlink" href="#Vm1" title="Permalink to this definition">¶</a></dt>
+<dd><p>(<em>destination message field</em>) Handles Vm message from compartment</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Vm2">
+<tt class="descname">Vm2</tt><big>(</big><big>)</big><a class="headerlink" href="#Vm2" title="Permalink to this definition">¶</a></dt>
+<dd><p>(<em>destination message field</em>) Handles Vm message from another compartment</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="setGk">
+<tt class="descname">setGk</tt><big>(</big><big>)</big><a class="headerlink" href="#setGk" title="Permalink to this definition">¶</a></dt>
+<dd><p>(<em>destination message field</em>) Assigns field value.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="getGk">
+<tt class="descname">getGk</tt><big>(</big><big>)</big><a class="headerlink" href="#getGk" title="Permalink to this definition">¶</a></dt>
+<dd><p>(<em>destination message field</em>) Requests field value. The requesting Element must provide a handler for the returned value.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">process</tt><big>(</big><big>)</big></dt>
+<dd><p>(<em>destination message field</em>) Handles &#8216;process&#8217; call</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">reinit</tt><big>(</big><big>)</big></dt>
+<dd><p>(<em>destination message field</em>) Handles &#8216;reinit&#8217; call</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="channel1Out">
+<tt class="descname">channel1Out</tt><a class="headerlink" href="#channel1Out" title="Permalink to this definition">¶</a></dt>
+<dd><p>double,double (<em>source message field</em>) Sends Gk and Vm from one compartment to the other</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="channel2Out">
+<tt class="descname">channel2Out</tt><a class="headerlink" href="#channel2Out" title="Permalink to this definition">¶</a></dt>
+<dd><p>double,double (<em>source message field</em>) Sends Gk and Vm from one compartment to the other</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="Gk">
+<tt class="descname">Gk</tt><a class="headerlink" href="#Gk" title="Permalink to this definition">¶</a></dt>
+<dd><p>double (<em>value field</em>) Conductance of the gap junction</p>
+</dd></dl>
+
+</div></blockquote>
 <dl class="class">
 <dt id="Group">
 <em class="property">class </em><tt class="descname">Group</tt><a class="headerlink" href="#Group" title="Permalink to this definition">¶</a></dt>
@@ -11652,9 +11743,12 @@ command input.</p>
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/moose_logo.png" alt="Logo"/>
+            </a></p>
   <h4>Previous topic</h4>
   <p class="topless"><a href="moose_builtins.html"
-                        title="previous chapter">MOOSE builtins</a></p>
+                        title="previous chapter">MOOSE Classes</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/moose_classes.txt"
@@ -11684,12 +11778,12 @@ command input.</p>
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="moose_builtins.html" title="MOOSE builtins"
+          <a href="moose_builtins.html" title="MOOSE Classes"
              >previous</a> |</li>
-        <li><a href="index.html">MOOSE 3.0 documentation</a> &raquo;</li> 
+    <li><a href="http://moose.ncbs.res.in/">MOOSE Homepage</a> &raquo;</li>
+        
+        <li><a href="index.html">MOOSE 3.0 documentation</a> &raquo;</li>
+ 
       </ul>
     </div>
     <div class="footer">
