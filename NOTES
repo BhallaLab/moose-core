@@ -3760,3 +3760,13 @@ adaptors for Ca on the spines. Try to figure out how to do this for dends.
 Then: Put in a more complicated chem model. Different ones in spine and PSD.
 
 ============================================================================
+30 June. Checked in with the midchan.py.
+Trying to put in adaptors on the dend. There is a skeleton code around line 188.
+Unable to get the psde_rged
+============================================================================
+6 July.
+Some cleanups to NeuroMesh so that look up of electrical compartments and
+corresponding voxels is now possible.
+
+Updates to midchan.py to utilize these lookups, now the dendritic compartments
+are also utilizing adaptors for taking elec Ca values and mapping to chem.

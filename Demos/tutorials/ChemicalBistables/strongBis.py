@@ -25,8 +25,9 @@ import numpy
 import sys
 
 def main():
-        solver = "gsl"  # Pick any of gsl, gssa, ee..
-        #solver = "gssa"  # Pick any of gsl, gssa, ee..
+	solver = "gsl"  # Pick any of gsl, gssa, ee..
+	#solver = "gssa"  # Pick any of gsl, gssa, ee..
+	#moose.seed( 1234 ) # Needed if stochastic.
 	mfile = '../../Genesis_files/M1719.g'
 	runtime = 100.0
 	if ( len( sys.argv ) >= 2 ):
