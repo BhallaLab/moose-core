@@ -122,6 +122,39 @@ const Cinfo* NeuroMesh::initCinfo()
 			"Vector of indices of parents of each voxel.",
 			&NeuroMesh::getParentVoxel
 		);
+		static ReadOnlyValueFinfo< NeuroMesh, vector< Id > > elecComptMap(
+			"elecComptMap",
+			"Vector of Ids of electrical compartments that map to each "
+			"voxel. This is necessary because the order of the IDs may "
+			"differ from the ordering of the voxels. Additionally, there "
+			"are typically many more voxels than there are electrical "
+			"compartments. So many voxels point to the same elecCompt.",
+			&NeuroMesh::getElecComptMap
+		);
+		static ReadOnlyValueFinfo< NeuroMesh, vector< Id > > elecComptList(
+			"elecComptList",
+			"Vector of Ids of all electrical compartments in this "
+			"NeuroMesh. Ordering is as per the tree structure built in "
+			"the NeuroMesh, and may differ from Id order. Ordering "
+			"matches that used for startVoxelInCompt and endVoxelInCompt",
+			&NeuroMesh::getElecComptList
+		);
+		static ReadOnlyValueFinfo< NeuroMesh, vector< unsigned int > > startVoxelInCompt(
+			"startVoxelInCompt",
+			"Index of first voxel that maps to each electrical "
+			"compartment. Each elecCompt has one or more voxels. "
+			"The voxels in a compartment are numbered sequentially.",
+			&NeuroMesh::getStartVoxelInCompt
+		);
+		static ReadOnlyValueFinfo< NeuroMesh, vector< unsigned int > > endVoxelInCompt(
+			"endVoxelInCompt",
+			"Index of end voxel that maps to each electrical "
+			"compartment. In keeping with C and Python convention, this "
+			"is one more than the last voxel. "
+			"Each elecCompt has one or more voxels. "
+			"The voxels in a compartment are numbered sequentially.",
+			&NeuroMesh::getEndVoxelInCompt
+		);
 
 		static ValueFinfo< NeuroMesh, double > diffLength(
 			"diffLength",
@@ -203,6 +236,10 @@ const Cinfo* NeuroMesh::initCinfo()
 		&numSegments,		// ReadOnlyValue
 		&numDiffCompts,		// ReadOnlyValue
 		&parentVoxel,			// ReadOnlyValue
+		&elecComptList,			// ReadOnlyValue
+		&elecComptMap,			// ReadOnlyValue
+		&startVoxelInCompt,			// ReadOnlyValue
+		&endVoxelInCompt,			// ReadOnlyValue
 		&diffLength,			// Value
 		&geometryPolicy,		// Value
 		&setCellPortion,			// DestFinfo
@@ -662,6 +699,49 @@ unsigned int NeuroMesh::getNumDiffCompts() const
 vector< unsigned int > NeuroMesh::getParentVoxel() const
 {
 	return parentVoxel_;
+}
+
+vector< Id > NeuroMesh::getElecComptMap() const
+{
+	vector< Id > ret( nodeIndex_.size() );
+	for ( unsigned int i = 0; i < nodeIndex_.size(); ++i ) {
+		ret.push_back( nodes_[nodeIndex_[i]].elecCompt() );
+
+	}
+	return ret;
+}
+
+vector< Id > NeuroMesh::getElecComptList() const
+{
+	vector< Id > ret;
+	for ( vector< NeuroNode >::const_iterator 
+				i = nodes_.begin(); i != nodes_.end(); ++i ) {
+		if ( !i->isDummyNode() )
+			ret.push_back( i->elecCompt() );
+	}
+	return ret;
+}
+
+vector< unsigned int > NeuroMesh::getStartVoxelInCompt() const
+{
+	vector< unsigned int > ret;
+	for ( vector< NeuroNode >::const_iterator 
+				i = nodes_.begin(); i != nodes_.end(); ++i ) {
+		if ( !i->isDummyNode() )
+			ret.push_back( i->startFid() );
+	}
+	return ret;
+}
+
+vector< unsigned int > NeuroMesh::getEndVoxelInCompt() const
+{
+	vector< unsigned int > ret;
+	for ( vector< NeuroNode >::const_iterator 
+				i = nodes_.begin(); i != nodes_.end(); ++i ) {
+		if ( !i->isDummyNode() )
+			ret.push_back( i->startFid() + i->getNumDivs() );
+	}
+	return ret;
 }
 
 const vector< double >& NeuroMesh::vGetVoxelVolume() const
