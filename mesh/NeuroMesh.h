@@ -111,6 +111,11 @@ class NeuroMesh: public MeshCompt
 
 		unsigned int innerGetDimensions() const;
 
+		vector< Id > getElecComptList() const;
+		vector< Id > getElecComptMap() const;
+		vector< unsigned int > getStartVoxelInCompt() const;
+		vector< unsigned int > getEndVoxelInCompt() const;
+
 		vector< unsigned int > getParentVoxel() const;
 		const vector< double >& vGetVoxelVolume() const;
 		const vector< double >& getVoxelArea() const;
@@ -281,6 +286,10 @@ class NeuroMesh: public MeshCompt
 		/**
 		 * nodeIndex_[fid_for_MeshEntry].
 		 * Looks up index of NeuroNode from the fid of each MeshEntry.
+		 * In other words, node# = nodeIndex_[ voxel# ].
+		 * This is needed because there are typically many voxels in each
+		 * electrical compartment of the neuron. The nodes_ map closely to
+		 * the electrical compartments.
 		 */
 		vector< unsigned int > nodeIndex_;
 
@@ -321,13 +330,6 @@ class NeuroMesh: public MeshCompt
 		 */
 		double surfaceGranularity_;
 
-		/*
-		NeuroStencil ns_;
-		bool useCaps_; // Flag: Should the ends have hemispherical caps?
-		double totLen_;	/// Utility value: Total length of cylinder
-		double rSlope_;	/// Utility value: dr/dx
-		double lenSlope_; /// Utility value: dlen/dx
-		*/
 		/**
 		 * The shaft vector and the matching head vector track the dendritic
 		 * spines. The parent is the voxel to which the spine  is attached.
