@@ -66,6 +66,7 @@ def loadChem( diffLength ):
 	#print 'Meshvolume[neuro, spine, psd] = ', neuroCompt.mesh[0].volume, spineCompt.mesh[0].volume, psdCompt.mesh[0].volume
 	moose.connect( neuroCompt, 'psdListOut', psdCompt, 'psdList', 'OneToOne' )
 	modelId = moose.loadModel( 'minimal.g', '/model/chem', 'ee' )
+	#modelId = moose.loadModel( 'psd_merged31d.g', '/model/chem', 'ee' )
         neuroCompt.name = 'dend'
         spineCompt.name = 'spine'
         psdCompt.name = 'psd'
@@ -161,7 +162,7 @@ def makeNeuroMeshModel():
 	assert( len( chemCa ) == sdc )
         for i in range( sdc ):
             elecCa = moose.element( '/model/elec/spine_head_14_' + str(i+1) + '/NMDA_Ca_conc' )
-            print elecCa
+            #print elecCa
 	    moose.connect( elecCa, 'concOut', adaptCa[i], 'input', 'Single' )
 	moose.connect( adaptCa, 'output', chemCa, 'setConc', 'OneToOne' )
 	adaptCa.inputOffset = 0.0	# 
@@ -170,25 +171,29 @@ def makeNeuroMeshModel():
 	#print adaptCa.outputOffset
 
 
-        ''' 
-	aCa = moose.Adaptor( '/model/chem/dend/DEND/adaptCa', ndc )
+        moose.le( '/model/chem/dend/DEND' )
+
+
+        compts = neuroCompt.elecComptList
+        begin = neuroCompt.startVoxelInCompt
+        end = neuroCompt.endVoxelInCompt
+	aCa = moose.Adaptor( '/model/chem/dend/DEND/adaptCa', len( compts))
 	adaptCa = moose.vec( '/model/chem/dend/DEND/adaptCa' )
 	chemCa = moose.vec( '/model/chem/dend/DEND/Ca' )
 	#print 'aCa = ', aCa, ' foo = ', foo, "len( ChemCa ) = ", len( chemCa ), ", numData = ", chemCa.numData, "len( adaptCa ) = ", len( adaptCa )
-	assert( len( adaptCa ) == ndc )
 	assert( len( chemCa ) == ndc )
-        for i in range( ndc ):
-            elecCa = moose.element( '/model/elec/spine_head_14_' + str(i+1) + '/NMDA_Ca_conc' )
-            print elecCa
-	    moose.connect( elecCa, 'concOut', adaptCa[i], 'input', 'Single' )
-	moose.connect( adaptCa, 'output', chemCa, 'setConc', 'OneToOne' )
+        for i in zip( compts, adaptCa, begin, end ):
+            name = i[0].path + '/Ca_conc'
+            if ( moose.exists( name ) ):
+                elecCa = moose.element( name )
+                #print i[2], i[3], '   ', elecCa
+                #print i[1]
+                moose.connect( elecCa, 'concOut', i[1], 'input', 'Single' ) 
+                for j in range( i[2], i[3] ):
+                    moose.connect( i[1], 'output', chemCa[j], 'setConc', 'Single' )
 	adaptCa.inputOffset = 0.0	# 
 	adaptCa.outputOffset = 0.00008	# 80 nM offset in chem.
-   	adaptCa.scale = 1e-4	# 520 to 0.0052 mM
-	#print adaptCa.outputOffset
-	print adaptCa.scale
-        '''
-
+   	adaptCa.scale = 20e-6	# 10 arb units to 2 uM.
 
 def addPlot( objpath, field, plot ):
 	#assert moose.exists( objpath )
@@ -211,7 +216,8 @@ def makeElecPlots():
     elec = moose.Neutral( '/graphs/elec' )
     addPlot( '/model/elec/soma', 'getVm', 'elec/somaVm' )
     addPlot( '/model/elec/spine_head_14_4', 'getVm', 'elec/spineVm' )
-    #addPlot( '/model/elec/soma/Ca_conc', 'getCa', 'elec/somaCa' )
+    addPlot( '/model/elec/soma/Ca_conc', 'getCa', 'elec/somaCa' )
+    addPlot( '/model/elec/lat_11_2/Ca_conc', 'getCa', 'elec/lat11Ca' )
     addPlot( '/model/elec/spine_head_14_4/NMDA_Ca_conc', 'getCa', 'elec/spine4Ca' )
     addPlot( '/model/elec/spine_head_14_12/NMDA_Ca_conc', 'getCa', 'elec/spine12Ca' )
 
@@ -224,38 +230,19 @@ def makeChemPlots():
 	addPlot( '/model/chem/spine/Ca[3]', 'getConc', 'chem/spine4Ca' )
 	addPlot( '/model/chem/spine/Ca[11]', 'getConc', 'chem/spine12Ca' )
 	addPlot( '/model/chem/dend/DEND/Ca', 'getConc', 'chem/dendCa' )
+	addPlot( '/model/chem/dend/DEND/Ca[20]', 'getConc', 'chem/dendCa20' )
 
 def testNeuroMeshMultiscale():
 	elecDt = 50e-6
-	chemDt = 0.01
+	chemDt = 0.005
 	ePlotDt = 0.5e-3
-	cPlotDt = 0.01
+	cPlotDt = 0.005
 	plotName = 'nm.plot'
 
 	makeNeuroMeshModel()
 	print "after model is completely done"
 	for i in moose.wildcardFind( '/model/chem/#/#/#/transloc#' ):
 		print i[0].name, i[0].Kf, i[0].Kb, i[0].kf, i[0].kb
-
-	"""
-	for i in moose.wildcardFind( '/model/chem/##[ISA=PoolBase]' ):
-		if ( i[0].diffConst > 0 ):
-			grandpaname = i.parent[0].parent.name + '/'
-			paname = i.parent[0].name + '/'
-			print grandpaname + paname + i[0].name, i[0].diffConst
-	print 'Neighbors:'
-	for t in moose.element( '/model/chem/spine/ksolve/junction' ).neighbors['masterJunction']:
-		print 'masterJunction <-', t.path
-	for t in moose.wildcardFind( '/model/chem/#/ksolve' ):
-		k = moose.element( t[0] )
-		print k.path + ' localVoxels=', k.numLocalVoxels, ', allVoxels= ', k.numAllVoxels
-	"""
-        '''
-        moose.useClock( 4, '/model/chem/dend/dsolve', 'process' )
-        moose.useClock( 5, '/model/chem/dend/ksolve', 'process' )
-        moose.useClock( 5, '/model/chem/spine/ksolve', 'process' )
-        moose.useClock( 5, '/model/chem/psd/ksolve', 'process' )
-        '''
 
 	makeChemPlots()
 	makeElecPlots()
@@ -276,6 +263,7 @@ def testNeuroMeshMultiscale():
 	moose.useClock( 4, '/model/chem/#/dsolve', 'process' )
 	moose.useClock( 5, '/model/chem/#/ksolve', 'process' )
 	moose.useClock( 6, '/model/chem/spine/adaptCa', 'process' )
+	moose.useClock( 6, '/model/chem/dend/DEND/adaptCa', 'process' )
 	moose.useClock( 7, '/graphs/chem/#', 'process' )
 	moose.useClock( 8, '/graphs/elec/#', 'process' )
 	#hsolve = moose.HSolve( '/model/elec/hsolve' )
@@ -313,7 +301,7 @@ def testNeuroMeshMultiscale():
         plt.ion()
         fig = plt.figure( figsize=(8,8) )
         chem = fig.add_subplot( 211 )
-        chem.set_ylim( 0, 0.004 )
+        chem.set_ylim( 0, 0.002 )
         plt.ylabel( 'Conc (mM)' )
         plt.xlabel( 'time (seconds)' )
         for x in moose.wildcardFind( '/graphs/chem/#[ISA=Table]' ):
