@@ -203,7 +203,7 @@ class SimpleLogger {
                 , unsigned indent) const
         {
             string prefix = "";
-            for(int i = 0; i < indent; ++i)
+            for(unsigned int i = 0; i < indent; ++i)
                 prefix += "\t";
             ss << prefix << "<" << tagName << ">" << endl;
 
