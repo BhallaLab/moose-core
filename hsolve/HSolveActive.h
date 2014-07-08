@@ -13,7 +13,7 @@
 #include "../basecode/header.h"
 #include <set>
 #include <limits> // Max and min 'double' values needed for lookup table init.
-#include "../biophysics/CaConc.h"
+#include "../biophysics/CaConcBase.h"
 #include "../biophysics/HHGate.h"
 #include "../biophysics/ChanBase.h"
 #include "../biophysics/HHChannel.h"

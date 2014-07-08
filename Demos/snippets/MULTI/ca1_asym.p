@@ -46,7 +46,7 @@ apical_15	apical_14  0   120  0  2.6 Ca_conc 8.96e-3 Ca 70 K_AHP 8 K_C 50 Na 40 
 apical_16	apical_15  0   120  0  2.6 Ca_conc 8.96e-3 Ca 70 K_AHP 8 K_C 50 Na 40 K_DR 60 K_A 100   glu 700 NMDA 200
 apical_17	apical_16  0   120  0  2.6 Ca_conc 8.96e-3 Ca 70 K_AHP 8 K_C 50 Na 40 K_DR 60 K_A 100   glu 700 NMDA 200
 apical_18	apical_17  0   120  0  2.6 Ca_conc 8.96e-3 Ca 70 K_AHP 8 K_C 50 Na 40 K_DR 60 K_A 100   glu 700 NMDA 200
-apical_19 apical_18	   0  120   0  2.6
+apical_19 apical_18	   0  120   0  2.6 Ca_conc 8.96e-3
 
 lat_11_1  apical_10  -60   60  0  2 Ca_conc 8.96e-3 Ca 70 K_AHP 8 K_C 50 Na 80 K_DR 60 K_A 100  glu 700 NMDA 200
 lat_11_2  	lat_11_1  -60   60  0  1.8 Ca_conc 8.96e-3 Ca 70 K_AHP 8 K_C 50 Na 40 K_DR 60 K_A 100   glu 700 NMDA 200

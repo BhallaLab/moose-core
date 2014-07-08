@@ -1,4 +1,4 @@
-# midchan.py --- 
+# multi1.py --- 
 # Upi Bhalla, NCBS Bangalore 2014.
 #
 # Commentary: 
@@ -8,6 +8,7 @@
 # has just Ca and CaM in it, and there are no-cross-compartment
 # reactions though Ca diffuses everywhere. The elec model controls the
 # Ca levels in the chem compartments.
+# This version uses solvers for both chem and electrical parts.
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -214,15 +215,19 @@ def addPlot( objpath, field, plot ):
 		print "addPlot failed: object not found: ", objpath
 		return moose.element( '/' )
 
+def makeCaPlots():
+    graphs = moose.Neutral( '/graphs' )
+    ca = moose.Neutral( '/graphs/ca' )
+    addPlot( '/model/elec/soma/Ca_conc', 'getCa', 'ca/somaCa' )
+    addPlot( '/model/elec/lat_11_2/Ca_conc', 'getCa', 'ca/lat11Ca' )
+    addPlot( '/model/elec/spine_head_14_4/NMDA_Ca_conc', 'getCa', 'ca/spine4Ca' )
+    addPlot( '/model/elec/spine_head_14_12/NMDA_Ca_conc', 'getCa', 'ca/spine12Ca' )
+
 def makeElecPlots():
     graphs = moose.Neutral( '/graphs' )
     elec = moose.Neutral( '/graphs/elec' )
     addPlot( '/model/elec/soma', 'getVm', 'elec/somaVm' )
     addPlot( '/model/elec/spine_head_14_4', 'getVm', 'elec/spineVm' )
-    addPlot( '/model/elec/soma/Ca_conc', 'getCa', 'elec/somaCa' )
-    addPlot( '/model/elec/lat_11_2/Ca_conc', 'getCa', 'elec/lat11Ca' )
-    addPlot( '/model/elec/spine_head_14_4/NMDA_Ca_conc', 'getCa', 'elec/spine4Ca' )
-    addPlot( '/model/elec/spine_head_14_12/NMDA_Ca_conc', 'getCa', 'elec/spine12Ca' )
 
 def makeChemPlots():
 	graphs = moose.Neutral( '/graphs' )
@@ -235,58 +240,11 @@ def makeChemPlots():
 	addPlot( '/model/chem/dend/DEND/Ca', 'getConc', 'chem/dendCa' )
 	addPlot( '/model/chem/dend/DEND/Ca[20]', 'getConc', 'chem/dendCa20' )
 
-def testNeuroMeshMultiscale():
-	elecDt = 50e-6
-	chemDt = 0.005
-	ePlotDt = 0.5e-3
-	cPlotDt = 0.005
-	plotName = 'nm.plot'
-
-	makeNeuroMeshModel()
-	print "after model is completely done"
-	for i in moose.wildcardFind( '/model/chem/#/#/#/transloc#' ):
-		print i[0].name, i[0].Kf, i[0].Kb, i[0].kf, i[0].kb
-
-	makeChemPlots()
-	makeElecPlots()
-	moose.setClock( 0, elecDt )
-	moose.setClock( 1, elecDt )
-	moose.setClock( 2, elecDt )
-	moose.setClock( 4, chemDt )
-	moose.setClock( 5, chemDt )
-	moose.setClock( 6, chemDt )
-	moose.setClock( 7, cPlotDt )
-	moose.setClock( 8, ePlotDt )
-	moose.useClock( 0, '/model/elec/##[ISA=Compartment]', 'init' )
-	moose.useClock( 1, '/model/elec/##[ISA=Compartment]', 'process' )
-	moose.useClock( 1, '/model/elec/##[ISA=SpikeGen]', 'process' )
-	moose.useClock( 2, '/model/elec/##[ISA=ChanBase],/model/##[ISA=SynBase],/model/##[ISA=CaConc]','process')
-	#moose.useClock( 5, '/model/chem/##[ISA=PoolBase],/model/##[ISA=ReacBase],/model/##[ISA=EnzBase]', 'process' )
-	#moose.useClock( 4, '/model/chem/##[ISA=Adaptor]', 'process' )
-	moose.useClock( 4, '/model/chem/#/dsolve', 'process' )
-	moose.useClock( 5, '/model/chem/#/ksolve', 'process' )
-	moose.useClock( 6, '/model/chem/spine/adaptCa', 'process' )
-	moose.useClock( 6, '/model/chem/dend/DEND/adaptCa', 'process' )
-	moose.useClock( 7, '/graphs/chem/#', 'process' )
-	moose.useClock( 8, '/graphs/elec/#', 'process' )
-	#hsolve = moose.HSolve( '/model/elec/hsolve' )
-	#moose.useClock( 1, '/model/elec/hsolve', 'process' )
-	#hsolve.dt = elecDt
-	#hsolve.target = '/model/elec/compt'
-	#moose.reinit()
-        moose.element( '/model/elec/soma' ).inject = 2e-10
-        moose.element( '/model/chem/psd/Ca' ).concInit = 0.001
-        moose.element( '/model/chem/spine/Ca' ).concInit = 0.002
-        moose.element( '/model/chem/dend/DEND/Ca' ).concInit = 0.003
-	moose.reinit()
-
-	moose.start( 0.25 )
-#        moose.element( '/model/elec/soma' ).inject = 0
-#	moose.start( 0.25 )
+def makeGraphics( cPlotDt, ePlotDt ):
         plt.ion()
-        fig = plt.figure( figsize=(8,8) )
-        chem = fig.add_subplot( 311 )
-        chem.set_ylim( 0, 0.002 )
+        fig = plt.figure( figsize=(10,16) )
+        chem = fig.add_subplot( 411 )
+        chem.set_ylim( 0, 0.006 )
         plt.ylabel( 'Conc (mM)' )
         plt.xlabel( 'time (seconds)' )
         for x in moose.wildcardFind( '/graphs/chem/#[ISA=Table]' ):
@@ -294,7 +252,7 @@ def testNeuroMeshMultiscale():
             line1, = chem.plot( pos, x.vector, label=x.name )
         plt.legend()
 
-        elec = fig.add_subplot( 312 )
+        elec = fig.add_subplot( 412 )
         plt.ylabel( 'Vm (V)' )
         plt.xlabel( 'time (seconds)' )
         for x in moose.wildcardFind( '/graphs/elec/#[ISA=Table]' ):
@@ -302,7 +260,15 @@ def testNeuroMeshMultiscale():
             line1, = elec.plot( pos, x.vector, label=x.name )
         plt.legend()
 
-        lenplot = fig.add_subplot( 313 )
+        ca = fig.add_subplot( 413 )
+        plt.ylabel( '[Ca] (mM)' )
+        plt.xlabel( 'time (seconds)' )
+        for x in moose.wildcardFind( '/graphs/ca/#[ISA=Table]' ):
+            pos = numpy.arange( 0, x.vector.size, 1 ) * ePlotDt
+            line1, = ca.plot( pos, x.vector, label=x.name )
+        plt.legend()
+
+        lenplot = fig.add_subplot( 414 )
         plt.ylabel( 'Ca (mM )' )
         plt.xlabel( 'Voxel#)' )
 
@@ -311,7 +277,7 @@ def testNeuroMeshMultiscale():
         line1, = lenplot.plot( range( len( spineCa ) ), spineCa.conc, label='spine' )
         line2, = lenplot.plot( range( len( dendCa ) ), dendCa.conc, label='dend' )
 
-        ca = [ x.Ca * 0.0001 for x in moose.wildcardFind( '/model/elec/##[ISA=CaConc]') ]
+        ca = [ x.Ca * 0.0001 for x in moose.wildcardFind( '/model/elec/##[ISA=CaConcBase]') ]
         line3, = lenplot.plot( range( len( ca ) ), ca, label='elec' )
 
 	spineCaM = moose.vec( '/model/chem/spine/Ca_CaM' )
@@ -333,6 +299,61 @@ def testNeuroMeshMultiscale():
         '''
 
 	print 'All done'
+
+def testNeuroMeshMultiscale():
+        runtime = 0.5
+	elecDt = 0.2e-6
+	chemDt = 0.005
+	ePlotDt = 0.5e-3
+	cPlotDt = 0.005
+	plotName = 'nm.plot'
+
+	makeNeuroMeshModel()
+	print "after model is completely done"
+	for i in moose.wildcardFind( '/model/chem/#/#/#/transloc#' ):
+		print i[0].name, i[0].Kf, i[0].Kb, i[0].kf, i[0].kb
+
+	makeChemPlots()
+	makeElecPlots()
+	makeCaPlots()
+	moose.setClock( 0, elecDt )
+	moose.setClock( 1, elecDt )
+	moose.setClock( 2, elecDt )
+	moose.setClock( 4, chemDt )
+	moose.setClock( 5, chemDt )
+	moose.setClock( 6, chemDt )
+	moose.setClock( 7, cPlotDt )
+	moose.setClock( 8, ePlotDt )
+	moose.useClock( 0, '/model/elec/##[ISA=Compartment]', 'init' )
+	moose.useClock( 1, '/model/elec/##[ISA=Compartment]', 'process' )
+	moose.useClock( 1, '/model/elec/##[ISA=SpikeGen]', 'process' )
+	moose.useClock( 2, '/model/elec/##[ISA=ChanBase],/model/##[ISA=SynBase],/model/##[ISA=CaConc]','process')
+	#moose.useClock( 2, '/model/##[ISA=SynBase],/model/##[ISA=CaConc]','process')
+	#moose.useClock( 5, '/model/chem/##[ISA=PoolBase],/model/##[ISA=ReacBase],/model/##[ISA=EnzBase]', 'process' )
+	#moose.useClock( 4, '/model/chem/##[ISA=Adaptor]', 'process' )
+	moose.useClock( 4, '/model/chem/#/dsolve', 'process' )
+	moose.useClock( 5, '/model/chem/#/ksolve', 'process' )
+	moose.useClock( 6, '/model/chem/spine/adaptCa', 'process' )
+	moose.useClock( 6, '/model/chem/dend/DEND/adaptCa', 'process' )
+	moose.useClock( 7, '/graphs/chem/#', 'process' )
+	moose.useClock( 8, '/graphs/elec/#,/graphs/ca/#', 'process' )
+        '''
+	hsolve = moose.HSolve( '/model/elec/hsolve' )
+	moose.useClock( 1, '/model/elec/hsolve', 'process' )
+	hsolve.dt = elecDt
+	hsolve.target = '/model/elec/compt'
+        '''
+	moose.reinit()
+        moose.element( '/model/elec/soma' ).inject = 2e-10
+        moose.element( '/model/chem/psd/Ca' ).concInit = 0.001
+        moose.element( '/model/chem/spine/Ca' ).concInit = 0.002
+        moose.element( '/model/chem/dend/DEND/Ca' ).concInit = 0.003
+	moose.reinit()
+
+	moose.start( runtime )
+#        moose.element( '/model/elec/soma' ).inject = 0
+#	moose.start( 0.25 )
+        makeGraphics( cPlotDt, ePlotDt )
 
 
 def main():
