@@ -1,6 +1,6 @@
 .. Documentation for all MOOSE classes and functions
 .. As visible in the Python module
-.. Auto-generated on July 04, 2014
+.. Auto-generated on July 08, 2014
 
 
 MOOSE Classes
@@ -4933,6 +4933,22 @@ The second entry is a MsgDest for the Reinit operation. It also uses ProcInfo.
 
        (*destination message field*) Requests field value. The requesting Element must provide a handler for the returned value.
 
+   .. py:method:: getElecComptList
+
+       (*destination message field*) Requests field value. The requesting Element must provide a handler for the returned value.
+
+   .. py:method:: getElecComptMap
+
+       (*destination message field*) Requests field value. The requesting Element must provide a handler for the returned value.
+
+   .. py:method:: getStartVoxelInCompt
+
+       (*destination message field*) Requests field value. The requesting Element must provide a handler for the returned value.
+
+   .. py:method:: getEndVoxelInCompt
+
+       (*destination message field*) Requests field value. The requesting Element must provide a handler for the returned value.
+
    .. py:method:: setDiffLength
 
        (*destination message field*) Assigns field value.
@@ -4984,6 +5000,22 @@ The second entry is a MsgDest for the Reinit operation. It also uses ProcInfo.
    .. py:attribute:: parentVoxel
 
       vector<unsigned int> (*value field*) Vector of indices of parents of each voxel.
+
+   .. py:attribute:: elecComptList
+
+      vector<Id> (*value field*) Vector of Ids of all electrical compartments in this NeuroMesh. Ordering is as per the tree structure built in the NeuroMesh, and may differ from Id order. Ordering matches that used for startVoxelInCompt and endVoxelInCompt
+
+   .. py:attribute:: elecComptMap
+
+      vector<Id> (*value field*) Vector of Ids of electrical compartments that map to each voxel. This is necessary because the order of the IDs may differ from the ordering of the voxels. Additionally, there are typically many more voxels than there are electrical compartments. So many voxels point to the same elecCompt.
+
+   .. py:attribute:: startVoxelInCompt
+
+      vector<unsigned int> (*value field*) Index of first voxel that maps to each electrical compartment. Each elecCompt has one or more voxels. The voxels in a compartment are numbered sequentially.
+
+   .. py:attribute:: endVoxelInCompt
+
+      vector<unsigned int> (*value field*) Index of end voxel that maps to each electrical compartment. In keeping with C and Python convention, this is one more than the last voxel. Each elecCompt has one or more voxels. The voxels in a compartment are numbered sequentially.
 
    .. py:attribute:: diffLength
 
