@@ -48,6 +48,7 @@
 built into pymoose and moose python scripts."""
 
 import sys
+sys.path.append('../../../python')
 import cStringIO
 import re
 import inspect
@@ -90,8 +91,10 @@ def extract_finfo_doc(cinfo, finfotype, docio, indent='   '):
         else:
             name = '.. py:attribute:: {0}'.format(field_element.fieldName)
             dtype = '{0}'.format(dtype)
-        doc = field_element.docs
-        docio.write('{0}{1}\n\n{0}   {2} (*{3}*) {4}\n\n'.format(indent, name, dtype, finfotypes[finfotype], doc))
+        docio.write('\n{0}{1}'.format(indent, name))
+        docio.write('\n\n{0}{0}{1} (*{2}*)'.format(indent, dtype, finfotypes[finfotype]))
+        for line in field_element.docs.split('\n'):
+            docio.write('\n\n{0}{0}{1}\n'.format(indent, line))
 
 def extract_class_doc(name, docio, indent='   '):
     """Extract documentation for Cinfo object at path
@@ -106,7 +109,7 @@ def extract_class_doc(name, docio, indent='   '):
     """
     cinfo = moose.Cinfo('/classes/%s' % (name))
     docs = cinfo.docs.strip()
-    docio.write('{0}.. py:class:: {1}\n\n'.format(indent, cinfo.name))
+    docio.write('\n{0}.. py:class:: {1}\n\n'.format(indent, cinfo.name))
     if docs:                    
         docs = docs.split('\n')
         # We need these checks to avoid mis-processing `:` within
@@ -199,7 +202,7 @@ if __name__ == '__main__':
 MOOSE Builitin Classes and Functions
 ====================================
     ''')
-    builtins_docio.write('.. module:: moose\n')    
+    builtins_docio.write('\n.. py:module:: moose\n')    
     for item in ['vec', 'melement', 'LookupField', 'DestField', 'ElementField']:
         builtins_docio.write('\n   .. py:class:: {0}\n'.format(item))        
         builtins_docio.write('\n      ')
