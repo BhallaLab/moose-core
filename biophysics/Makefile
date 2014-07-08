@@ -25,6 +25,7 @@ OBJ = \
 	HHGate.o	\
 	HHGate2D.o	\
 	HHChannel2D.o	\
+	CaConcBase.o	\
 	CaConc.o	\
 	MgBlock.o	\
 	Nernst.o	\
@@ -77,7 +78,8 @@ HHChannel.o: ChanBase.h HHChannel.h HHGate.h
 HHGate.o: HHGate.h
 HHChannel2D.o: ChanBase.h HHChannel2D.h HHGate2D.h
 HHGate2D.o: HHGate2D.h
-CaConc.o:	CaConc.h
+CaConcBase.o:	CaConcBase.h
+CaConc.o:	CaConcBase.h CaConc.h
 MgBlock.o:	MgBlock.h ChanBase.h
 Nernst.o:	Nernst.h
 Neuron.o:	Neuron.h
