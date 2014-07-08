@@ -17,7 +17,7 @@
 #include "HSolve.h"
 #include "../biophysics/CompartmentBase.h"
 #include "../biophysics/Compartment.h"
-#include "../biophysics/CaConc.h"
+#include "../biophysics/CaConcBase.h"
 #include "ZombieCaConc.h"
 using namespace moose;
 //~ #include "ZombieCompartment.h"
@@ -347,7 +347,7 @@ void HSolveActive::sendValues( ProcPtr info )
 
     for ( i = outCa_.begin(); i != outCa_.end(); ++i )
         //~ CaConc::concOut()->send(
-        ZombieCaConc::concOut()->send(
+        CaConcBase::concOut()->send(
             caConcId_[ *i ].eref(),
             ca_[ *i ]
         );

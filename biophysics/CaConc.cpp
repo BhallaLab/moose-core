@@ -9,144 +9,16 @@
 
 // #include <cfloat>
 #include "header.h"
+#include "CaConcBase.h"
 #include "CaConc.h"
 
-///////////////////////////////////////////////////////
-// MsgSrc definitions
-///////////////////////////////////////////////////////
-/*
- * This Finfo is used to send out Ca concentration to channels.
- * 
- * It is exposed here so that HSolve can also use it to send out
- * Ca concentration to the recipients.
- */
-// Static function.
-SrcFinfo1< double >* CaConc::concOut() {
-	static SrcFinfo1< double > concOut( "concOut", 
-			"Concentration of Ca in pool" );
-	return &concOut;
-}
 
 const Cinfo* CaConc::initCinfo()
 {
-	///////////////////////////////////////////////////////
-	// Shared message definitions
-	///////////////////////////////////////////////////////
-	static DestFinfo process( "process", 
-		"Handles process call",
-		new ProcOpFunc< CaConc >( &CaConc::process ) );
-	static DestFinfo reinit( "reinit", 
-		"Handles reinit call",
-		new ProcOpFunc< CaConc >( &CaConc::reinit ) );
-
-	static Finfo* processShared[] =
-	{
-		&process, &reinit
-	};
-
-	static SharedFinfo proc( "proc", 
-		"Shared message to receive Process message from scheduler",
-		processShared, sizeof( processShared ) / sizeof( Finfo* ) );
-		
-///////////////////////////////////////////////////////
-// Field definitions
-///////////////////////////////////////////////////////
-	static ValueFinfo< CaConc, double > Ca( "Ca",
-		"Calcium concentration.",
-        &CaConc::setCa,
-		&CaConc::getCa
-	);
-	static ValueFinfo< CaConc, double > CaBasal( "CaBasal",
-		"Basal Calcium concentration.",
-        &CaConc::setCaBasal,
-		&CaConc::getCaBasal
-	);
-	static ValueFinfo< CaConc, double > Ca_base( "Ca_base",
-		"Basal Calcium concentration, synonym for CaBasal",
-        &CaConc::setCaBasal,
-		&CaConc::getCaBasal
-	);
-	static ValueFinfo< CaConc, double > tau( "tau",
-		"Settling time for Ca concentration",
-        &CaConc::setTau,
-		&CaConc::getTau
-	);
-	static ValueFinfo< CaConc, double > B( "B",
-		"Volume scaling factor",
-        &CaConc::setB,
-		&CaConc::getB
-	);
-	static ValueFinfo< CaConc, double > thick( "thick",
-		"Thickness of Ca shell.",
-        &CaConc::setThickness,
-		&CaConc::getThickness
-	);
-	static ValueFinfo< CaConc, double > ceiling( "ceiling",
-		"Ceiling value for Ca concentration. If Ca > ceiling, Ca = ceiling. If ceiling <= 0.0, there is no upper limit on Ca concentration value.",
-        &CaConc::setCeiling,
-		&CaConc::getCeiling
-	);
-	static ValueFinfo< CaConc, double > floor( "floor",
-		"Floor value for Ca concentration. If Ca < floor, Ca = floor",
-        &CaConc::setFloor,
-		&CaConc::getFloor
-	);
-
-///////////////////////////////////////////////////////
-// MsgDest definitions
-///////////////////////////////////////////////////////
-
-	static DestFinfo current( "current", 
-		"Calcium Ion current, due to be converted to conc.",
-		new OpFunc1< CaConc, double >( &CaConc::current )
-	);
-
-	static DestFinfo currentFraction( "currentFraction", 
-		"Fraction of total Ion current, that is carried by Ca2+.",
-		new OpFunc2< CaConc, double, double >( &CaConc::currentFraction )
-	);
-
-	static DestFinfo increase( "increase", 
-		"Any input current that increases the concentration.",
-		new OpFunc1< CaConc, double >( &CaConc::increase )
-	);
-
-	static DestFinfo decrease( "decrease", 
-		"Any input current that decreases the concentration.",
-		new OpFunc1< CaConc, double >( &CaConc::decrease )
-	);
-
-	static DestFinfo basal( "basal", 
-		"Synonym for assignment of basal conc.",
-		new OpFunc1< CaConc, double >( &CaConc::setCaBasal )
-	);
-
-	static Finfo* CaConcFinfos[] =
-	{
-		&proc,		// Shared 
-		concOut(),	// Src
-		&Ca,		// Value
-		&CaBasal,	// Value
-		&Ca_base,	// Value
-		&tau,		// Value
-		&B,			// Value
-		&thick,		// Value
-		&ceiling,	// Value
-		&floor,		// Value
-		&current,	// Dest
-		&currentFraction,	// Dest
-		&increase,	// Dest
-		&decrease,	// Dest
-		&basal,		// Dest
-	};
-
-	// We want the Ca updates before channel updates, so along with compts.
-	// static SchedInfo schedInfo[] = { { process, 0, 0 } };
-
 	static string doc[] =
 	{
 		"Name", "CaConc",
-		"Author", "Upinder S. Bhalla, 2007, NCBS",
+		"Author", "Upinder S. Bhalla, 2014, NCBS",
 		"Description", "CaConc: Calcium concentration pool. Takes current from a "
 				"channel and keeps track of calcium buildup and depletion by a "
 				"single exponential process. ",
@@ -156,12 +28,12 @@ const Cinfo* CaConc::initCinfo()
 
 	static Cinfo CaConcCinfo(
 		"CaConc",
-		Neutral::initCinfo(),
-		CaConcFinfos,
-		sizeof( CaConcFinfos )/sizeof(Finfo *),
-                &dinfo,
-                doc,
-                sizeof(doc)/sizeof(string)
+		CaConcBase::initCinfo(),
+		0,
+		0,
+		&dinfo,
+		doc,
+		sizeof(doc)/sizeof(string)
 	);
 
 	return &CaConcCinfo;
@@ -171,14 +43,13 @@ const Cinfo* CaConc::initCinfo()
 static const Cinfo* caConcCinfo = CaConc::initCinfo();
 
 CaConc::CaConc()
-	:
+	: CaConcBase(),
 		Ca_( 0.0 ),
 		CaBasal_( 0.0 ),
 		tau_( 1.0 ),
 		B_( 1.0 ),
 		c_( 0.0 ),
 		activation_( 0.0 ),
-		thickness_( 0.0 ),
 		ceiling_( 1.0e9 ),
 		floor_( 0.0 )
 {;}
@@ -187,63 +58,55 @@ CaConc::CaConc()
 // Field function definitions
 ///////////////////////////////////////////////////
 
-void CaConc::setCa( double Ca )
+void CaConc::vSetCa( const Eref& e, double Ca )
 {
 	Ca_ = Ca;
 }
-double CaConc::getCa() const
+double CaConc::vGetCa( const Eref& e ) const
 {
 	return Ca_;
 }
 
-void CaConc::setCaBasal( double CaBasal )
+void CaConc::vSetCaBasal( const Eref& e, double CaBasal )
 {
 	CaBasal_ = CaBasal;
 }
-double CaConc::getCaBasal() const
+double CaConc::vGetCaBasal( const Eref& e ) const
 {
 	return CaBasal_;
 }
 
-void CaConc::setTau( double tau )
+void CaConc::vSetTau( const Eref& e, double tau )
 {
 	tau_ = tau;
 }
-double CaConc::getTau() const
+double CaConc::vGetTau( const Eref& e ) const
 {
 	return tau_;
 }
 
-void CaConc::setB( double B )
+void CaConc::vSetB( const Eref& e, double B )
 {
 	B_ = B;
 }
-double CaConc::getB() const
+double CaConc::vGetB( const Eref& e ) const
 {
 	return B_;
 }
-void CaConc::setThickness( double thickness )
-{
-    thickness_ = thickness;
-}
-double CaConc::getThickness() const
-{
-	return thickness_;
-}
-void CaConc::setCeiling( double ceiling )
+void CaConc::vSetCeiling( const Eref& e, double ceiling )
 {
     ceiling_ = ceiling;
 }
-double CaConc::getCeiling() const
+double CaConc::vGetCeiling( const Eref& e ) const
 {
 	return ceiling_;
 }
 
-void CaConc::setFloor( double floor )
+void CaConc::vSetFloor( const Eref& e, double floor )
 {
     floor_ = floor;
 }
-double CaConc::getFloor() const
+double CaConc::vGetFloor( const Eref& e ) const
 {
 	return floor_;
 }
@@ -252,7 +115,7 @@ double CaConc::getFloor() const
 // Dest function definitions
 ///////////////////////////////////////////////////
 
-void CaConc::reinit( const Eref& e, ProcPtr p )
+void CaConc::vReinit( const Eref& e, ProcPtr p )
 {
 	activation_ = 0.0;
 	c_ = 0.0;
@@ -260,7 +123,7 @@ void CaConc::reinit( const Eref& e, ProcPtr p )
 	concOut()->send( e, Ca_ );
 }
 
-void CaConc::process( const Eref& e, ProcPtr p )
+void CaConc::vProcess( const Eref& e, ProcPtr p )
 {
 	double x = exp( -p->dt / tau_ );
 	Ca_ = CaBasal_ + c_ * x + ( B_ * activation_ * tau_ )  * (1.0 - x);
@@ -275,22 +138,22 @@ void CaConc::process( const Eref& e, ProcPtr p )
 }
 
 
-void CaConc::current( double I )
+void CaConc::vCurrent( const Eref& e, double I )
 {
 	activation_ += I;
 }
 
-void CaConc::currentFraction( double I, double fraction )
+void CaConc::vCurrentFraction( const Eref& e, double I, double fraction )
 {
 	activation_ += I * fraction;
 }
 
-void CaConc::increase( double I )
+void CaConc::vIncrease( const Eref& e, double I )
 {
 	activation_ += fabs( I );
 }
 
-void CaConc::decrease( double I )
+void CaConc::vDecrease( const Eref& e, double I )
 {
 	activation_ -= fabs( I );
 }

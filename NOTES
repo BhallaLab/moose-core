@@ -3770,3 +3770,29 @@ corresponding voxels is now possible.
 
 Updates to midchan.py to utilize these lookups, now the dendritic compartments
 are also utilizing adaptors for taking elec Ca values and mapping to chem.
+Checkin 5619.
+
+Let's visualize Ca in the entire model as a line plot.
+Done. Things actually seem reasonable.
+
+Next step is to get the solvers going. For the chem stuff we're already doing
+solvers.
+Tried Backward Euler implicit solution for elec model. Doesn't look right.
+Then put in more complex chemistry and see if it still holds together.
+
+
+============================================================================
+7 July.
+Compared with and without solver. Basic HH stuff is working. When I take
+the deterministic dt down to 0.1 usec it starts to look like the output of
+the solver. But the Ca output isn't coming through, even though the 
+Adaptors seem to be doing all right.
+============================================================================
+8 July.
+Cleaned up CaConc to have a base class saved with the Zombie.
+Seems to work OK.
+Compared multi1.py with multi1_ee.py. dt = (10e-6, 0.2e-6) respectively.
+The hsolve version is more accurate as judged by convergence. The spike
+timings of the ee version are off. But the shape of all graphs is good.
+
+============================================================================

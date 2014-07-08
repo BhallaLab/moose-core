@@ -17,7 +17,7 @@
 #include "HSolve.h"
 #include "../biophysics/Compartment.h"
 #include "ZombieCompartment.h"
-#include "../biophysics/CaConc.h"
+#include "../biophysics/CaConcBase.h"
 #include "ZombieCaConc.h"
 #include "../biophysics/HHGate.h"
 #include "../biophysics/ChanBase.h"
@@ -222,7 +222,7 @@ void HSolve::zombify( Eref hsolve ) const
 		temp.push_back( ObjId( *i, 0 ) );
 	Shell::dropClockMsgs( temp, "process" );
     for ( i = caConcId_.begin(); i != caConcId_.end(); ++i )
-        ZombieCaConc::zombify( hsolve.element(), i->eref().element() );
+        CaConcBase::zombify( i->eref().element(), ZombieCaConc::initCinfo(), hsolve.id() );
 
 	temp.clear();
     for ( i = channelId_.begin(); i != channelId_.end(); ++i )

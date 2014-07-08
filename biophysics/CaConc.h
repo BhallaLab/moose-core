@@ -33,47 +33,37 @@
  * be taken as an absolute value of B, without scaling. 
  */
 
-class CaConc
+class CaConc: public CaConcBase
 {
 	public:
 		CaConc();
 		///////////////////////////////////////////////////////////////
 		// Message handling functions
 		///////////////////////////////////////////////////////////////
-		void reinit( const Eref&, ProcPtr info );
-		void process( const Eref&, ProcPtr info );
+		void vReinit( const Eref&, ProcPtr info );
+		void vProcess( const Eref&, ProcPtr info );
 
-		void current( double I );
-		void currentFraction( double I, double fraction );
-		void increase( double I );
-		void decrease( double I );
+		void vCurrent( const Eref& e, double I );
+		void vCurrentFraction( const Eref& e, double I, double fraction );
+		void vIncrease( const Eref& e, double I );
+		void vDecrease( const Eref& e, double I );
 		///////////////////////////////////////////////////////////////
 		// Field handling functions
 		///////////////////////////////////////////////////////////////
-		void setCa( double val );
-		double getCa() const;
-		void setCaBasal( double val );
-		double getCaBasal() const;
-		void setTau( double val );
-		double getTau() const;
-		void setB( double val );
-		double getB() const;
-        void setThickness( double val );
-        double getThickness() const;
-        void setCeiling( double val );
-        double getCeiling() const;
-        void setFloor( double val );
-        double getFloor() const;
+		void vSetCa( const Eref& e, double val );
+		double vGetCa( const Eref& e ) const;
+		void vSetCaBasal( const Eref& e, double val );
+		double vGetCaBasal( const Eref& e ) const;
+		void vSetTau( const Eref& e, double val );
+		double vGetTau( const Eref& e ) const;
+		void vSetB( const Eref& e, double val );
+		double vGetB( const Eref& e ) const;
+        void vSetCeiling( const Eref& e, double val );
+        double vGetCeiling( const Eref& e ) const;
+        void vSetFloor( const Eref& e, double val );
+        double vGetFloor( const Eref& e ) const;
 
 		static const Cinfo* initCinfo();
-
-		/*
-		 * This Finfo is used to send out Ca concentration to channels.
-		 * 
-		 * It is exposed here so that HSolve can also use it to send out
-		 * Ca concentration to the recipients.
-		 */
-		static SrcFinfo1< double >* concOut();
 	private:
 		double Ca_;
 		double CaBasal_;
@@ -81,7 +71,6 @@ class CaConc
 		double B_;
 		double c_;
 		double activation_;
-		double thickness_;
 		double ceiling_;
 		double floor_;
 };
