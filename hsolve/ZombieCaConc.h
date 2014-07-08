@@ -10,27 +10,16 @@
 
 #ifndef _ZOMBIE_CACONC_H
 #define _ZOMBIE_CACONC_H
-#include "header.h"
-#include "ElementValueFinfo.h"
-#include "../biophysics/CaConc.h"
-#include "HinesMatrix.h"
-#include "HSolveStruct.h"
-#include "HSolvePassive.h"
-#include "RateLookup.h"
-#include "HSolveActive.h"
-#include "HSolve.h"
-
-class DataHandler;
 
 /**
  * Zombie object that lets HSolve do its calculations, while letting the user
  * interact with this object as if it were the original object.
  */
-class ZombieCaConc
+class ZombieCaConc: public CaConcBase
 {
 public:
     ZombieCaConc()
-        :
+        : CaConcBase(),
         hsolve_( NULL ),
         tau_( 0.0 ),
         B_( 0.0 ),
@@ -42,55 +31,40 @@ public:
     ///////////////////////////////////////////////////////////////
     // Message handling functions
     ///////////////////////////////////////////////////////////////
-    void reinit( const Eref&, ProcPtr info );
-    void process( const Eref&, ProcPtr info );
+    void vReinit( const Eref& e, ProcPtr info );
+    void vProcess( const Eref& e, ProcPtr info );
 
-    void current( double I );
-    void currentFraction( double I, double fraction );
-    void increase( double I );
-    void decrease( double I );
+    void vCurrent( const Eref& e, double I );
+    void vCurrentFraction( const Eref& e, double I, double fraction );
+    void vIncrease( const Eref& e, double I );
+    void vDecrease( const Eref& e, double I );
     ///////////////////////////////////////////////////////////////
-    // Field handling functions
+    // Field handling functions. These are all virtual, overriding base.
     ///////////////////////////////////////////////////////////////
-    void setCa( const Eref& e,   double val );
-    double getCa( const Eref& e ) const;
-    void setCaBasal( const Eref& e , double val );
-    double getCaBasal( const Eref& e ) const;
-    void setTau( const Eref& e , double val );
-    double getTau( const Eref& e ) const;
-    void setB( const Eref& e , double val );
-    double getB( const Eref& e ) const;
-    void setCeiling( const Eref& e , double val );
-    double getCeiling( const Eref& e ) const;
-    void setFloor( const Eref& e , double val );
-    double getFloor( const Eref& e ) const;
+    void vSetCa( const Eref& e,   double val );
+    double vGetCa( const Eref& e ) const;
+    void vSetCaBasal( const Eref& e , double val );
+    double vGetCaBasal( const Eref& e ) const;
+    void vSetTau( const Eref& e , double val );
+    double vGetTau( const Eref& e ) const;
+    void vSetB( const Eref& e , double val );
+    double vGetB( const Eref& e ) const;
+    void vSetCeiling( const Eref& e , double val );
+    double vGetCeiling( const Eref& e ) const;
+    void vSetFloor( const Eref& e , double val );
+    double vGetFloor( const Eref& e ) const;
 
-    // Locally stored fields.
-    void setThickness( double val );
-    double getThickness() const;
-
+    ///////////////////////////////////////////////////////////////
+	void vSetSolver( const Eref& e, Id hsolve );
+    ///////////////////////////////////////////////////////////////
     static const Cinfo* initCinfo();
 
-    //////////////////////////////////////////////////////////////////
-    // utility funcs
-    //////////////////////////////////////////////////////////////////
-    static void zombify( Element* solver, Element* orig );
-    static void unzombify( Element* zombie );
-
-    /*
-     * This Finfo is used to send out CaConc to channels.
-     * The original CaConc sends this itself, whereas the HSolve
-     * sends on behalf of the Zombie.
-     */
-    static SrcFinfo1< double >* concOut();
 private:
     HSolve* hsolve_;
 
     double tau_;
     double B_;
     double thickness_;
-
-    void copyFields( CaConc* c );
 };
 
 
