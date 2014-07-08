@@ -1,5 +1,5 @@
-"""MOOSE = Multiscale Object Oriented Simulation Environment.
-=========================================================
+"""MOOSE = Multiscale Object Oriented Simulation Environment
+============================================================
 
 How to use the documentation
 ----------------------------
@@ -197,7 +197,7 @@ c = Cell('charlie', parent=a) # creates element `charlie` under `alpha`
 d = DiffAmp('delta', parent='alpha/beta') # creates element `delta` under `beta`
 
 
-module functions
+Module functions
 ----------------
 
 element(path)
