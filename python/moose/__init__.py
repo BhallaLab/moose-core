@@ -245,9 +245,12 @@ assigned tick 0.
 6,7 : Lookup (tables), stimulus : 'process'
 8,9 : Tables for plotting : process
 
-Example: 
+Example
+-------
+
 moose.useClock(0, '/model/compartment_1', 'init')
 moose.useClock(1, '/model/compartment_1', 'process')
+
 
 setClock(tick, dt) 
     
@@ -304,6 +307,11 @@ le(obj)
     list element under object, if no parameter specified, list
     elements under current working element
 
+.. rubric::
+   MOOSE overview ends here
+
+Documentation
+=============
 """
 
 __version__ = '$Revision: 4454$'
