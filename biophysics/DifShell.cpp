@@ -84,11 +84,12 @@ const Cinfo* DifShell::initCinfo()
     static SharedFinfo buffer( "buffer",
                         "This is a shared message from a DifShell to a Buffer (FixBuffer or DifBuffer). "
 			"During stage 0:\n "
-			"- DifShell sends ion concentration \n"
-			"- Buffer updates buffer concentration and sends it back immediately using a call-back.\n"
-			"- DifShell updates the time-derivative ( dC / dt ) \n"
+			" - DifShell sends ion concentration\n"
+			" - Buffer updates buffer concentration and sends it back immediately using a call-back.\n"
+			" - DifShell updates the time-derivative ( dC / dt ) \n"
+                        "\n"
 	 		"During stage 1: \n"
-			"- DifShell advances concentration C \n"
+			" - DifShell advances concentration C \n\n"
 			"This scheme means that the Buffer does not need to be scheduled, and it does its computations when "
 			"it receives a cue from the DifShell. May not be the best idea, but it saves us from doing the above "
 			"computations in 3 stages instead of 2." ,

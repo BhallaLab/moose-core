@@ -1,5 +1,5 @@
-"""MOOSE = Multiscale Object Oriented Simulation Environment
-============================================================
+"""MOOSE - the Multiscale Object Oriented Simulation Environment
+=============================================================
 
 How to use the documentation
 ----------------------------
@@ -10,13 +10,11 @@ Python interface can be viewed via Python's builtin ``help``
 function::
 
 >>> help(moose.connect)
-...
 
 The documentation built into main C++ code of MOOSE can be accessed
 via the module function ``doc``::
 
 >>> moose.doc('Neutral')
-...
 
 To get documentation about a particular field::
 
