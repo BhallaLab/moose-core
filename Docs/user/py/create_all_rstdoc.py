@@ -85,16 +85,22 @@ def extract_finfo_doc(cinfo, finfotype, docio, indent='   '):
         return
     for field_element in finfo:
         dtype = type_mangling_regex.sub('', field_element.type)
+        if len(dtype.strip()) == 0:
+            dtype = 'void'
         if finfotype.startswith('dest'):
             name = '.. py:method:: {0}'.format(field_element.fieldName)
             dtype = ''
         else:
             name = '.. py:attribute:: {0}'.format(field_element.fieldName)
             dtype = '{0}'.format(dtype)
-        docio.write('\n{0}{1}'.format(indent, name))
-        docio.write('\n\n{0}{0}{1} (*{2}*)'.format(indent, dtype, finfotypes[finfotype]))
-        for line in field_element.docs.split('\n'):
-            docio.write('\n\n{0}{0}{1}\n'.format(indent, line))
+        doc = field_element.docs.replace('_', '\\_')
+        
+        docio.write('{0}{1}\n\n'.format(indent, name).replace('_', '\\_'))
+        ftype = '{0} (*{1}*)\n\n'.format(dtype, finfotypes[finfotype]).strip()
+        docio.write('{0}   {1}'.format(indent, ftype))
+        for line in doc.split('\n'):
+            docio.write('{0}   {1}\n'.format(indent, line))
+        docio.write('\n\n')
 
 def extract_class_doc(name, docio, indent='   '):
     """Extract documentation for Cinfo object at path
@@ -108,8 +114,8 @@ def extract_class_doc(name, docio, indent='   '):
         output object to write the documentation into.
     """
     cinfo = moose.Cinfo('/classes/%s' % (name))
-    docs = cinfo.docs.strip()
-    docio.write('\n{0}.. py:class:: {1}\n\n'.format(indent, cinfo.name))
+    docs = cinfo.docs
+    docio.write('{0}.. py:class:: {1}\n\n'.format(indent, cinfo.name).replace('_', '\\_'))
     if docs:                    
         docs = docs.split('\n')
         # We need these checks to avoid mis-processing `:` within
@@ -120,12 +126,10 @@ def extract_class_doc(name, docio, indent='   '):
         for doc in docs:
             if not doc:
                 continue
+            field = None
             if not (name_done and author_done and descr_done):
                 pos = doc.find(':')         
-                field = doc[:pos].strip()
-                content = doc[pos+1:]
-            else:
-                content = doc
+                field = doc[:pos]
             if field.lower() == 'name':
                 name_done = True
                 continue
@@ -134,8 +138,12 @@ def extract_class_doc(name, docio, indent='   '):
                 continue          
             elif field.lower() == 'description':
                 descr_done = True
-                content = content.lstrip()                
-            docio.write('{0}   {1}\n\n'.format(indent, content))
+                content = doc[pos+1:].strip()
+            else:
+                content = doc
+            content = content.replace('_', '\\_')
+            docio.write('{0}   {1}\n'.format(indent, content))
+    docio.write('\n')
     for finfotype in finfotypes.keys():
 	extract_finfo_doc(cinfo, finfotype, docio, indent + '   ')
 
@@ -146,20 +154,20 @@ def extract_all_class_doc(docio, indent='   '):
 def extract_all_func_doc(docio, indent='   '):
     for fname, fdef in (inspect.getmembers(moose, inspect.isbuiltin) +
                         inspect.getmembers(moose, inspect.isfunction)):
-	docio.write('\n{}.. py:func:: {}\n'.format(indent, fname))
+	docio.write('\n{}.. py:func:: {}\n'.format(indent, fname).replace('_', '\\_'))
 	doc = inspect.getdoc(fdef)
 	doc = doc.split('\n')
 	drop = []
 	for i in range(len(doc)):
 	    di = doc[i]
-	    doc[i] = di.strip()
+	    doc[i] = di
 	    hyphen_count = di.count('-')
 	    if hyphen_count > 0 and hyphen_count == len(di) and i > 0:
 		drop.append(i)
 		doc[i-1] = indent + doc[i-1]
 	for i in range(len(doc)):
 	    if i not in drop:
-		docio.write(doc[i] + '\n\n')
+		docio.write(doc[i].replace('_', '\\_') + '\n\n')
 
 
 if __name__ == '__main__':
@@ -180,7 +188,7 @@ if __name__ == '__main__':
     overview_docio.write('.. MOOSE overview\n')
     overview_docio.write('.. As visible in the Python module\n')
     overview_docio.write(ts.strftime('.. Auto-generated on %B %d, %Y\n'))
-    overview_docio.write('\n'.join(pydoc.getdoc(moose).split('\n')))
+    overview_docio.write('\n'.join(pydoc.getdoc(moose).split('\n')).replace('_', '\\_'))
     overview_docio.write('\n')        
         
     
@@ -204,20 +212,20 @@ MOOSE Builitin Classes and Functions
     ''')
     builtins_docio.write('\n.. py:module:: moose\n')    
     for item in ['vec', 'melement', 'LookupField', 'DestField', 'ElementField']:
-        builtins_docio.write('\n   .. py:class:: {0}\n'.format(item))        
+        builtins_docio.write('\n   .. py:class:: {0}\n'.format(item).replace('_', '\\_'))        
         builtins_docio.write('\n      ')
         class_obj = eval('moose.{0}'.format(item))
-        builtins_docio.write('\n      '.join(pydoc.getdoc(class_obj).split('\n')))
+        builtins_docio.write('\n      '.join(pydoc.getdoc(class_obj).split('\n')).replace('_', '\\_'))
         builtins_docio.write('\n')
         for name, member in inspect.getmembers(class_obj):
             if name.startswith('__'):
                 continue
             if inspect.ismethod(member) or inspect.ismethoddescriptor(member):
-                builtins_docio.write('\n         .. py:method:: {0}\n'.format(name))
+                builtins_docio.write('\n      .. py:method:: {0}\n'.format(name).replace('_', '\\_'))
             else:
-                builtins_docio.write('\n         .. py:atribute:: {0}\n'.format(name))
+                builtins_docio.write('\n      .. py:attribute:: {0}\n'.format(name).replace('_', '\\_'))
             builtins_docio.write('\n            ')
-            builtins_docio.write('\n            '.join(inspect.getdoc(member).split('\n')))
+            builtins_docio.write('\n         '.join(inspect.getdoc(member).split('\n')).replace('_', '\\_'))
             builtins_docio.write('\n')
             
 
@@ -227,9 +235,9 @@ MOOSE Builitin Classes and Functions
                  'exists', 'writeSBML', 'readSBML', 'loadModel', 'saveModel',
                  'connect', 'getCwe', 'setCwe', 'getFieldDict', 'getField',
                  'seed', 'rand', 'wildcardFind', 'quit']:
-        builtins_docio.write('\n   .. py:function:: {0}\n'.format(item))        
+        builtins_docio.write('\n   .. py:function:: {0}\n'.format(item).replace('_', '\\_'))        
         builtins_docio.write('\n      ')
-        builtins_docio.write('\n      '.join(inspect.getdoc(eval('moose.{0}'.format(item))).split('\n')))
+        builtins_docio.write('\n      '.join(inspect.getdoc(eval('moose.{0}'.format(item))).split('\n')).replace('_', '\\_'))
         builtins_docio.write('\n')                    
     if isinstance(builtins_docio, cStringIO.OutputType):
 	print builtins_docio.getvalue()
