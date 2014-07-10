@@ -11,7 +11,6 @@ Contents:
 .. toctree::
    :maxdepth: 2
 	
-   moose_overview
    moose_builtins
    moose_classes
 
