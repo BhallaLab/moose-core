@@ -182,68 +182,68 @@ if __name__ == '__main__':
         overview_doc = sys.argv[3]
     ts = datetime.now()
 
-    # MOOSE overview - the module level doc - this is for extracting
-    # the moose docs into separate component files.
-    overview_docio = open(overview_doc, 'w')
-    overview_docio.write('.. MOOSE overview\n')
-    overview_docio.write('.. As visible in the Python module\n')
-    overview_docio.write(ts.strftime('.. Auto-generated on %B %d, %Y\n'))
-    overview_docio.write('\n'.join(pydoc.getdoc(moose).split('\n')).replace('_', '\\_'))
-    overview_docio.write('\n')        
+    # # MOOSE overview - the module level doc - this is for extracting
+    # # the moose docs into separate component files.
+    # overview_docio = open(overview_doc, 'w')
+    # overview_docio.write('.. MOOSE overview\n')
+    # overview_docio.write('.. As visible in the Python module\n')
+    # overview_docio.write(ts.strftime('.. Auto-generated on %B %d, %Y\n'))
+    # overview_docio.write('\n'.join(pydoc.getdoc(moose).split('\n')).replace('_', '\\_'))
+    # overview_docio.write('\n')        
         
     
-    if isinstance(overview_docio, cStringIO.OutputType):
-	print overview_docio.getvalue()
-    else:
-	overview_docio.close()
+    # if isinstance(overview_docio, cStringIO.OutputType):
+    #     print overview_docio.getvalue()
+    # else:
+    #     overview_docio.close()
     
     ## Builtin docs - we are going to do something like what autodoc
     ## does for sphinx. Because we cannot afford to build moose on
     ## servers like readthedocs, we ourselvs ectract the docs into rst
     ## files.
-    builtins_docio = open(builtins_doc, 'w')
-    builtins_docio.write('.. Documentation for all MOOSE builtin functions\n')
-    builtins_docio.write('.. As visible in the Python module\n')
-    builtins_docio.write(ts.strftime('.. Auto-generated on %B %d, %Y\n'))
-    builtins_docio.write('''
+#     builtins_docio = open(builtins_doc, 'w')
+#     builtins_docio.write('.. Documentation for all MOOSE builtin functions\n')
+#     builtins_docio.write('.. As visible in the Python module\n')
+#     builtins_docio.write(ts.strftime('.. Auto-generated on %B %d, %Y\n'))
+#     builtins_docio.write('''
 
-MOOSE Builitin Classes and Functions
-====================================
-    ''')
-    builtins_docio.write('\n.. py:module:: moose\n')    
-    indent = '   '
-    for item in ['vec', 'melement', 'LookupField', 'DestField', 'ElementField']:
-        builtins_docio.write('\n\n{0}.. py:class:: {1}\n'.format(indent, item).replace('_', '\\_'))        
-        class_obj = eval('moose.{0}'.format(item))
-        doc = pydoc.getdoc(class_obj).replace('_', '\\_')
-        for line in doc.split('\n'):
-            builtins_docio.write('\n{0}{0}{1}'.format(indent, line))
-        for name, member in inspect.getmembers(class_obj):
-            if name.startswith('__'):
-                continue
-            if inspect.ismethod(member) or inspect.ismethoddescriptor(member):
-                builtins_docio.write('\n\n{0}{0}.. py:method:: {1}\n'.format(indent, name).replace('_', '\\_'))
-            else:
-                builtins_docio.write('\n\n{0}{0}.. py:attribute:: {1}\n'.format(indent, name).replace('_', '\\_'))
-            doc = inspect.getdoc(member).replace('_', '\\_')
-            for line in doc.split('\n'):
-                builtins_docio.write('\n{0}{0}{0}{1}'.format(indent, line))
+# # MOOSE Builitin Classes and Functions
+# # ====================================
+# #     ''')
+#     builtins_docio.write('\n.. py:module:: moose\n')    
+#     indent = '   '
+#     for item in ['vec', 'melement', 'LookupField', 'DestField', 'ElementField']:
+#         builtins_docio.write('\n\n{0}.. py:class:: {1}\n'.format(indent, item).replace('_', '\\_'))        
+#         class_obj = eval('moose.{0}'.format(item))
+#         doc = pydoc.getdoc(class_obj).replace('_', '\\_')
+#         for line in doc.split('\n'):
+#             builtins_docio.write('\n{0}{0}{1}'.format(indent, line))
+#         for name, member in inspect.getmembers(class_obj):
+#             if name.startswith('__'):
+#                 continue
+#             if inspect.ismethod(member) or inspect.ismethoddescriptor(member):
+#                 builtins_docio.write('\n\n{0}{0}.. py:method:: {1}\n'.format(indent, name).replace('_', '\\_'))
+#             else:
+#                 builtins_docio.write('\n\n{0}{0}.. py:attribute:: {1}\n'.format(indent, name).replace('_', '\\_'))
+#             doc = inspect.getdoc(member).replace('_', '\\_')
+#             for line in doc.split('\n'):
+#                 builtins_docio.write('\n{0}{0}{0}{1}'.format(indent, line))
  
-    for item in ['pwe', 'le', 'ce', 'showfield', 'showmsg', 'doc', 'element',
-                 'getFieldNames', 'copy', 'move', 'delete',
-                 'useClock', 'setClock', 'start', 'reinit', 'stop', 'isRunning',
-                 'exists', 'writeSBML', 'readSBML', 'loadModel', 'saveModel',
-                 'connect', 'getCwe', 'setCwe', 'getFieldDict', 'getField',
-                 'seed', 'rand', 'wildcardFind', 'quit']:
-        builtins_docio.write('\n\n{0}.. py:function:: {1}\n'.format(indent, item).replace('_', '\\_'))        
-        doc = inspect.getdoc(eval('moose.{0}'.format(item))).replace('_', '\\_')
-        for line in doc.split('\n'):
-            builtins_docio.write('\n{0}{0}{1}'.format(indent, line))
-        builtins_docio.write('\n')                    
-    if isinstance(builtins_docio, cStringIO.OutputType):
-	print builtins_docio.getvalue()
-    else:
-	builtins_docio.close()
+#     for item in ['pwe', 'le', 'ce', 'showfield', 'showmsg', 'doc', 'element',
+#                  'getFieldNames', 'copy', 'move', 'delete',
+#                  'useClock', 'setClock', 'start', 'reinit', 'stop', 'isRunning',
+#                  'exists', 'writeSBML', 'readSBML', 'loadModel', 'saveModel',
+#                  'connect', 'getCwe', 'setCwe', 'getFieldDict', 'getField',
+#                  'seed', 'rand', 'wildcardFind', 'quit']:
+#         builtins_docio.write('\n\n{0}.. py:function:: {1}\n'.format(indent, item).replace('_', '\\_'))        
+#         doc = inspect.getdoc(eval('moose.{0}'.format(item))).replace('_', '\\_')
+#         for line in doc.split('\n'):
+#             builtins_docio.write('\n{0}{0}{1}'.format(indent, line))
+#         builtins_docio.write('\n')                    
+#     if isinstance(builtins_docio, cStringIO.OutputType):
+# 	print builtins_docio.getvalue()
+#     else:
+# 	builtins_docio.close()
     # This is the primary purpos
     classes_docio = open(classes_doc, 'w')
     classes_docio.write('.. Documentation for all MOOSE classes and functions\n')
