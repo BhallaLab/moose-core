@@ -1,11 +1,13 @@
 .. Documentation for all MOOSE builtin functions
 .. As visible in the Python module
-.. Auto-generated on July 08, 2014
+.. Auto-generated on July 10, 2014
 
 
 MOOSE Builitin Classes and Functions
 ====================================
-    .. module:: moose
+    
+.. py:module:: moose
+
 
    .. py:class:: vec
 
@@ -22,7 +24,7 @@ MOOSE Builitin Classes and Functions
       element or (2) create a reference to an existing object.
       
       
-      __init__(self, path=path, n=size, g=isGlobal, dtype=className)
+      \_\_init\_\_(self, path=path, n=size, g=isGlobal, dtype=className)
       
       Parameters
       ----------
@@ -47,7 +49,7 @@ MOOSE Builitin Classes and Functions
       The vector will be of this moose-class.
       
       
-      __init__(self, id)
+      \_\_init\_\_(self, id)
       
       Create a reference to an existing array object.
       
@@ -57,225 +59,236 @@ MOOSE Builitin Classes and Functions
       vec of an existing array object. The new object will be another
       reference to this object.
 
-         .. py:method:: delete
+      .. py:method:: delete
 
-            vec.delete() -> None
-            
-            Delete the underlying moose object. This will invalidate all
-            references to this object and any attempt to access it will raise a
-            ValueError.
+         vec.delete() -> None
+         
+         Delete the underlying moose object. This will invalidate all
+         references to this object and any attempt to access it will raise a
+         ValueError.
 
-         .. py:method:: getPath
+      .. py:method:: getPath
 
-            Return the path of this vec object.
+         Return the path of this vec object.
 
-         .. py:method:: getShape
+      .. py:method:: getShape
 
-            Get the shape of the vec object as a tuple.
+         Get the shape of the vec object as a tuple.
 
-         .. py:method:: getValue
+      .. py:method:: getValue
 
-            Return integer representation of the id of the element.
+         Return integer representation of the id of the element.
 
-         .. py:method:: setField
+      .. py:method:: setField
 
-            setField(fieldname, value_vector) -> None
-            
-            Set the value of `fieldname` in all elements under this vec.
-            
-            Parameters
-            ----------
-            fieldname: str
-                field to be set.
-            value: sequence of values
-                sequence of values corresponding to individual elements under this
-                vec.
-            
-            Notes
-            -----
-                This is an interface to SetGet::setVec
+         setField(fieldname, value\_vector) -> None
+         
+         Set the value of `fieldname` in all elements under this vec.
+         
+         Parameters
+         ----------
+         fieldname: str
+             field to be set.
+         value: sequence of values
+             sequence of values corresponding to individual elements under this
+             vec.
+         
+         Notes
+         -----
+             This is an interface to SetGet::setVec
 
    .. py:class:: melement
 
       Individual moose element contained in an array-type object
       (vec). Each element has a unique path, possibly with its index in
-      the vec. These are identified by three components: id_ and
-      dindex. id_ is the Id of the containing vec, it has a unique
+      the vec. These are identified by three components: id\_ and
+      dindex. id\_ is the Id of the containing vec, it has a unique
       numerical value (field `value`). `dindex` is the index of the current
       item in the containing vec. `dindex` is 0 for single elements.
       
-          __init__(path, dims, dtype) or
-          __init__(id, dataIndex, fieldIndex)
+          \_\_init\_\_(path, dims, dtype) or
+          \_\_init\_\_(id, dataIndex, fieldIndex)
           Initialize moose object
       
           Parameters
           ----------
           path : string
               Target element path.
+      
           dims : tuple or int
               dimensions along each axis (can be        an integer for 1D objects). Default: (1,)
+      
           dtype : string
               the MOOSE class name to be created.
+      
           id : vec or integer
               id of an existing element.
 
-         .. py:method:: connect
+      .. py:method:: connect
 
-            connect(srcfield, destobj, destfield, msgtype) -> bool
-            Connect another object via a message.
-            Parameters
-            ----------
-            srcfield : str
-                    source field on self.
-            destobj : element
-                    Destination object to connect to.
-            destfield : str
-                    field to connect to on `destobj`.
-            msgtype : str
-                    type of the message. Can be `Single`, `OneToAll`, `AllToOne`,
-             `OneToOne`, `Reduce`, `Sparse`. Default: `Single`.
-            Returns
-            -------
-            element of the created message.
-            
-            See also
-            --------
-            moose.connect
+         connect(srcfield, destobj, destfield, msgtype) -> bool
+         Connect another object via a message.
+         
+         Parameters
+         ----------
+         srcfield : str
+            source field on self.
+         
+         destobj : element
+            Destination object to connect to.
+         
+         destfield : str
+            field to connect to on `destobj`.
+         
+         msgtype : str
+            type of the message. Can be `Single`, `OneToAll`, `AllToOne`,
+            `OneToOne`, `Reduce`, `Sparse`. Default: `Single`.
+         
+         Returns
+         -------
+         element of the created message.
+         
+         See also
+         --------
+         moose.connect
 
-         .. py:method:: getDataIndex
+      .. py:method:: getDataIndex
 
-            getDataIndex()
-            
-            Return the dataIndex of this object.
+         getDataIndex()
+         
+         Return the dataIndex of this object.
 
-         .. py:method:: getField
+      .. py:method:: getField
 
-            getField(fieldName)
-            
-            Get the value of the field.
-            
-            Parameters
-            ----------
-            fieldName : string
-                    Name of the field.
+         getField(fieldName)
+         
+         Get the value of the field.
+         
+         Parameters
+         ----------
+         fieldName : string
+            Name of the field.
 
-         .. py:method:: getFieldIndex
+      .. py:method:: getFieldIndex
 
-            Get the index of this object as a field.
+         Get the index of this object as a field.
 
-         .. py:method:: getFieldNames
+      .. py:method:: getFieldNames
 
-            getFieldNames(fieldType='')
-            
-            Get the names of fields on this element.
-            
-            Parameters
-            ----------
-            fieldType : str
-                    Field type to retrieve. Can be `valueFinfo`, `srcFinfo`,
-                    `destFinfo`, `lookupFinfo`, etc. If an empty string is specified,
-                    names of all avaialable fields are returned.
-            
-            Returns
-            -------
-                    out : tuple of strings.
-            
-            Example
-            -------
-            List names of all the source fields in PulseGen class:
-            ~~~~
-            >>> moose.getFieldNames('PulseGen', 'srcFinfo')
-            ('childMsg', 'output')
-            ~~~~
+         getFieldNames(fieldType='')
+         
+         Get the names of fields on this element.
+         
+         Parameters
+         ----------
+         fieldType : str
+            Field type to retrieve. Can be `valueFinfo`, `srcFinfo`,
+            `destFinfo`, `lookupFinfo`, etc. If an empty string is specified,
+            names of all avaialable fields are returned.
+         
+         Returns
+         -------
+            out : tuple of strings.
+         
+         Example
+         -------
+         List names of all the source fields in PulseGen class:
+         
+         >>> moose.getFieldNames('PulseGen', 'srcFinfo')
+         ('childMsg', 'output')
 
-         .. py:method:: getFieldType
+      .. py:method:: getFieldType
 
-            getFieldType(fieldName')
-            
-            Get the string representation of the type of this field.
-            
-            Parameters
-            ----------
-            fieldName : string
-                    Name of the field to be queried.
+         getFieldType(fieldName')
+         
+         Get the string representation of the type of this field.
+         
+         Parameters
+         ----------
+         fieldName : string
+            Name of the field to be queried.
 
-         .. py:method:: getId
+      .. py:method:: getId
 
-            getId()
-            
-            Get the vec of this object
+         getId()
+         
+         Get the vec of this object
 
-         .. py:method:: getLookupField
+      .. py:method:: getLookupField
 
-            getLookupField(fieldName, key)
-            
-            Lookup entry for `key` in `fieldName`
-            
-            Parameters
-            ----------
-            fieldName : string
-                    Name of the lookupfield.
-            key : appropriate type for key of the lookupfield (as in the dict getFieldDict).
-                    Key for the look-up.
+         getLookupField(fieldName, key)
+         
+         Lookup entry for `key` in `fieldName`
+         
+         Parameters
+         ----------
+         fieldName : string
+            Name of the lookupfield.
+         
+         key : appropriate type for key of the lookupfield (as in the dict  getFieldDict).
+            Key for the look-up.
 
-         .. py:method:: getNeighbors
+      .. py:method:: getNeighbors
 
-            getNeighbors(fieldName)
-            
-            Get the objects connected to this element by a message on specified
-            field.
-            
-            Parameters
-            ----------
-            fieldName : str
-                    name of the connection field (a destFinfo or srcFinfo)
-            
-            Returns
-            -------
-            out: tuple of ematrices.
+         getNeighbors(fieldName)
+         
+         Get the objects connected to this element by a message on specified
+         field.
+         
+         Parameters
+         ----------
+         fieldName : str
+            name of the connection field (a destFinfo or srcFinfo)
+         
+         Returns
+         -------
+         out: tuple of ematrices.
 
-         .. py:method:: setDestField
+      .. py:method:: setDestField
 
-            setDestField(arg0, arg1, ...)
-            Set a destination field. This is for advanced uses. destFields can
-            (and should) be directly called like functions as
-            `element.fieldname(arg0, ...)`
-            
-            Parameters
-            ----------
-            The number and type of paramateres depend on the destFinfo to be
-            set. Use moose.doc('{classname}.{fieldname}') to get builtin
-            documentation on the destFinfo `fieldname`
+         setDestField(arg0, arg1, ...)
+         Set a destination field. This is for advanced uses. destFields can
+         (and should) be directly called like functions as
+         `element.fieldname(arg0, ...)`
+         
+         Parameters
+         ----------
+         The number and type of paramateres depend on the destFinfo to be
+         set. Use moose.doc('{classname}.{fieldname}') to get builtin
+         documentation on the destFinfo `fieldname`
 
-         .. py:method:: setField
+      .. py:method:: setField
 
-            setField(fieldName, value)
-            
-            Set the value of specified field.
-            
-            Parameters
-            ----------
-            fieldName : string
-                    Field to be assigned value to.
-            value : python datatype compatible with the type of the field
-                    The value to be assigned to the field.
+         setField(fieldName, value)
+         
+         Set the value of specified field.
+         
+         Parameters
+         ----------
+         fieldName : string
+            Field to be assigned value to.
+         
+         value : python datatype compatible with the type of the field
+            The value to be assigned to the field.
 
-         .. py:method:: setLookupField
+      .. py:method:: setLookupField
 
-            setLookupField(field, key, value)
-            Set a lookup field entry.
-            Parameters
-            ----------
-            field : string
-                    name of the field to be set
-            key : key type
-                    key in the lookup field for which the value is to be set.
-            value : value type
-                    value to be set for `key` in the lookkup field.
+         setLookupField(field, key, value)
+         Set a lookup field entry.
+         Parameters
+         ----------
+         field : string
+            name of the field to be set
+         
+         key : key type
+            key in the lookup field for which the value is to be set.
+         
+         value : value type
+            value to be set for `key` in the lookkup field.
 
-         .. py:method:: vec
+      .. py:method:: vec
 
-            Return the vec this element belongs to. This is overridden by the attribute of the same name for quick access.
+         Return the vec this element belongs to. This is overridden by the attribute of the same name for quick access.
 
    .. py:class:: LookupField
 
@@ -284,29 +297,29 @@ MOOSE Builitin Classes and Functions
       like a sequence. Additionally, you can set the number of entries by
       setting the `num` attribute to a desired value.
 
-         .. py:atribute:: dataIndex
+      .. py:attribute:: dataIndex
 
-            dataIndex of the field element
+         dataIndex of the field element
 
-         .. py:atribute:: name
+      .. py:attribute:: name
 
-            
+         
 
-         .. py:atribute:: num
+      .. py:attribute:: num
 
-            Number of entries in the field.
+         Number of entries in the field.
 
-         .. py:atribute:: owner
+      .. py:attribute:: owner
 
-            
+         
 
-         .. py:atribute:: path
+      .. py:attribute:: path
 
-            Path of the field element.
+         Path of the field element.
 
-         .. py:atribute:: vec
+      .. py:attribute:: vec
 
-            Id of the field element.
+         Id of the field element.
 
    .. py:class:: DestField
 
@@ -321,35 +334,36 @@ MOOSE Builitin Classes and Functions
       like a sequence. Additionally, you can set the number of entries by
       setting the `num` attribute to a desired value.
 
-         .. py:atribute:: dataIndex
+      .. py:attribute:: dataIndex
 
-            dataIndex of the field element
+         dataIndex of the field element
 
-         .. py:atribute:: name
+      .. py:attribute:: name
 
-            
+         
 
-         .. py:atribute:: num
+      .. py:attribute:: num
 
-            Number of entries in the field.
+         Number of entries in the field.
 
-         .. py:atribute:: owner
+      .. py:attribute:: owner
 
-            
+         
 
-         .. py:atribute:: path
+      .. py:attribute:: path
 
-            Path of the field element.
+         Path of the field element.
 
-         .. py:atribute:: vec
+      .. py:attribute:: vec
 
-            Id of the field element.
+         Id of the field element.
 
    .. py:function:: pwe
 
       Print present working element. Convenience function for GENESIS
       users. If you want to retrieve the element in stead of printing
       the path, use moose.getCwe()
+
 
    .. py:function:: le
 
@@ -366,9 +380,11 @@ MOOSE Builitin Classes and Functions
       -------
       None
 
+
    .. py:function:: ce
 
       Set the current working element. 'ce' is an alias of this function
+
 
    .. py:function:: showfield
 
@@ -391,6 +407,7 @@ MOOSE Builitin Classes and Functions
       -------
       None
 
+
    .. py:function:: showmsg
 
       Print the incoming and outgoing messages of `el`.
@@ -403,6 +420,7 @@ MOOSE Builitin Classes and Functions
       Returns
       -------
       None
+
 
    .. py:function:: doc
 
@@ -435,6 +453,7 @@ MOOSE Builitin Classes and Functions
       NameError
           If class or field does not exist.
 
+
    .. py:function:: element
 
       moose.element(arg) -> moose object
@@ -452,6 +471,7 @@ MOOSE Builitin Classes and Functions
       -------
       melement
           MOOSE element (object) corresponding to the `arg` converted to write subclass.
+
 
    .. py:function:: getFieldNames
 
@@ -472,6 +492,7 @@ MOOSE Builitin Classes and Functions
       -------
       tuple
           Names of the fields of type `finfoType` in class `className`.
+
 
    .. py:function:: copy
 
@@ -500,9 +521,11 @@ MOOSE Builitin Classes and Functions
       vec
           newly copied vec
 
+
    .. py:function:: move
 
       Move a vec object to a destination.
+
 
    .. py:function:: delete
 
@@ -521,13 +544,16 @@ MOOSE Builitin Classes and Functions
       -------
       None
 
+
    .. py:function:: useClock
 
       Schedule objects on a specified clock
 
+
    .. py:function:: setClock
 
       Set the dt of a clock.
+
 
    .. py:function:: start
 
@@ -555,6 +581,7 @@ MOOSE Builitin Classes and Functions
       --------
       moose.reinit : (Re)initialize simulation
 
+
    .. py:function:: reinit
 
       reinit() -> None
@@ -569,25 +596,31 @@ MOOSE Builitin Classes and Functions
       (like clear out all data recording tables, set state variables to
       their initial values, etc.
 
+
    .. py:function:: stop
 
       Stop simulation
+
 
    .. py:function:: isRunning
 
       True if the simulation is currently running.
 
+
    .. py:function:: exists
 
       True if there is an object with specified path.
+
 
    .. py:function:: writeSBML
 
       Export biochemical model to an SBML file.
 
+
    .. py:function:: readSBML
 
       Import SBML model to Moose.
+
 
    .. py:function:: loadModel
 
@@ -609,6 +642,7 @@ MOOSE Builitin Classes and Functions
       vec
           loaded model container vec.
 
+
    .. py:function:: saveModel
 
       saveModel(source, filename) -> None
@@ -627,26 +661,27 @@ MOOSE Builitin Classes and Functions
       -------
       None
 
+
    .. py:function:: connect
 
-      connect(src, src_field, dest, dest_field, message_type) -> bool
+      connect(src, src\_field, dest, dest\_field, message\_type) -> bool
       
-      Create a message between `src_field` on `src` object to `dest_field`
+      Create a message between `src\_field` on `src` object to `dest\_field`
       on `dest` object.
       
       Parameters
       ----------
       src : element/vec/string
           the source object (or its path)
-      src_field : str
+      src\_field : str
           the source field name. Fields listed under `srcFinfo` and
           `sharedFinfo` qualify for this.
       dest : element/vec/string
           the destination object.
-      dest_field : str
+      dest\_field : str
           the destination field name. Fields listed under `destFinfo`
           and `sharedFinfo` qualify for this.
-      message_type : str (optional)
+      message\_type : str (optional)
           Type of the message. Can be `Single`, `OneToOne`, `OneToAll`.
           If not specified, it defaults to `Single`.
       
@@ -665,13 +700,16 @@ MOOSE Builitin Classes and Functions
       >>> moose.connect(pulsegen, 'output', spikegen, 'Vm')
       1
 
+
    .. py:function:: getCwe
 
       Get the current working element. 'pwe' is an alias of this function.
 
+
    .. py:function:: setCwe
 
       Set the current working element. 'ce' is an alias of this function
+
 
    .. py:function:: getFieldDict
 
@@ -704,9 +742,11 @@ MOOSE Builitin Classes and Functions
       >>> moose.getFieldDict('Neutral', 'srcFinfo')
       {'childMsg': 'int'}
 
+
    .. py:function:: getField
 
       getField(element, field, fieldtype) -- Get specified field of specified type from object vec.
+
 
    .. py:function:: seed
 
@@ -725,6 +765,7 @@ MOOSE Builitin Classes and Functions
       -------
       None
 
+
    .. py:function:: rand
 
       moose.rand() -> [0,1)
@@ -733,6 +774,7 @@ MOOSE Builitin Classes and Functions
       Returns
       -------
       float in [0, 1) real interval generated by MT19937.
+
 
    .. py:function:: wildcardFind
 
@@ -766,6 +808,7 @@ MOOSE Builitin Classes and Functions
       
           For example, /mymodel/##[FIELD(Vm)>=-65] will return a list of all
           the objects under /mymodel whose Vm field is >= -65.
+
 
    .. py:function:: quit
 

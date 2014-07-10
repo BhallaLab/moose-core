@@ -1,8 +1,8 @@
 .. MOOSE overview
 .. As visible in the Python module
-.. Auto-generated on July 08, 2014
-MOOSE = Multiscale Object Oriented Simulation Environment
-============================================================
+.. Auto-generated on July 10, 2014
+MOOSE - the Multiscale Object Oriented Simulation Environment
+=============================================================
 
 How to use the documentation
 ----------------------------
@@ -13,13 +13,11 @@ Python interface can be viewed via Python's builtin ``help``
 function::
 
 >>> help(moose.connect)
-...
 
 The documentation built into main C++ code of MOOSE can be accessed
 via the module function ``doc``::
 
 >>> moose.doc('Neutral')
-...
 
 To get documentation about a particular field::
 
@@ -192,7 +190,7 @@ All arguments can be passed as keyword arguments.
 
 For concrete subclasses of melement, you do not need to pass the class
 argument because the class name is passed automatically to `melement`
-__init__ method.
+\_\_init\_\_ method.
 
 a = Neutral('alpha') # Creates element named `alpha` under current working element
 b = Neutral('alpha/beta') # Creates the element named `beta` under `alpha`
@@ -208,8 +206,8 @@ element(path)
     returns a reference to an existing object converted to
     the right class. Raises ValueError if path does not exist.
 
-copy(src=<src>, dest=<dest>, name=<name_of_the_copy>, n=<num_copies>,
-copyMsg=<whether_to_copy_messages) 
+copy(src=<src>, dest=<dest>, name=<name\_of\_the\_copy>, n=<num\_copies>,
+copyMsg=<whether\_to\_copy\_messages) 
 
     make a copy of source object as a child of the destination object.
 
@@ -219,9 +217,9 @@ move(src, dest)
     move src object under dest object.
 
 
-useClock(tick, path, update_function) 
+useClock(tick, path, update\_function) 
 
-    schedule <update_function> of every object that matches <path> on clock no. <tick>. Most commonly
+    schedule <update\_function> of every object that matches <path> on clock no. <tick>. Most commonly
     the function is 'process'.  NOTE: unlike earlier versions, now
     autoschedule is not available. You have to call useClock for every
     element that should be updated during the simulation. 
@@ -251,8 +249,8 @@ assigned tick 0.
 8,9 : Tables for plotting : process
 
 Example: 
-moose.useClock(0, '/model/compartment_1', 'init')
-moose.useClock(1, '/model/compartment_1', 'process')
+moose.useClock(0, '/model/compartment\_1', 'init')
+moose.useClock(1, '/model/compartment\_1', 'process')
 
 setClock(tick, dt) 
     

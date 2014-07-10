@@ -86,12 +86,14 @@ const Cinfo * VClamp::initCinfo()
                                                "Command input received by the clamp circuit.",
                                                &VClamp::getCommand);
     static ValueFinfo< VClamp, unsigned int> mode("mode",
-                                                  "Working mode of the PID controller."
-                                                  "\nmode = 0, standard PID with proportional, integral and derivative"
-                                                  "\n\tall acting on the error."
-                                                  "\nmode = 1, derivative action based on command input"
-                                                  "\nmode = 2, proportional action and derivative action are based on"
-                                                  "\ncommand input.",
+                                                  "Working mode of the PID controller.\n"
+                                                  "\n   mode = 0, standard PID with proportional, integral and derivative"
+                                                  "\n   all acting on the error."
+                                                  "\n"
+                                                  "\n   mode = 1, derivative action based on command input"
+                                                  "\n"
+                                                  "\n   mode = 2, proportional action and derivative action are based on"
+                                                  "\n   command input.",
                                                   &VClamp::setMode,
                                                   &VClamp::getMode);
     static ValueFinfo< VClamp, double> ti("ti",
@@ -124,8 +126,8 @@ const Cinfo * VClamp::initCinfo()
                                                      "Membrane potential read from compartment.",
                                                      &VClamp::getVin);
     static DestFinfo sensedIn("sensedIn",
-                              " The `VmOut` message of the Compartment object should be connected"
-                              "\n here.",
+                              "The `VmOut` message of the Compartment object should be connected"
+                              "\nhere.",
                               new OpFunc1<VClamp, double>( &VClamp::setVin));
                                               
     static DestFinfo commandIn("commandIn",

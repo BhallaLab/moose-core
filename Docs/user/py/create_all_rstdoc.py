@@ -211,33 +211,34 @@ MOOSE Builitin Classes and Functions
 ====================================
     ''')
     builtins_docio.write('\n.. py:module:: moose\n')    
+    indent = '   '
     for item in ['vec', 'melement', 'LookupField', 'DestField', 'ElementField']:
-        builtins_docio.write('\n   .. py:class:: {0}\n'.format(item).replace('_', '\\_'))        
-        builtins_docio.write('\n      ')
+        builtins_docio.write('\n\n{0}.. py:class:: {1}\n'.format(indent, item).replace('_', '\\_'))        
         class_obj = eval('moose.{0}'.format(item))
-        builtins_docio.write('\n      '.join(pydoc.getdoc(class_obj).split('\n')).replace('_', '\\_'))
-        builtins_docio.write('\n')
+        doc = pydoc.getdoc(class_obj).replace('_', '\\_')
+        for line in doc.split('\n'):
+            builtins_docio.write('\n{0}{0}{1}'.format(indent, line))
         for name, member in inspect.getmembers(class_obj):
             if name.startswith('__'):
                 continue
             if inspect.ismethod(member) or inspect.ismethoddescriptor(member):
-                builtins_docio.write('\n      .. py:method:: {0}\n'.format(name).replace('_', '\\_'))
+                builtins_docio.write('\n\n{0}{0}.. py:method:: {1}\n'.format(indent, name).replace('_', '\\_'))
             else:
-                builtins_docio.write('\n      .. py:attribute:: {0}\n'.format(name).replace('_', '\\_'))
-            builtins_docio.write('\n            ')
-            builtins_docio.write('\n         '.join(inspect.getdoc(member).split('\n')).replace('_', '\\_'))
-            builtins_docio.write('\n')
-            
-
+                builtins_docio.write('\n\n{0}{0}.. py:attribute:: {1}\n'.format(indent, name).replace('_', '\\_'))
+            doc = inspect.getdoc(member).replace('_', '\\_')
+            for line in doc.split('\n'):
+                builtins_docio.write('\n{0}{0}{0}{1}'.format(indent, line))
+ 
     for item in ['pwe', 'le', 'ce', 'showfield', 'showmsg', 'doc', 'element',
                  'getFieldNames', 'copy', 'move', 'delete',
                  'useClock', 'setClock', 'start', 'reinit', 'stop', 'isRunning',
                  'exists', 'writeSBML', 'readSBML', 'loadModel', 'saveModel',
                  'connect', 'getCwe', 'setCwe', 'getFieldDict', 'getField',
                  'seed', 'rand', 'wildcardFind', 'quit']:
-        builtins_docio.write('\n   .. py:function:: {0}\n'.format(item).replace('_', '\\_'))        
-        builtins_docio.write('\n      ')
-        builtins_docio.write('\n      '.join(inspect.getdoc(eval('moose.{0}'.format(item))).split('\n')).replace('_', '\\_'))
+        builtins_docio.write('\n\n{0}.. py:function:: {1}\n'.format(indent, item).replace('_', '\\_'))        
+        doc = inspect.getdoc(eval('moose.{0}'.format(item))).replace('_', '\\_')
+        for line in doc.split('\n'):
+            builtins_docio.write('\n{0}{0}{1}'.format(indent, line))
         builtins_docio.write('\n')                    
     if isinstance(builtins_docio, cStringIO.OutputType):
 	print builtins_docio.getvalue()
