@@ -458,8 +458,8 @@ void Ksolve::reinit( const Eref& e, ProcPtr p )
 			pools_[i].reinit();
 		}
 		isBuilt_ = true;
-	}
 #endif
+	}
 }
 
 //////////////////////////////////////////////////////////////
