@@ -17,7 +17,7 @@ class VoxelPoolsBase
 		virtual ~VoxelPoolsBase();
 
 		//////////////////////////////////////////////////////////////////
-		// Field assignment stuff
+		// Compute access operations.
 		//////////////////////////////////////////////////////////////////
 		/// Allocate # of pools
 		void resizeArrays( unsigned int totNumPools );
@@ -61,6 +61,11 @@ class VoxelPoolsBase
 
 		void setVolume( double vol );
 		double getVolume() const;
+
+		/**
+		 * Assigns the xfer vector.
+		 */
+		void setXfer( const vector< pair< int, int > >& xfer );
 		
 		//////////////////////////////////////////////////////////////////
 		// Field assignment functions
@@ -72,6 +77,12 @@ class VoxelPoolsBase
 		double getNinit( unsigned int ) const;
 		void setDiffConst( unsigned int, double v );
 		double getDiffConst( unsigned int ) const;
+
+		//////////////////////////////////////////////////////////////////
+		// Functions to handle cross-compartment reactions.
+		//////////////////////////////////////////////////////////////////
+		void mergeProxy( const vector< double >& remote, 
+						vector< double >& local );
 
 	private:
 		/**
@@ -103,6 +114,12 @@ class VoxelPoolsBase
 		 * Volume of voxel.
 		 */
 		double volume_;
+
+		/**
+		 * Enumerates every pool involved in cross-solver reactions.
+		 * Each entry holds (localIndex, indexForXferVector)
+		 */
+		vector< pair< int, int > > xfer_;
 };
 
 #endif	// _VOXEL_POOLS_BASE_H

@@ -570,7 +570,7 @@ void NeuroMesh::setCellPortion( const Eref& e, Id cell,
 void NeuroMesh::setCellPortion( const Eref& e,
 					Id cell, vector< ObjId > portion )
 {
-	double oldVol = getMeshEntryVolume( 0 );
+	// double oldVol = getMeshEntryVolume( 0 );
 	cell_ = cell;
 	NeuroNode::buildTree( nodes_, portion );
 	if ( separateSpines_ )
@@ -582,7 +582,7 @@ void NeuroMesh::setCellPortion( const Eref& e,
 	if ( separateSpines_ )
 		updateShaftParents();
 
-	transmitChange( e, oldVol );
+	// transmitChange( e, oldVol );
 	if ( separateSpines_ ) {
 		separateOutSpines( e );
 	}
@@ -788,86 +788,6 @@ bool NeuroMesh::vSetVolumeNotRates( double volume )
 	return true;
 }
 
-// Deprecated
-vector< Id > spineVec( const vector< Id >& head )
-{
-	const Cinfo* ccinfo = Cinfo::find( "Compartment" );
-	const Finfo* axialFinfo = ccinfo->findFinfo( "axialOut" ); // to pa
-	const Finfo* raxialFinfo = ccinfo->findFinfo( "raxialOut" ); // to kids
-	const Cinfo* scinfo = Cinfo::find( "SymCompartment" );
-	const Finfo* r1Finfo = scinfo->findFinfo( "distalOut" ); // to kids
-	const Finfo* r2Finfo = scinfo->findFinfo( "proximalOut" ); // to pa
-	assert( r1Finfo );
-	assert( r2Finfo );
-	map< Id, Id > spineMap;
-	for ( vector< Id >::const_iterator i = head.begin(); i != head.end(); ++i )
-	{
-		vector< Id > ret;
-		const Element* e = i->element();
-		if ( e->cinfo() == ccinfo ) {
-			if ( e->getNeighbors( ret, axialFinfo ) ) {
-				spineMap[ *i ] = ret[0];
-			} else if ( e->getNeighbors( ret, raxialFinfo ) ) {
-				spineMap[ *i ] = ret[0];
-			} else {
-				assert( 0 );
-			}
-		} else if ( e->cinfo() == scinfo ) {
-			if ( e->getNeighbors( ret, r2Finfo ) ) {
-				spineMap[ *i ] = ret[0];
-			} else if ( e->getNeighbors( ret, r1Finfo ) ) {
-				spineMap[ *i ] = ret[0];
-			} else {
-				assert( 0 );
-			}
-		} else {
-			assert( 0 );
-		}
-	}
-	vector< Id > temp;
-	for ( vector< Id >::const_iterator i = head.begin(); i != head.end(); ++i){
-		temp.push_back( spineMap[ *i ] );
-	}
-	return temp;
-}
-
-/// Deprecated. I don't trust the message traversal.
-Id getSpineParent( Id spine, Id head )
-{
-	const Cinfo* ccinfo = Cinfo::find( "Compartment" );
-	const Finfo* axialFinfo = ccinfo->findFinfo( "axialOut" ); // to pa
-	const Finfo* raxialFinfo = ccinfo->findFinfo( "raxialOut" ); // to kids
-	const Cinfo* scinfo = Cinfo::find( "SymCompartment" );
-	const Finfo* r1Finfo = scinfo->findFinfo( "distalOut" ); // to kids
-	const Finfo* r2Finfo = scinfo->findFinfo( "proximalOut" ); // to pa
-	assert( r1Finfo );
-	assert( r2Finfo );
-	Id pa;
-	Element* se = spine.element();
-	vector< Id > ret;
-	if ( se->cinfo() == ccinfo ) {
-		if ( se->getNeighbors( ret, axialFinfo ) ) {
-			if ( ret[0] != head ) {
-				pa = ret[0];
-			} else if ( se->getNeighbors( ret, raxialFinfo ) ) {
-				assert( ret[0] != head );
-				pa = ret[0];
-			} 
-		}
-	} else if ( se->cinfo() == scinfo ) {
-		if ( se->getNeighbors( ret, r2Finfo ) ) {
-			if ( ret[0] != head ) {
-				pa = ret[0];
-			} else if ( se->getNeighbors( ret, r1Finfo ) ) {
-				assert( ret[0] != head );
-				pa = ret[0];
-			} 
-		}
-	}
-
-	return pa;
-}
-
 //////////////////////////////////////////////////////////////////
 // FieldElement assignment stuff for MeshEntries
 //////////////////////////////////////////////////////////////////
@@ -967,6 +887,7 @@ double NeuroMesh::extendedMeshEntryVolume( unsigned int fid ) const
 // Dest funcsl
 //////////////////////////////////////////////////////////////////
 
+#if 0
 /// More inherited virtual funcs: request comes in for mesh stats
 /// Not clear what this does.
 void NeuroMesh::innerHandleRequestMeshStats( const Eref& e,
@@ -976,6 +897,7 @@ void NeuroMesh::innerHandleRequestMeshStats( const Eref& e,
 	vector< double > ret( vGetEntireVolume() / nodeIndex_.size() ,1 );
 	meshStatsFinfo->send( e, 1, ret );
 }
+#endif
 
 void NeuroMesh::innerHandleNodeInfo(
 			const Eref& e,
@@ -1093,54 +1015,6 @@ void NeuroMesh::innerBuildDefaultMesh( const Eref& e,
 }
 
 //////////////////////////////////////////////////////////////////
-// Utility function to transmit any changes to target nodes.
-//////////////////////////////////////////////////////////////////
-
-void NeuroMesh::transmitChange( const Eref& e, double oldVol )
-{
-		/*
-	Id meshEntry( e.id().value() + 1 );
-	assert( 
-		meshEntry.eref().data() == reinterpret_cast< char* >( lookupEntry( 0 ) )
-	);
-	unsigned int totalNumEntries = nodeIndex_.size();
-	unsigned int localNumEntries = totalNumEntries;
-	unsigned int startEntry = 0;
-	vector< unsigned int > localIndices( localNumEntries ); // empty
-	for ( unsigned int i = 0; i < localNumEntries; ++i )
-		localIndices[i] = i;
-	vector< double > vols( localNumEntries, 0.0 );
-	vector< vector< unsigned int > > outgoingEntries; // [node#][Entry#]
-	vector< vector< unsigned int > > incomingEntries; // [node#][Entry#]
-
-	// This function updates the size of the FieldDataHandler for the 
-	// MeshEntries.
-	DataHandler* dh = meshEntry.element()->dataHandler();
-	FieldDataHandlerBase* fdh = dynamic_cast< FieldDataHandlerBase* >( dh );
-	assert( fdh );
-	if ( totalNumEntries > fdh->getMaxFieldEntries() ) {
-		fdh->setMaxFieldEntries( localNumEntries );
-	}
-	assert( vols.size() == nodeIndex_.size() );
-	for ( unsigned int i = 0; i < vols.size(); ++i ) {
-		vols[i] = getMeshEntryVolume( i );
-	}
-
-	// This message tells the Stoich about the new mesh, and also about
-	// how it communicates with other nodes.
-	meshSplit()->Send( e 
-		oldVol,
-		vols, localIndices, 
-		outgoingEntries, incomingEntries );
-
-	// This func goes down to the MeshEntry to tell all the pools and
-	// Reacs to deal with the new mesh. They then update the stoich.
-	lookupEntry( 0 )->triggerRemesh( meshEntry.eref(),
-		oldVol, startEntry, localIndices, vols );
-		*/
-}
-
-//////////////////////////////////////////////////////////////////
 // Utility function to set up Stencil for diffusion
 //////////////////////////////////////////////////////////////////
 
@@ -1180,7 +1054,6 @@ double NeuroMesh::getAdx( unsigned int i, unsigned int& parentFid ) const
 
 void NeuroMesh::buildStencil()
 {
-// stencil_[0] = new NeuroStencil( nodes_, nodeIndex_, vs_, area_);
 	parentVoxel_.clear();
 	setStencilSize( nodeIndex_.size(), nodeIndex_.size() );
 	SparseMatrix< double > sm( nodeIndex_.size(), nodeIndex_.size() );
