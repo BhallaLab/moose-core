@@ -452,7 +452,16 @@ class Stoich
 		 */
 		vector< unsigned int > species_;
 
-		/// The RateTerms handle the update operations for reaction rate v_
+		/**
+		 * The RateTerms handle the update operations for reaction rate v_
+		 * rates_[volIndex][termIndex]
+		 * There is a separate vector of RateTerm for each volume handled
+		 * by the stoich. This is needed because RateTerms use #/voxel
+		 * units and are thus volume dependent.
+		 * For example, if the reaction system is in a tapering cylinder, 
+		 * there will be distinct volumes for each voxel, and each will
+		 * need its own scaled set of RateTerms.
+		 */
 		vector< vector< RateTerm* > > rates_;
 
 		/**

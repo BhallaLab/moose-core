@@ -28,6 +28,22 @@
 
 const unsigned int OFFNODE = ~0;
 
+// static function
+SrcFinfo1< vector< double > >* Ksolve::xComptOut() {
+	static SrcFinfo1< vector< double > > xComptOut( "xComptOut",
+		"Sends 'n' of all molecules participating in cross-compartment "
+		"reactions between any juxtaposed voxels between current compt "
+		"and another compartment. This includes molecules local to this "
+		"compartment, as well as proxy molecules belonging elsewhere. "
+		"A(t+1) = (Alocal(t+1) + AremoteProxy(t+1)) - Alocal(t) "
+		"A(t+1) = (Aremote(t+1) + Aproxy(t+1)) - Aproxy(t) "
+		"Then we update A on the respective solvers with: "
+		"Alocal(t+1) = Aproxy(t+1) = A(t+1) "
+		"This is equivalent to sending dA over on each timestep. "
+   	);
+	return &xComptOut;
+}
+
 const Cinfo* Ksolve::initCinfo()
 {
 		///////////////////////////////////////////////////////
@@ -133,6 +149,22 @@ const Cinfo* Ksolve::initCinfo()
 			procShared, sizeof( procShared ) / sizeof( const Finfo* )
 		);
 
+		static DestFinfo xComptIn( "xComptIn",
+			"Handles arriving pool 'n' values used in cross-compartment "
+			"reactions.",
+			new OpFunc1< Ksolve, vector< double > >(
+					&Ksolve::xComptIn )
+		);
+		static Finfo* xComptShared[] = {
+			xComptOut(), &xComptIn
+		};
+		static SharedFinfo xCompt( "xCompt",
+			"Shared message for pool exchange for cross-compartment "
+			"reactions. Exchanges latest values of all pools that "
+			"participate in such reactions.",
+			xComptShared, sizeof( xComptShared ) / sizeof( const Finfo* )
+		);
+
 	static Finfo* ksolveFinfos[] =
 	{
 		&method,			// Value
@@ -145,6 +177,7 @@ const Cinfo* Ksolve::initCinfo()
 		&nVec,				// LookupValue
 		&numAllVoxels,		// ReadOnlyValue
 		&numPools,			// Value
+		&xCompt,			// SharedFinfo
 		&proc,				// SharedFinfo
 	};
 	
@@ -331,47 +364,6 @@ void Ksolve::setNvec( unsigned int voxel, vector< double > nVec )
 			s[i] = nVec[i];
 	}
 }
-/*
-void Ksolve::setNumAllVoxels( unsigned int numVoxels )
-{
-	if ( numVoxels == 0 ) {
-		return;
-	}
-	// Preserve the number of pool species.
-	unsigned int numPoolSpecies = pools_[0].size();
-	// Preserve the concInit.
-	vector< double > nInit( numPoolSpecies );
-	for ( unsigned int i = 0; i < numPoolSpecies; ++i ) {
-		nInit[i] = pools_[0].Sinit()[i]; 
-	}
-	
-	// Later do the node allocations.
-	pools_.clear();
-	pools_.resize( numVoxels );
-	if ( !stoichPtr_ )
-		return;
-	// assert( stoichPtr_ );
-	OdeSystem ode;
-#ifdef USE_GSL
-	ode.gslSys.function = &VoxelPools::gslFunc;
-   	ode.gslSys.jacobian = 0;
-	ode.gslSys.dimension = stoichPtr_->getNumVarPools();
-	// This cast is needed because the C interface for GSL doesn't 
-	// use const void here.
-   	ode.gslSys.params = const_cast< Stoich* >( stoichPtr_ );
-	if ( ode.method == "rk5" ) {
-		ode.gslStep = gsl_odeiv2_step_rkf45;
-	}
-#endif
-	for ( unsigned int i = 0 ; i < numVoxels; ++i ) {
-		pools_[i].resizeArrays( numPoolSpecies );
-		pools_[i].setStoich( stoichPtr_, &ode );
-		for ( unsigned int j = 0; j < numPoolSpecies; ++j ) {
-			pools_[i].varSinit()[j] = nInit[j];
-		}
-	}
-}
-*/
 
 //////////////////////////////////////////////////////////////
 // Process operations.
@@ -578,3 +570,12 @@ void Ksolve::setBlock( const vector< double >& values )
 		}
 	}
 }
+
+void Ksolve::xComptIn( vector< double > values )
+{
+	assert( values.size() == xComptData_.size() );
+	for ( vector< VoxelPools >::iterator
+			i = pools_.begin(); i != pools_.end(); ++i )
+		i->mergeProxy( values, xComptData_ );
+}
+

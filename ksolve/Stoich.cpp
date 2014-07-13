@@ -636,6 +636,14 @@ void Stoich::locateOffSolverReacs( Id myCompt, vector< Id >& elist )
 			}
 	}
 
+	/*
+	// Build a map of which reacs are at specified junction of compts.
+	assert( offSolverReacs_.size() == offSolverReacCompts_.size() );
+	for ( unsigned int i = 0; i < offSolverReacs_.size(); ++i ) {
+		offSolverReacMap_[ offSolverReactCompts_[i] ].push_back( offSolverReacs_[i] );
+	}
+	*/
+
 	elist = temp;
 }
 
