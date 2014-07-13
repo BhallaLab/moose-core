@@ -116,3 +116,20 @@ double VoxelPoolsBase::getDiffConst( unsigned int i ) const
 		return 0;
 }
 
+//////////////////////////////////////////////////////////////
+// Handle cross compartment reactions
+//////////////////////////////////////////////////////////////
+void VoxelPoolsBase::mergeProxy(
+		const vector< double >& remote, vector< double >& local )
+{
+	for ( vector< pair< int, int > >::const_iterator
+		i = xfer_.begin(); i != xfer_.end(); ++i ) {
+		S_[i->first] = local[i->second] = 
+			S_[i->first ] + remote[i->second] - local[i->second];
+	}
+}
+
+void VoxelPoolsBase::setXfer( const vector< pair< int, int > >& xfer )
+{
+	xfer_ = xfer;
+}

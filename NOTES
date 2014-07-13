@@ -3794,5 +3794,125 @@ Seems to work OK.
 Compared multi1.py with multi1_ee.py. dt = (10e-6, 0.2e-6) respectively.
 The hsolve version is more accurate as judged by convergence. The spike
 timings of the ee version are off. But the shape of all graphs is good.
+Checkin 5629.
+
+Next: Load in a more complex chem model. We could try the one from the 
+2011 multiscale paper. Or the variant already here in the MULTI directory.
+
+Then I really need to get the cross-compartment reactions working again.
+Would be nice to implement Crank-Nicolson in HSolve. Also the core
+	matrix calculations are much more complicated than my version for
+	reac-diff.
+
 
 ============================================================================
+10 July.
+The psd_merged31d.g fails with a segv. Try separate_compts.g which has
+similar complexity but the cross-compartment reactions are removed.
+
+This works, and each compt is doing something interesting and different.
+Only Ca in the dends so the run doesn't take all that long.
+============================================================================
+11 July.
+Key step now is to get inter-compartmental reactions going.
+Stoich.cpp does this function 'locateOffSolverReacs'
+which builds up a list of offSolverReacs_
+and another of offSolverReacCompts_.
+The latter is a one-to-one matching vector of pair< Id, Id >, each entry is
+either a compartment for that reac, or Id().
+
+We need to traverse this and locate 2- and 3-way junctions, set up a map
+with the junctions. When building the model tree we need to find every interface
+between compartments, look up the map, and set up the reaction.
+
+That is easy. offSolverReacMap_. Now problem is how to build from this
+and then how to solve it.
+One option is to make zombies that are a variant of the regular reacs,
+but have ptrs to the appropriate location in the solver. Problem is that 
+we have singleton Reacs but multiple junctions where they would be used. So
+we need to go back to using data structures within the solver.
+
+Options for solving:
+- Use proxy molecules. On each timestep, get the latest value of the proxies,
+	do some internal calculation, then send back proxy values.
+	So the comms with the remote solver would be a vector of doubles of
+	the proxy values.
+	- Messaging scheduling has to be like this:
+		tick 0 ownerSolver and sideSolver sends latest to each other.
+		tick 1 ownerSolver: 
+			Does process.
+			Uses reac and sideSolver concs to compute new conc
+			Updates its own mol concs as modified by reac.
+		tick 1 sideSolver
+			pastes new conc into its concs.
+			Does process
+
+	
+In the Ksolve::reinit, we need to tell each of the voxelPools which 
+	compartments/voxels it touches. This lets the voxelPool figure out 
+	which of the crossReacs to deploy.
+In an earlier incarnation, we had distinct GSL computations for each combination
+of cross reacs. These filled out the proxy molecules. In principle I could
+make duplicates of the Stoich that did this. May be marginally more accurate
+and faster.
+I need to ask the Mesh which compartments/voxels each voxel touches.
+NeuroMesh keeps a vector of parent voxels of each spine.
+
+============================================================================
+13 July.
+Some ops to implement in the solver and elsewhere:
+	- Scheduling: Have a default clock for each class. 
+		*Have 20 ticks.
+		*Calling remains via message.
+		- Upon creation each object is scheduled.
+		- Add a 'clock' field to Element as a short. -1 means not sched.
+		- Remove the Shell::doUseClock stuff, instead use this field.
+		- Scheduling is immediate upon setting this field.
+		- Never permit multiple scheduling.
+		- When zombified, object adopts default clock of zombie class.
+	- Ksolver: 
+		- Stoich::addElist and dropElist functions for adding and 
+			removing objects from ksolve management.
+		- Func to generate Stoich with specified set of compts
+		- Never incorporate dangling reacs or pools into numerics.
+
+	- Option 1 for distinct cross-compartment reacs on different voxels.
+		- Stoich should have an internal data structure which fully
+			specifies calculations per voxel:
+			N_; rates_; funcs_; offSolverPoolIndex_[compt]; 
+		- Stoich currently maintains rates_[volIndex][rateIndex].
+			Should be changed to a 
+	- Option 2 for distinct cross-compartment reacs on different voxels.
+		- Stoich sets up exactly 2 internal data structures
+			- N_ for just the bare voxels
+			- N2_ for the voxels that connect to other reac systems.
+			- Rates have to be set for each volume as currently.
+				I'd need to do some further duplication.
+			- Voxel-specific stuff is handled in the VoxelPools.
+	- Option 3 for distinct cross-compartment reacs on different voxels.
+		- Stoich maintains the minimal set of data structures required
+			- N_ for different x-compt reaction cases
+			- rates_ for different volumes and x-compt cases.
+			- Info about mapping of different pool Ids to index.
+			These are the authoritative data structures and the
+			memory management is the job of the Stoich.
+		- VoxelPools maintains per-voxel info
+			- for chem calculations: ptrs to N_ and rates_
+			- For data transfer: Arrays for which pools to manage.
+			- Accumulates outgoing data into vector for the Ksolve
+		- Ksolve interfaces with the rest of the world.
+			* farms out the calculations to the pools_ vector of
+				VoxelPools.
+			* Accumulates data transfer info, transfers it.
+			* Disperses incoming data transfer info to pools_.
+		
+	Clearly, Option2 isn't going to help much. Option 3 is perhaps a little
+		cleaner in that it moves some of the per-voxel management to
+		the voxels where it belongs.
+
+Need a way to propagate changes in concInit of proxy pools to all affected
+Stoichs.
+
+Implemented skeleton code for Ksolve interfacing to each other.
+Intermediate checkin with the updated Clock.cpp and the skeleton code for
+Ksolves to send data for cross-compartment reactions.

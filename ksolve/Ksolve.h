@@ -58,6 +58,7 @@ class Ksolve: public ZombiePoolInterface
 		//////////////////////////////////////////////////////////////////
 		// Dest Finfos
 		//////////////////////////////////////////////////////////////////
+		void xComptIn( vector< double > );
 		void process( const Eref& e, ProcPtr p );
 		void reinit( const Eref& e, ProcPtr p );
 
@@ -90,6 +91,7 @@ class Ksolve: public ZombiePoolInterface
 		void setBlock( const vector< double >& values );
 
 		//////////////////////////////////////////////////////////////////
+		static SrcFinfo1< vector< double > >* xComptOut();
 		static const Cinfo* initCinfo();
 	private:
 		string method_;
@@ -129,6 +131,12 @@ class Ksolve: public ZombiePoolInterface
 
 		/// Flag for when the entire solver is built.
 		bool isBuilt_;
+
+		/**
+		 * Vector of all the pool #s participating in cross-compartment
+		 * reactions. Retails the value from previous clock tick.
+		 */
+		vector< double > xComptData_;
 
 };
 

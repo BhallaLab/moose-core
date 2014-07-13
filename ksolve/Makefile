@@ -47,7 +47,7 @@ HEADERS = \
 # Optional: Comment out the following three items if not using GSL
 ifeq ($(USE_GSL),1)
 GSL_OBJ = \
-#	GslIntegrator.o
+
 
 GSL_LIBS = -L/usr/lib -lgsl -lgslcblas
 GSL_FLAGS = -DUSE_GSL
@@ -78,7 +78,6 @@ testKsolve.o:	../shell/Shell.h
 ifeq ($(USE_GSL),1)
 #Optional: Comment out the following two items if not using GSL.
 $(GSL_OBJ) : $(HEADERS)
-#GslIntegrator.o:	GslIntegrator.h Stoich.h RateTerm.h KinSparseMatrix.h ../basecode/SparseMatrix.h ../shell/Shell.h
 #StateScanner.o:	StateScanner.h
 endif # !USE_GSL
 

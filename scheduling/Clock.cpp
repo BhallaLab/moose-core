@@ -78,9 +78,23 @@ vector< SrcFinfo1< ProcPtr >* >& processVec() {
 	static SrcFinfo1< ProcPtr > process7( "process7", "Process for Tick 7");
 	static SrcFinfo1< ProcPtr > process8( "process8", "Process for Tick 8");
 	static SrcFinfo1< ProcPtr > process9( "process9", "Process for Tick 9");
+	static SrcFinfo1< ProcPtr > process10("process10", "Process Tick 10");
+	static SrcFinfo1< ProcPtr > process11("process11", "Process Tick 11");
+	static SrcFinfo1< ProcPtr > process12("process12", "Process Tick 12");
+	static SrcFinfo1< ProcPtr > process13("process13", "Process Tick 13");
+	static SrcFinfo1< ProcPtr > process14("process14", "Process Tick 14");
+	static SrcFinfo1< ProcPtr > process15("process15", "Process Tick 15");
+	static SrcFinfo1< ProcPtr > process16("process16", "Process Tick 16");
+	static SrcFinfo1< ProcPtr > process17("process17", "Process Tick 17");
+	static SrcFinfo1< ProcPtr > process18("process18", "Process Tick 18");
+	static SrcFinfo1< ProcPtr > process19("process19", "Process Tick 19");
 
 	static SrcFinfo1< ProcPtr >* processArray[] = {
-		&process0, &process1, &process2, &process3, &process4, &process5, &process6, &process7, &process8, &process9, };
+		&process0, &process1, &process2, &process3, &process4, 
+		&process5, &process6, &process7, &process8, &process9,
+		&process10, &process11, &process12, &process13, &process14,
+	   	&process15, &process16, &process17, &process18, &process19,
+   	};
 	static vector< SrcFinfo1< ProcPtr >* > processVec(processArray, processArray + sizeof(processArray) / sizeof(SrcFinfo1< ProcPtr > *));
 
 	return processVec;
@@ -98,9 +112,23 @@ vector< SrcFinfo1< ProcPtr >* >& reinitVec() {
 	static SrcFinfo1< ProcPtr > reinit7( "reinit7", "Reinit for Tick 7" );
 	static SrcFinfo1< ProcPtr > reinit8( "reinit8", "Reinit for Tick 8" );
 	static SrcFinfo1< ProcPtr > reinit9( "reinit9", "Reinit for Tick 9" );
+	static SrcFinfo1< ProcPtr > reinit10( "reinit10", "Reinit for Tick 10");
+	static SrcFinfo1< ProcPtr > reinit11( "reinit11", "Reinit for Tick 11");
+	static SrcFinfo1< ProcPtr > reinit12( "reinit12", "Reinit for Tick 12");
+	static SrcFinfo1< ProcPtr > reinit13( "reinit13", "Reinit for Tick 13");
+	static SrcFinfo1< ProcPtr > reinit14( "reinit14", "Reinit for Tick 14");
+	static SrcFinfo1< ProcPtr > reinit15( "reinit15", "Reinit for Tick 15");
+	static SrcFinfo1< ProcPtr > reinit16( "reinit16", "Reinit for Tick 16");
+	static SrcFinfo1< ProcPtr > reinit17( "reinit17", "Reinit for Tick 17");
+	static SrcFinfo1< ProcPtr > reinit18( "reinit18", "Reinit for Tick 18");
+	static SrcFinfo1< ProcPtr > reinit19( "reinit19", "Reinit for Tick 19");
 
 	static SrcFinfo1< ProcPtr >* reinitArray[] = {
-		&reinit0, &reinit1, &reinit2, &reinit3, &reinit4, &reinit5, &reinit6, &reinit7, &reinit8, &reinit9, };
+		&reinit0, &reinit1, &reinit2, &reinit3, &reinit4, 
+		&reinit5, &reinit6, &reinit7, &reinit8, &reinit9, 
+		&reinit10, &reinit11, &reinit12, &reinit13, &reinit14, 
+		&reinit15, &reinit16, &reinit17, &reinit18, &reinit19, 
+	};
 	static vector< SrcFinfo1< ProcPtr >* > reinitVec(reinitArray, reinitArray + sizeof(reinitArray) / sizeof(SrcFinfo1< ProcPtr > *));
 
 	return reinitVec;
@@ -185,17 +213,39 @@ const Cinfo* Clock::initCinfo()
 	static Finfo* procShared7[] = { processVec()[7], reinitVec()[7] };
 	static Finfo* procShared8[] = { processVec()[8], reinitVec()[8] };
 	static Finfo* procShared9[] = { processVec()[9], reinitVec()[9] };
+	static Finfo* procShared10[] = { processVec()[10], reinitVec()[10] };
+	static Finfo* procShared11[] = { processVec()[11], reinitVec()[11] };
+	static Finfo* procShared12[] = { processVec()[12], reinitVec()[12] };
+	static Finfo* procShared13[] = { processVec()[13], reinitVec()[13] };
+	static Finfo* procShared14[] = { processVec()[14], reinitVec()[14] };
+	static Finfo* procShared15[] = { processVec()[15], reinitVec()[15] };
+	static Finfo* procShared16[] = { processVec()[16], reinitVec()[16] };
+	static Finfo* procShared17[] = { processVec()[17], reinitVec()[17] };
+	static Finfo* procShared18[] = { processVec()[18], reinitVec()[18] };
+	static Finfo* procShared19[] = { processVec()[19], reinitVec()[19] };
 
-	static SharedFinfo proc0( "proc0", "Shared proc/reinit message", procShared0, sizeof( procShared0 ) / sizeof( const Finfo* ) );
-	static SharedFinfo proc1( "proc1", "Shared proc/reinit message", procShared1, sizeof( procShared1 ) / sizeof( const Finfo* ) );
-	static SharedFinfo proc2( "proc2", "Shared proc/reinit message", procShared2, sizeof( procShared2 ) / sizeof( const Finfo* ) );
-	static SharedFinfo proc3( "proc3", "Shared proc/reinit message", procShared3, sizeof( procShared3 ) / sizeof( const Finfo* ) );
-	static SharedFinfo proc4( "proc4", "Shared proc/reinit message", procShared4, sizeof( procShared4 ) / sizeof( const Finfo* ) );
-	static SharedFinfo proc5( "proc5", "Shared proc/reinit message", procShared5, sizeof( procShared5 ) / sizeof( const Finfo* ) );
-	static SharedFinfo proc6( "proc6", "Shared proc/reinit message", procShared6, sizeof( procShared6 ) / sizeof( const Finfo* ) );
-	static SharedFinfo proc7( "proc7", "Shared proc/reinit message", procShared7, sizeof( procShared7 ) / sizeof( const Finfo* ) );
-	static SharedFinfo proc8( "proc8", "Shared proc/reinit message", procShared8, sizeof( procShared8 ) / sizeof( const Finfo* ) );
-	static SharedFinfo proc9( "proc9", "Shared proc/reinit message", procShared9, sizeof( procShared9 ) / sizeof( const Finfo* ) );
+	static string s = "Shared process/reinit message";
+	unsigned int sz = sizeof( procShared0 ) / sizeof( const Finfo* );
+	static SharedFinfo proc0( "proc0", s, procShared0, sz );
+	static SharedFinfo proc1( "proc1", s, procShared1, sz );
+	static SharedFinfo proc2( "proc2", s, procShared2, sz );
+	static SharedFinfo proc3( "proc3", s, procShared3, sz );
+	static SharedFinfo proc4( "proc4", s, procShared4, sz );
+	static SharedFinfo proc5( "proc5", s, procShared5, sz );
+	static SharedFinfo proc6( "proc6", s, procShared6, sz );
+	static SharedFinfo proc7( "proc7", s, procShared7, sz );
+	static SharedFinfo proc8( "proc8", s, procShared8, sz );
+	static SharedFinfo proc9( "proc9", s, procShared9, sz );
+	static SharedFinfo proc10( "proc10", s, procShared10, sz );
+	static SharedFinfo proc11( "proc11", s, procShared11, sz );
+	static SharedFinfo proc12( "proc12", s, procShared12, sz );
+	static SharedFinfo proc13( "proc13", s, procShared13, sz );
+	static SharedFinfo proc14( "proc14", s, procShared14, sz );
+	static SharedFinfo proc15( "proc15", s, procShared15, sz );
+	static SharedFinfo proc16( "proc16", s, procShared16, sz );
+	static SharedFinfo proc17( "proc17", s, procShared17, sz );
+	static SharedFinfo proc18( "proc18", s, procShared18, sz );
+	static SharedFinfo proc19( "proc19", s, procShared19, sz );
 
 	///////////////////////////////////////////////////////
 	// MsgDest definitions
@@ -257,6 +307,16 @@ const Cinfo* Clock::initCinfo()
 		&proc7,				// Src
 		&proc8,				// Src
 		&proc9,				// Src
+		&proc10,				// Src
+		&proc11,				// Src
+		&proc12,				// Src
+		&proc13,				// Src
+		&proc14,				// Src
+		&proc15,				// Src
+		&proc16,				// Src
+		&proc17,				// Src
+		&proc18,				// Src
+		&proc19,				// Src
 	};
 	
 	static string doc[] =
