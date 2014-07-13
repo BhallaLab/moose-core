@@ -95,8 +95,8 @@ MOOSE_REPORT_BUG_URL = 'http://sourceforge.net/tracker/?func=add&group_id=165660
 MOOSE_DEMOS_DIR = '/usr/share/moose/Demos'
 MOOSE_DOCS_DIR =  '/usr/share/doc/moose'
 MOOSE_GUI_DIR = os.path.dirname(__file__)
-print("MOOSE_GUI_DIR %s " % MOOSE_GUI_DIR)
 MOOSE_PLUGIN_DIR = os.path.join(MOOSE_GUI_DIR, 'plugins')
+MOOSE_COLORMAP_DIR = os.path.join(MOOSE_GUI_DIR, 'colormaps')
 MOOSE_CFG_DIR = os.path.join(os.environ['HOME'], '.moose')
 MOOSE_LOCAL_DIR = os.path.join(os.environ['HOME'], 'moose')
 MOOSE_NUMPTHREADS = '1'
@@ -218,6 +218,7 @@ def init_dirs():
     return firsttime, errors
 
 settings = MooseSetting()
+print settings
 
 # LOG_FILENAME = os.path.join(TEMPDIR, 'moose.log')
 LOG_LEVEL = logging.ERROR
