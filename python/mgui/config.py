@@ -94,7 +94,8 @@ MOOSE_REPORT_BUG_URL = 'http://sourceforge.net/tracker/?func=add&group_id=165660
 
 MOOSE_DEMOS_DIR = '/usr/share/moose/Demos'
 MOOSE_DOCS_DIR =  '/usr/share/doc/moose'
-MOOSE_GUI_DIR = os.path.dirname(os.path.abspath(__file__))
+MOOSE_GUI_DIR = os.path.dirname(__file__)
+print("MOOSE_GUI_DIR %s " % MOOSE_GUI_DIR)
 MOOSE_PLUGIN_DIR = os.path.join(MOOSE_GUI_DIR, 'plugins')
 MOOSE_CFG_DIR = os.path.join(os.environ['HOME'], '.moose')
 MOOSE_LOCAL_DIR = os.path.join(os.environ['HOME'], 'moose')

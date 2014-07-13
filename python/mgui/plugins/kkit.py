@@ -9,15 +9,14 @@ import networkx as nx
 import numpy as np
 from mgui import config
 import pickle 
-from .default import *
+from mgui.plugins.default import *
 from moose import *
-sys.path.append('plugins')
 from mgui.mplugin import *
-from .kkitUtil import *
-from .kkitQGraphics import PoolItem, ReacItem,EnzItem,CplxItem,ComptItem
-from .kkitViewcontrol import *
-from .kkitCalcArrow import *
-from .kkitOrdinateUtil import *
+from mgui.plugins.kkitUtil import *
+from mgui.plugins.kkitQGraphics import PoolItem, ReacItem,EnzItem,CplxItem,ComptItem
+from mgui.plugins.kkitViewcontrol import *
+from mgui.plugins.kkitCalcArrow import *
+from mgui.plugins.kkitOrdinateUtil import *
 import posixpath
 from mgui.mtoolbutton import MToolButton
 
@@ -182,7 +181,12 @@ class  KineticsWidget(EditorWidgetBase):
             self.autocoordinates = False
             
             # pickled the color map file """
-            colormap_file = open(os.path.join(config.settings[config.KEY_COLORMAP_DIR], 'rainbow2.pkl'),'rb')
+            colormapFile = os.path.join(
+                    config.settings[config.KEY_COLORMAP_DIR]
+                    , 'rainbow2.pkl'
+                    )
+            colormap_file = open(colormapFile, 'rb')
+
             self.colorMap = pickle.load(colormap_file)
             colormap_file.close()
             
