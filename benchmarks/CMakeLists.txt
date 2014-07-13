@@ -6,4 +6,3 @@ add_library(benchmarks
     benchmarks.cpp
     kineticMarks.cpp
     )
-target_link_libraries(benchmarks shell)

@@ -18,4 +18,3 @@ add_library(hsolve
     ZombieHHChannel.cpp
     )
 
-target_link_libraries(hsolve basecode)
