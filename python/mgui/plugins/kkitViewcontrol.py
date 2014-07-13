@@ -1,6 +1,6 @@
 from PyQt4 import QtCore, QtGui,Qt
 import sys
-import config
+import mgui.config
 from modelBuild import *
 
 class GraphicalView(QtGui.QGraphicsView):
