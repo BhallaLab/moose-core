@@ -98,7 +98,11 @@ endif()
 
 # Wheather to use local-gsl or not. link_directories are need to be called
 # before target is created therefore it is here.
-set(LOCAL_GSL 1)
+if(EXISTS ${CMAKE_SOURCE_DIR}/external/gsl-1.16)
+    MESSAGE("+ Local gsl is found.")
+    set(LOCAL_GSL 1)
+endif()
+
 if(LOCAL_GSL)
 
     # Setup GSL as external library.
