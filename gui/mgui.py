@@ -748,7 +748,7 @@ class MWindow(QtGui.QMainWindow):
             self.objectEditSlot('/', False)
 
 
-if __name__ == '__main__':
+def main():
     # create the GUI application
     app = QtGui.QApplication(sys.argv)
     QtGui.qApp = app
@@ -770,6 +770,9 @@ if __name__ == '__main__':
     config.settings[config.KEY_FIRSTTIME] = 'False' # string not boolean
     sys.exit(app.exec_())
     
+
+if __name__ == '__main__':
+    main()
 
 # 
 # mgui.py ends here

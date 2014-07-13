@@ -1,4 +1,5 @@
 import sys
+sys.path.append('..')
 import os
 import math
 import re
@@ -9,15 +10,15 @@ import networkx as nx
 import numpy as np
 import config
 import pickle 
-from default import *
+from .default import *
 from moose import *
 sys.path.append('plugins')
 from mplugin import *
-from kkitUtil import *
-from kkitQGraphics import PoolItem, ReacItem,EnzItem,CplxItem,ComptItem
-from kkitViewcontrol import *
-from kkitCalcArrow import *
-from kkitOrdinateUtil import *
+from .kkitUtil import *
+from .kkitQGraphics import PoolItem, ReacItem,EnzItem,CplxItem,ComptItem
+from .kkitViewcontrol import *
+from .kkitCalcArrow import *
+from .kkitOrdinateUtil import *
 import posixpath
 from mtoolbutton import MToolButton
 
@@ -244,7 +245,7 @@ class  KineticsWidget(EditorWidgetBase):
     def mooseObjOntoscene(self):
         #  All the compartments are put first on to the scene \
         #  Need to do: Check With upi if empty compartments exist 
-        for cmpt in sorted(self.meshEntry.iterkeys()):
+        for cmpt in sorted(self.meshEntry.keys()):
             self.createCompt(cmpt)
             self.qGraCompt[cmpt]
             #comptRef = self.qGraCompt[cmpt]
@@ -253,7 +254,7 @@ class  KineticsWidget(EditorWidgetBase):
         #     so that when cplx (which is pool object) queries for its parent, it gets its \
         #     parent enz co-ordinates with respect to QGraphicsscene """
         
-        for cmpt,memb in self.meshEntry.items():
+        for cmpt,memb in list(self.meshEntry.items()):
             for enzObj in find_index(memb,'enzyme'):
                 enzinfo = enzObj.path+'/info'
                 if enzObj.className == 'Enz':
@@ -263,7 +264,7 @@ class  KineticsWidget(EditorWidgetBase):
                 self.setupDisplay(enzinfo,enzItem,"enzyme")
                 self.setupSlot(enzObj,enzItem)
         
-        for cmpt,memb in self.meshEntry.items():
+        for cmpt,memb in list(self.meshEntry.items()):
             for poolObj in find_index(memb,'pool'):
                 poolinfo = poolObj.path+'/info'
                 poolItem = PoolItem(poolObj,self.qGraCompt[cmpt])
@@ -289,7 +290,7 @@ class  KineticsWidget(EditorWidgetBase):
                 self.setupSlot(tabObj,tabItem)
         
         # compartment's rectangle size is calculated depending on children 
-        for k, v in self.qGraCompt.items():
+        for k, v in list(self.qGraCompt.items()):
             rectcompt = v.childrenBoundingRect()
             v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
             v.setPen(QtGui.QPen(Qt.QColor(66,66,66,100), 5, Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin))
@@ -348,20 +349,20 @@ class  KineticsWidget(EditorWidgetBase):
         #slot for updating the display item.
         #In this case if the name is updated from the keyboard both in mooseobj and gui gets updation
         changedItem = ''
-        for item in self.sceneContainer.items():
+        for item in list(self.sceneContainer.items()):
             if isinstance(item,PoolItem):
                 if mooseObject.getId() == element(item.mobj).getId():
                     item.updateSlot()
                     #once the text is edited in editor, laydisplay gets updated in turn resize the length, positionChanged signal shd be emitted
                     self.positionChange(mooseObject)
     def resetColor(self):
-        for item in self.sceneContainer.items():
+        for item in list(self.sceneContainer.items()):
             if isinstance(item,PoolItem):
                 pinfo = moose.element(item.mobj).path+'/info'
                 color,bg = getColor(pinfo,self.colorMap)
                 item.updateColor(bg)
     def changeBgSize(self):
-        for item in self.sceneContainer.items():
+        for item in list(self.sceneContainer.items()):
             if isinstance(item,PoolItem):
                 initialConc = moose.element(item.mobj).concInit
                 presentConc = moose.element(item.mobj).conc
@@ -374,7 +375,7 @@ class  KineticsWidget(EditorWidgetBase):
         
     def colorChange(self):
         '''While simulation is running pool color are increased or decreased as per concentration level '''
-        for item in self.sceneContainer.items():
+        for item in list(self.sceneContainer.items()):
             if isinstance(item,PoolItem):
                 bg = item.returnColor()
                 initialConc = moose.element(item.mobj[0]).concInit
@@ -398,7 +399,7 @@ class  KineticsWidget(EditorWidgetBase):
     def positionChange(self,mooseObject):
         #If the item position changes, the corresponding arrow's are calculated
         if isinstance(element(mooseObject),CubeMesh):
-            for k, v in self.qGraCompt.items():
+            for k, v in list(self.qGraCompt.items()):
                 #mesh = mooseObject.path+'/mesh[0]'
                 #print " mesh ",mesh,k.path
                 #if k.path == mesh:
@@ -407,7 +408,7 @@ class  KineticsWidget(EditorWidgetBase):
         else:
             mobj = self.mooseId_GObj[mooseObject.getId()]
             self.updateArrow(mobj)
-            for k, v in self.qGraCompt.items():
+            for k, v in list(self.qGraCompt.items()):
                 rectcompt = v.childrenBoundingRect()
                 v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
 
@@ -416,7 +417,7 @@ class  KineticsWidget(EditorWidgetBase):
         self.editObject.emit(mooseObject.path)
 
     def drawLine_arrow(self, itemignoreZooming=False):
-        for inn,out in self.srcdesConnection.items():
+        for inn,out in list(self.srcdesConnection.items()):
             # self.srcdesConnection is dictionary which contains key,value \
             #    key is Enzyme or Reaction  and value [[list of substrate],[list of product]] (tuple)
             #    key is FuncBase and value is [list of pool] (list)
@@ -424,21 +425,21 @@ class  KineticsWidget(EditorWidgetBase):
             #src = self.mooseId_GObj[inn]
             if isinstance(out,tuple):
                 if len(out[0])== 0:
-                    print inn.className + ':' +inn.name+ " doesn't output message"
+                    print(inn.className + ':' +inn.name+ " doesn't output message")
                 else:
                     src = self.mooseId_GObj[inn.getId()]
                     for items in (items for items in out[0] ):
                         des = self.mooseId_GObj[element(items[0]).getId()]
                         self.lineCord(src,des,items,itemignoreZooming)
                 if len(out[1]) == 0:
-                    print inn.className + ':' +inn.name+ " doesn't output message"
+                    print(inn.className + ':' +inn.name+ " doesn't output message")
                 else:
                     for items in (items for items in out[1] ):
                         des = self.mooseId_GObj[element(items[0]).getId()]
                         self.lineCord(src,des,items,itemignoreZooming)
             elif isinstance(out,list):
                 if len(out) == 0:
-                    print "Func pool doesn't have sumtotal"
+                    print("Func pool doesn't have sumtotal")
                 else:
                     src = self.mooseId_GObj[element(inn).getId()]
                     for items in (items for items in out ):
@@ -449,7 +450,7 @@ class  KineticsWidget(EditorWidgetBase):
         endtype = type_no[1]
         line = 0
         if (src == "") and (des == ""):
-            print "Source or destination is missing or incorrect"
+            print("Source or destination is missing or incorrect")
             return 
         srcdes_list = [src,des,endtype,line]
         arrow = calcArrow(srcdes_list,itemignoreZooming,self.iconScale)
@@ -462,14 +463,14 @@ class  KineticsWidget(EditorWidgetBase):
             line = line +1
 
         if type_no[2] > 5:
-            print "Higher order reaction will not be displayed"
+            print("Higher order reaction will not be displayed")
 
     def drawLine(self,srcdes_list,arrow):
         src = srcdes_list[0]
         des = srcdes_list[1]
         endtype = srcdes_list[2]
         line = srcdes_list[3]
-        source = element(next((k for k,v in self.mooseId_GObj.items() if v == src), None))
+        source = element(next((k for k,v in list(self.mooseId_GObj.items()) if v == src), None))
         for l,v,o in self.object2line[src]:
             if v == des and o ==line:
                 l.setPolygon(arrow)
@@ -489,7 +490,7 @@ class  KineticsWidget(EditorWidgetBase):
             if ( (endtype == 's') or (endtype == 'p')):
                 pen.setColor(QtCore.Qt.red)
             elif(endtype != 'cplx'):
-                p1 = (next((k for k,v in self.mooseId_GObj.items() if v == src), None))
+                p1 = (next((k for k,v in list(self.mooseId_GObj.items()) if v == src), None))
                 pinfo = p1.path+'/info'
                 color,bgcolor = getColor(pinfo,self.colorMap)
                 pen.setColor(color)
@@ -562,14 +563,14 @@ class  KineticsWidget(EditorWidgetBase):
             self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
                    
     def updateItemTransformationMode(self, on):
-        for v in self.sceneContainer.items():
+        for v in list(self.sceneContainer.items()):
             if( not isinstance(v,ComptItem)):
                 #if ( isinstance(v, PoolItem) or isinstance(v, ReacItem) or isinstance(v, EnzItem) or isinstance(v, CplxItem) ):
                 if isinstance(v,KineticsDisplayItem):
                     v.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations, on)
 
     def updateScale( self, scale ):
-        for item in self.sceneContainer.items():
+        for item in list(self.sceneContainer.items()):
             if isinstance(item,KineticsDisplayItem):
                 item.refresh(scale)
                 #iteminfo = item.mobj.path+'/info'
@@ -592,7 +593,7 @@ class  KineticsWidget(EditorWidgetBase):
                      item.bg.setRect(0, 0, item.gobj.boundingRect().width()+PoolItem.fontMetrics.width('  '), item.gobj.boundingRect().height())
 
         self.drawLine_arrow(itemignoreZooming=False)
-        for k, v in self.qGraCompt.items():
+        for k, v in list(self.qGraCompt.items()):
             rectcompt = v.childrenBoundingRect()
             comptPen = v.pen()
             comptWidth =  self.defaultComptsize*self.iconScale
@@ -613,7 +614,7 @@ if __name__ == "__main__":
     try:
         filepath = '../../Demos/Genesis_files/'+modelPath+'.g'
         filepath = '/home/harsha/genesis_files/gfile/'+modelPath+'.g'
-        print filepath
+        print(filepath)
         f = open(filepath, "r")
         loadModel(filepath,'/'+modelPath)
         
@@ -627,8 +628,8 @@ if __name__ == "__main__":
         dt.updateModelView()
         dt.show()
   
-    except  IOError, what:
+    except  IOError as what:
       (errno, strerror) = what
-      print "Error number",errno,"(%s)" %strerror
+      print("Error number",errno,"(%s)" %strerror)
       sys.exit(0)
     sys.exit(app.exec_())

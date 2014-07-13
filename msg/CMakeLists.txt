@@ -9,4 +9,3 @@ add_library(msg
     OneToOneDataIndexMsg.cpp 
     testMsg.cpp
     )
-target_link_libraries(msg randnum basecode)

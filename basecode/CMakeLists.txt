@@ -27,5 +27,3 @@ add_library(basecode
 	doubleEq.cpp 
 	testAsync.cpp	
     )
-
-target_link_libraries(basecode biophysics)

@@ -1,15 +1,14 @@
-cmake_minimum_required(VERSION 2.6)
-set(CMAKE_INSTALL_PREFIX /usr/local)
+cmake_minimum_required(VERSION 2.8)
 
 project(moose)
 
 # This snippet is from LLVM project.
-
 # Sanity check our source directory to make sure that we are not trying to
 # generate an in-tree build (unless on MSVC_IDE, where it is ok), and to make
 # sure that we don't have any stray generated files lying around in the tree
 # (which would end up getting picked up by header search, instead of the correct
 # versions).
+
 if( CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT MSVC_IDE )
     message(FATAL_ERROR 
         "In-source builds are not allowed.
@@ -23,21 +22,13 @@ endif()
 
 ################################# CMKAE MACROS #################################
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
+set(CMAKE_VERBOSE_MAKEFILE FALSE)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
-set(INSTALL_LIB_DIR lib CACHE PATH "/usr/local/lib")
-set(INSTALL_BIN_DIR bin CACHE PATH "/usr/local/bin")
-set(INSTALL_INCLUDE_DIR include CACHE PATH "/usr/local/include/")
+set(INSTALL_LIB_DIR lib CACHE PATH "${CMAKE_INSTALL_PREFIX}/lib")
+set(INSTALL_BIN_DIR bin CACHE PATH "${CMAKE_INSTALL_PREFIX}/bin")
+set(INSTALL_INCLUDE_DIR include CACHE PATH "${CMAKE_INSTALL_PREFIX}/include/")
 
 ########################### COMPILER MACROS #####################################
-set(LOCAL_GSL 0)
-if(LOCAL_GSL)
-    add_subdirectory(gsl)
-    include_directories(gsl)
-else()
-    find_package(GSL REQUIRED)
-endif()
-
 # Compiler 
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
@@ -102,6 +93,30 @@ if(DEBUG)
 else()
     set(CMAKE_BUILD_TYPE distribution)
     set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -O3)
+    add_definitions(-UDO_UNIT_TESTS)
+endif()
+
+# Wheather to use local-gsl or not. link_directories are need to be called
+# before target is created therefore it is here.
+set(LOCAL_GSL 1)
+if(LOCAL_GSL)
+
+    # Setup GSL as external library.
+    set(GSL_SOURCE_DIR ${CMAKE_SOURCE_DIR}/external/gsl-1.16)
+    set(GSL_INSTALL_DIR ${CMAKE_SOURCE_DIR}/gsl)
+
+    include(ExternalProject)
+    ExternalProject_Add(LOCAL_GSL
+        SOURCE_DIR ${GSL_SOURCE_DIR}
+        CONFIGURE_COMMAND ${GSL_SOURCE_DIR}/configure --prefix=${GSL_INSTALL_DIR}
+        BUILD_COMMAND ${MAKE}
+        )
+
+    include_directories(${GSL_INSTALL_DIR}/include)
+    set(LOCAL_GSL_LIBRARIES 
+        ${GSL_INSTALL_DIR}/lib/libgsl.so
+        ${GSL_INSTALL_DIR}/lib/libgslcblas.so
+        )
 endif()
 
 ################################### SETUP BUILD ################################
@@ -109,12 +124,16 @@ include_directories(msg basecode)
 add_executable(moose.bin basecode/main.cpp)
 
 ## GSL
-add_definitions(-DUSE_GSL)
+# Setup GSL
 if(LOCAL_GSL)
-    include_directories(gsl)
+    set(GSL_FOUND 1)
+    add_definitions(-DUSE_GSL)
 else()
-    include_directories(${GSL_INCLUDE_DIR})
-    target_link_libraries(moose.bin ${GSL_LIBRARIES})
+    find_package(GSL)
+    if(GSL_FOUND)
+        include_directories(${GSL_INCLUDE_DIR})
+        add_definitions(-DUSE_GSL)
+    endif()
 endif()
 
 
@@ -123,10 +142,8 @@ find_package(HDF5)
 if(HDF5_FOUND)
     add_definitions(-DUSE_HDF5)
     include_directories(${HDF5_INCLUDE_DIR})
-    target_link_libraries(moose.bin ${HDF5_LIBRARY})
 endif(HDF5_FOUND)
 
-find_package(BZip2)
 find_package(LIBSBML)
 if(LIBSBML_FOUND)
     # If LIBSBML_FOUND then we'll probably also need the LibXML2.
@@ -142,13 +159,15 @@ endif(LIBSBML_FOUND)
 
 find_package(Termcap)
 find_package(Readline)
+
 if(READLINE_FOUND AND TERMCAP_FOUND)
     add_definitions(-DUSE_READLINE)
     include_directories(${Readline_INCLUDE_DIR})
-    target_link_libraries(moose.bin ${Readline_LIBRARY})
-    target_link_libraries(moose.bin ${TERMCAP_LIBRARY})
 endif()
 
+# Openmpi
+find_package(MPI REQUIRED)
+set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
 
 # Add subdirectroeis
 add_subdirectory(basecode)
@@ -172,8 +191,30 @@ add_subdirectory(device)
 add_subdirectory(benchmarks)
 add_subdirectory(kinetics)
 
+set(LIBRARIES ${LibBZip2_LIBRARIES})
+if(HDF5_FOUND)
+    list(APPEND LIBRARIES ${HDF5_LIBRARY})
+endif()
+
+if(LIBSBML_FOUND)
+    list(APPEND LIBRARIES moose_sbml ${LIBSBML_LIBRARY})
+endif()
+
+if(LIBXML2_FOUND)
+    list(APPEND LIBRARIES ${LibXML2_LIBRARIES})
+endif()
+
+if(GSL_FOUND)
+    # Link gsl 
+    list(APPEND LIBRARIES ${GSL_LIBRARIES})
+endif()
+
+if(READLINE_FOUND AND TERMCAP_FOUND)
+    list(APPEND LIBRARIES ${Readline_LIBRARY} ${TERMCAP_LIBRARY})
+endif()
+
 ###################################### LINKING #################################
-target_link_libraries(moose.bin 
+target_link_libraries(moose.bin
     "-Wl,--whole-archive"
     moose_builtins
     basecode
@@ -186,7 +227,6 @@ target_link_libraries(moose.bin
     muparser
     biophysics 
     kinetics 
-    ksolve
     hsolve 
     mesh
     signeur
@@ -194,29 +234,17 @@ target_link_libraries(moose.bin
     diffusion 
     device
     benchmarks
+    ksolve
     "-Wl,--no-whole-archive"
+    ${LOCAL_GSL_LIBRARIES}
+    ${LIBRARIES}
     )
-
-if(LIBSBML_FOUND)
-    target_link_libraries(moose.bin moose_sbml ${LIBSBML_LIBRARY} z)
-    if(BZIP2_FOUND)
-        target_link_libraries(moose.bin ${BZIP2_LIBRARIES})
-    else()
-        target_link_libraries(moose.bin bz2)
-    endif()
-    if(LIBXML2_FOUND)
-        target_link_libraries(moose.bin ${LibXML2_LIBRARIES})
-    endif()
-endif()
-
-# Link gsl 
-set(LOCAL_GSL_LIBRARIES  gsl gslcblas m)
-target_link_libraries(moose.bin ${LOCAL_GSL_LIBRARIES})
 
 ######################### BUILD PYMOOSE ########################################
 set(BUILD_PYMOOSE 1)
 if(BUILD_PYMOOSE)
     find_package(NumpyHeaders)
+
     if(PYTHON_NUMPY_FOUND)
         add_definitions(-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
         include_directories(${PYTHON_NUMPY_INCLUDE_DIR})
@@ -225,9 +253,6 @@ if(BUILD_PYMOOSE)
         message(WARNING "Could not find numpy/arrayobject.h in usual places")
         add_definitions(-UUSE_NUMPY)
     endif()
-    # Openmpi
-    find_package(MPI REQUIRED)
-    set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
 
     find_package(PythonDev REQUIRED)
     include_directories(${PYTHON_INCLUDE_DIRS})
@@ -238,21 +263,7 @@ if(BUILD_PYMOOSE)
         LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/python/moose"
         PREFIX ""
         )
-
-    set(LIBRARIES ${PYTHON_LIBRARY} ${LibBZip2_LIBRARIES} 
-        ${LOCAL_GSL_LIBRARIES}
-        )
-    if(HDF5_FOUND)
-        list(APPEND LIBRARIES ${HDF5_LIBRARY})
-    endif()
-
-    if(LIBSBML_FOUND)
-        list(APPEND LIBRARIES moose_sbml ${LIBSBML_LIBRARY})
-    endif()
-
-    if(LIBXML2_FOUND)
-        list(APPEND LIBSBML_FOUND ${LibXML2_LIBRARIES})
-    endif()
+    list(APPEND LIBRARIES ${PYTHON_LIBRARIES})
 
     target_link_libraries(_moose 
         "-Wl,--whole-archive"
@@ -276,19 +287,24 @@ if(BUILD_PYMOOSE)
         diffusion 
         device
         benchmarks
-        pthread
-        ${LIBRARIES}
         "-Wl,--no-whole-archive"
+        ${LOCAL_GSL_LIBRARIES}
+        ${LIBRARIES}
         )
 endif(BUILD_PYMOOSE)
 
 ######################### INSTALL ##############################################
-install(TARGETS moose.bin
+set(CMAKE_INSTALL_PREFIX /usr/local)
+install(TARGETS moose.bin 
     RUNTIME DESTINATION bin
     )
-install(PROGRAMS ${CMAKE_SOURCE_DIR}/scripts/moose 
-    DESTINATION bin
+install(PROGRAMS scripts/moose DESTINATION bin)
+install(DIRECTORY gsl/lib/ DESTINATION lib
+    USE_SOURCE_PERMISSIONS
+    FILES_MATCHING PATTERN "*.so*"
+    PATTERN ".svn" EXCLUDE
     )
+install(SCRIPT python/InstallPyMoose.cmake)
 
 ######################  TESTING  ###############################################
 include(CTest)
@@ -296,21 +312,8 @@ find_package(PythonInterp REQUIRED)
 set(ENV{PYTHONPATH} "${CMAKE_SOURCE_DIR}/python")
 message("++ PYTHONPATH is set to $ENV{PYTHONPATH}")
 
-add_custom_target(check_moose
-    COMMAND ${CMAKE_BINARY_DIR}/run_moose.sh --output-on-failure
-    COMMENT "Checking: moose with test-enabled" VERBATIM 
+add_test(NAME check_moose
+    WORKING_DIRECTORY .
+    COMMAND ./run_moose.sh
     )
-
-add_custom_target(check_python
-    #COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_SOURCE_DIR}/python/moose/test.py"
-    #COMMENT "Checking: loading moose into python" VERBATIM
-    COMMAND ${PYTHON_EXECUTABLE} test_pymoose.py 
-    COMMENT "Checking: running test_pymoose in python" VERBATIM
-    COMMAND ${PYTHON_EXECUTABLE} Rallpacks/rallpacks_passive_cable.py
-    COMMENT "Checking: running rallpack2"
-    #COMMAND ${PYTHON_EXECUTABLE} Rallpacks/rallpacks_passive_cable.py
-    #COMMENT "Checking: running rallpack2"
-    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/tests/python"
-    )
-
 
