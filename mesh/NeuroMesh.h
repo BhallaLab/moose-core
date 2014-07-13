@@ -184,7 +184,7 @@ class NeuroMesh: public MeshCompt
 			const Eref& e, 
 			unsigned int numNodes, unsigned int numThreads );
 
-		void transmitChange( const Eref& e, double oldVol );
+		// void transmitChange( const Eref& e, double oldVol );
 
 		/**
 		 * Helper function for buildStencil, calculates diffusion term

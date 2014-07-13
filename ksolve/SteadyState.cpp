@@ -228,11 +228,6 @@ const Cinfo* SteadyState::initCinfo()
 		///////////////////////////////////////////////////////
 		// Shared definitions
 		///////////////////////////////////////////////////////
-		/*
-		new SharedFinfo( "gsl", gslShared, 
-				sizeof( gslShared )/ sizeof( Finfo* ),
-					"Messages that connect to the GslIntegrator object" ),
-					*/
 
 	static Finfo * steadyStateFinfos[] = {
 			&stoich,				// Value
