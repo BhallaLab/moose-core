@@ -4,4 +4,3 @@ add_library(signeur
     Adaptor.cpp
     testSigNeur.cpp
     )
-target_link_libraries(signeur mesh biophysics)

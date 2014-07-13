@@ -23,4 +23,3 @@ add_library(kinetics
 	lookupVolumeFromMesh.cpp	
 	testKinetics.cpp	
         )
-target_link_libraries(kinetics basecode)
