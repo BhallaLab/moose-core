@@ -9,6 +9,6 @@ if [ $# -gt 0 ]; then
 fi
 rm -rf ../CMakeFiles/ 
 rm -f ../CMakeCache.txt
-cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE ..
-make VERBOSE=1
-make check_python
+rm -f CMakeCache.txt
+cmake ..
+make  VERBOSE=0

@@ -6,4 +6,3 @@ add_library(diffusion
 	Dsolve.cpp
         testDiffusion.cpp
     )
-target_link_libraries(diffusion ksolve basecode)

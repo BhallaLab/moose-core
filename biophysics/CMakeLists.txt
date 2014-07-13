@@ -14,6 +14,7 @@ add_library(biophysics
 	HHGate.cpp	
 	HHGate2D.cpp	
 	HHChannel2D.cpp	
+        CaConcBase.cpp
 	CaConc.cpp	
 	MgBlock.cpp	
 	Neuron.cpp	
@@ -38,5 +39,3 @@ add_library(biophysics
 	# GHK.cpp		
 	# NMDAChan.cpp	
     )
-
-target_link_libraries(biophysics)
