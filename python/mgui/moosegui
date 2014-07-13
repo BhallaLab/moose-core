@@ -1,31 +1,5 @@
-# mgui.py --- 
-# 
-# Filename: mgui.py
-# Description: 
-# Author: 
-# Maintainer: 
-# Created: Mon Nov 12 09:38:09 2012 (+0530)
-# Version: 
-# Last-Updated: Thu Jul 18 10:54:33 2013 (+0530)
-#           By: subha
-#     Update #: 1338
-# URL: 
-# Keywords: 
-# Compatibility: 
-# 
-# 
+#!/usr/bin/env python
 
-# Commentary: 
-# 
-# The gui driver
-# 
-# 
-
-# Change log:
-# 
-# 
-# 
-# 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
 # published by the Free Software Foundation; either version 3, or
@@ -40,16 +14,12 @@
 # along with this program; see the file COPYING.  If not, write to
 # the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 # Floor, Boston, MA 02110-1301, USA.
-# 
-# 
 
-# Code:
 import imp
 import inspect
 import code
 import traceback
 import sys
-sys.path.append('../python')
 import os
 from collections import defaultdict
 import posixpath # We use this to create MOOSE paths
@@ -66,7 +36,7 @@ from objectedit import ObjectEditDockWidget
 from newmodeldialog import DialogWidget
 import re
 from biomodelsclient import BioModelsClientWidget
-__author__ = 'Subhasis Ray'
+__author__ = [ 'Subhasis Ray', 'Dilawar Singh']
 
 # This maps model subtypes to corresponding plugin names. Should be
 # moved to a separate property file perhaps
@@ -749,18 +719,21 @@ class MWindow(QtGui.QMainWindow):
 
 
 def main():
+    # This is needed to updated current path of compiled config.pyc 
+    config.MOOSE_CFG_DIR = os.path.dirname(__file__)
+
     # create the GUI application
     app = QtGui.QApplication(sys.argv)
     QtGui.qApp = app
     icon = QtGui.QIcon(os.path.join(config.KEY_ICON_DIR,'moose_icon.png'))
     app.setWindowIcon(icon)
     # instantiate the main window
+    #moose.loadModel('../Demos/Genesis_files/Kholodenko.g','/kho')
     mWindow =  MWindow()
     mWindow.setWindowState(QtCore.Qt.WindowMaximized)
     sys.excepthook = mWindow.handleException
     # show it
     mWindow.show()
-
     # start the Qt main loop execution, exiting from this script
     #http://code.google.com/p/subplot/source/browse/branches/mzViewer/PyMZViewer/mpl_custom_widget.py
     #http://eli.thegreenplace.net/files/prog_code/qt_mpl_bars.py.txt
@@ -771,8 +744,5 @@ def main():
     sys.exit(app.exec_())
     
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
-
-# 
-# mgui.py ends here

@@ -1,5 +1,5 @@
 from PyQt4 import QtGui, QtCore, Qt
-import config
+import mgui.config
 from moose import *
 
 class KineticsDisplayItem(QtGui.QGraphicsWidget):

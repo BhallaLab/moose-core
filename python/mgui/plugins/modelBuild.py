@@ -1,5 +1,5 @@
 import moose
-from kkitQGraphics import * 
+from mgui.plugins.kkitQGraphics import * 
 #PoolItem, ReacItem,EnzItem,CplxItem,ComptItem
 from PyQt4 import QtCore,QtGui
 
