@@ -305,6 +305,10 @@ install(DIRECTORY gsl/lib/ DESTINATION lib
     PATTERN ".svn" EXCLUDE
     )
 install(SCRIPT python/InstallPyMoose.cmake)
+install(PROGRAMS scripts/moosegui 
+    DESTINATION bin
+    )
+
 
 ######################  TESTING  ###############################################
 include(CTest)
