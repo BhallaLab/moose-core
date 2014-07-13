@@ -750,6 +750,7 @@ class MWindow(QtGui.QMainWindow):
 
 def main():
     # create the GUI application
+    print(config.settings)
     app = QtGui.QApplication(sys.argv)
     QtGui.qApp = app
     icon = QtGui.QIcon(os.path.join(config.KEY_ICON_DIR,'moose_icon.png'))

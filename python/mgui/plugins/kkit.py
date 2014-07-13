@@ -181,12 +181,8 @@ class  KineticsWidget(EditorWidgetBase):
             self.autocoordinates = False
             
             # pickled the color map file """
-            colormapFile = os.path.join(
-                    config.settings[config.KEY_COLORMAP_DIR]
-                    , 'rainbow2.pkl'
-                    )
+            colormapFile = os.path.join(config.MOOSE_COLORMAP_DIR, 'rainbow2.pkl')
             colormap_file = open(colormapFile, 'rb')
-
             self.colorMap = pickle.load(colormap_file)
             colormap_file.close()
             
