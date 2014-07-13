@@ -1,6 +1,6 @@
 from PyQt4 import QtGui,QtCore,Qt
 import math
-from kkitQGraphics import PoolItem, ReacItem,EnzItem,CplxItem,ComptItem
+from mgui.plugins.kkitQGraphics import PoolItem, ReacItem,EnzItem,CplxItem,ComptItem
 
 ''' One to need to pass the source, destination,endtype and order for drawing the arrow between 2 object \
     endtype is to check if needs arrow head (arrowhead for product and sumtotal) \
