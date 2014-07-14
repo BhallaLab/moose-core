@@ -54,6 +54,10 @@ writeGraphviz  = graph_utils.writeGraphviz
 # Some verification tests
 verify = verification_utils.verify
 
+# Simulation libarary
+import sim_utils 
+run = sim_utils.run
+
 
 def readtable(table, filename, separator=None):
     """Reads the file specified by filename to fill the MOOSE table object.
