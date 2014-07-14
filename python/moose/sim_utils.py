@@ -18,6 +18,7 @@ __status__           = "Development"
 
 import _moose
 import print_utils
+import verification_utils 
 
 def recordTarget(tablePath, target, field = 'vm', **kwargs):
     """Setup a table to record at given path.
@@ -69,3 +70,7 @@ def recordTarget(tablePath, target, field = 'vm', **kwargs):
     return table
 
  
+def run(simTime, verify=False):
+    if verify:
+        verification_utils.verify()
+    _moose.start(simTime)
