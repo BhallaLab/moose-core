@@ -263,21 +263,21 @@ extern "C" {
     }
         
     PyDoc_STRVAR(moose_ObjId_init_documentation,
-                 "__init__(path, dims, dtype) or"
-                 " __init__(id, dataIndex, fieldIndex)\n"
-                 "Initialize moose object\n"
+                 "__init__(path, dims, dtype) or\n"
+                 "__init__(id, dataIndex, fieldIndex)\n"
+                 "    Initialize moose object\n"
                  "Parameters\n"
                  "----------\n"
                  "path : string\n"
-                 "   Target element path.\n"
+                 "    Target element path.\n"
                  "dims : tuple or int\n"
-                 "   dimensions along each axis (can be an integer for 1D objects). Default: (1,)\n"
+                 "    dimensions along each axis (can be an integer for 1D objects). Default: (1,)\n"
                  "\n"
                  "dtype : string\n"
-                 "   the MOOSE class name to be created.\n"
+                 "    the MOOSE class name to be created.\n"
                  "\n"
                  "id : vec or integer\n"
-                 "   id of an existing element.\n"
+                 "    id of an existing element.\n"
                  "\n");
         
     int moose_ObjId_init(PyObject * self, PyObject * args,
@@ -341,7 +341,7 @@ extern "C" {
     PyDoc_STRVAR(moose_ObjId_getId_documentation,
                  "getId()\n"
                  "\n"
-                 "   Get the vec of this object\n"
+                 "    Get the vec of this object\n"
                  "\n");
     PyObject* moose_ObjId_getId(_ObjId * self)
     {
@@ -362,7 +362,7 @@ extern "C" {
                  "Parameters\n"
                  "----------\n"
                  "fieldName : string\n"
-                 "   Name of the field to be queried.\n"
+                 "    Name of the field to be queried.\n"
                  "\n");
     
     PyObject * moose_ObjId_getFieldType(_ObjId * self, PyObject * args)
@@ -398,7 +398,7 @@ extern "C" {
                  "Parameters\n"
                  "----------\n"
                  "fieldName : string\n"
-                 "   Name of the field.");
+                 "    Name of the field.");
     PyObject * moose_ObjId_getField(_ObjId * self, PyObject * args)
     {
         if (!Id::isValid(self->oid_.id)){
@@ -622,14 +622,17 @@ extern "C" {
             case 'H': {
                 unsigned short value = Field<unsigned short>::get(self->oid_, fieldName);
                 _ret = to_py(&value, ftype);
+                break;
             }
             case 'w': {
                 vector < short > value = Field<vector <short> >::get(self->oid_, fieldName);
                 _ret = to_py(&value, ftype);
+                break;
             }
             case 'C': {
                 vector < char > value = Field<vector <char> >::get(self->oid_, fieldName);
                 _ret = to_py(&value, ftype);
+                break;
             }
 
             case 'b': {
@@ -641,6 +644,7 @@ extern "C" {
                     _ret = Py_False;
                     Py_INCREF(Py_False);
                 }
+                break;
             }
 
             default:
@@ -664,10 +668,10 @@ extern "C" {
                  "Parameters\n"
                  "----------\n"
                  "fieldName : string\n"
-                 "   Field to be assigned value to.\n"
+                 "    Field to be assigned value to.\n"
                  "\n"
                  "value : python datatype compatible with the type of the field\n"
-                 "   The value to be assigned to the field.");
+                 "    The value to be assigned to the field.");
     
     PyObject * moose_ObjId_setField(_ObjId * self, PyObject * args)
     {
@@ -1178,11 +1182,11 @@ extern "C" {
                  "Parameters\n"
                  "----------\n"
                  "fieldName : string\n"
-                 "   Name of the lookupfield.\n"
+                 "    Name of the lookupfield.\n"
                  "\n"
                  "key : appropriate type for key of the lookupfield (as in the dict "
-                 " getFieldDict).\n"
-                 "   Key for the look-up.");
+                 "    getFieldDict).\n"
+                 "    Key for the look-up.");
 
     PyObject * moose_ObjId_getLookupField(_ObjId * self, PyObject * args)
     {
@@ -1291,13 +1295,13 @@ extern "C" {
                  "Parameters\n"
                  "----------\n"
                  "field : string\n"
-                 "   name of the field to be set\n"
+                 "    name of the field to be set\n"
                  "\n"
                  "key : key type\n"
-                 "   key in the lookup field for which the value is to be set.\n"
+                 "    key in the lookup field for which the value is to be set.\n"
                  "\n"
                  "value : value type\n"
-                 "   value to be set for `key` in the lookkup field.\n");
+                 "    value to be set for `key` in the lookkup field.\n");
     
     PyObject * moose_ObjId_setLookupField(_ObjId * self, PyObject * args)
     {
@@ -1636,13 +1640,13 @@ PyObject* setDestFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type1
                  "Parameters\n"
                  "----------\n"
                  "fieldType : str\n"
-                 "   Field type to retrieve. Can be `valueFinfo`, `srcFinfo`,\n"
+                 "    Field type to retrieve. Can be `valueFinfo`, `srcFinfo`,\n"
                  "   `destFinfo`, `lookupFinfo`, etc. If an empty string is specified,\n"
-                 "   names of all avaialable fields are returned.\n"
+                 "    names of all avaialable fields are returned.\n"
                  "\n"
                  "Returns\n"
                  "-------\n"
-                 "   out : tuple of strings.\n"
+                 "    out : tuple of strings.\n"
                  "\n"
                  "Example\n"
                  "-------\n"
@@ -1702,7 +1706,7 @@ PyObject* setDestFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type1
                  "Parameters\n"
                  "----------\n"
                  "fieldName : str\n"
-                 "   name of the connection field (a destFinfo or srcFinfo)\n"
+                 "    name of the connection field (a destFinfo or srcFinfo)\n"
                  "\n"
                  "Returns\n"
                  "-------\n"
@@ -1747,16 +1751,16 @@ PyObject* setDestFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type1
                  "Parameters\n"
                  "----------\n"
                  "srcfield : str\n"
-                 "   source field on self.\n"
+                 "    source field on self.\n"
                  "\n"
                  "destobj : element\n"
-                 "   Destination object to connect to.\n"
+                 "    Destination object to connect to.\n"
                  "\n"
                  "destfield : str\n"
-                 "   field to connect to on `destobj`.\n"
+                 "    field to connect to on `destobj`.\n"
                  "\n"
                  "msgtype : str\n"
-                 "   type of the message. Can be `Single`, `OneToAll`, `AllToOne`,\n"
+                 "    type of the message. Can be `Single`, `OneToAll`, `AllToOne`,\n"
                  "   `OneToOne`, `Reduce`, `Sparse`. Default: `Single`.\n"
                  "\n"
                  "Returns\n"
