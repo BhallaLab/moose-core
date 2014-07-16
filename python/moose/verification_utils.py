@@ -82,8 +82,25 @@ class MooseTestCase( unittest.TestCase ):
 
     def test_synapses(self):
         self.dump("Checking if any synapse is dead")
-        for synapse in self.mooseElems.synchans:
-            print synapse
+        for synchan in self.mooseElems.synchans:
+            if not synchan.neighbors['channel']:
+                debug.dump("FAIL"
+                        , [ "SynChan %s is not receiving any input " % synchan.path
+                            , " No incoming 'channel'. " 
+                             " Did you forget to connect compartment e.g." 
+                             "moose.connect(synchan, 'channel', comp, 'channel')"
+                             " where synchan is 'moose.SynChan' and comp is "
+                             " 'moose.Compartment'"
+                            ]
+                        )
+                sys.exit()
+            else:
+                for synapse in synchan.synapses:
+                    debug.dump("TODO"
+                            , "Write verification test for output of each synapse"
+                            , frame = inspect.curretframe()
+                            )
+
     
     def test_unused_tables(self):
         '''Tests if any table is not reading data. Such tables remain empty.
@@ -108,7 +125,7 @@ class MooseTestCase( unittest.TestCase ):
         if np.count_nonzero(clockDtList) < 1:
             debug.dump("FATAL"
                     , [ "No clock is found with non-zero dt size. "
-                        , "Use `moose.setClock` function and confinue."
+                        , "Did you forget to use `moose.setClock` function?"
                         , "Quitting..." 
                         ]
                     )
