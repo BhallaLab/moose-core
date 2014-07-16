@@ -324,4 +324,3 @@ add_test(NAME check_moose
     WORKING_DIRECTORY .
     COMMAND ./run_moose.sh
     )
-
