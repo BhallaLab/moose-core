@@ -15,7 +15,7 @@
 
 """backend.py: 
 
-Last modified: Tue Jun 17, 2014  01:59PM
+Last modified: Tue Jul 15, 2014  12:10PM
 
 """
     
@@ -44,9 +44,12 @@ class Backend(object):
         self.compartments = []
         self.pulseGens = []
         self.tables = []
+        self.synchans = []
         # A set of tuple of sourceCompartment.path and targetCompartment.path
         self.connections = set()
         self.clock = _moose.wildcardFind('/clock')[0]
+        self.clocks = []
+        self.filled = False
 
     def filterPaths(self, mooseObjs, ignorePat=None):
         """Filter paths """
@@ -76,11 +79,33 @@ class Backend(object):
         self.tables = _moose.wildcardFind('/##[TYPE=Table]')
         return self.tables
 
+    def getSynChans(self, **kwargs):
+        """Get all the SynChans """
+        self.synchans = _moose.wildcardFind('/##[TYPE=SynChan]')
+        return self.synchans
+
+    def getClocks(self, **kwargs):
+        """Get all clocks"""
+        self.clocks = _moose.wildcardFind("/##[TYPE=Clock]")
+        return self.clocks
+
     def populateStoreHouse(self, **kwargs):
         """ Populate all data-structures related with Compartments, Tables, and
         pulse generators.
         """
+        if self.filled:
+            print_utils.dump("INFO", "Moose elements are already acquired")
+            return 
         print_utils.dump("INFO", "Getting moose-datastructure for backend.")
         self.getComparments(**kwargs)
         self.getTables(**kwargs)
         self.getPulseGens(**kwargs)
+        self.getSynChans(**kwargs)
+        self.getClocks()
+        self.filled = True
+
+
+##
+# @brief This is a global object. Import it and call populateStoreHouse() only
+# if it has not be called before.
+moose_elems = Backend()
