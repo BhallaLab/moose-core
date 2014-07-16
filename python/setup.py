@@ -40,11 +40,9 @@ setup(
         author='Dilwar Singh',
         author_email='dilawars@ncns.res.in',
         url='http://moose.ncbs.res.in',
-        packages=['libmumbl', 'libmumbl.core', 'libmumbl.nml_parser'
-            , 'libmumbl.utility', 'libmumbl.helper'
+        packages=['libmumbl'
             , 'moose', 'moose.neuroml', 'moose.backend'
-            , 'mgui', 'mgui.plugins'
-            ],
+            , 'mgui', 'mgui.plugins'],
         package_dir = { 'moose' : 'moose'
             , 'libmumbl' : 'libmumbl'
             , 'mgui' : 'mgui' 

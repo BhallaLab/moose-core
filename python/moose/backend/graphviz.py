@@ -3,7 +3,7 @@
 """graph_utils.py: Graph related utilties. It does not require networkx library.
 It writes files to be used with graphviz.
 
-Last modified: Wed Jun 18, 2014  02:20PM
+Last modified: Tue Jul 15, 2014  12:21PM
 
 """
     
@@ -198,12 +198,13 @@ def writeGraphviz(filename=None, pat='/##[TYPE=Compartment]', ignore=None):
 
     global dotFile
 
-    b = backend.Backend()
-    b.populateStoreHouse()
-
     print_utils.dump("GRAPHVIZ"
             , "Preparing graphviz file for writing"
             )
+
+    if not backend.moose_elems.filled:
+        backend.moose_elems.populateStoreHouse()
+    b = backend.moose_elems
 
     ignorePat = re.compile(r'^abcd')
     if ignore:
