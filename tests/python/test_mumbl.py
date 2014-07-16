@@ -33,7 +33,6 @@ __status__           = "Development"
 import sys
 import moose
 import moose.neuroml as nml
-import moose.mumbl as mumbl
 import moose.utils as utils
 import moose.backend.graphviz as graphviz
 
@@ -47,9 +46,9 @@ def main():
     moose.useClock(0, '/##', 'process')
     moose.useClock(0, '/##', 'init')
     moose.reinit()
-    utils.run(0.1)
+    utils.run(0.1, verify=True)
     graphviz.writeGraphviz(__file__+".dot", ignore='/library')
-    #utils.plotTables([table1, table2])
+    utils.plotTables([table1, table2])
     
 if __name__ == '__main__':
     main()
