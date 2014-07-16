@@ -26,6 +26,8 @@ import unittest
 import inspect
 import print_utils as debug
 import numpy as np
+from backend import backend
+
 
 class MooseTestCase( unittest.TestCase ):
 
@@ -39,16 +41,16 @@ class MooseTestCase( unittest.TestCase ):
     def setUp(self):
         '''Initialize storehouse
         '''
-        self.compartments = _moose.wildcardFind('/##[TYPE=Compartment]')
-        self.tables = _moose.wildcardFind('/##[TYPE=Table]')
-        self.pulse_gens = _moose.wildcardFind('/##[TYPE=PulseGen]')
-        self.clocks = _moose.wildcardFind('/##[TYPE=Clock]')
+        if not backend.moose_elems.filled:
+            backend.moose_elems.populateStoreHouse()
+
+        self.mooseElems = backend.moose_elems
         self.nonZeroClockIds = None
 
     def test_disconnected_compartments(self):
         '''Test if any comparment is not connected '''
         self.dump("Checking if any compartment is not connected ...")
-        for c in self.compartments:
+        for c in self.mooseElems.compartments:
             if (c.neighbors['axial'] or c.neighbors['raxial']):
                 continue
             elif c.neighbors['injectMsg']:
@@ -66,7 +68,7 @@ class MooseTestCase( unittest.TestCase ):
         compartment
         '''
         self.dump('Checking if any pulse-generator is floating')
-        for pg in self.pulse_gens:
+        for pg in self.mooseElems.pulseGens:
             if pg.neighbors['output']:
                 continue
             else:
@@ -77,12 +79,17 @@ class MooseTestCase( unittest.TestCase ):
                             , 'Perhaps you forgot to use `moose.connect`?'
                             ]
                         )
+
+    def test_synapses(self):
+        self.dump("Checking if any synapse is dead")
+        for synapse in self.mooseElems.synchans:
+            print synapse
     
     def test_unused_tables(self):
         '''Tests if any table is not reading data. Such tables remain empty.
         '''
         self.dump('Checking if any table is not connected')
-        for table in self.tables:
+        for table in self.mooseElems.tables:
             if table.neighbors['requestOut']:
                 continue
             else:
@@ -96,7 +103,7 @@ class MooseTestCase( unittest.TestCase ):
     def test_clocks(self):
         """Tests if clocks are missing. """
         self.dump("Checking if clocks are available")
-        clock = self.clocks[0]
+        clock = self.mooseElems.clocks[0]
         clockDtList = clock.dts
         if np.count_nonzero(clockDtList) < 1:
             debug.dump("FATAL"
@@ -107,17 +114,17 @@ class MooseTestCase( unittest.TestCase ):
                     )
             sys.exit(0)
         else:
-            self.nonZeroClockIds = np.nonzero(self.clocks)
+            self.nonZeroClockIds = np.nonzero(self.mooseElems.clocks)
 
     def test_methods_sensitivity(self):
         """Test if each compartment has process connected to a non-zero clock"""
         self.dump("Checking for insensitive processes")
         [ self.checkSentitivity( m, objs) 
                 for m in ['process', 'init']  
-                for objs in [self.compartments] 
+                for objs in [self.mooseElems.compartments] 
                 ]
         [self.checkSentitivity('process', objs)
-                for objs in [self.tables, self.pulse_gens]
+                for objs in [self.mooseElems.tables, self.mooseElems.pulseGens]
                 ]
 
 
@@ -152,6 +159,7 @@ def verify( *args, **kwargs):
     connectivitySuite.addTest(MooseTestCase('test_disconnected_compartments'))
     connectivitySuite.addTest(MooseTestCase('test_isolated_pulse_gen'))
     connectivitySuite.addTest(MooseTestCase('test_unused_tables'))
+    connectivitySuite.addTest(MooseTestCase('test_synapses'))
 
     simulationSuite = unittest.TestSuite()
     simulationSuite.addTest(MooseTestCase('test_clocks'))
