@@ -87,7 +87,7 @@ def loadFile(filename, target, merge=True):
     pwe = moose.getCwe()
     if modeltype == 'genesis':
         if subtype == 'kkit' or subtype == 'prototype':
-            model = moose.loadModel(filename, target)
+            model = moose.loadModel(filename, target,'gsl')
         else:
             print 'Only kkit and prototype files can be loaded.'
     elif modeltype == 'cspace':
