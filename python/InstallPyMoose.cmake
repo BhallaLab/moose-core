@@ -5,4 +5,3 @@ execute_process(COMMAND python setup.py build_py install --prefix=${CMAKE_INSTAL
     WORKING_DIRECTORY ${PYTHON_DIR}
     )
 FILE(REMOVE_RECURSE ${PYTHON_DIR}/build)
-
