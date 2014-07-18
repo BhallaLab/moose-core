@@ -1,5 +1,6 @@
-moose (1.1-0ppa0) trusty; urgency=low
+moose (1.1) trusty; urgency=low
 
   * Initial upload!
 
- -- Dilawar Singh <dilawars@ncbs.res.in> (My public key.) Fri, 18 Jul 2014 16:32:17 +0530
+ -- Dilawar Singh (My public key.) <dilawars@ncbs.res.in> Fri, 18 Jul 2014 16:32:17 +0530
+
