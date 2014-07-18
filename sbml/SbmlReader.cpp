@@ -17,7 +17,7 @@
 * Change log:
 
 * Originally created by Siji for l2v4 for 'trunk ' branch
-* Modified / adapted to 'asyn' branch Harsharani for both l2v4 and l3v1
+* Modified / adapted to 'asyn13' branch Harsharani for both l2v4 and l3v1
 ***************/
 
 
@@ -105,9 +105,16 @@ Id SbmlReader::read( string filename, string location, string solverClass)
         string modelName;
         Id parentId;
         findModelParent ( Id(), location, parentId, modelName ) ;
+        Id parentId2 = parentId;
         Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
-        Id base_ = s->doCreate( "Neutral", parentId, modelName, 1, MooseGlobal );
-        //Id base_ = s->doCreate( "SimManager", parentId, modelName, dims, true );
+        /*  As a policy model is created under /model and all the graphs are created under /data, if this file is invoke from Gui the /model is already created and path is passed, but if readSbml is called then only modelName is taken so making sure /model is the model path                                                                    */
+        //Id modelPath_ = s->doCreate("Neutral",parentId,"model",1,MooseGlobal);
+        if (parentId == Id()) {
+            Id parentId1 = s->doCreate("Neutral",parentId,"model",1,MooseGlobal);
+            parentId = parentId1;
+        }
+        Id base_ = s->doCreate( "Neutral", parentId, modelName, 1, MooseGlobal);
+            //Id base_ = s->doCreate( "SimManager", parentId, modelName, dims, true );
         assert( base_ != Id() );
         //Map Compartment's SBML id to Moose ID
         map< string,Id > comptSidMIdMap;
@@ -148,26 +155,46 @@ Id SbmlReader::read( string filename, string location, string solverClass)
                                 //double nodeValue;
                                 if(nodeName == "plots") {
                                     // if plots exist then will be placing at "/data"
-                                    Id graphs = s->doCreate( "Neutral", parentId, "data", 1);
-                                    assert( graphs != Id() );
+                                    Id graphs;
+                                    //Id dataId;
+                                    Id dataIdTest;
+                                    if (parentId2 == Id())
+                                        graphs = s->doCreate( "Neutral", parentId2, "data", 1);
+                                    else
+                                        // need to check how to put / while coming from gui as the path is /model/modelName??? 27 jun 2014
+                                        findModelParent ( Id(), modelName, dataIdTest, modelName ) ;
+                                        string test = "/data";
+                                        Id tgraphs(test);
+                                        graphs=tgraphs;
+                                        //graphs = s->doCreate("Neutral",parentId,"data",1);
+                                        //Id dataId;
+                                        //if (dataId == Id())
+                                        //    cout << "Id " << dataId;
+                                        //    graphs = s->doCreate( "Neutral",dataId, "data", 1);
+                                        assert( graphs != Id() );
                                     plotValue = (grandChildNode.getChild(0).toXMLString()).c_str();
                                     istringstream pltVal(plotValue);
                                     string pltClean;
                                     while (getline(pltVal,pltClean, ';')) {
                                         pltClean.erase( remove( pltClean.begin(), pltClean.end(), ' ' ), pltClean.end() );
-                                        string plotPath = location+pltClean;
+                                        //string plotPath = location+pltClean;
+                                        string plotPath = base_.path()+pltClean;
                                         Id plotSId(plotPath);
                                         unsigned pos = pltClean.find('/');
                                         if (pos != std::string::npos)
                                             pltClean = pltClean.substr(pos+1,pltClean.length());
                                         replace(pltClean.begin(),pltClean.end(),'/','_');
                                         string plotName =  pltClean + ".conc";
-                                        Id pltPath("/data");
+                                        Id pltPath(graphs.path());
                                         Id tab = s->doCreate( "Table", pltPath, plotName, 1 );
                                         if (tab != Id())
                                             s->doAddMsg("Single",tab,"requestOut",plotSId,"getConc");
                                     }//while
-                                    string tablePath = "/data/##[TYPE=Table]";
+                                    /* passing /model and /data         */
+                                    string comptPath =base_.path()+"/##";
+                                    s->doUseClock(comptPath,"process",4);
+
+                                    string tablePath = graphs.path()+"/##[TYPE=Table]";
                                     s->doUseClock( tablePath, "process",8 );
                                 }//plots
                                 /*else
@@ -189,23 +216,19 @@ Id SbmlReader::read( string filename, string location, string solverClass)
                 }
             }//annotation Node
             else {
-                // cout << " simManager is pending "<<endl;
                 //4 for simdt and 8 for plotdt
+                s->doUseClock(base_.path()+"/##","process",4);
+                s->doUseClock(+"/data/##[TYPE=Table]","process",8);
                 s->doSetClock(4,0.1);
                 s->doSetClock(8,0.1);
 
             }
             vector< ObjId > compts;
-            //	  string comptpath = base_.path() + "/##[ISA=ChemCompt]";
-            string comptpath = "/##[ISA=ChemCompt]";
+            string comptpath = base_.path()+"/##[ISA=ChemCompt]";
             wildcardFind( comptpath, compts );
             vector< ObjId >::iterator i = compts.begin();
             string comptName = nameString(Field<string> :: get(ObjId(*i),"name"));
-
-            //cout << " first element "<< *i << "  " << comptName << " Path " << base_.path()+"/"+comptName+"/##[]";
-            //string simpath = base_.path() + "/"+comptName+"/##[]";
-            string simpath = base_.path() + "##";
-
+            string simpath = base_.path() + "/##";
             s->doUseClock( simpath, "process", 4 );
 
             //wildcardFind( plotpath, plots );
@@ -305,8 +328,6 @@ map< string,Id > SbmlReader::createCompartment(string location, Id parentId, str
 
 //        cerr << "Creating under " << base_.path() << " : " << name << endl;
         Id compt = s->doCreate( "CubeMesh", base_, name,  1);
-
-        //Id meshEntry =  Neutral::child( compt.eref(), "mesh" );
         comptSidMIdMap[id] = compt;
         if (size != 0.0)
             Field< double >::set( compt, "volume", size );
@@ -322,12 +343,11 @@ const SbmlReader::sbmlStr_mooseId SbmlReader::createMolecule( map< string,Id > &
     Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
     map< string, Id >molSidcmptMIdMap;
     double transvalue = 0.0;
-
     int num_species = model_->getNumSpecies();
 
     if (num_species == 0) {
         baseId = Id();
-        errorFlag_ = "TRUE";
+        errorFlag_ = true;
         return molSidcmptMIdMap;
     }
 
@@ -1032,6 +1052,7 @@ void SbmlReader ::findModelParent( Id cwe, const string& path, Id& parentId, str
     // at the time it comes to SbmlReader.cpp
     //When run directly (command line readSBML() )it ignores the path and creates under '/' and filename takes as "SBMLtoMoose"
     //modelName = "test";
+    cout << "here " << path;
     string fullPath = path;
     if ( path.length() == 0 )
         parentId = cwe;
