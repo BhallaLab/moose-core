@@ -262,7 +262,7 @@ class MWindow(QtGui.QMainWindow):
         # except KeyError:
         #     self.plugin = self.loadPluginClass(str(name))(str(root), self)
         #     self._plugins[str(name)] = self.plugin
-        self.plugin.getEditorView().getCentralWidget().editObject.connect(self.objectEditSlot, QtCore.Qt.UniqueConnection)
+        #self.plugin.getEditorView().getCentralWidget().editObject.connect(self.objectEditSlot, QtCore.Qt.UniqueConnection)
         self.updateMenus()
         for action in self.pluginsMenu.actions():
             if str(action.text()) == str(name):
@@ -369,7 +369,7 @@ class MWindow(QtGui.QMainWindow):
     def getMyToolBars(self):
         if not hasattr(self, 'viewToolBar'):
             self.viewToolBar = QtGui.QToolBar('View')
-            #removing plotView from the ToolBar
+            #Harsha:removing plotView from the ToolBar
             for t in self.getViewActions():
                 if t.text() != "&Plot view":
                     self.viewToolBar.addAction(t)   
@@ -392,7 +392,7 @@ class MWindow(QtGui.QMainWindow):
             self.loadModelAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+L", None, QtGui.QApplication.UnicodeUTF8))
             self.connect(self.loadModelAction, QtCore.SIGNAL('triggered()'), self.loadModelDialogSlot)
         self.fileMenu.addAction(self.loadModelAction)
-        # self.fileMenu.addAction(self.plugin.getSaveAction())
+        #self.fileMenu.addAction(self.plugin.getSaveAction())
         self.fileMenu.addAction(self.quitAction)
         return self.fileMenu
 
@@ -574,7 +574,6 @@ class MWindow(QtGui.QMainWindow):
         if filepath:
             head, fileName = os.path.split(filepath)
             modelName = os.path.splitext(fileName)[0]
-            print " filename " ,fileName, " modelName ", modelName, " filepath ",filepath
             pwe = moose.getCwe()
             ret = loadFile(str(filepath), '/model/%s' % (modelName), merge=False)
             self.objectEditSlot('/',False)
@@ -664,6 +663,7 @@ class MWindow(QtGui.QMainWindow):
         moose.reinit()
         view = self.plugin.getRunView()
         moose.start(simtime)
+
         if view.getCentralWidget().plotAll:
             view.getCentralWidget().plotAllData()
         self.setCurrentView('run')        
@@ -711,7 +711,6 @@ class MWindow(QtGui.QMainWindow):
         if dialog.exec_():
             fileNames = dialog.selectedFiles()
             for fileName in fileNames:
-                # print 'Current plugin', self.plugin
                 modelName = dialog.getTargetPath()
                 if '/' in modelName:
                     raise mexception.ElementNameError('Model name cannot contain `/`')
