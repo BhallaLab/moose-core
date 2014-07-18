@@ -23,7 +23,7 @@ tar -avcf $TARNAME \
     --exclude "*.o" \
     --exclude "*~" \
     --exclude "moose" \
-    ../
+    ../..
 (
     cd .. && debuild --check-dirname-level=0 -S -sa
 )
