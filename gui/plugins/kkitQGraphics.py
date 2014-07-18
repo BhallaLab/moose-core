@@ -32,7 +32,6 @@ class KineticsDisplayItem(QtGui.QGraphicsWidget):
             self.emit(QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),element(self.mobj))
         return QtGui.QGraphicsItem.itemChange(self,change,value)
 
-
 class PoolItem(KineticsDisplayItem):
     """Class for displaying pools. Uses a QGraphicsSimpleTextItem to
     display the name."""    
@@ -46,10 +45,6 @@ class PoolItem(KineticsDisplayItem):
         self.bg = QtGui.QGraphicsRectItem(self)
         self.gobj = QtGui.QGraphicsSimpleTextItem(self.mobj.name, self.bg)        
         self.gobj.setFont(PoolItem.font)
-        self.bgColor = QtGui.QGraphicsEllipseItem(self)
-        self.bgColor.setFlag(QtGui.QGraphicsItem.ItemStacksBehindParent,True)
-        self.bgColor.setRect(((self.gobj.boundingRect().width()
-                        +PoolItem.fontMetrics.width('  '))/2)-5,self.gobj.boundingRect().height()/2-5,10,10)
         if not PoolItem.fontMetrics:
             PoolItem.fontMetrics = QtGui.QFontMetrics(self.gobj.font())
         self.bg.setRect(0, 
@@ -65,15 +60,7 @@ class PoolItem(KineticsDisplayItem):
                         +PoolItem.fontMetrics.width('  '), 
                         self.gobj.boundingRect().height())
         
-        #self.gobj.setPen(QtGui.QPen(QtGui.QBrush(textcolor)))
-        #self.gobj.setBrush(QtGui.QBrush(textcolor))
-
-	if self.mobj.className != "StimulusTable":
-            ## Changing back ground ellipse color and not setting rectItem
-            self.bgColor.setBrush(QtGui.QBrush(QtGui.QColor(bgcolor.red(),bgcolor.green(),bgcolor.blue(),255)))
-            #Setting alpha value to be between 0-255
-            #self.bg.setBrush(QtGui.QBrush(QtGui.QColor(bgcolor.red(),bgcolor.green(),bgcolor.blue(),128)))
-            #self.bg.setBrush(QtGui.QBrush(bgcolor))
+        self.bg.setBrush(QtGui.QBrush(bgcolor))
             
     def refresh(self,scale):
         fontsize = PoolItem.defaultFontsize*scale
@@ -86,7 +73,8 @@ class PoolItem(KineticsDisplayItem):
         return QtCore.QRectF(0,0,self.gobj.boundingRect().width()+PoolItem.fontMetrics.width('  '),self.gobj.boundingRect().height())
 
     def updateSlot(self):
-        self.gobj.setText(self.mobj[0].name)
+        #This func will adjust the background color with respect to text size
+        self.gobj.setText(self.mobj.name)
         self.bg.setRect(0, 0, self.gobj.boundingRect().width()+PoolItem.fontMetrics.width('  '), self.gobj.boundingRect().height())
     
     def updateColor(self,bgcolor):
@@ -103,6 +91,27 @@ class PoolItem(KineticsDisplayItem):
 
     def returnColor(self):
         return (self.bg.brush().color())
+
+class PoolItemCircle(PoolItem):
+    def __init__(self,*args,**kwargs):
+        PoolItem.__init__(self, *args, **kwargs)
+        self.bgColor = QtGui.QGraphicsEllipseItem(self)
+        self.bgColor.setFlag(QtGui.QGraphicsItem.ItemStacksBehindParent,True)
+        self.bgColor.setRect(((self.gobj.boundingRect().width()+PoolItem.fontMetrics.width('  '))/2)-5,self.gobj.boundingRect().height()/2-5,10,10)
+        
+    def setDisplayProperties(self,x,y,textcolor,bgcolor):
+        self.setGeometry(x, y,self.gobj.boundingRect().width()
+                        +PoolItem.fontMetrics.width('  '), 
+                        self.gobj.boundingRect().height())
+        self.bgColor.setBrush(QtGui.QBrush(QtGui.QColor(bgcolor.red(),bgcolor.green(),bgcolor.blue(),255)))
+        
+    def updateRect(self,ratio):
+        width = self.gobj.boundingRect().width()+PoolItem.fontMetrics.width('  ')
+        height = self.gobj.boundingRect().height()
+        adjustw = width*ratio
+        adjusth = height*ratio
+        #for ellispe
+        self.bgColor.setRect(width/2-abs(adjustw/2),height/2-abs(adjusth/2),adjustw, adjusth)
 
 class TableItem(KineticsDisplayItem):
     defaultWidth = 30

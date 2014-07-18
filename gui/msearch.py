@@ -158,7 +158,7 @@ class SearchWidget(QtGui.QWidget):
                 search_str += '#'
             type_ = str(self.typeEdit.text()).strip()
             if len(type_) > 0:
-                search_str += '[TYPE=%s]' % (type_)
+                search_str += '[ISA=%s]' % (type_)
             field = str(self.fieldEdit.text()).strip()
             if len(field) > 0:
                 search_str += '[FIELD(%s)'
