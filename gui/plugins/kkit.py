@@ -362,7 +362,7 @@ class  KineticsWidget(EditorWidgetBase):
                 color,bg = getColor(pinfo,self.colorMap)
                 item.updateColor(bg)
     def changeBgSize(self):
-	 for item in list(self.sceneContainer.items()):
+	 item in list(self.sceneContainer.items()):
             if isinstance(item,PoolItem):
                 initialConc = moose.element(item.mobj).concInit
                 presentConc = moose.element(item.mobj).conc
