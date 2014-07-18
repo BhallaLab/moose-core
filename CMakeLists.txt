@@ -312,6 +312,22 @@ install(SCRIPT python/InstallPyMoose.cmake)
 install(PROGRAMS scripts/moosegui 
     DESTINATION bin
     )
+########################## PACKAGING #########################################
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Moose")
+set(CPACK_PACKAGE_VERSION_MAJOR "1")
+set(CPACK_PACKAGE_VERSION_MINOR "1")
+set(CPACK_PACKAGE_VENDOR "NCBS Bangalore")
+set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README")
+if(WIN32)
+    MESSAGE("++ Currently only Unix is supported")
+else()
+    set(CPACK_STRIP_FILES moose.bin)
+endif()
+set(CPACK_GENERATOR "DEB")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dilawar Singh")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libgsl (>= 1.16) ")
+include(CPack)
+
 
 
 ######################  TESTING  ###############################################
