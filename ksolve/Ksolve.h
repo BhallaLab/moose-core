@@ -11,6 +11,51 @@
 #define _KSOLVE_H
 
 class Stoich;
+
+/** 
+ * Utility class holding the information required for setting up  the
+ * data transfers needed on each timestep for the cross-solver reactions.
+ */
+class XferInfo {
+	public:
+		XferInfo( Id ks )
+				: ksolve( ks )
+		{;}
+
+		/**
+		 * Vector of the pool.n values participating in cross-compartment
+		 * reactions. Latest values that have just come in.
+		 */
+		vector< double > values;
+		/**
+		 * Vector of the pool.n values participating in cross-compartment
+		 * reactions. Retains the value from previous clock tick.
+		 */
+		vector< double > lastValues;
+
+		/**
+		 * Vector of the internal indices of pools involved in cross-
+		 * compartment reactions.
+		 */
+		vector< unsigned int > xferPoolIdx;
+
+		/**
+		 * Vector of voxels that particpate in junctions with the 
+		 * communicating ksolve. This is a subset of the
+		 * total number of voxels.
+		 */
+		vector< unsigned int > xferVoxel;
+
+		/**
+		 * Vector of Ksolves participating in cross-compartment reactions
+		 * with self.
+		 * The indices into this are used to look up the proxy pool info
+		 * of the VoxelPools, for xreacs into the specified Ksolve.
+		 */
+		Id ksolve;
+
+};
+
 class Ksolve: public ZombiePoolInterface
 {
 	public: 
@@ -58,9 +103,15 @@ class Ksolve: public ZombiePoolInterface
 		//////////////////////////////////////////////////////////////////
 		// Dest Finfos
 		//////////////////////////////////////////////////////////////////
-		void xComptIn( vector< double > );
+		void xComptIn( const Eref& e, vector< double > );
 		void process( const Eref& e, ProcPtr p );
 		void reinit( const Eref& e, ProcPtr p );
+		void initProc( const Eref& e, ProcPtr p );
+		void initReinit( const Eref& e, ProcPtr p );
+		//////////////////////////////////////////////////////////////////
+		// Utility for SrcFinfo
+		//////////////////////////////////////////////////////////////////
+		void xComptOut( const Eref& e );
 
 		//////////////////////////////////////////////////////////////////
 		// Solver interface functions
@@ -82,13 +133,31 @@ class Ksolve: public ZombiePoolInterface
 		/**
 		 * Assigns number of different pools (chemical species) present in
 		 * each voxel.
-		 * Inheritied.
+		 * Inherited.
 		 */
 		void setNumPools( unsigned int num );
 		unsigned int getNumPools() const;
 
 		void getBlock( vector< double >& values ) const;
 		void setBlock( const vector< double >& values );
+
+		void setupCrossSolverReacs( const map< Id, vector< Id > >& xr,
+				Id otherStoich );
+		//////////////////////////////////////////////////////////////////
+		// Functions for cross-compartment transfer
+		//////////////////////////////////////////////////////////////////
+		void setupXfer( Id myKsolve, Id otherKsolve, 
+						unsigned int numProxyMols,
+						const vector< VoxelJunction >& vj );
+
+		void assignXferIndex( unsigned int numProxyMols, 
+						unsigned int xferCompt,
+						const vector< vector< unsigned int > >& voxy );
+
+		void assignXferVoxels( unsigned int xferCompt );
+
+		unsigned int assignProxyPools( const map< Id, vector< Id > >& xr,
+					Id myKsolve, Id otherKsolve, Id otherComptId );
 
 		//////////////////////////////////////////////////////////////////
 		static SrcFinfo1< vector< double > >* xComptOut();
@@ -132,12 +201,8 @@ class Ksolve: public ZombiePoolInterface
 		/// Flag for when the entire solver is built.
 		bool isBuilt_;
 
-		/**
-		 * Vector of all the pool #s participating in cross-compartment
-		 * reactions. Retails the value from previous clock tick.
-		 */
-		vector< double > xComptData_;
-
+		/// All the data transfer information from current to other solvers.
+		vector< XferInfo > xfer_;
 };
 
 #endif	// _KSOLVE_H

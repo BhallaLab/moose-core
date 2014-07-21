@@ -288,16 +288,18 @@ void Dsolve::setStoich( Id id )
 	path_ = Field< string >::get( stoich_, "path" );
 
 	for ( unsigned int i = 0; i < poolMap_.size(); ++i ) {
-		if ( poolMap_[i] != ~0U ) {
+		unsigned int poolIndex = poolMap_[i];
+		if ( poolIndex < pools_.size() ) {
+			// assert( poolIndex < pools_.size() );
 			Id pid( i + poolMapStart_ );
 			assert( pid.element()->cinfo()->isA( "PoolBase" ) );
 			PoolBase* pb = 
 					reinterpret_cast< PoolBase* >( pid.eref().data());
 			double diffConst = pb->getDiffConst( pid.eref() );
 			double motorConst = pb->getMotorConst( pid.eref() );
-			pools_[ poolMap_[i] ].setId( pid.value() );
-			pools_[ poolMap_[i] ].setDiffConst( diffConst );
-			pools_[ poolMap_[i] ].setMotorConst( motorConst );
+			pools_[ poolIndex ].setId( pid.value() );
+			pools_[ poolIndex ].setDiffConst( diffConst );
+			pools_[ poolIndex ].setMotorConst( motorConst );
 		}
 	}
 }
@@ -639,6 +641,7 @@ unsigned int Dsolve::getNumPools() const
 	return numTotPools_;
 }
 
+// July 2014: This is half-baked wrt the startPool.
 void Dsolve::getBlock( vector< double >& values ) const
 {
 	unsigned int startVoxel = values[0];
@@ -673,6 +676,7 @@ void Dsolve::setBlock( const vector< double >& values )
 	assert( startVoxel + numVoxels <= numVoxels_ );
 	assert( startPool >= poolStartIndex_ );
 	assert( numPools + startPool <= numLocalPools_ );
+	assert( values.size() == 4 + numVoxels * numPools );
 
 	for ( unsigned int i = 0; i < numPools; ++i ) {
 		unsigned int j = i + startPool;
@@ -682,4 +686,10 @@ void Dsolve::setBlock( const vector< double >& values )
 			pools_[ j - poolStartIndex_ ].setNvec( startVoxel, numVoxels, q );
 		}
 	}
+}
+
+void Dsolve::setupCrossSolverReacs( const map< Id, 
+						vector< Id > >& xr, Id otherStoich )
+{
+	;
 }

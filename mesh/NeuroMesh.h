@@ -203,9 +203,6 @@ class NeuroMesh: public MeshCompt
 		void matchMeshEntries( const ChemCompt* other, 
 			vector< VoxelJunction > & ret ) const;
 
-		void matchSpineMeshEntries( const ChemCompt* other, 
-			vector< VoxelJunction > & ret ) const;
-
 		void matchCubeMeshEntries( const ChemCompt* other, 
 			vector< VoxelJunction > & ret ) const;
 

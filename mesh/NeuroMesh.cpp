@@ -22,6 +22,7 @@
 #include "NeuroNode.h"
 #include "NeuroMesh.h"
 #include "SpineEntry.h"
+#include "SpineMesh.h"
 #include "../utility/numutil.h"
 #include "../shell/Wildcard.h"
 
@@ -1141,13 +1142,12 @@ void NeuroMesh::matchMeshEntries( const ChemCompt* other,
 		matchCubeMeshEntries( other, ret );
 		return;
 	}
-	/*
 	const SpineMesh* sm = dynamic_cast< const SpineMesh* >( other );
 	if ( sm ) {
-		matchSpineMeshEntries( other, ret );
+		sm->matchNeuroMeshEntries( this, ret );
+		flipRet( ret );
 		return;
 	}
-	*/
 	const NeuroMesh* nm = dynamic_cast< const NeuroMesh* >( other );
 	if ( nm ) {
 		matchNeuroMeshEntries( other, ret );
@@ -1196,11 +1196,6 @@ double NeuroMesh::nearest( double x, double y, double z,
 	if ( best == 1e12 )
 		return -1;
 	return best;
-}
-
-void NeuroMesh::matchSpineMeshEntries( const ChemCompt* other,
-	   vector< VoxelJunction >& ret ) const
-{
 }
 
 void NeuroMesh::matchCubeMeshEntries( const ChemCompt* other,
