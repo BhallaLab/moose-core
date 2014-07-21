@@ -104,6 +104,10 @@ class Dsolve: public ZombiePoolInterface
 		void getBlock( vector< double >& values ) const;
 		void setBlock( const vector< double >& values );
 
+		// This one isn't used in Dsolve, but is defined as a dummy.
+		void setupCrossSolverReacs( const map< Id, 
+						vector< Id > >& xr, Id otherStoich );
+
 		//////////////////////////////////////////////////////////////////
 		// Model traversal and building functions
 		//////////////////////////////////////////////////////////////////
