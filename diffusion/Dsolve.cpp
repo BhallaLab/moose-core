@@ -572,37 +572,56 @@ unsigned int Dsolve::convertIdToPoolIndex( const Eref& e ) const
 
 void Dsolve::setN( const Eref& e, double v )
 {
+	unsigned int pid = convertIdToPoolIndex( e );
+	// Ignore silently, as this may be a valid pid for the ksolve to use.
+	if ( pid >= pools_.size() )  
+		return;
 	unsigned int vox = e.dataIndex();
-	if ( vox < numVoxels_ )
-		pools_[ convertIdToPoolIndex( e ) ].setN( vox, v );
-	else 
-		cout << "Warning: Dsolve::setN: Eref out of range\n";
+	if ( vox < numVoxels_ ) {
+		pools_[ pid ].setN( vox, v );
+		return;
+	}
+	cout << "Warning: Dsolve::setN: Eref " << e << " out of range " <<
+			pools_.size() << ", " << numVoxels_ << "\n";
 }
 
 double Dsolve::getN( const Eref& e ) const
 {
+	unsigned int pid = convertIdToPoolIndex( e );
+	if ( pid >= pools_.size() ) return 0.0; // ignore silently
 	unsigned int vox = e.dataIndex();
-	if ( vox <  numVoxels_ )
-		return pools_[ convertIdToPoolIndex( e ) ].getN( vox );
-	cout << "Warning: Dsolve::getN: Eref out of range\n";
+	if ( vox <  numVoxels_ ) {
+		return pools_[ pid ].getN( vox );
+	}
+	cout << "Warning: Dsolve::setN: Eref " << e << " out of range " <<
+			pools_.size() << ", " << numVoxels_ << "\n";
 	return 0.0;
 }
 
 void Dsolve::setNinit( const Eref& e, double v )
 {
+	unsigned int pid = convertIdToPoolIndex( e );
+	if ( pid >= pools_.size() )  // Ignore silently
+		return;
 	unsigned int vox = e.dataIndex();
-	if ( vox < numVoxels_ )
-		pools_[ convertIdToPoolIndex( e ) ].setNinit( vox, v );
-	else 
-		cout << "Warning: Dsolve::setNinit: Eref out of range\n";
+	if ( vox < numVoxels_ ) {
+		pools_[ pid ].setNinit( vox, v );
+		return;
+	}
+	cout << "Warning: Dsolve::setNinit: Eref " << e << " out of range " <<
+			pools_.size() << ", " << numVoxels_ << "\n";
 }
 
 double Dsolve::getNinit( const Eref& e ) const
 {
+	unsigned int pid = convertIdToPoolIndex( e );
+	if ( pid >= pools_.size() ) return 0.0; // ignore silently
 	unsigned int vox = e.dataIndex();
-	if ( vox < numVoxels_ )
-		return pools_[ convertIdToPoolIndex( e ) ].getNinit( vox );
-	cout << "Warning: Dsolve::getNinit: Eref out of range\n";
+	if ( vox < numVoxels_ ) {
+		return pools_[ pid ].getNinit( vox );
+	}
+	cout << "Warning: Dsolve::setNinit: Eref " << e << " out of range " <<
+			pools_.size() << ", " << numVoxels_ << "\n";
 	return 0.0;
 }
 

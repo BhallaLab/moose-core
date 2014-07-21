@@ -404,7 +404,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 		dvalues[0] = 0;
 		dvalues[1] = getNumLocalVoxels();
 		dvalues[2] = 0;
-		dvalues[3] = stoichPtr_->getNumAllPools();
+		dvalues[3] = stoichPtr_->getNumVarPools();
 		dsolvePtr_->getBlock( dvalues );
 		/*
 		getBlock( kvalues );
@@ -436,7 +436,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 		kvalues[0] = 0;
 		kvalues[1] = getNumLocalVoxels();
 		kvalues[2] = 0;
-		kvalues[3] = stoichPtr_->getNumAllPools();
+		kvalues[3] = stoichPtr_->getNumVarPools();
 		getBlock( kvalues );
 		dsolvePtr_->setBlock( kvalues );
 	}
@@ -719,6 +719,8 @@ void Ksolve::assignXferVoxels( unsigned int xferCompt )
 		if ( pools_[i].hasXfer( xferCompt ) )
 			xf.xferVoxel.push_back( i );
 	}
+	xf.values.resize( xf.xferVoxel.size() & xf.xferPoolIdx.size(), 0 );
+	xf.lastValues.resize( xf.xferVoxel.size() & xf.xferPoolIdx.size(), 0 );
 }
 
 /**
@@ -762,6 +764,7 @@ void Ksolve::setupXfer( Id myKsolve, Id otherKsolve,
 	// Use this so we can figure out what the other side will send.
 	vector< vector< unsigned int > > proxyVoxy( myCompt->getNumEntries() );
 	vector< vector< unsigned int > > reverseProxyVoxy( otherCompt->getNumEntries() );
+	assert( xfer_.size() > 0 && otherKsolvePtr->xfer_.size() > 0 );
 	unsigned int myKsolveIndex = xfer_.size() -1;
 	unsigned int otherKsolveIndex = otherKsolvePtr->xfer_.size() -1;
 	for ( unsigned int i = 0; i < vj.size(); ++i ) {
@@ -799,8 +802,6 @@ unsigned int Ksolve::assignProxyPools( const map< Id, vector< Id > >& xr,
 	Ksolve* otherKsolvePtr = reinterpret_cast< Ksolve* >( 
 					otherKsolve.eref().data() );
 
-	xfer_.push_back( XferInfo( otherKsolve ) );
-	otherKsolvePtr->xfer_.push_back( XferInfo( myKsolve ) );
 	vector< Id > proxyMols = i->second;
 		
 	vector< Id > otherProxies = LookupField< Id, vector< Id > >::get( 
@@ -811,7 +812,9 @@ unsigned int Ksolve::assignProxyPools( const map< Id, vector< Id > >& xr,
 	if ( proxyMols.size() == 0 )
 		return 0;
 	sort( proxyMols.begin(), proxyMols.end() );
+	xfer_.push_back( XferInfo( otherKsolve ) );
 
+	otherKsolvePtr->xfer_.push_back( XferInfo( myKsolve ) );
 	vector< unsigned int >& xfi = xfer_.back().xferPoolIdx;
 	vector< unsigned int >& oxfi = otherKsolvePtr->xfer_.back().xferPoolIdx;
 	xfi.resize( proxyMols.size() );
@@ -847,6 +850,7 @@ void Ksolve::setupCrossSolverReacs( const map< Id, vector< Id > >& xr,
 	// Establish which molecules will be exchanged.
 	unsigned int numPools = assignProxyPools( xr, myKsolve, otherKsolve, 
 					otherComptId );
+	if ( numPools == 0 ) return;
 
 	// Then, figure out which voxels do the exchange.
 	// Note that vj has a list of pairs of voxels on either side of a 
