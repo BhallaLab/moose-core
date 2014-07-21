@@ -10,6 +10,14 @@
 #ifndef _VOXEL_POOLS_BASE_H
 #define _VOXEL_POOLS_BASE_H
 
+/**
+ * This is the base class for voxels used in reac-diffusion systems.
+ * Each voxel manages all the molecular pools that live in it. This
+ * is the S_ and Sinit_ vectors.
+ * Additionally, the last set of entries in S_ and Sinit_ refer to the
+ * proxy pools that participate in cross-node reactions, but are really 
+ * located on other compartments.
+ */
 class VoxelPoolsBase
 {
 	public: 
@@ -62,10 +70,6 @@ class VoxelPoolsBase
 		void setVolume( double vol );
 		double getVolume() const;
 
-		/**
-		 * Assigns the xfer vector.
-		 */
-		void setXfer( const vector< pair< int, int > >& xfer );
 		
 		//////////////////////////////////////////////////////////////////
 		// Field assignment functions
@@ -81,8 +85,37 @@ class VoxelPoolsBase
 		//////////////////////////////////////////////////////////////////
 		// Functions to handle cross-compartment reactions.
 		//////////////////////////////////////////////////////////////////
-		void mergeProxy( const vector< double >& remote, 
-						vector< double >& local );
+		/**
+		 * Digests incoming data values for cross-compt reactions.
+		 * Sums the changes in the values onto the specified pools.
+		 */
+		void xferIn( const vector< unsigned int >& poolIndex,
+				const vector< double >& values, 
+				const vector< double >& lastValues,
+				unsigned int voxelIndex );
+
+		/**
+		 * Used during initialization: Takes only the proxy pool values 
+		 * from the incoming transfer data, and assigns it to the proxy
+		 * pools on current solver
+		 */
+		void xferInOnlyProxies(
+			const vector< unsigned int >& poolIndex,
+			const vector< double >& values, 
+			unsigned int numProxyPools,
+	    	unsigned int voxelIndex	);
+
+		/// Assembles data values for sending out for x-compt reacs.
+		void xferOut( unsigned int voxelIndex,
+				vector< double >& values,
+				const vector< unsigned int >& poolIndex );
+		/// Adds the index of a voxel to which proxy data should go.
+		void addProxyVoxy( unsigned int comptIndex, unsigned int voxel );
+		void addProxyTransferIndex( unsigned int comptIndex, 
+						unsigned int transferIndex );
+
+		/// True when this voxel has data to be transferred.
+		bool hasXfer( unsigned int comptIndex ) const;
 
 	private:
 		/**
@@ -111,15 +144,30 @@ class VoxelPoolsBase
 		vector< double > Sinit_;
 
 		/**
+		 * The number of pools (at the end of S and Sinit) that are here
+		 * just as proxies for some off-compartment pools that participate
+		 * in cross-compartment reactions.
+		unsigned int numProxyPools_;
+		 */
+
+		/**
+		 * proxyPoolVoxels_[comptIndex][#]
+		 * Used to build the transfer vector.
+		 * Stores the voxels of proxy pools in specified compartment,
+		 */
+		vector< vector< unsigned int > > proxyPoolVoxels_;
+		/**
+		 * proxyTransferIndex_[comptIndex][#]
+		 * Stores the index in the transfer vector for proxy pools that 
+		 * live on this voxel. The poolIndex and # of pools is known from
+		 * the xferPoolIdx_ vector stored on the Ksolve.
+		 */
+		vector< vector< unsigned int > > proxyTransferIndex_;
+
+		/**
 		 * Volume of voxel.
 		 */
 		double volume_;
-
-		/**
-		 * Enumerates every pool involved in cross-solver reactions.
-		 * Each entry holds (localIndex, indexForXferVector)
-		 */
-		vector< pair< int, int > > xfer_;
 };
 
 #endif	// _VOXEL_POOLS_BASE_H

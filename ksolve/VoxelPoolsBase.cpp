@@ -119,17 +119,70 @@ double VoxelPoolsBase::getDiffConst( unsigned int i ) const
 //////////////////////////////////////////////////////////////
 // Handle cross compartment reactions
 //////////////////////////////////////////////////////////////
-void VoxelPoolsBase::mergeProxy(
-		const vector< double >& remote, vector< double >& local )
+void VoxelPoolsBase::xferIn(
+		const vector< unsigned int >& poolIndex,
+		const vector< double >& values, 
+		const vector< double >& lastValues,
+	    unsigned int voxelIndex	)
 {
-	for ( vector< pair< int, int > >::const_iterator
-		i = xfer_.begin(); i != xfer_.end(); ++i ) {
-		S_[i->first] = local[i->second] = 
-			S_[i->first ] + remote[i->second] - local[i->second];
+	unsigned int offset = voxelIndex * poolIndex.size();
+	vector< double >::const_iterator i = values.begin() + offset;
+	vector< double >::const_iterator j = lastValues.begin() + offset;
+	for ( vector< unsigned int >::const_iterator 
+			k = poolIndex.begin(); k != poolIndex.end(); ++k ) {
+		S_[*k] += *i++ - *j++;
 	}
 }
 
-void VoxelPoolsBase::setXfer( const vector< pair< int, int > >& xfer )
+void VoxelPoolsBase::xferInOnlyProxies(
+		const vector< unsigned int >& poolIndex,
+		const vector< double >& values, 
+		unsigned int numProxyPools,
+	    unsigned int voxelIndex	)
 {
-	xfer_ = xfer;
+	unsigned int offset = voxelIndex * poolIndex.size();
+	vector< double >::const_iterator i = values.begin() + offset;
+	for ( vector< unsigned int >::const_iterator 
+			k = poolIndex.begin(); k != poolIndex.end(); ++k ) {
+		if ( *k >= S_.size() - numProxyPools ) {
+			S_[*k] += *i;
+		}
+		i++;
+	}
+}
+
+void VoxelPoolsBase::xferOut( 
+	unsigned int voxelIndex, 
+	vector< double >& values,
+	const vector< unsigned int >& poolIndex)
+{
+	unsigned int offset = voxelIndex * poolIndex.size();
+	vector< double >::iterator i = values.begin() + offset;
+	for ( vector< unsigned int >::const_iterator 
+			k = poolIndex.begin(); k != poolIndex.end(); ++k ) {
+		*i++ = S_[*k];
+	}
+}
+
+void VoxelPoolsBase::addProxyVoxy( 
+				unsigned int comptIndex, unsigned int voxel )
+{
+	if ( comptIndex >= proxyPoolVoxels_.size() )
+		proxyPoolVoxels_.resize( comptIndex + 1 );
+	proxyPoolVoxels_[comptIndex].push_back( voxel );
+}
+
+void VoxelPoolsBase::addProxyTransferIndex( 
+				unsigned int comptIndex, unsigned int transferIndex )
+{
+	if ( comptIndex >= proxyTransferIndex_.size() )
+		proxyTransferIndex_.resize( comptIndex + 1 );
+	proxyTransferIndex_[comptIndex].push_back( transferIndex );
+}
+
+bool VoxelPoolsBase::hasXfer( unsigned int comptIndex ) const
+{
+	if ( comptIndex >= proxyPoolVoxels_.size() )
+		return false;
+	return (proxyPoolVoxels_[ comptIndex ].size() > 0);
 }

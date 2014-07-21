@@ -11,6 +11,10 @@
 #define _VOXEL_POOLS_H
 
 class Stoich;
+/**
+ * This is the class for handling reac-diff voxels used for deterministic
+ * computations.
+ */
 class VoxelPools: public VoxelPoolsBase
 {
 	public: 

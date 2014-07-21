@@ -543,3 +543,9 @@ void Gsolve::setBlock( const vector< double >& values )
 		}
 	}
 }
+
+// Inherited virtual
+void Gsolve::setupCrossSolverReacs( const map< Id, vector< Id > >& xr,
+	   Id otherStoich )
+{
+}
