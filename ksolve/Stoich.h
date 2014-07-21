@@ -134,6 +134,7 @@ class Stoich
 		vector< unsigned int > getColIndex() const;
 		vector< unsigned int > getRowStart() const;
 
+		vector< Id > getProxyPools( Id i ) const;
 		//////////////////////////////////////////////////////////////////
 		// Model traversal and building functions
 		//////////////////////////////////////////////////////////////////
@@ -180,6 +181,15 @@ class Stoich
 		 * in mol number or concentration.
 		 */
 		void convertRatesToStochasticForm();
+
+		/**
+		 * Builds cross-reaction terms between current stoich and 
+		 * otherStoich. The function scans the voxels at which there
+		 * are jucntions between different compartments, and orchestrates
+		 * setup of interfaces between the Ksolves that implement the
+		 * cross-reactions at these junctions.
+		 */
+		void buildXreacs( const Eref& e, Id otherStoich );
 		//////////////////////////////////////////////////////////////////
 		// Zombification functions.
 		//////////////////////////////////////////////////////////////////
@@ -386,8 +396,10 @@ class Stoich
 		void updateFuncs( double* s, double t ) const;
 
 		/// Updates the rates for cross-compartment reactions.
+		/*
 		void updateJunctionRates( const double* s,
 			   const vector< unsigned int >& reacTerms, double* yprime );
+			   */
 
 		/** 
 		 * Get the rate for a single reaction specified by r, as per all 
@@ -516,12 +528,21 @@ class Stoich
 		 */
 		vector< Id > mmEnzMap_;
 		
+
 		/**
-		 * Number of variable molecules that the solver deals with.
+		 * Number of variable molecules that the solver deals with,
+		 * that are local to the solver.
 		 *
 		 */
 		unsigned int numVarPools_;
-		unsigned int numVarPoolsBytes_;
+
+		/**
+		 * Number of variable molecules that the solver deals with,
+		 * including the proxy molecules which belong in other compartments.
+		 *
+		unsigned int totVarPools_;
+		 */
+
 		/**
 		 * Number of buffered molecules
 		 */

@@ -3916,3 +3916,257 @@ Stoichs.
 Implemented skeleton code for Ksolve interfacing to each other.
 Intermediate checkin with the updated Clock.cpp and the skeleton code for
 Ksolves to send data for cross-compartment reactions.
+Checkin 5644.
+Next: fill up the xfer_ vectors in each VoxelPool that determines which pools
+	transfer pool 'n' to each other. To do this I need the list of 
+	compartment juxtapositions. There is a ChemCompt::matchMeshEntries
+	function but it is patchily implemented.
+
+Another problem: Suppose we have a cross-compartment reaction in which
+multiple voxels are involved. I really need to send over the dx of each 
+voxel, rather than the 
+
+I should be able to set up the ordering without further information because
+each of the ksolves has full information about the molecules and the
+voxelization. The order of molecules should also be unambiguous based on
+their Ids.
+
+Jn# is given by the sequence obtained from matchMeshEntries.
+# of mols is always fixed because the same mols will be present in all voxels of
+	any compartment.
+So order in transfer sequence is to be the array of [jn#][mol#]
+
+On a given stoich we only know local molecules. Need to pick up the 
+other stoich. For now use external function do to this.
+
+Use cases:
+Suppose I have a single extracellular compt that connects to several spines.
+I have transporters on each spine. Just to make it nasty, have them as MM.
+Transmitter_ext --- transporter_spineMemb ---> transmitter_spine
+
+ext will send out just one value, but to several spineMemb voxels.
+ext will not have any proxies.
+ext will receive many values indicating decrement, one from each spineMemb.
+spineMemb will send out many values to the single transmitter_ext.
+spineMemb will send out many values, one-to-one for the transmitter_spine
+spineMemb: each spine will will have a proxy for transmitter_ext and another
+	for transmitter_spine
+spineMemb will receive a single value from ext, which will be used by each voxel
+spineMemb will receive many values from spine, which are mapped one-to-one to
+	each voxel.
+
+Now that I have an implementation, two problems crop up. 
+1. We need to replicate this entire structure for each paired compartment. 
+2. We need to send each message to one specific ksolve only.
+
+For now:
+*Pull it all together - compile
+	Successfully compiled, still need to provide an interface to the 
+	setup function, and ideally have a way to call it automatically.
+	Also the setup function needs a way to set up the xfer messages too.
+
+Set up the clock/scheduling stuff.
+
+=============================================================================
+Jul 15 2014.
+Implemented DestFinfo Stoich::buildXreacs. Yet to test what it does.
+Crosses function but fails when trying to run. Unclear whether it is OK
+after it crosses function.
+=============================================================================
+Jul 16 2014.
+Fixing up the calculations to deal with junction and non-junction voxels.
+1* The N_ matrix is always the same, and includes on and off compt reactions.
+2. The RateTerms vector differs, both for different volumes, and also for
+	cases where there are additional cross-compartment reactions. However
+	it is always the same length with the same entries in each location so
+	that the Stoich::convertIdToReacIndex works uniformly. Where there
+	are off-compartment reactions not being used, they are replaced with
+	blanks.
+	In Stoich::buildAllRateTermVectors, we need to also provide a lookup
+	of which rate set is to be included.
+	So we need a rate set for each possible combination of voxel junctions.
+2a. Several functions on the lines of Stoich::setReacKf need to be updated,
+	as there are multiple rates vectors, typically one per voxel.
+3. the 'v' vector of reaction velocities is always sized to match the N_ matrix.
+	That is, it includes on and off compt reactions. Off are always zero
+	if they are not activated.
+4. Each VoxelPool maintains both local and proxy pools. Proxy pools are 
+	invisible to the user, any access functions must refer to the parent.
+	But somehow the Sinit must propagate.
+	Again, we keep things uniform for simple access.
+5. We might be able to optimize calculations a little bit if each voxel pool
+	knows if it is bare or decorated (with cross-compartment reactions).
+	If bare then the updateRates need only iterate for the local RateTerms
+	and the subsequent loop for updating yprime need only go over the 
+	local numVarPools. If it is decorated then it needs to do the entire
+	set regardless of which subsets of x-reacs it deals with.
+6* The Dsolve does NOT handle proxy pools. It does diffusion for the core
+	set of pools and it is up to the x-reac updates to propagate the 
+	diffused values to other ksolves.
+7. The OdeSystem should either use on+off pools, or just the on pools.
+	See (5). This is currently happening in the ksolve.
+
+=============================================================================
+
+17 July 
+
+Moose key things to do before release and paper:
+Ksolve cross compartment
+Synapses
+KKit GUI
+Clocks
+Identifying message source.
+Documentation
+	Tutorials
+		- How to load and run a neuronal model (using NEUROML)
+		- How to load and run a chemical kinetic model (using
+			kkit or SBML formats)
+		- How to load and run a reaction-diffusion model
+			kkit + dsolve
+		- How to load and run a multiscale model.
+	GUI documentation internal.
+
+Packaging:
+	.deb
+	Fedora rpm
+	mac?
+	Virtual box, small as possible.
+
+=============================================================================
+18 July.
+in Ksolve::setupCrossSolverReacs, we need to address points 2,3,5,7.
+
+Fixing up some incompleteness in earlier implementation. I have two options:
+1. Build a transfer vector directly from the VoxelJunction vector built by 
+	ChemCompt::matchMeshEntries. This is unambiguous and has the same
+	sequence and size in both compartments, but it will result in multiple
+	transfers of the same data if any voxel in 'self' compt touches 
+	multiple voxels in 'other' compt.
+2. Populate each VoxelPool with a list of voxels to which it must send data.
+	Here we must also give each VoxelPool a list of transfer indices
+	from which it should receive data, in the transfer vector.
+	Suppose the VoxelJunction vector was
+		A	B
+		4	1
+		4	2
+		4	3
+		10	10
+		11	11
+		12	12
+		13	12
+		14	12
+		15	11
+	for a really odd connection.
+	Then the compts represented in the transfer vectors look like this:
+		A->B	4, 10, 11, 12, 13, 14, 15
+		tr. idx	0, 1,  2,  3,  4,  5,  6
+		transfer index on B (voxel, transfer indices)
+		(1, [0]),(2, [0]), (3, [0]), (10, [1]), (11,[2,6]), (12,[3,4,5])
+
+		B->A	1, 2, 3, 10, 11, 12
+		tr. idx	0, 1, 2, 3,  4,  5
+		transfer index on A (voxel, transfer indices)
+		(4, [0,1,2]), (10, [3]), (11,[4]), (12,[5]), 
+			(13,[5]),(14,[5]),(15,[4])
+	This is also unambiguous but requires an extra level of housekeeping
+	to build each direction of indices. This option does not have multiple 
+	transfers. But it may involve going through lots of VoxelPools to find
+	the few which do transfers - again easily bypassed with a further
+	table of connected voxels.
+- Independent of the above decision, the implementation also needs to
+	be extended to handle multiple adjoining compartments.
+OK, will do option 2 because I feel it is cleaner for a voxel to know what
+it is doing, rather than have it done to it.
+
+Implementation with this in progress. Need to put the functions in the headers
+then compile. Should test as standalone. Need to put in the multiple compts.
+
+=============================================================================
+19 July
+Found ugly bug: the Stoich::getPoolIdMap is a terrible function, 
+see error in Dsolve::setStoich.
+
+Lots more ugly errors, most to do with sizing the calculations to include
+the proxy pools. Finally it clears multi3.py. Also stops segv on exit.
+
+Now finally to go on to checking the cross-compt reacs.
+
+Lots of cleanup now needed. For starters, setting up to use the 
+indices to look up the xStoichs in the VoxelPools, rather than the Ids.
+Idea is that the sending Ksolve will go through all connected Stoichs in
+the xStoich array, and build up all the values to go out. The VoxelPools
+will put together the entries in the values array.
+
+=============================================================================
+20 July
+Created a small class to handle the info need for each pairwise transfer
+between compartments.
+
+Now it compiles and runs peacefully, but doesn't exercise the new code.
+Somewhere I had a cross-compartment reaction sytem.
+OSC_diff_vols.g will do it.
+=============================================================================
+21 July
+Looks like it is coming together, it runs without crashing but there is
+a numerical issue with the values rising steeply.
+
+I need to revisit what is sent, what is in lastValues, and so on.
+
+Suppose we have A0, A1, A2 as the respective proxy pools, and the
+correct summated conc is A.
+
+A[t+1] ~= A[t] + A'[t+1]	// Ideally would like to evaluate A' at t+1.
+
+
+A'[t+1] ~= (A0[t+1] + A1[t+1] + A2[t+1] ) - 3A[t]
+
+Or
+A[t+1] ~= (A0[t+1] + A1[t+1] + A2[t+1] ) - 2A[t]
+
+On compt 0, we have,
+S[t+1] += A1[t+1] + A2[t+1] - 2A[t]
+A[t+1] = S[t+1]
+
+Each compt independently evalutes A[t+1] in this manner.
+
+Staging:
+initProc
+	Extract values from S.
+	Transfer values. 
+	Handle and buffer incoming. Can't update S directly because it would
+		affect the values to be extracted from objects processed later.
+process
+	Update S vectors using buffered values.
+	Update lastValues
+	Transfer data in from dsolve.
+	Compute A0[t+1]
+	Transfer data out to dsolve.
+
+Need some further cleanup to ensure that the order of voxels matches in the
+two transfer vectors.
+
+It isn't handling things. 
++ Check that the xreac is being built
+	* Seems so from the code
+	* Tested from examination of what reacs have been converted to zombies
+		Look for endo and exo. Yes, converted.
+* Check that the reinit values are set up properly
++ Check that pool quantitites are being transferred back and forth
+	* Assign just before a single step, see where it goes.
+- Check that the proxy pool values do get updated at both ends.
+	No, it doesn't. Oddly, only one of the proxies is not being updated.
+		* Check that the respective Stoichs have correct # of reacs.
+			They do.
+
+Works! The one proxy was a clue. Turns out that the proxies are being 
+assigned the
+last pool entry, possibly colliding with the buffered or sumtotal pools.
+Only one of the compartments had a sumtotal, it was the only asymmetry in the
+model. Note also that in both cases the proxies have been situated at the
+last entries in the pool vector. When I deleted the sumtotal in the script 
+the oscillations worked.
+
+Next: fix the indexing of the proxy vs other pool entries.
+Then: Design a more challenging multicompartment/multivoxel system.
+
+=============================================================================

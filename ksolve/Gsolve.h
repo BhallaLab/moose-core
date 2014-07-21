@@ -85,6 +85,8 @@ class Gsolve: public ZombiePoolInterface
 
 		void getBlock( vector< double >& values ) const;
 		void setBlock( const vector< double >& values );
+		void setupCrossSolverReacs( const map< Id, vector< Id > >& xr,
+	   		Id otherStoich );
 
 		//////////////////////////////////////////////////////////////////
 		/// Flag: returns true if randomized round to integers is done.

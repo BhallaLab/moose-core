@@ -54,6 +54,10 @@ class ZombiePoolInterface
 		 * this ZombiePoolInterface.
 		 * The block is organized as an array of arrays of voxels;
 		 * values[pool#][voxel#]
+		 *
+		 * Note that numVoxels and numPools are the number in the current
+		 * block, not the upper limit of the block. So 
+		 * values.size() == 4 + numPools * numVoxels.
 		 */
 		virtual void getBlock( vector< double >& values ) const = 0;
 
@@ -79,6 +83,11 @@ class ZombiePoolInterface
 		/// Assigns compartment.
 		virtual void setCompartment( Id compartment ) = 0;
 		virtual Id getCompartment() const = 0;
+
+		/// Sets up cross-solver reactions.
+		virtual void setupCrossSolverReacs( 
+			const map< Id, vector< Id > >& xr, 
+			Id otherStoich ) = 0;
 };
 
 #endif	// _ZOMBIE_POOL_INTERFACE_H

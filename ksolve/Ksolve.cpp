@@ -23,7 +23,12 @@
 #include "SparseMatrix.h"
 #include "KinSparseMatrix.h"
 #include "Stoich.h"
+#include "../shell/Shell.h"
 
+#include "../mesh/VoxelJunction.h"
+#include "../mesh/MeshEntry.h"
+#include "../mesh/Boundary.h"
+#include "../mesh/ChemCompt.h"
 #include "Ksolve.h"
 
 const unsigned int OFFNODE = ~0;
@@ -132,11 +137,18 @@ const Cinfo* Ksolve::initCinfo()
 		///////////////////////////////////////////////////////
 
 		static DestFinfo process( "process",
-			"Handles process call",
+			"Handles process call from Clock",
 			new ProcOpFunc< Ksolve >( &Ksolve::process ) );
 		static DestFinfo reinit( "reinit",
-			"Handles reinit call",
+			"Handles reinit call from Clock",
 			new ProcOpFunc< Ksolve >( &Ksolve::reinit ) );
+
+		static DestFinfo initProc( "initProc",
+			"Handles initProc call from Clock",
+			new ProcOpFunc< Ksolve >( &Ksolve::initProc ) );
+		static DestFinfo initReinit( "initReinit",
+			"Handles initReinit call from Clock",
+			new ProcOpFunc< Ksolve >( &Ksolve::initReinit ) );
 		
 		///////////////////////////////////////////////////////
 		// Shared definitions
@@ -148,11 +160,18 @@ const Cinfo* Ksolve::initCinfo()
 			"Shared message for process and reinit",
 			procShared, sizeof( procShared ) / sizeof( const Finfo* )
 		);
+		static Finfo* initShared[] = {
+			&initProc, &initReinit
+		};
+		static SharedFinfo init( "init",
+			"Shared message for process and reinit",
+			initShared, sizeof( initShared ) / sizeof( const Finfo* )
+		);
 
 		static DestFinfo xComptIn( "xComptIn",
 			"Handles arriving pool 'n' values used in cross-compartment "
 			"reactions.",
-			new OpFunc1< Ksolve, vector< double > >(
+			new EpFunc1< Ksolve, vector< double > >(
 					&Ksolve::xComptIn )
 		);
 		static Finfo* xComptShared[] = {
@@ -179,6 +198,7 @@ const Cinfo* Ksolve::initCinfo()
 		&numPools,			// Value
 		&xCompt,			// SharedFinfo
 		&proc,				// SharedFinfo
+		&init,				// SharedFinfo
 	};
 	
 	static Dinfo< Ksolve > dinfo;
@@ -370,13 +390,21 @@ void Ksolve::setNvec( unsigned int voxel, vector< double > nVec )
 //////////////////////////////////////////////////////////////
 void Ksolve::process( const Eref& e, ProcPtr p )
 {
+	// First, take the arrived xCompt reac values and update S with them.
+	for ( unsigned int i = 0; i < xfer_.size(); ++i ) {
+		const XferInfo& xf = xfer_[i];
+		for ( unsigned int j = 0; j < xf.xferVoxel.size(); ++j ) {
+			pools_[xf.xferVoxel[j]].xferIn( 
+					xf.xferPoolIdx, xf.values, xf.lastValues, j );
+		}
+	}
+	// Second, handle incoming diffusion values, update S with those.
 	if ( dsolvePtr_ ) {
 		vector< double > dvalues( 4 );
-		vector< double > kvalues( 4 );
-		kvalues[0] = dvalues[0] = 0;
-		kvalues[1] = dvalues[1] = getNumLocalVoxels();
-		kvalues[2] = dvalues[2] = 0;
-		kvalues[3] = dvalues[3] = stoichPtr_->getNumAllPools();
+		dvalues[0] = 0;
+		dvalues[1] = getNumLocalVoxels();
+		dvalues[2] = 0;
+		dvalues[3] = stoichPtr_->getNumAllPools();
 		dsolvePtr_->getBlock( dvalues );
 		/*
 		getBlock( kvalues );
@@ -387,19 +415,30 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 		setBlock( kvalues );
 		*/
 		setBlock( dvalues );
-		for ( vector< VoxelPools >::iterator 
-					i = pools_.begin(); i != pools_.end(); ++i ) {
-			i->advance( p );
+	}
+	// Third, record the current value of pools as the reference for the
+	// next cycle.
+	for ( unsigned int i = 0; i < xfer_.size(); ++i ) {
+		XferInfo& xf = xfer_[i];
+		for ( unsigned int j = 0; j < xf.xferVoxel.size(); ++j ) {
+			pools_[xf.xferVoxel[j]].xferOut( j, xf.lastValues, xf.xferPoolIdx );
 		}
-		getBlock( kvalues );
-	
-		dsolvePtr_->setBlock( kvalues );
-	} else {
+	}
 
-		for ( vector< VoxelPools >::iterator 
-					i = pools_.begin(); i != pools_.end(); ++i ) {
-			i->advance( p );
-		}
+	// Fourth, do the numerical integration for all reactions.
+	for ( vector< VoxelPools >::iterator 
+				i = pools_.begin(); i != pools_.end(); ++i ) {
+		i->advance( p );
+	}
+	// Finally, assemble and send the integrated values off for the Dsolve.
+	if ( dsolvePtr_ ) {
+		vector< double > kvalues( 4 );
+		kvalues[0] = 0;
+		kvalues[1] = getNumLocalVoxels();
+		kvalues[2] = 0;
+		kvalues[3] = stoichPtr_->getNumAllPools();
+		getBlock( kvalues );
+		dsolvePtr_->setBlock( kvalues );
 	}
 }
 
@@ -440,7 +479,7 @@ void Ksolve::reinit( const Eref& e, ProcPtr p )
 		innerSetMethod( ode, method_ );
 		ode.gslSys.function = &VoxelPools::gslFunc;
    		ode.gslSys.jacobian = 0;
-		ode.gslSys.dimension = stoichPtr_->getNumAllPools();
+		ode.gslSys.dimension = stoichPtr_->getNumAllPools() + stoichPtr_->getNumProxyPools();
 		innerSetMethod( ode, method_ );
 		unsigned int numVoxels = pools_.size();
 		for ( unsigned int i = 0 ; i < numVoxels; ++i ) {
@@ -452,6 +491,58 @@ void Ksolve::reinit( const Eref& e, ProcPtr p )
 		isBuilt_ = true;
 #endif
 	}
+	for ( unsigned int i = 0; i < xfer_.size(); ++i ) {
+		const XferInfo& xf = xfer_[i];
+		for ( unsigned int j = 0; j < xf.xferVoxel.size(); ++j ) {
+			pools_[xf.xferVoxel[j]].xferInOnlyProxies( 
+					xf.xferPoolIdx, xf.values, 
+					stoichPtr_->getNumProxyPools(),
+					j );
+		}
+	}
+	for ( unsigned int i = 0; i < xfer_.size(); ++i ) {
+		XferInfo& xf = xfer_[i];
+		for ( unsigned int j = 0; j < xf.xferVoxel.size(); ++j ) {
+			pools_[xf.xferVoxel[j]].xferOut( 
+					j, xf.lastValues, xf.xferPoolIdx );
+		}
+	}
+}
+//////////////////////////////////////////////////////////////
+// init operations.
+//////////////////////////////////////////////////////////////
+void Ksolve::initProc( const Eref& e, ProcPtr p )
+{
+	vector< vector< double > > values( xfer_.size() );
+	for ( unsigned int i = 0; i < xfer_.size(); ++i ) {
+		XferInfo& xf = xfer_[i];
+		unsigned int size = xf.xferPoolIdx.size() * xf.xferVoxel.size();
+		values[i].resize( size, 0.0 );
+		for ( unsigned int j = 0; j < xf.xferVoxel.size(); ++j ) {
+			pools_[xf.xferVoxel[j]].xferOut( i, values[i], xf.xferPoolIdx );
+		}
+		// xComptOut()->sendTo( e, values );
+	}
+	xComptOut()->sendVec( e, values );
+}
+
+void Ksolve::initReinit( const Eref& e, ProcPtr p )
+{
+	for ( unsigned int i = 0 ; i < pools_.size(); ++i ) {
+		pools_[i].reinit();
+	}
+	vector< vector< double > > values( xfer_.size() );
+	for ( unsigned int i = 0; i < xfer_.size(); ++i ) {
+		XferInfo& xf = xfer_[i];
+		unsigned int size = xf.xferPoolIdx.size() * xf.xferVoxel.size();
+		xf.lastValues.assign( size, 0.0 );
+		for ( unsigned int j = 0; j < xf.xferVoxel.size(); ++j ) {
+			pools_[ xf.xferVoxel[j] ].xferOut( 
+							i, xf.lastValues, xf.xferPoolIdx );
+			values[i] = xf.lastValues;
+		}
+	}
+	xComptOut()->sendVec( e, values );
 }
 
 //////////////////////////////////////////////////////////////
@@ -562,6 +653,7 @@ void Ksolve::setBlock( const vector< double >& values )
 	assert( numVoxels <= pools_.size() );
 	assert( pools_.size() > 0 );
 	assert( numPools + startPool <= pools_[0].size() );
+	assert( values.size() == 4 + numVoxels * numPools );
 
 	for ( unsigned int i = 0; i < numVoxels; ++i ) {
 		double* v = pools_[ startVoxel + i ].varS();
@@ -571,11 +663,209 @@ void Ksolve::setBlock( const vector< double >& values )
 	}
 }
 
-void Ksolve::xComptIn( vector< double > values )
+//////////////////////////////////////////////////////////////////////////
+// cross-compartment reaction stuff.
+//////////////////////////////////////////////////////////////////////////
+// void Ksolve::xComptIn( const Eref& e, const ObjId& src, 
+// vector< double > values )
+void Ksolve::xComptIn( const Eref& e,
+	vector< double > values )
 {
+	// This needs to be refined to identify source compt, and select
+	// subset of targets based on that.
+	ObjId src( xfer_[0].ksolve );
+		/*
 	assert( values.size() == xComptData_.size() );
 	for ( vector< VoxelPools >::iterator
 			i = pools_.begin(); i != pools_.end(); ++i )
 		i->mergeProxy( values, xComptData_ );
+		*/
+	unsigned int comptIdx ;
+	for ( comptIdx = 0 ; comptIdx < xfer_.size(); ++comptIdx ) {
+		if ( xfer_[comptIdx].ksolve == src.id ) break;
+	}
+	assert( comptIdx != xfer_.size() );
+	XferInfo& xf = xfer_[comptIdx];
+	// assert( values.size() == xf.values.size() );
+	xf.values = values;
+//	xfer_[comptIdx].lastValues = values;
 }
 
+void Ksolve::xComptOut( const Eref& e )
+{
+	for ( vector< XferInfo >::const_iterator i = 
+			xfer_.begin(); i != xfer_.end(); ++i ) {
+		vector< double > values( i->lastValues.size(), 0.0 );
+		for ( unsigned int j = 0; j < i->xferVoxel.size(); ++j ) {
+			pools_[ i->xferVoxel[j] ].xferOut( j, values, i->xferPoolIdx );
+		}
+		// Use sendTo or sendVec to send to specific ksolves.
+		xComptOut()->send( e, values );
+	}
+}
+
+/////////////////////////////////////////////////////////////////////
+// Functions for setup of cross-compartment transfer.
+/////////////////////////////////////////////////////////////////////
+/**
+ * Figures out which voxels are involved in cross-compt reactions. Stores
+ * in the appropriate xfer_ entry.
+ */
+void Ksolve::assignXferVoxels( unsigned int xferCompt )
+{
+	assert( xferCompt < xfer_.size() );
+	XferInfo& xf = xfer_[xferCompt];
+	for ( unsigned int i = 0; i < pools_.size(); ++i ) {
+		if ( pools_[i].hasXfer( xferCompt ) )
+			xf.xferVoxel.push_back( i );
+	}
+}
+
+/**
+ * Figures out indexing of the array of transferred pool n's used to fill
+ * out proxies on each timestep.
+ */
+void Ksolve::assignXferIndex( unsigned int numProxyMols, 
+		unsigned int xferCompt,
+		const vector< vector< unsigned int > >& voxy )
+{
+	unsigned int idx = 0;
+	for ( unsigned int i = 0; i < voxy.size(); ++i ) {
+		const vector< unsigned int >& rpv = voxy[i];
+		if ( rpv.size()  > 0) { // There would be a transfer here
+			for ( vector< unsigned int >::const_iterator
+					j = rpv.begin(); j != rpv.end(); ++j ) {
+				pools_[*j].addProxyTransferIndex( xferCompt, idx );
+			}
+			idx += numProxyMols;
+		}
+	}
+}
+
+/**
+ * This function sets up the information about the pool transfer for
+ * cross-compartment reactions. It consolidates the transfer into a
+ * distinct vector for each direction of the transfer between each coupled 
+ * pair of Ksolves.
+ * This one call sets up the information about transfer on both sides
+ * of the junction(s) between current Ksolve and otherKsolve.
+ */
+void Ksolve::setupXfer( Id myKsolve, Id otherKsolve, 
+	unsigned int numProxyMols, const vector< VoxelJunction >& vj )
+{
+	const ChemCompt *myCompt = reinterpret_cast< const ChemCompt* >(
+			compartment_.eref().data() );
+	Ksolve* otherKsolvePtr = reinterpret_cast< Ksolve* >( 
+					otherKsolve.eref().data() );
+	const ChemCompt *otherCompt = reinterpret_cast< const ChemCompt* >(
+			otherKsolvePtr->compartment_.eref().data() );
+	// Use this so we can figure out what the other side will send.
+	vector< vector< unsigned int > > proxyVoxy( myCompt->getNumEntries() );
+	vector< vector< unsigned int > > reverseProxyVoxy( otherCompt->getNumEntries() );
+	unsigned int myKsolveIndex = xfer_.size() -1;
+	unsigned int otherKsolveIndex = otherKsolvePtr->xfer_.size() -1;
+	for ( unsigned int i = 0; i < vj.size(); ++i ) {
+		unsigned int j = vj[i].first;
+		assert( j < pools_.size() ); // Check voxel indices.
+		proxyVoxy[j].push_back( vj[i].second );
+		pools_[j].addProxyVoxy( myKsolveIndex, vj[i].second );
+		unsigned int k = vj[i].second;
+		assert( k < otherCompt->getNumEntries() );
+		reverseProxyVoxy[k].push_back( vj[i].first );
+		otherKsolvePtr->pools_[k].addProxyVoxy( 
+						otherKsolveIndex, vj[i].first );
+	}
+
+	// Build the indexing for the data values to transfer on each timestep
+	assignXferIndex( numProxyMols, myKsolveIndex, reverseProxyVoxy );
+	otherKsolvePtr->assignXferIndex( 
+			numProxyMols, otherKsolveIndex, proxyVoxy );
+	// Figure out which voxels participate in data transfer.
+	assignXferVoxels( myKsolveIndex );
+	otherKsolvePtr->assignXferVoxels( otherKsolveIndex );
+}
+
+
+/**
+ * Builds up the list of proxy pools on either side of the junction,
+ * and assigns to the XferInfo data structures for use during runtime.
+ */
+unsigned int Ksolve::assignProxyPools( const map< Id, vector< Id > >& xr,
+				Id myKsolve, Id otherKsolve, Id otherComptId )
+{
+	map< Id, vector< Id > >::const_iterator i = xr.find( otherComptId );
+	if ( i == xr.end() ) 
+		return 0;
+	Ksolve* otherKsolvePtr = reinterpret_cast< Ksolve* >( 
+					otherKsolve.eref().data() );
+
+	xfer_.push_back( XferInfo( otherKsolve ) );
+	otherKsolvePtr->xfer_.push_back( XferInfo( myKsolve ) );
+	vector< Id > proxyMols = i->second;
+		
+	vector< Id > otherProxies = LookupField< Id, vector< Id > >::get( 
+			otherKsolvePtr->stoich_, "proxyPools", stoich_ );
+
+	proxyMols.insert( proxyMols.end(), 
+					otherProxies.begin(), otherProxies.end() );
+	if ( proxyMols.size() == 0 )
+		return 0;
+	sort( proxyMols.begin(), proxyMols.end() );
+
+	vector< unsigned int >& xfi = xfer_.back().xferPoolIdx;
+	vector< unsigned int >& oxfi = otherKsolvePtr->xfer_.back().xferPoolIdx;
+	xfi.resize( proxyMols.size() );
+	oxfi.resize( proxyMols.size() );
+	for ( unsigned int i = 0; i < xfi.size(); ++i ) {
+		xfi[i] = stoichPtr_->convertIdToPoolIndex( proxyMols[i] );
+		oxfi[i] = otherKsolvePtr->stoichPtr_->convertIdToPoolIndex( 
+						proxyMols[i] );
+	}
+	return proxyMols.size();
+}
+
+/**
+ * This function builds cross-solver reaction calculations. For the 
+ * specified pair of stoichs (this->stoich_, otherStoich) it identifies
+ * interacting molecules, finds where the junctions are, sets up the
+ * info to build the data transfer vector, and sets up the transfer
+ * itself.
+ */
+void Ksolve::setupCrossSolverReacs( const map< Id, vector< Id > >& xr,
+	   Id otherStoich )
+{
+	const ChemCompt *myCompt = reinterpret_cast< const ChemCompt* >(
+			compartment_.eref().data() );
+	Id otherComptId = Field< Id >::get( otherStoich, "compartment" );
+	Id myKsolve = Field< Id >::get( stoich_, "ksolve" );
+	if ( myKsolve == Id() )
+		return;
+	Id otherKsolve = Field< Id >::get( otherStoich, "ksolve" );
+	if ( otherKsolve == Id() ) 
+		return;
+
+	// Establish which molecules will be exchanged.
+	unsigned int numPools = assignProxyPools( xr, myKsolve, otherKsolve, 
+					otherComptId );
+
+	// Then, figure out which voxels do the exchange.
+	// Note that vj has a list of pairs of voxels on either side of a 
+	// junction. If one voxel on self touches 5 voxels on other, then
+	// there will be five entries in vj for this contact. 
+	// If one voxel on self touches two different compartments, then
+	// a distinct vj vector must be built for those contacts.
+	const ChemCompt *otherCompt = reinterpret_cast< const ChemCompt* >(
+			otherComptId.eref().data() );
+	vector< VoxelJunction > vj;
+	myCompt->matchMeshEntries( otherCompt, vj );
+	if ( vj.size() == 0 )
+		return;
+
+	// This function sets up the information about the pool transfer on
+	// both sides.
+	setupXfer( myKsolve, otherKsolve, numPools, vj );
+
+	// Here we set up the messaging.
+	Shell *shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	shell->doAddMsg( "Single", myKsolve, "xCompt", otherKsolve, "xCompt" );
+}
