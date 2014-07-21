@@ -4167,6 +4167,11 @@ last entries in the pool vector. When I deleted the sumtotal in the script
 the oscillations worked.
 
 Next: fix the indexing of the proxy vs other pool entries.
+Checkin 5671. 
+
 Then: Design a more challenging multicompartment/multivoxel system.
+As a step to this, run multi3.py. This turned up numerous bugs, cleaned up.
+Not clear yet if the multicompartment calculations are actually taking place,
+but it loads and runs.
 
 =============================================================================
