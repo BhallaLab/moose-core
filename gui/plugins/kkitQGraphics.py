@@ -112,6 +112,10 @@ class PoolItemCircle(PoolItem):
         adjusth = height*ratio
         #for ellispe
         self.bgColor.setRect(width/2-abs(adjustw/2),height/2-abs(adjusth/2),adjustw, adjusth)
+    
+    def returnEllispeSize(self):
+        self.bgColor.setRect(((self.gobj.boundingRect().width()+PoolItem.fontMetrics.width('  '))/2)-5,self.gobj.boundingRect().
+            height()/2-5,10,10)
 
 class TableItem(KineticsDisplayItem):
     defaultWidth = 30
