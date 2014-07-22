@@ -60,6 +60,7 @@ class KkitPlugin(MoosePlugin):
         self.runView = KkitRunView(self)
         self.currentRunView = self.runView.getCentralWidget()
         schedulingDockWidget.runner.update.connect(self.currentRunView.changeBgSize)
+        schedulingDockWidget.runner.resetAndRun.connect(self.currentRunView.resetColor)
         graphView.layout().addWidget(self.currentRunView,0,0,2,1)
         return self.view
 
@@ -380,18 +381,15 @@ class  KineticsWidget(EditorWidgetBase):
             hLayout.addWidget(self.view)
             #self.layout().addWidget(self.view)
     
-    '''def resetColor(self):
+    '''
+    def resetColor(self):
         for item in self.sceneContainer.items():
             if isinstance(item,PoolItem):
                 pinfo = moose.element(item.mobj).path+'/info'
                 color,bg = getColor(pinfo,self.colorMap)
                 item.updateColor(bg)
     def changeBgSize(self):
-<<<<<<< .mine
         for item in self.sceneContainer.items():
-=======
-	 item in list(self.sceneContainer.items()):
->>>>>>> .r5666
             if isinstance(item,PoolItem):
                 initialConc = moose.element(item.mobj).concInit
                 presentConc = moose.element(item.mobj).conc
@@ -401,9 +399,9 @@ class  KineticsWidget(EditorWidgetBase):
                     # multipying by 1000 b'cos moose concentration is in milli in moose
                     ratio = presentConc*1000
                 item.updateRect(math.sqrt(ratio))
-     '''   
+        
     def colorChange(self):
-        '''While simulation is running pool color are increased or decreased as per concentration level '''
+        #While simulation is running pool color are increased or decreased as per concentration level 
         for item in self.sceneContainer.items():
             if isinstance(item,PoolItem):
                 bg = item.returnColor()
@@ -424,7 +422,7 @@ class  KineticsWidget(EditorWidgetBase):
                 #only alpha value is changed
                 bg =QtGui.QColor(bg.red(),bg.green(),bg.blue(),alpha)
                 item.updateColor(bg)
-        
+     '''   
     def positionChange(self,mooseObject):
         #If the item position changes, the corresponding arrow's are calculated
         if isinstance(element(mooseObject),CubeMesh):
@@ -673,8 +671,13 @@ class kineticRunWidget(KineticsWidget):
                     ratio = presentConc/initialConc
                 else:
                     # multipying by 1000 b'cos moose concentration is in milli in moose
-                    ratio = presentConc*1000
+                    ratio = presentConc
+                
                 item.updateRect(math.sqrt(ratio))
+    def resetColor(self):
+        for item in self.sceneContainer.items():
+            if isinstance(item,PoolItemCircle):
+                item.returnEllispeSize()
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     size = QtCore.QSize(1024 ,768)
