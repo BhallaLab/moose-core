@@ -1,6 +1,7 @@
 moose (1.1) trusty; urgency=low
 
   * Initial upload!
+  * This script works on launchpad.
 
- -- Dilawar Singh (My public key.) <dilawars@ncbs.res.in> Fri, 18 Jul 2014 16:32:17 +0530
+ -- Dilawar Singh <dilawars@ncbs.res.in> Fri, 18 Jul 2014 16:32:17 +0530
 
