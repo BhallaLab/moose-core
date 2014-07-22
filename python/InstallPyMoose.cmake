@@ -2,8 +2,7 @@
 MESSAGE("Instlling python scripts: ${CMAKE_INSTALL_PREFIX}")
 set(PYTHON_DIR ${CMAKE_CURRENT_LIST_DIR})
 execute_process(COMMAND 
-    python setup.py build_py install --build-base=/tmp --force \
-        --prefix=${CMAKE_INSTALL_PREFIX} 
+    python setup.py build_py build -b /tmp install --force --prefix=${CMAKE_INSTALL_PREFIX} 
     WORKING_DIRECTORY ${PYTHON_DIR}
     )
 FILE(REMOVE_RECURSE ${PYTHON_DIR}/build)
