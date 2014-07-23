@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
+set(CMAKE_INSTALL_PREFIX /usr/local)
 
 project(moose)
 
@@ -298,7 +299,6 @@ if(BUILD_PYMOOSE)
 endif(BUILD_PYMOOSE)
 
 ######################### INSTALL ##############################################
-set(CMAKE_INSTALL_PREFIX .)
 install(TARGETS moose.bin 
     RUNTIME DESTINATION bin
     )
@@ -313,12 +313,14 @@ install(PROGRAMS scripts/moosegui
     DESTINATION bin
     )
 ########################## PACKAGING #########################################
+include(CPack)
 set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Moose")
-set(CPACK_INSTALL_SCRIPT "${CMAKE_SOURCE_DIR}/PackageScript.cmake")
+set(CPACK_INSTALL_SCRIPT "${CMAKE_SOURCE_DIR}/python/InstallPyMoose.cmake")
 set(CPACK_PACKAGE_VERSION_MAJOR "1")
 set(CPACK_PACKAGE_VERSION_MINOR "1")
 set(CPACK_PACKAGE_VENDOR "NCBS Bangalore")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dilawar Singh <dilawars@ncbs.res.in>")
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README")
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dilawar Singh <dilawars@ncbs.res.in>")
 if(WIN32)
@@ -333,9 +335,6 @@ set(CPACK_PACKAGE_FILE_NAME
 set(CPACK_DEB_COMPONENT_INSTALL 1)
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dilawar Singh")
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "libgsl (>= 1.16) ")
-include(CPack)
-
-
 
 ######################  TESTING  ###############################################
 include(CTest)
