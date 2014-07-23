@@ -298,7 +298,7 @@ if(BUILD_PYMOOSE)
 endif(BUILD_PYMOOSE)
 
 ######################### INSTALL ##############################################
-set(CMAKE_INSTALL_PREFIX /usr/local)
+set(CMAKE_INSTALL_PREFIX .)
 install(TARGETS moose.bin 
     RUNTIME DESTINATION bin
     )
@@ -315,6 +315,7 @@ install(PROGRAMS scripts/moosegui
 ########################## PACKAGING #########################################
 set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Moose")
+set(CPACK_INSTALL_SCRIPT "${CMAKE_SOURCE_DIR}/PackageScript.cmake")
 set(CPACK_PACKAGE_VERSION_MAJOR "1")
 set(CPACK_PACKAGE_VERSION_MINOR "1")
 set(CPACK_PACKAGE_VENDOR "NCBS Bangalore")
