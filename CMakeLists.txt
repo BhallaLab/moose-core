@@ -300,19 +300,30 @@ endif(BUILD_PYMOOSE)
 ######################### INSTALL ##############################################
 install(TARGETS moose.bin 
     RUNTIME DESTINATION bin
+    COMPONENT applications
     )
-install(PROGRAMS scripts/moose DESTINATION bin)
+install(PROGRAMS scripts/moose DESTINATION bin
+    COMPONENT applications
+    )
 install(DIRECTORY gsl/lib/ DESTINATION lib
+    COMPONENT libraries
     USE_SOURCE_PERMISSIONS
     FILES_MATCHING PATTERN "*.so*"
     PATTERN ".svn" EXCLUDE
     )
-install(SCRIPT python/InstallPyMoose.cmake)
+install(SCRIPT python/InstallPyMoose.cmake
+    COMPONENT pymoose
+    )
 install(PROGRAMS scripts/moosegui 
     DESTINATION bin
     )
 ########################## PACKAGING #########################################
+
 set(CPACK_GENERATOR "DEB")
+set(CPACK_STRIP_FILES TRUE)
+
+#  We need to compile python scripts on the installation  host.
+set(CPACK_COMPONENTS_ALL applications libraries)
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dilawar Singh")
 set(CPACK_PACKAGE_CONTACT "dilawars@ncbs.res.in")
 #set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
@@ -332,8 +343,7 @@ set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
 set(CPACK_PACKAGE_FILE_NAME
     "moose_${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.orig"
     )
-set(CPACK_DEB_COMPONENT_INSTALL 1)
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "libgsl (>= 1.16) ")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libgsl (>= 1.16) libopenmpi libhdf5-7 python-numpy")
 include(CPack)
 
 ######################  TESTING  ###############################################
