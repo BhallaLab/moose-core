@@ -1,7 +1,5 @@
-moose (1.1) trusty; urgency=low
+moose (3.0) unstable; urgency=low
 
-  * Initial upload!
-  * Trying to build.
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
 
- -- Dilawar Singh <dilawars@ncbs.res.in>  Fri, 18 Jul 2014 16:32:17 +0530
-
+ -- Dilawar <dilawars@ncbs.res.in>  Thu, 24 Jul 2014 16:41:58 +0530

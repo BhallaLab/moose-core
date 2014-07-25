@@ -1,27 +1,4 @@
 #!/usr/bin/make -f
-
-BUILDDIR = buildMooseUsingCMake
-
-# secondly called by launchpad
-build:
-	#mkdir $(BUILDDIR);
-	cd $(BUILDDIR); ./build_me.sh
-
-# thirdly called by launchpad
-binary: binary-indep binary-arch
-
-binary-indep:
-	# nothing to be done
-
-binary-arch:
-	cd $(BUILDDIR); cmake -P cmake_install.cmake
-	mkdir debian/tmp/DEBIAN
-	dpkg-gencontrol -pmoose
-	dpkg --build debian/tmp ..
-
-# firstly called by launchpad
-clean:
-	rm -f build
-	rm -rf $(BUILDDIR)
-
-.PHONY: binary binary-arch binary-indep clean
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/class/python-distutils.mk
+include /usr/share/cdbs/1/class/cmake.mk

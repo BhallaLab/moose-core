@@ -1,16 +1,14 @@
 Source: moose
-Section: devel
+Section: science
 Priority: optional
 Maintainer: Dilawar Singh <dilawars@ncbs.res.in>
-Build-Depends: cmake, build-essential
+Build-Depends: debhelper (>= 8.0.0), cdbs, devscripts, libgsl0-dev (>= 1.16), cmake, libhdf5-dev, python-dev, python-numpy, python-setuptools, libopenmpi-dev
+Standards-Version: 3.9.4
 Homepage: http://moose.ncbs.res.in
 
 Package: moose
 Architecture: any
-Depends: libgsl
-Description: Moose, Multiscale Object Oriented Simulation Environment
-    MOOSE spans the range from single molecules to subcellular networks, from
-    single cells to neuronal networks, and to still larger systems.  MOOSE uses
-    Python for scripting compatibility with a large range of software and
-    analysis tools. It recognizes model definition standards including SBML,
-    NeuroML, and GENESIS model file formats
+Depends: ${shlibs:Depends}, ${misc:Depends}, libhdf5-7, gsl-bin
+Suggests: libsbml5
+Description: Neural simulator.
+  To be continued.
