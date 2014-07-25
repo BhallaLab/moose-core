@@ -2,6 +2,11 @@
 set -e
 set -o xtrace
 
+cat > moose.recipe <<EOF
+# bzr-builder format 0.3 deb-version {debupstream}+{revno}
+lp:~dilawar/+junk/testing
+EOF
+# one can do nesting here.
 if [ $# -gt 0 ]; then
     if [[ "$1" == "update" ]]; then
         echo "Fetching repo and creating tar-ball"
@@ -23,5 +28,6 @@ if [[ ! $tarFile ]]; then
     bzr dailydeb --allow-fallback-to-native moose.recipe ..
 fi
 
+rm -f moose.recipe
 echo "Building debian package"
 bzr builddeb -- -uc -us
