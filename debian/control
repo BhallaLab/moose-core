@@ -10,5 +10,16 @@ Package: moose
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, libhdf5-7, gsl-bin
 Suggests: libsbml5
-Description: Neural simulator.
-  To be continued.
+Description: MOOSE is the Multiscale Object-Oriented Simulation Environment. It is the base and numerical core for large, detailed simulations including Computational Neuroscience and Systems Biology.
+ MOOSE spans the range from single molecules to subcellular networks, from
+ single cells to neuronal networks, and to still larger systems.  MOOSE uses
+ Python for scripting compatibility with a large range of software and
+ analysis tools. It recognizes model definition standards including SBML,
+ NeuroML, and GENESIS model file formatsGallery
+ .
+ MOOSE is open source software, licensed under the LGPL (Lesser GNU Public
+ License). It has absolutely no warranty.
+ .
+ The MOOSE team is also participating in development of MOOGLI: a library and
+ standalone application for displaying time-course of activity of detailed 3-D
+ network models using OpenGL and also using OpenSceneGraph	
