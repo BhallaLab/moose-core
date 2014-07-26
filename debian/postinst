@@ -20,7 +20,7 @@ set -e
 
 case "$1" in
     configure)
-        cd python && python setup.py install 
+        cd /usr/share/moose/python && python setup.py install --prefix=/usr
 
 	## Unfortunately $HOME is undefined if installed via Ubuntu Software Center (the default).
 	## Only if you 'sudo dpkg -i moose...deb' do you have $HOME defined.
