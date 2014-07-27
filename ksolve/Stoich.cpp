@@ -91,6 +91,13 @@ const Cinfo* Stoich::initCinfo()
 			&Stoich::getNumAllPools
 		);
 
+		static ReadOnlyValueFinfo< Stoich, unsigned int > numProxyPools(
+			"numProxyPools",
+			"Number of pools here by proxy as substrates of a cross-"
+			"compartment reaction.",
+			&Stoich::getNumProxyPools
+		);
+
 		static ReadOnlyValueFinfo< Stoich, vector< unsigned int > > 
 			poolIdMap(
 			"poolIdMap",
@@ -139,9 +146,11 @@ const Cinfo* Stoich::initCinfo()
 		static ReadOnlyLookupValueFinfo< Stoich, Id, vector< Id > >
 				proxyPools(
 			"proxyPools",
-			"Return vector of proxy pools for X-compt reactions on this "
-			"stoich, where the pools belong to the specified compartment."
-			" If no pools are found, return an empty vector.",
+			"Return vector of proxy pools for X-compt reactions between "
+			"current stoich, and the argument, which is a StoichId. "
+			"The returned pools belong to the compartment handling the "
+			"Stoich specified in the argument. "
+			"If no pools are found, return an empty vector.",
 			&Stoich::getProxyPools
 		);
 
@@ -177,6 +186,7 @@ const Cinfo* Stoich::initCinfo()
 		&estimatedDt,		// ReadOnlyValue
 		&numVarPools,		// ReadOnlyValue
 		&numAllPools,		// ReadOnlyValue
+		&numProxyPools,		// ReadOnlyValue
 		&poolIdMap,		// ReadOnlyValue
 		&numRates,			// ReadOnlyValue
 		&matrixEntry,		// ReadOnlyValue
@@ -533,6 +543,11 @@ vector< unsigned int > Stoich::getRowStart() const
 vector< Id > Stoich::getProxyPools( Id i ) const
 {
 	static vector< Id > dummy;
+	if ( !i.element()->cinfo()->isA( "Stoich" ) ) {
+		cout << "Warning: Stoich::getProxyPools: argument " << i << 
+				" is not a Stoich\n";
+		return dummy;
+	}
 	Id compt = Field< Id >::get( i, "compartment" );
 	map< Id, vector< Id > >::const_iterator j = 
 			offSolverPoolMap_.find( compt );

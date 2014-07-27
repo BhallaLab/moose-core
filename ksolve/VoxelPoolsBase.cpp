@@ -145,7 +145,7 @@ void VoxelPoolsBase::xferInOnlyProxies(
 	for ( vector< unsigned int >::const_iterator 
 			k = poolIndex.begin(); k != poolIndex.end(); ++k ) {
 		if ( *k >= S_.size() - numProxyPools ) {
-			S_[*k] += *i;
+			Sinit_[*k] = S_[*k] += *i;
 		}
 		i++;
 	}
