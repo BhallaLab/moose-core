@@ -35,8 +35,8 @@ const Cinfo* CubeMesh::initCinfo()
 		static ValueFinfo< CubeMesh, double > x0(
 			"x0",
 			"X coord of one end",
-			&CubeMesh::setY0,
-			&CubeMesh::getY0
+			&CubeMesh::setX0,
+			&CubeMesh::getX0
 		);
 		static ValueFinfo< CubeMesh, double > y0(
 			"y0",
