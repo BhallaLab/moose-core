@@ -34,8 +34,8 @@
 const unsigned int OFFNODE = ~0;
 
 // static function
-SrcFinfo1< vector< double > >* Ksolve::xComptOut() {
-	static SrcFinfo1< vector< double > > xComptOut( "xComptOut",
+SrcFinfo2< Id, vector< double > >* Ksolve::xComptOut() {
+	static SrcFinfo2< Id, vector< double > > xComptOut( "xComptOut",
 		"Sends 'n' of all molecules participating in cross-compartment "
 		"reactions between any juxtaposed voxels between current compt "
 		"and another compartment. This includes molecules local to this "
@@ -171,8 +171,7 @@ const Cinfo* Ksolve::initCinfo()
 		static DestFinfo xComptIn( "xComptIn",
 			"Handles arriving pool 'n' values used in cross-compartment "
 			"reactions.",
-			new EpFunc1< Ksolve, vector< double > >(
-					&Ksolve::xComptIn )
+			new EpFunc2< Ksolve, Id, vector< double > >( &Ksolve::xComptIn )
 		);
 		static Finfo* xComptShared[] = {
 			xComptOut(), &xComptIn
@@ -513,17 +512,19 @@ void Ksolve::reinit( const Eref& e, ProcPtr p )
 //////////////////////////////////////////////////////////////
 void Ksolve::initProc( const Eref& e, ProcPtr p )
 {
-	vector< vector< double > > values( xfer_.size() );
+	// vector< vector< double > > values( xfer_.size() );
 	for ( unsigned int i = 0; i < xfer_.size(); ++i ) {
 		XferInfo& xf = xfer_[i];
 		unsigned int size = xf.xferPoolIdx.size() * xf.xferVoxel.size();
-		values[i].resize( size, 0.0 );
+		// values[i].resize( size, 0.0 );
+		vector< double > values( size, 0.0 );
 		for ( unsigned int j = 0; j < xf.xferVoxel.size(); ++j ) {
-			pools_[xf.xferVoxel[j]].xferOut( i, values[i], xf.xferPoolIdx );
+			unsigned int vox = xf.xferVoxel[j];
+			pools_[vox].xferOut( vox, values, xf.xferPoolIdx );
 		}
-		// xComptOut()->sendTo( e, values );
+		xComptOut()->sendTo( e, xf.ksolve, e.id(), values );
 	}
-	xComptOut()->sendVec( e, values );
+	// xComptOut()->sendVec( e, values );
 }
 
 void Ksolve::initReinit( const Eref& e, ProcPtr p )
@@ -531,18 +532,19 @@ void Ksolve::initReinit( const Eref& e, ProcPtr p )
 	for ( unsigned int i = 0 ; i < pools_.size(); ++i ) {
 		pools_[i].reinit();
 	}
-	vector< vector< double > > values( xfer_.size() );
+	// vector< vector< double > > values( xfer_.size() );
 	for ( unsigned int i = 0; i < xfer_.size(); ++i ) {
 		XferInfo& xf = xfer_[i];
 		unsigned int size = xf.xferPoolIdx.size() * xf.xferVoxel.size();
 		xf.lastValues.assign( size, 0.0 );
 		for ( unsigned int j = 0; j < xf.xferVoxel.size(); ++j ) {
-			pools_[ xf.xferVoxel[j] ].xferOut( 
-							i, xf.lastValues, xf.xferPoolIdx );
-			values[i] = xf.lastValues;
+			unsigned int vox = xf.xferVoxel[j];
+			pools_[ vox ].xferOut( vox, xf.lastValues, xf.xferPoolIdx );
+			// values[i] = xf.lastValues;
 		}
+		xComptOut()->sendTo( e, xf.ksolve, e.id(), xf.lastValues );
 	}
-	xComptOut()->sendVec( e, values );
+	// xComptOut()->sendVec( e, values );
 }
 
 //////////////////////////////////////////////////////////////
@@ -668,21 +670,20 @@ void Ksolve::setBlock( const vector< double >& values )
 //////////////////////////////////////////////////////////////////////////
 // void Ksolve::xComptIn( const Eref& e, const ObjId& src, 
 // vector< double > values )
-void Ksolve::xComptIn( const Eref& e,
+void Ksolve::xComptIn( const Eref& e, Id srcKsolve,
 	vector< double > values )
 {
-	// This needs to be refined to identify source compt, and select
-	// subset of targets based on that.
-	ObjId src( xfer_[0].ksolve );
 		/*
 	assert( values.size() == xComptData_.size() );
 	for ( vector< VoxelPools >::iterator
 			i = pools_.begin(); i != pools_.end(); ++i )
 		i->mergeProxy( values, xComptData_ );
 		*/
+	// Identify the xfer_ that maps to the srcKsolve. Assume only a small
+	// number of them, otherwise we should use a map.
 	unsigned int comptIdx ;
 	for ( comptIdx = 0 ; comptIdx < xfer_.size(); ++comptIdx ) {
-		if ( xfer_[comptIdx].ksolve == src.id ) break;
+		if ( xfer_[comptIdx].ksolve == srcKsolve ) break;
 	}
 	assert( comptIdx != xfer_.size() );
 	XferInfo& xf = xfer_[comptIdx];
@@ -700,7 +701,7 @@ void Ksolve::xComptOut( const Eref& e )
 			pools_[ i->xferVoxel[j] ].xferOut( j, values, i->xferPoolIdx );
 		}
 		// Use sendTo or sendVec to send to specific ksolves.
-		xComptOut()->send( e, values );
+		xComptOut()->sendTo( e, i->ksolve, e.id(), values );
 	}
 }
 
@@ -797,12 +798,11 @@ unsigned int Ksolve::assignProxyPools( const map< Id, vector< Id > >& xr,
 				Id myKsolve, Id otherKsolve, Id otherComptId )
 {
 	map< Id, vector< Id > >::const_iterator i = xr.find( otherComptId );
-	if ( i == xr.end() ) 
-		return 0;
+	vector< Id > proxyMols;
+	if ( i != xr.end() ) 
+		proxyMols = i->second;
 	Ksolve* otherKsolvePtr = reinterpret_cast< Ksolve* >( 
 					otherKsolve.eref().data() );
-
-	vector< Id > proxyMols = i->second;
 		
 	vector< Id > otherProxies = LookupField< Id, vector< Id > >::get( 
 			otherKsolvePtr->stoich_, "proxyPools", stoich_ );

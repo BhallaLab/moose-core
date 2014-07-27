@@ -4172,6 +4172,52 @@ Checkin 5671.
 Then: Design a more challenging multicompartment/multivoxel system.
 As a step to this, run multi3.py. This turned up numerous bugs, cleaned up.
 Not clear yet if the multicompartment calculations are actually taking place,
-but it loads and runs.
+but it loads and runs.  Checkin 5672. 
+
+=============================================================================
+24 July 2014
+Multicompartment calculations: For starters just do the simplest possible:
+
+a <===> b <===> c
+
+This has easy analytic time-course solutions for non-spatial compartments, and 
+easy analytic steady-state solutions for spatial compts.
+
+Implemented it, unfortunately numerics are off. Now to track down.
+Aha, asymmetry in the outcome depending on whether I do
+stoich0.buildXreacs( stoich1 )
+	or
+stoich1.buildXreacs( stoich0 )
+That suggests a hole in the implementation, which was to have been totally
+symmetric.
+
+Now it looks symmetric. But the thing settles to a smaller value than it
+should. To 110/111 to be precise.
+
+
+=============================================================================
+27 July.
+One of the proxy pools is initialized to zero. That would deplete the
+concs. I need to have a way to set nInit even for proxies.
+
+Compt	aS(t0)	aSinit	bS(t0)	bSinit	cS(t0)	cSinit
+0	6e6	6e8	
+1	0	0	6e7	6e7	6e6	0
+2					0	6e6
+
+Some changes:
+1. On reinit the local Sinit should always override the incoming values for
+	the starting computations.
+2. The local Sinit should perhaps propagate to the Sinit for the other compts,
+	use this value instead of relying on other stuff sent around.
+
+Tracked down one major problem: I don't identify the source compartment, so I'm
+filling in the wrong values.
+This is something listed in the 17 July wishlist.
+
+Implemented. Several more fixes to indexing of data being transferred for
+cross-voxel reactions. Will need to generate a much nastier stress case.
+For now it works at least to this point. The crossComptOscillator also
+works.
 
 =============================================================================

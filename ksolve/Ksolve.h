@@ -47,10 +47,10 @@ class XferInfo {
 		vector< unsigned int > xferVoxel;
 
 		/**
-		 * Vector of Ksolves participating in cross-compartment reactions
-		 * with self.
-		 * The indices into this are used to look up the proxy pool info
-		 * of the VoxelPools, for xreacs into the specified Ksolve.
+		 * Id of Ksolve that particpates in this set of 
+		 * cross-compartment reactions with self.
+		 * This is used to identify with XferInfo to use for a given
+		 * incoming message.
 		 */
 		Id ksolve;
 
@@ -103,7 +103,7 @@ class Ksolve: public ZombiePoolInterface
 		//////////////////////////////////////////////////////////////////
 		// Dest Finfos
 		//////////////////////////////////////////////////////////////////
-		void xComptIn( const Eref& e, vector< double > );
+		void xComptIn( const Eref& e, Id srcKsolve, vector< double > );
 		void process( const Eref& e, ProcPtr p );
 		void reinit( const Eref& e, ProcPtr p );
 		void initProc( const Eref& e, ProcPtr p );
@@ -160,7 +160,7 @@ class Ksolve: public ZombiePoolInterface
 					Id myKsolve, Id otherKsolve, Id otherComptId );
 
 		//////////////////////////////////////////////////////////////////
-		static SrcFinfo1< vector< double > >* xComptOut();
+		static SrcFinfo2< Id, vector< double > >* xComptOut();
 		static const Cinfo* initCinfo();
 	private:
 		string method_;

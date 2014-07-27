@@ -124,6 +124,36 @@ template < class T > class SrcFinfo1: public SrcFinfo
 			}
 		}
 
+		void sendTo( const Eref& er, Id tgt, T arg ) const 
+		{
+			const vector< MsgDigest >& md = er.msgDigest( getBindIndex() );
+			for ( vector< MsgDigest >::const_iterator
+				i = md.begin(); i != md.end(); ++i ) {
+				const OpFunc1Base< T >* f = 
+					dynamic_cast< const OpFunc1Base< T >* >( i->func );
+				assert( f );
+				for ( vector< Eref >::const_iterator
+					j = i->targets.begin(); j != i->targets.end(); ++j ) {
+					if ( j->element() != tgt.element() )
+						continue; // Wasteful unless very few dests.
+					if ( j->dataIndex() == ALLDATA ) {
+						Element* e = j->element();
+						unsigned int start = e->localDataStart();
+						unsigned int end = start + e->numLocalData();
+						for ( unsigned int k = start; k < end; ++k )
+							f->op( Eref( e, k ), arg );
+					} else  {
+						f->op( *j, arg );
+						// Need to send stuff offnode too here. The 
+						// target in this case is just the src Element.
+						// Its ObjId gets stuffed into the send buf.
+						// On the other node it will execute
+						// its own send command with the passed in args. 
+					}
+				}
+			}
+		}
+
 		/**
 		 * Each target gets successive entries from the arg vector.
 		 * Rolls over if the # of targets exceeds vector size.
@@ -198,6 +228,32 @@ template < class T1, class T2 > class SrcFinfo2: public SrcFinfo
 				assert( f );
 				for ( vector< Eref >::const_iterator
 					j = i->targets.begin(); j != i->targets.end(); ++j ) {
+					if ( j->dataIndex() == ALLDATA ) {
+						Element* e = j->element();
+						unsigned int start = e->localDataStart();
+						unsigned int end = start + e->numData();
+						for ( unsigned int k = start; k < end; ++k )
+							f->op( Eref( e, k ), arg1, arg2 );
+					} else  {
+						f->op( *j, arg1, arg2 );
+					}
+				}
+			}
+		}
+
+		void sendTo( const Eref& e, Id tgt, 
+						const T1& arg1, const T2& arg2 ) const
+		{
+			const vector< MsgDigest >& md = e.msgDigest( getBindIndex() );
+			for ( vector< MsgDigest >::const_iterator
+				i = md.begin(); i != md.end(); ++i ) {
+				const OpFunc2Base< T1, T2 >* f = 
+					dynamic_cast< const OpFunc2Base< T1, T2 >* >( i->func );
+				assert( f );
+				for ( vector< Eref >::const_iterator
+					j = i->targets.begin(); j != i->targets.end(); ++j ) {
+					if ( j->element() != tgt.element() )
+						continue; // Wasteful unless very few dests.
 					if ( j->dataIndex() == ALLDATA ) {
 						Element* e = j->element();
 						unsigned int start = e->localDataStart();
