@@ -98,27 +98,18 @@ endif()
 # Wheather to use local-gsl or not. link_directories are need to be called
 # before target is created therefore it is here.
 if(EXISTS ${CMAKE_SOURCE_DIR}/external/gsl-1.16/gsl-config.in)
-    MESSAGE("+ Local gsl is found.")
+    MESSAGE("++ Local gsl is found.")
     set(LOCAL_GSL 1)
 endif()
 
 if(LOCAL_GSL)
     # Setup GSL as external library.
-    set(GSL_SOURCE_DIR ${CMAKE_SOURCE_DIR}/external/gsl-1.16)
-    set(GSL_INSTALL_DIR ${CMAKE_SOURCE_DIR}/gsl)
-
-    include(ExternalProject)
-    ExternalProject_Add(LOCAL_GSL
-        SOURCE_DIR ${GSL_SOURCE_DIR}
-        CONFIGURE_COMMAND ${GSL_SOURCE_DIR}/configure --prefix=${GSL_INSTALL_DIR}
-        BUILD_COMMAND ${MAKE}
-        )
-
-    include_directories(${GSL_INSTALL_DIR}/include)
-    set(LOCAL_GSL_LIBRARIES 
-        ${GSL_INSTALL_DIR}/lib/libgsl.so
-        ${GSL_INSTALL_DIR}/lib/libgslcblas.so
-        )
+    add_subdirectory(external/gsl-1.16)
+    include_directories(external/gsl-1.16)
+    #set(GSL_SOURCE_DIR ${CMAKE_SOURCE_DIR}/external/gsl-1.16)
+    #set(GSL_INSTALL_DIR ${CMAKE_SOURCE_DIR}/gsl)
+    #include_directories(${GSL_INSTALL_DIR}/include)
+    set(LOCAL_GSL_LIBRARIES gsl gslcblas)
 else()
     find_package(GSL REQUIRED)
 endif()
