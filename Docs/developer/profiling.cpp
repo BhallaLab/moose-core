@@ -74,7 +74,9 @@ To profile moose, it should be recompiled with altering the Makefile setting BUI
 
 Essentially you should add the -lprofiler flag. So if the flags corresponding to the "profile" BUILD option does not include -lprofiler you should add it yourself (probably that is the case).
 
-You may only add the -lprofiler flag to the Makefile which compiles the C++ code you are interested in profiling (not tested). Then recompile the moose.
+Flags to use for example: \verbatim CXXFLAGS  = -pg -lprofiler -fpermissive -fno-strict-aliasing -fPIC -Wall -Wno-long-long -pedantic -DUSE_GENESIS_PARSER \endverbatim
+
+You may only add the -lprofiler flag to the Makefile which compiles the C++ code you are interested in profiling (not tested). Then recompile moose.
 
 \section ProfilingInAction Profiling in action
 
