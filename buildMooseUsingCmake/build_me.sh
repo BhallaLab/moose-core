@@ -11,4 +11,4 @@ rm -rf ../CMakeFiles/
 rm -f ../CMakeCache.txt
 rm -f CMakeCache.txt
 cmake ..
-make  VERBOSE=0
+make VERBOSE=0
