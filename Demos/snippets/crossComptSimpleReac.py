@@ -59,7 +59,7 @@ def makeModel():
 
 		# Assign parameters
 		a.concInit = 1
-		b.concInit = 1
+		b.concInit = 12.1
 		c.concInit = 1
 		reac0.Kf = 0.1
 		reac0.Kb = 0.1
