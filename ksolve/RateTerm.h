@@ -487,7 +487,7 @@ class NOrder: public ZeroOrder
 			assert( v_.size() > 0 );
 			if ( v_.size() == 1 )
 				return new NOrder( k_, v_ );
-			return new NOrder( k_ * pow( ratio, v_.size() -1 ), v_ );
+			return new NOrder( k_ * pow( ratio, (int)(v_.size() -1) ), v_ );
 		}
 
 	protected:
@@ -513,7 +513,7 @@ class StochNOrder: public NOrder
 			assert( v_.size() > 0 );
 			if ( v_.size() == 1 )
 				return new StochNOrder( k_, v_ );
-			return new StochNOrder( k_ * pow( ratio, v_.size() -1 ), v_ );
+			return new StochNOrder( k_ * pow( ratio, (int)(v_.size() -1) ), v_ );
 		}
 };
 
