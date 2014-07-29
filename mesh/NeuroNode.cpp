@@ -163,7 +163,7 @@ void NeuroNode::findConnectedCompartments(
 		elecCompt_.element()->getNeighbors( ret, sumRaxialOut );
 		all.insert( all.end(), ret.begin(), ret.end() );
 	} else {
-		assert( cinfo->isA( "Compartment" ) );
+		assert( cinfo->isA( "CompartmentBase" ) );
 		vector< Id > ret;
 		elecCompt_.element()->getNeighbors( ret, axialOut );
 		all.insert( all.end(), ret.begin(), ret.end() );
@@ -331,7 +331,7 @@ void NeuroNode::buildTree(
 	map< Id, unsigned int > nodeMap;
 	for ( vector< ObjId >::iterator 
 		i = elist.begin(); i != elist.end(); ++i ) {
-		if ( i->element()->cinfo()->isA( "Compartment" ) )
+		if ( i->element()->cinfo()->isA( "CompartmentBase" ) )
 			nodes.push_back( NeuroNode( *i ) );
 	}
 	if ( nodes.size() <= 1 )
