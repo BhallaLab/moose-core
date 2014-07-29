@@ -4220,4 +4220,51 @@ cross-voxel reactions. Will need to generate a much nastier stress case.
 For now it works at least to this point. The crossComptOscillator also
 works.
 
+Final conc = 2.0
+Final vol = 111e-17
+Final amount = 222e-17
+Initial amount from a and c = 101e-17
+So new amount from b should be 121e-17, which comes to a conc of 12.1
+This works. Updated crossComptSimpleReac.py to do it.
+
+Next to devise a crossComptCplxReac.py which has many voxels that 
+communicate. Preferably something analytical.
+A model with dend, spines and psd seems the best bet. I'll set diffusion
+const to sero, so each has its own domain. Then different init conditions
+to check that the voxels are communicating in the correct order.
 =============================================================================
+28 July.
+Subha has clarified the use case for the item on 17 July
+Consider an object that sends a 'get' request to multiple targets. It needs
+two things
+	- To have each return value come into a different location
+	- To have an unambiguous map between the values and the sources.
+Note that the SendTo function also would benefit from a message variant that
+gave an unambiguous mapping and ordering.
+
+=============================================================================
+29 July
+Options for the 'get' request
+1. Identical to current API, except that the GetOpFunc::Op() does
+	*ret++ = returnOp( e ) 
+rather than 
+	*ret = returnOp( e )
+This requires that the calling function know exactly how many values it is
+to pick up, that it allocate the buffer for them, and that it know exactly what
+order the return values will take. It is fast and fragile, needs no API change.
+
+2. Replace current API with 
+	ret.push_back( returnOp( e ) )
+where ret is now a vector< A >&. 
+This requires that the calling function knows the order of the return values.
+It is safe and reasonably fast but needs an API change. Also some care with the
+ordering, specially across nodes.
+
+3. Replace current API with
+	ret.push_back( pair< A, ObjId >( returnOp( e ), e.objId() ) )
+where ret is a vector< pair< A, ObjId >&
+This does not requre any info on the calling func, nor any care with ordering.
+API changes. May need lookup/sorting of the returned values to map to ObjIds.
+Somewhat extra overhead.
+
+
