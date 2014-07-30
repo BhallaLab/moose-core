@@ -178,8 +178,8 @@ template< class T, class A > class GetEpFunc: public GetOpFuncBase< A >
 			: func_( func )
 			{;}
 
-		void op( const Eref& e, A* ret ) const {
-			*ret = returnOp( e );
+		void op( const Eref& e, vector< A >* ret ) const {
+			ret->push_back( returnOp( e ) );
 		}
 		/*
 		void op( const Eref& e, ObjId recipient, FuncId fid ) const {

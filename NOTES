@@ -4267,4 +4267,9 @@ This does not requre any info on the calling func, nor any care with ordering.
 API changes. May need lookup/sorting of the returned values to map to ObjIds.
 Somewhat extra overhead.
 
+Trying to implement. Compiler err
+=============================================================================
+30 July
+Implemented Number 2. Works. Did unit test.
 
+=============================================================================
