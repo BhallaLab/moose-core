@@ -591,8 +591,8 @@ foreach (dir "." ${dirs})
   endforeach ()
 endforeach ()
 
-option(GSL_SHARED "Build shared library instead of static one" OFF)
-
+option(GSL_SHARED "Build shared library instead of static one" ON)
+set(GSL_SHARED 1)
 if (GSL_SHARED)
   include(CheckCCompilerFlag)
   check_c_compiler_flag(-fPIC HAVE_FPIC)
