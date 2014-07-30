@@ -36,7 +36,7 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     set(CMAKE_CXX_COMPILER "g++")
 else()
-    message(WARNING "Continuing with unsupported compiler")
+    message(WARNING "Continuing with unsupported compiler: ${CMAKE_CXX_COMPILER}")
 endif()
 
 ## Turn warning to error
@@ -103,13 +103,17 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/external/gsl-1.16/gsl-config.in)
 endif()
 
 if(LOCAL_GSL)
-    # Setup GSL as external library.
-    add_subdirectory(external/gsl-1.16)
-    include_directories(external/gsl-1.16)
-    #set(GSL_SOURCE_DIR ${CMAKE_SOURCE_DIR}/external/gsl-1.16)
-    #set(GSL_INSTALL_DIR ${CMAKE_SOURCE_DIR}/gsl)
-    #include_directories(${GSL_INSTALL_DIR}/include)
-    set(LOCAL_GSL_LIBRARIES gsl)
+    set(GSL_SOURCE_DIR ${CMAKE_SOURCE_DIR}/external/gsl-1.16)
+    set(GSL_INSTALL_DIR ${CMAKE_SOURCE_DIR}/gsl)
+    include(ExternalProject)
+    ExternalProject_Add(GSL
+        PREFIX ${GSL_SOURCE_DIR}
+        SOURCE_DIR ${GSL_SOURCE_DIR}
+        CMAKE_ARGS ${CMARGS} -DCMAKE_INSTALL_PREFIX=${GSL_INSTALL_DIR}
+        )
+    include_directories(${GSL_INSTALL_DIR}/include)
+    LINK_DIRECTORIES(${GSL_INSTALL_DIR}/lib)
+    set(LOCAL_GSL_LIBRARIES gsl gslcblas)
 else()
     find_package(GSL REQUIRED)
 endif()

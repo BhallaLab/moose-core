@@ -1,11 +1,15 @@
 # CMake build script for the GNU Scientific Library.
-
 cmake_minimum_required(VERSION 2.6)
+project(GSL)
 
+set(PACKAGE "gsl")
+set(PACKAGE_NAME ${PACKAGE})
+set(PACKAGE_TARNAME ${PACKAGE})
+set(PACKAGE_BUGREPORT "")
+set(PACKAGE_URL "")
 set(LT_OBJDIR ".libs/")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
-set(GSL_BINARY_DIR .)
 
 # The following part of config.h is hard to derive from configure.ac.
 string(REGEX MATCHALL "[^\n]*\n" CONFIG
@@ -546,8 +550,8 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/copy-headers.cmake "
     configure_file(\${path} ${GSL_BINARY_DIR}/gsl/\${filename} COPY_ONLY)
   endforeach ()")
 
-#add_custom_command(OUTPUT ${GSL_HEADERS} COMMAND ${CMAKE_COMMAND} -P copy-headers.cmake)
-
+add_custom_command(OUTPUT ${GSL_HEADERS}
+  COMMAND ${CMAKE_COMMAND} -P copy-headers.cmake)
 add_custom_target(copy-headers DEPENDS ${GSL_HEADERS})
 
 macro(get_sources dir line source_var)

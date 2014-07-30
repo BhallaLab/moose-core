@@ -1,4 +1,7 @@
 #  Build folder 
+gsl/include
+gsl/lib
+external/gsl-1.16
 .svn
 buildMooseUsingCmake
 tags
