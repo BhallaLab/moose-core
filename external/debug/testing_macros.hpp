@@ -10,7 +10,7 @@
  *       Revision:  none
  *       Compiler:  gcc
  *
- *         Author:  Dilawar Singh (), dilawar@ee.iitb.ac.in
+ *         Author:  Dilawar Singh (), dilawars@ncbs.res.in
  *   Organization:  
  *
  * ==============================================================================

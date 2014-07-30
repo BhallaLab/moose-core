@@ -10,8 +10,8 @@
  *       Revision:  none
  *       Compiler:  gcc/g++
  *
- *         Author:  Dilawar Singh (), dilawar@ee.iitb.ac.in
- *   Organization:  IIT Bombay
+ *         Author:  Dilawar Singh (), dilawars@ncbs.res.in
+ *   Organization:  NCBS Bangalore.
  *
  * =====================================================================================
  */
