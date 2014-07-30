@@ -31,7 +31,7 @@ __credits__          = ["NCBS Bangalore", "Bhalla Lab"]
 __license__          = "GPL"
 __version__          = "1.0.0"
 __maintainer__       = "Dilawar Singh"
-__email__            = "dilawars@iitb.ac.in"
+__email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
 import os
