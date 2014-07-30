@@ -1,300 +1,167 @@
--*- mode: org -*-/code/moose/branches/asyn13
+# MOOSE
 
-MOOSE is the Multiscale Object-Oriented Simulation Environment. is the
+MOOSE is the Multiscale Object-Oriented Simulation Environment. It is the
 core of a modern software platform for the simulation of neural
 systems ranging from subcellular components and biochemical reactions
 to complex models of single neurons, large networks, and systems-level
 processes.
 
+
+# LICENSE
+
 MOOSE is released under GPLv3.
 
-Homepage: http://moose.ncbs.res.in/
-Sourceforge project page: https://sourceforge.net/projects/moose/
+
+# HOMEPAGE 
+
+http://moose.ncbs.res.in/
 
 
-* Getting MOOSE 
-==============================================================================
+# SOURCE REPOSITORY
 
-** Released versions of MOOSE are available in the sourceforge file area:
-   http://sourceforge.net/projects/moose/files/moose/Moose%202.0.0%20Kalakand/
-   
-
-   Download and install the prepackaged version suitable for your
-   platform. If no such package exists, you can build it from the sources
-   (download the file ending with tar.gz or tar.bz2 or zip and unpack it,
-   go through README and INSTALLATION).
-
-** Development version:
-
-   You can download the development sources using a subversion client:
-   svn co svn://svn.code.sf.net/p/moose/code/moose/branches/async13 moose
-   
-
-   or 
-   svn checkout svn://svn.code.sf.net/p/moose/code/moose/branches/{branchname} moose
-   
+https://sourceforge.net/projects/moose/
 
 
-* Building MOOSE from sources
-==============================================================================
+# REQUIREMENTS
 
-** Linux:
+    ## Core MOOSE
+    
+        - g++ (>= 4.6.x)            REQUIRED
+          --------------
+          For building the C++ MOOSE core.
 
-*** Requirements:
-   - g++
-   - gnu make
-   - Python development headers and libraries
-   - GNU Scientific Library (GSL) development packages latest 1.16
-   - HDF5 development library   
-   - libsbml (if you want SBML support).
-   - numpy development libraries
-   - OpenMPI (if you want to run it in parallel).
+        - GSL     (1.16.x)          OPTIONAL
+          ----------------
+          For core moose numerical computation
+
+        - OpenMPI (1.8.x)           OPTIONAL
+          ---------------
+          For running moose in parallel on clusters
 
 
-     On Debian based distributions these can be obtained by the command:
+    ## PyMOOSE                              OPTIONAL
 
-     sudo apt-get install g++ make python-dev libgsl0-dev python-numpy libhdf5-serial-dev
+    Python interface for core MOOSE API
 
-     These names are for Ubuntu 12.04, the exact package names may
-     vary depending on your distribution.
+        - Python2       ( >= 2.7.x)         REQUIRED
+          -------------------------
+          For building the MOOSE Python bindings 
 
-     On Fedora based distributions, you can use:
+        - Python-dev    ( >= 2.7.x)         REQUIRED
+          -------------------------
+          Python development headers and libraries 
 
-     sudo yum install {package names}
+        - NumPy         ( >= 1.6.x)         REQUIRED
+          -------------------------
+          For numerical computation in PyMOOSE
 
-     where {package names} is the list of Fedora packages
-     corresponding to thos mentioned above.
+        - H5py          (2.3.x)             REQUIRED
+          ---------------------
+          For reading and writing data to HDF5 files
+
+
+        ### Chemical Kinetics Network Simulations   OPTIONAL
+    
+            - GSL     (1.16.x)                      REQUIRED
+              ----------------
+              For core moose numerical computation
+
+            - PyQt4         (4.8.x)                 REQUIRED
+              ---------------------
+              For Python GUI    
+
+            - Matplotlib    ( >= 1.1.x)             REQUIRED
+              -------------------------
+              For plotting simulation results
+
+            - SBML          (5.9.x)                 OPTIONAL
+              ---------------------
+              For reading and writing signalling models to SBML files
+
+
+
+        ### Compartmental Model Viusalization       OPTIONAL
+            - GSL     (1.16.x)                      REQUIRED
+              ----------------
+              For core moose numerical computation
+
+            - OSG           (3.2.x)                 REQUIRED
+              ---------------------
+              For 3D rendering and simulation of neuronal models
+
+            - Qt4           (4.8.x)                 REQUIRED
+              ---------------------
+              For C++ GUI of Moogli
+
+            - PyQt4         (4.8.x)                 REQUIRED
+              ---------------------
+              For Python GUI    
+
+            - Matplotlib    ( >= 1.1.x)             REQUIRED
+              -------------------------
+              For plotting simulation results
+
+
+# AUTHORS
+
+- Upinder S. Bhalla     -   Primary Architect, Chemical kinetic solvers
+- Niraj Dudani          -   Neuronal solver
+- Subhasis Ray          -   PyMOOSE Design and Documentation, Python Plugin Interface, NSDF Format
+- G.V.HarshaRani        -   Web page design, SBML support, Kinetikit Plugin Development
+- Aditya Gilra          -   NeuroML reader development
+- Aviral Goel           -   Moogli/Neurokit Development
+- Dilawar Singh         -   Packaging
+
+
+# Support:
+
+You can join the MOOSE generic mailing list for your queries -
+https://lists.sourceforge.net/lists/listinfo/moose-generic
+
+
+# Bugs:
   
+You can file bug reports and feature requets at the sourceforge tracker -
+http://sourceforge.net/p/moose/bugs/
 
+# Getting started:
 
-*** Building:
+MOOSE can be used as a python module. Look into the Demos directory
+for sample code. A starting point can be Demos/snippets with useful
+python code snippets that can be used as building blocks.
 
-    You may need to inform make of C++ include directories and library
-    directories if your installed packages are at non-standard
-    location. For example, if your have libsbml installed in
-    /opt/libsbml and the header files are located in
-    /opt/libsbml/include and lib files are located in
-    /opt/libsbml/lib, you can set the environment variables CXXFLAGS
-    and LDFLAGS to include these before calling make:
+MOOSE also comes with a NeuroML reader. Demos/neuroml has some
+python scripts showing how to load NeuroML models.
 
-    export CXXFLAGS= -I/opt/libsbml/include
-    export LDFLAGS= -L/opt/libsbml/lib
+MOOSE is backward compatible with GENESIS
+kinetikit. Demos/Genesis_files has some examples. You can load a
+kinetikit model with the loadModel function:
 
-    Lookup the manuals for gcc and gnu make to understand CXXFLAGS and
-    LDFLAGS.
+    moose.loadModel(kkit_file_path, target_model_path)
 
+You can also load GENESIS prototype files. The same loadModel
+function can be used for this (but you need to have all the channels
+used in the prototype preloaded in /library):
 
-**** Release build:
-     cd moose
-     make BUILD=release
+    moose.loadModel(prototype_file_path, prototype_model_path)
 
-**** Debug build:
-     cd moose
-     make BUILD=debug
-
-**** Python 3K
-     By default, MOOSE is built for Python 2. In case you want to
-     build MOOSE for Python 3K, you need to pass the additional flag:
-
-     PYTHON=3
-
-     like:
-     
-     make BUILD=release PYTHON=3
-
-
-*** Installation:
-
-    For system-wide installation you can run:
-
-    sudo make install
-
-    Now you can import moose in a Python script or interpreter with
-    the statement:
+Top level moose documentation can be accessed in the Python
+interpreter the usual way:
 
     import moose
-     
-    If you have installed the GUI dependencies below for running the
-    graphical user interface, then you can run the GUI by
-    double-clicking on the desktop icon or via the main-menu.  The
-    squid axon tutorial/demo is also accessible via these routes.
+    help(moose)
 
 
-**** Local-installation
+MOOSE classes have built-in documentation that can be accessed via
+the `doc()` function -
 
-     If you do not have permission to install it in system directories,
-     you can let it be where it was built or copy the `python`
-     subdirectory of MOOSE source tree to a location of your choice and
-     add the path to your PYTHONPATH environment variable. Suppose you
-     have a ~/lib directory where you keep all your locally built
-     libraries, do:
+    moose.doc(classname)
 
-     cp -r {moose-source-directory}/python ~/lib/
-     
-     and add this to your .bashrc file (if you use bash shell):
+This will give the full documentation for the class including the fields
+available.
 
-     export PYTHONPATH="$HOME/lib/python":"$PYTHONPATH"
+`moose.doc(classname.fieldname)` 
+will give you information about a particular field in a class.
 
-     For other shells, look up your shell's manual to find out how to
-     set environment variable in it.
-
-     To use the GUI, copy the `gui` subdirectory from MOOSE source
-     tree to a location of your choice, like this:
-
-     cp -r {moose-source-directory}}/gui ~/lib/python/moosegui
-
-     and make the MooseGUI.py executable:
-
-     chmod +x  ~/lib/python/moosegui/MooseGUI.py
-
-     and create a link somewhere in your PATH:
-
-     ln -s ~/lib/python/moosegui/MooseGUI.py ~/bin/moosegui
-
-     assuming you have ~/bin directory in your PATH environment
-     variable. After this you run the MOOSE GUI by the `moosegui`
-     command.
-
-***** Recommended:
-
-      In addition to the essential libraries for building MOOSE, you
-      can use many of the Python libraries freely available for
-      scientific computing. Among these are:
-      - scipy: provides many utility functions for data analysis
-      - h5py: provides capability to read and write HDF5 files.
-
-**** GUI:
-     To run the moose GUI, you need some additional packages:
-
-     - Python bindings for Qt4 or higher
-     - matplotlib
-     - Python OpenGL
-     - Python bindings for Qt's OpenGL module
-
-     On Ubuntu 12.04 these can be installed with:
-
-     sudo apt-get install python-matplotlib python-qt4 python-qt4-gl 
-
-     If you have installed moose as above 'sudo make install', and above dependencies,
-     you can run 'moosegui' in the terminal, or via the desktop / main menu shortcuts.
-     There are also shortcuts for the squid axon tutorial/demo on the desktop / main menu.
-     MOOSE GUI creates a ~/moose/Demos directory (home folder) on first run.
-     File->load models from there. Help is available from the GUI menu.
-
-* Getting started:
-==============================================================================
-
-  MOOSE can be used as a python module. Look into the Demos directory
-  for sample code. A starting point can be Demos/snippets with useful
-  python code snippets that can be used as building blocks.
-
-  MOOSE also comes with a NeuroML reader. Demos/neuroml has some
-  python scripts showing how to load NeuroML models.
-
-  MOOSE is backward compatible with GENESIS
-  kinetikit. Demos/Genesis_files has some examples. You can load a
-  kinetikit model with the loadModel function:
-
-  moose.loadModel(kkit_file_path, target_model_path)
-
-  You can also load GENESIS prototype files. The same loadModel
-  function can be used for this (but you need to have all the channels
-  used in the prototype preloaded in /library):
-
-  moose.loadModel(prototype_file_path, prototype_model_path)
-
-  Top level moose documentation can be accessed in the Python
-  interpreter the usual way:
-
-  import moose
-
-  help(moose)
-
-
-  MOOSE classes have built-in documentation that can be accessed via
-  the doc() function:
-
-  moose.doc(classname)
-
-  will give the full documentation for the class including the fields
-  available.
-
-  moose.doc(classname.fieldname)
-
-  will give you information about a particular field in a class.
-
-
-* Support:
-==============================================================================
-  
-  You can join the MOOSE generic mailing list for your queries:
-  https://lists.sourceforge.net/lists/listinfo/moose-generic
-
-
-* Bugs:
-==============================================================================
-  
-  You can file bug reports and feature requets at the sourceforge tracker:
-  https://sourceforge.net/tracker/?atid=836272&group_id=165660
-
-
-* Authors:
-==============================================================================
-
-  Upinder S. Bhalla	Primary Architect, Chemical kinetic solvers
-  Niraj Dudani	Neuronal solver, parallelization
-  Subhasis Ray	Python interface, XML standards
-  G.V.HarshaRani	Web page design and User Interface
-  Chaitanya.H	Visualization and User Interface
-  Aditya Gilra  NeuroML reader and .deb packaging
-
-
-==============================================================================
-
-MOOSE 2.0.0 "Kalakand"
-
-We announce the release of MOOSE 2.0.0, "Kalakand"*. Debian packages and
-tarballs can be downloaded from 
-
-	http://moose.ncbs.res.in
-
-The latest code is in the usual SourceForge repository at 
-	http://sourceforge.net/projects/moose
-
-This is the first full release of MOOSE. In this release the MOOSE team has
-been conservative about features, and has instead focused on the basics:
-a decent GUI, documentation, basic numerics, and a cleaner install framework.
-
-In this release you can load and run NEUROML (compartmental neuronal models
-and networks) from the GUI. You can also load, run, and save chemical kinetic
-models in the Kinetikit (kkit.g) format. There are demo models for each of
-these.
-
-There are also a couple of standalone demos, most importantly the Squid demo
-for the original Hodgkin-Huxley model. This is based on the GENESIS demo of the
-same name and is an excellent teaching tool.
-
-The scripting language is now Python. The GUI is written in this, and we
-have production simulations in Python.
-
-Behind the scenes we have set in place a more structured development process
-with a strong test framework. We invite you to look at the roadmap and
-indicate what developments you would like best.
-
-We aim to have a much shorter and incremental release cycle from now. Further,
-the build process is now easier with the debian packaging, so it will be
-simpler to grab the latest source code from SourceForge if you want to try out
-new features/bugs hot off the keyboard. Along the way we will fold in the 
-ports to other OSs, depending on what else is prioritized in the roadmap.
-
-*Kalakand is an Indian milk-based sweet. The naming scheme is from an old lab
-tradition to name things after Indian sweets. The order is alphabetical in the
-sequence of most Indian alphabets.
-
-The MOOSE team:
-  Niraj Dudani		Neuronal solver, parallelization
-  Subhasis Ray		Python interface, XML standards
-  G.V.HarshaRani	Web page design and User Interface
-  Chaitanya.H		Visualization and User Interface
-  Aditya Gilra  	NeuroML reader and .deb packaging
-  Upinder S. Bhalla	Primary Architect, Chemical kinetic solvers
+Complete MOOSE Documentation can be found at -
+http://moose.ncbs.res.in/content/view/5/6/
