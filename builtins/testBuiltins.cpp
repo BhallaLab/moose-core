@@ -309,6 +309,32 @@ void testGetMsg()
 		assert( doubleEq( temp[i], 2 * i ) );
 	}
 
+	/////////////////////////////////////////////////////////////////
+	// Here we check using the 'get' message with multiple targets
+	/////////////////////////////////////////////////////////////////
+	Id arith2 = shell->doCopy( arithid, ObjId(), "arith2", 1, false, false);
+	shell->doUseClock( "/arith2", "process", 0 );
+	ret = shell->doAddMsg( "Single", 
+		tabid.eref().objId(), "requestOut",
+		arith2.eref().objId(), "getOutputValue" );
+	shell->doReinit();
+	SetGet1< double >::set( arithid, "arg1", 0.0 );
+	SetGet1< double >::set( arithid, "arg2", 2.0 );
+	SetGet1< double >::set( arith2, "arg1", 10.0 );
+	SetGet1< double >::set( arith2, "arg2", 12.0 );
+	shell->doStart( 100 );
+
+	numEntries = Field< unsigned int >::get( tabid, "size" );
+	// One for reinit call, 100 for process, and there are two targets.
+	assert( numEntries == 202 ); 
+	temp = Field< vector< double > >::get( tabid, "vector" );
+
+	for ( unsigned int i = 1; i < 100; ++i ) {
+		assert( doubleEq( temp[2 * i], 2 * i ) );
+		assert( doubleEq( temp[2 * i + 1], 10 + 12 * i ) );
+	}
+
+
 	// Perhaps I should do another test without reinit.
 	/*
 	SetGet2< string, string >::set( 
@@ -316,6 +342,7 @@ void testGetMsg()
 	tabentry.destroy();
 		*/
 	shell->doDelete( arithid );
+	shell->doDelete( arith2 );
 	shell->doDelete( tabid );
 	cout << "." << flush;
 	

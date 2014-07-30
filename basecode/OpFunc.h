@@ -122,41 +122,11 @@ template< class T,
 		void ( T::*func_ )( A1, A2, A3, A4, A5, A6 ); 
 };
 
-/**
- * This specialized OpFunc is for returning a single field value
- * It generates an opFunc that takes a single argument:
- * FuncId of the function on the object that requested the
- * value. The OpFunc then sends back a message with the info.
- */
-/*
-template< class T, class A > class GetOpFunc: public GetOpFuncBase< A >
-{
-	public:
-		GetOpFunc( A ( T::*func )() const )
-			: func_( func )
-			{;}
-
-		void op( const Eref& e, ObjId recipient, FuncId fid ) const {
-			const OpFunc *f = recipient.element()->cinfo()->getOpFunc( fid);
-			const OpFunc1Base< A >* recvOpFunc =
-				dynamic_cast< const OpFunc1Base< A >* >( f );
-			assert( recvOpFunc );
-			recvOpFunc->op( recipient.eref(), returnOp( e ) );
-		}
-
-		A returnOp( const Eref& e ) const {
-			return ( reinterpret_cast< T* >( e.data() )->*func_)();
-		}
-
-	private:
-		A ( T::*func_ )() const;
-};
-*/
 
 /**
  * This specialized OpFunc is for returning a single field value
- * It generates an opFunc that takes a single argument, the
- * address of the variable into which the return value should be passed.
+ * It generates an opFunc that takes a single argument, a reference
+ * to a vector into which the return value should be appended.
  * It manages the 'get' function that retrieves the return value.
  * Note that the 'get' function must be blocking in case the request
  * goes off node.
@@ -168,8 +138,8 @@ template< class T, class A > class GetOpFunc: public GetOpFuncBase< A >
 			: func_( func )
 			{;}
 
-		void op( const Eref& e, A* ret ) const {
-			*ret = returnOp( e );
+		void op( const Eref& e, vector< A >* ret ) const {
+			ret->push_back( returnOp( e ) );
 		}
 
 		A returnOp( const Eref& e ) const {

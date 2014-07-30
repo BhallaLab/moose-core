@@ -303,7 +303,7 @@ template< class A1, class A2, class A3, class A4, class A5, class A6 >
 /**
  * This is the base class for all GetOpFuncs. 
  */
-template< class A > class GetOpFuncBase: public OpFunc1Base< A* >
+template< class A > class GetOpFuncBase: public OpFunc1Base< vector< A >* >
 {
 	public: 
 			/*

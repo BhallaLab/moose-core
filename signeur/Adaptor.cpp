@@ -34,9 +34,9 @@ static SrcFinfo0 *requestInput()
 	return &requestInput;
 }
 
-static SrcFinfo1< double* >  *requestField()
+static SrcFinfo1< vector< double >* >  *requestField()
 {
-	static SrcFinfo1< double* > requestField( "requestField", 
+	static SrcFinfo1< vector< double >* > requestField( "requestField", 
 			"Sends out a request to a generic double field. "
 			"Issued from the process call."
 			"Works for any number of targets."
@@ -283,6 +283,7 @@ void Adaptor::process( const Eref& e, ProcPtr p )
 	// static FuncId fid = handleInput()->getFid(); 
 	requestInput()->send( e );
 	if ( numRequestField_ > 0 ) {
+			/*
 		vector< double > vals( numRequestField_, 0.0 );
 		vector< double* > args( numRequestField_ );
 		for ( unsigned int i = 0; i < numRequestField_; ++i )
@@ -290,6 +291,14 @@ void Adaptor::process( const Eref& e, ProcPtr p )
 		requestField()->sendVec( e, args );
 		for ( unsigned int i = 0; i < numRequestField_; ++i ) {
 			sum_ += vals[i];
+		}
+		counter_ += numRequestField_;
+		*/
+		vector< double > ret;
+		requestField()->send( e, &ret );
+		assert( ret.size() == numRequestField_ );
+		for ( unsigned int i = 0; i < numRequestField_; ++i ) {
+			sum_ += ret[i];
 		}
 		counter_ += numRequestField_;
 	}
