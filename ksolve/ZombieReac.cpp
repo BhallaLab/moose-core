@@ -111,7 +111,7 @@ void ZombieReac::vSetNumKb( const Eref& e, double v )
 
 double ZombieReac::vGetNumKb( const Eref& e ) const
 {
-	double volScale = convertConcToNumRateUsingMesh( e, subOut, 0 );
+	double volScale = convertConcToNumRateUsingMesh( e, prdOut, 0 );
 	return concKb_ / volScale;
 }
 

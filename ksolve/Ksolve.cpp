@@ -520,7 +520,7 @@ void Ksolve::initProc( const Eref& e, ProcPtr p )
 		vector< double > values( size, 0.0 );
 		for ( unsigned int j = 0; j < xf.xferVoxel.size(); ++j ) {
 			unsigned int vox = xf.xferVoxel[j];
-			pools_[vox].xferOut( vox, values, xf.xferPoolIdx );
+			pools_[vox].xferOut( j, values, xf.xferPoolIdx );
 		}
 		xComptOut()->sendTo( e, xf.ksolve, e.id(), values );
 	}
@@ -539,7 +539,7 @@ void Ksolve::initReinit( const Eref& e, ProcPtr p )
 		xf.lastValues.assign( size, 0.0 );
 		for ( unsigned int j = 0; j < xf.xferVoxel.size(); ++j ) {
 			unsigned int vox = xf.xferVoxel[j];
-			pools_[ vox ].xferOut( vox, xf.lastValues, xf.xferPoolIdx );
+			pools_[ vox ].xferOut( j, xf.lastValues, xf.xferPoolIdx );
 			// values[i] = xf.lastValues;
 		}
 		xComptOut()->sendTo( e, xf.ksolve, e.id(), xf.lastValues );

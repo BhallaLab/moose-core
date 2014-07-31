@@ -237,7 +237,7 @@ void SpineMesh::handleSpineList(
 /// Virtual function to return MeshType of specified entry.
 unsigned int SpineMesh::getMeshType( unsigned int fid ) const
 {
-	assert( fid < spines_.size() * 3 );
+	assert( fid < spines_.size() );
 	return CYL;
 }
 
@@ -252,7 +252,7 @@ double SpineMesh::getMeshEntryVolume( unsigned int fid ) const
 {
 	if ( spines_.size() == 0 )
 		return 1.0;
-	assert( fid < spines_.size() * 3 );
+	assert( fid < spines_.size() );
 	return spines_[ fid % spines_.size() ].volume();
 }
 
