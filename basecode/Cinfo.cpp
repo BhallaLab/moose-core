@@ -560,6 +560,8 @@ const string& Cinfo::srcFinfoName( BindIndex bid ) const
 			return sf->name();
 		}
 	}
+	if ( baseCinfo_ )
+		return baseCinfo_->srcFinfoName( bid );
 	cout << "Error: Cinfo::srcFinfoName( " << bid << " ): not found\n";
 	return err;
 }
@@ -575,6 +577,8 @@ const string& Cinfo::destFinfoName( FuncId fid ) const
 			return df->name();
 		}
 	}
+	if ( baseCinfo_ )
+		return baseCinfo_->destFinfoName( fid );
 	cout << "Error: Cinfo::destFinfoName( " << fid << " ): not found\n";
 	return err;
 }
