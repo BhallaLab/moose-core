@@ -251,8 +251,7 @@ class MooseTreeWidget(QtGui.QTreeWidget):
 def main():
     """Test main: load a model and display the tree for it"""
     model = moose.Neutral('/model')
-    #moose.loadModel('../Demos/Genesis_files/Kholodenko.g', '/model/Kholodenko')
-    moose.loadModel('/home/harsha/genesis_files/gfile/acc42.g','/model/acc42')
+    moose.loadModel('../Demos/Genesis_files/Kholodenko.g', '/model/Kholodenko')
     # tab = moose.element('/model/Kholodenko/graphs/conc1/MAPK_PP.Co')
     # print tab
     # for t in tab.children:
