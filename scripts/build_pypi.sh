@@ -1,19 +1,19 @@
 #!/bin/bash
 set -e
 # This creates a package for pip. For testing purpose
+moose_dir=moose-3.0
 ( 
     cd ..  
-    svn export --force . scripts/moose-3.0 
+    svn export --force . scripts/$moose_dir 
 )
 (
-    cd moose-3.0
+    cp setup.py $moose_dir/
+    cd $moose_dir
     echo "Creating new archive"
-    if [ -f dist/moose-3.0.tar.gz ]; then
+    if [ -f dist/$moose_dir.tar.gz ]; then
         rm -f dist/*.tar.gz
     fi
     python setup.py sdist -vv
     echo "Created new archive"
-    cd dist && pip install -vvvv *.tar.gz --user
-    echo "Trying to upload MOOSE to PyPI"
-    python setup.py register sdist upload
+    echo "Do the rest in $moose_dir"
 )
