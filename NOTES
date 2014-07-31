@@ -4302,4 +4302,6 @@ This is in crossComptNeuroMesh.py.
 Next step is to fix up the rates vector so it does the right thing when
 the volumes do differ.
 
+Fixed bug with Cinfo::srcFinfoName and Cinfo::destFinfoName, to traverse
+base classes if needed.
 =============================================================================
