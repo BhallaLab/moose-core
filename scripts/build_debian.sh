@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
+(
 set -e
 set -o xtrace
-
+cd ..
 cat > moose.recipe <<EOF
 # bzr-builder format 0.3 deb-version {debupstream}+{revno}
 lp:~dilawar/+junk/testing
@@ -31,3 +32,4 @@ fi
 rm -f moose.recipe
 echo "Building debian package"
 bzr builddeb -- -uc -us
+)
