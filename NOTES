@@ -4011,11 +4011,11 @@ Fixing up the calculations to deal with junction and non-junction voxels.
 17 July 
 
 Moose key things to do before release and paper:
-Ksolve cross compartment
++Ksolve cross compartment
 Synapses
 KKit GUI
 Clocks
-Identifying message source.
+*Identifying message source.
 Documentation
 	Tutorials
 		- How to load and run a neuronal model (using NEUROML)
@@ -4271,5 +4271,35 @@ Trying to implement. Compiler err
 =============================================================================
 30 July
 Implemented Number 2. Works. Did unit test.
+Viktor has done some benchmarks and it looks like the diffusion solver is
+more than twice as fast as the Hsolve passive code. Just for fun I should do
+a gprof to check. Doesn't generate the gmon.out. Later
+
+=============================================================================
+31 July
+Built crossComptNeuroMesh.py to test the simple reaction in a number of
+dendritic spines. Somewhat unplanned, the soma was bigger than the
+dendrite compartments. This unearthed a hugely difficult bug.
+Tracked it down to the following: cross-compartment reactions are special
+in that their scaling depends on both (or all three) compartments. I need
+to make and rescale rates for all combinations of vols on all three. What
+is worse, first order reaction rates (which are independent of volume 
+for intra-compartment reacs) do depend on relative volumes. 
+
+- Expand uniqueVols to include vols of other compts as a pair.
+- expand copyWithVolScaling to include this othervol term.
+
+This strengthens the case for just having a complete new rates vector_ for
+every voxel in a NeuroMesh or a tapering CylMesh.
+In a CubeMesh this comes up when we have to deal with cross-compartment
+reactions, unless we require that all relevant reacs are located on the 
+NeuroMesh.
+
+Confirmed by getting all vols to be uniform, upon which the model worked
+including with different concInits.
+This is in crossComptNeuroMesh.py.
+
+Next step is to fix up the rates vector so it does the right thing when
+the volumes do differ.
 
 =============================================================================
