@@ -37,105 +37,91 @@
 
 #include "HDF5DataWriter.h"
 
-static SrcFinfo1< FuncId > *requestOut() {
-	static SrcFinfo1< FuncId > requestOut(
-			"requestOut",
-			"Sends request for a field to target object"
-			);
-	return &requestOut;
-}
-
-static DestFinfo *recvDataBuf() {
-    static DestFinfo recvDataBuf(
-            "recvData",
-            "Handles data sent back following request",
-            new EpFunc3< HDF5DataWriter, ObjId, 
-			const double*, unsigned int >( &HDF5DataWriter::recvData ));
-    return &recvDataBuf;
-}
-
-static SrcFinfo0 * clear(){
-    static SrcFinfo0 clear("clearOut",
-                           "Send request to clear a Table vector.");
-    return &clear;
+static SrcFinfo1< vector < double > * > *requestOut() {
+    static SrcFinfo1< vector < double > * > requestOut(
+        "requestOut",
+        "Sends request for a field to target object"
+                                                       );
+    return &requestOut;
 }
 
 const Cinfo * HDF5DataWriter::initCinfo()
 {
-  static DestFinfo process(
-      "process",
-      "Handle process calls. Write data to file and clear all Table objects"
-      " associated with this. Hence you want to keep it on a slow clock"
-      " 1000 times or more slower than that for the tables.",
-  		new ProcOpFunc<HDF5DataWriter>( &HDF5DataWriter::process)
-	);
-  static  DestFinfo reinit(
-      "reinit",
-      "Reinitialize the object. If the current file handle is valid, it tries"
-      " to close that and open the file specified in current filename field.",
-  		new ProcOpFunc<HDF5DataWriter>( &HDF5DataWriter::reinit )
-    );
-  static Finfo * processShared[] = {
-    &process, &reinit
-  };
-  static SharedFinfo proc(
-      "proc",
-      "Shared message to receive process and reinit",
-      processShared, sizeof( processShared ) / sizeof( Finfo* ));
-  static Finfo * finfos[] = {
-    requestOut(),
-    clear(),
-    recvDataBuf(),        
-    &proc,
-  };
+    static DestFinfo process(
+        "process",
+        "Handle process calls. Write data to file and clear all Table objects"
+        " associated with this. Hence you want to keep it on a slow clock"
+        " 1000 times or more slower than that for the tables.",
+        new ProcOpFunc<HDF5DataWriter>( &HDF5DataWriter::process)
+                             );
+    static  DestFinfo reinit(
+        "reinit",
+        "Reinitialize the object. If the current file handle is valid, it tries"
+        " to close that and open the file specified in current filename field.",
+        new ProcOpFunc<HDF5DataWriter>( &HDF5DataWriter::reinit )
+                             );
+    static Finfo * processShared[] = {
+        &process, &reinit
+    };
+    static SharedFinfo proc(
+        "proc",
+        "Shared message to receive process and reinit",
+        processShared, sizeof( processShared ) / sizeof( Finfo* ));
+    static Finfo * finfos[] = {
+        requestOut(),
+        &proc,
+    };
 
-  static string doc[] = {
-    "Name", "HDF5DataWriter",
-    "Author", "Subhasis Ray",
-    "Description", "HDF5 file writer for saving data tables. It saves the tables connected"
-    " to it via `requestOut` field into an HDF5 file.  The path of the"
-    " table is maintained in the HDF5 file, with a HDF5 group for each"
-    " element above the table."
-    "\n"
-    "Thus, if you have a table `/data/VmTable` in MOOSE, then it will be"
-    " written as an HDF5 table called `VmTable` inside an HDF5 Group called"
-    " `data`."
-    "\n"
-    "However Table inside Table is considered a pathological case and is"
-    " not handled.\n"
-    "At every process call it writes the contents of the tables to the file"
-    " and clears the table vectors. You can explicitly force writing of the"
-    " data via the `flush` function."
-  };
+    static string doc[] = {
+        "Name", "HDF5DataWriter",
+        "Author", "Subhasis Ray",
+        "Description", "HDF5 file writer for saving data tables. It saves the tables connected"
+        " to it via `requestOut` field into an HDF5 file.  The path of the"
+        " table is maintained in the HDF5 file, with a HDF5 group for each"
+        " element above the table."
+        "\n"
+        "Thus, if you have a table `/data/VmTable` in MOOSE, then it will be"
+        " written as an HDF5 table called `VmTable` inside an HDF5 Group called"
+        " `data`."
+        "\n"
+        "However Table inside Table is considered a pathological case and is"
+        " not handled.\n"
+        "At every process call it writes the contents of the tables to the file"
+        " and clears the table vectors. You can explicitly force writing of the"
+        " data via the `flush` function."
+    };
 
-	static Dinfo< HDF5DataWriter > dinfo;
+    static Dinfo< HDF5DataWriter > dinfo;
     static Cinfo cinfo(
         "HDF5DataWriter",
         HDF5WriterBase::initCinfo(),
         finfos,
         sizeof(finfos)/sizeof(Finfo*),
-		&dinfo,
+        &dinfo,
 	doc, sizeof( doc ) / sizeof( string ));
     return &cinfo;
 }
 
 static const Cinfo * hdf5dataWriterCinfo = HDF5DataWriter::initCinfo();
 
-HDF5DataWriter::HDF5DataWriter()
+HDF5DataWriter::HDF5DataWriter(): steps_(0)
 {
 }
 
 HDF5DataWriter::~HDF5DataWriter()
 {
     if (filehandle_ < 0){
-      return;
+        return;
     }
     this->flush();
-    for (map < string, hid_t >::iterator ii = nodemap_.begin(); ii != nodemap_.end(); ++ii){
+    for (map < string, hid_t >::iterator ii = nodemap_.begin();
+         ii != nodemap_.end(); ++ii){
         if (ii->second >= 0){
             herr_t status = H5Dclose(ii->second);
             if (status < 0){
-  	        cerr << "Warning: closing dataset for " << ii->first << ", returned status = " << status << endl;
+  	        cerr << "Warning: closing dataset for "
+                     << ii->first << ", returned status = "
+                     << status << endl;
             }
         }
     }
@@ -145,21 +131,19 @@ HDF5DataWriter::~HDF5DataWriter()
 void HDF5DataWriter::flush()
 {
     if (filehandle_ < 0){
-        cerr << "HDF5DataWriter::flush() - Filehandle invalid. Cannot write data." << endl;
+        cerr << "HDF5DataWriter::flush() - "
+                "Filehandle invalid. Cannot write data." << endl;
         return;
     }
-    for (map < string, vector < double > >::iterator ii = datamap_.begin(); ii != datamap_.end(); ++ ii){
-        hid_t dataset = nodemap_[ii->first];
-        if (dataset < 0){
-            dataset = get_dataset(ii->first);
-            nodemap_[ii->first] = dataset;
-        }
-        herr_t status = appendToDataset(dataset, ii->second);
+    
+    for (unsigned int ii = 0; ii < datasets_.size(); ++ii){
+        herr_t status = appendToDataset(datasets_[ii], data_[ii]);
+        data_[ii].clear();
         if (status < 0){
-            cerr << "Warning: appending data for object " << ii->first << " returned status " << status << endl;                
-        }
-        ii->second.clear();        
-    }
+            cerr << "Warning: appending data for object " << src_[ii]
+                 << " returned status " << status << endl;                
+        }        
+    }        
     H5Fflush(filehandle_, H5F_SCOPE_LOCAL);
 }
         
@@ -171,35 +155,75 @@ void HDF5DataWriter::process(const Eref & e, ProcPtr p)
     if (filehandle_ < 0){
         return;
     }
-    // cout << "HDF5DataWriter::process: currentTime=" << p->currTime << endl;
-    requestOut()->send(e, recvDataBuf()->getFid());
-    for (map<string, vector < double > >:: iterator data_it = datamap_.begin(); data_it != datamap_.end(); ++data_it){        
-        string path = data_it->first;
-        // if (data_it->second.size() >= flushLimit_){
-        map < string, hid_t >::iterator node_it = nodemap_.find(path);
-        assert (node_it != nodemap_.end());
-        if (node_it->second < 0){
-            nodemap_[path] = get_dataset(path);
+    
+    vector <double> dataBuf;
+        requestOut()->send(e, &dataBuf);
+    for (unsigned int ii = 0; ii < dataBuf.size(); ++ii){
+        data_[ii].push_back(dataBuf[ii]);
+    }
+    ++steps_;
+    if (steps_ >= flushLimit_){
+        steps_ = 0;
+        for (unsigned int ii = 0; ii < datasets_.size(); ++ii){
+            herr_t status = appendToDataset(datasets_[ii], data_[ii]);
+            data_[ii].clear();
+            if (status < 0){
+                cerr << "Warning: appending data for object " << src_[ii]
+                     << " returned status " << status << endl;                
+            }
         }
-        herr_t status = appendToDataset(nodemap_[path], data_it->second);
-        if (status < 0){
-            cerr << "Warning: appending data for object " << data_it->first << " returned status " << status << endl;                
-        }
-        data_it->second.clear();
-    }    
+    }
 }
 
 void HDF5DataWriter::reinit(const Eref & e, ProcPtr p)
 {
-  // TODO: It will be preferable to initialize datamap_ and nodemap_
-  // here. But is there a way to figure out what tables are connected
-  // to this object at this point? Subha, 2012-11-13
+    steps_ = 0;
+    for (unsigned int ii = 0; ii < data_.size(); ++ii){
+        data_[ii].clear();
+    }
+    data_.clear();
+    src_.clear();
+    func_.clear();
+    datasets_.clear();
+    unsigned int numTgt = e.element()->getMsgTargetAndFunctions(e.dataIndex(),
+                                                                requestOut(),
+                                                                src_,
+                                                                func_);
+    assert(numTgt ==  src_.size());
+    // TODO: what to do when reinit is called? Close the existing file
+    // and open a new one in append mode? Or keep adding to the
+    // current file?
     if (filename_.empty()){
-        filename_ = "moose_output.h5";
+        filename_ = "moose_data.h5";
     }
-    if (filehandle_ < 0){      
-      openFile();      
+    if (filehandle_ > 0 ){
+        close();
     }
+    if (numTgt == 0){
+        return;
+    }
+    openFile();
+    for (unsigned int ii = 0; ii < src_.size(); ++ii){
+        string varname = func_[ii];
+        size_t found = varname.find("get");
+        if (found == 0){
+            varname = varname.substr(3);
+            if (varname.length() == 0){
+                varname = func_[ii];
+            } else {
+                // TODO: there is no way we can get back the original
+                // field-name case. tolower will get the right name in
+                // most cases as field names start with lower case by
+                // convention in MOOSE.
+                varname[0] = tolower(varname[0]);
+            }
+        }
+        assert(varname.length() > 0);
+        string path = src_[ii].path() + "/" + varname;
+        hid_t dataset_id = get_dataset(path);
+        datasets_.push_back(dataset_id);
+    }
+    data_.resize(src_.size());
 }
 
 /**
@@ -211,22 +235,22 @@ hid_t HDF5DataWriter::get_dataset(string path)
         return -1;
     }
     herr_t status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-    // Create the groups corresponding to this path We are not
-    // taking care of Table object containing Table
-    // objects. That's an unusual possibility.
+    // Create the groups corresponding to this path
     vector<string> path_tokens;
     tokenize(path, "/", path_tokens);
     hid_t prev_id = filehandle_;
     hid_t id = -1;
     for ( unsigned int ii = 0; ii < path_tokens.size()-1; ++ii ){
         // check if object exists
-        htri_t exists = H5Lexists(prev_id, path_tokens[ii].c_str(), H5P_DEFAULT);
+        htri_t exists = H5Lexists(prev_id, path_tokens[ii].c_str(),
+                                  H5P_DEFAULT);
         if (exists > 0){
             // try to open existing group
             id = H5Gopen2(prev_id, path_tokens[ii].c_str(), H5P_DEFAULT);
         } else if (exists == 0) {
             // If that fails, try to create a group
-            id = H5Gcreate2(prev_id, path_tokens[ii].c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+            id = H5Gcreate2(prev_id, path_tokens[ii].c_str(),
+                            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         } 
         if ((exists < 0) || (id < 0)){
             // Failed to open/create a group, print the
@@ -254,7 +278,9 @@ hid_t HDF5DataWriter::get_dataset(string path)
     } else if (exists == 0){
         dataset_id = create_dataset(prev_id, name);
     } else {
-        cerr << "Error: H5Lexists returned " << exists << " for path \"" << path << "\"" << endl;
+        cerr << "Error: H5Lexists returned "
+             << exists << " for path \""
+             << path << "\"" << endl;
     }
     return dataset_id;
 }
@@ -276,10 +302,13 @@ hid_t HDF5DataWriter::create_dataset(hid_t parent_id, string name)
     } else if (compressor_ == "szip"){
         // this needs more study
         unsigned sz_opt_mask = H5_SZIP_NN_OPTION_MASK;
-        status = H5Pset_szip(chunk_params, sz_opt_mask, HDF5WriterBase::CHUNK_SIZE);
+        status = H5Pset_szip(chunk_params, sz_opt_mask,
+                             HDF5WriterBase::CHUNK_SIZE);
     }
     hid_t dataspace = H5Screate_simple(1, dims, maxdims);            
-    hid_t dataset_id = H5Dcreate2(parent_id, name.c_str(), H5T_NATIVE_DOUBLE, dataspace, H5P_DEFAULT, chunk_params, H5P_DEFAULT);
+    hid_t dataset_id = H5Dcreate2(parent_id, name.c_str(),
+                                  H5T_NATIVE_DOUBLE, dataspace,
+                                  H5P_DEFAULT, chunk_params, H5P_DEFAULT);
     return dataset_id;
 }
 
@@ -308,43 +337,14 @@ herr_t HDF5DataWriter::appendToDataset(hid_t dataset_id, const vector< double >&
     hsize_t size_increment = data.size();
     hid_t memspace = H5Screate_simple(1, &size_increment, NULL);
     hsize_t start = size - data.size();
-    H5Sselect_hyperslab(filespace, H5S_SELECT_SET, &start, NULL, &size_increment, NULL);
-    status = H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE, memspace, filespace, H5P_DEFAULT, &data[0]);
+    H5Sselect_hyperslab(filespace, H5S_SELECT_SET, &start, NULL,
+                        &size_increment, NULL);
+    status = H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE, memspace, filespace,
+                      H5P_DEFAULT, &data[0]);
     return status;
 }
 
-void HDF5DataWriter::recvData(const Eref&e, 
-				ObjId src, const double* start, unsigned int num )
-{
-    string path = src.path();
-    if (nodemap_.find(path) == nodemap_.end()){
-        // first time call, initialize entries in map
-        hid_t dataid =  get_dataset(path);
-        if (dataid < 0){
-            cerr << "Warning: could not create data set for " << path << endl;
-        }
-        nodemap_[path] = dataid;
-        datamap_[path] = vector<double>();
-    }
-    const double * end = start + num;
-    // append only the new data. old_size is guaranteed to be 0 on
-    // write and the table vecs will also be cleared.
-    datamap_[path].insert(datamap_[path].end(), start, end);
 
-    SetGet0::set(src, "clearVec"); //Unsure what this is for.
-	
-// #ifndef NDEBUG
-//     // debug leftover entries coming from table
-//     cout << "HDF5DataWriter::recvData: vec_size=" << vec_size << endl;
-//     cout << "HDF5DataWriter::recvData: dataSize=" << pb.dataSize() << endl;
-//     cout << "HDF5DataWriter::recvData: numEntries=" << pb.numEntries()  << endl;
-//     cout << "HDF5DataWriter::recvData: size=" << pb.size() << endl;
-//     cout << "HDF5DataWriter::recvData: data()" << endl;
-//     for (int ii = 0; ii <= vec_size; ++ii){
-//         cout << ii << "\t" << pb.data()[ii] << endl;
-//     }
-// #endif
-}
         
 #endif // USE_HDF5
 // 
