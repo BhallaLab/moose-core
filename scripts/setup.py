@@ -1,5 +1,6 @@
 
-"""setup.py: This scripts prepare MOOSE for PyPI.
+"""setup.py: This 
+scripts prepare MOOSE for PyPI.
 
 Last modified: Mon Jul 28, 2014  12:52AM
 
@@ -17,7 +18,6 @@ __status__           = "Development"
 import os
 import sys
 
-import setuptools
 from distutils.core import setup, Command, Extension
 from distutils.command.install import install as _install
 from distutils.command.build import build as _build
@@ -148,7 +148,7 @@ setup(
         , license = "LGPL"
         , url = url
         , long_description = read('README')
-        , scripts = [ 'scripts/moosegui' ]
+        , data_files = [ ('/usr/bin', [ 'scripts/moosegui' ]) ]
         , ext_modules = [
             Extension('_moose', [ '*' ])
             ]
