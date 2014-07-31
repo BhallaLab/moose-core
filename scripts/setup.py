@@ -153,14 +153,13 @@ setup(
             Extension('_moose', [ '*' ])
             ]
         , cmdclass = { 
-             'build' : BuildCommand 
-            , 'install' : InstallCommand
+             'install' : InstallCommand
             , 'build_py' : BuildPyCommand
             , 'build_ext' : BuildCommand
             }
         , require = [ 'numpy', 'matplotlib', 'lxml' ]
         , keywords = "neural simulation"
-        classifiers=[
+        , classifiers=[
             'Development Status :: 3 - Beta',
             'Intended Audience :: Science/Research',
             'Operating System :: Linux',

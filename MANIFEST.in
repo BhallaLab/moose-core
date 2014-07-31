@@ -6,6 +6,7 @@ global-include *.hpp
 global-include *.cc
 global-include *.py
 global-include CMakeLists.txt
+include README
 graft cmake_modules
 graft gsl
 graft external
