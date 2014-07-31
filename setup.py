@@ -17,62 +17,108 @@ __status__           = "Development"
 import os
 import sys
 
-from distutils.core import setup, Command
+import setuptools
+from distutils.core import setup, Command, Extension
 from distutils.command.install import install as _install
+from distutils.command.build import build as _build
+from distutils.command.build_py import build_py as _build_py
+
 
 import distutils.spawn as ds
 
-class ConfigureCommand(Command):
-    """Configure MOOSE """
-    user_options = []
+build_dir = 'buildMooseUsingCmake'
+if not os.path.isdir(build_dir):
+    os.makedirs(build_dir)
+
+class BuildCommand(_build):
+    """This command builds """
+    user_options = _build.user_options + []
 
     def initialize_options(self):
         self.cwd = os.getcwd()
-        self.new_dir = os.path.join(os.path.split(__file__)[0], 'buildMooseUsingCmake')
+        self.build_base = '/tmp'
+        self.build_temp = '/tmp'
+        self.build_lib = '/tmp'
+        self.new_dir = os.path.join(os.path.split(__file__)[0], build_dir)
     
     def finalize_options(self):
         pass
 
-    def run(self):
-        if ds.find_executable('cmake') is None:
-            msg = [ "Error: Unable to configure MOOSE."
-                    , " "
-                    , " This application relies on CMake build tool (www.cmake.org)"
-                    , " Once cmake is installed, you can continue "
-                    ]
-            print("\n".join(msg))
-            sys.exit(0)
-
-        print("Configuring MOOSE using CMake")
-        os.chdir(self.new_dir)
-        try:
-            ds.spawn(['cmake', '..'])
-        except ds.DistutilsExecError:
-            print("Error: error occurred while running CMake to configure MOOSE.")
-            os.chdir(self.cwd)
-            sys.exit(-1)
-        os.chdir(self.cwd)
-
-class BuildCommand(Command):
-    user_options = []
-    def initialize_options(self):
-        self.cwd = os.getcwd()
-        self.new_dir = os.path.join(os.path.split(__file__)[0], 'buildMooseUsingCmake')
-    
-    def finalize_options(self):
-        pass
+    def get_source_files(self):
+        return []
 
     def run(self):
-        print("Building PyMOOSE")
+        print("++ Building MOOSE")
         os.chdir(self.new_dir)
         try:
-            ds.spawn(['make'])
+            ds.spawn(['cmake',  '..' ])
+            ds.spawn(['make', '_moose'])
         except ds.DistutilsExecError as e:
             print("Can't build MOOSE")
             print(e)
             os.chdir(self.cwd)
             sys.exit(-1)
         os.chdir(self.cwd)
+
+class InstallCommand(_install):
+    user_options = _install.user_options + [
+            ('single-version-externally-managed', None, '')
+            ]
+
+    def initialize_options(self):
+        _install.initialize_options(self)
+        self.cwd = os.getcwd()
+        self.single_version_externally_managed = False
+        self.record = None
+        self.build_lib = None
+
+    def finalize_options(self):
+        _install.finalize_options(self)
+
+    def run(self):
+        self.new_dir = os.path.join(os.path.split(__file__)[0], build_dir)
+        os.chdir(self.new_dir)
+        try:
+            ds.spawn(['cmake',  '..' ])
+            ds.spawn(['make', '_moose'])
+        except ds.DistutilsExecError as e:
+            print("Can't build MOOSE")
+            print(e)
+            os.chdir(self.cwd)
+            sys.exit(-1)
+        os.chdir(self.cwd)
+
+        print("++ Installing PyMOOSE")
+        self.new_dir = os.path.join(os.path.split(__file__)[0], 'python')
+        os.chdir(self.new_dir)
+        try:
+            ds.spawn(["python", "setup.py", "install", "--user"])
+        except ds.DistutilsExecError as e:
+            print("Can't install PyMOOSE")
+            print(e)
+            os.chdir(self.cwd)
+            sys.exit(-1)
+        os.chdir(self.cwd)
+
+class BuildPyCommand(_build_py):
+    """Build PyMoose for distribution"""
+    user_options =  _build_py.user_options + [
+            ( 'build_lib', None, 'Build library' )
+            , ('compiler', None, 'Compiler' )
+            ]
+
+    def initialize_options(self):
+        self.data_files = []
+        self.build_lib = '/tmp'
+        self.cwd = os.getcwd()
+        self.compiler = None
+        self.new_dir = os.path.join(os.path.split(__file__)[0], 'python')
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        pass
 
 ##
 # @brief FUnction to read a file.
@@ -101,9 +147,14 @@ setup(
         , license = "LGPL"
         , keywords = "neural simulation"
         , url = url
-        , packages = []
         , long_description = read('README')
-        , cmdclass = { 'configure' : ConfigureCommand 
-            , 'build' : BuildCommand 
+        , ext_modules = [
+            Extension('_moose', [ '*.cpp' ], compiler = 'g++')
+            ]
+        , cmdclass = { 
+             'build' : BuildCommand 
+            , 'install' : InstallCommand
+            , 'build_py' : BuildPyCommand
+            , 'build_ext' : BuildCommand
             }
         )

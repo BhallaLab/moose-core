@@ -35,11 +35,12 @@ from setuptools import setup
 
 setup(
         name='pymoose',
-        version='1.0',
+        version='3.0',
         description='PyMoose: Python scripting support in moose',
         author='Dilwar Singh',
         author_email='dilawars@ncns.res.in',
         url='http://moose.ncbs.res.in',
+        options={'build' : {'build_base' : '/tmp' } },
         packages=['libmumbl'
             , 'moose', 'moose.neuroml', 'moose.backend'
             , 'mgui', 'mgui.plugins'],

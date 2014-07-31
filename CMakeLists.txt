@@ -56,7 +56,7 @@ if(ENABLE_STD_2011)
 endif(ENABLE_STD_2011)
 
 # DO UNIT TESTS 
-set(ENABLE_UNIT_TESTS 1)
+set(ENABLE_UNIT_TESTS 0)
 if(ENABLE_UNIT_TESTS)
     MESSAGE("++ Unit testing enabled.")
     add_definitions(-DDO_UNIT_TESTS)
@@ -127,6 +127,7 @@ add_executable(moose.bin basecode/main.cpp)
 if(LOCAL_GSL)
     set(GSL_FOUND 1)
     add_definitions(-DUSE_GSL)
+    add_dependencies(moose.bin GSL)
 else()
     if(GSL_FOUND)
         include_directories(${GSL_INCLUDE_DIR})
@@ -254,6 +255,11 @@ if(BUILD_PYMOOSE)
     include_directories(${PYTHON_INCLUDE_DIRS})
     add_subdirectory(pymoose)
     add_library(_moose SHARED pymoose/moosemodule.cpp)
+
+    if(LOCAL_GSL)
+        add_dependencies(_moose GSL)
+    endif()
+
     set_target_properties(_moose PROPERTIES COMPILE_DEFINITIONS "PYMOOSE")
     set_target_properties(_moose PROPERTIES 
         LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/python/moose"
