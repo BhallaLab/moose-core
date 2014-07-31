@@ -17,17 +17,20 @@
 
 // Commentary: 
 // 
-// Specialization of HDF5WriterBase to save Table objects in
-// MOOSE. The table can be regular table or Stimulus table. The data
-// is appended to an existing dataset at each process step. An
-// explicit writing is also allowed via the flush command.  As soon as
-// the data from a table is written to file, the table is cleared.
+// Specialization of HDF5WriterBase to collect and save data from
+// moose model. The data is appended to an existing dataset at each
+// process step. An explicit writing is also allowed via the flush
+// command.  As soon as the data from a table is written to file, the
+// table is cleared.
 // 
 
 // Change log:
 // 
 // 2012-02-25 15:50:03 (+0530) Subha - started coding this class
-// 
+//
+// Thu Jul 31 16:56:47 IST 2014 Subha - updating to use new API on
+// async13 branch.
+
 
 // Code:
 #ifdef USE_HDF5
@@ -45,13 +48,17 @@ class HDF5DataWriter: public HDF5WriterBase
     // void flush();
     void process(const Eref &e, ProcPtr p);
     void reinit(const Eref &e, ProcPtr p);
-    void recvData(const Eref& e, ObjId src, const double* start, unsigned int num );
     virtual void flush();
     static const Cinfo* initCinfo();
   protected:
     unsigned int flushLimit_;
-    // Maps the paths of data sources to vectors storing the data locally
-    map <string, vector <double> > datamap_;
+    // Maps the paths of data sources to vectors storing the data
+    // locally
+    vector <ObjId> src_;
+    vector <vector < double > > data_;
+    vector <string> func_;
+    vector <hid_t> datasets_;
+    unsigned long steps_;
     hid_t get_dataset(string path);
     hid_t create_dataset(hid_t parent, string name);
     herr_t appendToDataset(hid_t dataset, const vector<double>& data);
