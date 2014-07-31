@@ -140,13 +140,15 @@ url           = 'http://moose.ncbs.res.in/'
 setup(
         name = name
         , version = version 
-        , author = [ "Upinder Bhalla et. al." ]
+        , author = "Upinder Bhalla et. al."
         , author_email = "bhalla@ncbs.res.in"
+        , maintainer = 'Dilawar Singh'
+        , maintainer_email = 'dilawars@ncbs.res.in'
         , description = description 
         , license = "LGPL"
-        , keywords = "neural simulation"
         , url = url
         , long_description = read('README')
+        , scripts = [ 'scripts/moosegui' ]
         , ext_modules = [
             Extension('_moose', [ '*' ])
             ]
@@ -156,4 +158,13 @@ setup(
             , 'build_py' : BuildPyCommand
             , 'build_ext' : BuildCommand
             }
+        , require = [ 'numpy', 'matplotlib', 'lxml' ]
+        , keywords = "neural simulation"
+        classifiers=[
+            'Development Status :: 3 - Beta',
+            'Intended Audience :: Science/Research',
+            'Operating System :: Linux',
+            'Programming Language :: Python',
+            'Programming Language :: C++',
+            ],
         )
