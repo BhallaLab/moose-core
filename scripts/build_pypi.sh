@@ -15,6 +15,6 @@ moose_dir=moose-3.0
     fi
     python setup.py sdist -vv
     echo "Created new archive"
-    sudo pip install dist/*.tar.gz
+    sudo pip install --upgrade dist/*.tar.gz --no-clean
     echo "Do the rest in $moose_dir"
 )
