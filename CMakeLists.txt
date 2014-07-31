@@ -115,7 +115,7 @@ if(LOCAL_GSL)
     LINK_DIRECTORIES(${GSL_INSTALL_DIR}/lib)
     set(LOCAL_GSL_LIBRARIES gsl gslcblas)
 else()
-    find_package(GSL REQUIRED)
+    find_package(GSL 1.16 REQUIRED)
 endif()
 
 ################################### SETUP BUILD ################################
