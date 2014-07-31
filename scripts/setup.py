@@ -92,7 +92,7 @@ class InstallCommand(_install):
         self.new_dir = os.path.join(os.path.split(__file__)[0], 'python')
         os.chdir(self.new_dir)
         try:
-            ds.spawn(["python", "setup.py", "install", "--user"])
+            ds.spawn(["python", "setup.py", "install"])
         except ds.DistutilsExecError as e:
             print("Can't install PyMOOSE")
             print(e)
@@ -104,7 +104,6 @@ class BuildPyCommand(_build_py):
     """Build PyMoose for distribution"""
     user_options =  _build_py.user_options + [
             ( 'build_lib', None, 'Build library' )
-            , ('compiler', None, 'Compiler' )
             ]
 
     def initialize_options(self):
@@ -149,7 +148,7 @@ setup(
         , url = url
         , long_description = read('README')
         , ext_modules = [
-            Extension('_moose', [ '*.cpp' ], compiler = 'g++')
+            Extension('_moose', [ '*' ])
             ]
         , cmdclass = { 
              'build' : BuildCommand 
