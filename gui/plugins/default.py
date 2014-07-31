@@ -89,7 +89,8 @@ class MoosePlugin(MoosePluginBase):
     def getEditorView(self):
         if not hasattr(self, 'editorView'):
             self.editorView = MooseEditorView(self)
-            # self.editorView.getCentralWidget().editObject.connect(self.mainWindow.objectEditSlot)
+            #signal to objecteditor from default plugin
+            self.editorView.getCentralWidget().editObject.connect(self.mainWindow.objectEditSlot)
             self.currentView = self.editorView
         return self.editorView
 
