@@ -14,4 +14,6 @@ set -e
     python setup.py sdist -vv
     echo "Created new archive"
     cd dist && pip install -vvvv *.tar.gz --user
+    echo "Trying to upload MOOSE to PyPI"
+    python setup.py register sdist upload
 )
