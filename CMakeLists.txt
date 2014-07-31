@@ -78,9 +78,9 @@ else()
 endif()
 
 # STATS INSIDE MOOSE
-set(ENABLE_LOGGER 1)
+set(ENABLE_LOGGER 0)
 if(ENABLE_LOGGER)
-    message("++ Moose will print statistics during simulation")
+    message("++ LOGGER ENABLED")
     add_definitions(-DENABLE_LOGGER)
 endif()
 
