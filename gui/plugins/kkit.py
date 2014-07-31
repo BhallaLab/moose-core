@@ -5,7 +5,7 @@ import re
 from PyQt4 import QtGui, QtCore, Qt
 #import pygraphviz as pgv
 import networkx as nx
-sys.path.insert(0, '/home/harsha/async/gui')
+sys.path.insert(0, '~/async/gui')
 import numpy as np
 import config
 import pickle 
@@ -47,6 +47,8 @@ class KkitPlugin(MoosePlugin):
         if not hasattr(self, 'editorView'):
             self.editorView = KkitEditorView(self)
             self.editorView.getCentralWidget().editObject.connect(self.mainWindow.objectEditSlot)
+            #self.editorView.GrViewresize(self)
+            #self.editorView.connect(self,QtCore.SIGNAL("resize(QResizeEvent)"),self.editorView.GrViewresize)
             self.currentView = self.editorView
         return self.editorView
 
@@ -102,7 +104,11 @@ class KkitEditorView(MooseEditorView):
             self.fileinsertMenu.addAction(self.saveModelAction)
         self._menus.append(self.fileinsertMenu)
 
- 
+    '''def GrViewresize(self,event):
+        print "GrViewresize in kkitEditorView"
+        #when Gui resize and event is sent which inturn call resizeEvent of qgraphicsview
+        self.view.resizeEvent1(event)
+    '''
     def SaveModelDialogSlot(self):
         type_sbml = 'SBML'
         filters = {'SBML(*.xml)': type_sbml}
@@ -132,6 +138,7 @@ class KkitEditorView(MooseEditorView):
     def getCentralWidget(self):
         if self._centralWidget is None:
             self._centralWidget = kineticEditorWidget()
+            #self._centralWidget.connect(self,QtCore.SIGNAL("resize(QResizeEvent)"),self._centralWidget.GrViewresize)
             self._centralWidget.setModelRoot(self.plugin.modelRoot)
         return self._centralWidget
 
@@ -144,15 +151,7 @@ class  KineticsWidget(EditorWidgetBase):
         self.sceneContainer = QtGui.QGraphicsScene(self)
         self.sceneContainer.setSceneRect(self.sceneContainer.itemsBoundingRect())
         self.sceneContainer.setBackgroundBrush(QtGui.QColor(230,220,219,120))
-        #self.insertMenu = QtGui.QMenu('&Insert')
-        #self._menus.append(self.insertMenu)
-        #self.insertMapper = QtCore.QSignalMapper(self)
-        classlist = ['CubeMesh','CylMesh','Pool','FuncPool','SumFunc','Reac','Enz','MMenz','StimulusTable','Table']
-        #insertMapper, actions = self.getInsertActions(classlist)
-
-        #for action in actions:
-        #    self.insertMenu.addAction(action)
-        #print "viewType",self.viewType
+       
         # pickled the color map file """
         colormap_file = open(os.path.join(config.settings[config.KEY_COLORMAP_DIR], 'rainbow2.pkl'),'rb')
         self.colorMap = pickle.load(colormap_file)
@@ -326,7 +325,6 @@ class  KineticsWidget(EditorWidgetBase):
             #print "updateItemSlot",item
             if isinstance(item,PoolItem):
                 if mooseObject.getId() == element(item.mobj).getId():
-                    print "##",mooseObject.getId(),element(item.mobj).getId()
                     item.updateSlot()
                     #once the text is edited in editor, laydisplay gets updated in turn resize the length, positionChanged signal shd be emitted
                     self.positionChange(mooseObject)        
@@ -344,6 +342,10 @@ class  KineticsWidget(EditorWidgetBase):
     def sizeHint(self):
         return QtCore.QSize(800,400)
 
+    def GrViewresize(self,event):
+        #when Gui resize and event is sent which inturn call resizeEvent of qgraphicsview
+        self.view.resizeEvent1(event)
+
     def updateModelView(self):
         # if self.modelRoot == '/':
         #     m = wildcardFind('/##[ISA=ChemCompt]')
@@ -357,10 +359,11 @@ class  KineticsWidget(EditorWidgetBase):
             createdItem = {}
             self.sceneContainer.setSceneRect(-self.width()/2,-self.height()/2,self.width(),self.height())
             self.view = GraphicalView(self, self.modelRoot,self.sceneContainer,self.border,self,createdItem)
+            
             self.connect(self.view, QtCore.SIGNAL("dropped"), self.objectEditSlot)
             hLayout = QtGui.QGridLayout(self)
             self.setLayout(hLayout)
-            hLayout.addWidget(self.view)
+            hLayout.addWidget(self.view,0,0)
         else:
             # maxmium and minimum coordinates of the objects specified in kkit file. 
             self.sceneContainer.clear()
@@ -376,10 +379,16 @@ class  KineticsWidget(EditorWidgetBase):
             if hasattr(self, 'view') and isinstance(self.view, QtGui.QWidget):
                 self.layout().removeWidget(self.view)
             self.view = GraphicalView(self,self.modelRoot,self.sceneContainer,self.border,self,createdItem)
+            #self.view.resizeEvent1(event)
+            #self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
+            #self.view.fitInView(self.sceneContainer.itemsBoundingRect())
+            #print "center kkit file",self.sceneContainer.itemsBoundingRect().center()
+            #self.view.centerOn(self.sceneContainer.itemsBoundingRect().center())
             hLayout = QtGui.QGridLayout(self)
             self.setLayout(hLayout)
             hLayout.addWidget(self.view)
             #self.layout().addWidget(self.view)
+
     
     '''
     def resetColor(self):
@@ -633,21 +642,30 @@ class kineticEditorWidget(KineticsWidget):
         self.insertMenu = QtGui.QMenu('&Insert')
         self._menus.append(self.insertMenu)
         self.insertMapper = QtCore.QSignalMapper(self)
-        classlist = ['CubeMesh','CylMesh','Pool','FuncPool','SumFunc','Reac','Enz','MMenz','StimulusTable','Table']
+        classlist = ['CubeMesh','CylMesh','Pool','FuncPool','SumFunc','Reac','Enz','MMenz','StimulusTable']
         insertMapper, actions = self.getInsertActions(classlist)
         for action in actions:
             self.insertMenu.addAction(action)        
+
+    def GrViewresize(self,event):
+        #when Gui resize and event is sent which inturn call resizeEvent of qgraphicsview
+        self.view.resizeEvent1(event)
 
     def makePoolItem(self, poolObj, qGraCompt):
         return PoolItem(poolObj, qGraCompt)
         
     def getToolBars(self):
+        #Add specific tool items with respect to kkit
         if not hasattr(self, '_insertToolBar'):
             self._insertToolBar = QtGui.QToolBar('Insert')
             self._toolBars.append(self._insertToolBar)
             for action in self.insertMenu.actions():
                 button = MToolButton()
                 button.setDefaultAction(action)
+                icon = QtGui.QIcon()
+                #icon.addPixmap(QtGui.QPixmap(QtCore.QString.fromUtf8("~/../../Doc/images/kkitGui/"+action.text()+".png")), QtGui.QIcon.Active, QtGui.QIcon.Off)
+                button.setIcon(QtGui.QIcon("~/../../Docs/images/classIcon/"+action.text()+".png"))
+                #button.setIconSize(QtCore.QSize(200,200))
                 self._insertToolBar.addWidget(button)
         return self._toolBars
 
@@ -660,6 +678,7 @@ class kineticRunWidget(KineticsWidget):
 
     def getToolBars(self):
         return self._toolBars
+        
 
     def changeBgSize(self):
         #print "here in chageBgSize"

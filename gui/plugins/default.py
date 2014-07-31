@@ -322,11 +322,11 @@ class RunView(RunBase):
     def setDataRoot(self, path):        
         self.dataRoot = path
         self.getCentralWidget().setDataRoot(path)
-        self.getSchedulingDockWidget().widget().setDataRoot(path)
+        #self.getSchedulingDockWidget().widget().setDataRoot(path)
 
     def setModelRoot(self, path):
         self.modelRoot = path
-        self.getSchedulingDockWidget().widget().setModelRoot(path)
+        #self.getSchedulingDockWidget().widget().setModelRoot(path)
         self.getCentralWidget().setModelRoot(path)
 
     def getDataTablesPane(self):
@@ -357,7 +357,6 @@ class RunView(RunBase):
         widget.simtimeExtended.connect(self._centralWidget.extendXAxes)
         widget.runner.resetAndRun.connect(self._centralWidget.plotAllData)
         return self.schedulingDockWidget
-    
 
 class MooseRunner(QtCore.QObject):
     """Helper class to control simulation execution
@@ -540,10 +539,10 @@ class SchedulingWidget(QtGui.QWidget):
         #        equal to the min TickDt and not zero.
         tickDt = self.getTickDtMap().values()
         tickDt = [item for item in self.getTickDtMap().values() if float(item) != 0.0]
-        dt = min(tickDt)
+        dt = max(tickDt)
         #dt = min(self.getTickDtMap().values())
         if dt > self.updateInterval:
-            self.updateInterval = dt
+            self.updateInterval = dt*10
             #self.updateIntervalText.setText(str(dt))
 
     # def disableButton(self):
