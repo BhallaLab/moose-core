@@ -60,6 +60,8 @@ ELSE(WIN32)
     IF (GSL_CONFIG) 
       # set CXXFLAGS to be fed into CXX_FLAGS by the user:
       SET(GSL_CXX_FLAGS "`${GSL_CONFIG} --cflags`")
+      SET(GSL_VERSION "`${GSL_CONFIG} --version`")
+
       
       # set INCLUDE_DIRS to prefix+include
       EXEC_PROGRAM(${GSL_CONFIG}
