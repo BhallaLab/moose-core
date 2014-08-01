@@ -41,7 +41,183 @@
 #include "HDF5WriterBase.h"
 
 using namespace std;
-                
+
+///////////////////////
+// Utility functions
+///////////////////////
+/**
+   Create or open attribute at specified path.
+
+   path should be `/node1/node2/.../nodeN/attribute`
+
+   it is always relative to the file root
+ */
+hid_t require_attribute(hid_t file_id, string path,
+                        hid_t data_type, hid_t data_id)
+{
+    size_t attr_start = path.rfind("/");
+    string node_path = ".";
+    string attr_name = "";
+    if (attr_start == string::npos){
+        attr_start = 0;
+    } else {
+        node_path = path.substr(0, attr_start);
+        attr_start += 1;
+    }
+    attr_name = path.substr(attr_start);   
+    if (H5Aexists_by_name(file_id, node_path.c_str(), attr_name.c_str(),
+                          H5P_DEFAULT)){
+        return H5Aopen_by_name(file_id, node_path.c_str(), attr_name.c_str(),
+                               H5P_DEFAULT, H5P_DEFAULT);
+    } else {
+        return H5Acreate_by_name(file_id, node_path.c_str(), attr_name.c_str(),
+                                   data_type, data_id,
+                                   H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    }   
+}
+
+/**
+   Iterate through the path->value map of scalar attributes of type
+   `A` and write to HDF5 file handle `file_id`.
+ */
+template <typename A>
+herr_t writeScalarAttributesFromMap(hid_t file_id, map < string, A > path_value_map)
+{
+    for (typename map< string, A >::const_iterator ii = path_value_map.begin();
+         ii != path_value_map.end(); ++ii){
+        herr_t status = writeScalarAttr<A>(file_id,
+                                           ii->first, ii->second);
+        if (status < 0){
+            cerr << "Error: writing attribute " << ii->first
+                 << " returned status code " << status << endl;
+            return status;
+        }
+    }
+    return 0;    
+}
+
+/**
+   Iterate through the path->value map of vector attributes of type
+   `A` and write to HDF5 file handle `file_id`.
+ */
+template <typename A>
+herr_t writeVectorAttributesFromMap(hid_t file_id, map < string, vector < A > > path_value_map)
+{
+    for (typename map< string, vector < A > >::const_iterator ii = path_value_map.begin();
+         ii != path_value_map.end(); ++ii){
+        herr_t status = writeVectorAttr<A>(file_id,
+                                           ii->first, ii->second);
+        if (status < 0){
+            cerr << "Error: writing attribute " << ii->first
+                 << " returned status code " << status << endl;
+            return status;
+        }
+    }
+    return 0;    
+}
+
+////////////////////////////////////////////////////////////////////
+// Template specializations for scalar attribute writing
+////////////////////////////////////////////////////////////////////
+template <>
+herr_t writeScalarAttr(hid_t file_id, string path, string value)
+{
+    hid_t data_id = H5Screate(H5S_SCALAR);    
+    hid_t dtype = H5Tcopy(H5T_C_S1);
+    H5Tset_size(dtype, value.length());
+    const char * data = value.c_str();
+    hid_t attr_id = require_attribute(file_id, path, dtype, data_id);
+    herr_t status =  H5Awrite(attr_id, dtype, data);
+    H5Aclose(attr_id);
+    return status;
+}
+
+template <>
+herr_t writeScalarAttr(hid_t file_id, string path, double value)
+{
+    hid_t data_id = H5Screate(H5S_SCALAR);    
+    hid_t dtype = H5T_NATIVE_DOUBLE;
+    hid_t attr_id = require_attribute(file_id, path, dtype, data_id);
+    herr_t status = H5Awrite(attr_id, dtype, (void*)(&value));    
+    H5Aclose(attr_id);
+    return status;
+}
+
+template <>
+herr_t writeScalarAttr(hid_t file_id, string path,  long value)
+{
+    hid_t data_id = H5Screate(H5S_SCALAR);    
+    hid_t dtype = H5T_NATIVE_LONG;
+    hid_t attr_id = require_attribute(file_id, path, dtype, data_id);
+    herr_t status = H5Awrite(attr_id, dtype, (void*)(&value));
+    H5Aclose(attr_id);
+    return status;
+}
+
+template <>
+herr_t writeScalarAttr(hid_t file_id, string path, int value)
+{
+    hid_t data_id = H5Screate(H5S_SCALAR);    
+    hid_t dtype = H5T_NATIVE_INT;
+    hid_t attr_id = require_attribute(file_id, path, dtype, data_id);
+    herr_t status =  H5Awrite(attr_id, dtype, (void*)(&value));
+    H5Aclose(attr_id);
+    return status;
+}
+
+////////////////////////////////////////////////////////////////////
+// Template specializations for vector attribute writing
+////////////////////////////////////////////////////////////////////
+
+template <>
+herr_t writeVectorAttr(hid_t file_id, string path, vector < string > value)
+{
+    hsize_t dims[] = {value.size()};
+    hid_t data_id = H5Screate_simple(1, dims, NULL);    
+    hid_t dtype = H5Tcopy(H5T_C_S1);
+    H5Tset_size(dtype, value.size());
+    const char ** data = (const char **)calloc(value.size(),
+                                   sizeof(const char*));
+    for (unsigned int ii = 0; ii < value.size(); ++ii){
+        data[ii] = value[ii].c_str();
+    }
+    hid_t attr_id = require_attribute(file_id, path, dtype, data_id);
+    herr_t status = H5Awrite(attr_id, dtype, data);
+    free(data);
+    H5Aclose(attr_id);
+    return status;
+}
+
+template <>
+herr_t writeVectorAttr(hid_t file_id, string path, vector < double > value)
+{
+    hsize_t dims[] = {value.size()};
+    hid_t data_id = H5Screate_simple(1, dims, NULL);    
+    hid_t dtype = H5T_NATIVE_DOUBLE;
+    H5Tset_size(dtype, value.size());
+    void * data = &value[0];
+    hid_t attr_id = require_attribute(file_id, path, dtype, data_id);
+    herr_t status = H5Awrite(attr_id, dtype, data);
+    H5Aclose(attr_id);
+    return status;
+}
+
+template <>
+herr_t writeVectorAttr(hid_t file_id, string path, vector < long > value)
+{
+    hsize_t dims[] = {value.size()};
+    hid_t data_id = H5Screate_simple(1, dims, NULL);    
+    hid_t dtype = H5T_NATIVE_LONG;
+    H5Tset_size(dtype, value.size());
+    void * data = &value[0];
+    hid_t attr_id = require_attribute(file_id, path, dtype, data_id);
+    herr_t status = H5Awrite(attr_id, dtype, data);
+    H5Aclose(attr_id);
+    return status;
+}
+
+
+
 const Cinfo* HDF5WriterBase::initCinfo()
 {
 
@@ -86,23 +262,45 @@ const Cinfo* HDF5WriterBase::initCinfo()
       &HDF5WriterBase::getCompression);
 
   static LookupValueFinfo< HDF5WriterBase, string, string  > sattr(
-      "sattr",
-      "String attributes. The key is attribute name, value is attribute value (string).",
-      &HDF5WriterBase::setSAttr,
-      &HDF5WriterBase::getSAttr);
+      "stringAttr",
+      "String attributes. The key is attribute name, value is attribute value"
+      " (string).",
+      &HDF5WriterBase::setStringAttr,
+      &HDF5WriterBase::getStringAttr);
   
-  static LookupValueFinfo< HDF5WriterBase, string, double > fattr(
-      "fattr",
-      "Float attributes. The key is attribute name, value is attribute value (double).",
-      &HDF5WriterBase::setFAttr,
-      &HDF5WriterBase::getFAttr);
+  static LookupValueFinfo< HDF5WriterBase, string, double > dattr(
+      "doubleAttr",
+      "Double precision floating point attributes. The key is attribute name,"
+      " value is attribute value (double).",
+      &HDF5WriterBase::setDoubleAttr,
+      &HDF5WriterBase::getDoubleAttr);
   
-  static LookupValueFinfo< HDF5WriterBase, string, long > iattr(
-      "iattr",
-      "Integer attributes. The key is attribute name, value is attribute value (long).",
-      &HDF5WriterBase::setIAttr,
-      &HDF5WriterBase::getIAttr);
+  static LookupValueFinfo< HDF5WriterBase, string, long > lattr(
+      "longAttr",
+      "Long integer attributes. The key is attribute name, value is attribute"
+      " value (long).",
+      &HDF5WriterBase::setLongAttr,
+      &HDF5WriterBase::getLongAttr);
   
+  static LookupValueFinfo< HDF5WriterBase, string, vector < string >  > svecattr(
+      "stringVecAttr",
+      "String vector attributes. The key is attribute name, value is attribute value (string).",
+      &HDF5WriterBase::setStringVecAttr,
+      &HDF5WriterBase::getStringVecAttr);
+  
+  static LookupValueFinfo< HDF5WriterBase, string, vector < double > > dvecattr(
+      "doubleVecAttr",
+      "Double vector attributes. The key is attribute name, value is"
+      " attribute value (vector of double).",
+      &HDF5WriterBase::setDoubleVecAttr,
+      &HDF5WriterBase::getDoubleVecAttr);
+  
+  static LookupValueFinfo< HDF5WriterBase, string, vector < long > > lvecattr(
+      "longVecAttr",
+      "Long integer vector attributes. The key is attribute name, value is"
+      " attribute value (vector of long).",
+      &HDF5WriterBase::setLongVecAttr,
+      &HDF5WriterBase::getLongVecAttr);
   static DestFinfo flush(
       "flush",
       "Write all buffer contents to file and clear the buffers.",
@@ -122,8 +320,11 @@ const Cinfo* HDF5WriterBase::initCinfo()
     &compressor,
     &compression,
     &sattr,
-    &fattr,
-    &iattr,
+    &dattr,
+    &lattr,
+    &svecattr,
+    &dvecattr,
+    &lvecattr,
     &flush,
     &close,
   };
@@ -287,41 +488,59 @@ unsigned int HDF5WriterBase::getCompression() const
 // file.
 void HDF5WriterBase::flush()
 {
-    cout << "Warning: HDF5WriterBase:: flush() should never be called. Subclasses should reimplement this." << endl;// do nothing
+    flushAttributes();
+    sattr_.clear();
+    dattr_.clear();
+    lattr_.clear();
+    svecattr_.clear();
+    dvecattr_.clear();
+    lvecattr_.clear();
 }
 
+void HDF5WriterBase::flushAttributes()
+{
+    if (filehandle_ < 0){
+        return;
+    }    
+    // Write all scalar attributes
+    writeScalarAttributesFromMap< string >(filehandle_, sattr_);
+    writeScalarAttributesFromMap< double >(filehandle_, dattr_);
+    writeScalarAttributesFromMap< long >(filehandle_, lattr_);
+    // Write the vector attributes
+    writeVectorAttributesFromMap< string >(filehandle_, svecattr_);
+    writeVectorAttributesFromMap< double >(filehandle_, dvecattr_);
+    writeVectorAttributesFromMap< long >(filehandle_, lvecattr_);
+
+}
 void HDF5WriterBase::close()
 {
     if (filehandle_ < 0){
         return;
     }
-    // First write all attributes of root node.
-    writeRootAttr<string>(filehandle_, sattr_);
-    writeRootAttr<double>(filehandle_, fattr_);
-    writeRootAttr<long>(filehandle_, iattr_);    
-    herr_t err = H5Fclose(filehandle_);
+    flush();
+    herr_t status = H5Fclose(filehandle_);
     filehandle_ = -1;
-    if (err < 0){
-        cerr << "Error: closing file. Status code=" << err << endl;
+    if (status < 0){
+        cerr << "Error: closing file returned status code=" << status << endl;
     }
 }
 
-void HDF5WriterBase::setSAttr(string name, string value)
+void HDF5WriterBase::setStringAttr(string name, string value)
 {
     sattr_[name] = value;
 }
 
-void HDF5WriterBase::setFAttr(string name, double value)
+void HDF5WriterBase::setDoubleAttr(string name, double value)
 {
-    fattr_[name] = value;
+    dattr_[name] = value;
 }
 
-void HDF5WriterBase::setIAttr(string name, long value)
+void HDF5WriterBase::setLongAttr(string name, long value)
 {
-    iattr_[name] = value;
+    lattr_[name] = value;
 }
 
-string HDF5WriterBase::getSAttr(string name) const
+string HDF5WriterBase::getStringAttr(string name) const
 {
     map <string, string>::const_iterator ii = sattr_.find(name);
     if (ii != sattr_.end()){
@@ -331,26 +550,75 @@ string HDF5WriterBase::getSAttr(string name) const
     return "";
 }
 
-double HDF5WriterBase::getFAttr(string name) const
+double HDF5WriterBase::getDoubleAttr(string name) const
 {
-    map <string, double>::const_iterator ii = fattr_.find(name);
-    if (ii != fattr_.end()){
+    map <string, double>::const_iterator ii = dattr_.find(name);
+    if (ii != dattr_.end()){
         return ii->second;
     }
     cerr << "Error: no attribute named " << name << endl;
     return 0.0;
 }
 
-long HDF5WriterBase::getIAttr(string name) const
+long HDF5WriterBase::getLongAttr(string name) const
 {
-    map <string, long>::const_iterator ii = iattr_.find(name);
-    if (ii != iattr_.end()){
+    map <string, long>::const_iterator ii = lattr_.find(name);
+    if (ii != lattr_.end()){
         return ii->second;
     }
     cerr << "Error: no attribute named " << name << endl;
-    return 0.0;
+    return 0;
 }
 
+///////////////////////////////////////////////////
+// Vector attributes
+///////////////////////////////////////////////////
+
+void HDF5WriterBase::setStringVecAttr(string name, vector < string > value)
+{
+    svecattr_[name] = value;
+}
+
+void HDF5WriterBase::setDoubleVecAttr(string name, vector < double > value)
+{
+    dvecattr_[name] = value;
+}
+
+void HDF5WriterBase::setLongVecAttr(string name, vector < long  >value)
+{
+    lvecattr_[name] = value;
+}
+
+vector < string > HDF5WriterBase::getStringVecAttr(string name) const
+{
+    map <string, vector < string > >::const_iterator ii = svecattr_.find(name);
+    if (ii != svecattr_.end()){
+        return ii->second;
+    }
+    cerr << "Error: no attribute named " << name << endl;
+    return vector<string>();
+}
+
+vector < double > HDF5WriterBase::getDoubleVecAttr(string name) const
+{
+    map <string, vector < double > >::const_iterator ii = dvecattr_.find(name);
+    if (ii != dvecattr_.end()){
+        return ii->second;
+    }
+    cerr << "Error: no attribute named " << name << endl;
+    return vector<double>();
+}
+
+vector < long > HDF5WriterBase::getLongVecAttr(string name) const
+{
+    map <string, vector < long > >::const_iterator ii = lvecattr_.find(name);
+    if (ii != lvecattr_.end()){
+        return ii->second;
+    }
+    cerr << "Error: no attribute named " << name << endl;
+    return vector<long>();
+;
+}
 
 
 

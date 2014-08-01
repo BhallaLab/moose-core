@@ -63,14 +63,26 @@ const Cinfo * HDF5DataWriter::initCinfo()
     static Finfo * processShared[] = {
         &process, &reinit
     };
+    
     static SharedFinfo proc(
         "proc",
         "Shared message to receive process and reinit",
         processShared, sizeof( processShared ) / sizeof( Finfo* ));
+
+    static ValueFinfo< HDF5DataWriter, unsigned int> flushLimit(
+      "flushLimit",
+      "Buffer size limit for flushing the data from memory to file. Default"
+      " is 4M doubles.",
+      &HDF5DataWriter::setFlushLimit,
+      &HDF5DataWriter::getFlushLimit);
+
     static Finfo * finfos[] = {
         requestOut(),
+        &flushLimit,
         &proc,
     };
+
+    
 
     static string doc[] = {
         "Name", "HDF5DataWriter",
@@ -104,7 +116,7 @@ const Cinfo * HDF5DataWriter::initCinfo()
 
 static const Cinfo * hdf5dataWriterCinfo = HDF5DataWriter::initCinfo();
 
-HDF5DataWriter::HDF5DataWriter(): steps_(0)
+HDF5DataWriter::HDF5DataWriter(): flushLimit_(4*1024*1024), steps_(0)
 {
 }
 
@@ -143,7 +155,8 @@ void HDF5DataWriter::flush()
             cerr << "Warning: appending data for object " << src_[ii]
                  << " returned status " << status << endl;                
         }        
-    }        
+    }
+    HDF5WriterBase::flush();
     H5Fflush(filehandle_, H5F_SCOPE_LOCAL);
 }
         
@@ -179,7 +192,7 @@ void HDF5DataWriter::reinit(const Eref & e, ProcPtr p)
 {
     steps_ = 0;
     for (unsigned int ii = 0; ii < data_.size(); ++ii){
-        data_[ii].clear();
+        H5Dclose(datasets_[ii]);
     }
     data_.clear();
     src_.clear();
@@ -344,7 +357,15 @@ herr_t HDF5DataWriter::appendToDataset(hid_t dataset_id, const vector< double >&
     return status;
 }
 
+void HDF5DataWriter::setFlushLimit(unsigned int value)
+{
+    flushLimit_ = value;
+}
 
+unsigned int HDF5DataWriter::getFlushLimit() const
+{
+    return flushLimit_;
+}
         
 #endif // USE_HDF5
 // 

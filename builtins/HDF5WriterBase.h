@@ -32,6 +32,9 @@
 #ifndef _HDF5IO_H
 #define _HDF5IO_H
 #include <typeinfo>
+
+hid_t require_attribute(hid_t file_id, string path,
+                        hid_t data_type, hid_t data_id);
 class HDF5WriterBase
 {
   public:
@@ -49,12 +52,21 @@ class HDF5WriterBase
     string getCompressor() const;
     void setCompression(unsigned int level);
     unsigned int getCompression() const;
-    void setSAttr(string name, string value);
-    void setFAttr(string name, double value);
-    void setIAttr(string name, long value);
-    string getSAttr(string name) const;
-    double getFAttr(string name) const;
-    long getIAttr(string name) const;            
+    void setStringAttr(string name, string value);
+    void setDoubleAttr(string name, double value);
+    void setLongAttr(string name, long value);
+    string getStringAttr(string name) const;
+    double getDoubleAttr(string name) const;
+    long getLongAttr(string name) const;            
+
+    void setStringVecAttr(string name, vector < string > value);
+    void setDoubleVecAttr(string name, vector < double > value);
+    void setLongVecAttr(string name, vector < long > value);
+    vector < string > getStringVecAttr(string name) const;
+    vector < double > getDoubleVecAttr(string name) const;
+    vector < long > getLongVecAttr(string name) const;            
+
+    virtual void flushAttributes();
     virtual void flush();
     virtual void close();
     
@@ -74,50 +86,35 @@ class HDF5WriterBase
     unsigned int openmode_;
     // We also allow attributes of string, double or long int type on / node
     map<string, string> sattr_;
-    map<string, double> fattr_;
-    map<string, long> iattr_;
+    map<string, double> dattr_;
+    map<string, long> lattr_;
+    map<string, vector < string > > svecattr_;
+    map<string, vector < double > > dvecattr_;
+    map<string, vector < long > > lvecattr_;
     // These are for compressing data
     unsigned int chunkSize_;
     string compressor_; // can be zlib or szip
     unsigned int compression_;
 };
 
-template <typename A>
-void writeRootAttr(hid_t fileid, const map< string, A> & attr)
+template <typename A> herr_t writeScalarAttr(hid_t file_id, string path, A value)
 {
-    hid_t dataid;
-    hid_t attrid;
-    hid_t dtype;
-    for (typename map<string, A>::const_iterator ii = attr.begin(); ii != attr.end(); ++ii){
-        dataid = H5Screate(H5S_SCALAR);
-        const void * data = (void*)(&ii->second);
-        if (typeid(A) == typeid(std::string)){
-            dtype = H5Tcopy(H5T_C_S1);
-            string * s = reinterpret_cast<string*>(const_cast<void*>(data));
-            H5Tset_size(dtype, s->length());
-            data = s->c_str();
-        } else if (typeid(A) == typeid(double)){
-            dtype = H5T_NATIVE_DOUBLE;
-        } else if (typeid(A) == typeid(long)){
-            dtype = H5T_NATIVE_LONG;
-        } else {
-            cerr << "Error: handling of " << typeid(A).name() << " not handled." << endl;
-            return;
-        }
-        if (H5Aexists(fileid, ii->first.c_str())){
-            attrid = H5Aopen(fileid, ii->first.c_str(), H5P_DEFAULT);
-        } else {
-            attrid = H5Acreate2(fileid, ii->first.c_str(), dtype, dataid, H5P_DEFAULT, H5P_DEFAULT);
-        }
-        if (attrid < 0){
-            cerr <<  "Error: failed to open/create attribute " << ii->first << ". Return value: " << attrid << endl;
-            continue;
-        }        
-        herr_t status = H5Awrite(attrid, dtype, data);
-        if (status < 0){
-            cerr << "Error: failed to write attribute " << ii->first << ". Status code=" << status << endl;
-        }
-    }    
+    cerr << "This should be never be called."
+         << " Specialized version exist for basic types." << endl;
+    return -1;
+}
+
+
+////////////////////////////////////////////////////////////
+// Write vector attributes
+////////////////////////////////////////////////////////////
+
+template <typename A> herr_t writeVectorAttr(hid_t file_id, string path,
+                                             vector < A > value)
+{
+    cerr << "writeVectorAttr: This should be never be called."
+         << " Specialized version exist for basic types." << endl;
+    return -1;
 }
 
 #endif // _HDF5IO_H
