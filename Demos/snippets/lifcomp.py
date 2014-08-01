@@ -170,7 +170,7 @@ if __name__ == '__main__':
     data = []
     for tab in tables:
         data.append(tab.vector)
-    data = np.concatenate(data)
+    data = np.vstack(data)
     np.savetxt('lifcomp.csv', data.transpose(), delimiter='\t', header=' '.join([tab.name for tab in tables]))
     #     subplot(len(tables), 1, ii+1)
     #     t = np.linspace(0, simtime, len(tab.vector))*1e3
