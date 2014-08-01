@@ -173,15 +173,15 @@ template <>
 herr_t writeVectorAttr(hid_t file_id, string path, vector < string > value)
 {
     hsize_t dims[] = {value.size()};
-    hid_t data_id = H5Screate_simple(1, dims, NULL);    
+    hid_t space = H5Screate_simple(1, dims, NULL);
     hid_t dtype = H5Tcopy(H5T_C_S1);
-    H5Tset_size(dtype, value.size());
+    H5Tset_size(dtype, H5T_VARIABLE);    
     const char ** data = (const char **)calloc(value.size(),
                                    sizeof(const char*));
     for (unsigned int ii = 0; ii < value.size(); ++ii){
         data[ii] = value[ii].c_str();
     }
-    hid_t attr_id = require_attribute(file_id, path, dtype, data_id);
+    hid_t attr_id = require_attribute(file_id, path, dtype, space);
     herr_t status = H5Awrite(attr_id, dtype, data);
     free(data);
     H5Aclose(attr_id);
