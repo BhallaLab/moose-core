@@ -33,15 +33,18 @@ moose.connect(h, 'requestOut', c, 'getIm')
 
 print 'Here....'
 h.filename = 'output.h5'
-h.chunkSize = 10000
 h.compressor = 'zlib'
 h.compression = 7
+# h.flushLimit = 10
 # We allow simple attributes of type string, double and long on the
 # root node. This allows for file-level metadata/annotation.
 print '1111111111'
-h.sattr['note'] = 'This is a test.'
-h.fattr['a float attribute'] = 3.141592
-h.iattr['an int attribute'] = 86400
+h.stringAttr['note'] = 'This is a test.'
+h.doubleAttr['a_double_attribute'] = 3.141592
+h.longAttr['an_int_attribute'] = 86400
+h.stringVecAttr['stringvec'] = ['I wonder', 'why', 'I wonder']
+h.doubleVecAttr['c[0]/dvec'] = [3.141592, 2.71828]
+h.longVecAttr['c[0]/lvec'] = [3, 14, 1592, 271828]
 print '1111111111'
 moose.setClock(0, 1e-5)
 moose.setClock(1, 1e-5)
@@ -52,10 +55,10 @@ moose.useClock(2, '/##[TYPE=HDF5DataWriter]', 'process')
 print '333'
 
 moose.reinit()
-print '22222'
 c.inject = 0.1
 moose.start(30.0)
 h.close()
+print t.vector
 print 'Finished simulation. Data was saved in', h.filename
 # print numpy.array(t.vector)
 # moose.start(0.5)
