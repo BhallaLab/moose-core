@@ -31,34 +31,39 @@ h.mode = 2 # Truncate existing file
 moose.connect(h, 'requestOut', c, 'getVm')
 moose.connect(h, 'requestOut', c, 'getIm')
 
-print 'Here....'
 h.filename = 'output.h5'
 h.compressor = 'zlib'
 h.compression = 7
-# h.flushLimit = 10
-# We allow simple attributes of type string, double and long on the
-# root node. This allows for file-level metadata/annotation.
-print '1111111111'
+
+# Flush data from memory to disk after accumulating every 1K entries.
+h.flushLimit = 1024
+
+# We allow simple attributes of type string, double and long.
+# This allows for file-level metadata/annotation.
 h.stringAttr['note'] = 'This is a test.'
-h.doubleAttr['a_double_attribute'] = 3.141592
-h.longAttr['an_int_attribute'] = 86400
+
+# All paths are taken relative to the root. The last token is the name
+# of the attribute.
+h.doubleAttr['/c[0]/vm/a_double_attribute'] = 3.141592
+h.longAttr['an_int_attribute'] = 8640
+
+# In addition, vectors of string, long and double can also be stored
+# as attributes.
 h.stringVecAttr['stringvec'] = ['I wonder', 'why', 'I wonder']
 h.doubleVecAttr['c[0]/dvec'] = [3.141592, 2.71828]
 h.longVecAttr['c[0]/lvec'] = [3, 14, 1592, 271828]
-print '1111111111'
+
 moose.setClock(0, 1e-5)
 moose.setClock(1, 1e-5)
 moose.setClock(2, 1e-5)
 moose.useClock(0, '/c', 'init')
 moose.useClock(1, '/##[TYPE!=HDF5DataWriter]', 'process')
 moose.useClock(2, '/##[TYPE=HDF5DataWriter]', 'process')
-print '333'
 
 moose.reinit()
 c.inject = 0.1
 moose.start(30.0)
 h.close()
-print t.vector
 print 'Finished simulation. Data was saved in', h.filename
 # print numpy.array(t.vector)
 # moose.start(0.5)
