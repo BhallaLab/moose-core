@@ -509,41 +509,38 @@ int set_lookup_value(const ObjId& oid, string fname, char value_type_code, char 
     }
     
     switch (value_type_code){
-        case 'b':
-            SET_LOOKUP_VALUE(bool)        
-        case 'c':
-            SET_LOOKUP_VALUE(char)
-        case 'h':
-            SET_LOOKUP_VALUE(short)
-        case 'H':
-            SET_LOOKUP_VALUE(unsigned short)
-        case 'i':
-            SET_LOOKUP_VALUE(int)
-        case 'I':
-            SET_LOOKUP_VALUE(unsigned int)
-        case 'l':
-            SET_LOOKUP_VALUE(long)
-                    
-        case 'k': 
-            SET_LOOKUP_VALUE(unsigned long)
+        case 'b': SET_LOOKUP_VALUE(bool)        
+        case 'c': SET_LOOKUP_VALUE(char)
+        case 'h': SET_LOOKUP_VALUE(short)
+        case 'H': SET_LOOKUP_VALUE(unsigned short)
+        case 'i': SET_LOOKUP_VALUE(int)
+        case 'I': SET_LOOKUP_VALUE(unsigned int)
+        case 'l': SET_LOOKUP_VALUE(long)                    
+        case 'k': SET_LOOKUP_VALUE(unsigned long)
 #ifdef HAVE_LONG_LONG
-        case 'L':
-            SET_LOOKUP_VALUE(long long)
-        case 'K': 
-            SET_LOOKUP_VALUE(unsigned long long);
+        case 'L': SET_LOOKUP_VALUE(long long)
+        case 'K': SET_LOOKUP_VALUE(unsigned long long);
 #endif
-        case 'd':
-            SET_LOOKUP_VALUE(double)
-        case 'f': 
-            SET_LOOKUP_VALUE(float)
-        case 's':
-            SET_LOOKUP_VALUE(string)
-        case 'x':
-            SET_LOOKUP_VALUE(Id)
-        case 'y':
-            SET_LOOKUP_VALUE(ObjId)
+        case 'd': SET_LOOKUP_VALUE(double)
+        case 'f': SET_LOOKUP_VALUE(float)
+        case 's': SET_LOOKUP_VALUE(string)
+        case 'x': SET_LOOKUP_VALUE(Id)
+        case 'y': SET_LOOKUP_VALUE(ObjId)
+        case 'D': SET_LOOKUP_VALUE( vector <double> )
+        case 'S': SET_LOOKUP_VALUE( vector <string> )
+        case 'X': SET_LOOKUP_VALUE( vector <Id> )
+        case 'Y': SET_LOOKUP_VALUE( vector <ObjId> )
+        case 'v': SET_LOOKUP_VALUE( vector <int> )
+        case 'M': SET_LOOKUP_VALUE( vector <long> )
+        case 'N': SET_LOOKUP_VALUE( vector <unsigned int> )
+        case 'P': SET_LOOKUP_VALUE( vector <unsigned long> )
+        case 'F': SET_LOOKUP_VALUE( vector <float> )
+        case 'w': SET_LOOKUP_VALUE( vector <short> )
+        case 'C': SET_LOOKUP_VALUE( vector <char> )
         default:
-            PyErr_SetString(PyExc_TypeError, "invalid value type");
+            ostringstream err;
+            err << "Value type " << value_type_code << " not supported yet.";            
+            PyErr_SetString(PyExc_TypeError, err.str().c_str());
     }
     if (success){
         return 0;
