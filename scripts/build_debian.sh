@@ -5,7 +5,7 @@ set -o xtrace
 cd ..
 cat > moose.recipe <<EOF
 # bzr-builder format 0.3 deb-version {debupstream}+{revno}
-lp:~dilawar/+junk/testing
+lp:moose
 EOF
 # one can do nesting here.
 if [ $# -gt 0 ]; then
