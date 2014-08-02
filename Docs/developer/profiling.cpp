@@ -80,6 +80,10 @@ You may only add the -lprofiler flag to the Makefile which compiles the C++ code
 
 \section ProfilingInAction Profiling in action
 
+Before profiling one should always set the PYTHONPATH to the directory from where python picks up moose functions. To get the function names in your profiling, this should be done, whether it is already set in e.g. your .bashrc script. Example:
+
+\verbatim export PYTHONPATH=/path_to_moose/python/ \endverbatim
+
 To test profiling let's use an existing demo to check the runtime of HSolve functions.
 
 From the moose directory alter the script at Demos/traub_2005/py/test_hsolve_tcr.py. First import the wrapper we just made.
@@ -110,10 +114,19 @@ You can also comment out the testEE() function so the it will run faster.
 
 After running the python script you should have a file named hsolve.prof. As you can see the string passed to ProfStart() determines the name of the profiler's output.
 
-You can interpret the output using pprof, or if you installed kcachegrind, then with the following commands:
+You can interpret the output using pprof, or if you installed kcachegrind. Note that for the 'program' parameter of pprof you should provide the _moose.so file inside /path_to_moose/python/moose/.
+
+pprof text method:
 
 \verbatim
-~$ pprof --callgrind gperftools_wrapped.so hsolve.prof > output.callgrind
+~$ pprof --text /path_to_moose/python/moose/_moose.so hsolve.prof > log
+~$ less log
+\endverbatim
+
+kcachegrind method:
+
+\verbatim
+~$ pprof --callgrind /path_to_moose/python/moose/_moose.so hsolve.prof > output.callgrind
 ~$ kcachegrind output.callgrind
 \endverbatim
 
