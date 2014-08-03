@@ -18,7 +18,8 @@ __status__           = "Development"
 import os
 import sys
 
-from distutils.core import setup, Command, Extension
+from setuptools import setup
+from distutils.core import Command, Extension
 from distutils.command.install import install as _install
 from distutils.command.build import build as _build
 from distutils.command.build_py import build_py as _build_py
@@ -165,5 +166,5 @@ setup(
             'Operating System :: Linux',
             'Programming Language :: Python',
             'Programming Language :: C++',
-            ],
+            ]
         )

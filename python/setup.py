@@ -53,4 +53,7 @@ setup(
                 'plugins/list.txt'
                 ]
             },
+        entry_points = {
+            'gui_scripts' : [ 'moosegui = mgui.main' ]
+            },
     ) 
