@@ -17,6 +17,7 @@ __status__           = "Development"
 
 import os
 import sys
+import shutil
 
 from setuptools import setup
 from distutils.core import Command, Extension
@@ -149,7 +150,6 @@ setup(
         , license = "LGPL"
         , url = url
         , long_description = read('README')
-        , data_files = [ ('/usr/bin', [ 'scripts/moosegui' ]) ]
         , ext_modules = [
             Extension('_moose', [ '*' ])
             ]
@@ -158,10 +158,9 @@ setup(
             , 'build_py' : BuildPyCommand
             , 'build_ext' : BuildCommand
             }
-        , require = [ 'numpy', 'matplotlib', 'lxml' ]
+        , require = [ 'python-qt4' ]
         , keywords = "neural simulation"
         , classifiers=[
-            'Development Status :: 3 - Beta',
             'Intended Audience :: Science/Research',
             'Operating System :: Linux',
             'Programming Language :: Python',

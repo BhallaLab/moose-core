@@ -53,7 +53,8 @@ setup(
                 'plugins/list.txt'
                 ]
             },
+        install_requires = [ 'matplotlib', 'numpy' ],
         entry_points = {
-            'gui_scripts' : [ 'moosegui = mgui.main' ]
+            'gui_scripts' : [ 'moosegui = mgui.mgui.main' ]
             },
     ) 
