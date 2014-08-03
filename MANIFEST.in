@@ -12,4 +12,4 @@ graft gsl
 graft external
 graft Demos
 graft Docs
-purge buildMooseUsingCmake
+prune buildMooseUsingCmake
