@@ -88,6 +88,11 @@ class Gsolve: public ZombiePoolInterface
 		void setupCrossSolverReacs( const map< Id, vector< Id > >& xr,
 	   		Id otherStoich );
 
+		/**
+		 * Rescale specified voxel rate term following rate constant change 
+		 * or volume change. If index == ~0U then does all terms.
+		 */
+		void updateRateTerms( unsigned int index );
 		//////////////////////////////////////////////////////////////////
 		/// Flag: returns true if randomized round to integers is done.
 		bool getRandInit() const;

@@ -37,8 +37,12 @@
 #include <gsl/gsl_sort.h>
 #include <gsl/gsl_sort_vector.h>
 #include <gsl/gsl_eigen.h>
+#include <gsl/gsl_odeiv2.h>
 #endif
 
+#include "VoxelPoolsBase.h"
+#include "OdeSystem.h"
+#include "VoxelPools.h"
 #include "SteadyState.h"
 
 int ss_func( const gsl_vector* x, void* params, gsl_vector* f );
@@ -64,9 +68,8 @@ struct reac_info
 	double convergenceCriterion;
 
 	double* T;
-	Id stoich;
+	VoxelPools* pool;
 	vector< double > nVec;
-	// Stoich* s;
 
 #ifdef USE_GSL
 	gsl_matrix* Nr;
@@ -338,10 +341,21 @@ Id SteadyState::getStoich() const {
 }
 
 void SteadyState::setStoich( Id value ) {
+	if ( !value.element()->cinfo()->isA( "Stoich" ) ) {
+		cout << "Error: SteadyState::setStoich: Must be of Stoich class\n";
+		return;
+	}
+
 	stoich_ = value;
+	Stoich* stoichPtr = reinterpret_cast< Stoich* >( value.eref().data());
 	numVarPools_ = Field< unsigned int >::get( stoich_, "numVarPools" );
 	nReacs_ = Field< unsigned int >::get( stoich_, "numRates" );
 	setupSSmatrix();
+	double vol = LookupField< unsigned int, double >::get( 
+				stoichPtr->getCompartment(), "oneVoxelVolume", 0 );
+	pool_.setVolume( vol );
+	pool_.setStoich( stoichPtr, 0 );
+	pool_.setRates( stoichPtr->getRateTerms() );
 	isInitialized_ = 1;
 }
 
@@ -613,18 +627,6 @@ static double invop( double x )
  * First try gsl_multiroot_fsolver_hybrids
  * If that doesn't work try gsl_multiroot_fsolver_dnewton
  * Returns the gsl status.
-struct reac_info
-{
-	int rank;
-	int num_reacs;
-	int num_mols;
-
-	double* T;
-	Stoich* s;
-
-	gsl_matrix* Nr;
-	gsl_matrix* gamma;
-};
  */
 #ifdef USE_GSL
 int iterate( const gsl_multiroot_fsolver_type* st, struct reac_info *ri,
@@ -698,8 +700,8 @@ void SteadyState::classifyState( const double* T )
 			return;
 		}
 		nVec[i] = orig + tot;
-		/// Here we assume we always use voxel zero.
-		s->updateRates( &nVec[0], &yprime[0], 0 );
+
+		pool_.updateRates( &nVec[0], &yprime[0] );
 		nVec[i] = orig;
 
 		// Assign the rates for each mol.
@@ -784,7 +786,7 @@ void SteadyState::settle( bool forceSetup )
 	ri.T = T;
 	ri.Nr = Nr_;
 	ri.gamma = gamma_;
-	ri.stoich = stoich_;
+	ri.pool = &pool_;
 	ri.nVec = 
 			LookupField< unsigned int, vector< double > >::get(
 			ksolve,"nVec", 0 );
@@ -842,7 +844,7 @@ void SteadyState::settle( bool forceSetup )
 int ss_func( const gsl_vector* x, void* params, gsl_vector* f )
 {
 	struct reac_info* ri = (struct reac_info *)params;
-	Stoich* s = reinterpret_cast< Stoich* >( ri->stoich.eref().data() );
+	// Stoich* s = reinterpret_cast< Stoich* >( ri->stoich.eref().data() );
 	int num_consv = ri->num_mols - ri->rank;
 
 	for ( unsigned int i = 0; i < ri->num_mols; ++i ) {
@@ -854,7 +856,7 @@ int ss_func( const gsl_vector* x, void* params, gsl_vector* f )
 		}
 	}
 	vector< double > vels;
-	s->updateReacVelocities( &ri->nVec[0], vels, 0 ); // use compt zero
+	ri->pool->updateReacVelocities( &ri->nVec[0], vels );
 	assert( vels.size() == static_cast< unsigned int >( ri->num_reacs ) );
 
 	// y = Nr . v
