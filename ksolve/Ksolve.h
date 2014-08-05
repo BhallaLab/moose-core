@@ -100,6 +100,13 @@ class Ksolve: public ZombiePoolInterface
 		/// Returns the vector of pool Num at the specified voxel.
 		vector< double > getNvec( unsigned int voxel) const;
 		void setNvec( unsigned int voxel, vector< double > vec );
+
+		/**
+		 * This does a quick and dirty estimate of the timestep suitable 
+		 * for this sytem
+		 */
+		double getEstimatedDt() const;
+
 		//////////////////////////////////////////////////////////////////
 		// Dest Finfos
 		//////////////////////////////////////////////////////////////////
@@ -143,6 +150,13 @@ class Ksolve: public ZombiePoolInterface
 
 		void setupCrossSolverReacs( const map< Id, vector< Id > >& xr,
 				Id otherStoich );
+	
+		/**
+		 * Rescale specified voxel rate term following rate constant change 
+		 * or volume change. If index == ~0U then does all terms.
+		 */
+		void updateRateTerms( unsigned int index );
+
 		//////////////////////////////////////////////////////////////////
 		// Functions for cross-compartment transfer
 		//////////////////////////////////////////////////////////////////

@@ -88,6 +88,14 @@ class ZombiePoolInterface
 		virtual void setupCrossSolverReacs( 
 			const map< Id, vector< Id > >& xr, 
 			Id otherStoich ) = 0;
+
+		/**
+		 * Informs the solver that the rate terms or volumes have changed
+		 * and that the parameters must be updated.
+		 * The index specifies which rateTerm to change, and if it is
+		 * ~0U it means update all of them.
+		 */
+		virtual void updateRateTerms( unsigned int index = ~0U ) = 0;
 };
 
 #endif	// _ZOMBIE_POOL_INTERFACE_H
