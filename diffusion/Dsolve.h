@@ -108,6 +108,8 @@ class Dsolve: public ZombiePoolInterface
 		void setupCrossSolverReacs( const map< Id, 
 						vector< Id > >& xr, Id otherStoich );
 
+		// Do any updates following a volume or rate constant change.
+		void updateRateTerms( unsigned int index );
 		//////////////////////////////////////////////////////////////////
 		// Model traversal and building functions
 		//////////////////////////////////////////////////////////////////

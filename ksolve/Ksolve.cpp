@@ -82,6 +82,8 @@ const Cinfo* Ksolve::initCinfo()
 			&Ksolve::getEpsRel
 		);
 		
+		/* 
+		 * Remove it, user should not ever call or see this function.
 		static ValueFinfo< Ksolve, Id > stoich (
 			"stoich",
 			"Stoichiometry object for handling this reaction system.",
@@ -89,12 +91,14 @@ const Cinfo* Ksolve::initCinfo()
 			&Ksolve::getStoich
 		);
 
+		* or this.
 		static ValueFinfo< Ksolve, Id > dsolve (
 			"dsolve",
 			"Diffusion solver object handling this reactin system.",
 			&Ksolve::setDsolve,
 			&Ksolve::getDsolve
 		);
+		*/
 
 		static ValueFinfo< Ksolve, Id > compartment(
 			"compartment",
@@ -131,6 +135,13 @@ const Cinfo* Ksolve::initCinfo()
 			&Ksolve::setNumPools,
 			&Ksolve::getNumPools
 		);
+
+		static ReadOnlyValueFinfo< Ksolve, double > estimatedDt(
+			"estimatedDt",
+			"Estimated timestep for reac system based on Euler error",
+			&Ksolve::getEstimatedDt
+		);
+
 
 		///////////////////////////////////////////////////////
 		// DestFinfo definitions
@@ -188,13 +199,12 @@ const Cinfo* Ksolve::initCinfo()
 		&method,			// Value
 		&epsAbs,			// Value
 		&epsRel,			// Value
-		&stoich,			// Value
-		&dsolve,			// Value
 		&compartment,		// Value
 		&numLocalVoxels,	// ReadOnlyValue
 		&nVec,				// LookupValue
 		&numAllVoxels,		// ReadOnlyValue
 		&numPools,			// Value
+		&estimatedDt,		// ReadOnlyValue
 		&xCompt,			// SharedFinfo
 		&proc,				// SharedFinfo
 		&init,				// SharedFinfo
@@ -293,11 +303,52 @@ Id Ksolve::getStoich() const
 	return stoich_;
 }
 
+#ifdef USE_GSL
+void innerSetMethod( OdeSystem& ode, const string& method )
+{
+	ode.method = method;
+	if ( method == "rk5" ) {
+		ode.gslStep = gsl_odeiv2_step_rkf45;
+	} else if ( method == "rk4" ) {
+		ode.gslStep = gsl_odeiv2_step_rk4;
+	} else if ( method == "rk2" ) {
+		ode.gslStep = gsl_odeiv2_step_rk2;
+	} else if ( method == "rkck" ) {
+		ode.gslStep = gsl_odeiv2_step_rkck;
+	} else if ( method == "rk8" ) {
+		ode.gslStep = gsl_odeiv2_step_rk8pd;
+	} else {
+		ode.gslStep = gsl_odeiv2_step_rkf45;
+	}
+}
+#endif
+
 void Ksolve::setStoich( Id stoich )
 {
 	assert( stoich.element()->cinfo()->isA( "Stoich" ) );
 	stoich_ = stoich;
 	stoichPtr_ = reinterpret_cast< Stoich* >( stoich.eref().data() );
+	if ( !isBuilt_ ) {
+		OdeSystem ode;
+		ode.epsAbs = epsAbs_;
+		ode.epsRel = epsRel_;
+		// ode.initStepSize = getEstimatedDt();
+		ode.initStepSize = 0.01; // This will be overridden at reinit.
+#ifdef USE_GSL
+		innerSetMethod( ode, method_ );
+		ode.gslSys.function = &VoxelPools::gslFunc;
+   		ode.gslSys.jacobian = 0;
+		ode.gslSys.dimension = stoichPtr_->getNumAllPools() + stoichPtr_->getNumProxyPools();
+		innerSetMethod( ode, method_ );
+		unsigned int numVoxels = pools_.size();
+		for ( unsigned int i = 0 ; i < numVoxels; ++i ) {
+   			ode.gslSys.params = &pools_[i];
+			pools_[i].setStoich( stoichPtr_, &ode );
+			// pools_[i].setIntDt( ode.initStepSize ); // We're setting it up anyway
+		}
+		isBuilt_ = true;
+#endif
+	}
 }
 
 Id Ksolve::getDsolve() const
@@ -384,6 +435,27 @@ void Ksolve::setNvec( unsigned int voxel, vector< double > nVec )
 	}
 }
 
+
+double Ksolve::getEstimatedDt() const
+{
+	static const double EPSILON = 1e-15;
+	vector< double > s( stoichPtr_->getNumAllPools() + 
+					stoichPtr_->getNumProxyPools(), 1.0 );
+	vector< double > v( stoichPtr_->getNumRates(), 0.0 );
+	double maxVel = 0.0;
+	if ( pools_.size() > 0.0 ) {
+		pools_[0].updateReacVelocities( &s[0], v );
+		for ( vector< double >::iterator 
+						i = v.begin(); i != v.end(); ++i )
+				if ( maxVel < *i )
+					maxVel = *i;
+	}
+	if ( maxVel < EPSILON )
+	 	return 0.1; // Based on typical sig pathway reac rates.
+	// Heuristic: the largest velocity times dt should be 10% of mol conc.
+	return 0.1 / maxVel; 
+}
+
 //////////////////////////////////////////////////////////////
 // Process operations.
 //////////////////////////////////////////////////////////////
@@ -441,54 +513,15 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 	}
 }
 
-#ifdef USE_GSL
-void innerSetMethod( OdeSystem& ode, const string& method )
-{
-	ode.method = method;
-	if ( method == "rk5" ) {
-		ode.gslStep = gsl_odeiv2_step_rkf45;
-	} else if ( method == "rk4" ) {
-		ode.gslStep = gsl_odeiv2_step_rk4;
-	} else if ( method == "rk2" ) {
-		ode.gslStep = gsl_odeiv2_step_rk2;
-	} else if ( method == "rkck" ) {
-		ode.gslStep = gsl_odeiv2_step_rkck;
-	} else if ( method == "rk8" ) {
-		ode.gslStep = gsl_odeiv2_step_rk8pd;
-	} else {
-		ode.gslStep = gsl_odeiv2_step_rkf45;
-	}
-}
-#endif
-
 void Ksolve::reinit( const Eref& e, ProcPtr p )
 {
 	assert( stoichPtr_ );
 	if ( isBuilt_ ) {
 		for ( unsigned int i = 0 ; i < pools_.size(); ++i )
-			pools_[i].reinit();
+			pools_[i].reinit( p->dt );
 	} else {
-		OdeSystem ode;
-		ode.epsAbs = epsAbs_;
-		ode.epsRel = epsRel_;
-		ode.initStepSize = stoichPtr_->getEstimatedDt();
-		if ( ode.initStepSize > p->dt )
-			ode.initStepSize = p->dt;
-#ifdef USE_GSL
-		innerSetMethod( ode, method_ );
-		ode.gslSys.function = &VoxelPools::gslFunc;
-   		ode.gslSys.jacobian = 0;
-		ode.gslSys.dimension = stoichPtr_->getNumAllPools() + stoichPtr_->getNumProxyPools();
-		innerSetMethod( ode, method_ );
-		unsigned int numVoxels = pools_.size();
-		for ( unsigned int i = 0 ; i < numVoxels; ++i ) {
-   			ode.gslSys.params = &pools_[i];
-			pools_[i].setStoich( stoichPtr_, &ode );
-			// pools_[i].setIntDt( ode.initStepSize ); // We're setting it up anyway
-			pools_[i].reinit();
-		}
-		isBuilt_ = true;
-#endif
+		cout << "Warning:Ksolve::reinit: Reaction system not initialized\n";
+		return;
 	}
 	for ( unsigned int i = 0; i < xfer_.size(); ++i ) {
 		const XferInfo& xf = xfer_[i];
@@ -530,7 +563,7 @@ void Ksolve::initProc( const Eref& e, ProcPtr p )
 void Ksolve::initReinit( const Eref& e, ProcPtr p )
 {
 	for ( unsigned int i = 0 ; i < pools_.size(); ++i ) {
-		pools_[i].reinit();
+		pools_[i].reinit( p->dt );
 	}
 	// vector< vector< double > > values( xfer_.size() );
 	for ( unsigned int i = 0; i < xfer_.size(); ++i ) {
@@ -546,6 +579,23 @@ void Ksolve::initReinit( const Eref& e, ProcPtr p )
 	}
 	// xComptOut()->sendVec( e, values );
 }
+
+/**
+ * updateRateTerms obtains the latest parameters for the rates_ vector,
+ * and has each of the pools update its parameters including rescaling
+ * for volumes.
+ */
+void Ksolve::updateRateTerms( unsigned int index )
+{
+	if ( index == ~0U ) {
+		for ( unsigned int i = 0 ; i < pools_.size(); ++i )
+			pools_[i].setRates( stoichPtr_->getRateTerms() );
+	} else if ( index < stoichPtr_->getNumRates() ) {
+		for ( unsigned int i = 0 ; i < pools_.size(); ++i )
+			pools_[i].updateRateTerms( stoichPtr_->getRateTerms(), index );
+	}
+}
+
 
 //////////////////////////////////////////////////////////////
 // Solver ops

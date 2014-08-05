@@ -712,3 +712,8 @@ void Dsolve::setupCrossSolverReacs( const map< Id,
 {
 	;
 }
+
+void Dsolve::updateRateTerms( unsigned int index )
+{
+	;
+}

@@ -4289,6 +4289,9 @@ for intra-compartment reacs) do depend on relative volumes.
 - Expand uniqueVols to include vols of other compts as a pair.
 - expand copyWithVolScaling to include this othervol term.
 
+-Perhaps I should have a areVolsUniform() function in ChemCompt. Even with this
+I need to check if there are any x-reacs to compts for which this is false.
+
 This strengthens the case for just having a complete new rates vector_ for
 every voxel in a NeuroMesh or a tapering CylMesh.
 In a CubeMesh this comes up when we have to deal with cross-compartment
@@ -4305,3 +4308,71 @@ the volumes do differ.
 Fixed bug with Cinfo::srcFinfoName and Cinfo::destFinfoName, to traverse
 base classes if needed.
 =============================================================================
+01 Aug 2014
+At 5729. I need to brace myself to take on the messy rewrite for the rateTerm
+vector, which seems to have to be one per voxel.
+
+Multiple considerations if I'm going to change things deeply;
+- Regular rate assignments need to traverse all voxels
+	Easy fix.
+- To what volume is the rates_[0] assigned? The volume of the 'reference'
+	voxel may itself have changed.
+	If I use a preconverted rates_ vector as reference for all rates, 
+	then it should be a separate rates array referred to unit volume.
+- Need to be able to dynamically add and remove reacs and pools.
+	Doable. Need a rebuild function is all, one which can digest a mix of
+	preexisting zombies and fresh objects. 
+- Need to be able to resize entire neuron or subparts of it.
+	If I use the reference rates_ array, then it is just going over each
+	voxel scaling the local rates to the reference ones.
+- Need a flag on ChemCompt to specify if it has variable vols or a single one.
+	Easlily done.
+
+
+Option: use a special rates_ array
+	- Very easy to go through duplicating and scaling.
+	- Nasty to have two references for rates
+	- 
+Other option: build new rates from the original reac and enz objects.
+	- Single point of referece.
+	- Slower
+	- May be very nasty if objects are on different nodes. Better to
+	have local info.
+
+=============================================================================
+02 Aug.
+- Put a master rates_ vector on Stoich. Unit SI units for volume
+- Put the subsidiary rates_vectors in their individual VoxelPools.
+- Use a separate sub-class of VoxelPools for handling shared rates_ vectors,
+	vs the ones handling individual ones.
+- Put in a message from compartment to stoich for updates. Possibly even
+	recompartmentalizationisticisms.
+- Stoich deals with changes to rates, and propagates.
+- Need to attach info to scaled rates about vol scaling for all the x-compts. 
+	Perhaps a wrapper around the rate terms? But that would slow 
+	calculations.
+	- Stoich knows which compts belong to which rateTerms. I can just
+	refer to this.
+
+=============================================================================
+03 Aug
+Steps in changeover for RateTerm vectors.
+*1. Change data structs and get to compile
+*2. Get it to work for one voxel.
+	*2a. Get it to work for one voxel deterministic
+	*2b. Get it to work for one voxel stochastic
+	*2c. Get to clear unit tests.
+	*2d. Get it to work for one voxel steady state finder.
++3. Get it to work for spatial
+4. Get it to work for x-compt
+
+=============================================================================
+04 Aug
+Stuff fails in steadyState finder
+- The VoxelPools struct in the finder doesn't have its rates_ initialized.
+- The S_ vector is dubious, with a size of only 1.
+
+=============================================================================
+05 Aug. 
+Steady-state finder seems to be OK now, but one of the demos from Sahil 
+isn't working. 

@@ -117,6 +117,7 @@ class SteadyState
 		unsigned int stateType_;
 		unsigned int solutionStatus_;
 		unsigned int numFailed_;
+		VoxelPools pool_;
 };
 
 extern const Cinfo* initSteadyStateCinfo();

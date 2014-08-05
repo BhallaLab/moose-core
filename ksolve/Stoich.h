@@ -107,12 +107,6 @@ class Stoich
 		Id getCompartment() const;
 
 		/**
-		 * This does a quick and dirty estimate of the timestep suitable 
-		 * for this sytem
-		 */
-		double getEstimatedDt() const;
-
-		/**
 		 * Utility function to return # of rates_ entries. This includes
 		 * the cross-solver reactions.
 		 */
@@ -126,6 +120,9 @@ class Stoich
 
 		/// Utility function to return a rates_ entry
 		const RateTerm* rates( unsigned int i ) const;
+
+		/// Returns a pointer to the entire rates_ vector.
+		const vector< RateTerm* >* getRateTerms() const;
 
 		unsigned int getNumFuncs() const;
 		const FuncTerm* funcs( unsigned int i ) const;
@@ -143,9 +140,6 @@ class Stoich
 		 * elist of all elements managed by this solver.
 		 */
 		void setElist( const Eref& e, const vector< ObjId >& elist );
-
-		/// Builds new RateTerm vectors scaled to all the unique volumes.
-		void buildAllRateTermVectors();
 
 		/**
 		 * Scans through elist to find any reactions that connect to
@@ -380,9 +374,10 @@ class Stoich
 		 * Updates the yprime array, rate of change of each molecule
 		 * The volIndex specifies which set of rates to use, since the
 		 * rates are volume dependent.
-		 */
+		 * Moved to VoxelPools
 		void updateRates( const double* s, double* yprime,
 					   unsigned int volIndex ) const;
+		 */
 		
 		/**
 		 * Computes the velocity of each reaction, vel.
@@ -404,9 +399,9 @@ class Stoich
 		/** 
 		 * Get the rate for a single reaction specified by r, as per all 
 		 * the mol numbers in s.
-		 */
 		double getReacVelocity( unsigned int r, const double* s,
 					   unsigned int volIndex ) const;
+		 */
 
 		/// Returns the stoich matrix. Used by gsolve.
 		const KinSparseMatrix& getStoichiometryMatrix() const;
@@ -465,16 +460,17 @@ class Stoich
 		vector< unsigned int > species_;
 
 		/**
-		 * The RateTerms handle the update operations for reaction rate v_
-		 * rates_[volIndex][termIndex]
-		 * There is a separate vector of RateTerm for each volume handled
-		 * by the stoich. This is needed because RateTerms use #/voxel
-		 * units and are thus volume dependent.
-		 * For example, if the reaction system is in a tapering cylinder, 
-		 * there will be distinct volumes for each voxel, and each will
-		 * need its own scaled set of RateTerms.
+		 * The RateTerms handle the update operations for reaction rate v_.
+		 * This is the master vector of RateTerms, and it is scaled to
+		 * a volume such that the 'n' units and the conc units are
+		 * identical.
+		 * Duplicates of this vector are made in each voxel with a different
+		 * volume. The duplicates have rates scaled as per volume.
+		 * The RateTerms vector also includes reactions that have 
+		 * off-compartment products. These need special volume scaling 
+		 * involving all the interactiong compartments.
 		 */
-		vector< vector< RateTerm* > > rates_;
+		vector< RateTerm* > rates_;
 
 		/**
 		 * This tracks the unique volumes handled by the reac system.
