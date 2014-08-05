@@ -28,7 +28,7 @@
 //////////////////////////////////////////////////////////////
 
 VoxelPools::VoxelPools()
-	:	volIndex_( 0 )
+	: stoichPtr_( 0 )
 {
 #ifdef USE_GSL
 		driver_ = 0;
@@ -37,6 +37,8 @@ VoxelPools::VoxelPools()
 
 VoxelPools::~VoxelPools()
 {
+	for ( unsigned int i = 0; i < rates_.size(); ++i )
+		delete( rates_[i] );
 #ifdef USE_GSL
 	if ( driver_ )
 		gsl_odeiv2_driver_free( driver_ );
@@ -46,18 +48,31 @@ VoxelPools::~VoxelPools()
 //////////////////////////////////////////////////////////////
 // Solver ops
 //////////////////////////////////////////////////////////////
+void VoxelPools::reinit( double dt )
+{
+	VoxelPoolsBase::reinit();
+#ifdef USE_GSL
+	if ( !driver_ )
+		return;
+	gsl_odeiv2_driver_reset( driver_ );
+	gsl_odeiv2_driver_reset_hstart( driver_, dt );
+#endif
+}
+
 void VoxelPools::setStoich( Stoich* s, const OdeSystem* ode )
 {
-	volIndex_ = s->indexOfMatchingVolume( getVolume() );
 	stoichPtr_ = s;
 #ifdef USE_GSL
-	sys_ = ode->gslSys;
-	if ( driver_ )
-		gsl_odeiv2_driver_free( driver_ );
-	driver_ = gsl_odeiv2_driver_alloc_y_new( 
-		&sys_, ode->gslStep, ode->initStepSize, 
-		ode->epsAbs, ode->epsRel );
+	if ( ode ) {
+		sys_ = ode->gslSys;
+		if ( driver_ )
+			gsl_odeiv2_driver_free( driver_ );
+		driver_ = gsl_odeiv2_driver_alloc_y_new( 
+			&sys_, ode->gslStep, ode->initStepSize, 
+			ode->epsAbs, ode->epsRel );
+	}
 #endif
+	VoxelPoolsBase::reinit();
 }
 
 void VoxelPools::advance( const ProcInfo* p )
@@ -107,10 +122,85 @@ int VoxelPools::gslFunc( double t, const double* y, double *dydt,
 		*/
 
 	vp->stoichPtr_->updateFuncs( q, t );
-	vp->stoichPtr_->updateRates( y, dydt, vp->volIndex_ );
+	vp->updateRates( y, dydt );
 #ifdef USE_GSL
 	return GSL_SUCCESS;
 #else
 	return 0;
 #endif
+}
+///////////////////////////////////////////////////////////////////////
+// Here are the internal reaction rate calculation functions
+///////////////////////////////////////////////////////////////////////
+
+void VoxelPools::setRates( const vector< RateTerm* >* rates )
+{
+	// Clear out old rates if any
+	for ( unsigned int i = 0; i < rates_.size(); ++i )
+		delete( rates_[i] );
+
+	rates_.resize( rates->size() );
+	double scaling = NA * getVolume();
+	for ( unsigned int i = 0; i < rates->size(); ++i ) {
+		rates_[i] = (*rates)[i]->copyWithVolScaling(  scaling );
+	}
+}
+
+void VoxelPools::updateRateTerms( const vector< RateTerm* >* rates,
+			   unsigned int index )
+{
+	// During setup or expansion of the reac system, it is possible to
+	// call this function before the rates_ term is assigned. Disable.
+ 	if ( index >= rates_.size() )
+		return;
+	double scaling = NA * getVolume();
+	delete( rates_[index] );
+	rates_[index] = (*rates)[index]->copyWithVolScaling( scaling );
+}
+
+void VoxelPools::updateRates( const double* s, double* yprime ) const
+{
+	const KinSparseMatrix& N = stoichPtr_->getStoichiometryMatrix();
+	vector< double > v( N.nColumns(), 0.0 );
+	vector< double >::iterator j = v.begin();
+	unsigned int totVar = stoichPtr_->getNumVarPools() + 
+			stoichPtr_->getNumProxyPools();
+	unsigned int totInvar = stoichPtr_->getNumBufPools() + 
+			stoichPtr_->getNumFuncs();
+	assert( N.nRows() == 
+			stoichPtr_->getNumAllPools() + stoichPtr_->getNumProxyPools() );
+	assert( N.nColumns() == rates_.size() );
+
+	for ( vector< RateTerm* >::const_iterator
+		i = rates_.begin(); i != rates_.end(); i++) {
+		*j++ = (**i)( s );
+		assert( !isnan( *( j-1 ) ) );
+	}
+
+	for (unsigned int i = 0; i < totVar; ++i)
+		*yprime++ = N.computeRowRate( i , v );
+	for (unsigned int i = 0; i < totInvar ; ++i)
+		*yprime++ = 0.0;
+}
+
+/**
+ * updateReacVelocities computes the velocity *v* of each reaction.
+ * This is a utility function for programs like SteadyState that need
+ * to analyze velocity.
+ */
+void VoxelPools::updateReacVelocities( 
+			const double* s, vector< double >& v ) const
+{
+	const KinSparseMatrix& N = stoichPtr_->getStoichiometryMatrix();
+	assert( N.nColumns() == rates_.size() );
+
+	vector< RateTerm* >::const_iterator i;
+	v.clear();
+	v.resize( rates_.size(), 0.0 );
+	vector< double >::iterator j = v.begin();
+
+	for ( i = rates_.begin(); i != rates_.end(); i++) {
+		*j++ = (**i)( s );
+		assert( !isnan( *( j-1 ) ) );
+	}
 }

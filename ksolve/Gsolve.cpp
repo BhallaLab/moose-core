@@ -549,3 +549,13 @@ void Gsolve::setupCrossSolverReacs( const map< Id, vector< Id > >& xr,
 	   Id otherStoich )
 {
 }
+void Gsolve::updateRateTerms( unsigned int index )
+{
+	if ( index == ~0U ) {
+		for ( unsigned int i = 0 ; i < pools_.size(); ++i )
+			pools_[i].setRates( stoichPtr_->getRateTerms() );
+	} else if ( index < stoichPtr_->getNumRates() ) {
+		for ( unsigned int i = 0 ; i < pools_.size(); ++i )
+			pools_[i].updateRateTerms( stoichPtr_->getRateTerms(), index );
+	}
+}

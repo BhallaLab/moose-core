@@ -18,6 +18,7 @@
  * proxy pools that participate in cross-node reactions, but are really 
  * located on other compartments.
  */
+class RateTerm;
 class VoxelPoolsBase
 {
 	public: 
@@ -81,6 +82,21 @@ class VoxelPoolsBase
 		double getNinit( unsigned int ) const;
 		void setDiffConst( unsigned int, double v );
 		double getDiffConst( unsigned int ) const;
+		//////////////////////////////////////////////////////////////////
+		// Functions to set up rates vector
+		//////////////////////////////////////////////////////////////////
+		/** 
+		 * Reassign entire rate vector.
+		 */
+		virtual void setRates( const vector< RateTerm* >* rates ) = 0;  
+
+		/**
+		 * Update specified index on rate terms. The entire rates vector is 
+		 * passed in for the source values, the index specifies which
+		 * entry on the local rate vector is to be updated.
+		 */
+		virtual void updateRateTerms( const vector< RateTerm* >* rates, 
+						unsigned int index ) = 0;
 
 		//////////////////////////////////////////////////////////////////
 		// Functions to handle cross-compartment reactions.
@@ -113,6 +129,12 @@ class VoxelPoolsBase
 		void addProxyVoxy( unsigned int comptIndex, unsigned int voxel );
 		void addProxyTransferIndex( unsigned int comptIndex, 
 						unsigned int transferIndex );
+
+		/**
+		 * Assigns the Id and volume of the specified x-reac coupled 
+		 * compartment
+		 */
+		void setComptVolume( unsigned int comptIndex, Id id, double vol );
 
 		/// True when this voxel has data to be transferred.
 		bool hasXfer( unsigned int comptIndex ) const;
@@ -163,6 +185,13 @@ class VoxelPoolsBase
 		 * the xferPoolIdx_ vector stored on the Ksolve.
 		 */
 		vector< vector< unsigned int > > proxyTransferIndex_;
+
+		/**
+		 * volume of each compartment that couples to this one through
+		 * cross-compartment reactions. Same indexing as the proxy vectors
+		 * above.
+		 */
+		vector< double > comptVolume_;
 
 		/**
 		 * Volume of voxel.
