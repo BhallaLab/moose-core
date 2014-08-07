@@ -130,6 +130,6 @@ kcachegrind method:
 ~$ kcachegrind output.callgrind
 \endverbatim
 
-\author Viktor Toth
+\author Viktor Tóth
 
 */
