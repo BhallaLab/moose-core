@@ -43,4 +43,6 @@ some higher-level hand-written documents:
 
 \ref Profiling
 
+\ref ParamFitting
+
 */
