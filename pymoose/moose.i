@@ -10,6 +10,7 @@
 	#include "PyMooseContext.h"
 	#include "PyMooseBase.h"
 	#include "Neutral.h"
+	#include "Calculator.h"
 	#include "Class.h"
 	#include "Cell.h"
 	#include "Compartment.h"
@@ -230,6 +231,10 @@ def doc(cls):
 %attribute(pymoose::Class, std::string, description, __get_description)
 %attribute(pymoose::Class, unsigned int, tick, __get_tick, __set_tick)
 %attribute(pymoose::Class, unsigned int, stage, __get_stage, __set_stage)
+
+%include "Calculator.h"
+%attribute(pymoose::Calculator, double, initValue, __get_initValue, __set_initValue)
+%attribute(pymoose::Calculator, double, value, __get_value)
 
 %include "Cell.h"
 %attribute(pymoose::Cell, string, method, __get_method, __set_method)

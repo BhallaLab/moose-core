@@ -45,6 +45,7 @@ OBJ = PyMooseBase.o \
 	Compartment.o \
 	Neutral.o \
 	PyMooseUtil.o \
+	Calculator.o  \
 	HHChannel.o \
 	HHGate.o \
 	Mg_block.o	\
@@ -120,6 +121,7 @@ HEADERS=PyMooseUtil.h \
 	PyMooseContext.h \
 	PyMooseBase.h \
 	Compartment.h \
+	Calculator.h	\
 	Neutral.h \
 	Class.h	\
 	Cell.h	\
