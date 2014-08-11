@@ -41,7 +41,8 @@ const Cinfo* initCalculatorCinfo()
                      RFCAST( &Calculator::addValue ) ),
       new DestFinfo( "sub", Ftype1< double >::global(),
                      RFCAST( &Calculator::subValue ) ),
-
+      new DestFinfo( "cnt", Ftype1< double >::global(),
+		     RFCAST( &Calculator::cntInput ) ),          
 
     };
 
@@ -117,6 +118,11 @@ void Calculator::addValue( const Conn* c, double term )
 void Calculator::subValue( const Conn* c, double term )
 {
   static_cast< Calculator* >( c->data() )->val_ -= term;
+}
+
+void Calculator::cntInput( const Conn * c, double term)
+{
+  static_cast< Calculator* >( c->data() )->val_ += ( term != 0 );
 }
 
 
