@@ -22,6 +22,7 @@ class Calculator {
   static void divValue( const Conn* c, double divisor );
   static void addValue( const Conn* c, double term );
   static void subValue( const Conn* c, double term );
+  static void cntInput( const Conn* c, double term );
 
  private:
 
