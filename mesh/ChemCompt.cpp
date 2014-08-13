@@ -14,6 +14,14 @@
 #include "MeshEntry.h"
 #include "ChemCompt.h"
 
+SrcFinfo1< vector< double > >* ChemCompt::voxelVolOut() {
+	static SrcFinfo1< vector< double > > voxelVolOut( "voxelVolOut",
+	"Sends updated voxel volume out to Ksolve, Gsolve, and Dsolve."
+	"Used to request a recalculation of rates and of initial numbers."
+	);
+	return &voxelVolOut;
+}
+
 const Cinfo* ChemCompt::initCinfo()
 {
 		//////////////////////////////////////////////////////////////
@@ -92,15 +100,6 @@ const Cinfo* ChemCompt::initCinfo()
 				&ChemCompt::setVolumeNotRates )
 		);
 
-		/*
-		static DestFinfo handleRequestMeshStats( "handleRequestMeshStats",
-			"Handles request from SimManager for mesh stats",
-			new EpFunc0< ChemCompt >(
-				&ChemCompt::handleRequestMeshStats
-			)
-		);
-		*/
-
 		static DestFinfo handleNodeInfo( "handleNodeInfo",
 			"Tells ChemCompt how many nodes and threads per node it is "
 			"allowed to use. Triggers a return meshSplitOut message.",
@@ -118,47 +117,8 @@ const Cinfo* ChemCompt::initCinfo()
 
 
 		//////////////////////////////////////////////////////////////
-		// SharedMsg Definitions
-		//////////////////////////////////////////////////////////////
-
-		/*
-		static Finfo* nodeMeshingShared[] = {
-			meshSplitOut(), meshStats(), 
-			&handleRequestMeshStats, &handleNodeInfo
-		};
-
-		static SharedFinfo nodeMeshing( "nodeMeshing",
-			"Connects to SimManager to coordinate meshing with parallel"
-			"decomposition and with the Stoich",
-			nodeMeshingShared, sizeof( nodeMeshingShared ) / sizeof( const Finfo* )
-		);
-		*/
-
-		/*
-		static Finfo* geomShared[] = {
-			&requestSize, &handleSize
-		};
-
-		static SharedFinfo geom( "geom",
-			"Connects to Geometry tree(s) defining compt",
-			geomShared, sizeof( geomShared ) / sizeof( const Finfo* )
-		);
-		*/
-
-		//////////////////////////////////////////////////////////////
 		// Field Elements
 		//////////////////////////////////////////////////////////////
-		/*
-		static FieldElementFinfo< ChemCompt, Boundary > boundaryFinfo( 
-			"boundary", 
-			"Field Element for Boundaries",
-			Boundary::initCinfo(),
-			&ChemCompt::lookupBoundary,
-			&ChemCompt::setNumBoundary,
-			&ChemCompt::getNumBoundary,
-			4
-		);
-		*/
 
 		static FieldElementFinfo< ChemCompt, MeshEntry > entryFinfo( 
 			"mesh", 
@@ -177,10 +137,10 @@ const Cinfo* ChemCompt::initCinfo()
 		&numDimensions,	// ReadOnlyValue
 		&stencilRate,	// ReadOnlyLookupValue
 		&stencilIndex,	// ReadOnlyLookupValue
+		voxelVolOut(),	// SrcFinfo
 		&buildDefaultMesh,	// DestFinfo
 		&setVolumeNotRates,		// DestFinfo
 		&resetStencil,	// DestFinfo
-		// &nodeMeshing,	// SharedFinfo
 		&entryFinfo,	// FieldElementFinfo
 	};
 
@@ -238,14 +198,6 @@ void ChemCompt::buildDefaultMesh( const Eref& e,
 	this->innerBuildDefaultMesh( e, volume, numEntries );
 }
 
-/*
-void ChemCompt::handleRequestMeshStats( const Eref& e )
-{
-	// Pass it down to derived classes along with the SrcFinfo
-	innerHandleRequestMeshStats( e, meshStats() );
-}
-*/
-
 void ChemCompt::handleNodeInfo( const Eref& e,
 	unsigned int numNodes, unsigned int numThreads )
 {
@@ -264,13 +216,18 @@ void ChemCompt::resetStencil()
 
 void ChemCompt::setEntireVolume( const Eref& e, double volume )
 {
-	vector< double > childConcs;
-	getChildConcs( e, childConcs );
-	if ( vSetVolumeNotRates( volume ) ) {
-		// buildDefaultMesh( e, volume, getNumEntries() );
-		// vector< double >::const_iterator conc = childConcs.begin();
-		setChildConcs( e, childConcs, 0 );
-		// assert( conc == childConcs.end() );
+	// If the reac system is not solved, then explicitly do scaling
+	vector< ObjId > tgtVec = 
+			e.element()->getMsgTargets( e.dataIndex(), voxelVolOut() );
+	if ( tgtVec.size() == 0 ) {
+		vector< double > childConcs;
+		getChildConcs( e, childConcs );
+		if ( vSetVolumeNotRates( volume ) ) {
+			setChildConcs( e, childConcs, 0 );
+		}
+	} else {
+		vSetVolumeNotRates( volume );
+		voxelVolOut()->send( e, this->vGetVoxelVolume() );
 	}
 }
 
@@ -384,31 +341,6 @@ unsigned int ChemCompt::getNumEntries() const
 	return this->innerGetNumEntries();
 }
 
-//////////////////////////////////////////////////////////////
-// Element Field Definitions for boundary
-//////////////////////////////////////////////////////////////
-
-/*
-Boundary* ChemCompt::lookupBoundary( unsigned int index )
-{
-	if ( index < boundaries_.size() )
-		return &( boundaries_[index] );
-	cout << "Error: ChemCompt::lookupBoundary: Index " << index << 
-		" >= vector size " << boundaries_.size() << endl;
-	return 0;
-}
-
-void ChemCompt::setNumBoundary( unsigned int num )
-{
-	assert( num < 1000 ); // Pretty unlikely upper limit
-	boundaries_.resize( num );
-}
-
-unsigned int ChemCompt::getNumBoundary() const
-{
-	return boundaries_.size();
-}
-*/
 
 //////////////////////////////////////////////////////////////
 // Build the junction between this and another ChemCompt.
@@ -418,14 +350,6 @@ void ChemCompt::buildJunction( ChemCompt* other, vector< VoxelJunction >& ret)
 {
 	matchMeshEntries( other, ret );
 	extendStencil( other, ret );
-	/*
-	 * No longer having diffusion to abutting voxels in the follower
-	 * compartment.
-	 *
-	flipRet( ret );
-	other->extendStencil( this, ret );
-	flipRet( ret );
-	*/
 }
 
 void ChemCompt::flipRet( vector< VoxelJunction >& ret ) const
@@ -435,6 +359,9 @@ void ChemCompt::flipRet( vector< VoxelJunction >& ret ) const
 		  unsigned int temp = i->first;
 		  i->first = i->second;
 		  i->second = temp;
+		  double vol = i->firstVol;
+		  i->firstVol = i->secondVol;
+		  i->secondVol = vol;
    }
 }
 

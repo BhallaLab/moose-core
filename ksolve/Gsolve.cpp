@@ -98,6 +98,12 @@ const Cinfo* Gsolve::initCinfo()
 			"Handles reinit call",
 			new ProcOpFunc< Gsolve >( &Gsolve::reinit ) );
 		
+		static DestFinfo voxelVol( "voxelVol",
+			"Handles updates to all voxels. Comes from parent "
+			"ChemCompt object.",
+			new OpFunc1< Gsolve, vector< double > >(
+			&Gsolve::updateVoxelVol )
+		);
 		///////////////////////////////////////////////////////
 		// Shared definitions
 		///////////////////////////////////////////////////////
@@ -116,6 +122,7 @@ const Cinfo* Gsolve::initCinfo()
 		&nVec,				// LookupValue
 		&numAllVoxels,		// ReadOnlyValue
 		&numPools,			// Value
+		&voxelVol,			// DestFinfo
 		&proc,				// SharedFinfo
 		// Here we put new fields that were not there in the Ksolve. 
 		&useRandInit,		// Value
@@ -188,6 +195,8 @@ void Gsolve::setStoich( Id stoich )
 	stoichPtr_ = reinterpret_cast< Stoich* >( stoich.eref().data() );
 	sys_.stoich = stoichPtr_;
 	sys_.isReady = false;
+	for ( unsigned int i = 0; i < pools_.size(); ++i )
+		pools_[i].setStoich( stoichPtr_ );
 }
 
 unsigned int Gsolve::getNumLocalVoxels() const
@@ -544,18 +553,47 @@ void Gsolve::setBlock( const vector< double >& values )
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////
+void Gsolve::updateVoxelVol( vector< double > vols )
+{
+	// For now we assume identical numbers of voxels. Also assume
+	// identical voxel junctions. But it should not be too hard to
+	// update those too.
+	if ( vols.size() == pools_.size() ) {
+		for ( unsigned int i = 0; i < vols.size(); ++i ) {
+			pools_[i].setVolumeAndDependencies( vols[i] );
+		}
+		stoichPtr_->setupCrossSolverReacVols();
+		updateRateTerms( ~0U );
+	}
+}
+
 // Inherited virtual
 void Gsolve::setupCrossSolverReacs( const map< Id, vector< Id > >& xr,
 	   Id otherStoich )
 {
 }
+
+// Inherited virtual. Will need to populate for x-compt reacs.
+void Gsolve::setupCrossSolverReacVols(
+		const vector< vector< Id > >& subCompts,
+		const vector< vector< Id > >& prdCompts )
+{
+}
+
 void Gsolve::updateRateTerms( unsigned int index )
 {
 	if ( index == ~0U ) {
-		for ( unsigned int i = 0 ; i < pools_.size(); ++i )
-			pools_[i].setRates( stoichPtr_->getRateTerms() );
+		unsigned int numCrossRates =
+			stoichPtr_->getNumRates() - stoichPtr_->getNumCoreRates();
+		for ( unsigned int i = 0 ; i < pools_.size(); ++i ) {
+			pools_[i].resetXreacScale( numCrossRates );
+			pools_[i].updateAllRateTerms( stoichPtr_->getRateTerms(),
+						   stoichPtr_->getNumCoreRates() );
+		}
 	} else if ( index < stoichPtr_->getNumRates() ) {
 		for ( unsigned int i = 0 ; i < pools_.size(); ++i )
-			pools_[i].updateRateTerms( stoichPtr_->getRateTerms(), index );
+			pools_[i].updateRateTerms( stoichPtr_->getRateTerms(),
+						   stoichPtr_->getNumCoreRates(), index );
 	}
 }

@@ -68,9 +68,16 @@ class VoxelPoolsBase
 		 */
 		void reinit();
 
+		/// Just assigns the volume without any cascading to other values.
 		void setVolume( double vol );
+		/// Return the volume of the voxel.
 		double getVolume() const;
 
+		/**
+		 * Assign the volume, and handle the cascading effects by scaling
+		 * all the dependent values of nInit and rates if applicable.
+		 */
+		virtual void setVolumeAndDependencies( double vol );
 		
 		//////////////////////////////////////////////////////////////////
 		// Field assignment functions
@@ -88,15 +95,16 @@ class VoxelPoolsBase
 		/** 
 		 * Reassign entire rate vector.
 		 */
-		virtual void setRates( const vector< RateTerm* >* rates ) = 0;  
+		virtual void updateAllRateTerms( const vector< RateTerm* >& rates,
+				unsigned int numCoreRates ) = 0;  
 
 		/**
 		 * Update specified index on rate terms. The entire rates vector is 
 		 * passed in for the source values, the index specifies which
 		 * entry on the local rate vector is to be updated.
 		 */
-		virtual void updateRateTerms( const vector< RateTerm* >* rates, 
-						unsigned int index ) = 0;
+		virtual void updateRateTerms( const vector< RateTerm* >& rates,
+				unsigned int numCoreRates, unsigned int index ) = 0;
 
 		//////////////////////////////////////////////////////////////////
 		// Functions to handle cross-compartment reactions.
@@ -138,6 +146,44 @@ class VoxelPoolsBase
 
 		/// True when this voxel has data to be transferred.
 		bool hasXfer( unsigned int comptIndex ) const;
+
+		//////////////////////////////////////////////////////////////////
+		// Functions for cross-compartment rate scaling.
+		//////////////////////////////////////////////////////////////////
+		/**
+		 * Initialize/reset the vector xReacScaling_ for scale factors
+		 * for each cross reaction in this voxel.
+		 */
+		void resetXreacScale( unsigned int size );
+
+		/**
+		 * Multiply in scale factor for different cross-reac volumes, 
+		 * to be applied to specified RateTerm in the rates_ vector.
+		 * Applies to forward reaction terms
+		 */
+		void forwardReacVolumeFactor( unsigned int i, double volume );
+
+		/**
+		 * Multiply in scale factor for different cross-reac volumes, 
+		 * to be applied to specified RateTerm in the rates_ vector.
+		 * Applies to backward reaction terms
+		 */
+		void backwardReacVolumeFactor( unsigned int i, double volume );
+
+		/**
+		 * Return scale factor for specified entry on rate terms.
+		 * Index is # of cross-compartment rate term.
+		 */
+		double getXreacScaleSubstrates( unsigned int i ) const;
+
+		/**
+		 * Return scale factor for specified entry on rate terms.
+		 * Index is # of cross-compartment rate term.
+		 */
+		double getXreacScaleProducts( unsigned int i ) const;
+
+		/// Debugging utility
+		void print() const;
 
 	private:
 		/**
@@ -186,17 +232,31 @@ class VoxelPoolsBase
 		 */
 		vector< vector< unsigned int > > proxyTransferIndex_;
 
-		/**
-		 * volume of each compartment that couples to this one through
-		 * cross-compartment reactions. Same indexing as the proxy vectors
-		 * above.
+		/** This is what I would need to fully identify proxy compts and
+		 * voxels for each proxy reac.
+		vector< Id, Id, unsigned int, unsigned int>  proxyComptVoxel
 		 */
-		vector< double > comptVolume_;
 
 		/**
 		 * Volume of voxel.
 		 */
 		double volume_;
+
+		/**
+		 * xReacScaleSubstrates_[crossRateTermIndex]
+		 * Product of substrateVol/voxelVol for each of the substrates, 
+		 * for forward reacs.
+		 * Applied to R1 of the RateTerm. Used only for cross reactions.
+		 */
+		vector< double > xReacScaleSubstrates_;
+
+		/**
+		 * xReacScaleProducts_[crossRateTermIndex]
+		 * Product of productVol/voxelVol for each of the products, 
+		 * for reverse reacs.
+		 * Applied to R2 of the RateTerm. Used only for cross reactions.
+		 */
+		vector< double > xReacScaleProducts_;
 };
 
 #endif	// _VOXEL_POOLS_BASE_H

@@ -712,6 +712,12 @@ void Dsolve::setupCrossSolverReacs( const map< Id,
 {
 	;
 }
+void Dsolve::setupCrossSolverReacVols( 
+			const vector< vector< Id > >& subCompts,
+			const vector< vector< Id > >& prdCompts )
+{
+		;
+}
 
 void Dsolve::updateRateTerms( unsigned int index )
 {

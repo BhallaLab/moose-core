@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <cassert>
 using namespace std;
+#include "header.h"
 #include "RateTerm.h"
 
 const double RateTerm::EPSILON = 1.0e-6;

@@ -355,7 +355,8 @@ void SteadyState::setStoich( Id value ) {
 				stoichPtr->getCompartment(), "oneVoxelVolume", 0 );
 	pool_.setVolume( vol );
 	pool_.setStoich( stoichPtr, 0 );
-	pool_.setRates( stoichPtr->getRateTerms() );
+	pool_.updateAllRateTerms( stoichPtr->getRateTerms(),
+				   stoichPtr->getNumCoreRates() );
 	isInitialized_ = 1;
 }
 

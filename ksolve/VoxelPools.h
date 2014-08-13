@@ -46,16 +46,20 @@ class VoxelPools: public VoxelPoolsBase
 		//////////////////////////////////////////////////////////////////
 		// Rate manipulation and calculation functions
 		//////////////////////////////////////////////////////////////////
+		/// Handles volume change and subsequent cascading updates.
+		void setVolumeAndDependencies( double vol );
+
 		/// Updates all the rate constants from the reference rates vector.
-		void setRates( const vector< RateTerm* >* rates );
+		void updateAllRateTerms( const vector< RateTerm* >& rates,
+					   unsigned int numCoreRates	);
 		/**
 		 * updateRateTerms updates the rate consts of a belonging to 
 		 * the specified index on the rates vector.
 		 * It does recaling and assigning using values from the 
 		 * internal rates vector.
 		 */
-		void updateRateTerms( const vector< RateTerm* >* rates,
-			unsigned int index );
+		void updateRateTerms( const vector< RateTerm* >& rates,
+			unsigned int numCoreRates, unsigned int index );
 
 		/**
 		 * Core computation function. Updates the reaction velocities
@@ -72,7 +76,8 @@ class VoxelPools: public VoxelPoolsBase
 		void updateReacVelocities( 
 						const double* s, vector< double >& v ) const;
 
-
+		/// Used for debugging.
+		void print() const;
 	private:
 		const Stoich* stoichPtr_;
 #ifdef USE_GSL

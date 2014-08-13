@@ -310,6 +310,7 @@ class ChemCompt
 			const ChemCompt* other, const vector< VoxelJunction >& vj ) = 0;
 
 		//////////////////////////////////////////////////////////////////
+		static SrcFinfo1< vector< double > >* voxelVolOut();
 
 		static const Cinfo* initCinfo();
 
