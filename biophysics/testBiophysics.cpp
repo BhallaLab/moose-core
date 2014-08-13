@@ -183,21 +183,23 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
 	assert( fabs( retVm900 - origVm900 ) < 1e-6 );
 
 	shell->doStart( static_cast< double >( timestep * runsteps) + 0.0 );
-	retVm100 = Field< double >::get( ObjId( i2, 100 ), "Vm" );
-	double retVm101 = Field< double >::get( ObjId( i2, 101 ), "Vm" );
-	double retVm102 = Field< double >::get( ObjId( i2, 102 ), "Vm" );
-	double retVm99 = Field< double >::get( ObjId( i2, 99 ), "Vm" );
-	retVm900 = Field< double >::get( ObjId( i2, 900 ), "Vm" );
-	double retVm901 = Field< double >::get( ObjId( i2, 901 ), "Vm" );
-	double retVm902 = Field< double >::get( ObjId( i2, 902 ), "Vm" );
+	if ( runsteps == 5 ) { // default for unit tests, others are benchmarks
+		retVm100 = Field< double >::get( ObjId( i2, 100 ), "Vm" );
+		double retVm101 = Field< double >::get( ObjId( i2, 101 ), "Vm" );
+		double retVm102 = Field< double >::get( ObjId( i2, 102 ), "Vm" );
+		double retVm99 = Field< double >::get( ObjId( i2, 99 ), "Vm" );
+		retVm900 = Field< double >::get( ObjId( i2, 900 ), "Vm" );
+		double retVm901 = Field< double >::get( ObjId( i2, 901 ), "Vm" );
+		double retVm902 = Field< double >::get( ObjId( i2, 902 ), "Vm" );
 
-	assert( doubleEq( retVm100, 0.00734036 ) );
-	assert( doubleEq( retVm101, 0.246818 ) );
-	assert( doubleEq( retVm102, 0.200087 ) );
-	assert( doubleEq( retVm99, 0.0095779083 ) );
-	assert( doubleEq( retVm900, 0.1150573482 ) );
-	assert( doubleEq( retVm901, 0.289321534 ) );
-	assert( doubleEq( retVm902, 0.01011172486 ) );
+		assert( doubleEq( retVm100, 0.00734036 ) );
+		assert( doubleEq( retVm101, 0.246818 ) );
+		assert( doubleEq( retVm102, 0.200087 ) );
+		assert( doubleEq( retVm99, 0.0095779083 ) );
+		assert( doubleEq( retVm900, 0.1150573482 ) );
+		assert( doubleEq( retVm901, 0.289321534 ) );
+		assert( doubleEq( retVm902, 0.01011172486 ) );
+	}
 	/*
 	cout << "testIntFireNetwork: Vm100 = " << retVm100 << ", " <<
 			retVm101 << ", " << retVm102 << ", " << retVm99 <<

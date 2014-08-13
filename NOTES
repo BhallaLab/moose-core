@@ -4521,8 +4521,8 @@ properly. May be a general problem with legacy x-compt reac systems.
 
 I need to fix the following:
 * Several of the GSSA bistable snippets don't flip state the way they used to
-- Cspace models are not loaded properly
-- Check that the multivol gsl models do the right thing.
+* Cspace models are not loaded properly
+* Check that the multivol gsl models do the right thing.
 - Fix the dangling proxy problem.
 * Re-examine vol change calculations.
 	Both ChemCompt and Stoich have independent functions doing the same
@@ -4549,6 +4549,38 @@ Did a simple test for presence of voxelVol messages to decide whether to
 do scan through all child objects, or to scale by using the messaging. This
 works. Clears unit tests and most of the snippets I've tested. The problem
 with the unconnected voxel in crossComptNeuroMesh.cpp remains and I'll look
-at it next.
+at it next. 
+Checkin 5740.
+
+From 17 July 
+
+Moose key things to do before release and paper:
+*Ksolve cross compartment
+Synapses
+KKit GUI
+Clocks
+*Identifying message source.
+Documentation
+	Tutorials
+		- How to load and run a neuronal model (using NEUROML)
+		- How to load and run a chemical kinetic model (using
+			kkit or SBML formats)
+		- How to load and run a reaction-diffusion model
+			kkit + dsolve
+		- How to load and run a multiscale model.
+	GUI documentation internal.
+
+Packaging:
+	.deb
+	Fedora rpm
+	mac?
+	Virtual box, small as possible.
+
+
+Preparing to change synapse. As preparation, did some benchmarks on an 
+intFire network. Turns out that the benchmark options in MOOSE were broken.
+So were the unit test options - the thing was running unit tests every time.
+Fixed. Ran the intFire with the ring buffer synapse, takes 24.5 seconds
+to do 200K steps.
 
 =============================================================================
