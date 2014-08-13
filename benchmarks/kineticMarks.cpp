@@ -11,10 +11,10 @@
 #include "../shell/Shell.h"
 
 /// Small model, long runtime.
-void runKineticsBenchmark1()
+void runKineticsBenchmark1( const string& method )
 {
 	Shell* s = reinterpret_cast< Shell* >( ObjId().data() );
-	Id mgr = s->doLoadModel( "../Demos/Genesis_files/OSC_Cspace.g", "/model", "Neutral" );
+	Id mgr = s->doLoadModel( "../Demos/Genesis_files/OSC_Cspace.g", "/model", method );
 	assert( mgr != Id() );
 	s->doReinit();
 	s->doStart( 10000.0 );
