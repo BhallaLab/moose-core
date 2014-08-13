@@ -177,7 +177,23 @@ Id init( int argc, char** argv, bool& doUnitTests, bool& doRegressionTests,
 			  numNodes = (unsigned int)atoi( optarg );
 				break;
 			case 'b': // Benchmark:
-				benchmark = atoi( optarg );
+				{
+				string s(optarg);
+				if ( s == "ee" )
+					benchmark = 1;
+				else if ( s == "gsl" )
+					benchmark = 2;
+				else if ( s == "gssa" )
+					benchmark = 3;
+				else if ( s[0] == 'i' )
+					benchmark = 4;
+				else if ( s[0] == 'h' )
+					benchmark = 5;
+				else if ( s[0] == 'm' )
+					benchmark = 6;
+				else 
+					cout << "Unknown benchmark, " << optarg << ", skipping\n";
+				}
 				break;
 			case 'B': // Benchmark plus dump data: handle later.
 				break;
@@ -192,7 +208,7 @@ Id init( int argc, char** argv, bool& doUnitTests, bool& doRegressionTests,
 				break;
 			case 'h': // help
 			default:
-				cout << "Usage: moose -help -infiniteLoop -unit_tests -regression_tests -quit -n numNodes -benchmark [ksolve intFire hhNet msg_<msgType>_<size>]\n";
+				cout << "Usage: moose -help -infiniteLoop -unit_tests -regression_tests -quit -n numNodes -benchmark [ee gsl gssa intFire hhNet msg_<msgType>_<size>]\n";
 
 				exit( 1 );
 		}
@@ -332,7 +348,7 @@ void mpiTests()
 #ifndef PYMOOSE
 int main( int argc, char** argv )
 {
-	bool doUnitTests = 1;
+	bool doUnitTests = 0;
 	bool doRegressionTests = 0;
 	unsigned int benchmark = 0;
 	// This reorders the OpFunc to Fid mapping to ensure it is node and
