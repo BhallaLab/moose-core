@@ -121,8 +121,8 @@ class Stoich
 		/// Utility function to return a rates_ entry
 		const RateTerm* rates( unsigned int i ) const;
 
-		/// Returns a pointer to the entire rates_ vector.
-		const vector< RateTerm* >* getRateTerms() const;
+		/// Returns a reference to the entire rates_ vector.
+		const vector< RateTerm* >& getRateTerms() const;
 
 		unsigned int getNumFuncs() const;
 		const FuncTerm* funcs( unsigned int i ) const;
@@ -184,6 +184,19 @@ class Stoich
 		 * cross-reactions at these junctions.
 		 */
 		void buildXreacs( const Eref& e, Id otherStoich );
+
+		/**
+		 * Expands out list of compartment mappings of proxy reactions to
+		 * the appropriate entries on the rates_vector.
+		 */
+		void comptsOnCrossReacTerms( vector< pair< Id, Id > >& xr ) const;
+
+		/**
+		 * Used to set up and update all cross solver reac terms and
+		 * their rates, if there has been a change in volumes. Should
+		 * also work if there has been a change in voxelization.
+		 */
+		void setupCrossSolverReacVols() const;
 		//////////////////////////////////////////////////////////////////
 		// Zombification functions.
 		//////////////////////////////////////////////////////////////////
@@ -214,18 +227,20 @@ class Stoich
 
 		/*
 		 * This takes the specified Reac and its substrate and product
-		 * list, and installs them into the Stoich. This is the high-level
-		 * interface function.
+		 * list, and installs them into the Stoich. It also builds up the
+		 * vectors to store which compartment each substrate/product 
+		 * belongs to, needed for cross-reaction computations.
+		 * This is the high-level interface function.
 		 */
 		void installReaction( Id reacId,
 				const vector< Id >& subs, const vector< Id >& prds );
 		/*
-		 * This takes the specified forward and reverse half-reacs belonging
+		 * This takes the specified subs and prds belonging
 		 * to the specified Reac, and builds them into the Stoich.
 		 * It is a low-level function used internally.
 		 */
-		void installReaction( Id reacId, 
-				ZeroOrder* forward, ZeroOrder* reverse );
+		unsigned int innerInstallReaction( Id reacId, 
+				const vector< Id >& subs, const vector< Id >& prds );
 
 		/**
 		 * This takes the baseclass for an MMEnzyme and builds the
@@ -425,8 +440,8 @@ class Stoich
 		/**
 		 * Returns the index of the matching volume,
 		 * which is also the index into the RateTerm vector.
-		 */
 		unsigned int indexOfMatchingVolume( double vol ) const;
+		 */
 		
 		//////////////////////////////////////////////////////////////////
 		static const unsigned int PoolIsNotOnSolver;
@@ -587,6 +602,19 @@ class Stoich
 		 */
 		vector< pair< Id, Id > > offSolverReacCompts_;
 
+		/**
+		 * subComptVec_[rateTermIndex][substrate#]: Identifies compts
+		 * for each substrate for each cross-compartment RateTerm in 
+		 * the rates_vector.
+		 */
+		vector< vector< Id > > subComptVec_;
+
+		/**
+		 * prdComptVec_[rateTermIndex][product#]: Identifies compts
+		 * for each product for each cross-compartment RateTerm in 
+		 * the rates_vector.
+		 */
+		vector< vector< Id > > prdComptVec_;
 };
 
 #endif	// _STOICH_H

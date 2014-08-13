@@ -404,6 +404,8 @@ void PsdMesh::matchSpineMeshEntries( const ChemCompt* other,
 		for ( unsigned int i = 0; i < psd_.size(); ++i ) {
 			double xda = psd_[i].getDiffusionArea( pa_[i], 0 ) / parentDist_[i];
 			ret.push_back( VoxelJunction( i, parent_[i], xda ) );
+			ret.back().firstVol = getMeshEntryVolume( i );
+			ret.back().secondVol = sm->getMeshEntryVolume( parent_[i] );
 		}
 	} else {
 		assert( 0 ); // Don't know how to do this yet.

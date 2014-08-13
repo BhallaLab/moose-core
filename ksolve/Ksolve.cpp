@@ -82,24 +82,6 @@ const Cinfo* Ksolve::initCinfo()
 			&Ksolve::getEpsRel
 		);
 		
-		/* 
-		 * Remove it, user should not ever call or see this function.
-		static ValueFinfo< Ksolve, Id > stoich (
-			"stoich",
-			"Stoichiometry object for handling this reaction system.",
-			&Ksolve::setStoich,
-			&Ksolve::getStoich
-		);
-
-		* or this.
-		static ValueFinfo< Ksolve, Id > dsolve (
-			"dsolve",
-			"Diffusion solver object handling this reactin system.",
-			&Ksolve::setDsolve,
-			&Ksolve::getDsolve
-		);
-		*/
-
 		static ValueFinfo< Ksolve, Id > compartment(
 			"compartment",
 			"Compartment in which the Ksolve reaction system lives.",
@@ -161,6 +143,12 @@ const Cinfo* Ksolve::initCinfo()
 			"Handles initReinit call from Clock",
 			new ProcOpFunc< Ksolve >( &Ksolve::initReinit ) );
 		
+		static DestFinfo voxelVol( "voxelVol",
+			"Handles updates to all voxels. Comes from parent "
+			"ChemCompt object.",
+			new OpFunc1< Ksolve, vector< double > >( 
+					&Ksolve::updateVoxelVol )
+		);
 		///////////////////////////////////////////////////////
 		// Shared definitions
 		///////////////////////////////////////////////////////
@@ -205,6 +193,7 @@ const Cinfo* Ksolve::initCinfo()
 		&numAllVoxels,		// ReadOnlyValue
 		&numPools,			// Value
 		&estimatedDt,		// ReadOnlyValue
+		&voxelVol,			// DestFinfo
 		&xCompt,			// SharedFinfo
 		&proc,				// SharedFinfo
 		&init,				// SharedFinfo
@@ -588,11 +577,16 @@ void Ksolve::initReinit( const Eref& e, ProcPtr p )
 void Ksolve::updateRateTerms( unsigned int index )
 {
 	if ( index == ~0U ) {
-		for ( unsigned int i = 0 ; i < pools_.size(); ++i )
-			pools_[i].setRates( stoichPtr_->getRateTerms() );
+		// unsigned int numCrossRates = stoichPtr_->getNumRates() - stoichPtr_->getNumCoreRates();
+		for ( unsigned int i = 0 ; i < pools_.size(); ++i ) {
+			// pools_[i].resetXreacScale( numCrossRates );
+			pools_[i].updateAllRateTerms( stoichPtr_->getRateTerms(),
+						   stoichPtr_->getNumCoreRates() );
+		}
 	} else if ( index < stoichPtr_->getNumRates() ) {
 		for ( unsigned int i = 0 ; i < pools_.size(); ++i )
-			pools_[i].updateRateTerms( stoichPtr_->getRateTerms(), index );
+			pools_[i].updateRateTerms( stoichPtr_->getRateTerms(),
+							stoichPtr_->getNumCoreRates(), index );
 	}
 }
 
@@ -716,6 +710,21 @@ void Ksolve::setBlock( const vector< double >& values )
 }
 
 //////////////////////////////////////////////////////////////////////////
+void Ksolve::updateVoxelVol( vector< double > vols )
+{
+	// For now we assume identical numbers of voxels. Also assume
+	// identical voxel junctions. But it should not be too hard to
+	// update those too.
+	if ( vols.size() == pools_.size() ) {
+		for ( unsigned int i = 0; i < vols.size(); ++i ) {
+			pools_[i].setVolumeAndDependencies( vols[i] );
+		}
+		stoichPtr_->setupCrossSolverReacVols();
+		updateRateTerms( ~0U );
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////
 // cross-compartment reaction stuff.
 //////////////////////////////////////////////////////////////////////////
 // void Ksolve::xComptIn( const Eref& e, const ObjId& src, 
@@ -802,6 +811,11 @@ void Ksolve::assignXferIndex( unsigned int numProxyMols,
  * pair of Ksolves.
  * This one call sets up the information about transfer on both sides
  * of the junction(s) between current Ksolve and otherKsolve.
+ *
+ * VoxelJunction refers to a specific junction between compartments.
+ * It has the following relevant fields:
+ * 	first, second: VoxelIndex for the first and second compartments.
+ * 	firstVol, secondVol: VoxelVolume for the first and second compartments.
  */
 void Ksolve::setupXfer( Id myKsolve, Id otherKsolve, 
 	unsigned int numProxyMols, const vector< VoxelJunction >& vj )
@@ -838,6 +852,43 @@ void Ksolve::setupXfer( Id myKsolve, Id otherKsolve,
 	assignXferVoxels( myKsolveIndex );
 	otherKsolvePtr->assignXferVoxels( otherKsolveIndex );
 }
+
+/**
+ *
+ * At every junction, all the reacs that inhabit the two compartments need
+ * to have their cross-terms set up. Go through each VJ and set up the
+ * xReacScaling for each rate Term that applies.
+void Ksolve::buildCrossReacVolScaling( Id otherKsolve,
+				const vector< VoxelJunction >& vj )
+{
+	Ksolve* otherKsolvePtr = reinterpret_cast< Ksolve* >( 
+					otherKsolve.eref().data() );
+
+	vector< pair< Id, Id > > xr; 
+	// This returns cross-reac compartments associated with each RateTerm
+	stoichPtr_->comptsOnCrossReacTerms( xr );
+	for ( unsigned int i = 0; i < xr.size(); ++i ) {
+		if ( xr[i].first == otherKsolvePtr->compartment_ ||
+			xr[i].second == otherKsolvePtr->compartment_ )
+		{
+			for ( unsigned int k = 0; k < vj.size(); ++k )
+				pools_[vj[k].first].multiplyXreacScale( i, vj[k].secondVol);
+		}
+	}
+
+	// Now do this for the otherKsolve.
+	xr.clear(); 
+	otherKsolvePtr->stoichPtr_->comptsOnCrossReacTerms( xr );
+	for ( unsigned int i = 0; i < xr.size(); ++i ) {
+		if ( xr[i].first == compartment_ ||
+			xr[i].second == compartment_ )
+		{
+			for ( unsigned int k = 0; k < vj.size(); ++k )
+				otherKsolvePtr->pools_[vj[k].second].multiplyXreacScale( i, vj[k].firstVol);
+		}
+	}
+}
+ */
 
 
 /**
@@ -919,7 +970,126 @@ void Ksolve::setupCrossSolverReacs( const map< Id, vector< Id > >& xr,
 	// both sides.
 	setupXfer( myKsolve, otherKsolve, numPools, vj );
 
+	/// This sets up the volume scaling from cross reac terms
+	// Deprecated. Handled by setupCrossSolverReacVols. 
+	// buildCrossReacVolScaling( otherKsolve, vj );
+
 	// Here we set up the messaging.
 	Shell *shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	shell->doAddMsg( "Single", myKsolve, "xCompt", otherKsolve, "xCompt" );
+}
+
+/** 
+ * This fills the vols vector with the volume of the abutting 
+ * voxel on compt. If there are no abutting voxels on a given
+ * voxel then that entry of the vols vector is filled with a zero.
+ * There is exactly one vols entry for each voxel of the local compt.
+ */
+void Ksolve::matchJunctionVols( vector< double >& vols, Id otherComptId ) 
+		const
+{
+	vols.resize( pools_.size() );
+	for ( unsigned int i = 0; i < vols.size(); ++i )
+		vols[i] = pools_[i].getVolume();
+	if ( otherComptId == compartment_ ) {
+		// This may legitimately happen if the substrate or product is
+		// on the local compartment.
+		// cout << "Warning: Ksolve::matchJunctionVols: self compt.\n";
+		return;
+	}
+	const ChemCompt *myCompt = reinterpret_cast< const ChemCompt* >(
+			compartment_.eref().data() );
+	const ChemCompt *otherCompt = reinterpret_cast< const ChemCompt* >(
+			otherComptId.eref().data() );
+	vector< VoxelJunction > vj;
+	myCompt->matchMeshEntries( otherCompt, vj );
+	if ( vj.size() == 0 )
+		return;
+	for ( vector< VoxelJunction >::const_iterator 
+			i = vj.begin(); i != vj.end(); ++i ) {
+		assert( i->first < vols.size() );
+		/*
+		if ( !doubleEq( vols[ i->first ], 0.0 ) )
+			cout << "Warning: Ksolve::matchJuntionVols: repeated voxel\n";
+			*/
+		vols[ i->first ] = i->secondVol;
+	}
+}
+
+/**
+ * This function builds cross-solver reaction volume scaling. 
+ */
+void Ksolve::setupCrossSolverReacVols( 
+	const vector< vector< Id > >& subCompts, 
+	const vector< vector< Id > >& prdCompts )
+{
+	map< Id, vector< double > > comptVolMap;
+	unsigned int numOffSolverReacs = 
+			stoichPtr_->getNumRates() - stoichPtr_->getNumCoreRates();
+	assert( subCompts.size() == numOffSolverReacs );
+	assert( prdCompts.size() == numOffSolverReacs );
+	for ( unsigned int i = 0 ; i < pools_.size(); ++i )
+		pools_[i].resetXreacScale( numOffSolverReacs );
+	for( unsigned int i = 0; i < numOffSolverReacs; ++i ) {
+		for ( unsigned int j = 0; j < subCompts[i].size(); ++j ) {
+			map< Id, vector< double > >::iterator cvi;
+			vector< double > vols;
+			cvi = comptVolMap.find( subCompts[i][j] );
+			if ( cvi == comptVolMap.end() ) {
+				matchJunctionVols( vols, subCompts[i][j] );
+				comptVolMap[subCompts[i][j]] = vols;
+			} else {
+				vols = cvi->second;
+			}
+			assert( vols.size() == pools_.size() );
+			for ( unsigned int k = 0; k < vols.size(); ++k )
+				pools_[k].forwardReacVolumeFactor( i, vols[k] );
+		}
+
+		for ( unsigned int j = 0; j < prdCompts[i].size(); ++j ) {
+			map< Id, vector< double > >::iterator cvi;
+			vector< double > vols;
+			cvi = comptVolMap.find( prdCompts[i][j] );
+			if ( cvi == comptVolMap.end() ) {
+				matchJunctionVols( vols, prdCompts[i][j] );
+				comptVolMap[prdCompts[i][j]] = vols;
+			} else {
+				vols = cvi->second;
+			}
+			assert( vols.size() == pools_.size() );
+			for ( unsigned int k = 0; k < vols.size(); ++k )
+				pools_[k].backwardReacVolumeFactor( i, vols[k] );
+		}
+	}
+}
+
+void Ksolve::print() const
+{
+	cout << "path = " << stoichPtr_->getKsolve().path() << 
+			", numPools = " << pools_.size() << "\n";
+	for ( unsigned int i = 0; i < pools_.size(); ++i ) {
+		cout << "pools[" << i << "] contents = ";
+		pools_[i].print();
+	}
+	cout << "method = " << method_ << ", stoich=" << stoich_.path() <<endl;
+	cout << "dsolve = " << dsolve_.path() << endl;
+	cout << "compartment = " << compartment_.path() << endl;
+	cout << "xfer summary: numxfer = " << xfer_.size() << "\n";
+	for ( unsigned int i = 0; i < xfer_.size(); ++i ) {
+		cout << "xfer_[" << i << "] numValues=" << 
+			xfer_[i].values.size() <<
+			", xferPoolIdx.size = " << xfer_[i].xferPoolIdx.size() <<
+			", xferVoxel.size = " << xfer_[i].xferVoxel.size() << endl;
+	}
+	cout << "xfer details:\n";
+	for ( unsigned int i = 0; i < xfer_.size(); ++i ) {
+		cout << "xfer_[" << i << "] xferPoolIdx=\n";
+		const vector< unsigned int>& xi = xfer_[i].xferPoolIdx;
+		for ( unsigned int j = 0; j << xi.size(); ++j )
+			cout << "	" << xi[j];
+		cout << "\nxfer_[" << i << "] xferVoxel=\n";
+		const vector< unsigned int>& xv = xfer_[i].xferVoxel;
+		for ( unsigned int j = 0; j << xv.size(); ++j )
+			cout << "	" << xv[j];
+	}
 }
