@@ -271,7 +271,11 @@ class CubeMesh: public MeshCompt
 				double zmin, double zmax
 		   	   ) const;
 		
+		/// Assigns diffusion scaling info for the voxel junctions.
 		void setDiffScale( const CubeMesh* other,
+			vector< VoxelJunction >& ret ) const;
+		/// Assigns volume info for the voxel junctions.
+		void setJunctionVol( const CubeMesh* other,
 			vector< VoxelJunction >& ret ) const;
 
 		void updateM2s();

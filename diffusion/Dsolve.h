@@ -105,8 +105,11 @@ class Dsolve: public ZombiePoolInterface
 		void setBlock( const vector< double >& values );
 
 		// This one isn't used in Dsolve, but is defined as a dummy.
-		void setupCrossSolverReacs( const map< Id, 
-						vector< Id > >& xr, Id otherStoich );
+		void setupCrossSolverReacs( 
+					const map< Id, vector< Id > >& xr, Id otherStoich );
+		void setupCrossSolverReacVols( 
+			const vector< vector< Id > >& subCompts,
+			const vector< vector< Id > >& prdCompts );
 
 		// Do any updates following a volume or rate constant change.
 		void updateRateTerms( unsigned int index );

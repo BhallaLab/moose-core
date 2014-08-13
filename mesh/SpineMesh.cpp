@@ -473,6 +473,9 @@ void SpineMesh::matchNeuroMeshEntries( const ChemCompt* other,
 		for ( unsigned int i = 0; i < spines_.size(); ++i ) {
 			double xda = spines_[i].rootArea() / spines_[i].diffusionLength();
 			ret.push_back( VoxelJunction( i, spines_[i].parent(), xda ) );
+			ret.back().firstVol = spines_[i].volume();
+			ret.back().secondVol = 
+					nm->getMeshEntryVolume( spines_[i].parent() );
 		}
 	} else {
 		assert( 0 ); // Don't know how to do this yet.

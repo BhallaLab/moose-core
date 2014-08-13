@@ -16,6 +16,11 @@
 # a, b, and c are in the dendrite, spine head, and PSD respectively.
 # The model is set up to run using the Ksolve for integration. Although
 # a diffusion solver is set up, the diff consts here are set to zero.
+# The display has two parts: 
+# Above is a line plot of concentration against compartment#. 
+# Below is a time-series plot that appears after # the simulation has 
+# ended. The plot is for the last (rightmost) compartment.
+# Concs of a, b, c are plotted for both graphs.
 #
 
 import math
@@ -177,9 +182,9 @@ def makeModel():
 		outputC = moose.Table ( '/model/graphs/concC' )
 
 		# connect up the tables
-                a1 = moose.element( '/model/compt0/a[2]' )
-                b1 = moose.element( '/model/compt1/b[1]' )
-                c1 = moose.element( '/model/compt2/c[1]' )
+                a1 = moose.element( '/model/compt0/a[' + str( numSeg )+ ']')
+                b1 = moose.element( '/model/compt1/b[' +str(numSeg - 1)+']')
+                c1 = moose.element( '/model/compt2/c[' +str(numSeg - 1)+']')
 		moose.connect( outputA, 'requestOut', a1, 'getConc' );
 		moose.connect( outputB, 'requestOut', b1, 'getConc' );
 		moose.connect( outputC, 'requestOut', c1, 'getConc' );
@@ -239,8 +244,8 @@ def display():
     c = moose.element( '/model/compt2/c' )
     plt.ion()
     fig = plt.figure( figsize=(12,10))
-    timeseries = fig.add_subplot( 211 )
-    spatial = fig.add_subplot( 212)
+    timeseries = fig.add_subplot( 212 )
+    spatial = fig.add_subplot( 211)
     spatial.set_ylim(0, 15)
     pos = numpy.arange( 0, a.vec.conc.size, 1 )
     line1, = spatial.plot( pos, a.vec.conc, 'b-', label='a' )
@@ -261,7 +266,7 @@ def display():
         #raw_input()
         moose.start( dt )
 
-    timeseries.set_ylim( 0, 12 )
+    timeseries.set_ylim( 0, 20 )
     for x in moose.wildcardFind( '/model/graphs/conc#' ):
         t = numpy.arange( 0, x.vector.size *dt , dt ) # sec
         line4, = timeseries.plot( t, x.vector, label=x.name )

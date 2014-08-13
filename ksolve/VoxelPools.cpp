@@ -133,29 +133,39 @@ int VoxelPools::gslFunc( double t, const double* y, double *dydt,
 // Here are the internal reaction rate calculation functions
 ///////////////////////////////////////////////////////////////////////
 
-void VoxelPools::setRates( const vector< RateTerm* >* rates )
+void VoxelPools::updateAllRateTerms( const vector< RateTerm* >& rates,
+			   unsigned int numCoreRates )
 {
 	// Clear out old rates if any
 	for ( unsigned int i = 0; i < rates_.size(); ++i )
 		delete( rates_[i] );
 
-	rates_.resize( rates->size() );
-	double scaling = NA * getVolume();
-	for ( unsigned int i = 0; i < rates->size(); ++i ) {
-		rates_[i] = (*rates)[i]->copyWithVolScaling(  scaling );
+	rates_.resize( rates.size() );
+	for ( unsigned int i = 0; i < numCoreRates; ++i )
+		rates_[i] = rates[i]->copyWithVolScaling( getVolume(), 1, 1 );
+	for ( unsigned int i = numCoreRates; i < rates.size(); ++i ) {
+		rates_[i] = rates[i]->copyWithVolScaling(  getVolume(), 
+				getXreacScaleSubstrates(i - numCoreRates),
+				getXreacScaleProducts(i - numCoreRates ) );
 	}
 }
 
-void VoxelPools::updateRateTerms( const vector< RateTerm* >* rates,
-			   unsigned int index )
+void VoxelPools::updateRateTerms( const vector< RateTerm* >& rates,
+			   unsigned int numCoreRates, unsigned int index )
 {
 	// During setup or expansion of the reac system, it is possible to
 	// call this function before the rates_ term is assigned. Disable.
  	if ( index >= rates_.size() )
 		return;
-	double scaling = NA * getVolume();
 	delete( rates_[index] );
-	rates_[index] = (*rates)[index]->copyWithVolScaling( scaling );
+	if ( index >= numCoreRates )
+		rates_[index] = rates[index]->copyWithVolScaling(
+				getVolume(), 
+				getXreacScaleSubstrates(index - numCoreRates),
+				getXreacScaleProducts(index - numCoreRates ) );
+	else
+		rates_[index] = rates[index]->copyWithVolScaling(  
+				getVolume(), 1.0, 1.0 );
 }
 
 void VoxelPools::updateRates( const double* s, double* yprime ) const
@@ -163,8 +173,10 @@ void VoxelPools::updateRates( const double* s, double* yprime ) const
 	const KinSparseMatrix& N = stoichPtr_->getStoichiometryMatrix();
 	vector< double > v( N.nColumns(), 0.0 );
 	vector< double >::iterator j = v.begin();
+	// totVar should include proxyPools only if this voxel uses them
 	unsigned int totVar = stoichPtr_->getNumVarPools() + 
 			stoichPtr_->getNumProxyPools();
+	// totVar should include proxyPools if this voxel does not use them
 	unsigned int totInvar = stoichPtr_->getNumBufPools() + 
 			stoichPtr_->getNumFuncs();
 	assert( N.nRows() == 
@@ -203,4 +215,24 @@ void VoxelPools::updateReacVelocities(
 		*j++ = (**i)( s );
 		assert( !isnan( *( j-1 ) ) );
 	}
+}
+
+/// For debugging: Print contents of voxel pool
+void VoxelPools::print() const
+{
+	cout << "numAllRates = " << rates_.size() << 
+			", numLocalRates= " << stoichPtr_->getNumCoreRates() << endl;
+	VoxelPoolsBase::print();
+}
+
+////////////////////////////////////////////////////////////
+/** 
+ * Handle volume updates. Inherited Virtual func.
+ */
+void VoxelPools::setVolumeAndDependencies( double vol )
+{
+	VoxelPoolsBase::setVolumeAndDependencies( vol );
+	stoichPtr_->setupCrossSolverReacVols();
+	updateAllRateTerms( stoichPtr_->getRateTerms(), 
+		stoichPtr_->getNumCoreRates() );
 }
