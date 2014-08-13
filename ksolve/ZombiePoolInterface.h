@@ -88,6 +88,9 @@ class ZombiePoolInterface
 		virtual void setupCrossSolverReacs( 
 			const map< Id, vector< Id > >& xr, 
 			Id otherStoich ) = 0;
+		virtual void setupCrossSolverReacVols( 
+			const vector< vector< Id > >& subCompts, 
+			const vector< vector< Id > >& prdCompts ) = 0; 
 
 		/**
 		 * Informs the solver that the rate terms or volumes have changed

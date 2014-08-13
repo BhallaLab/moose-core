@@ -319,6 +319,9 @@ void Stoich::setElist( const Eref& e, const vector< ObjId >& elist )
 	if ( kinterface_ ) {
 		// kinterface_->setNumPools( n );
 		kinterface_->setStoich( e.id() );
+		Shell* shell =  reinterpret_cast< Shell* >( Id().eref().data() );
+		shell->doAddMsg( "Single", 
+				compartment_, "voxelVolOut", ksolve_, "voxelVol" );
 	}
 	if ( dinterface_ ) {
 		// dinterface_->setNumPools( n );
@@ -327,9 +330,15 @@ void Stoich::setElist( const Eref& e, const vector< ObjId >& elist )
 	zombifyModel( e, temp );
 	if ( kinterface_ ) {
 		kinterface_->setDsolve( dsolve_ );
-		kinterface_->updateRateTerms();
 		// kinterface_->setupCrossSolverReacs( offSolverPoolMap_ ); 
+		kinterface_->setupCrossSolverReacVols( subComptVec_, prdComptVec_);
+		kinterface_->updateRateTerms();
 	}
+}
+
+void Stoich::setupCrossSolverReacVols() const
+{
+	kinterface_->setupCrossSolverReacVols( subComptVec_, prdComptVec_);
 }
 
 
@@ -467,15 +476,26 @@ unsigned int Stoich::getNumRates() const
 	return rates_.size();
 }
 
+unsigned int Stoich::getNumCoreRates() const
+{
+	if ( offSolverReacs_.size() == 0 )
+		return rates_.size();
+	unsigned int i = convertIdToReacIndex( offSolverReacs_[0] ); 
+	if ( i == ~0U )
+		return rates_.size();
+	return i;
+}
+
+
 const RateTerm* Stoich::rates( unsigned int i ) const
 {
 	assert( i < rates_.size() );
 	return rates_[i];
 }
 
-const vector< RateTerm* >* Stoich::getRateTerms() const
+const vector< RateTerm* >& Stoich::getRateTerms() const
 {
-	return &rates_;
+	return rates_;
 }
 
 unsigned int Stoich::getNumFuncs() const
@@ -850,6 +870,28 @@ void Stoich::buildXreacs( const Eref& e, Id otherStoich )
 	kinterface_->setupCrossSolverReacs( offSolverPoolMap_, otherStoich );
 }
 
+void Stoich::comptsOnCrossReacTerms( vector< pair< Id, Id > >& xr ) const
+{
+	xr.clear();
+	assert( offSolverReacs_.size() == offSolverReacCompts_.size() );
+	if ( offSolverReacs_.size() == 0 )
+		return;
+	unsigned int numPlainRates = convertIdToReacIndex( offSolverReacs_[0]);
+	unsigned int numXrates = rates_.size() - numPlainRates;
+	unsigned int k = numPlainRates;
+	unsigned int j = 0;
+	for ( unsigned int i = 0; i < offSolverReacs_.size() ; ++i ) {
+		if ( i+1 < offSolverReacs_.size() )
+			j = convertIdToReacIndex( offSolverReacs_[i+1] );
+		else
+			j = rates_.size();
+		while ( k < j ) {
+			xr.push_back( offSolverReacCompts_[i] );
+			k++;
+		}
+	}
+	assert( xr.size() == numXrates );
+}
 
 //////////////////////////////////////////////////////////////
 // Model zombification functions
@@ -1061,22 +1103,46 @@ ZeroOrder* makeHalfReaction(
 	return rateTerm;
 }
 
+void Stoich::installReaction( Id reacId,
+		const vector< Id >& subs, 
+		const vector< Id >& prds )
+{
+	static vector< Id > dummy;
+	unsigned int rateIndex = innerInstallReaction( reacId, subs, prds );
+	if ( rateIndex < getNumCoreRates() ) // Only handle off-compt reacs
+		return;
+	vector< Id > subCompt;
+	vector< Id > prdCompt;
+	for ( vector< Id >::const_iterator
+					i = subs.begin(); i != subs.end(); ++i )
+		subCompt.push_back( getCompt( *i ).id );
+	for ( vector< Id >::const_iterator
+					i = prds.begin(); i != prds.end(); ++i )
+		prdCompt.push_back( getCompt( *i ).id );
+
+	assert ( rateIndex - getNumCoreRates() == subComptVec_.size() );
+	assert ( rateIndex - getNumCoreRates() == prdComptVec_.size() );
+	if ( useOneWay_ ) {
+		subComptVec_.push_back( subCompt );
+		subComptVec_.push_back( prdCompt );
+		prdComptVec_.push_back( dummy );
+		prdComptVec_.push_back( dummy );
+	} else {
+		subComptVec_.push_back( subCompt );
+		prdComptVec_.push_back( prdCompt );
+	}
+}
+
 /**
  * This takes the specified forward and reverse half-reacs belonging
  * to the specified Reac, and builds them into the Stoich.
  */
-void Stoich::installReaction( Id reacId,
+unsigned int Stoich::innerInstallReaction( Id reacId, 
 		const vector< Id >& subs, 
 		const vector< Id >& prds )
 {
 	ZeroOrder* forward = makeHalfReaction( 0, this, subs );
 	ZeroOrder* reverse = makeHalfReaction( 0, this, prds );
-	installReaction( reacId, forward, reverse );
-}
-
-void Stoich::installReaction( Id reacId, 
-				ZeroOrder* forward, ZeroOrder* reverse )
-{
 	unsigned int rateIndex = convertIdToReacIndex( reacId );
 	unsigned int revRateIndex = rateIndex;
 	if ( useOneWay_ ) {
@@ -1089,6 +1155,8 @@ void Stoich::installReaction( Id reacId,
 	}
 
 	vector< unsigned int > molIndex;
+	vector< double > reacScaleSubstrates;
+	vector< double > reacScaleProducts;
 
 	if ( useOneWay_ ) {
 		unsigned int numReactants = forward->getReactants( molIndex );
@@ -1119,6 +1187,7 @@ void Stoich::installReaction( Id reacId,
 			N_.set( molIndex[i], rateIndex, temp + 1 );
 		}
 	}
+	return rateIndex;
 }
 
 /**
@@ -1146,6 +1215,17 @@ void Stoich::installMMenz( Id enzId, Id enzMolId,
 		return;
 	}
 	installMMenz( meb, enzSiteIndex, subs, prds );
+	if ( enzSiteIndex < getNumCoreRates() ) // Only handle off-compt reacs
+		return;
+	vector< Id > subCompt;
+	vector< Id > dummy;
+	for ( vector< Id >::const_iterator
+					i = subs.begin(); i != subs.end(); ++i )
+		subCompt.push_back( getCompt( *i ).id );
+	subComptVec_.push_back( subCompt );
+	prdComptVec_.push_back( dummy );
+	assert ( enzSiteIndex - getNumCoreRates() == subComptVec_.size() );
+	assert ( enzSiteIndex - getNumCoreRates() == prdComptVec_.size() );
 }
 
 /// This is the internal variant to install the MMenz.
@@ -1179,6 +1259,34 @@ void Stoich::installEnzyme( Id enzId, Id enzMolId, Id cplxId,
 	ZeroOrder* r3 = makeHalfReaction( 0, this, temp );
 
 	installEnzyme( r1, r2, r3, enzId, enzMolId, prds );
+	unsigned int rateIndex = convertIdToReacIndex( enzId );
+	if ( rateIndex < getNumCoreRates() ) // Only handle off-compt reacs
+		return;
+	vector< Id > subCompt;
+	vector< Id > dummy;
+	for ( vector< Id >::const_iterator
+					i = subs.begin(); i != subs.end(); ++i )
+		subCompt.push_back( getCompt( *i ).id );
+
+	if ( useOneWay_ ) { 
+		// enz is split into 3 reactions. Only the first might be off-compt
+		subComptVec_.push_back( subCompt );
+		subComptVec_.push_back( dummy );
+		subComptVec_.push_back( dummy );
+		prdComptVec_.push_back( dummy );
+		prdComptVec_.push_back( dummy );
+		prdComptVec_.push_back( dummy );
+		assert ( 2 + rateIndex - getNumCoreRates() == subComptVec_.size());
+		assert ( 2 + rateIndex - getNumCoreRates() == prdComptVec_.size());
+	} else {
+		// enz is split into 2 reactions. Only the first might be off-compt
+		subComptVec_.push_back( subCompt );
+		subComptVec_.push_back( dummy );
+		prdComptVec_.push_back( dummy );
+		prdComptVec_.push_back( dummy );
+		assert ( 1+rateIndex - getNumCoreRates() == subComptVec_.size() );
+		assert ( 1+rateIndex - getNumCoreRates() == prdComptVec_.size() );
+	}
 }
 
 void Stoich::installEnzyme( ZeroOrder* r1, ZeroOrder* r2, ZeroOrder* r3,
@@ -1491,70 +1599,6 @@ const vector< Id >& Stoich::offSolverPoolMap( Id compt ) const
 // Numeric funcs. These are in Stoich because the rate terms are here.
 /////////////////////////////////////////////////////////////////////
 
-/**
- * updateRates computes the velocity *v* of each reaction. Then it
- * uses this to compute the rate of change, *yprime*, for each pool
- * Moved to VoxelPools.
-
-void Stoich::updateRates( const double* s, double* yprime, 
-				unsigned int volIndex ) const
-{
-	vector< double > v( numReac_, 0.0 );
-	vector< double >::iterator j = v.begin();
-	const vector< RateTerm* >& r = rates_[volIndex];
-	assert( numReac_ == rates_.size() );
-	assert( N_.nRows() == getNumAllPools() + getNumProxyPools() );
-	assert( N_.nColumns() == rates_.size() );
-
-	for ( vector< RateTerm* >::const_iterator
-		i = rates_.begin(); i != rates_.end(); i++) {
-		*j++ = (**i)( s );
-		assert( !isnan( *( j-1 ) ) );
-	}
-
-	unsigned int totVar = numVarPools_ + offSolverPools_.size();
-
-	for (unsigned int i = 0; i < totVar; ++i)
-		*yprime++ = N_.computeRowRate( i , v );
-	for (unsigned int i = 0; i < numBufPools_ + numFuncPools_; ++i)
-		*yprime++ = 0.0;
-}
- */
-
-/**
- * updateVels computes the velocity *v* of each reaction.
- * This is a utility function for programs like SteadyState that need
- * to analyze velocity.
- * Moved to VoxelPools too.
-void Stoich::updateReacVelocities( const double* s, vector< double >& v,
-			   unsigned int volIndex ) const
-{
-	assert( volIndex < rates_.size() );
-	const vector< RateTerm* >& r = rates_[volIndex];
-	assert( numReac_ == r.size() );
-
-	vector< RateTerm* >::const_iterator i;
-	v.clear();
-	v.resize( numReac_, 0.0 );
-	vector< double >::iterator j = v.begin();
-	assert( numReac_ == r.size() );
-
-	for ( i = r.begin(); i != r.end(); i++) {
-		*j++ = (**i)( s );
-		assert( !isnan( *( j-1 ) ) );
-	}
-}
- */
-
-/**
- * Only used internally in GssaVoxelPools.
-double Stoich::getReacVelocity( unsigned int r, const double* s, 
-			   unsigned int volIndex ) const
-{
-	assert( volIndex < rates_.size() );
-	return rates_[volIndex][r]->operator()( s );
-}
-*/
 
 // s is the array of pools, S_[meshIndex][0]
 void Stoich::updateFuncs( double* s, double t ) const
@@ -1618,6 +1662,7 @@ void Stoich::updateRatesAfterRemesh()
 }
 
 
+/*
 unsigned int Stoich::indexOfMatchingVolume( double vol ) const
 {
 	assert( rates_.size() == uniqueVols_.size() );
@@ -1634,3 +1679,4 @@ unsigned int Stoich::indexOfMatchingVolume( double vol ) const
 	assert( 0 );
 	return 0;
 }
+*/

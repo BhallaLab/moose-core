@@ -8,7 +8,8 @@
 #########################################################################
 # This example illustrates loading and running a reaction system that
 # spans two volumes, that is, is in different compartments. It uses a
-# kkit model file.
+# kkit model file. You can tell if it is working if you see nice 
+# relaxation oscillations.
 
 import moose
 import pylab

@@ -7,15 +7,28 @@
 ## See the file COPYING.LIB for the full notice.
 #########################################################################
 
-# This example illustrates how to define a kinetic model using the
-# scripting interface. Normally one uses standard model formats like
-# SBML or kkit to concisely define kinetic models, but in some cases one
-# would like to modify the model through the script.
-# This example creates a bistable model having two enzymes and a reaction.
-# One of the enzymes is autocatalytic.
-# The model is set up to run using default Exponential Euler integration.
-# The snippet scriptKineticSolver.py uses the much better GSL 
-# Runge-Kutta-Fehlberg integration scheme on this same model.
+# This example illustrates a simple cross compartment reaction.
+# a <===> b <===> c,
+# each mol is in a different compt.
+# The initial conditions are such that the end conc on all compartments
+# should be 2.0
+# The time course depends on which compartment the reaction is embedded in.
+# The cleanest thing numerically and also conceptually is to have both 
+# reactions in the same compartment, in this case the middle one compt1.
+# The initial conditions have a lot of B. The equil with C is fast and so
+# C shoots up and passes B, peaking at about (2.5,9). This is also just 
+# about the crossover point.
+# A starts low and slowly climbs up to equilibrate.
+# If we put reac0 in compt 0 and reac1 in compt1, it behaves the same
+# qualitiatively but now the peak is at around (1, 5.2)
+# This config of reactions makes sense from the viewpoint of having the
+# reactions always in the compartment with the smaller volume, which is
+# important if we need to have junctions where many small voxels talk to
+# one big voxel in another compartment.
+# Note that putting the reacs in other compartments doesn't work and in
+# some combinations (e.g., reac0 in compt0 and reac1 in compt2) gives
+# numerical instability.
+
 
 import math
 import pylab
@@ -36,12 +49,10 @@ def makeModel():
                 # compt1 in the middle.
                 print compt1.dx, compt1.dy, compt1.dz
                 side = compt1.dy
-                moose.showfields( compt0 )
                 compt0.y1 += side
                 compt0.y0 += side
                 compt2.x1 += side
                 compt2.x0 += side
-                moose.showfields( compt0 )
                 print compt0.volume, compt1.volume, compt2.volume
 
 		# create molecules and reactions
@@ -81,12 +92,12 @@ def makeModel():
 		moose.connect( outputC, 'requestOut', c, 'getConc' );
 
                 # Build the solvers. No need for diffusion in this version.
-                ksolve0 = moose.Ksolve( '/model/compt0/ksolve' )
-                ksolve1 = moose.Ksolve( '/model/compt1/ksolve' )
-                ksolve2 = moose.Ksolve( '/model/compt2/ksolve' )
-                stoich0 = moose.Stoich( '/model/compt0/stoich' )
-                stoich1 = moose.Stoich( '/model/compt1/stoich' )
-                stoich2 = moose.Stoich( '/model/compt2/stoich' )
+                ksolve0 = moose.Ksolve( '/model/compt0/ksolve0' )
+                ksolve1 = moose.Ksolve( '/model/compt1/ksolve1' )
+                ksolve2 = moose.Ksolve( '/model/compt2/ksolve2' )
+                stoich0 = moose.Stoich( '/model/compt0/stoich0' )
+                stoich1 = moose.Stoich( '/model/compt1/stoich1' )
+                stoich2 = moose.Stoich( '/model/compt2/stoich2' )
 
                 # Configure solvers
                 stoich0.compartment = compt0
@@ -98,6 +109,7 @@ def makeModel():
                 stoich0.path = '/model/compt0/#'
                 stoich1.path = '/model/compt1/#'
                 stoich2.path = '/model/compt2/#'
+                '''
                 assert( stoich0.numVarPools == 1 )
                 assert( stoich0.numProxyPools == 0 )
                 assert( stoich0.numRates == 0 )
@@ -107,15 +119,18 @@ def makeModel():
                 assert( stoich2.numVarPools == 1 )
                 assert( stoich2.numProxyPools == 0 )
                 assert( stoich2.numRates == 0 )
-                stoich0.buildXreacs( stoich1 )
-                #stoich1.buildXreacs( stoich0 )
+                '''
+                #stoich0.buildXreacs( stoich1 )
+                stoich1.buildXreacs( stoich0 )
                 stoich1.buildXreacs( stoich2 )
+                #stoich2.buildXreacs( stoich1 )
 
 
 
 def main():
                 simdt = 0.1
                 plotdt = 0.1
+                runtime = 100.0
 
 		makeModel()
 
@@ -123,19 +138,19 @@ def main():
 		moose.setClock( 4, simdt ) # for the computational objects
 		moose.setClock( 5, simdt ) # for the computational objects
 		moose.setClock( 8, plotdt ) # for the plots
-		moose.useClock( 4, '/model/compt#/ksolve', 'init' )
-		moose.useClock( 5, '/model/compt#/ksolve', 'process' )
+		moose.useClock( 4, '/model/compt#/ksolve#', 'init' )
+		moose.useClock( 5, '/model/compt#/ksolve#', 'process' )
 		moose.useClock( 8, '/model/graphs/#', 'process' )
 
 		moose.reinit()
-		moose.start( 100.0 ) # Run the model for 100 seconds.
+		moose.start( runtime ) # Run the model for 100 seconds.
 		for x in moose.wildcardFind( '/model/compt#/#[ISA=PoolBase]' ):
                     print x.name, x.conc
 
 		# Iterate through all plots, dump their contents to data.plot.
 		for x in moose.wildcardFind( '/model/graphs/conc#' ):
 				#x.xplot( 'scriptKineticModel.plot', x.name )
-				t = numpy.arange( 0, x.vector.size, 1 ) # sec
+				t = numpy.linspace( 0, runtime, x.vector.size ) # sec
 				pylab.plot( t, x.vector, label=x.name )
 		pylab.legend()
 		pylab.show()

@@ -4334,7 +4334,7 @@ Option: use a special rates_ array
 	- Nasty to have two references for rates
 	- 
 Other option: build new rates from the original reac and enz objects.
-	- Single point of referece.
+	- Single point of reference.
 	- Slower
 	- May be very nasty if objects are on different nodes. Better to
 	have local info.
@@ -4363,8 +4363,9 @@ Steps in changeover for RateTerm vectors.
 	*2b. Get it to work for one voxel stochastic
 	*2c. Get to clear unit tests.
 	*2d. Get it to work for one voxel steady state finder.
-+3. Get it to work for spatial
+*3. Get it to work for spatial
 4. Get it to work for x-compt
+5. Get volume changes in mesh to propagate into rates and diffusion.
 
 =============================================================================
 04 Aug
@@ -4375,4 +4376,179 @@ Stuff fails in steadyState finder
 =============================================================================
 05 Aug. 
 Steady-state finder seems to be OK now, but one of the demos from Sahil 
-isn't working. 
+isn't working.  Checkin 5735.
+
+Some progress. But I need to do somewhat more intelligent scaling, for the
+off-compt substrates and products. Will need to separate out.
+For substrates, no scaling. For products, only
+the product terms scale.
+
+=============================================================================
+06 Aug.
+
+numkf = Kf * Va.NA/Multiply(Vsub.NA)
+numkb = Kb * Va.NA/Multiply(Vprd.NA)
+numKm = Km / Multiply(Vsub.NA) // The Va.NA cancels out in num and denom
+
+In the code I need to separate the Multiply for substrates and products.
+I also need to track which of the rate parameters are for Kf and which for Kb.
+
+Which terms does the advance() routine call? Perhaps if there are no
+connected things the local rates_ index should be truncated., or at least
+	dummies put in to return zero.
+Also the VoxelPools::updateRates should limit the number of matrix rows it
+	computes, according to whether it handles proxies.
+
+To fill this, just go through all reacs and find the volumes of the specified
+pool.
+
+What happens when there is a volume change?
+In current form we need to rebuild the entire volscaling system. 
+If so, I can use ratios in the xReacScaleSubstrates_ etc vectors, 
+folding in the local voxel volme
+
+If we know the power that each ReacTerm will take (which we do), then we
+only need the ratio of Vreac to Va. This lets us replace the sub and prd
+arguments with one, for the cases where there is no cross reaction.
+So we store volXcompt/volLocal
+
+numkf = Kf * Va.NA/Multiply(Vsub.NA)
+numkf = Kf * Va*NA/(Vsub1*Vsub2 * NA*NA)
+	= Kf * Va/Vsub1 * Va/Vsub2 * 1/(NA * Va)
+	= Kf / ( ratio1 * ratio2 * NA * VA )
+(Vsub1/Va * Vsub2/Va)
+
+
+=============================================================================
+07 Aug.
+Nearly there, try to compile
+=============================================================================
+08 Aug
+Compiles but fails with the crossComptNeuroMesh.py example. This
+brings up a possible conceptual problem.
+
+
+A1	B1
+A2	B1
+A3	B1
+A4	B2
+A5	B2
+A6	B2
+
+
+A <====> B
+Suppose we have the above geometry. Reaction-wise we need to do
+
+
+A1 <====> B1
+A2 <====> B1
+A3 <====> B1
+
+This is possible to manage, but only if the reaction is situated in the compt
+with smaller voxels, ie, in A. 
+
+In the general case we could have 
+A1	B1
+A2	B1
+A2	B2
+A3	B2
+A3	B3
+
+and so on. This would not work with the smaller voxel approach.
+
+For now we stick with the small-voxel rule.
+
+- Next problem is that the current code has assumed a one-to-one map
+of the junction voxels on either side, this is of course incorrect.
+We need to query the VoxelJunction list for which voxels to use for
+the volume.
+-Check if the other code has disabled the extra reac calculations in the voxels
+where there are no junctions.
+Apparently not. I'm not hanlding this very well. Should just have vol of
+parent voxel in there.
+
+Tried this, didn't work.
+
+=============================================================================
+11 Aug 2014. 
+Tracked part of the problem to zero sub rate.
+
+Tracked further to Ksolve.cpp:998, where matchMeshEntries returns a nonzero
+size yet clearly an empty junction as vols are both zero.
+
+Seems like the CubeMesh simply does not put any of the relevant volumes into
+the VoxelJunction when it builds it. In fact none of the mesh classes seem to.
+Probably should replace Ksolve::1008.
+
+Also remove the volume fields if they are not being used.
+Turns out they are used in Dsolve. In that case I will assign the volumes
+in the function that builds the VoxelJunctions.
+
+With that done, the system runs crossComptSimpleReac, but incorrectly. The
+level in compt B remains ten times that in compt A, even though compts
+B and C equilibrate.
+
+One further test: If I put reac0 on compartment 0, then the reac system
+settles correctly to 2.0.
+
+If I put reac0 on compartment1 and reac1 on compartment2 (under the principle
+that the reacs should be on the smaller compartment of a junction) then
+the reac system fails totally. There are reactions but each of the final
+concs is 10x the previous one, in inverse proportion to their volumes.
+To try: Check actual assigned numerical rates. ZombieReac::vGetNumKf and Kb
+cheats, it does the calculations locally without asking the solver.
+
+=============================================================================
+12 Aug 2014.
+Tracked it down. It was because the flipRet function was flipping voxel numbers
+but not the voxel volumes. 
+Tested with crossComptSimpleReac.py.  
+	Confirmed that I get the same output regardless of which compartment
+	I choose for building of the xreacs.
+	Turns out I get different rates if I put the reacs in different
+	compartments. The steady state is the same though. There is a
+	numerical blowup if the reacs are on the biggest and smallest compt,
+	and nothing at all if they are on compts which do not participate in
+	the reactions.
+
+I ran this for the other crossCompt cases: crossComptOscillator.py was fine
+and crossComptNeuroMesh was nearly so, except that the dangling soma compt
+looked like it was in exponential decline. This would be consistent with
+there being an unreciprocated proxy on that voxel.
+	
+I was going to check this in but the old MAPK model doesn't seem to run
+properly. May be a general problem with legacy x-compt reac systems.
+
+I need to fix the following:
+* Several of the GSSA bistable snippets don't flip state the way they used to
+- Cspace models are not loaded properly
+- Check that the multivol gsl models do the right thing.
+- Fix the dangling proxy problem.
+* Re-examine vol change calculations.
+	Both ChemCompt and Stoich have independent functions doing the same
+	thing: scanning through all reacs and enz and assigning rates again.
+	This will not do well because the volume terms in VoxelPools don't 
+	change.
+	* Update the volume terms in each voxelPool. 
+	* Update the vol terms for xReacScaleSubstrates and products.
+	* Also update nInit in each voxel.
+	* Eliminate the rescan and just use the reference rates_ vector
+	* Connect up the chemCompt to the Stoich so that the request can
+		propagate down. Do this at setup time.
+		* Ensure that the affected off-compt reacs also get updated.
+
+I've done the connecting up stuff for notification of volume changes. 
+	Unfortunately the Gssa vols stuff has stopped working.
+	I think I've fixed it. Unfortunately now the hard-coded unit tests
+	fail because I had to comment out lines in ChemMesh.cpp which
+	do the non-solver volume scaling.
+
+=============================================================================
+13 Aug.
+Did a simple test for presence of voxelVol messages to decide whether to
+do scan through all child objects, or to scale by using the messaging. This
+works. Clears unit tests and most of the snippets I've tested. The problem
+with the unconnected voxel in crossComptNeuroMesh.cpp remains and I'll look
+at it next.
+
+=============================================================================

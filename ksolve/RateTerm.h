@@ -65,9 +65,15 @@ class RateTerm
 
 		/**
 		 * Duplicates rate term and then applies volume scaling.
-		 * Ratio is newVol / oldVol
+		 * Arguments are volume of reference voxel, 
+		 * product of vol/refVol for all substrates: applied to R1
+		 * product of vol/refVol for all products: applied to R2
+		 *
+		 * Note that unless the reaction is cross-compartment, the 
+		 * vol/refVol will be one.
 		 */
-		virtual RateTerm* copyWithVolScaling( double ratio ) const = 0;
+		virtual RateTerm* copyWithVolScaling( 
+				double vol, double sub, double prd ) const = 0;
 };
 
 // Base class MMEnzme for the purposes of setting rates
@@ -152,8 +158,10 @@ class MMEnzyme1: public MMEnzymeBase
 			return 2;
 		}
 
-		RateTerm* copyWithVolScaling( double ratio ) const
+		RateTerm* copyWithVolScaling( 
+				double vol, double sub, double prd ) const
 		{
+			double ratio = vol * sub * NA;
 			return new MMEnzyme1( ratio * Km_, kcat_, enz_, sub_);
 		}
 
@@ -184,8 +192,10 @@ class MMEnzyme: public MMEnzymeBase
 			return molIndex.size();
 		}
 
-		RateTerm* copyWithVolScaling( double ratio ) const
+		RateTerm* copyWithVolScaling(
+				double vol, double sub, double prd ) const
 		{
+			double ratio = sub * vol * NA;
 			return new MMEnzyme( ratio * Km_, kcat_, enz_, substrates_ );
 		}
 	private:
@@ -232,7 +242,8 @@ class ExternReac: public RateTerm
 			return; // Need to figure out what to do here.
 		}
 
-		RateTerm* copyWithVolScaling( double ratio ) const
+		RateTerm* copyWithVolScaling(
+				double vol, double sub, double prd ) const
 		{
 			return new ExternReac();
 		}
@@ -291,7 +302,8 @@ class ZeroOrder: public RateTerm
 			return; // Nothing needs to be scaled.
 		}
 
-		RateTerm* copyWithVolScaling( double ratio ) const
+		RateTerm* copyWithVolScaling(
+				double vol, double sub, double prd ) const
 		{
 			return new ZeroOrder( k_ );
 		}
@@ -328,7 +340,8 @@ class Flux: public ZeroOrder
 			return; // Nothing needs to be scaled.
 		}
 
-		RateTerm* copyWithVolScaling( double ratio ) const
+		RateTerm* copyWithVolScaling(
+				double vol, double sub, double prd ) const
 		{
 			return new Flux( k_, y_ );
 		}
@@ -361,9 +374,10 @@ class FirstOrder: public ZeroOrder
 			return; // Nothing needs to be scaled.
 		}
 
-		RateTerm* copyWithVolScaling( double ratio ) const
+		RateTerm* copyWithVolScaling(
+				double vol, double sub, double prd ) const
 		{
-			return new FirstOrder( k_, y_ );
+			return new FirstOrder( k_ / sub, y_ );
 		}
 
 	private:
@@ -398,8 +412,10 @@ class SecondOrder: public ZeroOrder
 			k_ /= ratio;
 		}
 
-		RateTerm* copyWithVolScaling( double ratio ) const
+		RateTerm* copyWithVolScaling(
+				double vol, double sub, double prd ) const
 		{
+			double ratio = sub * vol * NA;
 			return new SecondOrder( k_ / ratio, y1_, y2_ );
 		}
 
@@ -442,8 +458,10 @@ class StochSecondOrderSingleSubstrate: public ZeroOrder
 				k_ /= ratio;
 		}
 
-		RateTerm* copyWithVolScaling( double ratio ) const
+		RateTerm* copyWithVolScaling(
+				double vol, double sub, double prd ) const
 		{
+			double ratio = sub * vol * NA;
 			return new StochSecondOrderSingleSubstrate( k_ / ratio, y_ );
 		}
 
@@ -482,12 +500,12 @@ class NOrder: public ZeroOrder
 			}
 		}
 
-		RateTerm* copyWithVolScaling( double ratio ) const
+		RateTerm* copyWithVolScaling(
+				double vol, double sub, double prd ) const
 		{
 			assert( v_.size() > 0 );
-			if ( v_.size() == 1 )
-				return new NOrder( k_, v_ );
-			return new NOrder( k_ * pow( ratio, (int)(v_.size() -1) ), v_ );
+			double ratio = sub * pow( NA * vol, (int)( v_.size() ) - 1 );
+			return new NOrder( k_ * ratio, v_ );
 		}
 
 	protected:
@@ -508,12 +526,12 @@ class StochNOrder: public NOrder
 
 		double operator() ( const double* S ) const;
 
-		RateTerm* copyWithVolScaling( double ratio ) const
+		RateTerm* copyWithVolScaling(
+				double vol, double sub, double prd ) const
 		{
 			assert( v_.size() > 0 );
-			if ( v_.size() == 1 )
-				return new StochNOrder( k_, v_ );
-			return new StochNOrder( k_ * pow( ratio, (int)(v_.size() -1) ), v_ );
+			double ratio = sub * pow( vol * NA, (int)( v_.size() ) -1);
+			return new StochNOrder( k_ / ratio, v_ );
 		}
 };
 
@@ -576,12 +594,13 @@ class BidirectionalReaction: public RateTerm
 			forward_->rescaleVolume( comptIndex, compartmentLookup, ratio );
 			backward_->rescaleVolume( comptIndex, compartmentLookup, ratio);
 		}
-		RateTerm* copyWithVolScaling( double ratio ) const
+		RateTerm* copyWithVolScaling(
+				double vol, double sub, double prd ) const
 		{
 			ZeroOrder* f = static_cast< ZeroOrder* >( 
-							forward_->copyWithVolScaling( ratio ) );
+							forward_->copyWithVolScaling( vol, sub, 1 ) );
 			ZeroOrder* b = static_cast< ZeroOrder* >( 
-							backward_->copyWithVolScaling( ratio ) );
+							backward_->copyWithVolScaling( vol, prd, 1 ) );
 			return new BidirectionalReaction( f, b );
 		}
 

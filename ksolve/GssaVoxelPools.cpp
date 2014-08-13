@@ -176,28 +176,37 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
 // Rate computation functions
 /////////////////////////////////////////////////////////////////////////
 
-void GssaVoxelPools::setRates( const vector< RateTerm* >* rates )
+void GssaVoxelPools::updateAllRateTerms( const vector< RateTerm* >& rates,
+			   unsigned int numCoreRates )
 {
 	for ( unsigned int i = 0; i < rates_.size(); ++i )
 		delete( rates_[i] );
-	rates_.resize( rates->size() );
+	rates_.resize( rates.size() );
 
-	double scaling = NA * getVolume();
-	for ( unsigned int i = 0; i < rates->size(); ++i ) {
-		rates_[i] = (*rates)[i]->copyWithVolScaling(  scaling );
-	}
+	for ( unsigned int i = 0; i < numCoreRates; ++i )
+		rates_[i] = rates[i]->copyWithVolScaling( getVolume(), 1, 1 );
+	for ( unsigned int i = numCoreRates; i < rates.size(); ++i )
+		rates_[i] = rates[i]->copyWithVolScaling( getVolume(), 
+						getXreacScaleSubstrates(i - numCoreRates),
+						getXreacScaleProducts(i - numCoreRates ) );
 }
 
-void GssaVoxelPools::updateRateTerms( const vector< RateTerm* >* rates,
-			   unsigned int index 	)
+void GssaVoxelPools::updateRateTerms( const vector< RateTerm* >& rates,
+			   unsigned int numCoreRates, unsigned int index 	)
 {
 	// During setup or expansion of the reac system, this might be called
 	// before the local rates_ term is assigned. If so, ignore.
  	if ( index >= rates_.size() )
 		return;
-	double scaling = NA * getVolume();
 	delete( rates_[index] );
-	rates_[index] = (*rates)[index]->copyWithVolScaling( scaling );
+	if ( index >= numCoreRates )
+		rates_[index] = rates[index]->copyWithVolScaling(
+				getVolume(), 
+				getXreacScaleSubstrates(index - numCoreRates),
+				getXreacScaleProducts(index - numCoreRates ) );
+	else
+		rates_[index] = rates[index]->copyWithVolScaling(  
+				getVolume(), 1.0, 1.0 );
 }
 /**
  * updateReacVelocities computes the velocity *v* of each reaction.
@@ -227,3 +236,16 @@ double GssaVoxelPools::getReacVelocity(
 	return rates_[r]->operator()( s );
 }
 
+void GssaVoxelPools::setStoich( const Stoich* stoichPtr )
+{
+	stoichPtr_ = stoichPtr;
+}
+
+// Handle volume updates. Inherited virtual func.
+void GssaVoxelPools::setVolumeAndDependencies( double vol )
+{
+	VoxelPoolsBase::setVolumeAndDependencies( vol );
+	stoichPtr_->setupCrossSolverReacVols();
+	updateAllRateTerms( stoichPtr_->getRateTerms(),
+		stoichPtr_->getNumCoreRates() );
+}

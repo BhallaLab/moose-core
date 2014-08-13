@@ -115,6 +115,12 @@ class Ksolve: public ZombiePoolInterface
 		void reinit( const Eref& e, ProcPtr p );
 		void initProc( const Eref& e, ProcPtr p );
 		void initReinit( const Eref& e, ProcPtr p );
+		/**
+		 * Handles request to change volumes of voxels in this Ksolve, and
+		 * all cascading effects of this. At this point it won't handle
+		 * change in size of voxel array.
+		 */
+		void updateVoxelVol( vector< double > vols );
 		//////////////////////////////////////////////////////////////////
 		// Utility for SrcFinfo
 		//////////////////////////////////////////////////////////////////
@@ -150,6 +156,12 @@ class Ksolve: public ZombiePoolInterface
 
 		void setupCrossSolverReacs( const map< Id, vector< Id > >& xr,
 				Id otherStoich );
+		void setupCrossSolverReacVols( 
+			const vector< vector< Id > >& subCompts, 
+			const vector< vector< Id > >& prdCompts );
+
+		void matchJunctionVols( vector< double >& vols, Id otherCompt ) 
+				const;
 	
 		/**
 		 * Rescale specified voxel rate term following rate constant change 
@@ -172,6 +184,12 @@ class Ksolve: public ZombiePoolInterface
 
 		unsigned int assignProxyPools( const map< Id, vector< Id > >& xr,
 					Id myKsolve, Id otherKsolve, Id otherComptId );
+
+		void buildCrossReacVolScaling( Id otherKsolve,
+				const vector< VoxelJunction >& vj );
+		//////////////////////////////////////////////////////////////////
+		// for debugging
+		void print() const;
 
 		//////////////////////////////////////////////////////////////////
 		static SrcFinfo2< Id, vector< double > >* xComptOut();
@@ -215,7 +233,10 @@ class Ksolve: public ZombiePoolInterface
 		/// Flag for when the entire solver is built.
 		bool isBuilt_;
 
-		/// All the data transfer information from current to other solvers.
+		/** 
+		 * All the data transfer information from current to other solvers.
+		 * xfer_[otherKsolveIndex]
+		 */
 		vector< XferInfo > xfer_;
 };
 
