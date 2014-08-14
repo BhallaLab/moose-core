@@ -15,9 +15,8 @@
 #include "../builtins/Arith.h"
 #include "Dinfo.h"
 #include <queue>
-#include "../biophysics/SpikeRingBuffer.h"
-#include "../biophysics/Synapse.h"
 #include "../biophysics/IntFire.h"
+#include "../synapse/Synapse.h"
 #include "../synapse/SynHandlerBase.h"
 #include "../synapse/SimpleSynHandler.h"
 #include "SparseMatrix.h"
