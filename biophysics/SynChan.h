@@ -10,7 +10,7 @@
 #ifndef _SynChan_h
 #define _SynChan_h
 
-class SynChan: public SynChanBase
+class SynChan: public ChanBase
 {
 	public:
 		SynChan();
@@ -80,7 +80,7 @@ class SynChan: public SynChanBase
 		double modulation_;
 		double X_;	
 		double Y_;	
-		/* priority_queue< Synapse > pendingEvents_; */
+		double dt_; /// Tracks the timestep assigned at reinit.
 };
 
 

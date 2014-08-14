@@ -10,10 +10,7 @@
 TARGET = _biophysics.o
 
 OBJ = \
-	SpikeRingBuffer.o	\
-	SynHandler.o	\
 	IntFire.o	\
-	Synapse.o	\
 	SpikeGen.o	\
 	CompartmentDataHolder.o	\
 	CompartmentBase.o	\
@@ -31,7 +28,6 @@ OBJ = \
 	Nernst.o	\
 	Neuron.o	\
 	ReadCell.o	\
-	SynChanBase.o	\
 	SynChan.o	\
 	testBiophysics.o	\
 	IzhikevichNrn.o	\
@@ -63,9 +59,7 @@ HEADERS = \
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
-SpikeRingBuffer.o:	SpikeRingBuffer.h
-SynHandler.o:	SpikeRingBuffer.h SynHandler.h Synapse.h 
-IntFire.o:	IntFire.h SpikeRingBuffer.h SynHandler.h Synapse.h 
+IntFire.o:	IntFire.h
 SpikeGen.o: SpikeGen.h
 CompartmentDataHolder.o: CompartmentDataHolder.h
 CompartmentBase.o: CompartmentBase.h CompartmentDataHolder.h
@@ -87,15 +81,6 @@ ReadCell.o: CompartmentBase.h Compartment.h SymCompartment.h ReadCell.h ../shell
 IzhikevichNrn.o: IzhikevichNrn.h
 DifShell.o: DifShell.h
 testBiophysics.o: IntFire.h CompartmentBase.h Compartment.h HHChannel.h HHGate.h 
-#LeakyIaF.o: LeakyIaF.h
-#Synapse.o:	SynBase.h Synapse.h
-#GapJunction.o: GapJunction.h
-#NMDAChan.o: NMDAChan.h SynBase.h ChanBase.h Synapse.h SynChan.h
-#Nernst.o:	Nernst.h
-#MgBlock.o:	MgBlock.h
-#GHK.o:	GHK.h
-#HHGate2D.o:	../builtins/Interpol2D.h HHGate2D.h
-#HHChannel2D.o: ChanBase.h HHChannel2D.h HHGate2D.h
 VectorTable.o : VectorTable.h
 MarkovGslSolver.o : MarkovGslSolver.h 
 MatrixOps.o : MatrixOps.h
