@@ -11,7 +11,7 @@
 #define _INT_FIRE_H
 
 
-class IntFire: public SynHandler
+class IntFire
 {
 	friend void testStandaloneIntFire();
 	friend void testSynapse();
@@ -37,12 +37,11 @@ class IntFire: public SynHandler
 		double getThresh() const;
 		void setRefractoryPeriod( double v );
 		double getRefractoryPeriod() const;
-		void setBufferTime( double v );
-		double getBufferTime() const;
 
 		////////////////////////////////////////////////////////////////
 		// Dest Func
 		////////////////////////////////////////////////////////////////
+		void activation( double v );
 		void process( const Eref& e, ProcPtr p );
 		void reinit( const Eref&  e, ProcPtr p );
 
@@ -53,7 +52,7 @@ class IntFire: public SynHandler
 		double tau_; // Time course of membrane settling.
 		double refractoryPeriod_; // Minimum time between successive spikes
 		double lastSpike_; // Time of last action potential.
-		double bufferTime_; // size of ring buffer.
+		double activation_; // Total synaptic activation
 };
 
 #endif // _INT_FIRE_H

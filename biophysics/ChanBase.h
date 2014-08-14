@@ -27,6 +27,7 @@ class ChanBase
 		/////////////////////////////////////////////////////////////
 
 		void setGbar( double Gbar );
+		virtual void innerSetGbar( double Gbar );
 		double getGbar() const;
 		void setEk( double Ek );
 		double getEk() const;

@@ -64,9 +64,11 @@ void testTreeTraversal()
 	assert( f3ba != Id() );
 	Id f4 = shell->doCreate( "IntFire", ObjId(f3ba, i++), "cell", 10 );
 	assert( f4 != Id() );
-	Id syns( f4.value() + 1 );
+	Id f5 = shell->doCreate( "SimpleSynHandler", ObjId(f4, i++), "syns", 10 );
+	assert( f5 != Id() );
+	Id syns( f5.value() + 1 );
 	for ( unsigned int i = 0; i < 10; ++i ) {
-		Field< unsigned int >::set( ObjId( f4, i ), "numSynapse", 5 );
+		Field< unsigned int >::set( ObjId( f5, i ), "numSynapse", 5 );
 	}
 
 	////////////////////////////////////////////////////////////////
@@ -133,12 +135,12 @@ void testTreeTraversal()
 	// Checking Id::path and ObjId::path
 	////////////////////////////////////////////////////////////////
 	string path = syns.path();
-	assert( path == "/f1[1]/f2b[5]/f3ba[6]/cell[0]/synapse" );
-	ObjId oi( syns, 7, 3 );
+	assert( path == "/f1[1]/f2b[5]/f3ba[6]/cell[7]/syns[0]/synapse" );
+	ObjId oi( syns, 8, 3 );
 	path = oi.path();
-	assert( path == "/f1[1]/f2b[5]/f3ba[6]/cell[7]/synapse[3]" );
+	assert( path == "/f1[1]/f2b[5]/f3ba[6]/cell[7]/syns[8]/synapse[3]" );
 	path = oi.id.path();
-	assert( path == "/f1[1]/f2b[5]/f3ba[6]/cell[0]/synapse" );
+	assert( path == "/f1[1]/f2b[5]/f3ba[6]/cell[7]/syns[0]/synapse" );
 
 	ObjId oi2( f4, 4 );
 	path = oi2.path();
@@ -160,9 +162,9 @@ void testTreeTraversal()
 	path = Field< string >::get( f4, "path" );
 	assert( path == "/f1[1]/f2b[5]/f3ba[6]/cell[0]" );
 	path = Field< string >::get( syns, "path" );
-	assert( path == "/f1[1]/f2b[5]/f3ba[6]/cell[0]/synapse[0]" );
-	path = Field< string >::get( ObjId( syns, 7, 3 ), "path" );
-	assert( path == "/f1[1]/f2b[5]/f3ba[6]/cell[7]/synapse[3]" );
+	assert( path == "/f1[1]/f2b[5]/f3ba[6]/cell[7]/syns[0]/synapse[0]" );
+	path = Field< string >::get( ObjId( syns, 8, 3 ), "path" );
+	assert( path == "/f1[1]/f2b[5]/f3ba[6]/cell[7]/syns[8]/synapse[3]" );
 
 	path = Field< string >::get( ObjId( f2a, 7 ), "path" );
 	assert( path == "/f1[0]/f2a[7]" );
@@ -441,7 +443,7 @@ void testCopyFieldElement()
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 	unsigned int size = 10;
 	unsigned int size2 = 17;
-	Id origId = shell->doCreate( "IntFire", Id(), "f1", size, MooseGlobal );
+	Id origId = shell->doCreate( "SimpleSynHandler", Id(), "f1", size, MooseGlobal );
 	Id origSynId( origId.value() + 1 );
 	Id origChild = shell->doCreate( "Neutral", origId, "f2", size2, MooseGlobal );
 	
@@ -559,7 +561,7 @@ void testObjIdToAndFromPath()
 	unsigned int index4 = 0;
 	unsigned int index5 = 5;
 
-	Id level1 = shell->doCreate( "IntFire", Id(), "f1", s1 );
+	Id level1 = shell->doCreate( "SimpleSynHandler", Id(), "f1", s1 );
 	Id origSynId( level1.value() + 1 );
 
 	// origSynId.element()->resizeField( 7, 8 );
@@ -1454,11 +1456,12 @@ void testSyncSynapseSize()
 {
 	Eref sheller = Id().eref();
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
-	const Finfo* f = Cinfo::find( "IntFire" )->findFinfo( "getNumSynapses" );
+	const Cinfo* c = Cinfo::find( "SimpleSynHandler" );
+	const Finfo* f = c->findFinfo( "getNumSynapses" );
 	const DestFinfo* df = dynamic_cast< const DestFinfo* >( f );
 	assert( df );
 	unsigned int size = 100;
-	Id neuronId = shell->doCreate( "IntFire", Id(), "neurons", size );
+	Id neuronId = shell->doCreate( "SimpleSynHandler", Id(), "handler", size );
 	assert( neuronId != Id() );
 	Id synId( neuronId.value() + 1 );
 	Element* syn = synId.element();
