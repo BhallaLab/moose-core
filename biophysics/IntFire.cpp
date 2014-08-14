@@ -9,9 +9,6 @@
 
 #include <queue>
 #include "header.h"
-#include "SpikeRingBuffer.h"
-#include "Synapse.h"
-#include "SynHandler.h"
 #include "IntFire.h"
 
 static SrcFinfo1< double > *spikeOut() {
