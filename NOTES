@@ -4638,3 +4638,8 @@ Not to mention the queueing synapses. Need to work out how to profile it.
 Also fixed a bug reported by Dilawar about a function called by the benchmarks
 that is hidden by the debug flag.
 
+Checkin 5743.
+
+Fixed a bug in Gssa calculations, due to pickReac very rarely going out of
+range of existing reactions.
+

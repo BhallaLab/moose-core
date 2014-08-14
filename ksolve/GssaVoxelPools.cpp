@@ -120,6 +120,7 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
 					i = v_.begin(); i != v_.end(); ++i )
 				atot_ += *i;
 			atot_ *= SAFETY_FACTOR;
+			rindex = v_.size() - 1;
 		}
 
 		g->transposeN.fireReac( rindex, Svec() );
