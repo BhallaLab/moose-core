@@ -157,8 +157,14 @@ ChanBase::~ChanBase()
 ///////////////////////////////////////////////////
 // Field function definitions
 ///////////////////////////////////////////////////
-
+//
 void ChanBase::setGbar( double Gbar )
+{
+	// Call virtual functions of derived classes for this operation.
+	innerSetGbar( Gbar );
+}
+
+void ChanBase::innerSetGbar( double Gbar )
 {
 	Gbar_ = Gbar;
 }

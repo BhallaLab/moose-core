@@ -4583,4 +4583,58 @@ So were the unit test options - the thing was running unit tests every time.
 Fixed. Ran the intFire with the ring buffer synapse, takes 24.5 seconds
 to do 200K steps.
 
+
+Designing synapse handling. Many problems with previous.
+- Synapse must be a virtual base class, since we have to deal with a range of
+	synapses with different learning rules.
+- SynHandler<T> manages a vector< T > of some class derived from Synapse. It
+	also has a priority_queue< of pair< synIndex, arrivalTime > >
+	- It deals with addSpike( ptr, time ) which places the 
+		index of the syn with new spike, and the time of
+		generation + delay, into the priority queue.
+	- It has a pure virtual function Synapse* popBuffe
+
+- I need to be able to independently specify the synapse type and the
+	parent compartment. Something like the SynChans do.
+ 	This will let me put arbitrary synapses on an intFire.
+
+- I need to specify the interface for checking/updating the Synapse.
+	- Pass in presyn Vm
+	- pass in time since last AP??
+	- Pop it if ready, go back for more.
+
+
 =============================================================================
+14 Aug
+Orthogonal classes:
+	1. Synapses: individual weight, delay, learning variables.
+	2. SynHandlers: Manage synapses, manage queueing of input events,
+		collective syn params for learning,
+	3. Electrophys: Channels, IntFire neurons
+
+Points of possible orthogonality:
+	- Synapses vs SynHandlers: different kinds of queuing for the same 
+		synapses. This is probably a minor and specialized case.
+	- SynHandlers vs Electrophys: map many kinds of synaptic properties, 
+		including different learning rules, to different SynChans with
+		one or two exponentials, or intFires, or izzy neurons.
+OK, so we will only have 2 orthogonal classes: the SynHandlers and the
+electrophys classes.
+API for the classes: electrophys classes need to know an Activation term
+as a sporadic event, from the SynHandler. This is typically an analog impulse 
+function for a single synaptic event, but could be a continuous variable if
+the synapse experiences continuous input, like a dendro-dendritic synapse.
+SynHandlers may optionally need to know any number of terms from the 
+electrophys side, ranging from events for action potential timings to 
+continuous Ca or Vm.
+This unfortunately requires that the SynHandler receive a process message.
+
+Implemented it. There are some modest differences with absolute values from
+the IntFire unit test. Other than those, the code seems to run fine but
+about 50% slower according to the benchmarks. This is not surprising as there
+is another whole set of objects process'ed and another layer of messages.
+Not to mention the queueing synapses. Need to work out how to profile it.
+
+Also fixed a bug reported by Dilawar about a function called by the benchmarks
+that is hidden by the debug flag.
+
