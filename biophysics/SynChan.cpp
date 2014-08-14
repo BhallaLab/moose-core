@@ -7,14 +7,8 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include <queue>
 #include "header.h"
-// #include "SynInfo.h"
-#include "SpikeRingBuffer.h"
-#include "Synapse.h"
-#include "SynHandler.h"
 #include "ChanBase.h"
-#include "SynChanBase.h"
 #include "SynChan.h"
 
 const double& SynE() {
@@ -89,20 +83,23 @@ const Cinfo* SynChan::initCinfo()
 	static string doc[] =
 	{
 		"Name", "SynChan",
-		"Author", "Upinder S. Bhalla, 2007, NCBS",
-		"Description", "SynChan: Synaptic channel incorporating weight and delay. Does not "
-				"handle activity-dependent modification, see HebbSynChan for that. "
-				"Very similiar to the old synchan from GENESIS.", 
+		"Author", "Upinder S. Bhalla, 2007, 2014, NCBS",
+		"Description", "SynChan: Synaptic channel incorporating "
+			" weight and delay. Does not handle "
+			"activity-dependent modification, see HebbSynChan for that. "
+			"Very similiar to the old synchan from GENESIS.", 
 	};
 
         static Dinfo< SynChan > dinfo;
 
 	static Cinfo SynChanCinfo(
 		"SynChan",
-		SynChanBase::initCinfo(),
+		ChanBase::initCinfo(),
 		SynChanFinfos,
 		sizeof( SynChanFinfos )/sizeof(Finfo *),
-                &dinfo
+                &dinfo,
+		doc, 
+		sizeof( doc )/sizeof( string )
 	);
 
 	return &SynChanCinfo;
@@ -122,7 +119,8 @@ SynChan::SynChan()
         activation_(0.0),
         modulation_(1.0),
         X_(0.0),
-        Y_(0.0)    
+        Y_(0.0),
+		dt_( 25.0e-6 )
 { ; }
 
 SynChan::~SynChan()
@@ -134,7 +132,7 @@ SynChan::~SynChan()
 //
 void SynChan::innerSetGbar( double Gbar )
 {
-	SynChanBase::innerSetGbar( Gbar );
+	ChanBase::innerSetGbar( Gbar );
 	normalizeGbar();
 }
 
@@ -144,9 +142,8 @@ void SynChan::setTau1( double tau1 )
     // Aditya added
     // required if changing tau1 during a simulation
     // (eg. Marder pyloric networks).
-    double dt = 25e-6;
-	xconst1_ = tau1_ * ( 1.0 - exp( -dt / tau1_ ) );
-	xconst2_ = exp( -dt / tau1_ );
+	xconst1_ = tau1_ * ( 1.0 - exp( -dt_ / tau1_ ) );
+	xconst2_ = exp( -dt_ / tau1_ );
     normalizeGbar();
 }
 
@@ -161,13 +158,12 @@ void SynChan::setTau2( double tau2 )
     // Aditya added
     // required if changing tau1 during a simulation
     // (eg. Marder pyloric networks).
-    double dt = 25e-6;
     if ( doubleEq( tau2_, 0.0 ) ) {
             yconst1_ = 1.0;
             yconst2_ = 0.0;
     } else {
-            yconst1_ = tau2_ * ( 1.0 - exp( -dt / tau2_ ) );
-            yconst2_ = exp( -dt / tau2_ );
+            yconst1_ = tau2_ * ( 1.0 - exp( -dt_ / tau2_ ) );
+            yconst2_ = exp( -dt_ / tau2_ );
     }
     normalizeGbar();
 
@@ -192,21 +188,24 @@ void SynChan::normalizeGbar()
 {
         if ( doubleEq( tau2_, 0.0 ) ) {
                 // norm_ = 1.0;
-                norm_ = SynChanBase::getGbar();
+                norm_ = ChanBase::getGbar();
         } else {
                 if ( doubleEq( tau1_, tau2_ ) ) {
-                    norm_ = SynChanBase::getGbar() * SynE() / tau1_;
+                    norm_ = ChanBase::getGbar() * SynE() / tau1_;
                 } else {
                     double tpeak = tau1_ * tau2_ * log( tau1_ / tau2_ ) / 
                             ( tau1_ - tau2_ );
-                    norm_ = SynChanBase::getGbar() * ( tau1_ - tau2_ ) / 
+                    norm_ = ChanBase::getGbar() * ( tau1_ - tau2_ ) / 
                             ( tau1_ * tau2_ * ( 
                             exp( -tpeak / tau1_ ) - exp( -tpeak / tau2_ )
                                                 ));
                 }
         }
+		/*
+		 * Can't handle at this time. Simple but tedious to implement.
 	if ( normalizeWeights_ && getNumSynapses() > 0 )
 		norm_ /= static_cast< double >( getNumSynapses() );
+		*/
 }
 
 ///////////////////////////////////////////////////
@@ -215,11 +214,6 @@ void SynChan::normalizeGbar()
 
 void SynChan::process( const Eref& e, ProcPtr info )
 {
-	// while ( !pendingEvents_.empty() &&
-		// pendingEvents_.top().getDelay() <= info->currTime ) {
-        activation_ += popBuffer(info->currTime) / info->dt;
-	// 	pendingEvents_.pop();
-	// }
 	X_ = modulation_ * activation_ * xconst1_ + X_ * xconst2_;
 	Y_ = X_ * yconst1_ + Y_ * yconst2_;
 	double Gk = Y_ * norm_;
@@ -227,7 +221,7 @@ void SynChan::process( const Eref& e, ProcPtr info )
 	updateIk();
 	activation_ = 0.0;
 	modulation_ = 1.0;
-	SynChanBase::process( e, info ); // Sends out messages for channel.
+	ChanBase::process( e, info ); // Sends out messages for channel.
 }
 
 /*
@@ -235,53 +229,27 @@ void SynChan::process( const Eref& e, ProcPtr info )
  */
 void SynChan::reinit( const Eref& e, ProcPtr info )
 {
-	double dt = info->dt;
+	dt_ = info->dt;
 	activation_ = 0.0;
 	modulation_ = 1.0;
-	SynChanBase::setGk( 0.0 );
-	SynChanBase::setIk( 0.0 );
+	ChanBase::setGk( 0.0 );
+	ChanBase::setIk( 0.0 );
 	X_ = 0.0;
 	Y_ = 0.0;
     // These below statements are also called when setting tau1 and tau2
     // (required when changing tau1 and tau2 during a simulation).
-	xconst1_ = tau1_ * ( 1.0 - exp( -dt / tau1_ ) );
-	xconst2_ = exp( -dt / tau1_ );
+	xconst1_ = tau1_ * ( 1.0 - exp( -dt_ / tau1_ ) );
+	xconst2_ = exp( -dt_ / tau1_ );
 
         if ( doubleEq( tau2_, 0.0 ) ) {
                 yconst1_ = 1.0;
                 yconst2_ = 0.0;
         } else {
-                yconst1_ = tau2_ * ( 1.0 - exp( -dt / tau2_ ) );
-                yconst2_ = exp( -dt / tau2_ );
+                yconst1_ = tau2_ * ( 1.0 - exp( -dt_ / tau2_ ) );
+                yconst2_ = exp( -dt_ / tau2_ );
         }
 	normalizeGbar();
-	/*
-        if ( doubleEq( tau2_, 0.0 ) ) {
-                yconst1_ = 1.0;
-                yconst2_ = 0.0;
-                norm_ = 1.0;
-        } else {
-                yconst1_ = tau2_ * ( 1.0 - exp( -dt / tau2_ ) );
-                yconst2_ = exp( -dt / tau2_ );
-                if ( tau1_ == tau2_ ) {
-                    norm_ = SynChanBase::getGbar() * SynE() / tau1_;
-                } else {
-                    double tpeak = tau1_ * tau2_ * log( tau1_ / tau2_ ) / 
-                            ( tau1_ - tau2_ );
-                    norm_ = SynChanBase::getGbar() * ( tau1_ - tau2_ ) / 
-                            ( tau1_ * tau2_ * ( 
-                            exp( -tpeak / tau1_ ) - exp( -tpeak / tau2_ )
-                                                ));
-                }
-        }
-        
-	// updateNumSynapse( e );
-	if ( normalizeWeights_ && getNumSynapses() > 0 )
-		norm_ /= static_cast< double >( getNumSynapses() );
-	*/
-	// while ( !pendingEvents_.empty() )
-	// 	pendingEvents_.pop();
-        SynChanBase::reinit(e, info);
+    ChanBase::reinit(e, info);
 }
 
 void SynChan::activation( double val )
@@ -293,30 +261,3 @@ void SynChan::modulator( double val )
 {
 	modulation_ *= val;
 }
-
-///////////////////////////////////////////////////
-// Utility function
-///////////////////////////////////////////////////
-/*
-* Turns out to be rather hard.
-unsigned int SynChan::countNumSynapses( const Eref& er )
-{
-	static const DestFinfo* spikeFinfo = 
-		dynamic_cast< const DestFinfo* >(
-			Synapse::initCinfo()->findFinfo("addSpike") );
-	assert( spikeFinfo != 0 );
-	assert( reinterpret_cast< char* >(this) == er.data() );
-	Id synId( er.id().value() + 1 );
-}
-*/
-
-/*
- * Not needed anymore as the synapses get the spike directly from SpikeGens.
-void SynChan::innerAddSpike( unsigned int synIndex, const double time )
-{
-	assert( synIndex < getNumSynapses() );
-	Synapse s( *getSynapse( synIndex ));
-        s.setDelay(time);
-	// pendingEvents_.push( s );
-}
-*/

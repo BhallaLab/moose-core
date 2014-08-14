@@ -7,7 +7,6 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifdef DO_UNIT_TESTS
 
 #include "header.h"
 #include "../shell/Shell.h"
@@ -48,9 +47,11 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
 	Eref sheller( Id().eref() );
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 
-	Id i2 = shell->doCreate( "IntFire", Id(), "network", size );
-	assert( i2.element()->getName() == "network" );
-	Field< double >::setRepeat( i2, "bufferTime", delayMax *2 );
+	Id fire = shell->doCreate( "IntFire", Id(), "network", size );
+	assert( fire.element()->getName() == "network" );
+
+	Id i2 = shell->doCreate( "SimpleSynHandler", fire, "syns", size );
+	assert( i2.element()->getName() == "syns" );
 
 	Id synId( i2.value() + 1 );
 	Element* syn = synId.element();
@@ -59,11 +60,15 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
 	DataId di( 1 ); // DataId( data, field )
 	Eref syne( syn, di );
 
-	ObjId mid = shell->doAddMsg( "Sparse", i2, "spikeOut",
+	ObjId mid = shell->doAddMsg( "Sparse", fire, "spikeOut",
 		ObjId( synId, 0 ), "addSpike" );
 	
 	SetGet2< double, long >::set( mid, "setRandomConnectivity", 
 		connectionProbability, 5489UL );
+
+	mid = shell->doAddMsg( "OneToOne", i2, "activationOut",
+		fire, "activation" );
+	assert( !mid.bad() );
 
 	unsigned int nd = syn->totNumLocalField();
 	if ( Shell::numNodes() == 1 )
@@ -81,7 +86,7 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
 	//////////////////////////////////////////////////////////////////
 	vector< ObjId > tgts;
 	vector< string > funcs;
-	ObjId oi( i2, 123 );
+	ObjId oi( fire, 123 );
 	tgts = LookupField< string, vector< ObjId > >::
 			get( oi, "msgDests", "spikeOut" );
 	funcs = LookupField< string, vector< string > >::
@@ -130,11 +135,11 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
 	vector< double > temp;
 	temp.clear();
 	temp.resize( size, thresh );
-	bool ret = Field< double >::setVec( i2, "thresh", temp );
+	bool ret = Field< double >::setVec( fire, "thresh", temp );
 	assert( ret );
 	temp.clear();
 	temp.resize( size, refractoryPeriod );
-	ret = Field< double >::setVec( i2, "refractoryPeriod", temp );
+	ret = Field< double >::setVec( fire, "refractoryPeriod", temp );
 	assert( ret );
 
 	// cout << Shell::myNode() << ": fieldSize = " << fieldSize << endl;
@@ -170,28 +175,30 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
 		}
 	}
 
+	shell->doUseClock("/network/syns", "process", 0 );
 	shell->doUseClock("/network", "process", 0 );
 	shell->doSetClock( 0, timestep );
 	shell->doSetClock( 9, timestep );
 	shell->doReinit();
-	ret = Field< double >::setVec( i2, "Vm", origVm );
+	ret = Field< double >::setVec( fire, "Vm", origVm );
 	assert( ret );
 
-	double retVm100 = Field< double >::get( ObjId( i2, 100 ), "Vm" );
-	double retVm900 = Field< double >::get( ObjId( i2, 900 ), "Vm" );
+	double retVm100 = Field< double >::get( ObjId( fire, 100 ), "Vm" );
+	double retVm900 = Field< double >::get( ObjId( fire, 900 ), "Vm" );
 	assert( fabs( retVm100 - origVm100 ) < 1e-6 );
 	assert( fabs( retVm900 - origVm900 ) < 1e-6 );
 
 	shell->doStart( static_cast< double >( timestep * runsteps) + 0.0 );
 	if ( runsteps == 5 ) { // default for unit tests, others are benchmarks
-		retVm100 = Field< double >::get( ObjId( i2, 100 ), "Vm" );
-		double retVm101 = Field< double >::get( ObjId( i2, 101 ), "Vm" );
-		double retVm102 = Field< double >::get( ObjId( i2, 102 ), "Vm" );
-		double retVm99 = Field< double >::get( ObjId( i2, 99 ), "Vm" );
-		retVm900 = Field< double >::get( ObjId( i2, 900 ), "Vm" );
-		double retVm901 = Field< double >::get( ObjId( i2, 901 ), "Vm" );
-		double retVm902 = Field< double >::get( ObjId( i2, 902 ), "Vm" );
+		retVm100 = Field< double >::get( ObjId( fire, 100 ), "Vm" );
+		double retVm101 = Field< double >::get( ObjId( fire, 101 ), "Vm" );
+		double retVm102 = Field< double >::get( ObjId( fire, 102 ), "Vm" );
+		double retVm99 = Field< double >::get( ObjId( fire, 99 ), "Vm" );
+		retVm900 = Field< double >::get( ObjId( fire, 900 ), "Vm" );
+		double retVm901 = Field< double >::get( ObjId( fire, 901 ), "Vm" );
+		double retVm902 = Field< double >::get( ObjId( fire, 902 ), "Vm" );
 
+		/*
 		assert( doubleEq( retVm100, 0.00734036 ) );
 		assert( doubleEq( retVm101, 0.246818 ) );
 		assert( doubleEq( retVm102, 0.200087 ) );
@@ -199,6 +206,14 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
 		assert( doubleEq( retVm900, 0.1150573482 ) );
 		assert( doubleEq( retVm901, 0.289321534 ) );
 		assert( doubleEq( retVm902, 0.01011172486 ) );
+		*/
+		assert( doubleEq( retVm100, 0.008593194687366486 ) );
+		assert( doubleEq( retVm101, 0.24931678857743744 ) );
+		assert( doubleEq( retVm102, 0.19668269662484533 ) );
+		assert( doubleEq( retVm99, 0.00701607616202429 ) );
+		assert( doubleEq( retVm900, 0.12097053045094018 ) );
+		assert( doubleEq( retVm901, 0.2902593120492995 ) );
+		assert( doubleEq( retVm902, 0.00237157280699805 ) );
 	}
 	/*
 	cout << "testIntFireNetwork: Vm100 = " << retVm100 << ", " <<
@@ -209,8 +224,10 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
 			*/
 
 	cout << "." << flush;
-	shell->doDelete( i2 );
+	shell->doDelete( fire );
 }
+
+#ifdef DO_UNIT_TESTS
 
 static const double EREST = -0.07;
 
