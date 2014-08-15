@@ -102,25 +102,6 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
 	for ( unsigned int i = 0; i < funcs.size(); ++i )
 		assert( funcs[i] == "addSpike" );
 
-	/*
-	 * The LookupField doesn't yet work in parallel.
-	oi = ObjId( i2, 900 );
-	tgts = LookupField< string, vector< ObjId > >::
-			get( oi, "msgDests", "spikeOut" );
-	funcs = LookupField< string, vector< string > >::
-			get( oi, "msgDestFunctions", "spikeOut" );
-	assert( tgts.size() == funcs.size() );
-	assert( tgts.size() == 97  );
-	assert( tgts[0] == ObjId( synId, 18, 91 ) );
-	assert( tgts[1] == ObjId( synId, 26, 95 ) );
-	assert( tgts[2] == ObjId( synId, 29, 91 ) );
-	assert( tgts[90] == ObjId( synId, 927, 88 ) );
-	assert( tgts[91] == ObjId( synId, 928, 77 ) );
-	assert( tgts[92] == ObjId( synId, 933, 77 ) );
-	for ( unsigned int i = 0; i < funcs.size(); ++i )
-		assert( funcs[i] == "addSpike" );
-		*/
-
 	//////////////////////////////////////////////////////////////////
 	// Here we have an interesting problem. The mtRand might be called
 	// by multiple threads if the above Set call is not complete.
@@ -175,9 +156,13 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
 		}
 	}
 
+	// We have to have the SynHandlers called before the network of
+	// IntFires since the 'activation' message must be delivered within
+	// the same timestep.
 	shell->doUseClock("/network/syns", "process", 0 );
-	shell->doUseClock("/network", "process", 0 );
+	shell->doUseClock("/network", "process", 1 );
 	shell->doSetClock( 0, timestep );
+	shell->doSetClock( 1, timestep );
 	shell->doSetClock( 9, timestep );
 	shell->doReinit();
 	ret = Field< double >::setVec( fire, "Vm", origVm );
@@ -206,7 +191,6 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
 		assert( doubleEq( retVm900, 0.1150573482 ) );
 		assert( doubleEq( retVm901, 0.289321534 ) );
 		assert( doubleEq( retVm902, 0.01011172486 ) );
-		*/
 		assert( doubleEq( retVm100, 0.008593194687366486 ) );
 		assert( doubleEq( retVm101, 0.24931678857743744 ) );
 		assert( doubleEq( retVm102, 0.19668269662484533 ) );
@@ -214,6 +198,15 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
 		assert( doubleEq( retVm900, 0.12097053045094018 ) );
 		assert( doubleEq( retVm901, 0.2902593120492995 ) );
 		assert( doubleEq( retVm902, 0.00237157280699805 ) );
+		*/
+		assert( doubleEq( retVm100, 0.015766608829826119 ) );
+		assert( doubleEq( retVm101, 0.24405557875013356 ) );
+		assert( doubleEq( retVm102, 0.20878261213859917 ) );
+		assert( doubleEq( retVm99, 0.0081746848675747306 ) );
+		assert( doubleEq( retVm900, 0.12525297735741736 ) );
+		assert( doubleEq( retVm901, 0.28303358631241327 ) );
+		assert( doubleEq( retVm902, 0.0096374021108587178 ) );
+
 	}
 	/*
 	cout << "testIntFireNetwork: Vm100 = " << retVm100 << ", " <<
@@ -1341,9 +1334,18 @@ void testSynChan()
 
 	shell->doSetClock( 0, 1e-4 );
 	shell->doSetClock( 1, 1e-4 );
+	shell->doSetClock( 2, 1e-4 );
 	// shell->doUseClock( "/n/##", "process", 0 );
-	shell->doUseClock( "/n/synChan/syns,/n/sg1,/n/sg2", "process", 0 );
-	shell->doUseClock( "/n/synChan", "process", 1 );
+	// shell->doUseClock( "/n/synChan/syns,/n/sg1,/n/sg2", "process", 0 );
+	//It turns out that the order of setting of the spikes (sg1, sg2)
+	//does not affect the outcome. The one thing that is critical is that
+	//the 'process' call for the 'syns' should be before that of the 
+	//synChan. This is because the 'activation' message from the syns to
+	//the synChan should proceed within a given timestep otherwise the
+	//apparent arrival time of the event is delayed.
+	shell->doUseClock( "/n/sg1,/n/sg2", "process", 0 );
+	shell->doUseClock( "/n/synChan/syns", "process", 1 );
+	shell->doUseClock( "/n/synChan", "process", 2 );
 	// shell->doStart( 0.001 );
 	shell->doReinit();
 	shell->doReinit();
@@ -1505,6 +1507,7 @@ void testBiophysics()
 // This is applicable to tests that use the messaging and scheduling.
 void testBiophysicsProcess()
 {
+	testSynChan();
 	testIntFireNetwork();
 	testCompartmentProcess();
 	testMarkovGslSolver();
@@ -1512,7 +1515,6 @@ void testBiophysicsProcess()
 #if 0
 	testHHChannel();
 #endif
-	testSynChan();
 }
 
 #endif

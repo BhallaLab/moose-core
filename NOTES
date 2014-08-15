@@ -4652,3 +4652,15 @@ firing by having the inputLayer of spikeGens keep ticking away.
 Fixed another compile oversight.
 Still stuck with IntFire snippet, but I've exhumed an old unit test for
 SynChans and that has cleaned up a bit of code.
+
+Spent a long time working on the snippet trying to get it to behave like the
+MOOSE unit test. Finally realized that I was running the snippet five times 
+longer than the unit test and the activity had died down.
+
+I can't expect identical activity because MOOSE uses a different random
+number than Numpy, and I'm using Numpy to set the weights etc.
+
+It would be nice for this and other situations to have an object to do 
+simple spiking stats. Counting/averaging/ISI/rate/fano factor and so on.
+
+=============================================================================
