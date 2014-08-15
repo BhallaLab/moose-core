@@ -22,14 +22,10 @@ def make_network():
 	t0 = time.time()
 
 	network = moose.IntFire( 'network', size );
-	network.vec.bufferTime = [delayMax * 2] * size
+	syns = moose.SimpleSynHandler( '/network/syns', size );
 	moose.le( '/network' )
-	network.vec.numSynapses = [1] * size
-	# Interesting. This fails because we haven't yet allocated
-	# the synapses. I guess it is fair to avoid instances of objects that
-	# don't have allocations.
-	#synapse = moose.element( '/network/synapse' )
-	sv = moose.vec( '/network/synapse' )
+	syns.vec.numSynapses = [1] * size
+	sv = moose.vec( '/network/syns/synapse' )
 	print 'before connect t = ', time.time() - t0
 	mid = moose.connect( network, 'spikeOut', sv, 'addSpike', 'Sparse')
 	print 'after connect t = ', time.time() - t0
@@ -40,7 +36,7 @@ def make_network():
 	network.vec.Vm = [(Vmax*random.random()) for r in range(size)]
 	network.vec.thresh = thresh
 	network.vec.refractoryPeriod = refractoryPeriod
-	numSynVec = network.vec.numSynapses
+	numSynVec = syns.vec.numSynapses
 	print 'Middle of setup, t = ', time.time() - t0
 	numTotSym = sum( numSynVec )
 	for item in network.vec:

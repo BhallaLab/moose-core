@@ -4643,3 +4643,12 @@ Checkin 5743.
 Fixed a bug in Gssa calculations, due to pickReac very rarely going out of
 range of existing reactions.
 
+Fixed dangling files which were problems for other people to compile.
+
+Working on IntFire snippet. Somewhat stuck. Trying to get it to keep
+firing by having the inputLayer of spikeGens keep ticking away.
+=============================================================================
+15 Aug
+Fixed another compile oversight.
+Still stuck with IntFire snippet, but I've exhumed an old unit test for
+SynChans and that has cleaned up a bit of code.
