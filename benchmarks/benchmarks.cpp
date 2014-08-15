@@ -12,6 +12,7 @@ using namespace std;
 
 void runKineticsBenchmark1( const string& method );
 void testIntFireNetwork( unsigned int runsteps );
+
 void mooseBenchmarks( unsigned int option )
 {
 	switch ( option ) {

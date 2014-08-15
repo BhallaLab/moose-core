@@ -1,9 +1,9 @@
-include_directories(../basecode)
+include_directories(../basecode ../synapse)
 add_library(biophysics 
 	SpikeRingBuffer.cpp	
-	SynHandler.cpp	
+        RingSynHandler.cpp	
 	IntFire.cpp	
-	Synapse.cpp	
+        RingSynapse.cpp
 	SpikeGen.cpp	
 	CompartmentDataHolder.cpp	
 	CompartmentBase.cpp	
@@ -19,7 +19,7 @@ add_library(biophysics
 	MgBlock.cpp	
 	Neuron.cpp	
 	ReadCell.cpp	
-	SynChanBase.cpp	
+	#SynChanBase.cpp	
 	SynChan.cpp	
 	testBiophysics.cpp	
 	IzhikevichNrn.cpp	
@@ -38,4 +38,5 @@ add_library(biophysics
 	Nernst.cpp	
 	# GHK.cpp		
 	# NMDAChan.cpp	
+        testBiophysics.cpp
     )
