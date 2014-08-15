@@ -11,8 +11,6 @@
 #include "SparseMatrix.h"
 #include "SparseMsg.h"
 #include "../randnum/randnum.h"
-#include "../biophysics/SpikeRingBuffer.h"
-//#include "../biophysics/Synapse.h"
 #include "../shell/Shell.h"
 
 // Initializing static variables
