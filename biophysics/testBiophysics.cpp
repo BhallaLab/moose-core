@@ -1251,7 +1251,6 @@ void testMarkovChannel()
 	cout << "." << flush;
 }
 
-#if 0
 
 ///////////////////////////////////////////////////
 // Unit tests for SynChan
@@ -1270,18 +1269,18 @@ void testSynChan()
 {
 	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
 
-	vector< int > dims( 1, 1 );
-	Id nid = shell->doCreate( "Neutral", Id(), "n", dims );
+	Id nid = shell->doCreate( "Neutral", Id(), "n", 1 );
 
-	Id synChanId = shell->doCreate( "SynChan", nid, "synChan", dims );
-	Id synId( synChanId.value() + 1 );
-	Id sgId1 = shell->doCreate( "SpikeGen", nid, "sg1", dims );
-	Id sgId2 = shell->doCreate( "SpikeGen", nid, "sg2", dims );
+	Id synChanId = shell->doCreate( "SynChan", nid, "synChan", 1 );
+	Id synHandlerId = shell->doCreate( "SimpleSynHandler", synChanId, "syns", 1 );
+	Id synId( synHandlerId.value() + 1 );
+	Id sgId1 = shell->doCreate( "SpikeGen", nid, "sg1", 1 );
+	Id sgId2 = shell->doCreate( "SpikeGen", nid, "sg2", 1 );
 	ProcInfo p;
 	p.dt = 1.0e-4;
 	p.currTime = 0;
 	bool ret;
-	assert( synId()->getName() == "synapse" );
+	assert( synId.element()->getName() == "synapse" );
 	ret = Field< double >::set( synChanId, "tau1", 1.0e-3 );
 	assert( ret );
 	ret = Field< double >::set( synChanId, "tau2", 1.0e-3 );
@@ -1291,25 +1290,20 @@ void testSynChan()
 
 	// This is a hack, should really inspect msgs to automatically figure
 	// out how many synapses are needed.
-	ret = Field< unsigned int >::set( synChanId, "num_synapse", 2 );
+	ret = Field< unsigned int >::set( synHandlerId, "numSynapse", 2 );
 	assert( ret );
 
-	Element* syne = synId();
-	assert( syne->dataHandler()->localEntries() == 2 );
-	dynamic_cast< FieldDataHandlerBase* >( syne->dataHandler() )->setNumField( synChanId.eref().data(), 2 );
-	
-	unsigned int size = dims[0];
-	assert( syne->dataHandler()->totalEntries() == size * 65536 );
-	assert( syne->dataHandler()->numDimensions() == 1 );
-	assert( syne->dataHandler()->sizeOfDim( 0 ) == size * 65536 );
+	Element* syne = synId.element();
+	assert( syne->totNumLocalField() == 2 );
 
-	MsgId mid = shell->doAddMsg( "single", 
-		ObjId( sgId1, DataId( 0 ) ), "spikeOut",
-		ObjId( synId, DataId( 0 ) ), "addSpike" );
+	ObjId mid = shell->doAddMsg( "single", 
+		ObjId( sgId1, 0 ), "spikeOut", ObjId( synId, 0, 0 ), "addSpike" );
 	assert( mid != Id() );
 	mid = shell->doAddMsg( "single", 
-		ObjId( sgId2, DataId( 0 ) ), "spikeOut",
-		ObjId( synId, DataId( 1 ) ), "addSpike" );
+		ObjId( sgId2, 0 ), "spikeOut", ObjId( synId, 0, 1 ), "addSpike" );
+	assert( mid != Id() );
+	mid = shell->doAddMsg( "single", 
+		synHandlerId, "activationOut", synChanId, "activation" );
 	assert( mid != Id() );
 	
 	ret = Field< double >::set( sgId1, "threshold", 0.0 );
@@ -1319,27 +1313,23 @@ void testSynChan()
 	ret = Field< double >::set( sgId2, "refractT", 1.0 );
 	ret = Field< bool >::set( sgId2, "edgeTriggered", 0 );
 
-	ret = Field< double >::set( ObjId( synId, DataId( 0 ) ), 
-		"weight", 1.0 );
+	ret = Field< double >::set( ObjId( synId, 0, 0 ), "weight", 1.0 );
 	assert( ret);
-	ret = Field< double >::set( ObjId( synId, DataId( 0 ) ), 
-		"delay", 0.001 );
+	ret = Field< double >::set( ObjId( synId, 0, 0 ), "delay", 0.001 );
 	assert( ret);
-	ret = Field< double >::set( ObjId( synId, DataId( 1 ) ),
-		"weight", 1.0 );
+	ret = Field< double >::set( ObjId( synId, 0, 1 ), "weight", 1.0 );
 	assert( ret);
-	ret = Field< double >::set( ObjId( synId, DataId( 1 ) ), 
-		"delay", 0.01 );
+	ret = Field< double >::set( ObjId( synId, 0, 1 ), "delay", 0.01 );
 	assert( ret);
 
 	double dret;
-	dret = Field< double >::get( ObjId( synId, DataId( 0 ) ), "weight" );
+	dret = Field< double >::get( ObjId( synId, 0, 0 ), "weight" );
 	assert( doubleEq( dret, 1.0 ) );
-	dret = Field< double >::get( ObjId( synId, DataId( 0 ) ), "delay" );
+	dret = Field< double >::get( ObjId( synId, 0, 0 ), "delay" );
 	assert( doubleEq( dret, 0.001 ) );
-	dret = Field< double >::get( ObjId( synId, DataId( 1 ) ), "weight" );
+	dret = Field< double >::get( ObjId( synId, 0, 1 ), "weight" );
 	assert( doubleEq( dret, 1.0 ) );
-	dret = Field< double >::get( ObjId( synId, DataId( 1 ) ), "delay" );
+	dret = Field< double >::get( ObjId( synId, 0, 1 ), "delay" );
 	assert( doubleEq( dret, 0.01 ) );
 
 	dret = SetGet1< double >::set( sgId1, "Vm", 2.0 );
@@ -1350,8 +1340,10 @@ void testSynChan()
 	/////////////////////////////////////////////////////////////////////
 
 	shell->doSetClock( 0, 1e-4 );
+	shell->doSetClock( 1, 1e-4 );
 	// shell->doUseClock( "/n/##", "process", 0 );
-	shell->doUseClock( "/n/synChan,/n/sg1,/n/sg2", "process", 0 );
+	shell->doUseClock( "/n/synChan/syns,/n/sg1,/n/sg2", "process", 0 );
+	shell->doUseClock( "/n/synChan", "process", 1 );
 	// shell->doStart( 0.001 );
 	shell->doReinit();
 	shell->doReinit();
@@ -1378,12 +1370,14 @@ void testSynChan()
 
 	shell->doStart( 0.007 );
 	dret = Field< double >::get( synChanId, "Gk" );
-	assert( doubleApprox( dret, 0.997 ) );
+	// assert( doubleApprox( dret, 0.997 ) );
+	assert( doubleApprox( dret, 1.002 ) );
 
 	shell->doDelete( nid );
 	cout << "." << flush;
 }
 
+#if 0
 
 void testNMDAChan()
 {
@@ -1517,8 +1511,8 @@ void testBiophysicsProcess()
 	testMarkovChannel();
 #if 0
 	testHHChannel();
-	testSynChan();
 #endif
+	testSynChan();
 }
 
 #endif

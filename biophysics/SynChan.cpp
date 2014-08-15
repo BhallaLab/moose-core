@@ -214,7 +214,9 @@ void SynChan::normalizeGbar()
 
 void SynChan::process( const Eref& e, ProcPtr info )
 {
-	X_ = modulation_ * activation_ * xconst1_ + X_ * xconst2_;
+	// Need to scale activation by 1/dt, because it is effective for
+	// only one clock tick and then zeroed.
+	X_ = modulation_ * activation_ * xconst1_ / info->dt + X_ * xconst2_;
 	Y_ = X_ * yconst1_ + Y_ * yconst2_;
 	double Gk = Y_ * norm_;
 	setGk( Gk );
