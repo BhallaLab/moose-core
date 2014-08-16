@@ -1481,7 +1481,7 @@ void testFinfoFields()
 	assert( reinitFinfo.type() == "const ProcInfo*" );
 
 	assert( spikeFinfo.getName() == "spikeOut" );
-	assert( spikeFinfo.docs() == "Sends out spike events" );
+	assert( spikeFinfo.docs() == "Sends out spike events. The argument is the timestamp of the spike. " );
 	assert( spikeFinfo.src().size() == 0 );
 	assert( spikeFinfo.dest().size() == 0 );
 	// cout << spikeFinfo->type() << endl;
