@@ -4556,7 +4556,7 @@ From 17 July
 
 Moose key things to do before release and paper:
 *Ksolve cross compartment
-Synapses
++Synapses
 KKit GUI
 Clocks
 *Identifying message source.
@@ -4662,5 +4662,10 @@ number than Numpy, and I'm using Numpy to set the weights etc.
 
 It would be nice for this and other situations to have an object to do 
 simple spiking stats. Counting/averaging/ISI/rate/fano factor and so on.
+Checkin 5751
 
+I should put this in, and plot it, and then fiddle with parameters here and
+in the unit tests so as to get sustained reasonable rate firing in the model.
+
+Trying to compile the new Stats.cpp.
 =============================================================================

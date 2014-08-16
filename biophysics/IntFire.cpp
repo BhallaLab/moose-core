@@ -14,7 +14,8 @@
 static SrcFinfo1< double > *spikeOut() {
 	static SrcFinfo1< double > spikeOut( 
 			"spikeOut", 
-			"Sends out spike events"
+			"Sends out spike events. The argument is the timestamp of "
+			"the spike. "
 			);
 	return &spikeOut;
 }
