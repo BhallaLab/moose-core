@@ -28,15 +28,29 @@ class Stats
 		double getSum() const;
 		unsigned int getNum() const;
 
+		double getWmean() const;
+		double getWsdev() const;
+		double getWsum() const;
+		unsigned int getWnum() const;
+
+		void setWindowLength( unsigned int len );
+		unsigned int getWindowLength() const;
+
 		////////////////////////////////////////////////////////////////
 		// Dest Func
 		////////////////////////////////////////////////////////////////
+		void input( double v );
+		void addSpike( double v );
 		
 		void process( const Eref& e, ProcPtr p );
 		void reinit( const Eref& e, ProcPtr p );
 
 		////////////////////////////////////////////////////////////////
-		// Reduce func
+		// other func
+		////////////////////////////////////////////////////////////////
+		void doWindowCalculation() const;
+		void innerWindowCalculation();
+
 		////////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();
 	private:
@@ -44,6 +58,14 @@ class Stats
 		double sdev_;
 		double sum_;
 		unsigned int num_;
+		double wmean_;
+		double wsdev_;
+		double wsum_;
+		unsigned int wnum_;
+		double sumsq_;
+		double lastt_;
+		vector< double > samples_;
+		bool isWindowDirty_;
 };
 
 #endif // _STATS_H
