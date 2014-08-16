@@ -17,24 +17,53 @@ const Cinfo* Stats::initCinfo()
 		//////////////////////////////////////////////////////////////
 		static ReadOnlyValueFinfo< Stats, double > mean(
 			"mean",
-			"Mean of all sampled values.",
+			"Mean of all sampled values or of spike rate.",
 			&Stats::getMean
 		);
 		static ReadOnlyValueFinfo< Stats, double > sdev(
 			"sdev",
-			"Standard Deviation of all sampled values.",
+			"Standard Deviation of all sampled values, or of rate.",
 			&Stats::getSdev
 		);
 		static ReadOnlyValueFinfo< Stats, double > sum(
 			"sum",
-			"Sum of all sampled values.",
+			"Sum of all sampled values, or total number of spikes.",
 			&Stats::getSum
 		);
 		static ReadOnlyValueFinfo< Stats, unsigned int > num(
 			"num",
-			"Number of all sampled values.",
+			"Number of all sampled values, or total number of spikes.",
 			&Stats::getNum
 		);
+		static ValueFinfo< Stats, unsigned int > windowLength(
+			"windowLength",
+			"Number of bins for windowed stats. "
+			"Ignores windowing if this value is zero. ",
+			&Stats::setWindowLength,
+			&Stats::getWindowLength
+		);
+		static ReadOnlyValueFinfo< Stats, double > wmean(
+			"wmean",
+			"Mean of sampled values or of spike rate within window.",
+			&Stats::getWmean
+		);
+		static ReadOnlyValueFinfo< Stats, double > wsdev(
+			"wsdev",
+			"Standard Deviation of sampled values, or rate, within window.",
+			&Stats::getWsdev
+		);
+		static ReadOnlyValueFinfo< Stats, double > wsum(
+			"wsum",
+			"Sum of all sampled values, or total number of spikes, within window.",
+			&Stats::getWsum
+		);
+		static ReadOnlyValueFinfo< Stats, unsigned int > wnum(
+			"wnum",
+			"Number of all sampled values, or total number of spikes, "
+			"within window.",
+			&Stats::getWnum
+		);
+
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
@@ -44,6 +73,17 @@ const Cinfo* Stats::initCinfo()
 		static DestFinfo reinit( "reinit",
 			"Handles reinit call",
 			new ProcOpFunc< Stats >( &Stats::reinit ) );
+
+		static DestFinfo input( "input",
+			"Handles continuous value input as a time-series. "
+			"Multiple inputs are allowed, they will be merged. "
+			"Should not be used together with spiking input on addSpike. ",
+			new OpFunc1< Stats, double >( &Stats::input ) );
+
+		static DestFinfo addSpike( "addSpike",
+			"Handles spike event time input, converts into a rate "
+			"to do stats upon.",
+			new OpFunc1< Stats, double >( &Stats::addSpike ) );
 
 		//////////////////////////////////////////////////////////////
 		// SharedFinfo Definitions
@@ -61,8 +101,13 @@ const Cinfo* Stats::initCinfo()
 		&sdev,	// ReadOnlyValue
 		&sum,	// ReadOnlyValue
 		&num,	// ReadOnlyValue
-		&process,		// DestFinfo
-		&reinit,		// DestFinfo
+		&wmean,	// ReadOnlyValue
+		&wsdev,	// ReadOnlyValue
+		&wsum,	// ReadOnlyValue
+		&wnum,	// ReadOnlyValue
+		&windowLength,	// Value
+		&input,		// DestFinfo
+		&addSpike,	// DestFinfo
 		&proc		// SharedFinfo
 	};
 
@@ -86,7 +131,10 @@ static const Cinfo* statsCinfo = Stats::initCinfo();
 
 Stats::Stats()
 	: 
-	mean_( 0.0 ), sdev_( 0.0 ), sum_( 0.0 ), num_( 0 )
+	mean_( 0.0 ), sdev_( 0.0 ), sum_( 0.0 ), num_( 0 ),
+	wmean_( 0.0 ), wsdev_( 0.0 ), wsum_( 0.0 ), wnum_( 0 ),
+	sumsq_( 0.0 ), lastt_( 0.0 ),
+	isWindowDirty_( true )
 {
 	;
 }
@@ -106,10 +154,39 @@ void Stats::reinit( const Eref& e, ProcPtr p )
 	sdev_ = 0.0;
 	sum_ = 0.0;
 	num_ = 0;
+	sumsq_ = 0.0;
+	wmean_ = 0.0;
+	wsdev_ = 0.0;
+	wsum_ = 0.0;
+	wnum_ = 0;
+	lastt_ = 0.0;
+	samples_.assign( samples_.size(), 0.0 );
 }
 ///////////////////////////////////////////////////////////////////////////
 // DestFinfos
 ///////////////////////////////////////////////////////////////////////////
+
+void Stats::input( double v )
+{
+	sum_ += v;
+	sumsq_ += v * v;
+	if ( samples_.size() > 0 )
+		samples_[ num_ % samples_.size() ] = v;
+	++num_;
+	isWindowDirty_ = true;
+}
+
+void Stats::addSpike( double t )
+{
+	double v = t - lastt_;
+	sum_ += v;
+	sumsq_ += v * v;
+	if ( samples_.size() > 0 )
+		samples_[ num_ % samples_.size() ] = v;
+	++num_;
+	isWindowDirty_ = true;
+	lastt_ = t;
+}
 
 ///////////////////////////////////////////////////////////////////////////
 // Fields
@@ -117,12 +194,16 @@ void Stats::reinit( const Eref& e, ProcPtr p )
 
 double Stats::getMean() const
 {
-	return mean_;
+	if ( num_ > 0 )
+		return sum_ / num_;
+	return 0.0;
 }
 
 double Stats::getSdev() const
 {
-	return sdev_;
+	if ( num_ > 0 )
+		return sqrt( ( sumsq_ - sum_ * sum_ / num_ ) / num_ );
+	return 0.0;
 }
 
 double Stats::getSum() const
@@ -133,4 +214,72 @@ double Stats::getSum() const
 unsigned int Stats::getNum() const
 {
 	return num_;
+}
+
+double Stats::getWmean() const
+{
+	doWindowCalculation();
+	return wmean_;
+}
+
+double Stats::getWsdev() const
+{
+	doWindowCalculation();
+	return wsdev_;
+}
+
+double Stats::getWsum() const
+{
+	doWindowCalculation();
+	return wsum_;
+}
+
+unsigned int Stats::getWnum() const
+{
+	doWindowCalculation();
+	return wnum_;
+}
+
+void Stats::setWindowLength( unsigned int len )
+{
+	if ( len < 1e6 ) {
+		samples_.resize( len, 0.0 );
+		isWindowDirty_ = true;
+	} else {
+		samples_.resize( 0 );
+	}
+}
+
+unsigned int Stats::getWindowLength() const
+{
+	return samples_.size();
+}
+
+// Filthy function to const_cast the object. There is no particular
+// reason other than the template requirements for this to be a const.
+void Stats::doWindowCalculation() const
+{
+	Stats* temp = const_cast< Stats* >( this );
+	temp->innerWindowCalculation();
+}
+
+void Stats::innerWindowCalculation()
+{
+	if ( isWindowDirty_ ) {
+		double wsumsq = 0.0;
+		wsum_ = 0.0;
+		unsigned int max = samples_.size();
+		if ( max > num_ )
+			max = num_;
+		for ( unsigned int i = 0; i < max; ++i ) {
+			wsum_ += samples_[i];
+			wsumsq += samples_[i] * samples_[i];
+		}
+		if ( max > 0 ) {
+			wmean_ = wsum_ / max;
+			wsdev_ = sqrt( ( wsumsq - wsum_ * wsum_ / max ) / max );
+		}
+		wnum_ = max;
+		isWindowDirty_ = false;
+	}
 }
