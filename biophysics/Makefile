@@ -12,6 +12,7 @@ TARGET = _biophysics.o
 OBJ = \
 	IntFire.o	\
 	SpikeGen.o	\
+	RandSpike.o	\
 	CompartmentDataHolder.o	\
 	CompartmentBase.o	\
 	Compartment.o	\
@@ -61,6 +62,7 @@ default: $(TARGET)
 $(OBJ)	: $(HEADERS)
 IntFire.o:	IntFire.h
 SpikeGen.o: SpikeGen.h
+RandSpike.o: RandSpike.h ../randnum/randnum.h
 CompartmentDataHolder.o: CompartmentDataHolder.h
 CompartmentBase.o: CompartmentBase.h CompartmentDataHolder.h
 Compartment.o: CompartmentBase.h Compartment.h

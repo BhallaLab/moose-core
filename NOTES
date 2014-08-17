@@ -4668,4 +4668,14 @@ I should put this in, and plot it, and then fiddle with parameters here and
 in the unit tests so as to get sustained reasonable rate firing in the model.
 
 Trying to compile the new Stats.cpp.
+
+Done, clears unit tests, checked  in.
+
+Now working on SpikeStats, I have a snippet trying to test it out
+in recurrentIntFire.py.
+=============================================================================
+17 Aug
+Implemented SpikeStats and RandSpike and a snippet, RandSpikeStats.py
+to test them all. Quite satisfactory.
+
 =============================================================================
