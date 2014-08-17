@@ -13,6 +13,7 @@
 # with a rate of 1e-6 microns/sec.
 # Molecule C does not move: diffConst = 0.0
 # Molecule D does not move: diffConst = 1.0e-12 but it is buffered.
+# There is a little reaction: b + d <===> c
 
 import sys
 sys.path.append('../../python')
@@ -61,8 +62,8 @@ def makeModel():
                 moose.connect( r1, 'sub', b, 'reac' )
                 moose.connect( r1, 'sub', d, 'reac' )
                 moose.connect( r1, 'prd', c, 'reac' )
-                r1.Kf = 100 # 1/(mM.sec)
-                r1.Kb = 0.01 # 1/sec
+                r1.Kf = 1.0 # 1/(mM.sec)
+                r1.Kb = 1.0 # 1/sec
 
 		# Assign parameters
 		a.diffConst = diffConst
@@ -82,10 +83,12 @@ def makeModel():
 		os.kill( PID, signal.SIGUSR1 )
 		stoich.path = "/model/compartment/##"
 
-                assert( dsolve.numPools == 4 )
+                print dsolve.numPools
+                assert( dsolve.numPools == 3 )
 		a.vec[0].concInit = concA
 		b.vec[0].concInit = concA
-		#c.vec[0].concInit = concA
+		c.vec[0].concInit = concA
+                d.vec.concInit = concA / 5.0
 		d.vec[num-1].concInit = concA
 
 def displayPlots():
@@ -102,6 +105,7 @@ def displayPlots():
                 pylab.show()
 
 def main():
+                runtime = 10.0
 		dt4 = 0.01
 		dt5 = 0.1
 		makeModel()
@@ -112,7 +116,7 @@ def main():
                 # Ksolve must be scheduled after dsolve.
 		moose.useClock( 5, '/model/compartment/ksolve', 'process' )
 		moose.reinit()
-		moose.start( 10.0 ) # Run the model for 10 seconds.
+		moose.start( runtime ) # Run the model
 
 		a = moose.element( '/model/compartment/a' )
 		b = moose.element( '/model/compartment/b' )

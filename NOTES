@@ -4677,5 +4677,67 @@ in recurrentIntFire.py.
 17 Aug
 Implemented SpikeStats and RandSpike and a snippet, RandSpikeStats.py
 to test them all. Quite satisfactory.
+Also updated recurrentIntFire.py to achieve sustained activity and plot it.
 
+Considering rescheduling, that is, setting up clock ticks automatically
+at creation. Not an urgent matter.
+
+Considering an optimization for messaging: have the opfuncs operate directly
+on pointers to the data rather than on Erefs, which have to look the
+data ptr up each time. Unfortunately many functions do rely on Erefs for
+message sending, for zombie lookups and for accessing Element fields. 
+What I could do instead is to expand the MsgDigest::targets_ vector to
+include ptr to object. 90% of time-critical calls should be possible to 
+do without further lookups.
+
+
+Check if Clock sets its internal dt to the smallest dt that is actually used,
+or to any small dt.
+
+
+Cleaning up Demos directory
+	- Need a README in each subdirectory
+	- Need to clean up traub2005 and Izhikevich
+	- Decide if symcomp belongs here at all
+	- Does hopfield do anything?
+	- Check that the files in the neuroml directory are OK.
+	- Eliminate util.
+
+Cleaning up Snippets directory
+	- Go through updating and checking each one
+	- Find a way to run all as a regression test, without display.
+	- Have an example for every class and every function in MOOSE.
+        - Put in an index so that one can find which snippet illustrates 
+		which class. Or provide a listing of all class names linked
+		to the appropriate file. 
+
+Misc
+	Have a sensible sorting for moose.showfields.
+	Check with Subha about which of the documentation options is actually
+	working at present. Should we do all our docs in markdown?
+
+Reorganizing directory structure.
+	moose
+		/README
+		/Copyright
+		/src
+			/basecode
+			/benchmarks # this is for C++ benchmarks.
+			/builtins
+			...
+		/Documentation
+			/user
+			/developer
+			...
+		/Demos
+			/squid
+			/tutorials
+			...
+		/gui
+			...
+		/benchmarks	# This is for MOOSE-wide benchmarks scripts.
+			/Rallpacks
+			...
+	
+	
 =============================================================================
