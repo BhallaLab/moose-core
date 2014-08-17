@@ -15,6 +15,7 @@
 import os
 import random
 import time
+import pylab
 from numpy import random as nprand
 import sys
 sys.path.append('/home/subha/src/moose_async13/python')
@@ -22,15 +23,16 @@ import moose
 
 def make_network():
 	size = 1024
-	timestep = 0.2
-	runsteps = 5
+	dt = 0.2
+	runsteps = 50
 	delayMin = 0
 	delayMax = 4
-	weightMax = 0.02
+	weightMax = 1
 	Vmax = 1.0
-	thresh = 0.8
+	thresh = 0.4
 	refractoryPeriod = 0.4
-	connectionProbability = 0.1
+        tau = 0.5
+	connectionProbability = 0.01
 	random.seed( 123 )
 	nprand.seed( 456 )
 	t0 = time.time()
@@ -52,6 +54,7 @@ def make_network():
 	network.vec.Vm = nprand.rand( size ) * Vmax
 	network.vec.thresh = thresh
 	network.vec.refractoryPeriod = refractoryPeriod
+	network.vec.tau = tau
 	numSynVec = syns.vec.numSynapses
 	print 'Middle of setup, t = ', time.time() - t0
 	numTotSyn = sum( numSynVec )
@@ -63,21 +66,27 @@ def make_network():
 		sh.synapse.weight = nprand.rand( len( sh.synapse ) ) * weightMax
 	print 'after setup, t = ', time.time() - t0
 
-	"""
-
-	netvec = network.vec
-	for i in range( size ):
-		synvec = netvec[i].synapse.vec
-		synvec.weight = [ (random.random() * weightMax) for r in range( synvec.len )] 
-		synvec.delay = [ (delayMin + random.random() * delayMax) for r in range( synvec.len )] 
-	"""
+        numStats = 100
+        stats = moose.SpikeStats( '/stats', numStats )
+        stats.vec.windowLength = 1 # timesteps to put together.
+        plots = moose.Table( '/plot', numStats )
+        convergence = size / numStats
+        for i in range( numStats ):
+            for j in range( size/numStats ):
+                k = i * convergence + j
+                moose.connect( network.vec[k], 'spikeOut', stats.vec[i], 'addSpike' )
+        moose.connect( plots, 'requestOut', stats, 'getMean', 'OneToOne' )
 
 	#moose.useClock( 0, '/network/syns,/network', 'process' )
 	moose.useClock( 0, '/network/syns', 'process' )
 	moose.useClock( 1, '/network', 'process' )
-	moose.setClock( 0, timestep )
-	moose.setClock( 1, timestep )
-	moose.setClock( 9, timestep )
+	moose.useClock( 2, '/stats', 'process' )
+	moose.useClock( 3, '/plot', 'process' )
+	moose.setClock( 0, dt )
+	moose.setClock( 1, dt )
+	moose.setClock( 2, dt )
+	moose.setClock( 3, dt )
+	moose.setClock( 9, dt )
 	t1 = time.time()
 	moose.reinit()
 	print 'reinit time t = ', time.time() - t1
@@ -85,8 +94,15 @@ def make_network():
 	print 'setting Vm , t = ', time.time() - t1
 	t1 = time.time()
 	print 'starting'
-	moose.start(runsteps * timestep)
+	moose.start(runsteps * dt)
 	print 'runtime, t = ', time.time() - t1
 	print network.vec.Vm[99:103], network.vec.Vm[900:903]
+        t = [i * dt for i in range( plots.vec[0].vector.size )]
+        i = 0
+        for p in plots.vec:
+            pylab.plot( t, p.vector, label=str( i) )
+            i += 1
+        pylab.legend()
+        pylab.show()
 
 make_network()

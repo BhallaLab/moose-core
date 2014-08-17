@@ -20,6 +20,7 @@ OBJ = \
 	StimulusTable.o	\
 	TimeTable.o	\
 	Stats.o	\
+	SpikeStats.o	\
 	Interpol2D.o \
 	HDF5WriterBase.o	\
 	HDF5DataWriter.o	\
@@ -43,6 +44,7 @@ Interpol.o:		TableBase.h Interpol.h
 StimulusTable.o:		TableBase.h StimulusTable.h
 TimeTable.o:	TimeTable.h TableBase.h
 Stats.o:	Stats.h
+SpikeStats.o:	Stats.h SpikeStats.h
 Interpol2D.o:	Interpol2D.h
 HDF5WriterBase.o: HDF5WriterBase.h
 HDF5DataWriter.o: HDF5DataWriter.h HDF5WriterBase.h
