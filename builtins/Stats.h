@@ -14,11 +14,6 @@ class Stats
 	public: 
 		Stats();
 
-		/**
- 		 * Inserts an event into the pendingEvents queue for spikes.
- 		 */
-		void addSpike( DataId synIndex, const double time );
-		
 		////////////////////////////////////////////////////////////////
 		// Field assignment stuff.
 		////////////////////////////////////////////////////////////////
@@ -40,10 +35,13 @@ class Stats
 		// Dest Func
 		////////////////////////////////////////////////////////////////
 		void input( double v );
-		void addSpike( double v );
 		
 		void process( const Eref& e, ProcPtr p );
 		void reinit( const Eref& e, ProcPtr p );
+
+		/// Virtual func for handling process calls for derived classes.
+		virtual void vProcess( const Eref& e, ProcPtr p );
+		virtual void vReinit( const Eref& e, ProcPtr p );
 
 		////////////////////////////////////////////////////////////////
 		// other func
