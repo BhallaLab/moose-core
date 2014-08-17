@@ -949,7 +949,7 @@ bool Shell::innerUseClock( string path, string field, unsigned int tick,
 	vector< ObjId > list;
 	wildcardFind( path, list ); // By default scans only Elements.
 	if ( list.size() == 0 ) {
-		cout << "Warning: no Elements found on path " << path << endl;
+		cout << "Warning: Shell::innerUseClock: no Elements found on path " << path << endl;
 		return 0;
 	}
 	// string tickField = "proc";

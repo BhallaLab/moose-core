@@ -39,7 +39,7 @@ https://sourceforge.net/projects/moose/
           For running moose in parallel on clusters
 
 
-    ## PyMOOSE                              OPTIONAL
+    ## PyMOOSE                      REQUIRED except on cluster worker nodes
 
     Python interface for core MOOSE API
 
@@ -80,7 +80,7 @@ https://sourceforge.net/projects/moose/
 
 
 
-        ### Compartmental Model Viusalization       OPTIONAL
+        ### Compartmental Model Visualization       OPTIONAL
             - GSL     (1.16.x)                      REQUIRED
               ----------------
               For core moose numerical computation
@@ -126,25 +126,61 @@ http://sourceforge.net/p/moose/bugs/
 
 # Getting started:
 
-MOOSE can be used as a python module. Look into the Demos directory
-for sample code. A starting point can be Demos/snippets with useful
-python code snippets that can be used as building blocks.
+# Running MOOSE: the short short guide.
+Moose is usually run within Python. Here is a template Python script that will
+load and run various kinds of predefined model files:
 
-MOOSE also comes with a NeuroML reader. Demos/neuroml has some
+>>> import moose
+>>> help( moose ) # See what you can do with MOOSE.
+>>> moose.loadModel( file_path, modelname )	# Load in your model
+>>> moose.reinit()				# Set initial conditions
+>>> moose.start( runtime )			# Run the model
+
+Using Matplotlib and a few more lines, one can plot the output of this 
+simulation, which will have been been stored in tables somewhere in the model:
+
+>>> import pylab
+>>> import numpy
+>>> for x in moose.wildcardFind( '/modelname/##[ISA=Table]' ):
+>>>	t = numpy.arange( 0, x.vector.size, 1, ) * dt
+>>>	pylab.plot( t, x.vector, label = x.name )
+>>> pylab.legend()
+>>> pylab.show()
+
+
+# Examples, tutorials and Demos: 
+Look in the Demos directory for sample code. 
+Demos/tutorials: Standalone scripts meant for teaching. Students are expected
+	to modify the scripts to learn the principles of the models.
+Demos/squid: The Hodkin-Huxley squid model, fully graphical interface.
+Demos/Genesis_files: A number of kinetics models used in MOOSE demos.
+Demos/neuroml: A number of NeuroML models used in MOOSE demos
+Demos/traub_2005: Example scripts for each of the individual cell models from
+	the Traub 2005 thalamocortical model.
+Demos/snippets: Code snippets that can be used as building blocks and to
+	illustrate how to use certain kinds of objects in MOOSE. These 
+	snippets are all meant to run as individual files.
+
+
+
+# Supported file formats.
+MOOSE comes with a NeuroML reader. Demos/neuroml has some
 python scripts showing how to load NeuroML models.
 
-MOOSE is backward compatible with GENESIS
-kinetikit. Demos/Genesis_files has some examples. You can load a
+MOOSE is backward compatible with GENESIS kinetikit. 
+Demos/Genesis_files has some examples. You can load a
 kinetikit model with the loadModel function:
 
-    moose.loadModel(kkit_file_path, target_model_path)
+    moose.loadModel(kkit_file_path, modelname )
 
-You can also load GENESIS prototype files. The same loadModel
-function can be used for this (but you need to have all the channels
-used in the prototype preloaded in /library):
+MOOSE is backward compatible with GENESIS <model>.p files used for neuronal
+model specification. The same loadModel
+function can be used for this but you need to have all the channels
+used in the .p file preloaded in /library:
 
-    moose.loadModel(prototype_file_path, prototype_model_path)
+    moose.loadModel(prototype_file_path, modelname )
 
+# Documentation
 Top level moose documentation can be accessed in the Python
 interpreter the usual way:
 
