@@ -10,6 +10,14 @@
 #include "header.h"
 #include "Stats.h"
 
+static SrcFinfo1< vector< double >* > *requestOut() {
+	static SrcFinfo1< vector< double >* > requestOut(
+			"requestOut",
+			"Sends request for a field to target object"
+			);
+	return &requestOut;
+}
+
 const Cinfo* Stats::initCinfo()
 {
 		//////////////////////////////////////////////////////////////
@@ -76,14 +84,8 @@ const Cinfo* Stats::initCinfo()
 
 		static DestFinfo input( "input",
 			"Handles continuous value input as a time-series. "
-			"Multiple inputs are allowed, they will be merged. "
-			"Should not be used together with spiking input on addSpike. ",
+			"Multiple inputs are allowed, they will be merged. ",
 			new OpFunc1< Stats, double >( &Stats::input ) );
-
-		static DestFinfo addSpike( "addSpike",
-			"Handles spike event time input, converts into a rate "
-			"to do stats upon.",
-			new OpFunc1< Stats, double >( &Stats::addSpike ) );
 
 		//////////////////////////////////////////////////////////////
 		// SharedFinfo Definitions
@@ -107,7 +109,7 @@ const Cinfo* Stats::initCinfo()
 		&wnum,	// ReadOnlyValue
 		&windowLength,	// Value
 		&input,		// DestFinfo
-		&addSpike,	// DestFinfo
+		requestOut(),		// SrcFinfo
 		&proc		// SharedFinfo
 	};
 
@@ -133,8 +135,7 @@ Stats::Stats()
 	: 
 	mean_( 0.0 ), sdev_( 0.0 ), sum_( 0.0 ), num_( 0 ),
 	wmean_( 0.0 ), wsdev_( 0.0 ), wsum_( 0.0 ), wnum_( 0 ),
-	sumsq_( 0.0 ), lastt_( 0.0 ),
-	isWindowDirty_( true )
+	sumsq_( 0.0 ), isWindowDirty_( true )
 {
 	;
 }
@@ -145,10 +146,24 @@ Stats::Stats()
 
 void Stats::process( const Eref& e, ProcPtr p )
 {
-	;
+	this->vProcess( e, p );
+}
+
+void Stats::vProcess( const Eref& e, ProcPtr p )
+{
+	vector< double > v;
+	requestOut()->send( e, &v );
+	for ( vector< double >::const_iterator
+					i = v.begin(); i != v.end(); ++i )
+		input( *i );
 }
 
 void Stats::reinit( const Eref& e, ProcPtr p )
+{
+	this->vReinit( e, p );
+}
+
+void Stats::vReinit( const Eref& e, ProcPtr p )
 {
 	mean_ = 0.0;
 	sdev_ = 0.0;
@@ -159,7 +174,6 @@ void Stats::reinit( const Eref& e, ProcPtr p )
 	wsdev_ = 0.0;
 	wsum_ = 0.0;
 	wnum_ = 0;
-	lastt_ = 0.0;
 	samples_.assign( samples_.size(), 0.0 );
 }
 ///////////////////////////////////////////////////////////////////////////
@@ -174,18 +188,6 @@ void Stats::input( double v )
 		samples_[ num_ % samples_.size() ] = v;
 	++num_;
 	isWindowDirty_ = true;
-}
-
-void Stats::addSpike( double t )
-{
-	double v = t - lastt_;
-	sum_ += v;
-	sumsq_ += v * v;
-	if ( samples_.size() > 0 )
-		samples_[ num_ % samples_.size() ] = v;
-	++num_;
-	isWindowDirty_ = true;
-	lastt_ = t;
 }
 
 ///////////////////////////////////////////////////////////////////////////
