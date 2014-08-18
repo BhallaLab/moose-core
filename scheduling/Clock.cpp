@@ -51,7 +51,10 @@
 #include "header.h"
 #include "Clock.h"
 
-const unsigned int Clock::numTicks = 10;
+// Declaration of some static variables.
+const unsigned int Clock::numTicks = 32;
+map< string, unsigned int > Clock::defaultTick_;
+vector< double > Clock::defaultDt_;
 
 ///////////////////////////////////////////////////////
 // MsgSrc definitions
@@ -65,73 +68,48 @@ static SrcFinfo0 *finished() {
 	return &finished;
 }
 
+// Static func for building the process vectors.
+static vector< SrcFinfo1< ProcPtr >* > buildProcessVec( const string& name )
+{
+	vector< SrcFinfo1< ProcPtr >* > vec;
+	vec.resize( Clock::numTicks );
+	for ( unsigned int i = 0; i < Clock::numTicks; ++i ) {
+		stringstream ss;
+		ss << name << i;
+		stringstream ss2;
+		ss2 << name << " for Tick " << i;
+		vec[i] = new SrcFinfo1< ProcPtr >( ss.str(), ss2.str() );
+	}
+	return vec;
+}
+
 // This vector contains the SrcFinfos used for Process calls for each
 // of the Ticks.
-vector< SrcFinfo1< ProcPtr >* >& processVec() {
-	static SrcFinfo1< ProcPtr > process0( "process0", "Process for Tick 0");
-	static SrcFinfo1< ProcPtr > process1( "process1", "Process for Tick 1");
-	static SrcFinfo1< ProcPtr > process2( "process2", "Process for Tick 2");
-	static SrcFinfo1< ProcPtr > process3( "process3", "Process for Tick 3");
-	static SrcFinfo1< ProcPtr > process4( "process4", "Process for Tick 4");
-	static SrcFinfo1< ProcPtr > process5( "process5", "Process for Tick 5");
-	static SrcFinfo1< ProcPtr > process6( "process6", "Process for Tick 6");
-	static SrcFinfo1< ProcPtr > process7( "process7", "Process for Tick 7");
-	static SrcFinfo1< ProcPtr > process8( "process8", "Process for Tick 8");
-	static SrcFinfo1< ProcPtr > process9( "process9", "Process for Tick 9");
-	static SrcFinfo1< ProcPtr > process10("process10", "Process Tick 10");
-	static SrcFinfo1< ProcPtr > process11("process11", "Process Tick 11");
-	static SrcFinfo1< ProcPtr > process12("process12", "Process Tick 12");
-	static SrcFinfo1< ProcPtr > process13("process13", "Process Tick 13");
-	static SrcFinfo1< ProcPtr > process14("process14", "Process Tick 14");
-	static SrcFinfo1< ProcPtr > process15("process15", "Process Tick 15");
-	static SrcFinfo1< ProcPtr > process16("process16", "Process Tick 16");
-	static SrcFinfo1< ProcPtr > process17("process17", "Process Tick 17");
-	static SrcFinfo1< ProcPtr > process18("process18", "Process Tick 18");
-	static SrcFinfo1< ProcPtr > process19("process19", "Process Tick 19");
-
-	static SrcFinfo1< ProcPtr >* processArray[] = {
-		&process0, &process1, &process2, &process3, &process4, 
-		&process5, &process6, &process7, &process8, &process9,
-		&process10, &process11, &process12, &process13, &process14,
-	   	&process15, &process16, &process17, &process18, &process19,
-   	};
-	static vector< SrcFinfo1< ProcPtr >* > processVec(processArray, processArray + sizeof(processArray) / sizeof(SrcFinfo1< ProcPtr > *));
-
+static vector< SrcFinfo1< ProcPtr >* >& processVec() {
+	static vector< SrcFinfo1< ProcPtr >* > processVec = 
+			buildProcessVec( "process" );
 	return processVec;
 }
 
-vector< SrcFinfo1< ProcPtr >* >& reinitVec() {
-
-	static SrcFinfo1< ProcPtr > reinit0( "reinit0", "Reinit for Tick 0" );
-	static SrcFinfo1< ProcPtr > reinit1( "reinit1", "Reinit for Tick 1" );
-	static SrcFinfo1< ProcPtr > reinit2( "reinit2", "Reinit for Tick 2" );
-	static SrcFinfo1< ProcPtr > reinit3( "reinit3", "Reinit for Tick 3" );
-	static SrcFinfo1< ProcPtr > reinit4( "reinit4", "Reinit for Tick 4" );
-	static SrcFinfo1< ProcPtr > reinit5( "reinit5", "Reinit for Tick 5" );
-	static SrcFinfo1< ProcPtr > reinit6( "reinit6", "Reinit for Tick 6" );
-	static SrcFinfo1< ProcPtr > reinit7( "reinit7", "Reinit for Tick 7" );
-	static SrcFinfo1< ProcPtr > reinit8( "reinit8", "Reinit for Tick 8" );
-	static SrcFinfo1< ProcPtr > reinit9( "reinit9", "Reinit for Tick 9" );
-	static SrcFinfo1< ProcPtr > reinit10( "reinit10", "Reinit for Tick 10");
-	static SrcFinfo1< ProcPtr > reinit11( "reinit11", "Reinit for Tick 11");
-	static SrcFinfo1< ProcPtr > reinit12( "reinit12", "Reinit for Tick 12");
-	static SrcFinfo1< ProcPtr > reinit13( "reinit13", "Reinit for Tick 13");
-	static SrcFinfo1< ProcPtr > reinit14( "reinit14", "Reinit for Tick 14");
-	static SrcFinfo1< ProcPtr > reinit15( "reinit15", "Reinit for Tick 15");
-	static SrcFinfo1< ProcPtr > reinit16( "reinit16", "Reinit for Tick 16");
-	static SrcFinfo1< ProcPtr > reinit17( "reinit17", "Reinit for Tick 17");
-	static SrcFinfo1< ProcPtr > reinit18( "reinit18", "Reinit for Tick 18");
-	static SrcFinfo1< ProcPtr > reinit19( "reinit19", "Reinit for Tick 19");
-
-	static SrcFinfo1< ProcPtr >* reinitArray[] = {
-		&reinit0, &reinit1, &reinit2, &reinit3, &reinit4, 
-		&reinit5, &reinit6, &reinit7, &reinit8, &reinit9, 
-		&reinit10, &reinit11, &reinit12, &reinit13, &reinit14, 
-		&reinit15, &reinit16, &reinit17, &reinit18, &reinit19, 
-	};
-	static vector< SrcFinfo1< ProcPtr >* > reinitVec(reinitArray, reinitArray + sizeof(reinitArray) / sizeof(SrcFinfo1< ProcPtr > *));
-
+static vector< SrcFinfo1< ProcPtr >* >& reinitVec() {
+	static vector< SrcFinfo1< ProcPtr >* > reinitVec = 
+			buildProcessVec( "reinit" );
 	return reinitVec;
+}
+
+static vector< SharedFinfo *> sharedProcVec() {
+	vector< SharedFinfo* > vec;
+	vec.resize( Clock::numTicks );
+	for ( unsigned int i = 0; i < Clock::numTicks; ++i ) {
+		stringstream ss;
+		Finfo* temp[2];
+		temp[0] = processVec()[i];
+		temp[1] = reinitVec()[i];
+		ss << "proc" << i;
+		vec[i] = new SharedFinfo( ss.str(), "Shared process/reinit message",
+						temp, 2 );
+	}
+	return vec;
 }
 
 const Cinfo* Clock::initCinfo()
@@ -203,49 +181,7 @@ const Cinfo* Clock::initCinfo()
 	///////////////////////////////////////////////////////
 	// Shared definitions
 	///////////////////////////////////////////////////////
-	static Finfo* procShared0[] = { processVec()[0], reinitVec()[0] };
-	static Finfo* procShared1[] = { processVec()[1], reinitVec()[1] };
-	static Finfo* procShared2[] = { processVec()[2], reinitVec()[2] };
-	static Finfo* procShared3[] = { processVec()[3], reinitVec()[3] };
-	static Finfo* procShared4[] = { processVec()[4], reinitVec()[4] };
-	static Finfo* procShared5[] = { processVec()[5], reinitVec()[5] };
-	static Finfo* procShared6[] = { processVec()[6], reinitVec()[6] };
-	static Finfo* procShared7[] = { processVec()[7], reinitVec()[7] };
-	static Finfo* procShared8[] = { processVec()[8], reinitVec()[8] };
-	static Finfo* procShared9[] = { processVec()[9], reinitVec()[9] };
-	static Finfo* procShared10[] = { processVec()[10], reinitVec()[10] };
-	static Finfo* procShared11[] = { processVec()[11], reinitVec()[11] };
-	static Finfo* procShared12[] = { processVec()[12], reinitVec()[12] };
-	static Finfo* procShared13[] = { processVec()[13], reinitVec()[13] };
-	static Finfo* procShared14[] = { processVec()[14], reinitVec()[14] };
-	static Finfo* procShared15[] = { processVec()[15], reinitVec()[15] };
-	static Finfo* procShared16[] = { processVec()[16], reinitVec()[16] };
-	static Finfo* procShared17[] = { processVec()[17], reinitVec()[17] };
-	static Finfo* procShared18[] = { processVec()[18], reinitVec()[18] };
-	static Finfo* procShared19[] = { processVec()[19], reinitVec()[19] };
-
-	static string s = "Shared process/reinit message";
-	unsigned int sz = sizeof( procShared0 ) / sizeof( const Finfo* );
-	static SharedFinfo proc0( "proc0", s, procShared0, sz );
-	static SharedFinfo proc1( "proc1", s, procShared1, sz );
-	static SharedFinfo proc2( "proc2", s, procShared2, sz );
-	static SharedFinfo proc3( "proc3", s, procShared3, sz );
-	static SharedFinfo proc4( "proc4", s, procShared4, sz );
-	static SharedFinfo proc5( "proc5", s, procShared5, sz );
-	static SharedFinfo proc6( "proc6", s, procShared6, sz );
-	static SharedFinfo proc7( "proc7", s, procShared7, sz );
-	static SharedFinfo proc8( "proc8", s, procShared8, sz );
-	static SharedFinfo proc9( "proc9", s, procShared9, sz );
-	static SharedFinfo proc10( "proc10", s, procShared10, sz );
-	static SharedFinfo proc11( "proc11", s, procShared11, sz );
-	static SharedFinfo proc12( "proc12", s, procShared12, sz );
-	static SharedFinfo proc13( "proc13", s, procShared13, sz );
-	static SharedFinfo proc14( "proc14", s, procShared14, sz );
-	static SharedFinfo proc15( "proc15", s, procShared15, sz );
-	static SharedFinfo proc16( "proc16", s, procShared16, sz );
-	static SharedFinfo proc17( "proc17", s, procShared17, sz );
-	static SharedFinfo proc18( "proc18", s, procShared18, sz );
-	static SharedFinfo proc19( "proc19", s, procShared19, sz );
+	static vector< SharedFinfo *> procs = sharedProcVec();
 
 	///////////////////////////////////////////////////////
 	// MsgDest definitions
@@ -297,26 +233,38 @@ const Cinfo* Clock::initCinfo()
 		&tickDt,			// LookupValue
 		&clockControl,		// Shared
 		finished(),			// Src
-		&proc0,				// Src
-		&proc1,				// Src
-		&proc2,				// Src
-		&proc3,				// Src
-		&proc4,				// Src
-		&proc5,				// Src
-		&proc6,				// Src
-		&proc7,				// Src
-		&proc8,				// Src
-		&proc9,				// Src
-		&proc10,				// Src
-		&proc11,				// Src
-		&proc12,				// Src
-		&proc13,				// Src
-		&proc14,				// Src
-		&proc15,				// Src
-		&proc16,				// Src
-		&proc17,				// Src
-		&proc18,				// Src
-		&proc19,				// Src
+		procs[0],				// Src
+		procs[1],				// Src
+		procs[2],				// Src
+		procs[3],				// Src
+		procs[4],				// Src
+		procs[5],				// Src
+		procs[6],				// Src
+		procs[7],				// Src
+		procs[8],				// Src
+		procs[9],				// Src
+		procs[10],				// Src
+		procs[11],				// Src
+		procs[12],				// Src
+		procs[13],				// Src
+		procs[14],				// Src
+		procs[15],				// Src
+		procs[16],				// Src
+		procs[17],				// Src
+		procs[18],				// Src
+		procs[19],				// Src
+		procs[20],				// Src
+		procs[21],				// Src
+		procs[22],				// Src
+		procs[23],				// Src
+		procs[24],				// Src
+		procs[25],				// Src
+		procs[26],				// Src
+		procs[27],				// Src
+		procs[28],				// Src
+		procs[29],				// Src
+		procs[30],				// Src
+		procs[31],				// Src
 	};
 	
 	static string doc[] =
@@ -326,30 +274,24 @@ const Cinfo* Clock::initCinfo()
 		"Description", "Clock: Clock class. Handles sequencing of operations in simulations."
 		"Every object scheduled for operations in MOOSE is connected to one"
 		"of the 'Tick' entries on the Clock."
-		"The Clock manages ten 'Ticks', each of which has its own dt,"
+		"The Clock manages 32 'Ticks', each of which has its own dt,"
 		"which is an integral multiple of the base clock dt_. "
 		"On every clock step the ticks are examined to see which of them"
 		"is due for updating. When a tick is updated, the 'process' call "
-		"of all the objects scheduled on that tick is called."
-		"The default scheduling (should not be overridden) has the "
-		"following assignment of classes to Ticks:"
-		"0. Biophysics: Init call on Compartments in EE method"
-		"1. Biophysics: Channels"
-		"2. Biophysics: Process call on Compartments"
-		"3. Undefined "
-		"4. Kinetics: Pools, or in ksolve mode: Mesh to handle diffusion"
-		"5. Kinetics: Reacs, enzymes, etc, or in ksolve mode: Stoich/GSL"
-		"6. Stimulus tables"
-		"7. More stimulus tables"
-		"8. Plots"
-		"9. Postmaster. This must be called last of all and nothing else "
-		"should use this Tick. The Postmaster is automatically scheduled "
-		"at set up time. The Tick should be given the longest possible "
-		"value, typically but not always equal to one of the other ticks, "
-		"so as to batch the "
-		"communications. For spiking-only communications, it is usually "
-		"possible to space the communication tick by as much as 1-2 ms "
-		"which is the axonal + synaptic delay. "
+		"of all the objects scheduled on that tick is called. "
+		"Order of execution: If a subset of ticks are scheduled for "
+		"execution at a given timestep, then they will be executed in "
+		"numerical order, lowest tick first and highest last. "
+		"There is no guarantee of execution order for objects within "
+		"a clock tick. "
+		"The clock provides default scheduling for all objects which "
+		"can be accessed using Clock::lookupDefaultTick( className ). "
+		"Specific items of note are that the output/file dump objects are "
+		"second-last, and the postmaster is last on the order of Ticks. "
+		"The clock also starts up with some default timesteps for each "
+		"of these ticks, and this can be overridden using the shell "
+		"command setClock, or by directly assigning tickStep values on the "
+		"clock object. "
 		"",
 	};
 
@@ -378,12 +320,18 @@ Clock::Clock()
 	  currentTime_( 0.0 ), 
 	  nSteps_( 0 ), 
 	  currentStep_( 0 ), 
+	  stride_( 1 ),
 	  dt_( 1.0 ), 
 	  isRunning_( false ),
 	  doingReinit_( false ),
 	  info_(),
 	  ticks_( Clock::numTicks, 0 )
 {
+	buildDefaultTick();
+	dt_ = defaultDt_[0];
+	for ( unsigned int i = 0; i < Clock::numTicks; ++i ) {
+		ticks_[i] = round( defaultDt_[i] / dt_ );
+	}
 }
 ///////////////////////////////////////////////////
 // Field function definitions
@@ -548,13 +496,17 @@ void Clock::buildTicks( const Eref& e )
 {
 	activeTicks_.resize(0);
 	activeTicksMap_.resize(0);
+	stride_ = ~0U;
 	for ( unsigned int i = 0; i < ticks_.size(); ++i ) {
 		if ( ticks_[i] > 0 && 
 				e.element()->hasMsgs( processVec()[i]->getBindIndex() ) ) {
 			activeTicks_.push_back( ticks_[i] );
 			activeTicksMap_.push_back( i );
+			if ( ticks_[i] > 0 && stride_ > ticks_[i] )
+				stride_ = ticks_[i];
 		}
 	}
+	// Should really do the HCF of N numbers here to get the stride.
 }
 
 /**
@@ -580,10 +532,10 @@ void Clock::handleStep( const Eref& e, unsigned int numSteps )
 	nSteps_ += numSteps;
 	runTime_ = nSteps_ * dt_;
 	for ( isRunning_ = true;
-		isRunning_ && currentStep_ < nSteps_; ++currentStep_ )
+		isRunning_ && currentStep_ < nSteps_; currentStep_ += stride_ )
 	{
 		// Curr time is end of current step.
-		unsigned int endStep = currentStep_ + 1;
+		unsigned int endStep = currentStep_ + stride_;
 		currentTime_ = info_.currTime = dt_ * endStep;
 		vector< unsigned int >::const_iterator k = activeTicksMap_.begin();
 		for ( vector< unsigned int>::iterator j = 
@@ -650,3 +602,163 @@ double Dsolve::findDt( const Eref& e )
 	return dt;
 }
 */
+
+/**
+ * This is the authoritative database of default tick assignments
+ * for each class. This is here because one needs to see relative
+ * locations of all assignments in order to do this.
+ * This assumes that in cases where there are two ticks (such as
+ * init and process) for a single class, then they are sequential.
+ * Base classes are also represented here. They are checked as a fallback
+ * if the more specific class lookup fails.
+ * Certain classes, such as Zombies, explicitly do not get scheduled
+ * even though they may inherit process messages. These are given
+ * the tick ~0U.
+ */
+void Clock::buildDefaultTick()
+{
+	defaultTick_["DiffAmp"] = 0;
+	defaultTick_["Interpol"] = 0;
+	defaultTick_["PIDController"] = 0;
+	defaultTick_["PulseGen"] = 0;
+	defaultTick_["StimulusTable"] = 0;
+	defaultTick_["testSched"] = 0;
+	defaultTick_["VClamp"] = 0;
+	defaultTick_["SynHandlerBase"] = 1;
+	defaultTick_["SimpleSynHandler"] = 1;
+	defaultTick_["CaConc"] = 1;
+	defaultTick_["CaConcBase"] = 1;
+	defaultTick_["DifShell"] = 1;
+	defaultTick_["MgBlock"] = 1;
+	defaultTick_["Nernst"] = 1;
+	defaultTick_["RandSpike"] = 1;
+	defaultTick_["ChanBase"] = 2;
+	defaultTick_["IntFire"] = 2;
+	defaultTick_["IzhikevichNrn"] = 2;
+	defaultTick_["SynChan"] = 2;
+	defaultTick_["GapJunction"] = 2;
+	defaultTick_["HHChannel"] = 2;
+	defaultTick_["HHChannel2D"] = 2;
+	defaultTick_["Leakage"] = 2;
+	defaultTick_["MarkovChannel"] = 2;
+	defaultTick_["MarkovGslSolver"] = 2;
+	defaultTick_["MarkovRateTable"] = 2;
+	defaultTick_["MarkovSolver"] = 2;
+	defaultTick_["MarkovSolverBase"] = 2;
+	defaultTick_["RC"] = 2;
+	defaultTick_["Compartment"] = 4; // Note these use an 'init', at t-1.
+	defaultTick_["CompartmentBase"] = 4; // Uses 'init'
+	defaultTick_["SymCompartment"] = 4; // Uses 'init'
+	defaultTick_["SpikeGen"] = 5;
+	defaultTick_["HSolve"] = 6;
+	defaultTick_["SpikeStats"] = 7;
+
+	defaultTick_["Dsolve"] = 10;
+	defaultTick_["Adaptor"] = 11;
+	defaultTick_["Func"] = 12;
+	defaultTick_["Arith"] = 12;
+	defaultTick_["FuncBase"] = 12;
+	defaultTick_["FuncPool"] = 12;
+	defaultTick_["MathFunc"] = 12;
+	defaultTick_["SumFunc"] = 12;
+	defaultTick_["BufPool"] = 13;
+	defaultTick_["Pool"] = 13;
+	defaultTick_["PoolBase"] = 13;
+	defaultTick_["CplxEnzBase"] = 14;
+	defaultTick_["Enz"] = 14;
+	defaultTick_["EnzBase"] = 42;
+	defaultTick_["MMenz"] = 14;
+	defaultTick_["Reac"] = 14;
+	defaultTick_["ReacBase"] = 14;
+	defaultTick_["Gsolve"] = 16; // Note this uses an 'init' at t-1
+	defaultTick_["Ksolve"] = 16; // Note this uses an 'init' at t-1
+
+	defaultTick_["Stats"] = 17;
+	defaultTick_["Table"] = 18;
+	defaultTick_["TimeTable"] = 18;
+	defaultTick_["HDF5DataWriter"] = 30;
+	defaultTick_["HDF5WriterBase"] = 30;
+	defaultTick_["PostMaster"] = 31;
+
+	defaultTick_["Annotator"] = ~0U;
+	defaultTick_["ChemCompt"] = ~0U;
+	defaultTick_["Cinfo"] = ~0U;
+	defaultTick_["Clock"] = ~0U;
+	defaultTick_["CubeMesh"] = ~0U;
+	defaultTick_["CylMesh"] = ~0U;
+	defaultTick_["DiagonalMsg"] = ~0U;
+	defaultTick_["Double"] = ~0U;
+	defaultTick_["Finfo"] = ~0U;
+	defaultTick_["Group"] = ~0U;
+	defaultTick_["HHGate"] = ~0U;
+	defaultTick_["HHGate2D"] = ~0U;
+	defaultTick_["Interpol2D"] = ~0U;
+	defaultTick_["Long"] = ~0U;
+	defaultTick_["MeshEntry"] = ~0U;
+	defaultTick_["Msg"] = ~0U;
+	defaultTick_["Mstring"] = ~0U;
+	defaultTick_["Neuron"] = ~0U;
+	defaultTick_["NeuroMesh"] = ~0U;
+	defaultTick_["Neutral"] = ~0U;
+	defaultTick_["OneToAllMsg"] = ~0U;
+	defaultTick_["OneToOneDataIndexMsg"] = ~0U;
+	defaultTick_["OneToOneMsg"] = ~0U;
+	defaultTick_["PsdMesh"] = ~0U;
+	defaultTick_["Shell"] = ~0U;
+	defaultTick_["SingleMsg"] = ~0U;
+	defaultTick_["SparseMsg"] = ~0U;
+	defaultTick_["Species"] = ~0U;
+	defaultTick_["SpineMesh"] = ~0U;
+	defaultTick_["SteadyState"] = ~0U;
+	defaultTick_["Stoich"] = ~0U;
+	defaultTick_["Synapse"] = ~0U;
+	defaultTick_["TableBase"] = ~0U;
+	defaultTick_["Unsigned"] = ~0U;
+	defaultTick_["VectorTable"] = ~0U;
+	defaultTick_["ZombieBufPool"] = ~0U;
+	defaultTick_["ZombieCaConc"] = ~0U;
+	defaultTick_["ZombieCompartment"] = ~0U;
+	defaultTick_["ZombieEnz"] = ~0U;
+	defaultTick_["ZombieFuncPool"] = ~0U;
+	defaultTick_["ZombieHHChannel"] = ~0U;
+	defaultTick_["ZombieMMenz"] = ~0U;
+	defaultTick_["ZombiePool"] = ~0U;
+	defaultTick_["ZombieReac"] = ~0U;
+
+	defaultDt_.assign( Clock::numTicks, 0.0 );
+	defaultDt_[0] = 50.0e-6;
+	defaultDt_[1] = 50.0e-6;
+	defaultDt_[2] = 50.0e-6;
+	defaultDt_[3] = 50.0e-6;
+	defaultDt_[4] = 50.0e-6;
+	defaultDt_[5] = 50.0e-6;
+	defaultDt_[6] = 50.0e-6;
+	defaultDt_[7] = 50.0e-6;
+	defaultDt_[8] = 0.0; // Not assigned
+	defaultDt_[9] = 5.0e-3;
+	defaultDt_[10] = 0.01;
+	defaultDt_[11] = 0.1;
+	defaultDt_[12] = 0.1;
+	defaultDt_[13] = 0.1;
+	defaultDt_[14] = 0.1;
+	defaultDt_[15] = 0.1;
+	defaultDt_[16] = 0.1;
+	defaultDt_[17] = 1;
+	defaultDt_[18] = 1;
+	// 19-29 are not assigned.
+	defaultDt_[30] = 1;	// For the HDF writer
+	defaultDt_[31] = 0.01; // For the postmaster.
+}
+
+// Static function
+unsigned int Clock::lookupDefaultTick( const string& className )
+{
+	map< string, unsigned int >::const_iterator i = 
+			defaultTick_.find( className );
+	if ( i == defaultTick_.end() ) {
+		cout << "Warning: unknown className: '" << className << "'.\n" <<
+	   "Advisable to update the defaultTick table in the Clock class.\n";
+		return 0;
+	}
+	return i->second;
+}

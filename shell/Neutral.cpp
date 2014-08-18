@@ -70,6 +70,26 @@ const Cinfo* Neutral::initCinfo()
 			&Neutral::setNumField,
 			&Neutral::getNumField );
 
+	static ElementValueFinfo< Neutral, int > 
+		tick( 
+		"tick",
+		"Clock tick for this Element for periodic execution in the "
+		"main simulation event loop. A default is normally assigned, "
+	    "based on object class, but one can override to any value "
+		"between 0 and 19. Assigning to -1 means that the object is "
+		"disabled and will not be called during simulation execution "
+		"The actual timestep (dt) belonging to a clock tick is defined "
+		"by the Clock object.",
+			&Neutral::setTick,
+			&Neutral::getTick );
+
+	static ReadOnlyElementValueFinfo< Neutral, double > 
+			dt(
+			"dt",
+			"Timestep used for this Element. Zero if not scheduled.",
+			&Neutral::getDt );
+
+
 	static ReadOnlyElementValueFinfo< Neutral, vector< string > > 
 			valueFields(
 			"valueFields",
@@ -183,6 +203,8 @@ const Cinfo* Neutral::initCinfo()
 		&className,				// ReadOnlyValue
 		&numData,				// Value
 		&numField,				// Value
+		&tick,					// Value
+		&dt,					// ReadOnlyValue
 		&valueFields,			// ReadOnlyValue
 		&sourceFields,			// ReadOnlyValue
 		&destFields,			// ReadOnlyValue
@@ -366,6 +388,26 @@ void Neutral::setNumField( const Eref& e, unsigned int num )
 	e.element()->resizeField( rawIndex, num );
 }
 
+int Neutral::getTick( const Eref& e ) const
+{
+	return e.element()->getTick();
+}
+
+void Neutral::setTick( const Eref& e, int num )
+{
+	e.element()->setTick( num );
+}
+
+double Neutral::getDt( const Eref& e ) const
+{
+	int tick = e.element()->getTick();
+	if ( tick < 0 ) 
+		return 0.0;
+	Id clockId( 1 );
+	return LookupField< unsigned int, double >::get(
+		clockId, "tickDt", tick );
+}
+
 vector< string > Neutral::getValueFields( const Eref& e ) const
 {
 	unsigned int num = e.element()->cinfo()->getNumValueFinfo();
@@ -491,7 +533,10 @@ unsigned int Neutral::buildTree( const Eref& e, vector< Id >& tree )
 	const 
 {
 	unsigned int ret = 1;
-	vector< Id > kids = getChildren( e );
+	Eref er( e.element(), ALLDATA );
+	vector< Id > kids = getChildren( er );
+	sort( kids.begin(), kids.end() );
+	kids.erase( unique( kids.begin(), kids.end() ), kids.end() );
 	for ( vector< Id >::iterator i = kids.begin(); i != kids.end(); ++i )
 		ret += buildTree( i->eref(), tree );
 	tree.push_back( e.element()->id() );
@@ -508,7 +553,8 @@ unsigned int Neutral::buildTree( const Eref& e, vector< Id >& tree )
 void Neutral::destroy( const Eref& e, int stage )
 {
 	vector< Id > tree;
-	unsigned int numDescendants = buildTree( e, tree );
+	Eref er( e.element(), ALLDATA );
+	unsigned int numDescendants = buildTree( er, tree );
 	/*
 	cout << "Neutral::destroy: id = " << e.id() << 
 		", name = " << e.element()->getName() <<

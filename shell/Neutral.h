@@ -123,6 +123,20 @@ class Neutral
 		void setNumField( const Eref& e, unsigned int num );
 		unsigned int getNumField( const Eref& e ) const;
 
+		/**
+		 * The clock Tick specifies the timing and order of execution
+		 * of the 'process' action of this object in the simulation. 
+		 * The timing is set by assigning the appropriate dt to
+		 * this tick in the Clock object.
+		 * A value of -1 means that the object is disabled.
+		 */
+		void setTick( const Eref& e, int num );
+		/// Returns clock tick of this object.
+		int getTick( const Eref& e ) const;
+
+		/// Returns dt associated with this object based on its clock tick.
+		double getDt( const Eref& e ) const;
+
 		/// Information function to return names of all value Finfos.
 		vector< string > getValueFields( const Eref& e ) const;
 		/// Information function to return names of all SrcFinfos.

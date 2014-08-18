@@ -1819,10 +1819,9 @@ void testShell( )
 	testChopPath();
 	testTreeTraversal();
 	testChildren();
-	// testShellParserQuit();
+	////// testShellParserQuit();
 	testGetMsgs();	// Tests getting Msg info from Neutral.
 	testGetMsgSrcAndTarget();
-	// testShellMesh();
 	
 	// This is a multinode test, but only needs to run on master node.
 	testFilterOffNodeTargets();

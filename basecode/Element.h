@@ -104,6 +104,29 @@ class Element
 		///specified node. 
 		virtual unsigned int getNumOnNode( unsigned int node ) const = 0;
 
+		/**
+		 * Returns Clock tick used by object. -1 means none. 
+		 * -2 means none for now because I am a zombie, but if I should
+		 * be unzombified please put me back on my default clock tick.
+		 */
+		int getTick() const;
+
+		/**
+		 * Assigns clock tick to be used by object. -1 means none.
+		 * This function does substantial message manipulation to set up
+		 * the message from the Clock object to the current object to
+		 * define the Tick. Furthermore, if the object has both init and
+		 * proc methods, it will set them both up, with the init method
+		 * on 't-1' and the proc method on 't'
+		 */
+		void setTick( int t );
+
+		/**
+		 * Direct assignment of tick field, without doing any of the 
+		 * message manipulation
+		 */
+		void innerSetTick( unsigned int tick );
+
 		/////////////////////////////////////////////////////////////////
 		// data access stuff
 		/////////////////////////////////////////////////////////////////
@@ -240,6 +263,11 @@ class Element
 		 */
 		void printMsgDigest( unsigned int srcIndex, unsigned int dataIndex ) const;
 
+		/**
+		 * Drop all messages arriving from src onto current Element,
+		 * regardless of which field they come from.
+		 */
+		void dropAllMsgsFromSrc( Id src );
 	/////////////////////////////////////////////////////////////////////
 	// Utility functions for message traversal
 	/////////////////////////////////////////////////////////////////////
@@ -323,8 +351,10 @@ class Element
 		 * Allocates a new data block using zCinfo,
 		 * that matches the number of entries of the old data block.
 		 * Deletes old data.
+		 * The base version calls the Clock object to assign
+		 * a suitable default clock.
 		 */
-		virtual void zombieSwap( const Cinfo* zCinfo ) = 0;
+		virtual void zombieSwap( const Cinfo* zCinfo );
 	protected:
 		/// Support function for zombieSwap, replaces Cinfo.
 		void replaceCinfo( const Cinfo* newCinfo );
@@ -383,6 +413,9 @@ class Element
 		 * to redo the ordering.
 		 */
 		vector< vector < MsgDigest > > msgDigest_;
+
+		/// Returns tick on which element is scheduled. -1 for disabled.
+		int tick_;
 
 		/// True if messages have been changed and need to digestMessages.
 		bool isRewired_; 
