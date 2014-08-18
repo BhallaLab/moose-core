@@ -4739,5 +4739,28 @@ Reorganizing directory structure.
 			/Rallpacks
 			...
 	
+
+Set up code for default ticks and their assignment during creation.
+Lots of additional infrastructure code too.
+I should assign default dts for these ticks, after making sure that
+empty dts dont get invoked in the clock loop.
+Also need to fix # of ticks.
 	
+Yet to compile.
+=============================================================================
+18 Aug 2014.
+
+* Set up default dts.
+* Fixed # of ticks. Not totally automatic, but mostly so.
+* Check invocation of empty dts and correct spec of base dt.
+
+I now have it working, need to retrofit some unit tests.
+- Along the way found and fixed a bug with deleting child elements - it was
+not getting all of them. But this needs to be revisited using a low-level
+Element call because it is very inefficient.
+- Need to write a snippet to show equivalent ways of scheduling something.
+- Need to check zombification and automatic clearing/rebuilding of ticks.
+	Clearing doesn't happen
+- Would like some more intelligence in how to assign the Table tick for plots.
+
 =============================================================================

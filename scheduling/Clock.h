@@ -94,6 +94,17 @@ class Clock
 		/// Utility func to range-check when Ticks are being changed.
 		bool checkTickNum( const string& funcName, unsigned int i ) const;
 
+		/** 
+		 * Look up the default Tick number for the specified class.
+		 * Note that for objects having an 'init' action as well as process,
+		 * the assigned tick is for 'init' and the next number will be
+		 * used for 'process'.
+		 */
+		static unsigned int lookupDefaultTick( const string& className );
+
+		/// Builds the default scheduling map of classes to ticks.
+		static void buildDefaultTick();
+
 		/*
 		 * Does nasty message traversal to look up the clock tick that
 		 * sends the Process/reinit message to the Dsolve (specified by e)
@@ -101,12 +112,18 @@ class Clock
 			static double findDt( const Eref& e );
 		 */
 
+		/**
+		 * number of Ticks.
+		 */
+		static const unsigned int numTicks;
+
 	private:
 		void buildTicks( const Eref& e );
 		double runTime_;
 		double currentTime_;
 		unsigned int nSteps_;
 		unsigned int currentStep_;
+		unsigned int stride_; // Increment to currentStep each cycle.
 		double dt_; /// The minimum dt. All ticks are a multiple of this.
 
 		/**
@@ -143,9 +160,13 @@ class Clock
 		vector< unsigned int > activeTicksMap_;
 
 		/**
-		 * number of Ticks.
+		 * This is the database of default scheduling. Assigns
+		 * classes to ticks. Filled in at Clock creation time.
 		 */
-		static const unsigned int numTicks;
+		static map< string, unsigned int > defaultTick_;
+
+		static vector< double > defaultDt_;
+
 };
 
 #endif // _CLOCK_H
