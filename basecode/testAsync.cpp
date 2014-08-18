@@ -307,7 +307,7 @@ void testSetGetDouble()
 
 	string arg;
 	Id i2 = Id::nextId();
-	Id i3( i2.value() + 1 );
+	// Id i3( i2.value() + 1 );
 	Element* ret = new GlobalDataElement( i2, ic, "test2", size );
 	assert( ret );
 	ProcInfo p;
@@ -331,7 +331,7 @@ void testSetGetDouble()
 
 	cout << "." << flush;
 	delete i2.element();
-	delete i3.element();
+	// delete i3.element();
 }
 
 void testSetGetSynapse()
@@ -434,15 +434,17 @@ void testSendSpike()
 	Id i2 = Id::nextId();
 	Element* temp = new GlobalDataElement( i2, ic, "test2", size );
 	assert( temp );
+	Id i3 = Id::nextId();
+	Element* temp2 = new GlobalDataElement( i3, sc, "syns", size );
+	assert( temp2 );
 	Eref e2 = i2.eref();
 	for ( unsigned int i = 0; i < size; ++i ) {
-		// Eref er( i2(), i );
-		ObjId oid( i2, i );
+		ObjId oid( i3, i );
 		bool ret = Field< unsigned int >::set( oid, "numSynapses", i );
 		assert( ret );
 	}
 
-	Id synId( i2.value() + 1 );
+	Id synId( i3.value() + 1 );
 	ObjId target( synId , 1 );
 
 	reinterpret_cast< Synapse* >(target.data())->setWeight( WEIGHT );
@@ -450,7 +452,7 @@ void testSendSpike()
 	SingleMsg *m = new SingleMsg( e2, target.eref(), 0 );
 	const Finfo* f1 = ic->findFinfo( "spikeOut" );
 	const Finfo* f2 = sc->findFinfo( "addSpike" );
-	bool ret = f1->addMsg( f2, m->mid(), e2.element() );
+	bool ret = f1->addMsg( f2, m->mid(), synId.element() );
 	assert( ret );
 
 	reinterpret_cast< IntFire* >(e2.data())->setVm( 1.0 );
@@ -467,8 +469,10 @@ void testSendSpike()
 	reinterpret_cast< IntFire* >(targetCell.data())->process( targetCell.eref(), &p );
 	Vm = Field< double >::get( targetCell, "Vm" );
 	assert( doubleEq( Vm , WEIGHT * ( 1.0 - DT / TAU ) ) );
-	cout << "." << flush;
 	delete i2.element();
+	delete i3.element();
+	delete synId.element();
+	cout << "." << flush;
 }
 
 void printSparseMatrix( const SparseMatrix< unsigned int >& m)
@@ -848,8 +852,8 @@ void testSparseMsg()
 		// cells()->process( &p, df->getFid() );
 	}
 
-	delete syns.element();
-	delete cells.element();
+	delete t2;
+	delete t3;
 	cout << "." << flush;
 }
 
@@ -1511,9 +1515,9 @@ void testCinfoFields()
 	assert( cinfo->getSrcFinfo( 0 + nsf ) == cinfo->findFinfo( "spikeOut" ) );
 
 	unsigned int ndf = neutralCinfo->getNumDestFinfo();
-	assert( ndf == 22 );
+	assert( ndf == 25 );
 	unsigned int sdf = IntFire::initCinfo()->getNumDestFinfo();
-	assert( sdf == 33 );
+	assert( sdf == 36 );
 
 	/*
 	assert( cinfo->getDestFinfo( 0+ndf )->name() == "setNumSynapses" );
@@ -1537,7 +1541,7 @@ void testCinfoFields()
 
 
 	unsigned int nvf = neutralCinfo->getNumValueFinfo();
-	assert( nvf == 14 );
+	assert( nvf == 16 );
 	assert( cinfo->getNumValueFinfo() == 4 + nvf );
 	assert( cinfo->getValueFinfo( 0 + nvf ) == cinfo->findFinfo( "Vm" ) );
 	assert( cinfo->getValueFinfo( 1 + nvf ) == cinfo->findFinfo( "tau" ) );

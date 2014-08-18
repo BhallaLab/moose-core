@@ -740,6 +740,7 @@ void Shell::innerCreate( string type, ObjId parent, Id newElm, string name,
 		};
 		assert( ret );
 		adopt( parent, newElm, msgIndex );
+		ret->setTick( Clock::lookupDefaultTick( c->name() ) );
 	} else{
 		assert( 0 );
 	}
@@ -782,6 +783,7 @@ void Shell::handleAddMsg( const Eref& e,
  * The actual function that adds messages. Does NOT send an ack.
  * The msgIndex specifies the index on which to place this message. If the
  * value is zero it does an automatic placement.
+ * Returns zero on failure.
  */
 const Msg* Shell::innerAddMsg( string msgType,
 	ObjId src, string srcField, 
@@ -936,9 +938,11 @@ void Shell::addClockMsgs(
 		if ( i->element() ) {
 			stringstream ss;
 			ss << "proc" << tick;
-			innerAddMsg( "OneToAll",
+			const Msg* m = innerAddMsg( "OneToAll",
 				clockId, ss.str(), 
 				*i, field, msgIndex++ );
+			if ( m )
+				i->element()->innerSetTick( tick );
 		}
 	}
 }
@@ -960,6 +964,9 @@ bool Shell::innerUseClock( string path, string field, unsigned int tick,
 		field = "init"; 
 	
 	addClockMsgs( list, field, tick, msgIndex );
+	for ( vector< ObjId >::iterator 
+					i = list.begin(); i != list.end(); ++i )
+			i->id.element()->innerSetTick( tick );
 	return 1;
 }
 
