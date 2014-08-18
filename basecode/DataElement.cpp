@@ -112,4 +112,5 @@ void DataElement::zombieSwap( const Cinfo* zCinfo )
 	data_ = zCinfo->dinfo()->allocData( numLocalData_ );
 	replaceCinfo( zCinfo );
 	size_ = zCinfo->dinfo()->sizeIncrement();
+	Element::zombieSwap( zCinfo ); // Handles clock tick reassignment.
 }

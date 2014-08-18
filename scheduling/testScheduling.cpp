@@ -169,8 +169,21 @@ void testClock()
 	cout << "." << flush;
 }
 
+void testClockMessaging()
+{
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	Clock* cdata = reinterpret_cast< Clock* >( Id(1).eref().data() );
+	Id syns = shell->doCreate( "SimpleSynHandler", Id(), "syns0", 10 );
+	Id fire = shell->doCreate( "IntFire", Id(), "fire0", 10 );
+
+	shell->doDelete( syns );
+	shell->doDelete( fire );
+	cout << "." << flush;
+}
+
 void testScheduling()
 {
+	testClockMessaging();
 	testClock();
 }
 
