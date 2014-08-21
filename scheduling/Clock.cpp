@@ -118,8 +118,11 @@ const Cinfo* Clock::initCinfo()
 	// Field definitions
 	///////////////////////////////////////////////////////
 		static ValueFinfo< Clock, double > dt( 
-			"dt",
-			"Base timestep for simulation",
+			"baseDt",
+			"Base timestep for simulation. This is the smallest dt out "
+			"of all the clock ticks. By definition all other timesteps "
+			"are integral multiples of this, and are rounded to "
+			"ensure that this is the case . ",
 			&Clock::setDt,
 			&Clock::getDt
 		);
@@ -275,7 +278,7 @@ const Cinfo* Clock::initCinfo()
 		"Every object scheduled for operations in MOOSE is connected to one"
 		"of the 'Tick' entries on the Clock."
 		"The Clock manages 32 'Ticks', each of which has its own dt,"
-		"which is an integral multiple of the base clock dt_. "
+		"which is an integral multiple of the clock baseDt_. "
 		"On every clock step the ticks are examined to see which of them"
 		"is due for updating. When a tick is updated, the 'process' call "
 		"of all the objects scheduled on that tick is called. "

@@ -54,9 +54,8 @@ def main():
                 '''
 
 	# Display all plots.
-        dt = moose.element( '/clock' ).dt
 	for x in moose.wildcardFind( '/model/#graphs/conc#/#' ):
-            t = numpy.arange( 0, x.vector.size, 1 ) * dt
+            t = numpy.arange( 0, x.vector.size, 1 ) * x.dt
             pylab.plot( t, x.vector, label=x.name )
         pylab.legend()
         pylab.show()

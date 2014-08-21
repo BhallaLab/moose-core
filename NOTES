@@ -4762,5 +4762,70 @@ Element call because it is very inefficient.
 - Need to check zombification and automatic clearing/rebuilding of ticks.
 	Clearing doesn't happen
 - Would like some more intelligence in how to assign the Table tick for plots.
+- Need to redo ReadKkit and ReadCspace to put objects appropriately, and to
+	fit with the new scheduling.
 
 =============================================================================
+19 Aug
+A documentation framework. The Use of Moose.
+
+1. What is MOOSE and what is it good for?
+
+2. Loading and running models
+	2.1 Hello, MOOSE: Load, run and display existing models.
+	2.2 Adding graphs
+	2.2 Start, stop, and speed: Timing and scheduling
+	2.3 Accessing and tweaking parameters
+	2. Storing simulation output.
+
+3. Chemical signaling models
+	3.1 Loading, modifying, saving
+	3.2 Running with different numerical methods
+	3.3 Changing volumes
+	3.4 Feeding tabulated input to a model
+	3.5 Finding steady states
+	3.6 Making a dose-response curve
+	3.7 Building a chemical model from parts.
+	3.8 Oscillation models
+	3.8 Bistability models
+
+4. Reaction-diffusion models
+	4.1 In a cylinder
+	4.2 In a neuron
+	4.3 Reaction+diffusion+motor transport
+	4.4 A Turing model
+	4.5 A spatial bistable model.
+
+5. Single cell models
+	5.1 Loading, modifying, saving
+	5.2 Explicit vs. implicit methods
+	5.3 Integrate-and-fire models
+	5.4 The HH model
+	5.5 Analyzing spike trains
+
+6. Network models
+	6.1 Connecting two cells together
+	6.2 Regular and plastic synapses
+	6.3 Providing random input to a cell
+	6.4 A recurrent integrate-and-fire network
+	6.5 An integrate-and-fire network with plasticity
+	6.6 A feed-forward network with random input
+	6.7 Using compartmental models in networks.
+
+7. Multiscale models
+	7.1 A multiscale HH model with chemical feedback
+	7.2 A multiscale compartmental model with chemical feedback
+
+8. Graphics
+	8.1 Displaying time-series plots 
+	8.2 Animation of values along an axis.
+	8.3 Using MOOGLI widgets to display a neuron
+
+
+
+
+Looks like problem in unzombification is that upon stoich deletion the
+objects dont get unzombified. Which is because of ordering issues.
+If I remember, the Elemetns know if they are slated for destruction.
+
+

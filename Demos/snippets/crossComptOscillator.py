@@ -94,7 +94,6 @@ def main():
                 '''
 
 	# Display all plots.
-        dt = moose.element( '/clock' ).dt
 	for x in moose.wildcardFind( '/model/#graphs/conc#/#' ):
             t = numpy.arange( 0, x.vector.size, 1 ) * simDt
             pylab.plot( t, x.vector, label=x.name )
