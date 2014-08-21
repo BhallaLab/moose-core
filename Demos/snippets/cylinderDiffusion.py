@@ -12,7 +12,8 @@ This example illustrates how to set up a diffusion/transport model with
 a simple reaction-diffusion system in a cylinder: 
 
 | Molecule A diffuses with DiffConst of 2e-12 m^2/sec. 
-| Molecule B undergoes motor transport with a rate of 1e-6 microns/sec.
+| Molecule B diffuses with DiffConst of 1e-12 m^2/sec. 
+| Molecule B also undergoes motor transport with a rate of 1e-6 microns/sec.
 | Molecule C does not move: diffConst = 0.0
 | Molecule D does not move: diffConst = 1.0e-12 but it is buffered.
 
@@ -72,7 +73,7 @@ def makeModel():
 		# Assign parameters
 		a.diffConst = diffConst
 		b.diffConst = diffConst / 2.0
-		#b.motorRate = motorRate
+		b.motorConst = motorRate
 		c.diffConst = 0
 		d.diffConst = diffConst
 
