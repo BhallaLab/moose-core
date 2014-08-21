@@ -4826,6 +4826,11 @@ A documentation framework. The Use of Moose.
 
 Looks like problem in unzombification is that upon stoich deletion the
 objects dont get unzombified. Which is because of ordering issues.
-If I remember, the Elemetns know if they are slated for destruction.
+If I remember, the Elements know if they are slated for destruction.
 
+=============================================================================
+21 Aug.
+	Proceeding with documentation. Put in general chapter outline for
+the MOOSE cookbook.
 
+=============================================================================

@@ -28,13 +28,114 @@ The demo has built-in documentation and may be run from the
 ``Demos/squid``
 subdirectory of MOOSE.
 
-Stop, Start, and clocks
+Start, Stop, and Speed
 ^^^^^^^^^^^^^^^^^^^^^^^
 .. automodule:: startstop
 
-Cylinder Diffusion
-------------------
+Accessing and tweaking parameters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: tweakingParameters
+
+Storing simulation output
+^^^^^^^^^^^^^^^^^^^^^^^^^
+Here we'll show how to store and dump from a table and also using HDF5.
+
+.. automodule:: hdfdemo
+
+Chemical Signaling models
+-------------------------
+This section of the documentation explains how to do operations specific
+to the chemical signaling.
+
+Running with different numerical methods
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+load solvers.
+
+Changing volumes
+^^^^^^^^^^^^^^^^
+.. automodule:: scriptGssaVols.py
+
+Feeding tabulated input to a model
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Finding steady states
+^^^^^^^^^^^^^^^^^^^^^
+
+Making a dose-response curve
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Building a chemical model from parts
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Oscillation models
+^^^^^^^^^^^^^^^^^^
+
+Bistability models
+^^^^^^^^^^^^^^^^^^
+
+Reaction-diffusion models
+-------------------------
+
+Reaction-diffusion in a cylinder
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. automodule:: cylinderDiffusion
+
+Reaction-diffusion in a neuron
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Reaction-diffusion + motor + transport
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A Turing model
+^^^^^^^^^^^^^^
+
+A spatial bistable model
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+Single cell models
+------------------
+
+Loading, modifying, saving
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+Explicit vs. implict methods
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Integrate-and-fire models
+^^^^^^^^^^^^^^^^^^^^^^^^^
+The HH model
+^^^^^^^^^^^^
+Analyzing spike trains
+^^^^^^^^^^^^^^^^^^^^^^
+
+Network models
+--------------
+Connecting two cells together
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Regular and plastic synapses
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Providing random input to a cell
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+A recurrent integrate-and-fire network
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+A recurrent integrate-and-fire network with plastiicty
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+A feed-forward network with random input
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Using compartmental models in networks
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Multiscale models
+-----------------
+A multiscale HH model with chemical feedback
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Graphics
+--------
+Displaying time-series plots
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Animation of values along an axis
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Using MOOGLI widgets to display a neuron
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 HDF5 Writer
 -----------
