@@ -229,7 +229,7 @@ Stoich::Stoich()
 
 Stoich::~Stoich()
 {
-	// unZombifyModel();
+	unZombifyModel();
 	// Note that we cannot do the unZombify here, because it is too
 	// prone to problems with the ordering of the delete operations
 	// relative to the zombies.
@@ -971,6 +971,8 @@ void Stoich::unZombifyPools()
 	unsigned int i;
 	for ( i = 0; i < numVarPools_; ++i ) {
 		Element* e = idMap_[i].element();
+		if ( !e || e->isDoomed() )
+			continue;
 		if ( e != 0 &&  e->cinfo() == zombiePoolCinfo )
 			PoolBase::zombify( e, poolCinfo, Id(), Id() );
 	}
@@ -980,6 +982,8 @@ void Stoich::unZombifyPools()
 	for ( ; i < tot; ++i )
    	{
 		Element* e = idMap_[i].element();
+		if ( !e || e->isDoomed() )
+			continue;
 		if ( e != 0 &&  e->cinfo() == zombieBufPoolCinfo )
 			PoolBase::zombify( e, bufPoolCinfo, Id(), Id() );
 	}

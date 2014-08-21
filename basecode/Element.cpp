@@ -150,11 +150,14 @@ void Element::clearAllMsgs()
 /// virtual func, this base version must be called by all derived classes
 void Element::zombieSwap( const Cinfo* c )
 {
+	cout << name_ << ", cname=" << c->name() << 
+		 ", t0 = " << this->tick_ << ", t1 = " << 
+				 Clock::lookupDefaultTick( c->name() ) << endl;
 	if ( tick_ == -1 ) { // Object is already disabled, let it be.
 		return;
 	}
 	if ( tick_ == -2 ) { // Object was a zombie and wants to come home.
-		int t = Clock::lookupDefaultTick( cinfo_->name() );
+		int t = Clock::lookupDefaultTick( c->name() );
 		setTick( t );
 	} else if ( tick_ >= 0 ) { // disable clock, with option to return
 		setTick( -2 );
