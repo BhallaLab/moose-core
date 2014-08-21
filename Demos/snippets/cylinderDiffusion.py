@@ -7,13 +7,18 @@
 ## See the file COPYING.LIB for the full notice.
 #########################################################################
 
-# This example illustrates how to set up a diffusion/transport model with 
-# four non-reacting molecules in a cylinder. Molecule A diffuses with
-# DiffConst of 2e-12 m^2/sec. Molecule B undergoes motor transport
-# with a rate of 1e-6 microns/sec.
-# Molecule C does not move: diffConst = 0.0
-# Molecule D does not move: diffConst = 1.0e-12 but it is buffered.
-# There is a little reaction: b + d <===> c
+"""
+This example illustrates how to set up a diffusion/transport model with 
+a simple reaction-diffusion system in a cylinder: 
+
+| Molecule A diffuses with DiffConst of 2e-12 m^2/sec. 
+| Molecule B undergoes motor transport with a rate of 1e-6 microns/sec.
+| Molecule C does not move: diffConst = 0.0
+| Molecule D does not move: diffConst = 1.0e-12 but it is buffered.
+
+There is a little reaction: ``b + d <===> c``
+Note that molecule A does not participate in this reaction.
+"""
 
 import sys
 sys.path.append('../../python')
@@ -25,7 +30,6 @@ import moose
 import os
 import signal 
 PID = os.getpid()
-
 
 def doNothing( *args ):
 		pass

@@ -45,6 +45,16 @@
 
 # Code:
 
+"""
+This demo shows how to start, stop, and continue a simulation. The model
+is just the output of a PulseGen object which generates periodic pulses.
+The demo shows how to start the simulation. using the 
+*moose.reinit* command to reset the model to its initial state,
+and *moose.start* command to run the model for the specified duration. 
+The demo also shows a number of ways to assign the timestep (dt) to each
+object in the simulation.
+"""
+
 import time
 import pylab
 
