@@ -1,3 +1,5 @@
+
+
 # This example illustrates loading and running, a kinetic model 
 # defined in cspace format. We use the gsl solver here. The model already
 # defines a couple of plots and sets the runtime to 100 seconds. The
@@ -11,14 +13,10 @@ import moose
 def main():
 		# This command loads the file into the path '/model', and tells
 		# the system to use the gsl solver.
-		modelId = moose.loadModel( 'Osc.cspace', 'model', 'Neutral' )
+		modelId = moose.loadModel( 'Osc.cspace', 'model', 'gsl' )
 		moose.useClock( 4, "/model/kinetics/##[]", "process" )
-		moose.setClock( 4, 0.01 )
+		moose.setClock( 4, 0.05 )
 		moose.setClock( 8, 1 )
-		"""
-		moose.useClock( 5, "/model/graphs/##", "process" )
-		moose.setClock( 5, 1 )
-		"""
 		moose.reinit()
 		moose.start( 3000.0 ) # Run the model for 300 seconds.
 
