@@ -271,6 +271,7 @@ if(BUILD_PYMOOSE)
 
     target_link_libraries(_moose 
         "-Wl,--whole-archive"
+        moose_builtins
         moosepython
         basecode
         msg
@@ -278,7 +279,6 @@ if(BUILD_PYMOOSE)
         randnum
         scheduling
         moose_mpi
-        moose_builtins
         utility 
         muparser
         biophysics 
