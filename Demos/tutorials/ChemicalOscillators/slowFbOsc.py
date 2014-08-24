@@ -29,7 +29,7 @@ def main():
 	if ( len( sys.argv ) >= 2 ):
                 solver = sys.argv[1]
 	modelId = moose.loadModel( mfile, 'model', solver )
-        dt = moose.element( '/clock' ).dt
+        dt = moose.element( '/clock' ).tickDt[18]
 
 	moose.reinit()
 	moose.start( runtime ) 
