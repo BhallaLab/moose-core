@@ -4558,9 +4558,9 @@ Moose key things to do before release and paper:
 *Ksolve cross compartment
 +Synapses
 KKit GUI
-Clocks
+*Clocks
 *Identifying message source.
-Documentation
++Documentation
 	Tutorials
 		- How to load and run a neuronal model (using NEUROML)
 		- How to load and run a chemical kinetic model (using
@@ -4602,7 +4602,6 @@ Designing synapse handling. Many problems with previous.
 	- Pass in presyn Vm
 	- pass in time since last AP??
 	- Pop it if ready, go back for more.
-
 
 =============================================================================
 14 Aug
@@ -4759,7 +4758,7 @@ I now have it working, need to retrofit some unit tests.
 not getting all of them. But this needs to be revisited using a low-level
 Element call because it is very inefficient.
 - Need to write a snippet to show equivalent ways of scheduling something.
-- Need to check zombification and automatic clearing/rebuilding of ticks.
+* Need to check zombification and automatic clearing/rebuilding of ticks.
 	Clearing doesn't happen
 - Would like some more intelligence in how to assign the Table tick for plots.
 - Need to redo ReadKkit and ReadCspace to put objects appropriately, and to
@@ -4832,5 +4831,41 @@ If I remember, the Elements know if they are slated for destruction.
 21 Aug.
 	Proceeding with documentation. Put in general chapter outline for
 the MOOSE cookbook.
+
+Stuff to fix still with solver and zombification scheduling.
+=============================================================================
+23 Aug.
+I think that the solver delete is now safe. 
+Now to figure out the best way to build on an existing model for merging and
+for editing. Deleting solver is the obvious way.
+
+After quite a bit of debugging, I have it working for solver clearing
+and rebuilding. The test script is switchKineticSolvers.py
+
+Next:
+- Make a few good cross-reac and multiscale model examples.
+
+
+For later on: There are some options for removing the fieldId in handling
+synapses.
+
+Basic requirement: 
+- Messages to synapses needs to identify individual synapses.
+- Want to have a single message to all equiv synapses in a network.
+
+Current approach manages this by
+- FieldElement index provides the identity of the synapse on each msg.
+- All FieldElements share the same channel parent.
+
+Alternate approaches
+Wrapper class + regular child elements on each synchan. Message goes to
+	common wrapper class. Wrapper class figures out mapping from its 
+	internal field indexing to that of the actual synapses on each synchan.
+
+Messages store extra index info + regular child elements on each synchan.
+	The messages go to the synchan, not to the synapse, but identify it
+	through their extra index.
+
+Wrapper class Di
 
 =============================================================================

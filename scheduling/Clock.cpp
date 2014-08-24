@@ -669,7 +669,7 @@ void Clock::buildDefaultTick()
 	defaultTick_["PoolBase"] = 13;
 	defaultTick_["CplxEnzBase"] = 14;
 	defaultTick_["Enz"] = 14;
-	defaultTick_["EnzBase"] = 42;
+	defaultTick_["EnzBase"] = 14;
 	defaultTick_["MMenz"] = 14;
 	defaultTick_["Reac"] = 14;
 	defaultTick_["ReacBase"] = 14;

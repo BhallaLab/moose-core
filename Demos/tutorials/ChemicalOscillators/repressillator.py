@@ -33,7 +33,7 @@ def main():
         # gives an interesting output
         compt = moose.element( '/model/kinetics' )
         compt.volume = 1e-19 
-        dt = moose.element( '/clock' ).dt
+        dt = moose.element( '/clock' ).tickDt[18]
 
 	moose.reinit()
 	moose.start( runtime ) 

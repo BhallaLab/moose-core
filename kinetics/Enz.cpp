@@ -201,14 +201,21 @@ double Enz::vGetRatio( const Eref& e ) const
 
 void Enz::vSetConcK1( const Eref& e, double v )
 {
+	if ( v < EPSILON ) {
+		cout << "Enz::vSetConcK1: Warning: value " << v << " too small\n";
+		return;
+	}
 	double volScale = convertConcToNumRateUsingMesh( e, subOut, 1 );
 	r1_ = k1_ = v * volScale;
-	Km_ = ( k2_ + k3_ ) / ( k1_ * volScale );
+	Km_ = ( k2_ + k3_ ) / ( v );
 }
 
 double Enz::vGetConcK1( const Eref& e ) const
 {
-	double volScale = convertConcToNumRateUsingMesh( e, subOut, 1 );
-	return k1_ * volScale;
+	if ( Km_ < EPSILON ) {
+		cout << "Enz::vGetConcK1: Warning: Km_ too small\n";
+		return 1.0;
+	}
+	return ( k2_ + k3_ ) / Km_;
 }
 
