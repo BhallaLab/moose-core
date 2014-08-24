@@ -7,15 +7,17 @@
 ## See the file COPYING.LIB for the full notice.
 #########################################################################
 
-# This example illustrates how to define a kinetic model using the
-# scripting interface. Normally one uses standard model formats like
-# SBML or kkit to concisely define kinetic models, but in some cases one
-# would like to modify the model through the script.
-# This example creates a bistable model having two enzymes and a reaction.
-# One of the enzymes is autocatalytic.
-# The model is set up to run using default Exponential Euler integration.
-# The snippet scriptKineticSolver.py uses the much better GSL 
-# Runge-Kutta-Fehlberg integration scheme on this same model.
+"""
+This example illustrates how to define a kinetic model using the
+scripting interface. Normally one uses standard model formats like
+SBML or kkit to concisely define kinetic models, but in some cases one
+would like to modify the model through the script.
+This example creates a bistable model having two enzymes and a reaction.
+One of the enzymes is autocatalytic.
+The model is set up to run using default Exponential Euler integration.
+The snippet scriptKineticSolver.py uses the much better GSL 
+Runge-Kutta-Fehlberg integration scheme on this same model.
+"""
 
 import math
 import pylab

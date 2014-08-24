@@ -3,7 +3,7 @@
 #
 # Commentary: 
 # 
-# This loads in a medium-detail model incorporating 
+# This loads in a low-detail model incorporating 
 # reac-diff and elec signaling in neurons. The reac-diff model
 # has just Ca and CaM in it, and there are no-cross-compartment
 # reactions though Ca diffuses everywhere. The elec model controls the
@@ -316,14 +316,13 @@ def testNeuroMeshMultiscale():
 	makeChemPlots()
 	makeElecPlots()
 	makeCaPlots()
-	moose.setClock( 0, elecDt )
-	moose.setClock( 1, elecDt )
-	moose.setClock( 2, elecDt )
-	moose.setClock( 4, chemDt )
-	moose.setClock( 5, chemDt )
-	moose.setClock( 6, chemDt )
-	moose.setClock( 7, cPlotDt )
+        for i in range (10):
+	    moose.setClock( i, elecDt )
+        for i in range ( 10, 20 ):
+	    moose.setClock( i, chemDt )
 	moose.setClock( 8, ePlotDt )
+	moose.setClock( 18, cPlotDt )
+        '''
 	#moose.useClock( 0, '/model/elec/##[ISA=Compartment]', 'init' )
 	#moose.useClock( 1, '/model/elec/##[ISA=Compartment]', 'process' )
 	moose.useClock( 1, '/model/elec/##[ISA=SpikeGen]', 'process' )
@@ -335,10 +334,11 @@ def testNeuroMeshMultiscale():
 	moose.useClock( 5, '/model/chem/#/ksolve', 'process' )
 	moose.useClock( 6, '/model/chem/spine/adaptCa', 'process' )
 	moose.useClock( 6, '/model/chem/dend/DEND/adaptCa', 'process' )
-	moose.useClock( 7, '/graphs/chem/#', 'process' )
+        '''
 	moose.useClock( 8, '/graphs/elec/#,/graphs/ca/#', 'process' )
+	moose.useClock( 18, '/graphs/chem/#', 'process' )
 	hsolve = moose.HSolve( '/model/elec/hsolve' )
-	moose.useClock( 1, '/model/elec/hsolve', 'process' )
+	#moose.useClock( 1, '/model/elec/hsolve', 'process' )
 	hsolve.dt = elecDt
 	hsolve.target = '/model/elec/compt'
 	moose.reinit()

@@ -276,7 +276,7 @@ void CplxEnzBase::zombify( Element* orig, const Cinfo* zClass, Id solver )
 		CplxEnzBase* ceb = reinterpret_cast< CplxEnzBase* >( er.data() );
 		ceb->setSolver( solver, orig->id() );
 		ceb->setKcat( er, kcat[i] );
-		ceb->setConcK1( er, concK1[i] );
 		ceb->setK2( er, k2[i] );
+		ceb->setConcK1( er, concK1[i] );
 	}
 }
