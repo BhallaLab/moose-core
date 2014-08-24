@@ -16,8 +16,8 @@ The model looks like this::
             |        |
             V        |
     M-----Enzyme---->M*           All in compartment A
-    |\              / ^
-    | \___basal____/  |
+    |\             /| ^
+    | \___basal___/   |
     |                 |
     endo              |
     |                 exo
@@ -25,15 +25,15 @@ The model looks like this::
     |       |      \  |
     V       V       \ |
     M-----Enzyme---->M*           All in compartment B
-     \              /|
-      \___basal____/
+     \             /|
+      \___basal___/
 
 
 The way it works: We set the run off for a few seconds with the original
 model parameters. This version oscillates. Then we double the endo
 and exo forward rates and run it further to show that the period becomes 
 nearly twice as fast. Then we restore endo and exo, and instead double the
-initial amounts of M. We it further still to see what happens.
+initial amounts of M. We run it further again to see what happens.
 """
 
 import moose

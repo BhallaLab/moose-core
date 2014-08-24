@@ -819,8 +819,9 @@ void Stoich::allocateModel( const vector< Id >& elist )
 void Stoich::installAndUnschedFunc( Id func, Id Pool )
 {
 	// Unsched Func
-	vector< ObjId > unsched( 1, func );
-	Shell::dropClockMsgs(  unsched, "process" );
+	func.element()->setTick( -2 ); // Disable with option to resurrect.
+	// vector< ObjId > unsched( 1, func );
+	// Shell::dropClockMsgs(  unsched, "process" );
 
 	// Install the FuncTerm
 	static const Finfo* funcSrcFinfo = 
@@ -918,8 +919,6 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 	temp.insert( temp.end(), offSolverReacs_.begin(), offSolverReacs_.end() );
 
 	for ( vector< Id >::const_iterator i = temp.begin(); i != temp.end(); ++i ){
-		vector< ObjId > unsched( 1, *i );
-		Shell::dropClockMsgs( unsched, "process" );
 		Element* ei = i->element();
 		if ( ei->cinfo() == poolCinfo ) {
 			double concInit = 
@@ -994,10 +993,9 @@ void Stoich::unZombifyFuncs()
 {
 	static const Cinfo* funcPoolCinfo = Cinfo::find( "FuncPool" );
 	static const Cinfo* zombieFuncPoolCinfo = Cinfo::find( "ZombieFuncPool");
-	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	// Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
 	unsigned int start = 
 			numVarPools_ + offSolverPools_.size() + numBufPools_;
-	vector< ObjId > list;
 	for ( unsigned int k = 0; k < numFuncPools_; ++k ) {
 		unsigned int i = k + start;
 		Element* e = idMap_[i].element();
@@ -1008,11 +1006,11 @@ void Stoich::unZombifyFuncs()
 			if ( funcId != Id() ) {
 				assert ( funcId.element()->cinfo()->isA( "FuncBase" ) );
 				// s->doUseClock( funcId.path(), "process", 5 );
-				list.push_back( funcId );
+				// Should really make a zombie funct to do this properly
+				funcId.element()->setTick( 12 );
 			}
 		}
 	}
-	s->addClockMsgs( list, "process", 5, 0 );
 }
 
 void Stoich::unZombifyModel()
@@ -1029,7 +1027,7 @@ void Stoich::unZombifyModel()
 	unZombifyPools();
 	unZombifyFuncs();
 
-	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	// Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
 
 	for ( vector< Id >::iterator i = reacMap_.begin(); 
 						i != reacMap_.end(); ++i ) {
@@ -1051,10 +1049,6 @@ void Stoich::unZombifyModel()
 		if ( e != 0 &&  e->cinfo() == zombieEnzCinfo )
 			CplxEnzBase::zombify( e, enzCinfo, Id() );
 	}
-
-	vector< ObjId > temp( idMap_.begin(), 
-			idMap_.begin() + numVarPools_ + numBufPools_ + numFuncPools_ );
-	s->addClockMsgs( temp, "proc", 4, 0 );
 }
 
 unsigned int Stoich::convertIdToPoolIndex( Id id ) const

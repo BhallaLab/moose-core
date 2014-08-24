@@ -173,9 +173,9 @@ void setMethod( Shell* s, Id mgr, double simdt, double plotdt,
 			Field< Id >::set( stoich, "compartment", compt );
 			Field< Id >::set( stoich, "ksolve", ksolve );
 			Field< string >::set( stoich, "path", simpath );
-			simpath2 += "," + cpath + "/ksolve";
-			s->doUseClock( simpath2, "process", 4 );
-			s->doSetClock( 4, plotdt );
+			// simpath2 += "," + cpath + "/ksolve";
+			// s->doUseClock( simpath2, "process", 4 );
+			// s->doSetClock( 4, plotdt );
 	} else if ( m == "gssa" || m == "gsolve" || 
 		m == "gillespie" || m == "stochastic" ) {
 			Id gsolve = s->doCreate( "Gsolve", compt, "gsolve", 1 );
@@ -183,18 +183,26 @@ void setMethod( Shell* s, Id mgr, double simdt, double plotdt,
 			Field< Id >::set( stoich, "compartment", compt );
 			Field< Id >::set( stoich, "ksolve", gsolve );
 			Field< string >::set( stoich, "path", simpath );
-			simpath2 += "," + cpath + "/gsolve";
-			s->doUseClock( simpath2, "process", 4 );
-			s->doSetClock( 4, plotdt );
+			// simpath2 += "," + cpath + "/gsolve";
+			// s->doUseClock( simpath2, "process", 4 );
+			// s->doSetClock( 4, plotdt );
 	} else if ( m == "ee" || m == "neutral" ) {
-			s->doUseClock( simpath, "process", 4 );
-			s->doSetClock( 4, simdt );
+			// s->doUseClock( simpath, "process", 4 );
+			// s->doSetClock( 4, simdt );
 	} else {
 			cout << "ReadKkit::setMethod: option " << method <<
 					" not known, using Exponential Euler (ee)\n";
-			s->doUseClock( simpath, "process", 4 );
-			s->doSetClock( 4, simdt );
+			// s->doUseClock( simpath, "process", 4 );
+			// s->doSetClock( 4, simdt );
 	}
+	s->doUseClock( simpath2, "proc", 11 );
+	s->doSetClock( 11, simdt );
+	s->doSetClock( 12, simdt );
+	s->doSetClock( 13, simdt );
+	s->doSetClock( 14, simdt );
+	s->doSetClock( 16, plotdt );
+	s->doSetClock( 17, plotdt );
+	s->doSetClock( 18, plotdt );
 }
 /**
  * The readcell function implements the old GENESIS cellreader
@@ -236,11 +244,10 @@ Id ReadKkit::read(
 
 	convertParametersToConcUnits();
 
-	s->doSetClock( 8, plotdt_ );
+	// s->doSetClock( 8, plotdt_ );
 	
-	string plotpath = basePath_ + "/graphs/##[TYPE=Table]," +
-			basePath_ + "/moregraphs/##[TYPE=Table]";
-	s->doUseClock( plotpath, "process", 8 );
+	// string plotpath = basePath_ + "/graphs/##[TYPE=Table]," + basePath_ + "/moregraphs/##[TYPE=Table]";
+	// s->doUseClock( plotpath, "process", 8 );
 
 	setMethod( s, mgr, simdt_, plotdt_, method );
 
@@ -250,10 +257,14 @@ Id ReadKkit::read(
 
 void ReadKkit::run()
 {
-	shell_->doSetClock( 4, simdt_ );
-	shell_->doSetClock( 5, simdt_ );
-	shell_->doSetClock( 8, plotdt_ );
-	shell_->doSetClock( 7, 0 );
+	shell_->doSetClock( 11, simdt_ );
+	shell_->doSetClock( 12, simdt_ );
+	shell_->doSetClock( 13, simdt_ );
+	shell_->doSetClock( 14, simdt_ );
+	shell_->doSetClock( 16, plotdt_ );
+	shell_->doSetClock( 17, plotdt_ );
+	shell_->doSetClock( 18, plotdt_ );
+	/*
 	string poolpath = basePath_ + "/kinetics/##[ISA=Pool]";
 	string reacpath = basePath_ + "/kinetics/##[ISA!=Pool]";
 	string plotpath = basePath_ + "/graphs/##[TYPE=Table]," + 
@@ -261,13 +272,18 @@ void ReadKkit::run()
 	shell_->doUseClock( reacpath, "process", 4 );
 	shell_->doUseClock( poolpath, "process", 5 );
 	shell_->doUseClock( plotpath, "process", 8 );
+	*/
 	shell_->doReinit();
 	if ( useVariableDt_ ) {
-		shell_->doSetClock( 4, fastdt_ );
-		shell_->doSetClock( 5, fastdt_ );
+		shell_->doSetClock( 11, fastdt_ );
+		shell_->doSetClock( 12, fastdt_ );
+		shell_->doSetClock( 13, fastdt_ );
+		shell_->doSetClock( 14, fastdt_ );
 		shell_->doStart( transientTime_ );
-		shell_->doSetClock( 4, simdt_ );
-		shell_->doSetClock( 5, simdt_ );
+		shell_->doSetClock( 11, simdt_ );
+		shell_->doSetClock( 12, simdt_ );
+		shell_->doSetClock( 13, simdt_ );
+		shell_->doSetClock( 14, simdt_ );
 		shell_->doStart( maxtime_ - transientTime_ );
 	} else {
 		shell_->doStart( maxtime_ );

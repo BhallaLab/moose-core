@@ -37,7 +37,6 @@ def main():
         # gives an interesting output
         compt = moose.element( '/model/kinetics' )
         compt.volume = 0.2e-19 
-        dt = moose.element( '/clock' ).dt
         r = moose.element( '/model/kinetics/equil' )
 
 	moose.reinit()
@@ -69,6 +68,7 @@ def main():
         imgplot = plt.imshow( img )
         ax = fig.add_subplot( 212 )
 	x = moose.wildcardFind( '/model/#graphs/conc#/#' )
+        dt = moose.element( '/clock' ).tickDt[18]
         t = numpy.arange( 0, x[0].vector.size, 1 ) * dt
         ax.plot( t, x[0].vector, 'r-', label=x[0].name )
         ax.plot( t, x[1].vector, 'g-', label=x[1].name )
