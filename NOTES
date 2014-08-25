@@ -4866,6 +4866,24 @@ Messages store extra index info + regular child elements on each synchan.
 	The messages go to the synchan, not to the synapse, but identify it
 	through their extra index.
 
-Wrapper class Di
+
+=============================================================================
+24 Aug
+	Trying to find why the system crashes with multi2.g. May need to run
+valgrind.
+
+=============================================================================
+25 Aug
+Fixed problem with indexing Func pools in Dsolve. Hack to ignore.
+Now problem with Ksolve nan. Possibly due to cross-compt reacs on non-
+connected compts. 
+
+Tracked it down. It was a silly oversight in the RateTerm calculations for
+volume scaling. Came up for the first in this model because I haven't used
+N-order reactions in the other tests.
+
+Now both multi2 and multi3 run and give reasonable outputs.
+Would like to compare multi2 with and without hsolve, but it isn't doing the
+right thing.
 
 =============================================================================

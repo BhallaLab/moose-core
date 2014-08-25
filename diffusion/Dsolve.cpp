@@ -627,16 +627,25 @@ double Dsolve::getNinit( const Eref& e ) const
 
 void Dsolve::setDiffConst( const Eref& e, double v )
 {
+	unsigned int pid = convertIdToPoolIndex( e );
+	if ( pid >= pools_.size() )   // Ignore silently, out of range.
+		return;
 	pools_[ convertIdToPoolIndex( e ) ].setDiffConst( v );
 }
 
 double Dsolve::getDiffConst( const Eref& e ) const
 {
+	unsigned int pid = convertIdToPoolIndex( e );
+	if ( pid >= pools_.size() )   // Ignore silently, out of range.
+		return 0.0;
 	return pools_[ convertIdToPoolIndex( e ) ].getDiffConst();
 }
 
 void Dsolve::setMotorConst( const Eref& e, double v )
 {
+	unsigned int pid = convertIdToPoolIndex( e );
+	if ( pid >= pools_.size() )   // Ignore silently, out of range.
+		return;
 	pools_[ convertIdToPoolIndex( e ) ].setMotorConst( v );
 }
 
