@@ -84,7 +84,7 @@ def main():
 		stoich = moose.Stoich( '/model/compartment/stoich' )
 		stoich.compartment = compartment
 		stoich.ksolve = ksolve
-		ksolve.stoich = stoich
+		#ksolve.stoich = stoich
 		stoich.path = "/model/compartment/##"
 		state = moose.SteadyState( '/model/compartment/state' )
 		moose.useClock( 5, '/model/compartment/ksolve', 'process' )

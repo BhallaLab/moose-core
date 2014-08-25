@@ -505,7 +505,7 @@ class NOrder: public ZeroOrder
 		{
 			assert( v_.size() > 0 );
 			double ratio = sub * pow( NA * vol, (int)( v_.size() ) - 1 );
-			return new NOrder( k_ * ratio, v_ );
+			return new NOrder( k_ / ratio, v_ );
 		}
 
 	protected:
