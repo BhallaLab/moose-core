@@ -18,7 +18,7 @@ set(PYTHON_DIR ${CMAKE_CURRENT_LIST_DIR})
 execute_process(COMMAND 
     python setup.py build_py build -b /tmp install
         --prefix=${CMAKE_INSTALL_PREFIX} 
-        -O2 --force --install-layout=deb
+        -O2 --force 
     WORKING_DIRECTORY ${PYTHON_DIR}
     )
 FILE(REMOVE_RECURSE ${PYTHON_DIR}/build)
