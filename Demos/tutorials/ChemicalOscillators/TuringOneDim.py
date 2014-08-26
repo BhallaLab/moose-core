@@ -7,17 +7,24 @@
 ## See the file COPYING.LIB for the full notice.
 #########################################################################
 
-# This example illustrates how to set up a Turing pattern in 1-D using
-# reaction diffusion calculations.
-# Reaction system is: 
-#   s ---a---> a  // s goes to a, catalyzed by a.
-#   s ---a---> b  // s goes to b, catalyzed by a.
-#   a ---b---> s  // a goes to s, catalyzed by b.
-#   b -------> s  // b is degraded irreversibly to s.
-# in sum, a has a positive feedback onto itself and also forms b.
-# b has a negative feedback onto a.
-# Finally, the diffusion constant for a is 1/10 that of b.
-# Run using python -i if you want the plot to hang around after finishing.
+"""
+This example illustrates how to set up a oscillatory Turing pattern 
+in 1-D using reaction diffusion calculations.
+Reaction system is::
+
+    s ---a---> a  // s goes to a, catalyzed by a.
+    s ---a---> b  // s goes to b, catalyzed by a.
+    a ---b---> s  // a goes to s, catalyzed by b.
+    b -------> s  // b is degraded irreversibly to s.
+
+in sum, **a** has a positive feedback onto itself and also forms **b**.
+**b** has a negative feedback onto **a**.
+Finally, the diffusion constant for **a** is 1/10 that of **b**.
+
+This chemical system is present in a 1-dimensional (cylindrical) 
+compartment. The entire reaction-diffusion system is set up 
+within the script.
+"""
 
 import math
 import numpy

@@ -4886,4 +4886,6 @@ Now both multi2 and multi3 run and give reasonable outputs.
 Would like to compare multi2 with and without hsolve, but it isn't doing the
 right thing.
 
+Continuing documentation updates too.
+
 =============================================================================
