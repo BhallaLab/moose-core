@@ -12,28 +12,33 @@ function moose.loadModel( filename, modelpath, solver ).
 Having loaded in the model, you can change the solver to use on it.
 This example illustrates how to assign and change solvers for a kinetic
 model. This process is necessary in two situations: 
-    1. If we want to change the numerical method employed, for example, 
-        from deterministic to stochastic.
-    2. If we are already using a solver, and we have changed the reaction
-        network. 
+    
+* If we want to change the numerical method employed, for example, 
+    from deterministic to stochastic.
+* If we are already using a solver, and we have changed the reaction
+    network. 
+
 Note that we do not have to change the solvers if the volume or reaction
 rates change.
 In this example the model is loaded in with a gsl solver. The
 sequence of solver calculations is:
-    gsl
-    ee
-    gsl
-    gssa
-    gsl
+
+#. gsl
+#. ee
+#. gsl
+#. gssa
+#. gsl
 
 If you're removing the solvers, you just delete the stoichiometry
 object and the associated ksolve/gsolve. Should there be diffusion 
 (a dsolve)then you should delete that too. If you're 
 building the solvers up again, then you must do the following steps in
 order:
-    build up the ksolve/gsolve and stoich (any order)
-    Assign stoich.ksolve
-    Assign stoich.path.
+
+#. build up the ksolve/gsolve and stoich (any order)
+#. Assign stoich.ksolve
+#. Assign stoich.path.
+
 See the Reaction-diffusion section should you want to do diffusion as well.
 """
 

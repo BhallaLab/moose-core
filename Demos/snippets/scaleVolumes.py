@@ -7,12 +7,28 @@
 ## See the file COPYING.LIB for the full notice.
 #########################################################################
 
-# This example illustrates how to run a model at different volumes.
-# For a deterministic reaction one would not see any change in concs.
-# For a stochastic reaction one sees the level of 'noise' changing.
-# This example creates a bistable model having two enzymes and a reaction.
-# One of the enzymes is autocatalytic.
-# The model is set up to run using the GSSA stochastic method in Moose.
+"""
+This example illustrates how to run a model at different volumes.
+The key line is just to set the volume of the compartment. If everything
+else is set up correctly, then this change propagates through to all
+reactions molecules.
+
+For a deterministic reaction one would not see any change in output 
+concentrations.
+For a stochastic reaction illustrated here, one sees the level of 'noise' 
+changing, even though the concentrations are similar up to a point.
+This example creates a bistable model having two enzymes and a reaction.
+One of the enzymes is autocatalytic.
+This model is set up within the script rather than using an external file.
+The model is set up to run using the GSSA stochastic method in Moose.
+
+To run the example, run the script
+
+    ``python scaleVolumes.py``
+
+and hit ``enter`` every cycle to see the outcome of stochastic
+calculations at smaller volumes, keeping concentrations the same.
+"""
 
 import math
 import pylab

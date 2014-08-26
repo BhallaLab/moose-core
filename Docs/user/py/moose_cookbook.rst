@@ -56,7 +56,7 @@ Running with different numerical methods
 
 Changing volumes
 ^^^^^^^^^^^^^^^^
-.. automodule:: scriptGssaVols.py
+.. automodule:: scaleVolumes
 
 Feeding tabulated input to a model
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -91,9 +91,11 @@ Reaction-diffusion + motor + transport
 
 A Turing model
 ^^^^^^^^^^^^^^
+.. automodule:: TuringOneDim
 
 A spatial bistable model
 ^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: propagationBis
 
 Single cell models
 ------------------
