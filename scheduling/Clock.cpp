@@ -295,6 +295,19 @@ const Cinfo* Clock::initCinfo()
 		"of these ticks, and this can be overridden using the shell "
 		"command setClock, or by directly assigning tickStep values on the "
 		"clock object. "
+		"Which objects use which tick? As a rule of thumb, try this: "
+		"Electrical/compartmental model calculations: Ticks 0-7"
+		"Tables and output objects for electrical output: Tick 8"
+		"Diffusion solver: Tick 10"
+		"Chemical/compartmental model calculations: Ticks 11-17"
+		"Tables and output objects for chemical output: Tick 18"
+		"Unassigned: Ticks 20-29 "
+		"Special: 30-31 "
+		"Data output is a bit special, since you may want to store data "
+		"at different rates for electrical and chemical processes in the "
+		"same model. Here you will have to specifically assign distinct "
+		"clock ticks for the tables/fileIO objects handling output at "
+		"different time-resolutions. Typically one uses tick 8 and 18."
 		"",
 	};
 
@@ -737,9 +750,9 @@ void Clock::buildDefaultTick()
 	defaultDt_[5] = 50.0e-6;
 	defaultDt_[6] = 50.0e-6;
 	defaultDt_[7] = 50.0e-6;
-	defaultDt_[8] = 0.0; // Not assigned
-	defaultDt_[9] = 5.0e-3;
-	defaultDt_[10] = 0.01;
+	defaultDt_[8] = 5.0e-3; // For the tables for electrical calculations
+	defaultDt_[9] = 0.0; // Not assigned
+	defaultDt_[10] = 0.01; // For diffusion.
 	defaultDt_[11] = 0.1;
 	defaultDt_[12] = 0.1;
 	defaultDt_[13] = 0.1;
