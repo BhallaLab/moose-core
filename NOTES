@@ -4889,3 +4889,31 @@ right thing.
 Continuing documentation updates too.
 
 =============================================================================
+26 Aug.
+Worked on why the multi1 and multi2 models don't work in EE mode. Seems that
+there is an error in message setup for channels in ReadCell.cpp.
+
+Testing hhcomp.py
+I get good HH spiking with the original scheduling func that Subha has.
+I don't get channel responses with the new scheduling.
+
+Is it just that the functions don't get called, or is there something
+nasty happening with the messaging?
+
+Another clue: the channel process is called twice. Looks like some fairly
+serious message confusion is happening. Possibly only to do with shared msgs.
+
+27 Aug
+I think I have it: the library channels are scheduled (should not be) but
+the ones on the compartment are not (should be). Need to look at the copy
+function to ensure that sensible things happen
+
+=============================================================================
+27 Aug
+I think I have it: the library channels are scheduled (should not be) but
+the ones on the compartment are not (should be). Need to look at the copy
+function to ensure that sensible things happen.
+
+Fixed. Works. The ee method at 0.2us slowly is converging to the hsolve@10usec,
+still not there.
+=============================================================================

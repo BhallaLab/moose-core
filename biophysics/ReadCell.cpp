@@ -775,13 +775,16 @@ bool ReadCell::addCanonicalChannel(
 		className == "HHChannel2D" ||
 		className == "SynChan"
 	) {
-		shell_->doAddMsg(
+		ObjId mid = shell_->doAddMsg(
 			"Single",
 			compt,
 			"channel",
 			chan,
 			"channel"
 		);
+		if ( mid.bad() )
+			cout << "failed to connect message from compt " << compt << 
+					" to channel " << chan << endl;
 		
 		if ( value > 0 ) {
 			value *= calcSurf( length, dia );

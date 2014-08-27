@@ -10,6 +10,7 @@
 #include "header.h"
 #include "OneToAllMsg.h"
 #include "Shell.h"
+#include "../scheduling/Clock.h"
 
 /// Returns the Id of the root of the copied tree upon success.
 Id Shell::doCopy( Id orig, ObjId newParent, string newName, 
@@ -57,6 +58,7 @@ Element* innerCopyElements( Id orig, ObjId newParent, Id newId,
 				newParent, newId, newNumData, toGlobal );
 	assert( e );
 	Shell::adopt( newParent, newId, 0 );
+	e->setTick( Clock::lookupDefaultTick( e->cinfo()->name() ) );
 
 	// cout << Shell::myNode() << ": Copy: orig= " << orig << ", newParent = " << newParent << ", newId = " << newId << endl;
 	tree[ orig ] = e->id();

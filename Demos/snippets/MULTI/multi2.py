@@ -310,7 +310,7 @@ def makeGraphics( cPlotDt, ePlotDt ):
 	print 'All done'
 
 def testNeuroMeshMultiscale():
-        useHsolve = 1
+        useHsolve = 0
         runtime = 0.5
 	elecDt = 10e-6
 	chemDt = 0.005
@@ -338,6 +338,7 @@ def testNeuroMeshMultiscale():
 	    hsolve.dt = elecDt
 	    hsolve.target = '/model/elec/compt'
 	    moose.reinit()
+        #soma = moose.element( '/model/elec/soma' )
         '''
         else:
 	    moose.useClock( 0, '/model/elec/##[ISA=Compartment]', 'init' )
