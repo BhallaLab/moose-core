@@ -95,6 +95,7 @@ def create_na_chan(parent='/library', name='na', vmin=-110e-3, vmax=50e-3, vdivs
     plt.legend()
     plt.show()
     plt.close()
+    na.tick = -1
     return na
 
 def create_k_chan(parent='/library', name='k', vmin=-120e-3, vmax=40e-3, vdivs=3000):
@@ -120,6 +121,7 @@ def create_k_chan(parent='/library', name='k', vmin=-120e-3, vmax=40e-3, vdivs=3
     plt.plot(v, 1/(n_alpha + n_beta))
     plt.show()
     plt.close()
+    k.tick = -1
     return k
 
 def test_channel_gates():
@@ -221,7 +223,15 @@ def test_hhcomp():
     simdt = 1e-6
     plotdt = 1e-4
     simtime = 100e-3
-    utils.resetSim([model.path, data.path], simdt, plotdt, simmethod='ee')
+    if (1):
+        moose.showmsg( '/clock' )
+        for i in range(10):
+            moose.setClock( i, simdt )
+        moose.setClock( 18, plotdt )
+        moose.reinit()
+    else:
+        utils.resetSim([model.path, data.path], simdt, plotdt, simmethod='ee')
+        moose.showmsg( '/clock' )
     moose.start(simtime)
     t = np.linspace(0, simtime, len(vm.vector))
     plt.subplot(211)
