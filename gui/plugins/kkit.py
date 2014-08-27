@@ -20,13 +20,20 @@ from kkitCalcArrow import *
 from kkitOrdinateUtil import *
 import posixpath
 from mtoolbutton import MToolButton
-
+from DataTable import DataTable
 class KkitPlugin(MoosePlugin):
     """Default plugin for MOOSE GUI"""
     def __init__(self, *args):
         #print args
         MoosePlugin.__init__(self, *args)
         self.view = None
+        self.dataTable = DataTable(self.dataRoot)
+
+    def getPlotView(self):
+        if not hasattr(self, 'plotView'):
+            self.plotView = PlotView(self)
+            self.plotView.dataTable = self.dataTable
+        return self.plotView
 
     def getPreviousPlugin(self):
         return None
@@ -45,7 +52,7 @@ class KkitPlugin(MoosePlugin):
 
     def getEditorView(self):
         if not hasattr(self, 'editorView'):
-            self.editorView = KkitEditorView(self)
+            self.editorView = KkitEditorView(self, self.dataTable)
             self.editorView.getCentralWidget().editObject.connect(self.mainWindow.objectEditSlot)
             #self.editorView.GrViewresize(self)
             #self.editorView.connect(self,QtCore.SIGNAL("resize(QResizeEvent)"),self.editorView.GrViewresize)
@@ -59,17 +66,19 @@ class KkitPlugin(MoosePlugin):
         graphView.setDataRoot(self.modelRoot)
         schedulingDockWidget = self.view.getSchedulingDockWidget().widget()
         self._kkitWidget = self.view.plugin.getEditorView().getCentralWidget()
-        self.runView = KkitRunView(self)
+        self.runView = KkitRunView(self,self.dataTable)
         self.currentRunView = self.runView.getCentralWidget()
-        schedulingDockWidget.runner.update.connect(self.currentRunView.changeBgSize)
-        schedulingDockWidget.runner.resetAndRun.connect(self.currentRunView.resetColor)
+
+        #schedulingDockWidget.runner.update.connect(self.currentRunView.changeBgSize)
+        #schedulingDockWidget.runner.resetAndRun.connect(self.currentRunView.resetColor)
         graphView.layout().addWidget(self.currentRunView,0,0,2,1)
         return self.view
 
 class KkitRunView(MooseEditorView):
 
-    def __init__(self, plugin):
+    def __init__(self, plugin,dataTable):
         MooseEditorView.__init__(self, plugin)
+        self.dataTable =dataTable
     '''
     def getToolPanes(self):
         return super(KkitRunView, self).getToolPanes()
@@ -91,10 +100,10 @@ class KkitRunView(MooseEditorView):
 
 
 class KkitEditorView(MooseEditorView):
-    def __init__(self, plugin):
+    def __init__(self, plugin, dataTable):
         MooseEditorView.__init__(self, plugin)
         ''' EditorView and if kkit model is loaded then save model in XML is allowed '''
-      
+        self.dataTable = dataTable
         #self.insertMenu = QtGui.QMenu('&Insert')
         self.fileinsertMenu = QtGui.QMenu('&File')
         if not hasattr(self,'SaveModelAction'):
@@ -284,6 +293,7 @@ class  KineticsWidget(EditorWidgetBase):
         elif objClass == "tab":
             textcolor,bgcolor = getColor(info,self.colorMap)
         else:
+            
             textcolor,bgcolor = getColor(info,self.colorMap)
         graphicalObj.setDisplayProperties(xpos,ypos,textcolor,bgcolor)
     
@@ -351,6 +361,12 @@ class  KineticsWidget(EditorWidgetBase):
         #     m = wildcardFind('/##[ISA=ChemCompt]')
         # else:
         #     m = wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
+        self.widget = ""
+        if isinstance(self,kineticEditorWidget):
+            self.widget = "kineticEditorWidget"
+        elif isinstance(self,kineticRunWidget):
+            self.widget = "kineticRunWidget"
+            
         if not self.m:
             # when we want an empty GraphicView while creating new model,
             # then remove all the view and add an empty view
@@ -358,8 +374,7 @@ class  KineticsWidget(EditorWidgetBase):
                 self.layout().removeWidget(self.view)
             createdItem = {}
             self.sceneContainer.setSceneRect(-self.width()/2,-self.height()/2,self.width(),self.height())
-            self.view = GraphicalView(self, self.modelRoot,self.sceneContainer,self.border,self,createdItem)
-            
+            self.view = GraphicalView(self.widget, self.modelRoot,self.sceneContainer,self.border,self,createdItem)
             self.connect(self.view, QtCore.SIGNAL("dropped"), self.objectEditSlot)
             hLayout = QtGui.QGridLayout(self)
             self.setLayout(hLayout)
@@ -378,7 +393,7 @@ class  KineticsWidget(EditorWidgetBase):
             createdItem = {}
             if hasattr(self, 'view') and isinstance(self.view, QtGui.QWidget):
                 self.layout().removeWidget(self.view)
-            self.view = GraphicalView(self,self.modelRoot,self.sceneContainer,self.border,self,createdItem)
+            self.view = GraphicalView(self.widget,self.modelRoot,self.sceneContainer,self.border,self,createdItem)
             #self.view.resizeEvent1(event)
             #self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
             #self.view.fitInView(self.sceneContainer.itemsBoundingRect())
@@ -642,7 +657,7 @@ class kineticEditorWidget(KineticsWidget):
         self.insertMenu = QtGui.QMenu('&Insert')
         self._menus.append(self.insertMenu)
         self.insertMapper = QtCore.QSignalMapper(self)
-        classlist = ['CubeMesh','CylMesh','Pool','FuncPool','SumFunc','Reac','Enz','MMenz','StimulusTable']
+        classlist = ['CubeMesh','CylMesh','Pool','BufPool','SumFunc','Reac','Enz','MMenz','StimulusTable']
         insertMapper, actions = self.getInsertActions(classlist)
         for action in actions:
             self.insertMenu.addAction(action)        
@@ -662,8 +677,8 @@ class kineticEditorWidget(KineticsWidget):
             for action in self.insertMenu.actions():
                 button = MToolButton()
                 button.setDefaultAction(action)
-                icon = QtGui.QIcon()
-                #icon.addPixmap(QtGui.QPixmap(QtCore.QString.fromUtf8("~/../../Doc/images/kkitGui/"+action.text()+".png")), QtGui.QIcon.Active, QtGui.QIcon.Off)
+                #set the unicode instead of image by setting
+                #button.setText(unicode(u'\u20de'))
                 button.setIcon(QtGui.QIcon("~/../../Docs/images/classIcon/"+action.text()+".png"))
                 #button.setIconSize(QtCore.QSize(200,200))
                 self._insertToolBar.addWidget(button)
