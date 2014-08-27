@@ -51,7 +51,6 @@ import pickle
 import os
 from collections import defaultdict
 import numpy as np
-import re
 from PyQt4 import QtGui, QtCore
 from PyQt4.Qt import Qt
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
@@ -180,8 +179,6 @@ class MooseTreeEditor(mtree.MooseTreeWidget):
             return
         pos = event.pos()
         item = self.itemAt(pos)
-        print "dropEvent",item
-        print item.mobj.path
         try:
             self.insertChildElement(item, str(event.mimeData().text()))
             event.acceptProposedAction()
@@ -537,7 +534,7 @@ class SchedulingWidget(QtGui.QWidget):
             QtGui.QMessageBox.warning(self, 'Invalid value', 'Specified plot update interval is meaningless.')
         '''
         #Harsha: Atleast for loading signalling model in the GSL method, the updateInterval need to be atleast
-        #        equal to the min TickDt and not zero.
+        #        equal to the max TickDt and not zero.
         tickDt = self.getTickDtMap().values()
         tickDt = [item for item in self.getTickDtMap().values() if float(item) != 0.0]
         dt = max(tickDt)
@@ -745,6 +742,7 @@ class PlotWidget(QtGui.QWidget):
         self.lineToDataSource = {}
         self.canvas.addSubplot(1, 1)
         self.onclick_count = 0
+                
     @property
     def plotAll(self):
         return len(self.pathToLine) == 0
@@ -761,8 +759,10 @@ class PlotWidget(QtGui.QWidget):
         modelroot = moose.element(self.modelRoot).path
         time = moose.Clock('/clock').currentTime
         tabList = []
-	#print " default ",path
-        for tabId in moose.wildcardFind('%s/##[TYPE=Table]' % (path)):
+        #for tabId in moose.wildcardFind('%s/##[TYPE=Table]' % (path)):
+        #harsha: policy graphs will be under /model/modelName need to change in kkit
+        #for tabId in moose.wildcardFind('%s/##[TYPE=Table]' % (modelroot)):
+        for tabId in moose.wildcardFind('/##[TYPE=Table]'):
             tab = moose.Table(tabId)
             line_list=[]
             tableObject = tab.neighbors['requestOut']
@@ -789,6 +789,8 @@ class PlotWidget(QtGui.QWidget):
                                 tc = (tc * 2 )
                                 r,g,b = self.colorMap[tc]
                                 color = "#"+ hexchars[r / 16] + hexchars[r % 16] + hexchars[g / 16] + hexchars[g % 16] + hexchars[b / 16] + hexchars[b % 16]
+                        else:
+                            color = 'white'
                 lines = self.pathToLine[tab.path]
 
                 if len(lines) == 0:
@@ -811,17 +813,22 @@ class PlotWidget(QtGui.QWidget):
                             ts = xSrc.vector.copy()
                         line.set_data(ts, tab.vector.copy())
                 tabList.append(tab)
-        self.canvas.mpl_connect('pick_event',self.onclick)
-        if len(tabList) > 0:
-            leg = self.canvas.callAxesFn('legend',loc='upper center',prop={'size':10},bbox_to_anchor=(0.5, -0.03),fancybox=True, shadow=True, ncol=3)
-            #leg = self.canvas.callAxesFn('legend')
-            #leg = self.canvas.callAxesFn('legend',loc='upper left', fancybox=True, shadow=True)
-            global legend
-            legend =leg
-            for legobj in leg.legendHandles:
-                legobj.set_linewidth(4.0)
-                legobj.set_picker(True)
-        self.canvas.draw()
+                self.canvas.mpl_connect('pick_event',self.onclick)
+                if len(tabList) > 0:
+                    leg = self.canvas.callAxesFn('legend',loc='upper center',prop={'size':10},bbox_to_anchor=(0.5, -0.03),fancybox=True, shadow=True, ncol=3)
+                    #leg = self.canvas.callAxesFn('legend')
+                    #leg = self.canvas.callAxesFn('legend',loc='upper left', fancybox=True, shadow=True)
+                    #global legend
+                    #legend =leg
+                    for legobj in leg.legendHandles:
+                        legobj.set_linewidth(5.0)
+                        legobj.set_picker(True)
+              
+                self.canvas.draw()
+        else:
+            print "returning as len tabId is zero",tabId
+
+
     
     def onclick(self,event1):
         #print "onclick",event1.artist.get_label()
@@ -952,10 +959,12 @@ class PlotView(PlotBase):
     """View for selecting fields on elements to plot."""
     def __init__(self, *args):
         PlotBase.__init__(self, *args)
+        #harsha: just a hack for now
+        self.dataTable = None
         self.plugin.modelRootChanged.connect(self.getSelectionPane().setSearchRoot)
         self.plugin.dataRootChanged.connect(self.setDataRoot)
-        self._recordingDict = {}
-        self._reverseDict = {}
+        #self._recordingDict = {}
+        #self._reverseDict = {}
         self.dataRoot = self.plugin.dataRoot
 
     def setDataRoot(self, root):
@@ -1041,9 +1050,12 @@ class PlotView(PlotBase):
     def setupRecording(self):
         """Create the tables for recording selected data and connect them."""
         for element, field in self.getCentralWidget().getSelectedFields():
-            self.createRecordingTable(element, field)
-
-
+            #createRecordingTable(element, field, self._recordingDict, self._reverseDict, self.dataRoot)
+            #harsha:CreateRecordingTable function is moved to gui/utlis/dataTable.py file as create function
+            #as this is required when I drop table on to the plot and added a utlis folder to system path so
+            # import is not done
+            self.dataTable.create(element,field)
+    '''
     def createRecordingTable(self, element, field):
         """Create table to record `field` from element `element`
 
@@ -1090,7 +1102,7 @@ class PlotView(PlotBase):
             moose.connect(table, 'requestOut', target, 'get%s' % (field))
             self._recordingDict[(target, field)] = table
             self._reverseDict[table] = (target, field)
-
+ '''
 class PlotSelectionWidget(QtGui.QScrollArea):
     """Widget showing the fields of specified elements and their plottable
     fields. User can select any number of fields for plotting and click a
