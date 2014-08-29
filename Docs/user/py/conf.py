@@ -28,7 +28,11 @@ sys.path.append(os.path.abspath('../../../Demos/tutorials/ChemicalBistables'))
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode', 'numpydoc']
+extensions = ['sphinx.ext.autodoc',
+              'sphinx.ext.mathjax',
+              'sphinx.ext.autosummary',
+              'sphinx.ext.viewcode',
+              'numpydoc']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -192,14 +196,14 @@ latex_documents = [
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
-#latex_logo = None
+latex_logo = 'images/moose_logo.png'
 
 # For "manual" documents, if this is true, then toplevel headings are parts,
 # not chapters.
 #latex_use_parts = False
 
 # If true, show page references after internal links.
-#latex_show_pagerefs = False
+latex_show_pagerefs = True
 
 # If true, show URL addresses after external links.
 #latex_show_urls = False
@@ -208,7 +212,7 @@ latex_documents = [
 #latex_appendices = []
 
 # If false, no module index is generated.
-#latex_domain_indices = True
+latex_domain_indices = True
 
 
 # -- Options for manual page output --------------------------------------------
@@ -231,15 +235,18 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'MOOSE', u'MOOSE Documentation',
-   u'Upinder Bhalla, Niraj Dudani, Aditya Gilra, Aviral Goel, Subhasis Ray and Dilawar Singh', 'MOOSE', 'One line description of project.',
-   'Miscellaneous'),
+   u'Upinder Bhalla, Niraj Dudani, Aditya Gilra, Aviral Goel, Subhasis Ray and Dilawar Singh', 'MOOSE', 'MOOSE is the Multiscale Object-Oriented Simulation Environment.',
+   'Science'),
 ]
 
 # Documents to append as an appendix to all manuals.
 #texinfo_appendices = []
 
 # If false, no module index is generated.
-#texinfo_domain_indices = True
+texinfo_domain_indices = True
 
 # How to display URL addresses: 'footnote', 'no', or 'inline'.
 #texinfo_show_urls = 'footnote'
+
+#numpydoc option
+numpydoc_show_class_members = True
