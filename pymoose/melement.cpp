@@ -263,9 +263,10 @@ extern "C" {
     }
         
     PyDoc_STRVAR(moose_ObjId_init_documentation,
-                 "__init__(path, dims, dtype) or\n"
-                 "__init__(id, dataIndex, fieldIndex)\n"
-                 "    Initialize moose object\n"
+                 "melement(path, dims, dtype) or\n"
+                 "melement(id, dataIndex, fieldIndex)\n"
+                 "    Create moose element\n"
+                 "\n"
                  "Parameters\n"
                  "----------\n"
                  "path : string\n"
@@ -339,9 +340,9 @@ extern "C" {
     } // !  moose_ObjId_repr
 
     PyDoc_STRVAR(moose_ObjId_getId_documentation,
-                 "getId()\n"
+                 "getId() -> vec\n"
                  "\n"
-                 "    Get the vec of this object\n"
+                 "Get the vec of this object\n"
                  "\n");
     PyObject* moose_ObjId_getId(_ObjId * self)
     {
@@ -355,13 +356,13 @@ extern "C" {
     }
 
     PyDoc_STRVAR(moose_ObjId_getFieldType_documentation,
-                 "getFieldType(fieldName')\n"
+                 "getFieldType(fieldname)\n"
                  "\n"
-                 "Get the string representation of the type of this field.\n"
+                 "Get the string representation of the type of the field `fieldname`.\n"
                  "\n"
                  "Parameters\n"
                  "----------\n"
-                 "fieldName : string\n"
+                 "fieldname : string\n"
                  "    Name of the field to be queried.\n"
                  "\n");
     
@@ -391,13 +392,13 @@ extern "C" {
     */
     
     PyDoc_STRVAR(moose_ObjId_getField_documentation,
-                 "getField(fieldName)\n"
+                 "getField(fieldname)\n"
                  "\n"
-                 "Get the value of the field.\n"
+                 "Get the value of the field `fieldname`.\n"
                  "\n"
                  "Parameters\n"
                  "----------\n"
-                 "fieldName : string\n"
+                 "fieldname : string\n"
                  "    Name of the field.");
     PyObject * moose_ObjId_getField(_ObjId * self, PyObject * args)
     {
@@ -661,13 +662,13 @@ extern "C" {
        Wrapper over setattro to make METHOD_VARARG
     */
     PyDoc_STRVAR(moose_ObjId_setField_documentation,
-                 "setField(fieldName, value)\n"
+                 "setField(fieldname, value)\n"
                  "\n"
                  "Set the value of specified field.\n"
                  "\n"
                  "Parameters\n"
                  "----------\n"
-                 "fieldName : string\n"
+                 "fieldname : string\n"
                  "    Field to be assigned value to.\n"
                  "\n"
                  "value : python datatype compatible with the type of the field\n"
@@ -1175,13 +1176,13 @@ extern "C" {
     }
 
     PyDoc_STRVAR(moose_ObjId_getLookupField_documentation,
-                 "getLookupField(fieldName, key)\n"
+                 "getLookupField(fieldname, key) -> value type\n"
                  "\n"
                  "Lookup entry for `key` in `fieldName`\n"
                  "\n"
                  "Parameters\n"
                  "----------\n"
-                 "fieldName : string\n"
+                 "fieldname : string\n"
                  "    Name of the lookupfield.\n"
                  "\n"
                  "key : appropriate type for key of the lookupfield (as in the dict "
@@ -1290,18 +1291,18 @@ extern "C" {
     }// setLookupField
 
     PyDoc_STRVAR(moose_ObjId_setLookupField_documentation,
-                 "setLookupField(field, key, value)\n"
+                 "setLookupField(fieldname, key, value)\n"
+                 "\n"
                  "Set a lookup field entry.\n"
+                 "\n"
                  "Parameters\n"
                  "----------\n"
-                 "field : string\n"
+                 "fieldname : str\n"
                  "    name of the field to be set\n"
-                 "\n"
                  "key : key type\n"
                  "    key in the lookup field for which the value is to be set.\n"
-                 "\n"
                  "value : value type\n"
-                 "    value to be set for `key` in the lookkup field.\n");
+                 "    value to be set for `key` in the lookup field.\n");
     
     PyObject * moose_ObjId_setLookupField(_ObjId * self, PyObject * args)
     {
@@ -1322,6 +1323,7 @@ extern "C" {
 
     PyDoc_STRVAR(moose_ObjId_setDestField_documentation,
                  "setDestField(arg0, arg1, ...)\n"
+                 "\n"
                  "Set a destination field. This is for advanced uses. destFields can\n"
                  "(and should) be directly called like functions as\n"
                  "`element.fieldname(arg0, ...)`\n"
@@ -1633,7 +1635,7 @@ PyObject* setDestFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type1
 
 
     PyDoc_STRVAR(moose_ObjId_getFieldNames_documenation,
-                 "getFieldNames(fieldType='')\n"
+                 "getFieldNames(fieldType='') -> tuple of str\n"
                  "\n"
                  "Get the names of fields on this element.\n"
                  "\n"
@@ -1646,15 +1648,15 @@ PyObject* setDestFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type1
                  "\n"
                  "Returns\n"
                  "-------\n"
-                 "    out : tuple of strings.\n"
+                 "names : tuple of strings.\n"
+                 "    names of the fields of the specified type.\n"   
                  "\n"
                  "Example\n"
                  "-------\n"
                  "List names of all the source fields in PulseGen class:\n"
                  "\n"
-                 ">>> moose.getFieldNames('PulseGen', 'srcFinfo')\n"
-                 "('childMsg', 'output')\n"
-                 "\n"
+                 "    >>> moose.getFieldNames('PulseGen', 'srcFinfo')\n"
+                 "    ('childMsg', 'output')\n"
                  "\n");
     // 2011-03-23 15:28:26 (+0530)
     PyObject * moose_ObjId_getFieldNames(_ObjId * self, PyObject *args)
@@ -1698,19 +1700,19 @@ PyObject* setDestFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type1
     }
 
     PyDoc_STRVAR(moose_ObjId_getNeighbors_documentation,
-                 "getNeighbors(fieldName)\n"
+                 "getNeighbors(fieldName) -> tuple of vecs\n"
                  "\n"
-                 "Get the objects connected to this element by a message on specified\n"
-                 "field.\n"
+                 "Get the objects connected to this element on specified field.\n"
                  "\n"
                  "Parameters\n"
                  "----------\n"
                  "fieldName : str\n"
-                 "    name of the connection field (a destFinfo or srcFinfo)\n"
+                 "    name of the connection field (a destFinfo/srcFinfo/sharedFinfo)\n"
                  "\n"
                  "Returns\n"
                  "-------\n"
-                 "out: tuple of ematrices.\n"
+                 "neighbors: tuple of vecs.\n"
+                 "    tuple containing the ids of the neighbour vecs.\n"
                  "\n");
                  
     PyObject * moose_ObjId_getNeighbors(_ObjId * self, PyObject * args)
@@ -1746,27 +1748,34 @@ PyObject* setDestFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type1
     // 2011-03-28 10:51:52 (+0530)
     PyDoc_STRVAR(moose_ObjId_connect_documentation,
                  "connect(srcfield, destobj, destfield, msgtype) -> bool\n"
+                 "\n"
                  "Connect another object via a message.\n"
                  "\n"
                  "Parameters\n"
                  "----------\n"
                  "srcfield : str\n"
                  "    source field on self.\n"
-                 "\n"
                  "destobj : element\n"
                  "    Destination object to connect to.\n"
-                 "\n"
                  "destfield : str\n"
                  "    field to connect to on `destobj`.\n"
-                 "\n"
                  "msgtype : str\n"
                  "    type of the message. Can be `Single`, `OneToAll`, `AllToOne`,\n"
                  "   `OneToOne`, `Reduce`, `Sparse`. Default: `Single`.\n"
                  "\n"
                  "Returns\n"
                  "-------\n"
-                 "element of the created message.\n"
+                 "msgmanager: melement\n"
+                 "    message-manager for the newly created message.\n"
                  "\n"
+                 "Examples\n"
+                 "-------\n"
+                 "Connect the output of a pulse generator to the input of a spike\n"
+                 "generator::\n"
+                 "\n"
+                 "    >>> pulsegen = moose.PulseGen('pulsegen')\n"
+                 "    >>> spikegen = moose.SpikeGen('spikegen')\n"
+                 "    >>> pulsegen.connect('output', spikegen, 'Vm')\n"
                  "See also\n"
                  "--------\n"
                  "moose.connect\n"
@@ -1863,9 +1872,10 @@ PyObject* setDestFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type1
     }
 
     PyDoc_STRVAR(moose_ObjId_getDataIndex_documentation,
-                 "getDataIndex()\n"
+                 "getDataIndex() -> int\n"
                  "\n"
-                 "Return the dataIndex of this object.\n");
+                 "Get the dataIndex of this object.\n"
+                 );
     PyObject * moose_ObjId_getDataIndex(_ObjId * self)
     {
         if (!Id::isValid(self->oid_.id)){
@@ -1935,24 +1945,24 @@ PyObject* setDestFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type1
                  "item in the containing vec. `dindex` is 0 for single elements."
                  "\n"
                  "\n"
-                 "    __init__(path, dims, dtype) or\n"
-                 "    __init__(id, dataIndex, fieldIndex)\n"
+                 "    melement(path, dims, dtype) or\n"
+                 "    melement(id, dataIndex, fieldIndex)\n"
                  "    Initialize moose object\n"
                  "\n"
-                 "    Parameters\n"
-                 "    ----------\n"
-                 "    path : string\n"
-                 "        Target element path.\n"
+                 "Parameters\n"
+                 "----------\n"
+                 "path : str\n"
+                 "    Target element path.\n"
                  "\n"
-                 "    dims : tuple or int\n"
-                 "        dimensions along each axis (can be"
-                 "        an integer for 1D objects). Default: (1,)\n"
+                 "dims : tuple or int\n"
+                 "    dimensions along each axis (can be"
+                 "    an integer for 1D objects). Default: (1,)\n"
                  "\n"
-                 "    dtype : string\n"
-                 "        the MOOSE class name to be created.\n"
+                 "dtype : string\n"
+                 "    the MOOSE class name to be created.\n"
                  "\n"
-                 "    id : vec or integer\n"
-                 "        id of an existing element.\n"
+                 "id : vec or integer\n"
+                 "    id of an existing element.\n"
                  "\n"
                  );
     PyTypeObject ObjIdType = { 
