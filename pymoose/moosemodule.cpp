@@ -1368,6 +1368,36 @@ extern "C" {
         Py_RETURN_NONE;
     }
 
+    PyDoc_STRVAR(moose_useClock_documentation,
+                 "useClock(tick, path, fn)\n\n"
+                 "schedule `fn` function of every object that matches `path` on tick no. `tick`.\n\n "
+                 "Most commonly the function is 'process'.  NOTE: unlike earlier versions, now autoschedule is not available. You have to call useClock for every element that should be updated during the  simulation.\n\n "
+                 "The sequence of clockticks with the same dt is according to their number. This is utilized for controlling the order of updates in various objects where it matters. The following convention should be observed when assigning clockticks to various components of a model:\n\n "
+                 "Clock ticks 0-3 are for electrical (biophysical) components, 4 and 5 are for chemical kinetics, 6 and 7 are for lookup tables and stimulus, 8 and 9 are for recording tables.\n\n "
+                 "Generally, `process` is the method to be assigned a clock tick. Notable exception is `init` method of Compartment class which is assigned tick 0.\n\n"
+                 "     - 0 : Compartment: `init`\n"
+                 "     - 1 : Compartment: `process`\n"
+                 "     - 2 : HHChannel and other channels: `process`\n"
+                 "     - 3 : CaConc : `process`\n"
+                 "     - 4,5 : Elements for chemical kinetics : `process`\n"
+                 "     - 6,7 : Lookup (tables), stimulus : `process`\n"
+                 "     - 8,9 : Tables for plotting : `process`\n"
+                 " \n"
+                 "Parameters\n"
+                 "----------\n"
+                 "tick : int\n"
+                 "        tick number on which the targets should be scheduled.\n"
+                 "path : str\n"
+                 "        path of the target element(s). This can be a wildcard also.\n"
+                 "fn : str\n"
+                 "        name of the function to be called on each tick. Commonly `process`.\n"
+                 "\n"
+                 "Examples\n"
+                 "--------\n"
+                 "In multi-compartmental neuron model a compartment's membrane potential (Vm) is dependent on its neighbours' membrane potential. Thus it must get the neighbour's present Vm before computing its own Vm in next time step. This ordering is achieved by scheduling the `init` function, which communicates membrane potential, on tick 0 and `process` function on tick 1.\n\n"
+                 "    >>> moose.useClock(0, '/model/compartment_1', 'init')\n"
+                 "    >>> moose.useClock(1, '/model/compartment_1', 'process')\n");
+    
     PyObject * moose_useClock(PyObject * dummy, PyObject * args)
     {
         char * path, * field;
@@ -1378,6 +1408,22 @@ extern "C" {
         SHELLPTR->doUseClock(string(path), string(field), tick);
         Py_RETURN_NONE;
     }
+
+    
+    PyDoc_STRVAR(moose_setClock_documentation,
+                 "setClock(tick, dt)\n"
+                 "\n"
+                 "set the ticking interval of `tick` to `dt`.\n"
+                 "\n"
+                 "A tick with interval `dt` will call the functions scheduled on that tick every `dt` timestep.\n"
+                 "\n"
+                 "Parameters\n"
+                 "----------\n"
+                 "    tick : int\n"
+                 "        tick number\n"
+                 "    dt : double\n"
+                 "        ticking interval\n");
+                              
     PyObject * moose_setClock(PyObject * dummy, PyObject * args)
     {
         unsigned int tick;
@@ -1661,18 +1707,17 @@ extern "C" {
                  "\n"
                  "Returns\n"
                  "-------\n"
-                 "melement\n"
+                 "msgmanager: melement\n"
                  "    message-manager for the newly created message.\n"
                  "\n"
-                 "Example\n"
+                 "Examples\n"
                  "-------\n"
                  "Connect the output of a pulse generator to the input of a spike\n"
                  "generator::\n"
                  "\n"
-                 ">>> pulsegen = moose.PulseGen('pulsegen')\n"
-                 ">>> spikegen = moose.SpikeGen('spikegen')\n"
-                 ">>> moose.connect(pulsegen, 'output', spikegen, 'Vm')\n"
-                 "1\n"
+                 "    >>> pulsegen = moose.PulseGen('pulsegen')\n"
+                 "    >>> spikegen = moose.SpikeGen('spikegen')\n"
+                 "    >>> moose.connect(pulsegen, 'output', spikegen, 'Vm')\n"
                  "\n"
                  );
     
@@ -1732,7 +1777,7 @@ extern "C" {
                  "Get dictionary of field names and types for specified class.\n"
                  "\n"
                  "Parameters\n"
-                 "-----------\n"
+                 "----------\n"
                  "className : str\n"
                  "    MOOSE class to find the fields of.\n"
                  "finfoType : str (optional)\n"
@@ -1749,8 +1794,8 @@ extern "C" {
                  "    This behaviour is different from `getFieldNames` where only\n"
                  "    `valueFinfo`s are returned when `finfoType` remains unspecified.\n"
                  "\n"
-                 "Example\n"
-                 "-------\n"
+                 "Examples\n"
+                 "--------\n"
                  "List all the source fields on class Neutral::\n"
                  "\n"
                  ">>> moose.getFieldDict('Neutral', 'srcFinfo')\n"
@@ -2025,7 +2070,7 @@ extern "C" {
                  "        {PATH}/{WILDCARD}[{CONDITION}]\n"
                  "\n"
                  "    where {PATH} is valid path in the element tree.\n"
-                 "    {WILDCARD} can be `#` or `##`.\n"
+                 "    `{WILDCARD}` can be `#` or `##`.\n"
                  "\n"
                  "    `#` causes the search to be restricted to the children of the\n"
                  "    element specified by {PATH}.\n"
@@ -2033,6 +2078,7 @@ extern "C" {
                  "    `##` makes the search to recursively go through all the descendants\n"
                  "    of the {PATH} element.\n"
                  "    {CONDITION} can be::\n"
+                 "\n"
                  "        TYPE={CLASSNAME} : an element satisfies this condition if it is of\n"
                  "        class {CLASSNAME}.\n"
                  "        ISA={CLASSNAME} : alias for TYPE={CLASSNAME}\n"
@@ -2043,6 +2089,11 @@ extern "C" {
                  "\n"
                  "    For example, /mymodel/##[FIELD(Vm)>=-65] will return a list of all\n"
                  "    the objects under /mymodel whose Vm field is >= -65.\n"
+                 "\n"
+                 "Returns\n"
+                 "-------\n"
+                 "tuple\n"
+                 "   all elements that match the wildcard.\n"
                  "\n");
 
     PyObject * moose_wildcardFind(PyObject * dummy, PyObject * args)
@@ -2631,8 +2682,8 @@ extern "C" {
         {"copy", (PyCFunction)moose_copy, METH_VARARGS|METH_KEYWORDS, moose_copy_documentation},
         {"move", (PyCFunction)moose_move, METH_VARARGS, "Move a vec object to a destination."},
         {"delete", (PyCFunction)moose_delete, METH_VARARGS, moose_delete_documentation},
-        {"useClock", (PyCFunction)moose_useClock, METH_VARARGS, "Schedule objects on a specified clock"},
-        {"setClock", (PyCFunction)moose_setClock, METH_VARARGS, "Set the dt of a clock."},
+        {"useClock", (PyCFunction)moose_useClock, METH_VARARGS, moose_useClock_documentation},
+        {"setClock", (PyCFunction)moose_setClock, METH_VARARGS, moose_setClock_documentation},
         {"start", (PyCFunction)moose_start, METH_VARARGS, moose_start_documentation},
         {"reinit", (PyCFunction)moose_reinit, METH_VARARGS, moose_reinit_documentation},
         {"stop", (PyCFunction)moose_stop, METH_VARARGS, "Stop simulation"},

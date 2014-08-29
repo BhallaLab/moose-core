@@ -19,9 +19,12 @@ Loading and running models
 This section of the documentation explains how to load and run predefined
 models in MOOSE.
 
-Hello, MOOSE: Load, run and display existing models.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. _helloMoose:
+
+Hello, MOOSE: Load, run and display existing models
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. automodule:: helloMoose
+   :members:
 
 The Hodgkin-Huxley demo
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -44,6 +47,7 @@ Storing simulation output
 Here we'll show how to store and dump from a table and also using HDF5.
 
 .. automodule:: hdfdemo
+   :members:
 
 Chemical Signaling models
 -------------------------
@@ -142,8 +146,5 @@ Animation of values along an axis
 Using MOOGLI widgets to display a neuron
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-HDF5 Writer
------------
-.. automodule:: hdfdemo
 
 		
