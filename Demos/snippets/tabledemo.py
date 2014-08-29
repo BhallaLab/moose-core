@@ -44,7 +44,7 @@
 # 
 
 # Code:
-"""Example of saving data using a table."""
+""":class:`Table` can be used for recording and saving data in ascii text formats."""
 
 import sys
 sys.path.append('../../python')
