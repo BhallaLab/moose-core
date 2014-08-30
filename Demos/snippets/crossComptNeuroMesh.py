@@ -166,6 +166,11 @@ def makeModel():
                 stoich0.buildXreacs( stoich1 )
                 #stoich1.buildXreacs( stoich0 )
                 stoich1.buildXreacs( stoich2 )
+                stoich0.filterXreacs()
+                stoich1.filterXreacs()
+                stoich2.filterXreacs()
+
+
                 print a.vec.volume, b.vec.volume, c.vec.volume
 		a.vec.concInit = range( numSeg + 1, 0, -1 )
 		b.vec.concInit = [5.0 * ( 1 + x ) for x in range( numSeg )]

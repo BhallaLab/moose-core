@@ -574,6 +574,11 @@ void Gsolve::setupCrossSolverReacs( const map< Id, vector< Id > >& xr,
 {
 }
 
+// Inherited virtual
+void Gsolve::filterCrossRateTerms( const vector< pair< Id, Id > >& xrt )
+{
+}
+
 // Inherited virtual. Will need to populate for x-compt reacs.
 void Gsolve::setupCrossSolverReacVols(
 		const vector< vector< Id > >& subCompts,

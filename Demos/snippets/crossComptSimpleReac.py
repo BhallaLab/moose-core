@@ -124,6 +124,9 @@ def makeModel():
                 stoich1.buildXreacs( stoich0 )
                 stoich1.buildXreacs( stoich2 )
                 #stoich2.buildXreacs( stoich1 )
+                stoich0.filterXreacs()
+                stoich1.filterXreacs()
+                stoich2.filterXreacs()
 
 
 
