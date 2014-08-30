@@ -162,6 +162,14 @@ const Cinfo* Stoich::initCinfo()
 			new EpFunc1< Stoich, Id >( &Stoich::buildXreacs )
 		);
 
+		static DestFinfo filterXreacs( "filterXreacs",
+			"Filter cross-reaction terms on current stoich"
+			"This function clears out absent rate terms that would "
+			"otherwise try to compute cross reactions where the "
+			"junctions are not present. ",
+			new OpFunc0< Stoich >( &Stoich::filterXreacs )
+		);
+
 		//////////////////////////////////////////////////////////////
 		// SrcFinfo Definitions
 		//////////////////////////////////////////////////////////////
@@ -186,6 +194,7 @@ const Cinfo* Stoich::initCinfo()
 		&proxyPools,		// ReadOnlyLookupValue
 		&unzombify,			// DestFinfo
 		&buildXreacs,		// DestFinfo
+		&filterXreacs,		// DestFinfo
 	};
 
 	static Dinfo< Stoich > dinfo;
@@ -217,7 +226,7 @@ Stoich::Stoich()
 		kinterface_( 0 ),
 		dinterface_( 0 ),
 		rates_( 0 ), 	// No RateTerms yet.
-		uniqueVols_( 1, 1.0 ), 
+		// uniqueVols_( 1, 1.0 ), 
 		numVoxels_( 1 ),
 		objMapStart_( 0 ),
 		numVarPools_( 0 ),
@@ -420,15 +429,19 @@ void Stoich::setCompartment( Id compartment ) {
 			if ( !doubleEq( temp.back(), *i / bigVol ) )
 				temp.push_back( *i / bigVol );
 		}
+		/*
 		uniqueVols_.clear();
 		for ( int i = temp.size() - 1; i >= 0; i-- ) {
 			uniqueVols_.push_back( temp[i] * bigVol );
 		}
+		*/
+		/*
 	} else {
 		uniqueVols_.resize( 1 );
 		uniqueVols_[0] = 1.0;
 		cout << "Warning: Stoich::setCompartment: " << 
 				compartment.path() << ". Compartment has zero voxels\n";
+				*/
 	}
 }
 
@@ -869,6 +882,11 @@ const KinSparseMatrix& Stoich::getStoichiometryMatrix() const
 void Stoich::buildXreacs( const Eref& e, Id otherStoich )
 {
 	kinterface_->setupCrossSolverReacs( offSolverPoolMap_, otherStoich );
+}
+
+void Stoich::filterXreacs()
+{
+	kinterface_->filterCrossRateTerms( offSolverReacCompts_ );
 }
 
 void Stoich::comptsOnCrossReacTerms( vector< pair< Id, Id > >& xr ) const

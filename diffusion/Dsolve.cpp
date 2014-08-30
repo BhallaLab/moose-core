@@ -721,6 +721,12 @@ void Dsolve::setupCrossSolverReacs( const map< Id,
 {
 	;
 }
+
+// Inherited virtual
+void Dsolve::filterCrossRateTerms( const vector< pair< Id, Id > >& xrt )
+{
+}
+
 void Dsolve::setupCrossSolverReacVols( 
 			const vector< vector< Id > >& subCompts,
 			const vector< vector< Id > >& prdCompts )
