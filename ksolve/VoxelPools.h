@@ -76,6 +76,11 @@ class VoxelPools: public VoxelPoolsBase
 		void updateReacVelocities( 
 						const double* s, vector< double >& v ) const;
 
+		/**
+		 * Changes cross rate terms to zero if there is no junction
+		 */
+		void filterCrossRateTerms( const vector< pair< Id, Id > >& vec );
+
 		/// Used for debugging.
 		void print() const;
 	private:

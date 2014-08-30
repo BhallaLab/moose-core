@@ -187,6 +187,7 @@ class Ksolve: public ZombiePoolInterface
 
 		void buildCrossReacVolScaling( Id otherKsolve,
 				const vector< VoxelJunction >& vj );
+		void filterCrossRateTerms( const vector< pair< Id, Id > >& xrt );
 		//////////////////////////////////////////////////////////////////
 		// for debugging
 		void print() const;

@@ -4915,5 +4915,33 @@ the ones on the compartment are not (should be). Need to look at the copy
 function to ensure that sensible things happen.
 
 Fixed. Works. The ee method at 0.2us slowly is converging to the hsolve@10usec,
-still not there.
+still not there. Key thing is that the method works.
+
+=============================================================================
+28 Aug.
+Try to understand why crossComptNeuroMesh.py has a slowly decaying conc
+in first compt. Implemented foo.py based on this. will try:
+- shfiting compts so they no longer touch eath other, see what happens. Do the
+structures for junctions still remain and is there reaction stuff
+across.
+
+Did this. Fixed a minor bug with CubeMesh. Now I'm able to run with
+CubeMesh compartments, a<===>b<===>c is the reac. The problem occurs even 
+in this simple case. 
+
+Is there a way a voxel can find out if it a given x-reaction does not occur
+on it? There is already the hasXfer function, but this is for the voxel as a
+whole.
+
+Compiles, runs, but 
+At this point it looks like all of the reacs have been turned off.
+
+=============================================================================
+29 Aug.
+Looks like the proxyPoolsMap is never getting assigned.
+
+=============================================================================
+30 Aug.
+Some progress on it, seems to be OK now but I need to design proper
+unit tests.
 =============================================================================
