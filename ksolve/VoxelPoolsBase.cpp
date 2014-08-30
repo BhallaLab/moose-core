@@ -181,11 +181,14 @@ void VoxelPoolsBase::xferOut(
 }
 
 void VoxelPoolsBase::addProxyVoxy( 
-				unsigned int comptIndex, unsigned int voxel )
+		unsigned int comptIndex, Id otherComptId, unsigned int voxel )
 {
-	if ( comptIndex >= proxyPoolVoxels_.size() )
+	if ( comptIndex >= proxyPoolVoxels_.size() ) {
 		proxyPoolVoxels_.resize( comptIndex + 1 );
+	}
+
 	proxyPoolVoxels_[comptIndex].push_back( voxel );
+	proxyComptMap_[otherComptId] = comptIndex;
 }
 
 void VoxelPoolsBase::addProxyTransferIndex( 
@@ -201,6 +204,20 @@ bool VoxelPoolsBase::hasXfer( unsigned int comptIndex ) const
 	if ( comptIndex >= proxyPoolVoxels_.size() )
 		return false;
 	return (proxyPoolVoxels_[ comptIndex ].size() > 0);
+}
+
+bool VoxelPoolsBase::isVoxelJunctionPresent( Id i1, Id i2 ) const
+{
+	if ( i1 == Id () )
+		return false;
+	if ( proxyComptMap_.find( i1 ) == proxyComptMap_.end() )
+		return false;
+	if ( i2 == Id() ) // This is intentionally blank, only one jn.
+		return true;
+	// If there is an i2 but it isn't on the map, then not connected.
+	if ( proxyComptMap_.find( i2 ) == proxyComptMap_.end() )
+		return false;
+	return true;
 }
 
 ////////////////////////////////////////////////////////////////////

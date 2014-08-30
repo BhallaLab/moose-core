@@ -185,6 +185,8 @@ class Stoich
 		 */
 		void buildXreacs( const Eref& e, Id otherStoich );
 
+		void filterXreacs();
+
 		/**
 		 * Expands out list of compartment mappings of proxy reactions to
 		 * the appropriate entries on the rates_vector.
@@ -490,8 +492,8 @@ class Stoich
 		/**
 		 * This tracks the unique volumes handled by the reac system.
 		 * Maps one-to-one with the vector of vector of RateTerms.
-		 */
 		vector< double > uniqueVols_;
+		 */
 
 		/// Number of voxels in reac system.
 		unsigned int numVoxels_;

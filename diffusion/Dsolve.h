@@ -110,6 +110,7 @@ class Dsolve: public ZombiePoolInterface
 		void setupCrossSolverReacVols( 
 			const vector< vector< Id > >& subCompts,
 			const vector< vector< Id > >& prdCompts );
+		void filterCrossRateTerms( const vector< pair< Id, Id > >& xrt );
 
 		// Do any updates following a volume or rate constant change.
 		void updateRateTerms( unsigned int index );

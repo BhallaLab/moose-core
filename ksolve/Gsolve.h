@@ -97,6 +97,7 @@ class Gsolve: public ZombiePoolInterface
 		void setupCrossSolverReacVols( 
 			const vector< vector< Id > >& subCompts, 
 			const vector< vector< Id > >& prdCompts );
+		void filterCrossRateTerms( const vector< pair< Id, Id > >& xrt );
 
 		/**
 		 * Rescale specified voxel rate term following rate constant change 

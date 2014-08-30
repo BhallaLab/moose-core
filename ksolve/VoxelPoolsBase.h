@@ -134,19 +134,25 @@ class VoxelPoolsBase
 				vector< double >& values,
 				const vector< unsigned int >& poolIndex );
 		/// Adds the index of a voxel to which proxy data should go.
-		void addProxyVoxy( unsigned int comptIndex, unsigned int voxel );
+		void addProxyVoxy( unsigned int comptIndex, 
+						Id comptId, unsigned int voxel );
 		void addProxyTransferIndex( unsigned int comptIndex, 
 						unsigned int transferIndex );
 
 		/**
 		 * Assigns the Id and volume of the specified x-reac coupled 
 		 * compartment
-		 */
 		void setComptVolume( unsigned int comptIndex, Id id, double vol );
+		 */
 
 		/// True when this voxel has data to be transferred.
 		bool hasXfer( unsigned int comptIndex ) const;
 
+		/** 
+		 * True when there is a junction. i1 must match, and if i2 is
+		 * non-zero then it too must match.
+		 */
+		bool isVoxelJunctionPresent( Id i1, Id i2 ) const;
 		//////////////////////////////////////////////////////////////////
 		// Functions for cross-compartment rate scaling.
 		//////////////////////////////////////////////////////////////////
@@ -231,6 +237,11 @@ class VoxelPoolsBase
 		 * the xferPoolIdx_ vector stored on the Ksolve.
 		 */
 		vector< vector< unsigned int > > proxyTransferIndex_;
+
+		/**
+		 * Looks up comptIndex from compt. Actually just a set would do.
+		 */
+		map< Id, unsigned int > proxyComptMap_;
 
 		/** This is what I would need to fully identify proxy compts and
 		 * voxels for each proxy reac.

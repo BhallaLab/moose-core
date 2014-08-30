@@ -1215,6 +1215,9 @@ void CubeMesh::defineIntersection( const CubeMesh* other,
 	ymax += dy_;
 	zmin -= dz_;
 	zmax += dz_;
+	swapIfBackward( xmin, xmax );
+	swapIfBackward( ymin, ymax );
+	swapIfBackward( zmin, zmax );
 }
 
 /**
