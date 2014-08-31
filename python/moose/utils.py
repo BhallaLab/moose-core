@@ -243,7 +243,7 @@ def printtree(root, vchar='|', hchar='__', vcount=1, depth=0, prefix='', is_last
 
     """
     root = _moose.element(root)
-    print('%s: "%s"' % (root, root.children))
+    # print('%s: "%s"' % (root, root.children))
     for i in range(vcount):
         print(prefix)
 
@@ -258,8 +258,14 @@ def printtree(root, vchar='|', hchar='__', vcount=1, depth=0, prefix='', is_last
         prefix = prefix + vchar
 
     print(root.name)
-    
-    children = [ _moose.element(child) for child in root.children ]
+    children = []
+    for child_vec in root.children:
+        try:
+            child = _moose.element(child_vec)
+            children.append(child)
+        except TypeError:
+            pass
+            # print 'TypeError:', child_vec, 'when converting to element.'
     for i in range(0, len(children) - 1):
         printtree(children[i],
                   vchar, hchar, vcount, depth + 1, 
