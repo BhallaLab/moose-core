@@ -19,7 +19,6 @@ Loading and running models
 This section of the documentation explains how to load and run predefined
 models in MOOSE.
 
-.. _helloMoose:
 
 Hello, MOOSE: Load, run and display existing models
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -42,13 +41,17 @@ The demo has built-in documentation and may be run from the
 ``Demos/squid``
 subdirectory of MOOSE.
 
-Start, Stop, and Speed
-^^^^^^^^^^^^^^^^^^^^^^^
+Start, Stop, and setting clocks
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. automodule:: startstop
+   :members:
 
 Accessing and tweaking parameters
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. automodule:: tweakingParameters
+   :members:
+.. figure:: images/tweakingParameters.png
+   :alt: Three oscillation patterns after tweaking model parameters.
 
 Storing simulation output
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -68,19 +71,29 @@ to the chemical signaling.
 Running with different numerical methods
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. automodule:: switchKineticSolvers
+   :members:
 
 Changing volumes
 ^^^^^^^^^^^^^^^^
 .. automodule:: scaleVolumes
+   :members:
 
 Feeding tabulated input to a model
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: analogStimTable
+   :members:
 
 Finding steady states
 ^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: findChemSteadyState
+   :members:
 
 Making a dose-response curve
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. figure:: images/chemDoseResponse.png
+   :alt: Dose-response curve example for a bistable system.
+.. automodule:: chemDoseResponse
+   :members:
 
 Building a chemical model from parts
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
