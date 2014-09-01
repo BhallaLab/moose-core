@@ -50,6 +50,7 @@ import code
 import traceback
 import sys
 sys.path.append('../python')
+sys.path.append('utils')
 import os
 from collections import defaultdict
 import posixpath # We use this to create MOOSE paths
@@ -354,7 +355,14 @@ class MWindow(QtGui.QMainWindow):
                 dockWidget.setVisible(False)
         for dockWidget in self.plugin.getCurrentView().getToolPanes():
             if dockWidget not in dockWidgets:
-                self.addDockWidget(Qt.Qt.RightDockWidgetArea, dockWidget)
+                if dockWidget.windowTitle() == "Scheduling":
+                    dockWidget.setFeatures( QtGui.QDockWidget.NoDockWidgetFeatures);
+                    dockWidget.setWindowFlags(Qt.Qt.CustomizeWindowHint)
+                    titleWidget = QtGui.QWidget();
+                    dockWidget.setTitleBarWidget( titleWidget );
+                    self.addDockWidget(Qt.Qt.TopDockWidgetArea, dockWidget)
+                else:
+                    self.addDockWidget(Qt.Qt.RightDockWidgetArea, dockWidget)
             else:
                 dockWidget.setVisible(True)
         subwin.setVisible(True)
