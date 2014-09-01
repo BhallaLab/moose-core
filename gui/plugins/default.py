@@ -792,7 +792,6 @@ class PlotWidget(QtGui.QWidget):
                         else:
                             color = 'white'
                 lines = self.pathToLine[tab.path]
-
                 if len(lines) == 0:
                     #Harsha: pass color for plot if exist and not white else random color
                     if (color != 'white'):
@@ -825,8 +824,8 @@ class PlotWidget(QtGui.QWidget):
                         legobj.set_picker(True)
               
                 self.canvas.draw()
-        else:
-            print "returning as len tabId is zero",tabId
+            else:
+                print "returning as len tabId is zero ",tabId, " tableObject ",tableObject, " len ",len(tableObject)
 
 
     
