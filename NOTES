@@ -4945,3 +4945,8 @@ Looks like the proxyPoolsMap is never getting assigned.
 Some progress on it, seems to be OK now but I need to design proper
 unit tests.
 =============================================================================
+31 Aug.
+Lots of documentation and code snippets. Implemented a rather nice one for
+dose-response of a bistable.
+
+=============================================================================
