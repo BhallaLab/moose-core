@@ -4,10 +4,10 @@ import config
 from modelBuild import *
 
 class GraphicalView(QtGui.QGraphicsView):
-    def __init__(self,editorWidgetBase,modelRoot,parent,border,layoutPt,createdItem):
+    def __init__(self,XWidgetBase,modelRoot,parent,border,layoutPt,createdItem):
         QtGui.QGraphicsView.__init__(self,parent)
         self.setScene(parent)
-        self.editorWigetBaseref = editorWidgetBase
+        self.refWidgetBase = XWidgetBase
         self.modelRoot = modelRoot
         self.sceneContainerPt = parent
         self.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
@@ -26,64 +26,79 @@ class GraphicalView(QtGui.QGraphicsView):
         self.stackOrder = self.sceneContainerPt.items(Qt.Qt.DescendingOrder)
         #From stackOrder selecting only compartment
         self.cmptStackorder = [i for i in self.stackOrder if isinstance(i,ComptItem)]
-        
+    
+
     def mousePressEvent(self, event):
         selectedItem = None
-        if event.buttons() == QtCore.Qt.LeftButton:
-            self.startingPos = event.pos()
-            self.startScenepos = self.mapToScene(self.startingPos)
-            self.deviceTransform = self.viewportTransform()
-            viewItem = self.items(self.startingPos)
-            #All previously seted zValue made zero
-            for i in self.cmptStackorder:
-                i.setZValue(0)
-            itemIndex = 0
-            kkitItem  = [j for j in viewItem if isinstance(j,KineticsDisplayItem)]
-            comptItem = [k for k in viewItem if isinstance(k,ComptItem)]
-            if kkitItem:
-                for displayitem in kkitItem:
-                    ''' mooseItem(child) ->compartment (parent) But for cplx
-                        cplx(child)->Enz(parent)->compartment(super parent)
-                        to get compartment for cplx one has to get super parent
-                    '''
-                    if isinstance(displayitem,CplxItem):
-                        displayitem = displayitem.parentItem()
-                    itemIndex = self.cmptStackorder.index(displayitem.parentItem())
-                    selectedItem = displayitem
-                    displayitem.parentItem().setZValue(1)
-            elif not kkitItem and comptItem:
-                for cmpt in comptItem:
-                    for previouslySelected in self.sceneContainerPt.selectedItems():
-                        if previouslySelected.isSelected() == True:
-                            previouslySelected.setSelected(False)
-                    xs = cmpt.mapToScene(cmpt.boundingRect().topLeft()).x()+self.border/2
-                    ys = cmpt.mapToScene(cmpt.boundingRect().topLeft()).y()+self.border/2
-                    xe = cmpt.mapToScene(cmpt.boundingRect().bottomRight()).x()-self.border/2
-                    ye = cmpt.mapToScene(cmpt.boundingRect().bottomRight()).y()-self.border/2
-                    xp = self.startScenepos.x()
-                    yp = self.startScenepos.y()
-                    #if on border rubberband is not started, but called parent class for default implementation
-                    if(  ((xp > xs-self.border/2) and (xp < xs+self.border/2) and (yp > ys-self.border/2) and (yp < ye+self.border/2) )or
-                         ((xp > xs+self.border/2) and (xp < xe-self.border/2) and (yp > ye-self.border/2) and (yp < ye+self.border/2) ) or 
-                         ((xp > xs+self.border/2) and (xp < xe-self.border/2) and (yp > ys-self.border/2) and (yp < ys+self.border/2) ) or 
-                         ((xp > xe-self.border/2) and (xp < xe+self.border/2) and (yp > ys-self.border/2) and (yp < ye+self.border/2) ) ):
-                        if self.cmptStackorder:
-                            itemIndex = self.cmptStackorder.index(cmpt)
-                        
-                        cmpt.setZValue(1)
-                        selectedItem = cmpt
-                        break
+        if self.refWidgetBase == "kineticEditorWidget":
+            if event.buttons() == QtCore.Qt.LeftButton:
+                self.startingPos = event.pos()
+                self.startScenepos = self.mapToScene(self.startingPos)
+                self.deviceTransform = self.viewportTransform()
+                viewItem = self.items(self.startingPos)
+                #All previously seted zValue made zero
+                for i in self.cmptStackorder:
+                    i.setZValue(0)
+                itemIndex = 0
+                kkitItem  = [j for j in viewItem if isinstance(j,KineticsDisplayItem)]
+                comptItem = [k for k in viewItem if isinstance(k,ComptItem)]
+                if kkitItem:
+                    for displayitem in kkitItem:
+                        ''' mooseItem(child) ->compartment (parent) But for cplx
+                            cplx(child)->Enz(parent)->compartment(super parent)
+                            to get compartment for cplx one has to get super parent
+                        '''
+                        if isinstance(displayitem,CplxItem):
+                            displayitem = displayitem.parentItem()
+                        itemIndex = self.cmptStackorder.index(displayitem.parentItem())
+                        selectedItem = displayitem
+                        displayitem.parentItem().setZValue(1)
+                elif not kkitItem and comptItem:
+                    for cmpt in comptItem:
+                        for previouslySelected in self.sceneContainerPt.selectedItems():
+                            if previouslySelected.isSelected() == True:
+                                previouslySelected.setSelected(False)
+                        xs = cmpt.mapToScene(cmpt.boundingRect().topLeft()).x()+self.border/2
+                        ys = cmpt.mapToScene(cmpt.boundingRect().topLeft()).y()+self.border/2
+                        xe = cmpt.mapToScene(cmpt.boundingRect().bottomRight()).x()-self.border/2
+                        ye = cmpt.mapToScene(cmpt.boundingRect().bottomRight()).y()-self.border/2
+                        xp = self.startScenepos.x()
+                        yp = self.startScenepos.y()
+                        #if on border rubberband is not started, but called parent class for default implementation
+                        if(  ((xp > xs-self.border/2) and (xp < xs+self.border/2) and (yp > ys-self.border/2) and (yp < ye+self.border/2) )or
+                             ((xp > xs+self.border/2) and (xp < xe-self.border/2) and (yp > ye-self.border/2) and (yp < ye+self.border/2) ) or 
+                             ((xp > xs+self.border/2) and (xp < xe-self.border/2) and (yp > ys-self.border/2) and (yp < ys+self.border/2) ) or 
+                             ((xp > xe-self.border/2) and (xp < xe+self.border/2) and (yp > ys-self.border/2) and (yp < ye+self.border/2) ) ):
+                            if self.cmptStackorder:
+                                itemIndex = self.cmptStackorder.index(cmpt)
+                            
+                            cmpt.setZValue(1)
+                            selectedItem = cmpt
+                            break
 
-            if selectedItem == None:
-                #if mousepressed is not on any kineticsDisplayitem or on compartment border, 
-                #then rubberband is made active
-                enableRubberband = False
-                self.customrubberBand = QtGui.QRubberBand(QtGui.QRubberBand.Rectangle,self)
-                self.customrubberBand.setGeometry(QtCore.QRect(self.startingPos,QtCore.QSize()))
-                self.customrubberBand.show()
-            else:
-                QtGui.QGraphicsView.mousePressEvent(self,event)
+                if selectedItem == None:
+                    #if mousepressed is not on any kineticsDisplayitem or on compartment border, 
+                    #then rubberband is made active
+                    enableRubberband = False
+                    self.customrubberBand = QtGui.QRubberBand(QtGui.QRubberBand.Rectangle,self)
+                    self.customrubberBand.setGeometry(QtCore.QRect(self.startingPos,QtCore.QSize()))
+                    self.customrubberBand.show()
+                else:
+                    QtGui.QGraphicsView.mousePressEvent(self,event)
 
+        elif self.refWidgetBase == "kineticRunWidget":
+            pos = event.pos()
+            item = self.itemAt(pos)
+            itemClass = type(item).__name__
+            if ( itemClass!='ComptItem' and itemClass != 'QGraphicsPolygonItem'):
+                self.setCursor(Qt.Qt.CrossCursor)
+                mimeData = QtCore.QMimeData()
+                mimeData.setText(item.mobj.name)
+                mimeData.setData("text/plain", item.mobj.path)
+                drag = QtGui.QDrag(self)
+                drag.setMimeData(mimeData)
+                dropAction = drag.start(QtCore.Qt.MoveAction)
+                self.setCursor(Qt.Qt.ArrowCursor)
     def mouseMoveEvent(self,event):
         QtGui.QGraphicsView.mouseMoveEvent(self, event)
         if( (self.customrubberBand) and (event.buttons() == QtCore.Qt.LeftButton)):
@@ -100,8 +115,9 @@ class GraphicalView(QtGui.QGraphicsView):
             for item in rbandSelection:
                 if isinstance(item,KineticsDisplayItem) and item.isSelected() == False:
                         item.setSelected(True)
-                        
+        
     def mouseReleaseEvent(self, event):
+        
         self.setCursor(Qt.Qt.ArrowCursor)
         QtGui.QGraphicsView.mouseReleaseEvent(self, event)
         if(self.customrubberBand):
@@ -160,37 +176,51 @@ class GraphicalView(QtGui.QGraphicsView):
         
     def resizeEvent1(self, event):
         """ zoom when resize! """
-        self.fitInView(self.sceneContainerPt.itemsBoundingRect().x()-10,self.sceneContainerPt.itemsBoundingRect().y()-10,self.sceneContainerPt.itemsBoundingRect().width()+20,self.sceneContainerPt.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
+        self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
+        #self.fitInView(self.sceneContainerPt.itemsBoundingRect().x()-10,self.sceneContainerPt.itemsBoundingRect().y()-10,self.sceneContainerPt.itemsBoundingRect().width()+20,self.sceneContainerPt.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
         QtGui.QGraphicsView.resizeEvent(self, event)
         
     def wheelEvent(self,event):
         factor = 1.41 ** (event.delta() / 240.0)
         self.scale(factor, factor)
         
-
+    
     def dragEnterEvent(self, event):
-        if event.mimeData().hasFormat('text/plain'):
-            event.acceptProposedAction()
+        if self.refWidgetBase == "kineticEditorWidget":
+            if event.mimeData().hasFormat('text/plain'):
+                event.acceptProposedAction()
+        else:
+            pass
 
     def dragMoveEvent(self, event):
-        if event.mimeData().hasFormat('text/plain'):
-            event.acceptProposedAction()
+        if self.refWidgetBase == "kineticEditorWidget":
+            if event.mimeData().hasFormat('text/plain'):
+                event.acceptProposedAction()
+        else:
+            pass
 
     def eventFilter(self, source, event):
-        if (event.type() == QtCore.QEvent.Drop):
-            print "dropEvent has happened"
+        if self.refWidgetBase == "kineticEditorWidget":
+            if (event.type() == QtCore.QEvent.Drop):
+                pass
+        else:
+            pass
 
     def dropEvent(self, event):
         """Insert an element of the specified class in drop location"""
-        if not event.mimeData().hasFormat('text/plain'):
-            return
-        pos = event.pos()
-        viewItems = self.items(pos)
-        mapToscene = self.mapToScene(event.pos())
-        newString = str(event.mimeData().text())
-        Item = NewObject(self.editorWigetBaseref,self,self.modelRoot,newString,mapToscene,self.createdItem)
-        self.sceneContainerPt.addItem(Item)
-        Item.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations,True)
-        self.setScene(self.sceneContainerPt)
-        event.accept()
-          
+        if self.refWidgetBase == "kineticEditorWidget":
+            if not event.mimeData().hasFormat('text/plain'):
+                return
+            pos = event.pos()
+            viewItems = self.items(pos)
+            mapToscene = self.mapToScene(event.pos())
+
+            newString = str(event.mimeData().text())
+            print "nreString",newString
+            Item = NewObject(self.refWidgetBase,self,self.modelRoot,newString,mapToscene,self.createdItem)
+            self.sceneContainerPt.addItem(Item)
+            Item.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations,True)
+            self.setScene(self.sceneContainerPt)
+            event.accept()
+        else:
+            pass
