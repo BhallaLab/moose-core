@@ -43,7 +43,8 @@ class PoolItem(KineticsDisplayItem):
     def __init__(self, *args, **kwargs):
         KineticsDisplayItem.__init__(self, *args, **kwargs)
         self.bg = QtGui.QGraphicsRectItem(self)
-        self.gobj = QtGui.QGraphicsSimpleTextItem(self.mobj.name, self.bg)        
+        self.gobj = QtGui.QGraphicsSimpleTextItem(self.mobj.name, self.bg)
+        self.gobj.mobj = self.mobj
         self.gobj.setFont(PoolItem.font)
         if not PoolItem.fontMetrics:
             PoolItem.fontMetrics = QtGui.QFontMetrics(self.gobj.font())
@@ -95,6 +96,7 @@ class PoolItem(KineticsDisplayItem):
 class PoolItemCircle(PoolItem):
     def __init__(self,*args,**kwargs):
         PoolItem.__init__(self, *args, **kwargs)
+        self.setFlag(QtGui.QGraphicsItem.ItemIsMovable,True)
         self.bgColor = QtGui.QGraphicsEllipseItem(self)
         self.bgColor.setFlag(QtGui.QGraphicsItem.ItemStacksBehindParent,True)
         self.bgColor.setRect(((self.gobj.boundingRect().width()+PoolItem.fontMetrics.width('  '))/2)-5,self.gobj.boundingRect().height()/2-5,10,10)
@@ -116,6 +118,8 @@ class PoolItemCircle(PoolItem):
     def returnEllispeSize(self):
         self.bgColor.setRect(((self.gobj.boundingRect().width()+PoolItem.fontMetrics.width('  '))/2)-5,self.gobj.boundingRect().
             height()/2-5,10,10)
+    def MooseRef(self):
+        return self.gobj.mobj
 
 class TableItem(KineticsDisplayItem):
     defaultWidth = 30
@@ -124,6 +128,7 @@ class TableItem(KineticsDisplayItem):
 
     def __init__(self, *args, **kwargs):
         KineticsDisplayItem.__init__(self, *args, **kwargs)
+
         points = [QtCore.QPointF(0,TableItem.defaultWidth/2),
                   QtCore.QPointF(TableItem.defaultHeight/2-2,0),
                   QtCore.QPointF(TableItem.defaultWidth/2+2,0),
@@ -142,7 +147,8 @@ class TableItem(KineticsDisplayItem):
 
         self.gobj = QtGui.QGraphicsPathItem(path, self)
         self.gobj.setPen(QtGui.QPen(QtCore.Qt.black, 2,Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin))
-    
+        self.gobj.mobj = self.mobj
+
     def refresh( self,scale):
         defaultWidth = TableItem.defaultWidth*scale
         defaultHeight = TableItem.defaultHeight*scale
@@ -192,7 +198,7 @@ class ReacItem(KineticsDisplayItem):
             path.moveTo(p)
         self.gobj = QtGui.QGraphicsPathItem(path, self)
         self.gobj.setPen(QtGui.QPen(QtCore.Qt.black, 2,Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin))
-    
+        self.gobj.mobj = self.mobj
     def refresh( self,scale):
         defaultWidth = ReacItem.defaultWidth*scale
         defaultHeight = ReacItem.defaultHeight*scale
@@ -226,7 +232,8 @@ class EnzItem(KineticsDisplayItem):
         self.gobj = QtGui.QGraphicsEllipseItem(0, 0, 
                                             EnzItem.defaultWidth, 
                                             EnzItem.defaultHeight, self)
-        
+        self.gobj.mobj = self.mobj
+
     def setDisplayProperties(self,x,y,textcolor,bgcolor):
         """Set the display properties of this item."""
         self.setGeometry(x,y, 
@@ -250,6 +257,7 @@ class CplxItem(KineticsDisplayItem):
     def __init__(self, *args, **kwargs):
         KineticsDisplayItem.__init__(self, *args, **kwargs)
         self.gobj = QtGui.QGraphicsRectItem(0,0, CplxItem.defaultWidth, CplxItem.defaultHeight, self)
+        self.gobj.mobj = self.mobj
 
     def setDisplayProperties(self,x,y,textcolor,bgcolor):
         """Set the display properties of this item."""
