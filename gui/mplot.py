@@ -78,7 +78,7 @@
 
 
 __author__ = "Subhasis Ray"
-
+import sys
 import numpy as np
 from PyQt4 import QtGui, QtCore
 from PyQt4.Qt import Qt
@@ -86,8 +86,11 @@ from matplotlib import mlab
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
-
 from mplugin import PlotBase
+import moose
+from DataTable import DataTable
+
+#from PlottingType import DialogWidget
 
 class CanvasWidget(FigureCanvas):
     """Widget to draw plots on.
@@ -109,10 +112,15 @@ class CanvasWidget(FigureCanvas):
             self.reparent(args[0])
         elif (kwargs is not None) and ('parent' in kwargs):
             self.reparent(kwargs['parent'])
+        self.setAcceptDrops(True)
         FigureCanvas.updateGeometry(self)
         self.axes = {}
         self.next_id = 0
         self.current_id = -1
+        tabList = []
+        self.addTabletoPlot = ''
+        self.dataTable = DataTable()
+
 
     def addSubplot(self, rows, cols):        
         """Add a subplot to figure and set it as current axes."""
@@ -122,9 +130,20 @@ class CanvasWidget(FigureCanvas):
         axes.set_title(chr(self.next_id + ord('A')))
         self.current_id = self.next_id
         self.next_id += 1
+        labelList = []
+        import moose
+        from matplotlib.lines import Line2D
+        for tabId in moose.wildcardFind('/##[TYPE=Table]'):
+            labelList.append(tabId.name)
+        lines = [Line2D([],[],color='blue',mec=label) for label in labelList]
+        labels = sorted(labelList,reverse=True)
+        #axes.legend(lines, labels,loc='upper center', bbox_to_anchor=(0.5, -0.05),fancybox=True, shadow=True, ncol=3)
+        axes.legend(lines, labels, loc='upper center', prop={'size':10}, bbox_to_anchor=(0.5, -0.03), fancybox=True, shadow=True, ncol=3)
+        #axes.legend(loc='upper center')
         return axes
 
     def plot(self, *args, **kwargs):
+        #self.callAxesFn('legend',loc='lower center',bbox_to_anchor=(0.5, -0.03),fancybox=True, shadow=True, ncol=3)
         return self.callAxesFn('plot', *args, **kwargs)
 
     def callAxesFn(self, fname, *args, **kwargs):
@@ -132,8 +151,43 @@ class CanvasWidget(FigureCanvas):
         if self.current_id < 0:
             self.addSubplot(1,1)
         fn = eval('self.axes[self.current_id].%s' % (fname))
+
         return fn(*args, **kwargs)
 
+    
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasFormat('text/plain'):
+            event.accept()
+    def dragMoveEvent(self, event):
+        if event.mimeData().hasFormat('text/plain'):
+            event.accept()
+    def eventFilter(self, source, event):
+        if (event.type() == QtCore.QEvent.Drop):
+            print "dropEvent has happened"
+
+    def dropEvent(self, event):
+        """Insert an element of the specified class in drop location"""
+
+        if not event.mimeData().hasFormat('text/plain'):
+            return
+        
+        newplot = str(event.mimeData().text())
+        self.addTabletoPlot = moose.element(newplot)
+        popupmenu = QtGui.QMenu('PopupMenu', self)
+        self.conc = QtGui.QAction(self.tr('Conc'), self)
+        self.connect(self.conc, QtCore.SIGNAL('triggered()'), self.plotConc)
+        self.nInit = QtGui.QAction(self.tr('Init'), self)
+        popupmenu.addAction(self.conc)
+        popupmenu.addAction(self.nInit)
+        popupmenu.exec_(QtGui.QCursor.pos())
+        # add createRecordingTable fun in pymoose/moose/utils.py similar to setupTable
+        event.accept()
+    
+    def plotConc(self):
+        self.dataTable.create(self.addTabletoPlot,"Conc")
+
+    def plotnInit(self,tablename):
+        self.dataTable.create(self.addTabletoPlot,"init")        
 
 import sys
 import os
@@ -164,7 +218,7 @@ class CanvasWidgetTests(unittest.TestCase):
 
     def tearDown(self):
         self.app.exec_()
-    
+
 if __name__ == '__main__':
     unittest.main()
 
