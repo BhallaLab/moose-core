@@ -62,7 +62,15 @@ def NewObject(EditWB,view,modelRoot,newString,mapToscene,createdItem):
         cplxItem = CplxItem(cplxPool,Item)
         cplxItem.setDisplayProperties(mapToscene.x(),mapToscene.y(),'','')
         view.emit(QtCore.SIGNAL("dropped"),enzyme)
-
+    elif newString == "StimulusTable":
+        if not num is None:
+            stiTab = moose.StimulusTable(modelRoot+'/StiTab'+str(num))
+        else:
+            stiTab = moose.StimulusTable(modelRoot+'/StiTab')
+        Item = TableItem(stiTab)
+        Item.setDisplayProperties(mapToscene.x(),mapToscene.y(),QtGui.QColor('green'),'')
+        view.emit(QtCore.SIGNAL("dropped"),stiTab)
+    
     elif newString == 'MMenz':
         if not num is None:
             MMEnzyme = moose.MMenz(modelRoot+'/MMEnz'+str(num))
@@ -71,7 +79,36 @@ def NewObject(EditWB,view,modelRoot,newString,mapToscene,createdItem):
         Item = MMEnzItem(MMEnzyme)
         Item.setDisplayProperties(mapToscene.x(),mapToscene.y(),QtGui.QColor('green'),'')
         view.emit(QtCore.SIGNAL("dropped"),MMEnzyme)
+
+    else:
+        if newString == 'Pool':
+            if not num is None:
+                pool = moose.Pool(modelRoot+'/pool'+str(num))
+            else:
+                pool = moose.Pool(modelRoot+'/pool')
+            Item = PoolItem(pool)
+        elif newString == "BufPool":
+            if not num is None:
+                pool = moose.BufPool(modelRoot+'/Bufpool'+str(num))
+            else:
+                pool = moose.BufPool(modelRoot+'/Bufpool')
+            Item = PoolItem(pool)
+        elif newString == "SumFunc":
+            if not num is None:
+                pool = moose.SumFunc(modelRoot+'/SumFunc'+str(num))
+            else:
+                pool = moose.SumFunc(modelRoot+'/SumFunc')
+            Item = PoolItem(pool)
+        if Item != '':
+            
+            Item.setDisplayProperties(mapToscene.x(),mapToscene.y(),QtGui.QColor('green'),QtGui.QColor('blue'))
+            view.emit(QtCore.SIGNAL("dropped"),pool)
+        else:
+            print "Moose doesn't identify this Object Type"
     return Item
+
+    
+
 
 def checkExist(modelRoot,mooseClass,mooseDict):
     mObj = ''
