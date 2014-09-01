@@ -45,14 +45,15 @@ class DataTable():
             field = "Volume"
         elif field == "diffConst":
             field ="DiffConst"
-
         tablePath =  relativePath.replace('/', '_') + '.' + field
         tablePath = re.sub('.', lambda m: {'[':'_', ']':'_'}.get(m.group(), m.group()),tablePath)
         tablePath = self._dataRoot + '/' +tablePath
         if moose.exists(tablePath):
             tablePath = '%s_%d' % (tablePath, element.getId().value)
         if not moose.exists(tablePath):
-            table = moose.Table(tablePath)
+            #table = moose.Table(tablePath)
+            #harsha: Instead of fullpath, just poolname is sent
+            table = moose.Table(element.name)
             print 'Created', table.path, 'for plotting', '%s.%s' % (element.path, field)
             target = element
             moose.connect(table, 'requestOut', target, 'get%s' % (field))
