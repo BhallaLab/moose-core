@@ -7,19 +7,6 @@
 ## See the file COPYING.LIB for the full notice.
 #########################################################################
 
-"""
-This example illustrates how to set up a diffusion/transport model with 
-a simple reaction-diffusion system in a cylinder: 
-
-| Molecule A diffuses with DiffConst of 2e-12 m^2/sec. 
-| Molecule B diffuses with DiffConst of 1e-12 m^2/sec. 
-| Molecule B also undergoes motor transport with a rate of 1e-6 microns/sec.
-| Molecule C does not move: diffConst = 0.0
-| Molecule D does not move: diffConst = 1.0e-12 but it is buffered.
-
-There is a little reaction: ``b + d <===> c``
-Note that molecule A does not participate in this reaction.
-"""
 
 import sys
 sys.path.append('../../python')
@@ -33,121 +20,135 @@ import signal
 PID = os.getpid()
 
 def doNothing( *args ):
-		pass
+    pass
 
 signal.signal( signal.SIGUSR1, doNothing )
 
 def makeModel():
-		# create container for model
-		r0 = 1e-6	# m
-		r1 = 1e-6	# m
-		num = 25
-		diffLength = 1e-6 # m
-		len = num * diffLength	# m
-		diffConst = 2e-12 # m^2/sec
-		motorRate = 1e-6 # m/sec
-		concA = 1 # millimolar
+    """
+    This example illustrates how to set up a diffusion/transport model with 
+    a simple reaction-diffusion system in a cylinder: 
 
-		model = moose.Neutral( 'model' )
-		compartment = moose.CylMesh( '/model/compartment' )
-		compartment.r0 = r0
-		compartment.r1 = r1
-		compartment.x0 = 0
-		compartment.x1 = len
-		compartment.diffLength = diffLength
-		
-		assert( compartment.numDiffCompts == num )
+    | Molecule A diffuses with diffConst of 2e-12 m^2/sec. 
+    | Molecule B diffuses with diffConst of 1e-12 m^2/sec. 
+    | Molecule B also undergoes motor transport with a rate of 1e-6 m/sec.
+    | Molecule C does not move: diffConst = 0.0
+    | Molecule D does not move: diffConst = 1.0e-12 but it is buffered.
 
-		# create molecules and reactions
-		a = moose.Pool( '/model/compartment/a' )
-		b = moose.Pool( '/model/compartment/b' )
-		c = moose.Pool( '/model/compartment/c' )
-		d = moose.BufPool( '/model/compartment/d' )
-                r1 = moose.Reac( '/model/compartment/r1' )
-                moose.connect( r1, 'sub', b, 'reac' )
-                moose.connect( r1, 'sub', d, 'reac' )
-                moose.connect( r1, 'prd', c, 'reac' )
-                r1.Kf = 1.0 # 1/(mM.sec)
-                r1.Kb = 1.0 # 1/sec
+    There is a little reaction in all compartments: ``b + d <===> c``
 
-		# Assign parameters
-		a.diffConst = diffConst
-		b.diffConst = diffConst / 2.0
-		b.motorConst = motorRate
-		c.diffConst = 0
-		d.diffConst = diffConst
+    Note that molecule **A** does not participate in this reaction.
+    """
+    # create container for model
+    r0 = 1e-6	# m
+    r1 = 1e-6	# m
+    num = 25
+    diffLength = 1e-6 # m
+    len = num * diffLength	# m
+    diffConst = 2e-12 # m^2/sec
+    motorRate = 1e-6 # m/sec
+    concA = 1 # millimolar
+
+    model = moose.Neutral( 'model' )
+    compartment = moose.CylMesh( '/model/compartment' )
+    compartment.r0 = r0
+    compartment.r1 = r1
+    compartment.x0 = 0
+    compartment.x1 = len
+    compartment.diffLength = diffLength
+    
+    assert( compartment.numDiffCompts == num )
+
+    # create molecules and reactions
+    a = moose.Pool( '/model/compartment/a' )
+    b = moose.Pool( '/model/compartment/b' )
+    c = moose.Pool( '/model/compartment/c' )
+    d = moose.BufPool( '/model/compartment/d' )
+    r1 = moose.Reac( '/model/compartment/r1' )
+    moose.connect( r1, 'sub', b, 'reac' )
+    moose.connect( r1, 'sub', d, 'reac' )
+    moose.connect( r1, 'prd', c, 'reac' )
+    r1.Kf = 1.0 # 1/(mM.sec)
+    r1.Kb = 1.0 # 1/sec
+
+    # Assign parameters
+    a.diffConst = diffConst
+    b.diffConst = diffConst / 2.0
+    b.motorConst = motorRate
+    c.diffConst = 0
+    d.diffConst = diffConst
 
 
-		# Make solvers
-		ksolve = moose.Ksolve( '/model/compartment/ksolve' )
-		dsolve = moose.Dsolve( '/model/compartment/dsolve' )
-		stoich = moose.Stoich( '/model/compartment/stoich' )
-                stoich.compartment = compartment
-                stoich.ksolve = ksolve
-                stoich.dsolve = dsolve
-		os.kill( PID, signal.SIGUSR1 )
-		stoich.path = "/model/compartment/##"
+    # Make solvers
+    ksolve = moose.Ksolve( '/model/compartment/ksolve' )
+    dsolve = moose.Dsolve( '/model/compartment/dsolve' )
+    stoich = moose.Stoich( '/model/compartment/stoich' )
+    stoich.compartment = compartment
+    stoich.ksolve = ksolve
+    stoich.dsolve = dsolve
+    os.kill( PID, signal.SIGUSR1 )
+    stoich.path = "/model/compartment/##"
 
-                print dsolve.numPools
-                assert( dsolve.numPools == 3 )
-		a.vec[0].concInit = concA
-		b.vec[0].concInit = concA
-		c.vec[0].concInit = concA
-                d.vec.concInit = concA / 5.0
-		d.vec[num-1].concInit = concA
+    print dsolve.numPools
+    assert( dsolve.numPools == 3 )
+    a.vec[0].concInit = concA
+    b.vec[0].concInit = concA
+    c.vec[0].concInit = concA
+    d.vec.concInit = concA / 5.0
+    d.vec[num-1].concInit = concA
 
 def displayPlots():
-		a = moose.element( '/model/compartment/a' )
-		b = moose.element( '/model/compartment/b' )
-		c = moose.element( '/model/compartment/c' )
-		d = moose.element( '/model/compartment/d' )
-                pos = numpy.arange( 0, a.vec.conc.size, 1 )
-                pylab.plot( pos, a.vec.conc, label='a' )
-                pylab.plot( pos, b.vec.conc, label='b' )
-                pylab.plot( pos, c.vec.conc, label='c' )
-                pylab.plot( pos, d.vec.conc, label='d' )
-                pylab.legend()
-                pylab.show()
+    a = moose.element( '/model/compartment/a' )
+    b = moose.element( '/model/compartment/b' )
+    c = moose.element( '/model/compartment/c' )
+    d = moose.element( '/model/compartment/d' )
+    pos = numpy.arange( 0, a.vec.conc.size, 1 )
+    pylab.plot( pos, a.vec.conc, label='a' )
+    pylab.plot( pos, b.vec.conc, label='b' )
+    pylab.plot( pos, c.vec.conc, label='c' )
+    pylab.plot( pos, d.vec.conc, label='d' )
+    pylab.legend()
+    pylab.show()
 
 def main():
-                runtime = 10.0
-		dt4 = 0.01
-		dt5 = 0.1
-		makeModel()
-                # Set up clocks. The dsolver to know before assigning stoich
-		moose.setClock( 4, dt4 )
-		moose.setClock( 5, dt5 )
-		moose.useClock( 4, '/model/compartment/dsolve', 'process' )
-                # Ksolve must be scheduled after dsolve.
-		moose.useClock( 5, '/model/compartment/ksolve', 'process' )
-		moose.reinit()
-		moose.start( runtime ) # Run the model
+    runtime = 10.0
+    dt4 = 0.01
+    dt5 = 0.1
+    makeModel()
+    # Set up clocks. The dsolver to know before assigning stoich
+    moose.setClock( 4, dt4 )
+    moose.setClock( 5, dt5 )
+    moose.useClock( 4, '/model/compartment/dsolve', 'process' )
+    # Ksolve must be scheduled after dsolve.
+    moose.useClock( 5, '/model/compartment/ksolve', 'process' )
+    moose.reinit()
+    moose.start( runtime ) # Run the model
 
-		a = moose.element( '/model/compartment/a' )
-		b = moose.element( '/model/compartment/b' )
-		c = moose.element( '/model/compartment/c' )
-		d = moose.element( '/model/compartment/d' )
+    a = moose.element( '/model/compartment/a' )
+    b = moose.element( '/model/compartment/b' )
+    c = moose.element( '/model/compartment/c' )
+    d = moose.element( '/model/compartment/d' )
 
-                atot = sum( a.vec.conc )
-                btot = sum( b.vec.conc )
-                ctot = sum( c.vec.conc )
-                dtot = sum( d.vec.conc )
+    atot = sum( a.vec.conc )
+    btot = sum( b.vec.conc )
+    ctot = sum( c.vec.conc )
+    dtot = sum( d.vec.conc )
 
-                print 'tot = ', atot, btot, ctot, dtot, ' (b+c)=', btot+ctot
-                displayPlots()
+    print 'tot = ', atot, btot, ctot, dtot, ' (b+c)=', btot+ctot
+    displayPlots()
 
-                """
-		dsolve = moose.element( '/model/dsolve' )
-                
-                print '**************** dsolve.nvecs'
-                x = dsolve.nVec[0]
-                print dsolve.numPools, x, sum(x)
-                print dsolve.nVec[1], sum( dsolve.nVec[1] )
-                print dsolve.nVec[2], sum( dsolve.nVec[2] )
-                print dsolve.nVec[3], sum( dsolve.nVec[3] )
-                """
+    """
+    dsolve = moose.element( '/model/dsolve' )
+    
+    print '**************** dsolve.nvecs'
+    x = dsolve.nVec[0]
+    print dsolve.numPools, x, sum(x)
+    print dsolve.nVec[1], sum( dsolve.nVec[1] )
+    print dsolve.nVec[2], sum( dsolve.nVec[2] )
+    print dsolve.nVec[3], sum( dsolve.nVec[3] )
+    """
 
-		quit()
+    quit()
 
 
 # Run the 'main' if this script is executed standalone.

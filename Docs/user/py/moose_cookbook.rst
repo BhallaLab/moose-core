@@ -115,7 +115,7 @@ typically:
        creating an enzyme, one must also create a molecule beneath it to
        serve as the enzyme-substrate complex.  Other less-used
        components include Michaelis-Menten enzymes **moose.MMenz**, input
-       tables, pulse generates and so on. These are illustrated in other
+       tables, pulse generators and so on. These are illustrated in other
        examples.
     #. Assign parameters for the components. 
 
@@ -205,6 +205,7 @@ There are several bistable models defined in the
 
 2. Simple minimal bistable model, run stochastically at different volumes
    to illustrate the effects of chemical noise.
+
 .. automodule:: scaleVolumes
    :members:
 
@@ -227,7 +228,7 @@ A reaction system can be loaded in from any of the supported MOOSE
 formats, or built within Python from MOOSE parts.
 
 The computations for such models are done by a set of objects: 
-Stoich, Ksolve and Dsolve. Respectively, thse handle the model 
+Stoich, Ksolve and Dsolve. Respectively, these handle the model 
 reactions and stoichiometry matrix, the reaction computations for 
 each voxel, and the diffusion between voxels. The 'Compartment' specifies
 how the model should be spatially discretized.
@@ -235,6 +236,7 @@ how the model should be spatially discretized.
 Reaction-diffusion in a cylinder
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. automodule:: cylinderDiffusion
+   :members:
 
 Reaction-diffusion in a neuron
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -245,6 +247,7 @@ Reaction-diffusion + motor + transport
 A Turing model
 ^^^^^^^^^^^^^^
 .. automodule:: TuringOneDim
+   :members:
 
 A spatial bistable model
 ^^^^^^^^^^^^^^^^^^^^^^^^
