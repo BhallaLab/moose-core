@@ -48,25 +48,24 @@
 #include "header.h"
 #include "Variable.h"
 
-template <typename T>  const Cinfo * Variable<T>::initCinfo(const char * name)
+const Cinfo * Variable::initCinfo()
 {
-    static ValueFinfo< Variable<T>, T > value(
+    static ValueFinfo< Variable, double > value(
         "value",
         "Variable value",
-        &Variable<T>::setValue,
-        &Variable<T>::getValue);
+        &Variable::setValue,
+        &Variable::getValue);
 
     static Finfo * variableFinfos[] = {
         &value,
     };
-    static string _name(name);
     static string doc[] = {
-        "Name", _name,
+        "Name", "Variable",
         "Author", "Subhasis Ray",
-        "Description", "Variable for storing values."
+        "Description", "Variable for storing double values. This is used in Function class."
     };
     static Dinfo< Variable<T> > dinfo;
-    static Cinfo variableCinfo(name,
+    static Cinfo variableCinfo("Variable",
                                Neutral::initCinfo(),
                                variableFinfos,
                                sizeof(variableFinfos) / sizeof(Finfo*),
@@ -78,9 +77,6 @@ template <typename T>  const Cinfo * Variable<T>::initCinfo(const char * name)
     return & variableCinfo;                               
 }
 
-const Cinfo * doubleVariableCinfo = Variable<double>::initCinfo("Double");
-const Cinfo * longVariableCinfo = Variable<long>::initCinfo("Long");
-const Cinfo * unsignedVariableCinfo = Variable<unsigned long>::initCinfo("Unsigned"); // we do not care about low precision stuff
 
 // 
 // Variable.cpp ends here
