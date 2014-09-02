@@ -51,9 +51,9 @@ def main():
     kinetic model. This process is necessary in two situations: 
 
     * If we want to change the numerical method employed, for example, 
-    from deterministic to stochastic.
+      from deterministic to stochastic.
     * If we are already using a solver, and we have changed the reaction
-    network. 
+      network. 
 
     Note that we do not have to change the solvers if the volume or
     reaction rates change.

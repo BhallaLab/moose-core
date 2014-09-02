@@ -20,7 +20,9 @@ def main():
 	for a bistable system, defined in kkit format. 
 	Defaults to the deterministic gsl method, you can pick the 
 	stochastic one by 
+
 	    ``python filename gssa``
+
 	The model starts out equally poised between sides **b** and **c**. 
 	Then there is a small molecular 'tap' to push it over to **b**.
 	Then we apply a moderate push to show that it is now very stably in
@@ -29,6 +31,7 @@ def main():
 	This is a good model to use as the basis for running stochastically
 	and examining how state stability is affected by changing volume.
 	"""
+
 	solver = "gsl"  # Pick any of gsl, gssa, ee..
 	#solver = "gssa"  # Pick any of gsl, gssa, ee..
 	#moose.seed( 1234 ) # Needed if stochastic.
