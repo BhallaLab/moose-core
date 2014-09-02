@@ -454,15 +454,14 @@ class SchedulingWidget(QtGui.QWidget):
         layout = QtGui.QHBoxLayout()
         self.advanceOptiondisplayed = False
         self.simtimeWidget = self.__getSimtimeWidget()
-        self.tickListWidget = self.__getTickListWidget()
         self.runControlWidget = self.__getRunControlWidget()
         self.advanceOpt = self.__getAdvanceOptionsWidget()
         layout.addWidget(self.advanceOpt)
         layout.addWidget(self.runControlWidget)
         layout.addWidget(self.simtimeWidget)
-        
+            
         #layout.addWidget(self.tickListWidget)
-
+        self.tickListWidget = self.__getTickListWidget()
         if not self.advanceOptiondisplayed:
             self.tickListWidget.hide()
 
@@ -604,7 +603,6 @@ class SchedulingWidget(QtGui.QWidget):
         return simtimeWidget
 
     def __getTickListWidget(self):
-
         layout = QtGui.QGridLayout()
         # Set up the column titles
         layout.addWidget(QtGui.QLabel('Tick'), 0, 0)
@@ -615,7 +613,7 @@ class SchedulingWidget(QtGui.QWidget):
         # (16,) while only 10 valid ticks exist. The following is a hack
         clock = moose.element('/clock')
         numticks = clock.numTicks
-        
+
         for ii in range(numticks):
             tt = clock.tickDt[ii]
             layout.addWidget(QtGui.QLabel("(\'"+clock.path+'\').tickDt['+str(ii)+']'), ii+1, 0)
@@ -640,11 +638,11 @@ class SchedulingWidget(QtGui.QWidget):
         layout.setRowStretch(rowcnt, 10)
         # layout.setColumnStretch(1, 1)
         layout.setColumnStretch(2, 2)
-        #scrollbar = QtGui.QScrollArea()
-        #widget = QtGui.QWidget(scrollbar)
         widget = QtGui.QWidget()
         widget.setLayout(layout)
-        return widget
+        scrollbar = QtGui.QScrollArea()
+        scrollbar.setWidget(widget)
+        return scrollbar
 
     def updateCurrentTime(self):
         sys.stdout.flush()
