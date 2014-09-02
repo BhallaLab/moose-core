@@ -29,6 +29,7 @@ def main():
     * Run for 10 seconds. This is completely unnecessary, and is done here
       just so that the resultant graph will show what kind of state has
       been  found.
+
     After it does all this, the program runs for 100 more seconds on the
     last found fixed point (which turns out to be a saddle node), then
     is hard-switched in the script to the first attractor basin from which
