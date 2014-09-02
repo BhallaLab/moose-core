@@ -1,47 +1,47 @@
-# default.py --- 
-# 
+# default.py ---
+#
 # Filename: default.py
-# Description: 
+# Description:
 # Author: Subhasis Ray
-# Maintainer: 
+# Maintainer:
 # Created: Tue Nov 13 15:58:31 2012 (+0530)
-# Version: 
+# Version:
 # Last-Updated: Thu Jul 18 10:35:00 2013 (+0530)
 #           By: subha
 #     Update #: 2244
-# URL: 
-# Keywords: 
-# Compatibility: 
-# 
-# 
+# URL:
+# Keywords:
+# Compatibility:
+#
+#
 
-# Commentary: 
-# 
+# Commentary:
+#
 # The default placeholder plugin for MOOSE
-# 
-# 
+#
+#
 
 # Change log:
-# 
-# 
-# 
-# 
+#
+#
+#
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
 # published by the Free Software Foundation; either version 3, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; see the file COPYING.  If not, write to
 # the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 # Floor, Boston, MA 02110-1301, USA.
-# 
-# 
+#
+#
 
 # Code:
 
@@ -183,12 +183,12 @@ class MooseTreeEditor(mtree.MooseTreeWidget):
             self.insertChildElement(item, str(event.mimeData().text()))
             event.acceptProposedAction()
         except NameError:
-            return            
+            return
 
 
 class DefaultEditorWidget(EditorWidgetBase):
-    """Editor widget for default plugin. 
-    
+    """Editor widget for default plugin.
+
     Plugin-writers should code there own editor widgets derived from
     EditorWidgetBase.
 
@@ -208,7 +208,7 @@ class DefaultEditorWidget(EditorWidgetBase):
         self.tree = MooseTreeEditor()
         self.tree.setAcceptDrops(True)
         self.getTreeMenu()
-        self.layout().addWidget(self.tree)        
+        self.layout().addWidget(self.tree)
 
     def getTreeMenu(self):
         try:
@@ -216,7 +216,7 @@ class DefaultEditorWidget(EditorWidgetBase):
         except AttributeError:
             self.treeMenu = QtGui.QMenu()
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.tree.customContextMenuRequested.connect(self.treeMenu.exec_)
+        self.tree.customContextMenuRequested.connect(lambda : self.treeMenu.exec_(QtGui.QCursor.pos()) )
         # Inserting a child element
         self.insertMenu = QtGui.QMenu('Insert')
         self._menus.append(self.insertMenu)
@@ -228,7 +228,7 @@ class DefaultEditorWidget(EditorWidgetBase):
                      if (ch[0].baseClass not in ignored_bases)
                      and (ch[0].name not in (ignored_bases + ignored_classes))
                      and not ch[0].name.startswith('Zombie')
-                     and not ch[0].name.endswith('Base')                     
+                     and not ch[0].name.endswith('Base')
                  ]
         insertMapper, actions = self.getInsertActions(classlist)
         for action in actions:
@@ -287,7 +287,7 @@ from mplot import CanvasWidget
 class RunView(RunBase):
     """A default runtime view implementation. This should be
     sufficient for most common usage.
-    
+
     canvas: widget for plotting
 
     dataRoot: location of data tables
@@ -302,7 +302,7 @@ class RunView(RunBase):
         self.setModelRoot(moose.Neutral(self.plugin.modelRoot).path)
         self.setDataRoot(moose.Neutral('/data').path)
         self.plugin.modelRootChanged.connect(self.setModelRoot)
-        self.plugin.dataRootChanged.connect(self.setDataRoot)        
+        self.plugin.dataRootChanged.connect(self.setDataRoot)
         self._menus += self.getCentralWidget().getMenus()
 
     def getCentralWidget(self):
@@ -311,13 +311,13 @@ class RunView(RunBase):
         if self._centralWidget is None:
             self._centralWidget = PlotWidget()
         return self._centralWidget
-        
+
     # def setDataRootSlot(self):
     #     path, ok = QtGui.QInputDialog.getText(self.getCentralWidget(), 'Set data root', 'Enter path to data root')
     #     if ok:
     #         self.setDataRoot(str(path))
-        
-    def setDataRoot(self, path):        
+
+    def setDataRoot(self, path):
         self.dataRoot = path
         self.getCentralWidget().setDataRoot(path)
         #self.getSchedulingDockWidget().widget().setDataRoot(path)
@@ -371,8 +371,8 @@ class MooseRunner(QtCore.QObject):
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
             cls._instance = super(MooseRunner, cls).__new__(cls, *args, **kwargs)
-        return cls._instance        
-    '''    
+        return cls._instance
+    '''
     def __init__(self, *args, **kwargs):
         QtCore.QObject.__init__(self, *args, **kwargs)
         '''
@@ -380,7 +380,7 @@ class MooseRunner(QtCore.QObject):
             return
         '''
         self._updateInterval = 100e-3
-        self._simtime = 0.0        
+        self._simtime = 0.0
         self._clock = moose.Clock('/clock')
         self._pause = False
         self.dataRoot = moose.Neutral('/data').path
@@ -396,7 +396,7 @@ class MooseRunner(QtCore.QObject):
         self.resetAndRun.emit()
         moose.reinit()
         QtCore.QTimer.singleShot(0, self.run)
-        
+
     def run(self):
         """Run simulation for a small interval."""
         if self._clock.currentTime >= self._simtime:
@@ -410,14 +410,14 @@ class MooseRunner(QtCore.QObject):
         moose.start(toRun)
         self.update.emit()
         QtCore.QTimer.singleShot(0, self.run)
-    
+
     def continueRun(self, simtime, updateInterval):
         """Continue running without reset for `simtime`."""
         self._simtime = simtime
         self._updateInterval = updateInterval
         self._pause = False
         QtCore.QTimer.singleShot(0, self.run)
-    
+
     def stop(self):
         """Pause simulation"""
         self._pause = True
@@ -442,9 +442,9 @@ class SchedulingWidget(QtGui.QWidget):
 
     simtimeExtended(simtime)
         emitted when simulation time is increased by user.
-    
 
-    """    
+
+    """
     resetAndRun = QtCore.pyqtSignal(dict, dict, float, float, name='resetAndRun')
     simtimeExtended = QtCore.pyqtSignal(float, name='simtimeExtended')
     continueRun = QtCore.pyqtSignal(float, float, name='continueRun')
@@ -459,7 +459,7 @@ class SchedulingWidget(QtGui.QWidget):
         layout.addWidget(self.advanceOpt)
         layout.addWidget(self.runControlWidget)
         layout.addWidget(self.simtimeWidget)
-            
+
         #layout.addWidget(self.tickListWidget)
         self.tickListWidget = self.__getTickListWidget()
         if not self.advanceOptiondisplayed:
@@ -510,7 +510,7 @@ class SchedulingWidget(QtGui.QWidget):
         widget = QtGui.QWidget()
         widget.setLayout(layout)
         return widget
-    
+
     def __getRunControlWidget(self):
         widget = QtGui.QWidget()
         layout = QtGui.QHBoxLayout()
@@ -567,20 +567,20 @@ class SchedulingWidget(QtGui.QWidget):
         simtime = self.getSimTime()
         self.simtimeExtended.emit(simtime)
         self.runner.doResetAndRun(
-            self.getTickDtMap(), 
-            self.getTickTargets(), 
-            self.getSimTime(), 
+            self.getTickDtMap(),
+            self.getTickTargets(),
+            self.getSimTime(),
             self.updateInterval)
 
     def doContinueRun(self):
         """Helper function to emit signal with arguments"""
-        
+
         #self.updateUpdateInterval()
         simtime = self.getSimTime()
         self.simtimeExtended.emit(simtime)
         self.continueRun.emit(simtime,
                                self.updateInterval)
-    
+
     def __getSimtimeWidget(self):
         runtime = moose.Clock('/clock').runTime
         #layout = QtGui.QGridLayout()
@@ -592,12 +592,12 @@ class SchedulingWidget(QtGui.QWidget):
         self.currentTimeLabel = QtGui.QLabel('0')
         layout1.addWidget(QtGui.QLabel('Run for'), 0, 0)
         layout1.addWidget(self.simtimeEdit, 0, 1)
-        layout1.addWidget(QtGui.QLabel('seconds'), 0, 2)        
+        layout1.addWidget(QtGui.QLabel('seconds'), 0, 2)
         layout.addLayout(layout1)
         layout2 = QtGui.QGridLayout()
         layout2.addWidget(QtGui.QLabel('Current time:'), 1, 0)
         layout2.addWidget(self.currentTimeLabel, 1, 1)
-        layout2.addWidget(QtGui.QLabel('second'), 1, 2)        
+        layout2.addWidget(QtGui.QLabel('second'), 1, 2)
         layout.addLayout(layout2)
         simtimeWidget.setLayout(layout)
         return simtimeWidget
@@ -702,7 +702,7 @@ class SchedulingWidget(QtGui.QWidget):
 
     def setModelRoot(self, root='/model'):
         self.runner.modelRoot = moose.element(root).path
-        
+
 
 from collections import namedtuple
 
@@ -751,7 +751,7 @@ class PlotWidget(QtGui.QWidget):
         self.lineToDataSource = {}
         self.canvas.addSubplot(1, 1)
         self.onclick_count = 0
-                
+
     @property
     def plotAll(self):
         return len(self.pathToLine) == 0
@@ -763,7 +763,7 @@ class PlotWidget(QtGui.QWidget):
         self.dataRoot = path
 
     def plotAllData(self):
-        """Plot data from all tables under dataRoot"""        
+        """Plot data from all tables under dataRoot"""
         path = moose.element(self.dataRoot).path
         modelroot = moose.element(self.modelRoot).path
         time = moose.Clock('/clock').currentTime
@@ -831,13 +831,13 @@ class PlotWidget(QtGui.QWidget):
                     for legobj in leg.legendHandles:
                         legobj.set_linewidth(5.0)
                         legobj.set_picker(True)
-              
+
                 self.canvas.draw()
             else:
                 print "returning as len tabId is zero ",tabId, " tableObject ",tableObject, " len ",len(tableObject)
 
 
-    
+
     def onclick(self,event1):
         #print "onclick",event1.artist.get_label()
         #harsha:To workout with double-event-registered on onclick event
@@ -872,10 +872,10 @@ class PlotWidget(QtGui.QWidget):
         else:
             legline.set_alpha(0.2)
         '''
-    def addTimeSeries(self, table, *args, **kwargs):        
+    def addTimeSeries(self, table, *args, **kwargs):
         ts = np.linspace(0, moose.Clock('/clock').currentTime, len(table.vector))
         return self.canvas.plot(ts, table.vector, *args, **kwargs)
-        
+
     def addRasterPlot(self, eventtable, yoffset=0, *args, **kwargs):
         """Add raster plot of events in eventtable.
 
@@ -885,7 +885,7 @@ class PlotWidget(QtGui.QWidget):
         return self.canvas.plot(eventtable.vector, y, '|')
 
     def updatePlots(self):
-        for path, lines in self.pathToLine.items():            
+        for path, lines in self.pathToLine.items():
             tab = moose.Table(path)
             data = tab.vector
             ts = np.linspace(0, moose.Clock('/clock').currentTime, len(data))
@@ -902,7 +902,7 @@ class PlotWidget(QtGui.QWidget):
 
     def rescalePlots(self):
         """This is to rescale plots at the end of simulation.
-        
+
         ideally we should set xlim from simtime.
         """
         for axes in self.canvas.axes.values():
@@ -1031,7 +1031,7 @@ class PlotView(PlotBase):
 
     def selectElements(self, elements):
         """Refines the selection.
-        
+
         Currently checks if _fieldEdit has an entry and if so, selects
         only elements which have that field, and ticks the same in the
         PlotSelectionWidget.
@@ -1041,7 +1041,7 @@ class PlotView(PlotBase):
         if len(field) == 0:
             self.getCentralWidget().setSelectedElements(elements)
             return
-        classElementDict = defaultdict(list)        
+        classElementDict = defaultdict(list)
         for epath in elements:
             el = moose.element(epath)
             classElementDict[el.className].append(el)
@@ -1053,7 +1053,7 @@ class PlotView(PlotBase):
                 elementFieldList += [(el, field) for el in elist]
         self.getCentralWidget().setSelectedElements(refinedList)
         self.getCentralWidget().setSelectedFields(elementFieldList)
-        
+
 
     def setupRecording(self):
         """Create the tables for recording selected data and connect them."""
@@ -1074,7 +1074,7 @@ class PlotView(PlotBase):
         appended to the name.
 
         """
-        if len(field) == 0 or ((element, field) in self._recordingDict):            
+        if len(field) == 0 or ((element, field) in self._recordingDict):
             return
         # The table path is not foolproof - conflict is
         # possible: e.g. /model/test_object and
@@ -1121,7 +1121,7 @@ class PlotSelectionWidget(QtGui.QScrollArea):
 
     """
     def __init__(self, *args):
-        QtGui.QScrollArea.__init__(self, *args)        
+        QtGui.QScrollArea.__init__(self, *args)
         model = moose.Neutral('/model')
         self.modelRoot = model.path
         self.setLayout(QtGui.QVBoxLayout(self))
@@ -1135,10 +1135,10 @@ class PlotSelectionWidget(QtGui.QScrollArea):
         if not hasattr(self, '_plotListWidget'):
             self._plotListWidget = QtGui.QWidget(self)
             layout = QtGui.QGridLayout(self._plotListWidget)
-            self._plotListWidget.setLayout(layout)        
-            layout.addWidget(QtGui.QLabel('<h1>Elements matching search criterion will be listed here</h1>'), 0, 0)            
-        return self._plotListWidget            
-    
+            self._plotListWidget.setLayout(layout)
+            layout.addWidget(QtGui.QLabel('<h1>Elements matching search criterion will be listed here</h1>'), 0, 0)
+        return self._plotListWidget
+
     def setSelectedElements(self, elementlist):
         """Create a grid of widgets displaying paths of elements in
         `elementlist` if it has at least one plottable field (a field
@@ -1151,7 +1151,7 @@ class PlotSelectionWidget(QtGui.QScrollArea):
             item = self.getPlotListWidget().layout().itemAt(ii)
             if item is None:
                 continue
-            self.getPlotListWidget().layout().removeItem(item)            
+            self.getPlotListWidget().layout().removeItem(item)
             w = item.widget()
             w.hide()
             del w
@@ -1177,7 +1177,7 @@ class PlotSelectionWidget(QtGui.QScrollArea):
             self.getPlotListWidget().layout().addWidget(elementLabel, ii+1, 0, 1, 2)
             self.getPlotListWidget().layout().addWidget(fieldsCombo, ii+1, 2, 1, 1)
             self._elementWidgetsDict[el] = (elementLabel, fieldsCombo)
-                
+
     def setModelRoot(self, root):
         pass
 
@@ -1203,7 +1203,7 @@ class PlotSelectionWidget(QtGui.QScrollArea):
         """Set the checked fields for each element in elementFieldList.
 
         elementFieldList: ((element1, field1), (element2, field2), ...)
-        
+
         """
         for el, field in elementFieldList:
             combo = self._elementWidgetsDict[el][1]
@@ -1211,5 +1211,5 @@ class PlotSelectionWidget(QtGui.QScrollArea):
             if idx >= 0:
                 combo.setItemData(idx, QtCore.QVariant(Qt.Checked), Qt.CheckStateRole)
                 combo.setCurrentIndex(idx)
-# 
+#
 # default.py ends here
