@@ -450,16 +450,18 @@ class SchedulingWidget(QtGui.QWidget):
     continueRun = QtCore.pyqtSignal(float, float, name='continueRun')
     def __init__(self, *args, **kwargs):
         QtGui.QWidget.__init__(self, *args, **kwargs)
-        layout = QtGui.QVBoxLayout()
+        #layout = QtGui.QVBoxLayout()
+        layout = QtGui.QHBoxLayout()
         self.advanceOptiondisplayed = False
         self.simtimeWidget = self.__getSimtimeWidget()
         self.tickListWidget = self.__getTickListWidget()
         self.runControlWidget = self.__getRunControlWidget()
         self.advanceOpt = self.__getAdvanceOptionsWidget()
+        layout.addWidget(self.advanceOpt)
         layout.addWidget(self.runControlWidget)
         layout.addWidget(self.simtimeWidget)
-        layout.addWidget(self.advanceOpt)
-        layout.addWidget(self.tickListWidget)
+        
+        #layout.addWidget(self.tickListWidget)
 
         if not self.advanceOptiondisplayed:
             self.tickListWidget.hide()
@@ -467,7 +469,7 @@ class SchedulingWidget(QtGui.QWidget):
         self.updateInterval = 100e-3 # This will be made configurable with a textbox
         self.__getUpdateIntervalWidget()
         #layout.addWidget(self.__getUpdateIntervalWidget())
-        spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        spacerItem = QtGui.QSpacerItem(450, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         layout.addItem(spacerItem)
         self.setLayout(layout)
         self.runner = MooseRunner()
@@ -487,7 +489,7 @@ class SchedulingWidget(QtGui.QWidget):
 
     def __getAdvanceOptionsWidget(self):
         widget = QtGui.QWidget()
-        layout = QtGui.QVBoxLayout()
+        layout = QtGui.QHBoxLayout()
         icon = QtGui.QIcon(os.path.join(config.settings[config.KEY_ICON_DIR],'arrow.png'))
         self.advancedOption = QtGui.QToolButton()
         self.advancedOption.setText("Advance Options")
@@ -512,7 +514,7 @@ class SchedulingWidget(QtGui.QWidget):
     
     def __getRunControlWidget(self):
         widget = QtGui.QWidget()
-        layout = QtGui.QVBoxLayout()
+        layout = QtGui.QHBoxLayout()
         self.resetAndRunButton = QtGui.QPushButton('Reset and run')
         self.stopButton = QtGui.QPushButton('Stop')
         self.continueButton = QtGui.QPushButton('Continue')
@@ -582,21 +584,27 @@ class SchedulingWidget(QtGui.QWidget):
     
     def __getSimtimeWidget(self):
         runtime = moose.Clock('/clock').runTime
-        layout = QtGui.QGridLayout()
+        #layout = QtGui.QGridLayout()
+        layout = QtGui.QHBoxLayout()
         simtimeWidget = QtGui.QWidget()
-        self.simtimeEdit = QtGui.QLineEdit('1')
+        layout1 = QtGui.QGridLayout()
+        self.simtimeEdit = QtGui.QLineEdit('6')
         self.simtimeEdit.setText(str(runtime))
         self.currentTimeLabel = QtGui.QLabel('0')
-        layout.addWidget(QtGui.QLabel('Run for'), 0, 0)
-        layout.addWidget(self.simtimeEdit, 0, 1)
-        layout.addWidget(QtGui.QLabel('seconds'), 0, 2)        
-        layout.addWidget(QtGui.QLabel('Current time:'), 1, 0)
-        layout.addWidget(self.currentTimeLabel, 1, 1)
-        layout.addWidget(QtGui.QLabel('second'), 1, 2)        
+        layout1.addWidget(QtGui.QLabel('Run for'), 0, 0)
+        layout1.addWidget(self.simtimeEdit, 0, 1)
+        layout1.addWidget(QtGui.QLabel('seconds'), 0, 2)        
+        layout.addLayout(layout1)
+        layout2 = QtGui.QGridLayout()
+        layout2.addWidget(QtGui.QLabel('Current time:'), 1, 0)
+        layout2.addWidget(self.currentTimeLabel, 1, 1)
+        layout2.addWidget(QtGui.QLabel('second'), 1, 2)        
+        layout.addLayout(layout2)
         simtimeWidget.setLayout(layout)
         return simtimeWidget
 
     def __getTickListWidget(self):
+
         layout = QtGui.QGridLayout()
         # Set up the column titles
         layout.addWidget(QtGui.QLabel('Tick'), 0, 0)
@@ -607,6 +615,7 @@ class SchedulingWidget(QtGui.QWidget):
         # (16,) while only 10 valid ticks exist. The following is a hack
         clock = moose.element('/clock')
         numticks = clock.numTicks
+        
         for ii in range(numticks):
             tt = clock.tickDt[ii]
             layout.addWidget(QtGui.QLabel("(\'"+clock.path+'\').tickDt['+str(ii)+']'), ii+1, 0)
@@ -631,6 +640,8 @@ class SchedulingWidget(QtGui.QWidget):
         layout.setRowStretch(rowcnt, 10)
         # layout.setColumnStretch(1, 1)
         layout.setColumnStretch(2, 2)
+        #scrollbar = QtGui.QScrollArea()
+        #widget = QtGui.QWidget(scrollbar)
         widget = QtGui.QWidget()
         widget.setLayout(layout)
         return widget
