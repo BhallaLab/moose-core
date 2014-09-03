@@ -461,9 +461,9 @@ class SchedulingWidget(QtGui.QWidget):
         layout.addWidget(self.simtimeWidget)
 
         #layout.addWidget(self.tickListWidget)
-        self.tickListWidget = self.__getTickListWidget()
+        self.tickListWidget, self.tickListWidgetContainer = self.__getTickListWidget()
         if not self.advanceOptiondisplayed:
-            self.tickListWidget.hide()
+            self.tickListWidgetContainer.hide()
 
         self.updateInterval = 100e-3 # This will be made configurable with a textbox
         self.__getUpdateIntervalWidget()
@@ -480,10 +480,10 @@ class SchedulingWidget(QtGui.QWidget):
     def updateTickswidget(self):
 
         if self.advanceOptiondisplayed:
-            self.tickListWidget.hide()
+            self.tickListWidgetContainer.hide()
             self.advanceOptiondisplayed = False
         else:
-            self.tickListWidget.show()
+            self.tickListWidgetContainer.show()
             self.advanceOptiondisplayed = True
 
     def __getAdvanceOptionsWidget(self):
@@ -642,7 +642,7 @@ class SchedulingWidget(QtGui.QWidget):
         widget.setLayout(layout)
         scrollbar = QtGui.QScrollArea()
         scrollbar.setWidget(widget)
-        return scrollbar
+        return widget, scrollbar
 
     def updateCurrentTime(self):
         sys.stdout.flush()
