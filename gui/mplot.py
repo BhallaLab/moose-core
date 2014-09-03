@@ -170,9 +170,8 @@ class CanvasWidget(FigureCanvas):
 
         if not event.mimeData().hasFormat('text/plain'):
             return
-        
-        newplot = str(event.mimeData().text())
-        self.addTabletoPlot = moose.element(newplot)
+
+        self.modelRoot, self.element = event.mimeData().data
         popupmenu = QtGui.QMenu('PopupMenu', self)
         self.conc = QtGui.QAction(self.tr('Conc'), self)
         self.connect(self.conc, QtCore.SIGNAL('triggered()'), self.plotConc)
@@ -184,10 +183,10 @@ class CanvasWidget(FigureCanvas):
         event.accept()
     
     def plotConc(self):
-        self.dataTable.create(self.addTabletoPlot,"Conc")
+        self.dataTable.create(self.modelRoot, self.element,"Conc",)
 
     def plotnInit(self,tablename):
-        self.dataTable.create(self.addTabletoPlot,"init")        
+        self.dataTable.create(self.modelRoot, self.element,"init")        
 
 import sys
 import os

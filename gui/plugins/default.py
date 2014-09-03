@@ -717,6 +717,8 @@ PlotDataSource = namedtuple('PlotDataSource', ['x', 'y', 'z'], verbose=False)
 event = None
 legend = None
 canvas = None
+
+
 class PlotWidget(QtGui.QWidget):
     """A wrapper over CanvasWidget to handle additional MOOSE-specific
     stuff.
@@ -771,10 +773,12 @@ class PlotWidget(QtGui.QWidget):
         #for tabId in moose.wildcardFind('%s/##[TYPE=Table]' % (path)):
         #harsha: policy graphs will be under /model/modelName need to change in kkit
         #for tabId in moose.wildcardFind('%s/##[TYPE=Table]' % (modelroot)):
-        for tabId in moose.wildcardFind('/##[TYPE=Table]'):
+        for tabId in moose.wildcardFind('%s/##[TYPE=Table]' %(modelroot)):
+            print "tabId ",tabId
             tab = moose.Table(tabId)
             line_list=[]
             tableObject = tab.neighbors['requestOut']
+
             if len(tableObject) > 0:
                 # This is the default case: we do not plot the same
                 # table twice. But in special cases we want to have
@@ -1062,7 +1066,7 @@ class PlotView(PlotBase):
             #harsha:CreateRecordingTable function is moved to gui/utlis/dataTable.py file as create function
             #as this is required when I drop table on to the plot and added a utlis folder to system path so
             # import is not done
-            self.dataTable.create(element,field)
+            self.dataTable.create(self.plugin.modelRoot, moose.element(element), field)
     '''
     def createRecordingTable(self, element, field):
         """Create table to record `field` from element `element`
