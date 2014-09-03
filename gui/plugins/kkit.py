@@ -20,19 +20,19 @@ from kkitCalcArrow import *
 from kkitOrdinateUtil import *
 import posixpath
 from mtoolbutton import MToolButton
-from DataTable import DataTable
+#from DataTable import DataTable
 class KkitPlugin(MoosePlugin):
     """Default plugin for MOOSE GUI"""
     def __init__(self, *args):
         #print args
         MoosePlugin.__init__(self, *args)
         self.view = None
-        self.dataTable = DataTable(self.dataRoot)
+        self.plotView = PlotView(self)
+        self.getRunView()
+        self.plotView.dataTable = self.view._centralWidget.canvas.dataTable
+        #self.dataTable = DataTable(self.dataRoot)
 
     def getPlotView(self):
-        if not hasattr(self, 'plotView'):
-            self.plotView = PlotView(self)
-            self.plotView.dataTable = self.dataTable
         return self.plotView
 
     def getPreviousPlugin(self):
@@ -52,7 +52,8 @@ class KkitPlugin(MoosePlugin):
 
     def getEditorView(self):
         if not hasattr(self, 'editorView'):
-            self.editorView = KkitEditorView(self, self.dataTable)
+            #self.editorView = KkitEditorView(self, self.dataTable)
+            self.editorView = KkitEditorView(self)
             self.editorView.getCentralWidget().editObject.connect(self.mainWindow.objectEditSlot)
             #self.editorView.GrViewresize(self)
             #self.editorView.connect(self,QtCore.SIGNAL("resize(QResizeEvent)"),self.editorView.GrViewresize)
@@ -62,11 +63,13 @@ class KkitPlugin(MoosePlugin):
     def getRunView(self):
         if self.view is not None: return self.view
         self.view = RunView(self)
+        
         graphView = self.view._centralWidget
         graphView.setDataRoot(self.modelRoot)
         schedulingDockWidget = self.view.getSchedulingDockWidget().widget()
         self._kkitWidget = self.view.plugin.getEditorView().getCentralWidget()
-        self.runView = KkitRunView(self,self.dataTable)
+        #self.runView = KkitRunView(self,self.dataTable)
+        self.runView = KkitRunView(self)
         self.currentRunView = self.runView.getCentralWidget()
 
         #schedulingDockWidget.runner.update.connect(self.currentRunView.changeBgSize)
@@ -76,9 +79,10 @@ class KkitPlugin(MoosePlugin):
 
 class KkitRunView(MooseEditorView):
 
-    def __init__(self, plugin,dataTable):
+    #def __init__(self, plugin,dataTable):
+    def __init__(self, plugin):
         MooseEditorView.__init__(self, plugin)
-        self.dataTable =dataTable
+        #self.dataTable =dataTable
     '''
     def getToolPanes(self):
         return super(KkitRunView, self).getToolPanes()
@@ -100,10 +104,11 @@ class KkitRunView(MooseEditorView):
 
 
 class KkitEditorView(MooseEditorView):
-    def __init__(self, plugin, dataTable):
+    #def __init__(self, plugin, dataTable):
+    def __init__(self, plugin):
         MooseEditorView.__init__(self, plugin)
         ''' EditorView and if kkit model is loaded then save model in XML is allowed '''
-        self.dataTable = dataTable
+        #self.dataTable = dataTable
         #self.insertMenu = QtGui.QMenu('&Insert')
         self.fileinsertMenu = QtGui.QMenu('&File')
         if not hasattr(self,'SaveModelAction'):
