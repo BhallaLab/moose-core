@@ -346,6 +346,9 @@ class RunView(RunBase):
         if hasattr(self, 'schedulingDockWidget')  and self.schedulingDockWidget is not None:
             return self.schedulingDockWidget
         self.schedulingDockWidget = QtGui.QDockWidget('Scheduling')
+        self.schedulingDockWidget.setFeatures( QtGui.QDockWidget.NoDockWidgetFeatures);
+        self.schedulingDockWidget.setWindowFlags(Qt.CustomizeWindowHint)
+        self.schedulingDockWidget.setTitleBarWidget(None)
         widget = SchedulingWidget()
         widget.setDataRoot(self.dataRoot)
         widget.setModelRoot(self.modelRoot)
