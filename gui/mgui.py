@@ -133,6 +133,7 @@ class MWindow(QtGui.QMainWindow):
         self.getMyDockWidgets()       
         self.setCentralWidget(self.mdiArea)
         self.mdiArea.setViewMode(QtGui.QMdiArea.TabbedView)
+        self.mdiArea.subWindowActivated.connect(self.switchSubwindowSlot)
         self.setPlugin('default', '/')
 
     def quit(self):
@@ -273,6 +274,8 @@ class MWindow(QtGui.QMainWindow):
         for subwin in self.mdiArea.subWindowList():
             subwin.close()
         self.setCurrentView('editor')
+        self.setCurrentView('run')
+        self.setCurrentView('editor')
         self.objectEditDockWidget.objectNameChanged.connect(
             self.plugin.getEditorView().getCentralWidget().updateItemSlot)
         return self.plugin
@@ -326,6 +329,17 @@ class MWindow(QtGui.QMainWindow):
             self.addToolBar(toolbar)
             toolbar.setVisible(True)
 
+    def switchSubwindowSlot(self, window):
+        """Change view based on what subwindow `window` is activated."""
+        if not window:
+            print 'Window is None'
+            return
+        view = str(window.windowTitle()).partition(':')[0]
+        print 'activated', window.windowTitle(), 'view=', view
+        print 'setting current view'
+        self.setCurrentView(view)
+        
+
     def setCurrentView(self, view):
         """Set current view to a particular one: options are 'editor',
         'plot', 'run'. A plugin can provide more views if necessary.
@@ -334,6 +348,8 @@ class MWindow(QtGui.QMainWindow):
         targetView = None
         newSubWindow = True
         widget = self.plugin.getCurrentView().getCentralWidget()
+        current = self.mdiArea.activeSubWindow()
+        subwin = None
         for subwin in self.mdiArea.subWindowList():
             if subwin.widget() == widget:
                 newSubWindow = False
@@ -356,15 +372,10 @@ class MWindow(QtGui.QMainWindow):
         for dockWidget in self.plugin.getCurrentView().getToolPanes():
             if dockWidget not in dockWidgets:
                 if dockWidget.windowTitle() == "Scheduling":
-                    dockWidget.setFeatures( QtGui.QDockWidget.NoDockWidgetFeatures);
-                    dockWidget.setWindowFlags(Qt.Qt.CustomizeWindowHint)
-                    titleWidget = QtGui.QWidget();
-                    dockWidget.setTitleBarWidget( titleWidget );
                     self.addDockWidget(Qt.Qt.TopDockWidgetArea, dockWidget)
                 else:
                     self.addDockWidget(Qt.Qt.RightDockWidgetArea, dockWidget)
-            else:
-                dockWidget.setVisible(True)
+            dockWidget.setVisible(True)
         subwin.setVisible(True)
         self.mdiArea.setActiveSubWindow(subwin)
         self.updateMenus()
