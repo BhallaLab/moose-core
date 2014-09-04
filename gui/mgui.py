@@ -232,6 +232,7 @@ class MWindow(QtGui.QMainWindow):
         MoosePluginBase. Otherwise the first such class found will be
         loaded.
         """
+        print "name ",name
         try:
             return self._loadedPlugins[name]
         except KeyError:
@@ -244,6 +245,7 @@ class MWindow(QtGui.QMainWindow):
         raise Exception('No plugin with name: %s' % (name))
 
     def setPlugin(self, name, root='/'):
+        print "inside set plugin", name,"root",root
         """Set the current plugin to use.
 
         This -
@@ -386,6 +388,9 @@ class MWindow(QtGui.QMainWindow):
         return subwin
 
     def getMyToolBars(self):
+        self._toolBars = []
+        ''' 
+        #Harsha: removing the toolbars (plot,run,edit) from the Gui
         if not hasattr(self, 'viewToolBar'):
             self.viewToolBar = QtGui.QToolBar('View')
             #Harsha:removing plotView from the ToolBar
@@ -393,9 +398,9 @@ class MWindow(QtGui.QMainWindow):
                 if t.text() != "&Plot view":
                     self.viewToolBar.addAction(t)   
             #self.viewToolBar.addActions(self.getViewActions())
-
-        return [self.viewToolBar]
-
+        #return [self.viewToolBar]
+        '''
+        return self._toolBars
     def getFileMenu(self):
         if self.fileMenu is None:
             self.fileMenu = QtGui.QMenu('&File')
@@ -508,6 +513,7 @@ class MWindow(QtGui.QMainWindow):
         root, ok = QtGui.QInputDialog.getText(self, 'Model Root', 'Enter the model root path:', text=moose.element(self.plugin.modelRoot).path)
         if not ok:
             return
+        print "mgui showSetModelRootDialog",root
         root = str(root) #convert from QString to python str
         self.plugin.setModelRoot(root)
         for subwin in self.mdiArea.subWindowList():
@@ -603,6 +609,7 @@ class MWindow(QtGui.QMainWindow):
                 pluginName = 'default'
             
             print 'Loaded model', ret['model'].path
+
             self.setPlugin(pluginName, ret['model'].path)
 
 
@@ -733,7 +740,8 @@ class MWindow(QtGui.QMainWindow):
                 modelName = dialog.getTargetPath()
                 if '/' in modelName:
                     raise mexception.ElementNameError('Model name cannot contain `/`')
-                ret = loadFile(str(fileName), '/model/%s' % (modelName), merge=False)
+                ret = loadFile(str(fileName),'%s' %(modelName),merge=False)
+                #ret = loadFile(str(fileName), '/model/%s' % (modelName), merge=False)
 		#Harsha: This will clear out object editor's objectpath and make it invisible
                 self.objectEditSlot('/',False)
 
@@ -745,6 +753,7 @@ class MWindow(QtGui.QMainWindow):
                 except KeyError:
                     pluginName = 'default'
                 print 'Loaded model', ret['model'].path
+                print " mgui and plugin",pluginName,ret['model'].path
                 self.setPlugin(pluginName, ret['model'].path)
                 
         

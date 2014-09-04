@@ -348,7 +348,8 @@ class RunView(RunBase):
         self.schedulingDockWidget = QtGui.QDockWidget('Scheduling')
         self.schedulingDockWidget.setFeatures( QtGui.QDockWidget.NoDockWidgetFeatures);
         self.schedulingDockWidget.setWindowFlags(Qt.CustomizeWindowHint)
-        self.schedulingDockWidget.setTitleBarWidget(None)
+        titleWidget = QtGui.QWidget();
+        self.schedulingDockWidget.setTitleBarWidget(titleWidget)
         widget = SchedulingWidget()
         widget.setDataRoot(self.dataRoot)
         widget.setModelRoot(self.modelRoot)
