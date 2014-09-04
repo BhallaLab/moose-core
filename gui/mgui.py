@@ -232,7 +232,6 @@ class MWindow(QtGui.QMainWindow):
         MoosePluginBase. Otherwise the first such class found will be
         loaded.
         """
-        print "name ",name
         try:
             return self._loadedPlugins[name]
         except KeyError:
@@ -245,7 +244,6 @@ class MWindow(QtGui.QMainWindow):
         raise Exception('No plugin with name: %s' % (name))
 
     def setPlugin(self, name, root='/'):
-        print "inside set plugin", name,"root",root
         """Set the current plugin to use.
 
         This -
@@ -334,11 +332,11 @@ class MWindow(QtGui.QMainWindow):
     def switchSubwindowSlot(self, window):
         """Change view based on what subwindow `window` is activated."""
         if not window:
-            print 'Window is None'
+            #print 'Window is None'
             return
         view = str(window.windowTitle()).partition(':')[0]
-        print 'activated', window.windowTitle(), 'view=', view
-        print 'setting current view'
+        #print 'activated', window.windowTitle(), 'view=', view
+        #print 'setting current view'
         self.setCurrentView(view)
         
 
