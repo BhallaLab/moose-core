@@ -105,17 +105,9 @@ Id SbmlReader::read( string filename, string location, string solverClass)
         string modelName;
         Id parentId;
         findModelParent ( Id(), location, parentId, modelName ) ;
-        Id parentId2 = parentId;
         Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
-        /*  As a policy model is created under /model and all the graphs are created under /data, if this file is invoke from Gui the /model is already created and path is passed, but if readSbml is called then only modelName is taken so making sure /model is the model path                                                                    */
-        //Id modelPath_ = s->doCreate("Neutral",parentId,"model",1,MooseGlobal);
-        if (parentId == Id()) {
-            Id parentId1 = s->doCreate("Neutral",parentId,"model",1,MooseGlobal);
-            parentId = parentId1;
-        }
-        Id base_ = s->doCreate( "Neutral", parentId, modelName, 1, MooseGlobal);
-            //Id base_ = s->doCreate( "SimManager", parentId, modelName, dims, true );
-        
+        Id baseId_ = s->doCreate( "Neutral", parentId, modelName, 1, MooseGlobal);
+        Id base_ =s->doCreate("Neutral",baseId_,"model",1,MooseGlobal);
         assert( base_ != Id() );
         //Map Compartment's SBML id to Moose ID
         map< string,Id > comptSidMIdMap;
@@ -157,11 +149,10 @@ Id SbmlReader::read( string filename, string location, string solverClass)
                                 if(nodeName == "plots") {
                                     Id graphs;
                                     // Carrying on with the policy that all graphs will be created under /model/modelName
-                                    string datapath = base_.path() +"/data";
+                                    string datapath = baseId_.path() +"/data";
                                     Id graphpath(datapath);
                                     graphs = datapath;
-                                    graphs = s->doCreate("Neutral",base_,"data",1);
-                                    cout << "graphs " << graphs;
+                                    graphs = s->doCreate("Neutral",baseId_,"data",1);
                                     assert(graphs != Id());
 
                                     /*
@@ -234,11 +225,22 @@ Id SbmlReader::read( string filename, string location, string solverClass)
             else {
                 //4 for simdt and 8 for plotdt
                 //Harsha:Since scheduling is automatically done commeting this
+                
+                //s->doUseClock(base_.path()+"/##","process",4);
+                //s->doUseClock(+"/data/##[TYPE=Table]","process",8);
+                //s->doSetClock(4,0.1);
+                //s->doSetClock(8,0.1);
                 /*
-                s->doUseClock(base_.path()+"/##","process",4);
-                s->doUseClock(+"/data/##[TYPE=Table]","process",8);
-                s->doSetClock(4,0.1);
-                s->doSetClock(8,0.1);
+                s->doUseClock( "/data/##[TYPE=Table]", "proc", 16 );
+                double simdt = 0.1;
+                double plotdt = 1;
+                s->doSetClock( 11, simdt );
+                s->doSetClock( 12, simdt );
+                s->doSetClock( 13, simdt );
+                s->doSetClock( 14, simdt );
+                s->doSetClock( 16, plotdt );
+                s->doSetClock( 17, plotdt );
+                s->doSetClock( 18, plotdt );
                 */
             }
             vector< ObjId > compts;
