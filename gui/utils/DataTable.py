@@ -20,11 +20,10 @@ class DataTable():
         table, the id value of the target element (elementPath) is
         appended to the name.
         """
-        dataroot = modelroot + "/data"
 
+        dataroot = modelroot+"/" + "data"
         if not moose.exists(dataroot):
             moose.Neutral(dataroot)
-
         if len(field) == 0 or ((element, field) in self._recordDict):            
             return
         # The table path is not foolproof - conflict is
