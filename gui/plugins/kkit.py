@@ -109,7 +109,6 @@ class KkitEditorView(MooseEditorView):
         MooseEditorView.__init__(self, plugin)
         ''' EditorView and if kkit model is loaded then save model in XML is allowed '''
         #self.dataTable = dataTable
-        #self.insertMenu = QtGui.QMenu('&Insert')
         self.fileinsertMenu = QtGui.QMenu('&File')
         if not hasattr(self,'SaveModelAction'):
             self.saveModelAction = QtGui.QAction('SaveToSBMLFile', self)
@@ -118,11 +117,6 @@ class KkitEditorView(MooseEditorView):
             self.fileinsertMenu.addAction(self.saveModelAction)
         self._menus.append(self.fileinsertMenu)
 
-    '''def GrViewresize(self,event):
-        print "GrViewresize in kkitEditorView"
-        #when Gui resize and event is sent which inturn call resizeEvent of qgraphicsview
-        self.view.resizeEvent1(event)
-    '''
     def SaveModelDialogSlot(self):
         type_sbml = 'SBML'
         filters = {'SBML(*.xml)': type_sbml}
@@ -152,7 +146,6 @@ class KkitEditorView(MooseEditorView):
     def getCentralWidget(self):
         if self._centralWidget is None:
             self._centralWidget = kineticEditorWidget()
-            #self._centralWidget.connect(self,QtCore.SIGNAL("resize(QResizeEvent)"),self._centralWidget.GrViewresize)
             self._centralWidget.setModelRoot(self.plugin.modelRoot)
         return self._centralWidget
 
@@ -160,6 +153,7 @@ class KkitEditorView(MooseEditorView):
 class  KineticsWidget(EditorWidgetBase):
     def __init__(self, *args):
         EditorWidgetBase.__init__(self, *args)
+
         self.setAcceptDrops(True)
         self.border = 10        
         self.sceneContainer = QtGui.QGraphicsScene(self)
@@ -171,10 +165,26 @@ class  KineticsWidget(EditorWidgetBase):
         self.colorMap = pickle.load(colormap_file)
         colormap_file.close()   
         
-        if self.modelRoot == '/':
-            self.m = wildcardFind('/##[ISA=ChemCompt]')
-        else:
-            self.m = wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
+        #A map b/w moose compartment key with QGraphicsObject
+        self.qGraCompt = {}
+        
+        #A map between mooseId of all the mooseObject (except compartment) with QGraphicsObject
+        self.mooseId_GObj = {}
+        
+        self.border = 5
+        self.arrowsize = 2
+        self.iconScale = 1
+        self.defaultComptsize = 5
+        self.itemignoreZooming = False
+        self.lineItem_dict = {}
+        self.object2line = defaultdict(list)
+
+    def getMooseObj(self):
+        #if self.modelRoot == '/':
+        #    self.m = wildcardFind('/##[ISA=ChemCompt]')
+        #else:
+
+        self.m = wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
         if self.m:
             self.xmin = 0.0
             self.xmax = 1.0
@@ -191,9 +201,6 @@ class  KineticsWidget(EditorWidgetBase):
 
             if self.noPositionInfo:
                 self.autocoordinates = True
-                QtGui.QMessageBox.warning(self, 
-                                          'No coordinates found for the model', 
-                                          '\n Automatic layouting will be done')
             #raise Exception('Unsupported kkit version')
                 self.xmin,self.xmax,self.ymin,self.ymax,self.autoCordinatepos = autoCoordinates(self.meshEntry,self.srcdesConnection)
             # TODO: size will be dummy at this point, but I need the availiable size from the Gui
@@ -208,20 +215,6 @@ class  KineticsWidget(EditorWidgetBase):
             if self.ymax-self.ymin:
                 self.yratio = (self.size.height()-10)/(self.ymax-self.ymin)
             else: self.yratio = (self.size.height()-10)
-
-        #A map b/w moose compartment key with QGraphicsObject
-            self.qGraCompt = {}
-        
-        #A map between mooseId of all the mooseObject (except compartment) with QGraphicsObject
-            self.mooseId_GObj = {}
-        
-            self.border = 5
-            self.arrowsize = 2
-            self.iconScale = 1
-            self.defaultComptsize = 5
-            self.itemignoreZooming = False
-            self.lineItem_dict = {}
-            self.object2line = defaultdict(list)
 
     def makePoolItem(self, poolObj, qGraCompt):
         raise NotImplementedError('method must be reimplemented in subclass')
@@ -337,7 +330,6 @@ class  KineticsWidget(EditorWidgetBase):
         changedItem = ''
 
         for item in self.sceneContainer.items():
-            #print "updateItemSlot",item
             if isinstance(item,PoolItem):
                 if mooseObject.getId() == element(item.mobj).getId():
                     item.updateSlot()
@@ -362,6 +354,7 @@ class  KineticsWidget(EditorWidgetBase):
         self.view.resizeEvent1(event)
 
     def updateModelView(self):
+        self.getMooseObj()
         # if self.modelRoot == '/':
         #     m = wildcardFind('/##[ISA=ChemCompt]')
         # else:
@@ -658,6 +651,7 @@ class  KineticsWidget(EditorWidgetBase):
 
 class kineticEditorWidget(KineticsWidget):
     def __init__(self,*args):
+
         KineticsWidget.__init__(self,*args)
         self.insertMenu = QtGui.QMenu('&Insert')
         self._menus.append(self.insertMenu)
