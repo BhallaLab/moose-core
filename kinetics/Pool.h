@@ -39,7 +39,7 @@ class Pool: public PoolBase
 		void vSetConc( const Eref& e, double v );
 		double vGetConc( const Eref& e ) const;
 		void vSetConcInit( const Eref& e, double v );
-		double vGetConcInit( const Eref& e ) const;
+		// double vGetConcInit( const Eref& e ) const;
 
 		/**
 		 * Volume is usually volume, but we also permit areal density

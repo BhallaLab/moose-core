@@ -9,6 +9,7 @@
 
 #include "header.h"
 #include "ElementValueFinfo.h"
+#include "lookupVolumeFromMesh.h"
 #include "PoolBase.h"
 
 #define EPSILON 1e-15
@@ -187,7 +188,9 @@ static const Cinfo* poolCinfo = PoolBase::initCinfo();
 
 //////////////////////////////////////////////////////////////
 PoolBase::PoolBase()
+	: concInit_( 0.0 )
 {;}
+
 PoolBase::~PoolBase()
 {;}
 
@@ -247,6 +250,7 @@ double PoolBase::getN( const Eref& e ) const
 
 void PoolBase::setNinit( const Eref& e, double v )
 {
+	concInit_ =  v / ( NA * lookupVolumeFromMesh( e ) );
 	vSetNinit( e, v );
 }
 
@@ -269,12 +273,13 @@ double PoolBase::getConc( const Eref& e ) const
 
 void PoolBase::setConcInit( const Eref& e, double c )
 {
+	concInit_ = c;
 	vSetConcInit( e, c );
 }
 
 double PoolBase::getConcInit( const Eref& e ) const
 {
-	return vGetConcInit( e );
+	return concInit_;
 }
 
 void PoolBase::setDiffConst( const Eref& e, double v )
