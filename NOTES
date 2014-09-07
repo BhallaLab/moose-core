@@ -4953,3 +4953,17 @@ dose-response of a bistable.
 
 1 Sep. Working on demo neuroDiffusion.py.
 =============================================================================
+2 Sep. Still working on it, seems to be close.
+=============================================================================
+3/4 Sep. Now it looks OK. One issue to fix is that if I set concInit in the
+original pool, it should persist through voxelization and zombification.
+
+=============================================================================
+7 Sep.
+I need to do a gdb to find out why the Stoich::zombifyModel call (when
+the model path is set), fails to iterate through all voxels assigning concInit.
+
+The reac-diff models now work but the simple single compt models all seem
+to start at initConc = 0.
+
+=============================================================================

@@ -240,6 +240,8 @@ Reaction-diffusion in a cylinder
 
 Reaction-diffusion in a neuron
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: neuroDiffusion
+   :members:
 
 Reaction-diffusion + motor + transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
