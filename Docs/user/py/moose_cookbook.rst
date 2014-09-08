@@ -233,8 +233,8 @@ reactions and stoichiometry matrix, the reaction computations for
 each voxel, and the diffusion between voxels. The 'Compartment' specifies
 how the model should be spatially discretized.
 
-Reaction-diffusion in a cylinder
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Reaction-diffusion + transport in a tapering cylinder
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. automodule:: cylinderDiffusion
    :members:
 
@@ -243,8 +243,6 @@ Reaction-diffusion in a neuron
 .. automodule:: neuroDiffusion
    :members:
 
-Reaction-diffusion + motor + transport
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 A Turing model
 ^^^^^^^^^^^^^^
