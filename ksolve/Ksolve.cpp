@@ -156,14 +156,17 @@ const Cinfo* Ksolve::initCinfo()
 			&process, &reinit
 		};
 		static SharedFinfo proc( "proc",
-			"Shared message for process and reinit",
+			"Shared message for process and reinit. These are used for "
+			"all regular Ksolve calculations including interfacing with "
+			"the diffusion calculations by a Dsolve.",
 			procShared, sizeof( procShared ) / sizeof( const Finfo* )
 		);
 		static Finfo* initShared[] = {
 			&initProc, &initReinit
 		};
 		static SharedFinfo init( "init",
-			"Shared message for process and reinit",
+			"Shared message for initProc and initReinit. This is used"
+		    " when the system has cross-compartment reactions. ",
 			initShared, sizeof( initShared ) / sizeof( const Finfo* )
 		);
 

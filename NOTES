@@ -4966,4 +4966,27 @@ the model path is set), fails to iterate through all voxels assigning concInit.
 The reac-diff models now work but the simple single compt models all seem
 to start at initConc = 0.
 
+Fixed this - the functions setting nInit were not setting PoolBase::initConc_.
+
+Checking 5799.
+
+Trying to fix the problem Nikon has with the cspace tests. I found and
+fixed one error but it is still possible to hang the steady-state finder.
+=============================================================================
+8 Sep.
+Tracked the problem with Nikon's model. Turns out that the routine for
+generating starting points consistent with the stoichiometry rules was
+also generating cases with negative concentration. Fixed. Now Nikon's 
+models, even the original one with 26 pools, works.
+
+Did lots of cleanup on the cylinderDiffusion snippet, with a nice animation.
+I want to make another snippet to check that the system does sensible things
+in a branching neuronal model, and also to illustrate bidirectional motor
+transport. Need to do this anyway for my own benefit.
+
+From FastMatrixElim.cpp:400, the motor equations are:
+* n-1:    dt*(D+M)*adx(-)
+* n:   1 -dt*[ D*adx(-) +D*adx(+) + M*adx(+) ]
+* n+1:    dt*D*adx(+)
+
 =============================================================================
