@@ -173,6 +173,7 @@ class MWindow(QtGui.QMainWindow):
                                    'list.txt')) as lfile:
                 self.pluginNames = [line.strip() for line in lfile]
                 self.pluginNames = [name for name in self.pluginNames if name]
+
         return self.pluginNames
 
     def loadPluginModule(self, name, re=False):
@@ -511,7 +512,6 @@ class MWindow(QtGui.QMainWindow):
         root, ok = QtGui.QInputDialog.getText(self, 'Model Root', 'Enter the model root path:', text=moose.element(self.plugin.modelRoot).path)
         if not ok:
             return
-        print "mgui showSetModelRootDialog",root
         root = str(root) #convert from QString to python str
         self.plugin.setModelRoot(root)
         for subwin in self.mdiArea.subWindowList():
