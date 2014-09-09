@@ -571,7 +571,7 @@ more elements. You can create an array of elements:
 
 .. code:: python
 
-        >>> comp_array = moose.vec('/model/comp', (3,), 'Compartment')
+        >>> comp_array = moose.vec('/model/comp', n=3, dtype='Compartment')
 
 This tells MOOSE to create an ``vec`` of 3 ``Compartment`` elements
 with path ``/model/comp``. For ``vec`` objects with multiple
