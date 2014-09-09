@@ -18,6 +18,15 @@ Hello, MOOSE: Load, run and display existing models
 .. automodule:: helloMoose
    :members:
 
+Computing arbitrary functions on the fly
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Sometimes you want to calculate arbitrary function of the state
+variables of one or more elements and feed the result into another
+element during a simulation. The Function class is useful for this.
+
+.. automodule:: function
+   :members:
+            
 The Hodgkin-Huxley demo
 ^^^^^^^^^^^^^^^^^^^^^^^
 This is a self-contained graphical demo implemented by Subhasis Ray,
