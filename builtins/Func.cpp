@@ -344,7 +344,7 @@ void Func::_showError(mu::Parser::exception_type &e) const
 /**
    Call-back to add variables to parser automatically. 
  */
-double * _addVar(const char *name, void *data)
+static double * _addVar(const char *name, void *data)
 {
     Func* func = reinterpret_cast< Func * >(data);
     double *ret = new double;
