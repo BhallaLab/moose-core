@@ -47,6 +47,8 @@
 
 #include "header.h"
 #include "../utility/utility.h"
+#include "Variable.h"
+
 #include "Function.h"
 
 static SrcFinfo1<double> *valueOut()
@@ -136,13 +138,21 @@ const Cinfo * Function::initCinfo()
         "?:  if then else operator   C++ style syntax\n",
         &Function::setExpr,
         &Function::getExpr);
+
+    static ValueFinfo< Function, unsigned int > numVars(
+        "numVars",
+        "Number of variables used by Function.",
+        &Function::setNumVar,
+        &Function::getNumVar);
+    
     static FieldElementFinfo< Function, Variable > inputs(
         "x",
         "Input variables to the function. These can be passed via messages.",
-        Variable< double >::initCinfo(),
+        Variable::initCinfo(),
         &Function::getVar,
         &Function::setNumVar,
         &Function::getNumVar);
+
     static LookupValueFinfo < Function, string, double > constants(
         "c",
         "Constants used in the function. These must be assigned before"
@@ -150,9 +160,9 @@ const Cinfo * Function::initCinfo()
         &Function::setConst,
         &Function::getConst);
 
-    static ValueFinfo< string > independent(
+    static ValueFinfo< Function, unsigned int > independent(
         "independent",
-        "Independent variable. Differentiation is done based on this. Defaults"
+        "Index of independent variable. Differentiation is done based on this. Defaults"
         " to the first assigned variable.",
         &Function::setIndependent,
         &Function::getIndependent);
@@ -165,10 +175,10 @@ const Cinfo * Function::initCinfo()
     ///////////////////////////////////////////////////////////////////
     static DestFinfo process( "process",
                               "Handles process call, updates internal time stamp.",
-                              new ProcOpFunc< Func >( &Func::process ) );
+                              new ProcOpFunc< Function >( &Function::process ) );
     static DestFinfo reinit( "reinit",
                              "Handles reinit call.",
-                             new ProcOpFunc< Func >( &Func::reinit ) );
+                             new ProcOpFunc< Function >( &Function::reinit ) );
     static Finfo* processShared[] =
             {
 		&process, &reinit
@@ -193,6 +203,7 @@ const Cinfo * Function::initCinfo()
                 &expr,
                 &inputs,
                 &constants,
+                &independent,
                 // &vars,
                 &proc,
                 valueOut(),
@@ -230,36 +241,33 @@ const Cinfo * Function::initCinfo()
 
 static const Cinfo * functionCinfo = Function::initCinfo();
 
-const int Function::VARMAX = 10;
-
-Function::Function(): _mode(1), _valid(false)
+Function::Function(): _mode(1), _valid(false), _numVar(0)
 {
-    _varbuf.reserve(VARMAX);
-    _parser.SetVarFactory(_addVar, this);
+    _parser.SetVarFactory(_functionAddVar, this);
     // Adding pi and e, the defaults are `_pi` and `_e`
     _parser.DefineConst(_T("pi"), (mu::value_type)M_PI);
     _parser.DefineConst(_T("e"), (mu::value_type)M_E);
 }
 
-Function::Function(const Function& rhs): _mode(rhs._mode)
+Function::Function(const Function& rhs): _mode(rhs._mode), _numVar(rhs._numVar)
 {
-    _parser.SetVarFactory(_addVar, this);
+    _parser.SetVarFactory(_functionAddVar, this);
     // Adding pi and e, the defaults are `_pi` and `_e`
     _parser.DefineConst(_T("pi"), (mu::value_type)M_PI);
     _parser.DefineConst(_T("e"), (mu::value_type)M_E);
     // Copy the constants
-    mu::Parser::valmap_type cmap = rhs._parser.GetConst();
+    mu::valmap_type cmap = rhs._parser.GetConst();
     if (cmap.size()){
-        mu::Parser::valmap_type::const_iterator item = cmap.begin();
+        mu::valmap_type::const_iterator item = cmap.begin();
         for (; item!=cmap.end(); ++item){
             _parser.DefineConst(item->first, item->second);
         }
     }
     setExpr(rhs.getExpr());
+    assert(_varbuf.size() == rhs._varbuf.size());
     // Copy the values from the var pointers in rhs
-    for (map< string, double >::iterator it = rhs._varbuf.begin();
-         it != rhs._varbuf.end(); ++it){
-        *_varbuf[it->first] = *it->second;
+    for (unsigned int ii = 0; ii < rhs._varbuf.size(); ++ii){
+        _varbuf[ii]->value = rhs._varbuf[ii]->value;
     }
 }
 
@@ -270,34 +278,36 @@ Function& Function::operator=(const Function rhs)
     // Adding pi and e, the defaults are `_pi` and `_e`
     _parser.DefineConst(_T("pi"), (mu::value_type)M_PI);
     _parser.DefineConst(_T("e"), (mu::value_type)M_E);
-    setExpr(rhs.getExpr());
     // Copy the constants
-    mu::Parser::valmap_type cmap = rhs._parser.GetConst();
+    mu::valmap_type cmap = rhs._parser.GetConst();
     if (cmap.size()){
-        mu::Parser::valmap_type::const_iterator item = cmap.begin();
+        mu::valmap_type::const_iterator item = cmap.begin();
         for (; item!=cmap.end(); ++item){
             _parser.DefineConst(item->first, item->second);
         }
     }
     // Copy the values from the var pointers in rhs
-    for (map< string, double >::iterator it = rhs._varbuf.begin();
-         it != rhs._varbuf.end(); ++it){
-        *_varbuf[it->first] = *it->second;
+    setExpr(rhs.getExpr());
+    assert(_varbuf.size() == rhs._varbuf.size());
+    for (unsigned int ii = 0; ii < rhs._varbuf.size(); ++ii){
+        _varbuf[ii]->value = rhs._varbuf[ii]->value;
     }
     return *this;
 }
 
 Function::~Function()
 {
-    _clearBuffer();
-}
+ //    _clearBuffer();
+ }
 
+// do not know what to do about Variables that have already been
+// connected by message.
 void Function::_clearBuffer()
 {
+    _numVar = 0;
     _parser.ClearVar();
-    for (map< string, double >::iterator it = _varbuf.begin();
-         it != _varbuf.end(); ++it){
-        delete it->second;
+    for (unsigned int ii = 0; ii < _varbuf.size(); ++ii){
+        delete _varbuf[ii]; 
     }
     _varbuf.clear();
 }
@@ -311,21 +321,73 @@ void Function::_showError(mu::Parser::exception_type &e) const
          << "Position: " << e.GetPos() << "\n"
          << "Error code:     " << e.GetCode() << endl;
 }
+
 /**
-   Call-back to add variables to parser automatically. 
+   Call-back to add variables to parser automatically.
+
+   We use different storage for constants and variables. Variables are
+   stored in a vector of Variable object pointers. They must have the
+   name x{index} where index is any non-negative integer. Note that
+   the vector is resized to whatever the maximum index is. It is up to
+   the user to make sure that indices are sequential without any
+   gap. In case there is a gap in indices, those entries will remain
+   unused.
+
+   If the name starts with anything other than `x`, then it is taken
+   to be a named constant, which must be set before any expression or
+   variables and error is thrown.
  */
-double * _addVar(const char *name, void *data)
+static double * _functionAddVar(const char *name, void *data)
 {
     Function* function = reinterpret_cast< Function * >(data);
-    map< string, double *>::iterator target = _varbuf.find(string(name));
-    if (target == _varbuf.end()){
-        double *ret = new double;
-        *ret = 0.0;
-        _varbuf.insert(pair<string, double*>(string(name), ret));
+    double * ret = NULL;
+    string strname(name);
+    // Names starting with x are variables, everything else is constant.
+    if (strname[0] == 'x'){
+        int index = atoi(strname.substr(1).c_str());
+        if (index >= function->_varbuf.size()){
+            function->_varbuf.resize(index+1);
+            function->_varbuf[index] = new Variable();
+        }
+        ret = &(function->_varbuf[index]->value);        
     } else {
-        ret = target->second;
+        cerr << "Got an undefined constant " << name << endl
+             << "You must define the constants beforehand using LookupField c: c[name]"
+                " = value"
+             << endl;
+        throw mu::ParserError("Undefined constant.");
     }
     return ret;
+}
+
+/**
+   This function is for automatically adding variables when setVar
+   messages are connected.
+
+   There are two ways new variables can be created :
+
+   (1) When the user sets the expression, muParser calls _functionAddVar to
+   get the address of the storage for each variable name in the
+   expression.
+
+   (2) When the user connects a setVar message to a Variable. ??
+
+   
+ */
+unsigned int Function::addVar()
+{
+    unsigned int newVarIndex = _numVar;
+    ++_numVar;
+    stringstream name;
+    name << "x" << newVarIndex;
+    _functionAddVar(name.str().c_str(), this);
+    return newVarIndex;
+}
+
+void Function::dropVar(unsigned int msgLookup)
+{
+    // Don't know what this can possibly mean in the context of
+    // evaluating a set expression.
 }
 
 void Function::setExpr(string expr)
@@ -376,6 +438,16 @@ double Function::getValue() const
     return value;
 }
 
+void Function::setIndependent(unsigned int index)
+{
+    _independent = index;
+}
+unsigned int Function::getIndependent() const
+{
+    return _independent;
+}
+
+
 double Function::getDerivative() const
 {
     double value = 0.0;    
@@ -383,58 +455,47 @@ double Function::getDerivative() const
         cout << "Error: Function::getDerivative() - invalid state" << endl;        
         return value;
     }
-    map<string, double *>::iterator it = _varbuf.find(_independent);
-    if ((it != map::end) && (it->second != NULL)){
-        try{
-            value = _parser.Diff(it->second, *(it->second));
-        } catch (mu::Parser::exception_type &e){
+    assert(_independent < _varbuf.size());
+    try{
+        value = _parser.Diff(&(_varbuf[_independent]->value),
+                             _varbuf[_independent]->value);
+    } catch (mu::Parser::exception_type &e){
             _showError(e);
-        }
-    }
+    }    
     return value;
 }
 
-void setNumVar(sunigned int num)
+void Function::setNumVar(const unsigned int num)
 {
+    _clearBuffer();
+    for (unsigned int ii = 0; ii < num; ++ii){
+        stringstream name;
+        name << "x" << ii;
+        _functionAddVar(name.str().c_str(), this);
+    }
 }
 
-unsigned int getNumVar() const
-{    
+unsigned int Function::getNumVar() const
+{
+    return _varbuf.size();
 }
 
-vector<string> Function::getVars() const
+void Function::setVar(unsigned int index, double value)
 {
-    vector< string > ret;
-    if (!_valid){
-        cout << "Error: Function::getVars() - invalid parser state" << endl;        
-        return ret;
-    }
-    mu::varmap_type vars;
-    try{
-        vars = _parser.GetVar();
-        for (mu::varmap_type::iterator ii = vars.begin();
-             ii != vars.end(); ++ii){
-            ret.push_back(ii->first);
-        }
-    } catch (mu::Parser::exception_type &e){
-        _showError(e);
-    }
-    return ret;
+    assert(index < _varbuf.size());
+    _varbuf[index]->setValue(value);
 }
 
-void Function::setVarValues(vector<string> vars, vector<double> vals)
+Variable * Function::getVar(unsigned int ii)
 {
-    
-    if (vars.size() > vals.size() || !_valid){
-        return;
+    static Variable dummy;
+    if ( ii < _varbuf.size()){
+        return _varbuf[ii];
     }
-    mu::varmap_type varmap = _parser.GetVar();
-    for (unsigned int ii = 0; ii < vars.size(); ++ii){
-        mu::varmap_type::iterator v = varmap.find(vars[ii]);
-        if ( v != varmap.end()){
-            *v->second = vals[ii];
-        }
-    }
+    cout << "Warning: Function::getVar: index: "
+         << ii << " is out of range: "
+         << _varbuf.size() << endl;
+    return &dummy;
 }
 
 void Function::setConst(string name, double value)
@@ -444,9 +505,9 @@ void Function::setConst(string name, double value)
 
 double Function::getConst(string name) const
 {
-    mu::Parser::valmap_type cmap = _parser.GetConst();
+    mu::valmap_type cmap = _parser.GetConst();
     if (cmap.size()){
-        mu::Parser::valmap_type::const_iterator it = cmap.find(name);
+        mu::valmap_type::const_iterator it = cmap.find(name);
         if (it != cmap.end()){
             return it->second;
         }

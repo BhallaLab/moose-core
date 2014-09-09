@@ -53,7 +53,7 @@
    expression in standard C form and a list of variables values and
    evaluate the results.
  */
-double *_addVar(const char *name, void *data);
+static double *_addVar(const char *name, void *data);
 
 class Func
 {
