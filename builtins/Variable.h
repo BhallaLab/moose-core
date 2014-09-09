@@ -56,10 +56,19 @@ public:
     Variable():value(0.0)
     {
     };
+    Variable(const Variable& rhs): value(rhs.value)
+    {
+        ;
+    }
 
     virtual ~Variable(){};
 
-    void setValue( double v)
+    void setValue(double v)
+    {
+        value = v;
+    }
+
+    void epSetValue(const Eref & e, double v)
     {
         value = v;
     }
@@ -68,6 +77,8 @@ public:
     {
         return value;
     }
+
+    void addMsgCallback(const Eref& e, const string& finfoName, ObjId msg, unsigned int msgLookup);
 
     static const Cinfo * initCinfo();
 

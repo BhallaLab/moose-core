@@ -49,12 +49,13 @@
 #define _FUNCTION_H
 
 #include "muParser.h"
+
 /**
    Simple function parser and evaluator for MOOSE. This can take a mathematical
    expression in standard C form and a list of variables values and
    evaluate the results.
  */
-double *_addVar(const char *name, void *data);
+static double *_functionAddVar(const char *name, void *data);
 
 class Function
 {
@@ -74,8 +75,8 @@ class Function
 
     
     // get/set the value of variable `name`
-    void setVar(string name, double value);
-    double getVar(string name) const;
+    void setVar(unsigned int index, double value);
+    Variable * getVar(unsigned int ii);
 
     // get function eval result
     double getValue() const;
@@ -84,21 +85,21 @@ class Function
     void setMode(unsigned int mode);
     unsigned int getMode() const;
 
-    void setX(double value);
-    double getX() const;
+    void setNumVar(unsigned int num);
+    unsigned int getNumVar() const;
 
-    void setY(double value);
-    double getY() const;
+    void setConst(string name, double value);
+    double getConst(string name) const;
 
-    void setZ(double value);
-    double getZ() const;
-
-    void setXY(double x, double y);
-    void setXYZ(double x, double y, double z);
+    void setIndependent(unsigned int index);
+    unsigned int getIndependent() const;
 
     double getDerivative() const;
 
-    Function& operator=(const Func rhs);
+    Function& operator=(const Function rhs);
+
+    unsigned int addVar();
+    void dropVar(unsigned int msgLookup);
 
     void process(const Eref& e, ProcPtr p);
     void reinit(const Eref& e, ProcPtr p);
@@ -106,12 +107,12 @@ class Function
     static const Cinfo * initCinfo();
 
 protected:
-    friend double * _addVar(const char * name, void *data);
-    map< string, double *> _varbuf; // for variables
+    friend double * _functionAddVar(const char * name, void *data);
+    vector<Variable *> _varbuf;
+    unsigned int _numVar;
     map< string, double *> _constbuf;  // for constants
-    string _independent; // name of independent variable
+    unsigned int _independent; // index of independent variable
     mu::Parser _parser;
-    double *_x, *_y, *_z;
     unsigned int _mode;
     mutable bool _valid;
     void _clearBuffer();

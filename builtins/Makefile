@@ -14,6 +14,8 @@ OBJ = \
 	Group.o	\
 	Mstring.o	\
 	Func.o \
+	Function.o	\
+	Variable.o	\
 	TableBase.o	\
 	Table.o	\
 	Interpol.o	\
@@ -37,6 +39,8 @@ Arith.o:	Arith.h
 Group.o:	Group.h
 Mstring.o:		Mstring.h
 Func.o:	Func.h
+Function.o: Function.h
+Variable.o: Variable.h
 TableBase.o:		TableBase.h
 Table.o:		TableBase.h Table.h
 Interpol.o:		TableBase.h Interpol.h
