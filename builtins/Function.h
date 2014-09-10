@@ -94,6 +94,8 @@ class Function
     void setIndependent(unsigned int index);
     unsigned int getIndependent() const;
 
+    vector < double > getY() const;
+
     double getDerivative() const;
 
     Function& operator=(const Function rhs);
@@ -108,13 +110,16 @@ class Function
 
 protected:
     friend double * _functionAddVar(const char * name, void *data);
+    unsigned int _mode;
+    mutable bool _valid;
+     // this stores variables received via incoming messages, identifiers of the form x{i} are included in this
     vector<Variable *> _varbuf;
     unsigned int _numVar;
+    // this stores variable values pulled by sending request. identifiers of the form y{i} are included in this
+    vector< double * > _pullbuf;
     map< string, double *> _constbuf;  // for constants
     unsigned int _independent; // index of independent variable
     mu::Parser _parser;
-    unsigned int _mode;
-    mutable bool _valid;
     void _clearBuffer();
     void _showError(mu::Parser::exception_type &e) const;
 };

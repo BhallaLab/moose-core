@@ -65,6 +65,14 @@ static SrcFinfo1< double > *derivativeOut()
     return &derivativeOut;
 }
 
+static SrcFinfo1< vector < double > *> *requestOut()
+{
+    static SrcFinfo1< vector < double > * > requestOut(
+        "requestOut",
+        "Sends request for input variable from a field on target object");
+    return &requestOut;
+}
+
 const Cinfo * Function::initCinfo()
 {
     ////////////////////////////////////////////////////////////
@@ -159,6 +167,11 @@ const Cinfo * Function::initCinfo()
         " specifying the function expression.",
         &Function::setConst,
         &Function::getConst);
+    
+    static ReadOnlyValueFinfo< Function, vector < double > > y(
+        "y",
+        "Variable values received from target fields by requestOut",
+        &Function::getY);
 
     static ValueFinfo< Function, unsigned int > independent(
         "independent",
@@ -166,10 +179,7 @@ const Cinfo * Function::initCinfo()
         " to the first assigned variable.",
         &Function::setIndependent,
         &Function::getIndependent);
-    // static ReadOnlyLookupValueFinfo< Function, string, double > vars(
-    //     "var",
-    //     "Variable names in the expression",
-    //     &Function::getVars);
+
     ///////////////////////////////////////////////////////////////////
     // Shared messages
     ///////////////////////////////////////////////////////////////////
@@ -204,8 +214,8 @@ const Cinfo * Function::initCinfo()
                 &inputs,
                 &constants,
                 &independent,
-                // &vars,
                 &proc,
+                requestOut(),
                 valueOut(),
                 derivativeOut(),
             };
@@ -215,16 +225,20 @@ const Cinfo * Function::initCinfo()
                 "Name", "Function",
                 "Author", "Subhasis Ray",
                 "Description",
-                "Function: general purpose function calculator using real numbers. It can "
-                "parse mathematical expression defining a function and evaluate it "                
-                "and/or its derivative for specified variable values. "
-                "The variables can be input from other moose objects. In case of "
-                "arbitrary variable names, the source message must have the variable "
-                "name as the first argument. For most common cases, input messages to "
-                "set x, y, z and xy, xyz are made available without such "
-                "requirement. This class handles only real numbers "
-                "(C-double). Predefined constants are: pi=3.141592..., "
-                "e=2.718281...  "
+                "Function: general purpose function calculator using real numbers. It can"
+                " parse mathematical expression defining a function and evaluate it"                
+                " and/or its derivative for specified variable values."                
+                " The variables can be input from other moose objects."
+                " Such variables must be named `x{i}` in the expression and the source"
+                " field is connected to Function.x[i]'s setVar destination field."
+                " In case the input variable is not available as a source field, but is"
+                " a value field, then the value can be requested by connecting the"
+                " `requestOut` message to the `get{Field}` destination on the target"
+                " object. Such variables must be specified in the expression as y{i}"
+                " and connecting the messages should happen in the same order as the"
+                " y indices." 
+                " This class handles only real numbers (C-double). Predefined constants"
+                " are: pi=3.141592..., e=2.718281..."
             };
     
     static Dinfo< Function > dinfo;
@@ -264,10 +278,14 @@ Function::Function(const Function& rhs): _mode(rhs._mode), _numVar(rhs._numVar)
         }
     }
     setExpr(rhs.getExpr());
-    assert(_varbuf.size() == rhs._varbuf.size());
     // Copy the values from the var pointers in rhs
+    assert(_varbuf.size() == rhs._varbuf.size());
     for (unsigned int ii = 0; ii < rhs._varbuf.size(); ++ii){
         _varbuf[ii]->value = rhs._varbuf[ii]->value;
+    }
+    assert(_pullbuf.size() == rhs._pullbuf.size());
+    for (unsigned int ii = 0; ii < rhs._pullbuf.size(); ++ii){
+        *_pullbuf[ii] = *(rhs._pullbuf[ii]);
     }
 }
 
@@ -292,6 +310,10 @@ Function& Function::operator=(const Function rhs)
     for (unsigned int ii = 0; ii < rhs._varbuf.size(); ++ii){
         _varbuf[ii]->value = rhs._varbuf[ii]->value;
     }
+    assert(_pullbuf.size() == rhs._pullbuf.size());
+    for (unsigned int ii = 0; ii < rhs._pullbuf.size(); ++ii){
+        *_pullbuf[ii] = *(rhs._pullbuf[ii]);
+    }
     return *this;
 }
 
@@ -310,6 +332,10 @@ void Function::_clearBuffer()
         delete _varbuf[ii]; 
     }
     _varbuf.clear();
+    for (unsigned int ii = 0; ii < _pullbuf.size(); ++ii){
+        delete _pullbuf[ii]; 
+    }
+    _pullbuf.clear();
 }
 
 void Function::_showError(mu::Parser::exception_type &e) const
@@ -350,6 +376,13 @@ static double * _functionAddVar(const char *name, void *data)
             function->_varbuf[index] = new Variable();
         }
         ret = &(function->_varbuf[index]->value);        
+    } else if (strname[0] == 'y'){
+        int index = atoi(strname.substr(1).c_str());
+        if (index >= function->_pullbuf.size()){
+            function->_pullbuf.resize(index+1);
+            function->_pullbuf[index] = new double();
+        }
+        ret = function->_pullbuf[index];        
     } else {
         cerr << "Got an undefined constant " << name << endl
              << "You must define the constants beforehand using LookupField c: c[name]"
@@ -442,11 +475,20 @@ void Function::setIndependent(unsigned int index)
 {
     _independent = index;
 }
+
 unsigned int Function::getIndependent() const
 {
     return _independent;
 }
 
+vector< double > Function::getY() const
+{
+    vector < double > ret(_pullbuf.size());
+    for (unsigned int ii = 0; ii < ret.size(); ++ii){
+        ret[ii] = *_pullbuf[ii];
+    }
+    return ret;
+}
 
 double Function::getDerivative() const
 {
@@ -519,6 +561,13 @@ void Function::process(const Eref &e, ProcPtr p)
 {
     if (!_valid){
         return;
+    }
+    vector < double > databuf;
+    requestOut()->send(e, &databuf);
+    for (unsigned int ii = 0;
+         (ii < databuf.size()) && (ii < _pullbuf.size());
+         ++ii){
+        *_pullbuf[ii] = databuf[ii];        
     }
     if (_mode & 1){
         valueOut()->send(e, getValue());

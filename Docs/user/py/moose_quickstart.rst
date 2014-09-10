@@ -3,7 +3,8 @@ Getting started with python scripting for MOOSE
 ===============================================
 
 :Author: Subhasis Ray
-:Date:   December 12, 2012
+:Date:   December 12, 2012, Updated: September 9, 2014
+		  
 
 Introduction
 ============
