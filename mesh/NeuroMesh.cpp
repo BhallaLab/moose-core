@@ -750,6 +750,29 @@ const vector< double >& NeuroMesh::vGetVoxelVolume() const
 	return vs_;
 }
 
+const vector< double >& NeuroMesh::vGetVoxelMidpoint() const
+{
+	static vector< double > midpoint;
+	unsigned int num = vs_.size();
+	midpoint.resize( num * 3 );
+	vector< double >::iterator k = midpoint.begin();
+	for ( unsigned int i = 0; i < nodes_.size(); ++i ) {
+		const NeuroNode& nn = nodes_[i];
+		if ( !nn.isDummyNode() ) {
+			assert( nn.parent() < nodes_.size() );
+			const NeuroNode& parent = nodes_[ nn.parent() ];
+			for ( unsigned int j = 0; j < nn.getNumDivs(); ++j ) {
+				vector< double > coords = nn.getCoordinates( parent, j );
+				*k = ( coords[0] + coords[3] ) / 2.0;
+				*(k + num ) = ( coords[1] + coords[4] ) / 2.0;
+				*(k + 2 * num ) = ( coords[2] + coords[5] ) / 2.0;
+				k++;
+			}
+		}
+	}
+	return midpoint;
+}
+
 const vector< double >& NeuroMesh::getVoxelArea() const
 {
 	return area_;
