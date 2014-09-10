@@ -64,6 +64,8 @@ from checkcombobox import CheckComboBox
 
 from mplugin import MoosePluginBase, EditorBase, EditorWidgetBase, PlotBase, RunBase
 #from defaultToolPanel import DefaultToolPanel
+from DataTable import DataTable
+from matplotlib.lines import Line2D
 
 class MoosePlugin(MoosePluginBase):
     """Default plugin for MOOSE GUI"""
@@ -301,6 +303,7 @@ class RunView(RunBase):
         self.getCentralWidget()
         self.setModelRoot(moose.Neutral(self.plugin.modelRoot).path)
         self.setDataRoot(moose.Neutral('/data').path)
+        self.setDataRoot(moose.Neutral(self.plugin.modelRoot).path)
         self.plugin.modelRootChanged.connect(self.setModelRoot)
         self.plugin.dataRootChanged.connect(self.setDataRoot)
         self._menus += self.getCentralWidget().getMenus()
@@ -310,6 +313,9 @@ class RunView(RunBase):
         tabs"""
         if self._centralWidget is None:
             self._centralWidget = PlotWidget()
+            #self.x = QtGui.QScrollArea()
+            #x.setWidget(self._centralWidget)
+            #self._centralWidget.setWidget()
         return self._centralWidget
 
     # def setDataRootSlot(self):
@@ -319,7 +325,7 @@ class RunView(RunBase):
 
     def setDataRoot(self, path):
         self.dataRoot = path
-        self.getCentralWidget().setDataRoot(path)
+        #self.getCentralWidget().setDataRoot(path)
         #self.getSchedulingDockWidget().widget().setDataRoot(path)
 
     def setModelRoot(self, path):
@@ -743,6 +749,7 @@ class PlotWidget(QtGui.QWidget):
     """
     def __init__(self, *args, **kwargs):
         QtGui.QWidget.__init__(self, *args)
+        scrollbar = QtGui.QScrollArea()
         self.canvas = CanvasWidget()
         self.canvas.setParent(self)
         #global canvas
@@ -752,11 +759,13 @@ class PlotWidget(QtGui.QWidget):
         layout.addWidget(self.canvas,0,1)
         layout.addWidget(self.navToolbar,1,1)
         self.setLayout(layout)
-        self.modelRoot = '/'
+        self.setAcceptDrops(True)
+        #self.modelRoot = '/'
         self.pathToLine = defaultdict(set)
         self.lineToDataSource = {}
-        self.canvas.addSubplot(1, 1)
+        self.axesRef = self.canvas.addSubplot(1, 1)
         self.onclick_count = 0
+        self.dataTable = DataTable()
 
     @property
     def plotAll(self):
@@ -767,9 +776,51 @@ class PlotWidget(QtGui.QWidget):
 
     def setDataRoot(self, path):
         self.dataRoot = path
+        #self.legendUpdate()
+
+    def genColorMap(self,tableObject):
+        #print "tableObject in colorMap ",tableObject
+        species = tableObject+'/info'
+        colormap_file = open(os.path.join(config.settings[config.KEY_COLORMAP_DIR], 'rainbow2.pkl'),'rb')
+        self.colorMap = pickle.load(colormap_file)
+        colormap_file.close()
+        hexchars = "0123456789ABCDEF"
+        color = 'white'
+        #Genesis model exist the path and color will be set but not xml file so bypassing
+        #print "here genColorMap ",moose.exists(species)
+        if moose.exists(species):
+            color = moose.element(species).getField('color')
+            if ((not isinstance(color,(list,tuple)))):
+                if color.isdigit():
+                    tc = int(color)
+                    tc = (tc * 2 )
+                    r,g,b = self.colorMap[tc]
+                    color = "#"+ hexchars[r / 16] + hexchars[r % 16] + hexchars[g / 16] + hexchars[g % 16] + hexchars[b / 16] + hexchars[b % 16]
+            else:
+                color = 'white'
+        return color
+        
+    def legendUpdate(self):
+        modelroot = moose.element(self.modelRoot).path
+        labelList = []
+        lines = []
+        labels = []
+        color = 'white'
+        for tabId in moose.wildcardFind('%s/##[TYPE=Table]' %(modelroot)):
+            tab = moose.Table(tabId)
+            line_list=[]
+            tableObject = tab.neighbors['requestOut']
+            if len(tableObject) > 0:
+                color = self.genColorMap(tableObject[0].path)
+                lines.append(Line2D([],[],color=color,mec=tableObject[0].path))
+                labels.append(tableObject[0].name)
+        self.axesRef.legend(lines, labels, loc='upper center', prop={'size':10}, bbox_to_anchor=(0.5, -0.03), fancybox=True, shadow=True, ncol=3)
+        self.canvas.hide()
+        self.canvas.show()
 
     def plotAllData(self):
         """Plot data from all tables under dataRoot"""
+
         path = moose.element(self.dataRoot).path
         modelroot = moose.element(self.modelRoot).path
         time = moose.Clock('/clock').currentTime
@@ -778,11 +829,10 @@ class PlotWidget(QtGui.QWidget):
         #harsha: policy graphs will be under /model/modelName need to change in kkit
         #for tabId in moose.wildcardFind('%s/##[TYPE=Table]' % (modelroot)):
         for tabId in moose.wildcardFind('%s/##[TYPE=Table]' %(modelroot)):
-            print "tabId ",tabId
             tab = moose.Table(tabId)
             line_list=[]
             tableObject = tab.neighbors['requestOut']
-
+            print "tableObject ",tableObject
             if len(tableObject) > 0:
                 # This is the default case: we do not plot the same
                 # table twice. But in special cases we want to have
@@ -790,24 +840,9 @@ class PlotWidget(QtGui.QWidget):
                 # axes.
                 #
                 #Harsha: Adding color to graph for signalling model, check if given path has cubemesh or cylmesh
-                color = ''
-                if (len(moose.wildcardFind('%s/##[ISA=ChemCompt]' %(modelroot)))):
-                    species = tableObject[0].path+'/info'
-                    colormap_file = open(os.path.join(config.settings[config.KEY_COLORMAP_DIR], 'rainbow2.pkl'),'rb')
-                    self.colorMap = pickle.load(colormap_file)
-                    colormap_file.close()
-                    hexchars = "0123456789ABCDEF"
-                    #Genesis model exist the path and color will be set but not xml file so bypassing
-                    if moose.exists(species):
-                        color = moose.element(species).getField('color')
-                        if ((not isinstance(color,(list,tuple)))):
-                            if color.isdigit():
-                                tc = int(color)
-                                tc = (tc * 2 )
-                                r,g,b = self.colorMap[tc]
-                                color = "#"+ hexchars[r / 16] + hexchars[r % 16] + hexchars[g / 16] + hexchars[g % 16] + hexchars[b / 16] + hexchars[b % 16]
-                        else:
-                            color = 'white'
+                color = 'white'
+                color = self.genColorMap(tableObject[0].path)
+                
                 lines = self.pathToLine[tab.path]
                 if len(lines) == 0:
                     #Harsha: pass color for plot if exist and not white else random color
@@ -839,12 +874,10 @@ class PlotWidget(QtGui.QWidget):
                     for legobj in leg.legendHandles:
                         legobj.set_linewidth(5.0)
                         legobj.set_picker(True)
-
+                    
                 self.canvas.draw()
             else:
                 print "returning as len tabId is zero ",tabId, " tableObject ",tableObject, " len ",len(tableObject)
-
-
 
     def onclick(self,event1):
         #print "onclick",event1.artist.get_label()
@@ -951,6 +984,27 @@ class PlotWidget(QtGui.QWidget):
             for line in self.lineToDataSource.keys():
                 self.saveCsv(line,directory)
 
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasFormat('text/plain'):
+            event.accept()
+    def dragMoveEvent(self, event):
+        if event.mimeData().hasFormat('text/plain'):
+            event.accept()
+    def eventFilter(self, source, event):
+        if (event.type() == QtCore.QEvent.Drop):
+            pass
+    def dropEvent(self, event):
+        """Insert an element of the specified class in drop location"""
+
+        if not event.mimeData().hasFormat('text/plain'):
+            return
+
+        self.modelRoot, self.element = event.mimeData().data
+        self.dataTable.create(self.modelRoot,self.element,"Conc")
+        self.legendUpdate()
+        self.hide()
+        self.show()
+
     def getMenus(self):
         if not hasattr(self, '_menus'):
             self._menus = []
@@ -975,12 +1029,8 @@ class PlotView(PlotBase):
     """View for selecting fields on elements to plot."""
     def __init__(self, *args):
         PlotBase.__init__(self, *args)
-        #harsha: just a hack for now
-        self.dataTable = None
         self.plugin.modelRootChanged.connect(self.getSelectionPane().setSearchRoot)
         self.plugin.dataRootChanged.connect(self.setDataRoot)
-        #self._recordingDict = {}
-        #self._reverseDict = {}
         self.dataRoot = self.plugin.dataRoot
 
     def setDataRoot(self, root):
@@ -1071,6 +1121,7 @@ class PlotView(PlotBase):
             #as this is required when I drop table on to the plot and added a utlis folder to system path so
             # import is not done
             self.dataTable.create(self.plugin.modelRoot, moose.element(element), field)
+            self.updateCallback()
     '''
     def createRecordingTable(self, element, field):
         """Create table to record `field` from element `element`
