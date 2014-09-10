@@ -274,6 +274,11 @@ rendition of the neuron and the molecular spatial oscillations within it.
 .. automodule:: reacDiffSpinyNeuron
    :members:
 
+Transport in branching dendritic tree
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: transportBranchingNeuron
+   :members:
+
 Single cell models
 ------------------
 
