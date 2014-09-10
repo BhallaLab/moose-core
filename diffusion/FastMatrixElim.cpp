@@ -532,6 +532,29 @@ void buildColIndex( unsigned int nrows,
 	}
 }
 
+/** 
+ * Motor transport into branches is divided between the child branches
+ * in proportion to their area. This function computes these proportions.
+ */
+void findAreaProportion( vector< double >& areaProportion, 
+		const vector< unsigned int >& parentVoxel,
+			const vector< double >& area )
+{
+	unsigned int nrows = parentVoxel.size();
+	vector< double > sumAreaOfChildren( nrows, 0.0 );
+	for ( unsigned int i = 0; i < nrows; ++i ) {
+		if ( parentVoxel[i] != EMPTY_VOXEL )
+			sumAreaOfChildren[ parentVoxel[i] ] += area[i];
+	}
+	for ( unsigned int i = 0; i < nrows; ++i ) {
+		if ( parentVoxel[i] != EMPTY_VOXEL )
+			areaProportion[i] = area[i]/sumAreaOfChildren[ parentVoxel[i] ];
+		else
+			areaProportion[i] = 1.0;
+	}
+}
+
+/// This function makes the diffusion matrix.
 bool FastMatrixElim::buildForDiffusion( 
 			const vector< unsigned int >& parentVoxel,
 			const vector< double >& volume,
@@ -554,6 +577,9 @@ bool FastMatrixElim::buildForDiffusion(
 		if ( parentVoxel[i] != EMPTY_VOXEL )
 			isTwig[ parentVoxel[i] ] = false;
 	}
+
+	vector< double > areaProportion( nrows_, 1.0 );
+	findAreaProportion( areaProportion, parentVoxel, area );
 
 	// Fill in the matrix entries for each colIndex
 	for ( unsigned int i = 0; i < nrows_; ++i ) {
@@ -591,10 +617,10 @@ bool FastMatrixElim::buildForDiffusion(
 
 				// Fill in motor transport
 				if ( k == parentVoxel[i] && motorConst > 0 ) { //toward twig
-					e[j] += motorConst / len;
+					e[j] += areaProportion[i] * motorConst / len;
 				}
 				if ( i == parentVoxel[k] && motorConst < 0 ) { //toward soma
-					e[j] -= motorConst / length[i];
+					e[j] -= motorConst / length[k];
 				}
 				e[j] *= -dt; // Scale the whole thing by dt.
 			}
