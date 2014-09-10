@@ -1711,13 +1711,13 @@ extern "C" {
                  "    message-manager for the newly created message.\n"
                  "\n"
                  "Examples\n"
-                 "-------\n"
+                 "--------\n"
                  "Connect the output of a pulse generator to the input of a spike\n"
                  "generator::\n"
                  "\n"
-                 "    >>> pulsegen = moose.PulseGen('pulsegen')\n"
-                 "    >>> spikegen = moose.SpikeGen('spikegen')\n"
-                 "    >>> moose.connect(pulsegen, 'output', spikegen, 'Vm')\n"
+                 ">>> pulsegen = moose.PulseGen('pulsegen')\n"
+                 ">>> spikegen = moose.SpikeGen('spikegen')\n"
+                 ">>> moose.connect(pulsegen, 'output', spikegen, 'Vm')\n"
                  "\n"
                  );
     

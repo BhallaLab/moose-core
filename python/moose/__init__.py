@@ -1,4 +1,4 @@
-"""==================================      
+"""
 PyMOOSE : moose as a python module
 ==================================
 
@@ -32,10 +32,6 @@ via the module function ``doc``::
 To get documentation about a particular field::
 
 >>> moose.doc('Neutral.childMsg')
-
-
-Documentation
-=============
 
 """
 
