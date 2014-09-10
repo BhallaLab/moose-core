@@ -87,30 +87,31 @@ const Cinfo * VClamp::initCinfo()
                                                &VClamp::getCommand);
     static ValueFinfo< VClamp, unsigned int> mode("mode",
                                                   "Working mode of the PID controller.\n"
-                                                  "\n   mode = 0, standard PID with proportional, integral and derivative"
-                                                  "\n   all acting on the error."
                                                   "\n"
-                                                  "\n   mode = 1, derivative action based on command input"
+                                                  "   mode = 0, standard PID with proportional, integral and derivative"
+                                                  " all acting on the error.\n"
                                                   "\n"
-                                                  "\n   mode = 2, proportional action and derivative action are based on"
-                                                  "\n   command input.",
+                                                  "   mode = 1, derivative action based on command input\n"
+                                                  "\n"
+                                                  "   mode = 2, proportional action and derivative action are based on"
+                                                  " command input.",
                                                   &VClamp::setMode,
                                                   &VClamp::getMode);
     static ValueFinfo< VClamp, double> ti("ti",
                                           "Integration time of the PID controller. Defaults to 1e9, i.e. integral"
-                                          "\naction is negligibly small.",
+                                          " action is negligibly small.",
                                           &VClamp::setTi,
                                           &VClamp::getTi);
     
     static ValueFinfo< VClamp, double> td("td",
                                           "Derivative time of the PID controller. This defaults to 0,"
-                                          "\ni.e. derivative action is unused.",
+                                          "i.e. derivative action is unused.",
                                           &VClamp::setTd,
                                           &VClamp::getTd);
     static ValueFinfo< VClamp, double> tau("tau",
                                           "Time constant of the lowpass filter at input of the PID"
-                                           "\ncontroller. This smooths out abrupt changes in the input. Set it to "
-                                           "\n5 * dt or more to avoid overshoots.",
+                                           " controller. This smooths out abrupt changes in the input. Set it to "
+                                           " 5 * dt or more to avoid overshoots.",
                                           &VClamp::setTau,
                                           &VClamp::getTau);
     static ValueFinfo< VClamp, double> gain("gain",
@@ -127,7 +128,7 @@ const Cinfo * VClamp::initCinfo()
                                                      &VClamp::getVin);
     static DestFinfo sensedIn("sensedIn",
                               "The `VmOut` message of the Compartment object should be connected"
-                              "\nhere.",
+                              " here.",
                               new OpFunc1<VClamp, double>( &VClamp::setVin));
                                               
     static DestFinfo commandIn("commandIn",
@@ -153,24 +154,27 @@ const Cinfo * VClamp::initCinfo()
         "Name", "VClamp",
         "Author", "Subhasis Ray",
         "Description", "Voltage clamp object for holding neuronal compartments at a specific"
-        " voltage. This implementation uses a builtin RC circuit to filter the"
-        "\ncommand input and then use a PID to bring the sensed voltage (Vm from"
-        "\ncompartment) to the filtered command potential."
+        " voltage.\n"
         "\n"
-        "\nUsage: Connect the `currentOut` source of VClamp to `injectMsg`"
-        "\ndest of Compartment. Connect the `VmOut` source of Compartment to"
-        "\n`set_sensed` dest of VClamp. Either set `command` field to a"
-        "\nfixed value, or connect an appropriate source of command potential"
-        "\n(like the `outputOut` message of an appropriately configured"
-        "\nPulseGen) to `set_command` dest."
-        "\n The default settings for the RC filter and PID controller should be"
-        "\nfine. For step change in command voltage, good defaults with"
-        "integration time step dt are as follows:"
-        "\ntime constant of RC filter, tau = 5 * dt"
-        "\nproportional gain of PID, gain = Cm/dt where Cm is the membrane"
-        "\n\tcapacitance of the compartment"
-        "\nintegration time of PID, ti = dt"
-        "\nderivative time  of PID, td = 0",
+        "This implementation uses a builtin RC circuit to filter the "
+        " command input and then use a PID to bring the sensed voltage (Vm from"
+        " compartment) to the filtered command potential.\n"
+        "\n"
+        "Usage: Connect the `currentOut` source of VClamp to `injectMsg`"
+        " dest of Compartment. Connect the `VmOut` source of Compartment to"
+        " `set_sensed` dest of VClamp. Either set `command` field to a"
+        " fixed value, or connect an appropriate source of command potential"
+        " (like the `outputOut` message of an appropriately configured"
+        " PulseGen) to `set_command` dest.\n"
+        "The default settings for the RC filter and PID controller should be"
+        " fine. For step change in command voltage, good defaults with"
+        "integration time step dt are as follows:\n"
+        "    time constant of RC filter, tau = 5 * dt\n"
+        "    proportional gain of PID, gain = Cm/dt where Cm is the membrane"
+        "    capacitance of the compartment\n"
+        "    integration time of PID, ti = dt\n"
+        "    derivative time  of PID, td = 0\n"
+        "\n",
     };
     
     static Cinfo vclampCinfo(
