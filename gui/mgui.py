@@ -375,6 +375,7 @@ class MWindow(QtGui.QMainWindow):
                 if dockWidget.windowTitle() == "Scheduling":
                     self.addDockWidget(Qt.Qt.TopDockWidgetArea, dockWidget)
                 else:
+
                     self.addDockWidget(Qt.Qt.RightDockWidgetArea, dockWidget)
             dockWidget.setVisible(True)
         subwin.setVisible(True)
@@ -751,7 +752,6 @@ class MWindow(QtGui.QMainWindow):
                 except KeyError:
                     pluginName = 'default'
                 print 'Loaded model', ret['model'].path
-                print " mgui and plugin",pluginName,ret['model'].path
                 self.setPlugin(pluginName, ret['model'].path)
                 
         
