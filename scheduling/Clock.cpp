@@ -532,7 +532,9 @@ void Clock::buildTicks( const Eref& e )
  */
 void Clock::handleStart( const Eref& e, double runtime )
 {
-	unsigned int n = round( runtime / dt_ );
+	if ( stride_ == 0 )
+			stride_ = 1;
+	unsigned int n = stride_ * round( runtime / ( stride_ * dt_ ) );
 	handleStep( e, n );
 }
 
