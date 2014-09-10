@@ -323,6 +323,19 @@ const vector< double >& SpineMesh::vGetVoxelVolume() const
 	return vs_;
 }
 
+const vector< double >& SpineMesh::vGetVoxelMidpoint() const
+{
+	static vector< double > midpoint;
+	midpoint.resize( spines_.size() * 3 );
+	for ( unsigned int i = 0; i < spines_.size(); ++i ) {
+		spines_[i].mid( midpoint[i], 
+						midpoint[i + spines_.size() ], 
+						midpoint[i + 2 * spines_.size() ] 
+		); 
+	}
+	return midpoint;
+}
+
 const vector< double >& SpineMesh::getVoxelArea() const
 {
 	return area_;

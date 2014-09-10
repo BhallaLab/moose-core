@@ -4990,3 +4990,5 @@ From FastMatrixElim.cpp:400, the motor equations are:
 * n+1:    dt*D*adx(+)
 
 =============================================================================
+9 Sep.
+Making a display of a neuron to watch motor transport on it.

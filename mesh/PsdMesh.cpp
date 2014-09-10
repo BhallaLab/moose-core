@@ -462,6 +462,22 @@ const vector< double >& PsdMesh::vGetVoxelVolume() const
 	return vs_;
 }
 
+const vector< double >& PsdMesh::vGetVoxelMidpoint() const
+{
+	static vector< double > midpoint;
+	midpoint.resize( psd_.size() * 3 );
+	vector< double >::iterator k = midpoint.begin();
+	for ( unsigned int i = 0; i < psd_.size(); ++i ) {
+		vector< double > coords = 
+				psd_[i].getCoordinates( pa_[i], 0 );
+		*k = ( coords[0] + coords[3] ) / 2.0;
+		*(k + psd_.size() ) = ( coords[1] + coords[4] ) / 2.0;
+		*(k + 2 * psd_.size() ) = ( coords[2] + coords[5] ) / 2.0;
+		k++;
+	}
+	return midpoint;
+}
+
 const vector< double >& PsdMesh::getVoxelArea() const
 {
 	return area_;
