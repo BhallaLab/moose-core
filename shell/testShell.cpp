@@ -1173,7 +1173,7 @@ void testCopyMsgOps()
 
 	assert( ret );
 
-	ObjId clock( Id( 1 ), 0 );
+	// ObjId clock( Id( 1 ), 0 );
 
 	///////////////////////////////////////////////////////////
 	// Copy it
