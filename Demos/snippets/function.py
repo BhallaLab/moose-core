@@ -58,20 +58,39 @@ def example():
     number of variables and constants. We can assign expression of the
     form::
 
-        f(c0, c1, c2, ..., cn, x0, x1, x2, x3, ... xm) 
+        f(c0, c1, ..., cM, x0, x1, ..., xN, y0,..., yP ) 
 
-    where `ci`'s are constants and `xi`'s are variables.
+    where `ci`'s are constants and `xi`'s and `yi`'s are variables.
 
     The constants must be defined before setting the expression and
     variables are connected via messages. The constants can have any
-    name, but the variable names must be of the form x{i} where i is
-    increasing integer starting from 0.  In this example we evaluate
-    the expression: ``z = c0 * exp(c1 * x0) * cos(x1)``
+    name, but the variable names must be of the form x{i} or y{i}
+    where i is increasing integer starting from 0. 
 
-    with x0 ranging from -1 to +1 and x1 ranging from -pi to
+    The `xi`'s are field elements and you have to set their number
+    first (function.x.num = N). Then you can connect any source field
+    sending out double to the 'setVar' destination field of the
+    `x[i]`.
+
+    The `yi`'s are useful when the required variable is a value field
+    and is not available as a source field. In that case you connect
+    the `requestOut` source field of the function element to the
+    `get{Field}` destination field on the target element. The `yi`'s
+    are automatically added on connecting. Thus, if you call::
+
+       moose.connect(function, 'requestOut', a, 'getSomeField')
+       moose.connect(function, 'requestOut', b, 'getSomeField')
+
+    then ``a.someField`` will be assigned to ``y0`` and
+    ``b.someField`` will be assigned to ``y1``.
+
+    In this example we evaluate the expression: ``z = c0 * exp(c1 *
+    x0) * cos(y0)``
+
+    with x0 ranging from -1 to +1 and y0 ranging from -pi to
     +pi. These values are stored in two stimulus tables called xtab
     and ytab respectively, so that at each timestep the next values of
-    x0 and x1 are assigned to the function.
+    x0 and y0 are assigned to the function.
 
     Unlike Func class, the number of variables and constants are
     unlimited in Function and you can set all the variables via
@@ -82,7 +101,7 @@ def example():
     function.c['c0'] = 1.0
     function.c['c1'] = 2.0
     function.x.num = 2
-    function.expr = 'c0 * exp(c1*x0) * cos(x1)'
+    function.expr = 'c0 * exp(c1*x0) * cos(y0)'
     # mode 1 - just evaluate function value,
     # mode 2 - evaluate derivative,
     # mode 3 evaluate both
@@ -105,7 +124,7 @@ def example():
     input_y.startTime = 0.0
     input_y.stepPosition = yarr[0]
     input_y.stopTime = simtime
-    moose.connect(input_y, 'output', function.x[1], 'setVar')
+    moose.connect(function, 'requestOut', input_y, 'getOutputValue')
     result = moose.Table('/ztab')
     moose.connect(result, 'requestOut', function, 'getValue')
     derivative = moose.Table('/zprime')
@@ -115,7 +134,11 @@ def example():
     moose.useClock(0, '/xtab,/ytab,/ztab,/zprime,/function', 'process')
     moose.reinit()    
     moose.start(simtime)
-    # plt.plot(result.vector, 'b-', label='z = c0 * exp(c1 * x0) * cos(x1)')
+    
+    # Uncomment the following lines and the import matplotlib.pyplot as plt on top
+    # of this file to display the plot.
+    
+    # plt.plot(result.vector, 'b-', label='z = c0 * exp(c1 * x0) * cos(y0)')
     # plt.plot(derivative.vector, 'g-', label='dz/dx0')
     # z = function.c['c0'] * np.exp(function.c['c1'] * xarr) * np.cos(yarr)
     # plt.plot(z, 'r--', label='numpy computed')
