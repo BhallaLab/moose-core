@@ -20,6 +20,9 @@ from kkitCalcArrow import *
 from kkitOrdinateUtil import *
 import posixpath
 from mtoolbutton import MToolButton
+
+#from QtGui import QScrollArea
+
 #from DataTable import DataTable
 class KkitPlugin(MoosePlugin):
     """Default plugin for MOOSE GUI"""
@@ -29,7 +32,9 @@ class KkitPlugin(MoosePlugin):
         self.view = None
         self.plotView = PlotView(self)
         self.getRunView()
-        self.plotView.dataTable = self.view._centralWidget.canvas.dataTable
+        self.plotView.dataTable = self.view._centralWidget.dataTable
+        self.plotView.updateCallback = self.view._centralWidget.legendUpdate
+        self.view._centralWidget.legendUpdate()
         #self.dataTable = DataTable(self.dataRoot)
 
     def getPlotView(self):
@@ -63,7 +68,6 @@ class KkitPlugin(MoosePlugin):
     def getRunView(self):
         if self.view is not None: return self.view
         self.view = RunView(self)
-        
         graphView = self.view._centralWidget
         graphView.setDataRoot(self.modelRoot)
         schedulingDockWidget = self.view.getSchedulingDockWidget().widget()
@@ -101,7 +105,6 @@ class KkitRunView(MooseEditorView):
             self._centralWidget = kineticRunWidget()
             self._centralWidget.setModelRoot(self.plugin.modelRoot)
         return self._centralWidget
-
 
 class KkitEditorView(MooseEditorView):
     #def __init__(self, plugin, dataTable):
