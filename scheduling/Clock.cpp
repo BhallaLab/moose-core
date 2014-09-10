@@ -672,6 +672,7 @@ void Clock::buildDefaultTick()
 	defaultTick_["Dsolve"] = 10;
 	defaultTick_["Adaptor"] = 11;
 	defaultTick_["Func"] = 12;
+	defaultTick_["Function"] = 12;
 	defaultTick_["Arith"] = 12;
 	defaultTick_["FuncBase"] = 12;
 	defaultTick_["FuncPool"] = 12;

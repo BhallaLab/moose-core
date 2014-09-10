@@ -1,6 +1,6 @@
 .. Documentation for all MOOSE classes and functions
 .. As visible in the Python module
-.. Auto-generated on August 29, 2014
+.. Auto-generated on September 10, 2014
 
 
 MOOSE Classes
@@ -76,7 +76,7 @@ MOOSE Classes
 
    .. py:attribute:: requestField
 
-      Pd (*source message field*)      Sends out a request to a generic double field. Issued from the process call.Works for any number of targets.
+      PSt6vectorIdSaIdEE (*source message field*)      Sends out a request to a generic double field. Issued from the process call.Works for any number of targets.
 
 
    .. py:attribute:: inputOffset
@@ -2659,25 +2659,6 @@ MOOSE Classes
       double (*value field*)      Output of the amplifier, i.e. gain * (plus - minus).
 
 
-.. py:class:: Double
-
-   Variable for storing values.
-
-   .. py:method:: setValue
-
-      (*destination message field*)      Assigns field value.
-
-
-   .. py:method:: getValue
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
-
-
-   .. py:attribute:: value
-
-      double (*value field*)      Variable value
-
-
 .. py:class:: Dsolve
 
 
@@ -3131,9 +3112,9 @@ MOOSE Classes
    .. py:attribute:: mode
 
       unsigned int (*value field*)      Mode of operation: 
-       1: only the function value will be funculated
-       2: only the derivative will be funculated
-       3: both function value and derivative at current variable values will be funculated.
+       1: only the function value will be calculated
+       2: only the derivative will be calculated
+       3: both function value and derivative at current variable values will be calculated.
 
 
    .. py:attribute:: expr
@@ -3269,6 +3250,183 @@ MOOSE Classes
    .. py:method:: input
 
       (*destination message field*)      Handles input to control value of n\_
+
+
+.. py:class:: Function
+
+   Function: general purpose function calculator using real numbers. It can parse mathematical expression defining a function and evaluate it and/or its derivative for specified variable values. The variables can be input from other moose objects. Such variables must be named `x{i}` in the expression and the source field is connected to Function.x[i]'s setVar destination field. In case the input variable is not available as a source field, but is a value field, then the value can be requested by connecting the `requestOut` message to the `get{Field}` destination on the target object. Such variables must be specified in the expression as y{i} and connecting the messages should happen in the same order as the y indices. This class handles only real numbers (C-double). Predefined constants are: pi=3.141592..., e=2.718281...
+
+   .. py:attribute:: proc
+
+      void (*shared message field*)      This is a shared message to receive Process messages from the scheduler objects.The first entry in the shared msg is a MsgDest for the Process operation. It has a single argument, ProcInfo, which holds lots of information about current time, thread, dt and so on. The second entry is a MsgDest for the Reinit operation. It also uses ProcInfo. 
+
+
+   .. py:method:: getValue
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: getDerivative
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: setMode
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getMode
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: setExpr
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getExpr
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: setNumX
+
+      (*destination message field*)      Assigns number of field entries in field array.
+
+
+   .. py:method:: getNumX
+
+      (*destination message field*)      Requests number of field entries in field array.The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: setC
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getC
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: setIndependent
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getIndependent
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: process
+
+      (*destination message field*)      Handles process call, updates internal time stamp.
+
+
+   .. py:method:: reinit
+
+      (*destination message field*)      Handles reinit call.
+
+
+   .. py:attribute:: requestOut
+
+      PSt6vectorIdSaIdEE (*source message field*)      Sends request for input variable from a field on target object
+
+
+   .. py:attribute:: valueOut
+
+      double (*source message field*)      Evaluated value of the function for the current variable values.
+
+
+   .. py:attribute:: derivativeOut
+
+      double (*source message field*)      Value of derivative of the function for the current variable values
+
+
+   .. py:attribute:: value
+
+      double (*value field*)      Result of the function evaluation with current variable values.
+
+
+   .. py:attribute:: derivative
+
+      double (*value field*)      Derivative of the function at given variable values.
+
+
+   .. py:attribute:: mode
+
+      unsigned int (*value field*)      Mode of operation: 
+       1: only the function value will be funculated
+       2: only the derivative will be funculated
+       3: both function value and derivative at current variable values will be funculated.
+
+
+   .. py:attribute:: expr
+
+      string (*value field*)      Mathematical expression defining the function. The underlying parser
+      is muParser. Hence the available functions and operators are (from
+      muParser docs):
+      
+      Functions
+      Name        args    explanation
+      sin         1       sine function
+      cos         1       cosine function
+      tan         1       tangens function
+      asin        1       arcus sine function
+      acos        1       arcus cosine function
+      atan        1       arcus tangens function
+      sinh        1       hyperbolic sine function
+      cosh        1       hyperbolic cosine
+      tanh        1       hyperbolic tangens function
+      asinh       1       hyperbolic arcus sine function
+      acosh       1       hyperbolic arcus tangens function
+      atanh       1       hyperbolic arcur tangens function
+      log2        1       logarithm to the base 2
+      log10       1       logarithm to the base 10
+      log         1       logarithm to the base 10
+      ln  1       logarithm to base e (2.71828...)
+      exp         1       e raised to the power of x
+      sqrt        1       square root of a value
+      sign        1       sign function -1 if x<0; 1 if x>0
+      rint        1       round to nearest integer
+      abs         1       absolute value
+      min         var.    min of all arguments
+      max         var.    max of all arguments
+      sum         var.    sum of all arguments
+      avg         var.    mean value of all arguments
+      
+      Operators
+      Op  meaning         prioroty
+      =   assignement     -1
+      &&  logical and     1
+      ||  logical or      2
+      <=  less or equal   4
+      >=  greater or equal        4
+      !=  not equal       4
+      ==  equal   4
+      >   greater than    4
+      <   less than       4
+      +   addition        5
+      -   subtraction     5
+      *   multiplication  6
+      /   division        6
+      ^   raise x to the power of y       7
+      
+      ?:  if then else operator   C++ style syntax
+      
+
+
+   .. py:attribute:: independent
+
+      unsigned int (*value field*)      Index of independent variable. Differentiation is done based on this. Defaults to the first assigned variable.
+
+
+   .. py:attribute:: c
+
+      string,double (*lookup field*)      Constants used in the function. These must be assigned before specifying the function expression.
 
 
 .. py:class:: GapJunction
@@ -5362,12 +5520,12 @@ MOOSE Classes
 
    .. py:attribute:: proc
 
-      void (*shared message field*)      Shared message for process and reinit
+      void (*shared message field*)      Shared message for process and reinit. These are used for all regular Ksolve calculations including interfacing with the diffusion calculations by a Dsolve.
 
 
    .. py:attribute:: init
 
-      void (*shared message field*)      Shared message for process and reinit
+      void (*shared message field*)      Shared message for initProc and initReinit. This is used when the system has cross-compartment reactions. 
 
 
    .. py:method:: setMethod
@@ -5548,25 +5706,6 @@ MOOSE Classes
    .. py:method:: reinit
 
       (*destination message field*)      Handles reinit call
-
-
-.. py:class:: Long
-
-   Variable for storing values.
-
-   .. py:method:: setValue
-
-      (*destination message field*)      Assigns field value.
-
-
-   .. py:method:: getValue
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
-
-
-   .. py:attribute:: value
-
-      long (*value field*)      Variable value
 
 
 .. py:class:: MMenz
@@ -8926,6 +9065,11 @@ MOOSE Classes
       (*destination message field*)      Build cross-reaction terms between current stoich and argument. This function scans the voxels at which there are junctions between different compartments, and orchestrates set up of interfaces between the Ksolves that implement the X reacs at those junctions. 
 
 
+   .. py:method:: filterXreacs
+
+      (*destination message field*)      Filter cross-reaction terms on current stoichThis function clears out absent rate terms that would otherwise try to compute cross reactions where the junctions are not present. 
+
+
    .. py:attribute:: path
 
       string (*value field*)      Wildcard path for reaction system handled by Stoich
@@ -9583,25 +9727,6 @@ MOOSE Classes
       double (*value field*)      Current state of the time table.
 
 
-.. py:class:: Unsigned
-
-   Variable for storing values.
-
-   .. py:method:: setValue
-
-      (*destination message field*)      Assigns field value.
-
-
-   .. py:method:: getValue
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
-
-
-   .. py:attribute:: value
-
-      unsigned long (*value field*)      Variable value
-
-
 .. py:class:: VClamp
 
    Voltage clamp object for holding neuronal compartments at a specific voltage. This implementation uses a builtin RC circuit to filter the
@@ -9767,6 +9892,30 @@ MOOSE Classes
    .. py:attribute:: gain
 
       double (*value field*)      Proportional gain of the PID controller.
+
+
+.. py:class:: Variable
+
+   Variable for storing double values. This is used in Function class.
+
+   .. py:method:: setValue
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getValue
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: setVar
+
+      (*destination message field*)      Handles incoming variable value.
+
+
+   .. py:attribute:: value
+
+      double (*value field*)      Variable value
 
 
 .. py:class:: VectorTable
