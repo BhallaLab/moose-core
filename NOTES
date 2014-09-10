@@ -5016,5 +5016,6 @@ in opposite directions, simultaneously. Done.
 
 Subha has reported a bug in Clock.cpp, causing assertion errors when 
 dt is not a clean multiple of the baseDt. Confirmed. Fixed.
+Fixed a problem arising from this fix.
 
 =============================================================================
