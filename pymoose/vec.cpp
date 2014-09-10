@@ -199,7 +199,7 @@ extern "C" {
                  "\n    "
                  "\n    Examples"
                  "\n    ---------"
-                 "\n        >>> iaf = moose.vec('/iaf', (10), 'IntFire')"
+                 "\n        >>> iaf = moose.vec('/iaf', n=10, dtype='IntFire')"
                  "\n        >>> iaf.Vm = range(10)"
                  "\n        >>> print iaf[5].Vm"
                  "\n        5.0"
