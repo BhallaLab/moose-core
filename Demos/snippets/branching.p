@@ -19,10 +19,10 @@ dend1    soma    0      20      0       4
 dend11   dend1  -10     10      0       3
 dend12   dend1   10     10      0       3
 
-dend111  dend11 -10     0       0       2
-dend112  dend11   0     10      0       2
-dend121  dend12   0     10      0       2
-dend122  dend12  10     0       0       2
+dend111  dend11 -10     0       0       2.12
+dend112  dend11   0     10      0       2.12
+dend121  dend12   0     10      0       2.12
+dend122  dend12  10     0       0       2.12
 
 dend1111 dend111 -5    -5       0       1.5
 dend1112 dend111 -5     5       0       1.5
