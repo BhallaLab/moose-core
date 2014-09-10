@@ -47,6 +47,15 @@ const Cinfo* ChemCompt::initCinfo()
 			&ChemCompt::getVoxelVolume
 		);
 
+		static ReadOnlyValueFinfo< ChemCompt, vector< double > > 
+				voxelMidpoint(
+			"voxelMidpoint",
+			"Vector of midpoint coordinates of each of the voxels. The "
+			"size of this vector is 3N, where N is the number of voxels. "
+			"The first N entries are for x, next N for y, last N are z. ",
+			&ChemCompt::getVoxelMidpoint
+		);
+
 		static ReadOnlyLookupElementValueFinfo< 
 				ChemCompt, unsigned int, double > 
 			oneVoxelVolume(
@@ -133,6 +142,7 @@ const Cinfo* ChemCompt::initCinfo()
 	static Finfo* chemMeshFinfos[] = {
 		&volume,			// Value
 		&voxelVolume,		// ReadOnlyLookupValue
+		&voxelMidpoint,		// ReadOnlyLookupValue
 		&oneVoxelVolume,	// ReadOnlyLookupValue
 		&numDimensions,	// ReadOnlyValue
 		&stencilRate,	// ReadOnlyLookupValue
@@ -288,6 +298,11 @@ unsigned int ChemCompt::setChildConcs( const Eref& e,
 vector< double > ChemCompt::getVoxelVolume() const
 {
 	return this->vGetVoxelVolume();
+}
+
+vector< double > ChemCompt::getVoxelMidpoint() const
+{
+	return this->vGetVoxelMidpoint();
 }
 
 double ChemCompt::getOneVoxelVolume( const Eref& e, unsigned int dataIndex ) const

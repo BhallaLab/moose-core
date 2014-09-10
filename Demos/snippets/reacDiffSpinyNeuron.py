@@ -106,54 +106,6 @@ def makeTab( plotname, molpath ):
     moose.connect( tab, 'requestOut', moose.element( molpath ), 'getConc' );
 
 
-def main():
-    """
-    This example illustrates how to define a kinetic model embedded in
-    the branching 1-dimensional geometry of a neuron. The model 
-    oscillates in space and time due to a Turing-like reaction-diffusion
-    mechanism present in all compartments. For the sake of this demo,
-    the initial conditions are set up slightly different on the PSD
-    compartments, so as to break the symmetry and initiate oscillations
-    in the spines.
-    This example uses an external electrical model file with basal 
-    dendrite and three branches on
-    the apical dendrite. One of those branches has a dozen or so spines.
-    In this example we build an identical model in each compartment, using
-    the makeChemModel function. One could readily define a system with
-    distinct reactions in each compartment.
-    The model is set up to run using the Ksolve for integration and the
-    Dsolve for handling diffusion.
-    The display has four parts:
-
-        a. animated line plot of concentration against main compartment#. 
-        b. animated line plot of concentration against spine compartment#. 
-        c. animated line plot of concentration against psd compartment#. 
-        d. time-series plot that appears after the simulation has 
-           ended. The plot is for the last (rightmost) compartment.
-
-    """
-    chemdt = 0.1 # Tested various dts, this is reasonable.
-    diffdt = 0.01
-    plotdt = 1
-    animationdt = 5
-    runtime = 800
-
-    makeModel()
-    plotlist = makeDisplay()
-
-    # Schedule the whole lot
-    for i in range( 11, 17 ):
-        moose.setClock( i, chemdt ) # for the chem objects
-    moose.setClock( 10, diffdt ) # for the diffusion
-    moose.setClock( 18, plotdt ) # for the output tables.
-    moose.reinit()
-    for i in range( 0, runtime, animationdt ):
-        moose.start( animationdt )
-        plotlist[11].set_text( "time = %d" % i )
-        updateDisplay( plotlist )
-
-    finalizeDisplay( plotlist, plotdt )
-
 def makeDisplay():
         plt.ion()
         fig = plt.figure( figsize=(10,12) )
@@ -229,9 +181,8 @@ def finalizeDisplay( plotlist, cPlotDt ):
 
 def makeChemModel( compt ):
     """
-    This example illustrates how to set up a oscillatory Turing pattern 
-    in 1-D using reaction diffusion calculations.
-    Reaction system is::
+    This function setus up a simple oscillatory chemical system within
+    the script. The reaction system is::
 
         s ---a---> a  // s goes to a, catalyzed by a.
         s ---a---> b  // s goes to b, catalyzed by a.
@@ -241,10 +192,6 @@ def makeChemModel( compt ):
     in sum, **a** has a positive feedback onto itself and also forms **b**.
     **b** has a negative feedback onto **a**.
     Finally, the diffusion constant for **a** is 1/10 that of **b**.
-
-    This chemical system is present in a 1-dimensional (cylindrical) 
-    compartment. The entire reaction-diffusion system is set up 
-    within the script.
     """
     # create container for model
     diffConst = 10e-12 # m^2/sec
@@ -291,6 +238,54 @@ def makeChemModel( compt ):
     a.diffConst = diffConst/10
     b.diffConst = diffConst
     s.diffConst = 0
+
+def main():
+    """
+    This example illustrates how to define a kinetic model embedded in
+    the branching pseudo-1-dimensional geometry of a neuron. The model 
+    oscillates in space and time due to a Turing-like reaction-diffusion
+    mechanism present in all compartments. For the sake of this demo,
+    the initial conditions are set up slightly different on the PSD
+    compartments, so as to break the symmetry and initiate oscillations
+    in the spines.
+    This example uses an external electrical model file with basal 
+    dendrite and three branches on
+    the apical dendrite. One of those branches has a dozen or so spines.
+    In this example we build an identical model in each compartment, using
+    the makeChemModel function. One could readily define a system with
+    distinct reactions in each compartment.
+    The model is set up to run using the Ksolve for integration and the
+    Dsolve for handling diffusion.
+    The display has four parts:
+
+        a. animated line plot of concentration against main compartment#. 
+        b. animated line plot of concentration against spine compartment#. 
+        c. animated line plot of concentration against psd compartment#. 
+        d. time-series plot that appears after the simulation has 
+           ended. The plot is for the last (rightmost) compartment.
+
+    """
+    chemdt = 0.1 # Tested various dts, this is reasonable.
+    diffdt = 0.01
+    plotdt = 1
+    animationdt = 5
+    runtime = 800
+
+    makeModel()
+    plotlist = makeDisplay()
+
+    # Schedule the whole lot
+    for i in range( 11, 17 ):
+        moose.setClock( i, chemdt ) # for the chem objects
+    moose.setClock( 10, diffdt ) # for the diffusion
+    moose.setClock( 18, plotdt ) # for the output tables.
+    moose.reinit()
+    for i in range( 0, runtime, animationdt ):
+        moose.start( animationdt )
+        plotlist[11].set_text( "time = %d" % i )
+        updateDisplay( plotlist )
+
+    finalizeDisplay( plotlist, plotdt )
 
 # Run the 'main' if this script is executed standalone.
 if __name__ == '__main__':

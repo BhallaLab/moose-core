@@ -659,6 +659,24 @@ const vector< double >& CylMesh::vGetVoxelVolume() const
 	return vol;
 }
 
+const vector< double >& CylMesh::vGetVoxelMidpoint() const
+{
+	static vector< double > midpoint( numEntries_ * 3, 0.0 );
+	midpoint.resize( numEntries_ * 3 );
+	double dx = ( x1_ - x0_ ) / numEntries_;
+	double dy = ( y1_ - y0_ ) / numEntries_;
+	double dz = ( z1_ - z0_ ) / numEntries_;
+	vector< double >::iterator j = midpoint.begin();
+	for ( unsigned int i = 0; i < numEntries_; ++i )
+		*j++ = x0_ + dx * i;
+	for ( unsigned int i = 0; i < numEntries_; ++i )
+		*j++ = y0_ + dy * i;
+	for ( unsigned int i = 0; i < numEntries_; ++i )
+		*j++ = z0_ + dz * i;
+
+	return midpoint;
+}
+
 const vector< double >& CylMesh::getVoxelArea() const
 {
 	static vector< double > area;

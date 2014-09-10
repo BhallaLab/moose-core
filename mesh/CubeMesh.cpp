@@ -901,6 +901,23 @@ const vector< double >& CubeMesh::vGetVoxelVolume() const
 	return vol;
 }
 
+const vector< double >& CubeMesh::vGetVoxelMidpoint() const
+{
+	static vector< double > midpoint;
+	midpoint.resize( m2s_.size() * 3 );
+	for ( unsigned int i = 0; i < m2s_.size(); ++i ) // x coords. Lowest.
+		midpoint[i] = x0_ + ( 0.5 + (m2s_[i] % nx_ ) ) * dx_;
+	for ( unsigned int i = 0; i < m2s_.size(); ++i ) { // y coords. Middle.
+		unsigned int k = i + m2s_.size();
+		midpoint[k] = y0_ + ( 0.5 + ( (m2s_[i] / nx_) % ny_ ) ) * dy_;
+	}
+	for ( unsigned int i = 0; i < m2s_.size(); ++i ) { // z coords. Top.
+		unsigned int k = i + m2s_.size() * 2;
+		midpoint[k] = z0_ + ( 0.5 + ( m2s_[i] / ( nx_ * ny_ ) ) ) * dz_;
+	}
+	return midpoint;
+}
+
 const vector< double >& CubeMesh::getVoxelArea() const
 {
 	static vector< double > area;
