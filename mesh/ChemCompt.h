@@ -88,6 +88,11 @@ class ChemCompt
 		/// Virtual func so that derived classes can pass voxel volume back.
 		virtual const vector< double >& vGetVoxelVolume() const = 0;
 
+		/// Returns vector of all voxel midpoints in compartment.
+		vector< double > getVoxelMidpoint() const;
+		/// Virtual func so that derived classes can return voxel midpoint
+		virtual const vector< double >& vGetVoxelMidpoint() const = 0;
+
 		//////////////////////////////////////////////////////////////////
 		// Dest Finfo
 		//////////////////////////////////////////////////////////////////

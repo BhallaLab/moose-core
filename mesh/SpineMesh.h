@@ -157,6 +157,7 @@ class SpineMesh: public MeshCompt
 						double& x, double& y, double& z ) const;
 		
 		const vector< double >& vGetVoxelVolume() const;
+		const vector< double >& vGetVoxelMidpoint() const;
 		const vector< double >& getVoxelArea() const;
 		const vector< double >& getVoxelLength() const;
 		//////////////////////////////////////////////////////////////////

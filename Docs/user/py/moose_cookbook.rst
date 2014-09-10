@@ -240,11 +240,30 @@ Reaction-diffusion + transport in a tapering cylinder
 .. automodule:: cylinderDiffusion
    :members:
 
-Reaction-diffusion in a neuron
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. automodule:: neuroDiffusion
-   :members:
+Reaction-diffusion in neurons
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Reaction-diffusion systems can easily be embedded into neuronal geometries.
+MOOSE does so by treating each neuron as a pseudo 1-dimensional object. 
+This means that diffusion only happens along the axis of dendritic 
+segments, not radially from inside to outside a dendrite, nor tangentially 
+around the dendrite circumference.
+Here we illustrate two cases. The simple case treats the entire neuron 
+as a single, chemically equivalent reaction-diffusion system in a binary
+branching neuronal tree. The more complex example shows how to set up
+three chemically distinct kinds of subdivisions within the neuron:
+the dendritic tree, the dendritic spine heads, and the postsynaptic 
+densities. In both examples we embed a simple Turing-like spatial oscillator
+in every compartment of the model neurons, so as to see nice oscillations
+and animations. The first example has a particularly striking pseudo-3D
+rendition of the neuron and the molecular spatial oscillations within it.
 
+.. figure:: images/reacDiffBranchingNeuron.png
+   :alt: Pseudo-3-D rendition of branching neuron and the concs in it.
+
+.. automodule:: reacDiffBranchingNeuron
+   :members:
+.. automodule:: reacDiffSpinyNeuron
+   :members:
 
 A Turing model
 ^^^^^^^^^^^^^^
