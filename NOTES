@@ -4992,3 +4992,26 @@ From FastMatrixElim.cpp:400, the motor equations are:
 =============================================================================
 9 Sep.
 Making a display of a neuron to watch motor transport on it.
+This reveals errors.
+Further tests show that the errors happen only when there is branching.
+It is OK with a tapering geometry without branches.
+
+Tracked it (I think). Line 592 in FastMatrixElim.cpp shows that we are adding
+all the mols to every twig. Need instead to get the total XA downstream,
+and then weight the amount going to each twig by its XA.
+
+Fixed.
+This works very accurately for motor transport from soma toward dends.
+There is a numerical error though going the other way:
+
+mass consv =  86000366.962 86784536.0959
+It is not a dt problem, checked with much smaller diffdt.
+It is not that the terminal voxels have some bits left over. Checked with a
+printout of final concs.
+
+Fixed it: it was a problem with indexing.
+
+I'll update the transport demo to show the diffusions of a and b 
+in opposite directions, simultaneously.
+
+=============================================================================

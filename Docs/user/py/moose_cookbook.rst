@@ -240,6 +240,15 @@ Reaction-diffusion + transport in a tapering cylinder
 .. automodule:: cylinderDiffusion
    :members:
 
+A Turing model
+^^^^^^^^^^^^^^
+.. automodule:: TuringOneDim
+   :members:
+
+A spatial bistable model
+^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: propagationBis
+
 Reaction-diffusion in neurons
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Reaction-diffusion systems can easily be embedded into neuronal geometries.
@@ -264,15 +273,6 @@ rendition of the neuron and the molecular spatial oscillations within it.
    :members:
 .. automodule:: reacDiffSpinyNeuron
    :members:
-
-A Turing model
-^^^^^^^^^^^^^^
-.. automodule:: TuringOneDim
-   :members:
-
-A spatial bistable model
-^^^^^^^^^^^^^^^^^^^^^^^^
-.. automodule:: propagationBis
 
 Single cell models
 ------------------
