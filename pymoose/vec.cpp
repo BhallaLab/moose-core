@@ -149,29 +149,39 @@ extern "C" {
     ///////////////////////////////////////////////
 
     PyDoc_STRVAR(moose_Id_doc,
-                 "An object uniquely identifying a moose element. moose elements are"
-                 "\narray-like objects which can have one or more single-objects within"
-                 "\nthem. vec can be traversed like a Python sequence and is item is an"
-                 "\nelement identifying single-objects contained in the array element."
+                 "An object uniquely identifying a moose array-element.\n"
                  "\n"
-                 "\nField access to ematrices are vectorized. For example, vec.name returns a"
-                 "\ntuple containing the names of all the single-elements in this"
-                 "\nvec. There are a few special fields that are unique for vec and are not"
-                 "\nvectorized. These are `path`, `value`, `shape` and `className`."
-                 "\nThere are two ways an vec can be initialized, (1) create a new array"
-                 "\nelement or (2) create a reference to an existing object."
+                 "array-elements are narray-like objects which can have one or more"
+                 " single-elements within them."
+                 " vec can be traversed like a Python sequence and is item is an"
+                 " element identifying single-objects contained in the array element.\n"
                  "\n"
+                 "you can create multiple references to the same MOOSE object in Python,"
+                 " but as long as they have the same path/id value, they all point to"
+                 " the same entity in MOOSE.\n"
+                 "\n"
+                 "Field access to ematrices are vectorized. For example, vec.name returns a"
+                 " tuple containing the names of all the single-elements in this"
+                 " vec. There are a few special fields that are unique for vec and are not"
+                 " vectorized. These are `path`, `value`, `shape` and `className`."
+                 " There are two ways an vec can be initialized, (1) create a new array"
+                 " element or (2) create a reference to an existing object.\n"
                  "\n"
                  "\n    vec(self, path=path, n=size, g=isGlobal, dtype=className)"
                  "\n    "
+                 "\n    "
                  "\n    Parameters"
                  "\n    ----------"                 
-                 "\n    path : str "
+                 "\n    path : str/vec/int "
                  "\n        Path of an existing array element or for creating a new one. This has"
                  "\n        the same format as unix file path: /{element1}/{element2} ... If there"
                  "\n        is no object with the specified path, moose attempts to create a new"
                  "\n        array element. For that to succeed everything until the last `/`"
                  "\n        character must exist or an error is raised"
+                 "\n"
+                 "\n        Alternatively, path can be vec or integer value of the id of an"
+                 "\n        existing vec object. The new object will be another reference to"
+                 "\n        the existing object."
                  "\n    "
                  "\n    n : positive int"
                  "\n        This is a positive integers specifying the size of the array element"
@@ -187,16 +197,14 @@ extern "C" {
                  "\n        The vector will be of this moose-class."
                  "\n    "
                  "\n    "
-                 "\n    vec(self, id)"
-                 "\n    "
-                 "\n        Create a reference to an existing array object."
-                 "\n    "
-                 "\n    Parameters"
-                 "\n    ----------"
-                 "\n    id : vec/int"
-                 "\n        vec of an existing array object. The new object will be another"
-                 "\n        reference to this object."
-                 "\n    "
+                 "\n    Examples"
+                 "\n    ---------"
+                 "\n        >>> iaf = moose.vec('/iaf', (10), 'IntFire')"
+                 "\n        >>> iaf.Vm = range(10)"
+                 "\n        >>> print iaf[5].Vm"
+                 "\n        5.0"
+                 "\n        >>> print iaf.Vm"
+                 "\n        array([ 0.,  1.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9.])"
                  );
     
     PyTypeObject IdType = { 
@@ -309,7 +317,7 @@ extern "C" {
             parent_path = "/";
         }
         ObjId parent_id(parent_path);
-        if (parent_id.bad() ) {
+        if (parent_id.bad() ) {            
             string message = "Parent element does not exist: ";
             message += parent_path;
             PyErr_SetString(PyExc_ValueError, message.c_str());
@@ -320,7 +328,11 @@ extern "C" {
                 string(name),
                 numData, 
                 static_cast< NodePolicy >( isGlobal ) 
-                );
+                                     );
+        if (nId == Id() && path != "/" && path != "/root"){
+            string message = "no such moose class : " + type;
+            PyErr_SetString(PyExc_TypeError, message.c_str());
+        }
 
 #ifdef ENABLE_LOGGER
         logger.updateGlobalCount(type);

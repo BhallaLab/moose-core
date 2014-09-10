@@ -178,50 +178,45 @@ extern "C" {
         PyTypeObject * mytype = Py_TYPE(self);
         string mytypename(mytype->tp_name);
         
-        // First try to parse the arguments as (path, dims, class)
+        // First try to parse the arguments as (path, n, g, dtype)
         bool parse_success = false;
-        if (kwargs == NULL){
-            if (PyArg_ParseTuple(args,
-                                 "s|IIs:moose_ObjId_init_from_path",
-                                 &path,
-                                 &numData,
-                                 &isGlobal)){
-                parse_success = true;
-            }
-        } else if (PyArg_ParseTupleAndKeywords(args,
-                                               kwargs,
-                                               "s|IIs:moose_ObjId_init_from_path",
-                                               kwlist,
-                                               &path,
-                                               &numData,
-                                               &isGlobal)){
+        if (PyArg_ParseTupleAndKeywords(args,
+                                        kwargs,
+                                        "s|IIs:moose_ObjId_init_from_path",
+                                        kwlist,
+                                        &path,
+                                        &numData,
+                                        &isGlobal,
+                                        &type)){
             parse_success = true;
         }
-        PyErr_Clear();
+        // we need to clear the parse error so that the callee can try
+        // other alternative: moose_ObjId_init_from_id
+        PyErr_Clear(); 
         if (!parse_success){
             return -2;
         }
         ostringstream err;
         // First see if there is an existing object with at path
         instance->oid_ = ObjId(path);
-        PyTypeObject * basetype = NULL;
+        PyTypeObject * basetype = getBaseClass(self);
         string basetype_str;
         if (type == NULL){
-            basetype = getBaseClass(self);
+            if (basetype == NULL){
+                PyErr_SetString(PyExc_TypeError, "Unknown class. Need a valid MOOSE class or subclass thereof.");
+                Py_DECREF(self);
+                return -1;
+            }
             basetype_str = string(basetype->tp_name).substr(6); // remove `moose.` prefix from type name
         } else {
-            basetype_str = string(type);
+            basetype_str = string(type);            
         }
-        if (basetype == NULL){
-            PyErr_SetString(PyExc_TypeError, "Unknown class. Need a valid MOOSE class or subclass thereof.");
-            Py_DECREF(self);
-            return -1;
-        }
+        // If oid_ is bad, it can be either a nonexistent path or the root.
         if (instance->oid_.bad()){
             // is this the root element?
             string p(path);
             if ((p == "/") || (p == "/root")){
-                if (PyType_IsSubtype(mytype, basetype)){
+                if ((basetype == NULL) || PyType_IsSubtype(mytype, basetype)){
                     return 0;
                 }
                 err << "cannot convert "
@@ -234,52 +229,37 @@ extern "C" {
             }
             // no - so we need to create a new element
         } else { // this is a non-root existing element
-            if (PyType_IsSubtype(mytype, basetype)){
+            // If the current class is a subclass of some predefined
+            // moose class, do nothing.
+            if ((basetype != NULL) && PyType_IsSubtype(mytype, basetype)){
                 return 0;
             }
+            // element exists at this path, but it does not inherit from any moose class.
+            // throw an error
             err << "cannot convert "
                 << Field<string>::get(instance->oid_, "className")
                 << " to "
-                << mytypename
+                << basetype_str
                 << ". To get the existing object use `moose.element(obj)` instead.";
             PyErr_SetString(PyExc_TypeError, err.str().c_str());
             return -1;
         }
-            
-        
+        // try to create new vec
         Id new_id = create_Id_from_path(path, numData, isGlobal, basetype_str);
+        // vec failed. throw error
+        if (new_id == Id() && PyErr_Occurred()){
+            // Py_XDECREF(self);
+            return -1;
+        }
 
 #ifndef QUIET_MODE
         cout << "Created " << new_id << " path=" << path << " numData=" << numData << " isGlobal=" << isGlobal << " baseType=" << basetype_str << endl;
 #else
         cout << "+";
 #endif
-        if (new_id == Id() && PyErr_Occurred()){
-            // Py_XDECREF(self);
-            return -1;
-        }
         instance->oid_ = ObjId(new_id);
         return 0;
     }
-        
-    PyDoc_STRVAR(moose_ObjId_init_documentation,
-                 "melement(path, dims, dtype) or\n"
-                 "melement(id, dataIndex, fieldIndex)\n"
-                 "    Create moose element\n"
-                 "\n"
-                 "Parameters\n"
-                 "----------\n"
-                 "path : string\n"
-                 "    Target element path.\n"
-                 "dims : tuple or int\n"
-                 "    dimensions along each axis (can be an integer for 1D objects). Default: (1,)\n"
-                 "\n"
-                 "dtype : string\n"
-                 "    the MOOSE class name to be created.\n"
-                 "\n"
-                 "id : vec or integer\n"
-                 "    id of an existing element.\n"
-                 "\n");
         
     int moose_ObjId_init(PyObject * self, PyObject * args,
                          PyObject * kwargs)
@@ -1937,33 +1917,60 @@ PyObject* setDestFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type1
     // Type defs for PyObject of ObjId
     ///////////////////////////////////////////////
     PyDoc_STRVAR(moose_ObjId_documentation,
-                 "Individual moose element contained in an array-type object\n"
-                 "(vec). Each element has a unique path, possibly with its index in\n"
-                 "the vec. These are identified by three components: id_ and\n"
-                 "dindex. id_ is the Id of the containing vec, it has a unique\n"
-                 "numerical value (field `value`). `dindex` is the index of the current\n"
-                 "item in the containing vec. `dindex` is 0 for single elements."
+                 "Individual moose element contained in an array-type object"
+                 " (vec).\n"
                  "\n"
+                 "Each element has a unique path, possibly with its index in"
+                 " the vec. These are identified by three components: vec, dndex and"
+                 " findex. vec is the containing vec, which is identified by a unique"
+                 " number (field `value`). `dindex` is the index of the current"
+                 " item in the containing vec. `dindex` is 0 for single elements."
+                 " findex is field index, specifying the index of elements which exist"
+                 " as fields of another moose element.\n"
                  "\n"
-                 "    melement(path, dims, dtype) or\n"
-                 "    melement(id, dataIndex, fieldIndex)\n"
-                 "    Initialize moose object\n"
+                 "Notes\n"
+                 "-----\n"
+                 "Users need not create melement directly. Instead use the named moose"
+                 " class for creating new elements. To get a reference to an existing"
+                 " element, use the :ref:`moose.element` function.\n"
                  "\n"
-                 "Parameters\n"
+                 "Paramaters\n"
                  "----------\n"
                  "path : str\n"
-                 "    Target element path.\n"
+                 "    path of the element to be created.\n"
                  "\n"
-                 "dims : tuple or int\n"
-                 "    dimensions along each axis (can be"
-                 "    an integer for 1D objects). Default: (1,)\n"
+                 "n : positive int, optional\n"
+                 "    defaults to 1. If greater, then a vec of that size is created and\n"
+                 "    this element is a reference to the first entry of the vec.\n"
                  "\n"
-                 "dtype : string\n"
-                 "    the MOOSE class name to be created.\n"
+                 "g : int, optional\n"
+                 "    if 1, this is a global element, else if 0 (default), the element\n"
+                 "    is local to the current node.\n"
                  "\n"
-                 "id : vec or integer\n"
-                 "    id of an existing element.\n"
+                 "dtype : str\n"
+                 "    name of the class of the element. If creating any concrete\n"
+                 "    subclass, this is automatically taken from the class name and\n"
+                 "    should not be specified explicitly.\n"
                  "\n"
+                 "Attributes\n"
+                 "----------\n"
+                 "vec : moose.vec\n"
+                 "    The vec containing this element\n"
+                 "\n"
+                 "dindex : int\n"
+                 "    index of this element in the container vec\n"
+                 "\n"
+                 "findex: int\n"
+                 "    if this is a tertiary object, i.e. acts as a field in another\n"
+                 "    element (like synapse[0] in IntFire[1]), then the index of\n"
+                 "    this field in the containing element.\n"
+                 "\n"
+                 "Examples\n"
+                 "--------\n"
+                 "\n"
+                 ">>> a = Neutral('alpha') # Creates element named `alpha` under current working element\n"
+                 ">>> b = Neutral('alpha/beta') # Creates the element named `beta` under `alpha`\n"
+                 ">>> c = moose.melement(b)"
                  );
     PyTypeObject ObjIdType = { 
         PyVarObject_HEAD_INIT(NULL, 0)            /* tp_head */
