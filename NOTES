@@ -5019,3 +5019,15 @@ dt is not a clean multiple of the baseDt. Confirmed. Fixed.
 Fixed a problem arising from this fix.
 
 =============================================================================
+11 Sep
+Trying to build a decent snippet for multiscale models. I have one doing
+a rather boring thing, will need to modify. The exercise turns out to
+be nastier than expected. The Ca-dependent channels don't seem to do much.
+
+Ran into puzzling errors on the HSolve. Turns out that the ZombieHHChannel
+isn't done properly, and this is bound to cause issues if there is messaging
+to the channel. Need to fix.
+
+Managed to implement a decent single-compt multiscale model, but the
+HHChannel issues will need to be fixed soon.
+
