@@ -1,19 +1,4 @@
 """
-PyMOOSE : moose as a python module
-==================================
-
-This document describes classes and functions specific to the MOOSE
-Python module. This is an API reference.
-
-* If you are looking for basic tutorials for getting started with 
-  moose, then check :doc:`moose_quickstart`.
-
-* If you want recipes for particular tasks, check out
-  :doc:`moose_cookbook`.
-
-* If you want the reference for specific moose classes, then go to
-  :doc:`moose_classes`.
-
 How to use the documentation
 ----------------------------
 
@@ -32,6 +17,9 @@ via the module function ``doc``::
 To get documentation about a particular field::
 
 >>> moose.doc('Neutral.childMsg')
+
+Builtin functions and classes in moose module (Python only)
+-----------------------------------------------------------
 
 """
 
