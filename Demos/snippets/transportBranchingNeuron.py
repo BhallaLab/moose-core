@@ -36,7 +36,6 @@ def makeModel():
     model = moose.Neutral( '/model' )
     # Make neuronal model. It has no channels, just for geometry
     cell = moose.loadModel( './branching.p', '/model/cell', 'Neutral' )
-    #cell = moose.loadModel( './nonbranch.p', '/model/cell', 'Neutral' )
     # We don't want the cell to do any calculations. Disable everything.
     for i in moose.wildcardFind( '/model/cell/##' ):
         i.tick = -1
