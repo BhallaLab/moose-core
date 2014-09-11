@@ -2831,7 +2831,7 @@ extern "C" {
             exit(-1);
         }        
         Py_INCREF(&moose_LookupField);
-        PyModule_AddObject(moose_module, "LookupField", (PyObject*)&moose_ElementField);
+        PyModule_AddObject(moose_module, "LookupField", (PyObject*)&moose_LookupField);
 
         if (PyType_Ready(&moose_ElementField) < 0){
             PyErr_Print();
