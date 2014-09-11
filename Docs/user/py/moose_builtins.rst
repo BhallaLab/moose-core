@@ -1,8 +1,8 @@
 .. Documentation for all MOOSE builtin-functions accessible in python
 .. As visible in the Python module
 .. Created by Subhasis Ray, NCBS, Tue Jul  1 14:41:10 IST 2014
-PyMOOSE : moose as a python module
-==================================
+MOOSE builtins
+==============
 
 This document describes classes and functions specific to the MOOSE
 Python module. This is an API reference.
