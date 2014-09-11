@@ -301,10 +301,10 @@ Regular and plastic synapses
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Providing random input to a cell
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-A recurrent integrate-and-fire network
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-A recurrent integrate-and-fire network with plastiicty
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Recurrent integrate-and-fire network
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Recurrent integrate-and-fire network with plastiicty
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 A feed-forward network with random input
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Using compartmental models in networks
@@ -312,8 +312,13 @@ Using compartmental models in networks
 
 Multiscale models
 -----------------
-A multiscale HH model with chemical feedback
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Single-compartment multiscale model
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: multiscaleOneCompt
+   :members:
+
+Multi-compartment multiscale model
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Graphics
 --------
