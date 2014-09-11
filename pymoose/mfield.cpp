@@ -372,10 +372,19 @@ extern "C" {
 
     PyDoc_STRVAR(moose_ElementField_path_documentation,
                  "Path of the field element.");
+    
+    PyDoc_STRVAR(moose_ElementField_name_documentation,
+                 "Name of the field element.");
+
+    PyDoc_STRVAR(moose_ElementField_owner_documentation,
+                 "Reference to owner element of the field element.");
+    
     PyDoc_STRVAR(moose_ElementField_id_documentation,
                  "Id of the field element.");
+
     PyDoc_STRVAR(moose_ElementField_dataId_documentation,
                  "dataIndex of the field element");
+
     /* These static defs are required for compiler complaining about string literals. */
     static char name[] = "name";
     static char numfield[] = "num";
@@ -403,12 +412,12 @@ extern "C" {
         {name,
          (getter)moose_ElementField_getName,
          NULL,
-         emptyString,
+         moose_ElementField_name_documentation,
          NULL},
         {owner,
          (getter)moose_ElementField_getOwner,
          NULL,
-         emptyString,
+         moose_ElementField_owner_documentation,
          NULL},
         {dataIndex,
          (getter)moose_ElementField_getDataId,
@@ -526,8 +535,6 @@ extern "C" {
         unsigned int num = Field<unsigned int>::get(self->myoid, "numField");
         return Py_ssize_t(num);
     }
-
-
 
     PyObject * moose_ElementField_getPath(_Field * self, void * closure)
     {
