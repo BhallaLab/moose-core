@@ -455,9 +455,9 @@ void ZombieHHChannel::zombify( Element* solver, Element* orig )
 
     dump("ZombieHHChannel::zombify() is not tested yet.", "WARN");
 
+	*/
     HSolve::deleteIncomingMessages(orig, "concen");
     HSolve::deleteIncomingMessages(orig, "Vm");
-	*/
 
     Eref oer( orig, 0 );
     Eref ser( solver, 0 );
