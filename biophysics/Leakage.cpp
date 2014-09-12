@@ -47,6 +47,7 @@
 
 #include "header.h"
 #include "ChanBase.h"
+#include "ChanCommon.h"
 #include "Leakage.h"
 
 const Cinfo* Leakage::initCinfo()

@@ -9,6 +9,7 @@
 
 #include "header.h"
 #include "ChanBase.h"
+#include "ChanCommon.h"
 #include "SynChan.h"
 
 const double& SynE() {
@@ -85,9 +86,14 @@ const Cinfo* SynChan::initCinfo()
 		"Name", "SynChan",
 		"Author", "Upinder S. Bhalla, 2007, 2014, NCBS",
 		"Description", "SynChan: Synaptic channel incorporating "
-			" weight and delay. Does not handle "
-			"activity-dependent modification, see HebbSynChan for that. "
-			"Very similiar to the old synchan from GENESIS.", 
+		" weight and delay. Does not handle actual arrival of synaptic "
+		" events, that is done by one of the derived classes of "
+		"SynHandlerBase.\n"
+		"In use, the SynChan sits on the compartment connected to it by "
+		"the **channel** message. One or more of the SynHandler "
+		"objects connects to the SynChan through the **activation** "
+		"message. The SynHandlers each manage multiple synapses, and "
+		"the handlers can be fixed weight or have a learning rule. "
 	};
 
         static Dinfo< SynChan > dinfo;
@@ -130,9 +136,9 @@ SynChan::~SynChan()
 // Field function definitions
 ///////////////////////////////////////////////////
 //
-void SynChan::innerSetGbar( double Gbar )
+void SynChan::vSetGbar( double Gbar )
 {
-	ChanBase::innerSetGbar( Gbar );
+	ChanCommon::vSetGbar( Gbar );
 	normalizeGbar();
 }
 
