@@ -45,6 +45,7 @@ class SimpleSynHandler: public SynHandlerBase
 	public: 
 		SimpleSynHandler();
 		~SimpleSynHandler();
+		SimpleSynHandler& operator=( const SimpleSynHandler& other );
 
 		////////////////////////////////////////////////////////////////
 		// Inherited virtual functions
