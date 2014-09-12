@@ -13,7 +13,7 @@
 
 //typedef double ( *PFDD )( double, double );
 
-class MgBlock: public ChanBase
+class MgBlock: public ChanCommon
 {
 	public:
 		MgBlock();

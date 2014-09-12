@@ -196,6 +196,10 @@ def create_spine_with_receptor( compt, cell, index, frac ):
     caPool.B = B
     moose.connect( gluR, 'IkOut', caPool, 'current', 'Single' )
 
+    synHandler = moose.SimpleSynHandler( head.path + '/gluR/handler' )
+    synHandler.synapse.num = 1
+    moose.connect( synHandler, 'activationOut', gluR, 'activation', 'Single' )
+
     return gluR
 
 def add_plot( objpath, field, plot ):
@@ -245,8 +249,8 @@ def make_spiny_compt():
     cell = moose.element( '/n' )
     for i in range( numSpines ):
         r = create_spine_with_receptor( compt, cell, i, i/float(numSpines) )
-        r.synapse.num = 1
-        syn = moose.element( r.path + '/synapse' )
+        #r.synapse.num = 1
+        syn = moose.element( r.path + '/handler/synapse' )
         moose.connect( synInput, 'spikeOut', syn, 'addSpike', 'Single' )
         syn.weight = 0.2
         syn.delay = i * 1.0e-4

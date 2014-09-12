@@ -12,6 +12,7 @@
 #include "../builtins/Interpol2D.h"
 #include "MarkovRateTable.h"
 #include "ChanBase.h"
+#include "ChanCommon.h"
 #include "MarkovChannel.h"
 #include <gsl/gsl_errno.h>
 
@@ -259,8 +260,8 @@ void MarkovChannel::process( const Eref& e, const ProcPtr p )
 	for( unsigned int i = 0; i < numOpenStates_; ++i )
 		g_ += Gbars_[i] * state_[i];			
 
-	ChanBase::setGk( g_ );
-	ChanBase::updateIk();
+	setGk( g_ );
+	updateIk();
 
 	ChanBase::process( e, p ); 
 }

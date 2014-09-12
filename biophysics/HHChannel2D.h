@@ -21,7 +21,7 @@
 // Ported to asyn13 on 2014-05-30 by Subhasis Ray
 
 typedef double ( *PFDD )( double, double );
-class HHChannel2D: public ChanBase
+class HHChannel2D: public ChanCommon
 {
 #ifdef DO_UNIT_TESTS
 	friend void testHHChannel2D();

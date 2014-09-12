@@ -10,7 +10,7 @@
 #ifndef _SynChan_h
 #define _SynChan_h
 
-class SynChan: public ChanBase
+class SynChan: public ChanCommon
 {
 	public:
 		SynChan();
@@ -30,7 +30,7 @@ class SynChan: public ChanBase
 		bool getNormalizeWeights() const;
 
 		// override virtual func from ChanBase
-		void innerSetGbar( double Gbar );
+		void vSetGbar( double Gbar );
 
 		/////////////////////////////////////////////////////////////////
 		// Utility function for any time Gbar changes

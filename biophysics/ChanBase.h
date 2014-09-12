@@ -1,15 +1,15 @@
-#ifndef _ChanBase_h
-#define _ChanBase_h
 /**********************************************************************
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment,
 ** also known as GENESIS 3 base code.
-**           copyright (C) 2003-2011 Upinder S. Bhalla. and NCBS
+**           copyright (C) 2003-2014 Upinder S. Bhalla. and NCBS
 ** It is made available under the terms of the
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 *********************************************************************
 */
+#ifndef _ChanBase_h
+#define _ChanBase_h
 
 /**
  * The ChanBase is the base class for all ion channel classes in MOOSE.
@@ -27,18 +27,21 @@ class ChanBase
 		/////////////////////////////////////////////////////////////
 
 		void setGbar( double Gbar );
-		virtual void innerSetGbar( double Gbar );
+		virtual void vSetGbar( double Gbar ) = 0;
 		double getGbar() const;
+		virtual double vGetGbar() const = 0;
 		void setEk( double Ek );
+		virtual void vSetEk( double Ek ) = 0;
 		double getEk() const;
-		// void setInstant( int Instant );
-		// int getInstant() const;
+		virtual double vGetEk() const = 0;
 		void setGk( double Gk );
+		virtual void vSetGk( double Gk ) = 0;
 		double getGk() const;
-		/// Ik is read-only for MOOSE, but we provide the set 
-		/// func for derived classes to update it.
+		virtual double vGetGk() const = 0;
 		void setIk( double Ic );
+		virtual void vSetIk( double Ik ) = 0;
 		double getIk() const;
+		virtual double vGetIk() const = 0;
 
 		/////////////////////////////////////////////////////////////
 		// Dest function definitions
@@ -48,6 +51,7 @@ class ChanBase
 		 * Assign the local Vm_ to the incoming Vm from the compartment
 		 */
 		void handleVm( double Vm );
+		virtual void vHandleVm( double Vm ) = 0;
 
 		/////////////////////////////////////////////////////////////
 		/**
@@ -57,32 +61,17 @@ class ChanBase
 		 */
 		void process( const Eref& e, const ProcPtr info );
 		void reinit( const Eref& e, const ProcPtr info );
+		virtual void vProcess( const Eref& e, const ProcPtr info ) = 0;
+		virtual void vReinit( const Eref& e, const ProcPtr info ) = 0;
 
-		/**
-		 * Utility function for a common computation using local variables
-		 */
-		void updateIk();
-
-		/// Utility function to access Vm
-		double getVm() const;
-
+		/////////////////////////////////////////////////////////////
+		static SrcFinfo1< double >* permeability();
+		static SrcFinfo2< double, double >* channelOut();
+		static SrcFinfo1< double >* IkOut();
+		/////////////////////////////////////////////////////////////
 		/// Specify the Class Info static variable for initialization.
 		static const Cinfo* initCinfo();
-
-	protected:
-		/// Vm_ is input variable from compartment, used for most rates
-		double Vm_;
-
 	private:
-		/// Channel maximal conductance
-		double Gbar_;
-		/// Reversal potential of channel
-		double Ek_;
-
-		/// Channel actual conductance depending on opening of gates.
-		double Gk_;
-		/// Channel current
-		double Ik_;
 };
 
 
