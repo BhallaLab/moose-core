@@ -428,7 +428,7 @@ double HHChannel2D::integrate( double state, double dt, double A, double B )
 
 void HHChannel2D::vProcess( const Eref& e, ProcPtr info )
 {
-	g_ += ChanBase::getGbar();
+	g_ += ChanBase::getGbar( e );
 	double A = 0;
 	double B = 0;
 	if ( Xpower_ > 0 ) {
@@ -460,7 +460,7 @@ void HHChannel2D::vProcess( const Eref& e, ProcPtr info )
 		g_ *= takeZpower_( Z_, Zpower_ );
 	}
 
-	ChanBase::setGk( g_ );
+	ChanBase::setGk( e, g_ );
 	updateIk();
 	// Gk_ = g_;
 	// Ik_ = ( Ek_ - Vm_ ) * g_;
@@ -476,7 +476,7 @@ void HHChannel2D::vProcess( const Eref& e, ProcPtr info )
   */
  void HHChannel2D::vReinit( const Eref& er, ProcPtr info )
  {
-     g_ = ChanBase::getGbar();
+     g_ = ChanBase::getGbar( er );
      Element* e = er.element();
 
      double A = 0.0;
@@ -517,7 +517,7 @@ void HHChannel2D::vProcess( const Eref& e, ProcPtr info )
          g_ *= takeZpower_( Z_, Zpower_ );
      }
 
-     ChanBase::setGk( g_ );
+     ChanBase::setGk( er, g_ );
      updateIk();
      // Gk_ = g_;
      // Ik_ = ( Ek_ - Vm_ ) * g_;

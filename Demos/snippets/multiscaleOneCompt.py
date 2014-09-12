@@ -130,12 +130,12 @@ def main():
     cPlotDt = 0.0025
 
     makeModel()
+
     moose.setClock( 8, ePlotDt )
     moose.setClock( 18, cPlotDt )
     for i in range( 10, 18 ):
         moose.setClock( i, chemDt )
     graphs = moose.Neutral( '/graphs' )
-    moose.le( '/model/chem/kinetics' )
     caplot = addPlot( '/model/elec/soma/Ca_conc', 'getCa', 'somaCa', 8 )
     vmplot = addPlot( '/model/elec/soma', 'getVm', 'somaVm', 8 )
     ikplot = addPlot( '/model/elec/soma/K_A', 'getIk', 'KAIk', 8 )
@@ -143,12 +143,9 @@ def main():
     addPlot( '/model/chem/kinetics/Ca', 'getConc', 'Ca', 18 )
     addPlot( '/model/chem/kinetics/CaM', 'getConc', 'CaM', 18 )
     addPlot( '/model/chem/kinetics/Ca_CaM_CaMKII', 'getConc', 'enz', 18 )
-    '''
     hsolve = moose.HSolve( '/model/elec/hsolve' )
     hsolve.dt = 50.0e-6
     hsolve.target = '/model/elec/soma'
-    moose.reinit()
-    '''
     moose.reinit()
     moose.element( '/model/elec/soma' ).inject = 0e-12
     moose.start( runtime )
