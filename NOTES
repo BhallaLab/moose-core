@@ -5039,4 +5039,11 @@ and most of the other channel classes. This is the first step in having
 a systematic channel inheritance framework to include the Zombie classes.
 
 Something is wrong about SynChans. They don't support synapses!
+Turns out the documentation was incorrect. SynChans need input from
+SynHandlers. Fixed docs.
+
+Tested out a couple of snippets. mgblock wasn't working. Did quite a bit
+of fixing on it and now it works. Uncovered and fixed a bug in the copying 
+of synapses.
+
 =============================================================================

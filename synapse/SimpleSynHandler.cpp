@@ -46,6 +46,20 @@ SimpleSynHandler::SimpleSynHandler()
 SimpleSynHandler::~SimpleSynHandler()
 { ; }
 
+SimpleSynHandler& SimpleSynHandler::operator=( const SimpleSynHandler& ssh)
+{
+	synapses_ = ssh.synapses_;
+	for ( vector< Synapse >::iterator 
+					i = synapses_.begin(); i != synapses_.end(); ++i )
+			i->setHandler( this );
+
+	// For no apparent reason, priority queues don't have a clear operation.
+	while( !events_.empty() )
+		events_.pop();
+
+	return *this;
+}
+
 void SimpleSynHandler::vSetNumSynapses( const unsigned int v )
 {
 	unsigned int prevSize = synapses_.size();
