@@ -357,3 +357,52 @@ PFDD HHChannelBase::selectPower( double power )
 	else
 		return powerN;
 }
+/////////////////////////////////////////////////////////////////////
+// Dummy instantiation, the zombie derivatives make the real function
+void HHChannelBase::vSetSolver( const Eref& e, Id hsolve )
+{;}
+
+void HHChannelBase::zombify( Element* orig, const Cinfo* zClass, Id hsolve )
+{
+	if ( orig->cinfo() == zClass )
+		return;
+	unsigned int start = orig->localDataStart();
+	unsigned int num = orig->numLocalData();
+	if ( num == 0 )
+		return;
+	// Parameters are Gbar, Ek, Xpower, Ypower, Zpower, useConcentration
+	// We also want to haul the original gates over, this is done earlier
+	// in the HSolve building process. So just six terms.
+	vector< double > chandata( num * 6, 0.0 );
+	vector< double >::iterator j = chandata.begin();
+
+	for ( unsigned int i = 0; i < num; ++i ) {
+		Eref er( orig, i + start );
+		const HHChannelBase* hb = 
+			reinterpret_cast< const HHChannelBase* >( er.data() );
+		*j = hb->vGetGbar( er );
+		*(j+1) = hb->vGetEk( er);
+		*(j+2) = hb->getXpower( er );
+		*(j+3) = hb->getYpower( er );
+		*(j+4) = hb->getZpower( er );
+		*(j+5) = hb->getUseConcentration( er );
+		j+= 6;
+	}
+	orig->zombieSwap( zClass );
+	j = chandata.begin();
+	for ( unsigned int i = 0; i < num; ++i ) {
+		Eref er( orig, i + start );
+		HHChannelBase* hb = reinterpret_cast< HHChannelBase* >( er.data() );
+		hb->vSetSolver( er, hsolve );
+		hb->vSetGbar( er, *j );
+		hb->vSetEk( er, *(j+1) );
+		hb->vSetXpower( er, *(j+2) );
+		hb->vSetYpower( er, *(j+3) );
+		hb->vSetZpower( er, *(j+4) );
+		// hb->vSetUseConcentration( er, *(j+5) > 0.5 );
+		// Disable this assignment because the Solver already reads the 
+		// value, and it triggers an error msg.
+		j+= 6;
+	}
+}
+

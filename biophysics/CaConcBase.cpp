@@ -300,30 +300,34 @@ void CaConcBase::zombify( Element* orig, const Cinfo* zClass,
 		return;
 	vector< double > data( num * 7 );
 
+	unsigned int j = 0;
 	for ( unsigned int i = 0; i < num; ++i ) {
 		Eref er( orig, i + start );
 		const CaConcBase* cb = 
 			reinterpret_cast< const CaConcBase* >( er.data() );
-		data[i + 0] = cb->getCa( er );
-		data[i + 1] = cb->getCaBasal( er );
-		data[i + 2] = cb->getTau( er );
-		data[i + 3] = cb->getB( er );
-		data[i + 4] = cb->getCeiling( er );
-		data[i + 5] = cb->getFloor( er );
-		data[i + 6] = cb->getThickness( er );
+		data[j + 0] = cb->getCa( er );
+		data[j + 1] = cb->getCaBasal( er );
+		data[j + 2] = cb->getTau( er );
+		data[j + 3] = cb->getB( er );
+		data[j + 4] = cb->getCeiling( er );
+		data[j + 5] = cb->getFloor( er );
+		data[j + 6] = cb->getThickness( er );
+		j += 7;
 	}
 	orig->zombieSwap( zClass );
+	j = 0;
 	for ( unsigned int i = 0; i < num; ++i ) {
 		Eref er( orig, i + start );
 		CaConcBase* cb = reinterpret_cast< CaConcBase* >( er.data() );
 		cb->vSetSolver( er, hsolve );
-		cb->setCa( er, data[i + 0] );
-		cb->setCaBasal( er, data[i + 1] );
-		cb->setTau( er, data[i + 2] );
-		cb->setB( er, data[i + 3] );
-		cb->setCeiling( er, data[i + 4] );
-		cb->setFloor( er, data[i + 5] );
-		cb->setThickness( er, data[i + 6] );
+		cb->setCa( er, data[j + 0] );
+		cb->setCaBasal( er, data[j + 1] );
+		cb->setTau( er, data[j + 2] );
+		cb->setB( er, data[j + 3] );
+		cb->setCeiling( er, data[j + 4] );
+		cb->setFloor( er, data[j + 5] );
+		cb->setThickness( er, data[j + 6] );
+		j += 7;
 	}
 }
 

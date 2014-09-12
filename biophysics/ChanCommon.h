@@ -27,16 +27,16 @@ class ChanCommon: public virtual ChanBase
 		// Value field access function definitions
 		/////////////////////////////////////////////////////////////
 
-		void vSetGbar( double Gbar );
-		double vGetGbar() const;
-		void vSetEk( double Ek );
-		double vGetEk() const;
-		void vSetGk( double Gk );
-		double vGetGk() const;
+		void vSetGbar( const Eref& e, double Gbar );
+		double vGetGbar( const Eref& e ) const;
+		void vSetEk( const Eref& e, double Ek );
+		double vGetEk( const Eref& e ) const;
+		void vSetGk( const Eref& e, double Gk );
+		double vGetGk( const Eref& e ) const;
 		/// Ik is read-only for MOOSE, but we provide the set 
 		/// func for derived classes to update it.
-		void vSetIk( double Ic );
-		double vGetIk() const;
+		void vSetIk( const Eref& e, double Ic );
+		double vGetIk( const Eref& e ) const;
 
 		/////////////////////////////////////////////////////////////
 		// Dest function definitions
@@ -62,8 +62,12 @@ class ChanCommon: public virtual ChanBase
 		 */
 		void updateIk();
 
+
 		/// Utility function to access Vm
 		double getVm() const;
+
+		/// Utility function to acces Gbar
+		double getGbar() const;
 
 		/// Specify the Class Info static variable for initialization.
 		static const Cinfo* initCinfo();

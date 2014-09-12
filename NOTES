@@ -5046,4 +5046,9 @@ Tested out a couple of snippets. mgblock wasn't working. Did quite a bit
 of fixing on it and now it works. Uncovered and fixed a bug in the copying 
 of synapses.
 
+Ground through the refactoring, now the HSolver is working again with
+the refactored ZombieHHChannels. The crash with the ordering of plots
+is gone, but it turns out that we still need to put in the Adaptors before
+the Hsolve otherwise they don't receive input.
+
 =============================================================================
