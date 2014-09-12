@@ -11,6 +11,7 @@
 #include "ElementValueFinfo.h"
 #include "HHGate.h"
 #include "ChanBase.h"
+#include "ChanCommon.h"
 #include "HHChannel.h"
 #include "../shell/Shell.h"
 
@@ -457,7 +458,7 @@ double HHChannel::integrate( double state, double dt, double A, double B )
 
 void HHChannel::process( const Eref& e, ProcPtr info )
 {
-	g_ += ChanBase::getGbar();
+	g_ += getGbar();
 	double A = 0;
 	double B = 0;
 	if ( Xpower_ > 0 ) {
@@ -492,8 +493,8 @@ void HHChannel::process( const Eref& e, ProcPtr info )
 		g_ *= takeZpower_( Z_, Zpower_ );
 	}
 
-	ChanBase::setGk( g_ );
-	ChanBase::updateIk();
+	setGk( g_ );
+	this->updateIk();
 	// Gk_ = g_;
 	// Ik_ = ( Ek_ - Vm_ ) * g_;
 
@@ -567,8 +568,8 @@ void HHChannel::reinit( const Eref& er, ProcPtr info )
 		g_ *= takeZpower_( Z_, Zpower_ );
 	}
 
-	ChanBase::setGk( g_ );
-	ChanBase::updateIk();
+	setGk( g_ );
+	updateIk();
 	// Gk_ = g_;
 	// Ik_ = ( Ek_ - Vm_ ) * g_;
 

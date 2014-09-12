@@ -103,16 +103,6 @@ def main():
     CaM-Kinase II. The kinase phosphorylates the K_A channel to inactivate
     it.
 
-    Both the electrical and chemical models are loaded in from model
-    description files, and these files could be replaced if one wished
-    to define different models. However, there
-    are model-specific Adaptor objects needed to map activity between the
-    models of the two kinds. The Adaptors connect specific model entities
-    between the two models. Here one Adaptor connects the electrical 
-    Ca_conc object to the chemical Ca pool. The other Adaptor connects
-    the chemical pool representing the K_A channel to its conductance 
-    term in the electrical model.
-
     The net effect of the multiscale activity is a positive feedback
     loop where activity increases Ca, which activates the kinase, 
     which reduces K_A, leading to increased excitability of the cell. 
@@ -122,6 +112,16 @@ def main():
     but if it is activated by a current pulse the cell will continue to
     fire even after the current is turned off. Application of an
     inhibitory current restores the cell to its silent state.
+
+    Both the electrical and chemical models are loaded in from model
+    description files, and these files could be replaced if one wished
+    to define different models. However, there
+    are model-specific Adaptor objects needed to map activity between the
+    models of the two kinds. The Adaptors connect specific model entities
+    between the two models. Here one Adaptor connects the electrical 
+    Ca_conc object to the chemical Ca pool. The other Adaptor connects
+    the chemical pool representing the K_A channel to its conductance 
+    term in the electrical model.
     """
 
     runtime = 4

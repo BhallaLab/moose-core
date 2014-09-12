@@ -19,6 +19,7 @@ OBJ = \
 	SymCompartment.o	\
 	GapJunction.o	\
 	ChanBase.o	\
+	ChanCommon.o	\
 	HHChannel.o	\
 	HHGate.o	\
 	HHGate2D.o	\
@@ -68,7 +69,8 @@ CompartmentBase.o: CompartmentBase.h CompartmentDataHolder.h
 Compartment.o: CompartmentBase.h Compartment.h
 SymCompartment.o: CompartmentBase.h Compartment.h SymCompartment.h
 ChanBase.o: ChanBase.h
-Leakage.o: Leakage.h ChanBase.h
+ChanCommon.o: ChanBase.h ChanCommon.h
+Leakage.o: Leakage.h ChanBase.h ChanCommon.h
 GapJunction.o: GapJunction.h
 HHChannel.o: ChanBase.h HHChannel.h HHGate.h
 HHGate.o: HHGate.h

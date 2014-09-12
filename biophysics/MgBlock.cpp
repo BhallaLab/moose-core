@@ -9,6 +9,7 @@
 
 #include "header.h"
 #include "ChanBase.h"
+#include "ChanCommon.h"
 #include "MgBlock.h"
 
 const double EPSILON = 1.0e-12;
@@ -180,7 +181,7 @@ void MgBlock::process( const Eref& e, ProcPtr info )
 	// ChanBase::setGk( ChanBase::getGk() * KMg / ( KMg + CMg_ ) );
 	// Gk_ = Gk_ * KMg / (KMg + CMg_);
 
-	ChanBase::updateIk();
+	updateIk();
 	// send2< double, double >( e, channelSlot, Gk_, Ek_ );
 	// Ik_ = Gk_ * (Ek_ - Vm_);
 	ChanBase::process( e, info );

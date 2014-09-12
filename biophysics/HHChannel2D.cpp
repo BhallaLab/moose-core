@@ -11,6 +11,7 @@
 #include "ElementValueFinfo.h"
 #include "../builtins/Interpol2D.h"
 #include "ChanBase.h"
+#include "ChanCommon.h"
 #include "HHGate2D.h"
 #include "HHChannel2D.h"
 
@@ -190,7 +191,7 @@ const Cinfo* HHChannel2D::initCinfo()
 static const Cinfo* HHChannel2DCinfo = HHChannel2D::initCinfo();
 
 HHChannel2D::HHChannel2D()
-	:	ChanBase(),
+	:	ChanCommon(),
 		Xpower_( 0.0 ),
 		Ypower_( 0.0 ),
 		Zpower_( 0.0 ),
@@ -480,12 +481,12 @@ void HHChannel2D::process( const Eref& e, ProcPtr info )
 	}
 
 	ChanBase::setGk( g_ );
-	ChanBase::updateIk();
+	updateIk();
 	// Gk_ = g_;
 	// Ik_ = ( Ek_ - Vm_ ) * g_;
 
 	// Send out the relevant channel messages.
-	ChanBase::process( e, info );
+	ChanCommon::vProcess( e, info );
 	/*
 	channelOut.send( e, info, Gk_, Ek_ );
 	
@@ -548,7 +549,7 @@ void HHChannel2D::process( const Eref& e, ProcPtr info )
      }
 
      ChanBase::setGk( g_ );
-     ChanBase::updateIk();
+     updateIk();
      // Gk_ = g_;
      // Ik_ = ( Ek_ - Vm_ ) * g_;
 
