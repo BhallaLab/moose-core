@@ -39,6 +39,7 @@
 #include "HSolve.h"
 #include "../biophysics/HHGate.h"
 #include "../biophysics/ChanBase.h"
+#include "../biophysics/ChanCommon.h"
 #include "../biophysics/Compartment.h"
 #include "../biophysics/HHChannel.h"
 #include "../external/debug/print_function.hpp"

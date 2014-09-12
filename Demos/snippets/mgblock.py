@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jul  3 09:36:06 2013 (+0530)
 # Version: 
-# Last-Updated: Fri Jul 26 15:33:18 2013 (+0530)
-#           By: subha
-#     Update #: 115
+# Last-Updated: Fri Sep 12 10:56:18 2014 (+0530)
+#           By: Upi
+#     Update #: 
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -71,6 +71,11 @@ def test_mgblock():
     mgblock.CMg = 2.0
     mgblock.KMg_A = 1/0.33
     mgblock.KMg_B = 1/60.0
+
+    # The synHandler manages the synapses and their learning rules if any.
+    synHandler = moose.SimpleSynHandler( '/model/soma/nmda/handler' )
+    synHandler.synapse.num = 1
+    moose.connect( synHandler, 'activationOut', nmda, 'activation' )
     
     # MgBlock sits between original channel nmda and the
     # compartment. The origChannel receives the channel message from
@@ -89,17 +94,23 @@ def test_mgblock():
     pulse.level[0] = 1.0
     pulse.width[0] = 50e-3
     moose.connect(pulse, 'output', spikegen, 'Vm')
-    nmda.synapse.num = 1
-    syn = moose.element(nmda.synapse.path)
-    moose.connect(spikegen, 'spikeOut', syn, 'addSpike')
-    nmda_noMg.synapse.num = 1
-    moose.connect(spikegen, 'spikeOut', moose.element(nmda_noMg.synapse.path), 'addSpike')
+    moose.le( synHandler )
+    #syn = moose.element(synHandler.path + '/synapse' )
+    syn = synHandler.synapse[0]
+    moose.connect(spikegen, 'spikeOut', synHandler.synapse[0], 'addSpike')
+    moose.le( nmda_noMg )
+    noMgSyn = moose.element(nmda_noMg.path + '/handler/synapse' )
+    moose.connect(spikegen, 'spikeOut', noMgSyn, 'addSpike')
     Gnmda = moose.Table('/data/Gnmda')
     moose.connect(Gnmda, 'requestOut', mgblock, 'getGk')
     Gnmda_noMg = moose.Table('/data/Gnmda_noMg')
     moose.connect(Gnmda_noMg, 'requestOut', nmda_noMg, 'getGk')
     Vm = moose.Table('/data/Vm')
     moose.connect(Vm, 'requestOut', soma, 'getVm')
+    moose.setClock( 18, plotdt )
+    moose.reinit()
+    moose.start( simtime )
+    '''
     utils.setDefaultDt(elecdt=simdt, plotdt2=plotdt)
     utils.assignDefaultTicks(modelRoot='/model', dataRoot='/data')
     moose.reinit()
@@ -107,6 +118,7 @@ def test_mgblock():
     for ii in range(10):
         for n in moose.element('/clock/tick').neighbors['proc%d' % (ii)]:
             print ii, n.path
+    '''
     t = pylab.linspace(0, simtime*1e3, len(Vm.vector))
     pylab.plot(t, Vm.vector*1e3, label='Vm (mV)')
     pylab.plot(t, Gnmda.vector * 1e9, label='Gnmda (nS)')

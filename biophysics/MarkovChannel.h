@@ -12,7 +12,7 @@
 //The implicit assumption is that there are a number of ion channels present in
 //the system. */
 
-class MarkovChannel : public ChanBase
+class MarkovChannel : public ChanCommon
 {
 	public:
 	//Default constructor. Use is not recommended as most of the class members

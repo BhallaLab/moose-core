@@ -49,7 +49,7 @@
 #ifndef   	LEAKAGE_H_
 #define   	LEAKAGE_H_
 
-class Leakage: public ChanBase
+class Leakage: public ChanCommon
 {
   public:
     Leakage();

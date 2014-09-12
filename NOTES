@@ -5031,3 +5031,12 @@ to the channel. Need to fix.
 Managed to implement a decent single-compt multiscale model, but the
 HHChannel issues will need to be fixed soon.
 
+=============================================================================
+12 Sep
+
+Implemented a ChanCommon class to sit between ChanBase (virtual base class)
+and most of the other channel classes. This is the first step in having 
+a systematic channel inheritance framework to include the Zombie classes.
+
+Something is wrong about SynChans. They don't support synapses!
+=============================================================================

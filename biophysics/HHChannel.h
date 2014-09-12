@@ -47,7 +47,7 @@
 
 typedef double ( *PFDD )( double, double );
 
-class HHChannel: public ChanBase
+class HHChannel: public ChanCommon
 {
 #ifdef DO_UNIT_TESTS
 	friend void testHHChannel();
