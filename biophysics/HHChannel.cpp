@@ -12,6 +12,7 @@
 #include "HHGate.h"
 #include "ChanBase.h"
 #include "ChanCommon.h"
+#include "HHChannelBase.h"
 #include "HHChannel.h"
 #include "../shell/Shell.h"
 
@@ -22,148 +23,7 @@ const int HHChannel::INSTANT_Z = 4;
 
 const Cinfo* HHChannel::initCinfo()
 {
-	/////////////////////////////////////////////////////////////////////
-	// Shared messages
-	/////////////////////////////////////////////////////////////////////
-	static DestFinfo process( "process", 
-		"Handles process call",
-		new ProcOpFunc< HHChannel >( &HHChannel::process ) );
-	static DestFinfo reinit( "reinit", 
-		"Handles reinit call",
-		new ProcOpFunc< HHChannel >( &HHChannel::reinit ) );
-	static Finfo* processShared[] =
-	{
-		&process, &reinit
-	};
-	static SharedFinfo proc( "proc", 
-			"This is a shared message to receive Process message from the"
-			"scheduler. The first entry is a MsgDest for the Process "
-			"operation. It has a single argument, ProcInfo, which "
-			"holds lots of information about current time, thread, dt and"
-			"so on.\n The second entry is a MsgDest for the Reinit "
-			"operation. It also uses ProcInfo.",
-		processShared, sizeof( processShared ) / sizeof( Finfo* )
-	);
-
-	/////////////////////////////////////////////////////////////////////
-
 ///////////////////////////////////////////////////////
-// Field definitions
-///////////////////////////////////////////////////////
-		static ElementValueFinfo< HHChannel, double > Xpower( "Xpower",
-			"Power for X gate",
-			&HHChannel::setXpower,
-			&HHChannel::getXpower
-		);
-		static ElementValueFinfo< HHChannel, double > Ypower( "Ypower",
-			"Power for Y gate",
-			&HHChannel::setYpower,
-			&HHChannel::getYpower
-		);
-		static ElementValueFinfo< HHChannel, double > Zpower( "Zpower",
-			"Power for Z gate",
-			&HHChannel::setZpower,
-			&HHChannel::getZpower
-		);
-		static ValueFinfo< HHChannel, int > instant( "instant",
-			"Bitmapped flag: bit 0 = Xgate, bit 1 = Ygate, bit 2 = Zgate"
-			"When true, specifies that the lookup table value should be"
-			"used directly as the state of the channel, rather than used"
-			"as a rate term for numerical integration for the state",
-			&HHChannel::setInstant,
-			&HHChannel::getInstant
-		);
-		static ValueFinfo< HHChannel, double > X( "X", 
-			"State variable for X gate",
-			&HHChannel::setX,
-			&HHChannel::getX
-		);
-		static ValueFinfo< HHChannel, double > Y( "Y",
-			"State variable for Y gate",
-			&HHChannel::setY,
-			&HHChannel::getY
-		);
-		static ValueFinfo< HHChannel, double > Z( "Z",
-			"State variable for Y gate",
-			&HHChannel::setZ,
-			&HHChannel::getZ
-		);
-		static ValueFinfo< HHChannel, int > useConcentration( 
-			"useConcentration",
-			"Flag: when true, use concentration message rather than Vm to"
-			"control Z gate",
-			&HHChannel::setUseConcentration,
-			&HHChannel::getUseConcentration
-		);
-
-///////////////////////////////////////////////////////
-// MsgSrc definitions
-///////////////////////////////////////////////////////
-	// IkOut SrcFinfo defined above.
-
-///////////////////////////////////////////////////////
-// MsgDest definitions
-///////////////////////////////////////////////////////
-		static DestFinfo concen( "concen", 
-			"Incoming message from Concen object to specific conc to use"
-			"in the Z gate calculations",
-			new OpFunc1< HHChannel, double >( &HHChannel::handleConc )
-		);
-		static DestFinfo createGate( "createGate",
-			"Function to create specified gate."
-			"Argument: Gate type [X Y Z]",
-			new EpFunc1< HHChannel, string >( &HHChannel::createGate )
-		);
-///////////////////////////////////////////////////////
-// FieldElementFinfo definition for HHGates. Note that these are made
-// with the deferCreate flag off, so that the HHGates are created 
-// right away even if they are empty.
-// Assume only a single entry allocated in each gate.
-///////////////////////////////////////////////////////
-		static FieldElementFinfo< HHChannel, HHGate > gateX( "gateX",
-			"Sets up HHGate X for channel",
-			HHGate::initCinfo(),
-			&HHChannel::getXgate,
-			&HHChannel::setNumGates,
-			&HHChannel::getNumXgates
-			// 1
-		);
-		static FieldElementFinfo< HHChannel, HHGate > gateY( "gateY",
-			"Sets up HHGate Y for channel",
-			HHGate::initCinfo(),
-			&HHChannel::getYgate,
-			&HHChannel::setNumGates,
-			&HHChannel::getNumYgates
-			// 1
-		);
-		static FieldElementFinfo< HHChannel, HHGate > gateZ( "gateZ",
-			"Sets up HHGate Z for channel",
-			HHGate::initCinfo(),
-			&HHChannel::getZgate,
-			&HHChannel::setNumGates,
-			&HHChannel::getNumZgates
-			// 1
-		);
-	
-///////////////////////////////////////////////////////
-	static Finfo* HHChannelFinfos[] =
-	{
-		&proc,				// Shared
-		&Xpower,			// Value
-		&Ypower,			// Value
-		&Zpower,			// Value
-		&instant,			// Value
-		&X,					// Value
-		&Y,					// Value
-		&Z,					// Value
-		&useConcentration,	// Value
-		&concen,			// Dest
-		&createGate,		// Dest
-		&gateX,				// FieldElement
-		&gateY,				// FieldElement
-		&gateZ				// FieldElement
-	};
-	
 	static string doc[] =
 	{
 		"Name", "HHChannel",
@@ -177,9 +37,9 @@ const Cinfo* HHChannel::initCinfo()
         
 	static Cinfo HHChannelCinfo(
 		"HHChannel",
-		ChanBase::initCinfo(),
-		HHChannelFinfos,
-		sizeof( HHChannelFinfos )/sizeof(Finfo *),
+		HHChannelBase::initCinfo(),
+		0,
+		0,
                 &dinfo,
                 doc,
                 sizeof(doc)/sizeof(string)
@@ -196,17 +56,16 @@ static const Cinfo* hhChannelCinfo = HHChannel::initCinfo();
 // Constructor
 ///////////////////////////////////////////////////
 HHChannel::HHChannel()
-			: Xpower_( 0.0 ), Ypower_( 0.0 ), Zpower_( 0.0 ),
-                          conc_( 0.0 ),
-                          instant_( 0 ),
-                          X_( 0.0 ), Y_( 0.0 ), Z_( 0.0 ),
-                          xInited_( false ), yInited_( false ), zInited_( false ),
-                          g_( 0.0 ),
-                          useConcentration_( 0 ),
-                          xGate_( 0 ),
-                          yGate_( 0 ),
-                          zGate_( 0 ),
-                          myId_()
+			:
+                  conc_( 0.0 ),
+                  instant_( 0 ),
+                  X_( 0.0 ), Y_( 0.0 ), Z_( 0.0 ),
+                  xInited_( false ), yInited_( false ), zInited_( false ),
+                  g_( 0.0 ),
+                  xGate_( 0 ),
+                  yGate_( 0 ),
+                  zGate_( 0 ),
+                  myId_()
 {
 	;
 }
@@ -227,23 +86,17 @@ HHChannel::~HHChannel()
 bool HHChannel::setGatePower( const Eref& e, double power,
 	double *assignee, const string& gateType )
 {
-	if ( power < 0 ) {
-		cout << "Error: HHChannel::set" << gateType << 
-			"power: Cannot use negative power: " << power << endl;
-		return 0;
-	}
-
 	if ( doubleEq( power, *assignee ) )
-		return 0;
+		return false;
 
 	if ( doubleEq( *assignee, 0.0 ) && power > 0 ) {
 		createGate( e, gateType );
 	} else if ( doubleEq( power, 0.0 ) ) {
 		// destroyGate( e, gateType );
 	}
-	
 	*assignee = power;
-	return 1;
+	
+	return true;
 }
 
 /**
@@ -252,22 +105,22 @@ bool HHChannel::setGatePower( const Eref& e, double power,
  * If the gate exists and has multiple parents, then make a new gate.
  * If the gate does not exist, make a new gate
  */
-void HHChannel::setXpower( const Eref& e, double Xpower )
+void HHChannel::vSetXpower( const Eref& e, double power )
 {
-	if ( setGatePower( e, Xpower, &Xpower_, "X" ) )
-		takeXpower_ = selectPower( Xpower );
+	if ( setGatePower( e, power, &Xpower_, "X" ) )
+		takeXpower_ = selectPower( power );
 }
 
-void HHChannel::setYpower( const Eref& e, double Ypower )
+void HHChannel::vSetYpower( const Eref& e, double power )
 {
-	if ( setGatePower( e, Ypower, &Ypower_, "Y" ) )
-		takeYpower_ = selectPower( Ypower );
+	if ( setGatePower( e, power, &Ypower_, "Y" ) )
+		takeYpower_ = selectPower( power );
 }
 
-void HHChannel::setZpower( const Eref& e, double Zpower )
+void HHChannel::vSetZpower( const Eref& e, double power )
 {
-	if ( setGatePower( e, Zpower, &Zpower_, "Z" ) ) {
-		takeZpower_ = selectPower( Zpower );
+	if ( setGatePower( e, power, &Zpower_, "Z" ) ) {
+		takeZpower_ = selectPower( power );
 		useConcentration_ = 1; // Not sure about this.
 	}
 }
@@ -315,7 +168,7 @@ void HHChannel::innerCreateGate( const string& gateName,
 	*gatePtr = new HHGate( chanId, gateId );
 }
 
-void HHChannel::createGate( const Eref& e, 
+void HHChannel::vCreateGate( const Eref& e, 
 	string gateType )
 {
 	if ( !checkOriginal( e.id() ) ) {
@@ -368,76 +221,49 @@ void HHChannel::destroyGate( const Eref& e,
 ///////////////////////////////////////////////////
 // Field function definitions
 ///////////////////////////////////////////////////
-/**
- * Assigns the Xpower for this gate. If the gate exists and has
- * only this element for input, then change the gate value.
- * If the gate exists and has multiple parents, then make a new gate.
- * If the gate does not exist, make a new gate
- */
 
-double HHChannel::getXpower( const Eref& e) const
-{
-	return Xpower_;
-}
-
-double HHChannel::getYpower( const Eref& e) const
-{
-	return Ypower_;
-}
-
-double HHChannel::getZpower( const Eref& e) const
-{
-	return Zpower_;
-}
-
-void HHChannel::setInstant( int instant )
+void HHChannel::vSetInstant( const Eref& e, int instant )
 {
 	instant_ = instant;
 }
-int HHChannel::getInstant() const
+
+int HHChannel::vGetInstant( const Eref& e ) const
 {
 	return instant_;
 }
 
-void HHChannel::setX( double X )
+void HHChannel::vSetX( const Eref& e, double X )
 {
         X_ = X;
         xInited_ = true;        
 }
-double HHChannel::getX() const
+double HHChannel::vGetX( const Eref& e ) const
 {
 	return X_;
 }
 
-void HHChannel::setY( double Y )
+void HHChannel::vSetY( const Eref& e, double Y )
 {
         Y_ = Y;
         yInited_ = true;        
 }
-double HHChannel::getY() const
+double HHChannel::vGetY( const Eref& e ) const
 {
 	return Y_;
 }
 
-void HHChannel::setZ( double Z )
+void HHChannel::vSetZ( const Eref& e, double Z )
 {
         Z_ = Z;
         zInited_ = true;        
 }
-double HHChannel::getZ() const
+double HHChannel::vGetZ( const Eref& e ) const
 {
 	return Z_;
 }
 
-void HHChannel::setUseConcentration( int value )
-{
-	useConcentration_ = value;
-}
-
-int HHChannel::getUseConcentration() const
-{
-	return useConcentration_;
-}
+void HHChannel::vSetUseConcentration( const Eref& e, int value )
+{;}
 
 ///////////////////////////////////////////////////
 // Dest function definitions
@@ -456,9 +282,9 @@ double HHChannel::integrate( double state, double dt, double A, double B )
 	return state + A * dt ;
 }
 
-void HHChannel::process( const Eref& e, ProcPtr info )
+void HHChannel::vProcess( const Eref& e, ProcPtr info )
 {
-	g_ += getGbar();
+	g_ += ChanCommon::vGetGbar();
 	double A = 0;
 	double B = 0;
 	if ( Xpower_ > 0 ) {
@@ -493,35 +319,24 @@ void HHChannel::process( const Eref& e, ProcPtr info )
 		g_ *= takeZpower_( Z_, Zpower_ );
 	}
 
-	setGk( g_ );
+	ChanCommon::vSetGk( g_ );
 	this->updateIk();
 	// Gk_ = g_;
 	// Ik_ = ( Ek_ - Vm_ ) * g_;
 
 	// Send out the relevant channel messages.
-	ChanBase::process( e, info );
-	/*
-	channelOut.send( e, info, Gk_, Ek_ );
-	
-	// This is used if the channel connects up to a conc pool and
-	// handles influx of ions giving rise to a concentration change.
-	IkOut.send( e, info, Ik_ );
-	
-	// Needed by GHK-type objects
-	permeability.send( e, info, Gk_ );
-	*/
+	sendProcessMsgs( e, info );
 	
 	g_ = 0.0;
-    
 }
 
 /**
  * Here we get the steady-state values for the gate (the 'instant'
  * calculation) as A_/B_.
  */
-void HHChannel::reinit( const Eref& er, ProcPtr info )
+void HHChannel::vReinit( const Eref& er, ProcPtr info )
 {
-	g_ = ChanBase::getGbar();
+	g_ = ChanCommon::vGetGbar();
 	Element* e = er.element();
 
 	double A = 0.0;
@@ -568,25 +383,19 @@ void HHChannel::reinit( const Eref& er, ProcPtr info )
 		g_ *= takeZpower_( Z_, Zpower_ );
 	}
 
-	setGk( g_ );
+	ChanCommon::vSetGk( g_ );
 	updateIk();
 	// Gk_ = g_;
 	// Ik_ = ( Ek_ - Vm_ ) * g_;
 
 	// Send out the relevant channel messages.
 	// Same for reinit as for process.
-	ChanBase::reinit( er, info );
-
-	/*
-	channelOut.send( er, info, Gk_, Ek_ );
-	// Needed by GHK-type objects
-	permeability.send( er, info, Gk_ );
-	*/
+	sendReinitMsgs( er, info );
 	
 	g_ = 0.0;
 }
 
-void HHChannel::handleConc( double conc )
+void HHChannel::vHandleConc( const Eref& e, double conc )
 {
 	conc_ = conc;
 }
@@ -597,60 +406,17 @@ void HHChannel::handleConc( double conc )
 ///////////////////////////////////////////////////
 
 
-HHGate* HHChannel::getXgate( unsigned int i )
+HHGate* HHChannel::vGetXgate( unsigned int i ) const
 {
 	return xGate_;
 }
 
-HHGate* HHChannel::getYgate( unsigned int i )
+HHGate* HHChannel::vGetYgate( unsigned int i ) const
 {
 	return yGate_;
 }
 
-HHGate* HHChannel::getZgate( unsigned int i )
+HHGate* HHChannel::vGetZgate( unsigned int i ) const
 {
 	return zGate_;
-}
-
-void HHChannel::setNumGates( unsigned int num ) 
-{ ; }
-
-unsigned int  HHChannel::getNumXgates() const
-{
-	return ( xGate_ != 0 );
-}
-
-unsigned int  HHChannel::getNumYgates() const
-{
-	return ( yGate_ != 0 );
-}
-
-unsigned int  HHChannel::getNumZgates() const
-{
-	return ( zGate_ != 0 );
-}
-///////////////////////////////////////////////////
-// Utility function
-///////////////////////////////////////////////////
-double HHChannel::powerN( double x, double p )
-{
-	if ( x > 0.0 )
-		return exp( p * log( x ) );
-	return 0.0;
-}
-
-PFDD HHChannel::selectPower( double power )
-{
-	if ( power == 0.0 )
-		return powerN;
-	else if ( power == 1.0 )
-		return power1;
-	else if ( power == 2.0 )
-		return power2;
-	else if ( power == 3.0 )
-		return power3;
-	else if ( power == 4.0 )
-		return power4;
-	else
-		return powerN;
 }

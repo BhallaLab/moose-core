@@ -37,6 +37,21 @@ const Cinfo* ChanBase::initCinfo()
 	/////////////////////////////////////////////////////////////////////
 	// Shared messages
 	/////////////////////////////////////////////////////////////////////
+	static DestFinfo process( "process", 
+		"Handles process call",
+		new ProcOpFunc< ChanBase >( &ChanBase::process ) );
+	static DestFinfo reinit( "reinit", 
+		"Handles reinit call",
+		new ProcOpFunc< ChanBase >( &ChanBase::reinit ) );
+
+	static Finfo* processShared[] =
+	{
+		&process, &reinit
+	};
+
+	static SharedFinfo proc( "proc", 
+		"Shared message to receive Process message from scheduler",
+		processShared, sizeof( processShared ) / sizeof( Finfo* ) );
 
 	/////////////////////////////////////////////////////////////////////
 	/// ChannelOut SrcFinfo defined above.
@@ -109,7 +124,8 @@ const Cinfo* ChanBase::initCinfo()
 		&Ek,				// Value
 		&Gk,				// Value
 		&Ik,				// ReadOnlyValue
-		IkOut(),				// Src
+		IkOut(),			// Src
+		&proc,				// Shared
 	};
 	
 	static string doc[] =

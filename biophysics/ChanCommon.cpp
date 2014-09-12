@@ -81,7 +81,7 @@ void ChanCommon::vHandleVm( double Vm )
 // from the child class. Sends out various messages.
 ///////////////////////////////////////////////////
 
-void ChanCommon::vProcess(  const Eref& e, const ProcPtr info )
+void ChanCommon::sendProcessMsgs(  const Eref& e, const ProcPtr info )
 {
 		ChanBase::channelOut()->send( e, Gk_, Ek_ );
 	// This is used if the channel connects up to a conc pool and
@@ -92,7 +92,7 @@ void ChanCommon::vProcess(  const Eref& e, const ProcPtr info )
 }
 
 
-void ChanCommon::vReinit(  const Eref& e, const ProcPtr info )
+void ChanCommon::sendReinitMsgs(  const Eref& e, const ProcPtr info )
 {
 		ChanBase::channelOut()->send( e, Gk_, Ek_ );
 	// Needed by GHK-type objects

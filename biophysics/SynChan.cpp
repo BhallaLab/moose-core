@@ -22,21 +22,6 @@ const Cinfo* SynChan::initCinfo()
 	///////////////////////////////////////////////////////
 	// Shared message definitions
 	///////////////////////////////////////////////////////
-	static DestFinfo process( "process", 
-		"Handles process call",
-		new ProcOpFunc< SynChan >( &SynChan::process ) );
-	static DestFinfo reinit( "reinit", 
-		"Handles reinit call",
-		new ProcOpFunc< SynChan >( &SynChan::reinit ) );
-
-	static Finfo* processShared[] =
-	{
-		&process, &reinit
-	};
-
-	static SharedFinfo proc( "proc", 
-		"Shared message to receive Process message from scheduler",
-		processShared, sizeof( processShared ) / sizeof( Finfo* ) );
 		
 ///////////////////////////////////////////////////////
 // Field definitions
@@ -73,7 +58,6 @@ const Cinfo* SynChan::initCinfo()
 
 	static Finfo* SynChanFinfos[] =
 	{
-		&proc,			// Shared
 		&tau1,			// Value
 		&tau2,			// Value
 		&normalizeWeights,	// Value
@@ -218,7 +202,7 @@ void SynChan::normalizeGbar()
 // Dest function definitions
 ///////////////////////////////////////////////////
 
-void SynChan::process( const Eref& e, ProcPtr info )
+void SynChan::vProcess( const Eref& e, ProcPtr info )
 {
 	// Need to scale activation by 1/dt, because it is effective for
 	// only one clock tick and then zeroed.
@@ -229,13 +213,13 @@ void SynChan::process( const Eref& e, ProcPtr info )
 	updateIk();
 	activation_ = 0.0;
 	modulation_ = 1.0;
-	ChanBase::process( e, info ); // Sends out messages for channel.
+	sendProcessMsgs( e, info ); // Sends out messages for channel.
 }
 
 /*
  * Note that this causes issues if we have variable dt.
  */
-void SynChan::reinit( const Eref& e, ProcPtr info )
+void SynChan::vReinit( const Eref& e, ProcPtr info )
 {
 	dt_ = info->dt;
 	activation_ = 0.0;
@@ -257,7 +241,7 @@ void SynChan::reinit( const Eref& e, ProcPtr info )
                 yconst2_ = exp( -dt_ / tau2_ );
         }
 	normalizeGbar();
-    ChanBase::reinit(e, info);
+    sendReinitMsgs(e, info);
 }
 
 void SynChan::activation( double val )

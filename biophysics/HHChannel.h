@@ -4,7 +4,7 @@
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment,
 ** also known as GENESIS 3 base code.
-**           copyright (C) 2003-2005 Upinder S. Bhalla. and NCBS
+**           copyright (C) 2003-2014 Upinder S. Bhalla. and NCBS
 ** It is made available under the terms of the
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
@@ -45,9 +45,7 @@
  * on each node.
  */
 
-typedef double ( *PFDD )( double, double );
-
-class HHChannel: public ChanCommon
+class HHChannel: public HHChannelBase, public ChanCommon
 {
 #ifdef DO_UNIT_TESTS
 	friend void testHHChannel();
@@ -61,22 +59,18 @@ class HHChannel: public ChanCommon
 		// Value field access function definitions
 		/////////////////////////////////////////////////////////////
 
-		void setXpower( const Eref& e, double Xpower );
-		double getXpower( const Eref& e) const;
-		void setYpower( const Eref& e, double Ypower );
-		double getYpower( const Eref& e) const;
-		void setZpower( const Eref& e, double Zpower );
-		double getZpower( const Eref& e) const;
-		void setInstant( int Instant );
-		int getInstant() const;
-		void setX( double X );
-		double getX() const;
-		void setY( double Y );
-		double getY() const;
-		void setZ( double Z );
-		double getZ() const;
-		void setUseConcentration( int value );
-		int getUseConcentration() const;
+		void vSetXpower( const Eref& e, double Xpower );
+		void vSetYpower( const Eref& e, double Ypower );
+		void vSetZpower( const Eref& e, double Zpower );
+		void vSetInstant( const Eref& e, int Instant );
+		int vGetInstant( const Eref& e ) const;
+		void vSetX( const Eref& e, double X );
+		double vGetX( const Eref& e ) const;
+		void vSetY( const Eref& e, double Y );
+		double vGetY( const Eref& e ) const;
+		void vSetZ( const Eref& e, double Z );
+		double vGetZ( const Eref& e ) const;
+		void vSetUseConcentration( const Eref& e, int value );
 
 		void innerSetXpower( double Xpower );
 		void innerSetYpower( double Ypower );
@@ -98,7 +92,7 @@ class HHChannel: public ChanCommon
 		 * send back to the parent compartment through regular 
 		 * messages.
 		 */
-		void process( const Eref& e, ProcPtr p );
+		void vProcess( const Eref& e, ProcPtr p );
 
 		/**
 		 * Reinitializes the values for the channel. This involves
@@ -107,7 +101,7 @@ class HHChannel: public ChanCommon
 		 * involves a similar cycle through the gates and then 
 		 * updates to the parent compartment as for the processFunc.
 		 */
-		void reinit( const Eref& e, ProcPtr p );
+		void vReinit( const Eref& e, ProcPtr p );
 
 		/**
 		 * Assign the local Vm_ to the incoming Vm from the compartment
@@ -120,7 +114,7 @@ class HHChannel: public ChanCommon
 		 * the message source will be a CaConc object, but there
 		 * are other options for computing the conc.
 		 */
-		void handleConc( double conc );
+		void vHandleConc( const Eref& e, double conc );
 
 		/////////////////////////////////////////////////////////////
 		// Gate handling functions
@@ -128,41 +122,17 @@ class HHChannel: public ChanCommon
 		/**
 		 * Access function used for the X gate. The index is ignored.
 		 */
-		HHGate* getXgate( unsigned int i );
+		HHGate* vGetXgate( unsigned int i ) const;
 
 		/**
 		 * Access function used for the Y gate. The index is ignored.
 		 */
-		HHGate* getYgate( unsigned int i );
+		HHGate* vGetYgate( unsigned int i ) const;
 
 		/**
 		 * Access function used for the Z gate. The index is ignored.
 		 */
-		HHGate* getZgate( unsigned int i );
-
-		/**
-		 * Dummy assignment function for the number of gates.
-		 */
-		void setNumGates( unsigned int num );
-
-		/**
-		 * Access function for the number of Xgates. Gives 1 if present,
-		 * otherwise 0.
-		 */
-		unsigned int getNumXgates() const;
-		/// Returns 1 if Y gate present, otherwise 0
-		unsigned int getNumYgates() const;
-		/// Returns 1 if Z gate present, otherwise 0
-		unsigned int getNumZgates() const;
-
-		/**
-		 * Function for safely creating each gate, identified by strings
-		 * as X, Y and Z. Will only work on a new channel, not on a
-		 * copy. The idea is that the gates are always referred to the
-		 * original 'library' channel, and their contents cannot be touched
-		 * except by the original.
-		 */
-		void createGate( const Eref& e, string gateType );
+		HHGate* vGetZgate( unsigned int i ) const;
 
 		/// Inner utility function for creating the gate.
 		void innerCreateGate(
@@ -172,6 +142,7 @@ class HHChannel: public ChanCommon
 		/// Returns true if channel is original, false if copy.
 		bool checkOriginal( Id chanId ) const;
 
+		void vCreateGate( const Eref& e, string gateType );
 		/**
 		 * Utility function for destroying gate. Works only on original
 		 * HHChannel. Somewhat dangerous, should never be used after a 
@@ -195,15 +166,7 @@ class HHChannel: public ChanCommon
 		/////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();
 
-	protected:
-		static PFDD selectPower( double power);
-
-		/// Exponent for X gate
-		double Xpower_;
-		/// Exponent for Y gate
-		double Ypower_;
-		/// Exponent for Z gate
-		double Zpower_;
+	private:
 		/// Conc_ is input variable for Ca-dependent channels.
 		double conc_;
 
@@ -211,7 +174,6 @@ class HHChannel: public ChanCommon
 		double ( *takeYpower_ )( double, double );
 		double ( *takeZpower_ )( double, double );
 
-	private:
 		/// bitmapped flag for X, Y, Z, to do equil calculation for gate
 		int instant_;
 		/// Channel actual conductance depending on opening of gates.
@@ -226,12 +188,6 @@ class HHChannel: public ChanCommon
         	// has been initialized
 		double g_;	/// Internal variable used to calculate conductance
 
-		/// Flag for use of conc for input to Z gate calculations.
-		bool useConcentration_;	
-
-		// Internal variables for return values.. deprecated
-//		double A_;
-//		double B_;
 		double integrate( double state, double dt, double A, double B );
 
 		/**
@@ -253,20 +209,6 @@ class HHChannel: public ChanCommon
 		static const int INSTANT_X;
 		static const int INSTANT_Y;
 		static const int INSTANT_Z;
-
-		static double power1( double x, double p ) {
-			return x;
-		}
-		static double power2( double x, double p ) {
-			return x * x;
-		}
-		static double power3( double x, double p ) {
-			return x * x * x;
-		}
-		static double power4( double x, double p ) {
-			return power2( x * x, p );
-		}
-		static double powerN( double x, double p );
 };
 
 

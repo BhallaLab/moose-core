@@ -54,8 +54,8 @@ class Leakage: public ChanCommon
   public:
     Leakage();
     ~Leakage();
-    void process( const Eref & e, ProcPtr p );
-    void reinit( const Eref & e, ProcPtr p );
+    void vProcess( const Eref & e, ProcPtr p );
+    void vReinit( const Eref & e, ProcPtr p );
 
     static const Cinfo * initCinfo();
 };

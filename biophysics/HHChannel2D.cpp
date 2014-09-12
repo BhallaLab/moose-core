@@ -25,25 +25,6 @@ const Cinfo* HHChannel2D::initCinfo()
 	/////////////////////////////////////////////////////////////////////
 	// Shared messages
 	/////////////////////////////////////////////////////////////////////
-	static DestFinfo process( "process", 
-		"Handles process call",
-		new ProcOpFunc< HHChannel2D >( &HHChannel2D::process ) );
-	static DestFinfo reinit( "reinit", 
-		"Handles reinit call",
-		new ProcOpFunc< HHChannel2D >( &HHChannel2D::reinit ) );
-	static Finfo* processShared[] =
-	{
-		&process, &reinit
-	};
-	static SharedFinfo proc( "proc", 
-			"This is a shared message to receive Process message from the"
-			"scheduler. The first entry is a MsgDest for the Process "
-			"operation. It has a single argument, ProcInfo, which "
-			"holds lots of information about current time, thread, dt and"
-			"so on.\n The second entry is a MsgDest for the Reinit "
-			"operation. It also uses ProcInfo.",
-		processShared, sizeof( processShared ) / sizeof( Finfo* )
-	);
 ///////////////////////////////////////////////////////
 // Field definitions
 ///////////////////////////////////////////////////////
@@ -147,7 +128,6 @@ const Cinfo* HHChannel2D::initCinfo()
 		);
 	static Finfo* HHChannel2DFinfos[] =
 	{
-		&proc,		// SharedFinfo
 		&Xindex,	// Value
 		&Yindex,	// Value
 		&Zindex,	// Value
@@ -446,7 +426,7 @@ double HHChannel2D::integrate( double state, double dt, double A, double B )
 	return state + A * dt ;
 }
 
-void HHChannel2D::process( const Eref& e, ProcPtr info )
+void HHChannel2D::vProcess( const Eref& e, ProcPtr info )
 {
 	g_ += ChanBase::getGbar();
 	double A = 0;
@@ -486,26 +466,15 @@ void HHChannel2D::process( const Eref& e, ProcPtr info )
 	// Ik_ = ( Ek_ - Vm_ ) * g_;
 
 	// Send out the relevant channel messages.
-	ChanCommon::vProcess( e, info );
-	/*
-	channelOut.send( e, info, Gk_, Ek_ );
-	
-	// This is used if the channel connects up to a conc pool and
-	// handles influx of ions giving rise to a concentration change.
-	IkOut.send( e, info, Ik_ );
-	
-	// Needed by GHK-type objects
-	permeability.send( e, info, Gk_ );
-	*/       
-     g_ = 0.0;
-
+	sendProcessMsgs( e, info );
+    g_ = 0.0;
  }
 
  /**
   * Here we get the steady-state values for the gate (the 'instant'
   * calculation) as A_/B_.
   */
- void HHChannel2D::reinit( const Eref& er, ProcPtr info )
+ void HHChannel2D::vReinit( const Eref& er, ProcPtr info )
  {
      g_ = ChanBase::getGbar();
      Element* e = er.element();
@@ -555,13 +524,7 @@ void HHChannel2D::process( const Eref& e, ProcPtr info )
 
      // Send out the relevant channel messages.
      // Same for reinit as for process.
-     ChanBase::reinit( er, info );
-
-     /*
-     channelOut.send( er, info, Gk_, Ek_ );
-     // Needed by GHK-type objects
-     permeability.send( er, info, Gk_ );
-     */
+     sendReinitMsgs( er, info );
 	g_ = 0.0;
 }
 

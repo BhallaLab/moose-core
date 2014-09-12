@@ -19,26 +19,6 @@ const Cinfo* MgBlock::initCinfo()
 	/////////////////////////////////////////////////////////////////////
 	// Shared messages
 	/////////////////////////////////////////////////////////////////////
-	static DestFinfo process( "process", 
-		"Handles process call",
-		new ProcOpFunc< MgBlock >( &MgBlock::process ) );
-	static DestFinfo reinit( "reinit", 
-		"Handles reinit call",
-		new ProcOpFunc< MgBlock >( &MgBlock::reinit ) );
-	static Finfo* processShared[] =
-	{
-		&process, &reinit
-	};
-	static SharedFinfo proc( "proc", 
-			"This is a shared message to receive Process message from the"
-			"scheduler. The first entry is a MsgDest for the Process "
-			"operation. It has a single argument, ProcInfo, which "
-			"holds lots of information about current time, thread, dt and"
-			"so on.\n The second entry is a MsgDest for the Reinit "
-			"operation. It also uses ProcInfo.",
-		processShared, sizeof( processShared ) / sizeof( Finfo* )
-	);
-
 	///////////////////////////////////////////////////////
 	// Dest definitions
 	///////////////////////////////////////////////////////
@@ -64,11 +44,6 @@ const Cinfo* MgBlock::initCinfo()
 			&MgBlock::setCMg,
 			&MgBlock::getCMg
 		);
-	static ValueFinfo< MgBlock, double > Ik( "Ik",
-			"Current through MgBlock",
-			&MgBlock::setIk,
-			&MgBlock::getIk
-		);
 	static ValueFinfo< MgBlock, double > Zk( "Zk",
 			"Charge on ion",
 			&MgBlock::setZk,
@@ -77,12 +52,10 @@ const Cinfo* MgBlock::initCinfo()
 	/////////////////////////////////////////////////////////////////////
 	static Finfo* MgBlockFinfos[] =
 	{
-		&proc,		// Shared
 		&origChannel,	// Dest
 		&KMg_A,			// Value
 		&KMg_B,			// Value
 		&CMg,			// Value
-		&Ik,			// Value
 		&Zk,			// Value
 	};
 
@@ -174,7 +147,7 @@ void MgBlock::setZk( double Zk )
 // Process functions
 ///////////////////////////////////////////////////////////
 
-void MgBlock::process( const Eref& e, ProcPtr info )
+void MgBlock::vProcess( const Eref& e, ProcPtr info )
 {
 	double KMg = KMg_A_ * exp(Vm_/KMg_B_);
 	ChanBase::setGk( origGk_ * KMg / ( KMg + CMg_ ) );
@@ -184,10 +157,10 @@ void MgBlock::process( const Eref& e, ProcPtr info )
 	updateIk();
 	// send2< double, double >( e, channelSlot, Gk_, Ek_ );
 	// Ik_ = Gk_ * (Ek_ - Vm_);
-	ChanBase::process( e, info );
+	sendProcessMsgs( e, info );
 }
 
-void MgBlock::reinit( const Eref& e, ProcPtr info )
+void MgBlock::vReinit( const Eref& e, ProcPtr info )
 {
 	Zk_ = 0;
 	if ( CMg_ < EPSILON || KMg_B_ < EPSILON || KMg_A_ < EPSILON ) {
@@ -196,6 +169,7 @@ void MgBlock::reinit( const Eref& e, ProcPtr info )
 		if ( KMg_B_ < EPSILON ) KMg_B_ = 1.0;
 		if ( KMg_A_ < EPSILON ) KMg_A_ = 1.0;
 	}
+	sendReinitMsgs( e, info );
 }
 
 ///////////////////////////////////////////////////
