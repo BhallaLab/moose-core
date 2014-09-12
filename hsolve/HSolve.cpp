@@ -212,8 +212,6 @@ void HSolve::zombify( Eref hsolve ) const
 
     for ( i = compartmentId_.begin(); i != compartmentId_.end(); ++i )
 		temp.push_back( ObjId( *i, 0 ) );
-	Shell::dropClockMsgs( temp, "init" );
-	Shell::dropClockMsgs( temp, "process" );
     for ( i = compartmentId_.begin(); i != compartmentId_.end(); ++i )
         CompartmentBase::zombify( i->eref().element(),
 					   ZombieCompartment::initCinfo(), hsolve.id() );
@@ -221,16 +219,16 @@ void HSolve::zombify( Eref hsolve ) const
 	temp.clear();
     for ( i = caConcId_.begin(); i != caConcId_.end(); ++i )
 		temp.push_back( ObjId( *i, 0 ) );
-	Shell::dropClockMsgs( temp, "process" );
+	// Shell::dropClockMsgs( temp, "process" );
     for ( i = caConcId_.begin(); i != caConcId_.end(); ++i )
         CaConcBase::zombify( i->eref().element(), ZombieCaConc::initCinfo(), hsolve.id() );
 
 	temp.clear();
     for ( i = channelId_.begin(); i != channelId_.end(); ++i )
 		temp.push_back( ObjId( *i, 0 ) );
-	Shell::dropClockMsgs( temp, "process" );
     for ( i = channelId_.begin(); i != channelId_.end(); ++i )
-        ZombieHHChannel::zombify( hsolve.element(), i->eref().element() );
+        HHChannelBase::zombify( i->eref().element(), 
+						ZombieHHChannel::initCinfo(), hsolve.id() );
 }
 
 void HSolve::setup( Eref hsolve )

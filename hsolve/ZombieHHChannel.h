@@ -41,10 +41,11 @@
 #include "../biophysics/ChanBase.h"
 #include "../biophysics/ChanCommon.h"
 #include "../biophysics/Compartment.h"
+#include "../biophysics/HHChannelBase.h"
 #include "../biophysics/HHChannel.h"
 #include "../external/debug/print_function.hpp"
 
-class ZombieHHChannel
+class ZombieHHChannel: public HHChannelBase
 {
 public:
     ZombieHHChannel();
@@ -53,107 +54,72 @@ public:
     // Value field access function definitions
     /////////////////////////////////////////////////////////////
 
-    void setGbar( const Eref& e , double Gbar );
-    double getGbar( const Eref& e  ) const;
-    void setGk( const Eref& e , double Gk );
-    double getGk( const Eref& e  ) const;
-    void setEk( const Eref& e , double Ek );
-    double getEk( const Eref& e  ) const;
-    /// Ik is read-only
-    double getIk( const Eref& e  ) const;
-    void setXpower( const Eref& e , double Xpower );
-    double getXpower( const Eref& e  ) const;
-    void setYpower( const Eref& e , double Ypower );
-    double getYpower( const Eref& e  ) const;
-    void setZpower( const Eref& e , double Zpower );
-    double getZpower( const Eref& e  ) const;
-    void setInstant( const Eref& e , int instant );
-    int getInstant( const Eref& e  ) const;
-    void setX( const Eref& e , double X );
-    double getX( const Eref& e  ) const;
-    void setY( const Eref& e , double Y );
-    double getY( const Eref& e  ) const;
-    void setZ( const Eref& e , double Z );
-    double getZ( const Eref& e  ) const;
+    void vSetGbar( const Eref& e , double Gbar );
+    double vGetGbar( const Eref& e  ) const;
+    void vSetGk( const Eref& e , double Gk );
+    double vGetGk( const Eref& e  ) const;
+    void vSetEk( const Eref& e , double Ek );
+    double vGetEk( const Eref& e  ) const;
+    void vSetIk( const Eref& e, double Ik );
+    double vGetIk( const Eref& e  ) const;
+    void vSetXpower( const Eref& e , double Xpower );
+    void vSetYpower( const Eref& e , double Ypower );
+    void vSetZpower( const Eref& e , double Zpower );
+    void vSetInstant( const Eref& e , int instant );
+    int vGetInstant( const Eref& e  ) const;
+    void vSetX( const Eref& e , double X );
+    double vGetX( const Eref& e  ) const;
+    void vSetY( const Eref& e , double Y );
+    double vGetY( const Eref& e  ) const;
+    void vSetZ( const Eref& e , double Z );
+    double vGetZ( const Eref& e  ) const;
     /**
      * Not trivial to change Ca-dependence once HSolve has been set up, and
      * unlikely that one would want to change this field after setup, so
      * keeping this field read-only.
      */
-    void setUseConcentration( int value );
-    int getUseConcentration() const;
+    void vSetUseConcentration( const Eref& e, int value );
+    // implemented in baseclass: int getUseConcentration() const;
 
     /////////////////////////////////////////////////////////////
     // Dest function definitions
     /////////////////////////////////////////////////////////////
 
-    void process( const Eref& e, ProcPtr p );
-    void reinit( const Eref& e, ProcPtr p );
-    void handleConc( double value);
-    void createGate(const Eref& e , string name);
+    void vProcess( const Eref& e, ProcPtr p );
+    void vReinit( const Eref& e, ProcPtr p );
+    void vHandleConc( const Eref& e, double value);
+    void vCreateGate(const Eref& e , string name);
     
-    // Not sure if the Zombie should hold these. Keeping them out for now.
+    /////////////////////////////////////////////////////////////
+	// Dummy function, not needed in Zombie.
+	void vHandleVm( double Vm );
+
     /////////////////////////////////////////////////////////////
     // Gate handling functions
     /////////////////////////////////////////////////////////////
     /**
      * Access function used for the X gate. The index is ignored.
      */
-    HHGate* getXgate( unsigned int i );
+    HHGate* vGetXgate( unsigned int i ) const;
 
     /**
      * Access function used for the Y gate. The index is ignored.
      */
-    HHGate* getYgate( unsigned int i );
+    HHGate* vGetYgate( unsigned int i ) const;
 
     /**
      * Access function used for the Z gate. The index is ignored.
      */
-    HHGate* getZgate( unsigned int i );
-    void setNumGates(unsigned int num);
-    unsigned int getNumXgates() const;
-    unsigned int getNumYgates() const;
-    unsigned int getNumZgates() const;
+    HHGate* vGetZgate( unsigned int i ) const;
     /////////////////////////////////////////////////////////////
-    static const Cinfo* initCinfo();
+	void vSetSolver( const Eref& e , Id hsolve );
 
-    //////////////////////////////////////////////////////////////////
-    // utility funcs
-    //////////////////////////////////////////////////////////////////
-    static void zombify( Element* solver, Element* orig );
-    static void unzombify( Element* zombie );
+    static const Cinfo* initCinfo();
 
 private:
     HSolve* hsolve_;
 
-    /// Exponent for X gate
-    double Xpower_;
-    /// Exponent for Y gate
-    double Ypower_;
-    /// Exponent for Z gate
-    double Zpower_;
-
-    /// Flag for use of conc for input to Z gate calculations.
-    bool useConcentration_;
-
     void copyFields( Id chanId, HSolve* hsolve_ );
-
-
-    // Not sure if the Zombie should hold these. Keeping them out for now.
-    /**
-     * HHGate data structure for the xGate. This is writable only
-     * on the HHChannel that originally created the HHGate, for others
-     * it must be treated as readonly.
-     */
-    // HHGate* xGate_;
-
-    // /// HHGate data structure for the yGate.
-    // HHGate* yGate_;
-
-    // /// HHGate data structure for the yGate.
-    // HHGate* zGate_;
-
-    //~ Id myId_;
 };
 
 

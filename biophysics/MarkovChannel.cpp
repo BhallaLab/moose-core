@@ -235,7 +235,7 @@ void MarkovChannel::vProcess( const Eref& e, const ProcPtr p )
 	for( unsigned int i = 0; i < numOpenStates_; ++i )
 		g_ += Gbars_[i] * state_[i];			
 
-	setGk( g_ );
+	setGk( e, g_ );
 	updateIk();
 
 	sendProcessMsgs( e, p ); 

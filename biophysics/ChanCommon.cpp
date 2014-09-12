@@ -30,39 +30,39 @@ ChanCommon::~ChanCommon()
 // Field function definitions
 ///////////////////////////////////////////////////
 
-void ChanCommon::vSetGbar( double Gbar )
+void ChanCommon::vSetGbar( const Eref& e, double Gbar )
 {
 	Gbar_ = Gbar;
 }
 
-double ChanCommon::vGetGbar() const
+double ChanCommon::vGetGbar( const Eref& e ) const
 {
 	return Gbar_;
 }
 
-void ChanCommon::vSetEk( double Ek )
+void ChanCommon::vSetEk( const Eref& e, double Ek )
 {
 	Ek_ = Ek;
 }
-double ChanCommon::vGetEk() const
+double ChanCommon::vGetEk( const Eref& e ) const
 {
 	return Ek_;
 }
 
-void ChanCommon::vSetGk( double Gk )
+void ChanCommon::vSetGk( const Eref& e, double Gk )
 {
 	Gk_ = Gk;
 }
-double ChanCommon::vGetGk() const
+double ChanCommon::vGetGk( const Eref& e ) const
 {
 	return Gk_;
 }
 
-void ChanCommon::vSetIk( double Ik )
+void ChanCommon::vSetIk( const Eref& e, double Ik )
 {
 	Ik_ = Ik;
 }
-double ChanCommon::vGetIk() const
+double ChanCommon::vGetIk( const Eref& e ) const
 {
 	return Ik_;
 }
@@ -107,4 +107,9 @@ void ChanCommon::updateIk()
 double ChanCommon::getVm() const
 {
 	return Vm_;
+}
+
+double ChanCommon::getGbar() const
+{
+	return Gbar_;
 }
