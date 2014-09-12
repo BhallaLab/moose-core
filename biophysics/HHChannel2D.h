@@ -91,7 +91,7 @@ class HHChannel2D: public ChanCommon
 		 * send back to the parent compartment through regular 
 		 * messages.
 		 */
-		void process( const Eref& e, ProcPtr p );
+		void vProcess( const Eref& e, ProcPtr p );
 
 		/**
 		 * Reinitializes the values for the channel. This involves
@@ -100,7 +100,7 @@ class HHChannel2D: public ChanCommon
 		 * involves a similar cycle through the gates and then 
 		 * updates to the parent compartment as for the processFunc.
 		 */
-		void reinit( const Eref& e, ProcPtr p );
+		void vReinit( const Eref& e, ProcPtr p );
 		/**
 		 * Assign the local conc_ to the incoming conc from the
 		 * concentration calculations for the compartment. Typically

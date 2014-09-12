@@ -49,8 +49,8 @@ class SynChan: public ChanCommon
 // Dest function definitions
 ///////////////////////////////////////////////////
 
-		void process( const Eref& e, ProcPtr p );
-		void reinit( const Eref& e, ProcPtr p );
+		void vProcess( const Eref& e, ProcPtr p );
+		void vReinit( const Eref& e, ProcPtr p );
 
 		void activation( double val );
 		void modulator( double val );

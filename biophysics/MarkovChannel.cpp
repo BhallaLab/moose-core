@@ -18,30 +18,6 @@
 
 const Cinfo* MarkovChannel::initCinfo()
 {
-	//DestFinfos : process and reinit
-	static DestFinfo process(	"process",
-			"Handles process call",
-			new ProcOpFunc< MarkovChannel >( &MarkovChannel::process ) ); 
-
-	static DestFinfo reinit( "reinit", 
-			"Handles reinit call",
-			new ProcOpFunc< MarkovChannel >( &MarkovChannel::reinit ) );
-
-	static Finfo* processShared[] =
-	{
-		&process, &reinit
-	};
-
-	static SharedFinfo proc( "proc", 
-			"This is a shared message to receive Process message from the"
-			"scheduler. The first entry is a MsgDest for the Process "
-			"operation. It has a single argument, ProcInfo, which "
-			"holds lots of information about current time, thread, dt and"
-			"so on. The second entry is a MsgDest for the Reinit "
-			"operation. It also uses ProcInfo.",
-		processShared, sizeof( processShared ) / sizeof( Finfo* )
-	);
-
 	///////////////////////
 	//Field information.
 	///////////////////////
@@ -105,7 +81,6 @@ const Cinfo* MarkovChannel::initCinfo()
 	///////////////////////////////////////////
 	static Finfo* MarkovChannelFinfos[] = 
 	{
-		&proc,
 		&ligandconc,
 		&vm,
 		&numstates,						
@@ -249,7 +224,7 @@ void MarkovChannel::setGbars( vector< double > Gbars )
 //MsgDest functions
 ////////////////////////////
 
-void MarkovChannel::process( const Eref& e, const ProcPtr p ) 
+void MarkovChannel::vProcess( const Eref& e, const ProcPtr p ) 
 {
 	g_ = 0.0;
 	
@@ -263,10 +238,10 @@ void MarkovChannel::process( const Eref& e, const ProcPtr p )
 	setGk( g_ );
 	updateIk();
 
-	ChanBase::process( e, p ); 
+	sendProcessMsgs( e, p ); 
 }
 
-void MarkovChannel::reinit( const Eref& e, const ProcPtr p )
+void MarkovChannel::vReinit( const Eref& e, const ProcPtr p )
 {
 	g_ = 0.0;
 
@@ -277,7 +252,7 @@ void MarkovChannel::reinit( const Eref& e, const ProcPtr p )
 	}
 	state_ = initialState_;
 
-	ChanBase::reinit( e, p );	
+	sendReinitMsgs( e, p );	
 }
 
 void MarkovChannel::handleLigandConc( double ligandConc )
