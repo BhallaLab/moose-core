@@ -55,9 +55,8 @@ class ChanBase
 
 		/////////////////////////////////////////////////////////////
 		/**
-		 * This function sends out the messages expected of a channel,
-		 * after process or reinit. It is NOT used by the ChanBase
-		 * itself for a DestFinfo.
+		 * Takes over the Process and reinit functions of all derived
+		 * classes.
 		 */
 		void process( const Eref& e, const ProcPtr info );
 		void reinit( const Eref& e, const ProcPtr info );

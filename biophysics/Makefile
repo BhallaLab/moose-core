@@ -20,6 +20,7 @@ OBJ = \
 	GapJunction.o	\
 	ChanBase.o	\
 	ChanCommon.o	\
+	HHChannelBase.o	\
 	HHChannel.o	\
 	HHGate.o	\
 	HHGate2D.o	\
@@ -72,6 +73,7 @@ ChanBase.o: ChanBase.h
 ChanCommon.o: ChanBase.h ChanCommon.h
 Leakage.o: Leakage.h ChanBase.h ChanCommon.h
 GapJunction.o: GapJunction.h
+HHChannelBase.o: ChanBase.h HHChannelBase.h HHGate.h
 HHChannel.o: ChanBase.h HHChannel.h HHGate.h
 HHGate.o: HHGate.h
 HHChannel2D.o: ChanBase.h HHChannel2D.h HHGate2D.h

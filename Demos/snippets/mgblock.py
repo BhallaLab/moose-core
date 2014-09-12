@@ -141,8 +141,8 @@ def test_mgblock():
     pylab.plot(t, Gnmda.vector * 1e9, label='Gnmda (nS)')
     pylab.plot(t, Gnmda_noMg.vector * 1e9, label='Gnmda no Mg (nS)')
     pylab.legend()
-    data = pylab.vstack((t, Gnmda.vector, Gnmda_noMg.vector)).transpose()
-    pylab.savetxt('mgblock.dat', data)
+    #data = pylab.vstack((t, Gnmda.vector, Gnmda_noMg.vector)).transpose()
+    #pylab.savetxt('mgblock.dat', data)
     pylab.show()
     
 

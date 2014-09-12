@@ -17,6 +17,7 @@
 #include "../biophysics/HHGate.h"
 #include "../biophysics/ChanBase.h"
 #include "../biophysics/ChanCommon.h"
+#include "../biophysics/HHChannelBase.h"
 #include "../biophysics/HHChannel.h"
 #include "../biophysics/SpikeGen.h"
 #include "HSolveUtils.h"
