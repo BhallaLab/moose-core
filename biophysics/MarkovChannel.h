@@ -64,8 +64,8 @@ class MarkovChannel : public ChanCommon
 	//MsgDest functions
 	/////////////////////
 	
-	void process( const Eref&, const ProcPtr);
-	void reinit( const Eref&, const ProcPtr);
+	void vProcess( const Eref&, const ProcPtr);
+	void vReinit( const Eref&, const ProcPtr);
 	void handleLigandConc( double );
 	void handleState( vector< double > );
 

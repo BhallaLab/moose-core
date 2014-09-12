@@ -17,7 +17,7 @@
  * It knows how to communicate with the parent compartment, not much else.
  */
 
-class ChanCommon: public ChanBase
+class ChanCommon: public virtual ChanBase
 {
 	public:
 		ChanCommon();
@@ -50,11 +50,12 @@ class ChanCommon: public ChanBase
 		/////////////////////////////////////////////////////////////
 		/**
 		 * This function sends out the messages expected of a channel,
-		 * after process or reinit. It is NOT used by the ChanCommon
-		 * itself for a DestFinfo.
+		 * after process. Used as a utility by various derived classes.
 		 */
-		void vProcess( const Eref& e, const ProcPtr info );
-		void vReinit( const Eref& e, const ProcPtr info );
+		void sendProcessMsgs( const Eref& e, const ProcPtr info );
+		void sendReinitMsgs( const Eref& e, const ProcPtr info );
+
+		/////////////////////////////////////////////////////////////
 
 		/**
 		 * Utility function for a common computation using local variables
