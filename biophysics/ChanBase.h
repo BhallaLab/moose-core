@@ -26,22 +26,22 @@ class ChanBase
 		// Value field access function definitions
 		/////////////////////////////////////////////////////////////
 
-		void setGbar( double Gbar );
-		virtual void vSetGbar( double Gbar ) = 0;
-		double getGbar() const;
-		virtual double vGetGbar() const = 0;
-		void setEk( double Ek );
-		virtual void vSetEk( double Ek ) = 0;
-		double getEk() const;
-		virtual double vGetEk() const = 0;
-		void setGk( double Gk );
-		virtual void vSetGk( double Gk ) = 0;
-		double getGk() const;
-		virtual double vGetGk() const = 0;
-		void setIk( double Ic );
-		virtual void vSetIk( double Ik ) = 0;
-		double getIk() const;
-		virtual double vGetIk() const = 0;
+		void setGbar( const Eref& e, double Gbar );
+		virtual void vSetGbar( const Eref& e, double Gbar ) = 0;
+		double getGbar( const Eref& e ) const;
+		virtual double vGetGbar( const Eref& e ) const = 0;
+		void setEk( const Eref& e, double Ek );
+		virtual void vSetEk( const Eref& e, double Ek ) = 0;
+		double getEk( const Eref& e ) const;
+		virtual double vGetEk( const Eref& e ) const = 0;
+		void setGk( const Eref& e, double Gk );
+		virtual void vSetGk( const Eref& e, double Gk ) = 0;
+		double getGk( const Eref& e ) const;
+		virtual double vGetGk( const Eref& e ) const = 0;
+		void setIk( const Eref& e, double Ic );
+		virtual void vSetIk( const Eref& e, double Ik ) = 0;
+		double getIk( const Eref& e ) const;
+		virtual double vGetIk( const Eref& e ) const = 0;
 
 		/////////////////////////////////////////////////////////////
 		// Dest function definitions

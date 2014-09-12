@@ -30,7 +30,7 @@ class SynChan: public ChanCommon
 		bool getNormalizeWeights() const;
 
 		// override virtual func from ChanBase
-		void vSetGbar( double Gbar );
+		void vSetGbar( const Eref& e, double Gbar );
 
 		/////////////////////////////////////////////////////////////////
 		// Utility function for any time Gbar changes

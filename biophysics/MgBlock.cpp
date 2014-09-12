@@ -24,7 +24,7 @@ const Cinfo* MgBlock::initCinfo()
 	///////////////////////////////////////////////////////
 	static DestFinfo origChannel( "origChannel", 
 		"",
-		new OpFunc2< MgBlock, double, double > (&MgBlock::origChannel )
+		new EpFunc2< MgBlock, double, double > (&MgBlock::origChannel )
 	);
 	///////////////////////////////////////////////////////
 	// Field definitions
@@ -150,7 +150,7 @@ void MgBlock::setZk( double Zk )
 void MgBlock::vProcess( const Eref& e, ProcPtr info )
 {
 	double KMg = KMg_A_ * exp(Vm_/KMg_B_);
-	ChanBase::setGk( origGk_ * KMg / ( KMg + CMg_ ) );
+	ChanBase::setGk( e, origGk_ * KMg / ( KMg + CMg_ ) );
 	// ChanBase::setGk( ChanBase::getGk() * KMg / ( KMg + CMg_ ) );
 	// Gk_ = Gk_ * KMg / (KMg + CMg_);
 
@@ -175,11 +175,11 @@ void MgBlock::vReinit( const Eref& e, ProcPtr info )
 ///////////////////////////////////////////////////
 // Dest functions
 ///////////////////////////////////////////////////
-void MgBlock::origChannel( double Gk, double Ek )
+void MgBlock::origChannel( const Eref& e, double Gk, double Ek )
 {
 	// setGk( Gk );
-        origGk_ = Gk;
-	setEk( Ek );
+    origGk_ = Gk;
+	setEk( e, Ek );
 }
 
 ///////////////////////////////////////////////////

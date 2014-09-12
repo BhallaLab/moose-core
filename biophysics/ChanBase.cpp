@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "ElementValueFinfo.h"
 #include "ChanBase.h"
 
 SrcFinfo1< double >* ChanBase::permeability()
@@ -86,22 +87,22 @@ const Cinfo* ChanBase::initCinfo()
 // Field definitions
 ///////////////////////////////////////////////////////
 
-		static ValueFinfo< ChanBase, double > Gbar( "Gbar",
+		static ElementValueFinfo< ChanBase, double > Gbar( "Gbar",
 			"Maximal channel conductance",
 			&ChanBase::setGbar,
 			&ChanBase::getGbar
 		);
-		static ValueFinfo< ChanBase, double > Ek( "Ek", 
+		static ElementValueFinfo< ChanBase, double > Ek( "Ek", 
 			"Reversal potential of channel",
 			&ChanBase::setEk,
 			&ChanBase::getEk
 		);
-		static ValueFinfo< ChanBase, double > Gk( "Gk",
+		static ElementValueFinfo< ChanBase, double > Gk( "Gk",
 			"Channel conductance variable",
 			&ChanBase::setGk,
 			&ChanBase::getGk
 		);
-		static ReadOnlyValueFinfo< ChanBase, double > Ik( "Ik",
+		static ReadOnlyElementValueFinfo< ChanBase, double > Ik( "Ik",
 			"Channel current variable",
 			&ChanBase::getIk
 		);
@@ -168,42 +169,42 @@ ChanBase::~ChanBase()
 // Field function definitions
 ///////////////////////////////////////////////////
 //
-void ChanBase::setGbar( double Gbar )
+void ChanBase::setGbar( const Eref& e, double Gbar )
 {
 	// Call virtual functions of derived classes for this operation.
-	vSetGbar( Gbar );
+	vSetGbar( e, Gbar );
 }
 
-double ChanBase::getGbar() const
+double ChanBase::getGbar( const Eref& e ) const
 {
-	return vGetGbar();
+	return vGetGbar( e );
 }
 
-void ChanBase::setEk( double Ek )
+void ChanBase::setEk( const Eref& e, double Ek )
 {
-	vSetEk( Ek );
+	vSetEk( e, Ek );
 }
-double ChanBase::getEk() const
+double ChanBase::getEk( const Eref& e ) const
 {
-	return vGetEk();
-}
-
-void ChanBase::setGk( double Gk )
-{
-	vSetGk( Gk );
-}
-double ChanBase::getGk() const
-{
-	return vGetGk();
+	return vGetEk( e );
 }
 
-void ChanBase::setIk( double Ik )
+void ChanBase::setGk( const Eref& e, double Gk )
 {
-	vSetIk( Ik );
+	vSetGk( e, Gk );
 }
-double ChanBase::getIk() const
+double ChanBase::getGk( const Eref& e ) const
 {
-	return vGetIk();
+	return vGetGk( e );
+}
+
+void ChanBase::setIk( const Eref& e, double Ik )
+{
+	vSetIk( e, Ik );
+}
+double ChanBase::getIk( const Eref& e ) const
+{
+	return vGetIk( e );
 }
 
 ///////////////////////////////////////////////////

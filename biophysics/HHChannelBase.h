@@ -105,6 +105,7 @@ class HHChannelBase: public virtual ChanBase
 		virtual void vSetXpower( const Eref& e, double Xpower ) = 0;
 		virtual void vSetYpower( const Eref& e, double Ypower ) = 0;
 		virtual void vSetZpower( const Eref& e, double Zpower ) = 0;
+		// getXpower etc functions are implemented here in the baseclass.
 		virtual void vSetInstant( const Eref& e, int Instant ) = 0;
 		virtual int vGetInstant( const Eref& e ) const = 0;
 		virtual void vSetX( const Eref& e, double X ) = 0;
@@ -163,6 +164,12 @@ class HHChannelBase: public virtual ChanBase
 		static double powerN( double x, double p );
 
 		static PFDD selectPower( double power);
+
+		/////////////////////////////////////////////////////////////
+		// Zombification functions.
+		/////////////////////////////////////////////////////////////
+		virtual void vSetSolver( const Eref& e, Id hsolve );
+		static void zombify( Element* orig, const Cinfo* zClass, Id hsolve);
 
 		/////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();

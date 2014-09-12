@@ -120,9 +120,9 @@ SynChan::~SynChan()
 // Field function definitions
 ///////////////////////////////////////////////////
 //
-void SynChan::vSetGbar( double Gbar )
+void SynChan::vSetGbar( const Eref& e, double Gbar )
 {
-	ChanCommon::vSetGbar( Gbar );
+	ChanCommon::vSetGbar( e, Gbar );
 	normalizeGbar();
 }
 
@@ -178,14 +178,14 @@ void SynChan::normalizeGbar()
 {
         if ( doubleEq( tau2_, 0.0 ) ) {
                 // norm_ = 1.0;
-                norm_ = ChanBase::getGbar();
+                norm_ = ChanCommon::getGbar();
         } else {
                 if ( doubleEq( tau1_, tau2_ ) ) {
-                    norm_ = ChanBase::getGbar() * SynE() / tau1_;
+                    norm_ = ChanCommon::getGbar() * SynE() / tau1_;
                 } else {
                     double tpeak = tau1_ * tau2_ * log( tau1_ / tau2_ ) / 
                             ( tau1_ - tau2_ );
-                    norm_ = ChanBase::getGbar() * ( tau1_ - tau2_ ) / 
+                    norm_ = ChanCommon::getGbar() * ( tau1_ - tau2_ ) / 
                             ( tau1_ * tau2_ * ( 
                             exp( -tpeak / tau1_ ) - exp( -tpeak / tau2_ )
                                                 ));
@@ -209,7 +209,7 @@ void SynChan::vProcess( const Eref& e, ProcPtr info )
 	X_ = modulation_ * activation_ * xconst1_ / info->dt + X_ * xconst2_;
 	Y_ = X_ * yconst1_ + Y_ * yconst2_;
 	double Gk = Y_ * norm_;
-	setGk( Gk );
+	setGk( e, Gk );
 	updateIk();
 	activation_ = 0.0;
 	modulation_ = 1.0;
@@ -224,8 +224,8 @@ void SynChan::vReinit( const Eref& e, ProcPtr info )
 	dt_ = info->dt;
 	activation_ = 0.0;
 	modulation_ = 1.0;
-	ChanBase::setGk( 0.0 );
-	ChanBase::setIk( 0.0 );
+	ChanBase::setGk( e, 0.0 );
+	ChanBase::setIk( e, 0.0 );
 	X_ = 0.0;
 	Y_ = 0.0;
     // These below statements are also called when setting tau1 and tau2

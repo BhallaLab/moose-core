@@ -284,7 +284,7 @@ double HHChannel::integrate( double state, double dt, double A, double B )
 
 void HHChannel::vProcess( const Eref& e, ProcPtr info )
 {
-	g_ += ChanCommon::vGetGbar();
+	g_ += ChanCommon::vGetGbar( e );
 	double A = 0;
 	double B = 0;
 	if ( Xpower_ > 0 ) {
@@ -319,7 +319,7 @@ void HHChannel::vProcess( const Eref& e, ProcPtr info )
 		g_ *= takeZpower_( Z_, Zpower_ );
 	}
 
-	ChanCommon::vSetGk( g_ );
+	ChanCommon::vSetGk( e, g_ );
 	this->updateIk();
 	// Gk_ = g_;
 	// Ik_ = ( Ek_ - Vm_ ) * g_;
@@ -336,7 +336,7 @@ void HHChannel::vProcess( const Eref& e, ProcPtr info )
  */
 void HHChannel::vReinit( const Eref& er, ProcPtr info )
 {
-	g_ = ChanCommon::vGetGbar();
+	g_ = ChanCommon::vGetGbar( er );
 	Element* e = er.element();
 
 	double A = 0.0;
@@ -383,7 +383,7 @@ void HHChannel::vReinit( const Eref& er, ProcPtr info )
 		g_ *= takeZpower_( Z_, Zpower_ );
 	}
 
-	ChanCommon::vSetGk( g_ );
+	ChanCommon::vSetGk( er, g_ );
 	updateIk();
 	// Gk_ = g_;
 	// Ik_ = ( Ek_ - Vm_ ) * g_;

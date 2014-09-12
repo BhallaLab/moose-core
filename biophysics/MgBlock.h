@@ -61,7 +61,7 @@ class MgBlock: public ChanCommon
 		 * Assign the local Vm_ to the incoming Vm from the compartment
 		 */
 // 		void channelFunc( double Vm );
-		void origChannel( double Gk, double Ek );
+		void origChannel( const Eref& e, double Gk, double Ek );
 		
 		static const Cinfo* initCinfo();
 	private:
