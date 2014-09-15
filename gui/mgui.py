@@ -50,7 +50,7 @@ import code
 import traceback
 import sys
 sys.path.append('../python')
-sys.path.append('utils')
+#sys.path.append('utils')
 import os
 from collections import defaultdict
 import posixpath # We use this to create MOOSE paths
