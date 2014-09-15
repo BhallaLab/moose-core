@@ -34,6 +34,7 @@ def create_action( parent
                  , callback
                  , text
                  , checkable
+                 , checked
                  , icon_path
                  ):
     pixmap = QPixmap(icon_path)
@@ -43,6 +44,7 @@ def create_action( parent
     # action.setIconText(text)
     action.triggered.connect(callback)
     action.setCheckable(checkable)
+    action.setChecked(checked)
     return action
 
 
@@ -50,6 +52,7 @@ def mode_action( parent
                , callback   = (lambda event: print("Mode Clicked!"))
                , text       = "Mode"
                , checkable  = True
+               , checked    = True
                , icon_path  = os.path.join( ICON_DIRECTORY
                                           , HAND_ICON_FILENAME
                                           )
@@ -58,6 +61,7 @@ def mode_action( parent
                         , callback
                         , text
                         , checkable
+                        , checked
                         , icon_path
                         )
 
@@ -65,6 +69,7 @@ def connector_action( parent
                     , callback   = (lambda event: print("Connector Clicked!"))
                     , text       = "Mode"
                     , checkable  = True
+                    , checked    = False
                     , icon_path  = os.path.join( ICON_DIRECTORY
                                                , CONNECTOR_ICON_FILENAME
                                                )
@@ -73,6 +78,7 @@ def connector_action( parent
                         , callback
                         , text
                         , checkable
+                        , checked
                         , icon_path
                         )
 
@@ -80,6 +86,7 @@ def settings_action( parent
                    , callback   = (lambda event: print("Settings Clicked"))
                    , text       = "Mode"
                    , checkable  = False
+                   , checked    = False
                    , icon_path  = os.path.join( ICON_DIRECTORY
                                               , WRENCH_ICON_FILENAME
                                               )
@@ -88,6 +95,7 @@ def settings_action( parent
                         , callback
                         , text
                         , checkable
+                        , checked
                         , icon_path
                         )
 
