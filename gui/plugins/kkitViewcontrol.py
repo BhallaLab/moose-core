@@ -20,14 +20,13 @@ class GraphicalView(QtGui.QGraphicsView):
         self.border = 6
         self.setRenderHints(QtGui.QPainter.Antialiasing)
         self.layoutPt = layoutPt        
-        self.setAcceptDrops(True)
+        #self.setAcceptDrops(True)
         self.createdItem = createdItem
         # All the object which are stacked on the scene are listed
         self.stackOrder = self.sceneContainerPt.items(Qt.Qt.DescendingOrder)
         #From stackOrder selecting only compartment
         self.cmptStackorder = [i for i in self.stackOrder if isinstance(i,ComptItem)]
-    
-
+        
     def mousePressEvent(self, event):
         selectedItem = None
         if self.refWidgetBase == "kineticEditorWidget":
@@ -215,9 +214,7 @@ class GraphicalView(QtGui.QGraphicsView):
             pos = event.pos()
             viewItems = self.items(pos)
             mapToscene = self.mapToScene(event.pos())
-
             newString = str(event.mimeData().text())
-            print "nreString",newString
             Item = NewObject(self.refWidgetBase,self,self.modelRoot,newString,mapToscene,self.createdItem)
             self.sceneContainerPt.addItem(Item)
             Item.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations,True)

@@ -30,15 +30,12 @@ class KkitPlugin(MoosePlugin):
         #print args
         MoosePlugin.__init__(self, *args)
         self.view = None
-        self.plotView = PlotView(self)
-        self.getRunView()
-        self.plotView.dataTable = self.view._centralWidget.dataTable
-        self.plotView.updateCallback = self.view._centralWidget.legendUpdate
-        self.view._centralWidget.legendUpdate()
+        #self.plotView = PlotView(self)
+        #self.getRunView()
+        #self.plotView.dataTable = self.view._centralWidget.dataTable
+        #self.plotView.updateCallback = self.view._centralWidget.legendUpdate
+        #self.view._centralWidget.legendUpdate()
         #self.dataTable = DataTable(self.dataRoot)
-
-    def getPlotView(self):
-        return self.plotView
 
     def getPreviousPlugin(self):
         return None
@@ -70,6 +67,7 @@ class KkitPlugin(MoosePlugin):
         self.view = RunView(self)
         graphView = self.view._centralWidget
         graphView.setDataRoot(self.modelRoot)
+        graphView.plotAllData()
         schedulingDockWidget = self.view.getSchedulingDockWidget().widget()
         self._kkitWidget = self.view.plugin.getEditorView().getCentralWidget()
         #self.runView = KkitRunView(self,self.dataTable)
@@ -157,7 +155,7 @@ class  KineticsWidget(EditorWidgetBase):
     def __init__(self, *args):
         EditorWidgetBase.__init__(self, *args)
 
-        self.setAcceptDrops(True)
+        #self.setAcceptDrops(True)
         self.border = 10        
         self.sceneContainer = QtGui.QGraphicsScene(self)
         self.sceneContainer.setSceneRect(self.sceneContainer.itemsBoundingRect())
@@ -375,7 +373,13 @@ class  KineticsWidget(EditorWidgetBase):
                 self.layout().removeWidget(self.view)
             createdItem = {}
             self.sceneContainer.setSceneRect(-self.width()/2,-self.height()/2,self.width(),self.height())
+
             self.view = GraphicalView(self.widget, self.modelRoot,self.sceneContainer,self.border,self,createdItem)
+
+            if isinstance(self,kineticEditorWidget):
+                self.widget = "kineticEditorWidget"
+                self.view.setRefWidget("editor")
+                self.view.setAcceptDrops(True)
             self.connect(self.view, QtCore.SIGNAL("dropped"), self.objectEditSlot)
             hLayout = QtGui.QGridLayout(self)
             self.setLayout(hLayout)
@@ -662,7 +666,8 @@ class kineticEditorWidget(KineticsWidget):
         classlist = ['CubeMesh','CylMesh','Pool','BufPool','SumFunc','Reac','Enz','MMenz','StimulusTable']
         insertMapper, actions = self.getInsertActions(classlist)
         for action in actions:
-            self.insertMenu.addAction(action)        
+            self.insertMenu.addAction(action)
+        #self.view.setAcceptDrops(True)
 
     def GrViewresize(self,event):
         #when Gui resize and event is sent which inturn call resizeEvent of qgraphicsview
