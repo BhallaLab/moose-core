@@ -18,6 +18,8 @@ def NewObject(EditWB,view,modelRoot,newString,mapToscene,createdItem):
         createdItem[newString] += 1
     else:
         createdItem[newString] = 1
+    
+    modelRoot1 = moose.Neutral('%s/%s' % (modelRoot, 'model'))
     if newString == 'CubeMesh':
         #compartment = checkExist(modelRoot,newString,createdItem)
         if not num is None:
