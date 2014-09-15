@@ -7,7 +7,7 @@ class GraphicalView(QtGui.QGraphicsView):
     def __init__(self,XWidgetBase,modelRoot,parent,border,layoutPt,createdItem):
         QtGui.QGraphicsView.__init__(self,parent)
         self.setScene(parent)
-        self.refWidgetBase = XWidgetBase
+        
         self.modelRoot = modelRoot
         self.sceneContainerPt = parent
         self.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
@@ -26,10 +26,13 @@ class GraphicalView(QtGui.QGraphicsView):
         self.stackOrder = self.sceneContainerPt.items(Qt.Qt.DescendingOrder)
         #From stackOrder selecting only compartment
         self.cmptStackorder = [i for i in self.stackOrder if isinstance(i,ComptItem)]
-        
+        self.viewBaseType = " " 
+
+    def setRefWidget(self,path):
+        self.viewBaseType = path
     def mousePressEvent(self, event):
         selectedItem = None
-        if self.refWidgetBase == "kineticEditorWidget":
+        if self.viewBaseType == "editorView":
             if event.buttons() == QtCore.Qt.LeftButton:
                 self.startingPos = event.pos()
                 self.startScenepos = self.mapToScene(self.startingPos)
@@ -85,7 +88,7 @@ class GraphicalView(QtGui.QGraphicsView):
                 else:
                     QtGui.QGraphicsView.mousePressEvent(self,event)
 
-        elif self.refWidgetBase == "kineticRunWidget":
+        elif self.viewBaseType == "runView":
             pos = event.pos()
             item = self.itemAt(pos)
             itemClass = type(item).__name__
@@ -186,21 +189,21 @@ class GraphicalView(QtGui.QGraphicsView):
         
     
     def dragEnterEvent(self, event):
-        if self.refWidgetBase == "kineticEditorWidget":
+        if self.viewBaseType == "editorView":
             if event.mimeData().hasFormat('text/plain'):
                 event.acceptProposedAction()
         else:
             pass
 
     def dragMoveEvent(self, event):
-        if self.refWidgetBase == "kineticEditorWidget":
+        if self.viewBaseType == "editorView":
             if event.mimeData().hasFormat('text/plain'):
                 event.acceptProposedAction()
         else:
             pass
 
     def eventFilter(self, source, event):
-        if self.refWidgetBase == "kineticEditorWidget":
+        if self.viewBase == "editorView":
             if (event.type() == QtCore.QEvent.Drop):
                 pass
         else:
@@ -208,14 +211,14 @@ class GraphicalView(QtGui.QGraphicsView):
 
     def dropEvent(self, event):
         """Insert an element of the specified class in drop location"""
-        if self.refWidgetBase == "kineticEditorWidget":
+        if self.viewBaseType == "editorView":
             if not event.mimeData().hasFormat('text/plain'):
                 return
             pos = event.pos()
             viewItems = self.items(pos)
             mapToscene = self.mapToScene(event.pos())
             newString = str(event.mimeData().text())
-            Item = NewObject(self.refWidgetBase,self,self.modelRoot,newString,mapToscene,self.createdItem)
+            Item = NewObject(self.viewBaseType,self,self.modelRoot,newString,mapToscene,self.createdItem)
             self.sceneContainerPt.addItem(Item)
             Item.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations,True)
             self.setScene(self.sceneContainerPt)
