@@ -150,16 +150,17 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
         self.undoStack = deque(maxlen=undolen)
         self.redoStack = deque(maxlen=undolen)
         self.checkState_ = False
-
+        
         for fieldName in self.mooseObject.getFieldNames('valueFinfo'):
             if fieldName in extra_fields :
                 continue
 
             value = self.mooseObject.getField(fieldName)
             self.fields.append(fieldName)
-        if self.mooseObject.className == "Pool":
-            self.fields.append("plot Conc")
-            self.fields.append("plot n")
+        #harsha: For signalling models will be pulling out notes field from Annotator
+        #        can updates if exist for other types also
+        if ( isinstance(self.mooseObject, moose.PoolBase) or isinstance(self.mooseObject,moose.ReacBase) or isinstance(self.mooseObject,moose.EnzBase)) :
+            self.fields.append("Notes")
         flag = QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable
         self.fieldFlags[fieldName] = flag
 
@@ -170,14 +171,12 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
         return len(self.headerdata)
 
     def setData(self, index, value, role=QtCore.Qt.EditRole): 
-        print "role",role
         if not index.isValid() or index.row () >= len(self.fields) or index.column() != 1:
             return False
         print(value)
         field = self.fields[index.row()]
         if (role == QtCore.Qt.CheckStateRole):
             if (index.column() == 1):
-                print "index",index.row(),index.column(),value,index.flags()
                 self.checkState_ = value
                 return True
                 
@@ -185,10 +184,18 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
             value = str(value.toString()).strip() # convert Qt datastructure to Python string
             if len(value) == 0:
                 return False
-            oldValue = self.mooseObject.getField(field)
-            value = type(oldValue)(value)
-            self.mooseObject.setField(field, value)
-            self.undoStack.append((index, oldValue))
+            if field == "Notes":
+                field = "notes"
+                ann = moose.Annotator(self.mooseObject.path+'/info')
+                oldValue = ann.getField(field)
+                value = type(oldValue)(value)
+                ann.setField(field,value)
+                self.undoStack.append((index,oldValue))
+            else:
+                oldValue = self.mooseObject.getField(field)
+                value = type(oldValue)(value)
+                self.mooseObject.setField(field, value)
+                self.undoStack.append((index, oldValue))
             if field == 'name':
                 self.emit(QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'), self.mooseObject)
             return True
@@ -235,12 +242,16 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
         #setter = 'set_%s' % (self.fields[index.row()])
         #print " from Object setter",setter, "object",self.mooseObject, " ",self.mooseObject.getFieldNames('destFinfo');
         if index.column() == 1:
+            if field == "Notes":
+                ann = moose.Annotator(self.mooseObject.path+'/info')
+                if setter in ann.getFieldNames('destFinfo'):
+                    flag |= QtCore.Qt.ItemIsEditable
 
             if setter in self.mooseObject.getFieldNames('destFinfo'):
                 flag |= QtCore.Qt.ItemIsEditable
             
-            if field == "plot Conc" or field == "plot n":
-                flag |= QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEditable
+            #if field == "Notes":
+            #    flag |= QtCore.Qt.ItemIsEditable
 
         # !! Replaced till here
 
@@ -261,8 +272,13 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
                     return self.checkState_
             elif (role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole):
                 try:
-                    if ((str(field) != "plot Conc") & (str(field) != "plot n") ):
+                    if ( (str(field) != "Notes") ):
                         ret = self.mooseObject.getField(str(field))
+                        ret = QtCore.QVariant(QtCore.QString(str(ret)))
+                    elif(str(field) == "Notes"):
+                        astr = self.mooseObject.path+'/info'
+                        mastr = moose.Annotator(astr)
+                        ret = (mastr).getField(str('notes'))
                         ret = QtCore.QVariant(QtCore.QString(str(ret)))
                 except ValueError:
                     ret = None
