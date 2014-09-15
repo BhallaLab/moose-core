@@ -64,14 +64,15 @@ from checkcombobox import CheckComboBox
 
 from mplugin import MoosePluginBase, EditorBase, EditorWidgetBase, PlotBase, RunBase
 #from defaultToolPanel import DefaultToolPanel
-from DataTable import DataTable
+#from DataTable import DataTable
 from matplotlib.lines import Line2D
 
 class MoosePlugin(MoosePluginBase):
     """Default plugin for MOOSE GUI"""
     def __init__(self, root, mainwindow):
         MoosePluginBase.__init__(self, root, mainwindow)
-
+        #print "mplugin ",self.getRunView()
+        #self.connect(self, QtCore.SIGNAL("tableCreated"),self.getRunView().getCentralWidget().plotAllData)
     def getPreviousPlugin(self):
         return None
 
@@ -101,6 +102,7 @@ class MoosePlugin(MoosePluginBase):
         return self.plotView
 
     def getRunView(self):
+
         if not hasattr(self, 'runView') or self.runView is None:
             self.runView = RunView(self)
         return self.runView
@@ -313,9 +315,6 @@ class RunView(RunBase):
         tabs"""
         if self._centralWidget is None:
             self._centralWidget = PlotWidget()
-            #self.x = QtGui.QScrollArea()
-            #x.setWidget(self._centralWidget)
-            #self._centralWidget.setWidget()
         return self._centralWidget
 
     # def setDataRootSlot(self):
@@ -759,13 +758,16 @@ class PlotWidget(QtGui.QWidget):
         layout.addWidget(self.canvas,0,1)
         layout.addWidget(self.navToolbar,1,1)
         self.setLayout(layout)
-        self.setAcceptDrops(True)
+        # self.setAcceptDrops(True)
         #self.modelRoot = '/'
         self.pathToLine = defaultdict(set)
         self.lineToDataSource = {}
         self.axesRef = self.canvas.addSubplot(1, 1)
         self.onclick_count = 0
-        self.dataTable = DataTable()
+
+        #self.dataTable = DataTable()
+        #utils.tableCreated.connect(plotAllData)
+        QtCore.QObject.connect(utils.tableEmitter,QtCore.SIGNAL("tableCreated()"),self.plotAllData)
 
     @property
     def plotAll(self):
@@ -776,8 +778,7 @@ class PlotWidget(QtGui.QWidget):
 
     def setDataRoot(self, path):
         self.dataRoot = path
-        #self.legendUpdate()
-
+        #plotAllData()
     def genColorMap(self,tableObject):
         #print "tableObject in colorMap ",tableObject
         species = tableObject+'/info'
@@ -799,24 +800,6 @@ class PlotWidget(QtGui.QWidget):
             else:
                 color = 'white'
         return color
-        
-    def legendUpdate(self):
-        modelroot = moose.element(self.modelRoot).path
-        labelList = []
-        lines = []
-        labels = []
-        color = 'white'
-        for tabId in moose.wildcardFind('%s/##[TYPE=Table]' %(modelroot)):
-            tab = moose.Table(tabId)
-            line_list=[]
-            tableObject = tab.neighbors['requestOut']
-            if len(tableObject) > 0:
-                color = self.genColorMap(tableObject[0].path)
-                lines.append(Line2D([],[],color=color,mec=tableObject[0].path))
-                labels.append(tableObject[0].name)
-        self.axesRef.legend(lines, labels, loc='upper center', prop={'size':10}, bbox_to_anchor=(0.5, -0.03), fancybox=True, shadow=True, ncol=3)
-        self.canvas.hide()
-        self.canvas.show()
 
     def plotAllData(self):
         """Plot data from all tables under dataRoot"""
@@ -828,53 +811,56 @@ class PlotWidget(QtGui.QWidget):
         #for tabId in moose.wildcardFind('%s/##[TYPE=Table]' % (path)):
         #harsha: policy graphs will be under /model/modelName need to change in kkit
         #for tabId in moose.wildcardFind('%s/##[TYPE=Table]' % (modelroot)):
-        for tabId in moose.wildcardFind('%s/##[TYPE=Table]' %(modelroot)):
-            tab = moose.Table(tabId)
-            line_list=[]
-            tableObject = tab.neighbors['requestOut']
-            print "tableObject ",tableObject
-            if len(tableObject) > 0:
-                # This is the default case: we do not plot the same
-                # table twice. But in special cases we want to have
-                # multiple variations of the same table on different
-                # axes.
-                #
-                #Harsha: Adding color to graph for signalling model, check if given path has cubemesh or cylmesh
-                color = 'white'
-                color = self.genColorMap(tableObject[0].path)
-                
-                lines = self.pathToLine[tab.path]
-                if len(lines) == 0:
-                    #Harsha: pass color for plot if exist and not white else random color
-                    if (color != 'white'):
-                        newLines = self.addTimeSeries(tab, label=tab.name,color=color)
-                    else:
-                        newLines = self.addTimeSeries(tab, label=tab.name)
-                    self.pathToLine[tab.path].update(newLines)
-                    for line in newLines:
-                        self.lineToDataSource[line] = PlotDataSource(x='/clock', y=tab.path, z='')
-                else:
-                    for line in lines:
-                        dataSrc = self.lineToDataSource[line]
-                        xSrc = moose.element(dataSrc.x)
-                        ySrc = moose.element(dataSrc.y)
-                        if isinstance(xSrc, moose.Clock):
-                            ts = np.linspace(0, time, len(tab.vector))
-                        elif isinstance(xSrc, moose.Table):
-                            ts = xSrc.vector.copy()
-                        line.set_data(ts, tab.vector.copy())
-                tabList.append(tab)
-                self.canvas.mpl_connect('pick_event',self.onclick)
-                if len(tabList) > 0:
-                    leg = self.canvas.callAxesFn('legend',loc='upper center',prop={'size':10},bbox_to_anchor=(0.5, -0.03),fancybox=True, shadow=True, ncol=3)
-                    #leg = self.canvas.callAxesFn('legend')
-                    #leg = self.canvas.callAxesFn('legend',loc='upper left', fancybox=True, shadow=True)
-                    #global legend
-                    #legend =leg
-                    for legobj in leg.legendHandles:
-                        legobj.set_linewidth(5.0)
-                        legobj.set_picker(True)
+        plotTables = moose.wildcardFind('%s/##[TYPE=Table]' %(modelroot))
+        if len (plotTables) > 0:
+            for tabId in plotTables:
+                tab = moose.Table(tabId)
+                line_list=[]
+                tableObject = tab.neighbors['requestOut']
+                if len(tableObject) > 0:
+                    # This is the default case: we do not plot the same
+                    # table twice. But in special cases we want to have
+                    # multiple variations of the same table on different
+                    # axes.
+                    #
+                    #Harsha: Adding color to graph for signalling model, check if given path has cubemesh or cylmesh
+                    color = 'white'
+                    color = self.genColorMap(tableObject[0].path)
                     
+                    lines = self.pathToLine[tab.path]
+                    if len(lines) == 0:
+                        #Harsha: pass color for plot if exist and not white else random color
+                        #print "tab in plotAllData ",tab, tab.path,tab.name
+                        if (color != 'white'):
+                            newLines = self.addTimeSeries(tab, label=tab.name,color=color)
+                        else:
+                            newLines = self.addTimeSeries(tab, label=tab.name)
+                        self.pathToLine[tab.path].update(newLines)
+                        for line in newLines:
+                            self.lineToDataSource[line] = PlotDataSource(x='/clock', y=tab.path, z='')
+                    else:
+                        for line in lines:
+                            dataSrc = self.lineToDataSource[line]
+                            xSrc = moose.element(dataSrc.x)
+                            ySrc = moose.element(dataSrc.y)
+                            if isinstance(xSrc, moose.Clock):
+                                ts = np.linspace(0, time, len(tab.vector))
+                            elif isinstance(xSrc, moose.Table):
+                                ts = xSrc.vector.copy()
+                            line.set_data(ts, tab.vector.copy())
+                    tabList.append(tab)
+                    self.canvas.mpl_connect('pick_event',self.onclick)
+            
+            if len(tabList) > 0:
+                leg = self.canvas.callAxesFn('legend',loc='upper center',prop={'size':10},bbox_to_anchor=(0.5, -0.03),fancybox=True, shadow=True, ncol=3)
+                        #leg = self.canvas.callAxesFn('legend')
+                        #leg = self.canvas.callAxesFn('legend',loc='upper left', fancybox=True, shadow=True)
+                        #global legend
+                        #legend =leg
+                for legobj in leg.legendHandles:
+                    legobj.set_linewidth(5.0)
+                    legobj.set_picker(True)
+                            
                 self.canvas.draw()
             else:
                 print "returning as len tabId is zero ",tabId, " tableObject ",tableObject, " len ",len(tableObject)
@@ -983,27 +969,7 @@ class PlotWidget(QtGui.QWidget):
             directory = fileDialog2.directory().path()
             for line in self.lineToDataSource.keys():
                 self.saveCsv(line,directory)
-
-    def dragEnterEvent(self, event):
-        if event.mimeData().hasFormat('text/plain'):
-            event.accept()
-    def dragMoveEvent(self, event):
-        if event.mimeData().hasFormat('text/plain'):
-            event.accept()
-    def eventFilter(self, source, event):
-        if (event.type() == QtCore.QEvent.Drop):
-            pass
-    def dropEvent(self, event):
-        """Insert an element of the specified class in drop location"""
-
-        if not event.mimeData().hasFormat('text/plain'):
-            return
-
-        self.modelRoot, self.element = event.mimeData().data
-        self.dataTable.create(self.modelRoot,self.element,"Conc")
-        self.legendUpdate()
-        self.hide()
-        self.show()
+    
 
     def getMenus(self):
         if not hasattr(self, '_menus'):
@@ -1117,11 +1083,11 @@ class PlotView(PlotBase):
         """Create the tables for recording selected data and connect them."""
         for element, field in self.getCentralWidget().getSelectedFields():
             #createRecordingTable(element, field, self._recordingDict, self._reverseDict, self.dataRoot)
-            #harsha:CreateRecordingTable function is moved to gui/utlis/dataTable.py file as create function
-            #as this is required when I drop table on to the plot and added a utlis folder to system path so
-            # import is not done
-            self.dataTable.create(self.plugin.modelRoot, moose.element(element), field)
-            self.updateCallback()
+            #harsha:CreateRecordingTable function is moved to python/moose/utils.py file as create function
+            #as this is required when I drop table on to the plot 
+            utils.create(self.plugin.modelRoot,moose.element(element),field)
+            #self.dataTable.create(self.plugin.modelRoot, moose.element(element), field)
+            #self.updateCallback()
     '''
     def createRecordingTable(self, element, field):
         """Create table to record `field` from element `element`

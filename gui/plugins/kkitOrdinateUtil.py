@@ -28,9 +28,7 @@ def setupMeshObj(modelRoot):
     meshEntryWildcard = '/##[ISA=ChemCompt]'
     if modelRoot != '/':
         meshEntryWildcard = modelRoot+meshEntryWildcard
-
     for meshEnt in wildcardFind(meshEntryWildcard):
-        print meshEnt
         mollist = []
         realist = []
         enzlist = []

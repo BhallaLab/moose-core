@@ -32,6 +32,8 @@ import print_utils
 import graph_utils
 import sim_utils
 from moose_constants import *
+import re
+from PyQt4 import QtCore, Qt
 
 # Import functions from sub-libraries.
 plotTable = plot_utils.plotTable
@@ -58,6 +60,66 @@ verify = verification_utils.verify
 import sim_utils 
 run = sim_utils.run
 
+tableEmitter = QtCore.QObject()
+# Harsha: Moved this fun from default to pymoose/moose/utils.py
+#def createRecordingTable(element, field, _recordDict, _reverseDict,dataRoot='/data'):       
+
+def create(modelroot, element,field):
+        """Create table to record `field` from element `element`
+
+        Tables are created under `dataRoot`, the names are generally
+        created by removing `/model` in the beginning of `elementPath`
+        and replacing `/` with `_`. If this conflicts with an existing
+        table, the id value of the target element (elementPath) is
+        appended to the name.
+        """
+        dataroot = modelroot+"/" + "data"
+        if not _moose.exists(dataroot):
+            _moose.Neutral(dataroot)
+        '''
+        if len(field) == 0 or ((element, field) in self._recordDict):
+            return
+        '''
+        field = lst = [word[0].upper() + word[1:] for word in field.split()]
+        field = " ".join(lst)
+        
+        if len(field) == 0 or len(element.neighbors['get%s'%(field)]) > 0:
+            return
+        # The table path is not foolproof - conflict is
+        # possible: e.g. /model/test_object and
+        # /model/test/object will map to same table. So we
+        # check for existing table without element field
+        # path in recording dict.
+        relativePath = element.path.partition(modelroot)[-1]
+        if relativePath.startswith('/'):
+            relativePath = relativePath[1:]
+
+        #Convert to camelcase
+        
+        tablePath =  relativePath.replace('/', '_') + '.' + field
+        tablePath = re.sub('.', lambda m: {'[':'_', ']':'_'}.get(m.group(), m.group()),tablePath)
+        
+        if tablePath.startswith("_0__"):
+            tablePath = tablePath[4:]
+        
+        #tablePath = dataroot + '/' +tablePath
+        tablePath = dataroot+'/'+element.name+'.'+field[:2]
+        if _moose.exists(tablePath):
+            tablePath = '%s_%d' % (tablePath, element.getId().value)
+        
+        if not _moose.exists(tablePath):
+            table = _moose.Table(tablePath)
+            print 'Created', table.path, 'for plotting', '%s.%s' % (element.path, field)
+            target = element
+            _moose.connect(table, 'requestOut', target, 'get%s' % (field))
+            
+            tableEmitter.emit(QtCore.SIGNAL('tableCreated()'))
+            #tableCreated.emit()
+            return True
+            #self.emit(QtCore.SIGNAL('tableCreated(PyQt_PyObject)'))
+            #self.created.emit()
+            
+        return False
 
 def readtable(table, filename, separator=None):
     """Reads the file specified by filename to fill the MOOSE table object.
@@ -1006,7 +1068,6 @@ cell1
             self.assertAlmostEqual(comp.x, 0.0, sigfig)
             self.assertAlmostEqual(comp.y, 0.0, sigfig)
             self.assertAlmostEqual(comp.z, soma.diameter/2.0 + (ii + 1) * 100e-6, sigfig)
-        
 
 if __name__ == "__main__": # test printtree
     unittest.main()
