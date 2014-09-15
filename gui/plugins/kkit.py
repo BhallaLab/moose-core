@@ -360,11 +360,6 @@ class  KineticsWidget(EditorWidgetBase):
         #     m = wildcardFind('/##[ISA=ChemCompt]')
         # else:
         #     m = wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
-        self.widget = ""
-        if isinstance(self,kineticEditorWidget):
-            self.widget = "kineticEditorWidget"
-        elif isinstance(self,kineticRunWidget):
-            self.widget = "kineticRunWidget"
             
         if not self.m:
             # when we want an empty GraphicView while creating new model,
@@ -373,13 +368,13 @@ class  KineticsWidget(EditorWidgetBase):
                 self.layout().removeWidget(self.view)
             createdItem = {}
             self.sceneContainer.setSceneRect(-self.width()/2,-self.height()/2,self.width(),self.height())
-
             self.view = GraphicalView(self.widget, self.modelRoot,self.sceneContainer,self.border,self,createdItem)
-
+            
             if isinstance(self,kineticEditorWidget):
-                self.widget = "kineticEditorWidget"
-                self.view.setRefWidget("editor")
+                self.view.setRefWidget("editorView")
                 self.view.setAcceptDrops(True)
+            elif isinstance(self,kineticRunWidget):
+                self.view.setRefWidget("runView")
             self.connect(self.view, QtCore.SIGNAL("dropped"), self.objectEditSlot)
             hLayout = QtGui.QGridLayout(self)
             self.setLayout(hLayout)
@@ -399,6 +394,12 @@ class  KineticsWidget(EditorWidgetBase):
             if hasattr(self, 'view') and isinstance(self.view, QtGui.QWidget):
                 self.layout().removeWidget(self.view)
             self.view = GraphicalView(self.widget,self.modelRoot,self.sceneContainer,self.border,self,createdItem)
+            if isinstance(self,kineticEditorWidget):
+                self.view.setRefWidget("editorView")
+                self.view.setAcceptDrops(True)
+            elif isinstance(self,kineticRunWidget):
+                self.view.setRefWidget("runView")
+        
             #self.view.resizeEvent1(event)
             #self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
             #self.view.fitInView(self.sceneContainer.itemsBoundingRect())
