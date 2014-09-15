@@ -86,7 +86,8 @@ from matplotlib import mlab
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
-
+#from moose import utils
+import moose
 class CanvasWidget(FigureCanvas):
     """Widget to draw plots on.
 
@@ -114,6 +115,35 @@ class CanvasWidget(FigureCanvas):
         self.current_id = -1
         tabList = []
         self.addTabletoPlot = ''
+        self.setAcceptDrops(True)
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasFormat('text/plain'):
+            event.acceptProposedAction()
+
+    def dragMoveEvent(self, event):
+        if event.mimeData().hasFormat('text/plain'):
+            event.acceptProposedAction()
+
+    def eventFilter(self, source, event):
+        if (event.type() == QtCore.QEvent.Drop):
+            pass
+    
+    def dropEvent(self, event):
+        """Insert an element of the specified class in drop location"""
+
+        if not event.mimeData().hasFormat('text/plain'):
+            return
+        # print " active window ", self.isActiveWindow()
+        # print "Mouse : ", self.mouse
+
+        # pos = self.mapFromGlobal(QCursor.pos())
+        # print "Mouse Position : ", pos
+        self.modelRoot, self.element = event.mimeData().data
+        if isinstance (self.element,moose.PoolBase):
+            moose.utils.create(self.modelRoot,self.element,"Conc")
+        else:
+            QtGui.QMessageBox.question(self, 'Message',"This field is not plottable", QtGui.QMessageBox.Ok)
 
     def addSubplot(self, rows, cols):        
         """Add a subplot to figure and set it as current axes."""
