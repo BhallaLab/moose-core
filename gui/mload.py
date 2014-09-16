@@ -88,6 +88,32 @@ def loadFile(filename, target, merge=True):
     if modeltype == 'genesis':
         if subtype == 'kkit' or subtype == 'prototype':
             model = moose.loadModel(filename, target,'gsl')
+            #Harsha: Moving the model under /modelname/model and graphs under /model/graphs
+            lmodel = moose.Neutral('%s/%s' %(model.path,"model"))
+            for compt in moose.wildcardFind(model.path+'/##[ISA=ChemCompt]'):
+                moose.move(compt.path,lmodel)
+            if not moose.exists(model.path+'/data'):
+                graphspath = moose.Neutral('%s/%s' %(model.path,"data"))
+            dataPath = moose.element(model.path+'/data')
+            i =1
+            j =0
+            for graphs in moose.wildcardFind(model.path+'/graphs/##[TYPE=Table]'):
+                if not moose.exists(dataPath.path+'/graphs_'+str(i)):
+                    graphspath = moose.Neutral('%s/%s' %(dataPath.path,"graphs_"+str(i)))
+                else:
+                    graphspath = moose.element(dataPath.path+'/graphs_'+str(i))
+                j=1
+                moose.move(graphs.path,graphspath)
+            i = i+j
+            for moregraphs in moose.wildcardFind(model.path+'/moregraphs/##[TYPE=Table]'):
+                if not moose.exists(dataPath.path+'/graphs_'+str(i)):
+                    graphspath = moose.Neutral('%s/%s' %(dataPath.path,"graphs_"+str(i)))
+                else:
+                    graphspath = moose.element(dataPath.path+'/graphs_'+str(i))
+                moose.move(moregraphs.path,graphspath)
+            #deleting old genesis graph and moregraphs path
+            moose.delete(model.path+'/graphs')
+            moose.delete(model.path+'/moregraphs')
         else:
             print 'Only kkit and prototype files can be loaded.'
     elif modeltype == 'cspace':
