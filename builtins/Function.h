@@ -81,6 +81,8 @@ class Function
     // get function eval result
     double getValue() const;
 
+    double getRate() const;
+
     // get/set operation mode
     void setMode(unsigned int mode);
     unsigned int getMode() const;
@@ -110,6 +112,9 @@ class Function
 
 protected:
     friend double * _functionAddVar(const char * name, void *data);
+    double _lastValue;
+    double _value;
+    double _rate;
     unsigned int _mode;
     mutable bool _valid;
      // this stores variables received via incoming messages, identifiers of the form x{i} are included in this

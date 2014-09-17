@@ -65,6 +65,13 @@ static SrcFinfo1< double > *derivativeOut()
     return &derivativeOut;
 }
 
+static SrcFinfo1< double > *rateOut()
+{
+    static SrcFinfo1< double > rateOut("rateOut",
+                                             "Value of time-derivative of the function for the current variable values");
+    return &rateOut;
+}
+
 static SrcFinfo1< vector < double > *> *requestOut()
 {
     static SrcFinfo1< vector < double > * > requestOut(
@@ -86,6 +93,10 @@ const Cinfo * Function::initCinfo()
         "derivative",
         "Derivative of the function at given variable values.",
         &Function::getDerivative);
+    static ReadOnlyValueFinfo< Function, double > rate(
+        "rate",
+        "Derivative of the function at given variable values.",
+        &Function::getRate);
     static ValueFinfo< Function, unsigned int > mode(
         "mode",
         "Mode of operation: \n"
@@ -208,6 +219,7 @@ const Cinfo * Function::initCinfo()
     static Finfo *functionFinfos[] =
             {
                 &value,
+                &rate,
                 &derivative,
                 &mode,
                 &expr,
@@ -217,6 +229,7 @@ const Cinfo * Function::initCinfo()
                 &proc,
                 requestOut(),
                 valueOut(),
+                rateOut(),
                 derivativeOut(),
             };
     
@@ -255,7 +268,7 @@ const Cinfo * Function::initCinfo()
 
 static const Cinfo * functionCinfo = Function::initCinfo();
 
-Function::Function(): _mode(1), _valid(false), _numVar(0)
+Function::Function(): _mode(1), _valid(false), _numVar(0), _lastValue(0.0), _value(0.0), _rate(0.0)
 {
     _parser.SetVarFactory(_functionAddVar, this);
     // Adding pi and e, the defaults are `_pi` and `_e`
@@ -263,7 +276,9 @@ Function::Function(): _mode(1), _valid(false), _numVar(0)
     _parser.DefineConst(_T("e"), (mu::value_type)M_E);
 }
 
-Function::Function(const Function& rhs): _mode(rhs._mode), _numVar(rhs._numVar)
+Function::Function(const Function& rhs): _mode(rhs._mode), _numVar(rhs._numVar),
+                                         _lastValue(rhs._lastValue),
+                                         _value(rhs._value), _rate(rhs._rate)
 {
     _parser.SetVarFactory(_functionAddVar, this);
     // Adding pi and e, the defaults are `_pi` and `_e`
@@ -293,6 +308,9 @@ Function& Function::operator=(const Function rhs)
 {
     _clearBuffer();
     _mode = rhs._mode;
+    _lastValue = rhs._lastValue;
+    _value = rhs._value;
+    _rate = rhs._rate;
     // Adding pi and e, the defaults are `_pi` and `_e`
     _parser.DefineConst(_T("pi"), (mu::value_type)M_PI);
     _parser.DefineConst(_T("e"), (mu::value_type)M_E);
@@ -471,6 +489,14 @@ double Function::getValue() const
     return value;
 }
 
+double Function::getRate() const
+{
+    if (!_valid){
+        cout << "Error: Function::getValue() - invalid state" << endl;        
+    }
+    return _rate;
+}
+
 void Function::setIndependent(unsigned int index)
 {
     _independent = index;
@@ -569,12 +595,29 @@ void Function::process(const Eref &e, ProcPtr p)
          ++ii){
         *_pullbuf[ii] = databuf[ii];        
     }
-    if (_mode & 1){
-        valueOut()->send(e, getValue());
+    _value = getValue();
+    _rate = (_value - _lastValue) / p->dt;
+    switch (_mode){
+        case 0: {
+            valueOut()->send(e, _value);
+            break;
+        }
+        case 1: {
+            rateOut()->send(e, _rate);
+            break;
+        }
+        case 2: {
+            derivativeOut()->send(e, getDerivative());
+            break;
+        }
+        default: {
+            valueOut()->send(e, _value);
+            derivativeOut()->send(e, getDerivative());
+            rateOut()->send(e, _rate);
+            break;
+        }
     }
-    if (_mode & 2){
-        derivativeOut()->send(e, getDerivative());
-    }
+    _lastValue = _value;
 }
 
 void Function::reinit(const Eref &e, ProcPtr p)
@@ -588,6 +631,8 @@ void Function::reinit(const Eref &e, ProcPtr p)
         setExpr("0.0");
         _valid = false;
     }
+    _lastValue = 0.0;
+    _rate = 0.0;
 }
 // 
 // Function.cpp ends here
