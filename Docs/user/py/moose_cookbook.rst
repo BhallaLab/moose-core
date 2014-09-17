@@ -290,6 +290,13 @@ Integrate-and-fire models
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 The HH model
 ^^^^^^^^^^^^
+
+This is a standalone script for simulating the Hodgkin-Huxley squid
+axon experiment with a step current injection.
+
+.. automodule:: ionchannel
+   :members:
+		
 Analyzing spike trains
 ^^^^^^^^^^^^^^^^^^^^^^
 
@@ -297,6 +304,19 @@ Network models
 --------------
 Connecting two cells together
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Below is the connectivity diagram for setting up a synaptic connection
+from one neuron to another. The PulseGen object is there for
+stimulating the presynaptic cell as part of experimental setup.
+
+.. figure:: images/twoCells.png
+   :scale: 50%	    
+   :alt: Two cells connected via synapse
+      
+.. automodule:: twocells
+   :members:
+
+
 Regular and plastic synapses
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Providing random input to a cell

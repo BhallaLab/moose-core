@@ -348,11 +348,11 @@ extern "C" {
         unsigned int isGlobal = 0;
         char * type = NULL;
         // first try parsing the arguments as (path, size, classname)
-        char _path[] = "path";
-        char _dtype[] = "dtype";
-        char _size[] = "n";
-        char _global[] = "g";
-        static char * kwlist[] = {_path, _size,  _global, _dtype,NULL};
+        static char _path[] = "path";
+        static char _dtype[] = "dtype";
+        static char _size[] = "n";
+        static char _global[] = "g";
+        static char * kwlist[] = {_path, _size,  _global, _dtype, NULL};
         char * path = NULL;
         char _default_type[] = "Neutral";
         // set it to 0 for unspecified value in case the user tries to
@@ -362,42 +362,28 @@ extern "C" {
         // nonexisting vec, we change the unspecifed numData to 1.
         unsigned int numData = 0; 
         // char *type = _default_type;
-        bool parse_success = false;
         /* The expected arguments are:
            string path, 
            [unsigned int numData] - default: 1
            [unsigned int isGlobal] - default: 0
            [string type] - default: Neutral
         */
-        if (kwargs == NULL){
-            if(PyArg_ParseTuple(args,
-                                "s|IIs:moose_Id_init",
-                                &path,
-                                &numData,
-                                &isGlobal,
-                                &type)){
-                parse_success = true;
-            }
-        } else if (PyArg_ParseTupleAndKeywords(args,
-                                               kwargs,
-                                               "s|IIs:moose_Id_init",
-                                               kwlist,
-                                               &path,
-                                               &numData,
-                                               &isGlobal,
-                                               &type)){
-            parse_success = true;
-        }
+        if (PyArg_ParseTupleAndKeywords(args,
+                                        kwargs,
+                                        "s|IIs:moose_Id_init",
+                                        kwlist,
+                                        &path,
+                                        &numData,
+                                        &isGlobal,
+                                        &type)){
         // Parsing args successful, if any error happens now,
         // different argument processing will not help. Return error
-        if (parse_success){
             string trimmed_path(path);
             trimmed_path = trim(trimmed_path);
             size_t length = trimmed_path.length();
             if (length <= 0){
                 PyErr_SetString(PyExc_ValueError,
                                 "moose_Id_init: path must be non-empty string.");
-                Py_DECREF(self);
                 return -1;
             }
             self->id_ = Id(trimmed_path);
@@ -418,7 +404,6 @@ extern "C" {
             }
             self->id_ = create_Id_from_path(path, numData, isGlobal, type);
             if (self->id_ == Id() && PyErr_Occurred()){
-                Py_DECREF(self);
                 return -1;
             }
             return 0;
@@ -443,7 +428,6 @@ extern "C" {
             self->id_ = Id(id);
             return 0;
         }
-        Py_DECREF(self);
         return -1;
     }// ! moose_Id_init
 
@@ -614,7 +598,6 @@ extern "C" {
         if (!Id::isValid(self->id_)){
             RAISE_INVALID_ID(NULL, "moose_Id_getItem");
         }        
-        extern PyTypeObject ObjIdType;
         if (index < 0){
             index += moose_Id_getLength(self);
         }
@@ -638,7 +621,6 @@ extern "C" {
         if (!Id::isValid(self->id_)){
             RAISE_INVALID_ID(NULL, "moose_Id_getSlice");
         }        
-        extern PyTypeObject ObjIdType;
         Py_ssize_t len = moose_Id_getLength(self);
         while (start < 0){
             start += len;
@@ -732,7 +714,6 @@ extern "C" {
      PyObject * moose_Id_getattro(_Id * self, PyObject * attr)
      {
          int new_attr = 0;
-         extern PyTypeObject ObjIdType;
         if (!Id::isValid(self->id_)){
             RAISE_INVALID_ID(NULL, "moose_Id_getattro");
         }        
