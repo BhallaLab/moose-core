@@ -154,7 +154,11 @@ Id SbmlReader::read( string filename, string location, string solverClass)
                                     graphs = datapath;
                                     graphs = s->doCreate("Neutral",baseId_,"data",1);
                                     assert(graphs != Id());
-
+                                    Id graph;
+                                    string datagrph = graphs.path()+"/graph_1";
+                                    Id graph1(datagrph);
+                                    graph = s->doCreate("Neutral",graphs,"graph_0",1);
+                                    assert(graph != Id());
                                     /*
                                     // if plots exist then will be placing at "/data"
                                     Id graphs;
@@ -188,7 +192,7 @@ Id SbmlReader::read( string filename, string location, string solverClass)
                                             pltClean = pltClean.substr(pos+1,pltClean.length());
                                         replace(pltClean.begin(),pltClean.end(),'/','_');
                                         string plotName =  pltClean + ".conc";
-                                        Id pltPath(graphs.path());
+                                        Id pltPath(graph.path());
                                         Id tab = s->doCreate( "Table", pltPath, plotName, 1 );
                                         if (tab != Id())
                                             s->doAddMsg("Single",tab,"requestOut",plotSId,"getConc");
