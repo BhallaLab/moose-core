@@ -120,7 +120,34 @@ def loadFile(filename, target, merge=True):
             print 'Only kkit and prototype files can be loaded.'
     elif modeltype == 'cspace':
             model = moose.loadModel(filename, target)
-                        
+            #Harsha: Moving the model under /modelname/model and graphs under /model/graphs
+            lmodel = moose.Neutral('%s/%s' %(model.path,"model"))
+            for compt in moose.wildcardFind(model.path+'/##[ISA=ChemCompt]'):
+                moose.move(compt.path,lmodel)
+            if not moose.exists(model.path+'/data'):
+                graphspath = moose.Neutral('%s/%s' %(model.path,"data"))
+            dataPath = moose.element(model.path+'/data')
+            i =0
+            nGraphs = moose.wildcardFind(model.path+'/graphs/##[TYPE=Table]')
+            for graphs in nGraphs:
+                if not moose.exists(dataPath.path+'/graph_'+str(i)):
+                    graphspath = moose.Neutral('%s/%s' %(dataPath.path,"graph_"+str(i)))
+                else:
+                    graphspath = moose.element(dataPath.path+'/graph_'+str(i))
+                
+                moose.move(graphs.path,graphspath)
+            
+            if len(nGraphs) > 0:
+                i = i+1
+            print " i ", i,moose.wildcardFind(model.path+'/moregraphs/##[TYPE=Table]')
+            for moregraphs in moose.wildcardFind(model.path+'/moregraphs/##[TYPE=Table]'):
+                if not moose.exists(dataPath.path+'/graph_'+str(i)):
+                    graphspath = moose.Neutral('%s/%s' %(dataPath.path,"graph_"+str(i)))
+                else:
+                    graphspath = moose.element(dataPath.path+'/graph_'+str(i))
+                moose.move(moregraphs.path,graphspath)
+            moose.delete(model.path+'/graphs')    
+            moose.delete(model.path+'/moregraphs')            
     elif modeltype == 'xml':
         if subtype == 'neuroml':
             popdict, projdict = neuroml.loadNeuroML_L123(filename)
