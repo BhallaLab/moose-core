@@ -101,12 +101,10 @@ extern "C" {
         _ObjId * instance = (_ObjId*)self;
         unsigned int id = 0, data = 0, field = 0;
         PyObject * obj = NULL;
-        if ((kwargs && PyArg_ParseTupleAndKeywords(args, kwargs,
-                                                   "I|III:moose_ObjId_init",
-                                                   kwlist,
-                                                   &id, &data, &field ))
-            || (!kwargs && PyArg_ParseTuple(args, "I|III:moose_ObjId_init_from_id",
-                                            &id, &data, &field ))){
+        if (PyArg_ParseTupleAndKeywords(args, kwargs,
+                                        "I|III:moose_ObjId_init_from_id",
+                                        kwlist,
+                                        &id, &data, &field )){
             PyErr_Clear();
             if (!Id::isValid(id)){
                 RAISE_INVALID_ID(-1, "moose_ObjId_init_from_id");
@@ -119,20 +117,14 @@ extern "C" {
             return 0;
         }
         PyErr_Clear();
-        if ((kwargs && PyArg_ParseTupleAndKeywords(args,
-                                                   kwargs,
-                                                   "O|III:moose_ObjId_init_from_id",
-                                                   kwlist,
-                                                   &obj,
-                                                   &data,
-                                                   &field
-                                                   )) ||
-            (!kwargs && PyArg_ParseTuple(args,
-                                         "O|III:moose_ObjId_init_from_id",
-                                         &obj,
-                                         &data,
-                                         &field
-                                         ))){
+        if (PyArg_ParseTupleAndKeywords(args,
+                                        kwargs,
+                                        "O|III:moose_ObjId_init_from_id",
+                                        kwlist,
+                                        &obj,
+                                        &data,
+                                        &field
+                                        )){
             PyErr_Clear();
             // If first argument is an Id object, construct an ObjId out of it
             if (Id_Check(obj)){
@@ -204,7 +196,6 @@ extern "C" {
         if (type == NULL){
             if (basetype == NULL){
                 PyErr_SetString(PyExc_TypeError, "Unknown class. Need a valid MOOSE class or subclass thereof.");
-                Py_DECREF(self);
                 return -1;
             }
             basetype_str = string(basetype->tp_name).substr(6); // remove `moose.` prefix from type name
