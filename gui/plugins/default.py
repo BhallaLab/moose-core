@@ -585,7 +585,7 @@ class SchedulingWidget(QtGui.QWidget):
         """Helper function to emit signal with arguments"""
 
         #self.updateUpdateInterval()
-        simtime = self.getSimTime()
+        simtime = self.getSimTime()+moose.Clock('/clock').currentTime
         self.simtimeExtended.emit(simtime)
         self.continueRun.emit(simtime,
                                self.updateInterval)
