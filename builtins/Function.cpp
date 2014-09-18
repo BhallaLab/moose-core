@@ -91,18 +91,25 @@ const Cinfo * Function::initCinfo()
         &Function::getValue);
     static ReadOnlyValueFinfo< Function, double > derivative(
         "derivative",
-        "Derivative of the function at given variable values.",
+        "Derivative of the function at given variable values. This is calulated"
+        " using 5-point stencil "
+        " <http://en.wikipedia.org/wiki/Five-point_stencil> at current value of"
+        " independent variable. Note that unlike hand-calculated derivatives,"
+        " numerical derivatives are not exact.",
         &Function::getDerivative);
     static ReadOnlyValueFinfo< Function, double > rate(
         "rate",
-        "Derivative of the function at given variable values.",
+        "Derivative of the function at given variable values. This is computed"
+        " as the difference of the current and previous value of the function"
+        " divided by the time step.",
         &Function::getRate);
     static ValueFinfo< Function, unsigned int > mode(
         "mode",
         "Mode of operation: \n"
-        " 1: only the function value will be funculated\n"
-        " 2: only the derivative will be funculated\n"
-        " 3: both function value and derivative at current variable values will be funculated.",
+        " 1: only the function value will be sent out.\n"
+        " 2: only the derivative with respect to the independent variable will be sent out.\n"
+        " 3: only rate (time derivative) will be sent out.\n"
+        " anything else: all three, value, derivative and rate will be sent out.\n",
         &Function::setMode,
         &Function::getMode);
     static ValueFinfo< Function, string > expr(
@@ -184,7 +191,7 @@ const Cinfo * Function::initCinfo()
         "Variable values received from target fields by requestOut",
         &Function::getY);
 
-    static ValueFinfo< Function, unsigned int > independent(
+    static ValueFinfo< Function, string > independent(
         "independent",
         "Index of independent variable. Differentiation is done based on this. Defaults"
         " to the first assigned variable.",
@@ -268,18 +275,22 @@ const Cinfo * Function::initCinfo()
 
 static const Cinfo * functionCinfo = Function::initCinfo();
 
-Function::Function(): _mode(1), _valid(false), _numVar(0), _lastValue(0.0), _value(0.0), _rate(0.0)
+Function::Function(): _valid(false), _numVar(0), _lastValue(0.0),
+                      _value(0.0), _rate(0.0), _mode(1)
 {
     _parser.SetVarFactory(_functionAddVar, this);
     // Adding pi and e, the defaults are `_pi` and `_e`
     _parser.DefineConst(_T("pi"), (mu::value_type)M_PI);
     _parser.DefineConst(_T("e"), (mu::value_type)M_E);
+    _independent = "x0";
 }
 
-Function::Function(const Function& rhs): _mode(rhs._mode), _numVar(rhs._numVar),
+Function::Function(const Function& rhs): _numVar(rhs._numVar),
                                          _lastValue(rhs._lastValue),
-                                         _value(rhs._value), _rate(rhs._rate)
+                                         _value(rhs._value), _rate(rhs._rate),
+                                         _mode(rhs._mode)
 {
+    _independent = rhs._independent;
     _parser.SetVarFactory(_functionAddVar, this);
     // Adding pi and e, the defaults are `_pi` and `_e`
     _parser.DefineConst(_T("pi"), (mu::value_type)M_PI);
@@ -311,6 +322,7 @@ Function& Function::operator=(const Function rhs)
     _lastValue = rhs._lastValue;
     _value = rhs._value;
     _rate = rhs._rate;
+    _independent = rhs._independent;
     // Adding pi and e, the defaults are `_pi` and `_e`
     _parser.DefineConst(_T("pi"), (mu::value_type)M_PI);
     _parser.DefineConst(_T("e"), (mu::value_type)M_E);
@@ -389,14 +401,14 @@ static double * _functionAddVar(const char *name, void *data)
     // Names starting with x are variables, everything else is constant.
     if (strname[0] == 'x'){
         int index = atoi(strname.substr(1).c_str());
-        if (index >= function->_varbuf.size()){
+        if ((unsigned)index >= function->_varbuf.size()){
             function->_varbuf.resize(index+1);
             function->_varbuf[index] = new Variable();
         }
         ret = &(function->_varbuf[index]->value);        
     } else if (strname[0] == 'y'){
         int index = atoi(strname.substr(1).c_str());
-        if (index >= function->_pullbuf.size()){
+        if ((unsigned)index >= function->_pullbuf.size()){
             function->_pullbuf.resize(index+1);
             function->_pullbuf[index] = new double();
         }
@@ -497,12 +509,12 @@ double Function::getRate() const
     return _rate;
 }
 
-void Function::setIndependent(unsigned int index)
+void Function::setIndependent(string var)
 {
-    _independent = index;
+    _independent = var;
 }
 
-unsigned int Function::getIndependent() const
+string Function::getIndependent() const
 {
     return _independent;
 }
@@ -523,10 +535,10 @@ double Function::getDerivative() const
         cout << "Error: Function::getDerivative() - invalid state" << endl;        
         return value;
     }
-    assert(_independent < _varbuf.size());
+    mu::varmap_type variables = _parser.GetVar();
+    mu::varmap_type::const_iterator item = variables.find(_independent);
     try{
-        value = _parser.Diff(&(_varbuf[_independent]->value),
-                             _varbuf[_independent]->value);
+        value = _parser.Diff(item->second, *(item->second));
     } catch (mu::Parser::exception_type &e){
             _showError(e);
     }    
@@ -598,16 +610,16 @@ void Function::process(const Eref &e, ProcPtr p)
     _value = getValue();
     _rate = (_value - _lastValue) / p->dt;
     switch (_mode){
-        case 0: {
-            valueOut()->send(e, _value);
-            break;
-        }
         case 1: {
-            rateOut()->send(e, _rate);
+            valueOut()->send(e, _value);
             break;
         }
         case 2: {
             derivativeOut()->send(e, getDerivative());
+            break;
+        }
+        case 3: {
+            rateOut()->send(e, _rate);
             break;
         }
         default: {
@@ -631,8 +643,29 @@ void Function::reinit(const Eref &e, ProcPtr p)
         setExpr("0.0");
         _valid = false;
     }
+    _value = 0.0;
     _lastValue = 0.0;
     _rate = 0.0;
+    switch (_mode){
+        case 1: {
+            valueOut()->send(e, _value);
+            break;
+        }
+        case 2: {
+            derivativeOut()->send(e, 0.0);
+            break;
+        }
+        case 3: {
+            rateOut()->send(e, _rate);
+            break;
+        }
+        default: {
+            valueOut()->send(e, _value);
+            derivativeOut()->send(e, 0.0);
+            rateOut()->send(e, _rate);
+            break;
+        }
+    }
 }
 // 
 // Function.cpp ends here
