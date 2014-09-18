@@ -310,8 +310,8 @@ class MWindow(QtGui.QMainWindow):
                  self.getEditMenu(),
                  self.getViewMenu(),
                  self.getPluginsMenu(),
-                 self.getRunMenu(),
-                 self.getConnectMenu(),
+                 #self.getRunMenu(),
+                 #self.getConnectMenu(),
                  self.getHelpMenu()]
         for menu in menus:
             self.menuBar().addMenu(menu)
@@ -411,11 +411,18 @@ class MWindow(QtGui.QMainWindow):
             self.newModelAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+N", None, QtGui.QApplication.UnicodeUTF8))
             self.connect(self.newModelAction, QtCore.SIGNAL('triggered()'), self.newModelDialogSlot)
         self.fileMenu.addAction(self.newModelAction)
+        
         if not hasattr(self, 'loadModelAction'):
             self.loadModelAction = QtGui.QAction('L&oad model', self)
             self.loadModelAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+L", None, QtGui.QApplication.UnicodeUTF8))
             self.connect(self.loadModelAction, QtCore.SIGNAL('triggered()'), self.loadModelDialogSlot)
         self.fileMenu.addAction(self.loadModelAction)
+        if not hasattr(self,'connectBioModelAction'):
+            self.connectBioModelAction = QtGui.QAction('&Connect BioModels', self)
+            self.connectBioModelAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+B", None, QtGui.QApplication.UnicodeUTF8))
+            self.connect(self.connectBioModelAction, QtCore.SIGNAL('triggered()'), self.connectBioModel)
+        self.fileMenu.addAction(self.connectBioModelAction)
+        
         #self.fileMenu.addAction(self.plugin.getSaveAction())
         self.fileMenu.addAction(self.quitAction)
         return self.fileMenu
@@ -427,7 +434,6 @@ class MWindow(QtGui.QMainWindow):
             self.editMenu.clear()
         self.editMenu.addActions(self.getEditActions())
         return self.editMenu
-
     def getPluginsMenu(self):
         """Populate plugins menu if it does not exist already."""
         if (not hasattr(self, 'pluginsMenu')) or (self.pluginsMenu is None):
@@ -453,7 +459,7 @@ class MWindow(QtGui.QMainWindow):
             self.helpMenu.clear()
         self.helpMenu.addActions(self.getHelpActions())        
         return self.helpMenu
-
+    '''
     def getConnectMenu(self):
         if self.connectMenu is None:
             self.connectMenu = QtGui.QMenu('&Connect')
@@ -461,7 +467,7 @@ class MWindow(QtGui.QMainWindow):
             self.connectMenu.clear()
         self.connectMenu.addActions(self.getConnectActions())
         return self.connectMenu
-
+    '''
     def getViewMenu(self):
         if (not hasattr(self, 'viewMenu')) or (self.viewMenu is None):
             self.viewMenu = QtGui.QMenu('&View')
@@ -491,14 +497,14 @@ class MWindow(QtGui.QMainWindow):
     #     self.subWindowVisibilityMenu = QtGui.Q
     #     for subwin in self.mdiArea.subWindowList():
             
-
-    def getRunMenu(self):
-        if (not hasattr(self, 'runMenu')) or (self.runMenu is None):
-            self.runMenu = QtGui.QMenu('&Run')
-        else:
-            self.runMenu.clear()
-        self.runMenu.addActions(self.getRunActions())
-        return self.runMenu
+    # Removed from the menu
+    # def getRunMenu(self):
+    #     if (not hasattr(self, 'runMenu')) or (self.runMenu is None):
+    #         self.runMenu = QtGui.QMenu('&Run')
+    #     else:
+    #         self.runMenu.clear()
+    #     self.runMenu.addActions(self.getRunActions())
+    #     return self.runMenu
     
     def getEditActions(self):
         if (not hasattr(self, 'editActions')) or (self.editActions is None):
@@ -559,18 +565,18 @@ class MWindow(QtGui.QMainWindow):
 
         """
         return [widget.toggleViewAction() for widget in self.findChildren(QtGui.QDockWidget)]
-
-    def getRunActions(self):
-        if (not hasattr(self, 'runActions')) or \
-                (self.runActions is None):
-            self.startAction = QtGui.QAction('Start', self)
-            self.startAction.triggered.connect(self.resetAndStartSimulation)
-            self.pauseAction = QtGui.QAction('Pause', self)
-            self.pauseAction.triggered.connect(self.pauseSimulation)
-            self.continueAction = QtGui.QAction('Continue', self)
-            self.continueAction.triggered.connect(self.continueSimulation)
-            self.runActions = [self.startAction, self.pauseAction, self.continueAction]
-        return self.runActions
+    # Removed form the menu item
+    # def getRunActions(self):
+    #     if (not hasattr(self, 'runActions')) or \
+    #             (self.runActions is None):
+    #         self.startAction = QtGui.QAction('Start', self)
+    #         self.startAction.triggered.connect(self.resetAndStartSimulation)
+    #         self.pauseAction = QtGui.QAction('Pause', self)
+    #         self.pauseAction.triggered.connect(self.pauseSimulation)
+    #         self.continueAction = QtGui.QAction('Continue', self)
+    #         self.continueAction.triggered.connect(self.continueSimulation)
+    #         self.runActions = [self.startAction, self.pauseAction, self.continueAction]
+    #     return self.runActions
 
     def getHelpActions(self):
         if (not hasattr(self, 'helpActions')) or (self.helpActions is None):
@@ -582,13 +588,13 @@ class MWindow(QtGui.QMainWindow):
             self.connect(self.actionBug, QtCore.SIGNAL('triggered()'), self.reportBug)
             self.helpActions = [self.actionAbout, self.actionBuiltInDocumentation, self.actionBug]
         return self.helpActions
-
-    def getConnectActions(self):
-        if(not hasattr(self,'connectActions')) or(self.connectActions is None):
-            self.actionBioModel = QtGui.QAction('BioModels',self)
-            self.connect(self.actionBioModel, QtCore.SIGNAL('triggered()'), self.connectBioModel)
-            self.connectActions = [self.actionBioModel]
-        return self.connectActions
+    # Removed from the main menu item replace with File menu
+    # def getConnectActions(self):
+    #     if(not hasattr(self,'connectActions')) or(self.connectActions is None):
+    #         self.actionBioModel = QtGui.QAction('BioModels',self)
+    #         self.connect(self.actionBioModel, QtCore.SIGNAL('triggered()'), self.connectBioModel)
+    #         self.connectActions = [self.actionBioModel]
+    #     return self.connectActions
     
     def connectBioModel(self):
         connecttoBioModel = BioModelsClientWidget()
@@ -610,7 +616,6 @@ class MWindow(QtGui.QMainWindow):
             print 'Loaded model', ret['model'].path
 
             self.setPlugin(pluginName, ret['model'].path)
-
 
         
     def showAboutMoose(self):
