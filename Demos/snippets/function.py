@@ -47,7 +47,7 @@
 
 import numpy as np
 import sys
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 import moose
 
@@ -92,6 +92,12 @@ def example():
     and ytab respectively, so that at each timestep the next values of
     x0 and y0 are assigned to the function.
 
+    Along with the value of the expression itself we also compute its
+    derivative with respect to y0 and its derivative with respect to
+    time (rate). The former uses a five-point stencil for the
+    numerical differentiation and has a glitch at y=0. The latter uses
+    backward difference divided by dt.
+
     Unlike Func class, the number of variables and constants are
     unlimited in Function and you can set all the variables via
     messages.
@@ -100,12 +106,14 @@ def example():
     function = moose.Function('/function')
     function.c['c0'] = 1.0
     function.c['c1'] = 2.0
-    function.x.num = 2
+    function.x.num = 1
     function.expr = 'c0 * exp(c1*x0) * cos(y0)'
+    # mode 0 - evaluate function value, derivative and rate
     # mode 1 - just evaluate function value,
     # mode 2 - evaluate derivative,
-    # mode 3 evaluate both
-    function.mode = 3 
+    # mode 3 - evaluate rate
+    function.mode = 0
+    function.independent = 'y0'
     nsteps = 1000
     xarr = np.linspace(0.0, 1.0, nsteps)
     # Stimulus tables allow you to store sequences of numbers which
@@ -118,6 +126,7 @@ def example():
     input_x.stepPosition = xarr[0]
     input_x.stopTime = simtime
     moose.connect(input_x, 'output', function.x[0], 'setVar')
+    
     yarr = np.linspace(-np.pi, np.pi, nsteps)
     input_y = moose.StimulusTable('/ytab')
     input_y.vector = yarr
@@ -125,25 +134,56 @@ def example():
     input_y.stepPosition = yarr[0]
     input_y.stopTime = simtime
     moose.connect(function, 'requestOut', input_y, 'getOutputValue')
+
+    # data recording
     result = moose.Table('/ztab')
     moose.connect(result, 'requestOut', function, 'getValue')
     derivative = moose.Table('/zprime')
     moose.connect(derivative, 'requestOut', function, 'getDerivative')
-    dt =  simtime/nsteps
-    moose.setClock(0, dt)
-    moose.useClock(0, '/xtab,/ytab,/ztab,/zprime,/function', 'process')
-    moose.reinit()    
+    rate = moose.Table('/dz_by_dt')
+    moose.connect(rate, 'requestOut', function, 'getRate')
+    x_rec = moose.Table('/xrec')
+    moose.connect(x_rec, 'requestOut', input_x, 'getOutputValue')
+    y_rec = moose.Table('/yrec')
+    moose.connect(y_rec, 'requestOut', input_y, 'getOutputValue')    
+
+    dt =  simtime/nsteps    
+    for ii in range(32):
+        moose.setClock(ii, dt)
+    moose.reinit()
     moose.start(simtime)
     
     # Uncomment the following lines and the import matplotlib.pyplot as plt on top
     # of this file to display the plot.
-    
-    # plt.plot(result.vector, 'b-', label='z = c0 * exp(c1 * x0) * cos(y0)')
-    # plt.plot(derivative.vector, 'g-', label='dz/dx0')
-    # z = function.c['c0'] * np.exp(function.c['c1'] * xarr) * np.cos(yarr)
-    # plt.plot(z, 'r--', label='numpy computed')
-    # plt.legend()
-    # plt.show()
+    plt.subplot(3,1,1)
+    plt.plot(x_rec.vector, result.vector, 'r-', label='z = c0 * exp(c1 * x0) * cos(y0)')
+    z = function.c['c0'] * np.exp(function.c['c1'] * xarr) * np.cos(yarr)
+    plt.plot(xarr, z, 'b--', label='numpy computed')
+    plt.xlabel('x')
+    plt.ylabel('z')
+    plt.legend()
+
+    plt.subplot(3,1,2)
+    plt.plot(y_rec.vector, derivative.vector, 'r-', label='dz/dy0')
+    # derivatives computed by putting x values in the analytical formula
+    dzdy = function.c['c0'] * np.exp(function.c['c1'] * xarr) * (- np.sin(yarr))
+    plt.plot(yarr, dzdy, 'b--', label='numpy computed')
+    plt.xlabel('y')
+    plt.ylabel('dz/dy')
+    plt.legend()
+
+    plt.subplot(3,1,3)
+    # *** BEWARE *** The first two entries are spurious. Entry 0 is
+    # *** from reinit sending out the defaults. Entry 2 is because
+    # *** there is no lastValue for computing real forward difference.
+    plt.plot(np.arange(2, len(rate.vector), 1) * dt, rate.vector[2:], 'r-', label='dz/dt')
+    dzdt = np.diff(z)/dt
+    plt.plot(np.arange(0, len(dzdt), 1.0) * dt, dzdt, 'b--', label='numpy computed')
+    plt.xlabel('t')
+    plt.ylabel('dz/dt')
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
     
 if __name__ == '__main__':
     example()

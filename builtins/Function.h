@@ -93,8 +93,8 @@ class Function
     void setConst(string name, double value);
     double getConst(string name) const;
 
-    void setIndependent(unsigned int index);
-    unsigned int getIndependent() const;
+    void setIndependent(string index);
+    string getIndependent() const;
 
     vector < double > getY() const;
 
@@ -112,18 +112,18 @@ class Function
 
 protected:
     friend double * _functionAddVar(const char * name, void *data);
+    mutable bool _valid;
+    unsigned int _numVar;
     double _lastValue;
     double _value;
     double _rate;
     unsigned int _mode;
-    mutable bool _valid;
      // this stores variables received via incoming messages, identifiers of the form x{i} are included in this
     vector<Variable *> _varbuf;
-    unsigned int _numVar;
     // this stores variable values pulled by sending request. identifiers of the form y{i} are included in this
     vector< double * > _pullbuf;
     map< string, double *> _constbuf;  // for constants
-    unsigned int _independent; // index of independent variable
+    string _independent; // index of independent variable
     mu::Parser _parser;
     void _clearBuffer();
     void _showError(mu::Parser::exception_type &e) const;
