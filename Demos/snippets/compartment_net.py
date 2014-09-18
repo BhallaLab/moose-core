@@ -78,7 +78,7 @@ def create_population(container, size):
     m = moose.connect(comps, 'channel', synchan, 'channel', 'OneToOne')
     synhandler = moose.vec('{}/synhandler'.format(path), n=size,
                            dtype='SimpleSynHandler')
-    moose.connect(synhandler, 'activationOut', synchan, 'activation')
+    moose.connect(synhandler, 'activationOut', synchan, 'activation', 'OneToOne')
     spikegen = moose.vec('{}/spikegen'.format(path), n=size, dtype='SpikeGen')
     spikegen.threshold = 0.0
     m = moose.connect(comps, 'VmOut', spikegen, 'Vm', 'OneToOne')
@@ -103,24 +103,13 @@ def make_synapses(spikegen, synhandler, connprob=1.0, delay=5e-3):
         mean delay of synaptic transmission. Individual delays are
         normally distributed with sd=0.1*mean.  
     """
-    for sh in synhandler: 
+    for sh in synhandler:
         scount = len(spikegen)
         sh.synapse.num = scount
         sh.synapse.vec.delay = 5e-3
-        msg = moose.connect(spikegen, 'spikeOut', sh.synapse.vec, 'addSpike', 'Sparse')
-        moose.SparseMsg(msg).setRandomConnectivity(connprob, 1)
-    for ii, sh in enumerate(synhandler):
-        print '***', ii
-        moose.showmsg(sh)
-    # #: Create sparse message from spike generators to synaptic channels
-    # m = moose.connect(spikegen, 'spikeOut',
-    #                   moose.element(synchan.path + '/synapse'),  'addSpike',
-    #                   'Sparse')
-    # #: The sparse message maintains an adjacency matrix. In the special
-    # #: case of synapses on synchan objects, entry a[i][j] = k means
-    # #: that source object no. i (say spikegen[i] connects to synapse
-    # #: no. k on the j-th synchan object.
-    # moose.SparseMsg(m).setRandomConnectivity(connprob, 1)
+        for ii, syn in enumerate(sh.synapse):
+            msg = moose.connect(spikegen[ii], 'spikeOut', syn, 'addSpike')
+            print 'Connected', spikegen[ii].path, 'to', syn.path, 'on', sh.path
             
 def create_network(size=2):
     """Create a network containing two neuronal populations, pop_A and
@@ -156,7 +145,7 @@ if __name__ == '__main__':
     simtime = 0.1
     simdt = 0.25e-5
     plotdt = 0.25e-3
-    netinfo = create_network(size=20)
+    netinfo = create_network(size=2)
     vm_a = netinfo['Vm_A']
     vm_b = netinfo['Vm_B']
     gksyn_b = netinfo['Gsyn_B']
