@@ -24,6 +24,11 @@ Sometimes you want to calculate arbitrary function of the state
 variables of one or more elements and feed the result into another
 element during a simulation. The Function class is useful for this.
 
+.. figure:: images/function.png
+   :alt: Outputs of Function object calculating z = c0 * exp(c1 * x) * cos(y)
+   :scale: 50%    
+
+	    
 .. automodule:: function
    :members:
             
