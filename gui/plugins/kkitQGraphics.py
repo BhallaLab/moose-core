@@ -11,6 +11,7 @@ class KineticsDisplayItem(QtGui.QGraphicsWidget):
         self.pressed = False
         self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable,True)
         self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
+        self.setAcceptHoverEvents(True)
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         if QtCore.QT_VERSION >= 0x040600:
             self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges,1)
@@ -43,8 +44,21 @@ class PoolItem(KineticsDisplayItem):
     def __init__(self, *args, **kwargs):
         KineticsDisplayItem.__init__(self, *args, **kwargs)
         self.bg = QtGui.QGraphicsRectItem(self)
+        self.bg.setAcceptHoverEvents(True)
         self.gobj = QtGui.QGraphicsSimpleTextItem(self.mobj.name, self.bg)
         self.gobj.mobj = self.mobj
+        classname = self.mobj.className
+        # classname = 'PoolBase'
+        # doc = moose.element('/classes/%s' % (classname)).docs
+        # print "docs ",self.gobj.mobj, " ",doc
+        # doc = doc.split('Description:')[-1].split('Name:')[0].strip()
+        if (classname == "ZombiePool" or classname == "Pool"):
+            doc = "A Pool is a collection of molecules of a given species in a given cellular compartment.\n It can undergo reactions that convert it into other pool(s). \nParameters: initConc (Initial concentration), diffConst (diffusion constant). Variable: conc (Concentration)"
+        elif (classname == "ZombieBufPool" or classname =="BufPool" ):
+            doc = "A BufPool is a buffered pool. \nIt is a collection of molecules of a given species in a given cellular compartment, that are always present at the same concentration.\n This is set by the initConc parameter. \nIt can undergo reactions in the same way as a pool."
+        elif (classname == "ZombieFuncPool" or classname == "FuncPool"):
+            doc = "A Func computes an arbitrary mathematical expression of one or more input concentrations of Pools. The output can be used to control the concentration of another Pool, or as an input to another Func "
+        self.gobj.setToolTip(doc)
         self.gobj.setFont(PoolItem.font)
         if not PoolItem.fontMetrics:
             PoolItem.fontMetrics = QtGui.QFontMetrics(self.gobj.font())
@@ -146,6 +160,7 @@ class TableItem(KineticsDisplayItem):
         path.lineTo((TableItem.defaultWidth+10),TableItem.defaultHeight/4)
 
         self.gobj = QtGui.QGraphicsPathItem(path, self)
+        self.gobj.setToolTip("A StimulusTable stores an array of values that are read out during a simulation, and typically control the concentration of one of the pools in the model. \nParameters: size of table, values of entries, start and stop times, and an optional loopTime that defines the period over which the StimulusTable should loop around to repeat its values")
         self.gobj.setPen(QtGui.QPen(QtCore.Qt.black, 2,Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin))
         self.gobj.mobj = self.mobj
 
@@ -199,6 +214,12 @@ class ReacItem(KineticsDisplayItem):
         self.gobj = QtGui.QGraphicsPathItem(path, self)
         self.gobj.setPen(QtGui.QPen(QtCore.Qt.black, 2,Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin))
         self.gobj.mobj = self.mobj
+        #classname = self.mobj.className
+        # classname = 'ReacBase'
+        # doc = moose.element('/classes/%s' % (classname)).docs
+        # print "docs ",self.gobj.mobj, " ",doc
+        # doc = doc.split('Description:')[-1].split('Name:')[0].strip()
+        self.gobj.setToolTip(" A Reac is a chemical reaction that converts substrates into products, and back. \nThe rates of these conversions are specified by the rate constants Kf and Kb respectively.")
     def refresh( self,scale):
         defaultWidth = ReacItem.defaultWidth*scale
         defaultHeight = ReacItem.defaultHeight*scale
@@ -233,7 +254,14 @@ class EnzItem(KineticsDisplayItem):
                                             EnzItem.defaultWidth, 
                                             EnzItem.defaultHeight, self)
         self.gobj.mobj = self.mobj
-
+        # classname = 'EnzBase'
+        # doc = moose.element('/classes/%s' % (classname)).docs
+        # doc = doc.split('Description:')[-1].split('Name:')[0].strip()
+        if not (self.mobj.className == "ZombieEnz" or self.mobj.className == "Enz"):
+            self.gobj.setToolTip("An MMenz is the Michaelis-Menten version of an enzyme activity of a given Pool.\n The MMenz must be created on a pool and can only catalyze a single reaction with a specified substrate(s). \nIf a given enzyme species can have multiple substrates, then multiple MMenz activites must be created on the parent Pool. \nThe rate of an MMenz is V [S].[E].kcat/(Km + [S]). There is no enzyme-substrate complex. Parameters: Km and kcat.")
+        else:
+            self.gobj.setToolTip("An Enz is an enzyme activity of a given Pool. The Enz must be created on a pool and can only catalyze a single reaction with a specified substrate(s). \nIf a given enzyme species can have multiple substrates, then multiple Enz activities must be created on the parent Pool. \nThe reaction for an Enz is E + S <===> E.S ---> E + P. \nThis means that a new Pool, the enzyme-substrate complex E.S, is always formed when you create an Enz. \nParameters: Km and kcat, or alternatively, K1, K2 and K3. Km = (K2+K3)/K1")
+        
     def setDisplayProperties(self,x,y,textcolor,bgcolor):
         """Set the display properties of this item."""
         self.setGeometry(x,y, 
@@ -258,6 +286,8 @@ class CplxItem(KineticsDisplayItem):
         KineticsDisplayItem.__init__(self, *args, **kwargs)
         self.gobj = QtGui.QGraphicsRectItem(0,0, CplxItem.defaultWidth, CplxItem.defaultHeight, self)
         self.gobj.mobj = self.mobj
+
+        #self.gobj.setToolTip("This is the a tooltip for CplxItem")
 
     def setDisplayProperties(self,x,y,textcolor,bgcolor):
         """Set the display properties of this item."""
