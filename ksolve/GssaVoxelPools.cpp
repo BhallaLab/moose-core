@@ -111,6 +111,7 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
 			return;
 		}
 		unsigned int rindex = pickReac();
+		assert( g->stoich->getNumRates() == v_.size() );
 		if ( rindex >= g->stoich->getNumRates() ) {
 			// probably cumulative roundoff error here. 
 			// Recalculate atot to avoid, and redo.
@@ -120,7 +121,20 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
 					i = v_.begin(); i != v_.end(); ++i )
 				atot_ += *i;
 			atot_ *= SAFETY_FACTOR;
-			rindex = v_.size() - 1;
+			// Check if the system is in a stuck state. If so, terminate.
+			if ( atot_ <= 0.0 ) {
+				t_ = nextt;
+				return;
+			}
+			// We had a roundoff error, fixed it, but now need to be sure
+			// we only fire a reaction where this is permissible.
+			for ( unsigned int i = v_.size(); i > 0; --i ) {
+				if ( v_[i-1] > 0.0 ) {
+					rindex = i - 1;
+					break;
+				}
+			}
+			assert( rindex < v_.size() );
 		}
 
 		g->transposeN.fireReac( rindex, Svec() );
