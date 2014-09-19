@@ -411,7 +411,7 @@ class  KineticsWidget(EditorWidgetBase):
                 self.layout().removeWidget(self.view)
             createdItem = {}
             self.sceneContainer.setSceneRect(-self.width()/2,-self.height()/2,self.width(),self.height())
-            self.view = GraphicalView(self.widget, self.modelRoot,self.sceneContainer,self.border,self,createdItem)
+            self.view = GraphicalView(self.modelRoot,self.sceneContainer,self.border,self,createdItem)
 
             if isinstance(self,kineticEditorWidget):
                 self.view.setRefWidget("editorView")
@@ -436,7 +436,7 @@ class  KineticsWidget(EditorWidgetBase):
             createdItem = {}
             if hasattr(self, 'view') and isinstance(self.view, QtGui.QWidget):
                 self.layout().removeWidget(self.view)
-            self.view = GraphicalView(self.widget,self.modelRoot,self.sceneContainer,self.border,self,createdItem)
+            self.view = GraphicalView(self.modelRoot,self.sceneContainer,self.border,self,createdItem)
             if isinstance(self,kineticEditorWidget):
                 self.view.setRefWidget("editorView")
                 self.view.setAcceptDrops(True)
