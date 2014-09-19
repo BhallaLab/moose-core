@@ -125,6 +125,7 @@ class MWindow(QtGui.QMainWindow):
         self.toolBars = []
         self._loadedPlugins = {}
         self._plugins = {}
+        self._loadedModels = {}
         self.setDockOptions(self.AnimatedDocks and self.AllowNestedDocks and self.AllowTabbedDocks)
         self.mdiArea = QtGui.QMdiArea()
         self.quitAction = QtGui.QAction('&Quit', self)
@@ -433,7 +434,8 @@ class MWindow(QtGui.QMainWindow):
             self.editMenu = QtGui.QMenu('&Edit')
         else:
             self.editMenu.clear()
-        self.editMenu.addActions(self.getEditActions())
+        
+        #   self.editMenu.addActions(self.getEditActions())
         return self.editMenu
     def getPluginsMenu(self):
         """Populate plugins menu if it does not exist already."""
@@ -508,13 +510,16 @@ class MWindow(QtGui.QMainWindow):
     #     return self.runMenu
 
     def getEditActions(self):
-        if (not hasattr(self, 'editActions')) or (self.editActions is None):
-            self.setModelRootAction = QtGui.QAction('&Set model root', self)
-            self.setModelRootAction.triggered.connect(self.showSetModelRootDialog)
-            self.setDataRootAction = QtGui.QAction('Set &data root', self)
-            self.setDataRootAction.triggered.connect(self.showSetDataRootDialog)
-            self.editActions = [self.setModelRootAction, self.setDataRootAction]
-        return self.editActions
+
+        #self.editActions = []
+        # if (not hasattr(self, 'editActions')) or (self.editActions is None):
+        #     self.setModelRootAction = QtGui.QAction('&Set model root', self)
+        #     self.setModelRootAction.triggered.connect(self.showSetModelRootDialog)
+        #     self.setDataRootAction = QtGui.QAction('Set &data root', self)
+        #     self.setDataRootAction.triggered.connect(self.showSetDataRootDialog)
+        #     self.editActions = [self.setModelRootAction, self.setDataRootAction]
+        #return self.editActions
+        return
 
     def showSetModelRootDialog(self):
         root, ok = QtGui.QInputDialog.getText(self, 'Model Root', 'Enter the model root path:', text=moose.element(self.plugin.modelRoot).path)
@@ -615,7 +620,7 @@ class MWindow(QtGui.QMainWindow):
                 pluginName = 'default'
 
             print 'Loaded model', ret['model'].path
-
+            self._loadedModels[ret['model'].path] = "kkit"
             self.setPlugin(pluginName, ret['model'].path)
 
 
@@ -758,6 +763,8 @@ class MWindow(QtGui.QMainWindow):
                 except KeyError:
                     pluginName = 'default'
                 print 'Loaded model', ret['model'].path
+                self._loadedModels[ret['model'].path] = "kkit"
+                print "loadModelDialog",self._loadedModels
                 self.setPlugin(pluginName, ret['model'].path)
 
 
@@ -780,6 +787,7 @@ class MWindow(QtGui.QMainWindow):
             modelContainer = moose.Neutral('%s' %(modelPath))
             modelRoot = moose.Neutral('%s/%s' %(modelContainer.path,"model"))
             self.setPlugin(plugin, modelRoot.path)
+            self._loadedModels[modelContainer.path] = plugin
             #Harsha: This will clear out object editor's objectpath and make it invisible
             self.objectEditSlot('/', False)
 
