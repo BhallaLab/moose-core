@@ -66,6 +66,8 @@ from mplugin import MoosePluginBase, EditorBase, EditorWidgetBase, PlotBase, Run
 #from defaultToolPanel import DefaultToolPanel
 #from DataTable import DataTable
 from matplotlib.lines import Line2D
+from PlotWidgetContainer import PlotWidgetContainer
+
 
 class MoosePlugin(MoosePluginBase):
     """Default plugin for MOOSE GUI"""
@@ -104,7 +106,7 @@ class MoosePlugin(MoosePluginBase):
     def getRunView(self):
 
         if not hasattr(self, 'runView') or self.runView is None:
-            self.runView = RunView(self)
+            self.runView = RunView(self.modelRoot, self)
         return self.runView
 
     def getMenus(self):
@@ -297,24 +299,26 @@ class RunView(RunBase):
     dataRoot: location of data tables
 
     """
-    def __init__(self, *args, **kwargs):
+    def __init__(self, modelRoot, *args, **kwargs):
         RunBase.__init__(self, *args, **kwargs)
-        self.getCentralWidget()
-        self.modelRoot = '/model'
-        self.dataRoot = '/data'
-        self.getCentralWidget()
+        self.modelRoot = modelRoot
+        if modelRoot != "/":
+            self.dataRoot = modelRoot + '/data'
+        else:
+            self.dataRoot = "/data"
         self.setModelRoot(moose.Neutral(self.plugin.modelRoot).path)
         self.setDataRoot(moose.Neutral('/data').path)
         self.setDataRoot(moose.Neutral(self.plugin.modelRoot).path)
         self.plugin.modelRootChanged.connect(self.setModelRoot)
         self.plugin.dataRootChanged.connect(self.setDataRoot)
         self._menus += self.getCentralWidget().getMenus()
+        # self.getCentralWidget()
 
     def getCentralWidget(self):
         """TODO: replace this with an option for multiple canvas
         tabs"""
         if self._centralWidget is None:
-            self._centralWidget = PlotWidget()
+            self._centralWidget = PlotWidgetContainer(self.modelRoot)
         return self._centralWidget
 
     # def setDataRootSlot(self):
@@ -330,7 +334,7 @@ class RunView(RunBase):
     def setModelRoot(self, path):
         self.modelRoot = path
         #self.getSchedulingDockWidget().widget().setModelRoot(path)
-        self.getCentralWidget().setModelRoot(path)
+        # self.getCentralWidget().setModelRoot(path)
 
     def getDataTablesPane(self):
         """This should create a tree widget with dataRoot as the root
@@ -392,8 +396,8 @@ class MooseRunner(QtCore.QObject):
         self._simtime = 0.0
         self._clock = moose.Clock('/clock')
         self._pause = False
-        self.dataRoot = moose.Neutral('/data').path
-        self.modelRoot = moose.Neutral('/model').path
+        self.dataRoot = '/Kholodenko/data'
+        self.modelRoot = '/Kholodenko/model'
         #MooseRunner.inited = True
 
     def doResetAndRun(self, tickDtMap, tickTargetMap, simtime, updateInterval):
@@ -404,10 +408,12 @@ class MooseRunner(QtCore.QObject):
         utils.assignTicks(tickTargetMap)
         self.resetAndRun.emit()
         moose.reinit()
+        print("()()()() ", self._simtime)
         QtCore.QTimer.singleShot(0, self.run)
 
     def run(self):
         """Run simulation for a small interval."""
+        print("In run")
         if self._clock.currentTime >= self._simtime:
             self.finished.emit()
             return
@@ -457,6 +463,7 @@ class SchedulingWidget(QtGui.QWidget):
     resetAndRun = QtCore.pyqtSignal(dict, dict, float, float, name='resetAndRun')
     simtimeExtended = QtCore.pyqtSignal(float, name='simtimeExtended')
     continueRun = QtCore.pyqtSignal(float, float, name='continueRun')
+
     def __init__(self, *args, **kwargs):
         QtGui.QWidget.__init__(self, *args, **kwargs)
         #layout = QtGui.QVBoxLayout()
@@ -507,6 +514,7 @@ class SchedulingWidget(QtGui.QWidget):
         layout.addWidget(self.advancedOption)
         widget.setLayout(layout)
         return widget
+
     def __getUpdateIntervalWidget(self):
         label = QtGui.QLabel('Plot update interval')
         self.updateIntervalText = QtGui.QLineEdit(str(self.updateInterval))
@@ -548,9 +556,13 @@ class SchedulingWidget(QtGui.QWidget):
         tickDt = self.getTickDtMap().values()
         tickDt = [item for item in self.getTickDtMap().values() if float(item) != 0.0]
         dt = max(tickDt)
+        print("dt => ", dt)
+        print("tickDt => ", tickDt)
         #dt = min(self.getTickDtMap().values())
+        print("UpdateInterval", self.updateInterval)
         if dt > self.updateInterval:
             self.updateInterval = dt*10
+            print("UpdateInterval", self.updateInterval)
             #self.updateIntervalText.setText(str(dt))
 
     # def disableButton(self):
@@ -727,8 +739,14 @@ event = None
 legend = None
 canvas = None
 
+from PyQt4.QtGui import QWidget
+from PyQt4.QtGui import QSizeGrip
+from PyQt4.QtGui import QLayout
+from PyQt4.QtGui import QScrollArea
+from PyQt4.QtGui import QMenu
+from PyQt4.QtCore import pyqtSlot,SIGNAL,SLOT, Signal, pyqtSignal
 
-class PlotWidget(QtGui.QWidget):
+class PlotWidget(QWidget):
     """A wrapper over CanvasWidget to handle additional MOOSE-specific
     stuff.
 
@@ -746,17 +764,22 @@ class PlotWidget(QtGui.QWidget):
     lineToDataSource - map from Line2D objects to moose paths
 
     """
-    def __init__(self, *args, **kwargs):
-        QtGui.QWidget.__init__(self, *args)
-        scrollbar = QtGui.QScrollArea()
-        self.canvas = CanvasWidget()
+
+    widgetClosedSignal = pyqtSignal(object)
+
+    def __init__(self, model, graph, index, parentWidget, *args, **kwargs):
+        super(PlotWidget, self).__init__()
+        self.model = model
+        self.graph = graph
+        self.index = index
+        self.canvas = CanvasWidget(self.model, self.graph, self.index)
         self.canvas.setParent(self)
-        #global canvas
-        #canvas = self.canvas
         self.navToolbar = NavigationToolbar(self.canvas, self)
         layout = QtGui.QGridLayout()
-        layout.addWidget(self.canvas,0,1)
-        layout.addWidget(self.navToolbar,1,1)
+        # canvasScrollArea = QScrollArea()
+        # canvasScrollArea.setWidget(self.canvas)
+        layout.addWidget(self.navToolbar, 0, 0)
+        layout.addWidget(self.canvas, 1, 0)
         self.setLayout(layout)
         # self.setAcceptDrops(True)
         #self.modelRoot = '/'
@@ -764,14 +787,72 @@ class PlotWidget(QtGui.QWidget):
         self.lineToDataSource = {}
         self.axesRef = self.canvas.addSubplot(1, 1)
         self.onclick_count = 0
-
+        layout.setSizeConstraint( QLayout.SetNoConstraint )
+        self.setSizePolicy( QtGui.QSizePolicy.Expanding
+                          , QtGui.QSizePolicy.Expanding
+                          )
+        self.setMinimumSize(self.width(), self.height())
+        self.setMaximumSize(2 * self.width(), 2* self.height())
+        # QtCore.QObject.connect(utils.tableEmitter,QtCore.SIGNAL("tableCreated()"),self.plotAllData)
+        self.canvas.updateSignal.connect(self.plotAllData)
+        self.plotAllData()
+        self.menu = self.getContextMenu()
+        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.connect(self,SIGNAL("customContextMenuRequested(QPoint)"),
+                    self,SLOT("contextMenuRequested(QPoint)"))
+        # self.plotView = PlotView(model, graph, index, self)
         #self.dataTable = DataTable()
         #utils.tableCreated.connect(plotAllData)
-        QtCore.QObject.connect(utils.tableEmitter,QtCore.SIGNAL("tableCreated()"),self.plotAllData)
+        # self.plotAllData()
+        # self.setSizePolicy(QtGui.QSizePolicy.Fixed,
+        #         QtGui.QSizePolicy.Expanding)
 
     @property
     def plotAll(self):
         return len(self.pathToLine) == 0
+
+    def getContextMenu(self):
+        menu =  QMenu()
+        closeAction     = menu.addAction("Delete")
+        closeAction.triggered.connect(self.delete)
+        # configureAction.triggered.connect(self.configure)
+        # self.connect(,SIGNAL("triggered()"),
+        #                 self,SLOT("slotShow500x500()"))
+        # self.connect(action1,SIGNAL("triggered()"),
+        #                 self,SLOT("slotShow100x100()"))
+
+        return menu
+
+    def deleteGraph(self):
+        print("Deleting " + self.graph.path)
+        moose.delete(self.graph.path)
+
+    def delete(self, event):
+        print("Deleting PlotWidget")
+        self.deleteGraph()
+        self.close()
+        self.widgetClosedSignal.emit(self)
+
+    def configure(self, event):
+        print("Displaying configure view!")
+        self.plotView.getCentralWidget().show()
+
+    @pyqtSlot(QtCore.QPoint)
+    def contextMenuRequested(self,point):
+        print("Reaching here!")
+        # menu     = QtGui.QMenu()
+
+        # action1 = menu.addAction("Set Size 100x100")
+        # action2 = menu.addAction("Set Size 500x500")
+
+
+        # self.connect(action2,SIGNAL("triggered()"),
+        #                 self,SLOT("slotShow500x500()"))
+        # self.connect(action1,SIGNAL("triggered()"),
+        #                 self,SLOT("slotShow100x100()"))
+        self.menu.exec_(self.mapToGlobal(point))
+
+
 
     def setModelRoot(self, path):
         self.modelRoot = path
@@ -779,6 +860,7 @@ class PlotWidget(QtGui.QWidget):
     def setDataRoot(self, path):
         self.dataRoot = path
         #plotAllData()
+
     def genColorMap(self,tableObject):
         #print "tableObject in colorMap ",tableObject
         species = tableObject+'/info'
@@ -802,21 +884,22 @@ class PlotWidget(QtGui.QWidget):
         return color
 
     def plotAllData(self):
-        """Plot data from all tables under dataRoot"""
-
-        path = moose.element(self.dataRoot).path
-        modelroot = moose.element(self.modelRoot).path
+        """Plot data from existing tables"""
+        path = self.model.path
+        modelroot = self.model.path
         time = moose.Clock('/clock').currentTime
         tabList = []
         #for tabId in moose.wildcardFind('%s/##[TYPE=Table]' % (path)):
         #harsha: policy graphs will be under /model/modelName need to change in kkit
         #for tabId in moose.wildcardFind('%s/##[TYPE=Table]' % (modelroot)):
-        plotTables = moose.wildcardFind('%s/##[TYPE=Table]' %(modelroot))
+        plotTables = moose.wildcardFind(self.graph.path + '/##[TYPE=Table]')
         if len (plotTables) > 0:
             for tabId in plotTables:
                 tab = moose.Table(tabId)
                 line_list=[]
                 tableObject = tab.neighbors['requestOut']
+                # Not a good way
+                #tableObject.msgOut[0]
                 if len(tableObject) > 0:
                     # This is the default case: we do not plot the same
                     # table twice. But in special cases we want to have
@@ -826,15 +909,22 @@ class PlotWidget(QtGui.QWidget):
                     #Harsha: Adding color to graph for signalling model, check if given path has cubemesh or cylmesh
                     color = 'white'
                     color = self.genColorMap(tableObject[0].path)
-                    
+
                     lines = self.pathToLine[tab.path]
                     if len(lines) == 0:
                         #Harsha: pass color for plot if exist and not white else random color
                         #print "tab in plotAllData ",tab, tab.path,tab.name
+                        field = tab.path.rpartition(".")[-1]
+                        if field.endswith("[0]") or field.endswith("_0_"):
+                            field = field[:-3]
+                        label = ( tableObject[0].path.partition(self.model.path + "/model[0]/")[-1]
+                                + "."
+                                + field
+                                )
                         if (color != 'white'):
-                            newLines = self.addTimeSeries(tab, label=tab.name,color=color)
+                            newLines = self.addTimeSeries(tab, label=label,color=color)
                         else:
-                            newLines = self.addTimeSeries(tab, label=tab.name)
+                            newLines = self.addTimeSeries(tab, label=label)
                         self.pathToLine[tab.path].update(newLines)
                         for line in newLines:
                             self.lineToDataSource[line] = PlotDataSource(x='/clock', y=tab.path, z='')
@@ -850,9 +940,18 @@ class PlotWidget(QtGui.QWidget):
                             line.set_data(ts, tab.vector.copy())
                     tabList.append(tab)
                     self.canvas.mpl_connect('pick_event',self.onclick)
-            
+
             if len(tabList) > 0:
-                leg = self.canvas.callAxesFn('legend',loc='upper center',prop={'size':10},bbox_to_anchor=(0.5, -0.03),fancybox=True, shadow=True, ncol=3)
+                leg = self.canvas.callAxesFn( 'legend'
+                                            , loc               ='upper center'
+                                            , prop              = {'size' : 10 }
+                                            , bbox_to_anchor    = (0.5, -0.03)
+                                            , fancybox          = True
+                                            , shadow            = True
+                                            , ncol              = 2
+                                            )
+                leg.draggable(True)
+                print(leg.get_window_extent())
                         #leg = self.canvas.callAxesFn('legend')
                         #leg = self.canvas.callAxesFn('legend',loc='upper left', fancybox=True, shadow=True)
                         #global legend
@@ -860,7 +959,7 @@ class PlotWidget(QtGui.QWidget):
                 for legobj in leg.legendHandles:
                     legobj.set_linewidth(5.0)
                     legobj.set_picker(True)
-                            
+
                 self.canvas.draw()
             else:
                 print "returning as len tabId is zero ",tabId, " tableObject ",tableObject, " len ",len(tableObject)
@@ -969,7 +1068,7 @@ class PlotWidget(QtGui.QWidget):
             directory = fileDialog2.directory().path()
             for line in self.lineToDataSource.keys():
                 self.saveCsv(line,directory)
-    
+
 
     def getMenus(self):
         if not hasattr(self, '_menus'):
@@ -993,11 +1092,14 @@ class PlotWidget(QtGui.QWidget):
 
 class PlotView(PlotBase):
     """View for selecting fields on elements to plot."""
-    def __init__(self, *args):
+    def __init__(self, model, graph, index, *args):
         PlotBase.__init__(self, *args)
-        self.plugin.modelRootChanged.connect(self.getSelectionPane().setSearchRoot)
-        self.plugin.dataRootChanged.connect(self.setDataRoot)
-        self.dataRoot = self.plugin.dataRoot
+        self.model = model
+        self.graph = graph
+        self.index = index
+        # self.plugin.modelRootChanged.connect(self.getSelectionPane().setSearchRoot)
+        # self.plugin.dataRootChanged.connect(self.setDataRoot)
+        # self.dataRoot = self.plugin.dataRoot
 
     def setDataRoot(self, root):
         self.dataRoot = moose.element(root).path
@@ -1011,7 +1113,7 @@ class PlotView(PlotBase):
         """
         if not hasattr(self, '_selectionPane'):
             self._searchWidget = SearchWidget()
-            self._searchWidget.setSearchRoot(self.plugin.modelRoot)
+            self._searchWidget.setSearchRoot(self.model.path)
             self._fieldLabel = QtGui.QLabel('Field to plot')
             self._fieldEdit = QtGui.QLineEdit()
             self._fieldEdit.returnPressed.connect(self._searchWidget.searchSlot)
@@ -1049,7 +1151,7 @@ class PlotView(PlotBase):
 
     def getCentralWidget(self):
         if not hasattr(self, '_centralWidget') or self._centralWidget is None:
-            self._centralWidget = PlotSelectionWidget()
+            self._centralWidget = PlotSelectionWidget(self.model, self.graph)
             self.getSelectionPane().executed.connect(self.selectElements)
         return self._centralWidget
 
@@ -1084,7 +1186,7 @@ class PlotView(PlotBase):
         for element, field in self.getCentralWidget().getSelectedFields():
             #createRecordingTable(element, field, self._recordingDict, self._reverseDict, self.dataRoot)
             #harsha:CreateRecordingTable function is moved to python/moose/utils.py file as create function
-            #as this is required when I drop table on to the plot 
+            #as this is required when I drop table on to the plot
             utils.create(self.plugin.modelRoot,moose.element(element),field)
             #self.dataTable.create(self.plugin.modelRoot, moose.element(element), field)
             #self.updateCallback()
@@ -1145,13 +1247,13 @@ class PlotSelectionWidget(QtGui.QScrollArea):
     setDataRoot with a path to specify alternate location.
 
     """
-    def __init__(self, *args):
+    def __init__(self, model, graph, *args):
         QtGui.QScrollArea.__init__(self, *args)
-        model = moose.Neutral('/model')
-        self.modelRoot = model.path
+        self.model = moose.element(model.path + "/model")
+        self.modelRoot = self.model.path
         self.setLayout(QtGui.QVBoxLayout(self))
         self.layout().addWidget(self.getPlotListWidget())
-        self.setDataRoot(moose.Neutral('/data'))
+        self.setDataRoot(self.model.path)
         self._elementWidgetsDict = {} # element path to corresponding qlabel and fields combo
 
     def getPlotListWidget(self):
@@ -1208,6 +1310,7 @@ class PlotSelectionWidget(QtGui.QScrollArea):
 
     def setDataRoot(self, path):
         """The tables will be created under dataRoot"""
+        pass
         self.dataRoot = path
 
     def getSelectedFields(self):

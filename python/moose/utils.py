@@ -1,12 +1,12 @@
 #!/usr/bin/env python
-"""utils.py: 
+"""utils.py:
 
     Utility functions for moose.
 
     Last modified: Sat Jan 18, 2014  05:01PM
 
 """
-    
+
 __author__           = 'Subhasis Ray, Aditya Gilra, Dilawar Singh, NCBS'
 __copyright__        = "Copyright 2013, NCBS Bangalore"
 __credits__          = ["NCBS Bangalore", "Bhalla Lab"]
@@ -38,9 +38,9 @@ from PyQt4 import QtCore, Qt
 # Import functions from sub-libraries.
 plotTable = plot_utils.plotTable
 plotTables = plot_utils.plotTables
-saveTables = plot_utils.saveTables 
+saveTables = plot_utils.saveTables
 
-# 
+#
 recordAt = sim_utils.recordTarget
 recordTarget = sim_utils.recordTarget
 
@@ -57,76 +57,117 @@ writeGraphviz  = graph_utils.writeGraphviz
 verify = verification_utils.verify
 
 # Simulation libarary
-import sim_utils 
+import sim_utils
 run = sim_utils.run
 
 tableEmitter = QtCore.QObject()
 # Harsha: Moved this fun from default to pymoose/moose/utils.py
-#def createRecordingTable(element, field, _recordDict, _reverseDict,dataRoot='/data'):       
+#def createRecordingTable(element, field, _recordDict, _reverseDict,dataRoot='/data'):
 
-def create(modelroot, element,field):
-        """Create table to record `field` from element `element`
+def create(model, graph, element, field):
+    """Create table to record `field` from element `element`
 
-        Tables are created under `dataRoot`, the names are generally
-        created by removing `/model` in the beginning of `elementPath`
-        and replacing `/` with `_`. If this conflicts with an existing
-        table, the id value of the target element (elementPath) is
-        appended to the name.
-        """
-        dataroot = modelroot+"/" + "data"
-        if not _moose.exists(dataroot):
-            _moose.Neutral(dataroot)
-        '''
-        if len(field) == 0 or ((element, field) in self._recordDict):
-            return
-        '''
-        field = lst = [word[0].upper() + word[1:] for word in field.split()]
-        field = " ".join(lst)
-        
-        if len(field) == 0 or len(element.neighbors['get%s'%(field)]) > 0:
-            return
-        # The table path is not foolproof - conflict is
-        # possible: e.g. /model/test_object and
-        # /model/test/object will map to same table. So we
-        # check for existing table without element field
-        # path in recording dict.
-        relativePath = element.path.partition(modelroot)[-1]
-        if relativePath.startswith('/'):
-            relativePath = relativePath[1:]
+    Tables are created under `dataRoot`, the names are generally
+    created by removing `/model` in the beginning of `elementPath`
+    and replacing `/` with `_`. If this conflicts with an existing
+    table, the id value of the target element (elementPath) is
+    appended to the name.
+    """
 
-        #Convert to camelcase
-        
-        tablePath =  relativePath.replace('/', '_') + '.' + field
-        tablePath = re.sub('.', lambda m: {'[':'_', ']':'_'}.get(m.group(), m.group()),tablePath)
-        
-        if tablePath.startswith("_0__"):
-            tablePath = tablePath[4:]
-        
-        #tablePath = dataroot + '/' +tablePath
-        tablePath = dataroot+'/'+element.name+'.'+field[:2]
-        if _moose.exists(tablePath):
-            tablePath = '%s_%d' % (tablePath, element.getId().value)
-        
-        if not _moose.exists(tablePath):
-            table = _moose.Table(tablePath)
-            print 'Created', table.path, 'for plotting', '%s.%s' % (element.path, field)
-            target = element
-            _moose.connect(table, 'requestOut', target, 'get%s' % (field))
-            
-            tableEmitter.emit(QtCore.SIGNAL('tableCreated()'))
-            #tableCreated.emit()
-            return True
-            #self.emit(QtCore.SIGNAL('tableCreated(PyQt_PyObject)'))
-            #self.created.emit()
-            
-        return False
+    # if not _moose.exists(dataroot):
+    #     _moose.Neutral(dataroot)
+    '''
+    if len(field) == 0 or ((element, field) in self._recordDict):
+        return
+    '''
+    field = lst = [word[0].upper() + word[1:] for word in field.split()]
+    field = " ".join(lst)
+
+    if len(field) == 0 or len(element.neighbors['get%s'%(field)]) > 0:
+        return
+    # The table path is not foolproof - conflict is
+    # possible: e.g. /model/test_object and
+    # /model/test/object will map to same table. So we
+    # check for existing table without element field
+    # path in recording dict.
+    relativePath = element.path.partition(modelroot)[-1]
+    if relativePath.startswith('/'):
+        relativePath = relativePath[1:]
+
+    #Convert to camelcase
+
+    tablePath =  relativePath.replace('/', '_') + '.' + field
+    tablePath = re.sub('.', lambda m: {'[':'_', ']':'_'}.get(m.group(), m.group()),tablePath)
+
+    if tablePath.startswith("_0__"):
+        tablePath = tablePath[4:]
+
+    tablePath = dataroot + '/' +tablePath
+    #tablePath = dataroot+'/'+element.name+'.'+field[:2]
+    if _moose.exists(tablePath):
+        tablePath = '%s_%d' % (tablePath, element.getId().value)
+
+    if not _moose.exists(tablePath):
+        table = _moose.Table(tablePath)
+        print 'Created', table.path, 'for plotting', '%s.%s' % (element.path, field)
+        target = element
+        _moose.connect(table, 'requestOut', target, 'get%s' % (field))
+
+        tableEmitter.emit(QtCore.SIGNAL('tableCreated()'))
+        #tableCreated.emit()
+        return True
+        #self.emit(QtCore.SIGNAL('tableCreated(PyQt_PyObject)'))
+        #self.created.emit()
+
+    return False
+
+
+def create_table_path(model, graph, element, field):
+
+    field = field[0].upper() + field[1:]
+
+    tablePathSuffix = element.path.partition(model.path + "/model[0]/")[-1]
+    if tablePathSuffix.startswith('/'):
+        tablePathSuffix = tablePathSuffix[1:]
+
+    tablePathSuffix =  tablePathSuffix.replace('/', '_') + '.' + field
+    tablePathSuffix = re.sub( '.'
+                            , lambda m: { '[' : '_'
+                                        , ']' : '_'
+                                        }.get(m.group(), m.group())
+                            ,tablePathSuffix
+                            )
+
+    if tablePathSuffix.startswith("_0__"):
+        tablePathSuffix = tablePathSuffix[4:]
+
+    #tablePath = dataroot + '/' +tablePath
+    tablePath = graph.path + "/" + tablePathSuffix
+    return tablePath
+
+
+def create_table(tablePath, element, field):
+    """Create table to record `field` from element `element`
+
+    Tables are created under `dataRoot`, the names are generally
+    created by removing `/model` in the beginning of `elementPath`
+    and replacing `/` with `_`. If this conflicts with an existing
+    table, the id value of the target element (elementPath) is
+    appended to the name.
+    """
+    if _moose.exists(tablePath):
+        table = _moose.element(tablePath)
+    else:
+        table = _moose.Table(tablePath)
+        _moose.connect(table, 'requestOut', element, 'get%s' % (field))
+    return table
 
 def readtable(table, filename, separator=None):
     """Reads the file specified by filename to fill the MOOSE table object.
 
     The file can either have one float on each line, in that case the
     table will be filled with values sequentially.
-    Or, the file can have 
+    Or, the file can have
     index value
     on each line. If the separator between index and value is anything other than
     white space, you can specify it in the separator argument."""
@@ -144,7 +185,7 @@ def readtable(table, filename, separator=None):
         elif len(token) == 2:
             table[int(token[0])] = float(token[1])
         else:
-            print "pymoose.readTable(", table, ",", filename, ",", separator, ") - line#", line_no, " does not fit." 
+            print "pymoose.readTable(", table, ",", filename, ",", separator, ") - line#", line_no, " does not fit."
 
 def getfields(moose_object):
     """Returns a dictionary of the fields and values in this object."""
@@ -211,7 +252,7 @@ def apply_to_tree(moose_wildcard, python_filter=None, value=None):
 
     If you want to assign Rm = 1e6 for each compartment in mycell
     whose name match 'axon_*':
-    
+
     apply_to_tree('/mycell/##[Class=Compartment]',
             lambda x: 'axon_' in Neutral(x).name,
             lambda x: setattr(Compartment(x), 'Rm', 1e6))
@@ -243,7 +284,7 @@ def apply_to_tree(moose_wildcard, python_filter=None, value=None):
                 setattr(moose_obj, python_filter, value)
         else:
             raise TypeError('Second argument must be a string specifying a field to assign to when third argument is a value')
-            
+
 
 def tweak_field(moose_wildcard, field, assignment_string):
     """Tweak a specified field of all objects that match the
@@ -256,7 +297,7 @@ def tweak_field(moose_wildcard, field, assignment_string):
 
     will assign Rm to every compartment in mycell such that the
     specific membrane resistance is 1.5 Ohm-m2.
-    """    
+    """
     if not isinstance(moose_wildcard, str):
         raise TypeError('moose_wildcard must be a string.')
     id_list = _moose.getWildcardList(moose_wildcard, True)
@@ -282,11 +323,11 @@ def tweak_field(moose_wildcard, field, assignment_string):
         moose_obj = eval('_moose.%s(moose_id)' % (_moose.Neutral(moose_id).className))
         value = eval(code)
         _moose.setField(moose_id, field, str(value))
-        
-# 2012-01-11 19:20:39 (+0530) Subha: checked for compatibility with dh_branch        
+
+# 2012-01-11 19:20:39 (+0530) Subha: checked for compatibility with dh_branch
 def printtree(root, vchar='|', hchar='__', vcount=1, depth=0, prefix='', is_last=False):
     """Pretty-print a MOOSE tree.
-    
+
     root - the root element of the MOOSE tree, must be some derivatine of Neutral.
 
     vchar - the character printed to indicate vertical continuation of
@@ -330,7 +371,7 @@ def printtree(root, vchar='|', hchar='__', vcount=1, depth=0, prefix='', is_last
             # print 'TypeError:', child_vec, 'when converting to element.'
     for i in range(0, len(children) - 1):
         printtree(children[i],
-                  vchar, hchar, vcount, depth + 1, 
+                  vchar, hchar, vcount, depth + 1,
                   prefix, False)
     if len(children) > 0:
         printtree(children[-1], vchar, hchar, vcount, depth + 1, prefix, True)
@@ -339,7 +380,7 @@ def printtree(root, vchar='|', hchar='__', vcount=1, depth=0, prefix='', is_last
 def df_traverse(root, operation, *args):
     """Traverse the tree in a depth-first manner and apply the
     operation using *args. The first argument is the root object by
-    default.""" 
+    default."""
     if hasattr(root, '_visited'):
         return
     operation(root, *args)
@@ -368,7 +409,7 @@ def autoposition(root):
         raise Exception('There must be one and only one top level compartment. Found %d' % (len(topcomp_list)))
     ret = stack[0]
     while len(stack) > 0:
-        comp = stack.pop()        
+        comp = stack.pop()
         parentlist = comp.neighbors['axial']
         parent = None
         if len(parentlist) > 0:
@@ -381,10 +422,10 @@ def autoposition(root):
         else:
             # for spherical compartments x0, y0, z0 are centre
             # position nad x,y,z are on the surface
-            comp.x, comp.y, comp.z, = comp.x0, comp.y0, comp.z0 + comp.diameter/2.0 
+            comp.x, comp.y, comp.z, = comp.x0, comp.y0, comp.z0 + comp.diameter/2.0
         # We take z == 0 as an indicator that this compartment has not
         # been processed before - saves against inadvertent loops.
-        stack.extend([childcomp for childcomp in map(_moose.element, comp.neighbors['raxial']) if childcomp.z == 0])    
+        stack.extend([childcomp for childcomp in map(_moose.element, comp.neighbors['raxial']) if childcomp.z == 0])
     return ret
 
 
@@ -466,7 +507,7 @@ def assignTicks(tickTargetMap):
 
     Parameters
     ----------
-    tickTargetMap: 
+    tickTargetMap:
     Map from tick no. to target path and method. The path can be wildcard expression also.
     """
     print 'assignTicks', tickTargetMap
@@ -515,7 +556,7 @@ def setDefaultDt(elecdt=1e-5, chemdt=0.01, tabdt=1e-5, plotdt1=1.0, plotdt2=0.25
     _moose.setClock(4, chemdt)
     _moose.setClock(5, chemdt)
     _moose.setClock(6, tabdt)
-    _moose.setClock(7, tabdt)        
+    _moose.setClock(7, tabdt)
     _moose.setClock(8, plotdt1) # kinetics sim
     _moose.setClock(9, plotdt2) # electrical sim
 
@@ -546,7 +587,7 @@ def assignDefaultTicks(modelRoot='/model', dataRoot='/data', solver='hsolve'):
     _moose.useClock(3, '%s/##[ISA=Func]' % (modelRoot), 'process')
     # The voltage clamp circuit depends critically on the dt used for
     # computing soma Vm and need to be on a clock with dt=elecdt.
-    _moose.useClock(0, '%s/##[ISA=DiffAmp]'  % (modelRoot), 'process') 
+    _moose.useClock(0, '%s/##[ISA=DiffAmp]'  % (modelRoot), 'process')
     _moose.useClock(0, '%s/##[ISA=VClamp]' % (modelRoot), 'process')
     _moose.useClock(0, '%s/##[ISA=PIDController]' % (modelRoot), 'process')
     _moose.useClock(0, '%s/##[ISA=RC]' % (modelRoot), 'process')
@@ -589,7 +630,7 @@ def stepRun(simtime, steptime, verbose=True, logger=None):
                 print msg
             else:
                 logger.info(msg)
-            
+
     remaining = simtime - clock.currentTime
     if remaining > 0:
         if verbose:
@@ -660,7 +701,7 @@ def resetSim(simpaths, simdt, plotdt, simmethod='hsolve'):
         else: # use hsolve, one hsolve for each Neuron
             print 'Using hsolve'
             element = _moose.Neutral(simpath)
-            for childid in element.children: 
+            for childid in element.children:
                 childobj = _moose.Neutral(childid)
                 classname = childobj.className
                 if classname in ['Neuron']:
@@ -680,7 +721,7 @@ def setupTable(name, obj, qtyname, tables_path=None, threshold=None, spikegen=No
     tables_path_obj = _moose.Neutral(tables_path)
     qtyTable = _moose.Table(tables_path_obj.path+'/'+name)
     ## stepMode no longer supported, connect to 'input'/'spike' message dest to record Vm/spiktimes
-    # qtyTable.stepMode = TAB_BUF 
+    # qtyTable.stepMode = TAB_BUF
     if spikegen is None:
         if threshold is None:
             ## below is wrong! reads qty twice every clock tick!
@@ -748,7 +789,7 @@ def printRecursiveTree(elementid, level):
     specify depth/'level' to recurse and print subelements under MOOSE 'elementid'. """
     spacefill = '  '*level
     element = _moose.Neutral(elementid)
-    for childid in element.children: 
+    for childid in element.children:
         childobj = _moose.Neutral(childid)
         classname = childobj.className
         if classname in ['SynChan','KinSynChan']:
@@ -811,7 +852,7 @@ def setup_vclamp(compartment, name, delay1, width1, level1, gain=0.5e-5):
     vclamp.connect('outputSrc',PID,'commandDest')
     PID.connect('outputSrc',compartment,'injectMsg')
     compartment.connect('VmSrc',PID,'sensedDest')
-    
+
     pulsegen.trigMode = 0 # free run
     pulsegen.baseLevel = -70e-3
     pulsegen.firstDelay = delay1
@@ -825,7 +866,7 @@ def setup_vclamp(compartment, name, delay1, width1, level1, gain=0.5e-5):
     vclamp_I.stepMode = TAB_BUF #TAB_BUF: table acts as a buffer.
     vclamp_I.connect("inputRequest", PID, "output")
     vclamp_I.useClock(PLOTCLOCK)
-    
+
     return vclamp_I
 
 def setup_iclamp(compartment, name, delay1, width1, level1):
@@ -894,7 +935,7 @@ def get_child_Mstring(mooseobject,mstring):
             return child
     return None
 
-# Note: This function is also moved to helper.moose_methods 
+# Note: This function is also moved to helper.moose_methods
 def connect_CaConc(compartment_list, temperature=None):
     """ Connect the Ca pools and channels within each of the compartments in compartment_list
      Ca channels should have a child Mstring named 'ion' with value set in MOOSE.
@@ -946,7 +987,7 @@ def connect_CaConc(compartment_list, temperature=None):
                                     print 'Connected Nernst',nernst.path
                         except TypeError:
                             pass
-                            
+
                 if neutralwrap.className == 'HHChannel2D':
                     channel = _moose.HHChannel2D(child)
                     ## If child Mstring 'ionDependency' is present, connect caconc Ca conc to channel
@@ -980,7 +1021,7 @@ class _TestMooseUtils(unittest.TestCase):
         d5 = _moose.Neutral('%s/d5'% (s.path))
         orig_stdout = sys.stdout
         sys.stdout = _sio()
-        printtree(s)                
+        printtree(s)
         expected = """
 cell
 |
@@ -1031,7 +1072,7 @@ cell1
 
     def test_autoposition(self):
         """Simple check for automatic generation of positions.
-        
+
         A spherical soma is created with 20 um diameter. A 100
         compartment cable is created attached to it with each
         compartment of length 100 um.
