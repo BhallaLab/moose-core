@@ -5051,4 +5051,32 @@ the refactored ZombieHHChannels. The crash with the ordering of plots
 is gone, but it turns out that we still need to put in the Adaptors before
 the Hsolve otherwise they don't receive input.
 
+Planning final snippet multiscale model. Will do something very similar
+to chanPhosphByCaMKII.g, but placed in spine/psd mostly and here the
+chan will be AMPAR and the phospho will put it in the PSD. Just have Ca
+in dends and it will diffuse into the spines.
+=============================================================================
+13 sep
+getting close, working currently on adaptor areount 
+multiscaleManyCompt.py:178
+=============================================================================
+14 Sep
+Ran into a bug with the big multiscaleManyCompt.py snippet. 
+It looked like the cross-compt reaction from the spine to the PSD was not
+happening.
+Actually the data for the cross-compt reaction was going across, but was 
+promptly overwritten by data coming in for diffusion. There shouldn't have
+been any pools connected by diffusion.
+
+After a long investigation of the logic of the dsolve, turns out everything was
+fine except that I should have had the Dsolve input come in before the 
+kinetics input. I will need to check out the math for this but functionally
+it seems to be OK.
+
+The multi demo seems to be taking shape.
+=============================================================================
+19 Sep
+Fixed GSSA bug reported by Sahil.
+Reordered updates for X-compt reacs in Ksolve.
+
 =============================================================================

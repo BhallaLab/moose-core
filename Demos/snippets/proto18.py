@@ -398,6 +398,11 @@ def make_glu():
 	glu.tau1 = 2.0e-3
 	glu.tau2 = 9.0e-3
 	glu.Gbar = 40 * SOMA_A
+        sh = moose.SimpleSynHandler( 'glu/sh' )
+        moose.connect( sh, 'activationOut', glu, 'activation' )
+        sh.numSynapses = 1
+        sh.synapse[0].weight = 1
+
 
 #========================================================================
 #                SynChan: NMDA receptor
@@ -426,9 +431,17 @@ def make_NMDA():
 	# now handled by the MgBlock.
 	#addmsg2 = moose.Mstring( 'NMDA/addmsg2'
 	#addmsg2.value = 'DropMsg	..	channel'
+	addmsg1 = moose.Mstring( '/library/NMDA/addmsg1' )
+	addmsg1.value = '.. VmOut	./block	Vm'
+	addmsg2 = moose.Mstring( '/library/NMDA/addmsg2' )
+	addmsg2.value = './block	IkOut ../Ca_conc current'
 	addmsg3 = moose.Mstring( '/library/NMDA/addmsg3' )
 	addmsg3.value = '.. VmOut	.	Vm'
 
+	sh = moose.SimpleSynHandler( 'NMDA/sh' )
+	moose.connect( sh, 'activationOut', NMDA, 'activation' )
+	sh.numSynapses = 1
+	sh.synapse[0].weight = 1
 
 #addfield NMDA addmsg1
 #setfield NMDA addmsg1        ".. ./block VOLTAGE Vm"

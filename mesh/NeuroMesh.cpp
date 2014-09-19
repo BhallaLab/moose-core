@@ -644,7 +644,9 @@ void NeuroMesh::updateShaftParents()
 		if ( r >= 0.0 ) {
 			parent_[i] = index + nn.startFid();
 		} else {
-			assert( 0 );
+			cout << "Warning: NeuroMesh::updateShaftParents: may be"
+					"misalgned on " << i << "\n";
+			parent_[i] = index + nn.startFid();
 		}
 	}
 }
