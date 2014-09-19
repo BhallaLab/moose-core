@@ -396,8 +396,8 @@ class MooseRunner(QtCore.QObject):
         self._simtime = 0.0
         self._clock = moose.Clock('/clock')
         self._pause = False
-        self.dataRoot = '/Kholodenko/data'
-        self.modelRoot = '/Kholodenko/model'
+        self.dataRoot = '/data'
+        self.modelRoot = '/model'
         #MooseRunner.inited = True
 
     def doResetAndRun(self, tickDtMap, tickTargetMap, simtime, updateInterval):
@@ -408,12 +408,10 @@ class MooseRunner(QtCore.QObject):
         utils.assignTicks(tickTargetMap)
         self.resetAndRun.emit()
         moose.reinit()
-        print("()()()() ", self._simtime)
         QtCore.QTimer.singleShot(0, self.run)
 
     def run(self):
         """Run simulation for a small interval."""
-        print("In run")
         if self._clock.currentTime >= self._simtime:
             self.finished.emit()
             return
@@ -422,6 +420,7 @@ class MooseRunner(QtCore.QObject):
         toRun = self._simtime - self._clock.currentTime
         if toRun > self._updateInterval:
             toRun = self._updateInterval
+
         moose.start(toRun)
         self.update.emit()
         QtCore.QTimer.singleShot(0, self.run)
@@ -429,7 +428,8 @@ class MooseRunner(QtCore.QObject):
     def continueRun(self, simtime, updateInterval):
         """Continue running without reset for `simtime`."""
         self._simtime = simtime
-        self._updateInterval = updateInterval
+        self._updateInterval = updateInterval+self._clock.currentTime
+        self._simtime = self._updateInterval
         self._pause = False
         QtCore.QTimer.singleShot(0, self.run)
 
@@ -556,13 +556,9 @@ class SchedulingWidget(QtGui.QWidget):
         tickDt = self.getTickDtMap().values()
         tickDt = [item for item in self.getTickDtMap().values() if float(item) != 0.0]
         dt = max(tickDt)
-        print("dt => ", dt)
-        print("tickDt => ", tickDt)
         #dt = min(self.getTickDtMap().values())
-        print("UpdateInterval", self.updateInterval)
         if dt > self.updateInterval:
             self.updateInterval = dt*10
-            print("UpdateInterval", self.updateInterval)
             #self.updateIntervalText.setText(str(dt))
 
     # def disableButton(self):
@@ -839,7 +835,6 @@ class PlotWidget(QWidget):
 
     @pyqtSlot(QtCore.QPoint)
     def contextMenuRequested(self,point):
-        print("Reaching here!")
         # menu     = QtGui.QMenu()
 
         # action1 = menu.addAction("Set Size 100x100")
