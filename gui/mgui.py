@@ -1,47 +1,47 @@
-# mgui.py --- 
-# 
+# mgui.py ---
+#
 # Filename: mgui.py
-# Description: 
-# Author: 
-# Maintainer: 
+# Description:
+# Author:
+# Maintainer:
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
-# Version: 
+# Version:
 # Last-Updated: Thu Jul 18 10:54:33 2013 (+0530)
 #           By: subha
 #     Update #: 1338
-# URL: 
-# Keywords: 
-# Compatibility: 
-# 
-# 
+# URL:
+# Keywords:
+# Compatibility:
+#
+#
 
-# Commentary: 
-# 
+# Commentary:
+#
 # The gui driver
-# 
-# 
+#
+#
 
 # Change log:
-# 
-# 
-# 
-# 
+#
+#
+#
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
 # published by the Free Software Foundation; either version 3, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; see the file COPYING.  If not, write to
 # the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 # Floor, Boston, MA 02110-1301, USA.
-# 
-# 
+#
+#
 
 # Code:
 import imp
@@ -77,7 +77,7 @@ subtype_plugin_map = {
     'xml/sbml': 'kkit'
 }
 
-    
+
 class MWindow(QtGui.QMainWindow):
     """The main window for MOOSE GUI.
 
@@ -90,7 +90,7 @@ class MWindow(QtGui.QMainWindow):
        When a plugin is set as the current plugin, the view and the
        menus are updated.
 
-    1.a) Updating menus: 
+    1.a) Updating menus:
 
     the plugin can provide its own list of menus by implementing the
     function getMenus().
@@ -102,12 +102,12 @@ class MWindow(QtGui.QMainWindow):
     main window.
 
     1.b) Updating views
-    
+
     central widget is set to the currentView (a ViewBase instance) of
     the plugin.
 
     the currentView provides a set of panes that are inserted in the
-    right dock area one by one.    
+    right dock area one by one.
 
     """
     def __init__(self, *args):
@@ -120,7 +120,7 @@ class MWindow(QtGui.QMainWindow):
         self.helpMenu = None
         self.helpActions = None
         self.viewActions = None
-        self.editActions = None        
+        self.editActions = None
         self.connectMenu = None
         self.toolBars = []
         self._loadedPlugins = {}
@@ -129,8 +129,8 @@ class MWindow(QtGui.QMainWindow):
         self.mdiArea = QtGui.QMdiArea()
         self.quitAction = QtGui.QAction('&Quit', self)
         self.connect(self.quitAction, QtCore.SIGNAL('triggered()'), self.quit)
-        self.quitAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Q", None, QtGui.QApplication.UnicodeUTF8))        
-        self.getMyDockWidgets()       
+        self.quitAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Q", None, QtGui.QApplication.UnicodeUTF8))
+        self.getMyDockWidgets()
         self.setCentralWidget(self.mdiArea)
         self.mdiArea.setViewMode(QtGui.QMdiArea.TabbedView)
         self.mdiArea.subWindowActivated.connect(self.switchSubwindowSlot)
@@ -161,7 +161,7 @@ class MWindow(QtGui.QMainWindow):
             QtGui.QMessageBox.warning(self, title, '\n'.join((title, trace)))
         else:
             QtGui.QMessageBox.critical(self, title, '\n'.join((title, trace)))
-    
+
     def getPluginNames(self):
         """Return pluginNames attribute or create it by retrieving
         available plugin names from plugin/list.txt file.
@@ -169,7 +169,7 @@ class MWindow(QtGui.QMainWindow):
         """
         if self.pluginNames is None:
             with open(os.path.join(config.MOOSE_GUI_DIR,
-                                   'plugins', 
+                                   'plugins',
                                    'list.txt')) as lfile:
                 self.pluginNames = [line.strip() for line in lfile]
                 self.pluginNames = [name for name in self.pluginNames if name]
@@ -219,7 +219,7 @@ class MWindow(QtGui.QMainWindow):
         """Create an instance of shell widget. This can be either a
         QSciQScintialla widget or a PyCute widget (extends QTextArea)
         if the first is not available"""
-        if not hasattr(self, 'shellWidget') or self.shellWidget is None:            
+        if not hasattr(self, 'shellWidget') or self.shellWidget is None:
             self.shellWidget = get_shell_class()(code.InteractiveInterpreter(),
                                                  message='MOOSE version %s' % (moose._moose.__version__))
             self.shellWidget.interpreter.runsource('from moose import *')
@@ -228,7 +228,7 @@ class MWindow(QtGui.QMainWindow):
 
     def loadPluginClass(self, name, re=False):
         """Load the plugin class from a plugin module.
-        
+
         A plugin module should have only one subclass of
         MoosePluginBase. Otherwise the first such class found will be
         loaded.
@@ -240,7 +240,7 @@ class MWindow(QtGui.QMainWindow):
             for classname, classobj in inspect.getmembers(pluginModule, inspect.isclass):
                 if issubclass(classobj, mplugin.MoosePluginBase):
                     self._loadedPlugins[name] = classobj
-                    # classobj.getEditorView().getCentralWidget().editObject.connect(self.objectEditSlot)                        
+                    # classobj.getEditorView().getCentralWidget().editObject.connect(self.objectEditSlot)
                     return self._loadedPlugins[name]
         raise Exception('No plugin with name: %s' % (name))
 
@@ -275,8 +275,9 @@ class MWindow(QtGui.QMainWindow):
         for subwin in self.mdiArea.subWindowList():
             subwin.close()
         self.setCurrentView('editor')
-        self.setCurrentView('run')
-        self.setCurrentView('editor')
+        if name != "default" :
+            self.setCurrentView('run')
+            self.setCurrentView('editor')
         self.objectEditDockWidget.objectNameChanged.connect(
             self.plugin.getEditorView().getCentralWidget().updateItemSlot)
         return self.plugin
@@ -294,7 +295,7 @@ class MWindow(QtGui.QMainWindow):
                 action.menu().addActions(menu.actions())
                 return True
         return False
-        
+
     def updateMenus(self):
         """Clear the menubar and reinstate the basic menus.  Go
         through the menus provided by current plugin and add those to
@@ -339,7 +340,7 @@ class MWindow(QtGui.QMainWindow):
         #print 'activated', window.windowTitle(), 'view=', view
         #print 'setting current view'
         self.setCurrentView(view)
-        
+
 
     def setCurrentView(self, view):
         """Set current view to a particular one: options are 'editor',
@@ -359,8 +360,8 @@ class MWindow(QtGui.QMainWindow):
             subwin = self.mdiArea.addSubWindow(widget)
             subwin.setWindowTitle('%s: %s' % (view, widget.modelRoot))
             subwin.setSizePolicy(QtGui.QSizePolicy.Minimum |
-                                 QtGui.QSizePolicy.Expanding, 
-                                 QtGui.QSizePolicy.Minimum | 
+                                 QtGui.QSizePolicy.Expanding,
+                                 QtGui.QSizePolicy.Minimum |
                                  QtGui.QSizePolicy.Expanding)
             subwin.resize(600, 400)
         # Make dockwidgets from other views invisible and make those
@@ -389,14 +390,14 @@ class MWindow(QtGui.QMainWindow):
 
     def getMyToolBars(self):
         self._toolBars = []
-        ''' 
+        '''
         #Harsha: removing the toolbars (plot,run,edit) from the Gui
         if not hasattr(self, 'viewToolBar'):
             self.viewToolBar = QtGui.QToolBar('View')
             #Harsha:removing plotView from the ToolBar
             for t in self.getViewActions():
                 if t.text() != "&Plot view":
-                    self.viewToolBar.addAction(t)   
+                    self.viewToolBar.addAction(t)
             #self.viewToolBar.addActions(self.getViewActions())
         #return [self.viewToolBar]
         '''
@@ -411,7 +412,7 @@ class MWindow(QtGui.QMainWindow):
             self.newModelAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+N", None, QtGui.QApplication.UnicodeUTF8))
             self.connect(self.newModelAction, QtCore.SIGNAL('triggered()'), self.newModelDialogSlot)
         self.fileMenu.addAction(self.newModelAction)
-        
+
         if not hasattr(self, 'loadModelAction'):
             self.loadModelAction = QtGui.QAction('L&oad model', self)
             self.loadModelAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+L", None, QtGui.QApplication.UnicodeUTF8))
@@ -422,7 +423,7 @@ class MWindow(QtGui.QMainWindow):
             self.connectBioModelAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+B", None, QtGui.QApplication.UnicodeUTF8))
             self.connect(self.connectBioModelAction, QtCore.SIGNAL('triggered()'), self.connectBioModel)
         self.fileMenu.addAction(self.connectBioModelAction)
-        
+
         #self.fileMenu.addAction(self.plugin.getSaveAction())
         self.fileMenu.addAction(self.quitAction)
         return self.fileMenu
@@ -441,7 +442,7 @@ class MWindow(QtGui.QMainWindow):
             mapper = QtCore.QSignalMapper(self)
             pluginsGroup = QtGui.QActionGroup(self)
             pluginsGroup.setExclusive(True)
-            for pluginName in self.getPluginNames():                
+            for pluginName in self.getPluginNames():
                 action = QtGui.QAction(pluginName, self)
                 action.setObjectName(pluginName)
                 action.setCheckable(True)
@@ -457,7 +458,7 @@ class MWindow(QtGui.QMainWindow):
             self.helpMenu = QtGui.QMenu('&Help')
         else:
             self.helpMenu.clear()
-        self.helpMenu.addActions(self.getHelpActions())        
+        self.helpMenu.addActions(self.getHelpActions())
         return self.helpMenu
     '''
     def getConnectMenu(self):
@@ -486,17 +487,17 @@ class MWindow(QtGui.QMainWindow):
     #         self.toggleToSubWindow = QtGui.QSignalMapper()
     #     for subwindow in self.mdiArea.subWindowList():
     #         if self.subWindowToToggle.mapping(subwindow) is None:
-    #             action = QtGui.QAction('Show: %s' % (subwindow.windowTitle), self)                
+    #             action = QtGui.QAction('Show: %s' % (subwindow.windowTitle), self)
     #             self.toggleToSubWindow.setMapping(action, subwindow)
     #             self.connect(action, QtCore.SIGNAL('triggered()'),
     #                          self.toggleToSubWindow,
     #                          QtCore.SLOT('mapped(QWidget*)'))
     #             self.subWindowToToggle.setMapping(subwindow, action)
     #             self.connect(subwindow, QtCore.SIGNAL('closed()')
-            
+
     #     self.subWindowVisibilityMenu = QtGui.Q
     #     for subwin in self.mdiArea.subWindowList():
-            
+
     # Removed from the menu
     # def getRunMenu(self):
     #     if (not hasattr(self, 'runMenu')) or (self.runMenu is None):
@@ -505,7 +506,7 @@ class MWindow(QtGui.QMainWindow):
     #         self.runMenu.clear()
     #     self.runMenu.addActions(self.getRunActions())
     #     return self.runMenu
-    
+
     def getEditActions(self):
         if (not hasattr(self, 'editActions')) or (self.editActions is None):
             self.setModelRootAction = QtGui.QAction('&Set model root', self)
@@ -542,7 +543,7 @@ class MWindow(QtGui.QMainWindow):
             self.plotViewAction = QtGui.QAction('&Plot view', self)
             self.plotViewAction.triggered.connect(self.openPlotView)
             self.runViewAction = QtGui.QAction('&Run view', self)
-            self.runViewAction.triggered.connect(self.openRunView)     
+            self.runViewAction.triggered.connect(self.openRunView)
             self.viewActions = [self.editorViewAction, self.plotViewAction, self.runViewAction]
         return self.viewActions
 
@@ -595,7 +596,7 @@ class MWindow(QtGui.QMainWindow):
     #         self.connect(self.actionBioModel, QtCore.SIGNAL('triggered()'), self.connectBioModel)
     #         self.connectActions = [self.actionBioModel]
     #     return self.connectActions
-    
+
     def connectBioModel(self):
         connecttoBioModel = BioModelsClientWidget()
         if connecttoBioModel.exec_():
@@ -612,16 +613,16 @@ class MWindow(QtGui.QMainWindow):
                 pluginName = subtype_plugin_map['%s/%s' % (ret['modeltype'], ret['subtype'])]
             except KeyError:
                 pluginName = 'default'
-            
+
             print 'Loaded model', ret['model'].path
 
             self.setPlugin(pluginName, ret['model'].path)
 
-        
+
     def showAboutMoose(self):
         with open(config.MOOSE_ABOUT_FILE, 'r') as aboutfile:
             QtGui.QMessageBox.about(self, 'About MOOSE', ''.join(aboutfile.readlines()))
-        
+
     def showDocumentation(self, source):
         if not hasattr(self, 'documentationViewer'):
             self.documentationViewer = QtGui.QTextBrowser()
@@ -659,7 +660,7 @@ class MWindow(QtGui.QMainWindow):
 
     def openPlotView(self):
         self.setCurrentView('plot')
-        
+
     def openRunView(self):
         self.setCurrentView('run')
 
@@ -696,7 +697,7 @@ class MWindow(QtGui.QMainWindow):
 
         if view.getCentralWidget().plotAll:
             view.getCentralWidget().plotAllData()
-        self.setCurrentView('run')        
+        self.setCurrentView('run')
 
     def pauseSimulation(self):
         moose.stop()
@@ -707,13 +708,13 @@ class MWindow(QtGui.QMainWindow):
             simtime = float(config.MooseSetting()[config.KEY_SIMTIME])
         except ValueError:
             simtime = 1.0
-        moose.start(simtime)      
+        moose.start(simtime)
 
     #Harsha: added visible=True so that loadModelDialogSlot and NewModelDialogSlot call this function
     #        to clear out object path
     def objectEditSlot(self, mobj, visible=True):
         """Slot for switching the current object in object editor."""
-        self.objectEditDockWidget.setObject(mobj)        
+        self.objectEditDockWidget.setObject(mobj)
         self.objectEditDockWidget.setVisible(visible)
 
     def loadModelDialogSlot(self):
@@ -735,9 +736,9 @@ class MWindow(QtGui.QMainWindow):
 
         """
         activeWindow = None # This to be used later to refresh the current widget with newly loaded model
-        dialog = LoaderDialog(self, 
+        dialog = LoaderDialog(self,
                               self.tr('Load model from file'))
-        
+
         if dialog.exec_():
             fileNames = dialog.selectedFiles()
             for fileName in fileNames:
@@ -749,8 +750,8 @@ class MWindow(QtGui.QMainWindow):
 		#Harsha: This will clear out object editor's objectpath and make it invisible
                 self.objectEditSlot('/',False)
 
-                # Harsha: if subtype is None, in case of cspace then pluginLookup = /cspace/None 
-                #     which will not call kkit plugin so cleaning to /cspace 
+                # Harsha: if subtype is None, in case of cspace then pluginLookup = /cspace/None
+                #     which will not call kkit plugin so cleaning to /cspace
                 pluginLookup = '%s/%s' % (ret['modeltype'], ret['subtype'])
                 try:
                     pluginName = subtype_plugin_map['%s/%s' % (ret['modeltype'], ret['subtype'])]
@@ -758,8 +759,8 @@ class MWindow(QtGui.QMainWindow):
                     pluginName = 'default'
                 print 'Loaded model', ret['model'].path
                 self.setPlugin(pluginName, ret['model'].path)
-                
-        
+
+
     def newModelDialogSlot(self):
         #Harsha: Create a new dialog widget for model building
         newModelDialog = DialogWidget()
@@ -770,7 +771,7 @@ class MWindow(QtGui.QMainWindow):
             if re.search('[ /]',modelPath) is not None:
                 raise mexception.ElementNameError('Model path should not containe / or whitespace')
             plugin = str(newModelDialog.submenu.currentText())
-            #Harsha: All model will be forced to load/build under /model, 
+            #Harsha: All model will be forced to load/build under /model,
             #2014 sep 10: All the model will be forced to load/build model under /modelName/model
             '''
             modelContainer = moose.Neutral('/model')
@@ -804,10 +805,10 @@ def main():
     # with the same return code of Qt application
     config.settings[config.KEY_FIRSTTIME] = 'False' # string not boolean
     sys.exit(app.exec_())
-    
+
 
 if __name__ == '__main__':
     main()
 
-# 
+#
 # mgui.py ends here

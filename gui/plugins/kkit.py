@@ -8,7 +8,7 @@ import networkx as nx
 sys.path.insert(0, '~/async/gui')
 import numpy as np
 import config
-import pickle 
+import pickle
 from default import *
 from moose import *
 sys.path.append('plugins')
@@ -20,6 +20,12 @@ from kkitCalcArrow import *
 from kkitOrdinateUtil import *
 import posixpath
 from mtoolbutton import MToolButton
+
+from PyQt4 import QtGui, Qt
+from PyQt4.QtGui import QWidget
+from PyQt4.QtGui import QGridLayout
+
+import RunWidget
 
 #from QtGui import QScrollArea
 
@@ -63,8 +69,13 @@ class KkitPlugin(MoosePlugin):
         return self.editorView
 
     def getRunView(self):
+        if self.view is None:
+            self.view = AnotherKkitRunView(self.modelRoot, self)
+        return self.view
+
+        if self.view is not None: return AnotherKkitRunView(self.modelRoot, self)
         if self.view is not None: return self.view
-        self.view = RunView(self)
+        self.view = RunView(self.modelRoot, self)
         graphView = self.view._centralWidget
         graphView.setDataRoot(self.modelRoot)
         graphView.plotAllData()
@@ -78,6 +89,38 @@ class KkitPlugin(MoosePlugin):
         #schedulingDockWidget.runner.resetAndRun.connect(self.currentRunView.resetColor)
         graphView.layout().addWidget(self.currentRunView,0,0,2,1)
         return self.view
+
+# class AnotherKkitRunViewsCentralWidget(QWidget):
+
+#     def __init__():
+#         QWidget.__init__()
+
+#     def
+
+class AnotherKkitRunView(RunView):
+
+    def __init__(self, modelRoot, plugin,*args):
+        RunView.__init__(self, modelRoot, plugin, *args)
+        self.modelRoot = modelRoot
+        self.plugin    = plugin
+        self.schedular = None
+
+    def createCentralWidget(self):
+        self._centralWidget = RunWidget.RunWidget(self.modelRoot)
+        self.kkitRunView   = KkitRunView(self.plugin)
+        self.plotWidgetContainer = PlotWidgetContainer(self.modelRoot)
+        self._centralWidget.setChildWidget(self.kkitRunView.getCentralWidget(), False, 0, 0)
+        self._centralWidget.setChildWidget(self.plotWidgetContainer, False, 0, 1)
+        self._centralWidget.setPlotWidgetContainer(self.plotWidgetContainer)
+        self.schedular = self.getSchedulingDockWidget().widget()
+        self.schedular.runner.update.connect(self.kkitRunView.getCentralWidget().changeBgSize)
+        self.schedular.runner.resetAndRun.connect(self.kkitRunView.getCentralWidget().resetColor)
+        return self._centralWidget
+
+    def getCentralWidget(self):
+        if self._centralWidget is None:
+            self.createCentralWidget()
+        return self._centralWidget
 
 class KkitRunView(MooseEditorView):
 
@@ -156,22 +199,22 @@ class  KineticsWidget(EditorWidgetBase):
         EditorWidgetBase.__init__(self, *args)
 
         #self.setAcceptDrops(True)
-        self.border = 10        
+        self.border = 10
         self.sceneContainer = QtGui.QGraphicsScene(self)
         self.sceneContainer.setSceneRect(self.sceneContainer.itemsBoundingRect())
         self.sceneContainer.setBackgroundBrush(QtGui.QColor(230,220,219,120))
-       
+
         # pickled the color map file """
         colormap_file = open(os.path.join(config.settings[config.KEY_COLORMAP_DIR], 'rainbow2.pkl'),'rb')
         self.colorMap = pickle.load(colormap_file)
-        colormap_file.close()   
-        
+        colormap_file.close()
+
         #A map b/w moose compartment key with QGraphicsObject
         self.qGraCompt = {}
-        
+
         #A map between mooseId of all the mooseObject (except compartment) with QGraphicsObject
         self.mooseId_GObj = {}
-        
+
         self.border = 5
         self.arrowsize = 2
         self.iconScale = 1
@@ -192,7 +235,7 @@ class  KineticsWidget(EditorWidgetBase):
             self.ymin = 0.0
             self.ymax = 1.0
             self.autoCordinatepos = {}
-            
+
             # Compartment and its members are setup
             self.meshEntry,self.xmin,self.xmax,self.ymin,self.ymax,self.noPositionInfo = setupMeshObj(self.modelRoot)
             self.autocoordinates = False
@@ -207,12 +250,12 @@ class  KineticsWidget(EditorWidgetBase):
             # TODO: size will be dummy at this point, but I need the availiable size from the Gui
             self.size = QtCore.QSize(1024 ,768)
             #self.size = QtCore.QSize(300,400)
-            
+
             # Scale factor to translate the x -y position to fit the Qt graphicalScene, scene width. """
             if self.xmax-self.xmin != 0:
                 self.xratio = (self.size.width()-10)/(self.xmax-self.xmin)
             else: self.xratio = self.size.width()-10
-            
+
             if self.ymax-self.ymin:
                 self.yratio = (self.size.height()-10)/(self.ymax-self.ymin)
             else: self.yratio = (self.size.height()-10)
@@ -222,16 +265,16 @@ class  KineticsWidget(EditorWidgetBase):
 
     def mooseObjOntoscene(self):
         #  All the compartments are put first on to the scene \
-        #  Need to do: Check With upi if empty compartments exist 
+        #  Need to do: Check With upi if empty compartments exist
         for cmpt in sorted(self.meshEntry.iterkeys()):
             self.createCompt(cmpt)
             self.qGraCompt[cmpt]
             #comptRef = self.qGraCompt[cmpt]
-        
+
         #Enzymes of all the compartments are placed first, \
         #     so that when cplx (which is pool object) queries for its parent, it gets its \
         #     parent enz co-ordinates with respect to QGraphicsscene """
-        
+
         for cmpt,memb in self.meshEntry.items():
             for enzObj in find_index(memb,'enzyme'):
                 enzinfo = enzObj.path+'/info'
@@ -241,7 +284,7 @@ class  KineticsWidget(EditorWidgetBase):
                     enzItem = MMEnzItem(enzObj,self.qGraCompt[cmpt])
                 self.setupDisplay(enzinfo,enzItem,"enzyme")
                 self.setupSlot(enzObj,enzItem)
-        
+
         for cmpt,memb in self.meshEntry.items():
             for poolObj in find_index(memb,'pool'):
                 poolinfo = poolObj.path+'/info'
@@ -249,63 +292,63 @@ class  KineticsWidget(EditorWidgetBase):
                 poolItem = self.makePoolItem(poolObj,self.qGraCompt[cmpt])
                 self.setupDisplay(poolinfo,poolItem,"pool")
                 self.setupSlot(poolObj,poolItem)
-            
+
             for cplxObj in find_index(memb,'cplx'):
                 cplxinfo = (cplxObj.parent).path+'/info'
                 cplxItem = CplxItem(cplxObj,self.mooseId_GObj[element(cplxObj).parent.getId()])
                 self.setupDisplay(cplxinfo,cplxItem,"cplx")
                 self.setupSlot(cplxObj,cplxItem)
-            
+
             for reaObj in find_index(memb,'reaction'):
                 reainfo = reaObj.path+'/info'
                 reaItem = ReacItem(reaObj,self.qGraCompt[cmpt])
                 self.setupDisplay(reainfo,reaItem,"reaction")
                 self.setupSlot(reaObj,reaItem)
-                
+
             for tabObj in find_index(memb,'table'):
                 tabinfo = tabObj.path+'/info'
                 tabItem = TableItem(tabObj,self.qGraCompt[cmpt])
                 self.setupDisplay(tabinfo,tabItem,"tab")
                 self.setupSlot(tabObj,tabItem)
-        
-        # compartment's rectangle size is calculated depending on children 
+
+        # compartment's rectangle size is calculated depending on children
         for k, v in self.qGraCompt.items():
             rectcompt = v.childrenBoundingRect()
             v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
             v.setPen(QtGui.QPen(Qt.QColor(66,66,66,100), 5, Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin))
             v.cmptEmitter.connect(v.cmptEmitter,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
             v.cmptEmitter.connect(v.cmptEmitter,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.objectEditSlot)
-        
+
     def createCompt(self,key):
         self.new_Compt = ComptItem(self,0,0,0,0,key)
         self.qGraCompt[key] = self.new_Compt
         self.new_Compt.setRect(10,10,10,10)
         self.sceneContainer.addItem(self.new_Compt)
-        
+
     def setupDisplay(self,info,graphicalObj,objClass):
         xpos,ypos = self.positioninfo(info)
         # For Reaction and Complex object I have skipped the process to get the facecolor and background color as \
-        #    we are not using these colors for displaying the object so just passing dummy color white 
+        #    we are not using these colors for displaying the object so just passing dummy color white
 
         if( (objClass == "reaction" ) or (objClass == "cplx")):
             textcolor,bgcolor = "white","white"
         elif objClass == "tab":
             textcolor,bgcolor = getColor(info,self.colorMap)
         else:
-            
+
             textcolor,bgcolor = getColor(info,self.colorMap)
         graphicalObj.setDisplayProperties(xpos,ypos,textcolor,bgcolor)
-    
+
     def positioninfo(self,iteminfo):
         if self.noPositionInfo:
-            
+
             try:
-                # kkit does exist item's/info which up querying for parent.path gives the information of item's parent 
+                # kkit does exist item's/info which up querying for parent.path gives the information of item's parent
                 x,y = self.autoCordinatepos[(element(iteminfo).parent).path]
             except:
                 # But in Cspace reader doesn't create item's/info, up on querying gives me the error which need to change\
                 # in ReadCspace.cpp, at present i am taking care b'cos i don't want to pass just the item where I need to check\
-                # type of the object (rea,pool,enz,cplx,tab) which I have already done. 
+                # type of the object (rea,pool,enz,cplx,tab) which I have already done.
                 parent, child = posixpath.split(iteminfo)
                 x,y = self.autoCordinatepos[parent]
             ypos = (y-self.ymin)*self.yratio
@@ -313,10 +356,10 @@ class  KineticsWidget(EditorWidgetBase):
             x = float(element(iteminfo).getField('x'))
             y = float(element(iteminfo).getField('y'))
             #Qt origin is at the top-left corner. The x values increase to the right and the y values increase downwards \
-            #as compared to Genesis codinates where origin is center and y value is upwards, that is why ypos is negated 
+            #as compared to Genesis codinates where origin is center and y value is upwards, that is why ypos is negated
             ypos = -(y-self.ymin)*self.yratio
         xpos = (x-self.xmin)*self.xratio
-        
+
         return(xpos,ypos)
 
     def setupSlot(self,mooseObj,qgraphicItem):
@@ -335,7 +378,7 @@ class  KineticsWidget(EditorWidgetBase):
                 if mooseObject.getId() == element(item.mobj).getId():
                     item.updateSlot()
                     #once the text is edited in editor, laydisplay gets updated in turn resize the length, positionChanged signal shd be emitted
-                    self.positionChange(mooseObject)        
+                    self.positionChange(mooseObject)
     def getToolBars(self):
         raise NotImplementedError('method must be reimplemented in subclass')
         '''if not hasattr(self, '_insertToolBar'):
@@ -360,7 +403,7 @@ class  KineticsWidget(EditorWidgetBase):
         #     m = wildcardFind('/##[ISA=ChemCompt]')
         # else:
         #     m = wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
-            
+
         if not self.m:
             # when we want an empty GraphicView while creating new model,
             # then remove all the view and add an empty view
@@ -369,7 +412,7 @@ class  KineticsWidget(EditorWidgetBase):
             createdItem = {}
             self.sceneContainer.setSceneRect(-self.width()/2,-self.height()/2,self.width(),self.height())
             self.view = GraphicalView(self.widget, self.modelRoot,self.sceneContainer,self.border,self,createdItem)
-            
+
             if isinstance(self,kineticEditorWidget):
                 self.view.setRefWidget("editorView")
                 self.view.setAcceptDrops(True)
@@ -380,14 +423,14 @@ class  KineticsWidget(EditorWidgetBase):
             self.setLayout(hLayout)
             hLayout.addWidget(self.view,0,0)
         else:
-            # maxmium and minimum coordinates of the objects specified in kkit file. 
+            # maxmium and minimum coordinates of the objects specified in kkit file.
             self.sceneContainer.clear()
-            
-            
+
+
             # Compartment and its members are put on the qgraphicsscene
             self.mooseObjOntoscene()
-            
-            # All the moose Object are connected for visualization 
+
+            # All the moose Object are connected for visualization
             self.drawLine_arrow(itemignoreZooming=False)
 
             createdItem = {}
@@ -399,7 +442,7 @@ class  KineticsWidget(EditorWidgetBase):
                 self.view.setAcceptDrops(True)
             elif isinstance(self,kineticRunWidget):
                 self.view.setRefWidget("runView")
-        
+
             #self.view.resizeEvent1(event)
             #self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
             #self.view.fitInView(self.sceneContainer.itemsBoundingRect())
@@ -410,7 +453,7 @@ class  KineticsWidget(EditorWidgetBase):
             hLayout.addWidget(self.view)
             #self.layout().addWidget(self.view)
 
-    
+
     '''
     def resetColor(self):
         for item in self.sceneContainer.items():
@@ -429,9 +472,9 @@ class  KineticsWidget(EditorWidgetBase):
                     # multipying by 1000 b'cos moose concentration is in milli in moose
                     ratio = presentConc*1000
                 item.updateRect(math.sqrt(ratio))
-        
+
     def colorChange(self):
-        #While simulation is running pool color are increased or decreased as per concentration level 
+        #While simulation is running pool color are increased or decreased as per concentration level
         for item in self.sceneContainer.items():
             if isinstance(item,PoolItem):
                 bg = item.returnColor()
@@ -452,7 +495,7 @@ class  KineticsWidget(EditorWidgetBase):
                 #only alpha value is changed
                 bg =QtGui.QColor(bg.red(),bg.green(),bg.blue(),alpha)
                 item.updateColor(bg)
-     '''   
+     '''
     def positionChange(self,mooseObject):
         #If the item position changes, the corresponding arrow's are calculated
         if isinstance(element(mooseObject),CubeMesh):
@@ -502,13 +545,13 @@ class  KineticsWidget(EditorWidgetBase):
                     for items in (items for items in out ):
                         des = self.mooseId_GObj[element(items[0]).getId()]
                         self.lineCord(src,des,items,itemignoreZooming)
-    
+
     def lineCord(self,src,des,type_no,itemignoreZooming):
         endtype = type_no[1]
         line = 0
         if (src == "") and (des == ""):
             print "Source or destination is missing or incorrect"
-            return 
+            return
         srcdes_list = [src,des,endtype,line]
         arrow = calcArrow(srcdes_list,itemignoreZooming,self.iconScale)
         self.drawLine(srcdes_list,arrow)
@@ -568,17 +611,17 @@ class  KineticsWidget(EditorWidgetBase):
             srcdes = []
             srcdes = self.lineItem_dict[ql]
             # Checking if src (srcdes[0]) or des (srcdes[1]) is ZombieEnz,
-            # if yes then need to check if cplx is connected to any mooseObject, 
+            # if yes then need to check if cplx is connected to any mooseObject,
             # so that when Enzyme is moved, cplx connected arrow to other mooseObject(poolItem) should also be updated
             if( type(srcdes[0]) == EnzItem):
                 self.cplxUpdatearrow(srcdes[0])
             elif( type(srcdes[1]) == EnzItem):
                 self.cplxUpdatearrow(srcdes[1])
-            
+
             # For calcArrow(src,des,endtype,itemignoreZooming) is to be provided
             arrow = calcArrow(srcdes,self.itemignoreZooming,self.iconScale)
             ql.setPolygon(arrow)
-    
+
     def cplxUpdatearrow(self,srcdes):
         # srcdes which is 'EnzItem' from this,get ChildItems are retrived (b'cos cplx is child of zombieEnz)
         #And cplxItem is passed for updatearrow
@@ -589,7 +632,7 @@ class  KineticsWidget(EditorWidgetBase):
             self.updateArrow(srcdes.childItems()[1])
         else:
             self.updateArrow(srcdes.childItems()[0])
-    
+
     def keyPressEvent(self,event):
         # key1 = event.key() # key event does not distinguish between capital and non-capital letters
         key = event.text().toAscii().toHex()
@@ -598,8 +641,8 @@ class  KineticsWidget(EditorWidgetBase):
             self.updateItemTransformationMode(itemignoreZooming)
             self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
             self.drawLine_arrow(itemignoreZooming=False)
-            
-        elif (key == '2e'): # '.' key, lower case for '>' zooms in 
+
+        elif (key == '2e'): # '.' key, lower case for '>' zooms in
             self.view.scale(1.1,1.1)
 
         elif (key == '2c'): # ',' key, lower case for '<' zooms in
@@ -612,12 +655,12 @@ class  KineticsWidget(EditorWidgetBase):
         elif (key == '3e'): # '>' key. zooms-out to iconScale factor
             self.iconScale *= 1.25
             self.updateScale( self.iconScale )
-            
+
         elif (key == '61'):  # 'a' fits the view to initial value where iconscale=1
             self.iconScale = 1
             self.updateScale( self.iconScale )
             self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
-                   
+
     def updateItemTransformationMode(self, on):
         for v in self.sceneContainer.items():
             if( not isinstance(v,ComptItem)):
@@ -635,16 +678,16 @@ class  KineticsWidget(EditorWidgetBase):
                 ypos = item.scenePos().y()
 
                 if isinstance(item,ReacItem) or isinstance(item,EnzItem) or isinstance(item,MMEnzItem):
-                     item.setGeometry(xpos,ypos, 
-                                     item.gobj.boundingRect().width(), 
+                     item.setGeometry(xpos,ypos,
+                                     item.gobj.boundingRect().width(),
                                      item.gobj.boundingRect().height())
                 elif isinstance(item,CplxItem):
-                    item.setGeometry(item.gobj.boundingRect().width()/2,item.gobj.boundingRect().height(), 
-                                     item.gobj.boundingRect().width(), 
+                    item.setGeometry(item.gobj.boundingRect().width()/2,item.gobj.boundingRect().height(),
+                                     item.gobj.boundingRect().width(),
                                      item.gobj.boundingRect().height())
                 elif isinstance(item,PoolItem):
                      item.setGeometry(xpos, ypos,item.gobj.boundingRect().width()
-                                     +PoolItem.fontMetrics.width('  '), 
+                                     +PoolItem.fontMetrics.width('  '),
                                      item.gobj.boundingRect().height())
                      item.bg.setRect(0, 0, item.gobj.boundingRect().width()+PoolItem.fontMetrics.width('  '), item.gobj.boundingRect().height())
 
@@ -676,7 +719,7 @@ class kineticEditorWidget(KineticsWidget):
 
     def makePoolItem(self, poolObj, qGraCompt):
         return PoolItem(poolObj, qGraCompt)
-        
+
     def getToolBars(self):
         #Add specific tool items with respect to kkit
         if not hasattr(self, '_insertToolBar'):
@@ -701,7 +744,7 @@ class kineticRunWidget(KineticsWidget):
 
     def getToolBars(self):
         return self._toolBars
-        
+
 
     def changeBgSize(self):
         #print "here in chageBgSize"
@@ -714,7 +757,7 @@ class kineticRunWidget(KineticsWidget):
                 else:
                     # multipying by 1000 b'cos moose concentration is in milli in moose
                     ratio = presentConc
-                
+
                 item.updateRect(math.sqrt(ratio))
     def resetColor(self):
         for item in self.sceneContainer.items():
@@ -736,17 +779,17 @@ if __name__ == "__main__":
         print filepath
         f = open(filepath, "r")
         loadModel(filepath,'/'+modelPath)
-        
+
         #moose.le('/'+modelPath+'/kinetics')
         dt = KineticsWidget()
         dt.modelRoot ='/'+modelPath
         ''' Loading moose signalling model in python '''
         #execfile('/home/harsha/BuildQ/Demos/Genesis_files/scriptKineticModel.py')
         #dt.modelRoot = '/model'
-        
+
         dt.updateModelView()
         dt.show()
-  
+
     except  IOError, what:
       (errno, strerror) = what
       print "Error number",errno,"(%s)" %strerror

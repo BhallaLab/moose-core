@@ -17,17 +17,24 @@ __status__      =   "Development"
 
 import sys
 import os
+import SettingsDialog
 from PyQt4 import QtGui, Qt
+from PyQt4.QtGui import QDialog
+from PyQt4.QtGui import QHBoxLayout
 from PyQt4.QtGui import QPixmap
 from PyQt4.QtGui import QIcon
 from PyQt4.QtGui import QPushButton
 from PyQt4.QtGui import QAction
 
-ICON_DIRECTORY              = "icons"
 
+
+ICON_DIRECTORY              = "icons"
 HAND_ICON_FILENAME          = "hand.png"
 CONNECTOR_ICON_FILENAME     = "straight_connector_with_filled_circles.png"
 WRENCH_ICON_FILENAME        = "wrench.png"
+DELETE_GRAPH_ICON_FILENAME  = "add_graph.png"
+ADD_GRAPH_ICON_FILENAME     = "delete_graph.png"
+LIST_ICON_FILENAME          = "list.png"
 
 
 def create_action( parent
@@ -55,6 +62,57 @@ def mode_action( parent
                , checked    = True
                , icon_path  = os.path.join( ICON_DIRECTORY
                                           , HAND_ICON_FILENAME
+                                          )
+               ):
+    return create_action( parent
+                        , callback
+                        , text
+                        , checkable
+                        , checked
+                        , icon_path
+                        )
+
+def add_graph_action( parent
+                   , callback   = (lambda event: print("Add Graph Clicked!"))
+                   , text       = "Add Graph"
+                   , checkable  = False
+                   , checked    = False
+                   , icon_path  = os.path.join( ICON_DIRECTORY
+                                              , ADD_GRAPH_ICON_FILENAME
+                                              )
+                   ):
+    return create_action( parent
+                        , callback
+                        , text
+                        , checkable
+                        , checked
+                        , icon_path
+                        )
+
+def delete_graph_action( parent
+                      , callback   = (lambda event: print("Delete Graph Clicked!"))
+                      , text       = "Delete Graph"
+                      , checkable  = False
+                      , checked    = False
+                      , icon_path  = os.path.join( ICON_DIRECTORY
+                                                 , DELETE_GRAPH_ICON_FILENAME
+                                                 )
+                      ):
+    return create_action( parent
+                        , callback
+                        , text
+                        , checkable
+                        , checked
+                        , icon_path
+                        )
+
+def list_action( parent
+               , callback   = (lambda event: print("List Clicked!"))
+               , text       = "Show List"
+               , checkable  = False
+               , checked    = False
+               , icon_path  = os.path.join( ICON_DIRECTORY
+                                          , LIST_ICON_FILENAME
                                           )
                ):
     return create_action( parent
@@ -139,10 +197,23 @@ def sidebar():
 def main():
     app = QtGui.QApplication(sys.argv)
     window = QtGui.QMainWindow()
+    widget = SettingsDialog.SettingsWidget({
+                            'LeakyIaF':['Vm'],
+                            'Compartment':['Vm','Im'],
+                            'HHChannel':['Ik','Gk'],
+                            'ZombiePool':['n','conc'],
+                            'ZombieBufPool':['n','conc'],
+                            'HHChannel2D':['Ik','Gk'],
+                            'CaConc':['Ca']
+                            })
+    d = QDialog()
+    l = QHBoxLayout()
+    d.setLayout(l)
+    l.addWidget(widget)
     bar = sidebar()
     bar.addAction(mode_action(bar))
     bar.addAction(connector_action(bar))
-    bar.addAction(settings_action(bar))
+    bar.addAction(settings_action(bar, d.show))
     window.addToolBar(bar)
     window.show()
     sys.exit(app.exec_())
