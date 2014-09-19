@@ -1,47 +1,47 @@
-# mplugin.py --- 
-# 
+# mplugin.py ---
+#
 # Filename: mplugin.py
-# Description: 
-# Author: 
-# Maintainer: 
+# Description:
+# Author:
+# Maintainer:
 # Created: Tue Oct  2 17:25:41 2012 (+0530)
-# Version: 
+# Version:
 # Last-Updated: Thu Jul 18 10:51:48 2013 (+0530)
 #           By: subha
 #     Update #: 297
-# URL: 
-# Keywords: 
-# Compatibility: 
-# 
-# 
+# URL:
+# Keywords:
+# Compatibility:
+#
+#
 
-# Commentary: 
-# 
+# Commentary:
+#
 # This is to be the base class for all MOOSE GUI plugins.
-# 
-# 
+#
+#
 
 # Change log:
-# 
-# 
-# 
-# 
+#
+#
+#
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
 # published by the Free Software Foundation; either version 3, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; see the file COPYING.  If not, write to
 # the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 # Floor, Boston, MA 02110-1301, USA.
-# 
-# 
+#
+#
 
 # Code:
 
@@ -68,7 +68,7 @@ class MoosePluginBase(QtCore.QObject):
     def __init__(self, root='/', mainwindow=None):
         """Create a plugin object whose model is the tree rooted at
         `root` and whose widgets will be displayed in `mainwindow`.
-        
+
         """
         QtCore.QObject.__init__(self, mainwindow)
         self._views = []
@@ -93,7 +93,7 @@ class MoosePluginBase(QtCore.QObject):
         raise NotImplementedError('method must be reimplemented in subclass')
 
     def getViews(self):
-        """Return the view widgets available from this plugin."""        
+        """Return the view widgets available from this plugin."""
         raise NotImplementedError('method must be reimplemented in subclass')
 
     def getCurrentView(self):
@@ -135,9 +135,10 @@ class MoosePluginBase(QtCore.QObject):
         raise NotImplementedError('method must be implemented in derived class')
 
     def setModelRoot(self, root):
+        print("Default setModelRoot called.")
         self.modelRoot = moose.element(root).path
         self.getEditorView().getCentralWidget().setModelRoot(self.modelRoot)
-        self.getPlotView().getCentralWidget().setModelRoot(self.modelRoot)    
+        self.getPlotView().getCentralWidget().setModelRoot(self.modelRoot)
         self.modelRootChanged.emit(self.modelRoot)
 
     def setDataRoot(self, root):
@@ -149,7 +150,7 @@ class MoosePluginBase(QtCore.QObject):
 class ViewBase(QtCore.QObject):
     """Base class for each view: Editor, Plot, Run.
 
-    A view is a mode in a of a plugin. Each view provides 
+    A view is a mode in a of a plugin. Each view provides
 
     a list of toolbars to be displayed on top.
 
@@ -162,11 +163,11 @@ class ViewBase(QtCore.QObject):
     """
     def __init__(self, plugin):
         QtCore.QObject.__init__(self, plugin)
-        self._menus = []
-        self._toolPanes = []
-        self._toolBars = []
-        self._centralWidget = None
-        self.plugin = plugin
+        self._menus             =   []
+        self._toolPanes         =   []
+        self._toolBars          =   []
+        self._centralWidget     =   None
+        self.plugin             =   plugin
 
     def getToolPanes(self):
         """Return a list of widgets to be displayed as dock widgets."""
@@ -200,7 +201,7 @@ class EditorBase(ViewBase):
 
     """
     def __init__(self, plugin):
-        ViewBase.__init__(self, plugin)        
+        ViewBase.__init__(self, plugin)
 
     def getToolPanes(self):
         return self._toolPanes
@@ -221,7 +222,7 @@ class EditorBase(ViewBase):
 
 class PlotBase(ViewBase):
     """Base class for plot configuration view.
-    
+
     In each plugin, this should provide utility to setup the plotting
     of object fields. This is supposed to be used by intermediate
     users.
@@ -245,8 +246,8 @@ class RunBase(ViewBase):
     When the simulation runs, this view displays the runtime
     visualization and controls for the simulation.
     """
-    def __init__(self, *args):
-        ViewBase.__init__(self, *args)
+    def __init__(self, plugin, *args):
+        super(RunBase, self).__init__(plugin)
 
 
 class EditorWidgetBase(QtGui.QScrollArea):
@@ -268,19 +269,19 @@ class EditorWidgetBase(QtGui.QScrollArea):
     editObject = QtCore.pyqtSignal('PyQt_PyObject')
     def __init__(self, *args):
         QtGui.QScrollArea.__init__(self, *args)
-        self.modelRoot = '/'
-        self._menus = []
-        self._toolBars = []
+        self.modelRoot      = '/'
+        self._menus         = []
+        self._toolBars      = []
         self._insertActions = []
-        self._insertMapper = None
+        self._insertMapper  = None
 
     def getInsertActions(self, classlist):
         """Create actions to be used in menus/toolbars for inserting class
         instances. This function needs to be called only once. This
         also creates the signal mapping from the insert actions.
-        
+
         Returns: (mapper, actions)
-        
+
         mapper is a QSignalMapper and actions is a list of QAction
         objects. The triggering of any action in `actions` list causes
         the `mapper` to emit a mapped(action-name) signal. This can be
@@ -294,16 +295,16 @@ class EditorWidgetBase(QtGui.QScrollArea):
             for classname in classlist:
                 action = QtGui.QAction(classname, self)
                 self._insertMapper.setMapping(action, QtCore.QString(classname))
-                self.connect(action, 
+                self.connect(action,
                              QtCore.SIGNAL('triggered()'),
-                             self._insertMapper, 
+                             self._insertMapper,
                              QtCore.SLOT('map()'))
                 doc = moose.element('/classes/%s' % (classname)).docs
                 doc = doc.split('Description:')[-1].split('Name:')[0].strip()
                 action.setToolTip(doc)
                 self._insertActions.append(action)
         return self._insertMapper, self._insertActions
-        
+
     def setModelRoot(self, path):
         """Set the root of the model tree to be displayed.
 
@@ -327,24 +328,24 @@ class EditorWidgetBase(QtGui.QScrollArea):
         """
         raise NotImplementedError('must be implemented in derived class.')
 
-    def getMenus(self):        
+    def getMenus(self):
         return self._menus
 
     def getToolBars(self):
         return self._toolBars
 
     def elementInsertedSlot(self, mobj):
-        self.editObject.emit(mobj.path)        
+        self.editObject.emit(mobj.path)
 
     def objectEditSlot(self, mobj):
         """Emits an `editObject(str)` signal with moose element path of currently selected tree item as
-        argument"""        
+        argument"""
         self.editObject.emit(moose.element(mobj).path)
 
     def getCurrentMobj(self):
         raise NotImplementedError('should be reimplemented in subclass')
 
-    
-    
-# 
+
+
+#
 # mplugin.py ends here
