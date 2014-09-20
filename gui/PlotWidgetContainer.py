@@ -38,9 +38,13 @@ class PlotWidgetContainer(QWidget):
 
         super(PlotWidgetContainer, self).__init__(*args)
         self.modelRoot = modelRoot
-        self.model          = moose.element(modelRoot)
+        self.model          = moose.element(self.modelRoot)
         if self.modelRoot != "/":
-            self.data       = moose.element(modelRoot + "/data")
+            if moose.exists(modelRoot + "/data"):
+                self.data   = moose.element(self.modelRoot + "/data")
+            else:
+                self.data   = moose.Neutral(self.modelRoot + "/data")
+
         else:
             self.data       = moose.element("/data")
 
