@@ -4,10 +4,10 @@ import config
 from modelBuild import *
 
 class GraphicalView(QtGui.QGraphicsView):
-    def __init__(self,XWidgetBase,modelRoot,parent,border,layoutPt,createdItem):
+    def __init__(self, modelRoot,parent,border,layoutPt,createdItem):
         QtGui.QGraphicsView.__init__(self,parent)
         self.setScene(parent)
-        
+
         self.modelRoot = modelRoot
         self.sceneContainerPt = parent
         self.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
@@ -19,14 +19,14 @@ class GraphicalView(QtGui.QGraphicsView):
         self.showpopupmenu = False
         self.border = 6
         self.setRenderHints(QtGui.QPainter.Antialiasing)
-        self.layoutPt = layoutPt        
+        self.layoutPt = layoutPt
         #self.setAcceptDrops(True)
         self.createdItem = createdItem
         # All the object which are stacked on the scene are listed
         self.stackOrder = self.sceneContainerPt.items(Qt.Qt.DescendingOrder)
         #From stackOrder selecting only compartment
         self.cmptStackorder = [i for i in self.stackOrder if isinstance(i,ComptItem)]
-        self.viewBaseType = " " 
+        self.viewBaseType = " "
 
     def setRefWidget(self,path):
         self.viewBaseType = path
@@ -68,18 +68,18 @@ class GraphicalView(QtGui.QGraphicsView):
                         yp = self.startScenepos.y()
                         #if on border rubberband is not started, but called parent class for default implementation
                         if(  ((xp > xs-self.border/2) and (xp < xs+self.border/2) and (yp > ys-self.border/2) and (yp < ye+self.border/2) )or
-                             ((xp > xs+self.border/2) and (xp < xe-self.border/2) and (yp > ye-self.border/2) and (yp < ye+self.border/2) ) or 
-                             ((xp > xs+self.border/2) and (xp < xe-self.border/2) and (yp > ys-self.border/2) and (yp < ys+self.border/2) ) or 
+                             ((xp > xs+self.border/2) and (xp < xe-self.border/2) and (yp > ye-self.border/2) and (yp < ye+self.border/2) ) or
+                             ((xp > xs+self.border/2) and (xp < xe-self.border/2) and (yp > ys-self.border/2) and (yp < ys+self.border/2) ) or
                              ((xp > xe-self.border/2) and (xp < xe+self.border/2) and (yp > ys-self.border/2) and (yp < ye+self.border/2) ) ):
                             if self.cmptStackorder:
                                 itemIndex = self.cmptStackorder.index(cmpt)
-                            
+
                             cmpt.setZValue(1)
                             selectedItem = cmpt
                             break
 
                 if selectedItem == None:
-                    #if mousepressed is not on any kineticsDisplayitem or on compartment border, 
+                    #if mousepressed is not on any kineticsDisplayitem or on compartment border,
                     #then rubberband is made active
                     enableRubberband = False
                     self.customrubberBand = QtGui.QRubberBand(QtGui.QRubberBand.Rectangle,self)
@@ -118,9 +118,9 @@ class GraphicalView(QtGui.QGraphicsView):
             for item in rbandSelection:
                 if isinstance(item,KineticsDisplayItem) and item.isSelected() == False:
                         item.setSelected(True)
-        
+
     def mouseReleaseEvent(self, event):
-        
+
         self.setCursor(Qt.Qt.ArrowCursor)
         QtGui.QGraphicsView.mouseReleaseEvent(self, event)
         if(self.customrubberBand):
@@ -148,7 +148,7 @@ class GraphicalView(QtGui.QGraphicsView):
             popupmenu.addAction(self.move)
             popupmenu.exec_(event.globalPos())
         self.showpopupmenu = False
-    
+
     def moveItem(self):
       self.setCursor(Qt.Qt.CrossCursor)
 
@@ -176,18 +176,18 @@ class GraphicalView(QtGui.QGraphicsView):
                         item.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations, False)
         self.rubberBandactive = False
 
-        
+
     def resizeEvent1(self, event):
         """ zoom when resize! """
         self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
         #self.fitInView(self.sceneContainerPt.itemsBoundingRect().x()-10,self.sceneContainerPt.itemsBoundingRect().y()-10,self.sceneContainerPt.itemsBoundingRect().width()+20,self.sceneContainerPt.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
         QtGui.QGraphicsView.resizeEvent(self, event)
-        
+
     def wheelEvent(self,event):
         factor = 1.41 ** (event.delta() / 240.0)
         self.scale(factor, factor)
-        
-    
+
+
     def dragEnterEvent(self, event):
         if self.viewBaseType == "editorView":
             if event.mimeData().hasFormat('text/plain'):
