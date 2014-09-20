@@ -164,13 +164,15 @@ def loadFile(filename, target, merge=True):
             # model name is the filename without extension
 
             model   = moose.Neutral("/" + splitext(basename(filename))[0])
-            if(moose.exists("/cells"))  : moose.move("/cells"  , model.path)
+            element = moose.Neutral(model.path + "/model")
+            if(moose.exists("/cells"))  : moose.move("/cells"  , element.path)
             if(moose.exists("/elec"))   : moose.move("/elec"   , model.path)
             if(moose.exists("/library")): moose.move("/library", model.path)
 
             # moose.move("cells/", cell.path)
         elif subtype == 'sbml':
             model = moose.readSBML(filename,target)
+            print "model",model
     else:
         raise FileLoadError('Do not know how to handle this filetype: %s' % (filename))
     moose.setCwe(pwe) # The MOOSE loadModel changes the current working element to newly loaded model. We revert that behaviour

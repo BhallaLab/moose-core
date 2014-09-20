@@ -272,7 +272,8 @@ Id SbmlReader::read( string filename, string location, string solverClass)
                sm->buildForSBML(base_.eref(),&q,solverClass);
                }
                */
-            return base_;
+            cout << "base_ " <<base_.path() << "baseId_ " << baseId_.path();
+            return baseId_;
         }
 
     } else
