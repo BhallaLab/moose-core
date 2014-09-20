@@ -433,7 +433,7 @@ class MWindow(QtGui.QMainWindow):
 
         if not hasattr(self, 'loadModelAction'):
             self.loadModelAction = QtGui.QAction('L&oad model', self)
-            self.loadModelAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+L", None, QtGui.QApplication.UnicodeUTF8))
+            self.loadModelAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+O", None, QtGui.QApplication.UnicodeUTF8))
             self.connect(self.loadModelAction, QtCore.SIGNAL('triggered()'), self.loadModelDialogSlot)
         self.fileMenu.addAction(self.loadModelAction)
         if not hasattr(self,'connectBioModelAction'):
@@ -602,11 +602,12 @@ class MWindow(QtGui.QMainWindow):
         if (not hasattr(self, 'viewActions')) or (self.viewActions is None):
             self.editorViewAction = QtGui.QAction('&Editor view', self)
             self.editorViewAction.triggered.connect(self.openEditorView)
-            self.plotViewAction = QtGui.QAction('&Plot view', self)
-            self.plotViewAction.triggered.connect(self.openPlotView)
+            #self.plotViewAction = QtGui.QAction('&Plot view', self)
+            #self.plotViewAction.triggered.connect(self.openPlotView)
             self.runViewAction = QtGui.QAction('&Run view', self)
             self.runViewAction.triggered.connect(self.openRunView)
-            self.viewActions = [self.editorViewAction, self.plotViewAction, self.runViewAction]
+            #self.viewActions = [self.editorViewAction, self.plotViewAction, self.runViewAction]
+            self.viewActions = [self.editorViewAction, self.runViewAction]
         return self.viewActions
 
     def getSubWindowActions(self):
