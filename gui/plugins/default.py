@@ -428,8 +428,8 @@ class MooseRunner(QtCore.QObject):
     def continueRun(self, simtime, updateInterval):
         """Continue running without reset for `simtime`."""
         self._simtime = simtime
-        self._updateInterval = updateInterval+self._clock.currentTime
-        self._simtime = self._updateInterval
+        self._updateInterval = updateInterval
+        #self._simtime = self._updateInterval
         self._pause = False
         QtCore.QTimer.singleShot(0, self.run)
 
