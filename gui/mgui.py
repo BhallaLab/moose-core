@@ -67,7 +67,8 @@ from objectedit import ObjectEditDockWidget
 from newmodeldialog import DialogWidget
 import re
 from biomodelsclient import BioModelsClientWidget
-__author__ = 'Subhasis Ray'
+
+__author__ = 'Subhasis Ray , HarshaRani, Aviral Goel, NCBS'
 
 # This maps model subtypes to corresponding plugin names. Should be
 # moved to a separate property file perhaps
@@ -122,14 +123,13 @@ class MWindow(QtGui.QMainWindow):
         self.viewActions = None
         self.editActions = None
         self.connectMenu = None
-        self.loadedModelAction = None
+        
         self.toolBars = []
         self._loadedPlugins = {}
         self._plugins = {}
         self._loadedModels = {}
-        self.kkitPluginMenu       = QtGui.QMenu('kkit')
-        self.neurokitPluginMenu   = QtGui.QMenu("NeuroKit")
-        self.defaultPluginMenu    = QtGui.QMenu("Default")
+        
+        self.loadedModelMenu = QtGui.QMenu('Recently Loaded Model')
         self.setDockOptions(self.AnimatedDocks and self.AllowNestedDocks and self.AllowTabbedDocks)
         self.mdiArea = QtGui.QMdiArea()
         self.quitAction = QtGui.QAction('&Quit', self)
@@ -264,18 +264,12 @@ class MWindow(QtGui.QMainWindow):
         """
 
         self.plugin = self.loadPluginClass(str(name))(str(root), self)
-
-        if root not in self._loadedModels:
+        #Harsha: added under file Menu, Recently Loaded Models
+        if root != '/' and root not in self._loadedModels:
+            action = self.loadedModelMenu.addAction(root)
+            action.triggered.connect(lambda : self.setPlugin(name, root))
             self._loadedModels[root] = name
-            # action = self.defaultPluginMenu.addAction(root)
-            # action.triggered.connect(lambda : self.setPlugin('default', root))
-            if name == "kkit":
-                action = self.kkitPluginMenu.addAction(root)
-                action.triggered.connect(lambda : self.setPlugin(name, root))
-            if name == "NeuroKit":
-                action = self.neurokitPluginMenu.addAction(root)
-                action.triggered.connect(lambda : self.setPlugin(name, root))
-
+    
         # try:
         #     self.plugin = self._plugins[str(name)]
         #     print 'PLUGIN', self.plugin
@@ -285,11 +279,11 @@ class MWindow(QtGui.QMainWindow):
         #     self._plugins[str(name)] = self.plugin
         #self.plugin.getEditorView().getCentralWidget().editObject.connect(self.objectEditSlot, QtCore.Qt.UniqueConnection)
         self.updateMenus()
-        # for action in self.pluginsMenu.actions():
-        #     if str(action.text()) == str(name):
-        #         action.setChecked(True)
-        #     elif action.isChecked():
-        #         action.setChecked(False)
+        for action in self.pluginsMenu.actions():
+            if str(action.text()) == str(name):
+                action.setChecked(True)
+            elif action.isChecked():
+                action.setChecked(False)
         for subwin in self.mdiArea.subWindowList():
             subwin.close()
         self.setCurrentView('editor')
@@ -430,7 +424,8 @@ class MWindow(QtGui.QMainWindow):
             self.newModelAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+N", None, QtGui.QApplication.UnicodeUTF8))
             self.connect(self.newModelAction, QtCore.SIGNAL('triggered()'), self.newModelDialogSlot)
         self.fileMenu.addAction(self.newModelAction)
-
+        if self._loadedModels:
+            self.fileMenu.addMenu(self.loadedModelMenu)
         if not hasattr(self, 'loadModelAction'):
             self.loadModelAction = QtGui.QAction('L&oad model', self)
             self.loadModelAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+O", None, QtGui.QApplication.UnicodeUTF8))
@@ -458,23 +453,23 @@ class MWindow(QtGui.QMainWindow):
         """Populate plugins menu if it does not exist already."""
         if (not hasattr(self, 'pluginsMenu')) or (self.pluginsMenu is None):
             self.pluginsMenu = QtGui.QMenu('&Plugins')
-            # mapper = QtCore.QSignalMapper(self)
-            # pluginsGroup = QtGui.QActionGroup(self)
-            # pluginsGroup.setExclusive(True)
-            self.pluginsMenu.addMenu(self.defaultPluginMenu)
-            self.pluginsMenu.addMenu(self.kkitPluginMenu)
-            self.pluginsMenu.addMenu(self.neurokitPluginMenu)
-            openRootAction = self.defaultPluginMenu.addAction("/")
-            openRootAction.triggered.connect(lambda : self.setPlugin("default", "/") )
-            # for pluginName in self.getPluginNames():
-            #     action = QtGui.QAction(pluginName, self)
-            #     action.setObjectName(pluginName)
-            #     action.setCheckable(True)
-            #     mapper.setMapping(action, QtCore.QString(pluginName))
-            #     self.connect(action, QtCore.SIGNAL('triggered()'), mapper, QtCore.SLOT('map()'))
-            #     self.pluginsMenu.addAction(action)
-            #     pluginsGroup.addAction(action)
-            # self.connect(mapper, QtCore.SIGNAL('mapped(const QString &)'), self.setPlugin)
+            mapper = QtCore.QSignalMapper(self)
+            pluginsGroup = QtGui.QActionGroup(self)
+            pluginsGroup.setExclusive(True)
+            for pluginName in self.getPluginNames():
+                action = QtGui.QAction(pluginName, self)
+                action.setObjectName(pluginName)
+                action.setCheckable(True)
+                mapper.setMapping(action, QtCore.QString(pluginName))
+                self.connect(action, QtCore.SIGNAL('triggered()'), mapper, QtCore.SLOT('map()'))
+                self.pluginsMenu.addAction(action)
+                pluginsGroup.addAction(action)
+            self.connect(mapper, QtCore.SIGNAL('mapped(const QString &)'), self.setPlugin) 
+            #self.pluginsMenu.addMenu(self.defaultPluginMenu)
+            #self.pluginsMenu.addMenu(self.kkitPluginMenu)
+            #self.pluginsMenu.addMenu(self.neurokitPluginMenu)
+            #openRootAction = self.defaultPluginMenu.addAction("/")
+            #openRootAction.triggered.connect(lambda : self.setPlugin("default", "/") )
             # if (not hasattr(self, 'loadedModelAction')) or (self.loadedModelAction is None)  :
             #     self.loadedModelAction = QtGui.QAction("kkit",self)
             #     self.loadedModelAction.addMenu('test')
@@ -482,16 +477,6 @@ class MWindow(QtGui.QMainWindow):
             # self.pluginsMenu.addMenu(self.insertkkitMenu)
             # self.insertMapperkkit = QtCore.QSignalMapper(self)
             #insertMapperkkit,actions = self.getInsertkkitActions(self.loadedModels)
-            print "------------self.loadedModels",self._loadedModels
-            #self.getInsertActions(self._loadedModels)
-            #for action in actions:
-            #    self.insertkkitMenu.addAction(action)
-                #self.connect(insertMapper, QtCore.SIGNAL('mapped(const QString&)'), self.tree.insertElementSlot)  
-            #     ----
-            #     self.insertMenu = QtGui.QMenu('Insert')
-            # self._menus.append(self.insertMenu)
-            # self.treeMenu.addMenu(self.insertMenu)
-            # self.insertMapper = QtCore.QSignalMapper(self)
             # ignored_bases = ['ZPool', 'Msg', 'Panel', 'SolverBase', 'none']
             # ignored_classes = ['ZPool','ZReac','ZMMenz','ZEnz','CplxEnzBase']
             # classlist = [ch[0].name for ch in moose.element('/classes').children
@@ -508,8 +493,6 @@ class MWindow(QtGui.QMainWindow):
             # self.editAction.triggered.connect(self.editCurrentObjectSlot)
             # self.tree.elementInserted.connect(self.elementInsertedSlot)
             # self.treeMenu.addAction(self.editAction)
-            #     ----
-
         return self.pluginsMenu
 
     def getHelpMenu(self):
@@ -678,7 +661,7 @@ class MWindow(QtGui.QMainWindow):
                 pluginName = 'default'
 
             print 'Loaded model', ret['model'].path,subtype
-            # self._loadedModels[ret['model'].path] = pluginName
+            #self._loadedModels[ret['model'].path] = pluginName
             self.setPlugin(pluginName, ret['model'].path)
 
 
@@ -764,7 +747,7 @@ class MWindow(QtGui.QMainWindow):
 
     def pauseSimulation(self):
         moose.stop()
-
+    '''
     def continueSimulation(self):
         """TODO implement this somewhere else"""
         try:
@@ -772,7 +755,7 @@ class MWindow(QtGui.QMainWindow):
         except ValueError:
             simtime = 1.0
         moose.start(simtime)
-
+    '''
     #Harsha: added visible=True so that loadModelDialogSlot and NewModelDialogSlot call this function
     #        to clear out object path
     def objectEditSlot(self, mobj, visible=True):
@@ -821,7 +804,7 @@ class MWindow(QtGui.QMainWindow):
                 except KeyError:
                     pluginName = 'default'
                 print 'Loaded model', ret['model'].path
-                # self._loadedModels[ret['model'].path] = pluginName
+                #self._loadedModels[ret['model'].path] = pluginName
                 print "loadModelDialog",self._loadedModels
                 self.setPlugin(pluginName, ret['model'].path)
 
@@ -845,7 +828,7 @@ class MWindow(QtGui.QMainWindow):
             modelContainer = moose.Neutral('%s' %(modelPath))
             modelRoot = moose.Neutral('%s/%s' %(modelContainer.path,"model"))
             self.setPlugin(plugin, modelRoot.path)
-            # self._loadedModels[modelContainer.path] = plugin
+            #self._loadedModels[modelContainer.path] = plugin
             #Harsha: This will clear out object editor's objectpath and make it invisible
             self.objectEditSlot('/', False)
 
