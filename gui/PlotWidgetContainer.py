@@ -128,7 +128,7 @@ class PlotWidgetContainer(QWidget):
     def apply(self, f):
         for graphWidget in self.graphWidgets:
             f(graphWidget)
-            print(graphWidget)
+            #print(graphWidget)
     # def plotAll(self):
     #     self.apply(lambda obj: obj.plotAll())
 
