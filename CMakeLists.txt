@@ -318,6 +318,16 @@ install(SCRIPT python/InstallPyMoose.cmake
 install(PROGRAMS scripts/moosegui 
     DESTINATION bin
     )
+
+# Install the icon
+install(FILES gui/icons/moose_icon.png 
+    DESTINATION share/moose
+    )
+
+# And the desktop file.
+install(FILES scripts/moose.desktop
+    DESTINATION share/applications
+    )
 ########################## PACKAGING #########################################
 
 set(CPACK_GENERATOR "DEB")
