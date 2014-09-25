@@ -68,6 +68,8 @@ from mplugin import MoosePluginBase, EditorBase, EditorWidgetBase, PlotBase, Run
 from matplotlib.lines import Line2D
 from PlotWidgetContainer import PlotWidgetContainer
 
+from PyQt4 import QtCore, QtGui
+from PyQt4.QtGui import QDoubleValidator
 
 class MoosePlugin(MoosePluginBase):
     """Default plugin for MOOSE GUI"""
@@ -633,8 +635,11 @@ class SchedulingWidget(QtGui.QWidget):
 
         for ii in range(numticks):
             tt = clock.tickDt[ii]
+            dtLineWidget = QtGui.QLineEdit(str(tt))
+            dtLineWidget.setValidator(QDoubleValidator())
+            dtLineWidget.returnPressed.connect(lambda : utils.updateTicks(self.getTickDtMap()))
             layout.addWidget(QtGui.QLabel("(\'"+clock.path+'\').tickDt['+str(ii)+']'), ii+1, 0)
-            layout.addWidget(QtGui.QLineEdit(str(tt)), ii+1, 1)
+            layout.addWidget(dtLineWidget, ii+1, 1)
             layout.addWidget(QtGui.QLineEdit(''), ii+1, 2, 1, 2)
             layout.setRowStretch(ii+1, 1)
         '''
@@ -698,7 +703,7 @@ class SchedulingWidget(QtGui.QWidget):
                 target = str(widget.text()).strip()
                 if len(target) > 0:
                     ret[ii-1] = target
-        print '77777', ret
+        # print '77777', ret
         return ret
 
     def getTickDtMap(self):
@@ -710,8 +715,9 @@ class SchedulingWidget(QtGui.QWidget):
                 try:
                     ret[ii-1] = float(str(widget.text()))
                 except ValueError:
+                    print "Error value : ", str(widget.text())
                     QtGui.QMessageBox.warning(self, 'Invalid value', '`dt` for tick %d was meaningless.' % (ii-1))
-        print '66666', ret
+        # print '66666', ret
         return ret
 
     def setDataRoot(self, root='/data'):
@@ -912,7 +918,11 @@ class PlotWidget(QWidget):
                         field = tab.path.rpartition(".")[-1]
                         if field.endswith("[0]") or field.endswith("_0_"):
                             field = field[:-3]
-                        label = ( tableObject[0].path.partition(self.model.path + "/model[0]/")[-1]
+                        # label = ( tableObject[0].path.partition(self.model.path + "/model[0]/")[-1]
+                        #         + "."
+                        #         + field
+                        #         )
+                        label = ( tableObject[0].path.rpartition("/")[-1]
                                 + "."
                                 + field
                                 )
@@ -938,12 +948,12 @@ class PlotWidget(QWidget):
 
             if len(tabList) > 0:
                 leg = self.canvas.callAxesFn( 'legend'
-                                            , loc               ='upper center'
+                                            , loc               ='upper right'
                                             , prop              = {'size' : 10 }
-                                            , bbox_to_anchor    = (0.5, -0.03)
-                                            , fancybox          = True
-                                            , shadow            = True
-                                            , ncol              = 2
+                                            # , bbox_to_anchor    = (0.5, -0.03)
+                                             , fancybox          = False
+                                            # , shadow            = True
+                                            , ncol              = 1
                                             )
                 leg.draggable(True)
                 print(leg.get_window_extent())
