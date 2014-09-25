@@ -1,0 +1,4 @@
+Exec=moosegui %u
+Type=Application
+Icon=/usr/share/moose/moose_icon.png
+Categories=Biology,Science,Neuroscience
