@@ -1,4 +1,7 @@
-Exec=moosegui %u
+[Desktop Entry]
+Name=MOOSE
+Exec=moosegui
 Type=Application
+Version=3.0
 Icon=/usr/share/moose/moose_icon.png
-Categories=Biology,Science,Neuroscience
+Categories=Education,Biology,Science,Neuroscience;
