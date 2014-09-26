@@ -42,7 +42,8 @@ class KkitPlugin(MoosePlugin):
         #self.plotView.updateCallback = self.view._centralWidget.legendUpdate
         #self.view._centralWidget.legendUpdate()
         #self.dataTable = DataTable(self.dataRoot)
-
+        
+        
     def getPreviousPlugin(self):
         return None
 
@@ -114,7 +115,7 @@ class AnotherKkitRunView(RunView):
         self._centralWidget.setPlotWidgetContainer(self.plotWidgetContainer)
         self.schedular = self.getSchedulingDockWidget().widget()
         self.schedular.runner.update.connect(self.kkitRunView.getCentralWidget().changeBgSize)
-        self.schedular.runner.resetAndRun.connect(self.kkitRunView.getCentralWidget().resetColor)
+        #self.schedular.runner.resetAndRun.connect(self.kkitRunView.getCentralWidget().resetColor)
         return self._centralWidget
 
     def getCentralWidget(self):
@@ -155,6 +156,7 @@ class KkitEditorView(MooseEditorView):
         #self.dataTable = dataTable
         self.fileinsertMenu = QtGui.QMenu('&File')
         if not hasattr(self,'SaveModelAction'):
+            #self.fileinsertMenu.addSeparator()
             self.saveModelAction = QtGui.QAction('SaveToSBMLFile', self)
             self.saveModelAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+S", None, QtGui.QApplication.UnicodeUTF8))
             self.connect(self.saveModelAction, QtCore.SIGNAL('triggered()'), self.SaveModelDialogSlot)
@@ -439,6 +441,7 @@ class  KineticsWidget(EditorWidgetBase):
             self.view = GraphicalView(self.modelRoot,self.sceneContainer,self.border,self,createdItem)
             if isinstance(self,kineticEditorWidget):
                 self.view.setRefWidget("editorView")
+                self.view.setobject2line(self.object2line)
                 self.view.setAcceptDrops(True)
             elif isinstance(self,kineticRunWidget):
                 self.view.setRefWidget("runView")
@@ -571,6 +574,7 @@ class  KineticsWidget(EditorWidgetBase):
         endtype = srcdes_list[2]
         line = srcdes_list[3]
         source = element(next((k for k,v in self.mooseId_GObj.items() if v == src), None))
+
         for l,v,o in self.object2line[src]:
             if v == des and o ==line:
                 l.setPolygon(arrow)
@@ -598,8 +602,8 @@ class  KineticsWidget(EditorWidgetBase):
         elif isinstance(source,moose.StimulusTable):
             pen.setColor(QtCore.Qt.yellow)
         self.lineItem_dict[qgLineitem] = srcdes_list
-        self.object2line[ src ].append( ( qgLineitem, des,line) )
-        self.object2line[ des ].append( ( qgLineitem, src,line ) )
+        self.object2line[ src ].append( ( qgLineitem, des,line,) )
+        self.object2line[ des ].append( ( qgLineitem, src,line, ) )
         qgLineitem.setPen(pen)
 
     def updateArrow(self,qGTextitem):
@@ -708,11 +712,27 @@ class kineticEditorWidget(KineticsWidget):
         self._menus.append(self.insertMenu)
         self.insertMapper = QtCore.QSignalMapper(self)
         classlist = ['CubeMesh','CylMesh','Pool','BufPool','SumFunc','Reac','Enz','MMenz','StimulusTable']
+        self.toolTipinfo = { "CubeMesh":"",
+                             "CylMesh" : "",
+                             "Pool":"A Pool is a collection of molecules of a given species in a given cellular compartment.\n It can undergo reactions that convert it into other pool(s). \nParameters: initConc (Initial concentration), diffConst (diffusion constant). Variable: conc (Concentration)",
+                             "BufPool":"A BufPool is a buffered pool. \nIt is a collection of molecules of a given species in a given cellular compartment, that are always present at the same concentration.\n This is set by the initConc parameter. \nIt can undergo reactions in the same way as a pool.",
+                             "SumFunc":"A Func computes an arbitrary mathematical expression of one or more input concentrations of Pools. The output can be used to control the concentration of another Pool, or as an input to another Func",
+                             "StimulusTable":"A StimulusTable stores an array of values that are read out during a simulation, and typically control the concentration of one of the pools in the model. \nParameters: size of table, values of entries, start and stop times, and an optional loopTime that defines the period over which the StimulusTable should loop around to repeat its values",
+                             "Reac":"A Reac is a chemical reaction that converts substrates into products, and back. \nThe rates of these conversions are specified by the rate constants Kf and Kb respectively.",
+                             "MMenz":"An MMenz is the Michaelis-Menten version of an enzyme activity of a given Pool.\n The MMenz must be created on a pool and can only catalyze a single reaction with a specified substrate(s). \nIf a given enzyme species can have multiple substrates, then multiple MMenz activites must be created on the parent Pool. \nThe rate of an MMenz is V [S].[E].kcat/(Km + [S]). There is no enzyme-substrate complex. Parameters: Km and kcat.",
+                             "Enz":"An Enz is an enzyme activity of a given Pool. The Enz must be created on a pool and can only catalyze a single reaction with a specified substrate(s). \nIf a given enzyme species can have multiple substrates, then multiple Enz activities must be created on the parent Pool. \nThe reaction for an Enz is E + S <===> E.S ---> E + P. \nThis means that a new Pool, the enzyme-substrate complex E.S, is always formed when you create an Enz. \nParameters: Km and kcat, or alternatively, K1, K2 and K3. Km = (K2+K3)/K1"
+
+                             }
         insertMapper, actions = self.getInsertActions(classlist)
         for action in actions:
             self.insertMenu.addAction(action)
-        #self.view.setAcceptDrops(True)
-
+            doc = self.toolTipinfo[str(action.text())]
+            if doc == "":
+                classname = str(action.text())
+                doc = moose.element('/classes/%s' % (classname)).docs
+                doc = doc.split('Description:')[-1].split('Name:')[0].strip()
+            action.setToolTip(doc)
+            
     def GrViewresize(self,event):
         #when Gui resize and event is sent which inturn call resizeEvent of qgraphicsview
         self.view.resizeEvent1(event)
@@ -747,7 +767,6 @@ class kineticRunWidget(KineticsWidget):
 
 
     def changeBgSize(self):
-        #print "here in chageBgSize"
         for item in self.sceneContainer.items():
             if isinstance(item,PoolItemCircle):
                 initialConc = moose.element(item.mobj).concInit
@@ -757,7 +776,6 @@ class kineticRunWidget(KineticsWidget):
                 else:
                     # multipying by 1000 b'cos moose concentration is in milli in moose
                     ratio = presentConc
-
                 item.updateRect(math.sqrt(ratio))
     def resetColor(self):
         for item in self.sceneContainer.items():
