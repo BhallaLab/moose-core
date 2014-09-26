@@ -440,15 +440,15 @@ def makeNeuroMeshModel():
         elecR = moose.element( path )
         moose.connect( adaptGluR[i], 'outputSrc', elecR, 'setGbar', 'Single' )
     #moose.connect( chemR, 'nOut', adaptGluR, 'input', 'OneToOne' )
-	# Ksolve isn't sending nOut. Not good. So have to use requestField.
-    moose.connect( adaptGluR, 'requestField', chemR, 'getN', 'OneToOne' )
+	# Ksolve isn't sending nOut. Not good. So have to use requestOut.
+    moose.connect( adaptGluR, 'requestOut', chemR, 'getN', 'OneToOne' )
     adaptGluR.outputOffset = 1e-7    # pS
     adaptGluR.scale = 1e-6 / 100     # from n to pS
 
     adaptK = moose.Adaptor( '/model/chem/neuroMesh/adaptK' )
     chemK = moose.element( '/model/chem/neuroMesh/kChan' )
     elecK = moose.element( '/model/elec/compt/K' )
-    moose.connect( adaptK, 'requestField', chemK, 'getConc', 'OneToAll' )
+    moose.connect( adaptK, 'requestOut', chemK, 'getConc', 'OneToAll' )
     moose.connect( adaptK, 'outputSrc', elecK, 'setGbar', 'Single' )
     adaptK.scale = 0.3               # from mM to Siemens
     """

@@ -24,34 +24,17 @@ const Cinfo* BufPool::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
-		static DestFinfo process( "process",
-			"Handles process call",
-			new ProcOpFunc< BufPool >( &BufPool::process ) );
-		static DestFinfo reinit( "reinit",
-			"Handles reinit call",
-			new ProcOpFunc< BufPool >( &BufPool::reinit ) );
 
 		//////////////////////////////////////////////////////////////
 		// SharedMsg Definitions
 		//////////////////////////////////////////////////////////////
-		static Finfo* procShared[] = {
-			&process, &reinit
-		};
-		static SharedFinfo proc( "proc",
-			"Shared message for process and reinit",
-			procShared, sizeof( procShared ) / sizeof( const Finfo* )
-		);
-
-	static Finfo* bufPoolFinfos[] = {
-		&proc,				// SharedFinfo
-	};
 
 	static Dinfo< BufPool > dinfo;
 	static Cinfo bufPoolCinfo (
 		"BufPool",
 		Pool::initCinfo(),
-		bufPoolFinfos,
-		sizeof( bufPoolFinfos ) / sizeof ( Finfo* ),
+		0,
+		0,
 		&dinfo
 	);
 
@@ -100,14 +83,14 @@ void BufPool::vSetConcInit( const Eref& e, double conc )
 // MsgDest Definitions
 //////////////////////////////////////////////////////////////
 
-void BufPool::process( const Eref& e, ProcPtr p )
+void BufPool::vProcess( const Eref& e, ProcPtr p )
 {
-	Pool::reinit( e, p );
+	Pool::vReinit( e, p );
 }
 
-void BufPool::reinit( const Eref& e, ProcPtr p )
+void BufPool::vReinit( const Eref& e, ProcPtr p )
 {
-	Pool::reinit( e, p );
+	Pool::vReinit( e, p );
 }
 
 
