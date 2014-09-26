@@ -15,7 +15,15 @@ class KineticsDisplayItem(QtGui.QGraphicsWidget):
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         if QtCore.QT_VERSION >= 0x040600:
             self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges,1)
-
+        #print "self.mobj",self.mobj
+        #self.updateValue(self.mobj)
+        '''
+        if self.mobj == "Pool":
+            self._conc = self.mobj.conc
+            self._n    = self.mobj.n
+            doc = "Conc\t: "+str(self._conc)+"\n n\t: "+str(self._n)
+            self.gobj.setToolTip(doc)
+            '''
     def setDisplayProperties(self, dinfo):
         self.setGeometry(dinfo.x, dinfo.y)
       
@@ -25,7 +33,30 @@ class KineticsDisplayItem(QtGui.QGraphicsWidget):
             painter.setPen(QtGui.QPen(QtGui.QPen(QtCore.Qt.black, 1.8,Qt.Qt.DashLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin)))
             painter.drawRect(self.boundingRect())
             
-
+    def updateValue(self,mobj):
+        pass
+        '''
+        self._mobj = mobj
+        print "\t \t here in kineticsDisplayItem ",type(mobj)
+        if type(mobj) is moose.ZombiePool:
+            self._conc = self._mobj.conc
+            self._n    = self._mobj.n
+            doc = "Conc\t: "+str(self._conc)+"\n n\t: "+str(self._n)
+            self.gobj.setToolTip(doc)
+        '''
+        '''if moose.element(self._mobj).class == "Pool" or moose.element(self._mobj).class == "ZombiePool":
+            self._conc = self._mobj.conc
+            self._n    = self._mobj.n
+            doc = "Conc\t: "+str(self._conc)+"\n n\t: "+str(self._n)
+            self.gobj.setToolTip(doc)
+            
+        elif self._mobj.class == "Reac" or self._mobj.class == "ZombieReac":
+            self._kf = self.mobj.kf
+            self._kb    = self.mobj.kb
+            doc = "kf\t: "+str(self._kf)+"\n kb\t: "+str(self._kb)
+            self.gobj.setToolTip(doc)
+        pass
+        '''
     def itemChange(self,change,value):
         if change == QtGui.QGraphicsItem.ItemPositionChange:
             self.emit(QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),element(self.mobj))
@@ -54,9 +85,7 @@ class PoolItem(KineticsDisplayItem):
         # doc = doc.split('Description:')[-1].split('Name:')[0].strip()
         self._conc = self.mobj.conc
         self._n    = self.mobj.n
-        doc = "will impliment con and nint"
-        doc = "Conc\t: "+str(self._conc)+"\n n\t: "+str(self._n)
-        print "doc ",doc,self.mobj
+        doc = "Conc\t: "+str(self._conc)+"\nn\t: "+str(self._n)
         self.gobj.setToolTip(doc)
         self.gobj.setFont(PoolItem.font)
         if not PoolItem.fontMetrics:
@@ -105,6 +134,15 @@ class PoolItem(KineticsDisplayItem):
     def returnColor(self):
         return (self.bg.brush().color())
 
+    def updateValue(self,gobj):
+        self._gobj = gobj
+        #if type(self._gobj) is moose.ZombiePool:
+        if (isinstance(self._gobj,PoolBase)):
+            self._conc = self.mobj.conc
+            self._n    = self.mobj.n
+            doc = "Conc\t: "+str(self._conc)+"\nn\t: "+str(self._n)
+            self.gobj.setToolTip(doc)
+
 class PoolItemCircle(PoolItem):
     def __init__(self,*args,**kwargs):
         PoolItem.__init__(self, *args, **kwargs)
@@ -112,15 +150,6 @@ class PoolItemCircle(PoolItem):
         self.bgColor = QtGui.QGraphicsEllipseItem(self)
         self.bgColor.setFlag(QtGui.QGraphicsItem.ItemStacksBehindParent,True)
         self.bgColor.setRect(((self.gobj.boundingRect().width()+PoolItem.fontMetrics.width('  '))/2)-5,self.gobj.boundingRect().height()/2-5,10,10)
-        '''print "self.*****",self.gobj.mobj
-        self._conc = self.updateValue(self.gobj)
-        self._n    = self.mobj.n
-        doc = "will impliment con and nint"
-        doc = "Conc\t: "+str(self._conc)+"\n n\t: "+str(self._n)
-        print "doc ",doc,self.mobj
-        self.gobj.setToolTip(doc)
-        '''
-        self.updateValue(self.gobj)
     def setDisplayProperties(self,x,y,textcolor,bgcolor):
         self.setGeometry(x, y,self.gobj.boundingRect().width()
                         +PoolItem.fontMetrics.width('  '), 
@@ -134,13 +163,7 @@ class PoolItemCircle(PoolItem):
         adjusth = height*ratio
         self.bgColor.setRect(width/2-abs(adjustw/2),height/2-abs(adjusth/2),adjustw, adjusth)
         self.updateValue(self.gobj)
-        
-    def updateValue(self,gobj):
-        self._conc = gobj.mobj.conc
-        self._n = gobj.mobj.n
-        doc = "Conc\t: "+str(self._conc)+"\n n\t: "+str(self._n)
-        gobj.setToolTip(doc)
-        
+     
     def returnEllispeSize(self):
         self.bgColor.setRect(((self.gobj.boundingRect().width()+PoolItem.fontMetrics.width('  '))/2)-5,self.gobj.boundingRect().
             height()/2-5,10,10)
@@ -232,7 +255,20 @@ class ReacItem(KineticsDisplayItem):
         # doc = moose.element('/classes/%s' % (classname)).docs
         # print "docs ",self.gobj.mobj, " ",doc
         # doc = doc.split('Description:')[-1].split('Name:')[0].strip()
-        self.gobj.setToolTip(" kf and kd will be showed")
+        self._Kf = self.gobj.mobj.Kf
+        self._Kb = self.gobj.mobj.Kb
+        doc = "Kf\t: "+str(self._Kf)+"\nKb\t: "+str(self._Kb) 
+        self.gobj.setToolTip(doc)
+
+    def updateValue(self,gobj):
+        self._gobj = gobj
+        #if ( type(self._gobj) is moose.ZombieReac or type(self_gobj) is moose.Reac):
+        if (isinstance(self._gobj,ReacBase)):
+            self._Kf = self._gobj.Kf
+            self._Kb = self._gobj.Kb
+            doc = "Kf\t: "+str(self._Kf)+"\nKb\t: "+str(self._Kb)
+            self.gobj.setToolTip(doc)
+
     def refresh( self,scale):
         defaultWidth = ReacItem.defaultWidth*scale
         defaultHeight = ReacItem.defaultHeight*scale
@@ -270,10 +306,18 @@ class EnzItem(KineticsDisplayItem):
         # classname = 'EnzBase'
         # doc = moose.element('/classes/%s' % (classname)).docs
         # doc = doc.split('Description:')[-1].split('Name:')[0].strip()
-        if not (self.mobj.className == "ZombieEnz" or self.mobj.className == "Enz"):
-            self.gobj.setToolTip("MMenz item")
-        else:
-            self.gobj.setToolTip("Enz details")
+        self._Km   = self.gobj.mobj.Km
+        self._Kcat = self.gobj.mobj.kcat
+        doc = "Km\t: "+str(self._Km)+"\nKcat\t: "+str(self._Kcat) 
+        self.gobj.setToolTip(doc)
+
+    def updateValue(self,gobj):
+        self._gobj = gobj
+        if ( isinstance(self.gobj,EnzBase)):
+            self._Km = self._gobj.Km
+            self._Kcat = self._gobj.kcat
+            doc = "Km\t: "+str(self._Km)+"\nKcat\t: "+str(self._Kcat)
+            self.gobj.setToolTip(doc)
         
     def setDisplayProperties(self,x,y,textcolor,bgcolor):
         """Set the display properties of this item."""
@@ -299,8 +343,18 @@ class CplxItem(KineticsDisplayItem):
         KineticsDisplayItem.__init__(self, *args, **kwargs)
         self.gobj = QtGui.QGraphicsRectItem(0,0, CplxItem.defaultWidth, CplxItem.defaultHeight, self)
         self.gobj.mobj = self.mobj
+        self._conc = self.mobj.conc
+        self._n    = self.mobj.n
+        doc = "Conc\t: "+str(self._conc)+"\nn\t: "+str(self._n)
+        self.gobj.setToolTip(doc)
 
-        #self.gobj.setToolTip("This is the a tooltip for CplxItem")
+    def updateValue(self,gobj):
+        self._gobj = gobj
+        if (isinstance(self._gobj,PoolBase)):
+            self._conc = self.mobj.conc
+            self._n    = self.mobj.n
+            doc = "Conc\t: "+str(self._conc)+"\nn\t: "+str(self._n)
+            self.gobj.setToolTip(doc)
 
     def setDisplayProperties(self,x,y,textcolor,bgcolor):
         """Set the display properties of this item."""
