@@ -73,7 +73,7 @@ def makeAdaptors():
     elecChan = moose.element( '/model/elec/soma/K_A' )
     # The Adaptor has to request the output conc of the chemical pool,
     # since there isn't an output message to deliver this value.
-    moose.connect( adaptChan, 'requestField', chemChan, 'getConc' )
+    moose.connect( adaptChan, 'requestOut', chemChan, 'getConc' )
     moose.connect( adaptChan, 'output', elecChan, 'setGbar' )
     adaptChan.inputOffset = 0.0    # 
     adaptChan.outputOffset = 0.0

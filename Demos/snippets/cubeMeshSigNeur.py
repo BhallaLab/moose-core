@@ -211,7 +211,7 @@ def makeModelInCubeMesh():
     adaptK = moose.Adaptor( '/n/chem/neuroMesh/adaptK' )
     chemK = moose.element( '/n/chem/neuroMesh/kChan' )
     elecK = moose.element( '/n/elec/compt/K' )
-    moose.connect( adaptK, 'requestField', chemK, 'getConc', 'OneToAll' )
+    moose.connect( adaptK, 'requestOut', chemK, 'getConc', 'OneToAll' )
     moose.connect( adaptK, 'outputSrc', elecK, 'setGbar', 'OneToAll' )
     adaptK.scale = 0.3               # from mM to Siemens
 

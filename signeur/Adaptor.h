@@ -10,8 +10,6 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include "../basecode/PrepackedBuffer.h"
-
 /**
  * This is the adaptor class. It is used in interfacing different kinds
  * of solver with each other, especially for electrical to chemical
@@ -37,7 +35,11 @@
  * field access and update to take place at quite different timescales 
  * from the numerical engines.
  * 5. The implementation of Adaptor classes. These perform a linear
- * transformation (y = mx + c) of the input. The input is the average of
+ * transformation::
+ *
+ * 	(y = scale * (x + inputOffset) + outputOffset ) 
+ *
+ * where y is output and x is the input. The input is the average of
  * any number of sources (through messages) and any number of timesteps.
  * The output goes to any number of targets, again through messages.
  *
@@ -169,7 +171,7 @@ class Adaptor
 		unsigned int counter_; /// Counts number of inputs received.
 
 		/// Counts number of targets of requestField message
-		unsigned int numRequestField_; 
+		unsigned int numRequestOut_; 
 };
 
 #endif // _Adaptor_h
