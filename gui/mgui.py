@@ -363,6 +363,10 @@ class MWindow(QtGui.QMainWindow):
         'plot', 'run'. A plugin can provide more views if necessary.
         """
         self.plugin.setCurrentView(view)
+        if view =='run':
+            #Harsha: This will clear out object editor's objectpath and make it invisible
+            self.objectEditSlot('/',False)
+        
         targetView = None
         newSubWindow = True
         widget = self.plugin.getCurrentView().getCentralWidget()
@@ -796,7 +800,7 @@ class MWindow(QtGui.QMainWindow):
                     raise mexception.ElementNameError('Model name cannot contain `/`')
                 ret = loadFile(str(fileName),'%s' %(modelName),merge=False)
                 #ret = loadFile(str(fileName), '/model/%s' % (modelName), merge=False)
-		#Harsha: This will clear out object editor's objectpath and make it invisible
+		        #Harsha: This will clear out object editor's objectpath and make it invisible
                 self.objectEditSlot('/',False)
 
                 # Harsha: if subtype is None, in case of cspace then pluginLookup = /cspace/None
