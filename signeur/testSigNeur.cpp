@@ -43,16 +43,16 @@ void testAdaptorRequestField()
 	Id onepool = shell->doCreate( "Pool", model, "onepool", 1 );
 	Id twopool = shell->doCreate( "Pool", model, "twopool", 2 );
 	Id tenpool = shell->doCreate( "Pool", model, "tenpool", 10 );
-	ObjId mid = shell->doAddMsg( "Single", adaptor, "requestField", 
+	ObjId mid = shell->doAddMsg( "Single", adaptor, "requestOut", 
 					onepool, "getNInit" );
 	assert( !mid.bad() );
-	mid = shell->doAddMsg( "Single", adaptor, "requestField", 
+	mid = shell->doAddMsg( "Single", adaptor, "requestOut", 
 					ObjId( twopool, 0 ), "getNInit" );
 	assert( !mid.bad() );
-	mid = shell->doAddMsg( "Single", adaptor, "requestField", 
+	mid = shell->doAddMsg( "Single", adaptor, "requestOut", 
 					ObjId( twopool, 1 ), "getNInit" );
 	assert( !mid.bad() );
-	mid = shell->doAddMsg( "OneToAll", adaptor, "requestField", 
+	mid = shell->doAddMsg( "OneToAll", adaptor, "requestOut", 
 					tenpool, "getNInit" );
 	assert( !mid.bad() );
 	Field< double >::set( onepool, "nInit", 1.0 );
@@ -66,7 +66,7 @@ void testAdaptorRequestField()
 	double ret = Field< double >::get( adaptor, "outputValue" );
 	assert( doubleEq( ret, ( 1.0 + 50.0 + 5500.0 )/13.0 ) );
 
-	const Finfo *f = adaptor.element()->cinfo()->findFinfo( "requestField" );
+	const Finfo *f = adaptor.element()->cinfo()->findFinfo( "requestOut" );
 	const SrcFinfo* sf = dynamic_cast< const SrcFinfo* >( f );
 	assert( sf );
 	vector< ObjId > temp;
@@ -857,7 +857,7 @@ Id buildAdaptorsInCubeMesh( vector< Id >& plots )
 	assert( ! mid.bad() );
 	/*
 	mid = shell->doAddMsg( "OneToAll", 
-					adaptCa, "requestField", elecCa, "get_Ca" );
+					adaptCa, "requestOut", elecCa, "get_Ca" );
 	assert( ! mid.bad() );
 	*/
 
@@ -869,7 +869,7 @@ Id buildAdaptorsInCubeMesh( vector< Id >& plots )
 
 	Id adaptGluR = shell->doCreate( "Adaptor", nid, "adaptGluR", dims.size() );
 	mid = shell->doAddMsg( "OneToAll", 
-					adaptGluR, "requestField", chemGluR, "get_n" );
+					adaptGluR, "requestOut", chemGluR, "get_n" );
 	assert( ! mid.bad() );
 	mid = shell->doAddMsg( "OneToAll", 
 					adaptGluR, "output", elecGluR, "set_Gbar" );
@@ -879,7 +879,7 @@ Id buildAdaptorsInCubeMesh( vector< Id >& plots )
 
 	Id adaptK = shell->doCreate( "Adaptor", nid, "adaptK", dims.size() );
 	mid = shell->doAddMsg( "OneToAll", 
-					adaptK, "requestField", chemK, "get_conc" );
+					adaptK, "requestOut", chemK, "get_conc" );
 	assert( ! mid.bad() );
 	mid = shell->doAddMsg( "OneToAll", 
 					adaptK, "output", elecK, "set_Gbar" );
