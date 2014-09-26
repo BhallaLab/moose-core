@@ -109,7 +109,7 @@ def loadFile(filename, target, merge=True):
 
             if len(nGraphs) > 0:
                 i = i+1
-            print " i ", i,moose.wildcardFind(model.path+'/moregraphs/##[TYPE=Table]')
+            #print " i ", i,moose.wildcardFind(model.path+'/moregraphs/##[TYPE=Table]')
             for moregraphs in moose.wildcardFind(model.path+'/moregraphs/##[TYPE=Table]'):
                 if not moose.exists(dataPath.path+'/graph_'+str(i)):
                     graphspath = moose.Neutral('%s/%s' %(dataPath.path,"graph_"+str(i)))
@@ -141,7 +141,7 @@ def loadFile(filename, target, merge=True):
 
             if len(nGraphs) > 0:
                 i = i+1
-            print " i ", i,moose.wildcardFind(model.path+'/moregraphs/##[TYPE=Table]')
+            #print " i ", i,moose.wildcardFind(model.path+'/moregraphs/##[TYPE=Table]')
             for moregraphs in moose.wildcardFind(model.path+'/moregraphs/##[TYPE=Table]'):
                 if not moose.exists(dataPath.path+'/graph_'+str(i)):
                     graphspath = moose.Neutral('%s/%s' %(dataPath.path,"graph_"+str(i)))

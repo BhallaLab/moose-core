@@ -303,7 +303,8 @@ class MWindow(QtGui.QMainWindow):
             return False
         for action in self.menuBar().actions():
             if menu.title() == action.text():
-                action.menu().addSeparator()
+                if not action.menu().isEmpty():
+                    action.menu().addSeparator()
                 action.menu().addActions(menu.actions())
                 return True
         return False
@@ -328,8 +329,11 @@ class MWindow(QtGui.QMainWindow):
                  self.getHelpMenu()]
         for menu in menus:
             self.menuBar().addMenu(menu)
+
         for menu in self.plugin.getMenus():
             if not self.updateExistingMenu(menu):
+                if not self.menuBar().isEmpty():
+                    action.menu().addSeparator()
                 self.menuBar().addMenu(menu)
 
     def updateToolbars(self):
@@ -385,10 +389,10 @@ class MWindow(QtGui.QMainWindow):
                 dockWidget.setVisible(False)
         for dockWidget in self.plugin.getCurrentView().getToolPanes():
             if dockWidget not in dockWidgets:
-                if dockWidget.windowTitle() == "Scheduling":
-                    self.addDockWidget(Qt.Qt.TopDockWidgetArea, dockWidget)
+                if view == "run":
+                    if dockWidget.windowTitle() == "Scheduling":
+                        self.addDockWidget(Qt.Qt.TopDockWidgetArea, dockWidget)
                 else:
-
                     self.addDockWidget(Qt.Qt.RightDockWidgetArea, dockWidget)
             dockWidget.setVisible(True)
         subwin.setVisible(True)
@@ -446,9 +450,9 @@ class MWindow(QtGui.QMainWindow):
             self.editMenu = QtGui.QMenu('&Edit')
         else:
             self.editMenu.clear()
-        
-        #   self.editMenu.addActions(self.getEditActions())
+        #self.editMenu.addActions(self.getEditActions())
         return self.editMenu
+        
     def getPluginsMenu(self):
         """Populate plugins menu if it does not exist already."""
         if (not hasattr(self, 'pluginsMenu')) or (self.pluginsMenu is None):
@@ -551,15 +555,15 @@ class MWindow(QtGui.QMainWindow):
 
     def getEditActions(self):
 
-        #self.editActions = []
+        # self.editActions = []
         # if (not hasattr(self, 'editActions')) or (self.editActions is None):
         #     self.setModelRootAction = QtGui.QAction('&Set model root', self)
         #     self.setModelRootAction.triggered.connect(self.showSetModelRootDialog)
         #     self.setDataRootAction = QtGui.QAction('Set &data root', self)
         #     self.setDataRootAction.triggered.connect(self.showSetDataRootDialog)
         #     self.editActions = [self.setModelRootAction, self.setDataRootAction]
-        #return self.editActions
-        return
+        # return self.editActions
+        return None
 
     def showSetModelRootDialog(self):
         root, ok = QtGui.QInputDialog.getText(self, 'Model Root', 'Enter the model root path:', text=moose.element(self.plugin.modelRoot).path)
@@ -659,9 +663,8 @@ class MWindow(QtGui.QMainWindow):
                 pluginName = subtype_plugin_map['%s/%s' % (ret['modeltype'], ret['subtype'])]
             except KeyError:
                 pluginName = 'default'
-
             print 'Loaded model', ret['model'].path,subtype
-            #self._loadedModels[ret['model'].path] = pluginName
+            self._loadedModels[ret['model'].path] = pluginName
             self.setPlugin(pluginName, ret['model'].path)
 
 
@@ -804,8 +807,6 @@ class MWindow(QtGui.QMainWindow):
                 except KeyError:
                     pluginName = 'default'
                 print 'Loaded model', ret['model'].path
-                #self._loadedModels[ret['model'].path] = pluginName
-                print "loadModelDialog",self._loadedModels
                 self.setPlugin(pluginName, ret['model'].path)
 
 
