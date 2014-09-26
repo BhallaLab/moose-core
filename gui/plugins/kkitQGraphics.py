@@ -52,12 +52,11 @@ class PoolItem(KineticsDisplayItem):
         # doc = moose.element('/classes/%s' % (classname)).docs
         # print "docs ",self.gobj.mobj, " ",doc
         # doc = doc.split('Description:')[-1].split('Name:')[0].strip()
-        if (classname == "ZombiePool" or classname == "Pool"):
-            doc = "A Pool is a collection of molecules of a given species in a given cellular compartment.\n It can undergo reactions that convert it into other pool(s). \nParameters: initConc (Initial concentration), diffConst (diffusion constant). Variable: conc (Concentration)"
-        elif (classname == "ZombieBufPool" or classname =="BufPool" ):
-            doc = "A BufPool is a buffered pool. \nIt is a collection of molecules of a given species in a given cellular compartment, that are always present at the same concentration.\n This is set by the initConc parameter. \nIt can undergo reactions in the same way as a pool."
-        elif (classname == "ZombieFuncPool" or classname == "FuncPool"):
-            doc = "A Func computes an arbitrary mathematical expression of one or more input concentrations of Pools. The output can be used to control the concentration of another Pool, or as an input to another Func "
+        self._conc = self.mobj.conc
+        self._n    = self.mobj.n
+        doc = "will impliment con and nint"
+        doc = "Conc\t: "+str(self._conc)+"\n n\t: "+str(self._n)
+        print "doc ",doc,self.mobj
         self.gobj.setToolTip(doc)
         self.gobj.setFont(PoolItem.font)
         if not PoolItem.fontMetrics:
@@ -76,7 +75,7 @@ class PoolItem(KineticsDisplayItem):
                         self.gobj.boundingRect().height())
         
         self.bg.setBrush(QtGui.QBrush(bgcolor))
-            
+    
     def refresh(self,scale):
         fontsize = PoolItem.defaultFontsize*scale
         font =QtGui.QFont("Helvetica")
@@ -103,7 +102,6 @@ class PoolItem(KineticsDisplayItem):
         adjusth = height*ratio
         self.bgColor.setRect(width/2-abs(adjustw/2),height/2-abs(adjusth/2),adjustw, adjusth)
         #self.bg.setRect(0,0,self.gobj.boundingRect().width()*ratio+PoolItem.fontMetrics.width('  '), self.gobj.boundingRect().height()*ratio)
-
     def returnColor(self):
         return (self.bg.brush().color())
 
@@ -114,7 +112,15 @@ class PoolItemCircle(PoolItem):
         self.bgColor = QtGui.QGraphicsEllipseItem(self)
         self.bgColor.setFlag(QtGui.QGraphicsItem.ItemStacksBehindParent,True)
         self.bgColor.setRect(((self.gobj.boundingRect().width()+PoolItem.fontMetrics.width('  '))/2)-5,self.gobj.boundingRect().height()/2-5,10,10)
-        
+        '''print "self.*****",self.gobj.mobj
+        self._conc = self.updateValue(self.gobj)
+        self._n    = self.mobj.n
+        doc = "will impliment con and nint"
+        doc = "Conc\t: "+str(self._conc)+"\n n\t: "+str(self._n)
+        print "doc ",doc,self.mobj
+        self.gobj.setToolTip(doc)
+        '''
+        self.updateValue(self.gobj)
     def setDisplayProperties(self,x,y,textcolor,bgcolor):
         self.setGeometry(x, y,self.gobj.boundingRect().width()
                         +PoolItem.fontMetrics.width('  '), 
@@ -126,12 +132,19 @@ class PoolItemCircle(PoolItem):
         height = self.gobj.boundingRect().height()
         adjustw = width*ratio
         adjusth = height*ratio
-        #for ellispe
         self.bgColor.setRect(width/2-abs(adjustw/2),height/2-abs(adjusth/2),adjustw, adjusth)
-    
+        self.updateValue(self.gobj)
+        
+    def updateValue(self,gobj):
+        self._conc = gobj.mobj.conc
+        self._n = gobj.mobj.n
+        doc = "Conc\t: "+str(self._conc)+"\n n\t: "+str(self._n)
+        gobj.setToolTip(doc)
+        
     def returnEllispeSize(self):
         self.bgColor.setRect(((self.gobj.boundingRect().width()+PoolItem.fontMetrics.width('  '))/2)-5,self.gobj.boundingRect().
             height()/2-5,10,10)
+    
     def MooseRef(self):
         return self.gobj.mobj
 
@@ -160,7 +173,7 @@ class TableItem(KineticsDisplayItem):
         path.lineTo((TableItem.defaultWidth+10),TableItem.defaultHeight/4)
 
         self.gobj = QtGui.QGraphicsPathItem(path, self)
-        self.gobj.setToolTip("A StimulusTable stores an array of values that are read out during a simulation, and typically control the concentration of one of the pools in the model. \nParameters: size of table, values of entries, start and stop times, and an optional loopTime that defines the period over which the StimulusTable should loop around to repeat its values")
+        self.gobj.setToolTip("Need to see what to show unlike conc/nint for pool")
         self.gobj.setPen(QtGui.QPen(QtCore.Qt.black, 2,Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin))
         self.gobj.mobj = self.mobj
 
@@ -219,7 +232,7 @@ class ReacItem(KineticsDisplayItem):
         # doc = moose.element('/classes/%s' % (classname)).docs
         # print "docs ",self.gobj.mobj, " ",doc
         # doc = doc.split('Description:')[-1].split('Name:')[0].strip()
-        self.gobj.setToolTip(" A Reac is a chemical reaction that converts substrates into products, and back. \nThe rates of these conversions are specified by the rate constants Kf and Kb respectively.")
+        self.gobj.setToolTip(" kf and kd will be showed")
     def refresh( self,scale):
         defaultWidth = ReacItem.defaultWidth*scale
         defaultHeight = ReacItem.defaultHeight*scale
@@ -258,9 +271,9 @@ class EnzItem(KineticsDisplayItem):
         # doc = moose.element('/classes/%s' % (classname)).docs
         # doc = doc.split('Description:')[-1].split('Name:')[0].strip()
         if not (self.mobj.className == "ZombieEnz" or self.mobj.className == "Enz"):
-            self.gobj.setToolTip("An MMenz is the Michaelis-Menten version of an enzyme activity of a given Pool.\n The MMenz must be created on a pool and can only catalyze a single reaction with a specified substrate(s). \nIf a given enzyme species can have multiple substrates, then multiple MMenz activites must be created on the parent Pool. \nThe rate of an MMenz is V [S].[E].kcat/(Km + [S]). There is no enzyme-substrate complex. Parameters: Km and kcat.")
+            self.gobj.setToolTip("MMenz item")
         else:
-            self.gobj.setToolTip("An Enz is an enzyme activity of a given Pool. The Enz must be created on a pool and can only catalyze a single reaction with a specified substrate(s). \nIf a given enzyme species can have multiple substrates, then multiple Enz activities must be created on the parent Pool. \nThe reaction for an Enz is E + S <===> E.S ---> E + P. \nThis means that a new Pool, the enzyme-substrate complex E.S, is always formed when you create an Enz. \nParameters: Km and kcat, or alternatively, K1, K2 and K3. Km = (K2+K3)/K1")
+            self.gobj.setToolTip("Enz details")
         
     def setDisplayProperties(self,x,y,textcolor,bgcolor):
         """Set the display properties of this item."""
