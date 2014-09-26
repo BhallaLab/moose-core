@@ -114,8 +114,9 @@ class AnotherKkitRunView(RunView):
         self._centralWidget.setChildWidget(self.plotWidgetContainer, False, 0, 1)
         self._centralWidget.setPlotWidgetContainer(self.plotWidgetContainer)
         self.schedular = self.getSchedulingDockWidget().widget()
+        self.schedular.runner.update.connect(self.kkitRunView.getCentralWidget().updateValue)
         self.schedular.runner.update.connect(self.kkitRunView.getCentralWidget().changeBgSize)
-        #self.schedular.runner.resetAndRun.connect(self.kkitRunView.getCentralWidget().resetColor)
+        self.schedular.runner.resetAndRun.connect(self.kkitRunView.getCentralWidget().resetColor)
         return self._centralWidget
 
     def getCentralWidget(self):
@@ -574,6 +575,7 @@ class  KineticsWidget(EditorWidgetBase):
         endtype = srcdes_list[2]
         line = srcdes_list[3]
         source = element(next((k for k,v in self.mooseId_GObj.items() if v == src), None))
+        #print "------> ",src,des,endtype,line,source
 
         for l,v,o in self.object2line[src]:
             if v == des and o ==line:
@@ -765,8 +767,13 @@ class kineticRunWidget(KineticsWidget):
     def getToolBars(self):
         return self._toolBars
 
+    def updateValue(self):
+        for item in self.sceneContainer.items():
+            if isinstance(item,ReacItem) or isinstance(item,MMEnzItem) or isinstance(item,EnzItem) or isinstance(item,PoolItemCircle) or isinstance(item,CplxItem): 
+                item.updateValue(item.mobj)
 
     def changeBgSize(self):
+        #print "here in chageBgSize"
         for item in self.sceneContainer.items():
             if isinstance(item,PoolItemCircle):
                 initialConc = moose.element(item.mobj).concInit
@@ -781,6 +788,7 @@ class kineticRunWidget(KineticsWidget):
         for item in self.sceneContainer.items():
             if isinstance(item,PoolItemCircle):
                 item.returnEllispeSize()
+
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     size = QtCore.QSize(1024 ,768)
