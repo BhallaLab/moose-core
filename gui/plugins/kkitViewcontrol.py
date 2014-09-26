@@ -17,6 +17,7 @@ class GraphicalView(QtGui.QGraphicsView):
         self.rubberbandHeight = 0
         self.moved = False
         self.showpopupmenu = False
+        self.popupmenu4rlines = True
         self.border = 6
         self.setRenderHints(QtGui.QPainter.Antialiasing)
         self.layoutPt = layoutPt
@@ -27,9 +28,18 @@ class GraphicalView(QtGui.QGraphicsView):
         #From stackOrder selecting only compartment
         self.cmptStackorder = [i for i in self.stackOrder if isinstance(i,ComptItem)]
         self.viewBaseType = " "
+        self.object2line = defaultdict(list)
+        self.subsetObject2line = {}
 
+    def setobject2line(self,path):
+        self.object2line = path
+        # print "------------------------"
+        # for k,tupValue in self.object2line.iteritems():
+        #     print k,tupValue
+        # print "------------------------"
     def setRefWidget(self,path):
         self.viewBaseType = path
+    
     def mousePressEvent(self, event):
         selectedItem = None
         if self.viewBaseType == "editorView":
@@ -42,8 +52,32 @@ class GraphicalView(QtGui.QGraphicsView):
                 for i in self.cmptStackorder:
                     i.setZValue(0)
                 itemIndex = 0
+                arrowItem = [j for j in viewItem if isinstance(j,QtGui.QGraphicsPolygonItem)]
                 kkitItem  = [j for j in viewItem if isinstance(j,KineticsDisplayItem)]
                 comptItem = [k for k in viewItem if isinstance(k,ComptItem)]
+                if arrowItem:
+                    print "self.object2line ",self.object2line
+                    print '----------'
+                    for k,tupValue in self.object2line.iteritems():
+                        
+                        for l,v in enumerate(tupValue):
+                            print k,l,v
+                    '''
+                    for k,tupValue in self.object2line.iteritems():
+                        for l,v in enumerate(tupValue):
+                            print k,l,v, "arrowItem ",arrowItem[0]
+
+                            '''
+                            # if v[0] == arrowItem[0]:
+                            #     print "--",k,v[1]
+                            #     if self.popupmenu4rlines:
+                            #         popupmenu = QtGui.QMenu('PopupMenu', self)
+                            #         self.delete = QtGui.QAction(self.tr('delete'), self)
+                            #         self.connect(self.delete, QtCore.SIGNAL('triggered()'), self.testItem)
+                            #         popupmenu.addAction(self.delete)
+                            #         popupmenu.exec_(event.globalPos())
+                            #     self.popupmenu4rlines = False
+                    '''            '''
                 if kkitItem:
                     for displayitem in kkitItem:
                         ''' mooseItem(child) ->compartment (parent) But for cplx
@@ -91,6 +125,7 @@ class GraphicalView(QtGui.QGraphicsView):
         elif self.viewBaseType == "runView":
             pos = event.pos()
             item = self.itemAt(pos)
+            print "item ",self.itemAt(pos)
             itemClass = type(item).__name__
             if ( itemClass!='ComptItem' and itemClass != 'QGraphicsPolygonItem'):
                 self.setCursor(Qt.Qt.CrossCursor)
@@ -132,6 +167,7 @@ class GraphicalView(QtGui.QGraphicsView):
                 self.rubberbandWidth = (self.endScenepos.x()-self.startScenepos.x())
                 self.rubberbandHeight = (self.endScenepos.y()-self.startScenepos.y())
                 selecteditems = self.sceneContainerPt.selectedItems()
+                print "selecteditems ",selecteditems
                 if self.rubberbandWidth != 0 and self.rubberbandHeight != 0 and len(selecteditems) != 0 :
                     self.showpopupmenu = True
         self.itemSelected = False
@@ -148,7 +184,9 @@ class GraphicalView(QtGui.QGraphicsView):
             popupmenu.addAction(self.move)
             popupmenu.exec_(event.globalPos())
         self.showpopupmenu = False
-
+    def testItem(self):
+        self.setCursor(Qt.Qt.CrossCursor)
+        print ":here in testItem "
     def moveItem(self):
       self.setCursor(Qt.Qt.CrossCursor)
 
