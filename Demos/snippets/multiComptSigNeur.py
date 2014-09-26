@@ -451,7 +451,7 @@ def makeCubeMultiscale():
     elec1R = moose.element( '/model/elec/head1/gluR' )
     elec2R = moose.element( '/model/elec/head2/gluR' )
     elec3R = moose.element( '/model/elec/head3/gluR' )
-    moose.connect( adaptGluR, 'requestField', chemR, 'getN', 'OneToAll' )
+    moose.connect( adaptGluR, 'requestOut', chemR, 'getN', 'OneToAll' )
     moose.connect( adaptGluR, 'outputSrc', elec1R, 'setGbar', 'OneToAll' )
     moose.connect( adaptGluR, 'outputSrc', elec2R, 'setGbar', 'OneToAll' )
     moose.connect( adaptGluR, 'outputSrc', elec3R, 'setGbar', 'OneToAll' )
@@ -461,7 +461,7 @@ def makeCubeMultiscale():
     adaptK = moose.Adaptor( '/model/chem/neuroMesh/adaptK' )
     chemK = moose.element( '/model/chem/neuroMesh/kChan' )
     elecK = moose.element( '/model/elec/compt/K' )
-    moose.connect( adaptK, 'requestField', chemK, 'getConc', 'OneToAll' )
+    moose.connect( adaptK, 'requestOut', chemK, 'getConc', 'OneToAll' )
     moose.connect( adaptK, 'outputSrc', elecK, 'setGbar', 'OneToAll' )
     adaptK.scale = 0.3               # from mM to Siemens
 

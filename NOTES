@@ -5079,4 +5079,13 @@ The multi demo seems to be taking shape.
 Fixed GSSA bug reported by Sahil.
 Reordered updates for X-compt reacs in Ksolve.
 
+To do:
+- Handle functions by solvers
+- Test out the differential func object.
+
 =============================================================================
+25 Sep. Looking at functions. First, examined the FuncPool. It doesn't
+really do anything that the BufPool cannot, so I'll eliminate FuncPool.
+- Will first need to confirm that I can use the BufPool in its place.
+- Then test the use of Subha's Func or Function object for doing sumtotals
+	among other things..
