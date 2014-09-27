@@ -312,6 +312,7 @@ SUBDIR = \
 	external/muparser \
 	biophysics \
 	synapse \
+	intfire \
 	kinetics \
 	ksolve \
 	mesh \
@@ -340,6 +341,7 @@ OBJLIBS =	\
 	external/muparser/_muparser.o \
 	biophysics/_biophysics.o \
 	synapse/_synapse.o \
+	intfire/_intfire.o \
 	kinetics/_kinetics.o \
 	ksolve/_ksolve.o \
 	hsolve/_hsolve.o \

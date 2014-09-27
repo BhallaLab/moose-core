@@ -6,10 +6,10 @@
 #** GNU Lesser General Public License version 2.1
 #** See the file COPYING.LIB for the full notice.
 #**********************************************************************/
-# This snippet sets up a recurrent network of IntFire objects, using
+# This snippet sets up a recurrent network of LIF objects, using
 # SimpleSynHandlers to deal with spiking events. 
 # It isn't very satisfactory as activity runs down after a while.
-# It is a good example for using the IntFire, setting up random
+# It is a good example for using the LIF, setting up random
 # connectivity, and using SynHandlers.
 #
 import os
@@ -37,7 +37,7 @@ def make_network():
 	nprand.seed( 456 )
 	t0 = time.time()
 
-	network = moose.IntFire( 'network', size );
+	network = moose.LIF( 'network', size );
 	syns = moose.SimpleSynHandler( '/network/syns', size );
         moose.connect( syns, 'activationOut', network, 'activation', 'OneToOne' )
 	moose.le( '/network' )
@@ -54,7 +54,8 @@ def make_network():
 	network.vec.Vm = nprand.rand( size ) * Vmax
 	network.vec.thresh = thresh
 	network.vec.refractoryPeriod = refractoryPeriod
-	network.vec.tau = tau
+	network.vec.Rm = 1e10
+	network.vec.Cm = 5e-9
 	numSynVec = syns.vec.numSynapses
 	print 'Middle of setup, t = ', time.time() - t0
 	numTotSyn = sum( numSynVec )
