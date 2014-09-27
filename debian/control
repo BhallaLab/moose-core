@@ -23,3 +23,15 @@ Description: MOOSE is the Multiscale Object-Oriented Simulation Environment. It 
  The MOOSE team is also participating in development of MOOGLI: a library and
  standalone application for displaying time-course of activity of detailed 3-D
  network models using OpenGL and also using OpenSceneGraph	
+
+Package: moose-core
+Architecture: any
+Depends: libsbml0-dev
+Suggests: libsbml5, libhdf5-7
+Description: Core package of MOOSE.
+
+Package: pymoose
+Architecture: any
+Depends: libsbml0-dev, python-dev, libhdf-7, libsbml5, libgsl0-dev, python-numpy, python-matplotlib
+Suggests: python-networkx
+Description: Core package of MOOSE.
