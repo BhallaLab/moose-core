@@ -28,7 +28,7 @@ Description: All packages of MOOSE simulator.
 Package: moose-core
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, libhdf5-7
-Suggests: libsbml5, libhdf5-7
+Suggests: libsbml5
 Description: Core package of MOOSE.
 
 Package: moose-python
