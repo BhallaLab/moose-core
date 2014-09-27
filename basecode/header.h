@@ -111,6 +111,7 @@ class Neutral;
 #include "ProcOpFunc.h"
 #include "ValueFinfo.h"
 #include "LookupValueFinfo.h"
+#include "ValueFinfo.h"
 #include "SharedFinfo.h"
 #include "FieldElementFinfo.h"
 #include "FieldElement.h"

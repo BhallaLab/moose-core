@@ -5089,3 +5089,13 @@ really do anything that the BufPool cannot, so I'll eliminate FuncPool.
 - Will first need to confirm that I can use the BufPool in its place.
 - Then test the use of Subha's Func or Function object for doing sumtotals
 	among other things..
+=============================================================================
+26 Sep 2014
+
+Minor fixes checked in, 5864.
+=============================================================================
+27 Sep
+Added in IntFireBase class and LIF class. Added snippet in 
+Demos/snippets/recurreintLIF.py. This is almost identical to 
+recurrentIntFire.py.
+
