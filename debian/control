@@ -6,7 +6,7 @@ Build-Depends: debhelper, cdbs, devscripts, cmake, libhdf5-dev, python-dev, pyth
 Standards-Version: 3.9.4
 Homepage: http://moose.ncbs.res.in
 
-Package: moose
+Package: moose-all
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, libhdf5-7
 Suggests: libsbml5
