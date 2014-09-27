@@ -120,14 +120,14 @@ endif()
 
 ################################### SETUP BUILD ################################
 include_directories(msg basecode)
-add_executable(moose.bin basecode/main.cpp)
+add_executable(moose-core basecode/main.cpp)
 
 ## GSL
 # Setup GSL
 if(LOCAL_GSL)
     set(GSL_FOUND 1)
     add_definitions(-DUSE_GSL)
-    add_dependencies(moose.bin GSL)
+    add_dependencies(moose-coren GSL)
 else()
     if(GSL_FOUND)
         include_directories(${GSL_INCLUDE_DIR})
@@ -212,7 +212,7 @@ if(READLINE_FOUND AND TERMCAP_FOUND)
 endif()
 
 ###################################### LINKING #################################
-target_link_libraries(moose.bin
+target_link_libraries(moose-core
     "-Wl,--whole-archive"
     moose_builtins
     basecode
@@ -299,7 +299,7 @@ if(BUILD_PYMOOSE)
 endif(BUILD_PYMOOSE)
 
 ######################### INSTALL ##############################################
-install(TARGETS moose.bin 
+install(TARGETS moose-core 
     RUNTIME DESTINATION bin
     COMPONENT applications
     )
@@ -348,7 +348,7 @@ set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dilawar Singh <dilawars@ncbs.res.in>")
 if(WIN32)
     MESSAGE("++ Currently only Unix is supported")
 else()
-    set(CPACK_STRIP_FILES moose.bin)
+    set(CPACK_STRIP_FILES moose-core)
 endif()
 set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
 set(CPACK_PACKAGE_FILE_NAME
@@ -363,7 +363,7 @@ find_package(PythonInterp REQUIRED)
 set(ENV{PYTHONPATH} "${CMAKE_SOURCE_DIR}/python")
 message("++ PYTHONPATH is set to $ENV{PYTHONPATH}")
 
-add_test(NAME check_moose
-    WORKING_DIRECTORY .
-    COMMAND ./run_moose.sh
-    )
+#add_test(NAME check_moose
+#    WORKING_DIRECTORY .
+#    COMMAND ./run_moose.sh
+#    )

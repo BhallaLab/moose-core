@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# This script is for launchpad.
 (
 set -e
 set -o xtrace
