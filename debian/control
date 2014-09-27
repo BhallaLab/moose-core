@@ -5,11 +5,6 @@ Maintainer: Dilawar Singh <dilawars@ncbs.res.in>
 Build-Depends: debhelper, cdbs, devscripts, cmake, libhdf5-dev, python-dev, python-numpy, python-setuptools, libopenmpi-dev, libgsl0-dev (>= 1.16)
 Standards-Version: 3.9.4
 Homepage: http://moose.ncbs.res.in
-
-Package: moose-all
-Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libhdf5-7
-Suggests: libsbml5
 Description: MOOSE is the Multiscale Object-Oriented Simulation Environment. It is the base and numerical core for large, detailed simulations including Computational Neuroscience and Systems Biology.
  MOOSE spans the range from single molecules to subcellular networks, from
  single cells to neuronal networks, and to still larger systems.  MOOSE uses
@@ -24,14 +19,26 @@ Description: MOOSE is the Multiscale Object-Oriented Simulation Environment. It 
  standalone application for displaying time-course of activity of detailed 3-D
  network models using OpenGL and also using OpenSceneGraph	
 
+
+Package: moose-all
+Architecture: any
+Depends: moose-core, moose-python, moose-gui
+Description: All packages of MOOSE simulator.
+
 Package: moose-core
 Architecture: any
-Depends: libsbml0-dev
+Depends: ${shlibs:Depends}, ${misc:Depends}, libhdf5-7
 Suggests: libsbml5, libhdf5-7
 Description: Core package of MOOSE.
 
-Package: pymoose
+Package: moose-python
 Architecture: any
-Depends: libsbml0-dev, python-dev, libhdf-7, libsbml5, libgsl0-dev, python-numpy, python-matplotlib
+Depends: moose-core, python-numpy, python-matplotlib
 Suggests: python-networkx
 Description: Core package of MOOSE.
+
+Package: moose-gui
+Architecture: any
+Depends: python-matplotlib, python-qt4, moose-core, moose-python
+Suggests: python-networkx
+Description: GUI of moose.
