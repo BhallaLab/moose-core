@@ -2,7 +2,7 @@
 set -e 
 source ../scripts/color.sh
 
-BUILD_TYPE=debug
+BUILD_TYPE=Release
 if [ $# -gt 0 ]; then
     colorPrint "INPUT" "Building for distribution" 
     BUILD_TYPE=distribution 

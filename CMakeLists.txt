@@ -91,7 +91,7 @@ set(DEBUG 0)
 if(DEBUG)
     set(CMAKE_BUILD_TYPE Debug)
 else()
-    set(CMAKE_BUILD_TYPE distribution)
+    set(CMAKE_BUILD_TYPE Release)
     add_definitions(-UDO_UNIT_TESTS)
 endif()
 
@@ -120,14 +120,16 @@ endif()
 
 ################################### SETUP BUILD ################################
 include_directories(msg basecode)
-add_executable(moose-core basecode/main.cpp)
+#add_executable(moose basecode/main.cpp)
+add_library(moose SHARED basecode/main.cpp)
+set_target_properties(moose PROPERTIES COMPILE_FLAGS  "-DMOOSE_LIB")
 
 ## GSL
 # Setup GSL
 if(LOCAL_GSL)
     set(GSL_FOUND 1)
     add_definitions(-DUSE_GSL)
-    add_dependencies(moose-coren GSL)
+    add_dependencies(moose GSL)
 else()
     if(GSL_FOUND)
         include_directories(${GSL_INCLUDE_DIR})
@@ -212,7 +214,7 @@ if(READLINE_FOUND AND TERMCAP_FOUND)
 endif()
 
 ###################################### LINKING #################################
-target_link_libraries(moose-core
+target_link_libraries(moose
     "-Wl,--whole-archive"
     moose_builtins
     basecode
@@ -268,49 +270,23 @@ if(BUILD_PYMOOSE)
         PREFIX ""
         )
     list(APPEND LIBRARIES ${PYTHON_LIBRARIES})
+    target_link_libraries(_moose ${LIBRARIES} moose)
 
-    target_link_libraries(_moose 
-        "-Wl,--whole-archive"
-        moose_builtins
-        moosepython
-        basecode
-        msg
-        shell
-        randnum
-        scheduling
-        moose_mpi
-        utility 
-        muparser
-        biophysics 
-        kinetics 
-        ksolve
-        tinyxml
-        synapse
-        hsolve 
-        mesh
-        signeur
-        diffusion 
-        device
-        benchmarks
-        "-Wl,--no-whole-archive"
-        ${LOCAL_GSL_LIBRARIES}
-        ${LIBRARIES}
-        )
 endif(BUILD_PYMOOSE)
 
 ######################### INSTALL ##############################################
-install(TARGETS moose-core 
-    RUNTIME DESTINATION bin
-    COMPONENT applications
+install(TARGETS moose 
+    LIBRARY DESTINATION lib
+    COMPONENT libraries
     )
+
+#install(TARGETS moose 
+#    RUNTIME DESTINATION bin
+#    COMPONENT applications
+#    )
+
 install(PROGRAMS scripts/moose DESTINATION bin
     COMPONENT applications
-    )
-install(DIRECTORY gsl/lib/ DESTINATION lib
-    COMPONENT libraries
-    USE_SOURCE_PERMISSIONS
-    FILES_MATCHING PATTERN "*.so*"
-    PATTERN ".svn" EXCLUDE
     )
 install(SCRIPT python/InstallPyMoose.cmake
     COMPONENT pymoose
@@ -329,40 +305,40 @@ install(FILES scripts/moose.desktop
     DESTINATION share/applications
     )
 ########################## PACKAGING #########################################
-
-set(CPACK_GENERATOR "DEB")
-set(CPACK_STRIP_FILES TRUE)
-
-#  We need to compile python scripts on the installation  host.
-set(CPACK_COMPONENTS_ALL applications libraries)
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dilawar Singh")
-set(CPACK_PACKAGE_CONTACT "dilawars@ncbs.res.in")
-#set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Moose")
-set(CPACK_INSTALL_SCRIPT "${CMAKE_SOURCE_DIR}/python/InstallPyMoose.cmake")
-set(CPACK_PACKAGE_VERSION_MAJOR "1")
-set(CPACK_PACKAGE_VERSION_MINOR "1")
-set(CPACK_PACKAGE_VENDOR "NCBS Bangalore")
-set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README")
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dilawar Singh <dilawars@ncbs.res.in>")
-if(WIN32)
-    MESSAGE("++ Currently only Unix is supported")
-else()
-    set(CPACK_STRIP_FILES moose-core)
-endif()
-set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
-set(CPACK_PACKAGE_FILE_NAME
-    "moose_${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.orig"
-    )
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "libgsl (>= 1.16) libopenmpi libhdf5-7 python-numpy")
-include(CPack)
-
+#
+#set(CPACK_GENERATOR "DEB")
+#set(CPACK_STRIP_FILES TRUE)
+#
+##  We need to compile python scripts on the installation  host.
+#set(CPACK_COMPONENTS_ALL applications libraries)
+#set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dilawar Singh")
+#set(CPACK_PACKAGE_CONTACT "dilawars@ncbs.res.in")
+##set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+#set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Moose")
+#set(CPACK_INSTALL_SCRIPT "${CMAKE_SOURCE_DIR}/python/InstallPyMoose.cmake")
+#set(CPACK_PACKAGE_VERSION_MAJOR "1")
+#set(CPACK_PACKAGE_VERSION_MINOR "1")
+#set(CPACK_PACKAGE_VENDOR "NCBS Bangalore")
+#set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README")
+#set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dilawar Singh <dilawars@ncbs.res.in>")
+#if(WIN32)
+#    MESSAGE("++ Currently only Unix is supported")
+#else()
+#    set(CPACK_STRIP_FILES moose)
+#endif()
+#set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
+#set(CPACK_PACKAGE_FILE_NAME
+#    "moose_${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.orig"
+#    )
+#set(CPACK_DEBIAN_PACKAGE_DEPENDS "libgsl (>= 1.16) libopenmpi libhdf5-7 python-numpy")
+#include(CPack)
+#
 ######################  TESTING  ###############################################
-include(CTest)
-find_package(PythonInterp REQUIRED)
-set(ENV{PYTHONPATH} "${CMAKE_SOURCE_DIR}/python")
-message("++ PYTHONPATH is set to $ENV{PYTHONPATH}")
-
+#include(CTest)
+#find_package(PythonInterp REQUIRED)
+#set(ENV{PYTHONPATH} "${CMAKE_SOURCE_DIR}/python")
+#message("++ PYTHONPATH is set to $ENV{PYTHONPATH}")
+#
 #add_test(NAME check_moose
 #    WORKING_DIRECTORY .
 #    COMMAND ./run_moose.sh

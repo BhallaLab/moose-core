@@ -345,7 +345,7 @@ void mpiTests()
 		cout << "." << flush;
 #endif
 }
-#ifndef PYMOOSE
+#if ! defined(PYMOOSE) && defined(MOOSE_LIB)
 int main( int argc, char** argv )
 {
 	bool doUnitTests = 0;
