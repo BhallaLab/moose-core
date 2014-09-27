@@ -652,6 +652,8 @@ void Clock::buildDefaultTick()
 	defaultTick_["RandSpike"] = 1;
 	defaultTick_["ChanBase"] = 2;
 	defaultTick_["IntFire"] = 2;
+	defaultTick_["IntFireBase"] = 2;
+	defaultTick_["LIF"] = 2;
 	defaultTick_["IzhikevichNrn"] = 2;
 	defaultTick_["SynChan"] = 2;
 	defaultTick_["GapJunction"] = 2;
