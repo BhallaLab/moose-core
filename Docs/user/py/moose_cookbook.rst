@@ -17,20 +17,6 @@ Hello, MOOSE: Load, run and display existing models
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. automodule:: helloMoose
    :members:
-
-Computing arbitrary functions on the fly
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Sometimes you want to calculate arbitrary function of the state
-variables of one or more elements and feed the result into another
-element during a simulation. The Function class is useful for this.
-
-.. figure:: images/function.png
-   :alt: Outputs of Function object calculating z = c0 * exp(c1 * x) * cos(y)
-   :scale: 50%    
-
-	    
-.. automodule:: function
-   :members:
             
 .. _squid:
 	 
@@ -72,6 +58,31 @@ Here we'll show how to store and dump from a table and also using HDF5.
    
 .. automodule:: hdfdemo
    :members:
+
+Computing arbitrary functions on the fly
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Sometimes you want to calculate arbitrary function of the state
+variables of one or more elements and feed the result into another
+element during a simulation. The Function class is useful for this.
+
+.. figure:: images/function.png
+   :alt: Outputs of Function object calculating z = c0 * exp(c1 * x) * cos(y)
+   :scale: 50%    
+
+	    
+.. automodule:: function
+   :members:
+
+Solving arbitrary differential equations
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The Function classes are also useful for setting up arbitrary differential
+equations. MOOSE supports solution of such equation systems, with the
+caveat that it thinks they should be chemical systems and therefore 
+interprets the variables as concentrations. MOOSE does not permit the 
+concentrations to go negative.
+
+.. automodule:: diffEqSolution
+    :members:
 
 Chemical Signaling models
 -------------------------
@@ -171,7 +182,8 @@ Some examples of doing this are in:
 The recommended way to build a chemical model, of course, is to load it
 in from a file format specific to such models. MOOSE understands
 **SBML**, **kkit.g** (a legacy GENESIS format), and **cspace** 
-(a very compact format used in a large study of bistables).
+(a very compact format used in a large study of bistables from
+Ramakrishnan and Bhalla, PLoS Comp. Biol 2008).
 
 One key concept is that in MOOSE the components, messaging, and access
 to model components is identical regardless of whether the model was
