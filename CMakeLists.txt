@@ -120,7 +120,7 @@ endif()
 
 ################################### SETUP BUILD ################################
 include_directories(msg basecode)
-#add_executable(moose basecode/main.cpp)
+add_executable(moose-bin basecode/main.cpp)
 add_library(moose SHARED basecode/main.cpp)
 set_target_properties(moose PROPERTIES COMPILE_FLAGS  "-DMOOSE_LIB")
 
@@ -214,8 +214,7 @@ if(READLINE_FOUND AND TERMCAP_FOUND)
 endif()
 
 ###################################### LINKING #################################
-target_link_libraries(moose
-    "-Wl,--whole-archive"
+set(MOOSE_LIBRARIES
     moose_builtins
     basecode
     msg
@@ -236,9 +235,16 @@ target_link_libraries(moose
     device
     benchmarks
     ksolve
-    "-Wl,--no-whole-archive"
+    )
+
+target_link_libraries(moose
+    ${MOOSE_LIBRARIES}
     ${LOCAL_GSL_LIBRARIES}
     ${LIBRARIES}
+    )
+
+target_link_libraries(moose-bin 
+    moose
     )
 
 ######################### BUILD PYMOOSE ########################################
@@ -270,39 +276,42 @@ if(BUILD_PYMOOSE)
         PREFIX ""
         )
     list(APPEND LIBRARIES ${PYTHON_LIBRARIES})
-    target_link_libraries(_moose ${LIBRARIES} moose)
+    target_link_libraries(
+        _moose 
+        moosepython  
+        "-Wl,--whole-archive"
+        ${MOOSE_LIBRARIES}
+        "-Wl,--no-whole-archive"
+        ${LIBRARIES}
+        )
 
 endif(BUILD_PYMOOSE)
 
 ######################### INSTALL ##############################################
 install(TARGETS moose 
     LIBRARY DESTINATION lib
-    COMPONENT libraries
+    COMPONENT moose-core
     )
 
-#install(TARGETS moose 
-#    RUNTIME DESTINATION bin
-#    COMPONENT applications
+install(TARGETS moose-bin
+    RUNTIME DESTINATION bin
+    COMPONENT moose-core
+    )
+
+#install(SCRIPT python/InstallPyMoose.cmake
+#    COMPONENT moose-python
 #    )
-
-install(PROGRAMS scripts/moose DESTINATION bin
-    COMPONENT applications
-    )
-install(SCRIPT python/InstallPyMoose.cmake
-    COMPONENT pymoose
-    )
-install(PROGRAMS scripts/moosegui 
-    DESTINATION bin
-    )
-
-# Install the icon
+#
+## Install the icon
 install(FILES gui/icons/moose_icon.png 
     DESTINATION share/moose
+    COMPONENT moose-python
     )
 
 # And the desktop file.
 install(FILES scripts/moose.desktop
     DESTINATION share/applications
+    COMPONENT moose-python
     )
 ########################## PACKAGING #########################################
 #
