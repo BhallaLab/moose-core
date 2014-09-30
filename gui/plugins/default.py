@@ -314,7 +314,6 @@ class RunView(RunBase):
         self.plugin.modelRootChanged.connect(self.setModelRoot)
         self.plugin.dataRootChanged.connect(self.setDataRoot)
         self._menus += self.getCentralWidget().getMenus()
-        # self.getCentralWidget()
 
     def getCentralWidget(self):
         """TODO: replace this with an option for multiple canvas
@@ -323,20 +322,11 @@ class RunView(RunBase):
             self._centralWidget = PlotWidgetContainer(self.modelRoot)
         return self._centralWidget
 
-    # def setDataRootSlot(self):
-    #     path, ok = QtGui.QInputDialog.getText(self.getCentralWidget(), 'Set data root', 'Enter path to data root')
-    #     if ok:
-    #         self.setDataRoot(str(path))
-
     def setDataRoot(self, path):
         self.dataRoot = path
-        #self.getCentralWidget().setDataRoot(path)
-        #self.getSchedulingDockWidget().widget().setDataRoot(path)
 
     def setModelRoot(self, path):
         self.modelRoot = path
-        #self.getSchedulingDockWidget().widget().setModelRoot(path)
-        # self.getCentralWidget().setModelRoot(path)
 
     def getDataTablesPane(self):
         """This should create a tree widget with dataRoot as the root
@@ -369,6 +359,7 @@ class RunView(RunBase):
         widget.runner.finished.connect(self._centralWidget.rescalePlots)
         widget.simtimeExtended.connect(self._centralWidget.extendXAxes)
         widget.runner.resetAndRun.connect(self._centralWidget.plotAllData)
+        self._toolBars += widget.getToolBars()
         return self.schedulingDockWidget
 
 class MooseRunner(QtCore.QObject):
@@ -379,21 +370,13 @@ class MooseRunner(QtCore.QObject):
     """
     resetAndRun = QtCore.pyqtSignal(name='resetAndRun')
     update = QtCore.pyqtSignal(name='update')
+    currentTime = QtCore.pyqtSignal(float, name='currentTime')
     finished = QtCore.pyqtSignal(name='finished')
-    '''
-    _instance = None # singleton
-    inited = False
-    def __new__(cls, *args, **kwargs):
-        if cls._instance is None:
-            cls._instance = super(MooseRunner, cls).__new__(cls, *args, **kwargs)
-        return cls._instance
-    '''
+
     def __init__(self, *args, **kwargs):
         QtCore.QObject.__init__(self, *args, **kwargs)
-        '''
-        if (MooseRunner.inited):
-            return
-        '''
+        # if (MooseRunner.inited):
+        #     return
         self._updateInterval = 100e-3
         self._simtime = 0.0
         self._clock = moose.Clock('/clock')
@@ -422,16 +405,17 @@ class MooseRunner(QtCore.QObject):
         toRun = self._simtime - self._clock.currentTime
         if toRun > self._updateInterval:
             toRun = self._updateInterval
-
+        if toRun < self._clock.baseDt:
+            return
         moose.start(toRun)
         self.update.emit()
+        self.currentTime.emit(self._clock.currentTime)
         QtCore.QTimer.singleShot(0, self.run)
 
     def continueRun(self, simtime, updateInterval):
         """Continue running without reset for `simtime`."""
         self._simtime = simtime
         self._updateInterval = updateInterval
-        #self._simtime = self._updateInterval
         self._pause = False
         QtCore.QTimer.singleShot(0, self.run)
 
@@ -469,14 +453,14 @@ class SchedulingWidget(QtGui.QWidget):
     def __init__(self, *args, **kwargs):
         QtGui.QWidget.__init__(self, *args, **kwargs)
         #layout = QtGui.QVBoxLayout()
-        layout = QtGui.QHBoxLayout()
+        # layout = QtGui.QHBoxLayout()
         self.advanceOptiondisplayed = False
-        self.simtimeWidget = self.__getSimtimeWidget()
-        self.runControlWidget = self.__getRunControlWidget()
-        self.advanceOpt = self.__getAdvanceOptionsWidget()
-        layout.addWidget(self.advanceOpt)
-        layout.addWidget(self.runControlWidget)
-        layout.addWidget(self.simtimeWidget)
+        # self.simtimeWidget = self.__getSimtimeWidget()
+        # self.runControlWidget = self.__getRunControlWidget()
+        # self.advanceOpt = self.__getAdvanceOptionsWidget()
+        # layout.addWidget(self.advanceOpt)
+        # layout.addWidget(self.runControlWidget)
+        # layout.addWidget(self.simtimeWidget)
 
         #layout.addWidget(self.tickListWidget)
         self.tickListWidget, self.tickListWidgetContainer = self.__getTickListWidget()
@@ -486,17 +470,69 @@ class SchedulingWidget(QtGui.QWidget):
         self.updateInterval = 100e-3 # This will be made configurable with a textbox
         self.__getUpdateIntervalWidget()
         #layout.addWidget(self.__getUpdateIntervalWidget())
-        spacerItem = QtGui.QSpacerItem(450, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
-        layout.addItem(spacerItem)
-        self.setLayout(layout)
+        # spacerItem = QtGui.QSpacerItem(450, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        # layout.addItem(spacerItem)
+        # self.setLayout(layout)
+        # self._toolBars.append(
         self.runner = MooseRunner()
-        self.resetAndRunButton.clicked.connect(self.resetAndRunSlot)
-        self.continueButton.clicked.connect(self.doContinueRun)
-        self.continueRun.connect(self.runner.continueRun)
-        self.stopButton.clicked.connect(self.runner.stop)
-        self.runner.update.connect(self.updateCurrentTime)
-    def updateTickswidget(self):
+        # self.resetAndRunButton.clicked.connect(self.resetAndRunSlot)
+        # self.continueButton.clicked.connect(self.doContinueRun)
+        # self.continueRun.connect(self.runner.continueRun)
+        # self.stopButton.clicked.connect(self.runner.stop)
 
+    def getToolBars(self):
+        self.__createRunToolBar()
+        return [self._runToolBar]
+
+    def __createRunToolBar(self):    
+        if hasattr(self, '_runToolBar'):
+            return
+        self._runToolBar = QtGui.QToolBar("Run", self)
+        #: run simulation
+        self.resetAndRunAction = self._runToolBar.addAction(
+            QtGui.QIcon('icons/run.png'),
+            'Reset and Run',
+            self.resetAndRunSlot)
+        self.resetAndRunAction.setToolTip('Reset the simulation and run it')
+        #: stop simulation
+        self.stopAction = self._runToolBar.addAction(
+            QtGui.QIcon('icons/stop.png'),
+            'Stop',
+            self.runner.stop)
+        self.stopAction.setToolTip('Stop the running simulation')
+        #: continue simulation
+        self.continueAction = self._runToolBar.addAction(
+            QtGui.QIcon('icons/continue.png'),
+            'Continue run',
+            self.doContinueRun)
+        self.continueAction.setToolTip('Continue simulation')
+        self._runToolBar.addSeparator()        
+        spacer = QtGui.QLabel('  ')
+        self._runToolBar.addWidget(spacer)
+        #: simulation run time
+        runtimeLabel = QtGui.QLabel('Run for')
+        runtimeLabel.setPixmap(QtGui.QPixmap('icons/runtime.png').scaled(16,16))
+        self._runToolBar.addWidget(runtimeLabel)
+        self.simtimeEdit = QtGui.QDoubleSpinBox()
+        self.simtimeEdit.setToolTip('Simulation run time')
+        self.simtimeEdit.setDecimals(3)
+        self.simtimeEdit.setRange(0, 1e12)
+        self.simtimeEdit.setValue(moose.Clock('/clock').runTime)
+        self._runToolBar.addWidget(self.simtimeEdit)
+        self._runToolBar.addWidget(QtGui.QLabel('  seconds'))
+        #: current time
+        spacer = QtGui.QLabel('    ')
+        spacer.setMinimumWidth(5)
+        spacer.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Preferred)
+        self._runToolBar.addWidget(spacer)
+        # self._runToolBar.addWidget(QtGui.QLabel('Current time'))
+        self.currentTimeWidget = QtGui.QLCDNumber(6) # 6 digits
+        self.currentTimeWidget.setToolTip('Current time in simulation')
+        self.runner.currentTime.connect(self.currentTimeWidget.display)
+        self._runToolBar.addWidget(self.currentTimeWidget)
+        self._runToolBar.addWidget(self.__getAdvanceOptionsWidget())
+
+    def updateTickswidget(self):
         if self.advanceOptiondisplayed:
             self.tickListWidgetContainer.hide()
             self.advanceOptiondisplayed = False
@@ -530,17 +566,17 @@ class SchedulingWidget(QtGui.QWidget):
         widget.setLayout(layout)
         return widget
 
-    def __getRunControlWidget(self):
-        widget = QtGui.QWidget()
-        layout = QtGui.QHBoxLayout()
-        self.resetAndRunButton = QtGui.QPushButton('Reset and run')
-        self.stopButton = QtGui.QPushButton('Stop')
-        self.continueButton = QtGui.QPushButton('Continue')
-        layout.addWidget(self.resetAndRunButton)
-        layout.addWidget(self.stopButton)
-        layout.addWidget(self.continueButton)
-        widget.setLayout(layout)
-        return widget
+    # def __getRunControlWidget(self):
+    #     widget = QtGui.QWidget()
+    #     layout = QtGui.QHBoxLayout()
+    #     self.resetAndRunButton = QtGui.QPushButton('Reset and run')
+    #     self.stopButton = QtGui.QPushButton('Stop')
+    #     self.continueButton = QtGui.QPushButton('Continue')
+    #     layout.addWidget(self.resetAndRunButton)
+    #     layout.addWidget(self.stopButton)
+    #     layout.addWidget(self.continueButton)
+    #     widget.setLayout(layout)
+    #     return widget
 
     def updateUpdateInterval(self):
         """Read the updateInterval from text box.
@@ -606,12 +642,15 @@ class SchedulingWidget(QtGui.QWidget):
         layout = QtGui.QHBoxLayout()
         simtimeWidget = QtGui.QWidget()
         layout1 = QtGui.QGridLayout()
-        self.simtimeEdit = QtGui.QLineEdit('6')
-        self.simtimeEdit.setText(str(runtime))
+        # self.simtimeEdit = QtGui.QDoubleSpinBox()
+        # self.simtimeEdit.setToolTip('Simulation run time')
+        # self.simtimeEdit.setDecimals(3)
+        # self.simtimeEdit.setRange(0, 1e12)
+        # self.simtimeEdit.setValue(runtime)
         self.currentTimeLabel = QtGui.QLabel('0')
-        layout1.addWidget(QtGui.QLabel('Run for'), 0, 0)
-        layout1.addWidget(self.simtimeEdit, 0, 1)
-        layout1.addWidget(QtGui.QLabel('seconds'), 0, 2)
+        # layout1.addWidget(QtGui.QLabel('Run for'), 0, 0)
+        # layout1.addWidget(self.simtimeEdit, 0, 1)
+        # layout1.addWidget(QtGui.QLabel('seconds'), 0, 2)
         layout.addLayout(layout1)
         layout2 = QtGui.QGridLayout()
         layout2.addWidget(QtGui.QLabel('Current time:'), 1, 0)
@@ -668,7 +707,7 @@ class SchedulingWidget(QtGui.QWidget):
 
     def updateCurrentTime(self):
         sys.stdout.flush()
-        self.currentTimeLabel.setText('%f' % (moose.Clock('/clock').currentTime))
+        self.currentTimeWidget.dispay(str(moose.Clock('/clock').currentTime))
 
     def updateTextFromTick(self, tickNo):
         tick = moose.vector('/clock/tick')[tickNo]
@@ -852,8 +891,6 @@ class PlotWidget(QWidget):
         # self.connect(action1,SIGNAL("triggered()"),
         #                 self,SLOT("slotShow100x100()"))
         self.menu.exec_(self.mapToGlobal(point))
-
-
 
     def setModelRoot(self, path):
         self.modelRoot = path
