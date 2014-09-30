@@ -345,6 +345,13 @@ Regular and plastic synapses
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Providing random input to a cell
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: randomspike
+   :members:
+
+.. figure:: images/randomSpike.png
+   :scale: 50%
+   :alt: Random spike input to a cell
+
 Recurrent integrate-and-fire network
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Recurrent integrate-and-fire network with plastiicty
