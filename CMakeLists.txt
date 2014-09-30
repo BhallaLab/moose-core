@@ -218,6 +218,7 @@ set(MOOSE_LIBRARIES
     moose_builtins
     basecode
     msg
+    benchmarks
     shell
     randnum
     scheduling
@@ -233,7 +234,6 @@ set(MOOSE_LIBRARIES
     synapse
     diffusion 
     device
-    benchmarks
     ksolve
     )
 
