@@ -43,18 +43,10 @@ setup(
         options={'build' : {'build_base' : '/tmp' } },
         packages=['libmumbl'
             , 'moose', 'moose.neuroml', 'moose.backend'
-            , 'mgui', 'mgui.plugins'],
+            ],
         package_dir = { 'moose' : 'moose'
             , 'libmumbl' : 'libmumbl'
-            , 'mgui' : 'mgui' 
             },
-        package_data = { 'moose' : ['_moose.so'] 
-            , 'mgui' : [ 'moosegui', 'bioModels/*', 'icons/*', 'colormaps/*',
-                'plugins/list.txt'
-                ]
-            },
+        package_data = { 'moose' : ['_moose.so'] },
         install_requires = [ 'matplotlib', 'numpy' ],
-        entry_points = {
-            'gui_scripts' : [ 'moosegui = mgui.mgui:main' ]
-            },
     ) 

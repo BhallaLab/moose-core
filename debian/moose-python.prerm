@@ -19,19 +19,22 @@ set -e
 
 case "$1" in
     remove|upgrade|deconfigure)
-	if [ -d /usr/share/moose ];
-	then
-            rm -R /usr/share/moose
+	if [ -d /usr/share/moose/python ]; then
+            ( cd /usr/share/moose/python && cat installed_files | xargs rm -rf )
 	fi
-	if [ -d /usr/share/doc/moose ];
-	then
+
+        if [ -d /usr/share/moose ]; then
+            rm -R /usr/share/moose
+        fi
+
+	if [ -d /usr/share/doc/moose ]; then
             rm -R /usr/share/doc/moose
 	fi
-	if [ -d /usr/share/pyshared/moose ];
-	then
+
+	if [ -d /usr/share/pyshared/moose ]; then
             rm -R /usr/share/pyshared/moose
 	fi
-	rm /usr/bin/moosegui
+
 	pydistpkg_dir=`python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"`
 	if [ -d $pydistpkg_dir/moose ];
 	then 
