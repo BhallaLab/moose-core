@@ -1,7 +1,7 @@
 // Function.cpp --- 
 // 
 // Filename: Function.cpp
-// Description: Implementation of a wrapper around GNU libmatheval to calculate arbitrary functions.
+// Description: Implementation of a wrapper around muParser.
 // Author: Subhasis Ray
 // Maintainer: Subhasis Ray
 // Created: Sat May 25 16:35:17 2013 (+0530)
@@ -393,7 +393,7 @@ void Function::_showError(mu::Parser::exception_type &e) const
    to be a named constant, which must be set before any expression or
    variables and error is thrown.
  */
-static double * _functionAddVar(const char *name, void *data)
+double * _functionAddVar(const char *name, void *data)
 {
     Function* function = reinterpret_cast< Function * >(data);
     double * ret = NULL;
