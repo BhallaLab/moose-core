@@ -5102,3 +5102,56 @@ recurrentIntFire.py.
 Checkin as rev 5874.
 
 =============================================================================
+29 Sep.
+Planning for arbitrary functions in ksolver. This means that the RateTerms
+must know how to use it.
+Use cases:
+	1. Arb funcs transforming mol concs to another mol conc.
+		This would include sumtotals.
+	2. Arb funcs altering reaction rates.
+	3. Arb funcs directly specifying differential equations.
+		This is used, for example, in the model by Tim O'Leary.
+
+Discussed with Harsha, seems all of the above are used in SBML models.
+Implementation.
+1: Make a RateTerm that holds a Func, and directly does conc assignment.
+2. Make a RateTerm implementing a reaction incorporating the Func. This
+	would have as inputs both the reactants and also the terms whose
+	values contribute to the rate scaling.
+3. Similar to 2, except that we have a single reactant whose value is 
+	governed by the RateTerm. Guarantees positive concs.
+3a. Variant on 3, which permits negative values for variables.
+
+This need not go into the current release.
+
+The current implementation of FuncTerm handles 1, but the math part isn't
+implemented yet.
+
+* Will need a base class to encapsulate the func stuff. Subha has some rather
+	elaborate code to do this.
+- Will need to provide specialized version of RateTerm where the function can
+	be set, for use cases 2 and 3.
+- For Use case 1, the existing MathFunc framework will suffice.
+	- Put a flag in there for using time as x0.
+	- I would like to use Func or Function for this but both have
+	problems. Func has only 3 args. Function requires msgs to the
+	FieldElements. Could be handled in the gui, but not friendly otherwise.
+
+The muparser docs have an example which I've copied here. It should be much
+easier to base the code off this.
+Compile with 
+
+g++ muparser_example.cpp external/muparser/_muparser.o -Iexternal/muparser
+
+Questions:
+- What happens if I define extra (unused) args? No problem.
+- What happens if I haven't defined a variable used in the expression? Bails.
+
+Implemented FuncCore class. This can either fit inside a RateTerm, or
+be the basis for a FuncTerm. Won't bother with the subdivisions into 
+MathFuncTerm any more.
+
+Separately, Aditya reports a compile problem. This is fixed.
+
+
+
