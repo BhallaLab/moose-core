@@ -930,7 +930,8 @@ class PlotWidget(QWidget):
         #for tabId in moose.wildcardFind('%s/##[TYPE=Table]' % (path)):
         #harsha: policy graphs will be under /model/modelName need to change in kkit
         #for tabId in moose.wildcardFind('%s/##[TYPE=Table]' % (modelroot)):
-        plotTables = moose.wildcardFind(self.graph.path + '/##[TYPE=Table]')
+        
+        plotTables = moose.wildcardFind(self.graph.path + '/##[TYPE=Table2]')
         if len (plotTables) > 0:
             for tabId in plotTables:
                 tab = moose.Table(tabId)
@@ -1229,7 +1230,7 @@ class PlotView(PlotBase):
             #createRecordingTable(element, field, self._recordingDict, self._reverseDict, self.dataRoot)
             #harsha:CreateRecordingTable function is moved to python/moose/utils.py file as create function
             #as this is required when I drop table on to the plot
-            utils.create(self.plugin.modelRoot,moose.element(element),field)
+            utils.create(self.plugin.modelRoot,moose.element(element),field,"Table2")
             #self.dataTable.create(self.plugin.modelRoot, moose.element(element), field)
             #self.updateCallback()
     '''
