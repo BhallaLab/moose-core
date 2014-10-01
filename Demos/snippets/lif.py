@@ -62,24 +62,26 @@ def setupmodel(modelpath, iaf_Rm, iaf_Cm, pulse_interval):
     """
     model_container = moose.Neutral(modelpath)
     data_container = moose.Neutral(datapath)
-    iaf = moose.LeakyIaF('%s/iaf' % (modelpath))
+    iaf = moose.LIF('%s/iaf' % (modelpath))
     iaf.Rm = iaf_Rm
     iaf.Cm = iaf_Cm
     iaf.initVm = -0.070
     iaf.Em = -0.065
-    iaf.Vreset = -0.070
-    iaf.Vthreshold = -0.055
+    #iaf.Vreset = -0.070
+    iaf.thresh = -0.055
     # iaf.refractoryPeriod = 0.005
     syn = moose.SynChan('%s/syn' % (iaf.path))
-    syn.synapse.num = 1
-    syn.synapse[0].delay = 0.01
+    synh = moose.SimpleSynHandler( syn.path + '/synh' )
+    moose.connect( synh, 'activationOut', syn, 'activation' )
+    synh.synapse.num = 1
+    synh.synapse[0].delay = 0.01
     syn.Ek = 0.0
     syn.Gbar = 1.0
-    moose.connect(syn, 'IkOut', iaf, 'injectDest')
+    moose.connect(syn, 'channel', iaf, 'channel')
     moose.connect(iaf, 'VmOut', syn, 'Vm')
     sg = moose.SpikeGen('%s/spike' % (modelpath))
     sg.threshold = 0.1
-    moose.connect(sg, 'spikeOut', syn.synapse[0], 'addSpike')
+    moose.connect(sg, 'spikeOut', synh.synapse[0], 'addSpike')
     pg = moose.PulseGen('%s/pulse' % (modelpath))
     pg.delay[0] = pulse_interval
     pg.width[0] = 1e-3
@@ -103,7 +105,8 @@ if __name__ == '__main__':
     vm_table = moose.Table('%s/vm' % (data_container.path))
     moose.connect(vm_table, 'requestOut', setup['iaf'], 'getVm')
     spike_table = moose.Table('%s/spike' % (data_container.path))
-    moose.connect(spike_table, 'requestOut', setup['spikegen'], 'getHasFired')
+    # Can't connect this, the types don't match.
+    #moose.connect(spike_table, 'requestOut', setup['spikegen'], 'getHasFired')
     # moose.connect(setup['iaf'], 'VmOut', spike_table, 'spike')
     pulse_table = moose.Table('%s/pulse' % (data_container.path))
     moose.connect(pulse_table, 'requestOut', setup['pulsegen'], 'getOutputValue')

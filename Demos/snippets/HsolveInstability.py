@@ -24,12 +24,14 @@
 
 # Code:
 
-import sys
-sys.path.append('../../python')
-import os
-os.environ['NUMPTHREADS'] = '1'
+#import sys
+#sys.path.append('../../python')
+#import os
+#os.environ['NUMPTHREADS'] = '1'
 import math
+import numpy
 
+import pylab
 import moose
 
 EREST_ACT = -70e-3
@@ -203,7 +205,10 @@ def create_spine_with_receptor( compt, cell, index, frac ):
     B = B / 20.0 				# scaling factor for Ca buffering
     caPool.B = B
     moose.connect( gluR, 'IkOut', caPool, 'current', 'single' )
-    return gluR
+
+    synh = moose.SimpleSynHandler( gluR.path + '/synh' )
+    moose.connect( synh, "activationOut", gluR, "activation" )
+    return synh
 
 def add_plot( objpath, field, plot ):
     if moose.exists( objpath ):
@@ -218,11 +223,14 @@ def make_plots():
     add_plot( '/n/head2', 'getVm', 'head2Vm' )
     add_plot( '/n/head2/ca', 'getCa', 'head2Ca' )
 
-def dump_plots( fname ):
-    if ( os.path.exists( fname ) ):
-        os.remove( fname )
+def display_plots( name ):
+    pylab.figure()
     for x in moose.wildcardFind( '/graphs/#' ):
-        moose.element( x[0] ).xplot( fname, x[0].name )
+        pos = numpy.arange( 0, x.vector.size ) * x.dt
+        print len( pos ), len( x.vector )
+        pylab.plot( pos, x.vector, label=x.name )
+    pylab.legend()
+    pylab.title( name )
 
 def make_spiny_compt():
     comptLength = 100e-6
@@ -253,30 +261,26 @@ def make_spiny_compt():
         syn.delay = i * 1.0e-4
 
 def main():
+    fineDt = 1e-5
+    coarseDt = 5e-5
     make_spiny_compt()
     make_plots()
-    moose.setClock( 0, 1e-5 )
-    moose.setClock( 1, 1e-5 )
-    moose.setClock( 2, 1e-5 )
-    moose.setClock( 8, 0.1e-3 )
-    moose.useClock( 0, '/n/#', 'init' )
-    moose.useClock( 1, '/n/#', 'process' )
-    moose.useClock( 2, '/n/#/#', 'process' )
-    moose.useClock( 8, '/graphs/#', 'process' )
+    for i in range( 8 ):
+        moose.setClock( i, fineDt )
+    moose.setClock( 8, coarseDt )
     moose.reinit()
     moose.start( 0.1 )
-    dump_plots( 'instab.plot' )
+    display_plots( 'instab.plot' )
     # make Hsolver and rerun
     hsolve = moose.HSolve( '/n/hsolve' )
-    moose.useClock( 1, '/n/hsolve', 'process' )
-    moose.setClock( 0, 2e-5 )
-    moose.setClock( 1, 2e-5 )
-    moose.setClock( 2, 2e-5 )
-    hsolve.dt = 2e-5
+    for i in range( 8 ):
+        moose.setClock( i, coarseDt )
+    hsolve.dt = coarseDt
     hsolve.target = '/n/compt'
     moose.reinit()
     moose.start( 0.1 )
-    dump_plots( 'h_instab.plot' )
+    display_plots( 'h_instab.plot' )
+    pylab.show()
 
 if __name__ == '__main__':
     main()

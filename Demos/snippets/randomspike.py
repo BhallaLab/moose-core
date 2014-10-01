@@ -115,10 +115,6 @@ def example():
                   cellmodel['synhandler'].synapse[0], 'addSpike')
     tab_vm = moose.Table('/Vm')
     moose.connect(tab_vm, 'requestOut', cellmodel['neuron'], 'getVm')
-    moose.setClock(0, 1e-5)
-    moose.setClock(1, 1e-5)
-    moose.useClock(0, cellmodel['neuron'].path, 'init')
-    moose.useClock(1, '/#', 'process')
     moose.reinit()
     moose.start(SIMTIME)
     return tab_vm

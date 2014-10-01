@@ -5153,5 +5153,13 @@ MathFuncTerm any more.
 
 Separately, Aditya reports a compile problem. This is fixed.
 
+=============================================================================
+1 Oct 2014.
 
+Cloned Table class so that one variant automagically uses the slower clock for
+plotting chemical kinetics.
+Updated Clock to handle this.
 
+Went through and fixed many snippets.
+
+=============================================================================
