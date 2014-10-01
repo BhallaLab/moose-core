@@ -428,7 +428,7 @@ class SchedulingWidget(QtGui.QWidget):
 
     Important member fields:
 
-    runner - object to run/pause/continue simulation. Whenevr an
+    runner - object to run/pause/continue simulation. Whenever
     `updateInterval` time has been simulated this object sends an
     `update()` signal. This can be connected to other objects to
     update their data.
@@ -452,23 +452,13 @@ class SchedulingWidget(QtGui.QWidget):
 
     def __init__(self, *args, **kwargs):
         QtGui.QWidget.__init__(self, *args, **kwargs)
-        #layout = QtGui.QVBoxLayout()
-        # layout = QtGui.QHBoxLayout()
         self.advanceOptiondisplayed = False
-        # self.simtimeWidget = self.__getSimtimeWidget()
-        # self.runControlWidget = self.__getRunControlWidget()
-        # self.advanceOpt = self.__getAdvanceOptionsWidget()
-        # layout.addWidget(self.advanceOpt)
-        # layout.addWidget(self.runControlWidget)
-        # layout.addWidget(self.simtimeWidget)
-
-        #layout.addWidget(self.tickListWidget)
-        self.tickListWidget, self.tickListWidgetContainer = self.__getTickListWidget()
-        if not self.advanceOptiondisplayed:
-            self.tickListWidgetContainer.hide()
-
         self.updateInterval = 100e-3 # This will be made configurable with a textbox
-        self.__getUpdateIntervalWidget()
+        self.__createAdvancedOptionsWidget()
+        if not self.advanceOptiondisplayed:
+            self.advancedOptionsWidget.hide()
+
+        # self.__getUpdateIntervalWidget()
         #layout.addWidget(self.__getUpdateIntervalWidget())
         # spacerItem = QtGui.QSpacerItem(450, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         # layout.addItem(spacerItem)
@@ -530,38 +520,32 @@ class SchedulingWidget(QtGui.QWidget):
         self.currentTimeWidget.setToolTip('Current time in simulation')
         self.runner.currentTime.connect(self.currentTimeWidget.display)
         self._runToolBar.addWidget(self.currentTimeWidget)
-        self._runToolBar.addWidget(self.__getAdvanceOptionsWidget())
+        self._runToolBar.addWidget(self.__getAdvanceOptionsButton())
 
     def updateTickswidget(self):
         if self.advanceOptiondisplayed:
-            self.tickListWidgetContainer.hide()
+            self.advancedOptionsWidget.hide()
             self.advanceOptiondisplayed = False
         else:
-            self.tickListWidgetContainer.show()
+            self.advancedOptionsWidget.show()
             self.advanceOptiondisplayed = True
 
-    def __getAdvanceOptionsWidget(self):
-        widget = QtGui.QWidget()
-        layout = QtGui.QHBoxLayout()
+    def __getAdvanceOptionsButton(self):
         icon = QtGui.QIcon(os.path.join(config.settings[config.KEY_ICON_DIR],'arrow.png'))
-        self.advancedOption = QtGui.QToolButton()
-        self.advancedOption.setText("Advance Options")
-        self.advancedOption.setIcon(QtGui.QIcon(icon))
-        self.advancedOption.setToolButtonStyle( Qt.ToolButtonTextBesideIcon );
-        self.advancedOption.clicked.connect(self.updateTickswidget)
-        layout.addWidget(self.advancedOption)
-        widget.setLayout(layout)
-        return widget
+        self.advancedOptionsButton = QtGui.QToolButton()
+        self.advancedOptionsButton.setText("Advance Options")
+        self.advancedOptionsButton.setIcon(QtGui.QIcon(icon))
+        self.advancedOptionsButton.setToolButtonStyle( Qt.ToolButtonTextBesideIcon );
+        self.advancedOptionsButton.clicked.connect(self.updateTickswidget)
+        return self.advancedOptionsButton
 
     def __getUpdateIntervalWidget(self):
         label = QtGui.QLabel('Plot update interval')
         self.updateIntervalText = QtGui.QLineEdit(str(self.updateInterval))
-        label = QtGui.QLabel('Update plots after every')
-        ulabel = QtGui.QLabel('seconds of simulation')
+        label = QtGui.QLabel('Plot update interval (s)')
         layout = QtGui.QHBoxLayout()
         layout.addWidget(label)
         layout.addWidget(self.updateIntervalText)
-        layout.addWidget(ulabel)
         widget = QtGui.QWidget()
         widget.setLayout(layout)
         return widget
@@ -660,7 +644,9 @@ class SchedulingWidget(QtGui.QWidget):
         simtimeWidget.setLayout(layout)
         return simtimeWidget
 
-    def __getTickListWidget(self):
+    def __createAdvancedOptionsWidget(self):
+        """Creates a widget containing the list of clock tickes for
+        scheduling and a textbox for updateInterval"""
         layout = QtGui.QGridLayout()
         # Set up the column titles
         layout.addWidget(QtGui.QLabel('Tick'), 0, 0)
@@ -681,14 +667,6 @@ class SchedulingWidget(QtGui.QWidget):
             layout.addWidget(dtLineWidget, ii+1, 1)
             layout.addWidget(QtGui.QLineEdit(''), ii+1, 2, 1, 2)
             layout.setRowStretch(ii+1, 1)
-        '''
-        for ii in range(ticks[0].localNumField):
-            tt = ticks[ii]
-            layout.addWidget(QtGui.QLabel(tt.path), ii+1, 0)
-            layout.addWidget(QtGui.QLineEdit(str(tt.dt)), ii+1, 1)
-            layout.addWidget(QtGui.QLineEdit(''), ii+1, 2, 1, 2)
-            layout.setRowStretch(ii+1, 1)
-        '''
         # We add spacer items to the last row so that expansion
         # happens at bottom. All other rows have stretch = 1, and
         # the last one has 0 (default) so that is the one that
@@ -697,13 +675,19 @@ class SchedulingWidget(QtGui.QWidget):
         for ii in range(3):
             layout.addItem(QtGui.QSpacerItem(1, 1), rowcnt, ii)
         layout.setRowStretch(rowcnt, 10)
-        # layout.setColumnStretch(1, 1)
         layout.setColumnStretch(2, 2)
         widget = QtGui.QWidget()
         widget.setLayout(layout)
+        self.tickListWidget = widget
+        widget2 = QtGui.QWidget()
+        layout = QtGui.QVBoxLayout()
+        layout.addWidget(widget)
+        layout.addWidget(self.__getUpdateIntervalWidget())
+        widget2.setLayout(layout)
         scrollbar = QtGui.QScrollArea()
-        scrollbar.setWidget(widget)
-        return widget, scrollbar
+        scrollbar.setWidget(widget2)
+        self.advancedOptionsWidget = scrollbar
+        return self.advancedOptionsWidget
 
     def updateCurrentTime(self):
         sys.stdout.flush()
@@ -742,7 +726,6 @@ class SchedulingWidget(QtGui.QWidget):
                 target = str(widget.text()).strip()
                 if len(target) > 0:
                     ret[ii-1] = target
-        # print '77777', ret
         return ret
 
     def getTickDtMap(self):
