@@ -245,7 +245,7 @@ def current_step_test(simtime, simdt, plotdt):
     moose.connect(vm_tab, 'requestOut', comp, 'getVm')
     for i in range(10):
         moose.setClock(i, simdt)
-    moose.setClock(18, plotdt)
+    moose.setClock(8, plotdt)
     moose.reinit()
     moose.start(simtime)
     ts = np.linspace(0, simtime, len(vm_tab.vector))

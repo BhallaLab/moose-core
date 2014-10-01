@@ -351,6 +351,8 @@ const Cinfo* Clock::initCinfo()
 		"	SpikeGen			5		50e-6\n"
 		"	HSolve				6		50e-6\n"
 		"	SpikeStats			7		50e-6\n"
+		"	Table				8		0.1e-3\n"
+		"	TimeTable			8		0.1e-3\n"
 
 		"	Dsolve				10		0.01\n"
 		"	Adaptor				11		0.1\n"
@@ -376,8 +378,7 @@ const Cinfo* Clock::initCinfo()
 		"	Ksolve				16		0.1\n"
 
 		"	Stats				17		1\n"
-		"	Table				18		1\n"
-		"	TimeTable			18		1\n"
+		"	Table2				18		1\n"
 		"	HDF5DataWriter			30		1\n"
 		"	HDF5WriterBase			30		1\n"
 		"	PostMaster			31		0.01\n"
@@ -746,6 +747,8 @@ void Clock::buildDefaultTick()
 	defaultTick_["SpikeGen"] = 5;
 	defaultTick_["HSolve"] = 6;
 	defaultTick_["SpikeStats"] = 7;
+	defaultTick_["Table"] = 8;
+	defaultTick_["TimeTable"] = 8;
 
 	defaultTick_["Dsolve"] = 10;
 	defaultTick_["Adaptor"] = 11;
@@ -769,8 +772,7 @@ void Clock::buildDefaultTick()
 	defaultTick_["Ksolve"] = 16; // Note this uses an 'init' at t-1
 
 	defaultTick_["Stats"] = 17;
-	defaultTick_["Table"] = 18;
-	defaultTick_["TimeTable"] = 18;
+	defaultTick_["Table2"] = 18;
 	defaultTick_["HDF5DataWriter"] = 30;
 	defaultTick_["HDF5WriterBase"] = 30;
 	defaultTick_["PostMaster"] = 31;
@@ -829,7 +831,7 @@ void Clock::buildDefaultTick()
 	defaultDt_[5] = 50.0e-6;
 	defaultDt_[6] = 50.0e-6;
 	defaultDt_[7] = 50.0e-6;
-	defaultDt_[8] = 5.0e-3; // For the tables for electrical calculations
+	defaultDt_[8] = 1.0e-4; // For the tables for electrical calculations
 	defaultDt_[9] = 0.0; // Not assigned
 	defaultDt_[10] = 0.01; // For diffusion.
 	defaultDt_[11] = 0.1;
@@ -839,7 +841,7 @@ void Clock::buildDefaultTick()
 	defaultDt_[15] = 0.1;
 	defaultDt_[16] = 0.1;
 	defaultDt_[17] = 1;
-	defaultDt_[18] = 1;
+	defaultDt_[18] = 1; // For tables for chemical calculations.
 	// 19-29 are not assigned.
 	defaultDt_[30] = 1;	// For the HDF writer
 	defaultDt_[31] = 0.01; // For the postmaster.
