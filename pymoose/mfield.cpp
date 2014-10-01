@@ -166,7 +166,8 @@ extern "C" {
                  "name. Hence changing the name of the container element will cause the\n"
                  "hash to change. This is rather unusual in a moose script, but if you\n"
                  "are putting fields as dictionary keys, you should do that after names\n"
-                 "of all elements have been finalized.");
+                 "of all elements have been finalized.\n"
+                 "\n");
 
 
     static PyTypeObject moose_Field = {
@@ -238,7 +239,9 @@ extern "C" {
                  "keys can be any number and the corresponding value is dynamically\n"
                  "computed by the method of interpolation.\n"
                  "Use moose.doc('classname.fieldname') to display builtin\n"
-                 "documentation for `field` in class `classname`.\n");
+                 "documentation for `field` in class `classname`.\n"
+                 "\n"
+                 );
     PyTypeObject moose_LookupField = {
         PyVarObject_HEAD_INIT(NULL, 0)
         "moose.LookupField",                                  /* tp_name */
