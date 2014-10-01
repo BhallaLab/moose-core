@@ -87,7 +87,7 @@ def main():
         avec.append( a.conc )
         bvec.append( b.conc )
         a.concInit += deltaA
-        print i, a.conc, b.conc
+        #print i, a.conc, b.conc
     pylab.plot( numpy.log10( avec ), numpy.log10( bvec ), label='b vs a up' )
     # Now go down.
     avec = []
@@ -98,7 +98,7 @@ def main():
         avec.append( a.conc )
         bvec.append( b.conc )
         a.concInit -= deltaA
-        print i, a.conc, b.conc
+        #print i, a.conc, b.conc
 
 
     pylab.plot( numpy.log10( avec ), numpy.log10( bvec ), label='b vs a down' )
@@ -114,7 +114,7 @@ def main():
         avec.append( a.conc )
         bvec.append( b.conc )
         a.concInit -= deltaA
-        print i, a.conc, b.conc
+        #print i, a.conc, b.conc
     pylab.plot( numpy.log10( avec ), numpy.log10( bvec ), label='b vs a mid' )
 
     pylab.ylim( [-1.7, 1.2] )

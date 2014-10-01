@@ -200,9 +200,9 @@ void setMethod( Shell* s, Id mgr, double simdt, double plotdt,
 	s->doSetClock( 12, simdt );
 	s->doSetClock( 13, simdt );
 	s->doSetClock( 14, simdt );
-	s->doSetClock( 16, plotdt );
-	s->doSetClock( 17, plotdt );
-	s->doSetClock( 18, plotdt );
+	s->doSetClock( 16, plotdt );	// Gsolve and Ksolve
+	s->doSetClock( 17, plotdt );	// Stats objects
+	s->doSetClock( 18, plotdt );	// Table2 objects.
 }
 /**
  * The readcell function implements the old GENESIS cellreader
@@ -294,8 +294,8 @@ void ReadKkit::dumpPlots( const string& filename )
 {
 	// ofstream fout ( filename.c_str() );
 	vector< ObjId > plots;
-	string plotpath = basePath_ + "/graphs/##[TYPE=Table]," + 
-		basePath_ + "/moregraphs/##[TYPE=Table]";
+	string plotpath = basePath_ + "/graphs/##[TYPE=Table2]," + 
+		basePath_ + "/moregraphs/##[TYPE=Table2]";
 	wildcardFind( plotpath, plots );
 	for ( vector< ObjId >::iterator 
 					i = plots.begin(); i != plots.end(); ++i )
@@ -1150,7 +1150,7 @@ Id ReadKkit::buildPlot( const vector< string >& args )
 	Id pa = shell_->doFind( head ).id;
 	assert( pa != Id() );
 
-	Id plot = shell_->doCreate( "Table", pa, tail, 1 );
+	Id plot = shell_->doCreate( "Table2", pa, tail, 1 );
 	assert( plot != Id() );
 
 	temp = graph + "/" + tail;

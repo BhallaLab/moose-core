@@ -148,7 +148,7 @@ void ReadCspace::makePlots( double plotdt )
 		const Cinfo* kidCinfo = children[i].element()->cinfo();
 		if ( kidCinfo->isA( "PoolBase" ) ) {
 			string plotname = "plot" + children[i].element()->getName();
-    		Id tab = shell->doCreate( "Table", graphs, plotname, 1 );
+    		Id tab = shell->doCreate( "Table2", graphs, plotname, 1 );
 			assert( tab != Id() );
 			// cout << "ReadCspace made plot " << plotname << endl;
 			ObjId mid = shell->doAddMsg( "Single", 
@@ -156,10 +156,12 @@ void ReadCspace::makePlots( double plotdt )
 			assert( mid != ObjId() );
 		}
 	}
+	/* Clocks are now assigned automatically
     shell->doSetClock( 8, plotdt );
 
-    string plotpath = basepath + "/graphs/##[TYPE=Table]";
+    string plotpath = basepath + "/graphs/##[TYPE=Table2]";
     shell->doUseClock( plotpath, "process", 8 ); 
+	*/
 }
 
 

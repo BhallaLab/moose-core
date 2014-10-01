@@ -69,19 +69,12 @@ def makeModel():
 
 		# Create the output tables
 		graphs = moose.Neutral( '/model/graphs' )
-		outputA = moose.Table ( '/model/graphs/concA' )
-		outputB = moose.Table ( '/model/graphs/concB' )
+		outputA = moose.Table2 ( '/model/graphs/concA' )
+		outputB = moose.Table2 ( '/model/graphs/concB' )
 
 		# connect up the tables
 		moose.connect( outputA, 'requestOut', a, 'getConc' );
 		moose.connect( outputB, 'requestOut', b, 'getConc' );
-
-		# Schedule the whole lot
-		moose.setClock( 4, 0.01 ) # for the computational objects
-		moose.setClock( 8, 1.0 ) # for the plots
-		# The wildcard uses # for single level, and ## for recursive.
-		moose.useClock( 4, '/model/compartment/##', 'process' )
-		moose.useClock( 8, '/model/graphs/#', 'process' )
 
 def displayPlots():
 		for x in moose.wildcardFind( '/model/graphs/conc#' ):
@@ -100,8 +93,10 @@ def main():
 		#solver.method = "rk5"
 		#mesh = moose.element( "/model/compartment/mesh" )
 		#moose.connect( mesh, "remesh", solver, "remesh" )
+                '''
 		moose.setClock( 5, 1.0 ) # clock for the solver
 		moose.useClock( 5, '/model/compartment/ksolve', 'process' )
+                '''
 
 		moose.reinit()
 		moose.start( 100.0 ) # Run the model for 100 seconds.
