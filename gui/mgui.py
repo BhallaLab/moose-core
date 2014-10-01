@@ -129,7 +129,6 @@ class MWindow(QtGui.QMainWindow):
         self._plugins = {}
         self._loadedModels = {}
         
-        self.loadedModelMenu = QtGui.QMenu('Recently Loaded Model')
         self.setDockOptions(self.AnimatedDocks and self.AllowNestedDocks and self.AllowTabbedDocks)
         self.mdiArea = QtGui.QMdiArea()
         self.quitAction = QtGui.QAction('&Quit', self)
@@ -266,8 +265,6 @@ class MWindow(QtGui.QMainWindow):
         self.plugin = self.loadPluginClass(str(name))(str(root), self)
         #Harsha: added under file Menu, Recently Loaded Models
         if root != '/' and root not in self._loadedModels:
-            action = self.loadedModelMenu.addAction(root)
-            action.triggered.connect(lambda : self.setPlugin(name, root))
             self._loadedModels[root] = name
     
         # try:
@@ -427,18 +424,27 @@ class MWindow(QtGui.QMainWindow):
             self.fileMenu = QtGui.QMenu('&File')
         else:
             self.fileMenu.clear()
+        
         if not hasattr(self, 'newModelAction'):
             self.newModelAction = QtGui.QAction('New', self)
             self.newModelAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+N", None, QtGui.QApplication.UnicodeUTF8))
             self.connect(self.newModelAction, QtCore.SIGNAL('triggered()'), self.newModelDialogSlot)
         self.fileMenu.addAction(self.newModelAction)
-        if self._loadedModels:
-            self.fileMenu.addMenu(self.loadedModelMenu)
         if not hasattr(self, 'loadModelAction'):
             self.loadModelAction = QtGui.QAction('L&oad model', self)
             self.loadModelAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+O", None, QtGui.QApplication.UnicodeUTF8))
             self.connect(self.loadModelAction, QtCore.SIGNAL('triggered()'), self.loadModelDialogSlot)
         self.fileMenu.addAction(self.loadModelAction)
+
+        if not hasattr(self,'loadedModels'):
+            self.loadedModelAction = QtGui.QAction('Recently Loaded Model',self)
+            if bool(self._loadedModels):
+                self.fileMenu.addSeparator()
+                self.fileMenu.addAction(self.loadedModelAction)
+                for path,pluginType in self._loadedModels.iteritems():
+                    action = self.fileMenu.addAction(path)
+                    action.triggered.connect(lambda : self.setPlugin(pluginType,path))
+                self.fileMenu.addSeparator()
         if not hasattr(self,'connectBioModelAction'):
             self.connectBioModelAction = QtGui.QAction('&Connect BioModels', self)
             self.connectBioModelAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+B", None, QtGui.QApplication.UnicodeUTF8))
