@@ -26,6 +26,8 @@ sys.path.append('../../python')
 import os
 os.environ['NUMPTHREADS'] = '1'
 import math
+import numpy
+import pylab
 
 import moose
 
@@ -122,7 +124,9 @@ def createSynapseOnCompartment( compt ):
     gluR.Gbar = 1e-6
     gluR.Ek= 10.0e-3
     moose.connect( compt, 'channel', gluR, 'channel', 'Single' )
-    gluR.synapse.num = 1
+    gluSyn = moose.SimpleSynHandler( compt.path + '/gluR/sh' )
+    moose.connect( gluSyn, 'activationOut', gluR, 'activation' )
+    gluSyn.synapse.num = 1
     # Ca comes in through this channel, at least for this example.
     caPool = moose.CaConc( compt.path + '/ca' )
     caPool.CaBasal = 1e-4       # 0.1 micromolar
@@ -137,16 +141,14 @@ def createSynapseOnCompartment( compt ):
     synInput.threshold = -1.0
     synInput.edgeTriggered = 0
     synInput.Vm( 0 )
-    syn = moose.element( gluR.path + '/synapse' )
+    syn = moose.element( gluSyn.path + '/synapse' )
     moose.connect( synInput, 'spikeOut', syn, 'addSpike', 'Single' )
     syn.weight = 0.2
     syn.delay = 1.0e-3
     return gluR
 
 def createPool( compt, name, concInit ):
-    meshEntries = moose.element( compt.path + '/mesh' )
     pool = moose.Pool( compt.path + '/' + name )
-    moose.connect( pool, 'mesh', meshEntries, 'mesh', 'Single' )
     pool.concInit = concInit
     pool.diffConst = 5e-11
     return pool
@@ -168,8 +170,6 @@ def createChemModel( neuroCompt ):
     dendTurnOnKinase.Kb = 1
     dendKinaseEnz = moose.Enz( dendKinase.path + '/enz' )
     dendKinaseEnzCplx = moose.Pool( dendKinase.path + '/enz/cplx' )
-    mesh = moose.element( neuroCompt.path + '/mesh' )
-    moose.connect( dendKinaseEnzCplx, 'mesh', mesh, 'mesh' )
     kChan = createPool( neuroCompt, 'kChan', 1e-3 )
     kChan_p = createPool( neuroCompt, 'kChan_p', 0.0 )
     moose.connect( dendKinaseEnz, 'enz', dendKinase, 'reac', 'OneToOne' )
@@ -212,14 +212,14 @@ def makeModelInCubeMesh():
     chemK = moose.element( '/n/chem/neuroMesh/kChan' )
     elecK = moose.element( '/n/elec/compt/K' )
     moose.connect( adaptK, 'requestOut', chemK, 'getConc', 'OneToAll' )
-    moose.connect( adaptK, 'outputSrc', elecK, 'setGbar', 'OneToAll' )
+    moose.connect( adaptK, 'output', elecK, 'setGbar', 'OneToAll' )
     adaptK.scale = 0.3               # from mM to Siemens
 
     adaptCa = moose.Adaptor( '/n/chem/neuroMesh/adaptCa' )
     chemCa = moose.element( '/n/chem/neuroMesh/Ca' )
     elecCa = moose.element( '/n/elec/compt/ca' )
     moose.connect( elecCa, 'concOut', adaptCa, 'input', 'OneToAll' )
-    moose.connect( adaptCa, 'outputSrc', chemCa, 'setConc', 'OneToAll' )
+    moose.connect( adaptCa, 'output', chemCa, 'setConc', 'OneToAll' )
     adaptCa.outputOffset = 0.0001      # 100 nM offset in chem conc
     adaptCa.scale = 0.05               # Empirical: 0.06 max to 0.003 mM
 
@@ -230,11 +230,12 @@ def addPlot( objpath, field, plot ):
     moose.connect( tab, 'requestOut', obj, field )
     return tab
 
-def dumpPlots( fname ):
-    if ( os.path.exists( fname ) ):
-        os.remove( fname )
+def displayPlots():
     for x in moose.wildcardFind( '/graphs/##[ISA=Table]' ):
-        moose.element( x[0] ).xplot( fname, x[0].name )
+        t = numpy.arange( 0, x.vector.size, 1 ) * x.dt
+        pylab.plot( t, x.vector, label=x.name )
+    pylab.legend()
+    pylab.show()
 
 def makeElecPlots():
     graphs = moose.Neutral( '/graphs' )
@@ -263,6 +264,7 @@ def testCubeMultiscale( useSolver ):
     makeModelInCubeMesh()
     makeChemPlots()
     makeElecPlots()
+    '''
     moose.setClock( 0, elecDt )
     moose.setClock( 1, elecDt )
     moose.setClock( 2, elecDt )
@@ -279,18 +281,22 @@ def testCubeMultiscale( useSolver ):
     moose.useClock( 1, '/n/##[ISA=Compartment]', 'process' )
     moose.useClock( 2, '/n/##[ISA=ChanBase],/n/##[ISA=SynBase],/n/##[ISA=CaConc]','process')
     moose.useClock( 5, '/n/##[ISA=PoolBase],/n/##[ISA=ReacBase],/n/##[ISA=EnzBase]', 'process' )
+    '''
     if ( useSolver ):
-        ksolve = moose.GslStoich( '/n/ksolve' )
-        ksolve.path = '/n/##'
+        ksolve = moose.Ksolve( '/n/ksolve' )
+        stoich = moose.Stoich( '/n/stoich' )
+        stoich.compartment = moose.element( '/n/chem/neuroMesh' )
+        stoich.ksolve = ksolve
+        stoich.path = '/n/##'
         ksolve.method = 'rk5'
-        moose.useClock( 5, '/n/ksolve', 'process' )
+        #moose.useClock( 5, '/n/ksolve', 'process' )
         hsolve = moose.HSolve( '/n/hsolve' )
-        moose.useClock( 1, '/n/hsolve', 'process' )
+        #moose.useClock( 1, '/n/hsolve', 'process' )
         hsolve.dt = elecDt
         hsolve.target = '/n/compt'
     moose.reinit()
     moose.start( 1 )
-    dumpPlots( plotName )
+    displayPlots()
 
 def main():
     testCubeMultiscale( 1 ) # change argument to 0 to run without solver.

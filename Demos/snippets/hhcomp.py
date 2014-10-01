@@ -225,9 +225,9 @@ def test_hhcomp():
     simtime = 100e-3
     if (1):
         moose.showmsg( '/clock' )
-        for i in range(10):
+        for i in range(8):
             moose.setClock( i, simdt )
-        moose.setClock( 18, plotdt )
+        moose.setClock( 8, plotdt )
         moose.reinit()
     else:
         utils.resetSim([model.path, data.path], simdt, plotdt, simmethod='ee')
