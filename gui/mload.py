@@ -98,7 +98,7 @@ def loadFile(filename, target, merge=True):
                 graphspath = moose.Neutral('%s/%s' %(model.path,"data"))
             dataPath = moose.element(model.path+'/data')
             i =0
-            nGraphs = moose.wildcardFind(model.path+'/graphs/##[TYPE=Table]')
+            nGraphs = moose.wildcardFind(model.path+'/graphs/##[TYPE=Table2]')
             for graphs in nGraphs:
                 if not moose.exists(dataPath.path+'/graph_'+str(i)):
                     graphspath = moose.Neutral('%s/%s' %(dataPath.path,"graph_"+str(i)))
@@ -109,8 +109,8 @@ def loadFile(filename, target, merge=True):
 
             if len(nGraphs) > 0:
                 i = i+1
-            #print " i ", i,moose.wildcardFind(model.path+'/moregraphs/##[TYPE=Table]')
-            for moregraphs in moose.wildcardFind(model.path+'/moregraphs/##[TYPE=Table]'):
+            #print " i ", i,moose.wildcardFind(model.path+'/moregraphs/##[TYPE=Table2]')
+            for moregraphs in moose.wildcardFind(model.path+'/moregraphs/##[TYPE=Table2]'):
                 if not moose.exists(dataPath.path+'/graph_'+str(i)):
                     graphspath = moose.Neutral('%s/%s' %(dataPath.path,"graph_"+str(i)))
                 else:
@@ -130,7 +130,7 @@ def loadFile(filename, target, merge=True):
                 graphspath = moose.Neutral('%s/%s' %(model.path,"data"))
             dataPath = moose.element(model.path+'/data')
             i =0
-            nGraphs = moose.wildcardFind(model.path+'/graphs/##[TYPE=Table]')
+            nGraphs = moose.wildcardFind(model.path+'/graphs/##[TYPE=Table2]')
             for graphs in nGraphs:
                 if not moose.exists(dataPath.path+'/graph_'+str(i)):
                     graphspath = moose.Neutral('%s/%s' %(dataPath.path,"graph_"+str(i)))
@@ -141,8 +141,8 @@ def loadFile(filename, target, merge=True):
 
             if len(nGraphs) > 0:
                 i = i+1
-            #print " i ", i,moose.wildcardFind(model.path+'/moregraphs/##[TYPE=Table]')
-            for moregraphs in moose.wildcardFind(model.path+'/moregraphs/##[TYPE=Table]'):
+            #print " i ", i,moose.wildcardFind(model.path+'/moregraphs/##[TYPE=Table2]')
+            for moregraphs in moose.wildcardFind(model.path+'/moregraphs/##[TYPE=Table2]'):
                 if not moose.exists(dataPath.path+'/graph_'+str(i)):
                     graphspath = moose.Neutral('%s/%s' %(dataPath.path,"graph_"+str(i)))
                 else:
