@@ -72,6 +72,7 @@ def make_model():
 def main():
     make_model()
 
+    '''
     moose.useClock( 0, '/stim', 'process' )
     moose.useClock( 1, '/spike', 'process' )
     moose.useClock( 2, '/syn', 'process' )
@@ -80,6 +81,8 @@ def main():
     moose.useClock( 8, '/plot#', 'process' )
     for i in range (10):
         moose.setClock( i, dt )
+        '''
+    moose.useClock( 8, '/plot#', 'process' )
     moose.reinit()
     moose.start( runtime )
     plots = moose.element( '/plots' )
