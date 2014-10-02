@@ -5162,4 +5162,14 @@ Updated Clock to handle this.
 
 Went through and fixed many snippets.
 
+Problem with scaleVolumes.py. Issue is at the time I swap concs.
+
+Harsha:
+	Need a way to access runtime from kkit reader.
+	Deleting messages. Go to Neutral::destroy and call Msg::deleteMsg
+	if it is a Msg ObjId.
 =============================================================================
+2. Oct. 
+Fixed problem with non-integral poll Ns. This cures scaleVolumes.py. 
+
+

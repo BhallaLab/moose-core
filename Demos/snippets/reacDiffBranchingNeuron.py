@@ -64,7 +64,7 @@ def makeModel():
     makeTab( 'b_apical', '/model/chem/compt0/b[' + str( num ) + ']' )
 
 def makeTab( plotname, molpath ):
-    tab = moose.Table ( '/model/graphs/' + plotname ) # Make output table
+    tab = moose.Table2( '/model/graphs/' + plotname ) # Make output table
     # connect up the tables
     moose.connect( tab, 'requestOut', moose.element( molpath ), 'getConc' );
 
@@ -107,7 +107,7 @@ def updateDisplay( plotlist ):
 
 
 def finalizeDisplay( plotlist, cPlotDt ):
-    for x in moose.wildcardFind( '/model/graphs/#[ISA=Table]' ):
+    for x in moose.wildcardFind( '/model/graphs/#[ISA=Table2]' ):
         pos = numpy.arange( 0, x.vector.size, 1 ) * cPlotDt
         line1, = plotlist[0].plot( pos, x.vector, label=x.name )
     plt.legend()
@@ -215,11 +215,13 @@ def main():
     makeModel()
     plotlist = makeDisplay()
 
-    # Schedule the whole lot
+    # Schedule the whole lot. Autoscheduling already takes care of these
+    '''
     for i in range( 11, 17 ):
         moose.setClock( i, chemdt ) # for the chem objects
     moose.setClock( 10, diffdt ) # for the diffusion
     moose.setClock( 18, plotdt ) # for the output tables.
+    '''
     moose.reinit()
     for i in range( 0, runtime, animationdt ):
         moose.start( animationdt )

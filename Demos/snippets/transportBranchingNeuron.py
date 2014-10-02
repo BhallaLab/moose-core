@@ -86,7 +86,7 @@ def makeModel():
     makeTab( 'b_apical', '/model/chem/compt0/b[' + str( num ) + ']' )
 
 def makeTab( plotname, molpath ):
-    tab = moose.Table ( '/model/graphs/' + plotname ) # Make output table
+    tab = moose.Table2( '/model/graphs/' + plotname ) # Make output table
     # connect up the tables
     moose.connect( tab, 'requestOut', moose.element( molpath ), 'getConc' );
 
@@ -133,7 +133,7 @@ def updateDisplay( plotlist ):
 
 
 def finalizeDisplay( plotlist, cPlotDt ):
-    for x in moose.wildcardFind( '/model/graphs/#[ISA=Table]' ):
+    for x in moose.wildcardFind( '/model/graphs/#[ISA=Table2]' ):
         pos = numpy.arange( 0, x.vector.size, 1 ) * cPlotDt
         line1, = plotlist[0].plot( pos, x.vector, label=x.name )
     plt.legend()
@@ -188,20 +188,15 @@ def main():
            that is, the soma and the tip of one of the apical dendrites.
 
     """
-    chemdt = 0.1 # Tested various dts, this is reasonable.
-    diffdt = 0.01
     plotdt = 1
     animationdt = 5
     runtime = 600 
 
     makeModel()
     plotlist = makeDisplay()
+    # Default Scheduling works fine for this model. 
+    # Chemdt = 0.1, diffdt = 0.01, plotdt = 1
 
-    # Schedule the whole lot
-    for i in range( 11, 17 ):
-        moose.setClock( i, chemdt ) # for the chem objects
-    moose.setClock( 10, diffdt ) # for the diffusion
-    moose.setClock( 18, plotdt ) # for the output tables.
     moose.reinit()
     a = moose.vec( '/model/chem/compt0/a' )
     b = moose.vec( '/model/chem/compt0/b' )
