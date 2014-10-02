@@ -102,6 +102,26 @@ void GssaVoxelPools::setNumReac( unsigned int n )
 	v_.resize( n, 0.0 );
 }
 
+/**
+ * Cleans out all reac rates and recalculates atot. Needed whenever a
+ * mol conc changes, or if there is a roundoff error.
+ * Returns true if OK, returns false if it is in a stuck state and atot<=0
+ */
+bool GssaVoxelPools::refreshAtot( const GssaSystem* g )
+{
+	updateReacVelocities( g, S(), v_ );
+	atot_ = 0;
+	for ( vector< double >::const_iterator 
+			i = v_.begin(); i != v_.end(); ++i )
+		atot_ += *i;
+	atot_ *= SAFETY_FACTOR;
+	// Check if the system is in a stuck state. If so, terminate.
+	if ( atot_ <= 0.0 ) {
+		return false;
+	}
+	return true;
+}
+
 void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
 {
 	double nextt = p->currTime;
@@ -115,14 +135,7 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
 		if ( rindex >= g->stoich->getNumRates() ) {
 			// probably cumulative roundoff error here. 
 			// Recalculate atot to avoid, and redo.
-			updateReacVelocities( g, S(), v_ );
-			atot_ = 0;
-			for ( vector< double >::const_iterator 
-					i = v_.begin(); i != v_.end(); ++i )
-				atot_ += *i;
-			atot_ *= SAFETY_FACTOR;
-			// Check if the system is in a stuck state. If so, terminate.
-			if ( atot_ <= 0.0 ) {
+			if ( !refreshAtot( g ) ) { // Stuck state.
 				t_ = nextt;
 				return;
 			}
@@ -139,12 +152,9 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
 
 		g->transposeN.fireReac( rindex, Svec() );
 		updateDependentMathExpn( g, rindex );
-		// atot_ = g->updateDependentRates( atot_, rinidex );
 		updateDependentRates( g->dependency[ rindex ], g->stoich );
-		// double r = gsl_rng_uniform( rng );
 		double r = mtrand();
 		while ( r <= 0.0 ) {
-			// r = gsl_rng_uniform( rng )
 			r = mtrand();
 		}
 		t_ -= ( 1.0 / atot_ ) * log( r );
@@ -176,15 +186,7 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
 		}
 	}
 	t_ = 0.0;
-	// vector< double > yprime( g->stoich->getNumAllPools(), 0.0 );
-				// i = yprime.begin(); i != yprime.end(); ++i )
-	updateReacVelocities( g, S(), v_ );
-	atot_ = 0;
-	for ( vector< double >::const_iterator 
-		i = v_.begin(); i != v_.end(); ++i ) {
-		atot_ += *i;
-	}
-	atot_ *= SAFETY_FACTOR;
+	refreshAtot( g );
 }
 
 /////////////////////////////////////////////////////////////////////////

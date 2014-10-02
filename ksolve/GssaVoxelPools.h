@@ -30,6 +30,14 @@ class GssaVoxelPools: public VoxelPoolsBase
 		void setNumReac( unsigned int n );
 
 		void advance( const ProcInfo* p, const GssaSystem* g );
+
+		/**
+ 		* Cleans out all reac rates and recalculates atot. Needed whenever a
+ 		* mol conc changes, or if there is a roundoff error. Returns true
+ 		* if OK, returns false if it is in a stuck state and atot<=0
+ 		*/
+		bool refreshAtot( const GssaSystem* g );
+
 		/**
 		 * Builds the gssa system as needed.
 		 */

@@ -141,14 +141,14 @@ def wildcard_test():
     wildcard = '/alfa/bravo/#[TYPE!=HHChannel]'
     print '\nElements Matching:', wildcard
     for element in moose.wildcardFind(wildcard):
-        print '\t', element.path, ', class:', element.class_
+        print '\t', element.path, ', class:', element.className
 
     # With `##` you can get a listing of all elements under a path if
     # you don't use a condition
     wildcard = '/alfa/##'
     print '\nElements Matching:', wildcard
     for element in moose.wildcardFind(wildcard):
-        print '\t', element.path, ', class:', element.class_
+        print '\t', element.path, ', class:', element.className
     
 
 if __name__ == '__main__':
