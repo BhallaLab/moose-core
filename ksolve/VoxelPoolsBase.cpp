@@ -105,6 +105,8 @@ void VoxelPoolsBase::setVolumeAndDependencies( double vol )
 void VoxelPoolsBase::setN( unsigned int i, double v )
 {
 	S_[i] = v;
+	if ( S_[i] < 0.0 ) 
+		S_[i] = 0.0;
 }
 
 double VoxelPoolsBase::getN( unsigned int i ) const
@@ -115,6 +117,8 @@ double VoxelPoolsBase::getN( unsigned int i ) const
 void VoxelPoolsBase::setNinit( unsigned int i, double v )
 {
 	Sinit_[i] = v;
+	if ( Sinit_[i] < 0.0 ) 
+		Sinit_[i] = 0.0;
 }
 
 double VoxelPoolsBase::getNinit( unsigned int i ) const

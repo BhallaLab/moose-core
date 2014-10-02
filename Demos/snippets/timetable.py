@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jun 19 19:37:00 2013 (+0530)
 # Version: 
-# Last-Updated: Wed Jun 19 20:55:01 2013 (+0530)
-#           By: subha
-#     Update #: 142
+# Last-Updated: Thu Oct 02
+#           By: Upi
+#     Update #: ?
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -118,8 +118,10 @@ def timetable_demo():
     synchan.Gbar = 1e-6
     synchan.Ek = 0.0
     moose.connect(synchan, 'channel', comp, 'channel')
-    synchan.synapse.num = 1
-    moose.connect(tt_file, 'eventOut', moose.element(synchan.path + '/synapse'), 'addSpike')
+    synh = moose.SimpleSynHandler( '/model/comp/synchan/synh' )
+    moose.connect( synh, 'activationOut', synchan, 'activation')
+    synh.synapse.num = 1
+    moose.connect(tt_file, 'eventOut', moose.element(synh.path + '/synapse'), 'addSpike')
     # Data recording: record the `state` of the time table filled
     # using array.
     data = moose.Neutral('/data')

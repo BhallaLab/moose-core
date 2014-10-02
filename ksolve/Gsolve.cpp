@@ -237,8 +237,13 @@ void Gsolve::setNvec( unsigned int voxel, vector< double > nVec )
 			return;
 		}
 		double* s = pools_[voxel].varS();
-		for ( unsigned int i = 0; i < nVec.size(); ++i )
-			s[i] = nVec[i];
+		for ( unsigned int i = 0; i < nVec.size(); ++i ) {
+			s[i] = round( nVec[i] );
+			if ( s[i] < 0.0 ) 
+				s[i] = 0.0;
+		}
+		if ( sys_.isReady )
+			pools_[voxel].refreshAtot( &sys_ );
 	}
 }
 
@@ -459,8 +464,11 @@ void Gsolve::setDsolve( Id dsolve )
 void Gsolve::setN( const Eref& e, double v )
 {
 	unsigned int vox = getVoxelIndex( e );
-	if ( vox != OFFNODE )
-		pools_[vox].setN( getPoolIndex( e ), v );
+	if ( vox != OFFNODE ) {
+		pools_[vox].setN( getPoolIndex( e ), round( v ) );
+		if ( sys_.isReady )
+			pools_[vox].refreshAtot( &sys_ );
+	}
 }
 
 double Gsolve::getN( const Eref& e ) const
@@ -474,8 +482,12 @@ double Gsolve::getN( const Eref& e ) const
 void Gsolve::setNinit( const Eref& e, double v )
 {
 	unsigned int vox = getVoxelIndex( e );
-	if ( vox != OFFNODE )
-		pools_[vox].setNinit( getPoolIndex( e ), v );
+	if ( vox != OFFNODE ) {
+		pools_[vox].setNinit( getPoolIndex( e ), round( v ) );
+		// Have to refresh rates because nInit might alter a buffered pool.
+		if ( sys_.isReady )
+			pools_[vox].refreshAtot( &sys_ ); 
+	}
 }
 
 double Gsolve::getNinit( const Eref& e ) const
