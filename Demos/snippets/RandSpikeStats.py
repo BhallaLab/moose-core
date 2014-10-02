@@ -24,6 +24,9 @@ def make_model():
     maxFiringRate = 10
     refractT = 0.05
 
+    for i in range( 20 ):
+        moose.setClock( i, dt )
+
     ############### Create objects ###############
     stim = moose.StimulusTable( 'stim' )
     spike = moose.RandSpike( 'spike' )
@@ -81,8 +84,8 @@ def main():
     moose.useClock( 8, '/plot#', 'process' )
     for i in range (10):
         moose.setClock( i, dt )
-        '''
     moose.useClock( 8, '/plot#', 'process' )
+        '''
     moose.reinit()
     moose.start( runtime )
     plots = moose.element( '/plots' )

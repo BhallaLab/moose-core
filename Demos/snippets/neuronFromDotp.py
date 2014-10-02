@@ -116,10 +116,10 @@ def addPlot( objpath, field, plot ):
 	return tab
 
 def dumpPlots():
-	t = numpy.arange( 0, 100.2, 0.2 ) # msec
 	plots = moose.wildcardFind( '/graphs/##[ISA=Table]' )
 	for x in moose.wildcardFind( '/graphs/##[ISA=Table]' ):
-		pylab.plot( t, x.vector, label=x.name)
+	    t = numpy.arange( 0, x.size ) * x.dt # msec
+	    pylab.plot( t, x.vector, label=x.name)
 
 	pylab.legend()
 	pylab.show()
