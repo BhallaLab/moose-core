@@ -547,11 +547,16 @@ unsigned int Neutral::buildTree( const Eref& e, vector< Id >& tree )
 //////////////////////////////////////////////////////////////////////////
 
 //
+// Stage 0: Check if it is a Msg. This is deleted by Msg::deleteMsg( ObjId )
 // Stage 1: mark for deletion. This is done by setting cinfo = 0
 // Stage 2: Clear out outside-going msgs
 // Stage 3: delete self and attached msgs, 
 void Neutral::destroy( const Eref& e, int stage )
 {
+	if ( e.element()->cinfo()->isA( "Msg" ) ) {
+		Msg::deleteMsg( e.objId() );
+		return;
+	}
 	vector< Id > tree;
 	Eref er( e.element(), ALLDATA );
 	unsigned int numDescendants = buildTree( er, tree );
