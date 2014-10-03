@@ -24,12 +24,25 @@ const Cinfo* SimpleSynHandler::initCinfo()
 		"It uses a priority queue to manage them."
 	};
 
+	static FieldElementFinfo< SynHandlerBase, Synapse > synFinfo( 
+		"synapse",
+		"Sets up field Elements for synapse",
+		Synapse::initCinfo(),
+		&SynHandlerBase::getSynapse,
+		&SynHandlerBase::setNumSynapses,
+		&SynHandlerBase::getNumSynapses
+	);
+
+	static Finfo* synHandlerFinfos[] = {
+		&synFinfo			// FieldElement
+	};
+
 	static Dinfo< SimpleSynHandler > dinfo;
 	static Cinfo synHandlerCinfo (
 		"SimpleSynHandler",
 		SynHandlerBase::initCinfo(),
-		0,
-		0,
+		synHandlerFinfos,
+		sizeof( synHandlerFinfos ) / sizeof ( Finfo* ),
 		&dinfo,
 		doc,
 		sizeof( doc ) / sizeof( string )
