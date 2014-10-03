@@ -104,7 +104,7 @@ def make_network():
             pylab.plot( t, p.vector, label=str( i) )
             i += 1
         pylab.xlabel( "Time (s)" )
-        pylab.ylabel( "Vm (mV)" )
+        pylab.ylabel( "Rate (Hz)" )
         pylab.legend()
         pylab.show()
 
