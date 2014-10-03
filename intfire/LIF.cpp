@@ -57,7 +57,7 @@ void LIF::vProcess( const Eref& e, ProcPtr p )
 {
 	fired_ = false;
 	if ( p->currTime < lastEvent_ + refractT_ ) {
-		Vm_ = initVm_;
+		Vm_ = vReset_;
 		A_ = 0.0;
 		B_ = 1.0 / Rm_;
 		sumInject_ = 0.0;
@@ -66,7 +66,7 @@ void LIF::vProcess( const Eref& e, ProcPtr p )
 		Vm_ += activation_;
 		activation_ = 0.0;
 		if ( Vm_ > threshold_ ) {
-			Vm_ = initVm_;
+			Vm_ = vReset_;
 			lastEvent_ = p->currTime;
 			fired_ = true;
 			spikeOut()->send( e, p->currTime );
