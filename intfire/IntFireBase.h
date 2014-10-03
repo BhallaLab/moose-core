@@ -25,6 +25,8 @@ class IntFireBase: public Compartment
 			// Value Field access function definitions.
 			void setThresh( const Eref& e,  double val );
 			double getThresh( const Eref& e  ) const;
+			void setVReset( const Eref& e,  double val );
+			double getVReset( const Eref& e  ) const;
 			void setRefractoryPeriod( const Eref& e,  double val );
 			double getRefractoryPeriod( const Eref& e  ) const;
 			bool hasFired( const Eref& e ) const;
@@ -56,6 +58,7 @@ class IntFireBase: public Compartment
 			static const Cinfo* initCinfo();
 	protected:
 			double threshold_;
+			double vReset_;
 			double activation_;
 			double refractT_;
 			double lastEvent_;

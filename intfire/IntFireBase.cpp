@@ -36,6 +36,13 @@ const Cinfo* IntFireBase::initCinfo()
 			&IntFireBase::getThresh
 		);
 
+		static ElementValueFinfo< IntFireBase, double > vReset(
+			"vReset",
+			"voltage is set to vReset after firing",
+			&IntFireBase::setVReset,
+			&IntFireBase::getVReset
+		);
+
 		static ElementValueFinfo< IntFireBase, double > refractoryPeriod(
 			"refractoryPeriod",
 			"Minimum time between successive spikes",
@@ -59,6 +66,7 @@ const Cinfo* IntFireBase::initCinfo()
 
 	static Finfo* intFireFinfos[] = {
 		&thresh,				// Value
+		&vReset,				// Value
 		&refractoryPeriod,		// Value
 		&hasFired,				// ReadOnlyValue
 		&activation,			// DestFinfo
@@ -94,6 +102,7 @@ static const Cinfo* intFireBaseCinfo = IntFireBase::initCinfo();
 IntFireBase::IntFireBase()
 	:
 		threshold_( 0.0 ),
+		vReset_( 0.0 ),
 		activation_( 0.0 ),
 		refractT_( 0.0 ),
 		lastEvent_( 0.0 ),
@@ -114,6 +123,16 @@ void IntFireBase::setThresh( const Eref& e, double val )
 double IntFireBase::getThresh( const Eref& e ) const
 {
 	return threshold_;
+}
+
+void IntFireBase::setVReset( const Eref& e, double val )
+{
+	vReset_ = val;
+}
+
+double IntFireBase::getVReset( const Eref& e ) const
+{
+	return vReset_;
 }
 
 void IntFireBase::setRefractoryPeriod( const Eref& e, double val )
