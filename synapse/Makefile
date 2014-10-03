@@ -12,7 +12,9 @@ TARGET = _synapse.o
 OBJ = \
 	SynHandlerBase.o	\
 	SimpleSynHandler.o	\
+	STDPSynHandler.o	\
 	Synapse.o	\
+	STDPSynapse.o	\
 	testSynapse.o	\
 
 # GSL_LIBS = -L/usr/lib -lgsl
@@ -27,7 +29,9 @@ default: $(TARGET)
 $(OBJ)	: $(HEADERS)
 SynHandlerBase.o:	SynHandlerBase.h Synapse.h 
 SimpleSynHandler.o:	SynHandlerBase.h Synapse.h SimpleSynHandler.h
+STDPSynHandler.o:	SynHandlerBase.h STDPSynapse.h STDPSynHandler.h
 Synapse.o:	Synapse.h SynHandlerBase.h
+STDPSynapse.o:	STDPSynapse.h SynHandlerBase.h
 testSynapse.o: SynHandlerBase.h Synapse.h SimpleSynHandler.h
 
 .cpp.o:
