@@ -33,14 +33,6 @@ const Cinfo* SynHandlerBase::initCinfo()
 		&SynHandlerBase::setNumSynapses,
 		&SynHandlerBase::getNumSynapses
 	);
-	static FieldElementFinfo< SynHandlerBase, Synapse > synFinfo( 
-		"synapse",
-		"Sets up field Elements for synapse",
-		Synapse::initCinfo(),
-		&SynHandlerBase::getSynapse,
-		&SynHandlerBase::setNumSynapses,
-		&SynHandlerBase::getNumSynapses
-	);
 	//////////////////////////////////////////////////////////////////////
 	static DestFinfo process( "process",
 		"Handles 'process' call. Checks if any spike events are due for"
@@ -62,7 +54,6 @@ const Cinfo* SynHandlerBase::initCinfo()
 	//////////////////////////////////////////////////////////////////////
 	static Finfo* synHandlerFinfos[] = {
 		&numSynapses,		// Value
-		&synFinfo,			// FieldElement
 		activationOut(),	// SrcFinfo
 		&proc, 				// SharedFinfo
 	};
