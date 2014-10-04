@@ -47,7 +47,10 @@ GssaVoxelPools::GssaVoxelPools()
 {;}
 
 GssaVoxelPools::~GssaVoxelPools()
-{;}
+{
+	for ( unsigned int i = 0; i < rates_.size(); ++i )
+		delete( rates_[i] );
+}
 
 //////////////////////////////////////////////////////////////
 // Solver ops

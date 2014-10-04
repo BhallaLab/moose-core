@@ -243,6 +243,7 @@ Linear cable, 12 segments.
 	}
 	// cout << "GSL: " << checkAns( test, numCompts, &gslAns[0], &ones[0] ) << endl;
 	assert( checkAns( test, numCompts, &gslAns[0], &ones[0] ) < 1e-25 );
+	gsl_permutation_free( p );
 	gsl_vector_free( x );
 
 	cout << "." << flush;

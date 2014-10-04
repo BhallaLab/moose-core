@@ -337,8 +337,8 @@ Id Dsolve::getCompartment() const
 void Dsolve::makePoolMapFromElist( const vector< ObjId >& elist, 
 				vector< Id >& temp )
 {
-	unsigned int minId;
-	unsigned int maxId;
+	unsigned int minId = 0;
+	unsigned int maxId = 0;
 	temp.resize( 0 );
 	for ( vector< ObjId >::const_iterator 
 			i = elist.begin(); i != elist.end(); ++i ) {
