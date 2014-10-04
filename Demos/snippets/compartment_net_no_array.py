@@ -254,15 +254,17 @@ def make_synapses(spikegen, synchan, delay=5e-3):
     scount = len(spikegen)
     for ii, sid in enumerate(synchan): 
         s = moose.SynChan(sid)
-        s.synapse.num = scount
+        sh = moose.SimpleSynHandler( sid.path + "/synh" )
+        moose.connect( sh, "activationOut", s, "activation" )
+        sh.synapse.num = scount
         delay_list = np.random.normal(delay, delay*0.1, scount)
         # print delay_list
         for jj in range(scount): 
-            s.synapse[jj].delay = delay_list[jj]
+            sh.synapse[jj].delay = delay_list[jj]
             # Connect all spikegens to this synchan except that from
             # same compartment - we assume if parents are same the two belong to the same compartment
             if s.parent.path != spikegen[jj].parent.path:
-                m = moose.connect(spikegen[jj], 'spikeOut', moose.element(s.path + '/synapse'),  'addSpike')
+                m = moose.connect(spikegen[jj], 'spikeOut', moose.element(sh.path + '/synapse'),  'addSpike')
             
 def two_populations(size=2):
     """An example with two population connected via synapses."""

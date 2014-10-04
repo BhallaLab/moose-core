@@ -187,6 +187,8 @@ def createSpineWithReceptor( compt, cell, index, frac ):
     gluR.Gbar = 1e-6
     gluR.Ek= 10.0e-3
     moose.connect( head, 'channel', gluR, 'channel', 'Single' )
+    synh = moose.SimpleSynHandler( gluR.path + '/synh' )
+    moose.connect( synh, 'activationOut', gluR, 'activation' )
 
     caPool = moose.CaConc( head.path + '/ca' )
     caPool.CaBasal = 1e-4       # 0.1 micromolar
@@ -196,7 +198,7 @@ def createSpineWithReceptor( compt, cell, index, frac ):
     caPool.B = B
     moose.connect( gluR, 'IkOut', caPool, 'current', 'Single' )
 
-    return gluR
+    return synh
 
 def addPlot( objpath, field, plot ):
     assert moose.exists( objpath )
@@ -289,8 +291,6 @@ def createChemModel( neuroCompt, spineCompt, psdCompt ):
     turnOnPsd.Kb = 1
     toPsdEnz = moose.Enz( toPsd.path + '/enz' )
     toPsdEnzCplx = moose.Pool( toPsdEnz.path + '/cplx' )
-    mesh = moose.element( spineCompt.path + '/mesh' )
-    moose.connect( toPsdEnzCplx, 'mesh', mesh, 'mesh' )
     toPsdEnzCplx.concInit = 0
     moose.connect( toPsdEnz, 'enz', toPsd, 'reac', 'OneToOne' )
     moose.connect( toPsdEnz, 'sub', headGluR, 'reac', 'OneToOne' )
@@ -306,8 +306,6 @@ def createChemModel( neuroCompt, spineCompt, psdCompt ):
     # Stuff in dendrite
     dendCa = createPool( neuroCompt, 'Ca', 1e-4 )
     bufCa = moose.Pool( neuroCompt.path + '/bufCa' )
-    mesh = moose.element( neuroCompt.path + '/mesh' )
-    moose.connect( mesh, 'mesh', bufCa, 'mesh', 'Single' )
     bufCa.concInit = 1e-4
     pumpCa = moose.Reac( neuroCompt.path + '/pumpCa' )
     moose.connect( pumpCa, 'sub', dendCa, 'reac', 'OneToOne' )
@@ -324,7 +322,6 @@ def createChemModel( neuroCompt, spineCompt, psdCompt ):
     dendTurnOnKinase.Kb = 1
     dendKinaseEnz = moose.Enz( dendKinase.path + '/enz' )
     dendKinaseEnzCplx = moose.Pool( dendKinase.path + '/enz/cplx' )
-    moose.connect( dendKinaseEnzCplx, 'mesh', mesh, 'mesh' )
     kChan = createPool( neuroCompt, 'kChan', 1e-3 )
     kChan_p = createPool( neuroCompt, 'kChan_p', 0.0 )
     moose.connect( dendKinaseEnz, 'enz', dendKinase, 'reac', 'OneToOne' )
@@ -401,9 +398,12 @@ def makeChemInCubeMesh():
 def makeSolvers( elecDt ):
         # Put in the solvers, see how they fare.
         # Here we kludge in a single chem solver for the whole system.
-        ksolve = moose.GslStoich( '/model/ksolve' )
-        ksolve.path = '/model/chem/##'
-        ksolve.method = 'rk5'
+        ksolve = moose.Ksolve( '/model/ksolve' )
+        stoich = moose.Stoich( '/model/stoich' )
+        stoich.compartment = moose.element( '/model/chem/neuroMesh' )
+        stoich.ksolve = ksolve
+        stoich.path = '/model/chem/##'
+        #stoich.method = 'rk5'
         moose.useClock( 5, '/model/ksolve', 'init' )
         moose.useClock( 6, '/model/ksolve', 'process' )
         # Here is the elec solver
@@ -440,7 +440,7 @@ def makeCubeMultiscale():
         path = '/model/elec/head' + str( i ) + '/ca'
         elecCa = moose.element( path )
         moose.connect( elecCa, 'concOut', adaptCa, 'input', 'Single' )
-    moose.connect( adaptCa, 'outputSrc', headCa, 'setConc' )
+    moose.connect( adaptCa, 'output', headCa, 'setConc' )
     adaptCa.outputOffset = 0.0001    # 100 nM offset in chem.
     adaptCa.scale = 0.05             # 0.06 to 0.003 mM
 
@@ -452,9 +452,9 @@ def makeCubeMultiscale():
     elec2R = moose.element( '/model/elec/head2/gluR' )
     elec3R = moose.element( '/model/elec/head3/gluR' )
     moose.connect( adaptGluR, 'requestOut', chemR, 'getN', 'OneToAll' )
-    moose.connect( adaptGluR, 'outputSrc', elec1R, 'setGbar', 'OneToAll' )
-    moose.connect( adaptGluR, 'outputSrc', elec2R, 'setGbar', 'OneToAll' )
-    moose.connect( adaptGluR, 'outputSrc', elec3R, 'setGbar', 'OneToAll' )
+    moose.connect( adaptGluR, 'output', elec1R, 'setGbar', 'OneToAll' )
+    moose.connect( adaptGluR, 'output', elec2R, 'setGbar', 'OneToAll' )
+    moose.connect( adaptGluR, 'output', elec3R, 'setGbar', 'OneToAll' )
     adaptGluR.outputOffset = 1e-9    # pS
     adaptGluR.scale = 1e-8 / 100    # from n to pS
 
@@ -462,7 +462,7 @@ def makeCubeMultiscale():
     chemK = moose.element( '/model/chem/neuroMesh/kChan' )
     elecK = moose.element( '/model/elec/compt/K' )
     moose.connect( adaptK, 'requestOut', chemK, 'getConc', 'OneToAll' )
-    moose.connect( adaptK, 'outputSrc', elecK, 'setGbar', 'OneToAll' )
+    moose.connect( adaptK, 'output', elecK, 'setGbar', 'OneToAll' )
     adaptK.scale = 0.3               # from mM to Siemens
 
 
