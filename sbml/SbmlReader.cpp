@@ -36,7 +36,7 @@
 #include "../shell/Wildcard.h"
 //#include "../manager/SimManager.h"
 #include "SbmlReader.h"
-#include "../kinetics/FuncPool.h"
+//#include "../kinetics/FuncPool.h"
 #include "../external/debug/simple_logger.hpp"
 
 using namespace std;
@@ -148,7 +148,7 @@ Id SbmlReader::read( string filename, string location, string solverClass)
                                 //double nodeValue;
                                 if(nodeName == "plots") {
                                     Id graphs;
-                                    // Carrying on with the policy that all graphs will be created under /model/modelName
+                                    // Carrying on with the policy that all graphs will be created under /modelName
                                     string datapath = baseId_.path() +"/data";
                                     Id graphpath(datapath);
                                     graphs = datapath;
@@ -493,11 +493,15 @@ void SbmlReader::getRules() {
             if (v_iter != molSidMIdMap_.end()) {
                 Id rVariable = molSidMIdMap_.find(rule_variable)->second;
                 string rstring =molSidMIdMap_.find(rule_variable)->first;
-                Id sumId = shell->doCreate( "SumFunc", rVariable, "func", 1 );
-                rVariable.element()->zombieSwap( FuncPool::initCinfo() );
+                //Id sumId = shell->doCreate( "SumFunc", rVariable, "func", 1 );
+                Id sumId = shell->doCreate( "Function", rVariable, "func", 1 );
+                //rVariable.element()->zombieSwap( FuncPool::initCinfo() );
+                //ObjId ret = shell->doAddMsg( "single",
+                //                             ObjId( sumId, 0 ), "output",
+                //                             ObjId( rVariable, 0 ), "input" );
                 ObjId ret = shell->doAddMsg( "single",
-                                             ObjId( sumId, 0 ), "output",
-                                             ObjId( rVariable, 0 ), "input" );
+                                             ObjId( sumId, 0 ), "valueOut",
+                                             ObjId( rVariable, 0 ), "setN" );
                 assert( ret != ObjId() );
                 const ASTNode * ast = rule->getMath();
                 vector< string > ruleMembers;
