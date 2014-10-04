@@ -13,7 +13,6 @@ OBJ = \
 	PoolBase.o	\
 	Pool.o	\
 	BufPool.o	\
-	FuncPool.o	\
 	ReacBase.o	\
 	Reac.o	\
 	EnzBase.o	\
@@ -24,11 +23,6 @@ OBJ = \
 	ReadKkit.o	\
 	WriteKkit.o	\
 	ReadCspace.o	\
-	SumTotalTerm.o	\
-	MathFuncTerm.o	\
-	FuncBase.o	\
-	MathFunc.o	\
-	SumFunc.o	\
 	lookupVolumeFromMesh.o	\
 	testKinetics.o	\
 
@@ -40,7 +34,6 @@ default: $(TARGET)
 $(OBJ)	: $(HEADERS)
 Pool.o:	PoolBase.h Pool.h lookupVolumeFromMesh.h
 BufPool.o:	PoolBase.h Pool.h BufPool.h lookupVolumeFromMesh.h
-FuncPool.o:	PoolBase.h Pool.h FuncPool.h lookupVolumeFromMesh.h
 ReacBase.o:	ReacBase.h lookupVolumeFromMesh.h
 Reac.o:	ReacBase.h Reac.h lookupVolumeFromMesh.h
 EnzBase.o:	EnzBase.h lookupVolumeFromMesh.h
@@ -49,14 +42,9 @@ Enz.o:	EnzBase.h CplxEnzBase.h Enz.h lookupVolumeFromMesh.h
 MMenz.o:	EnzBase.h MMenz.h  lookupVolumeFromMesh.h
 Boundary.o:	Boundary.h
 Species.o:	Species.h
-ReadKkit.o:	lookupVolumeFromMesh.h ReadKkit.h PoolBase.h Pool.h FuncPool.h ../shell/Shell.h 
+ReadKkit.o:	lookupVolumeFromMesh.h ReadKkit.h PoolBase.h Pool.h ../shell/Shell.h 
 WriteKkit.o:	lookupVolumeFromMesh.h PoolBase.h
 ReadCspace.o:	lookupVolumeFromMesh.h ReadCspace.h ../shell/Shell.h
-FuncBase.o:	FuncBase.h
-MathFunc.o:	MathFunc.h
-MathFuncTerm.o:	MathFunc.h MathFuncTerm.h
-SumTotalTerm.o: FuncTerm.h SumTotalTerm.h
-SumFunc.o:	FuncBase.h SumFunc.h FuncTerm.h SumTotalTerm.h
 lookupVolumeFromMesh.o: lookupVolumeFromMesh.h
 testKinetics.o:	ReadKkit.h
 

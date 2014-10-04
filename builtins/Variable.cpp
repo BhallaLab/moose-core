@@ -91,7 +91,7 @@ static const Cinfo * variableCinfo = Variable::initCinfo();
 
 void Variable::addMsgCallback(const Eref& e, const string& finfoName, ObjId msg, unsigned int msgLookup)
 {
-    if (finfoName == "setVar"){
+    if (finfoName == "input"){
         ObjId pa = Neutral::parent(e);
         Function * fn = reinterpret_cast< Function *>(pa.data());
         unsigned int varNumber = fn->addVar();
@@ -104,7 +104,7 @@ void Variable::addMsgCallback(const Eref& e, const string& finfoName, ObjId msg,
 //     const Eref& e, const string& finfoName, 
 //     ObjId msg, unsigned int msgLookup )
 // {
-// 	if ( finfoName == "setVar" ) {
+// 	if ( finfoName == "input" ) {
 // 		ObjId pa = Neutral::parent( e );
 // 		SynHandlerBase* sh = 
 // 				reinterpret_cast< Function* >( pa.data() );
