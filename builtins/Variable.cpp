@@ -56,14 +56,14 @@ const Cinfo * Variable::initCinfo()
         "Variable value",
         &Variable::setValue,
         &Variable::getValue);
-    static DestFinfo assignValue(
-        "setVar",
+    static DestFinfo input(
+        "input",
         "Handles incoming variable value.",
         new EpFunc1< Variable, double >( &Variable::epSetValue ));
     
     static Finfo * variableFinfos[] = {
         &value,
-        &assignValue
+        &input
     };
     static string doc[] = {
         "Name", "Variable",
