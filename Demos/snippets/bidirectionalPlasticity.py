@@ -41,7 +41,7 @@ def main():
     #method = 'gsl'	# This is a Runge-Kutta-Fehlberg ODE solver
     #gssa turns off only about 20% of the time, perhaps a longer turnoff
     # stimulus time would increase this.
-    method = 'gssa'  # This is the Gillespie Stoichastic Systems Algorithm
+    method = 'old_gssa'  # This is the Gillespie Stoichastic Systems Algorithm
     # Load in the model and set up to use the gsl solver.
     modelId = moose.loadModel( './stargazin_synapse.g', 'model', method )
     moose.start( 1000.0 ) # Run the model for 1000 seconds.
