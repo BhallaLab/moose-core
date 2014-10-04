@@ -4,7 +4,7 @@ add_library(kinetics
 	PoolBase.cpp	
 	Pool.cpp	
 	BufPool.cpp	
-	FuncPool.cpp	
+	#FuncPool.cpp	
 	ReacBase.cpp	
 	Reac.cpp	
 	EnzBase.cpp	
@@ -15,11 +15,11 @@ add_library(kinetics
 	ReadKkit.cpp	
 	WriteKkit.cpp	
 	ReadCspace.cpp	
-	SumTotalTerm.cpp	
-	MathFuncTerm.cpp	
-	FuncBase.cpp	
-	MathFunc.cpp	
-	SumFunc.cpp	
+	#SumTotalTerm.cpp	
+	#MathFuncTerm.cpp	
+	#FuncBase.cpp	
+	#MathFunc.cpp	
+	#SumFunc.cpp	
 	lookupVolumeFromMesh.cpp	
 	testKinetics.cpp	
         )
