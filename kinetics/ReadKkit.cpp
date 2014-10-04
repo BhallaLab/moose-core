@@ -14,7 +14,6 @@
 #include "../utility/utility.h"
 #include "PoolBase.h"
 #include "Pool.h"
-#include "FuncPool.h"
 #include "BufPool.h"
 #include "ReacBase.h"
 #include "EnzBase.h"
@@ -1030,38 +1029,44 @@ void ReadKkit::buildSumTotal( const string& src, const string& dest )
 	assert( i != poolIds_.end() );
 	Id destId = i->second;
 	
-	// Don't bother on buffered pool.
-	if ( destId.element()->cinfo()->isA( "BufPool" ) ) 
-		return;
-
 	Id sumId;
 	// Check if the pool has not yet been converted to handle SumTots.
 	if ( destId.element()->cinfo()->name() == "Pool" ) {
-		sumId = shell_->doCreate( "SumFunc", destId, "func", 1 );
+		sumId = shell_->doCreate( "Function", destId, "func", 1 );
 		// Turn dest into a FuncPool.
-		destId.element()->zombieSwap( FuncPool::initCinfo() );
+		destId.element()->zombieSwap( BufPool::initCinfo() );
 
 		ObjId ret = shell_->doAddMsg( "single", 
-			ObjId( sumId, 0 ), "output",
-			ObjId( destId, 0 ), "input" ); 
+			ObjId( sumId, 0 ), "valueOut",
+			ObjId( destId, 0 ), "setN" ); 
 		assert( ret != ObjId() );
 	} else {
 		sumId = Neutral::child( destId.eref(), "func" );
 	}
 
 	if ( sumId == Id() ) {
-		cout << "Error: ReadKkit::buildSumTotal: could not make SumFunc on '"
+		cout << "Error: ReadKkit::buildSumTotal: could not make Function on '"
 		<< dest << "'\n";
 		return;
 	}
 	
 	Id srcId = findSumTotSrc( src );
+	unsigned int numVars = Field< unsigned int >::get( sumId, "numVars" );
+	ObjId xi( sumId.value() + 1, 0, numVars );
+	Field< unsigned int >::set( sumId, "numVars", numVars + 1 );
 
 	ObjId ret = shell_->doAddMsg( "single", 
 		ObjId( srcId, 0 ), "nOut",
-		ObjId( sumId, 0 ), "input" ); 
+		xi, "input" ); 
 	assert( ret != ObjId() );
 
+
+	stringstream ss;
+	for ( unsigned int i = 0; i < numVars; ++i ) {
+		ss << "x" << i << "+";
+	}
+	ss << "x" << numVars;
+	Field< string >::set( sumId, "expr", ss.str() );
 }
 
 /**

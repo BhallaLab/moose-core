@@ -9,6 +9,7 @@
 #include "header.h"
 #include "../shell/Shell.h"
 #include "RateTerm.h"
+#include "muParser.h"
 #include "FuncTerm.h"
 #include "SparseMatrix.h"
 #include "KinSparseMatrix.h"
@@ -44,8 +45,9 @@ Id makeReacTest()
 	Id C = pools[i++] = s->doCreate( "Pool", kin, "C", 1 );
 	Id D = pools[i++] = s->doCreate( "Pool", kin, "D", 1 );
 	Id E = pools[i++] = s->doCreate( "Pool", kin, "E", 1 );
-	Id tot1 = pools[i++] = s->doCreate( "FuncPool", kin, "tot1", 1 );
-	Id sum = s->doCreate( "SumFunc", tot1, "func", 1 ); // Silly that it has to have this name. 
+	Id tot1 = pools[i++] = s->doCreate( "BufPool", kin, "tot1", 1 );
+	Id sum = s->doCreate( "Function", tot1, "func", 1 ); // Silly that it has to have this name. 
+	Id sumInput( sum.value() + 1 );
 	Id e1Pool = s->doCreate( "Pool", kin, "e1Pool", 1 );
 	Id e2Pool = s->doCreate( "Pool", kin, "e2Pool", 1 );
 	Id e1 = s->doCreate( "Enz", e1Pool, "e1", 1 );
@@ -53,7 +55,7 @@ Id makeReacTest()
 	Id e2 = s->doCreate( "MMenz", e2Pool, "e2", 1 );
 	Id r1 = s->doCreate( "Reac", kin, "r1", 1 );
 	Id r2 = s->doCreate( "Reac", kin, "r2", 1 );
-	Id plots = s->doCreate( "Table", kin, "plots", 7 );
+	Id plots = s->doCreate( "Table2", kin, "plots", 7 );
 
 	// Connect them up
 	s->doAddMsg( "Single", tab, "output", T, "setN" );
@@ -62,9 +64,10 @@ Id makeReacTest()
 	s->doAddMsg( "Single", r1, "sub", A, "reac" );
 	s->doAddMsg( "Single", r1, "prd", B, "reac" );
 
-	s->doAddMsg( "Single", A, "nOut", sum, "input" );
-	s->doAddMsg( "Single", B, "nOut", sum, "input" );
-	s->doAddMsg( "Single", sum, "output", tot1, "input" );
+	Field< unsigned int >::set( sum, "numVars", 2 );
+	s->doAddMsg( "Single", A, "nOut", ObjId( sumInput, 0, 0 ), "input" );
+	s->doAddMsg( "Single", B, "nOut", ObjId( sumInput, 0, 1 ), "input" );
+	s->doAddMsg( "Single", sum, "valueOut", tot1, "setN" );
 
 	s->doAddMsg( "Single", r2, "sub", B, "reac" );
 	s->doAddMsg( "Single", r2, "sub", B, "reac" );
@@ -83,6 +86,7 @@ Id makeReacTest()
 	Field< double >::set( A, "concInit", 2 );
 	Field< double >::set( e1Pool, "concInit", 1 );
 	Field< double >::set( e2Pool, "concInit", 1 );
+	Field< string >::set( sum, "expr", "x0+x1" );
 	Field< double >::set( r1, "Kf", 0.2 );
 	Field< double >::set( r1, "Kb", 0.1 );
 	Field< double >::set( r2, "Kf", 0.1 );
@@ -110,6 +114,10 @@ Id makeReacTest()
 						"requestOut", pools[i], "getConc" );
 
 	// Schedule it.
+	for ( unsigned int i = 11; i < 18; ++i )
+		s->doSetClock( i, simDt );
+	s->doSetClock( 18, plotDt );
+	/*
 	s->doUseClock( "/kinetics/##[ISA=Reac],/kinetics/##[ISA=EnzBase],/kinetics/##[ISA=SumFunc]",
 					"process", 4 );
 	s->doUseClock( "/kinetics/##[ISA=PoolBase]", "process", 5 );
@@ -119,6 +127,7 @@ Id makeReacTest()
 	s->doSetClock( 4, simDt );
 	s->doSetClock( 5, simDt );
 	s->doSetClock( 8, plotDt );
+	*/
 	return kin;
 }
 
@@ -297,12 +306,37 @@ void testRunGsolve()
 	cout << "." << flush;
 }
 
+void testFuncTerm()
+{
+	FuncTerm ft;
+	ft.setExpr( "x0 + x1 * t" );
+	double args[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+
+	// First check that it doesn't die even if we forget to set up anything.
+	double ans = ft( args, 2.0 );
+
+	vector< unsigned int > mol( 2, 0 );
+	mol[0] = 2;
+	mol[1] = 0;
+	ft.setReactantIndex( mol );
+
+	ans = ft( args, 10.0 );
+	assert( doubleEq( ans, 13.0 ) );
+	mol[0] = 0;
+	mol[1] = 9;
+	ft.setReactantIndex( mol );
+	ans = ft( args, 2.0 );
+	assert( doubleEq( ans, 21.0 ) );
+	cout << "." << flush;
+}
+
 void testKsolve()
 {
 	testSetupReac();
 	testBuildStoich();
 	testRunKsolve();
 	testRunGsolve();
+	testFuncTerm();
 }
 
 void testKsolveProcess()

@@ -230,6 +230,7 @@ const Cinfo * Function::initCinfo()
                 &derivative,
                 &mode,
                 &expr,
+                &numVars,
                 &inputs,
                 &constants,
                 &independent,
@@ -250,7 +251,7 @@ const Cinfo * Function::initCinfo()
                 " and/or its derivative for specified variable values."                
                 " The variables can be input from other moose objects."
                 " Such variables must be named `x{i}` in the expression and the source"
-                " field is connected to Function.x[i]'s setVar destination field."
+                " field is connected to Function.x[i]'s input destination field."
                 " In case the input variable is not available as a source field, but is"
                 " a value field, then the value can be requested by connecting the"
                 " `requestOut` message to the `get{Field}` destination on the target"
