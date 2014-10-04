@@ -57,11 +57,11 @@ void GssaVoxelPools::updateDependentMathExpn(
 				const GssaSystem* g, unsigned int rindex )
 {
 	const vector< unsigned int >& deps = g->dependentMathExpn[ rindex ];
-	unsigned int offset = g->stoich->getNumVarPools() + 
-			g->stoich->getNumBufPools();
 	for( vector< unsigned int >::const_iterator 
 			i = deps.begin(); i != deps.end(); ++i ) {
-		varS()[ *i + offset] = g->stoich->funcs( *i )->operator()( S(), t_);
+			// Future fix: Need to get current time in here.
+			g->stoich->funcs( *i )->evalPool( varS(), 0.0 );
+		// varS()[ *i + offset] = g->stoich->funcs( *i )->operator()( S(), t_);
 	}
 }
 

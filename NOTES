@@ -5186,3 +5186,9 @@ Now that mostly works but the sumtotal isn't computing its value at reinit.
 Otherwise seems good.
 
 =============================================================================
+4 Oct 2014
+Added in fix for stochastic calculations that use functions (sumtotals).
+This fixes a problem with the bidirectionalPlasticity model.
+
+Valgrind seems very unhappy about the MOOSE unit tests, will tackle next.
+
