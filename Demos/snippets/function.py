@@ -69,7 +69,7 @@ def example():
 
     The `xi`'s are field elements and you have to set their number
     first (function.x.num = N). Then you can connect any source field
-    sending out double to the 'setVar' destination field of the
+    sending out double to the 'input' destination field of the
     `x[i]`.
 
     The `yi`'s are useful when the required variable is a value field
@@ -125,7 +125,7 @@ def example():
     input_x.startTime = 0.0
     input_x.stepPosition = xarr[0]
     input_x.stopTime = simtime
-    moose.connect(input_x, 'output', function.x[0], 'setVar')
+    moose.connect(input_x, 'output', function.x[0], 'input')
     
     yarr = np.linspace(-np.pi, np.pi, nsteps)
     input_y = moose.StimulusTable('/ytab')
