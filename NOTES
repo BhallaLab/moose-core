@@ -5192,3 +5192,5 @@ This fixes a problem with the bidirectionalPlasticity model.
 
 Valgrind seems very unhappy about the MOOSE unit tests, will tackle next.
 
+Cleaned up most of the mess with memory and other things. A couple of
+small leaks remain.

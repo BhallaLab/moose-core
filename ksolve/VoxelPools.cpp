@@ -177,8 +177,7 @@ void VoxelPools::updateRates( const double* s, double* yprime ) const
 	unsigned int totVar = stoichPtr_->getNumVarPools() + 
 			stoichPtr_->getNumProxyPools();
 	// totVar should include proxyPools if this voxel does not use them
-	unsigned int totInvar = stoichPtr_->getNumBufPools() + 
-			stoichPtr_->getNumFuncs();
+	unsigned int totInvar = stoichPtr_->getNumBufPools();
 	assert( N.nRows() == 
 			stoichPtr_->getNumAllPools() + stoichPtr_->getNumProxyPools() );
 	assert( N.nColumns() == rates_.size() );

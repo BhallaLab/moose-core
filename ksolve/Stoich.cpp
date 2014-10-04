@@ -245,6 +245,10 @@ Stoich::~Stoich()
 		j != rates_.end(); ++j )
 		delete *j;
 
+	for ( vector< FuncTerm* >::iterator j = funcs_.begin();
+		j != funcs_.end(); ++j )
+		delete *j;
+
 	/*
 	 * Do NOT delete FuncTerms, they are just pointers stolen from
 	 * the non-zombified objects.
