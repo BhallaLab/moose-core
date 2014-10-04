@@ -14,9 +14,6 @@ def main():
 		# This command loads the file into the path '/model', and tells
 		# the system to use the gsl solver.
 		modelId = moose.loadModel( 'Osc.cspace', 'model', 'gsl' )
-		moose.useClock( 4, "/model/kinetics/##[]", "process" )
-		moose.setClock( 4, 0.05 )
-		moose.setClock( 8, 1 )
 		moose.reinit()
 		moose.start( 3000.0 ) # Run the model for 300 seconds.
 

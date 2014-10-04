@@ -5171,5 +5171,18 @@ Harsha:
 =============================================================================
 2. Oct. 
 Fixed problem with non-integral poll Ns. This cures scaleVolumes.py. 
+Unfortunately the issue with the stargazin model in bidirectionalPlasticity.py
+remains. Defer.
+
+=============================================================================
+3 Oct
+Massive rewrite in progress to remove FuncPool and the old FuncTerm stuff,
+replacing it with code based on the muParser. Not pretty but will vastly
+expand the kinds of models supported, and flexibility.
+
+Now it compiles and clears unit tests, but fails to work in loadKineticModel.py
+
+Now that mostly works but the sumtotal isn't computing its value at reinit.
+Otherwise seems good.
 
 =============================================================================

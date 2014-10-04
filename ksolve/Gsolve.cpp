@@ -363,9 +363,8 @@ void Gsolve::fillMathDep()
 	unsigned int numFuncs = stoichPtr_->getNumFuncs();
 	for ( unsigned int i = 0; i < numFuncs; ++i ) {
 		const FuncTerm *f = stoichPtr_->funcs( i );
-		vector< unsigned int > molIndex;
-		unsigned int numMols = f->getReactants( molIndex );
-		for ( unsigned int j = 0; j < numMols; ++j )
+		vector< unsigned int > molIndex = f->getReactantIndex();
+		for ( unsigned int j = 0; j < molIndex.size(); ++j )
 			funcMap[ molIndex[j] ].push_back( i );
 	}
 	// The output of each func is a mol indexed as 

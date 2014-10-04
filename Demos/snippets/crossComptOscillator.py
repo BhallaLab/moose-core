@@ -68,6 +68,7 @@ def main():
         moose.le( '/model/compartment_1' )
         #moose.element( '/model/kinetics/A/M_p' ).nInit = 1234
         #moose.element( '/model/compartment_1/M' ).nInit = 5678
+        '''
         moose.setClock( 0, simDt )
         moose.setClock( 1, simDt )
         moose.setClock( 2, simDt )
@@ -80,6 +81,7 @@ def main():
         moose.setClock( 9, simDt )
         moose.useClock( 5, '/model/#/ksolve', 'init' )
         moose.useClock( 6, '/model/#/ksolve', 'process' )
+        '''
 	moose.reinit()
 	moose.start( runtime ) 
 
