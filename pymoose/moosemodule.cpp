@@ -1334,6 +1334,7 @@ extern "C" {
     {
         PyObject * obj;
         bool isId_ = false;
+        bool isObjId_ = false;
         if (!PyArg_ParseTuple(args, "O:moose.delete", &obj)){
             return NULL;
         }
@@ -1341,28 +1342,32 @@ extern "C" {
         //     PyErr_SetString(PyExc_TypeError, "vec instance expected");
         //     return NULL;
         // }
-        Id id_;
+        ObjId oid_;
         if (PyObject_IsInstance(obj, (PyObject*)&IdType)){
-            id_ = ((_Id*)obj)->id_;
+            oid_ = ((_Id*)obj)->id_;
             isId_ = true;
         } else if (PyObject_IsInstance(obj, (PyObject*)&ObjIdType)){
-            id_ = (((_ObjId*)obj)->oid_).id;
+            oid_ = ((_ObjId*)obj)->oid_;
+            isObjId_ = true;
         } else if (PyString_Check(obj)){
-            id_ = Id(PyString_AsString(obj));
+            oid_ = ObjId(PyString_AsString(obj));
         } else {
             PyErr_SetString(PyExc_ValueError, "cannot delete moose shell.");
             return NULL;
         }
-        if (id_ == Id()){
+        if (oid_ == ObjId()){
             PyErr_SetString(PyExc_ValueError, "cannot delete moose shell.");
             return NULL;
         }
-        if (!Id::isValid(id_)){
+        if ( oid_.bad() ){
             RAISE_INVALID_ID(NULL, "moose_delete");
         }
-        deleteId(id_);
+        deleteObjId(oid_);
         if (isId_){
             ((_Id*)obj)->id_ = Id();
+        }
+        if (isObjId_){
+            ((_ObjId*)obj)->oid_ = ObjId();
         }
         // SHELLPTR->doDelete(((_Id*)obj)->id_);
         Py_RETURN_NONE;
