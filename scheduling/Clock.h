@@ -27,6 +27,7 @@ class Clock
 	friend void testClock();
 	public:
 		Clock();
+		~Clock();
 
 		//////////////////////////////////////////////////////////
 		//  Field assignment functions

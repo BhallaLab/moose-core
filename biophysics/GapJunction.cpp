@@ -153,12 +153,13 @@ const Cinfo* GapJunction::initCinfo()
         "compartment."
     };
 
+	static Dinfo< GapJunction > dinfo;
     static Cinfo gapJunctionCinfo(
         "GapJunction",
         Neutral::initCinfo(),
         gapJunctionFinfos,
         sizeof(gapJunctionFinfos)/sizeof(Finfo*),
-        new Dinfo< GapJunction >(),
+		&dinfo,
         doc,
         sizeof(doc) / sizeof(string));
     return &gapJunctionCinfo;

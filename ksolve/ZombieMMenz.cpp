@@ -31,12 +31,20 @@ const Cinfo* ZombieMMenz::initCinfo()
 		// Shared Msg Definitions
 		//////////////////////////////////////////////////////////////
 
+    static string doc[] = {
+        "Name", "ZombieMMenz",
+        "Author", "Upi Bhalla",
+        "Description", "Zombie class for MM (Michaelis-Menten) enzyme."
+	};
+	static Dinfo< ZombieMMenz > dinfo;
 	static Cinfo zombieMMenzCinfo (
 		"ZombieMMenz",
 		EnzBase::initCinfo(),
 		0,
 		0,
-		new Dinfo< ZombieMMenz >()
+		&dinfo,
+        doc,
+        sizeof(doc)/sizeof(string)
 	);
 
 	return &zombieMMenzCinfo;
