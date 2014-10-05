@@ -83,13 +83,16 @@ const Cinfo* VectorTable::initCinfo()
 		"varies with either membrane voltage or ligand concentration."
 	};
 
+	static Dinfo< VectorTable > dinfo;
 	static Cinfo VectorTableCinfo(
 		"VectorTable",
 		Neutral::initCinfo(),
 		vectorTableFinfos,
 		sizeof( vectorTableFinfos )/sizeof( Finfo* ),
-		new Dinfo< VectorTable >()
-		);
+		&dinfo,
+		doc,
+		sizeof( doc ) / sizeof( string )
+	);
 
 	return &VectorTableCinfo;
 }
