@@ -177,12 +177,13 @@ const Cinfo * VClamp::initCinfo()
         "\n",
     };
     
+    static Dinfo< VClamp > dinfo;
     static Cinfo vclampCinfo(
         "VClamp",
         Neutral::initCinfo(),
         vclampFinfos,
         sizeof(vclampFinfos) / sizeof(Finfo*),
-        new Dinfo< VClamp >(),
+		&dinfo,
         doc,
         sizeof(doc)/sizeof(string));
 

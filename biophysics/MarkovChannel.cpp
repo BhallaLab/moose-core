@@ -108,15 +108,16 @@ const Cinfo* MarkovChannel::initCinfo()
                 "obtained from the assumptions above."
 	};
 
+	static Dinfo< MarkovChannel > dinfo;
 	static Cinfo MarkovChannelCinfo(
 		"MarkovChannel",
 		ChanBase::initCinfo(),
 		MarkovChannelFinfos,
 		sizeof( MarkovChannelFinfos )/ sizeof( Finfo* ),
-		new Dinfo< MarkovChannel >(),
-                doc,
-                sizeof(doc) / sizeof(string)
-		);
+		&dinfo,
+        doc,
+        sizeof(doc) / sizeof(string)
+	);
 
 	return &MarkovChannelCinfo;
 }

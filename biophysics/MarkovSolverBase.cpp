@@ -164,13 +164,22 @@ const Cinfo* MarkovSolverBase::initCinfo()
 		&invdy							//ReadOnlyValueFinfo
 	};
 
+	static string doc[] = 
+	{
+		"Name", "MarkovSolverBase",
+		"Author", "Vishaka Datta S, 2011, NCBS",
+		"Description", "Solver for Markov Channel." 
+	};
+	static Dinfo< MarkovSolverBase > dinfo;
 	static Cinfo markovSolverBaseCinfo(
 			"MarkovSolverBase",			
 			Neutral::initCinfo(),
 			markovSolverFinfos,
 			sizeof( markovSolverFinfos ) / sizeof( Finfo* ),
-			new Dinfo< MarkovSolverBase > 
-			);
+			&dinfo,
+        	doc,
+        	sizeof(doc) / sizeof(string)
+		);
 
 	return &markovSolverBaseCinfo;
 }
@@ -441,7 +450,8 @@ Vector* MarkovSolverBase::linearInterpolate() const
 void MarkovSolverBase::computeState( )
 {
 	Vector* newState;
-	bool useBilinear = false, useLinear = false;
+	bool useBilinear = false;
+    // useLinear = false;
 
 	if ( rateTable_->areAnyRates2d() || 
 			( rateTable_->areAllRates1d() && 
@@ -451,11 +461,13 @@ void MarkovSolverBase::computeState( )
 	{
 		useBilinear = true;
 	}
+	/*
 	else if ( rateTable_->areAllRatesVoltageDep() ||
 						rateTable_->areAllRatesLigandDep() )
 	{
 		useLinear = true;
 	}
+	*/
 
 	//Heavily borrows from the Interpol2D::interpolate function.
 	if ( useBilinear ) 

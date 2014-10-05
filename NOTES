@@ -5194,3 +5194,10 @@ Valgrind seems very unhappy about the MOOSE unit tests, will tackle next.
 
 Cleaned up most of the mess with memory and other things. A couple of
 small leaks remain.
+
+Possibly should expand ~Clock. Check if the Clock id at is the root 
+id of clock, and then delete the new-created objs.
+
+=============================================================================
+5 Oct 2014.
+Further grinding through leaks. Now Valgrind is happy.
