@@ -5200,4 +5200,11 @@ id of clock, and then delete the new-created objs.
 
 =============================================================================
 5 Oct 2014.
-Further grinding through leaks. Now Valgrind is happy.
+Further grinding through leaks. Now Valgrind is happy. Checkin 5901.
+
+Trying to fix the problem Harsha reported with deleting messages. This
+was far more involved than expected, including code in MooseModule etc which
+was using Ids rather than ObjIds for deleting. I think it is OK but I'll
+consult Subha.
+
+=============================================================================
