@@ -76,9 +76,19 @@ const Cinfo* Shell::initCinfo()
 	static DestFinfo handleCreate( "create", 
 			"create( class, parent, newElm, name, numData, isGlobal )",
 			new EpFunc6< Shell, string, ObjId, Id, string, NodeBalance, unsigned int >( &Shell::handleCreate ) );
+
 	static DestFinfo handleDelete( "delete", 
-			"Destroys Element, all its messages, and all its children. Args: Id",
-			new EpFunc1< Shell, Id >( & Shell::destroy ) );
+			"When applied to a regular object, this function operates "
+			"on the Id (element) specified by the ObjId argument. "
+			"The function deletes the entire object "
+			"array on this Id, including all dataEntries on it,"
+			"all its messages, and all its children. The DataIndex here "
+			"is ignored, and all dataEntries are destroyed. \n"
+			"When applied to a message: Destroys only that one specific "
+			"message identified by the full ObjId. \n"
+			"Args: ObjId\n",
+			new EpFunc1< Shell, ObjId >( & Shell::destroy ) );
+
 	static DestFinfo handleAddMsg( "addMsg", 
 			"Makes a msg. Arguments are:"
 			" msgtype, src object, src field, dest object, dest field",
@@ -245,9 +255,9 @@ Id Shell::doCreate( string type, ObjId parent, string name,
 	return Id();
 }
 
-bool Shell::doDelete( Id id )
+bool Shell::doDelete( ObjId oid )
 {
-	SetGet1< Id >::set( ObjId(), "delete", id );
+	SetGet1< ObjId >::set( ObjId(), "delete", oid );
 	/*
 	Neutral n;
 	n.destroy( i.eref(), 0 );
@@ -746,16 +756,14 @@ void Shell::innerCreate( string type, ObjId parent, Id newElm, string name,
 	}
 }
 
-void Shell::destroy( const Eref& e, Id eid)
+void Shell::destroy( const Eref& e, ObjId oid)
 {
 	Neutral *n = reinterpret_cast< Neutral* >( e.data() );
 	assert( n );
 	// cout << myNode_ << ": Shell::destroy done for element id: " << eid << ", name = " << eid.element()->getName() << endl;
-	n->destroy( eid.eref(), 0 );
-	if ( cwe_.id == eid )
+	n->destroy( oid.eref(), 0 );
+	if ( cwe_.id == oid.id )
 		cwe_ = ObjId();
-
-	// ack()->send( e, Shell::myNode(), OkStatus );
 }
 
 
