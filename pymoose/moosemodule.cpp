@@ -1367,7 +1367,7 @@ extern "C" {
             ((_Id*)obj)->id_ = Id();
         }
         if (isObjId_){
-            ((_ObjId*)obj)->oid_ = ObjId();
+            ((_ObjId*)obj)->oid_ = ObjId(0, BADINDEX, BADINDEX);
         }
         // SHELLPTR->doDelete(((_Id*)obj)->id_);
         Py_RETURN_NONE;
