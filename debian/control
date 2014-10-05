@@ -32,7 +32,7 @@ Depends: ${misc:Depends}, libhdf5-7, libgsl0ldbl
 Suggests: moose-python, moose-gui
 Description: Core package of MOOSE.
 
-Package: moose-python
+Package: python-moose
 Architecture: any
 Depends: python-numpy, python-matplotlib
 Suggests: python-networkx
