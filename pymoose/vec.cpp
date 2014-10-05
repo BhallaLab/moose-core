@@ -444,21 +444,27 @@ extern "C" {
     // ObjId will destroy the containing element and invalidate all
     // the other ObjId with the same Id.
     // 2011-03-28 13:44:49 (+0530)
-    PyObject * deleteId(Id id)
+    PyObject * deleteObjId(ObjId oid)
     {
 #ifndef NDEBUG
         if (verbosity > 1){
-            cout << "Deleting Id " << id << endl;
+            cout << "Deleting ObjId " << oid << endl;
         }
 #endif
-        string className = Field<string >::get(id, "className");
+        string className = Field<string >::get(oid, "className");
         vector <string> destFields = getFieldNames(className, "destFinfo");
         vector <string> lookupFields = getFieldNames(className, "lookupFinfo");
         vector <string> elementFields = getFieldNames(className, "elementFinfo");
-        unsigned int numData = Field<unsigned int>::get(id, "numData");
+        unsigned int numData = Field<unsigned int>::get(oid, "numData");
+		unsigned int begin = 0;
+		unsigned int end = numData;
+		if ( oid.element()->cinfo()->isA( "Msg" ) ) {
+			begin = oid.dataIndex;
+			end = oid.dataIndex + 1;
+		}
         // clean up the maps containing initialized lookup/dest/element fields
-        for (unsigned int ii = 0; ii < numData; ++ii){
-            ObjId el(id, ii);
+        for (unsigned int ii = begin; ii < end; ++ii){
+            ObjId el(oid.id, ii);
 #ifndef NDEBUG
             if (verbosity > 1){
                 cout << "    Deleting ObjId " << el << endl;
@@ -489,7 +495,7 @@ extern "C" {
                 }
             }    
         }
-        SHELLPTR->doDelete(id);
+        SHELLPTR->doDelete(oid);
         Py_RETURN_NONE;
     }
     
@@ -502,7 +508,7 @@ extern "C" {
         if (!Id::isValid(self->id_)){
             RAISE_INVALID_ID(NULL, "moose_Id_delete");
         }
-        deleteId(self->id_);
+        deleteObjId(self->id_);
         self->id_ = Id();
         Py_CLEAR(self);
         Py_RETURN_NONE;
