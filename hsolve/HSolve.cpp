@@ -170,12 +170,15 @@ const Cinfo* HSolve::initCinfo()
         "branching neuron models.",
     };
 
+    static Dinfo< HSolve > dinfo;
     static Cinfo hsolveCinfo(
         "HSolve",
         Neutral::initCinfo(),
         hsolveFinfos,
         sizeof( hsolveFinfos ) / sizeof( Finfo* ),
-        new Dinfo< HSolve >()
+		&dinfo,
+        doc,
+        sizeof(doc)/sizeof(string)
     );
 
     return &hsolveCinfo;

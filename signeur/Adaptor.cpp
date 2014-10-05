@@ -271,12 +271,13 @@ const Cinfo* Adaptor::initCinfo()
 		""
 	};
 
+	static Dinfo< Adaptor > dinfo;
 	static Cinfo adaptorCinfo(
 		"Adaptor",
 		Neutral::initCinfo(),
 		adaptorFinfos,
 		sizeof( adaptorFinfos ) / sizeof( Finfo * ),
-		new Dinfo< Adaptor >(),
+		&dinfo,
 		doc,
 		sizeof( doc ) / sizeof( string )
 	);

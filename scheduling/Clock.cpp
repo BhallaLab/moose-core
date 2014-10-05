@@ -97,17 +97,20 @@ static vector< SrcFinfo1< ProcPtr >* >& reinitVec() {
 	return reinitVec;
 }
 
-static vector< SharedFinfo *> sharedProcVec() {
-	vector< SharedFinfo* > vec;
-	vec.resize( Clock::numTicks );
-	for ( unsigned int i = 0; i < Clock::numTicks; ++i ) {
-		stringstream ss;
-		Finfo* temp[2];
-		temp[0] = processVec()[i];
-		temp[1] = reinitVec()[i];
-		ss << "proc" << i;
-		vec[i] = new SharedFinfo( ss.str(), "Shared process/reinit message",
+static vector< SharedFinfo *>& sharedProcVec() {
+	static vector< SharedFinfo* > vec;
+	if ( vec.size() == 0 ) {
+		vec.resize( Clock::numTicks );
+		for ( unsigned int i = 0; i < Clock::numTicks; ++i ) {
+			stringstream ss;
+			Finfo* temp[2];
+			temp[0] = processVec()[i];
+			temp[1] = reinitVec()[i];
+			ss << "proc" << i;
+			vec[i] = new SharedFinfo( ss.str(), 
+						"Shared process/reinit message",
 						temp, 2 );
+		}
 	}
 	return vec;
 }
@@ -418,6 +421,17 @@ Clock::Clock()
 	dt_ = defaultDt_[0];
 	for ( unsigned int i = 0; i < Clock::numTicks; ++i ) {
 		ticks_[i] = round( defaultDt_[i] / dt_ );
+	}
+}
+
+Clock::~Clock()
+{
+	if ( Msg::isLastTrump() ) { // Clean up, end of the simulation.
+		for ( unsigned int i = 0; i < Clock::numTicks; ++i ) {
+			delete processVec()[i];
+			delete reinitVec()[i];
+			delete sharedProcVec()[i];
+		}
 	}
 }
 ///////////////////////////////////////////////////

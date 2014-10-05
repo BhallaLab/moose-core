@@ -350,7 +350,7 @@ Function& Function::operator=(const Function rhs)
 
 Function::~Function()
 {
- //    _clearBuffer();
+        _clearBuffer();
  }
 
 // do not know what to do about Variables that have already been
@@ -360,11 +360,13 @@ void Function::_clearBuffer()
     _numVar = 0;
     _parser.ClearVar();
     for (unsigned int ii = 0; ii < _varbuf.size(); ++ii){
-        delete _varbuf[ii]; 
+		if ( _varbuf[ii] )
+        	delete _varbuf[ii]; 
     }
     _varbuf.clear();
     for (unsigned int ii = 0; ii < _pullbuf.size(); ++ii){
-        delete _pullbuf[ii]; 
+		if ( _pullbuf[ii] )
+        	delete _pullbuf[ii]; 
     }
     _pullbuf.clear();
 }
@@ -403,14 +405,14 @@ double * _functionAddVar(const char *name, void *data)
     if (strname[0] == 'x'){
         int index = atoi(strname.substr(1).c_str());
         if ((unsigned)index >= function->_varbuf.size()){
-            function->_varbuf.resize(index+1);
+            function->_varbuf.resize(index+1, 0);
             function->_varbuf[index] = new Variable();
         }
         ret = &(function->_varbuf[index]->value);        
     } else if (strname[0] == 'y'){
         int index = atoi(strname.substr(1).c_str());
         if ((unsigned)index >= function->_pullbuf.size()){
-            function->_pullbuf.resize(index+1);
+            function->_pullbuf.resize(index+1, 0 );
             function->_pullbuf[index] = new double();
         }
         ret = function->_pullbuf[index];        
