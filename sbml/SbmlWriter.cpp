@@ -114,7 +114,7 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
   Id baseId(path);
     vector< ObjId > graphs;
   string plots;
-  wildcardFind(path+"/##[TYPE=Table]",graphs);
+  wildcardFind(path+"/##[TYPE=Table2]",graphs);
   
   for ( vector< ObjId >::iterator itrgrp = graphs.begin(); itrgrp != graphs.end();itrgrp++)
     {  
@@ -269,48 +269,43 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	      
 	      // Buffered Molecule setting BoundaryCondition and constant has to be made true 
 	      if (objclass == "BufPool")
-		{sp->setBoundaryCondition(true);
-		  sp->setConstant(true);
-		}//zbufpool
-	      else
-		{ sp->setBoundaryCondition(false);
-		  sp->setConstant(false);
-		}
-	      // Funpool need to get SumFunPool 
-	      //Funpool is not set, setConstant
-	      if (objclass == "FuncPool")
-		{ 
-		  vector< Id > funpoolChildren = Field< vector< Id > >::get( *itrp, "children" );
-		  for ( vector< Id >::iterator itrfunpoolchild = funpoolChildren.begin();  itrfunpoolchild != funpoolChildren.end(); ++itrfunpoolchild )
-		    { 
-		      string funpoolclass = Field<string> :: get(*itrfunpoolchild,"className");
-		      if (funpoolclass == "SumFunc")
-			{vector < Id > sumfunpool = LookupField <string,vector < Id> >::get(*itrfunpoolchild, "neighbors","input");
-			  int sumtot_count = sumfunpool.size();
-			  if ( sumtot_count > 0 )
-			    { // For sumfunc pool boundingcondition has to made true,
-			      // if its acting in react or product for a reaction/enzyme and also funcpool
-			      vector < Id > connectreac = LookupField <string,vector < Id> >::get(*itrp, "neighbors","reac");
-			      if( connectreac.size() > 0)
-				sp->setBoundaryCondition(true);
-			      ostringstream sumtotal_formula;
-			      for(vector< Id >::iterator itrsumfunc = sumfunpool.begin();itrsumfunc != sumfunpool.end(); itrsumfunc++)
-				{  // Check with Upi: Finds the source pool for a SumTot. It also deals with cases whether source is an enz-substrate complex Readkkit.cpp
-				  ostringstream spId;
-				  sumtot_count -= 1;
-				  string clean_sumFuncname = cleanNameId(*itrsumfunc,index);
-				  if ( sumtot_count == 0 )
-				    sumtotal_formula << clean_sumFuncname;
-				  else
-				    sumtotal_formula << clean_sumFuncname << "+";
-				}
-			      Rule * rule =  cremodel_->createAssignmentRule();
-			      rule->setVariable( clean_poolname );
-			      rule->setFormula( sumtotal_formula.str() );
+		  { sp->setBoundaryCondition(true);
+		  	
+		  	string Funcpoolname = Field<string> :: get(*itrp,"path");
+			Id funcId(Funcpoolname+"/func");
+			if (funcId != ObjId())
+			{   // if its acting in react or product for a reaction/enzyme and also funcpool
+				sp->setConstant(false);
+				Id funcparentId = Field<ObjId> :: get(funcId,"parent");
+				string f1 = Field <string> :: get(funcId,"path");
+				Id funcIdx(f1+"/x");
+				string f1x = Field <string> :: get(funcIdx,"path");
+				vector < Id > inputPool = LookupField <string,vector <Id> > :: get(funcIdx,"neighbors","input");
+				int sumtot_count = inputPool.size();
+				if (sumtot_count > 0)
+				{	ostringstream sumtotal_formula;
+					for(vector< Id >::iterator itrsumfunc = inputPool.begin();itrsumfunc != inputPool.end(); itrsumfunc++)
+					{
+						string sumpool = Field<string> :: get(*itrsumfunc,"name");
+						sumtot_count -= 1;
+				  		string clean_sumFuncname = cleanNameId(*itrsumfunc,index);
+				  		if ( sumtot_count == 0 )
+				    		sumtotal_formula << clean_sumFuncname;
+				  		else
+				    		sumtotal_formula << clean_sumFuncname << "+";
+					}
+					Rule * rule =  cremodel_->createAssignmentRule();
+			      	rule->setVariable( clean_poolname );
+			      	rule->setFormula( sumtotal_formula.str() );
 			    }
 			}
-		    }
-		} //zfunPool
+			else
+				sp->setConstant(true);
+		  }//zbufpool
+	      else
+			{ sp->setBoundaryCondition(false);
+		 	  sp->setConstant(false);
+			}
 	    } //itrp
 	  
 	  vector< ObjId > Compt_Reac;
