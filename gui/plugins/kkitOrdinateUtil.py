@@ -36,6 +36,8 @@ def setupMeshObj(modelRoot):
         tablist = []
 
         mol_cpl = wildcardFind(meshEnt.path+'/##[ISA=PoolBase]')
+        mol_fun = wildcardFind(meshEnt.path+'/##[ISA=Function]')
+        mol_cpl = mol_cpl+mol_fun
         enzlist = wildcardFind(meshEnt.path+'/##[ISA=EnzBase]')
         realist = wildcardFind(meshEnt.path+'/##[ISA=ReacBase]')
         tablist = wildcardFind(meshEnt.path+'/##[ISA=StimulusTable]')
@@ -79,7 +81,7 @@ def setupItem(modelPath,cntDict):
     eg. substrate and product connectivity to reaction's and enzyme's \
     sumtotal connectivity to its pool are collected '''
 
-    zombieType = ['ReacBase','EnzBase','FuncBase','StimulusTable']
+    zombieType = ['ReacBase','EnzBase','Function','StimulusTable']
     for baseObj in zombieType:
         path = '/##[ISA='+baseObj+']'
         if modelPath != '/':
@@ -110,20 +112,21 @@ def setupItem(modelPath,cntDict):
                     for enzpar in uniqItem:
                         sublist.append((enzpar,'t',countuniqItem[enzpar]))
                 cntDict[items] = sublist,prdlist
-        elif baseObj == 'FuncBase':
+        elif baseObj == 'Function':
             #ZombieSumFunc adding inputs
+            inputlist = []
+            outputlist = []
+            funplist = []
+            nfunplist = []
+
             for items in wildcardFind(path):
-                inputlist = []
-                outputlist = []
-                funplist = []
-                nfunplist = []
-                uniqItem,countuniqItem = countitems(items,'input')
-                for inpt in uniqItem:
-                    inputlist.append((inpt,'st',countuniqItem[inpt]))
-                for funcbase in moose.element(items).neighbors['output']: 
-                    funplist.append(funcbase)
-                if(len(funplist) > 1): print "SumFunPool has multiple Funpool"
-                else:  cntDict[funplist[0]] = inputlist
+                for funplist in moose.element(items).neighbors['valueOut']:
+                    for func in funplist:
+                        funcx = moose.element(items.path+'/x[0]')
+                        uniqItem,countuniqItem = countitems(funcx,'input')
+                        for inPut in uniqItem:
+                            inputlist.append((inPut,'st',countuniqItem[inPut]))
+                    cntDict[func] = inputlist
         else:
             for tab in wildcardFind(path):
                 tablist = []
