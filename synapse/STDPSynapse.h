@@ -22,18 +22,12 @@ class STDPSynapse: public Synapse
 
 		void setAPlus( double v );
 		double getAPlus() const;
-		void setAPlus0( double v );
-		double getAPlus0() const;
-		void setTauPlus( double v );
-		double getTauPlus() const;
 
 		void setHandler( SynHandlerBase* h );
 		static const Cinfo* initCinfo();
 
 	private:
 		double aPlus_;
-		double aPlus0_;
-        double tauPlus_;
 		SynHandlerBase* handler_;
 };
 
