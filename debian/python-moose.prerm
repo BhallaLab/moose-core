@@ -20,7 +20,7 @@ set -e
 case "$1" in
     remove|upgrade|deconfigure)
 	if [ -d /usr/share/moose/python ]; then
-            ( cd /usr/share/moose/python && cat installed_files | xargs rm -rf )
+            ( cd /usr/share/moose/python && cat installed_files.txt | xargs rm -rf )
 	fi
 
         if [ -d /usr/share/moose ]; then
