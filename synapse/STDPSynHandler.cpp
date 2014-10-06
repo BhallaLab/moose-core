@@ -49,6 +49,34 @@ const Cinfo* STDPSynHandler::initCinfo()
 		&STDPSynHandler::getTauMinus
     );
 
+    static ValueFinfo< STDPSynHandler, double > aPlus0(
+        "aPlus0", 
+        "aPlus0 is added to aPlus on every pre-spike",
+		&STDPSynHandler::setAPlus0,
+		&STDPSynHandler::getAPlus0
+    );
+
+    static ValueFinfo< STDPSynHandler, double > tauPlus(
+        "tauPlus", 
+        "aPlus decays with tauPlus time constant",
+		&STDPSynHandler::setTauPlus,
+		&STDPSynHandler::getTauPlus
+    );
+
+    static ValueFinfo< STDPSynHandler, double > weightMax(
+        "weightMax", 
+        "an upper bound on the weight",
+		&STDPSynHandler::setWeightMax,
+		&STDPSynHandler::getWeightMax
+    );
+
+    static ValueFinfo< STDPSynHandler, double > weightMin(
+        "weightMin", 
+        "a lower bound on the weight",
+		&STDPSynHandler::setWeightMin,
+		&STDPSynHandler::getWeightMin
+    );
+
     static DestFinfo addPostSpike( "addPostSpike",
         "Handles arriving spike messages from post-synaptic neuron, inserts into postEvent queue.",
         new EpFunc1< STDPSynHandler, double >( &STDPSynHandler::addPostSpike ) );
@@ -79,6 +107,10 @@ const Cinfo* STDPSynHandler::initCinfo()
 		&aMinus0,		    // Field
 		&aMinus,		    // Field
 		&tauMinus,   	    // Field
+		&aPlus0,	        // Field
+		&tauPlus,	        // Field
+        &weightMax,         // Field
+        &weightMin          // Field
 	};
 
 	static Dinfo< STDPSynHandler > dinfo;
@@ -102,6 +134,8 @@ STDPSynHandler::STDPSynHandler()
     aMinus_ = 0.0;
     tauMinus_ = 0.0;
     aMinus0_ = 0.0;
+    tauPlus_ = 0.0;
+    aPlus0_ = 0.0;
 }
 
 STDPSynHandler::~STDPSynHandler()
@@ -162,49 +196,67 @@ void STDPSynHandler::addPostSpike( const Eref& e, double time )
 void STDPSynHandler::vProcess( const Eref& e, ProcPtr p ) 
 {
 	double activation = 0.0;
+
     // process pre-synaptic spike events for activation and STDP
 	while( !events_.empty() && events_.top().time <= p->currTime ) {
         PreSynEvent currEvent = events_.top();
+        // activate the synapse for every pre-spike
 		activation += currEvent.weight;
         
-        // Add aPlus0 to the aPlus for this synapse due to pre-spike
+        // Maintain 'history' of pre-spikes in Aplus
         unsigned int synIndex = currEvent.synIndex;
-        STDPSynapse currSyn = synapses_[synIndex];
-        currSyn.setAPlus( currSyn.getAPlus() + currSyn.getAPlus0() );
+        // Warning, coder! 'STDPSynapse currSyn = synapses_[synIndex];' is wrong,
+        // it creates a new, shallow-copied object.
+        // We want only to point to the same object.
+        STDPSynapse* currSynPtr = &synapses_[synIndex];
+        // Add aPlus0 to the aPlus for this synapse due to pre-spike
+        currSynPtr->setAPlus( currSynPtr->getAPlus() + aPlus0_ );
         
         // Change weight by aMinus_ at each pre-spike
-        currSyn.setWeight( currEvent.weight + aMinus_ );
+        // clip weight within [weightMin,weightMax]
+        double newWeight = currEvent.weight + aMinus_;
+        newWeight = std::max(weightMin_, std::min(newWeight, weightMax_));
+        currSynPtr->setWeight( newWeight );
+
 		events_.pop();
 	}
 	if ( activation != 0.0 )
 		SynHandlerBase::activationOut()->send( e, activation );
 
-    unsigned int i;
     // process post-synaptic spike events for STDP
 	while( !postEvents_.empty() && postEvents_.top().time <= p->currTime ) {
-		postEvents_.pop();
-        
         // Add aMinus0 to the aMinus for this synapse
         aMinus_ += aMinus0_;
         
         // Change weight of all synapses by aPlus_ at each post-spike
-        for (i=0; i<synapses_.size(); i++) {
+        for (unsigned int i=0; i<synapses_.size(); i++) {
             // since aPlus_, tauPlus_ are private inside STDPSynapse,
             //   we use the set, get functions
-            STDPSynapse currSyn = synapses_[i];
-            currSyn.setWeight( currSyn.getWeight() + currSyn.getAPlus() );
+            // Warning, coder! 'STDPSynapse currSyn = synapses_[i];' is wrong,
+            // it creates a new, shallow-copied object.
+            // We want only to point to the same object.
+            STDPSynapse* currSynPtr = &synapses_[i];
+            // clip weight within [weightMin,weightMax]
+            double newWeight = currSynPtr->getWeight() + currSynPtr->getAPlus();
+            newWeight = std::max(weightMin_, std::min(newWeight, weightMax_));
+            currSynPtr->setWeight( newWeight );
         }        
+
+		postEvents_.pop();
 	}
     
     // modify aPlus and aMinus at every time step
     double dt_ = p->dt;
     // decay aPlus for all pre-synaptic inputs
-    for (i=0; i<synapses_.size(); i++) {
+    for (unsigned int i=0; i<synapses_.size(); i++) {
         // forward Euler
         // since aPlus_, tauPlus_ are private inside STDPSynapse,
         //   we use the set, get functions
-        STDPSynapse currSyn = synapses_[i];
-        currSyn.setAPlus( currSyn.getAPlus() * (1.0 - dt_/currSyn.getTauPlus()) );
+        // Warning, coder! 'STDPSynapse currSyn = synapses_[i];' is wrong,
+        // it creates a new, shallow-copied object.
+        // We want only to point to the same object.
+        STDPSynapse* currSynPtr = &synapses_[i];
+        currSynPtr->setAPlus( currSynPtr->getAPlus() * (1.0 - dt_/tauPlus_) );
     }
     // decay aMinus for this STDPSynHandler which sits on the post-synaptic compartment
     // forward Euler
@@ -262,4 +314,44 @@ void STDPSynHandler::setTauMinus( const double v )
 double STDPSynHandler::getTauMinus() const
 {
 	return tauMinus_;
+}
+
+void STDPSynHandler::setAPlus0( const double v )
+{
+	aPlus0_ = v;
+}
+
+double STDPSynHandler::getAPlus0() const
+{
+	return aPlus0_;
+}
+
+void STDPSynHandler::setTauPlus( const double v )
+{
+	tauPlus_ = v;
+}
+
+double STDPSynHandler::getTauPlus() const
+{
+	return tauPlus_;
+}
+
+void STDPSynHandler::setWeightMax( const double v )
+{
+	weightMax_ = v;
+}
+
+double STDPSynHandler::getWeightMax() const
+{
+	return weightMax_;
+}
+
+void STDPSynHandler::setWeightMin( const double v )
+{
+	weightMin_ = v;
+}
+
+double STDPSynHandler::getWeightMin() const
+{
+	return weightMin_;
 }
