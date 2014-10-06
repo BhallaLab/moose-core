@@ -31,24 +31,8 @@ const Cinfo* STDPSynapse::initCinfo()
 		&STDPSynapse::getAPlus
     );
 
-    static ValueFinfo< STDPSynapse, double > aPlus0(
-        "aPlus0", 
-        "aPlus0 is added to aPlus on every pre-spike",
-		&STDPSynapse::setAPlus0,
-		&STDPSynapse::getAPlus0
-    );
-
-    static ValueFinfo< STDPSynapse, double > tauPlus(
-        "tauPlus", 
-        "aPlus decays with tauPlus time constant",
-		&STDPSynapse::setTauPlus,
-		&STDPSynapse::getTauPlus
-    );
-
 	static Finfo* synapseFinfos[] = {
 		&aPlus,		// Field
-		&aPlus0,	// Field
-		&tauPlus,	// Field
 	};
 
 	static Dinfo< STDPSynapse > dinfo;
@@ -71,24 +55,12 @@ static const Cinfo* STDPSynapseCinfo = STDPSynapse::initCinfo();
 STDPSynapse::STDPSynapse() : handler_ (0)
 {
     aPlus_ = 0.0;
-    tauPlus_ = 0.0;
-    aPlus0_ = 0.0;
 }
 
 void STDPSynapse::setHandler( SynHandlerBase* h )
 {
 	handler_ = h;
     Synapse::setHandler( h );
-}
-
-void STDPSynapse::setAPlus0( const double v )
-{
-	aPlus0_ = v;
-}
-
-double STDPSynapse::getAPlus0() const
-{
-	return aPlus0_;
 }
 
 void STDPSynapse::setAPlus( const double v )
@@ -99,14 +71,4 @@ void STDPSynapse::setAPlus( const double v )
 double STDPSynapse::getAPlus() const
 {
 	return aPlus_;
-}
-
-void STDPSynapse::setTauPlus( const double v )
-{
-	tauPlus_ = v;
-}
-
-double STDPSynapse::getTauPlus() const
-{
-	return tauPlus_;
 }

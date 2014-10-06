@@ -78,12 +78,25 @@ class STDPSynHandler: public SynHandlerBase
 		////////////////////////////////////////////////////////////////
 		void addPostSpike( const Eref& e, double time );
 
+		void setAPlus0( double v );
+		double getAPlus0() const;
+		void setTauPlus( double v );
+		double getTauPlus() const;
+        // note: APlus is in STDPSynapse as
+        // it is different for each presynaptic neuron
+        // connected to this 'aggregate-synapse'
+
 		void setAMinus( double v );
 		double getAMinus() const;
-		void setAMinus0( double v );
-		double getAMinus0() const;
 		void setTauMinus( double v );
 		double getTauMinus() const;
+		void setAMinus0( double v );
+		double getAMinus0() const;
+
+		void setWeightMax( double v );
+		double getWeightMax() const;
+		void setWeightMin( double v );
+		double getWeightMin() const;
 
 		static const Cinfo* initCinfo();
 	private:
@@ -93,6 +106,10 @@ class STDPSynHandler: public SynHandlerBase
 		double aMinus_;
 		double aMinus0_;
         double tauMinus_;
+		double aPlus0_;
+        double tauPlus_;
+        double weightMax_;
+        double weightMin_;
 };
 
 #endif // _STDP_SYN_HANDLER_H
