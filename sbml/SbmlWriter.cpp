@@ -27,6 +27,8 @@
 *  write a Model after validation
 */
 /* ToDo: Tables should be implemented
+		 Assignment rule is assumed to be addition since genesis file has just sumtotal
+		 But now "Function" function class exist so any arbitarary function can be read and written
  */
 
 using namespace std;
@@ -78,9 +80,7 @@ int SbmlWriter::write( string filepath,string target )
   
   if ( i == fileextensions.end() )
     filepath += ".xml";
-  
-  //cout << " filepath " << filepath << " " << filename << endl;
-  
+  //std::pair<int, std::string > infoValue();
   SBMLDocument sbmlDoc;
   bool SBMLok = false;
   createModel( filename,sbmlDoc,target );
@@ -268,7 +268,7 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	      sp->setHasOnlySubstanceUnits( true );
 	      
 	      // Buffered Molecule setting BoundaryCondition and constant has to be made true 
-	      if (objclass == "BufPool")
+	      if ( (objclass == "BufPool") || (objclass == "ZombieBufPool"))
 		  { sp->setBoundaryCondition(true);
 		  	
 		  	string Funcpoolname = Field<string> :: get(*itrp,"path");
@@ -398,7 +398,7 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	      string objname = Field < string> :: get(*itrE,"name");
 	      objname = nameString(objname);
 	      KineticLaw* kl;
-	      if (enzClass == "Enz")
+	      if ( (enzClass == "Enz") || (enzClass == "ZombieEnz"))
 		{// Complex Formation S+E -> SE*;
 		   reaction->setId( cleanEnzname);
 		   reaction->setName( objname);
@@ -490,7 +490,7 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 		   printParameters( kl,"k3",k3,"per_second" );
 
 		} //enzclass = Enz
-	      else if (enzClass == "MMenz")
+	      else if ( (enzClass == "MMenz") || (enzClass == "ZombieMMenz"))
 		{ reaction->setId( cleanEnzname);
 		  reaction->setName( objname);
 		  double Km = Field<double>::get(*itrE,"numKm");
