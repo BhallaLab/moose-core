@@ -179,7 +179,6 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
     def setData(self, index, value, role=QtCore.Qt.EditRole): 
         if not index.isValid() or index.row () >= len(self.fields) or index.column() != 1:
             return False
-        print "setData",(value)
         field = self.fields[index.row()]
         if (role == QtCore.Qt.CheckStateRole):
             if (index.column() == 1):
@@ -252,9 +251,15 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
                 ann = moose.Annotator(self.mooseObject.path+'/info')
                 if setter in ann.getFieldNames('destFinfo'):
                     flag |= QtCore.Qt.ItemIsEditable
+            if ( not isinstance(self.mooseObject, moose.ChemCompt) ):
 
-            if setter in self.mooseObject.getFieldNames('destFinfo'):
-                flag |= QtCore.Qt.ItemIsEditable
+                if field == "volume":
+                    flag |= QtCore.Qt.NoItemFlags
+                elif setter in self.mooseObject.getFieldNames('destFinfo'):
+                    flag |= QtCore.Qt.ItemIsEditable
+            else:
+                if setter in self.mooseObject.getFieldNames('destFinfo'):
+                    flag |= QtCore.Qt.ItemIsEditable
             
             #if field == "Notes":
             #    flag |= QtCore.Qt.ItemIsEditable
