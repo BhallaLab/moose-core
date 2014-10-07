@@ -74,6 +74,7 @@ class KkitPlugin(MoosePlugin):
             self.view = AnotherKkitRunView(self.modelRoot, self)
         return self.view
 
+
         if self.view is not None: return AnotherKkitRunView(self.modelRoot, self)
         if self.view is not None: return self.view
         self.view = RunView(self.modelRoot, self)
@@ -176,7 +177,11 @@ class KkitEditorView(MooseEditorView):
         if filename:
             filename = filename+extension
             if filters[str(filter_)] == 'SBML':
-                moose.writeSBML(str(filename),self.plugin.modelRoot)
+                writeerror = moose.writeSBML(str(filename),self.plugin.modelRoot)
+                if writeerror:
+                    QtGui.QMessageBox.warning(None,'Could not save the Model','\n Error in the consistency check') 
+                else:
+                     QtGui.QMessageBox.information(None,'Saved the Model','\n File Saved to \'{filename}\''.format(filename =filename),QtGui.QMessageBox.Ok) 
     '''
     def getToolPanes(self):
         return super(KkitEditorView, self).getToolPanes()
@@ -248,6 +253,9 @@ class  KineticsWidget(EditorWidgetBase):
 
             if self.noPositionInfo:
                 self.autocoordinates = True
+                #QtGui.QMessageBox.warning(self,
+#'No coordinates found for the model',
+#'\n Automatic layouting will be done') 
             #raise Exception('Unsupported kkit version')
                 self.xmin,self.xmax,self.ymin,self.ymax,self.autoCordinatepos = autoCoordinates(self.meshEntry,self.srcdesConnection)
             # TODO: size will be dummy at this point, but I need the availiable size from the Gui
