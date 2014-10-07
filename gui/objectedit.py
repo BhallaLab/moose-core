@@ -156,8 +156,12 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
         for fieldName in self.mooseObject.getFieldNames('valueFinfo'):
             if fieldName in extra_fields :
                 continue
-
-            value = self.mooseObject.getField(fieldName)
+            if fieldName == "className":
+                value = self.mooseObject.getField(fieldName)
+                if "Zombie" in value:
+                    value = value[6:len(value)]
+            elif fieldName != "className":
+                value = self.mooseObject.getField(fieldName)
             self.fields.append(fieldName)
         #harsha: For signalling models will be pulling out notes field from Annotator
         #        can updates if exist for other types also
@@ -175,7 +179,7 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
     def setData(self, index, value, role=QtCore.Qt.EditRole): 
         if not index.isValid() or index.row () >= len(self.fields) or index.column() != 1:
             return False
-        print(value)
+        print "setData",(value)
         field = self.fields[index.row()]
         if (role == QtCore.Qt.CheckStateRole):
             if (index.column() == 1):
@@ -275,7 +279,14 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
             elif (role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole):
                 try:
                     if ( (str(field) != "Notes") ):
-                        ret = self.mooseObject.getField(str(field))
+                        if field == "className":
+                            value = self.mooseObject.getField(str(field))
+                            if "Zombie" in value:
+                                ret = value[6:len(value)]
+                            else:
+                                ret = self.mooseObject.getField(str(field))
+                        else:
+                            ret = self.mooseObject.getField(str(field))
                         ret = QtCore.QVariant(QtCore.QString(str(ret)))
                     elif(str(field) == "Notes"):
                         astr = self.mooseObject.path+'/info'

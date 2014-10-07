@@ -530,7 +530,6 @@ class  KineticsWidget(EditorWidgetBase):
 
     def drawLine_arrow(self, itemignoreZooming=False):
         for inn,out in self.srcdesConnection.items():
-            print "inn and out in kkit 525",inn,type(out)
             # self.srcdesConnection is dictionary which contains key,value \
             #    key is Enzyme or Reaction  and value [[list of substrate],[list of product]] (tuple)
             #    key is Function and value is [list of pool] (list)
