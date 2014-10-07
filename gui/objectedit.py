@@ -121,7 +121,9 @@ extra_fields = ['this',
                 'valueFields',
                 'sourceFields',
                 'motorConst',
-		'destFields'
+        		'destFields',
+                'dt',
+                'tick'
                 ]
         
 
