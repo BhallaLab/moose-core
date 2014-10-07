@@ -829,7 +829,9 @@ class MWindow(QtGui.QMainWindow):
                 raise mexception.ElementNameError('Model path cannot be empty')
             if re.search('[ /]',modelPath) is not None:
                 raise mexception.ElementNameError('Model path should not containe / or whitespace')
-            plugin = str(newModelDialog.submenu.currentText())
+            #plugin = str(newModelDialog.submenu.currentText())
+            plugin = str(newModelDialog.getcurrentRadioButton())
+            print "plugin ",plugin
             #Harsha: All model will be forced to load/build under /model,
             #2014 sep 10: All the model will be forced to load/build model under /modelName/model
             '''
