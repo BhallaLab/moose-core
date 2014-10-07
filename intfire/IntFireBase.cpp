@@ -70,7 +70,7 @@ const Cinfo* IntFireBase::initCinfo()
 		&refractoryPeriod,		// Value
 		&hasFired,				// ReadOnlyValue
 		&activation,			// DestFinfo
-		IntFireBase::spikeOut(), 		// MsgSrc
+		IntFireBase::spikeOut() // MsgSrc
 	};
 
 	static string doc[] =
