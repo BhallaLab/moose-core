@@ -12,6 +12,9 @@ TARGET = _intfire.o
 OBJ = \
 	IntFireBase.o	\
 	LIF.o \
+	QIF.o \
+	ExIF.o \
+	AdExIF.o \
 	testIntFire.o \
 
 # GSL_LIBS = -L/usr/lib -lgsl
@@ -28,6 +31,9 @@ default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
 LIF.o:	LIF.h
+QIF.o:	QIF.h
+ExIF.o:	ExIF.h
+AdExIF.o:	AdExIF.h
 testIntFire.o:	LIF.h
 
 .cpp.o:
