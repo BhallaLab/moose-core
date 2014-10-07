@@ -29,7 +29,7 @@ Description: MOOSE is the Multiscale Object-Oriented Simulation Environment.
 Package: moose-core
 Architecture: any
 Depends: ${misc:Depends}, libhdf5-7, libgsl0ldbl
-Suggests: moose-python, moose-gui, moose-doc
+Suggests: python-moose, moose-gui, moose-doc
 Description: Core package of MOOSE.
 
 Package: python-moose
