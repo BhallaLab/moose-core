@@ -42,6 +42,7 @@ network.vec.Rm = R
 network.vec.vReset = Vreset
 network.vec.Cm = tau/R
 network.vec.inject = 0.
+network.vec.initVm = Vrest
 
 # ###########################################
 # Synaptic model: STDP at each pre and post spike
@@ -94,7 +95,7 @@ moose.connect( network, 'spikeOut', spikes, 'input', 'OneToOne')
 # Simulate the STDP curve with spaced pre-post spike pairs
 # ###########################################
 
-dt = 0.5e-3 # s
+dt = 0.5e-5 # s
 # moose simulation
 moose.useClock( 0, '/network/syn', 'process' )
 moose.useClock( 1, '/network', 'process' )
@@ -105,9 +106,9 @@ moose.setClock( 1, dt )
 moose.setClock( 2, dt )
 moose.setClock( 3, dt )
 moose.setClock( 9, dt )
+moose.reinit()
 
-
-##  function to make the aPlus and aMinus settle to equilibrium values
+# function to make the aPlus and aMinus settle to equilibrium values
 settletime = 100e-3 # s
 def reset_settle():
     """ Call this between every pre-post pair
@@ -116,6 +117,8 @@ def reset_settle():
     syn.synapse[0].weight = weight # V
     moose.start(settletime)
 
+# function to inject a sharp current pulse to make neuron spike
+# immediately at a given time step
 def make_neuron_spike(nrnidx,I=1e-7,duration=1e-3):
     """ Inject a brief current pulse to 
     make a neuron spike
@@ -161,27 +164,36 @@ print '-----------------------------------------------'
 # Plot the simulated Vm-s and STDP curve
 # ###########################################
 
+# insert spikes so that Vm reset doesn't look weird
+Vmseries0 = Vms.vec[0].vector
+numsteps = len(Vmseries0)
+for t in spikes.vec[0].vector:
+    Vmseries0[int(t/dt)-1] = 30e-3 # V
+Vmseries1 = Vms.vec[1].vector
+for t in spikes.vec[1].vector:
+    Vmseries1[int(t/dt)-1] = 30e-3 # V
+
 # Voltage plots
-# insert spikes from Spike Monitor so that Vm doesn't look weird
 figure(facecolor='w')
-plot(Vms.vec[0].vector,color='r') # pre neuron's vm
-plot(Vms.vec[1].vector,color='b') # post neuron's vm
-xlabel('time (s)')
+timeseries = arange(0.,1000*numsteps*dt,dt*1000)
+plot(timeseries,Vmseries0,color='r') # pre neuron's vm
+plot(timeseries,Vmseries1,color='b') # post neuron's vm
+xlabel('time (ms)')
 ylabel('Vm (V)')
 title("pre (r) and post (b) neurons' Vm")
 
 # STDP curve
 fig = figure(facecolor='w')
 ax = fig.add_subplot(111)
-ax.plot(arange(-t_extent,0,ddt),array(dwlist_neg),'.-r')
-ax.plot(arange(ddt,(t_extent+ddt),ddt),array(dwlist_pos),'.-b')
+ax.plot(arange(-t_extent,0,ddt)*1000,array(dwlist_neg),'.-r')
+ax.plot(arange(ddt,(t_extent+ddt),ddt)*1000,array(dwlist_pos),'.-b')
 xmin,xmax = ax.get_xlim()
 ymin,ymax = ax.get_ylim()
 ax.set_xticks([xmin,0,xmax])
 ax.set_yticks([ymin,0,ymax])
 ax.plot((0,0),(ymin,ymax),linestyle='dashed',color='k')
 ax.plot((xmin,xmax),(0,0),linestyle='dashed',color='k')
-ax.set_xlabel('$t_{post}-t_{pre}$ (s)')
+ax.set_xlabel('$t_{post}-t_{pre}$ (ms)')
 ax.set_ylabel('$\Delta w / w$')
 fig.tight_layout()
 #fig.subplots_adjust(hspace=0.3,wspace=0.5) # has to be after tight_layout()
