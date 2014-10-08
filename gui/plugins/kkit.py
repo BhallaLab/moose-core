@@ -328,8 +328,8 @@ class  KineticsWidget(EditorWidgetBase):
             v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
             v.setPen(QtGui.QPen(Qt.QColor(66,66,66,100), 5, Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin))
             v.cmptEmitter.connect(v.cmptEmitter,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
-            v.cmptEmitter.connect(v.cmptEmitter,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.objectEditSlot)
-
+            #v.cmptEmitter.connect(v.cmptEmitter,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.objectEditSlot)
+            v.cmptEmitter.connect(v.cmptEmitter,QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.objectEditSlot)
     def createCompt(self,key):
         self.new_Compt = ComptItem(self,0,0,0,0,key)
         self.qGraCompt[key] = self.new_Compt
@@ -376,7 +376,8 @@ class  KineticsWidget(EditorWidgetBase):
     def setupSlot(self,mooseObj,qgraphicItem):
         self.mooseId_GObj[element(mooseObj).getId()] = qgraphicItem
         qgraphicItem.connect(qgraphicItem,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
-        qgraphicItem.connect(qgraphicItem,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.objectEditSlot)
+        #qgraphicItem.connect(qgraphicItem,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.objectEditSlot)
+        qgraphicItem.connect(qgraphicItem,QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.objectEditSlot)
 
     def updateItemSlot(self, mooseObject):
         #This is overridden by derived classes to connect appropriate
