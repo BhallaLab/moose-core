@@ -1,9 +1,0 @@
-This is a demo for single compartmental leaky integrate and fire
-neurons, that is, class IntFire in MOOSE. They are same as Compartment
-except that they do not have axial resistance and the membrane
-potential Vm is set to reset potential Vr after each spike. Also, the
-computation in SpikeGen has been implemented into the IntFire class so
-that you do not need a separate SpikeGen object for creating and
-passing spike events.
-
-

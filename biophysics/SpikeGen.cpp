@@ -7,255 +7,264 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include "moose.h"
-#include <math.h>
-
+#include "header.h"
 #include "SpikeGen.h"
-
-const Cinfo* initSpikeGenCinfo()
-{
-	static Finfo* processShared[] =
-	{
-		new DestFinfo( "process", Ftype1< ProcInfo >::global(),
-				RFCAST( &SpikeGen::processFunc ) ),
-		new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
-				RFCAST( &SpikeGen::reinitFunc ) ),
-	};
-	static Finfo* process =	new SharedFinfo( "process", processShared, 
-			sizeof( processShared ) / sizeof( Finfo* ),
-			"This is a shared message to receive Process messages from the scheduler objects." );
-	
-	static Finfo* spikeGenFinfos[] = 
-	{
-		new ValueFinfo( "threshold", ValueFtype1< double >::global(),
-			GFCAST( &SpikeGen::getThreshold ),
-			RFCAST( &SpikeGen::setThreshold )
-		),
-		new ValueFinfo( "refractT", ValueFtype1< double >::global(),
-			GFCAST( &SpikeGen::getRefractT ),
-			RFCAST( &SpikeGen::setRefractT )
-		),
-		new ValueFinfo( "abs_refract", ValueFtype1< double >::global(),
-			GFCAST( &SpikeGen::getRefractT ),
-			RFCAST( &SpikeGen::setRefractT )
-		),
-
-		/**	"The amplitude field of the spikeGen is never used. "
-		 	\todo: perhaps should deprecate this."	*/
-
-		new ValueFinfo( "amplitude", ValueFtype1< double >::global(),
-			GFCAST( &SpikeGen::getAmplitude ),
-			RFCAST( &SpikeGen::setAmplitude ),
-			"The amplitude field of the spikeGen is never used. "
-		),
-		new ValueFinfo( "state", ValueFtype1< double >::global(),
-			GFCAST( &SpikeGen::getState ),
-			RFCAST( &SpikeGen::setState )
-		),
-		new ValueFinfo( "edgeTriggered", ValueFtype1< int >::global(),
-			GFCAST( &SpikeGen::getEdgeTriggered ),
-                        RFCAST( &SpikeGen::setEdgeTriggered ),
-                        "When edgeTriggered = 0, the SpikeGen will fire an event in each timestep "
-                        "while incoming Vm is > threshold and at least abs_refract time has passed "
-                        "since last event. This may be problematic if the incoming Vm remains above "
-                        "threshold for longer than abs_refract. Setting edgeTriggered to 1 resolves this "
-                        "as the SpikeGen generates an event only on the rising edge of the incoming Vm "
-                        "and will remain idle unless the incoming Vm goes below threshold."
-		),
-
-	//////////////////////////////////////////////////////////////////
-	// SharedFinfos
-	//////////////////////////////////////////////////////////////////
-		process,
-		/*
-		new SharedFinfo( "process", processShared, 
-			sizeof( processShared ) / sizeof( Finfo* ) ),
-			*/
 
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
-		new SrcFinfo( "event", Ftype1< double >::global(), 
-			"Sends out a trigger for an event. The time is not sent - everyone knows the time." ),
+static SrcFinfo1< double > *spikeOut() {
+	static SrcFinfo1< double > spikeOut( "spikeOut", 
+			"Sends out a trigger for an event.");
+	return &spikeOut;
+}
 
+const Cinfo* SpikeGen::initCinfo()
+{
+	///////////////////////////////////////////////////////
+	// Shared message definitions
+	///////////////////////////////////////////////////////
+	static DestFinfo process( "process", 
+		"Handles process call",
+		new ProcOpFunc< SpikeGen >( &SpikeGen::process ) );
+	static DestFinfo reinit( "reinit", 
+		"Handles reinit call",
+		new ProcOpFunc< SpikeGen >( &SpikeGen::reinit ) );
+
+	static Finfo* processShared[] =
+	{
+		&process, &reinit
+	};
+
+	static SharedFinfo proc( "proc", 
+		"Shared message to receive Process message from scheduler",
+		processShared, sizeof( processShared ) / sizeof( Finfo* ) );
+		
 	//////////////////////////////////////////////////////////////////
 	// Dest Finfos.
 	//////////////////////////////////////////////////////////////////
-		new DestFinfo( "Vm", Ftype1< double >::global(),
-			RFCAST( &SpikeGen::VmFunc ) ),
+	static DestFinfo Vm( "Vm",
+			"Handles Vm message coming in from compartment",
+			new OpFunc1< SpikeGen, double >( &SpikeGen::handleVm ) );
+
+	//////////////////////////////////////////////////////////////////
+	// Value Finfos.
+	//////////////////////////////////////////////////////////////////
+	
+	static ValueFinfo< SpikeGen, double > threshold( "threshold",
+		"Spiking threshold, must cross it going up",
+		&SpikeGen::setThreshold,
+		&SpikeGen::getThreshold
+	);
+	static ValueFinfo< SpikeGen, double > refractT( "refractT",
+		"Refractory Time.",
+		&SpikeGen::setRefractT,
+		&SpikeGen::getRefractT
+	);
+	static ValueFinfo< SpikeGen, double > absRefract( "abs_refract",
+		"Absolute refractory time. Synonym for refractT.",
+		&SpikeGen::setRefractT,
+		&SpikeGen::getRefractT
+	);
+	static ReadOnlyValueFinfo< SpikeGen, bool > hasFired( "hasFired",
+		"True if SpikeGen has just fired",
+		&SpikeGen::getFired
+	);
+	static ValueFinfo< SpikeGen, bool > edgeTriggered( "edgeTriggered",
+		"When edgeTriggered = 0, the SpikeGen will fire an event in each "
+		"timestep while incoming Vm is > threshold and at least abs_refract"
+		"time has passed since last event. This may be problematic if the "
+		"incoming Vm remains above threshold for longer than abs_refract. "
+		"Setting edgeTriggered to 1 resolves this as the SpikeGen generates"
+		"an event only on the rising edge of the incoming Vm and will "
+		"remain idle unless the incoming Vm goes below threshold.",
+		&SpikeGen::setEdgeTriggered,
+		&SpikeGen::getEdgeTriggered
+	);
+
+	static Finfo* spikeGenFinfos[] = 
+	{
+		spikeOut(),	// SrcFinfo
+		&proc,		// Shared
+		&Vm,		// Dest
+		&threshold,	// Value
+		&refractT,	// Value
+		&absRefract,	// Value
+		&hasFired,	// ReadOnlyValue
+		&edgeTriggered,	// Value
+
 	};
 
-	// We want the spikeGen to update after the compartments have done so
-	static SchedInfo schedInfo[] = { { process, 0, 1 } };
 	static string doc[] =
 	{
 		"Name", "SpikeGen",
 		"Author", "Upi Bhalla",
-		"Description", "SpikeGen object, for detecting threshold crossings. "
-                "The threshold detection can work in multiple modes.\n "
-                "If the refractT < 0.0, then it fires an event only at the rising edge of the "
+		"Description", "SpikeGen object, for detecting threshold crossings."
+		"The threshold detection can work in multiple modes.\n "
+		"If the refractT < 0.0, then it fires an event only at the rising "
+		"edge of the input voltage waveform"
 	};
+	static Dinfo< SpikeGen > dinfo;
 	static Cinfo spikeGenCinfo(
-				doc,
-				sizeof( doc ) / sizeof( string ),				
-				initNeutralCinfo(),
-				spikeGenFinfos,
-				sizeof( spikeGenFinfos ) / sizeof( Finfo* ),
-				ValueFtype1< SpikeGen >::global(),
-				schedInfo, 1
+		"SpikeGen",
+		Neutral::initCinfo(),
+		spikeGenFinfos, sizeof( spikeGenFinfos ) / sizeof( Finfo* ),
+		&dinfo,
+                doc,
+                sizeof(doc)/sizeof(string)                
 	);
 
 	return &spikeGenCinfo;
 }
 
-static const Cinfo* spikeGenCinfo = initSpikeGenCinfo();
+static const Cinfo* spikeGenCinfo = SpikeGen::initCinfo();
 
-static const Slot eventSlot =
-	initSpikeGenCinfo()->getSlot( "event" );
+SpikeGen::SpikeGen()
+	: threshold_(0.0),
+      refractT_(0.0),
+      lastEvent_(0.0),
+      V_(0.0),
+	  fired_( 0 ),
+      edgeTriggered_(1)
+{;}
 
 //////////////////////////////////////////////////////////////////
 // Here we put the SpikeGen class functions.
 //////////////////////////////////////////////////////////////////
 
 // Value Field access function definitions.
-void SpikeGen::setThreshold( const Conn* c, double threshold )
+void SpikeGen::setThreshold( double threshold )
 {
-	static_cast< SpikeGen* >( c->data() )->threshold_ = threshold;
+	threshold_ = threshold;
 }
-double SpikeGen::getThreshold( Eref e )
+double SpikeGen::getThreshold() const
 {
-	return static_cast< SpikeGen* >( e.data() )->threshold_;
-}
-
-void SpikeGen::setRefractT( const Conn* c, double val )
-{
-	static_cast< SpikeGen* >( c->data() )->refractT_ = val;
-}
-double SpikeGen::getRefractT( Eref e )
-{
-	return static_cast< SpikeGen* >( e.data() )->refractT_;
+	return threshold_;
 }
 
-void SpikeGen::setAmplitude( const Conn* c, double val )
+void SpikeGen::setRefractT( double val )
 {
-	static_cast< SpikeGen* >( c->data() )->amplitude_ = val;
+	refractT_ = val;
 }
-double SpikeGen::getAmplitude( Eref e )
+double SpikeGen::getRefractT() const
 {
-	return static_cast< const SpikeGen* >( e.data() )->amplitude_;
-}
-
-void SpikeGen::setState( const Conn* c, double val )
-{
-	static_cast< SpikeGen* >( c->data() )->state_ = val;
-}
-double SpikeGen::getState( Eref e )
-{
-	return static_cast< SpikeGen* >( e.data() )->state_;
+	return refractT_;
 }
 
-void SpikeGen::setEdgeTriggered( const Conn* c, int yes )
+/*
+void SpikeGen::setAmplitude( double val )
 {
-	static_cast< SpikeGen* >( c->data() )->edgeTriggered_ = yes;
+	amplitude_ = val;
 }
-int SpikeGen::getEdgeTriggered( Eref e )
+double SpikeGen::getAmplitude() const
 {
-	return static_cast< SpikeGen* >( e.data() )->edgeTriggered_;
+	return amplitude_;
+}
+
+void SpikeGen::setState( double val )
+{
+	state_ = val;
+}
+double SpikeGen::getState() const
+{
+	return state_;
+}
+*/
+
+bool SpikeGen::getFired() const
+{
+	return fired_;
+}
+
+void SpikeGen::setEdgeTriggered( bool yes )
+{
+	edgeTriggered_ = yes;
+}
+bool SpikeGen::getEdgeTriggered() const
+{
+	return edgeTriggered_;
 }
 
 //////////////////////////////////////////////////////////////////
 // SpikeGen::Dest function definitions.
 //////////////////////////////////////////////////////////////////
 
-void SpikeGen::innerProcessFunc( const Conn* c, ProcInfo p )
+void SpikeGen::process( const Eref& e, ProcPtr p )
 {
-	double t = p->currTime_;
+	double t = p->currTime;
 	if ( V_ > threshold_ ) {
-            if ((t + p->dt_/2.0) >= (lastEvent_ + refractT_)){
-                if (!edgeTriggered_ || (edgeTriggered_ && !fired_)) {
-                    send1< double >( c->target(), eventSlot, t );
-                    lastEvent_ = t;
-                    state_ = amplitude_;
-                    fired_ = true;                    
-                } else {
-                    state_ = 0.0;                
-                }
-            }
+		if ((t + p->dt/2.0) >= (lastEvent_ + refractT_)) {
+			if ( !( edgeTriggered_ && fired_ ) ) {
+				spikeOut()->send( e, t );
+				lastEvent_ = t;
+				fired_ = true;                    
+			}
+		}
 	} else {
-            state_ = 0.0;
             fired_ = false;
 	}
 }
-void SpikeGen::processFunc( const Conn* c, ProcInfo p )
-{
-	static_cast< SpikeGen* >( c->data() )->innerProcessFunc( c, p );
-}
 
 // Set it so that first spike is allowed.
-void SpikeGen::reinitFunc( const Conn* c, ProcInfo p )
+void SpikeGen::reinit( const Eref& e, ProcPtr p )
 {
-	static_cast< SpikeGen* >( c->data() )->lastEvent_ = 
-			- static_cast< SpikeGen* >( c->data() )->refractT_ ;
+	lastEvent_ = -refractT_ ;
 }
 
-void SpikeGen::VmFunc( const Conn* c, double val )
+void SpikeGen::handleVm( double val )
 {
-	static_cast< SpikeGen* >( c->data() )->V_ = val;
+	V_ = val;
 }
 
 /////////////////////////////////////////////////////////////////////
 
 #ifdef DO_UNIT_TESTS
-#include "../element/Neutral.h"
+#include "../shell/Shell.h"
 
 void testSpikeGen()
 {
-	cout << "\nTesting SpikeGen" << flush;
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	Id sid = shell->doCreate( "SpikeGen", Id(), "spike", 1, MooseGlobal );
+	SpikeGen& sg = *( reinterpret_cast< SpikeGen* >( sid.eref().data() ) );
 
-	Element* n = Neutral::create( "Neutral", "n", Element::root()->id(), 
-		Id::scratchId() );
-	Element* sg = Neutral::create( "SpikeGen", "c0", n->id(), 
-		Id::scratchId() );
-	ASSERT( sg != 0, "creating compartment" );
-	ProcInfoBase p;
-	SetConn c( sg, 0 );
-	p.dt_ = 0.001;
-	p.currTime_ = 0.0;
-	SpikeGen::setThreshold( &c, 1.0 );
-	SpikeGen::setAmplitude( &c, 1.0 );
-	SpikeGen::setRefractT( &c, 0.005 );
-	SpikeGen::reinitFunc( &c, &p );
+	Eref er( sid.eref() );
+	ProcInfo p;
+	p.dt = 0.001;
+	p.currTime = 0.0;
+	sg.setThreshold( 1.0 );
+	sg.setRefractT( 0.005 );
 
-	SpikeGen::VmFunc( &c, 0.5 );
-	SpikeGen::processFunc( &c, &p );
-	ASSERT( SpikeGen::getState( sg ) == 0.0, "SpikeGen" );
-	p.currTime_ += p.dt_;
+	sg.reinit( er, &p );
+	sg.handleVm( 0.5 );
+	sg.process( er, &p );
+	assert( !sg.getFired() );
+	p.currTime += p.dt;
 
-	SpikeGen::VmFunc( &c, 0.999 );
-	SpikeGen::processFunc( &c, &p );
-	ASSERT( SpikeGen::getState( sg ) == 0.0, "SpikeGen" );
-	p.currTime_ += p.dt_;
+	sg.handleVm( 0.999 );
+	sg.process( er, &p );
+	assert( !sg.getFired() );
+	p.currTime += p.dt;
 
-	SpikeGen::VmFunc( &c, 1.01 ); // First spike
-	SpikeGen::processFunc( &c, &p );
-	ASSERT( SpikeGen::getState( sg ) == 1.0, "SpikeGen" );
-	p.currTime_ += p.dt_;
+	sg.handleVm( 1.001 );
+	sg.process( er, &p );
+	assert( sg.getFired() );
+	p.currTime += p.dt;
 
-	SpikeGen::VmFunc( &c, 0.999 );
-	SpikeGen::processFunc( &c, &p );
-	ASSERT( SpikeGen::getState( sg ) == 0.0, "SpikeGen" );
-	p.currTime_ += p.dt_;
+	sg.handleVm( 0.999 );
+	sg.process( er, &p );
+	assert( !sg.getFired() );
+	p.currTime += p.dt;
 
-	SpikeGen::VmFunc( &c, 2.0 ); // Too soon, refractory.
-	SpikeGen::processFunc( &c, &p );
-	ASSERT( SpikeGen::getState( sg ) == 0.0, "SpikeGen" );
+	sg.handleVm( 2.0 ); // Too soon, refractory
+	sg.process( er, &p );
+	assert( !sg.getFired() );
 
-	p.currTime_ = 0.010;
-	SpikeGen::VmFunc( &c, 2.0 ); // Now not refractory.
-	SpikeGen::processFunc( &c, &p );
-	ASSERT( SpikeGen::getState( sg ) == 1.0, "SpikeGen" );
+	p.currTime += 0.005; // Now post-refractory
+	sg.handleVm( 2.0 ); // Now not refractory
+	sg.process( er, &p );
+	assert( sg.getFired() );
 
-	// Get rid of all the test objects
-	set( n, "destroy" );
+	sid.destroy();
+	cout << "." << flush;
 }
 #endif

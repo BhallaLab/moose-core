@@ -7,62 +7,86 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include <math.h>
-#include "moose.h"
+#include "header.h"
 #include "Nernst.h"
 
 const double Nernst::R_OVER_F = 8.6171458e-5;
 const double Nernst::ZERO_CELSIUS = 273.15;
 
-const Cinfo* initNernstCinfo()
+	///////////////////////////////////////////////////////
+	// MsgSrc definitions
+	///////////////////////////////////////////////////////
+static SrcFinfo1< double > *Eout() {
+	static SrcFinfo1< double > Eout( "Eout", 
+			"Computed reversal potential"
+			);
+	return &Eout;
+}
+
+const Cinfo* Nernst::initCinfo()
 {
+	static ReadOnlyValueFinfo< Nernst, double > E( "E", 
+		"Computed reversal potential",
+			&Nernst::getE
+	);
+	static ValueFinfo< Nernst, double > temperature( "Temperature",
+		"Temperature of cell",
+		&Nernst::setTemperature,
+		&Nernst::getTemperature
+	);
+	static ValueFinfo< Nernst, int > valence( "valence",
+		"Valence of ion in Nernst calculation",
+		&Nernst::setValence,
+		&Nernst::getValence
+	);
+	static ValueFinfo< Nernst, double > Cin( "Cin",
+		"Internal conc of ion",
+		&Nernst::setCin,
+		&Nernst::getCin
+	);
+	static ValueFinfo< Nernst, double > Cout( "Cout",
+		"External conc of ion",
+		&Nernst::setCout,
+		&Nernst::getCout
+	);
+	static ValueFinfo< Nernst, double > scale( "scale",
+		"Voltage scale factor",
+		&Nernst::setScale,
+		&Nernst::getScale
+	);
+	///////////////////////////////////////////////////////
+	// Shared definitions
+	///////////////////////////////////////////////////////
+
+
+	///////////////////////////////////////////////////////
+	// MsgDest definitions
+	// These differ from field assignments because they trigger an
+	// outgoing msg with the updated E.
+	///////////////////////////////////////////////////////
+	static DestFinfo ci( "ci", 
+		"Set internal conc of ion, and immediately send out the updated E",
+		new EpFunc1< Nernst, double >( &Nernst::handleCin )
+	);
+	static DestFinfo co( "co", 
+		"Set external conc of ion, and immediately send out the updated E",
+		new EpFunc1< Nernst, double >( &Nernst::handleCout )
+	);
 
 	///////////////////////////////////////////////////////
 	// Field definitions
 	///////////////////////////////////////////////////////
 	static Finfo* NernstFinfos[] =
 	{
-		new ValueFinfo( "E", ValueFtype1< double >::global(),
-			GFCAST( &Nernst::getE ),
-			&dummyFunc
-		),
-		new ValueFinfo( "Temperature", ValueFtype1< double >::global(),
-			GFCAST( &Nernst::getTemperature ), 
-			RFCAST( &Nernst::setTemperature )
-		),
-		new ValueFinfo( "valence", ValueFtype1< int >::global(),
-			GFCAST( &Nernst::getValence ), 
-			RFCAST( &Nernst::setValence )
-		),
-		new ValueFinfo( "Cin", ValueFtype1< double >::global(),
-			GFCAST( &Nernst::getCin ), 
-			RFCAST( &Nernst::setCin )
-		),
-		new ValueFinfo( "Cout", ValueFtype1< double >::global(),
-			GFCAST( &Nernst::getCout ), 
-			RFCAST( &Nernst::setCout )
-		),
-		new ValueFinfo( "scale", ValueFtype1< double >::global(),
-			GFCAST( &Nernst::getScale ), 
-			RFCAST( &Nernst::setScale )
-		),
-	///////////////////////////////////////////////////////
-	// Shared definitions
-	///////////////////////////////////////////////////////
-
-	///////////////////////////////////////////////////////
-	// MsgSrc definitions
-	///////////////////////////////////////////////////////
-		new SrcFinfo( "ESrc", Ftype1< double >::global() ),
-
-	///////////////////////////////////////////////////////
-	// MsgDest definitions
-	///////////////////////////////////////////////////////
-		new DestFinfo( "CinMsg", Ftype1< double >::global(),
-			RFCAST( &Nernst::cinFunc ) ),
-		new DestFinfo( "CoutMsg", Ftype1< double >::global(),
-			RFCAST( &Nernst::coutFunc ) ),
-
+		Eout(),		// SrcFinfo
+		&E,			// ReadOnlyValue
+		&temperature,	// Value
+		&valence,		// Value
+		&Cin,		// Value
+		&Cout,		// Value
+		&scale,		// Value
+		&ci,		// Dest
+		&co,		// Dest
 	};
 
 	static string doc[] =
@@ -74,76 +98,95 @@ const Cinfo* initNernstCinfo()
 				"Immediately sends out the potential to all targets.",
 	};
 	
+	static Dinfo< Nernst > dinfo;
 	static const Cinfo NernstCinfo(
-		doc,
-		sizeof( doc ) / sizeof( string ),		
-		initNeutralCinfo(),
+		"Nernst",
+		Neutral::initCinfo(),
 		NernstFinfos,
 		sizeof( NernstFinfos ) / sizeof(Finfo *),
-		ValueFtype1< Nernst >::global()
+		&dinfo,
+		doc,
+		sizeof( doc ) / sizeof( string )
 	);
 
 	return &NernstCinfo;
 }
 
-static const Cinfo* nernstCinfo = initNernstCinfo();
-static const Slot eSrcSlot =
-	initNernstCinfo()->getSlot( "ESrc" );
+///////////////////////////////////////////////////
+static const Cinfo* nernstCinfo = Nernst::initCinfo();
 
+Nernst::Nernst()
+	:
+		E_( 0.0 ),
+		Temperature_( 295 ),
+		valence_( 1 ),
+		Cin_( 1.0 ),
+		Cout_( 1.0 ),
+		scale_( 1.0 ),
+		factor_( scale_ * R_OVER_F * Temperature_ / valence_ )
+{;}
 ///////////////////////////////////////////////////
 // Field function definitions
 ///////////////////////////////////////////////////
 
-double Nernst::getE( Eref e ) {
-	static_cast< Nernst* >( e.data() )->updateE();
-	return static_cast< Nernst* >( e.data() )->E_;
+double Nernst::getE() const
+{
+	return E_;
 }
 
-void Nernst::localSetTemperature( double value ) {
+void Nernst::setTemperature( double value ) {
 	if ( value > 0.0 ) {
 		Temperature_ = value;
 		factor_ = scale_ * R_OVER_F * Temperature_ / valence_;
 	}
-}
-void Nernst::setTemperature( const Conn* c, double value ) {
-	static_cast< Nernst* >( c->data() )->localSetTemperature( value );
-}
-double Nernst::getTemperature( Eref e ) {
-	return static_cast< Nernst* >( e.data() )->Temperature_;
+	updateE();
 }
 
-void Nernst::localSetValence( int value ) {
+double Nernst::getTemperature() const
+{
+	return Temperature_;
+}
+
+void Nernst::setValence( int value ) {
 	if ( value != 0 ) {
 		valence_ = value;
-		factor_ = scale_ * R_OVER_F * Temperature_ / valence_;
 	}
-}
-void Nernst::setValence( const Conn* c, int value ) {
-	static_cast< Nernst* >( c->data() )->localSetValence( value );
-}
-int Nernst::getValence( Eref e ) {
-	return static_cast< Nernst* >( e.data() )->valence_;
+	factor_ = scale_ * R_OVER_F * Temperature_ / valence_;
+	updateE();
 }
 
-void Nernst::setCin( const Conn* c, double value ) {
-	static_cast< Nernst* >( c->data() )->Cin_ = value;
-}
-double Nernst::getCin( Eref e ) {
-	return static_cast< const Nernst* >( e.data() )->Cin_;
+int Nernst::getValence() const
+{
+	return valence_;
 }
 
-void Nernst::setCout( const Conn* c, double value ) {
-	static_cast< Nernst* >( c->data() )->Cout_ = value;
+void Nernst::setCin( double value )
+{
+	Cin_ = value;
+	updateE();
 }
-double Nernst::getCout( Eref e ) {
-	return static_cast< const Nernst* >( e.data() )->Cout_;
+double Nernst::getCin() const
+{
+	return Cin_;
 }
 
-void Nernst::setScale( const Conn* c, double value ) {
-	static_cast< Nernst* >( c->data() )->scale_ = value;
+void Nernst::setCout( double value ) {
+	Cout_ = value;
+	updateE();
 }
-double Nernst::getScale( Eref e ) {
-	return static_cast< const Nernst* >( e.data() )->scale_;
+double Nernst::getCout() const
+{
+	return Cout_;
+}
+
+void Nernst::setScale( double value ) {
+	scale_ = value;
+	factor_ = scale_ * R_OVER_F * Temperature_ / valence_;
+	updateE();
+}
+double Nernst::getScale() const
+{
+	return scale_;
 }
 
 ///////////////////////////////////////////////////
@@ -155,50 +198,34 @@ void Nernst::updateE( )
 	E_ = factor_ * log( Cout_ / Cin_ );
 }
 
-void Nernst::cinFuncLocal( const Conn* c, double conc )
+void Nernst::handleCin( const Eref& er, double conc )
 {
 	Cin_ = conc;
 	updateE();
-	send1< double >( c->target(), eSrcSlot, E_ );
-}
-void Nernst::cinFunc( const Conn* c, double value ) {
-	static_cast< Nernst* >( c->data() )->cinFuncLocal( c, value );
+	Eout()->send( er, E_ );
 }
 
-void Nernst::coutFuncLocal( const Conn* c, double conc )
+void Nernst::handleCout( const Eref& er, double conc )
 {
 	Cout_ = conc;
 	updateE();
-	send1< double >( c->target(), eSrcSlot, E_ );
+	Eout()->send( er, E_ );
 }
-void Nernst::coutFunc( const Conn* c, double value ) {
-	static_cast< Nernst* >( c->data() )->coutFuncLocal( c, value );
-}
-
 
 ///////////////////////////////////////////////////
 // Unit tests
 ///////////////////////////////////////////////////
 
 #ifdef DO_UNIT_TESTS
-#include "../element/Neutral.h"
 void testNernst()
 {
-	cout << "\nTesting Nernst" << flush;
+	Nernst ne;
+	ne.setValence( 1 );
+	ne.setCin( 0.01 );
+	ne.setCout( 1.0 );
+	double E = ne.getE();
+	assert( doubleApprox( E, 0.0585 * 2.0 ) );
 
-	Element* n = Neutral::create( "Neutral", "n", Element::root()->id(), 
-		Id::scratchId() );
-	Element* nernst = Neutral::create( "Nernst", "Ca", n->id(), 
-		Id::scratchId() );
-	SetConn c( nernst, 0 );
-	ASSERT( nernst != 0, "creating Nernst" );
-	Nernst::setValence( &c, 1 );
-	Nernst::setCin( &c, 0.01 );
-	Nernst::setCout( &c, 1.0 );
-	double E = Nernst::getE( nernst );
-	ASSERT( fabs( E - 0.0585 * 2.0 ) < 0.001, "Testing Nernst" );
-
-	// Get rid of the test stuff
-	set( n, "destroy" );
+	cout << "." << flush;
 }
 #endif 

@@ -1,36 +1,26 @@
-##
-## Makefile
-##  
-## Made by subhasis ray
-## Login   <subhayantranaa>
-##
-## Started on  Mon Dec 29 15:52:03 2008 subhasis ray
-## Last update Mon Dec 29 15:52:03 2008 subhasis ray
-## 
+TARGET = _device.o
 
-CXXFLAGS += -I.. -I../basecode
-TARGET=device.o
-OBJ= \
-	DiffAmp.o \
-	PIDController.o \
-	RC.o	\
-	PulseGen.o	\
-	Efield.o	\
+OBJ = PulseGen.o	\
+	DiffAmp.o	\
+	PIDController.o	\
+	RC.o	
 
-
-HEADERS= \
-	DiffAmp.h \
-	PIDController.h \
-	RC.h	\
-	PulseGen.h	\
-	Efield.h	\
-
+HEADERS = \
+	../basecode/header.h 	\
 
 default: $(TARGET)
-$(OBJ): $(HEADERS)
 
-$(TARGET): $(OBJ) $(HEADERS)
-	$(LD) -r -o $(TARGET) $(OBJ)
+$(OBJ): $(HEADERS)
+PulseGen.o: PulseGen.h
+DiffAmp.o: DiffAmp.h
+PIDController.o: PIDController.h
+RC.o: RC.h
+
+.cpp.o:
+	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I. -I../basecode -I../msg $< -c
+
+$(TARGET): $(OBJ) $(SMOLDYN_OBJ) $(HEADERS)
+	$(LD) -r -o $(TARGET) $(OBJ) $(SMOLDYN_OBJ) $(SMOLDYN_LIB_PATH) $(SMOLDYN_LIBS) $(GSL_LIBS)
 
 clean:
-	-rm -f *.o $(TARGET) core core.*
+	rm -f *.o $(TARGET) core core.*

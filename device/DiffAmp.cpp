@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Mon Dec 29 16:01:22 2008 (+0530)
 // Version: 
-// Last-Updated: Thu Oct 29 18:39:03 2009 (+0530)
-//           By: subhasis ray
-//     Update #: 186
+// Last-Updated: Tue Jun 11 17:00:33 2013 (+0530)
+//           By: subha
+//     Update #: 290
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -23,77 +23,103 @@
 
 // Change log:
 // 2008-12-30 16:21:19 (+0530) - Initial version.
-// 
+// 2012-02-22 03:05:40 (+0530) - Ported to dh_branch
 // 
 /**********************************************************************
  ** This program is part of 'MOOSE', the
  ** Messaging Object Oriented Simulation Environment,
  ** also known as GENESIS 3 base code.
- **           copyright (C) 2003-2008 Upinder S. Bhalla. and NCBS
+ **           copyright (C) 2003-2013 Upinder S. Bhalla. and NCBS
  ** It is made available under the terms of the
- ** GNU General Public License version 2
+ ** GNU Lesser General Public License version 2.1
  ** See the file COPYING.LIB for the full notice.
  **********************************************************************/
 
 // Code:
+
+#include <cfloat>
+
 #include "DiffAmp.h"
 
-const Cinfo* initDiffAmpCinfo()
+static SrcFinfo1< double >* outputOut()
 {
-    static Finfo* processShared[] = {
-	new DestFinfo( "process", Ftype1< ProcInfo>::global(),
-		      RFCAST(&DiffAmp::processFunc)),
-	new DestFinfo("reinit", Ftype1< ProcInfo >::global(),
-		      RFCAST(&DiffAmp::reinitFunc)),
-    };
-    static Finfo* process = new SharedFinfo("process", processShared, sizeof(processShared) / sizeof(Finfo*),
-					    "This is a shared message to receive process messages from the"
-                                            " scheduler objects.");
-    static Finfo* diffAmpFinfos[] = {
-	new ValueFinfo( "gain", ValueFtype1< double >::global(),
-                        GFCAST(&DiffAmp::getGain),
-                        RFCAST(&DiffAmp::setGain),
-                        "Gain of the amplifier. The output of the amplifier is the difference"
-                        " between the totals in plus and minus inputs multiplied by the"
-                        " gain. Defaults to 1" ),
-	new ValueFinfo( "saturation", ValueFtype1< double >::global(),
-                        GFCAST(&DiffAmp::getSaturation),
-                        RFCAST(&DiffAmp::setSaturation),
-                        "Saturation is the bound on the output. If output goes beyond the +/-"
-                        "saturation range, it is truncated to the closer of +saturation and"
-                        " -saturation. Defaults to the maximum double precision floating point"
-                        " number representable on the system." ),
-	new ValueFinfo( "plus", ValueFtype1< double >::global(),
-                        GFCAST(&DiffAmp::getPlus),
-                        RFCAST(&dummyFunc),
-                        "Total input to the positive terminal of the amplifier." ),
-	new ValueFinfo( "minus", ValueFtype1< double >::global(),
-                        GFCAST(&DiffAmp::getMinus),
-                        RFCAST(&dummyFunc),
-                        "Total input to the negative terminal of the amplifier."
- ),
-	new ValueFinfo( "output", ValueFtype1< double >::global(),
-                        GFCAST(&DiffAmp::getOutput),
-                        RFCAST(&dummyFunc),
-                        "Output of the amplifier, i.e. gain * (plus - minus)." ),
-	process,
-	    
-	new SrcFinfo( "outputSrc", Ftype1< double >::global(),
-                      "Sends the output of this difference amplifier."),
-	new DestFinfo( "gainDest", Ftype1< double >::global(),
-                       RFCAST(&DiffAmp::setGain),
-                       "This is a destination message to control gain dynamically."),
-	new DestFinfo( "plusDest", Ftype1< double >::global(),
-                       RFCAST(&DiffAmp::plusFunc),
-                       "Positive input terminal of the amplifier. All the messages connected"
-                       " here are summed up to get total positive input."),
-	new DestFinfo( "minusDest", Ftype1< double >::global(),
-                       RFCAST(&DiffAmp::minusFunc),
-                       "Negative input terminal of the amplifier. All the messages connected"
-                       " here are summed up to get total positive input."),
-    };
+    static SrcFinfo1< double > outputOut( "output",
+                                          "Current output level.");
+    return &outputOut;
+}
+
+const Cinfo* DiffAmp::initCinfo()
+{
+    static ValueFinfo<DiffAmp, double> gain( "gain",
+                                             "Gain of the amplifier. The output of the amplifier is the difference"
+                                             " between the totals in plus and minus inputs multiplied by the"
+                                             " gain. Defaults to 1" ,
+                                             &DiffAmp::setGain,
+                                             &DiffAmp::getGain);
+    static ValueFinfo<DiffAmp, double > saturation( "saturation",
+                                                    "Saturation is the bound on the output. If output goes beyond the +/-"
+                                                    "saturation range, it is truncated to the closer of +saturation and"
+                                                    " -saturation. Defaults to the maximum double precision floating point"
+                                                    " number representable on the system." ,
+                                                    &DiffAmp::setSaturation,
+                                                    &DiffAmp::getSaturation);
     
-    static SchedInfo schedInfo[] = {{ process, 0, 0 }};
+    static ReadOnlyValueFinfo<DiffAmp, double> output( "outputValue",
+                                               "Output of the amplifier, i.e. gain * (plus - minus)." ,
+                                               &DiffAmp::getOutput);
+    ///////////////////////////////////////////////////////////////
+    // Dest messages
+    ///////////////////////////////////////////////////////////////
+    
+    static DestFinfo gainIn( "gainIn",
+                             "Destination message to control gain dynamically.",                                 
+                             new OpFunc1<DiffAmp, double> (&DiffAmp::setGain));
+    
+    static DestFinfo plusIn( "plusIn", 
+                      "Positive input terminal of the amplifier. All the messages connected"
+                      " here are summed up to get total positive input.",                          
+                      new OpFunc1<DiffAmp, double> (&DiffAmp::plusFunc));
+    
+    static DestFinfo minusIn( "minusIn", 
+                      "Negative input terminal of the amplifier. All the messages connected"
+                      " here are summed up to get total positive input.",
+                      new OpFunc1<DiffAmp, double> (&DiffAmp::minusFunc));
+    ///////////////////////////////////////////////////////////////////
+    // Shared messages
+    ///////////////////////////////////////////////////////////////////
+    static DestFinfo process( "process",
+                              "Handles process call, updates internal time stamp.",
+                              new ProcOpFunc< DiffAmp >( &DiffAmp::process ) );
+    static DestFinfo reinit( "reinit",
+                             "Handles reinit call.",
+                             new ProcOpFunc< DiffAmp >( &DiffAmp::reinit ) );
+    static Finfo* processShared[] =
+            {
+		&process, &reinit
+            };
+    
+    static SharedFinfo proc( "proc",
+                             "This is a shared message to receive Process messages "
+                             "from the scheduler objects."
+                             "The first entry in the shared msg is a MsgDest "
+                             "for the Process operation. It has a single argument, "
+                             "ProcInfo, which holds lots of information about current "
+                             "time, thread, dt and so on. The second entry is a MsgDest "
+                             "for the Reinit operation. It also uses ProcInfo. ",
+                             processShared, sizeof( processShared ) / sizeof( Finfo* )
+                             );
+
+    
+    static Finfo * diffAmpFinfos[] = {
+        &gain,
+        &saturation,
+        &output,
+        &gainIn,
+        &plusIn,
+        &minusIn,
+        outputOut(),
+        &proc
+    };
     static string doc[] = {
         "Name", "DiffAmp",
         "Author", "Subhasis Ray, 2008, NCBS",
@@ -103,113 +129,83 @@ const Cinfo* initDiffAmpCinfo()
         " or can be a destination message and thus dynamically determined by the"
         " output of another object. Same as GENESIS diffamp object."
     };
-    
+    static Dinfo<DiffAmp> dinfo;
     static Cinfo diffAmpCinfo(
-            doc,
-            sizeof( doc ) / sizeof( string ),
-            initNeutralCinfo(),
+            "DiffAmp",
+            Neutral::initCinfo(),
             diffAmpFinfos,
-            sizeof( diffAmpFinfos ) / sizeof( Finfo* ),
-            ValueFtype1< DiffAmp >::global(),
-            schedInfo, 1 );
+            sizeof(diffAmpFinfos)/sizeof(Finfo*),
+            &dinfo,
+            doc,
+            sizeof(doc)/sizeof(string)
+);
     
     return &diffAmpCinfo;    
 }
 
-static const Cinfo* diffAmpCinfo = initDiffAmpCinfo();
-
-static const Slot outputSlot = initDiffAmpCinfo()->getSlot("outputSrc");
-
+static const Cinfo* diffAmpCinfo = DiffAmp::initCinfo();
 DiffAmp::DiffAmp():gain_(1.0), saturation_(DBL_MAX), plus_(0), minus_(0), output_(0)
 {
 }
-
-void DiffAmp::plusFunc(const Conn* conn, double input)
+DiffAmp::~DiffAmp(){
+    ;
+}
+void DiffAmp::plusFunc(double input)
 {
-    DiffAmp* instance = static_cast < DiffAmp* >(conn->data());
-#ifndef NDEBUG
-    cout << "PLUS " << conn->target().id().path() << " : " << instance->plus_ << ", " << instance->minus_<< " : " << input << endl;
-#endif
-
-    instance->plus_ += input;
+    plus_ += input;
 }
 
-void DiffAmp::minusFunc(const Conn* conn, double input)
+void DiffAmp::minusFunc(double input)
 {
-    DiffAmp* instance = static_cast < DiffAmp* >(conn->data());
-#ifndef NDEBUG
-    cout << "MINUS " << conn->target().id().path() << " : " << instance->plus_ << ", " << instance->minus_<< " : " << input <<endl;
-#endif
-    instance->minus_ += input;
+    minus_ += input;
 }
 
-void DiffAmp::setGain(const Conn* conn, double gain)
+void DiffAmp::setGain(double gain)
 {
-    DiffAmp* instance = static_cast< DiffAmp* >(conn->data());
-    instance->gain_ = gain;
+    gain_ = gain;
 }
 
-void DiffAmp::setSaturation(const Conn* conn, double saturation)
+void DiffAmp::setSaturation(double saturation)
 {
-    DiffAmp* instance = static_cast< DiffAmp* >(conn->data());
-    instance->saturation_ = saturation;
+    saturation_ = saturation;
 }
 
-double DiffAmp::getGain(Eref e)
+double DiffAmp::getGain() const
 {
-    DiffAmp* instance = static_cast< DiffAmp* >(e.data());
-    return instance->gain_;
+    return gain_;
 }
 
-double DiffAmp::getSaturation(Eref e)
+double DiffAmp::getSaturation() const
 {
-    DiffAmp* instance = static_cast< DiffAmp* >(e.data());
-    return instance->saturation_;
+    return saturation_;
 }
 
-double DiffAmp::getPlus(Eref e)
+double DiffAmp::getOutput() const
 {
-    DiffAmp* instance = static_cast< DiffAmp* >(e.data());
-    return instance->plus_;
+    return output_;
 }
 
-double DiffAmp::getMinus(Eref e)
+void DiffAmp::process(const Eref& e, ProcPtr p)
 {
-    DiffAmp* instance = static_cast< DiffAmp* >(e.data());
-    return instance->minus_;
-}
-
-double DiffAmp::getOutput(Eref e)
-{
-    DiffAmp* instance = static_cast< DiffAmp* >(e.data());
-    return instance->output_;
-}
-
-void DiffAmp::processFunc(const Conn* conn, ProcInfo p)
-{
-    DiffAmp* instance = static_cast< DiffAmp* >(conn->data());
-    double output = instance->gain_ * (instance->plus_ - instance->minus_);
-#ifndef NDEBUG
-    cout << conn->target().id().path() << ": plus = " << instance->plus_ << " :minus = " << instance->minus_ << " :output = " << output << " :gain = " << instance->gain_ << " :saturation = " << instance->saturation_ << endl;
-#endif
-    instance->plus_ = 0.0;
-    instance->minus_ = 0.0;
-    if ( output > instance->saturation_ ) {
-	output = instance->saturation_;
+    double output = gain_ * (plus_ - minus_);
+    plus_ = 0.0;
+    minus_ = 0.0;
+    if ( output > saturation_ ) {
+	output = saturation_;
     }
-    if ( output < -instance->saturation_ ) {
-	output = -instance->saturation_;
+    if ( output < -saturation_ ) {
+	output = -saturation_;
     }    
-    instance->output_ = output;
-    send1<double>(conn->target(), outputSlot, output);
+    output_ = output;
+    outputOut()->send(e, output_);
 }
 
-void DiffAmp::reinitFunc(const Conn* conn, ProcInfo p)
+void DiffAmp::reinit(const Eref& e, ProcPtr p)
 {
-    DiffAmp* instance = static_cast< DiffAmp* >(conn->data());
-    instance->output_ = 0.0;
-    instance->plus_ = 0.0;
-    instance->minus_ = 0.0;
+    // What is the right thing to do?? Should we actually do a process step??
+    output_ = 0.0;
+    plus_ = 0.0;
+    minus_ = 0.0;
 }
 
 // 
