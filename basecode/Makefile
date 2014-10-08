@@ -4,7 +4,7 @@
 #** also known as GENESIS 3 base code.
 #**           copyright (C) 2004 Upinder S. Bhalla. and NCBS
 #** It is made available under the terms of the
-#** GNU General Public License version 2
+#** GNU Lesser General Public License version 2.1
 #** See the file COPYING.LIB for the full notice.
 #**********************************************************************/
 # $Id: $
@@ -12,106 +12,87 @@
 # $Log: $
 #
 
-TARGET = basecode.o
-CXXFLAGS += -I.. -I../connections
+TARGET = _basecode.o
+
+
+#  CXXFLAGS += -I.. -I../kinetics -I../biophysics
+
 OBJ = \
+	consts.o	\
 	Element.o	\
+	DataElement.o	\
+	GlobalDataElement.o	\
+	LocalDataElement.o	\
 	Eref.o	\
-	Id.o	\
-	IdGenerator.o	\
-	IdManager.o	\
-	Fid.o	\
-	RecvFunc.o \
-	Ftype.o \
-	Msg.o \
-	SimpleElement.o	\
-	ArrayElement.o \
-	Copy.o \
-	Send.o \
+	Finfo.o	\
+	DestFinfo.o	\
+	Cinfo.o	\
 	SrcFinfo.o \
-	DestFinfo.o \
 	ValueFinfo.o \
-	LookupFinfo.o \
-	ThisFinfo.o \
-	DeletionMarkerFinfo.o \
-	GlobalMarkerFinfo.o \
-	Cinfo.o \
-	DynamicFinfo.o \
-	strconv.o \
-	SharedFtype.o \
 	SharedFinfo.o \
-	SolveFinfo.o \
-	setget.o \
-	filecheck.o \
-	ParallelDummy.o \
-	Class.o	\
-	FuncVec.o \
-	ExtFieldFinfo.o \
-	UnitTests.o \
-	TestBasecode.o \
+	FieldElementFinfo.o \
+	FieldElement.o \
+	Id.o \
+	ObjId.o \
+	global.o \
+	SetGet.o \
+	OpFuncBase.o \
+	EpFunc.o \
+	HopFunc.o \
+	SparseMatrix.o \
+	doubleEq.o \
+	testAsync.o	\
+	main.o	\
 
 HEADERS = \
 	header.h \
-	Eref.h \
-	RecvFunc.h \
-	../connections/Conn.h \
-	../connections/ConnTainer.h \
-	Ftype.h \
-	Ftype0.h \
-	Ftype1.h \
-	Ftype2.h \
-	Ftype3.h \
-	Ftype4.h \
-	Ftype5.h \
-	Serializer.h \
-	FuncVec.h \
-	Slot.h \
-	Finfo.h \
-	Id.h \
-	IdGenerator.h \
-	IdManager.h \
-	Msg.h \
+	Cinfo.h \
+	Conv.h \
+	Dinfo.h \
+	MsgDigest.h \
 	Element.h \
-	Class.h \
-#	AssignFinfo.h
-#	ArrayFinfo.o \
-
-#	ArrayWrapperElement.o	\
+	DataElement.h \
+	GlobalDataElement.h \
+	LocalDataElement.h \
+	Eref.h \
+	global.h \
+	Finfo.h \
+	DestFinfo.h \
+	Id.h \
+	ObjId.h \
+	../msg/Msg.h \
+	OpFuncBase.h \
+	OpFunc.h \
+	EpFunc.h \
+	HopFunc.h \
+	ProcInfo.h \
+	SrcFinfo.h \
+	ValueFinfo.h \
+	LookupValueFinfo.h \
+	LookupElementValueFinfo.h \
+	SharedFinfo.h \
+	FieldElementFinfo.h \
+	FieldElement.h \
+	MsgFuncBinding.h \
 
 default: $(TARGET)
 
-$(OBJ)	: $(HEADERS)
-#TestBasecode.o:	Shell.h ShellWrapper.h
-
-SrcFinfo.o:		SrcFinfo.h
-DestFinfo.o: 	DestFinfo.h
-ThisFinfo.o: 	ThisFinfo.h
-DynamicFinfo.o:	DynamicFinfo.h
-ValueFinfo.o:	ValueFinfo.h DynamicFinfo.h Send.h
-ExtFieldFinfo.o:	ExtFieldFinfo.h
-DerivedFtype.o:	DerivedFtype.h
-SharedFtype.o:	SharedFtype.h
-SharedFinfo.o:	SharedFinfo.h SharedFtype.h
-SolveFinfo.o:	ThisFinfo.h SolveFinfo.h
-Cinfo.o:		Cinfo.h
-UnitTests.o:	SimpleElement.h DerivedFtype.h SrcFinfo.h DestFinfo.h Cinfo.h DynamicFinfo.h ValueFinfo.h Send.h ValueFtype.h
-LookupFinfo.o:	LookupFinfo.h DynamicFinfo.h LookupFtype.h
-DeletionMarkerFinfo.o: DeletionMarkerFinfo.h
-GlobalMarkerFinfo.o: DeletionMarkerFinfo.h GlobalMarkerFinfo.h
-SimpleElement.o:	SimpleElement.h DeletionMarkerFinfo.h
-setget.o:		setget.h DerivedFtype.h
-strconv.o:		DerivedFtype.h
-filecheck.o: filecheck.h
-IdManager.o:	Id.h IdManager.h
-ArrayElement.o:	ArrayElement.h SimpleElement.h DeletionMarkerFinfo.h
-Class.o: Class.h Cinfo.h Cinfo.cpp
-FuncVec.o: RecvFunc.h Ftype.h FuncVec.h
-Ftype.o: Ftype.h
+$(OBJ)	: $(HEADERS) ../shell/Shell.h
+Element.o:	FuncOrder.h
+testAsync.o:	SparseMatrix.h SetGet.h ../scheduling/Clock.h ../biophysics/IntFire.h ../synapse/SynHandlerBase.h ../synapse/SimpleSynHandler.h ../synapse/Synapse.h
+SparseMsg.o:	SparseMatrix.h
+SetGet.o:	SetGet.h ../shell/Neutral.h
+HopFunc.o:	HopFunc.h ../mpi/PostMaster.h
+global.o:       global.h 
 
 .cpp.o:
-	$(CXX) $(CXXFLAGS) $< -c
+	$(CXX) $(CXXFLAGS) -I../msg $< -c
 
-$(TARGET):		$(OBJ) $(HEADERS)
+.PHONY: pymoose
+
+pymoose: CXXFLAGS += -DPYMOOSE
+
+$(TARGET): $(OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ)
 
 clean:

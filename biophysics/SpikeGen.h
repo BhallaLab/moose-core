@@ -1,7 +1,7 @@
 /**********************************************************************
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment.
-**           Copyright (C) 2003-2007 Upinder S. Bhalla. and NCBS
+**           Copyright (C) 2003-2011 Upinder S. Bhalla. and NCBS
 ** It is made available under the terms of the
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
@@ -13,55 +13,45 @@
 class SpikeGen
 {
   public:
-    SpikeGen():threshold_(0.0),
-               refractT_(0.0),
-               amplitude_(1.0),
-               state_(0.0),
-               lastEvent_(0.0),
-               V_(0.0),
-               edgeTriggered_(1)
-    {
-    }
+    SpikeGen();
 
 	//////////////////////////////////////////////////////////////////
 	// Field functions.
 	//////////////////////////////////////////////////////////////////
-		static void setThreshold( const Conn* c, double threshold );
-		static double getThreshold( Eref e );
+		void setThreshold( double threshold );
+		double getThreshold() const;
 
-		static void setRefractT( const Conn* c, double val );
-		static double getRefractT( Eref e );
+		void setRefractT( double val );
+		double getRefractT() const;
 
-		static void setAmplitude( const Conn* c, double val );
-		static double getAmplitude( Eref e );
+		/*
+		void setAmplitude( double val );
+		double getAmplitude() const;
 
-		static void setState( const Conn* c, double val );
-		static double getState( Eref e );
+		void setState( double val );
+		double getState() const;
+		*/
 
-                static void setEdgeTriggered( const Conn* c, int yes);
-                static int getEdgeTriggered( Eref e);
+        bool getFired() const;
+        void setEdgeTriggered( bool yes);
+        bool getEdgeTriggered() const;
 
 	//////////////////////////////////////////////////////////////////
 	// Message dest functions.
 	//////////////////////////////////////////////////////////////////
 
-    virtual void innerProcessFunc( const Conn* c, ProcInfo p );
-	static void processFunc( const Conn* c, ProcInfo p );
-	static void reinitFunc( const Conn* c, ProcInfo p );
-	static void VmFunc( const Conn* c, double val );
+		void process( const Eref& e, ProcPtr p );
+		void reinit( const Eref& e, ProcPtr p );
+		void handleVm( double val );
 
-	protected:
+		static const Cinfo* initCinfo();
+	private:
 		double threshold_;
 		double refractT_;
-		double amplitude_;
-		double state_;
 		double lastEvent_;
 		double V_;
-                bool fired_;
-                int edgeTriggered_;
+		bool fired_;
+		bool edgeTriggered_;
 };
-
-// Used by solver, readcell, etc.
-extern const Cinfo* initSpikeGenCinfo();
 
 #endif // _SpikeGen_h

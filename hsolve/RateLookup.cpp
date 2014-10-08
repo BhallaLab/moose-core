@@ -24,15 +24,16 @@ LookupTable::LookupTable(
 	// Every row has 2 entries for each type of gate
 	nColumns_ = 2 * nSpecies;
 	
-	interpolate_.resize( nSpecies );
+	//~ interpolate_.resize( nSpecies );
 	table_.resize( nPts_ * nColumns_ );
 }
 
 void LookupTable::addColumns(
 	int species,
 	const vector< double >& C1,
-	const vector< double >& C2,
-	bool interpolate )
+	const vector< double >& C2 )
+	//~ const vector< double >& C2,
+	//~ bool interpolate )
 {
 	vector< double >::const_iterator ic1 = C1.begin();
 	vector< double >::const_iterator ic2 = C2.begin();
@@ -49,13 +50,13 @@ void LookupTable::addColumns(
 	*( iTable )     = C1.back();
 	*( iTable + 1 ) = C2.back();
 	
-	interpolate_[ species ] = interpolate;
+	//~ interpolate_[ species ] = interpolate;
 }
 
 void LookupTable::column( unsigned int species, LookupColumn& column )
 {
 	column.column = 2 * species;
-	column.interpolate = interpolate_[ species ];
+	//~ column.interpolate = interpolate_[ species ];
 }
 
 void LookupTable::row( double x, LookupRow& row )
@@ -83,12 +84,12 @@ void LookupTable::lookup(
 	
 	ap = row.row + column.column;
 	
-	if ( ! column.interpolate ) {
-		C1 = *ap;
-		C2 = *( ap + 1 );
-		
-		return;
-	}
+	//~ if ( ! column.interpolate ) {
+		//~ C1 = *ap;
+		//~ C2 = *( ap + 1 );
+		//~ 
+		//~ return;
+	//~ }
 	
 	bp = ap + nColumns_;
 	

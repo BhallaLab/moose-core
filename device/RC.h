@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Wed Dec 31 15:18:22 2008 (+0530)
 // Version: 
-// Last-Updated: Mon Mar  2 01:28:06 2009 (+0530)
-//           By: subhasis ray
-//     Update #: 30
+// Last-Updated: Wed Feb 22 20:29:35 2012 (+0530)
+//           By: Subhasis Ray
+//     Update #: 54
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -41,26 +41,24 @@
 #ifndef _RC_H
 #define _RC_H
 
-#include "basecode/header.h"
-#include "basecode/moose.h"
+#include "../basecode/header.h"
 
 class RC{
   public:
-    RC();
-    
-    static void setV0( const Conn* conn, double voltage );
-    static double getV0( Eref e );
-    static void setResistance( const Conn* conn, double resistance );
-    static double getResistance( Eref e );
-    static void setCapacitance( const Conn* conn, double capacitance );
-    static double getCapacitance( Eref e );
-    static double getState( Eref e );
-    static void setInject( const Conn* conn, double inject );
-    static double getInject( Eref e );
-    static void setInjectMsg( const Conn* conn, double inject );
-    static void processFunc( const Conn* conn, ProcInfo proc );
-    static void reinitFunc( const Conn* conn, ProcInfo proc );
-    
+    RC();    
+    void setV0(double voltage);
+    double getV0() const;
+    void setResistance(double resistance);
+    double getResistance() const;
+    void setCapacitance(double capacitance);
+    double getCapacitance() const;
+    double getState() const;
+    void setInject(double inject);
+    double getInject() const;
+    void setInjectMsg(double inject);
+    void process(const Eref& e, ProcPtr proc);
+    void reinit(const Eref& e, ProcPtr proc);
+    static const Cinfo * initCinfo();
   private:
     double v0_;
     double resistance_;

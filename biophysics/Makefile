@@ -1,90 +1,106 @@
 #/**********************************************************************
 #** This program is part of 'MOOSE', the
-#** Messaging Object Oriented Simulation Environment,
-#** also known as GENESIS 3 base code.
-#**           copyright (C) 2004 Upinder S. Bhalla. and NCBS
+#** Messaging Object Oriented Simulation Environment.
+#**           copyright (C) 2007 Upinder S. Bhalla. and NCBS
 #** It is made available under the terms of the
-#** GNU General Public License version 2
+#** GNU Lesser General Public License version 2.1
 #** See the file COPYING.LIB for the full notice.
 #**********************************************************************/
 
-TARGET = biophysics.o
+TARGET = _biophysics.o
 
 OBJ = \
+	IntFire.o	\
+	SpikeGen.o	\
+	RandSpike.o	\
+	CompartmentDataHolder.o	\
+	CompartmentBase.o	\
 	Compartment.o	\
 	SymCompartment.o	\
+	GapJunction.o	\
+	ChanBase.o	\
+	ChanCommon.o	\
+	HHChannelBase.o	\
 	HHChannel.o	\
-	HHChannel2D.o	\
-	Mg_block.o	\
 	HHGate.o	\
 	HHGate2D.o	\
+	HHChannel2D.o	\
+	CaConcBase.o	\
 	CaConc.o	\
+	MgBlock.o	\
 	Nernst.o	\
-	SpikeGen.o	\
+	Neuron.o	\
+	ReadCell.o	\
 	SynChan.o	\
-	BinSynchan.o	\
-	StochSynchan.o	\
-	STPSynChan.o	\
-	STPNMDAChan.o	\
-	NMDAChan.o	\
-	RandomSpike.o \
-	Cell.o		\
-	BioScan.o	\
-	TestBiophysics.o \
-	script_out.o \
+	testBiophysics.o	\
+	IzhikevichNrn.o	\
 	DifShell.o	\
-	TauPump.o	\
-	GHK.o \
-	IntFire.o	\
-	IzhikevichNrn.o \
 	Leakage.o	\
-	KinSynChan.o	\
-	StochSpikeGen.o \
+	VectorTable.o	\
+	MarkovRateTable.o	\
+	MarkovChannel.o	\
+	MarkovGslSolver.o	\
+	MatrixOps.o	\
+	MarkovSolverBase.o	\
+	MarkovSolver.o	\
+	VClamp.o	\
 
 
+	# LeakyIaF.o	\
+	# GapJunction.o	\
+	# Nernst.o	\
+	# GHK.o		\
+	# NMDAChan.o	\
+
+# GSL_LIBS = -L/usr/lib -lgsl
 
 HEADERS = \
 	../basecode/header.h \
-	../connections/Conn.h \
-	../basecode/Element.h \
+	../utility/numutil.h \
+
 
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
-Compartment.o:	Compartment.h ../basecode/Ftype2.h
-SymCompartment.o:	Compartment.h SymCompartment.h ../basecode/Ftype2.h
-HHChannel.o:	HHChannel.h ../basecode/Ftype2.h ../basecode/Ftype3.h
-HHChannel2D.o:	HHChannel.h HHChannel2D.h ../basecode/Ftype2.h ../basecode/Ftype3.h
-Mg_block.o:	Mg_block.h ../basecode/Ftype2.h ../basecode/Ftype3.h
-HHGate.o:	HHGate.h ../builtins/Interpol.h
-HHGate2D.o:	HHGate.h HHGate2D.h ../builtins/Interpol.h ../builtins/Interpol2D.h
-CaConc.o:	CaConc.h
+IntFire.o:	IntFire.h
+SpikeGen.o: SpikeGen.h
+RandSpike.o: RandSpike.h ../randnum/randnum.h
+CompartmentDataHolder.o: CompartmentDataHolder.h
+CompartmentBase.o: CompartmentBase.h CompartmentDataHolder.h
+Compartment.o: CompartmentBase.h Compartment.h
+SymCompartment.o: CompartmentBase.h Compartment.h SymCompartment.h
+ChanBase.o: ChanBase.h
+ChanCommon.o: ChanBase.h ChanCommon.h
+Leakage.o: Leakage.h ChanBase.h ChanCommon.h
+GapJunction.o: GapJunction.h
+HHChannelBase.o: ChanBase.h HHChannelBase.h HHGate.h
+HHChannel.o: ChanBase.h HHChannel.h HHGate.h
+HHGate.o: HHGate.h
+HHChannel2D.o: ChanBase.h HHChannel2D.h HHGate2D.h
+HHGate2D.o: HHGate2D.h
+CaConcBase.o:	CaConcBase.h
+CaConc.o:	CaConcBase.h CaConc.h
+MgBlock.o:	MgBlock.h ChanBase.h
 Nernst.o:	Nernst.h
-SpikeGen.o:	SpikeGen.h
-script_out.o:	script_out.h
-SynChan.o:	SynChan.h SynInfo.h
-STPSynChan.o:	STPSynChan.h SynChan.h SynInfo.h
-STPNMDAChan.o: STPSynChan.h STPNMDAChan.h SynInfo.h
-NMDAChan.o:	NMDAChan.h SynInfo.h
-Cell.o:	Cell.h ../element/Neutral.h
-BioScan.o:		BioScan.h
-StochSynchan.o:	StochSynchan.h StochSynInfo.h
-BinSynchan.o:	BinSynchan.h BinSynInfo.h ../randnum/BinomialRng.h
-DifShell.o: DifShell.h
-TauPump.o: TauPump.h
-GHK.o: GHK.h ../basecode/Ftype2.h
-IntFire.o: IntFire.h
+Neuron.o:	Neuron.h
+ReadCell.o: CompartmentBase.h Compartment.h SymCompartment.h ReadCell.h ../shell/Shell.h ../utility/utility.h
 IzhikevichNrn.o: IzhikevichNrn.h
-Leakage.o: Leakage.h
-KinSynChan.o: KinSynChan.h SynChan.h SynInfo.h
-StochSpikeGen.o: SpikeGen.h StochSpikeGen.h ../randnum/mt19937ar.cpp
+DifShell.o: DifShell.h
+testBiophysics.o: IntFire.h CompartmentBase.h Compartment.h HHChannel.h HHGate.h 
+VectorTable.o : VectorTable.h
+MarkovGslSolver.o : MarkovGslSolver.h 
+MatrixOps.o : MatrixOps.h
+MarkovRateTable.o : VectorTable.h ../builtins/Interpol2D.h MarkovRateTable.h 
+MarkovSolverBase.o : MarkovSolver.h MatrixOps.h MarkovRateTable.h
+MarkovSolver.o : MarkovSolverBase.h MarkovSolver.h
+MarkovChannel.o : VectorTable.h ../builtins/Interpol2D.h MarkovRateTable.h ChanBase.h MarkovChannel.h 
+VClamp.o: VClamp.h
 
 .cpp.o:
-	$(CXX) $(CXXFLAGS) -I../basecode -I../randnum -I.. $< -c
+	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I. -I../basecode -I../msg $< -c
 
-$(TARGET):		$(OBJ) $(HEADERS)
-	$(LD) -r -o $(TARGET) $(OBJ)
-#	$(LD) -r -o $(TARGET) $(OBJ) $(LIBS)
+$(TARGET): $(OBJ) $(SMOLDYN_OBJ) $(HEADERS)
+	$(LD) -r -o $(TARGET) $(OBJ) $(SMOLDYN_OBJ) $(SMOLDYN_LIB_PATH) $(SMOLDYN_LIBS) $(GSL_LIBS)
 
 clean:
-	-rm -f *.o $(TARGET) core core.*
+	rm -f *.o $(TARGET) core core.*

@@ -1,8 +1,0 @@
-[source]
-  binary=/home/hjorth/music/moose/trunk/moose
-  args=testMusicSource.g
-
-[dest]
-  binary=/home/hjorth/music/moose/trunk/moose
-  args=testMusicDest.g 
-  source.UTDATA -> dest.INDATA [1]

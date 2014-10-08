@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Wed Dec 31 15:47:45 2008 (+0530)
 // Version: 
-// Last-Updated: Fri Jun  4 00:03:11 2010 (+0530)
-//           By: Subhasis Ray
-//     Update #: 167
+// Last-Updated: Tue Jun 11 17:01:03 2013 (+0530)
+//           By: subha
+//     Update #: 247
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -30,9 +30,9 @@
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment,
 ** also known as GENESIS 3 base code.
-**           copyright (C) 2003-2008 Upinder S. Bhalla. and NCBS
+**           copyright (C) 2003-2013 Upinder S. Bhalla. and NCBS
 ** It is made available under the terms of the
-** GNU General Public License version 2
+** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
@@ -40,62 +40,87 @@
 
 #include "RC.h"
 
-const Cinfo* initRCCinfo()
+static SrcFinfo1< double >* outputOut()
 {
+    static SrcFinfo1< double > outputOut( "output",
+                                          "Current output level.");
+    return &outputOut;
+}
+
+const Cinfo* RC::initCinfo()
+{
+        static DestFinfo process("process",
+                      "Handles process call.",
+                      new ProcOpFunc<RC>(&RC::process));
+        static DestFinfo reinit( "reinit",
+                       "Handle reinitialization",
+                       new ProcOpFunc<RC>( &RC::reinit ));
     static Finfo* processShared[] = {
-        new DestFinfo( "process", Ftype1< ProcInfo >::global(),
-                       RFCAST( &RC::processFunc)),
-        new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
-                       RFCAST( &RC::reinitFunc )),
+		&process, &reinit
     };
-    static Finfo* process = new SharedFinfo( "process", processShared, sizeof( processShared ) / sizeof( Finfo* ));
+    static SharedFinfo proc("proc",
+                                         "This is a shared message to receive Process messages "
+                                         "from the scheduler objects."
+                                         "The first entry in the shared msg is a MsgDest "
+                                         "for the Process operation. It has a single argument, "
+                                         "ProcInfo, which holds lots of information about current "
+                                         "time, thread, dt and so on. The second entry is a MsgDest "
+                                         "for the Reinit operation. It also uses ProcInfo. ",
+                                         processShared,
+                                         sizeof( processShared ) / sizeof( Finfo* ));
+        static ValueFinfo<RC, double> V0( "V0", 
+                                    "Initial value of 'state'",
+                                    &RC::setV0,
+                                    &RC::getV0 );
+        static ValueFinfo<RC, double> R( "R", 
+                                    "Series resistance of the RC circuit.",
+                                    &RC::setResistance,
+                                    &RC::getResistance);
+        static ValueFinfo<RC, double> C( "C", 
+                                    "Parallel capacitance of the RC circuit.",
+                                    &RC::setCapacitance,
+                                    &RC::getCapacitance);
+        static ReadOnlyValueFinfo<RC, double> state("state", 
+                               "Output value of the RC circuit. This is the voltage across the"
+                               " capacitor.",
+                               &RC::getState);
+        static ValueFinfo<RC, double> inject( "inject",
+                        "Input value to the RC circuit.This is handled as an input current to"
+                        " the circuit.",
+                        &RC::setInject,
+                        &RC::getInject );
+        static DestFinfo injectIn( "injectIn",
+                       "Receives input to the RC circuit. All incoming messages are summed up"
+                       " to give the total input current." ,
+                       new OpFunc1<RC, double>(&RC::setInjectMsg));
     static Finfo* rcFinfos[] = {
-        new ValueFinfo( "V0", ValueFtype1< double >::global(),
-                        GFCAST( &RC::getV0 ),
-                        RFCAST( &RC::setV0 ),
-                        "Initial value of 'state'" ),
-        new ValueFinfo( "R", ValueFtype1< double >::global(),
-                        GFCAST( &RC::getResistance ),
-                        RFCAST( &RC::setResistance ),
-                        "Series resistance of the RC circuit." ),
-        new ValueFinfo( "C", ValueFtype1< double >::global(),
-                        GFCAST( &RC::getCapacitance ),
-                        RFCAST( &RC::setCapacitance ),
-                        "Parallel capacitance of the RC circuit." ),
-        new ValueFinfo( "state", ValueFtype1< double >::global(),
-                        GFCAST( &RC::getState ),
-                        RFCAST( &dummyFunc ),
-                        "Output value of the RC circuit. This is the voltage across the capacitor." ),
-        new ValueFinfo( "inject", ValueFtype1< double >::global(),
-                        GFCAST( &RC::getInject ),
-                        RFCAST( &RC::setInject ),
-                        "Input value to the RC circuit.This is handled as an input current to the circuit." ),
-        process,
-        new SrcFinfo( "outputSrc", Ftype1< double >::global(),
-                      "Sends the output of the RC circuit." ),
-        new DestFinfo( "injectMsg", Ftype1< double >::global(),
-                       RFCAST( &RC::setInjectMsg ),
-                       "Receives input to the RC circuit. All incoming messages are summed up to give the total input current." ),
+        &V0,
+        &R,
+        &C,
+        &state,
+        &inject,
+        outputOut(),
+        &injectIn,
+        &proc,
     };
-    static SchedInfo  schedInfo[] = {{process, 0, 0}};
     static string doc[] = {
         "Name", "RC",
         "Author", "Subhasis Ray, 2008, NCBS",
         "Description", "RC circuit: a series resistance R shunted by a capacitance C." };
-    static Cinfo rcCinfo(
-            doc,
-            sizeof( doc ) / sizeof( string ),
-            initNeutralCinfo(),
-            rcFinfos,
-            sizeof( rcFinfos ) / sizeof( Finfo* ),
-            ValueFtype1< RC >::global(),
-            schedInfo, 1 );
+    static Dinfo<RC> dinfo;
+    static Cinfo rcCinfo("RC",
+                         Neutral::initCinfo(),
+                         rcFinfos,
+                         sizeof( rcFinfos ) / sizeof( Finfo* ),
+                         &dinfo,
+                         doc,
+                         sizeof(doc)/sizeof(string)
+                         );
     return &rcCinfo;
 }
 
-static const Cinfo* rcCinfo = initRCCinfo();
+static const Cinfo* rcCinfo = RC::initCinfo();
 
-static const Slot outputSlot = initRCCinfo()->getSlot( "outputSrc" );
 
 RC::RC():
         v0_(0),
@@ -107,67 +132,67 @@ RC::RC():
         exp_(0.0),
         dt_tau_(0.0)
 {
-    // Do nothing
+    ;   // Do nothing
 }
             
-void RC::setV0( const Conn* conn, double v0 )
+void RC::setV0( double v0 )
 {
-    RC* instance = static_cast< RC* >( conn->data() );
-    instance->v0_ = v0;
+
+    v0_ = v0;
 }
 
-double RC::getV0( Eref e )
+double RC::getV0() const
 {
-    RC* instance = static_cast< RC* >( e.data() );
-    return instance->v0_;
+
+    return v0_;
 }
 
-void RC::setResistance( const Conn* conn, double resistance )
+void RC::setResistance( double resistance )
 {
-    RC* instance = static_cast< RC* >( conn->data() );
-    instance->resistance_ = resistance;
+
+    resistance_ = resistance;
 }
 
-double RC::getResistance( Eref e )
+double RC::getResistance( ) const
 {
-    RC* instance = static_cast< RC* >( e.data() );
-    return instance->resistance_;
+
+    return resistance_;
 }
 
-void RC::setCapacitance( const Conn* conn, double capacitance )
+void RC::setCapacitance( double capacitance )
 {
-    RC* instance = static_cast< RC* >( conn->data());
-    instance->capacitance_ = capacitance;
+
+    capacitance_ = capacitance;
 }
 
-double RC::getCapacitance( Eref e )
+double RC::getCapacitance() const
 {
-    RC* instance = static_cast< RC* >( e.data() );
-    return instance->capacitance_;
+
+    return capacitance_;
 }
 
-double RC::getState( Eref e )
+double RC::getState() const
 {
-    RC* instance = static_cast< RC* >( e.e->data() );
-    return instance->state_;
+
+    return state_;
 }
 
-void RC::setInject( const Conn* conn, double inject )
+void RC::setInject( double inject )
 {
-    RC* instance = static_cast< RC* >( conn->data() );
-    instance->inject_ = inject;
+
+    inject_ = inject;
 }
 
-double RC::getInject( Eref e )
+double RC::getInject() const
 {
-    RC* instance = static_cast< RC* >( e.e->data() );
-    return instance->inject_;
+
+    return inject_;
 }
 
-void RC::setInjectMsg( const Conn* conn, double inject )
+void RC::setInjectMsg( double inject )
 {
-    RC* instance = static_cast< RC* >( conn->data() );
-    instance->msg_inject_ += inject;
+
+    msg_inject_ += inject;
 }
 
 /**
@@ -176,31 +201,31 @@ void RC::setInjectMsg( const Conn* conn, double inject )
    Methods by Lawrance Pillage, McGraw-Hill Professional, 1999. pp
    87-100. Eqn: 4.7.21 */
 
-void RC::processFunc( const Conn* conn, ProcInfo proc )
+void RC::process(const Eref& e, const ProcPtr proc )
 {
-    RC* instance = static_cast< RC* >( conn->data() );
-    double sum_inject_prev = instance->inject_ + instance->msg_inject_;
-    double sum_inject = instance->inject_ + instance->msg_inject_;
-    double dVin = (sum_inject - sum_inject_prev) * instance->resistance_;
-    double Vin = sum_inject * instance->resistance_;
-    instance->state_ = Vin + dVin - dVin / instance->dt_tau_ +
-            (instance->state_ - Vin + dVin / instance->dt_tau_) * instance->exp_;
+    double sum_inject_prev = inject_ + msg_inject_;
+    double sum_inject = inject_ + msg_inject_;
+    double dVin = (sum_inject - sum_inject_prev) * resistance_;
+    double Vin = sum_inject * resistance_;
+    state_ = Vin + dVin - dVin / dt_tau_ +
+            (state_ - Vin + dVin / dt_tau_) * exp_;
     sum_inject_prev = sum_inject;
-    instance->msg_inject_ = 0.0;
-    send1<double>(conn->target(), outputSlot, instance->state_);
+    msg_inject_ = 0.0;
+    outputOut()->send(e, state_);
 }
 
-void RC::reinitFunc( const Conn* conn, ProcInfo proc)
+void RC::reinit(const Eref& e, const ProcPtr proc)
 {
-    RC* instance = static_cast< RC* >(conn->data());
-    instance->dt_tau_ = proc->dt_ / (instance->resistance_ * instance->capacitance_);
-    instance->state_ = instance->v0_;
-    if (instance->dt_tau_ > 1e-15){ 
-        instance->exp_ = exp(-instance->dt_tau_);
+
+    dt_tau_ = proc->dt / (resistance_ * capacitance_);
+    state_ = v0_;
+    if (dt_tau_ > 1e-15){ 
+        exp_ = exp(-dt_tau_);
     } else {// use approximation
-        instance->exp_ = 1 - instance->dt_tau_;
+        exp_ = 1 - dt_tau_;
     }
-    instance->msg_inject_ = 0.0;
+    msg_inject_ = 0.0;
+    outputOut()->send(e, state_);
 }
 
 
