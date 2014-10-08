@@ -55,7 +55,7 @@
    expression in standard C form and a list of variables values and
    evaluate the results.
  */
-static double *_functionAddVar(const char *name, void *data);
+double *_functionAddVar(const char *name, void *data);
 
 class Function
 {
