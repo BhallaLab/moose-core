@@ -15,6 +15,8 @@ OBJ = \
 	QIF.o \
 	ExIF.o \
 	AdExIF.o \
+	AdThreshIF.o \
+	IzhIF.o \
 	testIntFire.o \
 
 # GSL_LIBS = -L/usr/lib -lgsl
@@ -34,6 +36,8 @@ LIF.o:	LIF.h
 QIF.o:	QIF.h
 ExIF.o:	ExIF.h
 AdExIF.o:	AdExIF.h
+AdThreshIF.o:	AdThreshIF.h
+IzhIF.o:	IzhIF.h
 testIntFire.o:	LIF.h
 
 .cpp.o:

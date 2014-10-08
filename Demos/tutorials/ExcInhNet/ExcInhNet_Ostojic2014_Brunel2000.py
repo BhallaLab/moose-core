@@ -32,8 +32,6 @@ import moose
 np.random.seed(100) # set seed for reproducibility of simulations
 random.seed(100) # set seed for reproducibility of simulations
 
-STDP_FLAG = False       # set this to True/False to turn on/off STDP in exc synapses
-
 #############################################
 # Neuron model
 #############################################
@@ -85,6 +83,16 @@ g = 5.0           # -gJ is the inh strength. For exc-inh balance g >~ f(1-f)=4
 syndelay = 0.5e-3 + dt # s     # synaptic delay:
                                # 0 ms gives similar result contrary to Ostojic?!
 refrT = 0.5e-3    # s     # absolute refractory time -- 0 ms gives similar result
+
+#############################################
+# STDP parameters: synapses (not for ExcInhNetBase)
+#############################################
+
+## pre before post
+aPlus0 = 100     # fraction of the base strength J 
+tauPlus = 0.01  # 10 ms
+aMinus0 = -100    # fraction of the base strength J 
+tauMinus = 0.01  # 10 ms
 
 #############################################
 # Exc-Inh network base class without connections
@@ -149,10 +157,10 @@ class ExcInhNetBase:
         
         # moose simulation
         moose.useClock( 0, '/network/syns', 'process' )
-        moose.useClock( 0, '/network/syns/synapse', 'process' )
         moose.useClock( 1, '/network', 'process' )
         moose.useClock( 2, '/plotSpikes', 'process' )
         moose.useClock( 3, '/plotVms', 'process' )
+        moose.useClock( 3, '/plotWeights', 'process' )
         moose.setClock( 0, dt )
         moose.setClock( 1, dt )
         moose.setClock( 2, dt )
@@ -171,8 +179,8 @@ class ExcInhNetBase:
             self._plot()
 
     def _init_plots(self):
-        ## make 100 tables to store Vm-s
-        numVms = 100
+        ## make a few tables to store a few Vm-s
+        numVms = 10
         self.plots = moose.Table( '/plotVms', numVms )
         ## draw numVms out of N neurons
         nrnIdxs = random.sample(range(self.N),numVms)
@@ -243,6 +251,9 @@ class ExcInhNet(ExcInhNetBase):
     def _init_network(self,**args):
         ExcInhNetBase._init_network(self,**args)
         
+    def _init_plots(self):
+        ExcInhNetBase._init_plots(self)
+
     def _setup_network(self):
         ## Set up the neurons without connections
         ExcInhNetBase._setup_network(self)  
@@ -254,10 +265,7 @@ class ExcInhNet(ExcInhNetBase):
         ##  synaptic weight in one time step i.e. delta-fn synapse.
         ## Since LIF neuron is derived from Compartment class,
         ## conductance-based synapses (SynChan class) can also be used.
-        if STDP_FLAG:
-            self.syns = moose.STDPSynHandler( '/network/syns', self.N ) # syns is a vector
-        else:
-            self.syns = moose.SimpleSynHandler( '/network/syns', self.N );
+        self.syns = moose.SimpleSynHandler( '/network/syns', self.N );
         moose.connect( self.syns, 'activationOut', self.network, \
             'activation', 'OneToOne' )
 
@@ -265,14 +273,6 @@ class ExcInhNet(ExcInhNetBase):
         for i in range(0,self.N):
             ## each neuron has incC number of synapses
             self.syns.vec[i].numSynapses = self.incC
-            if STDP_FLAG:
-                connectExcId = moose.connect( self.network.vec[i], \
-                    'spikeOut', self.syns.vec[i], 'addPostSpike')
-                self.syns.vec[i].aMinus0 = -0.1*self.J  # sets for post-part of synapse on a neuron
-                                                        # unlike FieldElement array, has to be set for each
-                                                        # aMinus0 includes learning rate
-                                                        # it is added directly to the weight
-                self.syns.vec[i].tauMinus = 0.01 # 10 ms   # sets for syn on all neurons
 
             ## draw excC number of neuron indices out of NmaxExc neurons
             preIdxs = random.sample(range(self.NmaxExc),self.excC)
@@ -283,11 +283,6 @@ class ExcInhNet(ExcInhNetBase):
                     'spikeOut', synij, 'addSpike')
                 synij.delay = syndelay
                 synij.weight = self.J
-                if STDP_FLAG:
-                    synij.aPlus0 = 0.1*self.J       # sets for all pre-part of all synapses on a neuron
-                                                    # aPlus0 includes learning rate
-                                                    # it is added directly to the weight
-                    synij.tauPlus = 0.01 # 10 ms
 
             ## draw inhC=incC-excC number of neuron indices out of inhibitory neurons
             preIdxs = random.sample(range(self.NmaxExc,self.N),self.incC-self.excC)
@@ -345,7 +340,7 @@ def extra_plots(net):
     ## individual neuron firing rates
     fig = plt.figure()
     plt.subplot(221)
-    num_to_plot = 50
+    num_to_plot = 10
     #rates = []
     for nrni in range(num_to_plot):
         rate = rate_from_spiketrain(\
@@ -370,17 +365,17 @@ def extra_plots(net):
     plt.ylim(0,100)
     plt.title("Exc population rate")
     plt.ylabel("Hz")
-    plt.xlabel("Time (ms)")
+    plt.xlabel("Time (s)")
     plt.subplot(224)
     rate = rate_from_spiketrain(net.spikesInh.vector,simtime,dt)\
         /float(net.N-net.NmaxExc) # per neuron    
     plt.plot(timeseries,rate)
     plt.ylim(0,100)
     plt.title("Inh population rate")
-    plt.xlabel("Time (ms)")
+    plt.xlabel("Time (s)")
 
     fig.tight_layout()
-
+            
 if __name__=='__main__':
     ## ExcInhNetBase has unconnected neurons,
     ## ExcInhNet connects them
