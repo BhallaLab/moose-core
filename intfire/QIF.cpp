@@ -24,7 +24,7 @@ const Cinfo* QIF::initCinfo()
 		"Author", "Aditya Gilra",
 		"Description", "Leaky Integrate-and-Fire neuron with Quadratic term in Vm."
         "Based on Spiking Neuron Models book by Gerstner and Kistler."
-        "Rm*Cm dVm/dt = a0*(Vm-Em)*(Vm-vCritical) + Rm*I"
+        "Rm*Cm * dVm/dt = a0*(Vm-Em)*(Vm-vCritical) + Rm*I"
 	};
 
     static ElementValueFinfo< QIF, double > vCritical(

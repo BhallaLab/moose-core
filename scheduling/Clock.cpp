@@ -729,6 +729,7 @@ void Clock::buildDefaultTick()
 	defaultTick_["VClamp"] = 0;
 	defaultTick_["SynHandlerBase"] = 1;
 	defaultTick_["SimpleSynHandler"] = 1;
+	defaultTick_["STDPSynHandler"] = 1;
 	defaultTick_["CaConc"] = 1;
 	defaultTick_["CaConcBase"] = 1;
 	defaultTick_["DifShell"] = 1;
@@ -739,6 +740,11 @@ void Clock::buildDefaultTick()
 	defaultTick_["IntFire"] = 2;
 	defaultTick_["IntFireBase"] = 2;
 	defaultTick_["LIF"] = 2;
+	defaultTick_["QIF"] = 2;
+	defaultTick_["ExIF"] = 2;
+	defaultTick_["AdExIF"] = 2;
+	defaultTick_["AdThreshIF"] = 2;
+	defaultTick_["IzhIF"] = 2;
 	defaultTick_["IzhikevichNrn"] = 2;
 	defaultTick_["SynChan"] = 2;
 	defaultTick_["GapJunction"] = 2;
