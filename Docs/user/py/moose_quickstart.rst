@@ -23,53 +23,41 @@ Importing MOOSE and accessing built-in documentation
 ====================================================
 
 In a python script you import modules to access the functionalities they
-provide.
+provide. ::
 
-.. code:: python
-
-        import moose
+        >>> import moose
 
 This makes the ``moose`` module available for use in Python. You can use
 Python's built-in ``help`` function to read the top-level documentation
-for the moose module:
+for the moose module ::
 
-.. code:: python
-
-        help(moose)
+        >>> help(moose)
 
 This will give you an overview of the module. Press ``q`` to exit the
 pager and get back to the interpreter. You can also access the
-documentation for individual classes and functions this way.
+documentation for individual classes and functions this way. ::
 
-.. code:: python
-
-        help(moose.connect)
+        >>> help(moose.connect)
 
 To list the available functions and classes you can use ``dir``
-function [1]_.
+function [1]_. ::
 
-.. code:: python
-
-        dir(moose)
+        >>> dir(moose)
 
 MOOSE has built-in documentation in the C++-source-code independent of
 Python. The ``moose`` module has a separate ``doc`` function to extract
-this documentation.
+this documentation. ::
 
-.. code:: python
-
-        moose.doc(moose.Compartment)
+        >>> moose.doc(moose.Compartment)
 
 The class level documentation will show whatever the author/maintainer
 of the class wrote for documentation followed by a list of various kinds
 of fields and their data types. This can be very useful in an
 interactive session.
 
-Each field can have its own detailed documentation, too.
+Each field can have its own detailed documentation, too. ::
 
-.. code:: python
-
-        moose.doc('Compartment.Rm')
+        >>> moose.doc('Compartment.Rm')
 
 Note that you need to put the class-name followed by dot followed by
 field-name within quotes. Otherwise, ``moose.doc`` will receive the
@@ -88,9 +76,7 @@ system hierarchies in common operating systems, this should be simple.
 
 At the top of the object hierarchy sits the ``Shell``, equivalent to the
 root directory in UNIX-based systems and represented by the path ``/``.
-You can list the existing objects under ``/`` using the ``le`` function.
-
-.. code:: python
+You can list the existing objects under ``/`` using the ``le`` function. ::
 
         >>> moose.le()
 	Elements under /
@@ -98,15 +84,10 @@ You can list the existing objects under ``/`` using the ``le`` function.
 	/clock
 	/classes
 	/postmaster
-	>>> 
 	
 ``Msgs``, ``clock`` and ``classes`` are predefined objects in MOOSE. And
 each object can contain other objects inside them. You can see them by
-passing the path of the parent object to ``le``.
-
-Entering:
-
-.. code:: python
+passing the path of the parent object to ``le`` ::
 
         >>> moose.le('/Msgs')
         Elements under /Msgs[0]
@@ -115,72 +96,50 @@ Entering:
         /Msgs[0]/oneToAllMsg
         /Msgs[0]/diagonalMsg
         /Msgs[0]/sparseMsg
-	>>> 
 
 Now let us create some objects of our own. This can be done by invoking
-MOOSE class constructors (just like regular Python classes).
-
-.. code:: python
+MOOSE class constructors (just like regular Python classes). ::
 
         >>> model = moose.Neutral('/model')
-	>>> 
 	
 The above creates a ``Neutral`` object named ``model``. ``Neutral`` is
 the most basic class in MOOSE. A ``Neutral`` element can act as a
-container for other elements. We can create something under ``model``:
-
-.. code:: python
+container for other elements. We can create something under ``model`` ::
 
         >>> soma = moose.Compartment('/model/soma')
-	>>> 
 	
 Every element has a unique path. This is a concatenation of the names of
 all the objects one has to traverse starting with the root to reach that
-element. 
-
-.. code:: python
+element. ::
 
         >>> print soma.path
         /model/soma
-	>>> 
-	
-The name of the element can be printed, too.
 
-.. code:: python
+The name of the element can be printed, too. ::
 
         >>> print soma.name
         soma
-	>>>  
 
 The ``Compartment`` elements model small sections of a neuron. Some
 basic experiments can be carried out using a single compartment. Let us
 create another object to act on the ``soma``. This will be a step
-current generator to inject a current pulse into the soma.
-
-.. code:: python
+current generator to inject a current pulse into the soma. ::
 
         >>> pulse = moose.PulseGen('/model/pulse')
-	>>> 
 	
-You can use ``le`` at any point to see what is there:
-
-.. code:: python
+You can use ``le`` at any point to see what is there ::
 
         >>> moose.le('/model')
         Elements under /model
         /model/soma
         /model/pulse
-	>>>
 	
 And finally, we can create a ``Table`` to record the time series of the
 soma's membrane potential. It is good practice to organize the data
-separately from the model. So we do it as below:
-
-.. code:: python
+separately from the model. So we do it as below ::
 
         >>> data = moose.Neutral('/data')
         >>> vmtab = moose.Table('/data/soma_Vm')
-	>>>
 	
 Now that we have the essential elements for a small model, we can go on
 to set the properties of this model and the experimental protocol.
@@ -191,15 +150,14 @@ Setting the properties of elements: accessing fields
 Elements have several kinds of fields. The simplest ones are the
 ``value fields``. These can be accessed like ordinary Python members.
 You can list the available value fields using ``getFieldNames``
-function:
-
-.. code:: python
+function ::
 
           >>> soma.getFieldNames('valueFinfo')
 
 Here ``valueFinfo`` is the type name for value fields. ``Finfo`` is
 short form of *field information*. For each type of field there is a
-name ending with ``-Finfo``. The above will display the following list::
+name ending with ``-Finfo``. The above will display the following
+list ::
 
          ('this',
         'name',
@@ -231,7 +189,6 @@ name ending with ``-Finfo``. The above will display the following list::
         'x',
         'y',
         'z')
-	>>>
 	
 Some of these fields are for internal or advanced use, some give access
 to the physical properties of the biological entity we are trying to
@@ -250,29 +207,21 @@ voltage ``Em`` is in series with the resistor, as shown below:
 
 --------------
 
-The fields are populated with some defaults.
-
-.. code:: python
+The fields are populated with some defaults. ::
 
         >>> print soma.Cm, soma.Rm, soma.Vm, soma.Em, soma.initVm
         1.0 1.0 -0.06 -0.06 -0.06
-	>>>
 	  
 	
 You can set the ``Cm`` and ``Rm`` fields to something realistic using
-simple assignment (we follow SI unit) [2]_.
-
-.. code:: python
+simple assignment (we follow SI unit) [2]_. ::
 
         >>> soma.Cm = 1e-9
         >>> soma.Rm = 1e7
         >>> soma.initVm = -0.07
-	>>>  
 
 Instead of writing print statements for each field, you could use the
-utility function showfield to see that the changes took effect:
-
-.. code:: python
+utility function showfield to see that the changes took effect ::
 
         >>> moose.showfield(soma)
 	[ /soma[0] ]
@@ -299,17 +248,13 @@ utility function showfield to see that the changes took effect:
 	Im               = 0.0
 	x                = 0.0
 	z                = 0.0
-	>>> 
 	
-Now we can setup the current pulse to be delivered to the soma:
-
-.. code:: python
+Now we can setup the current pulse to be delivered to the soma ::
 
         >>> pulse.delay[0] = 50e-3
         >>> pulse.width[0] = 100e-3
         >>> pulse.level[0] = 1e-9
         >>> pulse.delay[1] = 1e9
-	>>>  
 
 This tells the pulse generator to create a 100 ms long pulse 50 ms after
 the start of the simulation. The amplitude of the pulse is set to 1 nA.
@@ -326,33 +271,25 @@ connect them via messages. Elements are connected to each other using
 special source and destination fields. These types are named
 ``srcFinfo`` and ``destFinfo``. You can query the available source and
 destination fields on an element using ``getFieldNames`` as before. This
-time, let us do it another way: by the class name:
-
-.. code:: python
+time, let us do it another way: by the class name ::
 
         >>> moose.getFieldNames('PulseGen', 'srcFinfo')
         ('childMsg', 'output')
-	>>>
 
 This form has the advantage that you can get information about a class
 without creating elements of that class.
 
 Here ``childMsg`` is a source field that is used by the MOOSE internals
 to connect child elements to parent elements. The second one is of our
-interest. Check out the built-in documentation here:
-
-.. code:: python
+interest. Check out the built-in documentation here ::
 
         >>> moose.doc('PulseGen.output')
         PulseGen.output: double - source field
         Current output level.
-	>>>
 
 so this is the output of the pulse generator and this must be injected
 into the ``soma`` to stimulate it. But where in the ``soma`` can we send
-it? Again, MOOSE has some introspection built in.
-
-.. code:: python
+it? Again, MOOSE has some introspection built in. ::
 
         >>> soma.getFieldNames('destFinfo')
         ('parentMsg',
@@ -371,41 +308,32 @@ it? Again, MOOSE has some introspection built in.
          'handleChannel',
          'handleRaxial',
          'handleAxial')
-	>>> 
 
 Now that is a long list. But much of it are fields for internal or
 special use. Anything that starts with ``get`` or ``set`` are internal
 ``destFinfo`` used for accessing value fields (we shall use one of those
 when setting up data recording). Among the rest ``injectMsg`` seems to
 be the most likely candidate. Use the ``connect`` function to connect
-the pulse generator output to the soma input:
-
-.. code:: python
+the pulse generator output to the soma input ::
 
           >>> m = moose.connect(pulse, 'output', soma, 'injectMsg')
-	  >>> 
 
 ``connect(source, source_field, dest, dest_field)`` creates a
 ``message`` from ``source`` element's ``source_field`` field to ``dest``
 elements ``dest_field`` field and returns that message. Messages are
-also elements. You can print them to see their identity:
-
-.. code:: python
+also elements. You can print them to see their identity ::
 
         >>> print m
         <moose.SingleMsg: id=5, dataId=733, path=/Msgs/singleMsg[733]>
-	>>>  
 
 You can print any element as above and the string representation will
 show you the class, two numbers(\ ``id`` and ``dataId``) uniquely
 identifying it among all elements, and its path. You can get some more
-information about a message:
-
-.. code:: python
+information about a message ::
 
         >>> print m.e1.path, m.e2.path, m.srcFieldsOnE1, m.destFieldsOnE2
         /model/pulse /model/soma ('output',) ('injectMsg',)
-        >>> 
+
 	
 will confirm what you already know.
 
@@ -416,13 +344,10 @@ destination elements, which are ``pulse`` and ``soma`` respectively. The
 next two items are lists of the field names which are connected by this
 message.
 
-You could also check which elements are connected to a particular field:
-
-.. code:: python
+You could also check which elements are connected to a particular field ::
 
         >>> print soma.neighbors['injectMsg']
         [<moose.vec: class=PulseGen, id=729,path=/model/pulse>]
-	>>> 
 	
 Notice that the list contains something called vec. We discuss this
 `later <#some-more-details>`__. Also ``neighbors`` is a new kind of
@@ -431,13 +356,10 @@ the table to the soma to retrieve its membrane potential ``Vm``. This is
 where all those ``destFinfo`` starting with ``get`` or ``set`` come in
 use. For each value field ``X``, there is a ``destFinfo`` ``get{X}`` to
 retrieve the value at simulation time. This is used by the table to
-record the values ``Vm`` takes.
-
-.. code:: python
+record the values ``Vm`` takes. ::
 
 	>>> moose.connect(vmtab, 'requestOut', soma, 'getVm')
 	<moose.SingleMsg: id=5, dataIndex=0, path=/Msgs[0]/singleMsg[0]>
-	>>> 
 	  
 This finishes our model and recording setup. You might be wondering
 about the source-destination relationship above. It is natural to think
@@ -455,14 +377,11 @@ element with time as the simulation progresses. Every element to be
 included in a simulation must be assigned a tick. Each tick can have a
 different ticking interval (``dt``) that allows different elements to be
 updated at different rates. We initialize the ticks and set their ``dt``
-values using the ``setClock`` function.
-
-.. code:: python
+values using the ``setClock`` function. ::
 
         >>> moose.setClock(0, 0.025e-3)
         >>> moose.setClock(1, 0.025e-3)
         >>> moose.setClock(2, 0.25e-3)
-	>>> 
 	
 This will initialize tick #0 and tick #1 with ``dt = 25`` μs and tick #2
 with ``dt = 250`` μs. Thus all the elements scheduled on ticks #0 and 1
@@ -472,12 +391,9 @@ required for numerical accuracy and the slower clock to sample the
 values of ``Vm``.
 
 So to assign tick #2 to the table for recording ``Vm``, we pass its
-whole path to the ``useClock`` function.
-
-.. code:: python
+whole path to the ``useClock`` function. ::
 
         >>> moose.useClock(2, '/data/soma_Vm', 'process')
-	>>> 
 	
 Read this as "use tick # 2 on the element at path ``/data/soma_Vm`` to
 call its ``process`` method at every step". Every class that is supposed
@@ -488,22 +404,15 @@ which is implemented in some classes to interleave actions or updates
 that must be executed in a specific order [4]_. The ``Compartment``
 class is one such case where a neuronal compartment has to know the
 ``Vm`` of its neighboring compartments before it can calculate its
-``Vm`` for the next step. This is done with:
-
-.. code:: python
+``Vm`` for the next step. This is done with: ::
 
         >>> moose.useClock(0, soma.path, 'init')
-	>>> 
-
 	
 Here we used the ``path`` field instead of writing the path explicitly.
 
-Next we assign tick #1 to process method of everything under ``/model``.
-
-.. code:: python
+Next we assign tick #1 to process method of everything under ``/model``. ::
 
         >>> moose.useClock(1, '/model/##', 'process')
-	>>> 
 	
 Here the second argument is an example of wild-card path. The ``##``
 matches everything under the path preceding it at any depth. Thus if we
@@ -515,25 +424,17 @@ the path. This is a single level wild-card which matches only the
 children of ``/model`` but does not go farther down in the hierarchy.
 
 Once the elements are assigned ticks, we can put the model to its
-initial state using:
-
-.. code:: python
+initial state using ::
 
         >>> moose.reinit()
-	>>> 
 	  
 You may remember that we had changed initVm from ``-0.06`` to ``-0.07``.
-The reinit call we initialize ``Vm`` to that value. You can verify that:
-
-.. code:: python
+The reinit call we initialize ``Vm`` to that value. You can verify that ::
 
         >>> print soma.Vm
         -0.07
-	>>> 
 	  
-Finally, we run the simulation for 300 ms:
-
-.. code:: python
+Finally, we run the simulation for 300 ms ::
 
         >>> moose.start(300e-3)
 
@@ -541,15 +442,12 @@ The data will be recorded by the ``soma_vm`` table, which is referenced
 by the variable ``vmtab``. The ``Table`` class provides a numpy array
 interface to its content. The field is ``vec``. So you can easily plot
 the membrane potential using the `matplotlib <http://matplotlib.org/>`__
-library.
-
-.. code:: python
+library. ::
 
         >>> import pylab
         >>> t = pylab.linspace(0, 300e-3, len(vmtab.vec))
         >>> pylab.plot(t, vmtab.vec)
         >>> pylab.show()
-	>>> 
 	
 The first line imports the pylab submodule from matplotlib. This useful
 for interactive plotting. The second line creates the time points to
@@ -568,31 +466,24 @@ MOOSE elements are instances of the class ``melement``. ``Compartment``,
 ``melement``. All ``melement`` instances are contained in array-like
 structures called ``vec``. Each ``vec`` object has a numerical
 ``id_`` field uniquely identifying it. An ``vec`` can have one or
-more elements. You can create an array of elements:
-
-.. code:: python
+more elements. You can create an array of elements ::
 
         >>> comp_array = moose.vec('/model/comp', n=3, dtype='Compartment')
 
 This tells MOOSE to create an ``vec`` of 3 ``Compartment`` elements
 with path ``/model/comp``. For ``vec`` objects with multiple
-elements, the index in the ``vec`` is part of the element path.
-
-.. code:: python
+elements, the index in the ``vec`` is part of the element path. ::
 
         >>> print comp_array.path, type(comp_array)
 
 shows that ``comp_array`` is an instance of ``vec`` class. You can
-loop through the elements in an ``vec`` like a Python list:
+loop through the elements in an ``vec`` like a Python list ::
 
-.. code:: python
+        >>> for comp in comp_array:
+        ...    print comp.path, type(comp)
+	... 
 
-        for comp in comp_array:
-            print comp.path, type(comp)
-
-shows:
-
-.. code:: python
+shows ::
 
         /model/comp[0] <type 'moose.melement'>
         /model/comp[1] <type 'moose.melement'>
@@ -607,9 +498,7 @@ the paths of various model components but does not know the appropriate
 class name for them. For this scenario there is a function called
 ``element`` which converts ("casts" in programming jargon) a path or any
 moose object to its proper MOOSE class. You can create additional
-references to ``soma`` in the example this way:
-
-.. code:: python
+references to ``soma`` in the example this way ::
 
         x = moose.element('/model/soma')
 
