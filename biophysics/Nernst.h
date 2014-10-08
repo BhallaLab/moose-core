@@ -9,53 +9,43 @@
 
 #ifndef _Nernst_h
 #define _Nernst_h
+
+/**
+ * This class does the Nernst equation calculations
+ */
 class Nernst
 {
 	public:
-		Nernst()
-		{
-			E_ = 0.0;
-			Temperature_ = 295;
-			valence_ = 1;
-			Cin_ = 1.0;
-			Cout_ = 1.0;
-			scale_ = 1.0;
-			factor_ = scale_ * R_OVER_F * Temperature_ / valence_;
-		}
+		Nernst();
 
 	///////////////////////////////////////////////////
 	// Field function definitions
 	///////////////////////////////////////////////////
-	static double getE( Eref e );
+	double getE() const;
 
-	void localSetTemperature( double value );
-	static void setTemperature( const Conn* c, double value );
-	static double getTemperature( Eref e );
+	void setTemperature( double value );
+	double getTemperature() const;
 
-	void localSetValence( int value );
-	static void setValence( const Conn* c, int value );
-	static int getValence( Eref e );
+	void setValence( int value );
+	int getValence() const;
 
-	static void setCin( const Conn* c, double value );
-	static double getCin( Eref e );
+	void setCin( double value );
+	double getCin() const;
 
-	static void setCout( const Conn* c, double value );
-	static double getCout( Eref e );
+	void setCout( double value );
+	double getCout() const;
 
-	static void setScale( const Conn* c, double value );
-	static double getScale( Eref e );
-
+	void setScale( double value );
+	double getScale() const;
 
 	///////////////////////////////////////////////////
 	// Dest function definitions
 	///////////////////////////////////////////////////
 
-	void cinFuncLocal( const Conn* c, double conc );
-	static void cinFunc( const Conn* c, double value );
+	void handleCin( const Eref& e, double conc );
+	void handleCout( const Eref& e, double conc );
 
-	void coutFuncLocal( const Conn* c, double conc );
-	static void coutFunc( const Conn* c, double value );
-
+	static const Cinfo* initCinfo();
 	private:
 		void updateE( );
 		double E_;
@@ -70,6 +60,5 @@ class Nernst
 };
 
 // Used by solver, readcell, etc.
-extern const Cinfo* initNernstCinfo();
 
 #endif // _Nernst_h

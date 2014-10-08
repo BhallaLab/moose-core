@@ -10,146 +10,166 @@
 #ifndef _HSOLVE_ACTIVE_H
 #define _HSOLVE_ACTIVE_H
 
+#include "../basecode/header.h"
+#include <set>
+#include <limits> // Max and min 'double' values needed for lookup table init.
+#include "../biophysics/CaConcBase.h"
+#include "../biophysics/HHGate.h"
+#include "../biophysics/ChanBase.h"
+#include "../biophysics/ChanCommon.h"
+#include "../biophysics/HHChannelBase.h"
+#include "../biophysics/HHChannel.h"
+#include "../biophysics/SpikeGen.h"
+#include "HSolveUtils.h"
+#include "HSolveStruct.h"
+#include "HinesMatrix.h"
+#include "HSolvePassive.h"
+#include "RateLookup.h"
+
 class HSolveActive: public HSolvePassive
 {
-	typedef vector< CurrentStruct >::iterator currentVecIter;
-	
+    typedef vector< CurrentStruct >::iterator currentVecIter;
+
 public:
-	HSolveActive();
-	
-	void setup( Id seed, double dt );
-	void solve( ProcInfo info );
-	
-	/**
-	 * Interface functions to access the solver's data: Defined in HSolveInterface.cpp
-	 */
-	
-	/// Interface to compartments
-	const vector< Id >& getCompartments( ) const;
-	double getVm( unsigned int index ) const;
-	void setVm( unsigned int index, double value );
-	double getInject( unsigned int index ) const;
-	void setInject( unsigned int index, double value );
-	double getIm( unsigned int index ) const;
-	void addInject( unsigned int index, double value );
-	void addGkEk( unsigned int index, double v1, double v2 );
-	
-	/// Interface to channels
-	const vector< Id >& getHHChannels( ) const;
-	double getHHChannelGbar( unsigned int index ) const;
-	void setHHChannelGbar( unsigned int index, double value );
-	double getEk( unsigned int index ) const;
-	void setEk( unsigned int index, double value );
-	double getGk( unsigned int index ) const;
-	void setGk( unsigned int index, double value );
-	// Ik is read-only
-	double getIk( unsigned int index ) const;
-	double getX( unsigned int index ) const;
-	void setX( unsigned int index, double value );
-	double getY( unsigned int index ) const;
-	void setY( unsigned int index, double value );
-	double getZ( unsigned int index ) const;
-	void setZ( unsigned int index, double value );
-	
-	/// Interface to CaConc
-	const vector< Id >& getCaConcs( ) const;
-	double getCaBasal( unsigned int index ) const;
-	void setCaBasal( unsigned int index, double value );
-	double getCa( unsigned int index ) const;
-	void setCa( unsigned int index, double value );
-	
-	/// Interface to external channels
-	const vector< vector< Id > >& getExternalChannels( ) const;
-	
+    HSolveActive();
+
+    void setup( Id seed, double dt );
+    void step( ProcPtr info );			///< Equivalent to process
+    void reinit( ProcPtr info );
+
 protected:
-	/**
-	 * Solver parameters: exposed as fields in MOOSE
-	 */
-	
-	/**
-	 * caAdvance_: This flag determines how current flowing into a calcium pool
-	 * is computed. A value of 0 means that the membrane potential at the
-	 * beginning of the time-step is used for the calculation. This is how
-	 * GENESIS does its computations. A value of 1 means the membrane potential
-	 * at the middle of the time-step is used. This is the correct way of
-	 * integration, and is the default way.
-	 */	
-	int                       caAdvance_;
-	
-	/**
-	 * vMin_, vMax_, vDiv_,
-	 * caMin_, caMax_, caDiv_:
-	 * 
-	 * These are the parameters for the lookup tables for rate constants.
-	 * 'min' and 'max' are the boundaries within which the function is defined.
-	 * 'div' is the number of divisions between min and max.
-	 */
-	double                    vMin_;
-	double                    vMax_;
-	int                       vDiv_;
-	double                    caMin_;
-	double                    caMax_;
-	int                       caDiv_;
+    /**
+     * Solver parameters: exposed as fields in MOOSE
+     */
+
+    /**
+     * caAdvance_: This flag determines how current flowing into a calcium pool
+     * is computed. A value of 0 means that the membrane potential at the
+     * beginning of the time-step is used for the calculation. This is how
+     * GENESIS does its computations. A value of 1 means the membrane potential
+     * at the middle of the time-step is used. This is the correct way of
+     * integration, and is the default way.
+     */
+    int                       caAdvance_;
+
+    /**
+     * vMin_, vMax_, vDiv_,
+     * caMin_, caMax_, caDiv_:
+     *
+     * These are the parameters for the lookup tables for rate constants.
+     * 'min' and 'max' are the boundaries within which the function is defined.
+     * 'div' is the number of divisions between min and max.
+     */
+    double                    vMin_;
+    double                    vMax_;
+    int                       vDiv_;
+    double                    caMin_;
+    double                    caMax_;
+    int                       caDiv_;
+
+    /**
+     * Internal data structures. Will also be accessed in derived class HSolve.
+     */
+    vector< CurrentStruct >   current_;			///< Channel current
+    vector< double >          state_;			///< Fraction of gates open
+    //~ vector< int >             instant_;
+    vector< ChannelStruct >   channel_;			///< Vector of channels. Link
+    ///< to compartment: chan2compt
+    vector< SpikeGenStruct >  spikegen_;
+    vector< SynChanStruct >   synchan_;
+    vector< CaConcStruct >    caConc_;			///< Ca pool info
+    vector< double >          ca_;				///< Ca conc in each pool
+    vector< double >          caActivation_;	///< Ca current entering each
+    ///< calcium pool
+    vector< double* >         caTarget_;		///< For each channel, which
+    ///< calcium pool is being fed?
+    ///< Points into caActivation.
+    LookupTable               vTable_;
+    LookupTable               caTable_;
+    vector< bool >            gCaDepend_;		///< Does the conductance
+    ///< depend on Ca conc?
+    vector< unsigned int >    caCount_;			///< Number of calcium pools in
+    ///< each compartment
+    vector< int >             caDependIndex_;	///< Which pool does each Ca
+    ///< depdt channel depend upon?
+    vector< LookupColumn >    column_;			///< Which column in the table
+    ///< to lookup for this species
+    vector< LookupRow >       caRowCompt_;      /**< Lookup row buffer.
+		*   For each compartment, the lookup rows for calcium dependent
+		*   channels are loaded into this vector before being used. The vector
+		*   is then reused for the next compartment. This vector therefore has
+		*   a size equal to the maximum number of calcium pools across all
+		*   compartments. This is done in HSolveActive::advanceChannels */
+
+    vector< LookupRow* >      caRow_;			/**< Points into caRowCompt.
+		*   For each channel, points to the appropriate pool's LookupRow in the
+		*   caRowCompt vector. This value is then used by the channel. Also
+		*   happens in HSolveActive::advanceChannels */
+
+    vector< int >             channelCount_;	///< Number of channels in each
+    ///< compartment
+    vector< currentVecIter >  currentBoundary_;	///< Used to designate compt
+    ///< boundaries in the current_
+    ///< vector.
+    vector< unsigned int >    chan2compt_;		///< Index of the compt to
+    ///< which a given (index)
+    ///< channel belongs.
+    vector< unsigned int >    chan2state_;		///< Converts a chnnel index to
+    ///< a state index
+    vector< double >          externalCurrent_; ///< External currents from
+    ///< channels that HSolve
+    ///< cannot internalize.
+    vector< Id >              caConcId_;		///< Used for localIndex-ing.
+    vector< Id >              channelId_;		///< Used for localIndex-ing.
+    vector< Id >              gateId_;			///< Used for localIndex-ing.
+    //~ vector< vector< Id > >    externalChannelId_;
+    vector< unsigned int >    outVm_;			/**< VmOut info.
+		*   Tells you which compartments have external voltage-dependent
+		*   channels (if any), so that you can send out Vm values only in those
+		*   places */
+    vector< unsigned int >    outCa_;			/**< concOut info.
+		*   Tells you which compartments have external calcium-dependent
+		*   channels so that you can send out Calcium concentrations in only
+		*   those compartments. */
 
 private:
-	/**
-	 * Internal data structures
-	 */
-	vector< CurrentStruct >   current_;
-	vector< double >          state_;
-	vector< int >             instant_;
-	vector< ChannelStruct >   channel_;
-	vector< SpikeGenStruct >  spikegen_;
-	vector< SynChanStruct >   synchan_;
-	vector< CaConcStruct >    caConc_;
-	vector< double >          caActivation_;
-	vector< CaTractStruct >   caTract_;
-	vector< CurrentStruct* >  caSource_;
-	vector< double* >         caTarget_;
-	LookupTable               vTable_;
-	LookupTable               caTable_;
-	vector< Id >              caConcId_;
-	vector< bool >            gCaDepend_;
-	vector< int >             caDependIndex_;
-	vector< LookupColumn >    column_;
-	vector< LookupRow >       caRow_;
-	vector< LookupRow* >      caRowChan_;
-	vector< Id >              channelId_;
-	vector< Id >              gateId_;
-	vector< int >             channelCount_;
-	vector< currentVecIter >  currentBoundary_;
-	vector< unsigned int >    chan2compt_;
-	vector< unsigned int >    chan2state_;
-	vector< vector< Id > >    externalChannelId_;
-	vector< double >          externalCurrent_;
-	
-	/**
-	 * Setting up of data structures: Defined in HSolveActiveSetup.cpp
-	 */
-	void readHHChannels( );
-	void readGates( );
-	void readCalcium( );
-	void readSynapses( );
-	void readExternalChannels( );
-	void createLookupTables( );
-	void cleanup( );
+    /**
+     * Setting up of data structures: Defined in HSolveActiveSetup.cpp
+     */
+    void readHHChannels();
+    void readGates();
+    void readCalcium();
+    void readSynapses();
+    void readExternalChannels();
+    void createLookupTables();
+    void manageOutgoingMessages();
 
-	/**
-	 * Integration: Defined in HSolveActive.cpp
-	 */
-	void calculateChannelCurrents( );
-	void updateMatrix( );
-	void forwardEliminate( );
-	void backwardSubstitute( );
-	void advanceCalcium( );
-	void advanceChannels( double dt );
-	void advanceSynChans( ProcInfo info );
-	void sendSpikes( ProcInfo info );
-	void sendValues( );
-	
-	static const int INSTANT_X;
-	static const int INSTANT_Y;
-	static const int INSTANT_Z;
+    void cleanup();
+
+    /**
+     * Reinit code: Defined in HSolveActiveSetup.cpp
+     */
+    void reinitSpikeGens( ProcPtr info );
+    void reinitCompartments();
+    void reinitCalcium();
+    void reinitChannels();
+
+    /**
+     * Integration: Defined in HSolveActive.cpp
+     */
+    void calculateChannelCurrents();
+    void updateMatrix();
+    void forwardEliminate();
+    void backwardSubstitute();
+    void advanceCalcium();
+    void advanceChannels( double dt );
+    void advanceSynChans( ProcPtr info );
+    void sendSpikes( ProcPtr info );
+    void sendValues( ProcPtr info );
+
+    static const int INSTANT_X;
+    static const int INSTANT_Y;
+    static const int INSTANT_Z;
 };
 
 #endif // _HSOLVE_ACTIVE_H

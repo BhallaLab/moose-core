@@ -8,118 +8,195 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include "moose.h"
+#include "header.h"
 #include "DifShell.h"
 #include <cmath>
 
-const Cinfo* initDifShellCinfo()
+static SrcFinfo1< double >* concentrationOut()
 {
-	static Finfo* processShared_0[] =
-	{
-		new DestFinfo( "process", Ftype1< ProcInfo >::global(),
-			RFCAST( &DifShell::process_0 ) ),
-		new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
-			RFCAST( &DifShell::reinit_0 ),
-			"Reinit happens only in stage 0" ),
-	};
-	static Finfo* process_0 = new SharedFinfo( "process_0", processShared_0,
-		sizeof( processShared_0 ) / sizeof( Finfo* ),
-		"Here we create 2 shared finfos to attach with the Ticks. This is because we want to perform DifShell "
-		"computations in 2 stages, much as in the Compartment object. "
-		"In the first stage we send out the concentration value to other DifShells and Buffer elements. We also "
-		"receive fluxes and currents and sum them up to compute ( dC / dt ). "
-		"In the second stage we find the new C value using an explicit integration method. "
-		"This 2-stage procedure eliminates the need to store and send prev_C values, as was common in GENESIS."	);
+    static SrcFinfo1< double > concentrationOut("concentrationOut",
+                                                "Sends out concentration");
+    return &concentrationOut;
+}
+
+static SrcFinfo2< double, double >* innerDifSourceOut(){
+    static SrcFinfo2< double, double > sourceOut("innerDifSourceOut",
+                                         "Sends out source information.");
+    return & sourceOut;
+}
+
+static SrcFinfo2< double, double >* outerDifSourceOut(){
+    static SrcFinfo2< double, double > sourceOut("outerDifSourceOut",
+                                         "Sends out source information.");
+    return & sourceOut;
+}
+
+const Cinfo* DifShell::initCinfo()
+{
+    
+    static DestFinfo process( "process",
+                              "Handles process call",
+                              new ProcOpFunc< DifShell >(  &DifShell::process_0 ) );
+    static DestFinfo reinit( "reinit",
+                             "Reinit happens only in stage 0",
+                             new ProcOpFunc< DifShell >( &DifShell::reinit_0 ));
+    
+    static Finfo* processShared_0[] = {
+        &process,
+        &reinit
+    };
+
+    static SharedFinfo process_0(
+        "process_0", 
+        "Here we create 2 shared finfos to attach with the Ticks. This is because we want to perform DifShell "
+        "computations in 2 stages, much as in the Compartment object. "
+        "In the first stage we send out the concentration value to other DifShells and Buffer elements. We also "
+        "receive fluxes and currents and sum them up to compute ( dC / dt ). "
+        "In the second stage we find the new C value using an explicit integration method. "
+        "This 2-stage procedure eliminates the need to store and send prev_C values, as was common in GENESIS.",
+        processShared_0,
+        sizeof( processShared_0 ) / sizeof( Finfo* ));
 	
-	static Finfo* processShared_1[] =
-	{
-		new DestFinfo( "process", Ftype1< ProcInfo >::global(),
-			RFCAST( &DifShell::process_1 ) ),
-		new DestFinfo( "reinit", Ftype0::global(),
-			&dummyFunc, 
-			"Reinit happens only in stage 0" ),
-	};
-	static Finfo* process_1 = new SharedFinfo( "process_1", processShared_1,
-		sizeof( processShared_1 ) / sizeof( Finfo* ) );
+    static DestFinfo process1( "process",
+                               "Handle process call",
+                               new ProcOpFunc< DifShell >( &DifShell::process_1 ) );
+    static DestFinfo reinit1( "reinit", 
+                              "Reinit happens only in stage 0",
+                              new ProcOpFunc< DifShell >( &DifShell::reinit_1)
+                              );
+    static Finfo* processShared_1[] = {
+        &process1, &reinit1        
+    };
+    
+    static SharedFinfo process_1( "process_1",
+                                  "Second process call",
+                                  processShared_1,
+                                  sizeof( processShared_1 ) / sizeof( Finfo* ) );
 	
-	static Finfo* bufferShared[] =
-	{
-		new SrcFinfo( "concentration", Ftype1< double >::global() ),
-		new DestFinfo( "reaction",
-			Ftype4< double, double, double, double >::global(),
-			RFCAST( &DifShell::buffer ),
-			"Here the DifShell receives reaction rates (forward and backward), and concentrations for the "
-			"free-buffer and bound-buffer molecules."	),
-	};
+    
+    static DestFinfo reaction( "reaction",
+                               "Here the DifShell receives reaction rates (forward and backward), and concentrations for the "
+                               "free-buffer and bound-buffer molecules.",
+                               new OpFunc4< DifShell, double, double, double, double >( &DifShell::buffer ));
+    static Finfo* bufferShared[] = {
+        concentrationOut(), &reaction
+    };
+    static SharedFinfo buffer( "buffer",
+                        "This is a shared message from a DifShell to a Buffer (FixBuffer or DifBuffer). "
+			"During stage 0:\n "
+			" - DifShell sends ion concentration\n"
+			" - Buffer updates buffer concentration and sends it back immediately using a call-back.\n"
+			" - DifShell updates the time-derivative ( dC / dt ) \n"
+                        "\n"
+	 		"During stage 1: \n"
+			" - DifShell advances concentration C \n\n"
+			"This scheme means that the Buffer does not need to be scheduled, and it does its computations when "
+			"it receives a cue from the DifShell. May not be the best idea, but it saves us from doing the above "
+			"computations in 3 stages instead of 2." ,
+                        bufferShared,
+			sizeof( bufferShared ) / sizeof( Finfo* ));
 
-	static Finfo* innerDifShared[] =
-	{
-		new SrcFinfo( "source", Ftype2< double, double >::global() ),
-		new DestFinfo( "dest", Ftype2< double, double >::global(),
-			RFCAST( &DifShell::fluxFromOut ) ),
-	};
+    static DestFinfo fluxFromOut( "fluxFromOut",
+                                  "Destination message",
+                                  new OpFunc2< DifShell, double, double > ( &DifShell::fluxFromOut ));
+    
+    static Finfo* innerDifShared[] = {
+        innerDifSourceOut(),
+        &fluxFromOut
+    };
+    static SharedFinfo innerDif( "innerDif",
+                                 "This shared message (and the next) is between DifShells: adjoining shells exchange information to "
+                                 "find out the flux between them. "
+                                 "Using this message, an inner shell sends to, and receives from its outer shell." ,
+                                 innerDifShared,
+                                 sizeof( innerDifShared ) / sizeof( Finfo* ));
 
-	static Finfo* outerDifShared[] =
-	{
-		new DestFinfo( "dest", Ftype2< double, double >::global(),
-			RFCAST( &DifShell::fluxFromIn ) ),
-		new SrcFinfo( "source", Ftype2< double, double >::global() ),
-	};
+    static DestFinfo fluxFromIn( "fluxFromIn", "",
+                                 new OpFunc2< DifShell, double, double> ( &DifShell::fluxFromIn ) );
+    static Finfo* outerDifShared[] = {
+        &fluxFromIn,
+        outerDifSourceOut(),
+    };
 
-	static Finfo* difShellFinfos[] = 
-	{
+    static  SharedFinfo outerDif( "outerDif",
+                                  "Using this message, an outer shell sends to, and receives from its inner shell." ,
+                                  outerDifShared,
+                                  sizeof( outerDifShared ) / sizeof( Finfo* ));
+
+    static ReadOnlyValueFinfo< DifShell, double> C( "C", 
+                                 "Concentration C is computed by the DifShell and is read-only",
+                                 &DifShell::getC);
+    static ValueFinfo< DifShell, double> Ceq( "Ceq", "",
+                           &DifShell::setCeq,
+                           &DifShell::getCeq);
+    static ValueFinfo< DifShell, double> D( "D", "",
+                         &DifShell::setD,
+                         &DifShell::getD);
+    static ValueFinfo< DifShell, double> valence( "valence", "",
+                               &DifShell::setValence,
+                               &DifShell::getValence);
+    static ValueFinfo< DifShell, double> leak( "leak", "",
+                            &DifShell::setLeak,
+                            &DifShell::getLeak);
+    static ValueFinfo< DifShell, unsigned int> shapeMode( "shapeMode", "",
+                       &DifShell::setShapeMode,
+                       &DifShell::getShapeMode);
+    static ValueFinfo< DifShell, double> length( "length", "",
+                              &DifShell::setLength,
+                              &DifShell::getLength);
+    static ValueFinfo< DifShell, double> diameter( "diameter", "",
+                       &DifShell::setDiameter,
+                       &DifShell::getDiameter );
+    static ValueFinfo< DifShell, double> thickness( "thickness", "",
+                                 &DifShell::setThickness,
+                                 &DifShell::getThickness );
+    static ValueFinfo< DifShell, double> volume( "volume", "",
+                              &DifShell::setVolume,
+                              &DifShell::getVolume );
+    static ValueFinfo< DifShell, double> outerArea( "outerArea", "",
+                                                    &DifShell::setOuterArea,
+                                                    &DifShell::getOuterArea);
+    static ValueFinfo< DifShell, double> innerArea( "innerArea", "",
+                                 &DifShell::setInnerArea,
+                                 &DifShell::getInnerArea );
+
+    
+    static DestFinfo influx( "influx", "",
+                             new OpFunc1< DifShell, double > (&DifShell::influx ));
+    static DestFinfo outflux( "outflux", "",
+                              new OpFunc1< DifShell, double >( &DifShell::influx ));
+    static DestFinfo fInflux( "fInflux", "",
+                              new OpFunc2< DifShell, double, double >( &DifShell::fInflux ));
+    static DestFinfo fOutflux( "fOutflux", "",
+                               new OpFunc2< DifShell, double, double> (&DifShell::fOutflux ));
+    static DestFinfo storeInflux( "storeInflux", "",
+                                 new OpFunc1< DifShell, double >( &DifShell::storeInflux ) );
+    static DestFinfo storeOutflux( "storeOutflux", "",
+                                   new OpFunc1< DifShell, double > ( &DifShell::storeOutflux ) );
+    static DestFinfo tauPump( "tauPump","",
+                              new OpFunc2< DifShell, double, double >( &DifShell::tauPump ) );
+    static DestFinfo eqTauPump( "eqTauPump", "",
+                                new OpFunc1< DifShell, double >( &DifShell::eqTauPump ) );
+    static DestFinfo mmPump( "mmPump", "",
+                             new OpFunc2< DifShell, double, double >( &DifShell::mmPump ) );
+    static DestFinfo hillPump( "hillPump", "",
+                               new OpFunc3< DifShell, double, double, unsigned int >( &DifShell::hillPump ) );
+    static Finfo* difShellFinfos[] = {
 	//////////////////////////////////////////////////////////////////
 	// Field definitions
 	//////////////////////////////////////////////////////////////////
-		new ValueFinfo( "C", ValueFtype1< double >::global(),
-			GFCAST( &DifShell::getC ),
-			&dummyFunc,
-			"Concentration C is computed by the DifShell and is read-only"
-		),
-		new ValueFinfo( "Ceq", ValueFtype1< double >::global(),
-			GFCAST( &DifShell::getCeq ),
-			RFCAST( &DifShell::setCeq )
-		),
-		new ValueFinfo( "D", ValueFtype1< double >::global(),
-			GFCAST( &DifShell::getD ),
-			RFCAST( &DifShell::setD )
-		),
-		new ValueFinfo( "valence", ValueFtype1< double >::global(),
-			GFCAST( &DifShell::getValence ),
-			RFCAST( &DifShell::setValence )
-		),
-		new ValueFinfo( "leak", ValueFtype1< double >::global(),
-			GFCAST( &DifShell::getLeak ),
-			RFCAST( &DifShell::setLeak )
-		),
-		new ValueFinfo( "shapeMode", ValueFtype1< unsigned int >::global(),
-			GFCAST( &DifShell::getShapeMode ),
-			RFCAST( &DifShell::setShapeMode )
-		),
-		new ValueFinfo( "length", ValueFtype1< double >::global(),
-			GFCAST( &DifShell::getLength ),
-			RFCAST( &DifShell::setLength )
-		),
-		new ValueFinfo( "diameter", ValueFtype1< double >::global(),
-			GFCAST( &DifShell::getDiameter ),
-			RFCAST( &DifShell::setDiameter )
-		),
-		new ValueFinfo( "thickness", ValueFtype1< double >::global(),
-			GFCAST( &DifShell::getThickness ),
-			RFCAST( &DifShell::setThickness )
-		),
-		new ValueFinfo( "volume", ValueFtype1< double >::global(),
-			GFCAST( &DifShell::getVolume ),
-			RFCAST( &DifShell::setVolume )
-		),
-		new ValueFinfo( "outerArea", ValueFtype1< double >::global(),
-			GFCAST( &DifShell::getOuterArea ),
-			RFCAST( &DifShell::setOuterArea )
-		),
-		new ValueFinfo( "innerArea", ValueFtype1< double >::global(),
-			GFCAST( &DifShell::getInnerArea ),
-			RFCAST( &DifShell::setInnerArea )
-		),
+        &C,
+        &Ceq,
+        &D,
+        &valence,
+        &leak,
+        &shapeMode,
+        &length,
+        &diameter,
+        &thickness,
+        &volume,
+        &outerArea,
+        &innerArea,
 	//////////////////////////////////////////////////////////////////
 	// MsgSrc definitions
 	//////////////////////////////////////////////////////////////////
@@ -127,97 +204,50 @@ const Cinfo* initDifShellCinfo()
 	//////////////////////////////////////////////////////////////////
 	// SharedFinfo definitions
 	//////////////////////////////////////////////////////////////////
-		process_0,
-		process_1,
-		new SharedFinfo( "buffer", bufferShared,
-			sizeof( bufferShared ) / sizeof( Finfo* ),
-			"This is a shared message from a DifShell to a Buffer (FixBuffer or DifBuffer). "
-			"During stage 0:\n "
-			"- DifShell sends ion concentration \n"
-			"- Buffer updates buffer concentration and sends it back immediately using a call-back.\n"
-			"- DifShell updates the time-derivative ( dC / dt ) \n"
-	 		"During stage 1: \n"
-			"- DifShell advances concentration C \n"
-			"This scheme means that the Buffer does not need to be scheduled, and it does its computations when "
-			"it receives a cue from the DifShell. May not be the best idea, but it saves us from doing the above "
-			"computations in 3 stages instead of 2." ),
-		new SharedFinfo( "innerDif", innerDifShared,
-			sizeof( innerDifShared ) / sizeof( Finfo* ),
-			"This shared message (and the next) is between DifShells: adjoining shells exchange information to "
-			"find out the flux between them. "
-			"Using this message, an inner shell sends to, and receives from its outer shell." ),
-		new SharedFinfo( "outerDif", outerDifShared,
-			sizeof( outerDifShared ) / sizeof( Finfo* ),
-			"Using this message, an outer shell sends to, and receives from its inner shell." ),
-
+        &process_0,
+        &process_1,
+        &buffer,
+        &innerDif,
+        &outerDif,
 	//////////////////////////////////////////////////////////////////
 	// DestFinfo definitions
 	//////////////////////////////////////////////////////////////////
-		new DestFinfo( "influx",
-			Ftype1< double >::global(),
-			RFCAST( &DifShell::influx ) ),
-		new DestFinfo( "outflux",
-			Ftype1< double >::global(),
-			RFCAST( &DifShell::influx ) ),
-		new DestFinfo( "fInflux",
-			Ftype2< double, double >::global(),
-			RFCAST( &DifShell::fInflux ) ),
-		new DestFinfo( "fOutflux",
-			Ftype2< double, double >::global(),
-			RFCAST( &DifShell::fOutflux ) ),
-		new DestFinfo( "storeInflux",
-			Ftype1< double >::global(),
-			RFCAST( &DifShell::storeInflux ) ),
-		new DestFinfo( "storeOutflux",
-			Ftype1< double >::global(),
-			RFCAST( &DifShell::storeOutflux ) ),
-		new DestFinfo( "tauPump",
-			Ftype2< double, double >::global(),
-			RFCAST( &DifShell::tauPump ) ),
-		new DestFinfo( "eqTauPump",
-			Ftype1< double >::global(),
-			RFCAST( &DifShell::eqTauPump ) ),
-		new DestFinfo( "mmPump",
-			Ftype2< double, double >::global(),
-			RFCAST( &DifShell::mmPump ) ),
-		new DestFinfo( "hillPump",
-			Ftype3< double, double, unsigned int >::global(),
-			RFCAST( &DifShell::hillPump ) ),
+        &influx,
+        &outflux,
+        &fInflux,
+        &fOutflux,
+        &storeInflux,
+        &storeOutflux,
+        &tauPump,
+        &eqTauPump,
+        &mmPump,
+        &hillPump,
 	};
-
-	static SchedInfo schedInfo[] = { { process_0, 0, 0 }, { process_1, 0, 1 } };
 
 	static string doc[] =
 	{
 		"Name", "DifShell",
-		"Author", "Niraj Dudani",
+		"Author", "Niraj Dudani. Ported to async13 by Subhasis Ray.",
 		"Description", "DifShell object: Models diffusion of an ion (typically calcium) within an "
 				"electric compartment. A DifShell is an iso-concentration region with respect to "
 				"the ion. Adjoining DifShells exchange flux of this ion, and also keep track of "
 				"changes in concentration due to pumping, buffering and channel currents, by "
 				"talking to the appropriate objects.",
-	};	
+	};
+        static Dinfo< DifShell > dinfo;
 	static Cinfo difShellCinfo(
-		doc,
-		sizeof( doc ) / sizeof( string ),		
-		initNeutralCinfo(),
-		difShellFinfos,
-		sizeof( difShellFinfos ) / sizeof( Finfo* ),
-		ValueFtype1< DifShell >::global(),
-		schedInfo, 2
-	);
+            "DifShell",
+            Neutral::initCinfo(),
+            difShellFinfos,
+            sizeof( difShellFinfos ) / sizeof( Finfo* ),
+            &dinfo,
+            doc,
+            sizeof( doc ) / sizeof( string ));
 
 	return &difShellCinfo;
 }
 
-static const Cinfo* difShellCinfo = initDifShellCinfo();
-
-static const Slot bufferSlot =
-	initDifShellCinfo()->getSlot( "buffer.concentration" );
-static const Slot innerDifSlot =
-	initDifShellCinfo()->getSlot( "innerDif.source" );
-static const Slot outerDifSlot =
-	initDifShellCinfo()->getSlot( "outerDif.source" );
+static const Cinfo* difShellCinfo = DifShell::initCinfo();
 
 ////////////////////////////////////////////////////////////////////////////////
 // Class functions
@@ -246,130 +276,128 @@ DifShell::DifShell() :
 // Field access functions
 ////////////////////////////////////////////////////////////////////////////////
 /// C is a read-only field
-double DifShell::getC( Eref e )
+double DifShell::getC() const
 {
-	return static_cast< DifShell* >( e.data() )->C_;
+	return C_;
 }
 
-void DifShell::setCeq( const Conn* c, double Ceq )
+void DifShell::setCeq( double Ceq )
 {
 	if ( Ceq < 0.0 ) {
 		cerr << "Error: DifShell: Ceq cannot be negative!\n";
 		return;
 	}
 	
-	static_cast< DifShell* >( c->data() )->Ceq_ = Ceq;
+	Ceq_ = Ceq;
 }
 
-double DifShell::getCeq( Eref e )
+double DifShell::getCeq( ) const
 {
-	return static_cast< DifShell* >( e.data() )->Ceq_;
+	return Ceq_;
 }
 
-void DifShell::setD( const Conn* c, double D )
+void DifShell::setD( double D )
 {
 	if ( D < 0.0 ) {
 		cerr << "Error: DifShell: D cannot be negative!\n";
 		return;
 	}
 	
-	static_cast< DifShell* >( c->data() )->D_ = D;
+	D_ = D;
 }
 
-double DifShell::getD( Eref e )
+double DifShell::getD( ) const
 {
-	return static_cast< DifShell* >( e.data() )->D_;
+	return D_;
 }
 
-void DifShell::setValence( const Conn* c, double valence )
+void DifShell::setValence( double valence )
 {
 	if ( valence < 0.0 ) {
 		cerr << "Error: DifShell: valence cannot be negative!\n";
 		return;
 	}
 	
-	static_cast< DifShell* >( c->data() )->valence_ = valence;
+	valence_ = valence;
 }
 
-double DifShell::getValence( Eref e )
+double DifShell::getValence( ) const 
 {
-	return static_cast< DifShell* >( e.data() )->valence_;
+	return valence_;
 }
 
-void DifShell::setLeak( const Conn* c, double leak )
+void DifShell::setLeak( double leak )
 {
-	static_cast< DifShell* >( c->data() )->leak_ = leak;
+    leak_ = leak;
 }
 
-double DifShell::getLeak( Eref e )
+double DifShell::getLeak( ) const
 {
-	return static_cast< DifShell* >( e.data() )->leak_;
+	return leak_;
 }
 
-void DifShell::setShapeMode( const Conn* c, unsigned int shapeMode )
+void DifShell::setShapeMode( unsigned int shapeMode )
 {
 	if ( shapeMode != 0 && shapeMode != 1 && shapeMode != 3 ) {
 		cerr << "Error: DifShell: I only understand shapeModes 0, 1 and 3.\n";
 		return;
 	}
-	static_cast< DifShell* >( c->data() )->shapeMode_ = shapeMode;
+        shapeMode_ = shapeMode;
 }
 
-unsigned int DifShell::getShapeMode( Eref e )
+unsigned int DifShell::getShapeMode() const
 {
-	return static_cast< DifShell* >( e.data() )->shapeMode_;
+	return shapeMode_;
 }
 
-void DifShell::setLength( const Conn* c, double length )
+void DifShell::setLength( double length )
 {
 	if ( length < 0.0 ) {
 		cerr << "Error: DifShell: length cannot be negative!\n";
 		return;
 	}
 	
-	static_cast< DifShell* >( c->data() )->length_ = length;
+	length_ = length;
 }
 
-double DifShell::getLength( Eref e )
+double DifShell::getLength( ) const
 {
-	return static_cast< DifShell* >( e.data() )->length_;
+	return length_;
 }
 
-void DifShell::setDiameter( const Conn* c, double diameter )
+void DifShell::setDiameter( double diameter )
 {
 	if ( diameter < 0.0 ) {
 		cerr << "Error: DifShell: diameter cannot be negative!\n";
 		return;
 	}
 	
-	static_cast< DifShell* >( c->data() )->diameter_ = diameter;
+	diameter_ = diameter;
 }
 
-double DifShell::getDiameter( Eref e )
+double DifShell::getDiameter( ) const
 {
-	return static_cast< DifShell* >( e.data() )->diameter_;
+	return diameter_;
 }
 
-void DifShell::setThickness( const Conn* c, double thickness )
+void DifShell::setThickness( double thickness )
 {
 	if ( thickness < 0.0 ) {
 		cerr << "Error: DifShell: thickness cannot be negative!\n";
 		return;
 	}
 	
-	static_cast< DifShell* >( c->data() )->thickness_ = thickness;
+	thickness_ = thickness;
 }
 
-double DifShell::getThickness( Eref e )
+double DifShell::getThickness() const
 {
-	return static_cast< DifShell* >( e.data() )->thickness_;
+    return thickness_;
 }
 
-void DifShell::setVolume( const Conn* c, double volume )
+void DifShell::setVolume( double volume )
 {
-	DifShell* difshell = static_cast< DifShell* >( c->data() );
-	
-	if ( difshell->shapeMode_ != 3 )
+	if ( shapeMode_ != 3 )
 		cerr << "Warning: DifShell: Trying to set volume, when shapeMode is not USER-DEFINED\n";
 	
 	if ( volume < 0.0 ) {
@@ -377,182 +405,168 @@ void DifShell::setVolume( const Conn* c, double volume )
 		return;
 	}
 	
-	difshell->volume_ = volume;
+	volume_ = volume;
 }
 
-double DifShell::getVolume( Eref e )
+double DifShell::getVolume( ) const
 {
-	return static_cast< DifShell* >( e.data() )->volume_;
+	return volume_;
 }
 
-void DifShell::setOuterArea( const Conn* c, double outerArea )
+void DifShell::setOuterArea( double outerArea )
 {
-	DifShell* difshell = static_cast< DifShell* >( c->data() );
+    if (shapeMode_ != 3 )
+        cerr << "Warning: DifShell: Trying to set outerArea, when shapeMode is not USER-DEFINED\n";
 	
-	if ( difshell->shapeMode_ != 3 )
-		cerr << "Warning: DifShell: Trying to set outerArea, when shapeMode is not USER-DEFINED\n";
+    if ( outerArea < 0.0 ) {
+        cerr << "Error: DifShell: outerArea cannot be negative!\n";
+        return;
+    }
 	
-	if ( outerArea < 0.0 ) {
-		cerr << "Error: DifShell: outerArea cannot be negative!\n";
-		return;
-	}
-	
-	difshell->outerArea_ = outerArea;
+    outerArea_ = outerArea;
 }
 
-double DifShell::getOuterArea( Eref e )
+double DifShell::getOuterArea( ) const
 {
-	return static_cast< DifShell* >( e.data() )->outerArea_;
+    return outerArea_;
 }
 
-void DifShell::setInnerArea( const Conn* c, double innerArea )
+void DifShell::setInnerArea( double innerArea )
 {
-	DifShell* difshell = static_cast< DifShell* >( c->data() );
-	
-	if ( difshell->shapeMode_ != 3 )
-		cerr << "Warning: DifShell: Trying to set innerArea, when shapeMode is not USER-DEFINED\n";
-	
-	if ( innerArea < 0.0 ) {
-		cerr << "Error: DifShell: innerArea cannot be negative!\n";
-		return;
-	}
-	
-	difshell->innerArea_ = innerArea;
+    if ( shapeMode_ != 3 )
+        cerr << "Warning: DifShell: Trying to set innerArea, when shapeMode is not USER-DEFINED\n";
+    
+    if ( innerArea < 0.0 ) {
+        cerr << "Error: DifShell: innerArea cannot be negative!\n";
+        return;
+    }
+    
+    innerArea_ = innerArea;
 }
 
-double DifShell::getInnerArea( Eref e )
+double DifShell::getInnerArea() const
 {
-	return static_cast< DifShell* >( e.data() )->innerArea_;
+    return innerArea_;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Dest functions
 ////////////////////////////////////////////////////////////////////////////////
 
-void DifShell::reinit_0( const Conn* c, ProcInfo p )
+void DifShell::reinit_0( const Eref& e, ProcPtr p )
 {
-	static_cast< DifShell* >( c->data() )->localReinit_0( p );
+    localReinit_0( e, p );
 }
 
-void DifShell::process_0( const Conn* c, ProcInfo p )
+void DifShell::process_0( const Eref& e, ProcPtr p )
 {
-	static_cast< DifShell* >( c->data() )->localProcess_0( c->target(), p );
+	localProcess_0( e, p );
 }
 
-void DifShell::process_1( const Conn* c, ProcInfo p )
+void DifShell::process_1(const Eref& e, ProcPtr p )
 {
-	static_cast< DifShell* >( c->data() )->localProcess_1( p );
+    localProcess_1( e, p );
+}
+
+void DifShell::reinit_1(const Eref& e, ProcPtr p )
+{
+    ;
 }
 
 void DifShell::buffer(
-	const Conn* c,
 	double kf,
 	double kb,
 	double bFree,
 	double bBound )
 {
-	static_cast< DifShell* >( c->data() )->localBuffer( kf, kb, bFree, bBound );
+    localBuffer( kf, kb, bFree, bBound );
 }
 
 void DifShell::fluxFromOut(
-	const Conn* c,
 	double outerC,
 	double outerThickness )
 {
-	static_cast< DifShell* >( c->data() )->
 		localFluxFromOut( outerC, outerThickness );
 }
 
 void DifShell::fluxFromIn(
-	const Conn* c,
 	double innerC,
 	double innerThickness )
 {
-	static_cast< DifShell* >( c->data() )->
 		localFluxFromIn( innerC, innerThickness );
 }
 
 void DifShell::influx(
-	const Conn* c,
 	double I )
 {
-	static_cast< DifShell* >( c->data() )->localInflux( I );
+    localInflux( I );
 }
 
 void DifShell::outflux(
-	const Conn* c,
 	double I )
 {
-	static_cast< DifShell* >( c->data() )->localOutflux( I );
+    localOutflux( I );
 }
 
 void DifShell::fInflux(
-	const Conn* c,
 	double I,
 	double fraction )
 {
-	static_cast< DifShell* >( c->data() )->localFInflux( I, fraction );
+localFInflux( I, fraction );
 }
 
 void DifShell::fOutflux(
-	const Conn* c,
 	double I,
 	double fraction )
 {
-	static_cast< DifShell* >( c->data() )->localFOutflux( I, fraction );
+localFOutflux( I, fraction );
 }
 
 void DifShell::storeInflux(
-	const Conn* c,
 	double flux )
 {
-	static_cast< DifShell* >( c->data() )->localStoreInflux( flux );
+localStoreInflux( flux );
 }
 
 void DifShell::storeOutflux(
-	const Conn* c,
 	double flux )
 {
-	static_cast< DifShell* >( c->data() )->localStoreOutflux( flux );
+localStoreOutflux( flux );
 }
 
 void DifShell::tauPump(
-	const Conn* c,
 	double kP,
 	double Ceq )
 {
-	static_cast< DifShell* >( c->data() )->localTauPump( kP, Ceq );
+localTauPump( kP, Ceq );
 }
 
 void DifShell::eqTauPump(
-	const Conn* c,
 	double kP )
 {
-	static_cast< DifShell* >( c->data() )->localEqTauPump( kP );
+localEqTauPump( kP );
 }
 
 void DifShell::mmPump(
-	const Conn* c,
 	double vMax,
 	double Kd )
 {
-	static_cast< DifShell* >( c->data() )->localMMPump( vMax, Kd );
+localMMPump( vMax, Kd );
 }
 
 void DifShell::hillPump(
-	const Conn* c,
 	double vMax,
 	double Kd,
 	unsigned int hill )
 {
-	static_cast< DifShell* >( c->data() )->localHillPump( vMax, Kd, hill );
+localHillPump( vMax, Kd, hill );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Local dest functions
 ////////////////////////////////////////////////////////////////////////////////
 
-void DifShell::localReinit_0( ProcInfo p )
+void DifShell::localReinit_0( const Eref& e, ProcPtr p )
 {
 	dCbyDt_ = leak_;
 	
@@ -600,14 +614,14 @@ void DifShell::localReinit_0( ProcInfo p )
 	}
 }
 
-void DifShell::localProcess_0( Eref difshell, ProcInfo p )
+void DifShell::localProcess_0( const Eref & e, ProcPtr p )
 {
 	/**
 	 * Send ion concentration and thickness to adjacent DifShells. They will
 	 * then compute their incoming fluxes.
 	 */
-	send2< double, double >( difshell, innerDifSlot, C_, thickness_ );
-	send2< double, double >( difshell, outerDifSlot, C_, thickness_ );
+    innerDifSourceOut()->send( e, C_, thickness_ );
+    outerDifSourceOut()->send( e, C_, thickness_ );
 	
 	/**
 	 * Send ion concentration to ion buffers. They will send back information on
@@ -615,12 +629,12 @@ void DifShell::localProcess_0( Eref difshell, ProcInfo p )
 	 * immediately, which this DifShell will use to find amount of ion captured
 	 * or released in the current time-step.
 	 */
-	send1< double >( difshell, bufferSlot, C_ );
+    concentrationOut()->send( e, C_ );
 }
 
-void DifShell::localProcess_1( ProcInfo p )
+void DifShell::localProcess_1( const Eref& e, ProcPtr p )
 {
-	C_ += dCbyDt_ * p->dt_;
+	C_ += dCbyDt_ * p->dt;
 	dCbyDt_ = leak_;
 }
 
@@ -737,10 +751,4 @@ void DifShell::localHillPump( double vMax, double Kd, unsigned int hill )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifdef DO_UNIT_TESTS
-#include "../element/Neutral.h"
 
-void testDifShell()
-{
-}
-#endif

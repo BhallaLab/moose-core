@@ -1,336 +1,397 @@
-# objectedit.py --- 
-# 
+# objectedit.py ---
+#
 # Filename: objectedit.py
-# Description: 
+# Description:
 # Author: Subhasis Ray
-# Maintainer: 
-# Created: Wed Jun 30 11:18:34 2010 (+0530)
-# Version: 
-# Last-Updated: Tue Nov 15 11:17:54 2011 (+0530)
-#           By: Subhasis Ray
-#     Update #: 522
-# URL: 
-# Keywords: 
-# Compatibility: 
-# 
-# 
-
-# Commentary: 
-# 
+# Maintainer:
+# Created: Wed Jun 30 11:18:34 2010 (+0530) 
+# Version:
+# Last-Updated: Wed Mar 28 14:26:59 2014 (+0530)
+#           By: Harsha
+#     Update #: 917
+# URL:
+# Keywords:
+# Compatibility:
+#
+#
+  
+# Commentary:
+#
 # This code is for a widget to edit MOOSE objects. We can now track if
 # a field is a Value field and make it editable accordingly. There
 # seems to be no clean way of determining whether the field is worth
 # plotting (without a knowledge of the model/biology there is no way
 # we can tell this). But we can of course check if the field is a
 # numeric one.
-# 
-# 
-
+#
+#
+  
 # Change log:
-# 
-# 
-# 
-# 
+#
+# Wed Jun 30 11:18:34 2010 (+0530) - Originally created by Subhasis
+# Ray, the model and the view 
+#
+# Modified/adapted to dh_branch by Chaitanya/Harsharani
+#
+# Thu Apr 18 18:37:31 IST 2013 - Reintroduced into multiscale GUI by
+# Subhasis
+#
+# Fri Apr 19 15:05:53 IST 2013 - Subhasis added undo redo
+# feature. Create ObjectEditModel as part of ObjectEditView.
+#
+
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
 # published by the Free Software Foundation; either version 3, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; see the file COPYING.  If not, write to
 # the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 # Floor, Boston, MA 02110-1301, USA.
-# 
-# 
-
+#
+#
+  
 # Code:
 
-import types
-import sys
-
-from PyQt4.Qt import Qt
-from PyQt4 import QtCore
+from PyQt4 import QtCore 
 from PyQt4 import QtGui
+import sys
+from collections import deque
+import traceback
 
-# Local modules and moose.
+sys.path.append('../python')
 import moose
+import defaults
 import config
 
-class ObjectFieldsModel(QtCore.QAbstractTableModel):
-    """Model the fields list for MOOSE objects.
-    
-    extra_fields -- list of fields that are of no use in the fields
-                    editor.
+#these fields will be ignored
+extra_fields = ['this',
+                'me',
+                'parent',
+                'path',
+                'children',
+                'linearSize',
+                'objectDimensions',
+                'lastDimension',
+                'localNumField',
+                'pathIndices',
+                'msgOut',
+                'msgIn',
+                'diffConst',
+                'speciesId',
+                'Coordinates',
+                'neighbors',
+                'DiffusionArea',
+                'DiffusionScaling',
+                'x',
+                'x0',
+                'x1',
+                'dx',
+                'nx',
+                'y',
+                'y0',
+                'y1',
+                'dy',
+                'ny',
+                'z',
+                'z0',
+                'z1',
+                'dz',
+                'nz',
+                'coords',
+                'isToroid',
+                'preserveNumEntries',
+                'numKm',
+                'numSubstrates',
+                'concK1',
+                'meshToSpace',
+                'spaceToMesh',
+                'surface',
+                'method',
+                'alwaysDiffuse',
+                'numData',
+                'numField',
+                'valueFields',
+                'sourceFields',
+                'motorConst',
+        		'destFields',
+                'dt',
+                'tick'
+                ]
+        
 
-    sys_fields -- list of fields that carry system information. This
-                  is for future - so that we can restrict the
-                  visibility of these fields to advanced mode.
+class ObjectEditModel(QtCore.QAbstractTableModel):
+    """Model class for editing MOOSE elements. This is not to be used
+    directly, except that its undo and redo slots should be connected
+    to by the GUI actions for the same.
+
+    SIGNALS:
+
+    objectNameChanged(PyQt_PyObject): when a moose object's name is
+    changed, this signal is emitted with the object as argument. This
+    can be captured by widgets that display the object name.
+
+    dataChanged: emitted when any data is changed in the moose object
 
     """
-    extra_fields = ['parent', 'childList', 'fieldList', 'index', 'xtree_textfg_req', 'xtree_fg_req','nInitComplex','concInitComplex', 'step_mode', 'tableVector','x','y','z','x0','y0','z0']
-    sys_fields = ['node', 'cpu', 'dataMem', 'msgMem', 'class']
-    moose_py_fieldname_map = {'step_mode': 'stepMode',
-                              'stepmode': 'stepMode',
-                              'lambda': 'lambda_',
-                              'calc_mode': 'calcMode',
-                              'abs_refract':'absRefractT',
-                              'stepsize': 'stepSize'}
-    py_moose_fieldname_map = {'stepMode': 'step_mode',
-                              'calcMode': 'calc_mode',
-                              'lambda_': 'lambda',
-                              'absRefractT': 'abs_refract',
-                              'stepSize': 'stepsize'
-                              }
-    
-    def __init__(self, mooseObject, parent=None):
-        """Set up the model. 
-
-        The table model has one moose field in each row.  A field that
-        has a set method is editable. Fields listed in extra_fields
-        are not shown.
-
-        Members:
-
-        fields -- list of the names of the fields in the object.
-
-        plotNames -- lists the names of the available plot
-                     windows. These are displayed as the targets in
-                     the plot submenu / combobox.
-
-        fieldFlags -- flags for each field. We calculate these ahead
-                      of time by checking if the field can be set, if
-                      it is a numerical (so can be dragged to a plot
-                      window).
-
-        """
-        QtCore.QAbstractTableModel.__init__(self, parent)
-        self.mooseObject = mooseObject
-        self._header = ('Field', 'Value', 'Plot')
-        self.fields = []
-        self.plotNames = ['None']
+    objectNameChanged = QtCore.pyqtSignal('PyQt_PyObject')
+    # dataChanged = QtCore.pyqtSignal('PyQt_PyObject')
+    def __init__(self, datain, headerdata=['Field','Value'], undolen=100, parent=None, *args):
+        QtCore.QAbstractTableModel.__init__(self, parent, *args)
         self.fieldFlags = {}
-        self.fieldPlotNameMap = {}
-        try:
-            className = 'moose.' + mooseObject.className
-            classObject = eval(className)
-            self.mooseObject = classObject(mooseObject.id)
-
-        except AttributeError:
-            config.LOGGER.error('Could not wrap object %s into class %s' % (mooseObject.path, className))
-            return
-
-        for fieldName in self.mooseObject.getFieldList(moose.FTYPE_VALUE):
-            if (fieldName in ObjectFieldsModel.extra_fields) or (fieldName in ObjectFieldsModel.sys_fields):
+        self.fields = []
+        self.mooseObject = datain
+        self.headerdata = headerdata
+        self.undoStack = deque(maxlen=undolen)
+        self.redoStack = deque(maxlen=undolen)
+        self.checkState_ = False
+        
+        for fieldName in self.mooseObject.getFieldNames('valueFinfo'):
+            if fieldName in extra_fields :
                 continue
-            if fieldName in ObjectFieldsModel.moose_py_fieldname_map.keys():
-                pyFieldName = ObjectFieldsModel.moose_py_fieldname_map[fieldName]
-            else:
-                pyFieldName = fieldName
-            flag = Qt.ItemIsEnabled | Qt.ItemIsSelectable
-            try:
-                prop = eval('moose.' + self.mooseObject.__class__.__name__ + '.' + pyFieldName)
-                if (type(prop) is property) and prop.fset:
-                    flag = flag | Qt.ItemIsEditable
-                value = mooseObject.getField(fieldName)
-                try:
-                    dummy = float(value)
-                    flag = flag | Qt.ItemIsDragEnabled
-                    self.fieldPlotNameMap[fieldName] = self.plotNames[0]
-                except ValueError:
-                    pass
-            except Exception, e:
-                config.LOGGER.error("%s" % (e))
-
-            self.fieldFlags[pyFieldName] = flag
-            self.fields.append(pyFieldName)            
-        self.insertRows(0, len(self.fields))
-
-    def setData(self, index, value, role=Qt.EditRole):
-        """Set field value or set plot flag.
-
-        If a user tries to put an invalid value then the field is
-        reset to default value. Restored to previous edit.
-        """
-        oldValue = str(index.data().toString())
-        if not index.isValid() and index.row () >= len(self.fields):
-            return False
-        ret = True
-        value = str(value.toString()) # convert Qt datastructure to
-                                      # Python datastructure
-        #add_chait
-        if value =='':
-            value = oldValue
-        field = self.fields[index.row()]
-        
-        if index.column() == 0: # This is the fieldname
-            ret = False
-        elif index.column() == 1: # This is the value column
-            try:
-                field = ObjectFieldsModel.py_moose_fieldname_map[field]
-            except KeyError:
-                pass
-            self.mooseObject.setField(field, value)
-            if field == 'name':
-                self.emit(QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'), self.mooseObject)
-        elif index.column() == 2 and role ==Qt.EditRole:
-            try:
-                self.fieldPlotNameMap[self.fields[index.row()]] = str(value)
-                self.emit(QtCore.SIGNAL('plotWindowChanged(const QString&, const QString&)'), QtCore.QString(self.mooseObject.path + '/' + field), QtCore.QString(value))
-            except KeyError:
-                ret = False
-        if ret:
-            self.emit(QtCore.SIGNAL('dataChanged(const QModelIndex&, const QModelIndex&)'), index, index)
-        return ret
-                
-        
-    def data(self, index, role=Qt.DisplayRole):
-        """Return the data  stored at given index.
-
-        """
-        if not index.isValid() or index.row() >= len(self.fields):
-            return None
-        ret = None
-        field = self.fields[index.row()]        
-        if role == Qt.ToolTipRole:
-            return self.tr('<html>' + moose.context.doc(self.mooseObject.className + '.' + str(field)).replace(chr(27) + '[1m', '<b>').replace(chr(27) + '[0m', '</b>') + '</html>') # This is to remove special characters used for pretty printing in terminals
-        if index.column() == 0 and role == Qt.DisplayRole:
-            ret = QtCore.QVariant(QtCore.QString(field))
-        elif index.column() == 1 and (role == Qt.DisplayRole or role == Qt.EditRole):
-            try:
-                field = ObjectFieldsModel.py_moose_fieldname_map[field]
-            except KeyError:
-                pass
-            ret = QtCore.QVariant(QtCore.QString(self.mooseObject.getField(field)))
-        elif index.column() == 2 and role == Qt.DisplayRole:
-            try:
-                ret = QtCore.QVariant(self.fieldPlotNameMap[field])
-            except KeyError:
-                pass
-        return ret
-
-    
-    def headerData(self, section, orientation, role=Qt.DisplayRole):
-        if orientation == Qt.Horizontal and role == Qt.DisplayRole:
-            return QtCore.QVariant(self._header[section])
-        else:
-            return None
-
-    def flags(self, index):
-        """
-        Return the flags for the item pointed to by index.
-        
-        first column is field-name and is enabled and selectable
-        
-        second column is field value and its flags are precalculated
-        in __init__ method and saved in self.fieldFlags
-
-        third column is check button determining if the field is to be
-        plotted.
-        
-        """
-        flag = Qt.ItemIsEnabled
-        if index.isValid():
-            try:
-                flag = self.fieldFlags[self.fields[index.row()]]
-            except KeyError:
-                flag = Qt.ItemIsEnabled
-            if index.column() == 0:
-                flag = flag & ~Qt.ItemIsEditable
-            elif index.column() == 2:
-                try:
-                    flag = self.fieldPlotNameMap[self.fields[index.row()]]
-                    if flag is not None:
-                        flag = Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsEditable
-                except KeyError:
-                    flag = Qt.ItemIsEnabled
-        return flag
+            if fieldName == "className":
+                value = self.mooseObject.getField(fieldName)
+                if "Zombie" in value:
+                    value = value[6:len(value)]
+            elif fieldName != "className":
+                value = self.mooseObject.getField(fieldName)
+            self.fields.append(fieldName)
+        #harsha: For signalling models will be pulling out notes field from Annotator
+        #        can updates if exist for other types also
+        if ( isinstance(self.mooseObject, moose.PoolBase) or isinstance(self.mooseObject,moose.ReacBase) or isinstance(self.mooseObject,moose.EnzBase)) :
+            self.fields.append("Notes")
+        flag = QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable
+        self.fieldFlags[fieldName] = flag
 
     def rowCount(self, parent):
         return len(self.fields)
 
     def columnCount(self, parent):
-        return len(self._header)
+        return len(self.headerdata)
 
-    @property
-    def checkedFields(self):
-        checked_fields = []
-        for field in self.fields:
-            if self.fieldChecked[field]:
-                checked_fields.append(field)
-        return checked_fields
+    def setData(self, index, value, role=QtCore.Qt.EditRole): 
+        if not index.isValid() or index.row () >= len(self.fields) or index.column() != 1:
+            return False
+        field = self.fields[index.row()]
+        if (role == QtCore.Qt.CheckStateRole):
+            if (index.column() == 1):
+                self.checkState_ = value
+                return True
+                
+        else:
+            value = str(value.toString()).strip() # convert Qt datastructure to Python string
+            if len(value) == 0:
+                return False
+            if field == "Notes":
+                field = "notes"
+                ann = moose.Annotator(self.mooseObject.path+'/info')
+                oldValue = ann.getField(field)
+                value = type(oldValue)(value)
+                ann.setField(field,value)
+                self.undoStack.append((index,oldValue))
+            else:
+                oldValue = self.mooseObject.getField(field)
+                value = type(oldValue)(value)
+                self.mooseObject.setField(field, value)
+                self.undoStack.append((index, oldValue))
+            if field == 'name':
+                self.emit(QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'), self.mooseObject)
+            return True
 
-    def updatePlotField(self, index, plotWindowName):
-        self.fieldPlotNameMap[self.fields[index.row()]] = str(plotWindowName)                
+        self.dataChanged.emit(index, index)
+        return True
+    
+    def undo(self):
+        print 'Undo'
+        if len(self.undoStack) == 0:
+            raise Info('No more undo information')
+        index, oldvalue, = self.undoStack.pop()
+        field = self.fields[index.row()]
+        currentvalue = self.mooseObject.getField(field)
+        oldvalue = type(currentvalue)(oldvalue)
+        self.redoStack.append((index, str(currentvalue)))
+        self.mooseObject.setField(field, oldvalue)
+        if field == 'name':
+            self.objectNameChanged.emit(self.mooseObject)
         self.emit(QtCore.SIGNAL('dataChanged(const QModelIndex&, const QModelIndex&)'), index, index)
 
-        
-class ObjectEditDelegate(QtGui.QItemDelegate):
-    """Delegate to handle object editor"""
-    def __init__(self, *args):
-        QtGui.QItemDelegate.__init__(self, *args)
+    def redo(self):
+        if len(self.redoStack) ==0:
+            raise Info('No more redo information')
+        index, oldvalue, = self.redoStack.pop()
+        currentvalue = self.mooseObject.getField(self.fields[index.row()])
+        self.undoStack.append((index, str(currentvalue)))
+        self.mooseObject.setField(self.fields[index.row()], type(currentvalue)(oldvalue))
+        if field == 'name':
+            self.emit(QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'), self.mooseObject)
+        self.emit(QtCore.SIGNAL('dataChanged(const QModelIndex&, const QModelIndex&)'), index, index)
 
-    def createEditor(self, parent, option, index):
-        """Override createEditor from parent class to show custom
-        combo box for the plot column."""
-        widget = None
-        if index.column() == 2:
-            combobox = QtGui.QComboBox(parent)  
-            combobox.addItems(index.model().plotNames)
-            combobox.setEditable(False)
-            self.index = index
-            self.connect(combobox, QtCore.SIGNAL('currentIndexChanged( int )'), self.emitComboSelectionCommit)
-            widget = combobox
-        else:
-            widget = QtGui.QItemDelegate.createEditor(self, parent, option, index)
-        widget.setFocusPolicy(Qt.StrongFocus)
-        return widget
+    def flags(self, index):
+        flag =  QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
+        #flag = QtCore.Qt.NoItemFlags
+        if not index.isValid():
+            return None
+        # Replacing the `outrageous` up stuff with something sensible
+        field = self.fields[index.row()]
+        newstr = field[0]
+        newstr = newstr.upper()
+        field_string = newstr + field[1:]
+        setter = 'set%s' %(field_string)
+        #setter = 'set_%s' % (self.fields[index.row()])
+        #print " from Object setter",setter, "object",self.mooseObject, " ",self.mooseObject.getFieldNames('destFinfo');
+        if index.column() == 1:
+            if field == "Notes":
+                ann = moose.Annotator(self.mooseObject.path+'/info')
+                if setter in ann.getFieldNames('destFinfo'):
+                    flag |= QtCore.Qt.ItemIsEditable
+            if ( not isinstance(self.mooseObject, moose.ChemCompt) ):
 
-    def emitComboSelectionCommit(self, index):
-        if not isinstance(self.sender(), QtGui.QComboBox):
-            raise TypeError('This should have never been reached. Only the plot selection ComboBox should be connected to this signal. But got: %s' % (self.sender()))
-        self.emit(QtCore.SIGNAL('commitData(QWidget *)'), self.sender())
+                if field == "volume":
+                    flag |= QtCore.Qt.NoItemFlags
+                elif setter in self.mooseObject.getFieldNames('destFinfo'):
+                    flag |= QtCore.Qt.ItemIsEditable
+            else:
+                if setter in self.mooseObject.getFieldNames('destFinfo'):
+                    flag |= QtCore.Qt.ItemIsEditable
+            
+            #if field == "Notes":
+            #    flag |= QtCore.Qt.ItemIsEditable
 
+        # !! Replaced till here
 
-    def setEditorData(self, editor, index):
-        text = index.model().data(index, Qt.DisplayRole).toString()
-        if index.column == 2:
-            ii = editor.findText(text)
-            if ii == -1:
-                ii = 0
-            editor.setCurrentIndex(ii)
-        else:
-            QtGui.QItemDelegate.setEditorData(self, editor, index)
+        return flag
 
-    def setModelData(self, editor, model, index):
-        if index.column() == 2:
-            model.setData(index, QtCore.QVariant(editor.currentText()))
-        else:
-            QtGui.QItemDelegate.setModelData(self, editor, model, index)
+    def data(self, index, role):
+        ret = None
+        field = self.fields[index.row()]
+        if index.column() == 0 and role == QtCore.Qt.DisplayRole:
+            try:
+                ret = QtCore.QVariant(QtCore.QString(field)+' ('+defaults.FIELD_UNITS[field]+')')
+            except KeyError:
+                ret = QtCore.QVariant(QtCore.QString(field))
+        elif index.column() == 1:
+            if role==QtCore.Qt.CheckStateRole:
+                if ((str(field) == "plot Conc") or (str(field) == "plot n") ):
+                    # print index.data(QtCore.Qt. ), str(field)
+                    return self.checkState_
+            elif (role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole):
+                try:
+                    if ( (str(field) != "Notes") ):
+                        if field == "className":
+                            value = self.mooseObject.getField(str(field))
+                            if "Zombie" in value:
+                                ret = value[6:len(value)]
+                            else:
+                                ret = self.mooseObject.getField(str(field))
+                        else:
+                            ret = self.mooseObject.getField(str(field))
+                        ret = QtCore.QVariant(QtCore.QString(str(ret)))
+                    elif(str(field) == "Notes"):
+                        astr = self.mooseObject.path+'/info'
+                        mastr = moose.Annotator(astr)
+                        ret = (mastr).getField(str('notes'))
+                        ret = QtCore.QVariant(QtCore.QString(str(ret)))
+                except ValueError:
+                    ret = None
+        return ret 
+
+    def headerData(self, col, orientation, role):
+        if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
+            return QtCore.QVariant(self.headerdata[col])
+        return QtCore.QVariant()
 
 class ObjectEditView(QtGui.QTableView):
-    """Extension of QTableView in order to automate update of the plot field when a field is dragged and dropped on a plot"""
-    def __init__(self, *args):
-        QtGui.QTableView.__init__(self, *args)
-        self.setEditTriggers(self.DoubleClicked | self.SelectedClicked | self.EditKeyPressed)
-        
+    """View class for object editor. 
+
+    This class creates an instance of ObjectEditModel using the moose
+    element passed as its first argument.
+    
+    undolen - specifies the size of the undo stack. By default set to
+    OBJECT_EDIT_UNDO_LENGTH constant in defaults.py. Specify something smaller if
+    large number of objects are likely to be edited.
+
+    To enable undo/redo conect the corresponding actions from the gui
+    to view.model().undo and view.model().redo slots.
+    """
+    def __init__(self, mobject, undolen=defaults.OBJECT_EDIT_UNDO_LENGTH, parent=None):
+        QtGui.QTableView.__init__(self, parent)
+        #self.setEditTriggers(self.DoubleClicked | self.SelectedClicked | self.EditKeyPressed)
+        vh = self.verticalHeader()
+        vh.setVisible(False)
+        hh = self.horizontalHeader()
+        hh.setStretchLastSection(True)
+        self.setAlternatingRowColors(True)
+        self.resizeColumnsToContents()
+        self.setModel(ObjectEditModel(mobject, undolen=undolen))
+        print 'Created view with', mobject
+
     def dataChanged(self, tl, br):
         QtGui.QTableView.dataChanged(self, tl, br)
         self.viewport().update()
 
+class ObjectEditDockWidget(QtGui.QDockWidget):
+    """A dock widget whose title is set by the current moose
+    object. Allows switching the moose object. It stores the created
+    view in a dict for future use.
 
-if __name__ == '__main__':
-    app = QtGui.QApplication([])
-    mainWin = QtGui.QMainWindow()
-    view = QtGui.QTableView(mainWin)
-    mainWin.setCentralWidget(view)
-    model = ObjectFieldsModel(moose.Compartment('c'))
-    view.setModel(model)
-    mainWin.show()
+    TODO possible performance issue: storing the views (along with
+    their models) ensures the undo history for each object is
+    retained. But without a limit on the number of views stored, it
+    will be wasteful on memory.
+
+    """
+    objectNameChanged = QtCore.pyqtSignal('PyQt_PyObject')
+    def __init__(self, mobj='/', parent=None, flags=None):
+        QtGui.QDockWidget.__init__(self, parent=parent)
+        mobj = moose.element(mobj)
+        view = ObjectEditView(mobj)
+        self.view_dict = {mobj: view}
+        self.setWidget(view)
+        self.setWindowTitle('Edit: %s' % (mobj.path))
+
+    def setObject(self, mobj):
+        element = moose.element(mobj)
+        try:
+            view = self.view_dict[element]
+        except KeyError:
+            view = ObjectEditView(element)
+            self.view_dict[element] = view
+            view.model().objectNameChanged.connect(
+                         self.emitObjectNameChanged)
+        self.setWidget(view)
+        self.setWindowTitle('Edit: %s' % (element.path))
+        #print view.model().mooseObject
+        view.update()
+    
+    def emitObjectNameChanged(self, mobj):
+        self.objectNameChanged.emit(mobj)
+        
+
+def main():
+    app = QtGui.QApplication(sys.argv)
+    mainwin = QtGui.QMainWindow()
+    c = moose.Pool('test_compartment')
+    view = ObjectEditView(c, undolen=3)
+    mainwin.setCentralWidget(view)
+    action = QtGui.QAction('Undo', mainwin)
+    action.setShortcut('Ctrl+z')
+    action.triggered.connect(view.model().undo)
+    mainwin.menuBar().addAction(action)
+    action = QtGui.QAction('Redo', mainwin)
+    action.setShortcut('Ctrl+y')
+    action.triggered.connect(view.model().redo)
+    mainwin.menuBar().addAction(action)
+    mainwin.show()
     sys.exit(app.exec_())
-            
 
+
+if __name__ == "__main__":
+    main()
+# ojectedit.py ends here

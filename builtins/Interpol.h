@@ -1,152 +1,92 @@
-#ifndef _Interpol_h
-#define _Interpol_h
+// Interpol.h --- 
+// 
+// Filename: Interpol.h
+// Description: 
+// Author: Subhasis Ray
+// Maintainer: 
+// Created: Wed Jun 25 15:13:52 2014 (+0530)
+// Version: 
+// Last-Updated: 
+//           By: 
+//     Update #: 0
+// URL: 
+// Keywords: 
+// Compatibility: 
+// 
+// 
 
-/**********************************************************************
-** This program is part of 'MOOSE', the
-** Messaging Object Oriented Simulation Environment.
-**           Copyright (C) 2003-2007 Upinder S. Bhalla. and NCBS
-** It is made available under the terms of the
-** GNU Lesser General Public License version 2.1
-** See the file COPYING.LIB for the full notice.
-**********************************************************************/
+// Commentary: 
+// 
+// 
+// 
+// 
 
-class Interpol
+// Change log:
+// 
+// 
+// 
+// 
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as
+// published by the Free Software Foundation; either version 3, or
+// (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with this program; see the file COPYING.  If not, write to
+// the Free Software Foundation, Inc., 51 Franklin Street, Fifth
+// Floor, Boston, MA 02110-1301, USA.
+// 
+// 
+
+// Code:
+
+#ifndef _INTERPOL_H
+#define _INTERPOL_H
+
+/**
+ * 1 Dimensional table, with interpolation. The internal vector is
+ * accessed like this: table_[ xIndex ] with the x-coordinate used as
+ * the index.
+ */
+class Interpol: public TableBase
 {
-	public:
-		Interpol()
-		{
-			xmin_ = 0.0;
-			xmax_ = 1.0;
-			mode_ = 1; // Mode 1 is linear interpolation. 0 is indexing.
-			invDx_ = 1.0;
-			sy_ = 1.0;
-			table_.resize( 2, 0.0 );
-		}
-		virtual ~Interpol() { ; }
-
-		Interpol( unsigned long xdivs, double xmin, double xmax );
-
-		////////////////////////////////////////////////////////////
-		// Here are the interface functions for the MOOSE class
-		////////////////////////////////////////////////////////////
-		static void setXmin( const Conn* c, double value );
-		static double getXmin( Eref e );
-		static void setXmax( const Conn* c, double value );
-		static double getXmax( Eref e );
-		static void setXdivs( const Conn* c, int value );
-		static int getXdivs( Eref e );
-		static void setDx( const Conn* c, double value );
-		static double getDx( Eref e );
-		static void setSy( const Conn* c, double value );
-		static double getSy( Eref e );
-		static void setMode( const Conn* c, int value );
-		static int getMode( Eref e );
-
-		static void setTable(
-					const Conn* c, double val, const unsigned int& i );
-		static double getTable(
-					Eref e,const unsigned int& i );
-		static void setTableVector( const Conn* c, vector< double > value );
-		static vector< double > getTableVector( Eref e );
-
-		////////////////////////////////////////////////////////////
-		// Here are the Interpol Destination functions
-		////////////////////////////////////////////////////////////
-		static void lookupReturn( const Conn* c, double val );
-		static void lookup( const Conn* c, double val );
-		static void tabFill( const Conn* c, int xdivs, int mode );
-		static void print( const Conn* c, string fname );
-		static void append( const Conn* c, string fname );
-		static void load( const Conn* c, string fname,
-			unsigned int skiplines );
-		static void appendTableVector( const Conn* c, 
-			vector< double > value );
-
-		static void push( const Conn* c, double value );
-		static void clear( const Conn* c );
-		static void pop( const Conn* c );
-
-		////////////////////////////////////////////////////////////
-		// Here are the internal functions
-		////////////////////////////////////////////////////////////
-		double interpolateWithoutCheck( double x ) const;
-		double indexWithoutCheck( double x ) const {
-			return table_[ static_cast< int >( (x - xmin_) * invDx_ ) ];
-		}
-		double innerLookup( double x ) const;
-		bool operator==( const Interpol& other ) const;
-		bool operator<( const Interpol& other ) const;
-		void localSetXmin( double value );
-		void localSetXmax( double value );
-		virtual void localSetXdivs( int value );
-		virtual int localGetXdivs( ) const;
-		/// \todo Later do interpolation etc to preserve contents.
-		void localSetDx( double value );
-		double localGetDx() const;
-		double invDx() const {
-			return invDx_;
-		}
-		virtual void localSetSy( double value );
-
-		void setTableValue( double value, unsigned int index );
-		double getTableValue( unsigned int index );
-		void localSetTableVector( const vector< double >& value );
-
-		void innerPush( double value );
-		void innerClear();
-		void innerPop();
-
-		void localAppendTableVector( const vector< double >& value );
-		unsigned long size( ) const {
-			return table_.size();
-		}
-		void resize( unsigned int size, double init = 0.0 ) {
-			table_.resize( size, init );
-		}
-		void push_back( double value ) {
-			table_.push_back( value );
-		}
-
-		double xmin() const {
-			return xmin_;
-		}
-
-		double xmax() const {
-			return xmax_;
-		}
-
-		virtual int xdivs() const {
-			if ( table_.empty() )
-				return 0;
-			
-			return table_.size() - 1;
-		}
-
-		int mode() const {
-			return mode_;
-		}
-
-		/**
-		 * Expand out the table, using the specified mode.  
-		 * Mode 0 : B-Splines
-		 * Mode 2 : Linear interpolation for fill 
-		 */
-		virtual void innerTabFill( int xdivs, int mode );
-		virtual void innerPrint( const string& fname, bool doAppend ) const;
-		virtual void innerLoad( const string& fname, unsigned int skiplines );
-
-	protected:
-		double xmin_;
-		double xmax_;
-		double invDx_;
-		int mode_;
-		double sy_;
-		vector < double > table_;
-
-		static const double EPSILON;
-		static const unsigned int MAX_DIVS;
+  public:
+    Interpol();
+    Interpol(double xmin, double xmax);
+    
+    ////////////////////////////////////////////////////////////
+    // Here are the interface functions for the MOOSE class
+    ////////////////////////////////////////////////////////////
+    void setXmin( double value );
+    double getXmin() const;
+    void setXmax( double value );
+    double getXmax() const;
+    double getY() const;
+    ////////////////////////////////////////////////////////////
+    // Here are the Interpol Destination functions
+    ////////////////////////////////////////////////////////////
+    void handleInput(double x);
+    void process( const Eref& e, ProcPtr p );
+    void reinit( const Eref& e, ProcPtr p );
+    
+    
+    static const Cinfo* initCinfo();
+    static const unsigned int MAX_DIVS;
+  protected:
+    double x_;
+    double xmin_;
+    double xmax_;                               
+    double y_;
 };
 
-extern const Cinfo* initInterpolCinfo();
 
-#endif // _Interpol_h
+#endif // _INTERPOL_H
+
+
+// 
+// Interpol.h ends here
