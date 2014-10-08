@@ -24,9 +24,10 @@ const Cinfo* AdExIF::initCinfo()
 		"Name", "AdExIF",
 		"Author", "Aditya Gilra",
 		"Description", "Leaky Integrate-and-Fire neuron with Exponential spike rise"
-        " and adaptation via a second variable w."
-        "Rm*Cm dVm/dt = -(Vm-Em) + deltaThresh * exp((Vm-thresh)/deltaThresh) + Rm*I -w "
-        "tau_w dw/dt = a0*(Vm-Em) - w "
+        " and adaptation via an adapting current w."
+        "Rm*Cm * dVm/dt = -(Vm-Em) + deltaThresh * exp((Vm-thresh)/deltaThresh) + Rm*I - w "
+        "tau_w * d w /dt = a0*(Vm-Em) - w "
+        "at each spike, w -> w + b0 "
 	};
 
     static ElementValueFinfo< AdExIF, double > w(
@@ -130,6 +131,7 @@ void AdExIF::vProcess( const Eref& e, ProcPtr p )
 void AdExIF::vReinit(  const Eref& e, ProcPtr p )
 {
 	activation_ = 0.0;
+    w_ = 0.0;
 	fired_ = false;
 	lastEvent_ = -refractT_; // Allow it to fire right away.
 	Compartment::vReinit( e, p );

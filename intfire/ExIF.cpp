@@ -29,7 +29,7 @@ const Cinfo* ExIF::initCinfo()
     static ElementValueFinfo< ExIF, double > deltaThresh(
         "deltaThresh",
         "Parameter in Vm evolution equation:"
-        "Rm*Cm dVm/dt = -(Vm-Em) + deltaThresh * exp((Vm-thresh)/deltaThresh) + Rm*I",
+        "Rm*Cm * dVm/dt = -(Vm-Em) + deltaThresh * exp((Vm-thresh)/deltaThresh) + Rm*I",
         &ExIF::setDeltaThresh,
         &ExIF::getDeltaThresh
     );
