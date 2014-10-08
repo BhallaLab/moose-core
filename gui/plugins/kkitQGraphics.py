@@ -15,15 +15,6 @@ class KineticsDisplayItem(QtGui.QGraphicsWidget):
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         if QtCore.QT_VERSION >= 0x040600:
             self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges,1)
-        #print "self.mobj",self.mobj
-        #self.updateValue(self.mobj)
-        '''
-        if self.mobj == "Pool":
-            self._conc = self.mobj.conc
-            self._n    = self.mobj.n
-            doc = "Conc\t: "+str(self._conc)+"\n n\t: "+str(self._n)
-            self.gobj.setToolTip(doc)
-            '''
     def setDisplayProperties(self, dinfo):
         self.setGeometry(dinfo.x, dinfo.y)
       
@@ -32,36 +23,14 @@ class KineticsDisplayItem(QtGui.QGraphicsWidget):
         if self.hasFocus() or self.isSelected():
             painter.setPen(QtGui.QPen(QtGui.QPen(QtCore.Qt.black, 1.8,Qt.Qt.DashLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin)))
             painter.drawRect(self.boundingRect())
+    def mouseDoubleClickEvent(self, event):
+        self.emit(QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),element(self.mobj))
             
-    def updateValue(self,mobj):
-        pass
-        '''
-        self._mobj = mobj
-        print "\t \t here in kineticsDisplayItem ",type(mobj)
-        if type(mobj) is moose.ZombiePool:
-            self._conc = self._mobj.conc
-            self._n    = self._mobj.n
-            doc = "Conc\t: "+str(self._conc)+"\n n\t: "+str(self._n)
-            self.gobj.setToolTip(doc)
-        '''
-        '''if moose.element(self._mobj).class == "Pool" or moose.element(self._mobj).class == "ZombiePool":
-            self._conc = self._mobj.conc
-            self._n    = self._mobj.n
-            doc = "Conc\t: "+str(self._conc)+"\n n\t: "+str(self._n)
-            self.gobj.setToolTip(doc)
-            
-        elif self._mobj.class == "Reac" or self._mobj.class == "ZombieReac":
-            self._kf = self.mobj.kf
-            self._kb    = self.mobj.kb
-            doc = "kf\t: "+str(self._kf)+"\n kb\t: "+str(self._kb)
-            self.gobj.setToolTip(doc)
-        pass
-        '''
     def itemChange(self,change,value):
         if change == QtGui.QGraphicsItem.ItemPositionChange:
             self.emit(QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),element(self.mobj))
-        if change == QtGui.QGraphicsItem.ItemSelectedChange and value == True:
-            self.emit(QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),element(self.mobj))
+        #if change == QtGui.QGraphicsItem.ItemSelectedChange and value == True:
+        #    self.emit(QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),element(self.mobj))
         return QtGui.QGraphicsItem.itemChange(self,change,value)
 
 class PoolItem(KineticsDisplayItem):
@@ -390,11 +359,14 @@ class ComptItem(QtGui.QGraphicsRectItem):
     def pointerLayoutpt(self):
         return (self.layoutWidgetPt)
 
+    def mouseDoubleClickEvent(self, event):
+        self.cmptEmitter.emit(QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),element(self.mooseObj_))
+    
     def itemChange(self,change,value):
         if change == QtGui.QGraphicsItem.ItemPositionChange:
             self.cmptEmitter.emit(QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.mooseObj_)
-        if change == QtGui.QGraphicsItem.ItemSelectedChange and value == True:
-            self.cmptEmitter.emit(QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.mooseObj_)
+        #if change == QtGui.QGraphicsItem.ItemSelectedChange and value == True:
+        #    self.cmptEmitter.emit(QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.mooseObj_)
         return QtGui.QGraphicsItem.itemChange(self,change,value)
 
 import sys
