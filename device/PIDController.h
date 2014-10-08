@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Tue Dec 30 23:14:00 2008 (+0530)
 // Version: 
-// Last-Updated: Mon Mar  2 01:27:53 2009 (+0530)
-//           By: subhasis ray
-//     Update #: 45
+// Last-Updated: Wed Feb 22 18:34:37 2012 (+0530)
+//           By: Subhasis Ray
+//     Update #: 57
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -23,7 +23,7 @@
 
 // Change log:
 // 
-// 
+// 2012-02-22 17:14:29 (+0530) subha - started porting to dh_branch
 // 
 //
 /**********************************************************************
@@ -39,32 +39,32 @@
 #ifndef _PIDCONTROLLER_H
 #define _PIDCONTROLLER_H
 
-#include "basecode/header.h"
-#include "basecode/moose.h"
+#include "../basecode/header.h"
 
 class PIDController{
   public:
     PIDController();
     
-    static void setCommand( const Conn* conn, double command );
-    static double getCommand( Eref e );
-    static void setSensed( const Conn* conn, double sensed );
-    static double getSensed( Eref e );
-    static double getOutput( Eref e );
-    static void setGain( const Conn* conn, double gain );
-    static double getGain( Eref e );
-    static void setTauI( const Conn* conn, double tau_i );
-    static double getTauI( Eref e );
-    static void setTauD( const Conn* conn, double tau_d );
-    static double getTauD( Eref e );
-    static void setSaturation( const Conn* conn, double saturation );
-    static double getSaturation( Eref e );
-    static double getError( Eref e );
-    static double getEIntegral( Eref e );
-    static double getEDerivative( Eref e );
-    static double getEPrevious( Eref e );
-    static void processFunc( const Conn* conn, ProcInfo process );
-    static void reinitFunc( const Conn* conn, ProcInfo process );
+    void setCommand( double command );
+    double getCommand() const;
+    void setSensed(double sensed );
+    double getSensed() const;
+    double getOutput() const;
+    void setGain(double gain );
+    double getGain() const;
+    void setTauI(double tau_i );
+    double getTauI() const;
+    void setTauD(double tau_d );
+    double getTauD() const;
+    void setSaturation(double saturation );
+    double getSaturation() const;
+    double getError() const;
+    double getEIntegral() const;
+    double getEDerivative() const;
+    double getEPrevious() const;
+    void process(const Eref&e, ProcPtr process );
+    void reinit(const Eref& e, ProcPtr process );
+    static const Cinfo * initCinfo();
     
   private:
     double command_;

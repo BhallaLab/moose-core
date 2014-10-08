@@ -1,8 +1,7 @@
 /**********************************************************************
 ** This program is part of 'MOOSE', the
-** Messaging Object Oriented Simulation Environment,
-** also known as GENESIS 3 base code.
-**           copyright (C) 2003-2006 Upinder S. Bhalla. and NCBS
+** Messaging Object Oriented Simulation Environment.
+**           Copyright (C) 2003-2009 Upinder S. Bhalla. and NCBS
 ** It is made available under the terms of the
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
@@ -11,105 +10,73 @@
 #ifndef _EREF_H
 #define _EREF_H
 
-/**
- * Wrapper for Element and its index, for passing around as a unit.
- * Provides several utility functions including for messaging.
- *
- */
-
-class ConnTainer; // required forward declaration.
-
-class Eref {
+class Eref
+{
 	public:
-		Eref()
-		{;}
-		
-		Eref( Element* eArg, unsigned int iArg = 0 )
-			: e( eArg ), i( iArg )
-		{;}
-		
-		void* data();
 
-		bool operator<( const Eref& other ) const;
+		friend ostream& operator <<( ostream& s, const Eref& e );
+		Eref();
+		Eref( Element* e, unsigned int index, unsigned int field = 0 );
 
-		bool operator==( const Eref& other ) const;
+		/**
+		 * Returns data entry.
+		 */
+		char* data() const;
 
-		Element* operator->() {
-			return e;
+		/**
+		 * Returns Element part
+		 */
+		Element* element() const {
+			return e_;
 		}
 
-		Id id();
-
 		/**
-		 * Returns the Element name with optional index if it is an
-		 * array element.
+		 * Returns data index, for now typecast to unsigned int.
 		 */
-		string name() const;
-		
-		/**
-		 * Returns the Element name with index only if the parent element
-		 * is simple and current element is array. Otherwise, returns the 
-		 * name of the element. Faking business!!
-		 */	
-		string saneName(Id parent) const;
-
-		///////////////////////////////////////////////////////////////
-		// Msg handling functions
-		///////////////////////////////////////////////////////////////
+		unsigned int dataIndex() const {
+			return i_;
+		}
 
 		/**
-		 * Add a message from field f1 on current Element to field f2 on e2
-		 * Return true if success.
+		 * Returns field index, for now typecast to unsigned int.
+		 * This is really an extra bit of baggage used here not for
+		 * immediate lookup, but to pass to EpFuncs that know
+		 * how to use this for lookup.
 		 */
-		bool add( const string& f1, Eref e2, const string& f2,
-			unsigned int connTainerOption );
-		bool add( const string& f1, Eref e2, const string& f2 ); 
-		// using default option
+		unsigned int fieldIndex() const {
+			return f_;
+		}
 
 		/**
-		 * Add a message from Msg m1 on current Element to Msg m2 on e2
-		 * Return true if success.
+		 * Returns the ObjId corresponding to the Eref. All info is kept.
 		 */
-		bool add( int m1, Eref e2, int m2, unsigned int connTainerOption );
+		ObjId objId() const;
 
 		/**
-		 * Drop slot 'doomed' on Msg msg
+		 * Returns the Id corresponding to the Eref. Loses information.
 		 */
-		bool drop( int msg, unsigned int doomed );
+		Id id() const;
 
 		/**
-		 * Drop ConnTainer 'doomed' on Msg msg
+		 * Returns the digested version of the specified msgsrc. If the
+		 * message has changed, this call triggers the digestion operation.
 		 */
-		bool drop( int msg, const ConnTainer* doomed );
+		const vector< MsgDigest >& msgDigest(unsigned int bindIndex ) const;
 
 		/**
-		 * Drop all msgs going out of the identified msg.
+		 * True if the data are on the current node
 		 */
-		bool dropAll( int msg );
+		bool isDataHere() const;
 
 		/**
-		 * Drop all msgs going out of the identified Finfo.
+		 * Returns node upon which specified data entry resides .
+		 * If this is a GlobalElement then it returns the local node.
 		 */
-		bool dropAll( const string& finfo );
-
-		/**
-		 * Drop all entries on a vector of connTainers. In due course
-		 * this will be updated to be more efficient than just a sequence
-		 * of individual calls to drop.
-		 */
-		bool dropVec( int msg, const vector< const ConnTainer* >& vec );
-
-		/**
-		 * Checks if the msgNum is OK. Looks at #finfos and #src.
-		 * Rejects negative below #src, rejects others out of range.
-		 * Does not consider indices into 'next' as valid.
-		 */
-		bool validMsg( int msg ) const;
-
-		static Eref root();
-		
-		Element* e;
-		unsigned int i;
+		unsigned int getNode() const;
+	private:
+		Element* e_;
+		unsigned int i_;
+		unsigned int f_;
 };
 
 #endif // _EREF_H

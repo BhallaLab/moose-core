@@ -1,35 +1,36 @@
 #/**********************************************************************
 #** This program is part of 'MOOSE', the
-#** Messaging Object Oriented Simulation Environment,
-#** also known as GENESIS 3 base code.
-#**           copyright (C) 2004 Upinder S. Bhalla. and NCBS
+#** Messaging Object Oriented Simulation Environment.
+#**           Copyright (C) 2003-2012 Upinder S. Bhalla. and NCBS
 #** It is made available under the terms of the
-#** GNU General Public License version 2
+#** GNU Lesser General Public License version 2.1
 #** See the file COPYING.LIB for the full notice.
 #**********************************************************************/
 
-TARGET = signeur.o
+CXXFLAGS += -I..
+# the line below are for easy inclusion of libxml++
+#CXXFLAGS += $(shell pkg-config libxml++-2.6 --cflags) 
+
+TARGET = _signeur.o
 
 OBJ = \
-	SigNeur.o	\
 	Adaptor.o	\
+	testSigNeur.o
+
 
 HEADERS = \
 	../basecode/header.h \
-	../connections/Conn.h \
-	../basecode/Element.h \
 
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
-SigNeur.o:	SigNeur.h
 Adaptor.o:	Adaptor.h
+testSigNeur.o:	Adaptor.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -I.. -I../basecode $< -c
 
-$(TARGET):		$(OBJ) $(HEADERS)
-	$(LD) -r -o $(TARGET) $(OBJ)
-
+$(TARGET): $(OBJ) $(HEADERS)
+	$(LD) -r -o $(TARGET) $(OBJ) 
 clean:
 	-rm -f *.o $(TARGET) core core.*

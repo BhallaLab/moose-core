@@ -1,0 +1,2968 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>Getting started with python scripting for MOOSE</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="author" content="Subhasis Ray" />
+  <meta name="date" content="December 12, 2012" />
+  <style type="text/css">
+    table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode, table.sourceCode pre { margin: 0; padding: 0; border: 0; vertical-align: baseline; border: none; }
+    td.lineNumbers { border-right: 1px solid #AAAAAA; text-align: right; color: #AAAAAA; padding-right: 5px; padding-left: 5px; }
+    td.sourceCode { padding-left: 5px; }
+    pre.sourceCode { }
+    pre.sourceCode span.Normal { }
+    pre.sourceCode span.Keyword { color: #007020; font-weight: bold; } 
+    pre.sourceCode span.DataType { color: #902000; }
+    pre.sourceCode span.DecVal { color: #40a070; }
+    pre.sourceCode span.BaseN { color: #40a070; }
+    pre.sourceCode span.Float { color: #40a070; }
+    pre.sourceCode span.Char { color: #4070a0; }
+    pre.sourceCode span.String { color: #4070a0; }
+    pre.sourceCode span.Comment { color: #60a0b0; font-style: italic; }
+    pre.sourceCode span.Others { color: #007020; }
+    pre.sourceCode span.Alert { color: red; font-weight: bold; }
+    pre.sourceCode span.Function { color: #06287e; }
+    pre.sourceCode span.RegionMarker { }
+    pre.sourceCode span.Error { color: red; font-weight: bold; }
+  </style>
+  <link rel="stylesheet" href="css/moosedocs.css" type="text/css" />
+</head>
+<body>
+
+<h1 class="title">Getting started with python scripting for MOOSE</h1>
+
+<h2>
+    Subhasis Ray
+</h2>
+
+<h2>December 12, 2012</h2>
+
+<div id="TOC"
+><ul
+  ><li
+    ><a href="#introduction"
+      >Introduction</a
+      ></li
+    ><li
+    ><a href="#importing-moose-and-accessing-built-in-documentation"
+      >Importing MOOSE and accessing built-in documentation</a
+      ></li
+    ><li
+    ><a href="#creating-objects-and-traversing-the-object-hierarchy"
+      >Creating objects and traversing the object hierarchy</a
+      ></li
+    ><li
+    ><a href="#setting-the-properties-of-elements:-accessing-fields"
+      >Setting the properties of elements: accessing fields</a
+      ></li
+    ><li
+    ><a href="#putting-them-together:-setting-up-connections"
+      >Putting them together: setting up connections</a
+      ></li
+    ><li
+    ><a href="#scheduling-and-running-the-simulation"
+      >Scheduling and running the simulation</a
+      ></li
+    ><li
+    ><a href="#some-more-details"
+      >Some more details</a
+      ><ul
+      ><li
+	><a href="#ematrix-melement-and-element"
+	  ><code
+	    >ematrix</code
+	    >, <code
+	    >melement</code
+	    > and <code
+	    >element</code
+	    ></a
+	  ></li
+	><li
+	><a href="#finfos"
+	  ><code
+	    >Finfos</code
+	    ></a
+	  ></li
+	></ul
+      ></li
+    ><li
+    ><a href="#moving-on"
+      >Moving on</a
+      ></li
+    ></ul
+  ></div
+>
+<div id="introduction"
+><h1
+  ><a href="#TOC"
+    >Introduction</a
+    ></h1
+  ><p
+  >This document describes how to use the <code
+    >moose</code
+    > module in Python scripts or in an interactive Python shell. It aims to give you enough overview to help you start scripting using MOOSE and extract farther information that may be required for advanced work. Knowledge of Python or programming in general will be helpful. If you just want to simulate existing models in one of the supported formats, you can fire the MOOSE GUI and locate the model file using the <code
+    >File</code
+    > menu and load it. The GUI is described <a href="./MooseGuiDocs.html"
+    >here</a
+    >. The example code in the boxes can be entered in a Python shell.</p
+  ></div
+><div id="importing-moose-and-accessing-built-in-documentation"
+><h1
+  ><a href="#TOC"
+    >Importing MOOSE and accessing built-in documentation</a
+    ></h1
+  ><p
+  >In a python script you import modules to access the functionalities they provide.</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Char Preprocessor"
+      >import</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal"
+      >moose</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >This makes the <code
+    >moose</code
+    > module available for use in Python. You can use Python's built-in <code
+    >help</code
+    > function to read the top-level documentation for the moose module:</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >help</span
+      ><span class="Normal Operator"
+      >(</span
+      ><span class="Normal"
+      >moose</span
+      ><span class="Normal Operator"
+      >)</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >This will give you an overview of the module. Press <code
+    >q</code
+    > to exit the pager and get back to the interpreter. You can also access the documentation for individual classes and functions this way.</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >help</span
+      ><span class="Normal Operator"
+      >(</span
+      ><span class="Normal"
+      >moose</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Others Extensions"
+      >connect</span
+      ><span class="Normal Operator"
+      >)</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >To list the available functions and classes you can use <code
+    >dir</code
+    > function<sup
+    ><a href="#fn1" class="footnoteRef" id="fnref1"
+      >1</a
+      ></sup
+    >.</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="DataType BuiltinFunction"
+      >dir</span
+      ><span class="Normal Operator"
+      >(</span
+      ><span class="Normal"
+      >moose</span
+      ><span class="Normal Operator"
+      >)</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >MOOSE has built-in documentation in the C++-source-code independent of Python. The <code
+    >moose</code
+    > module has a separate <code
+    >doc</code
+    > function to extract this documentation.</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >moose</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >doc</span
+      ><span class="Normal Operator"
+      >(</span
+      ><span class="Normal"
+      >moose</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >Compartment</span
+      ><span class="Normal Operator"
+      >)</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >The class level documentation will show whatever the author/maintainer of the class wrote for documentation followed by a list of various kinds of fields and their data types. This can be very useful in an interactive session.</p
+  ><p
+  >Each field can have its own detailed documentation, too.</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >moose</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >doc</span
+      ><span class="Normal Operator"
+      >(</span
+      ><span class="String"
+      >'Compartment.Rm'</span
+      ><span class="Normal Operator"
+      >)</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >Note that you need to put the class-name followed by dot followed by field-name within quotes. Otherwise, <code
+    >moose.doc</code
+    > will receive the field value as parameter and get confused.</p
+  ></div
+><div id="creating-objects-and-traversing-the-object-hierarchy"
+><h1
+  ><a href="#TOC"
+    >Creating objects and traversing the object hierarchy</a
+    ></h1
+  ><p
+  >Different types of biological entities like neurons, enzymes, etc are represented by classes and individual instances of those types are objects of those classes. Objects are the building-blocks of models in MOOSE. We call MOOSE objects <code
+    >element</code
+    > and use object and element interchangeably in the context of MOOSE. Elements are conceptually laid out in a tree-like hierarchical structure. If you are familiar with file system hierarchies in common operating systems, this should be simple.</p
+  ><p
+  >At the top of the object hierarchy sits the <code
+    >Shell</code
+    >, equivalent to the root directory in UNIX-based systems and represented by the path <code
+    >/</code
+    >. You can list the existing objects under <code
+    >/</code
+    > using the <code
+    >le</code
+    > function.</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >moose</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >le</span
+      ><span class="Normal Operator"
+      >()</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >This shows something like:</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >Elements</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal"
+      >under</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal Operator"
+      >/</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal Operator"
+      >/</span
+      ><span class="Normal"
+      >Msgs</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal Operator"
+      >/</span
+      ><span class="Normal"
+      >clock</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal Operator"
+      >/</span
+      ><span class="Normal"
+      >classes</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  ><code
+    >Msgs</code
+    >, <code
+    >clock</code
+    > and <code
+    >classes</code
+    > are predefined objects in MOOSE. And each object can contain other objects inside them. You can see them by passing the path of the parent object to <code
+    >le</code
+    >.</p
+  ><p
+  >Entering:</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >moose</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >le</span
+      ><span class="Normal Operator"
+      >(</span
+      ><span class="String"
+      >'/clock'</span
+      ><span class="Normal Operator"
+      >)</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >prints:</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >Elements</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal"
+      >under</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal Operator"
+      >/</span
+      ><span class="Normal"
+      >clock</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal Operator"
+      >/</span
+      ><span class="Normal"
+      >clock</span
+      ><span class="Normal Operator"
+      >/</span
+      ><span class="Normal"
+      >tick</span
+      ><span class="Normal NormalText"
+      >[</span
+      ><span class="DecVal Int"
+      >0</span
+      ><span class="Normal NormalText"
+      >]</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >Now let us create some objects of our own. This can be done by invoking MOOSE class constructors (just like regular Python classes).</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >model</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal Operator"
+      >=</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal"
+      >moose</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >Neutral</span
+      ><span class="Normal Operator"
+      >(</span
+      ><span class="String"
+      >'/model'</span
+      ><span class="Normal Operator"
+      >)</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >The above creates a <code
+    >Neutral</code
+    > object named <code
+    >model</code
+    >. <code
+    >Neutral</code
+    > is the most basic class in MOOSE. A <code
+    >Neutral</code
+    > element can act as a container for other elements. We can create something under <code
+    >model</code
+    >:</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >soma</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal Operator"
+      >=</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal"
+      >moose</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >Compartment</span
+      ><span class="Normal Operator"
+      >(</span
+      ><span class="String"
+      >'/model/soma'</span
+      ><span class="Normal Operator"
+      >)</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >Every element has a unique path. This is a concatenation of the names of all the objects one has to traverse starting with the root to reach that element.</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Keyword CommandKeyword"
+      >print</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal"
+      >soma</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >path</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >shows you its path:</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal Operator"
+      >/</span
+      ><span class="Normal"
+      >model</span
+      ><span class="Normal Operator"
+      >/</span
+      ><span class="Normal"
+      >soma</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >The name of the element can be printed, too.</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Keyword CommandKeyword"
+      >print</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal"
+      >soma</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >name</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >shows:</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >soma</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >The <code
+    >Compartment</code
+    > elements model small portions of a neuron. Some basic experiments can be carried out using a single compartment. Let us create another object to act on the <code
+    >soma</code
+    >. This will be a step current generator to inject a current pulse into the soma.</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >pulse</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal Operator"
+      >=</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal"
+      >moose</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >PulseGen</span
+      ><span class="Normal Operator"
+      >(</span
+      ><span class="String"
+      >'/model/pulse'</span
+      ><span class="Normal Operator"
+      >)</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >You can use <code
+    >le</code
+    > at any point to see what is there:</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >moose</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >le</span
+      ><span class="Normal Operator"
+      >(</span
+      ><span class="String"
+      >'/model'</span
+      ><span class="Normal Operator"
+      >)</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >will show you:</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >Elements</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal"
+      >under</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal Operator"
+      >/</span
+      ><span class="Normal"
+      >model</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal Operator"
+      >/</span
+      ><span class="Normal"
+      >model</span
+      ><span class="Normal Operator"
+      >/</span
+      ><span class="Normal"
+      >soma</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal Operator"
+      >/</span
+      ><span class="Normal"
+      >model</span
+      ><span class="Normal Operator"
+      >/</span
+      ><span class="Normal"
+      >pulse</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >And finally, we can create a <code
+    >Table</code
+    > to record the time series of the soma's membrane potential. It is good practice to organize the data separately from the model. So we do it as below:</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >data</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal Operator"
+      >=</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal"
+      >moose</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >Neutral</span
+      ><span class="Normal Operator"
+      >(</span
+      ><span class="String"
+      >'/data'</span
+      ><span class="Normal Operator"
+      >)</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >vmtab</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal Operator"
+      >=</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal"
+      >moose</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >Table</span
+      ><span class="Normal Operator"
+      >(</span
+      ><span class="String"
+      >'/data/soma_Vm'</span
+      ><span class="Normal Operator"
+      >)</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >Now that we have the essential elements for a small model, we can go on to set the properties of this model and the experimental protocol.</p
+  ></div
+><div id="setting-the-properties-of-elements:-accessing-fields"
+><h1
+  ><a href="#TOC"
+    >Setting the properties of elements: accessing fields</a
+    ></h1
+  ><p
+  >Elements have several kinds of fields. The simplest ones are the <code
+    >value fields</code
+    >. These can be accessed like ordinary Python members. You can list the available value fields using <code
+    >getFieldNames</code
+    > function:</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >soma</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >getFieldNames</span
+      ><span class="Normal Operator"
+      >(</span
+      ><span class="String"
+      >'valueFinfo'</span
+      ><span class="Normal Operator"
+      >)</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >Here <code
+    >valueFinfo</code
+    > is the type name for value fields. <code
+    >Finfo</code
+    > is short form of <em
+    >field information</em
+    >. For each type of field there is a name ending with <code
+    >-Finfo</code
+    >. The above will display the following list:</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >     </span
+      ><span class="Normal Operator"
+      >(</span
+      ><span class="String"
+      >'this'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="String"
+      >'name'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="String"
+      >'me'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="String"
+      >'parent'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="String"
+      >'children'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="String"
+      >'path'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="String"
+      >'class'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="String"
+      >'linearSize'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="String"
+      >'objectDimensions'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="String"
+      >'lastDimension'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="String"
+      >'localNumField'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="String"
+      >'pathIndices'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="String"
+      >'msgOut'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="String"
+      >'msgIn'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="String"
+      >'Vm'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="String"
+      >'Cm'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="String"
+      >'Em'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="String"
+      >'Im'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="String"
+      >'inject'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="String"
+      >'initVm'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="String"
+      >'Rm'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="String"
+      >'Ra'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="String"
+      >'diameter'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="String"
+      >'length'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="String"
+      >'x0'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="String"
+      >'y0'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="String"
+      >'z0'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="String"
+      >'x'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="String"
+      >'y'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="String"
+      >'z'</span
+      ><span class="Normal Operator"
+      >)</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >Some of these fields are for internal or advanced use, some give access to the physical properties of the biological entity we are trying to model. Now we are interested in <code
+    >Cm</code
+    >, <code
+    >Rm</code
+    >, <code
+    >Em</code
+    > and <code
+    >initVm</code
+    >. In the most basic form, a neuronal compartment acts like a parallel <code
+    >RC</code
+    > circuit with a battery attached. Here <code
+    >R</code
+    > and <code
+    >C</code
+    > are resistor and capacitor connected in parallel, and the battery with voltage <code
+    >Em</code
+    > is in series with the resistor, as shown below:</p
+  ><hr
+   /><div class="figure"
+  ><img src="../../images/neuronalcompartment.jpg" alt="&lt;strong
+&gt;Passive neuronal compartment&lt;/strong
+&gt;"
+     /><p class="caption"
+    ><strong
+      >Passive neuronal compartment</strong
+      ></p
+    ></div
+  ><hr
+   /><p
+  >The fields are populated with some defaults.</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Keyword CommandKeyword"
+      >print</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal"
+      >soma</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >Cm</span
+      ><span class="Normal NormalText"
+      >, </span
+      ><span class="Normal"
+      >soma</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >Rm</span
+      ><span class="Normal NormalText"
+      >, </span
+      ><span class="Normal"
+      >soma</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >Vm</span
+      ><span class="Normal NormalText"
+      >, </span
+      ><span class="Normal"
+      >soma</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >Em</span
+      ><span class="Normal NormalText"
+      >, </span
+      ><span class="Normal"
+      >soma</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >initVm</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >will give you:</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Float"
+      >1.0</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Float"
+      >1.0</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal Operator"
+      >-</span
+      ><span class="Float"
+      >0.06</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal Operator"
+      >-</span
+      ><span class="Float"
+      >0.06</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal Operator"
+      >-</span
+      ><span class="Float"
+      >0.06</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >You can set the <code
+    >Cm</code
+    > and <code
+    >Rm</code
+    > fields to something realistic using simple assignment (we follow SI unit)<sup
+    ><a href="#fn2" class="footnoteRef" id="fnref2"
+      >2</a
+      ></sup
+    >.</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >soma</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >Cm</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal Operator"
+      >=</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="DecVal Int"
+      >1</span
+      ><span class="Normal NormalText"
+      >e</span
+      ><span class="Normal Operator"
+      >-</span
+      ><span class="DecVal Int"
+      >9</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >soma</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >Rm</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal Operator"
+      >=</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="DecVal Int"
+      >1e7</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >soma</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >initVm</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal Operator"
+      >=</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal Operator"
+      >-</span
+      ><span class="Float"
+      >0.07</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >Instead of writing print statements for each field, you could use the utility function showfield to see that the changes took effect:</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >moose</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >showfield</span
+      ><span class="Normal Operator"
+      >(</span
+      ><span class="Normal"
+      >soma</span
+      ><span class="Normal Operator"
+      >)</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >will list most of the fields with their values:</p
+  ><pre class="sourceCode c"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal Symbol"
+      >[</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal Symbol"
+      >/</span
+      ><span class="Normal NormalText"
+      >model</span
+      ><span class="Normal Symbol"
+      >/</span
+      ><span class="Normal NormalText"
+      >soma </span
+      ><span class="Normal Symbol"
+      >]</span
+      ><br
+       /><span class="Normal NormalText"
+      >    diameter             </span
+      ><span class="Normal Symbol"
+      >=</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Float"
+      >0.0</span
+      ><br
+       /><span class="Normal NormalText"
+      >    linearSize           </span
+      ><span class="Normal Symbol"
+      >=</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="DecVal Decimal"
+      >1</span
+      ><br
+       /><span class="Normal NormalText"
+      >    localNumField        </span
+      ><span class="Normal Symbol"
+      >=</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="DecVal Decimal"
+      >0</span
+      ><br
+       /><span class="Normal NormalText"
+      >    Ra                   </span
+      ><span class="Normal Symbol"
+      >=</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Float"
+      >1.0</span
+      ><br
+       /><span class="Normal NormalText"
+      >    y0                   </span
+      ><span class="Normal Symbol"
+      >=</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Float"
+      >0.0</span
+      ><br
+       /><span class="Normal NormalText"
+      >    Rm                   </span
+      ><span class="Normal Symbol"
+      >=</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Float"
+      >10000000.0</span
+      ><br
+       /><span class="Normal NormalText"
+      >    inject               </span
+      ><span class="Normal Symbol"
+      >=</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Float"
+      >0.0</span
+      ><br
+       /><span class="Normal NormalText"
+      >    Em                   </span
+      ><span class="Normal Symbol"
+      >=</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal Symbol"
+      >-</span
+      ><span class="Float"
+      >0.06</span
+      ><br
+       /><span class="Normal NormalText"
+      >    initVm               </span
+      ><span class="Normal Symbol"
+      >=</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal Symbol"
+      >-</span
+      ><span class="Float"
+      >0.07</span
+      ><br
+       /><span class="Normal NormalText"
+      >    x                    </span
+      ><span class="Normal Symbol"
+      >=</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Float"
+      >0.0</span
+      ><br
+       /><span class="Normal NormalText"
+      >    path                 </span
+      ><span class="Normal Symbol"
+      >=</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal Symbol"
+      >/</span
+      ><span class="Normal NormalText"
+      >model</span
+      ><span class="Normal Symbol"
+      >/</span
+      ><span class="Normal NormalText"
+      >soma</span
+      ><br
+       /><span class="Normal NormalText"
+      >    x0                   </span
+      ><span class="Normal Symbol"
+      >=</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Float"
+      >0.0</span
+      ><br
+       /><span class="Normal NormalText"
+      >    z0                   </span
+      ><span class="Normal Symbol"
+      >=</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Float"
+      >0.0</span
+      ><br
+       /><span class="Normal NormalText"
+      >    class                </span
+      ><span class="Normal Symbol"
+      >=</span
+      ><span class="Normal NormalText"
+      > Compartment</span
+      ><br
+       /><span class="Normal NormalText"
+      >    name                 </span
+      ><span class="Normal Symbol"
+      >=</span
+      ><span class="Normal NormalText"
+      > soma</span
+      ><br
+       /><span class="Normal NormalText"
+      >    Cm                   </span
+      ><span class="Normal Symbol"
+      >=</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Float"
+      >1e-09</span
+      ><br
+       /><span class="Normal NormalText"
+      >    Vm                   </span
+      ><span class="Normal Symbol"
+      >=</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal Symbol"
+      >-</span
+      ><span class="Float"
+      >0.06</span
+      ><br
+       /><span class="Normal NormalText"
+      >    length               </span
+      ><span class="Normal Symbol"
+      >=</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Float"
+      >0.0</span
+      ><br
+       /><span class="Normal NormalText"
+      >    Im                   </span
+      ><span class="Normal Symbol"
+      >=</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Float"
+      >0.0</span
+      ><br
+       /><span class="Normal NormalText"
+      >    y                    </span
+      ><span class="Normal Symbol"
+      >=</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Float"
+      >0.0</span
+      ><br
+       /><span class="Normal NormalText"
+      >    lastDimension        </span
+      ><span class="Normal Symbol"
+      >=</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="DecVal Decimal"
+      >0</span
+      ><br
+       /><span class="Normal NormalText"
+      >    z                    </span
+      ><span class="Normal Symbol"
+      >=</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Float"
+      >0.0</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >Now we can setup the current pulse to be delivered to the soma:</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >pulse</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >delay</span
+      ><span class="Normal NormalText"
+      >[</span
+      ><span class="DecVal Int"
+      >0</span
+      ><span class="Normal NormalText"
+      >] </span
+      ><span class="Normal Operator"
+      >=</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="DecVal Int"
+      >50</span
+      ><span class="Normal NormalText"
+      >e</span
+      ><span class="Normal Operator"
+      >-</span
+      ><span class="DecVal Int"
+      >3</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >pulse</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >width</span
+      ><span class="Normal NormalText"
+      >[</span
+      ><span class="DecVal Int"
+      >0</span
+      ><span class="Normal NormalText"
+      >] </span
+      ><span class="Normal Operator"
+      >=</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="DecVal Int"
+      >100</span
+      ><span class="Normal NormalText"
+      >e</span
+      ><span class="Normal Operator"
+      >-</span
+      ><span class="DecVal Int"
+      >3</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >pulse</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >level</span
+      ><span class="Normal NormalText"
+      >[</span
+      ><span class="DecVal Int"
+      >0</span
+      ><span class="Normal NormalText"
+      >] </span
+      ><span class="Normal Operator"
+      >=</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="DecVal Int"
+      >1</span
+      ><span class="Normal NormalText"
+      >e</span
+      ><span class="Normal Operator"
+      >-</span
+      ><span class="DecVal Int"
+      >9</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >pulse</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >delay</span
+      ><span class="Normal NormalText"
+      >[</span
+      ><span class="DecVal Int"
+      >1</span
+      ><span class="Normal NormalText"
+      >] </span
+      ><span class="Normal Operator"
+      >=</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="DecVal Int"
+      >1e9</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >This tells the pulse generator to create a 100 ms long pulse 50 ms after the start of the simulation. The amplitude of the pulse is set to 1 nA. We set the delay for the next pulse to a very large value (larger than the total simulation time) so that the stimulation stops after the first pulse. Had we set <code
+    >pulse.delay = 0</code
+    > , it would have generated a pulse train at 50 ms intervals.</p
+  ></div
+><div id="putting-them-together:-setting-up-connections"
+><h1
+  ><a href="#TOC"
+    >Putting them together: setting up connections</a
+    ></h1
+  ><p
+  >In order for the elements to interact during simulation, we need to connect them via messages. Elements are connected to each other using special source and destination fields. These types are named <code
+    >srcFinfo</code
+    > and <code
+    >destFinfo</code
+    >. You can query the available source and destination fields on an element using <code
+    >getFieldNames</code
+    > as before. This time, let us do it another way: by the class name:</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >moose</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >getFieldNames</span
+      ><span class="Normal Operator"
+      >(</span
+      ><span class="String"
+      >'PulseGen'</span
+      ><span class="Normal NormalText"
+      >, </span
+      ><span class="String"
+      >'srcFinfo'</span
+      ><span class="Normal Operator"
+      >)</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >This form has the advantage that you can get information about a class without creating elements of that class. The above code shows:</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal Operator"
+      >(</span
+      ><span class="String"
+      >'childMsg'</span
+      ><span class="Normal NormalText"
+      >, </span
+      ><span class="String"
+      >'outputOut'</span
+      ><span class="Normal Operator"
+      >)</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >Here <code
+    >childMsg</code
+    > is a source field that is used by the MOOSE internals to connect child elements to parent elements. The second one is of our interest. Check out the built-in documentation here:</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >moose</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >doc</span
+      ><span class="Normal Operator"
+      >(</span
+      ><span class="String"
+      >'PulseGen.outputOut'</span
+      ><span class="Normal Operator"
+      >)</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >shows:</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >PulseGen</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >outputOut</span
+      ><span class="Normal NormalText"
+      >: </span
+      ><span class="Normal"
+      >double</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal Operator"
+      >-</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal"
+      >source</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal"
+      >field</span
+      ><br
+       /><span class="Normal NormalText"
+      >          </span
+      ><span class="Normal"
+      >Current</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal"
+      >output</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal"
+      >level</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >so this is the output of the pulse generator and this must be injected into the <code
+    >soma</code
+    > to stimulate it. But where in the <code
+    >soma</code
+    > can we send it? Again, MOOSE has some introspection built in.</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >soma</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >getFieldNames</span
+      ><span class="Normal Operator"
+      >(</span
+      ><span class="String"
+      >'destFinfo'</span
+      ><span class="Normal Operator"
+      >)</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >shows:</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal Operator"
+      >(</span
+      ><span class="String"
+      >'parentMsg'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >     </span
+      ><span class="String"
+      >'set_this'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >     </span
+      ><span class="String"
+      >'get_this'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >       ...</span
+      ><br
+       /><span class="Normal NormalText"
+      >     </span
+      ><span class="String"
+      >'set_z'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >     </span
+      ><span class="String"
+      >'get_z'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >     </span
+      ><span class="String"
+      >'injectMsg'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >     </span
+      ><span class="String"
+      >'randInject'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >     </span
+      ><span class="String"
+      >'cable'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >     </span
+      ><span class="String"
+      >'process'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >     </span
+      ><span class="String"
+      >'reinit'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >     </span
+      ><span class="String"
+      >'initProc'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >     </span
+      ><span class="String"
+      >'initReinit'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >     </span
+      ><span class="String"
+      >'handleChannel'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >     </span
+      ><span class="String"
+      >'handleRaxial'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><br
+       /><span class="Normal NormalText"
+      >     </span
+      ><span class="String"
+      >'handleAxial'</span
+      ><span class="Normal Operator"
+      >)</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >Now that is a long list. But much of it are fields for internal or special use. Anything that starts with <code
+    >get_</code
+    > or <code
+    >set_</code
+    > are internal <code
+    >destFinfo</code
+    > used for accessing value fields (we shall use one of those when setting up data recording). Among the rest <code
+    >injectMsg</code
+    > seems to be the most likely candidate. Use the <code
+    >connect</code
+    > function to connect the pulse generator output to the soma input:</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    m </span
+      ><span class="Normal Operator"
+      >=</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal"
+      >moose</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Others Extensions"
+      >connect</span
+      ><span class="Normal Operator"
+      >(</span
+      ><span class="Normal"
+      >pulse</span
+      ><span class="Normal NormalText"
+      >, </span
+      ><span class="String"
+      >'outputOut'</span
+      ><span class="Normal NormalText"
+      >, </span
+      ><span class="Normal"
+      >soma</span
+      ><span class="Normal NormalText"
+      >, </span
+      ><span class="String"
+      >'injectMsg'</span
+      ><span class="Normal Operator"
+      >)</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  ><code
+    >connect(source, source_field, dest, dest_field)</code
+    > creates a <code
+    >message</code
+    > from <code
+    >source</code
+    > element's <code
+    >source_field</code
+    > field to <code
+    >dest</code
+    > elements <code
+    >dest_field</code
+    > field and returns that message. Messages are also elements. You can print them to see their identity:</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Keyword CommandKeyword"
+      >print</span
+      ><span class="Normal NormalText"
+      > m</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >on my system gives:</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal Operator"
+      >&lt;</span
+      ><span class="Normal"
+      >moose</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >SingleMsg</span
+      ><span class="Normal NormalText"
+      >: </span
+      ><span class="DataType BuiltinFunction"
+      >id</span
+      ><span class="Normal Operator"
+      >=</span
+      ><span class="DecVal Int"
+      >5</span
+      ><span class="Normal NormalText"
+      >, </span
+      ><span class="Normal"
+      >dataId</span
+      ><span class="Normal Operator"
+      >=</span
+      ><span class="DecVal Int"
+      >733</span
+      ><span class="Normal NormalText"
+      >, </span
+      ><span class="Normal"
+      >path</span
+      ><span class="Normal Operator"
+      >=/</span
+      ><span class="Normal"
+      >Msgs</span
+      ><span class="Normal Operator"
+      >/</span
+      ><span class="Normal"
+      >singleMsg</span
+      ><span class="Normal NormalText"
+      >[</span
+      ><span class="DecVal Int"
+      >733</span
+      ><span class="Normal NormalText"
+      >]</span
+      ><span class="Normal Operator"
+      >&gt;</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >You can print any element as above and the string representation will show you the class, two numbers(<code
+    >id</code
+    > and <code
+    >dataId</code
+    >) uniquely identifying it among all elements, and its path. You can get some more information about a message:</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Keyword CommandKeyword"
+      >print</span
+      ><span class="Normal NormalText"
+      > m.</span
+      ><span class="Normal"
+      >e1</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >path</span
+      ><span class="Normal NormalText"
+      >, m.</span
+      ><span class="Normal"
+      >e2</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >path</span
+      ><span class="Normal NormalText"
+      >, m.</span
+      ><span class="Normal"
+      >srcFieldsOnE1</span
+      ><span class="Normal NormalText"
+      >, m.</span
+      ><span class="Normal"
+      >destFieldsOnE2</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >will confirm what you already know:</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal Operator"
+      >/</span
+      ><span class="Normal"
+      >model</span
+      ><span class="Normal Operator"
+      >/</span
+      ><span class="Normal"
+      >pulse</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal Operator"
+      >/</span
+      ><span class="Normal"
+      >model</span
+      ><span class="Normal Operator"
+      >/</span
+      ><span class="Normal"
+      >soma</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal Operator"
+      >(</span
+      ><span class="String"
+      >'outputOut'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><span class="Normal Operator"
+      >)</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal Operator"
+      >(</span
+      ><span class="String"
+      >'injectMsg'</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><span class="Normal Operator"
+      >)</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >A message element has fields <code
+    >e1</code
+    > and <code
+    >e2</code
+    > referring to the elements it connects. For single one-directional messages these are source and destination elements, which are <code
+    >pulse</code
+    > and <code
+    >soma</code
+    > respectively. The next two items are lists of the field names which are connected by this message.</p
+  ><p
+  >You could also check which elements are connected to a particular field:</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Keyword CommandKeyword"
+      >print</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal"
+      >soma</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >neighbours</span
+      ><span class="Normal NormalText"
+      >[</span
+      ><span class="String"
+      >'injectMsg'</span
+      ><span class="Normal NormalText"
+      >]</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >shows:</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    [</span
+      ><span class="Normal Operator"
+      >&lt;</span
+      ><span class="Normal"
+      >moose</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >ematrix</span
+      ><span class="Normal NormalText"
+      >: </span
+      ><span class="Keyword DefinitionKeyword"
+      >class</span
+      ><span class="Normal Operator"
+      >=</span
+      ><span class="Normal"
+      >PulseGen</span
+      ><span class="Normal NormalText"
+      >, </span
+      ><span class="DataType BuiltinFunction"
+      >id</span
+      ><span class="Normal Operator"
+      >=</span
+      ><span class="DecVal Int"
+      >729</span
+      ><span class="Normal NormalText"
+      >,</span
+      ><span class="Normal"
+      >path</span
+      ><span class="Normal Operator"
+      >=/</span
+      ><span class="Normal"
+      >model</span
+      ><span class="Normal Operator"
+      >/</span
+      ><span class="Normal"
+      >pulse</span
+      ><span class="Normal Operator"
+      >&gt;</span
+      ><span class="Normal NormalText"
+      >]</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >Notice that the list contains something called ematrix. We discuss this <a href="#some-more-details"
+    >later</a
+    >. Also <code
+    >neighbours</code
+    > is a new kind of field: <code
+    >lookupFinfo</code
+    > which behaves like a dictionary. Next we connect the table to the soma to retrieve its membrane potential <code
+    >Vm</code
+    >. This is where all those <code
+    >destFinfo</code
+    > starting with <code
+    >get_</code
+    > or <code
+    >set_</code
+    > come in use. For each value field <code
+    >X</code
+    >, there is a <code
+    >destFinfo</code
+    > <code
+    >get_{X}</code
+    > to retrieve the value at simulation time. This is used by the table to record the values <code
+    >Vm</code
+    > takes.</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >moose</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Others Extensions"
+      >connect</span
+      ><span class="Normal Operator"
+      >(</span
+      ><span class="Normal"
+      >vmtab</span
+      ><span class="Normal NormalText"
+      >, </span
+      ><span class="String"
+      >'requestData'</span
+      ><span class="Normal NormalText"
+      >, </span
+      ><span class="Normal"
+      >soma</span
+      ><span class="Normal NormalText"
+      >, </span
+      ><span class="String"
+      >'get_Vm'</span
+      ><span class="Normal Operator"
+      >)</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >This finishes our model and recording setup. You might be wondering about the source-destination relationship above. It is natural to think that <code
+    >soma</code
+    > is the source of <code
+    >Vm</code
+    > values which should be sent to <code
+    >vmtab</code
+    >. But here <code
+    >requestData</code
+    > is a <code
+    >srcFinfo</code
+    > acting like a reply card. This mode of obtaining data is called <em
+    >pull</em
+    > mode.<sup
+    ><a href="#fn3" class="footnoteRef" id="fnref3"
+      >3</a
+      ></sup
+    ></p
+  ></div
+><div id="scheduling-and-running-the-simulation"
+><h1
+  ><a href="#TOC"
+    >Scheduling and running the simulation</a
+    ></h1
+  ><p
+  >With the model all set up, we have to schedule the simulation. MOOSE has a central clock element (<code
+    >/clock</code
+    >) to manage time. Clock has a set of <code
+    >Tick</code
+    > elements under it that take care of advancing the state of each element with time as the simulation progresses. Every element to be included in a simulation must be assigned a tick. Each tick can have a different ticking interval (<code
+    >dt</code
+    >) that allows different elements to be updated at different rates. We initialize the ticks and set their <code
+    >dt</code
+    > values using the <code
+    >setClock</code
+    > function.</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >moose</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >setClock</span
+      ><span class="Normal Operator"
+      >(</span
+      ><span class="DecVal Int"
+      >0</span
+      ><span class="Normal NormalText"
+      >, </span
+      ><span class="Float"
+      >0.025</span
+      ><span class="Normal NormalText"
+      >e</span
+      ><span class="Normal Operator"
+      >-</span
+      ><span class="DecVal Int"
+      >3</span
+      ><span class="Normal Operator"
+      >)</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >moose</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >setClock</span
+      ><span class="Normal Operator"
+      >(</span
+      ><span class="DecVal Int"
+      >1</span
+      ><span class="Normal NormalText"
+      >, </span
+      ><span class="Float"
+      >0.025</span
+      ><span class="Normal NormalText"
+      >e</span
+      ><span class="Normal Operator"
+      >-</span
+      ><span class="DecVal Int"
+      >3</span
+      ><span class="Normal Operator"
+      >)</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >moose</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >setClock</span
+      ><span class="Normal Operator"
+      >(</span
+      ><span class="DecVal Int"
+      >2</span
+      ><span class="Normal NormalText"
+      >, </span
+      ><span class="Float"
+      >0.25</span
+      ><span class="Normal NormalText"
+      >e</span
+      ><span class="Normal Operator"
+      >-</span
+      ><span class="DecVal Int"
+      >3</span
+      ><span class="Normal Operator"
+      >)</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >This will initialize tick #0 and tick #1 with <code
+    >dt = 25</code
+    > μs and tick #2 with <code
+    >dt = 250</code
+    > μs. Thus all the elements scheduled on ticks #0 and 1 will be updated every 25 μs and those on tick #2 every 250 μs. We use the faster clocks for the model components where finer timescale is required for numerical accuracy and the slower clock to sample the values of <code
+    >Vm</code
+    >.</p
+  ><p
+  >So to assign tick #2 to the table for recording <code
+    >Vm</code
+    >, we pass its whole path to the <code
+    >useClock</code
+    > function.</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >moose</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >useClock</span
+      ><span class="Normal Operator"
+      >(</span
+      ><span class="DecVal Int"
+      >2</span
+      ><span class="Normal NormalText"
+      >, </span
+      ><span class="String"
+      >'/data/soma_Vm'</span
+      ><span class="Normal NormalText"
+      >, </span
+      ><span class="String"
+      >'process'</span
+      ><span class="Normal Operator"
+      >)</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >Read this as &quot;use tick # 2 on the element at path <code
+    >/data/soma_Vm</code
+    > to call its <code
+    >process</code
+    > method at every step&quot;. Every class that is supposed to update its state or take some action during simulation implements a <code
+    >process</code
+    > method. And in most cases that is the method we want the ticks to call at every time step. A less common method is <code
+    >init</code
+    >, which is implemented in some classes to interleave actions or updates that must be executed in a specific order<sup
+    ><a href="#fn4" class="footnoteRef" id="fnref4"
+      >4</a
+      ></sup
+    >. The <code
+    >Compartment</code
+    > class is one such case where a neuronal compartment has to know the <code
+    >Vm</code
+    > of its neighboring compartments before it can calculate its <code
+    >Vm</code
+    > for the next step. This is done with:</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >moose</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >useClock</span
+      ><span class="Normal Operator"
+      >(</span
+      ><span class="DecVal Int"
+      >0</span
+      ><span class="Normal NormalText"
+      >, </span
+      ><span class="Normal"
+      >soma</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >path</span
+      ><span class="Normal NormalText"
+      >, </span
+      ><span class="String"
+      >'init'</span
+      ><span class="Normal Operator"
+      >)</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >Here we used the <code
+    >path</code
+    > field instead of writing the path explicitly.</p
+  ><p
+  >Next we assign tick #1 to process method of everything under <code
+    >/model</code
+    >.</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >moose</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >useClock</span
+      ><span class="Normal Operator"
+      >(</span
+      ><span class="DecVal Int"
+      >1</span
+      ><span class="Normal NormalText"
+      >, </span
+      ><span class="String"
+      >'/model/##'</span
+      ><span class="Normal NormalText"
+      >, </span
+      ><span class="String"
+      >'process'</span
+      ><span class="Normal Operator"
+      >)</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >Here the second argument is an example of wild-card path. The <code
+    >##</code
+    > matches everything under the path preceding it at any depth. Thus if we had some other objects under <code
+    >/model/soma</code
+    >, <code
+    >process</code
+    > method of those would also have been scheduled on tick #1. This is very useful for complex models where it is tedious to scheduled each element individually. In this case we could have used <code
+    >/model/#</code
+    > as well for the path. This is a single level wild-card which matches only the children of <code
+    >/model</code
+    > but does not go farther down in the hierarchy.</p
+  ><p
+  >Once the elements are assigned ticks, we can put the model to its initial state using:</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >moose</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >reinit</span
+      ><span class="Normal Operator"
+      >()</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >You may remember that we had changed initVm from <code
+    >-0.06</code
+    > to <code
+    >-0.07</code
+    >. The reinit call we initialize <code
+    >Vm</code
+    > to that value. You can verify that:</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Keyword CommandKeyword"
+      >print</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal"
+      >soma</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >Vm</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >gives:</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal Operator"
+      >-</span
+      ><span class="Float"
+      >0.07</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >Finally, we run the simulation for 300 ms:</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >moose</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >start</span
+      ><span class="Normal Operator"
+      >(</span
+      ><span class="DecVal Int"
+      >300</span
+      ><span class="Normal NormalText"
+      >e</span
+      ><span class="Normal Operator"
+      >-</span
+      ><span class="DecVal Int"
+      >3</span
+      ><span class="Normal Operator"
+      >)</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >The data will be recorded by the <code
+    >soma_vm</code
+    > table, which is referenced by the variable <code
+    >vmtab</code
+    >. The <code
+    >Table</code
+    > class provides a numpy array interface to its content. The field is <code
+    >vec</code
+    >. So you can easily plot the membrane potential using the <a href="http://matplotlib.org/"
+    >matplotlib</a
+    > library.</p
+  ><pre class="sourceCode python"
+  ><code
+    ><span class="Normal NormalText"
+      >    </span
+      ><span class="Char Preprocessor"
+      >import</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal"
+      >pylab</span
+      ><br
+       /><span class="Normal NormalText"
+      >    t </span
+      ><span class="Normal Operator"
+      >=</span
+      ><span class="Normal NormalText"
+      > </span
+      ><span class="Normal"
+      >pylab</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >linspace</span
+      ><span class="Normal Operator"
+      >(</span
+      ><span class="DecVal Int"
+      >0</span
+      ><span class="Normal NormalText"
+      >, </span
+      ><span class="DecVal Int"
+      >300</span
+      ><span class="Normal NormalText"
+      >e</span
+      ><span class="Normal Operator"
+      >-</span
+      ><span class="DecVal Int"
+      >3</span
+      ><span class="Normal NormalText"
+      >, </span
+      ><span class="DataType BuiltinFunction"
+      >len</span
+      ><span class="Normal Operator"
+      >(</span
+      ><span class="Normal"
+      >vmtab</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >vec</span
+      ><span class="Normal Operator"
+      >))</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >pylab</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >plot</span
+      ><span class="Normal Operator"
+      >(</span
+      ><span class="Normal NormalText"
+      >t, </span
+      ><span class="Normal"
+      >vmtab</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >vec</span
+      ><span class="Normal Operator"
+      >)</span
+      ><br
+       /><span class="Normal NormalText"
+      >    </span
+      ><span class="Normal"
+      >pylab</span
+      ><span class="Normal NormalText"
+      >.</span
+      ><span class="Normal"
+      >show</span
+      ><span class="Normal Operator"
+      >()</span
+      ><br
+       /></code
+    ></pre
+  ><p
+  >The first line imports the pylab submodule from matplotlib. This useful for interactive plotting. The second line creates the time points to match our simulation time and length of the recorded data. The third line plots the <code
+    >Vm</code
+    > and the fourth line makes it visible. Does the plot match your expectation?</p
+  ></div
+><div id="some-more-details"
+><h1
+  ><a href="#TOC"
+    >Some more details</a
+    ></h1
+  ><div id="ematrix-melement-and-element"
+  ><h2
+    ><a href="#TOC"
+      ><code
+	>ematrix</code
+	>, <code
+	>melement</code
+	> and <code
+	>element</code
+	></a
+      ></h2
+    ><p
+    >MOOSE elements are instances of the class <code
+      >melement</code
+      >. <code
+      >Compartment</code
+      >, <code
+      >PulseGen</code
+      > and other MOOSE classes are derived classes of <code
+      >melement</code
+      >. All <code
+      >melement</code
+      > instances are contained in array-like structures called <code
+      >ematrix</code
+      >. Each <code
+      >ematrix</code
+      > object has a numerical <code
+      >id_</code
+      > field uniquely identifying it. An <code
+      >ematrix</code
+      > can have one or more elements. You can create an array of elements:</p
+    ><pre class="sourceCode python"
+    ><code
+      ><span class="Normal NormalText"
+	>    </span
+	><span class="Normal"
+	>comp_array</span
+	><span class="Normal NormalText"
+	> </span
+	><span class="Normal Operator"
+	>=</span
+	><span class="Normal NormalText"
+	> </span
+	><span class="Normal"
+	>moose</span
+	><span class="Normal NormalText"
+	>.</span
+	><span class="Normal"
+	>ematrix</span
+	><span class="Normal Operator"
+	>(</span
+	><span class="String"
+	>'/model/comp'</span
+	><span class="Normal NormalText"
+	>, </span
+	><span class="Normal Operator"
+	>(</span
+	><span class="DecVal Int"
+	>3</span
+	><span class="Normal NormalText"
+	>,</span
+	><span class="Normal Operator"
+	>)</span
+	><span class="Normal NormalText"
+	>, </span
+	><span class="String"
+	>'Compartment'</span
+	><span class="Normal Operator"
+	>)</span
+	><br
+	 /></code
+      ></pre
+    ><p
+    >This tells MOOSE to create an <code
+      >ematrix</code
+      > of 3 <code
+      >Compartment</code
+      > elements with path <code
+      >/model/comp</code
+      >. For <code
+      >ematrix</code
+      > objects with multiple elements, the index in the <code
+      >ematrix</code
+      > is part of the element path.</p
+    ><pre class="sourceCode python"
+    ><code
+      ><span class="Normal NormalText"
+	>    </span
+	><span class="Keyword CommandKeyword"
+	>print</span
+	><span class="Normal NormalText"
+	> </span
+	><span class="Normal"
+	>comp_array</span
+	><span class="Normal NormalText"
+	>.</span
+	><span class="Normal"
+	>path</span
+	><span class="Normal NormalText"
+	>, </span
+	><span class="DataType BuiltinFunction"
+	>type</span
+	><span class="Normal Operator"
+	>(</span
+	><span class="Normal"
+	>comp_array</span
+	><span class="Normal Operator"
+	>)</span
+	><br
+	 /></code
+      ></pre
+    ><p
+    >shows that <code
+      >comp_array</code
+      > is an instance of <code
+      >ematrix</code
+      > class. You can loop through the elements in an <code
+      >ematrix</code
+      > like a Python list:</p
+    ><pre class="sourceCode python"
+    ><code
+      ><span class="Normal NormalText"
+	>    </span
+	><span class="Keyword FlowControlKeyword"
+	>for</span
+	><span class="Normal NormalText"
+	> </span
+	><span class="Normal"
+	>comp</span
+	><span class="Normal NormalText"
+	> </span
+	><span class="Normal Operator"
+	>in</span
+	><span class="Normal NormalText"
+	> </span
+	><span class="Normal"
+	>comp_array</span
+	><span class="Normal NormalText"
+	>:</span
+	><br
+	 /><span class="Normal NormalText"
+	>        </span
+	><span class="Keyword CommandKeyword"
+	>print</span
+	><span class="Normal NormalText"
+	> </span
+	><span class="Normal"
+	>comp</span
+	><span class="Normal NormalText"
+	>.</span
+	><span class="Normal"
+	>path</span
+	><span class="Normal NormalText"
+	>, </span
+	><span class="DataType BuiltinFunction"
+	>type</span
+	><span class="Normal Operator"
+	>(</span
+	><span class="Normal"
+	>comp</span
+	><span class="Normal Operator"
+	>)</span
+	><br
+	 /></code
+      ></pre
+    ><p
+    >shows:</p
+    ><pre class="sourceCode python"
+    ><code
+      ><span class="Normal NormalText"
+	>    </span
+	><span class="Normal Operator"
+	>/</span
+	><span class="Normal"
+	>model</span
+	><span class="Normal Operator"
+	>/</span
+	><span class="Normal"
+	>comp</span
+	><span class="Normal NormalText"
+	>[</span
+	><span class="DecVal Int"
+	>0</span
+	><span class="Normal NormalText"
+	>] </span
+	><span class="Normal Operator"
+	>&lt;</span
+	><span class="DataType BuiltinFunction"
+	>type</span
+	><span class="Normal NormalText"
+	> </span
+	><span class="String"
+	>'moose.melement'</span
+	><span class="Normal Operator"
+	>&gt;</span
+	><br
+	 /><span class="Normal NormalText"
+	>    </span
+	><span class="Normal Operator"
+	>/</span
+	><span class="Normal"
+	>model</span
+	><span class="Normal Operator"
+	>/</span
+	><span class="Normal"
+	>comp</span
+	><span class="Normal NormalText"
+	>[</span
+	><span class="DecVal Int"
+	>1</span
+	><span class="Normal NormalText"
+	>] </span
+	><span class="Normal Operator"
+	>&lt;</span
+	><span class="DataType BuiltinFunction"
+	>type</span
+	><span class="Normal NormalText"
+	> </span
+	><span class="String"
+	>'moose.melement'</span
+	><span class="Normal Operator"
+	>&gt;</span
+	><br
+	 /><span class="Normal NormalText"
+	>    </span
+	><span class="Normal Operator"
+	>/</span
+	><span class="Normal"
+	>model</span
+	><span class="Normal Operator"
+	>/</span
+	><span class="Normal"
+	>comp</span
+	><span class="Normal NormalText"
+	>[</span
+	><span class="DecVal Int"
+	>2</span
+	><span class="Normal NormalText"
+	>] </span
+	><span class="Normal Operator"
+	>&lt;</span
+	><span class="DataType BuiltinFunction"
+	>type</span
+	><span class="Normal NormalText"
+	> </span
+	><span class="String"
+	>'moose.melement'</span
+	><span class="Normal Operator"
+	>&gt;</span
+	><br
+	 /></code
+      ></pre
+    ><p
+    >Thus elements are instances of class <code
+      >melement</code
+      >. All elements in an <code
+      >ematrix</code
+      > share the <code
+      >id_</code
+      > of the <code
+      >ematrix</code
+      > which can retrieved by <code
+      >melement.getId()</code
+      >.</p
+    ><p
+    >A frequent use case is that after loading a model from a file one knows the paths of various model components but does not know the appropriate class name for them. For this scenario there is a function called <code
+      >element</code
+      > which converts (&quot;casts&quot; in programming jargon) a path or any moose object to its proper MOOSE class. You can create additional references to <code
+      >soma</code
+      > in the example this way:</p
+    ><pre class="sourceCode python"
+    ><code
+      ><span class="Normal NormalText"
+	>    x </span
+	><span class="Normal Operator"
+	>=</span
+	><span class="Normal NormalText"
+	> </span
+	><span class="Normal"
+	>moose</span
+	><span class="Normal NormalText"
+	>.</span
+	><span class="Normal"
+	>element</span
+	><span class="Normal Operator"
+	>(</span
+	><span class="String"
+	>'/model/soma'</span
+	><span class="Normal Operator"
+	>)</span
+	><br
+	 /></code
+      ></pre
+    ><p
+    >Any MOOSE class can be extended in Python. But any additional attributes added in Python are invisible to MOOSE. So those can be used for functionalities at the Python level only. You can see <code
+      >Demos/squid/squid.py</code
+      > for an example.</p
+    ></div
+  ><div id="finfos"
+  ><h2
+    ><a href="#TOC"
+      ><code
+	>Finfos</code
+	></a
+      ></h2
+    ><p
+    >The following kinds of <code
+      >Finfo</code
+      > are accessible in Python</p
+    ><ul
+    ><li
+      ><strong
+	><code
+	  >valueFinfo</code
+	  ></strong
+	> : simple values. For each readable <code
+	>valueFinfo</code
+	> <code
+	>XYZ</code
+	> there is a <code
+	>destFinfo</code
+	> <code
+	>get_XYZ</code
+	> that can be used for reading the value at run time. If <code
+	>XYZ</code
+	> is writable then there will also be <code
+	>destFinfo</code
+	> to set it: <code
+	>set_XYZ</code
+	>. Example: <code
+	>Compartment.Rm</code
+	></li
+      ><li
+      ><strong
+	><code
+	  >lookupFinfo</code
+	  ></strong
+	> : lookup tables. These fields act like Python dictionaries but iteration is not supported. Example: <code
+	>Neutral.neighbours</code
+	>.</li
+      ><li
+      ><strong
+	><code
+	  >srcFinfo</code
+	  ></strong
+	> : source of a message. Example: <code
+	>PulseGen.outputOut</code
+	>.</li
+      ><li
+      ><strong
+	><code
+	  >destFinfo</code
+	  ></strong
+	> : destination of a message. Example: <code
+	>Compartment.injectMsg</code
+	>. Apart from being used in setting up messages, these are accessible as functions from Python. <code
+	>HHGate.setupAlpha</code
+	> is an example.</li
+      ><li
+      ><strong
+	><code
+	  >sharedFinfo</code
+	  ></strong
+	> : a composition of source and destination fields. Example: <code
+	>Compartment.channel</code
+	>.</li
+      ></ul
+    ></div
+  ></div
+><div id="moving-on"
+><h1
+  ><a href="#TOC"
+    >Moving on</a
+    ></h1
+  ><p
+  >Now you know the basics of pymoose and how to access the help system. MOOSE is backward compatible with GENESIS and most GENESIS classes have been reimplemented in MOOSE. There is slight change in naming (MOOSE uses CamelCase), and setting up messages are different. But <a href="http://www.genesis-sim.org/GENESIS/Hyperdoc/Manual.html"
+    >GENESIS documentation</a
+    > is still a good source for documentation on classes that have been ported from GENESIS.</p
+  ><p
+  >In addition, the <code
+    >Demos/snippets</code
+    > directory in your MOOSE installation has small executable python scripts that show usage of specific classes or functionalities. Beyond that you can browse the code in the <code
+    >Demos</code
+    > directory to see some more complex models.</p
+  ><p
+  >If the built-in MOOSE classes do not satisfy your needs entirely, you are welcome to add new classes to MOOSE. The API documentation will help you get started. Finally you can join the <a href="https://lists.sourceforge.net/lists/listinfo/moose-generic"
+    >moose mailing list</a
+    > and request for help.</p
+  ></div
+><div class="footnotes"
+><hr
+   /><ol
+  ><li id="fn1"
+    ><p
+      >To list the classes only, use <code
+	>moose.le('/classes')</code
+	> <a href="#fnref1" class="footnoteBackLink" title="Jump back to footnote 1">↩</a></p
+      ></li
+    ><li id="fn2"
+    ><p
+      >MOOSE is unit agnostic and things should work fine as long as you use values all converted to a consistent unit system. <a href="#fnref2" class="footnoteBackLink" title="Jump back to footnote 2">↩</a></p
+      ></li
+    ><li id="fn3"
+    ><p
+      >This apparently convoluted implementation is for performance reason. Can you figure out why? <em
+	>Hint: the table is driven by a slower clock than the compartment.</em
+	> <a href="#fnref3" class="footnoteBackLink" title="Jump back to footnote 3">↩</a></p
+      ></li
+    ><li id="fn4"
+    ><p
+      >In principle any function available in a MOOSE class can be executed periodically this way as long as that class exposes the function for scheduling following the MOOSE API. So you have to consult the class' documentation for any nonstandard methods that can be scheduled this way. <a href="#fnref4" class="footnoteBackLink" title="Jump back to footnote 4">↩</a></p
+      ></li
+    ></ol
+  ></div
+>
+</body>
+</html>
+

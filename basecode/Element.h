@@ -1,439 +1,427 @@
 /**********************************************************************
 ** This program is part of 'MOOSE', the
-** Messaging Object Oriented Simulation Environment,
-** also known as GENESIS 3 base code.
-**           copyright (C) 2003-2006 Upinder S. Bhalla. and NCBS
+** Messaging Object Oriented Simulation Environment.
+**           Copyright (C) 2003-2013 Upinder S. Bhalla. and NCBS
 ** It is made available under the terms of the
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
-
 #ifndef _ELEMENT_H
 #define _ELEMENT_H
 
-#include "header.h"
+class SrcFinfo;
+class FuncOrder;
+
 /**
- * The Element class handles all the MOOSE infrastructure: messages,
- * field information and class information. It manages the actual
- * data class through a generic char* pointer.
- * Here we start out with a generic base class Element, which will
- * be specialized as needed for arrays and other things.
+ * Base class for all object lookups.
+ * Provides the MOOSE interface so that it handles messaging, class info,
+ * and basic fields. Does not do data.
  */
-
-class Cinfo;
-class Id;
-
 class Element
 {
 	public:
-		Element( Id id );
-		Element( bool ignoreId );
+		/**
+		 * This is the main constructor, used by Shell::innerCreate
+		 * which makes most Elements. Also used to create base
+		 * Elements to init the simulator in main.cpp.
+		 * Id is the Id of the new Element
+		 * Cinfo is the class
+		 * name is its name
+		 * numData is the number of data entries, defaults to a singleton.
+		 * The isGlobal flag specifies whether the created objects should
+		 * be replicated on all nodes, or partitioned without replication. 
+		 */
+		Element( Id id, const Cinfo* c, const string& name );
 
+		/**
+		 * Destructor
+		 */
 		virtual ~Element();
 
-		/// Returns the name of the element
-		virtual const std::string& name( ) const = 0;
-
-		/// Sets the name of the element.
-		virtual void setName( const std::string& name ) = 0;
-
-		/// Returns the name of the element class
-		virtual const std::string& className( ) const = 0;
-
-		/// Returns the class info of the element class.
-		virtual const Cinfo* cinfo( ) const = 0;
-
-		///////////////////////////////////////////////////////////////
-		// Msg traversal functions. Use as API
-		///////////////////////////////////////////////////////////////
+		/**
+		 * Copier
+		 */
+		virtual Element* copyElement( Id newParent, Id newId, 
+					unsigned int n, bool toGlobal ) const = 0;
+		/////////////////////////////////////////////////////////////////
+		// Information access fields
+		/////////////////////////////////////////////////////////////////
 
 		/**
-		 * msgNum specifies the message.
-		 * Returns a Conn* iterator for going through all the targets,
-		 * as well as providing lots of collateral information.
-		 * Targets can be advanced by increment(), which goes one Element
-		 * and its index at a time, or by nextElement(), which goes
-		 * one Element at a time even if the Element is an array.
-		 * The Conn* must be deleted after use.
+		 * Returns name of Element
 		 */
-		virtual Conn* targets( int msgNum, unsigned int eIndex ) const = 0;
-
-		/**
-		 * finfoName specifies the finfo connecting to these targets.
-		 * Returns a Conn* iterator for going through all the targets.
-		 * Must be deleted after use.
-		 */
-		virtual Conn* targets( const string& finfoName, unsigned int eIndex ) const = 0;
-
-		/**
-		 * Finds the number of targets to this Msg, either src or dest.
-		 * Faster than iterating through the whole lot.
-		 */
-		virtual unsigned int numTargets( int msgNum ) const = 0;
-		/**
-		 * Finds the number of targets to this Msg, either src or dest,
-		 * on the specified eIndex.
-		 * Slow, but faster than iterating through the whole lot if there
-		 * are composite messages.
-		 */
-		virtual unsigned int numTargets( int msgNum, unsigned int eIndex )
-			const = 0;
-
-		/**
-		 * Finds the number of targets to this Finfo.
-		 * Faster than iterating through the whole lot.
-		 */
-		virtual unsigned int numTargets( const string& finfoName ) const = 0;
-
-		/**
-		 * Returns true if the specified Element is a target of any
-		 * of the messages emanating from this Element.
-		 * Ignores indices.
-		 */
-		virtual bool isTarget( const Element* tgt ) const;
-
-		///////////////////////////////////////////////////////////////
-		// Information functions
-		///////////////////////////////////////////////////////////////
+		const string& getName() const;
 		
-		/// True if element is marked for deletion.
-		virtual bool isMarkedForDeletion() const = 0;
+		/**
+		 * Changes name of Element
+		 */
+		void setName( const string& val );
 
-		/// True if element is global, that is, should not be copied.
+		/// Returns number of data entries across all nodes
+		virtual unsigned int numData() const = 0;
+
+		/// Returns number of local data entries on this node.
+		virtual unsigned int numLocalData() const = 0;
+
+		/// Returns index of first data entry on this node.
+		virtual unsigned int localDataStart() const = 0;
+
+		/// Returns number of field entries for specified data
+		virtual unsigned int numField( unsigned int rawIndex ) const = 0;
+
+		/**
+		 * Returns number of field entries on local node. If this is not
+		 * a FieldElement, returns numLocalData, assuming 1 field per data.
+		 */
+		virtual unsigned int totNumLocalField() const = 0;
+
+		/// Returns node number of specified dataIndex.
+		virtual unsigned int getNode( unsigned int dataIndex ) const = 0;
+
+		/// Returns start dataIndex on specified node
+		virtual unsigned int startDataIndex( unsigned int nodeNum ) const = 0;
+
+		/**
+		 * Converts dataIndex to index on current node. No error check.
+		 */ 
+		virtual unsigned int rawIndex( unsigned int dataIndex ) const = 0;
+
+		/**
+		 * Returns the Id on this Elm
+		 */
+		Id id() const;
+
+		/**
+		 * True if this is a FieldElement having an array of fields 
+		 * on each data entry. Clearly not true for the base Element.
+		 */
+		virtual bool hasFields() const = 0;
+
+		/// True if there is a copy of every dataEntry on all nodes.
 		virtual bool isGlobal() const = 0;
 
-		/// Before actual delete, mark all victims for message cleanup.
-		virtual void prepareForDeletion( bool stage ) = 0;
+		/// Returns number of data (or, if relevant, field) entries on 
+		///specified node. 
+		virtual unsigned int getNumOnNode( unsigned int node ) const = 0;
 
 		/**
-		 * Returns a pointer to the data stored on this Element.
+		 * Returns Clock tick used by object. -1 means none. 
+		 * -2 means none for now because I am a zombie, but if I should
+		 * be unzombified please put me back on my default clock tick.
 		 */
-		virtual void* data( unsigned int eIndex = 0 ) const = 0;
+		int getTick() const;
 
 		/**
-		 * Returns number of entries in the data. 1 for SimpleElement,
-		 * any value for ArrayElement
+		 * Assigns clock tick to be used by object. -1 means none.
+		 * This function does substantial message manipulation to set up
+		 * the message from the Clock object to the current object to
+		 * define the Tick. Furthermore, if the object has both init and
+		 * proc methods, it will set them both up, with the init method
+		 * on 't-1' and the proc method on 't'
 		 */
-		virtual unsigned int numEntries() const = 0;
+		void setTick( int t );
+
+		/**
+		 * Direct assignment of tick field, without doing any of the 
+		 * message manipulation
+		 */
+		void innerSetTick( unsigned int tick );
+
+		/////////////////////////////////////////////////////////////////
+		// data access stuff
+		/////////////////////////////////////////////////////////////////
+
+		/**
+		 * Looks up specified field data entry. On regular objects just
+		 * returns the data entry specified by the rawIndex. 
+		 * On FieldElements like synapses, does a second lookup on the
+		 * field index.
+		 * Note that the index is NOT a
+		 * DataIndex: it is instead the raw index of the data on the current
+		 * node. Index is also NOT the character offset, but the index
+		 * to the data array in whatever type the data may be.
+		 *
+		 * The DataIndex has to be filtered through the nodeMap to
+		 * find a) if the entry is here, and b) what its raw index is.
+		 *
+		 * Returns 0 if either index is out of range.
+		 */
+		virtual char* data( unsigned int rawIndex, 
+						unsigned int fieldIndex = 0 ) const = 0;
+
+		/**
+		 * Changes the number of entries in the data. Not permitted for
+		 * FieldElements since they are just fields on the data.
+		 */
+		virtual void resize( unsigned int newNumData ) = 0;
+
+		/**
+		 * Changes the number of fields on the specified data entry.
+		 * Doesn't do anything for the regular Element.
+		 */
+		virtual void resizeField( 
+				unsigned int rawIndex, unsigned int newNumField ) = 0;
+
+		/////////////////////////////////////////////////////////////////
+
+
+		/** 
+		 * Pushes the Msg mid onto the list.
+		 * The position on the list does not matter.
+		 * 
+		 */
+		void addMsg( ObjId mid );
+
+		/**
+		 * Removes the specified msg from the list.
+		 */
+		void dropMsg( ObjId mid );
 		
 		/**
-		  * Returns what whether the element is Simple or Array
+		 * Clears out all Msgs on specified BindIndex. Used in Shell::set
+		 */
+		void clearBinding( BindIndex b );
+
+		/**
+		 * Pushes back the specified Msg and Func pair into the properly
+		 * indexed place on the msgBinding_ vector.
+		 */
+		void addMsgAndFunc( ObjId mid, FuncId fid, BindIndex bindIndex );
+
+		/**
+		 * gets the Msg/Func binding information for specified bindIndex.
+		 * This is a vector.
+		 * Returns 0 on failure.
+		 */
+		const vector< MsgFuncBinding >* getMsgAndFunc( BindIndex b ) const;
+
+		/**
+		 * Returns true if there are one or more Msgs on the specified
+		 * BindIndex
+		 */
+		bool hasMsgs( BindIndex b ) const;
+
+		/**
+		 * Utility function for printing out all fields and their values
+		 */
+		void showFields() const;
+
+		/**
+		 * Utility function for traversing and displaying all messages
+		 */
+		void showMsg() const;
+
+		/**
+		 * Rebuild digested message array; traverse all messages to do so
+		 */
+		void digestMessages();
+
+		/**
+		 * Inner function that adds targets to a single function in the
+		 * MsgDigest
+		 */
+		void putTargetsInDigest(
+					   	unsigned int srcNum, const MsgFuncBinding& mfb,
+						const FuncOrder& fo,
+						vector< vector< bool > >& targetNodes
+	   	);
+		/**
+		 * Inner function that adds off-node targets to the MsgDigest
+		 */
+		void putOffNodeTargetsInDigest(
+		   	unsigned int srcNum, vector< vector< bool > >& targetNodes );
+
+		/**
+		 * Gets the class information for this Element
+		 */
+		const Cinfo* cinfo() const;
+
+		/**
+		 * Destroys all Elements in tree, being efficient about not
+		 * trying to traverse through clearing messages to doomed Elements.
+		 * Assumes tree includes all child elements.
+		 * Typically the Neutral::destroy function builds up this tree
+		 * and then calls this function.
+		 */
+		static void destroyElementTree( const vector< Id >& tree );
+
+		/**
+		 * Set flag to state that Element is due for destruction. Useful to
+		 * avoid following messages that will soon be gone.
+		 */
+		void markAsDoomed();
+		bool isDoomed() const;
+
+		/**
+		 * Set flag to state that the messages on this Element have
+		 * changed, and need to be re-digested.
+		 */
+		void markRewired();
+
+		/**
+		 * Utility function for debugging
+		 */
+		void printMsgDigest( unsigned int srcIndex, unsigned int dataIndex ) const;
+
+		/**
+		 * Drop all messages arriving from src onto current Element,
+		 * regardless of which field they come from.
+		 */
+		void dropAllMsgsFromSrc( Id src );
+	/////////////////////////////////////////////////////////////////////
+	// Utility functions for message traversal
+	/////////////////////////////////////////////////////////////////////
+	
+		/**
+		 * Raw lookup into MsgDigest vector. One for each MsgSrc X ObjEntry.
+		 * If the messages have been rewired, this call triggers the
+		 * re-parsing of all messages before returning the digested msgs.
+		 */
+		const vector< MsgDigest >& msgDigest( unsigned int index );
+
+		/**
+		 * Returns the binding index of the specified entry.
+		 * Returns ~0 on failure.
+		 */
+		 unsigned int findBinding( MsgFuncBinding b ) const;
+
+		 /**
+		  * Returns all incoming Msgs.
 		  */
-		virtual string elementType() const = 0;
-		
-		/** Returns a Finfo that matches the path given by 'name'.
-		 * This can be a general path including field indirection
-		 * and indices. If necessary the function will generate
-		 * a dynamic Finfo to handle the request. For this reason
-		 * it cannot be a const function of the Element.
+		 const vector< ObjId >& msgIn() const;
+
+		/**
+		 * Returns the first Msg that calls the specified Fid, 
+		 * on current Element.
+		 * Returns 0 on failure.
 		 */
-		virtual const Finfo* findFinfo( const string& name ) = 0;
+		 ObjId findCaller( FuncId fid ) const;
 
-		/**
-		 * Returns the Finfo identified by the specified msg number.
-		 * Source Finfos should have a positive index
-		 * pure Dest finfos have a negative index.
-		 * Not all Finfos will have a msgNum, but any valid msgNum 
-		 * should have a Finfo.
+		/** 
+		 * More general function. Fills up vector of ObjIds that call the
+		 * specified Fid on current Element. Returns # found
 		 */
-		virtual const Finfo* findFinfo( int msgNum ) const = 0;
+		unsigned int getInputMsgs( vector< ObjId >& caller, FuncId fid)
+		 	const;
 
 		/**
-		 * Returns finfo ptr associated with specified ConnTainer.
+		 * Fills in vector of Ids connected to this Finfo on
+		 * this Element. Returns # found
 		 */
-		virtual const Finfo* findFinfo( const ConnTainer* c ) const = 0;
+		unsigned int getNeighbors( vector< Id >& ret, const Finfo* finfo )
+			const;
 
 		/**
-		 * Returns a Finfo as above, except that it cannot handle any
-		 * dynamic Finfo thus limiting it to predefined finfos. Has the
-		 * merit that it is a const function
+		 * Fills in vector, each entry of which identifies the src and 
+		 * dest fields respectively. 
+		 * Src field is local and identified by BindIndex
+		 * Dest field is a FuncId on the remote Element.
 		 */
-		virtual const Finfo* constFindFinfo( const string& name ) const = 0;
+		unsigned int getFieldsOfOutgoingMsg( 
+			ObjId mid, vector< pair< BindIndex, FuncId > >& ret ) const;
 
 		/**
-		 * Returns finfo ptr on local vector of Finfos. 0 if we are out
-		 * of range. Most of these Finfos should be DynamicFinfos.
+		 * Fills in matching vectors of destination ObjIds and the
+		 * destination function, for the specified source Finfo and
+		 * dataId on this Element. 
+		 * Used in Neutral::msgDests and Neutral::msgDestFunctions.
+		 * Returns number of dests found.
 		 */
-		virtual const Finfo* localFinfo( unsigned int index )
-				const = 0;
+		unsigned int getMsgTargetAndFunctions( DataId srcDataId,
+				const SrcFinfo* finfo ,
+				vector< ObjId >& tgt, 
+				vector< string >& func
+				) const;
 
 		/**
-		 * Checks that specified finfo does in fact come from this
-		 * Element. Used for paranoia checks in some functions,
-		 * though perhaps this can later be phased out by using
-		 * encapsulation of finfos and elements into a Field object.
+		 * Enumerates msg targets. Will get confused if some
+		 * are across nodes.
 		 */
-		virtual unsigned int listFinfos(
-			vector<	const Finfo* >& flist ) const = 0;
+		vector< ObjId > getMsgTargets( DataId srcDataId,
+				const SrcFinfo* finfo  ) const;
 
-		/**
-		 * Finds the local Finfos associated with this Element.
-		 * Note that these are variable. Typically they are Dynamic
-		 * Finfos.
-		 * Returns number of Finfos found.
+		/** Used upon ending of MOOSE session, to rapidly clear out 
+		 * messages, secure in the knowledge that the data structures 
+		 * will be destroyed separately.
 		 */
-		virtual unsigned int listLocalFinfos( vector< Finfo* >& flist )
-				= 0;
-		
+		void clearAllMsgs();
+
 		/**
-		 * For adding ExtFieldFinfo for addfield command
+		 * zombieSwap: replaces the Cinfo and data of the zombie.
+		 * Allocates a new data block using zCinfo,
+		 * that matches the number of entries of the old data block.
+		 * Deletes old data.
+		 * The base version calls the Clock object to assign
+		 * a suitable default clock.
 		 */
-		
-		virtual void addExtFinfo( Finfo* f ) = 0;
-		
-		/**
-		 * Appends a new Finfo onto the Element. Typically this new
-		 * Finfo is a Dynamic Finfo used to store messages that are
-		 * not precompiled, and therefore need to be allocated on the
-		 * fly. It is also used once at startup to insert the 
-		 * main Finfo for the object, typically ThisFinfo, that holds
-		 * the class information.
-		 */
-		virtual void addFinfo( Finfo* f ) = 0;
-
-		/**
- 		* This function cleans up the finfo f. It removes its messages,
- 		* deletes it, and removes its entry from the finfo list. Returns
- 		* true if the finfo was found and removed. It does NOT
- 		* permit deleting the ThisFinfo at index 0.
- 		*/
-		virtual bool dropFinfo( const Finfo* f ) = 0;
-
-		/**
-		 * Assigns the zeroth finfo, which is the one that 
-		 * holds all the common info for the object. Normally this
-		 * is assigned at object creation time, but when an object
-		 * is taken over (zombified) by a solver, its functions
-		 * have to be overridden. At that time the 'ThisFinfo' is
-		 * reassigned by this function.
-		 */
-		virtual void setThisFinfo( Finfo* f ) = 0;
-
-		/**
-		 * Accesses the zeroth finfo.
-		 */
-		virtual const Finfo* getThisFinfo() const = 0;
-
-
-		/**
-		 * Returns the root element. This function is declared
-		 * in Neutral.cpp, because that is the data type of the 
-		 * root Element.
-		 */
-		static Element* root();
-
-		/**
-		 * Redefines the id associated with this element. Should only
-		 * be accessed by the IdManager, which may need to do this in
-		 * the redefineScratchIds function.
-		 */
-		void setId( Id id );
-
-		virtual Id id() const {
-			return id_;
-		}
-
-		///////////////////////////////////////////////////////////////
-		// Msg functions. Not to be used by mortals.
-		///////////////////////////////////////////////////////////////
-
-		/**
-		 * Returns the identified Msg.
-		 * Returns 0 if the msgNum is unreasonable.
-		 * Only used for looking up Src msgs, of course.
-		 */
-		virtual const Msg* msg( unsigned int msgNum ) const = 0;
-
-		/**
-		 * Returns a variable pointer to the specified msg.
-		 */
-		virtual Msg* varMsg( unsigned int msgNum ) = 0;
-
-		/**
-		 * Returns a variable pointer to the base msg, in case the 
-		 * msgNum indicates one of the later Msgs on the linked list
-		 */
-		virtual Msg* baseMsg( unsigned int msgNum ) = 0;
-
-		/**
-		 * Returns the identified destMsg, which is just a 
-		 * vector of ConnTainers. This entails scanning
-		 * through the dest map looking for matches. 
-		 * Returns 0 if not found. Not used in
-		 * message passing, but only in traversal.
-		 */
-		virtual const vector< ConnTainer* >* dest( int msgNum ) const = 0;
-
-		/**
-		 * Scan through dest entries looking for dest msg. Return it if
-		 * found. If not found, create a new entry for it and return that. 
-		 * This is currently managed by a map indexed by the msgNum.
-		 */
-		virtual vector< ConnTainer* >* getDest( int msgNum ) = 0;
-
-		/**
-		 * Create a new 'next' msg entry and return its index.
-		 * Called by Msg when adding a target that has a new, non-matching
-		 * funcId.
-		 * It will be inserted after the last of the existing 'next'
-		 * entries, before the DestMsgs.
-		 */
-		virtual unsigned int addNextMsg() = 0;
-
-
-		/**
-		 * Returns the # of msgs
-		 */
-		virtual unsigned int numMsg() const = 0;
-
-		/**
-		 * Checks if the msgNum is OK. Looks at #finfos and #src.
-		 * Rejects negative below #src, rejects others out of range.
-		 * Does not consider indices into 'next' as valid.
-		 */
-		// bool validMsg( int msg ) const;
-
-		///////////////////////////////////////////////////////////////
-		// Element Id management functions
-		///////////////////////////////////////////////////////////////
-
-		// static Element* element( unsigned int id );
-
-		// Deprecated
-		// static Element* lastElement();
-
-		// static unsigned int numElements();
-
-		// static unsigned int nextId();
-		// static unsigned int lastId();
-
-		///////////////////////////////////////////////////////////////
-		// Functions for the copy operation
-		///////////////////////////////////////////////////////////////
-		/**
-		 * This function does a deep copy of the current element 
-		 * including all messages. Returns the base of the copied tree.
-		 * It attaches the copied element tree to the parent.
-		 */
-		virtual Element* copy(
-				Element* parent,
-				const string& newName ) const
-		{
-			IdGenerator idGen;
-			return copy( parent, newName, idGen );
-		}
-		
-		virtual Element* copy(
-				Element* parent,
-				const string& newName,
-				IdGenerator& idGen ) const
-		{
-			cerr << "";
-			assert( 0 );
-			return 0;
-		}
-
-		/**
-		 * This function takes a prototype element and creates an array
-		 * of elements. Only the data part gets duplicated and Finfo and
-		 * Cinfo details, etc remain common. This will greatly increase
-		 * the space efficiency and reduce the number of messages.
-		 * \param parent the element to which the generated parent to be 
-		   added to
-		   \param newName the name of the copied element
-		   \param n number of copies
-		   \return An Element * pointing to a ArrayElement object
-		*/
-		virtual Element* copyIntoArray(
-				Id parent,
-				const string& newName,
-				int n ) const
-		{
-			IdGenerator idGen;
-			return copyIntoArray( parent, newName, n, idGen );
-		}
-		
-		virtual Element* copyIntoArray(
-				Id parent,
-				const string& newName,
-				int n,
-				IdGenerator& idGen ) const
-		{
-			cerr << "";
-			assert( 0 );
-			return 0;
-		}
-
-		/**
-		 * True if current element descends from the specified ancestor.
-		 */
-		virtual bool isDescendant( const Element* ancestor ) const = 0;
-
-		/**
-		 * This function fills up the map with current element and
-		 * all its descendants. Returns the root element of the
-		 * copied tree. The first entry in the map is the original
-		 * The second entry in the map is the copy.
-		 * The function does NOT fix up the messages.
-		 */
-		virtual Element* innerDeepCopy( 
-				map< const Element*, Element* >& tree,
-				IdGenerator& idGen ) const = 0;
-				
-		virtual Element* innerDeepCopy( 
-				map< const Element*, Element* >& tree,
-				int n,
-				IdGenerator& idGen ) const = 0;
-
-		/**
- 		* Copies messages from current element to duplicate provided dest is
- 		* also on tree.
- 		*/
-		virtual void copyMessages( Element* dup, 
-				map< const Element*, Element* >& origDup,
-				bool isArray ) const = 0;
-		/**
-		 * Copies messages present between current element and globals,
-		 * to go between the duplicate and the same globals. Handles
-		 * src as well as dest messages.
-		 */
-		virtual void copyGlobalMessages(
-				Element* dup,
-				bool isArray ) const = 0;
-		
-		/**
-		 * Returns the memory use of the Element and its messages, 
-		 * excluding the data part.
-		 */
-		virtual unsigned int getMsgMem() const = 0;
-
-		/**
-		 * Debugging function: prints out all the messaging info
-		 * for this element.
-		 */
-		virtual void dumpMsgInfo() const = 0;
+		virtual void zombieSwap( const Cinfo* zCinfo );
 	protected:
-		/**
-		 * This function copies the element, its data and its
-		 * dynamic Finfos. What it does not do is to replace
-		 * any pointers to other elements in the Conn array.
-		 * It does not do anything about the element hierarchy
-		 * either, because that is also handled through messages,
-		 * ie., the Conn array.
-		 * The returned Element is dangling in memory: No parent
-		 * or child.
-		 */
-		virtual Element* innerCopy( IdGenerator& idGen ) const = 0;
-
-		/**
-		 * Placeholder function: Copies current element into an array
-		 * Element with n entries instead of 1.
-		 */
-		virtual Element* innerCopy( int n, IdGenerator& idGen ) const = 0;
-
+		/// Support function for zombieSwap, replaces Cinfo.
+		void replaceCinfo( const Cinfo* newCinfo );
 
 	private:
-		Id id_;
+		/**
+		 * Fills in vector of Ids receiving messages from this SrcFinfo. 
+		 * Returns # found
+		 */
+		unsigned int getOutputs( vector< Id >& ret, const SrcFinfo* finfo )
+			const;
+
+		/**
+		 * Fills in vector of Ids sending messeges to this DestFinfo on
+		 * this Element. Returns # found
+		 */
+		unsigned int getInputs( vector< Id >& ret, const DestFinfo* finfo )
+			const;
+
+		string name_; /// Name of the Element.
+
+		Id id_; /// Stores the unique identifier for Element.
+
+		/**
+		 * Class information
+		 */
+		const Cinfo* cinfo_;
+
+		/**
+		 * Message vector. This is the low-level messaging information.
+		 * Contains info about incoming as well as outgoing Msgs.
+		 */
+		vector< ObjId > m_;
+
+		/**
+		 * Binds an outgoing message to its function.
+		 * Each index (BindIndex) gives a vector of MsgFuncBindings,
+		 * which are just pairs of ObjId, FuncId.
+		 * SrcFinfo keeps track of the BindIndex to look things up.
+		 * Note that a single BindIndex may refer to multiple Msg/Func
+		 * pairs. This means that a single MsgSrc may dispatch data 
+		 * through multiple msgs using a single 'send' call.
+		 */
+		vector< vector < MsgFuncBinding > > msgBinding_;
+
+		/**
+		 * Digested vector of message traversal sets. Each set has a
+		 * Func and element to lead off, followed by a list of target
+		 * indices and fields.
+		 * The indexing is like this:
+		 * msgDigest_[ numSrcMsgs * dataIndex + srcMsgIndex ][ func# ]
+		 * So we look up a vector of MsgDigests, each with a unique func,
+		 * based on both the dataIndex and the message number. This is 
+		 * designed
+		 * so that if we expand the number of data entries we don't have
+		 * to redo the ordering.
+		 */
+		vector< vector < MsgDigest > > msgDigest_;
+
+		/// Returns tick on which element is scheduled. -1 for disabled.
+		int tick_;
+
+		/// True if messages have been changed and need to digestMessages.
+		bool isRewired_; 
+
+		/// True if the element is marked for destruction.
+		bool isDoomed_;
 };
 
 #endif // _ELEMENT_H
