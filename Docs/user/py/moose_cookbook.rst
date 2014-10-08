@@ -331,7 +331,9 @@ Connecting two cells together
 
 Below is the connectivity diagram for setting up a synaptic connection
 from one neuron to another. The PulseGen object is there for
-stimulating the presynaptic cell as part of experimental setup. The cells are defined as single-compartments with Hodgkin-Huxley type Na+ and K+ channels (see :ref:`hhmodel`)
+stimulating the presynaptic cell as part of experimental setup. The
+cells are defined as single-compartments with Hodgkin-Huxley type Na+
+and K+ channels (see :ref:`hhmodel`)
 
 .. figure:: images/twoCells.png
    :scale: 50%	    
