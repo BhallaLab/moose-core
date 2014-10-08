@@ -1,15 +1,14 @@
 // IzhikevichNrn.h --- 
-
 // 
 // Filename: IzhikevichNrn.h
 // Description: 
-// Author: subhasis ray
+// Author: Subhasis Ray
 // Maintainer: 
-// Created: Fri Apr  3 17:52:55 2009 (+0530)
+// Created: Fri Jul  8 09:55:21 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Jun 23 17:43:27 2010 (+0530)
+// Last-Updated: Fri Jul  8 15:37:02 2011 (+0530)
 //           By: Subhasis Ray
-//     Update #: 34
+//     Update #: 13
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -18,7 +17,7 @@
 
 // Commentary: 
 // 
-// 
+// Implementation of Izhikevich Neuron model.
 // 
 // 
 
@@ -26,18 +25,9 @@
 // 
 // 
 // 
-// 
-/**********************************************************************
-** This program is part of 'MOOSE', the
-** Messaging Object Oriented Simulation Environment,
-** also known as GENESIS 3 base code.
-**           copyright (C) 2003-2008 Upinder S. Bhalla. and NCBS
-** It is made available under the terms of the
-** GNU General Public License version 2
-** See the file COPYING.LIB for the full notice.
-**********************************************************************/
 
 // Code:
+
 
 #ifndef _IZHIKEVICHNRN_H
 #define _IZHIKEVICHNRN_H
@@ -46,41 +36,68 @@ class IzhikevichNrn
 {
   public:
     IzhikevichNrn();
-    static void setA(const Conn* conn, double value);
-    static double getA(Eref e);
-    static void setB(const Conn* conn, double value);
-    static double getB(Eref e);
-    static void setC(const Conn* conn, double value);
-    static double getC(Eref e);
-    static void setD(const Conn* conn, double value);
-    static double getD(Eref e);
-    static void setVmax(const Conn* conn, double value);
-    static double getVmax(Eref e);
-    static void setAlpha(const Conn* conn, double value);
-    static double getAlpha(Eref e);
-    static void setBeta(const Conn* conn, double value);
-    static double getBeta(Eref e);
-    static void setGamma(const Conn* conn, double value);
-    static double getGamma(Eref e);
-    static void setInject(const Conn* conn, double value);
-    static double getInject(Eref e);
-    static void setVm(const Conn* conn, double value);
-    static double getVm(Eref e);
-    static void setInitVm(const Conn* conn, double value);
-    static double getInitVm(Eref e);
-    static void setInitU(const Conn* conn, double value);
-    static double getInitU(Eref e);
-    static double getU(Eref e);
-    static void processFunc(const Conn* conn, ProcInfo proc);
-    static void reinitFunc(const Conn* conn, ProcInfo proc);
-    static void setRm(const Conn * conn, double value);
-    static double getRm(Eref e);
+    ~IzhikevichNrn();
+    void setA( double value );
+    double getA() const;
+    
+    void setB( double value );
+    double getB() const;
+
+    void setC( double value );
+    double getC() const;
+
+    void setD( double value );
+    double getD() const;
+
+    void setVmax( double value );
+    double getVmax() const;
+
+    void setAlpha( double value );
+    double getAlpha() const;
+
+    void setBeta( double value );
+    double getBeta() const;
+
+    void setGamma( double value );
+    double getGamma() const;
+
+    double getIm() const;
+
+    void setInject( double value );
+    double getInject() const;
+
+    void setVm( double value );
+    double getVm() const;
+
+    void setInitVm( double value );
+    double getInitVm() const;
+
+    void setInitU( double value );
+    double getInitU() const;
+    double getU() const;
+
+    void setRmByTau(double value );
+    double getRmByTau() const;
+
+    void setAccommodating( bool value );
+    bool getAccommodating() const;
+
+    void setU0( double value );
+    double getU0() const;
+
+    void handleChannel( double Gk, double Ek);
+
+    void process(const Eref& eref, ProcPtr proc );
+    void reinit(const Eref& eref, ProcPtr proc );
+
+    static const Cinfo * initCinfo();
+
     
   private:
     double alpha_;
     double beta_;
     double gamma_;
-    double Rm_;
+    double RmByTau_;
     double a_;
     double b_;
     double c_;
@@ -93,10 +110,12 @@ class IzhikevichNrn
     double sum_inject_;
     double Im_;
     double savedVm_;
+    bool accommodating_;
+    double u0_;
+    double inject_;
 };
+
 #endif
-
-
 
 // 
 // IzhikevichNrn.h ends here

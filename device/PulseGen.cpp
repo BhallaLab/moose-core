@@ -1,171 +1,189 @@
-/*******************************************************************
- * File:            PulseGen.cpp
- * Description:      
- * Author:          Subhasis Ray
- * E-mail:          ray.subhasis@gmail.com
- * Created:         2008-02-01 12:23:50
- ********************************************************************/
-/**********************************************************************
- ** This program is part of 'MOOSE', the
- ** Messaging Object Oriented Simulation Environment,
- ** also known as GENESIS 3 base code.
- **           copyright (C) 2003-2011 Upinder S. Bhalla. and NCBS
- ** It is made available under the terms of the
- ** GNU General Public License version 2
- ** See the file COPYING.LIB for the full notice.
- **********************************************************************/
+// PulseGen.cpp --- 
+// 
+// Filename: PulseGen.cpp
+// Description: 
+// Author: Subhasis Ray
+// Maintainer: 
+// Created: Mon Feb 20 01:41:12 2012 (+0530)
+// Version: 
+// Last-Updated: Mon May 27 11:49:31 2013 (+0530)
+//           By: subha
+//     Update #: 170
+// URL: 
+// Keywords: 
+// Compatibility: 
+// 
+// 
 
-#ifndef _PULSEGEN_CPP
-#define _PULSEGEN_CPP
-#include "moose.h"
-#include <cmath>
+// Commentary: 
+// 
+// 
+// 
+// 
+
+// Change log:
+// 
+// 2012-02-20 01:41:16 (+0530) - Subha - started porting from old
+// moose.
+// 
+
+// Code:
+
+#include "header.h"
 #include "PulseGen.h"
 
-const Cinfo* initPulseGenCinfo()
+static SrcFinfo1< double >* outputOut()
 {
-    static Finfo* processShared[] =
-        {
-            new DestFinfo( "process", Ftype1<ProcInfo>::global(),
-                           RFCAST(&PulseGen::processFunc)),
-            new DestFinfo( "reinit", Ftype1<ProcInfo>::global(),
-                           RFCAST( &PulseGen::reinitFunc)),
-        };
-    static Finfo* process = new SharedFinfo( "process", processShared,
-                                             sizeof(processShared)/sizeof(Finfo*));
-    static Finfo* pulseGenFinfos[] = 
-        {
-            new ValueFinfo("firstLevel", ValueFtype1<double>::global(),
-                           GFCAST( &PulseGen::getFirstLevel),
-                           RFCAST( &PulseGen::setFirstLevel),
-                           "Amplitude of the first pulse output."),
-            new ValueFinfo("firstWidth", ValueFtype1<double>::global(),
-                           GFCAST( &PulseGen::getFirstWidth),
-                           RFCAST( &PulseGen::setFirstWidth),
-                           "Duration of the first pulse output."),
-            new ValueFinfo("firstDelay", ValueFtype1<double>::global(),
-                           GFCAST( &PulseGen::getFirstDelay),
-                           RFCAST( &PulseGen::setFirstDelay),
-                           "Delay to first pulse output. In FREE RUN mode, this is the interval" \
-                           "from the end of the previous pulse till the start of the first pulse." \
-                           "In case of TRIGGERED mode, this is how long it takes to start the "
-                           "triggered pulse after the start of the triggering pulse."
-
-                           "NOTE: If another triggering pulse comes before the triggered pulse "
-                           "was generated, the triggered pulse will be lost as the last trigger "
-                           "time is reset to the latest one and the pulsegen never reaches a state "
-                           "where the time interval since the last trigger input never crosses "
-                           "firstDelay."),
-            
-    
-            new ValueFinfo("secondLevel", ValueFtype1<double>::global(),
-                           GFCAST( &PulseGen::getSecondLevel),
-                           RFCAST( &PulseGen::setSecondLevel),
-                           "Amplitude of the second pulse. Default value: 0"),
-            new ValueFinfo("secondWidth", ValueFtype1<double>::global(),
-                           GFCAST( &PulseGen::getSecondWidth),
-                           RFCAST( &PulseGen::setSecondWidth),
-                           "Duration of the second pulse. Default value: 0"),
-            new ValueFinfo("secondDelay", ValueFtype1<double>::global(),
-                           GFCAST( &PulseGen::getSecondDelay),
-                           RFCAST( &PulseGen::setSecondDelay),
-                           "Time interval between first and second pulse. If 0, there will be no "
-                           "second pulse. Default value: 0"),
-            new ValueFinfo("baseLevel", ValueFtype1<double>::global(),
-                           GFCAST( &PulseGen::getBaseLevel),
-                           RFCAST( &PulseGen::setBaseLevel),
-                           "Baseline output (when no pulse is being generated). Default value: 0."),
-            new ValueFinfo("output", ValueFtype1<double>::global(),
-                           GFCAST( &PulseGen::getOutput),
-                           &dummyFunc,
-                           "Pulse output."),            
-            new ValueFinfo("trigTime", ValueFtype1<double>::global(),
-                           GFCAST( &PulseGen::getTrigTime),
-                           RFCAST( &PulseGen::setTrigTime),
-                           "Time since last time the input switched from 0 to non-zero. This is "
-                           "supposed to be an internal variable, but old GENESIS scripts use this "
-                           "field to generate a single pulse. If you set trigTime to a positive "
-                           "value after reset, a single output will be generated at firstDelay "
-                           "time."),
-            new ValueFinfo("count", ValueFtype1<int>::global(),
-                           GFCAST( &PulseGen::getCount),
-                           RFCAST( &PulseGen::setCount),
-                           "Number of pulses in each period. Default is 2, where the second is "
-                           "same as baseline at delay 0 with width 0."),
-            new LookupFinfo("width", LookupFtype<double, int>::global(),
-                            GFCAST( &PulseGen::getWidth),
-                            RFCAST( &PulseGen::setWidth),
-                            "Width of i-th pulse in a period. Before you can set this, make sure "
-                            "you have >= i pulses using pulseCount field."),
-            new LookupFinfo("delay", LookupFtype<double, int>::global(),
-                            GFCAST( &PulseGen::getDelay),
-                            RFCAST( &PulseGen::setDelay),
-                            "Delay of i-th pulse in a period. Before you can set this, make sure"
-                            " you have >= i pulses using pulseCount field."),
-            new LookupFinfo("level", LookupFtype<double, int>::global(),
-                            GFCAST( &PulseGen::getLevel),
-                            RFCAST( &PulseGen::setLevel),
-                            "Amplitude of i-th pulse in a period. Before you can set this, make"
-                            " sure you have >= i pulses using pulseCount field."),
-            
-                           
-            new ValueFinfo("trigMode", ValueFtype1<int>::global(),
-                           GFCAST( &PulseGen::getTrigMode),
-                           RFCAST( &PulseGen::setTrigMode),
-						   "TRIGGER MODES: \n"	
-							"trig_mode = 0	free run \n"
-							"trig_mode = 1	ext. trig \n"
-							"trig_mode = 2	ext. gate" ),                                       
-            new ValueFinfo("prevInput", ValueFtype1<int>::global(),
-                           GFCAST( &PulseGen::getPreviousInput),
-                           &dummyFunc),
-      
-            //////////////////////////////////////////////////////////////////
-            // SharedFinfos
-            //////////////////////////////////////////////////////////////////
-            process,
-
-            ///////////////////////////////////////////////////////
-            // MsgSrc definitions
-            ///////////////////////////////////////////////////////
-            new SrcFinfo("outputSrc", Ftype1<double>::global()),
-            
-            //////////////////////////////////////////////////////////////////
-            // MessageDestinations
-            //////////////////////////////////////////////////////////////////
-            new DestFinfo("input", Ftype1<double>::global(),
-                          RFCAST(&PulseGen::inputFunc)),
-            new DestFinfo("levelDest", Ftype2<int, double>::global(),
-                          RFCAST( &PulseGen::setLevelFunc)),
-            new DestFinfo("widthDest", Ftype2<int, double>::global(),
-                          RFCAST( &PulseGen::setWidthFunc)),
-            new DestFinfo("delayDest", Ftype2<int, double>::global(),
-                          RFCAST( & PulseGen::setDelayFunc)),
-        };
-
-    static SchedInfo schedInfo[] = { { process, 0, 0 } };
-
-
-	static string doc[] =
-	{
-		"Name", "PulseGen",
-		"Author", "Subhasis Ray, 2007, NCBS",
-		"Description", "PulseGen: general purpose pulse generator. This can generate any "
-                "number of pulses with specified level and duration.",
-	};
-    static Cinfo pulseGenCinfo(
-                               doc,
-			       sizeof( doc ) / sizeof( string ),                               
-			       initNeutralCinfo(),
-                               pulseGenFinfos,
-                               sizeof(pulseGenFinfos)/sizeof(Finfo*),
-                               ValueFtype1<PulseGen>::global(),
-                               schedInfo, 1);
-    return &pulseGenCinfo;
+    static SrcFinfo1< double > outputOut( "output",
+                                          "Current output level.");
+    return &outputOut;
 }
 
-static const Cinfo* pulseGenCinfo = initPulseGenCinfo();
+const Cinfo* PulseGen::initCinfo()
+{
+    ///////////////////////////////////////////////////////
+    // Field definitions
+    ///////////////////////////////////////////////////////
+    static ReadOnlyValueFinfo< PulseGen, double > output("outputValue",
+                                                 "Output amplitude",
+                                                 &PulseGen::getOutput);
+    static ValueFinfo< PulseGen, double > baseLevel("baseLevel",
+                                                     "Basal level of the stimulus",
+                                                     &PulseGen::setBaseLevel,
+                                                     &PulseGen::getBaseLevel);
+    static ValueFinfo< PulseGen, double > firstLevel("firstLevel",
+                                                     "Amplitude of the first pulse in a sequence",
+                                                     &PulseGen::setFirstLevel,
+                                                     &PulseGen::getFirstLevel);
+    static ValueFinfo< PulseGen, double > firstWidth("firstWidth",
+                                                     "Width of the first pulse in a sequence",
+                                                     &PulseGen::setFirstWidth,
+                                                     &PulseGen::getFirstWidth);
+    static ValueFinfo< PulseGen, double > firstDelay("firstDelay",
+                                                     "Delay to start of the first pulse in a sequence",
+                                                     &PulseGen::setFirstDelay,
+                                                     &PulseGen::getFirstDelay); 
+    static ValueFinfo< PulseGen, double > secondLevel("secondLevel",
+                                                     "Amplitude of the second pulse in a sequence",
+                                                     &PulseGen::setSecondLevel,
+                                                     &PulseGen::getSecondLevel);
+    static ValueFinfo< PulseGen, double > secondWidth("secondWidth",
+                                                     "Width of the second pulse in a sequence",
+                                                     &PulseGen::setSecondWidth,
+                                                     &PulseGen::getSecondWidth);
+    static ValueFinfo< PulseGen, double > secondDelay("secondDelay",
+                                                     "Delay to start of of the second pulse in a sequence",
+                                                     &PulseGen::setSecondDelay,
+                                                     &PulseGen::getSecondDelay);
+    static ValueFinfo< PulseGen, unsigned int > count("count",
+                                                     "Number of pulses in a sequence",
+                                                     &PulseGen::setCount,
+                                                     &PulseGen::getCount);
+    static ValueFinfo< PulseGen, unsigned int > trigMode("trigMode",
+                                                         "Trigger mode for pulses in the sequence.\n"
+                                                         " 0 : free-running mode where it keeps looping its output\n"
+                                                         " 1 : external trigger, where it is triggered by an external input (and"
+                                                         " stops after creating the first train of pulses)\n"
+                                                         " 2 : external gate mode, where it keeps generating the pulses in a"
+                                                         " loop as long as the input is high.",
+                                                     &PulseGen::setTrigMode,
+                                                     &PulseGen::getTrigMode);
+    static LookupValueFinfo < PulseGen, unsigned int, double > level("level",
+                                                                     "Level of the pulse at specified index",
+                                                                     &PulseGen::setLevel,
+                                                                     &PulseGen::getLevel);
+    static LookupValueFinfo < PulseGen, unsigned int, double > width("width",
+                                                                     "Width of the pulse at specified index",
+                                                                     &PulseGen::setWidth,
+                                                                    &PulseGen::getWidth);
+    static LookupValueFinfo < PulseGen, unsigned int, double > delay("delay",
+                                                                    "Delay of the pulse at specified index",
+                                                                    &PulseGen::setDelay,
+                                                                    &PulseGen::getDelay);
+    ///////////////////////////////////////////////////////////////
+    // Dest messages
+    ///////////////////////////////////////////////////////////////
+    static DestFinfo levelIn("levelIn",
+                             "Handle level value coming from other objects",
+                             new OpFunc2< PulseGen, unsigned int, double >(&PulseGen::setLevel));
+    static DestFinfo widthIn("widthIn",
+                             "Handle width value coming from other objects",
+                             new OpFunc2< PulseGen, unsigned int, double >(&PulseGen::setWidth));
+    static DestFinfo delayIn("delayIn",
+                             "Handle delay value coming from other objects",
+                             new OpFunc2< PulseGen, unsigned int, double >(&PulseGen::setDelay));
+    
+    static DestFinfo input("input",
+                           "Handle incoming input that determines gating/triggering onset. "
+                           "Note that although this is a double field, the underlying field is"
+                           " integer. So fractional part of input will be truncated",
+                           new OpFunc1< PulseGen, double >(&PulseGen::input));
+    ///////////////////////////////////////////////////////////////////
+    // Shared messages
+    ///////////////////////////////////////////////////////////////////
+    static DestFinfo process( "process",
+                              "Handles process call, updates internal time stamp.",
+                              new ProcOpFunc< PulseGen >( &PulseGen::process ) );
+    static DestFinfo reinit( "reinit",
+                             "Handles reinit call.",
+                             new ProcOpFunc< PulseGen >( &PulseGen::reinit ) );
+    static Finfo* processShared[] =
+            {
+		&process, &reinit
+            };
+    
+    static SharedFinfo proc( "proc",
+                             "This is a shared message to receive Process messages "
+                             "from the scheduler objects."
+                             "The first entry in the shared msg is a MsgDest "
+                             "for the Process operation. It has a single argument, "
+                             "ProcInfo, which holds lots of information about current "
+                             "time, thread, dt and so on. The second entry is a MsgDest "
+                             "for the Reinit operation. It also uses ProcInfo. ",
+                             processShared, sizeof( processShared ) / sizeof( Finfo* )
+                             );
 
-static const Slot outputSlot = initPulseGenCinfo()->getSlot( "outputSrc");
+    static Finfo* pulseGenFinfos[] = {
+        &output,
+        &baseLevel,
+        &firstLevel,
+        &firstWidth,
+        &firstDelay,
+        &secondLevel,
+        &secondWidth,
+        &secondDelay,
+        &count,
+        &trigMode,
+        &level,
+        &width,
+        &delay,
+        &input,
+        outputOut(),
+        &levelIn,
+        &widthIn,
+        &delayIn,
+        &proc,
+    };
+    static string doc[] =
+    {
+        "Name", "PulseGen",
+        "Author", "Subhasis Ray",
+        "Description", "PulseGen: general purpose pulse generator. This can generate any "
+        "number of pulses with specified level and duration.",        
+    };
+    static Dinfo<PulseGen> dinfo;
+    static Cinfo pulseGenCinfo("PulseGen",
+                               Neutral::initCinfo(),
+                               pulseGenFinfos,
+                               sizeof(pulseGenFinfos)/sizeof(Finfo*),
+                               &dinfo,
+                               doc,
+                               sizeof(doc)/sizeof(string));
+    return & pulseGenCinfo;    
+    
+}
+
+static const Cinfo* pulseGenCinfo = PulseGen::initCinfo();
 
 PulseGen::PulseGen()
 {
@@ -185,253 +203,184 @@ PulseGen::PulseGen()
     prevInput_ = 0;
 }
 
-void PulseGen::setFirstLevel(const Conn* c, double level)
+PulseGen::~PulseGen()
+
 {
-    PulseGen* obj = static_cast<PulseGen*> (c->data());
-    ASSERT(obj != NULL, "PulseGen::setFirstLevel(const Conn*, double) - target data pointer is NULL.");
-    obj->level_[0] = level;    
+    ;
 }
 
-double PulseGen::getFirstLevel(Eref e)
+void PulseGen::setFirstLevel( double level)
 {
-    PulseGen* obj = static_cast <PulseGen*> (e.data());
-    ASSERT(obj != NULL,"PulseGen::getFirstLevel(Eref ) - target data pointer is NULL.");
-    return obj->level_[0];    
-}
-    
-void PulseGen::setFirstWidth(const Conn* c, double width)
-{
-    PulseGen* obj = static_cast<PulseGen*> (c->data());
-    ASSERT(obj != NULL, "PulseGen::setFirstWidth(const Conn*, double) - target data pointer is NULL." );
-    obj->width_[0] = width;    
+    level_[0] = level;    
 }
 
-double PulseGen::getFirstWidth(Eref e)
+double PulseGen::getFirstLevel() const
 {
-    PulseGen* obj = static_cast <PulseGen*> (e.data());
-    ASSERT( obj != NULL, "PulseGen::getFirstWidth(Eref ) - target data pointer is NULL." );
-    return obj->width_[0];    
-}
-void PulseGen::setFirstDelay(const Conn* c, double delay)
-{
-    PulseGen* obj = static_cast<PulseGen*> (c->data());
-    ASSERT( obj != NULL, "PulseGen::setFirstDelay(const Conn*, double) - target data pointer is NULL.");
-    obj->delay_[0] = delay;    
-}
-double PulseGen::getFirstDelay(Eref e)
-{
-    PulseGen* obj = static_cast <PulseGen*> (e.data());
-    ASSERT( obj != NULL, "PulseGen::getFirstDelay(Eref ) - target data pointer is NULL.");    
-    return obj->delay_[0];
+    return level_[0];
 }
     
-void PulseGen::setSecondLevel(const Conn* c, double level)
+void PulseGen::setFirstWidth(double width)
 {
-    PulseGen* obj = static_cast<PulseGen*> (c->data());
-    ASSERT( obj != NULL, "PulseGen::setSecondLevel(const Conn*, double) - target data pointer is NULL.");
-    if (obj->level_.size() >= 2){
-        obj->level_[obj->level_.size() - 1] = level;
+    width_[0] = width;    
+}
+
+double PulseGen::getFirstWidth() const
+{
+    return width_[0];    
+}
+void PulseGen::setFirstDelay( double delay)
+{
+    delay_[0] = delay;    
+}
+double PulseGen::getFirstDelay() const
+{
+    return delay_[0];
+}
+    
+void PulseGen::setSecondLevel( double level)
+{
+    if (level_.size() >= 2){
+        level_[1] = level;
     }
 }
-double PulseGen::getSecondLevel(Eref e)
+
+double PulseGen::getSecondLevel() const
 {
-    PulseGen* obj = static_cast <PulseGen*> (e.data());
-    ASSERT( obj != NULL, "PulseGen::getSecondLevel(Eref ) - target data pointer is NULL.");
-    if (obj->level_.size() >= 2){
-        return obj->level_[obj->level_.size() - 1];
+    if (level_.size() >= 2){
+        return level_[1];
     } else {
         return 0.0;
     }
 }
-void PulseGen::setSecondWidth(const Conn* c, double width)
+
+void PulseGen::setSecondWidth(double width)
 {
-    PulseGen* obj = static_cast<PulseGen*> (c->data());
-    ASSERT( obj != NULL, "PulseGen::setFirstWidth(const Conn*, double) - target data pointer is NULL.");
-    if (obj->width_.size() >= 2){
-        obj->width_[obj->width_.size()-1] = width;
+    if (width_.size() >= 2){
+        width_[1] = width;
     }
 }
-double PulseGen::getSecondWidth(Eref e)
+
+double PulseGen::getSecondWidth() const
 {
-    PulseGen* obj = static_cast <PulseGen*> (e.data());
-    ASSERT( obj != NULL, "PulseGen::getSecondWidth(Eref ) - target data pointer is NULL.");
-    if (obj->width_.size() >= 2){
-        return obj->width_[obj->width_.size()-1];
+    if (width_.size() >= 2){
+        return width_[1];
     } else {
         return 0.0;
     }
 }
-void PulseGen::setSecondDelay(const Conn* c, double delay)
+void PulseGen::setSecondDelay( double delay)
 {
-    PulseGen* obj = static_cast<PulseGen*> (c->data());
-    ASSERT( obj != NULL, "PulseGen::setSecondDelay(const Conn*, double) - target data pointer is NULL.");
-    if (obj->delay_.size() >= 2){
-        obj->delay_[obj->delay_.size() - 1] = delay;
+    if (delay_.size() >= 2){
+        delay_[1] = delay;
     }
 }
-double PulseGen::getSecondDelay(Eref e)
+double PulseGen::getSecondDelay() const
 {
-    PulseGen* obj = static_cast <PulseGen*> (e.data());
-    ASSERT( obj != NULL, "PulseGen::getSecondDelay(Eref ) - target data pointer is NULL.");
-    if (obj->delay_.size() >= 2){
-        return obj->delay_[obj->delay_.size() - 1];
+    if (delay_.size() >= 2){
+        return delay_[1];
     }
     return 0.0;
 }
 
-void PulseGen::setBaseLevel(const Conn* c, double level)
+void PulseGen::setBaseLevel( double level)
 {
-    PulseGen* obj = static_cast<PulseGen*> (c->data());
-    ASSERT( obj != NULL, "PulseGen::setBaseLevel(const Conn*, double) - target data pointer is NULL.");
-    obj->baseLevel_ = level;    
+    baseLevel_ = level;    
 }
-double PulseGen::getBaseLevel(Eref e)
+double PulseGen::getBaseLevel() const
 {
-    PulseGen* obj = static_cast <PulseGen*> (e.data());
-    ASSERT( obj != NULL, "PulseGen::getFirstDelay(Eref ) - target data pointer is NULL.");
-    return obj->baseLevel_;    
+    return baseLevel_;    
 }
-void PulseGen::setTrigMode(const Conn* c, int mode)
+void PulseGen::setTrigMode(unsigned int mode)
 {
-    PulseGen* obj = static_cast<PulseGen*> (c->data());
-    ASSERT( obj != NULL, "PulseGen::setTrigMode(const Conn*, double) - target data pointer is NULL.");
-    obj->trigMode_ = mode;    
+    trigMode_ = mode;    
 }
-int PulseGen::getTrigMode(Eref e)
+unsigned int PulseGen::getTrigMode() const
 {
-    PulseGen* obj = static_cast <PulseGen*> (e.data());
-    ASSERT( obj != NULL, "PulseGen::getTrigMode(Eref ) - target data pointer is NULL.");
-    return obj->trigMode_;
+    return trigMode_;
 }
-double PulseGen::getOutput(Eref e)
+double PulseGen::getOutput() const
 {
-    PulseGen* obj = static_cast <PulseGen*> (e.data());
-    ASSERT( obj != NULL, "PulseGen::getOutput(Eref ) - target data pointer is NULL.");
-    return obj->output_;
+    return output_;
 }
 
-/**
-   trigTime is supposed to be an internal state variable according to
-   GENESIS documentation. But in GENESIS it is available for
-   manipulation by the user and there are scripts out there which use
-   this.
-
-   One particular case one changes this field is in association with
-   the generation of single pulse. In trigMode = 1 (EXT_TRIG), if
-   there is 0 input to the PulseGen object, and trigTime >= 0, then a
-   pulse is generated at firstDelay time after the trigTime, i.e. the
-   pulse starts at time = (trigTime + firstDelay).
-
-   But note that the reset method sets the trigTime to -1, so if you
-   want a single pulse, you need to set trigTime after the reset.
-*/
-void PulseGen::setTrigTime(const Conn* conn, double trigTime)
+int PulseGen::getPreviousInput() const
 {
-    PulseGen* obj = static_cast<PulseGen*> (conn->data());
-    ASSERT( obj != NULL, "PulseGen::setTrigTime(const Conn*, double) - target data pointer is NULL.");
-    obj->trigTime_ = trigTime;    
+    return prevInput_;    
 }
 
-double PulseGen::getTrigTime(Eref e)
-{
-    PulseGen* obj = static_cast <PulseGen*> (e.data());
-    ASSERT( obj != NULL, "PulseGen::getTrigTime(Eref ) - target data pointer is NULL." );    
-    return obj->trigTime_;
-}
-
-int PulseGen::getPreviousInput(Eref e)
-{
-    PulseGen* obj = static_cast <PulseGen*> (e.data());
-    ASSERT( obj != NULL, "PulseGen::getPreviousInput(Eref ) - target data pointer is NULL.");
-    return obj->prevInput_;    
-}
-
-void PulseGen::setCount(const Conn* conn, int count)
+void PulseGen::setCount(unsigned int count)
 {
     if (count <= 0){
-        cout << "WARNING: invalid pulse count." << endl;
+        cout << "WARNING: invalid pulse count specified." << endl;
         return;
     }
-    PulseGen* obj = static_cast<PulseGen*> (conn->data());
-    // we want to keep it compact
-    obj->level_.reserve(count);
-    obj->delay_.reserve(count);
-    obj->width_.reserve(count);
-    obj->level_.resize(count);
-    obj->delay_.resize(count);
-    obj->width_.resize(count);
+    // we want to keep it compact - reserve will ensure we do not
+    // overallocate in resize call
+    level_.reserve(count);
+    delay_.reserve(count);
+    width_.reserve(count);
+    level_.resize(count, 0.0);
+    delay_.resize(count, 0.0);
+    width_.resize(count, 0.0);
 }
 
-int PulseGen::getCount(Eref e)
+unsigned int PulseGen::getCount() const
 {
-    PulseGen* obj = static_cast<PulseGen*> (e.data());
-    return obj->level_.size();        
+    return level_.size();        
 }
 
-double PulseGen::getLevel(Eref e, const int& index)
+double PulseGen::getLevel(unsigned int index) const
 {
-    PulseGen* obj = static_cast <PulseGen*> (e.data());
-    ASSERT( obj != NULL, "PulseGen::getLevel(Eref ) - target data pointer is NULL.");
-    if (index >= 0 && index < obj->level_.size()){
-        return obj->level_[index];
+    if (index < level_.size()){
+        return level_[index];
     } else {
         cout << "WARNING: PulseGen::getLevel - invalid index." << endl;
         return 0.0;
     }
 }
     
-void PulseGen::setLevel(const Conn* c, double level, const int& index)
+void PulseGen::setLevel( unsigned int index, double level)
 {
-    PulseGen* obj = static_cast<PulseGen*> (c->data());
-    ASSERT( obj != NULL, "PulseGen::setLevel(const Conn*, int, double) - target data pointer is NULL.");
-    if (index >= 0 && index < obj->level_.size()){
-        obj->level_[index] = level;
+    if (index < level_.size()){
+        level_[index] = level;
     } else {
-        cout << "WARNING: PulseGen::setLevel - invalid index." << endl;
+        cout << "WARNING: PulseGen::setLevel - invalid index. First set the number of pulses by setting 'count' field." << endl;
     }
 }
 
-double PulseGen::getWidth(Eref e, const int& index)
+double PulseGen::getWidth(unsigned int index) const
 {
-    PulseGen* obj = static_cast <PulseGen*> (e.data());
-    ASSERT( obj != NULL, "PulseGen::getWidth(Eref ) - target data pointer is NULL.");
-    if (index >= 0 && index < obj->width_.size()){
-        return obj->width_[index];
+    if (index < width_.size()){
+        return width_[index];
     } else {
         cout << "WARNING: PulseGen::getWidth - invalid index." << endl;
         return 0.0;
     }
 }
-void PulseGen::setWidth(const Conn* c, double width, const int& index)
+void PulseGen::setWidth(unsigned int index, double width)
 {
-    PulseGen* obj = static_cast<PulseGen*> (c->data());
-    ASSERT( obj != NULL, "PulseGen::setWidth(const Conn*, int, double) - target data pointer is NULL.");
-    if (index >= 0 && index < obj->width_.size()){
-        obj->width_[index] = width;
+    if ( index < width_.size()){
+        width_[index] = width;
     } else {
-        cout << "WARNING: PulseGen::setWidth - invalid index." << endl;
+        cout << "WARNING: PulseGen::setWidth - invalid index. First set the number of pulses by setting 'count' field." << endl;
     }
 }
-double PulseGen::getDelay(Eref e, const int& index)
+double PulseGen::getDelay(unsigned int index) const
 {
-    PulseGen* obj = static_cast <PulseGen*> (e.data());
-    ASSERT( obj != NULL, "PulseGen::getDelay(Eref ) - target data pointer is NULL.");
-    if (index >= 0 && index < obj->delay_.size()){
-        return obj->delay_[index];
+    if ( index < delay_.size()){
+        return delay_[index];
     } else {
         cout << "WARNING: PulseGen::getDelay - invalid index." << endl;
         return 0.0;
     }
 }
 
-void PulseGen::setDelay(const Conn* c, double delay, const int& index)
+void PulseGen::setDelay(unsigned int index, double delay)
 {
-    PulseGen* obj = static_cast<PulseGen*> (c->data());
-    ASSERT( obj != NULL, "PulseGen::setDelay(const Conn*, int, double) - target data pointer is NULL.");
-    if ( index >= 0 && index < obj->delay_.size() ){
-        obj->delay_[index] = delay;
+    if (  index < delay_.size() ){
+        delay_[index] = delay;
     } else {
-        cout << "WARNING: PulseGen::setDelay - invalid index" << endl;
+        cout << "WARNING: PulseGen::setDelay - invalid index. First set the number of pulses by setting 'count' field." << endl;
     }
 }
 
@@ -440,47 +389,15 @@ void PulseGen::setDelay(const Conn* c, double delay, const int& index)
 // Message dest functions.
 //////////////////////////////////////////////////////////////////
 
-void PulseGen::inputFunc(const Conn* c, double value)
+void PulseGen::input( double value)
 {
-    PulseGen* obj = static_cast<PulseGen*> (c->data());
-    ASSERT( obj != NULL, "PulseGen::inputFunc(const Conn*, int) - target data pointer is NULL.");
-    obj->input_ = value;
-}
-
-void PulseGen::setLevelFunc(const Conn* c, int index, double level)
-{
-    PulseGen::setLevel(c, level, index);
-}
-void PulseGen::setDelayFunc(const Conn* c, int index, double delay)
-{
-    PulseGen::setDelay(c, delay, index);
-}
-void PulseGen::setWidthFunc(const Conn* c, int index, double width)
-{
-    PulseGen::setWidth(c, width, index);
-}
-
-void PulseGen::processFunc( const Conn* c, ProcInfo p )
-{
-    PulseGen* obj = static_cast<PulseGen*> (c->data());
-    ASSERT( obj != NULL, "PulseGen::processFunc(const Conn*, ProcInfo) - target data pointer is NULL.");
-    obj->innerProcessFunc(c, p);
+    input_ = value;
 }
 
 
-void PulseGen::reinitFunc( const Conn* c, ProcInfo p )
+void PulseGen::process(const Eref& e, ProcPtr p )
 {
-    PulseGen* obj = static_cast<PulseGen*> (c->data());
-    ASSERT( obj != NULL, "PulseGen::reinitFunc(const Conn*, ProcInfo) - target data pointer is NULL.");
-    obj->trigTime_ = -1;
-    obj->prevInput_ = 0;
-    obj->output_ = obj->baseLevel_;
-    obj->input_ = 0;    
-}
-
-void PulseGen::innerProcessFunc(const Conn* c, ProcInfo p)
-{
-    double currentTime = p->currTime_;
+    double currentTime = p->currTime;
     double period = width_[0] + delay_[0];
     double phase = 0.0;
     for (unsigned int ii = 1; ii < width_.size() && (width_[ii] > 0.0 || delay_[ii] > 0.0); ++ii){
@@ -542,8 +459,18 @@ void PulseGen::innerProcessFunc(const Conn* c, ProcInfo p)
         }
         phase -= delay_[ii];
     }
-    send1<double>( c->target(), outputSlot, output_);    
+    outputOut()->send(e, output_);
 }
-    
-                     
-#endif
+
+
+void PulseGen::reinit(const Eref& e, ProcPtr p)
+{
+    trigTime_ = -1;
+    prevInput_ = 0;
+    output_ = baseLevel_;
+    input_ = 0;    
+    outputOut()->send(e, output_);
+}
+
+// 
+// PulseGen.cpp ends here

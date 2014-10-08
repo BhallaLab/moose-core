@@ -7,90 +7,54 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-class TimeTable
+#ifndef _TIME_TABLE_H
+#define _TIME_TABLE_H
+class TimeTable: public TableBase
 {
-	public:
-		TimeTable();
-		~TimeTable();
+  public:
+    TimeTable();
+    ~TimeTable();
 
-		/* Functions to set and get TimeTable fields */
-		static void setFilename(
-				const Conn* c, 
-				string filename );
-		static string getFilename( Eref e );
+    /* Functions to set and get TimeTable fields */
+    void setFilename(string filename );
+    string getFilename() const;
 		
-		static void setMethod(
-				const Conn* c, 
-				int method );
-		static int getMethod( Eref e );
+    void setMethod(int method );
+    int getMethod() const;
+
+    double getState() const;
 		
-		static void setTableVector(
-				const Conn* c, 
-				vector< double > table );
-		static vector< double > getTableVector( Eref e );
+    /* Dest functions */
+    /**
+     * The process function called by scheduler on every tick
+     */
+    void process(const Eref& e, ProcPtr p);
 		
-		static void setTableSize(
-				const Conn* c, 
-				unsigned int val );
-		static unsigned int getTableSize( Eref e );
-		
-		static void setTable(
-				const Conn* c, 
-				double val, 
-				const unsigned int& i );
-		static double getTable(
-				Eref e,
-				const unsigned int& i );
-		
-		static double getState( Eref e );
-		
-		/* Dest functions */
-		/**
-		 * The process function called by scheduler on every tick
-		 */
-		static void processFunc(
-				const Conn* c,
-				ProcInfo info );
-		
-		/**
-		 * The reinit function called by scheduler for the reset 
-		 */
-		static void reinitFunc(
-				const Conn* c,
-				ProcInfo info );
+    /**
+     * The reinit function called by scheduler for the reset 
+     */
+    void reinit(const Eref& e, ProcPtr p);
+
+    static const Cinfo * initCinfo();
 	
-	private:
-		/*
-		 * Object (non-static) functions
-		 */
-		void localSetFilename(
-				string filename );
-		void localSetTable(
-				double value,
-				unsigned int index );
-		double localGetTable(
-				unsigned int index ) const;
-		void processFuncLocal(
-				Eref e,
-				ProcInfo info );
-		void reinitFuncLocal( );
+  private:
+    /*
+     * Fields
+     */
+    string filename_;
+    
+    /* The table with (spike)times */
+    vector < double > timeTable_;
+
+    /* 1 if it spiked in current step, 0 otherwise */
+    double state_;
 		
-		
-		/*
-		 * Fields
-		 */
-		string filename_;
-		
-		/* The table with (spike)times */
-		vector < double > timeTable_;
-		
-		double state_;
-		
-		/* Current position within the table */
-		unsigned int curPos_;
-		
-		/* How to fill the timetable, 
-		   currently only 4 = reading from ASCII file is supported */
-		int method_;
+    /* Current position within the table */
+    unsigned int curPos_;
+    
+    /* How to fill the timetable, 
+       currently only 4 = reading from ASCII file is supported */
+    int method_;
 
 };
+#endif
