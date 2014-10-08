@@ -1,25 +1,44 @@
-/*******************************************************************
- * File:            PulseGen.h
- * Description:      
- * Author:          Subhasis Ray
- * E-mail:          ray.subhasis@gmail.com
- * Created:         2008-02-01 12:01:21
- ********************************************************************/
-/**********************************************************************
-** This program is part of 'MOOSE', the
-** Messaging Object Oriented Simulation Environment,
-** also known as GENESIS 3 base code.
-**           copyright (C) 2003-2005 Upinder S. Bhalla. and NCBS
-** It is made available under the terms of the
-** GNU General Public License version 2
-** See the file COPYING.LIB for the full notice.
-**********************************************************************/
+// PulseGen.h --- 
+// 
+// Filename: PulseGen.h
+// Description: 
+// Author: Subhasis Ray
+// Maintainer: 
+// Created: Mon Feb 20 01:21:32 2012 (+0530)
+// Version: 
+// Last-Updated: Mon Feb 20 16:42:41 2012 (+0530)
+//           By: Subhasis Ray
+//     Update #: 60
+// URL: 
+// Keywords: 
+// Compatibility: 
+// 
+// 
+
+// Commentary: 
+// 
+// 
+// 
+// 
+
+// Change log:
+// 
+// 2012-02-20 01:22:01 (+0530) Subha - started porting old moose code
+// to dh_branch.
+// 
+
+// Code:
 
 #ifndef _PULSEGEN_H
 #define _PULSEGEN_H
+/**
+ * PulseGen acts as a pulse generator. It generates square pulses of
+ * specified duration and amplitude. Two consecutive pulses are
+ * separated by specified delay.
+ */
+
 class PulseGen
 {
-  public:
     /**
        With trigMode = FREE_RUN the pulse generator will create a
        train of pulses determined by the firstDealy, firstWidth,
@@ -47,77 +66,74 @@ class PulseGen
        from the leading edge of the input.
      */
     static const int EXT_GATE = 2;    
-
+    
+#ifdef DO_UNIT_TESTS
+    friend void testPulseGen();
+#endif
+  public:
     PulseGen();
+    ~PulseGen();
+    
+    /////////////////////////////////////////////////////////////
+    // Value field access function definitions
+    /////////////////////////////////////////////////////////////
+    
+    void setFirstDelay(double value );
+    double getFirstDelay() const;
+    void setFirstWidth(double value );
+    double getFirstWidth(  ) const;
+    void setFirstLevel(double value );
+    double getFirstLevel(  ) const;
+    void setSecondDelay(double value );
+    double getSecondDelay(  ) const;
+    void setSecondWidth(double value );
+    double getSecondWidth(  ) const;
+    void setSecondLevel(double value );
+    double getSecondLevel(  ) const;
+    void setBaseLevel(double value);
+    double getBaseLevel() const;
+    void setTrigMode(unsigned int value);
+    unsigned int getTrigMode() const;
+    double getOutput() const ;
+    double getTrigTime() const;
+    int getPreviousInput() const;
+    void setCount(unsigned int count);
+    unsigned int getCount() const;
+    void setLevel(unsigned int pulseNo, double level);
+    void setWidth(unsigned int pulseNo, double width);
+    void setDelay(unsigned int pulseNo, double delay);    
+    double getWidth(unsigned int index) const;
+    double getDelay(unsigned int index) const;
+    double getLevel(unsigned int index) const;
+    
+    /////////////////////////////////////////////////////////////
+    // Dest function definitions
+    /////////////////////////////////////////////////////////////
+    
+    void input(double input);
 
-    //////////////////////////////////////////////////////////////////
-    // Field functions.
-    //////////////////////////////////////////////////////////////////
+    void process( const Eref& e, ProcPtr p );
     
-    static void setFirstLevel(const Conn* c, double level);
-    static double getFirstLevel(Eref e);
-    static void setFirstWidth(const Conn* c, double width);
-    static double getFirstWidth(Eref e);
-    static void setFirstDelay(const Conn* c, double delay);
-    static double getFirstDelay(Eref e);
-    
-    static void setSecondLevel(const Conn* c, double level);
-    static double getSecondLevel(Eref e);
-    static void setSecondWidth(const Conn* c, double width);
-    static double getSecondWidth(Eref e);
-    static void setSecondDelay(const Conn* c, double delay);
-    static double getSecondDelay(Eref e);
+    void reinit( const Eref& e, ProcPtr p );
 
-    static void setBaseLevel(const Conn* c, double level);
-    static double getBaseLevel(Eref e);
-    static void setTrigMode(const Conn* c, int mode);
-    static int getTrigMode(Eref e);
-    static double getOutput(Eref e);
-    static double getTrigTime(Eref e);
-    static void setTrigTime(const Conn* c, double trigTime);
-    static int getPreviousInput(Eref e);
-    
-    //////////////////////////////////////////////////////////////////
-    // Message dest functions.
-    //////////////////////////////////////////////////////////////////
-    static void inputFunc(const Conn* c, double input);
-    /// The following three are for lookup (valuefinfos - where index
-    /// comes after value.
-    static void setLevel(const Conn* c, double level, const int& pulseNo);
-    static void setWidth(const Conn* c, double width, const int& pulseNo);
-    static void setDelay(const Conn* c, double delay, const int& pulseNo);
-    /// The following three are for dest messages - which have order
-    /// of parameters: index, value in GENESIS.
-    static void setLevelFunc(const Conn* c, int pulseNo, double level);
-    static void setWidthFunc(const Conn* c, int pulseNo, double width);
-    static void setDelayFunc(const Conn* c, int pulseNo, double delay);
-    
-    static void processFunc( const Conn* c, ProcInfo p );
-    static void reinitFunc( const Conn* c, ProcInfo p );
-    static void setCount(const Conn* c, int count);
-    static int getCount(Eref e);
-    static double getWidth(Eref e, const int& index);
-    static double getDelay(Eref e, const int& index);
-    static double getLevel(Eref e, const int& index);
-    
+    /////////////////////////////////////////////////////////////
+    static const Cinfo* initCinfo();
+
   protected:
-    void innerProcessFunc( const Conn* c, ProcInfo p );    
-    
-  private:
     vector <double> delay_;
     vector <double> level_;
     vector <double> width_;
-
     
     double output_;
     double baseLevel_;
     double trigTime_;
-    int trigMode_;
+    unsigned int trigMode_;
     bool secondPulse_;
     
     int prevInput_;
     int input_;    
 };
 
-    
-#endif
+#endif // _PULSEGEN_H
+// 
+// PulseGen.h ends here
