@@ -12,10 +12,14 @@
 #define _SYM_COMPARTMENT_H
 
 /**
- * The Compartment class sets up an asymmetric compartment for
+ * The SymCompartment class sets up a symmetric compartment for
  * branched nerve calculations. Handles electronic structure and
- * also channels. This is not a particularly efficient way of doing
- * this, so we should use a solver for any substantial calculations.
+ * also channels. This version splits the Ra between either end of the
+ * compartment and is hence slightly cleaner than the asymmetric 
+ * compartment.
+ * The default EE method is not a particularly efficient way of doing
+ * the calculations, so we should use a solver for any substantial 
+ * calculations.
  */
 class SymCompartment: public moose::Compartment
 {
@@ -24,27 +28,23 @@ class SymCompartment: public moose::Compartment
 			~SymCompartment() {;}
 
 			// Dest function definitions.
-			static void raxial2Func(const Conn* c, double Ra, double Vm);
-			static void sumRaxial( const Conn* c, double Ra );
-			static void sumRaxialRequest( const Conn* c );
-			static void sumRaxial2( const Conn* c, double Ra );
-			static void sumRaxial2Request( const Conn* c );
+            void raxialSphere( double Ra, double Vm );
+            void raxialCylinder( double Ra, double Vm );
+			void raxialSym( double Ra, double Vm );
+			void sumRaxial( double Ra );
 
-	private:
+			static const Cinfo* initCinfo();
+
 			// These functions override the virtual equivalents from the
 			// Compartment.
-			void innerReinitFunc( Eref e, ProcInfo p );
-			void innerRaxialFunc( double Ra, double Vm );
-			void innerInitFunc( Eref e, ProcInfo p );
-
-			// These functions are new for the Symcompartment.
-			void innerRaxial2Func( double Ra, double Vm );
-
+			void vReinit( const Eref& e, ProcPtr p );
+			void vInitProc( const Eref& e, ProcPtr p );
+			void vInitReinit( const Eref& e, ProcPtr p );
+	private:
+            // used for storing multiplicative coefficient computed from 
+			// adjacent nodes in star-mesh transformation
 			double coeff_;
-			double coeff2_;
+			double RaSum_;
 };
-
-// Used by the solver
-extern const Cinfo* initSymCompartmentCinfo();
 
 #endif // _SYM_COMPARTMENT_H

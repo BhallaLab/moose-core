@@ -1,8 +1,0 @@
-To start the GLcell demo, run the commands:
- - ./run-glcellclient.sh
- - moose visualize-glcell.g
-It may be easier to run both commands from separate terminal windows.
-
-Similarly, to start the GLview demo, run the commands:
- - ./run-glviewclient.sh
- - moose visualize-glview.g

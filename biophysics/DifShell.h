@@ -19,117 +19,108 @@ class DifShell
 		/////////////////////////////////////////////////////////////
 		// Field access functions
 		/////////////////////////////////////////////////////////////
-		static double getC( Eref e );
+		double getC( ) const;
 
-		static void setCeq( const Conn* c, double Ceq );
-		static double getCeq( Eref e );
+		void setCeq(double Ceq );
+		double getCeq() const;
 
-		static void setD( const Conn* c, double D );
-		static double getD( Eref e );
+		void setD( double D );
+		double getD() const;
 
-		static void setValence( const Conn* c, double valence );
-		static double getValence( Eref e );
+		void setValence( double valence );
+		double getValence() const;
 
-		static void setLeak( const Conn* c, double leak );
-		static double getLeak( Eref e );
+		void setLeak( double leak );
+		double getLeak() const;
 
-		static void setShapeMode( const Conn* c, unsigned int shapeMode );
-		static unsigned int getShapeMode( Eref e );
+		void setShapeMode( unsigned int shapeMode );
+		unsigned int getShapeMode() const;
 
-		static void setLength( const Conn* c, double length );
-		static double getLength( Eref e );
+		void setLength( double length );
+		double getLength() const;
 
-		static void setDiameter( const Conn* c, double diameter );
-		static double getDiameter( Eref e );
+		void setDiameter( double diameter );
+		double getDiameter() const;
 
-		static void setThickness( const Conn* c, double thickness );
-		static double getThickness( Eref e );
+		void setThickness( double thickness );
+		double getThickness() const;
 
-		static void setVolume( const Conn* c, double volume );
-		static double getVolume( Eref e );
+		void setVolume( double volume );
+		double getVolume() const;
 
-		static void setOuterArea( const Conn* c, double outerArea );
-		static double getOuterArea( Eref e );
+		void setOuterArea( double outerArea );
+		double getOuterArea() const;
 
-		static void setInnerArea( const Conn* c, double innerArea );
-		static double getInnerArea( Eref e );
+		void setInnerArea( double innerArea );
+		double getInnerArea() const;
 
 		/////////////////////////////////////////////////////////////
 		// Dest functions
 		/////////////////////////////////////////////////////////////
-		static void reinit_0( const Conn* c, ProcInfo p );
+		void reinit_0( const Eref & e, ProcPtr p );
 
-		static void process_0( const Conn* c, ProcInfo p );
+		void process_0(const Eref & e, ProcPtr p );
 
-		static void process_1( const Conn* c, ProcInfo p );
+                void process_1(const Eref & e, ProcPtr p );
 
-		static void buffer(
-			const Conn* c,
-			double kf,
-			double kb,
-			double bFree,
-			double bBound );
+                void reinit_1(const Eref & e, ProcPtr p ); // dummyFunc
+                
+		void buffer(
+		 double kf,
+		 double kb,
+		 double bFree,
+		 double bBound );
 
-		static void fluxFromOut(
-			const Conn* c,
-			double outerC,
-			double outerThickness );
+		void fluxFromOut(
+		 double outerC,
+		 double outerThickness );
 
-		static void fluxFromIn(
-			const Conn* c,
-			double innerC,
-			double innerThickness );
+		void fluxFromIn(
+		 double innerC,
+		 double innerThickness );
 
-		static void influx(
-			const Conn* c,
-			double I );
+		void influx(
+		 double I );
 
-		static void outflux(
-			const Conn* c,
-			double I );
+		void outflux(
+		 double I );
 
-		static void fInflux(
-			const Conn* c,
-			double I,
-			double fraction );
+		void fInflux(
+		 double I,
+		 double fraction );
 
-		static void fOutflux(
-			const Conn* c,
-			double I,
-			double fraction );
+		void fOutflux(
+		 double I,
+		 double fraction );
 
-		static void storeInflux(
-			const Conn* c,
-			double flux );
+		void storeInflux(
+		 double flux );
 
-		static void storeOutflux(
-			const Conn* c,
-			double flux );
+		void storeOutflux(
+		 double flux );
 
-		static void tauPump(
-			const Conn* c,
-			double kP,
-			double Ceq );
+		void tauPump(
+		 double kP,
+		 double Ceq );
 
-		static void eqTauPump(
-			const Conn* c,
-			double kP );
+		void eqTauPump(
+		 double kP );
 
-		static void mmPump(
-			const Conn* c,
-			double vMax,
-			double Kd );
+		void mmPump(
+		 double vMax,
+		 double Kd );
 
-		static void hillPump(
-			const Conn* c,
-			double vMax,
-			double Kd,
-			unsigned int hill );
+		void hillPump(
+                    double vMax,
+                    double Kd,
+                    unsigned int hill );
 
+                static const Cinfo * initCinfo();
+                
 	private:
-		void localReinit_0( ProcInfo p );
-		void localProcess_0( Eref difshell, ProcInfo p );
-		void localProcess_1( ProcInfo p );
+		void localReinit_0(  const Eref & e, ProcPtr p );
+		void localProcess_0( const Eref & e, ProcPtr p );
+		void localProcess_1( const Eref & e, ProcPtr p );
 		void localBuffer( double kf, double kb, double bFree, double bBound );
 		void localFluxFromOut( double outerC, double outerThickness );
 		void localFluxFromIn( double innerC, double innerThickness );

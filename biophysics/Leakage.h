@@ -24,7 +24,7 @@
 
 // Change log:
 // 
-// 
+// 2014-05-23: Subha - ported to async13 branch
 // 
 // 
 // This program is free software; you can redistribute it and/or
@@ -47,30 +47,17 @@
 // Code:
 
 #ifndef   	LEAKAGE_H_
-# define   	LEAKAGE_H_
+#define   	LEAKAGE_H_
 
-class Leakage
+class Leakage: public ChanCommon
 {
   public:
-    Leakage():Ek_(-0.6), Gk_(1.0), activation_(1.0), Ik_(0.0){};
-    ~Leakage(){};
+    Leakage();
+    ~Leakage();
+    void vProcess( const Eref & e, ProcPtr p );
+    void vReinit( const Eref & e, ProcPtr p );
 
-    static void setEk( const Conn* c, double Ek );
-    static double getEk( Eref e );
-    static void setGk( const Conn* c, double Gk );
-    static double getGk( Eref e );
-    static void setActivation( const Conn* c, double activation );
-    static double getActivation( Eref e );
-    static double getIk( Eref e );
-    static void processFunc( const Conn* c, ProcInfo p );
-    static void reinitFunc( const Conn* c, ProcInfo p );
-    static void channelFunc( const Conn* c, double Vm );
-  private:
-    double Ek_;
-    double Gk_;
-    double activation_;
-    double Ik_;
-    double Vm_;
+    static const Cinfo * initCinfo();
 };
 
 #endif 	    /* !LEAKAGE_H_ */

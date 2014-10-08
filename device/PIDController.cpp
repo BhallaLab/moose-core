@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Tue Dec 30 23:36:01 2008 (+0530)
 // Version: 
-// Last-Updated: Fri Jun  4 14:35:26 2010 (+0530)
-//           By: Subhasis Ray
-//     Update #: 222
+// Last-Updated: Tue Jun 11 17:00:51 2013 (+0530)
+//           By: subha
+//     Update #: 338
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -27,133 +27,161 @@
 // 
 // 
 /**********************************************************************
-** This program is part of 'MOOSE', the
-** Messaging Object Oriented Simulation Environment,
-** also known as GENESIS 3 base code.
-**           copyright (C) 2003-2008 Upinder S. Bhalla. and NCBS
-** It is made available under the terms of the
-** GNU General Public License version 2
-** See the file COPYING.LIB for the full notice.
-**********************************************************************/
+ ** This program is part of 'MOOSE', the
+ ** Messaging Object Oriented Simulation Environment,
+ ** also known as GENESIS 3 base code.
+ **           copyright (C) 2003-2013 Upinder S. Bhalla. and NCBS
+ ** It is made available under the terms of the
+ ** GNU Lesser General Public License version 2.1
+ ** See the file COPYING.LIB for the full notice.
+ **********************************************************************/
 
 // Code:
 
+#include <cfloat>
 #include "PIDController.h"
 
-const Cinfo* initPIDControllerCinfo()
+
+static SrcFinfo1< double > * outputOut()
 {
+    static SrcFinfo1 <double> outputOut("output", 
+                                        "Sends the output of the PIDController. This is known as manipulated"
+                                        " variable (MV) in control theory. This should be fed into the process"
+                                        " which we are trying to control.");
+    return &outputOut;
+}
+
+const Cinfo* PIDController::initCinfo()
+{
+       static DestFinfo process( "process",
+                       "Handle process calls.",
+                       new ProcOpFunc<PIDController>( &PIDController::process));
+	   static DestFinfo reinit( "reinit",
+                       "Reinitialize the object.",
+                       new ProcOpFunc<PIDController>( &PIDController::reinit ));
     static Finfo* processShared[] = {
-        new DestFinfo( "process", Ftype1< ProcInfo>::global(),
-		      RFCAST( &PIDController::processFunc )),
-	new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
-                       RFCAST( &PIDController::reinitFunc )),
+		&process, &reinit
     };
-    static Finfo* process = new SharedFinfo( "process", processShared, sizeof( processShared ) / sizeof( Finfo* ));
     
-    static Finfo* pidFinfos[] = {
-        new ValueFinfo( "gain", ValueFtype1< double >::global(),
-                        GFCAST( &PIDController::getGain ),
-                        RFCAST( &PIDController::setGain ),
-                        "This is the proportional gain (Kp). This tuning parameter scales the"
-                        " proportional term. Larger gain usually results in faster response, but"
-                        " too much will lead to instability and oscillation." ),
-        new ValueFinfo( "saturation",  ValueFtype1< double >::global(),
-                         GFCAST( &PIDController::getSaturation ),
-                         RFCAST( &PIDController::setSaturation ),
-                        "Bound on the permissible range of output. Defaults to maximum double"
-                        " value." ),
-        new ValueFinfo( "command", ValueFtype1< double >::global(),
-                        GFCAST( &PIDController::getCommand ),
-                        RFCAST( &PIDController::setCommand  ),
-                        "The command (desired) value of the sensed parameter. In control theory"
-                        " this is commonly known as setpoint(SP)." ),
-        new ValueFinfo( "sensed", ValueFtype1< double >::global(),
-                         GFCAST( &PIDController::getSensed ),
-                         RFCAST( &dummyFunc ),
-                        "Sensed (measured) value. This is commonly known as process variable"
-                        "(PV) in control theory."),
-        new ValueFinfo( "tauI", ValueFtype1< double >::global(),
-                        GFCAST( &PIDController::getTauI ),
-                        RFCAST( &PIDController::setTauI ),
-                        "The integration time constant, typically = dt. This is actually"
-                        " proportional gain divided by integral gain (Kp/Ki)). Larger Ki"
-                        " (smaller tauI) usually leads to fast elimination of steady state"
-                        " errors at the cost of larger overshoot." ),
-        new ValueFinfo( "tauD", ValueFtype1< double >::global(),
-                         GFCAST( &PIDController::getTauD ),
-                         RFCAST( &PIDController::setTauD ),
-                        "The differentiation time constant, typically = dt / 4. This is"
-                        " derivative gain (Kd) times proportional gain (Kp). Larger Kd (tauD)"
-                        " decreases overshoot at the cost of slowing down transient response"
-                        " and may lead to instability."),
-        new ValueFinfo( "output", ValueFtype1< double >::global(),
-                         GFCAST( &PIDController::getOutput ),
-                         RFCAST( &dummyFunc ),
-                         "Output of the PIDController. This is given by:"
-                         "      gain * ( error + INTEGRAL[ error dt ] / tau_i   + tau_d * d(error)/dt )\n"
-                         "Where gain = proportional gain (Kp), tau_i = integral gain (Kp/Ki) and"
-                         " tau_d = derivative gain (Kd/Kp). In control theory this is also known"
-                         " as the manipulated variable (MV)"),
-        new ValueFinfo( "error", ValueFtype1< double >::global(),
-                        GFCAST( &PIDController::getError ),
-                        RFCAST( &dummyFunc ),
-                        "The error term, which is the difference between command and sensed"
-                        " value."),
-        new ValueFinfo( "integral",ValueFtype1< double >::global(),
-                        GFCAST( &PIDController::getEIntegral ),
-                        RFCAST( &dummyFunc ),
-                        "The integral term. It is calculated as INTEGRAL(error dt) ="
-                        " previous_integral + dt * (error + e_previous)/2."),
-        new ValueFinfo( "derivative",ValueFtype1< double >::global(),
-                        GFCAST( &PIDController::getEDerivative ),
-                        RFCAST( &dummyFunc ),
-                        "The derivative term. This is (error - e_previous)/dt."),
-        new ValueFinfo( "e_previous",ValueFtype1< double >::global(),
-                        GFCAST( &PIDController::getEPrevious ),
-                        RFCAST( &dummyFunc ),
-                        "The error term for previous step."),
-        process,
-        new SrcFinfo( "outputSrc", Ftype1< double >::global(),
-                      "Sends the output of the PIDController. This is known as manipulated"
-                      " variable (MV) in control theory. This should be fed into the process"
-                      " which we are trying to control." ),
-        new DestFinfo( "commandDest", Ftype1< double >::global(),
-                       RFCAST( &PIDController::setCommand ),
+        static ValueFinfo<PIDController, double> gain( "gain",
+                                                "This is the proportional gain (Kp). This tuning parameter scales the"
+                                                " proportional term. Larger gain usually results in faster response, but"
+                                                " too much will lead to instability and oscillation.",
+                                                &PIDController::setGain,
+                                                &PIDController::getGain);
+        static ValueFinfo<PIDController, double> saturation("saturation",
+                                              "Bound on the permissible range of output. Defaults to maximum double"
+                                              " value.",
+                                              &PIDController::setSaturation,
+                                              &PIDController::getSaturation);
+        static ValueFinfo<PIDController, double> command("command",
+                                              "The command (desired) value of the sensed parameter. In control theory"
+                                              " this is commonly known as setpoint(SP).",                                               
+                                              &PIDController::setCommand, 
+                                              &PIDController::getCommand);
+        static ReadOnlyValueFinfo<PIDController, double> sensed( "sensed",
+                                                       "Sensed (measured) value. This is commonly known as process variable"
+                                                       "(PV) in control theory.",
+                                                       &PIDController::getSensed);
+        static ValueFinfo<PIDController, double> tauI( "tauI", 
+                                               "The integration time constant, typically = dt. This is actually"
+                                               " proportional gain divided by integral gain (Kp/Ki)). Larger Ki"
+                                               " (smaller tauI) usually leads to fast elimination of steady state"
+                                               " errors at the cost of larger overshoot.",
+                                               &PIDController::setTauI,
+                                               &PIDController::getTauI);
+        static ValueFinfo<PIDController, double> tauD( "tauD",
+                                               "The differentiation time constant, typically = dt / 4. This is"
+                                               " derivative gain (Kd) times proportional gain (Kp). Larger Kd (tauD)"
+                                               " decreases overshoot at the cost of slowing down transient response"
+                                               " and may lead to instability.",
+                                               &PIDController::setTauD,
+                                               &PIDController::getTauD);
+        static ReadOnlyValueFinfo<PIDController, double> outputValue( "outputValue", 
+                                                       "Output of the PIDController. This is given by:"
+                                                       "      gain * ( error + INTEGRAL[ error dt ] / tau_i   + tau_d * d(error)/dt )\n"
+                                                       "Where gain = proportional gain (Kp), tau_i = integral gain (Kp/Ki) and"
+                                                       " tau_d = derivative gain (Kd/Kp). In control theory this is also known"
+                                                       " as the manipulated variable (MV)",
+                                                       &PIDController::getOutput);                                                  
+        static ReadOnlyValueFinfo<PIDController, double> error( "error", 
+                                                       "The error term, which is the difference between command and sensed"
+                                                       " value.",
+                                                       &PIDController::getError);
+        static ReadOnlyValueFinfo<PIDController, double> integral( "integral",
+                                                       "The integral term. It is calculated as INTEGRAL(error dt) ="
+                                                       " previous_integral + dt * (error + e_previous)/2.",
+                                                       &PIDController::getEIntegral );
+        static ReadOnlyValueFinfo<PIDController, double> derivative( "derivative",
+                                                       "The derivative term. This is (error - e_previous)/dt.",
+                                                       &PIDController::getEDerivative );
+        static ReadOnlyValueFinfo<PIDController, double> e_previous( "e_previous",
+                                                       "The error term for previous step.",
+                                                       &PIDController::getEPrevious);
+        static DestFinfo commandIn( "commandIn",
                        "Command (desired value) input. This is known as setpoint (SP) in"
-                       " control theory." ),
-        new DestFinfo( "sensedDest", Ftype1< double >::global(),
-                       RFCAST( &PIDController::setSensed ),
+                       " control theory." ,
+                       new OpFunc1<PIDController, double>( &PIDController::setCommand ));
+        static DestFinfo sensedIn( "sensedIn",
                        "Sensed parameter - this is the one to be tuned. This is known as"
                        " process variable (PV) in control theory. This comes from the process"
-                       " we are trying to control." ),
-        new DestFinfo( "gainDest", Ftype1< double >::global(),
-                       RFCAST( &PIDController::setGain ),
-                       "Destination message to control the PIDController gain dynamically." ),
+                       " we are trying to control.",
+                       new OpFunc1<PIDController, double>( &PIDController::setSensed ));
+        static DestFinfo gainDest( "gainDest",
+                       "Destination message to control the PIDController gain dynamically.",
+                       new OpFunc1<PIDController, double>(&PIDController::setGain));
+        static SharedFinfo proc( "proc",
+                         "This is a shared message to receive Process messages "
+                         "from the scheduler objects."
+                         "The first entry in the shared msg is a MsgDest "
+                         "for the Process operation. It has a single argument, "
+                         "ProcInfo, which holds lots of information about current "
+                         "time, thread, dt and so on. The second entry is a MsgDest "
+                         "for the Reinit operation. It also uses ProcInfo. ",
+                         processShared, sizeof( processShared ) / sizeof( Finfo* )
+                         );
+
+
+    static Finfo* pidFinfos[] = {
+		&gain,
+		&saturation,
+		&command,
+		&sensed,
+		&tauI,
+		&tauD,
+		&outputValue,
+		&error,
+		&integral,
+		&derivative,
+		&e_previous,
+		outputOut(),
+		&commandIn,
+		&sensedIn,
+		&gainDest,
+		&proc
     };
-    static SchedInfo schedInfo[] = {{ process, 0, 0 }};
     static string doc[] = {
         "Name", "PIDController",
-        "Author", "Subhasis Ray, 2008, NCBS",
+        "Author", "Subhasis Ray",
         "Description", "PID feedback controller."
         "PID stands for Proportional-Integral-Derivative. It is used to"
         " feedback control dynamical systems. It tries to create a feedback"
         " output such that the sensed (measured) parameter is held at command"
         " value. Refer to wikipedia (http://wikipedia.org) for details on PID"
         " Controller." };
-
+    static Dinfo<PIDController> dinfo;
     static Cinfo pidCinfo(
-            doc,
-            sizeof( doc ) / sizeof( string ),
-            initNeutralCinfo(),
+            "PIDController",
+            Neutral::initCinfo(),
             pidFinfos,
             sizeof( pidFinfos ) / sizeof( Finfo* ),
-            ValueFtype1< PIDController >::global(),
-            schedInfo, 1 );
+            &dinfo,
+            doc,
+            sizeof(doc)/sizeof(string));
     return &pidCinfo;
 }
 
-static const Cinfo* pidCinfo = initPIDControllerCinfo();
-static const Slot outputSlot = initPIDControllerCinfo()->getSlot( "outputSrc" );
+static const Cinfo* pidCinfo = PIDController::initCinfo();
 
 PIDController::PIDController():
         command_(0),
@@ -168,153 +196,132 @@ PIDController::PIDController():
         e_derivative_(0),
         e_previous_(0)
 {
-    // do nothing else
+    ;    // do nothing else
 }
 
-void PIDController::setCommand( const Conn* conn, double command)
+void PIDController::setCommand(  double command)
 {
-    PIDController* instance = static_cast< PIDController* >( conn->data() );
-    instance->command_ = command;
+    command_ = command;
 }
 
-double PIDController::getCommand( Eref e )
+double PIDController::getCommand(  ) const
 {
-    PIDController* instance = static_cast< PIDController* >( e.e->data() );
-    return instance->command_;
+    return command_;
 }
 
-void PIDController::setSensed( const Conn* conn, double sensed )
+void PIDController::setSensed(  double sensed )
 {
-    PIDController* instance = static_cast< PIDController* >( conn->data() );
-    instance->sensed_ = sensed;
+    sensed_ = sensed;
 }
 
-double PIDController::getSensed( Eref e )
+double PIDController::getSensed(  ) const
 {
-    PIDController* instance = static_cast< PIDController* >( e.e->data() );
-    return instance->sensed_;
+    return sensed_;
 }
 
-double PIDController::getOutput( Eref e )
+double PIDController::getOutput(  ) const
 {
-    PIDController* instance = static_cast< PIDController* >( e.e->data() );
-    return instance->output_;
+    return output_;
 }
 
-void PIDController::setGain( const Conn* conn, double gain )
+void PIDController::setGain(  double gain )
 {
-    PIDController* instance = static_cast< PIDController* >( conn->data() );
-    instance->gain_ = gain;
+    gain_ = gain;
 }
 
-double PIDController::getGain( Eref e )
+double PIDController::getGain(  ) const
 {
-    PIDController* instance = static_cast< PIDController * >( e.e->data() );
-    return instance->gain_;
+    return gain_;
 }
 
-void PIDController::setTauI( const Conn* conn, double tau_i )
+void PIDController::setTauI(  double tau_i )
 {
-    PIDController* instance = static_cast< PIDController* >( conn->data());
-    instance->tau_i_ = tau_i;
+    tau_i_ = tau_i;
 }
 
-double PIDController::getTauI( Eref e )
+double PIDController::getTauI(  ) const
 {
-    PIDController* instance = static_cast< PIDController* >( e.e->data() );
-    return instance->tau_i_;
+    return tau_i_;
 }
 
-void PIDController::setTauD( const Conn* conn, double tau_d )
+void PIDController::setTauD(  double tau_d )
 {
-    PIDController* instance = static_cast< PIDController* >( conn->data() );
-    instance->tau_d_ = tau_d;
+    tau_d_ = tau_d;
 }
 
-double PIDController::getTauD( Eref e )
+double PIDController::getTauD(  ) const
 {
-    PIDController* instance = static_cast< PIDController* >( e.e->data() );
-    return instance->tau_d_;
+    return tau_d_;
 }
 
-void PIDController::setSaturation( const Conn* conn, double saturation )
+void PIDController::setSaturation(  double saturation )
 {
-    PIDController* instance = static_cast< PIDController* >( conn->data() );
     if (saturation <= 0) {
         cout << "Error: PIDController::setSaturation - saturation must be positive." << endl;
     } else {
-        instance->saturation_ = saturation;
+        saturation_ = saturation;
     }
 }
 
-double PIDController::getSaturation( Eref e )
+double PIDController::getSaturation(  ) const
 {
-    PIDController* instance = static_cast< PIDController* >( e.e->data() );
-    return instance->saturation_;
+    return saturation_;
 }
 
-double PIDController::getError( Eref e )
+double PIDController::getError(  ) const
 {
-    PIDController* instance = static_cast< PIDController* >( e.e->data() );
-    return instance->error_;
+    return error_;
 }
 
-double PIDController::getEIntegral( Eref e )
+double PIDController::getEIntegral(  ) const
 {
-    PIDController* instance = static_cast< PIDController* >( e.e->data() );
-    return instance->e_integral_;
+    return e_integral_;
 }
 
-double PIDController::getEDerivative( Eref e )
+double PIDController::getEDerivative(  ) const
 {
-    PIDController* instance = static_cast< PIDController* >( e.e->data() );
-    return instance->e_derivative_;
+    return e_derivative_;
 }
 
-double PIDController::getEPrevious( Eref e )
+double PIDController::getEPrevious(  ) const
 {
-    PIDController* instance = static_cast< PIDController* >( e.e->data() );
-    return instance->e_previous_;
+    return e_previous_;
 }
 
-void PIDController::processFunc( const Conn* conn, ProcInfo proc )
+void PIDController::process(const Eref& e,  ProcPtr proc )
 {
-    PIDController* instance = static_cast< PIDController* >( conn->data() );
-    instance->e_previous_ = instance->error_;
-    instance->error_ = instance->command_ - instance->sensed_;
-    instance->e_integral_ += 0.5 * (instance->error_ + instance->e_previous_) * proc->dt_;
-    instance->e_derivative_ = (instance->error_ - instance->e_previous_) / proc->dt_;
-    instance->output_ = instance->gain_ * (instance->error_ +
-                                           instance->e_integral_ / instance->tau_i_ +
-                                           instance->e_derivative_ * instance->tau_d_);
-    if (instance->output_ > instance->saturation_){
-        instance->output_ = instance->saturation_;
-        instance->e_integral_ -= 0.5 * (instance->error_ + instance->e_previous_) * proc->dt_;
+    double dt = proc->dt;
+    e_previous_ = error_;
+    error_ = command_ - sensed_;
+    e_integral_ += 0.5 * (error_ + e_previous_) * dt;
+    e_derivative_ = (error_ - e_previous_) / dt;
+    output_ = gain_ * (error_ + e_integral_ / tau_i_ + e_derivative_ * tau_d_);
+    if (output_ > saturation_){
+        output_ = saturation_;
+        e_integral_ -= 0.5 * (error_ + e_previous_) * dt;
+    } else if (output_ < -saturation_){
+        output_ = -saturation_;
+        e_integral_ -= 0.5 * (error_ + e_previous_) * dt;
     }
-    else if (instance->output_ < -instance->saturation_){
-        instance->output_ = -instance->saturation_;
-        instance->e_integral_ -= 0.5 * (instance->error_ + instance->e_previous_) * proc->dt_;
-    }
-#ifndef NDEBUG
-    cout << "PIDController::processFunc : " << conn->target().name() << ", command: " << instance->command_ << ", sensed: " << instance->sensed_ << ", e: " << instance->error_ << ", e_i: " << instance->e_integral_ << ", e_d: " << instance->e_derivative_ << ", e_prev: " << instance->e_previous_ << ", output: " << instance->output_ << ", gain: " << instance->gain_ << ", tauI: "<< instance->tau_i_ << ", tauD: " << instance->tau_d_ << endl;
-#endif
-    send1<double>( conn->target(), outputSlot, instance->output_);
+    outputOut()->send(e, output_);
 }
 
 
-void PIDController::reinitFunc( const Conn* conn, ProcInfo proc )
+void PIDController::reinit(const Eref& e, ProcPtr proc )
 {
-    PIDController* instance = static_cast< PIDController* >( conn->data());
-    if ( instance->tau_i_ <= 0.0 )
-        instance->tau_i_ = proc->dt_;
-    if ( instance->tau_d_ < 0.0 )
-        instance->tau_d_ = proc->dt_ / 4;
-    instance->sensed_ = 0.0;
-    instance->output_ = 0;
-    instance->error_ = 0;
-    instance->e_previous_ = instance->error_;
-    instance->e_integral_ = 0;
-    instance->e_derivative_ = 0;
+    if ( tau_i_ <= 0.0 ){
+        tau_i_ = proc->dt;
+    }
+    if ( tau_d_ < 0.0 ){
+        tau_d_ = proc->dt / 4;
+    }
+    sensed_ = 0.0;
+    output_ = 0;
+    error_ = 0;
+    e_previous_ = error_;
+    e_integral_ = 0;
+    e_derivative_ = 0;
+    outputOut()->send(e, output_);
 }
 
 

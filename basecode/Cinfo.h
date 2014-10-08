@@ -1,9 +1,8 @@
-
 /**********************************************************************
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment,
 ** also known as GENESIS 3 base code.
-**           copyright (C) 2003-2005 Upinder S. Bhalla. and NCBS
+**           copyright (C) 2003-2009 Upinder S. Bhalla. and NCBS
 ** It is made available under the terms of the
 ** GNU General Public License version 2
 ** See the file COPYING.LIB for the full notice.
@@ -11,23 +10,13 @@
 #ifndef _CINFO_H
 #define _CINFO_H
 
-struct SchedInfo
-{
-	const Finfo* finfo;
-	unsigned int tick;
-	unsigned int stage;
-};
+class DinfoBase;
 
 /**
  * Class to manage class information for all the other classes.
  */
 class Cinfo
 {
-#ifdef DO_UNIT_TESTS
-	friend void connTest();
-#endif
-    friend class Class;
-    
 		public:
 			/**
 			 * The Cinfo intializer is used for static initialization
@@ -40,156 +29,304 @@ class Cinfo
 			 * initialization sequence, despite the somewhat loose
 			 * semantics for this sequence in most C++ compilers.
 			 */
-			Cinfo( const std::string* doc,
-					unsigned int nDoc,
-					const Cinfo* baseCinfo,
-					Finfo** finfoArray,
-					unsigned int nFinfos,
-					const Ftype* ftype,
-					struct SchedInfo* schedInfo = 0,
-					unsigned int nSched = 0
-			);
-			
-			/**
-			 * Old-style constructor
-			 */
 			Cinfo( const std::string& name,
-					const std::string& author,
-					const std::string& description,
-					const Cinfo* baseCinfo,
-					Finfo** finfoArray,
+					const Cinfo* baseCinfo, // Base class
+					Finfo** finfoArray,	// Field information array
 					unsigned int nFinfos,
-					const Ftype* ftype,
-					struct SchedInfo* schedInfo = 0,
-					unsigned int nSched = 0
+					DinfoBase* d,	// A handle to lots of utility functions for the Data class.
+					const string* doc = 0,
+					unsigned int numDoc = 0,
+					bool banCreation = false
 			);
+
+			/**
+			 * This initializer is used only as a dummy, to keep Dinfo happy
+			 */
+			Cinfo();
+
+			/**
+			 * This is also a dummy initializer for Dinfo.
+			 */
+			Cinfo( const Cinfo& other );
 
 			~Cinfo();
+//////////////////////////////////////////////////////////////////////////
+			/**
+			 * Initializes the Cinfo. Must be called exactly once for
+			 * each Cinfo.
+			 */
+			void init( Finfo** finfoArray, unsigned int nFinfos );
 
+			/**
+			 * registerFinfo:
+			 * Puts Finfo information into Cinfo, and updates fields on
+			 * Finfo as necessary.
+			 */
+			void registerFinfo( Finfo* f );
+
+			/**
+			 * Registers the OpFunc, assigns it a FuncId and returns the
+			 * FuncId.
+			 */
+			FuncId registerOpFunc( const OpFunc* f );
+
+			/**
+			 * Used in derived classes, to replace the original OpFunc with
+			 * the new one. 
+			 */
+			void overrideFunc( FuncId fid, const OpFunc* f );
+
+			/**
+			 * Returns the next free value for BindIndex, and keeps track
+			 * of the total number set up.
+			 */
+			BindIndex registerBindIndex();
+
+			/**
+			 * Handles any operations that must be done after an Element
+			 * is created. Scans through all Finfos as they are the ones to
+			 * manage such requests. Examples are to create FieldElements.
+			 */
+			void postCreationFunc( Id newId, Element* newElm ) const;
+
+			/**
+			 * Registers a finfo as needing post-creation work
+			 */
+			void registerPostCreationFinfo( const Finfo* f );
+
+			/**
+			 * True if this class should never be instantiated in MOOSE.
+			 * This may happen if it is a pure virtual class, or if
+			 * this Cinfo is for a FieldElement which cannot be created
+			 * in isolation but only as a child of another class.
+			 */
+			bool banCreation() const;
+//////////////////////////////////////////////////////////////////////////
+
+			const OpFunc* getOpFunc( FuncId fid ) const;
+			// FuncId getOpFuncId( const string& funcName ) const;
+
+			/**
+			 * Return the name of the Cinfo
+			 */
 			const std::string& name() const;
-			const std::string& author() const;
-			const std::string& description() const;
 
 			/**
 			 * Finds the Cinfo with the specified name.
 			 */
 			static const Cinfo* find( const std::string& name );
 
-			/**
-			 * Finds Finfo on an element based on the name of the Finfo.
-			 * Checks the match with 
-			 * the element first, in case there is something overridden
+			/*
+			 * Returns base Cinfo class. The Neutral returns 0.
 			 */
-			const Finfo* findFinfo( Element* e, const string& name )
-					const;
-
-			/**
-			 * Finds Finfo on an element based on the ConnTainer.
-			 */
-			const Finfo* findFinfo( 
-					const Element* e, const ConnTainer* c ) const;
+			const Cinfo* baseCinfo() const;
 
 			/**
 			 * Finds Finfo by name in the list for this class, 
 			 * ignoring any element-specific fields.
+			 * Returns 0 on failure.
 			 */
 			const Finfo* findFinfo( const string& name) const;
 
 			/**
-			* Returns the Finfo identified by the specified msg number.
-			* Source Finfos should have a positive index
-			* pure Dest finfos have a negative index.
-			* Not all Finfos will have a msgNum, but any valid msgNum 
-			* should have a Finfo.
-			*/
-			const Finfo* findFinfo( int msgNum ) const;
+			 * Finds the funcId by name. Returns 0 on failure.
+			const FuncId findFuncId( const string& name) const;
+			 */
 
 			/**
-			 * Reorders the Finfo vector provided by the user. The
-			 * new ordering has SrcFinfos and src SharedFinfos first,
-			 * then DestFinfos, then ValueFinfos.
+			 * Number of SrcMsgs in total. Each has a unique number to
+			 * bind to an entry in the msgBinding vector in the Element.
 			 */
-			unsigned int shuffleFinfos();
-
-			static void initialize();
+			unsigned int numBindIndex() const;
 
 			/**
-			 * Returns true if 'other' is the same class or a base
-			 * class of the calling Cinfo.
+			 * Returns the map between name and field info
 			 */
-			bool isA( const Cinfo* other ) const;
+			const map< string, Finfo* >& finfoMap() const;
 
-			Element* create( Id id, const string& name ) const ;
-			Element* create( Id id, const string& name, 
-							void* data, bool noDelFlag = 0 ) const;
+			/**
+			 * Returns the Dinfo, which manages creation and destruction
+			 * of the data, and knows about its size.
+			 */
+			const DinfoBase* dinfo() const;
 
-			Element* createArray( Id id, const string& name,
-				unsigned int numEntries ) const ;
-			Element* createArray( Id id, const string& name, 
-					void* data, unsigned numEntries, size_t objectSize,
-					bool noDelFlag = 0 ) const;
+			/**
+			 * Returns true if the current Cinfo is derived from
+			 * the ancestor
+			 */
+			bool isA( const string& ancestor ) const;
 
-			bool schedule( Element* e, unsigned int connTainerOption ) const;
-			// void destroy( void* ) const ;
+			/**
+			 * Utility function for debugging
+			 */
+			void reportFids() const;
 
-			const Ftype* ftype() const {
-					return ftype_;
-			}
-
-			void listFinfos( vector< const Finfo* >& flist ) const;
-
-			Slot getSlot( const string& name ) const;
-			const Finfo* getThisFinfo() const {
-				return thisFinfo_;
-			}
-
-			unsigned int numSrc() const {
-				return numSrc_;
-			}
-
-			unsigned int numFinfos() const {
-				return finfos_.size();
-			}
+		/////////////////////////////////////////////////////////////////
+		// Functions here for the MOOSE Cinfo inspection class
+		/////////////////////////////////////////////////////////////////
 			
-			size_t size() const{
-				return ftype_->size();
-			}
+			/**
+			 * Return the documentation string
+			 */
+			string getDocs() const;
+
+			/**
+			 * Return the name of the base class
+			 */
+			string getBaseClass() const;
+
+
+			/**
+			 * Return the specified SrcFinfo
+			 */
+			Finfo* getSrcFinfo( unsigned int i ) const;
+
+			/**
+			 * Return number of SrcFinfos
+			 */
+			unsigned int getNumSrcFinfo() const;
+
+			/**
+			 * Return the specified DestFinfo
+			 */
+			Finfo* getDestFinfo( unsigned int i ) const;
+
+			/**
+			 * Return number of DestFinfo
+			 */
+			unsigned int getNumDestFinfo() const;
+
+			/**
+			 * Return the specified ValueFinfo
+			 */
+			Finfo* getValueFinfo( unsigned int i ) const;
+
+			/**
+			 * Return number of ValueFinfo
+			 */
+			unsigned int getNumValueFinfo() const;
+
+			/**
+			 * Return the specified LookupFinfo
+			 */
+			Finfo* getLookupFinfo( unsigned int i ) const;
+			/**
+			 * Return number of LookupFinfo
+			 */
+			unsigned int getNumLookupFinfo() const;
+
+			/**
+			 * Return the specified SharedFinfo
+			 */
+			Finfo* getSharedFinfo( unsigned int i );
+
+			/**
+			 * Return number of SharedFinfos
+			 */
+			unsigned int getNumSharedFinfo() const;
+
+			/**
+			 * Return the specified FieldElementFinfo
+			 */
+			Finfo* getFieldElementFinfo( unsigned int i ) const;
+
+			/**
+			 * Return number of FieldElementFinfos
+			 */
+			unsigned int getNumFieldElementFinfo() const;
+
+			/**
+			 * Dummy function. We never allow this assignment.
+			 */
+			void setNumFinfo( unsigned int v );
+
+			/**
+			 * Returns the name of the SrcFinfo having the specified 
+			 * BindIndex, on this Cinfo.
+			 * Returns "" on failure.
+			 */
+			 const string& srcFinfoName( BindIndex bid ) const;
+
+			/**
+			 * Returns the name of the DestFinfo having the specified 
+			 * FuncId, on this Cinfo.
+			 * Returns "" on failure.
+			 */
+			 const string& destFinfoName( FuncId fid ) const;
+
+	
+
+			/**
+			 * Utility function used at init to create the inspection 
+			 * Elements for each of the Cinfos.
+			 */
+			static void makeCinfoElements( Id parent );
+
+			/**
+			 * Ensures that the Func Ids are always in a fixed order,
+			 * regardless of the sequence of static initialization of
+			 * Cinfos.
+			 */
+			static void rebuildOpIndex();
+
+			/**
+			 * Initializer for the MOOSE fields for Cinfo
+			 */
+			static const Cinfo* initCinfo();
 
 		private:
-			/**
-			 * Helper function used by constructors. Required because in C++ we
-			 * cannot call one constructor from another to achieve the intended
-			 * effect.
-			 */
-			void init( const std::string* doc,
-					unsigned int nDoc,
-					Finfo** finfoArray,
-					unsigned int nFinfos,
-					struct SchedInfo* schedInfo,
-					unsigned int nSched
-			);
+			string name_;
 
-			std::map< std::string, std::string > doc_;
-			//~ const std::string name_;
-			//~ const std::string author_;
-			//~ const std::string description_;
+			// const std::string author_;
+			// const std::string description_;
 			const Cinfo* baseCinfo_;
-			vector< Finfo* > finfos_;
-			const Ftype* ftype_;
-			vector < SchedInfo > scheduling_;
-			// const Cinfo* base_;
+			const DinfoBase* dinfo_;
+
+			BindIndex numBindIndex_;
+			std::map< std::string, std::string > doc_;
+			
+			bool banCreation_;
+
 			/**
-			 * These two fields hold the Finfo that refers back to
-			 * this Cinfo for class information. The noDelFinfo_
-			 * is used where the data field of the Element must
-			 * not be freed at delete time. The only difference it
-			 * has is the state of the noDeleteFlag.
+			 * This looks up Finfos by name.
 			 */
-			Finfo* thisFinfo_;
-			Finfo* noDelFinfo_;
-			unsigned int nMsg_; // All messages
-			unsigned int numSrc_; // Highest index of SrcFinfos: need to preallocate at least this many.
-			static std::map< std::string, Cinfo* >& lookup();
+			map< string, Finfo* > finfoMap_;
+
+			/// Keep track of all SrcFinfos
+			vector< Finfo* > srcFinfos_;
+
+			/// Keep track of all DestFinfos
+			vector< Finfo* > destFinfos_;
+
+			/// Keep track of all ValueFinfos
+			vector< Finfo* > valueFinfos_;
+
+			/// Keep track of all LookupFinfos
+			vector< Finfo* > lookupFinfos_;
+
+			/// Keep track of all SharedFinfos
+			vector< Finfo* > sharedFinfos_;
+
+			/// Keep track of all FieldElementFinfos
+			vector< Finfo* > fieldElementFinfos_;
+
+			/**
+			 * These are special Finfos which have to be invoked
+			 * after the Element is created, and their postCreationFuncs
+			 * called. They are typically things like FieldElementFinfos.
+			 */
+			vector< const Finfo* > postCreationFinfos_;
+			vector< const OpFunc* > funcs_;
+
+			// Useful to know in case we have transient OpFuncs made and
+			//destroyed.
+			static unsigned int numCoreOpFunc_;
+//			map< string, FuncId > opFuncNames_;
+
+			static map< string, Cinfo* >& cinfoMap();
+
+			// Many opfuncs share same FuncId
+			// static map< OpFunc*, FuncId >& funcMap();
 };
 
 #endif // _CINFO_H

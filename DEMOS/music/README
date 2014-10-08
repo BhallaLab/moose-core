@@ -1,2 +1,0 @@
-Use command:
- mpirun -np 2 /usr/local/bin/music test.music

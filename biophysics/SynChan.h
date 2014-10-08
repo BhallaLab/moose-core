@@ -10,97 +10,64 @@
 #ifndef _SynChan_h
 #define _SynChan_h
 
-class SynChan
+class SynChan: public ChanCommon
 {
 	public:
-		SynChan()
-			: Ek_( 0.0 ), Gk_( 0.0 ), Ik_( 0.0 ), Gbar_( 0.0 ), 
-			tau1_( 1.0e-3 ), tau2_( 1.0e-3 ),
-			normalizeWeights_( 0 )
-		{
-			;
-		}
-    virtual ~SynChan(){
-        ;
-    }
-		static void setGbar( const Conn* c, double Gbar );
-		static double getGbar( Eref e );
+		SynChan();
+		~SynChan();
 
-		static void setEk( const Conn* c, double Ek );
-		static double getEk( Eref e );
+		/////////////////////////////////////////////////////////////////
+		// Value field access function definitions
+		/////////////////////////////////////////////////////////////////
 
-		static void setTau1( const Conn* c, double tau1 );
-		static double getTau1( Eref e );
+		void setTau1( double tau1 );
+		double getTau1() const;
 
-		static void setTau2( const Conn* c, double tau2 );
-		static double getTau2( Eref e );
+		void setTau2( double tau2 );
+		double getTau2() const;
 
-		static void setNormalizeWeights( const Conn* c, bool value );
-		static bool getNormalizeWeights( Eref e );
+		void setNormalizeWeights( bool value );
+		bool getNormalizeWeights() const;
 
-		static void setGk( const Conn* c, double Gk );
-		static double getGk( Eref e );
+		// override virtual func from ChanBase
+		void vSetGbar( const Eref& e, double Gbar );
 
-		// Ik is read-only
-		static double getIk( Eref e );
+		/////////////////////////////////////////////////////////////////
+		// Utility function for any time Gbar changes
+		void normalizeGbar();
 
-		static int getNumSynapses( Eref e );
-
-		static void setWeight(
-				const Conn* c, double val, const unsigned int& i );
-		static double getWeight( 
-				Eref e, const unsigned int& i );
-
-		static void setDelay(
-				const Conn* c, double val, const unsigned int& i );
-		static double getDelay( 
-				Eref e, const unsigned int& i );
+		/////////////////////////////////////////////////////////////////
+		// ElementFinfo access function definitions
+		/////////////////////////////////////////////////////////////////
+		/*
+		unsigned int getNumSynapses() const;
+		void setNumSynapses( unsigned int i );
+		Synapse* getSynapse( unsigned int i );
+		*/
 
 ///////////////////////////////////////////////////
 // Dest function definitions
 ///////////////////////////////////////////////////
 
-		static void synapseFunc( const Conn* c, double time );
+		void vProcess( const Eref& e, ProcPtr p );
+		void vReinit( const Eref& e, ProcPtr p );
 
-		static void channelFunc( const Conn* c, double Vm );
-
-		static void processFunc( const Conn* c, ProcInfo p );
-		static void reinitFunc( const Conn* c, ProcInfo p );
-
-		static void activationFunc( const Conn* c, double val );
-		static void modulatorFunc( const Conn* c, double val );
-
+		void activation( double val );
+		void modulator( double val );
 ///////////////////////////////////////////////////
-// Protected fields and functions.
-///////////////////////////////////////////////////
+		/**
+		 * Override base class function for spike handling
+		 */
+		/* void innerAddSpike( unsigned int synIndex, const double time ); */
 
-	protected:
-///////////////////////////////////////////////////
-// Local dest function definitions
-///////////////////////////////////////////////////
-		void innerSetWeight(
-				Eref e, double val, unsigned int i );
-		double innerGetWeight(
-				Eref e, unsigned int i );
-		void innerSetDelay(
-				Eref e, double val, unsigned int i );
-		double innerGetDelay(
-				Eref e, unsigned int i );
-    virtual void innerSynapseFunc( const Conn* c, double time );
-    virtual void innerProcessFunc( Eref e, ProcInfo p );
-    virtual void innerReinitFunc( Eref e,  ProcInfo p );
-    virtual void innerSetTau2(double value);
-    virtual double innerGetTau2();
+		static const Cinfo* initCinfo();
+	protected: // Used by NMDAChan
     
 ///////////////////////////////////////////////////
 // Utility function
 ///////////////////////////////////////////////////
-    virtual unsigned int updateNumSynapse( Eref e );
+    // virtual unsigned int updateNumSynapse( Eref e );
 		
-		double Ek_;
-		double Gk_;
-		double Ik_;
-		double Gbar_;
 		double tau1_;
 		double tau2_;
 		int normalizeWeights_;
@@ -113,12 +80,8 @@ class SynChan
 		double modulation_;
 		double X_;	
 		double Y_;	
-		double Vm_;
-		vector< SynInfo > synapses_;
-		priority_queue< SynInfo > pendingEvents_;
+		double dt_; /// Tracks the timestep assigned at reinit.
 };
 
-// Used by solver, readcell, etc.
-extern const Cinfo* initSynChanCinfo();
 
 #endif // _SynChan_h

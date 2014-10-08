@@ -1,18 +1,14 @@
 // IzhikevichNrn.cpp --- 
 // 
 // Filename: IzhikevichNrn.cpp
-// Description: Izhikevich model of neuron. See Izhikevich,EM. 2003.
-//              Simple model of spiking neurons. Neural Networks,
-//              IEEE Transactions on. 14(6). pp 1569–1572 for
-//              details.
-//
-// Author: subhasis ray
+// Description: 
+// Author: Subhasis Ray
 // Maintainer: 
-// Created: Fri Apr  3 18:00:50 2009 (+0530)
+// Created: Fri Jul  8 10:00:33 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Jun 23 17:44:55 2010 (+0530)
-//           By: Subhasis Ray
-//     Update #: 273
+// Last-Updated: Mon Nov  5 16:58:20 2012 (+0530)
+//           By: subha
+//     Update #: 110
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -29,174 +25,257 @@
 // 
 // 
 // 
-//
-/**********************************************************************
-** This program is part of 'MOOSE', the
-** Messaging Object Oriented Simulation Environment,
-** also known as GENESIS 3 base code.
-**           copyright (C) 2003-2009 Upinder S. Bhalla. and NCBS
-** It is made available under the terms of the
-** GNU General Public License version 2
-** See the file COPYING.LIB for the full notice.
-**********************************************************************/
 
 // Code:
 
-#include "basecode/header.h"
-#include "basecode/moose.h"
+#include "header.h"
 #include "IzhikevichNrn.h"
 
-const Cinfo* initIzhikevichNrnCinfo()
+
+static SrcFinfo1< double >* spikeOut()
 {
-    static Finfo* processShared[] = {
-        new DestFinfo( "process", Ftype1< ProcInfo >::global(),
-                  RFCAST( &IzhikevichNrn::processFunc )),
-        new DestFinfo( "reinit", Ftype1< ProcInfo >::global(),
-                       RFCAST( &IzhikevichNrn::reinitFunc )),
+    static SrcFinfo1< double > spike("spikeOut",
+                                      "Sends out spike events");
+    return &spike;
+}
+
+static SrcFinfo1< double >* VmOut()
+{
+    static SrcFinfo1< double > VmOut("VmOut", 
+                               "Sends out Vm");
+    return &VmOut;
+}
+
+const Cinfo* IzhikevichNrn::initCinfo()
+{
+
+    static DestFinfo process(
+            "process",
+            "Handles process call",
+            new ProcOpFunc< IzhikevichNrn >( &IzhikevichNrn::process));
+    static DestFinfo reinit(
+            "reinit",
+            "Handles reinit call",
+            new ProcOpFunc<IzhikevichNrn>( &IzhikevichNrn::reinit));
+
+    static Finfo * processShared[] = {
+        &process,
+        &reinit
     };
-    static Finfo* process = new SharedFinfo("process", processShared,
-                                             sizeof(processShared) / sizeof(Finfo*),
-			"This is a shared message to receive Process messages from the scheduler objects. "
-			"The first entry is a MsgDest for the Process operation. It has a single argument,ProcInfo, "
-			"which holds lots of information about current time, thread, dt and so on. "
-			"The second entry is a MsgDest for the Reinit operation. "
-			"It also uses ProcInfo.");
-    static Finfo* izhikevichNrnFinfos[] = {
-        
-        new ValueFinfo("Vmax", ValueFtype1<double>::global(),
-                       GFCAST(&IzhikevichNrn::getVmax),
-                       RFCAST(&IzhikevichNrn::setVmax),
-                       "Maximum membrane potential. Membrane potential is reset to c whenever"
-                       " it reaches Vmax. NOTE: Izhikevich model specifies the PEAK voltage,"
-                       " rather than THRSHOLD voltage. The threshold depends on the previous"
-                       " history."),
-        new ValueFinfo("c", ValueFtype1<double>::global(),
-                       GFCAST(&IzhikevichNrn::getC),
-                       RFCAST(&IzhikevichNrn::setC),
-                       "Reset potential. Membrane potential is reset to c whenever it reaches"
-                       " Vmax."),
-        new ValueFinfo("d", ValueFtype1<double>::global(),
-                       GFCAST(&IzhikevichNrn::getD),
-                       RFCAST(&IzhikevichNrn::setD),
-                       "Parameter d in Izhikevich model. Unit is V/s."),
-        new ValueFinfo("a", ValueFtype1<double>::global(),
-                       GFCAST(&IzhikevichNrn::getA),
-                       RFCAST(&IzhikevichNrn::setA),
-                       "Parameter a in Izhikevich model. Unit is s^-1"),
-        new ValueFinfo("b", ValueFtype1<double>::global(),
-                       GFCAST(&IzhikevichNrn::getB),
-                       RFCAST(&IzhikevichNrn::setB),
-                       "Parameter b in Izhikevich model. Unit is s^-1"),
-        new ValueFinfo("Vm", ValueFtype1<double>::global(),
-                       GFCAST(&IzhikevichNrn::getVm),
-                       RFCAST(&IzhikevichNrn::setVm),
-                       "Membrane potential, equivalent to v in Izhikevich equation."),
-        new ValueFinfo("u", ValueFtype1<double>::global(),
-                       GFCAST(&IzhikevichNrn::getU),
-                       RFCAST(&dummyFunc),
-                       "Parameter u in Izhikevich equation. Unit is V/s^-1"),
-        new ValueFinfo("Im", ValueFtype1<double>::global(),
-                       GFCAST(&IzhikevichNrn::getInject),
-                       RFCAST(&dummyFunc),
-                       "Total current going through the membrane. Unit is A."),
-        new ValueFinfo("initVm", ValueFtype1<double>::global(),
-                       GFCAST(&IzhikevichNrn::getInitVm),
-                       RFCAST(&IzhikevichNrn::setInitVm),
-                       "Initial membrane potential. Unit is V."),
-        new ValueFinfo("initU", ValueFtype1<double>::global(),
-                       GFCAST(&IzhikevichNrn::getInitU),
-                       RFCAST(&IzhikevichNrn::setInitU),
-                       "Initial value of u."),
-        new ValueFinfo("alpha", ValueFtype1<double>::global(),
-                       GFCAST(&IzhikevichNrn::getAlpha),
-                       RFCAST(&IzhikevichNrn::setAlpha),
-                       "Coefficient of v^2 in Izhikevich equation. Defaults to 0.04 in"
-                       " physiological unit. In SI it should be 40000.0. Unit is V^-1 s^-1"),
-        new ValueFinfo("beta", ValueFtype1<double>::global(),
-                        GFCAST(&IzhikevichNrn::getBeta),
-                        RFCAST(&IzhikevichNrn::setBeta),
-                       "Coefficient of v in Izhikevich model. Defaults to 5 in physiological"
-                       " unit, 5000.0 for SI units. Unit is s^-1"),
-        new ValueFinfo("gamma", ValueFtype1<double>::global(),
-                       GFCAST(&IzhikevichNrn::getGamma),
-                       RFCAST(&IzhikevichNrn::setGamma),
-                       "Constant term in Izhikevich model. Defaults to 140 in both"
-                       " physiological and SI units. unit is V/s."),
-        new ValueFinfo("Rm", ValueFtype1<double>::global(),
-                       GFCAST(&IzhikevichNrn::getRm),
-                       RFCAST(&IzhikevichNrn::setRm),
-                       "Hidden cefficient of input current term (I) in Izhikevich model. Defaults to 1e6 Ohm."),
-        
-        ///////////////////////////////
-        // MsgSrc definition
-        ///////////////////////////////
-        new SrcFinfo("VmSrc", Ftype1<double>::global()),
-        new SrcFinfo("eventSrc", Ftype1<double>::global(),
-                     "Sends out a trigger for an event whenever Vm >= c."),
-        ///////////////////////////////
-        // MsgDest definition
-        ///////////////////////////////
-        new DestFinfo("injectDest", Ftype1< double >::global(),
-                      RFCAST( &IzhikevichNrn::setInject), 
-                      "Injection current into the neuron."),
-        new DestFinfo("cDest", Ftype1< double >::global(),
-                      RFCAST(&IzhikevichNrn::setC),
-                      "Destination message to modify parameter c at runtime."),
-        new DestFinfo("dDest", Ftype1< double >::global(),
-                      RFCAST(&IzhikevichNrn::setD),
-                      "Destination message to modify parameter d at runtime."),
-        new DestFinfo("aDest", Ftype1<double>::global(),
-                      RFCAST(&IzhikevichNrn::setA),
-                      "Destination message modify parameter a at runtime."),
-        new DestFinfo("bDest", Ftype1<double>::global(),
-                      RFCAST(&IzhikevichNrn::setB),
-                      "Destination message to modify parameter b at runtime"),
-        ///////////////////////////////
-        // SharedFinfos
-        ///////////////////////////////
-        process,
+
+    static SharedFinfo proc(
+            "proc",
+            "Shared message to receive Process message from scheduler",
+            processShared, sizeof( processShared ) / sizeof( Finfo* ) );
+		
+    ///////////////////////////////////////////////////////
+    // Field definitions
+    ///////////////////////////////////////////////////////
+
+    static ValueFinfo<IzhikevichNrn, double> Vmax(
+            "Vmax",
+            "Maximum membrane potential. Membrane potential is reset to c whenever"
+            " it reaches Vmax. NOTE: Izhikevich model specifies the PEAK voltage,"
+            " rather than THRSHOLD voltage. The threshold depends on the previous"
+            " history.",
+            &IzhikevichNrn::setVmax,
+            &IzhikevichNrn::getVmax);
+    static ValueFinfo<IzhikevichNrn, double> c(
+            "c",
+            "Reset potential. Membrane potential is reset to c whenever it reaches"
+            " Vmax.",
+            &IzhikevichNrn::setC,
+            &IzhikevichNrn::getC);
+    static ValueFinfo<IzhikevichNrn, double> d(
+            "d",
+            "Parameter d in Izhikevich model. Unit is V/s.",
+            &IzhikevichNrn::setD,
+            &IzhikevichNrn::getD);
+    static ValueFinfo<IzhikevichNrn, double> a(
+            "a",
+            "Parameter a in Izhikevich model. Unit is s^{-1}",
+            &IzhikevichNrn::setA,
+            &IzhikevichNrn::getA);
+    static ValueFinfo<IzhikevichNrn, double> b(
+            "b",
+            "Parameter b in Izhikevich model. Unit is s^{-1}",
+            &IzhikevichNrn::setB,
+            &IzhikevichNrn::getB);
+    static ValueFinfo<IzhikevichNrn, double> Vm(
+            "Vm",
+            "Membrane potential, equivalent to v in Izhikevich equation.",
+            &IzhikevichNrn::setVm,
+            &IzhikevichNrn::getVm);
+    static ReadOnlyValueFinfo<IzhikevichNrn, double> u(
+            "u",
+            "Parameter u in Izhikevich equation. Unit is V/s",
+            &IzhikevichNrn::getU);
+    static ReadOnlyValueFinfo<IzhikevichNrn, double> Im(
+            "Im",
+            "Total current going through the membrane. Unit is A.",
+            &IzhikevichNrn::getIm);
+    static ValueFinfo<IzhikevichNrn, double> initVm(
+            "initVm",
+            "Initial membrane potential. Unit is V.",
+            &IzhikevichNrn::setInitVm,
+            &IzhikevichNrn::getInitVm);
+    static ValueFinfo<IzhikevichNrn, double> inject(
+            "inject",
+            "External current injection into the neuron",
+            &IzhikevichNrn::setInject,
+            &IzhikevichNrn::getInject);
+    static ValueFinfo<IzhikevichNrn, double> initU(
+            "initU",
+            "Initial value of u.",
+            &IzhikevichNrn::setInitU,
+            &IzhikevichNrn::getInitU);
+    
+    static ValueFinfo<IzhikevichNrn, double> alpha(
+            "alpha",
+            "Coefficient of v^2 in Izhikevich equation. Defaults to 0.04 in "
+            "physiological unit. In SI it should be 40000.0. Unit is V^-1 s^{-1}",
+            &IzhikevichNrn::setAlpha,
+            &IzhikevichNrn::getAlpha);
+
+    static ValueFinfo<IzhikevichNrn, double> beta(
+            "beta",
+            "Coefficient of v in Izhikevich model. Defaults to 5 in physiological"
+            " unit, 5000.0 for SI units. Unit is s^{-1}",
+            &IzhikevichNrn::setBeta,
+            &IzhikevichNrn::getBeta);
+    static ValueFinfo<IzhikevichNrn, double> gamma(
+            "gamma",
+            "Constant term in Izhikevich model. Defaults to 140 in both"
+            " physiological and SI units. unit is V/s.",
+            &IzhikevichNrn::setGamma,
+            &IzhikevichNrn::getGamma);
+    static ValueFinfo<IzhikevichNrn, double> RmByTau(
+            "RmByTau",
+            "Hidden coefficient of input current term (I) in Izhikevich model. Defaults to 1e9 Ohm/s.",
+            &IzhikevichNrn::setRmByTau,
+            &IzhikevichNrn::getRmByTau);
+
+    static ValueFinfo<IzhikevichNrn, bool> accommodating(
+            "accommodating",
+            "True if this neuron is an accommodating one. The equation for recovery"
+            " variable u is special in this case.",
+            &IzhikevichNrn::setAccommodating,
+            &IzhikevichNrn::getAccommodating);
+    
+    static ValueFinfo<IzhikevichNrn, double> u0(
+            "u0",
+            "This is used for accommodating neurons where recovery variables u is"
+            " computed as: u += tau*a*(b*(Vm-u0))",
+            &IzhikevichNrn::setU0,
+            &IzhikevichNrn::getU0);
+    
+    ///////////////////////////////
+    // MsgDest definition
+    ///////////////////////////////
+    static DestFinfo injectMsg(
+            "injectMsg",
+            "Injection current into the neuron.",
+            new OpFunc1<IzhikevichNrn, double>( &IzhikevichNrn::setInject));
+    
+    static DestFinfo cDest(
+            "cDest",
+            "Destination message to modify parameter c at runtime.",
+            new OpFunc1<IzhikevichNrn, double>(&IzhikevichNrn::setC));
+                          
+    static DestFinfo dDest(
+            "dDest",
+            "Destination message to modify parameter d at runtime.",                    
+            new OpFunc1<IzhikevichNrn, double>(&IzhikevichNrn::setD));
+    
+    static DestFinfo aDest(
+            "aDest",
+            "Destination message modify parameter a at runtime.",
+            new OpFunc1<IzhikevichNrn, double>(&IzhikevichNrn::setA));
+            
+    static DestFinfo bDest(
+            "bDest",
+            "Destination message to modify parameter b at runtime",            
+            new OpFunc1<IzhikevichNrn, double>(&IzhikevichNrn::setB));
+    
+
+    static DestFinfo handleChannel("handleChannel",
+                                   "Handles conductance and reversal potential arguments from Channel",
+                                   new OpFunc2<IzhikevichNrn, double, double >(&IzhikevichNrn::handleChannel));
+
+    static Finfo * channelShared[] = {
+        &handleChannel,
+        VmOut()
+    };
+
+    static SharedFinfo channel("channel",
+			"This is a shared message from a IzhikevichNrn to channels."
+			"The first entry is a MsgDest for the info coming from "
+			"the channel. It expects Gk and Ek from the channel "
+			"as args. The second entry is a MsgSrc sending Vm ",
+                               channelShared, sizeof( channelShared ) / sizeof( Finfo* )
+	);                               
+    static Finfo* IzhikevichNrnFinfos[] = {
+        &proc,
+        &Vmax,
+        &c,
+        &d,
+        &a,
+        &b,
+        &u,
+        &Vm,
+        &Im,
+        &inject,
+        &RmByTau,
+        &accommodating,
+        &u0,
+        &initVm,
+        &initU,
+        &alpha,
+        &beta,
+        &gamma,
+        &injectMsg,
+        &cDest,
+        &dDest,
+        &bDest,
+        &aDest,
+        VmOut(),
+        spikeOut(),
+        &channel,        
     };
     
-    static SchedInfo schedInfo[] = { {process, 0, 0 },};
-
     static string doc[] = {
         "Name", "IzhikevichNrn",
         "Author", "Subhasis Ray",
         "Description", "Izhikevich model of spiking neuron "
         "(Izhikevich,EM. 2003. Simple model of spiking neurons. Neural"
-        " Networks, IEEE Transactions on 14(6). pp 1569–1572).\n"
+        " Networks, IEEE Transactions on 14(6). pp 1569-1572).\n"
         " This class obeys the equations (in physiological units):\n"
         "  dVm/dt = 0.04 * Vm^2 + 5 * Vm + 140 - u + inject\n"
         "  du/dt = a * (b * Vm - u)\n"
         " if Vm >= Vmax then Vm = c and u = u + d\n"
         " Vmax = 30 mV in the paper."
     };
-    static Cinfo izhikevichNrnCinfo(
-            doc,
-            sizeof(doc) / sizeof(string),
-            initNeutralCinfo(),
-            izhikevichNrnFinfos,
-            sizeof(izhikevichNrnFinfos) / sizeof(Finfo*),
-            ValueFtype1<IzhikevichNrn>::global(),
-            schedInfo, 1);
+    static Dinfo< IzhikevichNrn > dinfo;
+    static Cinfo IzhikevichNrnCinfo(
+        "IzhikevichNrn",
+        Neutral::initCinfo(),
+        IzhikevichNrnFinfos,
+        sizeof( IzhikevichNrnFinfos ) / sizeof( Finfo* ),
+        &dinfo,
+        doc,
+        sizeof(doc)/sizeof(string));
 
-    return &izhikevichNrnCinfo;
+    return &IzhikevichNrnCinfo;
 }
 
-static const Cinfo* izhikevichNrnCinfo = initIzhikevichNrnCinfo();
-
-static const Slot eventSrcSlot = initIzhikevichNrnCinfo()->getSlot("eventSrc");
-static const Slot VmSrcSlot = initIzhikevichNrnCinfo()->getSlot("VmSrc");
-
-
-
+static const Cinfo * IzhikevichNrnCinfo = IzhikevichNrn::initCinfo();
 
 IzhikevichNrn::IzhikevichNrn():
         alpha_(40000.0), // 0.04 physiological unit
         beta_(5000.0), // 5 physiological unit
         gamma_(140.0), // 140 physiological unit
-        Rm_(1e6), // Assuming Izhikevich was using nA as unit of
-                  // current, 1e6 Ohm will be the scaling term for SI
+        RmByTau_(1e6), // Assuming Izhikevich was using nA as unit of
+        // current, 1e6 Ohm will be the scaling term for SI
         a_(20.0), 
         b_(200.0),
         c_(-0.065), // -65 mV
@@ -208,189 +287,214 @@ IzhikevichNrn::IzhikevichNrn():
         initU_(-13.0), 
         sum_inject_(0.0),
         Im_(0.0),
-        savedVm_(-0.065)
-{}
-
-void IzhikevichNrn::setA(const Conn* conn, double value)
+        savedVm_(-0.065),
+        accommodating_(false),
+        u0_(-0.065),
+        inject_(0.0)
 {
-    static_cast<IzhikevichNrn*>(conn->data())->a_ = value;
+    ;
 }
 
-double IzhikevichNrn::getA(Eref e)
+IzhikevichNrn::~IzhikevichNrn()
 {
-    return static_cast<IzhikevichNrn*>(e.data())->a_;
+    ;
+}
+void IzhikevichNrn::setA( double value)
+{
+    a_ = value;
 }
 
-void IzhikevichNrn::setB(const Conn* conn, double value)
+double IzhikevichNrn::getA() const
 {
-    static_cast<IzhikevichNrn*>(conn->data())->b_ = value;
+    return a_;
 }
 
-double IzhikevichNrn::getB(Eref e)
+void IzhikevichNrn::setB( double value)
 {
-    return static_cast<IzhikevichNrn*>(e.data())->b_;
-}
-void IzhikevichNrn::setC(const Conn* conn, double value)      
-{
-    static_cast<IzhikevichNrn*>(conn->data())->c_ = value;
+    b_ = value;
 }
 
-double IzhikevichNrn::getC(Eref e)
+double IzhikevichNrn::getB() const
 {
-    return static_cast<IzhikevichNrn*>(e.data())->c_;
+    return b_;
+}
+void IzhikevichNrn::setC( double value)      
+{
+    c_ = value;
+}
+
+double IzhikevichNrn::getC() const
+{
+    return c_;
 }                             
 
-void IzhikevichNrn::setD(const Conn* conn, double value)       
+void IzhikevichNrn::setD( double value)       
 {
-    static_cast<IzhikevichNrn*>(conn->data())->d_ = value;
+    d_ = value;
 }
 
-double IzhikevichNrn::getD(Eref e)
+double IzhikevichNrn::getD() const
 {
-    return static_cast<IzhikevichNrn*>(e.data())->d_;
+    return d_;
 }
 
-void IzhikevichNrn::setRm(const Conn* conn, double value)
+void IzhikevichNrn::setRmByTau( double value)
 {
-    static_cast<IzhikevichNrn*>(conn->data())->Rm_ = value;
+    RmByTau_ = value;
 }
 
-double IzhikevichNrn::getRm(Eref e)
+double IzhikevichNrn::getRmByTau() const
 {
-    return static_cast<IzhikevichNrn*>(e.data())->Rm_;
+    return RmByTau_;
 }                             
-void IzhikevichNrn::setVm(const Conn* conn, double value)       
+void IzhikevichNrn::setVm( double value)       
 {
-    static_cast<IzhikevichNrn*>(conn->data())->Vm_ = value;
+    Vm_ = value;
 }
-double IzhikevichNrn::getU(Eref e)
+double IzhikevichNrn::getU() const
 {
-    return static_cast<IzhikevichNrn*>(e.data())->u_;
-}                             
-
-double IzhikevichNrn::getVm(Eref e)
-{
-    return static_cast<IzhikevichNrn*>(e.data())->savedVm_;
+    return u_;
 }                             
 
-void IzhikevichNrn::setVmax(const Conn* conn, double value)    
+double IzhikevichNrn::getVm() const
 {
-    static_cast<IzhikevichNrn*>(conn->data())->Vmax_ = value;
+    return savedVm_;
+}                             
+
+void IzhikevichNrn::setVmax( double value) 
+{
+    Vmax_ = value;
 }
 
-double IzhikevichNrn::getVmax(Eref e)
+double IzhikevichNrn::getVmax() const
 {
-    return static_cast<IzhikevichNrn*>(e.data())->Vmax_;
+    return Vmax_;
 }
 
-void IzhikevichNrn::setAlpha(const Conn* conn, double value)   
+void IzhikevichNrn::setAlpha( double value)   
 {
-    static_cast<IzhikevichNrn*>(conn->data())->alpha_ = value;
+    alpha_ = value;
 }
 
-double IzhikevichNrn::getAlpha(Eref e)
+double IzhikevichNrn::getAlpha() const
 {
-    return static_cast<IzhikevichNrn*>(e.data())->alpha_;
+    return alpha_;
 }
 
-void IzhikevichNrn::setBeta(const Conn* conn, double value)
+void IzhikevichNrn::setBeta( double value)
 {
-    static_cast<IzhikevichNrn*>(conn->data())->beta_ = value;
+    beta_ = value;
 }
 
-double IzhikevichNrn::getBeta(Eref e)
+double IzhikevichNrn::getBeta() const
 {
-    return static_cast<IzhikevichNrn*>(e.data())->beta_;
+    return beta_;
 }                          
 
-void IzhikevichNrn::setGamma(const Conn* conn, double value)   
+void IzhikevichNrn::setGamma( double value)   
 {
-    static_cast<IzhikevichNrn*>(conn->data())->gamma_ = value;
+    gamma_ = value;
 }
 
-double IzhikevichNrn::getGamma(Eref e)
+double IzhikevichNrn::getGamma() const
 {
-    return static_cast<IzhikevichNrn*>(e.data())->gamma_;
+    return gamma_;
 }                         
 
-void IzhikevichNrn::setInject(const Conn* conn, double value)
+void IzhikevichNrn::setInject( double value)
 {
-    static_cast<IzhikevichNrn*>(conn->data())->sum_inject_ += value;
+    inject_ = value;
 }
 
-double IzhikevichNrn::getInject(Eref e)
+double IzhikevichNrn::getInject() const
 {
-    return static_cast<IzhikevichNrn*>(e.data())->Im_;
+    return inject_;
 }                        
 
-void IzhikevichNrn::setInitVm(const Conn* conn, double value)    
+double IzhikevichNrn::getIm() const
 {
-    static_cast<IzhikevichNrn*>(conn->data())->initVm_ = value;
+    return Im_;
+}                        
+
+void IzhikevichNrn::setInitVm( double value)    
+{
+    initVm_ = value;
 }
 
-double IzhikevichNrn::getInitVm(Eref e)
+double IzhikevichNrn::getInitVm() const
 {
-    return static_cast<IzhikevichNrn*>(e.data())->initVm_;
+    return initVm_;
 }
 
-void IzhikevichNrn::setInitU(const Conn* conn, double value)    
+void IzhikevichNrn::setInitU( double value)    
 {
-    static_cast<IzhikevichNrn*>(conn->data())->initU_ = value;
+    initU_ = value;
 }
 
-double IzhikevichNrn::getInitU(Eref e)
+double IzhikevichNrn::getInitU() const
 {
-    return static_cast<IzhikevichNrn*>(e.data())->initU_;
+    return initU_;
 }
 
-void IzhikevichNrn::processFunc(const Conn* conn, ProcInfo proc)
+void IzhikevichNrn::setAccommodating( bool value)    
 {
-    double dt = proc->dt_;
-    IzhikevichNrn* instance = static_cast<IzhikevichNrn*>(conn->data());
+    accommodating_ = value;
+}
 
-    instance->Vm_ += dt * ((instance->alpha_ * instance->Vm_ + instance->beta_) * instance->Vm_
-                           + instance->gamma_ - instance->u_ + 1e3 * instance->Rm_ * instance->sum_inject_);
-    instance->u_ += dt * instance->a_ * (instance->b_ * instance->Vm_ - instance->u_);
-    instance->Im_ = instance->sum_inject_;
-    instance->sum_inject_ = 0.0;
+bool IzhikevichNrn::getAccommodating() const
+{
+    return accommodating_;
+}
+
+void IzhikevichNrn::setU0( double value)    
+{
+    u0_ = value;
+}
+
+double IzhikevichNrn::getU0() const
+{
+    return u0_;
+}
+
+void IzhikevichNrn::handleChannel(double Gk, double Ek)
+{
+    sum_inject_ += Gk * (Ek - Vm_);
+}
+
+void IzhikevichNrn::process(const Eref& eref, ProcPtr proc)
+{
+    Vm_ += proc->dt * ((alpha_ * Vm_ + beta_) * Vm_
+                       + gamma_ - u_ + RmByTau_ * sum_inject_);
+    if (accommodating_){
+        u_ += proc->dt * a_ * b_ * (Vm_ - u0_);
+    } else {
+        u_ += proc->dt * a_ * (b_ * Vm_ - u_);
+    }
+    Im_ = sum_inject_;
+    sum_inject_ = inject_;
     // This check is to ensure that checking Vm field will always
     // return Vmax when Vm actually crosses Vmax.
-    if (instance->Vm_ >= instance->Vmax_){
-        instance->Vm_ = instance->c_;
-        instance->u_ += instance->d_;
-        instance->savedVm_ = instance->Vmax_;
-        send1<double>(conn->target(), VmSrcSlot, instance->Vmax_);
-        send1<double>(conn->target(), eventSrcSlot, proc->currTime_);
+    if (Vm_ >= Vmax_){
+        Vm_ = c_;
+        u_ += d_;
+        savedVm_ = Vmax_;
+        VmOut()->send(eref, Vmax_);
+        spikeOut()->send(eref, proc->currTime);
     } else {
-        instance->savedVm_ = instance->Vm_;
-        send1<double>(conn->target(), VmSrcSlot, instance->Vm_);
-    }
- 
+        savedVm_ = Vm_;
+        VmOut()->send(eref, Vm_);
+    } 
 }
 
-void IzhikevichNrn::reinitFunc(const Conn* conn, ProcInfo proc)
+void IzhikevichNrn::reinit(const Eref& eref, ProcPtr proc)
 {
-	//cout << "IzhikevichNrn::reinitFunc - start." << endl;
-    IzhikevichNrn* instance = static_cast<IzhikevichNrn*>(conn->data());
-    instance->sum_inject_ = 0.0;
-    instance->Vm_ = instance->initVm_;
-    instance->u_ = instance->initU_;
-    instance->Im_ = 0.0;
-	//cout << "IzhikevichNrn::reinitFunc - end." << endl;
-   
+    sum_inject_ = 0.0;
+    Vm_ = initVm_;
+    u_ = initU_;
+    Im_ = 0.0;
+    savedVm_ = Vm_;
+    VmOut()->send(eref, Vm_);    
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 // 
 // IzhikevichNrn.cpp ends here
