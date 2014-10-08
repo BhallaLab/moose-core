@@ -1,10 +1,11 @@
-===============================================
+***********************************************
 Getting started with python scripting for MOOSE
-===============================================
+***********************************************
 
 .. :Author: Subhasis Ray
 .. :Date:   December 12, 2012, Updated: September 9, 2014
 		  
+.. _quickstart-intro:
 
 Introduction
 ============
@@ -12,12 +13,16 @@ Introduction
 This document describes how to use the ``moose`` module in Python
 scripts or in an interactive Python shell. It aims to give you enough
 overview to help you start scripting using MOOSE and extract farther
-information that may be required for advanced work. Knowledge of Python
-or programming in general will be helpful. If you just want to simulate
-existing models in one of the supported formats, you can fire the MOOSE
-GUI and locate the model file using the ``File`` menu and load it. The
-GUI is described `here <./MooseGuiDocs.html>`__. The example code in the
-boxes can be entered in a Python shell.
+information that may be required for advanced work. Knowledge of
+Python or programming in general will be helpful. If you just want to
+simulate existing models in one of the supported formats, you can fire
+the MOOSE GUI and locate the model file using the ``File`` menu and
+load it. The GUI is described `here <./MooseGuiDocs.html>`__. If you
+are looking for recipes for specific tasks, take a look at
+:doc:`moose_cookbook`. The example code in the boxes can be entered in
+a Python shell.
+
+.. _quickstart-importing:
 
 Importing MOOSE and accessing built-in documentation
 ====================================================
@@ -63,8 +68,9 @@ Note that you need to put the class-name followed by dot followed by
 field-name within quotes. Otherwise, ``moose.doc`` will receive the
 field value as parameter and get confused.
 
+.. _quickstart-creating:
 Creating objects and traversing the object hierarchy
-====================================================
+----------------------------------------------------
 
 Different types of biological entities like neurons, enzymes, etc are
 represented by classes and individual instances of those types are
@@ -144,6 +150,8 @@ separately from the model. So we do it as below ::
 Now that we have the essential elements for a small model, we can go on
 to set the properties of this model and the experimental protocol.
 
+.. _quickstart-properties: 
+
 Setting the properties of elements: accessing fields
 ====================================================
 
@@ -198,14 +206,14 @@ In the most basic form, a neuronal compartment acts like a parallel
 resistor and capacitor connected in parallel, and the battery with
 voltage ``Em`` is in series with the resistor, as shown below:
 
---------------
+
 
 .. figure:: images/neuronalcompartment.jpg
    :alt: **Passive neuronal compartment**
 
    **Passive neuronal compartment**
 
---------------
+
 
 The fields are populated with some defaults. ::
 
@@ -262,6 +270,8 @@ We set the delay for the next pulse to a very large value (larger than
 the total simulation time) so that the stimulation stops after the first
 pulse. Had we set ``pulse.delay = 0`` , it would have generated a pulse
 train at 50 ms intervals.
+
+.. _quickstart-connections:
 
 Putting them together: setting up connections
 =============================================
@@ -367,17 +377,35 @@ that ``soma`` is the source of ``Vm`` values which should be sent to
 ``vmtab``. But here ``requestOut`` is a ``srcFinfo`` acting like a
 reply card. This mode of obtaining data is called *pull* mode. [3]_
 
-Scheduling and running the simulation
-=====================================
+You can skip the next section on fine control of the timing of updates
+and read :ref:`quickstart-running`.
 
-With the model all set up, we have to schedule the simulation. MOOSE has
-a central clock element (``/clock``) to manage time. Clock has a set of
-``Tick`` elements under it that take care of advancing the state of each
-element with time as the simulation progresses. Every element to be
-included in a simulation must be assigned a tick. Each tick can have a
-different ticking interval (``dt``) that allows different elements to be
-updated at different rates. We initialize the ticks and set their ``dt``
-values using the ``setClock`` function. ::
+.. _quickstart-scheduling:
+
+Scheduling
+==========
+
+With the model all set up, we have to schedule the
+simulation. Different components in a model may have different rates
+of update. For example, the dynamics of electrical components require
+the update intervals to be of the order 0.01 ms whereas chemical
+components can be as slow as 1 s. Also, the results may depend on the
+sequence of the updates of different components. These issues are
+addressed in MOOSE using a clock-based update scheme. Each model
+component is scheduled on a clock tick (think of multiple hands of a
+clock ticking at different intervals and the object being updated at
+each tick of the corresponding hand). These updates are scheduled
+automatically to reasonable defaults, but if you want fine control
+over this, read on.
+
+MOOSE has a central clock element (``/clock``) to manage
+time. Clock has a set of ``Tick`` elements under it that take care of
+advancing the state of each element with time as the simulation
+progresses. Every element to be included in a simulation must be
+assigned a tick. Each tick can have a different ticking interval
+(``dt``) that allows different elements to be updated at different
+rates. We initialize the ticks and set their ``dt`` values using the
+``setClock`` function. ::
 
         >>> moose.setClock(0, 0.025e-3)
         >>> moose.setClock(1, 0.025e-3)
@@ -423,7 +451,12 @@ individually. In this case we could have used ``/model/#`` as well for
 the path. This is a single level wild-card which matches only the
 children of ``/model`` but does not go farther down in the hierarchy.
 
-Once the elements are assigned ticks, we can put the model to its
+.. _quickstart-running:
+
+Running the simulation
+======================
+
+Once the model is all set up, we can put the model to its
 initial state using ::
 
         >>> moose.reinit()
@@ -454,6 +487,8 @@ for interactive plotting. The second line creates the time points to
 match our simulation time and length of the recorded data. The third
 line plots the ``Vm`` and the fourth line makes it visible. Does the
 plot match your expectation?
+
+.. _quickstart-details:
 
 Some more details
 =================
@@ -528,6 +563,8 @@ The following kinds of ``Finfo`` are accessible in Python
    ``HHGate.setupAlpha`` is an example.
 -  **``sharedFinfo``** : a composition of source and destination fields.
    Example: ``Compartment.channel``.
+
+.. _quickstart-moving-on:
 
 Moving on
 =========
