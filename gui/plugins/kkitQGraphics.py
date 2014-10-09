@@ -23,15 +23,15 @@ class KineticsDisplayItem(QtGui.QGraphicsWidget):
         if self.hasFocus() or self.isSelected():
             painter.setPen(QtGui.QPen(QtGui.QPen(QtCore.Qt.black, 1.8,Qt.Qt.DashLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin)))
             painter.drawRect(self.boundingRect())
-    def mouseDoubleClickEvent(self, event):
-        self.emit(QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),element(self.mobj))
+    # def mouseDoubleClickEvent(self, event):
+    #     self.emit(QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),element(self.mobj))
             
-    def itemChange(self,change,value):
-        if change == QtGui.QGraphicsItem.ItemPositionChange:
-            self.emit(QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),element(self.mobj))
-        #if change == QtGui.QGraphicsItem.ItemSelectedChange and value == True:
-        #    self.emit(QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),element(self.mobj))
-        return QtGui.QGraphicsItem.itemChange(self,change,value)
+    # def itemChange(self,change,value):
+    #     if change == QtGui.QGraphicsItem.ItemPositionChange:
+    #         self.emit(QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),element(self.mobj))
+    #     #if change == QtGui.QGraphicsItem.ItemSelectedChange and value == True:
+    #     #    self.emit(QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),element(self.mobj))
+    #     return QtGui.QGraphicsItem.itemChange(self,change,value)
 
 class PoolItem(KineticsDisplayItem):
     """Class for displaying pools. Uses a QGraphicsSimpleTextItem to
@@ -341,12 +341,12 @@ class CplxItem(KineticsDisplayItem):
 
 class ComptItem(QtGui.QGraphicsRectItem):
     def __init__(self,parent,x,y,w,h,item):
-        self.cmptEmitter = QtCore.QObject()
+        #self.cmptEmitter = QtCore.QObject()
         iParent = item
         if hasattr(iParent, "__iter__"):
-            self.mooseObj_ = iParent[0]
+            self.mobj = iParent[0]
         else:
-            self.mooseObj_ = iParent
+            self.mobj = iParent
 
         self.layoutWidgetPt = parent
         QtGui.QGraphicsRectItem.__init__(self,x,y,w,h)
@@ -359,15 +359,15 @@ class ComptItem(QtGui.QGraphicsRectItem):
     def pointerLayoutpt(self):
         return (self.layoutWidgetPt)
 
-    def mouseDoubleClickEvent(self, event):
-        self.cmptEmitter.emit(QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),element(self.mooseObj_))
+    # def mouseDoubleClickEvent(self, event):
+    #     self.cmptEmitter.emit(QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),element(self.mooseObj_))
     
-    def itemChange(self,change,value):
-        if change == QtGui.QGraphicsItem.ItemPositionChange:
-            self.cmptEmitter.emit(QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.mooseObj_)
-        #if change == QtGui.QGraphicsItem.ItemSelectedChange and value == True:
-        #    self.cmptEmitter.emit(QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.mooseObj_)
-        return QtGui.QGraphicsItem.itemChange(self,change,value)
+    # def itemChange(self,change,value):
+    #     if change == QtGui.QGraphicsItem.ItemPositionChange:
+    #         self.cmptEmitter.emit(QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.mooseObj_)
+    #     #if change == QtGui.QGraphicsItem.ItemSelectedChange and value == True:
+    #     #    self.cmptEmitter.emit(QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.mooseObj_)
+    #     return QtGui.QGraphicsItem.itemChange(self,change,value)
 
 import sys
 if __name__ == '__main__':
