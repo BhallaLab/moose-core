@@ -101,16 +101,16 @@ class PasiveCable( ):
         self.plotDt = plotDt
         self.setupDUT( )
  
-        # Setup clocks 
-        utils.dump("STEP", "Setting up the clocks ... ")
-        moose.setClock( 0, self.simDt )
-        moose.setClock( 1, self.simDt )
-        moose.setClock( 2, self.simDt )
+        ## Setup clocks 
+        #utils.dump("STEP", "Setting up the clocks ... ")
+        #moose.setClock( 0, self.simDt )
+        #moose.setClock( 1, self.simDt )
+        #moose.setClock( 2, self.simDt )
 
-        ## Use clocksc
-        moose.useClock( 0, '/cable/##'.format(self.cablePath), 'process' )
-        moose.useClock( 1, '/cable/##'.format(self.cablePath), 'init' )
-        moose.useClock( 2, '{}/##'.format(self.tablePath), 'process' )
+        ### Use clocksc
+        #moose.useClock( 0, '/cable/##'.format(self.cablePath), 'process' )
+        #moose.useClock( 1, '/cable/##'.format(self.cablePath), 'init' )
+        #moose.useClock( 2, '{}/##'.format(self.tablePath), 'process' )
 
         utils.dump("STEP"
                 , [ "Simulating cable for {} sec".format(simTime)

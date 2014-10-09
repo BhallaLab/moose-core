@@ -146,8 +146,8 @@ class BinaryCable( ):
         """Setting up HSolver """
         hsolve = moose.HSolve( path )
         hsolve.dt = self.simDt
-        moose.setClock(1, self.simDt)
-        moose.useClock(1, hsolve.path, 'process')
+        #moose.setClock(1, self.simDt)
+        #moose.useClock(1, hsolve.path, 'process')
         hsolve.target = self.cablePath
 
     def simulate(self, simTime, simDt, plotDt=None):
@@ -157,11 +157,11 @@ class BinaryCable( ):
         self.setupDUT( )
  
         # Setup clocks 
-        moose.setClock( 0, self.simDt )
+        #moose.setClock( 0, self.simDt )
 
         # Use clocks
-        moose.useClock( 0, '/##', 'process' )
-        moose.useClock( 0, '/##', 'init' )
+        #moose.useClock( 0, '/##', 'process' )
+        #moose.useClock( 0, '/##', 'init' )
 
         utils.dump("STEP"
                 , [ "Simulating cable for {} sec".format(simTime)
