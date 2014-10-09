@@ -40,7 +40,7 @@ Description: Python interface of MOOSE.
 
 Package: moose-gui
 Architecture: any
-Depends: python-matplotlib, python-qt4, moose-python
+Depends:  python-qt4, moose-python
 Suggests: python-networkx
 Description: GUI frontend of MOOSE simulator.
 
