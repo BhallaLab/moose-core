@@ -5,19 +5,9 @@ from modelBuild import *
 from constants import *
 
 class GraphicalView(QtGui.QGraphicsView):
-    objectSelected = QtCore.pyqtSignal(object)
     def __init__(self, modelRoot,parent,border,layoutPt,createdItem):
         QtGui.QGraphicsView.__init__(self,parent)
         self.setScene(parent)
-        self.state = { "press"      : { "item"          : None
-                                      , "compartment"   : None
-                                      , "mode"          : INVALID
-                                      }
-                     , "release"    : { "item"          : None
-                                      , "compartment"   : None
-                                      , "mode"          : INVALID
-                                      }
-                     }
         self.modelRoot = modelRoot
         self.sceneContainerPt = parent
         self.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
@@ -47,112 +37,9 @@ class GraphicalView(QtGui.QGraphicsView):
     def setRefWidget(self,path):
         self.viewBaseType = path
     
-    def selectGraphicalItem(self, graphicalItem, clickPoint):
-        rectangle = graphicalItem.sceneBoundingRect()
-        bottomLeft = rectangle.bottomLeft()
-        bottomRight = rectangle.bottomRight()
-        topLeft = rectangle.topLeft()
-        topRight = rectangle.topRight()
-        xLeft   = topLeft.x()  
-        xRight  = bottomRight.x()
-        yTop   = topLeft.y()
-        yBottom  = bottomRight.y()
-        xClick  = clickPoint.x()
-        yClick  = clickPoint.y()
-        borderWidth = 0.1 * (xRight - xLeft)
-        borderHeight = 0.1 * (yBottom - yTop)
-        #print(xClick, yClick, xLeft, xRight, yTop, yBottom) 
-        a = (xClick - xLeft) > borderWidth
-        b = (xRight - xClick) > borderWidth
-        c = (yClick - yTop) > borderHeight
-        d = (yBottom - yClick) > borderHeight
-        #print(a,b,c,d)
-        if(a and b and c and d):
-            return INTERIOR
-        else:
-            return BOUNDARY
-
-    def mouseReleaseEvent(self, event):
-
-        self.state["release"]["compartment"] = None
-        self.state["release"]["mode"]   = INVALID
-        self.state["release"]["item"]   = None
-
-        clickedItems = self.items(event.pos())
-        #print(clickedItems)
-        kineticsDisplayItem = filter( lambda x : isinstance(x,KineticsDisplayItem), clickedItems)
-        comptItem = filter( lambda x : isinstance(x,ComptItem), clickedItems) 
-
-        if len(comptItem) == 0:
-            return
-
-        self.state["release"]["compartment"] = comptItem[0] 
-
-        if self.state["release"]["compartment"] != self.state["press"]["compartment"]:
-            return
-
-        if len(kineticsDisplayItem) != 0:
-            self.state["release"]["item"] = kineticsDisplayItem[0]
-            if self.state["release"]["item"] == self.state["press"]["item"]:
-                self.state["release"]["mode"] = SAME_OBJECT
-            else:
-                self.state["release"]["mode"] = OTHER_OBJECT
-        else:
-            self.state["release"]["mode"] = NO_OBJECT
-
-        self.stateAction()
-
-
-    def stateAction(self):
-
-        if self.state["press"]["mode"] == RUBBERBAND_SELECTION:
-            print("Rubberband selection")
-            return
-
-        if self.state["release"]["mode"] == SAME_OBJECT:
-            print("Open Object Editor")
-            return
-
-        if self.state["release"]["mode"] == OTHER_OBJECT:
-            print("Connect Objects")
-            return
-
-        if self.state["release"]["mode"] == NO_OBJECT:
-            print("Drag Object")
-            return
-
+    
     def mousePressEvent(self, event):
-
-        self.state["press"]["compartment"] = None
-        self.state["press"]["mode"]   = INVALID
-        self.state["press"]["item"]   = None
-
-        clickedItems = self.items(event.pos())
-        #print(clickedItems)
-        kineticsDisplayItem = filter( lambda x : isinstance(x,KineticsDisplayItem), clickedItems)
-        comptItem = filter( lambda x : isinstance(x,ComptItem), clickedItems) 
-
-        if len(comptItem) == 0 :
-            return
-
-        self.state["press"]["compartment"] = comptItem[0]
-
-        if len(kineticsDisplayItem) == 0:
-            self.state["press"]["mode"]   = RUBBERBAND_SELECTION
-            self.state["press"]["item"]   = None
-            return 
-
-        self.state["press"]["item"] = kineticsDisplayItem[0]
-        self.state["press"]["mode"] = INVALID
-        # self.state["press"]["mode"] = self.selectGraphicalItem( kineticsDisplayItem[0].bg
-                                                        # , comptItem[0].mapToScene(self.mapToScene(event.pos())))
-        return 
-
-        #topmostitemlist = (self.items(event.pos()))
-        # print "1", clickedItems[1].event.pos()
-
-        #self.objectSelected.emit(clickedItems[2].mobj)
-        return 
+        selectedItem = None
         if self.viewBaseType == "editorView":
             if event.buttons() == QtCore.Qt.LeftButton:
                 self.startingPos = event.pos()
@@ -167,18 +54,9 @@ class GraphicalView(QtGui.QGraphicsView):
                 kkitItem  = [j for j in viewItem if isinstance(j,KineticsDisplayItem)]
                 comptItem = [k for k in viewItem if isinstance(k,ComptItem)]
                 if arrowItem:
-                    print "self.object2line ",self.object2line
-                    print '----------'
-                    for k,tupValue in self.object2line.iteritems():
-                        
-                        for l,v in enumerate(tupValue):
-                            print k,l,v
-                    '''
                     for k,tupValue in self.object2line.iteritems():
                         for l,v in enumerate(tupValue):
-                            print k,l,v, "arrowItem ",arrowItem[0]
-
-                            '''
+                            print "can delete QGraphicsPolygonItem"
                             # if v[0] == arrowItem[0]:
                             #     print "--",k,v[1]
                             #     if self.popupmenu4rlines:
@@ -188,7 +66,6 @@ class GraphicalView(QtGui.QGraphicsView):
                             #         popupmenu.addAction(self.delete)
                             #         popupmenu.exec_(event.globalPos())
                             #     self.popupmenu4rlines = False
-                    '''            '''
                 if kkitItem:
                     for displayitem in kkitItem:
                         ''' mooseItem(child) ->compartment (parent) But for cplx
@@ -200,6 +77,12 @@ class GraphicalView(QtGui.QGraphicsView):
                         itemIndex = self.cmptStackorder.index(displayitem.parentItem())
                         selectedItem = displayitem
                         displayitem.parentItem().setZValue(1)
+                        if isinstance(displayitem,PoolItem):
+                            rectangle = displayitem.bg.rect()
+                        else:
+                            srcobj = displayitem.gobj
+                            rectangle = srcobj.boundingRect()
+
                 elif not kkitItem and comptItem:
                     for cmpt in comptItem:
                         for previouslySelected in self.sceneContainerPt.selectedItems():
@@ -236,7 +119,6 @@ class GraphicalView(QtGui.QGraphicsView):
         elif self.viewBaseType == "runView":
             pos = event.pos()
             item = self.itemAt(pos)
-            print "item ",self.itemAt(pos)
             itemClass = type(item).__name__
             if ( itemClass!='ComptItem' and itemClass != 'QGraphicsPolygonItem'):
                 self.setCursor(Qt.Qt.CrossCursor)
@@ -248,6 +130,8 @@ class GraphicalView(QtGui.QGraphicsView):
                 drag.setMimeData(mimeData)
                 dropAction = drag.start(QtCore.Qt.MoveAction)
                 self.setCursor(Qt.Qt.ArrowCursor)
+
+    
     def mouseMoveEvent(self,event):
         QtGui.QGraphicsView.mouseMoveEvent(self, event)
         if( (self.customrubberBand) and (event.buttons() == QtCore.Qt.LeftButton)):
@@ -265,36 +149,36 @@ class GraphicalView(QtGui.QGraphicsView):
                 if isinstance(item,KineticsDisplayItem) and item.isSelected() == False:
                         item.setSelected(True)
 
-    # def mouseReleaseEvent(self, event):
+    def mouseReleaseEvent(self, event):
 
-    #     self.setCursor(Qt.Qt.ArrowCursor)
-    #     QtGui.QGraphicsView.mouseReleaseEvent(self, event)
-    #     if(self.customrubberBand):
-    #         self.customrubberBand.hide()
-    #         self.customrubberBand = 0
-    #         if event.button() == QtCore.Qt.LeftButton and self.itemSelected == False :
-    #             self.endingPos = event.pos()
-    #             self.endScenepos = self.mapToScene(self.endingPos)
-    #             self.rubberbandWidth = (self.endScenepos.x()-self.startScenepos.x())
-    #             self.rubberbandHeight = (self.endScenepos.y()-self.startScenepos.y())
-    #             selecteditems = self.sceneContainerPt.selectedItems()
-    #             print "selecteditems ",selecteditems
-    #             if self.rubberbandWidth != 0 and self.rubberbandHeight != 0 and len(selecteditems) != 0 :
-    #                 self.showpopupmenu = True
-    #     self.itemSelected = False
-    #     if self.showpopupmenu:
-    #         popupmenu = QtGui.QMenu('PopupMenu', self)
-    #         #~ self.delete = QtGui.QAction(self.tr('delete'), self)
-    #         #~ self.connect(self.delete, QtCore.SIGNAL('triggered()'), self.deleteItem)
-    #         self.zoom = QtGui.QAction(self.tr('zoom'), self)
-    #         self.connect(self.zoom, QtCore.SIGNAL('triggered()'), self.zoomItem)
-    #         self.move = QtGui.QAction(self.tr('move'), self)
-    #         self.connect(self.move, QtCore.SIGNAL('triggered()'), self.moveItem)
-    #         #~ popupmenu.addAction(self.delete)
-    #         popupmenu.addAction(self.zoom)
-    #         popupmenu.addAction(self.move)
-    #         popupmenu.exec_(event.globalPos())
-    #     self.showpopupmenu = False
+        self.setCursor(Qt.Qt.ArrowCursor)
+        QtGui.QGraphicsView.mouseReleaseEvent(self, event)
+        if(self.customrubberBand):
+            self.customrubberBand.hide()
+            self.customrubberBand = 0
+            if event.button() == QtCore.Qt.LeftButton and self.itemSelected == False :
+                self.endingPos = event.pos()
+                self.endScenepos = self.mapToScene(self.endingPos)
+                self.rubberbandWidth = (self.endScenepos.x()-self.startScenepos.x())
+                self.rubberbandHeight = (self.endScenepos.y()-self.startScenepos.y())
+                selecteditems = self.sceneContainerPt.selectedItems()
+                print "selecteditems ",selecteditems
+                if self.rubberbandWidth != 0 and self.rubberbandHeight != 0 and len(selecteditems) != 0 :
+                    self.showpopupmenu = True
+        self.itemSelected = False
+        if self.showpopupmenu:
+            popupmenu = QtGui.QMenu('PopupMenu', self)
+            #~ self.delete = QtGui.QAction(self.tr('delete'), self)
+            #~ self.connect(self.delete, QtCore.SIGNAL('triggered()'), self.deleteItem)
+            self.zoom = QtGui.QAction(self.tr('zoom'), self)
+            self.connect(self.zoom, QtCore.SIGNAL('triggered()'), self.zoomItem)
+            self.move = QtGui.QAction(self.tr('move'), self)
+            self.connect(self.move, QtCore.SIGNAL('triggered()'), self.moveItem)
+            #~ popupmenu.addAction(self.delete)
+            popupmenu.addAction(self.zoom)
+            popupmenu.addAction(self.move)
+            popupmenu.exec_(event.globalPos())
+        self.showpopupmenu = False
     def moveItem(self):
       self.setCursor(Qt.Qt.CrossCursor)
 

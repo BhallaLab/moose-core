@@ -146,7 +146,7 @@ class KkitRunView(MooseEditorView):
     '''
     def getCentralWidget(self):
         if self._centralWidget is None:
-            self._centralWidget = kineticRunWidget(self)
+            self._centralWidget = kineticRunWidget()
             # self._centralWidget.view.objectSelected.connect(self.plugin.mainWindow.objectEditSlot)
             self._centralWidget.setModelRoot(self.plugin.modelRoot)
         return self._centralWidget
@@ -198,17 +198,14 @@ class KkitEditorView(MooseEditorView):
     '''
     def getCentralWidget(self):
         if self._centralWidget is None:
-            self._centralWidget = kineticEditorWidget(self)
+            self._centralWidget = kineticEditorWidget()
             self._centralWidget.setModelRoot(self.plugin.modelRoot)
-            self._centralWidget.view.objectSelected.connect(self.plugin.mainWindow.objectEditSlot)
         return self._centralWidget
 
 
 class  KineticsWidget(EditorWidgetBase):
-    def __init__(self, parent, *args):
+    def __init__(self, *args):
         EditorWidgetBase.__init__(self, *args)
-        self.parent = parent
-        self.view = None
         #self.setAcceptDrops(True)
         self.border = 10
         self.sceneContainer = QtGui.QGraphicsScene(self)
@@ -330,9 +327,8 @@ class  KineticsWidget(EditorWidgetBase):
             rectcompt = v.childrenBoundingRect()
             v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
             v.setPen(QtGui.QPen(Qt.QColor(66,66,66,100), 5, Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin))
-            #v.cmptEmitter.connect(v.cmptEmitter,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
-            #v.cmptEmitter.connect(v.cmptEmitter,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.objectEditSlot)
-            #v.cmptEmitter.connect(v.cmptEmitter,QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.objectEditSlot)
+            v.cmptEmitter.connect(v.cmptEmitter,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
+            v.cmptEmitter.connect(v.cmptEmitter,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.objectEditSlot)
     def createCompt(self,key):
         self.new_Compt = ComptItem(self,0,0,0,0,key)
         self.qGraCompt[key] = self.new_Compt
@@ -379,9 +375,8 @@ class  KineticsWidget(EditorWidgetBase):
     def setupSlot(self,mooseObj,qgraphicItem):
         self.mooseId_GObj[element(mooseObj).getId()] = qgraphicItem
         qgraphicItem.connect(qgraphicItem,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
-        #qgraphicItem.connect(qgraphicItem,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.objectEditSlot)
-        qgraphicItem.connect(qgraphicItem,QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.objectEditSlot)
-
+        qgraphicItem.connect(qgraphicItem,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.objectEditSlot)
+        
     def updateItemSlot(self, mooseObject):
         #This is overridden by derived classes to connect appropriate
         #slot for updating the display item.
@@ -718,9 +713,9 @@ class  KineticsWidget(EditorWidgetBase):
             v.setRect(rectcompt.x()-comptWidth,rectcompt.y()-comptWidth,(rectcompt.width()+2*comptWidth),(rectcompt.height()+2*comptWidth))
 
 class kineticEditorWidget(KineticsWidget):
-    def __init__(self, parent, *args):
+    def __init__(self, *args):
 
-        KineticsWidget.__init__(self, parent, *args)
+        KineticsWidget.__init__(self, *args)
         self.insertMenu = QtGui.QMenu('&Insert')
         self._menus.append(self.insertMenu)
         self.insertMapper = QtCore.QSignalMapper(self)
@@ -769,8 +764,8 @@ class kineticEditorWidget(KineticsWidget):
         return self._toolBars
 
 class kineticRunWidget(KineticsWidget):
-    def __init__(self, parent, *args):
-        KineticsWidget.__init__(self, parent, *args)
+    def __init__(self, *args):
+        KineticsWidget.__init__(self, *args)
 
     def makePoolItem(self, poolObj, qGraCompt):
         return PoolItemCircle(poolObj, qGraCompt)
