@@ -63,7 +63,18 @@ const Cinfo* Annotator::initCinfo()
 			&Annotator::setIcon,
 			&Annotator::getIcon
 		);
-
+		static ValueFinfo< Annotator, string > solver(
+			"solver",
+			"A string to specify solver to store for Gui",
+			&Annotator::setSolver,
+			&Annotator::getSolver
+		);
+		static ValueFinfo< Annotator, double > runtime(
+			"runtime",
+			"runtime field. Store runtime ",
+			&Annotator::setRuntime,
+			&Annotator::getRuntime
+		);
 	static Finfo* annotatorFinfos[] = {
 		&x,	// Value
 		&y,	// Value
@@ -72,6 +83,8 @@ const Cinfo* Annotator::initCinfo()
 		&color,	// Value
 		&textColor,	// Value
 		&icon,	// Value
+		&solver,
+		&runtime,
 	};
 
 	static Dinfo< Annotator > dinfo;
@@ -91,7 +104,7 @@ static const Cinfo* annotatorCinfo = Annotator::initCinfo();
 Annotator::Annotator()
 	: x_( 0.0 ), y_( 0.0 ), z_( 0.0 ), 
 		notes_( "" ), color_( "white" ), textColor_( "black" ), 
-		icon_( "sphere" )
+		icon_( "sphere" ),solver_( "gsl"),runtime_(10.0)
 {
 	;
 }
@@ -164,4 +177,22 @@ string Annotator::getIcon() const
 void Annotator::setIcon( string v )
 {
 	icon_ = v;
+}
+string Annotator::getSolver() const
+{
+	return solver_;
+}
+
+void Annotator::setSolver( string v )
+{
+	solver_ = v;
+}
+double Annotator::getRuntime() const
+{
+	return runtime_;
+}
+
+void Annotator::setRuntime( double v )
+{
+	runtime_ = v;
 }
