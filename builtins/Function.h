@@ -64,8 +64,8 @@ class Function
     Function();
     Function(const Function& rhs);
     ~Function();
-    void setExpr(string expr);
-    string getExpr() const;
+    void setExpr( const Eref& e, string expr);
+    string getExpr( const Eref& e ) const;
     
     
     // get a list of variable identifiers.
@@ -127,6 +127,7 @@ protected:
     mu::Parser _parser;
     void _clearBuffer();
     void _showError(mu::Parser::exception_type &e) const;
+	char* _stoich; // Used by kinetic solvers when this is zombified.
 };
 
 
