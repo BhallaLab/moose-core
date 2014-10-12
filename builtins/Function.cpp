@@ -50,6 +50,7 @@
 #include "Variable.h"
 
 #include "Function.h"
+#include "ElementValueFinfo.h"
 
 static SrcFinfo1<double> *valueOut()
 {
@@ -112,7 +113,7 @@ const Cinfo * Function::initCinfo()
         " anything else: all three, value, derivative and rate will be sent out.\n",
         &Function::setMode,
         &Function::getMode);
-    static ValueFinfo< Function, string > expr(
+    static ElementValueFinfo< Function, string > expr(
         "expr",
         "Mathematical expression defining the function. The underlying parser\n"
         "is muParser. Hence the available functions and operators are (from\n"
@@ -277,7 +278,7 @@ const Cinfo * Function::initCinfo()
 static const Cinfo * functionCinfo = Function::initCinfo();
 
 Function::Function(): _valid(false), _numVar(0), _lastValue(0.0),
-                      _value(0.0), _rate(0.0), _mode(1)
+                      _value(0.0), _rate(0.0), _mode(1), _stoich(0)
 {
     _parser.SetVarFactory(_functionAddVar, this);
     // Adding pi and e, the defaults are `_pi` and `_e`
@@ -289,8 +290,9 @@ Function::Function(): _valid(false), _numVar(0), _lastValue(0.0),
 Function::Function(const Function& rhs): _numVar(rhs._numVar),
                                          _lastValue(rhs._lastValue),
                                          _value(rhs._value), _rate(rhs._rate),
-                                         _mode(rhs._mode)
+                                         _mode(rhs._mode), _stoich(0)
 {
+	static Eref er;
     _independent = rhs._independent;
     _parser.SetVarFactory(_functionAddVar, this);
     // Adding pi and e, the defaults are `_pi` and `_e`
@@ -304,7 +306,7 @@ Function::Function(const Function& rhs): _numVar(rhs._numVar),
             _parser.DefineConst(item->first, item->second);
         }
     }
-    setExpr(rhs.getExpr());
+    setExpr(er, rhs.getExpr( er ));
     // Copy the values from the var pointers in rhs
     assert(_varbuf.size() == rhs._varbuf.size());
     for (unsigned int ii = 0; ii < rhs._varbuf.size(); ++ii){
@@ -318,6 +320,7 @@ Function::Function(const Function& rhs): _numVar(rhs._numVar),
 
 Function& Function::operator=(const Function rhs)
 {
+	static Eref er;
     _clearBuffer();
     _mode = rhs._mode;
     _lastValue = rhs._lastValue;
@@ -336,7 +339,7 @@ Function& Function::operator=(const Function rhs)
         }
     }
     // Copy the values from the var pointers in rhs
-    setExpr(rhs.getExpr());
+    setExpr(er, rhs.getExpr( er ));
     assert(_varbuf.size() == rhs._varbuf.size());
     for (unsigned int ii = 0; ii < rhs._varbuf.size(); ++ii){
         _varbuf[ii]->value = rhs._varbuf[ii]->value;
@@ -456,7 +459,7 @@ void Function::dropVar(unsigned int msgLookup)
     // evaluating a set expression.
 }
 
-void Function::setExpr(string expr)
+void Function::setExpr(const Eref& e, string expr)
 {
     _valid = false;
     mu::varmap_type vars;
@@ -470,7 +473,7 @@ void Function::setExpr(string expr)
     _valid = true;
 }
 
-string Function::getExpr() const
+string Function::getExpr( const Eref& e ) const
 {
     if (!_valid){
         cout << "Error: Function::getExpr() - invalid parser state" << endl;
@@ -643,7 +646,7 @@ void Function::reinit(const Eref &e, ProcPtr p)
     }
     if (trim(_parser.GetExpr(), " \t\n\r").length() == 0){
         cout << "Error: no expression set. Will do nothing." << endl;
-        setExpr("0.0");
+        setExpr(e, "0.0");
         _valid = false;
     }
     _value = 0.0;

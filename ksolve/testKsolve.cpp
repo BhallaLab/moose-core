@@ -138,12 +138,14 @@ void testSetupReac()
 	s->doReinit();
 	s->doStart( 20.0 );
 	Id plots( "/kinetics/plots" );
+	/*
 	for ( unsigned int i = 0; i < 7; ++i ) {
 		stringstream ss;
 		ss << "plot." << i;
 		SetGet2< string, string >::set( ObjId( plots, i ), "xplot", 
 						"tsr.plot", ss.str() );
 	}
+	*/
 	s->doDelete( kin );
 	cout << "." << flush;
 }

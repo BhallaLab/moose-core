@@ -184,6 +184,15 @@ const Cinfo* Clock::initCinfo()
 			&Clock::setTickDt,
 			&Clock::getTickDt
 		);
+
+		static ReadOnlyLookupValueFinfo< Clock, string, unsigned int > defaultTick(
+			"defaultTick",
+			"Looks up the default Tick to use for the specified class. "
+		    "If no tick is assigned, as for classes without a process "
+			"operation or zombie classes, the tick is ~0U. "
+		    "If nothing can be found returns 0 and emits a warning.",
+			&Clock::getDefaultTick
+		);
 	///////////////////////////////////////////////////////
 	// Shared definitions
 	///////////////////////////////////////////////////////
@@ -237,6 +246,7 @@ const Cinfo* Clock::initCinfo()
 		&isRunning,			// ReadOnlyValue
 		&tickStep,			// LookupValue
 		&tickDt,			// LookupValue
+		&defaultTick,		// ReadOnlyLookupValue
 		&clockControl,		// Shared
 		finished(),			// Src
 		procs[0],				// Src
@@ -375,8 +385,8 @@ const Cinfo* Clock::initCinfo()
 		"	Ksolve	(init)			15		0.1\n"
 		"	Gsolve				16		0.1\n"
 		"	Ksolve				16		0.1\n"
+		"	Stats				17		0.1\n"
 
-		"	Stats				17		1\n"
 		"	Table2				18		1\n"
 		"	HDF5DataWriter			30		1\n"
 		"	HDF5WriterBase			30		1\n"
@@ -550,6 +560,11 @@ double Clock::getTickDt( unsigned int i ) const
 	if ( i < Clock::numTicks )
 		return ticks_[i] * dt_;
 	return 0.0;
+}
+
+unsigned int Clock::getDefaultTick( string s ) const
+{
+	return Clock::lookupDefaultTick( s );
 }
 
 ///////////////////////////////////////////////////
@@ -788,8 +803,8 @@ void Clock::buildDefaultTick()
 	defaultTick_["ReacBase"] = 14;
 	defaultTick_["Gsolve"] = 16; // Note this uses an 'init' at t-1
 	defaultTick_["Ksolve"] = 16; // Note this uses an 'init' at t-1
-
 	defaultTick_["Stats"] = 17;
+
 	defaultTick_["Table2"] = 18;
 	defaultTick_["HDF5DataWriter"] = 30;
 	defaultTick_["HDF5WriterBase"] = 30;
@@ -858,7 +873,7 @@ void Clock::buildDefaultTick()
 	defaultDt_[14] = 0.1;
 	defaultDt_[15] = 0.1;
 	defaultDt_[16] = 0.1;
-	defaultDt_[17] = 1;
+	defaultDt_[17] = 0.1;
 	defaultDt_[18] = 1; // For tables for chemical calculations.
 	// 19-29 are not assigned.
 	defaultDt_[30] = 1;	// For the HDF writer

@@ -394,9 +394,10 @@ sequence of the updates of different components. These issues are
 addressed in MOOSE using a clock-based update scheme. Each model
 component is scheduled on a clock tick (think of multiple hands of a
 clock ticking at different intervals and the object being updated at
-each tick of the corresponding hand). These updates are scheduled
-automatically to reasonable defaults, but if you want fine control
-over this, read on.
+each tick of the corresponding hand). The scheduling also guarantees
+the correct sequencing of operations. For example, your Table objects
+should always be scheduled *after* the computations that they are 
+recording, otherwise they will miss the outcome of the latest calculation.
 
 MOOSE has a central clock element (``/clock``) to manage
 time. Clock has a set of ``Tick`` elements under it that take care of
@@ -404,7 +405,70 @@ advancing the state of each element with time as the simulation
 progresses. Every element to be included in a simulation must be
 assigned a tick. Each tick can have a different ticking interval
 (``dt``) that allows different elements to be updated at different
-rates. We initialize the ticks and set their ``dt`` values using the
+rates. 
+
+By default, every object is assigned a clock tick with reasonable default
+timesteps as soon it is created::
+
+    Class type                      tick    dt
+    Electrical computations:        0-7     50 microseconds
+    electrical compartments,
+    V and ligand-gated ion channels,
+    Calcium conc and Nernst,
+    stimulus generators and tables,
+    HSolve.
+
+    Table (to plot elec. signals)   8       100 microseconds
+
+    Diffusion solver                10      0.01 seconds
+    Chemical computations:          11-17   0.1 seconds
+    Pool, Reac, Enz, MMEnz,
+    Func, Function, 
+    Gsolve, Ksolve,
+    Stats (to do stats on outputs)  
+
+    Table2 (to plot chem. signals)  18      1 second
+
+    HDF5DataWriter                  30      1 second
+    Postmaster (for parallel        31      0.01 seconds
+    computations)
+
+There are 32 available clock ticks. Numbers 20 to 29 are
+unassigned so you can use them for whatever purpose you like.
+
+If you want fine control over the scheduling, there are three things
+you can do.
+
+    * Alter the 'tick' field on the object
+    * Alter the dt associated with a given tick, using the 
+      **moose.setClock( tick, newdt)** command
+    * Go through a wildcard path of objects reassigning there clock ticks,
+      using **moose.useClock( path, newtick, function)**.
+
+Here we discuss these in more detail. 
+
+**Altering the 'tick' field**
+
+Every object knows which tick and dt it uses::
+
+    >>> a = moose.Pool( '/a' )
+    >>> print a.tick, a.dt
+    13 0.1
+
+The ``tick`` field on every object can be changed, and the object will
+adopt whatever clock dt is used for that tick. The ``dt`` field is
+readonly, because changing it would have side-effects on every object
+associated with the current tick.
+
+Ticks **-1** and **-2** are special: They both tell the object that it is
+disabled (not scheduled for any operations). An object with a 
+tick of **-1** will be left alone entirely. A tick of **-2** is used in
+solvers to indicate that should the solver be removed, the object will
+revert to its default tick.
+
+**Altering the dt associated with a given tick**
+
+We initialize the ticks and set their ``dt`` values using the
 ``setClock`` function. ::
 
         >>> moose.setClock(0, 0.025e-3)
@@ -418,7 +482,14 @@ the faster clocks for the model components where finer timescale is
 required for numerical accuracy and the slower clock to sample the
 values of ``Vm``.
 
-So to assign tick #2 to the table for recording ``Vm``, we pass its
+Note that if you alter the dt associated with a given tick, this will
+affect the update time for *all* the objects using that clock tick. If
+you're unsure that you want to do this, use one of the vacant ticks.
+
+
+**Assigning clock ticks to all objects in a wildcard path**
+
+To assign tick #2 to the table for recording ``Vm``, we pass its
 whole path to the ``useClock`` function. ::
 
         >>> moose.useClock(2, '/data/soma_Vm', 'process')
