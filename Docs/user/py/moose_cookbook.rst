@@ -241,10 +241,12 @@ Reaction-diffusion models
 The MOOSE design for reaction-diffusion is to specify one or
 more cellular 'compartments', and embed reaction systems in each of them.
 
-A 'compartment', is used in the cellular sense of a biochemically defined,
+A 'compartment', in the context of reaction-diffusion, is used in the 
+cellular sense of a biochemically defined,
 volume restricted subpart of a cell. Many but not all compartments
 are bounded by a cell membrane, but biochemically the membrane itself
-may form a compartment.
+may form a compartment. Note that this interpretation differs from that
+of a 'compartment' in detailed electrical models of neurons.
 
 A reaction system can be loaded in from any of the supported MOOSE
 formats, or built within Python from MOOSE parts.
@@ -298,6 +300,23 @@ Transport in branching dendritic tree
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. automodule:: transportBranchingNeuron
    :members:
+
+Cross-compartment reaction systems
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Frequently reaction systems span cellular (chemical) compartments. 
+For example, a membrane-bound molecule may be phosphorylated by a
+cytosolic kinase, using soluble ATP as one of the substrates. Here the
+membrane and the cytsol are different chemical compartments.
+MOOSE supports such reactions. The following snippets illustrate
+cross-compartment chemistry. Note that the interpretation of the rates
+of enzymes and reactions does depend on which compartment they reside in.
+
+.. automodule:: crossComptSimpleReac
+    :members:
+.. automodule:: crossComptOscillator
+    :members:
+.. automodule:: crossComptNeuroMesh
+    :members:
 
 Single cell models
 ------------------

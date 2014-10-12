@@ -1,4 +1,5 @@
 #########################################################################
+#
 ## This program is part of 'MOOSE', the
 ## Messaging Object Oriented Simulation Environment.
 ##           Copyright (C) 2013 Upinder S. Bhalla. and NCBS
@@ -6,22 +7,6 @@
 ## GNU Lesser General Public License version 2.1
 ## See the file COPYING.LIB for the full notice.
 #########################################################################
-
-# This example illustrates how to define a kinetic model embedded in
-# a NeuroMesh, and undergoing cross-compartment reactions. It is 
-# completely self-contained and does not use any external model definition
-# files.  Normally one uses standard model formats like
-# SBML or kkit to concisely define kinetic and neuronal models.
-# This example creates a simple reaction a <==> b <==> c in which 
-# a, b, and c are in the dendrite, spine head, and PSD respectively.
-# The model is set up to run using the Ksolve for integration. Although
-# a diffusion solver is set up, the diff consts here are set to zero.
-# The display has two parts: 
-# Above is a line plot of concentration against compartment#. 
-# Below is a time-series plot that appears after # the simulation has 
-# ended. The plot is for the last (rightmost) compartment.
-# Concs of a, b, c are plotted for both graphs.
-#
 
 import math
 import pylab
@@ -116,26 +101,17 @@ def makeModel():
 		reac0.Kb = 1
 		reac1.Kf = 1
 		reac1.Kb = 1
-                print reac0.numKf, reac0.numKb
-                print reac1.numKf, reac1.numKb
-                print a.volume, b.volume, c.volume
 
                 # Create a 'neuron' with a dozen spiny compartments.
                 elec = makeNeuron( numSeg )
                 # assign geometry to mesh
                 compt0.diffLength = 10e-6
                 compt0.cell = elec
-                print reac0.numKf, reac0.numKb
-                print reac1.numKf, reac1.numKb
-                print a.vec.volume, b.vec.volume, c.vec.volume
 
                 # Build the solvers. No need for diffusion in this version.
                 ksolve0 = moose.Ksolve( '/model/compt0/ksolve' )
                 ksolve1 = moose.Ksolve( '/model/compt1/ksolve' )
                 ksolve2 = moose.Ksolve( '/model/compt2/ksolve' )
-                #dsolve0 = moose.Dsolve( '/model/compt0/dsolve' )
-                #dsolve1 = moose.Dsolve( '/model/compt1/dsolve' )
-                #dsolve2 = moose.Dsolve( '/model/compt2/dsolve' )
                 stoich0 = moose.Stoich( '/model/compt0/stoich' )
                 stoich1 = moose.Stoich( '/model/compt1/stoich' )
                 stoich2 = moose.Stoich( '/model/compt2/stoich' )
@@ -147,9 +123,6 @@ def makeModel():
                 stoich0.ksolve = ksolve0
                 stoich1.ksolve = ksolve1
                 stoich2.ksolve = ksolve2
-                #stoich0.dsolve = dsolve0
-                #stoich1.dsolve = dsolve1
-                #stoich2.dsolve = dsolve2
                 stoich0.path = '/model/compt0/#'
                 stoich1.path = '/model/compt1/#'
                 stoich2.path = '/model/compt2/#'
@@ -162,9 +135,7 @@ def makeModel():
                 assert( stoich2.numVarPools == 1 )
                 assert( stoich2.numProxyPools == 0 )
                 assert( stoich2.numRates == 0 )
-                #dsolve0.buildNeuroMeshJunctions( dsolve1, dsolve2 )
                 stoich0.buildXreacs( stoich1 )
-                #stoich1.buildXreacs( stoich0 )
                 stoich1.buildXreacs( stoich2 )
                 stoich0.filterXreacs()
                 stoich1.filterXreacs()
@@ -175,16 +146,13 @@ def makeModel():
 		a.vec.concInit = range( numSeg + 1, 0, -1 )
 		b.vec.concInit = [5.0 * ( 1 + x ) for x in range( numSeg )]
 		c.vec.concInit = range( 1, numSeg + 1 )
-		#a.vec.concInit = [2] * (numSeg + 1)
-		#b.vec.concInit = [10] * numSeg
-		#c.vec.concInit = [1] * numSeg
                 print a.vec.concInit, b.vec.concInit, c.vec.concInit
 
 		# Create the output tables
 		graphs = moose.Neutral( '/model/graphs' )
-		outputA = moose.Table ( '/model/graphs/concA' )
-		outputB = moose.Table ( '/model/graphs/concB' )
-		outputC = moose.Table ( '/model/graphs/concC' )
+		outputA = moose.Table2 ( '/model/graphs/concA' )
+		outputB = moose.Table2 ( '/model/graphs/concB' )
+		outputC = moose.Table2 ( '/model/graphs/concC' )
 
 		# connect up the tables
                 a1 = moose.element( '/model/compt0/a[' + str( numSeg )+ ']')
@@ -196,50 +164,36 @@ def makeModel():
 
 
 def main():
-                simdt = 0.01
-                plotdt = 0.01
+    """
+    This example illustrates how to define a kinetic model embedded in
+    a NeuroMesh, and undergoing cross-compartment reactions. It is 
+    completely self-contained and does not use any external model definition
+    files.  Normally one uses standard model formats like
+    SBML or kkit to concisely define kinetic and neuronal models.
+    This example creates a simple reaction::
+        a <==> b <==> c 
+    in which 
+    **a, b**, and **c** are in the dendrite, spine head, and PSD 
+    respectively.
+    The model is set up to run using the Ksolve for integration. Although
+    a diffusion solver is set up, the diff consts here are set to zero.
+    The display has two parts: 
+    Above is a line plot of concentration against compartment#. 
+    Below is a time-series plot that appears after # the simulation has 
+    ended. The plot is for the last (rightmost) compartment.
+    Concs of **a**, **b**, **c** are plotted for both graphs.
+    """
+    simdt = 0.01
+    plotdt = 0.01
 
-		makeModel()
+    makeModel()
 
-		# Schedule the whole lot
-		moose.setClock( 4, simdt ) # for the computational objects
-		moose.setClock( 5, simdt ) # for the computational objects
-		moose.setClock( 8, plotdt ) # for the plots
-		#moose.useClock( 4, '/model/compt#/dsolve', 'process' )
-		moose.useClock( 4, '/model/compt#/ksolve', 'init' )
-		moose.useClock( 5, '/model/compt#/ksolve', 'process' )
-		moose.useClock( 8, '/model/graphs/#', 'process' )
-
-                a = moose.element( '/model/compt0/a' )
-                b = moose.element( '/model/compt1/b' )
-                c = moose.element( '/model/compt2/c' )
-		reac0 = moose.element( '/model/compt0/reac0' )
-		reac1 = moose.element( '/model/compt1/reac1' )
-                print "reac0 kf,kb: ", reac0.vec.numKf, reac0.vec.numKb
-                print "reac1 kf,kb: ", reac1.vec.numKf, reac1.vec.numKb
-                print "reac0 Kf,Kb: ", reac0.vec.Kf, reac0.vec.Kb
-                print "reac1 Kf,Kb: ", reac1.vec.Kf, reac1.vec.Kb
-
-		moose.reinit()
-                print "a: ", a.vec.n
-                print "b: ", b.vec.n
-                print "c: ", c.vec.n
-		#moose.start( 10.0 ) # Run the model for 100 seconds.
-                display()
-                print "a: ", a.vec.conc
-                print "b: ", b.vec.conc
-                print "c: ", c.vec.conc
-
-		# Iterate through all plots, dump their contents to data.plot.
-                '''
-		for x in moose.wildcardFind( '/model/graphs/conc#' ):
-				#x.xplot( 'scriptKineticModel.plot', x.name )
-				t = numpy.arange( 0, x.vector.size, 1 ) # sec
-				pylab.plot( t, x.vector, label=x.name )
-		pylab.legend()
-		pylab.show()
-                '''
-		quit()
+    # Schedule the whole lot
+    for i in range( 10, 19):
+        moose.setClock( i, simdt ) # for the compute objects
+    moose.reinit()
+    display()
+    quit()
 
 def display():
     dt = 0.01
