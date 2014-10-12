@@ -269,11 +269,23 @@ class Stoich
 			Id enzId, Id enzMolId, const vector< Id >& prds );
 
 		/**
-		 * This installs a funcTerm. Should be generic, that is, work
-		 * for any form of func. The pool is the FuncPool being
-		 * controlled.
+		 * This installs a FuncTerm, which evaluates a function to specify
+		 * the conc of the specific pool. The pool is a BufPool.
 		 */
 		void installAndUnschedFunc( Id func, Id pool );
+
+		/**
+		 * This installs a FuncRate, which evaluates a function to specify
+		 * the rate of change of conc of the specific pool. 
+		 * The pool is a Pool.
+		 */
+		void installAndUnschedFuncRate( Id func, Id pool );
+
+		/**
+		 * This installs a FuncReac, which evaluates a function to specify
+		 * the rate (Kf) of the specified reaction. 
+		 */
+		void installAndUnschedFuncReac( Id func, Id reac );
 
 		//////////////////////////////////////////////////////////////////
 
@@ -367,6 +379,11 @@ class Stoich
 		 * then returns 0.
 		 */
 		double getR2( const Eref& e ) const;
+
+		/**
+		 * Sets the arithmetic expression used in a FuncRate or FuncReac
+		 */
+		void setFunctionExpr( const Eref& e, string expr );
 
 		/**
 		 * This function scans all reacs and enzymes and recalculates the
