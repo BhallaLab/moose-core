@@ -355,7 +355,7 @@ class Element
 		 * a suitable default clock.
 		 */
 		virtual void zombieSwap( const Cinfo* zCinfo );
-	protected:
+
 		/// Support function for zombieSwap, replaces Cinfo.
 		void replaceCinfo( const Cinfo* newCinfo );
 

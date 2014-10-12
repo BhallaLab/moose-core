@@ -6,10 +6,6 @@
 ## GNU Lesser General Public License version 2.1
 ## See the file COPYING.LIB for the full notice.
 #########################################################################
-# This example illustrates loading and running a reaction system that
-# spans two volumes, that is, is in different compartments. It uses a
-# kkit model file. You can tell if it is working if you see nice 
-# relaxation oscillations.
 
 import moose
 import pylab
@@ -22,6 +18,12 @@ def deq( a, b ):
     return ( abs (a-b) < eps1 * (abs(a) + abs(b)) + eps2 )
 
 def main():
+        """
+        This example illustrates loading and running a reaction system that
+        spans two volumes, that is, is in different compartments. It uses a
+        kkit model file. You can tell if it is working if you see nice 
+        relaxation oscillations.
+        """
         # the kkit reader doesn't know how to do multicompt solver setup.
         solver = "ee"  
 	mfile = '../Genesis_files/OSC_diff_vols.g'
@@ -66,34 +68,8 @@ def main():
         print moose.element( '/model/kinetics/endo' )
         print moose.element( '/model/compartment_1/exo' )
         moose.le( '/model/compartment_1' )
-        #moose.element( '/model/kinetics/A/M_p' ).nInit = 1234
-        #moose.element( '/model/compartment_1/M' ).nInit = 5678
-        '''
-        moose.setClock( 0, simDt )
-        moose.setClock( 1, simDt )
-        moose.setClock( 2, simDt )
-        moose.setClock( 3, simDt )
-        moose.setClock( 4, simDt )
-        moose.setClock( 5, simDt )
-        moose.setClock( 6, simDt )
-        moose.setClock( 7, simDt )
-        moose.setClock( 8, simDt )
-        moose.setClock( 9, simDt )
-        moose.useClock( 5, '/model/#/ksolve', 'init' )
-        moose.useClock( 6, '/model/#/ksolve', 'process' )
-        '''
 	moose.reinit()
 	moose.start( runtime ) 
-
-        # Report parameters
-        '''
-	for x in moose.wildcardFind( '/model/kinetics/##[ISA=PoolBase]' ):
-		print x.name, x.nInit, x.concInit
-	for x in moose.wildcardFind( '/model/kinetics/##[ISA=ReacBase]' ):
-		print x.name, 'num: (', x.numKf, ', ',  x.numKb, '), conc: (', x.Kf, ', ', x.Kb, ')'
-	for x in moose.wildcardFind('/model/kinetics/##[ISA=EnzBase]'):
-		print x.name, '(', x.Km, ', ',  x.numKm, ', ', x.kcat, ')'
-                '''
 
 	# Display all plots.
 	for x in moose.wildcardFind( '/model/#graphs/conc#/#' ):
