@@ -123,6 +123,11 @@ const Cinfo* Ksolve::initCinfo()
 			"Estimated timestep for reac system based on Euler error",
 			&Ksolve::getEstimatedDt
 		);
+		static ReadOnlyValueFinfo< Ksolve, Id > stoich(
+			"stoich",
+			"Id for stoichiometry object tied to this Ksolve",
+			&Ksolve::getStoich
+		);
 
 
 		///////////////////////////////////////////////////////
@@ -196,6 +201,7 @@ const Cinfo* Ksolve::initCinfo()
 		&numAllVoxels,		// ReadOnlyValue
 		&numPools,			// Value
 		&estimatedDt,		// ReadOnlyValue
+		&stoich,			// ReadOnlyValue
 		&voxelVol,			// DestFinfo
 		&xCompt,			// SharedFinfo
 		&proc,				// SharedFinfo

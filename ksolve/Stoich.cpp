@@ -15,6 +15,7 @@
 #include "CplxEnzBase.h"
 #include "FuncTerm.h"
 #include "RateTerm.h"
+#include "FuncRateTerm.h"
 #include "SparseMatrix.h"
 #include "KinSparseMatrix.h"
 #include "ZombiePoolInterface.h"
@@ -851,6 +852,44 @@ void Stoich::installAndUnschedFunc( Id func, Id pool )
 	unsigned int funcIndex = convertIdToFuncIndex( func );
 	funcs_[ funcIndex ] = ft;
 }
+void Stoich::installAndUnschedFuncRate( Id func, Id pool )
+{
+	cout << "FuncRate not yet handled\n";
+}
+
+void Stoich::installAndUnschedFuncReac( Id func, Id reac )
+{
+	static const Cinfo* varCinfo = Cinfo::find( "Variable" );
+	// static const Finfo* funcSrcFinfo = varCinfo->findFinfo( "input" );
+	static const Finfo* funcSrcFinfo = varCinfo->findFinfo( "input" );
+	assert( funcSrcFinfo );
+	// Unsched Func
+	func.element()->setTick( -2 ); // Disable with option to resurrect.
+
+	unsigned int rateIndex = convertIdToReacIndex( reac );
+	assert( rateIndex < rates_.size() );
+	// Install the FuncReac
+	double k = rates_[rateIndex]->getR1();
+	vector< unsigned int > reactants;
+	rates_[rateIndex]->getReactants( reactants );
+	FuncReac* fr = new FuncReac( k, reactants );
+	delete rates_[rateIndex];
+	rates_[rateIndex] = fr;
+
+	Id ei( func.value() + 1 );
+
+	unsigned int numSrc = Field< unsigned int >::get( func, "numVars" );
+	vector< Id > srcPools;
+	unsigned int temp = ei.element()->getNeighbors( 
+					srcPools, funcSrcFinfo );
+	assert( numSrc == temp );
+	vector< unsigned int > poolIndex( numSrc, 0 );
+	for ( unsigned int i = 0; i < numSrc; ++i )
+		poolIndex[i] = convertIdToPoolIndex( srcPools[i] );
+	fr->setFuncArgIndex( poolIndex );
+	string expr = Field< string >::get( func, "expr" );
+	fr->setExpr( expr );
+}
 
 void Stoich::convertRatesToStochasticForm()
 {
@@ -927,6 +966,8 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 	static const Cinfo* zombieReacCinfo = Cinfo::find( "ZombieReac");
 	static const Cinfo* zombieMMenzCinfo = Cinfo::find( "ZombieMMenz");
 	static const Cinfo* zombieEnzCinfo = Cinfo::find( "ZombieEnz");
+	static const Finfo* funcSrcFinfo = Cinfo::find( "Function")->
+			findFinfo( "valueOut" );
 	// vector< Id > meshEntries;
 	vector< Id > temp = elist;
 
@@ -943,6 +984,16 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 				ObjId oi( ei->id(), j );
 				Field< double >::set( oi, "concInit", concInit );
 			}
+			// Look for func setting rate of change of pool
+			Id funcId = Neutral::child( i->eref(), "func" );
+			if ( funcId != Id() ) {
+				vector< Id > ret;
+				funcId.element()->getNeighbors( ret, funcSrcFinfo );
+				if ( ret.size() > 0 && ret[0] == *i ) {
+					assert( funcId.element()->cinfo()->isA( "Function" ) );
+					installAndUnschedFuncRate( funcId, (*i) );
+				}
+			}
 		}
 		else if ( ei->cinfo() == bufPoolCinfo ) {
 			double concInit = 
@@ -953,14 +1004,28 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 				ObjId oi( ei->id(), j );
 				Field< double >::set( oi, "concInit", concInit );
 			}
+			// Look for func setting conc of pool
 			Id funcId = Neutral::child( i->eref(), "func" );
 			if ( funcId != Id() ) {
-				assert( funcId.element()->cinfo()->isA( "Function" ) );
-				installAndUnschedFunc( funcId, (*i) );
+				vector< Id > ret;
+				funcId.element()->getNeighbors( ret, funcSrcFinfo );
+				if ( ret.size() > 0 && ret[0] == *i ) {
+					assert( funcId.element()->cinfo()->isA( "Function" ) );
+					installAndUnschedFunc( funcId, (*i) );
+				}
 			}
 		}
 		else if ( ei->cinfo() == reacCinfo ) {
 			ReacBase::zombify( ei, zombieReacCinfo, e.id() );
+			Id funcId = Neutral::child( i->eref(), "func" );
+			if ( funcId != Id() ) {
+				vector< Id > ret;
+				funcId.element()->getNeighbors( ret, funcSrcFinfo );
+				if ( ret.size() > 0 && ret[0] == *i ) {
+					assert( funcId.element()->cinfo()->isA( "Function" ) );
+					installAndUnschedFuncReac( funcId, (*i) );
+				}
+			}
 		}
 		else if ( ei->cinfo() == mmEnzCinfo ) {
 			EnzBase::zombify( ei, zombieMMenzCinfo, e.id() );
@@ -1530,6 +1595,15 @@ double Stoich::getR2( const Eref& e ) const
 	return rates_[ convertIdToReacIndex( e.id() ) ]->getR2();
 }
 
+void Stoich::setFunctionExpr( const Eref& e, string expr )
+{
+	unsigned int index = convertIdToReacIndex( e.id() );
+	FuncRate* fr = dynamic_cast< FuncRate* >( rates_[index] );
+	if ( fr ) {
+		fr->setExpr( expr );
+	}
+}
+/////////////////////////////////////////////////////////////////////
 SpeciesId Stoich::getSpecies( unsigned int poolIndex ) const
 {
 	return species_[ poolIndex ];
