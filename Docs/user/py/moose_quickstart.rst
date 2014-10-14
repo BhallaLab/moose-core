@@ -17,7 +17,7 @@ information that may be required for advanced work. Knowledge of
 Python or programming in general will be helpful. If you just want to
 simulate existing models in one of the supported formats, you can fire
 the MOOSE GUI and locate the model file using the ``File`` menu and
-load it. The GUI is described `here <./MooseGuiDocs.html>`__. If you
+load it. The GUI is described in separate document. If you
 are looking for recipes for specific tasks, take a look at
 :doc:`moose_cookbook`. The example code in the boxes can be entered in
 a Python shell.
