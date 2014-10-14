@@ -21,15 +21,31 @@
 class FuncRate: public ExternReac
 {
 	public:
-		FuncRate( double k )
+		FuncRate( double k, unsigned int targetPoolIndex )
 			: k_( k ), funcVolPower_( 0.0 )
-		{;}
+		{
+			func_.setTarget( targetPoolIndex );
+		}
 
 		double operator() ( const double* S ) const {
 			return func_( S, 0.0 ); // get rate from func calculation.
 		}
 
-		const vector< unsigned int >& getReactantIndex()
+		unsigned int getReactants( vector< unsigned int >& molIndex ) const{
+			molIndex.resize( 1 );
+			molIndex[0] = func_.getTarget();
+
+			// This is the number of substrates to the reac. It is zero.
+			return 0; 
+			// The target molecule is handled as a product.
+		}
+
+		void setReactants( const vector< unsigned int >& molIndex ) {
+			assert( molIndex.size() > 0 );
+			func_.setTarget( molIndex[0] );
+		}
+
+		const vector< unsigned int >& getFuncArgIndex()
 		{
 			return func_.getReactantIndex();
 		}
@@ -49,13 +65,15 @@ class FuncRate: public ExternReac
 				double vol, double sub, double prd ) const
 		{
 			double ratio = sub * pow( NA * vol, funcVolPower_ );
-			return new FuncRate( k_ / ratio );
+			FuncRate* ret = new FuncRate( k_ / ratio, func_.getTarget() );
+			ret->funcVolPower_ = funcVolPower_;
+			ret->func_ = func_;
+			// return new FuncRate( k_ / ratio );
+			return ret;
 		}
 
 	protected:
 		FuncTerm func_;
-
-	private:
 		double k_;
 		double funcVolPower_;
 	
@@ -64,7 +82,7 @@ class FuncRate: public ExternReac
 
 /**
  * This FuncReac manages a one-way NOrder reaction whose rate is determined
- * by a Function, but which also has regular substrates. 
+ * by a Function, but which also has regular substrates and products. 
  *
  *
  * dproduct/dt = func( x0, x1, x2..., t ) * [sub0] * [sub1] * ....
@@ -80,12 +98,13 @@ class FuncReac: public FuncRate
 {
 	public:
 		FuncReac( double k, vector< unsigned int > v )
-			: FuncRate( k ),
+			: FuncRate( k, 0 ),
 			v_( v )
 		{;}
 
 		double operator() ( const double* S ) const {
-			double ret = k_ * func_( S, 0.0 ); // get rate from func calculation.
+			// double ret = k_ * func_( S, 0.0 ); // get rate from func calculation.
+			double ret = func_( S, 0.0 ); // get rate from func calculation.
 			vector< unsigned int >::const_iterator i;
 			for ( i = v_.begin(); i != v_.end(); i++) {
 				assert( !isnan( S[ *i ] ) );
@@ -96,7 +115,7 @@ class FuncReac: public FuncRate
 
 		unsigned int getReactants( vector< unsigned int >& molIndex ) const{
 			molIndex = v_;
-			return v_.size();
+			return numSubstrates_;
 		}
 
 		void setReactants( const vector< unsigned int >& molIndex ) {
@@ -119,12 +138,15 @@ class FuncReac: public FuncRate
 			assert( v_.size() > 0 );
 			double ratio = sub * pow( NA * vol, 
 							funcVolPower_ + (int)( v_.size() ) - 1 );
-			return new FuncReac( k_ / ratio, v_ );
+			FuncReac* ret = new FuncReac( k_ / ratio, v_ );
+			ret->func_ = func_;
+			ret->funcVolPower_ = funcVolPower_;
+			return ret;
+			// return new FuncReac( k_ / ratio, v_ );
 		}
 
 	private:
-		double k_;
-		double funcVolPower_;
 		vector< unsigned int > v_;
+		unsigned int numSubstrates_;
 };
 
