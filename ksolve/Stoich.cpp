@@ -722,6 +722,9 @@ void Stoich::allocateModelObject( Id id, vector< Id >& bufPools )
 	static const Cinfo* enzCinfo = Cinfo::find( "Enz" );
 	static const Cinfo* mmEnzCinfo = Cinfo::find( "MMenz" );
 	static const Cinfo* functionCinfo = Cinfo::find( "Function" );
+	static const Finfo* f1 = functionCinfo->findFinfo( "valueOut" );
+	static const SrcFinfo* sf = dynamic_cast< const SrcFinfo* >( f1 );
+	assert( sf );
 
 	Element* ei = id.element();
 	if ( ei->cinfo() == poolCinfo ) {
@@ -753,9 +756,19 @@ void Stoich::allocateModelObject( Id id, vector< Id >& bufPools )
 				numReac_ += 2;
 			}
 	} else if ( ei->cinfo() == functionCinfo ) {
-			funcMap_.push_back( ei->id() );
-			objMap_[ id.value() - objMapStart_ ] = numFunctions_;
-			++numFunctions_;
+			vector< ObjId > tgt;
+			vector< string > func;
+			ei->getMsgTargetAndFunctions( 0, sf, tgt, func );
+			if ( func.size() > 0 && func[0] == "increment" ) {
+				objMap_[ id.value() - objMapStart_ ] = numReac_;
+				numReac_++;
+			} else if ( func.size() > 0 && func[0] == "setNumKf" ) {
+				// the reac has already been accounted for.
+			} else {
+				funcMap_.push_back( ei->id() );
+				objMap_[ id.value() - objMapStart_ ] = numFunctions_;
+				++numFunctions_;
+			}
 	}
 }
 
@@ -852,9 +865,39 @@ void Stoich::installAndUnschedFunc( Id func, Id pool )
 	unsigned int funcIndex = convertIdToFuncIndex( func );
 	funcs_[ funcIndex ] = ft;
 }
+
 void Stoich::installAndUnschedFuncRate( Id func, Id pool )
 {
-	cout << "FuncRate not yet handled\n";
+	static const Cinfo* varCinfo = Cinfo::find( "Variable" );
+	// static const Finfo* funcSrcFinfo = varCinfo->findFinfo( "input" );
+	static const Finfo* funcSrcFinfo = varCinfo->findFinfo( "input" );
+	assert( funcSrcFinfo );
+	// Unsched Func
+	func.element()->setTick( -2 ); // Disable with option to resurrect.
+
+	// Note that we set aside this index during allocateModelObject
+	unsigned int rateIndex = convertIdToReacIndex( func );
+	unsigned int tempIndex = convertIdToPoolIndex( pool );
+	assert( rateIndex < rates_.size() );
+	// Install the FuncReac
+	FuncRate* fr = new FuncRate( 1.0, tempIndex );
+	rates_[rateIndex] = fr;
+	int stoichEntry = N_.get( tempIndex, rateIndex );
+	N_.set( tempIndex, rateIndex, stoichEntry + 1 );
+
+	Id ei( func.value() + 1 );
+
+	unsigned int numSrc = Field< unsigned int >::get( func, "numVars" );
+	vector< Id > srcPools;
+	unsigned int temp = ei.element()->getNeighbors( 
+					srcPools, funcSrcFinfo );
+	assert( numSrc == temp );
+	vector< unsigned int > poolIndex( numSrc, 0 );
+	for ( unsigned int i = 0; i < numSrc; ++i )
+		poolIndex[i] = convertIdToPoolIndex( srcPools[i] );
+	fr->setFuncArgIndex( poolIndex );
+	string expr = Field< string >::get( func, "expr" );
+	fr->setExpr( expr );
 }
 
 void Stoich::installAndUnschedFuncReac( Id func, Id reac )
@@ -871,7 +914,9 @@ void Stoich::installAndUnschedFuncReac( Id func, Id reac )
 	// Install the FuncReac
 	double k = rates_[rateIndex]->getR1();
 	vector< unsigned int > reactants;
-	rates_[rateIndex]->getReactants( reactants );
+	unsigned int numForward = rates_[rateIndex]->getReactants( reactants );
+	// The reactants vector has both substrates and products.
+	reactants.resize( numForward );
 	FuncReac* fr = new FuncReac( k, reactants );
 	delete rates_[rateIndex];
 	rates_[rateIndex] = fr;
