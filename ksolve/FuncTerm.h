@@ -21,6 +21,7 @@ class FuncTerm
 		 * some functions.
 		 */
 		double operator() ( const double* S, double t ) const;
+		const FuncTerm& operator=( const FuncTerm& other );
 
 		void evalPool( double* s, double t ) const;
 
