@@ -51,11 +51,17 @@
 
 const Cinfo * PyRun::initCinfo()
 {
-    static ValueFinfo< PyRun, string > pystring(
-        "string",
-        "String to be executed.",
-        &PyRun::setString,
-        &PyRun::getString);
+    static ValueFinfo< PyRun, string > runstring(
+        "runString",
+        "String to be executed during at each time step.",
+        &PyRun::setRunString,
+        &PyRun::getRunString);
+
+    static ValueFinfo< PyRun, string > initstring(
+        "initString",
+        "String to be executed during at initialization (reinit).",
+        &PyRun::setInitString,
+        &PyRun::getInitString);
 
     // static ValueFinfo< PyRun, PyObject* > globals(
     //     "globals",
@@ -71,7 +77,7 @@ const Cinfo * PyRun::initCinfo()
     
     static DestFinfo run(
         "run",
-        "Runs a specified string. Does not modify existing python statement.",
+        "Runs a specified string. Does not modify existing run or init strings.",
         new OpFunc1< PyRun, string >(&PyRun::run));
 
     static DestFinfo process(
@@ -97,7 +103,8 @@ const Cinfo * PyRun::initCinfo()
         processShared, sizeof( processShared ) / sizeof( Finfo* ));
 
     static Finfo * pyRunFinfos[] = {
-        &pystring,
+        &runstring,
+        &initstring,
         // &locals,
         // &globals,
         &run,
@@ -122,26 +129,36 @@ const Cinfo * PyRun::initCinfo()
 
 static const Cinfo * pyRunCinfo = PyRun::initCinfo();
 
-PyRun::PyRun()
-{
-    pystr_ = "";
-    globals_ = NULL;
-    locals_ = NULL;
-}
-
-PyRun::~PyRun()
+PyRun::PyRun():initstr_(""), runstr_(""),
+               globals_(0), locals_(0),
+               runcompiled_(0), initcompiled_(0)
 {
     ;
 }
 
-void PyRun::setString(string statement)
+PyRun::~PyRun()
 {
-    pystr_ = statement;
+    Py_XDECREF(globals_);
+    Py_XDECREF(locals_);
 }
 
-string PyRun::getString() const
+void PyRun::setRunString(string statement)
 {
-    return pystr_;
+    runstr_ = statement;
+}
+
+string PyRun::getRunString() const
+{
+    return runstr_;
+}
+void PyRun::setInitString(string statement)
+{
+    initstr_ = statement;
+}
+
+string PyRun::getInitString() const
+{
+    return initstr_;
 }
 
 void PyRun::run(string statement)
@@ -151,34 +168,89 @@ void PyRun::run(string statement)
 
 void PyRun::process(const Eref & e, ProcPtr p)
 {
-    cout << "Running: '" << pystr_ << "'" << endl;
-    // PyRun_String(pystr_.c_str(), 0, globals_, locals_);
-    // PyRun_SimpleString(pystr_.c_str());
-       PyEval_EvalCode(compiled_, globals_, locals_);
+    // PyRun_String(runstr_.c_str(), 0, globals_, locals_);
+    // PyRun_SimpleString(runstr_.c_str());
+    if (!runcompiled_){
+        return;
+    }
+    PyEval_EvalCode(runcompiled_, globals_, locals_);
+    if (PyErr_Occurred()){
+        PyErr_Print ();
+    } 
+}
+
+/**
+   This is derived from:
+   http://effbot.org/pyfaq/how-do-i-tell-incomplete-input-from-invalid-input.htm
+ */
+void handleError(bool syntax)
+{
+    PyObject *exc, *val, *trb;
+    char * msg;
     
+    if (syntax && PyErr_ExceptionMatches (PyExc_SyntaxError)){           
+        PyErr_Fetch (&exc, &val, &trb);        /* clears exception! */
+        
+        if (PyArg_ParseTuple (val, "sO", &msg, &trb) &&
+            !strcmp (msg, "unexpected EOF while parsing")){ /* E_EOF */            
+            Py_XDECREF (exc);
+            Py_XDECREF (val);
+            Py_XDECREF (trb);
+        } else {                                  /* some other syntax error */
+            PyErr_Restore (exc, val, trb);
+            PyErr_Print ();
+        }
+    } else {                                     /* some non-syntax error */
+        PyErr_Print ();
+    }                
 }
 
 /**
    This function does not do anything at this point. It is possible to
    start a separate Python interpreter from here based on a flag. See
    http://www.linuxjournal.com/article/8497 for details.
- */
+*/
+
 void PyRun::reinit(const Eref& e, ProcPtr p)
 {
     PyObject * main_module;
     if (globals_ == NULL){
         main_module = PyImport_AddModule("__main__");        
         globals_ = PyModule_GetDict(main_module);
+        Py_XINCREF(globals_);
     }
-    // if (locals_ == NULL){
-    //     locals_ = globals_;
-    // }
-    cout << "Compiling string: " << pystr_ << endl;
-    compiled_ = (PyCodeObject*)Py_CompileStringFlags(
-        pystr_.c_str(),
+    if (locals_ == NULL){
+        locals_ = PyDict_New();
+        if (!locals_){
+            cerr << "Could not initialize locals dict" << endl;            
+        }
+    }
+    initcompiled_ = (PyCodeObject*)Py_CompileString(
+        initstr_.c_str(),
         Py_GetProgramName(),
-        0,
         Py_file_input);
+    if (!initcompiled_){
+        cerr << "Error compiling initString" << endl;
+        handleError(true);
+    } else {
+        PyEval_EvalCode(initcompiled_, globals_, locals_);
+        if (PyErr_Occurred()){
+            PyErr_Print ();
+        }
+    }
+    runcompiled_ = (PyCodeObject*)Py_CompileString(
+        runstr_.c_str(),
+        Py_GetProgramName(),
+        Py_file_input);
+    if (!runcompiled_){
+        cerr << "Error compiling runString" << endl;
+        handleError(true);
+    } else {
+        PyEval_EvalCode(runcompiled_, globals_, locals_);
+        if (PyErr_Occurred()){
+            PyErr_Print ();
+        }
+    }
 }
 
 
