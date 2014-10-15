@@ -45,13 +45,50 @@
 
 # Code:
 
-"""Shows the use of PyRun class to run Python statements"""
+"""You can use the PyRun class to run Python statements from MOOSE at runtime."""
 import moose
 
 def example():
-    hello_runner = moose.PyRun('Hello')
+    """In this example we demonstrate the use of PyRun objects to execute
+    Python statements from MOOSE. Here is a couple of fun things to
+    indicate the power of MOOSE-Python integration.
+
+    First we create a PyRun object called `Hello`. In its `initString`
+    we put in Python statements that prints the element's string
+    representation using pymoose-API. When ``moose.reinit()`` is
+    called, this causes MOOSE to execute these Python statements which
+    include Python calling a MOOSE function
+    (Python->MOOSE->Python->MOOSE) - isn't that cool!
+
+    We also initialize a counter called `hello_count` to 0.
+
+    The statements in initString gets executed once, when we call
+    ``moose.reinit()``.
+
+    In the `runString` we put a couple of print statements to indicate
+    the name fof the object which is running and the current
+    count. Then we increase the count directly.
+    
+    When we call ``moose.start()``, the `runString` gets executed at
+    each time step.
+
+    The other PyRun object we create, is `/World`. In its `initString`
+    apart from ordinary print statements and initialization, we define
+    a Python function called ``incr_count``. This silly little
+    function just increments the global `world_count` by 1. 
+
+    The `runString` for `World` simply calls this function to
+    increment the count and print it.
+
+    We may notice that we assign tick 0 to `Hello` and tick 1 to
+    `World`. Looking at the output, you will realize that the
+    sequences of the ticks strictly maintain the sequence of
+    execution.
+
+    """
+    hello_runner = moose.PyRun('/Hello')
     hello_runner.initString = """
-print 'Init Hello'
+print 'Init', moose.element('/Hello')
 hello_count = 0
 """
     hello_runner.runString = """
@@ -66,18 +103,21 @@ hello_count += 1
     world_runner.initString = """
 print 'Init World'
 world_count = 0
+def incr_count():
+    global world_count
+    world_count += 1
 """
     world_runner.runString = """
 print 'Running World'
 print 'World count =', world_count
-world_count += 1
+incr_count()
 """
     world_runner.run('from datetime import datetime')
     world_runner.run('print "World: current time:", datetime.now().isoformat()')
     
     moose.useClock(0, world_runner.path, 'process')
     moose.reinit()
-    moose.start(0.1)
+    moose.start(0.001)
 
 
 if __name__ == '__main__':
