@@ -42,6 +42,11 @@ Start, Stop, and setting clocks
 .. automodule:: startstop
    :members:
 
+Run Python from MOOSE
+^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: pyrun
+   :members:
+      
 Accessing and tweaking parameters
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. automodule:: tweakingParameters
