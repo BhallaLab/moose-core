@@ -390,6 +390,7 @@ const Cinfo* Clock::initCinfo()
 		"	Table2				18		1\n"
 		"	HDF5DataWriter			30		1\n"
 		"	HDF5WriterBase			30		1\n"
+                "       PyRun                           30              1\n"
 		"	PostMaster			31		0.01\n"
 		"	\n"
 		"	Note that the other classes are not scheduled at all.",
@@ -808,6 +809,8 @@ void Clock::buildDefaultTick()
 	defaultTick_["Table2"] = 18;
 	defaultTick_["HDF5DataWriter"] = 30;
 	defaultTick_["HDF5WriterBase"] = 30;
+        defaultTick_["PyRun"] = 30;
+        
 	defaultTick_["PostMaster"] = 31;
 
 	defaultTick_["Annotator"] = ~0U;

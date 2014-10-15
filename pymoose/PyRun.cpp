@@ -53,13 +53,13 @@ const Cinfo * PyRun::initCinfo()
 {
     static ValueFinfo< PyRun, string > runstring(
         "runString",
-        "String to be executed during at each time step.",
+        "String to be executed at each time step.",
         &PyRun::setRunString,
         &PyRun::getRunString);
 
     static ValueFinfo< PyRun, string > initstring(
         "initString",
-        "String to be executed during at initialization (reinit).",
+        "String to be executed at initialization (reinit).",
         &PyRun::setInitString,
         &PyRun::getInitString);
 
@@ -82,12 +82,12 @@ const Cinfo * PyRun::initCinfo()
 
     static DestFinfo process(
         "process",
-        "Handles process call. Runs the current string. This is not suitable for print statements.",
+        "Handles process call. Runs the current runString.",
         new ProcOpFunc< PyRun >(&PyRun::process));
 
     static DestFinfo reinit(
         "reinit",
-        "Handles reinit call.",
+        "Handles reinit call. Runs the current initString.",
         new ProcOpFunc< PyRun >( &PyRun::reinit ));
     
     static Finfo * processShared[] = { &process, &reinit };
