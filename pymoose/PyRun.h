@@ -57,8 +57,11 @@ public:
     PyRun();
     ~PyRun();
     
-    void setString(string str);
-    string getString() const;
+    void setInitString(string str);
+    string getInitString() const;
+
+    void setRunString(string str);
+    string getRunString() const;
 
     void setGlobals(PyObject *globals);
     PyObject * getGlobals() const;
@@ -73,11 +76,13 @@ public:
     
     static const Cinfo * initCinfo();
 
-  protected:
-    string pystr_; // statement str
+protected:
+    string initstr_; // statement str for running at reinit
+    string runstr_; // statement str for running in each process call
     PyObject * globals_; // global env dict
     PyObject * locals_; // local env dict
-    PyCodeObject * compiled_; // compiled form of statement str
+    PyCodeObject * runcompiled_; // compiled form of procstr_
+    PyCodeObject * initcompiled_; // coimpiled form of initstr_
 };
 
 #endif

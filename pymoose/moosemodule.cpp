@@ -1481,9 +1481,9 @@ extern "C" {
             return NULL;
         }
 
-        Py_BEGIN_ALLOW_THREADS
+        // Py_BEGIN_ALLOW_THREADS
                 SHELLPTR->doStart(runtime);
-        Py_END_ALLOW_THREADS
+        // Py_END_ALLOW_THREADS
                 Py_RETURN_NONE;
     }
 
