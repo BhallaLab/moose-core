@@ -80,7 +80,7 @@ element during a simulation. The Function class is useful for this.
 
 Solving arbitrary differential equations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The Function classes are also useful for setting up arbitrary differential
+The Function classes are useful for setting up arbitrary differential
 equations. MOOSE supports solution of such equation systems, with the
 caveat that it thinks they should be chemical systems and therefore 
 interprets the variables as concentrations. MOOSE does not permit the 
@@ -88,6 +88,29 @@ concentrations to go negative.
 
 .. automodule:: diffEqSolution
     :members:
+
+This limitation on positive solutions can be overcome with offsets to the
+variables. 
+
+.. automodule:: funcRateHarmonicOsc
+    :members:
+
+It is also possible to set up other forms of differential equations,
+where instead of directly controlling the rate of change of a pool, the
+equations take the form of modifying the rate of a reaction involving 
+a pool.
+
+.. automodule:: funcReacLotkaVolterra
+    :members:
+
+The solutions of such systems are much more accurate and faster using the
+chemical kinetic solver than with the basic exponential Euler method. 
+However, it is important to point out that the use of arbitrary 
+differential equations to represent chemical systems is
+discouraged in MOOSE. This is for the simple reason that they are 
+abstractions, frequently with serious flaws, of the underlying chemistry.
+At the current time the stochastic solver cannot handle systems formulated
+with functions rather than chemical objects.
 
 Chemical Signaling models
 -------------------------
