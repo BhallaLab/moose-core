@@ -49,6 +49,10 @@
 #include "../basecode/header.h"
 #include "PyRun.h"
 
+const int PyRun::RUNPROC = 1;
+const int PyRun::RUNTRIG = 2;
+const int PyRun::RUNBOTH = 0;
+
 static SrcFinfo1< double >* outputOut()
 {
     static SrcFinfo1< double > outputOut( "output",
@@ -75,7 +79,9 @@ const Cinfo * PyRun::initCinfo()
         &PyRun::getInitString);
     static ValueFinfo< PyRun, string > inputvar(
         "inputVar",
-        "Name of local variable in which input balue is to be stored. Default is `input`.",
+        "Name of local variable in which input balue is to be stored. Default"
+        " is `input_` (to avoid conflict with Python's builtin function"
+        " `input`).",
         &PyRun::setInputVar,
         &PyRun::getInputVar);
 
@@ -85,12 +91,11 @@ const Cinfo * PyRun::initCinfo()
         &PyRun::setOutputVar,
         &PyRun::getOutputVar);
 
-    // static ValueFinfo< PyRun, bool > debug(
-    //     "debug",
-    //     "Flag to indicate debug mode which prints the incoming value whenever a"
-    //     " trigger message comes. See `trigger` for more detail.",
-    //     &PyRun::setDebug,
-    //     &PyRun::getDebug);
+    static ValueFinfo< PyRun, int > mode(
+        "mode",
+        "Flag to indicate whether runString should be executed for both trigger and process, or one of them",
+        &PyRun::setMode,
+        &PyRun::getMode);
 
     // static ValueFinfo< PyRun, PyObject* > globals(
     //     "globals",
@@ -108,8 +113,10 @@ const Cinfo * PyRun::initCinfo()
         "trigger",
         "Executes the current runString whenever a message arrives. It stores"
         " the incoming value in local variable named"
-        " `input`, which can be used in the"
-        " `runString`. If debug is True, it prints the input value.",
+        " `input_`, which can be used in the"
+        " `runString` (the underscore is added to avoid conflict with Python's"
+        " builtin function `input`). If debug is True, it prints the input"
+        " value.",
         new EpFunc1< PyRun, double >(&PyRun::trigger));
     
     static DestFinfo run(
@@ -142,7 +149,7 @@ const Cinfo * PyRun::initCinfo()
     static Finfo * pyRunFinfos[] = {
         &runstring,
         &initstring,
-        // &debug,
+        &mode,
         &inputvar,
         &outputvar,
         &trigger,
@@ -171,12 +178,24 @@ const Cinfo * PyRun::initCinfo()
 
 static const Cinfo * pyRunCinfo = PyRun::initCinfo();
 
-PyRun::PyRun():initstr_(""), runstr_(""),
+PyRun::PyRun():mode_(0), initstr_(""), runstr_(""),
                globals_(0), locals_(0),
                runcompiled_(0), initcompiled_(0),
-               inputvar_("input"), outputvar_("output")
+               inputvar_("input_"), outputvar_("output")
 {
-    ;
+    locals_ = PyDict_New();
+    if (!locals_){
+        cerr << "Could not initialize locals dict" << endl;
+        return;
+    }
+    PyObject * value = PyFloat_FromDouble(0.0);
+    if (!value && PyErr_Occurred()){
+        PyErr_Print();
+        return;
+    }
+    if (PyDict_SetItemString(locals_, inputvar_.c_str(), value)){
+        PyErr_Print();
+    }    
 }
 
 PyRun::~PyRun()
@@ -227,14 +246,14 @@ string PyRun::getOutputVar() const
     return outputvar_;
 }
 
-void PyRun::setDebug(bool flag)
+void PyRun::setMode(int flag)
 {
-    debug_ = flag;
+    mode_ = flag;
 }
 
-bool PyRun::getDebug() const
+int PyRun::getMode() const
 {
-    return debug_;
+    return mode_;
 }
 
 void PyRun::trigger(const Eref& e, double input)
@@ -242,9 +261,10 @@ void PyRun::trigger(const Eref& e, double input)
     if (!runcompiled_){
         return;
     }
-    // if (debug_){
-    //     cout << "# " << e.objId().path() << " received input: " << input << endl;
-    // }
+    if (mode_ == 1){
+        return;
+    }
+    
     PyObject * value = PyDict_GetItemString(locals_, inputvar_.c_str());
     if (value){
         Py_DECREF(value);
@@ -289,7 +309,7 @@ void PyRun::process(const Eref & e, ProcPtr p)
 {
     // PyRun_String(runstr_.c_str(), 0, globals_, locals_);
     // PyRun_SimpleString(runstr_.c_str());
-    if (!runcompiled_){
+    if (!runcompiled_ || mode_ == 2){
         return;
     }
     PyEval_EvalCode(runcompiled_, globals_, locals_);
