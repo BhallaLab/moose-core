@@ -71,8 +71,14 @@ public:
 
     void setDebug(bool flag);
     bool getDebug() const;
+
+    void setInputVar(string name);
+    string getInputVar() const;
     
-    void run(string statement);
+    void setOutputVar(string name);
+    string getOutputVar() const;
+    
+    void run(const Eref& e, string statement);
 
     void trigger(const Eref& e, double input); // this is a way to trigger execution via incoming message - can be useful for debugging
     
@@ -89,6 +95,8 @@ protected:
     PyObject * locals_; // local env dict
     PyCodeObject * runcompiled_; // compiled form of procstr_
     PyCodeObject * initcompiled_; // coimpiled form of initstr_
+    string inputvar_; // identifier for input variable.
+    string outputvar_; // identifier for output variable
 };
 
 #endif
