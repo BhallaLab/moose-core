@@ -49,6 +49,17 @@
 #include "../basecode/header.h"
 #include "PyRun.h"
 
+static SrcFinfo1< double >* outputOut()
+{
+    static SrcFinfo1< double > outputOut( "output",
+                                          "Sends out the value of local variable called `output`. Thus, you can"
+                                          " have Python statements which compute some value and assign it to the"
+                                          " variable called `output` (which is defined at `reinit` call). This"
+                                          " will be sent out to any target connected to the `output` field.");
+    return &outputOut;
+}
+
+
 const Cinfo * PyRun::initCinfo()
 {
     static ValueFinfo< PyRun, string > runstring(
@@ -62,12 +73,24 @@ const Cinfo * PyRun::initCinfo()
         "String to be executed at initialization (reinit).",
         &PyRun::setInitString,
         &PyRun::getInitString);
+    static ValueFinfo< PyRun, string > inputvar(
+        "inputVar",
+        "Name of local variable in which input balue is to be stored. Default is `input`.",
+        &PyRun::setInputVar,
+        &PyRun::getInputVar);
 
-    static ValueFinfo< PyRun, bool > debug(
-        "debug",
-        "Flag to indicate debug mode. See `trigger` for more detail.",
-        &PyRun::setDebug,
-        &PyRun::getDebug);
+    static ValueFinfo< PyRun, string > outputvar(
+        "outputVar",
+        "Name of local variable for storing output. Default is `output`",
+        &PyRun::setOutputVar,
+        &PyRun::getOutputVar);
+
+    // static ValueFinfo< PyRun, bool > debug(
+    //     "debug",
+    //     "Flag to indicate debug mode which prints the incoming value whenever a"
+    //     " trigger message comes. See `trigger` for more detail.",
+    //     &PyRun::setDebug,
+    //     &PyRun::getDebug);
 
     // static ValueFinfo< PyRun, PyObject* > globals(
     //     "globals",
@@ -83,14 +106,16 @@ const Cinfo * PyRun::initCinfo()
 
     static DestFinfo trigger(
         "trigger",
-        "Executes the current runString when input > 0.0. If debug is True, "
-        "then runs each time the input arrives and prints the input value.",
+        "Executes the current runString whenever a message arrives. It stores"
+        " the incoming value in local variable named"
+        " `input`, which can be used in the"
+        " `runString`. If debug is True, it prints the input value.",
         new EpFunc1< PyRun, double >(&PyRun::trigger));
     
     static DestFinfo run(
         "run",
         "Runs a specified string. Does not modify existing run or init strings.",
-        new OpFunc1< PyRun, string >(&PyRun::run));
+        new EpFunc1< PyRun, string >(&PyRun::run));
 
     static DestFinfo process(
         "process",
@@ -117,8 +142,11 @@ const Cinfo * PyRun::initCinfo()
     static Finfo * pyRunFinfos[] = {
         &runstring,
         &initstring,
-        &debug,
+        // &debug,
+        &inputvar,
+        &outputvar,
         &trigger,
+        outputOut(),
         // &locals,
         // &globals,
         &run,
@@ -145,7 +173,8 @@ static const Cinfo * pyRunCinfo = PyRun::initCinfo();
 
 PyRun::PyRun():initstr_(""), runstr_(""),
                globals_(0), locals_(0),
-               runcompiled_(0), initcompiled_(0)
+               runcompiled_(0), initcompiled_(0),
+               inputvar_("input"), outputvar_("output")
 {
     ;
 }
@@ -165,6 +194,7 @@ string PyRun::getRunString() const
 {
     return runstr_;
 }
+
 void PyRun::setInitString(string statement)
 {
     initstr_ = statement;
@@ -173,6 +203,28 @@ void PyRun::setInitString(string statement)
 string PyRun::getInitString() const
 {
     return initstr_;
+}
+
+void PyRun::setInputVar(string name)
+{
+    PyDict_DelItemString(locals_, inputvar_.c_str());
+    inputvar_ = name;
+}
+
+string PyRun::getInputVar() const
+{
+    return inputvar_;
+}
+
+void PyRun::setOutputVar(string name)
+{
+    PyDict_DelItemString(locals_, outputvar_.c_str());
+    outputvar_ = name;
+}
+
+string PyRun::getOutputVar() const
+{
+    return outputvar_;
 }
 
 void PyRun::setDebug(bool flag)
@@ -190,20 +242,47 @@ void PyRun::trigger(const Eref& e, double input)
     if (!runcompiled_){
         return;
     }
-    if (input > 0.0 || debug_){
-        if (debug_){
-            cout << "# " << e.objId().path() << " received input: " << input << endl;
-        }
-        PyEval_EvalCode(runcompiled_, globals_, locals_);
+    // if (debug_){
+    //     cout << "# " << e.objId().path() << " received input: " << input << endl;
+    // }
+    PyObject * value = PyDict_GetItemString(locals_, inputvar_.c_str());
+    if (value){
+        Py_DECREF(value);
+    }
+    value = PyFloat_FromDouble(input);
+    if (!value && PyErr_Occurred()){
+        PyErr_Print();
+    }
+    if (PyDict_SetItemString(locals_, inputvar_.c_str(), value)){
+        PyErr_Print();
+    }
+    PyEval_EvalCode(runcompiled_, globals_, locals_);
+    if (PyErr_Occurred()){
+        PyErr_Print ();
+    }
+    value = PyDict_GetItemString(locals_, outputvar_.c_str());
+    if (value){
+        double output = PyFloat_AsDouble(value);
         if (PyErr_Occurred()){
             PyErr_Print ();
-        } 
-    }        
+        } else {
+            outputOut()->send(e, output);
+        }
+    }
 }
 
-void PyRun::run(string statement)
+void PyRun::run(const Eref&e, string statement)
 {
     PyRun_SimpleString(statement.c_str());
+    PyObject * value = PyDict_GetItemString(locals_, outputvar_.c_str());
+    if (value){
+        double output = PyFloat_AsDouble(value);
+        if (PyErr_Occurred()){
+            PyErr_Print ();
+        } else {
+            outputOut()->send(e, output);
+        }
+    }
 }
 
 void PyRun::process(const Eref & e, ProcPtr p)
@@ -216,7 +295,16 @@ void PyRun::process(const Eref & e, ProcPtr p)
     PyEval_EvalCode(runcompiled_, globals_, locals_);
     if (PyErr_Occurred()){
         PyErr_Print ();
-    } 
+    }
+    PyObject * value = PyDict_GetItemString(locals_, outputvar_.c_str());
+    if (value){
+        double output = PyFloat_AsDouble(value);
+        if (PyErr_Occurred()){
+            PyErr_Print ();
+        } else {
+            outputOut()->send(e, output);
+        }
+    }
 }
 
 /**
@@ -244,12 +332,6 @@ void handleError(bool syntax)
         PyErr_Print ();
     }                
 }
-
-/**
-   This function does not do anything at this point. It is possible to
-   start a separate Python interpreter from here based on a flag. See
-   http://www.linuxjournal.com/article/8497 for details.
-*/
 
 void PyRun::reinit(const Eref& e, ProcPtr p)
 {
