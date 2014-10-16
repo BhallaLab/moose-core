@@ -54,6 +54,10 @@
 class PyRun
 {
 public:
+    static const int RUNPROC; // only process call
+    static const int RUNTRIG; // only trigger call
+    static const int RUNBOTH; // both
+    
     PyRun();
     ~PyRun();
     
@@ -69,8 +73,8 @@ public:
     void setLocals(PyObject *locals);
     PyObject * getLocals() const;
 
-    void setDebug(bool flag);
-    bool getDebug() const;
+    void setMode(int flag);
+    int getMode() const;
 
     void setInputVar(string name);
     string getInputVar() const;
@@ -88,7 +92,7 @@ public:
     static const Cinfo * initCinfo();
 
 protected:
-    bool debug_; // flag to enable debug output
+    int mode_; // flag to decide when to run the Python string
     string initstr_; // statement str for running at reinit
     string runstr_; // statement str for running in each process call
     PyObject * globals_; // global env dict
