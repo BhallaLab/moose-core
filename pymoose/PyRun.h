@@ -68,8 +68,13 @@ public:
     
     void setLocals(PyObject *locals);
     PyObject * getLocals() const;
+
+    void setDebug(bool flag);
+    bool getDebug() const;
     
     void run(string statement);
+
+    void trigger(const Eref& e, double input); // this is a way to trigger execution via incoming message - can be useful for debugging
     
     void process(const Eref& e, ProcPtr p);
     void reinit(const Eref& e, ProcPtr p);
@@ -77,6 +82,7 @@ public:
     static const Cinfo * initCinfo();
 
 protected:
+    bool debug_; // flag to enable debug output
     string initstr_; // statement str for running at reinit
     string runstr_; // statement str for running in each process call
     PyObject * globals_; // global env dict
