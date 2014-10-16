@@ -44,8 +44,12 @@
 # 
 
 # Code:
-
-"""You can use the PyRun class to run Python statements from MOOSE at runtime."""
+"""You can use the PyRun class to run Python statements from MOOSE at
+runtime. This opens up many possibilities of interleaving computing in
+Python and MOOSE. You can also use this for debugging simulations.
+"""
+import numpy as np
+from matplotlib import pyplot as plt
 import moose
 
 def run_sequence():
@@ -86,9 +90,10 @@ def run_sequence():
     execution.
 
     """
-    hello_runner = moose.PyRun('/Hello')
+    model = moose.Neutral('/model')
+    hello_runner = moose.PyRun('/model/Hello')
     hello_runner.initString = """
-print 'Init', moose.element('/Hello')
+print 'Init', moose.element('/model/Hello')
 hello_count = 0
 """
     hello_runner.runString = """
@@ -127,7 +132,7 @@ def input_output():
 
     The fun part of this is that you can use the input value in your
     python statements in `runString`. This is stored in a local
-    variable called `input`. You can rename this by setting `inputVar`
+    variable called `input_`. You can rename this by setting `inputVar`
     field.
 
     Things become even more interesting when you can send out a value
@@ -142,12 +147,72 @@ def input_output():
     out the values 1, 2, 3 during each pulse and compute the square of
     these numbers in Python and set output to this square.
 
-    """
-    pass
+    The calculated value is assigned to the `output` variable and in
+    turn sent out to a Table object's input and gets recorded.
+
+    By default PyRun executes the `runString` whenever a `trigger`
+    message is received and when its process method is called at each
+    timestep. In both cases it sends out the `output` value. Since
+    this may cause inaccuracies depending on what the Python
+    statements in `runString` do, a `mode` can be specified to disable
+    one of the above. We set ``mode = 2`` to disable the `process`
+    method. Note that this could also have been done by setting its
+    ``tick = -1``.
+    
+    ``mode = 1`` will disable `trigger` message and ``mode = 0``, the
+    default, enables both.
+    """    
+    model = moose.Neutral('/model')
+    input_pulse = moose.PulseGen('/model/pulse')
+    #: set the baseline output 0
+    input_pulse.baseLevel = 0.0
+    #: We make it generate three pulses 
+    input_pulse.count = 3
+    input_pulse.level[0] = 1.0
+    input_pulse.level[1] = 2.0
+    input_pulse.level[2] = 3.0
+    #: Each pulse will appear 1 s after the previous one
+    input_pulse.delay[0] = 1.0
+    input_pulse.delay[1] = 1.0
+    input_pulse.delay[2] = 1.0
+    #: Each pulse is 1 s wide
+    input_pulse.width[0] = 1.0
+    input_pulse.width[1] = 1.0
+    input_pulse.width[2] = 1.0
+    #: Now create the PyRun object
+    pyrun = moose.PyRun('/model/pyrun')
+    pyrun.runString = """
+output = input_ * input_
+print 'input =', input_
+print 'output =', output
+"""
+    pyrun.mode = 2 # do not run process method
+    moose.connect(input_pulse, 'output', pyrun, 'trigger')
+    output_table = moose.Table('/model/output')
+    moose.connect(pyrun, 'output', output_table, 'input')
+    input_table = moose.Table('/model/input')
+    moose.connect(input_pulse, 'output', input_table, 'input')
+    moose.setClock(0, 0.25)
+    moose.setClock(1, 0.25)
+    moose.setClock(2, 0.25)
+    moose.useClock(0, input_pulse.path, 'process')
+    #: this is unnecessary because the mode=2 ensures that `process`
+    #: does nothing
+    moose.useClock(1, pyrun.path, 'process') 
+    moose.useClock(2, '/model/#[ISA=Table]', 'process')
+    moose.reinit()
+    moose.start(10.0)
+    ts = 
+    plt.plot(input_table.vector, label='input')
+    plt.plot(output_table.vector, label='output')
+    plt.legend()
+    plt.show()
 
 if __name__ == '__main__':
     run_sequence()
-
+    moose.delete('/model')
+    input_output()
+    
 
 
 # 
