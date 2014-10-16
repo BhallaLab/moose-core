@@ -63,6 +63,12 @@ const Cinfo * PyRun::initCinfo()
         &PyRun::setInitString,
         &PyRun::getInitString);
 
+    static ValueFinfo< PyRun, bool > debug(
+        "debug",
+        "Flag to indicate debug mode. See `trigger` for more detail.",
+        &PyRun::setDebug,
+        &PyRun::getDebug);
+
     // static ValueFinfo< PyRun, PyObject* > globals(
     //     "globals",
     //     "Global environment dict",
@@ -74,6 +80,12 @@ const Cinfo * PyRun::initCinfo()
     //     "Local environment dict",
     //     &PyRun::setLocals,
     //     &PyRun::getLocals);
+
+    static DestFinfo trigger(
+        "trigger",
+        "Executes the current runString when input > 0.0. If debug is True, "
+        "then runs each time the input arrives and prints the input value.",
+        new EpFunc1< PyRun, double >(&PyRun::trigger));
     
     static DestFinfo run(
         "run",
@@ -105,6 +117,8 @@ const Cinfo * PyRun::initCinfo()
     static Finfo * pyRunFinfos[] = {
         &runstring,
         &initstring,
+        &debug,
+        &trigger,
         // &locals,
         // &globals,
         &run,
@@ -159,6 +173,32 @@ void PyRun::setInitString(string statement)
 string PyRun::getInitString() const
 {
     return initstr_;
+}
+
+void PyRun::setDebug(bool flag)
+{
+    debug_ = flag;
+}
+
+bool PyRun::getDebug() const
+{
+    return debug_;
+}
+
+void PyRun::trigger(const Eref& e, double input)
+{
+    if (!runcompiled_){
+        return;
+    }
+    if (input > 0.0 || debug_){
+        if (debug_){
+            cout << "# " << e.objId().path() << " received input: " << input << endl;
+        }
+        PyEval_EvalCode(runcompiled_, globals_, locals_);
+        if (PyErr_Occurred()){
+            PyErr_Print ();
+        } 
+    }        
 }
 
 void PyRun::run(string statement)
