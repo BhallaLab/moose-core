@@ -14,35 +14,34 @@ import sys
 sys.path.append('.')
 
 from LIFxml_firing import *
-injectmax = 10e-12 # Amperes
+injectmax = 1e-7 # Amperes
 
 IF1 = create_LIF()
 
 ## edge-detect the spikes using spike-gen (table does not have edge detect)
-spikeGen = moose.SpikeGen(IF1.path+'/spikeGen')
-spikeGen.threshold = IF1.Vthreshold
-moose.connect(IF1,'VmOut',spikeGen,'Vm')
 ## save spikes in table
 table_path = moose.Neutral(IF1.path+'/data').path
 IF1spikesTable = moose.Table(table_path+'/spikesTable')
-moose.connect(spikeGen,'event',IF1spikesTable,'input')
+IF1soma = moose.element(IF1.path+'/soma_0')
+moose.connect(IF1soma,'spikeOut',IF1spikesTable,'input')
 
 ## from moose_utils.py sets clocks and resets/reinits
-resetSim(['/cells'], SIMDT, PLOTDT, simmethod='hsolve')
+## simmethod='hsolve' doesn't work -- check resetSim
+resetSim(['/cells'], SIMDT, PLOTDT, simmethod='ee')
 
 ## Loop through different current injections
 freqList = []
 currentvec = arange(0.4e-12, injectmax, injectmax/30.0)
-### log scale for x-axisx
+### log scale for x-axis
 #dlogI = log(2.5)
 #logcurrentvec = arange(log(injectmax)-30*dlogI,log(injectmax),dlogI)
 #currentvec = [0.0]
 #currentvec.extend( [exp(I) for I in logcurrentvec] )
 for currenti in currentvec:
     moose.reinit()
-    IF1.inject = currenti
+    IF1soma.inject = currenti
     moose.start(RUNTIME)
-    spikesList = array(IF1spikesTable.vector)
+    spikesList = IF1spikesTable.vector
     if len(spikesList)>0:
         spikesList = spikesList[where(spikesList>0.0)[0]]
         spikesNow = len(spikesList)
