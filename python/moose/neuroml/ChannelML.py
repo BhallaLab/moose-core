@@ -3,6 +3,7 @@
 ## Version 1.5 by Niraj Dudani, NCBS, Bangalore, India, 2012, ported to parallel MOOSE
 ## Version 1.6 by Aditya Gilra, NCBS, Bangalore, India, 2012, minor changes for parallel MOOSE
 ## Version 1.7 by Aditya Gilra, NCBS, Bangalore, India, 2013, further support for NeuroML 1.8.1
+## Version 1.8 by Aditya Gilra, NCBS, Bangalore, India, 2013, changes for new IntFire and SynHandler classes
 
 """
 NeuroML.py is the preferred interface. Use this only if NeuroML L1,L2,L3 files are misnamed/scattered.
@@ -52,19 +53,37 @@ class ChannelML():
             print "wrong units", units,": exiting ..."
             sys.exit(1)
         moose.Neutral('/library') # creates /library in MOOSE tree; elif present, wraps
-        if utils.neuroml_debug: print "loading synapse :",synapseElement.attrib['name'],"into /library ."
-        moosesynapse = moose.SynChan('/library/'+synapseElement.attrib['name'])
+        synname = synapseElement.attrib['name']
+        if utils.neuroml_debug: print "loading synapse :",synname,"into /library ."
+        moosesynapse = moose.SynChan('/library/'+synname)
         doub_exp_syn = synapseElement.find('./{'+self.cml+'}doub_exp_syn')
         moosesynapse.Ek = float(doub_exp_syn.attrib['reversal_potential'])*Vfactor
         moosesynapse.Gbar = float(doub_exp_syn.attrib['max_conductance'])*Gfactor
         moosesynapse.tau1 = float(doub_exp_syn.attrib['rise_time'])*Tfactor # seconds
         moosesynapse.tau2 = float(doub_exp_syn.attrib['decay_time'])*Tfactor # seconds
-        ### The delay and weight can be set only after connecting a spike event generator.
-        ### delay and weight are arrays: multiple event messages can be connected to a single synapse
+        ## The delay and weight can be set only after connecting a spike event generator.
+        ## delay and weight are arrays: multiple event messages can be connected to a single synapse
+
+        ## graded synapses are not supported by neuroml, so set to False here,
+        ## see my Demo/neuroml/lobster_pyloric/STG_net.py for how to still have graded synapses
         moosesynapse_graded = moose.Mstring(moosesynapse.path+'/graded')
         moosesynapse_graded.value = 'False'
         moosesynapse_mgblock = moose.Mstring(moosesynapse.path+'/mgblockStr')
         moosesynapse_mgblock.value = 'False'
+        ## check if STDP synapse is present or not
+        stdp_syn = synapseElement.find('./{'+self.cml+'}stdp_syn')
+        if stdp_syn is None:
+            moosesynhandler = moose.SimpleSynHandler('/library/'+synname+'_handler')
+        else:
+            moosesynhandler = moose.STDPSynHandler('/library/'+synname+'_handler')
+            moosesynhandler.aPlus0 = float(stdp_syn.attrib['del_weight_ltp'])
+            moosesynhandler.aMinus0 = float(stdp_syn.attrib['del_weight_ltd'])
+            moosesynhandler.tauPlus = float(stdp_syn.attrib['tau_ltp'])
+            moosesynhandler.tauMinus = float(stdp_syn.attrib['tau_ltd'])
+            moosesynhandler.weightMax = float(stdp_syn.attrib['max_syn_weight'])
+            moosesynhandler.weightMin = 0.0
+        ## connect the SimpleSynHandler or the STDPSynHandler to the SynChan (double exp)
+        moose.connect( moosesynhandler, 'activationOut', moosesynapse, 'activation' )
       
     def readChannelML(self,channelElement,params={},units="SI units"):
         ## I first calculate all functions assuming a consistent system of units.
@@ -87,6 +106,27 @@ class ChannelML():
         channel_name = channelElement.attrib['name']
         if utils.neuroml_debug: print "loading channel :", channel_name,"into /library ."
         IVrelation = channelElement.find('./{'+self.cml+'}current_voltage_relation')
+        intfire = IVrelation.find('./{'+self.cml+'}integrate_and_fire')
+
+        if intfire is not None:
+            ## Below params need to be set while making an LIF compartment
+            moosechannel = moose.Neutral('/library/'+channel_name)
+            moosechannelval = moose.Mstring(moosechannel.path+'/vReset')
+            moosechannelval.value = str(float(intfire.attrib['v_reset'])*Vfactor)
+            moosechannelval = moose.Mstring(moosechannel.path+'/thresh')
+            moosechannelval.value = str(float(intfire.attrib['threshold'])*Vfactor)
+            moosechannelval = moose.Mstring(moosechannel.path+'/refracT')
+            moosechannelval.value = str(float(intfire.attrib['t_refrac'])*Tfactor)
+            ## refracG is currently not supported by moose.LIF
+            ## Confirm if g_refrac is a conductance density or not?
+            ## assuming g_refrac is a conductance density below
+            moosechannelval = moose.Mstring(moosechannel.path+'/refracG')
+            moosechannelval.value = str(float(intfire.attrib['g_refrac'])*Gfactor)
+            ## create an Mstring saying this is an integrate_and_fire mechanism
+            moosechannelval = moose.Mstring(moosechannel.path+'/integrate_and_fire')
+            moosechannelval.value = 'True'
+            return
+
         concdep = IVrelation.find('./{'+self.cml+'}conc_dependence')
         if concdep is None:
             moosechannel = moose.HHChannel('/library/'+channel_name)
