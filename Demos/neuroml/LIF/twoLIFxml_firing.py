@@ -54,23 +54,32 @@ if __name__ == '__main__':
     IF1vmTable = setupTable("vmTableIF1",IF1Soma,'Vm')
     IF2vmTable = setupTable("vmTableIF2",IF2Soma,'Vm')
 
-    ## edge-detect the spikes using spike-gen (table does not have edge detect)
-    ## IaF_spikegen is already present for compartments having IaF mechanisms
-    spikeGen = moose.SpikeGen(IF1Soma.path+'/IaF_spikegen')
     table_path = moose.Neutral(IF1Soma.path+'/data').path
     IF1spikesTable = moose.Table(table_path+'/spikesTable')
-    moose.connect(spikeGen,'spikeOut',IF1spikesTable,'input') ## spikeGen gives spiketimes
+    moose.connect(IF1Soma,'spikeOut',IF1spikesTable,'input') ## spikeGen gives spiketimes
+
+    ## record Gk of the synapse on IF2
+    #print IF2Soma.children
+    IF2SynChanTable = moose.Table(table_path+'/synChanTable')
+    moose.connect(IF2SynChanTable,'requestOut',IF2Soma.path+'/exc_syn','getIk')
 
     run_twoLIFs()
     print "Spiketimes :",IF1spikesTable.vector
     ## plot the membrane potential of the neuron
     timevec = arange(0.0,RUNTIME+PLOTDT/2.0,PLOTDT)
     figure(facecolor='w')
-    print IF1vmTable,IF2vmTable
-    plot(timevec, IF1vmTable.vector,'r-')
+    plot(timevec, IF1vmTable.vector*1000,'r-')
+    xlabel('time(s)')
+    ylabel('Vm (mV)')
+    title('Vm of presynaptic IntFire')
     figure(facecolor='w')
-    plot(timevec, IF2vmTable.vector,'b-')
+    plot(timevec, IF2vmTable.vector*1000,'b-')
+    xlabel('time(s)')
+    ylabel('Vm (mV)')
+    title('Vm of postsynaptic IntFire')
+    figure(facecolor='w')
+    plot(timevec, IF2SynChanTable.vector*1e12,'b-')
+    xlabel('time(s)')
+    ylabel('Ik (pA)')
+    title('Ik entering postsynaptic IntFire')
     show()
-
-    ## At the end, some issue with Func (as per Subha) gives below or core dump error
-    ## *** glibc detected *** python: corrupted double-linked list: 0x00000000038f9aa0 ***
