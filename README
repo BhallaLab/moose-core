@@ -115,6 +115,9 @@ https://sourceforge.net/projects/moose/
               -------------------------
               For plotting simulation results
 
+	    - libqt4-dev			    REQUIRED
+	      --------------------------
+	      Qt development headers and libraries 
 
 # AUTHORS
 
