@@ -20,6 +20,7 @@
 #include "FuncTerm.h"
 #include "SparseMatrix.h"
 #include "KinSparseMatrix.h"
+#include "../mesh/VoxelJunction.h"
 #include "ZombiePoolInterface.h"
 #include "Stoich.h"
 
@@ -28,7 +29,6 @@
 //////////////////////////////////////////////////////////////
 
 VoxelPools::VoxelPools()
-	: stoichPtr_( 0 )
 {
 #ifdef USE_GSL
 		driver_ = 0;
@@ -237,6 +237,7 @@ void VoxelPools::setVolumeAndDependencies( double vol )
 }
 
 ////////////////////////////////////////////////////////////
+#if 0
 /**
  * Zeroes out rate terms that are involved in cross-reactions that 
  * are not present on current voxel.
@@ -285,3 +286,4 @@ comptIndex.
 		}
 	}
 }
+#endif
