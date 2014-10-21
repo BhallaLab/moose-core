@@ -9,6 +9,7 @@
 #include "header.h"
 
 #include "VoxelPoolsBase.h"
+#include "../mesh/VoxelJunction.h"
 #include "ZombiePoolInterface.h"
 
 #include "RateTerm.h"
@@ -149,10 +150,7 @@ static const Cinfo* gsolveCinfo = Gsolve::initCinfo();
 Gsolve::Gsolve()
 	: 
 		pools_( 1 ),
-		startVoxel_( 0 ),
-		stoich_(),
-		stoichPtr_( 0 ),
-		compartment_()
+		startVoxel_( 0 )
 {;}
 
 Gsolve::~Gsolve()
@@ -359,7 +357,8 @@ void Gsolve::fillMmEnzDep()
 void Gsolve::fillMathDep()
 {
 	// create map of funcs that depend on specified molecule.
-	vector< vector< unsigned int > > funcMap( stoichPtr_->getNumAllPools());
+	vector< vector< unsigned int > > funcMap( 
+			stoichPtr_->getNumAllPools() + stoichPtr_->getNumProxyPools() );
 	unsigned int numFuncs = stoichPtr_->getNumFuncs();
 	for ( unsigned int i = 0; i < numFuncs; ++i ) {
 		const FuncTerm *f = stoichPtr_->funcs( i );
@@ -579,24 +578,6 @@ void Gsolve::updateVoxelVol( vector< double > vols )
 	}
 }
 
-// Inherited virtual
-void Gsolve::setupCrossSolverReacs( const map< Id, vector< Id > >& xr,
-	   Id otherStoich )
-{
-}
-
-// Inherited virtual
-void Gsolve::filterCrossRateTerms( const vector< pair< Id, Id > >& xrt )
-{
-}
-
-// Inherited virtual. Will need to populate for x-compt reacs.
-void Gsolve::setupCrossSolverReacVols(
-		const vector< vector< Id > >& subCompts,
-		const vector< vector< Id > >& prdCompts )
-{
-}
-
 void Gsolve::updateRateTerms( unsigned int index )
 {
 	if ( index == ~0U ) {
@@ -612,4 +593,20 @@ void Gsolve::updateRateTerms( unsigned int index )
 			pools_[i].updateRateTerms( stoichPtr_->getRateTerms(),
 						   stoichPtr_->getNumCoreRates(), index );
 	}
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+VoxelPoolsBase* Gsolve::pools( unsigned int i )
+{
+	if ( pools_.size() > i )
+		return &pools_[i];
+	return 0;
+}
+
+double Gsolve::volume( unsigned int i ) const
+{
+	if ( pools_.size() > i )
+		return pools_[i].getVolume();
+	return 0.0;
 }

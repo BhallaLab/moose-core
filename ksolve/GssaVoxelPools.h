@@ -61,8 +61,6 @@ class GssaVoxelPools: public VoxelPoolsBase
 		void setStoich( const Stoich* stoichPtr );
 
 	private:
-		const Stoich* stoichPtr_;
-
 		/// Time at which next event will occur.
 		double t_; 
 
@@ -76,13 +74,8 @@ class GssaVoxelPools: public VoxelPoolsBase
 		 * recalculated on each step.
 		 */
 		vector< double > v_; 
-
 		// Possibly we should put independent RNGS, so save one here.
 		
-		/// Looks up vol-matched Rates from the stoich
-		//unsigned int volIndex_;
-
-		vector< RateTerm* > rates_;
 };
 
 #endif	// _GSSA_VOXEL_POOLS_H
