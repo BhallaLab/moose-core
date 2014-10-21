@@ -285,6 +285,15 @@ Function::Function(): _valid(false), _numVar(0), _lastValue(0.0),
     _parser.DefineConst(_T("pi"), (mu::value_type)M_PI);
     _parser.DefineConst(_T("e"), (mu::value_type)M_E);
     _independent = "x0";
+    // Adding this default expression by default to avoid complains from GUI
+    try{
+        _parser.SetExpr("0");
+    } catch (mu::Parser::exception_type &e) {
+        _showError(e);
+        _clearBuffer();
+        return;
+    }
+    _valid = true;
 }
 
 Function::Function(const Function& rhs): _numVar(rhs._numVar),
