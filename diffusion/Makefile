@@ -22,9 +22,9 @@ default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
 FastMatrixElim.o: ../basecode/SparseMatrix.h FastMatrixElim.h
-Dsolve.o:	../basecode/SparseMatrix.h ../kinetics/PoolBase.h ../kinetics/lookupVolumeFromMesh.h ../mesh/ChemCompt.h
+Dsolve.o:	../basecode/SparseMatrix.h ../kinetics/PoolBase.h ../kinetics/lookupVolumeFromMesh.h ../mesh/ChemCompt.h ../ksolve/ZombiePoolInterface.h
 DiffPoolVec.o: DiffPoolVec.h ../ksolve/ZombiePoolInterface.h
-testDiffusion.o:	Dsolve.h
+testDiffusion.o:	Dsolve.h ../ksolve/ZombiePoolInterface.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(GSL_FLAGS) $(SMOLDYN_FLAGS) -I.. -I../basecode -I../ksolve $< -c

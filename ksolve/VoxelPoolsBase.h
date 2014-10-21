@@ -19,6 +19,7 @@
  * located on other compartments.
  */
 class RateTerm;
+class Stoich;
 class VoxelPoolsBase
 {
 	public: 
@@ -106,6 +107,11 @@ class VoxelPoolsBase
 		virtual void updateRateTerms( const vector< RateTerm* >& rates,
 				unsigned int numCoreRates, unsigned int index ) = 0;
 
+		/**
+		 * Changes cross rate terms to zero if there is no junction
+		 */
+		void filterCrossRateTerms( const vector< pair< Id, Id > >& vec );
+
 		//////////////////////////////////////////////////////////////////
 		// Functions to handle cross-compartment reactions.
 		//////////////////////////////////////////////////////////////////
@@ -190,6 +196,10 @@ class VoxelPoolsBase
 
 		/// Debugging utility
 		void print() const;
+
+	protected:
+		const Stoich* stoichPtr_;
+		vector< RateTerm* > rates_;
 
 	private:
 		/**

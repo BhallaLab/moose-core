@@ -23,6 +23,8 @@
 #include "KinSparseMatrix.h"
 #include "RateTerm.h"
 #include "FuncTerm.h"
+#include "VoxelPoolsBase.h"
+#include "../mesh/VoxelJunction.h"
 #include "ZombiePoolInterface.h"
 #include "Stoich.h"
 #include "../randnum/randnum.h"
