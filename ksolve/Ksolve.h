@@ -12,50 +12,6 @@
 
 class Stoich;
 
-/** 
- * Utility class holding the information required for setting up  the
- * data transfers needed on each timestep for the cross-solver reactions.
- */
-class XferInfo {
-	public:
-		XferInfo( Id ks )
-				: ksolve( ks )
-		{;}
-
-		/**
-		 * Vector of the pool.n values participating in cross-compartment
-		 * reactions. Latest values that have just come in.
-		 */
-		vector< double > values;
-		/**
-		 * Vector of the pool.n values participating in cross-compartment
-		 * reactions. Retains the value from previous clock tick.
-		 */
-		vector< double > lastValues;
-
-		/**
-		 * Vector of the internal indices of pools involved in cross-
-		 * compartment reactions.
-		 */
-		vector< unsigned int > xferPoolIdx;
-
-		/**
-		 * Vector of voxels that particpate in junctions with the 
-		 * communicating ksolve. This is a subset of the
-		 * total number of voxels.
-		 */
-		vector< unsigned int > xferVoxel;
-
-		/**
-		 * Id of Ksolve that particpates in this set of 
-		 * cross-compartment reactions with self.
-		 * This is used to identify with XferInfo to use for a given
-		 * incoming message.
-		 */
-		Id ksolve;
-
-};
-
 class Ksolve: public ZombiePoolInterface
 {
 	public: 
@@ -85,10 +41,6 @@ class Ksolve: public ZombiePoolInterface
 		Id getDsolve() const;
 		void setDsolve( Id dsolve ); /// Inherited from ZombiePoolInterface.
 
-		/// Assigns Compartment object to Ksolve. Inherited.
-		Id getCompartment() const; 
-		void setCompartment( Id compt );
-
 		unsigned int getNumLocalVoxels() const;
 		unsigned int getNumAllVoxels() const;
 		/**
@@ -110,7 +62,6 @@ class Ksolve: public ZombiePoolInterface
 		//////////////////////////////////////////////////////////////////
 		// Dest Finfos
 		//////////////////////////////////////////////////////////////////
-		void xComptIn( const Eref& e, Id srcKsolve, vector< double > );
 		void process( const Eref& e, ProcPtr p );
 		void reinit( const Eref& e, ProcPtr p );
 		void initProc( const Eref& e, ProcPtr p );
@@ -124,7 +75,6 @@ class Ksolve: public ZombiePoolInterface
 		//////////////////////////////////////////////////////////////////
 		// Utility for SrcFinfo
 		//////////////////////////////////////////////////////////////////
-		void xComptOut( const Eref& e );
 
 		//////////////////////////////////////////////////////////////////
 		// Solver interface functions
@@ -150,15 +100,11 @@ class Ksolve: public ZombiePoolInterface
 		 */
 		void setNumPools( unsigned int num );
 		unsigned int getNumPools() const;
+		VoxelPoolsBase* pools( unsigned int i );
+		double volume( unsigned int i ) const;
 
 		void getBlock( vector< double >& values ) const;
 		void setBlock( const vector< double >& values );
-
-		void setupCrossSolverReacs( const map< Id, vector< Id > >& xr,
-				Id otherStoich );
-		void setupCrossSolverReacVols( 
-			const vector< vector< Id > >& subCompts, 
-			const vector< vector< Id > >& prdCompts );
 
 		void matchJunctionVols( vector< double >& vols, Id otherCompt ) 
 				const;
@@ -187,7 +133,6 @@ class Ksolve: public ZombiePoolInterface
 
 		void buildCrossReacVolScaling( Id otherKsolve,
 				const vector< VoxelJunction >& vj );
-		void filterCrossRateTerms( const vector< pair< Id, Id > >& xrt );
 		//////////////////////////////////////////////////////////////////
 		// for debugging
 		void print() const;
@@ -211,12 +156,6 @@ class Ksolve: public ZombiePoolInterface
 		/// First voxel indexed on the current node.
 		unsigned int startVoxel_;
 
-		/**
-		 * Stoich is the class that sets up the reaction system and
-		 * manages the stoichiometry matrix
-		 */
-		Id stoich_;
-
 		/// Utility ptr used to help Pool Id lookups by the Ksolve.
 		Stoich* stoichPtr_;
 
@@ -225,20 +164,11 @@ class Ksolve: public ZombiePoolInterface
 		 */
 		Id dsolve_;
 
-		/// Id of Chem compartment used to figure out volumes of voxels.
-		Id compartment_;
+		// Id of Chem compartment used to figure out volumes of voxels.
+		// Id compartment_;
 
 		/// Pointer to diffusion solver
 		ZombiePoolInterface* dsolvePtr_;
-
-		/// Flag for when the entire solver is built.
-		bool isBuilt_;
-
-		/** 
-		 * All the data transfer information from current to other solvers.
-		 * xfer_[otherKsolveIndex]
-		 */
-		vector< XferInfo > xfer_;
 };
 
 #endif	// _KSOLVE_H

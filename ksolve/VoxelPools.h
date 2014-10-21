@@ -78,18 +78,16 @@ class VoxelPools: public VoxelPoolsBase
 
 		/**
 		 * Changes cross rate terms to zero if there is no junction
-		 */
 		void filterCrossRateTerms( const vector< pair< Id, Id > >& vec );
+		 */
 
 		/// Used for debugging.
 		void print() const;
 	private:
-		const Stoich* stoichPtr_;
 #ifdef USE_GSL
 		gsl_odeiv2_driver* driver_;
 		gsl_odeiv2_system sys_;
 #endif
-		vector< RateTerm* > rates_;
 };
 
 #endif	// _VOXEL_POOLS_H

@@ -11,10 +11,11 @@
 #include "FuncTerm.h"
 #include "SparseMatrix.h"
 #include "KinSparseMatrix.h"
+#include "VoxelPoolsBase.h"
+#include "../mesh/VoxelJunction.h"
 #include "ZombiePoolInterface.h"
 #include "Stoich.h"
 #include "GssaSystem.h"
-#include "VoxelPoolsBase.h"
 #include "GssaVoxelPools.h"
 #include "../randnum/randnum.h"
 
