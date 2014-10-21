@@ -18,6 +18,8 @@
 #include "RateTerm.h"
 #include "SparseMatrix.h"
 #include "KinSparseMatrix.h"
+#include "VoxelPoolsBase.h"
+#include "../mesh/VoxelJunction.h"
 #include "ZombiePoolInterface.h"
 #include "Stoich.h"
 
