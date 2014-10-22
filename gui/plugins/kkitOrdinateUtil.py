@@ -114,16 +114,22 @@ def setupItem(modelPath,cntDict):
                 cntDict[items] = sublist,prdlist
         elif baseObj == 'Function':
             #ZombieSumFunc adding inputs
+            print "\t \t Inside the function"
             inputlist = []
             outputlist = []
             funplist = []
             nfunplist = []
-
+            print "path ",path
             for items in wildcardFind(path):
+                print "items ",items
                 for funplist in moose.element(items).neighbors['valueOut']:
+                    print "funplist ",funplist
                     for func in funplist:
+
                         funcx = moose.element(items.path+'/x[0]')
+                        print "funcX ",funcx
                         uniqItem,countuniqItem = countitems(funcx,'input')
+                        print "uniqItem ",uniqItem,countuniqItem
                         for inPut in uniqItem:
                             inputlist.append((inPut,'st',countuniqItem[inPut]))
                     cntDict[func] = inputlist

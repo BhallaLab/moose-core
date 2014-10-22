@@ -207,7 +207,6 @@ class  KineticsWidget(EditorWidgetBase):
     def __init__(self, *args):
         EditorWidgetBase.__init__(self, *args)
         #self.setAcceptDrops(True)
-        self.border = 10
         self.sceneContainer = QtGui.QGraphicsScene(self)
         self.sceneContainer.setSceneRect(self.sceneContainer.itemsBoundingRect())
         self.sceneContainer.setBackgroundBrush(QtGui.QColor(230,220,219,120))
@@ -230,7 +229,10 @@ class  KineticsWidget(EditorWidgetBase):
         self.itemignoreZooming = False
         self.lineItem_dict = {}
         self.object2line = defaultdict(list)
-
+        self.createdItem = {}
+        # srcdesConnection dictonary will have connection information between src and des """
+        self.srcdesConnection = {}
+        self.comptPen = 5
     def getMooseObj(self):
         #if self.modelRoot == '/':
         #    self.m = wildcardFind('/##[ISA=ChemCompt]')
@@ -247,8 +249,6 @@ class  KineticsWidget(EditorWidgetBase):
             # Compartment and its members are setup
             self.meshEntry,self.xmin,self.xmax,self.ymin,self.ymax,self.noPositionInfo = setupMeshObj(self.modelRoot)
             self.autocoordinates = False
-            # srcdesConnection dictonary will have connection information between src and des """
-            self.srcdesConnection = {}
             setupItem(self.modelRoot,self.srcdesConnection)
 
             if self.noPositionInfo:
@@ -326,7 +326,7 @@ class  KineticsWidget(EditorWidgetBase):
         for k, v in self.qGraCompt.items():
             rectcompt = v.childrenBoundingRect()
             v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
-            v.setPen(QtGui.QPen(Qt.QColor(66,66,66,100), 5, Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin))
+            v.setPen(QtGui.QPen(Qt.QColor(66,66,66,100), self.comptPen, Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin))
             v.cmptEmitter.connect(v.cmptEmitter,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
             v.cmptEmitter.connect(v.cmptEmitter,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.objectEditSlot)
     def createCompt(self,key):
@@ -419,9 +419,8 @@ class  KineticsWidget(EditorWidgetBase):
             # then remove all the view and add an empty view
             if hasattr(self, 'view') and isinstance(self.view, QtGui.QWidget):
                 self.layout().removeWidget(self.view)
-            createdItem = {}
             self.sceneContainer.setSceneRect(-self.width()/2,-self.height()/2,self.width(),self.height())
-            self.view = GraphicalView(self.modelRoot,self.sceneContainer,self.border,self,createdItem)
+            self.view = GraphicalView(self.modelRoot,self.sceneContainer,self.border,self,self.createdItem)
             if isinstance(self,kineticEditorWidget):
                 self.view.setRefWidget("editorView")
                 self.view.setAcceptDrops(True)
@@ -434,18 +433,15 @@ class  KineticsWidget(EditorWidgetBase):
         else:
             # maxmium and minimum coordinates of the objects specified in kkit file.
             self.sceneContainer.clear()
-
-
             # Compartment and its members are put on the qgraphicsscene
             self.mooseObjOntoscene()
-
             # All the moose Object are connected for visualization
             self.drawLine_arrow(itemignoreZooming=False)
 
             createdItem = {}
             if hasattr(self, 'view') and isinstance(self.view, QtGui.QWidget):
                 self.layout().removeWidget(self.view)
-            self.view = GraphicalView(self.modelRoot,self.sceneContainer,self.border,self,createdItem)
+            self.view = GraphicalView(self.modelRoot,self.sceneContainer,self.border,self,self.createdItem)
             if isinstance(self,kineticEditorWidget):
                 self.view.setRefWidget("editorView")
                 self.view.setobject2line(self.object2line)
@@ -506,6 +502,16 @@ class  KineticsWidget(EditorWidgetBase):
                 bg =QtGui.QColor(bg.red(),bg.green(),bg.blue(),alpha)
                 item.updateColor(bg)
      '''
+    def findparent(self,mooseObj):
+        mooseCmpt = mooseObj.parent
+        while True:
+            # print "mooseCmpt => ", mooseCmpt, "path =>", mooseCmpt.path
+            if mooseCmpt.path == "/":
+                return None
+            if mooseCmpt.className == 'CubeMesh':
+                return mooseCmpt
+            mooseCmpt = mooseCmpt.parent
+
     def positionChange(self,mooseObject):
         #If the item position changes, the corresponding arrow's are calculated
         if isinstance(element(mooseObject),CubeMesh):
@@ -522,11 +528,38 @@ class  KineticsWidget(EditorWidgetBase):
                 rectcompt = v.childrenBoundingRect()
                 v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
 
+
+    def positionChange1(self,mooseObject):
+        #If the item position changes, the corresponding arrow's are calculated
+        if isinstance(element(mooseObject),CubeMesh):
+            v = self.qGraCompt[mooseObject]
+            for rectChilditem in v.childItems():
+                self.updateArrow(rectChilditem)
+        else:
+            mobj = self.mooseId_GObj[mooseObject.getId()]
+            self.updateArrow(mobj)
+            mooseObjcompt = self.findparent(mooseObject)
+            v = self.qGraCompt[mooseObjcompt]
+            childBoundingRect = v.childrenBoundingRect()
+            comptBoundingRect = v.boundingRect()
+            rectcompt = comptBoundingRect.united(childBoundingRect)
+            comptPen = v.pen()
+            comptWidth =  5
+            comptPen.setWidth(comptWidth)
+            v.setPen(comptPen)
+            if not comptBoundingRect.contains(childBoundingRect):
+                v.setRect(rectcompt.x()-comptWidth,rectcompt.y()-comptWidth,rectcompt.width()+(comptWidth*2),rectcompt.height()+(comptWidth*2))
+            '''
+            for k, v in self.qGraCompt.items():
+                rectcompt = v.childrenBoundingRect()
+                v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
+            '''
     def emitItemtoEditor(self,mooseObject):
         #self.emit(QtCore.SIGNAL("itemPressed(PyQt_PyObject)"),mooseObject)
         self.editObject.emit(mooseObject.path)
 
     def drawLine_arrow(self, itemignoreZooming=False):
+        print "srcdesConnection ",self.srcdesConnection
         for inn,out in self.srcdesConnection.items():
             # self.srcdesConnection is dictionary which contains key,value \
             #    key is Enzyme or Reaction  and value [[list of substrate],[list of product]] (tuple)
@@ -559,6 +592,7 @@ class  KineticsWidget(EditorWidgetBase):
     def lineCord(self,src,des,type_no,itemignoreZooming):
         endtype = type_no[1]
         line = 0
+
         if (src == "") and (des == ""):
             print "Source or destination is missing or incorrect"
             return
@@ -651,6 +685,7 @@ class  KineticsWidget(EditorWidgetBase):
         if key ==  '41': # 'A' fits the view to iconScale factor
             itemignoreZooming = False
             self.updateItemTransformationMode(itemignoreZooming)
+            print "self.keyPressEvent ",self.sceneContainer
             self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
             self.drawLine_arrow(itemignoreZooming=False)
 

@@ -3,10 +3,28 @@ import sys
 import config
 from modelBuild import *
 from constants import *
+from PyQt4.QtGui import QPixmap
+from PyQt4.QtGui import QImage
+from PyQt4.QtGui import QGraphicsPixmapItem
+from kkitCalcArrow import *
+from kkitOrdinateUtil import *
 
 class GraphicalView(QtGui.QGraphicsView):
     def __init__(self, modelRoot,parent,border,layoutPt,createdItem):
         QtGui.QGraphicsView.__init__(self,parent)
+        self.state = { "press"  :   { "mode"    : INVALID
+                                    , "item"    : None
+                                    , "sign"    : None
+                                    }
+                     , "release"    :   { "mode"    : INVALID
+                                        , "item"    : None
+                                        , "sign"    : None
+                                        }
+                     }
+        self.connectionSignImagePath = "../gui/icons/connection.png"
+        self.connectionSignImage     = QImage(self.connectionSignImagePath)
+        self.connectionSign          = None
+
         self.setScene(parent)
         self.modelRoot = modelRoot
         self.sceneContainerPt = parent
@@ -22,7 +40,7 @@ class GraphicalView(QtGui.QGraphicsView):
         self.setRenderHints(QtGui.QPainter.Antialiasing)
         self.layoutPt = layoutPt
         #self.setAcceptDrops(True)
-        self.createdItem = createdItem
+        #self.createdItem = createdItem
         # All the object which are stacked on the scene are listed
         self.stackOrder = self.sceneContainerPt.items(Qt.Qt.DescendingOrder)
         #From stackOrder selecting only compartment
@@ -30,7 +48,10 @@ class GraphicalView(QtGui.QGraphicsView):
         self.viewBaseType = " "
         self.object2line = defaultdict(list)
         self.subsetObject2line = {}
-
+        #self.qGraCompt = {}
+        #self.mooseId_GObj = {}
+        self.c= 1
+        self.p = 1
     def setobject2line(self,path):
         self.object2line = path
         
@@ -39,6 +60,8 @@ class GraphicalView(QtGui.QGraphicsView):
     
     
     def mousePressEvent(self, event):
+        #print "---------------\n mousePressEvent",self.itemAt(event.pos()),event.pos(), " mtos",self.mapToScene(event.pos())
+        print "here at mousepressEvent ",self.sceneContainerPt.items()
         selectedItem = None
         if self.viewBaseType == "editorView":
             if event.buttons() == QtCore.Qt.LeftButton:
@@ -46,6 +69,8 @@ class GraphicalView(QtGui.QGraphicsView):
                 self.startScenepos = self.mapToScene(self.startingPos)
                 self.deviceTransform = self.viewportTransform()
                 viewItem = self.items(self.startingPos)
+                print "viewItem ",viewItem
+
                 #All previously seted zValue made zero
                 for i in self.cmptStackorder:
                     i.setZValue(0)
@@ -53,10 +78,32 @@ class GraphicalView(QtGui.QGraphicsView):
                 arrowItem = [j for j in viewItem if isinstance(j,QtGui.QGraphicsPolygonItem)]
                 kkitItem  = [j for j in viewItem if isinstance(j,KineticsDisplayItem)]
                 comptItem = [k for k in viewItem if isinstance(k,ComptItem)]
+                print "ComptItem ",comptItem, "kkitItem",kkitItem
+                connectionSign = [k for k in viewItem if isinstance(k, QGraphicsPixmapItem)]
+                print  "connectionSign ",connectionSign
+                if len(connectionSign) != 0:
+                    sign = connectionSign[0]
+                    self.state["press"]["mode"] = CONNECTION
+                    self.state["press"]["sign"] = self.connectionSign
+                    print "$$@ \t \t ",self.state["press"]["mode"], "1 ",self.state["press"]["sign"],"2",self.state["press"]["item"]
+                    self.startingPos = event.pos()
+                    self.startScenepos = self.mapToScene(self.startingPos)
+                    qgrapItem = self.state["press"]["item"]
+                    print "QGraphicsItem ",qgrapItem
+                    print "bR ",qgrapItem.sceneBoundingRect()
+                    srcdes = [qgrapItem,'',"s",1]
+                    foo = qgrapItem.sceneBoundingRect()
+                    #self.startScenepos=fd.sceneBoundingRect()
+                    #arrow = calcArrow(srcdes,False,1)
+                    # print "arror ---",arrow
+                    self.qlineItem = QtGui.QGraphicsLineItem(foo.x(),foo.y(),foo.x(),foo.y(),None)
+                    self.sceneContainerPt.addItem(self.qlineItem)
+                    return
                 if arrowItem:
                     for k,tupValue in self.object2line.iteritems():
                         for l,v in enumerate(tupValue):
-                            print "can delete QGraphicsPolygonItem"
+                            pass
+                            #print "can delete QGraphicsPolygonItem"
                             # if v[0] == arrowItem[0]:
                             #     print "--",k,v[1]
                             #     if self.popupmenu4rlines:
@@ -74,14 +121,31 @@ class GraphicalView(QtGui.QGraphicsView):
                         '''
                         if isinstance(displayitem,CplxItem):
                             displayitem = displayitem.parentItem()
-                        itemIndex = self.cmptStackorder.index(displayitem.parentItem())
+                        #itemIndex = self.cmptStackorder.index(displayitem.parentItem())
                         selectedItem = displayitem
                         displayitem.parentItem().setZValue(1)
-                        if isinstance(displayitem,PoolItem):
+                        print "\n  \\\\\\\\\\\\\\\\\\\\ \n"
+                        if isinstance(displayitem,PoolItem) or isinstance(displayitem,FuncItem):
                             rectangle = displayitem.bg.rect()
+                            print "rectangle",rectangle
+                            
                         else:
                             srcobj = displayitem.gobj
                             rectangle = srcobj.boundingRect()
+
+                        if self.connectionSign is not None:
+                            self.sceneContainerPt.removeItem(self.connectionSign)
+                            self.connectionSign = None
+                        self.state["press"]["item"] = displayitem    
+                        self.connectionSign =  QGraphicsPixmapItem(
+                            QPixmap.fromImage(self.connectionSignImage.scaled( rectangle.height()
+                                                                        , rectangle.height() 
+                                                                        )))
+                        self.connectionSign.setPos(0.0,0.0)
+                        position = displayitem.mapToParent(rectangle.topRight())
+                        self.connectionSign.moveBy(position.x(), position.y() - rectangle.height() / 2.0)
+                        self.sceneContainerPt.addItem(self.connectionSign)
+
 
                 elif not kkitItem and comptItem:
                     for cmpt in comptItem:
@@ -133,7 +197,14 @@ class GraphicalView(QtGui.QGraphicsView):
 
     
     def mouseMoveEvent(self,event):
+        if self.connectionSign is not None:
+            if self.state["press"]["mode"] == CONNECTION:
+                destination = self.mapToScene(event.pos())
+                #self.state["press"]["sign"].setPos(destination)
+                return
+
         QtGui.QGraphicsView.mouseMoveEvent(self, event)
+        
         if( (self.customrubberBand) and (event.buttons() == QtCore.Qt.LeftButton)):
             self.endingPos = event.pos()
             self.endingScenepos = self.mapToScene(self.endingPos)
@@ -150,6 +221,13 @@ class GraphicalView(QtGui.QGraphicsView):
                         item.setSelected(True)
 
     def mouseReleaseEvent(self, event):
+        if self.state["press"]["mode"] == CONNECTION:
+            desPos =self.mapToScene(event.pos())
+            destination = self.items(event.pos())
+            src = self.state["press"]["item"]
+            des  = [j for j in destination if isinstance(j,KineticsDisplayItem)]
+            if len(des):
+                self.populate_srcdes(src.mobj,des[0].mobj)
 
         self.setCursor(Qt.Qt.ArrowCursor)
         QtGui.QGraphicsView.mouseReleaseEvent(self, event)
@@ -162,19 +240,19 @@ class GraphicalView(QtGui.QGraphicsView):
                 self.rubberbandWidth = (self.endScenepos.x()-self.startScenepos.x())
                 self.rubberbandHeight = (self.endScenepos.y()-self.startScenepos.y())
                 selecteditems = self.sceneContainerPt.selectedItems()
-                print "selecteditems ",selecteditems
+                #print "selecteditems ",selecteditems
                 if self.rubberbandWidth != 0 and self.rubberbandHeight != 0 and len(selecteditems) != 0 :
                     self.showpopupmenu = True
         self.itemSelected = False
         if self.showpopupmenu:
             popupmenu = QtGui.QMenu('PopupMenu', self)
-            #~ self.delete = QtGui.QAction(self.tr('delete'), self)
-            #~ self.connect(self.delete, QtCore.SIGNAL('triggered()'), self.deleteItem)
+            self.delete = QtGui.QAction(self.tr('delete'), self)
+            self.connect(self.delete, QtCore.SIGNAL('triggered()'), self.deleteItem)
             self.zoom = QtGui.QAction(self.tr('zoom'), self)
             self.connect(self.zoom, QtCore.SIGNAL('triggered()'), self.zoomItem)
             self.move = QtGui.QAction(self.tr('move'), self)
             self.connect(self.move, QtCore.SIGNAL('triggered()'), self.moveItem)
-            #~ popupmenu.addAction(self.delete)
+            popupmenu.addAction(self.delete)
             popupmenu.addAction(self.zoom)
             popupmenu.addAction(self.move)
             popupmenu.exec_(event.globalPos())
@@ -182,6 +260,22 @@ class GraphicalView(QtGui.QGraphicsView):
     def moveItem(self):
       self.setCursor(Qt.Qt.CrossCursor)
 
+    def deleteItem(self):
+        vTransform = self.viewportTransform()
+        if( self.rubberbandWidth > 0  and self.rubberbandHeight >0):
+            self.rubberbandlist = self.sceneContainerPt.items(self.startScenepos.x(),self.startScenepos.y(),self.rubberbandWidth,self.rubberbandHeight, Qt.Qt.IntersectsItemShape)
+            for unselectitem in self.rubberbandlist:
+                if unselectitem.isSelected() == True:
+                    unselectitem.setSelected(0)
+            for items in (qgraphicsitem for qgraphicsitem in self.rubberbandlist):
+                print "items in delete function",items
+        else:
+            self.rubberbandlist = self.sceneContainerPt.items(self.endScenepos.x(),self.endScenepos.y(),abs(self.rubberbandWidth),abs(self.rubberbandHeight), Qt.Qt.IntersectsItemShape)
+            for unselectitem in self.rubberbandlist:
+                if unselectitem.isSelected() == True:
+                    unselectitem.setSelected(0)
+            for items in (qgraphicsitem for qgraphicsitem in self.rubberbandlist):
+                print "items in delete fnction -ve ",items
     def zoomItem(self):
         vTransform = self.viewportTransform()
         if( self.rubberbandWidth > 0  and self.rubberbandHeight >0):
@@ -241,17 +335,45 @@ class GraphicalView(QtGui.QGraphicsView):
 
     def dropEvent(self, event):
         """Insert an element of the specified class in drop location"""
+        """ Pool and reaction should have compartment as parent, dropping outside the compartment is not allowed """
+        """ Enz should be droped on the PoolItem which inturn will be under compartment"""
         if self.viewBaseType == "editorView":
             if not event.mimeData().hasFormat('text/plain'):
                 return
-            pos = event.pos()
-            viewItems = self.items(pos)
-            mapToscene = self.mapToScene(event.pos())
-            newString = str(event.mimeData().text())
-            Item = NewObject(self.viewBaseType,self,self.modelRoot,newString,mapToscene,self.createdItem)
-            self.sceneContainerPt.addItem(Item)
-            Item.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations,True)
-            self.setScene(self.sceneContainerPt)
-            event.accept()
+            event_pos = event.pos()
+            string = str(event.mimeData().text())
+            createObj(self.viewBaseType,self,self.modelRoot,string,event_pos,self.layoutPt)
+
+    def populate_srcdes(self,src,des):
+        self.modelRoot = self.layoutPt.modelRoot
+        callsetupItem = True
+        if ( isinstance(moose.element(src),PoolBase) and ( (isinstance(moose.element(des),ReacBase) ) or isinstance(moose.element(des),EnzBase) )):
+            moose.connect(src, 'reac', des, 'sub', 'OneToOne')
+        elif(isinstance (moose.element(src),PoolBase) and (isinstance(moose.element(des),Function))):
+
+            pFconnection = moose.connect( src, 'nOut', des.x[0], 'input' )
+            print "here",pFconnection
+        elif( isinstance(moose.element(src),Function) and (moose.element(des).className=="Pool") ):
+                moose.connect(src, 'valueOut', des, 'increment', 'OneToOne')
+        elif( isinstance(moose.element(src),Function) and (moose.element(des).className=="BufPool") ):
+                moose.connect(src, 'valueOut', des, 'setConcInit', 'OneToOne')
+        elif( isinstance(moose.element(src),Function) and (isinstance(moose.element(des),ReacBase) ) ):
+                moose.connect(src, 'valueOut', des, 'numkf', 'OneToOne')
+        elif( isinstance(moose.element(src),ReacBase) and (isinstance(moose.element(des),PoolBase) ) ):
+            moose.connect(src, 'prd', des, 'reac', 'OneToOne')
+        elif( isinstance(moose.element(src),EnzBase) and (isinstance(moose.element(des),PoolBase) ) ):
+            moose.connect(src, 'prd', des, 'reac', 'OneToOne')
+        elif( isinstance(moose.element(src),StimulusTable) and (isinstance(moose.element(des),PoolBase) ) ):
+            moose.connect(src, 'output', des, 'setconcInit', 'OneToOne')
         else:
-            pass
+            srcString = moose.element(src).className
+            desString = moose.element(des).className
+            srcdesString = srcString+'--'+desString
+            # QtGui.QMessageBox.information(None,'Connection Not possible','\'{srcString}\' Not allowed to connect \'{desString}\' '.format(srcString = srcString, desString=desString),QtGui.QMessageBox.Ok)
+            QtGui.QMessageBox.information(None,'Connection Not possible','\'{srcdesString}\' not allowed to connect'.format(srcdesString = srcdesString),QtGui.QMessageBox.Ok)
+            callsetupItem = False
+            
+        if callsetupItem:
+            print " here in setupItem"
+            setupItem(self.modelRoot,self.layoutPt.srcdesConnection)
+            self.layoutPt.drawLine_arrow(False)
