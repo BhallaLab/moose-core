@@ -111,6 +111,15 @@ template < class T > class SparseMatrix
 		 * the contents.
 		 */
 		void setSize( unsigned int nrows, unsigned int ncolumns ) {
+			if ( nrows == 0 || ncolumns == 0 ) {
+				N_.clear();
+				rowStart_.resize( 1 );
+				rowStart_[0] = 0;
+				colIndex_.clear();
+				nrows_ = 0;
+				ncolumns_ = 0;
+				return;
+			}
 			if ( nrows < SM_MAX_ROWS && ncolumns < SM_MAX_COLUMNS ) {
 				N_.clear();
 				N_.reserve( 2 * nrows );
@@ -133,6 +142,8 @@ template < class T > class SparseMatrix
 		 */
 		void set( unsigned int row, unsigned int column, T value )
 		{
+			if ( nrows_ == 0 || ncolumns_ == 0 )
+				return;
 			vector< unsigned int >::iterator i;
 			vector< unsigned int >::iterator begin = 
 				colIndex_.begin() + rowStart_[ row ];
@@ -176,6 +187,8 @@ template < class T > class SparseMatrix
 		 */
 		void unset( unsigned int row, unsigned int column )
 		{
+			if ( nrows_ == 0 || ncolumns_ == 0 )
+				return;
 			vector< unsigned int >::iterator i;
 			vector< unsigned int >::iterator begin = 
 				colIndex_.begin() + rowStart_[ row ];
@@ -209,6 +222,8 @@ template < class T > class SparseMatrix
 		 */
 		T get( unsigned int row, unsigned int column ) const
 		{
+			if ( nrows_ == 0 || ncolumns_ == 0 )
+				return 0;
 			assert( row < nrows_ && column < ncolumns_ );
 			vector< unsigned int >::const_iterator i;
 			vector< unsigned int >::const_iterator begin = 
@@ -240,7 +255,7 @@ template < class T > class SparseMatrix
 		unsigned int getRow( unsigned int row, 
 			const T** entry, const unsigned int** colIndex ) const
 		{
-			if ( row >= nrows_ ) {
+			if ( row >= nrows_ || ncolumns_ == 0 ) {
 				entry = 0;
 				colIndex = 0;
 				return 0;
@@ -266,7 +281,7 @@ template < class T > class SparseMatrix
 		{
 			e.clear();
 			c.clear();
-			if ( row >= nrows_ ) {
+			if ( row >= nrows_ || ncolumns_ == 0 ) {
 				return 0;
 			}
 			unsigned int rs = rowStart_[row];
@@ -332,6 +347,8 @@ template < class T > class SparseMatrix
 			assert( rowNum < nrows_ );
 			assert( rowStart_.size() == (nrows_ + 1 ) );
 			assert( N_.size() == colIndex_.size() );
+			if ( ncolumns_ == 0 )
+				return;
 			for ( unsigned int i = 0; i < ncolumns_; ++i ) {
 				if ( row[i] != T( ~0 ) ) {
 					N_.push_back( row[i] );
@@ -355,6 +372,8 @@ template < class T > class SparseMatrix
 			assert( rowStart_[ rowNum ] == N_.size() );
 			assert( entry.size() == colIndexArg.size() );
 			assert( N_.size() == colIndex_.size() );
+			if ( ncolumns_ == 0 )
+				return;
 			N_.insert( N_.end(), entry.begin(), entry.end() );
 			colIndex_.insert( colIndex_.end(), 
 				colIndexArg.begin(), colIndexArg.end() );

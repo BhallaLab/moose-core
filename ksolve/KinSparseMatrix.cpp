@@ -29,7 +29,7 @@ double KinSparseMatrix::computeRowRate(
 	unsigned int row, const vector< double >& v
 ) const
 {
-	assert( row < nRows() );
+	assert( nColumns() == 0 || row < nRows() );
 	assert( v.size() == nColumns() );
 	const int* entry = 0;
 	const unsigned int* colIndex = 0;
