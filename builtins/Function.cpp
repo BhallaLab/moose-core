@@ -499,7 +499,14 @@ void Function::setExpr(const Eref& eref, string expr)
         _clearBuffer();
         return;
     }
-    _valid = true;
+    // Force variable creation right away. Otherwise numVar does not
+    // get set properly
+    try{
+        _parser.Eval();
+        _valid = true;
+    } catch (mu::Parser::exception_type &e){
+        _showError(e);
+    }
 }
 
 string Function::getExpr( const Eref& e ) const
