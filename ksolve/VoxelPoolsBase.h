@@ -110,7 +110,7 @@ class VoxelPoolsBase
 		/**
 		 * Changes cross rate terms to zero if there is no junction
 		 */
-		void filterCrossRateTerms( const vector< pair< Id, Id > >& vec );
+		void filterCrossRateTerms( const vector< Id >& offSolverReacs, const vector< pair< Id, Id > >& offSolverReacCompts );
 
 		//////////////////////////////////////////////////////////////////
 		// Functions to handle cross-compartment reactions.
