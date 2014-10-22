@@ -270,3 +270,54 @@ void GssaVoxelPools::setVolumeAndDependencies( double vol )
 	updateAllRateTerms( stoichPtr_->getRateTerms(),
 		stoichPtr_->getNumCoreRates() );
 }
+
+//////////////////////////////////////////////////////////////
+// Handle cross compartment reactions
+//////////////////////////////////////////////////////////////
+void GssaVoxelPools::xferIn(
+		const vector< unsigned int >& poolIndex,
+		const vector< double >& values, 
+		const vector< double >& lastValues,
+	    unsigned int voxelIndex, const GssaSystem* g )
+{
+	unsigned int offset = voxelIndex * poolIndex.size();
+	vector< double >::const_iterator i = values.begin() + offset;
+	vector< double >::const_iterator j = lastValues.begin() + offset;
+	double* s = varS();
+	bool hasChanged = false;
+	for ( vector< unsigned int >::const_iterator 
+			k = poolIndex.begin(); k != poolIndex.end(); ++k ) {
+		double& x = s[*k];
+		x += round( *i++ - *j );
+		if ( x < 0 ) 
+			x = 0;
+		double y = fabs( x - *j );
+		// hasChanged |= ( fabs( x - *j ) < 0.1 ); // they are all integers.
+		hasChanged |= ( y > 0.1 ); // they are all integers.
+		j++;
+	}
+	// If S has changed, then I should update rates of all affected reacs.
+	// Go through stoich matrix to find affected reacs for each mol
+	// Store in list, since some may be hit more than once in this func.
+	// When done, go through and update all affected ones.
+	if ( hasChanged ) {
+		refreshAtot( g );
+	}
+}
+
+void GssaVoxelPools::xferInOnlyProxies(
+		const vector< unsigned int >& poolIndex,
+		const vector< double >& values, 
+		unsigned int numProxyPools,
+	    unsigned int voxelIndex	)
+{
+	unsigned int offset = voxelIndex * poolIndex.size();
+	vector< double >::const_iterator i = values.begin() + offset;
+	for ( vector< unsigned int >::const_iterator 
+			k = poolIndex.begin(); k != poolIndex.end(); ++k ) {
+		if ( *k >= size() - numProxyPools ) {
+			varSinit()[*k] = (varS()[*k] += round( *i ));
+		}
+		i++;
+	}
+}
