@@ -55,7 +55,7 @@
    expression in standard C form and a list of variables values and
    evaluate the results.
  */
-static double *_functionAddVar(const char *name, void *data);
+double *_functionAddVar(const char *name, void *data);
 
 class Function
 {
@@ -103,7 +103,7 @@ class Function
     Function& operator=(const Function rhs);
 
     unsigned int addVar();
-    void dropVar(unsigned int msgLookup);
+    /* void dropVar(unsigned int msgLookup); */
 
     void process(const Eref& e, ProcPtr p);
     void reinit(const Eref& e, ProcPtr p);
