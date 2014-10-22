@@ -91,12 +91,14 @@ static const Cinfo * variableCinfo = Variable::initCinfo();
 
 void Variable::addMsgCallback(const Eref& e, const string& finfoName, ObjId msg, unsigned int msgLookup)
 {
+    /*
     if (finfoName == "input"){
         ObjId pa = Neutral::parent(e);
         Function * fn = reinterpret_cast< Function *>(pa.data());
         unsigned int varNumber = fn->addVar();
         SetGet2<unsigned int, unsigned int>::set(msg, "fieldIndex", msgLookup, varNumber);
     }
+    */
 }
 
 // // This imitates Synapse::dropMsgCallback
