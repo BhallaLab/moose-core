@@ -148,7 +148,8 @@ class ZombiePoolInterface
 			const vector< vector< Id > >& subCompts, 
 			const vector< vector< Id > >& prdCompts );
 
-		void filterCrossRateTerms( const vector< pair< Id, Id > >& xrt );
+		void filterCrossRateTerms( const vector< Id >& xreacs,
+						const vector< pair< Id, Id > >& xrt );
 		/**
 		 * Informs the solver that the rate terms or volumes have changed
 		 * and that the parameters must be updated.

@@ -434,7 +434,7 @@ double Ksolve::getEstimatedDt() const
 //////////////////////////////////////////////////////////////
 void Ksolve::process( const Eref& e, ProcPtr p )
 {
-	// Second, handle incoming diffusion values, update S with those.
+	// First, handle incoming diffusion values, update S with those.
 	if ( dsolvePtr_ ) {
 		vector< double > dvalues( 4 );
 		dvalues[0] = 0;
@@ -452,7 +452,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 		*/
 		setBlock( dvalues );
 	}
-	// First, take the arrived xCompt reac values and update S with them.
+	// Second, take the arrived xCompt reac values and update S with them.
 	for ( unsigned int i = 0; i < xfer_.size(); ++i ) {
 		const XferInfo& xf = xfer_[i];
 		for ( unsigned int j = 0; j < xf.xferVoxel.size(); ++j ) {
