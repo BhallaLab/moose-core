@@ -164,9 +164,6 @@ class Ksolve: public ZombiePoolInterface
 		 */
 		Id dsolve_;
 
-		// Id of Chem compartment used to figure out volumes of voxels.
-		// Id compartment_;
-
 		/// Pointer to diffusion solver
 		ZombiePoolInterface* dsolvePtr_;
 };
