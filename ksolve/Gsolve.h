@@ -50,6 +50,8 @@ class Gsolve: public ZombiePoolInterface
 		//////////////////////////////////////////////////////////////////
 		void process( const Eref& e, ProcPtr p );
 		void reinit( const Eref& e, ProcPtr p );
+		void initProc( const Eref& e, ProcPtr p );
+		void initReinit( const Eref& e, ProcPtr p );
 
 		/**
 		 * Handles request to change volumes of voxels in this Ksolve, and
@@ -109,6 +111,7 @@ class Gsolve: public ZombiePoolInterface
 		void setRandInit( bool val );
 
 		//////////////////////////////////////////////////////////////////
+		static SrcFinfo2< Id, vector< double > >* xComptOut();
 		static const Cinfo* initCinfo();
 	private:
 		GssaSystem sys_;
@@ -126,6 +129,14 @@ class Gsolve: public ZombiePoolInterface
 
 		/// Utility ptr used to help Pool Id lookups by the Ksolve.
 		Stoich* stoichPtr_;
+
+		/**
+		 * Id of diffusion solver, needed for coordinating numerics.
+		 */
+		Id dsolve_;
+
+		/// Pointer to diffusion solver
+		ZombiePoolInterface* dsolvePtr_;
 };
 
 #endif	// _GSOLVE_H
