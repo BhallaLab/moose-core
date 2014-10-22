@@ -970,7 +970,7 @@ void Stoich::buildXreacs( const Eref& e, Id otherStoich )
 
 void Stoich::filterXreacs()
 {
-	kinterface_->filterCrossRateTerms( offSolverReacCompts_ );
+	kinterface_->filterCrossRateTerms( offSolverReacs_, offSolverReacCompts_ );
 }
 
 void Stoich::comptsOnCrossReacTerms( vector< pair< Id, Id > >& xr ) const
