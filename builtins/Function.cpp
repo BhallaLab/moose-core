@@ -50,6 +50,7 @@
 #include "Variable.h"
 
 #include "Function.h"
+#include "ElementValueFinfo.h"
 
 static SrcFinfo1<double> *valueOut()
 {
@@ -112,7 +113,7 @@ const Cinfo * Function::initCinfo()
         " anything else: all three, value, derivative and rate will be sent out.\n",
         &Function::setMode,
         &Function::getMode);
-    static ValueFinfo< Function, string > expr(
+    static ElementValueFinfo< Function, string > expr(
         "expr",
         "Mathematical expression defining the function. The underlying parser\n"
         "is muParser. Hence the available functions and operators are (from\n"
@@ -246,18 +247,28 @@ const Cinfo * Function::initCinfo()
                 "Name", "Function",
                 "Author", "Subhasis Ray",
                 "Description",
-                "Function: general purpose function calculator using real numbers. It can"
-                " parse mathematical expression defining a function and evaluate it"                
-                " and/or its derivative for specified variable values."                
+                "General purpose function calculator using real numbers.\n"
+                "It can parse mathematical expression defining a function and evaluate"
+                " it and/or its derivative for specified variable values."
+                "You can assign expressions of the form::\n"
+                "\n"
+                "f(c0, c1, ..., cM, x0, x1, ..., xN, y0,..., yP ) \n"
+                "\n"
+                " where `ci`'s are constants and `xi`'s and `yi`'s are variables."
+
+                "The constants must be defined before setting the expression and"
+                " variables are connected via messages. The constants can have any"
+                " name, but the variable names must be of the form x{i} or y{i}"
+                "  where i is increasing integer starting from 0.\n"
                 " The variables can be input from other moose objects."
                 " Such variables must be named `x{i}` in the expression and the source"
-                " field is connected to Function.x[i]'s input destination field."
+                " field is connected to Function.x[i]'s `input` destination field.\n"
                 " In case the input variable is not available as a source field, but is"
                 " a value field, then the value can be requested by connecting the"
                 " `requestOut` message to the `get{Field}` destination on the target"
                 " object. Such variables must be specified in the expression as y{i}"
                 " and connecting the messages should happen in the same order as the"
-                " y indices." 
+                " y indices.\n"
                 " This class handles only real numbers (C-double). Predefined constants"
                 " are: pi=3.141592..., e=2.718281..."
             };
@@ -286,7 +297,7 @@ Function::Function(): _valid(false), _numVar(0), _lastValue(0.0),
     _independent = "x0";
     // Adding this default expression by default to avoid complains from GUI
     try{
-         _parser.SetExpr("0");
+        _parser.SetExpr("0");
     } catch (mu::Parser::exception_type &e) {
         _showError(e);
         _clearBuffer();
@@ -300,6 +311,7 @@ Function::Function(const Function& rhs): _numVar(rhs._numVar),
                                          _value(rhs._value), _rate(rhs._rate),
                                          _mode(rhs._mode)
 {
+    static Eref er;
     _independent = rhs._independent;
     _parser.SetVarFactory(_functionAddVar, this);
     // Adding pi and e, the defaults are `_pi` and `_e`
@@ -313,7 +325,7 @@ Function::Function(const Function& rhs): _numVar(rhs._numVar),
             _parser.DefineConst(item->first, item->second);
         }
     }
-    setExpr(rhs.getExpr());
+    setExpr(er, rhs.getExpr( er ));
     // Copy the values from the var pointers in rhs
     assert(_varbuf.size() == rhs._varbuf.size());
     for (unsigned int ii = 0; ii < rhs._varbuf.size(); ++ii){
@@ -327,6 +339,7 @@ Function::Function(const Function& rhs): _numVar(rhs._numVar),
 
 Function& Function::operator=(const Function rhs)
 {
+	static Eref er;
     _clearBuffer();
     _mode = rhs._mode;
     _lastValue = rhs._lastValue;
@@ -345,7 +358,7 @@ Function& Function::operator=(const Function rhs)
         }
     }
     // Copy the values from the var pointers in rhs
-    setExpr(rhs.getExpr());
+    setExpr(er, rhs.getExpr( er ));
     assert(_varbuf.size() == rhs._varbuf.size());
     for (unsigned int ii = 0; ii < rhs._varbuf.size(); ++ii){
         _varbuf[ii]->value = rhs._varbuf[ii]->value;
@@ -369,13 +382,15 @@ void Function::_clearBuffer()
     _numVar = 0;
     _parser.ClearVar();
     for (unsigned int ii = 0; ii < _varbuf.size(); ++ii){
-		if ( _varbuf[ii] )
-        	delete _varbuf[ii]; 
+        if ( _varbuf[ii] ){
+            delete _varbuf[ii];
+        }
     }
     _varbuf.clear();
     for (unsigned int ii = 0; ii < _pullbuf.size(); ++ii){
-		if ( _pullbuf[ii] )
-        	delete _pullbuf[ii]; 
+        if ( _pullbuf[ii] ){
+            delete _pullbuf[ii];
+        }
     }
     _pullbuf.clear();
 }
@@ -401,9 +416,13 @@ void Function::_showError(mu::Parser::exception_type &e) const
    gap. In case there is a gap in indices, those entries will remain
    unused.
 
-   If the name starts with anything other than `x`, then it is taken
+   If the name starts with anything other than `x` or `y`, then it is taken
    to be a named constant, which must be set before any expression or
    variables and error is thrown.
+
+   NOTE: this is called not on setting expression but on first attempt
+   at evaluation of the same, i.e. when you access `value` of the
+   Function object.
  */
 double * _functionAddVar(const char *name, void *data)
 {
@@ -416,6 +435,7 @@ double * _functionAddVar(const char *name, void *data)
         if ((unsigned)index >= function->_varbuf.size()){
             function->_varbuf.resize(index+1, 0);
             function->_varbuf[index] = new Variable();
+            function->_numVar = function->_varbuf.size();
         }
         ret = &(function->_varbuf[index]->value);        
     } else if (strname[0] == 'y'){
@@ -447,31 +467,34 @@ double * _functionAddVar(const char *name, void *data)
 
    (2) When the user connects a setVar message to a Variable. ??
 
-   
+   This is called by Variable::addMsgCallback - which is unused.
  */
 unsigned int Function::addVar()
 {
-    unsigned int newVarIndex = _numVar;
-    ++_numVar;
-    stringstream name;
-    name << "x" << newVarIndex;
-    _functionAddVar(name.str().c_str(), this);
-    return newVarIndex;
+//     unsigned int newVarIndex = _numVar;
+//     ++_numVar;
+//     stringstream name;
+//     name << "x" << newVarIndex;
+//     _functionAddVar(name.str().c_str(), this);
+    //     return newVarIndex;
+    return 0;
 }
 
-void Function::dropVar(unsigned int msgLookup)
-{
-    // Don't know what this can possibly mean in the context of
-    // evaluating a set expression.
-}
+// void Function::dropVar(unsigned int msgLookup)
+// {
+//     // Don't know what this can possibly mean in the context of
+//     // evaluating a set expression.
+// }
 
-void Function::setExpr(string expr)
+void Function::setExpr(const Eref& eref, string expr)
 {
     _valid = false;
+    _clearBuffer();
     mu::varmap_type vars;
     try{
         _parser.SetExpr(expr);
     } catch (mu::Parser::exception_type &e) {
+        cerr << "Error setting expression on: " << eref.objId().path() << endl;
         _showError(e);
         _clearBuffer();
         return;
@@ -479,10 +502,10 @@ void Function::setExpr(string expr)
     _valid = true;
 }
 
-string Function::getExpr() const
+string Function::getExpr( const Eref& e ) const
 {
     if (!_valid){
-        cout << "Error: Function::getExpr() - invalid parser state" << endl;
+        cout << "Error: " << e.objId().path() << "::getExpr() - invalid parser state" << endl;
         return "";
     }
     return _parser.GetExpr();
@@ -549,11 +572,13 @@ double Function::getDerivative() const
     }
     mu::varmap_type variables = _parser.GetVar();
     mu::varmap_type::const_iterator item = variables.find(_independent);
-    try{
-        value = _parser.Diff(item->second, *(item->second));
-    } catch (mu::Parser::exception_type &e){
+    if (item != variables.end()){
+        try{
+            value = _parser.Diff(item->second, *(item->second));
+        } catch (mu::Parser::exception_type &e){
             _showError(e);
-    }    
+        }
+    }
     return value;
 }
 
@@ -569,13 +594,16 @@ void Function::setNumVar(const unsigned int num)
 
 unsigned int Function::getNumVar() const
 {
-    return _varbuf.size();
+    return _numVar;
 }
 
 void Function::setVar(unsigned int index, double value)
 {
-    assert(index < _varbuf.size());
-    _varbuf[index]->setValue(value);
+    if (index < _varbuf.size()){    
+        _varbuf[index]->setValue(value);
+    } else {
+        cerr << "Function: index " << index << " out of bounds." << endl;
+    }
 }
 
 Variable * Function::getVar(unsigned int ii)
@@ -652,7 +680,7 @@ void Function::reinit(const Eref &e, ProcPtr p)
     }
     if (trim(_parser.GetExpr(), " \t\n\r").length() == 0){
         cout << "Error: no expression set. Will do nothing." << endl;
-        setExpr("0.0");
+        setExpr(e, "0.0");
         _valid = false;
     }
     _value = 0.0;

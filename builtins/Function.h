@@ -64,8 +64,8 @@ class Function
     Function();
     Function(const Function& rhs);
     ~Function();
-    void setExpr(string expr);
-    string getExpr() const;
+    void setExpr( const Eref& e, string expr);
+    string getExpr( const Eref& e ) const;
     
     
     // get a list of variable identifiers.
@@ -103,7 +103,7 @@ class Function
     Function& operator=(const Function rhs);
 
     unsigned int addVar();
-    void dropVar(unsigned int msgLookup);
+    /* void dropVar(unsigned int msgLookup); */
 
     void process(const Eref& e, ProcPtr p);
     void reinit(const Eref& e, ProcPtr p);
