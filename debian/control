@@ -30,20 +30,28 @@ Package: moose-core
 Architecture: any
 Depends: ${misc:Depends}, libhdf5-7, libgsl0ldbl
 Suggests: moose-python, moose-gui, moose-doc
-Description: Core package of MOOSE.
+Description: C++ core of MOOSE neural simulator.
+ .
+ This package installs the C++ core of MOOSE.
 
 Package: moose-python
 Architecture: any
 Depends: python-numpy, python-matplotlib, moose-doc
 Suggests: python-networkx
-Description: Python interface of MOOSE.
+Description: Python interface of MOOSE neural simulator.
+ .
+ This package installs the Python scripting interface of MOOSE. 
 
 Package: moose-gui
 Architecture: any
 Depends:  python-qt4, moose-python
 Suggests: python-networkx
-Description: GUI frontend of MOOSE simulator.
+Description: GUI frontend of MOOSE neural simulator.
+ .
+ This package installs the Graphical User Interface (GUI) for MOOSE. 
 
 Package: moose-doc
 Architecture: any
-Description: Document package of MOOSE simulator.
+Description: User and developer documents of MOOSE neural simulator.
+ .
+ This package installs user-manuals, tutorials, and developer document of MOOSE simulator.
