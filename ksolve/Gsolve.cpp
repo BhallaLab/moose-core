@@ -349,11 +349,13 @@ void Gsolve::process( const Eref& e, ProcPtr p )
 			pools_[xf.xferVoxel[j]].xferOut( j, xf.lastValues, xf.xferPoolIdx );
 		}
 	}
+
 	// Fourth, update the mol #s
 	for ( vector< GssaVoxelPools >::iterator 
 					i = pools_.begin(); i != pools_.end(); ++i ) {
 		i->advance( p, &sys_ );
 	}
+
 	// Finally, assemble and send the integrated values off for the Dsolve.
 	if ( dsolvePtr_ ) {
 		vector< double > kvalues( 4 );
@@ -395,6 +397,11 @@ void Gsolve::reinit( const Eref& e, ProcPtr p )
 		for ( unsigned int j = 0; j < xf.xferVoxel.size(); ++j ) {
 			pools_[xf.xferVoxel[j]].xferOut( j, xf.lastValues, xf.xferPoolIdx );
 		}
+	}
+	// Fourth, update the atots.
+	for ( vector< GssaVoxelPools >::iterator 
+					i = pools_.begin(); i != pools_.end(); ++i ) {
+		i->refreshAtot( &sys_ );
 	}
 }
 
