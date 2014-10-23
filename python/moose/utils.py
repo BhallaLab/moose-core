@@ -151,7 +151,7 @@ def create_table_path(model, graph, element, field):
     return tablePath
 
 
-def create_table(tablePath, element, field):
+def create_table(tablePath, element, field,tableType):
     """Create table to record `field` from element `element`
 
     Tables are created under `dataRoot`, the names are generally
@@ -163,7 +163,10 @@ def create_table(tablePath, element, field):
     if _moose.exists(tablePath):
         table = _moose.element(tablePath)
     else:
-        table = _moose.Table(tablePath)
+        if tableType == "Table2":
+            table = _moose.Table2(tablePath)            
+        elif tableType == "Table":
+            table = _moose.Table(tablePath)
         _moose.connect(table, 'requestOut', element, 'get%s' % (field))
     return table
 

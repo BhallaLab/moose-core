@@ -149,7 +149,7 @@ class CanvasWidget(FigureCanvas):
         modelRoot, element = event.mimeData().data
         if isinstance (element,moose.PoolBase):
             tablePath = moose.utils.create_table_path(self.model, self.graph, element, "Conc")
-            table     = moose.utils.create_table(tablePath, element, "Conc")
+            table     = moose.utils.create_table(tablePath, element, "Conc","Table2")
             # moose.connect(table, 'requestOut', element, 'getConc')
             self.updateSignal.emit()
         else:
