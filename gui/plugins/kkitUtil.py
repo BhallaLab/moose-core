@@ -1,8 +1,15 @@
 from moose import *
 from PyQt4 import QtCore, QtGui
 import numpy as np
+import os
+import config
+import pickle
 
-def getColor(iteminfo,colorMap):
+colormap_file = open(os.path.join(config.settings[config.KEY_COLORMAP_DIR], 'rainbow2.pkl'),'rb')
+colorMap = pickle.load(colormap_file)
+colormap_file.close()
+
+def getColor(iteminfo):
     """ Getting a textcolor and background color for the given  mooseObject \
         If textcolor is empty replaced with green \
            background color is empty replaced with blue
@@ -17,11 +24,11 @@ def getColor(iteminfo,colorMap):
     if(textcolor == ''): textcolor = 'green'
     if(bgcolor == ''): bgcolor = 'blue'
     if(textcolor == bgcolor): textcolor = np.random.randint(low=0, high=255, size=3)
-    textcolor = colorCheck(textcolor,colorMap,"fc")
-    bgcolor = colorCheck(bgcolor,colorMap,"bg")
+    textcolor = colorCheck(textcolor,"fc")
+    bgcolor = colorCheck(bgcolor,"bg")
     return(textcolor,bgcolor)
 
-def colorCheck(fc_bgcolor,colorMap,fcbg):
+def colorCheck(fc_bgcolor,fcbg):
     """ textColor or background can be anything like string or tuple or list \
         if string its taken as colorname further down in validColorcheck checked for valid color, \
         but for tuple and list its taken as r,g,b value.

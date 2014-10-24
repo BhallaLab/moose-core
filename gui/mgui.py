@@ -289,6 +289,8 @@ class MWindow(QtGui.QMainWindow):
             self.setCurrentView('editor')
         self.objectEditDockWidget.objectNameChanged.connect(
             self.plugin.getEditorView().getCentralWidget().updateItemSlot)
+        self.objectEditDockWidget.objectColorChanged.connect(
+            self.plugin.getEditorView().getCentralWidget().updateColorSlot)
         return self.plugin
 
     def updateExistingMenu(self, menu):

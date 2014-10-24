@@ -69,8 +69,10 @@ import traceback
 sys.path.append('../python')
 import moose
 import defaults
-import config
-
+from plugins.kkitUtil import *
+# from PyQt4.QtGui import QColor
+# from PyQt4.QtGui import QColorDialog
+# from PyQt4.QtGui import QPushButton
 #these fields will be ignored
 extra_fields = ['this',
                 'me',
@@ -142,6 +144,7 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
 
     """
     objectNameChanged = QtCore.pyqtSignal('PyQt_PyObject')
+    objectColorChanged = QtCore.pyqtSignal('PyQt_PyObject')
     # dataChanged = QtCore.pyqtSignal('PyQt_PyObject')
     def __init__(self, datain, headerdata=['Field','Value'], undolen=100, parent=None, *args):
         QtCore.QAbstractTableModel.__init__(self, parent, *args)
@@ -165,6 +168,8 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
             self.fields.append(fieldName)
         #harsha: For signalling models will be pulling out notes field from Annotator
         #        can updates if exist for other types also
+        if ( isinstance(self.mooseObject, moose.PoolBase)  or isinstance(self.mooseObject,moose.EnzBase)) :
+            self.fields.append("Color")
         if ( isinstance(self.mooseObject, moose.PoolBase) or isinstance(self.mooseObject,moose.ReacBase) or isinstance(self.mooseObject,moose.EnzBase)) :
             self.fields.append("Notes")
         flag = QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable
@@ -196,13 +201,24 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
                 value = type(oldValue)(value)
                 ann.setField(field,value)
                 self.undoStack.append((index,oldValue))
+            elif field == "Color":
+                field = "color"
+                ann = moose.Annotator(self.mooseObject.path+'/info')
+                oldValue = ann.getField(field)
+                value = type(oldValue)(value)
+                value = str(value).strip()
+                ann.setField(field,value)
+                self.undoStack.append((index,oldValue))
             else:
                 oldValue = self.mooseObject.getField(field)
                 value = type(oldValue)(value)
                 self.mooseObject.setField(field, value)
                 self.undoStack.append((index, oldValue))
+                self.emit(QtCore.SIGNAL('objectColorChanged(PyQt_PyObject)'), self.mooseObject)
             if field == 'name':
                 self.emit(QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'), self.mooseObject)
+            if field == "color":
+                self.emit(QtCore.SIGNAL('objectColorChanged(PyQt_PyObject)'), self.mooseObject)
             return True
 
         self.dataChanged.emit(index, index)
@@ -220,6 +236,8 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
         self.mooseObject.setField(field, oldvalue)
         if field == 'name':
             self.objectNameChanged.emit(self.mooseObject)
+        if field == 'Color':
+            self.objectColorChanged.emit(self.mooseObject)
         self.emit(QtCore.SIGNAL('dataChanged(const QModelIndex&, const QModelIndex&)'), index, index)
 
     def redo(self):
@@ -231,6 +249,8 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
         self.mooseObject.setField(self.fields[index.row()], type(currentvalue)(oldvalue))
         if field == 'name':
             self.emit(QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'), self.mooseObject)
+        if field == 'Color':
+            self.emit(QtCore.SIGNAL('objectColorChanged(PyQt_PyObject)'), self.mooseObject)
         self.emit(QtCore.SIGNAL('dataChanged(const QModelIndex&, const QModelIndex&)'), index, index)
 
     def flags(self, index):
@@ -247,12 +267,15 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
         #setter = 'set_%s' % (self.fields[index.row()])
         #print " from Object setter",setter, "object",self.mooseObject, " ",self.mooseObject.getFieldNames('destFinfo');
         if index.column() == 1:
+            if field == "Color":
+                ann = moose.Annotator(self.mooseObject.path+'/info')
+                if setter in ann.getFieldNames('destFinfo'):
+                   flag |= QtCore.Qt.ItemIsEditable
             if field == "Notes":
                 ann = moose.Annotator(self.mooseObject.path+'/info')
                 if setter in ann.getFieldNames('destFinfo'):
                     flag |= QtCore.Qt.ItemIsEditable
             if ( not isinstance(self.mooseObject, moose.ChemCompt) ):
-
                 if field == "volume":
                     flag |= QtCore.Qt.NoItemFlags
                 elif setter in self.mooseObject.getFieldNames('destFinfo'):
@@ -283,7 +306,7 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
                     return self.checkState_
             elif (role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole):
                 try:
-                    if ( (str(field) != "Notes") ):
+                    if ( (str(field) != "Notes") and (str(field) != "Color") ):
                         if field == "className":
                             value = self.mooseObject.getField(str(field))
                             if "Zombie" in value:
@@ -293,6 +316,11 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
                         else:
                             ret = self.mooseObject.getField(str(field))
                         ret = QtCore.QVariant(QtCore.QString(str(ret)))
+                    elif(str(field) == "Color"):
+                        astr = self.mooseObject.path+'/info'
+                        textcolor,bgcolor = getColor(astr)
+                        #ret = QtCore.QVariant(QtCore.QString(str(bgcolor.getRgb())))
+                        ret = QtCore.QVariant(QtCore.QString(str(bgcolor.getRgb())))
                     elif(str(field) == "Notes"):
                         astr = self.mooseObject.path+'/info'
                         mastr = moose.Annotator(astr)
@@ -348,6 +376,7 @@ class ObjectEditDockWidget(QtGui.QDockWidget):
 
     """
     objectNameChanged = QtCore.pyqtSignal('PyQt_PyObject')
+    objectColorChanged = QtCore.pyqtSignal('PyQt_PyObject')
     def __init__(self, mobj='/', parent=None, flags=None):
         QtGui.QDockWidget.__init__(self, parent=parent)
         mobj = moose.element(mobj)
@@ -365,6 +394,8 @@ class ObjectEditDockWidget(QtGui.QDockWidget):
             self.view_dict[element] = view
             view.model().objectNameChanged.connect(
                          self.emitObjectNameChanged)
+            view.model().objectColorChanged.connect(
+                         self.emitObjectColorChanged)
         self.setWidget(view)
         self.setWindowTitle('Edit: %s' % (element.path))
         #print view.model().mooseObject
@@ -372,7 +403,8 @@ class ObjectEditDockWidget(QtGui.QDockWidget):
     
     def emitObjectNameChanged(self, mobj):
         self.objectNameChanged.emit(mobj)
-        
+    def emitObjectColorChanged(self, mobj):
+        self.objectColorChanged.emit(mobj)    
 
 def main():
     app = QtGui.QApplication(sys.argv)

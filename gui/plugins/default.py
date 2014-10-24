@@ -259,7 +259,8 @@ class DefaultEditorWidget(EditorWidgetBase):
 
         """
         self.tree.updateItemSlot(mobj)
-
+    def updateColorSlot(self,mobj):
+        pass
     def editCurrentObjectSlot(self):
         """Emits an `editObject(str)` signal with moose element path of
         currently selected tree item as argument

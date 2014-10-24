@@ -1,5 +1,4 @@
 import sys
-import os
 import math
 import re
 from PyQt4 import QtGui, QtCore, Qt
@@ -7,8 +6,6 @@ from PyQt4 import QtGui, QtCore, Qt
 import networkx as nx
 sys.path.insert(0, '~/async/gui')
 import numpy as np
-import config
-import pickle
 from default import *
 from moose import *
 sys.path.append('plugins')
@@ -20,14 +17,9 @@ from kkitCalcArrow import *
 from kkitOrdinateUtil import *
 import posixpath
 from mtoolbutton import MToolButton
-
-from PyQt4 import QtGui, Qt
 from PyQt4.QtGui import QWidget
 from PyQt4.QtGui import QGridLayout
-
 import RunWidget
-
-#from QtGui import QScrollArea
 
 #from DataTable import DataTable
 class KkitPlugin(MoosePlugin):
@@ -131,6 +123,7 @@ class KkitRunView(MooseEditorView):
     def __init__(self, plugin):
         MooseEditorView.__init__(self, plugin)
         #self.dataTable =dataTable
+        self.plugin = plugin
     '''
     def getToolPanes(self):
         return super(KkitRunView, self).getToolPanes()
@@ -146,7 +139,7 @@ class KkitRunView(MooseEditorView):
     '''
     def getCentralWidget(self):
         if self._centralWidget is None:
-            self._centralWidget = kineticRunWidget()
+            self._centralWidget = kineticRunWidget(self.plugin)
             # self._centralWidget.view.objectSelected.connect(self.plugin.mainWindow.objectEditSlot)
             self._centralWidget.setModelRoot(self.plugin.modelRoot)
         return self._centralWidget
@@ -198,23 +191,24 @@ class KkitEditorView(MooseEditorView):
     '''
     def getCentralWidget(self):
         if self._centralWidget is None:
-            self._centralWidget = kineticEditorWidget()
+            self._centralWidget = kineticEditorWidget(self.plugin)
             self._centralWidget.setModelRoot(self.plugin.modelRoot)
         return self._centralWidget
 
 
 class  KineticsWidget(EditorWidgetBase):
-    def __init__(self, *args):
+    def __init__(self, plugin, *args):
         EditorWidgetBase.__init__(self, *args)
+        self.plugin = plugin
         #self.setAcceptDrops(True)
         self.sceneContainer = QtGui.QGraphicsScene(self)
         self.sceneContainer.setSceneRect(self.sceneContainer.itemsBoundingRect())
         self.sceneContainer.setBackgroundBrush(QtGui.QColor(230,220,219,120))
-
+        #self.sceneContainer.setBackgroundBrush(QtGui.QColor(255,220,219,220))
         # pickled the color map file """
-        colormap_file = open(os.path.join(config.settings[config.KEY_COLORMAP_DIR], 'rainbow2.pkl'),'rb')
-        self.colorMap = pickle.load(colormap_file)
-        colormap_file.close()
+        # colormap_file = open(os.path.join(config.settings[config.KEY_COLORMAP_DIR], 'rainbow2.pkl'),'rb')
+        # self.colorMap = pickle.load(colormap_file)
+        # colormap_file.close()
 
         #A map b/w moose compartment key with QGraphicsObject
         self.qGraCompt = {}
@@ -343,10 +337,10 @@ class  KineticsWidget(EditorWidgetBase):
         if( (objClass == "reaction" ) or (objClass == "cplx")):
             textcolor,bgcolor = "white","white"
         elif objClass == "tab":
-            textcolor,bgcolor = getColor(info,self.colorMap)
+            textcolor,bgcolor = getColor(info)
         else:
 
-            textcolor,bgcolor = getColor(info,self.colorMap)
+            textcolor,bgcolor = getColor(info)
         graphicalObj.setDisplayProperties(xpos,ypos,textcolor,bgcolor)
 
     def positioninfo(self,iteminfo):
@@ -376,7 +370,15 @@ class  KineticsWidget(EditorWidgetBase):
         self.mooseId_GObj[element(mooseObj).getId()] = qgraphicItem
         qgraphicItem.connect(qgraphicItem,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
         qgraphicItem.connect(qgraphicItem,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.objectEditSlot)
-        
+    
+    def updateColorSlot(self,mooseObject):
+        anninfo = moose.Annotator(mooseObject.path+'/info')
+        textcolor,bgcolor = getColor(anninfo)
+        item = self.mooseId_GObj[mooseObject.getId()]
+        if (isinstance(item,PoolItem) or isinstance(item,EnzItem) or isinstance(item,MMEnzItem) ):
+            item.updateColor(bgcolor)
+        #self.bg.setBrush(QtGui.QBrush(QtGui.QColor(bgcolor)))
+    
     def updateItemSlot(self, mooseObject):
         #This is overridden by derived classes to connect appropriate
         #slot for updating the display item.
@@ -429,6 +431,7 @@ class  KineticsWidget(EditorWidgetBase):
             self.connect(self.view, QtCore.SIGNAL("dropped"), self.objectEditSlot)
             hLayout = QtGui.QGridLayout(self)
             self.setLayout(hLayout)
+            #self.view.GrVfitinView()
             hLayout.addWidget(self.view,0,0)
         else:
             # maxmium and minimum coordinates of the objects specified in kkit file.
@@ -454,8 +457,10 @@ class  KineticsWidget(EditorWidgetBase):
             #self.view.fitInView(self.sceneContainer.itemsBoundingRect())
             #print "center kkit file",self.sceneContainer.itemsBoundingRect().center()
             #self.view.centerOn(self.sceneContainer.itemsBoundingRect().center())
+            #self.view.GrVfitinView()
             hLayout = QtGui.QGridLayout(self)
             self.setLayout(hLayout)
+            
             hLayout.addWidget(self.view)
             #self.layout().addWidget(self.view)
 
@@ -559,8 +564,8 @@ class  KineticsWidget(EditorWidgetBase):
         self.editObject.emit(mooseObject.path)
 
     def drawLine_arrow(self, itemignoreZooming=False):
-        print "srcdesConnection ",self.srcdesConnection
         for inn,out in self.srcdesConnection.items():
+            #print "inn ",inn, " out ",out
             # self.srcdesConnection is dictionary which contains key,value \
             #    key is Enzyme or Reaction  and value [[list of substrate],[list of product]] (tuple)
             #    key is Function and value is [list of pool] (list)
@@ -637,7 +642,7 @@ class  KineticsWidget(EditorWidgetBase):
             elif(endtype != 'cplx'):
                 p1 = (next((k for k,v in self.mooseId_GObj.items() if v == src), None))
                 pinfo = p1.path+'/info'
-                color,bgcolor = getColor(pinfo,self.colorMap)
+                color,bgcolor = getColor(pinfo)
                 pen.setColor(color)
         elif isinstance(source, moose.PoolBase):
             pen.setColor(QtCore.Qt.blue)
@@ -678,14 +683,13 @@ class  KineticsWidget(EditorWidgetBase):
             self.updateArrow(srcdes.childItems()[1])
         else:
             self.updateArrow(srcdes.childItems()[0])
-
+    
     def keyPressEvent(self,event):
         # key1 = event.key() # key event does not distinguish between capital and non-capital letters
         key = event.text().toAscii().toHex()
-        if key ==  '41': # 'A' fits the view to iconScale factor
+        if (key ==  '41'): # 'A' fits the view to iconScale factor
             itemignoreZooming = False
             self.updateItemTransformationMode(itemignoreZooming)
-            print "self.keyPressEvent ",self.sceneContainer
             self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
             self.drawLine_arrow(itemignoreZooming=False)
 
@@ -707,7 +711,7 @@ class  KineticsWidget(EditorWidgetBase):
             self.iconScale = 1
             self.updateScale( self.iconScale )
             self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
-
+    
     def updateItemTransformationMode(self, on):
         for v in self.sceneContainer.items():
             if( not isinstance(v,ComptItem)):
@@ -748,9 +752,10 @@ class  KineticsWidget(EditorWidgetBase):
             v.setRect(rectcompt.x()-comptWidth,rectcompt.y()-comptWidth,(rectcompt.width()+2*comptWidth),(rectcompt.height()+2*comptWidth))
 
 class kineticEditorWidget(KineticsWidget):
-    def __init__(self, *args):
+    def __init__(self, plugin,*args):
 
-        KineticsWidget.__init__(self, *args)
+        KineticsWidget.__init__(self, plugin, *args)
+        self.plugin = plugin
         self.insertMenu = QtGui.QMenu('&Insert')
         self._menus.append(self.insertMenu)
         self.insertMapper = QtCore.QSignalMapper(self)
@@ -778,7 +783,8 @@ class kineticEditorWidget(KineticsWidget):
             
     def GrViewresize(self,event):
         #when Gui resize and event is sent which inturn call resizeEvent of qgraphicsview
-        self.view.resizeEvent1(event)
+        pass
+        #self.view.resizeEvent1(event)
 
     def makePoolItem(self, poolObj, qGraCompt):
         return PoolItem(poolObj, qGraCompt)
@@ -799,8 +805,13 @@ class kineticEditorWidget(KineticsWidget):
         return self._toolBars
 
 class kineticRunWidget(KineticsWidget):
-    def __init__(self, *args):
-        KineticsWidget.__init__(self, *args)
+    def __init__(self, plugin,*args):
+        KineticsWidget.__init__(self, plugin,*args)
+
+    def showEvent(self, event):
+        pass
+        #self.updateModelView()
+        #self.update()
 
     def makePoolItem(self, poolObj, qGraCompt):
         return PoolItemCircle(poolObj, qGraCompt)

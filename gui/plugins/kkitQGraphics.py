@@ -20,7 +20,7 @@ class KineticsDisplayItem(QtGui.QGraphicsWidget):
             self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges,1)
     def setDisplayProperties(self, dinfo):
         self.setGeometry(dinfo.x, dinfo.y)
-      
+   
     def paint(self, painter=None, option=None, widget = None):
         #If item is selected
         if self.hasFocus() or self.isSelected():
@@ -164,8 +164,8 @@ class PoolItem(KineticsDisplayItem):
         self.bg.setRect(0, 0, self.gobj.boundingRect().width()+PoolItem.fontMetrics.width('  '), self.gobj.boundingRect().height())
     
     def updateColor(self,bgcolor):
-        #self.bg.setBrush(QtGui.QBrush(QtGui.QColor(bgcolor)))
-        pass
+        self.bg.setBrush(QtGui.QBrush(QtGui.QColor(bgcolor)))
+        #pass
 
     def updateRect(self,ratio):
         width = self.gobj.boundingRect().width()+PoolItem.fontMetrics.width('  ')
@@ -362,7 +362,10 @@ class EnzItem(KineticsDisplayItem):
             self._Kcat = self._gobj.kcat
             doc = "Km\t: "+str(self._Km)+"\nKcat\t: "+str(self._Kcat)
             self.gobj.setToolTip(doc)
-        
+    
+    def updateColor(self,bgcolor):
+        self.gobj.setBrush(QtGui.QBrush(QtGui.QColor(bgcolor)))        
+
     def setDisplayProperties(self,x,y,textcolor,bgcolor):
         """Set the display properties of this item."""
         self.setGeometry(x,y, 
@@ -405,7 +408,6 @@ class CplxItem(KineticsDisplayItem):
         self.setGeometry(self.gobj.boundingRect().width()/2,self.gobj.boundingRect().height(), 
                          self.gobj.boundingRect().width(), 
                          self.gobj.boundingRect().height())
-
         self.setFlag(QtGui.QGraphicsItem.ItemIsMovable,False)
 
     def refresh(self,scale):
