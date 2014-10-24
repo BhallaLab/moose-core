@@ -106,6 +106,19 @@ def calcArrow(srcdes_list,itemignoreZooming,iconScale):
             arrow.append(QtCore.QPointF(srcXArr1,srcYArr1))
             arrow.append(QtCore.QPointF(lineSrcPoint.x(),lineSrcPoint.y()))
 
+        elif endtype == 's':
+            arrow.append(lineDestPoint)
+            arrow.append(lineSrcPoint)
+            
+            degree = 60
+            srcXArr2,srcYArr2 = arrowHead(srcAngle,degree,lineSrcPoint,iconScale)
+            arrow.append(QtCore.QPointF(srcXArr2,srcYArr2))                    
+            arrow.append(QtCore.QPointF(lineSrcPoint.x(),lineSrcPoint.y()))
+
+            degree = 120
+            srcXArr1,srcYArr1= arrowHead(srcAngle,degree,lineSrcPoint,iconScale)
+            arrow.append(QtCore.QPointF(srcXArr1,srcYArr1))
+            arrow.append(QtCore.QPointF(lineSrcPoint.x(),lineSrcPoint.y()))
         else:
             arrow.append(lineSrcPoint)
             arrow.append(lineDestPoint)
