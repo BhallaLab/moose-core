@@ -287,6 +287,14 @@ if(BUILD_PYMOOSE)
 
 endif(BUILD_PYMOOSE)
 
+######################### DOC PACKAGE ##########################################
+
+add_custom_target(moose-doc
+    COMMAND ./docgen 
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    )
+
+
 ######################### INSTALL ##############################################
 install(TARGETS moose 
     LIBRARY DESTINATION lib
@@ -314,34 +322,34 @@ install(FILES scripts/moose.desktop
     COMPONENT moose-python
     )
 ########################## PACKAGING #########################################
-#
-#set(CPACK_GENERATOR "DEB")
-#set(CPACK_STRIP_FILES TRUE)
-#
-##  We need to compile python scripts on the installation  host.
-#set(CPACK_COMPONENTS_ALL applications libraries)
-#set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dilawar Singh")
-#set(CPACK_PACKAGE_CONTACT "dilawars@ncbs.res.in")
-##set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
-#set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Moose")
-#set(CPACK_INSTALL_SCRIPT "${CMAKE_SOURCE_DIR}/python/InstallPyMoose.cmake")
-#set(CPACK_PACKAGE_VERSION_MAJOR "1")
-#set(CPACK_PACKAGE_VERSION_MINOR "1")
-#set(CPACK_PACKAGE_VENDOR "NCBS Bangalore")
-#set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README")
-#set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dilawar Singh <dilawars@ncbs.res.in>")
-#if(WIN32)
-#    MESSAGE("++ Currently only Unix is supported")
-#else()
-#    set(CPACK_STRIP_FILES moose)
-#endif()
-#set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
-#set(CPACK_PACKAGE_FILE_NAME
-#    "moose_${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.orig"
-#    )
-#set(CPACK_DEBIAN_PACKAGE_DEPENDS "libgsl (>= 1.16) libopenmpi libhdf5-7 python-numpy")
-#include(CPack)
-#
+
+set(CPACK_GENERATOR "DEB")
+set(CPACK_STRIP_FILES TRUE)
+
+#  We need to compile python scripts on the installation  host.
+set(CPACK_COMPONENTS_ALL applications libraries)
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dilawar Singh")
+set(CPACK_PACKAGE_CONTACT "dilawars@ncbs.res.in")
+set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Moose")
+set(CPACK_INSTALL_SCRIPT "${CMAKE_SOURCE_DIR}/python/InstallPyMoose.cmake")
+set(CPACK_PACKAGE_VERSION_MAJOR "1")
+set(CPACK_PACKAGE_VERSION_MINOR "1")
+set(CPACK_PACKAGE_VENDOR "NCBS Bangalore")
+set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dilawar Singh <dilawars@ncbs.res.in>")
+if(WIN32)
+    MESSAGE("++ Currently only Unix is supported")
+else()
+    set(CPACK_STRIP_FILES moose)
+endif()
+set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
+set(CPACK_PACKAGE_FILE_NAME
+    "moose_${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.orig"
+    )
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libgsl (>= 1.16) libopenmpi libhdf5-7 python-numpy")
+include(CPack)
+
 ######################  TESTING  ###############################################
 #include(CTest)
 #find_package(PythonInterp REQUIRED)
