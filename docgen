@@ -18,6 +18,9 @@ __status__      =   "Development"
 import subprocess
 import os
 
+if not os.path.isdir('docs'):
+    os.makedirs('docs')
+
 print("#######################################################################")
 print("Generating Documentation")
 print("#######################################################################")
