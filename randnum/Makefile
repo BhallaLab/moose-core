@@ -6,19 +6,19 @@ TARGET = _randnum.o
 
 OBJ = \
 	mt19937ar.o	\
-	# RandGenerator.o	\
-	# UniformRng.o	\
-	# Uniform.o	\
-	# Exponential.o	\
-	# ExponentialRng.o	\
-	# Binomial.o	\
-	# Normal.o	\
-	# Poisson.o	\
-	# Gamma.o		\
-	# PoissonRng.o	\
-	# NormalRng.o	\
-	# BinomialRng.o	\
-	# GammaRng.o	\
+	RandGenerator.o	\
+	UniformRng.o	\
+	Uniform.o	\
+	Exponential.o	\
+	ExponentialRng.o	\
+	Binomial.o	\
+	Normal.o	\
+	Poisson.o	\
+	Gamma.o		\
+	PoissonRng.o	\
+	NormalRng.o	\
+	BinomialRng.o	\
+	GammaRng.o	\
 
 HEADERS = \
 	../basecode/header.h	\
