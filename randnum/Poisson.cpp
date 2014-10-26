@@ -23,7 +23,7 @@
 #define _POISSON_CPP
 #include "Poisson.h"
 #include "randnum.h"
-#include "utility/NumUtil.h"
+#include "utility/numutil.h"
 #include "Gamma.h"
 #include "Binomial.h"
 #include <cmath>
