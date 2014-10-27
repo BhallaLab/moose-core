@@ -44,7 +44,7 @@ Description: Python interface of MOOSE neural simulator.
 
 Package: moose-gui
 Architecture: any
-Depends:  python-qt4, moose-python
+Depends:  python-qt4, moose-python, openscenegraph
 Suggests: python-networkx
 Description: GUI frontend of MOOSE neural simulator.
  .
