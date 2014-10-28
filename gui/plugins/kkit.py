@@ -20,7 +20,7 @@ from mtoolbutton import MToolButton
 from PyQt4.QtGui import QWidget
 from PyQt4.QtGui import QGridLayout
 import RunWidget
-
+import pprint
 #from DataTable import DataTable
 class KkitPlugin(MoosePlugin):
     """Default plugin for MOOSE GUI"""
@@ -157,8 +157,31 @@ class KkitEditorView(MooseEditorView):
             self.saveModelAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+S", None, QtGui.QApplication.UnicodeUTF8))
             self.connect(self.saveModelAction, QtCore.SIGNAL('triggered()'), self.SaveModelDialogSlot)
             self.fileinsertMenu.addAction(self.saveModelAction)
+        if not hasattr(self,'SaveModelAction'):
+            #self.fileinsertMenu.addSeparator()
+            self.saveModelAction = QtGui.QAction('SaveToGenesisFormat', self)
+            self.saveModelAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+S", None, QtGui.QApplication.UnicodeUTF8))
+            self.connect(self.saveModelAction, QtCore.SIGNAL('triggered()'), self.SaveToGenesisSlot)
+            self.fileinsertMenu.addAction(self.saveModelAction)
         self._menus.append(self.fileinsertMenu)
 
+    def SaveToGenesisSlot(self):
+        type_sbml = 'Genesis'
+        filters = {'Genesis(*.g)': type_sbml}
+        filename,filter_ = QtGui.QFileDialog.getSaveFileNameAndFilter(None,'Save File','',';;'.join(filters))
+        extension = ""
+        if str(filename).rfind('.') != -1:
+            filename = filename[:str(filename).rfind('.')]
+            if str(filter_).rfind('.') != -1:
+                extension = filter_[str(filter_).rfind('.'):len(filter_)-1]
+        if filename:
+            filename = filename+extension
+            if filters[str(filter_)] == 'Genesis':
+                writeerror = moose.writeGenesis(str(filename),self.plugin.modelRoot)
+                if writeerror:
+                    QtGui.QMessageBox.warning(None,'Could not save the Model','\n Error in the consistency check') 
+                else:
+                     QtGui.QMessageBox.information(None,'Saved the Model','\n File Saved to \'{filename}\''.format(filename =filename),QtGui.QMessageBox.Ok) 
     def SaveModelDialogSlot(self):
         type_sbml = 'SBML'
         filters = {'SBML(*.xml)': type_sbml}
@@ -226,7 +249,7 @@ class  KineticsWidget(EditorWidgetBase):
         self.createdItem = {}
         # srcdesConnection dictonary will have connection information between src and des """
         self.srcdesConnection = {}
-        self.comptPen = 5
+        self.comptPen = 6
     def getMooseObj(self):
         #if self.modelRoot == '/':
         #    self.m = wildcardFind('/##[ISA=ChemCompt]')
@@ -242,9 +265,10 @@ class  KineticsWidget(EditorWidgetBase):
 
             # Compartment and its members are setup
             self.meshEntry,self.xmin,self.xmax,self.ymin,self.ymax,self.noPositionInfo = setupMeshObj(self.modelRoot)
+            print "self.meshEntry ",self.meshEntry
             self.autocoordinates = False
             setupItem(self.modelRoot,self.srcdesConnection)
-
+            print " here --->", self.srcdesConnection
             if self.noPositionInfo:
                 self.autocoordinates = True
                 #QtGui.QMessageBox.warning(self,
@@ -291,6 +315,7 @@ class  KineticsWidget(EditorWidgetBase):
                 self.setupSlot(enzObj,enzItem)
 
         for cmpt,memb in self.meshEntry.items():
+            print "cmpt ========== memb ",cmpt,memb
             for poolObj in find_index(memb,'pool'):
                 poolinfo = poolObj.path+'/info'
                 ''' depending on Editor Widget or Run widget pool will be created a PoolItem or PoolItemCircle '''
@@ -316,13 +341,19 @@ class  KineticsWidget(EditorWidgetBase):
                 self.setupDisplay(tabinfo,tabItem,"tab")
                 self.setupSlot(tabObj,tabItem)
 
+            for funcObj in find_index(memb,'function'):
+                funcinfo = moose.element(funcObj.parent).path+'/info'
+                funcParent =self.mooseId_GObj[element(funcObj.parent).getId()]
+                funcItem = FuncItem(funcObj,funcParent)
+                self.setupDisplay(funcinfo,funcItem,"Function")
+                self.setupSlot(funcObj,funcItem)
         # compartment's rectangle size is calculated depending on children
         for k, v in self.qGraCompt.items():
             rectcompt = v.childrenBoundingRect()
             v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
             v.setPen(QtGui.QPen(Qt.QColor(66,66,66,100), self.comptPen, Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin))
             v.cmptEmitter.connect(v.cmptEmitter,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
-            v.cmptEmitter.connect(v.cmptEmitter,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.objectEditSlot)
+            #v.cmptEmitter.connect(v.cmptEmitter,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.objectEditSlot)
     def createCompt(self,key):
         self.new_Compt = ComptItem(self,0,0,0,0,key)
         self.qGraCompt[key] = self.new_Compt
@@ -417,6 +448,7 @@ class  KineticsWidget(EditorWidgetBase):
         #     m = wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
 
         if not self.m:
+            print "model yet to come"
             # when we want an empty GraphicView while creating new model,
             # then remove all the view and add an empty view
             if hasattr(self, 'view') and isinstance(self.view, QtGui.QWidget):
@@ -434,6 +466,7 @@ class  KineticsWidget(EditorWidgetBase):
             #self.view.GrVfitinView()
             hLayout.addWidget(self.view,0,0)
         else:
+            print " here model alread exust"
             # maxmium and minimum coordinates of the objects specified in kkit file.
             self.sceneContainer.clear()
             # Compartment and its members are put on the qgraphicsscene
@@ -447,7 +480,6 @@ class  KineticsWidget(EditorWidgetBase):
             self.view = GraphicalView(self.modelRoot,self.sceneContainer,self.border,self,self.createdItem)
             if isinstance(self,kineticEditorWidget):
                 self.view.setRefWidget("editorView")
-                self.view.setobject2line(self.object2line)
                 self.view.setAcceptDrops(True)
             elif isinstance(self,kineticRunWidget):
                 self.view.setRefWidget("runView")
@@ -513,19 +545,20 @@ class  KineticsWidget(EditorWidgetBase):
             # print "mooseCmpt => ", mooseCmpt, "path =>", mooseCmpt.path
             if mooseCmpt.path == "/":
                 return None
-            if mooseCmpt.className == 'CubeMesh':
+            if mooseCmpt.className == 'CubeMesh' or mooseCmpt.className == "CylMesh":
                 return mooseCmpt
             mooseCmpt = mooseCmpt.parent
 
     def positionChange(self,mooseObject):
         #If the item position changes, the corresponding arrow's are calculated
-        if isinstance(element(mooseObject),CubeMesh):
+        if isinstance(element(mooseObject),CubeMesh) or isinstance(element(mooseObject),CylMesh):
             for k, v in self.qGraCompt.items():
+                pass
                 #mesh = mooseObject.path+'/mesh[0]'
                 #print " mesh ",mesh,k.path
                 #if k.path == mesh:
-                for rectChilditem in v.childItems():
-                    self.updateArrow(rectChilditem)
+                # for rectChilditem in v.childItems():
+                #     self.updateArrow(rectChilditem)
         else:
             mobj = self.mooseId_GObj[mooseObject.getId()]
             self.updateArrow(mobj)
@@ -536,7 +569,7 @@ class  KineticsWidget(EditorWidgetBase):
 
     def positionChange1(self,mooseObject):
         #If the item position changes, the corresponding arrow's are calculated
-        if isinstance(element(mooseObject),CubeMesh):
+        if ( (isinstance(element(mooseObject),CubeMesh)) or (isinstance(element(mooseObject),CylMesh))):
             v = self.qGraCompt[mooseObject]
             for rectChilditem in v.childItems():
                 self.updateArrow(rectChilditem)
@@ -564,6 +597,7 @@ class  KineticsWidget(EditorWidgetBase):
         self.editObject.emit(mooseObject.path)
 
     def drawLine_arrow(self, itemignoreZooming=False):
+        print " drawLine_arrow ",self.srcdesConnection.items()
         for inn,out in self.srcdesConnection.items():
             #print "inn ",inn, " out ",out
             # self.srcdesConnection is dictionary which contains key,value \
@@ -572,10 +606,10 @@ class  KineticsWidget(EditorWidgetBase):
 
             #src = self.mooseId_GObj[inn]
             if isinstance(out,tuple):
+                src = self.mooseId_GObj[inn.getId()]
                 if len(out[0])== 0:
                     print inn.className + ':' +inn.name+ " doesn't output message"
                 else:
-                    src = self.mooseId_GObj[inn.getId()]
                     for items in (items for items in out[0] ):
                         des = self.mooseId_GObj[element(items[0]).getId()]
                         self.lineCord(src,des,items,itemignoreZooming)
@@ -589,6 +623,16 @@ class  KineticsWidget(EditorWidgetBase):
                 if len(out) == 0:
                     print "Func pool doesn't have sumtotal"
                 else:
+                    
+                    # for item in element(inn).children:
+                    #     if (item.className == 'Function'):
+                    #         src = self.mooseId_GObj[element(item).getId()]
+                    #         print "item ",item, " " ,src
+                    # if not src:
+                    #     print "inn ",inn
+                    #     src = self.mooseId_GObj[element(inn).getId()]
+                    # print "src in function ",src
+                    
                     src = self.mooseId_GObj[element(inn).getId()]
                     for items in (items for items in out ):
                         des = self.mooseId_GObj[element(items[0]).getId()]
@@ -619,6 +663,7 @@ class  KineticsWidget(EditorWidgetBase):
         des = srcdes_list[1]
         endtype = srcdes_list[2]
         line = srcdes_list[3]
+        print "\n src in drawLine ",src, des,endtype
         source = element(next((k for k,v in self.mooseId_GObj.items() if v == src), None))
         #print "------> ",src,des,endtype,line,source
 
@@ -632,6 +677,8 @@ class  KineticsWidget(EditorWidgetBase):
                 l.setPen(arrowPen)
                 return
         qgLineitem = self.sceneContainer.addPolygon(arrow)
+        #cmpt = src.getParentItem
+        qgLineitem.setParentItem(src.parentItem())
         pen = QtGui.QPen(QtCore.Qt.green, 0, Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin)
         pen.setWidth(self.arrowsize)
         #pen.setCosmetic(True)
@@ -644,13 +691,14 @@ class  KineticsWidget(EditorWidgetBase):
                 pinfo = p1.path+'/info'
                 color,bgcolor = getColor(pinfo)
                 pen.setColor(color)
-        elif isinstance(source, moose.PoolBase):
+        elif isinstance(source, moose.PoolBase) or isinstance(source,moose.Function):
             pen.setColor(QtCore.Qt.blue)
         elif isinstance(source,moose.StimulusTable):
             pen.setColor(QtCore.Qt.yellow)
         self.lineItem_dict[qgLineitem] = srcdes_list
         self.object2line[ src ].append( ( qgLineitem, des,line,) )
         self.object2line[ des ].append( ( qgLineitem, src,line, ) )
+        print " object2line ",src,des,self.object2line
         qgLineitem.setPen(pen)
 
     def updateArrow(self,qGTextitem):
@@ -658,6 +706,7 @@ class  KineticsWidget(EditorWidgetBase):
         if qGTextitem not in self.object2line:
             return
         listItem = self.object2line[qGTextitem]
+        print "updateArrow ",qGTextitem, listItem
         for ql, va,order in self.object2line[qGTextitem]:
             srcdes = []
             srcdes = self.lineItem_dict[ql]
@@ -668,21 +717,31 @@ class  KineticsWidget(EditorWidgetBase):
                 self.cplxUpdatearrow(srcdes[0])
             elif( type(srcdes[1]) == EnzItem):
                 self.cplxUpdatearrow(srcdes[1])
-
+            if(type(srcdes[0] == BufPool)):
+                self.funcUpdatearrow(srcdes[1])
+            elif(type(srcdes[1] == BufPool)):
+                self.funcUpdatearrow(srcdes[0])
             # For calcArrow(src,des,endtype,itemignoreZooming) is to be provided
             arrow = calcArrow(srcdes,self.itemignoreZooming,self.iconScale)
             ql.setPolygon(arrow)
 
+    def funcUpdatearrow(self,srcdes):
+        #since function is now connected to BufPool (parent)
+        # and if 'BufPool' is moved then function and its arrows are needed to be updated
+        print " funcUpdatearrow ",srcdes.childItems()
+        for item in srcdes.childItems():
+            if isinstance(item,FuncItem):
+                self.updateArrow(item)
     def cplxUpdatearrow(self,srcdes):
         # srcdes which is 'EnzItem' from this,get ChildItems are retrived (b'cos cplx is child of zombieEnz)
         #And cplxItem is passed for updatearrow
-
-        #Note: Here at this point enzItem has just one child which is cplxItem and childItems returns, PyQt4.QtGui.QGraphicsEllipseItem,CplxItem
-        #Assuming CplxItem is always[1], but still check if not[0], if something changes in structure one need to keep an eye.
-        if (srcdes.childItems()[1],CplxItem):
-            self.updateArrow(srcdes.childItems()[1])
-        else:
-            self.updateArrow(srcdes.childItems()[0])
+        for item in srcdes.childItems():
+            if isinstance(item,CplxItem):
+                self.updateArrow(item)    
+        # if (srcdes.childItems()[1],CplxItem):
+        #     self.updateArrow(srcdes.childItems()[1])
+        # else:
+        #     self.updateArrow(srcdes.childItems()[0])
     
     def keyPressEvent(self,event):
         # key1 = event.key() # key event does not distinguish between capital and non-capital letters

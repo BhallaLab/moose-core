@@ -13,12 +13,12 @@ def updateCompartmentSize(qGraCompt):
     qGraCompt.setPen(comptPen)
     if not comptBoundingRect.contains(childBoundingRect):
         qGraCompt.setRect(rectcompt.x()-comptWidth,rectcompt.y()-comptWidth,rectcompt.width()+(comptWidth*2),rectcompt.height()+(comptWidth*2))
-
+    #view.fitInView(view.sceneContainerPt.itemsBoundingRect())
 # def checkCreate(string,num,itemAt,qGraCompt,modelRoot,scene,pos,posf,view,qGIMob):
 def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
     # The variable 'compt' will be empty when dropping cubeMesh,cyclMesh, but rest it shd be
     # compartment
-    compt = view.sceneContainerPt.itemAt(view.mapToScene(event_pos))
+    itemAtView = view.sceneContainerPt.itemAt(view.mapToScene(event_pos))
     pos = view.mapToScene(event_pos)
     modelpath = moose.element(modelpath)
     if num:
@@ -63,101 +63,119 @@ def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
         qGItem.cmptEmitter.connect(qGItem.cmptEmitter,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),layoutPt.objectEditSlot)
     elif string == "Pool" or string == "BufPool":
         #getting pos with respect to compartment otherwise if compartment is moved then pos would be wrong
-        posWrtComp = (compt.mapFromScene(pos)).toPoint()
-        mobj = compt.mobj
-        print  "mobj ",mobj
-        #parent = moose.element(mobj).parent
+        posWrtComp = (itemAtView.mapFromScene(pos)).toPoint()
+        mobj = itemAtView.mobj
         if string == "Pool":
             poolObj = moose.Pool(mobj.path+'/'+string_num)
-
+            poolinfo = moose.Annotator(poolObj.path+'/info')
         else:
             poolObj = moose.BufPool(mobj.path+'/'+string_num)    
-        qGItem =PoolItem(poolObj,compt)
+            poolinfo = moose.Annotator(poolObj.path+'/info')
+        qGItem =PoolItem(poolObj,itemAtView)
         layoutPt.mooseId_GObj[poolObj.getId()] = qGItem
-        posWrtComp = (compt.mapFromScene(pos)).toPoint()
+        posWrtComp = (itemAtView.mapFromScene(pos)).toPoint()
         qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y(),QtGui.QColor('green'),QtGui.QColor('blue'))
+        poolinfo.x = posWrtComp.x()
+        poolinfo.y = posWrtComp.y()
+        poolinfo.color = 'blue'
         layoutPt.setupSlot(poolObj,qGItem)
         view.emit(QtCore.SIGNAL("dropped"),poolObj)
-        updateCompartmentSize(compt)
+        updateCompartmentSize(itemAtView)
 
     elif  string == "Reac":
-        posWrtComp = (compt.mapFromScene(pos)).toPoint()
-        mobj = compt.mobj
+        posWrtComp = (itemAtView.mapFromScene(pos)).toPoint()
+        mobj = itemAtView.mobj
         parent = moose.element(mobj).parent
         reacObj = moose.Reac(mobj.path+'/'+string_num)
-        qGItem = ReacItem(reacObj,compt)
-        reainfo = moose.element(reacObj).path+'/info'
+        reacinfo = moose.Annotator(reacObj.path+'/info')
+        qGItem = ReacItem(reacObj,itemAtView)
         qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y(),"white", "white")
+        reacinfo.x = posWrtComp.x()
+        reacinfo.y = posWrtComp.y()
         layoutPt.setupSlot(reacObj,qGItem)
         layoutPt.mooseId_GObj[reacObj.getId()] = qGItem
         view.emit(QtCore.SIGNAL("dropped"),reacObj)
-        updateCompartmentSize(compt)
+        updateCompartmentSize(itemAtView)
     elif  string == "StimulusTable":
-        posWrtComp = (compt.mapFromScene(pos)).toPoint()
-        mobj = compt.mobj
+        posWrtComp = (itemAtView.mapFromScene(pos)).toPoint()
+        mobj = itemAtView.mobj
         parent = moose.element(mobj).parent
         tabObj = moose.StimulusTable(mobj.path+'/'+string_num)
-        qGItem = TableItem(tabObj,compt)
+        tabinfo = moose.Annotator(tabObj.path+'/info')
+        qGItem = TableItem(tabObj,itemAtView)
         qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y(),QtGui.QColor('white'),QtGui.QColor('white'))
+        tabinfo.x = posWrtComp.x()
+        tabinfo.y = posWrtComp.y()
+        #print " table",tabObj.path, tabinfo.x, " ",tabinfo.y
         layoutPt.setupSlot(tabObj,qGItem)
         layoutPt.mooseId_GObj[tabObj.getId()] = qGItem
         view.emit(QtCore.SIGNAL("dropped"),tabObj)
-        updateCompartmentSize(compt)
+        updateCompartmentSize(itemAtView)
     elif string == "Function":
-        posWrtComp = (compt.mapFromScene(pos)).toPoint()
-        mobj = compt.mobj
+        posWrtComp = (itemAtView.mapFromScene(pos)).toPoint()
+        mobj = itemAtView.mobj
         parent = moose.element(mobj).parent
-        funObj = moose.Function(mobj.path+'/'+string_num)
-        qGItem = FuncItem(funObj,compt)
-        print "QGITem ",qGItem
-        #qGItem.setPixmap(QtGui.QPixmap('../Docs/images/classIcon/Function.png'))
-        print "qGItem",qGItem,isinstance(qGItem,KineticsDisplayItem)
-        #GItem.setPos(posWrtComp.x(),posWrtComp.y())
+        funcObj = moose.Function(mobj.path+'/'+string_num)
+        funcinfo = moose.Annotator(funcObj.path+'/info')
+        moose.connect( funcObj, 'valueOut', mobj.path ,'setN' )
+        funcParent = layoutPt.mooseId_GObj[element(mobj.path).getId()]
+        qGItem = FuncItem(funcObj,funcParent)
         qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y(),QtGui.QColor('red'),QtGui.QColor('green'))
-        layoutPt.mooseId_GObj[funObj.getId()] = qGItem
-        layoutPt.setupSlot(funObj,qGItem)
-        view.emit(QtCore.SIGNAL("dropped"),funObj)
+        layoutPt.mooseId_GObj[funcObj.getId()] = qGItem
+        funcinfo.x = posWrtComp.x()
+        funcinfo.y = posWrtComp.y()
+        layoutPt.setupSlot(funcObj,qGItem)
+        view.emit(QtCore.SIGNAL("dropped"),funcObj)
+        compt = layoutPt.qGraCompt[moose.element(itemAtView.mobj).parent]
         updateCompartmentSize(compt)
     elif  string == "Enz" or string == "MMenz":
         #If 2 enz has same pool parent, then pos of the 2nd enz shd be displaced by some position, need to check how to deal with it
-        posWrtComp = (compt.mapFromScene(pos)).toPoint()
-        mobj = compt.mobj
-        parent = moose.element(mobj).parent
+        #posWrtComp = (itemAtView.mapFromScene(pos)).toPoint()
+        posWrtComp = pos
+        mobj = itemAtView.mobj
+        enzPool = layoutPt.mooseId_GObj[mobj.getId()]
+        enzparent = mobj.parent
+        parentcompt = layoutPt.qGraCompt[enzparent]
 
         if string == "Enz":
             enzObj = moose.Enz(moose.element(mobj).path+'/'+string_num)
+            enzinfo = moose.Annotator(enzObj.path+'/info')
             moose.connect( enzObj, 'enz', mobj, 'reac' )
-            enzPool = layoutPt.mooseId_GObj[mobj.getId()]
-            poolboundingRect = enzPool.boundingRect()
-            qGItem = EnzItem(enzObj,compt)
-            posWrtPool = (enzPool.mapFromScene(pos)).toPoint()
-            qGItem.setDisplayProperties(poolboundingRect.height()/2,poolboundingRect.height()-60,QtGui.QColor('green'),QtGui.QColor('blue'))
-            layoutPt.setupSlot(enzObj,qGItem)
+            qGItem = EnzItem(enzObj,parentcompt)
             layoutPt.mooseId_GObj[enzObj.getId()] = qGItem
-            #Enz cplx need to be created
+            posWrtComp = pos
+            qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y()-40,QtGui.QColor('green'),QtGui.QColor('blue'))
+            e = moose.Annotator(enzinfo)
+            e.x = posWrtComp.x()
+            e.y = posWrtComp.y()
             Enz_cplx = enzObj.path+'/'+string_num+'_cplx';
             cplxItem = moose.Pool(Enz_cplx)
+            cplxinfo = moose.Annotator(cplxItem.path+'/info')
             qGEnz = layoutPt.mooseId_GObj[enzObj.getId()]
             qGItem = CplxItem(cplxItem,qGEnz)
+            #print "cplx ",cplxItem.getId(),qGItem
+            layoutPt.mooseId_GObj[cplxItem.getId()] = qGItem
             enzboundingRect = qGEnz.boundingRect()
             moose.connect( enzObj, 'cplx', cplxItem, 'reac' )
-            qGItem.setDisplayProperties(enzboundingRect.height()/2,enzboundingRect.height()-60,QtGui.QColor('white'),QtGui.QColor('white'))
+
+            qGItem.setDisplayProperties(enzboundingRect.height()/2,enzboundingRect.height()-40,QtGui.QColor('white'),QtGui.QColor('white'))
+            cplxinfo.x = enzboundingRect.height()/2
+            cplxinfo.y = enzboundingRect.height()-60
+
             layoutPt.setupSlot(cplxItem,qGItem)
             view.emit(QtCore.SIGNAL("dropped"),enzObj)
 
         else:
-            enzObj = moose.MMenz(moose.element(mobj).path+'/'+string_num)
-            #moose.connect( enzObj, 'enz', mobj, 'reac' )
+            enzObj = moose.MMenz(mobj.path+'/'+string_num)
+            enzinfo = moose.Annotator(enzObj.path+'/info')
             moose.connect(mobj,"nOut",enzObj,"enzDest")
-            poolboundingRect = (layoutPt.mooseId_GObj[mobj.getId()]).boundingRect()
-            qGItem = MMEnzItem(enzObj,compt)
-            qGItem.setDisplayProperties(poolboundingRect.height()/2,poolboundingRect.height()-40,QtGui.QColor('green'),QtGui.QColor('blue'))
+            qGItem = MMEnzItem(enzObj,parentcompt)
+            posWrtComp = pos
+            qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y()-30,QtGui.QColor('green'),QtGui.QColor('blue'))
             layoutPt.setupSlot(enzObj,qGItem)
             layoutPt.mooseId_GObj[enzObj.getId()] = qGItem
             view.emit(QtCore.SIGNAL("dropped"),enzObj)
-            #mobj = enzObj
-        
-        layoutPt.mooseId_GObj[enzObj.getId()] = qGItem
+
         compt = layoutPt.qGraCompt[moose.element(mobj).parent]
         updateCompartmentSize(compt)
 
@@ -167,6 +185,7 @@ def createObj(scene,view,modelpath,string,pos,layoutPt):
     pos = view.mapToScene(event_pos)
     itemAt = view.sceneContainerPt.itemAt(pos)
     chemMesh = moose.wildcardFind(modelpath+'/##[ISA=ChemCompt]')
+    #print " here ---> ",itemAt,string
     if len(chemMesh) and (string == "CubeMesh" or string == "CylMesh"):
         QtGui.QMessageBox.information(None,'Drop Not possible','At present model building allowed only for  single compartment.',QtGui.QMessageBox.Ok)
         return
@@ -175,8 +194,12 @@ def createObj(scene,view,modelpath,string,pos,layoutPt):
             QtGui.QMessageBox.information(None,'Drop Not possible','\'{newString}\' has to have compartment as its parent'.format(newString =string),QtGui.QMessageBox.Ok)
             return
     elif string == "Function":
-        if itemAt == None:
-            QtGui.QMessageBox.information(None,'Drop Not possible','\'{newString}\' has to have compartment as its parent'.format(newString =string),QtGui.QMessageBox.Ok)
+        if itemAt != None:
+            if ((itemAt.mobj).className != "BufPool"):    
+                QtGui.QMessageBox.information(None,'Drop Not possible','\'{newString}\' has to have BufPool as its parent'.format(newString =string),QtGui.QMessageBox.Ok)
+                return
+        else:
+            QtGui.QMessageBox.information(None,'Drop Not possible','\'{newString}\' has to have BufPool as its parent'.format(newString =string),QtGui.QMessageBox.Ok)
             return
 
     elif string == "Enz" or string == "MMenz":

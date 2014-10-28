@@ -12,7 +12,8 @@ def calcArrow(srcdes_list,itemignoreZooming,iconScale):
     des = srcdes_list[1]
     endtype = srcdes_list[2]
     order = srcdes_list[3]
-    
+    # print("Source => ", src)
+    compartment = src.parentItem()
     srcobj = src.gobj
     desobj = des.gobj
     if isinstance(src,PoolItem):
@@ -20,12 +21,12 @@ def calcArrow(srcdes_list,itemignoreZooming,iconScale):
     if isinstance(des,PoolItem):
         desobj = des.bg
             
-    if itemignoreZooming:
-        srcRect = self.recalcSceneBoundingRect(srcobj)
-        desRect = self.recalcSceneBoundingRect(desobj)
-    else:
-        srcRect = srcobj.sceneBoundingRect()
-        desRect = desobj.sceneBoundingRect()
+    # if itemignoreZooming:
+    #     srcRect = self.recalcSceneBoundingRect(srcobj)
+    #     desRect = self.recalcSceneBoundingRect(desobj)
+    # else:
+    srcRect = compartment.mapFromScene(srcobj.sceneBoundingRect()).boundingRect()
+    desRect = compartment.mapFromScene(desobj.sceneBoundingRect()).boundingRect()
     arrow = QtGui.QPolygonF()
     if srcRect.intersects(desRect):                
         ''' This is created for getting a emptyline reference \

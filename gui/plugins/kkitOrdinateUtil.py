@@ -34,10 +34,10 @@ def setupMeshObj(modelRoot):
         enzlist = []
         cplxlist = []
         tablist = []
+        funclist = []
 
         mol_cpl = wildcardFind(meshEnt.path+'/##[ISA=PoolBase]')
-        mol_fun = wildcardFind(meshEnt.path+'/##[ISA=Function]')
-        mol_cpl = mol_cpl+mol_fun
+        funclist = wildcardFind(meshEnt.path+'/##[ISA=Function]')
         enzlist = wildcardFind(meshEnt.path+'/##[ISA=EnzBase]')
         realist = wildcardFind(meshEnt.path+'/##[ISA=ReacBase]')
         tablist = wildcardFind(meshEnt.path+'/##[ISA=StimulusTable]')
@@ -52,6 +52,7 @@ def setupMeshObj(modelRoot):
             xcord.append(xyPosition(objInfo,'x'))
             ycord.append(xyPosition(objInfo,'y')) 
 
+        getxyCord(xcord,ycord,funclist)
         getxyCord(xcord,ycord,enzlist)
         getxyCord(xcord,ycord,realist)
         getxyCord(xcord,ycord,tablist)
@@ -60,7 +61,8 @@ def setupMeshObj(modelRoot):
                               'reaction':realist,
                               'pool':mollist,
                               'cplx':cplxlist,
-                              'table':tablist
+                              'table':tablist,
+                              'function':funclist
                               }
         xmin = min(xcord)
         xmax = max(xcord)
@@ -70,17 +72,22 @@ def setupMeshObj(modelRoot):
             and len(np.nonzero(ycord)[0]) == 0
     return(meshEntry,xmin,xmax,ymin,ymax,noPositionInfo)
 
-def getxyCord(xcord,ycord,list):
-    for item in list:
-        objInfo = item.path+'/info'
-        xcord.append(xyPosition(objInfo,'x'))
-        ycord.append(xyPosition(objInfo,'y'))
+def getxyCord(xcord,ycord,list1):
+    for item in list1:
+        # if isinstance(item,Function):
+        #     objInfo = moose.element(item.parent).path+'/info'
+        # else:
+        #     objInfo = item.path+'/info'
+        if not isinstance(item,Function):
+            objInfo = item.path+'/info'
+            xcord.append(xyPosition(objInfo,'x'))
+            ycord.append(xyPosition(objInfo,'y'))
 
 def setupItem(modelPath,cntDict):
     '''This function collects information of what is connected to what. \
     eg. substrate and product connectivity to reaction's and enzyme's \
     sumtotal connectivity to its pool are collected '''
-
+    #print " setupItem"
     zombieType = ['ReacBase','EnzBase','Function','StimulusTable']
     for baseObj in zombieType:
         path = '/##[ISA='+baseObj+']'
@@ -113,26 +120,34 @@ def setupItem(modelPath,cntDict):
                         sublist.append((enzpar,'t',countuniqItem[enzpar]))
                 cntDict[items] = sublist,prdlist
         elif baseObj == 'Function':
-            #ZombieSumFunc adding inputs
-            print "\t \t Inside the function"
-            inputlist = []
-            outputlist = []
-            funplist = []
-            nfunplist = []
-            print "path ",path
             for items in wildcardFind(path):
-                print "items ",items
-                for funplist in moose.element(items).neighbors['valueOut']:
-                    print "funplist ",funplist
-                    for func in funplist:
+                sublist = []
+                prdlist = []
+                item = items.path+'/x[0]'
+                uniqItem,countuniqItem = countitems(item,'input')
+                for funcpar in uniqItem:
+                    sublist.append((funcpar,'sts',countuniqItem[funcpar]))
+                '''
+                uniqItem,countuniqItem = countitems(items,'valueOut')
+                for funcpar in uniqItem:
+                    prdlist.append((funcpar,'stp',countuniqItem[funcpar]))
+                '''
+            cntDict[items] = sublist,prdlist
 
-                        funcx = moose.element(items.path+'/x[0]')
-                        print "funcX ",funcx
-                        uniqItem,countuniqItem = countitems(funcx,'input')
-                        print "uniqItem ",uniqItem,countuniqItem
-                        for inPut in uniqItem:
-                            inputlist.append((inPut,'st',countuniqItem[inPut]))
-                    cntDict[func] = inputlist
+        # elif baseObj == 'Function':
+        #     #ZombieSumFunc adding inputs
+        #     inputlist = []
+        #     outputlist = []
+        #     funplist = []
+        #     nfunplist = []
+        #     for items in wildcardFind(path):
+        #         for funplist in moose.element(items).neighbors['valueOut']:
+        #             for func in funplist:
+        #                 funcx = moose.element(items.path+'/x[0]')
+        #                 uniqItem,countuniqItem = countitems(funcx,'input')
+        #                 for inPut in uniqItem:
+        #                     inputlist.append((inPut,'st',countuniqItem[inPut]))
+        #             cntDict[func] = inputlist
         else:
             for tab in wildcardFind(path):
                 tablist = []
@@ -142,6 +157,7 @@ def setupItem(modelPath,cntDict):
                 cntDict[tab] = tablist
 def countitems(mitems,objtype):
     items = []
+    #print "mitems in countitems ",mitems,objtype
     items = element(mitems).neighbors[objtype]
     uniqItems = set(items)
     countuniqItems = Counter(items)
