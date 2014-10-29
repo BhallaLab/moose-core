@@ -113,7 +113,7 @@ if(LOCAL_GSL)
     ExternalProject_Add(GSL
         PREFIX ${GSL_SOURCE_DIR}
         DOWNLOAD_DIR ${CMAKE_SOURCE_DIR}/external
-        URL ftp://ftp.gnu.org/gnu/gsl/gsl-1.16.tar.gz
+        URL http://psg.mtu.edu/pub/gnu/gsl/gsl-1.16.tar.gz
         CONFIGURE_COMMAND ${GSL_SOURCE_DIR}/configure --prefix=${GSL_INSTALL_DIR}
         BUILD_COMMAND make
         BUILD_IN_SOURCE 1
