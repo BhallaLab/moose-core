@@ -546,20 +546,22 @@ class GraphicalView(QtGui.QGraphicsView):
         if ( isinstance(moose.element(src),PoolBase) and ( (isinstance(moose.element(des),ReacBase) ) or isinstance(moose.element(des),EnzBase) )):
             moose.connect(src, 'reac', des, 'sub', 'OneToOne')
         elif(isinstance (moose.element(src),PoolBase) and (isinstance(moose.element(des),Function))):
-            des.numVars +=1
             moose.connect( src, 'nOut', des.x[des.numVars-1], 'input' )
             if (des.numVars-1) == 0:
                 des.expr ='x'+str(des.numVars-1)
             else:
                 des.expr = des.expr+'+x'+str(des.numVars-1)
+            des.numVars+=1
         elif( isinstance(moose.element(src),Function) and (moose.element(des).className=="Pool") ):
-                moose.connect(src, 'valueOut', des, 'increment', 'OneToOne')
-                #print "here function to Pool"
+                if ((element(des).parent).className != 'Enz'):
+                    moose.connect(src, 'valueOut', des, 'increment', 'OneToOne')
+                else:
+                    srcdesString = element(src).className+'-- EnzCplx'
+                    QtGui.QMessageBox.information(None,'Connection Not possible','\'{srcdesString}\' not allowed to connect'.format(srcdesString = srcdesString),QtGui.QMessageBox.Ok)
+                    callsetupItem = False
         elif( isinstance(moose.element(src),Function) and (moose.element(des).className=="BufPool") ):
-                #print "##################################### ",src,des
                 moose.connect(src, 'valueOut', des, 'setConcInit', 'OneToOne')
         elif( isinstance(moose.element(src),Function) and (isinstance(moose.element(des),ReacBase) ) ):
-                #print "<<<<<<<<<<<<<<<<<<<<<<<<<<< ",src,des
                 moose.connect(src, 'valueOut', des, 'setNumKf', 'OneToOne')
         elif( isinstance(moose.element(src),ReacBase) and (isinstance(moose.element(des),PoolBase) ) ):
             moose.connect(src, 'prd', des, 'reac', 'OneToOne')

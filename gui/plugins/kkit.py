@@ -20,7 +20,7 @@ from mtoolbutton import MToolButton
 from PyQt4.QtGui import QWidget
 from PyQt4.QtGui import QGridLayout
 import RunWidget
-import pprint
+
 #from DataTable import DataTable
 class KkitPlugin(MoosePlugin):
     """Default plugin for MOOSE GUI"""
@@ -265,10 +265,10 @@ class  KineticsWidget(EditorWidgetBase):
 
             # Compartment and its members are setup
             self.meshEntry,self.xmin,self.xmax,self.ymin,self.ymax,self.noPositionInfo = setupMeshObj(self.modelRoot)
-            print "self.meshEntry ",self.meshEntry
+            #print "self.meshEntry ",self.meshEntry
             self.autocoordinates = False
             setupItem(self.modelRoot,self.srcdesConnection)
-            print " here --->", self.srcdesConnection
+            #print " here --->", self.srcdesConnection
             if self.noPositionInfo:
                 self.autocoordinates = True
                 #QtGui.QMessageBox.warning(self,
@@ -315,7 +315,7 @@ class  KineticsWidget(EditorWidgetBase):
                 self.setupSlot(enzObj,enzItem)
 
         for cmpt,memb in self.meshEntry.items():
-            print "cmpt ========== memb ",cmpt,memb
+            #print "cmpt ========== memb ",cmpt,memb
             for poolObj in find_index(memb,'pool'):
                 poolinfo = poolObj.path+'/info'
                 ''' depending on Editor Widget or Run widget pool will be created a PoolItem or PoolItemCircle '''
@@ -448,7 +448,7 @@ class  KineticsWidget(EditorWidgetBase):
         #     m = wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
 
         if not self.m:
-            print "model yet to come"
+            #print "model yet to come"
             # when we want an empty GraphicView while creating new model,
             # then remove all the view and add an empty view
             if hasattr(self, 'view') and isinstance(self.view, QtGui.QWidget):
@@ -466,7 +466,7 @@ class  KineticsWidget(EditorWidgetBase):
             #self.view.GrVfitinView()
             hLayout.addWidget(self.view,0,0)
         else:
-            print " here model alread exust"
+            #print " here model alread exust"
             # maxmium and minimum coordinates of the objects specified in kkit file.
             self.sceneContainer.clear()
             # Compartment and its members are put on the qgraphicsscene
@@ -597,7 +597,7 @@ class  KineticsWidget(EditorWidgetBase):
         self.editObject.emit(mooseObject.path)
 
     def drawLine_arrow(self, itemignoreZooming=False):
-        print " drawLine_arrow ",self.srcdesConnection.items()
+        #rint " drawLine_arrow ",self.srcdesConnection.items()
         for inn,out in self.srcdesConnection.items():
             #print "inn ",inn, " out ",out
             # self.srcdesConnection is dictionary which contains key,value \
@@ -663,7 +663,7 @@ class  KineticsWidget(EditorWidgetBase):
         des = srcdes_list[1]
         endtype = srcdes_list[2]
         line = srcdes_list[3]
-        print "\n src in drawLine ",src, des,endtype
+        #print "\n src in drawLine ",src, des,endtype
         source = element(next((k for k,v in self.mooseId_GObj.items() if v == src), None))
         #print "------> ",src,des,endtype,line,source
 
@@ -698,7 +698,7 @@ class  KineticsWidget(EditorWidgetBase):
         self.lineItem_dict[qgLineitem] = srcdes_list
         self.object2line[ src ].append( ( qgLineitem, des,line,) )
         self.object2line[ des ].append( ( qgLineitem, src,line, ) )
-        print " object2line ",src,des,self.object2line
+        #print " object2line ",src,des,self.object2line
         qgLineitem.setPen(pen)
 
     def updateArrow(self,qGTextitem):
@@ -706,7 +706,7 @@ class  KineticsWidget(EditorWidgetBase):
         if qGTextitem not in self.object2line:
             return
         listItem = self.object2line[qGTextitem]
-        print "updateArrow ",qGTextitem, listItem
+        #print "updateArrow ",qGTextitem, listItem
         for ql, va,order in self.object2line[qGTextitem]:
             srcdes = []
             srcdes = self.lineItem_dict[ql]
@@ -728,10 +728,11 @@ class  KineticsWidget(EditorWidgetBase):
     def funcUpdatearrow(self,srcdes):
         #since function is now connected to BufPool (parent)
         # and if 'BufPool' is moved then function and its arrows are needed to be updated
-        print " funcUpdatearrow ",srcdes.childItems()
+        #print " funcUpdatearrow ",srcdes.childItems()
         for item in srcdes.childItems():
             if isinstance(item,FuncItem):
-                self.updateArrow(item)
+                pass
+                #self.updateArrow(item)
     def cplxUpdatearrow(self,srcdes):
         # srcdes which is 'EnzItem' from this,get ChildItems are retrived (b'cos cplx is child of zombieEnz)
         #And cplxItem is passed for updatearrow

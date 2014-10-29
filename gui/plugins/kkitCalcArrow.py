@@ -79,7 +79,7 @@ def calcArrow(srcdes_list,itemignoreZooming,iconScale):
     '''
     if (abs(lineSrcPoint.x()-lineDestPoint.x()) > 8 or abs(lineSrcPoint.y()-lineDestPoint.y())>8):
         srcAngle = tmpLine.angle()
-        if endtype == 'p':
+        if endtype == 'p' or endtype == 'stp':
             ''' Arrow head for Destination is calculated'''
             arrow.append(lineSrcPoint)
             arrow.append(lineDestPoint)
@@ -107,7 +107,7 @@ def calcArrow(srcdes_list,itemignoreZooming,iconScale):
             arrow.append(QtCore.QPointF(srcXArr1,srcYArr1))
             arrow.append(QtCore.QPointF(lineSrcPoint.x(),lineSrcPoint.y()))
 
-        elif endtype == 's':
+        elif endtype == 's' or endtype == 'sts':
             arrow.append(lineDestPoint)
             arrow.append(lineSrcPoint)
             

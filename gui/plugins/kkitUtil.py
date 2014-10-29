@@ -4,10 +4,14 @@ import numpy as np
 import os
 import config
 import pickle
-
+import random
 colormap_file = open(os.path.join(config.settings[config.KEY_COLORMAP_DIR], 'rainbow2.pkl'),'rb')
 colorMap = pickle.load(colormap_file)
 colormap_file.close()
+def getRandColor():
+    color = (np.random.randint(low=0, high=255, size=3)).tolist()
+    return color
+    
 
 def getColor(iteminfo):
     """ Getting a textcolor and background color for the given  mooseObject \
@@ -18,12 +22,11 @@ def getColor(iteminfo):
            The colors are not valid there are siliently replaced with some values \
            but while model building can raise an exception
     """
-
     textcolor = Annotator(iteminfo).getField('textColor')
     bgcolor = Annotator(iteminfo).getField('color')
     if(textcolor == ''): textcolor = 'green'
     if(bgcolor == ''): bgcolor = 'blue'
-    if(textcolor == bgcolor): textcolor = np.random.randint(low=0, high=255, size=3)
+    if(textcolor == bgcolor):textcolor = getRandColor()
     textcolor = colorCheck(textcolor,"fc")
     bgcolor = colorCheck(bgcolor,"bg")
     return(textcolor,bgcolor)
@@ -37,13 +40,14 @@ def colorCheck(fc_bgcolor,fcbg):
         if fc_bgcolor.isdigit():
             """ color is int  a map from int to r,g,b triplets from pickled color map file """
             tc = int(fc_bgcolor)
-	    tc = 2*tc
+            tc = 2*tc
             pickledColor = colorMap[tc]
             fc_bgcolor = QtGui.QColor(*pickledColor)
-        else:
+        elif fc_bgcolor.isalpha():
             fc_bgcolor = validColorcheck(fc_bgcolor)
-    else:
-        fc_bgcolor = QtGui.QColor(*fc_bgcolor)
+        else:
+            fc_bgcolor = QtGui.QColor(*eval(fc_bgcolor))
+
     return(fc_bgcolor)
 
 def validColorcheck(color):

@@ -127,11 +127,11 @@ def setupItem(modelPath,cntDict):
                 uniqItem,countuniqItem = countitems(item,'input')
                 for funcpar in uniqItem:
                     sublist.append((funcpar,'sts',countuniqItem[funcpar]))
-                '''
+                
                 uniqItem,countuniqItem = countitems(items,'valueOut')
                 for funcpar in uniqItem:
                     prdlist.append((funcpar,'stp',countuniqItem[funcpar]))
-                '''
+                
             cntDict[items] = sublist,prdlist
 
         # elif baseObj == 'Function':

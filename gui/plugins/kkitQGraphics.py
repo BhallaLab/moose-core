@@ -193,7 +193,7 @@ class PoolItem(KineticsDisplayItem):
         self.gobj.setPos(PoolItem.fontMetrics.width(' '), 0)
     def setDisplayProperties(self,x,y,textcolor,bgcolor):
         """Set the display properties of this item."""
-        print " pool ",x,y
+        
         self.setGeometry(x, y,self.gobj.boundingRect().width()
                         +PoolItem.fontMetrics.width('  '), 
                         self.gobj.boundingRect().height())
@@ -398,7 +398,6 @@ class EnzItem(KineticsDisplayItem):
         self.gobj = QtGui.QGraphicsEllipseItem(0, 0, 
                                             EnzItem.defaultWidth, 
                                             EnzItem.defaultHeight, self)
-        print "here inside EnzItem ",self
         self.gobj.mobj = self.mobj
         # classname = 'EnzBase'
         # doc = moose.element('/classes/%s' % (classname)).docs
@@ -425,7 +424,7 @@ class EnzItem(KineticsDisplayItem):
         #self.setRect(x,y,self.gobj.boundingRect().width(),self.gobj.boundingRect().height())
         
         # self.gobj.setRect(-20.0, -20.0, 40.0, 40.0);
-        print("Parent =>", self.parentItem())
+        #print("Parent =>", self.parentItem())
         # self.gobj.setPos(x, y);
         #self.gobj.setRect(x,y,self.gobj.boundingRect().width(), 
         #                  self.gobj.boundingRect().height())

@@ -1,6 +1,7 @@
 import moose
 from kkitQGraphics import * 
-#rom kkitOrdinateUtil import *
+from kkitOrdinateUtil import *
+from kkitUtil import *
 import PyQt4
 
 def updateCompartmentSize(qGraCompt):
@@ -21,6 +22,7 @@ def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
     itemAtView = view.sceneContainerPt.itemAt(view.mapToScene(event_pos))
     pos = view.mapToScene(event_pos)
     modelpath = moose.element(modelpath)
+    #print "modelpath ",modelpath
     if num:
         if string == "CubeMesh":
             string_num = "Compartment"+str(num)
@@ -74,10 +76,11 @@ def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
         qGItem =PoolItem(poolObj,itemAtView)
         layoutPt.mooseId_GObj[poolObj.getId()] = qGItem
         posWrtComp = (itemAtView.mapFromScene(pos)).toPoint()
-        qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y(),QtGui.QColor('green'),QtGui.QColor('blue'))
+        bgcolor = getRandColor()
+        qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y(),QtGui.QColor('green'),QtGui.QColor(bgcolor[0],bgcolor[1],bgcolor[2]))
         poolinfo.x = posWrtComp.x()
         poolinfo.y = posWrtComp.y()
-        poolinfo.color = 'blue'
+        poolinfo.color = str(bgcolor[0])+","+str(bgcolor[1])+","+str(bgcolor[2])
         layoutPt.setupSlot(poolObj,qGItem)
         view.emit(QtCore.SIGNAL("dropped"),poolObj)
         updateCompartmentSize(itemAtView)
@@ -116,6 +119,7 @@ def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
         mobj = itemAtView.mobj
         parent = moose.element(mobj).parent
         funcObj = moose.Function(mobj.path+'/'+string_num)
+        funcObj.numVars+=1
         funcinfo = moose.Annotator(funcObj.path+'/info')
         moose.connect( funcObj, 'valueOut', mobj.path ,'setN' )
         funcParent = layoutPt.mooseId_GObj[element(mobj.path).getId()]
@@ -126,6 +130,8 @@ def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
         funcinfo.y = posWrtComp.y()
         layoutPt.setupSlot(funcObj,qGItem)
         view.emit(QtCore.SIGNAL("dropped"),funcObj)
+        setupItem(modelpath.path,layoutPt.srcdesConnection)
+        layoutPt.drawLine_arrow(False)
         compt = layoutPt.qGraCompt[moose.element(itemAtView.mobj).parent]
         updateCompartmentSize(compt)
     elif  string == "Enz" or string == "MMenz":
@@ -144,7 +150,11 @@ def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
             qGItem = EnzItem(enzObj,parentcompt)
             layoutPt.mooseId_GObj[enzObj.getId()] = qGItem
             posWrtComp = pos
-            qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y()-40,QtGui.QColor('green'),QtGui.QColor('blue'))
+            bgcolor = getRandColor()
+            qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y()-40,QtGui.QColor(bgcolor[0],bgcolor[1],bgcolor[2]),QtGui.QColor('green'))
+            enzinfo.x = posWrtComp.x()
+            enzinfo.y = posWrtComp.y()
+            enzinfo.color = str(bgcolor[0])+","+str(bgcolor[1])+","+str(bgcolor[2])
             e = moose.Annotator(enzinfo)
             e.x = posWrtComp.x()
             e.y = posWrtComp.y()
@@ -171,11 +181,16 @@ def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
             moose.connect(mobj,"nOut",enzObj,"enzDest")
             qGItem = MMEnzItem(enzObj,parentcompt)
             posWrtComp = pos
-            qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y()-30,QtGui.QColor('green'),QtGui.QColor('blue'))
+            bgcolor = getRandColor()
+            qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y()-30,QtGui.QColor(bgcolor[0],bgcolor[1],bgcolor[2]),QtGui.QColor('green'))
+            enzinfo.x = posWrtComp.x()
+            enzinfo.y = posWrtComp.y()
+            enzinfo.color = str(bgcolor[0])+","+str(bgcolor[1])+","+str(bgcolor[2])
             layoutPt.setupSlot(enzObj,qGItem)
             layoutPt.mooseId_GObj[enzObj.getId()] = qGItem
             view.emit(QtCore.SIGNAL("dropped"),enzObj)
-
+        setupItem(modelpath.path,layoutPt.srcdesConnection)
+        layoutPt.drawLine_arrow(False)
         compt = layoutPt.qGraCompt[moose.element(mobj).parent]
         updateCompartmentSize(compt)
 
