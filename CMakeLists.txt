@@ -22,7 +22,7 @@ endif()
 
 ################################# CMKAE MACROS #################################
 
-set(CMAKE_VERBOSE_MAKEFILE FALSE)
+set(CMAKE_VERBOSE_MAKEFILE TRUE)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
 set(INSTALL_LIB_DIR lib CACHE PATH "${CMAKE_INSTALL_PREFIX}/lib")
 set(INSTALL_BIN_DIR bin CACHE PATH "${CMAKE_INSTALL_PREFIX}/bin")
@@ -95,11 +95,14 @@ else()
     add_definitions(-UDO_UNIT_TESTS)
 endif()
 
-# Wheather to use local-gsl or not. link_directories are need to be called
-# before target is created therefore it is here.
 find_package(GSL 1.16 REQUIRED)
+
+# If installed version of gsl is not 1.16 then download and build gsl locally.
+# THIS IS USEFULL TO BUILD MOOSE FOR VARIOUS DISTRIBUTIONS.
 if(${GSL_VERSION} VERSION_LESS 1.16)
-    MESSAGE("+ Trouble. Needed version 1.16. Download and build gsl now.")
+    MESSAGE("+ Trouble. Needed version 1.16.")
+    MESSAGE("+-- I'll go ahead, download gsl-1.16 and build it for moose. Make
+    sure you have proxy environment variables set.")
     SET(LOCAL_GSL 1)
 endif()
 
@@ -109,8 +112,12 @@ if(LOCAL_GSL)
     include(ExternalProject)
     ExternalProject_Add(GSL
         PREFIX ${GSL_SOURCE_DIR}
-        SOURCE_DIR ${GSL_SOURCE_DIR}
-        CMAKE_ARGS ${CMARGS} -DCMAKE_INSTALL_PREFIX=${GSL_INSTALL_DIR}
+        DOWNLOAD_DIR ${CMAKE_SOURCE_DIR}/external
+        URL ftp://ftp.gnu.org/gnu/gsl/gsl-1.16.tar.gz
+        CONFIGURE_COMMAND ${GSL_SOURCE_DIR}/configure --prefix=${GSL_INSTALL_DIR}
+        BUILD_COMMAND make
+        BUILD_IN_SOURCE 1
+        INSTALL_COMMAND make install
         )
     include_directories(${GSL_INSTALL_DIR}/include)
     LINK_DIRECTORIES(${GSL_INSTALL_DIR}/lib)
