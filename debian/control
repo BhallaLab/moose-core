@@ -2,7 +2,7 @@ Source: moose
 Section: science
 Priority: optional
 Maintainer: Dilawar Singh <dilawars@ncbs.res.in>
-Build-Depends: debhelper, cdbs, devscripts, cmake, libhdf5-dev, python-dev, python-numpy, python-setuptools, python-epydoc, libopenmpi-dev, libgsl0-dev (>= 1.16)
+Build-Depends: debhelper, cdbs, devscripts, cmake, libhdf5-dev, python-dev, python-numpy, python-setuptools, python-epydoc, libopenmpi-dev, libgsl0-dev
 Standards-Version: 3.9.5
 Homepage: http://moose.ncbs.res.in
 
