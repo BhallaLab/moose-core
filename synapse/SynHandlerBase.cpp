@@ -11,6 +11,8 @@
 #include "Synapse.h"
 #include "SynHandlerBase.h"
 
+static const double RANGE = 1.0e-15;
+
 SrcFinfo1< double >* SynHandlerBase::activationOut() {
 	static SrcFinfo1< double > activationOut(
 		"activationOut",
@@ -116,4 +118,16 @@ void SynHandlerBase::process( const Eref& e, ProcPtr p )
 void SynHandlerBase::reinit( const Eref& e, ProcPtr p )
 {
 	vReinit( e, p );
+}
+
+bool SynHandlerBase::rangeWarning( const string& field, double value )
+{
+	if ( value < RANGE ) {
+		cout << "Warning: Ignored attempt to set " << field <<
+				" of SynHandler " <<
+				// c->target().e->name() << 
+				" to less than " << RANGE << endl;
+		return 1;
+	}
+	return 0;
 }
