@@ -398,7 +398,9 @@ class GraphicalView(QtGui.QGraphicsView):
 
     def moveSelections(self):
       self.setCursor(Qt.Qt.CrossCursor)
-      self.deselectSelections()
+      print " selected Item ",self.layoutPt.sceneContainer.selectedItems()
+            
+      #self.deselectSelections()
 
     def GrVfitinView(self):
         #print " here in GrVfitinView"
@@ -409,58 +411,22 @@ class GraphicalView(QtGui.QGraphicsView):
          
 
     def deleteSelections(self,x0,y0,x1,y1):
-        #print "deleteSelections",x1-x0, " ",y1-y0
-        vTransform = self.viewportTransform()
-        self.deleted = False
         if( x1-x0 > 0  and y1-y0 >0):
             self.rubberbandlist = self.sceneContainerPt.items(self.mapToScene(QtCore.QRect(x0, y0, x1 - x0, y1 - y0)).boundingRect(), Qt.Qt.IntersectsItemShape)
-            #print "self.rubberbandlist ",self.rubberbandlist
             for unselectitem in self.rubberbandlist:
                 if unselectitem.isSelected() == True:
                     unselectitem.setSelected(0)
             for item in (qgraphicsitem for qgraphicsitem in self.rubberbandlist):
-                #print "item for deletion ",item
                 self.deleteItem(item)
-                self.deleted = True
-        # else:
-        #     self.rubberbandlist = self.sceneContainerPt.items(self.endScenepos.x(),self.endScenepos.y(),abs(self.rubberbandWidth),abs(self.rubberbandHeight), Qt.Qt.IntersectsItemShape)
-        #     for unselectitem in self.rubberbandlist:
-        #         if unselectitem.isSelected() == True:
-        #             unselectitem.setSelected(0)
-        #     for items in (qgraphicsitem for qgraphicsitem in self.rubberbandlist):
-        #         deleteItem(item)
-        #         self.deleted = True
-        if self.deleted:
-            compt = moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
-            comptinfo = moose.Annotator(moose.element(compt[0]).path+'/info')
-            solver = comptinfo.solver
-            if ( solver == 'gsl' ):
-                ksolve = moose.Ksolve( compt[0].path+'/ksolve' )
-            if ( solver == 'gssa' ):
-                ksolve = moose.Gsolve( compt[0].path+'/ksolve' )
-            if ( solver != 'ee' ):
-                stoich = moose.Stoich( compt[0].path+'/stoich' )
-                stoich.compartment = moose.element(compt[0])
-                stoich.ksolve = ksolve
-                stoich.path = compt[0].path+"/##"
-
         self.deselectSelections()
 
     def deleteItem(self,item):
         self.layoutPt.plugin.mainWindow.objectEditSlot('/',False)
-        compt = moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
-        
-        if ( moose.exists( compt[0].path+'/stoich' ) ):
-            moose.delete( compt[0].path+'/stoich' )
-            moose.delete( compt[0].path+'/ksolve' )
-        #print "item isinstance ",isinstance(item,KineticsDisplayItem)
+        self.layoutPt.deleteSolver()
         if isinstance(item,KineticsDisplayItem):
             if moose.exists(item.mobj.path):
                 moose.delete(item.mobj)
-
                 self.sceneContainerPt.removeItem(item)
-
-
         elif isinstance(item,QtGui.QGraphicsPolygonItem):
             self.sceneContainerPt.removeItem(item)
 

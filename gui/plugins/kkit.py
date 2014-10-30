@@ -108,9 +108,10 @@ class AnotherKkitRunView(RunView):
         self._centralWidget.setChildWidget(self.plotWidgetContainer, False, 0, 1)
         self._centralWidget.setPlotWidgetContainer(self.plotWidgetContainer)
         self.schedular = self.getSchedulingDockWidget().widget()
-        self.schedular.runner.update.connect(self.kkitRunView.getCentralWidget().updateValue)
-        self.schedular.runner.update.connect(self.kkitRunView.getCentralWidget().changeBgSize)
-        self.schedular.runner.resetAndRun.connect(self.kkitRunView.getCentralWidget().resetColor)
+        # self.schedular.runner.update.connect(self.kkitRunView.getCentralWidget().updateValue)
+        # self.schedular.runner.update.connect(self.kkitRunView.getCentralWidget().changeBgSize)
+        # self.schedular.runner.resetAndRun.connect(self.kkitRunView.getCentralWidget().resetColor)
+        self.schedular.runner.resetAndRun.connect(self.kkitRunView.getCentralWidget().addSolver)
         return self._centralWidget
 
     def getCentralWidget(self):
@@ -266,19 +267,14 @@ class  KineticsWidget(EditorWidgetBase):
 
             # Compartment and its members are setup
             self.meshEntry,self.xmin,self.xmax,self.ymin,self.ymax,self.noPositionInfo = setupMeshObj(self.modelRoot)
-            #print "self.meshEntry ",self.meshEntry
             self.autocoordinates = False
             setupItem(self.modelRoot,self.srcdesConnection)
-            #print " here --->", self.srcdesConnection
             if self.noPositionInfo:
                 self.autocoordinates = True
-                #QtGui.QMessageBox.warning(self,
-#'No coordinates found for the model',
-#'\n Automatic layouting will be done') 
-            #raise Exception('Unsupported kkit version')
+           
                 self.xmin,self.xmax,self.ymin,self.ymax,self.autoCordinatepos = autoCoordinates(self.meshEntry,self.srcdesConnection)
             # TODO: size will be dummy at this point, but I need the availiable size from the Gui
-            self.size = QtCore.QSize(1024 ,768)
+            self.size = QtCore.QSize(1000 ,600)
             #self.size = QtCore.QSize(300,400)
 
             # Scale factor to translate the x -y position to fit the Qt graphicalScene, scene width. """
@@ -366,13 +362,11 @@ class  KineticsWidget(EditorWidgetBase):
         xpos,ypos = self.positioninfo(info)
         # For Reaction and Complex object I have skipped the process to get the facecolor and background color as \
         #    we are not using these colors for displaying the object so just passing dummy color white
-
         if( (objClass == "reaction" ) or (objClass == "cplx")):
             textcolor,bgcolor = "white","white"
         elif objClass == "tab":
             textcolor,bgcolor = getColor(info)
         else:
-
             textcolor,bgcolor = getColor(info)
         graphicalObj.setDisplayProperties(xpos,ypos,textcolor,bgcolor)
 
@@ -442,8 +436,14 @@ class  KineticsWidget(EditorWidgetBase):
         #when Gui resize and event is sent which inturn call resizeEvent of qgraphicsview
         self.view.resizeEvent1(event)
 
+    def deleteSolver(self):
+        if moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]'):
+            compt = moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
+            if ( moose.exists( compt[0].path+'/stoich' ) ):
+                moose.delete( compt[0].path+'/stoich' )
+                moose.delete( compt[0].path+'/ksolve' )
     def updateModelView(self):
-        print "ModelVire in kkit and self.modelRoot ",self.modelRoot
+        #print "ModelVire in kkit and self.modelRoot ",self.modelRoot
         self.getMooseObj()
         # if self.modelRoot == '/':
         #     m = wildcardFind('/##[ISA=ChemCompt]')
@@ -484,15 +484,26 @@ class  KineticsWidget(EditorWidgetBase):
                 self.layout().removeWidget(self.view)
             self.view = GraphicalView(self.modelRoot,self.sceneContainer,self.border,self,self.createdItem)
             if isinstance(self,kineticEditorWidget):
-                print " editor ",self.view
+                print " editor ",self.view," scene ",self.sceneContainer
                 self.view.setRefWidget("editorView")
                 self.view.setAcceptDrops(True)
                 hLayout = QtGui.QGridLayout(self)
                 self.setLayout(hLayout)
                 hLayout.addWidget(self.view)
+                #itemignoreZooming = False
+                #self.updateItemTransformationMode(itemignoreZooming)
+                #self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
+                
             elif isinstance(self,kineticRunWidget):
-                print " run ",self.view
+                print " run ",self.view," scene ",self.sceneContainer
                 self.view.setRefWidget("runView")
+                #itemignoreZooming = False
+                #self.updateItemTransformationMode(itemignoreZooming)
+                #self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
+                
+                hLayout = QtGui.QGridLayout(self)
+                self.setLayout(hLayout)
+                hLayout.addWidget(self.view)
 
             #self.view.resizeEvent1(event)
             #self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
@@ -507,48 +518,6 @@ class  KineticsWidget(EditorWidgetBase):
             #self.layout().addWidget(self.view)
 
 
-    '''
-    def resetColor(self):
-        for item in self.sceneContainer.items():
-            if isinstance(item,PoolItem):
-                pinfo = moose.element(item.mobj).path+'/info'
-                color,bg = getColor(pinfo,self.colorMap)
-                item.updateColor(bg)
-    def changeBgSize(self):
-        for item in self.sceneContainer.items():
-            if isinstance(item,PoolItem):
-                initialConc = moose.element(item.mobj).concInit
-                presentConc = moose.element(item.mobj).conc
-                if initialConc != 0:
-                    ratio = presentConc/initialConc
-                else:
-                    # multipying by 1000 b'cos moose concentration is in milli in moose
-                    ratio = presentConc*1000
-                item.updateRect(math.sqrt(ratio))
-
-    def colorChange(self):
-        #While simulation is running pool color are increased or decreased as per concentration level
-        for item in self.sceneContainer.items():
-            if isinstance(item,PoolItem):
-                bg = item.returnColor()
-                initialConc = moose.element(item.mobj[0]).concInit
-                presentConc = moose.element(item.mobj[0]).conc
-                if initialConc != 0:
-                    ratio = presentConc/initialConc
-                else:
-                    # multipying by 1000 b'cos moose concentration is in milli in moose
-                    ratio = presentConc*1000
-                #alpha between0-255
-                alpha = 128*ratio
-                # Limiting alpha values
-                if int(math.floor(alpha)) > 255:
-                    alpha = 255
-                elif int(math.floor(alpha))< 40:
-                    alpha = 40
-                #only alpha value is changed
-                bg =QColor(bg.red(),bg.green(),bg.blue(),alpha)
-                item.updateColor(bg)
-     '''
     def findparent(self,mooseObj):
         mooseCmpt = mooseObj.parent
         while True:
@@ -564,18 +533,12 @@ class  KineticsWidget(EditorWidgetBase):
         if isinstance(element(mooseObject),CubeMesh) or isinstance(element(mooseObject),CylMesh):
             for k, v in self.qGraCompt.items():
                 pass
-                #mesh = mooseObject.path+'/mesh[0]'
-                #print " mesh ",mesh,k.path
-                #if k.path == mesh:
-                # for rectChilditem in v.childItems():
-                #     self.updateArrow(rectChilditem)
         else:
             mobj = self.mooseId_GObj[mooseObject.getId()]
             self.updateArrow(mobj)
             for k, v in self.qGraCompt.items():
                 rectcompt = v.childrenBoundingRect()
                 v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
-
 
     def positionChange1(self,mooseObject):
         #If the item position changes, the corresponding arrow's are calculated
@@ -597,17 +560,12 @@ class  KineticsWidget(EditorWidgetBase):
             v.setPen(comptPen)
             if not comptBoundingRect.contains(childBoundingRect):
                 v.setRect(rectcompt.x()-comptWidth,rectcompt.y()-comptWidth,rectcompt.width()+(comptWidth*2),rectcompt.height()+(comptWidth*2))
-            '''
-            for k, v in self.qGraCompt.items():
-                rectcompt = v.childrenBoundingRect()
-                v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
-            '''
     def emitItemtoEditor(self,mooseObject):
         #self.emit(QtCore.SIGNAL("itemPressed(PyQt_PyObject)"),mooseObject)
         self.editObject.emit(mooseObject.path)
 
     def drawLine_arrow(self, itemignoreZooming=False):
-        #rint " drawLine_arrow ",self.srcdesConnection.items()
+        #print " drawLine_arrow ",self.srcdesConnection.items()
         for inn,out in self.srcdesConnection.items():
             #print "inn ",inn, " out ",out
             # self.srcdesConnection is dictionary which contains key,value \
@@ -883,8 +841,8 @@ class kineticRunWidget(KineticsWidget):
         #self.updateModelView()
         #pass
         #self.update()
-        self.view.update()
-
+        #self.view.update()
+        pass
     def makePoolItem(self, poolObj, qGraCompt):
         return PoolItemCircle(poolObj, qGraCompt)
 
@@ -908,11 +866,27 @@ class kineticRunWidget(KineticsWidget):
                     # multipying by 1000 b'cos moose concentration is in milli in moose
                     ratio = presentConc
                 item.updateRect(math.sqrt(ratio))
+    
     def resetColor(self):
         for item in self.sceneContainer.items():
             if isinstance(item,PoolItemCircle):
                 item.returnEllispeSize()
-
+    
+    def addSolver(self):
+        compt = moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
+        if not ( moose.exists( compt[0].path+'/stoich' ) ):
+            comptinfo = moose.Annotator(moose.element(compt[0]).path+'/info')
+            solver = comptinfo.solver
+            if ( solver == 'gsl' ):
+                ksolve = moose.Ksolve( compt[0].path+'/ksolve' )
+            if ( solver == 'gssa' ):
+                ksolve = moose.Gsolve( compt[0].path+'/ksolve' )
+            if ( solver != 'ee' ):
+                stoich = moose.Stoich( compt[0].path+'/stoich' )
+                stoich.compartment = moose.element(compt[0])
+                stoich.ksolve = ksolve
+                stoich.path = compt[0].path+"/##"
+        
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     size = QtCore.QSize(1024 ,768)

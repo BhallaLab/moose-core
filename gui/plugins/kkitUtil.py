@@ -51,7 +51,6 @@ def colorCheck(fc_bgcolor,fcbg):
         else:
             #fc_bgcolor = QColor(*eval(fc_bgcolor))
             fc_bgcolor = validColorcheck(fc_bgcolor)
-
     return(fc_bgcolor)
 
 def validColorcheck(color):

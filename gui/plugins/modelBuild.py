@@ -48,7 +48,6 @@ def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
         qGItem.cmptEmitter.connect(qGItem.cmptEmitter,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),layoutPt.objectEditSlot)
         compartment = qGItem
         layoutPt.qGraCompt[mobj]= qGItem
-        #qGItem.prepareGeometryChange()
         view.emit(QtCore.SIGNAL("dropped"),mobj)
     elif string == "CylMesh":
         mobj = moose.CylMesh(modelpath.path+'/'+string_num)
@@ -203,6 +202,7 @@ def createObj(scene,view,modelpath,string,pos,layoutPt):
     pos = view.mapToScene(event_pos)
     itemAt = view.sceneContainerPt.itemAt(pos)
     chemMesh = moose.wildcardFind(modelpath+'/##[ISA=ChemCompt]')
+    layoutPt.deleteSolver()
     #print " here ---> ",itemAt,string
     if len(chemMesh) and (string == "CubeMesh" or string == "CylMesh"):
         QtGui.QMessageBox.information(None,'Drop Not possible','At present model building allowed only for  single compartment.',QtGui.QMessageBox.Ok)
