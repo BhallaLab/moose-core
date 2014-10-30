@@ -132,10 +132,12 @@ static const Cinfo* STDPSynHandlerCinfo = STDPSynHandler::initCinfo();
 STDPSynHandler::STDPSynHandler()
 { 
     aMinus_ = 0.0;
-    tauMinus_ = 0.0;
+    tauMinus_ = 1.0;
     aMinus0_ = 0.0;
-    tauPlus_ = 0.0;
+    tauPlus_ = 1.0;
     aPlus0_ = 0.0;
+    weightMin_ = 0.0;
+    weightMax_ = 0.0;
 }
 
 STDPSynHandler::~STDPSynHandler()
@@ -201,6 +203,9 @@ void STDPSynHandler::vProcess( const Eref& e, ProcPtr p )
 	while( !events_.empty() && events_.top().time <= p->currTime ) {
         PreSynEvent currEvent = events_.top();
         // activate the synapse for every pre-spike
+        // If the synapse has a delay, the weight has been updated in the meanwhile!
+        // Also the weight updation for this spike is being done after setting activation!
+        // Might be better to use currSynPtr->getWeight() or the updated weight below!!!
 		activation += currEvent.weight;
         
         // Maintain 'history' of pre-spikes in Aplus
@@ -269,6 +274,8 @@ void STDPSynHandler::vReinit( const Eref& e, ProcPtr p )
 	// For no apparent reason, priority queues don't have a clear operation.
 	while( !events_.empty() )
 		events_.pop();
+	while( !postEvents_.empty() )
+		postEvents_.pop();
 }
 
 unsigned int STDPSynHandler::addSynapse()
@@ -308,6 +315,7 @@ double STDPSynHandler::getAMinus() const
 
 void STDPSynHandler::setTauMinus( const double v )
 {
+	if ( rangeWarning( "tauMinus", v ) ) return;
 	tauMinus_ = v;
 }
 
@@ -328,6 +336,7 @@ double STDPSynHandler::getAPlus0() const
 
 void STDPSynHandler::setTauPlus( const double v )
 {
+	if ( rangeWarning( "tauPlus", v ) ) return;
 	tauPlus_ = v;
 }
 
