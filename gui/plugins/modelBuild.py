@@ -77,10 +77,11 @@ def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
         layoutPt.mooseId_GObj[poolObj.getId()] = qGItem
         posWrtComp = (itemAtView.mapFromScene(pos)).toPoint()
         bgcolor = getRandColor()
-        qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y(),QtGui.QColor('green'),QtGui.QColor(bgcolor[0],bgcolor[1],bgcolor[2]))
+        qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y(),QtGui.QColor('green'),bgcolor)
         poolinfo.x = posWrtComp.x()
         poolinfo.y = posWrtComp.y()
-        poolinfo.color = str(bgcolor[0])+","+str(bgcolor[1])+","+str(bgcolor[2])
+        #poolinfo.color = str(bgcolor[0])+","+str(bgcolor[1])+","+str(bgcolor[2])
+        poolinfo.color = str(bgcolor.getRgb())
         layoutPt.setupSlot(poolObj,qGItem)
         view.emit(QtCore.SIGNAL("dropped"),poolObj)
         updateCompartmentSize(itemAtView)
@@ -151,10 +152,11 @@ def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
             layoutPt.mooseId_GObj[enzObj.getId()] = qGItem
             posWrtComp = pos
             bgcolor = getRandColor()
-            qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y()-40,QtGui.QColor(bgcolor[0],bgcolor[1],bgcolor[2]),QtGui.QColor('green'))
+            qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y()-40,bgcolor,QtGui.QColor('green'))
             enzinfo.x = posWrtComp.x()
             enzinfo.y = posWrtComp.y()
-            enzinfo.color = str(bgcolor[0])+","+str(bgcolor[1])+","+str(bgcolor[2])
+            #enzinfo.color = str(bgcolor[0])+","+str(bgcolor[1])+","+str(bgcolor[2])
+            enzinfo.color = bgcolor
             e = moose.Annotator(enzinfo)
             e.x = posWrtComp.x()
             e.y = posWrtComp.y()
@@ -182,10 +184,11 @@ def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
             qGItem = MMEnzItem(enzObj,parentcompt)
             posWrtComp = pos
             bgcolor = getRandColor()
-            qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y()-30,QtGui.QColor(bgcolor[0],bgcolor[1],bgcolor[2]),QtGui.QColor('green'))
+            qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y()-30,bgcolor,QtGui.QColor('green'))
             enzinfo.x = posWrtComp.x()
             enzinfo.y = posWrtComp.y()
-            enzinfo.color = str(bgcolor[0])+","+str(bgcolor[1])+","+str(bgcolor[2])
+            #enzinfo.color = str(bgcolor[0])+","+str(bgcolor[1])+","+str(bgcolor[2])
+            enzinfo.color = bgcolor
             layoutPt.setupSlot(enzObj,qGItem)
             layoutPt.mooseId_GObj[enzObj.getId()] = qGItem
             view.emit(QtCore.SIGNAL("dropped"),enzObj)

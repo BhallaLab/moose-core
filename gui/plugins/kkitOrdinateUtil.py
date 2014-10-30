@@ -1,10 +1,7 @@
 from moose import *
 import numpy as np
-#import matplotlib.pyplot as plt
-#import pygraphviz as pgv
 import networkx as nx
 from collections import Counter
-#import matplotlib.pyplot as plt
 
 def xyPosition(objInfo,xory):
     try:

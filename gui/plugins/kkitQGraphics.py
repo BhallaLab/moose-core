@@ -105,7 +105,8 @@ class FuncItem(KineticsDisplayItem):
         self.gobj.setAcceptHoverEvents(True)
         self.gobj.mobj = self.mobj
         classname = self.mobj.className
-        self.gobj.setToolTip("Function ")
+        funcdoc = (element(self.mobj.path)).expr
+        self.gobj.setToolTip(funcdoc)
         #self.bg.setPen(Qt.QColor(100,100,10,10))
         
     def setDisplayProperties(self,x,y,textcolor,bgcolor):
@@ -146,7 +147,7 @@ class FuncItem(KineticsDisplayItem):
         return (self.bg.brush().color())
 
     def updateValue(self,gobj):
-        self.gobj.setToolTip("Function definition")
+        self.gobj.setToolTip(funcdoc)
         # self._gobj = gobj
         # #if type(self._gobj) is moose.ZombiePool:
         # if (isinstance(self._gobj,PoolBase)):
@@ -414,7 +415,7 @@ class EnzItem(KineticsDisplayItem):
             self._Kcat = self._gobj.kcat
             doc = "Km\t: "+str(self._Km)+"\nKcat\t: "+str(self._Kcat)
             self.gobj.setToolTip(doc)
-    
+
     def updateColor(self,bgcolor):
         self.gobj.setBrush(QtGui.QBrush(QtGui.QColor(bgcolor)))        
 
@@ -666,14 +667,15 @@ class FuncItem1(KineticsDisplayItem):
         # may be I will show expression up on hover
         #doc = moose.element('/classes/%s' % (classname)).docs
         #doc = doc.split('Description:')[-1].split('Name:')[0].strip()
-        doc = "Fucntion expression will be showed"
+        funcdoc = (element(self.mobj.path)).expr
+        doc = (funcdoc)#"Fucntion expression will be showed"
         self.gobj.setToolTip(doc)
 
     def updateValue(self,gobj):
         #doc = moose.element('/classes/%s' % (classname)).docs
         #doc = doc.split('Description:')[-1].split('Name:')[0].strip()
-        doc = "Fucntion expression will be showed"
-        self.gobj.setToolTip(" ")
+        #doc = "Fucntion expression will be showed"
+        self.gobj.setToolTip(func)
 
     def setDisplayProperties(self,x,y,textcolor,bgcolor):
         """Set the display properties of this item."""

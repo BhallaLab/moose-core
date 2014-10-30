@@ -1,16 +1,18 @@
-from moose import *
-from PyQt4 import QtCore, QtGui
+from moose import Annotator
+from PyQt4.QtGui import QColor
 import numpy as np
 import os
 import config
 import pickle
-import random
+from random import randint
+
 colormap_file = open(os.path.join(config.settings[config.KEY_COLORMAP_DIR], 'rainbow2.pkl'),'rb')
 colorMap = pickle.load(colormap_file)
 colormap_file.close()
+
 def getRandColor():
     color = (np.random.randint(low=0, high=255, size=3)).tolist()
-    return color
+    return QColor(color[0],color[1],color[2])
     
 
 def getColor(iteminfo):
@@ -42,11 +44,13 @@ def colorCheck(fc_bgcolor,fcbg):
             tc = int(fc_bgcolor)
             tc = 2*tc
             pickledColor = colorMap[tc]
-            fc_bgcolor = QtGui.QColor(*pickledColor)
+            fc_bgcolor = QColor(*pickledColor)
+
         elif fc_bgcolor.isalpha():
             fc_bgcolor = validColorcheck(fc_bgcolor)
         else:
-            fc_bgcolor = QtGui.QColor(*eval(fc_bgcolor))
+            #fc_bgcolor = QColor(*eval(fc_bgcolor))
+            fc_bgcolor = validColorcheck(fc_bgcolor)
 
     return(fc_bgcolor)
 
@@ -56,8 +60,8 @@ def validColorcheck(color):
         checking if textcolor or backgroundcolor is valid color, if 'No' making white color as default
         where I have not taken care for checking what will be backgroundcolor for textcolor or textcolor for backgroundcolor 
         '''
-        if QtGui.QColor(color).isValid():
-            return (QtGui.QColor(color))
+        if QColor(color).isValid():
+            return (QColor(color))
         else:
-            return(QtGui.QColor("white"))
+            return(QColor("white"))
 

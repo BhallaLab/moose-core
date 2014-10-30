@@ -1,8 +1,8 @@
-from PyQt4 import QtCore, QtGui,Qt
 import sys
 import config
 from modelBuild import *
 from constants import *
+from PyQt4 import QtGui
 from PyQt4.QtGui import QPixmap
 from PyQt4.QtGui import QImage
 from PyQt4.QtGui import QGraphicsPixmapItem
@@ -10,7 +10,6 @@ from PyQt4.QtGui import QGraphicsLineItem
 from PyQt4.QtGui import QPen
 from kkitCalcArrow import *
 from kkitOrdinateUtil import *
-import pprint
 
 class GraphicalView(QtGui.QGraphicsView):
     def __init__(self, modelRoot,parent,border,layoutPt,createdItem):

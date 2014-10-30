@@ -1,11 +1,11 @@
 import sys
-import math
-import re
+#import math
+#import re
 from PyQt4 import QtGui, QtCore, Qt
 #import pygraphviz as pgv
 import networkx as nx
 sys.path.insert(0, '~/async/gui')
-import numpy as np
+#import numpy as np
 from default import *
 from moose import *
 sys.path.append('plugins')
@@ -19,6 +19,7 @@ import posixpath
 from mtoolbutton import MToolButton
 from PyQt4.QtGui import QWidget
 from PyQt4.QtGui import QGridLayout
+from PyQt4.QtGui import QColor
 import RunWidget
 
 #from DataTable import DataTable
@@ -226,7 +227,7 @@ class  KineticsWidget(EditorWidgetBase):
         #self.setAcceptDrops(True)
         self.sceneContainer = QtGui.QGraphicsScene(self)
         self.sceneContainer.setSceneRect(self.sceneContainer.itemsBoundingRect())
-        self.sceneContainer.setBackgroundBrush(QtGui.QColor(230,220,219,120))
+        self.sceneContainer.setBackgroundBrush(QColor(230,220,219,120))
         #self.sceneContainer.setBackgroundBrush(QtGui.QColor(255,220,219,220))
         # pickled the color map file """
         # colormap_file = open(os.path.join(config.settings[config.KEY_COLORMAP_DIR], 'rainbow2.pkl'),'rb')
@@ -311,6 +312,7 @@ class  KineticsWidget(EditorWidgetBase):
                     enzItem = EnzItem(enzObj,self.qGraCompt[cmpt])
                 else:
                     enzItem = MMEnzItem(enzObj,self.qGraCompt[cmpt])
+                #print " enzinfo",moose.Annotator(enzinfo).color,moose.Annotator(enzinfo).textColor
                 self.setupDisplay(enzinfo,enzItem,"enzyme")
                 self.setupSlot(enzObj,enzItem)
 
@@ -408,7 +410,7 @@ class  KineticsWidget(EditorWidgetBase):
         item = self.mooseId_GObj[mooseObject.getId()]
         if (isinstance(item,PoolItem) or isinstance(item,EnzItem) or isinstance(item,MMEnzItem) ):
             item.updateColor(bgcolor)
-        #self.bg.setBrush(QtGui.QBrush(QtGui.QColor(bgcolor)))
+        #self.bg.setBrush(QtGui.QBrush(QColor(bgcolor)))
     
     def updateItemSlot(self, mooseObject):
         #This is overridden by derived classes to connect appropriate
@@ -441,6 +443,7 @@ class  KineticsWidget(EditorWidgetBase):
         self.view.resizeEvent1(event)
 
     def updateModelView(self):
+        print "ModelVire in kkit and self.modelRoot ",self.modelRoot
         self.getMooseObj()
         # if self.modelRoot == '/':
         #     m = wildcardFind('/##[ISA=ChemCompt]')
@@ -456,9 +459,11 @@ class  KineticsWidget(EditorWidgetBase):
             self.sceneContainer.setSceneRect(-self.width()/2,-self.height()/2,self.width(),self.height())
             self.view = GraphicalView(self.modelRoot,self.sceneContainer,self.border,self,self.createdItem)
             if isinstance(self,kineticEditorWidget):
+                print " editor ",self.view
                 self.view.setRefWidget("editorView")
                 self.view.setAcceptDrops(True)
             elif isinstance(self,kineticRunWidget):
+                print " run ",self.view
                 self.view.setRefWidget("runView")
             self.connect(self.view, QtCore.SIGNAL("dropped"), self.objectEditSlot)
             hLayout = QtGui.QGridLayout(self)
@@ -479,9 +484,14 @@ class  KineticsWidget(EditorWidgetBase):
                 self.layout().removeWidget(self.view)
             self.view = GraphicalView(self.modelRoot,self.sceneContainer,self.border,self,self.createdItem)
             if isinstance(self,kineticEditorWidget):
+                print " editor ",self.view
                 self.view.setRefWidget("editorView")
                 self.view.setAcceptDrops(True)
+                hLayout = QtGui.QGridLayout(self)
+                self.setLayout(hLayout)
+                hLayout.addWidget(self.view)
             elif isinstance(self,kineticRunWidget):
+                print " run ",self.view
                 self.view.setRefWidget("runView")
 
             #self.view.resizeEvent1(event)
@@ -490,10 +500,10 @@ class  KineticsWidget(EditorWidgetBase):
             #print "center kkit file",self.sceneContainer.itemsBoundingRect().center()
             #self.view.centerOn(self.sceneContainer.itemsBoundingRect().center())
             #self.view.GrVfitinView()
-            hLayout = QtGui.QGridLayout(self)
-            self.setLayout(hLayout)
+            # hLayout = QtGui.QGridLayout(self)
+            # self.setLayout(hLayout)
             
-            hLayout.addWidget(self.view)
+            # hLayout.addWidget(self.view)
             #self.layout().addWidget(self.view)
 
 
@@ -536,7 +546,7 @@ class  KineticsWidget(EditorWidgetBase):
                 elif int(math.floor(alpha))< 40:
                     alpha = 40
                 #only alpha value is changed
-                bg =QtGui.QColor(bg.red(),bg.green(),bg.blue(),alpha)
+                bg =QColor(bg.red(),bg.green(),bg.blue(),alpha)
                 item.updateColor(bg)
      '''
     def findparent(self,mooseObj):
@@ -690,6 +700,7 @@ class  KineticsWidget(EditorWidgetBase):
                 p1 = (next((k for k,v in self.mooseId_GObj.items() if v == src), None))
                 pinfo = p1.path+'/info'
                 color,bgcolor = getColor(pinfo)
+                #color = QColor(color[0],color[1],color[2])
                 pen.setColor(color)
         elif isinstance(source, moose.PoolBase) or isinstance(source,moose.Function):
             pen.setColor(QtCore.Qt.blue)
@@ -869,9 +880,10 @@ class kineticRunWidget(KineticsWidget):
         KineticsWidget.__init__(self, plugin,*args)
 
     def showEvent(self, event):
-        pass
         #self.updateModelView()
+        #pass
         #self.update()
+        self.view.update()
 
     def makePoolItem(self, poolObj, qGraCompt):
         return PoolItemCircle(poolObj, qGraCompt)
