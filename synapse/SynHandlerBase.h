@@ -48,6 +48,12 @@ class SynHandlerBase
 		void process( const Eref& e, ProcPtr p );
 		void reinit( const Eref& e, ProcPtr p );
 
+        /**
+         * A utility function to check for assignment to fields that
+         * must be > 0
+         */
+        bool rangeWarning( const string& field, double value );
+
 		////////////////////////////////////////////////////////////////
 		/** 
 		 * Adds a new synapse, returns its index. This is 

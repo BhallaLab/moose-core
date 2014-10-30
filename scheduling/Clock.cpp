@@ -333,6 +333,8 @@ const Cinfo* Clock::initCinfo()
 		"	VClamp				0		50e-6\n"
 		"	SynHandlerBase			1		50e-6\n"
 		"	SimpleSynHandler		1		50e-6\n"
+        "   STDPSynHandler		1		50e-6\n"
+        "   GraupnerBrunel2012CaPlasticitySynHandler    1		50e-6\n"
 		"	CaConc				1		50e-6\n"
 		"	CaConcBase			1		50e-6\n"
 		"	DifShell			1		50e-6\n"
@@ -343,6 +345,11 @@ const Cinfo* Clock::initCinfo()
 		"	IntFire				2		50e-6\n"
 		"	IntFireBase			2		50e-6\n"
 		"	LIF				2		50e-6\n"
+		"	QIF				2		50e-6\n"
+		"	ExIF				2		50e-6\n"
+		"	AdExIF				2		50e-6\n"
+		"	AdThreshIF				2		50e-6\n"
+		"	IzhIF				2		50e-6\n"
 		"	IzhikevichNrn			2		50e-6\n"
 		"	SynChan				2		50e-6\n"
 		"	GapJunction			2		50e-6\n"
@@ -746,6 +753,7 @@ void Clock::buildDefaultTick()
 	defaultTick_["SynHandlerBase"] = 1;
 	defaultTick_["SimpleSynHandler"] = 1;
 	defaultTick_["STDPSynHandler"] = 1;
+	defaultTick_["GraupnerBrunel2012CaPlasticitySynHandler"] = 1;
 	defaultTick_["CaConc"] = 1;
 	defaultTick_["CaConcBase"] = 1;
 	defaultTick_["DifShell"] = 1;
