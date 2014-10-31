@@ -49,7 +49,11 @@ class MorphML():
         neuroml_element = tree.getroot()
         cellsDict = {}
         for cell in neuroml_element.findall('.//{'+self.neuroml+'}cell'):
-            cellDict = self.readMorphML(cell,params,neuroml_element.attrib['lengthUnits'])
+            if 'lengthUnits' in neuroml_element.attrib.keys():
+                lengthUnits = neuroml_element.attrib['lengthUnits']
+            else:
+                lengthUnits = 'micrometer'
+            cellDict = self.readMorphML(cell,params,lengthUnits)
             cellsDict.update(cellDict)
         return cellsDict
 
