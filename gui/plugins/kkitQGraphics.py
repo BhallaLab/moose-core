@@ -6,46 +6,6 @@ from PyQt4.QtGui import QImage
 from PyQt4.QtGui import QGraphicsPixmapItem
 from constants import *
 
-# class ConnectorItem(QtGui.QGraphicsObject):
-#     """docstring for ConnectorItem"""
-#     def __init__(self, arg):
-#         super(ConnectorItem, self).__init__()
-#         self.connectionSignImagePath = "../gui/icons/connection.png"
-#         self.connectionSignImage     = QImage(self.connectionSignImagePath)
-#         self.gobj = None
-
-#     def  
-
-    # def setDisplayProperties(self,x,y,textcolor,bgcolor):
-    #     """Set the display properties of this item."""
-    #     self.setGeometry(x, y,self.gobj.boundingRect().width()
-    #                     , self.gobj.boundingRect().height())
-    #     # self.bg.setBrush(QtGui.QBrush(bgcolor))
-    
-    # def refresh(self,scale):
-    #     pass
-
-    # def boundingRect(self):
-    #     ''' reimplimenting boundingRect for redrawing '''
-    #     return QtCore.QRectF(0,0,self.gobj.boundingRect().width(),self.gobj.boundingRect().height())
-
-    # def updateSlot(self):
-    #     pass
-    
-    # def updateColor(self,bgcolor):
-    #     pass
-
-    # def updateRect(self,ratio):
-    #     pass    
-
-    # def returnColor(self):
-    #     pass
-    
-    # def updateValue(self,gobj):
-    #     pass
-        
-
-
 class KineticsDisplayItem(QtGui.QGraphicsWidget):
     """Base class for display elemenets in kinetics layout"""
     name = ITEM
@@ -80,11 +40,14 @@ class KineticsDisplayItem(QtGui.QGraphicsWidget):
     #     self.emit(QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),element(self.mobj))
             
     def itemChange(self,change,value):
-        if change == QtGui.QGraphicsItem.ItemPositionChange:
-            self.emit(QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),element(self.mobj))
+        pass
+        #if change == QtGui.QGraphicsItem.ItemPositionChange:
+            #print "itemChange ---->",self.mobj
+        #    self.emit(QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.mobj)
         #if change == QtGui.QGraphicsItem.ItemSelectedChange and value == True:
         #   self.emit(QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),element(self.mobj))
-        return QtGui.QGraphicsItem.itemChange(self,change,value)
+        #print " itemChange ",self.mobj,change,value
+        #return QtGui.QGraphicsItem.itemChange(self,change,value)
 
 class FuncItem(KineticsDisplayItem):
     name = ITEM
@@ -421,14 +384,6 @@ class EnzItem(KineticsDisplayItem):
 
     def setDisplayProperties(self,x,y,textcolor,bgcolor):
         """Set the display properties of this item."""
-        # print " enz ",x,y,self.gobj.boundingRect().width(),self.gobj.boundingRect().height()
-        #self.setRect(x,y,self.gobj.boundingRect().width(),self.gobj.boundingRect().height())
-        
-        # self.gobj.setRect(-20.0, -20.0, 40.0, 40.0);
-        #print("Parent =>", self.parentItem())
-        # self.gobj.setPos(x, y);
-        #self.gobj.setRect(x,y,self.gobj.boundingRect().width(), 
-        #                  self.gobj.boundingRect().height())
         self.setGeometry(x,y, 
                           self.gobj.boundingRect().width(), 
                           self.gobj.boundingRect().height())

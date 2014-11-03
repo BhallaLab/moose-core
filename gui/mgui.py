@@ -289,8 +289,12 @@ class MWindow(QtGui.QMainWindow):
             self.setCurrentView('editor')
         self.objectEditDockWidget.objectNameChanged.connect(
             self.plugin.getEditorView().getCentralWidget().updateItemSlot)
-        self.objectEditDockWidget.objectColorChanged.connect(
-            self.plugin.getEditorView().getCentralWidget().updateColorSlot)
+        # self.objectEditDockWidget.objectColorChanged.connect(
+        #    self.plugin.getEditorView().getCentralWidget().updateColorSlot)
+        #self.objectEditDockWidget.view.colorDialog.colorSelected.connect(
+        #    lambda color: self.plugin.getEditorView().getCentralWidget().updateColorSlot(self.objectEditDockWidget.view.model().mooseObject, color)
+        #    )
+        self.objectEditDockWidget.view.colorChanged.connect(self.plugin.getEditorView().getCentralWidget().updateColorSlot)
         return self.plugin
 
     def updateExistingMenu(self, menu):
@@ -833,7 +837,7 @@ class MWindow(QtGui.QMainWindow):
                 raise mexception.ElementNameError('Model path should not containe / or whitespace')
             #plugin = str(newModelDialog.submenu.currentText())
             plugin = str(newModelDialog.getcurrentRadioButton())
-            print "plugin ",plugin
+            #print "plugin ",plugin
             #Harsha: All model will be forced to load/build under /model,
             #2014 sep 10: All the model will be forced to load/build model under /modelName/model
             '''

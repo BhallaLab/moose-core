@@ -245,8 +245,8 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
         #setter = 'set_%s' % (self.fields[index.row()])
         #print " from Object setter",setter, "object",self.mooseObject, " ",self.mooseObject.getFieldNames('destFinfo');
         if index.column() == 1:
-            if field == "Color":
-                flag = QtCore.Qt.ItemIsEnabled
+            # if field == "Color":
+            #     flag = QtCore.Qt.ItemIsEnabled
             if field == "Notes":
                 ann = moose.Annotator(self.mooseObject.path+'/info')
                 if setter in ann.getFieldNames('destFinfo'):
@@ -309,6 +309,7 @@ class ObjectEditView(QtGui.QTableView):
     To enable undo/redo conect the corresponding actions from the gui
     to view.model().undo and view.model().redo slots.
     """
+    colorChanged = QtCore.pyqtSignal('PyQt_PyObject', 'PyQt_PyObject')
     def __init__(self, mobject, undolen=defaults.OBJECT_EDIT_UNDO_LENGTH, parent=None):
         QtGui.QTableView.__init__(self, parent)
         #self.setEditTriggers(self.DoubleClicked | self.SelectedClicked | self.EditKeyPressed)
@@ -334,6 +335,11 @@ class ObjectEditView(QtGui.QTableView):
                                                                              )
                                                                     )
             self.setIndexWidget(self.model().index(colorIndex,1), self.colorButton)
+            # self.colorDialog.colorSelected.connect(
+            #     lambda color: 
+            #                                       )
+            self.colorDialog.colorSelected.connect(self.colorChangedEmit)
+
         except:
             pass
         print 'Created view with', mobject
@@ -350,6 +356,13 @@ class ObjectEditView(QtGui.QTableView):
         QtGui.QTableView.dataChanged(self, tl, br)
         self.viewport().update()
 
+
+    def colorChangedEmit(self, color):
+        #print(color)
+        #print "### ",self.model().mooseObject
+        self.colorChanged.emit(self.model().mooseObject, color)
+        #print "end"
+    
 class ObjectEditDockWidget(QtGui.QDockWidget):
     """A dock widget whose title is set by the current moose
     object. Allows switching the moose object. It stores the created
@@ -365,7 +378,8 @@ class ObjectEditDockWidget(QtGui.QDockWidget):
     def __init__(self, mobj='/', parent=None, flags=None):
         QtGui.QDockWidget.__init__(self, parent=parent)
         mobj = moose.element(mobj)
-        view = ObjectEditView(mobj)
+        #self.view = view = ObjectEditView(mobj)
+        self.view = view = ObjectEditView(mobj)
         self.view_dict = {mobj: view}
         self.setWidget(view)
         self.setWindowTitle('Edit: %s' % (mobj.path))
