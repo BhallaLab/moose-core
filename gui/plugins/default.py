@@ -54,7 +54,7 @@ import numpy as np
 from PyQt4 import QtGui, QtCore
 from PyQt4.Qt import Qt
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
-
+from PyQt4.QtGui import QColor
 import moose
 from moose import utils
 import mtree
@@ -70,6 +70,7 @@ from PlotWidgetContainer import PlotWidgetContainer
 
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtGui import QDoubleValidator
+from matplotlib.colors import ColorConverter
 
 class MoosePlugin(MoosePluginBase):
     """Default plugin for MOOSE GUI"""
@@ -901,8 +902,12 @@ class PlotWidget(QWidget):
                     tc = (tc * 2 )
                     r,g,b = self.colorMap[tc]
                     color = "#"+ hexchars[r / 16] + hexchars[r % 16] + hexchars[g / 16] + hexchars[g % 16] + hexchars[b / 16] + hexchars[b % 16]
-            else:
-                color = 'white'
+                elif color.isalpha() or color.isalnum():
+                    r,g,b,a = QColor(color).getRgb()
+                    color = "#"+ hexchars[r / 16] + hexchars[r % 16] + hexchars[g / 16] + hexchars[g % 16] + hexchars[b / 16] + hexchars[b % 16]
+                else:
+                    r,g,b,a = eval(color)
+                    color = "#"+ hexchars[r / 16] + hexchars[r % 16] + hexchars[g / 16] + hexchars[g % 16] + hexchars[b / 16] + hexchars[b % 16]
         return color
 
     def plotAllData(self):
@@ -911,11 +916,16 @@ class PlotWidget(QWidget):
         modelroot = self.model.path
         time = moose.Clock('/clock').currentTime
         tabList = []
+        # self.pathToLine.clear()
+        # self.lineToDataSource.clear()
+        # self.canvas.callAxesFn('legend')
+        # print("Legnd => ", self.canvas.axes[self.canvas.current_id].legend_)
         #for tabId in moose.wildcardFind('%s/##[TYPE=Table]' % (path)):
         #harsha: policy graphs will be under /model/modelName need to change in kkit
         #for tabId in moose.wildcardFind('%s/##[TYPE=Table]' % (modelroot)):
         
         plotTables = moose.wildcardFind(self.graph.path + '/##[TYPE=Table2]')
+        #print(plotTables)
         if len (plotTables) > 0:
             for tabId in plotTables:
                 tab = moose.Table(tabId)
@@ -932,7 +942,7 @@ class PlotWidget(QWidget):
                     #Harsha: Adding color to graph for signalling model, check if given path has cubemesh or cylmesh
                     color = 'white'
                     color = self.genColorMap(tableObject[0].path)
-
+                    #print "color ",color
                     lines = self.pathToLine[tab.path]
                     if len(lines) == 0:
                         #Harsha: pass color for plot if exist and not white else random color
@@ -973,12 +983,12 @@ class PlotWidget(QWidget):
                                             , loc               ='upper right'
                                             , prop              = {'size' : 10 }
                                             # , bbox_to_anchor    = (0.5, -0.03)
-                                             , fancybox          = False
+                                            , fancybox          = False
                                             # , shadow            = True
                                             , ncol              = 1
                                             )
-                leg.draggable(True)
-                print(leg.get_window_extent())
+                # leg.draggable(True)
+                #print(leg.get_window_extent())
                         #leg = self.canvas.callAxesFn('legend')
                         #leg = self.canvas.callAxesFn('legend',loc='upper left', fancybox=True, shadow=True)
                         #global legend
@@ -986,10 +996,9 @@ class PlotWidget(QWidget):
                 for legobj in leg.legendHandles:
                     legobj.set_linewidth(5.0)
                     legobj.set_picker(True)
-
-                self.canvas.draw()
             else:
                 print "returning as len tabId is zero ",tabId, " tableObject ",tableObject, " len ",len(tableObject)
+            self.canvas.draw()
 
     def onclick(self,event1):
         #print "onclick",event1.artist.get_label()
@@ -1039,11 +1048,12 @@ class PlotWidget(QWidget):
 
     def updatePlots(self):
         for path, lines in self.pathToLine.items():
-            tab = moose.Table(path)
-            data = tab.vector
-            ts = np.linspace(0, moose.Clock('/clock').currentTime, len(data))
-            for line in lines:
-                line.set_data(ts, data)
+            if moose.exists(path):
+                tab = moose.Table(path)
+                data = tab.vector
+                ts = np.linspace(0, moose.Clock('/clock').currentTime, len(data))
+                for line in lines:
+                    line.set_data(ts, data)
         self.canvas.draw()
 
     def extendXAxes(self, xlim):

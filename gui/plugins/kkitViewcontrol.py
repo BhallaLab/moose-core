@@ -8,10 +8,12 @@ from PyQt4.QtGui import QImage
 from PyQt4.QtGui import QGraphicsPixmapItem
 from PyQt4.QtGui import QGraphicsLineItem
 from PyQt4.QtGui import QPen
+# from PyQt4.QtGui import pyqtSignal
 from kkitCalcArrow import *
 from kkitOrdinateUtil import *
 
 class GraphicalView(QtGui.QGraphicsView):
+
     def __init__(self, modelRoot,parent,border,layoutPt,createdItem):
         QtGui.QGraphicsView.__init__(self,parent)
         self.state = None
@@ -44,7 +46,9 @@ class GraphicalView(QtGui.QGraphicsView):
         #From stackOrder selecting only compartment
         self.cmptStackorder = [i for i in self.stackOrder if isinstance(i,ComptItem)]
         self.viewBaseType = " "
-      
+        self.iconScale = 1
+        self.arrowsize = 2
+        self.defaultComptsize = 5
     def setRefWidget(self,path):
         self.viewBaseType = path
 
@@ -132,6 +136,7 @@ class GraphicalView(QtGui.QGraphicsView):
                         if isinstance(funcItem,FuncItem):
                             self.layoutPt.updateArrow(funcItem)
             self.state["press"]["pos"] = event.pos()
+            self.layoutPt.positionChange(self.state["press"]["item"].mobj)
 
             # item.setPos(item.getParentGraphicsObject().mapFromScene(self.mapToScene(event.pos())))
 
@@ -142,6 +147,7 @@ class GraphicalView(QtGui.QGraphicsView):
             #print("Displacement", displacement)
             item.moveBy(displacement.x(), displacement.y())            
             self.state["press"]["pos"] = event.pos()
+
             # QtGui.QGraphicsView.mouseMoveEvent(self, event)
             # self.state["press"]["item"].qgtextPositionChange.emit(self.state["press"]["item"].mobj, event.pos())
             # event.ignore()
@@ -380,6 +386,7 @@ class GraphicalView(QtGui.QGraphicsView):
                 if self.rubberbandWidth != 0 and self.rubberbandHeight != 0 and len(selecteditems) != 0 :
                     self.showpopupmenu = True
         self.itemSelected = False
+        '''
         if self.showpopupmenu:
             popupmenu = QtGui.QMenu('PopupMenu', self)
             self.delete = QtGui.QAction(self.tr('delete'), self)
@@ -393,12 +400,70 @@ class GraphicalView(QtGui.QGraphicsView):
             popupmenu.addAction(self.move)
             popupmenu.exec_(event.globalPos())
         self.showpopupmenu = False
+        '''
 
+    def keyPressEvent(self,event):
+        key = event.text().toAscii().toHex()
+        if (key ==  '41'): # 'A' fits the view to iconScale factor
+            itemignoreZooming = False
+            self.updateItemTransformationMode(itemignoreZooming)
+            self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
+            self.drawLine_arrow(itemignoreZooming=False)
 
+        elif (key == '2e'): # '.' key, lower case for '>' zooms in
+            self.scale(1.1,1.1)
 
+        elif (key == '2c'): # ',' key, lower case for '<' zooms in
+            self.scale(1/1.1,1/1.1)
+
+        elif (key == '3c'): # '<' key. zooms-in to iconScale factor
+            self.iconScale *= 0.8
+            self.updateScale( self.iconScale )
+
+        elif (key == '3e'): # '>' key. zooms-out to iconScale factor
+            self.iconScale *= 1.25
+            self.updateScale( self.iconScale )
+
+        elif (key == '61'):  # 'a' fits the view to initial value where iconscale=1
+            self.iconScale = 1
+            self.updateScale( self.iconScale )
+            self.fitInView(self.sceneContainerPt.itemsBoundingRect().x()-10,self.sceneContainerPt.itemsBoundingRect().y()-10,self.sceneContainerPt.itemsBoundingRect().width()+20,self.sceneContainerPt.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
+
+    def updateScale( self, scale ):
+        for item in self.sceneContainerPt.items():
+            if isinstance(item,KineticsDisplayItem):
+                item.refresh(scale)
+                #iteminfo = item.mobj.path+'/info'
+                #xpos,ypos = self.positioninfo(iteminfo)
+                xpos = item.scenePos().x()
+                ypos = item.scenePos().y()
+
+                if isinstance(item,ReacItem) or isinstance(item,EnzItem) or isinstance(item,MMEnzItem):
+                     item.setGeometry(xpos,ypos,
+                                     item.gobj.boundingRect().width(),
+                                     item.gobj.boundingRect().height())
+                elif isinstance(item,CplxItem):
+                    item.setGeometry(item.gobj.boundingRect().width()/2,item.gobj.boundingRect().height(),
+                                     item.gobj.boundingRect().width(),
+                                     item.gobj.boundingRect().height())
+                elif isinstance(item,PoolItem) or isinstance(item, PoolItemCircle):
+                     item.setGeometry(xpos, ypos,item.gobj.boundingRect().width()
+                                     +PoolItem.fontMetrics.width('  '),
+                                     item.gobj.boundingRect().height())
+                     item.bg.setRect(0, 0, item.gobj.boundingRect().width()+PoolItem.fontMetrics.width('  '), item.gobj.boundingRect().height())
+
+        self.layoutPt.drawLine_arrow(itemignoreZooming=False)
+        for k, v in self.layoutPt.qGraCompt.items():
+            rectcompt = v.childrenBoundingRect()
+            comptPen = v.pen()
+            comptWidth =  self.defaultComptsize*self.iconScale
+            comptPen.setWidth(comptWidth)
+            v.setPen(comptPen)
+            v.setRect(rectcompt.x()-comptWidth,rectcompt.y()-comptWidth,(rectcompt.width()+2*comptWidth),(rectcompt.height()+2*comptWidth))
+    
     def moveSelections(self):
       self.setCursor(Qt.Qt.CrossCursor)
-      print " selected Item ",self.layoutPt.sceneContainer.selectedItems()
+      #print " selected Item ",self.layoutPt.sceneContainer.selectedItems()
             
       #self.deselectSelections()
 
@@ -416,19 +481,42 @@ class GraphicalView(QtGui.QGraphicsView):
             for unselectitem in self.rubberbandlist:
                 if unselectitem.isSelected() == True:
                     unselectitem.setSelected(0)
+            #First for loop removes all the enz b'cos if parent is removed then
+            #then it will created problem at    qgraphicitem
             for item in (qgraphicsitem for qgraphicsitem in self.rubberbandlist):
-                self.deleteItem(item)
-        self.deselectSelections()
+                if isinstance(item,MMEnzItem) or isinstance(item,EnzItem) or isinstance(item,CplxItem):
+                    self.deleteItem(item)
+            for item in (qgraphicsitem for qgraphicsitem in self.rubberbandlist):
+                if not (isinstance(item,MMEnzItem) or isinstance(item,EnzItem) or isinstance(item,CplxItem)):
+                    self.deleteItem(item)
+
+            self.sceneContainerPt.clear()
+            self.layoutPt.getMooseObj()
+            setupItem(self.modelRoot,self.layoutPt.srcdesConnection)
+            self.layoutPt.mooseObjOntoscene()
+            self.layoutPt.drawLine_arrow(False)
+        self.selections = []
+
+        # self.deselectSelections()
 
     def deleteItem(self,item):
         self.layoutPt.plugin.mainWindow.objectEditSlot('/',False)
         self.layoutPt.deleteSolver()
         if isinstance(item,KineticsDisplayItem):
             if moose.exists(item.mobj.path):
-                moose.delete(item.mobj)
+                #self.updateDictionaries(item, mobj)
                 self.sceneContainerPt.removeItem(item)
+                #removing the table from the graph after removing object for Pool and BuffPool
+                if isinstance(item,PoolItem) or isinstance(item,BufPool):
+                    tableObj = (item.mobj).neighbors['getConc']
+                    if tableObj:
+                        moose.delete(tableObj[0].path)
+                        self.layoutPt.plugin.getRunView().plotWidgetContainer.plotAllData()
+                moose.delete(item.mobj)
+
         elif isinstance(item,QtGui.QGraphicsPolygonItem):
             self.sceneContainerPt.removeItem(item)
+    
 
     def zoomSelections(self, x0, y0, x1, y1):
 
@@ -543,8 +631,7 @@ class GraphicalView(QtGui.QGraphicsView):
             callsetupItem = False
             
         if callsetupItem:
-            #print " here in kkitView ",self.layoutPt.srcdesConnection
+            self.layoutPt.getMooseObj()
             setupItem(self.modelRoot,self.layoutPt.srcdesConnection)
-            #print " after ",self.layoutPt.srcdesConnection
             self.layoutPt.drawLine_arrow(False)
 

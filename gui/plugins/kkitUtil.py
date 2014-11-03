@@ -46,11 +46,11 @@ def colorCheck(fc_bgcolor,fcbg):
             pickledColor = colorMap[tc]
             fc_bgcolor = QColor(*pickledColor)
 
-        elif fc_bgcolor.isalpha():
+        elif fc_bgcolor.isalpha() or fc_bgcolor.isalnum():
             fc_bgcolor = validColorcheck(fc_bgcolor)
         else:
-            #fc_bgcolor = QColor(*eval(fc_bgcolor))
-            fc_bgcolor = validColorcheck(fc_bgcolor)
+            fc_bgcolor = QColor(*eval(fc_bgcolor))
+            # fc_bgcolor = validColorcheck(fc_bgcolor)
     return(fc_bgcolor)
 
 def validColorcheck(color):

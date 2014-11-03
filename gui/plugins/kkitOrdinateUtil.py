@@ -19,54 +19,59 @@ def setupMeshObj(modelRoot):
     xmax = 1.0
     ymin = 0.0
     ymax = 1.0
+    noPositionInfo = True
     meshEntry = {}
+    if meshEntry:
+        meshEntry.clear()
+    else:
+        meshEntry = {}
     xcord = []
     ycord = []
     meshEntryWildcard = '/##[ISA=ChemCompt]'
     if modelRoot != '/':
         meshEntryWildcard = modelRoot+meshEntryWildcard
     for meshEnt in wildcardFind(meshEntryWildcard):
-        mollist = []
-        realist = []
-        enzlist = []
+        mollist  = []
+        realist  = []
+        enzlist  = []
         cplxlist = []
-        tablist = []
+        tablist  = []
         funclist = []
 
-        mol_cpl = wildcardFind(meshEnt.path+'/##[ISA=PoolBase]')
+        mol_cpl  = wildcardFind(meshEnt.path+'/##[ISA=PoolBase]')
         funclist = wildcardFind(meshEnt.path+'/##[ISA=Function]')
-        enzlist = wildcardFind(meshEnt.path+'/##[ISA=EnzBase]')
-        realist = wildcardFind(meshEnt.path+'/##[ISA=ReacBase]')
-        tablist = wildcardFind(meshEnt.path+'/##[ISA=StimulusTable]')
-    
-        for m in mol_cpl:
-            if isinstance(element(m.parent),CplxEnzBase):
-                cplxlist.append(m)
-                objInfo = m.parent.path+'/info'
-            elif isinstance(element(m),moose.PoolBase):
-                mollist.append(m)
-                objInfo =m.path+'/info'
-            xcord.append(xyPosition(objInfo,'x'))
-            ycord.append(xyPosition(objInfo,'y')) 
+        enzlist  = wildcardFind(meshEnt.path+'/##[ISA=EnzBase]')
+        realist  = wildcardFind(meshEnt.path+'/##[ISA=ReacBase]')
+        tablist  = wildcardFind(meshEnt.path+'/##[ISA=StimulusTable]')
+        if mol_cpl or funclist or enzlist or realist or tablist:
+            for m in mol_cpl:
+                if isinstance(element(m.parent),CplxEnzBase):
+                    cplxlist.append(m)
+                    objInfo = m.parent.path+'/info'
+                elif isinstance(element(m),moose.PoolBase):
+                    mollist.append(m)
+                    objInfo =m.path+'/info'
+                xcord.append(xyPosition(objInfo,'x'))
+                ycord.append(xyPosition(objInfo,'y')) 
 
-        getxyCord(xcord,ycord,funclist)
-        getxyCord(xcord,ycord,enzlist)
-        getxyCord(xcord,ycord,realist)
-        getxyCord(xcord,ycord,tablist)
+            getxyCord(xcord,ycord,funclist)
+            getxyCord(xcord,ycord,enzlist)
+            getxyCord(xcord,ycord,realist)
+            getxyCord(xcord,ycord,tablist)
 
-        meshEntry[meshEnt] = {'enzyme':enzlist,
-                              'reaction':realist,
-                              'pool':mollist,
-                              'cplx':cplxlist,
-                              'table':tablist,
-                              'function':funclist
-                              }
-        xmin = min(xcord)
-        xmax = max(xcord)
-        ymin = min(ycord)
-        ymax = max(ycord)
-        noPositionInfo = len(np.nonzero(xcord)[0]) == 0 \
-            and len(np.nonzero(ycord)[0]) == 0
+            meshEntry[meshEnt] = {'enzyme':enzlist,
+                                  'reaction':realist,
+                                  'pool':mollist,
+                                  'cplx':cplxlist,
+                                  'table':tablist,
+                                  'function':funclist
+                                  }
+            xmin = min(xcord)
+            xmax = max(xcord)
+            ymin = min(ycord)
+            ymax = max(ycord)
+            noPositionInfo = len(np.nonzero(xcord)[0]) == 0 \
+                and len(np.nonzero(ycord)[0]) == 0
     return(meshEntry,xmin,xmax,ymin,ymax,noPositionInfo)
 
 def getxyCord(xcord,ycord,list1):
@@ -85,6 +90,8 @@ def setupItem(modelPath,cntDict):
     eg. substrate and product connectivity to reaction's and enzyme's \
     sumtotal connectivity to its pool are collected '''
     #print " setupItem"
+    sublist = []
+    prdlist = []
     zombieType = ['ReacBase','EnzBase','Function','StimulusTable']
     for baseObj in zombieType:
         path = '/##[ISA='+baseObj+']'
@@ -96,25 +103,25 @@ def setupItem(modelPath,cntDict):
                 prdlist = []
                 uniqItem,countuniqItem = countitems(items,'subOut')
                 for sub in uniqItem: 
-                    sublist.append((sub,'s',countuniqItem[sub]))
+                    sublist.append((element(sub),'s',countuniqItem[sub]))
 
                 uniqItem,countuniqItem = countitems(items,'prd')
                 for prd in uniqItem:
-                    prdlist.append((prd,'p',countuniqItem[prd]))
+                    prdlist.append((element(prd),'p',countuniqItem[prd]))
                 
                 if (baseObj == 'CplxEnzBase') :
                     uniqItem,countuniqItem = countitems(items,'toEnz')
                     for enzpar in uniqItem:
-                        sublist.append((enzpar,'t',countuniqItem[enzpar]))
+                        sublist.append((element(enzpar),'t',countuniqItem[enzpar]))
                     
                     uniqItem,countuniqItem = countitems(items,'cplxDest')
                     for cplx in uniqItem:
-                        prdlist.append((cplx,'cplx',countuniqItem[cplx]))
+                        prdlist.append((element(cplx),'cplx',countuniqItem[cplx]))
 
                 if (baseObj == 'EnzBase'):
                     uniqItem,countuniqItem = countitems(items,'enzDest')
                     for enzpar in uniqItem:
-                        sublist.append((enzpar,'t',countuniqItem[enzpar]))
+                        sublist.append((element(enzpar),'t',countuniqItem[enzpar]))
                 cntDict[items] = sublist,prdlist
         elif baseObj == 'Function':
             for items in wildcardFind(path):
@@ -123,13 +130,12 @@ def setupItem(modelPath,cntDict):
                 item = items.path+'/x[0]'
                 uniqItem,countuniqItem = countitems(item,'input')
                 for funcpar in uniqItem:
-                    sublist.append((funcpar,'sts',countuniqItem[funcpar]))
+                    sublist.append((element(funcpar),'sts',countuniqItem[funcpar]))
                 
                 uniqItem,countuniqItem = countitems(items,'valueOut')
                 for funcpar in uniqItem:
-                    prdlist.append((funcpar,'stp',countuniqItem[funcpar]))
-                
-            cntDict[items] = sublist,prdlist
+                    prdlist.append((element(funcpar),'stp',countuniqItem[funcpar]))
+                cntDict[items] = sublist,prdlist
 
         # elif baseObj == 'Function':
         #     #ZombieSumFunc adding inputs
@@ -150,8 +156,9 @@ def setupItem(modelPath,cntDict):
                 tablist = []
                 uniqItem,countuniqItem = countitems(tab,'output')
                 for tabconnect in uniqItem:
-                    tablist.append((tabconnect,'tab',countuniqItem[tabconnect]))
+                    tablist.append((element(tabconnect),'tab',countuniqItem[tabconnect]))
                 cntDict[tab] = tablist
+
 def countitems(mitems,objtype):
     items = []
     #print "mitems in countitems ",mitems,objtype
@@ -210,8 +217,12 @@ def autoCoordinates(meshEntry,srcdesConnection):
     for y in position.values():
         xcord.append(y[0])
         ycord.append(y[1])
-	    
-    return(min(xcord),max(xcord),min(ycord),max(ycord),position)
+    if xcord and ycord:
+        xmin = min(xcord)
+        xmax = max(xcord)
+        ymin = min(ycord)
+        ymax = max(ycord)    	    
+    return(xmin,xmax,ymin,ymax,position)
 
 def find_index(value, key):
     """ Value.get(key) to avoid expection which would raise if empty value in dictionary for a given key """
