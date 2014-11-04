@@ -204,20 +204,25 @@ void ZombieEnz::setSolver( Id stoich, Id enz )
 	assert( cplxFinfo );
 	vector< Id > temp;
 	unsigned int numReactants;
+	bool isOK = true;
 	numReactants = enz.element()->getNeighbors( temp, enzFinfo ); 
-	assert( numReactants == 1 );
+	isOK &= ( numReactants == 1 );
 	Id enzMol = temp[0];
 	vector< Id > subs;
 	numReactants = enz.element()->getNeighbors( subs, subFinfo ); 
-	assert( numReactants > 0 );
+	isOK &= ( numReactants > 0 );
 	numReactants = enz.element()->getNeighbors( temp, cplxFinfo ); 
-	assert( numReactants == 1 );
+	isOK &= ( numReactants == 1 );
 	Id cplx = temp[0];
 	vector< Id > prds;
 	numReactants = enz.element()->getNeighbors( prds, prdFinfo ); 
-	assert( numReactants > 0 );
+	isOK &= ( numReactants > 0 );
 
-	assert( stoich.element()->cinfo()->isA( "Stoich" ) );
-	stoich_ = reinterpret_cast< Stoich* >( stoich.eref().data() );
-	stoich_->installEnzyme( enz, enzMol, cplx, subs, prds );
+	if ( isOK ) {
+		assert( stoich.element()->cinfo()->isA( "Stoich" ) );
+		stoich_ = reinterpret_cast< Stoich* >( stoich.eref().data() );
+		stoich_->installEnzyme( enz, enzMol, cplx, subs, prds );
+	} else {
+		cout << "Warning: ZombieEnz:setSolver: Dangling Enz, missing a substrate or product\n"; 
+	}
 }
