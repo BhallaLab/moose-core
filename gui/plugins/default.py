@@ -71,6 +71,9 @@ from PlotWidgetContainer import PlotWidgetContainer
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtGui import QDoubleValidator
 from matplotlib.colors import ColorConverter
+sys.path.append('plugins')
+from kkitUtil import getColor
+
 
 class MoosePlugin(MoosePluginBase):
     """Default plugin for MOOSE GUI"""
@@ -884,32 +887,6 @@ class PlotWidget(QWidget):
         self.dataRoot = path
         #plotAllData()
 
-    def genColorMap(self,tableObject):
-        #print "tableObject in colorMap ",tableObject
-        species = tableObject+'/info'
-        colormap_file = open(os.path.join(config.settings[config.KEY_COLORMAP_DIR], 'rainbow2.pkl'),'rb')
-        self.colorMap = pickle.load(colormap_file)
-        colormap_file.close()
-        hexchars = "0123456789ABCDEF"
-        color = 'white'
-        #Genesis model exist the path and color will be set but not xml file so bypassing
-        #print "here genColorMap ",moose.exists(species)
-        if moose.exists(species):
-            color = moose.element(species).getField('color')
-            if ((not isinstance(color,(list,tuple)))):
-                if color.isdigit():
-                    tc = int(color)
-                    tc = (tc * 2 )
-                    r,g,b = self.colorMap[tc]
-                    color = "#"+ hexchars[r / 16] + hexchars[r % 16] + hexchars[g / 16] + hexchars[g % 16] + hexchars[b / 16] + hexchars[b % 16]
-                elif color.isalpha() or color.isalnum():
-                    r,g,b,a = QColor(color).getRgb()
-                    color = "#"+ hexchars[r / 16] + hexchars[r % 16] + hexchars[g / 16] + hexchars[g % 16] + hexchars[b / 16] + hexchars[b % 16]
-                else:
-                    r,g,b,a = eval(color)
-                    color = "#"+ hexchars[r / 16] + hexchars[r % 16] + hexchars[g / 16] + hexchars[g % 16] + hexchars[b / 16] + hexchars[b % 16]
-        return color
-
     def plotAllData(self):
         """Plot data from existing tables"""
         path = self.model.path
@@ -940,9 +917,9 @@ class PlotWidget(QWidget):
                     # axes.
                     #
                     #Harsha: Adding color to graph for signalling model, check if given path has cubemesh or cylmesh
-                    color = 'white'
-                    color = self.genColorMap(tableObject[0].path)
-                    #print "color ",color
+                    #
+                    color = getColor(tableObject[0].path+'/info')
+                    color = str(color[1].name()).upper()
                     lines = self.pathToLine[tab.path]
                     if len(lines) == 0:
                         #Harsha: pass color for plot if exist and not white else random color
@@ -958,7 +935,7 @@ class PlotWidget(QWidget):
                                 + "."
                                 + field
                                 )
-                        if (color != 'white'):
+                        if (color != '#0000FF'):
                             newLines = self.addTimeSeries(tab, label=label,color=color)
                         else:
                             newLines = self.addTimeSeries(tab, label=label)
