@@ -302,8 +302,11 @@ class  KineticsWidget(EditorWidgetBase):
                 self.autocoordinates = True
            
                 self.xmin,self.xmax,self.ymin,self.ymax,self.autoCordinatepos = autoCoordinates(self.meshEntry,self.srcdesConnection)
-            # TODO: size will be dummy at this point, but I need the availiable size from the Gui
-            self.size = QtCore.QSize(1000 ,600)
+            # TODO: size will be dummy at this point, busizet I need the availiable size from the Gui
+            if isinstance(self,kineticEditorWidget):
+                self.size = QtCore.QSize(1000 ,600)
+            else:
+                self.size = QtCore.QSize(500 ,550)
             #self.size = QtCore.QSize(300,400)
 
             # Scale factor to translate the x -y position to fit the Qt graphicalScene, scene width. """
@@ -569,6 +572,13 @@ class  KineticsWidget(EditorWidgetBase):
             # For calcArrow(src,des,endtype,itemignoreZooming) is to be provided
             arrow = calcArrow(srcdes,self.itemignoreZooming,self.iconScale)
             ql.setPolygon(arrow)
+    
+    def cplxUpdatearrow(self,srcdes):
+        # srcdes which is 'EnzItem' from this,get ChildItems are retrived (b'cos cplx is child of zombieEnz)
+        #And cplxItem is passed for updatearrow
+        for item in srcdes.childItems():
+            if isinstance(item,CplxItem):
+                self.updateArrow(item)    
     
     def deleteSolver(self):
         if moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]'):
