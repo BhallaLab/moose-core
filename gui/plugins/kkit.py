@@ -231,7 +231,7 @@ class  KineticsWidget(EditorWidgetBase):
         # if (sceneDim.width() == 0 and sceneDim.height() == 0):
         #     self.sceneContainer.setSceneRect(0,0,30,30)
         # else:
-        self.sceneContainer.setSceneRect(self.sceneContainer.itemsBoundingRect())
+        #elf.sceneContainer.setSceneRect(self.sceneContainer.itemsBoundingRect())
         self.sceneContainer.setBackgroundBrush(QColor(230,220,219,120))
             
     def updateModelView(self):
@@ -243,7 +243,7 @@ class  KineticsWidget(EditorWidgetBase):
             # then remove all the view and add an empty view
             if hasattr(self, 'view') and isinstance(self.view, QtGui.QWidget):
                 self.layout().removeWidget(self.view)
-            self.sceneContainer.setSceneRect(-self.width()/2,-self.height()/2,self.width(),self.height())
+           #self.sceneContainer.setSceneRect(-self.width()/2,-self.height()/2,self.width(),self.height())
             self.view = GraphicalView(self.modelRoot,self.sceneContainer,self.border,self,self.createdItem)
             if isinstance(self,kineticEditorWidget):
                 self.view.setRefWidget("editorView")

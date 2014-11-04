@@ -177,8 +177,8 @@ def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
             qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y()-30,bgcolor,QtGui.QColor('green'))
             enzinfo.x = posWrtComp.x()
             enzinfo.y = posWrtComp.y()
-            r,g,b,a = bgcolor.getRgb()
-            color = "#"+ hexchars[r / 16] + hexchars[r % 16] + hexchars[g / 16] + hexchars[g % 16] + hexchars[b / 16] + hexchars[b % 16]
+            # r,g,b,a = bgcolor.getRgb()
+            # color = "#"+ hexchars[r / 16] + hexchars[r % 16] + hexchars[g / 16] + hexchars[g % 16] + hexchars[b / 16] + hexchars[b % 16]
             enzinfo.color = "blue"
             layoutPt.mooseId_GObj[enzObj] = qGItem
             view.emit(QtCore.SIGNAL("dropped"),enzObj)

@@ -211,6 +211,7 @@ class GraphicalView(QtGui.QGraphicsView):
 
     def removeConnector(self):
         if self.connectionSign is not None:
+            print "self.connectionSign ",self.connectionSign
             self.sceneContainerPt.removeItem(self.connectionSign)
             self.connectionSign = None
 
@@ -340,7 +341,8 @@ class GraphicalView(QtGui.QGraphicsView):
             item = self.itemAt(pos)
             if item:
                 itemClass = type(item).__name__
-                if ( itemClass!='ComptItem' and itemClass != 'QGraphicsPolygonItem'):
+                if ( itemClass!='ComptItem' and itemClass != 'QGraphicsPolygonItem' and 
+                    itemClass != 'QGraphicsEllipseItem' and itemClass != 'QGraphicsRectItem'):
                     self.setCursor(Qt.Qt.CrossCursor)
                     mimeData = QtCore.QMimeData()
                     mimeData.setText(item.mobj.name)
@@ -402,13 +404,22 @@ class GraphicalView(QtGui.QGraphicsView):
         self.showpopupmenu = False
         '''
 
+    def updateItemTransformationMode(self, on):
+        for v in self.sceneContainerPt.items():
+            if( not isinstance(v,ComptItem)):
+                #if ( isinstance(v, PoolItem) or isinstance(v, ReacItem) or isinstance(v, EnzItem) or isinstance(v, CplxItem) ):
+                if isinstance(v,KineticsDisplayItem):
+                    v.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations, on)
+    
     def keyPressEvent(self,event):
         key = event.text().toAscii().toHex()
+        print "key in keyPressEvent",key
         if (key ==  '41'): # 'A' fits the view to iconScale factor
             itemignoreZooming = False
             self.updateItemTransformationMode(itemignoreZooming)
-            self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
-            self.drawLine_arrow(itemignoreZooming=False)
+            print "keyPressEvent A "
+            self.fitInView(self.sceneContainerPt.itemsBoundingRect().x()-10,self.sceneContainerPt.itemsBoundingRect().y()-10,self.sceneContainerPt.itemsBoundingRect().width()+20,self.sceneContainerPt.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
+            self.layoutPt.drawLine_arrow(itemignoreZooming=False)
 
         elif (key == '2e'): # '.' key, lower case for '>' zooms in
             self.scale(1.1,1.1)
@@ -519,40 +530,8 @@ class GraphicalView(QtGui.QGraphicsView):
     
 
     def zoomSelections(self, x0, y0, x1, y1):
-
-        # for selection in self.selections:
-        #     if isinstance(selection, PoolItem):
-
         self.fitInView(self.mapToScene(QtCore.QRect(x0, y0, x1 - x0, y1 - y0)).boundingRect(), Qt.Qt.KeepAspectRatio)
-        #print " matrix",self.matrix().m11()
         self.deselectSelections()
-
-        # vTransform = self.viewportTransform()
-        # rubberbandWidth     = x1 - x0
-        # rubberbandHeight    = y1 - y0
-
-        # for selection in self.selections:
-        #     if isinstance(selection, PoolItem):
-        #     if((self.matrix().m11()>=1.0)and(self.matrix().m22() >=1.0)):
-        #         for item in ( Txtitem for Txtitem in self.sceneContainerPt.items() if isinstance(Txtitem,PoolItem) ):
-        #             item.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations, False)
-        # else:
-        #     self.rubberbandlist = self.sceneContainerPt.items(self.endScenepos.x(),self.endScenepos.y(),abs(self.rubberbandWidth),abs(self.rubberbandHeight), Qt.Qt.IntersectsItemShape)
-        #     for unselectitem in self.rubberbandlist:
-        #         if unselectitem.isSelected() == True:
-        #             unselectitem.setSelected(0)
-        #     for items in (qgraphicsitem for qgraphicsitem in self.rubberbandlist if isinstance(qgraphicsitem,PoolItem)):
-        #         self.fitInView(self.endScenepos.x(),self.endScenepos.y(),abs(self.rubberbandWidth),abs(self.rubberbandHeight),Qt.Qt.KeepAspectRatio)
-        #         if((self.matrix().m11()>=1.0)and(self.matrix().m22() >=1.0)):
-        #             for item in ( Txtitem for Txtitem in self.sceneContainerPt.items() if isinstance (Txtitem, PoolItem)):
-        #                 item.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations, False)
-        # self.rubberBandactive = False
-
-
-    # def resizeEvent(self, event):
-    # #     """ zoom when resize! """
-    #     self.fitInView(self.sceneContainerPt.itemsBoundingRect().x()-10,self.sceneContainerPt.itemsBoundingRect().y()-10,self.sceneContainerPt.itemsBoundingRect().width()+20,self.sceneContainerPt.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
-    #     # QtGui.QGraphicsView.resizeEvent(self, event)
 
     def wheelEvent(self,event):
         factor = 1.41 ** (event.delta() / 240.0)

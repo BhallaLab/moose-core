@@ -209,6 +209,7 @@ class PoolItemCircle(PoolItem):
         self.bgColor = QtGui.QGraphicsEllipseItem(self)
         self.bgColor.setFlag(QtGui.QGraphicsItem.ItemStacksBehindParent,True)
         self.bgColor.setRect(((self.gobj.boundingRect().width()+PoolItem.fontMetrics.width('  '))/2)-5,self.gobj.boundingRect().height()/2-5,10,10)
+    
     def setDisplayProperties(self,x,y,textcolor,bgcolor):
         self.setGeometry(x, y,self.gobj.boundingRect().width()
                         +PoolItem.fontMetrics.width('  '), 
@@ -227,6 +228,11 @@ class PoolItemCircle(PoolItem):
         self.bgColor.setRect(((self.gobj.boundingRect().width()+PoolItem.fontMetrics.width('  '))/2)-5,self.gobj.boundingRect().
             height()/2-5,10,10)
     
+    def refresh(self,scale):
+        fontsize = PoolItem.defaultFontsize*scale
+        font =QtGui.QFont("Helvetica")
+        font.setPointSize(fontsize)
+        self.gobj.setFont(font)    
     def MooseRef(self):
         return self.gobj.mobj
 
@@ -608,45 +614,6 @@ class ComptItem(QtGui.QGraphicsRectItem):
         if change == QtGui.QGraphicsItem.ItemSelectedChange and value == True:
            self.cmptEmitter.emit(QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.mobj)
         return QtGui.QGraphicsItem.itemChange(self,change,value)
-
-class FuncItem1(KineticsDisplayItem):
-    defaultWidth = 20
-    defaultHeight = 10    
-    def __init__(self, *args, **kwargs):
-        KineticsDisplayItem.__init__(self, *args, **kwargs)
-        functionSignImage     = QtGui.QPixmap('../Docs/images/classIcon/Function.png')
-        self.bg = QtGui.QGraphicsRectItem(self)
-        self.bg.setAcceptHoverEvents(True)
-        self.gobj = QtGui.QGraphicsPixmapItem(functionSignImage,self.bg)
-        self.gobj.mobj = self.mobj
-        # may be I will show expression up on hover
-        #doc = moose.element('/classes/%s' % (classname)).docs
-        #doc = doc.split('Description:')[-1].split('Name:')[0].strip()
-        funcdoc = (element(self.mobj.path)).expr
-        doc = (funcdoc)#"Fucntion expression will be showed"
-        self.gobj.setToolTip(doc)
-
-    def updateValue(self,gobj):
-        #doc = moose.element('/classes/%s' % (classname)).docs
-        #doc = doc.split('Description:')[-1].split('Name:')[0].strip()
-        #doc = "Fucntion expression will be showed"
-        self.gobj.setToolTip(func)
-
-    def setDisplayProperties(self,x,y,textcolor,bgcolor):
-        """Set the display properties of this item."""
-        self.setGeometry(x,y, 
-                         self.gobj.boundingRect().width(), 
-                         self.gobj.boundingRect().height())
-
-        #elf.gobj.setBrush(QtGui.QBrush(textcolor))
-    def boundingRect(self):
-        ''' reimplimenting boundingRect for redrawning '''
-        return QtCore.QRectF(0,0,self.gobj.boundingRect().width()+PoolItem.fontMetrics.width('  '),self.gobj.boundingRect().height())
-    def refresh(self,scale):
-        pass
-        # defaultWidth = EnzItem.defaultWidth*scale
-        # defaultHeight = EnzItem.defaultHeight*scale
-        # self.gobj.setRect(0,0,defaultWidth,defaultHeight)
 
 import sys
 if __name__ == '__main__':
