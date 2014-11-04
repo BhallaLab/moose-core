@@ -1089,7 +1089,8 @@ ZeroOrder* makeHalfReaction(
 			temp.push_back( sc->convertIdToPoolIndex( reactants[i] ) );
 		rateTerm = new NOrder( rate, temp );
 	} else {
-		cout << "Error: Stoich::makeHalfReaction: no reactants\n";
+		cout << "Warning: Stoich::makeHalfReaction: no reactants\n";
+		rateTerm = new ZeroOrder(0.0); // Dummy RateTerm to avoid crash.
 	}
 	return rateTerm;
 }

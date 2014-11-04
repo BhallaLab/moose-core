@@ -327,10 +327,12 @@ void Ksolve::setStoich( Id stoich )
 		// ode.initStepSize = getEstimatedDt();
 		ode.initStepSize = 0.01; // This will be overridden at reinit.
 #ifdef USE_GSL
+		ode.gslSys.dimension = stoichPtr_->getNumAllPools() + stoichPtr_->getNumProxyPools();
+		if ( ode.gslSys.dimension == 0 )
+			return; // No pools, so don't bother.
 		innerSetMethod( ode, method_ );
 		ode.gslSys.function = &VoxelPools::gslFunc;
    		ode.gslSys.jacobian = 0;
-		ode.gslSys.dimension = stoichPtr_->getNumAllPools() + stoichPtr_->getNumProxyPools();
 		innerSetMethod( ode, method_ );
 		unsigned int numVoxels = pools_.size();
 		for ( unsigned int i = 0 ; i < numVoxels; ++i ) {
@@ -453,6 +455,8 @@ double Ksolve::getEstimatedDt() const
 //////////////////////////////////////////////////////////////
 void Ksolve::process( const Eref& e, ProcPtr p )
 {
+	if ( isBuilt_ == false )
+		return;
 	// Second, handle incoming diffusion values, update S with those.
 	if ( dsolvePtr_ ) {
 		vector< double > dvalues( 4 );
@@ -512,7 +516,7 @@ void Ksolve::reinit( const Eref& e, ProcPtr p )
 		for ( unsigned int i = 0 ; i < pools_.size(); ++i )
 			pools_[i].reinit( p->dt );
 	} else {
-		cout << "Warning:Ksolve::reinit: Reaction system not initialized\n";
+		cout << "Warning:Ksolve::reinit: Empty Reaction system \n";
 		return;
 	}
 	for ( unsigned int i = 0; i < xfer_.size(); ++i ) {
