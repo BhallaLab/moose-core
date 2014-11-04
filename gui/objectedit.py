@@ -70,7 +70,7 @@ sys.path.append('../python')
 import moose
 import defaults
 import config
-
+from plugins.kkitUtil import getColor
 #these fields will be ignored
 extra_fields = ['this',
                 'me',
@@ -309,7 +309,6 @@ class ObjectEditView(QtGui.QTableView):
     To enable undo/redo conect the corresponding actions from the gui
     to view.model().undo and view.model().redo slots.
     """
-    colorChanged = QtCore.pyqtSignal('PyQt_PyObject', 'PyQt_PyObject')
     def __init__(self, mobject, undolen=defaults.OBJECT_EDIT_UNDO_LENGTH, parent=None):
         QtGui.QTableView.__init__(self, parent)
         #self.setEditTriggers(self.DoubleClicked | self.SelectedClicked | self.EditKeyPressed)
@@ -337,14 +336,13 @@ class ObjectEditView(QtGui.QTableView):
             self.setIndexWidget(self.model().index(colorIndex,1), self.colorButton)
             # self.colorDialog.colorSelected.connect(
             #     lambda color: 
-            #                                       )
-            self.colorDialog.colorSelected.connect(self.colorChangedEmit)
-
+            #             
+            self.setColor(getColor(self.model().mooseObject.path+'/info')[1])
         except:
             pass
         print 'Created view with', mobject
 
-    def setColor(color):
+    def setColor(self, color):
         self.colorButton.setStyleSheet(
                     "QPushButton {"
                 +   "background-color: {0}; color: {0};".format(color.name())
@@ -357,11 +355,6 @@ class ObjectEditView(QtGui.QTableView):
         self.viewport().update()
 
 
-    def colorChangedEmit(self, color):
-        #print(color)
-        #print "### ",self.model().mooseObject
-        self.colorChanged.emit(self.model().mooseObject, color)
-        #print "end"
     
 class ObjectEditDockWidget(QtGui.QDockWidget):
     """A dock widget whose title is set by the current moose
@@ -375,6 +368,7 @@ class ObjectEditDockWidget(QtGui.QDockWidget):
 
     """
     objectNameChanged = QtCore.pyqtSignal('PyQt_PyObject')
+    colorChanged = QtCore.pyqtSignal(object, object)
     def __init__(self, mobj='/', parent=None, flags=None):
         QtGui.QDockWidget.__init__(self, parent=parent)
         mobj = moose.element(mobj)
@@ -383,6 +377,7 @@ class ObjectEditDockWidget(QtGui.QDockWidget):
         self.view_dict = {mobj: view}
         self.setWidget(view)
         self.setWindowTitle('Edit: %s' % (mobj.path))
+        # self.view.colorDialog.colorSelected.connect(self.colorChangedEmit)
 
     def setObject(self, mobj):
         element = moose.element(mobj)
@@ -393,14 +388,13 @@ class ObjectEditDockWidget(QtGui.QDockWidget):
             self.view_dict[element] = view
             view.model().objectNameChanged.connect(
                          self.emitObjectNameChanged)
+        view.colorDialog.colorSelected.connect(lambda color: self.colorChanged.emit(element, color))
         self.setWidget(view)
         self.setWindowTitle('Edit: %s' % (element.path))
-        #print view.model().mooseObject
         view.update()
 
     def emitObjectNameChanged(self, mobj):
         self.objectNameChanged.emit(mobj)
-
 
 def main():
     app = QtGui.QApplication(sys.argv)

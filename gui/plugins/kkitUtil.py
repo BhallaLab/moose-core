@@ -39,7 +39,9 @@ def colorCheck(fc_bgcolor,fcbg):
         but for tuple and list its taken as r,g,b value.
     """
     if isinstance(fc_bgcolor,str):
-        if fc_bgcolor.isdigit():
+        if fc_bgcolor.startswith("#"):
+            fc_bgcolor = QColor(fc_bgcolor)
+        elif fc_bgcolor.isdigit():
             """ color is int  a map from int to r,g,b triplets from pickled color map file """
             tc = int(fc_bgcolor)
             tc = 2*tc

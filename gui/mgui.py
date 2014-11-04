@@ -289,12 +289,7 @@ class MWindow(QtGui.QMainWindow):
             self.setCurrentView('editor')
         self.objectEditDockWidget.objectNameChanged.connect(
             self.plugin.getEditorView().getCentralWidget().updateItemSlot)
-        # self.objectEditDockWidget.objectColorChanged.connect(
-        #    self.plugin.getEditorView().getCentralWidget().updateColorSlot)
-        #self.objectEditDockWidget.view.colorDialog.colorSelected.connect(
-        #    lambda color: self.plugin.getEditorView().getCentralWidget().updateColorSlot(self.objectEditDockWidget.view.model().mooseObject, color)
-        #    )
-        self.objectEditDockWidget.view.colorChanged.connect(self.plugin.getEditorView().getCentralWidget().updateColorSlot)
+        self.objectEditDockWidget.colorChanged.connect(self.plugin.getEditorView().getCentralWidget().updateColorSlot)
         return self.plugin
 
     def updateExistingMenu(self, menu):

@@ -329,16 +329,16 @@ class  KineticsWidget(EditorWidgetBase):
                     item.updateSlot()
                     #once the text is edited in editor, laydisplay gets updated in turn resize the length, positionChanged signal shd be emitted
                     self.positionChange(mooseObject)
+
     def updateColorSlot(self,mooseObject, color):
         #Color slot for changing background color for PoolItem from objecteditor
-        #print mooseObject
-        #print color
         anninfo = moose.Annotator(mooseObject.path+'/info')
         textcolor,bgcolor = getColor(anninfo)
-        item = self.mooseId_GObj[mooseObject.getId()]
+        anninfo.color = str(color.name())
+        item = self.mooseId_GObj[mooseObject]
         if (isinstance(item,PoolItem) or isinstance(item,EnzItem) or isinstance(item,MMEnzItem) ):
             item.updateColor(color)
-
+        
     def mooseObjOntoscene(self):
         #  All the compartments are put first on to the scene \
         #  Need to do: Check With upi if empty compartments exist
@@ -369,7 +369,6 @@ class  KineticsWidget(EditorWidgetBase):
                     enzItem = EnzItem(enzObj,self.qGraCompt[cmpt])
                 else:
                     enzItem = MMEnzItem(enzObj,self.qGraCompt[cmpt])
-                #print " enzinfo",moose.Annotator(enzinfo).color,moose.Annotator(enzinfo).textColor
                 self.mooseId_GObj[element(enzObj.getId())] = enzItem
                 self.setupDisplay(enzinfo,enzItem,"enzyme")
                 
@@ -383,41 +382,33 @@ class  KineticsWidget(EditorWidgetBase):
                 poolItem = self.makePoolItem(poolObj,self.qGraCompt[cmpt])
                 self.mooseId_GObj[element(poolObj.getId())] = poolItem
                 self.setupDisplay(poolinfo,poolItem,"pool")
-                #self.setupSlot(poolObj,poolItem)
-
+                
             for reaObj in find_index(memb,'reaction'):
                 reainfo = reaObj.path+'/info'
                 reaItem = ReacItem(reaObj,self.qGraCompt[cmpt])
                 self.setupDisplay(reainfo,reaItem,"reaction")
                 self.mooseId_GObj[element(reaObj.getId())] = reaItem
-                #self.setupSlot(reaObj,reaItem)
+                
             for tabObj in find_index(memb,'table'):
                 tabinfo = tabObj.path+'/info'
                 tabItem = TableItem(tabObj,self.qGraCompt[cmpt])
                 self.setupDisplay(tabinfo,tabItem,"tab")
                 self.mooseId_GObj[element(tabObj.getId())] = tabItem
-                #self.setupSlot(tabObj,tabItem)
+                
             for funcObj in find_index(memb,'function'):
                 funcinfo = moose.element(funcObj.parent).path+'/info'
-                # p = element(funcObj.parent)
-                # pid = element(p).getId()
                 funcParent =self.mooseId_GObj[element(funcObj.parent)]
                 funcItem = FuncItem(funcObj,funcParent)
                 self.mooseId_GObj[element(funcObj.getId())] = funcItem
                 self.setupDisplay(funcinfo,funcItem,"Function")
-                #self.setupSlot(funcObj,funcItem)
+                
             for cplxObj in find_index(memb,'cplx'):
                 cplxinfo = (cplxObj.parent).path+'/info'
                 p = element(cplxObj).parent
-                # pid = element(p).getId()
-                # print "cplx parent ",p,pid
-                # print self.mooseId_GObj[p]
                 cplxItem = CplxItem(cplxObj,self.mooseId_GObj[element(cplxObj).parent])
-                #cplxItem = CplxItem(cplxObj,self.mooseId_GObj[element(cplxObj).parent.getId()])
                 self.mooseId_GObj[element(cplxObj.getId())] = cplxItem
                 self.setupDisplay(cplxinfo,cplxItem,"cplx")
-                #self.setupSlot(cplxObj,cplxItem)
-
+                
         # compartment's rectangle size is calculated depending on children
         for k, v in self.qGraCompt.items():
             rectcompt = v.childrenBoundingRect()
@@ -434,10 +425,8 @@ class  KineticsWidget(EditorWidgetBase):
         xpos,ypos = self.positioninfo(info)
         # For Reaction and Complex object I have skipped the process to get the facecolor and background color as \
         #    we are not using these colors for displaying the object so just passing dummy color white
-        if( (objClass == "reaction" ) or (objClass == "cplx")):
+        if( objClass == "reaction"  or objClass == "cplx" or objClass == "Function" or objClass == "StimulusTable"):
             textcolor,bgcolor = "white","white"
-        elif objClass == "tab":
-            textcolor,bgcolor = getColor(info)
         else:
             textcolor,bgcolor = getColor(info)
         graphicalObj.setDisplayProperties(xpos,ypos,textcolor,bgcolor)
