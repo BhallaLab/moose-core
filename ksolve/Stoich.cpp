@@ -1597,7 +1597,10 @@ void Stoich::updateFuncs( double* s, double t ) const
 {
 	for ( vector< FuncTerm* >::const_iterator i = funcs_.begin();
 					i != funcs_.end(); ++i ) {
-		(*i)->evalPool( s, t ); // s has arguments and also result location
+		if ( *i ) {
+			(*i)->evalPool( s, t ); 
+			// s holds arguments and also result location
+		}
 	}
 }
 
