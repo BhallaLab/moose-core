@@ -27,7 +27,8 @@ using namespace std;
 #include "FuncTerm.h"
 
 FuncTerm::FuncTerm()
-	: reactantIndex_( 1, 0 )
+	: reactantIndex_( 1, 0 ),
+		target_( ~0U )
 {
 	args_ = 0;
 	parser_.DefineConst(_T("pi"), (mu::value_type)M_PI);
@@ -127,7 +128,7 @@ double FuncTerm::operator() ( const double* S, double t ) const
 
 void FuncTerm::evalPool( double* S, double t ) const
 {
-	if ( !args_ )
+	if ( !args_ || target_ == ~0U )
 		return;
 	unsigned int i;
 	for ( i = 0; i < reactantIndex_.size(); ++i )

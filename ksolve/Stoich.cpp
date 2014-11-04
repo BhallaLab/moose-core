@@ -1238,6 +1238,23 @@ void Stoich::installMMenz( MMEnzymeBase* meb, unsigned int rateIndex,
 	}
 }
 
+// Handles dangling enzymes.
+void Stoich::installDummyEnzyme( Id enzId, Id enzMolId )
+{
+	ZeroOrder* r1 = new ZeroOrder( 0.0 ); // Dummy
+	ZeroOrder* r2 = new ZeroOrder( 0.0 ); // Dummy
+	ZeroOrder* r3 = new ZeroOrder( 0.0 ); // Dummy
+	vector< Id > dummy;
+	unsigned int rateIndex = convertIdToReacIndex( enzId );
+	if ( useOneWay_ ) { 
+		rates_[ rateIndex ] = r1;
+		rates_[ rateIndex + 1 ] = r2;
+		rates_[ rateIndex + 2 ] = r3;
+	} else {
+		rates_[ rateIndex ] = new BidirectionalReaction( r1, r2 );
+		rates_[ rateIndex + 1 ] = r3;
+	}
+}
 
 void Stoich::installEnzyme( Id enzId, Id enzMolId, Id cplxId,
 	const vector< Id >& subs, const vector< Id >& prds )

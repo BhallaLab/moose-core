@@ -217,12 +217,13 @@ void ZombieEnz::setSolver( Id stoich, Id enz )
 	vector< Id > prds;
 	numReactants = enz.element()->getNeighbors( prds, prdFinfo ); 
 	isOK &= ( numReactants > 0 );
+	assert( stoich.element()->cinfo()->isA( "Stoich" ) );
+	stoich_ = reinterpret_cast< Stoich* >( stoich.eref().data() );
 
 	if ( isOK ) {
-		assert( stoich.element()->cinfo()->isA( "Stoich" ) );
-		stoich_ = reinterpret_cast< Stoich* >( stoich.eref().data() );
 		stoich_->installEnzyme( enz, enzMol, cplx, subs, prds );
 	} else {
+		stoich_->installDummyEnzyme( enz, enzMol );
 		cout << "Warning: ZombieEnz:setSolver: Dangling Enz, missing a substrate or product\n"; 
 	}
 }

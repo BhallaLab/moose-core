@@ -268,6 +268,9 @@ class Stoich
 		void installEnzyme( ZeroOrder* r1, ZeroOrder* r2, ZeroOrder* r3,
 			Id enzId, Id enzMolId, const vector< Id >& prds );
 
+		/// This is used when the enzyme lacks sub or prd.
+		void installDummyEnzyme( Id enzId, Id enzMolId);
+
 		/**
 		 * This installs a funcTerm. Should be generic, that is, work
 		 * for any form of func. The pool is the FuncPool being
