@@ -412,30 +412,28 @@ class GraphicalView(QtGui.QGraphicsView):
                     v.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations, on)
     
     def keyPressEvent(self,event):
-        key = event.text().toAscii().toHex()
-        print "key in keyPressEvent",key
-        if (key ==  '41'): # 'A' fits the view to iconScale factor
+        key = event.key()
+        if (key ==  Qt.Qt.Key_A and (event.modifiers() & Qt.Qt.ShiftModifier)): # 'A' fits the view to iconScale factor
             itemignoreZooming = False
             self.updateItemTransformationMode(itemignoreZooming)
-            print "keyPressEvent A "
             self.fitInView(self.sceneContainerPt.itemsBoundingRect().x()-10,self.sceneContainerPt.itemsBoundingRect().y()-10,self.sceneContainerPt.itemsBoundingRect().width()+20,self.sceneContainerPt.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
             self.layoutPt.drawLine_arrow(itemignoreZooming=False)
 
-        elif (key == '2e'): # '.' key, lower case for '>' zooms in
-            self.scale(1.1,1.1)
-
-        elif (key == '2c'): # ',' key, lower case for '<' zooms in
-            self.scale(1/1.1,1/1.1)
-
-        elif (key == '3c'): # '<' key. zooms-in to iconScale factor
+        elif (key == Qt.Qt.Key_Less):# and (event.modifiers() & Qt.Qt.ShiftModifier)): # '<' key. zooms-in to iconScale factor
             self.iconScale *= 0.8
             self.updateScale( self.iconScale )
 
-        elif (key == '3e'): # '>' key. zooms-out to iconScale factor
+        elif (key == Qt.Qt.Key_Greater):# and (event.modifiers() & Qt.Qt.ShiftModifier)): # '>' key. zooms-out to iconScale factor
             self.iconScale *= 1.25
             self.updateScale( self.iconScale )
 
-        elif (key == '61'):  # 'a' fits the view to initial value where iconscale=1
+        elif (key == Qt.Qt.Key_Period): # '.' key, lower case for '>' zooms in
+            self.scale(1.1,1.1)
+
+        elif (key == Qt.Qt.Key_Comma): # ',' key, lower case for '<' zooms in
+            self.scale(1/1.1,1/1.1)
+
+        elif (key == Qt.Qt.Key_A):  # 'a' fits the view to initial value where iconscale=1
             self.iconScale = 1
             self.updateScale( self.iconScale )
             self.fitInView(self.sceneContainerPt.itemsBoundingRect().x()-10,self.sceneContainerPt.itemsBoundingRect().y()-10,self.sceneContainerPt.itemsBoundingRect().width()+20,self.sceneContainerPt.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)

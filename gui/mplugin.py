@@ -250,7 +250,7 @@ class RunBase(ViewBase):
         super(RunBase, self).__init__(plugin)
 
 
-class EditorWidgetBase(QtGui.QScrollArea):
+class EditorWidgetBase(QtGui.QWidget):
     """Base class for central widget displayed in editor view.
 
     The widget should display the model components in the tree rooted
@@ -268,7 +268,7 @@ class EditorWidgetBase(QtGui.QScrollArea):
     """
     editObject = QtCore.pyqtSignal('PyQt_PyObject')
     def __init__(self, *args):
-        QtGui.QScrollArea.__init__(self, *args)
+        QtGui.QWidget.__init__(self, *args)
         self.modelRoot      = '/'
         self._menus         = []
         self._toolBars      = []
