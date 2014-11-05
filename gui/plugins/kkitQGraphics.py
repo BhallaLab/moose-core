@@ -393,8 +393,7 @@ class EnzItem(KineticsDisplayItem):
         self.setGeometry(x,y, 
                           self.gobj.boundingRect().width(), 
                           self.gobj.boundingRect().height())
-
-        self.gobj.setBrush(QtGui.QBrush(textcolor))
+        self.gobj.setBrush(QtGui.QBrush(bgcolor))
 
     def refresh(self,scale):
         defaultWidth = EnzItem.defaultWidth*scale

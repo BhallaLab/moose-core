@@ -274,6 +274,7 @@ class  KineticsWidget(EditorWidgetBase):
                 hLayout = QtGui.QGridLayout(self)
                 self.setLayout(hLayout)
                 hLayout.addWidget(self.view)
+                self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
     def getMooseObj(self):
         #This fun call 2 more function
         # -- setupMeshObj(self.modelRoot),  
@@ -304,7 +305,11 @@ class  KineticsWidget(EditorWidgetBase):
                 self.xmin,self.xmax,self.ymin,self.ymax,self.autoCordinatepos = autoCoordinates(self.meshEntry,self.srcdesConnection)
             # TODO: size will be dummy at this point, busizet I need the availiable size from the Gui
             if isinstance(self,kineticEditorWidget):
-                self.size = QtCore.QSize(1000 ,600)
+                # w = self.width()
+                # h = self.height()
+                # self.size =  QtCore.QSize(w ,h)
+                # print("Window Size : ", self.size)
+                self.size= QtCore.QSize(1000 ,550)
             else:
                 self.size = QtCore.QSize(500 ,550)
             #self.size = QtCore.QSize(300,400)

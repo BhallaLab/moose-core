@@ -147,10 +147,10 @@ def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
             layoutPt.mooseId_GObj[enzObj] = qGItem
             posWrtComp = pos
             bgcolor = getRandColor()
-            qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y()-40,bgcolor,QtGui.QColor('green'))
+            qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y()-40,QtGui.QColor('green'),bgcolor)
             enzinfo.x = posWrtComp.x()
             enzinfo.y = posWrtComp.y()
-            enzinfo.color = "blue"
+            enzinfo.color = str(bgcolor.name())
             e = moose.Annotator(enzinfo)
             e.x = posWrtComp.x()
             e.y = posWrtComp.y()
@@ -174,12 +174,12 @@ def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
             qGItem = MMEnzItem(enzObj,parentcompt)
             posWrtComp = pos
             bgcolor = getRandColor()
-            qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y()-30,bgcolor,QtGui.QColor('green'))
+            qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y()-30,QtGui.QColor('green'),bgcolor)
             enzinfo.x = posWrtComp.x()
             enzinfo.y = posWrtComp.y()
             # r,g,b,a = bgcolor.getRgb()
             # color = "#"+ hexchars[r / 16] + hexchars[r % 16] + hexchars[g / 16] + hexchars[g % 16] + hexchars[b / 16] + hexchars[b % 16]
-            enzinfo.color = "blue"
+            enzinfo.color = str(bgcolor.name())
             layoutPt.mooseId_GObj[enzObj] = qGItem
             view.emit(QtCore.SIGNAL("dropped"),enzObj)
         setupItem(modelpath.path,layoutPt.srcdesConnection)
