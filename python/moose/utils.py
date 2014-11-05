@@ -131,7 +131,7 @@ def create_table_path(model, graph, element, field):
 
     field = field[0].upper() + field[1:]
 
-    tablePathSuffix = element.path.partition(model.path + "/model[0]/")[-1]
+    tablePathSuffix = element.path.partition(model.path)[-1]
     if tablePathSuffix.startswith('/'):
         tablePathSuffix = tablePathSuffix[1:]
 

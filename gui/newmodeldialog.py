@@ -10,18 +10,18 @@ class DialogWidget(QtGui.QDialog):
         
         
         layout = QtGui.QGridLayout()
-        self.modelPathLabel = QtGui.QLabel('Create model under')
+        self.modelPathLabel = QtGui.QLabel('Model Name')
         self.modelPathEdit =  QtGui.QLineEdit('')
         layout.addWidget(self.modelPathLabel, 1, 0)
         layout.addWidget(self.modelPathEdit, 1, 1)
-        self.defaultRadio = QtGui.QRadioButton('default')
+        #self.defaultRadio = QtGui.QRadioButton('default')
         #self.defaultRadio.setChecked(True);
         self.kkitRadio = QtGui.QRadioButton('kkit')
         self.kkitRadio.setChecked(True)
-        self.defaultRadio.toggled.connect(lambda : self.setcurrentRadioButton('default'))
+        #self.defaultRadio.toggled.connect(lambda : self.setcurrentRadioButton('default'))
         self.kkitRadio.toggled.connect(lambda : self.setcurrentRadioButton('kkit'))
-        layout.addWidget(self.defaultRadio,2,1)
-        layout.addWidget(self.kkitRadio,2,0)
+        #layout.addWidget(self.defaultRadio,2,1)
+        layout.addWidget(self.kkitRadio,2,1)
         self.buttonBox = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel)
         layout.addWidget(self.buttonBox,3,1)
         self.connect(self.buttonBox, QtCore.SIGNAL('accepted()'), self.accept)
