@@ -55,6 +55,7 @@ import os
 from collections import defaultdict
 import posixpath # We use this to create MOOSE paths
 from PyQt4 import QtGui, QtCore, Qt
+from PyQt4.QtGui import *
 import config
 import mplugin
 import moose
@@ -123,14 +124,15 @@ class MWindow(QtGui.QMainWindow):
         self.viewActions = None
         self.editActions = None
         self.connectMenu = None
-        
+        self.setStyleSheet("background-image: icons/moose_icon.png");
         self.toolBars = []
         self._loadedPlugins = {}
         self._plugins = {}
         self._loadedModels = {}
-        
         self.setDockOptions(self.AnimatedDocks and self.AllowNestedDocks and self.AllowTabbedDocks)
         self.mdiArea = QtGui.QMdiArea()
+        # self.mdiArea.setStyleSheet("{ background-color: #000;}")
+        # self.mdiArea.setStyleSheet("{ background-image: url(icons/moose_icon.png);}")
         self.quitAction = QtGui.QAction('&Quit', self)
         self.connect(self.quitAction, QtCore.SIGNAL('triggered()'), self.quit)
         self.quitAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Q", None, QtGui.QApplication.UnicodeUTF8))
@@ -139,6 +141,39 @@ class MWindow(QtGui.QMainWindow):
         self.mdiArea.setViewMode(QtGui.QMdiArea.TabbedView)
         self.mdiArea.subWindowActivated.connect(self.switchSubwindowSlot)
         self.setPlugin('default', '/')
+        self.plugin.getEditorView().getCentralWidget().parent().close()
+        self.createPopup()
+
+    def createPopup(self):
+        print("Hello")
+        dialog = QDialog(self)
+        dialog.setWindowFlags(Qt.Qt.Dialog | Qt.Qt.FramelessWindowHint)
+        # dialog.setModal(True)
+        layout = QGridLayout()
+        createKineticModelButton = QPushButton("Create Kinetic Model     ")
+        loadKineticModelButton   = QPushButton("     Load Kinetic Model     ")
+        loadNeuronalModelButton  = QPushButton("     Load Neuronal Model     ")
+        # createKineticModelButton.setStyleSheet(
+        #     """QPushButton { font-size  : 18pt;
+        #                      font-weight: bold;
+        #                      color      : #000000;
+        #                    }
+        #     """                               )
+        layout.setContentsMargins(QtCore.QMargins(20,20,20,20))
+        # layout.addWidget(QLabel(""), 0, 0)
+        layout.addWidget(createKineticModelButton)
+        # layout.addWidget(QLabel(" "), 0, 2)
+        # layout.addWidget(QLabel(" "), 1, 0)
+        layout.addWidget(loadKineticModelButton)
+        # layout.addWidget(QLabel(" "), 1, 2)
+        # layout.addWidget(QLabel(" "), 2, 0)
+        layout.addWidget(loadNeuronalModelButton)
+        # layout.addWidget(QLabel(" "), 2, 2)
+        dialog.setLayout(layout)
+        createKineticModelButton.clicked.connect(lambda : [dialog.close(), self.newModelDialogSlot()] )
+        loadKineticModelButton.clicked.connect(  lambda : [dialog.close(), self.loadModelDialogSlot()]  )
+        loadNeuronalModelButton.clicked.connect( lambda : [dialog.close(), self.loadModelDialogSlot()]  )
+        dialog.show()
 
     def quit(self):
         QtGui.qApp.closeAllWindows()
@@ -266,7 +301,7 @@ class MWindow(QtGui.QMainWindow):
         #Harsha: added under file Menu, Recently Loaded Models
         if root != '/' and root not in self._loadedModels:
             self._loadedModels[root] = name
-    
+
         # try:
         #     self.plugin = self._plugins[str(name)]
         #     print 'PLUGIN', self.plugin
@@ -289,7 +324,7 @@ class MWindow(QtGui.QMainWindow):
             self.setCurrentView('editor')
         self.objectEditDockWidget.objectNameChanged.connect(
             self.plugin.getEditorView().getCentralWidget().updateItemSlot)
-        self.objectEditDockWidget.colorChanged.connect(self.plugin.getEditorView().getCentralWidget().updateColorSlot)
+        # self.objectEditDockWidget.colorChanged.connect(self.plugin.getEditorView().getCentralWidget().updateColorSlot)
         return self.plugin
 
     def updateExistingMenu(self, menu):
@@ -364,7 +399,7 @@ class MWindow(QtGui.QMainWindow):
         if view =='run':
             #Harsha: This will clear out object editor's objectpath and make it invisible
             self.objectEditSlot('/',False)
-        
+
         targetView = None
         newSubWindow = True
         widget = self.plugin.getCurrentView().getCentralWidget()
@@ -425,7 +460,7 @@ class MWindow(QtGui.QMainWindow):
             self.fileMenu = QtGui.QMenu('&File')
         else:
             self.fileMenu.clear()
-        
+
         if not hasattr(self, 'newModelAction'):
             self.newModelAction = QtGui.QAction('New', self)
             self.newModelAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+N", None, QtGui.QApplication.UnicodeUTF8))
@@ -463,7 +498,7 @@ class MWindow(QtGui.QMainWindow):
             self.editMenu.clear()
         #self.editMenu.addActions(self.getEditActions())
         return self.editMenu
-        
+
     def getPluginsMenu(self):
         """Populate plugins menu if it does not exist already."""
         if (not hasattr(self, 'pluginsMenu')) or (self.pluginsMenu is None):
@@ -479,7 +514,7 @@ class MWindow(QtGui.QMainWindow):
                 self.connect(action, QtCore.SIGNAL('triggered()'), mapper, QtCore.SLOT('map()'))
                 self.pluginsMenu.addAction(action)
                 pluginsGroup.addAction(action)
-            self.connect(mapper, QtCore.SIGNAL('mapped(const QString &)'), self.setPlugin) 
+            self.connect(mapper, QtCore.SIGNAL('mapped(const QString &)'), self.setPlugin)
             #self.pluginsMenu.addMenu(self.defaultPluginMenu)
             #self.pluginsMenu.addMenu(self.kkitPluginMenu)
             #self.pluginsMenu.addMenu(self.neurokitPluginMenu)
