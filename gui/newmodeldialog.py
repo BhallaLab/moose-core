@@ -7,6 +7,7 @@ class DialogWidget(QtGui.QDialog):
     def __init__(self,parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.warning = None
+        self._currentRadioButton ="kkit"
         self.layout = QtGui.QGridLayout()
         self.modelPathLabel = QtGui.QLabel('Model Name')
         self.modelPathEdit =  QtGui.QLineEdit('')
@@ -30,7 +31,7 @@ class DialogWidget(QtGui.QDialog):
     def validateAccept(self):
         text = str(self.modelPathEdit.text())
         self.layout.removeWidget(self.warning)
-        print(self.layout.widgets())
+        #print(self.layout.widgets())
         if len(text) == 0:
             self.warning = QtGui.QLabel("Model name cannot be empty!")
             self.layout.addWidget(self.warning, 1, 0, 1, -1)
@@ -41,9 +42,6 @@ class DialogWidget(QtGui.QDialog):
             self.accept()
         return False
 
-    def setcurrentRadioButton(self,button):
-        print " setcurrentRadioButton ",button
-        self._currentRadioButton = button
     def getcurrentRadioButton(self):
         return self._currentRadioButton
 

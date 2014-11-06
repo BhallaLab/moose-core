@@ -437,6 +437,10 @@ class  KineticsWidget(EditorWidgetBase):
             textcolor,bgcolor = "white","white"
         else:
             textcolor,bgcolor = getColor(info)
+            if bgcolor.name() == "#ffffff" or bgcolor == "white":
+                bgcolor = getRandColor()
+                Annoinfo = Annotator(info)
+                Annoinfo.color = str(bgcolor.name())
         graphicalObj.setDisplayProperties(xpos,ypos,textcolor,bgcolor)
 
     def positioninfo(self,iteminfo):
