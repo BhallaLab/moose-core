@@ -28,9 +28,9 @@ class DialogWidget(QtGui.QDialog):
         self.setLayout(self.layout)
 
     def validateAccept(self):
-        print(self.warning)
         text = str(self.modelPathEdit.text())
         self.layout.removeWidget(self.warning)
+        print(self.layout.widgets())
         if len(text) == 0:
             self.warning = QtGui.QLabel("Model name cannot be empty!")
             self.layout.addWidget(self.warning, 1, 0, 1, -1)
