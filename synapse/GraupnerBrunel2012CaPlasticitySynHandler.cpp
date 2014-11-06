@@ -249,6 +249,7 @@ GraupnerBrunel2012CaPlasticitySynHandler::GraupnerBrunel2012CaPlasticitySynHandl
     noisy_ = false;
     noiseSD_ = 0.0;
     bistable_ = true;
+    normalGenerator_.setMethod(BOX_MUELLER); // the default ALIAS method is 1000x slower!
 }
 
 GraupnerBrunel2012CaPlasticitySynHandler::~GraupnerBrunel2012CaPlasticitySynHandler()
@@ -359,7 +360,8 @@ weightFactors GraupnerBrunel2012CaPlasticitySynHandler::updateCaWeightFactors( d
             wUp.B = exp(-wUp.tP*gPgD/tauSyn_);
             if (noisy_) {
                 wUp.C = noiseSD_ * normalGenerator_.getNextSample() *
-                        sqrt( ( 1.0-exp(-gPgD*wUp.tP/tauSyn_) ) / gPgD );
+                        sqrt( ( 1.0-exp(-2*gPgD*wUp.tP/tauSyn_) ) / gPgD );
+                //cout << "A = " << wUp.A << " B = " << wUp.B << " C = " << wUp.C << "\n";
             } else {
                 wUp.C = 0.0;
             }
@@ -369,13 +371,14 @@ weightFactors GraupnerBrunel2012CaPlasticitySynHandler::updateCaWeightFactors( d
             wUp.D = exp(-wUp.tD*gammaD_/tauSyn_);
             if (noisy_) {
                 wUp.E = noiseSD_ * normalGenerator_.getNextSample() *
-                        sqrt( ( 1.0-exp(-2.0*gammaD_*wUp.tD/tauSyn_) ) / 2.0/gammaD_ );
+                        sqrt( ( 1.0-exp(-2*gammaD_*wUp.tD/tauSyn_) ) / 2.0/gammaD_ );
+                //cout << "D = " << wUp.D << " E = " << wUp.E << "\n";
             } else{
                 wUp.E = 0.0;
             }
         }
         
-        //cout << "tD = " << wUp.tD << " tP = " << wUp.tP << "\n";
+        //cout << currTime  << " tD = " << wUp.tD << " tP = " << wUp.tP << "\n";
         // tP, tD, A, B, C, D, E of wUp
         // are set to 0.0 by default in struct constructor
         return wUp;     // return by value, i.e. copies the struct, so wUp going out of scope doesn't matter
