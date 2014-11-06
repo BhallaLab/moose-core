@@ -27,6 +27,7 @@ import moose
 
 np.random.seed(100) # set seed for reproducibility of simulations
 random.seed(100) # set seed for reproducibility of simulations
+moose.seed(100) # set seed for reproducibility of simulations
 
 #############################################
 # All parameters as per:
@@ -43,15 +44,17 @@ random.seed(100) # set seed for reproducibility of simulations
 # equation: dv/dt = (1/taum)*(-(v-el)) + inp
 # with spike when v>vt, reset to vr
 
-el = -70e-3  #V        # Resting potential
-vt = -50e-3  #V        # Spiking threshold
-Rm = 20e6    #Ohm      # Only taum is needed, but LIF neuron accepts 
-Cm = 1e-9    #F        # Rm and Cm and constructs taum=Rm*Cm
-taum = Rm*Cm #s        # Membrane time constant is 20 ms
-vr = -60e-3  #V        # Reset potential
-inp = 24e-3/taum #V/s  # inp = Iinject/Cm to each neuron
-                       # same as setting el=-41 mV and inp=0
-Iinject = inp*Cm       # LIF neuron has injection current as param
+el = -70e-3  #V         # Resting potential
+vt = -50e-3  #V         # Spiking threshold
+Rm = 20e6    #Ohm       # Only taum is needed, but LIF neuron accepts 
+Cm = 1e-9    #F         # Rm and Cm and constructs taum=Rm*Cm
+taum = Rm*Cm #s         # Membrane time constant is 20 ms
+vr = -60e-3  #V         # Reset potential
+Iinject = 10e-3/Rm      # constant current injection into LIF neuron
+                        # same as setting el=-70+15=-55 mV and inp=0
+noiseInj = True         # inject noisy current into each cell: boolean
+noiseInjSD = 5e-3/Rm #A # SD of noise added to 'current'
+                        # SD*sqrt(taum) is used as noise current SD
 
 #############################################
 # Network parameters: numbers
@@ -66,7 +69,7 @@ NI = N-NE         # Number of inhibitory cells
 # Simulation parameters
 #############################################
 
-simtime = 1.      #s # Simulation time
+simtime = 1.0     #s # Simulation time
 dt = 1e-3         #s # time step
 
 #############################################
@@ -78,15 +81,14 @@ dt = 1e-3         #s # time step
 ## Since LIF neuron used below is derived from Compartment class,
 ## conductance-based synapses (SynChan class) can also be used.
 
-C = 50           # Number of incoming connections on each neuron (exc or inh)
+C = 100           # Number of incoming connections on each neuron (exc or inh)
 fC = fexc         # fraction fC incoming connections are exc, rest inhibitory
-J = 0.8e-3 #V     # exc strength is J (in V as we add to voltage)
+J = 0.2e-3 #V     # exc strength is J (in V as we add to voltage)
                   # Critical J is ~ 0.45e-3 V in paper for N = 10000, C = 1000
                   # See what happens for J = 0.2e-3 V versus J = 0.8e-3 V
-g = 5.0           # -gJ is the inh strength. For exc-inh balance g >~ f(1-f)=4
-syndelay = 0.5e-3 + dt # s     # synaptic delay:
-                               # 0 ms gives similar result contrary to Ostojic?!
-refrT = 0.5e-3    # s     # absolute refractory time -- 0 ms gives similar result
+g = 4.0           # -gJ is the inh strength. For exc-inh balance g >~ f(1-f)=4
+syndelay = dt     # synaptic delay:
+refrT = 0.0 # s   # absolute refractory time
 
 #############################################
 # Ca Plasticity parameters: synapses (not for ExcInhNetBase)
@@ -108,14 +110,12 @@ thetaP = 1.3            # mM # potentiation threshold for Ca
 gammaD = 331.909        # factor for depression term
 gammaP = 725.085        # factor for potentiation term
 
-eqWeight = 0.43         # initial synaptic weight
+eqWeight = 0.5          # initial synaptic weight
                         # gammaP/(gammaP+gammaD) = eq weight w/o noise
-                        # see eqn (22), noiseSD also appears
-                        # but doesn't work here, 
-                        # weights away from 0.4 - 0.5 screw up the STDP rule!!
+                        # but see eqn (22), noiseSD also appears
 
 bistable = True        # if bistable is True, use bistable potential for weights
-noisy = False          # use noisy weight updates given by noiseSD
+noisy = True           # use noisy weight updates given by noiseSD
 noiseSD = 3.3501        # if noisy, use noiseSD (3.3501 from Higgins et al 2014)
 #noiseSD = 0.1           # if bistable==False, use a smaller noise than in Higgins et al 2014
 
@@ -132,20 +132,21 @@ class ExcInhNetBase:
         refrT=refrT,Iinject=Iinject):
         """ Constructor of the class """
         
-        self.N = N                 # Total number of neurons
-        self.fexc = fexc           # Fraction of exc neurons
-        self.NmaxExc = int(fexc*N) # max idx of exc neurons, rest inh
+        self.N = N                   # Total number of neurons
+        self.fexc = fexc             # Fraction of exc neurons
+        self.NmaxExc = int(fexc*N)   # max idx of exc neurons, rest inh
 
-        self.el = el        # Resting potential
-        self.vt = vt        # Spiking threshold
-        self.taum = taum    # Membrane time constant
-        self.vr = vr        # Reset potential
-        self.refrT = refrT  # Absolute refractory period
-        self.Rm = Rm        # Membrane resistance
-        self.Cm = Cm        # Membrane capacitance
-        self.Iinject = Iinject # constant input current
+        self.el = el                 # Resting potential
+        self.vt = vt                 # Spiking threshold
+        self.taum = taum             # Membrane time constant
+        self.vr = vr                 # Reset potential
+        self.refrT = refrT           # Absolute refractory period
+        self.Rm = Rm                 # Membrane resistance
+        self.Cm = Cm                 # Membrane capacitance
+        self.Iinject = Iinject       # constant input current
+        self.noiseInjSD = noiseInjSD # SD of injected noise
         
-        self.simif = False  # whether the simulation is complete
+        self.simif = False           # whether the simulation is complete
         
         self._setup_network()
 
@@ -163,7 +164,14 @@ class ExcInhNetBase:
         self.network.vec.Rm = self.Rm
         self.network.vec.vReset = self.vr
         self.network.vec.Cm = self.Cm
-        self.network.vec.inject = self.Iinject
+        if not noiseInj:
+            self.network.vec.inject = self.Iinject
+        else:
+            ## inject a constant + noisy current
+            ## values are set in self.simulate()
+            self.noiseTables = moose.StimulusTable('noiseTables',self.N)
+            moose.connect( self.noiseTables, 'output', \
+                self.network, 'setInject', 'OneToOne')
 
     def _init_network(self,v0=el):
         """Initialises the network variables before simulation"""        
@@ -175,13 +183,27 @@ class ExcInhNetBase:
         self.simtime = simtime
         self.T = np.ceil(simtime/dt)
         self.trange = np.arange(0,self.simtime,dt)   
+
+        for i in range(self.N):
+            if noiseInj:
+                ## Gaussian white noise SD added every dt interval should be
+                ## divided by sqrt(dt), as the later numerical integration
+                ## will multiply it by dt.
+                ## See the Euler-Maruyama method, numerical integration in 
+                ## http://www.scholarpedia.org/article/Stochastic_dynamical_systems
+                self.noiseTables.vec[i].vector = self.Iinject + \
+                    np.random.normal( \
+                        scale=self.noiseInjSD*np.sqrt(self.Rm*self.Cm/self.dt), \
+                        size=self.T ) # scale = SD
+                self.noiseTables.vec[i].stepSize = 0    # use current time 
+                                                        # as x value for interpolation
+                self.noiseTables.vec[i].stopTime = self.simtime
         
         self._init_network(**kwargs)
         if plotif:
             self._init_plots()
         
         # moose simulation
-        moose.useClock( 0, '/network/syns', 'process' )
         moose.useClock( 1, '/network', 'process' )
         moose.useClock( 2, '/plotSpikes', 'process' )
         moose.useClock( 3, '/plotVms', 'process' )
@@ -239,14 +261,14 @@ class ExcInhNetBase:
             else: label = ''
             spikes = self.spikes.vec[i].vector
             plt.plot(spikes,[i]*len(spikes),\
-                'b.',marker=',',label=label)
+                'b.',marker='.',label=label)
         for i in range(self.NmaxExc,self.N):
             if i==self.NmaxExc: label = 'Inh. spike trains'
             else: label = ''
             spikes = self.spikes.vec[i].vector
             plt.plot(spikes,[i]*len(spikes),\
-                'r.',marker=',',label=label)           
-        plt.xlabel('Time [ms]')
+                'r.',marker='.',label=label)           
+        plt.xlabel('Time (s)')
         plt.ylabel('Neuron number [#]')
         plt.xlim([0,self.simtime])
         plt.title("%s" % self, fontsize=14,fontweight='bold')
@@ -283,90 +305,114 @@ class ExcInhNet(ExcInhNetBase):
         ExcInhNetBase._init_plots(self)
         self.recN = 5 # number of neurons for which to record weights and Ca
         if CaPlasticity:
-            ## make self.N tables to store weight of 2 incoming synapses
-            ## for a post-synaptic neuron: one exc, one inh synapse
+            ## make tables to store weights of recN exc synapses
+            ## for each post-synaptic exc neuron
             self.weights = moose.Table( '/plotWeights', self.excC*self.recN )
             for i in range(self.recN):      # range(self.N) is too large
                 for j in range(self.excC):
                     moose.connect( self.weights.vec[self.excC*i+j], 'requestOut',
-                        self.synsEE.vec[i].synapse[j], 'getWeight')            
+                        self.synsEE.vec[i*self.excC+j].synapse[0], 'getWeight')            
             self.CaTables = moose.Table( '/plotCa', self.recN )
             for i in range(self.recN):      # range(self.N) is too large
                 moose.connect( self.CaTables.vec[i], 'requestOut',
-                        self.synsEE.vec[i], 'getCa')            
+                        self.synsEE.vec[i*self.excC+j], 'getCa')            
 
     def _setup_network(self):
         ## Set up the neurons without connections
         ExcInhNetBase._setup_network(self)  
 
-        ## Now, add in the connections...
-        ## Each LIF neuron has one incoming SynHandler,
-        ##  which collects the activation from all presynaptic neurons
+        ## Now, add in the connections...        
         ## Each pre-synaptic spike cause Vm of post-neuron to rise by
         ##  synaptic weight in one time step i.e. delta-fn synapse.
         ## Since LIF neuron is derived from Compartment class,
         ## conductance-based synapses (SynChan class) can also be used.
+
         ## E to E synapses can be plastic
+        ## Two ways to do this:
+        ## 1) Each LIF neuron has one incoming postsynaptic SynHandler,
+        ##  which collects the activation from all presynaptic neurons,
+        ##  but then a common Ca pool is used.
+        ## 2) Each LIF neuron has multiple postsyanptic SynHandlers,
+        ##  one for each pre-synaptic neuron, i.e. one per synapse,
+        ##  then each synapse has a different Ca pool.
+        ## Here we go with option 2) as per Higgins et al 2014 (Brunel private email)
+        ## separate SynHandler per EE synapse, thus NmaxExc*excC
         if CaPlasticity:
             self.synsEE = moose.GraupnerBrunel2012CaPlasticitySynHandler( \
-                '/network/synsEE', self.NmaxExc )
+                '/network/synsEE', self.NmaxExc*self.excC )
         else:
-            self.synsEE = moose.SimpleSynHandler( '/network/synsEE', self.NmaxExc )
+            self.synsEE = moose.SimpleSynHandler( \
+                '/network/synsEE', self.NmaxExc*self.excC )
+        moose.useClock( 0, '/network/synsEE', 'process' )
+
         ## I to E synapses are not plastic
         self.synsIE = moose.SimpleSynHandler( '/network/synsIE', self.NmaxExc )
         ## all synapses to I neurons are not plastic
         self.synsI = moose.SimpleSynHandler( '/network/synsI', self.N-self.NmaxExc )
         ## connect all SynHandlers to their respective neurons
         for i in range(self.NmaxExc):
-            moose.connect( self.synsEE.vec[i], 'activationOut', \
-                self.network.vec[i], 'activation' )
             moose.connect( self.synsIE.vec[i], 'activationOut', \
                 self.network.vec[i], 'activation' )
         for i in range(self.NmaxExc,self.N):
-            moose.connect( self.synsEE.vec[i-self.NmaxExc], 'activationOut', \
+            moose.connect( self.synsI.vec[i-self.NmaxExc], 'activationOut', \
                 self.network.vec[i], 'activation' )
 
         ## Connections from some Exc/Inh neurons to each Exc neuron
         for i in range(0,self.NmaxExc):
-            ## each neuron has excC number of EE synapses
-            self.synsEE.vec[i].numSynapses = self.excC
             self.synsIE.vec[i].numSynapses = self.incC-self.excC
-
-            ## set parameters for the Ca Plasticity SynHandler
-            ## in the post-synaptic neuron
-            if CaPlasticity:
-                connectExcId = moose.connect( self.network.vec[i], \
-                    'spikeOut', self.synsEE.vec[i], 'addPostSpike')
-                self.synsEE.vec[i].CaInit = 0.0
-                self.synsEE.vec[i].tauCa = tauCa
-                self.synsEE.vec[i].tauSyn = tauSyn
-                self.synsEE.vec[i].CaPre = CaPre
-                self.synsEE.vec[i].CaPost = CaPost
-                self.synsEE.vec[i].delayD = delayD
-                self.synsEE.vec[i].thetaD = thetaD
-                self.synsEE.vec[i].thetaP = thetaP
-                self.synsEE.vec[i].gammaD = gammaD
-                self.synsEE.vec[i].gammaP = gammaP
-                self.synsEE.vec[i].weightMax = 1.0   # bounds on the weight
-                self.synsEE.vec[i].weightMin = 0.0
-                self.synsEE.vec[i].weightScale = \
-                        self.J/eqWeight   # weight is eqWeight
-                                          # weightScale = J/eqWeight
-                                          # weight*weightScale=J is activation
-                self.synsEE.vec[i].noisy = noisy
-                self.synsEE.vec[i].noiseSD = noiseSD
-                self.synsEE.vec[i].bistable = bistable
 
             ## Connections from some Exc neurons to each Exc neuron
             ## draw excC number of neuron indices out of NmaxExc neurons
             preIdxs = random.sample(range(self.NmaxExc),self.excC)
             ## connect these presynaptically to i-th post-synaptic neuron
             for synnum,preIdx in enumerate(preIdxs):
-                synij = self.synsEE.vec[i].synapse[synnum]
+                synidx = i*self.excC+synnum
+                synHand = self.synsEE.vec[synidx]
+
+                ## connect each synhandler to the post-synaptic neuron
+                moose.connect( synHand, 'activationOut', \
+                    self.network.vec[i], 'activation' )
+                ## important to set numSynapses = 1 for each synHandler,
+                ## doesn't create synapses if you set the full array of SynHandlers
+                synHand.numSynapses = 1
+                    
+                synij = synHand.synapse[0]
                 connectExcId = moose.connect( self.network.vec[preIdx], \
-                    'spikeOut', synij, 'addSpike')
+                                'spikeOut', synij, 'addSpike')
                 synij.delay = syndelay
-                synij.weight = eqWeight
+                if CaPlasticity:
+                    ## set parameters for the Ca Plasticity SynHandler
+                    ## have to be set for each SynHandler
+                    ## doesn't set for full array at a time
+                    synHand.CaInit = 0.0
+                    synHand.tauCa = tauCa
+                    synHand.tauSyn = tauSyn
+                    synHand.CaPre = CaPre
+                    synHand.CaPost = CaPost
+                    synHand.delayD = delayD
+                    synHand.thetaD = thetaD
+                    synHand.thetaP = thetaP
+                    synHand.gammaD = gammaD
+                    synHand.gammaP = gammaP
+                    synHand.weightMax = 1.0 # bounds on the weight
+                    synHand.weightMin = 0.0
+                    synHand.weightScale = \
+                                self.J*2.0    # 0.2 mV, weight*weightScale is activation
+                                              # typically weight <~ 0.5, so activation <~ J
+                    synHand.noisy = noisy
+                    synHand.noiseSD = noiseSD
+                    synHand.bistable = bistable
+
+                    moose.connect( self.network.vec[i], \
+                        'spikeOut', synHand, 'addPostSpike')
+                    synij.weight = eqWeight # activation = weight*weightScale
+                                            # weightScale = 2*J
+                                            # weight <~ 0.5
+                    ## Randomly set 5% of them to be 1.0
+                    if np.random.uniform()<0.05:
+                        synij.weight = 1.0
+                else:
+                    synij.weight = self.J   # no weightScale here, activation = weight
 
             ## Connections from some Inh neurons to each Exc neuron
             ## draw inhC=incC-excC number of neuron indices out of inhibitory neurons
@@ -377,7 +423,7 @@ class ExcInhNet(ExcInhNetBase):
                 connectInhId = moose.connect( self.network.vec[preIdx], \
                     'spikeOut', synij, 'addSpike')
                 synij.delay = syndelay
-                synij.weight = -self.scaleI
+                synij.weight = -self.scaleI*self.J # activation = weight
 
         ## Connections from some Exc/Inh neurons to each Inh neuron
         for i in range(self.N-self.NmaxExc):
@@ -392,7 +438,7 @@ class ExcInhNet(ExcInhNetBase):
                 connectExcId = moose.connect( self.network.vec[preIdx], \
                     'spikeOut', synij, 'addSpike')
                 synij.delay = syndelay
-                synij.weight = 1.0
+                synij.weight = self.J   # activation = weight
 
             ## draw inhC=incC-excC number of neuron indices out of inhibitory neurons
             preIdxs = random.sample(range(self.NmaxExc,self.N),self.incC-self.excC)
@@ -402,7 +448,10 @@ class ExcInhNet(ExcInhNetBase):
                 connectInhId = moose.connect( self.network.vec[preIdx], \
                     'spikeOut', synij, 'addSpike')
                 synij.delay = syndelay
-                synij.weight = -self.scaleI
+                synij.weight = -self.scaleI*self.J  # activation = weight
+
+        moose.useClock( 0, '/network/synsIE', 'process' )
+        moose.useClock( 0, '/network/synsI', 'process' )
 
 #############################################
 # Analysis functions
@@ -491,8 +540,8 @@ def extra_plots(net):
         ## Ca versus time in post-synaptic neurons
         plt.figure()
         for i in range(net.recN):      # range(net.N) is too large
-                plt.plot(timeseries,\
-                    net.CaTables.vec[i].vector[:len(timeseries)])
+            plt.plot(timeseries,\
+                net.CaTables.vec[i].vector[:len(timeseries)])
         plt.title("Evolution of Ca in some neurons")
         plt.xlabel("Time (s)")
         plt.ylabel("Ca (mM)")
@@ -502,15 +551,18 @@ def extra_plots(net):
             for j in range(net.excC):
                 plt.plot(timeseries,\
                     net.weights.vec[net.excC*i+j].vector[:len(timeseries)])
-        plt.title("Evolution of some weights")
+        plt.title("Evolution of some efficacies")
         plt.xlabel("Time (s)")
-        plt.ylabel("Weight (V)")
+        plt.ylabel("Efficacy")
 
         ## all EE weights are used for a histogram
-        weights = [ net.synsEE.vec[i].synapse[j].weight \
+        weights = [ net.synsEE.vec[i*net.excC+j].synapse[0].weight \
                     for i in range(net.NmaxExc) for j in range(net.excC) ]
         plt.figure()
         plt.hist(weights, bins=100)
+        plt.title("Histogram of efficacies")
+        plt.xlabel("Efficacy (arb)")
+        plt.ylabel("# per bin")
 
 if __name__=='__main__':
     ## ExcInhNetBase has unconnected neurons,
