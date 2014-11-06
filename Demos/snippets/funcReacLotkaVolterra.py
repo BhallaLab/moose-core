@@ -110,6 +110,7 @@ def main():
         t = numpy.arange( 0, x.vector.size, 1 ) * x.dt # sec
         pylab.plot( t, x.vector, label=x.name )
     pylab.ylim( 0, 2.5 )
+    pylab.title( "Exponential Euler solution. Note slight error buildup" )
     pylab.legend()
 
 
@@ -129,6 +130,7 @@ def main():
         t = numpy.arange( 0, x.vector.size, 1 ) * x.dt # sec
         pylab.plot( t, x.vector, label=x.name )
     pylab.ylim( 0, 2.5 )
+    pylab.title( "Runge-Kutta solution." )
     pylab.legend()
     pylab.show()
 
