@@ -463,6 +463,8 @@ void Gsolve::rebuildGssaSystem()
 	for ( vector< GssaVoxelPools >::iterator 
 					i = pools_.begin(); i != pools_.end(); ++i ) {
 		i->setNumReac( stoichPtr_->getNumRates() );
+		i->updateAllRateTerms( stoichPtr_->getRateTerms(), 
+						stoichPtr_->getNumCoreRates() );
 	}
 	sys_.isReady = true;
 }
@@ -625,9 +627,15 @@ void Gsolve::setN( const Eref& e, double v )
 {
 	unsigned int vox = getVoxelIndex( e );
 	if ( vox != OFFNODE ) {
-		pools_[vox].setN( getPoolIndex( e ), round( v ) );
-		if ( sys_.isReady )
-			pools_[vox].refreshAtot( &sys_ );
+		if ( e.element()->cinfo()->isA( "ZombieBufPool" ) ) {
+			// Do NOT round it here, it is folded into rate term.
+			pools_[vox].setN( getPoolIndex( e ), v );
+			// refresh rates because nInit controls ongoing value of n.
+			if ( sys_.isReady )
+				pools_[vox].refreshAtot( &sys_ ); 
+		} else {
+			pools_[vox].setN( getPoolIndex( e ), round( v ) );
+		}
 	}
 }
 
@@ -643,10 +651,15 @@ void Gsolve::setNinit( const Eref& e, double v )
 {
 	unsigned int vox = getVoxelIndex( e );
 	if ( vox != OFFNODE ) {
-		pools_[vox].setNinit( getPoolIndex( e ), round( v ) );
-		// Have to refresh rates because nInit might alter a buffered pool.
-		if ( sys_.isReady )
-			pools_[vox].refreshAtot( &sys_ ); 
+		if ( e.element()->cinfo()->isA( "ZombieBufPool" ) ) {
+			// Do NOT round it here, it is folded into rate term.
+			pools_[vox].setNinit( getPoolIndex( e ), v );
+			// refresh rates because nInit controls ongoing value of n.
+			if ( sys_.isReady )
+				pools_[vox].refreshAtot( &sys_ ); 
+		} else {
+			pools_[vox].setNinit( getPoolIndex( e ), round( v ) );
+		}
 	}
 }
 
