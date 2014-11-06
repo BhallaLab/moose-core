@@ -291,18 +291,24 @@ void GssaVoxelPools::xferIn(
 		x += round( *i++ - *j );
 		if ( x < 0 ) 
 			x = 0;
+		/*
 		double y = fabs( x - *j );
 		// hasChanged |= ( fabs( x - *j ) < 0.1 ); // they are all integers.
 		hasChanged |= ( y > 0.1 ); // they are all integers.
+		*/
 		j++;
 	}
 	// If S has changed, then I should update rates of all affected reacs.
 	// Go through stoich matrix to find affected reacs for each mol
 	// Store in list, since some may be hit more than once in this func.
 	// When done, go through and update all affected ones.
+	/*
 	if ( hasChanged ) {
 		refreshAtot( g );
 	}
+	*/
+	// Does this fix the problem of negative concs?
+	refreshAtot( g );
 }
 
 void GssaVoxelPools::xferInOnlyProxies(
