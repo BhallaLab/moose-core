@@ -2,6 +2,7 @@ import os
 from PyQt4 import QtGui, QtCore,Qt
 import config
 from mplugin import MoosePluginBase, EditorBase, EditorWidgetBase, PlotBase, RunBase
+import re
 
 class DialogWidget(QtGui.QDialog):
     def __init__(self,parent=None):
@@ -31,12 +32,15 @@ class DialogWidget(QtGui.QDialog):
     def validateAccept(self):
         text = str(self.modelPathEdit.text())
         self.layout.removeWidget(self.warning)
+        #replace / to _
+        text = text.replace('/','_')
+
         #print(self.layout.widgets())
         if len(text) == 0:
             self.warning = QtGui.QLabel("Model name cannot be empty!")
             self.layout.addWidget(self.warning, 1, 0, 1, -1)
-        elif not text.isalnum():
-            self.warning = QtGui.QLabel("Special characters not allowed!")
+        elif not re.match("^[a-zA-Z]+.*",text):
+            self.warning = QtGui.QLabel("Start special characters not allowed!")
             self.layout.addWidget(self.warning, 1, 0, 1, -1)
         else:
             self.accept()
