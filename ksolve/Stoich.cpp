@@ -1201,7 +1201,8 @@ ZeroOrder* makeHalfReaction(
 			temp.push_back( sc->convertIdToPoolIndex( reactants[i] ) );
 		rateTerm = new NOrder( rate, temp );
 	} else {
-		cout << "Error: Stoich::makeHalfReaction: no reactants\n";
+		cout << "Warning: Stoich::makeHalfReaction: no reactants\n";
+		rateTerm = new ZeroOrder(0.0); // Dummy RateTerm to avoid crash.
 	}
 	return rateTerm;
 }
@@ -1349,6 +1350,23 @@ void Stoich::installMMenz( MMEnzymeBase* meb, unsigned int rateIndex,
 	}
 }
 
+// Handles dangling enzymes.
+void Stoich::installDummyEnzyme( Id enzId, Id enzMolId )
+{
+	ZeroOrder* r1 = new ZeroOrder( 0.0 ); // Dummy
+	ZeroOrder* r2 = new ZeroOrder( 0.0 ); // Dummy
+	ZeroOrder* r3 = new ZeroOrder( 0.0 ); // Dummy
+	vector< Id > dummy;
+	unsigned int rateIndex = convertIdToReacIndex( enzId );
+	if ( useOneWay_ ) { 
+		rates_[ rateIndex ] = r1;
+		rates_[ rateIndex + 1 ] = r2;
+		rates_[ rateIndex + 2 ] = r3;
+	} else {
+		rates_[ rateIndex ] = new BidirectionalReaction( r1, r2 );
+		rates_[ rateIndex + 1 ] = r3;
+	}
+}
 
 void Stoich::installEnzyme( Id enzId, Id enzMolId, Id cplxId,
 	const vector< Id >& subs, const vector< Id >& prds )
@@ -1379,16 +1397,16 @@ void Stoich::installEnzyme( Id enzId, Id enzMolId, Id cplxId,
 		prdComptVec_.push_back( dummy );
 		prdComptVec_.push_back( dummy );
 		prdComptVec_.push_back( dummy );
-		assert ( 2 + rateIndex - getNumCoreRates() == subComptVec_.size());
-		assert ( 2 + rateIndex - getNumCoreRates() == prdComptVec_.size());
+		//assert ( 2 + rateIndex - getNumCoreRates() == subComptVec_.size());
+		//assert ( 2 + rateIndex - getNumCoreRates() == prdComptVec_.size());
 	} else {
 		// enz is split into 2 reactions. Only the first might be off-compt
 		subComptVec_.push_back( subCompt );
 		subComptVec_.push_back( dummy );
 		prdComptVec_.push_back( dummy );
 		prdComptVec_.push_back( dummy );
-		assert ( 1+rateIndex - getNumCoreRates() == subComptVec_.size() );
-		assert ( 1+rateIndex - getNumCoreRates() == prdComptVec_.size() );
+		//assert ( 1+rateIndex - getNumCoreRates() == subComptVec_.size() );
+		// assert ( 1+rateIndex - getNumCoreRates() == prdComptVec_.size() );
 	}
 }
 
@@ -1717,7 +1735,10 @@ void Stoich::updateFuncs( double* s, double t ) const
 {
 	for ( vector< FuncTerm* >::const_iterator i = funcs_.begin();
 					i != funcs_.end(); ++i ) {
-		(*i)->evalPool( s, t ); // s has arguments and also result location
+		if ( *i ) {
+			(*i)->evalPool( s, t ); 
+			// s holds arguments and also result location
+		}
 	}
 }
 
