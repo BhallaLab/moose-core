@@ -11,6 +11,7 @@
 '''
 Simulate a pseudo-STDP protocol and plot the STDP kernel
 that emerges from Ca plasticity of Graupner and Brunel 2012.
+
 Author: Aditya Gilra, NCBS, Bangalore, October, 2014.
 '''
 
@@ -49,24 +50,50 @@ network.vec.initVm = Vrest
 # Ca Plasticity parameters: synapses (not for ExcInhNetBase)
 #############################################
 
-CaPlasticity = True    # set it True or False to turn on/off plasticity
-tauCa = 22.6936e-3      # s # Ca decay time scale
-tauSyn = 346.3615       # s # synaptic plasticity time scale
-## in vitro values in Higgins et al 2014, faster plasticity
-CaPre = 0.56175         # mM
-CaPost = 1.2964         # mM
-## in vivo values in Higgins et al 2014, slower plasticity
-#CaPre = 0.33705         # mM
-#CaPost = 0.74378        # mM
-delayD = 4.6098e-3      # s # CaPre is added to Ca after this delay
+### Cortical slice values -- Table Suppl 2 in Graupner & Brunel 2012
+### Also used in Higgins et al 2014
+#tauCa = 22.6936e-3      # s # Ca decay time scale
+#tauSyn = 346.3615       # s # synaptic plasticity time scale
+### in vitro values in Higgins et al 2014, faster plasticity
+#CaPre = 0.56175         # mM
+#CaPost = 1.2964         # mM
+### in vivo values in Higgins et al 2014, slower plasticity
+##CaPre = 0.33705         # mM
+##CaPost = 0.74378        # mM
+#delayD = 4.6098e-3      # s # CaPre is added to Ca after this delay
+                        ## proxy for rise-time of NMDA
+#thetaD = 1.0            # mM # depression threshold for Ca
+#thetaP = 1.3            # mM # potentiation threshold for Ca
+#gammaD = 331.909        # factor for depression term
+#gammaP = 725.085        # factor for potentiation term
+
+#J = 5e-3 # V            # delta function synapse, adds to Vm
+#weight = 0.43           # initial synaptic weight
+                        ## gammaP/(gammaP+gammaD) = eq weight w/o noise
+                        ## see eqn (22), noiseSD also appears
+                        ## but doesn't work here, 
+                        ## weights away from 0.4 - 0.5 screw up the STDP rule!!
+                        
+#bistable = True        # if bistable is True, use bistable potential for weights
+#noisy = False          # use noisy weight updates given by noiseSD
+#noiseSD = 3.3501        # if noisy, use noiseSD (3.3501 from Higgins et al 2014)
+
+########################################
+
+## DP STDP curve (Fig 2C) values -- Table Suppl 1 in Graupner & Brunel 2012
+tauCa = 20e-3           # s # Ca decay time scale
+tauSyn = 150.0          # s # synaptic plasticity time scale
+CaPre = 1.0             # arb
+CaPost = 2.0            # arb
+delayD = 13.7e-3        # s # CaPre is added to Ca after this delay
                         # proxy for rise-time of NMDA
 thetaD = 1.0            # mM # depression threshold for Ca
 thetaP = 1.3            # mM # potentiation threshold for Ca
-gammaD = 331.909        # factor for depression term
-gammaP = 725.085        # factor for potentiation term
+gammaD = 200.0          # factor for depression term
+gammaP = 321.808        # factor for potentiation term
 
 J = 5e-3 # V            # delta function synapse, adds to Vm
-weight = 0.43           # initial synaptic weight
+weight = 0.5            # initial synaptic weight
                         # gammaP/(gammaP+gammaD) = eq weight w/o noise
                         # see eqn (22), noiseSD also appears
                         # but doesn't work here, 
@@ -74,8 +101,9 @@ weight = 0.43           # initial synaptic weight
                         
 bistable = True        # if bistable is True, use bistable potential for weights
 noisy = False          # use noisy weight updates given by noiseSD
-#noiseSD = 3.3501        # if noisy, use noiseSD (3.3501 from Higgins et al 2014)
-noiseSD = 0.1           # use a smaller noise than in Higgins et al 2014
+noiseSD = 2.8284        # if noisy, use noiseSD (3.3501 in Higgins et al 2014)
+
+##########################################
 
 syn = moose.GraupnerBrunel2012CaPlasticitySynHandler( '/network/syn' )
 syn.numSynapses = 1     # 1 synapse
@@ -122,18 +150,21 @@ spikes = moose.Table( '/plotSpikes', 2 )
 moose.connect( network, 'spikeOut', spikes, 'input', 'OneToOne')
 CaTable = moose.Table( '/plotCa', 1 )
 moose.connect( CaTable, 'requestOut', syn, 'getCa')            
+WtTable = moose.Table( '/plotWeight', 1 )
+moose.connect( WtTable, 'requestOut', syn.synapse[0], 'getWeight')            
 
 # ###########################################
 # Simulate the STDP curve with spaced pre-post spike pairs
 # ###########################################
 
-dt = 0.5e-5 # s
+dt = 1e-3 # s
 # moose simulation
 moose.useClock( 0, '/network/syn', 'process' )
 moose.useClock( 1, '/network', 'process' )
 moose.useClock( 2, '/plotSpikes', 'process' )
 moose.useClock( 3, '/plotVms', 'process' )
 moose.useClock( 3, '/plotCa', 'process' )
+moose.useClock( 3, '/plotWeight', 'process' )
 moose.setClock( 0, dt )
 moose.setClock( 1, dt )
 moose.setClock( 2, dt )
@@ -170,10 +201,11 @@ dwlist_neg = []
 ddt = 2e-3 # s
 # since CaPlasticitySynHandler is event based
 # multiple pairs are needed for Ca to be registered above threshold
-numpairs = 10
-t_between_pairs = 60e-3
-t_extent = t_between_pairs/2.0 # s  # STDP kernel extent,
-                                    # deltat > t_between_pairs/2 inverts pre-post pairing!
+# Values from Fig 2, last line of legend
+numpairs = 60           # number of spike parts per deltat
+t_between_pairs = 1.0   # time between each spike pair
+t_extent = 100e-3       # s  # STDP kernel extent,
+                        # t_extent > t_between_pairs/2 inverts pre-post pairing!
 # dt = tpost - tpre
 # negative dt corresponds to post before pre
 print '-----------------------------------------------'
@@ -217,6 +249,9 @@ print 'Because of the event based update, multiple pre-post pairs are used.'
 print 
 print 'If you reduce the t_between_pairs,'
 print ' you\'ll see potentiation for the LTD part without using any triplet rule!'
+print
+print "If you turn on noise, the weights fluctuate too much,"
+print " not sure if there's a bug in my noise implementation."
 print '-----------------------------------------------'
 
 # ###########################################
@@ -250,8 +285,15 @@ plot((timeseries[0],timeseries[-1]),(thetaD,thetaD),color='b',\
     linestyle='dashed',label='dep thresh')
 legend()
 xlabel('time (ms)')
-ylabel('Ca (mM)')
+ylabel('Ca (arb)')
 title("Ca conc in the synapse")
+
+# Weight plots for the synapse
+figure(facecolor='w')
+plot(timeseries,WtTable.vector[:len(timeseries)],color='r')
+xlabel('time (ms)')
+ylabel('Efficacy')
+title("Efficacy of the synapse")
 
 # STDP curve
 fig = figure(facecolor='w')
