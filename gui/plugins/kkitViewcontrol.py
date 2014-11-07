@@ -277,7 +277,10 @@ class GraphicalView(QtGui.QGraphicsView):
                 self.removeExpectedConnection()
 
             self.resetState()
-
+        if clickedItemType == CONNECTION:
+            popupmenu = QtGui.QMenu('PopupMenu', self)
+            popupmenu.addAction("Delete", lambda : self.deleteConnection(item))
+            popupmenu.exec_(self.mapToGlobal(event.pos()))
         if clickedItemType == COMPARTMENT_BOUNDARY:
             if not self.state["move"]["happened"]:
                 self.layoutPt.plugin.mainWindow.objectEditSlot(self.state["press"]["item"].mobj, True)
@@ -311,7 +314,7 @@ class GraphicalView(QtGui.QGraphicsView):
                 popupmenu.addAction("Delete", lambda : self.deleteSelections(x0,y0,x1,y1))
                 popupmenu.addAction("Zoom", lambda : self.zoomSelections(x0, y0, x1, y1))
                 popupmenu.addAction("Move", self.moveSelections)
-                popupmenu.exec_(event.pos())
+                popupmenu.exec_(self.mapToGlobal(event.pos()))
                 # self.delete = QtGui.QAction(self.tr('delete'), self)
                 # self.connect(self.delete, QtCore.SIGNAL('triggered()'), self.deleteItems)
                 # self.zoom = QtGui.QAction(self.tr('zoom'), self)
@@ -507,7 +510,6 @@ class GraphicalView(QtGui.QGraphicsView):
             for item in (qgraphicsitem for qgraphicsitem in self.rubberbandlist):
                 if not (isinstance(item,MMEnzItem) or isinstance(item,EnzItem) or isinstance(item,CplxItem)):
                     self.deleteItem(item)
-
             self.sceneContainerPt.clear()
             self.layoutPt.getMooseObj()
             setupItem(self.modelRoot,self.layoutPt.srcdesConnection)
@@ -517,7 +519,42 @@ class GraphicalView(QtGui.QGraphicsView):
 
         # self.deselectSelections()
 
+    def deleteConnection(self,item):
+        if isinstance(item,QtGui.QGraphicsPolygonItem):
+            #deleting for function is pending
+            
+            src = self.layoutPt.lineItem_dict[item]
+            srcZero = [k for k, v in self.layoutPt.mooseId_GObj.iteritems() if v == src[0]]
+            srcOne = [k for k, v in self.layoutPt.mooseId_GObj.iteritems() if v == src[1]]
+            for msg in srcZero[0].msgOut:
+                msgIdforDeleting = " "
+                if moose.element(msg.e2.path) == moose.element(srcOne[0].path):
+                    if src[2] == 's':
+                        if msg.srcFieldsOnE1[0] == "subOut":
+                            msgIdforDeleting = msg
+                    elif src[2] == 'p':
+                        if msg.srcFieldsOnE1[0] == "prdOut":
+                            msgIdforDeleting = msg
+                    moose.delete(msgIdforDeleting)
+            self.sceneContainerPt.removeItem(item)
     def deleteItem(self,item):
+        if isinstance(item,QtGui.QGraphicsPolygonItem):
+            #deleting for function is pending
+            self.sceneContainerPt.removeItem(item)
+
+        elif isinstance(item,KineticsDisplayItem):
+            if moose.exists(item.mobj.path):
+                #self.updateDictionaries(item, mobj)
+                self.sceneContainerPt.removeItem(item)
+                #removing the table from the graph after removing object for Pool and BuffPool
+                if isinstance(item,PoolItem) or isinstance(item,BufPool):
+                    tableObj = (item.mobj).neighbors['getConc']
+                    if tableObj:
+                        pass
+                        #moose.delete(tableObj[0].path)
+                        #self.layoutPt.plugin.getRunView().plotWidgetContainer.plotAllData()
+                moose.delete(item.mobj)
+        '''        
         self.layoutPt.plugin.mainWindow.objectEditSlot('/',False)
         self.layoutPt.deleteSolver()
         if isinstance(item,KineticsDisplayItem):
@@ -535,7 +572,7 @@ class GraphicalView(QtGui.QGraphicsView):
 
         elif isinstance(item,QtGui.QGraphicsPolygonItem):
             self.sceneContainerPt.removeItem(item)
-    
+        '''
 
     def zoomSelections(self, x0, y0, x1, y1):
         self.fitInView(self.mapToScene(QtCore.QRect(x0, y0, x1 - x0, y1 - y0)).boundingRect(), Qt.Qt.KeepAspectRatio)
