@@ -596,6 +596,7 @@ class SchedulingWidget(QtGui.QWidget):
         print(self.updateInterval)
         print(self.simulationInterval)
         self.currentSimulationRuntime.setText("0.0")
+
         if self.checkConsistency():
             self.simulationRuntime.setText(str(self.runTime))
             self.runner.resetSimulation( self.runTime
@@ -621,7 +622,8 @@ class SchedulingWidget(QtGui.QWidget):
         if str(self.simulationRuntime.text()) == "":
             self.simulationRuntime.setText(str(chemicalPreferences["simulation"]["default-runtime"]))
         self.runTime            = float(self.simulationRuntime.text())
-
+        self.solver             = chemicalPreferences["simulation"]["solver"]
+        print(self.solver)
     def setElectricalParameters(self):
         electricalPreferences   = self.preferences.getElectricalPreferences()
         self.preferences.initializeElectricalClocks()
@@ -630,7 +632,8 @@ class SchedulingWidget(QtGui.QWidget):
         if str(self.simulationRuntime.text()) == "":
             self.simulationRuntime.setText(str(electricalPreferences["simulation"]["default-runtime"]))
         self.runTime            = float(self.simulationRuntime.text())
-
+        self.solver             = electricalPreferences["simulation"]["solver"]
+        print(self.solver)
     def checkConsistency(self):
         if self.updateInterval < self.simulationInterval :
             self.updateInterval = self.simulationInterval
