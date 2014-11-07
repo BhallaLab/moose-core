@@ -785,10 +785,13 @@ class kineticRunWidget(KineticsWidget):
         compt = moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
         comptinfo = moose.Annotator(moose.element(compt[0]).path+'/info')
         previousSolver = comptinfo.solver
+        print "solver from kkit ",previousSolver
+        currentSolver = "GSL"
         if solver == "Gillespie":
             currentSolver = "gssa"
         elif solver == "Runge Kutta":
             currentSolver = "rk"
+
         if previousSolver != currentSolver:
             if not ( moose.exists( compt[0].path+'/stoich' ) ):
                 #previos solver is not the same and current solver and
