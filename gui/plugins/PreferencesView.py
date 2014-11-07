@@ -33,9 +33,8 @@ class PreferencesView(QTabWidget):
         self.chemicalDefaultSimulationRuntime   =   self.createFloatingPointEditor()
         self.chemicalGuiUpdateInterval          =   self.createFloatingPointEditor()
         self.chemicalSolver                     =   QButtonGroup()
-        self.chemicalSolvers                    =   { "Stochastic"        :   QRadioButton("Stochastic")
-                                                    , "Deterministic"     :   QRadioButton("Deterministic")
-                                                    , "Exponential Euler" :   QRadioButton("Exponential Euler")
+        self.chemicalSolvers                    =   { "Gillespie"        :   QRadioButton("Gillespie")
+                                                    , "Runge Kutta"      :   QRadioButton("Runge Kutta")
                                                     }
 
         self.electricalSimulationDt             =   self.createFloatingPointEditor()
@@ -43,9 +42,8 @@ class PreferencesView(QTabWidget):
         self.electricalDefaultSimulationRuntime =   self.createFloatingPointEditor()
         self.electricalGuiUpdateInterval        =   self.createFloatingPointEditor()
         self.electricalSolver                   =   QButtonGroup()
-        self.electricalSolvers                  =   { "Stochastic"        :   QRadioButton("Stochastic")
-                                                    , "Deterministic"     :   QRadioButton("Deterministic")
-                                                    , "Exponential Euler" :   QRadioButton("Exponential Euler")
+        self.electricalSolvers                    =   { "Gillespie"        :   QRadioButton("Gillespie")
+                                                    , "Runge Kutta"      :   QRadioButton("Runge Kutta")
                                                     }
 
         self.electricalBaseColorButton          =   QPushButton()
