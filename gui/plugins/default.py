@@ -597,11 +597,14 @@ class SchedulingWidget(QtGui.QWidget):
         print(self.simulationInterval)
         self.currentSimulationRuntime.setText("0.0")
         if self.checkConsistency():
+            self.simulationRuntime.setText(str(self.runTime))
             self.runner.resetSimulation( self.runTime
                              , self.updateInterval
                              , self.simulationInterval
                              )
             self.runner.runSimulation()
+        else:
+            print("Not consistent")
 
 
     def setParameters(self):
@@ -630,19 +633,23 @@ class SchedulingWidget(QtGui.QWidget):
 
     def checkConsistency(self):
         if self.updateInterval < self.simulationInterval :
-            dialog = QErrorMessage()
-            dialog.showMessage(
-                """GUI Update interval should be greater than Simulation Interval.
-                Please update these values in Edit > Preferences."""
-                               )
-            return False
+            self.updateInterval = self.simulationInterval
+
+            # print("Hello")
+            # dialog = QErrorMessage()
+            # dialog.showMessage(
+            #     """GUI Update interval should be greater than Simulation Interval.
+            #     Please update these values in Edit > Preferences."""
+            #                    )
+            # return False
         if self.runTime < self.updateInterval :
-            dialog = QErrorMessage()
-            dialog.showMessage(
-                """Simulation runtime should greater than GUI Update interval.
-                Please update the runtime in the Scheduling Toolbar"""
-                              )
-            return False
+            self.runTime = self.updateInterval
+            # dialog = QErrorMessage()
+            # dialog.showMessage(
+            #     """Simulation runtime should greater than GUI Update interval.
+            #     Please update the runtime in the Scheduling Toolbar"""
+            #                   )
+            # return False
         return True
 
     # def setElectricalParameters(self):
