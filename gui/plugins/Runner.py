@@ -1,0 +1,99 @@
+import math
+import moose
+from PyQt4 import Qt, QtGui, QtCore
+from PyQt4.QtCore import QTimer
+from PyQt4.QtCore import QObject
+from PyQt4.QtCore import pyqtSignal
+
+class Runner(QObject):
+    """Helper class to control simulation execution
+
+    See: http://doc.qt.digia.com/qq/qq27-responsive-guis.html :
+    'Solving a Problem Step by Step' for design details.
+    """
+
+    simulationFinished   =   pyqtSignal(float)
+    simulationStarted    =   pyqtSignal(float)
+    simulationProgressed =   pyqtSignal(float)
+    simulationReset      =   pyqtSignal()
+    simulationContinued  =   pyqtSignal(float)
+
+    def __init__(self):
+        QtCore.QObject.__init__(self)
+        self.runTime            = None
+        self.updateInterval     = None
+        self.simulationInterval = None
+        self.runSequence        = None
+        self.pause              = None
+        self.currentRunTime     = None
+        self.continueCounter    = None
+        self.clock              = moose.element("/clock")
+
+    def resetSimulation(self, runTime, updateInterval, simulationInterval):
+        self.runTime            = runTime
+        self.updateInterval     = updateInterval
+        self.simulationInterval = simulationInterval
+        self.pause              = False
+        self.continueCounter    = 1
+        self.runSequence        = self.computeRunSequence( runTime
+                                                         , updateInterval
+                                                         , simulationInterval
+                                                         )
+        moose.reinit()
+        self.simulationReset.emit()
+
+    def computeRunSequence(self, runTime, updateInterval, simulationInterval):
+        frac, whole         = math.modf(runTime / updateInterval)
+        runSequence         = [ updateInterval ] * int(whole)
+        remaining           = frac * updateInterval
+        if remaining > simulationInterval:
+            runSequence.append(remaining)
+        return runSequence
+
+    def continueSimulation(self, runTime, updateInterval, simulationInterval):
+        self.runSequence.extend(self.computeRunSequence( runTime
+                                                       , updateInterval
+                                                       , simulationInterval
+                                                       ))
+        self.pause = False
+        self.continueCounter += 1
+        self.simulationContinued.emit(self.continueCounter * self.runTime)
+        self.simulationProgressed.emit(0.0)
+        QTimer.singleShot(0, self.next)
+
+    def runSimulation(self):
+        self.simulationStarted.emit(self.runTime)
+        self.simulationProgressed.emit(0.0)
+        QTimer.singleShot(0, self.next)
+
+    def next(self):
+        if self.pause:
+            return
+        if len(self.runSequence) == 0:
+            self.simulationFinished.emit(self.clock.currentTime)
+            return
+        moose.start(self.runSequence.pop(0))
+        self.simulationProgressed.emit(self.clock.currentTime)
+        QTimer.singleShot(0, self.next)
+
+    def pauseSimulation(self):
+        self.pause = True
+
+    def unpauseSimulation(self):
+        self.pause = False
+        self.next()
+
+    def togglePauseSimulation(self):
+        if self.pause :
+            self.pause = False
+            self.next()
+        else:
+            self.pause = True
+
+    def resetAndRunSimulation( self
+                             , runTime
+                             , updateInterval
+                             , simulationInterval
+                             ):
+        self.resetSimulation(runTime, updateInterval, simulationInterval)
+        self.runSimulation()

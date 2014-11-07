@@ -1,0 +1,44 @@
+{
+    "chemical": {
+        "simulation": {
+            "default-runtime": 1.0, 
+            "diffusion-dt": 0.01, 
+            "gui-update-interval": 0.1, 
+            "plot-update-interval": 0.1, 
+            "simulation-dt": 0.01, 
+            "solver": "Exponential Euler"
+        }, 
+        "visualization": {}
+    }, 
+    "electrical": {
+        "simulation": {
+            "default-runtime": 1.0, 
+            "gui-update-interval": 0.01, 
+            "plot-update-interval": 0.0005, 
+            "simulation-dt": 5e-05, 
+            "solver": "Exponential Euler"
+        }, 
+        "visualization": {
+            "background-color": [
+                113, 
+                113, 
+                113, 
+                255
+            ], 
+            "base-color": [
+                0, 
+                255, 
+                72, 
+                255
+            ], 
+            "base-membrane-voltage": -0.07, 
+            "peak-color": [
+                53, 
+                56, 
+                255, 
+                255
+            ], 
+            "peak-membrane-voltage": -0.06
+        }
+    }
+}

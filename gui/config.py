@@ -105,7 +105,7 @@ MOOSE_ABOUT_FILE = os.path.join(MOOSE_GUI_DIR, 'about.html')
 MOOSE_UNDO_LENGTH = 128 # Arbitrary undo length
 LOCAL_BUILD = False
 
-sys.path.append(os.path.join(MOOSE_GUI_DIR, 'plugins/NeuroKit'))
+sys.path.append(os.path.join(MOOSE_PLUGIN_DIR))
 
 class MooseSetting(dict):
     """

@@ -182,6 +182,17 @@ class CanvasWidget(FigureCanvas):
     def resize_event(self, event):
         print("Resize event called ", event)
 
+    def toggleGrid(self):
+        self.gridMode = not self.gridMode
+        for key in self.axes:
+            self.axes[key].grid(self.gridMode)
+        self.draw()
+
+    def setXLimit(self, minX, maxX):
+        for key in self.axes:
+            self.axes[key].set_xlim([minX, maxX])
+        self.draw()
+
 
 import sys
 import os

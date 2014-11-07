@@ -1,33 +1,33 @@
-# moose.py --- 
-# 
+# moose.py ---
+#
 # Filename: moose.py
-# Description: 
+# Description:
 # Author: Subhasis Ray
-# Maintainer: 
+# Maintainer:
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
-# Version: 
+# Version:
 # Last-Updated: Thu Oct  4 20:04:06 2012 (+0530)
 #           By: subha
 #     Update #: 2170
-# URL: 
-# Keywords: 
-# Compatibility: 
-# 
-# 
+# URL:
+# Keywords:
+# Compatibility:
+#
+#
 
-# Commentary: 
-# 
+# Commentary:
+#
 # This is the primary moose module. It wraps _moose.so and adds some
 # utility functions.
-# 
+#
 
 # Change log:
-# 
+#
 # Mon Sep 9 22:56:35 IST 2013 - Renamed some function parameters and
 # updated docstrings to consistently follow numpy docstring
 # convention.
-# 
+#
 
 # Code:
 
@@ -68,8 +68,8 @@ known_types = ['void',
 
 ################################################################
 # Wrappers for global functions
-################################################################ 
-    
+################################################################
+
 def pwe():
     """Print present working element. Convenience function for GENESIS
     users. If you want to retrieve the element in stead of printing
@@ -79,11 +79,11 @@ def pwe():
     pwe_ = _moose.getCwe()
     print pwe_.getPath()
     return pwe_
-    
+
 def le(el=None):
     """List elements under `el` or current element if no argument
     specified.
-    
+
     Parameters
     ----------
     el : str/melement/vec/None
@@ -102,7 +102,7 @@ def le(el=None):
             raise ValueError('no such element')
         el = element(el)
     elif isinstance(el, vec):
-        el = el[0]    
+        el = el[0]
     print 'Elements under', el.path
     for ch in el.children:
         print ch.path
@@ -160,7 +160,7 @@ def showfield(el, field='*', showtype=False):
         if not exists(el):
             raise ValueError('no such element')
         el = element(el)
-    if field == '*':        
+    if field == '*':
         value_field_dict = getFieldDict(el.className, 'valueFinfo')
         max_type_len = max([len(dtype) for dtype in list(value_field_dict.values())])
         max_field_len = max([len(dtype) for dtype in list(value_field_dict.keys())])
@@ -189,8 +189,8 @@ def showfields(el, showtype=False):
     warnings.warn('Deprecated. Use showfield(element, field="*", showtype=True) instead.', DeprecationWarning)
     showfield(el, field='*', showtype=showtype)
 
-# Predefined field types and their human readable names    
-finfotypes = [('valueFinfo', 'value field') , 
+# Predefined field types and their human readable names
+finfotypes = [('valueFinfo', 'value field') ,
               ('srcFinfo', 'source message field'),
               ('destFinfo', 'destination message field'),
               ('sharedFinfo', 'shared message field'),
@@ -208,7 +208,7 @@ def listmsg(el):
     Returns
     -------
     msg : list
-        List of Msg objects corresponding to incoming and outgoing 
+        List of Msg objects corresponding to incoming and outgoing
         connections of `el`.
 
     """
@@ -243,26 +243,26 @@ def showmsg(el):
 
 def getfielddoc(tokens, indent=''):
     """Return the documentation for field specified by `tokens`.
-    
+
     Parameters
     ----------
     tokens : (className, fieldName) str
-        A sequence whose first element is a MOOSE class name and second 
+        A sequence whose first element is a MOOSE class name and second
         is the field name.
-              
+
     indent : str
-        indentation (default: empty string) prepended to builtin 
+        indentation (default: empty string) prepended to builtin
         documentation string.
 
     Returns
     -------
     docstring : str
-        string of the form 
+        string of the form
         `{indent}{className}.{fieldName}: {datatype} - {finfoType}\n{Description}\n`
 
     Raises
     ------
-    NameError 
+    NameError
         If the specified fieldName is not present in the specified class.
     """
     assert(len(tokens) > 1)
@@ -271,15 +271,15 @@ def getfielddoc(tokens, indent=''):
         for field_element in finfo:
             if field_element.fieldName == tokens[1]: # TODO - this name clashes with Neutral.name.
                 return '%s%s.%s: %s - %s\n\t%s\n' % \
-                    (indent, tokens[0], tokens[1], 
-                     field_element.type, field_element.path.split('/')[-1].split('[')[0], field_element.docs)    
-    raise NameError('`%s` has no field called `%s`' 
+                    (indent, tokens[0], tokens[1],
+                     field_element.type, field_element.path.split('/')[-1].split('[')[0], field_element.docs)
+    raise NameError('`%s` has no field called `%s`'
                     % (tokens[0], tokens[1]))
-                    
-    
+
+
 def getmoosedoc(tokens, inherited=False):
     """Return MOOSE builtin documentation.
-  
+
     Parameters
     ----------
     tokens : (className, [fieldName])
@@ -291,7 +291,7 @@ def getmoosedoc(tokens, inherited=False):
 
     Returns
     -------
-    docstring : str        
+    docstring : str
         Documentation string for class `className`.`fieldName` if both
         are specified, for the class `className` if fieldName is not
         specified. In the latter case, the fields and their data types
@@ -301,7 +301,7 @@ def getmoosedoc(tokens, inherited=False):
     ------
     NameError
         If class or field does not exist.
-    
+
     """
     indent = '    '
     with closing(cStringIO.StringIO()) as docstring:
@@ -339,12 +339,12 @@ def append_finfodocs(classname, docstring, indent):
         try:
             finfo = _moose.element('%s/%s' % (class_element.path, ftype))
             for field in finfo.vec:
-                docstring.write('%s%s: %s\n' % 
+                docstring.write('%s%s: %s\n' %
                             (indent, field.fieldName, field.type))
         except ValueError:
             docstring.write('%sNone\n' % (indent))
-    
-    
+
+
 # the global pager is set from pydoc even if the user asks for paged
 # help once. this is to strike a balance between GENESIS user's
 # expectation of control returning to command line after printing the
@@ -353,20 +353,20 @@ pager=None
 
 def doc(arg, inherited=True, paged=True):
     """Display the documentation for class or field in a class.
-    
+
     Parameters
     ----------
     arg : str/class/melement/vec
         A string specifying a moose class name and a field name
         separated by a dot. e.g., 'Neutral.name'. Prepending `moose.`
         is allowed. Thus moose.doc('moose.Neutral.name') is equivalent
-        to the above.    
+        to the above.
         It can also be string specifying just a moose class name or a
         moose class or a moose object (instance of melement or vec
         or there subclasses). In that case, the builtin documentation
         for the corresponding moose class is displayed.
 
-    paged: bool    
+    paged: bool
         Whether to display the docs via builtin pager or print and
         exit. If not specified, it defaults to False and
         moose.doc(xyz) will print help on xyz and return control to
@@ -408,7 +408,7 @@ def doc(arg, inherited=True, paged=True):
         pager(text)
     else:
         print text
-                
 
-# 
+
+#
 # moose.py ends here
