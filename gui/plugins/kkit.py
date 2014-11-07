@@ -781,34 +781,44 @@ class kineticRunWidget(KineticsWidget):
             v.setRect(rectcompt.x()-comptWidth,rectcompt.y()-comptWidth,(rectcompt.width()+2*comptWidth),(rectcompt.height()+2*comptWidth))
     '''
     def addSolver(self,solver):
-        #print "solver",solver
+        print "solver",solver
         compt = moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
         comptinfo = moose.Annotator(moose.element(compt[0]).path+'/info')
         previousSolver = comptinfo.solver
-        print "solver from kkit ",previousSolver
+        print "pre solver from kkit ",previousSolver
         currentSolver = "GSL"
         if solver == "Gillespie":
-            currentSolver = "gssa"
+            currentSolver = "Gillespie"
         elif solver == "Runge Kutta":
-            currentSolver = "rk"
+            currentSolver = "Runge Kutta"
 
         if previousSolver != currentSolver:
             if not ( moose.exists( compt[0].path+'/stoich' ) ):
-                #previos solver is not the same and current solver and
-                # if solver is not set
-                #print "condition 1"
-                self.setCompartmentSolver(currentSolver)
-
+                print "1 pre solver is not same as c solver and solver is not set"
+                self.setCompartmentSolver(compt, currentSolver)
+                
             if ( moose.exists( compt[0].path+'/stoich' ) ):
-                #previos solver is not the same and current solver and
-                # if solver is set
-                #print " condition 2",previousSolver,currentSolver
+                print "2 pre solver is not same as c solver and solver is set"
                 self.deleteSolver()
                 self.setCompartmentSolver(compt,currentSolver)
             comptinfo.solver = currentSolver
+        else:
+            if not ( moose.exists( compt[0].path+'/stoich' ) ):
+                print "3 pre solver is  same as c solver and solver is not set"
+                self.setCompartmentSolver(compt,currentSolver)
+            else:
+                print "4 pre solver is same as c solver and solver is set then do nothing"
+                pass
 
     def setCompartmentSolver(self,compt,solver):
-            #print "solver in setSolver",solver
+            print "setCompartemt solver in setSolver",solver
+            if solver == 'GSL':
+                solver = 'gsl'
+            elif solver == 'Gillespie':
+                solver = 'gssa'
+            elif solver == 'Runge Kutta':
+                solver = 'rk'
+                
             if ( solver == 'gsl' ):
                 ksolve = moose.Ksolve( compt[0].path+'/ksolve' )
             if ( solver == 'gssa' ):

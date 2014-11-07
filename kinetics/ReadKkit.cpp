@@ -911,7 +911,7 @@ Id ReadKkit::buildInfo( Id parent,
 	Field< string >::set( info, "color", args[ m[ "xtree_fg_req" ] ] );
 	Field< string >::set( info, "textColor", 
 		args[ m[ "xtree_textfg_req" ] ] );
-	Field< string > ::set(info, "solver", "gsl");
+	Field< string > ::set(info, "solver", "GSL");
 	Field< double > :: set(info,"runtime",maxtime_);
 	return info;
 }
