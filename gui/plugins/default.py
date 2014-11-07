@@ -901,6 +901,7 @@ class SchedulingWidget(QtGui.QWidget):
             self.modelType = ELECTRICAL_MODEL
         else:
             self.modelType = CHEMICAL_MODEL
+        self.resetSimulation()
 
 from collections import namedtuple
 

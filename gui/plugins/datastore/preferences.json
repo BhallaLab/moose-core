@@ -1,12 +1,12 @@
 {
     "chemical": {
         "simulation": {
-            "default-runtime": 100.0, 
+            "default-runtime": 200.0, 
             "diffusion-dt": 0.01, 
             "gui-update-interval": 10.0, 
             "plot-update-interval": 0.1, 
             "simulation-dt": 10.0, 
-            "solver": "Gillespie"
+            "solver": "GSL"
         }, 
         "visualization": {}
     }, 
