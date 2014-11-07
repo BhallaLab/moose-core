@@ -1199,7 +1199,11 @@ class PlotWidget(QWidget):
 
     def updatePlots(self):
         for path, lines in self.pathToLine.items():
-            tab = moose.Table(path)
+            element = moose.element(path)
+            if isinstance(element, moose.Table2):
+                tab = moose.Table2(path)
+            else:
+                tab = moose.Table(path)
             data = tab.vector
             ts = np.linspace(0, moose.Clock('/clock').currentTime, len(data))
             for line in lines:

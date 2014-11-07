@@ -212,10 +212,17 @@ class GraphicalView(QtGui.QGraphicsView):
         self.connectionSource   = None
 
     def removeConnector(self):
-        if self.connectionSign is not None:
-            print "self.connectionSign ",self.connectionSign
-            self.sceneContainerPt.removeItem(self.connectionSign)
-            self.connectionSign = None
+        try:
+            if self.connectionSign is not None:    
+                self.sceneContainerPt.removeItem(self.connectionSign)
+                self.connectionSign = None
+        except:
+            #print("Exception received!")
+            pass
+        # if self.connectionSign is not None:
+        #     print "self.connectionSign ",self.connectionSign
+        #     self.sceneContainerPt.removeItem(self.connectionSign)
+        #     self.connectionSign = None
 
     def showConnector(self, item):
         self.removeConnector()
@@ -521,8 +528,9 @@ class GraphicalView(QtGui.QGraphicsView):
                 if isinstance(item,PoolItem) or isinstance(item,BufPool):
                     tableObj = (item.mobj).neighbors['getConc']
                     if tableObj:
-                        moose.delete(tableObj[0].path)
-                        self.layoutPt.plugin.getRunView().plotWidgetContainer.plotAllData()
+                        pass
+                        #moose.delete(tableObj[0].path)
+                        #self.layoutPt.plugin.getRunView().plotWidgetContainer.plotAllData()
                 moose.delete(item.mobj)
 
         elif isinstance(item,QtGui.QGraphicsPolygonItem):
