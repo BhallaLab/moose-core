@@ -794,16 +794,17 @@ class kineticRunWidget(KineticsWidget):
                 #previos solver is not the same and current solver and
                 # if solver is not set
                 #print "condition 1"
-                setSolver(currentSolver)
+                self.setCompartmentSolver(currentSolver)
                 
             if ( moose.exists( compt[0].path+'/stoich' ) ):
                 #previos solver is not the same and current solver and
                 # if solver is set
                 #print " condition 2",previousSolver,currentSolver
                 self.deleteSolver()
-                self.setSolver(compt,currentSolver)
+                self.setCompartmentSolver(compt,currentSolver)
             comptinfo.solver = currentSolver
-    def setSolver(self,compt,solver):
+
+    def setCompartmentSolver(self,compt,solver):
             #print "solver in setSolver",solver
             if ( solver == 'gsl' ):
                 ksolve = moose.Ksolve( compt[0].path+'/ksolve' )
