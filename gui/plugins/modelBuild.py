@@ -40,6 +40,7 @@ def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
 
     if string == "CubeMesh":
         mobj = moose.CubeMesh(modelpath.path+'/'+string_num)
+	mobj.volume = 1e-15
         mesh = moose.element(mobj.path+'/mesh')
         qGItem = ComptItem(scene,pos.toPoint().x(),pos.toPoint().y(),300,300,mobj)
         qGItem.setPen(QtGui.QPen(Qt.QColor(66,66,66,100), 5, Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin))
