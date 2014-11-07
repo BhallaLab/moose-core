@@ -13,14 +13,14 @@
 # along with MOOSE.  If not, see <http://www.gnu.org/licenses/>.
 
 
-"""setup.py: 
+"""setup.py:
 
     Script to install python targets.
 
 Last modified: Sat Jan 18, 2014  05:01PM
 
 """
-    
+
 __author__           = "Dilawar Singh"
 __copyright__        = "Copyright 2013, Dilawar Singh and NCBS Bangalore"
 __credits__          = ["NCBS Bangalore"]
@@ -38,15 +38,18 @@ setup(
         version='3.0',
         description='PyMoose: Python scripting support in moose',
         author='Dilwar Singh',
-        author_email='dilawars@ncns.res.in',
+        author_email='dilawars@ncbs.res.in',
         url='http://moose.ncbs.res.in',
         options={'build' : {'build_base' : '/tmp' } },
-        packages=['libmumbl'
-            , 'moose', 'moose.neuroml', 'moose.backend'
-            ],
+        packages=[ 'libmumbl'
+                 , 'moose'
+                 , 'moose.neuroml'
+                 , 'moose.backend'
+                 ],
         package_dir = { 'moose' : 'moose'
-            , 'libmumbl' : 'libmumbl'
-            },
-        package_data = { 'moose' : ['_moose.so'] },
+                      , 'libmumbl' : 'libmumbl'
+                      },
+        package_data = { 'moose' : ['_moose.so']
+                       },
         install_requires = [ 'matplotlib', 'numpy' ],
-    ) 
+    )

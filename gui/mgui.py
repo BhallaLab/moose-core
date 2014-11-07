@@ -74,11 +74,11 @@ __author__ = 'Subhasis Ray , HarshaRani, Aviral Goel, NCBS'
 
 # This maps model subtypes to corresponding plugin names. Should be
 # moved to a separate property file perhaps
-subtype_plugin_map = {
-    'genesis/kkit': 'kkit',
-    'cspace/': 'kkit',
-    'xml/sbml': 'kkit'
-}
+subtype_plugin_map = {  'genesis/kkit': 'kkit'
+                     ,  'cspace/': 'kkit'
+                     ,  'xml/sbml': 'kkit'
+                     ,  'xml/neuroml': 'NeuroKit'
+                     }
 
 
 class MWindow(QtGui.QMainWindow):
@@ -322,8 +322,8 @@ class MWindow(QtGui.QMainWindow):
         if name != "default" :
             self.setCurrentView('run')
             self.setCurrentView('editor')
-            self.objectEditDockWidget.objectNameChanged.connect(
-            self.plugin.getEditorView().getCentralWidget().updateItemSlot)
+        if name == 'kkit':
+            self.objectEditDockWidget.objectNameChanged.connect(self.plugin.getEditorView().getCentralWidget().updateItemSlot)
             self.objectEditDockWidget.colorChanged.connect(self.plugin.getEditorView().getCentralWidget().updateColorSlot)
         return self.plugin
 
