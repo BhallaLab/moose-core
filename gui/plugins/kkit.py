@@ -4,11 +4,11 @@ import sys
 from PyQt4 import QtGui, QtCore, Qt
 #import pygraphviz as pgv
 import networkx as nx
-sys.path.insert(0, '~/async/gui')
+#sys.path.insert(0, '~/async/gui')
 #import numpy as np
 from default import *
 from moose import *
-sys.path.append('plugins')
+#sys.path.append('plugins')
 from mplugin import *
 from kkitUtil import *
 from kkitQGraphics import PoolItem, ReacItem,EnzItem,CplxItem,ComptItem
@@ -111,7 +111,12 @@ class AnotherKkitRunView(RunView):
         self.schedular.runner.simulationProgressed.connect(self.kkitRunView.getCentralWidget().updateValue)
         self.schedular.runner.simulationProgressed.connect(self.kkitRunView.getCentralWidget().changeBgSize)
         self.schedular.runner.simulationReset.connect(self.kkitRunView.getCentralWidget().resetColor)
+        self.schedular.runner.simulationReset.connect(self.setSolver)
+
         return self._centralWidget
+
+    def setSolver(self):
+        self.kkitRunView.getCentralWidget().addSolver(self.getSchedulingDockWidget().widget().solver)
 
     def getCentralWidget(self):
         if self._centralWidget is None:
@@ -589,6 +594,7 @@ class  KineticsWidget(EditorWidgetBase):
                 self.updateArrow(item)
 
     def deleteSolver(self):
+        print "solver deleteSolver"
         if moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]'):
             compt = moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
             if ( moose.exists( compt[0].path+'/stoich' ) ):
@@ -774,17 +780,38 @@ class kineticRunWidget(KineticsWidget):
             v.setPen(comptPen)
             v.setRect(rectcompt.x()-comptWidth,rectcompt.y()-comptWidth,(rectcompt.width()+2*comptWidth),(rectcompt.height()+2*comptWidth))
     '''
-    def addSolver(self):
+    def addSolver(self,solver):
+        #print "solver",solver
         compt = moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
-        if not ( moose.exists( compt[0].path+'/stoich' ) ):
-            comptinfo = moose.Annotator(moose.element(compt[0]).path+'/info')
-            solver = comptinfo.solver
+        comptinfo = moose.Annotator(moose.element(compt[0]).path+'/info')
+        previousSolver = comptinfo.solver
+        if solver == "Gillespie":
+            currentSolver = "gssa"
+        elif solver == "Runge Kutta":
+            currentSolver = "rk"
+        if previousSolver != currentSolver:
+            if not ( moose.exists( compt[0].path+'/stoich' ) ):
+                #previos solver is not the same and current solver and
+                # if solver is not set
+                #print "condition 1"
+                setSolver(currentSolver)
+                
+            if ( moose.exists( compt[0].path+'/stoich' ) ):
+                #previos solver is not the same and current solver and
+                # if solver is set
+                #print " condition 2",previousSolver,currentSolver
+                self.deleteSolver()
+                self.setSolver(compt,currentSolver)
+            comptinfo.solver = currentSolver
+    def setSolver(self,compt,solver):
+            #print "solver in setSolver",solver
             if ( solver == 'gsl' ):
                 ksolve = moose.Ksolve( compt[0].path+'/ksolve' )
             if ( solver == 'gssa' ):
                 ksolve = moose.Gsolve( compt[0].path+'/ksolve' )
             if ( solver != 'ee' ):
                 stoich = moose.Stoich( compt[0].path+'/stoich' )
+                ksolve = moose.Ksolve( compt[0].path+'/ksolve' )
                 stoich.compartment = moose.element(compt[0])
                 stoich.ksolve = ksolve
                 stoich.path = compt[0].path+"/##"
