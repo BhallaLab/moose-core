@@ -120,6 +120,7 @@ class GraphicalView(QtGui.QGraphicsView):
 
         if itemType == CONNECTOR:
             self.drawExpectedConnection(event)
+            self.removeConnector()
             #print("connect objects")
 
         if itemType == ITEM:
@@ -130,6 +131,7 @@ class GraphicalView(QtGui.QGraphicsView):
             #print("Displacement", displacement),item.__class__, " par ",parent
             if not isinstance(item,FuncItem) and not isinstance(item,CplxItem):
                 #print "item at displacement ",item
+                self.removeConnector()
                 item.moveBy(displacement.x(), displacement.y())
                 if isinstance(item,PoolItem):
                     for funcItem in item.childItems():
