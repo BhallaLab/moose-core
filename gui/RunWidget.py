@@ -32,14 +32,14 @@ class RunWidget(QWidget):
         self.setLayout(layout)
         self.plotWidgetContainer = None
 
-    def setChildWidget(self, widget, wrap, row, col):
+    def setChildWidget(self, widget, wrap, row, col, rowspan = 1, colspan = 1):
         if wrap:
             scrollArea = QScrollArea()
             scrollArea.setWidget(widget)
             scrollArea.setWidgetResizable(True);
-            self.layout().addWidget(scrollArea, row, col)
+            self.layout().addWidget(scrollArea, row, col, rowspan, colspan)
         else:
-            self.layout().addWidget(widget, row, col)
+            self.layout().addWidget(widget, row, col, rowspan, colspan)
 
     def setPlotWidgetContainer(self, widget):
         self.plotWidgetContainer = widget

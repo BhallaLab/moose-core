@@ -45,6 +45,7 @@ class PreferencesPresenter(QObject):
         # self.initializeClocks()
 
     def save(self):
+        return
         print("Saving Preferences")
         self.getElectricalPreferences()
         self.getChemicalPreferences()

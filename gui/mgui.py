@@ -353,10 +353,10 @@ class MWindow(QtGui.QMainWindow):
 
         """
         self.menuBar().clear()
+        self.getPluginsMenu()
         menus = [self.getFileMenu(),
                  self.getEditMenu(),
                  self.getViewMenu(),
-                 self.getPluginsMenu(),
                  #self.getRunMenu(),
                  #self.getConnectMenu(),
                  self.getHelpMenu()]

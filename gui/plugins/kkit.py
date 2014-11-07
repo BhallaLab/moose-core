@@ -104,8 +104,8 @@ class AnotherKkitRunView(RunView):
         self._centralWidget = RunWidget.RunWidget(self.modelRoot)
         self.kkitRunView   = KkitRunView(self.plugin)
         self.plotWidgetContainer = PlotWidgetContainer(self.modelRoot)
-        self._centralWidget.setChildWidget(self.kkitRunView.getCentralWidget(), False, 0, 0)
-        self._centralWidget.setChildWidget(self.plotWidgetContainer, False, 0, 1)
+        self._centralWidget.setChildWidget(self.kkitRunView.getCentralWidget(), False, 0, 0, 1, 1)
+        self._centralWidget.setChildWidget(self.plotWidgetContainer, False, 0, 1, 1, 2)
         self._centralWidget.setPlotWidgetContainer(self.plotWidgetContainer)
         self.schedular = self.getSchedulingDockWidget().widget()
         self.schedular.runner.simulationProgressed.connect(self.kkitRunView.getCentralWidget().updateValue)
@@ -798,7 +798,7 @@ class kineticRunWidget(KineticsWidget):
                 # if solver is not set
                 #print "condition 1"
                 self.setCompartmentSolver(currentSolver)
-                
+
             if ( moose.exists( compt[0].path+'/stoich' ) ):
                 #previos solver is not the same and current solver and
                 # if solver is set
