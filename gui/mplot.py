@@ -108,7 +108,7 @@ class CanvasWidget(FigureCanvas):
         self.model = model
         self.graph = graph
         self.index = index
-        self.figure = Figure()
+        self.figure = Figure()#figsize=(4,4))
         FigureCanvas.__init__(self, self.figure, *args, **kwargs)
         self.figure.set_canvas(self)
         if len(args) > 0 and isinstance(args[0], QtGui.QWidget):

@@ -99,6 +99,7 @@ class PlotWidgetContainer(QWidget):
         self.rowIndex += 1
         self.graphWidgets.append(widget)
         widget.widgetClosedSignal.connect(self.deleteWidget)
+        # widget.resize(1, 1);
         return widget
 
     def showPlotView(self):

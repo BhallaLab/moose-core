@@ -503,6 +503,7 @@ class SchedulingWidget(QtGui.QWidget):
         self.simulationRuntime          = None
         self.schedulerToolBar           = self.getSchedulerToolBar()
         self.runner.simulationProgressed.connect(self.updateCurrentSimulationRuntime)
+        self.continueFlag               = False
         # self.resetAndRunButton.clicked.connect(self.resetAndRunSlot)
         # self.continueButton.clicked.connect(self.doContinueRun)
         # self.continueRun.connect(self.runner.continueRun)
@@ -518,11 +519,17 @@ class SchedulingWidget(QtGui.QWidget):
 
         bar = QToolBar("Run", self)
 
-        self.resetAndRunAction = bar.addAction( QIcon('icons/run.png')
-                                              , 'Reset and Run'
-                                              , self.resetAndRun
-                                              )
-        self.resetAndRunAction.setToolTip('Reset and run simulation.')
+        self.resetAction = bar.addAction( QIcon('icons/arrow_undo.png')
+                                        , 'Reset'
+                                        , self.resetSimulation
+                                        )
+        self.resetAction.setToolTip('Reset simulation.')
+
+        self.runAction = bar.addAction( QIcon('icons/run.png')
+                                      , 'Run'
+                                      , self.runSimulation
+                                      )
+        self.runAction.setToolTip('Run simulation.')
 
 
         self.stopAction = bar.addAction( QIcon('icons/stop.png')
@@ -530,12 +537,6 @@ class SchedulingWidget(QtGui.QWidget):
                                        , self.runner.togglePauseSimulation
                                        )
         self.stopAction.setToolTip('Stop simulation.')
-
-        self.continueAction = bar.addAction( QIcon('icons/continue.png')
-                                           , 'Continue simulation'
-                                           , self.continueSimulation
-                                           )
-        self.continueAction.setToolTip('Continue simulation.')
 
         bar.addSeparator()
 
@@ -590,23 +591,27 @@ class SchedulingWidget(QtGui.QWidget):
                                       )
         self.simulationRuntime.setText(str(float(self.simulationRuntime.text()) + self.runTime))
 
-    def resetAndRun(self):
+    def resetSimulation(self):
         self.setParameters()
         print(self.runTime)
         print(self.updateInterval)
         print(self.simulationInterval)
         self.currentSimulationRuntime.setText("0.0")
+        self.checkConsistency()
+        self.simulationRuntime.setText(str(self.runTime))
+        self.runner.resetSimulation( self.runTime
+                                   , self.updateInterval
+                                   , self.simulationInterval
+                                   )
+        self.continueFlag               = False
 
-        if self.checkConsistency():
-            self.simulationRuntime.setText(str(self.runTime))
-            self.runner.resetSimulation( self.runTime
-                             , self.updateInterval
-                             , self.simulationInterval
-                             )
-            self.runner.runSimulation()
+
+    def runSimulation(self):
+        if self.continueFlag:
+            self.continueSimulation()
         else:
-            print("Not consistent")
-
+            self.runner.runSimulation()
+            self.continueFlag = True
 
     def setParameters(self):
         if self.modelType == ELECTRICAL_MODEL:
