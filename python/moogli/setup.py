@@ -3,7 +3,7 @@
 from distutils.core import setup, Extension
 import sipdistutils
 import sys
-
+import os
 # print(sys.argv)
 # RESOURCES -
 # https://docs.python.org/2.7/distutils/apiref.html?highlight=setup#distutils.core.setup
@@ -13,6 +13,7 @@ import sys
 
 # list of object files to be passed to the linker.
 # These files must not have extensions, as the default extension for the compiler is used.
+os.environ["CC"]="g++"
 extra_objects           =   [
                             ]
 

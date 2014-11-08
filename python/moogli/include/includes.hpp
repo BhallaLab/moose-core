@@ -1,6 +1,6 @@
 #ifndef __INCLUDES_HPP__
 #define __INCLUDES_HPP__
-
+#undef ANY
 /******************************************************************************/
 /* C++ STANDARD LIBRARY HEADERS                                               */
 /******************************************************************************/
@@ -64,5 +64,5 @@
 
 #include "Python.h"
 // #include "utility/conversions.hpp"
-
+#define ANY void
 #endif  /* __INCLUDES_HPP__ */
