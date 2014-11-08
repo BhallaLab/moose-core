@@ -22,6 +22,17 @@ Selector::handle( const osgGA::GUIEventAdapter& ea
         return false;
     }
 
+    Geometry * geometry   = _get_intersection(ea,viewer);
+    bool blank_click      = geometry == nullptr;
+    if(!blank_click)
+    {
+        RECORD_INFO("Compartment clicked " + geometry -> getName());
+    }
+    else
+    {
+        RECORD_INFO("Problem");
+    }
+
     if(select_info -> get_event_type() == 2)
     {
         RECORD_INFO("Reaching here!");
@@ -212,6 +223,7 @@ Selector::_get_intersection( const osgGA::GUIEventAdapter& ea
                 *(intersector->getIntersections().begin());
 
             // LOD * lod = dynamic_cast<LOD *>(result.drawable -> getParent(0) -> getParent(0));
+        RECORD_INFO("Reaching here!");
         return result.drawable -> asGeometry();
     }
     return nullptr;

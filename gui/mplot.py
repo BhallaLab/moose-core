@@ -116,6 +116,7 @@ class CanvasWidget(FigureCanvas):
         elif (kwargs is not None) and ('parent' in kwargs):
             self.reparent(kwargs['parent'])
         #self.setAcceptDrops(True)
+        # self.setMaximumSize(100, 100)
         FigureCanvas.updateGeometry(self)
         self.axes = {}
         self.next_id = 0

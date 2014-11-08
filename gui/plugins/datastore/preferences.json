@@ -6,7 +6,7 @@
             "gui-update-interval": 10.0,
             "plot-update-interval": 0.1,
             "simulation-dt": 10.0,
-            "solver": "GSL"
+            "solver": "Gillespie"
         },
         "visualization": {}
     },

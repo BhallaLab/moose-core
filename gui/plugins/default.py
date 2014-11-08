@@ -53,7 +53,6 @@ from collections import defaultdict
 import numpy as np
 from PyQt4 import QtGui, QtCore
 from PyQt4.Qt import Qt
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 
 import moose
 from moose import utils
@@ -81,7 +80,13 @@ from PyQt4.QtGui import QLabel
 from PyQt4.QtGui import QIcon
 from PyQt4.QtGui import QLineEdit
 from PyQt4.QtGui import QErrorMessage
+from PyQt4.QtGui import QSizeGrip
+from PyQt4.QtGui import QIcon
+from PyQt4.QtGui import QPixmap
+from PyQt4.QtGui import QAction
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 
+# from PlotNavigationToolbar import PlotNavigationToolbar
 from global_constants import preferences
 ELECTRICAL_MODEL = 0
 CHEMICAL_MODEL   = 1
@@ -944,7 +949,7 @@ class PlotWidget(QWidget):
     """
 
     widgetClosedSignal = pyqtSignal(object)
-
+    addGraph           = pyqtSignal(object)
     def __init__(self, model, graph, index, parentWidget, *args, **kwargs):
         super(PlotWidget, self).__init__()
         self.model = model
@@ -953,6 +958,14 @@ class PlotWidget(QWidget):
         self.canvas = CanvasWidget(self.model, self.graph, self.index)
         self.canvas.setParent(self)
         self.navToolbar = NavigationToolbar(self.canvas, self)
+        # self.navToolbar.addSeparator()
+        pixmap = QPixmap("icons/add_graph.png")
+        icon   = QIcon(pixmap)
+        action  = QAction(icon, "Add a graph", self.navToolbar)
+        self.navToolbar.addAction(action)
+        action.triggered.connect(self.addGraph.emit)
+        self.navToolbar.insertAction(self.navToolbar.actions()[0], action)
+        self.navToolbar.insertSeparator(self.navToolbar.actions()[1])
         layout = QtGui.QGridLayout()
         # canvasScrollArea = QScrollArea()
         # canvasScrollArea.setWidget(self.canvas)
@@ -965,12 +978,18 @@ class PlotWidget(QWidget):
         self.lineToDataSource = {}
         self.axesRef = self.canvas.addSubplot(1, 1)
         self.onclick_count = 0
-        layout.setSizeConstraint( QLayout.SetNoConstraint )
-        self.setSizePolicy( QtGui.QSizePolicy.Expanding
-                          , QtGui.QSizePolicy.Expanding
-                          )
-        self.setMinimumSize(self.width(), self.height())
-        self.setMaximumSize(2 * self.width(), 2* self.height())
+        # layout.setSizeConstraint( QLayout.SetNoConstraint )
+        # self.setSizePolicy( QtGui.QSizePolicy.Expanding
+        #                   , QtGui.QSizePolicy.Expanding
+        #                   )
+
+        desktop = QtGui.QApplication.desktop()
+        # print("**********************")
+        # print(desktop.screenGeometry())
+        # print("***********************")
+        self.setMinimumSize(desktop.screenGeometry().width() / 2, desktop.screenGeometry().height() / 3.0)
+        # self.setMinimumSize(self.width(), self.height())
+        # self.setMaximumSize(2 * self.width(), 2* self.height())
         # QtCore.QObject.connect(utils.tableEmitter,QtCore.SIGNAL("tableCreated()"),self.plotAllData)
         self.canvas.updateSignal.connect(self.plotAllData)
         self.plotAllData()

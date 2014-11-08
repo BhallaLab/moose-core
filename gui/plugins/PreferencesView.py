@@ -15,7 +15,7 @@ from PyQt4.QtGui import QTabWidget
 from PyQt4.QtGui import QPushButton
 from PyQt4.QtGui import QColorDialog
 from PyQt4.QtGui import QColor
-
+from PyQt4.QtGui import QSizePolicy
 import sys
 
 class PreferencesView(QTabWidget):
@@ -26,27 +26,34 @@ class PreferencesView(QTabWidget):
         super(PreferencesView, self).__init__(parent)
 
         self.setWindowTitle("Preferences")
+        # self.setFixedSize(self.maximumSize())
+        # self.setMinimumSize(self.maximumSize())
+        # self.setMaximumSize(self.maximumSize())
 
+        # self.setSizePolicy(QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed))
         self.chemicalSimulationDt               =   self.createFloatingPointEditor()
         self.chemicalDiffusionDt                =   self.createFloatingPointEditor()
         self.chemicalPlotUpdateInterval         =   self.createFloatingPointEditor()
         self.chemicalDefaultSimulationRuntime   =   self.createFloatingPointEditor()
         self.chemicalGuiUpdateInterval          =   self.createFloatingPointEditor()
         self.chemicalSolver                     =   QButtonGroup()
-        self.chemicalSolvers                    =   { "GSL"              :   QRadioButton("GSL")
-                                                    , "Gillespie"        :   QRadioButton("Gillespie")
+        self.chemicalSolvers                    =   { "Gillespie"        :   QRadioButton("Gillespie")
                                                     , "Runge Kutta"      :   QRadioButton("Runge Kutta")
                                                     }
-
+        self.chemicalApply                      =   QPushButton("Apply")
+        self.chemicalCancel                     =   QPushButton("Cancel")
         self.electricalSimulationDt             =   self.createFloatingPointEditor()
         self.electricalPlotUpdateInterval       =   self.createFloatingPointEditor()
         self.electricalDefaultSimulationRuntime =   self.createFloatingPointEditor()
         self.electricalGuiUpdateInterval        =   self.createFloatingPointEditor()
         self.electricalSolver                   =   QButtonGroup()
-        self.electricalSolvers                    =   { "Gillespie"        :   QRadioButton("Gillespie")
-                                                    , "Runge Kutta"      :   QRadioButton("Runge Kutta")
+        self.electricalSolvers                    = { "Gillespie"       :   QRadioButton("Gillespie")
+                                                    , "Runge Kutta"     :   QRadioButton("Runge Kutta")
                                                     }
-
+        self.electricalSimulationApply          =   QPushButton("Apply")
+        self.electricalSimulationCancel         =   QPushButton("Cancel")
+        self.electricalVisualizationApply       =   QPushButton("Apply")
+        self.electricalVisualizationCancel      =   QPushButton("Cancel")
         self.electricalBaseColorButton          =   QPushButton()
         self.electricalBaseColorDialog          =   QColorDialog()
         self.electricalPeakColorButton          =   QPushButton()
@@ -99,6 +106,12 @@ class PreferencesView(QTabWidget):
 
         self.chemicalSolver.setExclusive(True)
 
+        buttonLayout = QGridLayout()
+        layout.addLayout(buttonLayout, 5 + index, 1)
+        buttonLayout.addWidget(self.chemicalCancel, 0, 0, Qt.Qt.AlignRight)
+        buttonLayout.addWidget(self.chemicalApply, 0, 1, Qt.Qt.AlignRight)
+
+
         return chemicalSettingsTab
 
     def createElectricalSettingsTab(self):
@@ -145,6 +158,10 @@ class PreferencesView(QTabWidget):
             index += 1
 
         self.electricalSolver.setExclusive(True)
+        buttonLayout = QGridLayout()
+        layout.addLayout(buttonLayout, 5 + index, 1)
+        buttonLayout.addWidget(self.electricalSimulationCancel, 0, 0, Qt.Qt.AlignRight)
+        buttonLayout.addWidget(self.electricalSimulationApply, 0, 1, Qt.Qt.AlignRight)
 
         return widget
 
@@ -198,6 +215,10 @@ class PreferencesView(QTabWidget):
                     +   "}"
                                                                          )
                                                                 )
+        buttonLayout = QGridLayout()
+        layout.addLayout(buttonLayout, 6, 1)
+        buttonLayout.addWidget(self.electricalVisualizationCancel, 0, 0, Qt.Qt.AlignRight)
+        buttonLayout.addWidget(self.electricalVisualizationApply, 0, 1, Qt.Qt.AlignRight)
 
         return widget
 
