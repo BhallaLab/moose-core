@@ -133,20 +133,31 @@ class MWindow(QtGui.QMainWindow):
 
         self.setDockOptions(self.AnimatedDocks and self.AllowNestedDocks and self.AllowTabbedDocks)
         self.mdiArea = QtGui.QMdiArea()
+
         self.quitAction = QtGui.QAction('&Quit', self)
         self.connect(self.quitAction, QtCore.SIGNAL('triggered()'), self.quit)
         self.quitAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Q", None, QtGui.QApplication.UnicodeUTF8))
         self.getMyDockWidgets()
         self.setCentralWidget(self.mdiArea)
+        pixmap = QPixmap("icons/moose_icon_large.png")
+        # pixmap = pixmap.scaled(self.mdiArea.size())
+        # self.mdiArea.setStyleSheet("QMdiArea { background-image: url(icons/moose_icon_large.png); }")
+        # palette = QPalette()
+        # palette.setBrush(QPalette.Background, QBrush(pixmap))
+        # self.setPalette(palette)
+
+        self.mdiArea.setBackground(QBrush(pixmap))
+
         self.mdiArea.setViewMode(QtGui.QMdiArea.TabbedView)
         self.mdiArea.subWindowActivated.connect(self.switchSubwindowSlot)
         self.setPlugin('default', '/')
         self.plugin.getEditorView().getCentralWidget().parent().close()
+        self.popup = None
         self.createPopup()
 
     def createPopup(self):
         print("Hello")
-        dialog = QDialog(self)
+        self.popup = dialog = QDialog(self)
         dialog.setWindowFlags(Qt.Qt.Dialog | Qt.Qt.FramelessWindowHint)
         # dialog.setModal(True)
         layout = QGridLayout()
@@ -170,10 +181,11 @@ class MWindow(QtGui.QMainWindow):
         layout.addWidget(loadNeuronalModelButton)
         # layout.addWidget(QLabel(" "), 2, 2)
         dialog.setLayout(layout)
-        createKineticModelButton.clicked.connect(lambda : [dialog.close(), self.newModelDialogSlot()] )
-        loadKineticModelButton.clicked.connect(  lambda : [dialog.close(), self.loadModelDialogSlot()]  )
-        loadNeuronalModelButton.clicked.connect( lambda : [dialog.close(), self.loadModelDialogSlot()]  )
+        createKineticModelButton.clicked.connect(self.newModelDialogSlot)
+        loadKineticModelButton.clicked.connect(self.loadModelDialogSlot)
+        loadNeuronalModelButton.clicked.connect(self.loadModelDialogSlot)
         dialog.show()
+        return dialog
 
     def quit(self):
         QtGui.qApp.closeAllWindows()
@@ -830,6 +842,7 @@ class MWindow(QtGui.QMainWindow):
         by looking into the model file for a regular expression)
 
         """
+        self.popup.close()
         activeWindow = None # This to be used later to refresh the current widget with newly loaded model
         dialog = LoaderDialog(self,
                               self.tr('Load model from file'))
@@ -859,6 +872,7 @@ class MWindow(QtGui.QMainWindow):
 
     def newModelDialogSlot(self):
         #Harsha: Create a new dialog widget for model building
+        self.popup.close()
         newModelDialog = DialogWidget()
         if newModelDialog.exec_():
             modelPath = str(newModelDialog.modelPathEdit.text()).strip()

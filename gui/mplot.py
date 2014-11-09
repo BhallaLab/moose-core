@@ -124,6 +124,7 @@ class CanvasWidget(FigureCanvas):
         tabList = []
         self.addTabletoPlot = ''
         self.setAcceptDrops(True)
+        self.gridMode = False
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasFormat('text/plain'):

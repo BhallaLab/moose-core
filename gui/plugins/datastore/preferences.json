@@ -4,7 +4,7 @@
             "default-runtime": 100.0,
             "diffusion-dt": 0.01,
             "gui-update-interval": 10.0,
-            "plot-update-interval": 0.1,
+            "plot-update-interval": 10.0,
             "simulation-dt": 10.0,
             "solver": "Gillespie"
         },

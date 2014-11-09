@@ -958,14 +958,8 @@ class PlotWidget(QWidget):
         self.canvas = CanvasWidget(self.model, self.graph, self.index)
         self.canvas.setParent(self)
         self.navToolbar = NavigationToolbar(self.canvas, self)
+        self.hackNavigationToolbar()
         # self.navToolbar.addSeparator()
-        pixmap = QPixmap("icons/add_graph.png")
-        icon   = QIcon(pixmap)
-        action  = QAction(icon, "Add a graph", self.navToolbar)
-        self.navToolbar.addAction(action)
-        action.triggered.connect(self.addGraph.emit)
-        self.navToolbar.insertAction(self.navToolbar.actions()[0], action)
-        self.navToolbar.insertSeparator(self.navToolbar.actions()[1])
         layout = QtGui.QGridLayout()
         # canvasScrollArea = QScrollArea()
         # canvasScrollArea.setWidget(self.canvas)
@@ -993,8 +987,8 @@ class PlotWidget(QWidget):
         # QtCore.QObject.connect(utils.tableEmitter,QtCore.SIGNAL("tableCreated()"),self.plotAllData)
         self.canvas.updateSignal.connect(self.plotAllData)
         self.plotAllData()
-        self.menu = self.getContextMenu()
-        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        # self.menu = self.getContextMenu()
+        # self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.connect(self,SIGNAL("customContextMenuRequested(QPoint)"),
                     self,SLOT("contextMenuRequested(QPoint)"))
         # self.plotView = PlotView(model, graph, index, self)
@@ -1004,23 +998,55 @@ class PlotWidget(QWidget):
         # self.setSizePolicy(QtGui.QSizePolicy.Fixed,
         #         QtGui.QSizePolicy.Expanding)
 
+    def hackNavigationToolbar(self):
+
+        # ADD Graph Action
+        pixmap = QPixmap("icons/add_graph.png")
+        icon   = QIcon(pixmap)
+        action  = QAction(icon, "Add a graph", self.navToolbar)
+        # self.navToolbar.addAction(action)
+        action.triggered.connect(self.addGraph.emit)
+        self.navToolbar.insertAction(self.navToolbar.actions()[0], action)
+
+        # Delete Graph Action
+        pixmap = QPixmap("icons/delete_graph.png")
+        icon   = QIcon(pixmap)
+        action  = QAction(icon, "Delete this graph", self.navToolbar)
+        # self.navToolbar.addAction(action)
+        action.triggered.connect(self.delete)
+
+        self.navToolbar.insertAction(self.navToolbar.actions()[1], action)
+
+        #Toggle Grid Action
+
+        pixmap = QPixmap("icons/grid.png")
+        icon   = QIcon(pixmap)
+        action  = QAction(icon, "Toggle Grid", self.navToolbar)
+        # self.navToolbar.addAction(action)
+        action.triggered.connect(self.canvas.toggleGrid)
+
+        self.navToolbar.insertAction(self.navToolbar.actions()[2], action)
+
+
+        self.navToolbar.insertSeparator(self.navToolbar.actions()[3])
+
+
     @property
     def plotAll(self):
         return len(self.pathToLine) == 0
 
-    def getContextMenu(self):
-        menu =  QMenu()
-        closeAction      = menu.addAction("Delete")
-        gridToggleAction = menu.addAction("Toggle Grid")
-        closeAction.triggered.connect(self.delete)
-        gridToggleAction.triggered.connect(self.canvas.toggleGrid)
-        # configureAction.triggered.connect(self.configure)
-        # self.connect(,SIGNAL("triggered()"),
-        #                 self,SLOT("slotShow500x500()"))
-        # self.connect(action1,SIGNAL("triggered()"),
-        #                 self,SLOT("slotShow100x100()"))
+    # def getContextMenu(self):
+    #     menu =  QMenu()
+    #     # closeAction      = menu.addAction("Delete")
+    #     gridToggleAction = menu.addAction("Toggle Grid")
+    #     gridToggleAction.triggered.connect(self.canvas.toggleGrid)
+    #     # configureAction.triggered.connect(self.configure)
+    #     # self.connect(,SIGNAL("triggered()"),
+    #     #                 self,SLOT("slotShow500x500()"))
+    #     # self.connect(action1,SIGNAL("triggered()"),
+    #     #                 self,SLOT("slotShow100x100()"))
 
-        return menu
+    #     return menu
 
     def deleteGraph(self):
         print("Deleting " + self.graph.path)
@@ -1036,19 +1062,19 @@ class PlotWidget(QWidget):
         print("Displaying configure view!")
         self.plotView.getCentralWidget().show()
 
-    @pyqtSlot(QtCore.QPoint)
-    def contextMenuRequested(self,point):
-        # menu     = QtGui.QMenu()
+    # @pyqtSlot(QtCore.QPoint)
+    # def contextMenuRequested(self,point):
+    #     # menu     = QtGui.QMenu()
 
-        # action1 = menu.addAction("Set Size 100x100")
-        # action2 = menu.addAction("Set Size 500x500")
+    #     # action1 = menu.addAction("Set Size 100x100")
+    #     # action2 = menu.addAction("Set Size 500x500")
 
 
-        # self.connect(action2,SIGNAL("triggered()"),
-        #                 self,SLOT("slotShow500x500()"))
-        # self.connect(action1,SIGNAL("triggered()"),
-        #                 self,SLOT("slotShow100x100()"))
-        self.menu.exec_(self.mapToGlobal(point))
+    #     # self.connect(action2,SIGNAL("triggered()"),
+    #     #                 self,SLOT("slotShow500x500()"))
+    #     # self.connect(action1,SIGNAL("triggered()"),
+    #     #                 self,SLOT("slotShow100x100()"))
+    #     self.menu.exec_(self.mapToGlobal(point))
 
     def setModelRoot(self, path):
         self.modelRoot = path

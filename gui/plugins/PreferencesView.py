@@ -109,7 +109,7 @@ class PreferencesView(QTabWidget):
         buttonLayout = QGridLayout()
         layout.addLayout(buttonLayout, 5 + index, 1)
         buttonLayout.addWidget(self.chemicalCancel, 0, 0, Qt.Qt.AlignRight)
-        buttonLayout.addWidget(self.chemicalApply, 0, 1, Qt.Qt.AlignRight)
+        buttonLayout.addWidget(self.chemicalApply, 0, 1, Qt.Qt.AlignLeft)
 
 
         return chemicalSettingsTab
@@ -161,7 +161,7 @@ class PreferencesView(QTabWidget):
         buttonLayout = QGridLayout()
         layout.addLayout(buttonLayout, 5 + index, 1)
         buttonLayout.addWidget(self.electricalSimulationCancel, 0, 0, Qt.Qt.AlignRight)
-        buttonLayout.addWidget(self.electricalSimulationApply, 0, 1, Qt.Qt.AlignRight)
+        buttonLayout.addWidget(self.electricalSimulationApply, 0, 1, Qt.Qt.AlignLeft)
 
         return widget
 
@@ -218,7 +218,7 @@ class PreferencesView(QTabWidget):
         buttonLayout = QGridLayout()
         layout.addLayout(buttonLayout, 6, 1)
         buttonLayout.addWidget(self.electricalVisualizationCancel, 0, 0, Qt.Qt.AlignRight)
-        buttonLayout.addWidget(self.electricalVisualizationApply, 0, 1, Qt.Qt.AlignRight)
+        buttonLayout.addWidget(self.electricalVisualizationApply, 0, 1, Qt.Qt.AlignLeft)
 
         return widget
 
