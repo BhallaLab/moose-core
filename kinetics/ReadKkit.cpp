@@ -122,7 +122,6 @@ void ReadKkit::setMoveOntoCompartment( bool v )
 Id  makeStandardElements( Id pa, const string& modelname )
 {
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
-	//cout << " kkit read " << pa << " " << modelname << " "<< MooseGlobal;
 	string modelPath = pa.path() + "/" + modelname;
 	if ( pa == Id() )
 		modelPath = "/" + modelname;
@@ -229,12 +228,18 @@ Id ReadKkit::read(
 	Shell* s = reinterpret_cast< Shell* >( ObjId().data() );
 	Id mgr = makeStandardElements( pa, modelname );
 	assert( mgr != Id() );
-
 	baseId_ = mgr;
 	basePath_ = mgr.path();
 	enzCplxMols_.resize( 0 );
 
 	innerRead( fin );
+	
+	Id kinetics( basePath_);
+	assert(kinetics != Id());
+	Id cInfo = s->doCreate( "Annotator", basePath_, "info", 1 );
+	assert( cInfo != Id() );
+	Field< string > ::set(cInfo, "solver", "GSL");
+	Field< double > ::set(cInfo, "runtime", maxtime_);
 
 	assignPoolCompartments();
 	assignReacCompartments();
@@ -429,7 +434,6 @@ ReadKkit::ParseMode ReadKkit::readInit( const string& line )
 		initdumpVersion_ = atoi( argv[2].c_str() );
 		return DATA;
 	}
-
 	return INIT;
 }
 
@@ -901,6 +905,7 @@ Id ReadKkit::buildInfo( Id parent,
 	map< string, int >& m, const vector< string >& args )
 {
 	Id info = shell_->doCreate( "Annotator", parent, "info", 1 );
+	//cout << "parent " << parent << " " << parent.path() << " info " << info.path();
 	assert( info != Id() );
 
 	double x = atof( args[ m[ "x" ] ].c_str() );
@@ -911,8 +916,6 @@ Id ReadKkit::buildInfo( Id parent,
 	Field< string >::set( info, "color", args[ m[ "xtree_fg_req" ] ] );
 	Field< string >::set( info, "textColor", 
 		args[ m[ "xtree_textfg_req" ] ] );
-	Field< string > ::set(info, "solver", "GSL");
-	Field< double > :: set(info,"runtime",maxtime_);
 	return info;
 }
 
