@@ -139,7 +139,8 @@ class MWindow(QtGui.QMainWindow):
         self.quitAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Q", None, QtGui.QApplication.UnicodeUTF8))
         self.getMyDockWidgets()
         self.setCentralWidget(self.mdiArea)
-        pixmap = QPixmap("icons/moose_icon_large.png")
+        # pixmap = QPixmap("icons/moose_icon.png")
+
         # pixmap = pixmap.scaled(self.mdiArea.size())
         # self.mdiArea.setStyleSheet("QMdiArea { background-image: url(icons/moose_icon_large.png); }")
         # palette = QPalette()
@@ -149,7 +150,7 @@ class MWindow(QtGui.QMainWindow):
 
 
         # self.mdiArea.setStyleSheet("border-image: url(icons/moose_icon_large.png)")
-        self.mdiArea.setBackground(QBrush(pixmap))
+        # self.mdiArea.setBackground(QBrush(pixmap))
 
         self.mdiArea.setViewMode(QtGui.QMdiArea.TabbedView)
         self.mdiArea.subWindowActivated.connect(self.switchSubwindowSlot)
@@ -181,7 +182,7 @@ class MWindow(QtGui.QMainWindow):
         layout.addWidget(loadKineticModelButton)
         # layout.addWidget(QLabel(" "), 1, 2)
         # layout.addWidget(QLabel(" "), 2, 0)
-        layout.addWidget(loadNeuronalModelButton)
+        # layout.addWidget(loadNeuronalModelButton)
         # layout.addWidget(QLabel(" "), 2, 2)
         dialog.setLayout(layout)
         createKineticModelButton.clicked.connect(self.newModelDialogSlot)
