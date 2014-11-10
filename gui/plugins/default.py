@@ -378,7 +378,7 @@ class RunView(RunBase):
         widget.runner.simulationStarted.connect(self._centralWidget.extendXAxes)
         widget.runner.simulationProgressed.connect(self._centralWidget.updatePlots)
         widget.runner.simulationFinished.connect(self._centralWidget.rescalePlots)
-        widget.runner.simulationContinued.connect(self._centralWidget.extendXAxes)
+        # widget.runner.simulationContinued.connect(self._centralWidget.extendXAxes)
         widget.runner.simulationReset.connect(self._centralWidget.plotAllData)
         self._toolBars += widget.getToolBars()
         return self.schedulingDockWidget

@@ -50,7 +50,7 @@ class Runner(QObject):
                                                   , self.simulationInterval
                                                   )
         self.pause = False
-        self.simulationStarted.emit(self.clock.currentTime)
+        self.simulationStarted.emit(self.clock.currentTime + self.runTime)
         QTimer.singleShot(0, self.next)
 
     def next(self):
