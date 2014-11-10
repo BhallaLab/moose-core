@@ -292,7 +292,7 @@ class PreferencesPresenter(QObject):
     #     self.setClocks(10, 10, dt)
 
     def setChemicalClocks(self):
-        self.setClocks2(CHEMICAL_SIMULATION_INTERVAL_CLOCKS, self.preferences["chemical"]["simulation"]["simulation-dt"])
+        self.setClocks2(CHEMICAL_SIMULATION_DT_CLOCKS , self.preferences["chemical"]["simulation"]["simulation-dt"])
         self.setClocks2(CHEMICAL_PLOT_UPDATE_INTERVAL_CLOCKS, self.preferences["chemical"]["simulation"]["plot-update-interval"])
         # self.setClocks2(CHEMICAL_DIFFUSION_INTERVAL_CLOCKS, self.preferences["chemical"]["simulation"]["diffusion-dt"])
 
