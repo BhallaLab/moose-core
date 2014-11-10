@@ -223,6 +223,7 @@ class PreferencesPresenter(QObject):
             lambda : signal.emit(float(intervalEditor.text())))
 
     def setClocks(self, clocks, dt):
+        return
         for clock in clocks:
             moose.setClock(clock, dt)
 

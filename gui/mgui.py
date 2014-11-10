@@ -146,6 +146,9 @@ class MWindow(QtGui.QMainWindow):
         # palette.setBrush(QPalette.Background, QBrush(pixmap))
         # self.setPalette(palette)
 
+
+
+        # self.mdiArea.setStyleSheet("border-image: url(icons/moose_icon_large.png)")
         self.mdiArea.setBackground(QBrush(pixmap))
 
         self.mdiArea.setViewMode(QtGui.QMdiArea.TabbedView)
