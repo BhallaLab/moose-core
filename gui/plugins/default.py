@@ -606,6 +606,7 @@ class SchedulingWidget(QtGui.QWidget):
         # print(self.simulationInterval)
         self.currentSimulationRuntime.setText("0.0")
         self.checkConsistency()
+        # self.preferences.setChemicalClocks()
         self.simulationRuntime.setText(str(self.runTime))
         self.runner.resetSimulation( self.runTime
                                    , self.updateInterval

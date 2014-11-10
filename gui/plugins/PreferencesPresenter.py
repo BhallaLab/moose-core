@@ -291,6 +291,15 @@ class PreferencesPresenter(QObject):
     # def setClocks(self, dt):
     #     self.setClocks(10, 10, dt)
 
+    def setChemicalClocks(self):
+        self.setClocks2(CHEMICAL_SIMULATION_INTERVAL_CLOCKS, self.preferences["chemical"]["simulation"]["simulation-dt"])
+        self.setClocks2(CHEMICAL_PLOT_UPDATE_INTERVAL_CLOCKS, self.preferences["chemical"]["simulation"]["plot-update-interval"])
+        # self.setClocks2(CHEMICAL_DIFFUSION_INTERVAL_CLOCKS, self.preferences["chemical"]["simulation"]["diffusion-dt"])
+
+    def setClocks2(self, clocks, dt):
+        for clock in clocks:
+            moose.setClock(clock, dt)
+
     def connectSlots(self):
         self.connectElectricalSlots()
         self.connectChemicalSlots()
@@ -332,8 +341,8 @@ class PreferencesPresenter(QObject):
                                    , "solverIndex"
                                    , self.view.electricalSolver.currentIndex()
                                    ))
-        self.view.electricalSimulationApply.connect(
-                                                   )
+        # self.view.electricalSimulationApply.connect(
+        #                                            )
 
 
     def setValue(self, dictionary, key, value):
@@ -411,6 +420,7 @@ class PreferencesPresenter(QObject):
 
     def applyChemicalSimulationSettings(self):
         self.getChemicalPreferences()
+        self.setChemicalClocks()
         self.view.close()
         self.applyChemicalSettings.emit(self.preferences["chemical"])
 
