@@ -622,6 +622,7 @@ class SchedulingWidget(QtGui.QWidget):
         except:
             self.runtime = 100.0
             self.simulationRuntime.setText("100.0")
+        self.checkConsistency()
         self.runner.runSimulation(self.runtime)
 
         # return

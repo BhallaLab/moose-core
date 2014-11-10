@@ -148,7 +148,6 @@ class MWindow(QtGui.QMainWindow):
         # self.setPalette(palette)
 
 
-
         # self.mdiArea.setStyleSheet("border-image: url(icons/moose_icon_large.png)")
         # self.mdiArea.setBackground(QBrush(pixmap))
 
