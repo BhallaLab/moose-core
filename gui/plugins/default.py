@@ -509,6 +509,7 @@ class SchedulingWidget(QtGui.QWidget):
         self.schedulerToolBar           = self.getSchedulerToolBar()
         self.runner.simulationProgressed.connect(self.updateCurrentSimulationRuntime)
         self.continueFlag               = False
+        self.preferences.applyChemicalSettings.connect(self.resetSimulation)
         # self.resetAndRunButton.clicked.connect(self.resetAndRunSlot)
         # self.continueButton.clicked.connect(self.doContinueRun)
         # self.continueRun.connect(self.runner.continueRun)
