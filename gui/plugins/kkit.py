@@ -129,7 +129,7 @@ class AnotherKkitRunView(RunView):
             chemprefs["simulation"]["solver"] = "Runge Kutta"
         else:
             chemprefs["simulation"]["solver"] = "Gillespie"
-        self.schedular.preferences.setChemicalPreferences()     
+        self.schedular.preferences.setChemicalPreferences()
         return self._centralWidget
 
     def setSolver(self, solver = None):
@@ -810,6 +810,7 @@ class kineticRunWidget(KineticsWidget):
     def addSolver(self,solver):
         #print "addsolver call ",solver
         #return
+
         compt = moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
         comptinfo = moose.Annotator(moose.element(compt[0]).path+'/info')
         previousSolver = comptinfo.solver
@@ -830,7 +831,7 @@ class kineticRunWidget(KineticsWidget):
         else:
             if not ( moose.exists( compt[0].path+'/stoich' ) ):
                 self.setCompartmentSolver(compt,currentSolver)
-
+        moose.reinit()
     def setCompartmentSolver(self,compt,solver):
         if solver == 'GSL' or solver == "Runge Kutta":
             solver = 'gsl'

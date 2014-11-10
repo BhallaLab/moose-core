@@ -3,9 +3,9 @@
         "simulation": {
             "default-runtime": 100.0,
             "diffusion-dt": 0.01,
-            "gui-update-interval": 20.0,
-            "plot-update-interval": 30.0,
-            "simulation-dt": 40.0,
+            "gui-update-interval": 10.0,
+            "plot-update-interval": 10.0,
+            "simulation-dt": 10.0,
             "solver": "Runge Kutta"
         },
         "visualization": {}
