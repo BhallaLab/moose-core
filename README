@@ -20,6 +20,35 @@ with Python, graphical displays with Matplotlib, PyQt, and OpenGL, and
 support for many model formats. These include SBML, NeuroML, GENESIS kkit 
 and cell.p formats, HDF5 and NSDF for data writing.
 
+# ABOUT VERSION 3.0.0, Kheer Kadam
+
+The Kheer Kadam release is the first of a new series of MOOSE releases.
+
+With this series, the release cycle will be much faster and the 
+changes more incremental. The naming continues to be after Indian sweets.
+
+Kheer Kadam is a Bengali sweet which has a soft white, somewhat powdery 
+outer layer with a pink or white spongy interior soaked in syrup.
+
+There are several big changes in 3.0.0::
+
+	- Major feature developments for multiscaling, including deterministic
+		reaction-diffusion calculations, a substantial set of
+		classes for Leaky Integrate-and-Fire neuronal networks,
+		and abstract plastic synapses.
+	- Extensive example-based documentation in a new MOOSE Cookbook.
+	- An entirely new and faster messaging system. 
+	- An evolution of the Python interface to use object arrays.
+	- Automatic scheduling of all objects upon creation.
+
+This release also has a reworked version of the GUI, which is currently in
+alpha but can be used to run and build kinetic models.
+
+The messaging overhaul has temporarily (for 3.0.0) led to removal of the MPI 
+based parallelization, though the hooks for incorporation are in place. 
+In a related design decision, multithreading has been
+completely removed and multicore systems will henceforth utilize MPI for
+parallelization.
 
 # LICENSE
 
