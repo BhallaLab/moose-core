@@ -111,12 +111,32 @@ class AnotherKkitRunView(RunView):
         self.schedular.runner.simulationProgressed.connect(self.kkitRunView.getCentralWidget().updateValue)
         self.schedular.runner.simulationProgressed.connect(self.kkitRunView.getCentralWidget().changeBgSize)
         self.schedular.runner.simulationReset.connect(self.kkitRunView.getCentralWidget().resetColor)
-        self.schedular.runner.simulationReset.connect(self.setSolver)
-
+        # self.schedular.runner.simulationReset.connect(self.setSolver)
+        self.schedular.preferences.applyChemicalSettings.connect(lambda x : self.setSolver(x["simulation"]["solver"]))
+        modelpath = moose.element(self.modelRoot).path
+        self.runTime = (moose.Annotator(modelpath+'/info')).runtime
+        self.schedular.simulationRuntime.setText(str(self.runTime))
+        #preferences
+        chemprefs = self.schedular.preferences.getChemicalPreferences() 
+        c = moose.Clock('/clock')
+        self.simulationdt = c.tickDt[11]
+        self.plotdt = c.tickDt[16]
+        solver = (moose.Annotator(modelpath+'/info')).solver
+        chemprefs["simulation"]["simulation-dt"] = self.simulationdt
+        chemprefs["simulation"]["plot-update-interval"] = self.plotdt
+        chemprefs["simulation"]["gui-update-interval"] = 2 * self.plotdt
+        if solver == "GSL":
+            chemprefs["simulation"]["solver"] = "Runge Kutta"
+        else:
+            chemprefs["simulation"]["solver"] = "Gillespie"
+        self.schedular.preferences.setChemicalPreferences()     
         return self._centralWidget
 
-    def setSolver(self):
-        self.kkitRunView.getCentralWidget().addSolver(self.getSchedulingDockWidget().widget().solver)
+    def setSolver(self, solver = None):
+        if solver == None:
+            self.kkitRunView.getCentralWidget().addSolver(self.getSchedulingDockWidget().widget().solver)
+        else:
+            self.kkitRunView.getCentralWidget().addSolver(solver)
 
     def getCentralWidget(self):
         if self._centralWidget is None:
@@ -465,7 +485,8 @@ class  KineticsWidget(EditorWidgetBase):
             y = float(element(iteminfo).getField('y'))
             #Qt origin is at the top-left corner. The x values increase to the right and the y values increase downwards \
             #as compared to Genesis codinates where origin is center and y value is upwards, that is why ypos is negated
-            ypos = -(y-self.ymin)*self.yratio
+            # ypos = -(y-self.ymin)*self.yratio
+            ypos = (y-self.ymin)*self.yratio
         xpos = (x-self.xmin)*self.xratio
 
         return(xpos,ypos)
@@ -594,10 +615,10 @@ class  KineticsWidget(EditorWidgetBase):
                 self.updateArrow(item)
 
     def deleteSolver(self):
-        print "solver deleteSolver"
         if moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]'):
             compt = moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
             if ( moose.exists( compt[0].path+'/stoich' ) ):
+                #print "delete"
                 moose.delete( compt[0].path+'/stoich' )
                 moose.delete( compt[0].path+'/ksolve' )
 
@@ -711,6 +732,12 @@ class kineticRunWidget(KineticsWidget):
                 else:
                     # multipying by 1000 b'cos moose concentration is in milli in moose
                     ratio = presentConc
+                    #print "ratio",item,ratio
+                if ratio > '10':
+                    ratio = 4
+                if ratio < '0.0':
+                    ratio =0.1
+                #print "size ",ratio
                 item.updateRect(math.sqrt(abs(ratio)))
 
     def resetColor(self):
@@ -781,11 +808,12 @@ class kineticRunWidget(KineticsWidget):
             v.setRect(rectcompt.x()-comptWidth,rectcompt.y()-comptWidth,(rectcompt.width()+2*comptWidth),(rectcompt.height()+2*comptWidth))
     '''
     def addSolver(self,solver):
-        print "solver",solver
+        #print "addsolver call ",solver
+        #return
         compt = moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
         comptinfo = moose.Annotator(moose.element(compt[0]).path+'/info')
         previousSolver = comptinfo.solver
-        print "pre solver from kkit ",previousSolver
+        #print "pre solver from kkit ",previousSolver
         currentSolver = "GSL"
         if solver == "Gillespie":
             currentSolver = "Gillespie"
@@ -793,45 +821,41 @@ class kineticRunWidget(KineticsWidget):
             currentSolver = "Runge Kutta"
 
         if previousSolver != currentSolver:
-            if not ( moose.exists( compt[0].path+'/stoich' ) ):
-                print "1 pre solver is not same as c solver and solver is not set"
-                self.setCompartmentSolver(compt, currentSolver)
-                
             if ( moose.exists( compt[0].path+'/stoich' ) ):
-                print "2 pre solver is not same as c solver and solver is set"
                 self.deleteSolver()
                 self.setCompartmentSolver(compt,currentSolver)
+            elif ( moose.exists( compt[0].path+'/stoich' ) ):
+                self.setCompartmentSolver(compt, currentSolver)
             comptinfo.solver = currentSolver
         else:
             if not ( moose.exists( compt[0].path+'/stoich' ) ):
-                print "3 pre solver is  same as c solver and solver is not set"
                 self.setCompartmentSolver(compt,currentSolver)
-            else:
-                print "4 pre solver is same as c solver and solver is set then do nothing"
-                pass
 
     def setCompartmentSolver(self,compt,solver):
-            print "setCompartemt solver in setSolver",solver
-            if solver == 'GSL':
-                solver = 'gsl'
-            elif solver == 'Gillespie':
-                solver = 'gssa'
-            elif solver == 'Runge Kutta':
-                solver = 'rk'
-                
-            if ( solver == 'gsl' ):
-                ksolve = moose.Ksolve( compt[0].path+'/ksolve' )
-            if ( solver == 'gssa' ):
-                ksolve = moose.Gsolve( compt[0].path+'/ksolve' )
-            if ( solver != 'ee' ):
-                stoich = moose.Stoich( compt[0].path+'/stoich' )
-                ksolve = moose.Ksolve( compt[0].path+'/ksolve' )
-                stoich.compartment = moose.element(compt[0])
-                stoich.ksolve = ksolve
-                stoich.path = compt[0].path+"/##"
+        if solver == 'GSL' or solver == "Runge Kutta":
+            solver = 'gsl'
+        elif solver == 'Gillespie':
+            solver = 'gssa'
+        else: 
+            solver = 'gsl'
+        # print "setComt ",compt[0]
+        # if ( moose.exists( compt[0].path+'/stoich' ) ):
+        #     moose.delete( compt[0].path+'/stoich' )
+        #     moose.delete( compt[0].path+'/ksolve' )
+        if ( solver == 'gsl' ):
+            ksolve = moose.Ksolve( compt[0].path+'/ksolve' )
+        if ( solver == 'gssa' ):
+            ksolve = moose.Gsolve( compt[0].path+'/ksolve' )
+        if (solver!= 'ee'):
+            stoich = moose.Stoich( compt[0].path+'/stoich' )
+            stoich.compartment = compt[0]
+            stoich.ksolve = ksolve
+            #print "stoich path " ,compt[0].path+'/##'
+            stoich.path = compt[0].path+'/##'
 
-
-
+        #print "compt in setCom ",compt[0]
+        moose.reinit()
+        
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     size = QtCore.QSize(1024 ,768)
