@@ -126,10 +126,10 @@ class MWindow(QtGui.QMainWindow):
         self.editActions = None
         self.connectMenu = None
 
-        self.toolBars = []
+        self.toolBars       = []
         self._loadedPlugins = {}
-        self._plugins = {}
-        self._loadedModels = {}
+        self._plugins       = {}
+        self._loadedModels  = {}
 
         self.setDockOptions(self.AnimatedDocks and self.AllowNestedDocks and self.AllowTabbedDocks)
         self.mdiArea = QtGui.QMdiArea()

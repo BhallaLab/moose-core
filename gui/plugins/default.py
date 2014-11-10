@@ -474,8 +474,8 @@ class SchedulingWidget(QtGui.QWidget):
     simtimeExtended(simtime)
         emitted when simulation time is increased by user.
 
-
     """
+
     resetAndRun = QtCore.pyqtSignal(dict, dict, float, float, name='resetAndRun')
     simtimeExtended = QtCore.pyqtSignal(float, name='simtimeExtended')
     continueRun = QtCore.pyqtSignal(float, float, name='continueRun')
@@ -552,7 +552,6 @@ class SchedulingWidget(QtGui.QWidget):
         bar.addWidget(runtimeLabel)
         bar.addWidget(self.simulationRuntime)
         bar.addWidget(QLabel(' (s)'))
-
         bar.addSeparator()
 
         #: current time
@@ -598,9 +597,13 @@ class SchedulingWidget(QtGui.QWidget):
 
     def resetSimulation(self):
         self.setParameters()
-        print(self.runTime)
-        print(self.updateInterval)
-        print(self.simulationInterval)
+        try:
+            self.runtime = float(runtime)
+        except:
+            self.runtime = 100.0
+        # print(self.runTime)
+        # print(self.updateInterval)
+        # print(self.simulationInterval)
         self.currentSimulationRuntime.setText("0.0")
         self.checkConsistency()
         self.simulationRuntime.setText(str(self.runTime))
@@ -610,13 +613,21 @@ class SchedulingWidget(QtGui.QWidget):
                                    )
         self.continueFlag               = False
 
-
     def runSimulation(self):
-        if self.continueFlag:
-            self.continueSimulation()
-        else:
-            self.runner.runSimulation()
-            self.continueFlag = True
+        runtime = str(self.simulationRuntime.text())
+        try:
+            self.runtime = float(runtime)
+        except:
+            self.runtime = 100.0
+            self.simulationRuntime.setText("100.0")
+        self.runner.runSimulation(self.runtime)
+
+        # return
+        # if self.continueFlag:
+        #     self.continueSimulation()
+        # else:
+        #     self.runner.runSimulation()
+        #     self.continueFlag = True
 
     def setParameters(self):
         if self.modelType == ELECTRICAL_MODEL:
@@ -634,6 +645,7 @@ class SchedulingWidget(QtGui.QWidget):
         self.runTime            = float(self.simulationRuntime.text())
         self.solver             = chemicalPreferences["simulation"]["solver"]
         print(self.solver)
+
     def setElectricalParameters(self):
         electricalPreferences   = self.preferences.getElectricalPreferences()
         self.preferences.initializeElectricalClocks()
@@ -644,6 +656,7 @@ class SchedulingWidget(QtGui.QWidget):
         self.runTime            = float(self.simulationRuntime.text())
         self.solver             = electricalPreferences["simulation"]["solver"]
         print(self.solver)
+
     def checkConsistency(self):
         if self.updateInterval < self.simulationInterval :
             self.updateInterval = self.simulationInterval

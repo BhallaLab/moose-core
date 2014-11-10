@@ -25,8 +25,6 @@ class Runner(QObject):
         self.simulationInterval = None
         self.runSequence        = None
         self.pause              = None
-        self.currentRunTime     = None
-        self.continueCounter    = None
         self.clock              = moose.element("/clock")
 
     def resetSimulation(self, runTime, updateInterval, simulationInterval):
@@ -34,11 +32,6 @@ class Runner(QObject):
         self.updateInterval     = updateInterval
         self.simulationInterval = simulationInterval
         self.pause              = False
-        self.continueCounter    = 1
-        self.runSequence        = self.computeRunSequence( runTime
-                                                         , updateInterval
-                                                         , simulationInterval
-                                                         )
         moose.reinit()
         self.simulationReset.emit()
 
@@ -50,20 +43,14 @@ class Runner(QObject):
             runSequence.append(remaining)
         return runSequence
 
-    def continueSimulation(self, runTime, updateInterval, simulationInterval):
-        self.runSequence.extend(self.computeRunSequence( runTime
-                                                       , updateInterval
-                                                       , simulationInterval
-                                                       ))
+    def runSimulation(self, runTime):
+        self.runTime = runTime
+        self.runSequence = self.computeRunSequence( self.runTime
+                                                  , self.updateInterval
+                                                  , self.simulationInterval
+                                                  )
         self.pause = False
-        self.continueCounter += 1
-        self.simulationContinued.emit(self.continueCounter * self.runTime)
-        self.simulationProgressed.emit(0.0)
-        QTimer.singleShot(0, self.next)
-
-    def runSimulation(self):
-        self.simulationStarted.emit(self.runTime)
-        self.simulationProgressed.emit(0.0)
+        self.simulationStarted.emit(self.clock.currentTime)
         QTimer.singleShot(0, self.next)
 
     def next(self):

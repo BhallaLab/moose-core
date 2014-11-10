@@ -31,6 +31,9 @@ class PreferencesPresenter(QObject):
     chemicalGuiUpdateIntervalChanged            =  pyqtSignal(float)
     chemicalSolverChanged                       =  None
 
+    applyChemicalSettings   =  pyqtSignal(object)
+    applyElectricalSettings =  pyqtSignal(object)
+
     def __init__(self, source = PREFERENCES_FILEPATH):
         super(PreferencesPresenter, self).__init__()
         self.source = source
@@ -39,14 +42,18 @@ class PreferencesPresenter(QObject):
 
         self.view = self.createView()
         self.initializeView()
-        self.view.closed.connect(self.save)
+        # self.view.closed.connect(self.save)
         # self.connectSignals()
         # self.connectSlots()
         # self.initializeClocks()
+        self.view.electricalSimulationApply.clicked.connect(self.applyElectricalSimulationSettings)
+        self.view.electricalSimulationCancel.clicked.connect(self.cancelElectricalSimulationSettings)
+        self.view.electricalVisualizationApply.clicked.connect(self.applyElectricalVisualizationSettings)
+        self.view.electricalVisualizationCancel.clicked.connect(self.cancelElectricalVisualizationSettings)
+        self.view.chemicalSimulationApply.clicked.connect(self.applyChemicalSimulationSettings)
+        self.view.chemicalSimulationCancel.clicked.connect(self.cancelChemicalSimulationSettings)
 
     def save(self):
-        return
-        print("Saving Preferences")
         self.getElectricalPreferences()
         self.getChemicalPreferences()
         # http://stackoverflow.com/questions/12309269/write-json-data-to-file-in-python
@@ -204,6 +211,10 @@ class PreferencesPresenter(QObject):
                                           )
 
         self.chemicalSolverChanged = self.view.chemicalSolver.currentIndexChanged
+        # self.view.electricalVisualizationApply.connect(self.applyElectricalVisualizationSettings)
+        # self.view.electricalVisualizationCancel.connect(self.cancelElectricalVisualizationSettings)
+
+
 
     def connectIntervalEditorToSignal(self, intervalEditor, signal):
         intervalEditor.returnPressed.connect(
@@ -244,7 +255,6 @@ class PreferencesPresenter(QObject):
                                                                                   , self.view.electricalBackgroundColorDialog.currentColor().blue()
                                                                                   , self.view.electricalBackgroundColorDialog.currentColor().alpha()
                                                                                   ]
-
         return self.preferences["electrical"]
 
     def getChemicalPreferences(self):
@@ -321,6 +331,10 @@ class PreferencesPresenter(QObject):
                                    , "solverIndex"
                                    , self.view.electricalSolver.currentIndex()
                                    ))
+        self.view.electricalSimulationApply.connect(
+                                                   )
+
+
     def setValue(self, dictionary, key, value):
         dictionary[key] = value
 
@@ -374,7 +388,6 @@ class PreferencesPresenter(QObject):
                       , self.preferences["electrical"]["simulation"]["plot-update-interval"]
                       )
 
-
     def initializeChemicalClocks(self):
         self.setClocks( CHEMICAL_SIMULATION_DT_CLOCKS
                       , self.preferences["chemical"]["simulation"]["simulation-dt"]
@@ -385,6 +398,33 @@ class PreferencesPresenter(QObject):
         self.setClocks( CHEMICAL_PLOT_UPDATE_INTERVAL_CLOCKS
                       , self.preferences["chemical"]["simulation"]["plot-update-interval"]
                       )
+
+    def applyElectricalSimulationSettings(self):
+        self.getElectricalPreferences()
+        self.view.close()
+        self.applyElectricalSettings.emit(self.preferences["electrical"])
+
+    def cancelElectricalSimulationSettings(self):
+        self.setElectricalPreferences()
+        self.view.close()
+
+    def applyChemicalSimulationSettings(self):
+        self.getChemicalPreferences()
+        self.view.close()
+        self.applyChemicalSettings.emit(self.preferences["chemical"])
+
+    def cancelChemicalSimulationSettings(self):
+        self.setChemicalPreferences()
+        self.view.close()
+
+    def applyElectricalVisualizationSettings(self):
+        self.getElectricalPreferences()
+        self.applyElectricalSettings.emit(self.preferences["electrical"])
+        self.view.close()
+
+    def cancelElectricalVisualizationSettings(self):
+        self.setElectricalPreferences()
+        self.view.close()
 
 
 def main():

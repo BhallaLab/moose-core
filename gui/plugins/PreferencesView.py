@@ -20,7 +20,7 @@ import sys
 
 class PreferencesView(QTabWidget):
 
-    closed           =  pyqtSignal()
+    closed                  =  pyqtSignal()
 
     def __init__(self, parent = None):
         super(PreferencesView, self).__init__(parent)
@@ -40,8 +40,8 @@ class PreferencesView(QTabWidget):
         self.chemicalSolvers                    =   { "Gillespie"        :   QRadioButton("Gillespie")
                                                     , "Runge Kutta"      :   QRadioButton("Runge Kutta")
                                                     }
-        self.chemicalApply                      =   QPushButton("Apply")
-        self.chemicalCancel                     =   QPushButton("Cancel")
+        self.chemicalSimulationApply                      =   QPushButton("Apply")
+        self.chemicalSimulationCancel                     =   QPushButton("Cancel")
         self.electricalSimulationDt             =   self.createFloatingPointEditor()
         self.electricalPlotUpdateInterval       =   self.createFloatingPointEditor()
         self.electricalDefaultSimulationRuntime =   self.createFloatingPointEditor()
@@ -92,8 +92,8 @@ class PreferencesView(QTabWidget):
         layout.addWidget(QLabel('GUI Update Interval'), 3, 0)
         layout.addWidget(self.chemicalGuiUpdateInterval, 3, 1)
 
-        layout.addWidget(QLabel('Default Runtime'), 4, 0)
-        layout.addWidget(self.chemicalDefaultSimulationRuntime, 4, 1)
+        # layout.addWidget(QLabel('Default Runtime'), 4, 0)
+        # layout.addWidget(self.chemicalDefaultSimulationRuntime, 4, 1)
 
         layout.addWidget(QLabel('Solver'), 5, 0)
 
@@ -108,8 +108,8 @@ class PreferencesView(QTabWidget):
 
         buttonLayout = QGridLayout()
         layout.addLayout(buttonLayout, 5 + index, 1)
-        buttonLayout.addWidget(self.chemicalCancel, 0, 0, Qt.Qt.AlignRight)
-        buttonLayout.addWidget(self.chemicalApply, 0, 1, Qt.Qt.AlignLeft)
+        buttonLayout.addWidget(self.chemicalSimulationCancel, 0, 0, Qt.Qt.AlignRight)
+        buttonLayout.addWidget(self.chemicalSimulationApply, 0, 1, Qt.Qt.AlignLeft)
 
 
         return chemicalSettingsTab
@@ -145,8 +145,8 @@ class PreferencesView(QTabWidget):
         layout.addWidget(QLabel('GUI Update Interval'), 3, 0)
         layout.addWidget(self.electricalGuiUpdateInterval, 3, 1)
 
-        layout.addWidget(QLabel('Default Runtime'), 4, 0)
-        layout.addWidget(self.electricalDefaultSimulationRuntime, 4, 1)
+        # layout.addWidget(QLabel('Default Runtime'), 4, 0)
+        # layout.addWidget(self.electricalDefaultSimulationRuntime, 4, 1)
 
         layout.addWidget(QLabel('Solver'), 5, 0)
 
