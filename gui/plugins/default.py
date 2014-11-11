@@ -53,7 +53,6 @@ from collections import defaultdict
 import numpy as np
 from PyQt4 import QtGui, QtCore
 from PyQt4.Qt import Qt
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 
 import moose
 from moose import utils
@@ -70,6 +69,27 @@ from PlotWidgetContainer import PlotWidgetContainer
 
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtGui import QDoubleValidator
+from kkitUtil import getColor
+from Runner import Runner
+# from Runner import Runner
+# from __future__ import print_function
+from PyQt4 import QtGui, QtCore
+from PyQt4.QtGui import QToolBar
+from PyQt4.QtGui import QToolButton
+from PyQt4.QtGui import QLabel
+from PyQt4.QtGui import QIcon
+from PyQt4.QtGui import QLineEdit
+from PyQt4.QtGui import QErrorMessage
+from PyQt4.QtGui import QSizeGrip
+from PyQt4.QtGui import QIcon
+from PyQt4.QtGui import QPixmap
+from PyQt4.QtGui import QAction
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+
+# from PlotNavigationToolbar import PlotNavigationToolbar
+from global_constants import preferences
+ELECTRICAL_MODEL = 0
+CHEMICAL_MODEL   = 1
 
 class MoosePlugin(MoosePluginBase):
     """Default plugin for MOOSE GUI"""
@@ -158,8 +178,8 @@ class MooseEditorView(EditorBase):
         """
         if self._centralWidget is None:
             self._centralWidget = DefaultEditorWidget()
-            if hasattr(self._centralWidget, 'init'):
-                self._centralWidget.init()
+        if hasattr(self._centralWidget, 'init'):
+            self._centralWidget.init()
             self._centralWidget.setModelRoot(self.plugin.modelRoot)
         return self._centralWidget
 
@@ -274,13 +294,13 @@ class DefaultEditorWidget(EditorWidgetBase):
     def getToolBars(self):
         if not hasattr(self, '_insertToolBar'):
             self._insertToolBar = QtGui.QToolBar('Insert')
+            return self._toolBars
             for action in self.insertMenu.actions():
                 button = MToolButton()
                 button.setDefaultAction(action)
                 self._insertToolBar.addWidget(button)
             self._toolBars.append(self._insertToolBar)
         return self._toolBars
-
 
 
 ############################################################
@@ -355,10 +375,11 @@ class RunView(RunBase):
         widget.setDataRoot(self.dataRoot)
         widget.setModelRoot(self.modelRoot)
         self.schedulingDockWidget.setWidget(widget)
-        widget.runner.update.connect(self._centralWidget.updatePlots)
-        widget.runner.finished.connect(self._centralWidget.rescalePlots)
-        widget.simtimeExtended.connect(self._centralWidget.extendXAxes)
-        widget.runner.resetAndRun.connect(self._centralWidget.plotAllData)
+        widget.runner.simulationStarted.connect(self._centralWidget.extendXAxes)
+        widget.runner.simulationProgressed.connect(self._centralWidget.updatePlots)
+        widget.runner.simulationFinished.connect(self._centralWidget.rescalePlots)
+        # widget.runner.simulationContinued.connect(self._centralWidget.extendXAxes)
+        widget.runner.simulationReset.connect(self._centralWidget.plotAllData)
         self._toolBars += widget.getToolBars()
         return self.schedulingDockWidget
 
@@ -373,10 +394,15 @@ class MooseRunner(QtCore.QObject):
     currentTime = QtCore.pyqtSignal(float, name='currentTime')
     finished = QtCore.pyqtSignal(name='finished')
 
-    def __init__(self, *args, **kwargs):
-        QtCore.QObject.__init__(self, *args, **kwargs)
+    def __init__( self
+                , runTime
+                , updateInterval
+                ):
+        QtCore.QObject.__init__(self)
         # if (MooseRunner.inited):
         #     return
+        self.runTime = runTime
+        self.updateInterval = updateInterval
         self._updateInterval = 100e-3
         self._simtime = 0.0
         self._clock = moose.Clock('/clock')
@@ -387,7 +413,7 @@ class MooseRunner(QtCore.QObject):
 
     def doResetAndRun(self, tickDtMap, tickTargetMap, simtime, updateInterval):
         self._pause = False
-        self._updateInterval = updateInterval
+        self._updateInterval = 0.1 #updateInterval
         self._simtime = simtime
         utils.updateTicks(tickDtMap)
         utils.assignTicks(tickTargetMap)
@@ -397,6 +423,10 @@ class MooseRunner(QtCore.QObject):
 
     def run(self):
         """Run simulation for a small interval."""
+        print("simtime => ", self._simtime)
+        print("update interval => ", self._updateInterval)
+        print("current time => ", self._clock.currentTime)
+        print("Base dt => ", self._clock.baseDt)
         if self._clock.currentTime >= self._simtime:
             self.finished.emit()
             return
@@ -444,19 +474,20 @@ class SchedulingWidget(QtGui.QWidget):
     simtimeExtended(simtime)
         emitted when simulation time is increased by user.
 
-
     """
+
     resetAndRun = QtCore.pyqtSignal(dict, dict, float, float, name='resetAndRun')
     simtimeExtended = QtCore.pyqtSignal(float, name='simtimeExtended')
     continueRun = QtCore.pyqtSignal(float, float, name='continueRun')
 
     def __init__(self, *args, **kwargs):
         QtGui.QWidget.__init__(self, *args, **kwargs)
-        self.advanceOptiondisplayed = False
-        self.updateInterval = 100e-3 # This will be made configurable with a textbox
-        self.__createAdvancedOptionsWidget()
-        if not self.advanceOptiondisplayed:
-            self.advancedOptionsWidget.hide()
+        self.simulationInterval = None
+        self.updateInterval     = None
+        self.runTime            = None
+
+        # if not self.advanceOptiondisplayed:
+        #     self.advancedOptionsWidget.hide()
 
         # self.__getUpdateIntervalWidget()
         #layout.addWidget(self.__getUpdateIntervalWidget())
@@ -464,91 +495,226 @@ class SchedulingWidget(QtGui.QWidget):
         # layout.addItem(spacerItem)
         # self.setLayout(layout)
         # self._toolBars.append(
-        self.runner = MooseRunner()
+        self.modelType                  = None
+        self.modelRoot                  = None
+        self.dataRoot                   = None
+        self.runner                     = Runner()
+        self.resetAndRunAction          = None
+        self.stopAction                 = None
+        self.continueAction             = None
+        self.preferences                = preferences
+        self.currentSimulationRuntime   = None
+        self.modelType                  = None
+        self.simulationRuntime          = None
+        self.schedulerToolBar           = self.getSchedulerToolBar()
+        self.runner.simulationProgressed.connect(self.updateCurrentSimulationRuntime)
+        self.continueFlag               = False
+        self.preferences.applyChemicalSettings.connect(self.resetSimulation)
         # self.resetAndRunButton.clicked.connect(self.resetAndRunSlot)
         # self.continueButton.clicked.connect(self.doContinueRun)
         # self.continueRun.connect(self.runner.continueRun)
         # self.stopButton.clicked.connect(self.runner.stop)
 
+    def updateCurrentSimulationRuntime(self, time):
+        self.currentSimulationRuntime.setText(str(time))
+
     def getToolBars(self):
-        self.__createRunToolBar()
-        return [self._runToolBar]
+        return [self.schedulerToolBar]
 
-    def __createRunToolBar(self):    
-        if hasattr(self, '_runToolBar'):
-            return
-        self._runToolBar = QtGui.QToolBar("Run", self)
-        #: run simulation
-        self.resetAndRunAction = self._runToolBar.addAction(
-            QtGui.QIcon('icons/run.png'),
-            'Reset and Run',
-            self.resetAndRunSlot)
-        self.resetAndRunAction.setToolTip('Reset the simulation and run it')
-        #: stop simulation
-        self.stopAction = self._runToolBar.addAction(
-            QtGui.QIcon('icons/stop.png'),
-            'Stop',
-            self.runner.stop)
-        self.stopAction.setToolTip('Stop the running simulation')
-        #: continue simulation
-        self.continueAction = self._runToolBar.addAction(
-            QtGui.QIcon('icons/continue.png'),
-            'Continue run',
-            self.doContinueRun)
-        self.continueAction.setToolTip('Continue simulation')
-        self._runToolBar.addSeparator()        
-        spacer = QtGui.QLabel('  ')
-        self._runToolBar.addWidget(spacer)
-        #: simulation run time
-        runtimeLabel = QtGui.QLabel('Run for')
-        runtimeLabel.setPixmap(QtGui.QPixmap('icons/runtime.png').scaled(16,16))
-        self._runToolBar.addWidget(runtimeLabel)
-        self.simtimeEdit = QtGui.QDoubleSpinBox()
-        self.simtimeEdit.setToolTip('Simulation run time')
-        self.simtimeEdit.setDecimals(3)
-        self.simtimeEdit.setRange(0, 1e12)
-        self.simtimeEdit.setValue(moose.Clock('/clock').runTime)
-        self._runToolBar.addWidget(self.simtimeEdit)
-        self._runToolBar.addWidget(QtGui.QLabel('  seconds'))
+    def getSchedulerToolBar(self):
+
+        bar = QToolBar("Run", self)
+
+        self.resetAction = bar.addAction( QIcon('icons/arrow_undo.png')
+                                        , 'Reset'
+                                        , self.resetSimulation
+                                        )
+        self.resetAction.setToolTip('Reset simulation.')
+
+        self.runAction = bar.addAction( QIcon('icons/run.png')
+                                      , 'Run'
+                                      , self.runSimulation
+                                      )
+        self.runAction.setToolTip('Run simulation.')
+
+
+        self.stopAction = bar.addAction( QIcon('icons/stop.png')
+                                       , 'Stop'
+                                       , self.runner.togglePauseSimulation
+                                       )
+        self.stopAction.setToolTip('Stop simulation.')
+
+        bar.addSeparator()
+
+        runtimeLabel = QLabel('Run for')
+        self.simulationRuntime = QLineEdit()
+        self.simulationRuntime.setValidator(QDoubleValidator())
+        self.simulationRuntime.setFixedWidth(75)
+        bar.addWidget(runtimeLabel)
+        bar.addWidget(self.simulationRuntime)
+        bar.addWidget(QLabel(' (s)'))
+        bar.addSeparator()
+
         #: current time
-        spacer = QtGui.QLabel('    ')
-        spacer.setMinimumWidth(5)
-        spacer.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Preferred)
-        self._runToolBar.addWidget(spacer)
+        # spacer.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Preferred)
+        # self._runToolBar.addWidget(spacer)
         # self._runToolBar.addWidget(QtGui.QLabel('Current time'))
-        self.currentTimeWidget = QtGui.QLCDNumber(6) # 6 digits
-        self.currentTimeWidget.setToolTip('Current time in simulation')
-        self.runner.currentTime.connect(self.currentTimeWidget.display)
-        self._runToolBar.addWidget(self.currentTimeWidget)
-        self._runToolBar.addWidget(self.__getAdvanceOptionsButton())
+        self.currentSimulationRuntime = QLineEdit() # 6 digits
+        self.currentSimulationRuntime.setToolTip('Current simulation runtime.')
+        self.currentSimulationRuntime.setFixedWidth(75)
+        self.currentSimulationRuntime.setValidator(QDoubleValidator())
+        self.currentSimulationRuntime.setText("0.0")
+        self.currentSimulationRuntime.setReadOnly(True)
 
-    def updateTickswidget(self):
-        if self.advanceOptiondisplayed:
-            self.advancedOptionsWidget.hide()
-            self.advanceOptiondisplayed = False
-        else:
-            self.advancedOptionsWidget.show()
-            self.advanceOptiondisplayed = True
+        # self.runner.currentTime.connect(self.currentTimeWidget.display)
+        bar.addWidget(QLabel("Current Time : "))
+        bar.addWidget(self.currentSimulationRuntime)
+        bar.addWidget(QLabel(" (s)"))
+        # self._runToolBar.addWidget(self.())
+
+        bar.addSeparator()
+
+        self.preferencesButton = QToolButton()
+        self.preferencesButton.setText("Preferences")
+        self.preferencesButton.clicked.connect(self.preferencesToggler)
+
+        bar.addWidget(self.preferencesButton)
+        return bar
+
+    # def updateTickswidget(self):
+    #     if self.advanceOptiondisplayed:
+    #         self.advancedOptionsWidget.hide()
+    #         self.advanceOptiondisplayed = False
+    #     else:
+    #         self.advancedOptionsWidget.show()
+    #         self.advanceOptiondisplayed = True
+
+    def continueSimulation(self):
+        self.runner.continueSimulation( self.runTime
+                                      , self.updateInterval
+                                      , self.simulationInterval
+                                      )
+        self.simulationRuntime.setText(str(float(self.simulationRuntime.text()) + self.runTime))
+
+    def resetSimulation(self):
+        self.setParameters()
+        try:
+            self.runtime = float(runtime)
+        except:
+            self.runtime = 100.0
+        # print(self.runTime)
+        # print(self.updateInterval)
+        # print(self.simulationInterval)
+        self.currentSimulationRuntime.setText("0.0")
+        self.checkConsistency()
+        # self.preferences.setChemicalClocks()
+        self.simulationRuntime.setText(str(self.runTime))
+        self.runner.resetSimulation( self.runTime
+                                   , self.updateInterval
+                                   , self.simulationInterval
+                                   )
+        self.continueFlag               = False
+
+    def runSimulation(self):
+        runtime = str(self.simulationRuntime.text())
+        try:
+            self.runtime = float(runtime)
+        except:
+            self.runtime = 100.0
+            self.simulationRuntime.setText("100.0")
+        self.checkConsistency()
+        self.runner.runSimulation(self.runtime)
+
+        # return
+        # if self.continueFlag:
+        #     self.continueSimulation()
+        # else:
+        #     self.runner.runSimulation()
+        #     self.continueFlag = True
+
+    def setParameters(self):
+        if self.modelType == ELECTRICAL_MODEL:
+            self.setElectricalParameters()
+        elif self.modelType == CHEMICAL_MODEL:
+            self.setChemicalParameters()
+
+    def setChemicalParameters(self):
+        chemicalPreferences   = self.preferences.getChemicalPreferences()
+        self.preferences.initializeChemicalClocks()
+        self.updateInterval     = chemicalPreferences["simulation"]["gui-update-interval"]
+        self.simulationInterval = chemicalPreferences["simulation"]["simulation-dt"]
+        if str(self.simulationRuntime.text()) == "":
+            self.simulationRuntime.setText(str(chemicalPreferences["simulation"]["default-runtime"]))
+        self.runTime            = float(self.simulationRuntime.text())
+        self.solver             = chemicalPreferences["simulation"]["solver"]
+        print(self.solver)
+
+    def setElectricalParameters(self):
+        electricalPreferences   = self.preferences.getElectricalPreferences()
+        self.preferences.initializeElectricalClocks()
+        self.updateInterval     = electricalPreferences["simulation"]["gui-update-interval"]
+        self.simulationInterval = electricalPreferences["simulation"]["simulation-dt"]
+        if str(self.simulationRuntime.text()) == "":
+            self.simulationRuntime.setText(str(electricalPreferences["simulation"]["default-runtime"]))
+        self.runTime            = float(self.simulationRuntime.text())
+        self.solver             = electricalPreferences["simulation"]["solver"]
+        print(self.solver)
+
+    def checkConsistency(self):
+        if self.updateInterval < self.simulationInterval :
+            self.updateInterval = self.simulationInterval
+
+            # print("Hello")
+            # dialog = QErrorMessage()
+            # dialog.showMessage(
+            #     """GUI Update interval should be greater than Simulation Interval.
+            #     Please update these values in Edit > Preferences."""
+            #                    )
+            # return False
+        if self.runTime < self.updateInterval :
+            self.runTime = self.updateInterval
+            # dialog = QErrorMessage()
+            # dialog.showMessage(
+            #     """Simulation runtime should greater than GUI Update interval.
+            #     Please update the runtime in the Scheduling Toolbar"""
+            #                   )
+            # return False
+        return True
+
+    # def setElectricalParameters(self):
+    #     chemicalPreferences     = self.preferences.getChemicalPreferences()
+    #     self.updateInterval     = chemicalPreferences["guiUpdateInterval"]
+    #     self.simulationInterval = chemicalPreferences["simulationInterval"]
+    #     chemicalPreferences["diffusionInterval"]
+    #     chemicalPreferences
+    #     self. chemicalPreferences
+    #     self. chemicalPreferences
+    #     self. chemicalPreferences
+    #     self. runTime            = float(self.simulationRuntime.text())
 
     def __getAdvanceOptionsButton(self):
         icon = QtGui.QIcon(os.path.join(config.settings[config.KEY_ICON_DIR],'arrow.png'))
-        self.advancedOptionsButton = QtGui.QToolButton()
-        self.advancedOptionsButton.setText("Advance Options")
-        self.advancedOptionsButton.setIcon(QtGui.QIcon(icon))
-        self.advancedOptionsButton.setToolButtonStyle( Qt.ToolButtonTextBesideIcon );
-        self.advancedOptionsButton.clicked.connect(self.updateTickswidget)
+        # self.advancedOptionsButton.setIcon(QtGui.QIcon(icon))
+        # self.advancedOptionsButton.setToolButtonStyle( Qt.ToolButtonTextBesideIcon );
         return self.advancedOptionsButton
 
-    def __getUpdateIntervalWidget(self):
-        label = QtGui.QLabel('Plot update interval')
-        self.updateIntervalText = QtGui.QLineEdit(str(self.updateInterval))
-        label = QtGui.QLabel('Plot update interval (s)')
-        layout = QtGui.QHBoxLayout()
-        layout.addWidget(label)
-        layout.addWidget(self.updateIntervalText)
-        widget = QtGui.QWidget()
-        widget.setLayout(layout)
-        return widget
+    def preferencesToggler(self):
+        visibility = not self.preferences.getView().isVisible()
+        self.preferences.getView().setVisible(visibility)
+
+    def continueSlot(self):
+        pass
+
+    # def __getUpdateIntervalWidget(self):
+    #     label = QtGui.QLabel('Plot update interval')
+    #     self.updateIntervalText = QtGui.QLineEdit(str(self.updateInterval))
+    #     label = QtGui.QLabel('Plot update interval (s)')
+    #     layout = QtGui.QHBoxLayout()
+    #     layout.addWidget(label)
+    #     layout.addWidget(self.updateIntervalText)
+    #     widget = QtGui.QWidget()
+    #     widget.setLayout(layout)
+    #     return widget
 
     # def __getRunControlWidget(self):
     #     widget = QtGui.QWidget()
@@ -576,7 +742,7 @@ class SchedulingWidget(QtGui.QWidget):
         #Harsha: Atleast for loading signalling model in the GSL method, the updateInterval need to be atleast
         #        equal to the max TickDt and not zero.
         tickDt = self.getTickDtMap().values()
-        tickDt = [item for item in self.getTickDtMap().values() if float(item) != 0.0]
+        tickDt = [float(item) for item in self.getTickDtMap().values()]
         dt = max(tickDt)
         #dt = min(self.getTickDtMap().values())
         if dt > self.updateInterval:
@@ -600,16 +766,16 @@ class SchedulingWidget(QtGui.QWidget):
     def resetAndRunSlot(self):
         """This is just for adding the arguments for the function
         MooseRunner.resetAndRun"""
-        self.updateUpdateInterval()
-        tickDtMap = self.getTickDtMap()
-        tickTargetsMap = self.getTickTargets()
-        simtime = self.getSimTime()
-        self.simtimeExtended.emit(simtime)
+        # self.updateUpdateInterval()
+        # tickDtMap = self.getTickDtMap()
+        # tickTargetsMap = self.getTickTargets()
+        # simtime = self.getSimTime()
+        # self.simtimeExtended.emit(simtime)
         self.runner.doResetAndRun(
             self.getTickDtMap(),
             self.getTickTargets(),
             self.getSimTime(),
-            self.updateInterval)
+            self.updateInterval  )
 
     def doContinueRun(self):
         """Helper function to emit signal with arguments"""
@@ -643,6 +809,8 @@ class SchedulingWidget(QtGui.QWidget):
         layout.addLayout(layout2)
         simtimeWidget.setLayout(layout)
         return simtimeWidget
+
+
 
     def __createAdvancedOptionsWidget(self):
         """Creates a widget containing the list of clock tickes for
@@ -743,11 +911,18 @@ class SchedulingWidget(QtGui.QWidget):
         return ret
 
     def setDataRoot(self, root='/data'):
-        self.runner.dataRoot = moose.element(root).path
+        self.dataRoot = moose.element(root).path
 
     def setModelRoot(self, root='/model'):
-        self.runner.modelRoot = moose.element(root).path
+        self.modelRoot = moose.element(root).path
+        self.setModelType()
 
+    def setModelType(self):
+        if moose.exists(self.modelRoot + "/model/cells"):
+            self.modelType = ELECTRICAL_MODEL
+        else:
+            self.modelType = CHEMICAL_MODEL
+        self.resetSimulation()
 
 from collections import namedtuple
 
@@ -790,7 +965,7 @@ class PlotWidget(QWidget):
     """
 
     widgetClosedSignal = pyqtSignal(object)
-
+    addGraph           = pyqtSignal(object)
     def __init__(self, model, graph, index, parentWidget, *args, **kwargs):
         super(PlotWidget, self).__init__()
         self.model = model
@@ -799,6 +974,8 @@ class PlotWidget(QWidget):
         self.canvas = CanvasWidget(self.model, self.graph, self.index)
         self.canvas.setParent(self)
         self.navToolbar = NavigationToolbar(self.canvas, self)
+        self.hackNavigationToolbar()
+        # self.navToolbar.addSeparator()
         layout = QtGui.QGridLayout()
         # canvasScrollArea = QScrollArea()
         # canvasScrollArea.setWidget(self.canvas)
@@ -811,17 +988,23 @@ class PlotWidget(QWidget):
         self.lineToDataSource = {}
         self.axesRef = self.canvas.addSubplot(1, 1)
         self.onclick_count = 0
-        layout.setSizeConstraint( QLayout.SetNoConstraint )
-        self.setSizePolicy( QtGui.QSizePolicy.Expanding
-                          , QtGui.QSizePolicy.Expanding
-                          )
-        self.setMinimumSize(self.width(), self.height())
-        self.setMaximumSize(2 * self.width(), 2* self.height())
+        # layout.setSizeConstraint( QLayout.SetNoConstraint )
+        # self.setSizePolicy( QtGui.QSizePolicy.Expanding
+        #                   , QtGui.QSizePolicy.Expanding
+        #                   )
+
+        desktop = QtGui.QApplication.desktop()
+        # print("**********************")
+        # print(desktop.screenGeometry())
+        # print("***********************")
+        self.setMinimumSize(desktop.screenGeometry().width() / 2, desktop.screenGeometry().height() / 3.0)
+        # self.setMinimumSize(self.width(), self.height())
+        # self.setMaximumSize(2 * self.width(), 2* self.height())
         # QtCore.QObject.connect(utils.tableEmitter,QtCore.SIGNAL("tableCreated()"),self.plotAllData)
         self.canvas.updateSignal.connect(self.plotAllData)
         self.plotAllData()
-        self.menu = self.getContextMenu()
-        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        # self.menu = self.getContextMenu()
+        # self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.connect(self,SIGNAL("customContextMenuRequested(QPoint)"),
                     self,SLOT("contextMenuRequested(QPoint)"))
         # self.plotView = PlotView(model, graph, index, self)
@@ -831,21 +1014,55 @@ class PlotWidget(QWidget):
         # self.setSizePolicy(QtGui.QSizePolicy.Fixed,
         #         QtGui.QSizePolicy.Expanding)
 
+    def hackNavigationToolbar(self):
+
+        # ADD Graph Action
+        pixmap = QPixmap("icons/add_graph.png")
+        icon   = QIcon(pixmap)
+        action  = QAction(icon, "Add a graph", self.navToolbar)
+        # self.navToolbar.addAction(action)
+        action.triggered.connect(self.addGraph.emit)
+        self.navToolbar.insertAction(self.navToolbar.actions()[0], action)
+
+        # Delete Graph Action
+        pixmap = QPixmap("icons/delete_graph.png")
+        icon   = QIcon(pixmap)
+        action  = QAction(icon, "Delete this graph", self.navToolbar)
+        # self.navToolbar.addAction(action)
+        action.triggered.connect(self.delete)
+
+        self.navToolbar.insertAction(self.navToolbar.actions()[1], action)
+
+        #Toggle Grid Action
+
+        pixmap = QPixmap("icons/grid.png")
+        icon   = QIcon(pixmap)
+        action  = QAction(icon, "Toggle Grid", self.navToolbar)
+        # self.navToolbar.addAction(action)
+        action.triggered.connect(self.canvas.toggleGrid)
+
+        self.navToolbar.insertAction(self.navToolbar.actions()[2], action)
+
+
+        self.navToolbar.insertSeparator(self.navToolbar.actions()[3])
+
+
     @property
     def plotAll(self):
         return len(self.pathToLine) == 0
 
-    def getContextMenu(self):
-        menu =  QMenu()
-        closeAction     = menu.addAction("Delete")
-        closeAction.triggered.connect(self.delete)
-        # configureAction.triggered.connect(self.configure)
-        # self.connect(,SIGNAL("triggered()"),
-        #                 self,SLOT("slotShow500x500()"))
-        # self.connect(action1,SIGNAL("triggered()"),
-        #                 self,SLOT("slotShow100x100()"))
+    # def getContextMenu(self):
+    #     menu =  QMenu()
+    #     # closeAction      = menu.addAction("Delete")
+    #     gridToggleAction = menu.addAction("Toggle Grid")
+    #     gridToggleAction.triggered.connect(self.canvas.toggleGrid)
+    #     # configureAction.triggered.connect(self.configure)
+    #     # self.connect(,SIGNAL("triggered()"),
+    #     #                 self,SLOT("slotShow500x500()"))
+    #     # self.connect(action1,SIGNAL("triggered()"),
+    #     #                 self,SLOT("slotShow100x100()"))
 
-        return menu
+    #     return menu
 
     def deleteGraph(self):
         print("Deleting " + self.graph.path)
@@ -861,19 +1078,19 @@ class PlotWidget(QWidget):
         print("Displaying configure view!")
         self.plotView.getCentralWidget().show()
 
-    @pyqtSlot(QtCore.QPoint)
-    def contextMenuRequested(self,point):
-        # menu     = QtGui.QMenu()
+    # @pyqtSlot(QtCore.QPoint)
+    # def contextMenuRequested(self,point):
+    #     # menu     = QtGui.QMenu()
 
-        # action1 = menu.addAction("Set Size 100x100")
-        # action2 = menu.addAction("Set Size 500x500")
+    #     # action1 = menu.addAction("Set Size 100x100")
+    #     # action2 = menu.addAction("Set Size 500x500")
 
 
-        # self.connect(action2,SIGNAL("triggered()"),
-        #                 self,SLOT("slotShow500x500()"))
-        # self.connect(action1,SIGNAL("triggered()"),
-        #                 self,SLOT("slotShow100x100()"))
-        self.menu.exec_(self.mapToGlobal(point))
+    #     # self.connect(action2,SIGNAL("triggered()"),
+    #     #                 self,SLOT("slotShow500x500()"))
+    #     # self.connect(action1,SIGNAL("triggered()"),
+    #     #                 self,SLOT("slotShow100x100()"))
+    #     self.menu.exec_(self.mapToGlobal(point))
 
     def setModelRoot(self, path):
         self.modelRoot = path
@@ -913,8 +1130,10 @@ class PlotWidget(QWidget):
         #for tabId in moose.wildcardFind('%s/##[TYPE=Table]' % (path)):
         #harsha: policy graphs will be under /model/modelName need to change in kkit
         #for tabId in moose.wildcardFind('%s/##[TYPE=Table]' % (modelroot)):
-        
-        plotTables = moose.wildcardFind(self.graph.path + '/##[TYPE=Table2]')
+
+        plotTables = list(moose.wildcardFind(self.graph.path + '/##[TYPE=Table]'))
+        plotTables.extend(moose.wildcardFind(self.graph.path + '/##[TYPE=Table2]'))
+
         if len (plotTables) > 0:
             for tabId in plotTables:
                 tab = moose.Table(tabId)
@@ -929,8 +1148,11 @@ class PlotWidget(QWidget):
                     # axes.
                     #
                     #Harsha: Adding color to graph for signalling model, check if given path has cubemesh or cylmesh
-                    color = 'white'
-                    color = self.genColorMap(tableObject[0].path)
+
+                    color = '#FFFFFF'
+                    if moose.exists(tableObject[0].path + '/info'):
+                        color = getColor(tableObject[0].path + '/info')
+                        color = str(color[1].name()).upper()
 
                     lines = self.pathToLine[tab.path]
                     if len(lines) == 0:
@@ -947,7 +1169,7 @@ class PlotWidget(QWidget):
                                 + "."
                                 + field
                                 )
-                        if (color != 'white'):
+                        if (color != '#FFFFFF'):
                             newLines = self.addTimeSeries(tab, label=label,color=color)
                         else:
                             newLines = self.addTimeSeries(tab, label=label)
@@ -976,8 +1198,8 @@ class PlotWidget(QWidget):
                                             # , shadow            = True
                                             , ncol              = 1
                                             )
-                leg.draggable(True)
-                print(leg.get_window_extent())
+                # leg.draggable(False)
+                # print(leg.get_window_extent())
                         #leg = self.canvas.callAxesFn('legend')
                         #leg = self.canvas.callAxesFn('legend',loc='upper left', fancybox=True, shadow=True)
                         #global legend
@@ -985,10 +1207,10 @@ class PlotWidget(QWidget):
                 for legobj in leg.legendHandles:
                     legobj.set_linewidth(5.0)
                     legobj.set_picker(True)
-
-                self.canvas.draw()
             else:
                 print "returning as len tabId is zero ",tabId, " tableObject ",tableObject, " len ",len(tableObject)
+            self.canvas.draw()
+
 
     def onclick(self,event1):
         #print "onclick",event1.artist.get_label()
@@ -1038,7 +1260,11 @@ class PlotWidget(QWidget):
 
     def updatePlots(self):
         for path, lines in self.pathToLine.items():
-            tab = moose.Table(path)
+            element = moose.element(path)
+            if isinstance(element, moose.Table2):
+                tab = moose.Table2(path)
+            else:
+                tab = moose.Table(path)
             data = tab.vector
             ts = np.linspace(0, moose.Clock('/clock').currentTime, len(data))
             for line in lines:
