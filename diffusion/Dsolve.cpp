@@ -13,6 +13,7 @@
 #include "KinSparseMatrix.h"
 #include "VoxelPoolsBase.h"
 #include "../mesh/VoxelJunction.h"
+#include "XferInfo.h"
 #include "ZombiePoolInterface.h"
 #include "DiffPoolVec.h"
 #include "FastMatrixElim.h"
