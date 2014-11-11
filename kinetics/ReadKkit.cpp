@@ -122,7 +122,6 @@ void ReadKkit::setMoveOntoCompartment( bool v )
 Id  makeStandardElements( Id pa, const string& modelname )
 {
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
-	//cout << " kkit read " << pa << " " << modelname << " "<< MooseGlobal;
 	string modelPath = pa.path() + "/" + modelname;
 	if ( pa == Id() )
 		modelPath = "/" + modelname;
@@ -150,44 +149,8 @@ Id  makeStandardElements( Id pa, const string& modelname )
 	return mgr;
 }
 
-void setSolverOnCompt( Shell* s, Id compt, string& m, bool makeDsolve )
-{
-		string simpath = compt.path() + "/##[]";
-	if ( m == "rk4" ) {
-		cout << "Warning, not yet implemented. Using rk5 instead\n";
-		m = "rk5";
-	}	
-	if ( m == "ksolve" || m == "gsl" || 
-		m == "rk5" || m == "rkf" || m == "rk" ) {
-			Id ksolve = s->doCreate( "Ksolve", compt, "ksolve", 1 );
-			Id stoich = s->doCreate( "Stoich", compt, "stoich", 1 );
-			Field< Id >::set( stoich, "compartment", compt );
-			if ( makeDsolve ) {
-				Id dsolve = s->doCreate( "Dsolve", compt, "dsolve", 1 );
-				Field< Id >::set( stoich, "dsolve", dsolve );
-			}
-			Field< Id >::set( stoich, "ksolve", ksolve );
-			Field< string >::set( stoich, "path", simpath );
-	} else if ( m == "gssa" || m == "gsolve" || 
-		m == "gillespie" || m == "stochastic" ) {
-			Id gsolve = s->doCreate( "Gsolve", compt, "gsolve", 1 );
-			Id stoich = s->doCreate( "Stoich", compt, "stoich", 1 );
-			Field< Id >::set( stoich, "compartment", compt );
-			if ( makeDsolve ) {
-				Id dsolve = s->doCreate( "Dsolve", compt, "dsolve", 1 );
-				Field< Id >::set( stoich, "dsolve", dsolve );
-			}
-			Field< Id >::set( stoich, "ksolve", gsolve );
-			Field< string >::set( stoich, "path", simpath );
-	} else if ( m == "ee" || m == "neutral" ) {
-			;
-	} else {
-			cout << "ReadKkit::setMethod: option " << m <<
-					" not known, using Exponential Euler (ee)\n";
-	}
-}
-
-void ReadKkit::setMethod( Id mgr, const string& method, bool makeDsolve )
+void setMethod( Shell* s, Id mgr, double simdt, double plotdt, 
+				const string& method )
 {
 	Id compt( mgr.path() + "/kinetics" );
 	assert( compt != Id() );
@@ -197,28 +160,47 @@ void ReadKkit::setMethod( Id mgr, const string& method, bool makeDsolve )
 			cpath + "/##[ISA=PulseGen]";
 
 	string m = lower( method );
-
-	setSolverOnCompt( shell_, compt, m, makeDsolve ); // Always set up the 'kinetics' compt.
-	if ( moveOntoCompartment_ ) { 
-			// Here we set up additional solvers, one per compt
-		vector< Id > kids;
-		Neutral::children( mgr.eref(), kids );
-		for ( unsigned int i = 0; i < kids.size(); ++i ) {
-			string name = kids[i].element()->getName();
-			if ( name.length() > 11 && name.substr(0,11) == "compartment"){
-				setSolverOnCompt( shell_, kids[i], m, makeDsolve );
-			}
-		}
+	if ( m == "rk4" ) {
+		cout << "Warning, not yet implemented. Using rk5 instead\n";
+		m = "rk5";
+	}	
+	if ( m == "ksolve" || m == "gsl" || 
+		m == "rk5" || m == "rkf" || m == "rk" ) {
+			Id ksolve = s->doCreate( "Ksolve", compt, "ksolve", 1 );
+			Id stoich = s->doCreate( "Stoich", compt, "stoich", 1 );
+			Field< Id >::set( stoich, "compartment", compt );
+			Field< Id >::set( stoich, "ksolve", ksolve );
+			Field< string >::set( stoich, "path", simpath );
+			// simpath2 += "," + cpath + "/ksolve";
+			// s->doUseClock( simpath2, "process", 4 );
+			// s->doSetClock( 4, plotdt );
+	} else if ( m == "gssa" || m == "gsolve" || 
+		m == "gillespie" || m == "stochastic" ) {
+			Id gsolve = s->doCreate( "Gsolve", compt, "gsolve", 1 );
+			Id stoich = s->doCreate( "Stoich", compt, "stoich", 1 );
+			Field< Id >::set( stoich, "compartment", compt );
+			Field< Id >::set( stoich, "ksolve", gsolve );
+			Field< string >::set( stoich, "path", simpath );
+			// simpath2 += "," + cpath + "/gsolve";
+			// s->doUseClock( simpath2, "process", 4 );
+			// s->doSetClock( 4, plotdt );
+	} else if ( m == "ee" || m == "neutral" ) {
+			// s->doUseClock( simpath, "process", 4 );
+			// s->doSetClock( 4, simdt );
+	} else {
+			cout << "ReadKkit::setMethod: option " << method <<
+					" not known, using Exponential Euler (ee)\n";
+			// s->doUseClock( simpath, "process", 4 );
+			// s->doSetClock( 4, simdt );
 	}
-
-	shell_->doUseClock( simpath2, "proc", 11 );
-	shell_->doSetClock( 11, simdt_ );
-	shell_->doSetClock( 12, simdt_ );
-	shell_->doSetClock( 13, simdt_ );
-	shell_->doSetClock( 14, simdt_ );
-	shell_->doSetClock( 16, plotdt_ );	// Gsolve and Ksolve
-	shell_->doSetClock( 17, plotdt_ );	// Stats objects
-	shell_->doSetClock( 18, plotdt_ );	// Table2 objects.
+	s->doUseClock( simpath2, "proc", 11 );
+	s->doSetClock( 11, simdt );
+	s->doSetClock( 12, simdt );
+	s->doSetClock( 13, simdt );
+	s->doSetClock( 14, simdt );
+	s->doSetClock( 16, plotdt );	// Gsolve and Ksolve
+	s->doSetClock( 17, plotdt );	// Stats objects
+	s->doSetClock( 18, plotdt );	// Table2 objects.
 }
 /**
  * The readcell function implements the old GENESIS cellreader
@@ -231,7 +213,6 @@ Id ReadKkit::read(
 	const string& modelname,
 	Id pa, const string& methodArg )
 {
-	bool makeDsolve = false;
 	string method = methodArg;
 	ifstream fin( filename.c_str() );
 	if (!fin){
@@ -243,21 +224,22 @@ Id ReadKkit::read(
 		moveOntoCompartment_ = false;
 		method = method.substr( 4 );
 	}
-	if ( method.substr(0, 5) == "diff_" ) {
-		moveOntoCompartment_ = true;
-		makeDsolve = true;
-		method = method.substr( 5 );
-	}
 
 	Shell* s = reinterpret_cast< Shell* >( ObjId().data() );
 	Id mgr = makeStandardElements( pa, modelname );
 	assert( mgr != Id() );
-
 	baseId_ = mgr;
 	basePath_ = mgr.path();
 	enzCplxMols_.resize( 0 );
 
 	innerRead( fin );
+	
+	Id kinetics( basePath_);
+	assert(kinetics != Id());
+	Id cInfo = s->doCreate( "Annotator", basePath_, "info", 1 );
+	assert( cInfo != Id() );
+	Field< string > ::set(cInfo, "solver", "GSL");
+	Field< double > ::set(cInfo, "runtime", maxtime_);
 
 	assignPoolCompartments();
 	assignReacCompartments();
@@ -271,7 +253,7 @@ Id ReadKkit::read(
 	// string plotpath = basePath_ + "/graphs/##[TYPE=Table]," + basePath_ + "/moregraphs/##[TYPE=Table]";
 	// s->doUseClock( plotpath, "process", 8 );
 
-	setMethod( mgr, method, makeDsolve );
+	setMethod( s, mgr, simdt_, plotdt_, method );
 
 	s->doReinit();
 	return mgr;
@@ -452,7 +434,6 @@ ReadKkit::ParseMode ReadKkit::readInit( const string& line )
 		initdumpVersion_ = atoi( argv[2].c_str() );
 		return DATA;
 	}
-
 	return INIT;
 }
 
@@ -924,6 +905,7 @@ Id ReadKkit::buildInfo( Id parent,
 	map< string, int >& m, const vector< string >& args )
 {
 	Id info = shell_->doCreate( "Annotator", parent, "info", 1 );
+	//cout << "parent " << parent << " " << parent.path() << " info " << info.path();
 	assert( info != Id() );
 
 	double x = atof( args[ m[ "x" ] ].c_str() );
@@ -934,8 +916,6 @@ Id ReadKkit::buildInfo( Id parent,
 	Field< string >::set( info, "color", args[ m[ "xtree_fg_req" ] ] );
 	Field< string >::set( info, "textColor", 
 		args[ m[ "xtree_textfg_req" ] ] );
-	Field< string > ::set(info, "solver", "gsl");
-	Field< double > :: set(info,"runtime",maxtime_);
 	return info;
 }
 
