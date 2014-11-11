@@ -95,9 +95,6 @@ class ReadKkit
  		*/
 		Id findSumTotSrc( const string& src );
 
-		/// Assigns compute method.
-		void setMethod( Id mgr, const string& method, bool makeDsolve );
-
 		//////////////////////////////////////////////////////////////////
 		// Special ops in the model definition
 		//////////////////////////////////////////////////////////////////

@@ -25,6 +25,7 @@ from PyQt4.QtGui import QVBoxLayout
 from PyQt4.QtGui import QGridLayout
 from PyQt4.QtGui import QScrollArea
 from PyQt4.QtGui import QToolBar
+from PyQt4.QtGui import QSizeGrip
 
 import moose
 import default
@@ -52,10 +53,9 @@ class PlotWidgetContainer(QWidget):
         self.graphs         = QWidget()
         self.graphsArea     = QScrollArea()
         self.graphsLayout   = QGridLayout()
-        self.menubar        = self.createMenuBar()
+        # self.menubar        = self.createMenuBar()
         self.rowIndex       = 0
-
-        # self.setSizePolicy( QtGui.QSizePolicy.Expanding
+            # self.setSizePolicy( QtGui.QSizePolicy.Expanding
         #                   , QtGui.QSizePolicy.Expanding
         #                   )
 
@@ -68,7 +68,7 @@ class PlotWidgetContainer(QWidget):
         self.graphsArea.setWidget(self.graphs)
         self.graphsArea.setWidgetResizable(True)
         self.graphWidgets = []
-        self._layout.addWidget(self.menubar)
+        # self._layout.addWidget(self.menubar)
         self._layout.addWidget(self.graphsArea)
         self.setLayout(self._layout)
 
@@ -99,6 +99,8 @@ class PlotWidgetContainer(QWidget):
         self.rowIndex += 1
         self.graphWidgets.append(widget)
         widget.widgetClosedSignal.connect(self.deleteWidget)
+        widget.addGraph.connect(lambda event : self.addPlotWidget())
+        # widget.resize(1, 1);
         return widget
 
     def showPlotView(self):

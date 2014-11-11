@@ -51,6 +51,7 @@ from mexception import FileLoadError
 import posixpath
 from os.path import basename
 from os.path import splitext
+from PyQt4 import QtGui, QtCore, Qt
 
 def loadFile(filename, target, merge=True):
     """Try to load a model from specified `filename` under the element
@@ -87,6 +88,10 @@ def loadFile(filename, target, merge=True):
     except KeyError:
         raise FileLoadError('Do not know how to handle this filetype: %s' % (filename))
     pwe = moose.getCwe()
+    #self.statusBar.showMessage('Loading model, please wait')
+    app = QtGui.qApp
+    app.setOverrideCursor(QtGui.QCursor(Qt.Qt.BusyCursor)) #shows a hourglass - or a busy/working arrow
+            
     if modeltype == 'genesis':
         if subtype == 'kkit' or subtype == 'prototype':
             model = moose.loadModel(filename, target,'gsl')
@@ -176,8 +181,10 @@ def loadFile(filename, target, merge=True):
     else:
         raise FileLoadError('Do not know how to handle this filetype: %s' % (filename))
     moose.setCwe(pwe) # The MOOSE loadModel changes the current working element to newly loaded model. We revert that behaviour
+
     # TODO: check with Aditya how to specify the target for
     # neuroml reader
+    app.restoreOverrideCursor()
     return {'modeltype': modeltype,
             'subtype': subtype,
             'model': model}

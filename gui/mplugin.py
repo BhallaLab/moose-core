@@ -135,7 +135,7 @@ class MoosePluginBase(QtCore.QObject):
         raise NotImplementedError('method must be implemented in derived class')
 
     def setModelRoot(self, root):
-        print("Default setModelRoot called.")
+        #print("Default setModelRoot called.")
         self.modelRoot = moose.element(root).path
         self.getEditorView().getCentralWidget().setModelRoot(self.modelRoot)
         self.getPlotView().getCentralWidget().setModelRoot(self.modelRoot)
@@ -250,7 +250,7 @@ class RunBase(ViewBase):
         super(RunBase, self).__init__(plugin)
 
 
-class EditorWidgetBase(QtGui.QScrollArea):
+class EditorWidgetBase(QtGui.QWidget):
     """Base class for central widget displayed in editor view.
 
     The widget should display the model components in the tree rooted
@@ -268,7 +268,7 @@ class EditorWidgetBase(QtGui.QScrollArea):
     """
     editObject = QtCore.pyqtSignal('PyQt_PyObject')
     def __init__(self, *args):
-        QtGui.QScrollArea.__init__(self, *args)
+        QtGui.QWidget.__init__(self, *args)
         self.modelRoot      = '/'
         self._menus         = []
         self._toolBars      = []
@@ -341,7 +341,8 @@ class EditorWidgetBase(QtGui.QScrollArea):
         """Emits an `editObject(str)` signal with moose element path of currently selected tree item as
         argument"""
         self.editObject.emit(moose.element(mobj).path)
-
+    def sizeHint():
+        return self.size()
     def getCurrentMobj(self):
         raise NotImplementedError('should be reimplemented in subclass')
 
