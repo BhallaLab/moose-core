@@ -108,7 +108,7 @@ class CanvasWidget(FigureCanvas):
         self.model = model
         self.graph = graph
         self.index = index
-        self.figure = Figure()
+        self.figure = Figure()#figsize=(4,4))
         FigureCanvas.__init__(self, self.figure, *args, **kwargs)
         self.figure.set_canvas(self)
         if len(args) > 0 and isinstance(args[0], QtGui.QWidget):
@@ -116,6 +116,7 @@ class CanvasWidget(FigureCanvas):
         elif (kwargs is not None) and ('parent' in kwargs):
             self.reparent(kwargs['parent'])
         #self.setAcceptDrops(True)
+        # self.setMaximumSize(100, 100)
         FigureCanvas.updateGeometry(self)
         self.axes = {}
         self.next_id = 0
@@ -123,6 +124,7 @@ class CanvasWidget(FigureCanvas):
         tabList = []
         self.addTabletoPlot = ''
         self.setAcceptDrops(True)
+        self.gridMode = False
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasFormat('text/plain'):
@@ -149,7 +151,7 @@ class CanvasWidget(FigureCanvas):
         modelRoot, element = event.mimeData().data
         if isinstance (element,moose.PoolBase):
             tablePath = moose.utils.create_table_path(self.model, self.graph, element, "Conc")
-            table     = moose.utils.create_table(tablePath, element, "Conc")
+            table     = moose.utils.create_table(tablePath, element, "Conc","Table2")
             # moose.connect(table, 'requestOut', element, 'getConc')
             self.updateSignal.emit()
         else:
@@ -181,6 +183,17 @@ class CanvasWidget(FigureCanvas):
 
     def resize_event(self, event):
         print("Resize event called ", event)
+
+    def toggleGrid(self):
+        self.gridMode = not self.gridMode
+        for key in self.axes:
+            self.axes[key].grid(self.gridMode)
+        self.draw()
+
+    def setXLimit(self, minX, maxX):
+        for key in self.axes:
+            self.axes[key].set_xlim([minX, maxX])
+        self.draw()
 
 
 import sys
