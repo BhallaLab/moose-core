@@ -322,6 +322,7 @@ unsigned int SparseMsg::randomConnect( double probability )
 
 	assert( nCols == syn->numData() );
 
+	matrix_.transpose();
 	for ( unsigned int i = 0; i < nCols; ++i ) {
 		vector< unsigned int > synIndex;
 		// This needs to be obtained from current size of syn array.
@@ -358,8 +359,8 @@ unsigned int SparseMsg::randomConnect( double probability )
 		*/
 	}
 
-	// cout << Shell::myNode() << ": sizes.size() = " << sizes.size() << ", ncols = " << nCols << ", startSynapse = " << startSynapse << endl;
 	matrix_.transpose();
+	// cout << Shell::myNode() << ": sizes.size() = " << sizes.size() << ", ncols = " << nCols << ", startSynapse = " << startSynapse << endl;
 	e1()->markRewired();
 	e2()->markRewired();
 	return totalSynapses;

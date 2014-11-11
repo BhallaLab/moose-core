@@ -16,6 +16,7 @@
 #include "VoxelPoolsBase.h"
 // #include "VoxelPools.h"
 #include "../mesh/VoxelJunction.h"
+#include "XferInfo.h"
 #include "ZombiePoolInterface.h"
 
 #include "RateTerm.h"
@@ -69,8 +70,9 @@ void ZombiePoolInterface::assignXferVoxels( unsigned int xferCompt )
 		if ( pools(i)->hasXfer( xferCompt ) )
 			xf.xferVoxel.push_back( i );
 	}
-	xf.values.resize( xf.xferVoxel.size() & xf.xferPoolIdx.size(), 0 );
-	xf.lastValues.resize( xf.xferVoxel.size() & xf.xferPoolIdx.size(), 0 );
+	xf.values.resize( xf.xferVoxel.size() * xf.xferPoolIdx.size(), 0 );
+	xf.lastValues.resize( xf.xferVoxel.size() * xf.xferPoolIdx.size(), 0 );
+	xf.subzero.resize( xf.xferVoxel.size() * xf.xferPoolIdx.size(), 0 );
 }
 
 /**
