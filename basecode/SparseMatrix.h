@@ -450,7 +450,9 @@ template < class T > class SparseMatrix
 				}
 				*/
 			}
-			rowStart_.push_back( N_.size() );
+			for ( j = ci; j < ncolumns_; ++j )
+				rowStart_.push_back( N_.size() );
+			// rowStart_.push_back( N_.size() );
 			j = nrows_;
 			nrows_ = ncolumns_;
 			ncolumns_ = j;

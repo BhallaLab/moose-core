@@ -37,6 +37,7 @@ HEADERS = \
 	../external/muparser/muParser.h \
 	FuncTerm.h \
 	KinSparseMatrix.h \
+	XferInfo.h \
 	ZombiePoolInterface.h \
 	Stoich.h \
 	../kinetics/Pool.h \

@@ -21,6 +21,7 @@
 #include "SparseMatrix.h"
 #include "KinSparseMatrix.h"
 #include "../mesh/VoxelJunction.h"
+#include "XferInfo.h"
 #include "ZombiePoolInterface.h"
 #include "Stoich.h"
 
