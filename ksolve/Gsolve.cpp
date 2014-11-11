@@ -10,6 +10,7 @@
 
 #include "VoxelPoolsBase.h"
 #include "../mesh/VoxelJunction.h"
+#include "XferInfo.h"
 #include "ZombiePoolInterface.h"
 
 #include "RateTerm.h"
@@ -335,10 +336,9 @@ void Gsolve::process( const Eref& e, ProcPtr p )
 	// Second, take the arrived xCompt reac values and update S with them.
 	// Here the roundoff issues are handled by the GssaVoxelPools functions
 	for ( unsigned int i = 0; i < xfer_.size(); ++i ) {
-		const XferInfo& xf = xfer_[i];
+		XferInfo& xf = xfer_[i];
 		for ( unsigned int j = 0; j < xf.xferVoxel.size(); ++j ) {
-			pools_[xf.xferVoxel[j]].xferIn( 
-					xf.xferPoolIdx, xf.values, xf.lastValues, j, &sys_ );
+			pools_[xf.xferVoxel[j]].xferIn( xf, j, &sys_ );
 		}
 	}
 	// Third, record the current value of pools as the reference for the

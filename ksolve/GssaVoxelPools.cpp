@@ -13,6 +13,7 @@
 #include "KinSparseMatrix.h"
 #include "VoxelPoolsBase.h"
 #include "../mesh/VoxelJunction.h"
+#include "XferInfo.h"
 #include "ZombiePoolInterface.h"
 #include "Stoich.h"
 #include "GssaSystem.h"
@@ -274,29 +275,33 @@ void GssaVoxelPools::setVolumeAndDependencies( double vol )
 //////////////////////////////////////////////////////////////
 // Handle cross compartment reactions
 //////////////////////////////////////////////////////////////
-void GssaVoxelPools::xferIn(
-		const vector< unsigned int >& poolIndex,
-		const vector< double >& values, 
-		const vector< double >& lastValues,
+void GssaVoxelPools::xferIn( XferInfo& xf,
 	    unsigned int voxelIndex, const GssaSystem* g )
 {
-	unsigned int offset = voxelIndex * poolIndex.size();
-	vector< double >::const_iterator i = values.begin() + offset;
-	vector< double >::const_iterator j = lastValues.begin() + offset;
+	unsigned int offset = voxelIndex * xf.xferPoolIdx.size();
+	vector< double >::const_iterator i = xf.values.begin() + offset;
+	vector< double >::const_iterator j = xf.lastValues.begin() + offset;
+	vector< double >::iterator m = xf.subzero.begin() + offset;
 	double* s = varS();
 	bool hasChanged = false;
 	for ( vector< unsigned int >::const_iterator 
-			k = poolIndex.begin(); k != poolIndex.end(); ++k ) {
+			k = xf.xferPoolIdx.begin(); k != xf.xferPoolIdx.end(); ++k ) {
 		double& x = s[*k];
 		x += round( *i++ - *j );
-		if ( x < 0 ) 
+		if ( x < *m )  {
+			*m -= x;
 			x = 0;
+		} else {
+			x -= *m;
+			*m = 0;
+		}
 		/*
 		double y = fabs( x - *j );
 		// hasChanged |= ( fabs( x - *j ) < 0.1 ); // they are all integers.
 		hasChanged |= ( y > 0.1 ); // they are all integers.
 		*/
 		j++;
+		m++;
 	}
 	// If S has changed, then I should update rates of all affected reacs.
 	// Go through stoich matrix to find affected reacs for each mol
