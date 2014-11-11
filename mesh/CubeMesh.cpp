@@ -937,12 +937,12 @@ bool CubeMesh::vSetVolumeNotRates( double vol )
 	// Leave x0,y0.z0 and nx,ny,nz the same. Do NOT update any rates.
 	double oldvol = vGetEntireVolume();
 	double linscale = pow( vol / oldvol , 1.0 / 3.0 );
-	x1_ *= linscale;
-	y1_ *= linscale;
-	z1_ *= linscale;
 	dx_ *= linscale;
 	dy_ *= linscale;
 	dz_ *= linscale;
+	x1_ = x0_ + dx_;
+	y1_ = y0_ + dy_;
+	z1_ = z0_ + dz_;
 
 	return true;
 }
