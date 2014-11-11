@@ -1,6 +1,7 @@
-from PyQt4 import QtGui,QtCore,Qt
+from PyQt4.QtGui import QPolygonF
+from PyQt4.QtCore import QLineF,QPointF
 import math
-from kkitQGraphics import PoolItem, ReacItem,EnzItem,CplxItem,ComptItem
+from kkitQGraphics import PoolItem #, ReacItem,EnzItem,CplxItem,ComptItem
 
 ''' One to need to pass the source, destination,endtype and order for drawing the arrow between 2 object \
     endtype is to check if needs arrow head (arrowhead for product and sumtotal) \
@@ -12,7 +13,8 @@ def calcArrow(srcdes_list,itemignoreZooming,iconScale):
     des = srcdes_list[1]
     endtype = srcdes_list[2]
     order = srcdes_list[3]
-    
+    # print("Source => ", src)
+    compartment = src.parentItem()
     srcobj = src.gobj
     desobj = des.gobj
     if isinstance(src,PoolItem):
@@ -20,22 +22,22 @@ def calcArrow(srcdes_list,itemignoreZooming,iconScale):
     if isinstance(des,PoolItem):
         desobj = des.bg
             
-    if itemignoreZooming:
-        srcRect = self.recalcSceneBoundingRect(srcobj)
-        desRect = self.recalcSceneBoundingRect(desobj)
-    else:
-        srcRect = srcobj.sceneBoundingRect()
-        desRect = desobj.sceneBoundingRect()
-    arrow = QtGui.QPolygonF()
+    # if itemignoreZooming:
+    #     srcRect = self.recalcSceneBoundingRect(srcobj)
+    #     desRect = self.recalcSceneBoundingRect(desobj)
+    # else:
+    srcRect = compartment.mapFromScene(srcobj.sceneBoundingRect()).boundingRect()
+    desRect = compartment.mapFromScene(desobj.sceneBoundingRect()).boundingRect()
+    arrow = QPolygonF()
     if srcRect.intersects(desRect):                
         ''' This is created for getting a emptyline reference \
             because 'lineCord' function keeps a reference between qgraphicsline and its src and des
         '''
-        arrow.append(QtCore.QPointF(0,0))
-        arrow.append(QtCore.QPointF(0,0))
+        arrow.append(QPointF(0,0))
+        arrow.append(QPointF(0,0))
         return arrow
     if (order == 0):
-        tmpLine = QtCore.QLineF(srcRect.center().x(),
+        tmpLine = QLineF(srcRect.center().x(),
                                 srcRect.center().y(),
                                 desRect.center().x(),
                                 desRect.center().y())
@@ -61,9 +63,9 @@ def calcArrow(srcdes_list,itemignoreZooming,iconScale):
             srcCenterb0 = srcRect.center().y()+b0
             desCentera0 = desRect.center().x()+a0
             desCenterb0 = desRect.center().y()+b0
-        pointa = QtCore.QPointF(srcCentera0,srcCenterb0)
-        pointb = QtCore.QPointF(desCentera0,desCenterb0)
-        tmpLine = QtCore.QLineF(srcCentera0,srcCenterb0,desCentera0,desCenterb0)
+        pointa = QPointF(srcCentera0,srcCenterb0)
+        pointb = QPointF(desCentera0,desCenterb0)
+        tmpLine = QLineF(srcCentera0,srcCenterb0,desCentera0,desCenterb0)
 
     srcIntersects, lineSrcPoint = calcLineRectIntersection(srcRect, tmpLine)
     destIntersects, lineDestPoint = calcLineRectIntersection(desRect, tmpLine)
@@ -78,19 +80,19 @@ def calcArrow(srcdes_list,itemignoreZooming,iconScale):
     '''
     if (abs(lineSrcPoint.x()-lineDestPoint.x()) > 8 or abs(lineSrcPoint.y()-lineDestPoint.y())>8):
         srcAngle = tmpLine.angle()
-        if endtype == 'p':
+        if endtype == 'p' or endtype == 'stp':
             ''' Arrow head for Destination is calculated'''
             arrow.append(lineSrcPoint)
             arrow.append(lineDestPoint)
             degree = -60
             srcXArr1,srcYArr1= arrowHead(srcAngle,degree,lineDestPoint,iconScale)
-            arrow.append(QtCore.QPointF(srcXArr1,srcYArr1))
-            arrow.append(QtCore.QPointF(lineDestPoint.x(),lineDestPoint.y()))
+            arrow.append(QPointF(srcXArr1,srcYArr1))
+            arrow.append(QPointF(lineDestPoint.x(),lineDestPoint.y()))
                 
             degree = -120
             srcXArr2,srcYArr2 = arrowHead(srcAngle,degree,lineDestPoint,iconScale)
-            arrow.append(QtCore.QPointF(srcXArr2,srcYArr2))                    
-            arrow.append(QtCore.QPointF(lineDestPoint.x(),lineDestPoint.y()))
+            arrow.append(QPointF(srcXArr2,srcYArr2))                    
+            arrow.append(QPointF(lineDestPoint.x(),lineDestPoint.y()))
  
         elif endtype == 'st':
             ''' Arrow head for Source is calculated'''
@@ -98,14 +100,27 @@ def calcArrow(srcdes_list,itemignoreZooming,iconScale):
             arrow.append(lineSrcPoint)
             degree = 60
             srcXArr2,srcYArr2 = arrowHead(srcAngle,degree,lineSrcPoint,iconScale)
-            arrow.append(QtCore.QPointF(srcXArr2,srcYArr2))                    
-            arrow.append(QtCore.QPointF(lineSrcPoint.x(),lineSrcPoint.y()))
+            arrow.append(QPointF(srcXArr2,srcYArr2))                    
+            arrow.append(QPointF(lineSrcPoint.x(),lineSrcPoint.y()))
 
             degree = 120
             srcXArr1,srcYArr1= arrowHead(srcAngle,degree,lineSrcPoint,iconScale)
-            arrow.append(QtCore.QPointF(srcXArr1,srcYArr1))
-            arrow.append(QtCore.QPointF(lineSrcPoint.x(),lineSrcPoint.y()))
+            arrow.append(QPointF(srcXArr1,srcYArr1))
+            arrow.append(QPointF(lineSrcPoint.x(),lineSrcPoint.y()))
 
+        elif endtype == 's' or endtype == 'sts':
+            arrow.append(lineDestPoint)
+            arrow.append(lineSrcPoint)
+            
+            degree = 60
+            srcXArr2,srcYArr2 = arrowHead(srcAngle,degree,lineSrcPoint,iconScale)
+            arrow.append(QPointF(srcXArr2,srcYArr2))                    
+            arrow.append(QPointF(lineSrcPoint.x(),lineSrcPoint.y()))
+
+            degree = 120
+            srcXArr1,srcYArr1= arrowHead(srcAngle,degree,lineSrcPoint,iconScale)
+            arrow.append(QPointF(srcXArr1,srcYArr1))
+            arrow.append(QPointF(lineSrcPoint.x(),lineSrcPoint.y()))
         else:
             arrow.append(lineSrcPoint)
             arrow.append(lineDestPoint)
@@ -126,10 +141,10 @@ def calcLineRectIntersection(rect, centerLine):
                    (x+w,y,x+w,y+h),
                    (x+w,y+h,x,y+h),
                    (x,y+h,x,y)]
-    intersectionPoint = QtCore.QPointF()
+    intersectionPoint = QPointF()
     intersects = False
     for lineEnds in borders:
-        line = QtCore.QLineF(*lineEnds)
+        line = QLineF(*lineEnds)
         intersectType = centerLine.intersect(line, intersectionPoint)
         if intersectType == centerLine.BoundedIntersection:
             intersects = True
