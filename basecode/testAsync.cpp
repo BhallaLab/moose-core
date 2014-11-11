@@ -629,6 +629,17 @@ void testSparseMatrix2()
 			assert (n.get( i, j ) ==  m[i][k] );
 		}
 	}
+	n.clear();
+	n.setSize( 1, 100 );
+	for ( unsigned int i = 0; i < 100; ++i )
+		n.set( 0, i, 10 * i );
+	n.transpose();
+	for ( unsigned int i = 0; i < 100; ++i )
+		assert( n.get( i, 0 ) == 10 * i );
+	n.transpose();
+	for ( unsigned int i = 0; i < 100; ++i )
+		assert( n.get( 0, i ) == 10 * i );
+
 	/*
 	n.printInternal();
 	cout << "before transpose\n";
