@@ -17,6 +17,7 @@
 #include "VoxelPoolsBase.h"
 #include "VoxelPools.h"
 #include "../mesh/VoxelJunction.h"
+#include "XferInfo.h"
 #include "ZombiePoolInterface.h"
 
 #include "RateTerm.h"

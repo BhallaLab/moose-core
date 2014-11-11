@@ -62,10 +62,8 @@ class GssaVoxelPools: public VoxelPoolsBase
 		 * Digests incoming data values for cross-compt reactions.
 		 * Sums the changes in the values onto the specified pools.
 		 */
-		void xferIn( const vector< unsigned int >& poolIndex,
-				const vector< double >& values, 
-				const vector< double >& lastValues,
-				unsigned int voxelIndex, const GssaSystem* g );
+		void xferIn( XferInfo& xf, 
+						unsigned int voxelIndex, const GssaSystem* g );
 
 		/**
 		 * Used during initialization: Takes only the proxy pool values 
