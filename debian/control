@@ -2,7 +2,7 @@ Source: moose
 Section: science
 Priority: optional
 Maintainer: Dilawar Singh <dilawars@ncbs.res.in>
-Build-Depends: debhelper, cdbs, devscripts, cmake, libhdf5-dev, python-dev, python-numpy, python-setuptools, libopenmpi-dev, libgsl0-dev
+Build-Depends: debhelper, cdbs, devscripts, cmake, libhdf5-dev, python-dev, python-numpy, python-setuptools, libopenmpi-dev, libgsl0-dev, libxml2-dev
 Standards-Version: 3.9.5
 Homepage: http://moose.ncbs.res.in
 
@@ -28,7 +28,7 @@ Description: MOOSE is the Multiscale Object-Oriented Simulation Environment.
 
 Package: moose-core
 Architecture: any
-Depends: ${misc:Depends}, libhdf5-7, libgsl0ldbl
+Depends: ${misc:Depends}, libhdf5-7, libgsl0ldbl, libxml2
 Suggests: moose-python, moose-gui, moose-doc
 Description: C++ core of MOOSE neural simulator.
  .
@@ -36,7 +36,7 @@ Description: C++ core of MOOSE neural simulator.
 
 Package: moose-python
 Architecture: any
-Depends: python-numpy, python-matplotlib, python-nose, moose-doc
+Depends: python-numpy, python-matplotlib, python-nose, moose-doc, libxml2
 Suggests: python-networkx
 Description: Python interface of MOOSE neural simulator.
  .
