@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """graph_utils.py: Graph related utilties. It does not require networkx library.
 It writes files to be used with graphviz.
 

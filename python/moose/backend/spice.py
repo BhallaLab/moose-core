@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """backend_spice.py: 
 
     This backend write spice files.

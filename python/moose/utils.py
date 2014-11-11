@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """utils.py:
 
     Utility functions for moose.

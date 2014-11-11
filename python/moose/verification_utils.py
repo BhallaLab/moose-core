@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """verification_utils.py:
 
     IT contains a class which runs tests on moose internal data-structures to

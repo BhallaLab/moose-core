@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """plot_utils.py: Some utility function for plotting data in moose.
 
 Last modified: Mon May 26, 2014  10:18AM

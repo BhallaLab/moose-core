@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """methods_utils.py: 
     Some non-standard functions generic to moose. 
 

@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """sim_utils.py: 
     Helper function related with simulation.
 
