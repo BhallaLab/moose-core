@@ -6,9 +6,9 @@
 # Maintainer:
 # Created: Sat Feb 13 16:07:56 2010 (+0530)
 # Version:
-# Last-Updated: Thu Apr 18 19:56:03 2013 (+0530)
-#           By: subha
-#     Update #: 361
+# Last-Updated: Wed Nov 12 19:10:08 2014 (+0530)
+#           By: Subhasis Ray
+#     Update #: 369
 # URL:
 # Keywords:
 # Compatibility:
@@ -97,7 +97,7 @@ MOOSE_DOCS_DIR =  '/usr/share/doc/moose'
 MOOSE_GUI_DIR = os.path.dirname(os.path.abspath(__file__))
 MOOSE_PLUGIN_DIR = os.path.join(MOOSE_GUI_DIR, 'plugins')
 NEUROKIT_PLUGIN_DIR = os.path.join(MOOSE_GUI_DIR, 'plugins/NeuroKit')
-MOOSE_CFG_DIR = os.path.join(os.environ['HOME'], '.moose')
+# MOOSE_CFG_DIR = os.path.join(os.environ['HOME'], '.moose')
 MOOSE_LOCAL_DIR = os.path.join(os.environ['HOME'], 'moose')
 MOOSE_NUMPTHREADS = '1'
 
@@ -132,15 +132,11 @@ class MooseSetting(dict):
             QtCore.QCoreApplication.setApplicationName('MOOSE')
             cls._instance.qsettings = QtCore.QSettings()
             # If this is the first time, then set some defaults
-            if firsttime:
-                cls._instance.qsettings.setValue(KEY_FIRSTTIME, True)
-                cls._instance.qsettings.setValue(KEY_COLORMAP_DIR, os.path.join(MOOSE_GUI_DIR, 'colormaps'))
-                cls._instance.qsettings.setValue(KEY_BIOMODEL_DIR, os.path.join(MOOSE_GUI_DIR, 'bioModels'))
-                cls._instance.qsettings.setValue(KEY_ICON_DIR, os.path.join(MOOSE_GUI_DIR, 'icons'))
-                cls._instance.qsettings.setValue(KEY_NUMPTHREADS, '1')
-                cls._instance.qsettings.setValue(KEY_UNDO_LENGTH, str(MOOSE_UNDO_LENGTH))
-            else:
-                cls._instance.qsettings.setValue(KEY_FIRSTTIME, False)
+            cls._instance.qsettings.setValue(KEY_COLORMAP_DIR, os.path.join(MOOSE_GUI_DIR, 'colormaps'))
+            cls._instance.qsettings.setValue(KEY_BIOMODEL_DIR, os.path.join(MOOSE_GUI_DIR, 'bioModels'))
+            cls._instance.qsettings.setValue(KEY_ICON_DIR, os.path.join(MOOSE_GUI_DIR, 'icons'))
+            cls._instance.qsettings.setValue(KEY_NUMPTHREADS, '1')
+            cls._instance.qsettings.setValue(KEY_UNDO_LENGTH, str(MOOSE_UNDO_LENGTH))
             # These are to be checked at every run
             cls._instance.qsettings.setValue(KEY_HOME_DIR, os.environ['HOME'])
             cls._instance.qsettings.setValue(KEY_DEMOS_DIR, MOOSE_DEMOS_DIR)
@@ -184,7 +180,7 @@ def init_dirs():
     firsttime = False
     global MOOSE_DEMOS_DIR
     global MOOSE_LOCAL_DIR
-    global MOOSE_CFG_DIR
+    # global MOOSE_CFG_DIR
     global MOOSE_DOCS_DIR
     global LOCAL_BUILD
     # If we have a Makefile above GUI directory, then this must be a
@@ -194,13 +190,13 @@ def init_dirs():
     moose_cfg_dir = os.path.join(os.environ['HOME'], '.moose')
     if not os.path.exists(moose_cfg_dir):
         firsttime = True
-        try:
-            os.mkdir(moose_cfg_dir)
-            MOOSE_CFG_DIR = moose_cfg_dir
-            print 'Created moose configuration directory:', moose_cfg_dir
-        except OSError, e:
-            errors.append(e)
-            print e
+        # try:
+        #     # os.mkdir(moose_cfg_dir)
+        #     # # MOOSE_CFG_DIR = moose_cfg_dir
+        #     # print 'Created moose configuration directory:', moose_cfg_dir
+        # except OSError, e:
+        #     errors.append(e)
+        #     print e
     if LOCAL_BUILD:
         MOOSE_LOCAL_DIR = os.path.normpath(os.path.join(MOOSE_GUI_DIR, '..'))
         MOOSE_DEMOS_DIR = os.path.join(MOOSE_LOCAL_DIR, 'Demos')
