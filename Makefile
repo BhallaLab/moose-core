@@ -11,9 +11,9 @@
 # NOTE:
 # This Makefile is compatible with _GNU Make_.
 # This does not work with nmake or borland make.
-# You may have to specify some variables when calling gnu make as 
+# You may have to specify some variables when calling gnu make as
 # described in the comments below. The defaults should work on most
-# Unix clones. 
+# Unix clones.
 ########################################################################
 
 # Linux compilation:
@@ -25,7 +25,7 @@
 #
 #     ADDITIONAL COMMANDLINE VARIABLES FOR MAKE
 #
-######################################################################     
+######################################################################
 # The variable BUILD determines if it should be optimized (release)
 # or a debug version (default).
 # make can be run with a command line parameter like below:
@@ -36,17 +36,17 @@
 # make clean
 # make
 #
-# There are some more variables which just need to be defined for 
+# There are some more variables which just need to be defined for
 # controlling the compilation and the value does not matter. These are:
 #
 # USE_GSL - use GNU Scientific Library for integration in kinetic simulations
-# 
-# USE_READLINE - use the readline library which provides command history and 
+#
+# USE_READLINE - use the readline library which provides command history and
 # 		better command line editing capabilities
-# 
-# GENERATE_WRAPPERS - useful for python interface developers. The binary created 
+#
+# GENERATE_WRAPPERS - useful for python interface developers. The binary created
 # 		with this option looks for a directory named 'generated' in the
-# 		working directory and creates a wrapper class ( one .h file 
+# 		working directory and creates a wrapper class ( one .h file
 # 		and a .cpp file ) and partial code for the swig interface file
 # 		(pymoose.i). These files with some modification can be used for
 # 		generating the python interface using swig.
@@ -54,15 +54,16 @@
 # USE_MPI - compile with support for parallel computing through MPICH library
 #
 # USE_SBML (default value: 0) - compile with support for the Systems Biology
-# 		Markup Language (SBML). This allows you to read and write chemical 
+# 		Markup Language (SBML). This allows you to read and write chemical
 # 		kinetic models in the simulator-indpendent SBML format.
-# 
+#
 
 # Default values for flags. The operator ?= assigns the given value only if the
 # variable is not already defined.
 USE_SBML?=0
 USE_HDF5?=1
 USE_CUDA?=0
+USE_NEUROKIT?=1
 PYTHON?=2
 # BUILD (= debug, release)
 ifndef BUILD
@@ -74,10 +75,10 @@ endif
 #export PLATFORM
 
 # Get the processor architecture - i686 or x86_64
-# All these should be taken care of in a script, not in the 
+# All these should be taken care of in a script, not in the
 # Makefile. But we are
 ifndef MACHINE
-MACHINE=i686 
+MACHINE=i686
 endif
 # We are assuming all non-win32 systems to be POSIX compliant
 # and thus have the command uname for getting Unix system name
@@ -100,18 +101,18 @@ USE_GSL = true
 endif
 # Profiling mode:
 ifeq ($(BUILD),profile)
-CXXFLAGS  = -O3 -pg  -fpermissive -fno-strict-aliasing -fPIC -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER  
+CXXFLAGS  = -O3 -pg  -fpermissive -fno-strict-aliasing -fPIC -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER
 USE_GSL = true
 endif
 # Profiling mode with gperftoools
 ifeq ($(BUILD),gperf)
-CXXFLAGS  = -O3 -fpermissive -fno-strict-aliasing -fPIC -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER  
+CXXFLAGS  = -O3 -fpermissive -fno-strict-aliasing -fPIC -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER
 LDFLAGS += -lprofiler -ltcmalloc
 USE_GSL = true
 endif
 # Threading mode:
 ifeq ($(BUILD),thread)
-CXXFLAGS  = -O3 -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER  
+CXXFLAGS  = -O3 -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER
 USE_GSL = true
 endif
 
@@ -145,7 +146,7 @@ endif
 ifeq ($(BUILD),developer)
     CXXFLAGS=-g \
 	     -Wall -Werror -Wno-unused-variable -Wno-unused-function \
-	     -DDO_UNIT_TESTS -DDEVELOPER -DDEBUG 
+	     -DDO_UNIT_TESTS -DDEVELOPER -DDEBUG
     USE_GSL = true
 endif
 ##########################################################################
@@ -179,13 +180,13 @@ endif
 
 
 # Libraries are defined below.
-SUBLIBS = 
+SUBLIBS =
 # Notice that pthread is no more included
 LIBS =	-L/usr/lib -L/usr/local/lib
 
 #LIBS = 	-lm
 
-# For 64 bit Linux systems add paths to 64 bit libraries 
+# For 64 bit Linux systems add paths to 64 bit libraries
 ifeq ($(PLATFORM),Linux)
 CXXFLAGS += -DLINUX
 ifeq ($(MACHINE),x86_64)
@@ -234,7 +235,7 @@ LIBS+= -lsbml
 CXXFLAGS+=-DUSE_SBML
 LDFLAGS += -L/usr/lib64 -Wl,--rpath='/usr/lib64'
 SBML_DIR = sbml
-SBML_LIB = sbml/_sbml.o 
+SBML_LIB = sbml/_sbml.o
 endif
 
 #Saeed
@@ -242,7 +243,7 @@ endif
 ifeq ($(USE_CUDA),1)
 LIBS+= -L/usr/local/cuda/lib64 -LhsolveCuda/cudaLibrary  -lcuda -lcudart -lm -lmooseCudaLibrary
 HCUDA_DIR = hsolveCuda
-HCUDA_LIB = hsolveCuda/_hsolveCuda.o 
+HCUDA_LIB = hsolveCuda/_hsolveCuda.o
 endif
 
 # To disable numpy pass USE_NUMPY=0
@@ -355,6 +356,14 @@ OBJLIBS =	\
 	$(HCUDA_LIB) \
 	$(EXAMPLES_LIB) \
 
+
+ifeq ($(USE_NEUROKIT),1)
+	NEUROKIT_COMMAND = cd ./python/moogli; python ./setup.py build_ext --sip-opts="-e -g -x VendorID -t WS_X11 -x PyQt_NoPrintRangeBug -t Qt_4_8_4 -x Py_v3 -g" build; cd ../../; mv ./python/moogli/build/lib.linux-x86_64-2.7/_moogli.so ./python/
+# else
+# 	NEUROKIT_COMMAND = ""
+endif
+
+
 export CXX
 export CXXFLAGS
 export LD
@@ -363,6 +372,9 @@ export USE_GSL
 export USE_SBML
 
 all: moose pymoose
+
+neurokit: ./python/moogli/setup.py
+	$(NEUROKIT_COMMAND)
 
 moose: libs $(OBJLIBS) $(PARALLEL_LIB)
 	$(CXX) $(CXXFLAGS) $(OBJLIBS) $(PARALLEL_LIB) $(LIBS) -o moose
@@ -383,12 +395,12 @@ PYTHON_VERSION := $(subst ., ,$(lastword $(shell python --version 2>&1)))
 ifneq ($(BUILD),debug)
 PYTHON_CFLAGS := $(shell python-config --cflags)
 PYTHON_LDFLAGS := $(shell python-config --ldflags)
-else 
+else
 PYTHON_CFLAGS := $(shell python-config --includes) \
     -fno-strict-aliasing -fwrapv \
     # -Wstrict-prototypes  \ # This option is not supported by g++-4.8
     -Wformat -Wformat-security -Werror=format-security \
-    -fstack-protector --param=ssp-buffer-size=4 
+    -fstack-protector --param=ssp-buffer-size=4
 
 PYTHON_LDFLAGS := -L/usr/lib/$(INSTALLED_PYTHON) \
     -Xlinker -export-dynamic -Wl,-O1 -Wl,-Bsymbolic-functions
@@ -434,7 +446,7 @@ libs:
 
 clean:
 	@(for i in $(CLEANSUBDIR) ; do $(MAKE) -C $$i clean;  done)
-	-rm -rf moose  core.* DOCS/html python/moose/*.so python/moose/*.pyc  
+	-rm -rf moose  core.* DOCS/html python/moose/*.so python/moose/*.pyc
 
 ############ INSTALL (works for sudo make install and deb packaging using dpkg-buildpackage)
 ## get the default python module install location
@@ -465,7 +477,7 @@ install:
 	rsync -r --exclude=.svn gui/* $(DESTDIR)$(install_prefix)/share/moose/gui
 	test -d $(DESTDIR)$(install_prefix)/share/doc || mkdir -p $(DESTDIR)$(install_prefix)/share/doc
 	rsync -r --exclude=.svn Docs/* $(DESTDIR)$(install_prefix)/share/doc/moose
-
+	# rsync -r --exclude=.svn Demos/* $(DESTDIR)$(install_prefix)/share/moose/
 	## pymoose module goes to python's dist-packages
 	## delete older .../dist-packages/moose, - before rm means ignore errors (eg not found)
 	-rm -rf $(DESTDIR)$(pydistpkg_dir)/moose
