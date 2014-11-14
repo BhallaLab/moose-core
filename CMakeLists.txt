@@ -113,16 +113,36 @@ if(LOCAL_GSL)
     ExternalProject_Add(GSL
         PREFIX ${GSL_SOURCE_DIR}
         DOWNLOAD_DIR ${CMAKE_SOURCE_DIR}/external
-        URL http://psg.mtu.edu/pub/gnu/gsl/gsl-1.16.tar.gz
-        CONFIGURE_COMMAND ${GSL_SOURCE_DIR}/configure --prefix=${GSL_INSTALL_DIR}
-        BUILD_COMMAND make
-        BUILD_IN_SOURCE 1
-        INSTALL_COMMAND make install
+        URL https://github.com/dilawar/gsl/archive/master.zip 
+        CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_C_FLAGS=-fpic -DCMAKE_INSTALL_PREFIX:PATH=${GSL_INSTALL_DIR} -DBUILD_SHARED_LIBS=OFF
         )
     include_directories(${GSL_INSTALL_DIR}/include)
-    LINK_DIRECTORIES(${GSL_INSTALL_DIR}/lib)
-    set(LOCAL_GSL_LIBRARIES gsl gslcblas)
+    set(LOCAL_GSL_LIBRARIES ${GSL_INSTALL_DIR}/lib/libgsl.a 
+        ${GSL_INSTALL_DIR}/lib/libgslcblas.a
+        )
 endif()
+
+find_package(LIBSBML)
+if(NOT LIBSBML)
+    MESSAGE("+ LIBSBML NOT FOUND. Using local SBML")
+    SET(LOCAL_SBML 1)
+else()
+    include_directories(${LIBSBML_INCLUDE_DIR})
+endif()
+
+if(LOCAL_SBML)
+    MESSAGE(" ++ I need to download SBML")
+    set(SBML_SOURCE_DIR ${CMAKE_SOURCE_DIR}/sbml)
+    set(SBML_INSTALL_DIR ${CMAKE_SOURCE_DIR}/sbml)
+    include(ExternalProject)
+    ExternalProject_Add(LIBSBML
+        PREFIX ${EXTERNAL_DIR}
+        URL http://sourceforge.net/projects/sbml/files/libsbml/5.10.2/stable/libSBML-5.10.2-core-src.tar.gz
+        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${SBML_INSTALL_DIR}
+        -DBUILD_SHARED_LIBS=OFF -DCMAKE_C_FLAGS=-fpic 
+        )
+endif()
+
 
 ################################### SETUP BUILD ################################
 include_directories(msg basecode)
