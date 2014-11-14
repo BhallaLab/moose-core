@@ -92,7 +92,7 @@ if(DEBUG)
     set(CMAKE_BUILD_TYPE Debug)
 else()
     set(CMAKE_BUILD_TYPE Release)
-    add_definitions(-UDO_UNIT_TESTS)
+    add_definitions(-UDO_UNIT_TESTS -O2)
 endif()
 
 find_package(GSL 1.16 REQUIRED)
@@ -113,16 +113,36 @@ if(LOCAL_GSL)
     ExternalProject_Add(GSL
         PREFIX ${GSL_SOURCE_DIR}
         DOWNLOAD_DIR ${CMAKE_SOURCE_DIR}/external
-        URL ftp://ftp.gnu.org/gnu/gsl/gsl-1.16.tar.gz
-        CONFIGURE_COMMAND ${GSL_SOURCE_DIR}/configure --prefix=${GSL_INSTALL_DIR}
-        BUILD_COMMAND make
-        BUILD_IN_SOURCE 1
-        INSTALL_COMMAND make install
+        URL https://github.com/dilawar/gsl/archive/master.zip 
+        CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_C_FLAGS=-fpic -DCMAKE_INSTALL_PREFIX:PATH=${GSL_INSTALL_DIR} -DBUILD_SHARED_LIBS=OFF
         )
     include_directories(${GSL_INSTALL_DIR}/include)
-    LINK_DIRECTORIES(${GSL_INSTALL_DIR}/lib)
-    set(LOCAL_GSL_LIBRARIES gsl gslcblas)
+    set(LOCAL_GSL_LIBRARIES ${GSL_INSTALL_DIR}/lib/libgsl.a 
+        ${GSL_INSTALL_DIR}/lib/libgslcblas.a
+        )
 endif()
+
+find_package(LIBSBML)
+if(NOT LIBSBML)
+    MESSAGE("+ LIBSBML NOT FOUND. Using local SBML")
+    SET(LOCAL_SBML 1)
+else()
+    include_directories(${LIBSBML_INCLUDE_DIR})
+endif()
+
+if(LOCAL_SBML)
+    MESSAGE(" ++ I need to download SBML")
+    set(SBML_SOURCE_DIR ${CMAKE_SOURCE_DIR}/sbml)
+    set(SBML_INSTALL_DIR ${CMAKE_SOURCE_DIR}/sbml)
+    include(ExternalProject)
+    ExternalProject_Add(LIBSBML
+        PREFIX ${EXTERNAL_DIR}
+        URL http://sourceforge.net/projects/sbml/files/libsbml/5.10.2/stable/libSBML-5.10.2-core-src.tar.gz
+        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${SBML_INSTALL_DIR}
+        -DBUILD_SHARED_LIBS=OFF -DCMAKE_C_FLAGS=-fpic 
+        )
+endif()
+
 
 ################################### SETUP BUILD ################################
 include_directories(msg basecode)
@@ -304,10 +324,10 @@ install(TARGETS moose-bin
     COMPONENT moose-core
     )
 
-#install(SCRIPT python/InstallPyMoose.cmake
-#    COMPONENT moose-python
-#    )
-#
+install(SCRIPT python/InstallPyMoose.cmake
+    COMPONENT moose-python
+    )
+
 ## Install the icon
 install(FILES gui/icons/moose_icon.png 
     DESTINATION share/moose
@@ -319,42 +339,3 @@ install(FILES scripts/moose.desktop
     DESTINATION share/applications
     COMPONENT moose-python
     )
-########################## PACKAGING #########################################
-#
-#set(CPACK_GENERATOR "DEB")
-#set(CPACK_STRIP_FILES TRUE)
-#
-##  We need to compile python scripts on the installation  host.
-#set(CPACK_COMPONENTS_ALL applications libraries)
-#set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dilawar Singh")
-#set(CPACK_PACKAGE_CONTACT "dilawars@ncbs.res.in")
-##set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
-#set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Moose")
-#set(CPACK_INSTALL_SCRIPT "${CMAKE_SOURCE_DIR}/python/InstallPyMoose.cmake")
-#set(CPACK_PACKAGE_VERSION_MAJOR "1")
-#set(CPACK_PACKAGE_VERSION_MINOR "1")
-#set(CPACK_PACKAGE_VENDOR "NCBS Bangalore")
-#set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README")
-#set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dilawar Singh <dilawars@ncbs.res.in>")
-#if(WIN32)
-#    MESSAGE("++ Currently only Unix is supported")
-#else()
-#    set(CPACK_STRIP_FILES moose)
-#endif()
-#set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
-#set(CPACK_PACKAGE_FILE_NAME
-#    "moose_${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.orig"
-#    )
-#set(CPACK_DEBIAN_PACKAGE_DEPENDS "libgsl (>= 1.16) libopenmpi libhdf5-7 python-numpy")
-#include(CPack)
-#
-######################  TESTING  ###############################################
-#include(CTest)
-#find_package(PythonInterp REQUIRED)
-#set(ENV{PYTHONPATH} "${CMAKE_SOURCE_DIR}/python")
-#message("++ PYTHONPATH is set to $ENV{PYTHONPATH}")
-#
-#add_test(NAME check_moose
-#    WORKING_DIRECTORY .
-#    COMMAND ./run_moose.sh
-#    )
