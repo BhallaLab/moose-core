@@ -92,7 +92,7 @@ if(DEBUG)
     set(CMAKE_BUILD_TYPE Debug)
 else()
     set(CMAKE_BUILD_TYPE Release)
-    add_definitions(-UDO_UNIT_TESTS)
+    add_definitions(-UDO_UNIT_TESTS -O2)
 endif()
 
 find_package(GSL 1.16 REQUIRED)
@@ -304,10 +304,10 @@ install(TARGETS moose-bin
     COMPONENT moose-core
     )
 
-#install(SCRIPT python/InstallPyMoose.cmake
-#    COMPONENT moose-python
-#    )
-#
+install(SCRIPT python/InstallPyMoose.cmake
+    COMPONENT moose-python
+    )
+
 ## Install the icon
 install(FILES gui/icons/moose_icon.png 
     DESTINATION share/moose
@@ -319,42 +319,3 @@ install(FILES scripts/moose.desktop
     DESTINATION share/applications
     COMPONENT moose-python
     )
-########################## PACKAGING #########################################
-#
-#set(CPACK_GENERATOR "DEB")
-#set(CPACK_STRIP_FILES TRUE)
-#
-##  We need to compile python scripts on the installation  host.
-#set(CPACK_COMPONENTS_ALL applications libraries)
-#set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dilawar Singh")
-#set(CPACK_PACKAGE_CONTACT "dilawars@ncbs.res.in")
-##set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
-#set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Moose")
-#set(CPACK_INSTALL_SCRIPT "${CMAKE_SOURCE_DIR}/python/InstallPyMoose.cmake")
-#set(CPACK_PACKAGE_VERSION_MAJOR "1")
-#set(CPACK_PACKAGE_VERSION_MINOR "1")
-#set(CPACK_PACKAGE_VENDOR "NCBS Bangalore")
-#set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README")
-#set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dilawar Singh <dilawars@ncbs.res.in>")
-#if(WIN32)
-#    MESSAGE("++ Currently only Unix is supported")
-#else()
-#    set(CPACK_STRIP_FILES moose)
-#endif()
-#set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
-#set(CPACK_PACKAGE_FILE_NAME
-#    "moose_${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.orig"
-#    )
-#set(CPACK_DEBIAN_PACKAGE_DEPENDS "libgsl (>= 1.16) libopenmpi libhdf5-7 python-numpy")
-#include(CPack)
-#
-######################  TESTING  ###############################################
-#include(CTest)
-#find_package(PythonInterp REQUIRED)
-#set(ENV{PYTHONPATH} "${CMAKE_SOURCE_DIR}/python")
-#message("++ PYTHONPATH is set to $ENV{PYTHONPATH}")
-#
-#add_test(NAME check_moose
-#    WORKING_DIRECTORY .
-#    COMMAND ./run_moose.sh
-#    )
