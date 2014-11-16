@@ -156,13 +156,14 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
 		}
 
 		g->transposeN.fireReac( rindex, Svec() );
-		updateDependentMathExpn( g, rindex );
-		updateDependentRates( g->dependency[ rindex ], g->stoich );
 		double r = mtrand();
 		while ( r <= 0.0 ) {
 			r = mtrand();
 		}
 		t_ -= ( 1.0 / atot_ ) * log( r );
+		g->stoich->updateFuncs( varS(), t_ );
+		updateDependentMathExpn( g, rindex );
+		updateDependentRates( g->dependency[ rindex ], g->stoich );
 	}
 }
 
