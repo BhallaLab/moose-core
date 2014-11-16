@@ -481,7 +481,7 @@ vector< unsigned int > Stoich::getPoolIdMap() const
 	vector< unsigned int > ret( objMap_.size() + 1, 0 );
 	for ( unsigned int i = 0; i < objMap_.size(); ++i ) {
 		Id id( i + objMapStart_ );
-		if ( id.element()->cinfo()->isA( "PoolBase" ) ) 
+		if ( id.element() && id.element()->cinfo()->isA( "PoolBase" ) ) 
 			ret[i] = objMap_[i];
 		else
 			ret[i] = ~0U;
