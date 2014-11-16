@@ -9,6 +9,7 @@
 
 import moose
 import os
+import sys
 import pylab
 
 def dumpPlots():
@@ -35,14 +36,16 @@ def main():
     a small a bistable chemical switch, and a small set of reactions that
     decode calcium input. One can turn the switch on with short high 
     calcium pulses (over 2 uM for about 10 sec). One can turn it back off
-    again using a long, lower calcium pulse (0.2 uM, 1000 sec).
+    again using a long, lower calcium pulse (0.2 uM, 2000 sec).
     """
-    # Pick your favourite numerical method.
-    #method = 'gsl'	# This is a Runge-Kutta-Fehlberg ODE solver
-    #gssa turns off only about 20% of the time, perhaps a longer turnoff
-    # stimulus time would increase this.
     method = 'old_gssa'  # This is the Gillespie Stoichastic Systems Algorithm
-    # Load in the model and set up to use the gsl solver.
+    if ( len( sys.argv ) >= 2 ):
+        method = sys.argv[1]
+    if ( method == "gsl" ):
+        method = "old_gsl"
+    if ( method == "gssa" ):
+        method = "old_gssa"
+    # Load in the model and set up to use the specified method
     modelId = moose.loadModel( './stargazin_synapse.g', 'model', method )
     moose.start( 1000.0 ) # Run the model for 1000 seconds.
     Ca = moose.element( '/model/kinetics/BULK/Ca' )
@@ -51,7 +54,7 @@ def main():
     Ca.concInit = 0.08e-3	# Calcium back to baseline
     moose.start( 1000.0 ) # Let system settle for 1000 sec
     Ca.concInit = 0.2e-3	# 	Calcium turnoff stimulus
-    moose.start( 1000.0 ) # Run the model for 1000 seconds for turnoff
+    moose.start( 2000.0 ) # Run the model for 1000 seconds for turnoff
     Ca.concInit = 0.08e-3	# Calcium back to baseline
     moose.start( 2000.0 ) # Let system settle for 2000 sec
 
