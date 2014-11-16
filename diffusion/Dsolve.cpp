@@ -435,8 +435,12 @@ void Dsolve::build( double dt )
 {
 	if ( doubleEq( dt, dt_ ) )
 		return;
+	if ( compartment_ == Id() ) {
+		cout << "Dsolve::build: Warning: No compartment defined. \n"
+				"Did you forget to assign 'stoich.dsolve = this' ?\n";
+		return;
+	}
 	dt_ = dt;
-
 	const MeshCompt* m = reinterpret_cast< const MeshCompt* >( 
 						compartment_.eref().data() );
 	unsigned int numVoxels = m->getNumEntries();
