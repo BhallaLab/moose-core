@@ -73,6 +73,7 @@ def main():
 
     b = moose.element( '/model/compartment/b' )
     a = moose.element( '/model/compartment/a' )
+    c = moose.element( '/model/compartment/c' )
     a.concInit = 0.1
     deltaA = 0.002
     num = 150
