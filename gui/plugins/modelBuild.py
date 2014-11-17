@@ -84,13 +84,11 @@ def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
         view.emit(QtCore.SIGNAL("dropped"),poolObj)
         setupItem(modelpath.path,layoutPt.srcdesConnection)
         layoutPt.drawLine_arrow(False)
-        # print " compt ",layoutPt.qGraCompt
-        # print " pool ", mobj.path,moose.element(mobj)
-
-        compt = layoutPt.qGraCompt[moose.element(mobj)]
-        updateCompartmentSize(compt)
-        #updateCompartmentSize(itemAtView)
-
+        #Dropping is on compartment then update Compart size
+        if isinstance(mobj,moose.ChemCompt):
+            compt = layoutPt.qGraCompt[moose.element(mobj)]
+            updateCompartmentSize(compt)
+        
     elif  string == "Reac":
         posWrtComp = (itemAtView.mapFromScene(pos)).toPoint()
         mobj = itemAtView.mobj
@@ -107,8 +105,10 @@ def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
         setupItem(modelpath.path,layoutPt.srcdesConnection)
         layoutPt.drawLine_arrow(False)
         #print " mooseCompt ",moose.element(mobj).parent
-        compt = layoutPt.qGraCompt[moose.element(mobj)]
-        updateCompartmentSize(itemAtView)
+        #Dropping is on compartment then update Compart size
+        if isinstance(mobj,moose.ChemCompt):
+            compt = layoutPt.qGraCompt[moose.element(mobj)]
+            updateCompartmentSize(itemAtView)
     elif  string == "StimulusTable":
         posWrtComp = (itemAtView.mapFromScene(pos)).toPoint()
         mobj = itemAtView.mobj
@@ -124,8 +124,10 @@ def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
         #updateCompartmentSize(itemAtView)
         setupItem(modelpath.path,layoutPt.srcdesConnection)
         layoutPt.drawLine_arrow(False)
-        compt = layoutPt.qGraCompt[moose.element(mobj).parent]
-        updateCompartmentSize(itemAtView)
+        #Dropping is on compartment then update Compart size
+        if isinstance(mobj,moose.ChemCompt):
+            compt = layoutPt.qGraCompt[moose.element(mobj).parent]
+            updateCompartmentSize(itemAtView)
     elif string == "Function":
         posWrtComp = (itemAtView.mapFromScene(pos)).toPoint()
         mobj = itemAtView.mobj
@@ -143,8 +145,10 @@ def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
         view.emit(QtCore.SIGNAL("dropped"),funcObj)
         setupItem(modelpath.path,layoutPt.srcdesConnection)
         layoutPt.drawLine_arrow(False)
-        compt = layoutPt.qGraCompt[moose.element(itemAtView.mobj).parent]
-        updateCompartmentSize(compt)
+        #Dropping is on compartment then update Compart size
+        if isinstance(mobj,moose.ChemCompt):
+            compt = layoutPt.qGraCompt[moose.element(itemAtView.mobj).parent]
+            updateCompartmentSize(compt)
 
 
     elif  string == "Enz" or string == "MMenz":
@@ -194,15 +198,16 @@ def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
             qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y()-30,QtGui.QColor('green'),bgcolor)
             enzinfo.x = posWrtComp.x()
             enzinfo.y = posWrtComp.y()
-            # r,g,b,a = bgcolor.getRgb()
-            # color = "#"+ hexchars[r / 16] + hexchars[r % 16] + hexchars[g / 16] + hexchars[g % 16] + hexchars[b / 16] + hexchars[b % 16]
             enzinfo.color = str(bgcolor.name())
             layoutPt.mooseId_GObj[enzObj] = qGItem
             view.emit(QtCore.SIGNAL("dropped"),enzObj)
         setupItem(modelpath.path,layoutPt.srcdesConnection)
         layoutPt.drawLine_arrow(False)
-        compt = layoutPt.qGraCompt[moose.element(mobj).parent]
-        updateCompartmentSize(compt)
+        #Dropping is on compartment then update Compart size
+        # print "enz ----",mobj,mobj.parent
+        if isinstance(mobj.parent,moose.ChemCompt):
+            compt = layoutPt.qGraCompt[moose.element(mobj).parent]
+            updateCompartmentSize(compt)
 
 def createObj(scene,view,modelpath,string,pos,layoutPt):
     event_pos = pos
