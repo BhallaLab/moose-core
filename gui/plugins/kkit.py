@@ -35,7 +35,31 @@ class KkitPlugin(MoosePlugin):
         #self.plotView.updateCallback = self.view._centralWidget.legendUpdate
         #self.view._centralWidget.legendUpdate()
         #self.dataTable = DataTable(self.dataRoot)
-
+        self.fileinsertMenu = QtGui.QMenu('&File')
+        if not hasattr(self,'SaveModelAction'):
+            #self.fileinsertMenu.addSeparator()
+            self.saveModelAction = QtGui.QAction('SaveToSBMLFile', self)
+            self.saveModelAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+S", None, QtGui.QApplication.UnicodeUTF8))
+            self.connect(self.saveModelAction, QtCore.SIGNAL('triggered()'), self.SaveModelDialogSlot)
+            self.fileinsertMenu.addAction(self.saveModelAction)
+        self._menus.append(self.fileinsertMenu)
+    def SaveModelDialogSlot(self):
+        type_sbml = 'SBML'
+        filters = {'SBML(*.xml)': type_sbml}
+        filename,filter_ = QtGui.QFileDialog.getSaveFileNameAndFilter(None,'Save File','',';;'.join(filters))
+        extension = ""
+        if str(filename).rfind('.') != -1:
+            filename = filename[:str(filename).rfind('.')]
+            if str(filter_).rfind('.') != -1:
+                extension = filter_[str(filter_).rfind('.'):len(filter_)-1]
+        if filename:
+            filename = filename+extension
+            if filters[str(filter_)] == 'SBML':
+                writeerror = moose.writeSBML(str(filename),self.modelRoot)
+                if writeerror:
+                    QtGui.QMessageBox.warning(None,'Could not save the Model','\n Error in the consistency check')
+                else:
+                     QtGui.QMessageBox.information(None,'Saved the Model','\n File Saved to \'{filename}\''.format(filename =filename),QtGui.QMessageBox.Ok)
 
     def getPreviousPlugin(self):
         return None
@@ -176,38 +200,32 @@ class KkitEditorView(MooseEditorView):
         MooseEditorView.__init__(self, plugin)
         ''' EditorView and if kkit model is loaded then save model in XML is allowed '''
         #self.dataTable = dataTable
-        self.fileinsertMenu = QtGui.QMenu('&File')
-        if not hasattr(self,'SaveModelAction'):
-            #self.fileinsertMenu.addSeparator()
-            self.saveModelAction = QtGui.QAction('SaveToSBMLFile', self)
-            self.saveModelAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+S", None, QtGui.QApplication.UnicodeUTF8))
-            self.connect(self.saveModelAction, QtCore.SIGNAL('triggered()'), self.SaveModelDialogSlot)
-            self.fileinsertMenu.addAction(self.saveModelAction)
+        #self.fileinsertMenu = QtGui.QMenu('&File')
         # if not hasattr(self,'SaveModelAction'):
         #     #self.fileinsertMenu.addSeparator()
         #     self.saveModelAction = QtGui.QAction('SaveToGenesisFormat', self)
         #     self.saveModelAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+S", None, QtGui.QApplication.UnicodeUTF8))
         #     self.connect(self.saveModelAction, QtCore.SIGNAL('triggered()'), self.SaveToGenesisSlot)
         #     self.fileinsertMenu.addAction(self.saveModelAction)
-        self._menus.append(self.fileinsertMenu)
+        #self._menus.append(self.fileinsertMenu)
 
-    def SaveModelDialogSlot(self):
-        type_sbml = 'SBML'
-        filters = {'SBML(*.xml)': type_sbml}
-        filename,filter_ = QtGui.QFileDialog.getSaveFileNameAndFilter(None,'Save File','',';;'.join(filters))
-        extension = ""
-        if str(filename).rfind('.') != -1:
-            filename = filename[:str(filename).rfind('.')]
-            if str(filter_).rfind('.') != -1:
-                extension = filter_[str(filter_).rfind('.'):len(filter_)-1]
-        if filename:
-            filename = filename+extension
-            if filters[str(filter_)] == 'SBML':
-                writeerror = moose.writeSBML(str(filename),self.plugin.modelRoot)
-                if writeerror:
-                    QtGui.QMessageBox.warning(None,'Could not save the Model','\n Error in the consistency check')
-                else:
-                     QtGui.QMessageBox.information(None,'Saved the Model','\n File Saved to \'{filename}\''.format(filename =filename),QtGui.QMessageBox.Ok)
+    # def SaveModelDialogSlot(self):
+    #     type_sbml = 'SBML'
+    #     filters = {'SBML(*.xml)': type_sbml}
+    #     filename,filter_ = QtGui.QFileDialog.getSaveFileNameAndFilter(None,'Save File','',';;'.join(filters))
+    #     extension = ""
+    #     if str(filename).rfind('.') != -1:
+    #         filename = filename[:str(filename).rfind('.')]
+    #         if str(filter_).rfind('.') != -1:
+    #             extension = filter_[str(filter_).rfind('.'):len(filter_)-1]
+    #     if filename:
+    #         filename = filename+extension
+    #         if filters[str(filter_)] == 'SBML':
+    #             writeerror = moose.writeSBML(str(filename),self.plugin.modelRoot)
+    #             if writeerror:
+    #                 QtGui.QMessageBox.warning(None,'Could not save the Model','\n Error in the consistency check')
+    #             else:
+    #                  QtGui.QMessageBox.information(None,'Saved the Model','\n File Saved to \'{filename}\''.format(filename =filename),QtGui.QMessageBox.Ok)
     '''
     def getToolPanes(self):
         return super(KkitEditorView, self).getToolPanes()
@@ -316,6 +334,7 @@ class  KineticsWidget(EditorWidgetBase):
             #self.meshEntry.clear= {}
             # Compartment and its members are setup
             self.meshEntry,self.xmin,self.xmax,self.ymin,self.ymax,self.noPositionInfo = setupMeshObj(self.modelRoot)
+            #print "xmin y max ",self.xmin,self.xmax,self.ymin,self.ymax
             self.autocoordinates = False
             if self.srcdesConnection:
                 self.srcdesConnection.clear()
@@ -328,6 +347,7 @@ class  KineticsWidget(EditorWidgetBase):
 
                 self.xmin,self.xmax,self.ymin,self.ymax,self.autoCordinatepos = autoCoordinates(self.meshEntry,self.srcdesConnection)
             # TODO: size will be dummy at this point, busizet I need the availiable size from the Gui
+            #print 'self ',self
             if isinstance(self,kineticEditorWidget):
                 # w = self.width()
                 # h = self.height()
@@ -339,6 +359,7 @@ class  KineticsWidget(EditorWidgetBase):
             #self.size = QtCore.QSize(300,400)
 
             # Scale factor to translate the x -y position to fit the Qt graphicalScene, scene width. """
+            #print "size ",self.size
             if self.xmax-self.xmin != 0:
                 self.xratio = (self.size.width()-10)/(self.xmax-self.xmin)
             else: self.xratio = self.size.width()-10
@@ -346,6 +367,10 @@ class  KineticsWidget(EditorWidgetBase):
             if self.ymax-self.ymin:
                 self.yratio = (self.size.height()-10)/(self.ymax-self.ymin)
             else: self.yratio = (self.size.height()-10)
+            self.xratio = int(self.xratio)
+            self.yratio = int(self.yratio)
+            #print " ratio ",self.xratio,self.yratio
+    
     def sizeHint(self):
         return QtCore.QSize(800,400)
 
@@ -732,11 +757,11 @@ class kineticRunWidget(KineticsWidget):
                 else:
                     # multipying by 1000 b'cos moose concentration is in milli in moose
                     ratio = presentConc
-                    #print "ratio",item,ratio
-                if ratio > '10':
-                    ratio = 4
-                if ratio < '0.0':
-                    ratio =0.1
+                #print "ratio",item.mobj,ratio
+                # if ratio > '10':
+                #     ratio = 9
+                # if ratio < '0.0':
+                #     ratio =0.1
                 #print "size ",ratio
                 item.updateRect(math.sqrt(abs(ratio)))
 
