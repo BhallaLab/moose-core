@@ -110,7 +110,10 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
   sbmlDoc.setNamespaces(&xmlns);
   cremodel_ = sbmlDoc.createModel();
   cremodel_->setId(filename);
-  //cremodel_->setUnits(time);
+  cremodel_->setTimeUnits("second");
+  cremodel_->setExtentUnits("substance");
+  cremodel_->setSubstanceUnits("substance");
+  
   Id baseId(path);
     vector< ObjId > graphs;
   string plots;
@@ -157,6 +160,7 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
   unit->setMultiplier(1);
   unit->setExponent(1.0);
   unit->setScale(0);
+
   //Getting Compartment from moose
   vector< ObjId > chemCompt;
   wildcardFind(path+"/##[ISA=ChemCompt]",chemCompt);
