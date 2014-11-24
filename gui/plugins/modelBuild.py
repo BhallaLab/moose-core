@@ -162,7 +162,7 @@ def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
         posWrtComp = pos
         mobj = itemAtView.mobj
         enzPool = layoutPt.mooseId_GObj[mobj]
-        enzparent = mobj.parent
+        enzparent = findCompartment(mobj)
         parentcompt = layoutPt.qGraCompt[enzparent]
 
         if string == "Enz":
@@ -209,10 +209,8 @@ def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
         setupItem(modelpath.path,layoutPt.srcdesConnection)
         layoutPt.drawLine_arrow(False)
         #Dropping is on compartment then update Compart size
-        #print "enz ----",mobj,mobj.parent
-        if isinstance(mobj.parent,moose.ChemCompt):
-            compt = layoutPt.qGraCompt[moose.element(mobj).parent]
-            updateCompartmentSize(compt)
+        if isinstance(enzparent,moose.ChemCompt):
+            updateCompartmentSize(parentcompt)
 
 def createObj(scene,view,modelpath,string,pos,layoutPt):
     event_pos = pos
