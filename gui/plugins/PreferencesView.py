@@ -37,8 +37,9 @@ class PreferencesView(QTabWidget):
         self.chemicalDefaultSimulationRuntime   =   self.createFloatingPointEditor()
         self.chemicalGuiUpdateInterval          =   self.createFloatingPointEditor()
         self.chemicalSolver                     =   QButtonGroup()
-        self.chemicalSolvers                    =   { "Gillespie"        :   QRadioButton("Gillespie")
-                                                    , "Runge Kutta"      :   QRadioButton("Runge Kutta")
+        self.chemicalSolvers                    =   {   "Exponential Euler" :  QRadioButton("Exponential Euler")
+                                                      , "Gillespie"         :  QRadioButton("Gillespie")
+                                                      , "Runge Kutta"       :  QRadioButton("Runge Kutta")
                                                     }
         self.chemicalSimulationApply                      =   QPushButton("Apply")
         self.chemicalSimulationCancel                     =   QPushButton("Cancel")
