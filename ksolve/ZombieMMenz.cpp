@@ -90,10 +90,14 @@ void ZombieMMenz::vRemesh( const Eref& e )
 // Field Definitions
 //////////////////////////////////////////////////////////////
 
+// Note that the units in the Stoich are where 1 uM = 1 molecule/voxel.
+// So we set the conc terms directly.
 void ZombieMMenz::vSetKm( const Eref& e, double v )
 {
 	Km_ = v;
 	stoich_->setMMenzKm( e, v );
+	//double volScale = convertConcToNumRateUsingMesh( e, subOut, 1 );
+	//stoich_->setMMenzKm( e, v * volScale );
 }
 
 double ZombieMMenz::vGetKm( const Eref& e ) const
@@ -105,12 +109,14 @@ void ZombieMMenz::vSetNumKm( const Eref& e, double v )
 {
 	double volScale = convertConcToNumRateUsingMesh( e, subOut, 1 );
 	Km_ = v / volScale;
-	setKm( e, Km_ );
+	stoich_->setMMenzKm( e, Km_ );
 }
 
 double ZombieMMenz::vGetNumKm( const Eref& e ) const
 {
-	return stoich_->getMMenzNumKm( e );
+	double volScale = convertConcToNumRateUsingMesh( e, subOut, 1 );
+	return Km_ * volScale;
+	// return stoich_->getMMenzNumKm( e );
 }
 
 void ZombieMMenz::vSetKcat( const Eref& e, double v )
