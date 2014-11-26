@@ -1528,6 +1528,9 @@ void Stoich::setReacKb( const Eref& e, double v ) const
 	}
 }
 
+// This uses Km to set the StoichR1, which is actually in # units.
+// It is OK to do for the Stoich because the volume is defined to be
+// 1.66e-21, such that conc == #.
 void Stoich::setMMenzKm( const Eref& e, double v ) const
 {
 	// static const Cinfo* zombieMMenzCinfo = Cinfo::find( "ZombieMMenz");
