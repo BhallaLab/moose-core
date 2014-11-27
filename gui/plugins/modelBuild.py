@@ -39,11 +39,17 @@ def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
             string_num = string
 
     if string == "Pool" or string == "BufPool" or string == "Reac" or string == "StimulusTable":
-        mobj = itemAtView.mobj
+        print "itemAtView ",itemAtView
         compartment = None
+        itemClass = type(itemAtView).__name__
+
+        if ( itemClass == 'QGraphicsRectItem'):
+            mobj = itemAtView.parentItem().mobj
+        else:
+            mobj = itemAtView.mobj
         compartment = findCompartment(mobj)
         mobj = compartment
-
+        print "mobj compt ",mobj
     if string == "CubeMesh":
         mobj = moose.CubeMesh(modelpath.path+'/'+string_num)
         mobj.volume = 1e-15
