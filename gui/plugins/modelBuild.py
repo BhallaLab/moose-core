@@ -39,17 +39,14 @@ def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
             string_num = string
 
     if string == "Pool" or string == "BufPool" or string == "Reac" or string == "StimulusTable":
-        print "itemAtView ",itemAtView
         compartment = None
         itemClass = type(itemAtView).__name__
-
         if ( itemClass == 'QGraphicsRectItem'):
             mobj = itemAtView.parentItem().mobj
         else:
             mobj = itemAtView.mobj
         compartment = findCompartment(mobj)
         mobj = compartment
-        print "mobj compt ",mobj
     if string == "CubeMesh":
         mobj = moose.CubeMesh(modelpath.path+'/'+string_num)
         mobj.volume = 1e-15
@@ -168,9 +165,12 @@ def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
         posWrtComp = pos
         mobj = itemAtView.mobj
         enzPool = layoutPt.mooseId_GObj[mobj]
-        enzparent = findCompartment(mobj)
-        parentcompt = layoutPt.qGraCompt[enzparent]
-
+        if ((mobj.parent).className == "Enz"):
+            QtGui.QMessageBox.information(None,'Drop Not possible','\'{newString}\' has to have Pool as its parent and not Enzyme Complex'.format(newString =string),QtGui.QMessageBox.Ok)
+            return
+        else:
+            enzparent = findCompartment(mobj)
+            parentcompt = layoutPt.qGraCompt[enzparent]
         if string == "Enz":
             enzObj = moose.Enz(moose.element(mobj).path+'/'+string_num)
             enzinfo = moose.Annotator(enzObj.path+'/info')
