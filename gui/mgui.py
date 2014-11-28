@@ -311,11 +311,20 @@ class MWindow(QtGui.QMainWindow):
         3. sets the current view  to the plugins editor view.
 
         """
-
         self.plugin = self.loadPluginClass(str(name))(str(root), self)
         #Harsha: added under file Menu, Recently Loaded Models
+        #All the previously loaded chemical models, solver's and table's ticks are made -1
         for k,v in self._loadedModels.items():
-            print k
+            compt = moose.wildcardFind(k+'/##[ISA=ChemCompt]')
+            if compt:
+                if moose.exists(compt[0].path+'/ksolve'):
+                    ksolve = moose.Ksolve( compt[0].path+'/ksolve' )
+                    ksolve.tick = -1
+                if moose.exists(compt[0].path+'/stoich'):
+                    stoich = moose.Stoich( compt[0].path+'/stoich' )
+                    stoich.tick = -1
+                for x in moose.wildcardFind( k+'/data/graph#/#' ):
+                    x.tick = -1
         if root != '/' and root not in self._loadedModels:
             self._loadedModels[root] = name
         
