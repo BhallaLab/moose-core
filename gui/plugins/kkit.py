@@ -3,7 +3,6 @@ import sys
 #import re
 from PyQt4 import QtGui, QtCore, Qt
 #import pygraphviz as pgv
-import networkx as nx
 #sys.path.insert(0, '~/async/gui')
 #import numpy as np
 from default import *
