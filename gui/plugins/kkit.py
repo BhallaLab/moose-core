@@ -149,14 +149,22 @@ class AnotherKkitRunView(RunView):
         chemprefs["simulation"]["simulation-dt"] = self.simulationdt
         chemprefs["simulation"]["plot-update-interval"] = self.plotdt
         chemprefs["simulation"]["gui-update-interval"] = 2 * self.plotdt
-        if solver == "GSL":
+        chemprefs["simulation"]["solver"] = "Runge Kutta"
+        if solver == "gsl":
             chemprefs["simulation"]["solver"] = "Runge Kutta"
-        else:
+        elif solver == "gssa":
             chemprefs["simulation"]["solver"] = "Gillespie"
+        else:
+            chemprefs["simulation"]["solver"] = "Runge Kutta"
+        # if solver == "GSL":
+        #     chemprefs["simulation"]["solver"] = "Runge Kutta"
+        # else:
+        #     chemprefs["simulation"]["solver"] = "Gillespie"
         self.schedular.preferences.setChemicalPreferences()
         return self._centralWidget
 
     def setSolver(self, solver = None):
+        print " setSolver ",solver
         if solver == None:
             self.kkitRunView.getCentralWidget().addSolver(self.getSchedulingDockWidget().widget().solver)
         else:
