@@ -353,8 +353,8 @@ class MWindow(QtGui.QMainWindow):
             return False
         for action in self.menuBar().actions():
             if menu.title() == action.text():
-                if not action.menu().isEmpty():
-                    action.menu().addSeparator()
+                # if not action.menu().isEmpty():
+                #     action.menu().addSeparator()
                 action.menu().addActions(menu.actions())
                 return True
         return False
@@ -385,6 +385,8 @@ class MWindow(QtGui.QMainWindow):
                 if not self.menuBar().isEmpty():
                     action.menu().addSeparator()
                 self.menuBar().addMenu(menu)
+        menus[0].addSeparator()
+        menus[0].addAction(self.quitAction)
 
     def updateToolbars(self):
         for toolbar in self.toolBars:
@@ -505,7 +507,6 @@ class MWindow(QtGui.QMainWindow):
         self.fileMenu.addAction(self.connectBioModelAction)
 
         #self.fileMenu.addAction(self.plugin.getSaveAction())
-        self.fileMenu.addAction(self.quitAction)
         return self.fileMenu
 
     def getEditMenu(self):
