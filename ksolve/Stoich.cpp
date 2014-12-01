@@ -149,6 +149,21 @@ const Cinfo* Stoich::initCinfo()
 			&Stoich::getProxyPools
 		);
 
+		static ReadOnlyValueFinfo< Stoich, int > status(
+			"status",
+			"Status of Stoich in the model building process. Values are: "
+			"-1: Reaction path not yet assigned.\n "
+			"0: Successfully built stoichiometry matrix.\n "
+			"1: Warning: Missing a reactant in a Reac or Enz.\n "
+			"2: Warning: Missing a substrate in an MMenz.\n "
+			"3: Warning: Missing substrates as well as reactants.\n "
+			"4: Warning: Compartment not defined.\n "
+			"8: Warning: Neither Ksolve nor Dsolve defined.\n "
+			"16: Warning: No objects found on path.\n "
+			"",
+			&Stoich::getStatus
+		);
+
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
@@ -195,6 +210,7 @@ const Cinfo* Stoich::initCinfo()
 		&columnIndex,		// ReadOnlyValue
 		&rowStart,			// ReadOnlyValue
 		&proxyPools,		// ReadOnlyLookupValue
+		&status,			// ReadOnlyLookupValue
 		&unzombify,			// DestFinfo
 		&buildXreacs,		// DestFinfo
 		&filterXreacs,		// DestFinfo
@@ -236,7 +252,8 @@ Stoich::Stoich()
 		// numVarPoolsBytes_( 0 ),
 		numBufPools_( 0 ),
 		numFunctions_( 0 ),
-		numReac_( 0 )
+		numReac_( 0 ),
+		status_( -1 )
 {;}
 
 Stoich::~Stoich()
@@ -281,11 +298,13 @@ void Stoich::setPath( const Eref& e, string v )
 	if ( path_ != "" && path_ != v ) {
 		// unzombify( path_ );
 		cout << "Stoich::setPath: need to clear old path.\n";
+		status_ = -1;
 		return;
 	}
 	if ( ksolve_ == Id() )
 	{
 		cout << "Stoich::setPath: need to first set ksolve.\n";
+		status_ = -1;
 		return;
 	}
 	vector< ObjId > elist;
@@ -317,16 +336,28 @@ void filterWildcards( vector< Id >& ret, const vector< ObjId >& elist )
 
 void Stoich::setElist( const Eref& e, const vector< ObjId >& elist )
 {
-	if ( !( kinterface_ || dinterface_  ) ) {
-		cout << "Warning: Stoich::setElist/setPath: Neither solver has been set. Aborting.\n";
+	if ( compartment_ == Id() ) {
+		cout << "Warning: Stoich::setElist/setPath: Compartment not set. Aborting.\n";
+		status_ = 4;
 		return;
 	}
+	if ( !( kinterface_ || dinterface_  ) ) {
+		cout << "Warning: Stoich::setElist/setPath: Neither solver has been set. Aborting.\n";
+		status_ = 8;
+		return;
+	}
+	status_ = 0;
 	if ( kinterface_ )
 		kinterface_->setCompartment( compartment_ );
 	if ( dinterface_ )
 		dinterface_->setCompartment( compartment_ );
 	vector< Id > temp;
 	filterWildcards( temp, elist );
+	if( temp.size() == 0 ) {
+		cout << "Warning: Stoich::setElist/setPath: No kinetics objects found on path. Aborting.\n";
+		status_ = 16;
+		return;
+	}
 	locateOffSolverReacs( compartment_, temp );
 
 	allocateObjMap( temp );
@@ -557,6 +588,11 @@ vector< Id > Stoich::getProxyPools( Id i ) const
 	if ( j != offSolverPoolMap_.end() )
 		return j->second;
 	return dummy;
+}
+
+int Stoich::getStatus() const
+{
+	return status_;
 }
 
 //////////////////////////////////////////////////////////////
@@ -1185,24 +1221,25 @@ unsigned int Stoich::convertIdToFuncIndex( Id id ) const
 	return i;
 }
 
-ZeroOrder* makeHalfReaction(
-	double rate, const Stoich* sc, const vector< Id >& reactants )
+ZeroOrder* Stoich::makeHalfReaction(
+	double rate, const vector< Id >& reactants )
 {
 	ZeroOrder* rateTerm = 0;
 	if ( reactants.size() == 1 ) {
 		rateTerm =  new FirstOrder( 
-			rate, sc->convertIdToPoolIndex( reactants[0] ) );
+			rate, convertIdToPoolIndex( reactants[0] ) );
 	} else if ( reactants.size() == 2 ) {
 		rateTerm = new SecondOrder( rate,
-			sc->convertIdToPoolIndex( reactants[0] ),
-			sc->convertIdToPoolIndex( reactants[1] ) );
+			convertIdToPoolIndex( reactants[0] ),
+			convertIdToPoolIndex( reactants[1] ) );
 	} else if ( reactants.size() > 2 ) {
 		vector< unsigned int > temp;
 		for ( unsigned int i = 0; i < reactants.size(); ++i )
-			temp.push_back( sc->convertIdToPoolIndex( reactants[i] ) );
+			temp.push_back( convertIdToPoolIndex( reactants[i] ) );
 		rateTerm = new NOrder( rate, temp );
 	} else {
 		cout << "Warning: Stoich::makeHalfReaction: no reactants\n";
+		status_ |= 1;
 		rateTerm = new ZeroOrder(0.0); // Dummy RateTerm to avoid crash.
 	}
 	return rateTerm;
@@ -1246,8 +1283,8 @@ unsigned int Stoich::innerInstallReaction( Id reacId,
 		const vector< Id >& subs, 
 		const vector< Id >& prds )
 {
-	ZeroOrder* forward = makeHalfReaction( 0, this, subs );
-	ZeroOrder* reverse = makeHalfReaction( 0, this, prds );
+	ZeroOrder* forward = makeHalfReaction( 0, subs );
+	ZeroOrder* reverse = makeHalfReaction( 0, prds );
 	unsigned int rateIndex = convertIdToReacIndex( reacId );
 	unsigned int revRateIndex = rateIndex;
 	if ( useOneWay_ ) {
@@ -1315,8 +1352,9 @@ void Stoich::installMMenz( Id enzId, Id enzMolId,
 		ZeroOrder* rateTerm = new NOrder( 1.0, v );
 		meb = new MMEnzyme( 1, 1, enzIndex, rateTerm );
 	} else {
-		cout << "Error: Stoich::installMMenz: No substrates for "  <<
+		cout << "Warning: Stoich::installMMenz: No substrates for "  <<
 			enzId.path() << endl;
+		status_ |= 2;
 		return;
 	}
 	installMMenz( meb, enzSiteIndex, subs, prds );
@@ -1374,11 +1412,11 @@ void Stoich::installEnzyme( Id enzId, Id enzMolId, Id cplxId,
 {
 	vector< Id > temp( subs );
 	temp.insert( temp.begin(), enzMolId );
-	ZeroOrder* r1 = makeHalfReaction( 0, this, temp );
+	ZeroOrder* r1 = makeHalfReaction( 0, temp );
 	temp.clear();
 	temp.resize( 1, cplxId );
-	ZeroOrder* r2 = makeHalfReaction( 0, this, temp );
-	ZeroOrder* r3 = makeHalfReaction( 0, this, temp );
+	ZeroOrder* r2 = makeHalfReaction( 0, temp );
+	ZeroOrder* r3 = makeHalfReaction( 0, temp );
 
 	installEnzyme( r1, r2, r3, enzId, enzMolId, prds );
 	unsigned int rateIndex = convertIdToReacIndex( enzId );
