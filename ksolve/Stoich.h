@@ -132,6 +132,18 @@ class Stoich
 		vector< unsigned int > getRowStart() const;
 
 		vector< Id > getProxyPools( Id i ) const;
+
+		/**
+		 * getStatus(): Flag to track status of Stoich object.
+		 * -1: No path yet assigned.
+		 *  0: Success
+		 *  1: Warning: Missing reactant in Reac or Enz
+		 *  2: Warning: Missing substrate in MMenz
+		 *  4: Warning: Compartment not defined
+		 *  8: Warning: Neither Ksolve nor Dsolve defined
+		 *  16: Warning: No objects found on path
+		 */
+		int getStatus() const;
 		//////////////////////////////////////////////////////////////////
 		// Model traversal and building functions
 		//////////////////////////////////////////////////////////////////
@@ -222,7 +234,10 @@ class Stoich
 		unsigned int convertIdToReacIndex( Id id ) const;
 		unsigned int convertIdToPoolIndex( Id id ) const;
 		unsigned int convertIdToFuncIndex( Id id ) const;
-		// unsigned int convertIdToComptIndex( Id id ) const;
+
+		/// Utility function to make a half reac and return the rate term.
+		ZeroOrder* makeHalfReaction( 
+						double rate, const vector< Id >& reactants );
 
 		/*
 		 * This takes the specified Reac and its substrate and product
@@ -595,6 +610,17 @@ class Stoich
 		 * The enzyme reactions count as two reaction steps.
 		 */
 		unsigned int numReac_;
+
+		/**
+		 * Flag to track status of Stoich object.
+		 * -1: No path yet assigned.
+		 *  0: Success
+		 *  1: Warning: Missing reactant in Reac or Enz
+		 *  2: Warning: Missing substrate in MMenz
+		 *  4: Warning: Compartment not defined
+		 *  8: Warning: Neither Ksolve nore Dsolve defined
+		 */
+		int status_;
 
 		//////////////////////////////////////////////////////////////////
 		// Off-solver stuff
