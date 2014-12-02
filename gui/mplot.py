@@ -108,9 +108,11 @@ class CanvasWidget(FigureCanvas):
         self.model = model
         self.graph = graph
         self.index = index
-        self.figure = Figure()#figsize=(4,4))
+        self.figure = Figure()#figsize=(1,1))
         FigureCanvas.__init__(self, self.figure, *args, **kwargs)
         self.figure.set_canvas(self)
+        # self.set_xlabel('Time (s)')
+        # self.set_ylabel('Concentration (mM)')
         if len(args) > 0 and isinstance(args[0], QtGui.QWidget):
             self.reparent(args[0])
         elif (kwargs is not None) and ('parent' in kwargs):
@@ -161,6 +163,8 @@ class CanvasWidget(FigureCanvas):
         """Add a subplot to figure and set it as current axes."""
         assert(self.next_id <= rows * cols)
         axes = self.figure.add_subplot(rows, cols, self.next_id+1)
+        axes.set_xlabel("Time (s)")
+        axes.set_ylabel("Concentration (mM)")
         self.axes[self.next_id] = axes
         axes.set_title("Graph " + str(self.index + 1))
         self.current_id = self.next_id
