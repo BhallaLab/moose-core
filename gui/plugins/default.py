@@ -973,6 +973,7 @@ class PlotWidget(QWidget):
         self.index = index
         self.canvas = CanvasWidget(self.model, self.graph, self.index)
         self.canvas.setParent(self)
+        self.canvas.figure.subplots_adjust(left = 0.18, bottom=0.2)
         self.navToolbar = NavigationToolbar(self.canvas, self)
         self.hackNavigationToolbar()
         # self.navToolbar.addSeparator()
@@ -997,7 +998,8 @@ class PlotWidget(QWidget):
         # print("**********************")
         # print(desktop.screenGeometry())
         # print("***********************")
-        self.setMinimumSize(desktop.screenGeometry().width() / 2, desktop.screenGeometry().height() / 3.0)
+        self.setMinimumSize(desktop.screenGeometry().width() / 4, desktop.screenGeometry().height() / 4)
+        self.setMaximumSize(desktop.screenGeometry().width() / 2, desktop.screenGeometry().height() / 2)
         # self.setMinimumSize(self.width(), self.height())
         # self.setMaximumSize(2 * self.width(), 2* self.height())
         # QtCore.QObject.connect(utils.tableEmitter,QtCore.SIGNAL("tableCreated()"),self.plotAllData)
@@ -1005,8 +1007,11 @@ class PlotWidget(QWidget):
         self.plotAllData()
         # self.menu = self.getContextMenu()
         # self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.connect(self,SIGNAL("customContextMenuRequested(QPoint)"),
-                    self,SLOT("contextMenuRequested(QPoint)"))
+        self.connect( self
+                    , SIGNAL("customContextMenuRequested(QPoint)")
+                    , self
+                    , SLOT("contextMenuRequested(QPoint)")
+                    )
         # self.plotView = PlotView(model, graph, index, self)
         #self.dataTable = DataTable()
         #utils.tableCreated.connect(plotAllData)
@@ -1015,7 +1020,6 @@ class PlotWidget(QWidget):
         #         QtGui.QSizePolicy.Expanding)
 
     def hackNavigationToolbar(self):
-
         # ADD Graph Action
         pixmap = QPixmap("icons/add_graph.png")
         icon   = QIcon(pixmap)
