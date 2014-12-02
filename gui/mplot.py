@@ -165,6 +165,8 @@ class CanvasWidget(FigureCanvas):
         axes = self.figure.add_subplot(rows, cols, self.next_id+1)
         axes.set_xlabel("Time (s)")
         axes.set_ylabel("Concentration (mM)")
+        axes.set_xlim(left=0.0)
+        axes.set_ylim(bottom=0.0)
         self.axes[self.next_id] = axes
         axes.set_title("Graph " + str(self.index + 1))
         self.current_id = self.next_id

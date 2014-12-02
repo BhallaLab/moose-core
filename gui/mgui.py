@@ -69,7 +69,8 @@ import re
 from biomodelsclient import BioModelsClientWidget
 from PyQt4 import Qt, QtCore, QtGui
 from PyQt4.QtGui import *
-
+from MdiArea import MdiArea
+import os
 __author__ = 'Subhasis Ray , HarshaRani, Aviral Goel, NCBS'
 
 # This maps model subtypes to corresponding plugin names. Should be
@@ -79,6 +80,11 @@ subtype_plugin_map = {  'genesis/kkit': 'kkit'
                      ,  'xml/sbml': 'kkit'
                      ,  'xml/neuroml': 'NeuroKit'
                      }
+
+APPLICATION_ICON_PATH = os.path.join( os.path.dirname(os.path.realpath(__file__))
+                                    , "icons/moose_icon.png"
+                                    )
+
 
 
 class MWindow(QtGui.QMainWindow):
@@ -132,13 +138,14 @@ class MWindow(QtGui.QMainWindow):
         self._loadedModels  = {}
 
         self.setDockOptions(self.AnimatedDocks and self.AllowNestedDocks and self.AllowTabbedDocks)
-        self.mdiArea = QtGui.QMdiArea()
+        self.mdiArea = MdiArea()
 
         self.quitAction = QtGui.QAction('&Quit', self)
         self.connect(self.quitAction, QtCore.SIGNAL('triggered()'), self.quit)
         self.quitAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Q", None, QtGui.QApplication.UnicodeUTF8))
         self.getMyDockWidgets()
         self.setCentralWidget(self.mdiArea)
+        self.setWindowIcon(QIcon(APPLICATION_ICON_PATH))
         # pixmap = QPixmap("icons/moose_icon.png")
 
         # pixmap = pixmap.scaled(self.mdiArea.size())
@@ -327,7 +334,7 @@ class MWindow(QtGui.QMainWindow):
                     x.tick = -1
         if root != '/' and root not in self._loadedModels:
             self._loadedModels[root] = name
-        
+
         # try:
         #     self.plugin = self._plugins[str(name)]
         #     print 'PLUGIN', self.plugin
