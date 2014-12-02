@@ -171,6 +171,7 @@ void setMethod( Shell* s, Id mgr, double simdt, double plotdt,
 			Field< Id >::set( stoich, "compartment", compt );
 			Field< Id >::set( stoich, "ksolve", ksolve );
 			Field< string >::set( stoich, "path", simpath );
+			cout << " 1 " << compt.path() << " simpath " << simpath ;
 			// simpath2 += "," + cpath + "/ksolve";
 			// s->doUseClock( simpath2, "process", 4 );
 			// s->doSetClock( 4, plotdt );
@@ -233,13 +234,6 @@ Id ReadKkit::read(
 	enzCplxMols_.resize( 0 );
 
 	innerRead( fin );
-	
-	Id kinetics( basePath_);
-	assert(kinetics != Id());
-	Id cInfo = s->doCreate( "Annotator", basePath_, "info", 1 );
-	assert( cInfo != Id() );
-	Field< string > ::set(cInfo, "solver", "GSL");
-	Field< double > ::set(cInfo, "runtime", maxtime_);
 
 	assignPoolCompartments();
 	assignReacCompartments();
@@ -255,6 +249,13 @@ Id ReadKkit::read(
 
 	setMethod( s, mgr, simdt_, plotdt_, method );
 
+	//Harsha: Storing solver and runtime at compartment level rather than model level
+	Id kinetics( basePath_+"/kinetics");
+	assert(kinetics != Id());
+	Id cInfo = s->doCreate( "Annotator", kinetics, "info", 1 );
+	assert( cInfo != Id() );
+	Field< string > ::set(cInfo, "solver", method);
+	Field< double > ::set(cInfo, "runtime", maxtime_);
 	s->doReinit();
 	return mgr;
 }
