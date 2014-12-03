@@ -75,6 +75,18 @@ const Cinfo* Annotator::initCinfo()
 			&Annotator::setRuntime,
 			&Annotator::getRuntime
 		);
+		static ValueFinfo< Annotator, string > dirpath(
+			"dirpath",
+			"directory path for Gui",
+			&Annotator::setdirpath,
+			&Annotator::getdirpath
+		);
+		static ValueFinfo< Annotator, string > modeltype(
+			"modeltype",
+			"model type ",
+			&Annotator::setmodeltype,
+			&Annotator::getmodeltype
+		);
 	static Finfo* annotatorFinfos[] = {
 		&x,	// Value
 		&y,	// Value
@@ -85,6 +97,8 @@ const Cinfo* Annotator::initCinfo()
 		&icon,	// Value
 		&solver,
 		&runtime,
+		&dirpath,
+		&modeltype,
 	};
 
 	static Dinfo< Annotator > dinfo;
@@ -104,7 +118,7 @@ static const Cinfo* annotatorCinfo = Annotator::initCinfo();
 Annotator::Annotator()
 	: x_( 0.0 ), y_( 0.0 ), z_( 0.0 ), 
 		notes_( "" ), color_( "white" ), textColor_( "black" ), 
-		icon_( "sphere" ),solver_( "gsl"),runtime_(10.0)
+		icon_( "sphere" ),solver_( "gsl"),runtime_(10.0),dirpath_(""),modeltype_("")
 {
 	;
 }
@@ -195,4 +209,22 @@ double Annotator::getRuntime() const
 void Annotator::setRuntime( double v )
 {
 	runtime_ = v;
+}
+string Annotator::getdirpath() const
+{
+	return dirpath_;
+}
+
+void Annotator::setdirpath( string v )
+{
+	dirpath_ = v;
+}
+string Annotator::getmodeltype() const
+{
+	return modeltype_;
+}
+
+void Annotator::setmodeltype( string v )
+{
+	modeltype_ = v;
 }

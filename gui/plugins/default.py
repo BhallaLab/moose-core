@@ -616,6 +616,16 @@ class SchedulingWidget(QtGui.QWidget):
         self.continueFlag               = False
 
     def runSimulation(self):
+        status = self.solverStatus()
+               # if status != 0 or status == -1:
+        #     return
+        if status == None or int(status) == -1 or int(status) == 0:
+            #allow the model to Run
+            pass
+        else:
+            # if something is dangling or solver is not set then return 
+            return
+
         runtime = str(self.simulationRuntime.text())
         try:
             self.runtime = float(runtime)
@@ -681,6 +691,40 @@ class SchedulingWidget(QtGui.QWidget):
             # return False
         return True
 
+    def solverStatus(self):
+        compt = moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
+        #print moose.le(compt[0].path)
+        print "#### ",moose.exists(compt[0].path+'/stoich')
+        if not moose.exists(compt[0].path+'/stoich'):
+            return None
+        else:
+            stoich = moose.Stoich(compt[0].path+'/stoich')
+            status = int(stoich.status)
+            if status == -1:
+                QtGui.QMessageBox.warning(None,"Could not Run the model","Warning: Reaction path not yet assigned.\n ")
+                return -1
+            if status == 1:
+                QtGui.QMessageBox.warning(None,"Could not Run the model","Warning: Missing a reactant in a Reac or Enz.\n ")
+                return 1
+            elif status == 2: 
+                QtGui.QMessageBox.warning(None,"Could not Run the model","Warning: Missing a substrate in an MMenz.\n ")
+                return 2
+            elif status == 3: 
+                QtGui.QMessageBox.warning(None,"Could not Run the model","Warning: Missing substrates as well as reactants.\n ")
+                return 3
+            elif status == 4:
+                QtGui.QMessageBox.warning(None,"Could not Run the model"," Warning: Compartment not defined.\n ")
+                return 4
+            elif status == 8:
+                QtGui.QMessageBox.warning(None,"Could not Run the model","Warning: Neither Ksolve nor Dsolve defined.\n ")
+                return 8
+            elif status == 16: 
+                QtGui.QMessageBox.warning(None,"Could not Run the model","Warning: No objects found on path.\n ")
+                return 16 
+            elif status == 0:
+                print "Successfully built stoichiometry matrix.\n "
+                moose.reinit()
+                return 0
     # def setElectricalParameters(self):
     #     chemicalPreferences     = self.preferences.getChemicalPreferences()
     #     self.updateInterval     = chemicalPreferences["guiUpdateInterval"]
@@ -704,158 +748,6 @@ class SchedulingWidget(QtGui.QWidget):
 
     def continueSlot(self):
         pass
-
-    # def __getUpdateIntervalWidget(self):
-    #     label = QtGui.QLabel('Plot update interval')
-    #     self.updateIntervalText = QtGui.QLineEdit(str(self.updateInterval))
-    #     label = QtGui.QLabel('Plot update interval (s)')
-    #     layout = QtGui.QHBoxLayout()
-    #     layout.addWidget(label)
-    #     layout.addWidget(self.updateIntervalText)
-    #     widget = QtGui.QWidget()
-    #     widget.setLayout(layout)
-    #     return widget
-
-    # def __getRunControlWidget(self):
-    #     widget = QtGui.QWidget()
-    #     layout = QtGui.QHBoxLayout()
-    #     self.resetAndRunButton = QtGui.QPushButton('Reset and run')
-    #     self.stopButton = QtGui.QPushButton('Stop')
-    #     self.continueButton = QtGui.QPushButton('Continue')
-    #     layout.addWidget(self.resetAndRunButton)
-    #     layout.addWidget(self.stopButton)
-    #     layout.addWidget(self.continueButton)
-    #     widget.setLayout(layout)
-    #     return widget
-
-    def updateUpdateInterval(self):
-        """Read the updateInterval from text box.
-
-        If updateInterval is less than the smallest dt, then make it
-        equal.
-        """
-        '''try:
-            self.updateInterval = float(str(self.updateIntervalText.text()))
-        except ValueError:
-            QtGui.QMessageBox.warning(self, 'Invalid value', 'Specified plot update interval is meaningless.')
-        '''
-        #Harsha: Atleast for loading signalling model in the GSL method, the updateInterval need to be atleast
-        #        equal to the max TickDt and not zero.
-        tickDt = self.getTickDtMap().values()
-        tickDt = [float(item) for item in self.getTickDtMap().values()]
-        dt = max(tickDt)
-        #dt = min(self.getTickDtMap().values())
-        if dt > self.updateInterval:
-            self.updateInterval = dt*10
-            #self.updateIntervalText.setText(str(dt))
-
-    # def disableButton(self):
-    #     """ When RunAndResetButton,continueButton,RunTillEndButton are clicked then disabling these buttons
-    #     for further clicks"""
-    #     self.disableButtons(False)
-
-    # def enableButton(self):
-    #     """ Enabling RunAndResetButton,continueButton,RunTillEndButton after stop button """
-    #     self.disableButtons()
-
-    # def disableButtons(self,Enabled=True):
-    #     self.resetAndRunButton.setEnabled(Enabled)
-    #     self.continueButton.setEnabled(Enabled)
-    #     self.runTillEndButton.setEnabled(Enabled)
-
-    def resetAndRunSlot(self):
-        """This is just for adding the arguments for the function
-        MooseRunner.resetAndRun"""
-        # self.updateUpdateInterval()
-        # tickDtMap = self.getTickDtMap()
-        # tickTargetsMap = self.getTickTargets()
-        # simtime = self.getSimTime()
-        # self.simtimeExtended.emit(simtime)
-        self.runner.doResetAndRun(
-            self.getTickDtMap(),
-            self.getTickTargets(),
-            self.getSimTime(),
-            self.updateInterval  )
-
-    def doContinueRun(self):
-        """Helper function to emit signal with arguments"""
-
-        #self.updateUpdateInterval()
-        simtime = self.getSimTime()+moose.Clock('/clock').currentTime
-        self.simtimeExtended.emit(simtime)
-        self.continueRun.emit(simtime,
-                               self.updateInterval)
-
-    def __getSimtimeWidget(self):
-        runtime = moose.Clock('/clock').runTime
-        #layout = QtGui.QGridLayout()
-        layout = QtGui.QHBoxLayout()
-        simtimeWidget = QtGui.QWidget()
-        layout1 = QtGui.QGridLayout()
-        # self.simtimeEdit = QtGui.QDoubleSpinBox()
-        # self.simtimeEdit.setToolTip('Simulation run time')
-        # self.simtimeEdit.setDecimals(3)
-        # self.simtimeEdit.setRange(0, 1e12)
-        # self.simtimeEdit.setValue(runtime)
-        self.currentTimeLabel = QtGui.QLabel('0')
-        # layout1.addWidget(QtGui.QLabel('Run for'), 0, 0)
-        # layout1.addWidget(self.simtimeEdit, 0, 1)
-        # layout1.addWidget(QtGui.QLabel('seconds'), 0, 2)
-        layout.addLayout(layout1)
-        layout2 = QtGui.QGridLayout()
-        layout2.addWidget(QtGui.QLabel('Current time:'), 1, 0)
-        layout2.addWidget(self.currentTimeLabel, 1, 1)
-        layout2.addWidget(QtGui.QLabel('second'), 1, 2)
-        layout.addLayout(layout2)
-        simtimeWidget.setLayout(layout)
-        return simtimeWidget
-
-
-
-    def __createAdvancedOptionsWidget(self):
-        """Creates a widget containing the list of clock tickes for
-        scheduling and a textbox for updateInterval"""
-        layout = QtGui.QGridLayout()
-        # Set up the column titles
-        layout.addWidget(QtGui.QLabel('Tick'), 0, 0)
-        layout.addWidget(QtGui.QLabel('dt'), 0, 1)
-        layout.addWidget(QtGui.QLabel('Targets (wildcard)'), 0, 2, 1, 2)
-        layout.setRowStretch(0, 1)
-        # Create one row for each tick. Somehow ticks.shape is
-        # (16,) while only 10 valid ticks exist. The following is a hack
-        clock = moose.element('/clock')
-        numticks = clock.numTicks
-
-        for ii in range(numticks):
-            tt = clock.tickDt[ii]
-            dtLineWidget = QtGui.QLineEdit(str(tt))
-            dtLineWidget.setValidator(QDoubleValidator())
-            dtLineWidget.returnPressed.connect(lambda : utils.updateTicks(self.getTickDtMap()))
-            layout.addWidget(QtGui.QLabel("(\'"+clock.path+'\').tickDt['+str(ii)+']'), ii+1, 0)
-            layout.addWidget(dtLineWidget, ii+1, 1)
-            layout.addWidget(QtGui.QLineEdit(''), ii+1, 2, 1, 2)
-            layout.setRowStretch(ii+1, 1)
-        # We add spacer items to the last row so that expansion
-        # happens at bottom. All other rows have stretch = 1, and
-        # the last one has 0 (default) so that is the one that
-        # grows
-        rowcnt = layout.rowCount()
-        for ii in range(3):
-            layout.addItem(QtGui.QSpacerItem(1, 1), rowcnt, ii)
-        layout.setRowStretch(rowcnt, 10)
-        layout.setColumnStretch(2, 2)
-        widget = QtGui.QWidget()
-        widget.setLayout(layout)
-        self.tickListWidget = widget
-        widget2 = QtGui.QWidget()
-        layout = QtGui.QVBoxLayout()
-        layout.addWidget(widget)
-        layout.addWidget(self.__getUpdateIntervalWidget())
-        widget2.setLayout(layout)
-        scrollbar = QtGui.QScrollArea()
-        scrollbar.setWidget(widget2)
-        self.advancedOptionsWidget = scrollbar
-        return self.advancedOptionsWidget
 
     def updateCurrentTime(self):
         sys.stdout.flush()
@@ -883,32 +775,6 @@ class SchedulingWidget(QtGui.QWidget):
             QtGui.QMessageBox.warning(self, 'Invalid value', 'Specified runtime was meaningless.')
         return 0
 
-    def getTickTargets(self):
-        """Return a dictionary containing tick nos mapped to the
-        target specified in tick list widget. If target is empty, the
-        tick is not included."""
-        ret = {}
-        for ii in range(1, self.tickListWidget.layout().rowCount()):
-            widget = self.tickListWidget.layout().itemAtPosition(ii, 2).widget()
-            if widget is not None and isinstance(widget, QtGui.QLineEdit):
-                target = str(widget.text()).strip()
-                if len(target) > 0:
-                    ret[ii-1] = target
-        return ret
-
-    def getTickDtMap(self):
-        ret = {}
-        # Items at position 0 are the column headers, hence ii+1
-        for ii in range(1, self.tickListWidget.layout().rowCount()):
-            widget = self.tickListWidget.layout().itemAtPosition(ii, 1).widget()
-            if widget is not None and isinstance(widget, QtGui.QLineEdit):
-                try:
-                    ret[ii-1] = float(str(widget.text()))
-                except ValueError:
-                    print "Error value : ", str(widget.text())
-                    QtGui.QMessageBox.warning(self, 'Invalid value', '`dt` for tick %d was meaningless.' % (ii-1))
-        # print '66666', ret
-        return ret
 
     def setDataRoot(self, root='/data'):
         self.dataRoot = moose.element(root).path
