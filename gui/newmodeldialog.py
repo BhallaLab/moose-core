@@ -13,7 +13,7 @@ class DialogWidget(QtGui.QDialog):
         self.modelPathLabel = QtGui.QLabel('Model Name')
         self.modelPathEdit =  QtGui.QLineEdit('')
         self.layout.addWidget(self.modelPathLabel, 0, 0)
-        self.layout.addWidget(self.modelPathEdit, 0, 1)
+        self.layout.addWidget(self.modelPathEdit, 0, 1,1,1)
         # self.defaultRadio = QtGui.QRadioButton('default')
         # #self.defaultRadio.setChecked(True);
         # self.kkitRadio = QtGui.QRadioButton('kkit')
@@ -22,12 +22,23 @@ class DialogWidget(QtGui.QDialog):
         # self.kkitRadio.toggled.connect(lambda : self.setcurrentRadioButton('kkit'))
         # layout.addWidget(self.defaultRadio,2,1)
         # layout.addWidget(self.kkitRadio,2,0)
+        self.hbox = QtGui.QHBoxLayout()
         self.buttonBox = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok)
-        self.layout.addWidget(self.buttonBox,2,1)
         self.connect(self.buttonBox, QtCore.SIGNAL('accepted()'), self.validateAccept)
-        self.modelPathEdit.returnPressed.connect(self.validateAccept)
+        self.hbox.addWidget(self.buttonBox,1)
+
+        self.buttonBox1 = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Cancel)
+        self.connect(self.buttonBox1, QtCore.SIGNAL('rejected()'), self.Cancel)
+        self.hbox.addWidget(self.buttonBox1,0)
+        #self.hbox.setBackgroundColor(Blue)
+        #self.modelPathEdit.returnPressed.connect(self.validateAccept)
         # self.connect(self.buttonBox, QtCore.SIGNAL('rejected()'), self.reject)
+        #self.hbox.addStretch(1)
+        self.layout.addLayout(self.hbox,1,1)
         self.setLayout(self.layout)
+
+    def Cancel (self):
+        self.close()
 
     def validateAccept(self):
         text = str(self.modelPathEdit.text())

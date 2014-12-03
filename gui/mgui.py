@@ -166,7 +166,6 @@ class MWindow(QtGui.QMainWindow):
         self.createPopup()
 
     def createPopup(self):
-        print("Hello")
         self.popup = dialog = QDialog(self)
         dialog.setWindowFlags(Qt.Qt.Dialog | Qt.Qt.FramelessWindowHint)
         # dialog.setModal(True)
@@ -745,6 +744,15 @@ class MWindow(QtGui.QMainWindow):
                 pluginName = 'default'
             print 'Loaded model', ret['model'].path,subtype
             self._loadedModels[ret['model'].path] = pluginName
+            if not moose.exists(ret['model'].path+'/info'):
+                    moose.Annotator(ret['model'].path+'/info')
+                
+            modelAnno = moose.Annotator(ret['model'].path+'/info')
+            if ret['subtype']:
+                modelAnno.modeltype = ret['subtype']
+            else:
+                modelAnno.modeltype = ret['modeltype']
+            modelAnno.dirpath = str(dialog.directory().absolutePath())
             self.setPlugin(pluginName, ret['model'].path)
 
 
@@ -888,6 +896,16 @@ class MWindow(QtGui.QMainWindow):
                 except KeyError:
                     pluginName = 'default'
                 print 'Loaded model', ret['model'].path
+                if not moose.exists(ret['model'].path+'/info'):
+                    moose.Annotator(ret['model'].path+'/info')
+                
+                modelAnno = moose.Annotator(ret['model'].path+'/info')
+                if ret['subtype']:
+                    modelAnno.modeltype = ret['subtype']
+                else:
+                    modelAnno.modeltype = ret['modeltype']
+                modelAnno.dirpath = str(dialog.directory().absolutePath())
+
                 self.setPlugin(pluginName, ret['model'].path)
                 if pluginName == 'kkit':
                     QtCore.QCoreApplication.sendEvent(self.plugin.getEditorView().getCentralWidget().view, QtGui.QKeyEvent(QtCore.QEvent.KeyPress, Qt.Qt.Key_A, Qt.Qt.NoModifier))
@@ -913,8 +931,14 @@ class MWindow(QtGui.QMainWindow):
             '''
             modelContainer = moose.Neutral('%s' %(modelPath))
             modelRoot = moose.Neutral('%s/%s' %(modelContainer.path,"model"))
+            if not moose.exists(modelContainer.path+'/info'):
+                moose.Annotator(modelContainer.path+'/info')
+            
+            modelAnno = moose.element(modelContainer.path+'/info')
+            modelAnno.modeltype = "kkit"
+            modelAnno.dirpath = " "
             self.setPlugin(plugin, modelRoot.path)
-            #self._loadedModels[modelContainer.path] = plugin
+            self._loadedModels[modelContainer.path] = plugin
             #Harsha: This will clear out object editor's objectpath and make it invisible
             self.objectEditSlot('/', False)
 
