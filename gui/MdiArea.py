@@ -18,7 +18,7 @@ class MdiArea(QMdiArea):
         # http://qt-project.org/faq/answer/when_setting_a_background_pixmap_for_a_widget_it_is_tiled_if_the_pixmap_is_
         self.background = QImage(event.size(), QImage.Format_ARGB32_Premultiplied)
         painter = QPainter(self.background)
-        painter.fillRect(self.background.rect(), QColor(255, 255, 255, 255))
+        painter.fillRect(self.background.rect(), QColor(243, 239, 238, 255))
         scaled = self.backgroundImage.scaled(event.size() , QtCore.Qt.KeepAspectRatio)
         scaledRect = scaled.rect()
         scaledRect.moveCenter(self.background.rect().center())
