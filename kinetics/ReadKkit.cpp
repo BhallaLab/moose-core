@@ -213,7 +213,7 @@ Id ReadKkit::read(
 	const string& filename, 
 	const string& modelname,
 	Id pa, const string& methodArg )
-{
+{   
 	string method = methodArg;
 	ifstream fin( filename.c_str() );
 	if (!fin){
@@ -249,10 +249,10 @@ Id ReadKkit::read(
 
 	setMethod( s, mgr, simdt_, plotdt_, method );
 
-	//Harsha: Storing solver and runtime at compartment level rather than model level
+	//Harsha: Storing solver and runtime at model level rather than model level
 	Id kinetics( basePath_+"/kinetics");
 	assert(kinetics != Id());
-	Id cInfo = s->doCreate( "Annotator", kinetics, "info", 1 );
+	Id cInfo = s->doCreate( "Annotator", basePath_, "info", 1 );
 	assert( cInfo != Id() );
 	Field< string > ::set(cInfo, "solver", method);
 	Field< double > ::set(cInfo, "runtime", maxtime_);
