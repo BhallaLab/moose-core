@@ -77,6 +77,6 @@ private:
 #endif
 
 };
-
+#endif //USE_SBML
 #endif // _SBMLREADER_H
 
