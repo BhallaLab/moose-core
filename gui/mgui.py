@@ -304,7 +304,7 @@ class MWindow(QtGui.QMainWindow):
                     return self._loadedPlugins[name]
         raise Exception('No plugin with name: %s' % (name))
 
-    def setPlugin(self, name, root='/', action = None):
+    def setPlugin(self, name, root='/'):
         """Set the current plugin to use.
 
         This -
@@ -317,24 +317,21 @@ class MWindow(QtGui.QMainWindow):
         3. sets the current view  to the plugins editor view.
 
         """
-        if action is not None:
-            print("asdfdsfdfds", action.text())
 
-        print " set Plugin ",name,root
         self.plugin = self.loadPluginClass(str(name))(str(root), self)
-        #Harsha: added under file Menu, Recently Loaded Models
-        #All the previously loaded chemical models, solver's and table's ticks are made -1
-        for l in self._loadedModels:
-          compt = moose.wildcardFind(l[0]+'/##[ISA=ChemCompt]')
-          if compt:
+        compt = moose.wildcardFind(root+'/##[ISA=ChemCompt]')
+        if compt:
             if moose.exists(compt[0].path+'/ksolve'):
                 ksolve = moose.Ksolve( compt[0].path+'/ksolve' )
-                ksolve.tick = -1
-            if moose.exists(compt[0].path+'/stoich'):
-                stoich = moose.Stoich( compt[0].path+'/stoich' )
-                stoich.tick = -1
-            for x in moose.wildcardFind( l[0]+'/data/graph#/#' ):
-                x.tick = -1
+                ksolve.tick = 16
+            if moose.exists(compt[0].path+'/gsolve'):
+                gsolve = moose.Gsolve( compt[0].path+'/gsolve' )
+                gsolve.tick = 16
+            # if moose.exists(compt[0].path+'/stoich'):
+            #     stoich = moose.Stoich( compt[0].path+'/stoich' )
+            #     stoich.tick = -1
+            for x in moose.wildcardFind( root+'/data/graph#/#' ):
+                x.tick = 18
         # if root != '/' and root not in self._loadedModels:
         #     self._loadedModels[root] = name
         # for k,v in self._loadedModels.items():
@@ -532,7 +529,7 @@ class MWindow(QtGui.QMainWindow):
                 self.fileMenu.addSeparator()
                 self.fileMenu.addAction(self.loadedModelAction)
                 self.loadedModelAction.setEnabled(False)
-                for (model, modeltype, action) in self._loadedModels:
+                for (model, modeltype, action) in reversed(self._loadedModels):
                     self.fileMenu.addAction(action)
                 self.fileMenu.addSeparator()
 
@@ -878,6 +875,23 @@ class MWindow(QtGui.QMainWindow):
         self.objectEditDockWidget.setVisible(visible)
 
     def loadedModelsAction(self,modelPath,pluginName):
+        #Harsha: added under file Menu, Recently Loaded Models
+        #All the previously loaded chemical models, solver's and table's ticks are made -1
+        if self._loadedModels:
+            l = self._loadedModels[-1]
+            compt = moose.wildcardFind(l[0]+'/##[ISA=ChemCompt]')
+            if compt:
+                if moose.exists(compt[0].path+'/ksolve'):
+                    ksolve = moose.Ksolve( compt[0].path+'/ksolve' )
+                    ksolve.tick = -1
+                if moose.exists(compt[0].path+'/gsolve'):
+                    gsolve = moose.Gsolve( compt[0].path+'/gsolve' )
+                    gsolve.tick = -1
+                # if moose.exists(compt[0].path+'/stoich'):
+                #     stoich = moose.Stoich( compt[0].path+'/stoich' )
+                #     stoich.tick = -1
+                for x in moose.wildcardFind( l[0]+'/data/graph#/#' ):
+                    x.tick = -1
         action = QAction(modelPath[1:],self)
         action.triggered.connect(lambda : self.setPlugin(pluginName, modelPath))
         self._loadedModels.append([modelPath,pluginName,action])
