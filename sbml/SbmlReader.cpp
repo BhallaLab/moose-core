@@ -1132,7 +1132,6 @@ void SbmlReader::getGlobalParameter() {
         parmValueMap[id] = value;
     }
 }
-#endif // USE_SBML
 
 string SbmlReader::nameString( string str ) {
     string str1;
@@ -1151,4 +1150,4 @@ string SbmlReader::nameString( string str ) {
     } while ( i < len );
     return str;
 }
-
+#endif // USE_SBML
