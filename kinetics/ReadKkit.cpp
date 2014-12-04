@@ -171,7 +171,6 @@ void setMethod( Shell* s, Id mgr, double simdt, double plotdt,
 			Field< Id >::set( stoich, "compartment", compt );
 			Field< Id >::set( stoich, "ksolve", ksolve );
 			Field< string >::set( stoich, "path", simpath );
-			cout << " 1 " << compt.path() << " simpath " << simpath ;
 			// simpath2 += "," + cpath + "/ksolve";
 			// s->doUseClock( simpath2, "process", 4 );
 			// s->doSetClock( 4, plotdt );
