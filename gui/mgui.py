@@ -525,13 +525,17 @@ class MWindow(QtGui.QMainWindow):
         self.fileMenu.addAction(self.loadModelAction)
 
         if not hasattr(self,'loadedModels'):
-            #self.loadedModelAction = QtGui.QAction('Recently Loaded Models',self)
+            self.loadedModelAction = QtGui.QAction('Recently Loaded Models',self)
+            self.loadedModelAction.setCheckable(False)
+            #self.fileMenu.addAction(QtGui.QAction(self.loadedModelAction,checkable=True))
             if bool(self._loadedModels):
                 self.fileMenu.addSeparator()
-                #self.fileMenu.addAction(self.loadModelAction)
+                self.fileMenu.addAction(self.loadedModelAction)
+                self.loadedModelAction.setEnabled(False)
                 for (model, modeltype, action) in self._loadedModels:
                     self.fileMenu.addAction(action)
                 self.fileMenu.addSeparator()
+
         if not hasattr(self,'connectBioModelAction'):
             self.connectBioModelAction = QtGui.QAction('&Connect BioModels', self)
             self.connectBioModelAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+B", None, QtGui.QApplication.UnicodeUTF8))
@@ -874,7 +878,7 @@ class MWindow(QtGui.QMainWindow):
         self.objectEditDockWidget.setVisible(visible)
 
     def loadedModelsAction(self,modelPath,pluginName):
-        action = QAction(modelPath,self)
+        action = QAction(modelPath[1:],self)
         action.triggered.connect(lambda : self.setPlugin(pluginName, modelPath))
         self._loadedModels.append([modelPath,pluginName,action])
         if len(self._loadedModels)>5:
