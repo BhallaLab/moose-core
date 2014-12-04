@@ -62,7 +62,9 @@ class KkitPlugin(MoosePlugin):
         if filename:
             filename = filename+extension
             if filters[str(filter_)] == 'SBML':
+
                 writeerror = moose.writeSBML(str(filename),self.modelRoot)
+                print "writeerror ",writeerror
                 if writeerror:
                     QtGui.QMessageBox.warning(None,'Could not save the Model','\n Error in the consistency check')
                 else:
@@ -144,14 +146,13 @@ class AnotherKkitRunView(RunView):
         self.schedular.runner.simulationReset.connect(self.kkitRunView.getCentralWidget().resetColor)
         # self.schedular.runner.simulationReset.connect(self.setSolver)
         self.schedular.preferences.applyChemicalSettings.connect(lambda x : self.setSolver(x["simulation"]["solver"]))
-
-        modelpath = moose.element(self.modelRoot).path
-        compt = moose.wildcardFind(modelpath+'/##[ISA=ChemCompt]')
+        compt = moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
+        ann = moose.Annotator(self.modelRoot+'/info')
         if compt:
-            self.runTime = (moose.Annotator(compt[0].path+'/info')).runtime
-            solver = (moose.Annotator(compt[0].path+'/info')).solver
+            self.runTime = (moose.Annotator(self.modelRoot+'/info')).runtime
+            solver = (moose.Annotator(self.modelRoot+'/info')).solver
         else:
-            self.runTime = 101
+            self.runTime = 10
             solver = "gsl"
         self.schedular.simulationRuntime.setText(str(self.runTime))
         #preferences
@@ -159,8 +160,6 @@ class AnotherKkitRunView(RunView):
         c = moose.Clock('/clock')
         self.simulationdt = c.tickDt[11]
         self.plotdt = c.tickDt[16]
-
-        
         chemprefs["simulation"]["simulation-dt"] = self.simulationdt
         chemprefs["simulation"]["plot-update-interval"] = self.plotdt
         chemprefs["simulation"]["gui-update-interval"] = 2 * self.plotdt

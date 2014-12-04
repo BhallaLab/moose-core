@@ -51,7 +51,8 @@ def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
         mobj = moose.CubeMesh(modelpath.path+'/'+string_num)
         mobj.volume = 1e-15
         mesh = moose.element(mobj.path+'/mesh')
-        qGItem = ComptItem(scene,pos.toPoint().x(),pos.toPoint().y(),500,500,mobj)
+        print "modelBuid ",view.sceneContainerPt.sceneRect()
+        qGItem = ComptItem(scene,pos.toPoint().x(),pos.toPoint().y(),800,500,mobj)
         qGItem.setPen(QtGui.QPen(Qt.QColor(66,66,66,100), 5, Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin))
         view.sceneContainerPt.addItem(qGItem)
         qGItem.cmptEmitter.connect(qGItem.cmptEmitter,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),layoutPt.positionChange1)
@@ -63,7 +64,7 @@ def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
         mobj = moose.CylMesh(modelpath.path+'/'+string_num)
         mobj.volume = 1e-15
         mesh = moose.element(mobj.path+'/mesh')
-        qGItem = ComptItem(scene,pos.toPoint().x(),pos.toPoint().y(),500,500,mobj)
+        qGItem = ComptItem(scene,pos.toPoint().x(),pos.toPoint().y(),800,500,mobj)
         qGItem.setPen(QtGui.QPen(Qt.QColor(66,66,66,100), 5, Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin))
         view.sceneContainerPt.addItem(qGItem)
         compartment = qGItem
