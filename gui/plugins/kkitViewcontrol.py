@@ -431,11 +431,11 @@ class GraphicalView(QtGui.QGraphicsView):
             self.fitInView(self.sceneContainerPt.itemsBoundingRect().x()-10,self.sceneContainerPt.itemsBoundingRect().y()-10,self.sceneContainerPt.itemsBoundingRect().width()+20,self.sceneContainerPt.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
             self.layoutPt.drawLine_arrow(itemignoreZooming=False)
 
-        elif (key == Qt.Qt.Key_Less):# and (event.modifiers() & Qt.Qt.ShiftModifier)): # '<' key. zooms-in to iconScale factor
+        elif (key == Qt.Qt.Key_Less or key == Qt.Qt.Key_Minus):# and (event.modifiers() & Qt.Qt.ShiftModifier)): # '<' key. zooms-in to iconScale factor
             self.iconScale *= 0.8
             self.updateScale( self.iconScale )
 
-        elif (key == Qt.Qt.Key_Greater):# and (event.modifiers() & Qt.Qt.ShiftModifier)): # '>' key. zooms-out to iconScale factor
+        elif (key == Qt.Qt.Key_Greater or key == Qt.Qt.Key_Plus):# and (event.modifiers() & Qt.Qt.ShiftModifier)): # '>' key. zooms-out to iconScale factor
             self.iconScale *= 1.25
             self.updateScale( self.iconScale )
 
@@ -504,6 +504,7 @@ class GraphicalView(QtGui.QGraphicsView):
                     unselectitem.setSelected(0)
             #First for loop removes all the enz b'cos if parent is removed then
             #then it will created problem at    qgraphicitem
+            self.layoutPt.deleteSolver()
             for item in (qgraphicsitem for qgraphicsitem in self.rubberbandlist):
                 if isinstance(item,MMEnzItem) or isinstance(item,EnzItem) or isinstance(item,CplxItem):
                     self.deleteItem(item)
