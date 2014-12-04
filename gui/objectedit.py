@@ -121,7 +121,7 @@ extra_fields = ['this',
                 'valueFields',
                 'sourceFields',
                 'motorConst',
-		'destFields'
+                'destFields'
                 ]
 
 
@@ -279,9 +279,21 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
                 try:
                     if (str(field) =="Color" ):
                         return QtGui.QPushButton("Press Me!")
-                    if ( (str(field) != "Notes") ):
+                    if ( (str(field) != "Notes") and (str(field) != "className")):
                         ret = self.mooseObject.getField(str(field))
                         ret = QtCore.QVariant(QtCore.QString(str(ret)))
+                    elif(str(field) == "className"):
+                        ret = self.mooseObject.getField(str(field))
+                        if ret == "ZombiePool":
+                            ret = QtCore.QVariant(QtCore.QString(str("Pool")))
+                        elif ret == "ZombieBufPool":
+                            ret = QtCore.QVariant(QtCore.QString(str("BufPool")))
+                        elif ret == "ZombieMMenz":
+                            ret = QtCore.QVariant(QtCore.QString(str("MMenz")))
+                        elif ret == "ZombieEnz":
+                            ret = QtCore.QVariant(QtCore.QString(str("Enz")))
+                        elif ret == "ZombieReac":
+                            ret = QtCore.QVariant(QtCore.QString(str("Reac")))    
                     elif(str(field) == "Notes"):
                         astr = self.mooseObject.path+'/info'
                         mastr = moose.Annotator(astr)
@@ -399,7 +411,11 @@ class ObjectEditDockWidget(QtGui.QDockWidget):
 def main():
     app = QtGui.QApplication(sys.argv)
     mainwin = QtGui.QMainWindow()
-    c = moose.Pool('test_compartment')
+    #c = moose.Pool('test_compartment')
+    c = moose.MMenz('Enz')
+    c.Km = 1.0
+    print(c.getField("Km"))
+    print(c.getField("numKm"))
     view = ObjectEditView(c, undolen=3)
     mainwin.setCentralWidget(view)
     action = QtGui.QAction('Undo', mainwin)
