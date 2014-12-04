@@ -13,6 +13,8 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
+#ifdef USE_SBML
+
 #include "header.h"
 #include <sbml/SBMLTypes.h>
 #include "SbmlWriter.h"
@@ -958,3 +960,4 @@ bool SbmlWriter::validateModel( SBMLDocument* sbmlDoc )
       return ( numConsistencyErrors == 0 && numValidationErrors == 0 );
       }
 }
+#endif // USE_SBML
