@@ -74,8 +74,6 @@ private:
     void setupEnzymaticReaction( const EnzymeInfo & einfo,string name,const map< string, Id > & ,string name1);
     void findModelParent( Id cwe, const string& path,Id& parentId, string& modelName );
     void getGlobalParameter();
-#endif
-
 };
 #endif //USE_SBML
 #endif // _SBMLREADER_H
