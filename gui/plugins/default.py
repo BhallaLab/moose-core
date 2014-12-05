@@ -85,7 +85,7 @@ from PyQt4.QtGui import QIcon
 from PyQt4.QtGui import QPixmap
 from PyQt4.QtGui import QAction
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
-from EventBlocker import EventBlocker
+#from EventBlocker import EventBlocker
 # from PlotNavigationToolbar import PlotNavigationToolbar
 from global_constants import preferences
 ELECTRICAL_MODEL = 0
@@ -657,7 +657,7 @@ class SchedulingWidget(QtGui.QWidget):
             self.simulationRuntime.setText(str(chemicalPreferences["simulation"]["default-runtime"]))
         self.runTime            = float(self.simulationRuntime.text())
         self.solver             = chemicalPreferences["simulation"]["solver"]
-        print(self.solver)
+        #print(self.solver)
 
     def setElectricalParameters(self):
         electricalPreferences   = self.preferences.getElectricalPreferences()
@@ -668,7 +668,7 @@ class SchedulingWidget(QtGui.QWidget):
             self.simulationRuntime.setText(str(electricalPreferences["simulation"]["default-runtime"]))
         self.runTime            = float(self.simulationRuntime.text())
         self.solver             = electricalPreferences["simulation"]["solver"]
-        print(self.solver)
+        #print(self.solver)
 
     def checkConsistency(self):
         if self.updateInterval < self.simulationInterval :
