@@ -202,7 +202,7 @@ print 'output =', output
     moose.useClock(2, '/model/#[ISA=Table]', 'process')
     moose.reinit()
     moose.start(10.0)
-    ts = 
+    #ts = 
     plt.plot(input_table.vector, label='input')
     plt.plot(output_table.vector, label='output')
     plt.legend()
