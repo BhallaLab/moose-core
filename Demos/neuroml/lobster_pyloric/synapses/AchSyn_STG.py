@@ -8,8 +8,7 @@ from pylab import *
 try:
     import moose
 except ImportError:
-    print "ERROR: Could not import moose."\
-        "Please add the directory containing moose.py in your PYTHONPATH"
+    print "ERROR: Could not import moose. Please add the directory containing moose.py in your PYTHONPATH"
     import sys
     sys.exit(1)
 
@@ -35,6 +34,10 @@ class AchSyn_STG(moose.SynChan):
         graded.value = 'True'
         mgblock = moose.Mstring(self.path+'/mgblockStr')
         mgblock.value = 'False'
+        # also needs a synhandler
+        moosesynhandler = moose.SimpleSynHandler(self.path+'/handler')
+        # connect the SimpleSynHandler or the STDPSynHandler to the SynChan (double exp)
+        moose.connect( moosesynhandler, 'activationOut', self, 'activation' )
 
         # ds/dt = s_inf/tau - s/tau = A - Bs
         # where A=s_inf/tau is activation, B is 1/tau
