@@ -85,7 +85,7 @@ from PyQt4.QtGui import QIcon
 from PyQt4.QtGui import QPixmap
 from PyQt4.QtGui import QAction
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
-
+from EventBlocker import EventBlocker
 # from PlotNavigationToolbar import PlotNavigationToolbar
 from global_constants import preferences
 ELECTRICAL_MODEL = 0
@@ -616,6 +616,7 @@ class SchedulingWidget(QtGui.QWidget):
         self.continueFlag               = False
 
     def runSimulation(self):
+
         status = self.solverStatus()
                # if status != 0 or status == -1:
         #     return
@@ -623,9 +624,8 @@ class SchedulingWidget(QtGui.QWidget):
             #allow the model to Run
             pass
         else:
-            # if something is dangling or solver is not set then return 
+            # if something is dangling or solver is not set then return
             return
-
         runtime = str(self.simulationRuntime.text())
         try:
             self.runtime = float(runtime)
@@ -706,10 +706,10 @@ class SchedulingWidget(QtGui.QWidget):
             if status == 1:
                 QtGui.QMessageBox.warning(None,"Could not Run the model","Warning: Missing a reactant in a Reac or Enz.\n ")
                 return 1
-            elif status == 2: 
+            elif status == 2:
                 QtGui.QMessageBox.warning(None,"Could not Run the model","Warning: Missing a substrate in an MMenz.\n ")
                 return 2
-            elif status == 3: 
+            elif status == 3:
                 QtGui.QMessageBox.warning(None,"Could not Run the model","Warning: Missing substrates as well as reactants.\n ")
                 return 3
             elif status == 4:
@@ -718,9 +718,9 @@ class SchedulingWidget(QtGui.QWidget):
             elif status == 8:
                 QtGui.QMessageBox.warning(None,"Could not Run the model","Warning: Neither Ksolve nor Dsolve defined.\n ")
                 return 8
-            elif status == 16: 
+            elif status == 16:
                 QtGui.QMessageBox.warning(None,"Could not Run the model","Warning: No objects found on path.\n ")
-                return 16 
+                return 16
             elif status == 0:
                 print "Successfully built stoichiometry matrix.\n "
                 moose.reinit()
@@ -865,7 +865,7 @@ class PlotWidget(QWidget):
         # print(desktop.screenGeometry())
         # print("***********************")
         self.setMinimumSize(desktop.screenGeometry().width() / 4, desktop.screenGeometry().height() / 4)
-        self.setMaximumSize(desktop.screenGeometry().width() / 2, desktop.screenGeometry().height() / 2)
+        # self.setMaximumSize(desktop.screenGeometry().width() / 2, desktop.screenGeometry().height() / 2)
         # self.setMinimumSize(self.width(), self.height())
         # self.setMaximumSize(2 * self.width(), 2* self.height())
         # QtCore.QObject.connect(utils.tableEmitter,QtCore.SIGNAL("tableCreated()"),self.plotAllData)
