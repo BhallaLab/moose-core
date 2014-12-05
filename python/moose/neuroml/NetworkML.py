@@ -7,7 +7,7 @@
 
 """
 NeuroML.py is the preferred interface. Use this only if NeuroML L1,L2,L3 files are misnamed/scattered.
-Instantiate NetworlML class, and thence use method:
+Instantiate NetworkML class, and thence use method:
 readNetworkMLFromFile(...) to load a standalone NetworkML file, OR
 readNetworkML(...) to load from an xml.etree xml element (could be part of a larger NeuroML file).
 """
@@ -299,7 +299,7 @@ class NetworkML():
         ## moose.element is a function that checks if path exists,
         ## and returns the correct object, here SynChan
         syn = moose.element(post_path+'/'+syn_name_full) # wrap the SynChan in this compartment
-        synhandler = moose.element(post_path+'/'+syn_name_full+'_handler') # wrap the SynHandler
+        synhandler = moose.element(post_path+'/'+syn_name_full+'/handler') # wrap the SynHandler
         gradedchild = utils.get_child_Mstring(syn,'graded')
         #### weights are set at the end according to whether the synapse is graded or event-based
 
@@ -416,11 +416,12 @@ class NetworkML():
             cmlR.readChannelMLFromFile(syn_name+'.xml')
         ## deep copies the library SynChan and SynHandler
         ## to instances under postcomp named as <arg3>
-        synid = moose.copy(moose.Neutral('/library/'+syn_name),postcomp,syn_name_full)
-        synhandlerid = moose.copy(moose.Neutral('/library/'+syn_name+'_handler'),\
-                postcomp,syn_name_full+'_handler')
+        synid = moose.copy(moose.element('/library/'+syn_name),postcomp,syn_name_full)
+        synhandlerid = moose.copy(moose.element('/library/'+syn_name+'/handler'),\
+                postcomp,syn_name_full+'/handler')
         syn = moose.SynChan(synid)
         synhandler = moose.element(synhandlerid) # returns SimpleSynHandler or STDPSynHandler
+        print synhandler.className
         ## connect the SimpleSynHandler or the STDPSynHandler to the SynChan (double exp)
         moose.connect( synhandler, 'activationOut', syn, 'activation' )
         # mgblock connections if required
