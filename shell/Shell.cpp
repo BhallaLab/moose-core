@@ -400,13 +400,15 @@ void Shell::doUseClock( string path, string field, unsigned int tick )
  * Write given model to SBML file. Returns success value.
  */
 int Shell::doWriteSBML( const string& fname, const string& modelpath )
-{
+{ 
 #ifdef USE_SBML
 	SbmlWriter sw;
-	return sw.write( fname, modelpath );
+	int ret = sw.write( fname, modelpath );
+	return ret;
 #else
+	
     cerr << "Shell::WriteSBML: This copy of MOOSE has not been compiled with SBML writing support.\n";
-	return 0;
+	return -2;
 #endif
 }
 /**
