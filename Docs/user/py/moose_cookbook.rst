@@ -80,7 +80,7 @@ element during a simulation. The Function class is useful for this.
 
 Solving arbitrary differential equations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The Function classes are useful for setting up arbitrary differential
+The Function classes are also useful for setting up arbitrary differential
 equations. MOOSE supports solution of such equation systems, with the
 caveat that it thinks they should be chemical systems and therefore 
 interprets the variables as concentrations. MOOSE does not permit the 
@@ -346,8 +346,239 @@ of enzymes and reactions does depend on which compartment they reside in.
 .. automodule:: crossComptNeuroMesh
     :members:
 
-Single cell models
-------------------
+Single neuron models
+--------------------
+
+Neurons are modelled as equivalent electrical circuits. The morphology
+of a neuron can be broken into isopotential compartments connected by
+axial resistances R\ :sub:`a`\  denoting the cytoplasmic
+resistance. In each compartment, the neuronal membrane is represented as
+a capacitance C\ :sub:`m`\  with a shunt leak resistance
+R\ :sub:`m`\ . Electrochemical gradient (due to ion pumps)
+across the leaky membrane causes a voltage drive E\ :sub:`m`\ ,
+that hyperpolarizes the inside of the cell membrane compared to the
+outside.
+
+Each voltage dependent ion channel, present on the membrane, is modelled
+as a voltage dependent conductance G\ :sub:`k`\  with gating
+kinetics, in series with an electrochemical voltage drive (battery)
+E\ :sub:`k`\ , across the membrane capacitance
+C\ :sub:`m`\ , as in the figure below.
+
+--------------
+
+.. figure:: ../../images/neuroncompartment.png
+   :align: center
+   :alt: **Equivalent circuit of neuronal compartments**
+
+   **Equivalent circuit of neuronal compartments**
+
+--------------
+
+Neurons fire action potentials / spikes (sharp rise and fall of membrane
+potential V\ :sub:`m`\ ) due to voltage dependent channels.
+These result in opening of excitatory / inhibitory synaptic channels
+(conductances with batteries, similar to voltage gated channels) on
+other connected neurons in the network.
+
+MOOSE can handle large networks of detailed neurons, each with
+complicated channel dynamics. Further, MOOSE can integrate chemical
+signalling with electrical activity. Presently, creating and simulating
+these requires PyMOOSE scripting, but these will be incorporated into
+the GUI in the future.
+
+To understand channel kinetics and neuronal action potentials, run the
+Squid Axon demo installed along with MOOSEGUI and consult its
+help/tutorial.
+
+Read more about compartmental modelling in the first few chapters of the
+`Book of
+Genesis <http://www.genesis-sim.org/GENESIS/iBoG/iBoGpdf/index.html>`_.
+
+Models can be defined in `NeuroML <http://www.neuroml.org>`_, an XML
+format which is mostly supported across simulators. Channels, neuronal
+morphology (compartments), and networks can be specified using various
+levels of NeuroML, namely ChannelML, MorphML and NetworkML. Importing of
+cell models in the `GENESIS <http://www.genesis-sim.org/GENESIS>`_
+.p format is supported for backwards compatibitility.
+
+Modeling details
+^^^^^^^^^^^^^^^^^
+
+Some salient properties of neuronal building blocks in MOOSE are
+described below. Variables that are updated at every simulation time
+step are are listed **dynamical**. Rest are parameters.
+
+-  **Compartment**
+   When you select a compartment, you can view and edit its properties
+   in the right pane. V\ :sub:`m`\  and I\ :sub:`m`\ 
+   are plot-able.
+
+   -  V\ :sub:`m`\ 
+        membrane potential (across C\ :sub:`m`\ ) in Volts. It is a 
+        dynamical variable.
+   -  C\ :sub:`m`\ 
+        membrane capacitance in Farads.
+   -  E\ :sub:`m`\ 
+        membrane leak potential in Volts due
+        to the electrochemical gradient setup by ion pumps.
+   -  I\ :sub:`m`\ 
+        current in Amperes across the membrane via leak resistance R\ 
+        :sub:`m`\ .
+   -  inject
+        current in Amperes injected externally into the compartment.
+   -  initVm
+        initial V\ :sub:`m`\  in Volts.
+   -  R\ :sub:`m`\ 
+        membrane leak resistance in Ohms due to leaky channels.
+   -  diameter
+        diameter of the compartment in metres.
+   -  length
+        length of the compartment in metres.
+
+-  **HHChannel**
+    Hodgkin-Huxley channel with voltage dependent dynamical gates.
+
+   -  Gbar
+        peak channel conductance in Siemens.
+   -  E\ :sub:`k`\ 
+        reversal potential of the channel, due to electrochemical 
+        gradient of the ion(s) it allows.
+   -  G\ :sub:`k`\ 
+        conductance of the channel in Siemens.
+        G\ :sub:`k`\ (t) = Gbar × X(t)\ :sup:`Xpower`\  ×
+        Y(t)\ :sup:`Ypower`\  × Z(t)\ :sup:`Zpower`\ 
+
+   -  I\ :sub:`k`\ 
+        current through the channel into the neuron in Amperes.
+          I\ :sub:`k`\ (t) = G\ :sub:`k`\ (t) ×
+          (E\ :sub:`k`\ -V\ :sub:`m`\ (t))
+
+   -  X, Y, Z
+        gating variables (range 0.0 to 1.0) that may turn on or off as 
+        voltage increases with different time constants.
+
+          dX(t)/dt = X\ :sub:`inf`\ /τ - X(t)/τ
+
+          Here, X\ :sub:`inf`\  and τ are typically
+          sigmoidal/linear/linear-sigmoidal functions of membrane 
+          potential V\ :sub:`m`\ , which are described in a ChannelML 
+          file and presently not editable from MOOSEGUI. Thus, a gate 
+          may open (X\ :sub:`inf`\ (V\ :sub:`m`\ ) → 1) or close (X\ 
+          :sub:`inf`\ (V\ :sub:`m`\ ) → 0) on increasing V\ :sub:`m`\ 
+          , with time constant τ(V\ :sub:`m`\ ).
+
+   -  Xpower, Ypower, Zpower
+        powers to which gates are raised in the G\ :sub:`k`\ (t) 
+        formula above.
+
+-  **HHChannel2D**
+   The Hodgkin-Huxley channel2D can have the usual voltage dependent
+   dynamical gates, and also gates that depend on voltage and an
+   ionic concentration, as for say Ca-dependent K conductance. It has
+   the properties of HHChannel above, and a few more, similar to
+   in the `GENESIS tab2Dchannel
+   reference <http://www.genesis-sim.org/GENESIS/Hyperdoc/Manual-26.html#ss26.61>`_.
+
+-  **CaConc**
+   This is a pool of Ca ions in each compartment, in a shell volume
+   under the cell membrane. The dynamical Ca concentration increases
+   when Ca channels open, and decays back to resting with a specified
+   time constant τ. Its concentration controls Ca-dependent K channels,
+   etc.
+
+   -  Ca
+        Ca concentration in the pool in units mM ( i.e., mol/m\ 
+        :sup:`3`\ ).
+
+          d[Ca\ :sup:`2+`\ ]/dt = B × I\ :sub:`Ca`\  -
+          [Ca\ :sup:`2+`\ ]/τ
+
+   -  CaBasal/Ca_base
+        Base Ca concentration to which the Ca decays
+   -  tau
+        time constant with which the Ca concentration decays to the base Ca level.
+   -  B
+        constant in the [Ca\ :sup:`2+`\ ] equation above.
+   -  thick
+        thickness of the Ca shell within the cell membrane which is 
+        used to calculate B (see Chapter 19 of `Book of GENESIS 
+        <http://www.genesis-sim.org/GENESIS/iBoG/iBoGpdf/index.html>`_.)
+
+Neuronal simulations in MOOSEGUI
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Neuronal models in various formats can be loaded and simulated in the
+**MOOSE Graphical User Interface**. The GUI displays the neurons in 3D,
+and allows visual selection and editing of neuronal properties. Plotting
+and visualization of activity proceeds concurrently with the simulation.
+Support for creating and editing channels, morphology and networks is
+planned for the future. MOOSEGUI uses SI units throughout.
+
+Demos
+^^^^^
+
+-  **Cerebellar granule cell**  
+
+   **File -> Load ->**  
+   ~/moose/Demos/neuroml/GranuleCell/GranuleCell.net.xml  
+   
+   This is a single compartment Cerebellar granule cell with a variety
+   of channels `Maex, R. and De Schutter, E.,
+   1997 <http://www.tnb.ua.ac.be/models/network.shtml>`_ (exported from
+   http://www.neuroconstruct.org/). Click on its soma, and **See
+   children** for its list of channels. Vary the Gbar of these
+   channels to obtain regular firing, adapting and bursty behaviour (may
+   need to increase tau of the Ca pool).
+
+
+-  **Pyloric rhythm generator in the stomatogastric ganglion of lobster**  
+
+   **File -> Load ->**  
+   ~/moose/Demos/neuroml/pyloric/Generated.net.xml
+
+
+-  **Purkinje cell**  
+
+   **File -> Load ->**  
+   ~/moose/Demos/neuroml/PurkinjeCell/Purkinje.net.xml  
+   
+   This is a purely passive cell, but with extensive morphology [De
+   Schutter, E. and Bower, J. M., 1994] (exported from
+   http://www.neuroconstruct.org/). The channel specifications are in an
+   obsolete ChannelML format which MOOSE does not support.
+
+
+-  **Olfactory bulb subnetwork**  
+
+   **File -> Load ->**  
+   ~/moose/Demos/neuroml/OlfactoryBulb/numgloms2_seed100.0_decimated.xml  
+   
+   This is a pruned and decimated version of a detailed network model
+   of the Olfactory bulb [Gilra A. and Bhalla U., in preparation]
+   without channels and synaptic connections. We hope to post the
+   ChannelML specifications of the channels and synapses soon.
+
+
+-  **All channels cell**  
+
+   **File -> Load ->**  
+   ~/moose/Demos/neuroml/allChannelsCell/allChannelsCell.net.xml  
+   
+   This is the Cerebellar granule cell as above, but with loads of
+   channels from various cell types (exported from
+   http://www.neuroconstruct.org/). Play around with the channel
+   properties to see what they do. You can also edit the ChannelML files
+   in ~/moose/Demos/neuroml/allChannelsCell/cells_channels/ to
+   experiment further.
+
+
+-  **NeuroML python scripts**  
+   In directory ~/moose/Demos/neuroml/GranuleCell, you can run
+   python FvsI_Granule98.py which plots firing rate vs injected
+   current for the granule cell. Consult this python script to see how
+   to read in a NeuroML model and to set up simulations. There are ample
+   snippets in ~/moose/Demos/snippets too.
 
 Loading, modifying, saving
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -355,11 +586,12 @@ Explicit vs. implict methods
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Integrate-and-fire models
 ^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. _hhmodel:
+.. automodule:: IntegrateFireZoo
+   :members:
 
 The HH model
 ^^^^^^^^^^^^
+.. _hhmodel:
 
 This is a standalone script for simulating the Hodgkin-Huxley squid
 axon experiment with a step current injection. The graphical version
@@ -373,8 +605,8 @@ Analyzing spike trains
 
 Network models
 --------------
-Connecting two cells together
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Connecting two cells via a synapse
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Below is the connectivity diagram for setting up a synaptic connection
 from one neuron to another. The PulseGen object is there for
@@ -389,9 +621,11 @@ and K+ channels (see :ref:`hhmodel`)
 .. automodule:: twocells
    :members:
 
+Plastic synapse: STDP
+^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: STDP
+   :members:
 
-Regular and plastic synapses
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Providing random input to a cell
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. automodule:: randomspike
@@ -403,12 +637,18 @@ Providing random input to a cell
 
 Recurrent integrate-and-fire network
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Recurrent integrate-and-fire network with plastiicty
+.. automodule:: ExcInhNet_Ostojic2014_Brunel2000
+   :members:
+
+Recurrent integrate-and-fire network with plasticity
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 A feed-forward network with random input
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 Using compartmental models in networks
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**Pyloric rhythm generator in the stomatogastric ganglion of lobster**
 
 Multiscale models
 -----------------
