@@ -73,9 +73,9 @@ class ChannelML():
         ## check if STDP synapse is present or not
         stdp_syn = synapseElement.find('./{'+self.cml+'}stdp_syn')
         if stdp_syn is None:
-            moosesynhandler = moose.SimpleSynHandler('/library/'+synname+'_handler')
+            moosesynhandler = moose.SimpleSynHandler('/library/'+synname+'/handler')
         else:
-            moosesynhandler = moose.STDPSynHandler('/library/'+synname+'_handler')
+            moosesynhandler = moose.STDPSynHandler('/library/'+synname+'/handler')
             moosesynhandler.aPlus0 = float(stdp_syn.attrib['del_weight_ltp'])
             moosesynhandler.aMinus0 = float(stdp_syn.attrib['del_weight_ltd'])
             moosesynhandler.tauPlus = float(stdp_syn.attrib['tau_ltp'])

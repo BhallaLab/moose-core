@@ -1,10 +1,15 @@
 ## Aditya Gilra, NCBS, Bangalore, 2013
 
 """
-Inside the .../Demos/neuroml/lobster_ploric/ directory supplied with MOOSE, run
-python STG_net.py
-(other channels and morph xml files are already present in this same directory).
-The soma name below is hard coded for gran98, else any other file can be used by modifying this script.
+Stomatogastric ganglion Central Pattern Generator:
+ generates pyloric rhythm of the lobster
+
+Network model translated from:
+Prinz, Bucher, Marder, Nature Neuroscience, 2004;
+STG neuron models translated from:
+Prinz, Billimoria, Marder, J.Neurophys., 2003.
+
+Translated into MOOSE by Aditya Gilra, Bangalore, 2013, revised 2014.
 """
 
 #import os
@@ -23,18 +28,19 @@ plotdt = 25e-6 # s
 runtime = 10.0 # s
 cells_path = '/cells' # neuromlR.readNeuroMLFromFile creates cells in '/cells'
 
-# for graded synapses, else NeuroML event-based are used
-from load_synapses import load_synapses
-moose.Neutral('/library')
-# set graded to False to use event based synapses
-#  if False, neuroml event-based synapses get searched for and loaded
-# True to load graded synapses
-graded_syn = True
-#graded_syn = False
-if graded_syn:
-    load_synapses()
+def loadRunSTGNeuroML_L123(filename):
+    'Loads and runs the pyloric rhythm generator from NeuroML files.'
+    # for graded synapses, else NeuroML event-based are used
+    from load_synapses import load_synapses
+    moose.Neutral('/library')
+    # set graded to False to use event based synapses
+    #  if False, neuroml event-based synapses get searched for and loaded
+    # True to load graded synapses
+    graded_syn = True
+    #graded_syn = False
+    if graded_syn:
+        load_synapses()
 
-def loadSTGNeuroML_L123(filename):
     neuromlR = NeuroML()
     ## readNeuroMLFromFile below returns:
     # This returns
@@ -79,21 +85,44 @@ def loadSTGNeuroML_L123(filename):
     syn_Ik = setupTable('DoubExpSyn_Ach_Ik',syn,'Ik')
 
     print "Reinit MOOSE ... "
-    resetSim(['/elec',cells_path], simdt, plotdt, simmethod='ee')
+    resetSim(['/elec',cells_path], simdt, plotdt, simmethod='hsolve')
 
-    print "Running ... "
+    print "Using graded synapses? = ", graded_syn
+    print "Running model filename = ",filename," ... "
     moose.start(runtime)
     tvec = arange(0.0,runtime+2*plotdt,plotdt)
     tvec = tvec[ : soma1Vm.vector.size ]
     
-    figure(facecolor='w')
-    plot(tvec,soma1Vm.vector,label='AB_PD',color='g',linestyle='solid')
-    plot(tvec,soma2Vm.vector,label='LP',color='r',linestyle='solid')
-    plot(tvec,soma3Vm.vector,label='PY',color='b',linestyle='solid')
-    legend()
-    title('Soma Vm')
+    fig = figure(facecolor='w',figsize=(10,6))
+    axA = plt.subplot2grid((3,2),(0,0),rowspan=3,colspan=1,frameon=False)
+    img = imread( 'STG.png' )
+    imgplot = axA.imshow( img )
+    for tick in axA.get_xticklines():
+        tick.set_visible(False)
+    for tick in axA.get_yticklines():
+        tick.set_visible(False)
+    axA.set_xticklabels([])
+    axA.set_yticklabels([])
+    ax = plt.subplot2grid((3,2),(0,1),rowspan=1,colspan=1)
+    plot(tvec,soma1Vm.vector*1000,label='AB_PD',color='g',linestyle='solid')
+    ax.set_xticklabels([])
+    ylabel('AB_PD (mV)')
+    ax = plt.subplot2grid((3,2),(1,1),rowspan=1,colspan=1)
+    plot(tvec,soma2Vm.vector*1000,label='LP',color='r',linestyle='solid')
+    ax.set_xticklabels([])
+    ylabel('LP (mV)')
+    ax = plt.subplot2grid((3,2),(2,1),rowspan=1,colspan=1)
+    plot(tvec,soma3Vm.vector*1000,label='PY',color='b',linestyle='solid')
+    ylabel('PY (mV)')
     xlabel('time (s)')
-    ylabel('Voltage (V)')
+    fig.tight_layout()
+
+    fig = figure(facecolor='w')
+    plot(tvec,soma2Vm.vector*1000,label='LP',color='r',linestyle='solid')
+    plot(tvec,soma3Vm.vector*1000,label='PY',color='b',linestyle='solid')
+    legend()
+    xlabel('time (s)')
+    ylabel('Soma Vm (mV)')
 
     figure(facecolor='w')
     plot(tvec,channel_Ik.vector,color='b',linestyle='solid')
@@ -114,6 +143,12 @@ def loadSTGNeuroML_L123(filename):
 
 filename = "Generated.net.xml"
 if __name__ == "__main__":
+    '''
+    Inside the Demos/neuroml/lobster_ploric/ directory supplied with MOOSE, run
+    ``python STG_net.py``
+    (other channels and morph xml files are already present in this same directory).
+    read the pdf documentation for a tutorial by Aditya Gilra.
+    '''
     if len(sys.argv)>=2:
         filename = sys.argv[1]
-    loadSTGNeuroML_L123(filename)
+    loadRunSTGNeuroML_L123(filename)
