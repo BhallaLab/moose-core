@@ -20,6 +20,7 @@ sys.path.insert(0, os.path.abspath('../../../python'))
 sys.path.append(os.path.abspath('../../../Demos/snippets'))
 sys.path.append(os.path.abspath('../../../Demos/tutorials/ChemicalOscillators'))
 sys.path.append(os.path.abspath('../../../Demos/tutorials/ChemicalBistables'))
+sys.path.append(os.path.abspath('../../../Demos/tutorials/ExcInhNet'))
 
 # -- General configuration -----------------------------------------------------
 
