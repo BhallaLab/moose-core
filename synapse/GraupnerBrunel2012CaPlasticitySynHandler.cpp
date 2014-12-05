@@ -436,11 +436,35 @@ void GraupnerBrunel2012CaPlasticitySynHandler::vProcess( const Eref& e, ProcPtr 
     // process pre-synaptic spike events for activation, Ca and weight update
 	while( !events_.empty() && events_.top().time <= currTime ) {
         PreSynEvent currEvent = events_.top();
+
+        unsigned int synIndex = currEvent.synIndex;
+        // Warning, coder! 'STDPSynapse currSyn = synapses_[synIndex];' is wrong,
+        // it creates a new, shallow-copied object.
+        // We want only to point to the same object.
+        Synapse* currSynPtr = &synapses_[synIndex];
+
         // activate the synapse for every pre-spike
-        // If the synapse has a delay, the weight has been updated in the meanwhile!
-        // Also the weight updation for this spike is being done after setting activation!
-        // Might be better to use currSynPtr->getWeight() or the updated weight below!!!
-		activation += currEvent.weight * weightScale_;
+        // If the synapse has a delay, the weight could be updated during the delay!
+        // currEvent.weight is the weight before the delay!
+        // Might be better to use currSynPtr->getWeight()
+        //      or even the latest updated weight below?!
+        // Using currSynPtr->getWeight().
+        // Still, weight update is event driven and not continuous
+        //      so using currSynPtr->getWeight() takes care of
+        //      weight updates due to events/spikes during the delay
+        //      but doesn't take care of continuous weight evolution during the delay.
+        // The weight update is done
+        //          after sending the current weight to activation
+        // Maybe I should use the updated weight to send to activation?!
+
+        // See: http://www.genesis-sim.org/GENESIS/Hyperdoc/Manual-26.html#synchan
+        // Send out weight / dt for every spike
+        //      Since it is an impulse active only for one dt,
+        //      need to send it divided by dt.
+        // Can connect activation to SynChan (double exp)
+        //      or to LIF as an impulse to voltage.
+		//activation += currEvent.weight * weightScale_ / p->dt;
+        activation += currSynPtr->getWeight() * weightScale_ / p->dt;
         
         // update only once for this time-step if an event occurs
         if (!CaFactorsUpdated) {
@@ -492,8 +516,8 @@ void GraupnerBrunel2012CaPlasticitySynHandler::vProcess( const Eref& e, ProcPtr 
             // Warning, coder! 'Synapse currSyn = synapses_[i];' is wrong,
             // it creates a new, shallow-copied object.
             // We want only to point to the same object.
-            Synapse* currSynPtr = &synapses_[i];
-            updateWeight(currSynPtr,&wFacs);
+            Synapse* currSynPtrHere = &synapses_[i];
+            updateWeight(currSynPtrHere,&wFacs);
         }
     }
 
