@@ -202,18 +202,32 @@ void STDPSynHandler::vProcess( const Eref& e, ProcPtr p )
     // process pre-synaptic spike events for activation and STDP
 	while( !events_.empty() && events_.top().time <= p->currTime ) {
         PreSynEvent currEvent = events_.top();
-        // activate the synapse for every pre-spike
-        // If the synapse has a delay, the weight has been updated in the meanwhile!
-        // Also the weight updation for this spike is being done after setting activation!
-        // Might be better to use currSynPtr->getWeight() or the updated weight below!!!
-		activation += currEvent.weight;
-        
-        // Maintain 'history' of pre-spikes in Aplus
+
         unsigned int synIndex = currEvent.synIndex;
         // Warning, coder! 'STDPSynapse currSyn = synapses_[synIndex];' is wrong,
         // it creates a new, shallow-copied object.
         // We want only to point to the same object.
         STDPSynapse* currSynPtr = &synapses_[synIndex];
+
+        // activate the synapse for every pre-spike
+        // If the synapse has a delay, the weight could be updated during the delay!
+        // currEvent.weight is the weight before the delay!
+        // Might be better to use currSynPtr->getWeight()
+        //      or even the latest updated weight below?!
+        // Using currSynPtr->getWeight().
+        // However, the weight update is done
+        //          after sending the current weight to activation
+
+        // See: http://www.genesis-sim.org/GENESIS/Hyperdoc/Manual-26.html#synchan
+        // Send out weight / dt for every spike
+        //      Since it is an impulse active only for one dt,
+        //      need to send it divided by dt.
+        // Can connect activation to SynChan (double exp)
+        //      or to LIF as an impulse to voltage.
+		//activation += currEvent.weight / p->dt;
+        activation += currSynPtr->getWeight() / p->dt;
+        
+        // Maintain 'history' of pre-spikes in Aplus
         // Add aPlus0 to the aPlus for this synapse due to pre-spike
         currSynPtr->setAPlus( currSynPtr->getAPlus() + aPlus0_ );
         
@@ -251,6 +265,8 @@ void STDPSynHandler::vProcess( const Eref& e, ProcPtr p )
 	}
     
     // modify aPlus and aMinus at every time step
+    // Future: I could make this event-driven. Would be faster.
+    // Or have a field to set it to event-driven or continuous.
     double dt_ = p->dt;
     // decay aPlus for all pre-synaptic inputs
     for (unsigned int i=0; i<synapses_.size(); i++) {
