@@ -164,7 +164,12 @@ void IzhIF::vProcess( const Eref& e, ProcPtr p )
 		sumInject_ = 0.0;
 		VmOut()->send( e, Vm_ );
 	} else {
-		Vm_ += activation_;
+        // activation can be a continous variable (graded synapse).
+        // So integrate it at every time step, thus *dt.
+        // For a delta-fn synapse, SynHandler-s divide by dt and send activation.
+        // See: http://www.genesis-sim.org/GENESIS/Hyperdoc/Manual-26.html#synchan
+        //          for this continuous definition of activation.
+		Vm_ += activation_ * p->dt;
 		activation_ = 0.0;
 		if ( Vm_ > vPeak_ ) {
 			Vm_ = vReset_;

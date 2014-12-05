@@ -204,9 +204,12 @@ void SynChan::normalizeGbar()
 
 void SynChan::vProcess( const Eref& e, ProcPtr info )
 {
-	// Need to scale activation by 1/dt, because it is effective for
-	// only one clock tick and then zeroed.
-	X_ = modulation_ * activation_ * xconst1_ / info->dt + X_ * xconst2_;
+	// http://www.genesis-sim.org/GENESIS/Hyperdoc/Manual-26.html#synchan
+    // For a spike event, activation = weight / dt
+    //      is sent from SynHandler-s for one dt
+    // For continuous activation in a graded synapse,
+    //      send activation for continous dt-s.
+	X_ = modulation_ * activation_ * xconst1_ + X_ * xconst2_;
 	Y_ = X_ * yconst1_ + Y_ * yconst2_;
 	double Gk = Y_ * norm_;
 	setGk( e, Gk );
