@@ -38,7 +38,7 @@ class KkitPlugin(MoosePlugin):
         self.fileinsertMenu = QtGui.QMenu('&File')
         if not hasattr(self,'SaveModelAction'):
             #self.fileinsertMenu.addSeparator()
-            self.saveModelAction = QtGui.QAction('SaveToSBMLFile', self)
+            self.saveModelAction = QtGui.QAction('Save', self)
             self.saveModelAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+S", None, QtGui.QApplication.UnicodeUTF8))
             self.connect(self.saveModelAction, QtCore.SIGNAL('triggered()'), self.SaveModelDialogSlot)
             self.fileinsertMenu.addAction(self.saveModelAction)
@@ -62,13 +62,15 @@ class KkitPlugin(MoosePlugin):
         if filename:
             filename = filename+extension
             if filters[str(filter_)] == 'SBML':
-
                 writeerror = moose.writeSBML(str(filename),self.modelRoot)
-                print "writeerror ",writeerror
-                if writeerror:
-                    QtGui.QMessageBox.warning(None,'Could not save the Model','\n Error in the consistency check')
-                else:
-                     QtGui.QMessageBox.information(None,'Saved the Model','\n File Saved to \'{filename}\''.format(filename =filename),QtGui.QMessageBox.Ok)
+                if writeerror == -2:
+                    QtGui.QMessageBox.warning(None,'Could not save the Model','\n WriteSBML :  This copy of MOOSE has not been compiled with SBML writing support.')
+                elif writeerror == -1:
+                    QtGui.QMessageBox.warning(None,'Could not save the Model','\n This model is not valid SBML Model, failed in the consistency check')
+                elif writeerror == 1:
+                    QtGui.QMessageBox.information(None,'Saved the Model','\n File saved to \'{filename}\''.format(filename =filename+'.xml'),QtGui.QMessageBox.Ok)                
+                elif writeerror == 0:
+                     QtGui.QMessageBox.information(None,'Could not save the Model','\nThe filename could not be opened for writing')
 
     def getPreviousPlugin(self):
         return None
