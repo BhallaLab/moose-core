@@ -122,7 +122,7 @@ https://sourceforge.net/projects/moose/
 - Niraj Dudani          -   Neuronal solver
 - Subhasis Ray          -   PyMOOSE Design and Documentation, Python Plugin Interface, NSDF Format
 - G.V.HarshaRani        -   Web page design, SBML support, Kinetikit Plugin Development
-- Aditya Gilra          -   NeuroML reader development
+- Aditya Gilra          -   NeuroML reader development, integrate-and-fire neurons/networks, STDP
 - Aviral Goel           -   Moogli/Neurokit Development
 - Dilawar Singh         -   Packaging
 
