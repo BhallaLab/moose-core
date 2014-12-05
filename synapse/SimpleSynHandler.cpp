@@ -107,7 +107,13 @@ void SimpleSynHandler::vProcess( const Eref& e, ProcPtr p )
 {
 	double activation = 0.0;
 	while( !events_.empty() && events_.top().time <= p->currTime ) {
-		activation += events_.top().weight;
+        // Send out weight / dt for every spike
+        //      Since it is an impulse active only for one dt,
+        //      need to send it divided by dt.
+        // Can connect activation to SynChan (double exp)
+        //      or to LIF as an impulse to voltage.
+        // See: http://www.genesis-sim.org/GENESIS/Hyperdoc/Manual-26.html#synchan
+		activation += events_.top().weight / p->dt;
 		events_.pop();
 	}
 	if ( activation != 0.0 )
