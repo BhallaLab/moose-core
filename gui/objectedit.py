@@ -62,6 +62,13 @@
 import PyQt4
 from PyQt4 import QtCore
 from PyQt4 import QtGui
+from PyQt4.QtGui import QTextEdit
+from PyQt4.QtGui import QWidget
+from PyQt4.QtGui import QGridLayout
+from PyQt4.QtGui import QVBoxLayout
+from PyQt4.QtGui import QSizePolicy
+from PyQt4.QtCore import QMargins
+from PyQt4.QtGui import QSplitter
 import sys
 from collections import deque
 import traceback
@@ -108,7 +115,7 @@ extra_fields = ['this',
                 'coords',
                 'isToroid',
                 'preserveNumEntries',
-                'numKm',
+                # 'numKm',
                 'numSubstrates',
                 'concK1',
                 'meshToSpace',
@@ -162,8 +169,8 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
         if ( isinstance(self.mooseObject, moose.PoolBase)
            or isinstance(self.mooseObject,moose.ReacBase)
            or isinstance(self.mooseObject,moose.EnzBase) ) :
-            self.fields.append("Notes")
             self.fields.append("Color")
+            # self.fields.append("Notes")
         flag = QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable
         self.fieldFlags[fieldName] = flag
 
@@ -293,7 +300,7 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
                         elif ret == "ZombieEnz":
                             ret = QtCore.QVariant(QtCore.QString(str("Enz")))
                         elif ret == "ZombieReac":
-                            ret = QtCore.QVariant(QtCore.QString(str("Reac")))    
+                            ret = QtCore.QVariant(QtCore.QString(str("Reac")))
                     elif(str(field) == "Notes"):
                         astr = self.mooseObject.path+'/info'
                         mastr = moose.Annotator(astr)
@@ -333,6 +340,21 @@ class ObjectEditView(QtGui.QTableView):
         self.setModel(ObjectEditModel(mobject, undolen=undolen))
         self.colorButton = QtGui.QPushButton()
         self.colorDialog = QtGui.QColorDialog()
+        self.textEdit    = QTextEdit()
+        try:
+            notesIndex = self.model().fields.index("Notes")
+            self.setIndexWidget(self.model().index(notesIndex,1), self.textEdit)
+            info = moose.Annotator(self.model().mooseObject.path+'/info')
+            self.textEdit.setText(QtCore.QString(info.getField('notes')))
+            self.setRowHeight(notesIndex, self.rowHeight(notesIndex) * 3)
+
+            # self.colorDialog.colorSelected.connect(
+            #     lambda color:
+            #
+            # self.setColor(getColor(self.model().mooseObject.path+'/info')[1])
+        except:
+            pass
+
 
         try:
             colorIndex = self.model().fields.index("Color")
@@ -347,8 +369,8 @@ class ObjectEditView(QtGui.QTableView):
                                                                     )
             self.setIndexWidget(self.model().index(colorIndex,1), self.colorButton)
             # self.colorDialog.colorSelected.connect(
-            #     lambda color: 
-            #             
+            #     lambda color:
+            #
             self.setColor(getColor(self.model().mooseObject.path+'/info')[1])
         except:
             pass
@@ -367,7 +389,7 @@ class ObjectEditView(QtGui.QTableView):
         self.viewport().update()
 
 
-    
+
 class ObjectEditDockWidget(QtGui.QDockWidget):
     """A dock widget whose title is set by the current moose
     object. Allows switching the moose object. It stores the created
@@ -387,9 +409,16 @@ class ObjectEditDockWidget(QtGui.QDockWidget):
         #self.view = view = ObjectEditView(mobj)
         self.view = view = ObjectEditView(mobj)
         self.view_dict = {mobj: view}
-        self.setWidget(view)
+        base = QWidget()
+        layout = QVBoxLayout()
+        base.setLayout(layout)
+        layout.addWidget(self.view)
+        layout.addWidget(QTextEdit())
+        self.setWidget(base)
         self.setWindowTitle('Edit: %s' % (mobj.path))
         # self.view.colorDialog.colorSelected.connect(self.colorChangedEmit)
+
+
 
     def setObject(self, mobj):
         element = moose.element(mobj)
@@ -398,10 +427,41 @@ class ObjectEditDockWidget(QtGui.QDockWidget):
         except KeyError:
             view = ObjectEditView(element)
             self.view_dict[element] = view
-            view.model().objectNameChanged.connect(
-                         self.emitObjectNameChanged)
+            view.model().objectNameChanged.connect(self.emitObjectNameChanged)
         view.colorDialog.colorSelected.connect(lambda color: self.colorChanged.emit(element, color))
-        self.setWidget(view)
+        textEdit = QTextEdit()
+        view.setSizePolicy( QSizePolicy.Ignored
+                          , QSizePolicy.Ignored
+                          )
+        textEdit.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        base = QSplitter()
+        base.setOrientation(PyQt4.QtCore.Qt.Vertical)
+        layout = QVBoxLayout()
+        layout.addWidget(view)#, 0, 0)
+
+        if ( isinstance(mobj, moose.PoolBase)
+           or isinstance(mobj,moose.ReacBase)
+           or isinstance(mobj,moose.EnzBase)
+           ) :
+            info = moose.Annotator(mobj.path +'/info')
+            textEdit.setText(QtCore.QString(info.getField('notes')))
+            textEdit.textChanged.connect(lambda : info.setField('notes', str(textEdit.toPlainText())))
+            layout.addWidget(textEdit)#,1,0)
+
+            # self.setRowHeight(notesIndex, self.rowHeight(notesIndex) * 3)
+        base.setLayout(layout)
+        # base.setSizes( [ view.height()
+        #                , base.height() - view.height()
+        #                ]
+        #              )
+        # print("a =>", view.height())
+        # print("b =>", base.height())
+
+
+        # layout.setStretch(0,3)
+        # layout.setStretch(1,1)
+        # layout.setContentsMargins(QMargins(0,0,0,0))
+        self.setWidget(base)
         self.setWindowTitle('Edit: %s' % (element.path))
         view.update()
 
@@ -411,11 +471,7 @@ class ObjectEditDockWidget(QtGui.QDockWidget):
 def main():
     app = QtGui.QApplication(sys.argv)
     mainwin = QtGui.QMainWindow()
-    #c = moose.Pool('test_compartment')
-    c = moose.MMenz('Enz')
-    c.Km = 1.0
-    print(c.getField("Km"))
-    print(c.getField("numKm"))
+    c = moose.Compartment("test")
     view = ObjectEditView(c, undolen=3)
     mainwin.setCentralWidget(view)
     action = QtGui.QAction('Undo', mainwin)
