@@ -11,9 +11,9 @@
 '''
 This LIF network is based on:
 Ostojic, S. (2014).
- Two types of asynchronous activity in networks of
- excitatory and inhibitory spiking neurons.
- Nat Neurosci 17, 594-600.
+Two types of asynchronous activity in networks of
+excitatory and inhibitory spiking neurons.
+Nat Neurosci 17, 594-600.
  
 Key parameter to change is synaptic coupling J (mV).
 Critical J is ~ 0.45e-3 V in paper for C/N = 0.1
