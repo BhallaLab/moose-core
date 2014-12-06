@@ -6,13 +6,16 @@ add_library(moose_builtins
     Group.cpp
     Mstring.cpp
     Func.cpp
+    Function.cpp
+    Variable.cpp
     TableBase.cpp
     Table.cpp
+    Interpol.cpp
+    StimulusTable.cpp
     TimeTable.cpp
     Stats.cpp
     Interpol2D.cpp
     HDF5WriterBase.cpp
-    StimulusTable.cpp
     HDF5DataWriter.cpp
     testBuiltins.cpp
     )
