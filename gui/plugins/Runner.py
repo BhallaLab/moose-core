@@ -36,11 +36,15 @@ class Runner(QObject):
         self.simulationReset.emit()
 
     def computeRunSequence(self, runTime, updateInterval, simulationInterval):
-        frac, whole         = math.modf(runTime / updateInterval)
-        runSequence         = [ updateInterval ] * int(whole)
-        remaining           = frac * updateInterval
-        if remaining > simulationInterval:
-            runSequence.append(remaining)
+        # http://sourceforge.net/p/moose/bugs/147/
+        runSequence = [ runTime / 20.0 ] * 6
+        runSequence.extend([runTime / 10.0] * 7)
+        # runSequence.append()
+        # frac, whole         = math.modf(runTime / updateInterval)
+        # runSequence         = [ updateInterval ] * int(whole)
+        # remaining           = frac * updateInterval
+        # if remaining > simulationInterval:
+        #     runSequence.append(remaining)
         return runSequence
 
     def runSimulation(self, runTime):
