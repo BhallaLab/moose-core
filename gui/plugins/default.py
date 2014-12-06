@@ -616,7 +616,6 @@ class SchedulingWidget(QtGui.QWidget):
         self.continueFlag               = False
 
     def runSimulation(self):
-
         status = self.solverStatus()
                # if status != 0 or status == -1:
         #     return
@@ -633,8 +632,8 @@ class SchedulingWidget(QtGui.QWidget):
             self.runtime = 100.0
             self.simulationRuntime.setText("100.0")
         self.checkConsistency()
+        self.continueSimulation = True
         self.runner.runSimulation(self.runtime)
-
         # return
         # if self.continueFlag:
         #     self.continueSimulation()
@@ -700,6 +699,7 @@ class SchedulingWidget(QtGui.QWidget):
         else:
             stoich = moose.Stoich(compt[0].path+'/stoich')
             status = int(stoich.status)
+            print("Status =>", status)
             if status == -1:
                 QtGui.QMessageBox.warning(None,"Could not Run the model","Warning: Reaction path not yet assigned.\n ")
                 return -1
@@ -723,7 +723,7 @@ class SchedulingWidget(QtGui.QWidget):
                 return 16
             elif status == 0:
                 print "Successfully built stoichiometry matrix.\n "
-                moose.reinit()
+                # moose.reinit()
                 return 0
     # def setElectricalParameters(self):
     #     chemicalPreferences     = self.preferences.getChemicalPreferences()
@@ -842,6 +842,8 @@ class PlotWidget(QWidget):
         self.canvas.figure.subplots_adjust(left = 0.18, bottom=0.2)
         self.navToolbar = NavigationToolbar(self.canvas, self)
         self.hackNavigationToolbar()
+        self.canvas.mpl_connect('pick_event',self.togglePlot)
+        # self.canvas.
         # self.navToolbar.addSeparator()
         layout = QtGui.QGridLayout()
         # canvasScrollArea = QScrollArea()
@@ -854,7 +856,9 @@ class PlotWidget(QWidget):
         self.pathToLine = defaultdict(set)
         self.lineToDataSource = {}
         self.axesRef = self.canvas.addSubplot(1, 1)
-        self.onclick_count = 0
+        box = self.axesRef.get_position()
+        self.axesRef.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+
         # layout.setSizeConstraint( QLayout.SetNoConstraint )
         # self.setSizePolicy( QtGui.QSizePolicy.Expanding
         #                   , QtGui.QSizePolicy.Expanding
@@ -871,8 +875,8 @@ class PlotWidget(QWidget):
         # QtCore.QObject.connect(utils.tableEmitter,QtCore.SIGNAL("tableCreated()"),self.plotAllData)
         self.canvas.updateSignal.connect(self.plotAllData)
         self.plotAllData()
-        # self.menu = self.getContextMenu()
-        # self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.menu = self.getContextMenu()
+        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.connect( self
                     , SIGNAL("customContextMenuRequested(QPoint)")
                     , self
@@ -921,18 +925,18 @@ class PlotWidget(QWidget):
     def plotAll(self):
         return len(self.pathToLine) == 0
 
-    # def getContextMenu(self):
-    #     menu =  QMenu()
-    #     # closeAction      = menu.addAction("Delete")
-    #     gridToggleAction = menu.addAction("Toggle Grid")
-    #     gridToggleAction.triggered.connect(self.canvas.toggleGrid)
-    #     # configureAction.triggered.connect(self.configure)
-    #     # self.connect(,SIGNAL("triggered()"),
-    #     #                 self,SLOT("slotShow500x500()"))
-    #     # self.connect(action1,SIGNAL("triggered()"),
-    #     #                 self,SLOT("slotShow100x100()"))
+    def getContextMenu(self):
+        menu =  QMenu()
+        # closeAction      = menu.addAction("Delete")
+        gridToggleAction = menu.addAction("Toggle Grid")
+        gridToggleAction.triggered.connect(self.canvas.toggleGrid)
+        # configureAction.triggered.connect(self.configure)
+        # self.connect(,SIGNAL("triggered()"),
+        #                 self,SLOT("slotShow500x500()"))
+        # self.connect(action1,SIGNAL("triggered()"),
+        #                 self,SLOT("slotShow100x100()"))
 
-    #     return menu
+        return menu
 
     def deleteGraph(self):
         print("Deleting " + self.graph.path)
@@ -948,9 +952,9 @@ class PlotWidget(QWidget):
         print("Displaying configure view!")
         self.plotView.getCentralWidget().show()
 
-    # @pyqtSlot(QtCore.QPoint)
-    # def contextMenuRequested(self,point):
-    #     # menu     = QtGui.QMenu()
+    @pyqtSlot(QtCore.QPoint)
+    def contextMenuRequested(self,point):
+        # menu     = QtGui.QMenu()
 
     #     # action1 = menu.addAction("Set Size 100x100")
     #     # action2 = menu.addAction("Set Size 500x500")
@@ -960,7 +964,7 @@ class PlotWidget(QWidget):
     #     #                 self,SLOT("slotShow500x500()"))
     #     # self.connect(action1,SIGNAL("triggered()"),
     #     #                 self,SLOT("slotShow100x100()"))
-    #     self.menu.exec_(self.mapToGlobal(point))
+        self.menu.exec_(self.mapToGlobal(point))
 
     def setModelRoot(self, path):
         self.modelRoot = path
@@ -1057,17 +1061,24 @@ class PlotWidget(QWidget):
                                 ts = xSrc.vector.copy()
                             line.set_data(ts, tab.vector.copy())
                     tabList.append(tab)
-                    self.canvas.mpl_connect('pick_event',self.onclick)
 
             if len(tabList) > 0:
                 leg = self.canvas.callAxesFn( 'legend'
-                                            , loc               ='upper right'
-                                            , prop              = {'size' : 10 }
-                                            # , bbox_to_anchor    = (0.5, -0.03)
-                                             , fancybox          = False
-                                            # , shadow            = True
-                                            , ncol              = 1
+                                            , loc='center left'
+                                            , prop= {'size' : 10 }
+                                            , bbox_to_anchor=(1.0, 0.5)
+                                            , fancybox=True
+                                            , shadow=True
+                                            , ncol=1
                                             )
+                # leg = self.canvas.callAxesFn( 'legend'
+                #                             , loc               ='upper right'
+                #                             , prop              = {'size' : 10 }
+                #                             # , bbox_to_anchor    = (0.5, -0.03)
+                #                              , fancybox          = False
+                #                             # , shadow            = True
+                #                             , ncol              = 1
+                #                             )
                 # leg.draggable(False)
                 # print(leg.get_window_extent())
                         #leg = self.canvas.callAxesFn('legend')
@@ -1081,41 +1092,25 @@ class PlotWidget(QWidget):
                 print "returning as len tabId is zero ",tabId, " tableObject ",tableObject, " len ",len(tableObject)
             self.canvas.draw()
 
+    def removePlot(self, event):
+        pass
 
-    def onclick(self,event1):
+    def togglePlot(self, event):
         #print "onclick",event1.artist.get_label()
         #harsha:To workout with double-event-registered on onclick event
         #http://stackoverflow.com/questions/16278358/double-event-registered-on-mouse-click-if-legend-is-outside-axes
-        if self.onclick_count % 2 == 0:
-            legline = event1.artist
-            #vis = event1.artist.get_visible()
-            #self.canvas.figure.get_axes()[0].lines[4].set_visible(True)
-            axes = self.canvas.figure.get_axes()
-            for a in range(len(axes)):
-                #lines =self.canvas.figure.get_axes()[a].lines
-                lines = axes[a].lines
-                for plotline in lines:
-                    if plotline.get_label() == event1.artist.get_label():
-                        vis = not plotline.get_visible()
-                        plotline.set_visible(vis)
-            #global event
-            #event = event1
-            if vis:
-                legline.set_alpha(1.0)
-            else:
-                legline.set_alpha(0.2)
-            self.canvas.draw()
-        self.onclick_count+=1
+        print("Here")
+        legline = event.artist
+        for line in self.axesRef.lines:
+            if line.get_label() == event.artist.get_label():
+                vis = not line.get_visible()
+                line.set_visible(vis)
+                if vis:
+                    legline.set_alpha(1.0)
+                else:
+                    legline.set_alpha(0.2)
+                self.canvas.draw()
 
-        '''leg = self.canvas.callAxesFn('legend',loc='upper center',prop={'size':10},bbox_to_anchor=(0.5, -0.03),fancybox=True, shadow=True, ncol=3)
-        print dir(leg)
-        for l in leg.get_lines():
-            l.set_visible(vis)
-        if vis:
-            legline.set_alpha(1.0)
-        else:
-            legline.set_alpha(0.2)
-        '''
     def addTimeSeries(self, table, *args, **kwargs):
         ts = np.linspace(0, moose.Clock('/clock').currentTime, len(table.vector))
         return self.canvas.plot(ts, table.vector, *args, **kwargs)
