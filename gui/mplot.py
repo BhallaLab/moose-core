@@ -108,7 +108,8 @@ class CanvasWidget(FigureCanvas):
         self.model = model
         self.graph = graph
         self.index = index
-        self.figure = Figure()#figsize=(1,1))
+        # QColor(243, 239, 238, 255)
+        self.figure = Figure(facecolor = '#F3EFEE')#figsize=(1,1))
         FigureCanvas.__init__(self, self.figure, *args, **kwargs)
         self.figure.set_canvas(self)
         # self.set_xlabel('Time (s)')
@@ -157,7 +158,7 @@ class CanvasWidget(FigureCanvas):
             # moose.connect(table, 'requestOut', element, 'getConc')
             self.updateSignal.emit()
         else:
-            QtGui.QMessageBox.question(self, 'Message',"This field is not plottable", QtGui.QMessageBox.Ok)
+            QtGui.QMessageBox.question(self, 'Message',"This element's properties cannot be plotted.", QtGui.QMessageBox.Ok)
 
     def addSubplot(self, rows, cols):
         """Add a subplot to figure and set it as current axes."""
