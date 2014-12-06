@@ -99,6 +99,7 @@ find_package(GSL 1.16 REQUIRED)
 
 # If installed version of gsl is not 1.16 then download and build gsl locally.
 # THIS IS USEFULL TO BUILD MOOSE FOR VARIOUS DISTRIBUTIONS.
+MESSAGE("+ GSL Version ${GSL_VERSION} found")
 if(${GSL_VERSION} VERSION_LESS 1.16)
     MESSAGE("+ Trouble. Needed version 1.16.")
     MESSAGE("+-- I'll go ahead, download gsl-1.16 and build it for moose. Make
