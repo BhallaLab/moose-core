@@ -203,6 +203,7 @@ add_subdirectory(shell)
 add_subdirectory(randnum)
 add_subdirectory(scheduling)
 add_subdirectory(builtins)
+add_subdirectory(intfire)
 add_subdirectory(utility)
 add_subdirectory(external/muparser)
 add_subdirectory(external/debug)
@@ -261,6 +262,7 @@ set(MOOSE_LIBRARIES
     synapse
     diffusion 
     device
+    intfire
     ksolve
     )
 
