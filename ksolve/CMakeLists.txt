@@ -8,6 +8,7 @@ add_library(ksolve
 	ZombieReac.cpp 
 	ZombieEnz.cpp 
 	ZombieMMenz.cpp 
+        ZombieFuncPool.cpp
         VoxelPoolsBase.cpp
 	VoxelPools.cpp 
         GssaVoxelPools.cpp
@@ -17,6 +18,7 @@ add_library(ksolve
 	Ksolve.cpp 
         SteadyState.cpp
         Gsolve.cpp
+        ZombiePoolInterface.cpp
         testKsolve.cpp
     )
 if(USE_GSL)
