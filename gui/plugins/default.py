@@ -926,11 +926,18 @@ class PlotWidget(QWidget):
     def plotAll(self):
         return len(self.pathToLine) == 0
 
+    def toggleLegend(self):
+        if self.legend is not None:
+            self.legend.set_visible(not self.legend.get_visible())
+        self.canvas.draw()
+
     def getContextMenu(self):
         menu =  QMenu()
         # closeAction      = menu.addAction("Delete")
         exportCsvAction = menu.addAction("Export to CSV")
         exportCsvAction.triggered.connect(self.saveAllCsv)
+        toggleLegendAction = menu.addAction("Toggle legend")
+        toggleLegendAction.triggered.connect(self.toggleLegend)
         self.removeSubmenu = menu.addMenu("Remove")
         # configureAction.triggered.connect(self.configure)
         # self.connect(,SIGNAL("triggered()"),
