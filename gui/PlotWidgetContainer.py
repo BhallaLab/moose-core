@@ -16,6 +16,7 @@ __status__      =   "Development"
 
 import sys
 import os
+import PyQt4
 from PyQt4 import QtGui, Qt
 from PyQt4.QtGui import QWidget
 from PyQt4.QtGui import QSizeGrip
@@ -26,6 +27,7 @@ from PyQt4.QtGui import QGridLayout
 from PyQt4.QtGui import QScrollArea
 from PyQt4.QtGui import QToolBar
 from PyQt4.QtGui import QSizeGrip
+from PyQt4.QtGui import QSplitter
 
 import moose
 import default
@@ -50,9 +52,10 @@ class PlotWidgetContainer(QWidget):
             self.data       = moose.element("/data")
 
         self._layout        = QVBoxLayout()
-        self.graphs         = QWidget()
+        self.graphs         = QSplitter()
+        self.graphs.setOrientation(PyQt4.QtCore.Qt.Vertical)
         self.graphsArea     = QScrollArea()
-        self.graphsLayout   = QGridLayout()
+        # self.graphsLayout   = QGridLayout()
         # self.menubar        = self.createMenuBar()
         self.rowIndex       = 0
             # self.setSizePolicy( QtGui.QSizePolicy.Expanding
@@ -64,7 +67,7 @@ class PlotWidgetContainer(QWidget):
                                  )
         self.setAcceptDrops(True)
         # self._layout.setSizeConstraint( QLayout.SetNoConstraint )
-        self.graphs.setLayout(self.graphsLayout)
+        # self.graphs.setLayout(self.graphsLayout)
         self.graphsArea.setWidget(self.graphs)
         self.graphsArea.setWidgetResizable(True)
         self.graphWidgets = []
@@ -79,8 +82,10 @@ class PlotWidgetContainer(QWidget):
             self.addPlotWidget()
 
     def deleteWidget(self, graphWidget):
-        print("Deleted => ", graphWidget)
+        # print("Deleted => ", graphWidget)
         self.graphWidgets.remove(graphWidget)
+        graphWidget.setParent(None)
+        graphWidget.close()
 
     def createMenuBar(self):
         bar = sidebar.sidebar()
@@ -95,7 +100,7 @@ class PlotWidgetContainer(QWidget):
         widget = default.PlotWidget(self.model, graph, self.rowIndex, self)
         if row == None:
             row = self.rowIndex
-        self.graphsLayout.addWidget(widget, row, col,1,1)
+        self.graphs.addWidget(widget)
         self.rowIndex += 1
         self.graphWidgets.append(widget)
         widget.widgetClosedSignal.connect(self.deleteWidget)
