@@ -839,7 +839,6 @@ class PlotWidget(QWidget):
         self.index = index
         self.canvas = CanvasWidget(self.model, self.graph, self.index)
         self.canvas.setParent(self)
-        self.canvas.figure.subplots_adjust(left = 0.18, bottom=0.2)
         self.navToolbar = NavigationToolbar(self.canvas, self)
         self.hackNavigationToolbar()
         self.canvas.mpl_connect('pick_event',self.togglePlot)
@@ -1073,7 +1072,7 @@ class PlotWidget(QWidget):
                                                     , loc='center left'
                                                     , prop= {'size' : 10 }
                                                     , bbox_to_anchor=(1.0, 0.5)
-                                                    , fancybox=False
+                                                    , fancybox = True
                                                     , shadow=False
                                                     , ncol=1
                                                     )
@@ -1210,6 +1209,9 @@ class PlotWidget(QWidget):
             self._menus.append(self.plotMenu)
         return self._menus
 
+    def resizeEvent(self, event):
+        print("Here", event)
+        # self.canvas.figure.subplots_adjust(bottom=0.2)#, left = 0.18)
 
 ###################################################
 #
