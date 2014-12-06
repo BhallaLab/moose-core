@@ -64,6 +64,8 @@ from checkcombobox import CheckComboBox
 from mplugin import MoosePluginBase, EditorBase, EditorWidgetBase, PlotBase, RunBase
 #from defaultToolPanel import DefaultToolPanel
 #from DataTable import DataTable
+from matplotlib import rcParams
+rcParams.update({'figure.autolayout': True})
 from matplotlib.lines import Line2D
 from PlotWidgetContainer import PlotWidgetContainer
 
@@ -868,7 +870,7 @@ class PlotWidget(QWidget):
         # print("**********************")
         # print(desktop.screenGeometry())
         # print("***********************")
-        self.setMinimumSize(desktop.screenGeometry().width() / 4, desktop.screenGeometry().height() / 4)
+        self.setMinimumSize(desktop.screenGeometry().width() / 4, desktop.screenGeometry().height() / 3)
         # self.setMaximumSize(desktop.screenGeometry().width() / 2, desktop.screenGeometry().height() / 2)
         # self.setMinimumSize(self.width(), self.height())
         # self.setMaximumSize(2 * self.width(), 2* self.height())
@@ -1069,9 +1071,9 @@ class PlotWidget(QWidget):
 
             if len(tabList) > 0:
                 self.legend = self.canvas.callAxesFn( 'legend'
-                                                    , loc='center left'
+                                                    , loc='upper right'
                                                     , prop= {'size' : 10 }
-                                                    , bbox_to_anchor=(1.0, 0.5)
+                                                    # , bbox_to_anchor=(1.0, 0.5)
                                                     , fancybox = True
                                                     , shadow=False
                                                     , ncol=1
