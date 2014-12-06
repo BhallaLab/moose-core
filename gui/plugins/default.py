@@ -839,6 +839,15 @@ class PlotWidget(QWidget):
         self.model = model
         self.graph = graph
         self.index = index
+
+        self.menu = self.getContextMenu()
+        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.connect( self
+                    , SIGNAL("customContextMenuRequested(QPoint)")
+                    , self
+                    , SLOT("contextMenuRequested(QPoint)")
+                    )
+
         self.canvas = CanvasWidget(self.model, self.graph, self.index)
         self.canvas.setParent(self)
         self.navToolbar = NavigationToolbar(self.canvas, self)
@@ -877,13 +886,6 @@ class PlotWidget(QWidget):
         # QtCore.QObject.connect(utils.tableEmitter,QtCore.SIGNAL("tableCreated()"),self.plotAllData)
         self.canvas.updateSignal.connect(self.plotAllData)
         self.plotAllData()
-        self.menu = self.getContextMenu()
-        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.connect( self
-                    , SIGNAL("customContextMenuRequested(QPoint)")
-                    , self
-                    , SLOT("contextMenuRequested(QPoint)")
-                    )
         # self.plotView = PlotView(model, graph, index, self)
         #self.dataTable = DataTable()
         #utils.tableCreated.connect(plotAllData)
@@ -927,8 +929,9 @@ class PlotWidget(QWidget):
     def getContextMenu(self):
         menu =  QMenu()
         # closeAction      = menu.addAction("Delete")
-        gridToggleAction = menu.addAction("Toggle Grid")
-        gridToggleAction.triggered.connect(self.canvas.toggleGrid)
+        exportCsvAction = menu.addAction("Export to CSV")
+        exportCsvAction.triggered.connect(self.saveAllCsv)
+        self.removeSubmenu = menu.addMenu("Remove")
         # configureAction.triggered.connect(self.configure)
         # self.connect(,SIGNAL("triggered()"),
         #                 self,SLOT("slotShow500x500()"))
@@ -994,16 +997,24 @@ class PlotWidget(QWidget):
                 color = 'white'
         return color
 
-    def addPlot(self, table):
-        pass
 
     def removePlot(self, table):
-        pass
+        print("removePlot =>", table)
+        moose.delete(table)
+        self.plotAllData()
+
+    def makeRemovePlotAction(self, label, table):
+        action = self.removeSubmenu.addAction(label)
+        action.triggered.connect(lambda: self.removePlot(table))
+        return action
 
     def plotAllData(self):
         """Plot data from existing tables"""
         self.axesRef.lines = []
         self.pathToLine.clear()
+        self.removeSubmenu.clear()
+        if self.legend is not None:
+            self.legend.set_visible(False)
         path = self.model.path
         modelroot = self.model.path
         time = moose.Clock('/clock').currentTime
@@ -1014,15 +1025,16 @@ class PlotWidget(QWidget):
 
         plotTables = list(moose.wildcardFind(self.graph.path + '/##[TYPE=Table]'))
         plotTables.extend(moose.wildcardFind(self.graph.path + '/##[TYPE=Table2]'))
-
         if len (plotTables) > 0:
             for tabId in plotTables:
                 tab = moose.Table(tabId)
+                print("Table =>", tab)
                 line_list=[]
                 tableObject = tab.neighbors['requestOut']
                 # Not a good way
                 #tableObject.msgOut[0]
                 if len(tableObject) > 0:
+
                     # This is the default case: we do not plot the same
                     # table twice. But in special cases we want to have
                     # multiple variations of the same table on different
@@ -1050,6 +1062,7 @@ class PlotWidget(QWidget):
                                 + "."
                                 + field
                                 )
+                        self.makeRemovePlotAction(label, tab)
                         if (color != '#FFFFFF'):
                             newLines = self.addTimeSeries(tab, label=label,color=color)
                         else:
@@ -1069,17 +1082,22 @@ class PlotWidget(QWidget):
                             line.set_data(ts, tab.vector.copy())
                     tabList.append(tab)
 
-            if len(tabList) > 0:
-                self.legend = self.canvas.callAxesFn( 'legend'
-                                                    , loc='upper right'
-                                                    , prop= {'size' : 10 }
-                                                    # , bbox_to_anchor=(1.0, 0.5)
-                                                    , fancybox = True
-                                                    , shadow=False
-                                                    , ncol=1
-                                                    )
-                self.legend.draggable()
-                self.legend.get_frame().set_alpha(0.5)
+            # if len(tabList) > 0:
+        self.legend = self.canvas.callAxesFn( 'legend'
+                                            , loc='upper right'
+                                            , prop= {'size' : 10 }
+                                            # , bbox_to_anchor=(1.0, 0.5)
+                                            , fancybox = True
+                                            , shadow=False
+                                            , ncol=1
+                                            )
+        if self.legend is not None:
+            self.legend.draggable()
+            self.legend.get_frame().set_alpha(0.5)
+            self.legend.set_visible(True)
+
+
+        self.canvas.draw()
 
             #     # leg = self.canvas.callAxesFn( 'legend'
             #     #                             , loc               ='upper right'
@@ -1100,16 +1118,11 @@ class PlotWidget(QWidget):
             #         legobj.set_picker(True)
             # else:
             #     print "returning as len tabId is zero ",tabId, " tableObject ",tableObject, " len ",len(tableObject)
-            self.canvas.draw()
-
-    def removePlot(self, event):
-        pass
 
     def togglePlot(self, event):
         #print "onclick",event1.artist.get_label()
         #harsha:To workout with double-event-registered on onclick event
         #http://stackoverflow.com/questions/16278358/double-event-registered-on-mouse-click-if-legend-is-outside-axes
-        print("Here")
         legline = event.artist
         for line in self.axesRef.lines:
             if line.get_label() == event.artist.get_label():
@@ -1119,7 +1132,8 @@ class PlotWidget(QWidget):
                     legline.set_alpha(1.0)
                 else:
                     legline.set_alpha(0.2)
-                self.canvas.draw()
+                break
+        self.canvas.draw()
 
     def addTimeSeries(self, table, *args, **kwargs):
         ts = np.linspace(0, moose.Clock('/clock').currentTime, len(table.vector))
@@ -1211,8 +1225,8 @@ class PlotWidget(QWidget):
             self._menus.append(self.plotMenu)
         return self._menus
 
-    def resizeEvent(self, event):
-        print("Here", event)
+    # def resizeEvent(self, event):
+    #     print("Here", event)
         # self.canvas.figure.subplots_adjust(bottom=0.2)#, left = 0.18)
 
 ###################################################
