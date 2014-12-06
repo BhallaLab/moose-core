@@ -859,6 +859,7 @@ class PlotWidget(QWidget):
         box = self.axesRef.get_position()
         self.axesRef.set_position([box.x0, box.y0, box.width * 0.8, box.height])
 
+        self.legend  = None
         # layout.setSizeConstraint( QLayout.SetNoConstraint )
         # self.setSizePolicy( QtGui.QSizePolicy.Expanding
         #                   , QtGui.QSizePolicy.Expanding
@@ -914,10 +915,7 @@ class PlotWidget(QWidget):
         action  = QAction(icon, "Toggle Grid", self.navToolbar)
         # self.navToolbar.addAction(action)
         action.triggered.connect(self.canvas.toggleGrid)
-
         self.navToolbar.insertAction(self.navToolbar.actions()[2], action)
-
-
         self.navToolbar.insertSeparator(self.navToolbar.actions()[3])
 
 
@@ -995,8 +993,16 @@ class PlotWidget(QWidget):
                 color = 'white'
         return color
 
+    def addPlot(self, table):
+        pass
+
+    def removePlot(self, table):
+        pass
+
     def plotAllData(self):
         """Plot data from existing tables"""
+        self.axesRef.lines = []
+        self.pathToLine.clear()
         path = self.model.path
         modelroot = self.model.path
         time = moose.Clock('/clock').currentTime
@@ -1063,33 +1069,36 @@ class PlotWidget(QWidget):
                     tabList.append(tab)
 
             if len(tabList) > 0:
-                leg = self.canvas.callAxesFn( 'legend'
-                                            , loc='center left'
-                                            , prop= {'size' : 10 }
-                                            , bbox_to_anchor=(1.0, 0.5)
-                                            , fancybox=True
-                                            , shadow=True
-                                            , ncol=1
-                                            )
-                # leg = self.canvas.callAxesFn( 'legend'
-                #                             , loc               ='upper right'
-                #                             , prop              = {'size' : 10 }
-                #                             # , bbox_to_anchor    = (0.5, -0.03)
-                #                              , fancybox          = False
-                #                             # , shadow            = True
-                #                             , ncol              = 1
-                #                             )
-                # leg.draggable(False)
-                # print(leg.get_window_extent())
-                        #leg = self.canvas.callAxesFn('legend')
-                        #leg = self.canvas.callAxesFn('legend',loc='upper left', fancybox=True, shadow=True)
-                        #global legend
-                        #legend =leg
-                for legobj in leg.legendHandles:
-                    legobj.set_linewidth(5.0)
-                    legobj.set_picker(True)
-            else:
-                print "returning as len tabId is zero ",tabId, " tableObject ",tableObject, " len ",len(tableObject)
+                self.legend = self.canvas.callAxesFn( 'legend'
+                                                    , loc='center left'
+                                                    , prop= {'size' : 10 }
+                                                    , bbox_to_anchor=(1.0, 0.5)
+                                                    , fancybox=False
+                                                    , shadow=False
+                                                    , ncol=1
+                                                    )
+                self.legend.draggable()
+                self.legend.get_frame().set_alpha(0.5)
+
+            #     # leg = self.canvas.callAxesFn( 'legend'
+            #     #                             , loc               ='upper right'
+            #     #                             , prop              = {'size' : 10 }
+            #     #                             # , bbox_to_anchor    = (0.5, -0.03)
+            #     #                              , fancybox          = False
+            #     #                             # , shadow            = True
+            #     #                             , ncol              = 1
+            #     #                             )
+            #     # leg.draggable(False)
+            #     # print(leg.get_window_extent())
+            #             #leg = self.canvas.callAxesFn('legend')
+            #             #leg = self.canvas.callAxesFn('legend',loc='upper left', fancybox=True, shadow=True)
+            #             #global legend
+            #             #legend =leg
+            #     for legobj in leg.legendHandles:
+            #         legobj.set_linewidth(5.0)
+            #         legobj.set_picker(True)
+            # else:
+            #     print "returning as len tabId is zero ",tabId, " tableObject ",tableObject, " len ",len(tableObject)
             self.canvas.draw()
 
     def removePlot(self, event):
@@ -1153,8 +1162,9 @@ class PlotWidget(QWidget):
             axes.relim()
             axes.autoscale_view(tight=True,scalex=True,scaley=True)
         self.canvas.draw()
-    #Harsha: Passing directory path to save plots
-    def saveCsv(self, line,directory):
+
+
+    def saveCsv(self, line, directory):
         """Save selected plot data in CSV file"""
         src = self.lineToDataSource[line]
         xSrc = moose.element(src.x)
