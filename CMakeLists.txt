@@ -203,7 +203,6 @@ add_subdirectory(shell)
 add_subdirectory(randnum)
 add_subdirectory(scheduling)
 add_subdirectory(builtins)
-add_subdirectory(intfire)
 add_subdirectory(utility)
 add_subdirectory(external/muparser)
 add_subdirectory(external/debug)
@@ -218,6 +217,8 @@ add_subdirectory(device)
 add_subdirectory(benchmarks)
 add_subdirectory(kinetics)
 add_subdirectory(synapse)
+add_subdirectory(intfire)
+add_subdirectory(examples)
 
 set(LIBRARIES ${LibBZip2_LIBRARIES})
 if(HDF5_FOUND)
@@ -262,8 +263,9 @@ set(MOOSE_LIBRARIES
     synapse
     diffusion 
     device
-    intfire
     ksolve
+    intfire
+    examples
     )
 
 target_link_libraries(moose
