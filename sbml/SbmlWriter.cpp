@@ -16,7 +16,9 @@
 #ifdef USE_SBML
 
 #include "header.h"
+#ifdef USE_SBML
 #include <sbml/SBMLTypes.h>
+#endif
 #include "SbmlWriter.h"
 #include "../shell/Wildcard.h"
 #include "../shell/Neutral.h"
