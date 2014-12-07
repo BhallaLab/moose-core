@@ -97,51 +97,13 @@ endif()
 
 find_package(GSL 1.16 REQUIRED)
 
-# If installed version of gsl is not 1.16 then download and build gsl locally.
-# THIS IS USEFULL TO BUILD MOOSE FOR VARIOUS DISTRIBUTIONS.
-MESSAGE("+ GSL Version ${GSL_VERSION} found")
-if(${GSL_VERSION} VERSION_LESS 1.16)
-    MESSAGE("+ Trouble. Needed version 1.16.")
-    MESSAGE("+-- I'll go ahead, download gsl-1.16 and build it for moose. Make
-    sure you have proxy environment variables set.")
-    SET(LOCAL_GSL 1)
-endif()
-
-if(LOCAL_GSL)
-    set(GSL_SOURCE_DIR ${CMAKE_SOURCE_DIR}/external/gsl-1.16)
-    set(GSL_INSTALL_DIR ${CMAKE_SOURCE_DIR}/gsl)
-    include(ExternalProject)
-    ExternalProject_Add(GSL
-        PREFIX ${GSL_SOURCE_DIR}
-        DOWNLOAD_DIR ${CMAKE_SOURCE_DIR}/external
-        URL https://github.com/dilawar/gsl/archive/master.zip 
-        CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_C_FLAGS=-fpic -DCMAKE_INSTALL_PREFIX:PATH=${GSL_INSTALL_DIR} -DBUILD_SHARED_LIBS=OFF
-        )
-    include_directories(${GSL_INSTALL_DIR}/include)
-    set(LOCAL_GSL_LIBRARIES ${GSL_INSTALL_DIR}/lib/libgsl.a 
-        ${GSL_INSTALL_DIR}/lib/libgslcblas.a
-        )
-endif()
-
 find_package(LIBSBML)
 if(NOT LIBSBML)
-    MESSAGE("+ LIBSBML NOT FOUND. Using local SBML")
-    SET(LOCAL_SBML 1)
+    MESSAGE("+ LIBSBML NOT FOUND.  Disabling SBML support.")
+    ADD_DEFINITIONS(-UUSE_SBML)
 else()
+    ADD_DEFINITIONS(-DUSE_SBML)
     include_directories(${LIBSBML_INCLUDE_DIR})
-endif()
-
-if(LOCAL_SBML)
-    MESSAGE(" ++ I need to download SBML")
-    set(SBML_SOURCE_DIR ${CMAKE_SOURCE_DIR}/sbml)
-    set(SBML_INSTALL_DIR ${CMAKE_SOURCE_DIR}/sbml)
-    include(ExternalProject)
-    ExternalProject_Add(LIBSBML
-        PREFIX ${EXTERNAL_DIR}
-        URL http://sourceforge.net/projects/sbml/files/libsbml/5.10.2/stable/libSBML-5.10.2-core-src.tar.gz
-        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${SBML_INSTALL_DIR}
-        -DBUILD_SHARED_LIBS=OFF -DCMAKE_C_FLAGS=-fpic 
-        )
 endif()
 
 
@@ -153,15 +115,9 @@ set_target_properties(moose PROPERTIES COMPILE_FLAGS  "-DMOOSE_LIB")
 
 ## GSL
 # Setup GSL
-if(LOCAL_GSL)
-    set(GSL_FOUND 1)
+if(GSL_FOUND)
     add_definitions(-DUSE_GSL)
     add_dependencies(moose GSL)
-else()
-    if(GSL_FOUND)
-        include_directories(${GSL_INCLUDE_DIR})
-        add_definitions(-DUSE_GSL)
-    endif()
 endif()
 
 
@@ -171,17 +127,6 @@ if(HDF5_FOUND)
     add_definitions(-DUSE_HDF5)
     include_directories(${HDF5_INCLUDE_DIR})
 endif(HDF5_FOUND)
-
-find_package(LIBSBML)
-if(LIBSBML_FOUND)
-    # If LIBSBML_FOUND then we'll probably also need the LibXML2.
-    add_definitions(-DUSE_SBML)
-    find_package(LibXML2 REQUIRED)
-    add_subdirectory(sbml)
-    include_directories(${LIBSBML_INCLUDE_DIR})
-elseif()
-    add_definitions(-UUSE_SBML)
-endif(LIBSBML_FOUND)
 
 find_package(Termcap)
 find_package(Readline)
@@ -234,7 +179,6 @@ if(LIBXML2_FOUND)
 endif()
 
 if(GSL_FOUND)
-    # Link gsl 
     list(APPEND LIBRARIES ${GSL_LIBRARIES})
 endif()
 
