@@ -866,8 +866,8 @@ class PlotWidget(QWidget):
         self.pathToLine = defaultdict(set)
         self.lineToDataSource = {}
         self.axesRef = self.canvas.addSubplot(1, 1)
-        box = self.axesRef.get_position()
-        self.axesRef.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+        # box = self.axesRef.get_position()
+        # self.axesRef.set_position([box.x0, box.y0, box.width * 0.8, box.height])
 
         self.legend  = None
         # layout.setSizeConstraint( QLayout.SetNoConstraint )
