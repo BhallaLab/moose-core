@@ -3,6 +3,7 @@ from kkitQGraphics import *
 from kkitOrdinateUtil import *
 from kkitUtil import *
 import PyQt4
+from setsolver import *
 
 def updateCompartmentSize(qGraCompt):
     childBoundingRect = qGraCompt.childrenBoundingRect()
@@ -225,7 +226,7 @@ def createObj(scene,view,modelpath,string,pos,layoutPt):
     pos = view.mapToScene(event_pos)
     itemAt = view.sceneContainerPt.itemAt(pos)
     chemMesh = moose.wildcardFind(modelpath+'/##[ISA=ChemCompt]')
-    layoutPt.deleteSolver()
+    deleteSolver(modelpath)
     if len(chemMesh) and (string == "CubeMesh" or string == "CylMesh"):
         QtGui.QMessageBox.information(None,'Drop Not possible','At present model building allowed only for  single compartment.',QtGui.QMessageBox.Ok)
         return
