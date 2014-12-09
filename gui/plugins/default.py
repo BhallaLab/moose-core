@@ -90,6 +90,7 @@ from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as Naviga
 #from EventBlocker import EventBlocker
 # from PlotNavigationToolbar import PlotNavigationToolbar
 from global_constants import preferences
+from setsolver import *
 ELECTRICAL_MODEL = 0
 CHEMICAL_MODEL   = 1
 
@@ -600,10 +601,10 @@ class SchedulingWidget(QtGui.QWidget):
 
     def resetSimulation(self):
         self.setParameters()
-        try:
-            self.runtime = float(runtime)
-        except:
-            self.runtime = 100.0
+        # try:
+        #     self.runTime = float(runtime)
+        # except:
+        #     self.runTime = 100.0
         # print(self.runTime)
         # print(self.updateInterval)
         # print(self.simulationInterval)
@@ -617,25 +618,43 @@ class SchedulingWidget(QtGui.QWidget):
                                    )
         self.continueFlag               = False
 
-    def runSimulation(self):
+    def chemicalModelStatus(self):
+        solver = self.preferences.getChemicalPreferences()["simulation"]["solver"]
+        compt = moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
+        if not moose.exists(compt[0].path+'/stoich'):
+            addSolver(self.modelRoot,self.solver)
         status = self.solverStatus()
                # if status != 0 or status == -1:
         #     return
         if status == None or int(status) == -1 or int(status) == 0:
             #allow the model to Run
-            pass
+            return True
         else:
             # if something is dangling or solver is not set then return
-            return
+            return False
+
+    def runSimulation(self):
+        status = True
+        if self.modelType == CHEMICAL_MODEL:
+            status = self.chemicalModelStatus()
+        if not status: return
         runtime = str(self.simulationRuntime.text())
-        try:
-            self.runtime = float(runtime)
-        except:
-            self.runtime = 100.0
-            self.simulationRuntime.setText("100.0")
-        self.checkConsistency()
+        self.runTime = float(runtime)
+
+        # try:
+        #     self.runTime = float(runtime)
+        # except:
+        #     QtGui.QMessageBox.critical(None
+        #         ,"Incosistent Settings"
+        #         ,"GUI update interval < simulation dt. Please ensure that simulation dt <= GUI update interval.")
+
+        #     self.runTime = 100.0
+        #     self.simulationRuntime.setText("100.0")
+
+
+        if not self.checkConsistency(): return
         self.continueSimulation = True
-        self.runner.runSimulation(self.runtime)
+        self.runner.runSimulation(self.runTime)
         # return
         # if self.continueFlag:
         #     self.continueSimulation()
@@ -673,8 +692,11 @@ class SchedulingWidget(QtGui.QWidget):
 
     def checkConsistency(self):
         if self.updateInterval < self.simulationInterval :
-            self.updateInterval = self.simulationInterval
-
+            # self.updateInterval = self.simulationInterval
+            QtGui.QMessageBox.critical(None
+                ,"Incosistent Settings"
+                ,"GUI update interval < simulation dt. Please ensure that simulation dt <= GUI update interval.")
+            return False
             # print("Hello")
             # dialog = QErrorMessage()
             # dialog.showMessage(
@@ -683,7 +705,13 @@ class SchedulingWidget(QtGui.QWidget):
             #                    )
             # return False
         if self.runTime < self.updateInterval :
-            self.runTime = self.updateInterval
+            # self.runTime = self.updateInterval
+            QtGui.QMessageBox.critical(None
+                ,"Incosistent Settings"
+                ,"Simulation runtime < GUI update Interval. Please ensure that GUI update interval <= Simulation runtime."
+                )
+            return False
+
             # dialog = QErrorMessage()
             # dialog.showMessage(
             #     """Simulation runtime should greater than GUI Update interval.
@@ -693,15 +721,13 @@ class SchedulingWidget(QtGui.QWidget):
         return True
 
     def solverStatus(self):
+        # if self.modelType == C
         compt = moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
-        #print moose.le(compt[0].path)
-        print "#### ",moose.exists(compt[0].path+'/stoich')
         if not moose.exists(compt[0].path+'/stoich'):
             return None
         else:
             stoich = moose.Stoich(compt[0].path+'/stoich')
             status = int(stoich.status)
-            print("Status =>", status)
             if status == -1:
                 QtGui.QMessageBox.warning(None,"Could not Run the model","Warning: Reaction path not yet assigned.\n ")
                 return -1
@@ -1035,7 +1061,7 @@ class PlotWidget(QWidget):
         if len (plotTables) > 0:
             for tabId in plotTables:
                 tab = moose.Table(tabId)
-                print("Table =>", tab)
+                #print("Table =>", tab)
                 line_list=[]
                 tableObject = tab.neighbors['requestOut']
                 # Not a good way
