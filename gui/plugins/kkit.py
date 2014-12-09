@@ -21,7 +21,7 @@ from PyQt4.QtGui import QGridLayout
 from PyQt4.QtGui import QColor
 import RunWidget
 from os.path import expanduser
-
+from setsolver import *
 #from DataTable import DataTable
 class KkitPlugin(MoosePlugin):
     """Default plugin for MOOSE GUI"""
@@ -147,14 +147,14 @@ class AnotherKkitRunView(RunView):
         self.schedular.runner.simulationProgressed.connect(self.kkitRunView.getCentralWidget().changeBgSize)
         self.schedular.runner.simulationReset.connect(self.kkitRunView.getCentralWidget().resetColor)
         # self.schedular.runner.simulationReset.connect(self.setSolver)
-        self.schedular.preferences.applyChemicalSettings.connect(lambda x : self.setSolver(x["simulation"]["solver"]))
+        self.schedular.preferences.applyChemicalSettings.connect(lambda x : self.setSolver(self.modelRoot,x["simulation"]["solver"]))
         compt = moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
         ann = moose.Annotator(self.modelRoot+'/info')
         if compt:
             self.runTime = (moose.Annotator(self.modelRoot+'/info')).runtime
             solver = (moose.Annotator(self.modelRoot+'/info')).solver
         else:
-            self.runTime = 10
+            self.runTime = 100
             solver = "gsl"
         self.schedular.simulationRuntime.setText(str(self.runTime))
         #preferences
@@ -174,19 +174,20 @@ class AnotherKkitRunView(RunView):
             chemprefs["simulation"]["solver"] = "Exponential Euler"
         else:
             chemprefs["simulation"]["solver"] = "Runge Kutta"
-        # if solver == "GSL":
-        #     chemprefs["simulation"]["solver"] = "Runge Kutta"
-        # else:
-        #     chemprefs["simulation"]["solver"] = "Gillespie"
         self.schedular.preferences.setChemicalPreferences()
         return self._centralWidget
 
-    def setSolver(self, solver = None):
-        print " setSolver ",solver
+    def setSolver(self, modelRoot,solver = None):
         if solver == None:
-            self.kkitRunView.getCentralWidget().addSolver(self.getSchedulingDockWidget().widget().solver)
+            reinit = addSolver(modelRoot,self.getSchedulingDockWidget().widget().solver)
+            if reinit:
+                self.getSchedulingDockWidget().widget().resetSimulation()
         else:
-            self.kkitRunView.getCentralWidget().addSolver(solver)
+            reinit = addSolver(modelRoot,solver)
+            if reinit:
+                self.getSchedulingDockWidget().widget().resetSimulation()
+
+            #self.kkitRunView.getCentralWidget().addSolver(solver)
 
     def getCentralWidget(self):
         if self._centralWidget is None:
@@ -665,23 +666,23 @@ class  KineticsWidget(EditorWidgetBase):
             if isinstance(item,CplxItem):
                 self.updateArrow(item)
 
-    def deleteSolver(self):
-        print " delete Solver"
-        print "### ",moose.wildcardFind(self.modelRoot+'/data/graph#/#')
-        if moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]'):
-            compt = moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
-            print " deletSolver ", 
-            # print moose.exists(compt[0].path+'/stoich'), " ksolve ", moose.exists(compt[0].path+'/ksolve')
-            # print "gsolve ", moose.delete( compt[0].path+'/gsolve' )
-            if ( moose.exists( compt[0].path+'/stoich' ) ):
-                #print "delete"
-                moose.delete( compt[0].path+'/stoich' )
-            if ( moose.exists( compt[0].path+'/ksolve' ) ):
-                moose.delete( compt[0].path+'/ksolve' )
-            if ( moose.exists( compt[0].path+'/gsolve' ) ):
-                moose.delete( compt[0].path+'/gsolve' )
-            for x in moose.wildcardFind( self.modelRoot+'/data/graph#/#' ):
-                    x.tick = -1
+    # def deleteSolver(self):
+    #     print " delete Solver"
+    #     print "### ",moose.wildcardFind(self.modelRoot+'/data/graph#/#')
+    #     if moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]'):
+    #         compt = moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
+    #         print " deletSolver ", 
+    #         # print moose.exists(compt[0].path+'/stoich'), " ksolve ", moose.exists(compt[0].path+'/ksolve')
+    #         # print "gsolve ", moose.delete( compt[0].path+'/gsolve' )
+    #         if ( moose.exists( compt[0].path+'/stoich' ) ):
+    #             #print "delete"
+    #             moose.delete( compt[0].path+'/stoich' )
+    #         if ( moose.exists( compt[0].path+'/ksolve' ) ):
+    #             moose.delete( compt[0].path+'/ksolve' )
+    #         if ( moose.exists( compt[0].path+'/gsolve' ) ):
+    #             moose.delete( compt[0].path+'/gsolve' )
+    #         for x in moose.wildcardFind( self.modelRoot+'/data/graph#/#' ):
+    #                 x.tick = -1
     def positionChange1(self,mooseObject):
         #If the item position changes, the corresponding arrow's are calculated
         if ( (isinstance(element(mooseObject),CubeMesh)) or (isinstance(element(mooseObject),CylMesh))):
@@ -795,10 +796,10 @@ class kineticRunWidget(KineticsWidget):
                     # multipying by 1000 b'cos moose concentration is in milli in moose
                     ratio = presentConc
                 #print "ratio",item.mobj,ratio
-                # if ratio > '10':
-                #     ratio = 9
-                # if ratio < '0.0':
-                #     ratio =0.1
+                if ratio > '10':
+                    ratio = 9
+                if ratio < '0.0':
+                    ratio =0.1
                 #print "size ",ratio
                 item.updateRect(math.sqrt(abs(ratio)))
 
@@ -807,55 +808,56 @@ class kineticRunWidget(KineticsWidget):
             if isinstance(item,PoolItemCircle):
                 item.returnEllispeSize()
     
-    def addSolver(self,solver):
-        compt = moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
-        comptinfo = moose.Annotator(moose.element(compt[0]).path+'/info')
-        print " $$$$$$$$$$$$$$ ",moose.element(compt[0].path)
-        previousSolver = comptinfo.solver
+    # def addSolver(self,solver):
+    #     print "\t addSolver--------"
+    #     compt = moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
+    #     comptinfo = moose.Annotator(moose.element(compt[0]).path+'/info')
+    #     print " $$$$$$$$$$$$$$ ",moose.element(compt[0].path)
+    #     previousSolver = comptinfo.solver
 
-        print "pre solver from kkit ",previousSolver, solver
-        currentSolver = previousSolver
-        if solver == "Gillespie":
-            currentSolver = "Gillespie"
-        elif solver == "Runge Kutta":
-            currentSolver = "Runge Kutta"
-        elif solver == " Exponential Euler":
-            currentSolver == "Exponential Euler"
+    #     print "pre solver from kkit ",previousSolver, solver
+    #     currentSolver = previousSolver
+    #     if solver == "Gillespie":
+    #         currentSolver = "Gillespie"
+    #     elif solver == "Runge Kutta":
+    #         currentSolver = "Runge Kutta"
+    #     elif solver == " Exponential Euler":
+    #         currentSolver == "Exponential Euler"
 
-        if previousSolver != currentSolver:
-            if ( moose.exists( compt[0].path+'/stoich' ) ):
-                print "1"
-                self.deleteSolver()
-                self.setCompartmentSolver(compt,currentSolver)
-            elif ( moose.exists( compt[0].path+'/stoich' ) ):
-                print "2"
-                self.setCompartmentSolver(compt, currentSolver)
-            comptinfo.solver = currentSolver
-        else:
-            print "3", moose.exists(compt[0].path+'/stoich')
-            if not ( moose.exists( compt[0].path+'/stoich' ) ):
-                self.setCompartmentSolver(compt,currentSolver)
-        for x in moose.wildcardFind( self.modelRoot+'/data/graph#/#' ):
-                    x.tick = 18
-        #self.solverStatus()
-    def setCompartmentSolver(self,compt,solver):
-        if solver == 'GSL' or solver == "Runge Kutta":
-            solver = 'gsl'
-        elif solver == 'Gillespie':
-            solver = 'gssa'
-        elif solver == "Exponential Euler":
-            solver = 'ee'
-        print "setCompartmentSolver ",solver
-        if ( solver == 'gsl' ):
-            ksolve = moose.Ksolve( compt[0].path+'/ksolve' )
-        if ( solver == 'gssa' ):
-            ksolve = moose.Gsolve( compt[0].path+'/gsolve' )
-        if (solver!= 'ee'):
-            stoich = moose.Stoich( compt[0].path+'/stoich' )
-            stoich.compartment = compt[0]
-            stoich.ksolve = ksolve
-            stoich.path = compt[0].path+'/##'
-        moose.reinit()
+    #     if previousSolver != currentSolver:
+    #         if ( moose.exists( compt[0].path+'/stoich' ) ):
+    #             print "1"
+    #             self.deleteSolver()
+    #             self.setCompartmentSolver(compt,currentSolver)
+    #         elif ( moose.exists( compt[0].path+'/stoich' ) ):
+    #             print "2"
+    #             self.setCompartmentSolver(compt, currentSolver)
+    #         comptinfo.solver = currentSolver
+    #     else:
+    #         print "3", moose.exists(compt[0].path+'/stoich')
+    #         if not ( moose.exists( compt[0].path+'/stoich' ) ):
+    #             self.setCompartmentSolver(compt,currentSolver)
+    #     for x in moose.wildcardFind( self.modelRoot+'/data/graph#/#' ):
+    #                 x.tick = 18
+    #     #self.solverStatus()
+    # def setCompartmentSolver(self,compt,solver):
+    #     if solver == 'GSL' or solver == "Runge Kutta":
+    #         solver = 'gsl'
+    #     elif solver == 'Gillespie':
+    #         solver = 'gssa'
+    #     elif solver == "Exponential Euler":
+    #         solver = 'ee'
+    #     print "setCompartmentSolver ",solver
+    #     if ( solver == 'gsl' ):
+    #         ksolve = moose.Ksolve( compt[0].path+'/ksolve' )
+    #     if ( solver == 'gssa' ):
+    #         ksolve = moose.Gsolve( compt[0].path+'/gsolve' )
+    #     if (solver!= 'ee'):
+    #         stoich = moose.Stoich( compt[0].path+'/stoich' )
+    #         stoich.compartment = compt[0]
+    #         stoich.ksolve = ksolve
+    #         stoich.path = compt[0].path+'/##'
+    #     moose.reinit()
         
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
