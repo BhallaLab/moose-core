@@ -881,23 +881,20 @@ class MWindow(QtGui.QMainWindow):
             l = self._loadedModels[-1]
             compt = moose.wildcardFind(l[0]+'/##[ISA=ChemCompt]')
             if compt:
-                if moose.exists(compt[0].path+'/ksolve'):
-                    ksolve = moose.Ksolve( compt[0].path+'/ksolve' )
-                    ksolve.tick = -1
-                if moose.exists(compt[0].path+'/gsolve'):
-                    gsolve = moose.Gsolve( compt[0].path+'/gsolve' )
-                    gsolve.tick = -1
-                # if moose.exists(compt[0].path+'/stoich'):
-                #     stoich = moose.Stoich( compt[0].path+'/stoich' )
-                #     stoich.tick = -1
-                for x in moose.wildcardFind( l[0]+'/data/graph#/#' ):
+                if moose.exists(compt[0].path+'/stoich'):
+                    st = moose.element(compt[0].path+'/stoich')
+                    if moose.exists((st.ksolve).path):
+                        kgSolve = st.ksolve
+                        kgSolve.tick = -1
+                for x in moose.wildcardFind( compt[0].path+'/data/graph#/#' ):
                     x.tick = -1
         action = QAction(modelPath[1:],self)
         action.triggered.connect(lambda : self.setPlugin(pluginName, modelPath))
         self._loadedModels.append([modelPath,pluginName,action])
         if len(self._loadedModels)>5:
             self._loadedModels.pop(0)
-
+            deleteModel =self._loadedModels.pop(0)
+            moose.delete(deleteModel[0])
     def loadModelDialogSlot(self):
         """Start a file dialog to choose a model file.
 
