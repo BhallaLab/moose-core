@@ -11,7 +11,7 @@ from PyQt4.QtGui import QPen
 # from PyQt4.QtGui import pyqtSignal
 from kkitCalcArrow import *
 from kkitOrdinateUtil import *
-
+from setsolver import *
 class GraphicalView(QtGui.QGraphicsView):
 
     def __init__(self, modelRoot,parent,border,layoutPt,createdItem):
@@ -504,13 +504,25 @@ class GraphicalView(QtGui.QGraphicsView):
                     unselectitem.setSelected(0)
             #First for loop removes all the enz b'cos if parent is removed then
             #then it will created problem at    qgraphicitem
-            self.layoutPt.deleteSolver()
+            deleteSolver(self.layoutPt.modelRoot)
             for item in (qgraphicsitem for qgraphicsitem in self.rubberbandlist):
                 if isinstance(item,MMEnzItem) or isinstance(item,EnzItem) or isinstance(item,CplxItem):
                     self.deleteItem(item)
             for item in (qgraphicsitem for qgraphicsitem in self.rubberbandlist):
                 if not (isinstance(item,MMEnzItem) or isinstance(item,EnzItem) or isinstance(item,CplxItem)):
+                    if isinstance(item,PoolItem):
+                        plot = moose.wildcardFind(self.layoutPt.modelRoot+'/data/graph#/#')
+                        for p in plot:
+                            #print p, p.neighbors['requestOut']
+                            if len(p.neighbors['requestOut']):
+                                if item.mobj.path == moose.element(p.neighbors['requestOut'][0]).path:
+                                    p.tick = -1
+                                    moose.delete(p)
+                                    self.layoutPt.plugin.view.getCentralWidget().plotWidgetContainer.plotAllData()
                     self.deleteItem(item)
+                    #moose.reinit()
+                    
+
             self.sceneContainerPt.clear()
             self.layoutPt.getMooseObj()
             setupItem(self.modelRoot,self.layoutPt.srcdesConnection)
