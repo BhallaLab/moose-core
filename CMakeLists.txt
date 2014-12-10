@@ -266,30 +266,58 @@ if(BUILD_PYMOOSE)
 endif(BUILD_PYMOOSE)
 
 ######################### INSTALL ##############################################
-
-install(TARGETS moose 
+install(TARGETS moose
     LIBRARY DESTINATION lib
     COMPONENT moose-core
     )
 
 install(TARGETS moose-bin
-    RUNTIME DESTINATION bin
+    DESTINATION bin
     COMPONENT moose-core
     )
 
-install(SCRIPT python/InstallPyMoose.cmake
-    COMPONENT moose-python
+install(PROGRAMS ${PROJECT_SOURCE_DIR}/scripts/moose
+    DESTINATION bin
+    COMPONENT moose-core
+    )
+
+install(FILES ${PROJECT_SOURCE_DIR}/scripts/moose
+    DESTINATION bin
+    COMPONENT moose-core
+    )
+
+install(PROGRAMS ${PROJECT_SOURCE_DIR}/scripts/moosegui
+    DESTINATION bin
+    COMPONENT moose-gui
     )
 
 ## Install the icon
-install(FILES gui/icons/moose_icon.png 
+install(FILES ${PROJECT_SOURCE_DIR}/gui/icons/moose_icon.png 
     DESTINATION share/moose
     COMPONENT moose-python
     )
 
 # And the desktop file.
-install(FILES scripts/moose.desktop
+install(FILES ${PROJECT_SOURCE_DIR}/scripts/moose.desktop
     DESTINATION share/applications
+    COMPONENT moose-python
+    )
+
+# And the gui
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/gui
+    DESTINATION lib/moose
+    COMPONENT moose-gui
+    )
+
+# and the python dependencies
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/python
+    DESTINATION lib/moose
+    COMPONENT moose-python
+    )
+
+## The demos goes here.
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/Demos
+    DESTINATION share/moose
     COMPONENT moose-python
     )
 
@@ -316,8 +344,15 @@ else()
     set(CPACK_STRIP_FILES moose)
 endif()
 set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "libopenmpi, libhdf5-7, python-numpy, python-matplotlib, python-qt4, openscenegraph, python-torando, python-suds, python-nose, python-certifi, python-setuptools, libxml2"
+
+set(CPACK_DEBIAN_PACKAGE_DEPENDS 
+    "openmpi-common, libhdf5-7
+    , python-numpy , python-matplotlib, python-qt4
+    , openscenegraph, python-torando
+    , python-suds, python-nose, python-setuptools
+    , libxml2, bzip2"
 )
+
 set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
     "${PROJECT_SOURCE_DIR}/scripts/postinst;${PROJECT_SOURCE_DIR}/scripts/prerm;"
     )
