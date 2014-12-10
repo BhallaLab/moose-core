@@ -19,17 +19,21 @@ set -e
 
 case "$1" in
     remove|upgrade|deconfigure)
-	if [ -d /usr/share/moose/python ]; then
-            ( cd /usr/share/moose/python && cat installed_files.txt | xargs rm -rf )
+	if [ -d /usr/lib/moose/python ]; then
+            ( cd /usr/lib/moose/python && cat installed_files.txt | xargs rm -rf )
 	fi
 
-        if [ -d /usr/share/moose ]; then
-            rm -R /usr/share/moose
+        if [ -d /usr/lib/moose ]; then
+            rm -R /usr/lib/moose
         fi
 
 	if [ -d /usr/share/doc/moose ]; then
             rm -R /usr/share/doc/moose
 	fi
+
+        if [ -d /usr/share/moose ]; then
+            rm -R /usr/share/moose
+        fi
 
 	if [ -d /usr/share/pyshared/moose ]; then
             rm -R /usr/share/pyshared/moose
