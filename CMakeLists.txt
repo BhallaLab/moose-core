@@ -266,6 +266,7 @@ if(BUILD_PYMOOSE)
 endif(BUILD_PYMOOSE)
 
 ######################### INSTALL ##############################################
+
 install(TARGETS moose 
     LIBRARY DESTINATION lib
     COMPONENT moose-core
@@ -291,3 +292,44 @@ install(FILES scripts/moose.desktop
     DESTINATION share/applications
     COMPONENT moose-python
     )
+
+################################# PACKAGING ###################################
+
+set(CPACK_STRIP_FILES TRUE)
+set(CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE 1)
+#  We need to compile python scripts on the installation  host.
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dilawar Singh")
+set(CPACK_PACKAGE_CONTACT "dilawars@ncbs.res.in")
+#set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "MOOSE, The Neural Simulator")
+set(CPACK_PACKAGE_VERSION "3.0.1")
+set(CPACK_SYSTEM_NAME "i386")
+set(CPACK_PACKAGE_VERSION_MAJOR "3")
+set(CPACK_PACKAGE_VERSION_MINOR "0")
+set(CPACK_PACKAGE_VERSION_PATCH "1")
+set(CPACK_PACKAGE_VENDOR "NCBS Bangalore")
+set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/README")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dilawar Singh <dilawars@ncbs.res.in>")
+if(WIN32)
+    MESSAGE("++ Currently only Unix is supported")
+else()
+    set(CPACK_STRIP_FILES moose)
+endif()
+set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libopenmpi, libhdf5-7, python-numpy, python-matplotlib, python-qt4, openscenegraph, python-torando, python-suds, python-nose, python-certifi, python-setuptools, libxml2"
+)
+set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
+    "${PROJECT_SOURCE_DIR}/scripts/postinst;${PROJECT_SOURCE_DIR}/scripts/prerm;"
+    )
+include(CPack)
+
+#####################  TESTING  ###############################################
+#include(CTest)
+#find_package(PythonInterp REQUIRED)
+#set(ENV{PYTHONPATH} "${PROJECT_SOURCE_DIR}/python")
+#message("++ PYTHONPATH is set to $ENV{PYTHONPATH}")
+#
+#add_test(NAME check_moose
+#    WORKING_DIRECTORY .
+#    COMMAND ./run_moose.sh
+#    )
