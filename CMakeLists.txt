@@ -348,7 +348,7 @@ set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
 set(CPACK_DEBIAN_PACKAGE_DEPENDS 
     "openmpi-common, libhdf5-7
     , python-numpy , python-matplotlib, python-qt4
-    , openscenegraph, python-torando
+    , openscenegraph, python-tornado
     , python-suds, python-nose, python-setuptools
     , libxml2, bzip2"
 )
