@@ -51,7 +51,11 @@ class GraphicalView(QtGui.QGraphicsView):
         self.defaultComptsize = 5
     def setRefWidget(self,path):
         self.viewBaseType = path
-
+    
+    def resizeEvent(self, event):
+        self.fitInView(self.sceneContainerPt.itemsBoundingRect().x()-10,self.sceneContainerPt.itemsBoundingRect().y()-10,self.sceneContainerPt.itemsBoundingRect().width()+20,self.sceneContainerPt.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
+        #print("Called =>", event)
+        return
     def resolveCompartmentInteriorAndBoundary(self, item, position):
         bound = item.rect().adjusted(3,3,-3,-3)
         return COMPARTMENT_INTERIOR if bound.contains(item.mapFromScene(position)) else COMPARTMENT_BOUNDARY
