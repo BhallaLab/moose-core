@@ -112,8 +112,8 @@ class KkitPlugin(MoosePlugin):
         schedulingDockWidget = self.view.getSchedulingDockWidget().widget()
         self._kkitWidget = self.view.plugin.getEditorView().getCentralWidget()
         #self.runView = KkitRunView(self,self.dataTable)
-        self.runView = KkitRunView(self)
-        self.currentRunView = self.runView.getCentralWidget()
+        self.runView = KkitRunView(self, self._kkitWidget)
+        self.currentRunView = self.ruAnotherKkitRunViewnView.getCentralWidget()
 
         #schedulingDockWidget.runner.update.connect(self.currentRunView.changeBgSize)
         #schedulingDockWidget.runner.resetAndRun.connect(self.currentRunView.resetColor)
@@ -217,6 +217,7 @@ class KkitRunView(MooseEditorView):
     def getCentralWidget(self):
         if self._centralWidget is None:
             self._centralWidget = kineticRunWidget(self.plugin)
+            self._centralWidget.editor = self.plugin.editorView
             # self._centralWidget.view.objectSelected.connect(self.plugin.mainWindow.objectEditSlot)
             self._centralWidget.setModelRoot(self.plugin.modelRoot)
         return self._centralWidget
@@ -225,7 +226,7 @@ class KkitEditorView(MooseEditorView):
     #def __init__(self, plugin, dataTable):
     def __init__(self, plugin):
         MooseEditorView.__init__(self, plugin)
-        ''' EditorView and if kkit model is loaded then save model in XML is allowed '''
+        ''' EditorView  '''
         #self.dataTable = dataTable
         #self.fileinsertMenu = QtGui.QMenu('&File')
         # if not hasattr(self,'SaveModelAction'):
@@ -282,17 +283,21 @@ class  KineticsWidget(EditorWidgetBase):
         self.arrowsize = 2
         self.defaultComptsize = 5
         self.noPositionInfo = True
+        self.xyCord             = {}
         self.reset()
         self.qGraCompt          = {}
         self.mooseId_GObj       = {}
         self.srcdesConnection   = {}
+        self.editor             = None
+
     def reset(self):
+        #print "reset "
         self.createdItem = {}
         #This are created at drawLine
         self.lineItem_dict = {}
         self.object2line = defaultdict(list)
         self.itemignoreZooming = False
-
+        
         if hasattr(self,'sceneContainer'):
                 self.sceneContainer.clear()
         self.sceneContainer = QtGui.QGraphicsScene(self)
@@ -306,7 +311,6 @@ class  KineticsWidget(EditorWidgetBase):
     def updateModelView(self):
         self.getMooseObj()
         if not self.m:
-            #print "here the empty model "
             #At the time of model building
             # when we want an empty GraphicView while creating new model,
             # then remove all the view and add an empty view
@@ -324,8 +328,6 @@ class  KineticsWidget(EditorWidgetBase):
             self.setLayout(hLayout)
             hLayout.addWidget(self.view,0,0)
         else:
-            self.mooseObjOntoscene()
-            self.drawLine_arrow()
             # Already created Model
             # maxmium and minimum coordinates of the objects specified in kkit file.
 
@@ -333,6 +335,9 @@ class  KineticsWidget(EditorWidgetBase):
                 self.layout().removeWidget(self.view)
             self.view = GraphicalView(self.modelRoot,self.sceneContainer,self.border,self,self.createdItem)
             if isinstance(self,kineticEditorWidget):
+                #self.getMooseObj()
+                self.mooseObjOntoscene()
+                self.drawLine_arrow()
                 self.view.setRefWidget("editorView")
                 self.view.setAcceptDrops(True)
                 hLayout = QtGui.QGridLayout(self)
@@ -361,7 +366,6 @@ class  KineticsWidget(EditorWidgetBase):
             #self.meshEntry.clear= {}
             # Compartment and its members are setup
             self.meshEntry,self.xmin,self.xmax,self.ymin,self.ymax,self.noPositionInfo = setupMeshObj(self.modelRoot)
-            #print "xmin y max ",self.xmin,self.xmax,self.ymin,self.ymax
             self.autocoordinates = False
             if self.srcdesConnection:
                 self.srcdesConnection.clear()
@@ -374,20 +378,7 @@ class  KineticsWidget(EditorWidgetBase):
 
                 self.xmin,self.xmax,self.ymin,self.ymax,self.autoCordinatepos = autoCoordinates(self.meshEntry,self.srcdesConnection)
             # TODO: size will be dummy at this point, but size I need the availiable size from the Gui
-            #print 'self ',self
-            if isinstance(self,kineticEditorWidget):
-                # w = self.width()
-                # h = self.height()
-                # self.size =  QtCore.QSize(w ,h)
-                # print("Window Size : ", self.size)
-                self.size= QtCore.QSize(1000 ,550)
-            else:
-                self.size = QtCore.QSize(500 ,550)
-            #self.size= QtCore.QSize(1000 ,550)
-            #self.size = QtCore.QSize(300,400)
-
-            # Scale factor to translate the x -y position to fit the Qt graphicalScene, scene width. """
-            #print "size ",self.size
+            self.size= QtCore.QSize(1000 ,550)
             if self.xmax-self.xmin != 0:
                 self.xratio = (self.size.width()-10)/(self.xmax-self.xmin)
             else: self.xratio = self.size.width()-10
@@ -397,8 +388,7 @@ class  KineticsWidget(EditorWidgetBase):
             else: self.yratio = (self.size.height()-10)
             self.xratio = int(self.xratio)
             self.yratio = int(self.yratio)
-            #print " ratio ",self.xratio,self.yratio
-    
+        
     def sizeHint(self):
         return QtCore.QSize(800,400)
 
@@ -459,8 +449,6 @@ class  KineticsWidget(EditorWidgetBase):
 
                 #self.setupSlot(enzObj,enzItem)
         for cmpt,memb in self.meshEntry.items():
-            #print "cmpt ========== memb ",cmpt,memb
-
             for poolObj in find_index(memb,'pool'):
                 poolinfo = poolObj.path+'/info'
                 #depending on Editor Widget or Run widget pool will be created a PoolItem or PoolItemCircle
@@ -507,7 +495,7 @@ class  KineticsWidget(EditorWidgetBase):
         self.sceneContainer.addItem(self.new_Compt)
 
     def setupDisplay(self,info,graphicalObj,objClass):
-        xpos,ypos = self.positioninfo(info)
+        Annoinfo = Annotator(info)
         # For Reaction and Complex object I have skipped the process to get the facecolor and background color as \
         #    we are not using these colors for displaying the object so just passing dummy color white
         if( objClass == "reaction"  or objClass == "cplx" or objClass == "Function" or objClass == "StimulusTable"):
@@ -516,8 +504,16 @@ class  KineticsWidget(EditorWidgetBase):
             textcolor,bgcolor = getColor(info)
             if bgcolor.name() == "#ffffff" or bgcolor == "white":
                 bgcolor = getRandColor()
-                Annoinfo = Annotator(info)
                 Annoinfo.color = str(bgcolor.name())
+        if isinstance(self,kineticEditorWidget):
+            xpos,ypos = self.positioninfo(info)
+            self.xylist = [xpos,ypos]
+            self.xyCord[moose.element(info).parent] = [xpos,ypos]
+        elif isinstance(self,kineticRunWidget):
+            self.editormooseId_GObj = self.editor.getCentralWidget().mooseId_GObj
+            editorItem = self.editormooseId_GObj[moose.element(info).parent]
+            xpos = editorItem.scenePos().x()
+            ypos = editorItem.scenePos().y()
         graphicalObj.setDisplayProperties(xpos,ypos,textcolor,bgcolor)
 
     def positioninfo(self,iteminfo):
@@ -758,16 +754,18 @@ class kineticEditorWidget(KineticsWidget):
         return self._toolBars
 
 class kineticRunWidget(KineticsWidget):
-    def __init__(self, plugin,*args):
+    def __init__(self, plugin, *args):
         KineticsWidget.__init__(self, plugin,*args)
 
     def showEvent(self, event):
         self.refresh()
         # pass
     def refresh(self):
+        #print("Refresh =>", self.editor.getCentralWidget().mooseId_GObj)
         self.sceneContainer.clear()
         self.Comptexist = wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
         if self.Comptexist:
+            # pass
             self.getMooseObj()
             self.mooseObjOntoscene()
             self.drawLine_arrow(itemignoreZooming=False)

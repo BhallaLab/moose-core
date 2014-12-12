@@ -23,7 +23,6 @@ def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
     itemAtView = view.sceneContainerPt.itemAt(view.mapToScene(event_pos))
     pos = view.mapToScene(event_pos)
     modelpath = moose.element(modelpath)
-    #print "modelpath ",modelpath
     if num:
         if string == "CubeMesh":
             string_num = "Compartment"+str(num)
@@ -95,8 +94,6 @@ def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
         posWrtComp = (itemAtView.mapFromScene(pos)).toPoint()
         bgcolor = getRandColor()
         qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y(),QtGui.QColor('green'),bgcolor)
-        poolinfo.x = posWrtComp.x()
-        poolinfo.y = posWrtComp.y()
         poolinfo.color = str(bgcolor.getRgb())
         view.emit(QtCore.SIGNAL("dropped"),poolObj)
         setupItem(modelpath.path,layoutPt.srcdesConnection)
