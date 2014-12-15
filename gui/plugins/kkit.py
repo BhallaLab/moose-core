@@ -330,7 +330,8 @@ class  KineticsWidget(EditorWidgetBase):
         else:
             # Already created Model
             # maxmium and minimum coordinates of the objects specified in kkit file.
-
+            #self.mooseObjOntoscene()
+            #self.drawLine_arrow()
             if hasattr(self, 'view') and isinstance(self.view, QtGui.QWidget):
                 self.layout().removeWidget(self.view)
             self.view = GraphicalView(self.modelRoot,self.sceneContainer,self.border,self,self.createdItem)
@@ -372,10 +373,9 @@ class  KineticsWidget(EditorWidgetBase):
             else:
                 self.srcdesConnection = {}
             setupItem(self.modelRoot,self.srcdesConnection)
-
             if self.noPositionInfo:
                 self.autocoordinates = True
-
+            
                 self.xmin,self.xmax,self.ymin,self.ymax,self.autoCordinatepos = autoCoordinates(self.meshEntry,self.srcdesConnection)
             # TODO: size will be dummy at this point, but size I need the availiable size from the Gui
             self.size= QtCore.QSize(1000 ,550)
@@ -517,6 +517,7 @@ class  KineticsWidget(EditorWidgetBase):
         graphicalObj.setDisplayProperties(xpos,ypos,textcolor,bgcolor)
 
     def positioninfo(self,iteminfo):
+        Anno = moose.Annotator(self.modelRoot+'/info')
         if self.noPositionInfo:
             try:
                 # kkit does exist item's/info which up querying for parent.path gives the information of item's parent
@@ -533,8 +534,10 @@ class  KineticsWidget(EditorWidgetBase):
             y = float(element(iteminfo).getField('y'))
             #Qt origin is at the top-left corner. The x values increase to the right and the y values increase downwards \
             #as compared to Genesis codinates where origin is center and y value is upwards, that is why ypos is negated
-            ypos = -(y-self.ymin)*self.yratio
-            #ypos = (y-self.ymin)*self.yratio
+            if Anno.modeltype == "kkit":
+                ypos = 1.0-(y-self.ymin)*self.yratio
+            else:
+                ypos = (y-self.ymin)*self.yratio
         xpos = (x-self.xmin)*self.xratio
 
         return(xpos,ypos)
