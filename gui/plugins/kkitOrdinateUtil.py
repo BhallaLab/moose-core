@@ -193,12 +193,12 @@ def autoCoordinates(meshEntry,srcdesConnection):
         else: arrowcolor = 'blue'
         if isinstance(out,tuple):
             if len(out[0])== 0:
-                print inn.className + ':' +inn[0].name + "  doesn't have input message"
+                print inn.className + ':' +inn.name + "  doesn't have input message"
             else:
                 for items in (items for items in out[0] ):
                     G.add_edge(element(items[0]).path,inn.path)
             if len(out[1]) == 0:
-                print inn.className + ':' + inn[0].name + "doesn't have output mssg"
+                print inn.className + ':' + inn.name + "doesn't have output mssg"
             else:
                 for items in (items for items in out[1] ):
                     G.add_edge(inn.path,element(items[0]).path)
@@ -214,9 +214,16 @@ def autoCoordinates(meshEntry,srcdesConnection):
     xcord = []
     ycord = []
     position = nx.spring_layout(G)
-    for y in position.values():
-        xcord.append(y[0])
-        ycord.append(y[1])
+    for item in position.items():
+        xy = item[1]
+        ann = moose.Annotator(item[0]+'/info')
+        ann.x = xy[0]
+        xcord.append(xy[0])
+        ann.y = xy[1]
+        ycord.append(xy[1])
+    # for y in position.values():
+    #     xcord.append(y[0])
+    #     ycord.append(y[1])
     if xcord and ycord:
         xmin = min(xcord)
         xmax = max(xcord)
