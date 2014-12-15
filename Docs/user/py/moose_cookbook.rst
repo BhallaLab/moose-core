@@ -626,6 +626,11 @@ Plastic synapse: STDP
 .. automodule:: STDP
    :members:
 
+Network with Ca-based plasticity
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: ExcInhNet_HigginsGraupnerBrunel2014
+   :members:
+
 Providing random input to a cell
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. automodule:: randomspike
@@ -650,6 +655,9 @@ Using compartmental models in networks
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 **Pyloric rhythm generator in the stomatogastric ganglion of lobster**
 
+.. automodule:: STG_net
+   :members:
+   
 Multiscale models
 -----------------
 Single-compartment multiscale model

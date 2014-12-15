@@ -10,12 +10,18 @@
 
 '''
 This LIF network with Ca plasticity is based on:
-David Higgins, Michael Graupner, Nicolas Brunel
+    David Higgins, Michael Graupner, Nicolas Brunel
     Memory Maintenance in Synapses with Calcium-Based
     Plasticity in the Presence of Background Activity
     PLOS Computational Biology, 2014.
 
 Author: Aditya Gilra, NCBS, Bangalore, October, 2014.
+
+This uses the Ca-based plasticity rule of:  
+    Graupner, Michael, and Nicolas Brunel. 2012.
+    Calcium-Based Plasticity Model Explains Sensitivity of Synaptic Changes to Spike Pattern, Rate, and Dendritic Location.
+    Proceedings of the National Academy of Sciences, February, 201109359.
+The Ca-based bistable synapse has been implemented as the GraupnerBrunel2012CaPlasticitySynHandler class.
 '''
 
 ## import modules and functions to be used
@@ -125,7 +131,6 @@ noiseSD = 3.3501        # if noisy, use noiseSD (3.3501 from Higgins et al 2014)
 
 class ExcInhNetBase:
     """Simulates and plots LIF neurons (exc and inh separate).
-    Author: Aditya Gilra, NCBS, Bangalore, India, October 2014
     """
     
     def __init__(self,N=N,fexc=fexc,el=el,vt=vt,Rm=Rm,Cm=Cm,vr=vr,\
