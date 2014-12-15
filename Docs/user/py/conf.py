@@ -21,6 +21,8 @@ sys.path.append(os.path.abspath('../../../Demos/snippets'))
 sys.path.append(os.path.abspath('../../../Demos/tutorials/ChemicalOscillators'))
 sys.path.append(os.path.abspath('../../../Demos/tutorials/ChemicalBistables'))
 sys.path.append(os.path.abspath('../../../Demos/tutorials/ExcInhNet'))
+sys.path.append(os.path.abspath('../../../Demos/neuroml/lobster_pyloric'))
+sys.path.append(os.path.abspath('../../../Demos/tutorials/ExcInhNetCaPlasticity'))
 
 # -- General configuration -----------------------------------------------------
 
