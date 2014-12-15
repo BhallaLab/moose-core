@@ -21,7 +21,8 @@ import moose
 from moose.utils import *
 from moose.neuroml.NeuroML import NeuroML
 
-from pylab import *
+import matplotlib.pyplot as plt
+import numpy as np
 
 simdt = 25e-6 # s
 plotdt = 25e-6 # s
@@ -90,12 +91,12 @@ def loadRunSTGNeuroML_L123(filename):
     print "Using graded synapses? = ", graded_syn
     print "Running model filename = ",filename," ... "
     moose.start(runtime)
-    tvec = arange(0.0,runtime+2*plotdt,plotdt)
+    tvec = np.arange(0.0,runtime+2*plotdt,plotdt)
     tvec = tvec[ : soma1Vm.vector.size ]
     
-    fig = figure(facecolor='w',figsize=(10,6))
+    fig = plt.figure(facecolor='w',figsize=(10,6))
     axA = plt.subplot2grid((3,2),(0,0),rowspan=3,colspan=1,frameon=False)
-    img = imread( 'STG.png' )
+    img = plt.imread( 'STG.png' )
     imgplot = axA.imshow( img )
     for tick in axA.get_xticklines():
         tick.set_visible(False)
@@ -104,42 +105,43 @@ def loadRunSTGNeuroML_L123(filename):
     axA.set_xticklabels([])
     axA.set_yticklabels([])
     ax = plt.subplot2grid((3,2),(0,1),rowspan=1,colspan=1)
-    plot(tvec,soma1Vm.vector*1000,label='AB_PD',color='g',linestyle='solid')
+    ax.plot(tvec,soma1Vm.vector*1000,label='AB_PD',color='g',linestyle='solid')
     ax.set_xticklabels([])
-    ylabel('AB_PD (mV)')
+    ax.set_ylabel('AB_PD (mV)')
     ax = plt.subplot2grid((3,2),(1,1),rowspan=1,colspan=1)
-    plot(tvec,soma2Vm.vector*1000,label='LP',color='r',linestyle='solid')
+    ax.plot(tvec,soma2Vm.vector*1000,label='LP',color='r',linestyle='solid')
     ax.set_xticklabels([])
-    ylabel('LP (mV)')
+    ax.set_ylabel('LP (mV)')
     ax = plt.subplot2grid((3,2),(2,1),rowspan=1,colspan=1)
-    plot(tvec,soma3Vm.vector*1000,label='PY',color='b',linestyle='solid')
-    ylabel('PY (mV)')
-    xlabel('time (s)')
+    ax.plot(tvec,soma3Vm.vector*1000,label='PY',color='b',linestyle='solid')
+    ax.set_ylabel('PY (mV)')
+    ax.set_xlabel('time (s)')
     fig.tight_layout()
 
-    fig = figure(facecolor='w')
-    plot(tvec,soma2Vm.vector*1000,label='LP',color='r',linestyle='solid')
-    plot(tvec,soma3Vm.vector*1000,label='PY',color='b',linestyle='solid')
-    legend()
-    xlabel('time (s)')
-    ylabel('Soma Vm (mV)')
+    fig = plt.figure(facecolor='w')
+    plt.plot(tvec,soma2Vm.vector*1000,label='LP',color='r',linestyle='solid')
+    plt.plot(tvec,soma3Vm.vector*1000,label='PY',color='b',linestyle='solid')
+    plt.legend()
+    plt.xlabel('time (s)')
+    plt.ylabel('Soma Vm (mV)')
 
-    figure(facecolor='w')
-    plot(tvec,channel_Ik.vector,color='b',linestyle='solid')
-    title('KCa current; Ca conc')
-    xlabel('time (s)')
-    ylabel('Ik (Amp)')
-    twinx()
-    plot(tvec,capool_Ca.vector,color='r',linestyle='solid')
-    ylabel('Ca (mol/m^3)')
+    plt.figure(facecolor='w')
+    plt.plot(tvec,channel_Ik.vector,color='b',linestyle='solid')
+    plt.title('KCa current; Ca conc')
+    plt.xlabel('time (s)')
+    plt.ylabel('Ik (Amp)')
+    plt.twinx()
+    plt.plot(tvec,capool_Ca.vector,color='r',linestyle='solid')
+    plt.ylabel('Ca (mol/m^3)')
 
-    figure(facecolor='w')
-    plot(tvec,syn_Ik.vector,color='b',linestyle='solid')    
-    title('Ach syn current in '+soma2_path)
-    xlabel('time (s)')
-    ylabel('Isyn (S)')
+    plt.figure(facecolor='w')
+    plt.plot(tvec,syn_Ik.vector,color='b',linestyle='solid')    
+    plt.title('Ach syn current in '+soma2_path)
+    plt.xlabel('time (s)')
+    plt.ylabel('Isyn (S)')
     print "Showing plots ..."
-    show()
+    
+    plt.show()
 
 filename = "Generated.net.xml"
 if __name__ == "__main__":
