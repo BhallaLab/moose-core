@@ -224,4 +224,5 @@ def main():
 
 # Run below if script is executed standalone.
 if __name__ == '__main__':
+    '''The main function to simulate an integrate and fire neuron.'''
     main()
