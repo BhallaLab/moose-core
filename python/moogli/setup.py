@@ -36,13 +36,13 @@ libraries               =   [ "QtCore"
 
 # list of directories to search for libraries at link-time
 library_dirs = []
-library_dirs            =   [ "/home/aviral/OpenSceneGraph-3.2.1-rc2/build/lib"
+library_dirs            =   [ #"/home/aviral/OpenSceneGraph-3.2.1-rc2/build/lib"
                             ]
 
 # # list of directories to search for shared (dynamically loaded) libraries at run-time
 runtime_library_dirs = []
-runtime_library_dirs    =   [ "/home/aviral/OpenSceneGraph-3.2.1-rc2/build/lib/"
-                            , "/home/aviral/OpenSceneGraph-3.2.1-rc2/build/lib/osgPlugins-3.2.1/"
+runtime_library_dirs    =   [ #"/home/aviral/OpenSceneGraph-3.2.1-rc2/build/lib/"
+                            , #"/home/aviral/OpenSceneGraph-3.2.1-rc2/build/lib/osgPlugins-3.2.1/"
                             ]
 
 # additional command line options for the compiler command line
@@ -67,7 +67,7 @@ include_dirs            =   [ "."
                             , "/usr/share/sip/PyQt4/QtCore/"
                             , "/usr/share/sip/PyQt4/QtGui/"
                             , "/usr/share/sip/PyQt4/QtOpenGL/"
-                            , "/home/aviral/OpenSceneGraph-3.2.1-rc2/include"
+                            , #"/home/aviral/OpenSceneGraph-3.2.1-rc2/include"
                             ]
 
 # define pre-processor macros
