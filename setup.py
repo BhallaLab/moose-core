@@ -190,6 +190,7 @@ moose_module = Extension(
              'kinetics/testKinetics.cpp',
              'ksolve/KinSparseMatrix.cpp',
              'ksolve/ZombiePool.cpp',
+             'ksolve/ZombiePoolInterface.cpp',
              'ksolve/ZombieBufPool.cpp',
              'ksolve/ZombieReac.cpp',
              'ksolve/ZombieEnz.cpp',
