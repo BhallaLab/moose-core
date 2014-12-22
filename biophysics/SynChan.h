@@ -36,6 +36,10 @@ class SynChan: public ChanCommon
 		// Utility function for any time Gbar changes
 		void normalizeGbar();
 
+		/// Utility function used to do the alpha function calculations for
+		/// Gk.
+		/// Separated out for convenience so that derived classes can use.
+		double calcGk();
 		/////////////////////////////////////////////////////////////////
 		// ElementFinfo access function definitions
 		/////////////////////////////////////////////////////////////////

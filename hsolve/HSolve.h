@@ -124,6 +124,7 @@ public:
 	//~ const vector< Id >& getCaConcs() const;
 	double getCa( Id id ) const;
 	void setCa( Id id, double Ca );
+	void iCa( Id id, double iCa ); // Add incoming calcium current.
 	
 	double getCaBasal( Id id ) const;
 	void setCaBasal( Id id, double CaBasal );
