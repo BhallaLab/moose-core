@@ -202,6 +202,16 @@ void SynChan::normalizeGbar()
 // Dest function definitions
 ///////////////////////////////////////////////////
 
+/// Update alpha function terms for synaptic channel.
+double SynChan::calcGk()
+{
+	X_ = modulation_ * activation_ * xconst1_ + X_ * xconst2_;
+	Y_ = X_ * yconst1_ + Y_ * yconst2_;
+	activation_ = 0.0;
+	modulation_ = 1.0;
+	return Y_ * norm_;
+}
+
 void SynChan::vProcess( const Eref& e, ProcPtr info )
 {
 	// http://www.genesis-sim.org/GENESIS/Hyperdoc/Manual-26.html#synchan
@@ -209,13 +219,8 @@ void SynChan::vProcess( const Eref& e, ProcPtr info )
     //      is sent from SynHandler-s for one dt
     // For continuous activation in a graded synapse,
     //      send activation for continous dt-s.
-	X_ = modulation_ * activation_ * xconst1_ + X_ * xconst2_;
-	Y_ = X_ * yconst1_ + Y_ * yconst2_;
-	double Gk = Y_ * norm_;
-	setGk( e, Gk );
+	setGk( e, calcGk() );
 	updateIk();
-	activation_ = 0.0;
-	modulation_ = 1.0;
 	sendProcessMsgs( e, info ); // Sends out messages for channel.
 }
 

@@ -352,6 +352,7 @@ const Cinfo* Clock::initCinfo()
 		"	IzhIF				2		50e-6\n"
 		"	IzhikevichNrn			2		50e-6\n"
 		"	SynChan				2		50e-6\n"
+		"	NMDAchan				2		50e-6\n"
 		"	GapJunction			2		50e-6\n"
 		"	HHChannel			2		50e-6\n"
 		"	HHChannel2D			2		50e-6\n"
@@ -771,6 +772,7 @@ void Clock::buildDefaultTick()
 	defaultTick_["IzhIF"] = 2;
 	defaultTick_["IzhikevichNrn"] = 2;
 	defaultTick_["SynChan"] = 2;
+	defaultTick_["NMDAchan"] = 2;
 	defaultTick_["GapJunction"] = 2;
 	defaultTick_["HHChannel"] = 2;
 	defaultTick_["HHChannel2D"] = 2;

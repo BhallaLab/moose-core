@@ -13,8 +13,9 @@
 #define _ChanCommon_h
 
 /**
- * The ChanCommon.g is the base class for all ion channel classes in MOOSE.
- * It knows how to communicate with the parent compartment, not much else.
+ * The ChanCommon.g handles the data fields for all ion channel classes 
+ * in MOOSE, when they are using regular ee calculations rather than 
+ * being zombified by the solver.
  */
 
 class ChanCommon: public virtual ChanBase

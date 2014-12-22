@@ -50,6 +50,12 @@ const Cinfo* IntFireBase::initCinfo()
 			&IntFireBase::getRefractoryPeriod
 		);
 
+		static ReadOnlyElementValueFinfo< IntFireBase, double > lastEventTime(
+			"lastEventTime",
+			"Timestamp of last firing.",
+			&IntFireBase::getLastEventTime
+		);
+
 		static ReadOnlyElementValueFinfo< IntFireBase, bool > hasFired(
 			"hasFired",
 			"The object has fired within the last timestep",
@@ -69,6 +75,7 @@ const Cinfo* IntFireBase::initCinfo()
 		&vReset,				// Value
 		&refractoryPeriod,		// Value
 		&hasFired,				// ReadOnlyValue
+		&lastEventTime,			// ReadOnlyValue
 		&activation,			// DestFinfo
 		IntFireBase::spikeOut() // MsgSrc
 	};
@@ -143,6 +150,11 @@ void IntFireBase::setRefractoryPeriod( const Eref& e, double val )
 double IntFireBase::getRefractoryPeriod( const Eref& e ) const
 {
 	return refractT_;
+}
+
+double IntFireBase::getLastEventTime( const Eref& e ) const
+{
+	return lastEvent_;
 }
 
 bool IntFireBase::hasFired( const Eref& e ) const
