@@ -528,8 +528,8 @@ class GraphicalView(QtGui.QGraphicsView):
         self.selections = []
     
     def deleteConnection(self,item):
-        print "delete Connection"
         #Delete moose connection, i.e one can click on connection arrow and delete the connection
+        deleteSolver(self.layoutPt.modelRoot)
         if isinstance(item,QtGui.QGraphicsPolygonItem):
             src = self.layoutPt.lineItem_dict[item]
             srcZero = [k for k, v in self.layoutPt.mooseId_GObj.iteritems() if v == src[0]]
@@ -547,7 +547,6 @@ class GraphicalView(QtGui.QGraphicsView):
             self.sceneContainerPt.removeItem(item)
     
     def deleteItem(self,item):
-        print "delete Item"
         #delete Items 
         if isinstance(item,KineticsDisplayItem):
             if moose.exists(item.mobj.path):
