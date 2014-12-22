@@ -773,7 +773,8 @@ bool ReadCell::addCanonicalChannel(
 	if (
 		className == "HHChannel" ||
 		className == "HHChannel2D" ||
-		className == "SynChan"
+		className == "SynChan" ||
+		className == "NMDAchan"
 	) {
 		ObjId mid = shell_->doAddMsg(
 			"Single",

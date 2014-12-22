@@ -72,6 +72,7 @@ typedef unsigned short BindIndex;
 extern const double PI;	// Defined in consts.cpp
 extern const double NA; // Defined in consts.cpp
 extern const double FaradayConst; // Defined in consts.cpp
+extern const double GasConst; // Defined in consts.cpp
 
 class Element;
 class Eref;

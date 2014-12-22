@@ -16,6 +16,8 @@ const double NA = 6.0221415e23;
 
 const double FaradayConst =  96485.3415; // s A / mol
 
+const double GasConst = 8.3144621; // R, units are J/(K.mol)
+
 /// Used by ObjId and Eref
 const unsigned int ALLDATA = ~0U;
 
