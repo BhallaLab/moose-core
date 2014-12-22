@@ -29,6 +29,7 @@ class IntFireBase: public Compartment
 			double getVReset( const Eref& e  ) const;
 			void setRefractoryPeriod( const Eref& e,  double val );
 			double getRefractoryPeriod( const Eref& e  ) const;
+			double getLastEventTime( const Eref& e  ) const;
 			bool hasFired( const Eref& e ) const;
 
 			// Dest function definitions.
