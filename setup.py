@@ -115,6 +115,7 @@ moose_module = Extension(
              'biophysics/Neuron.cpp',
              'biophysics/ReadCell.cpp',
              'biophysics/SynChan.cpp',
+             'biophysics/NMDAchan.cpp',
              'biophysics/testBiophysics.cpp',
              'biophysics/IzhikevichNrn.cpp',
              'biophysics/DifShell.cpp',
