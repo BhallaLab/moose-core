@@ -32,7 +32,7 @@ OBJ = \
 	Neuron.o	\
 	ReadCell.o	\
 	SynChan.o	\
-	NMDAchan.o	\
+	NMDAChan.o	\
 	testBiophysics.o	\
 	IzhikevichNrn.o	\
 	DifShell.o	\
@@ -73,7 +73,7 @@ SymCompartment.o: CompartmentBase.h Compartment.h SymCompartment.h
 ChanBase.o: ChanBase.h
 ChanCommon.o: ChanBase.h ChanCommon.h
 SynChan.o: SynChan.h ChanBase.h ChanCommon.h
-NMDAchan.o: NMDAchan.h SynChan.h ChanBase.h ChanCommon.h
+NMDAchan.o: NMDAChan.h SynChan.h ChanBase.h ChanCommon.h
 Leakage.o: Leakage.h ChanBase.h ChanCommon.h
 GapJunction.o: GapJunction.h
 HHChannelBase.o: ChanBase.h HHChannelBase.h HHGate.h
