@@ -12,10 +12,10 @@
 #include "ChanBase.h"
 #include "ChanCommon.h"
 #include "SynChan.h"
-#include "NMDAchan.h"
+#include "NMDAChan.h"
 
 const double EPSILON = 1.0e-12;
-const double NMDAchan::valency_ = 2.0;
+const double NMDAChan::valency_ = 2.0;
 
 SrcFinfo1< double >* ICaOut()
 {
@@ -24,7 +24,7 @@ SrcFinfo1< double >* ICaOut()
 	return &ICaOut;
 }
 
-const Cinfo* NMDAchan::initCinfo()
+const Cinfo* NMDAChan::initCinfo()
 {
 	/////////////////////////////////////////////////////////////////////
 	// Shared messages
@@ -35,57 +35,57 @@ const Cinfo* NMDAchan::initCinfo()
 	///////////////////////////////////////////////////////
 	// Field definitions
 	///////////////////////////////////////////////////////
-	static ValueFinfo< NMDAchan, double > KMg_A( "KMg_A", 
+	static ValueFinfo< NMDAChan, double > KMg_A( "KMg_A", 
 			"1/eta",
-			&NMDAchan::setKMg_A,
-			&NMDAchan::getKMg_A
+			&NMDAChan::setKMg_A,
+			&NMDAChan::getKMg_A
 		);
-	static ValueFinfo< NMDAchan, double > KMg_B( "KMg_B", 
+	static ValueFinfo< NMDAChan, double > KMg_B( "KMg_B", 
 			"1/gamma",
-			&NMDAchan::setKMg_B,
-			&NMDAchan::getKMg_B
+			&NMDAChan::setKMg_B,
+			&NMDAChan::getKMg_B
 		);
-	static ValueFinfo< NMDAchan, double > CMg( "CMg",
+	static ValueFinfo< NMDAChan, double > CMg( "CMg",
 			"[Mg] in mM",
-			&NMDAchan::setCMg,
-			&NMDAchan::getCMg
+			&NMDAChan::setCMg,
+			&NMDAChan::getCMg
 		);
-	static ValueFinfo< NMDAchan, double > temperature( "temperature", 
+	static ValueFinfo< NMDAChan, double > temperature( "temperature", 
 			"Temperature in degrees Kelvin.",
-			&NMDAchan::setTemperature,
-			&NMDAchan::getTemperature
+			&NMDAChan::setTemperature,
+			&NMDAChan::getTemperature
 		);
-	static ValueFinfo< NMDAchan, double > extCa( "extCa", 
+	static ValueFinfo< NMDAChan, double > extCa( "extCa", 
 			"External concentration of Calcium in millimolar",
-			&NMDAchan::setExtCa,
-			&NMDAchan::getExtCa
+			&NMDAChan::setExtCa,
+			&NMDAChan::getExtCa
 		);
-	static ValueFinfo< NMDAchan, double > intCa( "intCa", 
+	static ValueFinfo< NMDAChan, double > intCa( "intCa", 
 			"Internal concentration of Calcium in millimolar."
 			"This is the final value used by the internal calculations, "
 			"and may also be updated by the assignIntCa message after "
 			"offset and scaling.",
-			&NMDAchan::setIntCa,
-			&NMDAchan::getIntCa
+			&NMDAChan::setIntCa,
+			&NMDAChan::getIntCa
 		);
-	static ValueFinfo< NMDAchan, double > intCaScale( "intCaScale", 
+	static ValueFinfo< NMDAChan, double > intCaScale( "intCaScale", 
 			"Scale factor for internal concentration of Calcium in mM, "
 			"applied to values coming in through the assignIntCa message. "
 			"Required because in many models the units of calcium may "
 			"differ. ",
-			&NMDAchan::setIntCaScale,
-			&NMDAchan::getIntCaScale
+			&NMDAChan::setIntCaScale,
+			&NMDAChan::getIntCaScale
 		);
-	static ValueFinfo< NMDAchan, double > intCaOffset( "intCaOffset", 
+	static ValueFinfo< NMDAChan, double > intCaOffset( "intCaOffset", 
 			"Offsetfor internal concentration of Calcium in mM, "
 			"applied _after_ the scaling to mM is done. "
 			"Applied to values coming in through the assignIntCa message. "
 			"Required because in many models the units of calcium may "
 			"differ. ",
-			&NMDAchan::setIntCaOffset,
-			&NMDAchan::getIntCaOffset
+			&NMDAChan::setIntCaOffset,
+			&NMDAChan::getIntCaOffset
 		);
-	static ValueFinfo< NMDAchan, double > condFraction( "condFraction", 
+	static ValueFinfo< NMDAChan, double > condFraction( "condFraction", 
 			"Fraction of total channel conductance that is due to the "
 			"passage of Ca ions. This is related to the ratio of "
 			"permeabilities of different ions, and is typically in "
@@ -93,12 +93,12 @@ const Cinfo* NMDAchan::initCinfo()
 			"the concentrations of Na and K ions are far larger than that "
 			"of Ca. Thus, even though the channel is more permeable to "
 			"Ca, the conductivity and hence current due to Ca is smaller. ",
-			&NMDAchan::setCondFraction,
-			&NMDAchan::getCondFraction
+			&NMDAChan::setCondFraction,
+			&NMDAChan::getCondFraction
 		);
-	static ReadOnlyValueFinfo< NMDAchan, double > ICa( "ICa", 
+	static ReadOnlyValueFinfo< NMDAChan, double > ICa( "ICa", 
 			"Current carried by Ca ions",
-			&NMDAchan::getICa
+			&NMDAChan::getICa
 		);
 	static ElementValueFinfo< ChanBase, double > permeability( 
 			"permeability", 
@@ -115,10 +115,10 @@ const Cinfo* NMDAchan::initCinfo()
 			"Assign the internal concentration of Ca. The final value "
 			"is computed as: "
 			"     intCa = assignIntCa * intCaScale + intCaOffset ",
-			new OpFunc1< NMDAchan,  double >( &NMDAchan::assignIntCa )
+			new OpFunc1< NMDAChan,  double >( &NMDAChan::assignIntCa )
 		);
 	/////////////////////////////////////////////////////////////////////
-	static Finfo* NMDAchanFinfos[] =
+	static Finfo* NMDAChanFinfos[] =
 	{
 		&KMg_A,			// Value
 		&KMg_B,			// Value
@@ -137,35 +137,35 @@ const Cinfo* NMDAchan::initCinfo()
 
 	static string doc[] =
 	{
-		"Name", "NMDAchan",
+		"Name", "NMDAChan",
 		"Author", "Upinder S. Bhalla, 2007, NCBS",
-		"Description", "NMDAchan: Ligand-gated ion channel incorporating "
+		"Description", "NMDAChan: Ligand-gated ion channel incorporating "
 				"both the Mg block and a GHK calculation for Calcium "
 				"component of the current carried by the channel. "
 				"Assumes a steady reversal potential regardless of "
 				"Ca gradients. "
 				"Derived from SynChan. "
 	};
-	static Dinfo< NMDAchan > dinfo;
-	static Cinfo NMDAchanCinfo(
-		"NMDAchan",
+	static Dinfo< NMDAChan > dinfo;
+	static Cinfo NMDAChanCinfo(
+		"NMDAChan",
 		SynChan::initCinfo(),
-		NMDAchanFinfos,
-		sizeof( NMDAchanFinfos )/sizeof(Finfo *),
+		NMDAChanFinfos,
+		sizeof( NMDAChanFinfos )/sizeof(Finfo *),
 		&dinfo,
 		doc,
 		sizeof( doc ) / sizeof( string )
 	);
 
-	return &NMDAchanCinfo;
+	return &NMDAChanCinfo;
 }
 
-static const Cinfo* NMDAchanCinfo = NMDAchan::initCinfo();
+static const Cinfo* NMDAChanCinfo = NMDAChan::initCinfo();
 
 ///////////////////////////////////////////////////
 // Constructor
 ///////////////////////////////////////////////////
-NMDAchan::NMDAchan()
+NMDAChan::NMDAChan()
 	:	
 		KMg_A_( 1.0 ), // These are NOT the same as the A, B state
 		KMg_B_( 1.0 ), //. variables used for Exp Euler integration.
@@ -180,14 +180,14 @@ NMDAchan::NMDAchan()
 		const_( FaradayConst * valency_ / (GasConst * temperature_ ) )
 {;}
 
-NMDAchan::~NMDAchan()
+NMDAChan::~NMDAChan()
 {;}
 
 ///////////////////////////////////////////////////
 // Field function definitions
 ///////////////////////////////////////////////////
 
-void NMDAchan::setKMg_A( double KMg_A )
+void NMDAChan::setKMg_A( double KMg_A )
 {
 	if ( KMg_A < EPSILON ) {
 		cout << "Error: KMg_A=" << KMg_A << " must be > 0. Not set.\n";
@@ -195,11 +195,11 @@ void NMDAchan::setKMg_A( double KMg_A )
 		KMg_A_ = KMg_A;
 	}
 }
-double NMDAchan::getKMg_A() const
+double NMDAChan::getKMg_A() const
 {
 	return KMg_A_;
 }
-void NMDAchan::setKMg_B( double KMg_B )
+void NMDAChan::setKMg_B( double KMg_B )
 {
 	if ( KMg_B < EPSILON ) {
 		cout << "Error: KMg_B=" << KMg_B << " must be > 0. Not set.\n";
@@ -207,11 +207,11 @@ void NMDAchan::setKMg_B( double KMg_B )
 		KMg_B_ = KMg_B;
 	}
 }
-double NMDAchan::getKMg_B() const
+double NMDAChan::getKMg_B() const
 {
 	return KMg_B_;
 }
-void NMDAchan::setCMg( double CMg )
+void NMDAChan::setCMg( double CMg )
 {
 	if ( CMg < EPSILON ) {
 		cout << "Error: CMg = " << CMg << " must be > 0. Not set.\n";
@@ -219,12 +219,12 @@ void NMDAchan::setCMg( double CMg )
 		CMg_ = CMg;
 	}
 }
-double NMDAchan::getCMg() const
+double NMDAChan::getCMg() const
 {
 	return CMg_;
 }
 
-void NMDAchan::setExtCa( double Cout )
+void NMDAChan::setExtCa( double Cout )
 {
 	if ( Cout < EPSILON ) {
 		cout << "Error: Cout = " << Cout << " must be > 0. Not set.\n";
@@ -232,12 +232,12 @@ void NMDAchan::setExtCa( double Cout )
 		Cout_ = Cout;
 	}
 }
-double NMDAchan::getExtCa() const
+double NMDAChan::getExtCa() const
 {
 	return Cout_;
 }
 
-void NMDAchan::setIntCa( double Cin )
+void NMDAChan::setIntCa( double Cin )
 {
 	if ( Cin < 0.0 ) {
 		cout << "Error: IntCa = " << Cin << " must be > 0. Not set.\n";
@@ -246,51 +246,51 @@ void NMDAchan::setIntCa( double Cin )
 	}
 }
 
-double NMDAchan::getIntCa() const
+double NMDAChan::getIntCa() const
 {
 	return Cin_;
 }
 
-void NMDAchan::setIntCaScale( double v )
+void NMDAChan::setIntCaScale( double v )
 {
 	intCaScale_ = v;
 }
 
-double NMDAchan::getIntCaScale() const
+double NMDAChan::getIntCaScale() const
 {
 	return intCaScale_;
 }
 
-void NMDAchan::setIntCaOffset( double v )
+void NMDAChan::setIntCaOffset( double v )
 {
 	intCaOffset_ = v;
 }
 
-double NMDAchan::getIntCaOffset() const
+double NMDAChan::getIntCaOffset() const
 {
 	return intCaOffset_;
 }
 
-void NMDAchan::setCondFraction( double v )
+void NMDAChan::setCondFraction( double v )
 {
 	condFraction_ = v;
 }
 
-double NMDAchan::getCondFraction() const
+double NMDAChan::getCondFraction() const
 {
 	return condFraction_;
 }
 
-double NMDAchan::getICa() const
+double NMDAChan::getICa() const
 {
 	return ICa_;
 }
 
-double NMDAchan::getTemperature() const
+double NMDAChan::getTemperature() const
 {
 	return temperature_;
 }
-void NMDAchan::setTemperature( double temperature )
+void NMDAChan::setTemperature( double temperature )
 {
 	if ( temperature < EPSILON ) {
 		cout << "Error: temperature = " << temperature << " must be > 0. Not set.\n";
@@ -303,7 +303,7 @@ void NMDAchan::setTemperature( double temperature )
 ///////////////////////////////////////////////////////////
 // MsgDest function
 ///////////////////////////////////////////////////////////
-void NMDAchan::assignIntCa( double v )
+void NMDAChan::assignIntCa( double v )
 {
 	Cin_ = v * intCaScale_ + intCaOffset_;
 }
@@ -327,7 +327,7 @@ void NMDAchan::assignIntCa( double v )
 // Process functions
 ///////////////////////////////////////////////////////////
 
-void NMDAchan::vProcess( const Eref& e, ProcPtr info )
+void NMDAChan::vProcess( const Eref& e, ProcPtr info )
 {
 	// First do the regular channel current calculations for the 
 	// summed ions, in which the NMDAR behaves like a regular channel
@@ -446,11 +446,11 @@ void NMDAchan::vProcess( const Eref& e, ProcPtr info )
 	ICaOut()->send( e, ICa_ );
 }
 
-void NMDAchan::vReinit( const Eref& e, ProcPtr info )
+void NMDAChan::vReinit( const Eref& e, ProcPtr info )
 {
 	SynChan::vReinit( e, info );
 	if ( CMg_ < EPSILON || KMg_B_ < EPSILON || KMg_A_ < EPSILON ) {
-		cout << "Error: NMDAchan::innerReinitFunc: fields KMg_A, KMg_B, CMg\nmust be greater than zero. Resetting to 1 to avoid numerical errors\n";
+		cout << "Error: NMDAChan::innerReinitFunc: fields KMg_A, KMg_B, CMg\nmust be greater than zero. Resetting to 1 to avoid numerical errors\n";
 		if ( CMg_ < EPSILON ) CMg_ = 1.0;
 		if ( KMg_B_ < EPSILON ) KMg_B_ = 1.0;
 		if ( KMg_A_ < EPSILON ) KMg_A_ = 1.0;
