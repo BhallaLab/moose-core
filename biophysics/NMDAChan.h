@@ -7,22 +7,22 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifndef _NMDACHAN_h
-#define _NMDACHAN_h
+#ifndef _NMDACHAN_H
+#define _NMDACHAN_H
 
 /**
- * The NMDAchan incorporates calculations for Mg block, Nernst potential
+ * The NMDAChan incorporates calculations for Mg block, Nernst potential
  * and/or GHK estimates for the fraction of current carried by Ca.
  * These can also be done by messaging but it is messy and slow, so
  * I've lumped them. Also I've assumed that we're only dealing with the
  * GHK equation for Ca. This is not so good considering that other ions
  * also go through the channel.
  */
-class NMDAchan: public SynChan
+class NMDAChan: public SynChan
 {
 	public:
-		NMDAchan();
-		~NMDAchan();
+		NMDAChan();
+		~NMDAChan();
 
 		/////////////////////////////////////////////////////////////
 		// Value field access function definitions
@@ -93,4 +93,4 @@ class NMDAchan: public SynChan
 };
 
 
-#endif // _NMDAchan_h
+#endif // _NMDACHAN_H
