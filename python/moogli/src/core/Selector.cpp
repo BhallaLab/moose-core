@@ -5,9 +5,6 @@ Selector::Selector( /* QWidget * right_click_menu */
                     , mode(-1)
 {
      // this -> callback = callback;
-     menu -> addMenu(QString("A"));
-     menu -> addMenu(QString("B"));
-     menu -> addMenu(QString("C"));
 }
 
 bool
@@ -22,20 +19,22 @@ Selector::handle( const osgGA::GUIEventAdapter& ea
         return false;
     }
 
-    Geometry * geometry   = _get_intersection(ea,viewer);
-    bool blank_click      = geometry == nullptr;
-    if(!blank_click)
-    {
-        RECORD_INFO("Compartment clicked " + geometry -> getName());
-    }
-    else
-    {
-        RECORD_INFO("Problem");
-    }
+    // Geometry * geometry   = _get_intersection(ea,viewer);
+    // cout << geometry;
+    // bool blank_click      = geometry == nullptr;
+    // if(!blank_click)
+    // {
+    //     RECORD_INFO("Compartment clicked " + geometry -> getName());
+    // }
+    // else
+    // {
+    //     // return true;
+    //     // RECORD_INFO("Problem");
+    // }
 
     if(select_info -> get_event_type() == 2)
     {
-        RECORD_INFO("Reaching here!");
+        RECORD_INFO("Event Type => 2");
         return true;
     }
 
@@ -72,12 +71,14 @@ Selector::handle( const osgGA::GUIEventAdapter& ea
     //     // Start the drag and drop operation
     //     drag->start();
     // }
+
     bool drag_event_occurred = ea.getEventType() & osgGA::GUIEventAdapter::DRAG;
     bool push_event_occurred = ea.getEventType() & osgGA::GUIEventAdapter::PUSH;
+    bool release_event_occurred = ea.getEventType() & osgGA::GUIEventAdapter::RELEASE;
     bool left_mouse_button_pressed = ea.getButton() == osgGA::GUIEventAdapter::LEFT_MOUSE_BUTTON;
     bool ctrl_key_pressed = ea.getModKeyMask() &  osgGA::GUIEventAdapter::MODKEY_CTRL;
 
-    if(left_mouse_button_pressed && drag_event_occurred && ctrl_key_pressed)
+    if(left_mouse_button_pressed && push_event_occurred && ctrl_key_pressed)
     {
         Geometry * geometry = _get_intersection(ea,viewer);
         bool blank_click    = geometry == nullptr;
@@ -92,7 +93,7 @@ Selector::handle( const osgGA::GUIEventAdapter& ea
         return false;
     }
 
-    if(push_event_occurred && left_mouse_button_pressed)
+    if(release_event_occurred && left_mouse_button_pressed)
     {
         Geometry * geometry   = _get_intersection(ea,viewer);
         bool blank_click      = geometry == nullptr;
@@ -101,7 +102,7 @@ Selector::handle( const osgGA::GUIEventAdapter& ea
         {
             if(blank_click)
             {
-                RECORD_INFO("Do Nothing"); // do nothing
+                // RECORD_INFO("Do Nothing"); // do nothing
             }
             else if(selection_exists)
             {
@@ -188,46 +189,54 @@ Selector::handle( const osgGA::GUIEventAdapter& ea
 /*
 http://comments.gmane.org/gmane.comp.graphics.openscenegraph.user/80993
 */
-// Geometry *
-// Selector::_get_intersection( const osgGA::GUIEventAdapter& ea
-//                            , osgViewer::Viewer* viewer
-//                            )
-// {
-//     osgUtil::LineSegmentIntersector::Intersections intersections;
-//     if (viewer -> computeIntersections(ea,intersections))
-//     {
-//         const osgUtil::LineSegmentIntersector::Intersection& hit =
-//             *intersections.begin();
-//         return hit.drawable -> asGeometry();
-//     }
-//     return nullptr;
-// }
-
 Geometry *
 Selector::_get_intersection( const osgGA::GUIEventAdapter& ea
-                           , osgViewer::Viewer * viewer
+                           , osgViewer::Viewer* viewer
                            )
 {
-    osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector =
-            new osgUtil::LineSegmentIntersector( osgUtil::Intersector::WINDOW
-                                               , ea.getXnormalized()
-                                               , ea.getYnormalized()
-                                               );
-    osgUtil::IntersectionVisitor iv( intersector.get() );
-
-    viewer->getCamera() -> accept( iv );
-
-    if ( intersector->containsIntersections() )
+    osgUtil::LineSegmentIntersector::Intersections intersections;
+    if (viewer -> computeIntersections(ea,intersections))
     {
-        const osgUtil::LineSegmentIntersector::Intersection& result =
-                *(intersector->getIntersections().begin());
-
-            // LOD * lod = dynamic_cast<LOD *>(result.drawable -> getParent(0) -> getParent(0));
-        RECORD_INFO("Reaching here!");
-        return result.drawable -> asGeometry();
+        const osgUtil::LineSegmentIntersector::Intersection& hit =
+            *intersections.begin();
+        return hit.drawable -> asGeometry();
     }
     return nullptr;
 }
+
+
+/*
+http://uncommoncode.wordpress.com/2010/09/22/select-objects-with-mouse-in-openscenegraph/
+*/
+// Geometry *
+// Selector::_get_intersection( const osgGA::GUIEventAdapter& ea
+//                            , osgViewer::Viewer * viewer
+//                            )
+// {
+//     osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector =
+//             new osgUtil::LineSegmentIntersector( osgUtil::Intersector::PROJECTION
+//                                                , ea.getXnormalized()
+//                                                , ea.getYnormalized()
+//                                                );
+//     RECORD_INFO(to_string(ea.getXnormalized()));
+//     RECORD_INFO(to_string(ea.getYnormalized()));
+//     osgUtil::IntersectionVisitor iv( intersector.get() );
+
+//     cout << "Camera 2 => " << viewer -> getCamera();
+
+//     viewer->getCamera() -> accept( iv );
+
+//     if ( intersector->containsIntersections() )
+//     {
+//         const osgUtil::LineSegmentIntersector::Intersection& result =
+//                 *(intersector->getIntersections().begin());
+
+//             // LOD * lod = dynamic_cast<LOD *>(result.drawable -> getParent(0) -> getParent(0));
+//         RECORD_INFO("Reaching here!");
+//         return result.drawable -> asGeometry();
+//     }
+//     return nullptr;
+// }
 
 
 void

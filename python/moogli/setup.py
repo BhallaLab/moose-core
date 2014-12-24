@@ -42,7 +42,7 @@ library_dirs            =   [ #"/home/aviral/OpenSceneGraph-3.2.1-rc2/build/lib"
 # # list of directories to search for shared (dynamically loaded) libraries at run-time
 runtime_library_dirs = []
 runtime_library_dirs    =   [ #"/home/aviral/OpenSceneGraph-3.2.1-rc2/build/lib/"
-                            , #"/home/aviral/OpenSceneGraph-3.2.1-rc2/build/lib/osgPlugins-3.2.1/"
+                            #, "/home/aviral/OpenSceneGraph-3.2.1-rc2/build/lib/osgPlugins-3.2.1/"
                             ]
 
 # additional command line options for the compiler command line
@@ -58,7 +58,7 @@ extra_link_args         =   [ "-fPIC"
 
 #specify include directories to search
 include_dirs            =   [ "."
-                            , "include"
+                            , "./include"
                             , "/usr/share/sip/PyQt4/"
                             , "/usr/include/qt4/"
                             , "/usr/include/qt4/QtCore/"
@@ -67,7 +67,7 @@ include_dirs            =   [ "."
                             , "/usr/share/sip/PyQt4/QtCore/"
                             , "/usr/share/sip/PyQt4/QtGui/"
                             , "/usr/share/sip/PyQt4/QtOpenGL/"
-                            , #"/home/aviral/OpenSceneGraph-3.2.1-rc2/include"
+                            #, "/home/aviral/OpenSceneGraph-3.2.1-rc2/include"
                             ]
 
 # define pre-processor macros
@@ -86,6 +86,7 @@ moogli = Extension( name                  =   "_moogli"
                                               , "src/core/MorphologyViewer.cpp"
                                               , "moc/MorphologyViewer.moc.cpp"
                                               , "src/core/Selector.cpp"
+                                              , "src/core/PickHandler.cpp"
                                               , "src/mesh/CylinderMesh.cpp"
                                               , "src/mesh/SphereMesh.cpp"
                                               , "src/utility/conversions.cpp"
@@ -120,9 +121,9 @@ setup( name             =   'moogli'
      , maintainer_email =   'aviralg@ncbs.res.in'
      , url              =   ''
      , download_url     =   ''
-     , description      =   'A Neuronal Simulator'
+     , description      =   ''
      , long_description =   ''
-     , classifiers      =   [ 'Development Status :: Beta'
+     , classifiers      =   [ 'Development Status :: Alpha'
                             , 'Environment :: GUI'
                             , 'Environment :: Desktop'
                             , 'Intended Audience :: End Users/Desktop'

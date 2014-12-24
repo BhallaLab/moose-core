@@ -205,18 +205,19 @@ MorphologyViewer::create_camera()
 
     Camera * camera = new Camera();
 
-    double height = ds->getScreenHeight();
-    double width = ds->getScreenWidth() ;
+    double h = ds->getScreenHeight();
+    double w = ds->getScreenWidth() ;
     double distance = ds->getScreenDistance();
-    double vfov = osg::RadiansToDegrees(atan2(height/2.0f,distance)*2.0);
-    double aspect_ratio = width/height;
-    RECORD_INFO("Width: " + to_string(width));
-    RECORD_INFO("Height: " + to_string(height));
-    traits -> height = 1000;
-    traits -> width = int(traits -> height * aspect_ratio);
+    double vfov = osg::RadiansToDegrees(atan2(h/2.0f,distance)*2.0);
+    double aspect_ratio = w/h;
+    // RECORD_INFO("Width: " + to_string(width));
+    // RECORD_INFO("Height: " + to_string(height));
     traits -> x = 0;
     traits -> y = 0;
-    RECORD_INFO("Traits Width: " + to_string(traits -> width));
+    traits -> width = width;
+    traits -> height = static_cast<int>(traits -> width / aspect_ratio);
+    // traits -> width = int(traits -> height * aspect_ratio);
+    // RECORD_INFO("Traits Width: " + to_string(traits -> width));
     camera -> setProjectionMatrixAsPerspective( vfov
                                               , aspect_ratio
                                               , z_near

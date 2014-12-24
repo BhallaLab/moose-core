@@ -78,6 +78,7 @@ class MorphologyViewer : public QWidget
 #include "core/Morphology.hpp"
 #include "core/Selector.hpp"
 #include "core/MorphologyViewer.hpp"
+#include "core/PickHandler.hpp"
 %End
 
 public:
