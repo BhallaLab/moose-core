@@ -149,11 +149,11 @@ class PreferencesView(QTabWidget):
         # layout.addWidget(QLabel('Default Runtime'), 4, 0)
         # layout.addWidget(self.electricalDefaultSimulationRuntime, 4, 1)
 
-        layout.addWidget(QLabel('Solver'), 5, 0)
+        # layout.addWidget(QLabel('Solver'), 5, 0)
 
         index = 0
         for solver in self.electricalSolvers:
-            layout.addWidget(self.electricalSolvers[solver], 5 + index, 1)
+            # layout.addWidget(self.electricalSolvers[solver], 5 + index, 1)
             self.electricalSolver.addButton(self.electricalSolvers[solver], index)
             self.electricalSolvers[solver].setFocusPolicy(PyQt4.QtCore.Qt.NoFocus)
             index += 1
