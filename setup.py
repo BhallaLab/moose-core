@@ -115,7 +115,7 @@ moose_module = Extension(
              'biophysics/Neuron.cpp',
              'biophysics/ReadCell.cpp',
              'biophysics/SynChan.cpp',
-             'biophysics/NMDAchan.cpp',
+             'biophysics/NMDAChan.cpp',
              'biophysics/testBiophysics.cpp',
              'biophysics/IzhikevichNrn.cpp',
              'biophysics/DifShell.cpp',
@@ -298,7 +298,7 @@ setup(name = 'moose',
       version = '3.0',
       description = 'MOOSE Kheer Kadam',
       ext_modules = [moose_module],
-      packages=['moose'],
+      packages=['moose', 'moose.backend'],
       package_dir = {'': 'python'}
   )
 
