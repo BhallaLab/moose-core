@@ -1,9 +1,16 @@
 #include "core/Selector.hpp"
 
-Selector::Selector( /* QWidget * right_click_menu */
+Selector::Selector( ref_ptr<MatrixTransform> matrix_transform /* QWidget * right_click_menu */
                   ) : menu(new QMenu()) //: _right_click_menu(right_click_menu)
                     , mode(-1)
 {
+    _matrix_transform = matrix_transform;
+    osgFX::Outline * outline = new osgFX::Outline();
+    outline -> setColor(Vec4(0.0f, 1.0f, 0.0f, 1.0f));
+    _matrix_transform -> addChild(outline);
+    Geode   * selection   = new Geode();
+    outline -> addChild(selection);
+    _selection = selection;
      // this -> callback = callback;
 }
 
@@ -82,8 +89,14 @@ Selector::handle( const osgGA::GUIEventAdapter& ea
     {
         Geometry * geometry = _get_intersection(ea,viewer);
         bool blank_click    = geometry == nullptr;
-        if(!blank_click)
+        if(blank_click)
         {
+            _deselect_everything();
+            return false;
+        }
+        else
+        {
+            _select_compartment(geometry);
             RECORD_INFO("Compartment clicked " + geometry -> getName());
             // viewer -> emit_signal(geometry -> getName());
             select_info -> set_event_type(2);
@@ -102,41 +115,37 @@ Selector::handle( const osgGA::GUIEventAdapter& ea
         {
             if(blank_click)
             {
-                // RECORD_INFO("Do Nothing"); // do nothing
-            }
-            else if(selection_exists)
-            {
-                RECORD_INFO("Deselect"); // do nothing
-                // _deselect_compartment(geometry);
+                _deselect_everything();
             }
             else
             {
-                RECORD_INFO("Select Compartment"); // do nothing
+                // RECORD_INFO("Select Compartment"); // do nothing
                 _select_compartment(geometry);
                 select_info -> set_event_type(1);
                 select_info -> set_id(geometry -> getName().c_str());
                 return true;
             }
         }
-        else
-        {
-            if(blank_click)
-            {
-                RECORD_INFO("Deselect Everything."); // do nothing
-                // _deselect_everything();
-            }
-            else if(selection_exists)
-            {
-                RECORD_INFO("Select Neuron.");
-                _select_neuron(geometry);
-            }
-            else
-            {
-                RECORD_INFO("Select Compartment"); // do nothing
-                // _deselect_everything();
-                _select_compartment(geometry);
-            }
-        }
+        return false;
+        // else
+        // {
+        //     if(blank_click)
+        //     {
+        //         RECORD_INFO("Deselect Everything."); // do nothing
+        //         // _deselect_everything();
+        //     }
+        //     else if(selection_exists)
+        //     {
+        //         RECORD_INFO("Select Neuron.");
+        //         _select_neuron(geometry);
+        //     }
+        //     else
+        //     {
+        //         RECORD_INFO("Select Compartment"); // do nothing
+        //         // _deselect_everything();
+        //         _select_compartment(geometry);
+        //     }
+        // }
     }
 
     // if(ea.getEventType() == osgGA::GUIEventAdapter::PUSH)
@@ -245,22 +254,36 @@ Selector::_deselect()
 
 }
 
-// void
-// Selector::_deselect_everything()
-// {
-//     for(geometry : )
-// }
+void
+Selector::_deselect_everything()
+{
+    _selection -> removeDrawables(0);
+}
 
 
 bool
 Selector::_select_compartment(Geometry * geometry)
 {
-    if(geometry == nullptr)
-    {
-        RECORD_INFO("Invalid click!");
-        return false;
-    }
-    RECORD_INFO("Compartment clicked : " + geometry -> getName());
+    _selection -> removeDrawables(0);
+    _selection -> addDrawable(geometry);
+    // Geode * geode = (Geode *)(geometry -> getParent(0));
+    // Geode * geode = new Geode();
+    // geode -> addDrawable();
+    // LOD *   lod = (LOD *)(geode -> getParent(0)));
+    // lod -> removeChild(geode);
+
+    // osgFX::Outline * outline = new osgFX::Outline();
+    // outline -> setColor(Vec4(0.0f, 1.0f, 0.0f, 1.0f));
+    // outline -> addChild(geode);
+    // lod -> add
+    // matrix_transform -> addChild(outline);
+
+    // if(geometry == nullptr)
+    // {
+    //     RECORD_INFO("Invalid click!");
+    //     return false;
+    // }
+    // RECORD_INFO("Compartment clicked : " + geometry -> getName());
     return true;
 }
 
