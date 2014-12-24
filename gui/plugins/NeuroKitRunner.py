@@ -107,14 +107,14 @@ class NeuroKitRunner(RunView):
         self.schedular.preferences.getView().electricalBaseMembraneVoltage.editingFinished.connect(self.reset)
 
 
-        print("getting central widget")
+        # print("getting central widget")
         # self._centralWidget.show()
         # print(self.schedular.runner._updateInterval)
         self.reset()
         return self._centralWidget
 
     def update(self, time):
-        print("Update called => ", time)
+        # print("Update called => ", time)
         # print("Update called")
         # for neuron_id in self.geometry["neurons"]:
         #     neuron = self.geometry["neurons"][neuron_id]
@@ -138,7 +138,7 @@ class NeuroKitRunner(RunView):
             self.ims[i] = self.compartmentOrder[i].Im
 
     def reset(self):
-        print(" => reset called")
+        # print(" => reset called")
         prefs = preferences.getElectricalPreferences()
         self.setPeakColor(prefs["visualization"]["peak-color"])
         self.setBaseColor(prefs["visualization"]["base-color"])
@@ -171,17 +171,17 @@ class NeuroKitRunner(RunView):
             neuron = geometry["neurons"][neuron_id]
             for compartment_id in neuron["compartments"]:
                 compartment = neuron["compartments"][compartment_id]
-                print( compartment_id
-                     , neuron_id
-                     , compartment["proximal"]["x"]
-                     , compartment["proximal"]["y"]
-                     , compartment["proximal"]["z"]
-                     , compartment["diameter"]
-                     , compartment["distal"]["x"]
-                     , compartment["distal"]["y"]
-                     , compartment["distal"]["z"]
-                     , compartment["diameter"]
-                     )
+                # print( compartment_id
+                #      , neuron_id
+                #      , compartment["proximal"]["x"]
+                #      , compartment["proximal"]["y"]
+                #      , compartment["proximal"]["z"]
+                #      , compartment["diameter"]
+                #      , compartment["distal"]["x"]
+                #      , compartment["distal"]["y"]
+                #      , compartment["distal"]["z"]
+                #      , compartment["diameter"]
+                #      )
                 self.compartmentOrder.append(compartment["object"])
                 morphology.add_compartment( compartment_id
                                           , neuron_id
