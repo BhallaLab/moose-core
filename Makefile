@@ -63,7 +63,7 @@
 USE_SBML?=0
 USE_HDF5?=1
 USE_CUDA?=0
-USE_NEUROKIT?=1
+USE_NEUROKIT?=0
 PYTHON?=2
 # BUILD (= debug, release)
 ifndef BUILD
