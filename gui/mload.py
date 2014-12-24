@@ -92,7 +92,7 @@ def loadFile(filename, target, merge=True):
     #self.statusBar.showMessage('Loading model, please wait')
     app = QtGui.qApp
     app.setOverrideCursor(QtGui.QCursor(Qt.Qt.BusyCursor)) #shows a hourglass - or a busy/working arrow
-            
+
     if modeltype == 'genesis':
         if subtype == 'kkit' or subtype == 'prototype':
             model = moose.loadModel(filename, target,'gsl')
@@ -160,12 +160,15 @@ def loadFile(filename, target, merge=True):
     elif modeltype == 'xml':
         if subtype == 'neuroml':
             popdict, projdict = neuroml.loadNeuroML_L123(filename)
-        # Circus to get the container of populations from loaded neuroml
+            # Circus to get the container of populations from loaded neuroml
             for popinfo in popdict.values():
                 for cell in popinfo[1].values():
+                    solver = moose.HSolve(cell.path + "/hsolve")
+                    solver.target = cell.path
                     model = cell.parent
                     break
                 break
+
 
             # Moving model to a new location under the model name
             # model name is the filename without extension
