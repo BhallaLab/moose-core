@@ -336,6 +336,7 @@ Morphology::_add_neuron(const string &  neuron_id)
 
     LOD * neuron_node = new LOD();
     neuron_node -> setName(neuron_id);
+    // neuron_node->setNodeMask(0xffffffff);
     // neuron_node -> setStateSet(_state_set.get());
 
     float range = FLT_MIN;
@@ -344,6 +345,7 @@ Morphology::_add_neuron(const string &  neuron_id)
     {
         Geode * geode = new Geode();
         geode -> setName(neuron_id);
+        // geode -> setNodeMask(0xffffffff);
         // geode -> setStateSet(_state_set.get());
         neuron_node -> addChild( geode
                                , range
@@ -631,6 +633,7 @@ Morphology::set_peak_membrane_voltage(double peak_vm)
 //                     );
 //     Py_RETURN_TRUE;
 // }
+
 
 void
 Morphology::set_membrane_voltages(PyObject * vms)
