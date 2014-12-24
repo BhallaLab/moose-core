@@ -171,7 +171,7 @@ class MWindow(QtGui.QMainWindow):
         # dialog.setModal(True)
         layout = QGridLayout()
         createKineticModelButton = QPushButton("Create Kinetic Model")
-        loadKineticModelButton   = QPushButton("Load Kinetic Model")
+        loadKineticModelButton   = QPushButton("Load Model")
         loadNeuronalModelButton  = QPushButton("Load Neuronal Model")
         # createKineticModelButton.setStyleSheet(
         #     """QPushButton { font-size  : 18pt;
