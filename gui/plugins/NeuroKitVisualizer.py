@@ -15,10 +15,10 @@ import moose
 import default
 import _moogli
 
-class MorphologyViewer(_moogli.MorphologyViewer):
+class MorphologyEditor(_moogli.MorphologyViewer):
 
     def __init__(self, morphology, width, height, plugin):
-        super(MorphologyViewer, self).__init__( morphology
+        super(MorphologyEditor, self).__init__( morphology
                                               , width
                                               , height
                                               )
@@ -32,19 +32,46 @@ class MorphologyViewer(_moogli.MorphologyViewer):
     @QtCore.pyqtSlot()
     def show(self):
         self._timer.timeout.connect(self.next)
-        super(MorphologyViewer, self).show()
+        super(MorphologyEditor, self).show()
         self._timer.start(0)
 
     @QtCore.pyqtSlot()
     def hide(self):
         self._timer.stop()
-        super(MorphologyViewer, self).hide()
+        super(MorphologyEditor, self).hide()
 
-    def update(self):
-        pass
+    def next(self):
+        self.frame()
+        info_id = self.select_info.get_id()
+        info_event = self.select_info.get_event_type()
+        if info_event == 1:
+            self.plugin.mainWindow.objectEditSlot(info_id)
+            self.select_info.set_event_type(0)
 
-    def updateVm(self):
-        pass
+class MorphologySimulator(_moogli.MorphologyViewer):
+
+    def __init__(self, morphology, width, height, plugin):
+        super(MorphologySimulator, self).__init__( morphology
+                                                 , width
+                                                 , height
+                                                 )
+        self._timer = QtCore.QTimer(self)
+        self.plugin = plugin
+
+    def start(self):
+        self._timer.timeout.connect(self.next)
+        self._timer.start(0)
+
+    @QtCore.pyqtSlot()
+    def show(self):
+        self._timer.timeout.connect(self.next)
+        super(MorphologySimulator, self).show()
+        self._timer.start(0)
+
+    @QtCore.pyqtSlot()
+    def hide(self):
+        self._timer.stop()
+        super(MorphologySimulator, self).hide()
 
     def start_drag(self, info_id):
         # pixmap = QPixmap()
@@ -56,13 +83,14 @@ class MorphologyViewer(_moogli.MorphologyViewer):
         mimeData.setText(info_id)
         drag = QDrag(self)
         drag.setMimeData(mimeData)
-        pixmap = QPixmap("/home/aviral/Downloads/chart_line.png")
+        pixmap = QPixmap("")
 
         drag.setPixmap(pixmap)
         # drag.setHotSpot(e.pos() - self.rect().topLeft())
         dropAction = drag.start(QtCore.Qt.MoveAction)
         print(" => ", dropAction)
         self.select_info.set_event_type(0)
+        self._timer.start(0)
         return
 
     def next(self):
@@ -73,14 +101,9 @@ class MorphologyViewer(_moogli.MorphologyViewer):
         # print("type => ", info_event)
         if info_event == 2:
             # self.select_info.set_event_type(-1)
-            # self._timer.stop()
+            self._timer.stop()
             self.start_drag(info_id)
-        elif info_event == 1:
-            self.plugin.mainWindow.objectEditSlot(info_id)
-            self.select_info.set_event_type(0)
-            # self.objectEditSlot(info_id)
 
-            # self.select_info.set_id(-1)
 
 
 class NeuroKitVisualizer(_moogli.MorphologyViewer):

@@ -88,6 +88,8 @@ Compartment::create_geometry( unsigned int lod_resolution
                                   , _radius
                                   , points
                                   );
+            // geometries[i] -> setNodeMask(0xffffffff);
+
             geometries[i] -> setName(id);
             points        -= points_delta;
             // geometries[i] -> getOrCreateStateSet();
@@ -103,6 +105,7 @@ Compartment::create_geometry( unsigned int lod_resolution
                                    , _direction
                                    , points
                                    );
+            // geometries[i] -> setNodeMask(0xffffffff);
             geometries[i] -> setName(id);
             points -= points_delta;
             // geometries[i] -> getOrCreateStateSet();
