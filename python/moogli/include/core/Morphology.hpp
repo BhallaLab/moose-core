@@ -17,7 +17,6 @@ private:
     typedef unordered_map<string, unordered_set<Compartment *> > neuron_compartment_map_t;
     typedef unordered_map<string, unordered_set<string> > ontology_collection_t;
 
-    ref_ptr<MatrixTransform>    _matrix_transform;
     compartment_map_t           _compartments;
     vector<Compartment *>       _compartment_order;
     neuron_map_t                _neurons;
@@ -32,6 +31,8 @@ private:
     ref_ptr<StateSet> _state_set;
 
 public:
+
+    ref_ptr<MatrixTransform>    _matrix_transform;
 
     const unsigned int  lod_resolution;
     const float         lod_distance_delta;

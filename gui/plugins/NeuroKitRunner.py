@@ -9,7 +9,7 @@ from mplugin import RunBase
 from mplot import CanvasWidget
 import RunWidget
 from PlotWidgetContainer import PlotWidgetContainer
-from NeuroKitVisualizer import MorphologyViewer
+from NeuroKitVisualizer import MorphologySimulator
 from PyQt4 import QtGui, Qt
 from PyQt4.QtGui import QLabel
 from PyQt4.QtGui import QWidget
@@ -38,8 +38,6 @@ class NeuroKitRunner(RunView):
         # self.geometry       =   None
         # self.morphology     =   None
         self.schedular      = self.getSchedulingDockWidget().widget()
-        print(self.schedular)
-        # self.schedular.
 
     def setBaseColor(self, color):
         self.morphology.set_initial_color( color[0] / 255.0
@@ -83,7 +81,7 @@ class NeuroKitRunner(RunView):
         self.ims = np.empty(len(self.compartmentOrder), dtype=np.float, order='C')
         # self.visualizer.insertPlainText(pprint.pformat(self.geometry, indent = 4))
         # self.visualizer          =  QTextEdit()#NeuroKitVisualizer(self.modelRoot)
-        self.visualizer  = MorphologyViewer(self.morphology, 1000, 1000, self.plugin)
+        self.visualizer  = MorphologySimulator(self.morphology, 1000, 1000, self.plugin)
         # self.scheduler           = self.getSchedulingDockWidget().widget()
         # self._centralWidget.setChildWidget(self.scheduler, False, 0,0,1,-1)
         self.visualizer.setGeometry( 0, 0, 800, 600 )
@@ -167,7 +165,7 @@ class NeuroKitRunner(RunView):
         # morphology.add_compartment( "c"
         #                           , "b"
         #                           , 3.0, 3.0, 3.0, 3.0, 4.0, 4.0, 4.0, 4.0)
-        morphology = _moogli.Morphology("morph", 5)
+        morphology = _moogli.Morphology("morph", 1)
         self.compartmentOrder               = []
         for neuron_id in geometry["neurons"]:
             neuron = geometry["neurons"][neuron_id]
@@ -190,11 +188,11 @@ class NeuroKitRunner(RunView):
                                           , compartment["proximal"]["x"] * 10000000
                                           , compartment["proximal"]["y"] * 10000000
                                           , compartment["proximal"]["z"] * 10000000
-                                          , compartment["diameter"] * 10000000
-                                          , compartment["distal"]["x"] * 10000000
-                                          , compartment["distal"]["y"] * 10000000
-                                          , compartment["distal"]["z"] * 10000000
-                                          , compartment["diameter"] * 10000000
+                                          , compartment["diameter"]      * 10000000
+                                          , compartment["distal"]["x"]   * 10000000
+                                          , compartment["distal"]["y"]   * 10000000
+                                          , compartment["distal"]["z"]   * 10000000
+                                          , compartment["diameter"]      * 10000000
                                           )
         return morphology
 
