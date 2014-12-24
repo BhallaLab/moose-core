@@ -108,7 +108,7 @@ class PlotWidgetContainer(QWidget):
         if self.modelType == ELECTRICAL:
             for axes in widget.canvas.axes.values():
             # axes.autoscale(False, axis='x', tight=True)
-                axes.set_ylim(bottom = -0.07, top= -0.06)
+                axes.set_ylim(bottom = -0.07, top= 0.03)
 
         if row == None:
             row = self.rowIndex
