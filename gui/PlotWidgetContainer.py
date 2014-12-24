@@ -34,13 +34,19 @@ import default
 import sidebar
 # from default import PlotWidget
 
-
+ELECTRICAL = 0
+CHEMICAL = 1
 class PlotWidgetContainer(QWidget):
 
     def __init__(self, modelRoot, *args, **kwargs):
 
         super(PlotWidgetContainer, self).__init__(*args)
         self.modelRoot = modelRoot
+        if len(moose.wildcardFind(modelRoot + "/##[ISA=ChemCompt]")) == 0:
+            self.modelType = ELECTRICAL
+        else:
+            self.modelType = CHEMICAL
+
         self.model          = moose.element(self.modelRoot)
         if self.modelRoot != "/":
             if moose.exists(modelRoot + "/data"):
@@ -98,6 +104,12 @@ class PlotWidgetContainer(QWidget):
         if graph == None:
             graph = moose.Neutral(self.data.path + "/graph_" + str(self.rowIndex))
         widget = default.PlotWidget(self.model, graph, self.rowIndex, self)
+
+        if self.modelType == ELECTRICAL:
+            for axes in widget.canvas.axes.values():
+            # axes.autoscale(False, axis='x', tight=True)
+                axes.set_ylim(bottom = -0.07, top= -0.06)
+
         if row == None:
             row = self.rowIndex
         self.graphs.addWidget(widget)

@@ -765,7 +765,7 @@ class MWindow(QtGui.QMainWindow):
 
             if not moose.exists(ret['model'].path+'/info'):
                     moose.Annotator(ret['model'].path+'/info')
-                
+
             modelAnno = moose.Annotator(ret['model'].path+'/info')
             if ret['subtype']:
                 modelAnno.modeltype = ret['subtype']
@@ -878,23 +878,30 @@ class MWindow(QtGui.QMainWindow):
         #Harsha: added under file Menu, Recently Loaded Models
         #All the previously loaded chemical models, solver's and table's ticks are made -1
         if self._loadedModels:
-            l = self._loadedModels[-1]
-            compt = moose.wildcardFind(l[0]+'/##[ISA=ChemCompt]')
-            if compt:
-                if moose.exists(compt[0].path+'/stoich'):
-                    st = moose.element(compt[0].path+'/stoich')
-                    if moose.exists((st.ksolve).path):
-                        kgSolve = st.ksolve
-                        kgSolve.tick = -1
-                for x in moose.wildcardFind( compt[0].path+'/data/graph#/#' ):
-                    x.tick = -1
+            for l in self._loadedModels:
+                compt = moose.wildcardFind(l[0]+'/##[ISA=ChemCompt]')
+                if compt:
+                    if moose.exists(compt[0].path+'/ksolve'):
+                        ksolve = moose.Ksolve( compt[0].path+'/ksolve' )
+                        ksolve.tick = -1
+                    if moose.exists(compt[0].path+'/gsolve'):
+                        gsolve = moose.Gsolve( compt[0].path+'/gsolve' )
+                        gsolve.tick = -1
+                    # if moose.exists(compt[0].path+'/stoich'):
+                    #     stoich = moose.Stoich( compt[0].path+'/stoich' )
+                    #     stoich.tick = -1
+                    for x in moose.wildcardFind( l[0]+'/data/graph#/#' ):
+                        x.tick = -1
+                else :
+                    pass
+                    compt = moose.wildCardFind(l[0] + "##[ISA=Neuron]")
+
         action = QAction(modelPath[1:],self)
         action.triggered.connect(lambda : self.setPlugin(pluginName, modelPath))
         self._loadedModels.append([modelPath,pluginName,action])
         if len(self._loadedModels)>5:
             self._loadedModels.pop(0)
-            deleteModel =self._loadedModels.pop(0)
-            moose.delete(deleteModel[0])
+
     def loadModelDialogSlot(self):
         """Start a file dialog to choose a model file.
 
@@ -939,7 +946,7 @@ class MWindow(QtGui.QMainWindow):
                 print 'Loaded model', ret['model'].path
                 if not moose.exists(ret['model'].path+'/info'):
                     moose.Annotator(ret['model'].path+'/info')
-                
+
                 modelAnno = moose.Annotator(ret['model'].path+'/info')
                 if ret['subtype']:
                     modelAnno.modeltype = ret['subtype']
@@ -974,7 +981,7 @@ class MWindow(QtGui.QMainWindow):
             modelRoot = moose.Neutral('%s/%s' %(modelContainer.path,"model"))
             if not moose.exists(modelContainer.path+'/info'):
                 moose.Annotator(modelContainer.path+'/info')
-            
+
             modelAnno = moose.element(modelContainer.path+'/info')
             modelAnno.modeltype = "kkit"
             modelAnno.dirpath = " "
