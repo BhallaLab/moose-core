@@ -18,13 +18,15 @@ public:
     // _compartments;
     SelectInfo * select_info;
 
-    Selector();
+    Selector(ref_ptr<MatrixTransform> matrix_transform);
 
     virtual bool handle( const osgGA::GUIEventAdapter& ea
                        , osgGA::GUIActionAdapter& aa
                        );
 
 private:
+    ref_ptr<MatrixTransform> _matrix_transform;
+    ref_ptr<Geode>           _selection;
 
     Geometry *
     _get_intersection( const osgGA::GUIEventAdapter& ea
@@ -33,6 +35,9 @@ private:
 
     void
     _deselect();
+
+    void
+    _deselect_everything();
 
     bool
     _select_compartment(Geometry * geometry);
