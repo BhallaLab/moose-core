@@ -19,8 +19,8 @@ def addSolver(modelRoot,solver):
 		currentSolver = "gssa"
 	elif solver == "Runge Kutta":
 		currentSolver = "gsl"
-	elif solver == " Exponential Euler":
-		currentSolver == "ee"
+	elif solver == "Exponential Euler":
+		currentSolver = "ee"
 	if previousSolver != currentSolver:
 		# if previousSolver != currentSolver
 		comptinfo.solver = currentSolver
@@ -35,6 +35,7 @@ def addSolver(modelRoot,solver):
 			setCompartmentSolver(modelRoot,currentSolver)
 			return True
 	else:
+
 		# " solver is same "
 		if moose.exists(compt[0].path+'/stoich'):
 			# " stoich exist, doing nothing"

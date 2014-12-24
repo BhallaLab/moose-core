@@ -697,13 +697,12 @@ class SchedulingWidget(QtGui.QWidget):
     def solverStatus(self):
         compt = moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
         #print moose.le(compt[0].path)
-        print "#### ",moose.exists(compt[0].path+'/stoich')
         if not moose.exists(compt[0].path+'/stoich'):
             return None
         else:
             stoich = moose.Stoich(compt[0].path+'/stoich')
             status = int(stoich.status)
-            print("Status =>", status)
+            #print("Status =>", status)
             if status == -1:
                 QtGui.QMessageBox.warning(None,"Could not Run the model","Warning: Reaction path not yet assigned.\n ")
                 return -1
@@ -1037,7 +1036,7 @@ class PlotWidget(QWidget):
         if len (plotTables) > 0:
             for tabId in plotTables:
                 tab = moose.Table(tabId)
-                print("Table =>", tab)
+                #print("Table =>", tab)
                 line_list=[]
                 tableObject = tab.neighbors['requestOut']
                 # Not a good way
