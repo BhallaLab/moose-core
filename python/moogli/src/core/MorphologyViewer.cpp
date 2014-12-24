@@ -131,7 +131,7 @@ MorphologyViewer::create_graphics_widget()
 
     if(pick_handler)
     {
-        Selector * selector = new Selector();
+        Selector * selector = new Selector(_morphology -> get_scene_graph());
         selector -> select_info = select_info;
         _viewer.addEventHandler(selector);
     }
