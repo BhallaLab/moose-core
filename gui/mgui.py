@@ -877,30 +877,37 @@ class MWindow(QtGui.QMainWindow):
     def loadedModelsAction(self,modelPath,pluginName):
         #Harsha: added under file Menu, Recently Loaded Models
         #All the previously loaded chemical models, solver's and table's ticks are made -1
-        if self._loadedModels:
-            for l in self._loadedModels:
-                compt = moose.wildcardFind(l[0]+'/##[ISA=ChemCompt]')
-                if compt:
-                    if moose.exists(compt[0].path+'/ksolve'):
-                        ksolve = moose.Ksolve( compt[0].path+'/ksolve' )
-                        ksolve.tick = -1
-                    if moose.exists(compt[0].path+'/gsolve'):
-                        gsolve = moose.Gsolve( compt[0].path+'/gsolve' )
-                        gsolve.tick = -1
-                    # if moose.exists(compt[0].path+'/stoich'):
-                    #     stoich = moose.Stoich( compt[0].path+'/stoich' )
-                    #     stoich.tick = -1
-                    for x in moose.wildcardFind( l[0]+'/data/graph#/#' ):
-                        x.tick = -1
-                else :
-                    pass
-                    compt = moose.wildCardFind(l[0] + "##[ISA=Neuron]")
+        for model in self._loadedModels:
+            self.disableModel(model[0])
 
         action = QAction(modelPath[1:],self)
         action.triggered.connect(lambda : self.setPlugin(pluginName, modelPath))
         self._loadedModels.append([modelPath,pluginName,action])
         if len(self._loadedModels)>5:
             self._loadedModels.pop(0)
+
+    def disableModel(self, modelPath):
+        compt = moose.wildcardFind(modelPath + '/##[ISA=ChemCompt]')
+        if compt:
+            if moose.exists(compt[0].path+'/ksolve'):
+                ksolve = moose.Ksolve( compt[0].path+'/ksolve' )
+                ksolve.tick = -1
+            if moose.exists(compt[0].path+'/gsolve'):
+                gsolve = moose.Gsolve( compt[0].path+'/gsolve' )
+                gsolve.tick = -1
+            # if moose.exists(compt[0].path+'/stoich'):
+            #     stoich = moose.Stoich( compt[0].path+'/stoich' )
+            #     stoich.tick = -1
+        else :
+            neurons = moose.wildcardFind(modelPath + "/model/cells/##[ISA=Neuron]")
+            for neuron in neurons:
+                print(neuron)
+                solver = moose.element(neuron.path + "/hsolve")
+                print("Disabling => ", solver)
+                solver.tick = -1
+
+        for table in moose.wildcardFind( modelPath+'/data/graph#/#' ):
+            table.tick = -1
 
     def loadModelDialogSlot(self):
         """Start a file dialog to choose a model file.
