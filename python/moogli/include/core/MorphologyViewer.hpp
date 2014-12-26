@@ -3,7 +3,6 @@
 
 #include "includes.hpp"
 #include "core/Morphology.hpp"
-#include "core/PickHandler.hpp"
 #include "core/Selector.hpp"
 #include "core/SelectInfo.hpp"
 
