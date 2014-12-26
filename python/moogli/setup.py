@@ -4,6 +4,9 @@ from distutils.core import setup, Extension
 import sipdistutils
 import sys
 import os
+
+os.environ["CC"]="g++"
+
 # print(sys.argv)
 # RESOURCES -
 # https://docs.python.org/2.7/distutils/apiref.html?highlight=setup#distutils.core.setup
@@ -13,7 +16,6 @@ import os
 
 # list of object files to be passed to the linker.
 # These files must not have extensions, as the default extension for the compiler is used.
-os.environ["CC"]="g++"
 extra_objects           =   [
                             ]
 
@@ -36,14 +38,9 @@ libraries               =   [ "QtCore"
 
 # list of directories to search for libraries at link-time
 library_dirs = []
-library_dirs            =   [ #"/home/aviral/OpenSceneGraph-3.2.1-rc2/build/lib"
-                            ]
 
 # # list of directories to search for shared (dynamically loaded) libraries at run-time
 runtime_library_dirs = []
-runtime_library_dirs    =   [ #"/home/aviral/OpenSceneGraph-3.2.1-rc2/build/lib/"
-                            #, "/home/aviral/OpenSceneGraph-3.2.1-rc2/build/lib/osgPlugins-3.2.1/"
-                            ]
 
 # additional command line options for the compiler command line
 extra_compile_args      =   [ "-O3"
@@ -67,7 +64,6 @@ include_dirs            =   [ "."
                             , "/usr/share/sip/PyQt4/QtCore/"
                             , "/usr/share/sip/PyQt4/QtGui/"
                             , "/usr/share/sip/PyQt4/QtOpenGL/"
-                            #, "/home/aviral/OpenSceneGraph-3.2.1-rc2/include"
                             ]
 
 # define pre-processor macros
@@ -86,7 +82,6 @@ moogli = Extension( name                  =   "_moogli"
                                               , "src/core/MorphologyViewer.cpp"
                                               , "moc/MorphologyViewer.moc.cpp"
                                               , "src/core/Selector.cpp"
-                                              , "src/core/PickHandler.cpp"
                                               , "src/mesh/CylinderMesh.cpp"
                                               , "src/mesh/SphereMesh.cpp"
                                               , "src/utility/conversions.cpp"
