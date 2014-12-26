@@ -42,15 +42,18 @@ static SrcFinfo4< Id, vector< Id >, vector< Id >, vector< unsigned int > >*
 	return &spineListOut;
 }
 
-static SrcFinfo3< Id, vector< double >, vector< unsigned int > >* 
+static SrcFinfo4< Id, vector< double >, 
+		vector< Id >, vector< unsigned int > >* 
 	psdListOut()
 {
-	static SrcFinfo3< Id, vector< double >, vector< unsigned int > >
+	static SrcFinfo4< Id, vector< double >, 
+			vector< Id >, vector< unsigned int > >
    		psdListOut(
 		"psdListOut",
 		"Tells PsdMesh to build a mesh. "
-		"Arguments: Cell Id, Coordinates of each psd, "
-		"index of matching parent voxels for each spine"
+		"Arguments: (Cell Id, Coordinates of each psd, "
+		"Id of electrical compartment mapped to each voxel, "
+		"index of matching parent voxels for each spine.) "
 		"The coordinates each have 8 entries:"
 		"xyz of centre of psd, xyz of vector perpendicular to psd, "
 		"psd diameter, "
@@ -591,7 +594,7 @@ void NeuroMesh::setCellPortion( const Eref& e,
 
 void NeuroMesh::separateOutSpines( const Eref& e )
 {
-		vector< Id > ids;
+		// vector< Id > ids;
 		/*
 		e.element()->getNeighbors( ids, spineListOut() );
 		if ( ids.size() > 0 ) {
@@ -615,9 +618,9 @@ void NeuroMesh::separateOutSpines( const Eref& e )
 				psdCoords.insert( psdCoords.end(), ret.begin(), ret.end() );
 				index[i] = i;
 			}
-			ids.clear();
-			e.element()->getNeighbors( ids, psdListOut() );
-			psdListOut()->send( e, cell_, psdCoords, index );
+			// ids.clear();
+			// e.element()->getNeighbors( ids, psdListOut() );
+			psdListOut()->send( e, cell_, psdCoords, head_, index );
 			/*
 			SetGet3< Id, vector< double >, vector< unsigned int > >::set( 
 					ids[0], "psdList", cell_, psdCoords, index );

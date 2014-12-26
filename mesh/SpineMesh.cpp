@@ -69,6 +69,15 @@ const Cinfo* SpineMesh::initCinfo()
 			&SpineMesh::getNeuronVoxel
 		);
 
+		static ReadOnlyValueFinfo< SpineMesh, vector< Id > > elecComptMap(
+			"elecComptMap",
+			"Vector of Ids of electrical compartments that map to each "
+			"voxel. This is necessary because the order of the IDs may "
+			"differ from the ordering of the voxels. Note that there "
+			"is always just one voxel per spine head. ",
+			&SpineMesh::getElecComptMap
+		);
+
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
@@ -89,6 +98,7 @@ const Cinfo* SpineMesh::initCinfo()
 
 	static Finfo* spineMeshFinfos[] = {
 		&parentVoxel,		// ReadOnlyValueFinfo
+		&elecComptMap,		// ReadOnlyValueFinfo
 		&spineList,			// DestFinfo
 		// psdListOut(),		// SrcFinfo
 	};
@@ -163,6 +173,16 @@ vector< unsigned int > SpineMesh::getNeuronVoxel() const
 		ret[i] = spines_[i].parent();
 	return ret;
 }
+
+vector< Id > SpineMesh::getElecComptMap() const
+{
+	vector< Id > ret( spines_.size() );
+	for ( unsigned int i = 0; i < spines_.size(); ++i ) 
+		ret[i] = spines_[i].headId();
+	return ret;
+}
+
+//////////////////////////////////////////////////////////////////////
 
 /**
  * This assumes that lambda is the quantity to preserve, over numEntries.
