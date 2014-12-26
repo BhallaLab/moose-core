@@ -195,6 +195,8 @@ Selector::handle( const osgGA::GUIEventAdapter& ea
     return false;
 }
 
+#if OPENSCENEGRAPH_MINOR_VERSION == 2
+
 /*
 http://comments.gmane.org/gmane.comp.graphics.openscenegraph.user/80993
 */
@@ -217,36 +219,35 @@ Selector::_get_intersection( const osgGA::GUIEventAdapter& ea
 /*
 http://uncommoncode.wordpress.com/2010/09/22/select-objects-with-mouse-in-openscenegraph/
 */
-// Geometry *
-// Selector::_get_intersection( const osgGA::GUIEventAdapter& ea
-//                            , osgViewer::Viewer * viewer
-//                            )
-// {
-//     osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector =
-//             new osgUtil::LineSegmentIntersector( osgUtil::Intersector::PROJECTION
-//                                                , ea.getXnormalized()
-//                                                , ea.getYnormalized()
-//                                                );
-//     RECORD_INFO(to_string(ea.getXnormalized()));
-//     RECORD_INFO(to_string(ea.getYnormalized()));
-//     osgUtil::IntersectionVisitor iv( intersector.get() );
 
-//     cout << "Camera 2 => " << viewer -> getCamera();
+#else
 
-//     viewer->getCamera() -> accept( iv );
+Geometry *
+Selector::_get_intersection( const osgGA::GUIEventAdapter& ea
+                           , osgViewer::Viewer * viewer
+                           )
+{
+    osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector =
+        new osgUtil::LineSegmentIntersector( osgUtil::Intersector::WINDOW
+                                           , ea.getX()
+                                           , ea.getY()
+                                           );
+    osgUtil::IntersectionVisitor iv( intersector.get() );
+    viewer->getCamera()->accept( iv );
 
-//     if ( intersector->containsIntersections() )
-//     {
-//         const osgUtil::LineSegmentIntersector::Intersection& result =
-//                 *(intersector->getIntersections().begin());
+    if ( intersector->containsIntersections() )
+    {
+        const osgUtil::LineSegmentIntersector::Intersection& result =
+                *(intersector->getIntersections().begin());
 
-//             // LOD * lod = dynamic_cast<LOD *>(result.drawable -> getParent(0) -> getParent(0));
-//         RECORD_INFO("Reaching here!");
-//         return result.drawable -> asGeometry();
-//     }
-//     return nullptr;
-// }
+            // LOD * lod = dynamic_cast<LOD *>(result.drawable -> getParent(0) -> getParent(0));
+        // RECORD_INFO("Reaching here!");
+        return result.drawable -> asGeometry();
+    }
+    return nullptr;
+}
 
+#endif
 
 void
 Selector::_deselect()
