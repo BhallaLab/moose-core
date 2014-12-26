@@ -212,7 +212,6 @@ set(MOOSE_LIBRARIES
     device
     ksolve
     intfire
-    examples
     )
 
 target_link_libraries(moose
