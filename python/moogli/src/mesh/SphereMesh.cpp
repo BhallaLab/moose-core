@@ -142,7 +142,8 @@ SphereMesh::operator()( Vec3f        center
                   );
 
     sphere_geometry -> setVertexArray(vertices);
-    sphere_geometry -> setNormalArray(normals, Array::BIND_PER_VERTEX);
+    sphere_geometry -> setNormalArray(normals);
+    sphere_geometry -> setNormalBinding(Geometry::BIND_PER_VERTEX);
     sphere_geometry -> addPrimitiveSet(indices);
     Vec4Array * colors = new Vec4Array();
     colors -> push_back(osg::Vec4(1.0f, 0.0f, 1.0f, 0.5f)); //color);
