@@ -155,6 +155,7 @@ add_subdirectory(external/muparser)
 add_subdirectory(external/debug)
 add_subdirectory(external/tinyxml)
 add_subdirectory(mesh)
+add_subdirectory(sbml)
 add_subdirectory(mpi)
 add_subdirectory(signeur)
 add_subdirectory(ksolve)
@@ -166,7 +167,6 @@ add_subdirectory(kinetics)
 add_subdirectory(synapse)
 add_subdirectory(intfire)
 add_subdirectory(examples)
-add_subdirectory(sbml)
 
 set(LIBRARIES ${BZIP2_LIBRARIES} ${LibXML2_LIBRARIES})
 if(HDF5_FOUND)
@@ -263,6 +263,45 @@ if(BUILD_PYMOOSE)
         )
 
 endif(BUILD_PYMOOSE)
+
+######################### CYMOOSE #############################################
+set(CYMOOSE 1)
+if(CYMOOSE)
+    add_library(cymoose SHARED cymoose/cymoose_methods.cxx)
+    set_target_properties(moose PROPERTIES COMPILE_DEFINITIONS "CYMOOSE")
+    if(DEBUG)
+        add_definitions("-g -Wall")
+    endif()
+
+    set_target_properties(cymoose PROPERTIES 
+            LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/cymoose"
+            )
+    target_link_libraries(cymoose 
+        "-Wl,--whole-archive"
+        basecode
+        msg
+        shell
+        randnum
+        scheduling
+        moose_mpi
+        moose_builtins
+        utility 
+        muparser
+        biophysics 
+        kinetics 
+        ksolve
+        tinyxml
+        hsolve 
+        mesh
+        signeur
+        diffusion 
+        device
+        benchmarks
+        "-Wl,--no-whole-archive"
+        ${LIBRARIES}
+        ${LOCAL_GSL_LIBRARIES}
+        )
+endif()
 
 ######################### INSTALL ##############################################
 install(TARGETS moose
