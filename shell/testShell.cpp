@@ -1813,12 +1813,15 @@ void testFilterOffNodeTargets()
 	shell->doDelete( neuronId );
 }
 
+extern void testWildcard();
+
 void testShell( )
 {
 	testExtractIndices();
 	testChopPath();
 	testTreeTraversal();
 	testChildren();
+	testWildcard();
 	////// testShellParserQuit();
 	testGetMsgs();	// Tests getting Msg info from Neutral.
 	testGetMsgSrcAndTarget();
@@ -1826,8 +1829,6 @@ void testShell( )
 	// This is a multinode test, but only needs to run on master node.
 	testFilterOffNodeTargets();
 }
-
-extern void testWildcard();
 
 void testMpiShell( )
 {

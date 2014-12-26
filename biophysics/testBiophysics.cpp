@@ -200,7 +200,6 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
 		assert( doubleEq( retVm900, 0.12097053045094018 ) );
 		assert( doubleEq( retVm901, 0.2902593120492995 ) );
 		assert( doubleEq( retVm902, 0.00237157280699805 ) );
-		*/
 		assert( doubleEq( retVm100, 0.015766608829826119 ) );
 		assert( doubleEq( retVm101, 0.24405557875013356 ) );
 		assert( doubleEq( retVm102, 0.20878261213859917 ) );
@@ -208,6 +207,14 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
 		assert( doubleEq( retVm900, 0.12525297735741736 ) );
 		assert( doubleEq( retVm901, 0.28303358631241327 ) );
 		assert( doubleEq( retVm902, 0.0096374021108587178 ) );
+		*/
+		assert( doubleEq( retVm100, 0.069517018453329804 ) );
+		assert( doubleEq( retVm101, 0.32823493598699577 ) );
+		assert( doubleEq( retVm102, 0.35036493874475361 ) );
+		assert( doubleEq( retVm99,  0.04087358817787364 ) );
+		assert( doubleEq( retVm900, 0.26414663635984065 ) );
+		assert( doubleEq( retVm901, 0.39864519810259352 ) );
+		assert( doubleEq( retVm902, 0.04818717439429359 ) );
 
 	}
 	/*

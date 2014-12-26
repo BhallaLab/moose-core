@@ -60,6 +60,12 @@ class SpineMesh: public MeshCompt
 		 */
 		vector< unsigned int > getNeuronVoxel() const;
 
+		/**
+		 * Returns vector of Ids of electrical compts that map to 
+		 * respective voxels in SpineMesh
+		 */
+		vector< Id > getElecComptMap() const;
+
 		//////////////////////////////////////////////////////////////////
 		// FieldElement assignment stuff for MeshEntries
 		//////////////////////////////////////////////////////////////////
