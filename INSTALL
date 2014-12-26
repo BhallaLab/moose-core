@@ -2,8 +2,10 @@
 ==============================================================================
 
 ** Released versions of MOOSE are available in the sourceforge file area:
-   http://sourceforge.net/projects/moose/files/moose/Moose%202.0.0%20Kalakand/
-   
+http://sourceforge.net/projects/moose/files/moose/Moose%203.0.1%20Gulab%20Jamun/
+http://sourceforge.net/projects/moose/files/moose/Moose%203.0.0%20Kheer%20Kadam/
+http://sourceforge.net/projects/moose/files/moose/Moose%202.0.0%20Kalakand/
+
 
    Download and install the prepackaged version suitable for your
    platform. If no such package exists, you can build it from the sources
@@ -13,11 +15,11 @@
 ** Development version:
 
    You can download the development sources using a subversion client:
-   svn co svn://svn.code.sf.net/p/moose/code/moose/branches/async13 moose
-   
+   svn co svn://svn.code.sf.net/p/moose/code/moose/trunk moose
+
 
    or 
-   svn checkout svn://svn.code.sf.net/p/moose/code/moose/branches/{branchname} moose
+   svn checkout svn://svn.code.sf.net/p/moose/code/moose/trunk moose
    
 
 
