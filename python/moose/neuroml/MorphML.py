@@ -57,7 +57,7 @@ class MorphML():
             cellsDict.update(cellDict)
         return cellsDict
 
-    def readMorphML(self,cell,params={},lengthUnits="micrometer"):
+    def readMorphML(self,cell,params={},lengthUnits="micrometer",combine_segments=False):
         """
         returns {cellname:segDict}
         where segDict = { segid1 : [ segname,(proximalx,proximaly,proximalz),
@@ -156,7 +156,7 @@ class MorphML():
         ############################################################
         #### load morphology and connections between compartments
         ## Many neurons exported from NEURON have multiple segments in a section
-        ## Combine those segments into one Compartment / section
+        ## Combine those segments into one Compartment / section, if combine_segments = True
         ## assume segments of a compartment/section are in increasing order and
         ## assume all segments of a compartment/section have the same cableid
         ## findall() returns elements in document order:
@@ -172,8 +172,9 @@ class MorphML():
             ## cable is an optional attribute. WARNING: Here I assume it is always present.
             cableid = segment.attrib['cable']
             segmentid = segment.attrib['id']
-            ## old cableid still running, hence don't start a new compartment, skip to next segment
-            if cableid == running_cableid:
+            ## if old cableid still running AND combine_segments == True,
+            ## then don't start a new compartment, skip to next segment
+            if cableid == running_cableid and combine_segments:
                 self.cellDictBySegmentId[cellname][1][segmentid] = running_comp
                 proximal = segment.find('./{'+self.mml+'}proximal')
                 if proximal is not None:
