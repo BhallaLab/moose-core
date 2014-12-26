@@ -43,6 +43,10 @@ class KkitPlugin(MoosePlugin):
             self.connect(self.saveModelAction, QtCore.SIGNAL('triggered()'), self.SaveModelDialogSlot)
             self.fileinsertMenu.addAction(self.saveModelAction)
         self._menus.append(self.fileinsertMenu)
+
+
+        self.getEditorView()
+
     def SaveModelDialogSlot(self):
         type_sbml = 'SBML'
         if moose.Annotator(self.modelRoot+'/info'):
@@ -68,7 +72,7 @@ class KkitPlugin(MoosePlugin):
                 elif writeerror == -1:
                     QtGui.QMessageBox.warning(None,'Could not save the Model','\n This model is not valid SBML Model, failed in the consistency check')
                 elif writeerror == 1:
-                    QtGui.QMessageBox.information(None,'Saved the Model','\n File saved to \'{filename}\''.format(filename =filename+'.xml'),QtGui.QMessageBox.Ok)                
+                    QtGui.QMessageBox.information(None,'Saved the Model','\n File saved to \'{filename}\''.format(filename =filename+'.xml'),QtGui.QMessageBox.Ok)
                 elif writeerror == 0:
                      QtGui.QMessageBox.information(None,'Could not save the Model','\nThe filename could not be opened for writing')
 
@@ -158,7 +162,7 @@ class AnotherKkitRunView(RunView):
             solver = "gsl"
         self.schedular.simulationRuntime.setText(str(self.runTime))
         #preferences
-        chemprefs = self.schedular.preferences.getChemicalPreferences() 
+        chemprefs = self.schedular.preferences.getChemicalPreferences()
         c = moose.Clock('/clock')
         self.simulationdt = c.tickDt[11]
         self.plotdt = c.tickDt[16]
@@ -297,7 +301,7 @@ class  KineticsWidget(EditorWidgetBase):
         self.lineItem_dict = {}
         self.object2line = defaultdict(list)
         self.itemignoreZooming = False
-        
+
         if hasattr(self,'sceneContainer'):
                 self.sceneContainer.clear()
         self.sceneContainer = QtGui.QGraphicsScene(self)
@@ -375,7 +379,7 @@ class  KineticsWidget(EditorWidgetBase):
             setupItem(self.modelRoot,self.srcdesConnection)
             if self.noPositionInfo:
                 self.autocoordinates = True
-            
+
                 self.xmin,self.xmax,self.ymin,self.ymax,self.autoCordinatepos = autoCoordinates(self.meshEntry,self.srcdesConnection)
             # TODO: size will be dummy at this point, but size I need the availiable size from the Gui
             self.size= QtCore.QSize(1000 ,550)
@@ -388,7 +392,7 @@ class  KineticsWidget(EditorWidgetBase):
             else: self.yratio = (self.size.height()-10)
             self.xratio = int(self.xratio)
             self.yratio = int(self.yratio)
-        
+
     def sizeHint(self):
         return QtCore.QSize(800,400)
 
@@ -670,7 +674,7 @@ class  KineticsWidget(EditorWidgetBase):
     #     print "### ",moose.wildcardFind(self.modelRoot+'/data/graph#/#')
     #     if moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]'):
     #         compt = moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
-    #         print " deletSolver ", 
+    #         print " deletSolver ",
     #         # print moose.exists(compt[0].path+'/stoich'), " ksolve ", moose.exists(compt[0].path+'/ksolve')
     #         # print "gsolve ", moose.delete( compt[0].path+'/gsolve' )
     #         if ( moose.exists( compt[0].path+'/stoich' ) ):
@@ -808,7 +812,7 @@ class kineticRunWidget(KineticsWidget):
         for item in self.sceneContainer.items():
             if isinstance(item,PoolItemCircle):
                 item.returnEllispeSize()
-    
+
     # def addSolver(self,solver):
     #     print "\t addSolver--------"
     #     compt = moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
@@ -859,7 +863,7 @@ class kineticRunWidget(KineticsWidget):
     #         stoich.ksolve = ksolve
     #         stoich.path = compt[0].path+'/##'
     #     moose.reinit()
-        
+
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     size = QtCore.QSize(1024 ,768)
