@@ -993,7 +993,7 @@ class MWindow(QtGui.QMainWindow):
                 moose.Annotator(modelContainer.path+'/info')
 
             modelAnno = moose.element(modelContainer.path+'/info')
-            modelAnno.modeltype = "kkit"
+            modelAnno.modeltype = "new_kkit"
             modelAnno.dirpath = " "
             self.loadedModelsAction(modelRoot.path,plugin)
             self.setPlugin(plugin, modelRoot.path)
