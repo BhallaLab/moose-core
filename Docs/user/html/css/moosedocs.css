@@ -149,7 +149,7 @@ tr:nth-child( even ) {
 }
 #section {
 	#background-color:#aaeebb;
-    width:50%;
+    width:55%;
     float:left;
     padding:5px;	 	 
 }
@@ -158,3 +158,4 @@ tr:nth-child( even ) {
     clear:both;
     text-align:left;
    padding:5px;
+	}
