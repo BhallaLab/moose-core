@@ -1,12 +1,14 @@
+# languiage = C++
+
 cimport Eref as _Eref
-cimport Compartment as _comp
+cimport Compartment as _Compartment
 
 # Class 
-cdef class Compartment:
-    cdef _comp.Compartment* thisptr
+cdef class PyCompartment:
+    cdef _Compartment.Compartment* thisptr
 
     def __cinit__(self):
-        self.thisptr = new _comp.Compartment()
+        self.thisptr = new _Compartment.Compartment()
 
     def __deinit__(self):
         del self.thisptr
@@ -46,4 +48,5 @@ cdef class Compartment:
     property lenght:
         def __get__(self): return self.thisptr.vGetLength()
         def __set__(self, x): self.thisptr.vSetLength(x)
+
 
