@@ -22,8 +22,7 @@ cdef extern from "../shell/Shell.h":
     cdef extern cppclass Shell:
         Shell() 
         Shell* initShell()
-        _Id.Id doCreate(string elemType
-                , _ObjId.ObjId parent
+        _Id.Id create(string elemType
                 , string name
                 , unsigned int numData 
                 , NodePolicy nodePolicy 
