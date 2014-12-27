@@ -1,4 +1,4 @@
-# Wrapper around msg/Shell class
+# language: c++
 
 from libcpp.string cimport string
 from cython.operator import dereference
@@ -6,9 +6,6 @@ from cython.operator import dereference
 cimport Shell as _Shell
 cimport Id as _Id
 cimport ObjId as _ObjId
-
-include "PyId.pyx"
-include "PyObjId.pyx"
 
 from libcpp.string cimport string
 from libcpp.vector cimport vector
