@@ -41,31 +41,32 @@ for name in dirs:
     if(name == "build"):
         shutil.rmtree(name)
 
-
-extensions = [ 
-        Extension(moduleName, ["PyShell.pyx", "PyId.pyx"]
-        , language = "c++"
-        , include_dirs = [ 
-            "../basecode" 
-            , "../msg"
-            , "."
-            ]
-        , extra_compile_args = [
-            "-g"
-            , "-DCYMOOSE"
-            , "-DCYTHON"
-            , "-DLINUX"
-            ]
-        , extra_link_args = ["-L.", "-g"]
-        , libraries = [
-            "mpi"
-            , "moose"
-            , "stdc++"
-            ]
-        )
-]
+#
+#extensions = [ 
+#        Extension(moduleName, ["cymoose.pyx", "PyShell.pyx", "PyId.pyx"]
+#        , language = "c++"
+#        , include_dirs = [ 
+#            "../basecode" 
+#            , "../msg"
+#            , "."
+#            ]
+#        , extra_compile_args = [
+#            "-g"
+#            , "-DCYMOOSE"
+#            , "-DCYTHON"
+#            , "-DLINUX"
+#            ]
+#        , libraries = [
+#            "mpi"
+#            , "cymoose"
+#            , "stdc++"
+#            ]
+#        , extra_link_args = ["-L.", "-g"]
+#        )
+#        ]
+#
 
 setup(
         cmdclass = {'build_ext': build_ext},
-        ext_modules =  cythonize(extensions)
+        ext_modules =  cythonize("*.pyx")
         )
