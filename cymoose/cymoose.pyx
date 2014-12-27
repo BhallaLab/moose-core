@@ -9,6 +9,7 @@ cimport Compartment as _Compartment
 cimport Shell as _Shell
 #from libcpp.map cimport map
 from libcpp.vector cimport vector
+import PyId
 
 shell = PyShell()
 
