@@ -1,14 +1,12 @@
 # Wrapper around msg/Shell class
-#include "Id.pyx"
-#include "ObjId.pyx"
 
 from libcpp.string cimport string
 
-cimport PyShell as _Shell
+cimport Shell as _Shell
 cimport Id as _id 
 cimport ObjId as _objid 
 
-cdef class Shell:
+cdef class PyShell:
 
     cdef _Shell.Shell *thisptr
 
