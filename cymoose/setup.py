@@ -43,7 +43,7 @@ for name in dirs:
 
 
 extensions = [ 
-        Extension(moduleName, ["PyShell.pyx"]
+        Extension(moduleName, ["PyShell.pyx", "PyId.pyx"]
         , language = "c++"
         , include_dirs = [ 
             "../basecode" 

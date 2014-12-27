@@ -1,10 +1,13 @@
+# language = c++
+
 cimport Id as _Id 
 cimport ObjId as _ObjId
 cimport Eref as _Eref
-
-from cython.operator import dereference
+from libcpp.string cimport string
 
 include "PyEref.pyx"
+
+from cython.operator import dereference
 
 cdef class PyId:
 
