@@ -30,21 +30,21 @@ os.environ['CXX'] = "g++"
 
 # Clean up
 moduleName = "cymoose"
-#for root, dirs, files in os.walk(".", topdown=False):
-#    for name in files:
-#        if (name.startswith(moduleName) and not(
-#                name.endswith(".pyx") or name.endswith(".pxd") or name.endswith(".cxx") or name.endswith(".hpp")
-#                )
-#            ):
-#            os.remove(os.path.join(root, name))
-#for name in dirs:
-#    if(name == "build"):
-#        shutil.rmtree(name)
-#
+for root, dirs, files in os.walk(".", topdown=False):
+    for name in files:
+        if (name.startswith(moduleName) and not(
+                name.endswith(".pyx") or name.endswith(".pxd") or name.endswith(".cxx") or name.endswith(".hpp")
+                )
+            ):
+            os.remove(os.path.join(root, name))
+for name in dirs:
+    if(name == "build"):
+        shutil.rmtree(name)
+
 
 extensions = [ 
-        Extension(moduleName, ["Shell.pyx"]
-        , language = "C++"
+        Extension(moduleName, ["PyShell.pyx"]
+        , language = "c++"
         , include_dirs = [ 
             "../basecode" 
             , "../msg"
