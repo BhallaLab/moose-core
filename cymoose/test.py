@@ -5,12 +5,7 @@ import os
 os.environ['LD_LIBRARY_PATH'] = '.'
 sys.path.append(".")
 import time
-if len(sys.argv) < 2:
-    print("Importing cymoose")
-    import cymoose as moose
-else:
-    print("Importing pymoose")
-    import moose
+import _moose as moose
 
 if __name__ == "__main__":
     #a = moose.create("Neutral", "/comp", 1)
