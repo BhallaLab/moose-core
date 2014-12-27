@@ -1,6 +1,6 @@
 # distutils: language = c++
 # distutils: include_dirs = ., cymoose
-# distutils: extra_compiler_args = -DCYTHON
+# distutils: extra_compile_args = -DCYTHON
 
 from libcpp.string cimport string
 cimport Eref as _eref
