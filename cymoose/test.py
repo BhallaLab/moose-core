@@ -5,7 +5,7 @@ import os
 os.environ['LD_LIBRARY_PATH'] = '.'
 sys.path.append(".")
 import time
-import _moose as moose
+import cymoose as moose
 
 if __name__ == "__main__":
     #a = moose.create("Neutral", "/comp", 1)

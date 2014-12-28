@@ -142,6 +142,12 @@ endif()
 find_package(MPI REQUIRED)
 set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
 
+############################ CYMOOSE related macros. ########################
+set(CYMOOSE 1)
+if(CYMOOSE)
+    add_definitions("-DCYMOOSE -DCYTHON")
+endif()
+
 # Add subdirectroeis
 add_subdirectory(basecode)
 add_subdirectory(biophysics)
@@ -265,7 +271,6 @@ if(BUILD_PYMOOSE)
 endif(BUILD_PYMOOSE)
 
 ######################### CYMOOSE #############################################
-set(CYMOOSE 1)
 if(CYMOOSE)
     add_library(cymoose SHARED cymoose/cymoose_methods.cxx)
     set_target_properties(moose PROPERTIES COMPILE_DEFINITIONS "CYMOOSE")
@@ -276,30 +281,12 @@ if(CYMOOSE)
     set_target_properties(cymoose PROPERTIES 
             LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/cymoose"
             )
+
     target_link_libraries(cymoose 
         "-Wl,--whole-archive"
-        basecode
-        msg
-        shell
-        randnum
-        scheduling
-        moose_mpi
-        moose_builtins
-        utility 
-        muparser
-        biophysics 
-        kinetics 
-        ksolve
-        tinyxml
-        hsolve 
-        mesh
-        signeur
-        diffusion 
-        device
-        benchmarks
+        ${MOOSE_LIBRARIES}
         "-Wl,--no-whole-archive"
         ${LIBRARIES}
-        ${LOCAL_GSL_LIBRARIES}
         )
 endif()
 
