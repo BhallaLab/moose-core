@@ -9,9 +9,15 @@ cimport Compartment as _Compartment
 cimport Shell as _Shell
 #from libcpp.map cimport map
 from libcpp.vector cimport vector
-import PyId
+
+include "PyId.pyx"
+include "PyShell.pyx"
+include "Compartment.pyx"
+include "PyEref.pyx"
+include "PyObjId.pyx"
 
 shell = PyShell()
+
 
 ## CyMoose functions
 
