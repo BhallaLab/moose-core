@@ -26,11 +26,11 @@ cdef class PyObjId:
     def __cinit__(self, id_ = None, dataIndex = 0, fieldIndex = 0):
         self.thisptr = new _ObjId.ObjId()
 
-    def path(self):
-        """Get the path"""
-        if len(self.path_) > 0:
-            return self.path_
-        else:
-            return self.objId.path()
+    property path:
+        def __get__(self): 
+            if len(self.path_) > 0:
+                return self.path_
+            else:
+                return self.objId.path()
 
 
