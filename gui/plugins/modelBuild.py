@@ -20,8 +20,11 @@ def updateCompartmentSize(qGraCompt):
 def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
     # The variable 'compt' will be empty when dropping cubeMesh,cyclMesh, but rest it shd be
     # compartment
-    modelRoot = modelpath[0:modelpath.find('/',1)]
-    mType = (moose.element(modelRoot+'/info')).modeltype
+    if modelpath.find('/',1) > -1:
+        modelRoot = modelpath[0:modelpath.find('/',1)]
+    else:
+        modelRoot = modelpath
+    mType = moose.Annotator((moose.element(modelRoot+'/info'))).modeltype
     itemAtView = view.sceneContainerPt.itemAt(view.mapToScene(event_pos))
     pos = view.mapToScene(event_pos)
     modelpath = moose.element(modelpath)
