@@ -1,11 +1,11 @@
-# language = c++
+# distutils: language = c++
+# distutils: include_dirs = ., cymoose
+# distutils: extra_compile_args = -DCYTHON
 
 cimport Id as _Id 
 cimport ObjId as _ObjId
 cimport Eref as _Eref
 from libcpp.string cimport string
-
-include "PyEref.pyx"
 
 from cython.operator import dereference
 
