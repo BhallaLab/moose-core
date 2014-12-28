@@ -1,4 +1,4 @@
-# language: c++
+# distutils: language = c++
 
 from libcpp.string cimport string
 from cython.operator import dereference
@@ -29,9 +29,15 @@ cdef class PyShell:
     def create(self, string elemType, string elemPath, unsigned int numData
             , _Shell.NodePolicy nodePolicy = _Shell.MooseBlockBalance
             , unsigned int preferredNode = 1):
+        """Call shell create function """
         cdef _Id.Id obj
         obj = self.thisptr.create(elemType, elemPath , numData, nodePolicy, preferredNode)
         newObj = PyId()
         newObj.thisptr = &obj
         newObj.setPath()
         return newObj
+
+
+    # Function delete clashes with built-in name, therefore erase is provided.
+    cdef erase(self, _ObjId.ObjId objId):
+        self.thisptr.doDelete(objId)
