@@ -6,7 +6,7 @@ cimport Id as _Id
 cimport ObjId as _ObjId
 from libcpp.string cimport string
 from libcpp.vector cimport vector
-#from libcpp.map cimport map
+from libcpp cimport bool
 
 cdef extern from "../shell/Shell.h":
     cdef enum NodePolicy:
@@ -28,6 +28,7 @@ cdef extern from "../shell/Shell.h":
                 , NodePolicy nodePolicy 
                 , unsigned int preferredNode 
                 ) 
+        bool doDelete(_ObjId.ObjId id)
 
 cdef extern from "../shell/Wildcard.h":
     int wildcardFind(const string& n, vector[_ObjId.ObjId]& ret) 
