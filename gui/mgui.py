@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # mgui.py ---
 #
 # Filename: mgui.py
