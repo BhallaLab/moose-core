@@ -5,7 +5,12 @@ import os
 os.environ['LD_LIBRARY_PATH'] = '.'
 sys.path.append(".")
 import time
-import cymoose as moose
+if len(sys.argv) > 1:
+    print("Importing pymoose")
+    import moose
+else:
+    print("Importing cymoose")
+    import cymoose as moose
 
 if __name__ == "__main__":
     #a = moose.create("Neutral", "/comp", 1)
@@ -19,7 +24,9 @@ if __name__ == "__main__":
     t = time.time()
     paths = moose.wildcardFind('/comp/##')
     for p in paths:
-        p.path
+        #print p.path
+        #p.path
+        pass
     print("total time taken : {} ".format( time.time() - t))
 
 

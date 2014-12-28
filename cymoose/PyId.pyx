@@ -5,6 +5,7 @@
 cimport Id as _Id 
 cimport ObjId as _ObjId
 cimport Eref as _Eref
+
 from libcpp.string cimport string
 
 from cython.operator import dereference
