@@ -10,6 +10,15 @@
 #ifndef _NEUTRAL_H
 #define _NEUTRAL_H
 
+
+#ifdef  CYMOOSE
+
+#include "../basecode/ProcInfo.h"
+
+class Cinfo;
+
+#endif     /* -----  CYMOOSE  ----- */
+
 class Neutral
 {
 	public:
