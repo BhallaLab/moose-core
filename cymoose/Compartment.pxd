@@ -1,7 +1,6 @@
 # distutils: language = C++
 # distutils: include_dirs = ., cymoose, ../cymoose/
-# distutils: extra_compile_args = -DCYTHON
-# distutils: libraries = basecode
+# distutils: extra_compile_args = -DCYMOOSE
 
 cimport Eref as _Eref
 cimport CompartmentBase as CompartmentBase_
