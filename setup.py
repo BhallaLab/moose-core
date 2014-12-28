@@ -329,7 +329,7 @@ DEFINE_MACROS = [('USE_GSL', None),
                  ('USE_SBML', None), 
                  ('USE_HDF5', None)]
 
-# EXTRA_LINK_ARGS = ['-rdynamic']
+EXTRA_LINK_ARGS = ['-L/usr/lib64', '-Wl,-R/usr/lib64'] # distutils disregards everything in LIBRARY_DIRS except /usr/local/lib, hence this
 PACKAGES = ['moose', 'moose.backend', 'moose.neuroml', 'mgui', 'mgui.plugins']
 SCRIPTS = ['gui/mgui.py']
 PACKAGE_DATA = {'moose': ['copyleft', 'README'], 'mgui': ['icons/*', 'colormaps/*', 'bioModels/*']}
@@ -358,16 +358,15 @@ setup_info = dict(
     requires=REQUIRES,
     package_dir={'': 'python', 'mgui': 'gui'}
 )
-# try:
-#     from setuptools import setup
-#     from setuptools.extenion import Extension
-#     setup_info['install_requires'] = INSTALL_REQUIRES
-#     setup_info['extras_require'] = EXTRAS_REQUIRE
-#     setup_info['dependency_links'] = DEPENDENCY_LINKS
-# except ImportError:
-#     from distutils.core import setup, Extension
 
-from distutils.core import setup, Extension
+try:
+    from setuptools import setup
+    from setuptools.extenion import Extension
+    setup_info['install_requires'] = INSTALL_REQUIRES
+    setup_info['extras_require'] = EXTRAS_REQUIRE
+    setup_info['dependency_links'] = DEPENDENCY_LINKS
+except ImportError:
+    from distutils.core import setup, Extension
 
 moose_module = Extension(
     BUILD_TARGET,
@@ -377,7 +376,7 @@ moose_module = Extension(
     library_dirs=LIBRARY_DIRS,
     runtime_library_dirs=LIBRARY_DIRS,
     define_macros=DEFINE_MACROS,
-    # extra_link_args=EXTRA_LINK_ARGS
+    extra_link_args=EXTRA_LINK_ARGS
 )
 print moose_module.runtime_library_dirs
 
