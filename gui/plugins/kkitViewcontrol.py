@@ -107,6 +107,10 @@ class GraphicalView(QtGui.QGraphicsView):
             self.state["press"]["item"] = item
             self.state["press"]["type"] = itemType
             self.state["press"]["pos"]  = event.pos()
+            #If connector exist and if mousePress on Compartment interior,
+            # then removing any connect if exist
+            if itemType == COMPARTMENT_INTERIOR:
+                self.removeConnector()
             # self.layoutPt.plugin.mainWindow.objectEditSlot(self.state["press"]["item"].mobj, False)
         else:
             self.resetState()
@@ -121,7 +125,6 @@ class GraphicalView(QtGui.QGraphicsView):
         self.state["move"]["happened"] = True
         itemType = self.state["press"]["type"]
         item     = self.state["press"]["item"]
-
         if itemType == CONNECTOR:
             self.drawExpectedConnection(event)
             self.removeConnector()
