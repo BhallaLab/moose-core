@@ -65,9 +65,8 @@ class Msg;
 class Eref;
 
 template<typename T>
-class SrcFinfo1;
 
-typedef const ProcInfo* ProcPtr;
+//typedef const ProcInfo* ProcPtr;
 
 
 #endif   /* ----- #ifndef CYTHON_HEADER_INC  ----- */
