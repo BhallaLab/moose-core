@@ -53,9 +53,14 @@ cdef class Compartment:
 
     cdef public PyId obj
     cdef public PyCompartment comp_ 
+    cdef public object compartments
 
     def __cinit__(self, path, numData = 1):
+        # Following creates as many elements as given by numData. This function
+        # returns only top-object. We should iterate over it and create a list
+        # of objects created.
         self.obj = shell.create("Compartment", path, numData)
+
         # Wrap this id in python compartment
         self.comp_ = PyCompartment(self.obj)
 
@@ -70,5 +75,5 @@ cdef class Compartment:
             return self.comp_.getVm(deref(self.obj.eref_.thisptr))
 
         def __set__(self, value):
-            self.comp_.setVm(self.obj.eref_, value)
+            self.comp_.setVm(deref(self.obj.eref_.thisptr), value)
 
