@@ -3,8 +3,6 @@
 from libcpp.string cimport string
 from cython.operator import dereference
 
-include "PyId.pyx"
-
 cimport Shell as _Shell
 cimport Id as _Id
 cimport ObjId as _ObjId

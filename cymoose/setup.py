@@ -24,8 +24,8 @@ from distutils.extension import Extension
 from Cython.Distutils import build_ext
 from Cython.Build import cythonize
 
-os.environ['CC'] = "g++"
-os.environ['CXX'] = "g++"
+os.environ['CC'] = "clang++"
+os.environ['CXX'] = "clang++"
 
 
 # Clean up
@@ -41,32 +41,32 @@ for name in dirs:
     if(name == "build"):
         shutil.rmtree(name)
 
-#
-#extensions = [ 
-#        Extension(moduleName, ["cymoose.pyx", "PyShell.pyx", "PyId.pyx"]
-#        , language = "c++"
-#        , include_dirs = [ 
-#            "../basecode" 
-#            , "../msg"
-#            , "."
-#            ]
-#        , extra_compile_args = [
-#            "-g"
-#            , "-DCYMOOSE"
-#            , "-DCYTHON"
-#            , "-DLINUX"
-#            ]
-#        , libraries = [
-#            "mpi"
-#            , "cymoose"
-#            , "stdc++"
-#            ]
-#        , extra_link_args = ["-L.", "-g"]
-#        )
-#        ]
-#
+
+extensions = [ 
+        Extension(moduleName, ["cymoose.pyx"]
+        , language = "c++"
+        , include_dirs = [ 
+            "../basecode" 
+            , "../msg"
+            , "."
+            ]
+        , extra_compile_args = [
+            "-g"
+            , "-DCYMOOSE"
+            , "-DCYTHON"
+            , "-DLINUX"
+            ]
+        , libraries = [
+            "mpi"
+            , "cymoose"
+            , "stdc++"
+            ]
+        , extra_link_args = ["-L.", "-g"]
+        )
+        ]
+
 
 setup(
         cmdclass = {'build_ext': build_ext},
-        ext_modules =  cythonize("*.pyx")
+        ext_modules =  cythonize(extensions)
         )
