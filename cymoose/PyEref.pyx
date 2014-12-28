@@ -1,3 +1,7 @@
+# distutils: language = c++
+# distutils: include_dirs = ., cymoose
+# distutils: extra_compile_args = -DCYTHON
+
 cimport Eref as _Eref
 
 cdef class PyEref:
