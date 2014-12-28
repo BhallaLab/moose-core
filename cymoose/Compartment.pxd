@@ -1,4 +1,4 @@
-# distutils: language = C++
+# distutils: language = c++
 # distutils: include_dirs = ., cymoose, ../cymoose/
 # distutils: extra_compile_args = -DCYMOOSE
 

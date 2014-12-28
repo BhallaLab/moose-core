@@ -9,10 +9,11 @@ cimport Compartment as _Compartment
 cimport Shell as _Shell
 #from libcpp.map cimport map
 from libcpp.vector cimport vector
+from cython.operator cimport dereference as deref
 
 include "PyId.pyx"
 include "PyShell.pyx"
-include "Compartment.pyx"
+include "PyCompartment.pyx"
 include "PyEref.pyx"
 include "PyObjId.pyx"
 
@@ -66,7 +67,7 @@ cdef class Compartment:
 
     property Vm:
         def __get__(self):
-            return self.comp_.getVm(self.obj.eref_)
+            return self.comp_.getVm(deref(self.obj.eref_.thisptr))
 
         def __set__(self, value):
             self.comp_.setVm(self.obj.eref_, value)
