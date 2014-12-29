@@ -1,9 +1,9 @@
 # distutils: language = c++
-# distutils: include_dirs = ., cymoose, ../cymoose/
+# distutils: include_dirs = ., .., ../..,
 # distutils: extra_compile_args = -DCYMOOSE
 
-cimport Eref as _Eref
-cimport CompartmentBase as CompartmentBase_
+cimport bindings.Eref as _Eref
+cimport bindings.CompartmentBase as CompartmentBase_
 
 cdef extern from "../biophysics/Compartment.h" namespace "moose":
 
