@@ -2,9 +2,9 @@
 
 from libcpp.string cimport string
 
-cimport Shell as _Shell
-cimport Id as _id 
-cimport ObjId as _objid 
+cimport bindings.Shell as _Shell
+cimport bindings.Id as _id 
+cimport bindings.ObjId as _objid 
 
 cdef class PyShell:
 
