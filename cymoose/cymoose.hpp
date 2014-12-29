@@ -13,9 +13,8 @@
 #include <unistd.h> // for getopt
 #endif
 #include "../scheduling/Clock.h"
-#include "DiagonalMsg.h"
-#include "SparseMatrix.h"
-#include "SparseMsg.h"
+#include "../msg/DiagonalMsg.h"
+//#include "../msg/SparseMsg.h"
 #include "../mpi/PostMaster.h"
 #ifdef USE_MPI
 #include <mpi.h>

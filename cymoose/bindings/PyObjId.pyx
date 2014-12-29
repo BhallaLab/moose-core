@@ -4,10 +4,10 @@
 
 # Definition to this class.
 
-cimport ObjId as _ObjId
-cimport Id as _Id
-from libcpp.string cimport string
+cimport bindings.ObjId as _ObjId
+cimport bindings.Id as _Id
 
+from libcpp.string cimport string
 from cython.operator import dereference as deref
 from libc.stdio cimport printf
 
