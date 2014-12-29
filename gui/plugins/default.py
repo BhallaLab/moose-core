@@ -90,6 +90,7 @@ from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as Naviga
 #from EventBlocker import EventBlocker
 # from PlotNavigationToolbar import PlotNavigationToolbar
 from global_constants import preferences
+from setsolver import *
 ELECTRICAL_MODEL = 0
 CHEMICAL_MODEL   = 1
 
@@ -497,7 +498,6 @@ class SchedulingWidget(QtGui.QWidget):
         # layout.addItem(spacerItem)
         # self.setLayout(layout)
         # self._toolBars.append(
-        self.modelType                  = None
         self.modelRoot                  = None
         self.dataRoot                   = None
         self.runner                     = Runner()
@@ -618,8 +618,12 @@ class SchedulingWidget(QtGui.QWidget):
         self.continueFlag               = False
 
     def runSimulation(self):
-
         if self.modelType == CHEMICAL_MODEL:
+            compt = moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
+            if not moose.exists(compt[0].path+'/stoich'):
+                chemPref = self.preferences.getChemicalPreferences()
+                solver = chemPref["simulation"]["solver"]
+                addSolver(self.modelRoot,solver)
             status = self.solverStatus()
                    # if status != 0 or status == -1:
             #     return
@@ -696,7 +700,6 @@ class SchedulingWidget(QtGui.QWidget):
 
     def solverStatus(self):
         compt = moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
-        #print moose.le(compt[0].path)
         if not moose.exists(compt[0].path+'/stoich'):
             return None
         else:
