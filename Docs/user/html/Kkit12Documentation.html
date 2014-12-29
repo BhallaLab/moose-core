@@ -6,8 +6,7 @@
   <meta name="generator" content="pandoc" />
   <meta name="author" content="Upi Bhalla" />
   <meta name="author" content="Harsha Rani" />
-  <meta name="author" content="H. Chaitanya" />
-  <meta name="date" content="2012-05-11" />
+  <meta name="date" content="2014-27-12" />
   <title>Kinetikit 12: Interface for chemical kinetic models in MOOSEGUI</title>
   <link rel="stylesheet" href="css/moosedocs.css" type="text/css" />
 </head>
@@ -16,8 +15,7 @@
 <h1 class="title">Kinetikit 12: Interface for chemical kinetic models in MOOSEGUI</h1>
 <h2 class="author">Upi Bhalla</h2>
 <h2 class="author">Harsha Rani</h2>
-<h2 class="author">H. Chaitanya</h2>
-<h3 class="date">May 11, 2012</h3>
+<h3 class="date">Dec 27, 2014</h3>
 </div>
 <div id="TOC">
 <ul>
@@ -35,9 +33,10 @@
 <li><a href="#reaction">Reaction</a></li>
 <li><a href="#mass-action-enzymes">Mass-action enzymes</a></li>
 <li><a href="#michaelis-menten-enzymes">Michaelis-Menten Enzymes</a></li>
-<li><a href="#sumtotal">SumTotal</a></li>
+<li><a href="#function">Function</a></li>
 </ul></li>
 <li><a href="#model-operations">Model operations</a></li>
+<li><a href="#model-building">Model Building</a></li>
 </ul></li>
 </ul>
 </div>
@@ -63,27 +62,27 @@
 <h1 id="using-kinetikit-12"><a href="#TOC">Using Kinetikit 12</a></h1>
 <h2 id="overview"><a href="#TOC">Overview</a></h2>
 <ul>
-<li>Load models using <strong><code>File -&gt; Load</code></strong>. Chemical schematic appears in <strong><code>Model layout</code></strong> tab.</li>
-<li>Run models using <strong><code>Run</code></strong> button.</li>
-<li>View plots by clicking on <strong><code>Plot Window</code></strong> tab.</li>
-<li>View parameters in <strong><code>Model layout</code></strong> tab by clicking on icons, and looking at entries in <strong><code>Properties</code></strong> table to the right.</li>
+<li>Load models using <strong><code>File -&gt; Load model</code></strong>. Chemical schematic appears in <strong><code>Editor view</code></strong> tab.</li>
+<li>View parameters in <strong><code>Editor view</code></strong> tab by clicking on icons, and looking at entries in <strong><code>Properties</code></strong> table to the right.</li>
 <li>Edit parameters by changing their values in the <strong><code>Properties</code></strong> table.</li>
-<li>Plot variables belonging to an object by clicking on its icon, and then clicking <strong><code>Add Field</code></strong> in the <strong><code>Plot Configuration</code></strong> panel.</li>
-<li>Manipulate and save plots using the icons at the bottom of the <strong><code>Plot Window</code></strong>.</li>
-<li>Select numerical method using options under <strong><code>Solver</code></strong> menu item.</li>
+<li>From Run View, Pools can be plottable by clicking on it and dragging onto the plot Window, presently only concentration is plottable.</li>
+<li>Run models using <strong><code>Run</code></strong> button.</li>
+<li>Select numerical method using options under <strong><code>Preferences</code></strong> button in simulation control.</li>
+<!--<li>Save plots using the icons at the bottom of the <strong><code>Plot Window</code></strong>.</li> -->
+
 </ul>
 <p>Most of these operations are detailed in other sections, and are shared with other aspects of the MOOSE simulation interface. Here we focus on the Kinetikit-specific items.</p>
 <h2 id="model-layout-and-icons"><a href="#TOC">Model layout and icons</a></h2>
-<p>When you are in the <strong><code>Kkit layout</code></strong> tab you will see a collection of icons, arrows, and grey boxes surrounding these. This is a schematic of the reaction scheme being modeled. You can view and change parameters, and change the layout of the model. In the next MOOSE release you will also be able to add and remove molecules and reactions.</p>
+<p>When you are in the <strong><code>Model View</code></strong> tab you will see a collection of icons, arrows, and grey boxes surrounding these. This is a schematic of the reaction scheme being modeled. You can view and change parameters, and change the layout of the model.</p>
 <div class="figure">
-<img src="../../images/KkitModelWindow.png" /><p class="caption"></p>
+<img src="../../images/Moose1.png" /><p class="caption"></p>
 </div>
 <p>Resizing the model layout and icons:</p>
 <ul>
 <li><strong>Zoom</strong>: Comma and period keys. Alternatively, the mouse scroll wheel or vertical scroll line on the track pad will cause the display to zoom in and out.</li>
 <li><strong>Pan</strong>: The arrow keys move the display left, right, up, and down.</li>
 <li><strong>Entire Model View</strong>: Pressing the <strong><code>a</code></strong> key will fit the entire model into the entire field of view.</li>
-<li><strong>Resize Icons</strong>: Angle bracket keys, that is, <strong><code>&lt;</code></strong> and <strong><code>&gt;</code></strong>. This resizes the icons while leaving their positions on the screen layout more or less the same.</li>
+<li><strong>Resize Icons</strong>: Angle bracket keys, that is, <strong><code>&lt;</code></strong> and <strong><code>&gt;</code></strong> or <strong><code>+</code></strong> and <strong><code>-</code></strong>. This resizes the icons while leaving their positions on the screen layout more or less the same.</li>
 <li><strong>Original Model View</strong>: Presing the <strong><code>A</code></strong> key (capital <code>A</code>) will revert to the original model view including the original icon scaling.</li>
 </ul>
 <h3 id="compartment"><a href="#TOC">Compartment</a></h3>
@@ -105,7 +104,7 @@
 <h3 id="pool"><a href="#TOC">Pool</a></h3>
 <p>This is the set of molecules of a given species within a compartment. Different chemical states of the same molecule are in different pools.</p>
 <ul>
-<li><strong>Icon</strong>: <img src="../../images/KkitPoolIcon.png" /> Colored rectangle with pool name in it.</li>
+<li><strong>Icon</strong>: <img src="../../images/Pool.png" /> Colored rectangle with pool name in it.</li>
 <li><strong>Moving pools</strong>: Click and drag.</li>
 <li><strong>Pool editable parameters</strong>:
 <ul>
@@ -130,7 +129,7 @@
 <h3 id="buffered-pools"><a href="#TOC">Buffered pools</a></h3>
 <p>Some pools are set to a fixed <code>n</code>, that is number of molecules, and therefore a fixed concentration, throughout a simulation. These are buffered pools.</p>
 <ul>
-<li><strong>Icon</strong>: <img src="../../images/KkitPoolIcon.png" /> Colored rectangle with pool name in it.</li>
+<li><strong>Icon</strong>: <img src="../../images/BufPool.png" /> Colored rectangle with pool name in it.</li>
 <li><strong>Moving Buffered pools</strong>: Click and drag.</li>
 <li><strong>Buffered Pool editable parameters</strong>
 <ul>
@@ -245,32 +244,71 @@
 <li><strong><code>k</code><sub><code>cat</code></sub></strong>: Production rate of enzyme, in <code>1/time</code> units. Equal to <code>k</code><sub><code>3</code></sub>, the rate of the second, irreversible reaction.</li>
 </ul></li>
 </ul>
-<h3 id="sumtotal"><a href="#TOC">SumTotal</a></h3>
-<p>This is a pool whose concentration is just the sum of the concentrations of pools connected into it. It behaves like a buffer whose concentration varies as the simulation proceeds Note that this violates mass conservation: One can use a <strong><code>SumTotal</code></strong> in a reaction, just like a buffer, but the <strong><code>SumTotal</code></strong> itself will never be depleted. Typically used when we have multiple molecular forms of an enzyme, all with similar activity, and we just want to use a single enzyme activity to represent the whole lot.</p>
+<h3 id="function"><a href="#TOC">Function</a></h3>
+<p>Function objects can be used to evaluate expressions with arbitrary number of variables and constants. We can assign expression of the form:
+
+f(c0, c1, ..., cM, x0, x1, ..., xN, y0,..., yP ) 
+
+where ci‘s are constants and xi‘s and yi‘s are variables.</p><p>
+It can parse mathematical expression defining a function and evaluate it and/or its derivative for specified variable values. The variables can be input from other moose objects. In case of arbitrary variable names, the source message must have the variable name as the first argument.
+
+
 <ul>
-<li><strong>Icon</strong>: Colored rectangle with pool name. This is <strong><code>tot1</code></strong> in the example image below. The input pools <strong><code>A</code></strong> and <strong><code>B</code></strong> connect to the SumTotal with blue arrows. <img src="../../images/KkitSumTotal.png" /></li>
-<li><strong>Moving SumTotals</strong>: Click and drag.</li>
-<li><strong>SumTotal editable parameters</strong>:
-<ul>
-<li><strong><code>name</code></strong>: Name of the pool</li>
-</ul></li>
-<li><strong>SumTotal fixed parameters</strong>:
-<ul>
-<li><strong><code>n</code></strong>: Number of molecules in the pool. Computed as it runs.</li>
-<li><strong><code>conc</code></strong>: Concentration of molecules in the pool. Computed as it runs.</li>
-<li><strong><code>size</code></strong>: Derived from the compartment that holds the pool. Specifies volume, surface area or length of the holding compartment.</li>
-</ul></li>
+<li><strong>Icon</strong>: Colored rectangle with pool name. This is <strong><code>&fnof;</code></strong> in the example image below. The input pools <strong><code>A</code></strong> and <strong><code>B</code></strong> connect to the <strong>&fnof;</strong> with blue arrows. The function ouput's to BuffPool</li>
+<p><img src="../../images/func.png" /></p>
 </ul>
 <h2 id="model-operations"><a href="#TOC">Model operations</a></h2>
 <ul>
-<li><strong>Loading models</strong>: <strong><code>File -&gt; Load Model -&gt; select from dialog</code></strong>. This operation deletes the previously loaded model. Currently only understands Kkit.g format models.</li>
-<li><strong>Saving models</strong>: <strong><code>File -&gt; Save Model -&gt; select from dialog</code></strong>. Currently only understands Kkit.g format models.</li>
-<li><strong>Merging models</strong>: <strong><code>File -&gt; Merge Model -&gt; select from dialog</code></strong>. This operation tries to merge the new model into the currently loaded model. It does so by recognizing existing molecular pool names, and not duplicating those. Instead, any new reactions involving the existing pools get tied into the existing model. All other new pools and reactions are created as usual. Note that parameters of existing pools get updated to values from the new model.</li>
-<li><strong>Changing numerical methods</strong>: <strong><code>Solver</code></strong> menu item in title bar has options. Currently supports:
+<li><strong>Loading models</strong>: <strong><code>File -&gt; Load Model -&gt; select from dialog</code></strong>. This operation makes the previously loaded model disable and loads newly selected models in <strong><code>Model View</code></strong></li>
+<li><strong>New</strong>: <strong><code>File -&gt; New -&gt; Model name </code></strong>. This opens a empty widget for model building</li>
+<li><strong>Saving models</strong>: <strong><code>File -&gt; Save Model -&gt; select from dialog</code></strong>. </li>
+<!--<li><strong>Merging models</strong>: <strong><code>File -&gt; Merge Model -&gt; select from dialog</code></strong>. This operation tries to merge the new model into the currently loaded model. It does so by recognizing existing molecular pool names, and not duplicating those. Instead, any new reactions involving the existing pools get tied into the existing model. All other new pools and reactions are created as usual. Note that parameters of existing pools get updated to values from the new model.</li> -->
+<li><strong>Changing numerical methods</strong>: <strong><code>Preference->Chemical tab</code></strong> item from Simulation Control. Currently supports:
 <ul>
 <li>Runge Kutta: This is the Runge-Kutta-Fehlberg implementation from the GNU Scientific Library (GSL). It is a fifth order variable timestep explicit method. Works well for most reaction systems except if they have very stiff reactions.</li>
 <li>Gillespie: Optimized Gillespie stochastic systems algorithm, custom implementation. This uses variable timesteps internally. Note that it slows down with increasing numbers of molecules in each pool. It also slows down, but not so badly, if the number of reactions goes up.</li>
+<li>Exponential Euler:This methods computes the solution of partial and ordinary differential equations. </li>
 </ul></li>
 </ul>
+
+<h2 id="model-building"><a href="#TOC">Model building</a></h2>
+<ul>
+	<li><strong><code>File -&gt; New -&gt; Model name -&gt;</code></strong>This opens a empty widget for model building.
+</ul>
+<div id="header"></div>        
+<div id="nav_image"> <img src="../../images/chemical_CS.png"/></div>
+<div id="section">
+    <ul>
+        <li>The Edit Widget includes various menu options and model icons on the top. </li>
+        <li>Use the mouse buttton to click and drag icons from toolbar to Edit Widget, two things will happen, icon will appear in the editor widget
+        and a object editor will pop up with lots of parameters with respect to moose object.
+        <br>Rules:
+        	<ul>
+        		<li>Compartment has to be created firstly (At present only single compartment model is allowed)</li>
+        		<li>Enzyme should be dropped on a pool as parent and function should be dropped on buffPool for output</li>
+        	</ul>
+        <li> Drag in pool's and reaction on to the editor widget, now one can set up a reaction. 
+            <br>Click on mooseObject one can find a little arrow on the top right corner of the object, drag from this little arrow to any object for connection. <br>E.g pool to reaction and reaction to pool. 
+            <br> Specific connection type gets specific colored arrow. E.g. Green color arrow for specifying connection between reactant and product for reaction.
+            <br>Clicking on the object one can rearrange object for clean layout.
+            <br>Second order reaction can also be done by repeating the connection over again
+        </li>
+        <li>Each connection can be deleted and using rubberband selection each moose object can be deleted</li>
+    </ul>
+</div>
+<div id="header"></div>        
+<div id="nav_image"> <img src="../../images/Chemical_run.png"/></div>
+<div id="section">
+    <ul>
+        <li>From run widget, pools are draggable to plot window for plotting. (Currently <strong><code>conc</code></strong> is plotted as default field)
+        	Plots are color-coded as per in model.
+        </li>
+        <li>
+        Model can be run by clicking start button. One can stop button in mid-stream and start up again without affectiong the calculations.
+        The reset button clears the simulation.
+        </li>
+    </ul>
+</div>
+
 </body>
 </html>

@@ -114,7 +114,7 @@ dd p {
 }
 
 table {
-    width: 70%;
+    width: 80%;
     border: 1px solid #B099FF;
     border-collapse: collapse;
 }
@@ -140,3 +140,22 @@ tr:nth-child( odd ) {
 tr:nth-child( even ) {
     background-color: #E7E0FF;
 }
+
+#nav_image {
+	#background-color:#aaeeee;
+    width:35%;
+    float:left;
+    padding:5px;	      
+}
+#section {
+	#background-color:#aaeebb;
+    width:55%;
+    float:left;
+    padding:5px;	 	 
+}
+#header {
+    
+    clear:both;
+    text-align:left;
+   padding:5px;
+	}

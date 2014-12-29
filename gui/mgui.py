@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # mgui.py ---
 #
 # Filename: mgui.py
@@ -365,13 +364,16 @@ class MWindow(QtGui.QMainWindow):
                 action.setChecked(False)
         for subwin in self.mdiArea.subWindowList():
             subwin.close()
-        self.setCurrentView('editor')
+
         if name != "default" :
-            self.setCurrentView('run')
             self.setCurrentView('editor')
+            self.setCurrentView('run')
+
         if name == 'kkit':
             self.objectEditDockWidget.objectNameChanged.connect(self.plugin.getEditorView().getCentralWidget().updateItemSlot)
             self.objectEditDockWidget.colorChanged.connect(self.plugin.getEditorView().getCentralWidget().updateColorSlot)
+
+        self.setCurrentView('editor')
         return self.plugin
 
     def updateExistingMenu(self, menu):
@@ -902,7 +904,7 @@ class MWindow(QtGui.QMainWindow):
         else :
             neurons = moose.wildcardFind(modelPath + "/model/cells/##[ISA=Neuron]")
             for neuron in neurons:
-                print(neuron)
+                #print(neuron)
                 solver = moose.element(neuron.path + "/hsolve")
                 print("Disabling => ", solver)
                 solver.tick = -1
@@ -991,7 +993,7 @@ class MWindow(QtGui.QMainWindow):
                 moose.Annotator(modelContainer.path+'/info')
 
             modelAnno = moose.element(modelContainer.path+'/info')
-            modelAnno.modeltype = "kkit"
+            modelAnno.modeltype = "new_kkit"
             modelAnno.dirpath = " "
             self.loadedModelsAction(modelRoot.path,plugin)
             self.setPlugin(plugin, modelRoot.path)
