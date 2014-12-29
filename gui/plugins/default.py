@@ -90,6 +90,7 @@ from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as Naviga
 #from EventBlocker import EventBlocker
 # from PlotNavigationToolbar import PlotNavigationToolbar
 from global_constants import preferences
+from setsolver import *
 ELECTRICAL_MODEL = 0
 CHEMICAL_MODEL   = 1
 
@@ -497,7 +498,6 @@ class SchedulingWidget(QtGui.QWidget):
         # layout.addItem(spacerItem)
         # self.setLayout(layout)
         # self._toolBars.append(
-        self.modelType                  = None
         self.modelRoot                  = None
         self.dataRoot                   = None
         self.runner                     = Runner()
@@ -618,8 +618,12 @@ class SchedulingWidget(QtGui.QWidget):
         self.continueFlag               = False
 
     def runSimulation(self):
-
         if self.modelType == CHEMICAL_MODEL:
+            compt = moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
+            if not moose.exists(compt[0].path+'/stoich'):
+                chemPref = self.preferences.getChemicalPreferences()
+                solver = chemPref["simulation"]["solver"]
+                addSolver(self.modelRoot,solver)
             status = self.solverStatus()
                    # if status != 0 or status == -1:
             #     return
@@ -695,14 +699,16 @@ class SchedulingWidget(QtGui.QWidget):
         return True
 
     def solverStatus(self):
+        print "solverStatus "
         compt = moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
         #print moose.le(compt[0].path)
+        print "stoich exist ",moose.exists(compt[0].path+'/stoich')
         if not moose.exists(compt[0].path+'/stoich'):
             return None
         else:
             stoich = moose.Stoich(compt[0].path+'/stoich')
             status = int(stoich.status)
-            #print("Status =>", status)
+            print("Status =>", status)
             if status == -1:
                 QtGui.QMessageBox.warning(None,"Could not Run the model","Warning: Reaction path not yet assigned.\n ")
                 return -1
@@ -787,10 +793,15 @@ class SchedulingWidget(QtGui.QWidget):
         self.setModelType()
 
     def setModelType(self):
+        print "modelType: self.modelroot ",self.modelRoot
         if moose.exists(self.modelRoot + "/model/cells"):
+            print "%$%"
             self.modelType = ELECTRICAL_MODEL
         else:
+            print "()()"
             self.modelType = CHEMICAL_MODEL
+            print "()()())( ",self.modelType
+        print "setModelType ",self.modelType
         self.resetSimulation()
 
 from collections import namedtuple
