@@ -3,8 +3,8 @@
 # distutils: extra_compile_args = -DCYTHON
 
 
-cimport Neutral as _neutral
-cimport Eref as _eref
+cimport bindings.Neutral as _neutral
+cimport bindings.Eref as _eref
 
 cdef class PyNeutral:
     cdef _neutral.Neutral *thisptr
