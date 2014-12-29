@@ -904,7 +904,7 @@ class MWindow(QtGui.QMainWindow):
         else :
             neurons = moose.wildcardFind(modelPath + "/model/cells/##[ISA=Neuron]")
             for neuron in neurons:
-                print(neuron)
+                #print(neuron)
                 solver = moose.element(neuron.path + "/hsolve")
                 print("Disabling => ", solver)
                 solver.tick = -1
