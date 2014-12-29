@@ -3,7 +3,7 @@
 # distutils: extra_compile_args = -DCYTHON
 
 from libcpp.string cimport string
-cimport Eref as _eref
+cimport bindings.Eref as _eref
 
 cdef extern from "../shell/Neutral.h":
     cdef cppclass Neutral:
