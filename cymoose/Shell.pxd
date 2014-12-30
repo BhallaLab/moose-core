@@ -30,6 +30,13 @@ cdef extern from "../shell/Shell.h":
                 ) 
         bool doDelete(_ObjId.ObjId id)
 
+        # Function to  connect.
+        _ObjId.ObjId doAddMsg( const string& msgType, 
+                _ObjId.ObjId src, const string& srcField, 
+                _ObjId.ObjId dest, const string& destField )
+
+        
+
 cdef extern from "../shell/Wildcard.h":
     int wildcardFind(const string& n, vector[_ObjId.ObjId]& ret) 
 
