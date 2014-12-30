@@ -1,4 +1,6 @@
-# Wrapper around basecode/Id.h files 
+# distutils: language = c++
+# distutils: include_dirs = ., cymoose
+# distutils: extra_compile_args = -DCYTHON
 
 from libcpp.string cimport string 
 cimport Id as _Id
