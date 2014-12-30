@@ -14,7 +14,6 @@ from libc.stdio cimport printf
 cdef class PyObjId:
 
     cdef _ObjId.ObjId* thisptr
-    cdef _ObjId.ObjId objId
     cdef public string path_
 
     def __repr__(self):
