@@ -24,5 +24,5 @@ cdef class PyCompartment:
     cdef setVm(self, _Eref.Eref& e, double vm):
         self.thisptr.vSetVm(e, vm)
 
-    cdef getVm(self, _Eref.Eref& e):
-        self.thisptr.vGetVm(e)
+    cdef double getVm(self, _Eref.Eref& e):
+        return self.thisptr.vGetVm(e)
