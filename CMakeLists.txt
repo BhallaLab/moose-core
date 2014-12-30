@@ -142,6 +142,12 @@ endif()
 find_package(MPI REQUIRED)
 set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
 
+############################ CYMOOSE related macros. ########################
+set(CYMOOSE 1)
+if(CYMOOSE)
+    add_definitions("-DCYMOOSE -DCYTHON")
+endif()
+
 # Add subdirectroeis
 add_subdirectory(basecode)
 add_subdirectory(biophysics)
@@ -212,7 +218,6 @@ set(MOOSE_LIBRARIES
     device
     ksolve
     intfire
-    examples
     )
 
 target_link_libraries(moose
@@ -264,6 +269,26 @@ if(BUILD_PYMOOSE)
         )
 
 endif(BUILD_PYMOOSE)
+
+######################### CYMOOSE #############################################
+if(CYMOOSE)
+    add_library(cymoose SHARED cymoose/cymoose_methods.cxx)
+    set_target_properties(moose PROPERTIES COMPILE_DEFINITIONS "CYMOOSE")
+    if(DEBUG)
+        add_definitions("-g -Wall")
+    endif()
+
+    set_target_properties(cymoose PROPERTIES 
+            LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/cymoose"
+            )
+
+    target_link_libraries(cymoose 
+        "-Wl,--whole-archive"
+        ${MOOSE_LIBRARIES}
+        "-Wl,--no-whole-archive"
+        ${LIBRARIES}
+        )
+endif()
 
 ######################### INSTALL ##############################################
 install(TARGETS moose

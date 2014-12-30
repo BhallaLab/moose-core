@@ -38,7 +38,7 @@ class MorphML():
         self.model_dir = nml_params['model_dir']
         self.temperature = nml_params['temperature']
 
-    def readMorphMLFromFile(self,filename,params={}):
+    def readMorphMLFromFile(self,filename,params={}, combine_segments=False):
         """
         specify global params as a dict (presently none implemented)
         returns { cellname1 : segDict, ... }
@@ -53,11 +53,13 @@ class MorphML():
                 lengthUnits = neuroml_element.attrib['lengthUnits']
             else:
                 lengthUnits = 'micrometer'
-            cellDict = self.readMorphML(cell,params,lengthUnits)
+            print "readMorphMLFromFile using combine_segments = ", combine_segments
+            cellDict = self.readMorphML(cell,params,lengthUnits, combine_segments )
             cellsDict.update(cellDict)
         return cellsDict
 
     def readMorphML(self,cell,params={},lengthUnits="micrometer",combine_segments=False):
+        print "readMorphML using combine_segments = ", combine_segments
         """
         returns {cellname:segDict}
         where segDict = { segid1 : [ segname,(proximalx,proximaly,proximalz),

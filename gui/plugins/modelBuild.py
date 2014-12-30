@@ -100,9 +100,9 @@ def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
         bgcolor = getRandColor()
         qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y(),QtGui.QColor('green'),bgcolor)
         poolinfo.color = str(bgcolor.getRgb())
-        #if mType == "new_kkit":
-        poolinfo.x = posWrtComp.x()
-        poolinfo.y = -posWrtComp.y()
+        if mType == "new_kkit":
+            poolinfo.x = posWrtComp.x()
+            poolinfo.y = posWrtComp.y()
         view.emit(QtCore.SIGNAL("dropped"),poolObj)
         setupItem(modelpath.path,layoutPt.srcdesConnection)
         layoutPt.drawLine_arrow(False)
@@ -117,9 +117,9 @@ def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
         reacinfo = moose.Annotator(reacObj.path+'/info')
         qGItem = ReacItem(reacObj,itemAtView)
         qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y(),"white", "white")
-        #if mType == "new_kkit":
-        reacinfo.x = posWrtComp.x()
-        reacinfo.y = posWrtComp.y()
+        if mType == "new_kkit":
+            reacinfo.x = posWrtComp.x()
+            reacinfo.y = posWrtComp.y()
         layoutPt.mooseId_GObj[reacObj] = qGItem
         view.emit(QtCore.SIGNAL("dropped"),reacObj)
         setupItem(modelpath.path,layoutPt.srcdesConnection)
