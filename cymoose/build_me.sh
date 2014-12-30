@@ -9,4 +9,5 @@ else
     echo "Just testing"
 fi
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.
+python test/test_compartment.py
 python test/test.py
