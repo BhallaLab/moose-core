@@ -16,6 +16,7 @@ cdef class PyId:
 
     cdef public PyEref eref_
     cdef public string path
+    cdef public PyObjId objId
 
     def __cinit__(self
             , unsigned int id = 0
@@ -28,6 +29,8 @@ cdef class PyId:
         else:
             self.thisptr = new _Id.Id()
 
+        self.objId = PyObjId()
+        self.objId.pId = self.thisptr
 
     def __del__(self):
         del self.thisptr
