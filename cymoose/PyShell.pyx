@@ -3,15 +3,13 @@
 from libcpp.string cimport string
 from cython.operator import dereference
 
-cimport bindings.Shell as _Shell
-cimport bindings.Id as _Id
-cimport bindings.ObjId as _ObjId
+cimport Shell as _Shell
+cimport Id as _Id
+cimport ObjId as _ObjId
+
 
 from libcpp.string cimport string
 from libcpp.vector cimport vector
-
-from bindings.PyEref import PyEref
-from bindings.PyId import PyId
 
 cdef extern from "./cymoose.hpp":
     _Shell.Shell* initMoose(int argc, char** argv, _Shell.Shell* s)
