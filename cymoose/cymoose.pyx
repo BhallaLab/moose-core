@@ -28,7 +28,7 @@ def wildcardFind(pattern):
     pypath = []
     for p in paths:
         obj = PyObjId()
-        obj.objId = p
+        obj.thisptr = &p
         pypath.append(obj)
     return pypath
 
@@ -54,6 +54,7 @@ cdef class Compartment:
     cdef public PyId obj
     cdef public PyCompartment comp_ 
     cdef public object compartments
+    cdef _Eref.Eref* objEref 
 
     def __cinit__(self, path, numData = 1):
         # Following creates as many elements as given by numData. This function
@@ -63,6 +64,7 @@ cdef class Compartment:
 
         # Wrap this id in python compartment
         self.comp_ = PyCompartment(self.obj)
+        self.objEref = self.obj.eref_.thisptr
 
     def __repr__(self):
         return "Id: {0}, Type: Compartment, Path: {1}".format(1, self.obj.path)
@@ -72,8 +74,7 @@ cdef class Compartment:
 
     property Vm:
         def __get__(self):
-            return self.comp_.getVm(deref(self.obj.eref_.thisptr))
-
+            return self.comp_.getVm(deref(self.objEref))
         def __set__(self, value):
-            self.comp_.setVm(deref(self.obj.eref_.thisptr), value)
+            self.comp_.setVm(deref(self.objEref), value)
 
