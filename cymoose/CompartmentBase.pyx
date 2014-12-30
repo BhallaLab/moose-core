@@ -1,8 +1,8 @@
 # distutils: language = c++
 # distutils: extra_compile_args = -DCYTHON
 
-cimport bindings.Eref as _Eref
-cimport bindings.CompartmentBase as _CompartmentBase
+cimport Eref as _Eref
+cimport CompartmentBase as _CompartmentBase
 
 # Class 
 cdef class PyCompartmentBase:
