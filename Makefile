@@ -358,7 +358,7 @@ OBJLIBS =	\
 
 
 ifeq ($(USE_NEUROKIT),1)
-	NEUROKIT_COMMAND = cd ./python/moogli; python setup.py build_ext --sip-opts="-I/usr/share/sip/PyQt4/ -e -g -x VendorID -t WS_X11 -x PyQt_NoPrintRangeBug -t Qt_4_8_0 -x Py_v3 -g" build;  cd ../../; mv ./python/moogli/build/lib.linux-x86_64-2.7/_moogli.so ./python/;
+	NEUROKIT_COMMAND = cd ./python/moogli; python setup.py build;  cd ../../; mv ./python/moogli/build/lib.linux-x86_64-2.7/_moogli.so ./python/;
 # else
 # 	NEUROKIT_COMMAND = ""
 endif
