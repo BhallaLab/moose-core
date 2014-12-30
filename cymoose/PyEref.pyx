@@ -2,7 +2,7 @@
 # distutils: include_dirs = ., cymoose
 # distutils: extra_compile_args = -DCYTHON
 
-cimport bindings.Eref as _Eref
+cimport Eref as _Eref
 
 cdef class PyEref:
 
