@@ -1,7 +1,7 @@
 # Wrapper around basecode/Id.h files 
 
-cimport bindings.Eref as _Eref
-cimport bindings.ObjId as _ObjId
+cimport Eref as _Eref
+cimport ObjId as _ObjId
 from libcpp.string cimport string 
 
 cdef extern from "../basecode/Id.h":
