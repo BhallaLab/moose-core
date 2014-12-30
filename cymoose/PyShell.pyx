@@ -1,7 +1,7 @@
 # distutils: language = c++
 
 from libcpp.string cimport string
-from cython.operator import dereference
+from cython.operator import dereference as deref
 
 cimport Shell as _Shell
 cimport Id as _Id
@@ -41,3 +41,28 @@ cdef class PyShell:
     # Function delete clashes with built-in name, therefore erase is provided.
     cdef erase(self, _ObjId.ObjId objId):
         self.thisptr.doDelete(objId)
+        
+
+    # This function expose toAddMsg function
+    cdef _ObjId.ObjId add_msg(self, string msgType
+            , _ObjId.ObjId srcObj, const string& srcField
+            , _ObjId.ObjId destObj, const string& destField
+            ):
+        """Call shell do addMsg function """
+        cdef _ObjId.ObjId objId 
+        return self.thisptr.doAddMsg(msgType, srcObj, srcField
+                , destObj, destField
+                )
+
+    def connect(self, string msgType, PyObjId srcObj, string srcField
+            , PyObjId destObj, string destField
+            ):
+        cdef _ObjId.ObjId objId 
+        objId = self.add_msg(msgType, deref(srcObj.thisptr), srcField
+                , deref(destObj.thisptr), destField)
+        obj = PyObjId()
+        obj.thisptr = &objId 
+        obj.setPath()
+        return obj
+
+

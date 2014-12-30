@@ -5,6 +5,8 @@ cimport Eref as _Eref
 cimport Compartment as _Compartment
 cimport Id as _Id
 
+from libcpp.map cimport map
+
 # Class 
 cdef class PyCompartment:
 
@@ -21,8 +23,15 @@ cdef class PyCompartment:
     def __deinit__(self):
         del self.thisptr
 
+
+    cdef set(self, map[string, string] m):
+        pass
+
     cdef setVm(self, _Eref.Eref& e, double vm):
         self.thisptr.vSetVm(e, vm)
 
     cdef double getVm(self, _Eref.Eref& e):
         return self.thisptr.vGetVm(e)
+
+    
+    
