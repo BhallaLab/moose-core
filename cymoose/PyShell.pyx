@@ -62,7 +62,6 @@ cdef class PyShell:
                 , deref(destObj.thisptr), destField)
         obj = PyObjId()
         obj.thisptr = &objId 
-        obj.setPath()
         return obj
 
 
