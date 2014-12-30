@@ -1,6 +1,7 @@
 # distutils: language = c++
 # distutils: include_dirs = ., .., ../.., ../cymoose
 # distutils: extra_compile_args = -DCYTHON
+# distutils: libraries = cymoose
 
 cimport bindings.Id as _Id
 cimport bindings.ObjId as _ObjId 
@@ -12,13 +13,14 @@ cimport bindings.Shell as _Shell
 from libcpp.vector cimport vector
 from cython.operator cimport dereference as deref
 
-import modules.shell as shell
-
-import modules.compartment as comp
-
-shell_ = shell.PyShell()
 
 include "bindings/PyObjId.pyx"
+include "bindings/PyShell.pyx"
+
+import shell as shell
+import compartment as comp
+
+shell_ = shell.PyShell()
 
 ## CyMoose functions
 
