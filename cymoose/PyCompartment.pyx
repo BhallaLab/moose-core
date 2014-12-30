@@ -11,18 +11,20 @@ from libcpp.map cimport map
 cdef class PyCompartment:
 
     cdef _Compartment.Compartment* thisptr
-    cdef public object obj
+    cdef public PyId id_
+    cdef public PyObjId obj_
+
     cdef _Eref.Eref* pEref
 
     def __init__(self, obj):
-        self.obj = PyId()
+        self.id_ = obj
+        self.obj_ = PyObjId(obj)
 
     def __cinit__(self):
         self.thisptr = new _Compartment.Compartment()
 
     def __deinit__(self):
         del self.thisptr
-
 
     cdef set(self, map[string, string] m):
         pass
