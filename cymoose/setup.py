@@ -43,10 +43,28 @@ for name in dirs:
 
 
 extensions = [ 
-        Extension("compartment", ["modules/compartment.pyx"])
-        , Extension("shell", ["modules/shell.pyx"])
-        , Extension(moduleName, ["cymoose.pyx"] )
+        Extension(moduleName, ["cymoose.pyx"]
+        , language = "c++"
+        , include_dirs = [ 
+            "../basecode" 
+            , "../msg"
+            , "."
+            ]
+        , extra_compile_args = [
+            "-g"
+            , "-DCYMOOSE"
+            , "-DCYTHON"
+            , "-DLINUX"
+            ]
+        , libraries = [
+            "mpi"
+            , "cymoose"
+            , "stdc++"
+            ]
+        , extra_link_args = ["-L.", "-g"]
+        )
         ]
+
 
 setup(
         cmdclass = {'build_ext': build_ext},
