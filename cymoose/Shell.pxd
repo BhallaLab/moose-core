@@ -2,8 +2,8 @@
 # distutils: include_dirs = ., cymoose
 # distutils: extra_compile_args = -DCYTHON
 
-cimport bindings.Id as _Id
-cimport bindings.ObjId as _ObjId
+cimport Id as _Id
+cimport ObjId as _ObjId
 from libcpp.string cimport string
 from libcpp.vector cimport vector
 from libcpp cimport bool
