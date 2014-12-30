@@ -18,8 +18,11 @@ if __name__ == "__main__":
     #print a 
     a = moose.Neutral("/comp")
     b = moose.Compartment('/comp/comp1')
+    c = moose.Compartment('/comp/comp2')
     assert b.Vm == -0.06, b.Vm
     b.Vm = 0.09
     assert b.Vm == 0.09, b.Vm
-    print("Getting setting Vm passed")
+    print("Getting jsetting Vm passed")
+    msg = moose.connect("Single", c, "Vm", b, "Vm")
+    print msg
 
