@@ -7,6 +7,7 @@ Selector::Selector( ref_ptr<MatrixTransform> matrix_transform /* QWidget * right
     _matrix_transform = matrix_transform;
     osgFX::Outline * outline = new osgFX::Outline();
     outline -> setColor(Vec4(0.0f, 1.0f, 0.0f, 1.0f));
+    outline -> setWidth(10.0);
     _matrix_transform -> addChild(outline);
     Geode   * selection   = new Geode();
     outline -> addChild(selection);

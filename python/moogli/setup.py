@@ -5,6 +5,15 @@ import sipdistutils
 import sys
 import os
 
+remaining = sys.argv[1:]
+sys.argv = [ sys.argv[0]
+           , 'build_ext'
+           , '--sip-opts=-I/usr/share/sip/PyQt4/ -e -g -x VendorID -t WS_X11 -x PyQt_NoPrintRangeBug -t Qt_4_8_0 -x Py_v3 -g'
+           ]
+sys.argv.extend(remaining)
+# print(sys.argv)
+
+
 os.environ["CC"]="g++"
 
 # print(sys.argv)
