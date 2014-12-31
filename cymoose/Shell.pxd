@@ -35,6 +35,10 @@ cdef extern from "../shell/Shell.h":
                 _ObjId.ObjId src, const string& srcField, 
                 _ObjId.ObjId dest, const string& destField )
 
+
+        # Function to find ObjId 
+        _ObjId.ObjId doFind(const string& path) const
+
         
 
 cdef extern from "../shell/Wildcard.h":
