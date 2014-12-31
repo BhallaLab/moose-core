@@ -20,7 +20,7 @@ IF (WITH_SIP)
 
     # setup SIP variables
     SEPARATE_ARGUMENTS(PYQT4_SIP_FLAGS) # convert space separated values to a list
-    SET(SIP_INCLUDES ${PYQT4_SIP_DIR} ${PYTHON_INCLUDE_PATH} ${CMAKE_SOURCE_DIR}/python)
+    SET(SIP_INCLUDES ${PYQT4_SIP_DIR})
     SET(SIP_CONCAT_PARTS 4)
     SET(SIP_EXTRA_OPTIONS ${PYQT4_SIP_FLAGS})
     IF (NOT BINDINGS_GLOBAL_INSTALL)
@@ -37,9 +37,12 @@ FIND_PACKAGE(osgAnimation REQUIRED)
 
 INCLUDE( ${QT_USE_FILE} )
 
+FIND_PROGRAM(SIP_EXECUTABLE sip)
+MESSAGE("++ SIP ${SIP_EXECUTABLE}")
+
 include_directories(./include ${CMAKE_SOURCE_DIR})
 include_directories(${OSGQT_INCLUDE_DIR})
-include_directories(${SIP_INCLUDES})
+include_directories(${SIP_INCLUDES} ${PYTHON_INCLUDE_DIRS})
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 include_directories(${OSGANIMATION_INCLUDE_DIR})
 
@@ -55,10 +58,8 @@ add_subdirectory(src)
 target_link_libraries(_moogli
     moc
     src
+    sip
     ${OPENSCENEGRAPH_LIBRARIES}
     ${OSGANIMATION_LIBRARY}
-    moogli
-    morph
-    morphview
     )
 
