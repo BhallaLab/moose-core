@@ -260,7 +260,7 @@ class Stoich
 		 * This takes the baseclass for an MMEnzyme and builds the
 		 * MMenz into the Stoich.
 		 */
-		void installMMenz( Id enzId, Id enzMolId,
+		void installMMenz( Id enzId, const vector< Id >& enzMolId,
 			const vector< Id >& subs, const vector< Id >& prds );
 		/**
 		 * This is the inner function to do the installation.
