@@ -3,7 +3,7 @@ SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake_modules)
 LINK_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}/sip")
 PROJECT(moogli)
 
-add_definitions("-fPIC -std=c++0x")
+add_definitions("-shared -fPIC -std=c++0x")
 
 SET(CMAKE_VERBOSE_MAKEFILE ON)
 SET(WITH_SIP 1)
@@ -59,7 +59,18 @@ target_link_libraries(_moogli
     moc
     src
     sip
-    ${OPENSCENEGRAPH_LIBRARIES}
-    ${OSGANIMATION_LIBRARY}
+    "QtCore"
+    "QtGui"
+    "QtOpenGL"           
+    "osg"
+    "osgFX"
+    "osgUtil"
+    "osgFX"
+    "osgGA"
+    "osgQt"
+    "osgAnimation"
+    "osgViewer"
+    "osgQt"
+    "osgManipulator"
+    "osgText"
     )
-
