@@ -1,41 +1,21 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
-SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake_modules)
-LINK_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}/sip")
-PROJECT(moogli)
+# setup SIP variables
+SEPARATE_ARGUMENTS(PYQT4_SIP_FLAGS) # convert space separated values to a list
+SET(SIP_INCLUDES ${PYQT4_SIP_DIR})
+SET(SIP_CONCAT_PARTS 4)
+SET(SIP_EXTRA_OPTIONS ${PYQT4_SIP_FLAGS})
+IF (NOT BINDINGS_GLOBAL_INSTALL)
+    SET(PYTHON_SITE_PACKAGES_DIR ${QGIS_DATA_DIR}/python)
+ENDIF (NOT BINDINGS_GLOBAL_INSTALL)
+IF (WITH_CUSTOM_WIDGETS)
+    SET(PYUIC_WIDGET_PLUGIN_DIRECTORY ${PYQT4_MOD_DIR}/uic/widget-plugins/)
+ENDIF (WITH_CUSTOM_WIDGETS)
 
-add_definitions("-shared -fPIC -std=c++0x")
-
-SET(CMAKE_VERBOSE_MAKEFILE ON)
-SET(WITH_SIP 1)
-IF (WITH_SIP)
-    # python support: check for interpreter, sip, pyqt4
-    FIND_PACKAGE(PythonInterp REQUIRED)
-    FIND_PACKAGE(PythonLibs REQUIRED)
-    FIND_PACKAGE(SIP REQUIRED)
-    FIND_PACKAGE(PyQt4 REQUIRED)
-    FIND_PACKAGE(osgQt REQUIRED)
-    #INCLUDE(PythonMacros)
-    INCLUDE(SIPMacros)
-    INCLUDE(PyQt4Macros)
-
-    # setup SIP variables
-    SEPARATE_ARGUMENTS(PYQT4_SIP_FLAGS) # convert space separated values to a list
-    SET(SIP_INCLUDES ${PYQT4_SIP_DIR})
-    SET(SIP_CONCAT_PARTS 4)
-    SET(SIP_EXTRA_OPTIONS ${PYQT4_SIP_FLAGS})
-    IF (NOT BINDINGS_GLOBAL_INSTALL)
-        SET(PYTHON_SITE_PACKAGES_DIR ${QGIS_DATA_DIR}/python)
-    ENDIF (NOT BINDINGS_GLOBAL_INSTALL)
-    IF (WITH_CUSTOM_WIDGETS)
-        SET(PYUIC_WIDGET_PLUGIN_DIRECTORY ${PYQT4_MOD_DIR}/uic/widget-plugins/)
-    ENDIF (WITH_CUSTOM_WIDGETS)
-ENDIF (WITH_SIP)
-
-FIND_PACKAGE( Qt4  REQUIRED COMPONENTS QtCore QtGui QtOpenGL )
+FIND_PACKAGE(Qt4 REQUIRED COMPONENTS QtCore QtGui QtOpenGL)
 FIND_PACKAGE(OpenSceneGraph REQUIRED)
 FIND_PACKAGE(osgAnimation REQUIRED)
 
-INCLUDE( ${QT_USE_FILE} )
+INCLUDE(${QT_USE_FILE})
 
 FIND_PROGRAM(SIP_EXECUTABLE sip)
 MESSAGE("++ SIP ${SIP_EXECUTABLE}")
@@ -46,16 +26,18 @@ include_directories(${SIP_INCLUDES} ${PYTHON_INCLUDE_DIRS})
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 include_directories(${OSGANIMATION_INCLUDE_DIR})
 
+add_subdirectory(sip)
 ADD_LIBRARY(_moogli SHARED
-    sip/sip_mooglicmodule.cpp
-    sip/sip_moogliMorphology.cpp
-    sip/sip_moogliMorphologyViewer.cpp
-    sip/sip_moogliSelectInfo.cpp
+    ${SIP_TO_CPP_SOURCES}
+    #sip/sip_mooglicmodule.cpp
+    #sip/sip_moogliMorphology.cpp
+    #sip/sip_moogliMorphologyViewer.cpp
+    #sip/sip_moogliSelectInfo.cpp
 )
+add_dependencies(_moogli mooglisip)
 
 SET_TARGET_PROPERTIES(_moogli PROPERTIES PREFIX "")
 add_subdirectory(moc)
-add_subdirectory(sip)
 add_subdirectory(src)
 
 target_link_libraries(_moogli

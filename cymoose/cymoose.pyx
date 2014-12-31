@@ -54,7 +54,9 @@ cdef class Neutral:
         self.obj_ = PyObjId(self.id_)
 
     def __repr__(self):
-        return "Id: {0}, Type: Neutral, Path: {1}".format(None, self.id_.path)
+        return "{0}, Type: Neutral, Path: {1}".format(
+                self.id_, self.id_.path
+                )
 
     def path(self):
         return self.id_.path
@@ -82,7 +84,9 @@ cdef class Compartment:
         self.objEref = self.id_.eref_.thisptr
 
     def __repr__(self):
-        return "Id: {0}, Type: Compartment, Path: {1}".format(1, self.id_.path)
+        return "{0}, Type: Compartment, Path: {1}".format(
+                self.id_, self.id_.path
+                )
 
     def path(self):
         return self.obj.path
