@@ -12,3 +12,5 @@ cdef extern from "../basecode/Id.h":
         Id(string path, string sep = "/")
         string path(string)
         _Eref.Eref eref()
+        unsigned int value()
+        string id2str( Id id_)

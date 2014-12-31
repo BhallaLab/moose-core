@@ -19,7 +19,7 @@ if __name__ == "__main__":
     a = moose.Neutral("/comp")
     print a
     b = moose.Compartment('/comp/comp1')
-    print b.Vm
+    print b, b.Vm
     a = moose.Compartment('/comp/comp', 1000000)
     t = time.time()
     paths = moose.wildcardFind('/comp/##')
