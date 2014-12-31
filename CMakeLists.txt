@@ -49,11 +49,16 @@ add_definitions(-Wall
 add_definitions(-fPIC)
 
 ## Enable/Disable 2011 stupport.
-set(ENABLE_STD_2011 0)
-if(ENABLE_STD_2011)
-    add_definitions(-DENABLE_STD_2011 -DDEBUG2)
+include(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+if(COMPILER_SUPPORTS_CXX11)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+elseif(COMPILER_SUPPORTS_CXX0X)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-endif(ENABLE_STD_2011)
+else()
+    message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+endif()
 
 # DO UNIT TESTS 
 set(ENABLE_UNIT_TESTS 0)
@@ -108,6 +113,11 @@ else()
     find_package(LibXML2 REQUIRED)
 endif()
 
+# python support: check for interpreter, sip, pyqt4
+FIND_PACKAGE(PythonDev REQUIRED)
+FIND_PACKAGE(SIP REQUIRED)
+FIND_PACKAGE(PyQt4 REQUIRED)
+FIND_PACKAGE(osgQt REQUIRED)
 
 ################################### SETUP BUILD ################################
 include_directories(msg basecode)
@@ -173,6 +183,7 @@ add_subdirectory(kinetics)
 add_subdirectory(synapse)
 add_subdirectory(intfire)
 add_subdirectory(examples)
+add_subdirectory(python/moogli)
 
 set(LIBRARIES ${BZIP2_LIBRARIES} ${LibXML2_LIBRARIES})
 if(HDF5_FOUND)
