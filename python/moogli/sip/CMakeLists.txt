@@ -1,9 +1,26 @@
 cmake_minimum_required(VERSION 2.8)
 SET(CMAKE_VERBOSE_MAKEFILE ON)
 
-MESSAGE("++ SIP_INCLUDES ${SIP_INCLUDES}")
-include_directories(${SIP_INCLUDES})
+add_custom_command(OUTPUT
+    ${CMAKE_CURRENT_SOURCE_DIR}/_moogli.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Morphology.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/MorphologyViewer.cpp
+    COMMAND ${SIP_EXECUTABLE} -c ${CMAKE_CURRENT_SOURCE_DIR} -I ${SIP_INCLUDES} 
+    -e -g -x VendorID -t WS_X11 -x PyQt_NoPrintRangeBug -t Qt_4_8_0 -x Py_v3 -g
+    ${CMAKE_CURRENT_SOURCE_DIR}/_moogli.sip
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/_moogli.sip
+    COMMENT "Processing ${CMAKE_CURRENT_SOURCE_DIR}/_moogli.sip"
+    VERBATIM
+    )
 
-ADD_SIP_PYTHON_MODULE(libmoogli _moogli.sip)
-ADD_SIP_PYTHON_MODULE(libmorp Morphology.sip)
-ADD_SIP_PYTHON_MODULE(libmorphview MorphologyViewer.sip)
+SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/_moogli.cpp PROPERTIES  
+COMPILE_DEFINITIONS DINT )
+SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/Morphology.cpp PROPERTIES  
+COMPILE_DEFINITIONS DINT )
+SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/MorphologyViewer.cpp PROPERTIES  
+COMPILE_DEFINITIONS DINT )
+
+FILE(GLOB SRCS *.cpp)
+add_library(sip SHARED
+    ${SRCS}
+  )
