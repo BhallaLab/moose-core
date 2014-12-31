@@ -47,7 +47,10 @@ include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 include_directories(${OSGANIMATION_INCLUDE_DIR})
 
 ADD_LIBRARY(_moogli SHARED
-    ./scenegraph.cpp
+    sip/sip_mooglicmodule.cpp
+    sip/sip_moogliMorphology.cpp
+    sip/sip_moogliMorphologyViewer.cpp
+    sip/sip_moogliSelectInfo.cpp
 )
 
 SET_TARGET_PROPERTIES(_moogli PROPERTIES PREFIX "")
