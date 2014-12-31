@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
+
 SET(CMAKE_VERBOSE_MAKEFILE ON)
 
 add_custom_command(OUTPUT
@@ -13,14 +14,11 @@ add_custom_command(OUTPUT
     VERBATIM
     )
 
-SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/_moogli.cpp PROPERTIES  
-COMPILE_DEFINITIONS DINT )
-SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/Morphology.cpp PROPERTIES  
-COMPILE_DEFINITIONS DINT )
-SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/MorphologyViewer.cpp PROPERTIES  
-COMPILE_DEFINITIONS DINT )
+add_custom_target(mooglisip ALL DEPENDS _moogli.sip)
+set(SIP_TO_CPP_SOURCES 
+    ${CMAKE_CURRENT_SOURCE_DIR}/sip_mooglicmodule.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/sip_moogliMorphology.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/sip_moogliMorphologyViewer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/sip_moogliSelectInfo.cpp
+    )
 
-FILE(GLOB SRCS *.cpp)
-add_library(sip SHARED
-    ${SRCS}
-  )
