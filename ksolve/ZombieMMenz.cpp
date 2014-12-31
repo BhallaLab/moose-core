@@ -153,10 +153,7 @@ void ZombieMMenz::setSolver( Id solver, Id enzId )
 	vector< Id > subvec;
 	vector< Id > prdvec;
 	unsigned int num = enzId.element()->getNeighbors( enzvec, enzFinfo );
-	assert( num == 1 );
 	num = enzId.element()->getNeighbors( subvec, subFinfo );
-	assert( num > 0 );
 	num = enzId.element()->getNeighbors( prdvec, prdFinfo );
-	assert( num > 0 );
-	stoich_->installMMenz( enzId, enzvec[0], subvec, prdvec );
+	stoich_->installMMenz( enzId, enzvec, subvec, prdvec );
 }
