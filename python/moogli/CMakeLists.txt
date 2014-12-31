@@ -1,6 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake_modules)
-
+LINK_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}/sip")
 PROJECT(moogli)
 
 add_definitions("-fPIC -std=c++0x")
@@ -32,18 +32,22 @@ IF (WITH_SIP)
 ENDIF (WITH_SIP)
 
 FIND_PACKAGE( Qt4  REQUIRED COMPONENTS QtCore QtGui QtOpenGL )
+FIND_PACKAGE(OpenSceneGraph REQUIRED)
+FIND_PACKAGE(osgAnimation REQUIRED)
+
 INCLUDE( ${QT_USE_FILE} )
 
 include_directories(./include ${CMAKE_SOURCE_DIR})
 include_directories(${OSGQT_INCLUDE_DIR})
 include_directories(${SIP_INCLUDES})
-
-MESSAGE("++ OSGQT_INCLUDE_DIR ${OSGQT_INCLUDE_DIR}")
+include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
+include_directories(${OSGANIMATION_INCLUDE_DIR})
 
 ADD_LIBRARY(_moogli SHARED
     ./scenegraph.cpp
 )
 
+SET_TARGET_PROPERTIES(_moogli PROPERTIES PREFIX "")
 add_subdirectory(moc)
 add_subdirectory(sip)
 add_subdirectory(src)
@@ -51,5 +55,10 @@ add_subdirectory(src)
 target_link_libraries(_moogli
     moc
     src
+    ${OPENSCENEGRAPH_LIBRARIES}
+    ${OSGANIMATION_LIBRARY}
+    moogli
+    morph
+    morphview
     )
 
