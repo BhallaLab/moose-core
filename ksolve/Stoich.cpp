@@ -890,9 +890,7 @@ void Stoich::installAndUnschedFunc( Id func, Id pool )
 
 	unsigned int numSrc = Field< unsigned int >::get( func, "numVars" );
 	vector< Id > srcPools;
-	unsigned int temp = ei.element()->getNeighbors( 
-					srcPools, funcSrcFinfo );
-	assert( numSrc == temp );
+	assert( numSrc == ei.element()->getNeighbors( srcPools, funcSrcFinfo));
 	vector< unsigned int > poolIndex( numSrc, 0 );
 	for ( unsigned int i = 0; i < numSrc; ++i )
 		poolIndex[i] = convertIdToPoolIndex( srcPools[i] );
@@ -928,9 +926,7 @@ void Stoich::installAndUnschedFuncRate( Id func, Id pool )
 
 	unsigned int numSrc = Field< unsigned int >::get( func, "numVars" );
 	vector< Id > srcPools;
-	unsigned int temp = ei.element()->getNeighbors( 
-					srcPools, funcSrcFinfo );
-	assert( numSrc == temp );
+	assert( numSrc == ei.element()->getNeighbors( srcPools, funcSrcFinfo));
 	vector< unsigned int > poolIndex( numSrc, 0 );
 	for ( unsigned int i = 0; i < numSrc; ++i )
 		poolIndex[i] = convertIdToPoolIndex( srcPools[i] );
@@ -964,9 +960,7 @@ void Stoich::installAndUnschedFuncReac( Id func, Id reac )
 
 	unsigned int numSrc = Field< unsigned int >::get( func, "numVars" );
 	vector< Id > srcPools;
-	unsigned int temp = ei.element()->getNeighbors( 
-					srcPools, funcSrcFinfo );
-	assert( numSrc == temp );
+	assert( numSrc == ei.element()->getNeighbors( srcPools, funcSrcFinfo));
 	vector< unsigned int > poolIndex( numSrc, 0 );
 	for ( unsigned int i = 0; i < numSrc; ++i )
 		poolIndex[i] = convertIdToPoolIndex( srcPools[i] );
@@ -1332,16 +1326,36 @@ unsigned int Stoich::innerInstallReaction( Id reacId,
 	return rateIndex;
 }
 
+void installDummy( RateTerm** entry, Id enzId, const string& s )
+{
+	cout << "Warning: Stoich::installMMenz: No " << s << " for: "  <<
+		enzId.path() << endl;
+	*entry = new ZeroOrder( 0.0 );
+}
+
 /**
  * This takes the baseclass for an MMEnzyme and builds the
  * MMenz into the Stoich.
  */
-void Stoich::installMMenz( Id enzId, Id enzMolId,
+void Stoich::installMMenz( Id enzId, const vector< Id >& enzMols,
 	const vector< Id >& subs, const vector< Id >& prds )
 {
 	MMEnzymeBase* meb;
-	unsigned int enzIndex = convertIdToPoolIndex( enzMolId );
 	unsigned int enzSiteIndex = convertIdToReacIndex( enzId );
+	RateTerm** entry = &rates_[enzSiteIndex];
+	if ( enzMols.size() != 1 ) {
+		installDummy( entry, enzId, "enzmols" );
+		status_ |= 2;
+		return;
+	}
+
+	if ( prds.size() < 1 ) {
+		installDummy( entry, enzId, "products" );
+		status_ |= 1;
+		return;
+	}
+	unsigned int enzIndex = convertIdToPoolIndex( enzMols[0] );
+
 	if ( subs.size() == 1 ) {
 		unsigned int subIndex = convertIdToPoolIndex( subs[0] );
 		meb = new MMEnzyme1( 1, 1, enzIndex, subIndex );
@@ -1352,8 +1366,7 @@ void Stoich::installMMenz( Id enzId, Id enzMolId,
 		ZeroOrder* rateTerm = new NOrder( 1.0, v );
 		meb = new MMEnzyme( 1, 1, enzIndex, rateTerm );
 	} else {
-		cout << "Warning: Stoich::installMMenz: No substrates for "  <<
-			enzId.path() << endl;
+		installDummy( entry, enzId, "substrates" );
 		status_ |= 2;
 		return;
 	}
@@ -1405,6 +1418,7 @@ void Stoich::installDummyEnzyme( Id enzId, Id enzMolId )
 		rates_[ rateIndex ] = new BidirectionalReaction( r1, r2 );
 		rates_[ rateIndex + 1 ] = r3;
 	}
+	status_ = 1;
 }
 
 void Stoich::installEnzyme( Id enzId, Id enzMolId, Id cplxId,
@@ -1576,8 +1590,8 @@ void Stoich::setMMenzKm( const Eref& e, double v ) const
 	// Identify MMenz rate term
 	unsigned int index = convertIdToReacIndex( e.id() );
 	RateTerm* rt = rates_[ index ];
-	MMEnzymeBase* enz = dynamic_cast< MMEnzymeBase* >( rt );
-	assert( enz );
+	//MMEnzymeBase* enz = dynamic_cast< MMEnzymeBase* >( rt );
+	//assert( enz );
 	// Identify MMenz Enzyme substrate. I would have preferred the parent,
 	// but that gets messy.
 	// unsigned int enzMolIndex = enz->getEnzIndex();
@@ -1593,7 +1607,7 @@ void Stoich::setMMenzKm( const Eref& e, double v ) const
 	}
 	*/
 	// Do scaling and assignment.
-	enz->setR1( v );
+	rt->setR1( v );
 	kinterface_->updateRateTerms( index );
 }
 
@@ -1606,10 +1620,10 @@ void Stoich::setMMenzKcat( const Eref& e, double v ) const
 {
 	unsigned int index = convertIdToReacIndex( e.id() );
 	RateTerm* rt = rates_[ index ];
-	MMEnzymeBase* enz = dynamic_cast< MMEnzymeBase* >( rt );
-	assert( enz );
+	// MMEnzymeBase* enz = dynamic_cast< MMEnzymeBase* >( rt );
+	// assert( enz );
 
-	enz->setR2( v );
+	rt->setR2( v );
 	kinterface_->updateRateTerms( index );
 }
 
