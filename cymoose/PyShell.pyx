@@ -2,6 +2,7 @@
 
 from libcpp.string cimport string
 from cython.operator import dereference as deref
+from libc.stdio cimport printf
 
 cimport Shell as _Shell
 cimport Id as _Id
@@ -30,10 +31,10 @@ cdef class PyShell:
             , _Shell.NodePolicy nodePolicy = _Shell.MooseBlockBalance
             , unsigned int preferredNode = 1):
         """Call shell create function """
-        cdef _Id.Id obj
-        obj = self.thisptr.create(elemType, elemPath , numData, nodePolicy, preferredNode)
+        cdef _Id.Id id_
+        id_ = self.thisptr.create(elemType, elemPath , numData, nodePolicy, preferredNode)
         newObj = PyId()
-        newObj.thisptr = &obj
+        newObj.thisptr = &id_
         newObj.setPath()
         return newObj
 
@@ -50,9 +51,14 @@ cdef class PyShell:
             ):
         """Call shell do addMsg function """
         cdef _ObjId.ObjId objId 
-        return self.thisptr.doAddMsg(msgType, srcObj, srcField
-                , destObj, destField
-                )
+        objId = self.thisptr.doAddMsg(msgType, srcObj, srcField
+                , destObj, destField)
+        return objId 
+
+    cdef _ObjId.ObjId doFind(self, const string& p):
+        cdef _ObjId.ObjId objId 
+        objId = self.thisptr.doFind(p)
+        return objId 
 
     def connect(self, string msgType, PyObjId srcObj, string srcField
             , PyObjId destObj, string destField

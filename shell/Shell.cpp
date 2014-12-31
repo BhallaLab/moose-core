@@ -187,9 +187,11 @@ Id Shell::create(string type, string name, unsigned int numData
     string::size_type pos = name.find_last_of('/');
     string parentPath = name.substr(0, pos);
     ObjId parentObj = ObjId(parentPath);
+//    cerr << "info: Creating Obj with parent : " << parentObj << endl;
     Id id = doCreate(type, parentObj, name.substr(pos+1)
             , numData, nodePolicy, preferredNode
             );
+//    cerr << "    ++ with id " << id << endl;
     return id;
 }
 

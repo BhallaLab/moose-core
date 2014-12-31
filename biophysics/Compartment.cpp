@@ -96,6 +96,7 @@ Compartment::~Compartment()
 // Value Field access function definitions.
 void Compartment::vSetVm( const Eref& e, double Vm )
 {
+        assert(e);
 	Vm_ = Vm;
 }
 
