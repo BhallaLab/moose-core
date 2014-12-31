@@ -30,12 +30,12 @@
         <li><a href="#file">File</a></li>
         <li><a href="#edit">Edit</a></li>
         <li><a href="#view">View</a></li>
-        <li><a href="#help">Help</a></li>    
+        <li><a href="#help">Help</a></li>
     </ul>
     <li><a href="#the-model-window">The Model window</a></li>
     <ul>
         <li><a href="#d-display-of-neuronal-models-in-neurokit:">3-D display of neuronal models in Neurokit:</a></li>
-    <li><a href="#d-display-of-chemical-kinetics-models-in-kinetikit:">2-D display of chemical kinetics models in Kinetikit:</a></li>    
+    <li><a href="#d-display-of-chemical-kinetics-models-in-kinetikit:">2-D display of chemical kinetics models in Kinetikit:</a></li>
     </ul>
     <li><a href="#the-run-window">The run window</a></li>
     <li><a href="#the-docking-panel">The docking panel</a></li>
@@ -45,7 +45,7 @@
         <li><a href="#simulation-control">Simulation control</a></li>
     </ul>
 </ul>
-    
+
 <div id="introduction">
     <h1><a href="#TOC">Introduction</a></h1>
     <p>The Moose GUI lets you work on <a href="Kkit12Documentation.html">chemical</a>
@@ -64,7 +64,7 @@
 <div id="the-menu-bar"><h1><a href="#TOC">The menu bar</a></h1>
     <p>In Ubuntu 12.04, the menu bar appears only when the mouse is in the top menu strip of the screen. In other distributions it should appear over the top of the interface.</p>
     <div class="figure"><img src="../../images/MooseGuiMenuImage.png"/><p class="caption"></p></div>
-    <p>The menu bar contains the following entries: <strong><code>File</code></strong>, <strong><code>Edit</code></strong>, 
+    <p>The menu bar contains the following entries: <strong><code>File</code></strong>, <strong><code>Edit</code></strong>,
     <strong><code>View</code></strong>, <strong><code>Help</code></strong>.</p>
 </div>
 <div id="file"><h2><a href="#TOC">File</a></h2>
@@ -111,12 +111,12 @@
 
 <div id="the-model-window"><h1><a href="#TOC">The Model window</a></h1>
     <p>The Model window displays a view of the model structure. These views vary depending on the model type.</p>
-</div>    
+</div>
 <div id="d-display-of-neuronal-models-in-neurokit:"><h2><a href="#TOC">3-D display of neuronal models in Neurokit:</a></h2></div>
 <div class="figure"><img src="../../images/NkitModelWindow.png"/><p class="caption"></p></div>
 <div>
-    <p>The individual compartments of the neuron model can be clicked to select, and when selected, the compartment parameters and variables are displayed in the 
-    <strong><code>Property editor</code></strong> described below. For a neuronal or neuronal network model, the window displays a 3-D view of the cell(s) in the model. 
+    <p>The individual compartments of the neuron model can be clicked to select, and when selected, the compartment parameters and variables are displayed in the
+    <strong><code>Property editor</code></strong> described below. For a neuronal or neuronal network model, the window displays a 3-D view of the cell(s) in the model.
     It does so using <strong>OpenGL</strong>, which is a standard for displaying 3-D views. In addition, the display sets the color of each compartment based on some variable value, typically <code>
     Vm</code>, the membrane potential of the compartment. Note the 3-D axis indicators in the bottom left.</p>
     <p>The controls for moving the display are as follows:</p>
@@ -148,18 +148,18 @@
     <p>The run view displays both model view and time-series plots of the simulation.
      Plots are color-coded to distinguish them.<br> As the simulation progress, <br>
      &nbsp;&nbsp;- in the case of <strong>chemical kinetics models</strong> interface the background of each molecules varies as per the '<i>concentration</i>' (i.e., increase or decrease circle size) in the model view and the plots take the same color as the molecule pool that they represent.<br>
-     &nbsp;&nbsp;- in the case of <strong>neuronal models </strong>interface the color changes as per '<i>Vm</i>' value for the specfic segment</p> 
-    
+     &nbsp;&nbsp;- in the case of <strong>neuronal models </strong>interface the color changes as per '<i>Vm</i>' value for the specfic segment</p>
+
     <div class="figure"><img src="../../images/RunView.png"/><p class="caption"></p>
     </div>
     <hr>
-    
+
     <p>The plots are done using <strong>MatPlotLib</strong>, so the usual controls apply. Beneath the plot window there is a little row of icons:</p>
     <div class="figure"><img src="../../images/PlotWindowIcons.png"/><p class="caption"></p>
     </div>
-    
+
     <p>These are the plot controls. If you hover the mouse over them for a few seconds, a function reminder box pops up. The functions as follows:</p>
-    
+
     <div>
     <table>
         <tr>
@@ -214,22 +214,22 @@
         </ul>
     </div>
     <div id="python-shell"><h2><a href="#TOC">Python shell</a></h2>
-        <p>The <strong><code>Python shell</code></strong> 
+        <p>The <strong>Python shell</strong> is a full fledged python interpreter integrated with MOOSE GUI. You can interact with loaded models and load new models. The entire power of python language is available at your disposal.</strong>
     </div>
     <div id="simulation-control"><h2><a href="#TOC">Simulation control</a></h2>
-        <p>The <strong><code>Simulation control</code></strong> panel controls how the model is run.</p>
+        <p>The <strong>Simulation control</strong> panel controls how the model is run.</p>
         <div class="figure">
         <img src="../../images/SimulationControl.png"/>
         </div>
     </div>
     <ul>
         <li><strong>Run Time</strong>:Determines duration for which simulation is to run. If simulation has already run, this runs for the specified additional period.</li>
-        <li><strong>Reset</strong>:Restores simulation to its initial state; reinitializes all variables to t = 0.</li> 
+        <li><strong>Reset</strong>:Restores simulation to its initial state; reinitializes all variables to t = 0.</li>
         <li><strong>Stop</strong>: This button halts an ongoing simulation.</li>
         <li><strong>Current time</strong>:This reports the current simulation time.</li>
         <li><strong>Preferences</strong>:</li>
         <ul>
-            <div id="header"> <li><strong>Chemical</strong>:</li></div>        
+            <div id="header"> <li><strong>Chemical</strong>:</li></div>
             <div id="nav_image"> <img src="../../images/Chemical.png"/></div>
             <div id="section">
                 <ul>
@@ -254,22 +254,22 @@
                     <li><strong>Simulation dt</strong>: Timestep to use for internal simulation clocks. Edit only if you know what you are doing.</li>
                     <li><strong>Plot update Interval</strong>: Timestep to use for updating plots.</li>
                     <li><strong>Gui Update Interval</strong>: How frequently should the GUI refresh.</li>
-                    <li><strong>Solver</strong>:</li>
+<!--                     <li><strong>Solver</strong>:</li>
                     <ul>
                         <li><strong>Runge Kutta</strong>: This is the default method for integration of ODE systems. It uses the Gnu Scientific Library 5-th order explicit variable-timestep Runge-Kutta-Fehlberg method.</li>
                         <li><strong>Gillespie</strong>: This is an implementation of Gillespies Stochastic Systems Algorithm, which computes reaction progress using a stochastic method.</li>
                     </ul>
-                </ul>
+ -->                </ul>
             </div>
-            <div id="header"><li>Visulation</li></div>
+            <div id="header"><li>Visualization</li></div>
             <div id="nav_image"> <img src="../../images/Electrical_vis.png"/></div>
             <div id="section">
                 <ul>
-                    <li><strong>Base Membrane Voltage</strong>:</li>
-                    <li><strong>Base Compartment Color</strong>:</li>
-                    <li><strong>Peak Membrane Voltage</strong>:</li>
-                    <li><strong>Peak Compartment Color</strong>:</li>
-                    <li><strong>Background Color</strong>:</li>
+                    <li><strong>Base Membrane Voltage</strong>: This value is mapped directly to "Base Compartment Color".</li>
+                    <li><strong>Base Compartment Color</strong>: Compartment color corresponding to "Base Membrane Voltage".</li>
+                    <li><strong>Peak Membrane Voltage</strong>: This value is mapped directly to "Peak Compartment Color".</li>
+                    <li><strong>Peak Compartment Color</strong>: Compartment color corresponding to "Peak Membrane Voltage".</li>
+                    <li><strong>Background Color</strong>: Color to use as a backdrop for the model.</li>
                 </ul>
             </div>
             </ul>
