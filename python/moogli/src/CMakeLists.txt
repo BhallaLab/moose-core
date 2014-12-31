@@ -1,0 +1,5 @@
+FILE(GLOB SRCS *.cpp)
+ADD_LIBRARY(src STATIC
+    ${SRCS}
+)
+
