@@ -20,7 +20,7 @@ INCLUDE(${QT_USE_FILE})
 FIND_PROGRAM(SIP_EXECUTABLE sip)
 MESSAGE("++ SIP ${SIP_EXECUTABLE}")
 
-include_directories(./include ${CMAKE_SOURCE_DIR})
+include_directories(./include ${CMAKE_SOURCE_DIR} ".")
 include_directories(${OSGQT_INCLUDE_DIR})
 include_directories(${SIP_INCLUDES} ${PYTHON_INCLUDE_DIRS})
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
@@ -29,33 +29,33 @@ include_directories(${OSGANIMATION_INCLUDE_DIR})
 add_subdirectory(sip)
 ADD_LIBRARY(_moogli SHARED
     ${SIP_TO_CPP_SOURCES}
-    #sip/sip_mooglicmodule.cpp
-    #sip/sip_moogliMorphology.cpp
-    #sip/sip_moogliMorphologyViewer.cpp
-    #sip/sip_moogliSelectInfo.cpp
 )
+
 add_dependencies(_moogli mooglisip)
 
-SET_TARGET_PROPERTIES(_moogli PROPERTIES PREFIX "")
+SET_TARGET_PROPERTIES(_moogli PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/python/moogli"
+    PREFIX ""
+    )
+
 add_subdirectory(moc)
 add_subdirectory(src)
 
 target_link_libraries(_moogli
     moc
     src
-    sip
-    "QtCore"
-    "QtGui"
-    "QtOpenGL"           
-    "osg"
-    "osgFX"
-    "osgUtil"
-    "osgFX"
-    "osgGA"
-    "osgQt"
-    "osgAnimation"
-    "osgViewer"
-    "osgQt"
-    "osgManipulator"
-    "osgText"
+    QtCore
+    QtGui
+    QtOpenGL           
+    osg
+    osgFX
+    osgUtil
+    osgFX
+    osgGA
+    osgQt
+    osgAnimation
+    osgViewer
+    osgQt
+    osgManipulator
+    osgText
     )
