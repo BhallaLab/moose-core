@@ -25,33 +25,33 @@
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 
 
-find_package(PythonDev REQUIRED)
+find_package(PythonInterp REQUIRED)
 
 IF(SIP_VERSION)
-  # Already in cache, be silent
-  SET(SIP_FOUND TRUE)
+    # Already in cache, be silent
+    SET(SIP_FOUND TRUE)
 ELSE(SIP_VERSION)
 
-  FIND_FILE(_find_sip_py FindSIP.py PATHS ${CMAKE_MODULE_PATH})
+    MESSAGE("++ Setting pythonexec to ${PYTHON_EXECUTABLE}")
+    FIND_FILE(_find_sip_py FindSIP.py PATHS ${CMAKE_MODULE_PATH})
+    EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} ${_find_sip_py} OUTPUT_VARIABLE sip_config)
+    IF(sip_config)
+        STRING(REGEX REPLACE "^sip_version:([^\n]+).*$" "\\1" SIP_VERSION ${sip_config})
+        STRING(REGEX REPLACE ".*\nsip_version_str:([^\n]+).*$" "\\1" SIP_VERSION_STR ${sip_config})
+        STRING(REGEX REPLACE ".*\nsip_bin:([^\n]+).*$" "\\1" SIP_EXECUTABLE ${sip_config})
+        STRING(REGEX REPLACE ".*\ndefault_sip_dir:([^\n]+).*$" "\\1" SIP_DEFAULT_SIP_DIR ${sip_config})
+        STRING(REGEX REPLACE ".*\nsip_inc_dir:([^\n]+).*$" "\\1" SIP_INCLUDE_DIR ${sip_config})
+        SET(SIP_FOUND TRUE)
+    ENDIF(sip_config)
 
-  EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} ${_find_sip_py} OUTPUT_VARIABLE sip_config)
-  IF(sip_config)
-    STRING(REGEX REPLACE "^sip_version:([^\n]+).*$" "\\1" SIP_VERSION ${sip_config})
-    STRING(REGEX REPLACE ".*\nsip_version_str:([^\n]+).*$" "\\1" SIP_VERSION_STR ${sip_config})
-    STRING(REGEX REPLACE ".*\nsip_bin:([^\n]+).*$" "\\1" SIP_EXECUTABLE ${sip_config})
-    STRING(REGEX REPLACE ".*\ndefault_sip_dir:([^\n]+).*$" "\\1" SIP_DEFAULT_SIP_DIR ${sip_config})
-    STRING(REGEX REPLACE ".*\nsip_inc_dir:([^\n]+).*$" "\\1" SIP_INCLUDE_DIR ${sip_config})
-    SET(SIP_FOUND TRUE)
-  ENDIF(sip_config)
-
-  IF(SIP_FOUND)
-    IF(NOT SIP_FIND_QUIETLY)
-      MESSAGE(STATUS "Found SIP version: ${SIP_VERSION_STR}")
-    ENDIF(NOT SIP_FIND_QUIETLY)
-  ELSE(SIP_FOUND)
-    IF(SIP_FIND_REQUIRED)
-      MESSAGE(FATAL_ERROR "Could not find SIP")
-    ENDIF(SIP_FIND_REQUIRED)
-  ENDIF(SIP_FOUND)
+    IF(SIP_FOUND)
+        IF(NOT SIP_FIND_QUIETLY)
+            MESSAGE(STATUS "Found SIP version: ${SIP_VERSION_STR}")
+        ENDIF(NOT SIP_FIND_QUIETLY)
+    ELSE(SIP_FOUND)
+        IF(SIP_FIND_REQUIRED)
+            MESSAGE(FATAL_ERROR "Could not find SIP")
+        ENDIF(SIP_FIND_REQUIRED)
+    ENDIF(SIP_FOUND)
 
 ENDIF(SIP_VERSION)
