@@ -890,10 +890,12 @@ void Stoich::installAndUnschedFunc( Id func, Id pool )
 
 	unsigned int numSrc = Field< unsigned int >::get( func, "numVars" );
 	vector< Id > srcPools;
-	assert( numSrc == ei.element()->getNeighbors( srcPools, funcSrcFinfo));
+	unsigned int n = ei.element()->getNeighbors( srcPools, funcSrcFinfo);
+	assert( numSrc == n );
 	vector< unsigned int > poolIndex( numSrc, 0 );
-	for ( unsigned int i = 0; i < numSrc; ++i )
+	for ( unsigned int i = 0; i < numSrc; ++i ) {
 		poolIndex[i] = convertIdToPoolIndex( srcPools[i] );
+	}
 	ft->setReactantIndex( poolIndex );
 	string expr = Field< string >::get( func, "expr" );
 	ft->setExpr( expr );
@@ -926,7 +928,8 @@ void Stoich::installAndUnschedFuncRate( Id func, Id pool )
 
 	unsigned int numSrc = Field< unsigned int >::get( func, "numVars" );
 	vector< Id > srcPools;
-	assert( numSrc == ei.element()->getNeighbors( srcPools, funcSrcFinfo));
+	unsigned int n = ei.element()->getNeighbors( srcPools, funcSrcFinfo);
+	assert( numSrc == n );
 	vector< unsigned int > poolIndex( numSrc, 0 );
 	for ( unsigned int i = 0; i < numSrc; ++i )
 		poolIndex[i] = convertIdToPoolIndex( srcPools[i] );
@@ -960,7 +963,8 @@ void Stoich::installAndUnschedFuncReac( Id func, Id reac )
 
 	unsigned int numSrc = Field< unsigned int >::get( func, "numVars" );
 	vector< Id > srcPools;
-	assert( numSrc == ei.element()->getNeighbors( srcPools, funcSrcFinfo));
+	unsigned int n = ei.element()->getNeighbors( srcPools, funcSrcFinfo);
+	assert( numSrc == n );
 	vector< unsigned int > poolIndex( numSrc, 0 );
 	for ( unsigned int i = 0; i < numSrc; ++i )
 		poolIndex[i] = convertIdToPoolIndex( srcPools[i] );
