@@ -33,11 +33,11 @@ _Harsha Rani, Aviral Goel, Upinder S. Bhalla_
     
 #[Introduction](#introduction)
 
-The Moose GUI lets you work on both [chemical](Kkit12Documentation.html) and [compartmental](Nkit2Documentation.html) neuronal models using a common interface. This document describes the salient features of the GUI
+The Moose GUI lets you work on both [chemical](Kkit12Documentation.html) and [compartmental/electrical](Nkit2Documentation.html) neuronal models using a common interface. This document describes the salient features of the GUI
 
 #[Interface](#interface)
 
- The interface consists of a a [menu bar](#menu-bar) and two views, [editor view](#editor-view) and [run view](#run-view). 
+ The common interface layout consists of a a [menu bar](#menu-bar) and two views, [editor view](#editor-view) and [run view](#run-view). 
 
 ## [Menu Bar](#menu-bar)
 
@@ -48,12 +48,12 @@ In Ubuntu 12.04, the menu bar appears only when the mouse is in the top menu str
 
 ### [File](#menu-file)
 
-File menu option provides the following sub options -
+The File menu option provides the following sub options -
 
 - [New](#file-new) - Create a new chemical signalling model.
 - [Load Model](#file-load-model) - Load a chemical signalling or compartmental neuronal model from a file.
 - [Recently Loaded Models](#recently-loaded-models) - List of models loaded in MOOSE.
-- [Connect BioModels](#file-connect-biomodels) - Load models from BioModels database.
+- [Connect BioModels](#file-connect-biomodels) - Load chemical signaling models from the BioModels database.
 - [Quit](#file-quit) - Quit the interface.
 
 ### [View](#menu-view)
@@ -63,8 +63,8 @@ View menu option provides the following sub options -
 - [Editor View](#editor-view) - Switch to the editor view for editing models.
 - [Run View](#run-view) - Switch to run view for running models.
 - [Dock Widgets](#dock-widgets) - Following dock widgets are provided -
-    - [Python](#dock-widget-python) - Brings up a full fledged python interpreter integrated with MOOSE GUI. You can interact with loaded models and load new models through moose API. The entire power of python language is available at your disposal.
-    - [Edit](#dock-widget-edit) - A property editor for viewing and editing the properties of a selected object such as a pool, enzyme, function or compartment. Editable field values can be changed by clicking on them and overwriting the new values. Remember to press enter once the editing is complete.
+    - [Python](#dock-widget-python) - Brings up a full fledged python interpreter integrated with MOOSE GUI. You can interact with loaded models and load new models through the PyMoose API. The entire power of python language is accessible, as well as MOOSE-specific functions and classes.
+    - [Edit](#dock-widget-edit) - A property editor for viewing and editing the fields of a selected object such as a pool, enzyme, function or compartment. Editable field values can be changed by clicking on them and overwriting the new values. Please be sure to press enter once the editing is complete, in order to save your changes.
 - [SubWindows](#subwindows) - This allows you to tile or tabify the run and editor views.
 
 ### [Help](#menu-help)
@@ -77,7 +77,10 @@ View menu option provides the following sub options -
 
 The editor view provides two windows -
 
-- [Model Editor](#model-editor) - The model editor allows you to edit and create models. You can create and delete model entities and edit their properties.
+- [Model Editor](#model-editor) - The model editor is a workspace to edit and create models. Using click-and-drag from the icons in the menu bar, you can create model entities such as chemical pools, reactions, and so on. A click on any object brings its property editor on screen (see below). In objects that can be interconnected, a click also brings up a special arrow icon that is used to connect objects together with messages. You can move objects around within the edit window using click-and-drag. Finally, you can delete objects by selecting one or more, and then choosing the delete option from the pop-up menu.
+
+When displaying a neuronal model, most of the editing options are disabled. However, you can still click on a dendrite in order to bring up the property editor.
+
 - [Property Editor](#property-editor) - The property editor provides a way of viewing and editing the properties of objects selected in the model editor.
 
 The Model Editor is different for chemical signalling and compartmental neuronal models. The links below the screenshots point to the details for the respective editors.
@@ -88,7 +91,10 @@ The Model Editor is different for chemical signalling and compartmental neuronal
 
 ## [Run View](#run-view)
 
-Run view consists of a model view window along plot widget, dragging an object from model view window to plot widget for plotting is done and a tool bar for running the model.
+The Run view, as the name suggests, puts the GUI into a mode where the model can be simulated. As a first step in this, you can click-and-drag an object to the graph window in order to create a time-series plot for that object. For example, in a chemical reaction, you could drag a pool into the graph window and subsequent simulations will display a graph of the concentration of the pool as a function of time.
+Within the Run View window, the time-evolution of the simulation is 
+displayed as an animation. For chemical kinetic models, the size of the icons for reactant pools scale to indicate concentration. For neuronal models, the colour of dendritic segments changes to indicate membrane potential.
+Above the Run View window, there is a special tool bar with a set of simulation controls to run the simulation.
 
 ### [Simulation Controls](#simulation-controls)
 
