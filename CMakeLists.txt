@@ -349,6 +349,7 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/gui
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/python
     DESTINATION lib/moose
     COMPONENT moose-python
+    COMPONENT moogli
     )
 
 ## The demos goes here.
