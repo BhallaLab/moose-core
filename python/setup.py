@@ -34,19 +34,21 @@ import os
 from setuptools import setup
 
 setup(
-        name='pymoose',
-        version='3.0',
-        description='PyMoose: Python scripting support in moose',
+        name='moose',
+        version='3.0.1',
+        description='Python scripting support in MOOSE, and MOOGLI',
         author='Dilwar Singh',
-        author_email='dilawars@ncns.res.in',
+        author_email='dilawars@ncbs.res.in',
         url='http://moose.ncbs.res.in',
         options={'build' : {'build_base' : '/tmp' } },
         packages=['libmumbl'
             , 'moose', 'moose.neuroml', 'moose.backend'
+            , 'moogli'
             ],
         package_dir = { 'moose' : 'moose'
             , 'libmumbl' : 'libmumbl'
+            , 'moogli' : 'moogli'
             },
-        package_data = { 'moose' : ['_moose.so'] },
-        install_requires = [ 'matplotlib', 'numpy' ],
+        package_data = { 'moose' : ['_moose.so'], 'moogli' : ['_moogli.so'] },
+        install_requires = [ 'matplotlib'],
     ) 
