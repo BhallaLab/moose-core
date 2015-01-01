@@ -711,13 +711,13 @@ void SteadyState::classifyState( const double* T )
 	// Fill up Jacobian
 	for ( unsigned int i = 0; i < numVarPools_; ++i ) {
 		double orig = nVec[i];
-		if ( isnan( orig ) ) {
+		if ( isNaN( orig ) ) {
 			cout << "Warning: SteadyState::classifyState: orig=nan\n";
 			solutionStatus_ = 2; // Steady state OK, eig failed
 			gsl_matrix_free ( J );
 			return;
 		}
-		if ( isnan( tot ) ) {
+		if ( isNaN( tot ) ) {
 			cout << "Warning: SteadyState::classifyState: tot=nan\n";
 			solutionStatus_ = 2; // Steady state OK, eig failed
 			gsl_matrix_free ( J );
@@ -880,7 +880,7 @@ int ss_func( const gsl_vector* x, void* params, gsl_vector* f )
 
 	for ( unsigned int i = 0; i < ri->num_mols; ++i ) {
 		double temp = op( gsl_vector_get( x, i ) );
-		if ( isnan( temp ) || isinf( temp ) ) { 
+		if ( isNaN( temp ) || isInfinity( temp ) ) { 
 			return GSL_ERANGE;
 		} else {
 			ri->nVec[i] = temp;
