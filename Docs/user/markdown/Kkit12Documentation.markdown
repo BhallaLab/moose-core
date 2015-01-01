@@ -44,11 +44,11 @@ Such chemical equations can be modeled through standard Ordinary Differential Eq
 > d[CaM]/dt = −K<sub>f</sub> ∗ [Ca]<sup>4</sup> ∗ [CaM] + K<sub>b</sub> ∗ [Ca<sub>4</sub>.CaM]
 > d[Ca4.CaM]/dt = K<sub>f</sub> ∗ [Ca]<sup>4</sup> ∗ [CaM] − K<sub>b</sub> ∗ [Ca<sub>4</sub>.CaM]
 
-MOOSE models these chemical systems. This help document describes how to do such modelling using the graphical interface, Kinetikit 2.
+MOOSE models these chemical systems. This help document describes how to do such modelling using the graphical interface, Kinetikit 12.
 
 ## [Levels of model](#TOC)
 
-At present Kinetikit handles compartmental models but does not compute diffusion within the compartments, though MOOSE itself can do this at the script level. Kkit12 will do deterministic as well as stochastic chemical calculations.
+Chemical kinetic models can be simple well-stirred (or point) models, or they could have multiple interacting compartments, or they could include space explicitly using reaction-diffusion. In addition such models could be solved either deterministically, or using a stochastic formulation. At present Kinetikit handles compartmental models but does not compute diffusion within the compartments, though MOOSE itself can do this at the script level. Kkit12 will do deterministic as well as stochastic chemical calculations.
 
 ## [Numerical methods](#TOC)
 
@@ -59,10 +59,10 @@ At present Kinetikit handles compartmental models but does not compute diffusion
 
 ## [Overview](#TOC)
 
-*   Load models using **`File -> Load model`**. Chemical schematic appears in **`Editor view`** tab.
+*   Load models using **`File -> Load model`**. A reaction schematic for the chemical system appears in the  **`Editor view`** tab.
 *   View parameters in **`Editor view`** tab by clicking on icons, and looking at entries in **`Properties`** table to the right.
 *   Edit parameters by changing their values in the **`Properties`** table.
-*   From Run View, Pools can be plottable by clicking on it and dragging onto the plot Window, presently only concentration is plottable.
+*   From Run View, Pools can be plotted by clicking on their icons and dragging the icons onto the plot Window. Presently only concentration is plottable.
 *   Run models using **`Run`** button.
 *   Select numerical method using options under **`Preferences`** button in simulation control.
 
