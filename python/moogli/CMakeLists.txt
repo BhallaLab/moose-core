@@ -1,7 +1,10 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 # setup SIP variables
-SEPARATE_ARGUMENTS(PYQT4_SIP_FLAGS) # convert space separated values to a list
+
+FIND_PACKAGE(PyQt4 REQUIRED)
 SET(SIP_INCLUDES ${PYQT4_SIP_DIR})
+
+SEPARATE_ARGUMENTS(PYQT4_SIP_FLAGS) # convert space separated values to a list
 SET(SIP_CONCAT_PARTS 4)
 SET(SIP_EXTRA_OPTIONS ${PYQT4_SIP_FLAGS})
 IF (NOT BINDINGS_GLOBAL_INSTALL)
@@ -27,35 +30,5 @@ include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 include_directories(${OSGANIMATION_INCLUDE_DIR})
 
 add_subdirectory(sip)
-ADD_LIBRARY(_moogli SHARED
-    ${SIP_TO_CPP_SOURCES}
-)
-
-add_dependencies(_moogli mooglisip)
-
-SET_TARGET_PROPERTIES(_moogli PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/python/moogli"
-    PREFIX ""
-    )
-
 add_subdirectory(moc)
 add_subdirectory(src)
-
-target_link_libraries(_moogli
-    moc
-    src
-    QtCore
-    QtGui
-    QtOpenGL           
-    osg
-    osgFX
-    osgUtil
-    osgFX
-    osgGA
-    osgQt
-    osgAnimation
-    osgViewer
-    osgQt
-    osgManipulator
-    osgText
-    )
