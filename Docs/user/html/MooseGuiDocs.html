@@ -1,280 +1,159 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-    <title>MOOSEGUI: Graphical interface for MOOSE</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="generator" content="pandoc" />
-    <meta name="author" content="Harsha Rani" />
-    <meta name="author" content="Aviral Goel" />
-    <meta name="author" content="Upi Bhalla" />
-    <meta name="date" content="Dec 21, 2014" />
-    <link rel="stylesheet" href="css/moosedocs.css" type="text/css" />
-</head>
-<body>
+<!DOCTYPE html>
+<html>
+<title>MOOSE GUI Documentation</title>
 
-<h1 class="title">MOOSEGUI: Graphical interface for MOOSE</h1>
+<xmp theme="cerulean" style="display:none;">
 
-<h2>
-        Harsha Rani,
-        Aviral Goel,
-        Upi Bhalla
-</h2>
+# **MOOSE GUI**
+**Graphical interface for MOOSE**
 
-<h2>Dec 21, 2014</h2>
-<div id="TOC">
-<ul>
-    <li><a href="#introduction">Introduction</a></li>
-    <li><a href="#layout-of-interface">Layout of interface</a></li>
-    <li><a href="#the-menu-bar">The menu bar</a></li>
-    <ul>
-        <li><a href="#file">File</a></li>
-        <li><a href="#edit">Edit</a></li>
-        <li><a href="#view">View</a></li>
-        <li><a href="#help">Help</a></li>
-    </ul>
-    <li><a href="#the-model-window">The Model window</a></li>
-    <ul>
-        <li><a href="#d-display-of-neuronal-models-in-neurokit:">3-D display of neuronal models in Neurokit:</a></li>
-    <li><a href="#d-display-of-chemical-kinetics-models-in-kinetikit:">2-D display of chemical kinetics models in Kinetikit:</a></li>
-    </ul>
-    <li><a href="#the-run-window">The run window</a></li>
-    <li><a href="#the-docking-panel">The docking panel</a></li>
-    <ul>
-        <li><a href="#property-editor">Property editor</a></li>
-        <li><a href="#python-shell">Python shell</a></li>
-        <li><a href="#simulation-control">Simulation control</a></li>
-    </ul>
-</ul>
+_Harsha Rani, Aviral Goel, Upinder S. Bhalla_
 
-<div id="introduction">
-    <h1><a href="#TOC">Introduction</a></h1>
-    <p>The Moose GUI lets you work on <a href="Kkit12Documentation.html">chemical</a>
-    and <a href="Nkit2Documentation.html">compartmental neuronal</a> models using a common interface framework. This document describes this common framework. In MOOSE 3.0.0, the interface lets you read, run, edit, and write chemical kinetic models, and to read, edit and run neuronal models.</p>
-</div>
-<div id="layout-of-interface">
-    <h1> <a href="#TOC">Layout of interface</a></h1>
-    <p> The <strong>MooseGui</strong> interface consists of <i><strong>editor</strong></i> and <i><strong>run</strong></i> view tab. <br>&nbsp; Editor view consists of a model view window, </p>
+-----
+## Contents
+- [Introduction](#introduction)
+- [Interface](#interface)
+    * [Menu Bar](#menu-bar)
+        * [File](#menu-file)
+            * [New](#file-new)
+            * [Load Model](#file-load-model)
+            * [Connect BioModels](#file-connect-biomodels)
+            * [Quit](#file-quit)
+        * [View](#menu-view)
+            * [Editor View](#editor-view)
+            * [Run View](#run-view)
+            * [Dock Widgets](#dock-widgets)
+            * [SubWindows](#subwindows)
+        * [Help](#menu-help)
+            * [About MOOSE](#about-moose)
+            * [Built-in Documentation](#built-in-documentation)
+            * [Report a bug](#report-a-bug)
+    * [Editor View](#editor-view)
+        * [Model Editor](#model-editor)
+        * [Property Editor](#property-editor)
+    * [Run View](#run-view)
+        * [Simulation Controls](#simulation-controls)
+        * [Plot Widget](#plot-widget)
+            * [Toolbar](#plot-widget-toolbar)
+            * [Context Menu](#plot-widget-context-menu)
 
-    <div class="figure"><img src="../../images/Moose1.png"/><p class="caption"></p></div>
-    <p>clicking on any object in a model view window, object editor opens up for viewing and editing model parameters.</p>
-    <div class="figure1"><img src="../../images/Moose_edit.png"/><p class="caption"></p></div>
-    <br>&nbsp; Run view consists of a model view window along plot widget, dragging an object from model view window to plot widget for plotting is done and a tool bar for running the model </p>
-    <div class="figure"><img src="../../images/Moose_Run.png"/><p class="caption"></p></div>
-</div>
-<div id="the-menu-bar"><h1><a href="#TOC">The menu bar</a></h1>
-    <p>In Ubuntu 12.04, the menu bar appears only when the mouse is in the top menu strip of the screen. In other distributions it should appear over the top of the interface.</p>
-    <div class="figure"><img src="../../images/MooseGuiMenuImage.png"/><p class="caption"></p></div>
-    <p>The menu bar contains the following entries: <strong><code>File</code></strong>, <strong><code>Edit</code></strong>,
-    <strong><code>View</code></strong>, <strong><code>Help</code></strong>.</p>
-</div>
-<div id="file"><h2><a href="#TOC">File</a></h2>
-    <ul>
-        <li><strong>New </strong>: This leads to a file finder dialog, where one can start building chemical kinetic models</li>
-        <li><strong>Load Model</strong>: This leads to a file finder dialog. The default location should bring you to the <code>Demos</code> directory of MOOSE. Here you can go into the <code>Genesis-files</code> subdirectory, which contains legacy Kinetikit (<code>*.g</code>) format models. The <code>neuroml</code> subdirectory leads to a number of example neuronal and network models, each in their own subdirectory. The other demos are mostly standalone demos.</li>
-        <li><strong>Recently Loaded Models</strong>: This show recently loaded model list.</li>
-        <li><strong>Connect BioModels</strong>: This allows to connect to BioModels data to load in a new SBML model.</li>
-        <li><strong>Save</strong>: This currently works only for chemical kinetic models, and only works for the SBML format.</li>
-        <li><strong>Quit</strong>: Quits the interface.</li>
-    </ul>
-</div>
-<div id="edit"><h2><a href="#TOC">Edit</a></h2>
-    <ul>
-        <li><strong>Insert</strong>: Provides moose object for building models, currently only for chemical kinetics models.</li>
-    </ul>
-</div>
+## Introduction
 
-<div id="view"><h2><a href="#TOC">View</a></h2><p>This allows one to control display of various parts of the interface.</p>
-    <ul>
-        <li><strong>Editor View</strong>: Switches to editor view.</li>
-        <li><strong>Run View</strong>: Switches to run view.</li>
-        <li><strong>Dock Widgets</strong>: Provides two sublist <i>python</i> and <i>Edit</i></li>
-        <ul>
-            <li><strong>Python shell</strong>: Provides python shell</li>
-            <li><strong>Property editor</strong>: Toggles visibility of the panels for viewing and editing object parameters.</li>
-        </ul>
-        <li><strong>Sub Windows</strong>: This sets up the editor view and the run view panels into separate sub-windows of the screen.</li>
-            <ul>
-                <li><strong>Tabbed View</strong></li> <!--: This sets up the editor view and run view panels into tabs on the screen. This is useful to dedicate a larger portion of screen area to each display.--></li>
-                <li><strong>subwindow View</strong></li>
-                <li><strong>Tile subwindow</strong></li>
-                <li><strong>Cascade subwindow</strong></li>
-            </ul>
-    </ul>
-</div>
-<div id="help"><h2><a href="#TOC">Help</a></h2>
-    <ul>
-        <li><strong>About Moose</strong>: Version and general information about MOOSE.</li>
-        <li><strong>Build-in documentation</strong>: This file. How to use the common interface framework.</li>
-        <li><strong>Report a bug</strong>: Takes you to the SourceForge bug tracker for Moose.</li>
-    </ul>
-</div>
+The Moose GUI lets you work on both [chemical](Kkit12Documentation.html) and [compartmental/electrical](Nkit2Documentation.html) neuronal models using a common interface. This document describes the salient features of the GUI
 
-<div id="the-model-window"><h1><a href="#TOC">The Model window</a></h1>
-    <p>The Model window displays a view of the model structure. These views vary depending on the model type.</p>
-</div>
-<div id="d-display-of-neuronal-models-in-neurokit:"><h2><a href="#TOC">3-D display of neuronal models in Neurokit:</a></h2></div>
-<div class="figure"><img src="../../images/NkitModelWindow.png"/><p class="caption"></p></div>
-<div>
-    <p>The individual compartments of the neuron model can be clicked to select, and when selected, the compartment parameters and variables are displayed in the
-    <strong><code>Property editor</code></strong> described below. For a neuronal or neuronal network model, the window displays a 3-D view of the cell(s) in the model.
-    It does so using <strong>OpenGL</strong>, which is a standard for displaying 3-D views. In addition, the display sets the color of each compartment based on some variable value, typically <code>
-    Vm</code>, the membrane potential of the compartment. Note the 3-D axis indicators in the bottom left.</p>
-    <p>The controls for moving the display are as follows:</p>
-    <ul>
-        <li><strong>Zoom</strong>: One can zoom in and out of the field of view in the OpenGL window using the comma and period keys (think in terms of the angle bracket symbols on the same keys). In addition, the scroll wheel or the vertical scroll line on the track pad will also cause the display to zoom in and out.</li>
-        <li><strong>Pan</strong>: The arrow keys will move the display left, right, up and down. Pan can also be done using the mouse if you hold down the <strong><code>shift</code></strong> key and the <strong><code>left mouse button</code></strong> at the same time.</li>
-        <li><strong>Pitch</strong>: For reasons entirely unknown to me, the keys <strong><code>y</code></strong> and <strong><code>u</code></strong> are assigned to rotate the display about the vertical axis, otherwise known as <em>pitch</em>.</li>
-        <li><strong>Yaw</strong>: The keys <strong><code>q</code></strong> and <strong><code>a</code></strong> control rotation around the horizontal axis, otherwise known as <em>yaw</em>.</li>
-        <li><strong>Roll</strong>: To complete the key binding hall of fame, the keys <strong><code>z</code></strong> and <strong><code>x</code></strong> rotate the display around the axis going into the display from your eyes.</li>
-        <li><strong>Mouse controls</strong>: One can also acheive a combination of <em>pitch</em>, <em>roll</em>, and <em>yaw</em> by holding the <strong><code>left mouse button</code></strong> down and moving the mouse.</li>
-    </ul>
-</div>
-<div id="d-display-of-chemical-kinetics-models-in-kinetikit:"><h2><a href="#TOC">2-D display of chemical kinetics models in Kinetikit:</a></h2>
-    <p>For a chemical kinetics network, the window displays a schematic of the chemical reaction system. There are distinct icons for compartments, molecules, reactions and enzymes, function,table and these are connected by arrows to set up the reaction scheme. Again, any icon can be clicked to select and its parameters and variables come up in the <strong><code>editor</code></strong>.</p>
-    <div class="figure"><img src="../../images/Moose1.png"/><p class="caption"></p>
-    </div>
-    <p>The chemical network is displayed only in 2 dimensions. The controls are correspondingly simpler:</p>
-    <ul>
-        <li><strong>Zoom</strong>: Comma and period keys. Alternatively, the mouse scroll wheel or vertical scroll line on the track pad will cause the display to zoom in and out.</li>
-        <li><strong>Pan</strong>: The arrow keys move the display left, right, up, and down.</li>
-        <li><strong>Entire Model View</strong>: Pressing the <strong><code>a</code></strong> key will fit the entire model into the entire field of view.</li>
-        <li><strong>Resize Icons</strong>: Angle bracket keys, that is, <strong><code>&lt;</code></strong> and <strong><code>&gt;</code></strong> and <strong><code> + </code> </strong> and <strong><code> - </code></strong>.
-             This resizes the icons while leaving their positions on the screen layout more or less the same.</li>
-        <li><strong>Original Model View</strong>: Presing the <strong><code>A</code></strong> key (capital <code>A</code>) will revert to the original model view including the original icon scaling.</li>
-    </ul>
-</div>
+## Interface
 
-<div id="the-run-window"><h1><a href="#TOC">The run window</a></h1>
-    <p>The run view displays both model view and time-series plots of the simulation.
-     Plots are color-coded to distinguish them.<br> As the simulation progress, <br>
-     &nbsp;&nbsp;- in the case of <strong>chemical kinetics models</strong> interface the background of each molecules varies as per the '<i>concentration</i>' (i.e., increase or decrease circle size) in the model view and the plots take the same color as the molecule pool that they represent.<br>
-     &nbsp;&nbsp;- in the case of <strong>neuronal models </strong>interface the color changes as per '<i>Vm</i>' value for the specfic segment</p>
+ The common interface layout consists of a a [menu bar](#menu-bar) and two views, [editor view](#editor-view) and [run view](#run-view).
 
-    <div class="figure"><img src="../../images/RunView.png"/><p class="caption"></p>
-    </div>
-    <hr>
+### Menu Bar
 
-    <p>The plots are done using <strong>MatPlotLib</strong>, so the usual controls apply. Beneath the plot window there is a little row of icons:</p>
-    <div class="figure"><img src="../../images/PlotWindowIcons.png"/><p class="caption"></p>
-    </div>
+![](../../images/MooseGuiMenuImage.png)
 
-    <p>These are the plot controls. If you hover the mouse over them for a few seconds, a function reminder box pops up. The functions as follows:</p>
+The menu bar appears at the top of the top of the main window. In Ubuntu 12.04, the menu bar appears only when the mouse is in the top menu strip of the screen. It consists of the following options -
 
-    <div>
-    <table>
-        <tr>
-            <td><img src="../../images/Addgraph.png"/></td>
-            <td><ul><li><strong>Add Graph</strong>: Add plot window</li></ul></td>
-        </tr>
-        <tr>
-            <td><img src="../../images/delgraph.png"/></td>
-            <td><ul><li><strong>Delete Graph</strong>: Deletes current plot window</li></ul></td>
-        </tr>
-        <tr>
-            <td><img src="../../images/grid.png"/></td>
-            <td><ul><li><strong>Toggled Grid</strong>: A Grid applied to the current plot window.</li></ul></td>
-        </tr>
-        <tr>
-            <td><img src="../../images/MatPlotLibHomeIcon.png"/></td>
-            <td><ul><li><strong>Home</strong>: Returns the plot display to its default position</li></ul></td>
-        </tr>
-        <tr>
-            <td><img src="../../images/MatPlotLibDoUndo.png"/></td>
-            <td><ul><li><strong>Undo/Redo</strong>: Undoes or re-does manipulations you have done to the display.</li></ul></td>
-        </tr>
-        <tr>
-            <td><img src="../../images/MatPlotLibPan.png"/></td>
-            <td><ul><li><strong>Pan</strong>: The plots will pan around with the mouse when you hold the left button down. The plots will zoom with the mouse when you hold the right button down.</li></ul></td>
-        </tr>
-        <tr>
-            <td><img src="../../images/MatPlotLibZoom.png"/></td>
-            <td><ul><li><strong>Zoom to rectangle</strong>: With the <strong><code>left mouse button</code></strong>, this will zoom in to the specified rectangle so that the plots become bigger. With the <strong><code>right mouse button</code></strong>, the entire plot display will be shrunk to fit into the specified rectangle.</li></ul></td>
-        </tr>
-        <tr>
-            <td><img src="../../images/MatPlotLibConfigureSubplots.png"/></td>
-            <td><ul><li><strong>Configure subplots </strong>:You don't want to mess with these .</li></ul></td>
-        </tr>
-            <tr>
-            <td><img src="../../images/MatPlotLibSave.png"/></td>
-            <td><ul><li><strong> Save</strong>:Pops up a dialog box to save the plot. At this point it only saves into a <code>.png</code
-            > file.</li></ul></td>
-        </tr>
-    </table>
-    </div>
-    <div id="the-docking-panel"><h1><a href="#TOC">The docking panel</a></h1>
-        <p>The <strong><code> docking panel</code></strong> are the <strong><code>Property editor</code></strong>, the <strong><code>Python shell</code></strong> and the <strong><code>Simulation control</code></strong>.
-        </p>
-    </div>
-    <div id="property-editor"><h2><a href="#TOC">Property editor</a></h2>
-        <p>The <strong><code>Property editor</code></strong> displays parameters and variables of the selected model component (object).</p>
-        <div class="figure"><img src="../../images/PropertyEditor.png"/><p class="caption"></p></div>
-        <p>The object many be a compartments of a neuronal model, or pools, reactions, enzymes, function or table in a signaling model.</p>
-        <ul>
-            <li><strong>Properties</strong>: This table displays field names in the first column, followed by field values in the second. If the field is editable one can click on the value in the second column and change it.</li>
-        </ul>
-    </div>
-    <div id="python-shell"><h2><a href="#TOC">Python shell</a></h2>
-        <p>The <strong>Python shell</strong> is a full fledged python interpreter integrated with MOOSE GUI. You can interact with loaded models and load new models. The entire power of python language is available at your disposal.</strong>
-    </div>
-    <div id="simulation-control"><h2><a href="#TOC">Simulation control</a></h2>
-        <p>The <strong>Simulation control</strong> panel controls how the model is run.</p>
-        <div class="figure">
-        <img src="../../images/SimulationControl.png"/>
-        </div>
-    </div>
-    <ul>
-        <li><strong>Run Time</strong>:Determines duration for which simulation is to run. If simulation has already run, this runs for the specified additional period.</li>
-        <li><strong>Reset</strong>:Restores simulation to its initial state; reinitializes all variables to t = 0.</li>
-        <li><strong>Stop</strong>: This button halts an ongoing simulation.</li>
-        <li><strong>Current time</strong>:This reports the current simulation time.</li>
-        <li><strong>Preferences</strong>:</li>
-        <ul>
-            <div id="header"> <li><strong>Chemical</strong>:</li></div>
-            <div id="nav_image"> <img src="../../images/Chemical.png"/></div>
-            <div id="section">
-                <ul>
-                    <li><strong>Simulation dt</strong>: Timestep to use for internal simulation clocks. Edit only if you know what you are doing.</li>
-                    <li><strong>Diffusion dt</strong>:Timestep to use for reaction-diffusing calculation</li>
-                    <li><strong>Plot update Interval</strong>: Timestep to use for updating plots.</li>
-                    <li><strong>Gui Update Interval</strong>: How frequently should the GUI refresh.</li>
-                    <li><strong>Solver</strong>:The Solver options currently only select between methods for kinetic models. Details are in the <a href="Kkit12Documentation.html">chemical kinetics documentation</a>.<br>Options are:</li>
-                    <ul>
-                        <li><strong>Runge Kutta</strong>: This is the default method for integration of ODE systems. It uses the Gnu Scientific Library 5-th order explicit variable-timestep Runge-Kutta-Fehlberg method.</li>
-                        <li><strong>Gillespie</strong>: This is an implementation of Gillespies Stochastic Systems Algorithm, which computes reaction progress using a stochastic method.</li>
-                        <li><strong>Exponential Euler</strong>:This methods computes the solution of partial and ordinary differential equations.</li>
-                    </ul>
-                </ul>
-            </div>
-            <div id="header"> <li><strong>Electrical</strong>:</li></div>
-            <ul>
-            <div id="header"><li>Simulation</li></div>
-            <div id="nav_image"> <img src="../../images/Electrical_sim.png"/></div>
-            <div id="section">
-                <ul>
-                    <li><strong>Simulation dt</strong>: Timestep to use for internal simulation clocks. Edit only if you know what you are doing.</li>
-                    <li><strong>Plot update Interval</strong>: Timestep to use for updating plots.</li>
-                    <li><strong>Gui Update Interval</strong>: How frequently should the GUI refresh.</li>
-<!--                     <li><strong>Solver</strong>:</li>
-                    <ul>
-                        <li><strong>Runge Kutta</strong>: This is the default method for integration of ODE systems. It uses the Gnu Scientific Library 5-th order explicit variable-timestep Runge-Kutta-Fehlberg method.</li>
-                        <li><strong>Gillespie</strong>: This is an implementation of Gillespies Stochastic Systems Algorithm, which computes reaction progress using a stochastic method.</li>
-                    </ul>
- -->                </ul>
-            </div>
-            <div id="header"><li>Visualization</li></div>
-            <div id="nav_image"> <img src="../../images/Electrical_vis.png"/></div>
-            <div id="section">
-                <ul>
-                    <li><strong>Base Membrane Voltage</strong>: This value is mapped directly to "Base Compartment Color".</li>
-                    <li><strong>Base Compartment Color</strong>: Compartment color corresponding to "Base Membrane Voltage".</li>
-                    <li><strong>Peak Membrane Voltage</strong>: This value is mapped directly to "Peak Compartment Color".</li>
-                    <li><strong>Peak Compartment Color</strong>: Compartment color corresponding to "Peak Membrane Voltage".</li>
-                    <li><strong>Background Color</strong>: Color to use as a backdrop for the model.</li>
-                </ul>
-            </div>
-            </ul>
-        </ul>
-    </ul>
-    </body>
+#### File
+
+The File menu option provides the following sub options -
+
+- [New](#file-new) - Create a new chemical signalling model.
+- [Load Model](#file-load-model) - Load a chemical signalling or compartmental neuronal model from a file.
+- [Recently Loaded Models](#recently-loaded-models) - List of models loaded in MOOSE.
+- [Connect BioModels](#file-connect-biomodels) - Load chemical signaling models from the BioModels database.
+- [Quit](#file-quit) - Quit the interface.
+
+#### View
+
+View menu option provides the following sub options -
+
+- [Editor View](#editor-view) - Switch to the editor view for editing models.
+- [Run View](#run-view) - Switch to run view for running models.
+- [Dock Widgets](#dock-widgets) - Following dock widgets are provided -
+    - [Python](#dock-widget-python) - Brings up a full fledged python interpreter integrated with MOOSE GUI. You can interact with loaded models and load new models through the PyMoose API. The entire power of python language is accessible, as well as MOOSE-specific functions and classes.
+    - [Edit](#dock-widget-edit) - A property editor for viewing and editing the fields of a selected object such as a pool, enzyme, function or compartment. Editable field values can be changed by clicking on them and overwriting the new values. Please be sure to press enter once the editing is complete, in order to save your changes.
+- [SubWindows](#subwindows) - This allows you to tile or tabify the run and editor views.
+
+#### Help
+
+- [About Moose](#about-moose) - Version and general information about MOOSE.
+- [Built-in documentation](#butilt-in-documentation) - Documentation of  MOOSE GUI.
+- [Report a bug](#report-a-bug) - Directs to the SourceForge bug tracker for reporting bugs.
+
+### Editor View
+
+The editor view provides two windows -
+
+- [Model Editor](#model-editor) - The model editor is a workspace to edit and create models. Using click-and-drag from the icons in the menu bar, you can create model entities such as chemical pools, reactions, and so on. A click on any object brings its property editor on screen (see below). In objects that can be interconnected, a click also brings up a special arrow icon that is used to connect objects together with messages. You can move objects around within the edit window using click-and-drag. Finally, you can delete objects by selecting one or more, and then choosing the delete option from the pop-up menu.
+When displaying a neuronal model, most of the editing options are disabled. However, you can still click on a dendrite in order to bring up the property editor.
+
+The Model Editor is different for chemical signalling and compartmental neuronal models. The links below the screenshots point to the details for the respective editors.
+
+![Chemical Signalling Model Editor](../../images/ChemicalSignallingEditor.png)
+
+![Compartmental Model Editor](../../images/CompartmentalEditor.png)
+
+- [Property Editor](#property-editor) - The property editor provides a way of viewing and editing the properties of objects selected in the model editor.
+
+![Property Editor](../../images/PropertyEditor.png)
+
+
+### Run View
+
+The Run view, as the name suggests, puts the GUI into a mode where the model can be simulated. As a first step in this, you can click-and-drag an object to the graph window in order to create a time-series plot for that object. For example, in a chemical reaction, you could drag a pool into the graph window and subsequent simulations will display a graph of the concentration of the pool as a function of time.
+Within the Run View window, the time-evolution of the simulation is
+displayed as an animation. For chemical kinetic models, the size of the icons for reactant pools scale to indicate concentration. For neuronal models, the colour of dendritic segments changes to indicate membrane potential.
+Above the Run View window, there is a special tool bar with a set of simulation controls to run the simulation.
+
+#### Simulation Controls
+
+![Simulation Control](../../images/SimulationControl.png)
+
+This panel allows you to control the various aspects of the simulation.
+
+- [Run Time](#run-time) - Determines duration for which simulation is to run. A simulation which has already run, runs further for the specified additional period.
+- [Reset](#reset) - Restores simulation to its initial state; re-initializes all variables to t = 0.
+- [Stop](#stop) - This button halts an ongoing simulation.
+- [Current time](#current-time) - This reports the current simulation time.
+- [Preferences](#preferences) - Allows you to set simulation and visualization related preferences.
+
+
+#### Plot Widget
+
+
+##### Toolbar
+
+On top of plot window there is a little row of icons:
+
+![](../../images/PlotWindowIcons.png)
+
+These are the plot controls. If you hover the mouse over them for a few seconds, a tooltip pops up. The icons represent the following functions:
+
+* ![](../../images/Addgraph.png) - Add a new plot window
+
+* ![](../../images/delgraph.png) - Deletes current plot window
+
+* ![](../../images/grid.png) - Toggle X-Y axis grid
+
+* ![](../../images/MatPlotLibHomeIcon.png) - Returns the plot display to its default position
+
+* ![](../../images/MatPlotLibDoUndo.png) - Undoes or re-does manipulations you                       have done to the display.
+
+* ![](../../images/MatPlotLibPan.png) - The plots will pan around with the mouse when you hold the left button down. The plots will zoom with the mouse when you hold the right button down.
+
+* ![](../../images/MatPlotLibZoom.png) - With the **`left mouse button`**, this will zoom in to the specified rectangle so that the plots become bigger. With the **`right mouse button`**, the entire plot display will be shrunk to fit into the specified rectangle.
+
+* ![](../../images/MatPlotLibConfigureSubplots.png) - You don't want to mess with these .
+
+* ![](../../images/MatPlotLibSave.png) - Save the plot.
+
+##### Context Menu
+
+The context menu is enabled by right clicking on the plot window. It has the following options -
+
+* **Export to CSV** - Exports the plotted data to CSV format
+* **Toggle Legend** - Toggles the plot legend
+* **Remove** - Provides a list of plotted entities. The selected entity will not be plotted.
+
+</xmp>
+
+<script src="http://strapdownjs.com/v/0.2/strapdown.js"></script>
 </html>
-
