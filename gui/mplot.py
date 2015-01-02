@@ -157,7 +157,7 @@ class CanvasWidget(FigureCanvas):
             table     = moose.utils.create_table(tablePath, element, "Conc","Table2")
             # moose.connect(table, 'requestOut', element, 'getConc')
             self.updateSignal.emit()
-        elif isinstance(element, moose.Compartment):
+        elif isinstance(element, moose.ZombieCompartment):
             tablePath = moose.utils.create_table_path(self.model, self.graph, element, "Vm")
             table     = moose.utils.create_table(tablePath, element, "Vm","Table")
             self.updateSignal.emit()
