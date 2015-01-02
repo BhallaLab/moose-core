@@ -50,5 +50,5 @@ setup(
             , 'moogli' : 'moogli'
             },
         package_data = { 'moose' : ['_moose.so'], 'moogli' : ['_moogli.so'] },
-        install_requires = [ 'matplotlib'],
+        #install_requires = [ 'matplotlib'],
     ) 
