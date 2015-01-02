@@ -3,10 +3,28 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="author" content="Aviral Goel" />
-    <title>NeuroKit Documentation</title>
+    <title>Neurokit Documentation</title>
 </head>
 
 <xmp theme="cerulean" style="display:none;">
+# **MOOSE GUI - Neurokit**
+**Graphical interface for MOOSE**
+
+_Aditya Gilra, Aviral Goel, Upinder S. Bhalla_
+
+-----
+## Contents
+
+- [Introduction](#introduction)
+- [Neuronal Models](#neuronal-models)
+- [Neuronal Simulations](#neuronal-simulations)
+    * [Quickstart](#quickstart)
+        * [Editor View](#editor-view)
+        * [Run View](#run-view)
+    * [Modeling Details](#modeling-details)
+    * [Demos](#demos)
+
+<div id="introduction"></div>
 # Introduction
 
 Neuronal models in NeuroML 1.8 format can be loaded and simulated in
@@ -16,7 +34,8 @@ properties. Plotting and visualization of activity proceeds
 concurrently with the simulation. Support for creating and editing
 channels, morphology and networks is planned for the future.
 
-# Neuronal models
+<div id="neuronal-models"></div>
+# Neuronal Models
 
 Neurons are modeled as equivalent electrical circuits. The
 morphology of a neuron can be broken into isopotential compartments
@@ -66,8 +85,10 @@ NetworkML. Importing of cell models in the
 [GENESIS](http://www.genesis-sim.org/GENESIS) `.p` format is
 supported for backwards compatibitility.
 
-# Neuronal simulations in MOOSEGUI
+<div id="neuronal-simulations"></div>
+# Neuronal simulations
 
+<div id="quickstart"></div>
 ## Quick start
 
 -   MOOSEGUI provides a few neuronal models in moose/Demos directory in
@@ -82,13 +103,15 @@ supported for backwards compatibitility.
 -   Press `Ctrl` and click and drag a compartment from the visualizer to the plot window.
 -   Run the model using **`Run`** button. You can see the colors of the compartments changing as the simulation progresses. The graphs gets updated simultaneously with the visualizer.
 
+<div id="editor-view"></div>
 ### Editor View
 ![**Editor View**](../../images/NeurokitEditor.png)
 
-
+<div id="run-view"></div>
 ### Run View
 ![**Run View**](../../images/NeurokitRunner.png)
 
+<div id="modeling-details"></div>
 ## Modeling details
 
 MOOSE uses SI units throughout.
@@ -173,7 +196,7 @@ time step are are listed **dynamical**. Rest are parameters.
         used to calculate `B` (see Chapter 19 of
         [Book of GENESIS](http://www.genesis-sim.org/GENESIS/iBoG/iBoGpdf/index.html).)
 
-
+<div id="demos"></div>
 ## Demos
 
 -   **Cerebellar granule cell**
