@@ -38,7 +38,7 @@ class MorphML():
         self.model_dir = nml_params['model_dir']
         self.temperature = nml_params['temperature']
 
-    def readMorphMLFromFile(self,filename,params={}, combine_segments=False):
+    def readMorphMLFromFile(self,filename,params={}):
         """
         specify global params as a dict (presently none implemented)
         returns { cellname1 : segDict, ... }
@@ -53,13 +53,11 @@ class MorphML():
                 lengthUnits = neuroml_element.attrib['lengthUnits']
             else:
                 lengthUnits = 'micrometer'
-            print "readMorphMLFromFile using combine_segments = ", combine_segments
-            cellDict = self.readMorphML(cell,params,lengthUnits, combine_segments )
+            cellDict = self.readMorphML(cell,params,lengthUnits)
             cellsDict.update(cellDict)
         return cellsDict
 
-    def readMorphML(self,cell,params={},lengthUnits="micrometer",combine_segments=False):
-        print "readMorphML using combine_segments = ", combine_segments
+    def readMorphML(self,cell,params={},lengthUnits="micrometer"):
         """
         returns {cellname:segDict}
         where segDict = { segid1 : [ segname,(proximalx,proximaly,proximalz),
@@ -81,6 +79,11 @@ class MorphML():
         self.cellDictBySegmentId[cellname] = [moosecell,{}]
         self.cellDictByCableId[cellname] = [moosecell,{}]
         self.segDict = {}
+        if 'combineSegments' in params.keys():
+            self.combineSegments = params['combineSegments']
+        else:
+            self.combineSegments = False
+        print "readMorphML using combineSegments = ", self.combineSegments
 
         ###############################################
         #### load cablegroups into a dictionary
@@ -158,9 +161,10 @@ class MorphML():
         ############################################################
         #### load morphology and connections between compartments
         ## Many neurons exported from NEURON have multiple segments in a section
-        ## Combine those segments into one Compartment / section, if combine_segments = True
-        ## assume segments of a compartment/section are in increasing order and
-        ## assume all segments of a compartment/section have the same cableid
+        ## If self.combineSegments = True,
+        ##  then combine those segments into one Compartment / section
+        ##  for combining, assume segments of a compartment/section are in increasing order
+        ##  and assume all segments of a compartment/section have the same cableid
         ## findall() returns elements in document order:
         running_cableid = ''
         running_segid = ''
@@ -174,9 +178,9 @@ class MorphML():
             ## cable is an optional attribute. WARNING: Here I assume it is always present.
             cableid = segment.attrib['cable']
             segmentid = segment.attrib['id']
-            ## if old cableid still running AND combine_segments == True,
+            ## if old cableid still running AND self.combineSegments == True,
             ## then don't start a new compartment, skip to next segment
-            if cableid == running_cableid and combine_segments:
+            if cableid == running_cableid and self.combineSegments:
                 self.cellDictBySegmentId[cellname][1][segmentid] = running_comp
                 proximal = segment.find('./{'+self.mml+'}proximal')
                 if proximal is not None:
@@ -186,7 +190,8 @@ class MorphML():
                 if distal is not None:
                     running_diameter += float(distal.attrib["diameter"]) * self.length_factor
                     running_dia_nums += 1
-            ## new cableid starts, hence start a new compartment; also finish previous / last compartment
+            ## if (self.combineSegments and new cableid starts) or if not self.combineSegments,
+            ##  then start a new compartment
             else:
                 ## Create a new compartment
                 ## the moose "hsolve" method assumes compartments to be
@@ -224,7 +229,12 @@ class MorphML():
                 self.cellDictBySegmentId[cellname][1][segmentid] = moosecomp
                 ## cables are grouped and mechanism densities are set for cablegroups later.
                 ## hence I will need to refer to segment according to which cable it belongs to.
-                self.cellDictByCableId[cellname][1][cableid] = moosecomp
+                ## if combineSegments is False, there can be multiple segments per cable,
+                ##  so make array of compartments for cellDictByCableId[cellname][1][cableid]
+                if cableid in self.cellDictByCableId[cellname][1].keys():
+                    self.cellDictByCableId[cellname][1][cableid].append(moosecomp)
+                else:
+                    self.cellDictByCableId[cellname][1][cableid] = [moosecomp]
                 running_cableid = cableid
                 running_segid = segmentid
                 running_comp = moosecomp
@@ -343,8 +353,9 @@ class MorphML():
                 mech_params = mechanism.findall(".//{"+self.bio+"}parameter")
                 ## if no params, apply all default values to all compartments
                 if len(mech_params) == 0:
-                    for compartment in self.cellDictByCableId[cellname][1].values():
-                        self.set_compartment_param(compartment,None,'default',mechanismname)  
+                    for compartment_list in self.cellDictByCableId[cellname][1].values():
+                        for compartment in compartment_list:
+                            self.set_compartment_param(compartment,None,'default',mechanismname)  
                 ## if params are present, apply params to specified cable/compartment groups
                 for parameter in mech_params:
                     parametername = parameter.attrib['name']
@@ -391,8 +402,9 @@ class MorphML():
             #### Connect the Ca pools and channels
             #### Am connecting these at the very end so that all channels and pools have been created
             #### Note: this function is in moose.utils not moose.neuroml.utils !
-            moose_utils.connect_CaConc(self.cellDictByCableId[cellname][1].values(),\
-                self.temperature+neuroml_utils.ZeroCKelvin) # temperature should be in Kelvin for Nernst
+            for compartment_list in self.cellDictByCableId[cellname][1].values():
+                moose_utils.connect_CaConc(compartment_list,\
+                    self.temperature+neuroml_utils.ZeroCKelvin) # temperature should be in Kelvin for Nernst
         
         ##########################################################
         #### load connectivity / synapses into the compartments
@@ -421,12 +433,13 @@ class MorphML():
         for group in parameter.findall(".//{"+grouptype+"}group"):
             cablegroupname = group.text
             if cablegroupname == 'all':
-                for compartment in self.cellDictByCableId[cellname][1].values():
-                    self.set_compartment_param(compartment,name,value,mechanismname)
+                for compartment_list in self.cellDictByCableId[cellname][1].values():
+                    for compartment in compartment_list:
+                        self.set_compartment_param(compartment,name,value,mechanismname)
             else:
                 for cableid in self.cablegroupsDict[cablegroupname]:
-                    compartment = self.cellDictByCableId[cellname][1][cableid]
-                    self.set_compartment_param(compartment,name,value,mechanismname)
+                    for compartment in self.cellDictByCableId[cellname][1][cableid]:
+                        self.set_compartment_param(compartment,name,value,mechanismname)
 
     def set_compartment_param(self, compartment, name, value, mechanismname):
         """ Set the param for the compartment depending on name and mechanismname. """
