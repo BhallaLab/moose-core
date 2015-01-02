@@ -516,7 +516,7 @@ class  KineticsWidget(EditorWidgetBase):
         elif isinstance(self,kineticRunWidget):
             self.editormooseId_GObj = self.editor.getCentralWidget().mooseId_GObj
             editorItem = self.editormooseId_GObj[moose.element(info).parent]
-            print "editorItem ",info,editorItem
+            #print "editorItem ",info,editorItem
             xpos = editorItem.scenePos().x()
             ypos = editorItem.scenePos().y()
             Annoinfo.x = xpos

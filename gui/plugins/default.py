@@ -699,15 +699,15 @@ class SchedulingWidget(QtGui.QWidget):
         return True
 
     def solverStatus(self):
-        print "solverStatus "
+        #print "solverStatus "
         compt = moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
-        print "stoich exist ",moose.exists(compt[0].path+'/stoich')
+        #print "stoich exist ",moose.exists(compt[0].path+'/stoich')
         if not moose.exists(compt[0].path+'/stoich'):
             return None
         else:
             stoich = moose.Stoich(compt[0].path+'/stoich')
             status = int(stoich.status)
-            print("Status =>", status)
+            #print("Status =>", status)
             if status == -1:
                 QtGui.QMessageBox.warning(None,"Could not Run the model","Warning: Reaction path not yet assigned.\n ")
                 return -1
@@ -792,15 +792,11 @@ class SchedulingWidget(QtGui.QWidget):
         self.setModelType()
 
     def setModelType(self):
-        print "modelType: self.modelroot ",self.modelRoot
+        #print "modelType: self.modelroot ",self.modelRoot
         if moose.exists(self.modelRoot + "/model/cells"):
-            print "%$%"
             self.modelType = ELECTRICAL_MODEL
         else:
-            print "()()"
             self.modelType = CHEMICAL_MODEL
-            print "()()())( ",self.modelType
-        print "setModelType ",self.modelType
         self.resetSimulation()
 
 from collections import namedtuple
@@ -1268,6 +1264,7 @@ class PlotView(PlotBase):
         self.dataRoot = moose.element(root).path
 
     def getToolPanes(self):
+	return[]
         return (self.getFieldSelectionDock(), )
 
     def getSelectionPane(self):

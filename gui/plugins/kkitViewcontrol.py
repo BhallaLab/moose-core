@@ -537,8 +537,20 @@ class GraphicalView(QtGui.QGraphicsView):
             src = self.layoutPt.lineItem_dict[item]
             srcZero = [k for k, v in self.layoutPt.mooseId_GObj.iteritems() if v == src[0]]
             srcOne = [k for k, v in self.layoutPt.mooseId_GObj.iteritems() if v == src[1]]
+            if isinstance (moose.element(srcZero[0]),moose.MMenz):
+                for msg in moose.element(srcZero[0].parent).msgIn:
+                    msgIdforDeleting = " "
+                    if moose.element(msg.e2.path) == moose.element(srcZero[0].parent.path):
+                        if src[2] == 't':
+                            if len(msg.destFieldsOnE1) > 0:
+                                if msg.destFieldsOnE1[0] == "enzDest":
+                                    msgIdforDeleting = msg  
+                                    moose.delete(msgIdforDeleting)
+                                    self.sceneContainerPt.removeItem(item)        
+
             for msg in srcZero[0].msgOut:
                 msgIdforDeleting = " "
+                #print "%$%%%%%% ",msg.e2.path, "@@@@@@@@ ",srcOne[0].path
                 if moose.element(msg.e2.path) == moose.element(srcOne[0].path):
                     if src[2] == 's':
                         if msg.srcFieldsOnE1[0] == "subOut":
@@ -546,8 +558,17 @@ class GraphicalView(QtGui.QGraphicsView):
                     elif src[2] == 'p':
                         if msg.srcFieldsOnE1[0] == "prdOut":
                             msgIdforDeleting = msg
+                    elif src[2] == 't':
+                        print "t ", msg.srcFieldsOnE1[0]
+                        if msg.srcFieldsOnE1[0] == "enzOut":
+                            msgIdforDeleting = msg
+                        elif msg.srcFieldsOnE1[0] == "childOut":
+                            msgIdforDeleting = msg
+                    elif src[2] == 'tab':
+                        if msg.srcFieldsOnE1[0] == "output":
+                            msgIdforDeleting = msg
                     moose.delete(msgIdforDeleting)
-            self.sceneContainerPt.removeItem(item)
+                    self.sceneContainerPt.removeItem(item)
     
     def deleteItem(self,item):
         #delete Items 
