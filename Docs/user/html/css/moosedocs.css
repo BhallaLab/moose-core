@@ -159,3 +159,5 @@ tr:nth-child( even ) {
     text-align:left;
    padding:5px;
 	}
+img[drawing] { width: 10px; 	background-color: #cccccc;}
+
