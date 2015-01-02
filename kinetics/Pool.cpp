@@ -225,7 +225,7 @@ double Pool::vGetMotorConst( const Eref& e ) const
 
 void Pool::vSetVolume( const Eref& e,  double v )
 {
-	assert( 0 ); // Don't currently know how to do this.
+	cout << "Warning: Pool::vSetVolume: Operation not permitted. Ignored\n";
 }
 
 double Pool::vGetVolume( const Eref& e ) const
