@@ -28,7 +28,7 @@ def neuron(element):
                          , "id"              : element.path
                          , "object"          : element
                          , "type"            : etype(element)
-                         , "compartments"    : recurse(element, compartment, moose.Compartment)
+                         , "compartments"    : recurse(element, compartment, moose.ZombieCompartment)
                          }
 
 def compartment(element):
