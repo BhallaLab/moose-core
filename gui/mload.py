@@ -90,8 +90,8 @@ def loadFile(filename, target, merge=True):
         raise FileLoadError('Do not know how to handle this filetype: %s' % (filename))
     pwe = moose.getCwe()
     #self.statusBar.showMessage('Loading model, please wait')
-    app = QtGui.qApp
-    app.setOverrideCursor(QtGui.QCursor(Qt.Qt.BusyCursor)) #shows a hourglass - or a busy/working arrow
+    # app = QtGui.qApp
+    # app.setOverrideCursor(QtGui.QCursor(Qt.Qt.BusyCursor)) #shows a hourglass - or a busy/working arrow
 
     if modeltype == 'genesis':
         if subtype == 'kkit' or subtype == 'prototype':
@@ -165,9 +165,9 @@ def loadFile(filename, target, merge=True):
                 for cell in popinfo[1].values():
                     solver = moose.HSolve(cell.path + "/hsolve")
                     solver.target = cell.path
-                    model = cell.parent
-                    break
-                break
+                    # model = cell.parent
+                    # break
+                # break
 
 
             # Moving model to a new location under the model name
@@ -189,7 +189,7 @@ def loadFile(filename, target, merge=True):
 
     # TODO: check with Aditya how to specify the target for
     # neuroml reader
-    app.restoreOverrideCursor()
+    # app.restoreOverrideCursor()
     return {'modeltype': modeltype,
             'subtype': subtype,
             'model': model}
