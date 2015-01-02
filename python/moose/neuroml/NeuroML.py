@@ -54,7 +54,7 @@ class NeuroML():
     def __init__(self):
         pass
 
-    def readNeuroMLFromFile(self,filename,params={},cellsDict={}, combine_segments = False ):
+    def readNeuroMLFromFile(self,filename,params={},cellsDict={}):
         """
         For the format of params required to tweak what cells are loaded,
          refer to the doc string of NetworkML.readNetworkMLFromFile().
@@ -118,7 +118,7 @@ class NeuroML():
         self.cellsDict = cellsDict
         for cells in root_element.findall('.//{'+neuroml_ns+'}cells'):
             for cell in cells.findall('.//{'+neuroml_ns+'}cell'):
-                cellDict = mmlR.readMorphML(cell,params={},lengthUnits=self.lengthUnits, combine_segments = combine_segments )
+                cellDict = mmlR.readMorphML(cell,params={},lengthUnits=self.lengthUnits)
                 self.cellsDict.update(cellDict)
 
         ## check if there are populations in this NML files,
@@ -130,8 +130,7 @@ class NeuroML():
             #print "Loading individual cells into MOOSE root ... "
             nmlR = NetworkML(self.nml_params)
             return nmlR.readNetworkML(root_element,self.cellsDict,\
-                    params=params,lengthUnits=self.lengthUnits, \
-                    combine_segments = combine_segments )
+                    params=params,lengthUnits=self.lengthUnits)
 
 def loadNeuroML_L123(filename):
     neuromlR = NeuroML()

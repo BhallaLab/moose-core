@@ -25,13 +25,10 @@ from moose import utils
 class NetworkML():
 
     def __init__(self, nml_params):
-        self.cellDictBySegmentId={}
-        self.cellDictByCableId={}
         self.nml_params = nml_params
         self.model_dir = nml_params['model_dir']
 
-    def readNetworkMLFromFile(self,filename,cellSegmentDict,params={}, \
-					combine_segments = False ):
+    def readNetworkMLFromFile(self,filename,cellSegmentDict,params={}):
         """ 
         specify tweak params = {'excludePopulations':[popname1,...], 'excludeProjections':[projname1,...], \
             'onlyInclude':{'includePopulation':(popname,[id1,...]),'includeProjections':(projname1,...)} }
@@ -55,9 +52,9 @@ class NetworkML():
         print "Tweaking model ... "
         tweak_model(root_element, params)
         print "Loading model into MOOSE ... "
-        return self.readNetworkML(root_element,cellSegmentDict,params,root_element.attrib['lengthUnits'], combine_segments = combine_segments )
+        return self.readNetworkML(root_element,cellSegmentDict,params,root_element.attrib['lengthUnits'])
 
-    def readNetworkML(self,network,cellSegmentDict,params={},lengthUnits="micrometer", combine_segments = False ):
+    def readNetworkML(self,network,cellSegmentDict,params={},lengthUnits="micrometer"):
         """
         This returns populationDict = { 'populationname1':(cellname,{int(instanceid1):moosecell, ... }) , ... }
         and projectionDict = { 'projectionname1':(source,target,[(syn_name1,pre_seg_path,post_seg_path),...]) , ... }
@@ -70,7 +67,7 @@ class NetworkML():
         self.cellSegmentDict = cellSegmentDict
         self.params = params
         print "creating populations ... "
-        self.createPopulations( combine_segments ) # create cells
+        self.createPopulations() # create cells
         print "creating connections ... "
         self.createProjections() # create connections
         print "creating inputs in /elec ... "
@@ -125,13 +122,12 @@ class NetworkML():
                         compartment = moose.Compartment(segment_path)
                         moose.connect(iclamp,'output',compartment,'injectMsg')
 
-    def createPopulations(self, combine_segments ):
+    def createPopulations(self):
         self.populationDict = {}
         for population in self.network.findall(".//{"+nml_ns+"}population"):
             cellname = population.attrib["cell_type"]
             populationname = population.attrib["name"]
-            print "loading", populationname, \
-							" using combine_segments = ", combine_segments
+            print "loading", populationname
             ## if cell does not exist in library load it from xml file
             if not moose.exists('/library/'+cellname):
                 mmlR = MorphML(self.nml_params)
@@ -140,7 +136,7 @@ class NetworkML():
                 for model_filename in model_filenames:
                     model_path = find_first_file(model_filename,self.model_dir)
                     if model_path is not None:
-                        cellDict = mmlR.readMorphMLFromFile(model_path, combine_segments=combine_segments )
+                        cellDict = mmlR.readMorphMLFromFile(model_path)
                         success = True
                         break
                 if not success:
