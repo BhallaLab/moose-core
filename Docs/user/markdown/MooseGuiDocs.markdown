@@ -3,9 +3,10 @@
 
 _Harsha Rani, Aviral Goel, Upinder S. Bhalla_
 
------ 
-* [Introduction](#introduction)
-* [Interface](#interface)
+-----
+## Contents
+- [Introduction](#introduction)
+- [Interface](#interface)
     * [Menu Bar](#menu-bar)
         * [File](#menu-file)
             * [New](#file-new)
@@ -26,27 +27,25 @@ _Harsha Rani, Aviral Goel, Upinder S. Bhalla_
         * [Property Editor](#property-editor)
     * [Run View](#run-view)
         * [Simulation Controls](#simulation-controls)
-        * [Visualization Widget](#visualization-widget)
         * [Plot Widget](#plot-widget)
-            * [Toolbar](#plot-widget-toolbar)  
+            * [Toolbar](#plot-widget-toolbar)
             * [Context Menu](#plot-widget-context-menu)
-    
-#[Introduction](#introduction)
+
+## Introduction
 
 The Moose GUI lets you work on both [chemical](Kkit12Documentation.html) and [compartmental/electrical](Nkit2Documentation.html) neuronal models using a common interface. This document describes the salient features of the GUI
 
-#[Interface](#interface)
+## Interface
 
- The common interface layout consists of a a [menu bar](#menu-bar) and two views, [editor view](#editor-view) and [run view](#run-view). 
+ The common interface layout consists of a a [menu bar](#menu-bar) and two views, [editor view](#editor-view) and [run view](#run-view).
 
-## [Menu Bar](#menu-bar)
+### Menu Bar
 
 ![](../../images/MooseGuiMenuImage.png)
 
-The menu bar appears at the top of the top of the main window.
-In Ubuntu 12.04, the menu bar appears only when the mouse is in the top menu strip of the screen. It consists of the following options -
+The menu bar appears at the top of the top of the main window. In Ubuntu 12.04, the menu bar appears only when the mouse is in the top menu strip of the screen. It consists of the following options -
 
-### [File](#menu-file)
+#### File
 
 The File menu option provides the following sub options -
 
@@ -56,7 +55,7 @@ The File menu option provides the following sub options -
 - [Connect BioModels](#file-connect-biomodels) - Load chemical signaling models from the BioModels database.
 - [Quit](#file-quit) - Quit the interface.
 
-### [View](#menu-view)
+#### View
 
 View menu option provides the following sub options -
 
@@ -67,21 +66,18 @@ View menu option provides the following sub options -
     - [Edit](#dock-widget-edit) - A property editor for viewing and editing the fields of a selected object such as a pool, enzyme, function or compartment. Editable field values can be changed by clicking on them and overwriting the new values. Please be sure to press enter once the editing is complete, in order to save your changes.
 - [SubWindows](#subwindows) - This allows you to tile or tabify the run and editor views.
 
-### [Help](#menu-help)
+#### Help
 
 - [About Moose](#about-moose) - Version and general information about MOOSE.
-- [Built-in documentation](#butilt-in-documentation) - Documentation of  MOOSE GUI. 
+- [Built-in documentation](#butilt-in-documentation) - Documentation of  MOOSE GUI.
 - [Report a bug](#report-a-bug) - Directs to the SourceForge bug tracker for reporting bugs.
 
-## [Editor View](#editor-view)
+### Editor View
 
 The editor view provides two windows -
 
 - [Model Editor](#model-editor) - The model editor is a workspace to edit and create models. Using click-and-drag from the icons in the menu bar, you can create model entities such as chemical pools, reactions, and so on. A click on any object brings its property editor on screen (see below). In objects that can be interconnected, a click also brings up a special arrow icon that is used to connect objects together with messages. You can move objects around within the edit window using click-and-drag. Finally, you can delete objects by selecting one or more, and then choosing the delete option from the pop-up menu.
-
 When displaying a neuronal model, most of the editing options are disabled. However, you can still click on a dendrite in order to bring up the property editor.
-
-- [Property Editor](#property-editor) - The property editor provides a way of viewing and editing the properties of objects selected in the model editor.
 
 The Model Editor is different for chemical signalling and compartmental neuronal models. The links below the screenshots point to the details for the respective editors.
 
@@ -89,14 +85,21 @@ The Model Editor is different for chemical signalling and compartmental neuronal
 
 ![Compartmental Model Editor](../../images/CompartmentalEditor.png)
 
-## [Run View](#run-view)
+- [Property Editor](#property-editor) - The property editor provides a way of viewing and editing the properties of objects selected in the model editor.
+
+![Property Editor](../../images/PropertyEditor.png)
+
+
+### Run View
 
 The Run view, as the name suggests, puts the GUI into a mode where the model can be simulated. As a first step in this, you can click-and-drag an object to the graph window in order to create a time-series plot for that object. For example, in a chemical reaction, you could drag a pool into the graph window and subsequent simulations will display a graph of the concentration of the pool as a function of time.
-Within the Run View window, the time-evolution of the simulation is 
+Within the Run View window, the time-evolution of the simulation is
 displayed as an animation. For chemical kinetic models, the size of the icons for reactant pools scale to indicate concentration. For neuronal models, the colour of dendritic segments changes to indicate membrane potential.
 Above the Run View window, there is a special tool bar with a set of simulation controls to run the simulation.
 
-### [Simulation Controls](#simulation-controls)
+#### Simulation Controls
+
+![Simulation Control](../../images/SimulationControl.png)
 
 This panel allows you to control the various aspects of the simulation.
 
@@ -106,12 +109,13 @@ This panel allows you to control the various aspects of the simulation.
 - [Current time](#current-time) - This reports the current simulation time.
 - [Preferences](#preferences) - Allows you to set simulation and visualization related preferences.
 
-### [Visualization Widget](#visualization-widget)
+
+#### Plot Widget
 
 
+##### Toolbar
 
-### [Plot Widget](#plot-widget)
-- [Toolbar](#plot-widget-toolbar)  - On top of plot window there is a little row of icons:
+On top of plot window there is a little row of icons:
 
 ![](../../images/PlotWindowIcons.png)
 
@@ -135,12 +139,10 @@ These are the plot controls. If you hover the mouse over them for a few seconds,
 
 * ![](../../images/MatPlotLibSave.png) - Save the plot.
 
-- [Context Menu](#plot-widget-context-menu)
+##### Context Menu
 
-The context menu is enabled by right clicking on the plot window.
+The context menu is enabled by right clicking on the plot window. It has the following options -
 
-![](../../images/context-menu.png)
-
-* Export to CSV - Exports the plotted data to CSV format
-* Toggle Legend - Toggles the plot legend
-* Remove - Provides a list of plotted entities. The selected entity will not be plotted.
+* **Export to CSV** - Exports the plotted data to CSV format
+* **Toggle Legend** - Toggles the plot legend
+* **Remove** - Provides a list of plotted entities. The selected entity will not be plotted.
