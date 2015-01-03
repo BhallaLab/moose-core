@@ -1,8 +1,36 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 # setup SIP variables
 
+SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../cmake_modules")
+
+#if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    #set(CMAKE_CXX_COMPILER "clang++")
+#elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    #set(CMAKE_CXX_COMPILER "g++")
+#else()
+    #message(WARNING "Continuing with unsupported compiler: ${CMAKE_CXX_COMPILER}")
+#endif()
+
+## Enable/Disable 2011 stupport.
+include(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+if(COMPILER_SUPPORTS_CXX11)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+elseif(COMPILER_SUPPORTS_CXX0X)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+else()
+    message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+endif()
+
+ADD_DEFINITIONS("-fPIC")
+
 FIND_PACKAGE(PyQt4 REQUIRED)
 SET(SIP_INCLUDES ${PYQT4_SIP_DIR})
+MESSAGE("++ SIP_INCLUDES ${SIP_INCLUDES}")
+
+FIND_PACKAGE(PythonLibs REQUIRED)
+FIND_PACKAGE(PythonInterp REQUIRED)
 
 SEPARATE_ARGUMENTS(PYQT4_SIP_FLAGS) # convert space separated values to a list
 SET(SIP_CONCAT_PARTS 4)
