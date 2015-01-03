@@ -1,15 +1,16 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 # setup SIP variables
+PROJECT(MOOGLI)
 
 SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../cmake_modules")
 
-#if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    #set(CMAKE_CXX_COMPILER "clang++")
-#elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    #set(CMAKE_CXX_COMPILER "g++")
-#else()
-    #message(WARNING "Continuing with unsupported compiler: ${CMAKE_CXX_COMPILER}")
-#endif()
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    set(CMAKE_CXX_COMPILER "clang++")
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    set(CMAKE_CXX_COMPILER "g++")
+else()
+    message(WARNING "Continuing with unsupported compiler: ${CMAKE_CXX_COMPILER}")
+endif()
 
 ## Enable/Disable 2011 stupport.
 include(CheckCXXCompilerFlag)
@@ -60,3 +61,20 @@ include_directories(${OSGANIMATION_INCLUDE_DIR})
 add_subdirectory(sip)
 add_subdirectory(moc)
 add_subdirectory(src)
+
+## Added installation steps.
+#SET(CMAKE_INSTALL_PREFIX /usr)
+
+INSTALL(FILES ${PROJECT_SOURCE_DIR}/_moogli.so
+    LIBRARY DESTINATION share/moogli
+    )
+
+INSTALL(FILES ${PROJECT_SOURCE_DIR}/setup-moogli.py
+    DESTINATION share/moogli
+    )
+
+SET(CPACK_STRIP_FILES TRUE)
+SET(CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE TRUE)
+
+
+INCLUDE(CPack)

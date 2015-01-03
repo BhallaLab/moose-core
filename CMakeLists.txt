@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(moose)
+project(MOOSE)
 set(CMAKE_INSTALL_PREFIX /usr)
 
 # This snippet is from LLVM project.
@@ -183,7 +183,11 @@ add_subdirectory(kinetics)
 add_subdirectory(synapse)
 add_subdirectory(intfire)
 add_subdirectory(examples)
-add_subdirectory(python/moogli)
+
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/moogli/include)
+LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/moogli/lib)
+
+
 
 set(LIBRARIES ${BZIP2_LIBRARIES} ${LibXML2_LIBRARIES})
 if(HDF5_FOUND)
@@ -346,10 +350,20 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/gui
     )
 
 # and the python dependencies
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/python
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/python/moose
+    DESTINATION lib/moose/python
+    COMPONENT moose-python
+    )
+
+# and the python dependencies
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/python/libmumbl
+    DESTINATION lib/moose/python
+    COMPONENT moose-python
+    )
+
+INSTALL(FILES ${PROJECT_SOURCE_DIR}/python/setup.py
     DESTINATION lib/moose
     COMPONENT moose-python
-    COMPONENT moogli
     )
 
 ## The demos goes here.
@@ -357,6 +371,19 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/Demos
     DESTINATION share/moose
     COMPONENT moose-python
     )
+
+######################################## MOOGLI ################################
+# Moogli as external project
+include(ExternalProject)
+ExternalProject_Add(
+   moogli
+   PREFIX ${PROJECT_SOURCE_DIR}/python/moogli
+   SOURCE_DIR  ${PROJECT_SOURCE_DIR}/python/moogli
+   INSTALL_DIR ${PROJECT_SOURCE_DIR}
+   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${PROJECT_SOURCE_DIR}
+   #INSTALL_COMMAND make install
+) 
+
 
 ################################# PACKAGING ###################################
 
