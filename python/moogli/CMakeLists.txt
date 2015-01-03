@@ -91,11 +91,11 @@ TARGET_LINK_LIBRARIES(_moogli
 
 ## INSTALL components.
 INSTALL(TARGETS _moogli
-    LIBRARY DESTINATION share/moogli
+    LIBRARY DESTINATION lib/moogli
     )
 
 INSTALL(FILES ${PROJECT_SOURCE_DIR}/setup.py
-    DESTINATION share/moogli
+    DESTINATION lib/moogli
     )
 
 SET(CPACK_STRIP_FILES TRUE)
@@ -124,6 +124,6 @@ set(CPACK_DEBIAN_PACKAGE_DEPENDS
     )
 
 set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
-    "${PROJECT_SOURCE_DIR}/scripts/postinst;${PROJECT_SOURCE_DIR}/scripts/prerm;"
+    "${PROJECT_SOURCE_DIR}/debian/postinst;${PROJECT_SOURCE_DIR}/debian/prerm;"
     )
 INCLUDE(CPack)
