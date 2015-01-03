@@ -1,42 +1,57 @@
-# - Find sip
-# Find the python sip includes making sure it is loadable from python
-# This module defines
-#  SIP_INCLUDE_DIR, where to find sip.h, etc.
-#  SIP_FOUND, If false, do not try to use numpy headers.
+# Find SIP
+# ~~~~~~~~
+#
+# SIP website: http://www.riverbankcomputing.co.uk/sip/index.php
+#
+# Find the installed version of SIP. FindSIP should be called after Python
+# has been found.
+#
+# This file defines the following variables:
+#
+# SIP_VERSION - The version of SIP found expressed as a 6 digit hex number
+#     suitable for comparision as a string.
+#
+# SIP_VERSION_STR - The version of SIP found as a human readable string.
+#
+# SIP_EXECUTABLE - Path and filename of the SIP command line executable.
+#
+# SIP_INCLUDE_DIR - Directory holding the SIP C++ header file.
+#
+# SIP_DEFAULT_SIP_DIR - Default directory where .sip files should be installed
+#     into.
 
-# be certain sip is available from python.  this part might be unnecessary.
-execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
-  "import sip; print sip.SIP_VERSION"
-  OUTPUT_VARIABLE SIP_VERSION
-  OUTPUT_STRIP_TRAILING_WHITESPACE)
+# Copyright (c) 2007, Simon Edwards <simon@simonzone.com>
+# Redistribution and use is allowed according to the terms of the BSD license.
+# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 
-if(SIP_VERSION)
-  set(SIP_PYTHON_FOUND TRUE)
-  message(STATUS "SIP version ${SIP_VERSION} found")
-else()
-  message(STATUS "SIP module not available in Python." )
-  set(SIP_PYTHON_FOUND FALSE)
-endif()
 
-if(SIP_PYTHON_FOUND)
-  # search for sip.h
-  if(SIP_INCLUDE_DIR)
-    set(SIP_FOUND TRUE)
-  elseif(EXISTS ${PYTHON_INCLUDE_PATH}/sip.h)
-    # The SIP headers are often packaged in the Python include directory
-    set(SIP_INCLUDE_DIR ${PYTHON_INCLUDE_PATH})
-  else()
-    # Attempt to find the SIP headers in the normal system path
-    find_path(SIP_INCLUDE_DIR NAMES sip.h
-      PATHS
-      PATH_SUFFIXES SIP
-      )
-  endif()
-  include(FindPackageHandleStandardArgs)
-  find_package_handle_standard_args(SIP DEFAULT_MSG SIP_INCLUDE_DIR)
-else()
-  # give up
-  set(SIP_FOUND FALSE)
-endif()
+find_package(PythonInterp REQUIRED)
 
-mark_as_advanced(SIP_INCLUDE_DIR)
+IF(SIP_VERSION)
+    # Already in cache, be silent
+    SET(SIP_FOUND TRUE)
+ELSE(SIP_VERSION)
+
+    MESSAGE("++ Setting pythonexec to ${PYTHON_EXECUTABLE}")
+    FIND_FILE(_find_sip_py FindSIP.py PATHS ${CMAKE_MODULE_PATH})
+    EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} ${_find_sip_py} OUTPUT_VARIABLE sip_config)
+    IF(sip_config)
+        STRING(REGEX REPLACE "^sip_version:([^\n]+).*$" "\\1" SIP_VERSION ${sip_config})
+        STRING(REGEX REPLACE ".*\nsip_version_str:([^\n]+).*$" "\\1" SIP_VERSION_STR ${sip_config})
+        STRING(REGEX REPLACE ".*\nsip_bin:([^\n]+).*$" "\\1" SIP_EXECUTABLE ${sip_config})
+        STRING(REGEX REPLACE ".*\ndefault_sip_dir:([^\n]+).*$" "\\1" SIP_DEFAULT_SIP_DIR ${sip_config})
+        STRING(REGEX REPLACE ".*\nsip_inc_dir:([^\n]+).*$" "\\1" SIP_INCLUDE_DIR ${sip_config})
+        SET(SIP_FOUND TRUE)
+    ENDIF(sip_config)
+
+    IF(SIP_FOUND)
+        IF(NOT SIP_FIND_QUIETLY)
+            MESSAGE(STATUS "Found SIP version: ${SIP_VERSION_STR}")
+        ENDIF(NOT SIP_FIND_QUIETLY)
+    ELSE(SIP_FOUND)
+        IF(SIP_FIND_REQUIRED)
+            MESSAGE(FATAL_ERROR "Could not find SIP")
+        ENDIF(SIP_FIND_REQUIRED)
+    ENDIF(SIP_FOUND)
+
+ENDIF(SIP_VERSION)

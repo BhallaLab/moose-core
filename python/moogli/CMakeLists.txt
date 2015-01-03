@@ -1,8 +1,8 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 # setup SIP variables
-PROJECT(MOOGLI)
+PROJECT(moogli)
 
-SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../cmake_modules")
+SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake_modules")
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set(CMAKE_CXX_COMPILER "clang++")
@@ -27,9 +27,6 @@ endif()
 ADD_DEFINITIONS("-fPIC")
 
 FIND_PACKAGE(PyQt4 REQUIRED)
-SET(SIP_INCLUDES ${PYQT4_SIP_DIR})
-MESSAGE("++ SIP_INCLUDES ${SIP_INCLUDES}")
-
 FIND_PACKAGE(PythonLibs REQUIRED)
 FIND_PACKAGE(PythonInterp REQUIRED)
 
@@ -52,18 +49,18 @@ INCLUDE(${QT_USE_FILE})
 FIND_PROGRAM(SIP_EXECUTABLE sip)
 MESSAGE("++ SIP ${SIP_EXECUTABLE}")
 
-include_directories(./include ${CMAKE_SOURCE_DIR} ".")
+include_directories(./include ${PROJECT_SOURCE_DIR} ".")
 include_directories(${OSGQT_INCLUDE_DIR})
 include_directories(${SIP_INCLUDES} ${PYTHON_INCLUDE_DIRS})
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 include_directories(${OSGANIMATION_INCLUDE_DIR})
 
-add_subdirectory(sip)
-add_subdirectory(moc)
-add_subdirectory(src)
+add_subdirectory(${PROJECT_SOURCE_DIR}/sip)
+add_subdirectory(${PROJECT_SOURCE_DIR}/moc)
+add_subdirectory(${PROJECT_SOURCE_DIR}/src)
 
 ADD_LIBRARY(_moogli SHARED 
-    ${EMPTY_SOURCE}
+    scenegraph.cpp
     )
 
 SET_TARGET_PROPERTIES(_moogli PROPERTIES
@@ -97,12 +94,36 @@ INSTALL(TARGETS _moogli
     LIBRARY DESTINATION share/moogli
     )
 
-INSTALL(FILES ${PROJECT_SOURCE_DIR}/setup-moogli.py
+INSTALL(FILES ${PROJECT_SOURCE_DIR}/setup.py
     DESTINATION share/moogli
     )
 
 SET(CPACK_STRIP_FILES TRUE)
 SET(CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE TRUE)
+#  We need to compile python scripts on the installation  host.
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dilawar Singh")
+set(CPACK_PACKAGE_CONTACT "dilawars@ncbs.res.in")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "MOOGLI, the visualizer for neural simulator")
+set(CPACK_PACKAGE_VERSION "0.9.1")
+set(CPACK_SYSTEM_NAME "i386")
+set(CPACK_PACKAGE_VERSION_MAJOR "0")
+set(CPACK_PACKAGE_VERSION_MINOR "9")
+set(CPACK_PACKAGE_VERSION_PATCH "1")
+set(CPACK_PACKAGE_VENDOR "NCBS Bangalore")
+set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/README")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dilawar Singh <dilawars@ncbs.res.in>")
+if(WIN32)
+    MESSAGE("++ Currently only Unix is supported")
+else()
+    set(CPACK_STRIP_FILES moose)
+endif()
+set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
 
+set(CPACK_DEBIAN_PACKAGE_DEPENDS 
+    "openscenegraph, python-setuptools, python-qt4, python-sip, libqt4-qui, libopenscenegraph99"
+    )
 
+set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
+    "${PROJECT_SOURCE_DIR}/scripts/postinst;${PROJECT_SOURCE_DIR}/scripts/prerm;"
+    )
 INCLUDE(CPack)
