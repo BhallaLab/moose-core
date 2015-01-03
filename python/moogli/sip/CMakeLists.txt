@@ -8,10 +8,11 @@ SET(GENERATED_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/sip_mooglicmodule.cpp
     )
 
 
+SET(SIP_INCLUDES ${PYQT4_SIP_DIR})
 MESSAGE("++ Using sip includes: ${SIP_INCLUDES}")
 add_custom_command(OUTPUT ${GENERATED_SRCS}
     COMMAND ${SIP_EXECUTABLE} -c ${CMAKE_CURRENT_SOURCE_DIR} -I ${SIP_INCLUDES} 
-        -e -g -x VendorID -t WS_X11 -x PyQt_NoPrintRangeBug -t Qt_4_8_0 -x Py_v3 -g
+        ${PYQT4_SIP_FLAGS}
         ${CMAKE_CURRENT_SOURCE_DIR}/_moogli.sip
     DEPENDS ${SIP_SRC}
     COMMENT "Processing ${CMAKE_CURRENT_SOURCE_DIR}/_moogli.sip"
