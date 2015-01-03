@@ -120,7 +120,7 @@ endif()
 set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
 
 set(CPACK_DEBIAN_PACKAGE_DEPENDS 
-    "openscenegraph, python-setuptools, python-qt4, python-sip, libqt4-qui, libopenscenegraph99"
+    "openscenegraph, python-setuptools, python-qt4, python-sip, libqt4-gui, libopenscenegraph99"
     )
 
 set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
