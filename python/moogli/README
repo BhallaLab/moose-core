@@ -1,0 +1,6 @@
+Moogli (a sister project of MOOSE) is a simulator independent openGL based
+visualization tool for neural simulations. Moogli can visualize morphology of
+single/multiple neurons or network of neurons, and can also visualize activity
+in these cells.
+
+Moogli is like VLC player for neural simulations.
