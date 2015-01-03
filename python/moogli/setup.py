@@ -42,5 +42,6 @@ setup(
         url='http://moose.ncbs.res.in/moogli',
         options={'build' : {'build_base' : '/tmp' } },
         packages=[ 'moogli'] ,
+        package_dir= { 'moogli' : '.' },
         package_data = { 'moogli' : ['_moogli.so'] },
     ) 
