@@ -62,10 +62,38 @@ add_subdirectory(sip)
 add_subdirectory(moc)
 add_subdirectory(src)
 
-## Added installation steps.
-#SET(CMAKE_INSTALL_PREFIX /usr)
+ADD_LIBRARY(_moogli SHARED 
+    ${EMPTY_SOURCE}
+    )
 
-INSTALL(FILES ${PROJECT_SOURCE_DIR}/_moogli.so
+SET_TARGET_PROPERTIES(_moogli PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}"
+    PREFIX ""
+    )
+
+## Link the following libraries to _moogli.
+TARGET_LINK_LIBRARIES(_moogli
+    moc
+    src
+    sip
+    QtCore
+    QtGui
+    QtOpenGL           
+    osg
+    osgFX
+    osgUtil
+    osgFX
+    osgGA
+    osgQt
+    osgAnimation
+    osgViewer
+    osgQt
+    osgManipulator
+    osgText
+    )
+
+## INSTALL components.
+INSTALL(TARGETS _moogli
     LIBRARY DESTINATION share/moogli
     )
 

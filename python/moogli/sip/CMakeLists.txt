@@ -18,30 +18,6 @@ add_custom_command(OUTPUT ${GENERATED_SRCS}
     VERBATIM
     )
 
-ADD_LIBRARY(_moogli SHARED
-    ${GENERATED_SRCS}
-)
+ADD_LIBRARY(sip  ${GENERATED_SRCS})
 
-SET_TARGET_PROPERTIES(_moogli PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}"
-    PREFIX ""
-    )
 
-target_link_libraries(_moogli
-    moc
-    src
-    QtCore
-    QtGui
-    QtOpenGL           
-    osg
-    osgFX
-    osgUtil
-    osgFX
-    osgGA
-    osgQt
-    osgAnimation
-    osgViewer
-    osgQt
-    osgManipulator
-    osgText
-    )
