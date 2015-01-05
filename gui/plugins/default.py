@@ -361,10 +361,12 @@ class RunView(RunBase):
         self.centralWidget.plotAllData()
 
     def getToolPanes(self):
+        return[]
+        '''
         if not self._toolPanes:
             self._toolPanes = [self.getSchedulingDockWidget()]
         return self._toolPanes
-
+        '''
     def getSchedulingDockWidget(self):
         """Create and/or return a widget for schduling"""
         if hasattr(self, 'schedulingDockWidget')  and self.schedulingDockWidget is not None:
@@ -1264,7 +1266,6 @@ class PlotView(PlotBase):
         self.dataRoot = moose.element(root).path
 
     def getToolPanes(self):
-	return[]
         return (self.getFieldSelectionDock(), )
 
     def getSelectionPane(self):

@@ -533,43 +533,106 @@ class GraphicalView(QtGui.QGraphicsView):
     def deleteConnection(self,item):
         #Delete moose connection, i.e one can click on connection arrow and delete the connection
         deleteSolver(self.layoutPt.modelRoot)
+        msgIdforDeleting = " "
         if isinstance(item,QtGui.QGraphicsPolygonItem):
             src = self.layoutPt.lineItem_dict[item]
             srcZero = [k for k, v in self.layoutPt.mooseId_GObj.iteritems() if v == src[0]]
             srcOne = [k for k, v in self.layoutPt.mooseId_GObj.iteritems() if v == src[1]]
+            
             if isinstance (moose.element(srcZero[0]),moose.MMenz):
+                gItem =self.layoutPt.mooseId_GObj[moose.element(srcZero[0])]
+                # This block is done b'cos for MMenz while loaded from ReadKKit, the msg
+                # from parent pool to Enz is different as compared to direct model building.
+                # if ReadKKit get the msg from parent Pool, else from MMenz itself.
+
+                # Rules: If some one tries to remove connection parent Pool to Enz
+                # then delete entire enz itself, this is True for enz and mmenz
+                for msg in srcZero[0].msgIn:
+                    if moose.element(msg.e1.path) == moose.element(srcOne[0].path):
+                        if src[2] == "t":
+                            if msg.destFieldsOnE2[0] == "enzDest":
+                                # delete indivial msg if later adding parent is possible
+                                # msgIdforDeleting = msg  
+                                # moose.delete(msgIdforDeleting)
+                                # self.sceneContainerPt.removeItem(item)        
+                                self.deleteItem(gItem)
+                                return
+                        else:
+                            msgIdforDeleting = self.getMsgId(src,srcZero,srcOne,item)
+                            moose.delete(msgIdforDeleting)
+                            self.sceneContainerPt.removeItem(item)
+                            setupItem(self.modelRoot,self.layoutPt.srcdesConnection)
                 for msg in moose.element(srcZero[0].parent).msgIn:
-                    msgIdforDeleting = " "
                     if moose.element(msg.e2.path) == moose.element(srcZero[0].parent.path):
                         if src[2] == 't':
                             if len(msg.destFieldsOnE1) > 0:
                                 if msg.destFieldsOnE1[0] == "enzDest":
-                                    msgIdforDeleting = msg  
-                                    moose.delete(msgIdforDeleting)
-                                    self.sceneContainerPt.removeItem(item)        
+                                    # delete indivial msg if later adding parent is possible
+                                    # msgIdforDeleting = msg  
+                                    # moose.delete(msgIdforDeleting)
+                                    # self.sceneContainerPt.removeItem(item)
+                                    self.deleteItem(gItem)
+                                return
+                        else:
+                            msgIdforDeleting = self.getMsgId(src,srcZero,srcOne,item)
+                            # moose.delete(msgIdforDeleting)
+                            # self.sceneContainerPt.removeItem(item)
+                            # setupItem(self.modelRoot,self.layoutPt.srcdesConnection)
 
-            for msg in srcZero[0].msgOut:
-                msgIdforDeleting = " "
-                #print "%$%%%%%% ",msg.e2.path, "@@@@@@@@ ",srcOne[0].path
-                if moose.element(msg.e2.path) == moose.element(srcOne[0].path):
-                    if src[2] == 's':
-                        if msg.srcFieldsOnE1[0] == "subOut":
-                            msgIdforDeleting = msg
-                    elif src[2] == 'p':
-                        if msg.srcFieldsOnE1[0] == "prdOut":
-                            msgIdforDeleting = msg
-                    elif src[2] == 't':
-                        print "t ", msg.srcFieldsOnE1[0]
-                        if msg.srcFieldsOnE1[0] == "enzOut":
-                            msgIdforDeleting = msg
-                        elif msg.srcFieldsOnE1[0] == "childOut":
-                            msgIdforDeleting = msg
-                    elif src[2] == 'tab':
-                        if msg.srcFieldsOnE1[0] == "output":
-                            msgIdforDeleting = msg
-                    moose.delete(msgIdforDeleting)
-                    self.sceneContainerPt.removeItem(item)
-    
+            elif isinstance (moose.element(srcZero[0]),moose.Enz):
+                msgIdforDeleting = self.getMsgId(src,srcZero,srcOne,item)
+                #gItem =self.layoutPt.mooseId_GObj[moose.element(srcZero[0])]        
+                # msgIdforDeleting = " "
+                # for msg in srcZero[0].msgOut:
+                #     if moose.element(msg.e2.path) == moose.element(srcOne[0].path):
+                #         if src[2] == "t":
+                #             if msg.srcFieldsOnE1[0] == "enzOut":
+                #                 self.deleteItem(gItem)
+                #                 return
+                
+            else:
+                self.getMsgId(src,srcZero,srcOne,item)
+                #print "----> ",msgIdforDeleting
+                #self.deleteSceneObj(msgIdforDeleting,item)
+                # moose.delete(msgIdforDeleting)
+                # self.sceneContainerPt.removeItem(item)
+                # setupItem(self.modelRoot,self.layoutPt.srcdesConnection)
+    def deleteSceneObj(self,msgIdforDeleting,item):
+        moose.delete(msgIdforDeleting)
+        self.sceneContainerPt.removeItem(item)
+        setupItem(self.modelRoot,self.layoutPt.srcdesConnection)
+
+    def getMsgId(self,src,srcZero,srcOne,item):
+        for msg in srcZero[0].msgOut:
+            msgIdforDeleting = " "
+            if moose.element(msg.e2.path) == moose.element(srcOne[0].path):
+                if src[2] == 's':
+                    # substrate connection for R,E
+                    if msg.srcFieldsOnE1[0] == "subOut":
+                        msgIdforDeleting = msg
+                        self.deleteSceneObj(msgIdforDeleting,item)
+                        return
+                elif src[2] == 'p':
+                    # product connection for R,E
+                    if msg.srcFieldsOnE1[0] == "prdOut":
+                        msgIdforDeleting = msg
+                        self.deleteSceneObj(msgIdforDeleting,item)
+                        return 
+                elif src[2] == 't':
+                    if msg.srcFieldsOnE1[0] == "enzOut":
+                        gItem =self.layoutPt.mooseId_GObj[moose.element(srcZero[0])]
+                        self.deleteItem(gItem)
+                        return
+                elif src[2] == "sts":
+                    #function sumtotal
+                    print "Function deletion is pending",msg.srcFieldsOnE1[0]
+                elif src[2] == 'tab':
+                    #stimulation Table connection
+                    if msg.srcFieldsOnE1[0] == "output":
+                        msgIdforDeleting = msg
+                        self.deleteSceneObj(msgIdforDeleting,item)
+        return 
+
     def deleteItem(self,item):
         #delete Items 
         if isinstance(item,KineticsDisplayItem):
@@ -600,6 +663,8 @@ class GraphicalView(QtGui.QGraphicsView):
                         self.sceneContainerPt.removeItem(l[0])
                 self.sceneContainerPt.removeItem(item)
                 moose.delete(item.mobj)
+                self.layoutPt.getMooseObj()
+                setupItem(self.modelRoot,self.layoutPt.srcdesConnection) 
 
     def zoomSelections(self, x0, y0, x1, y1):
         self.fitInView(self.mapToScene(QtCore.QRect(x0, y0, x1 - x0, y1 - y0)).boundingRect(), Qt.Qt.KeepAspectRatio)
