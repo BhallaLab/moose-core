@@ -558,7 +558,7 @@ class GraphicalView(QtGui.QGraphicsView):
                                 self.deleteItem(gItem)
                                 return
                         else:
-                            msgIdforDeleting = self.getMsgId(src,srcZero,srcOne,item)
+                            self.getMsgId(src,srcZero,srcOne,item)
                             moose.delete(msgIdforDeleting)
                             self.sceneContainerPt.removeItem(item)
                             setupItem(self.modelRoot,self.layoutPt.srcdesConnection)
@@ -574,29 +574,36 @@ class GraphicalView(QtGui.QGraphicsView):
                                     self.deleteItem(gItem)
                                 return
                         else:
-                            msgIdforDeleting = self.getMsgId(src,srcZero,srcOne,item)
-                            # moose.delete(msgIdforDeleting)
-                            # self.sceneContainerPt.removeItem(item)
-                            # setupItem(self.modelRoot,self.layoutPt.srcdesConnection)
-
+                            self.getMsgId(src,srcZero,srcOne,item)
+                            
             elif isinstance (moose.element(srcZero[0]),moose.Enz):
-                msgIdforDeleting = self.getMsgId(src,srcZero,srcOne,item)
-                #gItem =self.layoutPt.mooseId_GObj[moose.element(srcZero[0])]        
-                # msgIdforDeleting = " "
-                # for msg in srcZero[0].msgOut:
-                #     if moose.element(msg.e2.path) == moose.element(srcOne[0].path):
-                #         if src[2] == "t":
-                #             if msg.srcFieldsOnE1[0] == "enzOut":
-                #                 self.deleteItem(gItem)
-                #                 return
+                self.getMsgId(src,srcZero,srcOne,item)
+
+            elif isinstance(moose.element(srcZero[0]),moose.Function):
+                v = moose.Variable(srcZero[0].path+'/x')
+                found = False
+                for msg in v.msgIn:
+                    if moose.element(msg.e1.path) == moose.element(srcOne[0].path):
+                        if src[2] == "sts":
+                            if msg.destFieldsOnE2[0] == "input":
+                                msgIdforDeleting = msg
+                                self.deleteSceneObj(msgIdforDeleting,item)
+                                found = True
+                if not found:
+                    for msg in srcZero[0].msgOut:
+                        if moose.element(msg.e2.path) == moose.element(srcOne[0].path):
+                            if src[2] == "stp":
+                                if msg.destFieldsOnE2[0] == "setN":
+                                    gItem =self.layoutPt.mooseId_GObj[moose.element(srcZero[0])]
+                                    print "deletItem "
+                                    #self.deleteItem(gItem)
+                                elif msg.destFieldsOnE2[0] == "setNumKf":
+                                    msgIdforDeleting = msg
+                                    self.deleteSceneObj(msgIdforDeleting,item)
                 
             else:
                 self.getMsgId(src,srcZero,srcOne,item)
-                #print "----> ",msgIdforDeleting
-                #self.deleteSceneObj(msgIdforDeleting,item)
-                # moose.delete(msgIdforDeleting)
-                # self.sceneContainerPt.removeItem(item)
-                # setupItem(self.modelRoot,self.layoutPt.srcdesConnection)
+
     def deleteSceneObj(self,msgIdforDeleting,item):
         moose.delete(msgIdforDeleting)
         self.sceneContainerPt.removeItem(item)
@@ -623,9 +630,6 @@ class GraphicalView(QtGui.QGraphicsView):
                         gItem =self.layoutPt.mooseId_GObj[moose.element(srcZero[0])]
                         self.deleteItem(gItem)
                         return
-                elif src[2] == "sts":
-                    #function sumtotal
-                    print "Function deletion is pending",msg.srcFieldsOnE1[0]
                 elif src[2] == 'tab':
                     #stimulation Table connection
                     if msg.srcFieldsOnE1[0] == "output":
@@ -642,7 +646,11 @@ class GraphicalView(QtGui.QGraphicsView):
                     # enz if 'yes', then enz and its connection are removed before
                     # removing Pool
                     for items in moose.element(item.mobj.path).children:
-                        if isinstance(moose.element(items), EnzBase):
+                        if isinstance(moose.element(items), Function):
+                            gItem = self.layoutPt.mooseId_GObj[moose.element(items)]
+                            #Need to check 
+                            print " Deleting function if reaction is connected then gives seg fault"
+                        elif isinstance(moose.element(items), EnzBase):
                             gItem = self.layoutPt.mooseId_GObj[moose.element(items)]
                             for l in self.layoutPt.object2line[gItem]:
                                 # Need to check if the connection on the scene exist
