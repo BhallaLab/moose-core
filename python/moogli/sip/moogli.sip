@@ -1,4 +1,4 @@
-%Module _moogli
+%Module moogli
 
 %Import QtGui/QtGuimod.sip
 
