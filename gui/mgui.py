@@ -73,6 +73,20 @@ from MdiArea import MdiArea
 import os
 __author__ = 'Subhasis Ray , HarshaRani, Aviral Goel, NCBS'
 
+
+
+# import sys
+# import traceback
+
+# class TracePrints(object):
+#   def __init__(self):
+#     self.stdout = sys.stdout
+#   def write(self, s):
+#     self.stdout.write("Writing %r\n" % s)
+#     traceback.print_stack(file=self.stdout)
+
+sys.stdout = TracePrints()
+
 # This maps model subtypes to corresponding plugin names. Should be
 # moved to a separate property file perhaps
 subtype_plugin_map = {  'genesis/kkit': 'kkit'
@@ -916,7 +930,7 @@ class MWindow(QtGui.QMainWindow):
             for neuron in neurons:
                 #print(neuron)
                 solver = moose.element(neuron.path + "/hsolve")
-                print("Disabling => ", solver)
+                # print("Disabling => ", solver)
                 solver.tick = -1
 
         for table in moose.wildcardFind( modelPath+'/data/graph#/#' ):
