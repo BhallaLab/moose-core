@@ -13,14 +13,14 @@
 # along with MOOSE.  If not, see <http://www.gnu.org/licenses/>.
 
 
-"""setup.py: 
+"""setup.py:
 
     Script to install python targets.
 
 Last modified: Sat Jan 18, 2014  05:01PM
 
 """
-    
+
 __author__           = "Dilawar Singh"
 __copyright__        = "Copyright 2013, Aviral Goel"
 __credits__          = ["NCBS Bangalore"]
@@ -43,6 +43,6 @@ setup(
         options={'build' : {'build_base' : '/tmp' } },
         packages=[ 'moogli'] ,
         package_dir = { 'moogli' : 'moogli' },
-        package_data = { 'moogli' : ['_moogli.so'] },
+        package_data = { 'moogli' : ['moogli.so'] },
         #install_requires = [ 'sip' ],
-    ) 
+    )

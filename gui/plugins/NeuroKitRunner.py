@@ -22,7 +22,7 @@ import pprint
 from default import *
 import moose
 import neuroextractor
-import _moogli
+import moogli
 import numpy as np
 from global_constants import preferences
 
@@ -159,13 +159,13 @@ class NeuroKitRunner(RunView):
         # f = open("/home/aviral/purkinje.json", "w")
         # f.write(json.dumps(geometry, indent=4))
         # f.close()
-        # morphology = _moogli.Morphology("morph")
+        # morphology = moogli.Morphology("morph")
         # morphology.add_compartment( "a"
         #                           , "b", 1.0, 1.0, 1.0, 1.0, 2.0, 2.0, 2.0, 2.0)
         # morphology.add_compartment( "c"
         #                           , "b"
         #                           , 3.0, 3.0, 3.0, 3.0, 4.0, 4.0, 4.0, 4.0)
-        morphology = _moogli.Morphology("morph", 1)
+        morphology = moogli.Morphology("morph", 1)
         self.compartmentOrder               = []
         for neuron_id in geometry["neurons"]:
             neuron = geometry["neurons"][neuron_id]
