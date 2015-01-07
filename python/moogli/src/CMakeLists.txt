@@ -6,7 +6,7 @@ ADD_LIBRARY(src STATIC
     core/Morphology.cpp
     core/MorphologyViewer.cpp
     #core/Neuron.cpp
-    core/PickHandler.cpp
+    #core/PickHandler.cpp
     core/SelectInfo.cpp
     core/Selector.cpp
     mesh/CylinderMesh.cpp
