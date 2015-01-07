@@ -47,8 +47,6 @@ setup(
             ],
         package_dir = { 'moose' : 'moose'
             , 'libmumbl' : 'libmumbl'
-            , 'moogli' : 'moogli'
             },
-        package_data = { 'moose' : ['_moose.so'], 'moogli' : ['_moogli.so'] },
-        #install_requires = [ 'matplotlib'],
+        package_data = { 'moose' : ['_moose.so'] },
     ) 
