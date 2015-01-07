@@ -595,8 +595,8 @@ class GraphicalView(QtGui.QGraphicsView):
                             if src[2] == "stp":
                                 if msg.destFieldsOnE2[0] == "setN":
                                     gItem =self.layoutPt.mooseId_GObj[moose.element(srcZero[0])]
-                                    print "deletItem "
-                                    #self.deleteItem(gItem)
+                                    self.deleteItem(gItem)
+                                    return
                                 elif msg.destFieldsOnE2[0] == "setNumKf":
                                     msgIdforDeleting = msg
                                     self.deleteSceneObj(msgIdforDeleting,item)
@@ -641,6 +641,10 @@ class GraphicalView(QtGui.QGraphicsView):
         #delete Items 
         if isinstance(item,KineticsDisplayItem):
             if moose.exists(item.mobj.path):
+                # if isinstance(item.mobj,Function):
+                #     print " inside the function"
+                #     for items in moose.element(item.mobj.path).children:
+                #         print items
                 if isinstance(item,PoolItem) or isinstance(item,BufPool):
                     # pool is item is removed, then check is made if its a parent to any
                     # enz if 'yes', then enz and its connection are removed before
@@ -648,9 +652,14 @@ class GraphicalView(QtGui.QGraphicsView):
                     for items in moose.element(item.mobj.path).children:
                         if isinstance(moose.element(items), Function):
                             gItem = self.layoutPt.mooseId_GObj[moose.element(items)]
-                            #Need to check 
-                            print " Deleting function if reaction is connected then gives seg fault"
-                        elif isinstance(moose.element(items), EnzBase):
+                            for l in self.layoutPt.object2line[gItem]:
+                                sceneItems = self.sceneContainerPt.items()
+                                if l[0] in sceneItems:
+                                    #deleting the connection which is connected to Enz
+                                    self.sceneContainerPt.removeItem(l[0])
+                            moose.delete(items)
+                            self.sceneContainerPt.removeItem(gItem)    
+                        if isinstance(moose.element(items), EnzBase):
                             gItem = self.layoutPt.mooseId_GObj[moose.element(items)]
                             for l in self.layoutPt.object2line[gItem]:
                                 # Need to check if the connection on the scene exist
@@ -665,6 +674,7 @@ class GraphicalView(QtGui.QGraphicsView):
                                     self.sceneContainerPt.removeItem(l[0])
                             moose.delete(items)
                             self.sceneContainerPt.removeItem(gItem)
+
                 for l in self.layoutPt.object2line[item]:
                     sceneItems = self.sceneContainerPt.items()
                     if l[0] in sceneItems:
@@ -673,7 +683,7 @@ class GraphicalView(QtGui.QGraphicsView):
                 moose.delete(item.mobj)
                 self.layoutPt.getMooseObj()
                 setupItem(self.modelRoot,self.layoutPt.srcdesConnection) 
-
+                
     def zoomSelections(self, x0, y0, x1, y1):
         self.fitInView(self.mapToScene(QtCore.QRect(x0, y0, x1 - x0, y1 - y0)).boundingRect(), Qt.Qt.KeepAspectRatio)
         self.deselectSelections()
@@ -712,7 +722,6 @@ class GraphicalView(QtGui.QGraphicsView):
             if not event.mimeData().hasFormat('text/plain'):
                 return
             event_pos = event.pos()
-            #print "event.scenePostion ",event.scenePos()
             string = str(event.mimeData().text())
             createObj(self.viewBaseType,self,self.modelRoot,string,event_pos,self.layoutPt)
 
