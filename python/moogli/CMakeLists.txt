@@ -68,17 +68,17 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/sip)
 add_subdirectory(${PROJECT_SOURCE_DIR}/moc)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src)
 
-ADD_LIBRARY(_moogli SHARED 
+ADD_LIBRARY(moogli SHARED 
     scenegraph.cpp
     )
 
-SET_TARGET_PROPERTIES(_moogli PROPERTIES
+SET_TARGET_PROPERTIES(moogli PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}"
     PREFIX ""
     )
 
-## Link the following libraries to _moogli.
-TARGET_LINK_LIBRARIES(_moogli
+## Link the following libraries to moogli.
+TARGET_LINK_LIBRARIES(moogli
     moc
     src
     sip
@@ -99,7 +99,7 @@ TARGET_LINK_LIBRARIES(_moogli
     )
 
 ## INSTALL components.
-INSTALL(TARGETS _moogli
+INSTALL(TARGETS moogli
     LIBRARY DESTINATION lib/moogli
     )
 
