@@ -639,11 +639,37 @@ class  KineticsWidget(EditorWidgetBase):
 
     def positionChange(self,mooseObject):
         #If the item position changes, the corresponding arrow's are calculated
+
         mobj = self.mooseId_GObj[element(mooseObject)]
         self.updateArrow(mobj)
+        elePath = moose.element(mooseObject).path
+        pos = elePath.find('/',1)
+        l = elePath[0:pos]
+        linfo = moose.Annotator(l+'/info')
+        
         for k, v in self.qGraCompt.items():
             rectcompt = v.childrenBoundingRect()
-            v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
+            if linfo.modeltype == "new_kkit":
+                #if newly built model then compartment is size is fixed for some size.
+                comptBoundingRect = v.boundingRect()
+                if not comptBoundingRect.contains(rectcompt):
+                    self.updateCompartmentSize(v)
+            else:
+                #if already built model then compartment size depends on max and min objects
+                v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
+
+    def updateCompartmentSize(self, compartment):
+        compartmentBoundary = compartment.rect()
+        childrenBoundary    = compartment.childrenBoundingRect()
+        x = min(compartmentBoundary.x(), childrenBoundary.x())
+        y = min(compartmentBoundary.y(), childrenBoundary.y())
+        width = max(compartmentBoundary.width(), childrenBoundary.width())
+        height = max(compartmentBoundary.height(), childrenBoundary.height())
+        compartment.setRect( x-10
+                 , y-10
+                 , width + 20
+                 , height + 20
+                 )
 
     def updateArrow(self,qGTextitem):
         #if there is no arrow to update then return
