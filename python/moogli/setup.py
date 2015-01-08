@@ -84,7 +84,7 @@ undef_macros            =   [
                             ]
 
 
-moogli = Extension( name                  =   "_moogli"
+moogli = Extension( name                  =   "moogli"
                   , sources               =   [ "src/core/Morphology.cpp"
                                               , "src/core/Compartment.cpp"
                                               , "src/core/SelectInfo.cpp"
@@ -99,7 +99,7 @@ moogli = Extension( name                  =   "_moogli"
                                               , "src/utility/utilities.cpp"
                                               , "src/constants.cpp"
                                               , "src/globals.cpp"
-                                              , "sip/_moogli.sip"
+                                              , "sip/moogli.sip"
                                               ]
                   , include_dirs          =   include_dirs
                   , extra_compile_args    =   extra_compile_args
