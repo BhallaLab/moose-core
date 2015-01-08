@@ -42,7 +42,7 @@ setup(
         url='http://moose.ncbs.res.in/moogli',
         options={'build' : {'build_base' : '/tmp' } },
         packages=[ 'moogli'] ,
-        package_dir = { 'moogli' : '.' },
+        package_dir = { 'moogli' : 'moogli' },
         package_data = { 'moogli' : ['moogli.so'] },
         #install_requires = [ 'sip' ],
     )

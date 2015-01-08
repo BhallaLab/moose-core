@@ -48,5 +48,5 @@ setup(
             , 'libmumbl' : 'libmumbl'
             },
         package_data = { 'moose' : ['_moose.so'] },
-        install_requires = [ 'matplotlib', 'numpy' ],
+        #install_requires = [ 'matplotlib', 'numpy' ],
     ) 
