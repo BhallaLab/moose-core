@@ -15,7 +15,7 @@ add_custom_command(OUTPUT ${GENERATED_SRCS}
         ${SIP_EXTRA_OPTIONS}
         ${CMAKE_CURRENT_SOURCE_DIR}/moogli.sip
     DEPENDS ${SIP_SRC}
-    COMMENT "Processing ${CMAKE_CURRENT_SOURCE_DIR}/_moogli.sip"
+    COMMENT "Processing ${CMAKE_CURRENT_SOURCE_DIR}/moogli.sip"
     VERBATIM
     )
 
