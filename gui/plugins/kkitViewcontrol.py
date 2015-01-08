@@ -49,6 +49,7 @@ class GraphicalView(QtGui.QGraphicsView):
         self.iconScale = 1
         self.arrowsize = 2
         self.defaultComptsize = 5
+
     def setRefWidget(self,path):
         self.viewBaseType = path
     
@@ -597,10 +598,9 @@ class GraphicalView(QtGui.QGraphicsView):
                                     gItem =self.layoutPt.mooseId_GObj[moose.element(srcZero[0])]
                                     self.deleteItem(gItem)
                                     return
-                                elif msg.destFieldsOnE2[0] == "setNumKf":
+                                elif msg.destFieldsOnE2[0] == "setNumKf" or msg.destFieldsOnE2[0] == "setConcInit" or msg.destFieldsOnE2[0]=="increment":
                                     msgIdforDeleting = msg
-                                    self.deleteSceneObj(msgIdforDeleting,item)
-                
+                                    self.deleteSceneObj(msgIdforDeleting,item)              
             else:
                 self.getMsgId(src,srcZero,srcOne,item)
 
@@ -639,6 +639,7 @@ class GraphicalView(QtGui.QGraphicsView):
 
     def deleteItem(self,item):
         #delete Items 
+        self.layoutPt.plugin.mainWindow.objectEditSlot('/', False)
         if isinstance(item,KineticsDisplayItem):
             if moose.exists(item.mobj.path):
                 # if isinstance(item.mobj,Function):
