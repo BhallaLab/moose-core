@@ -69,7 +69,7 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/moc)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src)
 
 ADD_LIBRARY(moogli SHARED 
-    scenegraph.cpp
+	${EMPTY_FILE}
     )
 
 SET_TARGET_PROPERTIES(moogli PROPERTIES
