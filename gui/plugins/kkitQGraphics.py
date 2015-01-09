@@ -40,14 +40,14 @@ class KineticsDisplayItem(QtGui.QGraphicsWidget):
     #     self.emit(QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),element(self.mobj))
             
     def itemChange(self,change,value):
-        pass
+        #pass
         #if change == QtGui.QGraphicsItem.ItemPositionChange:
             #print "itemChange ---->",self.mobj
         #    self.emit(QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.mobj)
-        #if change == QtGui.QGraphicsItem.ItemSelectedChange and value == True:
-        #   self.emit(QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),element(self.mobj))
+        if change == QtGui.QGraphicsItem.ItemSelectedChange and value == True:
+           self.emit(QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),element(self.mobj))
         #print " itemChange ",self.mobj,change,value
-        #return QtGui.QGraphicsItem.itemChange(self,change,value)
+        return QtGui.QGraphicsItem.itemChange(self,change,value)
 
 class FuncItem(KineticsDisplayItem):
     name = ITEM

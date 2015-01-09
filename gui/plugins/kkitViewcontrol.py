@@ -333,6 +333,9 @@ class GraphicalView(QtGui.QGraphicsView):
                 # print("Rect => ", self.customrubberBand.rect())
                 # selectedItems = self.items(self.mapToScene(self.customrubberBand.rect()).boundingRect())
                 self.selectSelections(selectedItems)
+                for item in selectedItems:
+                    if isinstance(item, KineticsDisplayItem) and not isinstance(item,ComptItem):
+                        item.setSelected(True)
                 #print("Rubberband Selections => ", self.selections)
                 self.customrubberBand.hide()
                 self.customrubberBand = None                
@@ -398,6 +401,8 @@ class GraphicalView(QtGui.QGraphicsView):
 
     def mouseReleaseEvent(self, event):
         if self.viewBaseType == "editorView":
+            for preSelectedItem in self.sceneContainerPt.selectedItems():
+                preSelectedItem.setSelected(False)
             return self.editorMouseReleaseEvent(event)
 
         return
