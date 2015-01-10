@@ -362,6 +362,7 @@ class RunView(RunBase):
         self.centralWidget.plotAllData()
 
     def getToolPanes(self):
+        return []
         if not self._toolPanes:
             self._toolPanes = [self.getSchedulingDockWidget()]
         return self._toolPanes
@@ -626,6 +627,7 @@ class SchedulingWidget(QtGui.QWidget):
                 solver = chemPref["simulation"]["solver"]
                 addSolver(self.modelRoot,solver)
             status = self.solverStatus()
+            #print "status ",status
                    # if status != 0 or status == -1:
             #     return
             if status == None or int(status) == -1 or int(status) == 0:
@@ -700,10 +702,7 @@ class SchedulingWidget(QtGui.QWidget):
         return True
 
     def solverStatus(self):
-        print "solverStatus "
         compt = moose.wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
-        #print moose.le(compt[0].path)
-        print "stoich exist ",moose.exists(compt[0].path+'/stoich')
         if not moose.exists(compt[0].path+'/stoich'):
             return None
         else:
@@ -794,15 +793,10 @@ class SchedulingWidget(QtGui.QWidget):
         self.setModelType()
 
     def setModelType(self):
-        print "modelType: self.modelroot ",self.modelRoot
         if moose.exists(self.modelRoot + "/model/cells"):
-            print "%$%"
             self.modelType = ELECTRICAL_MODEL
         else:
-            print "()()"
             self.modelType = CHEMICAL_MODEL
-            print "()()())( ",self.modelType
-        print "setModelType ",self.modelType
         self.resetSimulation()
 
 from collections import namedtuple
