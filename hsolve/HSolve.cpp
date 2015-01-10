@@ -187,7 +187,7 @@ const Cinfo* HSolve::initCinfo()
 static const Cinfo* hsolveCinfo = HSolve::initCinfo();
 
 HSolve::HSolve()
-    : dt_( 0.0 )
+    : dt_( 50e-6 )
 {
     ;
 }
@@ -230,7 +230,7 @@ void HSolve::zombify( Eref hsolve ) const
     for ( i = channelId_.begin(); i != channelId_.end(); ++i )
 		temp.push_back( ObjId( *i, 0 ) );
     for ( i = channelId_.begin(); i != channelId_.end(); ++i )
-        HHChannelBase::zombify( i->eref().element(), 
+        HHChannelBase::zombify( i->eref().element(),
 						ZombieHHChannel::initCinfo(), hsolve.id() );
 }
 

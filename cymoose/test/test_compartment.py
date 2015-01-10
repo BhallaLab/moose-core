@@ -17,8 +17,11 @@ if __name__ == "__main__":
     #a = moose.create("Neutral", "/comp/comp1", 1)
     #print a 
     a = moose.Neutral("/comp")
+    print a
     b = moose.Compartment('/comp/comp1')
+    print b
     c = moose.Compartment('/comp/comp2')
+    print c
     assert b.Vm == -0.06, b.Vm
     b.Vm = 0.09
     assert b.Vm == 0.09, b.Vm
