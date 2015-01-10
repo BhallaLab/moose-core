@@ -71,6 +71,8 @@ from PyQt4 import Qt, QtCore, QtGui
 from PyQt4.QtGui import *
 from MdiArea import MdiArea
 import os
+from setsolver import *
+
 __author__ = 'Subhasis Ray , HarshaRani, Aviral Goel, NCBS'
 
 # This maps model subtypes to corresponding plugin names. Should be
@@ -317,7 +319,14 @@ class MWindow(QtGui.QMainWindow):
         3. sets the current view  to the plugins editor view.
 
         """
+        for model in self._loadedModels:
+            self.disableModel(model[0])
 
+        for i in range (0, len(self._loadedModels)):
+            if self._loadedModels[i][0]== root:
+                c = moose.Clock('/clock')
+                c.tickDt[11] = self._loadedModels[i][3]
+                c.tickDt[16] = self._loadedModels[i][4]
         self.plugin = self.loadPluginClass(str(name))(str(root), self)
         compt = moose.wildcardFind(root+'/##[ISA=ChemCompt]')
         if compt:
@@ -532,7 +541,7 @@ class MWindow(QtGui.QMainWindow):
                 self.fileMenu.addSeparator()
                 self.fileMenu.addAction(self.loadedModelAction)
                 self.loadedModelAction.setEnabled(False)
-                for (model, modeltype, action) in reversed(self._loadedModels):
+                for (model, modeltype, action,simdt,plotdt) in reversed(self._loadedModels):
                     self.fileMenu.addAction(action)
                 self.fileMenu.addSeparator()
 
@@ -885,13 +894,21 @@ class MWindow(QtGui.QMainWindow):
 
         action = QAction(modelPath[1:],self)
         action.triggered.connect(lambda : self.setPlugin(pluginName, modelPath))
-        self._loadedModels.append([modelPath,pluginName,action])
+        compt = moose.wildcardFind(modelPath + '/##[ISA=ChemCompt]')
+        self.simulationdt = ''
+        self.plotdt = ''
+        if compt:
+            c = moose.Clock('/clock')
+            self.simulationdt = c.tickDt[11]
+            self.plotdt = c.tickDt[16]
+        self._loadedModels.append([modelPath,pluginName,action,self.simulationdt,self.plotdt])
         if len(self._loadedModels)>5:
             self._loadedModels.pop(0)
 
     def disableModel(self, modelPath):
         compt = moose.wildcardFind(modelPath + '/##[ISA=ChemCompt]')
         if compt:
+
             if moose.exists(compt[0].path+'/ksolve'):
                 ksolve = moose.Ksolve( compt[0].path+'/ksolve' )
                 ksolve.tick = -1
@@ -901,6 +918,7 @@ class MWindow(QtGui.QMainWindow):
             # if moose.exists(compt[0].path+'/stoich'):
             #     stoich = moose.Stoich( compt[0].path+'/stoich' )
             #     stoich.tick = -1
+            #deleteSolver(modelPath)
         else :
             neurons = moose.wildcardFind(modelPath + "/model/cells/##[ISA=Neuron]")
             for neuron in neurons:
