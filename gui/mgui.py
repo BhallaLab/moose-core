@@ -71,6 +71,7 @@ from PyQt4 import Qt, QtCore, QtGui
 from PyQt4.QtGui import *
 from MdiArea import MdiArea
 import os
+from setsolver import *
 __author__ = 'Subhasis Ray , HarshaRani, Aviral Goel, NCBS'
 
 # This maps model subtypes to corresponding plugin names. Should be
@@ -328,20 +329,43 @@ class MWindow(QtGui.QMainWindow):
 
         """
         busyCursor()
+        for model in self._loadedModels:
+            self.disableModel(model[0])
+
+        for i in range(0, len(self._loadedModels)):
+            print "##############3 ",root
+
+            if self._loadedModels[i][0]== root:
+                c = moose.Clock('/clock')
+                compt = moose.wildcardFind(root+'/##[ISA=ChemCompt]')
+                if compt:
+                    c.tickDt[11] = self._loadedModels[i][3]
+                    c.tickDt[16] = self._loadedModels[i][4]
+                    if moose.exists(compt[0].path+'/ksolve'):
+                        ksolve = moose.Ksolve( compt[0].path+'/ksolve' )
+                        ksolve.tick = 16
+                    if moose.exists(compt[0].path+'/gsolve'):
+                        gsolve = moose.Gsolve( compt[0].path+'/gsolve' )
+                        gsolve.tick = 16
+                    for x in moose.wildcardFind( root+'/data/graph#/#' ):
+                        x.tick = 18
+                    
+                else:
+                    c.tickDt[7] = self._loadedModels[i][3]
+                    c.tickDt[8] = self._loadedModels[i][4]
+                    neurons = moose.wildcardFind(root + "/model/cells/##[ISA=Neuron]")
+                    for neuron in neurons:
+                        #print(neuron)
+                        solver = moose.element(neuron.path + "/hsolve")
+                        # print("Disabling => ", solver)
+                        solver.tick = 7
+                    for x in moose.wildcardFind( root+'/data/graph#/#' ):
+                        x.tick = 8
+
+                break
+        
         self.plugin = self.loadPluginClass(str(name))(str(root), self)
-        compt = moose.wildcardFind(root+'/##[ISA=ChemCompt]')
-        if compt:
-            if moose.exists(compt[0].path+'/ksolve'):
-                ksolve = moose.Ksolve( compt[0].path+'/ksolve' )
-                ksolve.tick = 16
-            if moose.exists(compt[0].path+'/gsolve'):
-                gsolve = moose.Gsolve( compt[0].path+'/gsolve' )
-                gsolve.tick = 16
-            # if moose.exists(compt[0].path+'/stoich'):
-            #     stoich = moose.Stoich( compt[0].path+'/stoich' )
-            #     stoich.tick = -1
-            for x in moose.wildcardFind( root+'/data/graph#/#' ):
-                x.tick = 18
+        moose.reinit()
         # if root != '/' and root not in self._loadedModels:
         #     self._loadedModels[root] = name
         # for k,v in self._loadedModels.items():
@@ -543,7 +567,7 @@ class MWindow(QtGui.QMainWindow):
                 self.fileMenu.addSeparator()
                 self.fileMenu.addAction(self.loadedModelAction)
                 self.loadedModelAction.setEnabled(False)
-                for (model, modeltype, action) in reversed(self._loadedModels):
+                for (model, modeltype, action,simdt,plotdt) in reversed(self._loadedModels):
                     self.fileMenu.addAction(action)
                 self.fileMenu.addSeparator()
 
@@ -896,7 +920,15 @@ class MWindow(QtGui.QMainWindow):
 
         action = QAction(modelPath[1:],self)
         action.triggered.connect(lambda : self.setPlugin(pluginName, modelPath))
-        self._loadedModels.append([modelPath,pluginName,action])
+        compt = moose.wildcardFind(modelPath + '/##[ISA=ChemCompt]')
+        c = moose.Clock('/clock')
+        self.simulationdt = c.tickDt[7]
+        self.plotdt = c.tickDt[8]
+        if compt:
+            self.simulationdt = c.tickDt[11]
+            self.plotdt = c.tickDt[16]
+
+        self._loadedModels.append([modelPath,pluginName,action,self.simulationdt,self.plotdt])
         if len(self._loadedModels)>5:
             self._loadedModels.pop(0)
 
