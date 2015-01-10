@@ -336,6 +336,7 @@ class RunView(RunBase):
         self.setDataRoot(moose.Neutral(self.plugin.modelRoot).path)
         self.plugin.modelRootChanged.connect(self.setModelRoot)
         self.plugin.dataRootChanged.connect(self.setDataRoot)
+        # self.getCentralWidget()
         self._menus += self.getCentralWidget().getMenus()
 
     def getCentralWidget(self):
