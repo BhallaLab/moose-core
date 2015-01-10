@@ -77,11 +77,14 @@ SET_TARGET_PROPERTIES(moogli PROPERTIES
     PREFIX ""
     )
 
+
 ## Link the following libraries to moogli.
 TARGET_LINK_LIBRARIES(moogli
+    "-Wl,--whole-archive"
     moc
     src
     sip
+    "-Wl,--no-whole-archive"
     QtCore
     QtGui
     QtOpenGL           
