@@ -540,7 +540,7 @@ class GraphicalView(QtGui.QGraphicsView):
                 #then it will created problem at qgraphicalitem not having parent.
                 #So first delete enz and then delete pool
                     if isinstance(item,MMEnzItem) or isinstance(item,EnzItem) or isinstance(item,CplxItem):
-                    self.deleteItem(item)
+                        self.deleteItem(item)
             for item in (qgraphicsitem for qgraphicsitem in self.rubberbandlist):
                 if not (isinstance(item,MMEnzItem) or isinstance(item,EnzItem) or isinstance(item,CplxItem)):
                     if isinstance(item,PoolItem):
