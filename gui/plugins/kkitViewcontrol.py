@@ -12,6 +12,7 @@ from PyQt4.QtGui import QPen
 from kkitCalcArrow import *
 from kkitOrdinateUtil import *
 from setsolver import *
+
 class GraphicalView(QtGui.QGraphicsView):
 
     def __init__(self, modelRoot,parent,border,layoutPt,createdItem):
@@ -538,7 +539,7 @@ class GraphicalView(QtGui.QGraphicsView):
                 #First Loop to remove all the enz b'cos if parent (which is a Pool) is removed,
                 #then it will created problem at qgraphicalitem not having parent.
                 #So first delete enz and then delete pool
-                if isinstance(item,MMEnzItem) or isinstance(item,EnzItem) or isinstance(item,CplxItem):
+                    if isinstance(item,MMEnzItem) or isinstance(item,EnzItem) or isinstance(item,CplxItem):
                     self.deleteItem(item)
             for item in (qgraphicsitem for qgraphicsitem in self.rubberbandlist):
                 if not (isinstance(item,MMEnzItem) or isinstance(item,EnzItem) or isinstance(item,CplxItem)):
@@ -673,15 +674,15 @@ class GraphicalView(QtGui.QGraphicsView):
                     # enz if 'yes', then enz and its connection are removed before
                     # removing Pool
                     for items in moose.element(item.mobj.path).children:
-                        if isinstance(moose.element(items), Function):
-                            gItem = self.layoutPt.mooseId_GObj[moose.element(items)]
-                            for l in self.layoutPt.object2line[gItem]:
-                                sceneItems = self.sceneContainerPt.items()
-                                if l[0] in sceneItems:
-                                    #deleting the connection which is connected to Enz
-                                    self.sceneContainerPt.removeItem(l[0])
-                            moose.delete(items)
-                            self.sceneContainerPt.removeItem(gItem)    
+                        # if isinstance(moose.element(items), Function):
+                        #     gItem = self.layoutPt.mooseId_GObj[moose.element(items)]
+                        #     for l in self.layoutPt.object2line[gItem]:
+                        #         sceneItems = self.sceneContainerPt.items()
+                        #         if l[0] in sceneItems:
+                        #             #deleting the connection which is connected to Enz
+                        #             self.sceneContainerPt.removeItem(l[0])
+                        #     moose.delete(items)
+                        #     self.sceneContainerPt.removeItem(gItem)    
                         if isinstance(moose.element(items), EnzBase):
                             gItem = self.layoutPt.mooseId_GObj[moose.element(items)]
                             for l in self.layoutPt.object2line[gItem]:
@@ -704,9 +705,11 @@ class GraphicalView(QtGui.QGraphicsView):
                         self.sceneContainerPt.removeItem(l[0])
                 self.sceneContainerPt.removeItem(item)
                 moose.delete(item.mobj)
+                for key, value in self.layoutPt.object2line.items():
+                    self.layoutPt.object2line[key] = filter( lambda tup: tup[1] != item ,value)
                 self.layoutPt.getMooseObj()
                 setupItem(self.modelRoot,self.layoutPt.srcdesConnection) 
-                
+
     def zoomSelections(self, x0, y0, x1, y1):
         self.fitInView(self.mapToScene(QtCore.QRect(x0, y0, x1 - x0, y1 - y0)).boundingRect(), Qt.Qt.KeepAspectRatio)
         self.deselectSelections()
