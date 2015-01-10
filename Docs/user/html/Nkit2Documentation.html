@@ -93,7 +93,7 @@ supported for backwards compatibitility.
 
 -   MOOSEGUI provides a few neuronal models in moose/Demos directory in
     user's home folder. For example, *File->Load*
-    `~/moose/Demos/neuroml/PurkinjeCellPassive/PurkinjePassive.net.xml`, which is a model of the purkinje cell. A 3D rendering of the neuron appears in **`Editor`** tab.
+    `~/moose/Demos/neuroml/PurkinjeCellPassivePulseInput/PurkinjePassive.net.xml`, which is a model of the purkinje cell. A 3D rendering of the neuron appears in **`Editor`** tab.
 -   Click and drag to rotate, scroll wheel to zoom, and arrow
     keys to pan the 3D rendering.
 -   Click to select a compartment on the 3D model. The selected compartment is colored green.
@@ -101,7 +101,7 @@ supported for backwards compatibitility.
 -   The 3D view of the model provided by the editor allows only editing of the compartment parameters.
 -   In the **`Run`** tab you can see two subwindows. The one on the left provides a dynamic visualization of the compartment Vm as the simulation progresses. The one on the right is the plot window where you can plot the Vm of the various compartments.
 -   Press `Ctrl` and click and drag a compartment from the visualizer to the plot window.
--   Run the model using **`Run`** button. You can see the colors of the compartments changing as the simulation progresses. The graphs gets updated simultaneously with the visualizer.
+-   Run the model using **`Run`** button. In this model, the soma is stimulated with a pulse input. You can see the colors of the compartments changing as the simulation progresses. The graphs gets updated simultaneously with the visualizer.
 
 <div id="editor-view"></div>
 ### Editor View
@@ -212,7 +212,7 @@ time step are are listed **dynamical**. Rest are parameters.
 
 -   **Purkinje cell**
     **`File -> Load -> `**
-    `~/moose/Demos/neuroml/PurkinjeCell/Purkinje.net.xml`
+    `~/moose/Demos/neuroml/PurkinjeCellPassivePulseInput/Purkinje.net.xml`
     This is a purely passive cell, but with extensive morphology
     [De Schutter, E. and Bower, J. M., 1994] (exported from
     <http://www.neuroconstruct.org/>). The channel
