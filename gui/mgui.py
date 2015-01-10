@@ -73,20 +73,6 @@ from MdiArea import MdiArea
 import os
 __author__ = 'Subhasis Ray , HarshaRani, Aviral Goel, NCBS'
 
-
-
-# import sys
-# import traceback
-
-# class TracePrints(object):
-#   def __init__(self):
-#     self.stdout = sys.stdout
-#   def write(self, s):
-#     self.stdout.write("Writing %r\n" % s)
-#     traceback.print_stack(file=self.stdout)
-
-sys.stdout = TracePrints()
-
 # This maps model subtypes to corresponding plugin names. Should be
 # moved to a separate property file perhaps
 subtype_plugin_map = {  'genesis/kkit': 'kkit'
@@ -303,8 +289,9 @@ class MWindow(QtGui.QMainWindow):
         QSciQScintialla widget or a PyCute widget (extends QTextArea)
         if the first is not available"""
         if not hasattr(self, 'shellWidget') or self.shellWidget is None:
-            self.shellWidget = get_shell_class()(code.InteractiveInterpreter(),
-                                                 message='MOOSE version %s' % (moose._moose.__version__))
+            self.shellWidget = get_shell_class()( code.InteractiveInterpreter()
+                                                , message='MOOSE version %s' % (moose._moose.__version__)
+                                                )
             self.shellWidget.interpreter.runsource('from moose import *')
             self.shellWidget.setVisible(False)
         return self.shellWidget

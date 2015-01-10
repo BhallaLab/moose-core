@@ -10,7 +10,6 @@ APPLICATION_BACKGROUND_PATH = os.path.join( os.path.dirname(os.path.realpath(__f
 class MdiArea(QMdiArea):
     def __init__(self):
         super(MdiArea, self).__init__()
-        print()
         self.backgroundImage = QImage(APPLICATION_BACKGROUND_PATH)
         self.background      = None
 
