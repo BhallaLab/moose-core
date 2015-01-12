@@ -1,6 +1,8 @@
-cmake_minimum_required(VERSION 2.8)
-project(MOOSE)
-set(CMAKE_INSTALL_PREFIX /usr)
+cmake_minimum_required(VERSION 2.6)
+
+project(moose)
+
+SET(CMAKE_INSTALL_PREFIX /usr)
 
 # This snippet is from LLVM project.
 # Sanity check our source directory to make sure that we are not trying to
@@ -23,7 +25,7 @@ endif()
 ################################# CMKAE MACROS #################################
 
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules")
 set(INSTALL_LIB_DIR lib CACHE PATH "${CMAKE_INSTALL_PREFIX}/lib")
 set(INSTALL_BIN_DIR bin CACHE PATH "${CMAKE_INSTALL_PREFIX}/bin")
 set(INSTALL_INCLUDE_DIR include CACHE PATH "${CMAKE_INSTALL_PREFIX}/include/")
@@ -31,13 +33,13 @@ set(INSTALL_INCLUDE_DIR include CACHE PATH "${CMAKE_INSTALL_PREFIX}/include/")
 ########################### COMPILER MACROS #####################################
 # Compiler 
 
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    set(CMAKE_CXX_COMPILER "clang++")
-elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    set(CMAKE_CXX_COMPILER "g++")
-else()
-    message(WARNING "Continuing with unsupported compiler: ${CMAKE_CXX_COMPILER}")
-endif()
+#if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    #set(CMAKE_CXX_COMPILER "clang++")
+#elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    #set(CMAKE_CXX_COMPILER "g++")
+#else()
+    #message(WARNING "Continuing with unsupported compiler: ${CMAKE_CXX_COMPILER}")
+#endif()
 
 ## Turn warning to error
 add_definitions(-Wall
@@ -50,8 +52,10 @@ add_definitions(-fPIC)
 
 ## Enable/Disable 2011 stupport.
 include(CheckCXXCompilerFlag)
+
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
 CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+
 if(COMPILER_SUPPORTS_CXX11)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 elseif(COMPILER_SUPPORTS_CXX0X)
@@ -305,6 +309,28 @@ if(CYMOOSE)
         )
 endif()
 
+######################################## MOOGLI ################################
+# Moogli as external project
+OPTION(BUILD_MOOGLI "Build moogli extension." ON)
+IF(BUILD_MOOGLI)
+    MESSAGE("++ Building MOOGLI")
+    #SET(MOOGL_SRC_PATH ${PROJECT_SOURCE_DIR}/python/moogli)
+    SET(MOOGLI_BUILD_PATH ${CMAKE_BINARY_DIR}/_moogli)
+    #FILE(MAKE_DIRECTORY ${MOOGLI_BUILD_PATH})
+    #ADD_CUSTOM_TARGET(moogli ALL
+        #COMMAND ${CMAKE_COMMAND} ${MOOGL_SRC_PATH}
+        #COMMAND make
+        #WORKING_DIRECTORY ${MOOGLI_BUILD_PATH}
+        #COMMENT "Building and installing MOOGLI"
+        #VERBATIM
+    #) 
+    add_subdirectory(${PROJECT_SOURCE_DIR}/python/moogli)
+    INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/python/moogli/include)
+    LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/python/moogli)
+else()
+    MESSAGE("++ NOT building MOOGLI")
+endif()
+
 ######################### INSTALL ##############################################
 install(TARGETS moose
     LIBRARY DESTINATION lib
@@ -372,63 +398,34 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/Demos
     COMPONENT moose-python
     )
 
-######################################## MOOGLI ################################
-# Moogli as external project
-include(ExternalProject)
-ExternalProject_Add(
-   moogli
-   PREFIX ${PROJECT_SOURCE_DIR}/python/moogli
-   SOURCE_DIR  ${PROJECT_SOURCE_DIR}/python/moogli
-   INSTALL_DIR ${PROJECT_SOURCE_DIR}
-   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${PROJECT_SOURCE_DIR}
-   #INSTALL_COMMAND make install
-) 
 
+if(BUILD_MOOGLI)
 
-################################# PACKAGING ###################################
+    SET(MOOGLI_TEMP_DIR ${MOOGLI_BUILD_PATH})
 
-set(CPACK_STRIP_FILES TRUE)
-set(CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE 1)
-#  We need to compile python scripts on the installation  host.
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dilawar Singh")
-set(CPACK_PACKAGE_CONTACT "dilawars@ncbs.res.in")
-#set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "MOOSE, The Neural Simulator")
-set(CPACK_PACKAGE_VERSION "3.0.1")
-set(CPACK_SYSTEM_NAME "i386")
-set(CPACK_PACKAGE_VERSION_MAJOR "3")
-set(CPACK_PACKAGE_VERSION_MINOR "0")
-set(CPACK_PACKAGE_VERSION_PATCH "1")
-set(CPACK_PACKAGE_VENDOR "NCBS Bangalore")
-set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/README")
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dilawar Singh <dilawars@ncbs.res.in>")
-if(WIN32)
-    MESSAGE("++ Currently only Unix is supported")
-else()
-    set(CPACK_STRIP_FILES moose)
-endif()
-set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/python/moogli/_moogli/moogli.so
+        DESTINATION ${MOOGLI_TEMP_DIR}/moogli
+        COMPONENT moose
+        )
 
-set(CPACK_DEBIAN_PACKAGE_DEPENDS 
-    "openmpi-common, libhdf5-7
-    , python-numpy , python-matplotlib, python-qt4
-    , openscenegraph, python-tornado
-    , python-suds, python-nose, python-setuptools
-    , libxml2, bzip2"
-)
+    install(FILES ${PROJECT_SOURCE_DIR}/python/moogli/__init__.py
+        DESTINATION ${MOOGLI_TEMP_DIR}/moogli
+        COMPONENT moose
+        )
 
-set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
-    "${PROJECT_SOURCE_DIR}/scripts/postinst;${PROJECT_SOURCE_DIR}/scripts/prerm;"
-    )
-include(CPack)
+    install(FILES ${PROJECT_SOURCE_DIR}/python/setup-moogli.py
+        DESTINATION ${MOOGLI_TEMP_DIR}
+        COMPONENT moose
+        )
 
-#####################  TESTING  ###############################################
-#include(CTest)
-#find_package(PythonInterp REQUIRED)
-#set(ENV{PYTHONPATH} "${PROJECT_SOURCE_DIR}/python")
-#message("++ PYTHONPATH is set to $ENV{PYTHONPATH}")
-#
-#add_test(NAME check_moose
-#    WORKING_DIRECTORY .
-#    COMMAND ./run_moose.sh
-#    )
+    install(CODE
+        "execute_process(COMMAND ${PYTHON_EXECUTABLE} setup-moogli.py install 
+        WORKING_DIRECTORY ${MOOGLI_TEMP_DIR})"
+        COMPONENT moose
+        )
+    
+    install(CODE "MESSAGE(\"++ Installed moogli using setuptools. You can
+        uninstall it using python-pip\")"
+        )
+
+endif(BUILD_MOOGLI)
