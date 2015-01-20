@@ -173,3 +173,14 @@ def saveTables(tables, file=None, **kwargs):
             f.write(tableText)
     
    
+
+def plotVectorWithClock(vec, **kwargs):
+    """plotVectorWithClock: Plot a given vector. On x-axis, plot the time.
+
+    :param vec: Given vector.
+    :param **kwargs: Optional to pass to maplotlib.
+    """
+
+    clock = moose.Clock('/clock')
+    pylab.plot(pylab.linespace(0, clock.currentTime, len(vec)), vec, kwargs)
+
