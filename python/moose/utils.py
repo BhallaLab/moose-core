@@ -25,13 +25,16 @@ from datetime import datetime
 from collections import defaultdict
 
 import _moose
-
 import plot_utils
 import verification_utils
 import print_utils
-import graph_utils
+#import graph_utils
 import sim_utils
+
+from .backend import graphviz
+
 from moose_constants import *
+
 import re
 # from PyQt4 import QtCore, Qt
 
@@ -51,7 +54,7 @@ dump = print_utils.dump
 verify = verification_utils.verify
 
 # Topology and graph related functions.
-writeGraphviz  = graph_utils.writeGraphviz
+writeGraphviz  = graphviz.writeGraphviz
 
 # Some verification tests
 verify = verification_utils.verify

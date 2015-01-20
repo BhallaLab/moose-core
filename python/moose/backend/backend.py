@@ -42,9 +42,11 @@ class Backend(object):
         super(Backend, self).__init__()
         self.args = args
         self.compartments = []
+        self.chemEntities = []
         self.pulseGens = []
         self.tables = []
         self.synchans = []
+        self.msgs = []
         # A set of tuple of sourceCompartment.path and targetCompartment.path
         self.connections = set()
         self.clock = _moose.wildcardFind('/clock')[0]
@@ -89,6 +91,23 @@ class Backend(object):
         self.clocks = _moose.wildcardFind("/##[TYPE=Clock]")
         return self.clocks
 
+    def getChemicalEntities(self, **kwargs):
+        """Get the following chemical entities:
+        ZombiePool 
+        ZombieEnz
+        ZombieReac
+        """
+        self.chemEntities = _moose.wildcardFind("/##[TYPE=ZombiePool]")
+        self.chemEntities += _moose.wildcardFind("/##[TYPE=ZombieEnz]")
+        self.chemEntities += _moose.wildcardFind("/##[TYPE=ZombieReac]")
+        return self.chemEntities
+
+    def getMsgs(self, **kwargs):
+        """Get all messages in MOOSE"""
+        self.msgs = _moose.wildcardFind('/##[TYPE=SingleMsg]')
+        self.msgs += _moose.wildcardFind('/##[TYPE=OneToAllMsg]')
+        return self.msgs
+
     def populateStoreHouse(self, **kwargs):
         """ Populate all data-structures related with Compartments, Tables, and
         pulse generators.
@@ -98,9 +117,11 @@ class Backend(object):
             return 
         print_utils.dump("INFO", "Getting moose-datastructure for backend.")
         self.getComparments(**kwargs)
+        self.getChemicalEntities(**kwargs)
         self.getTables(**kwargs)
         self.getPulseGens(**kwargs)
         self.getSynChans(**kwargs)
+        self.getMsgs(**kwargs)
         self.getClocks()
         self.filled = True
 
