@@ -102,3 +102,8 @@ def dump(label, msg, frame=None, exception=None):
     if exception:
         print(" [Expcetion] {0}".format(exception))
 
+def info(msg): dump("INFO", msg)
+def warn(msg): dump("WARN", msg)
+def error(msg): dump("ERROR", msg)
+def debug(msg): dump("DEBUG", msg)
+
