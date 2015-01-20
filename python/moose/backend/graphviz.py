@@ -42,6 +42,7 @@ class DotFile():
         self.compShape = "box3d"
         self.tableShape = "folder"
         self.pulseShape = "invtriangle"
+        self.chemShape = "cds"
 
     def setIgnorePat(self, ignorePat):
         self.ignorePat = ignorePat
@@ -186,8 +187,8 @@ def getConnectedCompartments(obj):
 # @brief Write a graphviz topology file.
 #
 # @param filename Name of the output file.
-# @param pat Genesis pattern for searching all compratments; default
-# '/##[TYPE=Compartment'
+# @param pat If set only this pat is searched, else every electrical and
+# chemical compartment is searched and dumped to graphviz file.
 # @param Ignore paths containing this pattern. A regular expression. 
 #
 # @return None. 
@@ -212,13 +213,13 @@ def writeGraphviz(filename=None, pat='/##[TYPE=Compartment]', ignore=None):
         dotFile.setIgnorePat(ignorePat)
 
     compList = b.filterPaths(b.compartments, ignorePat)
+    chemList = b.filterPaths(b.chemEntities, ignorePat)
 
     if not compList:
         print_utils.dump("WARN"
-                , "No compartment found"
+                , "No compartment found."
                 , frame = inspect.currentframe()
                 )
-        return None
 
     header = "digraph mooseG{"
     header += "\n\tconcentrate=true;\n"
@@ -237,6 +238,18 @@ def writeGraphviz(filename=None, pat='/##[TYPE=Compartment]', ignore=None):
         # Each comparment might also have a synapse on it.
         chans = c.neighbors['channel']
         [dotFile.addChannel(c, chan) for chan in chans]
+
+    
+    [ dotFile.addNode(c.path, shape=dotFile.chemShape) for c in chemList ]
+
+    # Write messages are edges.
+    msgs = b.filterPaths(b.msgs, ignorePat)
+    for m in msgs:
+        sources, targets = m.e1, m.e2
+        for i, s in enumerate(sources):
+            pass
+            #print s, targets[i]
+
 
     # Now add the pulse-gen 
     pulseGens = b.pulseGens
