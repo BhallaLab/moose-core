@@ -48,7 +48,10 @@ recordAt = sim_utils.recordTarget
 recordTarget = sim_utils.recordTarget
 
 # dump messages onto console
-dump = print_utils.dump
+info = print_utils.info
+warn = print_utils.warn
+error = print_utils.error
+debug = print_utils.debug
 
 # Verification related function.
 verify = verification_utils.verify
