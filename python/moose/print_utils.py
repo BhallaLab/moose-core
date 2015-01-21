@@ -106,4 +106,5 @@ def info(msg): dump("INFO", msg)
 def warn(msg): dump("WARN", msg)
 def error(msg): dump("ERROR", msg)
 def debug(msg): dump("DEBUG", msg)
+def log(label, msg): dump(label, msg)
 
