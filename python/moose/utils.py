@@ -52,6 +52,7 @@ info = print_utils.info
 warn = print_utils.warn
 error = print_utils.error
 debug = print_utils.debug
+log = print_utils.log
 
 # Verification related function.
 verify = verification_utils.verify
