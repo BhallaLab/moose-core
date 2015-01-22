@@ -639,22 +639,39 @@ class  KineticsWidget(EditorWidgetBase):
 
     def positionChange(self,mooseObject):
         #If the item position changes, the corresponding arrow's are calculated
-        mobj = self.mooseId_GObj[element(mooseObject)]
-        self.updateArrow(mobj)
-        elePath = moose.element(mooseObject).path
-        pos = elePath.find('/',1)
-        l = elePath[0:pos]
-        linfo = moose.Annotator(l+'/info')
-        for k, v in self.qGraCompt.items():
-            rectcompt = v.childrenBoundingRect()
-            if linfo.modeltype == "new_kkit":
-                #if newly built model then compartment is size is fixed for some size.
-                comptBoundingRect = v.boundingRect()
-                if not comptBoundingRect.contains(rectcompt):
-                    self.updateCompartmentSize(v)
-            else:
-                #if already built model then compartment size depends on max and min objects
-                v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
+        if isinstance(element(mooseObject),ChemCompt):
+            for k, v in self.qGraCompt.items():
+                mesh = mooseObject
+                if k.path == mesh:
+                    for rectChilditem in v.childItems():
+                        if isinstance(rectChilditem, KineticsDisplayItem):
+                            if isinstance(moose.element(rectChilditem.mobj.path),PoolBase):
+                                t = moose.element(rectChilditem.mobj.path)
+                                moose.element(t).children
+                                for items in moose.element(t).children:
+                                    if isinstance(moose.element(items),Function):
+                                        test = moose.element(items.path+'/x')
+                                        for i in moose.element(test).neighbors['input']:
+                                            j = self.mooseId_GObj[moose.element(i)]
+                                            self.updateArrow(j)
+                            self.updateArrow(rectChilditem)
+        else:
+            mobj = self.mooseId_GObj[element(mooseObject)]
+            self.updateArrow(mobj)
+            elePath = moose.element(mooseObject).path
+            pos = elePath.find('/',1)
+            l = elePath[0:pos]
+            linfo = moose.Annotator(l+'/info')
+            for k, v in self.qGraCompt.items():
+                rectcompt = v.childrenBoundingRect()
+                if linfo.modeltype == "new_kkit":
+                    #if newly built model then compartment is size is fixed for some size.
+                    comptBoundingRect = v.boundingRect()
+                    if not comptBoundingRect.contains(rectcompt):
+                        self.updateCompartmentSize(v)
+                else:
+                    #if already built model then compartment size depends on max and min objects
+                    v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
 
     def updateCompartmentSize(self, compartment):
         compartmentBoundary = compartment.rect()
@@ -674,7 +691,6 @@ class  KineticsWidget(EditorWidgetBase):
         if qGTextitem not in self.object2line:
             return
         listItem = self.object2line[qGTextitem]
-        #print "updateArrow ",qGTextitem, listItem
         for ql, va,order in self.object2line[qGTextitem]:
             srcdes = []
             srcdes = self.lineItem_dict[ql]
@@ -795,7 +811,6 @@ class kineticRunWidget(KineticsWidget):
         self.refresh()
         # pass
     def refresh(self):
-        #print("Refresh =>", self.editor.getCentralWidget().mooseId_GObj)
         self.sceneContainer.clear()
         self.Comptexist = wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
         if self.Comptexist:
@@ -812,9 +827,7 @@ class kineticRunWidget(KineticsWidget):
 
     def updateValue(self):
         for item in self.sceneContainer.items():
-            #print "item ",item
             if isinstance(item,ReacItem) or isinstance(item,MMEnzItem) or isinstance(item,EnzItem) or isinstance(item,PoolItemCircle) or isinstance(item,CplxItem):
-                #print " kkit py file in 774 ", item.mobj
                 item.updateValue(item.mobj)
 
     def changeBgSize(self):
