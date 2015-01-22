@@ -170,7 +170,8 @@ class GraphicalView(QtGui.QGraphicsView):
             final = self.mapToScene(event.pos())
             displacement = final - initial
             #print("Displacement", displacement)
-            item.moveBy(displacement.x(), displacement.y())            
+            item.moveBy(displacement.x(), displacement.y())
+            self.layoutPt.positionChange(item.mobj.path)
             self.state["press"]["pos"] = event.pos()
 
             # QtGui.QGraphicsView.mouseMoveEvent(self, event)
@@ -308,6 +309,7 @@ class GraphicalView(QtGui.QGraphicsView):
             popupmenu = QtGui.QMenu('PopupMenu', self)
             popupmenu.addAction("Delete", lambda : self.deleteConnection(item))
             popupmenu.exec_(self.mapToGlobal(event.pos()))
+        
         if clickedItemType == COMPARTMENT_BOUNDARY:
             if not self.state["move"]["happened"]:
                 self.layoutPt.plugin.mainWindow.objectEditSlot(self.state["press"]["item"].mobj, True)
