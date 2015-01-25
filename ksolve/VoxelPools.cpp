@@ -187,7 +187,7 @@ void VoxelPools::updateRates( const double* s, double* yprime ) const
 	for ( vector< RateTerm* >::const_iterator
 		i = rates_.begin(); i != rates_.end(); i++) {
 		*j++ = (**i)( s );
-		assert( !isnan( *( j-1 ) ) );
+		assert( !std::isnan( *( j-1 ) ) );
 	}
 
 	for (unsigned int i = 0; i < totVar; ++i)
@@ -214,7 +214,7 @@ void VoxelPools::updateReacVelocities(
 
 	for ( i = rates_.begin(); i != rates_.end(); i++) {
 		*j++ = (**i)( s );
-		assert( !isnan( *( j-1 ) ) );
+		assert( !std::isnan( *( j-1 ) ) );
 	}
 }
 
