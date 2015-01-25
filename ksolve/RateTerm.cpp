@@ -33,7 +33,7 @@ double StochNOrder::operator() ( const double* S ) const {
 	unsigned int lasty = 0;
 	double y = 0.0;
 	for ( i = v_.begin(); i != v_.end(); i++) {
-		assert( !isnan( S[ *i ] ) );
+		assert( !std::isnan( S[ *i ] ) );
 		if ( lasty == *i )
 			y -= 1.0;
 		else

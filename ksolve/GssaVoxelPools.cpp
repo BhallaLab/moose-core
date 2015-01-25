@@ -249,7 +249,7 @@ void GssaVoxelPools::updateReacVelocities( const GssaSystem* g,
 
 	for ( i = rates_.begin(); i != rates_.end(); i++) {
 		*j++ = (**i)( s );
-		assert( !isnan( *( j-1 ) ) );
+		assert( !std::isnan( *( j-1 ) ) );
 	}
 }
 

@@ -58,7 +58,7 @@ double KinSparseMatrix::computeRowRate(
 
 	// assert ( !( ret !<>= 0.0 ) );
 	*/
-	assert ( !( isnan( ret ) ) );
+	assert ( !( std::isnan( ret ) ) );
 	return ret;
 }
 
