@@ -87,7 +87,7 @@ else()
 endif()
 
 # STATS INSIDE MOOSE
-set(ENABLE_LOGGER 0)
+option(ENABLE_LOGGER  "Enable MOOSE logger" ON)
 if(ENABLE_LOGGER)
     message("++ LOGGER ENABLED")
     add_definitions(-DENABLE_LOGGER)
@@ -96,7 +96,7 @@ endif()
 # Default macros
 add_definitions(-DUSE_GENESIS_PARSER)
 
-set(DEBUG 0)
+option(DEBUG "Building with debugging support" 0)
 if(DEBUG)
     set(CMAKE_BUILD_TYPE Debug)
 else()
@@ -164,11 +164,11 @@ endif()
 
 # Add subdirectroeis
 add_subdirectory(basecode)
-add_subdirectory(biophysics)
 add_subdirectory(msg)
 add_subdirectory(shell)
 add_subdirectory(randnum)
 add_subdirectory(scheduling)
+add_subdirectory(biophysics)
 add_subdirectory(builtins)
 add_subdirectory(utility)
 add_subdirectory(external/muparser)
@@ -217,7 +217,6 @@ endif()
 ###################################### LINKING #################################
 set(MOOSE_LIBRARIES
     moose_builtins
-    basecode
     msg
     benchmarks
     shell
@@ -226,14 +225,15 @@ set(MOOSE_LIBRARIES
     moose_mpi
     utility 
     muparser
-    biophysics 
     kinetics 
     hsolve 
     mesh
     signeur
     tinyxml
+    biophysics 
     synapse
     diffusion 
+    basecode
     device
     ksolve
     intfire
