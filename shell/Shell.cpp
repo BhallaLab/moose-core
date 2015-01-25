@@ -364,7 +364,7 @@ void Shell::doQuit()
 	SetGet0::set( ObjId(), "quit" );
 	// Shell::keepLooping_ = 0;
 #ifdef ENABLE_LOGGER 
-        cout << logger.dumpStats(1);
+        cout << logger.dumpStats(1) << endl << endl;
         logger.save();
 #endif
 }
@@ -373,8 +373,10 @@ void Shell::doStart( double runtime )
 {
 #ifdef ENABLE_LOGGER
         clock_t t = clock();
+        stringstream ss;
+        ss << "Running moose for " << runtime << " seconds";
+        logger.log("INFO", ss.str());
 #endif
-
 	Id clockId( 1 );
 	SetGet1< double >::set( clockId, "start", runtime );
 

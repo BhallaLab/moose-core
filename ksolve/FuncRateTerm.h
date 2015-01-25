@@ -107,7 +107,7 @@ class FuncReac: public FuncRate
 			double ret = func_( S, 0.0 ); // get rate from func calculation.
 			vector< unsigned int >::const_iterator i;
 			for ( i = v_.begin(); i != v_.end(); i++) {
-				assert( !isnan( S[ *i ] ) );
+				assert( !std::isnan( S[ *i ] ) );
 				ret *= S[ *i ];
 			}
 			return ret;

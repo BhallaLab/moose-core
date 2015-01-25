@@ -332,6 +332,36 @@ class SimpleLogger {
             cerr << ss.str() << endl;
         }
 
+
+        /**
+         * @brief Compose a message and log to logging file.
+         *
+         * @param type
+         * @param msg
+         * @param level
+         *
+         * @return 
+         */
+        std::string log(string type, const string& msg)
+        {
+#ifdef ENABLE_LOGGER 
+            stringstream ss;
+            string time = timeStamp();
+            fstream logF;
+            logF.open(outputFile.c_str(), std::fstream::out | std::fstream::app);
+            ss << "<" << type << " time=\"" << time << "\">";
+            ss << msg << "</" << type << ">" << endl;
+            logF << ss.str(); 
+            logF.close();
+            string newmsg = ss.str();
+            return newmsg;
+#else
+            return string("");
+#endif
+
+        }
+
+
     private:
         map<string, unsigned long> elementsMap;
         map<string, float> timekeeperMap;
