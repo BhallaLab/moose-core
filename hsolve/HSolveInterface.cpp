@@ -426,6 +426,14 @@ void HSolve::setZ( Id id, double value )
     state_[ stateIndex ] = value;
 }
 
+void HSolve::setHHmodulation( Id id, double value )
+{
+    unsigned int index = localIndex( id );
+    assert( index < channel_.size() );
+	if ( value > 0.0 )
+			channel_[index].modulation_ = value;
+}
+
 double HSolve::getCa( Id id ) const
 {
     unsigned int index = localIndex( id );

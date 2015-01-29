@@ -71,6 +71,8 @@ class HHChannel: public HHChannelBase, public ChanCommon
 		void vSetZ( const Eref& e, double Z );
 		double vGetZ( const Eref& e ) const;
 		void vSetUseConcentration( const Eref& e, int value );
+		void vSetModulation( const Eref& e, double modulation );
+		double vGetModulation( const Eref& e ) const;
 
 		void innerSetXpower( double Xpower );
 		void innerSetYpower( double Ypower );

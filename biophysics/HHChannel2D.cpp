@@ -460,7 +460,7 @@ void HHChannel2D::vProcess( const Eref& e, ProcPtr info )
 		g_ *= takeZpower_( Z_, Zpower_ );
 	}
 
-	ChanBase::setGk( e, g_ );
+	ChanBase::setGk( e, g_ * vGetModulation( e ) );
 	updateIk();
 	// Gk_ = g_;
 	// Ik_ = ( Ek_ - Vm_ ) * g_;
@@ -517,7 +517,7 @@ void HHChannel2D::vProcess( const Eref& e, ProcPtr info )
          g_ *= takeZpower_( Z_, Zpower_ );
      }
 
-     ChanBase::setGk( er, g_ );
+	 ChanBase::setGk( er, g_ * vGetModulation( er ) );
      updateIk();
      // Gk_ = g_;
      // Ik_ = ( Ek_ - Vm_ ) * g_;

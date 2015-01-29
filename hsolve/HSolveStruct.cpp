@@ -52,7 +52,7 @@ PFDD ChannelStruct::selectPower( double power )
 
 void ChannelStruct::process( double*& state, CurrentStruct& current )
 {
-	double fraction = 1.0;
+	double fraction = modulation_;
 	
 	if( Xpower_ > 0.0 )
 		fraction *= takeXpower_( *( state++ ), Xpower_ );
