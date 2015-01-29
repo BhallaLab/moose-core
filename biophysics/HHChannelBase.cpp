@@ -172,7 +172,8 @@ HHChannelBase::HHChannelBase()
 			Xpower_( 0.0 ), 
 			Ypower_( 0.0 ), 
 			Zpower_( 0.0 ),
-			useConcentration_( 0 )
+			useConcentration_( 0 ),
+			modulation_( 1.0 )
 {;}
 
 HHChannelBase::~HHChannelBase()
@@ -283,6 +284,11 @@ void HHChannelBase::setUseConcentration( const Eref& e, int value )
 int HHChannelBase::getUseConcentration( const Eref& e) const
 {
 	return useConcentration_;
+}
+
+double HHChannelBase::vGetModulation( const Eref& e) const
+{
+	return modulation_;
 }
 
 ///////////////////////////////////////////////////

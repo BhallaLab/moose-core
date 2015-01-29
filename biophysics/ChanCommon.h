@@ -30,6 +30,9 @@ class ChanCommon: public virtual ChanBase
 
 		void vSetGbar( const Eref& e, double Gbar );
 		double vGetGbar( const Eref& e ) const;
+		void vSetModulation( const Eref& e, double modulation );
+		double vGetModulation( const Eref& e ) const;
+		double getModulation() const;
 		void vSetEk( const Eref& e, double Ek );
 		double vGetEk( const Eref& e ) const;
 		void vSetGk( const Eref& e, double Gk );
@@ -79,6 +82,8 @@ class ChanCommon: public virtual ChanBase
 	private:
 		/// Channel maximal conductance
 		double Gbar_;
+		/// Channel modulation. Scales conductance.
+		double modulation_;
 		/// Reversal potential of channel
 		double Ek_;
 

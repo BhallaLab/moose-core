@@ -92,6 +92,18 @@ const Cinfo* ChanBase::initCinfo()
 			&ChanBase::setGbar,
 			&ChanBase::getGbar
 		);
+		static ElementValueFinfo< ChanBase, double > modulation( "modulation",
+			"Modulation, i.e, scale factor for channel conductance."
+			"Note that this is a regular parameter, it is not "
+			"recomputed each timestep. Thus one can use a slow update, "
+			"say, from a molecule pool, to send a message to set "
+			"the modulation, and it will stay at the set value even if "
+			"the channel runs many timesteps before the next assignment. "
+			"This differs from the GENESIS semantics of a similar message,"
+			"which required update each timestep. ",
+			&ChanBase::setModulation,
+			&ChanBase::getModulation
+		);
 		static ElementValueFinfo< ChanBase, double > Ek( "Ek", 
 			"Reversal potential of channel",
 			&ChanBase::setEk,
@@ -122,6 +134,7 @@ const Cinfo* ChanBase::initCinfo()
 		&channel,			// Shared
 		&ghk,				// Shared
 		&Gbar,				// Value
+		&modulation,		// Value
 		&Ek,				// Value
 		&Gk,				// Value
 		&Ik,				// ReadOnlyValue
@@ -178,6 +191,17 @@ void ChanBase::setGbar( const Eref& e, double Gbar )
 double ChanBase::getGbar( const Eref& e ) const
 {
 	return vGetGbar( e );
+}
+
+void ChanBase::setModulation( const Eref& e, double modulation )
+{
+	// Call virtual functions of derived classes for this operation.
+	vSetModulation( e, modulation );
+}
+
+double ChanBase::getModulation( const Eref& e ) const
+{
+	return vGetModulation( e );
 }
 
 void ChanBase::setEk( const Eref& e, double Ek )
