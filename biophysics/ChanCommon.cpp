@@ -17,7 +17,8 @@
 ChanCommon::ChanCommon()
 			:
 			Vm_( 0.0 ),
-			Gbar_( 0.0 ), Ek_( 0.0 ),
+			Gbar_( 0.0 ), modulation_( 1.0 ), 
+			Ek_( 0.0 ),
 			Gk_( 0.0 ), Ik_( 0.0 )
 {
 	;
@@ -38,6 +39,21 @@ void ChanCommon::vSetGbar( const Eref& e, double Gbar )
 double ChanCommon::vGetGbar( const Eref& e ) const
 {
 	return Gbar_;
+}
+
+void ChanCommon::vSetModulation( const Eref& e, double modulation )
+{
+	modulation_ = modulation;
+}
+
+double ChanCommon::vGetModulation( const Eref& e ) const
+{
+	return modulation_;
+}
+
+double ChanCommon::getModulation() const
+{
+	return modulation_;
 }
 
 void ChanCommon::vSetEk( const Eref& e, double Ek )
