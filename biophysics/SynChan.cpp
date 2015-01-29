@@ -51,10 +51,6 @@ const Cinfo* SynChan::initCinfo()
 		"Sometimes we want to continuously activate the channel",
 		new OpFunc1< SynChan, double >( &SynChan::activation )
 	);
-	static DestFinfo modulator( "modulator",
-		"Modulate channel response",
-		new OpFunc1< SynChan, double >( &SynChan::modulator )
-	);
 
 	static Finfo* SynChanFinfos[] =
 	{
@@ -62,7 +58,6 @@ const Cinfo* SynChan::initCinfo()
 		&tau2,			// Value
 		&normalizeWeights,	// Value
 		&activation,	// Dest
-		&modulator,	// Dest
 	};
 
 	static string doc[] =
@@ -107,7 +102,6 @@ SynChan::SynChan()
         yconst2_(0.0),
         norm_(1.0),
         activation_(0.0),
-        modulation_(1.0),
         X_(0.0),
         Y_(0.0),
 		dt_( 25.0e-6 )
@@ -205,10 +199,9 @@ void SynChan::normalizeGbar()
 /// Update alpha function terms for synaptic channel.
 double SynChan::calcGk()
 {
-	X_ = modulation_ * activation_ * xconst1_ + X_ * xconst2_;
+	X_ = getModulation() * activation_ * xconst1_ + X_ * xconst2_;
 	Y_ = X_ * yconst1_ + Y_ * yconst2_;
 	activation_ = 0.0;
-	modulation_ = 1.0;
 	return Y_ * norm_;
 }
 
@@ -231,7 +224,6 @@ void SynChan::vReinit( const Eref& e, ProcPtr info )
 {
 	dt_ = info->dt;
 	activation_ = 0.0;
-	modulation_ = 1.0;
 	ChanBase::setGk( e, 0.0 );
 	ChanBase::setIk( e, 0.0 );
 	X_ = 0.0;
@@ -255,9 +247,4 @@ void SynChan::vReinit( const Eref& e, ProcPtr info )
 void SynChan::activation( double val )
 {
 	activation_ += val;
-}
-
-void SynChan::modulator( double val )
-{
-	modulation_ *= val;
 }

@@ -30,6 +30,10 @@ class ChanBase
 		virtual void vSetGbar( const Eref& e, double Gbar ) = 0;
 		double getGbar( const Eref& e ) const;
 		virtual double vGetGbar( const Eref& e ) const = 0;
+		void setModulation( const Eref& e, double modulation );
+		virtual void vSetModulation( const Eref& e, double modulation ) = 0;
+		double getModulation( const Eref& e ) const;
+		virtual double vGetModulation( const Eref& e ) const = 0;
 		void setEk( const Eref& e, double Ek );
 		virtual void vSetEk( const Eref& e, double Ek ) = 0;
 		double getEk( const Eref& e ) const;

@@ -80,6 +80,8 @@ public:
      */
     void vSetUseConcentration( const Eref& e, int value );
     // implemented in baseclass: int getUseConcentration() const;
+	
+    void vSetModulation( const Eref& e, double value );
 
     /////////////////////////////////////////////////////////////
     // Dest function definitions
