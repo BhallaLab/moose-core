@@ -140,7 +140,7 @@ class MooseSetting(dict):
             # These are to be checked at every run
             cls._instance.qsettings.setValue(KEY_HOME_DIR, os.environ['HOME'])
             cls._instance.qsettings.setValue(KEY_DEMOS_DIR, MOOSE_DEMOS_DIR)
-            cls._instance.qsettings.setValue(KEY_LOCAL_DEMOS_DIR, os.path.join(MOOSE_LOCAL_DIR, 'Demos'))
+            cls._instance.qsettings.setValue(KEY_LOCAL_DEMOS_DIR, os.path.join(MOOSE_LOCAL_DIR, 'Demos/'))
             cls._instance.qsettings.setValue(KEY_DOCS_DIR, MOOSE_DOCS_DIR)
             cls._instance.qsettings.setValue(KEY_MOOSE_LOCAL_DIR, MOOSE_LOCAL_DIR)
             cls._instance.qsettings.setValue(KEY_LOCAL_BUILD, LOCAL_BUILD)
@@ -200,7 +200,7 @@ def init_dirs():
     if LOCAL_BUILD:
         MOOSE_LOCAL_DIR = os.path.normpath(os.path.join(MOOSE_GUI_DIR, '..'))
         MOOSE_DEMOS_DIR = os.path.join(MOOSE_LOCAL_DIR, 'Demos')
-        MOOSE_DOCS_DIR = os.path.join(MOOSE_LOCAL_DIR, 'Docs')
+        MOOSE_DOCS_DIR = os.path.join(MOOSE_LOCAL_DIR, 'Docs/user/py/_build/html/')
     else:
         MOOSE_LOCAL_DIR = os.path.join(os.environ['HOME'], 'moose')
         if not os.path.exists(MOOSE_LOCAL_DIR):
