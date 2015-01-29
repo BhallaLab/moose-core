@@ -153,6 +153,14 @@ void ZombieHHChannel::vSetUseConcentration( const Eref& e, int value )
          "'useConcentration' once HSolve has been setup.\n";
 }
 
+void ZombieHHChannel::vSetModulation( const Eref& e , double modulation )
+{
+	if ( modulation > 0.0 ) {
+		modulation_ = modulation;
+    	hsolve_->setHHmodulation( e.id(), modulation );
+	}
+}
+
 ///////////////////////////////////////////////////
 // Dest function definitions
 ///////////////////////////////////////////////////

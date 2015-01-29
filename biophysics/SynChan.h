@@ -57,7 +57,6 @@ class SynChan: public ChanCommon
 		void vReinit( const Eref& e, ProcPtr p );
 
 		void activation( double val );
-		void modulator( double val );
 ///////////////////////////////////////////////////
 		/**
 		 * Override base class function for spike handling
@@ -81,7 +80,6 @@ class SynChan: public ChanCommon
 		double yconst2_;
 		double norm_;
 		double activation_;
-		double modulation_;
 		double X_;	
 		double Y_;	
 		double dt_; /// Tracks the timestep assigned at reinit.
