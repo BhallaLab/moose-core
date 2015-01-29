@@ -319,7 +319,7 @@ void HHChannel::vProcess( const Eref& e, ProcPtr info )
 		g_ *= takeZpower_( Z_, Zpower_ );
 	}
 
-	ChanCommon::vSetGk( e, g_ );
+	ChanCommon::vSetGk( e, g_ * HHChannelBase::modulation_ );
 	this->updateIk();
 	// Gk_ = g_;
 	// Ik_ = ( Ek_ - Vm_ ) * g_;
@@ -383,7 +383,7 @@ void HHChannel::vReinit( const Eref& er, ProcPtr info )
 		g_ *= takeZpower_( Z_, Zpower_ );
 	}
 
-	ChanCommon::vSetGk( er, g_ );
+	ChanCommon::vSetGk( er, g_ * HHChannelBase::modulation_ );
 	updateIk();
 	// Gk_ = g_;
 	// Ik_ = ( Ek_ - Vm_ ) * g_;
@@ -398,6 +398,17 @@ void HHChannel::vReinit( const Eref& er, ProcPtr info )
 void HHChannel::vHandleConc( const Eref& e, double conc )
 {
 	conc_ = conc;
+}
+
+void HHChannel::vSetModulation( const Eref& e, double modulation )
+{
+	if ( modulation > 0.0 )
+		HHChannelBase::modulation_ = modulation;
+}
+
+double HHChannel::vGetModulation( const Eref& e ) const
+{
+	return HHChannelBase::modulation_;
 }
 
 

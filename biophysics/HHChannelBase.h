@@ -47,6 +47,7 @@ class HHChannelBase: public virtual ChanBase
 		double getZ( const Eref& e ) const;
 		void setUseConcentration( const Eref& e, int value );
 		int getUseConcentration( const Eref& e ) const;
+		double vGetModulation( const Eref& e ) const;
 		/////////////////////////////////////////////////////////////
 		// Dest function definitions
 		/////////////////////////////////////////////////////////////
@@ -182,6 +183,9 @@ class HHChannelBase: public virtual ChanBase
 		double Zpower_;
 		/// Flag for use of conc for input to Z gate calculations.
 		bool useConcentration_;	
+
+		/// Value used to scale channel conductance up or down
+		double modulation_;
 };
 
 
