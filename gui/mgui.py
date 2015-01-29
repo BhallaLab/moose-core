@@ -333,8 +333,6 @@ class MWindow(QtGui.QMainWindow):
             self.disableModel(model[0])
 
         for i in range(0, len(self._loadedModels)):
-            print "##############3 ",root
-
             if self._loadedModels[i][0]== root:
                 c = moose.Clock('/clock')
                 compt = moose.wildcardFind(root+'/##[ISA=ChemCompt]')
@@ -823,6 +821,7 @@ class MWindow(QtGui.QMainWindow):
             self.documentationViewer = QtGui.QTextBrowser()
             self.documentationViewer.setOpenLinks(True)
             self.documentationViewer.setOpenExternalLinks(True)
+            print " path ",config.settings[config.KEY_DOCS_DIR], os.path.join(config.settings[config.KEY_DOCS_DIR], 'html'), os.path.join(config.settings[config.KEY_DOCS_DIR], 'images')
             self.documentationViewer.setSearchPaths([config.settings[config.KEY_DOCS_DIR],
                                                      os.path.join(config.settings[config.KEY_DOCS_DIR], 'html'),
                                                      os.path.join(config.settings[config.KEY_DOCS_DIR], 'images')])
@@ -840,7 +839,7 @@ class MWindow(QtGui.QMainWindow):
         QtGui.QDesktopServices.openUrl(QtCore.QUrl(config.MOOSE_REPORT_BUG_URL))
 
     def showBuiltInDocumentation(self):
-        self.showDocumentation('moosebuiltindocs.html')
+        self.showDocumentation('moose_builtins.html')
 
     # openEditorView, openPlotView and openRunView are identical
     # except the view they ask from the plugin. Consider using a
