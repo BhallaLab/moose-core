@@ -12,6 +12,7 @@ from PyQt4.QtGui import QPen
 from kkitCalcArrow import *
 from kkitOrdinateUtil import *
 from setsolver import *
+from PyQt4 import QtSvg
 
 class GraphicalView(QtGui.QGraphicsView):
 
@@ -51,6 +52,7 @@ class GraphicalView(QtGui.QGraphicsView):
         self.iconScale = 1
         self.arrowsize = 2
         self.defaultComptsize = 5
+        self.connectorlist = {"plot": None ,"clone": None,"move": None,"delete": None}
 
     def setRefWidget(self,path):
         self.viewBaseType = path
@@ -89,8 +91,11 @@ class GraphicalView(QtGui.QGraphicsView):
                     solution = (item, self.resolveCompartmentInteriorAndBoundary(item, position))
 
         for item in items:
-            if isinstance(item, QtGui.QGraphicsPixmapItem):
+            # if isinstance(item, QtGui.QGraphicsPixmapItem):
+            #     return (item, CONNECTOR)
+            if isinstance(item, QtSvg.QGraphicsSvgItem):
                 return (item, CONNECTOR)
+            
             if isinstance(item, QtGui.QGraphicsPolygonItem):
                 return (item, CONNECTION)
 
@@ -114,6 +119,8 @@ class GraphicalView(QtGui.QGraphicsView):
             # then removing any connect if exist
             if itemType == COMPARTMENT_INTERIOR:
                 self.removeConnector()
+            elif itemType == ITEM:
+                self.showConnector(self.state["press"]["item"])
             # self.layoutPt.plugin.mainWindow.objectEditSlot(self.state["press"]["item"].mobj, False)
         else:
             self.resetState()
@@ -141,29 +148,27 @@ class GraphicalView(QtGui.QGraphicsView):
         self.state["move"]["happened"] = True
         itemType = self.state["press"]["type"]
         item     = self.state["press"]["item"]
+        
         if itemType == CONNECTOR:
-            self.drawExpectedConnection(event)
-            self.removeConnector()
-            #print("connect objects")
+            ''' connecting 2 object is removed and movement is impled'''
+            actionType = str(item.data(0).toString())
+            if actionType == "move":
+                initial = item.parent().pos()
+                final = self.mapToScene(event.pos())
+                displacement = final-initial
+                if not isinstance(item.parent(),FuncItem) and not isinstance(item.parent(),CplxItem):
+                    self.removeConnector()
+                    item.parent().moveBy(displacement.x(), displacement.y())
+                    if isinstance(item,PoolItem):
+                        for funcItem in item.childItems():
+                            if isinstance(funcItem,FuncItem):
+                                self.layoutPt.updateArrow(funcItem)
+                self.state["press"]["pos"] = event.pos()
+                self.layoutPt.positionChange(item.parent().mobj)
 
         if itemType == ITEM:
-            parent  = item.getParentGraphicsObject()
-            initial = parent.mapFromScene(self.mapToScene(self.state["press"]["pos"]))
-            final   = parent.mapFromScene(self.mapToScene(event.pos()))
-            displacement = final - initial
-            #print("Displacement", displacement),item.__class__, " par ",parent
-            if not isinstance(item,FuncItem) and not isinstance(item,CplxItem):
-                #print "item at displacement ",item
-                self.removeConnector()
-                item.moveBy(displacement.x(), displacement.y())
-                if isinstance(item,PoolItem):
-                    for funcItem in item.childItems():
-                        if isinstance(funcItem,FuncItem):
-                            self.layoutPt.updateArrow(funcItem)
-            self.state["press"]["pos"] = event.pos()
-            self.layoutPt.positionChange(self.state["press"]["item"].mobj)
-
-            # item.setPos(item.getParentGraphicsObject().mapFromScene(self.mapToScene(event.pos())))
+            print "editor mouse movement, moving item is disabled"
+            self.drawExpectedConnection(event)
 
         if itemType == COMPARTMENT_BOUNDARY:
             initial = self.mapToScene(self.state["press"]["pos"])
@@ -173,10 +178,6 @@ class GraphicalView(QtGui.QGraphicsView):
             item.moveBy(displacement.x(), displacement.y())
             self.layoutPt.positionChange(item.mobj.path)
             self.state["press"]["pos"] = event.pos()
-
-            # QtGui.QGraphicsView.mouseMoveEvent(self, event)
-            # self.state["press"]["item"].qgtextPositionChange.emit(self.state["press"]["item"].mobj, event.pos())
-            # event.ignore()
 
         if itemType == COMPARTMENT_INTERIOR:
             if self.customrubberBand == None:
@@ -208,8 +209,10 @@ class GraphicalView(QtGui.QGraphicsView):
             
         # if itemType == ITEM:
         #     dragging the item
-
+    
+  
     def drawExpectedConnection(self, event):
+        self.connectionSource = self.state["press"]["item"]
         sourcePoint      = self.connectionSource.mapToScene(
             self.connectionSource.boundingRect().center()
                                           )
@@ -229,6 +232,29 @@ class GraphicalView(QtGui.QGraphicsView):
                                            , destinationPoint.x()
                                            , destinationPoint.y()
                                            )
+
+        '''
+        print " drawExpectedConnection ()() ",self.state["item"]["press"].mobj
+        sourcePoint      = self.connectionSource.mapToScene(
+            self.connectionSource.boundingRect().center()
+                                          )
+        destinationPoint = self.mapToScene(event.pos())
+        if self.expectedConnection is None:
+            self.expectedConnection = QGraphicsLineItem( sourcePoint.x()
+                                                       , sourcePoint.y()
+                                                       , destinationPoint.x()
+                                                       , destinationPoint.y()
+                                                       )
+            self.expectedConnection.setPen(QPen(Qt.Qt.DashLine))
+
+            self.sceneContainerPt.addItem(self.expectedConnection)
+        else:
+            self.expectedConnection.setLine( sourcePoint.x()
+                                           , sourcePoint.y()
+                                           , destinationPoint.x()
+                                           , destinationPoint.y()
+                                           )
+        '''
     def removeExpectedConnection(self):
         #print("removeExpectedConnection")
         self.sceneContainerPt.removeItem(self.expectedConnection)
@@ -237,9 +263,15 @@ class GraphicalView(QtGui.QGraphicsView):
 
     def removeConnector(self):
         try:
-            if self.connectionSign is not None:    
-                self.sceneContainerPt.removeItem(self.connectionSign)
-                self.connectionSign = None
+            for l,k in self.connectorlist.items():
+                if k is not None:
+                    self.sceneContainerPt.removeItem(k)
+                    self.connectorlist[l] = None
+            '''
+            if self.connectionSign is not None:
+                    # self.sceneContainerPt.removeItem(self.connectionSign)
+                    # self.connectionSign = None
+            '''
         except:
             #print("Exception received!")
             pass
@@ -252,21 +284,60 @@ class GraphicalView(QtGui.QGraphicsView):
         self.removeConnector()
         self.connectionSource = item
         rectangle = item.boundingRect()
-        self.connectionSign = QGraphicsPixmapItem(
-            QPixmap.fromImage(self.connectionSignImage.scaled( rectangle.height()
-                                                             , rectangle.height() 
-                                                             )))
-        
-        self.connectionSign.setParentItem(item.parentItem())
-        self.connectionSign.setPos(0.0,0.0)
-        position = item.mapToParent(rectangle.topRight())
-        self.connectionSign.moveBy( position.x()
-                                  , position.y() - rectangle.height() / 2.0
-                                  )
-        #print "self.connectionSign at showConnector",self.connectionSign
-        # self.sceneContainerPt.addItem(self.connectionSign)
-        self.connectionSign.setToolTip("Drag to connect.")
-
+        for l,k in self.connectorlist.items():
+            self.xDisp = 0
+            self.yDisp = 0
+            if l == "move":
+                self.connectionSign = QtSvg.QGraphicsSvgItem('/home/harsha/trunk/gui/icons/move.svg')
+                self.connectionSign.setData(0, QtCore.QVariant("move"))
+                self.connectionSign.setParent(self.connectionSource)
+                self.connectionSign.setToolTip("Drag to connect.")
+                self.connectionSign.setScale(
+                    (1.0 * rectangle.height()) / self.connectionSign.boundingRect().height()
+                                            )
+                position = item.mapToParent(rectangle.topRight())
+                self.connectorlist["move"] = self.connectionSign
+            elif l == "delete":
+                self.connectionSign = QtSvg.QGraphicsSvgItem('/home/harsha/trunk/gui/icons/delete.svg')
+                self.connectionSign.setParent(self.connectionSource)
+                self.connectionSign.setData(0, QtCore.QVariant("delete"))
+                self.connectionSign.setScale(
+                    (1.0 * rectangle.height()) / self.connectionSign.boundingRect().height()
+                                            )
+                position = item.mapToParent(rectangle.bottomRight())
+                self.connectionSign.setToolTip("Delete the object")
+                self.connectorlist["delete"] = self.connectionSign
+            elif l == "clone":
+                
+                self.connectionSign = QtSvg.QGraphicsSvgItem('/home/harsha/trunk/gui/icons/clone.svg')
+                self.connectionSign.setData(0, QtCore.QVariant("clone"))
+                self.connectionSign.setParent(self.connectionSource)
+                self.connectionSign.setScale(
+                    (1.0 * rectangle.height()) / self.connectionSign.boundingRect().height()
+                                            )
+                position = item.mapToParent(rectangle.bottomLeft())
+                self.xDisp = 15
+                self.yDisp = 2
+                self.connectionSign.setToolTip("Clone the object")
+                self.connectorlist["clone"] = self.connectionSign
+            elif l == "plot":
+                self.connectionSign = QtSvg.QGraphicsSvgItem('/home/harsha/trunk/gui/icons/plot.svg')
+                self.connectionSign.setData(0, QtCore.QVariant("plot"))
+                self.connectionSign.setParent(self.connectionSource)
+                self.connectionSign.setScale(
+                    (1.0 * rectangle.height()) / self.connectionSign.boundingRect().height()
+                                            )
+                position = item.mapToParent(rectangle.topLeft())
+                self.xDisp = 15
+                self.yDisp = 0
+                self.connectionSign.setToolTip("plot the object")
+                self.connectorlist["plot"] = self.connectionSign
+            self.connectionSign.setFlag(QtGui.QGraphicsItem.ItemIsSelectable,True)
+            self.connectionSign.setParentItem(item.parentItem())
+            self.connectionSign.setPos(0.0,0.0)
+            self.connectionSign.moveBy( position.x()-self.xDisp
+                                      , position.y() +self.yDisp - rectangle.height() / 2.0
+                                      )
     def editorMouseReleaseEvent(self, event):
         if self.move:
             self.move = False
@@ -286,25 +357,25 @@ class GraphicalView(QtGui.QGraphicsView):
         clickedItemType = self.state["press"]["type"]
 
         if clickedItemType == ITEM:
-            #print("Adding Connector")
-            self.showConnector(self.state["press"]["item"])
-            # self.state["press"]["item"].setSelected(True)
             if not self.state["move"]["happened"]:
+                self.showConnector(self.state["press"]["item"])
                 self.layoutPt.plugin.mainWindow.objectEditSlot(self.state["press"]["item"].mobj, True)
-            #print(self.state)
-
-        if clickedItemType  == CONNECTOR :
-
-            if self.state["move"]["happened"]:
-                self.removeConnector()
+            else:
                 if isinstance(self.state["release"]["item"], KineticsDisplayItem):
-                    #print("Connection created =>", self.connectionSource, self.state["release"]["item"])
-                    self.populate_srcdes( self.connectionSource.mobj
+                    self.populate_srcdes( self.state["press"]["item"].mobj
                                         , self.state["release"]["item"].mobj
                                         )
-                self.removeExpectedConnection()
-
-            self.resetState()
+                    self.removeExpectedConnection()
+            
+        if clickedItemType  == CONNECTOR:
+            actionType = str(item.data(0).toString())
+            if actionType == "delete":
+                self.removeConnector()
+                self.deleteObj([item.parent()])
+            elif actionType == "plot":
+                print "plot this molecule"
+            elif actionType == "clone":
+                print "clone this object"
         if clickedItemType == CONNECTION:
             popupmenu = QtGui.QMenu('PopupMenu', self)
             popupmenu.addAction("Delete", lambda : self.deleteConnection(item))
@@ -530,32 +601,56 @@ class GraphicalView(QtGui.QGraphicsView):
          
 
     def deleteSelections(self,x0,y0,x1,y1):
+        print "deleteSelections"
         if( x1-x0 > 0  and y1-y0 >0):
+            print " inside if",x1-x0,y1-y0
             self.rubberbandlist = self.sceneContainerPt.items(self.mapToScene(QtCore.QRect(x0, y0, x1 - x0, y1 - y0)).boundingRect(), Qt.Qt.IntersectsItemShape)
+            print "rubberbandlist ",self.rubberbandlist
             for unselectitem in self.rubberbandlist:
                 if unselectitem.isSelected() == True:
                     unselectitem.setSelected(0)
-            
-            deleteSolver(self.layoutPt.modelRoot)
-            for item in (qgraphicsitem for qgraphicsitem in self.rubberbandlist):
-                #First Loop to remove all the enz b'cos if parent (which is a Pool) is removed,
-                #then it will created problem at qgraphicalitem not having parent.
-                #So first delete enz and then delete pool
-                    if isinstance(item,MMEnzItem) or isinstance(item,EnzItem) or isinstance(item,CplxItem):
-                        self.deleteItem(item)
-            for item in (qgraphicsitem for qgraphicsitem in self.rubberbandlist):
-                if not (isinstance(item,MMEnzItem) or isinstance(item,EnzItem) or isinstance(item,CplxItem)):
-                    if isinstance(item,PoolItem):
-                        plot = moose.wildcardFind(self.layoutPt.modelRoot+'/data/graph#/#')
-                        for p in plot:
-                            if len(p.neighbors['requestOut']):
-                                if item.mobj.path == moose.element(p.neighbors['requestOut'][0]).path:
-                                    p.tick = -1
-                                    moose.delete(p)
-                                    self.layoutPt.plugin.view.getCentralWidget().plotWidgetContainer.plotAllData()
-                    self.deleteItem(item)
+            self.deleteObj(self.rubberbandlist)
+            # deleteSolver(self.layoutPt.modelRoot)
+            # for item in (qgraphicsitem for qgraphicsitem in self.rubberbandlist):
+            #     #First Loop to remove all the enz b'cos if parent (which is a Pool) is removed,
+            #     #then it will created problem at qgraphicalitem not having parent.
+            #     #So first delete enz and then delete pool
+            #         if isinstance(item,MMEnzItem) or isinstance(item,EnzItem) or isinstance(item,CplxItem):
+            #             self.deleteItem(item)
+            # for item in (qgraphicsitem for qgraphicsitem in self.rubberbandlist):
+            #     if not (isinstance(item,MMEnzItem) or isinstance(item,EnzItem) or isinstance(item,CplxItem)):
+            #         if isinstance(item,PoolItem):
+            #             plot = moose.wildcardFind(self.layoutPt.modelRoot+'/data/graph#/#')
+            #             for p in plot:
+            #                 if len(p.neighbors['requestOut']):
+            #                     if item.mobj.path == moose.element(p.neighbors['requestOut'][0]).path:
+            #                         p.tick = -1
+            #                         moose.delete(p)
+            #                         self.layoutPt.plugin.view.getCentralWidget().plotWidgetContainer.plotAllData()
+            #         self.deleteItem(item)
         self.selections = []
-    
+    def deleteObj(self,item):
+        self.rubberbandlist = item
+        deleteSolver(self.layoutPt.modelRoot)
+        print "self.rubberbandlist in deleteObj ",self.rubberbandlist
+        for item in (qgraphicsitem for qgraphicsitem in self.rubberbandlist):
+            #First Loop to remove all the enz b'cos if parent (which is a Pool) is removed,
+            #then it will created problem at qgraphicalitem not having parent.
+            #So first delete enz and then delete pool
+                if isinstance(item,MMEnzItem) or isinstance(item,EnzItem) or isinstance(item,CplxItem):
+                    self.deleteItem(item)
+        for item in (qgraphicsitem for qgraphicsitem in self.rubberbandlist):
+            if not (isinstance(item,MMEnzItem) or isinstance(item,EnzItem) or isinstance(item,CplxItem)):
+                if isinstance(item,PoolItem):
+                    plot = moose.wildcardFind(self.layoutPt.modelRoot+'/data/graph#/#')
+                    for p in plot:
+                        if len(p.neighbors['requestOut']):
+                            if item.mobj.path == moose.element(p.neighbors['requestOut'][0]).path:
+                                p.tick = -1
+                                moose.delete(p)
+                                self.layoutPt.plugin.view.getCentralWidget().plotWidgetContainer.plotAllData()
+                self.deleteItem(item)
+
     def deleteConnection(self,item):
         #Delete moose connection, i.e one can click on connection arrow and delete the connection
         deleteSolver(self.layoutPt.modelRoot)
