@@ -8,11 +8,13 @@ from PyQt4.QtGui import QImage
 from PyQt4.QtGui import QGraphicsPixmapItem
 from PyQt4.QtGui import QGraphicsLineItem
 from PyQt4.QtGui import QPen
+from PyQt4.QtCore import pyqtSignal
 # from PyQt4.QtGui import pyqtSignal
 from kkitCalcArrow import *
 from kkitOrdinateUtil import *
 from setsolver import *
 from PyQt4 import QtSvg
+from moose import utils
 
 class GraphicalView(QtGui.QGraphicsView):
 
@@ -284,9 +286,39 @@ class GraphicalView(QtGui.QGraphicsView):
         self.removeConnector()
         self.connectionSource = item
         rectangle = item.boundingRect()
-        for l,k in self.connectorlist.items():
+
+        for l in self.connectorlist.keys():
             self.xDisp = 0
             self.yDisp = 0
+            self.connectionSign = None
+            if isinstance(item.mobj,PoolBase) or isinstance(item.mobj,ReacBase):
+                if l == "clone":
+                    self.connectionSign = QtSvg.QGraphicsSvgItem('/home/harsha/trunk/gui/icons/clone.svg')
+                    self.connectionSign.setData(0, QtCore.QVariant("clone"))
+                    self.connectionSign.setParent(self.connectionSource)
+                    self.connectionSign.setScale(
+                        (1.0 * rectangle.height()) / self.connectionSign.boundingRect().height()
+                                                )
+                    position = item.mapToParent(rectangle.bottomLeft())
+                    print " posiition for cloning ",rectangle.topLeft() , " and ",rectangle.bottomLeft()
+                    self.xDisp = 15
+                    self.yDisp = 2
+                    self.connectionSign.setToolTip("Clone the object")
+                    self.connectorlist["clone"] = self.connectionSign 
+            if isinstance(item.mobj,PoolBase):
+                if l == "plot":
+                    self.connectionSign = QtSvg.QGraphicsSvgItem('/home/harsha/trunk/gui/icons/plot.svg')
+                    self.connectionSign.setData(0, QtCore.QVariant("plot"))
+                    self.connectionSign.setParent(self.connectionSource)
+                    self.connectionSign.setScale(
+                        (1.0 * rectangle.height()) / self.connectionSign.boundingRect().height()
+                                                )
+                    position = item.mapToParent(rectangle.topLeft())
+                    self.xDisp = 15
+                    self.yDisp = 0
+                    self.connectionSign.setToolTip("plot the object")
+                    self.connectorlist["plot"] = self.connectionSign
+
             if l == "move":
                 self.connectionSign = QtSvg.QGraphicsSvgItem('/home/harsha/trunk/gui/icons/move.svg')
                 self.connectionSign.setData(0, QtCore.QVariant("move"))
@@ -307,37 +339,15 @@ class GraphicalView(QtGui.QGraphicsView):
                 position = item.mapToParent(rectangle.bottomRight())
                 self.connectionSign.setToolTip("Delete the object")
                 self.connectorlist["delete"] = self.connectionSign
-            elif l == "clone":
-                
-                self.connectionSign = QtSvg.QGraphicsSvgItem('/home/harsha/trunk/gui/icons/clone.svg')
-                self.connectionSign.setData(0, QtCore.QVariant("clone"))
-                self.connectionSign.setParent(self.connectionSource)
-                self.connectionSign.setScale(
-                    (1.0 * rectangle.height()) / self.connectionSign.boundingRect().height()
-                                            )
-                position = item.mapToParent(rectangle.bottomLeft())
-                self.xDisp = 15
-                self.yDisp = 2
-                self.connectionSign.setToolTip("Clone the object")
-                self.connectorlist["clone"] = self.connectionSign
-            elif l == "plot":
-                self.connectionSign = QtSvg.QGraphicsSvgItem('/home/harsha/trunk/gui/icons/plot.svg')
-                self.connectionSign.setData(0, QtCore.QVariant("plot"))
-                self.connectionSign.setParent(self.connectionSource)
-                self.connectionSign.setScale(
-                    (1.0 * rectangle.height()) / self.connectionSign.boundingRect().height()
-                                            )
-                position = item.mapToParent(rectangle.topLeft())
-                self.xDisp = 15
-                self.yDisp = 0
-                self.connectionSign.setToolTip("plot the object")
-                self.connectorlist["plot"] = self.connectionSign
-            self.connectionSign.setFlag(QtGui.QGraphicsItem.ItemIsSelectable,True)
-            self.connectionSign.setParentItem(item.parentItem())
-            self.connectionSign.setPos(0.0,0.0)
-            self.connectionSign.moveBy( position.x()-self.xDisp
-                                      , position.y() +self.yDisp - rectangle.height() / 2.0
-                                      )
+
+            if self.connectionSign != None:
+                self.connectionSign.setFlag(QtGui.QGraphicsItem.ItemIsSelectable,True)
+                self.connectionSign.setParentItem(item.parentItem())
+                self.connectionSign.setPos(0.0,0.0)
+                self.connectionSign.moveBy( position.x()-self.xDisp
+                                          , position.y() +self.yDisp - rectangle.height() / 2.0
+                                          )
+
     def editorMouseReleaseEvent(self, event):
         if self.move:
             self.move = False
@@ -373,9 +383,21 @@ class GraphicalView(QtGui.QGraphicsView):
                 self.removeConnector()
                 self.deleteObj([item.parent()])
             elif actionType == "plot":
-                print "plot this molecule"
+                element = moose.element(item.parent().mobj.path)
+                if isinstance (element,moose.PoolBase):
+                    self.graph = moose.element(self.modelRoot+'/data/graph_0')
+                    tablePath = utils.create_table_path(moose.element(self.modelRoot), self.graph, element, "Conc")
+                    table     = utils.create_table(tablePath, element, "Conc","Table2")
             elif actionType == "clone":
-                print "clone this object"
+                t = moose.element(item.parent().mobj)
+                name = t.name
+                name +="_1"
+                ct = moose.element(moose.copy(t,t.parent,name,1))
+                #Topology of the model is changing so solver is deleted
+                deleteSolver(self.layoutPt.modelRoot)
+                # final = self.mapToScene(event.pos())
+                # print "ct " ,ct,final.x(),final.y()
+
         if clickedItemType == CONNECTION:
             popupmenu = QtGui.QMenu('PopupMenu', self)
             popupmenu.addAction("Delete", lambda : self.deleteConnection(item))
@@ -632,7 +654,7 @@ class GraphicalView(QtGui.QGraphicsView):
     def deleteObj(self,item):
         self.rubberbandlist = item
         deleteSolver(self.layoutPt.modelRoot)
-        print "self.rubberbandlist in deleteObj ",self.rubberbandlist
+        #print "self.rubberbandlist in deleteObj ",self.rubberbandlist
         for item in (qgraphicsitem for qgraphicsitem in self.rubberbandlist):
             #First Loop to remove all the enz b'cos if parent (which is a Pool) is removed,
             #then it will created problem at qgraphicalitem not having parent.
