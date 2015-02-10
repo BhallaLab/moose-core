@@ -47,6 +47,29 @@ const Cinfo* PsdMesh::initCinfo()
 			"is always just one voxel per PSD. ",
 			&PsdMesh::getElecComptMap
 		);
+		static ReadOnlyValueFinfo< PsdMesh, vector< Id > > elecComptList(
+			"elecComptList",
+			"Vector of Ids of all electrical compartments in this "
+			"PsdMesh. Ordering is as per the tree structure built in "
+			"the NeuroMesh, and may differ from Id order. Ordering "
+			"matches that used for startVoxelInCompt and endVoxelInCompt",
+			&PsdMesh::getElecComptMap
+		);
+		static ReadOnlyValueFinfo< PsdMesh, vector< unsigned int > > startVoxelInCompt(
+			"startVoxelInCompt",
+			"Index of first voxel that maps to each electrical "
+			"compartment. This is a trivial function in the PsdMesh, as"
+			"we have a single voxel per spine. So just a vector of "
+			"its own indices.",
+			&PsdMesh::getStartVoxelInCompt
+		);
+		static ReadOnlyValueFinfo< PsdMesh, vector< unsigned int > > endVoxelInCompt(
+			"endVoxelInCompt",
+			"Index of end voxel that maps to each electrical "
+			"compartment. Since there is just one voxel per electrical "
+			"compartment in the spine, this is just a vector of index+1",
+			&PsdMesh::getEndVoxelInCompt
+		);
 
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
@@ -73,6 +96,9 @@ const Cinfo* PsdMesh::initCinfo()
 	static Finfo* psdMeshFinfos[] = {
 		&thickness,			// ValueFinfo
 		&elecComptMap,		// ReadOnlyValueFinfo
+		&elecComptList,		// ReadOnlyValueFinfo
+		&startVoxelInCompt,		// ReadOnlyValueFinfo
+		&endVoxelInCompt,		// ReadOnlyValueFinfo
 		&psdList,			// DestFinfo
 	};
 
@@ -142,6 +168,22 @@ void PsdMesh::setThickness( double v )
 vector< Id > PsdMesh::getElecComptMap() const
 {
 	return elecCompt_;
+}
+
+vector< unsigned int > PsdMesh::getStartVoxelInCompt() const
+{
+	vector< unsigned int > ret( elecCompt_.size() );
+	for ( unsigned int i = 0; i < ret.size(); ++i ) 
+		ret[i] = i;
+	return ret;
+}
+
+vector< unsigned int > PsdMesh::getEndVoxelInCompt() const
+{
+	vector< unsigned int > ret( elecCompt_.size() );
+	for ( unsigned int i = 0; i < ret.size(); ++i ) 
+		ret[i] = i+1;
+	return ret;
 }
 
 /**

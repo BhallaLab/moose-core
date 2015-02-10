@@ -26,6 +26,12 @@ Id Shell::doCopy( Id orig, ObjId newParent, string newName,
 			newParent.path() << " ) : numCopies must be > 0, using 1 \n";
 		return Id();
 	}
+	if ( Neutral::child( newParent.eref(), newName ) != Id() ) {
+		cout << "Error: Shell::doCopy: Cannot copy object '" << newName <<
+			   "' onto '" << newParent.path() << 
+			   "' since object with same name already present.\n";
+		return Id();
+	}
 
 	Eref sheller( shelle_, 0 );
 	Id newElm = Id::nextId();
