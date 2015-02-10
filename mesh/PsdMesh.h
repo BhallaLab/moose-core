@@ -59,6 +59,11 @@ class PsdMesh: public MeshCompt
 
 		vector< Id > getElecComptMap() const;
 
+		/// Returns index of first voxel mapping to elec compt
+		vector< unsigned int > getStartVoxelInCompt() const;
+		/// Returns index of end voxel mapping to elec compt, just first+1
+		vector< unsigned int > getEndVoxelInCompt() const;
+
 		//////////////////////////////////////////////////////////////////
 		// FieldElement assignment stuff for MeshEntries
 		//////////////////////////////////////////////////////////////////

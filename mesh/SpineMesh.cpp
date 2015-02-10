@@ -77,6 +77,29 @@ const Cinfo* SpineMesh::initCinfo()
 			"is always just one voxel per spine head. ",
 			&SpineMesh::getElecComptMap
 		);
+		static ReadOnlyValueFinfo< SpineMesh, vector< Id > > elecComptList(
+			"elecComptList",
+			"Vector of Ids of all electrical compartments in this "
+			"SpineMesh. Ordering is as per the tree structure built in "
+			"the NeuroMesh, and may differ from Id order. Ordering "
+			"matches that used for startVoxelInCompt and endVoxelInCompt",
+			&SpineMesh::getElecComptMap
+		);
+		static ReadOnlyValueFinfo< SpineMesh, vector< unsigned int > > startVoxelInCompt(
+			"startVoxelInCompt",
+			"Index of first voxel that maps to each electrical "
+			"compartment. This is a trivial function in the SpineMesh, as"
+			"we have a single voxel per spine. So just a vector of "
+			"its own indices.",
+			&SpineMesh::getStartVoxelInCompt
+		);
+		static ReadOnlyValueFinfo< SpineMesh, vector< unsigned int > > endVoxelInCompt(
+			"endVoxelInCompt",
+			"Index of end voxel that maps to each electrical "
+			"compartment. Since there is just one voxel per electrical "
+			"compartment in the spine, this is just a vector of index+1",
+			&SpineMesh::getEndVoxelInCompt
+		);
 
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
@@ -99,6 +122,9 @@ const Cinfo* SpineMesh::initCinfo()
 	static Finfo* spineMeshFinfos[] = {
 		&parentVoxel,		// ReadOnlyValueFinfo
 		&elecComptMap,		// ReadOnlyValueFinfo
+		&elecComptList,		// ReadOnlyValueFinfo
+		&startVoxelInCompt,		// ReadOnlyValueFinfo
+		&endVoxelInCompt,		// ReadOnlyValueFinfo
 		&spineList,			// DestFinfo
 		// psdListOut(),		// SrcFinfo
 	};
@@ -179,6 +205,22 @@ vector< Id > SpineMesh::getElecComptMap() const
 	vector< Id > ret( spines_.size() );
 	for ( unsigned int i = 0; i < spines_.size(); ++i ) 
 		ret[i] = spines_[i].headId();
+	return ret;
+}
+
+vector< unsigned int > SpineMesh::getStartVoxelInCompt() const
+{
+	vector< unsigned int > ret( spines_.size() );
+	for ( unsigned int i = 0; i < ret.size(); ++i ) 
+		ret[i] = i;
+	return ret;
+}
+
+vector< unsigned int > SpineMesh::getEndVoxelInCompt() const
+{
+	vector< unsigned int > ret( spines_.size() );
+	for ( unsigned int i = 0; i < ret.size(); ++i ) 
+		ret[i] = i+1;
 	return ret;
 }
 
