@@ -75,8 +75,7 @@ class DotFile():
         dotText =  dotText + "\n}"
         if not fileName:
             print(dotText)
-            return
-
+            return 
         with open(fileName, 'w') as graphviz:
             print_utils.dump("GRAPHVIZ"
                     , [ "Writing compartment topology to file {}".format(fileName)
@@ -192,7 +191,7 @@ def getConnectedCompartments(obj):
 # @param Ignore paths containing this pattern. A regular expression. 
 #
 # @return None. 
-def writeGraphviz(filename=None, pat='/##[TYPE=Compartment]', ignore=None):
+def writeGraphviz(filename=None, pat='/##', ignore=None):
     '''This is  a generic function. It takes the the pattern, search for paths
     and write a graphviz file.
     '''
@@ -243,13 +242,11 @@ def writeGraphviz(filename=None, pat='/##[TYPE=Compartment]', ignore=None):
     [ dotFile.addNode(c.path, shape=dotFile.chemShape) for c in chemList ]
 
     # Write messages are edges.
-    msgs = b.filterPaths(b.msgs, ignorePat)
-    for m in msgs:
-        sources, targets = m.e1, m.e2
-        for i, s in enumerate(sources):
-            pass
-            #print s, targets[i]
-
+    for sm in b.filterPaths(b.msgs['SingleMsg'], ignorePat):
+        src, tgt = sm.e1, sm.e2
+        dotFile.addEdge(src.path, tgt.path)
+    print_utils.dump("TODO", "OneToAllMsgs are not added to graphviz file")
+            
 
     # Now add the pulse-gen 
     pulseGens = b.pulseGens

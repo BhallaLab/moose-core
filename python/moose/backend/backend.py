@@ -46,7 +46,7 @@ class Backend(object):
         self.pulseGens = []
         self.tables = []
         self.synchans = []
-        self.msgs = []
+        self.msgs = { 'SingleMsg' : [], 'OneToAllMsg' : [] }
         # A set of tuple of sourceCompartment.path and targetCompartment.path
         self.connections = set()
         self.clock = _moose.wildcardFind('/clock')[0]
@@ -104,8 +104,8 @@ class Backend(object):
 
     def getMsgs(self, **kwargs):
         """Get all messages in MOOSE"""
-        self.msgs = _moose.wildcardFind('/##[TYPE=SingleMsg]')
-        self.msgs += _moose.wildcardFind('/##[TYPE=OneToAllMsg]')
+        self.msgs['SingleMsg'] = _moose.wildcardFind('/##[TYPE=SingleMsg]')
+        self.msgs['OneToAllMsg'] = _moose.wildcardFind('/##[TYPE=OneToAllMsg]')
         return self.msgs
 
     def populateStoreHouse(self, **kwargs):
