@@ -87,7 +87,7 @@ else()
 endif()
 
 # STATS INSIDE MOOSE
-option(ENABLE_LOGGER  "Enable MOOSE logger" ON)
+option(ENABLE_LOGGER  "Enable MOOSE logger" OFF)
 if(ENABLE_LOGGER)
     message("++ LOGGER ENABLED")
     add_definitions(-DENABLE_LOGGER)
