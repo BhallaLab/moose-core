@@ -17,7 +17,7 @@ __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
 import sys
-from .. import _moose
+from .. import _moose as moose
 from .. import print_utils
 import inspect
 import re
@@ -25,12 +25,18 @@ import backend
 
 pathPat = re.compile(r'.+?\[\d+\]$')
 
-def dictToString(**kwargs):
+def dictToString(params):
     """Convert a dictionary to a valid graphviz option line """
     txt = []
-    for k in kwargs:
-        txt.append('{}="{}"'.format(k, kwargs[k]))
+    for k in params:
+        txt.append('{}="{}"'.format(k, params[k]))
     return ','.join(txt)
+
+def textToColor(text):
+    maxVal = 16777215
+    textVal = hex(sum([1677*ord(x) for x in text]))
+    textVal = '#{}'.format(textVal[2:])
+    return textVal
 
 ##
 # @brief Write a graphviz file.
@@ -43,16 +49,35 @@ class DotFile():
         self.tableShape = "folder"
         self.pulseShape = "invtriangle"
         self.chemShape = "cds"
+        self.channelShape = 'doubleoctagon'
 
     def setIgnorePat(self, ignorePat):
         self.ignorePat = ignorePat
 
     def addNode(self, nodeName, **kwargs):
         """Return a line of dot for given node """
+        params = {}
+        for k in kwargs:
+            if k == 'node_type':
+                typeNode = kwargs[k]
+                if typeNode == moose.Compartment:
+                    params['shape'] = 'box3d'
+                    params['label'] = self.label(nodeName)
+                elif typeNode == moose.HHChannel:
+                    params['shape'] = 'doubleoctagon'
+                    params['label'] = ''
+                    params['fixedsize'] = 'true'
+                    params['width'] = 0.1
+                    params['height'] = 0.1
+                    params['color'] = textToColor(nodeName)
+                else:
+                    pass
+            else:
+                params[k] = kwargs[k]
         nodeName = self.fix(nodeName)
-        if 'label' not in kwargs.keys():
+        if 'label' not in params.keys():
             kwargs['label'] = self.label(nodeName)
-        nodeText = '"{}" [{}];'.format(nodeName, dictToString(**kwargs))
+        nodeText = '"{}" [{}];'.format(nodeName, dictToString(params))
         self.add(nodeText)
         return nodeText
 
@@ -60,7 +85,7 @@ class DotFile():
         """Add an edge line to graphviz file """
         node1 = self.fix(node1)
         node2 = self.fix(node2)
-        txt = '"{}" -> "{}" [{}];'.format(node1, node2, dictToString(**kwargs))
+        txt = '"{}" -> "{}" [{}];'.format(node1, node2, dictToString(kwargs))
         self.add(txt)
         return txt
 
@@ -116,7 +141,7 @@ class DotFile():
         self.addNode(p, shape=self.compShape, color='blue')
 
     def addChannel(self, c, chan):
-        """Find synapses in channels and add to dot."""
+        """Find synapses in channels and add to graphviz."""
         for sc in chan:
            if "moose.SynChan" not in sc.__str__():
                continue
@@ -168,13 +193,13 @@ def getConnectedCompartments(obj):
 
     paths = []
     comps = []
-    obj = _moose.Neutral(obj.path)
+    obj = moose.Neutral(obj.path)
     paths.append(obj)
     while len(paths) > 0:
         source =  paths.pop()
         targets = source.neighbors['output']
         for t in targets:
-            t = _moose.Neutral(t)
+            t = moose.Neutral(t)
             if "moose.Compartment" in t.__str__():
                 comps.append(t)
             elif "moose.ZombieCompartment" in t.__str__():
@@ -225,26 +250,30 @@ def writeGraphviz(filename=None, pat='/##', ignore=None):
 
     dotFile.add(header)
 
-    for c in compList:
-        # Each compartment has neighbours connected by axial resistance.
-        if c.neighbors['raxial']:
-            [dotFile.addRAxial(c, n) for n in c.neighbors['raxial']]
-        elif c.neighbors['axial']:
-            [dotFile.addAxial(c, n) for n in c.neighbors['axial']]
-        else:
-            dotFile.addLonelyCompartment(c)
+    #for c in compList:
+        ## Each compartment has neighbours connected by axial resistance.
+        #if c.neighbors['raxial']:
+            #[dotFile.addRAxial(c, n) for n in c.neighbors['raxial']]
+        #elif c.neighbors['axial']:
+            #[dotFile.addAxial(c, n) for n in c.neighbors['axial']]
+        #else:
+            #dotFile.addLonelyCompartment(c)
 
-        # Each comparment might also have a synapse on it.
-        chans = c.neighbors['channel']
-        [dotFile.addChannel(c, chan) for chan in chans]
+        ## Each comparment might also have a synapse on it.
+        #chans = c.neighbors['channel']
+        #[dotFile.addChannel(c, chan) for chan in chans]
 
     
-    [ dotFile.addNode(c.path, shape=dotFile.chemShape) for c in chemList ]
+    #[ dotFile.addNode(c.path, shape=dotFile.chemShape) for c in chemList ]
 
     # Write messages are edges.
     for sm in b.filterPaths(b.msgs['SingleMsg'], ignorePat):
-        src, tgt = sm.e1, sm.e2
-        dotFile.addEdge(src.path, tgt.path)
+        srcs, tgts = sm.e1, sm.e2
+        for i, src in enumerate(srcs):
+            tgt = tgts[i]
+            dotFile.addNode(src.path, node_type=type(src))
+            dotFile.addNode(tgt.path, node_type=type(tgt))
+            dotFile.addEdge(src.path, tgt.path)
     print_utils.dump("TODO", "OneToAllMsgs are not added to graphviz file")
             
 
