@@ -22,7 +22,7 @@ from os import path
 import moose
 from moose import utils as moose_utils
 from moose.neuroml import utils as neuroml_utils
-from ChannelML import ChannelML
+from ChannelML import ChannelML, make_new_synapse
 
 class MorphML():
 
@@ -83,6 +83,10 @@ class MorphML():
             self.combineSegments = params['combineSegments']
         else:
             self.combineSegments = False
+        if 'createPotentialSynapses' in params.keys():
+            self.createPotentialSynapses = params['createPotentialSynapses']
+        else:
+            self.createPotentialSynapses = False
         print "readMorphML using combineSegments = ", self.combineSegments
 
         ###############################################
@@ -412,14 +416,26 @@ class MorphML():
         if connectivity is not None:
             for potential_syn_loc in cell.findall(".//{"+self.nml+"}potential_syn_loc"):
                 if 'synapse_direction' in potential_syn_loc.attrib.keys():
-                    if potential_syn_loc.attrib['synapse_direction'] in ['post']:
+                    if potential_syn_loc.attrib['synapse_direction'] in ['post','preAndOrPost']:
                         self.set_group_compartment_param(cell, cellname, potential_syn_loc,\
                             'synapse_type', potential_syn_loc.attrib['synapse_type'],\
                             self.nml, mechanismname='synapse')
-                    if potential_syn_loc.attrib['synapse_direction'] in ['pre']:
+                    if potential_syn_loc.attrib['synapse_direction'] in ['pre','preAndOrPost']:
                         self.set_group_compartment_param(cell, cellname, potential_syn_loc,\
                             'spikegen_type', potential_syn_loc.attrib['synapse_type'],\
                             self.nml, mechanismname='spikegen')
+
+        ##########################################################
+        #### annotate each compartment with the cablegroups it belongs to
+        for cablegroupname in self.cablegroupsDict.keys():
+            for cableid in self.cablegroupsDict[cablegroupname]:
+                for compartment in self.cellDictByCableId[cellname][1][cableid]:
+                    cableStringPath = compartment.path+'/cable_groups'
+                    cableString = moose.Mstring(cableStringPath)
+                    if cableString.value == '':
+                        cableString.value += cablegroupname
+                    else:
+                        cableString.value += ',' + cablegroupname
 
         print "Finished loading into library, cell: ",cellname
         return {cellname:self.segDict}
@@ -465,10 +481,12 @@ class MorphML():
         elif name == 'g_refrac':
             print "Sorry, current moose.LIF doesn't support g_refrac."
         elif mechanismname is 'synapse': # synapse being added to the compartment
-            ## these are potential locations, we do not actually make synapses.
-            #synapse = self.context.deepCopy(self.context.pathToId('/library/'+value),\
-            #    self.context.pathToId(compartment.path),value) # value contains name of synapse i.e. synapse_type
-            #moose.connect(compartment,"channel", synapse, "channel")
+            ## these are potential locations, we do not actually make synapses,
+            ## unless the user has explicitly asked for it
+            if self.createPotentialSynapses:
+                syn_name = value
+                if not moose.exists(compartment.path+'/'+syn_name):
+                    make_new_synapse(syn_name, compartment, syn_name, self.nml_params)
             ## I assume below that compartment name has _segid at its end
             segid = string.split(compartment.name,'_')[-1] # get segment id from compartment name
             self.segDict[segid][5].append(value)
