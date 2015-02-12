@@ -131,6 +131,12 @@ class NeuroML():
             nmlR = NetworkML(self.nml_params)
             return nmlR.readNetworkML(root_element,self.cellsDict,\
                     params=params,lengthUnits=self.lengthUnits)
+        ## cellsDict = { cellname: (segDict, cableDict), ... } # multiple cells
+        ## where segDict = { segid1 : [ segname,(proximalx,proximaly,proximalz),
+        ##     (distalx,distaly,distalz),diameter,length,[potential_syn1, ... ] ] , ... }
+        ## segname is "<name>_<segid>" because 1) guarantees uniqueness,
+        ##     & 2) later scripts obtain segid from the compartment's name!
+        ## and cableDict = { cablegroupname : [campartment1name, compartment2name, ... ], ... }
         self.cellsDict = nmlR.cellSegmentDict
 
 def loadNeuroML_L123(filename):
