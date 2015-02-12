@@ -59,11 +59,11 @@ class MorphML():
 
     def readMorphML(self,cell,params={},lengthUnits="micrometer"):
         """
-        returns {cellname:segDict}
+        returns cellDict = { cellname: (segDict, cableDict) } # note: single cell only
         where segDict = { segid1 : [ segname,(proximalx,proximaly,proximalz),
             (distalx,distaly,distalz),diameter,length,[potential_syn1, ... ] ] , ... }
         segname is "<name>_<segid>" because 1) guarantees uniqueness,
-        2) later scripts obtain segid from the compartment's name!
+            & 2) later scripts obtain segid from the compartment's name!
         and cableDict = { cablegroupname : [campartment1name, compartment2name, ... ], ... }
         """
         if lengthUnits in ['micrometer','micron']:
