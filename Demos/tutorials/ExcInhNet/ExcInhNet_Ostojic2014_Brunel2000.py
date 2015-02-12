@@ -25,9 +25,10 @@ Author: Aditya Gilra, NCBS, Bangalore, October, 2014.
 ## import modules and functions to be used
 import numpy as np
 import matplotlib.pyplot as plt
-import random
 import time
 import moose
+
+import random
 
 np.random.seed(100) # set seed for reproducibility of simulations
 random.seed(100) # set seed for reproducibility of simulations
@@ -45,7 +46,7 @@ Rm = 20e6    #Ohm      # Only taum is needed, but LIF neuron accepts
 Cm = 1e-9    #F        # Rm and Cm and constructs taum=Rm*Cm
 taum = Rm*Cm #s        # Membrane time constant is 20 ms in Ostojic 2014.
 vr = -55e-3  #V        # Reset potential
-inp = 24e-3/taum #V/s  # inp = Iinject/Cm to each neuron
+inp = 20.1e-3/taum #V/s  # inp = Iinject/Cm to each neuron
                        # same as setting el=-41 mV and inp=0
 Iinject = inp*Cm       # LIF neuron has injection current as param
 
@@ -62,8 +63,8 @@ NI = N-NE         # Number of inhibitory cells
 # Simulation parameters
 #############################################
 
-simtime = 1.      #s # Simulation time
-dt = 1e-3         #s # time step
+simtime = 0.2      #s # Simulation time
+dt = 0.001e-3         #s # time step
 
 #############################################
 # Network parameters: synapses (not for ExcInhNetBase)
@@ -83,16 +84,6 @@ g = 5.0           # -gJ is the inh strength. For exc-inh balance g >~ f(1-f)=4
 syndelay = 0.5e-3 + dt # s     # synaptic delay:
                                # 0 ms gives similar result contrary to Ostojic?!
 refrT = 0.5e-3    # s     # absolute refractory time -- 0 ms gives similar result
-
-#############################################
-# STDP parameters: synapses (not for ExcInhNetBase)
-#############################################
-
-## pre before post
-aPlus0 = 100     # fraction of the base strength J 
-tauPlus = 0.01  # 10 ms
-aMinus0 = -100    # fraction of the base strength J 
-tauMinus = 0.01  # 10 ms
 
 #############################################
 # Exc-Inh network base class without connections
@@ -149,7 +140,7 @@ class ExcInhNetBase:
         self.dt = dt
         self.simtime = simtime
         self.T = np.ceil(simtime/dt)
-        self.trange = np.arange(0,self.simtime,dt)   
+        self.trange = np.arange(0,self.simtime+dt,dt)   
         
         self._init_network(**kwargs)
         if plotif:
@@ -183,7 +174,9 @@ class ExcInhNetBase:
         numVms = 10
         self.plots = moose.Table( '/plotVms', numVms )
         ## draw numVms out of N neurons
-        nrnIdxs = random.sample(range(self.N),numVms)
+        # not using random.sample() here since Brian version isn't
+        #nrnIdxs = random.sample(range(self.N),numVms)
+        nrnIdxs = range(self.N)
         for i in range( numVms ):
             moose.connect( self.network.vec[nrnIdxs[i]], 'VmOut', \
                 self.plots.vec[i], 'input')
@@ -269,6 +262,7 @@ class ExcInhNet(ExcInhNetBase):
         moose.connect( self.syns, 'activationOut', self.network, \
             'activation', 'OneToOne' )
 
+        random.seed(100) # set seed for reproducibility of simulations
         ## Connections from some Exc/Inh neurons to each neuron
         for i in range(0,self.N):
             ## each neuron has incC number of synapses
@@ -329,9 +323,10 @@ def extra_plots(net):
     ## extra plots apart from the spike rasters
     ## individual neuron Vm-s
     plt.figure()
-    plt.plot(net.trange,net.plots.vec[0].vector[0:len(net.trange)])
-    plt.plot(net.trange,net.plots.vec[1].vector[0:len(net.trange)])
-    plt.plot(net.trange,net.plots.vec[2].vector[0:len(net.trange)])
+    tlen = len(net.plots.vec[0].vector)
+    plt.plot(net.trange[:tlen],net.plots.vec[0].vector)
+    plt.plot(net.trange[:tlen],net.plots.vec[1].vector)
+    plt.plot(net.trange[:tlen],net.plots.vec[2].vector)
     plt.xlabel('time (s)')
     plt.ylabel('Vm (V)')
     plt.title("Vm-s of 3 LIF neurons (spike = reset).")
@@ -345,32 +340,37 @@ def extra_plots(net):
     for nrni in range(num_to_plot):
         rate = rate_from_spiketrain(\
             net.spikes.vec[nrni].vector,simtime,dt)
-        plt.plot(timeseries,rate)
+        plt.plot(timeseries[:len(rate)],rate)
     plt.title("Rates of "+str(num_to_plot)+" exc nrns")
     plt.ylabel("Hz")
-    plt.ylim(0,100)
+    #plt.ylim(0,100)
     plt.subplot(222)
     for nrni in range(num_to_plot):
         rate = rate_from_spiketrain(\
             net.spikes.vec[net.NmaxExc+nrni].vector,simtime,dt)
-        plt.plot(timeseries,rate)
+        plt.plot(timeseries[:len(rate)],rate)
     plt.title("Rates of "+str(num_to_plot)+" inh nrns")
-    plt.ylim(0,100)
+    #plt.ylim(0,100)
 
     ## population firing rates
     plt.subplot(223)
-    rate = rate_from_spiketrain(net.spikesExc.vector,simtime,dt)\
+    allspikes = []
+    for nrni in range(net.NmaxExc):
+        allspikes.extend(net.spikes.vec[nrni].vector)
+    #rate = rate_from_spiketrain(net.spikesExc.vector,simtime,dt)\
+    #    /float(net.NmaxExc) # per neuron
+    rate = rate_from_spiketrain(allspikes,simtime,dt)\
         /float(net.NmaxExc) # per neuron
     plt.plot(timeseries,rate)
-    plt.ylim(0,100)
+    #plt.ylim(0,100)
     plt.title("Exc population rate")
     plt.ylabel("Hz")
     plt.xlabel("Time (s)")
     plt.subplot(224)
     rate = rate_from_spiketrain(net.spikesInh.vector,simtime,dt)\
         /float(net.N-net.NmaxExc) # per neuron    
-    plt.plot(timeseries,rate)
-    plt.ylim(0,100)
+    plt.plot(timeseries[:rate],rate)
+    #plt.ylim(0,100)
     plt.title("Inh population rate")
     plt.xlabel("Time (s)")
 
@@ -385,8 +385,11 @@ if __name__=='__main__':
     print net
     ## Important to distribute the initial Vm-s
     ## else weak coupling gives periodic synchronous firing
+    ## not distributing Vm-s randomly to ensure match with Brian data
+    #net.simulate(simtime,plotif=True,\
+    #    v0=np.random.uniform(el-20e-3,vt,size=N))
     net.simulate(simtime,plotif=True,\
-        v0=np.random.uniform(el-20e-3,vt,size=N))
+        v0=np.linspace(el-20e-3,vt,N))
 
     extra_plots(net)
     plt.show()
