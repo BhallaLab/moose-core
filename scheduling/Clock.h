@@ -36,8 +36,9 @@ class Clock
 		double getDt() const;
 		double getRunTime() const;
 		double getCurrentTime() const;
-		unsigned int getNsteps( ) const;
-		unsigned int getCurrentStep() const;
+		unsigned long getNsteps( ) const;
+		unsigned long getCurrentStep() const;
+		unsigned int getStride( ) const;
 
 		void setTickStep( unsigned int i, unsigned int v );
 		unsigned int getTickStep( unsigned int i ) const;
@@ -60,7 +61,7 @@ class Clock
 		void handleStart( const Eref& e, double runtime );
 
 		/// dest function for message to run simulation for specified steps
-		void handleStep( const Eref& e, unsigned int steps );
+		void handleStep( const Eref& e, unsigned long steps );
 
 		/// dest function for message to trigger reinit.
 		void handleReinit( const Eref& e );
@@ -123,8 +124,8 @@ class Clock
 		void buildTicks( const Eref& e );
 		double runTime_;
 		double currentTime_;
-		unsigned int nSteps_;
-		unsigned int currentStep_;
+		unsigned long nSteps_;
+		unsigned long currentStep_;
 		unsigned int stride_; // Increment to currentStep each cycle.
 		double dt_; /// The minimum dt. All ticks are a multiple of this.
 
