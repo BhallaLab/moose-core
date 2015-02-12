@@ -846,13 +846,13 @@ vector< VoxelJunction >& ret ) const
 	// cylinder cap disk to the plane of the larger disk, provided it is
 	// within the radius of the disk. The subsequent calculations are the
 	// same though.
-	double dr1 = 
+	double dr1 = 	// startOfSelf-to-startOfOther
 			distance(x0_ - other->x0_, y0_ - other->y0_, z0_ - other->z0_ );
-	double dr2 = 
+	double dr2 =  // endOfSelf-to-endOfOther
 			distance(x1_ - other->x1_, y1_ - other->y1_, z1_ - other->z1_ );
-	double dr3 = 
+	double dr3 = // endOfSelf-to-startOfOther
 			distance(x1_ - other->x0_, y1_ - other->y0_, z1_ - other->z0_ );
-	double dr4 = 
+	double dr4 =  // startOfSelf-to-endOfOther
 			distance(x0_ - other->x1_, y0_ - other->y1_, z0_ - other->z1_ );
 
 	if ( dr1 <= dr2 && dr1 <= dr3 && dr1 <= dr4 ) {
@@ -864,6 +864,10 @@ vector< VoxelJunction >& ret ) const
 				xda = 2 * other->r0_ * other->r0_ * PI / 
 						( diffLength_ + other->diffLength_ );
 			ret.push_back( VoxelJunction( 0, 0, xda ) );
+			ret.back().first = 0;
+			ret.back().second = 0;
+			ret.back().firstVol = getMeshEntryVolume( 0 );
+			ret.back().secondVol = other->getMeshEntryVolume( 0 );
 		}
 	} else if ( dr2 <= dr3 && dr2 <= dr4 ) {
 		if ( ( dr2/totLen_ < EPSILON && dr2/other->totLen_ < EPSILON ) ) {
@@ -875,6 +879,10 @@ vector< VoxelJunction >& ret ) const
 						( diffLength_ + other->diffLength_ );
 			ret.push_back( VoxelJunction( numEntries_ - 1, 
 						other->numEntries_ - 1, xda ) );
+			ret.back().first = numEntries_;
+			ret.back().second = other->numEntries_ - 1;
+			ret.back().firstVol = getMeshEntryVolume( numEntries_ - 1 );
+			ret.back().secondVol = other->getMeshEntryVolume( other->numEntries_ - 1 );
 		}
 	} else if ( dr3 <= dr4 ) {
 		if ( ( dr3/totLen_ < EPSILON && dr3/other->totLen_ < EPSILON ) ) {
@@ -885,6 +893,10 @@ vector< VoxelJunction >& ret ) const
 				xda = 2 * other->r0_ * other->r0_ * PI / 
 						( diffLength_ + other->diffLength_ );
 			ret.push_back( VoxelJunction( numEntries_ - 1, 0, xda ) );
+			ret.back().first = numEntries_ - 1;
+			ret.back().second = 0;
+			ret.back().firstVol = getMeshEntryVolume( numEntries_ - 1 );
+			ret.back().secondVol = other->getMeshEntryVolume( 0 );
 		}
 	} else {
 		if ( ( dr4/totLen_ < EPSILON && dr4/other->totLen_ < EPSILON ) ) {
@@ -895,6 +907,10 @@ vector< VoxelJunction >& ret ) const
 				xda = 2 * other->r1_ * other->r1_ * PI / 
 						( diffLength_ + other->diffLength_ );
 			ret.push_back( VoxelJunction( 0, other->numEntries_ - 1, xda ));
+			ret.back().first = 0;
+			ret.back().second = other->numEntries_ - 1;
+			ret.back().firstVol = getMeshEntryVolume( 0 );
+			ret.back().secondVol = other->getMeshEntryVolume( other->numEntries_ - 1 );
 		}
 	}
 }
