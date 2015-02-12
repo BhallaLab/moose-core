@@ -131,6 +131,7 @@ class NeuroML():
             nmlR = NetworkML(self.nml_params)
             return nmlR.readNetworkML(root_element,self.cellsDict,\
                     params=params,lengthUnits=self.lengthUnits)
+        self.cellsDict = nmlR.cellSegmentDict
 
 def loadNeuroML_L123(filename):
     neuromlR = NeuroML()
