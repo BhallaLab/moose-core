@@ -229,6 +229,15 @@ const Cinfo* NeuroMesh::initCinfo()
 				&NeuroMesh::setCellPortion )
 		);
 
+		static DestFinfo setCellPortionList( "cellPortionList",
+			"Tells NeuroMesh to mesh up a subpart of a cell, using a list"
+			" of compartment Ids. For now assumed contiguous."
+			"The first argument is the cell Id. The second is a vector of"
+			"compartment ids to use for the subpart.",
+			new EpFunc2< NeuroMesh, Id, vector< ObjId > >(
+				&NeuroMesh::setCellPortion )
+		);
+
 		//////////////////////////////////////////////////////////////
 		// Field Elements
 		//////////////////////////////////////////////////////////////
@@ -247,6 +256,7 @@ const Cinfo* NeuroMesh::initCinfo()
 		&diffLength,			// Value
 		&geometryPolicy,		// Value
 		&setCellPortion,			// DestFinfo
+		&setCellPortionList,		// DestFinfo
 		spineListOut(),			// SrcFinfo
 		psdListOut(),			// SrcFinfo
 	};
@@ -487,8 +497,7 @@ void NeuroMesh::insertSingleDummy(
 	if ( nodes_[self].calculateLength( dummy ) < EPSILON ) {
 		double length = nodes_[self].getLength();
 		dummy.setX( x - length );
-		double temp = nodes_[self].calculateLength( dummy );
-		assert( doubleEq( temp, length ) );
+		assert( doubleEq( nodes_[self].calculateLength( dummy ), length) );
 	}
 	nodes_.push_back( dummy );
 }
