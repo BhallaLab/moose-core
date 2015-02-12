@@ -155,6 +155,7 @@ class GraphicalView(QtGui.QGraphicsView):
             ''' connecting 2 object is removed and movement is impled'''
             actionType = str(item.data(0).toString())
             if actionType == "move":
+                QtGui.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.CrossCursor))
                 initial = item.parent().pos()
                 final = self.mapToScene(event.pos())
                 displacement = final-initial
@@ -165,6 +166,7 @@ class GraphicalView(QtGui.QGraphicsView):
                         for funcItem in item.childItems():
                             if isinstance(funcItem,FuncItem):
                                 self.layoutPt.updateArrow(funcItem)
+              
                 self.state["press"]["pos"] = event.pos()
                 self.layoutPt.positionChange(item.parent().mobj)
 
@@ -352,7 +354,7 @@ class GraphicalView(QtGui.QGraphicsView):
         if self.move:
             self.move = False
             self.setCursor(Qt.Qt.ArrowCursor)
-
+        
         if self.state["press"]["mode"] == INVALID:
             self.state["release"]["mode"] = INVALID
             self.resetState()
@@ -376,9 +378,12 @@ class GraphicalView(QtGui.QGraphicsView):
                                         , self.state["release"]["item"].mobj
                                         )
                     self.removeExpectedConnection()
-            
+
         if clickedItemType  == CONNECTOR:
-            actionType = str(item.data(0).toString())
+            actionType = str(self.state["press"]["item"].data(0).toString())
+            if actionType == "move":
+                QtGui.QApplication.setOverrideCursor(QtGui.QCursor(Qt.Qt.ArrowCursor))
+
             if actionType == "delete":
                 self.removeConnector()
                 #QtGui.QApplication.setOverrideCursor(QtCore.Qt.CrossCursor)
