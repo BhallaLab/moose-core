@@ -19,6 +19,7 @@ import math
 
 import moose
 from moose.neuroml import utils
+from moose import utils as moose_utils
 
 class ChannelML():
 
@@ -461,3 +462,36 @@ class ChannelML():
 
     def replace(self, text, findstr, replacestr):
         return string.join(string.split(text,findstr),replacestr)
+
+def make_new_synapse(syn_name, postcomp, syn_name_full, nml_params):
+    ## if channel does not exist in library load it from xml file
+    if not moose.exists('/library/'+syn_name):
+        cmlR = ChannelML(nml_params)
+        model_filename = syn_name+'.xml'
+        model_path = utils.find_first_file(model_filename,nml_params['model_dir'])
+        if model_path is not None:
+            cmlR.readChannelMLFromFile(model_path)
+        else:
+            raise IOError(
+                'For mechanism {0}: files {1} not found under {2}.'.format(
+                    mechanismname, model_filename, self.model_dir
+                )
+            )
+    ## deep copies the library SynChan and SynHandler
+    ## to instances under postcomp named as <arg3>
+    synid = moose.copy(moose.element('/library/'+syn_name),postcomp,syn_name_full)
+    synhandlerid = moose.copy(moose.element('/library/'+syn_name+'/handler'),\
+            postcomp,syn_name_full+'/handler')
+    syn = moose.SynChan(synid)
+    synhandler = moose.element(synhandlerid) # returns SimpleSynHandler or STDPSynHandler
+    print synhandler.className
+    ## connect the SimpleSynHandler or the STDPSynHandler to the SynChan (double exp)
+    moose.connect( synhandler, 'activationOut', syn, 'activation' )
+    # mgblock connections if required
+    childmgblock = moose_utils.get_child_Mstring(syn,'mgblockStr')
+    #### connect the post compartment to the synapse
+    if childmgblock.value=='True': # If NMDA synapse based on mgblock, connect to mgblock
+        mgblock = moose.Mg_block(syn.path+'/mgblock')
+        moose.connect(postcomp,"channel", mgblock, "channel")
+    else: # if SynChan or even NMDAChan, connect normally
+        moose.connect(postcomp,"channel", syn, "channel")

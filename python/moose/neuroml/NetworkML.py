@@ -17,7 +17,7 @@ import string
 import os
 from math import cos, sin
 from MorphML import MorphML
-from ChannelML import ChannelML
+from ChannelML import ChannelML, make_new_synapse
 import moose
 from moose.neuroml.utils import meta_ns, nml_ns, find_first_file, tweak_model
 from moose import utils
@@ -45,6 +45,13 @@ class NetworkML():
         e.g. baseline synapses on granule cells connected to 'includePopulation' mitrals;
             these synapses receive file based pre-synaptic events,
             not presynaptically connected to a cell.
+        In params, you further specify:
+            'createPotentialSynapses' : True (False by default)
+            to create synapses at all potential locations/compartments specified in the MorphML cell file
+            even before Projections tag is parsed.
+            'combineSegments' : True (False by default)
+            to ask neuroml to combine segments belonging to a cable
+            (Neuron generates multiple segments per section).
         """
         print "reading file ... ", filename
         tree = ET.parse(filename)
@@ -172,30 +179,30 @@ class NetworkML():
         for childId in obj.children:
             try:
                 childobj = moose.element(childId)
+                if childobj.className in ['Compartment','SymCompartment']:
+                    ## SymCompartment inherits from Compartment,
+                    ## so below wrapping by Compartment() is fine for both Compartment and SymCompartment
+                    child = moose.Compartment(childId)
+                    x0 = child.x0
+                    y0 = child.y0
+                    x0new = x0*cos(ztheta)-y0*sin(ztheta)
+                    y0new = x0*sin(ztheta)+y0*cos(ztheta)
+                    child.x0 = x0new + x
+                    child.y0 = y0new + y
+                    child.z0 += z
+                    x1 = child.x
+                    y1 = child.y
+                    x1new = x1*cos(ztheta)-y1*sin(ztheta)
+                    y1new = x1*sin(ztheta)+y1*cos(ztheta)
+                    child.x = x1new + x
+                    child.y = y1new + y
+                    child.z += z
+                if len(childobj.children)>0:
+                    self.translate_rotate(childobj,x,y,z,ztheta) # recursive translation+rotation
             except TypeError:  # in async13, gates which have not been created still 'exist'
                                 # i.e. show up as a child, but cannot be wrapped.
                 pass
             ## if childobj is a compartment or symcompartment translate, else skip it
-            if childobj.className in ['Compartment','SymCompartment']:
-                ## SymCompartment inherits from Compartment,
-                ## so below wrapping by Compartment() is fine for both Compartment and SymCompartment
-                child = moose.Compartment(childId)
-                x0 = child.x0
-                y0 = child.y0
-                x0new = x0*cos(ztheta)-y0*sin(ztheta)
-                y0new = x0*sin(ztheta)+y0*cos(ztheta)
-                child.x0 = x0new + x
-                child.y0 = y0new + y
-                child.z0 += z
-                x1 = child.x
-                y1 = child.y
-                x1new = x1*cos(ztheta)-y1*sin(ztheta)
-                y1new = x1*sin(ztheta)+y1*cos(ztheta)
-                child.x = x1new + x
-                child.y = y1new + y
-                child.z += z
-            if len(childobj.children)>0:
-                self.translate_rotate(childobj,x,y,z,ztheta) # recursive translation+rotation
 
     def createProjections(self):
         self.projectionDict={}
@@ -288,12 +295,12 @@ class NetworkML():
         gradedchild = utils.get_child_Mstring(libsyn,'graded')
         if libsyn.className == 'KinSynChan' or gradedchild.value == 'True': # create a new synapse
             syn_name_full = syn_name+'_'+utils.underscorize(pre_path)
-            self.make_new_synapse(syn_name, postcomp, syn_name_full)
+            make_new_synapse(syn_name, postcomp, syn_name_full, self.nml_params)
         else:
             ## if syn doesn't exist in this compartment, create it
             syn_name_full = syn_name
             if not moose.exists(post_path+'/'+syn_name_full):
-                self.make_new_synapse(syn_name, postcomp, syn_name_full)
+                make_new_synapse(syn_name, postcomp, syn_name_full, self.nml_params)
         ## moose.element is a function that checks if path exists,
         ## and returns the correct object, here SynChan
         syn = moose.element(post_path+'/'+syn_name_full) # wrap the SynChan in this compartment
@@ -406,27 +413,3 @@ class NetworkML():
             #print 'len = ',len(synhandler.synapse)
             #for i,syn_syn in enumerate(synhandler.synapse):
             #    print i,'th weight =',syn_syn.weight,'\n'
-
-    def make_new_synapse(self, syn_name, postcomp, syn_name_full):
-        ## if channel does not exist in library load it from xml file
-        if not moose.exists('/library/'+syn_name):
-            cmlR = ChannelML(self.nml_params)
-            cmlR.readChannelMLFromFile(syn_name+'.xml')
-        ## deep copies the library SynChan and SynHandler
-        ## to instances under postcomp named as <arg3>
-        synid = moose.copy(moose.element('/library/'+syn_name),postcomp,syn_name_full)
-        synhandlerid = moose.copy(moose.element('/library/'+syn_name+'/handler'),\
-                postcomp,syn_name_full+'/handler')
-        syn = moose.SynChan(synid)
-        synhandler = moose.element(synhandlerid) # returns SimpleSynHandler or STDPSynHandler
-        print synhandler.className
-        ## connect the SimpleSynHandler or the STDPSynHandler to the SynChan (double exp)
-        moose.connect( synhandler, 'activationOut', syn, 'activation' )
-        # mgblock connections if required
-        childmgblock = utils.get_child_Mstring(syn,'mgblockStr')
-        #### connect the post compartment to the synapse
-        if childmgblock.value=='True': # If NMDA synapse based on mgblock, connect to mgblock
-            mgblock = moose.Mg_block(syn.path+'/mgblock')
-            moose.connect(postcomp,"channel", mgblock, "channel")
-        else: # if SynChan or even NMDAChan, connect normally
-            moose.connect(postcomp,"channel", syn, "channel")
