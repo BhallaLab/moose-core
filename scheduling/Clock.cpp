@@ -139,7 +139,7 @@ const Cinfo* Clock::initCinfo()
 			"Current simulation time",
 			&Clock::getCurrentTime
 		);
-		static ReadOnlyValueFinfo< Clock, unsigned int > nsteps( 
+		static ReadOnlyValueFinfo< Clock, unsigned long > nsteps( 
 			"nsteps",
 			"Number of steps to advance the simulation, in units of the smallest timestep on the clock ticks",
 			&Clock::getNsteps
@@ -149,7 +149,12 @@ const Cinfo* Clock::initCinfo()
 			"Number of clock ticks",
 			&Clock::getNumTicks
 		);
-		static ReadOnlyValueFinfo< Clock, unsigned int > currentStep( 
+		static ReadOnlyValueFinfo< Clock, unsigned int > stride( 
+			"stride",
+			"Number by which the simulation advances the current step on each cycle. stride = smallest active timestep/smallest defined timestep.",
+			&Clock::getStride
+		);
+		static ReadOnlyValueFinfo< Clock, unsigned long > currentStep( 
 			"currentStep",
 			"Current simulation step",
 			&Clock::getCurrentStep
@@ -207,8 +212,10 @@ const Cinfo* Clock::initCinfo()
 		);
 
 		static DestFinfo step( "step", 
-			"Sets off the simulation for the specified # of steps",
-			new EpFunc1< Clock, unsigned int >(&Clock::handleStep )
+			"Sets off the simulation for the specified # of steps. "
+			"Here each step advances the simulation by the timestep of the "
+			"smallest tick that is actually in use. ",
+			new EpFunc1< Clock, unsigned long >(&Clock::handleStep )
 		);
 
 		static DestFinfo stop( "stop", 
@@ -241,6 +248,7 @@ const Cinfo* Clock::initCinfo()
 		&currentTime,		// ReadOnlyValue
 		&nsteps,			// ReadOnlyValue
 		&numTicks,			// ReadOnlyValue
+		&stride,			// ReadOnlyValue
 		&currentStep,		// ReadOnlyValue
 		&dts,				// ReadOnlyValue
 		&isRunning,			// ReadOnlyValue
@@ -479,12 +487,12 @@ double Clock::getCurrentTime() const
 	return currentTime_;
 }
 
-unsigned int Clock::getNsteps() const
+unsigned long Clock::getNsteps() const
 {
 	return nSteps_;
 }
 
-unsigned int Clock::getCurrentStep() const
+unsigned long Clock::getCurrentStep() const
 {
 	return currentStep_;
 }
@@ -494,6 +502,10 @@ unsigned int Clock::getNumTicks() const
 	return numTicks;
 }
 
+unsigned int Clock::getStride() const
+{
+	return stride_;
+}
 
 vector< double > Clock::getDts() const
 {
@@ -643,12 +655,13 @@ void Clock::handleStart( const Eref& e, double runtime )
 {
 	if ( stride_ == 0 || stride_ == ~0U )
 			stride_ = 1;
-	unsigned int n = stride_ * round( runtime / ( stride_ * dt_ ) );
+	unsigned long n = round( runtime / ( stride_ * dt_ ) );
 	handleStep( e, n );
 }
 
-void Clock::handleStep( const Eref& e, unsigned int numSteps )
+void Clock::handleStep( const Eref& e, unsigned long numSteps )
 {
+	numSteps *= stride_;
 	if ( isRunning_ || doingReinit_ ) {
 		cout << "Clock::handleStart: Warning: simulation already in progress.\n Command ignored\n";
 		return;
@@ -662,7 +675,7 @@ void Clock::handleStep( const Eref& e, unsigned int numSteps )
 		isRunning_ && currentStep_ < nSteps_; currentStep_ += stride_ )
 	{
 		// Curr time is end of current step.
-		unsigned int endStep = currentStep_ + stride_;
+		unsigned long endStep = currentStep_ + stride_;
 		currentTime_ = info_.currTime = dt_ * endStep;
 		vector< unsigned int >::const_iterator k = activeTicksMap_.begin();
 		for ( vector< unsigned int>::iterator j = 
