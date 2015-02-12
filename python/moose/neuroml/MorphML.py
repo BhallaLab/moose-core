@@ -41,8 +41,8 @@ class MorphML():
     def readMorphMLFromFile(self,filename,params={}):
         """
         specify global params as a dict (presently none implemented)
-        returns { cellname1 : segDict, ... }
-        see readMorphML(...) for segDict 
+        returns { cellname1 : (segDict,cableDict), ... }
+        see readMorphML(...) for segDict and cableDict
         """
         print filename
         tree = ET.parse(filename)
@@ -64,6 +64,7 @@ class MorphML():
             (distalx,distaly,distalz),diameter,length,[potential_syn1, ... ] ] , ... }
         segname is "<name>_<segid>" because 1) guarantees uniqueness,
         2) later scripts obtain segid from the compartment's name!
+        and cableDict = { cablegroupname : [campartment1name, compartment2name, ... ], ... }
         """
         if lengthUnits in ['micrometer','micron']:
             self.length_factor = 1e-6
@@ -427,7 +428,9 @@ class MorphML():
 
         ##########################################################
         #### annotate each compartment with the cablegroups it belongs to
+        self.cableDict = {}
         for cablegroupname in self.cablegroupsDict.keys():
+            comp_list = []
             for cableid in self.cablegroupsDict[cablegroupname]:
                 for compartment in self.cellDictByCableId[cellname][1][cableid]:
                     cableStringPath = compartment.path+'/cable_groups'
@@ -436,9 +439,11 @@ class MorphML():
                         cableString.value += cablegroupname
                     else:
                         cableString.value += ',' + cablegroupname
+                    comp_list.append(compartment.name)
+            self.cableDict[cablegroupname] = comp_list
 
         print "Finished loading into library, cell: ",cellname
-        return {cellname:self.segDict}
+        return {cellname:(self.segDict,self.cableDict)}
 
     def set_group_compartment_param(self, cell, cellname, parameter,\
                 name, value, grouptype, mechanismname=None):

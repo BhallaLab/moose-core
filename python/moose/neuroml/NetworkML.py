@@ -125,7 +125,7 @@ class NetworkML():
                         ## population is populationname, self.populationDict[population][0] is cellname
                         cell_name = self.populationDict[population][0]
                         segment_path = self.populationDict[population][1][int(cell_id)].path+'/'+\
-                            self.cellSegmentDict[cell_name][segment_id][0]
+                            self.cellSegmentDict[cell_name][0][segment_id][0]
                         compartment = moose.Compartment(segment_path)
                         moose.connect(iclamp,'output',compartment,'injectMsg')
 
@@ -252,7 +252,7 @@ class NetworkML():
                             pre_segment_id = connection.attrib['pre_segment_id']
                         else: pre_segment_id = "0" # assume default segment 0, usually soma
                         pre_segment_path = self.populationDict[source][1][int(pre_cell_id)].path+'/'+\
-                            self.cellSegmentDict[pre_cell_name][pre_segment_id][0]
+                            self.cellSegmentDict[pre_cell_name][0][pre_segment_id][0]
                     else:
                         # I've removed extra excitation provided via files, so below comment doesn't apply.
                         # 'file[+<glomnum>]_<filenumber>' # glomnum is
@@ -264,7 +264,7 @@ class NetworkML():
                         post_segment_id = connection.attrib['post_segment_id']
                     else: post_segment_id = "0" # assume default segment 0, usually soma
                     post_segment_path = self.populationDict[target][1][int(post_cell_id)].path+'/'+\
-                        self.cellSegmentDict[post_cell_name][post_segment_id][0]
+                        self.cellSegmentDict[post_cell_name][0][post_segment_id][0]
                     self.projectionDict[projectionname][2].append((syn_name, pre_segment_path, post_segment_path))
                     properties = connection.findall('./{'+nml_ns+'}properties')
                     if len(properties)==0:
