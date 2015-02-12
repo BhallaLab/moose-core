@@ -381,7 +381,29 @@ class GraphicalView(QtGui.QGraphicsView):
             actionType = str(item.data(0).toString())
             if actionType == "delete":
                 self.removeConnector()
-                self.deleteObj([item.parent()])
+                #QtGui.QApplication.setOverrideCursor(QtCore.Qt.CrossCursor)
+                pixmap = QtGui.QPixmap(24, 24)
+                pixmap.fill(QtCore.Qt.transparent)
+                painter = QtGui.QPainter()
+                painter.begin(pixmap)
+                painter.setRenderHints(painter.Antialiasing)
+                pen = QtGui.QPen(QtGui.QBrush(QtGui.QColor("black")), 1)
+                pen.setWidthF(1.5)
+                painter.setPen(pen)
+                painter.drawLine(8,8,16,16)
+                painter.drawLine(8,16,16,8)
+                painter.end()
+                QtGui.QApplication.setOverrideCursor(QtGui.QCursor(pixmap))
+                reply = QtGui.QMessageBox.question(self, "Deleting Object","Do want to delete object and its connections",
+                                                   QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+                if reply == QtGui.QMessageBox.Yes:
+                    #delete solver first as topology is changing
+                    deleteSolver(self.modelRoot)
+                    self.deleteObj([item.parent()])
+                    QtGui.QApplication.restoreOverrideCursor()
+                else:
+                    QtGui.QApplication.restoreOverrideCursor()
+
             elif actionType == "plot":
                 element = moose.element(item.parent().mobj.path)
                 if isinstance (element,moose.PoolBase):
@@ -389,14 +411,20 @@ class GraphicalView(QtGui.QGraphicsView):
                     tablePath = utils.create_table_path(moose.element(self.modelRoot), self.graph, element, "Conc")
                     table     = utils.create_table(tablePath, element, "Conc","Table2")
             elif actionType == "clone":
+                #Solver should be deleted
+                    ## if there is change in 'Topology' of the model
+                    ## or if copy has to made then oject should be in unZombify mode
+                deleteSolver(self.modelRoot)
+                iR = 0
+                iP = 0
                 t = moose.element(item.parent().mobj)
                 name = t.name
-                name +="_1"
+                if isinstance(item.parent().mobj,PoolBase):
+                    name += self.objExist(t,iP) 
+                if isinstance(item.parent().mobj,ReacBase):
+                    name += self.objExist(t,iR) 
                 ct = moose.element(moose.copy(t,t.parent,name,1))
-                #Topology of the model is changing so solver is deleted
-                deleteSolver(self.layoutPt.modelRoot)
-                # final = self.mapToScene(event.pos())
-                # print "ct " ,ct,final.x(),final.y()
+                print " ct ",ct
 
         if clickedItemType == CONNECTION:
             popupmenu = QtGui.QMenu('PopupMenu', self)
@@ -455,7 +483,13 @@ class GraphicalView(QtGui.QGraphicsView):
 
         self.resetState()
 
-
+    def objExist(self,mObj,index):
+        index += 1
+        fPath = mObj.parent.path+'/'+mObj.name+'_'+str(index)
+        if moose.exists(fPath):
+            return self.objExist(mObj,index)
+        else:
+            return ('_'+str(index))
 
     def selectSelections(self, selections):
         for selection in selections :
