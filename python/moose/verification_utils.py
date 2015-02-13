@@ -93,13 +93,11 @@ class MooseTestCase( unittest.TestCase ):
                              " 'moose.Compartment'"
                             ]
                         )
-                sys.exit()
             else:
-                for synapse in synchan.synapses:
-                    debug.dump("TODO"
-                            , "Write verification test for output of each synapse"
-                            , frame = inspect.curretframe()
-                            )
+                debug.dump("TODO"
+                        , "Write verification test for output of each synapse"
+                        , frame = inspect.currentframe()
+                        )
 
     
     def test_unused_tables(self):
