@@ -50,6 +50,9 @@ class DotFile():
         self.pulseShape = "invtriangle"
         self.chemShape = "cds"
         self.channelShape = 'doubleoctagon'
+        self.synChanShape = 'point'
+        self.synapseShape = 'star'
+        self.nodes = set()
 
     def setIgnorePat(self, ignorePat):
         self.ignorePat = ignorePat
@@ -57,6 +60,7 @@ class DotFile():
     def addNode(self, nodeName, **kwargs):
         """Return a line of dot for given node """
         params = {}
+        nodeName = self.fix(nodeName)
         for k in kwargs:
             if k == 'node_type':
                 typeNode = kwargs[k]
@@ -64,27 +68,31 @@ class DotFile():
                     params['shape'] = 'box3d'
                     params['label'] = self.label(nodeName)
                 elif typeNode == moose.HHChannel:
-                    params['shape'] = 'doubleoctagon'
+                    params['shape'] = self.channelShape
                     params['label'] = ''
                     params['fixedsize'] = 'true'
                     params['width'] = 0.1
                     params['height'] = 0.1
                     params['color'] = textToColor(nodeName)
+                elif typeNode == moose.SimpleSynHandler:
+                    params['shape'] = self.synapseShape
+                elif typeNode == moose.SynChan:
+                    params['shape'] = self.synChanShape
                 else:
                     pass
             else:
                 params[k] = kwargs[k]
-        nodeName = self.fix(nodeName)
         if 'label' not in params.keys():
-            kwargs['label'] = self.label(nodeName)
+            params['label'] = self.label(nodeName)
         nodeText = '"{}" [{}];'.format(nodeName, dictToString(params))
+        self.nodes.add(nodeName)
         self.add(nodeText)
         return nodeText
 
-    def addEdge(self, node1, node2, **kwargs):
+    def addEdge(self, elem1, elem2, **kwargs):
         """Add an edge line to graphviz file """
-        node1 = self.fix(node1)
-        node2 = self.fix(node2)
+        node1 = self.fix(elem1.path)
+        node2 = self.fix(elem2.path)
         txt = '"{}" -> "{}" [{}];'.format(node1, node2, dictToString(kwargs))
         self.add(txt)
         return txt
@@ -129,7 +137,7 @@ class DotFile():
         self.addNode(lhs, shape=self.compShape)
         rhs = compB.path
         self.addNode(rhs, shape=self.compShape)
-        self.addEdge(rhs, lhs)
+        self.addEdge(compA, compB)
 
     def addAxial(self, compA, compB):
         """Add compA and compB axially. """
@@ -140,29 +148,45 @@ class DotFile():
         p = compartment.path
         self.addNode(p, shape=self.compShape, color='blue')
 
-    def addChannel(self, c, chan):
-        """Find synapses in channels and add to graphviz."""
-        for sc in chan:
-           if "moose.SynChan" not in sc.__str__():
-               continue
-           for synapse in sc.synapse:
-               spikeSources =  synapse.neighbors['addSpike']
-               for ss in spikeSources:
-                   for s in ss:
-                       for vmSource in  s.neighbors['Vm']:
-                           self.addEdge(c.path
-                                   , vmSource.path
-                                   , color = 'red'
-                                   , label = 'synapse'
-                                   , arrowhead = 'dot'
-                                   )
+    def addChannel(self, c, sc):
+       """Find synapses in channels and add to graphviz."""
+       print "Add channel", c, sc
+       from IPython import embed
+       embed()
+       for synapse in sc.synapses:
+           print("Adding synapse %s" % synaspe)
+           spikeSources =  synapse.neighbors['addSpike']
+           for ss in spikeSources:
+               for s in ss:
+                   for vmSource in  s.neighbors['Vm']:
+                       self.addEdge(c
+                               , vmSource
+                               , color = 'red'
+                               , label = 'synapse'
+                               , arrowhead = 'dot'
+                               )
+
+    def addSynHandler(self, synHandler, tgt):
+        self.addNode(synHandler.path, node_type=type(synHandler))
+        for synapse in synHandler.synapse:
+            self.addSynapse(synapse, synHandler)
+        self.addEdge(synHandler, tgt)
+
+    def addSynapse(self, synapse, synHandler):
+        """Get a synapse and add an edge from its pre-synaptic terminal """
+        for spikeGen in synapse.neighbors['addSpike']:
+            for sg in spikeGen:
+                for pre in sg.neighbors['Vm']:
+                    self.addEdge(pre, synHandler)
+
+        
 
     def addPulseGen(self, pulseGen, compartments):
         """Add a pulse-generator to dotfile """
         nodeName = pulseGen.path
         self.addNode(nodeName, shape=self.pulseShape)
         for c in compartments:
-            self.addEdge(pulseGen.path, c.path, color='red', label='pulse') 
+            self.addEdge(pulseGen, c, color='red', label='pulse') 
 
 
     def addTable(self, table, sources):
@@ -170,7 +194,7 @@ class DotFile():
         nodeName = table.path
         self.addNode(nodeName, shape=self.tableShape)
         for s in sources:
-            self.addEdge(s.path, nodeName, label='table', color='blue')
+            self.addEdge(s, table, label='table', color='blue')
 
 
 ##
@@ -213,15 +237,20 @@ def getConnectedCompartments(obj):
 # @param filename Name of the output file.
 # @param pat If set only this pat is searched, else every electrical and
 # chemical compartment is searched and dumped to graphviz file.
+# @param cluster. When set to true, cluster nodes together as per the root of their
+# path e.g. /library/cell1 and /library/cell2 are grouped together because they
+# are both under /library path.
 # @param Ignore paths containing this pattern. A regular expression. 
 #
 # @return None. 
-def writeGraphviz(filename=None, pat='/##', ignore=None):
+def writeGraphviz(filename=None, pat='/##', cluster=True, ignore=None):
     '''This is  a generic function. It takes the the pattern, search for paths
     and write a graphviz file.
     '''
 
     global dotFile
+
+    nodes = set()
 
     print_utils.dump("GRAPHVIZ"
             , "Preparing graphviz file for writing"
@@ -236,44 +265,23 @@ def writeGraphviz(filename=None, pat='/##', ignore=None):
         ignorePat = re.compile(r'%s' % ignore, re.I)
         dotFile.setIgnorePat(ignorePat)
 
-    compList = b.filterPaths(b.compartments, ignorePat)
-    chemList = b.filterPaths(b.chemEntities, ignorePat)
-
-    if not compList:
-        print_utils.dump("WARN"
-                , "No compartment found."
-                , frame = inspect.currentframe()
-                )
-
+    #chemList = b.filterPaths(b.chemEntities, ignorePat)
     header = "digraph mooseG{"
     header += "\n\tconcentrate=true;\n"
 
     dotFile.add(header)
-
-    #for c in compList:
-        ## Each compartment has neighbours connected by axial resistance.
-        #if c.neighbors['raxial']:
-            #[dotFile.addRAxial(c, n) for n in c.neighbors['raxial']]
-        #elif c.neighbors['axial']:
-            #[dotFile.addAxial(c, n) for n in c.neighbors['axial']]
-        #else:
-            #dotFile.addLonelyCompartment(c)
-
-        ## Each comparment might also have a synapse on it.
-        #chans = c.neighbors['channel']
-        #[dotFile.addChannel(c, chan) for chan in chans]
-
     
-    #[ dotFile.addNode(c.path, shape=dotFile.chemShape) for c in chemList ]
-
     # Write messages are edges.
-    for sm in b.filterPaths(b.msgs['SingleMsg'], ignorePat):
-        srcs, tgts = sm.e1, sm.e2
+    for sm in b.msgs['SingleMsg']:
+        srcs, tgts = b.filterPaths(sm.e1, ignorePat), b.filterPaths(sm.e2, ignorePat)
         for i, src in enumerate(srcs):
             tgt = tgts[i]
-            dotFile.addNode(src.path, node_type=type(src))
-            dotFile.addNode(tgt.path, node_type=type(tgt))
-            dotFile.addEdge(src.path, tgt.path)
+            if type(src) == moose.SimpleSynHandler:
+                dotFile.addSynHandler(src, tgt)
+            else:
+                dotFile.addNode(src.path, node_type=type(src))
+                dotFile.addNode(tgt.path, node_type=type(tgt))
+                dotFile.addEdge(src, tgt)
     print_utils.dump("TODO", "OneToAllMsgs are not added to graphviz file")
             
 
