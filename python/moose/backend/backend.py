@@ -52,7 +52,7 @@ class Backend(object):
         self.clocks = []
         self.filled = False
 
-    def filterPaths(self, mooseObjs, ignorePat=None):
+    def filterPaths(self, mooseObjs, ignorePat):
         """Filter paths """
         def ignore(x):
             if ignorePat.search(x.path):
