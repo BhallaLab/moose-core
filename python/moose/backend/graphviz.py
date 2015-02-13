@@ -50,8 +50,9 @@ class DotFile():
         self.pulseShape = "invtriangle"
         self.chemShape = "cds"
         self.channelShape = 'doubleoctagon'
-        self.synChanShape = 'point'
+        self.synChanShape = 'Mcircle'
         self.synapseShape = 'star'
+        self.defaultNodeShape = 'point'
         self.nodes = set()
 
     def setIgnorePat(self, ignorePat):
@@ -73,12 +74,14 @@ class DotFile():
                     params['fixedsize'] = 'true'
                     params['width'] = 0.1
                     params['height'] = 0.1
-                    params['color'] = textToColor(nodeName)
+                    #params['color'] = textToColor(nodeName)
                 elif typeNode == moose.SimpleSynHandler:
                     params['shape'] = self.synapseShape
                 elif typeNode == moose.SynChan:
                     params['shape'] = self.synChanShape
+                    params['label'] = ''
                 else:
+                    params['shape'] = self.defaultNodeShape
                     pass
             else:
                 params[k] = kwargs[k]
@@ -93,7 +96,10 @@ class DotFile():
         """Add an edge line to graphviz file """
         node1 = self.fix(elem1.path)
         node2 = self.fix(elem2.path)
-        txt = '"{}" -> "{}" [{}];'.format(node1, node2, dictToString(kwargs))
+        if type(elem1) == type(elem2):
+            txt = '"{}" -> "{}" [dir="both",{}];'.format(node1, node2, dictToString(kwargs))
+        else:
+            txt = '"{}" -> "{}" [{}];'.format(node1, node2, dictToString(kwargs))
         self.add(txt)
         return txt
 
