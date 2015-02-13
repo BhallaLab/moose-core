@@ -171,7 +171,6 @@ class GraphicalView(QtGui.QGraphicsView):
                 self.layoutPt.positionChange(item.parent().mobj)
 
         if itemType == ITEM:
-            print "editor mouse movement, moving item is disabled"
             self.drawExpectedConnection(event)
 
         if itemType == COMPARTMENT_BOUNDARY:
@@ -377,7 +376,8 @@ class GraphicalView(QtGui.QGraphicsView):
                     self.populate_srcdes( self.state["press"]["item"].mobj
                                         , self.state["release"]["item"].mobj
                                         )
-                    self.removeExpectedConnection()
+                self.removeExpectedConnection()
+                self.removeConnector()
 
         if clickedItemType  == CONNECTOR:
             actionType = str(self.state["press"]["item"].data(0).toString())
