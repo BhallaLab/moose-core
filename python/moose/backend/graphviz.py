@@ -3,7 +3,7 @@
 """graph_utils.py: Graph related utilties. It does not require networkx library.
 It writes files to be used with graphviz.
 
-Last modified: Tue Jul 15, 2014  12:21PM
+Last modified: Fri Feb 13, 2015  06:25PM
 
 """
     
@@ -22,6 +22,7 @@ from .. import print_utils
 import inspect
 import re
 import backend
+from collections import defaultdict
 
 pathPat = re.compile(r'.+?\[\d+\]$')
 
@@ -45,35 +46,54 @@ class DotFile():
     def __init__(self):
         self.dot = []
         self.ignorePat = re.compile(r'')
-        self.compShape = "box3d"
+        self.compShape = "point"
         self.tableShape = "folder"
         self.pulseShape = "invtriangle"
         self.chemShape = "cds"
-        self.channelShape = 'doubleoctagon'
-        self.synChanShape = 'Mcircle'
+        self.channelShape = 'doublecircle'
+        self.synChanShape = 'point'
         self.synapseShape = 'star'
         self.defaultNodeShape = 'point'
         self.nodes = set()
+        self.clusters = defaultdict(set)
+        self.verbosity = 0
+
+    def setVerbosity(self, verbosity):
+        self.verbosity = verbosity
 
     def setIgnorePat(self, ignorePat):
         self.ignorePat = ignorePat
 
-    def addNode(self, nodeName, **kwargs):
+    def addNode(self, node, **kwargs):
         """Return a line of dot for given node """
         params = {}
+        nodeName = ''
+        if type(node) != str:
+            nodeName = node.path
+            kwargs['node_type'] = type(node)
+        else:
+            nodeName = node
         nodeName = self.fix(nodeName)
         for k in kwargs:
             if k == 'node_type':
                 typeNode = kwargs[k]
                 if typeNode == moose.Compartment:
-                    params['shape'] = 'box3d'
+                    params['shape'] = self.compShape
                     params['label'] = self.label(nodeName)
                 elif typeNode == moose.HHChannel:
                     params['shape'] = self.channelShape
-                    params['label'] = ''
                     params['fixedsize'] = 'true'
                     params['width'] = 0.1
+                    params['label'] = ''
                     params['height'] = 0.1
+                    if node.name == 'KConductance':
+                        params['color'] = 'red'
+                    elif node.name == 'NaConductance':
+                        params['color'] = 'green'
+                    elif node.name == 'CaConductance':
+                        params['color'] = 'brown'
+                    else:
+                        pass
                     #params['color'] = textToColor(nodeName)
                 elif typeNode == moose.SimpleSynHandler:
                     params['shape'] = self.synapseShape
@@ -97,9 +117,22 @@ class DotFile():
         node1 = self.fix(elem1.path)
         node2 = self.fix(elem2.path)
         if type(elem1) == type(elem2):
-            txt = '"{}" -> "{}" [dir="both",{}];'.format(node1, node2, dictToString(kwargs))
+            kwargs['dir'] = 'both'
+        elif type(elem1) == moose.HHChannel or type(elem2) == moose.HHChannel:
+            kwargs['len'] = 0.2
+            kwargs['dir'] = 'none'
+        elif type(elem1) == moose.SimpleSynHandler or type(elem2) == moose.SimpleSynHandler:
+            pass
+        elif type(elem1) == moose.SynChan or type(elem2) == moose.SynChan:
+            pass
+        elif type(elem1) == moose.Synapse or type(elem2) == moose.Synapse:
+            #kwargs['len'] = 0.2
+            pass
         else:
-            txt = '"{}" -> "{}" [{}];'.format(node1, node2, dictToString(kwargs))
+            #kwargs['len'] = 0.2
+            kwargs['dir'] = 'none'
+
+        txt = '"{}" -> "{}" [{}];'.format(node1, node2, dictToString(kwargs))
         self.add(txt)
         return txt
 
@@ -131,8 +164,12 @@ class DotFile():
             path = path + '[0]'
         return path
 
-    def label(self, text, length=4):
+    def label(self, text):
         """Create label for a node """
+        if self.verbosity == 0:
+            return ''
+        else:
+            length = self.verbosity
         text = text.replace("[", '').replace("]", '').replace('_', '')
         text = text.replace('/', '')
         return text[-length:]
@@ -154,38 +191,21 @@ class DotFile():
         p = compartment.path
         self.addNode(p, shape=self.compShape, color='blue')
 
-    def addChannel(self, c, sc):
-       """Find synapses in channels and add to graphviz."""
-       print "Add channel", c, sc
-       from IPython import embed
-       embed()
-       for synapse in sc.synapses:
-           print("Adding synapse %s" % synaspe)
-           spikeSources =  synapse.neighbors['addSpike']
-           for ss in spikeSources:
-               for s in ss:
-                   for vmSource in  s.neighbors['Vm']:
-                       self.addEdge(c
-                               , vmSource
-                               , color = 'red'
-                               , label = 'synapse'
-                               , arrowhead = 'dot'
-                               )
 
     def addSynHandler(self, synHandler, tgt):
-        self.addNode(synHandler.path, node_type=type(synHandler))
+        """Add a synaptic handler to network """
         for synapse in synHandler.synapse:
-            self.addSynapse(synapse, synHandler)
-        self.addEdge(synHandler, tgt)
+            self.addSynapse(synapse, tgt)
+        # We don't have to add this to graphviz. 
+        #self.addNode(synHandler.path, node_type=type(synHandler))
+        #self.addEdge(synHandler, tgt)
 
-    def addSynapse(self, synapse, synHandler):
+    def addSynapse(self, synapse, post):
         """Get a synapse and add an edge from its pre-synaptic terminal """
         for spikeGen in synapse.neighbors['addSpike']:
             for sg in spikeGen:
                 for pre in sg.neighbors['Vm']:
-                    self.addEdge(pre, synHandler)
-
-        
+                    self.addEdge(pre, post, arrowhead='box')
 
     def addPulseGen(self, pulseGen, compartments):
         """Add a pulse-generator to dotfile """
@@ -220,7 +240,6 @@ def getConnectedCompartments(obj):
         return []
     if "moose.ZombieCompartment" in obj.__str__():
         return []
-
     paths = []
     comps = []
     obj = moose.Neutral(obj.path)
@@ -249,14 +268,14 @@ def getConnectedCompartments(obj):
 # @param Ignore paths containing this pattern. A regular expression. 
 #
 # @return None. 
-def writeGraphviz(filename=None, pat='/##', cluster=True, ignore=None):
+def writeGraphviz(filename=None, pat='/##', cluster=True, ignore=None, **kwargs):
     '''This is  a generic function. It takes the the pattern, search for paths
     and write a graphviz file.
     '''
 
     global dotFile
-
-    nodes = set()
+    verbose = kwargs.get('verbose', 0)
+    dotFile.setVerbosity(verbose)
 
     print_utils.dump("GRAPHVIZ"
             , "Preparing graphviz file for writing"
@@ -264,8 +283,8 @@ def writeGraphviz(filename=None, pat='/##', cluster=True, ignore=None):
 
     if not backend.moose_elems.filled:
         backend.moose_elems.populateStoreHouse()
-    b = backend.moose_elems
 
+    b = backend.moose_elems
     ignorePat = re.compile(r'^abcd')
     if ignore:
         ignorePat = re.compile(r'%s' % ignore, re.I)
@@ -273,9 +292,20 @@ def writeGraphviz(filename=None, pat='/##', cluster=True, ignore=None):
 
     #chemList = b.filterPaths(b.chemEntities, ignorePat)
     header = "digraph mooseG{"
-    header += "\n\tconcentrate=true;\n"
 
     dotFile.add(header)
+
+    # If cluster is True then cluster the compartments together.
+    if cluster:
+        pops = b.clusterNodes()
+        for pop in pops:
+            subgraphText = []
+            clustername = pop.translate(None, '/[]')
+            subgraphText.append('subgraph cluster_%s { '%clustername)
+            #subgraphText.append('label="%s"'%clustername)
+            [ subgraphText.append('"%s";'%c) for c in pops[pop] ]
+            subgraphText.append("}\n")
+            dotFile.add('\n'.join(subgraphText))
     
     # Write messages are edges.
     for sm in b.msgs['SingleMsg']:
@@ -285,12 +315,11 @@ def writeGraphviz(filename=None, pat='/##', cluster=True, ignore=None):
             if type(src) == moose.SimpleSynHandler:
                 dotFile.addSynHandler(src, tgt)
             else:
-                dotFile.addNode(src.path, node_type=type(src))
-                dotFile.addNode(tgt.path, node_type=type(tgt))
+                dotFile.addNode(src)
+                dotFile.addNode(tgt)
                 dotFile.addEdge(src, tgt)
     print_utils.dump("TODO", "OneToAllMsgs are not added to graphviz file")
             
-
     # Now add the pulse-gen 
     pulseGens = b.pulseGens
     for p in pulseGens:
