@@ -124,6 +124,17 @@ class Backend(object):
         self.getClocks()
         self.filled = True
 
+    def clusterNodes(self):
+        """Cluster all compartments according to parent path and return them in
+        a dictionary """
+        population = defaultdict(set)
+        for c in self.compartments:
+            path = c.path
+            parentPath = '/'.join(path.split('/')[0:-1])
+            population[parentPath].add(path)
+        return population
+
+
 
 ##
 # @brief This is a global object. Import it and call populateStoreHouse() only
