@@ -3,7 +3,7 @@
 """graph_utils.py: Graph related utilties. It does not require networkx library.
 It writes files to be used with graphviz.
 
-Last modified: Fri Feb 13, 2015  06:25PM
+Last modified: Sat Feb 14, 2015  06:19PM
 
 """
     
@@ -46,23 +46,44 @@ class DotFile():
     def __init__(self):
         self.dot = []
         self.ignorePat = re.compile(r'')
-        self.compShape = "point"
+        self.compShape = "box"
         self.tableShape = "folder"
         self.pulseShape = "invtriangle"
         self.chemShape = "cds"
         self.channelShape = 'doublecircle'
-        self.synChanShape = 'point'
+        self.synChanShape = 'Mcircle'
         self.synapseShape = 'star'
         self.defaultNodeShape = 'point'
         self.nodes = set()
+        # Keep nodes belonging to a subgraph/cluster.
         self.clusters = defaultdict(set)
         self.verbosity = 0
+        self.textDict = defaultdict(list)
+        # Map each node to a subgraph.
+        self.subgraphDict = {}
 
     def setVerbosity(self, verbosity):
         self.verbosity = verbosity
 
     def setIgnorePat(self, ignorePat):
         self.ignorePat = ignorePat
+
+    def addHHCHannelNode(self, node, params):
+        params['shape'] = self.channelShape
+        params['fixedsize'] = 'true'
+        params['width'] = 0.1
+        params['label'] = ''
+        params['height'] = 0.1
+        if node.name == 'KConductance':
+            params['color'] = 'red'
+        elif node.name == 'NaConductance':
+            params['color'] = 'green'
+        elif node.name == 'CaConductance':
+            params['color'] = 'brown'
+        else:
+            pass
+        #params['color'] = textToColor(nodeName)
+        return params
 
     def addNode(self, node, **kwargs):
         """Return a line of dot for given node """
@@ -81,20 +102,7 @@ class DotFile():
                     params['shape'] = self.compShape
                     params['label'] = self.label(nodeName)
                 elif typeNode == moose.HHChannel:
-                    params['shape'] = self.channelShape
-                    params['fixedsize'] = 'true'
-                    params['width'] = 0.1
-                    params['label'] = ''
-                    params['height'] = 0.1
-                    if node.name == 'KConductance':
-                        params['color'] = 'red'
-                    elif node.name == 'NaConductance':
-                        params['color'] = 'green'
-                    elif node.name == 'CaConductance':
-                        params['color'] = 'brown'
-                    else:
-                        pass
-                    #params['color'] = textToColor(nodeName)
+                    params = self.addHHCHannelNode(node, params)
                 elif typeNode == moose.SimpleSynHandler:
                     params['shape'] = self.synapseShape
                 elif typeNode == moose.SynChan:
@@ -108,8 +116,8 @@ class DotFile():
         if 'label' not in params.keys():
             params['label'] = self.label(nodeName)
         nodeText = '"{}" [{}];'.format(nodeName, dictToString(params))
+        self.textDict['nodes'].append(nodeText)
         self.nodes.add(nodeName)
-        self.add(nodeText)
         return nodeText
 
     def addEdge(self, elem1, elem2, **kwargs):
@@ -119,8 +127,10 @@ class DotFile():
         if type(elem1) == type(elem2):
             kwargs['dir'] = 'both'
         elif type(elem1) == moose.HHChannel or type(elem2) == moose.HHChannel:
-            kwargs['len'] = 0.2
+            kwargs['len'] = 0.1
+            kwargs['weight'] = 10
             kwargs['dir'] = 'none'
+
         elif type(elem1) == moose.SimpleSynHandler or type(elem2) == moose.SimpleSynHandler:
             pass
         elif type(elem1) == moose.SynChan or type(elem2) == moose.SynChan:
@@ -129,11 +139,12 @@ class DotFile():
             #kwargs['len'] = 0.2
             pass
         else:
-            #kwargs['len'] = 0.2
+            kwargs['len'] = 0.2
+            kwargs['weight'] = 100
             kwargs['dir'] = 'none'
 
         txt = '"{}" -> "{}" [{}];'.format(node1, node2, dictToString(kwargs))
-        self.add(txt)
+        self.textDict['edges'].append(txt)
         return txt
 
     def add(self, line):
@@ -141,20 +152,6 @@ class DotFile():
         if line in self.dot:
             return
         self.dot.append(line)
-
-    def writeDotFile(self, fileName):
-        dotText = '\n'.join(self.dot)
-        dotText =  dotText + "\n}"
-        if not fileName:
-            print(dotText)
-            return 
-        with open(fileName, 'w') as graphviz:
-            print_utils.dump("GRAPHVIZ"
-                    , [ "Writing compartment topology to file {}".format(fileName)
-                        , "Ignoring pattern : {}".format(self.ignorePat.pattern)
-                        ]
-                    )
-            graphviz.write(dotText)
 
     def fix(self, path):
         '''Fix a given path so it can be written to a graphviz file'''
@@ -222,6 +219,34 @@ class DotFile():
         for s in sources:
             self.addEdge(s, table, label='table', color='blue')
 
+
+    def writeDotFile(self, fileName):
+        dotText = ''
+        dotText += '\n'.join(self.textDict['header'])
+        dotText += "\n\n"
+
+        clusters = self.textDict['subgraphs']
+        for cname in clusters:
+            clusterText = 'subgraph cluster_%s{\n' % cname
+            for n in clusters[cname]:
+                clusterText += '"%s"[label="",shape=none];\n' % self.fix(n)
+            clusterText += '}\n'
+            dotText += clusterText
+
+        dotText += '\n'.join(self.textDict['nodes'])
+        dotText += '\n'.join(self.textDict['edges'])
+        dotText =  dotText + "\n}"
+
+        if not fileName:
+            print(dotText)
+            return 
+        with open(fileName, 'w') as graphviz:
+            print_utils.dump("GRAPHVIZ"
+                    , [ "Writing compartment topology to file {}".format(fileName)
+                        , "Ignoring pattern : {}".format(self.ignorePat.pattern)
+                        ]
+                    )
+            graphviz.write(dotText)
 
 ##
 # @brief Object of DotFile.
@@ -292,20 +317,8 @@ def writeGraphviz(filename=None, pat='/##', cluster=True, ignore=None, **kwargs)
 
     #chemList = b.filterPaths(b.chemEntities, ignorePat)
     header = "digraph mooseG{"
-
-    dotFile.add(header)
-
-    # If cluster is True then cluster the compartments together.
-    if cluster:
-        pops = b.clusterNodes()
-        for pop in pops:
-            subgraphText = []
-            clustername = pop.translate(None, '/[]')
-            subgraphText.append('subgraph cluster_%s { '%clustername)
-            #subgraphText.append('label="%s"'%clustername)
-            [ subgraphText.append('"%s";'%c) for c in pops[pop] ]
-            subgraphText.append("}\n")
-            dotFile.add('\n'.join(subgraphText))
+    header += '\ngraph[concentrate=true];\n'
+    dotFile.textDict['header'].append(header)
     
     # Write messages are edges.
     for sm in b.msgs['SingleMsg']:
@@ -331,6 +344,18 @@ def writeGraphviz(filename=None, pat='/##', cluster=True, ignore=None, **kwargs)
     for t in tables:
         sources = t.neighbors['requestOut']
         dotFile.addTable(t, sources)
+
+    # If cluster is True then cluster the compartments together. Also create a
+    # dictionary from which we can fetch the clustername of a compartment.
+    # NOTE: THIS MUST BE THE LAST STEP BEFORE WRITING TO GRAPHVIZ FILE.
+    subgraphDict = {}
+    if cluster:
+        pops = b.clusterNodes()
+        for pop in pops:
+            clustername = pop.translate(None, '/[]')
+            subgraphDict[clustername] = pops[pop]
+            for x in pops[pop]: dotFile.subgraphDict[x] = clustername
+    dotFile.textDict['subgraphs'] = subgraphDict
 
     dotFile.writeDotFile(filename)
     return True
