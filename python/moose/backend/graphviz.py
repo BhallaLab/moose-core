@@ -61,6 +61,7 @@ class DotFile():
         self.textDict = defaultdict(list)
         # Map each node to a subgraph.
         self.subgraphDict = {}
+        self.__total_synapses__ = 0
 
     def setVerbosity(self, verbosity):
         self.verbosity = verbosity
@@ -143,8 +144,13 @@ class DotFile():
             kwargs['weight'] = 100
             kwargs['dir'] = 'none'
 
+        # Between objects of same type, do not add multiple edges.
         txt = '"{}" -> "{}" [{}];'.format(node1, node2, dictToString(kwargs))
-        self.textDict['edges'].append(txt)
+        if type(elem1) == type(elem2):
+            if txt not in self.textDict['edges']:
+                self.textDict['edges'].append(txt)
+        else:
+            self.textDict['edges'].append(txt)
         return txt
 
     def add(self, line):
@@ -171,24 +177,6 @@ class DotFile():
         text = text.replace('/', '')
         return text[-length:]
 
-    def addRAxial(self, compA, compB):
-        """Connect compA with compB """
-        lhs = compA.path
-        self.addNode(lhs, shape=self.compShape)
-        rhs = compB.path
-        self.addNode(rhs, shape=self.compShape)
-        self.addEdge(compA, compB)
-
-    def addAxial(self, compA, compB):
-        """Add compA and compB axially. """
-        self.addRAxial(compB, compA)
-
-    def addLonelyCompartment(self, compartment):
-        """Add a compartment which has not Axial and RAxial connection """
-        p = compartment.path
-        self.addNode(p, shape=self.compShape, color='blue')
-
-
     def addSynHandler(self, synHandler, tgt):
         """Add a synaptic handler to network """
         for synapse in synHandler.synapse:
@@ -202,6 +190,7 @@ class DotFile():
         for spikeGen in synapse.neighbors['addSpike']:
             for sg in spikeGen:
                 for pre in sg.neighbors['Vm']:
+                    self.__total_synapses__ += 1
                     self.addEdge(pre, post, arrowhead='box')
 
     def addPulseGen(self, pulseGen, compartments):
@@ -248,6 +237,7 @@ class DotFile():
                     )
             graphviz.write(dotText)
 
+        
 ##
 # @brief Object of DotFile.
 dotFile = DotFile()
@@ -316,9 +306,9 @@ def writeGraphviz(filename=None, pat='/##', cluster=True, ignore=None, **kwargs)
         dotFile.setIgnorePat(ignorePat)
 
     #chemList = b.filterPaths(b.chemEntities, ignorePat)
-    header = "digraph mooseG{"
-    header += '\ngraph[concentrate=true];\n'
-    dotFile.textDict['header'].append(header)
+    header = ["digraph mooseG{"]
+    header.append('\ngraph[];')
+    dotFile.textDict['header'].append('\n'.join(header))
     
     # Write messages are edges.
     for sm in b.msgs['SingleMsg']:
@@ -356,7 +346,6 @@ def writeGraphviz(filename=None, pat='/##', cluster=True, ignore=None, **kwargs)
             subgraphDict[clustername] = pops[pop]
             for x in pops[pop]: dotFile.subgraphDict[x] = clustername
     dotFile.textDict['subgraphs'] = subgraphDict
-
     dotFile.writeDotFile(filename)
     return True
 
