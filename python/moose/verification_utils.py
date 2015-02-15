@@ -5,7 +5,7 @@
     IT contains a class which runs tests on moose internal data-structures to
     check if it is good for simulation.
 
-Last modified: Sun Feb 15, 2015  11:45AM
+Last modified: Sun Feb 15, 2015  12:21PM
 
 """
     
@@ -21,7 +21,7 @@ __status__           = "Development"
 
 import sys
 import sys
-import _moose
+import _moose as moose
 import unittest
 import inspect
 import print_utils as debug
@@ -115,19 +115,26 @@ class MooseTestCase( unittest.TestCase ):
         Rather it keeps an array of moose.Synapse inside it which recieves input
         of moose.SpikeGen.
         """
-        if len(synhandlers) == 1:
-            synhandler = synhandlers[0]
+        if type(synhandlers) == moose.vec:
+            if len(synhandlers) == 1:
+                synhandler = synhandlers[0]
+            else:
+                [self.test_synhandler(x) for x in synhandlers]
         else:
-            [self.test_synhandler(x) for x in synhandlers]
+            synhandler = synhandlers
         
         for synapses in synhandler.synapse:
             self.test_synapse(synapses)
 
     def test_synapse(self, synapses):
-        if len(synapses) == 1:
-            synapse = synapses[0]
-        else:
-            [ self.test_synapse(x) for x in synapses ]
+        if type(synapses) == moose.Synapse:
+            synapse = synapses
+        elif type(synapses) == moose.vec:
+            if len(synapses) == 1:
+                synapse = synapses[0]
+            else:
+                [ self.test_synapse(x) for x in synapses ]
+
         spikeGens = synapse.neighbors['addSpike']
         if not spikeGens:
             debug.dump('FAIL'
@@ -136,13 +143,17 @@ class MooseTestCase( unittest.TestCase ):
                         " moose.connect(spikegen, 'spikeOut', synapse, 'addSpike')" 
                         ]
                     )
-        else: self.test_spikegen(spikeGens)
+        else: 
+            [self.test_spikegen(x) for x in spikeGens]
 
     def test_spikegen(self, spikegens):
-        if len(spikegens) == 1:
-            spikeGen = spikegens[0]
-        else:
+        spikeGen = None
+        if len(spikegens) > 1:
             [self.test_spikegen(x) for x in spikegens]
+        elif len(spikegens) == 1:
+            spikeGen = spikegens[0]
+        elif type(spikegens) == moose.SpikeGen:
+            spikeGen = spikegens
 
         pre = spikeGen.neighbors['Vm']
         if not pre:
