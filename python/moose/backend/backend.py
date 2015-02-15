@@ -132,6 +132,9 @@ class Backend(object):
             path = c.path
             parentPath = '/'.join(path.split('/')[0:-1])
             population[parentPath].add(path)
+            # Get their channels into cluster as well.
+            for channel in c.neighbors['channel']:
+                population[parentPath].add(channel.path)
         return population
 
 
