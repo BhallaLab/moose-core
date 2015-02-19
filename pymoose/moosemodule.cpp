@@ -2878,7 +2878,7 @@ extern "C" {
         }
              
         clock_t defclasses_end = clock();
-#ifndef QUIET_MODE
+#ifndef QUIET_MODE 
         cout << "Info: Time to define moose classes:" << (defclasses_end - defclasses_start) * 1.0 /CLOCKS_PER_SEC << endl;
 #endif
         PyGILState_Release(gstate);
