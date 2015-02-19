@@ -77,13 +77,14 @@ if(VERIFY)
 endif(VERIFY)
 
 # VERBOSITY OF OUTPUT
-set(VERBOSITY 0)
+option(VERBOSITY "SET MOOSE VERBOSITY LEVEL" 0)
 if(VERBOSITY)
-    message("++ Verbosity of output is ${VERBOSITY}")
+    message("++ Verbosity of output is ${VERBOSITY}. This is not implemented
+    yet!")
     add_definitions(-DVERBOSITY=${VERBOSITY})
 else()
-    #message("++ Moose will be quiet")
-    #add_definitions(-DQUIET_MODE)
+    message("++ Moose will be quiet")
+    add_definitions(-DQUIET_MODE)
 endif()
 
 # STATS INSIDE MOOSE
