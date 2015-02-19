@@ -25,12 +25,23 @@ class Network(object):
         self.graph = nx.MultiDiGraph()
         self.outfileName = filename
 
-    def addEdge(self, src, tgt):
-        srcPath = src.path
-        tgtPath = tgt.path
-        self.graph.add_node(srcPath, type=type(src))
-        self.graph.add_node(tgtPath, type=type(tgt))
+    def addNode(self, elem):
+        path = elem.path
+        self.graph.add_node(path, type=type(elem))
+        if type(elem) == moose.Compartment:
+            x, y = elem.x + 0.1* elem.z, elem.y + 0.1 * elem.z
+            self.graph.node[path]['pos'] = (x, y)
+        return path
 
+    def addEdge(self, src, tgt):
+        n1 = self.addNode(src)
+        n2 = self.addNode(tgt)
+        self.graph.add_edge(n1, n2)
+
+    def computeNodePositions(self):
+        for n, d in self.graph.nodes(data=True):
+            if d['type'] == moose.Compartment:
+                print d
 
     def addMessage(self, m):
         e1, e2 = m.e1, m.e2
@@ -40,14 +51,18 @@ class Network(object):
 
     def build(self, **kwargs):
         """Build the network """
+        pu.info("TODO: Only SingleMsgs are added")
         msgs = moose.wildcardFind('/##[TYPE=SingleMsg]')
         for m in msgs:
             self.addMessage(m)
+        self.computeNodePositions()
 
 def writeNetwork(filename=None, **kwargs):
     pu.info("Writing network to %s" % filename)
     network = Network(filename)
     network.build()
     if not filename:
-        nx.draw(network.graph)
+        print network.graph
+        pu.debug("Plotting network")
+        #nx.draw_networkx(network.graph, with_labels=False)
         #plt.show()
