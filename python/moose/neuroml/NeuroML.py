@@ -44,8 +44,12 @@ from xml.etree import cElementTree as ET
 from .ChannelML import ChannelML
 from .MorphML import MorphML
 from .NetworkML import NetworkML
+
 import string
+
 from moose.neuroml.utils import *
+from .. import print_utils as pu
+
 import sys
 from os import path
 
@@ -61,7 +65,8 @@ class NeuroML():
         Returns (populationDict,projectionDict),
          see doc string of NetworkML.readNetworkML() for details.
         """
-        print(("Loading neuroml file ... ", filename))
+        pu.info("Loading neuroml file %s " % filename)
+
         moose.Neutral('/library') # creates /library in MOOSE tree; elif present, wraps
         tree = ET.parse(filename)
         root_element = tree.getroot()

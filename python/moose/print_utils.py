@@ -102,7 +102,15 @@ def dump(label, msg, frame=None, exception=None):
 
 def info(msg): dump("INFO", msg)
 def warn(msg): dump("WARN", msg)
-def error(msg): dump("ERROR", msg)
+
+def error(msg): 
+    dump("ERROR", msg)
+
+def fatal(msg):
+    dump("FATAL", msg)
+    raise IOException
+
 def debug(msg): dump("DEBUG", msg)
+
 def log(label, msg): dump(label, msg)
 
