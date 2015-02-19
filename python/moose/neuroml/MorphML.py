@@ -78,7 +78,7 @@ class MorphML():
             self.length_factor = 1.0
         cellname = cell.attrib["name"]
         moose.Neutral('/library') # creates /library in MOOSE tree; elif present, wraps
-        print("loading cell :", cellname,"into /library .")
+        pu.info("Loading cell %s into /library ." % cellname)
 
         #~ moosecell = moose.Cell('/library/'+cellname)
         #using moose Neuron class - in previous version 'Cell' class Chaitanya
@@ -94,7 +94,7 @@ class MorphML():
             self.createPotentialSynapses = params['createPotentialSynapses']
         else:
             self.createPotentialSynapses = False
-        print("readMorphML using combineSegments = ", self.combineSegments)
+        pu.info("readMorphML using combineSegments = %s" % self.combineSegments)
 
         ###############################################
         #### load cablegroups into a dictionary
@@ -134,7 +134,7 @@ class MorphML():
             if not passive:            
                 ## if channel does not exist in library load it from xml file
                 if not moose.exists("/library/"+mechanismname):
-                    print("Loading mechanism", mechanismname,"into library.")
+                    pu.info("Loading mechanism %s into library." % mechanismname)
                     cmlR = ChannelML(self.nml_params)
                     model_filename = mechanismname+'.xml'
                     model_path = neuroml_utils.find_first_file(model_filename,self.model_dir)
@@ -310,7 +310,8 @@ class MorphML():
                 (running_comp.x0,running_comp.y0,running_comp.z0),\
                 (running_comp.x,running_comp.y,running_comp.z),\
                 running_comp.diameter,running_comp.length,[]]
-            if neuroml_utils.neuroml_debug: print('Set up compartment/section', running_comp.name)
+            if neuroml_utils.neuroml_debug: 
+                pu.info('Set up compartment/section %s' % running_comp.name)
 
         ###############################################
         #### load biophysics into the compartments
@@ -356,7 +357,7 @@ class MorphML():
                 if "passive_conductance" in mechanism.attrib:
                     if mechanism.attrib['passive_conductance'] in ["true",'True','TRUE']:
                         passive = True
-                print("Loading mechanism ", mechanismname)
+                pu.info("Loading mechanism %s " % mechanismname)
                 ## ONLY creates channel if at least one parameter (like gmax) is specified in the xml
                 ## Neuroml does not allow you to specify all default values.
                 ## However, granule cell example in neuroconstruct has Ca ion pool without
@@ -381,8 +382,11 @@ class MorphML():
                             self.set_group_compartment_param(cell, cellname, parameter,\
                              'inject', Ifactor*float(parameter.attrib["value"]), self.bio)
                         else:
-                            print("WARNING: Yo programmer of MorphML! You didn't implement parameter ",\
-                             parametername, " in mechanism ",mechanismname)
+                            pu.warn(["Yo programmer of MorphML! You didn't"
+                                , " implement parameter %s " % parametername 
+                                , " in mechanism %s " % mechanismname 
+                                ]
+                                )
                     else:
                         if parametername in ['gmax']:
                             gmaxval = float(eval(parameter.attrib["value"],{"__builtins__":None},{}))
@@ -408,8 +412,10 @@ class MorphML():
                              't_refrac', Tfactor*float(parameter.attrib["value"]),\
                              self.bio, mechanismname)
                         else:
-                            print("WARNING: Yo programmer of MorphML import! You didn't implement parameter ",\
-                             parametername, " in mechanism ",mechanismname)
+                            pu.warn(["Yo programmer of MorphML import! You didn't"
+                                    , " implement parameter %s " % parametername
+                                    , " in mechanism %s " % mechanismname ]
+                                    )
             #### Connect the Ca pools and channels
             #### Am connecting these at the very end so that all channels and pools have been created
             #### Note: this function is in moose.utils not moose.neuroml.utils !
@@ -448,7 +454,7 @@ class MorphML():
                     comp_list.append(compartment.name)
             self.cableDict[cablegroupname] = comp_list
 
-        print("Finished loading into library, cell: ",cellname)
+        pu.info("Finished loading into library, cell: %s " % cellname)
         return {cellname:(self.segDict,self.cableDict)}
 
     def set_group_compartment_param(self, cell, cellname, parameter,\
@@ -481,7 +487,8 @@ class MorphML():
         elif name == 'initVm':
             compartment.initVm = value
         elif name == 'inject':
-            print(compartment.name, 'inject', value, 'A.') # this reader converts to SI
+            # this reader converts to SI
+            pu.info("Comparment %s inject %s A." % (compartment.name, value)) 
             compartment.inject = value
         elif name == 'v_reset':
             compartment.vReset = value # compartment is a moose.LIF instance (intfire)
@@ -490,7 +497,7 @@ class MorphML():
         elif name == 't_refrac':
             compartment.refractoryPeriod = value # compartment is a moose.LIF instance (intfire)
         elif name == 'g_refrac':
-            print("Sorry, current moose.LIF doesn't support g_refrac.")
+            pu.info("SORRY, current moose.LIF doesn't support g_refrac.")
         elif mechanismname is 'synapse': # synapse being added to the compartment
             ## these are potential locations, we do not actually make synapses,
             ## unless the user has explicitly asked for it
@@ -572,4 +579,5 @@ class MorphML():
                 ## Later, when calling connect_CaConc,
                 ## B is set for caconc based on thickness of Ca shell and compartment l and dia.
                 ## OR based on the Mstring phi under CaConc path.
-        if neuroml_utils.neuroml_debug: print("Setting ",name," for ",compartment.path," value ",value)
+        if neuroml_utils.neuroml_debug: 
+            pu.info("Setting %s  for comparment %s to %s" % (name, compartment.path, value))
