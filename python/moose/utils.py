@@ -33,6 +33,8 @@ import sim_utils
 
 from .backend import graphviz
 
+from .topology import topology
+
 from moose_constants import *
 
 import re
@@ -59,6 +61,7 @@ verify = verification_utils.verify
 
 # Topology and graph related functions.
 writeGraphviz  = graphviz.writeGraphviz
+writeNetwork = topology.writeNetwork
 
 # Some verification tests
 verify = verification_utils.verify
