@@ -51,11 +51,11 @@ class ChannelML():
             Tfactor = 1.0
             Gfactor = 1.0
         else:
-            print "wrong units", units,": exiting ..."
+            print("wrong units", units,": exiting ...")
             sys.exit(1)
         moose.Neutral('/library') # creates /library in MOOSE tree; elif present, wraps
         synname = synapseElement.attrib['name']
-        if utils.neuroml_debug: print "loading synapse :",synname,"into /library ."
+        if utils.neuroml_debug: print("loading synapse :",synname,"into /library .")
         moosesynapse = moose.SynChan('/library/'+synname)
         doub_exp_syn = synapseElement.find('./{'+self.cml+'}doub_exp_syn')
         moosesynapse.Ek = float(doub_exp_syn.attrib['reversal_potential'])*Vfactor
@@ -101,11 +101,11 @@ class ChannelML():
             Gfactor = 1.0
             concfactor = 1.0
         else:
-            print "wrong units", units,": exiting ..."
+            print("wrong units", units,": exiting ...")
             sys.exit(1)
         moose.Neutral('/library') # creates /library in MOOSE tree; elif present, wraps
         channel_name = channelElement.attrib['name']
-        if utils.neuroml_debug: print "loading channel :", channel_name,"into /library ."
+        if utils.neuroml_debug: print("loading channel :", channel_name,"into /library .")
         IVrelation = channelElement.find('./{'+self.cml+'}current_voltage_relation')
         intfire = IVrelation.find('./{'+self.cml+'}integrate_and_fire')
 
@@ -154,7 +154,7 @@ class ChannelML():
         
         gates = IVrelation.findall('./{'+self.cml+'}gate')
         if len(gates)>3:
-            print "Sorry! Maximum x, y, and z (three) gates are possible in MOOSE/Genesis"
+            print("Sorry! Maximum x, y, and z (three) gates are possible in MOOSE/Genesis")
             sys.exit()
         gate_full_name = [ 'gateX', 'gateY', 'gateZ' ] # These are the names that MOOSE uses to create gates.
         ## if impl_prefs tag is present change VMIN, VMAX and NDIVS
@@ -189,7 +189,7 @@ class ChannelML():
             self.gate_name = gate.attrib['name']
             for q10settings in IVrelation.findall('./{'+self.cml+'}q10_settings'):
                 ## self.temperature from neuro.utils
-                if 'gate' in q10settings.attrib.keys():
+                if 'gate' in list(q10settings.attrib.keys()):
                     if q10settings.attrib['gate'] == self.gate_name:
                         self.setQ10(q10settings)
                         break
@@ -236,7 +236,7 @@ class ChannelML():
                 if fn_name in ['alpha','beta']:
                     self.make_cml_function(transition, fn_name, concdep)
                 else:
-                    print "Unsupported transition ", name
+                    print("Unsupported transition ", name)
                     sys.exit()
             
             time_course = gate.find('./{'+self.cml+'}time_course')
@@ -336,10 +336,10 @@ class ChannelML():
                 #moosegate.dyB = dCa*concfactor
 
     def setQ10(self,q10settings):
-        if 'q10_factor' in q10settings.attrib.keys():
+        if 'q10_factor' in list(q10settings.attrib.keys()):
             self.q10factor = float(q10settings.attrib['q10_factor'])\
                 **((self.temperature-float(q10settings.attrib['experimental_temp']))/10.0)
-        elif 'fixed_q10' in q10settings.attrib.keys():
+        elif 'fixed_q10' in list(q10settings.attrib.keys()):
             self.q10factor = float(q10settings.attrib['fixed_q10'])
 
 
@@ -362,10 +362,10 @@ class ChannelML():
         ionSpecies = ionConcElement.find('./{'+self.cml+'}ion_species')
         if ionSpecies is not None:
             if not 'ca' in ionSpecies.attrib['name']:
-                print "Sorry, I cannot handle non-Ca-ion pools. Exiting ..."
+                print("Sorry, I cannot handle non-Ca-ion pools. Exiting ...")
                 sys.exit(1)
         capoolName = ionConcElement.attrib['name']
-        print "loading Ca pool :",capoolName,"into /library ."
+        print("loading Ca pool :",capoolName,"into /library .")
         caPool = moose.CaConc('/library/'+capoolName)
         poolModel = ionConcElement.find('./{'+self.cml+'}decaying_pool_model')
         caPool.CaBasal = float(poolModel.attrib['resting_conc']) * concfactor
@@ -406,7 +406,7 @@ class ChannelML():
             expr_string = self.replace(expr_string, 'beta', 'self.beta(v'+ca_name+')')                
             fn = self.make_function( fn_name, fn_type, expr_string=expr_string, concdep=concdep )
         else:
-            print "Unsupported function type ", fn_type
+            print("Unsupported function type ", fn_type)
             sys.exit()
                 
     def make_function(self, fn_name, fn_type, **kwargs):
@@ -440,7 +440,7 @@ class ChannelML():
                 allowed_locals['temp_adj_'+self.gate_name] = self.q10factor
                 for i,parameter in enumerate(self.parameters):
                     allowed_locals[parameter[0]] = self.parameters[i][1]
-                if kwargs.has_key('concdep'):
+                if 'concdep' in kwargs:
                     concdep = kwargs['concdep']
                     ## ca should appear as neuroML defined 'variable_name' to eval()
                     if concdep is not None:
@@ -484,7 +484,7 @@ def make_new_synapse(syn_name, postcomp, syn_name_full, nml_params):
             postcomp,syn_name_full+'/handler')
     syn = moose.SynChan(synid)
     synhandler = moose.element(synhandlerid) # returns SimpleSynHandler or STDPSynHandler
-    print synhandler.className
+    print(synhandler.className)
     ## connect the SimpleSynHandler or the STDPSynHandler to the SynChan (double exp)
     moose.connect( synhandler, 'activationOut', syn, 'activation' )
     # mgblock connections if required

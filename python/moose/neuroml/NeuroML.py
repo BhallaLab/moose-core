@@ -41,9 +41,9 @@ For testing, you can also call this from the command line with a neuroML file as
 import moose
 from moose.utils import *
 from xml.etree import cElementTree as ET
-from ChannelML import ChannelML
-from MorphML import MorphML
-from NetworkML import NetworkML
+from .ChannelML import ChannelML
+from .MorphML import MorphML
+from .NetworkML import NetworkML
 import string
 from moose.neuroml.utils import *
 import sys
@@ -61,12 +61,12 @@ class NeuroML():
         Returns (populationDict,projectionDict),
          see doc string of NetworkML.readNetworkML() for details.
         """
-        print "Loading neuroml file ... ", filename
+        print(("Loading neuroml file ... ", filename))
         moose.Neutral('/library') # creates /library in MOOSE tree; elif present, wraps
         tree = ET.parse(filename)
         root_element = tree.getroot()
         self.model_dir = path.dirname( path.abspath( filename ) )
-        if 'lengthUnits' in root_element.attrib.keys():
+        if 'lengthUnits' in list(root_element.attrib.keys()):
             self.lengthUnits = root_element.attrib['lengthUnits']
         else:
             self.lengthUnits = 'micrometer'
@@ -76,7 +76,7 @@ class NeuroML():
         self.temperature_default = True
         for meta_property in root_element.findall('.//{'+meta_ns+'}property'):
             ## tag can be an attrib or an element
-            if 'tag' in meta_property.attrib.keys(): # tag is an attrib
+            if 'tag' in list(meta_property.attrib.keys()): # tag is an attrib
                 tagname = meta_property.attrib['tag']
                 if 'temperature' in tagname:
                     self.temperature = float(meta_property.attrib['value'])
@@ -86,14 +86,14 @@ class NeuroML():
                 tagname = tag.text
                 if 'temperature' in tagname:
                     ## value can be a tag or an element 
-                    if 'value' in tag.attrib.keys(): # value is an attrib
+                    if 'value' in list(tag.attrib.keys()): # value is an attrib
                         self.temperature = float(tag.attrib['value'])
                         self.temperature_default = False
                     else: # value is a separate element
                         self.temperature = float(tag.find('.//{'+meta_ns+'}value').text)
                         self.temperature_default = False
         if self.temperature_default:
-            print "Using default temperature of", self.temperature,"degrees Celsius."
+            print(("Using default temperature of", self.temperature,"degrees Celsius."))
         self.nml_params = {
                 'temperature':self.temperature,
                 'model_dir':self.model_dir,
@@ -145,7 +145,7 @@ def loadNeuroML_L123(filename):
 
 if __name__ == "__main__":
     if len(sys.argv)<2:
-        print "You need to specify the neuroml filename."
+        print("You need to specify the neuroml filename.")
         sys.exit(1)
     loadNeuroML_L123(sys.argv[1])
     
