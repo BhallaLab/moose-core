@@ -21,6 +21,7 @@ import math
 from os import path
 import moose
 from moose import utils as moose_utils
+from .. import print_utils as pu
 from moose.neuroml import utils as neuroml_utils
 from .ChannelML import ChannelML, make_new_synapse
 
@@ -44,8 +45,13 @@ class MorphML():
         returns { cellname1 : (segDict,cableDict), ... }
         see readMorphML(...) for segDict and cableDict
         """
-        print(filename)
-        tree = ET.parse(filename)
+
+        pu.info("Reading morphology from %s" % filename)
+        try:
+            tree = ET.parse(filename)
+        except Exception as e:
+            pu.fatal("Failed to load morphology from file %s" % filename)
+
         neuroml_element = tree.getroot()
         cellsDict = {}
         for cell in neuroml_element.findall('.//{'+self.neuroml+'}cell'):
