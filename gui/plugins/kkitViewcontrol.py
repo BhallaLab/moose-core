@@ -386,7 +386,7 @@ class GraphicalView(QtGui.QGraphicsView):
                 self.layoutPt.plugin.mainWindow.objectEditSlot(self.state["press"]["item"].mobj, True)
             else:
                 if isinstance(self.state["release"]["item"], KineticsDisplayItem):
-                    if not moose.element(self.state["press"]["item"]) == moose.element(self.state["release"]["item"]):
+                    if not moose.element(self.state["press"]["item"].mobj) == moose.element(self.state["release"]["item"].mobj):
                         self.populate_srcdes( self.state["press"]["item"].mobj
                                             , self.state["release"]["item"].mobj
                                             )
