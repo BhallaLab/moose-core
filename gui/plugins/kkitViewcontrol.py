@@ -12,6 +12,7 @@ from PyQt4.QtCore import pyqtSignal
 # from PyQt4.QtGui import pyqtSignal
 from kkitCalcArrow import *
 from kkitOrdinateUtil import *
+from kkitUtil import getColor
 from setsolver import *
 from PyQt4 import QtSvg
 from moose import utils
@@ -169,6 +170,20 @@ class GraphicalView(QtGui.QGraphicsView):
               
                 self.state["press"]["pos"] = event.pos()
                 self.layoutPt.positionChange(item.parent().mobj)
+            if actionType == "clone":
+                pixmap = QtGui.QPixmap(24, 24)
+                pixmap.fill(QtCore.Qt.transparent)
+                painter = QtGui.QPainter()
+                painter.begin(pixmap)
+                painter.setRenderHints(painter.Antialiasing)
+                pen = QtGui.QPen(QtGui.QBrush(QtGui.QColor("black")), 1)
+                pen.setWidthF(1.5)
+                painter.setPen(pen)
+                painter.drawLine(12,7,12,17)
+                painter.drawLine(7,12,17,12)
+                painter.end()
+                #self.setCursor(QtGui.QCursor(pixmap))
+                QtGui.QApplication.setOverrideCursor(QtGui.QCursor(pixmap))
 
         if itemType == ITEM:
             self.drawExpectedConnection(event)
@@ -177,7 +192,6 @@ class GraphicalView(QtGui.QGraphicsView):
             initial = self.mapToScene(self.state["press"]["pos"])
             final = self.mapToScene(event.pos())
             displacement = final - initial
-            #print("Displacement", displacement)
             item.moveBy(displacement.x(), displacement.y())
             self.layoutPt.positionChange(item.mobj.path)
             self.state["press"]["pos"] = event.pos()
@@ -301,10 +315,9 @@ class GraphicalView(QtGui.QGraphicsView):
                         (1.0 * rectangle.height()) / self.connectionSign.boundingRect().height()
                                                 )
                     position = item.mapToParent(rectangle.bottomLeft())
-                    print " posiition for cloning ",rectangle.topLeft() , " and ",rectangle.bottomLeft()
                     self.xDisp = 15
                     self.yDisp = 2
-                    self.connectionSign.setToolTip("Clone the object")
+                    self.connectionSign.setToolTip("Click and drag to clone the object")
                     self.connectorlist["clone"] = self.connectionSign 
             if isinstance(item.mobj,PoolBase):
                 if l == "plot":
@@ -373,20 +386,23 @@ class GraphicalView(QtGui.QGraphicsView):
                 self.layoutPt.plugin.mainWindow.objectEditSlot(self.state["press"]["item"].mobj, True)
             else:
                 if isinstance(self.state["release"]["item"], KineticsDisplayItem):
-                    self.populate_srcdes( self.state["press"]["item"].mobj
-                                        , self.state["release"]["item"].mobj
-                                        )
+                    if not moose.element(self.state["press"]["item"]) == moose.element(self.state["release"]["item"]):
+                        self.populate_srcdes( self.state["press"]["item"].mobj
+                                            , self.state["release"]["item"].mobj
+                                            )
+                    else:
+                        pass
                 self.removeExpectedConnection()
                 self.removeConnector()
 
         if clickedItemType  == CONNECTOR:
             actionType = str(self.state["press"]["item"].data(0).toString())
+            
             if actionType == "move":
                 QtGui.QApplication.setOverrideCursor(QtGui.QCursor(Qt.Qt.ArrowCursor))
 
             if actionType == "delete":
                 self.removeConnector()
-                #QtGui.QApplication.setOverrideCursor(QtCore.Qt.CrossCursor)
                 pixmap = QtGui.QPixmap(24, 24)
                 pixmap.fill(QtCore.Qt.transparent)
                 painter = QtGui.QPainter()
@@ -416,21 +432,44 @@ class GraphicalView(QtGui.QGraphicsView):
                     tablePath = utils.create_table_path(moose.element(self.modelRoot), self.graph, element, "Conc")
                     table     = utils.create_table(tablePath, element, "Conc","Table2")
             elif actionType == "clone":
+                QtGui.QApplication.setOverrideCursor(QtGui.QCursor(Qt.Qt.ArrowCursor))
+                self.state["press"]["item"].parent().mobj
+                cloneObj = self.state["press"]["item"]
                 #Solver should be deleted
                     ## if there is change in 'Topology' of the model
                     ## or if copy has to made then oject should be in unZombify mode
                 deleteSolver(self.modelRoot)
                 iR = 0
                 iP = 0
-                t = moose.element(item.parent().mobj)
+                
+                t = moose.element(cloneObj.parent().mobj)
                 name = t.name
-                if isinstance(item.parent().mobj,PoolBase):
+                if isinstance(cloneObj.parent().mobj,PoolBase):
                     name += self.objExist(t,iP) 
-                if isinstance(item.parent().mobj,ReacBase):
+                    ct = moose.element(moose.copy(t,t.parent,name,1))
+                    itemAtView = self.state["release"]["item"]
+                    poolObj = moose.element(ct)
+                    poolinfo = moose.element(poolObj.path+'/info')
+                    qGItem =PoolItem(poolObj,itemAtView)
+                    self.layoutPt.mooseId_GObj[poolObj] = qGItem
+                    posWrtComp = self.mapToScene(event.pos())
+                    bgcolor = getRandColor()
+                    color,bgcolor = getColor(poolinfo)
+                    qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y(),color,bgcolor)
+                    self.emit(QtCore.SIGNAL("dropped"),poolObj)
+                    
+                if isinstance(cloneObj.parent().mobj,ReacBase):
                     name += self.objExist(t,iR) 
-                ct = moose.element(moose.copy(t,t.parent,name,1))
-                print " ct ",ct
-
+                    ct = moose.element(moose.copy(t,t.parent,name,1))
+                    itemAtView = self.state["release"]["item"]
+                    reacObj = moose.element(ct)
+                    reacinfo = moose.Annotator(reacObj.path+'/info')
+                    qGItem = ReacItem(reacObj,itemAtView)
+                    self.layoutPt.mooseId_GObj[reacObj] = qGItem
+                    posWrtComp = self.mapToScene(event.pos())
+                    qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y(),"white", "white")
+                    self.emit(QtCore.SIGNAL("dropped"),reacObj)
+                
         if clickedItemType == CONNECTION:
             popupmenu = QtGui.QMenu('PopupMenu', self)
             popupmenu.addAction("Delete", lambda : self.deleteConnection(item))
@@ -662,11 +701,8 @@ class GraphicalView(QtGui.QGraphicsView):
          
 
     def deleteSelections(self,x0,y0,x1,y1):
-        print "deleteSelections"
         if( x1-x0 > 0  and y1-y0 >0):
-            print " inside if",x1-x0,y1-y0
             self.rubberbandlist = self.sceneContainerPt.items(self.mapToScene(QtCore.QRect(x0, y0, x1 - x0, y1 - y0)).boundingRect(), Qt.Qt.IntersectsItemShape)
-            print "rubberbandlist ",self.rubberbandlist
             for unselectitem in self.rubberbandlist:
                 if unselectitem.isSelected() == True:
                     unselectitem.setSelected(0)
@@ -943,7 +979,6 @@ class GraphicalView(QtGui.QGraphicsView):
             srcString = moose.element(src).className
             desString = moose.element(des).className
             srcdesString = srcString+'--'+desString
-            # QtGui.QMessageBox.information(None,'Connection Not possible','\'{srcString}\' Not allowed to connect \'{desString}\' '.format(srcString = srcString, desString=desString),QtGui.QMessageBox.Ok)
             QtGui.QMessageBox.information(None,'Connection Not possible','\'{srcdesString}\' not allowed to connect'.format(srcdesString = srcdesString),QtGui.QMessageBox.Ok)
             callsetupItem = False
             
