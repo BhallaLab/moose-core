@@ -345,6 +345,7 @@ class  KineticsWidget(EditorWidgetBase):
                 self.drawLine_arrow()
                 self.view.setRefWidget("editorView")
                 self.view.setAcceptDrops(True)
+                self.connect(self.view, QtCore.SIGNAL("dropped"), self.objectEditSlot)
                 hLayout = QtGui.QGridLayout(self)
                 self.setLayout(hLayout)
                 hLayout.addWidget(self.view)
