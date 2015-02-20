@@ -456,6 +456,8 @@ class GraphicalView(QtGui.QGraphicsView):
                     bgcolor = getRandColor()
                     color,bgcolor = getColor(poolinfo)
                     qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y(),color,bgcolor)
+                    #self.emit(QtCore.SIGNAL("dropped"),element(self.mobj))
+                    #poolObj.connect(self, QtCore.SIGNAL("dropped"),self.objectEditSlot)
                     self.emit(QtCore.SIGNAL("dropped"),poolObj)
                     
                 if isinstance(cloneObj.parent().mobj,ReacBase):
