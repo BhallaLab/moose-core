@@ -124,6 +124,8 @@ class GraphicalView(QtGui.QGraphicsView):
                 self.removeConnector()
             elif itemType == ITEM:
                 self.showConnector(self.state["press"]["item"])
+                # compartment's rectangle size is calculated depending on children
+                self.layoutPt.comptChilrenBoundingRect()
             # self.layoutPt.plugin.mainWindow.objectEditSlot(self.state["press"]["item"].mobj, False)
         else:
             self.resetState()
@@ -456,8 +458,6 @@ class GraphicalView(QtGui.QGraphicsView):
                     bgcolor = getRandColor()
                     color,bgcolor = getColor(poolinfo)
                     qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y(),color,bgcolor)
-                    #self.emit(QtCore.SIGNAL("dropped"),element(self.mobj))
-                    #poolObj.connect(self, QtCore.SIGNAL("dropped"),self.objectEditSlot)
                     self.emit(QtCore.SIGNAL("dropped"),poolObj)
                     
                 if isinstance(cloneObj.parent().mobj,ReacBase):
@@ -681,13 +681,15 @@ class GraphicalView(QtGui.QGraphicsView):
                      item.bg.setRect(0, 0, item.gobj.boundingRect().width()+PoolItem.fontMetrics.width('  '), item.gobj.boundingRect().height())
 
         self.layoutPt.drawLine_arrow(itemignoreZooming=False)
-        for k, v in self.layoutPt.qGraCompt.items():
-            rectcompt = v.childrenBoundingRect()
-            comptPen = v.pen()
-            comptWidth =  self.defaultComptsize*self.iconScale
-            comptPen.setWidth(comptWidth)
-            v.setPen(comptPen)
-            v.setRect(rectcompt.x()-comptWidth,rectcompt.y()-comptWidth,(rectcompt.width()+2*comptWidth),(rectcompt.height()+2*comptWidth))
+        self.layoutPt.comptChilrenBoundingRect()
+        #compartment width is resize according apart from calculating boundingRect
+        # for k, v in self.layoutPt.qGraCompt.items():
+        #     rectcompt = v.childrenBoundingRect()
+        #     comptPen = v.pen()
+        #     comptWidth =  self.defaultComptsize*self.iconScale
+        #     comptPen.setWidth(comptWidth)
+        #     v.setPen(comptPen)
+        #     v.setRect(rectcompt.x()-comptWidth,rectcompt.y()-comptWidth,(rectcompt.width()+2*comptWidth),(rectcompt.height()+2*comptWidth))
     
     def moveSelections(self):
         self.setCursor(Qt.Qt.CrossCursor)
