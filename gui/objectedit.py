@@ -128,7 +128,8 @@ extra_fields = ['this',
                 'valueFields',
                 'sourceFields',
                 'motorConst',
-                'destFields'
+                'destFields',
+                'expr'
                 ]
 
 
@@ -167,7 +168,7 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
         #harsha: For signalling models will be pulling out notes field from Annotator
         #        can updates if exist for other types also
         if ( isinstance(self.mooseObject, moose.PoolBase)
-           or isinstance(self.mooseObject,moose.ReacBase)
+           #or isinstance(self.mooseObject,moose.ReacBase)
            or isinstance(self.mooseObject,moose.EnzBase) ) :
             self.fields.append("Color")
             # self.fields.append("Notes")
