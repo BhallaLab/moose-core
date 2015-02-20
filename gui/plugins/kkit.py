@@ -488,7 +488,12 @@ class  KineticsWidget(EditorWidgetBase):
                 self.setupDisplay(cplxinfo,cplxItem,"cplx")
 
         # compartment's rectangle size is calculated depending on children
+        self.comptChilrenBoundingRect()
+        
+
+    def comptChilrenBoundingRect(self):
         for k, v in self.qGraCompt.items():
+            # compartment's rectangle size is calculated depending on children
             rectcompt = v.childrenBoundingRect()
             v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
             v.setPen(QtGui.QPen(Qt.QColor(66,66,66,100), self.comptPen, Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin))
