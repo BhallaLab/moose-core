@@ -518,6 +518,12 @@ class Shell
 		static bool chopString( const string& path, vector< string >& ret,
 			char separator = '/' );
 
+		/** 
+		 * Checks that the provided name is valid for an object.
+		 * This returns false if it finds the reserved path chars /#[]
+		 */
+		static bool isNameValid( const string& name );
+
 		/**
 		 * Chop up the path into a vector of Element names, and 
  		 * also fills out a matching vector of indices. If at any level of

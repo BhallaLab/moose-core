@@ -269,7 +269,12 @@ void Neutral::setName( const Eref& e, string name )
 {
 	if ( e.id().value() <= 3 ) {
 		cout << "Warning: Neutral::setName on '" << e.id().path() << 
-			   "'.Cannot rename core objects\n";
+			   "'. Cannot rename core objects\n";
+		return;
+	}
+	if ( !Shell::isNameValid( name ) ) {
+		cout << "Warning: Neutral::setName on '" << e.id().path() << 
+			   "'. Illegal character in name.\n";
 		return;
 	}
 	ObjId pa = parent( e );

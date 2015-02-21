@@ -16,6 +16,10 @@
 Id Shell::doCopy( Id orig, ObjId newParent, string newName, 
 	unsigned int n, bool toGlobal, bool copyExtMsg )
 {
+	if ( newName.length() > 0 && !isNameValid( newName ) ) {
+		cout << "Error: Shell::doCopy: Illegal name for copy.\n";
+		return Id();
+	}
 
 	if ( Neutral::isDescendant( newParent, orig ) ) {
 		cout << "Error: Shell::doCopy: Cannot copy object to descendant in tree\n";
