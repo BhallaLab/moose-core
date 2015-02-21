@@ -486,10 +486,10 @@ def make_new_synapse(syn_name, postcomp, syn_name_full, nml_params):
     ## deep copies the library SynChan and SynHandler
     ## to instances under postcomp named as <arg3>
     synid = moose.copy(moose.element('/library/'+syn_name),postcomp,syn_name_full)
-    synhandlerid = moose.copy(moose.element('/library/'+syn_name+'/handler'),\
-            postcomp,syn_name_full+'/handler')
+    #synhandlerid = moose.copy(moose.element('/library/'+syn_name+'/handler'), postcomp,syn_name_full+'/handler') This line was a bug: double handler
+    synhandler = moose.element( synid.path + '/handler' )
     syn = moose.SynChan(synid)
-    synhandler = moose.element(synhandlerid) # returns SimpleSynHandler or STDPSynHandler
+    synhandler = moose.element(synid.path + '/handler') # returns SimpleSynHandler or STDPSynHandler
 
     ## connect the SimpleSynHandler or the STDPSynHandler to the SynChan (double exp)
     moose.connect( synhandler, 'activationOut', syn, 'activation' )
