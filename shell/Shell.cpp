@@ -223,7 +223,7 @@ Id Shell::doCreate( string type, ObjId parent, string name,
     clock_t t = clock();
 #endif
 	const Cinfo* c = Cinfo::find( type );
-	if ( name.find_first_of( "[] #?\"/\\" ) != string::npos ) {
+	if ( !isNameValid( name ) ) {
 		stringstream ss;
 		ss << "Shell::doCreate: bad character in name'" << name << 
 				"'. No Element created";
@@ -560,6 +560,15 @@ bool Shell::chopString( const string& path, vector< string >& ret,
 		ret.push_back( temp.substr( 0, pos ) );
 	}
 	return isAbsolute;
+}
+
+/**
+ * Static func to check if an object name is legal. True if legal.
+ */
+bool Shell::isNameValid( const string& name )
+{
+	return ( name.length() > 0 && 
+				name.find_first_of( "[] #?\"/\\" ) == string::npos );
 }
 
 /**
