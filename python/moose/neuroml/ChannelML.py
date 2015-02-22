@@ -22,6 +22,8 @@ from moose.neuroml import utils
 from moose import utils as moose_utils
 from .. import print_utils as pu
 
+import parameters as p
+
 class ChannelML():
 
     def __init__(self,nml_params):
@@ -29,6 +31,7 @@ class ChannelML():
         self.cml='http://morphml.org/channelml/schema'
         self.nml_params = nml_params
         self.temperature = nml_params['temperature']
+        self.libraryPath = p.libraryPath
 
     def readChannelMLFromFile(self,filename,params={}):
         """ specify params as a dict: e.g. temperature that you need to pass to channels """
@@ -55,11 +58,10 @@ class ChannelML():
         else:
             pu.fatal("Wrong units %s exiting ..." % units)
             sys.exit(1)
-        moose.Neutral('/library') # creates /library in MOOSE tree; elif present, wraps
         synname = synapseElement.attrib['name']
         if utils.neuroml_debug: 
            pu.info("Loading synapse : %s into /library" % synname)
-        moosesynapse = moose.SynChan('/library/'+synname)
+        moosesynapse = moose.SynChan(self.libraryPath+synname)
         doub_exp_syn = synapseElement.find('./{'+self.cml+'}doub_exp_syn')
         moosesynapse.Ek = float(doub_exp_syn.attrib['reversal_potential'])*Vfactor
         moosesynapse.Gbar = float(doub_exp_syn.attrib['max_conductance'])*Gfactor
@@ -77,9 +79,9 @@ class ChannelML():
         ## check if STDP synapse is present or not
         stdp_syn = synapseElement.find('./{'+self.cml+'}stdp_syn')
         if stdp_syn is None:
-            moosesynhandler = moose.SimpleSynHandler('/library/'+synname+'/handler')
+            moosesynhandler = moose.SimpleSynHandler(self.libraryPath+synname+'/handler')
         else:
-            moosesynhandler = moose.STDPSynHandler('/library/'+synname+'/handler')
+            moosesynhandler = moose.STDPSynHandler(self.libraryPath+synname+'/handler')
             moosesynhandler.aPlus0 = float(stdp_syn.attrib['del_weight_ltp'])
             moosesynhandler.aMinus0 = float(stdp_syn.attrib['del_weight_ltd'])
             moosesynhandler.tauPlus = float(stdp_syn.attrib['tau_ltp'])
@@ -106,7 +108,6 @@ class ChannelML():
         else:
             pu.fatal("Wrong units %s. Existing" % units)
             sys.exit(1)
-        moose.Neutral('/library') # creates /library in MOOSE tree; elif present, wraps
         channel_name = channelElement.attrib['name']
         if utils.neuroml_debug: 
            pu.info("Loading channel %s into /library" % channel_name)
@@ -116,7 +117,7 @@ class ChannelML():
 
         if intfire is not None:
             ## Below params need to be set while making an LIF compartment
-            moosechannel = moose.Neutral('/library/'+channel_name)
+            moosechannel = moose.Neutral(self.libraryPath+channel_name)
             moosechannelval = moose.Mstring(moosechannel.path+'/vReset')
             moosechannelval.value = str(float(intfire.attrib['v_reset'])*Vfactor)
             moosechannelval = moose.Mstring(moosechannel.path+'/thresh')
@@ -134,10 +135,12 @@ class ChannelML():
             return
 
         concdep = IVrelation.find('./{'+self.cml+'}conc_dependence')
+
+        channelPath = '{}/{}'.format(self.libraryPath, channel_name)
         if concdep is None:
-            moosechannel = moose.HHChannel('/library/'+channel_name)
+            moosechannel = moose.HHChannel(channelPath)
         else:
-            moosechannel = moose.HHChannel2D('/library/'+channel_name)
+            moosechannel = moose.HHChannel2D(channelPath)
         
         if IVrelation.attrib['cond_law']=="ohmic":
             moosechannel.Gbar = float(IVrelation.attrib['default_gmax']) * Gfactor
@@ -363,7 +366,7 @@ class ChannelML():
             concfactor = 1.0
             Lfactor = 1.0
             Ifactor = 1.0
-        moose.Neutral('/library') # creates /library in MOOSE tree; elif present, wraps
+
         ionSpecies = ionConcElement.find('./{'+self.cml+'}ion_species')
         if ionSpecies is not None:
             if not 'ca' in ionSpecies.attrib['name']:
@@ -372,7 +375,8 @@ class ChannelML():
         capoolName = ionConcElement.attrib['name']
 
         pu.info("Loading Ca pool %s into /library ." % capoolName)
-        caPool = moose.CaConc('/library/'+capoolName)
+        capoolPath = '{}/{}'.format(self.libraryPath, capoolName)
+        caPool = moose.CaConc(capoolPath)
         poolModel = ionConcElement.find('./{'+self.cml+'}decaying_pool_model')
         caPool.CaBasal = float(poolModel.attrib['resting_conc']) * concfactor
         caPool.Ca_base = float(poolModel.attrib['resting_conc']) * concfactor
@@ -470,8 +474,10 @@ class ChannelML():
         return string.join(string.split(text,findstr),replacestr)
 
 def make_new_synapse(syn_name, postcomp, syn_name_full, nml_params):
+
     ## if channel does not exist in library load it from xml file
-    if not moose.exists('/library/'+syn_name):
+    synPath = '{}/{}'.format(self.libraryPath, syn_name)
+    if not moose.exists(synPath):
         cmlR = ChannelML(nml_params)
         model_filename = syn_name+'.xml'
         model_path = utils.find_first_file(model_filename,nml_params['model_dir'])
@@ -485,8 +491,8 @@ def make_new_synapse(syn_name, postcomp, syn_name_full, nml_params):
             )
     ## deep copies the library SynChan and SynHandler
     ## to instances under postcomp named as <arg3>
-    synid = moose.copy(moose.element('/library/'+syn_name),postcomp,syn_name_full)
-    #synhandlerid = moose.copy(moose.element('/library/'+syn_name+'/handler'), postcomp,syn_name_full+'/handler') This line was a bug: double handler
+    synid = moose.copy(moose.element(synPath),postcomp,syn_name_full)
+    #synhandlerid = moose.copy(moose.element(self.libraryPath+syn_name+'/handler'), postcomp,syn_name_full+'/handler') This line was a bug: double handler
     synhandler = moose.element( synid.path + '/handler' )
     syn = moose.SynChan(synid)
     synhandler = moose.element(synid.path + '/handler') # returns SimpleSynHandler or STDPSynHandler
