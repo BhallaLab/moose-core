@@ -83,6 +83,13 @@ class MooseTestCase( unittest.TestCase ):
     def test_synchans(self):
         self.dump("Checking if any synapse is dead")
         for synchan in self.mooseElems.synchans:
+            if synchan.Gbar <= 0.0:
+                debug.dump("WARN"
+                        , [ synchan.path
+                        , "Gbar value is zero or negative: %s" % synchan.Gbar
+                        , "Not cool!"
+                        ]
+                        )
             # Check the output of synchan.
             if not synchan.neighbors['channel']:
                 debug.dump("FAIL"
