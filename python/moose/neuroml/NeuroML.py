@@ -41,6 +41,7 @@ For testing, you can also call this from the command line with a neuroML file as
 import moose
 from moose.utils import *
 from xml.etree import cElementTree as ET
+
 from .ChannelML import ChannelML
 from .MorphML import MorphML
 from .NetworkML import NetworkML
@@ -53,21 +54,32 @@ from .. import print_utils as pu
 import sys
 from os import path
 
-class NeuroML():
+import parameters as p
+
+class NeuroML(MorphML, NetworkML, ChannelML):
 
     def __init__(self):
-        pass
+        self.cells = {}
+        self.populations = defaultdict(list)
+        self.cables = {}
+
+        self.libraryPath = p.libraryPath
+        moose.Neutral(self.libraryPath)
+
+        self.mml = None
+        self.nml = None
+        self.cml = None
 
     def readNeuroMLFromFile(self,filename,params={},cellsDict={}):
+
         """
         For the format of params required to tweak what cells are loaded,
          refer to the doc string of NetworkML.readNetworkMLFromFile().
         Returns (populationDict,projectionDict),
          see doc string of NetworkML.readNetworkML() for details.
         """
-        pu.info("Loading neuroml file %s " % filename)
 
-        moose.Neutral('/library') # creates /library in MOOSE tree; elif present, wraps
+        pu.info("Loading neuroml file %s " % filename)
         tree = ET.parse(filename)
         root_element = tree.getroot()
         self.model_dir = path.dirname( path.abspath( filename ) )
@@ -77,7 +89,8 @@ class NeuroML():
             self.lengthUnits = 'micrometer'
         
         ## lots of gymnastics to check if temperature meta tag is present
-        self.temperature = CELSIUS_default # gets replaced below if tag for temperature is present
+        # gets replaced below if tag for temperature is present
+        self.temperature = CELSIUS_default 
         self.temperature_default = True
         for meta_property in root_element.findall('.//{'+meta_ns+'}property'):
             ## tag can be an attrib or an element
@@ -104,7 +117,6 @@ class NeuroML():
                 'model_dir':self.model_dir,
         }
 
-        #print "Loading channels and synapses into MOOSE /library ..."
         cmlR = ChannelML(self.nml_params)
         for channels in root_element.findall('.//{'+neuroml_ns+'}channels'):
             self.channelUnits = channels.attrib['units']
@@ -118,12 +130,11 @@ class NeuroML():
             for ionConc in channels.findall('.//{'+cml_ns+'}ion_concentration'):
                 cmlR.readIonConcML(ionConc,units=self.channelUnits)
 
-        #print "Loading cell definitions into MOOSE /library ..."
-        mmlR = MorphML(self.nml_params)
+        self.nml = MorphML(self.nml_params)
         self.cellsDict = cellsDict
         for cells in root_element.findall('.//{'+neuroml_ns+'}cells'):
             for cell in cells.findall('.//{'+neuroml_ns+'}cell'):
-                cellDict = mmlR.readMorphML(cell,params={},lengthUnits=self.lengthUnits)
+                cellDict = self.nml.readMorphML(cell,params={},lengthUnits=self.lengthUnits)
                 self.cellsDict.update(cellDict)
 
         ## check if there are populations in this NML files,
