@@ -18,7 +18,10 @@ from xml.etree import cElementTree as ET # cELementTree is mostly API-compatible
 import string
 import sys
 import math
+import os 
+
 from os import path
+
 import moose
 from moose import utils as moose_utils
 from .. import print_utils as pu
@@ -138,17 +141,17 @@ class MorphML():
                     passive = True
             if not passive:            
                 ## if channel does not exist in library load it from xml file
-                if not moose.exists("/library/"+mechanismname):
+                modelFilePath = os.path.join('.', '%s.xml'%mechanismname)
+                if not moose.exists("%s/%s" %(self.libraryPath, mechanismname)):
                     pu.info("Loading mechanism %s into library." % mechanismname)
-                    cmlR = ChannelML(self.nml_params)
-                    model_filename = mechanismname+'.xml'
-                    model_path = neuroml_utils.find_first_file(model_filename,self.model_dir)
-                    if model_path is not None:
-                        cmlR.readChannelMLFromFile(model_path)
+                    self.cml = ChannelML(self.nml_params)
+                    modelPath = neuroml_utils.find_first_file(modelFilePath,self.model_dir)
+                    if modelPath is not None:
+                        self.cml.readChannelMLFromFile(modelPath)
                     else:
                         raise IOError(
-                            'For mechanism {0}: files {1} not found under {2}.'.format(
-                                mechanismname, model_filename, self.model_dir)
+                            'For mechanism {0}: files {1} not found under {2}'.format(
+                                mechanismname, modelFilePath, self.model_dir)
                         )
                         
                     ## set those compartments to be LIF for which
@@ -229,7 +232,7 @@ class MorphML():
                 if mechanismname is not None: # this cableid is an intfire
                     ## create LIF (subclass of Compartment) and set to default values
                     moosecomp = moose.LIF(moosecomppath)
-                    moosechannel = moose.Neutral('/library/'+mechanismname)
+                    moosechannel = moose.Neutral(self.libraryPath+mechanismname)
                     moosechannelval = moose.Mstring(moosechannel.path+'/vReset')
                     moosecomp.vReset = moosechannelval.value
                     moosechannelval = moose.Mstring(moosechannel.path+'/thresh')
