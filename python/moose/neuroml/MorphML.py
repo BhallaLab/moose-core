@@ -25,9 +25,13 @@ from .. import print_utils as pu
 from moose.neuroml import utils as neuroml_utils
 from .ChannelML import ChannelML, make_new_synapse
 
+import NeuroML
+import parameters as p
+        
 class MorphML():
 
-    def __init__(self,nml_params):
+    def __init__(self, nml_params):
+
         self.neuroml='http://morphml.org/neuroml/schema'
         self.bio='http://morphml.org/biophysics/schema'
         self.mml='http://morphml.org/morphml/schema'
@@ -38,6 +42,7 @@ class MorphML():
         self.nml_params = nml_params
         self.model_dir = nml_params['model_dir']
         self.temperature = nml_params['temperature']
+        self.libraryPath = p.libraryPath
 
     def readMorphMLFromFile(self,filename,params={}):
         """
@@ -77,12 +82,12 @@ class MorphML():
         else:
             self.length_factor = 1.0
         cellname = cell.attrib["name"]
-        moose.Neutral('/library') # creates /library in MOOSE tree; elif present, wraps
-        pu.info("Loading cell %s into /library ." % cellname)
 
-        #~ moosecell = moose.Cell('/library/'+cellname)
-        #using moose Neuron class - in previous version 'Cell' class Chaitanya
-        moosecell = moose.Neuron('/library/'+cellname)
+        # creates /library in MOOSE tree; elif present, wraps
+        moose.Neutral(self.libraryPath) 
+        pu.info("Loading cell %s into %s ." % (cellname, self.libraryPath))
+
+        moosecell = moose.Neuron('%s/%s' %(self.libraryPath, cellname))
         self.cellDictBySegmentId[cellname] = [moosecell,{}]
         self.cellDictByCableId[cellname] = [moosecell,{}]
         self.segDict = {}
