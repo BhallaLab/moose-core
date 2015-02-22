@@ -117,24 +117,24 @@ class NeuroML(MorphML, NetworkML, ChannelML):
                 'model_dir':self.model_dir,
         }
 
-        cmlR = ChannelML(self.nml_params)
+        self.cml = ChannelML(self.nml_params)
         for channels in root_element.findall('.//{'+neuroml_ns+'}channels'):
             self.channelUnits = channels.attrib['units']
             for channel in channels.findall('.//{'+cml_ns+'}channel_type'):
                 ## ideally I should read in extra params
                 ## from within the channel_type element and put those in also.
                 ## Global params should override local ones.
-                cmlR.readChannelML(channel,params={},units=self.channelUnits)
+                self.cml.readChannelML(channel,params={},units=self.channelUnits)
             for synapse in channels.findall('.//{'+cml_ns+'}synapse_type'):
-                cmlR.readSynapseML(synapse,units=self.channelUnits)
+                self.cml.readSynapseML(synapse,units=self.channelUnits)
             for ionConc in channels.findall('.//{'+cml_ns+'}ion_concentration'):
-                cmlR.readIonConcML(ionConc,units=self.channelUnits)
+                self.cml.readIonConcML(ionConc,units=self.channelUnits)
 
-        self.nml = MorphML(self.nml_params)
+        self.mml = MorphML(self.nml_params)
         self.cellsDict = cellsDict
         for cells in root_element.findall('.//{'+neuroml_ns+'}cells'):
             for cell in cells.findall('.//{'+neuroml_ns+'}cell'):
-                cellDict = self.nml.readMorphML(cell,params={},lengthUnits=self.lengthUnits)
+                cellDict = self.mml.readMorphML(cell,params={},lengthUnits=self.lengthUnits)
                 self.cellsDict.update(cellDict)
 
         ## check if there are populations in this NML files,
