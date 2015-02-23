@@ -111,11 +111,12 @@ class NeuroML(MorphML, NetworkML, ChannelML):
                         self.temperature = float(tag.find('.//{'+meta_ns+'}value').text)
                         self.temperature_default = False
         if self.temperature_default:
-            print(("Using default temperature of", self.temperature,"degrees Celsius."))
-        self.nml_params = {
-                'temperature':self.temperature,
-                'model_dir':self.model_dir,
-        }
+            pu.info("Using default temperature of %s deg Celsius" % self.temperature)
+
+        self.nml_params = { 
+                'temperature':self.temperature
+                , 'model_dir':self.model_dir
+                }
 
         self.cml = ChannelML(self.nml_params)
         for channels in root_element.findall('.//{'+neuroml_ns+'}channels'):
@@ -134,26 +135,31 @@ class NeuroML(MorphML, NetworkML, ChannelML):
         self.cellsDict = cellsDict
         for cells in root_element.findall('.//{'+neuroml_ns+'}cells'):
             for cell in cells.findall('.//{'+neuroml_ns+'}cell'):
-                cellDict = self.mml.readMorphML(cell,params={},lengthUnits=self.lengthUnits)
+                cellDict = self.mml.readMorphML(
+                        cell
+                        , params={}
+                        , lengthUnits = self.lengthUnits
+                        )
                 self.cellsDict.update(cellDict)
 
         ## check if there are populations in this NML files,
         ## if not, it's a MorphML or ChannelML file, not NetworkML, so skip.
-        if root_element.find('.//{'+neuroml_ns+'}populations') is None \
-            and root_element.find('.//{'+nml_ns+'}populations') is None:
-            return (self.cellsDict,'no populations (L3 NetworkML) found.')
+        if root_element.find('.//{'+neuroml_ns+'}populations') is None:
+            if root_element.find('.//{'+nml_ns+'}populations') is None:
+                return (self.cellsDict,'no populations (L3 NetworkML) found.')
         else:
-            #print "Loading individual cells into MOOSE root ... "
-            nmlR = NetworkML(self.nml_params)
-            return nmlR.readNetworkML(root_element,self.cellsDict,\
+            self.nml = NetworkML(self.nml_params)
+            return self.nml.readNetworkML(root_element,self.cellsDict,\
                     params=params,lengthUnits=self.lengthUnits)
+
         ## cellsDict = { cellname: (segDict, cableDict), ... } # multiple cells
         ## where segDict = { segid1 : [ segname,(proximalx,proximaly,proximalz),
         ##     (distalx,distaly,distalz),diameter,length,[potential_syn1, ... ] ] , ... }
         ## segname is "<name>_<segid>" because 1) guarantees uniqueness,
         ##     & 2) later scripts obtain segid from the compartment's name!
         ## and cableDict = { cablegroupname : [campartment1name, compartment2name, ... ], ... }
-        self.cellsDict = nmlR.cellSegmentDict
+
+        self.cellsDict = self.nml.cellSegmentDict
 
 def loadNeuroML_L123(filename):
     neuromlR = NeuroML()
