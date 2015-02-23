@@ -209,7 +209,16 @@ class DotFile():
             self.addEdge(s, table, label='table', color='blue')
 
 
-    def writeDotFile(self, fileName):
+    def writeDotFile(self, fileName, options):
+        """Write the topology to a graphviz file 
+
+        nodes_shape : If this parameter is passed, all nodes shapes is set to
+        this value. Useful when large number of nodes are present in graph.
+        Automatically set to "point" if no of nodes in graph is more than 200.
+
+        ignore: If parameter ignores all nodes which have any of these words in
+        them.
+        """
         dotText = ''
         dotText += '\n'.join(self.textDict['header'])
         dotText += "\n\n"
@@ -218,13 +227,20 @@ class DotFile():
         for cname in clusters:
             clusterText = 'subgraph cluster_%s{\n' % cname
             for n in clusters[cname]:
-                clusterText += '"%s"[label="",shape=none];\n' % self.fix(n)
+                clusterText += '"%s"[label="",shape="none"];\n' % self.fix(n)
             clusterText += '}\n'
             dotText += clusterText
 
         dotText += '\n'.join(self.textDict['nodes'])
         dotText += '\n'.join(self.textDict['edges'])
         dotText =  dotText + "\n}"
+
+        globalNodeShape = options.get('nodes_shape', None)
+        if globalNodeShape:
+            dotText = re.sub(r'shape=\"\w+\"'
+                        , 'shape="%s"'%globalNodeShape
+                        , dotText
+                        )
 
         if not fileName:
             print(dotText)
@@ -281,6 +297,7 @@ def getConnectedCompartments(obj):
 # path e.g. /library/cell1 and /library/cell2 are grouped together because they
 # are both under /library path.
 # @param Ignore paths containing this pattern. A regular expression. 
+# @param add_recorders (False). If true add tables to graph as well.
 #
 # @return None. 
 def writeGraphviz(filename=None, pat='/##', cluster=True, ignore=None, **kwargs):
@@ -330,10 +347,12 @@ def writeGraphviz(filename=None, pat='/##', cluster=True, ignore=None, **kwargs)
         dotFile.addPulseGen(p, comps)
         
     # Now add tables
-    tables = b.tables 
-    for t in tables:
-        sources = t.neighbors['requestOut']
-        dotFile.addTable(t, sources)
+    recorders = kwargs.get('add_recorders', False)
+    if recorders:
+        tables = b.tables 
+        for t in tables:
+            sources = t.neighbors['requestOut']
+            dotFile.addTable(t, sources)
 
     # If cluster is True then cluster the compartments together. Also create a
     # dictionary from which we can fetch the clustername of a compartment.
@@ -346,6 +365,6 @@ def writeGraphviz(filename=None, pat='/##', cluster=True, ignore=None, **kwargs)
             subgraphDict[clustername] = pops[pop]
             for x in pops[pop]: dotFile.subgraphDict[x] = clustername
     dotFile.textDict['subgraphs'] = subgraphDict
-    dotFile.writeDotFile(filename)
+    dotFile.writeDotFile(filename, kwargs)
     return True
 
