@@ -133,6 +133,7 @@ class MorphML():
         ## set which compartments have integrate_and_fire mechanism
         self.intFireCableIds = {}   # dict with keys as Compartments/cableIds which are IntFire
                                     # with mechanismnames as values
+
         for mechanism in cell.findall(".//{"+self.bio+"}mechanism"):
             mechanismname = mechanism.attrib["name"]
             passive = False
@@ -141,18 +142,23 @@ class MorphML():
                     passive = True
             if not passive:            
                 ## if channel does not exist in library load it from xml file
-                modelFilePath = os.path.join('.', '%s.xml'%mechanismname)
                 if not moose.exists("%s/%s" %(self.libraryPath, mechanismname)):
                     pu.info("Loading mechanism %s into library." % mechanismname)
                     self.cml = ChannelML(self.nml_params)
-                    modelPath = neuroml_utils.find_first_file(modelFilePath,self.model_dir)
+                    mechanismFileName = "%s.xml" % mechanismname
+                    modelPath = neuroml_utils.find_first_file(
+                            mechanismFileName
+                            , self.model_dir
+                            )
                     if modelPath is not None:
                         self.cml.readChannelMLFromFile(modelPath)
                     else:
-                        raise IOError(
-                            'For mechanism {0}: files {1} not found under {2}'.format(
-                                mechanismname, modelFilePath, self.model_dir)
-                        )
+                        pu.fatal(
+                                'For mechanism {0}: files {1} not found under {2}'.format(
+                                mechanismname, mechanismname, self.model_dir
+                                )
+                                )
+                        raise IOError
                         
                     ## set those compartments to be LIF for which
                     ## any integrate_and_fire parameter is set
