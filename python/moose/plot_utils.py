@@ -15,9 +15,10 @@ __maintainer__       = "Dilawar Singh"
 __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
-import pylab 
-import _moose
-import print_utils as debug
+import matplotlib.pyplot as plt
+import _moose as moose
+import print_utils as pu 
+import numpy as np
 
 def plotAscii(yvec, xvec = None, file=None):
     """Plot two list-like object in terminal using gnuplot.
@@ -97,7 +98,7 @@ def scaleAxis(xvec, yvec, scaleX, scaleY):
 
 def reformatTable(table, kwargs):
     """ Given a table return x and y vectors with proper scaling """
-    if type(table) == _moose.Table:
+    if type(table) == moose.Table:
         vecY = table.vector 
         vecX = range(len(vecY))
     elif type(table) == tuple:
@@ -115,19 +116,19 @@ def plotTable(table, standalone=True, file=None, **kwargs):
     Pass 'xscale' and/or 'yscale' argument to function to modify scales.
     
     """
-    if not type(table) == _moose.Table:
+    if not type(table) == moose.Table:
         msg = "Expected moose.Table, got {}".format( type(table) )
         raise TypeError(msg)
     if standalone:
-        pylab.figure()
+        plt.figure()
 
     vecX, vecY = reformatTable(table, kwargs)
-    pylab.plot(vecX, vecY)
+    plt.plot(vecX, vecY)
     if file and standalone:
-        debug.dump("PLOT", "Saving plot to {}".format(file))
-        pylab.savefig(file)
+        pu.dump("PLOT", "Saving plot to {}".format(file))
+        plt.savefig(file)
     elif standalone:
-        pylab.show()
+        plt.show()
 
 def plotTables(tables, file=None, **kwargs):
     """Plot a list of tables onto one figure only.
@@ -136,16 +137,16 @@ def plotTables(tables, file=None, **kwargs):
     for t in tables:
         plotTable(t, standalone = False, file = None, **kwargs)
     if file:
-        debug.dump("PLOT", "Saving plots to file {}".format(file))
+        pu.dump("PLOT", "Saving plots to file {}".format(file))
         try:
-            pylab.savefig(file)
+            plt.savefig(file)
         except Exception as e:
-            debug.dump("WARN"
+            pu.dump("WARN"
                     , "Failed to save figure, plotting onto a window"
                     )
-            pylab.show()
+            plt.show()
     else:
-        pylab.show()
+        plt.show()
 
 def saveTables(tables, file=None, **kwargs):
     """Save a list to tables to a data file. """
@@ -168,7 +169,7 @@ def saveTables(tables, file=None, **kwargs):
     if file is None:
         print(tableText)
     else:
-        debug.dump("PLOT", "Saving tables data to file {}".format(file))
+        pu.dump("PLOT", "Saving tables data to file {}".format(file))
         with open(file, "w") as f:
             f.write(tableText)
     
@@ -182,5 +183,96 @@ def plotVectorWithClock(vec, **kwargs):
     """
 
     clock = moose.Clock('/clock')
-    pylab.plot(pylab.linespace(0, clock.currentTime, len(vec)), vec, kwargs)
+    plt.plot(np.linespace(0, clock.currentTime, len(vec)), vec, kwargs)
+    if(kwargs.get('legend', True)):
+        plt.legend(loc='best', framealpha=0.4, prop={'size' : 6})
+
+
+def saveRecords(dataDict, xvec = None, **kwargs):
+    """saveRecords Given a dictionary of data with (key, vector) pair, it saves
+    them.
+
+    :param dataDict:
+    :param **kwargs:
+    """
+
+    assert type(dataDict) == dict, "Got %s" % type(dataDict)
+    if not xvec:
+        clock = moose.Clock('/clock')
+
+    legend = kwargs.get('legend', True)
+    outfile = kwargs.get('outfile', None)
+    plot = kwargs.get('plot', False)
+    subplot = kwargs.get('subplot', False)
+
+    filters = [ x.lower() for x in kwargs.get('filter', [])]
+
+    dataFile = 'data.moose' 
+    pu.info("Writing data to %s" % dataFile)
+    with open(dataFile, 'w') as f:
+        for k in dataDict:
+            yvec = dataDict[k].vector
+            if not xvec:
+                xvec = np.linspace(0, clock.currentTime, len(yvec))
+            xline = ','.join([str(x) for x in xvec])
+            yline = ','.join([str(y) for y in yvec])
+            f.write('"%s:x",%s\n' % (k, xline))
+            f.write('"%s:y",%s\n' % (k, yline))
+
+    pu.info(" .. Done writing data to moose-data file")
+    if not plot:
+        return 
+
+    plt.figure()
+    averageData = []
+    for i, k in enumerate(dataDict):
+        pu.info("+ Plotting for %s" % k)
+        plotThis = False
+        if not filters: plotThis = True
+        for accept in filters:
+            if accept in k.lower(): 
+                plotThis = True
+                break
+                
+        if not subplot: 
+            if plotThis:
+                yvec = dataDict[k].vector
+                if not xvec:
+                    xvec = np.linspace(0, clock.currentTime, len(yvec))
+                plt.plot(xvec, yvec, label=str(k))
+                plt.legend(loc='best', framealpha=0.4, prop={'size':6})
+                averageData.append(yvec)
+                if legend:
+                    plt.legend(loc='best', framealpha=0.4, prop={'size':6})
+        else:
+            if plotThis:
+                plt.subplot(len(dataDict), 1, i)
+                yvec = dataDict[k].vector
+                if not xvec:
+                    xvec = np.linspace(0, clock.currentTime, len(yvec))
+                averageData.append(yvec)
+                plt.plot(xvec, yvec, label=str(k))
+                plt.legend(loc='best', framealpha=0.4, prop={'size':6})
+                if legend:
+                    plt.legend(loc='best', framealpha=0.4, prop={'size':6})
+
+    plt.title(kwargs.get('title', ''))
+    plt.ylabel(kwargs.get('ylabel', ''))
+    if kwargs.get('xlabel', None):
+        plt.xlabel(kwargs['xlabel'])
+    else:
+        plt.xlabel("Time (sec)")
+
+    if outfile:
+        print("Writing plot to %s" % outfile)
+        plt.savefig("%s" % outfile)
+
+    average = kwargs.get('average', False)
+    # if True, compute average of all plots and plot it.
+    if average:
+        plt.figure()
+        plt.plot(xvec, np.mean(averageData, axis=0))
+        if outfile:
+            print("Writing plot to %s" % outfile)
+            plt.savefig("avg_%s" % outfile)
 
