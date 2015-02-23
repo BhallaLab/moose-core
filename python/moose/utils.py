@@ -3,7 +3,7 @@
 
     Utility functions for moose.
 
-    Last modified: Sat Jan 18, 2014  05:01PM
+    Last modified: Mon Feb 23, 2015  08:34PM
 
 """
 
@@ -44,7 +44,9 @@ import re
 plotTable = plot_utils.plotTable
 plotTables = plot_utils.plotTables
 saveTables = plot_utils.saveTables
+
 saveRecords = plot_utils.saveRecords
+plotRecords = plot_utils.plotRecords
 
 #
 recordAt = sim_utils.recordTarget
