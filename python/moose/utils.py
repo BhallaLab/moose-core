@@ -44,6 +44,7 @@ import re
 plotTable = plot_utils.plotTable
 plotTables = plot_utils.plotTables
 saveTables = plot_utils.saveTables
+saveRecords = plot_utils.saveRecords
 
 #
 recordAt = sim_utils.recordTarget
