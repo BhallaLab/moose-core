@@ -175,16 +175,34 @@ def saveTables(tables, file=None, **kwargs):
     
    
 
-def plotVectorWithClock(vec, **kwargs):
-    """plotVectorWithClock: Plot a given vector. On x-axis, plot the time.
+def plotVector(vec, xvec = None, **options):
+    """plotVector: Plot a given vector. On x-axis, plot the time.
 
     :param vec: Given vector.
     :param **kwargs: Optional to pass to maplotlib.
     """
 
-    clock = moose.Clock('/clock')
-    plt.plot(np.linespace(0, clock.currentTime, len(vec)), vec, kwargs)
-    if(kwargs.get('legend', True)):
+    assert type(vec) == np.ndarray, "Expected type %s" % type(vec)
+
+    if xvec is None:
+        clock = moose.Clock('/clock')
+        xx = np.linspace(0, clock.currentTime, len(vec))
+    else:
+        xx = xvec[:]
+
+    assert len(xx) == len(vec), "Expecting %s got %s" % (len(vec), len(xvec))
+
+    plt.plot(xx, vec, label=options.get('label', ''))
+
+    if xvec is None:
+        plt.xlabel = 'Time (sec)'
+    else:
+        plt.xlabel = options.get('xlabel', '')
+    
+    plt.ylabel = options.get('ylabel', '')
+    plt.title = options.get('title', '')
+
+    if(options.get('legend', True)):
         plt.legend(loc='best', framealpha=0.4, prop={'size' : 6})
 
 
@@ -197,8 +215,6 @@ def saveRecords(dataDict, xvec = None, **kwargs):
     """
 
     assert type(dataDict) == dict, "Got %s" % type(dataDict)
-    if not xvec:
-        clock = moose.Clock('/clock')
 
     legend = kwargs.get('legend', True)
     outfile = kwargs.get('outfile', None)
@@ -212,9 +228,12 @@ def saveRecords(dataDict, xvec = None, **kwargs):
     with open(dataFile, 'w') as f:
         for k in dataDict:
             yvec = dataDict[k].vector
-            if not xvec:
-                xvec = np.linspace(0, clock.currentTime, len(yvec))
-            xline = ','.join([str(x) for x in xvec])
+            if xvec is None:
+                clock = moose.Clock('/clock')
+                xx = np.linspace(0, clock.currentTime, len(yvec))
+            else:
+                xx = xvec[:]
+            xline = ','.join([str(x) for x in xx])
             yline = ','.join([str(y) for y in yvec])
             f.write('"%s:x",%s\n' % (k, xline))
             f.write('"%s:y",%s\n' % (k, yline))
@@ -224,7 +243,6 @@ def saveRecords(dataDict, xvec = None, **kwargs):
         return 
 
     plt.figure()
-    averageData = []
     for i, k in enumerate(dataDict):
         pu.info("+ Plotting for %s" % k)
         plotThis = False
@@ -234,45 +252,15 @@ def saveRecords(dataDict, xvec = None, **kwargs):
                 plotThis = True
                 break
                 
-        if not subplot: 
-            if plotThis:
+        if plotThis:
+            if not subplot: 
                 yvec = dataDict[k].vector
-                if not xvec:
-                    xvec = np.linspace(0, clock.currentTime, len(yvec))
-                plt.plot(xvec, yvec, label=str(k))
-                plt.legend(loc='best', framealpha=0.4, prop={'size':6})
-                averageData.append(yvec)
-                if legend:
-                    plt.legend(loc='best', framealpha=0.4, prop={'size':6})
-        else:
-            if plotThis:
+                plotVector(yvec, xvec, **kwargs)
+            else:
                 plt.subplot(len(dataDict), 1, i)
                 yvec = dataDict[k].vector
-                if not xvec:
-                    xvec = np.linspace(0, clock.currentTime, len(yvec))
-                averageData.append(yvec)
-                plt.plot(xvec, yvec, label=str(k))
-                plt.legend(loc='best', framealpha=0.4, prop={'size':6})
-                if legend:
-                    plt.legend(loc='best', framealpha=0.4, prop={'size':6})
-
-    plt.title(kwargs.get('title', ''))
-    plt.ylabel(kwargs.get('ylabel', ''))
-    if kwargs.get('xlabel', None):
-        plt.xlabel(kwargs['xlabel'])
-    else:
-        plt.xlabel("Time (sec)")
+                plotVector(yvec, xvec, **kwargs)
 
     if outfile:
-        print("Writing plot to %s" % outfile)
+        pu.info("Writing plot to %s" % outfile)
         plt.savefig("%s" % outfile)
-
-    average = kwargs.get('average', False)
-    # if True, compute average of all plots and plot it.
-    if average:
-        plt.figure()
-        plt.plot(xvec, np.mean(averageData, axis=0))
-        if outfile:
-            print("Writing plot to %s" % outfile)
-            plt.savefig("avg_%s" % outfile)
-
