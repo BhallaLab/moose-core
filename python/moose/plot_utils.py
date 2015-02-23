@@ -216,16 +216,11 @@ def saveRecords(dataDict, xvec = None, **kwargs):
 
     assert type(dataDict) == dict, "Got %s" % type(dataDict)
 
-    legend = kwargs.get('legend', True)
-    outfile = kwargs.get('outfile', None)
-    plot = kwargs.get('plot', False)
-    subplot = kwargs.get('subplot', False)
+    outfile = kwargs.get('outfile', 'data.moose')
 
     filters = [ x.lower() for x in kwargs.get('filter', [])]
-
-    dataFile = 'data.moose' 
-    pu.info("Writing data to %s" % dataFile)
-    with open(dataFile, 'w') as f:
+    pu.info("Writing data to %s" % outfile)
+    with open(outfile, 'w') as f:
         for k in dataDict:
             yvec = dataDict[k].vector
             if xvec is None:
@@ -237,10 +232,20 @@ def saveRecords(dataDict, xvec = None, **kwargs):
             yline = ','.join([str(y) for y in yvec])
             f.write('"%s:x",%s\n' % (k, xline))
             f.write('"%s:y",%s\n' % (k, yline))
-
     pu.info(" .. Done writing data to moose-data file")
-    if not plot:
-        return 
+
+def plotRecords(dataDict, xvec = None, **kwargs):
+    """plotRecords Plot given records in dictionary.
+
+    :param dataDict:
+    :param xvec: If None, use moose.Clock to generate xvec.
+    :param **kwargs:
+    """
+
+    legend = kwargs.get('legend', True)
+    outfile = kwargs.get('outfile', None)
+    subplot = kwargs.get('subplot', False)
+    filters = [ x.lower() for x in kwargs.get('filter', [])]
 
     plt.figure()
     for i, k in enumerate(dataDict):
@@ -264,3 +269,5 @@ def saveRecords(dataDict, xvec = None, **kwargs):
     if outfile:
         pu.info("Writing plot to %s" % outfile)
         plt.savefig("%s" % outfile)
+    else:
+        plt.show()
