@@ -16,8 +16,8 @@ from xml.etree import cElementTree as ET
 import string
 import os
 from math import cos, sin
-from .MorphML import MorphML
-from .ChannelML import ChannelML, make_new_synapse
+from MorphML import MorphML
+from ChannelML import ChannelML
 import moose
 from moose.neuroml.utils import meta_ns, nml_ns, find_first_file, tweak_model
 from moose import utils
@@ -45,20 +45,13 @@ class NetworkML():
         e.g. baseline synapses on granule cells connected to 'includePopulation' mitrals;
             these synapses receive file based pre-synaptic events,
             not presynaptically connected to a cell.
-        In params, you further specify:
-            'createPotentialSynapses' : True (False by default)
-            to create synapses at all potential locations/compartments specified in the MorphML cell file
-            even before Projections tag is parsed.
-            'combineSegments' : True (False by default)
-            to ask neuroml to combine segments belonging to a cable
-            (Neuron generates multiple segments per section).
         """
-        print("reading file ... ", filename)
+        print "reading file ... ", filename
         tree = ET.parse(filename)
         root_element = tree.getroot()
-        print("Tweaking model ... ")
+        print "Tweaking model ... "
         tweak_model(root_element, params)
-        print("Loading model into MOOSE ... ")
+        print "Loading model into MOOSE ... "
         return self.readNetworkML(root_element,cellSegmentDict,params,root_element.attrib['lengthUnits'])
 
     def readNetworkML(self,network,cellSegmentDict,params={},lengthUnits="micrometer"):
@@ -73,11 +66,11 @@ class NetworkML():
         self.network = network
         self.cellSegmentDict = cellSegmentDict
         self.params = params
-        print("creating populations ... ")
+        print "creating populations ... "
         self.createPopulations() # create cells
-        print("creating connections ... ")
+        print "creating connections ... "
         self.createProjections() # create connections
-        print("creating inputs in /elec ... ")
+        print "creating inputs in /elec ... "
         self.createInputs() # create inputs (only current pulse supported)
         return (self.populationDict,self.projectionDict)
 
@@ -120,12 +113,12 @@ class NetworkML():
                     population = target.attrib['population']
                     for site in target.findall(".//{"+nml_ns+"}site"):
                         cell_id = site.attrib['cell_id']
-                        if 'segment_id' in site.attrib: segment_id = site.attrib['segment_id']
+                        if site.attrib.has_key('segment_id'): segment_id = site.attrib['segment_id']
                         else: segment_id = 0 # default segment_id is specified to be 0
                         ## population is populationname, self.populationDict[population][0] is cellname
                         cell_name = self.populationDict[population][0]
                         segment_path = self.populationDict[population][1][int(cell_id)].path+'/'+\
-                            self.cellSegmentDict[cell_name][0][segment_id][0]
+                            self.cellSegmentDict[cell_name][segment_id][0]
                         compartment = moose.Compartment(segment_path)
                         moose.connect(iclamp,'output',compartment,'injectMsg')
 
@@ -134,7 +127,7 @@ class NetworkML():
         for population in self.network.findall(".//{"+nml_ns+"}population"):
             cellname = population.attrib["cell_type"]
             populationname = population.attrib["name"]
-            print("loading", populationname)
+            print "loading", populationname
             ## if cell does not exist in library load it from xml file
             if not moose.exists('/library/'+cellname):
                 mmlR = MorphML(self.nml_params)
@@ -143,7 +136,7 @@ class NetworkML():
                 for model_filename in model_filenames:
                     model_path = find_first_file(model_filename,self.model_dir)
                     if model_path is not None:
-                        cellDict = mmlR.readMorphMLFromFile(model_path, self.params)
+                        cellDict = mmlR.readMorphMLFromFile(model_path)
                         success = True
                         break
                 if not success:
@@ -179,30 +172,30 @@ class NetworkML():
         for childId in obj.children:
             try:
                 childobj = moose.element(childId)
-                if childobj.className in ['Compartment','SymCompartment']:
-                    ## SymCompartment inherits from Compartment,
-                    ## so below wrapping by Compartment() is fine for both Compartment and SymCompartment
-                    child = moose.Compartment(childId)
-                    x0 = child.x0
-                    y0 = child.y0
-                    x0new = x0*cos(ztheta)-y0*sin(ztheta)
-                    y0new = x0*sin(ztheta)+y0*cos(ztheta)
-                    child.x0 = x0new + x
-                    child.y0 = y0new + y
-                    child.z0 += z
-                    x1 = child.x
-                    y1 = child.y
-                    x1new = x1*cos(ztheta)-y1*sin(ztheta)
-                    y1new = x1*sin(ztheta)+y1*cos(ztheta)
-                    child.x = x1new + x
-                    child.y = y1new + y
-                    child.z += z
-                if len(childobj.children)>0:
-                    self.translate_rotate(childobj,x,y,z,ztheta) # recursive translation+rotation
             except TypeError:  # in async13, gates which have not been created still 'exist'
                                 # i.e. show up as a child, but cannot be wrapped.
                 pass
             ## if childobj is a compartment or symcompartment translate, else skip it
+            if childobj.className in ['Compartment','SymCompartment']:
+                ## SymCompartment inherits from Compartment,
+                ## so below wrapping by Compartment() is fine for both Compartment and SymCompartment
+                child = moose.Compartment(childId)
+                x0 = child.x0
+                y0 = child.y0
+                x0new = x0*cos(ztheta)-y0*sin(ztheta)
+                y0new = x0*sin(ztheta)+y0*cos(ztheta)
+                child.x0 = x0new + x
+                child.y0 = y0new + y
+                child.z0 += z
+                x1 = child.x
+                y1 = child.y
+                x1new = x1*cos(ztheta)-y1*sin(ztheta)
+                y1new = x1*sin(ztheta)+y1*cos(ztheta)
+                child.x = x1new + x
+                child.y = y1new + y
+                child.z += z
+            if len(childobj.children)>0:
+                self.translate_rotate(childobj,x,y,z,ztheta) # recursive translation+rotation
 
     def createProjections(self):
         self.projectionDict={}
@@ -216,7 +209,7 @@ class NetworkML():
                 Tfactor = 1.0
         for projection in self.network.findall(".//{"+nml_ns+"}projection"):
             projectionname = projection.attrib["name"]
-            print("setting",projectionname)
+            print "setting",projectionname
             source = projection.attrib["source"]
             target = projection.attrib["target"]
             self.projectionDict[projectionname] = (source,target,[])
@@ -252,7 +245,7 @@ class NetworkML():
                             pre_segment_id = connection.attrib['pre_segment_id']
                         else: pre_segment_id = "0" # assume default segment 0, usually soma
                         pre_segment_path = self.populationDict[source][1][int(pre_cell_id)].path+'/'+\
-                            self.cellSegmentDict[pre_cell_name][0][pre_segment_id][0]
+                            self.cellSegmentDict[pre_cell_name][pre_segment_id][0]
                     else:
                         # I've removed extra excitation provided via files, so below comment doesn't apply.
                         # 'file[+<glomnum>]_<filenumber>' # glomnum is
@@ -264,7 +257,7 @@ class NetworkML():
                         post_segment_id = connection.attrib['post_segment_id']
                     else: post_segment_id = "0" # assume default segment 0, usually soma
                     post_segment_path = self.populationDict[target][1][int(post_cell_id)].path+'/'+\
-                        self.cellSegmentDict[post_cell_name][0][post_segment_id][0]
+                        self.cellSegmentDict[post_cell_name][post_segment_id][0]
                     self.projectionDict[projectionname][2].append((syn_name, pre_segment_path, post_segment_path))
                     properties = connection.findall('./{'+nml_ns+'}properties')
                     if len(properties)==0:
@@ -295,12 +288,12 @@ class NetworkML():
         gradedchild = utils.get_child_Mstring(libsyn,'graded')
         if libsyn.className == 'KinSynChan' or gradedchild.value == 'True': # create a new synapse
             syn_name_full = syn_name+'_'+utils.underscorize(pre_path)
-            make_new_synapse(syn_name, postcomp, syn_name_full, self.nml_params)
+            self.make_new_synapse(syn_name, postcomp, syn_name_full)
         else:
             ## if syn doesn't exist in this compartment, create it
             syn_name_full = syn_name
             if not moose.exists(post_path+'/'+syn_name_full):
-                make_new_synapse(syn_name, postcomp, syn_name_full, self.nml_params)
+                self.make_new_synapse(syn_name, postcomp, syn_name_full)
         ## moose.element is a function that checks if path exists,
         ## and returns the correct object, here SynChan
         syn = moose.element(post_path+'/'+syn_name_full) # wrap the SynChan in this compartment
@@ -413,3 +406,27 @@ class NetworkML():
             #print 'len = ',len(synhandler.synapse)
             #for i,syn_syn in enumerate(synhandler.synapse):
             #    print i,'th weight =',syn_syn.weight,'\n'
+
+    def make_new_synapse(self, syn_name, postcomp, syn_name_full):
+        ## if channel does not exist in library load it from xml file
+        if not moose.exists('/library/'+syn_name):
+            cmlR = ChannelML(self.nml_params)
+            cmlR.readChannelMLFromFile(syn_name+'.xml')
+        ## deep copies the library SynChan and SynHandler
+        ## to instances under postcomp named as <arg3>
+        synid = moose.copy(moose.element('/library/'+syn_name),postcomp,syn_name_full)
+        synhandlerid = moose.copy(moose.element('/library/'+syn_name+'/handler'),\
+                postcomp,syn_name_full+'/handler')
+        syn = moose.SynChan(synid)
+        synhandler = moose.element(synhandlerid) # returns SimpleSynHandler or STDPSynHandler
+        print synhandler.className
+        ## connect the SimpleSynHandler or the STDPSynHandler to the SynChan (double exp)
+        moose.connect( synhandler, 'activationOut', syn, 'activation' )
+        # mgblock connections if required
+        childmgblock = utils.get_child_Mstring(syn,'mgblockStr')
+        #### connect the post compartment to the synapse
+        if childmgblock.value=='True': # If NMDA synapse based on mgblock, connect to mgblock
+            mgblock = moose.Mg_block(syn.path+'/mgblock')
+            moose.connect(postcomp,"channel", mgblock, "channel")
+        else: # if SynChan or even NMDAChan, connect normally
+            moose.connect(postcomp,"channel", syn, "channel")

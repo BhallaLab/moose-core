@@ -41,60 +41,42 @@ For testing, you can also call this from the command line with a neuroML file as
 import moose
 from moose.utils import *
 from xml.etree import cElementTree as ET
-
-from .ChannelML import ChannelML
-from .MorphML import MorphML
-from .NetworkML import NetworkML
-
+from ChannelML import ChannelML
+from MorphML import MorphML
+from NetworkML import NetworkML
 import string
-
 from moose.neuroml.utils import *
-from .. import print_utils as pu
-
 import sys
 from os import path
 
-import parameters as p
-
-class NeuroML(MorphML, NetworkML, ChannelML):
+class NeuroML():
 
     def __init__(self):
-        self.cells = {}
-        self.populations = defaultdict(list)
-        self.cables = {}
-
-        self.libraryPath = p.libraryPath
-        moose.Neutral(self.libraryPath)
-
-        self.mml = None
-        self.nml = None
-        self.cml = None
+        pass
 
     def readNeuroMLFromFile(self,filename,params={},cellsDict={}):
-
         """
         For the format of params required to tweak what cells are loaded,
          refer to the doc string of NetworkML.readNetworkMLFromFile().
         Returns (populationDict,projectionDict),
          see doc string of NetworkML.readNetworkML() for details.
         """
-
-        pu.info("Loading neuroml file %s " % filename)
+        print "Loading neuroml file ... ", filename
+        moose.Neutral('/library') # creates /library in MOOSE tree; elif present, wraps
         tree = ET.parse(filename)
         root_element = tree.getroot()
         self.model_dir = path.dirname( path.abspath( filename ) )
-        if 'lengthUnits' in list(root_element.attrib.keys()):
+        if 'lengthUnits' in root_element.attrib.keys():
             self.lengthUnits = root_element.attrib['lengthUnits']
         else:
             self.lengthUnits = 'micrometer'
         
         ## lots of gymnastics to check if temperature meta tag is present
-        # gets replaced below if tag for temperature is present
-        self.temperature = CELSIUS_default 
+        self.temperature = CELSIUS_default # gets replaced below if tag for temperature is present
         self.temperature_default = True
         for meta_property in root_element.findall('.//{'+meta_ns+'}property'):
             ## tag can be an attrib or an element
-            if 'tag' in list(meta_property.attrib.keys()): # tag is an attrib
+            if 'tag' in meta_property.attrib.keys(): # tag is an attrib
                 tagname = meta_property.attrib['tag']
                 if 'temperature' in tagname:
                     self.temperature = float(meta_property.attrib['value'])
@@ -104,62 +86,51 @@ class NeuroML(MorphML, NetworkML, ChannelML):
                 tagname = tag.text
                 if 'temperature' in tagname:
                     ## value can be a tag or an element 
-                    if 'value' in list(tag.attrib.keys()): # value is an attrib
+                    if 'value' in tag.attrib.keys(): # value is an attrib
                         self.temperature = float(tag.attrib['value'])
                         self.temperature_default = False
                     else: # value is a separate element
                         self.temperature = float(tag.find('.//{'+meta_ns+'}value').text)
                         self.temperature_default = False
         if self.temperature_default:
-            pu.info("Using default temperature of %s deg Celsius" % self.temperature)
+            print "Using default temperature of", self.temperature,"degrees Celsius."
+        self.nml_params = {
+                'temperature':self.temperature,
+                'model_dir':self.model_dir,
+        }
 
-        self.nml_params = { 
-                'temperature':self.temperature
-                , 'model_dir':self.model_dir
-                }
-
-        self.cml = ChannelML(self.nml_params)
+        #print "Loading channels and synapses into MOOSE /library ..."
+        cmlR = ChannelML(self.nml_params)
         for channels in root_element.findall('.//{'+neuroml_ns+'}channels'):
             self.channelUnits = channels.attrib['units']
             for channel in channels.findall('.//{'+cml_ns+'}channel_type'):
                 ## ideally I should read in extra params
                 ## from within the channel_type element and put those in also.
                 ## Global params should override local ones.
-                self.cml.readChannelML(channel,params={},units=self.channelUnits)
+                cmlR.readChannelML(channel,params={},units=self.channelUnits)
             for synapse in channels.findall('.//{'+cml_ns+'}synapse_type'):
-                self.cml.readSynapseML(synapse,units=self.channelUnits)
+                cmlR.readSynapseML(synapse,units=self.channelUnits)
             for ionConc in channels.findall('.//{'+cml_ns+'}ion_concentration'):
-                self.cml.readIonConcML(ionConc,units=self.channelUnits)
+                cmlR.readIonConcML(ionConc,units=self.channelUnits)
 
-        self.mml = MorphML(self.nml_params)
+        #print "Loading cell definitions into MOOSE /library ..."
+        mmlR = MorphML(self.nml_params)
         self.cellsDict = cellsDict
         for cells in root_element.findall('.//{'+neuroml_ns+'}cells'):
             for cell in cells.findall('.//{'+neuroml_ns+'}cell'):
-                cellDict = self.mml.readMorphML(
-                        cell
-                        , params={}
-                        , lengthUnits = self.lengthUnits
-                        )
+                cellDict = mmlR.readMorphML(cell,params={},lengthUnits=self.lengthUnits)
                 self.cellsDict.update(cellDict)
 
         ## check if there are populations in this NML files,
         ## if not, it's a MorphML or ChannelML file, not NetworkML, so skip.
-        if root_element.find('.//{'+neuroml_ns+'}populations') is None:
-            if root_element.find('.//{'+nml_ns+'}populations') is None:
-                return (self.cellsDict,'no populations (L3 NetworkML) found.')
+        if root_element.find('.//{'+neuroml_ns+'}populations') is None \
+            and root_element.find('.//{'+nml_ns+'}populations') is None:
+            return (self.cellsDict,'no populations (L3 NetworkML) found.')
         else:
-            self.nml = NetworkML(self.nml_params)
-            return self.nml.readNetworkML(root_element,self.cellsDict,\
+            #print "Loading individual cells into MOOSE root ... "
+            nmlR = NetworkML(self.nml_params)
+            return nmlR.readNetworkML(root_element,self.cellsDict,\
                     params=params,lengthUnits=self.lengthUnits)
-
-        ## cellsDict = { cellname: (segDict, cableDict), ... } # multiple cells
-        ## where segDict = { segid1 : [ segname,(proximalx,proximaly,proximalz),
-        ##     (distalx,distaly,distalz),diameter,length,[potential_syn1, ... ] ] , ... }
-        ## segname is "<name>_<segid>" because 1) guarantees uniqueness,
-        ##     & 2) later scripts obtain segid from the compartment's name!
-        ## and cableDict = { cablegroupname : [campartment1name, compartment2name, ... ], ... }
-
-        self.cellsDict = self.nml.cellSegmentDict
 
 def loadNeuroML_L123(filename):
     neuromlR = NeuroML()
@@ -167,7 +138,7 @@ def loadNeuroML_L123(filename):
 
 if __name__ == "__main__":
     if len(sys.argv)<2:
-        print("You need to specify the neuroml filename.")
+        print "You need to specify the neuroml filename."
         sys.exit(1)
     loadNeuroML_L123(sys.argv[1])
     
