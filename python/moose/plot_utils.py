@@ -247,7 +247,7 @@ def plotRecords(dataDict, xvec = None, **kwargs):
     subplot = kwargs.get('subplot', False)
     filters = [ x.lower() for x in kwargs.get('filter', [])]
 
-    plt.figure()
+    plt.figure(figsize=(10, 1.5*len(dataDict)))
     for i, k in enumerate(dataDict):
         pu.info("+ Plotting for %s" % k)
         plotThis = False
@@ -265,6 +265,9 @@ def plotRecords(dataDict, xvec = None, **kwargs):
                 plt.subplot(len(dataDict), 1, i)
                 yvec = dataDict[k].vector
                 plotVector(yvec, xvec, **kwargs)
+    try:
+        plt.tight_layout()
+    except: pass
 
     if outfile:
         pu.info("Writing plot to %s" % outfile)
