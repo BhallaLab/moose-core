@@ -65,10 +65,11 @@ def model(element):
     information about all neurons and compartments belonging
     to that model
     """
-    if element.path.endswith("/") :
-        return morphology(moose.element(element.path + "cells"))
-    else:
-        return morphology(moose.element(element.path + "/cells"))
+    return morphology(moose.element(element))
+    # if element.path.endswith("/") :
+    #     return morphology(moose.element(element.path + "cells"))
+    # else:
+    #     return morphology(moose.element(element.path + "/cells"))
 
 def morphology(element):
     """Given the element containing all neurons, extracts
@@ -77,22 +78,29 @@ def morphology(element):
     return { "name"     : element.name
            , "id"       : element.path
            , "type"     : etype(element)
-           , "neurons"  : recurse(element, neuron, moose.Neuron)
+           , "neurons"  : neurons(element)
            }
 
-def neuron(element):
+def neurons(element):
     """Given a neuron element, extracts morphology
     information from all child compartment elements.
     """
-    return element.path, { "name"            : element.name
-                         , "id"              : element.path
-                         , "object"          : element
-                         , "type"            : etype(element)
-                         , "compartments"    : recurse(element, compartment, moose.CompartmentBase)
-                         }
+    retval = {}
+    neurons = moose.wildcardFind(element.path +  "/##[TYPE=Neuron]")
+    for element in neurons:
+        retval[element.path] = { "name"            : element.name
+                              , "id"              : element.path
+                              , "object"          : element
+                              , "type"            : etype(element)
+                              , "compartments"    : compartments(element)
+                              }
+    return retval
 
-def compartment(element):
-    return element.path, { "name"       : element.name
+def compartments(element):
+    retval = {}
+    compartments = moose.wildcardFind(element.path + "/##[TYPE=Compartment]")
+    for element in compartments:
+        retval[element.path] = { "name"       : element.name
                          , "object"     : element
                          , "id"         : element.path
                          , "type"       : etype(element)
@@ -106,6 +114,7 @@ def compartment(element):
                                           }
                          , "diameter"   : element.diameter
                          }
+    return retval
 
 def etype(element):
     element_type = element.name.rpartition("_")[0]
@@ -231,7 +240,7 @@ class MoogliViewer(QWidget):
             neuron = geometry["neurons"][neuron_id]
             for compartment_id in neuron["compartments"]:
                 compartment = neuron["compartments"][compartment_id]
-                # print( compartment_id
+                # print( compartment_id)
                 #      , neuron_id
                 #      , compartment["proximal"]["x"]
                 #      , compartment["proximal"]["y"]
@@ -259,15 +268,18 @@ class MoogliViewer(QWidget):
 
 
 def main():
+    # filename = os.path.join( os.path.split(os.path.realpath(__file__))[0]
+    #                        , "../neuroml/PurkinjeCellPassivePulseInput/PurkinjePassive.net.xml")
     filename = os.path.join( os.path.split(os.path.realpath(__file__))[0]
-                           , "../neuroml/PurkinjeCellPassivePulseInput/PurkinjePassive.net.xml")
+                           , "../neuroml/OlfactoryBulbPassive/OBpassive_numgloms3_seed750.0.xml")
+
     popdict, projdict = moose.neuroml.loadNeuroML_L123(filename)
     modelRoot   = moose.Neutral("/" + os.path.splitext(os.path.basename(filename))[0])
     element = moose.Neutral(modelRoot.path + "/model")
     if(moose.exists("/cells"))  : moose.move("/cells"  , element.path)
     if(moose.exists("/elec"))   : moose.move("/elec"   , modelRoot.path)
     if(moose.exists("/library")): moose.move("/library", modelRoot.path)
-    show_morphology(modelRoot.path + "/model")
+    show_morphology(modelRoot.path)
 
 def show_morphology(modelpath):
     app = QtGui.QApplication(sys.argv)
