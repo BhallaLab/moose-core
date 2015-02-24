@@ -18,23 +18,15 @@ from xml.etree import cElementTree as ET # cELementTree is mostly API-compatible
 import string
 import sys
 import math
-import os 
-
 from os import path
-
 import moose
 from moose import utils as moose_utils
-from .. import print_utils as pu
 from moose.neuroml import utils as neuroml_utils
-from .ChannelML import ChannelML, make_new_synapse
+from ChannelML import ChannelML
 
-import NeuroML
-import parameters as p
-        
 class MorphML():
 
-    def __init__(self, nml_params):
-
+    def __init__(self,nml_params):
         self.neuroml='http://morphml.org/neuroml/schema'
         self.bio='http://morphml.org/biophysics/schema'
         self.mml='http://morphml.org/morphml/schema'
@@ -45,25 +37,19 @@ class MorphML():
         self.nml_params = nml_params
         self.model_dir = nml_params['model_dir']
         self.temperature = nml_params['temperature']
-        self.libraryPath = p.libraryPath
 
     def readMorphMLFromFile(self,filename,params={}):
         """
         specify global params as a dict (presently none implemented)
-        returns { cellname1 : (segDict,cableDict), ... }
-        see readMorphML(...) for segDict and cableDict
+        returns { cellname1 : segDict, ... }
+        see readMorphML(...) for segDict 
         """
-
-        pu.info("Reading morphology from %s" % filename)
-        try:
-            tree = ET.parse(filename)
-        except Exception as e:
-            pu.fatal("Failed to load morphology from file %s" % filename)
-
+        print filename
+        tree = ET.parse(filename)
         neuroml_element = tree.getroot()
         cellsDict = {}
         for cell in neuroml_element.findall('.//{'+self.neuroml+'}cell'):
-            if 'lengthUnits' in list(neuroml_element.attrib.keys()):
+            if 'lengthUnits' in neuroml_element.attrib.keys():
                 lengthUnits = neuroml_element.attrib['lengthUnits']
             else:
                 lengthUnits = 'micrometer'
@@ -73,36 +59,31 @@ class MorphML():
 
     def readMorphML(self,cell,params={},lengthUnits="micrometer"):
         """
-        returns cellDict = { cellname: (segDict, cableDict) } # note: single cell only
+        returns {cellname:segDict}
         where segDict = { segid1 : [ segname,(proximalx,proximaly,proximalz),
             (distalx,distaly,distalz),diameter,length,[potential_syn1, ... ] ] , ... }
         segname is "<name>_<segid>" because 1) guarantees uniqueness,
-            & 2) later scripts obtain segid from the compartment's name!
-        and cableDict = { cablegroupname : [campartment1name, compartment2name, ... ], ... }
+        2) later scripts obtain segid from the compartment's name!
         """
         if lengthUnits in ['micrometer','micron']:
             self.length_factor = 1e-6
         else:
             self.length_factor = 1.0
         cellname = cell.attrib["name"]
+        moose.Neutral('/library') # creates /library in MOOSE tree; elif present, wraps
+        print "loading cell :", cellname,"into /library ."
 
-        # creates /library in MOOSE tree; elif present, wraps
-        moose.Neutral(self.libraryPath) 
-        pu.info("Loading cell %s into %s ." % (cellname, self.libraryPath))
-
-        moosecell = moose.Neuron('%s/%s' %(self.libraryPath, cellname))
+        #~ moosecell = moose.Cell('/library/'+cellname)
+        #using moose Neuron class - in previous version 'Cell' class Chaitanya
+        moosecell = moose.Neuron('/library/'+cellname)
         self.cellDictBySegmentId[cellname] = [moosecell,{}]
         self.cellDictByCableId[cellname] = [moosecell,{}]
         self.segDict = {}
-        if 'combineSegments' in list(params.keys()):
+        if 'combineSegments' in params.keys():
             self.combineSegments = params['combineSegments']
         else:
             self.combineSegments = False
-        if 'createPotentialSynapses' in list(params.keys()):
-            self.createPotentialSynapses = params['createPotentialSynapses']
-        else:
-            self.createPotentialSynapses = False
-        pu.info("readMorphML using combineSegments = %s" % self.combineSegments)
+        print "readMorphML using combineSegments = ", self.combineSegments
 
         ###############################################
         #### load cablegroups into a dictionary
@@ -123,7 +104,7 @@ class MorphML():
             cablegroups = cable.findall(".//{"+self.meta+"}group")
             for cablegroup in cablegroups:
                 cablegroupname = cablegroup.text
-                if cablegroupname in list(self.cablegroupsDict.keys()):
+                if cablegroupname in self.cablegroupsDict.keys():
                     self.cablegroupsDict[cablegroupname].append(cableid)
                 else:
                     self.cablegroupsDict[cablegroupname] = [cableid]
@@ -133,32 +114,26 @@ class MorphML():
         ## set which compartments have integrate_and_fire mechanism
         self.intFireCableIds = {}   # dict with keys as Compartments/cableIds which are IntFire
                                     # with mechanismnames as values
-
         for mechanism in cell.findall(".//{"+self.bio+"}mechanism"):
             mechanismname = mechanism.attrib["name"]
             passive = False
-            if "passive_conductance" in mechanism.attrib:
+            if mechanism.attrib.has_key("passive_conductance"):
                 if mechanism.attrib['passive_conductance'] in ["true",'True','TRUE']:
                     passive = True
             if not passive:            
                 ## if channel does not exist in library load it from xml file
-                if not moose.exists("%s/%s" %(self.libraryPath, mechanismname)):
-                    pu.info("Loading mechanism %s into library." % mechanismname)
-                    self.cml = ChannelML(self.nml_params)
-                    mechanismFileName = "%s.xml" % mechanismname
-                    modelPath = neuroml_utils.find_first_file(
-                            mechanismFileName
-                            , self.model_dir
-                            )
-                    if modelPath is not None:
-                        self.cml.readChannelMLFromFile(modelPath)
+                if not moose.exists("/library/"+mechanismname):
+                    print "Loading mechanism", mechanismname,"into library."
+                    cmlR = ChannelML(self.nml_params)
+                    model_filename = mechanismname+'.xml'
+                    model_path = neuroml_utils.find_first_file(model_filename,self.model_dir)
+                    if model_path is not None:
+                        cmlR.readChannelMLFromFile(model_path)
                     else:
-                        pu.fatal(
-                                'For mechanism {0}: files {1} not found under {2}'.format(
-                                mechanismname, mechanismname, self.model_dir
-                                )
-                                )
-                        raise IOError
+                        raise IOError(
+                            'For mechanism {0}: files {1} not found under {2}.'.format(
+                                mechanismname, model_filename, self.model_dir)
+                        )
                         
                     ## set those compartments to be LIF for which
                     ## any integrate_and_fire parameter is set
@@ -181,7 +156,7 @@ class MorphML():
                                                 ## only one intfire mechanism is allowed in a cable
                                                 ## the last one parsed will override others
                                                 self.intFireCableIds[cableid] = mechanismname
-                                if 'all' in list(self.intFireCableIds.keys()): break
+                                if 'all' in self.intFireCableIds.keys(): break
         
         ############################################################
         #### load morphology and connections between compartments
@@ -229,7 +204,7 @@ class MorphML():
                 moosecompname = segmentname+'_'+segmentid   # just segmentname is NOT unique
                                                             # eg: mitral bbmit exported from NEURON
                 moosecomppath = moosecell.path+'/'+moosecompname
-                IntFireIds = list(self.intFireCableIds.keys())
+                IntFireIds = self.intFireCableIds.keys()
                 mechanismname = None
                 if 'all' in IntFireIds:
                     mechanismname = self.intFireCableIds['all']
@@ -238,7 +213,7 @@ class MorphML():
                 if mechanismname is not None: # this cableid is an intfire
                     ## create LIF (subclass of Compartment) and set to default values
                     moosecomp = moose.LIF(moosecomppath)
-                    moosechannel = moose.Neutral(self.libraryPath+mechanismname)
+                    moosechannel = moose.Neutral('/library/'+mechanismname)
                     moosechannelval = moose.Mstring(moosechannel.path+'/vReset')
                     moosecomp.vReset = moosechannelval.value
                     moosechannelval = moose.Mstring(moosechannel.path+'/thresh')
@@ -256,7 +231,7 @@ class MorphML():
                 ## hence I will need to refer to segment according to which cable it belongs to.
                 ## if combineSegments is False, there can be multiple segments per cable,
                 ##  so make array of compartments for cellDictByCableId[cellname][1][cableid]
-                if cableid in list(self.cellDictByCableId[cellname][1].keys()):
+                if cableid in self.cellDictByCableId[cellname][1].keys():
                     self.cellDictByCableId[cellname][1][cableid].append(moosecomp)
                 else:
                     self.cellDictByCableId[cellname][1][cableid] = [moosecomp]
@@ -265,7 +240,7 @@ class MorphML():
                 running_comp = moosecomp
                 running_diameter = 0.0
                 running_dia_nums = 0
-                if 'parent' in segment.attrib:
+                if segment.attrib.has_key('parent'):
                     parentid = segment.attrib['parent'] # I assume the parent is created before the child
                                                         # so that I can immediately connect the child.
                     parent = self.cellDictBySegmentId[cellname][1][parentid]
@@ -324,8 +299,7 @@ class MorphML():
                 (running_comp.x0,running_comp.y0,running_comp.z0),\
                 (running_comp.x,running_comp.y,running_comp.z),\
                 running_comp.diameter,running_comp.length,[]]
-            if neuroml_utils.neuroml_debug: 
-                pu.info('Set up compartment/section %s' % running_comp.name)
+            if neuroml_utils.neuroml_debug: print 'Set up compartment/section', running_comp.name
 
         ###############################################
         #### load biophysics into the compartments
@@ -368,10 +342,10 @@ class MorphML():
             for mechanism in cell.findall(".//{"+self.bio+"}mechanism"):
                 mechanismname = mechanism.attrib["name"]
                 passive = False
-                if "passive_conductance" in mechanism.attrib:
+                if mechanism.attrib.has_key("passive_conductance"):
                     if mechanism.attrib['passive_conductance'] in ["true",'True','TRUE']:
                         passive = True
-                pu.info("Loading mechanism %s " % mechanismname)
+                print "Loading mechanism ", mechanismname
                 ## ONLY creates channel if at least one parameter (like gmax) is specified in the xml
                 ## Neuroml does not allow you to specify all default values.
                 ## However, granule cell example in neuroconstruct has Ca ion pool without
@@ -379,7 +353,7 @@ class MorphML():
                 mech_params = mechanism.findall(".//{"+self.bio+"}parameter")
                 ## if no params, apply all default values to all compartments
                 if len(mech_params) == 0:
-                    for compartment_list in list(self.cellDictByCableId[cellname][1].values()):
+                    for compartment_list in self.cellDictByCableId[cellname][1].values():
                         for compartment in compartment_list:
                             self.set_compartment_param(compartment,None,'default',mechanismname)  
                 ## if params are present, apply params to specified cable/compartment groups
@@ -396,11 +370,8 @@ class MorphML():
                             self.set_group_compartment_param(cell, cellname, parameter,\
                              'inject', Ifactor*float(parameter.attrib["value"]), self.bio)
                         else:
-                            pu.warn(["Yo programmer of MorphML! You didn't"
-                                , " implement parameter %s " % parametername 
-                                , " in mechanism %s " % mechanismname 
-                                ]
-                                )
+                            print "WARNING: Yo programmer of MorphML! You didn't implement parameter ",\
+                             parametername, " in mechanism ",mechanismname
                     else:
                         if parametername in ['gmax']:
                             gmaxval = float(eval(parameter.attrib["value"],{"__builtins__":None},{}))
@@ -426,14 +397,12 @@ class MorphML():
                              't_refrac', Tfactor*float(parameter.attrib["value"]),\
                              self.bio, mechanismname)
                         else:
-                            pu.warn(["Yo programmer of MorphML import! You didn't"
-                                    , " implement parameter %s " % parametername
-                                    , " in mechanism %s " % mechanismname ]
-                                    )
+                            print "WARNING: Yo programmer of MorphML import! You didn't implement parameter ",\
+                             parametername, " in mechanism ",mechanismname
             #### Connect the Ca pools and channels
             #### Am connecting these at the very end so that all channels and pools have been created
             #### Note: this function is in moose.utils not moose.neuroml.utils !
-            for compartment_list in list(self.cellDictByCableId[cellname][1].values()):
+            for compartment_list in self.cellDictByCableId[cellname][1].values():
                 moose_utils.connect_CaConc(compartment_list,\
                     self.temperature+neuroml_utils.ZeroCKelvin) # temperature should be in Kelvin for Nernst
         
@@ -442,34 +411,18 @@ class MorphML():
         connectivity = cell.find(".//{"+self.neuroml+"}connectivity")
         if connectivity is not None:
             for potential_syn_loc in cell.findall(".//{"+self.nml+"}potential_syn_loc"):
-                if 'synapse_direction' in list(potential_syn_loc.attrib.keys()):
-                    if potential_syn_loc.attrib['synapse_direction'] in ['post','preAndOrPost']:
+                if 'synapse_direction' in potential_syn_loc.attrib.keys():
+                    if potential_syn_loc.attrib['synapse_direction'] in ['post']:
                         self.set_group_compartment_param(cell, cellname, potential_syn_loc,\
                             'synapse_type', potential_syn_loc.attrib['synapse_type'],\
                             self.nml, mechanismname='synapse')
-                    if potential_syn_loc.attrib['synapse_direction'] in ['pre','preAndOrPost']:
+                    if potential_syn_loc.attrib['synapse_direction'] in ['pre']:
                         self.set_group_compartment_param(cell, cellname, potential_syn_loc,\
                             'spikegen_type', potential_syn_loc.attrib['synapse_type'],\
                             self.nml, mechanismname='spikegen')
 
-        ##########################################################
-        #### annotate each compartment with the cablegroups it belongs to
-        self.cableDict = {}
-        for cablegroupname in list(self.cablegroupsDict.keys()):
-            comp_list = []
-            for cableid in self.cablegroupsDict[cablegroupname]:
-                for compartment in self.cellDictByCableId[cellname][1][cableid]:
-                    cableStringPath = compartment.path+'/cable_groups'
-                    cableString = moose.Mstring(cableStringPath)
-                    if cableString.value == '':
-                        cableString.value += cablegroupname
-                    else:
-                        cableString.value += ',' + cablegroupname
-                    comp_list.append(compartment.name)
-            self.cableDict[cablegroupname] = comp_list
-
-        pu.info("Finished loading into library, cell: %s " % cellname)
-        return {cellname:(self.segDict,self.cableDict)}
+        print "Finished loading into library, cell: ",cellname
+        return {cellname:self.segDict}
 
     def set_group_compartment_param(self, cell, cellname, parameter,\
                 name, value, grouptype, mechanismname=None):
@@ -480,7 +433,7 @@ class MorphML():
         for group in parameter.findall(".//{"+grouptype+"}group"):
             cablegroupname = group.text
             if cablegroupname == 'all':
-                for compartment_list in list(self.cellDictByCableId[cellname][1].values()):
+                for compartment_list in self.cellDictByCableId[cellname][1].values():
                     for compartment in compartment_list:
                         self.set_compartment_param(compartment,name,value,mechanismname)
             else:
@@ -501,8 +454,7 @@ class MorphML():
         elif name == 'initVm':
             compartment.initVm = value
         elif name == 'inject':
-            # this reader converts to SI
-            pu.info("Comparment %s inject %s A." % (compartment.name, value)) 
+            print compartment.name, 'inject', value, 'A.' # this reader converts to SI
             compartment.inject = value
         elif name == 'v_reset':
             compartment.vReset = value # compartment is a moose.LIF instance (intfire)
@@ -511,14 +463,12 @@ class MorphML():
         elif name == 't_refrac':
             compartment.refractoryPeriod = value # compartment is a moose.LIF instance (intfire)
         elif name == 'g_refrac':
-            pu.info("SORRY, current moose.LIF doesn't support g_refrac.")
+            print "Sorry, current moose.LIF doesn't support g_refrac."
         elif mechanismname is 'synapse': # synapse being added to the compartment
-            ## these are potential locations, we do not actually make synapses,
-            ## unless the user has explicitly asked for it
-            if self.createPotentialSynapses:
-                syn_name = value
-                if not moose.exists(compartment.path+'/'+syn_name):
-                    make_new_synapse(syn_name, compartment, syn_name, self.nml_params)
+            ## these are potential locations, we do not actually make synapses.
+            #synapse = self.context.deepCopy(self.context.pathToId('/library/'+value),\
+            #    self.context.pathToId(compartment.path),value) # value contains name of synapse i.e. synapse_type
+            #moose.connect(compartment,"channel", synapse, "channel")
             ## I assume below that compartment name has _segid at its end
             segid = string.split(compartment.name,'_')[-1] # get segment id from compartment name
             self.segDict[segid][5].append(value)
@@ -593,5 +543,4 @@ class MorphML():
                 ## Later, when calling connect_CaConc,
                 ## B is set for caconc based on thickness of Ca shell and compartment l and dia.
                 ## OR based on the Mstring phi under CaConc path.
-        if neuroml_utils.neuroml_debug: 
-            pu.info("Setting %s  for comparment %s to %s" % (name, compartment.path, value))
+        if neuroml_utils.neuroml_debug: print "Setting ",name," for ",compartment.path," value ",value
