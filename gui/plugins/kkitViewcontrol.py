@@ -229,141 +229,6 @@ class GraphicalView(QtGui.QGraphicsView):
         # if itemType == ITEM:
         #     dragging the item
     
-  
-    def drawExpectedConnection(self, event):
-        self.connectionSource = self.state["press"]["item"]
-        sourcePoint      = self.connectionSource.mapToScene(
-            self.connectionSource.boundingRect().center()
-                                          )
-        destinationPoint = self.mapToScene(event.pos())
-        if self.expectedConnection is None:
-            self.expectedConnection = QGraphicsLineItem( sourcePoint.x()
-                                                       , sourcePoint.y()
-                                                       , destinationPoint.x()
-                                                       , destinationPoint.y()
-                                                       )
-            self.expectedConnection.setPen(QPen(Qt.Qt.DashLine))
-
-            self.sceneContainerPt.addItem(self.expectedConnection)
-        else:
-            self.expectedConnection.setLine( sourcePoint.x()
-                                           , sourcePoint.y()
-                                           , destinationPoint.x()
-                                           , destinationPoint.y()
-                                           )
-
-        '''
-        print " drawExpectedConnection ()() ",self.state["item"]["press"].mobj
-        sourcePoint      = self.connectionSource.mapToScene(
-            self.connectionSource.boundingRect().center()
-                                          )
-        destinationPoint = self.mapToScene(event.pos())
-        if self.expectedConnection is None:
-            self.expectedConnection = QGraphicsLineItem( sourcePoint.x()
-                                                       , sourcePoint.y()
-                                                       , destinationPoint.x()
-                                                       , destinationPoint.y()
-                                                       )
-            self.expectedConnection.setPen(QPen(Qt.Qt.DashLine))
-
-            self.sceneContainerPt.addItem(self.expectedConnection)
-        else:
-            self.expectedConnection.setLine( sourcePoint.x()
-                                           , sourcePoint.y()
-                                           , destinationPoint.x()
-                                           , destinationPoint.y()
-                                           )
-        '''
-    def removeExpectedConnection(self):
-        #print("removeExpectedConnection")
-        self.sceneContainerPt.removeItem(self.expectedConnection)
-        self.expectedConnection = None
-        self.connectionSource   = None
-
-    def removeConnector(self):
-        try:
-            for l,k in self.connectorlist.items():
-                if k is not None:
-                    self.sceneContainerPt.removeItem(k)
-                    self.connectorlist[l] = None
-            '''
-            if self.connectionSign is not None:
-                    # self.sceneContainerPt.removeItem(self.connectionSign)
-                    # self.connectionSign = None
-            '''
-        except:
-            #print("Exception received!")
-            pass
-        # if self.connectionSign is not None:
-        #     print "self.connectionSign ",self.connectionSign
-        #     self.sceneContainerPt.removeItem(self.connectionSign)
-        #     self.connectionSign = None
-
-    def showConnector(self, item):
-        self.removeConnector()
-        self.connectionSource = item
-        rectangle = item.boundingRect()
-
-        for l in self.connectorlist.keys():
-            self.xDisp = 0
-            self.yDisp = 0
-            self.connectionSign = None
-            if isinstance(item.mobj,PoolBase) or isinstance(item.mobj,ReacBase):
-                if l == "clone":
-                    self.connectionSign = QtSvg.QGraphicsSvgItem('/home/harsha/trunk/gui/icons/clone.svg')
-                    self.connectionSign.setData(0, QtCore.QVariant("clone"))
-                    self.connectionSign.setParent(self.connectionSource)
-                    self.connectionSign.setScale(
-                        (1.0 * rectangle.height()) / self.connectionSign.boundingRect().height()
-                                                )
-                    position = item.mapToParent(rectangle.bottomLeft())
-                    self.xDisp = 15
-                    self.yDisp = 2
-                    self.connectionSign.setToolTip("Click and drag to clone the object")
-                    self.connectorlist["clone"] = self.connectionSign 
-            if isinstance(item.mobj,PoolBase):
-                if l == "plot":
-                    self.connectionSign = QtSvg.QGraphicsSvgItem('/home/harsha/trunk/gui/icons/plot.svg')
-                    self.connectionSign.setData(0, QtCore.QVariant("plot"))
-                    self.connectionSign.setParent(self.connectionSource)
-                    self.connectionSign.setScale(
-                        (1.0 * rectangle.height()) / self.connectionSign.boundingRect().height()
-                                                )
-                    position = item.mapToParent(rectangle.topLeft())
-                    self.xDisp = 15
-                    self.yDisp = 0
-                    self.connectionSign.setToolTip("plot the object")
-                    self.connectorlist["plot"] = self.connectionSign
-
-            if l == "move":
-                self.connectionSign = QtSvg.QGraphicsSvgItem('/home/harsha/trunk/gui/icons/move.svg')
-                self.connectionSign.setData(0, QtCore.QVariant("move"))
-                self.connectionSign.setParent(self.connectionSource)
-                self.connectionSign.setToolTip("Drag to connect.")
-                self.connectionSign.setScale(
-                    (1.0 * rectangle.height()) / self.connectionSign.boundingRect().height()
-                                            )
-                position = item.mapToParent(rectangle.topRight())
-                self.connectorlist["move"] = self.connectionSign
-            elif l == "delete":
-                self.connectionSign = QtSvg.QGraphicsSvgItem('/home/harsha/trunk/gui/icons/delete.svg')
-                self.connectionSign.setParent(self.connectionSource)
-                self.connectionSign.setData(0, QtCore.QVariant("delete"))
-                self.connectionSign.setScale(
-                    (1.0 * rectangle.height()) / self.connectionSign.boundingRect().height()
-                                            )
-                position = item.mapToParent(rectangle.bottomRight())
-                self.connectionSign.setToolTip("Delete the object")
-                self.connectorlist["delete"] = self.connectionSign
-
-            if self.connectionSign != None:
-                self.connectionSign.setFlag(QtGui.QGraphicsItem.ItemIsSelectable,True)
-                self.connectionSign.setParentItem(item.parentItem())
-                self.connectionSign.setPos(0.0,0.0)
-                self.connectionSign.moveBy( position.x()-self.xDisp
-                                          , position.y() +self.yDisp - rectangle.height() / 2.0
-                                          )
-
     def editorMouseReleaseEvent(self, event):
         if self.move:
             self.move = False
@@ -528,6 +393,140 @@ class GraphicalView(QtGui.QGraphicsView):
             #     self.layoutPt.plugin.mainWindow.objectEditSlot(self.state["press"]["item"].mobj, True)
 
         self.resetState()
+
+    def drawExpectedConnection(self, event):
+        self.connectionSource = self.state["press"]["item"]
+        sourcePoint      = self.connectionSource.mapToScene(
+            self.connectionSource.boundingRect().center()
+                                          )
+        destinationPoint = self.mapToScene(event.pos())
+        if self.expectedConnection is None:
+            self.expectedConnection = QGraphicsLineItem( sourcePoint.x()
+                                                       , sourcePoint.y()
+                                                       , destinationPoint.x()
+                                                       , destinationPoint.y()
+                                                       )
+            self.expectedConnection.setPen(QPen(Qt.Qt.DashLine))
+
+            self.sceneContainerPt.addItem(self.expectedConnection)
+        else:
+            self.expectedConnection.setLine( sourcePoint.x()
+                                           , sourcePoint.y()
+                                           , destinationPoint.x()
+                                           , destinationPoint.y()
+                                           )
+
+        '''
+        print " drawExpectedConnection ()() ",self.state["item"]["press"].mobj
+        sourcePoint      = self.connectionSource.mapToScene(
+            self.connectionSource.boundingRect().center()
+                                          )
+        destinationPoint = self.mapToScene(event.pos())
+        if self.expectedConnection is None:
+            self.expectedConnection = QGraphicsLineItem( sourcePoint.x()
+                                                       , sourcePoint.y()
+                                                       , destinationPoint.x()
+                                                       , destinationPoint.y()
+                                                       )
+            self.expectedConnection.setPen(QPen(Qt.Qt.DashLine))
+
+            self.sceneContainerPt.addItem(self.expectedConnection)
+        else:
+            self.expectedConnection.setLine( sourcePoint.x()
+                                           , sourcePoint.y()
+                                           , destinationPoint.x()
+                                           , destinationPoint.y()
+                                           )
+        '''
+    def removeExpectedConnection(self):
+        #print("removeExpectedConnection")
+        self.sceneContainerPt.removeItem(self.expectedConnection)
+        self.expectedConnection = None
+        self.connectionSource   = None
+
+    def removeConnector(self):
+        try:
+            for l,k in self.connectorlist.items():
+                if k is not None:
+                    self.sceneContainerPt.removeItem(k)
+                    self.connectorlist[l] = None
+            '''
+            if self.connectionSign is not None:
+                    # self.sceneContainerPt.removeItem(self.connectionSign)
+                    # self.connectionSign = None
+            '''
+        except:
+            #print("Exception received!")
+            pass
+        # if self.connectionSign is not None:
+        #     print "self.connectionSign ",self.connectionSign
+        #     self.sceneContainerPt.removeItem(self.connectionSign)
+        #     self.connectionSign = None
+
+    def showConnector(self, item):
+        self.removeConnector()
+        self.connectionSource = item
+        rectangle = item.boundingRect()
+
+        for l in self.connectorlist.keys():
+            self.xDisp = 0
+            self.yDisp = 0
+            self.connectionSign = None
+            if isinstance(item.mobj,PoolBase) or isinstance(item.mobj,ReacBase):
+                if l == "clone":
+                    self.connectionSign = QtSvg.QGraphicsSvgItem('/home/harsha/trunk/gui/icons/clone.svg')
+                    self.connectionSign.setData(0, QtCore.QVariant("clone"))
+                    self.connectionSign.setParent(self.connectionSource)
+                    self.connectionSign.setScale(
+                        (1.0 * rectangle.height()) / self.connectionSign.boundingRect().height()
+                                                )
+                    position = item.mapToParent(rectangle.bottomLeft())
+                    self.xDisp = 15
+                    self.yDisp = 2
+                    self.connectionSign.setToolTip("Click and drag to clone the object")
+                    self.connectorlist["clone"] = self.connectionSign 
+            if isinstance(item.mobj,PoolBase):
+                if l == "plot":
+                    self.connectionSign = QtSvg.QGraphicsSvgItem('/home/harsha/trunk/gui/icons/plot.svg')
+                    self.connectionSign.setData(0, QtCore.QVariant("plot"))
+                    self.connectionSign.setParent(self.connectionSource)
+                    self.connectionSign.setScale(
+                        (1.0 * rectangle.height()) / self.connectionSign.boundingRect().height()
+                                                )
+                    position = item.mapToParent(rectangle.topLeft())
+                    self.xDisp = 15
+                    self.yDisp = 0
+                    self.connectionSign.setToolTip("plot the object")
+                    self.connectorlist["plot"] = self.connectionSign
+
+            if l == "move":
+                self.connectionSign = QtSvg.QGraphicsSvgItem('/home/harsha/trunk/gui/icons/move.svg')
+                self.connectionSign.setData(0, QtCore.QVariant("move"))
+                self.connectionSign.setParent(self.connectionSource)
+                self.connectionSign.setToolTip("Drag to connect.")
+                self.connectionSign.setScale(
+                    (1.0 * rectangle.height()) / self.connectionSign.boundingRect().height()
+                                            )
+                position = item.mapToParent(rectangle.topRight())
+                self.connectorlist["move"] = self.connectionSign
+            elif l == "delete":
+                self.connectionSign = QtSvg.QGraphicsSvgItem('/home/harsha/trunk/gui/icons/delete.svg')
+                self.connectionSign.setParent(self.connectionSource)
+                self.connectionSign.setData(0, QtCore.QVariant("delete"))
+                self.connectionSign.setScale(
+                    (1.0 * rectangle.height()) / self.connectionSign.boundingRect().height()
+                                            )
+                position = item.mapToParent(rectangle.bottomRight())
+                self.connectionSign.setToolTip("Delete the object")
+                self.connectorlist["delete"] = self.connectionSign
+
+            if self.connectionSign != None:
+                self.connectionSign.setFlag(QtGui.QGraphicsItem.ItemIsSelectable,True)
+                self.connectionSign.setParentItem(item.parentItem())
+                self.connectionSign.setPos(0.0,0.0)
+                self.connectionSign.moveBy( position.x()-self.xDisp
+                                          , position.y() +self.yDisp - rectangle.height() / 2.0
+                                          )
 
     def objExist(self,mObj,index):
         index += 1
