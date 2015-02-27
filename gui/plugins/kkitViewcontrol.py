@@ -1,16 +1,8 @@
 import sys
 from modelBuild import *
 from constants import *
-from PyQt4 import QtGui
-from PyQt4.QtGui import QPixmap
-from PyQt4.QtGui import QImage
-from PyQt4.QtGui import QGraphicsPixmapItem
-from PyQt4.QtGui import QGraphicsLineItem
-from PyQt4.QtGui import QPen
+from PyQt4.QtGui import QPixmap, QImage, QPen, QGraphicsPixmapItem, QGraphicsLineItem
 from PyQt4.QtCore import pyqtSignal
-# from PyQt4.QtGui import pyqtSignal
-from kkitCalcArrow import *
-from kkitOrdinateUtil import *
 from kkitUtil import getColor
 from setsolver import *
 from PyQt4 import QtSvg
@@ -299,43 +291,44 @@ class GraphicalView(QtGui.QGraphicsView):
                     tablePath = utils.create_table_path(moose.element(self.modelRoot), self.graph, element, "Conc")
                     table     = utils.create_table(tablePath, element, "Conc","Table2")
             elif actionType == "clone":
-                QtGui.QApplication.setOverrideCursor(QtGui.QCursor(Qt.Qt.ArrowCursor))
-                self.state["press"]["item"].parent().mobj
-                cloneObj = self.state["press"]["item"]
-                #Solver should be deleted
-                    ## if there is change in 'Topology' of the model
-                    ## or if copy has to made then oject should be in unZombify mode
-                deleteSolver(self.modelRoot)
-                iR = 0
-                iP = 0
-                
-                t = moose.element(cloneObj.parent().mobj)
-                name = t.name
-                if isinstance(cloneObj.parent().mobj,PoolBase):
-                    name += self.objExist(t,iP) 
-                    ct = moose.element(moose.copy(t,t.parent,name,1))
-                    itemAtView = self.state["release"]["item"]
-                    poolObj = moose.element(ct)
-                    poolinfo = moose.element(poolObj.path+'/info')
-                    qGItem =PoolItem(poolObj,itemAtView)
-                    self.layoutPt.mooseId_GObj[poolObj] = qGItem
-                    posWrtComp = self.mapToScene(event.pos())
-                    bgcolor = getRandColor()
-                    color,bgcolor = getColor(poolinfo)
-                    qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y(),color,bgcolor)
-                    self.emit(QtCore.SIGNAL("dropped"),poolObj)
+                if self.state["move"]["happened"]:
+                    QtGui.QApplication.setOverrideCursor(QtGui.QCursor(Qt.Qt.ArrowCursor))
+                    self.state["press"]["item"].parent().mobj
+                    cloneObj = self.state["press"]["item"]
+                    #Solver should be deleted
+                        ## if there is change in 'Topology' of the model
+                        ## or if copy has to made then oject should be in unZombify mode
+                    deleteSolver(self.modelRoot)
+                    iR = 0
+                    iP = 0
                     
-                if isinstance(cloneObj.parent().mobj,ReacBase):
-                    name += self.objExist(t,iR) 
-                    ct = moose.element(moose.copy(t,t.parent,name,1))
-                    itemAtView = self.state["release"]["item"]
-                    reacObj = moose.element(ct)
-                    reacinfo = moose.Annotator(reacObj.path+'/info')
-                    qGItem = ReacItem(reacObj,itemAtView)
-                    self.layoutPt.mooseId_GObj[reacObj] = qGItem
-                    posWrtComp = self.mapToScene(event.pos())
-                    qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y(),"white", "white")
-                    self.emit(QtCore.SIGNAL("dropped"),reacObj)
+                    t = moose.element(cloneObj.parent().mobj)
+                    name = t.name
+                    if isinstance(cloneObj.parent().mobj,PoolBase):
+                        name += self.objExist(t,iP) 
+                        ct = moose.element(moose.copy(t,t.parent,name,1))
+                        itemAtView = self.state["release"]["item"]
+                        poolObj = moose.element(ct)
+                        poolinfo = moose.element(poolObj.path+'/info')
+                        qGItem =PoolItem(poolObj,itemAtView)
+                        self.layoutPt.mooseId_GObj[poolObj] = qGItem
+                        posWrtComp = self.mapToScene(event.pos())
+                        bgcolor = getRandColor()
+                        color,bgcolor = getColor(poolinfo)
+                        qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y(),color,bgcolor)
+                        self.emit(QtCore.SIGNAL("dropped"),poolObj)
+                        
+                    if isinstance(cloneObj.parent().mobj,ReacBase):
+                        name += self.objExist(t,iR) 
+                        ct = moose.element(moose.copy(t,t.parent,name,1))
+                        itemAtView = self.state["release"]["item"]
+                        reacObj = moose.element(ct)
+                        reacinfo = moose.Annotator(reacObj.path+'/info')
+                        qGItem = ReacItem(reacObj,itemAtView)
+                        self.layoutPt.mooseId_GObj[reacObj] = qGItem
+                        posWrtComp = self.mapToScene(event.pos())
+                        qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y(),"white", "white")
+                        self.emit(QtCore.SIGNAL("dropped"),reacObj)
                 
         if clickedItemType == CONNECTION:
             popupmenu = QtGui.QMenu('PopupMenu', self)
