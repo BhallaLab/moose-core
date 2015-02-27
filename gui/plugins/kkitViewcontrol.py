@@ -1,5 +1,4 @@
 import sys
-import config
 from modelBuild import *
 from constants import *
 from PyQt4 import QtGui
@@ -16,6 +15,7 @@ from kkitUtil import getColor
 from setsolver import *
 from PyQt4 import QtSvg
 from moose import utils
+
 
 class GraphicalView(QtGui.QGraphicsView):
 
@@ -474,7 +474,7 @@ class GraphicalView(QtGui.QGraphicsView):
             self.connectionSign = None
             if isinstance(item.mobj,PoolBase) or isinstance(item.mobj,ReacBase):
                 if l == "clone":
-                    self.connectionSign = QtSvg.QGraphicsSvgItem('/home/harsha/trunk/gui/icons/clone.svg')
+                    self.connectionSign = QtSvg.QGraphicsSvgItem('icons/clone.svg')
                     self.connectionSign.setData(0, QtCore.QVariant("clone"))
                     self.connectionSign.setParent(self.connectionSource)
                     self.connectionSign.setScale(
@@ -487,7 +487,7 @@ class GraphicalView(QtGui.QGraphicsView):
                     self.connectorlist["clone"] = self.connectionSign 
             if isinstance(item.mobj,PoolBase):
                 if l == "plot":
-                    self.connectionSign = QtSvg.QGraphicsSvgItem('/home/harsha/trunk/gui/icons/plot.svg')
+                    self.connectionSign = QtSvg.QGraphicsSvgItem('icons/plot.svg')
                     self.connectionSign.setData(0, QtCore.QVariant("plot"))
                     self.connectionSign.setParent(self.connectionSource)
                     self.connectionSign.setScale(
@@ -500,7 +500,7 @@ class GraphicalView(QtGui.QGraphicsView):
                     self.connectorlist["plot"] = self.connectionSign
 
             if l == "move":
-                self.connectionSign = QtSvg.QGraphicsSvgItem('/home/harsha/trunk/gui/icons/move.svg')
+                self.connectionSign = QtSvg.QGraphicsSvgItem('icons/move.svg')
                 self.connectionSign.setData(0, QtCore.QVariant("move"))
                 self.connectionSign.setParent(self.connectionSource)
                 self.connectionSign.setToolTip("Drag to connect.")
@@ -510,7 +510,7 @@ class GraphicalView(QtGui.QGraphicsView):
                 position = item.mapToParent(rectangle.topRight())
                 self.connectorlist["move"] = self.connectionSign
             elif l == "delete":
-                self.connectionSign = QtSvg.QGraphicsSvgItem('/home/harsha/trunk/gui/icons/delete.svg')
+                self.connectionSign = QtSvg.QGraphicsSvgItem('icons/delete.svg')
                 self.connectionSign.setParent(self.connectionSource)
                 self.connectionSign.setData(0, QtCore.QVariant("delete"))
                 self.connectionSign.setScale(
