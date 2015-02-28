@@ -54,7 +54,8 @@
 #include <QMenu>
 #include <QCursor>
 #include <QDrag>
-
+#include <QToolBar>
+#include <QPushButton>
 /******************************************************************************/
 /* UTILITY HEADERS                                                            */
 /******************************************************************************/

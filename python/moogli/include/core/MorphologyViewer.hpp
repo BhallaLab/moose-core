@@ -4,15 +4,16 @@
 #include "includes.hpp"
 #include "core/Morphology.hpp"
 #include "core/Selector.hpp"
+#include "KeyboardHandler.hpp"
 #include "core/SelectInfo.hpp"
-
+#include <chrono>
 using namespace std;
 
 class MorphologyViewer : public QWidget
 {
     Q_OBJECT
 public:
-
+    enum Mode { KEYBOARD, MOUSE };
     Morphology *  _morphology;
     const int width;
     const int height;
@@ -75,6 +76,9 @@ public:
     void
     create_view();
 
+    void
+    setup_toolbar();
+
     QWidget*
     create_graphics_widget();
 
@@ -84,26 +88,31 @@ public:
     void
     frame()
     {
+        // std::chrono::time_point<std::chrono::system_clock> t1, t2;
+        // t1 = std::chrono::system_clock::now();
         _viewer.frame();
+        // t2 = std::chrono::system_clock::now();
+        // std::cout << std::chrono::duration_cast<chrono::nanoseconds>(t2 - t1).count() << endl;
     }
 
     void
     set_background_color(float r, float g, float b, float a);
 
 signals:
-    void compartment_dragged(const QString &compartment_id);
-
-
-protected:
-
-    virtual void
-    paintEvent( QPaintEvent* event )
-    {
-        _viewer.frame();
-    }
-
     void
-    emit_signal(const string & compartment_id);
+    compartment_dragged(const QString &compartment_id);
+
+
+// protected:
+
+//     virtual void
+//     paintEvent( QPaintEvent* event )
+//     {
+//         _viewer.frame();
+//     }
+
+//     void
+//     emit_signal(const string & compartment_id);
 
 private:
 
@@ -125,6 +134,36 @@ private:
     unsigned int        _view_count;
     QGridLayout  *      _grid_layout;
     osgViewer::Viewer   _viewer;
+
+    Mode mode = MOUSE;
+    QToolBar * _toolbar;
+    QPushButton * _toggle_mode_button;
+    QPushButton * _home;
+    QPushButton * _zoom_in;
+    QPushButton * _zoom_out;
+    QPushButton * _translate_left;
+    QPushButton * _translate_right;
+    QPushButton * _translate_up;
+    QPushButton * _translate_down;
+    QPushButton * _translate_forward;
+    QPushButton * _translate_backward;
+    QPushButton * _rotate_clockwise_roll;
+    QPushButton * _rotate_clockwise_pitch;
+    QPushButton * _rotate_clockwise_yaw;
+    QPushButton * _rotate_counterclockwise_roll;
+    QPushButton * _rotate_counterclockwise_pitch;
+    QPushButton * _rotate_counterclockwise_yaw;
+    osgGA::TrackballManipulator * manipulator;
+    KeyboardHandler        * keyboard_handler;
+    osg::Camera                 * camera;
+
+private slots:
+    void
+    toggle_mode();
+
+    void
+    handle_translate_positive_x();
+
 };
 
 
