@@ -5,7 +5,7 @@
 Moogli Visualizer.
 """
 
-
+# http://stackoverflow.com/questions/28104362/how-to-rotate-camera-in-openscenegraphwalk-through-in-model
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 from PyQt4 import Qt
@@ -86,7 +86,7 @@ def neurons(element):
     information from all child compartment elements.
     """
     retval = {}
-    neurons = moose.wildcardFind(element.path +  "/##[TYPE=Neuron]")
+    neurons = moose.wildcardFind(element.path +  "/##[TYPE=Neutral]")
     for element in neurons:
         retval[element.path] = { "name"            : element.name
                               , "id"              : element.path
@@ -98,7 +98,7 @@ def neurons(element):
 
 def compartments(element):
     retval = {}
-    compartments = moose.wildcardFind(element.path + "/##[TYPE=Compartment]")
+    compartments = moose.wildcardFind(element.path + "/##[ISA=CompartmentBase]")
     for element in compartments:
         retval[element.path] = { "name"       : element.name
                          , "object"     : element
@@ -192,7 +192,8 @@ class MoogliViewer(QWidget):
                                            )
         # self.scheduler           = self.getSchedulingDockWidget().widget()
         # self._centralWidget.setChildWidget(self.scheduler, False, 0,0,1,-1)
-        self.visualizer.setGeometry( 0, 0, 1200, 400 )
+        # self.visualizer.setGeometry( 0, 0, desktop.screenGeometry().width(), desktop.screenGeometry().height() )
+        self.visualizer.showMaximized()
         self.visualizer.show()
         # self.visualizer.start()
         self.layout().addWidget(self.visualizer)
@@ -268,10 +269,14 @@ class MoogliViewer(QWidget):
 
 
 def main():
+    filename = os.path.join( os.path.split(os.path.realpath(__file__))[0]
+                           , "../neuroml/CA1/CA1.morph.pop.xml")
+
+
     # filename = os.path.join( os.path.split(os.path.realpath(__file__))[0]
     #                        , "../neuroml/PurkinjeCellPassivePulseInput/PurkinjePassive.net.xml")
-    filename = os.path.join( os.path.split(os.path.realpath(__file__))[0]
-                           , "../neuroml/OlfactoryBulbPassive/OBpassive_numgloms3_seed750.0.xml")
+    # filename = os.path.join( os.path.split(os.path.realpath(__file__))[0]
+    #                        , "../neuroml/OlfactoryBulbPassive/OBpassive_numgloms3_seed750.0.xml")
 
     popdict, projdict = moose.neuroml.loadNeuroML_L123(filename)
     modelRoot   = moose.Neutral("/" + os.path.splitext(os.path.basename(filename))[0])
@@ -284,6 +289,8 @@ def main():
 def show_morphology(modelpath):
     app = QtGui.QApplication(sys.argv)
     widget = MoogliViewer(modelpath)
+    widget.showMaximized()
+    # widget.setStyleSheet("background-color: black;")
     widget.show()
     return app.exec_()
 
