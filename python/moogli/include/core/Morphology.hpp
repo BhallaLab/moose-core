@@ -43,14 +43,14 @@ public:
     Morphology( const string &      name
               , const unsigned int  lod_resolution     = 3
               , const float         lod_distance_delta = 50.0f
-              , const unsigned int  min_points         = 10
+              , const unsigned int  min_points         = 8
               , const unsigned int  points_delta       = 2
               );
 
     Morphology( const char *        name               = ""
               , const unsigned int  lod_resolution     = 3
               , const float         lod_distance_delta = 50.0f
-              , const unsigned int  min_points         = 10
+              , const unsigned int  min_points         = 8
               , const unsigned int  points_delta       = 2
               );
 
