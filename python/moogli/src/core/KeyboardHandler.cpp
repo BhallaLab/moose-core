@@ -140,7 +140,7 @@ KeyboardHandler::translate_forward(osgViewer::Viewer & viewer)
     osg::Vec3f look_vector = centre - eye;
     //look_vector.normalize();
     look_vector.normalize();
-    eye = eye + look_vector * translate_forward_factor;
+    eye = eye + look_vector / translate_forward_factor;
     viewer.getCamera()->setViewMatrixAsLookAt(eye, centre, up);
     // viewer.getCameraManipulator() -> setByMatrix(eye, center, up);
 }
