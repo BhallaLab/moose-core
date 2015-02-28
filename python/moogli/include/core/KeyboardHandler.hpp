@@ -14,7 +14,7 @@ public:
     double translate_down_factor    = 20.0;
     double translate_left_factor    = 20.0;
     double translate_right_factor   = 20.0;
-    double translate_forward_factor = 20.0;
+    double translate_forward_factor = 10.0;
     double translate_backward_factor= 20.0;
     double clockwise_roll_factor    = 5 * 3.14 / 180;
     double clockwise_pitch_factor    = 5 * 3.14 / 180;
