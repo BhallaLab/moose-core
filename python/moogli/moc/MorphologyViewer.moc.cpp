@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'MorphologyViewer.hpp'
 **
-** Created: Mon Dec 22 11:45:22 2014
+** Created: Thu Feb 26 16:43:14 2015
 **      by: The Qt Meta Object Compiler version 63 (Qt 4.8.4)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -23,7 +23,7 @@ static const uint qt_meta_data_MorphologyViewer[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-       1,   14, // methods
+       3,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -33,12 +33,17 @@ static const uint qt_meta_data_MorphologyViewer[] = {
  // signals: signature, parameters, type, tag, flags
       33,   18,   17,   17, 0x05,
 
+ // slots: signature, parameters, type, tag, flags
+      62,   17,   17,   17, 0x08,
+      76,   17,   17,   17, 0x08,
+
        0        // eod
 };
 
 static const char qt_meta_stringdata_MorphologyViewer[] = {
     "MorphologyViewer\0\0compartment_id\0"
-    "compartment_dragged(QString)\0"
+    "compartment_dragged(QString)\0toggle_mode()\0"
+    "handle_translate_positive_x()\0"
 };
 
 void MorphologyViewer::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
@@ -48,6 +53,8 @@ void MorphologyViewer::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int
         MorphologyViewer *_t = static_cast<MorphologyViewer *>(_o);
         switch (_id) {
         case 0: _t->compartment_dragged((*reinterpret_cast< const QString(*)>(_a[1]))); break;
+        case 1: _t->toggle_mode(); break;
+        case 2: _t->handle_translate_positive_x(); break;
         default: ;
         }
     }
@@ -85,9 +92,9 @@ int MorphologyViewer::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 1)
+        if (_id < 3)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 1;
+        _id -= 3;
     }
     return _id;
 }
