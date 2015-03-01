@@ -7,7 +7,10 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
-#ifdef DO_UNIT_TESTS
+#ifndef DO_UNIT_TESTS
+void testHSolve()
+{;}
+#else
 
 #include <vector>
 #include <map>

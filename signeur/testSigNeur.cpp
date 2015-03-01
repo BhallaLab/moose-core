@@ -1018,4 +1018,9 @@ void testSigNeurProcess()
 	*/
 }
 
+#else // DO_UNIT_TEST
+void testSigNeur()
+{;}
+void testSigNeurProcess()
+{;}
 #endif
