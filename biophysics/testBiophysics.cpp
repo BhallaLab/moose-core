@@ -1527,4 +1527,9 @@ void testBiophysicsProcess()
 #endif
 }
 
+#else // ifdef DO_UNIT_TESTS
+void testBiophysics()
+{;}
+void testBiophysicsProcess()
+{;}
 #endif
