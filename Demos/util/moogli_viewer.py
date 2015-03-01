@@ -86,7 +86,8 @@ def neurons(element):
     information from all child compartment elements.
     """
     retval = {}
-    neurons = moose.wildcardFind(element.path +  "/##[TYPE=Neutral]")
+    neurons = moose.wildcardFind(element.path +  "/##[TYPE=Neutral]" + \
+            "," + element.path + "/##[TYPE=Neuron'" )
     for element in neurons:
         retval[element.path] = { "name"            : element.name
                               , "id"              : element.path
