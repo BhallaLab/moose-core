@@ -21,11 +21,17 @@ bool ObjId::bad() const
 	return ( elm == 0 || 
 		dataIndex == BADINDEX || 
 		fieldIndex == BADINDEX ||
-		dataIndex >= elm->numData() ||
-		( 
+		dataIndex >= elm->numData()
+		/* 
+		 * We have a bit of a problem here. The FieldElement can exist 
+		 * with zero fields, and is invalid for field lookups but valid 
+		 * for the element level lookups. I should rather not create the 
+		 * FieldElements this way.
+		|| ( 
 		 	elm->getNode( dataIndex ) == Shell::myNode() &&
 		 	fieldIndex >= elm->numField( dataIndex - elm->localDataStart() )
 		)
+		 */
 	);
 }
 
