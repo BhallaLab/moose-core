@@ -148,6 +148,9 @@ class MorphML():
                         
                     ## set those compartments to be LIF for which
                     ## any integrate_and_fire parameter is set
+                    if not moose.exists( "/library/"+mechanismname):
+                        print "Mechanism doesn't exist: ", mechanismname
+                        moose.le( '/library' )
                     moosemech = moose.element("/library/"+mechanismname)
                     if moose.exists(moosemech.path+"/integrate_and_fire"):
                         mooseIaF = moose.element(moosemech.path+"/integrate_and_fire") # Mstring

@@ -241,7 +241,7 @@ class ChannelML():
                 if fn_name in ['alpha','beta']:
                     self.make_cml_function(transition, fn_name, concdep)
                 else:
-                    pu.fatal("Unsupported transition %s" % name)
+                    pu.fatal("Unsupported transition %s" % fn_name)
                     sys.exit()
             
             time_course = gate.find('./{'+self.cml+'}time_course')
