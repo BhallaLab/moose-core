@@ -295,19 +295,20 @@ class GraphicalView(QtGui.QGraphicsView):
                     QtGui.QApplication.setOverrideCursor(QtGui.QCursor(Qt.Qt.ArrowCursor))
                     self.state["press"]["item"].parent().mobj
                     cloneObj = self.state["press"]["item"]
-                    #Solver should be deleted
-                        ## if there is change in 'Topology' of the model
-                        ## or if copy has to made then oject should be in unZombify mode
-                    deleteSolver(self.modelRoot)
-                    iR = 0
-                    iP = 0
-                    t = moose.element(cloneObj.parent().mobj)
-                    name = t.name
-                    if isinstance(cloneObj.parent().mobj,PoolBase):
-                        name += self.objExist(t,iP) 
-                        posWrtComp = self.mapToScene(event.pos())
-                        itemAtView = self.sceneContainerPt.itemAt(self.mapToScene(event.pos()))
-                        if isinstance(itemAtView, ComptItem):
+                    posWrtComp = self.mapToScene(event.pos())
+                    itemAtView = self.sceneContainerPt.itemAt(self.mapToScene(event.pos()))
+                    if isinstance(itemAtView,ComptItem):
+                        #Solver should be deleted
+                            ## if there is change in 'Topology' of the model
+                            ## or if copy has to made then oject should be in unZombify mode
+                        deleteSolver(self.modelRoot)
+                        iR = 0
+                        iP = 0
+                        t = moose.element(cloneObj.parent().mobj)
+                        name = t.name
+                        if isinstance(cloneObj.parent().mobj,PoolBase):
+                            name += self.objExist(t,iP) 
+                            
                             ct = moose.element(moose.copy(t,t.parent,name,1))
                             itemAtView = self.state["release"]["item"]
                             poolObj = moose.element(ct)
@@ -318,20 +319,20 @@ class GraphicalView(QtGui.QGraphicsView):
                             color,bgcolor = getColor(poolinfo)
                             qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y(),color,bgcolor)
                             self.emit(QtCore.SIGNAL("dropped"),poolObj)
-                        else:
-                            QtGui.QMessageBox.information(None,'Dropping Not possible ','Dropping not allowed outside the compartment',QtGui.QMessageBox.Ok)
-                    if isinstance(cloneObj.parent().mobj,ReacBase):
-                        name += self.objExist(t,iR) 
-                        ct = moose.element(moose.copy(t,t.parent,name,1))
-                        itemAtView = self.state["release"]["item"]
-                        reacObj = moose.element(ct)
-                        reacinfo = moose.Annotator(reacObj.path+'/info')
-                        qGItem = ReacItem(reacObj,itemAtView)
-                        self.layoutPt.mooseId_GObj[reacObj] = qGItem
-                        posWrtComp = self.mapToScene(event.pos())
-                        qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y(),"white", "white")
-                        self.emit(QtCore.SIGNAL("dropped"),reacObj)
-                
+                            
+                        if isinstance(cloneObj.parent().mobj,ReacBase):
+                            name += self.objExist(t,iR) 
+                            ct = moose.element(moose.copy(t,t.parent,name,1))
+                            itemAtView = self.state["release"]["item"]
+                            reacObj = moose.element(ct)
+                            reacinfo = moose.Annotator(reacObj.path+'/info')
+                            qGItem = ReacItem(reacObj,itemAtView)
+                            self.layoutPt.mooseId_GObj[reacObj] = qGItem
+                            posWrtComp = self.mapToScene(event.pos())
+                            qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y(),"white", "white")
+                            self.emit(QtCore.SIGNAL("dropped"),reacObj)
+                    else:
+                        QtGui.QMessageBox.information(None,'Dropping Not possible ','Dropping not allowed outside the compartment',QtGui.QMessageBox.Ok)
         if clickedItemType == CONNECTION:
             popupmenu = QtGui.QMenu('PopupMenu', self)
             popupmenu.addAction("Delete", lambda : self.deleteConnection(item))
