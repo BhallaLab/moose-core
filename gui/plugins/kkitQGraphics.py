@@ -1,9 +1,9 @@
-from PyQt4 import QtGui, QtCore, Qt
+#import sys
+#sys.path.insert(0, '/home/harsha/trunk/gui')
 import config
+from PyQt4 import QtGui, QtCore, Qt
 from moose import *
-from PyQt4.QtGui import QPixmap
-from PyQt4.QtGui import QImage
-from PyQt4.QtGui import QGraphicsPixmapItem
+from PyQt4.QtGui import QPixmap, QImage, QGraphicsPixmapItem
 from constants import *
 
 class KineticsDisplayItem(QtGui.QGraphicsWidget):
@@ -134,7 +134,6 @@ class PoolItem(KineticsDisplayItem):
         self.bg = QtGui.QGraphicsRectItem(self)
         self.bg.setAcceptHoverEvents(True)
         self.gobj = QtGui.QGraphicsSimpleTextItem(self.mobj.name, self.bg)
-        
         self.gobj.mobj = self.mobj
         classname = self.mobj.className
         # classname = 'PoolBase'
@@ -233,6 +232,7 @@ class PoolItemCircle(PoolItem):
         font =QtGui.QFont("Helvetica")
         font.setPointSize(fontsize)
         self.gobj.setFont(font)    
+
     def MooseRef(self):
         return self.gobj.mobj
 
@@ -614,7 +614,7 @@ class ComptItem(QtGui.QGraphicsRectItem):
            self.cmptEmitter.emit(QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.mobj)
         return QtGui.QGraphicsItem.itemChange(self,change,value)
 
-import sys
+
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     a = moose.Pool('pool')
