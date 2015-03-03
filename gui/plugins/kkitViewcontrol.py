@@ -339,7 +339,7 @@ class GraphicalView(QtGui.QGraphicsView):
                                 self.emit(QtCore.SIGNAL("dropped"),reacObj)
 
                     else:
-                        if itemAtView == "None":
+                        if itemAtView == None:
                             QtGui.QMessageBox.information(None,'Dropping Not possible ','Dropping not allowed outside the compartment',QtGui.QMessageBox.Ok)
                         else:
                             srcdesString = ((self.state["release"]["item"]).mobj).className
