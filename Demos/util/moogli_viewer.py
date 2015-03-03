@@ -86,8 +86,8 @@ def neurons(element):
     information from all child compartment elements.
     """
     retval = {}
-    neurons = moose.wildcardFind(element.path +  "/##[TYPE=Neutral]" + \
-            "," + element.path + "/##[TYPE=Neuron'" )
+    neurons = list(moose.wildcardFind(element.path +  "/##[TYPE=Neutral]"))
+    neurons.extend(list(moose.wildcardFind(element.path +  "/##[TYPE=Neuron]")))
     for element in neurons:
         retval[element.path] = { "name"            : element.name
                               , "id"              : element.path
@@ -223,7 +223,8 @@ class MoogliViewer(QWidget):
         for i in range(0, len(self.compartmentOrder)):
             self.ims[i] = self.compartmentOrder[i].Im
 
-
+    def getCompartmentOrder(self):
+        return self.compartmentOrder
 
     def createMorphology(self, geometry):
         # import json
@@ -242,7 +243,7 @@ class MoogliViewer(QWidget):
             neuron = geometry["neurons"][neuron_id]
             for compartment_id in neuron["compartments"]:
                 compartment = neuron["compartments"][compartment_id]
-                # print( compartment_id)
+                print( compartment_id)
                 #      , neuron_id
                 #      , compartment["proximal"]["x"]
                 #      , compartment["proximal"]["y"]
@@ -290,6 +291,7 @@ def main():
 def show_morphology(modelpath):
     app = QtGui.QApplication(sys.argv)
     widget = MoogliViewer(modelpath)
+    # widget.setBaseVm()
     widget.showMaximized()
     # widget.setStyleSheet("background-color: black;")
     widget.show()
