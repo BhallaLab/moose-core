@@ -19,7 +19,7 @@ def setupMeshObj(modelRoot):
     xmax = 1.0
     ymin = 0.0
     ymax = 1.0
-    noPositionInfo = True
+    positionInfoExist = True
     meshEntry = {}
     if meshEntry:
         meshEntry.clear()
@@ -70,10 +70,12 @@ def setupMeshObj(modelRoot):
             xmax = max(xcord)
             ymin = min(ycord)
             ymax = max(ycord)
-            noPositionInfo = len(np.nonzero(xcord)[0]) == 0 \
-                and len(np.nonzero(ycord)[0]) == 0
-    return(meshEntry,xmin,xmax,ymin,ymax,noPositionInfo)
+            positionInfoExist = not(len(np.nonzero(xcord)[0]) == 0 \
+                and len(np.nonzero(ycord)[0]) == 0)
+    return(meshEntry,xmin,xmax,ymin,ymax,positionInfoExist)
 
+def sizeHint(self):
+    return QtCore.QSize(800,400)
 def getxyCord(xcord,ycord,list1):
     for item in list1:
         # if isinstance(item,Function):
