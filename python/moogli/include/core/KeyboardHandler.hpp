@@ -52,13 +52,19 @@ public:
     clockwise_roll(osgViewer::Viewer & viewer);
 
     void
+    counterclockwise_roll(osgViewer::Viewer & viewer);
+
+    void
     clockwise_pitch(osgViewer::Viewer & viewer);
+
+    void
+    counterclockwise_pitch(osgViewer::Viewer & viewer);
 
     void
     clockwise_yaw(osgViewer::Viewer & viewer);
 
     void
-    counterclockwise_roll(osgViewer::Viewer & viewer);
+    counterclockwise_yaw(osgViewer::Viewer & viewer);
 
 };
 

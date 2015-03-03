@@ -12,7 +12,10 @@ KeyboardHandler::handle( const osgGA::GUIEventAdapter& ea
         return false;
     }
 
-    auto key = ea.getKey();
+    int key = ea.getKey();
+    RECORD_INFO(to_string(ea.getKey()));
+    // RECORD_INFO(to_string(ea.getModKeyMask()));
+    // RECORD_INFO(to_string(ea.getUnmodifiedKey()));
     switch(key)
     {
         case osgGA::GUIEventAdapter::KEY_Up     :   translate_up(*viewer);
@@ -25,19 +28,32 @@ KeyboardHandler::handle( const osgGA::GUIEventAdapter& ea
                                                     return true;
         case osgGA::GUIEventAdapter::KEY_Plus   :   translate_forward(*viewer);
                                                     return true;
-        case osgGA::GUIEventAdapter::KEY_Minus  :   translate_backward(*viewer);
+        case osgGA::GUIEventAdapter::KEY_Equals :   translate_forward(*viewer);
                                                     return true;
         case osgGA::GUIEventAdapter::KEY_Greater:   translate_forward(*viewer);
                                                     return true;
+        case osgGA::GUIEventAdapter::KEY_Period :   translate_forward(*viewer);
+                                                    return true;
+        case osgGA::GUIEventAdapter::KEY_Minus  :   translate_backward(*viewer);
+                                                    return true;
+        case osgGA::GUIEventAdapter::KEY_Underscore :   translate_backward(*viewer);
+                                                        return true;
         case osgGA::GUIEventAdapter::KEY_Less   :   translate_backward(*viewer);
                                                     return true;
-        case osgGA::GUIEventAdapter::KEY_X      :   clockwise_roll(*viewer);
+        case osgGA::GUIEventAdapter::KEY_Comma  :   translate_backward(*viewer);
+                                                    return true;
+        case osgGA::GUIEventAdapter::KEY_R      :   clockwise_roll(*viewer);
+                                                    return true;
+        case 82                                 :   counterclockwise_roll(*viewer);
+                                                    return true;
+        case osgGA::GUIEventAdapter::KEY_P      :   clockwise_yaw(*viewer);
+                                                    return true;
+        case 80                                 :   counterclockwise_yaw(*viewer);
                                                     return true;
         case osgGA::GUIEventAdapter::KEY_Y      :   clockwise_pitch(*viewer);
                                                     return true;
-        case osgGA::GUIEventAdapter::KEY_Z      :   clockwise_yaw(*viewer);
+        case 89                                 :   counterclockwise_pitch(*viewer);
                                                     return true;
-
     }
     return false;
 }
@@ -140,8 +156,11 @@ KeyboardHandler::translate_forward(osgViewer::Viewer & viewer)
     osg::Vec3f look_vector = centre - eye;
     //look_vector.normalize();
     look_vector.normalize();
-    eye = eye + look_vector / translate_forward_factor;
-    viewer.getCamera()->setViewMatrixAsLookAt(eye, centre, up);
+    eye = eye + look_vector * translate_forward_factor;
+    centre = centre + look_vector * translate_forward_factor;
+
+    viewer.getCamera()->setViewMatrixAsLookAt(eye, centre, osg::Z_AXIS) ;
+    // viewer.getCamera()->setViewMatrixAsLookAt(eye, centre, up);
     // viewer.getCameraManipulator() -> setByMatrix(eye, center, up);
 }
 
@@ -168,24 +187,31 @@ KeyboardHandler::translate_backward(osgViewer::Viewer & viewer)
 void
 KeyboardHandler::clockwise_roll(osgViewer::Viewer & viewer)
 {
-    RECORD_INFO("Zooming out!");
+    RECORD_INFO("Rolling!");
 
     osg::Vec3f eye;
     osg::Vec3f centre;
     osg::Vec3f up;
     osg::Matrix view_matrix =viewer.getCamera()->getViewMatrix();
     view_matrix.getLookAt(eye,centre,up);
+    Vec3f look_vector = centre - eye;
+    look_vector.normalize();
+    Quat rotation = Quat( 3.14/12.0, look_vector);
+    Vec3f rotated_up = rotation * up;
+    rotated_up.normalize();
+    viewer.getCamera()->setViewMatrixAsLookAt(eye, centre, rotated_up);
+
     // Quat rotation;
     // Vec3d translation;
     // Vec3d scale;
     // view_matrix.decompose()
-    Quat rotation = view_matrix.getRotate();
-    Vec3d scale = view_matrix.getScale();
-    rotation.makeRotate(clockwise_roll_factor,up);
-    osg::Matrix new_view_matrix = osg::Matrix::scale(scale);
-    new_view_matrix.setRotate(rotation);
-    new_view_matrix.setTrans(centre);
-    viewer.getCamera()->setViewMatrix( new_view_matrix);
+    // Quat rotation = view_matrix.getRotate();
+    // Vec3d scale = view_matrix.getScale();
+    // rotation.makeRotate(clockwise_roll_factor,up);
+    // osg::Matrix new_view_matrix = osg::Matrix::scale(scale);
+    // new_view_matrix.setRotate(rotation);
+    // new_view_matrix.setTrans(centre);
+    // viewer.getCamera()->setViewMatrix( new_view_matrix);
 
     // osg::Vec3f look_vector = centre - eye;
     // // look_vector.normalize();
@@ -207,26 +233,104 @@ KeyboardHandler::clockwise_roll(osgViewer::Viewer & viewer)
 void
 KeyboardHandler::counterclockwise_roll(osgViewer::Viewer & viewer)
 {
-    RECORD_INFO("Zooming out!");
-    // osg::Matrix view_matrix =viewer.getCamera()->getViewMatrix();
-    // osg::Vec3d translation = view_matrix.getTrans();
-    // view_matrix.getLookAt(eye,centre,up);
-    // osg::Quat quaternion(-counterclockwise_roll_factor,up);
-    // view_matrix.setRotate(quaternion);
-    // view_matrix.setTrans(trans);
-    // viewer.getCamera()->setViewMatrix(view_matrix);
+    RECORD_INFO("Rolling!");
+
+    osg::Vec3f eye;
+    osg::Vec3f centre;
+    osg::Vec3f up;
+    osg::Matrix view_matrix =viewer.getCamera()->getViewMatrix();
+    view_matrix.getLookAt(eye,centre,up);
+    Vec3f look_vector = centre - eye;
+    look_vector.normalize();
+    Quat rotation = Quat( -3.14/12.0, look_vector);
+    Vec3f rotated_up = rotation * up;
+    rotated_up.normalize();
+    viewer.getCamera()->setViewMatrixAsLookAt(eye, centre, rotated_up);
 }
 
 
 void
 KeyboardHandler::clockwise_pitch(osgViewer::Viewer & viewer)
 {
-    RECORD_INFO("Zooming out!");
+    RECORD_INFO("Pitch!");
+
+    osg::Vec3f eye;
+    osg::Vec3f centre;
+    osg::Vec3f up;
+    osg::Matrix view_matrix =viewer.getCamera()->getViewMatrix();
+    view_matrix.getLookAt(eye,centre,up);
+    Vec3f look_vector = centre - eye;
+    float distance = look_vector.normalize();
+    up.normalize();
+    Quat rotation = Quat( 3.14/12.0, up);
+    Vec3f new_eye = centre - rotation * look_vector * distance;
+    viewer.getCamera()->setViewMatrixAsLookAt(new_eye, centre, up);
+}
+
+void
+KeyboardHandler::counterclockwise_pitch(osgViewer::Viewer & viewer)
+{
+    RECORD_INFO("Pitch!");
+
+    osg::Vec3f eye;
+    osg::Vec3f centre;
+    osg::Vec3f up;
+    osg::Matrix view_matrix =viewer.getCamera()->getViewMatrix();
+    view_matrix.getLookAt(eye,centre,up);
+    Vec3f look_vector = centre - eye;
+    float distance = look_vector.normalize();
+    up.normalize();
+    Quat rotation = Quat(-3.14/12.0, up);
+    Vec3f new_eye = centre - rotation * look_vector * distance;
+    viewer.getCamera()->setViewMatrixAsLookAt(new_eye, centre, up);
 }
 
 void
 KeyboardHandler::clockwise_yaw(osgViewer::Viewer & viewer)
 {
     RECORD_INFO("Zooming out!");
+    RECORD_INFO("Pitch!");
+
+    osg::Vec3f eye;
+    osg::Vec3f centre;
+    osg::Vec3f up;
+    osg::Matrix view_matrix =viewer.getCamera()->getViewMatrix();
+    view_matrix.getLookAt(eye,centre,up);
+    Vec3f look_vector = centre - eye;
+    float distance = look_vector.normalize();
+    up.normalize();
+    Vec3f cross_product = look_vector ^ up;
+    cross_product.normalize();
+    Quat rotation = Quat( 3.14/12.0, cross_product);
+    Vec3f new_up    = rotation * up;
+    new_up.normalize();
+    Vec3f new_look  = rotation * look_vector;
+    Vec3f new_eye = centre - new_look * distance;
+    viewer.getCamera()->setViewMatrixAsLookAt(new_eye, centre, new_up);
+
+}
+
+void
+KeyboardHandler::counterclockwise_yaw(osgViewer::Viewer & viewer)
+{
+    RECORD_INFO("Zooming out!");
+    RECORD_INFO("Pitch!");
+
+    osg::Vec3f eye;
+    osg::Vec3f centre;
+    osg::Vec3f up;
+    osg::Matrix view_matrix =viewer.getCamera()->getViewMatrix();
+    view_matrix.getLookAt(eye,centre,up);
+    Vec3f look_vector = centre - eye;
+    float distance = look_vector.normalize();
+    up.normalize();
+    Vec3f cross_product = look_vector ^ up;
+    cross_product.normalize();
+    Quat rotation = Quat( - 3.14/12.0, cross_product);
+    Vec3f new_up    = rotation * up;
+    new_up.normalize();
+    Vec3f new_look  = rotation * look_vector;
+    Vec3f new_eye = centre - new_look * distance;
+    viewer.getCamera()->setViewMatrixAsLookAt(new_eye, centre, new_up);
 
 }
