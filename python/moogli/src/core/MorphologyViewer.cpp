@@ -331,7 +331,15 @@ MorphologyViewer::toggle_mode()
     }
     else
     {
-        manipulator = new osgGA::TrackballManipulator( );
+        manipulator = new osgGA::TrackballManipulator();
+
+        osg::Vec3f eye;
+        osg::Vec3f centre;
+        osg::Vec3f up;
+
+        osg::Matrix view_matrix = _viewer.getCamera()->getViewMatrix();
+        view_matrix.getLookAt(eye,centre,up);
+
         // osgGA::StandardManipulator::UPDATE_MODEL_SIZE
         //                                     | osgGA::StandardManipulator::COMPUTE_HOME_USING_BBOX
         //                                     | osgGA::StandardManipulator::PROCESS_MOUSE_WHEEL
@@ -340,6 +348,7 @@ MorphologyViewer::toggle_mode()
         // // manipulator -> setAutoComputeHomePosition(true);
         // manipulator -> home(0.0);
         _viewer.setCameraManipulator( manipulator);
+        manipulator -> setHomePosition(eye, centre, up);
         _viewer.removeEventHandler(keyboard_handler);
         _toggle_mode_button -> setText("Keyboard Mode");
     }
