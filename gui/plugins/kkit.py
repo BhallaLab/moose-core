@@ -378,7 +378,7 @@ class  KineticsWidget(EditorWidgetBase):
             else:
                 self.srcdesConnection = {}
             setupItem(self.modelRoot,self.srcdesConnection)
-            if self.noPositionInfo:
+            if not self.noPositionInfo:
                 self.autocoordinates = True
 
                 self.xmin,self.xmax,self.ymin,self.ymax,self.autoCordinatepos = autoCoordinates(self.meshEntry,self.srcdesConnection)
@@ -531,7 +531,7 @@ class  KineticsWidget(EditorWidgetBase):
 
     def positioninfo(self,iteminfo):
         Anno = moose.Annotator(self.modelRoot+'/info')
-        if self.noPositionInfo:
+        if not self.noPositionInfo:
             try:
                 # kkit does exist item's/info which up querying for parent.path gives the information of item's parent
                 x,y = self.autoCordinatepos[(element(iteminfo).parent).path]
