@@ -297,42 +297,53 @@ class GraphicalView(QtGui.QGraphicsView):
                     cloneObj = self.state["press"]["item"]
                     posWrtComp = self.mapToScene(event.pos())
                     itemAtView = self.sceneContainerPt.itemAt(self.mapToScene(event.pos()))
+                    self.removeConnector()
                     if isinstance(itemAtView,ComptItem):
                         #Solver should be deleted
                             ## if there is change in 'Topology' of the model
                             ## or if copy has to made then oject should be in unZombify mode
                         deleteSolver(self.modelRoot)
+                        lKey = [key for key, value in self.layoutPt.qGraCompt.iteritems() if value == itemAtView][0]
                         iR = 0
                         iP = 0
                         t = moose.element(cloneObj.parent().mobj)
                         name = t.name
                         if isinstance(cloneObj.parent().mobj,PoolBase):
-                            name += self.objExist(t,iP) 
-                            
-                            ct = moose.element(moose.copy(t,t.parent,name,1))
-                            itemAtView = self.state["release"]["item"]
-                            poolObj = moose.element(ct)
-                            poolinfo = moose.element(poolObj.path+'/info')
-                            qGItem =PoolItem(poolObj,itemAtView)
-                            self.layoutPt.mooseId_GObj[poolObj] = qGItem
-                            bgcolor = getRandColor()
-                            color,bgcolor = getColor(poolinfo)
-                            qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y(),color,bgcolor)
-                            self.emit(QtCore.SIGNAL("dropped"),poolObj)
+                            name += self.objExist(lKey.path,name,iP) 
+                            pmooseCp = moose.copy(t,lKey.path,name,1)
+                            #if moose.copy failed then check for path != '/'
+                            if pmooseCp.path != '/':
+                                ct = moose.element(pmooseCp)
+                                #itemAtView = self.state["release"]["item"]
+                                poolObj = moose.element(ct)
+                                poolinfo = moose.element(poolObj.path+'/info')
+                                qGItem =PoolItem(poolObj,itemAtView)
+                                self.layoutPt.mooseId_GObj[poolObj] = qGItem
+                                bgcolor = getRandColor()
+                                color,bgcolor = getColor(poolinfo)
+                                qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y(),color,bgcolor)
+                                self.emit(QtCore.SIGNAL("dropped"),poolObj)
                             
                         if isinstance(cloneObj.parent().mobj,ReacBase):
-                            name += self.objExist(t,iR) 
-                            ct = moose.element(moose.copy(t,t.parent,name,1))
-                            itemAtView = self.state["release"]["item"]
-                            reacObj = moose.element(ct)
-                            reacinfo = moose.Annotator(reacObj.path+'/info')
-                            qGItem = ReacItem(reacObj,itemAtView)
-                            self.layoutPt.mooseId_GObj[reacObj] = qGItem
-                            posWrtComp = self.mapToScene(event.pos())
-                            qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y(),"white", "white")
-                            self.emit(QtCore.SIGNAL("dropped"),reacObj)
+                            name += self.objExist(lKey.path,name,iR)
+                            rmooseCp = moose.copy(t,lKey.path,name,1)
+                            if rmooseCp.path != '/':
+                                ct = moose.element(rmooseCp)
+                                #itemAtView = self.state["release"]["item"]
+                                reacObj = moose.element(ct)
+                                reacinfo = moose.Annotator(reacObj.path+'/info')
+                                qGItem = ReacItem(reacObj,itemAtView)
+                                self.layoutPt.mooseId_GObj[reacObj] = qGItem
+                                posWrtComp = self.mapToScene(event.pos())
+                                qGItem.setDisplayProperties(posWrtComp.x(),posWrtComp.y(),"white", "white")
+                                self.emit(QtCore.SIGNAL("dropped"),reacObj)
+
                     else:
-                        QtGui.QMessageBox.information(None,'Dropping Not possible ','Dropping not allowed outside the compartment',QtGui.QMessageBox.Ok)
+                        if itemAtView == "None":
+                            QtGui.QMessageBox.information(None,'Dropping Not possible ','Dropping not allowed outside the compartment',QtGui.QMessageBox.Ok)
+                        else:
+                            srcdesString = ((self.state["release"]["item"]).mobj).className
+                            QtGui.QMessageBox.information(None,'Dropping Not possible','Dropping on \'{srcdesString}\' not allowed'.format(srcdesString = srcdesString),QtGui.QMessageBox.Ok)
         if clickedItemType == CONNECTION:
             popupmenu = QtGui.QMenu('PopupMenu', self)
             popupmenu.addAction("Delete", lambda : self.deleteConnection(item))
@@ -524,11 +535,11 @@ class GraphicalView(QtGui.QGraphicsView):
                                           , position.y() +self.yDisp - rectangle.height() / 2.0
                                           )
 
-    def objExist(self,mObj,index):
+    def objExist(self,path,name,index):
         index += 1
-        fPath = mObj.parent.path+'/'+mObj.name+'_'+str(index)
+        fPath = path+'/'+name+'_'+str(index)
         if moose.exists(fPath):
-            return self.objExist(mObj,index)
+            return self.objExist(path,name,index)
         else:
             return ('_'+str(index))
 
