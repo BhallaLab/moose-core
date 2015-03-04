@@ -314,6 +314,11 @@ class GraphicalView(QtGui.QGraphicsView):
                             #if moose.copy failed then check for path != '/'
                             if pmooseCp.path != '/':
                                 ct = moose.element(pmooseCp)
+                                concInit = pmooseCp.concInit[0]
+                                #this is b'cos if pool copied across the comptartment,
+                                #then it doesn't calculate nInit according but if one set 
+                                #concInit then it would, just a hack
+                                ct.concInit = concInit
                                 #itemAtView = self.state["release"]["item"]
                                 poolObj = moose.element(ct)
                                 poolinfo = moose.element(poolObj.path+'/info')
