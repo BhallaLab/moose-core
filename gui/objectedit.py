@@ -292,16 +292,9 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
                         ret = QtCore.QVariant(QtCore.QString(str(ret)))
                     elif(str(field) == "className"):
                         ret = self.mooseObject.getField(str(field))
-                        if ret == "ZombiePool":
-                            ret = QtCore.QVariant(QtCore.QString(str("Pool")))
-                        elif ret == "ZombieBufPool":
-                            ret = QtCore.QVariant(QtCore.QString(str("BufPool")))
-                        elif ret == "ZombieMMenz":
-                            ret = QtCore.QVariant(QtCore.QString(str("MMenz")))
-                        elif ret == "ZombieEnz":
-                            ret = QtCore.QVariant(QtCore.QString(str("Enz")))
-                        elif ret == "ZombieReac":
-                            ret = QtCore.QVariant(QtCore.QString(str("Reac")))
+                        if 'Zombie' in ret:
+                            ret = ret.split('Zombie')[1]
+                        ret = QtCore.QVariant(QtCore.QString(str(ret)))
                     elif(str(field) == "Notes"):
                         astr = self.mooseObject.path+'/info'
                         mastr = moose.Annotator(astr)
