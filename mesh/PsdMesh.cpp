@@ -230,9 +230,13 @@ void PsdMesh::handlePsdList(
 		parent_.clear();
 		vector< double >::const_iterator x = diskCoords.begin();
 		for ( unsigned int i = 0; i < parentVoxel.size(); ++i ) {
-			psd_.push_back( CylBase( *x, *(x+1), *(x+2), 1, 0, 1 ));
+			double p = *x;
+			double q = *(x+1);
+			double r = *(x+2);
+
+			psd_.push_back( CylBase( p, q, r, 1, 0, 1 ));
 			x += 3;
-			pa_.push_back( CylBase( *x, *(x+1), *(x+2), 1, 0, 1 ));
+			pa_.push_back( CylBase( p - *x, q - *(x+1), r - *(x+2), 1, 0, 1 ));
 			x += 3;
 			psd_.back().setDia( *x++ );
 			psd_.back().setIsCylinder( true );
@@ -524,6 +528,13 @@ const vector< double >& PsdMesh::vGetVoxelVolume() const
 	return vs_;
 }
 
+/*
+* The order of coords sent in is
+		 * 	centre xyz
+		 * 	direction xyz
+		 * 	dia, 
+		 * 	diffusion distance to middle of spine Head.
+*/
 const vector< double >& PsdMesh::vGetVoxelMidpoint() const
 {
 	static vector< double > midpoint;
@@ -536,6 +547,7 @@ const vector< double >& PsdMesh::vGetVoxelMidpoint() const
 		*(k + psd_.size() ) = ( coords[1] + coords[4] ) / 2.0;
 		*(k + 2 * psd_.size() ) = ( coords[2] + coords[5] ) / 2.0;
 		k++;
+		// cout << i << " " << coords[0] << " " << coords[3]<< " " << coords[1]<< " " << coords[4]<< " " << coords[2]<< " " << coords[5] << " " << coords[6] << endl;
 	}
 	return midpoint;
 }
