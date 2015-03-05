@@ -129,7 +129,8 @@ extra_fields = ['this',
                 'sourceFields',
                 'motorConst',
                 'destFields',
-                'expr'
+                'dt',
+                'tick'
                 ]
 
 
@@ -259,9 +260,15 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
                 ann = moose.Annotator(self.mooseObject.path+'/info')
                 if setter in ann.getFieldNames('destFinfo'):
                     flag |= QtCore.Qt.ItemIsEditable
-
-            if setter in self.mooseObject.getFieldNames('destFinfo'):
-                flag |= QtCore.Qt.ItemIsEditable
+            
+            if isinstance(self.mooseObject, moose.PoolBase) or isinstance(self.mooseObject,moose.Function): 
+                if field == 'volume' or field == 'expr':
+                    pass
+                elif setter in self.mooseObject.getFieldNames('destFinfo'):
+                    flag |= QtCore.Qt.ItemIsEditable
+            else:
+                if setter in self.mooseObject.getFieldNames('destFinfo'):
+                    flag |= QtCore.Qt.ItemIsEditable
 
             #if field == "Notes":
             #    flag |= QtCore.Qt.ItemIsEditable
