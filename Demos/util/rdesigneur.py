@@ -157,12 +157,17 @@ class rdesigneur:
     # x is the direction of spines outward from soma and perpendicular to z
     # and y is the perpendicular to x and z.
     def _coordSystem( self, soma, dend ):
+        EPSILON = 1e-20
         z = np.array( [dend.x - dend.x0, dend.y - dend.y0, dend.z - dend.z0 ] )
         dendLength = np.sqrt( np.dot( z, z ) )
         z = z / dendLength
         y = np.array( [dend.x0 - soma.x0, dend.y0 - soma.y0, dend.z0 - soma.z0 ] )
         y = np.cross( y, z )
-        y = y / np.sqrt( np.dot( y, y ) )
+        ylen = np.dot( y, y )
+        if ylen < EPSILON:
+            y[1] = 1.0
+        else:
+            y = y / ylen
         x = np.cross( z, y )
         return ( dendLength, x,y,z )
 
@@ -247,7 +252,7 @@ class rdesigneur:
         coords = np.array( coords )
         coords -= origin # place spine shaft base at origin.
         moose.delete( spine )
-        moose.connect( parent, "axial", kids[0], "raxial" )
+        moose.connect( parent, "raxial", kids[0], "axial" )
         self._reorientSpine( kids, coords, ppos, pos, size, angle, x, y, z )
 
     ################################################################
@@ -296,6 +301,7 @@ class rdesigneur:
             else:
                 size = np.array( [1.0] * num )
 
+            print "insertSpines on ", i.name
             p = 0.0
             for j in zip( pos, theta, size ):
                 self._addSpine( i, spineProto, p, angle, x, y, z, j[2], k )
@@ -446,9 +452,11 @@ class rdesigneur:
             smksolve = moose.Gsolve( self.spineCompt.path + '/ksolve' )
         else:
             smksolve = moose.Ksolve( self.spineCompt.path + '/ksolve' )
+        smdsolve = moose.Dsolve( self.spineCompt.path + '/dsolve' )
         smstoich = moose.Stoich( self.spineCompt.path + '/stoich' )
         smstoich.compartment = self.spineCompt
         smstoich.ksolve = smksolve
+        smstoich.dsolve = smdsolve
         smstoich.path = self.spineCompt.path + "/##"
         print 'spine num Pools = ', smstoich.numAllPools, \
                 ', nvox= ',  self.spineCompt.mesh.num, smksolve.numAllVoxels
@@ -457,13 +465,17 @@ class rdesigneur:
             pmksolve = moose.Gsolve( self.psdCompt.path + '/ksolve' )
         else:
             pmksolve = moose.Ksolve( self.psdCompt.path + '/ksolve' )
+        pmdsolve = moose.Dsolve( self.psdCompt.path + '/dsolve' )
         pmstoich = moose.Stoich( self.psdCompt.path + '/stoich' )
         pmstoich.compartment = self.psdCompt
         pmstoich.ksolve = pmksolve
+        pmstoich.dsolve = pmdsolve
         pmstoich.path = self.psdCompt.path + "/##"
         print 'psd num Pools = ', pmstoich.numAllPools, \
                 ', voxels=', self.psdCompt.mesh.num, pmksolve.numAllVoxels
     
+        # Put in cross-compartment diffusion between ksolvers
+        dmdsolve.buildNeuroMeshJunctions( smdsolve, pmdsolve )
         # Put in cross-compartment reactions between ksolvers
         smstoich.buildXreacs( pmstoich )
         smstoich.buildXreacs( dmstoich )
@@ -602,7 +614,7 @@ class rdesigneur:
         spine = moose.Neutral( '/library/spine' )
         shaft = self._buildCompt( spine, 'shaft', shaftLen, shaftDia, 0.0, RM, RA, CM )
         head = self._buildCompt( spine, 'head', headLen, headDia, shaftLen, RM, RA, CM )
-        moose.connect( shaft, 'axial', head, 'raxial' )
+        moose.connect( shaft, 'raxial', head, 'axial' )
 
         if caTau > 0.0:
             conc = moose.CaConc( head.path + '/Ca_conc' )
