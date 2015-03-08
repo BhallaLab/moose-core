@@ -108,7 +108,7 @@ def error(msg):
 
 def fatal(msg):
     dump("FATAL", msg)
-    raise IOException
+    raise Exception(msg)
 
 def debug(msg): dump("DEBUG", msg)
 
