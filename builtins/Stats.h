@@ -14,11 +14,6 @@ class Stats
 	public: 
 		Stats();
 
-		/**
- 		 * Inserts an event into the pendingEvents queue for spikes.
- 		 */
-		void addSpike( DataId synIndex, const double time );
-		
 		////////////////////////////////////////////////////////////////
 		// Field assignment stuff.
 		////////////////////////////////////////////////////////////////
@@ -28,15 +23,32 @@ class Stats
 		double getSum() const;
 		unsigned int getNum() const;
 
+		double getWmean() const;
+		double getWsdev() const;
+		double getWsum() const;
+		unsigned int getWnum() const;
+
+		void setWindowLength( unsigned int len );
+		unsigned int getWindowLength() const;
+
 		////////////////////////////////////////////////////////////////
 		// Dest Func
 		////////////////////////////////////////////////////////////////
+		void input( double v );
 		
 		void process( const Eref& e, ProcPtr p );
 		void reinit( const Eref& e, ProcPtr p );
 
+		/// Virtual func for handling process calls for derived classes.
+		virtual void vProcess( const Eref& e, ProcPtr p );
+		virtual void vReinit( const Eref& e, ProcPtr p );
+
 		////////////////////////////////////////////////////////////////
-		// Reduce func
+		// other func
+		////////////////////////////////////////////////////////////////
+		void doWindowCalculation() const;
+		void innerWindowCalculation();
+
 		////////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();
 	private:
@@ -44,6 +56,14 @@ class Stats
 		double sdev_;
 		double sum_;
 		unsigned int num_;
+		double wmean_;
+		double wsdev_;
+		double wsum_;
+		unsigned int wnum_;
+		double sumsq_;
+		double lastt_;
+		vector< double > samples_;
+		bool isWindowDirty_;
 };
 
 #endif // _STATS_H

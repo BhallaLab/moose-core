@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """graph_utils.py: Graph related utilties. It does not require networkx library.
 It writes files to be used with graphviz.
 
@@ -53,7 +51,6 @@ def writeGraphviz(filename=None, pat='/##[TYPE=Compartment]'):
                 , "No compartment found"
                 , frame = inspect.currentframe()
                 )
-        return None
 
     dot = []
     dot.append("digraph G {")

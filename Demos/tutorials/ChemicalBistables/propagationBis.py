@@ -7,9 +7,41 @@
 ## See the file COPYING.LIB for the full notice.
 #########################################################################
 
-# This example illustrates propagation of state flips in a 
-# linear 1-dimensional reaction-diffusion system. It uses a strong
-# bistable system, loaded in from a kkit definition file.
+"""
+This example illustrates propagation of state flips in a 
+linear 1-dimensional reaction-diffusion system. It uses a 
+bistable system loaded in from a kkit definition file, and
+places this in a tapering cylinder for pseudo 1-dimentionsional 
+diffusion.
+
+This example illustrates a number of features of reaction-diffusion
+calculations. 
+
+First, it shows how to set up such systems. Key steps are to create
+the compartment and define its voxelization, then create the Ksolve, 
+Dsolve, and Stoich. Then we assign stoich.compartment, ksolve and
+dsolve in that order. Finally we assign the path of the Stoich.
+
+For running the model, we start by introducing
+a small symmetry-breaking increment of concInit
+of the molecule **b** in the last compartment on the cylinder. The model
+starts out with molecules at equal concentrations, so that the system would
+settle to the unstable fixed point. This symmetry breaking leads
+to the last compartment moving towards the state with an 
+increased concentration of **b**,
+and this effect propagates to all other compartments.
+
+Once the model has settled to the state where **b** is high throughout, 
+we simply exchange the concentrations of **b** with **c** in the left
+half of the cylinder. This introduces a brief transient at the junction,
+which soon settles to a smooth crossover.
+
+Finally, as we run the simulation, the tapering geometry comes into play.
+Since the left hand side has a larger diameter than the right, the
+state on the left gradually wins over and the transition point slowly
+moves to the right.
+
+"""
 
 import math
 import numpy
@@ -26,8 +58,8 @@ def makeModel():
 		comptLength = num * diffLength	# m
 		diffConst = 20e-12 # m^2/sec
 		concA = 1 # millimolar
-		dt4 = 0.02  # for the diffusion
-		dt5 = 0.2   # for the reaction
+		diffDt = 0.02  # for the diffusion
+		chemDt = 0.2   # for the reaction
                 mfile = '../../Genesis_files/M1719.g'
 
 		model = moose.Neutral( 'model' )
@@ -58,12 +90,10 @@ def makeModel():
 		# Make solvers
 		ksolve = moose.Ksolve( '/model/kinetics/ksolve' )
 		dsolve = moose.Dsolve( '/model/dsolve' )
-                # Set up clocks. The dsolver to know before assigning stoich
-		moose.setClock( 4, dt4 )
-		moose.setClock( 5, dt5 )
-		moose.useClock( 4, '/model/dsolve', 'process' )
-                # Ksolve must be scheduled after dsolve.
-		moose.useClock( 5, '/model/kinetics/ksolve', 'process' )
+                # Set up clocks.
+		moose.setClock( 10, diffDt )
+                for i in range( 11, 17 ):
+		    moose.setClock( i, chemDt )
 
 		stoich = moose.Stoich( '/model/kinetics/stoich' )
 		stoich.compartment = compartment

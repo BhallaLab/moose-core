@@ -69,19 +69,13 @@ def makeModel():
 
 		# Create the output tables
 		graphs = moose.Neutral( '/model/graphs' )
-		outputA = moose.Table ( '/model/graphs/concA' )
-		outputB = moose.Table ( '/model/graphs/concB' )
+		outputA = moose.Table2 ( '/model/graphs/concA' )
+		outputB = moose.Table2 ( '/model/graphs/concB' )
 
 		# connect up the tables
 		moose.connect( outputA, 'requestOut', a, 'getConc' );
 		moose.connect( outputB, 'requestOut', b, 'getConc' );
 
-		# Schedule the whole lot
-		moose.setClock( 4, 0.01 ) # for the computational objects
-		moose.setClock( 8, 1.0 ) # for the plots
-		# The wildcard uses # for single level, and ## for recursive.
-		moose.useClock( 4, '/model/compartment/##', 'process' )
-		moose.useClock( 8, '/model/graphs/#', 'process' )
 
 def displayPlots():
 		for x in moose.wildcardFind( '/model/graphs/conc#' ):

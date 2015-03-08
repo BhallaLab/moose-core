@@ -47,36 +47,14 @@
 
 #include "header.h"
 #include "ChanBase.h"
+#include "ChanCommon.h"
 #include "Leakage.h"
 
 const Cinfo* Leakage::initCinfo()
 {
-    static DestFinfo process("process",
-                             "Handles process call",
-                             new ProcOpFunc< Leakage >(&Leakage::process));
-    static DestFinfo reinit("reinit", "Handles reinit call",
-                            new ProcOpFunc< Leakage >(&Leakage::reinit));
-    
-    static Finfo* processShared[] = {
-        &process,
-        &reinit
-    };
-    
-    static SharedFinfo proc("proc", 
-                            "This is a shared message to receive Process message from the scheduler. "
-                            "The first entry is a MsgDest for the Process operation. It has a single argument, ProcInfo, which "
-                            "holds lots of information about current time, thread, dt and so on.\n"
-                            "The second entry is a MsgDest for the Reinit operation. It also uses ProcInfo." ,
-                            processShared,
-                            sizeof(processShared) / sizeof(Finfo*));
-
-    static Finfo * LeakageFinfos[] = {
-        &proc,
-    };
-    
     static string doc[] = {
         "Name", "Leakage",
-        "Author", "Subhasis Ray, 2009, NCBS",
+        "Author", "Subhasis Ray, 2009, Upi Bhalla 2014 NCBS",
         "Description", "Leakage: Passive leakage channel."
     };
 
@@ -85,8 +63,8 @@ const Cinfo* Leakage::initCinfo()
     static Cinfo LeakageCinfo(
         "Leakage",
         ChanBase::initCinfo(),
-        LeakageFinfos,
-        sizeof( LeakageFinfos )/sizeof(Finfo *),
+		0,
+		0,
         &dinfo,
         doc,
         sizeof( doc ) / sizeof( string ));
@@ -108,14 +86,14 @@ Leakage::~Leakage()
 }
 //////// Function definitions
 
-void Leakage::process( const Eref & e, ProcPtr p )
+void Leakage::vProcess( const Eref & e, ProcPtr p )
 {
-    ChanBase::process(e, p);
+    sendProcessMsgs(e, p);
 }
 
-void Leakage::reinit( const Eref & e, ProcPtr p )
+void Leakage::vReinit( const Eref & e, ProcPtr p )
 {
-    ChanBase::reinit(e, p);
+    sendReinitMsgs(e, p);
 }
 
 

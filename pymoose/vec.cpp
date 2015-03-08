@@ -149,29 +149,39 @@ extern "C" {
     ///////////////////////////////////////////////
 
     PyDoc_STRVAR(moose_Id_doc,
-                 "An object uniquely identifying a moose element. moose elements are"
-                 "\narray-like objects which can have one or more single-objects within"
-                 "\nthem. vec can be traversed like a Python sequence and is item is an"
-                 "\nelement identifying single-objects contained in the array element."
+                 "An object uniquely identifying a moose array-element.\n"
                  "\n"
-                 "\nField access to ematrices are vectorized. For example, vec.name returns a"
-                 "\ntuple containing the names of all the single-elements in this"
-                 "\nvec. There are a few special fields that are unique for vec and are not"
-                 "\nvectorized. These are `path`, `value`, `shape` and `className`."
-                 "\nThere are two ways an vec can be initialized, (1) create a new array"
-                 "\nelement or (2) create a reference to an existing object."
+                 "array-elements are narray-like objects which can have one or more"
+                 " single-elements within them."
+                 " vec can be traversed like a Python sequence and is item is an"
+                 " element identifying single-objects contained in the array element.\n"
                  "\n"
+                 "you can create multiple references to the same MOOSE object in Python,"
+                 " but as long as they have the same path/id value, they all point to"
+                 " the same entity in MOOSE.\n"
                  "\n"
-                 "\n    __init__(self, path=path, n=size, g=isGlobal, dtype=className)"
+                 "Field access to ematrices are vectorized. For example, vec.name returns a"
+                 " tuple containing the names of all the single-elements in this"
+                 " vec. There are a few special fields that are unique for vec and are not"
+                 " vectorized. These are `path`, `value`, `shape` and `className`."
+                 " There are two ways an vec can be initialized, (1) create a new array"
+                 " element or (2) create a reference to an existing object.\n"
+                 "\n"
+                 "\n    vec(self, path=path, n=size, g=isGlobal, dtype=className)"
+                 "\n    "
                  "\n    "
                  "\n    Parameters"
                  "\n    ----------"                 
-                 "\n    path : str "
+                 "\n    path : str/vec/int "
                  "\n        Path of an existing array element or for creating a new one. This has"
                  "\n        the same format as unix file path: /{element1}/{element2} ... If there"
                  "\n        is no object with the specified path, moose attempts to create a new"
                  "\n        array element. For that to succeed everything until the last `/`"
                  "\n        character must exist or an error is raised"
+                 "\n"
+                 "\n        Alternatively, path can be vec or integer value of the id of an"
+                 "\n        existing vec object. The new object will be another reference to"
+                 "\n        the existing object."
                  "\n    "
                  "\n    n : positive int"
                  "\n        This is a positive integers specifying the size of the array element"
@@ -187,16 +197,14 @@ extern "C" {
                  "\n        The vector will be of this moose-class."
                  "\n    "
                  "\n    "
-                 "\n    __init__(self, id)"
-                 "\n    "
-                 "\n        Create a reference to an existing array object."
-                 "\n    "
-                 "\n    Parameters"
-                 "\n    ----------"
-                 "\n    id : vec/int"
-                 "\n        vec of an existing array object. The new object will be another"
-                 "\n        reference to this object."
-                 "\n    "
+                 "\n    Examples"
+                 "\n    ---------"
+                 "\n        >>> iaf = moose.vec('/iaf', n=10, dtype='IntFire')"
+                 "\n        >>> iaf.Vm = range(10)"
+                 "\n        >>> print iaf[5].Vm"
+                 "\n        5.0"
+                 "\n        >>> print iaf.Vm"
+                 "\n        array([ 0.,  1.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9.])"
                  );
     
     PyTypeObject IdType = { 
@@ -309,7 +317,7 @@ extern "C" {
             parent_path = "/";
         }
         ObjId parent_id(parent_path);
-        if (parent_id.bad() ) {
+        if (parent_id.bad() ) {            
             string message = "Parent element does not exist: ";
             message += parent_path;
             PyErr_SetString(PyExc_ValueError, message.c_str());
@@ -320,7 +328,11 @@ extern "C" {
                 string(name),
                 numData, 
                 static_cast< NodePolicy >( isGlobal ) 
-                );
+                                     );
+        if (nId == Id() && path != "/" && path != "/root"){
+            string message = "no such moose class : " + type;
+            PyErr_SetString(PyExc_TypeError, message.c_str());
+        }
 
 #ifdef ENABLE_LOGGER
         logger.updateGlobalCount(type);
@@ -336,11 +348,11 @@ extern "C" {
         unsigned int isGlobal = 0;
         char * type = NULL;
         // first try parsing the arguments as (path, size, classname)
-        char _path[] = "path";
-        char _dtype[] = "dtype";
-        char _size[] = "n";
-        char _global[] = "g";
-        static char * kwlist[] = {_path, _size,  _global, _dtype,NULL};
+        static char _path[] = "path";
+        static char _dtype[] = "dtype";
+        static char _size[] = "n";
+        static char _global[] = "g";
+        static char * kwlist[] = {_path, _size,  _global, _dtype, NULL};
         char * path = NULL;
         char _default_type[] = "Neutral";
         // set it to 0 for unspecified value in case the user tries to
@@ -350,42 +362,28 @@ extern "C" {
         // nonexisting vec, we change the unspecifed numData to 1.
         unsigned int numData = 0; 
         // char *type = _default_type;
-        bool parse_success = false;
         /* The expected arguments are:
            string path, 
            [unsigned int numData] - default: 1
            [unsigned int isGlobal] - default: 0
            [string type] - default: Neutral
         */
-        if (kwargs == NULL){
-            if(PyArg_ParseTuple(args,
-                                "s|IIs:moose_Id_init",
-                                &path,
-                                &numData,
-                                &isGlobal,
-                                &type)){
-                parse_success = true;
-            }
-        } else if (PyArg_ParseTupleAndKeywords(args,
-                                               kwargs,
-                                               "s|IIs:moose_Id_init",
-                                               kwlist,
-                                               &path,
-                                               &numData,
-                                               &isGlobal,
-                                               &type)){
-            parse_success = true;
-        }
+        if (PyArg_ParseTupleAndKeywords(args,
+                                        kwargs,
+                                        "s|IIs:moose_Id_init",
+                                        kwlist,
+                                        &path,
+                                        &numData,
+                                        &isGlobal,
+                                        &type)){
         // Parsing args successful, if any error happens now,
         // different argument processing will not help. Return error
-        if (parse_success){
             string trimmed_path(path);
             trimmed_path = trim(trimmed_path);
             size_t length = trimmed_path.length();
             if (length <= 0){
                 PyErr_SetString(PyExc_ValueError,
                                 "moose_Id_init: path must be non-empty string.");
-                Py_DECREF(self);
                 return -1;
             }
             self->id_ = Id(trimmed_path);
@@ -406,7 +404,6 @@ extern "C" {
             }
             self->id_ = create_Id_from_path(path, numData, isGlobal, type);
             if (self->id_ == Id() && PyErr_Occurred()){
-                Py_DECREF(self);
                 return -1;
             }
             return 0;
@@ -431,7 +428,6 @@ extern "C" {
             self->id_ = Id(id);
             return 0;
         }
-        Py_DECREF(self);
         return -1;
     }// ! moose_Id_init
 
@@ -448,21 +444,27 @@ extern "C" {
     // ObjId will destroy the containing element and invalidate all
     // the other ObjId with the same Id.
     // 2011-03-28 13:44:49 (+0530)
-    PyObject * deleteId(Id id)
+    PyObject * deleteObjId(ObjId oid)
     {
 #ifndef NDEBUG
         if (verbosity > 1){
-            cout << "Deleting Id " << id << endl;
+            cout << "Deleting ObjId " << oid << endl;
         }
 #endif
-        string className = Field<string >::get(id, "className");
+        string className = Field<string >::get(oid, "className");
         vector <string> destFields = getFieldNames(className, "destFinfo");
         vector <string> lookupFields = getFieldNames(className, "lookupFinfo");
         vector <string> elementFields = getFieldNames(className, "elementFinfo");
-        unsigned int numData = Field<unsigned int>::get(id, "numData");
+        unsigned int numData = Field<unsigned int>::get(oid, "numData");
+		unsigned int begin = 0;
+		unsigned int end = numData;
+		if ( oid.element()->cinfo()->isA( "Msg" ) ) {
+			begin = oid.dataIndex;
+			end = oid.dataIndex + 1;
+		}
         // clean up the maps containing initialized lookup/dest/element fields
-        for (unsigned int ii = 0; ii < numData; ++ii){
-            ObjId el(id, ii);
+        for (unsigned int ii = begin; ii < end; ++ii){
+            ObjId el(oid.id, ii);
 #ifndef NDEBUG
             if (verbosity > 1){
                 cout << "    Deleting ObjId " << el << endl;
@@ -493,7 +495,7 @@ extern "C" {
                 }
             }    
         }
-        SHELLPTR->doDelete(id);
+        SHELLPTR->doDelete(oid);
         Py_RETURN_NONE;
     }
     
@@ -506,7 +508,7 @@ extern "C" {
         if (!Id::isValid(self->id_)){
             RAISE_INVALID_ID(NULL, "moose_Id_delete");
         }
-        deleteId(self->id_);
+        deleteObjId(self->id_);
         self->id_ = Id();
         Py_CLEAR(self);
         Py_RETURN_NONE;
@@ -602,7 +604,6 @@ extern "C" {
         if (!Id::isValid(self->id_)){
             RAISE_INVALID_ID(NULL, "moose_Id_getItem");
         }        
-        extern PyTypeObject ObjIdType;
         if (index < 0){
             index += moose_Id_getLength(self);
         }
@@ -626,7 +627,6 @@ extern "C" {
         if (!Id::isValid(self->id_)){
             RAISE_INVALID_ID(NULL, "moose_Id_getSlice");
         }        
-        extern PyTypeObject ObjIdType;
         Py_ssize_t len = moose_Id_getLength(self);
         while (start < 0){
             start += len;
@@ -720,7 +720,6 @@ extern "C" {
      PyObject * moose_Id_getattro(_Id * self, PyObject * attr)
      {
          int new_attr = 0;
-         extern PyTypeObject ObjIdType;
         if (!Id::isValid(self->id_)){
             RAISE_INVALID_ID(NULL, "moose_Id_getattro");
         }        

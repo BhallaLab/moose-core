@@ -39,6 +39,8 @@ class Gsolve: public ZombiePoolInterface
 		 */
 		void setNumPools( unsigned int num ); /// Inherited.
 		unsigned int getNumPools() const; /// Inherited.
+		VoxelPoolsBase* pools( unsigned int i ); /// Inherited.
+		double volume( unsigned int i ) const;
 
 		/// Returns the vector of pool Num at the specified voxel.
 		vector< double > getNvec( unsigned int voxel) const;
@@ -48,6 +50,15 @@ class Gsolve: public ZombiePoolInterface
 		//////////////////////////////////////////////////////////////////
 		void process( const Eref& e, ProcPtr p );
 		void reinit( const Eref& e, ProcPtr p );
+		void initProc( const Eref& e, ProcPtr p );
+		void initReinit( const Eref& e, ProcPtr p );
+
+		/**
+		 * Handles request to change volumes of voxels in this Ksolve, and
+		 * all cascading effects of this. At this point it won't handle
+		 * change in size of voxel array.
+		 */
+		void updateVoxelVol( vector< double > vols );
 
 		//////////////////////////////////////////////////////////////////
 		// Solver setup functions
@@ -85,8 +96,13 @@ class Gsolve: public ZombiePoolInterface
 
 		void getBlock( vector< double >& values ) const;
 		void setBlock( const vector< double >& values );
-		void setupCrossSolverReacs( const map< Id, vector< Id > >& xr,
-	   		Id otherStoich );
+
+		/**
+		 * Rescale specified voxel rate term following rate constant change 
+		 * or volume change. If index == ~0U then does all terms.
+		 */
+		void updateRateTerms( unsigned int index );
+
 
 		//////////////////////////////////////////////////////////////////
 		/// Flag: returns true if randomized round to integers is done.
@@ -95,6 +111,7 @@ class Gsolve: public ZombiePoolInterface
 		void setRandInit( bool val );
 
 		//////////////////////////////////////////////////////////////////
+		static SrcFinfo2< Id, vector< double > >* xComptOut();
 		static const Cinfo* initCinfo();
 	private:
 		GssaSystem sys_;
@@ -110,17 +127,16 @@ class Gsolve: public ZombiePoolInterface
 		/// First voxel indexed on the current node.
 		unsigned int startVoxel_;
 
-		/**
-		 * Stoich is the class that sets up the reaction system and
-		 * manages the stoichiometry matrix
-		 */
-		Id stoich_;
-
 		/// Utility ptr used to help Pool Id lookups by the Ksolve.
 		Stoich* stoichPtr_;
 
-		/// Used to track which volumes the system uses.
-		Id compartment_;
+		/**
+		 * Id of diffusion solver, needed for coordinating numerics.
+		 */
+		Id dsolve_;
+
+		/// Pointer to diffusion solver
+		ZombiePoolInterface* dsolvePtr_;
 };
 
 #endif	// _GSOLVE_H

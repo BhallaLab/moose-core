@@ -86,7 +86,7 @@ class PoolBase
 		virtual void vSetConc( const Eref& e, double v ) = 0;
 		virtual double vGetConc( const Eref& e ) const = 0;
 		virtual void vSetConcInit( const Eref& e, double v ) = 0;
-		virtual double vGetConcInit( const Eref& e ) const = 0;
+		// virtual double vGetConcInit( const Eref& e ) const = 0;
 		virtual double vGetVolume( const Eref& e ) const = 0;
 		virtual void vSetVolume( const Eref& e, double v ) = 0;
 		virtual void vSetSpecies( const Eref& e, SpeciesId v ) = 0;
@@ -140,6 +140,9 @@ class PoolBase
 		//////////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();
 	private:
+		double concInit_; /// Initial concentration.
+		// We don't store the conc here as this is computed on the fly 
+		// by derived classes. But the PoolBase::concInit is authoritative.
 };
 
 #endif	// _POOL_BASE_H

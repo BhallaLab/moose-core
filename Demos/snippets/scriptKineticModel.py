@@ -7,15 +7,17 @@
 ## See the file COPYING.LIB for the full notice.
 #########################################################################
 
-# This example illustrates how to define a kinetic model using the
-# scripting interface. Normally one uses standard model formats like
-# SBML or kkit to concisely define kinetic models, but in some cases one
-# would like to modify the model through the script.
-# This example creates a bistable model having two enzymes and a reaction.
-# One of the enzymes is autocatalytic.
-# The model is set up to run using default Exponential Euler integration.
-# The snippet scriptKineticSolver.py uses the much better GSL 
-# Runge-Kutta-Fehlberg integration scheme on this same model.
+"""
+This example illustrates how to define a kinetic model using the
+scripting interface. Normally one uses standard model formats like
+SBML or kkit to concisely define kinetic models, but in some cases one
+would like to modify the model through the script.
+This example creates a bistable model having two enzymes and a reaction.
+One of the enzymes is autocatalytic.
+The model is set up to run using default Exponential Euler integration.
+The snippet scriptKineticSolver.py uses the much better GSL 
+Runge-Kutta-Fehlberg integration scheme on this same model.
+"""
 
 import math
 import pylab
@@ -72,20 +74,17 @@ def makeModel():
 
 		# Create the output tables
 		graphs = moose.Neutral( '/model/graphs' )
-		outputA = moose.Table ( '/model/graphs/concA' )
-		outputB = moose.Table ( '/model/graphs/concB' )
+		outputA = moose.Table2 ( '/model/graphs/concA' )
+		outputB = moose.Table2 ( '/model/graphs/concB' )
 
 		# connect up the tables
 		moose.connect( outputA, 'requestOut', a, 'getConc' );
 		moose.connect( outputB, 'requestOut', b, 'getConc' );
 
-		# Schedule the whole lot
-		moose.setClock( 4, 0.001 ) # for the computational objects
-		moose.setClock( 8, 1.0 ) # for the plots
-		# The wildcard uses # for single level, and ## for recursive.
-		moose.useClock( 4, '/model/compartment/##', 'process' )
-		moose.useClock( 8, '/model/graphs/#', 'process' )
-
+		# We need a finer timestep than the default 0.1 seconds, 
+                # in order to get numerical accuracy.
+                for i in range (11, 15 ):
+		    moose.setClock( i, 0.001 ) # for computational objects
 
 def main():
 		makeModel()

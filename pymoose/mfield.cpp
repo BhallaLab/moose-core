@@ -166,7 +166,8 @@ extern "C" {
                  "name. Hence changing the name of the container element will cause the\n"
                  "hash to change. This is rather unusual in a moose script, but if you\n"
                  "are putting fields as dictionary keys, you should do that after names\n"
-                 "of all elements have been finalized.");
+                 "of all elements have been finalized.\n"
+                 "\n");
 
 
     static PyTypeObject moose_Field = {
@@ -238,7 +239,9 @@ extern "C" {
                  "keys can be any number and the corresponding value is dynamically\n"
                  "computed by the method of interpolation.\n"
                  "Use moose.doc('classname.fieldname') to display builtin\n"
-                 "documentation for `field` in class `classname`.\n");
+                 "documentation for `field` in class `classname`.\n"
+                 "\n"
+                 );
     PyTypeObject moose_LookupField = {
         PyVarObject_HEAD_INIT(NULL, 0)
         "moose.LookupField",                                  /* tp_name */
@@ -372,10 +375,19 @@ extern "C" {
 
     PyDoc_STRVAR(moose_ElementField_path_documentation,
                  "Path of the field element.");
+    
+    PyDoc_STRVAR(moose_ElementField_name_documentation,
+                 "Name of the field element.");
+
+    PyDoc_STRVAR(moose_ElementField_owner_documentation,
+                 "Reference to owner element of the field element.");
+    
     PyDoc_STRVAR(moose_ElementField_id_documentation,
                  "Id of the field element.");
+
     PyDoc_STRVAR(moose_ElementField_dataId_documentation,
                  "dataIndex of the field element");
+
     /* These static defs are required for compiler complaining about string literals. */
     static char name[] = "name";
     static char numfield[] = "num";
@@ -403,12 +415,12 @@ extern "C" {
         {name,
          (getter)moose_ElementField_getName,
          NULL,
-         emptyString,
+         moose_ElementField_name_documentation,
          NULL},
         {owner,
          (getter)moose_ElementField_getOwner,
          NULL,
-         emptyString,
+         moose_ElementField_owner_documentation,
          NULL},
         {dataIndex,
          (getter)moose_ElementField_getDataId,
@@ -526,8 +538,6 @@ extern "C" {
         unsigned int num = Field<unsigned int>::get(self->myoid, "numField");
         return Py_ssize_t(num);
     }
-
-
 
     PyObject * moose_ElementField_getPath(_Field * self, void * closure)
     {

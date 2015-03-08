@@ -69,6 +69,38 @@ const Cinfo* SpineMesh::initCinfo()
 			&SpineMesh::getNeuronVoxel
 		);
 
+		static ReadOnlyValueFinfo< SpineMesh, vector< Id > > elecComptMap(
+			"elecComptMap",
+			"Vector of Ids of electrical compartments that map to each "
+			"voxel. This is necessary because the order of the IDs may "
+			"differ from the ordering of the voxels. Note that there "
+			"is always just one voxel per spine head. ",
+			&SpineMesh::getElecComptMap
+		);
+		static ReadOnlyValueFinfo< SpineMesh, vector< Id > > elecComptList(
+			"elecComptList",
+			"Vector of Ids of all electrical compartments in this "
+			"SpineMesh. Ordering is as per the tree structure built in "
+			"the NeuroMesh, and may differ from Id order. Ordering "
+			"matches that used for startVoxelInCompt and endVoxelInCompt",
+			&SpineMesh::getElecComptMap
+		);
+		static ReadOnlyValueFinfo< SpineMesh, vector< unsigned int > > startVoxelInCompt(
+			"startVoxelInCompt",
+			"Index of first voxel that maps to each electrical "
+			"compartment. This is a trivial function in the SpineMesh, as"
+			"we have a single voxel per spine. So just a vector of "
+			"its own indices.",
+			&SpineMesh::getStartVoxelInCompt
+		);
+		static ReadOnlyValueFinfo< SpineMesh, vector< unsigned int > > endVoxelInCompt(
+			"endVoxelInCompt",
+			"Index of end voxel that maps to each electrical "
+			"compartment. Since there is just one voxel per electrical "
+			"compartment in the spine, this is just a vector of index+1",
+			&SpineMesh::getEndVoxelInCompt
+		);
+
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
@@ -89,6 +121,10 @@ const Cinfo* SpineMesh::initCinfo()
 
 	static Finfo* spineMeshFinfos[] = {
 		&parentVoxel,		// ReadOnlyValueFinfo
+		&elecComptMap,		// ReadOnlyValueFinfo
+		&elecComptList,		// ReadOnlyValueFinfo
+		&startVoxelInCompt,		// ReadOnlyValueFinfo
+		&endVoxelInCompt,		// ReadOnlyValueFinfo
 		&spineList,			// DestFinfo
 		// psdListOut(),		// SrcFinfo
 	};
@@ -163,6 +199,32 @@ vector< unsigned int > SpineMesh::getNeuronVoxel() const
 		ret[i] = spines_[i].parent();
 	return ret;
 }
+
+vector< Id > SpineMesh::getElecComptMap() const
+{
+	vector< Id > ret( spines_.size() );
+	for ( unsigned int i = 0; i < spines_.size(); ++i ) 
+		ret[i] = spines_[i].headId();
+	return ret;
+}
+
+vector< unsigned int > SpineMesh::getStartVoxelInCompt() const
+{
+	vector< unsigned int > ret( spines_.size() );
+	for ( unsigned int i = 0; i < ret.size(); ++i ) 
+		ret[i] = i;
+	return ret;
+}
+
+vector< unsigned int > SpineMesh::getEndVoxelInCompt() const
+{
+	vector< unsigned int > ret( spines_.size() );
+	for ( unsigned int i = 0; i < ret.size(); ++i ) 
+		ret[i] = i+1;
+	return ret;
+}
+
+//////////////////////////////////////////////////////////////////////
 
 /**
  * This assumes that lambda is the quantity to preserve, over numEntries.
@@ -323,6 +385,19 @@ const vector< double >& SpineMesh::vGetVoxelVolume() const
 	return vs_;
 }
 
+const vector< double >& SpineMesh::vGetVoxelMidpoint() const
+{
+	static vector< double > midpoint;
+	midpoint.resize( spines_.size() * 3 );
+	for ( unsigned int i = 0; i < spines_.size(); ++i ) {
+		spines_[i].mid( midpoint[i], 
+						midpoint[i + spines_.size() ], 
+						midpoint[i + 2 * spines_.size() ] 
+		); 
+	}
+	return midpoint;
+}
+
 const vector< double >& SpineMesh::getVoxelArea() const
 {
 	return area_;
@@ -473,6 +548,9 @@ void SpineMesh::matchNeuroMeshEntries( const ChemCompt* other,
 		for ( unsigned int i = 0; i < spines_.size(); ++i ) {
 			double xda = spines_[i].rootArea() / spines_[i].diffusionLength();
 			ret.push_back( VoxelJunction( i, spines_[i].parent(), xda ) );
+			ret.back().firstVol = spines_[i].volume();
+			ret.back().secondVol = 
+					nm->getMeshEntryVolume( spines_[i].parent() );
 		}
 	} else {
 		assert( 0 ); // Don't know how to do this yet.

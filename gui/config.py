@@ -1,50 +1,50 @@
-# config.py --- 
-# 
+# config.py ---
+#
 # Filename: config.py
-# Description: 
+# Description:
 # Author: Subhasis Ray
-# Maintainer: 
+# Maintainer:
 # Created: Sat Feb 13 16:07:56 2010 (+0530)
-# Version: 
-# Last-Updated: Thu Apr 18 19:56:03 2013 (+0530)
-#           By: subha
-#     Update #: 361
-# URL: 
-# Keywords: 
-# Compatibility: 
-# 
-# 
+# Version:
+# Last-Updated: Wed Nov 12 19:10:08 2014 (+0530)
+#           By: Subhasis Ray
+#     Update #: 369
+# URL:
+# Keywords:
+# Compatibility:
+#
+#
 
-# Commentary: 
-# 
+# Commentary:
+#
 # Provides keys for accessing per-user settings.
 # Provides initialization of several per-user variables for MooseGUI.
 # As part of initialization, creates `~/.moose` and `~/moose`
 # directories.
 #
-# 
+#
 
 # Change log:
-# 
+#
 # 2012-09-22 13:49:36 (+0530) Subha: cleaned up the initialization
-# 
-# 
+#
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
 # published by the Free Software Foundation; either version 3, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; see the file COPYING.  If not, write to
 # the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 # Floor, Boston, MA 02110-1301, USA.
-# 
-# 
+#
+#
 
 # Code:
 
@@ -66,9 +66,9 @@ KEY_WINDOW_LAYOUT = 'main/layout'
 KEY_RUNTIME_AUTOHIDE = 'main/rtautohide'
 KEY_DEMOS_DIR = 'main/demosdir'
 KEY_DOCS_DIR = 'main/docsdir'
-KEY_HOME_DIR = 'main/homedir' 
-KEY_ICON_DIR = 'main/icondir' 
-KEY_COLORMAP_DIR = 'main/colormapdir' 
+KEY_HOME_DIR = 'main/homedir'
+KEY_ICON_DIR = 'main/icondir'
+KEY_COLORMAP_DIR = 'main/colormapdir'
 KEY_BIOMODEL_DIR = 'main/biomodelsdir'
 KEY_LOCAL_DEMOS_DIR = 'main/localdemosdir'
 KEY_MOOSE_LOCAL_DIR = 'main/localdir'
@@ -96,7 +96,8 @@ MOOSE_DEMOS_DIR = '/usr/share/moose/Demos'
 MOOSE_DOCS_DIR =  '/usr/share/doc/moose'
 MOOSE_GUI_DIR = os.path.dirname(os.path.abspath(__file__))
 MOOSE_PLUGIN_DIR = os.path.join(MOOSE_GUI_DIR, 'plugins')
-MOOSE_CFG_DIR = os.path.join(os.environ['HOME'], '.moose')
+NEUROKIT_PLUGIN_DIR = os.path.join(MOOSE_GUI_DIR, 'plugins/NeuroKit')
+# MOOSE_CFG_DIR = os.path.join(os.environ['HOME'], '.moose')
 MOOSE_LOCAL_DIR = os.path.join(os.environ['HOME'], 'moose')
 MOOSE_NUMPTHREADS = '1'
 
@@ -104,22 +105,24 @@ MOOSE_ABOUT_FILE = os.path.join(MOOSE_GUI_DIR, 'about.html')
 MOOSE_UNDO_LENGTH = 128 # Arbitrary undo length
 LOCAL_BUILD = False
 
+sys.path.append(os.path.join(MOOSE_PLUGIN_DIR))
+
 class MooseSetting(dict):
     """
     dict-like access to QSettings.
 
     This subclass of dict wraps a QSettings object and lets one set
     and get values as Python strings rather than QVariant.
-    
+
     This is supposed to be a singleton in the whole application (all
     QSettings are with same parameters).
     """
-    _instance = None    
+    _instance = None
     def __new__(cls, *args, **kwargs):
         # This is designed to check if the class has been
         # instantiated, if so, returns the single instance, otherwise
         # creates it.
-        if cls._instance is None:           
+        if cls._instance is None:
             cls._instance = super(MooseSetting, cls).__new__(cls, *args, **kwargs)
             firsttime, errs = init_dirs()
             for e in errs:
@@ -129,19 +132,15 @@ class MooseSetting(dict):
             QtCore.QCoreApplication.setApplicationName('MOOSE')
             cls._instance.qsettings = QtCore.QSettings()
             # If this is the first time, then set some defaults
-            if firsttime:
-                cls._instance.qsettings.setValue(KEY_FIRSTTIME, True)
-                cls._instance.qsettings.setValue(KEY_COLORMAP_DIR, os.path.join(MOOSE_GUI_DIR, 'colormaps'))
-                cls._instance.qsettings.setValue(KEY_BIOMODEL_DIR, os.path.join(MOOSE_GUI_DIR, 'bioModels'))
-                cls._instance.qsettings.setValue(KEY_ICON_DIR, os.path.join(MOOSE_GUI_DIR, 'icons'))
-                cls._instance.qsettings.setValue(KEY_NUMPTHREADS, '1')
-                cls._instance.qsettings.setValue(KEY_UNDO_LENGTH, str(MOOSE_UNDO_LENGTH))
-            else:
-                cls._instance.qsettings.setValue(KEY_FIRSTTIME, False)
+            cls._instance.qsettings.setValue(KEY_COLORMAP_DIR, os.path.join(MOOSE_GUI_DIR, 'colormaps'))
+            cls._instance.qsettings.setValue(KEY_BIOMODEL_DIR, os.path.join(MOOSE_GUI_DIR, 'bioModels'))
+            cls._instance.qsettings.setValue(KEY_ICON_DIR, os.path.join(MOOSE_GUI_DIR, 'icons'))
+            cls._instance.qsettings.setValue(KEY_NUMPTHREADS, '1')
+            cls._instance.qsettings.setValue(KEY_UNDO_LENGTH, str(MOOSE_UNDO_LENGTH))
             # These are to be checked at every run
             cls._instance.qsettings.setValue(KEY_HOME_DIR, os.environ['HOME'])
             cls._instance.qsettings.setValue(KEY_DEMOS_DIR, MOOSE_DEMOS_DIR)
-            cls._instance.qsettings.setValue(KEY_LOCAL_DEMOS_DIR, os.path.join(MOOSE_LOCAL_DIR, 'Demos'))
+            cls._instance.qsettings.setValue(KEY_LOCAL_DEMOS_DIR, os.path.join(MOOSE_LOCAL_DIR, 'Demos/'))
             cls._instance.qsettings.setValue(KEY_DOCS_DIR, MOOSE_DOCS_DIR)
             cls._instance.qsettings.setValue(KEY_MOOSE_LOCAL_DIR, MOOSE_LOCAL_DIR)
             cls._instance.qsettings.setValue(KEY_LOCAL_BUILD, LOCAL_BUILD)
@@ -153,7 +152,7 @@ class MooseSetting(dict):
 
     def __iter__(self):
         return (str(key) for key in self.qsettings.allKeys())
-        
+
     def __setitem__(self, key, value):
         if isinstance(key, str):
             self.qsettings.setValue(key, value)
@@ -177,11 +176,11 @@ def init_dirs():
     directory. If not, we assume this to be the first run of MOOSE.
     Then we try to create the `~/.moose` directory and `~/moose`
     directory.
-    """  
+    """
     firsttime = False
     global MOOSE_DEMOS_DIR
     global MOOSE_LOCAL_DIR
-    global MOOSE_CFG_DIR
+    # global MOOSE_CFG_DIR
     global MOOSE_DOCS_DIR
     global LOCAL_BUILD
     # If we have a Makefile above GUI directory, then this must be a
@@ -191,23 +190,23 @@ def init_dirs():
     moose_cfg_dir = os.path.join(os.environ['HOME'], '.moose')
     if not os.path.exists(moose_cfg_dir):
         firsttime = True
-        try:
-            os.mkdir(moose_cfg_dir)
-            MOOSE_CFG_DIR = moose_cfg_dir
-            print 'Created moose configuration directory:', moose_cfg_dir
-        except OSError, e:
-            errors.append(e)
-            print e
+        # try:
+        #     # os.mkdir(moose_cfg_dir)
+        #     # # MOOSE_CFG_DIR = moose_cfg_dir
+        #     # print 'Created moose configuration directory:', moose_cfg_dir
+        # except OSError, e:
+        #     errors.append(e)
+        #     print e
     if LOCAL_BUILD:
         MOOSE_LOCAL_DIR = os.path.normpath(os.path.join(MOOSE_GUI_DIR, '..'))
         MOOSE_DEMOS_DIR = os.path.join(MOOSE_LOCAL_DIR, 'Demos')
-        MOOSE_DOCS_DIR = os.path.join(MOOSE_LOCAL_DIR, 'Docs')
+        MOOSE_DOCS_DIR = os.path.join(MOOSE_LOCAL_DIR, 'Docs/user/py/_build/html/')
     else:
         MOOSE_LOCAL_DIR = os.path.join(os.environ['HOME'], 'moose')
         if not os.path.exists(MOOSE_LOCAL_DIR):
             try:
                 os.mkdir(MOOSE_LOCAL_DIR)
-                print 'Created local moose directory:', MOOSE_LOCAL_DIR    
+                print 'Created local moose directory:', MOOSE_LOCAL_DIR
             except OSError, e:
                 errors.append(e)
                 print e
@@ -226,5 +225,5 @@ LOGGER = logging.getLogger('moose')
 BENCHMARK_LOGGER = logging.getLogger('moose.benchmark')
 BENCHMARK_LOGGER.setLevel(logging.INFO)
 
-# 
+#
 # config.py ends here

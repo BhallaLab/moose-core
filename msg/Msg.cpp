@@ -316,3 +316,8 @@ const Msg* Msg::lastMsg()
 {
 	return lastMsg_;
 }
+
+bool Msg::isLastTrump()
+{
+	return lastTrump_;
+}

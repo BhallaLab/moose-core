@@ -16,7 +16,6 @@ add_library(basecode
 	FieldElementFinfo.cpp 
 	FieldElement.cpp 
 	Id.cpp 
-        PrepackedBuffer.cpp
 	ObjId.cpp 
 	global.cpp 
 	SetGet.cpp 
@@ -25,5 +24,6 @@ add_library(basecode
 	HopFunc.cpp 
 	SparseMatrix.cpp 
 	doubleEq.cpp 
+        #PrepackedBuffer.cpp
 	testAsync.cpp	
     )

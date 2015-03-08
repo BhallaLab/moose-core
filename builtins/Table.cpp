@@ -78,13 +78,50 @@ const Cinfo* Table::initCinfo()
 		&proc,			// SharedFinfo
 	};
 
+	static string doc[] = 
+	{
+			"Name", "Table",
+			"Author", "Upi Bhalla",
+			"Description", 
+			"Table for accumulating data values, or spike timings. "
+			"Can either receive incoming doubles, or can explicitly "
+			"request values from fields provided they are doubles. "
+			"The latter mode of use is preferable if you wish to have "
+			"independent control of how often you sample from the output "
+			"variable. \n"
+			"Typically used for storing simulation output into memory. \n"
+			"There are two functionally identical variants of the Table "
+			"class: Table and Table2. Their only difference is that the "
+			"default scheduling of the Table (Clock Tick 8, dt = 0.1 ms ) "
+			"makes it suitable for "
+			"tracking electrical compartmental models of neurons and "
+			"networks. \n"
+			"Table2 (Clock Tick 18, dt = 1.0 s) is good for tracking "
+			"biochemical signaling pathway outputs. \n"
+			"These are just the default values and Tables can be assigned"
+			" to any Clock Tick and timestep in the usual manner.",
+	};
 	static Dinfo< Table > dinfo;
 	static Cinfo tableCinfo (
 		"Table",
 		TableBase::initCinfo(),
 		tableFinfos,
 		sizeof( tableFinfos ) / sizeof ( Finfo* ),
-		&dinfo
+		&dinfo,
+		doc,
+		sizeof( doc ) / sizeof( string )
+	);
+	static string doc2[] = {doc[0], "Table2", doc[2], doc[3], 
+			doc[4], doc[5] };
+	doc2[1] = "Table2";
+	static Cinfo table2Cinfo (
+		"Table2",
+		TableBase::initCinfo(),
+		tableFinfos,
+		sizeof( tableFinfos ) / sizeof ( Finfo* ),
+		&dinfo,
+		doc2,
+		sizeof( doc2 ) / sizeof( string )
 	);
 
 	return &tableCinfo;

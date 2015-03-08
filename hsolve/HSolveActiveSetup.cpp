@@ -180,12 +180,14 @@ void HSolveActive::readHHChannels()
             Ypower    = Field< double >::get( *ichan, "Ypower" );
             Zpower    = Field< double >::get( *ichan, "Zpower" );
             instant    = Field< int >::get( *ichan, "instant" );
+            double modulation = Field< double >::get( *ichan, "modulation");
 
             current.Ek = Ek;
 
             channel.Gbar_ = Gbar;
             channel.setPowers( Xpower, Ypower, Zpower );
             channel.instant_ = instant;
+            channel.modulation_ = modulation;
 
             /*
              * Map channel index to state index. This is useful in the

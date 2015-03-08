@@ -16,6 +16,7 @@
 
 #ifndef _SBMLWRITER_H
 #define _SBMLWRITER_H
+#ifdef USE_SBML
 #include <sbml/SBMLTypes.h>
 
 class SbmlWriter
@@ -46,4 +47,5 @@ class SbmlWriter
 #endif
 };
 //extern const Cinfo* initCinfo();
+#endif //USE_SBML
 #endif // _SBMLWRITER_H

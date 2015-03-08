@@ -29,8 +29,8 @@ class BufPool: public Pool
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
 
-		void process( const Eref& e, ProcPtr p );
-		void reinit( const Eref& e, ProcPtr p );
+		void vProcess( const Eref& e, ProcPtr p );
+		void vReinit( const Eref& e, ProcPtr p );
 
 		static const Cinfo* initCinfo();
 	private:

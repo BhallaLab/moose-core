@@ -13,11 +13,13 @@
 
 // Defined in kinetics/WriteKkit.cpp
 extern void writeKkit( Id model, const string& fname );
+extern void writeCspace (Id model, const string& fname );
 
 /**
  * Saves specified model to specified file, using filetype identified by
  * filename extension. Currently known filetypes are:
  * .g: Kkit model
+ * .cspace: cspace model
  *
  * Still to come:
  * .p: GENESIS neuron morphology and channel spec file
@@ -40,9 +42,12 @@ void Shell::doSaveModel( Id model, const string& fileName, bool qFlag )
 	string fileType = fileName.substr( pos );
 
 	if ( fileType == ".g" ) { // kkit model requested.
-			cout << "Cannot write kkit model at this point\n";
-			// writeKkit( model, fileName );
-	} else {
+			// cout << "Cannot write kkit model at this point\n";
+			writeKkit( model, fileName );
+	} else if (fileType == ".cspace"){
+            // writeCspace( model, fileName );
+            cout << "Cannot write cspace model at this point\n";
+    } else {
 		cout << "Warning: Shell::doSaveModel: Do not know how to save "
 				"model of file type '" << fileType << "'.\n";
 	}

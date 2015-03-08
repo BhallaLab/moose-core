@@ -9,6 +9,14 @@
 #include "header.h"
 
 #include "VoxelPoolsBase.h"
+#include "../mesh/VoxelJunction.h"
+#include "XferInfo.h"
+#include "ZombiePoolInterface.h"
+#include "RateTerm.h"
+#include "FuncTerm.h"
+#include "SparseMatrix.h"
+#include "KinSparseMatrix.h"
+#include "Stoich.h"
 
 //////////////////////////////////////////////////////////////
 // Class definitions
@@ -16,6 +24,7 @@
 
 VoxelPoolsBase::VoxelPoolsBase()
 	: 
+		stoichPtr_( 0 ),
 		S_(1),
 		Sinit_(1),
 		volume_(1.0)
@@ -82,6 +91,22 @@ double VoxelPoolsBase::getVolume() const
 	return volume_;
 }
 
+void VoxelPoolsBase::setVolumeAndDependencies( double vol )
+{
+	double ratio = vol / volume_;
+	volume_ = vol;
+	for ( vector< double >::iterator 
+					i = Sinit_.begin(); i != Sinit_.end(); ++i )
+		*i *= ratio;
+
+	for ( vector< double >::iterator i = S_.begin(); i != S_.end(); ++i )
+		*i *= ratio;
+
+	// I would like to update the xReacScaleSubstreates and Products here,
+	// but I don't know the order of their reactions. So leave it to
+	// a subsequent call via Ksolve or Stoich.
+}
+
 //////////////////////////////////////////////////////////////
 // Zombie Pool Access functions
 //////////////////////////////////////////////////////////////
@@ -89,6 +114,8 @@ double VoxelPoolsBase::getVolume() const
 void VoxelPoolsBase::setN( unsigned int i, double v )
 {
 	S_[i] = v;
+	if ( S_[i] < 0.0 ) 
+		S_[i] = 0.0;
 }
 
 double VoxelPoolsBase::getN( unsigned int i ) const
@@ -99,6 +126,8 @@ double VoxelPoolsBase::getN( unsigned int i ) const
 void VoxelPoolsBase::setNinit( unsigned int i, double v )
 {
 	Sinit_[i] = v;
+	if ( Sinit_[i] < 0.0 ) 
+		Sinit_[i] = 0.0;
 }
 
 double VoxelPoolsBase::getNinit( unsigned int i ) const
@@ -165,11 +194,14 @@ void VoxelPoolsBase::xferOut(
 }
 
 void VoxelPoolsBase::addProxyVoxy( 
-				unsigned int comptIndex, unsigned int voxel )
+		unsigned int comptIndex, Id otherComptId, unsigned int voxel )
 {
-	if ( comptIndex >= proxyPoolVoxels_.size() )
+	if ( comptIndex >= proxyPoolVoxels_.size() ) {
 		proxyPoolVoxels_.resize( comptIndex + 1 );
+	}
+
 	proxyPoolVoxels_[comptIndex].push_back( voxel );
+	proxyComptMap_[otherComptId] = comptIndex;
 }
 
 void VoxelPoolsBase::addProxyTransferIndex( 
@@ -185,4 +217,136 @@ bool VoxelPoolsBase::hasXfer( unsigned int comptIndex ) const
 	if ( comptIndex >= proxyPoolVoxels_.size() )
 		return false;
 	return (proxyPoolVoxels_[ comptIndex ].size() > 0);
+}
+
+bool VoxelPoolsBase::isVoxelJunctionPresent( Id i1, Id i2 ) const
+{
+	if ( i1 == Id () )
+		return false;
+	if ( proxyComptMap_.find( i1 ) == proxyComptMap_.end() )
+		return false;
+	if ( i2 == Id() ) // This is intentionally blank, only one jn.
+		return true;
+	// If there is an i2 but it isn't on the map, then not connected.
+	if ( proxyComptMap_.find( i2 ) == proxyComptMap_.end() )
+		return false;
+	return true;
+}
+
+////////////////////////////////////////////////////////////////////
+// Cross reaction stuff.
+////////////////////////////////////////////////////////////////////
+
+void VoxelPoolsBase::resetXreacScale( unsigned int size )
+{
+	xReacScaleSubstrates_.assign( size, 1.0 );
+	xReacScaleProducts_.assign( size, 1.0 );
+}
+
+void VoxelPoolsBase::forwardReacVolumeFactor( unsigned int i, double volume )
+{
+	assert( i < xReacScaleSubstrates_.size() );
+	xReacScaleSubstrates_[i] *= volume / getVolume();
+}
+
+void VoxelPoolsBase::backwardReacVolumeFactor( unsigned int i, double volume )
+{
+	assert( i < xReacScaleProducts_.size() );
+	xReacScaleProducts_[i] *= volume / getVolume();
+}
+
+double VoxelPoolsBase::getXreacScaleSubstrates( unsigned int i ) const
+{
+	return xReacScaleSubstrates_[i];
+}
+
+double VoxelPoolsBase::getXreacScaleProducts( unsigned int i ) const
+{
+	return xReacScaleProducts_[i];
+}
+
+/**
+ * Zeroes out rate terms that are involved in cross-reactions that 
+ * are not present on current voxel.
+ */
+void VoxelPoolsBase::filterCrossRateTerms(
+		const vector< Id >& offSolverReacs,
+		const vector< pair< Id, Id > >&  offSolverReacCompts  )
+{
+	assert (offSolverReacs.size() == offSolverReacCompts.size() );
+	// unsigned int numCoreRates = stoichPtr_->getNumCoreRates();
+ 	for ( unsigned int i = 0; i < offSolverReacCompts.size(); ++i ) {
+		const pair< Id, Id >& p = offSolverReacCompts[i];
+		if ( !isVoxelJunctionPresent( p.first, p.second) ) {
+			Id reacId = offSolverReacs[i];
+			const Cinfo* reacCinfo = reacId.element()->cinfo();
+			unsigned int k = stoichPtr_->convertIdToReacIndex( offSolverReacs[i] );
+			// Start by replacing the immediate cross reaction term.
+			if ( rates_[k] )
+				delete rates_[k];
+			rates_[k] = new ExternReac;
+			if ( stoichPtr_->getOneWay() ) {
+				k++; // Delete the next entry too, it is the reverse reacn.
+				assert( k < rates_.size() );
+				if ( reacCinfo->isA( "ReacBase" ) ) {
+					if ( rates_[k] )
+						delete rates_[k];
+					rates_[k] = new ExternReac;
+				}
+				if ( reacCinfo->isA( "CplxEnzBase" ) ) { // Delete next two.
+					if ( rates_[k] )
+						delete rates_[k];
+					rates_[k] = new ExternReac;
+					k++;
+					assert( k < rates_.size() );
+					if ( rates_[k] )
+						delete rates_[k];
+					rates_[k] = new ExternReac;
+				}
+			} else {
+				if ( reacCinfo->isA( "CplxEnzBase" ) ) { // Delete next one.
+					k++;
+					assert( k < rates_.size() );
+					if ( rates_[k] )
+						delete rates_[k];
+					rates_[k] = new ExternReac;
+				}
+			}
+		}
+	}
+}
+
+////////////////////////////////////////////////////////////////////////
+void VoxelPoolsBase::print() const
+{
+	cout << "S_.size=" << S_.size() << ", volume = " << volume_ << endl;
+	cout << "proxyPoolsVoxels.size()=" << proxyPoolVoxels_.size() <<
+		", proxyTransferIndex.size()=" << proxyTransferIndex_.size() << 
+		endl;
+	assert( proxyPoolVoxels_.size() == proxyTransferIndex_.size() );
+	for ( unsigned int i = 0; i < proxyPoolVoxels_.size(); ++i ) {
+		cout << "ppv[" << i << "]=";
+		const vector< unsigned int >& ppv = proxyPoolVoxels_[i];
+		for ( unsigned int j = 0; j < ppv.size(); ++j ) {
+			cout << "	" << ppv[j];
+		}
+		cout << endl;
+	}
+	for ( unsigned int i = 0; i < proxyTransferIndex_.size(); ++i ) {
+		cout << "pti[" << i << "]=";
+		const vector< unsigned int >& pti = proxyTransferIndex_[i];
+		for ( unsigned int j = 0; j < pti.size(); ++j ) {
+			cout << "	" << pti[j];
+		}
+		cout << endl;
+	}
+	cout << 
+		"xReacScaleSubstrates.size()=" << xReacScaleSubstrates_.size() <<
+		", xReacScaleProducts.size()=" << xReacScaleProducts_.size() <<
+		endl;
+	assert( xReacScaleSubstrates_.size() == xReacScaleProducts_.size() );
+	for ( unsigned int i = 0; i < xReacScaleSubstrates_.size(); ++i ) {
+		cout << i << "	" << xReacScaleSubstrates_[i] << "	" <<
+				xReacScaleProducts_[i] << endl;
+	}
 }

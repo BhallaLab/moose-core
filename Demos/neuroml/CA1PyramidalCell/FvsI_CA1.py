@@ -41,7 +41,7 @@ moose.connect(CA1CellSoma,'VmOut',spikeGen,'Vm')
 ## save spikes in table
 table_path = moose.Neutral(CA1Cell.path+'/data').path
 CA1CellSpikesTable = moose.Table(table_path+'/spikesTable')
-moose.connect(spikeGen,'event',CA1CellSpikesTable,'input')
+moose.connect(spikeGen,'spikeOut',CA1CellSpikesTable,'input')
 
 #CA1CellVmTable = moose.Table(table_path+'/vmTable')
 #moose.connect(CA1CellSoma,'VmOut',CA1CellVmTable,'input')

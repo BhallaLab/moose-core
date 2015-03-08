@@ -7,7 +7,9 @@ import moose
 
 connectionProbability = 0.5
 net = moose.IntFire('/net1', 10)
-synapse = net.synapse.vec
+syn = moose.SimpleSynHandler( '/net1/sh', 10 )
+moose.connect( syn, 'activationOut', net, 'activation', 'OneToOne' )
+synapse = syn.synapse.vec
 mid = moose.connect(net, 'spikeOut', synapse, 'addSpike', 'Sparse') # This creates a `Sparse` message from `spikeOut` source of net to `addSpike` destination on synapse.
 msg = moose.element(mid)
 msg.setRandomConnectivity(connectionProbability, 5)

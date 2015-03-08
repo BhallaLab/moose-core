@@ -1,6 +1,8 @@
-cmake_minimum_required(VERSION 2.8)
-set(CMAKE_INSTALL_PREFIX /usr)
+cmake_minimum_required(VERSION 2.6)
+
 project(moose)
+
+SET(CMAKE_INSTALL_PREFIX /usr)
 
 # This snippet is from LLVM project.
 # Sanity check our source directory to make sure that we are not trying to
@@ -22,8 +24,8 @@ endif()
 
 ################################# CMKAE MACROS #################################
 
-set(CMAKE_VERBOSE_MAKEFILE FALSE)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
+set(CMAKE_VERBOSE_MAKEFILE TRUE)
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules")
 set(INSTALL_LIB_DIR lib CACHE PATH "${CMAKE_INSTALL_PREFIX}/lib")
 set(INSTALL_BIN_DIR bin CACHE PATH "${CMAKE_INSTALL_PREFIX}/bin")
 set(INSTALL_INCLUDE_DIR include CACHE PATH "${CMAKE_INSTALL_PREFIX}/include/")
@@ -31,13 +33,13 @@ set(INSTALL_INCLUDE_DIR include CACHE PATH "${CMAKE_INSTALL_PREFIX}/include/")
 ########################### COMPILER MACROS #####################################
 # Compiler 
 
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    set(CMAKE_CXX_COMPILER "clang++")
-elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    set(CMAKE_CXX_COMPILER "g++")
-else()
-    message(WARNING "Continuing with unsupported compiler: ${CMAKE_CXX_COMPILER}")
-endif()
+#if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    #set(CMAKE_CXX_COMPILER "clang++")
+#elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    #set(CMAKE_CXX_COMPILER "g++")
+#else()
+    #message(WARNING "Continuing with unsupported compiler: ${CMAKE_CXX_COMPILER}")
+#endif()
 
 ## Turn warning to error
 add_definitions(-Wall
@@ -49,11 +51,18 @@ add_definitions(-Wall
 add_definitions(-fPIC)
 
 ## Enable/Disable 2011 stupport.
-set(ENABLE_STD_2011 0)
-if(ENABLE_STD_2011)
-    add_definitions(-DENABLE_STD_2011 -DDEBUG2)
+include(CheckCXXCompilerFlag)
+
+CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+
+if(COMPILER_SUPPORTS_CXX11)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+elseif(COMPILER_SUPPORTS_CXX0X)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-endif(ENABLE_STD_2011)
+else()
+    message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+endif()
 
 # DO UNIT TESTS 
 set(ENABLE_UNIT_TESTS 0)
@@ -68,17 +77,18 @@ if(VERIFY)
 endif(VERIFY)
 
 # VERBOSITY OF OUTPUT
-set(VERBOSITY 0)
+option(VERBOSITY "SET MOOSE VERBOSITY LEVEL" 0)
 if(VERBOSITY)
-    message("++ Verbosity of output is ${VERBOSITY}")
+    message("++ Verbosity of output is ${VERBOSITY}. This is not implemented
+    yet!")
     add_definitions(-DVERBOSITY=${VERBOSITY})
 else()
-    #message("++ Moose will be quiet")
-    #add_definitions(-DQUIET_MODE)
+    message("++ Moose will be quiet")
+    add_definitions(-DQUIET_MODE)
 endif()
 
 # STATS INSIDE MOOSE
-set(ENABLE_LOGGER 0)
+option(ENABLE_LOGGER  "Enable MOOSE logger" OFF)
 if(ENABLE_LOGGER)
     message("++ LOGGER ENABLED")
     add_definitions(-DENABLE_LOGGER)
@@ -87,52 +97,44 @@ endif()
 # Default macros
 add_definitions(-DUSE_GENESIS_PARSER)
 
-set(DEBUG 0)
+option(DEBUG "Building with debugging support" 0)
 if(DEBUG)
     set(CMAKE_BUILD_TYPE Debug)
 else()
-    set(CMAKE_BUILD_TYPE distribution)
-    add_definitions(-UDO_UNIT_TESTS)
+    set(CMAKE_BUILD_TYPE Release)
+    add_definitions(-UDO_UNIT_TESTS -O2)
 endif()
 
-# Wheather to use local-gsl or not. link_directories are need to be called
-# before target is created therefore it is here.
-if(EXISTS ${CMAKE_SOURCE_DIR}/external/gsl-1.16/gsl-config.in)
-    MESSAGE("++ Local gsl is found.")
-    set(LOCAL_GSL 1)
-endif()
+find_package(GSL 1.16 REQUIRED)
 
-if(LOCAL_GSL)
-    set(GSL_SOURCE_DIR ${CMAKE_SOURCE_DIR}/external/gsl-1.16)
-    set(GSL_INSTALL_DIR ${CMAKE_SOURCE_DIR}/gsl)
-    include(ExternalProject)
-    ExternalProject_Add(GSL
-        PREFIX ${GSL_SOURCE_DIR}
-        SOURCE_DIR ${GSL_SOURCE_DIR}
-        CMAKE_ARGS ${CMARGS} -DCMAKE_INSTALL_PREFIX=${GSL_INSTALL_DIR}
-        )
-    include_directories(${GSL_INSTALL_DIR}/include)
-    LINK_DIRECTORIES(${GSL_INSTALL_DIR}/lib)
-    set(LOCAL_GSL_LIBRARIES gsl gslcblas)
+find_package(LIBSBML)
+if(NOT LIBSBML_FOUND)
+    MESSAGE("+ LIBSBML NOT FOUND.  Disabling SBML support.")
+    ADD_DEFINITIONS(-UUSE_SBML)
 else()
-    find_package(GSL 1.16 REQUIRED)
+    ADD_DEFINITIONS(-DUSE_SBML)
+    include_directories(${LIBSBML_INCLUDE_DIR})
+    find_package(BZip2 REQUIRED)
+    find_package(LibXML2 REQUIRED)
 endif()
+
+# python support: check for interpreter, sip, pyqt4
+FIND_PACKAGE(PythonDev REQUIRED)
+FIND_PACKAGE(SIP REQUIRED)
+FIND_PACKAGE(PyQt4 REQUIRED)
+FIND_PACKAGE(osgQt REQUIRED)
 
 ################################### SETUP BUILD ################################
 include_directories(msg basecode)
-add_executable(moose.bin basecode/main.cpp)
+add_executable(moose-bin basecode/main.cpp)
+add_library(moose SHARED basecode/main.cpp)
+set_target_properties(moose PROPERTIES COMPILE_FLAGS  "-DMOOSE_LIB")
 
 ## GSL
 # Setup GSL
-if(LOCAL_GSL)
-    set(GSL_FOUND 1)
+if(GSL_FOUND)
     add_definitions(-DUSE_GSL)
-    add_dependencies(moose.bin GSL)
-else()
-    if(GSL_FOUND)
-        include_directories(${GSL_INCLUDE_DIR})
-        add_definitions(-DUSE_GSL)
-    endif()
+    add_dependencies(moose GSL)
 endif()
 
 
@@ -142,17 +144,6 @@ if(HDF5_FOUND)
     add_definitions(-DUSE_HDF5)
     include_directories(${HDF5_INCLUDE_DIR})
 endif(HDF5_FOUND)
-
-find_package(LIBSBML)
-if(LIBSBML_FOUND)
-    # If LIBSBML_FOUND then we'll probably also need the LibXML2.
-    add_definitions(-DUSE_SBML)
-    find_package(LibXML2 REQUIRED)
-    add_subdirectory(sbml)
-    include_directories(${LIBSBML_INCLUDE_DIR})
-elseif()
-    add_definitions(-UUSE_SBML)
-endif(LIBSBML_FOUND)
 
 find_package(Termcap)
 find_package(Readline)
@@ -166,19 +157,26 @@ endif()
 find_package(MPI REQUIRED)
 set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
 
+############################ CYMOOSE related macros. ########################
+set(CYMOOSE 1)
+if(CYMOOSE)
+    add_definitions("-DCYMOOSE -DCYTHON")
+endif()
+
 # Add subdirectroeis
 add_subdirectory(basecode)
-add_subdirectory(biophysics)
 add_subdirectory(msg)
 add_subdirectory(shell)
 add_subdirectory(randnum)
 add_subdirectory(scheduling)
+add_subdirectory(biophysics)
 add_subdirectory(builtins)
 add_subdirectory(utility)
 add_subdirectory(external/muparser)
 add_subdirectory(external/debug)
 add_subdirectory(external/tinyxml)
 add_subdirectory(mesh)
+add_subdirectory(sbml)
 add_subdirectory(mpi)
 add_subdirectory(signeur)
 add_subdirectory(ksolve)
@@ -187,8 +185,16 @@ add_subdirectory(diffusion)
 add_subdirectory(device)
 add_subdirectory(benchmarks)
 add_subdirectory(kinetics)
+add_subdirectory(synapse)
+add_subdirectory(intfire)
+add_subdirectory(examples)
 
-set(LIBRARIES ${LibBZip2_LIBRARIES})
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/moogli/include)
+LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/moogli/lib)
+
+
+
+set(LIBRARIES ${BZIP2_LIBRARIES} ${LibXML2_LIBRARIES})
 if(HDF5_FOUND)
     list(APPEND LIBRARIES ${HDF5_LIBRARY})
 endif()
@@ -202,7 +208,6 @@ if(LIBXML2_FOUND)
 endif()
 
 if(GSL_FOUND)
-    # Link gsl 
     list(APPEND LIBRARIES ${GSL_LIBRARIES})
 endif()
 
@@ -211,30 +216,38 @@ if(READLINE_FOUND AND TERMCAP_FOUND)
 endif()
 
 ###################################### LINKING #################################
-target_link_libraries(moose.bin
-    "-Wl,--whole-archive"
+set(MOOSE_LIBRARIES
     moose_builtins
-    basecode
     msg
+    benchmarks
     shell
     randnum
     scheduling
     moose_mpi
     utility 
     muparser
-    biophysics 
     kinetics 
     hsolve 
     mesh
     signeur
     tinyxml
+    biophysics 
+    synapse
     diffusion 
+    basecode
     device
-    benchmarks
     ksolve
-    "-Wl,--no-whole-archive"
+    intfire
+    )
+
+target_link_libraries(moose
+    ${MOOSE_LIBRARIES}
     ${LOCAL_GSL_LIBRARIES}
     ${LIBRARIES}
+    )
+
+target_link_libraries(moose-bin 
+    moose
     )
 
 ######################### BUILD PYMOOSE ########################################
@@ -266,91 +279,154 @@ if(BUILD_PYMOOSE)
         PREFIX ""
         )
     list(APPEND LIBRARIES ${PYTHON_LIBRARIES})
-
-    target_link_libraries(_moose 
+    target_link_libraries(
+        _moose 
+        moosepython  
         "-Wl,--whole-archive"
-        moosepython
-        basecode
-        msg
-        shell
-        randnum
-        scheduling
-        moose_mpi
-        moose_builtins
-        utility 
-        muparser
-        biophysics 
-        kinetics 
-        ksolve
-        tinyxml
-        hsolve 
-        mesh
-        signeur
-        diffusion 
-        device
-        benchmarks
+        ${MOOSE_LIBRARIES}
         "-Wl,--no-whole-archive"
-        ${LOCAL_GSL_LIBRARIES}
         ${LIBRARIES}
         )
+
 endif(BUILD_PYMOOSE)
 
-######################### INSTALL ##############################################
-install(TARGETS moose.bin 
-    RUNTIME DESTINATION bin
-    COMPONENT applications
-    )
-install(PROGRAMS scripts/moose DESTINATION bin
-    COMPONENT applications
-    )
-install(DIRECTORY gsl/lib/ DESTINATION lib
-    COMPONENT libraries
-    USE_SOURCE_PERMISSIONS
-    FILES_MATCHING PATTERN "*.so*"
-    PATTERN ".svn" EXCLUDE
-    )
-install(SCRIPT python/InstallPyMoose.cmake
-    COMPONENT pymoose
-    )
-install(PROGRAMS scripts/moosegui 
-    DESTINATION bin
-    )
-########################## PACKAGING #########################################
+######################### CYMOOSE #############################################
+if(CYMOOSE)
+    add_library(cymoose SHARED cymoose/cymoose_methods.cxx)
+    set_target_properties(moose PROPERTIES COMPILE_DEFINITIONS "CYMOOSE")
+    if(DEBUG)
+        add_definitions("-g -Wall")
+    endif()
 
-set(CPACK_GENERATOR "DEB")
-set(CPACK_STRIP_FILES TRUE)
+    set_target_properties(cymoose PROPERTIES 
+            LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/cymoose"
+            )
 
-#  We need to compile python scripts on the installation  host.
-set(CPACK_COMPONENTS_ALL applications libraries)
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dilawar Singh")
-set(CPACK_PACKAGE_CONTACT "dilawars@ncbs.res.in")
-#set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Moose")
-set(CPACK_INSTALL_SCRIPT "${CMAKE_SOURCE_DIR}/python/InstallPyMoose.cmake")
-set(CPACK_PACKAGE_VERSION_MAJOR "1")
-set(CPACK_PACKAGE_VERSION_MINOR "1")
-set(CPACK_PACKAGE_VENDOR "NCBS Bangalore")
-set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README")
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dilawar Singh <dilawars@ncbs.res.in>")
-if(WIN32)
-    MESSAGE("++ Currently only Unix is supported")
-else()
-    set(CPACK_STRIP_FILES moose.bin)
+    target_link_libraries(cymoose 
+        "-Wl,--whole-archive"
+        ${MOOSE_LIBRARIES}
+        "-Wl,--no-whole-archive"
+        ${LIBRARIES}
+        )
 endif()
-set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
-set(CPACK_PACKAGE_FILE_NAME
-    "moose_${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.orig"
-    )
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "libgsl (>= 1.16) libopenmpi libhdf5-7 python-numpy")
-include(CPack)
 
-######################  TESTING  ###############################################
-include(CTest)
-find_package(PythonInterp REQUIRED)
-set(ENV{PYTHONPATH} "${CMAKE_SOURCE_DIR}/python")
-message("++ PYTHONPATH is set to $ENV{PYTHONPATH}")
+######################################## MOOGLI ################################
+# Moogli as external project
+OPTION(BUILD_MOOGLI "Build moogli extension." ON)
+IF(BUILD_MOOGLI)
+    MESSAGE("++ Building MOOGLI")
+    #SET(MOOGL_SRC_PATH ${PROJECT_SOURCE_DIR}/python/moogli)
+    SET(MOOGLI_BUILD_PATH ${CMAKE_BINARY_DIR}/_moogli)
+    #FILE(MAKE_DIRECTORY ${MOOGLI_BUILD_PATH})
+    #ADD_CUSTOM_TARGET(moogli ALL
+        #COMMAND ${CMAKE_COMMAND} ${MOOGL_SRC_PATH}
+        #COMMAND make
+        #WORKING_DIRECTORY ${MOOGLI_BUILD_PATH}
+        #COMMENT "Building and installing MOOGLI"
+        #VERBATIM
+    #) 
+    add_subdirectory(${PROJECT_SOURCE_DIR}/python/moogli)
+    INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/python/moogli/include)
+    LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/python/moogli)
+else()
+    MESSAGE("++ NOT building MOOGLI")
+endif()
 
-add_test(NAME check_moose
-    WORKING_DIRECTORY .
-    COMMAND ./run_moose.sh
+######################### INSTALL ##############################################
+install(TARGETS moose
+    LIBRARY DESTINATION lib
+    COMPONENT moose-core
     )
+
+install(TARGETS moose-bin
+    DESTINATION bin
+    COMPONENT moose-core
+    )
+
+install(PROGRAMS ${PROJECT_SOURCE_DIR}/scripts/moose
+    DESTINATION bin
+    COMPONENT moose-core
+    )
+
+install(FILES ${PROJECT_SOURCE_DIR}/scripts/moose
+    DESTINATION bin
+    COMPONENT moose-core
+    )
+
+install(PROGRAMS ${PROJECT_SOURCE_DIR}/scripts/moosegui
+    DESTINATION bin
+    COMPONENT moose-gui
+    )
+
+## Install the icon
+install(FILES ${PROJECT_SOURCE_DIR}/gui/icons/moose_icon.png 
+    DESTINATION share/moose
+    COMPONENT moose-python
+    )
+
+# And the desktop file.
+install(FILES ${PROJECT_SOURCE_DIR}/scripts/moose.desktop
+    DESTINATION share/applications
+    COMPONENT moose-python
+    )
+
+# And the gui
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/gui
+    DESTINATION lib/moose
+    COMPONENT moose-gui
+    )
+
+# and the python dependencies
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/python/moose
+    DESTINATION lib/moose/python
+    COMPONENT moose-python
+    )
+
+# and the python dependencies
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/python/libmumbl
+    DESTINATION lib/moose/python
+    COMPONENT moose-python
+    )
+
+INSTALL(FILES ${PROJECT_SOURCE_DIR}/python/setup.py
+    DESTINATION lib/moose
+    COMPONENT moose-python
+    )
+
+## The demos goes here.
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/Demos
+    DESTINATION share/moose
+    COMPONENT moose-python
+    )
+
+
+if(BUILD_MOOGLI)
+
+    SET(MOOGLI_TEMP_DIR ${MOOGLI_BUILD_PATH})
+
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/python/moogli/_moogli/moogli.so
+        DESTINATION ${MOOGLI_TEMP_DIR}/moogli
+        COMPONENT moose
+        )
+
+    install(FILES ${PROJECT_SOURCE_DIR}/python/moogli/__init__.py
+        DESTINATION ${MOOGLI_TEMP_DIR}/moogli
+        COMPONENT moose
+        )
+
+    install(FILES ${PROJECT_SOURCE_DIR}/python/setup-moogli.py
+        DESTINATION ${MOOGLI_TEMP_DIR}
+        COMPONENT moose
+        )
+
+    install(CODE
+        "execute_process(COMMAND ${PYTHON_EXECUTABLE} setup-moogli.py install 
+        WORKING_DIRECTORY ${MOOGLI_TEMP_DIR})"
+        COMPONENT moose
+        )
+    
+    install(CODE "MESSAGE(\"++ Installed moogli using setuptools. You can
+        uninstall it using python-pip\")"
+        )
+
+endif(BUILD_MOOGLI)

@@ -314,9 +314,12 @@ def makeGraphics( cPlotDt, ePlotDt ):
 	print 'All done'
 
 def testNeuroMeshMultiscale():
-        useHsolve = 0
+        useHsolve = 1
         runtime = 0.5
-	elecDt = 10e-6
+        if useHsolve:
+	    elecDt = 50e-6
+        else:
+	    elecDt = 10e-6
 	chemDt = 0.005
 	ePlotDt = 0.5e-3
 	cPlotDt = 0.005

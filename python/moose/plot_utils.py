@@ -15,9 +15,10 @@ __maintainer__       = "Dilawar Singh"
 __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
-import pylab 
-import _moose
-import print_utils as debug
+import matplotlib.pyplot as plt
+import _moose as moose
+import print_utils as pu 
+import numpy as np
 
 def plotAscii(yvec, xvec = None, file=None):
     """Plot two list-like object in terminal using gnuplot.
@@ -97,7 +98,7 @@ def scaleAxis(xvec, yvec, scaleX, scaleY):
 
 def reformatTable(table, kwargs):
     """ Given a table return x and y vectors with proper scaling """
-    if type(table) == _moose.Table:
+    if type(table) == moose.Table:
         vecY = table.vector 
         vecX = range(len(vecY))
     elif type(table) == tuple:
@@ -115,19 +116,19 @@ def plotTable(table, standalone=True, file=None, **kwargs):
     Pass 'xscale' and/or 'yscale' argument to function to modify scales.
     
     """
-    if not type(table) == _moose.Table:
+    if not type(table) == moose.Table:
         msg = "Expected moose.Table, got {}".format( type(table) )
         raise TypeError(msg)
     if standalone:
-        pylab.figure()
+        plt.figure()
 
     vecX, vecY = reformatTable(table, kwargs)
-    pylab.plot(vecX, vecY)
+    plt.plot(vecX, vecY)
     if file and standalone:
-        debug.dump("PLOT", "Saving plot to {}".format(file))
-        pylab.savefig(file)
+        pu.dump("PLOT", "Saving plot to {}".format(file))
+        plt.savefig(file)
     elif standalone:
-        pylab.show()
+        plt.show()
 
 def plotTables(tables, file=None, **kwargs):
     """Plot a list of tables onto one figure only.
@@ -136,16 +137,16 @@ def plotTables(tables, file=None, **kwargs):
     for t in tables:
         plotTable(t, standalone = False, file = None, **kwargs)
     if file:
-        debug.dump("PLOT", "Saving plots to file {}".format(file))
+        pu.dump("PLOT", "Saving plots to file {}".format(file))
         try:
-            pylab.savefig(file)
+            plt.savefig(file)
         except Exception as e:
-            debug.dump("WARN"
+            pu.dump("WARN"
                     , "Failed to save figure, plotting onto a window"
                     )
-            pylab.show()
+            plt.show()
     else:
-        pylab.show()
+        plt.show()
 
 def saveTables(tables, file=None, **kwargs):
     """Save a list to tables to a data file. """
@@ -168,8 +169,108 @@ def saveTables(tables, file=None, **kwargs):
     if file is None:
         print(tableText)
     else:
-        debug.dump("PLOT", "Saving tables data to file {}".format(file))
+        pu.dump("PLOT", "Saving tables data to file {}".format(file))
         with open(file, "w") as f:
             f.write(tableText)
     
    
+
+def plotVector(vec, xvec = None, **options):
+    """plotVector: Plot a given vector. On x-axis, plot the time.
+
+    :param vec: Given vector.
+    :param **kwargs: Optional to pass to maplotlib.
+    """
+
+    assert type(vec) == np.ndarray, "Expected type %s" % type(vec)
+
+    if xvec is None:
+        clock = moose.Clock('/clock')
+        xx = np.linspace(0, clock.currentTime, len(vec))
+    else:
+        xx = xvec[:]
+
+    assert len(xx) == len(vec), "Expecting %s got %s" % (len(vec), len(xvec))
+
+    plt.plot(xx, vec, label=options.get('label', ''))
+
+    if xvec is None:
+        plt.xlabel = 'Time (sec)'
+    else:
+        plt.xlabel = options.get('xlabel', '')
+    
+    plt.ylabel = options.get('ylabel', '')
+    plt.title = options.get('title', '')
+
+    if(options.get('legend', True)):
+        plt.legend(loc='best', framealpha=0.4, prop={'size' : 6})
+
+
+def saveRecords(dataDict, xvec = None, **kwargs):
+    """saveRecords Given a dictionary of data with (key, vector) pair, it saves
+    them.
+
+    :param dataDict:
+    :param **kwargs:
+    """
+
+    assert type(dataDict) == dict, "Got %s" % type(dataDict)
+
+    outfile = kwargs.get('outfile', 'data.moose')
+
+    filters = [ x.lower() for x in kwargs.get('filter', [])]
+    pu.info("Writing data to %s" % outfile)
+    with open(outfile, 'w') as f:
+        for k in dataDict:
+            yvec = dataDict[k].vector
+            if xvec is None:
+                clock = moose.Clock('/clock')
+                xx = np.linspace(0, clock.currentTime, len(yvec))
+            else:
+                xx = xvec[:]
+            xline = ','.join([str(x) for x in xx])
+            yline = ','.join([str(y) for y in yvec])
+            f.write('"%s:x",%s\n' % (k, xline))
+            f.write('"%s:y",%s\n' % (k, yline))
+    pu.info(" .. Done writing data to moose-data file")
+
+def plotRecords(dataDict, xvec = None, **kwargs):
+    """plotRecords Plot given records in dictionary.
+
+    :param dataDict:
+    :param xvec: If None, use moose.Clock to generate xvec.
+    :param **kwargs:
+    """
+
+    legend = kwargs.get('legend', True)
+    outfile = kwargs.get('outfile', None)
+    subplot = kwargs.get('subplot', False)
+    filters = [ x.lower() for x in kwargs.get('filter', [])]
+
+    plt.figure(figsize=(10, 1.5*len(dataDict)))
+    for i, k in enumerate(dataDict):
+        pu.info("+ Plotting for %s" % k)
+        plotThis = False
+        if not filters: plotThis = True
+        for accept in filters:
+            if accept in k.lower(): 
+                plotThis = True
+                break
+                
+        if plotThis:
+            if not subplot: 
+                yvec = dataDict[k].vector
+                plotVector(yvec, xvec, **kwargs)
+            else:
+                plt.subplot(len(dataDict), 1, i)
+                yvec = dataDict[k].vector
+                plotVector(yvec, xvec, **kwargs)
+    try:
+        plt.tight_layout()
+    except: pass
+
+    if outfile:
+        pu.info("Writing plot to %s" % outfile)
+        plt.savefig("%s" % outfile)
+    else:
+        plt.show()

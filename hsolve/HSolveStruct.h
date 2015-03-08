@@ -69,6 +69,12 @@ public:
 	 * step.
 	 */
 	int instant_;
+
+	/**
+	 * Scale factor for conductance, used when there is biochemical and
+	 * other multiscale modulation of conductance.
+	 */
+	double modulation_;
 	
 	/**
 	 * Sets the powers and accordingly sets the takePower_ functions.

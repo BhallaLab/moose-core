@@ -203,11 +203,6 @@ void Pool::vSetConcInit( const Eref& e, double c )
 	nInit_ = NA * c * lookupVolumeFromMesh( e );
 }
 
-double Pool::vGetConcInit( const Eref& e ) const
-{
-	return ( nInit_ / NA ) / lookupVolumeFromMesh( e );
-}
-
 void Pool::vSetDiffConst( const Eref& e, double v )
 {
 	diffConst_ = v;
@@ -230,7 +225,7 @@ double Pool::vGetMotorConst( const Eref& e ) const
 
 void Pool::vSetVolume( const Eref& e,  double v )
 {
-	assert( 0 ); // Don't currently know how to do this.
+	cout << "Warning: Pool::vSetVolume: Operation not permitted. Ignored\n";
 }
 
 double Pool::vGetVolume( const Eref& e ) const

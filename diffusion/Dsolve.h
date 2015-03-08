@@ -40,13 +40,15 @@ class Dsolve: public ZombiePoolInterface
 		void setStoich( Id id );
 		Id getStoich() const;
 		void setCompartment( Id id );
-		Id getCompartment() const;
+		// Defined in base class. Id getCompartment() const;
 		void setDsolve( Id id ); /// Dummy, inherited but not used.
 
 		void setPath( const Eref& e, string path );
 		string getPath( const Eref& e ) const;
 
 		unsigned int getNumVoxels() const;
+		/// Inherited virtual.
+		void setNumAllVoxels( unsigned int numVoxels );
 
 		vector< double > getNvec( unsigned int pool ) const;
 		void setNvec( unsigned int pool, vector< double > vec );
@@ -100,18 +102,28 @@ class Dsolve: public ZombiePoolInterface
 
 		void setNumPools( unsigned int num );
 		unsigned int getNumPools() const;
+		unsigned int getNumLocalVoxels() const;
+		VoxelPoolsBase* pools( unsigned int i );
+		double volume( unsigned int i ) const;
 
 		void getBlock( vector< double >& values ) const;
 		void setBlock( const vector< double >& values );
 
 		// This one isn't used in Dsolve, but is defined as a dummy.
-		void setupCrossSolverReacs( const map< Id, 
-						vector< Id > >& xr, Id otherStoich );
+		void setupCrossSolverReacs( 
+					const map< Id, vector< Id > >& xr, Id otherStoich );
+		void setupCrossSolverReacVols( 
+			const vector< vector< Id > >& subCompts,
+			const vector< vector< Id > >& prdCompts );
+		void filterCrossRateTerms( const vector< pair< Id, Id > >& xrt );
 
+		// Do any updates following a volume or rate constant change.
+		void updateRateTerms( unsigned int index );
 		//////////////////////////////////////////////////////////////////
 		// Model traversal and building functions
 		//////////////////////////////////////////////////////////////////
 		unsigned int convertIdToPoolIndex( const Eref& e ) const;
+		unsigned int getPoolIndex( const Eref& e ) const;
 
 		/** 
 		 * Fills in poolMap_ using elist of objects found when the 
@@ -138,18 +150,6 @@ class Dsolve: public ZombiePoolInterface
 		//////////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();
 	private:
-		/**
-		 * Id of compartment object that specifies the diffusion space
-		 * of the Dsolve. Must be either a CylMesh or a NeuroMesh.
-		 */
-		Id compartment_;
-
-		/** 
-		 * Id of stoich object for reac system whose pools are being
-		 * diffused by this Dsolve. Optional, the path below can also be
-		 * used.
-		 */
-		Id stoich_;
 
 		/// Path of pools managed by Dsolve, may include other classes too.
 		string path_; 

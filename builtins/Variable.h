@@ -46,28 +46,43 @@
 // Code:
 #ifndef _VARIABLE_H
 #define _VARIABLE_H
-
-template< typename T> class Variable
+/**
+   This class is used as FieldElement in Function. It is used as named
+   variable of type double.
+ */
+class Variable
 {
 public:
-    Variable(){};
+    Variable():value(0.0)
+    {
+    };
+    Variable(const Variable& rhs): value(rhs.value)
+    {
+        ;
+    }
 
     virtual ~Variable(){};
 
-    void setValue( T value)
+    void setValue(double v)
     {
-        _value = value;
+        value = v;
+    }
+
+    void epSetValue(const Eref & e, double v)
+    {
+        value = v;
     }
     
-    T getValue() const
+    double getValue() const
     {
-        return _value;
+        return value;
     }
 
-    static const Cinfo * initCinfo(const char * name);
+    void addMsgCallback(const Eref& e, const string& finfoName, ObjId msg, unsigned int msgLookup);
 
-protected:
-    T _value;
+    static const Cinfo * initCinfo();
+
+    double value;
 };
 
 #endif

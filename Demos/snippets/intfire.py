@@ -52,8 +52,10 @@ def connect_two_intfires():
     transmitted to synapse of the other."""
     if1 = moose.IntFire('if1')
     if2 = moose.IntFire('if2')
-    if1.synapse.num = 1    
-    syn1 = moose.element(if1.synapse)
+    sf1 = moose.SimpleSynHandler( 'if1/sh' )
+    moose.connect( sf1, 'activationOut', if1, 'activation' )
+    sf1.synapse.num = 1    
+    syn1 = moose.element(sf1.synapse)
     # Connect the spike message of if2 to the first synapse on if1
     moose.connect(if2, 'spikeOut', syn1, 'addSpike')
 
@@ -62,23 +64,26 @@ def connect_spikegen():
     events in spikegen get transmitted to the synapse of the IntFire
     neuron."""
     if3 = moose.IntFire('if3')
-    if3.synapse.num = 1
+    sf3 = moose.SimpleSynHandler( 'if3/sh' )
+    moose.connect( sf3, 'activationOut', if3, 'activation' )
+    sf3.synapse.num = 1
     sg = moose.SpikeGen('sg')
-    syn = moose.element(if3.synapse)
+    syn = moose.element(sf3.synapse)
     moose.connect(sg, 'spikeOut', syn, 'addSpike')
 
 def setup_synapse():
     """Create an intfire object and create two synapses on it."""
     if4 = moose.IntFire('if4')
+    sf4 = moose.SimpleSynHandler( 'if4/sh' )
     sg1 = moose.SpikeGen('sg1')
     sg2 = moose.SpikeGen('sg2')
-    if4.synapse.num = 2 # set synapse count to 2
-    if4.synapse[0].weight = 0.5
-    if4.synapse[0].delay = 1e-3
-    if4.synapse[1].weight = 2.0
-    if4.synapse[1].delay = 2e-3
-    moose.connect(sg1, 'spikeOut', if4.synapse[0], 'addSpike')
-    moose.connect(sg2, 'spikeOut', if4.synapse[1], 'addSpike')
+    sf4.synapse.num = 2 # set synapse count to 2
+    sf4.synapse[0].weight = 0.5
+    sf4.synapse[0].delay = 1e-3
+    sf4.synapse[1].weight = 2.0
+    sf4.synapse[1].delay = 2e-3
+    moose.connect(sg1, 'spikeOut', sf4.synapse[0], 'addSpike')
+    moose.connect(sg2, 'spikeOut', sf4.synapse[1], 'addSpike')
 
 if __name__ == '__main__':
     connect_two_intfires()

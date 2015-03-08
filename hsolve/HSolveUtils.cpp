@@ -97,7 +97,9 @@ int HSolveUtils::gates(
             double power  = Field< double >::get ( channel, powerField[i] );
 
             if ( power > 0.0 ) {
-                string gatePath = moose::joinPath(channel.path(), gateName[i]);
+                // string gatePath = moose::joinPath(channel.path(), gateName[i]);
+                string gatePath = moose::fixPath( channel.path() ) + 
+						"/" +  gateName[i];
                 Id gate( gatePath );
 
                 string gPath = moose::fixPath(gate.path());
@@ -206,7 +208,7 @@ void HSolveUtils::rates(
 	vector< double >& A,
 	vector< double >& B )
 {
-    dump("HSolveUtils::rates() has not been tested yet.", "WARN");
+    // dump("HSolveUtils::rates() has not been tested yet.", "WARN");
     double min = Field< double >::get( gateId, "min" );
     double max = Field< double >::get( gateId, "max" );
     unsigned int divs = Field< unsigned int >::get( gateId, "divs" );

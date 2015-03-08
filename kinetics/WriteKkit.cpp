@@ -20,11 +20,6 @@
 #include "../builtins/Table.h"
 #include "../builtins/StimulusTable.h"
 #include "Pool.h"
-#include "FuncPool.h"
-#include "FuncTerm.h"
-#include "SumTotalTerm.h"
-#include "FuncBase.h"
-#include "SumFunc.h"
 
 void writeHeader( ofstream& fout, 
 		double simdt, double plotdt, double maxtime, double defaultVol)
@@ -475,27 +470,20 @@ void writeMsgs( ofstream& fout, const vector< string >& msgs )
 			fout << *i << endl;
 }
 
-void storeFuncPoolMsgs( Id pool, vector< string >& msgs )
+void storeFunctionMsgs( Id func, vector< string >& msgs )
 {
-	// Find the child SumFunc by following the input msg.
-	static const Finfo* poolInputFinfo = 
-			FuncPool::initCinfo()->findFinfo( "input" );
-
-	static const Finfo* funcInputFinfo = 
-			SumFunc::initCinfo()->findFinfo( "input" );
-
-	assert( poolInputFinfo );
+	// Get the msg sources into this Function object.
+	static const Finfo* funcInputFinfo = Cinfo::find( "Variable" )->findFinfo( "input" );
 	assert( funcInputFinfo );
-	vector< Id > funcs;
-	pool.element()->getNeighbors( funcs, poolInputFinfo );
-	assert( funcs.size() == 1 );
-	
-	// Get the msg sources into this SumFunc.
 	vector< Id > src;
-	funcs[0].element()->getNeighbors( src, funcInputFinfo );
+	// unsigned int numVars = Field< unsigned int >::get( func, "numVars" );
+	Id xi( func.value() + 1 );
+	xi.element()->getNeighbors( src, funcInputFinfo );
 	assert( src.size() > 0 );
 
-	string poolPath = trimPath( pool.path() );
+	ObjId sumPool = Neutral::parent( func.eref() );
+
+	string poolPath = trimPath( sumPool.path() );
 
 	// Write them out as msgs.
 	for ( vector< Id >::iterator i = src.begin(); i != src.end(); ++i ) {
@@ -628,12 +616,6 @@ void writeKkit( Id model, const string& fname )
 				if ( !pa.element()->cinfo()->isA( "CplxEnzBase" ) ) {
 					writePool( fout, *i, bg, fg, x, y );
 				}
-				// Unpleasant to have to check both the class and zombie.
-				// The single class inheritance makes things messy.
-				if ( i->element()->cinfo()->isA( "FuncPool" ) ||
-					 i->element()->cinfo()->isA( "ZombieFuncPool" ) ) {
-					storeFuncPoolMsgs( *i, msgs );
-				}
 			} else if ( i->element()->cinfo()->isA( "ReacBase" ) ) {
 				writeReac( fout, *i, bg, fg, x, y );
 				storeReacMsgs( *i, msgs );
@@ -648,6 +630,8 @@ void writeKkit( Id model, const string& fname )
 			} else if ( i->element()->cinfo()->isA( "Table" ) ) {
 				writePlot( fout, *i, bg, fg, x, y );
 				storePlotMsgs( *i, msgs );
+			} else if ( i->element()->cinfo()->isA( "Function") ) {
+				storeFunctionMsgs( *i, msgs );
 			}
 		}
 		writeMsgs( fout, msgs );

@@ -390,6 +390,25 @@ void NeuroNode::filterSpines( vector< NeuroNode >& nodes,
 	vector< unsigned int > head;
 	for ( unsigned int i = 0; i < nodes.size(); ++i ) {
 		const NeuroNode& n = nodes[i];
+		string name = n.elecCompt_.element()->getName();
+		for ( string::iterator j = name.begin(); j != name.end(); ++j )
+			*j = tolower(*j);
+
+		if ( name.find( "shaft" ) != string::npos ||
+			name.find( "neck" ) != string::npos ) {
+			reverseShaft[i] = shaft.size();
+			shaft.push_back( i );
+			// Remove from nodes vector by simply not copying.
+		} else if ( name.find( "spine" ) != string::npos ||
+			name.find( "head" ) != string::npos ) {
+			head.push_back( i );
+			// Remove from nodes vector by simply not copying.
+		} else {
+			nodeToTempMap[i] = temp.size();
+			temp.push_back( n );
+		}
+
+		/*
 		const char* name = n.elecCompt_.element()->getName().c_str();
 		if ( strncasecmp( name, "shaft", 5 ) == 0 ||
 			strncasecmp( name, "neck", 4 ) == 0 ||
@@ -407,6 +426,7 @@ void NeuroNode::filterSpines( vector< NeuroNode >& nodes,
 			nodeToTempMap[i] = temp.size();
 			temp.push_back( n );
 		}
+		*/
 	}
 	// Now go through finding spine shafts.
 	for ( unsigned int i = 0; i < head.size(); ++i ) {

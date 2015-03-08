@@ -11,10 +11,12 @@
 #include "FuncTerm.h"
 #include "SparseMatrix.h"
 #include "KinSparseMatrix.h"
+#include "VoxelPoolsBase.h"
+#include "../mesh/VoxelJunction.h"
+#include "XferInfo.h"
 #include "ZombiePoolInterface.h"
 #include "Stoich.h"
 #include "GssaSystem.h"
-#include "VoxelPoolsBase.h"
 #include "GssaVoxelPools.h"
 #include "../randnum/randnum.h"
 
@@ -43,12 +45,14 @@ GssaVoxelPools::GssaVoxelPools()
 	: 
 			VoxelPoolsBase(),
 			t_( 0.0 ),
-			atot_( 0.0 ),
-			volIndex_( 0 )
+			atot_( 0.0 )
 {;}
 
 GssaVoxelPools::~GssaVoxelPools()
-{;}
+{
+	for ( unsigned int i = 0; i < rates_.size(); ++i )
+		delete( rates_[i] );
+}
 
 //////////////////////////////////////////////////////////////
 // Solver ops
@@ -58,11 +62,11 @@ void GssaVoxelPools::updateDependentMathExpn(
 				const GssaSystem* g, unsigned int rindex )
 {
 	const vector< unsigned int >& deps = g->dependentMathExpn[ rindex ];
-	unsigned int offset = g->stoich->getNumVarPools() + 
-			g->stoich->getNumBufPools();
 	for( vector< unsigned int >::const_iterator 
 			i = deps.begin(); i != deps.end(); ++i ) {
-		varS()[ *i + offset] = g->stoich->funcs( *i )->operator()( S(), t_);
+			// Future fix: Need to get current time in here.
+			g->stoich->funcs( *i )->evalPool( varS(), 0.0 );
+		// varS()[ *i + offset] = g->stoich->funcs( *i )->operator()( S(), t_);
 	}
 }
 
@@ -73,8 +77,7 @@ void GssaVoxelPools::updateDependentRates(
 			i = deps.begin(); i != deps.end(); ++i ) {
 		atot_ -= v_[ *i ];
 		// atot_ += ( v[ *i ] = ( *rates_[ *i ] )( S() );
-		atot_ += ( v_[ *i ] = 
-						stoich->getReacVelocity( *i, S(), volIndex_ ) );
+		atot_ += ( v_[ *i ] = getReacVelocity( *i, S() ) );
 	}
 }
 
@@ -104,6 +107,26 @@ void GssaVoxelPools::setNumReac( unsigned int n )
 	v_.resize( n, 0.0 );
 }
 
+/**
+ * Cleans out all reac rates and recalculates atot. Needed whenever a
+ * mol conc changes, or if there is a roundoff error.
+ * Returns true if OK, returns false if it is in a stuck state and atot<=0
+ */
+bool GssaVoxelPools::refreshAtot( const GssaSystem* g )
+{
+	updateReacVelocities( g, S(), v_ );
+	atot_ = 0;
+	for ( vector< double >::const_iterator 
+			i = v_.begin(); i != v_.end(); ++i )
+		atot_ += *i;
+	atot_ *= SAFETY_FACTOR;
+	// Check if the system is in a stuck state. If so, terminate.
+	if ( atot_ <= 0.0 ) {
+		return false;
+	}
+	return true;
+}
+
 void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
 {
 	double nextt = p->currTime;
@@ -113,28 +136,34 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
 			return;
 		}
 		unsigned int rindex = pickReac();
+		assert( g->stoich->getNumRates() == v_.size() );
 		if ( rindex >= g->stoich->getNumRates() ) {
 			// probably cumulative roundoff error here. 
 			// Recalculate atot to avoid, and redo.
-			g->stoich->updateReacVelocities( S(), v_, volIndex_ );
-			atot_ = 0;
-			for ( vector< double >::const_iterator 
-					i = v_.begin(); i != v_.end(); ++i )
-				atot_ += *i;
-			atot_ *= SAFETY_FACTOR;
+			if ( !refreshAtot( g ) ) { // Stuck state.
+				t_ = nextt;
+				return;
+			}
+			// We had a roundoff error, fixed it, but now need to be sure
+			// we only fire a reaction where this is permissible.
+			for ( unsigned int i = v_.size(); i > 0; --i ) {
+				if ( v_[i-1] > 0.0 ) {
+					rindex = i - 1;
+					break;
+				}
+			}
+			assert( rindex < v_.size() );
 		}
 
 		g->transposeN.fireReac( rindex, Svec() );
-		updateDependentMathExpn( g, rindex );
-		// atot_ = g->updateDependentRates( atot_, rinidex );
-		updateDependentRates( g->dependency[ rindex ], g->stoich );
-		// double r = gsl_rng_uniform( rng );
 		double r = mtrand();
 		while ( r <= 0.0 ) {
-			// r = gsl_rng_uniform( rng )
 			r = mtrand();
 		}
 		t_ -= ( 1.0 / atot_ ) * log( r );
+		g->stoich->updateFuncs( varS(), t_ );
+		updateDependentMathExpn( g, rindex );
+		updateDependentRates( g->dependency[ rindex ], g->stoich );
 	}
 }
 
@@ -142,7 +171,6 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
 {
 	VoxelPoolsBase::reinit(); // Assigns S = Sinit;
 	g->stoich->updateFuncs( varS(), 0 );
-	volIndex_ = g->stoich->indexOfMatchingVolume( getVolume() );
 
 	unsigned int numVarPools = g->stoich->getNumVarPools();
 	double* n = varS();
@@ -164,13 +192,144 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
 		}
 	}
 	t_ = 0.0;
-	// vector< double > yprime( g->stoich->getNumAllPools(), 0.0 );
-				// i = yprime.begin(); i != yprime.end(); ++i )
-	g->stoich->updateReacVelocities( S(), v_, volIndex_ );
-	atot_ = 0;
-	for ( vector< double >::const_iterator 
-		i = v_.begin(); i != v_.end(); ++i ) {
-		atot_ += *i;
+	refreshAtot( g );
+}
+
+/////////////////////////////////////////////////////////////////////////
+// Rate computation functions
+/////////////////////////////////////////////////////////////////////////
+
+void GssaVoxelPools::updateAllRateTerms( const vector< RateTerm* >& rates,
+			   unsigned int numCoreRates )
+{
+	for ( unsigned int i = 0; i < rates_.size(); ++i )
+		delete( rates_[i] );
+	rates_.resize( rates.size() );
+
+	for ( unsigned int i = 0; i < numCoreRates; ++i )
+		rates_[i] = rates[i]->copyWithVolScaling( getVolume(), 1, 1 );
+	for ( unsigned int i = numCoreRates; i < rates.size(); ++i )
+		rates_[i] = rates[i]->copyWithVolScaling( getVolume(), 
+						getXreacScaleSubstrates(i - numCoreRates),
+						getXreacScaleProducts(i - numCoreRates ) );
+}
+
+void GssaVoxelPools::updateRateTerms( const vector< RateTerm* >& rates,
+			   unsigned int numCoreRates, unsigned int index 	)
+{
+	// During setup or expansion of the reac system, this might be called
+	// before the local rates_ term is assigned. If so, ignore.
+ 	if ( index >= rates_.size() )
+		return;
+	delete( rates_[index] );
+	if ( index >= numCoreRates )
+		rates_[index] = rates[index]->copyWithVolScaling(
+				getVolume(), 
+				getXreacScaleSubstrates(index - numCoreRates),
+				getXreacScaleProducts(index - numCoreRates ) );
+	else
+		rates_[index] = rates[index]->copyWithVolScaling(  
+				getVolume(), 1.0, 1.0 );
+}
+/**
+ * updateReacVelocities computes the velocity *v* of each reaction.
+ * This is a utility function for programs like SteadyState that need
+ * to analyze velocity.
+ */
+void GssaVoxelPools::updateReacVelocities( const GssaSystem* g, 
+			const double* s, vector< double >& v ) const
+{
+	const KinSparseMatrix& N = g->stoich->getStoichiometryMatrix();
+	assert( N.nColumns() == rates_.size() );
+
+	vector< RateTerm* >::const_iterator i;
+	v.clear();
+	v.resize( rates_.size(), 0.0 );
+	vector< double >::iterator j = v.begin();
+
+	for ( i = rates_.begin(); i != rates_.end(); i++) {
+		*j++ = (**i)( s );
+		assert( !std::isnan( *( j-1 ) ) );
 	}
-	atot_ *= SAFETY_FACTOR;
+}
+
+double GssaVoxelPools::getReacVelocity( 
+				unsigned int r, const double* s ) const
+{
+	return rates_[r]->operator()( s );
+}
+
+void GssaVoxelPools::setStoich( const Stoich* stoichPtr )
+{
+	stoichPtr_ = stoichPtr;
+}
+
+// Handle volume updates. Inherited virtual func.
+void GssaVoxelPools::setVolumeAndDependencies( double vol )
+{
+	VoxelPoolsBase::setVolumeAndDependencies( vol );
+	stoichPtr_->setupCrossSolverReacVols();
+	updateAllRateTerms( stoichPtr_->getRateTerms(),
+		stoichPtr_->getNumCoreRates() );
+}
+
+//////////////////////////////////////////////////////////////
+// Handle cross compartment reactions
+//////////////////////////////////////////////////////////////
+void GssaVoxelPools::xferIn( XferInfo& xf,
+	    unsigned int voxelIndex, const GssaSystem* g )
+{
+	unsigned int offset = voxelIndex * xf.xferPoolIdx.size();
+	vector< double >::const_iterator i = xf.values.begin() + offset;
+	vector< double >::const_iterator j = xf.lastValues.begin() + offset;
+	vector< double >::iterator m = xf.subzero.begin() + offset;
+	double* s = varS();
+	bool hasChanged = false;
+	for ( vector< unsigned int >::const_iterator 
+			k = xf.xferPoolIdx.begin(); k != xf.xferPoolIdx.end(); ++k ) {
+		double& x = s[*k];
+		x += round( *i++ - *j );
+		if ( x < *m )  {
+			*m -= x;
+			x = 0;
+		} else {
+			x -= *m;
+			*m = 0;
+		}
+		/*
+		double y = fabs( x - *j );
+		// hasChanged |= ( fabs( x - *j ) < 0.1 ); // they are all integers.
+		hasChanged |= ( y > 0.1 ); // they are all integers.
+		*/
+		j++;
+		m++;
+	}
+	// If S has changed, then I should update rates of all affected reacs.
+	// Go through stoich matrix to find affected reacs for each mol
+	// Store in list, since some may be hit more than once in this func.
+	// When done, go through and update all affected ones.
+	/*
+	if ( hasChanged ) {
+		refreshAtot( g );
+	}
+	*/
+	// Does this fix the problem of negative concs?
+	refreshAtot( g );
+}
+
+void GssaVoxelPools::xferInOnlyProxies(
+		const vector< unsigned int >& poolIndex,
+		const vector< double >& values, 
+		unsigned int numProxyPools,
+	    unsigned int voxelIndex	)
+{
+	unsigned int offset = voxelIndex * poolIndex.size();
+	vector< double >::const_iterator i = values.begin() + offset;
+	for ( vector< unsigned int >::const_iterator 
+			k = poolIndex.begin(); k != poolIndex.end(); ++k ) {
+		if ( *k >= size() - numProxyPools ) {
+			varSinit()[*k] = (varS()[*k] += round( *i ));
+		}
+		i++;
+	}
 }

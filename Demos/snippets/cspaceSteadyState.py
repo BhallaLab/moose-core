@@ -71,10 +71,6 @@ def getState( ksolve, state ):
 
 
 def main():
-		# Schedule the whole lot
-		moose.setClock( 4, 0.1 ) # for the computational objects
-		moose.setClock( 5, 0.1 ) # clock for the solver
-		moose.setClock( 8, 1.0 ) # for the plots
 		# The wildcard uses # for single level, and ## for recursive.
 		#compartment = makeModel()
                 moose.loadModel( '../Genesis_files/M1719.cspace', '/model', 'ee' )
@@ -84,11 +80,9 @@ def main():
 		stoich = moose.Stoich( '/model/compartment/stoich' )
 		stoich.compartment = compartment
 		stoich.ksolve = ksolve
-		ksolve.stoich = stoich
+		#ksolve.stoich = stoich
 		stoich.path = "/model/compartment/##"
 		state = moose.SteadyState( '/model/compartment/state' )
-		moose.useClock( 5, '/model/compartment/ksolve', 'process' )
-		moose.useClock( 8, '/model/graphs/#', 'process' )
 
 		moose.reinit()
 		state.stoich = stoich

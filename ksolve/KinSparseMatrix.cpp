@@ -29,7 +29,7 @@ double KinSparseMatrix::computeRowRate(
 	unsigned int row, const vector< double >& v
 ) const
 {
-	assert( row < nRows() );
+	assert( nColumns() == 0 || row < nRows() );
 	assert( v.size() == nColumns() );
 	const int* entry = 0;
 	const unsigned int* colIndex = 0;
@@ -58,7 +58,7 @@ double KinSparseMatrix::computeRowRate(
 
 	// assert ( !( ret !<>= 0.0 ) );
 	*/
-	assert ( !( isnan( ret ) ) );
+	assert ( !( std::isnan( ret ) ) );
 	return ret;
 }
 
@@ -117,8 +117,10 @@ void KinSparseMatrix::fireReac( unsigned int reacIndex, vector< double >& S )
 	vector< unsigned int >::const_iterator molIndex = 
 		colIndex_.begin() + rowBeginIndex;
 
-	for ( vector< int >::const_iterator i = rowBegin; i != rowEnd; ++i )
+	for ( vector< int >::const_iterator i = rowBegin; i != rowEnd; ++i ) {
+		assert( S[ *molIndex ] + *i >= 0.0 );
 		S[ *molIndex++ ] += *i;
+	}
 }
 
 /**

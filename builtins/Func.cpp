@@ -76,9 +76,9 @@ const Cinfo * Func::initCinfo()
                                                          &Func::getDerivative);
     static ValueFinfo< Func, unsigned int > mode("mode",
                                                  "Mode of operation: \n"
-                                                 " 1: only the function value will be funculated\n"
-                                                 " 2: only the derivative will be funculated\n"
-                                                 " 3: both function value and derivative at current variable values will be funculated.",
+                                                 " 1: only the function value will be calculated\n"
+                                                 " 2: only the derivative will be calculated\n"
+                                                 " 3: both function value and derivative at current variable values will be calculated.",
                                                  &Func::setMode,
                                                  &Func::getMode);
     static ValueFinfo< Func, string > expr("expr",
@@ -344,7 +344,7 @@ void Func::_showError(mu::Parser::exception_type &e) const
 /**
    Call-back to add variables to parser automatically. 
  */
-double * _addVar(const char *name, void *data)
+static double * _addVar(const char *name, void *data)
 {
     Func* func = reinterpret_cast< Func * >(data);
     double *ret = new double;

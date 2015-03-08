@@ -23,6 +23,9 @@
 #include "KinSparseMatrix.h"
 #include "RateTerm.h"
 #include "FuncTerm.h"
+#include "VoxelPoolsBase.h"
+#include "../mesh/VoxelJunction.h"
+#include "XferInfo.h"
 #include "ZombiePoolInterface.h"
 #include "Stoich.h"
 #include "../randnum/randnum.h"
@@ -37,8 +40,12 @@
 #include <gsl/gsl_sort.h>
 #include <gsl/gsl_sort_vector.h>
 #include <gsl/gsl_eigen.h>
+#include <gsl/gsl_odeiv2.h>
 #endif
 
+#include "VoxelPoolsBase.h"
+#include "OdeSystem.h"
+#include "VoxelPools.h"
 #include "SteadyState.h"
 
 int ss_func( const gsl_vector* x, void* params, gsl_vector* f );
@@ -64,9 +71,8 @@ struct reac_info
 	double convergenceCriterion;
 
 	double* T;
-	Id stoich;
+	VoxelPools* pool;
 	vector< double > nVec;
-	// Stoich* s;
 
 #ifdef USE_GSL
 	gsl_matrix* Nr;
@@ -257,17 +263,37 @@ const Cinfo* SteadyState::initCinfo()
 	static string doc[] =
 	{
 		"Name", "SteadyState",
-		"Author", "Upinder S. Bhalla, 2009, NCBS",
+		"Author", "Upinder S. Bhalla, 2009, updated 2014, NCBS",
 		"Description", "SteadyState: works out a steady-state value for "
-		"a reaction system. It uses GSL heavily, and isn't even compiled "
-		"if the flag isn't set. It finds the ss value closest to the "
-		"initial conditions, defined by current molecular concentrations."
- "If you want to find multiple stable states, use the MultiStable object,"
- "which operates a SteadyState object to find multiple states."
-	"If you want to carry out a dose-response calculation, use the "
- 	"DoseResponse object."
- 	"If you want to follow a stable state in phase space, use the "
-	"StateTrajectory object. "
+		"a reaction system. "
+		"This class uses the GSL multidimensional root finder algorithms "
+		"to find the fixed points closest to the "
+		"current molecular concentrations. "
+		"When it finds the fixed points, it figures out eigenvalues of "
+		"the solution, as a way to help classify the fixed points. "
+		"Note that the method finds unstable as well as stable fixed "
+		"points.\n "
+		"The SteadyState class also provides a utility function "
+	    "*randomInit()*	to "
+		"randomly initialize the concentrations, within the constraints "
+		"of stoichiometry. This is useful if you are trying to find "
+		"the major fixed points of the system. Note that this is "
+		"probabilistic. If a fixed point is in a very narrow range of "
+		"state space the probability of finding it is small and you "
+		"will have to run many iterations with different initial "
+		"conditions to find it.\n "
+		"The numerical calculations used by the SteadyState solver are "
+		"prone to failing on individual calculations. All is not lost, "
+		"because the system reports the solutionStatus. "
+		"It is recommended that you test this field after every "
+		"calculation, so you can simply ignore "
+		"cases where it failed and try again with different starting "
+		"conditions.\n "
+		"Another rule of thumb is that the SteadyState object is more "
+		"likely to succeed in finding solutions from a new starting point "
+		"if you numerically integrate the chemical system for a short "
+		"time (typically under 1 second) before asking it to find the "
+		"fixed point. "
 	};
 	
 	static Dinfo< SteadyState > dinfo;
@@ -338,10 +364,22 @@ Id SteadyState::getStoich() const {
 }
 
 void SteadyState::setStoich( Id value ) {
+	if ( !value.element()->cinfo()->isA( "Stoich" ) ) {
+		cout << "Error: SteadyState::setStoich: Must be of Stoich class\n";
+		return;
+	}
+
 	stoich_ = value;
+	Stoich* stoichPtr = reinterpret_cast< Stoich* >( value.eref().data());
 	numVarPools_ = Field< unsigned int >::get( stoich_, "numVarPools" );
 	nReacs_ = Field< unsigned int >::get( stoich_, "numRates" );
 	setupSSmatrix();
+	double vol = LookupField< unsigned int, double >::get( 
+				stoichPtr->getCompartment(), "oneVoxelVolume", 0 );
+	pool_.setVolume( vol );
+	pool_.setStoich( stoichPtr, 0 );
+	pool_.updateAllRateTerms( stoichPtr->getRateTerms(),
+				   stoichPtr->getNumCoreRates() );
 	isInitialized_ = 1;
 }
 
@@ -613,18 +651,6 @@ static double invop( double x )
  * First try gsl_multiroot_fsolver_hybrids
  * If that doesn't work try gsl_multiroot_fsolver_dnewton
  * Returns the gsl status.
-struct reac_info
-{
-	int rank;
-	int num_reacs;
-	int num_mols;
-
-	double* T;
-	Stoich* s;
-
-	gsl_matrix* Nr;
-	gsl_matrix* gamma;
-};
  */
 #ifdef USE_GSL
 int iterate( const gsl_multiroot_fsolver_type* st, struct reac_info *ri,
@@ -685,21 +711,21 @@ void SteadyState::classifyState( const double* T )
 	// Fill up Jacobian
 	for ( unsigned int i = 0; i < numVarPools_; ++i ) {
 		double orig = nVec[i];
-		if ( isnan( orig ) ) {
+		if ( isNaN( orig ) ) {
 			cout << "Warning: SteadyState::classifyState: orig=nan\n";
 			solutionStatus_ = 2; // Steady state OK, eig failed
 			gsl_matrix_free ( J );
 			return;
 		}
-		if ( isnan( tot ) ) {
+		if ( isNaN( tot ) ) {
 			cout << "Warning: SteadyState::classifyState: tot=nan\n";
 			solutionStatus_ = 2; // Steady state OK, eig failed
 			gsl_matrix_free ( J );
 			return;
 		}
 		nVec[i] = orig + tot;
-		/// Here we assume we always use voxel zero.
-		s->updateRates( &nVec[0], &yprime[0], 0 );
+
+		pool_.updateRates( &nVec[0], &yprime[0] );
 		nVec[i] = orig;
 
 		// Assign the rates for each mol.
@@ -752,6 +778,18 @@ void SteadyState::classifyState( const double* T )
 #endif
 }
 
+static bool isSolutionPositive( const vector< double >& x )
+{
+	for ( vector< double >::const_iterator 
+					i = x.begin(); i != x.end(); ++i ) {
+		if ( *i < 0.0 ) {
+			cout << "Warning: SteadyState iteration gave negative concs\n";
+			return false;
+		}
+	}
+	return true;
+}
+
 /**
  * The settle function computes the steady state nearest the initial
  * conditions.
@@ -784,7 +822,7 @@ void SteadyState::settle( bool forceSetup )
 	ri.T = T;
 	ri.Nr = Nr_;
 	ri.gamma = gamma_;
-	ri.stoich = stoich_;
+	ri.pool = &pool_;
 	ri.nVec = 
 			LookupField< unsigned int, vector< double > >::get(
 			ksolve,"nVec", 0 );
@@ -811,16 +849,11 @@ void SteadyState::settle( bool forceSetup )
 		status = iterate( gsl_multiroot_fsolver_dnewton, &ri, maxIter_ );
 	status_ = string( gsl_strerror( status ) );
 	nIter_ = ri.nIter;
-	if ( status == GSL_SUCCESS ) {
+	if ( status == GSL_SUCCESS && isSolutionPositive( ri.nVec ) ) {
 		solutionStatus_ = 0; // Good solution
 		LookupField< unsigned int, vector< double > >::set(
 			ksolve,"nVec", 0, ri.nVec );
 		classifyState( T );
-		/*
-		 * Should happen in the ss_func.
-		for ( i = 0; i < numVarPools_; ++i )
-			s_->S()[i] = gsl_vector_get( op( solver->x ), i );
-			*/
 	} else {
 		cout << "Warning: SteadyState iteration failed, status = " <<
 			status_ << ", nIter = " << nIter_ << endl;
@@ -842,19 +875,19 @@ void SteadyState::settle( bool forceSetup )
 int ss_func( const gsl_vector* x, void* params, gsl_vector* f )
 {
 	struct reac_info* ri = (struct reac_info *)params;
-	Stoich* s = reinterpret_cast< Stoich* >( ri->stoich.eref().data() );
+	// Stoich* s = reinterpret_cast< Stoich* >( ri->stoich.eref().data() );
 	int num_consv = ri->num_mols - ri->rank;
 
 	for ( unsigned int i = 0; i < ri->num_mols; ++i ) {
 		double temp = op( gsl_vector_get( x, i ) );
-		if ( isnan( temp ) || isinf( temp ) ) { 
+		if ( isNaN( temp ) || isInfinity( temp ) ) { 
 			return GSL_ERANGE;
 		} else {
 			ri->nVec[i] = temp;
 		}
 	}
 	vector< double > vels;
-	s->updateReacVelocities( &ri->nVec[0], vels, 0 ); // use compt zero
+	ri->pool->updateReacVelocities( &ri->nVec[0], vels );
 	assert( vels.size() == static_cast< unsigned int >( ri->num_reacs ) );
 
 	// y = Nr . v
@@ -980,6 +1013,16 @@ void recalcTotal( vector< double >& tot, gsl_matrix* g, const double* S )
 }
 #endif // end of long section of functions using GSL
 
+static bool checkAboveZero( const vector< double >& y )
+{
+	for ( vector< double >::const_iterator
+			i = y.begin(); i != y.end(); ++i ) {
+		if ( *i < 0.0 )
+			return false;
+	}
+	return true;
+}
+
 /**
  * Generates a new set of values for the S vector that is a) random
  * and b) obeys the conservation rules.
@@ -1014,7 +1057,9 @@ void SteadyState::randomizeInitialCondition( const Eref& me )
 
 	// Put Find a vector Y that fits the consv rules.
 	vector< double > y( numVarPools_, 0.0 );
-	fitConservationRules( U, eliminatedTotal, y );
+	do {
+		fitConservationRules( U, eliminatedTotal, y );
+	} while ( !checkAboveZero( y ) );
 
 	// Sanity check. Try the new vector with the old gamma and tots
 	for ( int i = 0; i < numConsv; ++i ) {

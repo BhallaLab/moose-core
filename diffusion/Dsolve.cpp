@@ -11,6 +11,9 @@
 #include "ElementValueFinfo.h"
 #include "SparseMatrix.h"
 #include "KinSparseMatrix.h"
+#include "VoxelPoolsBase.h"
+#include "../mesh/VoxelJunction.h"
+#include "XferInfo.h"
 #include "ZombiePoolInterface.h"
 #include "DiffPoolVec.h"
 #include "FastMatrixElim.h"
@@ -25,10 +28,8 @@
 #include "../kinetics/PoolBase.h"
 #include "../kinetics/Pool.h"
 #include "../kinetics/BufPool.h"
-#include "../kinetics/FuncPool.h"
 #include "../ksolve/ZombiePool.h"
 #include "../ksolve/ZombieBufPool.h"
-#include "../ksolve/ZombieFuncPool.h"
 
 const Cinfo* Dsolve::initCinfo()
 {
@@ -331,16 +332,11 @@ void Dsolve::setCompartment( Id id )
 	}
 }
 
-Id Dsolve::getCompartment() const
-{
-	return compartment_;
-}
-
 void Dsolve::makePoolMapFromElist( const vector< ObjId >& elist, 
 				vector< Id >& temp )
 {
-	unsigned int minId;
-	unsigned int maxId;
+	unsigned int minId = 0;
+	unsigned int maxId = 0;
 	temp.resize( 0 );
 	for ( vector< ObjId >::const_iterator 
 			i = elist.begin(); i != elist.end(); ++i ) {
@@ -389,14 +385,16 @@ void Dsolve::setPath( const Eref& e, string path )
 		double diffConst = Field< double >::get( id, "diffConst" );
 		double motorConst = Field< double >::get( id, "motorConst" );
 		const Cinfo* c = id.element()->cinfo();
-		if ( c == Pool::initCinfo() )
+		if ( c == Pool::initCinfo() ) {
 			PoolBase::zombify( id.element(), ZombiePool::initCinfo(), Id(), e.id() );
-		else if ( c == BufPool::initCinfo() )
+		} else if ( c == BufPool::initCinfo() ) {
 			PoolBase::zombify( id.element(), ZombieBufPool::initCinfo(), Id(), e.id() );
-		else if ( c == FuncPool::initCinfo() )
-			PoolBase::zombify( id.element(), ZombieFuncPool::initCinfo(), Id(), e.id() );
-		else
+			// Any Functions will have to continue to manage the BufPools.
+			// This needs them to be replicated, and for their messages
+			// to be copied over. Not really set up here.
+		} else {
 			cout << "Error: Dsolve::setPath( " << path << " ): unknown pool class:" << c->name() << endl; 
+		}
 		id.element()->resize( numVoxels_ );
 
 		unsigned int j = temp[i].value() - poolMapStart_;
@@ -437,8 +435,12 @@ void Dsolve::build( double dt )
 {
 	if ( doubleEq( dt, dt_ ) )
 		return;
+	if ( compartment_ == Id() ) {
+		cout << "Dsolve::build: Warning: No compartment defined. \n"
+				"Did you forget to assign 'stoich.dsolve = this' ?\n";
+		return;
+	}
 	dt_ = dt;
-
 	const MeshCompt* m = reinterpret_cast< const MeshCompt* >( 
 						compartment_.eref().data() );
 	unsigned int numVoxels = m->getNumEntries();
@@ -558,6 +560,13 @@ unsigned int Dsolve::getNumVoxels() const
 	return numVoxels_;
 }
 
+void Dsolve::setNumAllVoxels( unsigned int num ) 
+{
+	numVoxels_ = num;
+	for ( unsigned int i = 0 ; i < numLocalPools_; ++i )
+		pools_[i].setNumVoxels( numVoxels_ );
+}
+
 unsigned int Dsolve::convertIdToPoolIndex( const Eref& e ) const
 {
 	unsigned int i  = e.id().value() - poolMapStart_;
@@ -627,16 +636,25 @@ double Dsolve::getNinit( const Eref& e ) const
 
 void Dsolve::setDiffConst( const Eref& e, double v )
 {
+	unsigned int pid = convertIdToPoolIndex( e );
+	if ( pid >= pools_.size() )   // Ignore silently, out of range.
+		return;
 	pools_[ convertIdToPoolIndex( e ) ].setDiffConst( v );
 }
 
 double Dsolve::getDiffConst( const Eref& e ) const
 {
+	unsigned int pid = convertIdToPoolIndex( e );
+	if ( pid >= pools_.size() )   // Ignore silently, out of range.
+		return 0.0;
 	return pools_[ convertIdToPoolIndex( e ) ].getDiffConst();
 }
 
 void Dsolve::setMotorConst( const Eref& e, double v )
 {
+	unsigned int pid = convertIdToPoolIndex( e );
+	if ( pid >= pools_.size() )   // Ignore silently, out of range.
+		return;
 	pools_[ convertIdToPoolIndex( e ) ].setMotorConst( v );
 }
 
@@ -707,8 +725,30 @@ void Dsolve::setBlock( const vector< double >& values )
 	}
 }
 
-void Dsolve::setupCrossSolverReacs( const map< Id, 
-						vector< Id > >& xr, Id otherStoich )
+//////////////////////////////////////////////////////////////////////
+// Inherited virtual
+
+void Dsolve::updateRateTerms( unsigned int index )
 {
 	;
+}
+
+unsigned int Dsolve::getPoolIndex( const Eref& e ) const
+{
+	return convertIdToPoolIndex( e );
+}
+
+unsigned int Dsolve::getNumLocalVoxels() const
+{
+	return numVoxels_;
+}
+
+VoxelPoolsBase* Dsolve::pools( unsigned int i )
+{
+	return 0;
+}
+
+double Dsolve::volume( unsigned int i ) const
+{
+	return 1.0;
 }

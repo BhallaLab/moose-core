@@ -97,12 +97,22 @@ const Cinfo* MarkovGslSolver::initCinfo()
 		stateOut(),  				// SrcFinfo
 	};
 	
+	static string doc[] = 
+	{
+		"Name", "MarkovGslSolver",
+		"Author", "Vishaka Datta S, 2011, NCBS",
+		"Description", "Solver for Markov Channel." 
+	};
+
+	static Dinfo< MarkovGslSolver > dinfo;
 	static Cinfo MarkovGslSolverCinfo(
 		"MarkovGslSolver",
 		Neutral::initCinfo(),
 		MarkovGslFinfos,
 		sizeof(MarkovGslFinfos)/sizeof(Finfo *),
-		new Dinfo< MarkovGslSolver >
+		&dinfo,
+        doc,
+        sizeof(doc) / sizeof(string)
 	);
 
 	return &MarkovGslSolverCinfo;

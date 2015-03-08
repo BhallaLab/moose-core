@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """print_utils.py: A library with some print functions. Very useful during
 development.
 
@@ -101,4 +99,18 @@ def dump(label, msg, frame=None, exception=None):
         print(prefix+"@{0}:{1} {2}".format(filename, frame.f_lineno, colored(msg, label)))
     if exception:
         print(" [Expcetion] {0}".format(exception))
+
+def info(msg): dump("INFO", msg)
+def warn(msg): dump("WARN", msg)
+
+def error(msg): 
+    dump("ERROR", msg)
+
+def fatal(msg):
+    dump("FATAL", msg)
+    raise IOException
+
+def debug(msg): dump("DEBUG", msg)
+
+def log(label, msg): dump(label, msg)
 

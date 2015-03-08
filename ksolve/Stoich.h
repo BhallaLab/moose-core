@@ -107,12 +107,6 @@ class Stoich
 		Id getCompartment() const;
 
 		/**
-		 * This does a quick and dirty estimate of the timestep suitable 
-		 * for this sytem
-		 */
-		double getEstimatedDt() const;
-
-		/**
 		 * Utility function to return # of rates_ entries. This includes
 		 * the cross-solver reactions.
 		 */
@@ -127,6 +121,9 @@ class Stoich
 		/// Utility function to return a rates_ entry
 		const RateTerm* rates( unsigned int i ) const;
 
+		/// Returns a reference to the entire rates_ vector.
+		const vector< RateTerm* >& getRateTerms() const;
+
 		unsigned int getNumFuncs() const;
 		const FuncTerm* funcs( unsigned int i ) const;
 
@@ -135,6 +132,18 @@ class Stoich
 		vector< unsigned int > getRowStart() const;
 
 		vector< Id > getProxyPools( Id i ) const;
+
+		/**
+		 * getStatus(): Flag to track status of Stoich object.
+		 * -1: No path yet assigned.
+		 *  0: Success
+		 *  1: Warning: Missing reactant in Reac or Enz
+		 *  2: Warning: Missing substrate in MMenz
+		 *  4: Warning: Compartment not defined
+		 *  8: Warning: Neither Ksolve nor Dsolve defined
+		 *  16: Warning: No objects found on path
+		 */
+		int getStatus() const;
 		//////////////////////////////////////////////////////////////////
 		// Model traversal and building functions
 		//////////////////////////////////////////////////////////////////
@@ -143,9 +152,6 @@ class Stoich
 		 * elist of all elements managed by this solver.
 		 */
 		void setElist( const Eref& e, const vector< ObjId >& elist );
-
-		/// Builds new RateTerm vectors scaled to all the unique volumes.
-		void buildAllRateTermVectors();
 
 		/**
 		 * Scans through elist to find any reactions that connect to
@@ -166,8 +172,7 @@ class Stoich
 		/// Using the computed array sizes, now allocate space for them.
 		void resizeArrays();
 		/// Identifies and allocates objects in the Stoich.
-		void allocateModelObject( 
-				Id id, vector< Id >& bufPools, vector< Id >& funcPools );
+		void allocateModelObject( Id id, vector< Id >& bufPools );
 		/// Calculate sizes of all arrays, and allocate them.
 		void allocateModel( const vector< Id >& elist );
 
@@ -190,6 +195,21 @@ class Stoich
 		 * cross-reactions at these junctions.
 		 */
 		void buildXreacs( const Eref& e, Id otherStoich );
+
+		void filterXreacs();
+
+		/**
+		 * Expands out list of compartment mappings of proxy reactions to
+		 * the appropriate entries on the rates_vector.
+		 */
+		void comptsOnCrossReacTerms( vector< pair< Id, Id > >& xr ) const;
+
+		/**
+		 * Used to set up and update all cross solver reac terms and
+		 * their rates, if there has been a change in volumes. Should
+		 * also work if there has been a change in voxelization.
+		 */
+		void setupCrossSolverReacVols() const;
 		//////////////////////////////////////////////////////////////////
 		// Zombification functions.
 		//////////////////////////////////////////////////////////////////
@@ -208,36 +228,39 @@ class Stoich
 
 		/// unZombifies Pools. Helper for unZombifyModel.
 		void unZombifyPools();
-		/// unZombifies Funcs. Helper for unZombifyModel.
-		void unZombifyFuncs();
 
 		void zombifyChemCompt( Id compt );
 
 		unsigned int convertIdToReacIndex( Id id ) const;
 		unsigned int convertIdToPoolIndex( Id id ) const;
 		unsigned int convertIdToFuncIndex( Id id ) const;
-		// unsigned int convertIdToComptIndex( Id id ) const;
+
+		/// Utility function to make a half reac and return the rate term.
+		ZeroOrder* makeHalfReaction( 
+						double rate, const vector< Id >& reactants );
 
 		/*
 		 * This takes the specified Reac and its substrate and product
-		 * list, and installs them into the Stoich. This is the high-level
-		 * interface function.
+		 * list, and installs them into the Stoich. It also builds up the
+		 * vectors to store which compartment each substrate/product 
+		 * belongs to, needed for cross-reaction computations.
+		 * This is the high-level interface function.
 		 */
 		void installReaction( Id reacId,
 				const vector< Id >& subs, const vector< Id >& prds );
 		/*
-		 * This takes the specified forward and reverse half-reacs belonging
+		 * This takes the specified subs and prds belonging
 		 * to the specified Reac, and builds them into the Stoich.
 		 * It is a low-level function used internally.
 		 */
-		void installReaction( Id reacId, 
-				ZeroOrder* forward, ZeroOrder* reverse );
+		unsigned int innerInstallReaction( Id reacId, 
+				const vector< Id >& subs, const vector< Id >& prds );
 
 		/**
 		 * This takes the baseclass for an MMEnzyme and builds the
 		 * MMenz into the Stoich.
 		 */
-		void installMMenz( Id enzId, Id enzMolId,
+		void installMMenz( Id enzId, const vector< Id >& enzMolId,
 			const vector< Id >& subs, const vector< Id >& prds );
 		/**
 		 * This is the inner function to do the installation.
@@ -260,12 +283,27 @@ class Stoich
 		void installEnzyme( ZeroOrder* r1, ZeroOrder* r2, ZeroOrder* r3,
 			Id enzId, Id enzMolId, const vector< Id >& prds );
 
+		/// This is used when the enzyme lacks sub or prd.
+		void installDummyEnzyme( Id enzId, Id enzMolId);
+
 		/**
-		 * This installs a funcTerm. Should be generic, that is, work
-		 * for any form of func. The pool is the FuncPool being
-		 * controlled.
+		 * This installs a FuncTerm, which evaluates a function to specify
+		 * the conc of the specific pool. The pool is a BufPool.
 		 */
 		void installAndUnschedFunc( Id func, Id pool );
+
+		/**
+		 * This installs a FuncRate, which evaluates a function to specify
+		 * the rate of change of conc of the specific pool. 
+		 * The pool is a Pool.
+		 */
+		void installAndUnschedFuncRate( Id func, Id pool );
+
+		/**
+		 * This installs a FuncReac, which evaluates a function to specify
+		 * the rate (Kf) of the specified reaction. 
+		 */
+		void installAndUnschedFuncReac( Id func, Id reac );
 
 		//////////////////////////////////////////////////////////////////
 
@@ -361,6 +399,11 @@ class Stoich
 		double getR2( const Eref& e ) const;
 
 		/**
+		 * Sets the arithmetic expression used in a FuncRate or FuncReac
+		 */
+		void setFunctionExpr( const Eref& e, string expr );
+
+		/**
 		 * This function scans all reacs and enzymes and recalculates the
 		 * internal rate terms depending on the reference terms stored in
 		 * the original chemical object.
@@ -380,9 +423,10 @@ class Stoich
 		 * Updates the yprime array, rate of change of each molecule
 		 * The volIndex specifies which set of rates to use, since the
 		 * rates are volume dependent.
-		 */
+		 * Moved to VoxelPools
 		void updateRates( const double* s, double* yprime,
 					   unsigned int volIndex ) const;
+		 */
 		
 		/**
 		 * Computes the velocity of each reaction, vel.
@@ -404,9 +448,9 @@ class Stoich
 		/** 
 		 * Get the rate for a single reaction specified by r, as per all 
 		 * the mol numbers in s.
-		 */
 		double getReacVelocity( unsigned int r, const double* s,
 					   unsigned int volIndex ) const;
+		 */
 
 		/// Returns the stoich matrix. Used by gsolve.
 		const KinSparseMatrix& getStoichiometryMatrix() const;
@@ -430,8 +474,8 @@ class Stoich
 		/**
 		 * Returns the index of the matching volume,
 		 * which is also the index into the RateTerm vector.
-		 */
 		unsigned int indexOfMatchingVolume( double vol ) const;
+		 */
 		
 		//////////////////////////////////////////////////////////////////
 		static const unsigned int PoolIsNotOnSolver;
@@ -465,22 +509,23 @@ class Stoich
 		vector< unsigned int > species_;
 
 		/**
-		 * The RateTerms handle the update operations for reaction rate v_
-		 * rates_[volIndex][termIndex]
-		 * There is a separate vector of RateTerm for each volume handled
-		 * by the stoich. This is needed because RateTerms use #/voxel
-		 * units and are thus volume dependent.
-		 * For example, if the reaction system is in a tapering cylinder, 
-		 * there will be distinct volumes for each voxel, and each will
-		 * need its own scaled set of RateTerms.
+		 * The RateTerms handle the update operations for reaction rate v_.
+		 * This is the master vector of RateTerms, and it is scaled to
+		 * a volume such that the 'n' units and the conc units are
+		 * identical.
+		 * Duplicates of this vector are made in each voxel with a different
+		 * volume. The duplicates have rates scaled as per volume.
+		 * The RateTerms vector also includes reactions that have 
+		 * off-compartment products. These need special volume scaling 
+		 * involving all the interactiong compartments.
 		 */
-		vector< vector< RateTerm* > > rates_;
+		vector< RateTerm* > rates_;
 
 		/**
 		 * This tracks the unique volumes handled by the reac system.
 		 * Maps one-to-one with the vector of vector of RateTerms.
-		 */
 		vector< double > uniqueVols_;
+		 */
 
 		/// Number of voxels in reac system.
 		unsigned int numVoxels_;
@@ -528,6 +573,10 @@ class Stoich
 		 */
 		vector< Id > mmEnzMap_;
 		
+		/**
+		 * Vector of all funcs. Needed to unzombify
+		 */
+		vector< Id > funcMap_;
 
 		/**
 		 * Number of variable molecules that the solver deals with,
@@ -548,9 +597,10 @@ class Stoich
 		 */
 		unsigned int numBufPools_;
 		/**
-		 * Number of molecules whose values are computed by functions
+		 * Number functions, currently only the ones controlling molecule
+		 * numbers, like sumtotals.
 		 */
-		unsigned int numFuncPools_;
+		unsigned int numFunctions_;
 
 		/**
 		 * Number of reactions in the solver model. This includes 
@@ -560,6 +610,17 @@ class Stoich
 		 * The enzyme reactions count as two reaction steps.
 		 */
 		unsigned int numReac_;
+
+		/**
+		 * Flag to track status of Stoich object.
+		 * -1: No path yet assigned.
+		 *  0: Success
+		 *  1: Warning: Missing reactant in Reac or Enz
+		 *  2: Warning: Missing substrate in MMenz
+		 *  4: Warning: Compartment not defined
+		 *  8: Warning: Neither Ksolve nore Dsolve defined
+		 */
+		int status_;
 
 		//////////////////////////////////////////////////////////////////
 		// Off-solver stuff
@@ -591,6 +652,19 @@ class Stoich
 		 */
 		vector< pair< Id, Id > > offSolverReacCompts_;
 
+		/**
+		 * subComptVec_[rateTermIndex][substrate#]: Identifies compts
+		 * for each substrate for each cross-compartment RateTerm in 
+		 * the rates_vector.
+		 */
+		vector< vector< Id > > subComptVec_;
+
+		/**
+		 * prdComptVec_[rateTermIndex][product#]: Identifies compts
+		 * for each product for each cross-compartment RateTerm in 
+		 * the rates_vector.
+		 */
+		vector< vector< Id > > prdComptVec_;
 };
 
 #endif	// _STOICH_H

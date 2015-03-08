@@ -145,12 +145,21 @@ const Cinfo* MarkovRateTable::initCinfo()
 		&size,							//ReadOnlyValueFinfo
             };
 
+	static string doc[] =
+	{
+		"Name", "MarkovRateTable",
+		"Author", "Vishaka Datta S, 2011, NCBS",
+		"Description", "Rate Table for Markov channel calculations. "
+	};
+    static Dinfo< MarkovRateTable > dinfo;
     static Cinfo MarkovRateTableCinfo(
         "MarkovRateTable",
         Neutral::initCinfo(),
         markovRateTableFinfos,
         sizeof(markovRateTableFinfos)/sizeof(Finfo *),
-        new Dinfo< MarkovRateTable >
+		&dinfo,
+		doc,
+		sizeof( doc ) / sizeof( string )
                                       );
 
     return &MarkovRateTableCinfo;

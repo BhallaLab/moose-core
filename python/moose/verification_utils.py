@@ -5,7 +5,7 @@
     IT contains a class which runs tests on moose internal data-structures to
     check if it is good for simulation.
 
-Last modified: Wed May 14, 2014  12:08AM
+Last modified: Sun Feb 15, 2015  12:21PM
 
 """
     
@@ -21,7 +21,7 @@ __status__           = "Development"
 
 import sys
 import sys
-import _moose
+import _moose as moose
 import unittest
 import inspect
 import print_utils as debug
@@ -80,26 +80,98 @@ class MooseTestCase( unittest.TestCase ):
                             ]
                         )
 
-    def test_synapses(self):
+    def test_synchans(self):
         self.dump("Checking if any synapse is dead")
         for synchan in self.mooseElems.synchans:
+            if synchan.Gbar <= 0.0:
+                debug.dump("WARN"
+                        , [ synchan.path
+                        , "Gbar value is zero or negative: %s" % synchan.Gbar
+                        , "Not cool!"
+                        ]
+                        )
+            # Check the output of synchan.
             if not synchan.neighbors['channel']:
                 debug.dump("FAIL"
-                        , [ "SynChan %s is not receiving any input " % synchan.path
-                            , " No incoming 'channel'. " 
+                        , [ "SynChan %s is not connected to post-compartment" % synchan.path
+                            , " No connected 'channel'. " 
                              " Did you forget to connect compartment e.g." 
                              "moose.connect(synchan, 'channel', comp, 'channel')"
                              " where synchan is 'moose.SynChan' and comp is "
-                             " 'moose.Compartment'"
+                             " 'moose.Compartment'?"
                             ]
                         )
-                sys.exit()
             else:
-                for synapse in synchan.synapses:
-                    debug.dump("TODO"
-                            , "Write verification test for output of each synapse"
-                            , frame = inspect.curretframe()
-                            )
+                pass
+
+            # Check if anyone is activating this synchan.
+            synhandlers = synchan.neighbors['activation']
+            if not synhandlers:
+                debug.dump("FAIL"
+                        , [ "No SynHandler is activating SynChan %s" % synchan.path
+                            , " Did you forget to connect a SynHandler e.g. "
+                            "moose.connect(synHandler, 'activationOut', synchan, 'activation'"
+                            " where synchan is 'moose.SynChan' and synHandler is"
+                            " moose.SynHandler."
+                            ]
+                        )
+            else: [self.test_synhandler(x) for x in synhandlers]
+
+    def test_synhandler(self, synhandlers):
+        """A SynHandler object does not have incoming connections to itself.
+        Rather it keeps an array of moose.Synapse inside it which recieves input
+        of moose.SpikeGen.
+        """
+        if type(synhandlers) == moose.vec:
+            if len(synhandlers) == 1:
+                synhandler = synhandlers[0]
+            else:
+                [self.test_synhandler(x) for x in synhandlers]
+        else:
+            synhandler = synhandlers
+        
+        for synapses in synhandler.synapse:
+            self.test_synapse(synapses)
+
+    def test_synapse(self, synapses):
+        if type(synapses) == moose.Synapse:
+            synapse = synapses
+        elif type(synapses) == moose.vec:
+            if len(synapses) == 1:
+                synapse = synapses[0]
+            else:
+                [ self.test_synapse(x) for x in synapses ]
+
+        spikeGens = synapse.neighbors['addSpike']
+        if not spikeGens:
+            debug.dump('FAIL'
+                    , [" Synapse %s has no incoming spikes" % synapse.path
+                        , " Did you forget to connect a moose.SpikeGen e.g."
+                        " moose.connect(spikegen, 'spikeOut', synapse, 'addSpike')" 
+                        ]
+                    )
+        else: 
+            [self.test_spikegen(x) for x in spikeGens]
+
+    def test_spikegen(self, spikegens):
+        spikeGen = None
+        if len(spikegens) > 1:
+            [self.test_spikegen(x) for x in spikegens]
+        elif len(spikegens) == 1:
+            spikeGen = spikegens[0]
+        elif type(spikegens) == moose.SpikeGen:
+            spikeGen = spikegens
+
+        pre = spikeGen.neighbors['Vm']
+        if not pre:
+            debug.dump('FAIL', 
+                    [ "SpikeGen %s is not reading Vm of any compartment " % spikeGen.path
+                    , "Did you forget to connect Vm of a "
+                    "compartment to this SpikeGen? "
+                    " e.g. moose.connect(comp, 'VmOut', spikeGen, 'Vm')"
+                    ]
+                    )
+        else: pass
 
     
     def test_unused_tables(self):
@@ -176,7 +248,7 @@ def verify( *args, **kwargs):
     connectivitySuite.addTest(MooseTestCase('test_disconnected_compartments'))
     connectivitySuite.addTest(MooseTestCase('test_isolated_pulse_gen'))
     connectivitySuite.addTest(MooseTestCase('test_unused_tables'))
-    connectivitySuite.addTest(MooseTestCase('test_synapses'))
+    connectivitySuite.addTest(MooseTestCase('test_synchans'))
 
     simulationSuite = unittest.TestSuite()
     simulationSuite.addTest(MooseTestCase('test_clocks'))

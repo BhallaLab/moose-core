@@ -243,6 +243,7 @@ Linear cable, 12 segments.
 	}
 	// cout << "GSL: " << checkAns( test, numCompts, &gslAns[0], &ones[0] ) << endl;
 	assert( checkAns( test, numCompts, &gslAns[0], &ones[0] ) < 1e-25 );
+	gsl_permutation_free( p );
 	gsl_vector_free( x );
 
 	cout << "." << flush;
@@ -892,6 +893,7 @@ void testCalcJunction()
 	s->doReinit();
 	s->doStart( 100 );
 
+	/*
 	for ( unsigned int i = 0; i < 9; ++i ) {
 		double c = Field< double >::get( pools[i], "conc" );
 		double n = Field< double >::get( pools[i], "n" );
@@ -900,6 +902,7 @@ void testCalcJunction()
 				n / v << ", " <<
 				v << endl;
 	}
+	*/
 	s->doDelete( model );
 	cout << "." << flush;
 }

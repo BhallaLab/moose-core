@@ -76,9 +76,19 @@ const Cinfo* Shell::initCinfo()
 	static DestFinfo handleCreate( "create", 
 			"create( class, parent, newElm, name, numData, isGlobal )",
 			new EpFunc6< Shell, string, ObjId, Id, string, NodeBalance, unsigned int >( &Shell::handleCreate ) );
+
 	static DestFinfo handleDelete( "delete", 
-			"Destroys Element, all its messages, and all its children. Args: Id",
-			new EpFunc1< Shell, Id >( & Shell::destroy ) );
+			"When applied to a regular object, this function operates "
+			"on the Id (element) specified by the ObjId argument. "
+			"The function deletes the entire object "
+			"array on this Id, including all dataEntries on it,"
+			"all its messages, and all its children. The DataIndex here "
+			"is ignored, and all dataEntries are destroyed. \n"
+			"When applied to a message: Destroys only that one specific "
+			"message identified by the full ObjId. \n"
+			"Args: ObjId\n",
+			new EpFunc1< Shell, ObjId >( & Shell::destroy ) );
+
 	static DestFinfo handleAddMsg( "addMsg", 
 			"Makes a msg. Arguments are:"
 			" msgtype, src object, src field, dest object, dest field",
@@ -154,6 +164,39 @@ Shell::Shell()
 Shell::~Shell()
 {;}
 
+#ifdef  CYMOOSE
+
+/*-----------------------------------------------------------------------------
+ *  This function must create a fully functional Shell. Used in cython
+ *  interface.
+ *-----------------------------------------------------------------------------*/
+Shell* Shell::initShell()
+{
+    Eref sheller = Id().eref();
+    Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+    return shell;
+}
+
+Id Shell::create(string type, string name, unsigned int numData
+        , NodePolicy nodePolicy, unsigned int preferredNode 
+        ) 
+{
+    if(name.size() == 0)
+        return doCreate(type, Id(), name, numData, nodePolicy, preferredNode);
+
+    string::size_type pos = name.find_last_of('/');
+    string parentPath = name.substr(0, pos);
+    ObjId parentObj = ObjId(parentPath);
+//    cerr << "info: Creating Obj with parent : " << parentObj << endl;
+    Id id = doCreate(type, parentObj, name.substr(pos+1)
+            , numData, nodePolicy, preferredNode
+            );
+//    cerr << "    ++ with id " << id << endl;
+    return id;
+}
+
+#endif     /* -----  CYMOOSE  ----- */
+
 void Shell::setShellElement( Element* shelle )
 {
 	shelle_ = shelle;
@@ -180,7 +223,7 @@ Id Shell::doCreate( string type, ObjId parent, string name,
     clock_t t = clock();
 #endif
 	const Cinfo* c = Cinfo::find( type );
-	if ( name.find_first_of( "[] #?\"/\\" ) != string::npos ) {
+	if ( !isNameValid( name ) ) {
 		stringstream ss;
 		ss << "Shell::doCreate: bad character in name'" << name << 
 				"'. No Element created";
@@ -245,9 +288,9 @@ Id Shell::doCreate( string type, ObjId parent, string name,
 	return Id();
 }
 
-bool Shell::doDelete( Id id )
+bool Shell::doDelete( ObjId oid )
 {
-	SetGet1< Id >::set( ObjId(), "delete", id );
+	SetGet1< ObjId >::set( ObjId(), "delete", oid );
 	/*
 	Neutral n;
 	n.destroy( i.eref(), 0 );
@@ -321,7 +364,7 @@ void Shell::doQuit()
 	SetGet0::set( ObjId(), "quit" );
 	// Shell::keepLooping_ = 0;
 #ifdef ENABLE_LOGGER 
-        cout << logger.dumpStats(1);
+        cout << logger.dumpStats(1) << endl << endl;
         logger.save();
 #endif
 }
@@ -330,8 +373,10 @@ void Shell::doStart( double runtime )
 {
 #ifdef ENABLE_LOGGER
         clock_t t = clock();
+        stringstream ss;
+        ss << "Running moose for " << runtime << " seconds";
+        logger.log("INFO", ss.str());
 #endif
-
 	Id clockId( 1 );
 	SetGet1< double >::set( clockId, "start", runtime );
 
@@ -390,13 +435,15 @@ void Shell::doUseClock( string path, string field, unsigned int tick )
  * Write given model to SBML file. Returns success value.
  */
 int Shell::doWriteSBML( const string& fname, const string& modelpath )
-{
+{ 
 #ifdef USE_SBML
 	SbmlWriter sw;
-	return sw.write( fname, modelpath );
+	int ret = sw.write( fname, modelpath );
+	return ret;
 #else
+	
     cerr << "Shell::WriteSBML: This copy of MOOSE has not been compiled with SBML writing support.\n";
-	return 0;
+	return -2;
 #endif
 }
 /**
@@ -513,6 +560,15 @@ bool Shell::chopString( const string& path, vector< string >& ret,
 		ret.push_back( temp.substr( 0, pos ) );
 	}
 	return isAbsolute;
+}
+
+/**
+ * Static func to check if an object name is legal. True if legal.
+ */
+bool Shell::isNameValid( const string& name )
+{
+	return ( name.length() > 0 && 
+				name.find_first_of( "[] #?\"/\\" ) == string::npos );
 }
 
 /**
@@ -740,21 +796,20 @@ void Shell::innerCreate( string type, ObjId parent, Id newElm, string name,
 		};
 		assert( ret );
 		adopt( parent, newElm, msgIndex );
+		ret->setTick( Clock::lookupDefaultTick( c->name() ) );
 	} else{
 		assert( 0 );
 	}
 }
 
-void Shell::destroy( const Eref& e, Id eid)
+void Shell::destroy( const Eref& e, ObjId oid)
 {
 	Neutral *n = reinterpret_cast< Neutral* >( e.data() );
 	assert( n );
 	// cout << myNode_ << ": Shell::destroy done for element id: " << eid << ", name = " << eid.element()->getName() << endl;
-	n->destroy( eid.eref(), 0 );
-	if ( cwe_.id == eid )
+	n->destroy( oid.eref(), 0 );
+	if ( cwe_.id == oid.id )
 		cwe_ = ObjId();
-
-	// ack()->send( e, Shell::myNode(), OkStatus );
 }
 
 
@@ -782,6 +837,7 @@ void Shell::handleAddMsg( const Eref& e,
  * The actual function that adds messages. Does NOT send an ack.
  * The msgIndex specifies the index on which to place this message. If the
  * value is zero it does an automatic placement.
+ * Returns zero on failure.
  */
 const Msg* Shell::innerAddMsg( string msgType,
 	ObjId src, string srcField, 
@@ -936,9 +992,11 @@ void Shell::addClockMsgs(
 		if ( i->element() ) {
 			stringstream ss;
 			ss << "proc" << tick;
-			innerAddMsg( "OneToAll",
+			const Msg* m = innerAddMsg( "OneToAll",
 				clockId, ss.str(), 
 				*i, field, msgIndex++ );
+			if ( m )
+				i->element()->innerSetTick( tick );
 		}
 	}
 }
@@ -949,7 +1007,7 @@ bool Shell::innerUseClock( string path, string field, unsigned int tick,
 	vector< ObjId > list;
 	wildcardFind( path, list ); // By default scans only Elements.
 	if ( list.size() == 0 ) {
-		cout << "Warning: no Elements found on path " << path << endl;
+		cout << "Warning: Shell::innerUseClock: no Elements found on path " << path << endl;
 		return 0;
 	}
 	// string tickField = "proc";
@@ -960,6 +1018,9 @@ bool Shell::innerUseClock( string path, string field, unsigned int tick,
 		field = "init"; 
 	
 	addClockMsgs( list, field, tick, msgIndex );
+	for ( vector< ObjId >::iterator 
+					i = list.begin(); i != list.end(); ++i )
+			i->id.element()->innerSetTick( tick );
 	return 1;
 }
 

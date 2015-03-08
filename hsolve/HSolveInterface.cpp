@@ -22,6 +22,8 @@
 
 unsigned int HSolve::localIndex( Id id ) const
 {
+	/* can easily replace with an array lookup with some holes, as
+	 * done in the Stoich class. */
     map< Id, unsigned int >::const_iterator i;
 
     i = localIndex_.find( id );
@@ -424,6 +426,14 @@ void HSolve::setZ( Id id, double value )
     state_[ stateIndex ] = value;
 }
 
+void HSolve::setHHmodulation( Id id, double value )
+{
+    unsigned int index = localIndex( id );
+    assert( index < channel_.size() );
+	if ( value > 0.0 )
+			channel_[index].modulation_ = value;
+}
+
 double HSolve::getCa( Id id ) const
 {
     unsigned int index = localIndex( id );
@@ -438,6 +448,19 @@ void HSolve::setCa( Id id, double Ca )
 
     ca_[ index ] = Ca;
     caConc_[ index ].setCa( Ca );
+}
+
+void HSolve::iCa( Id id, double iCa )
+{
+    unsigned int index = localIndex( id );
+    assert( index < caConc_.size() );
+
+	caActivation_[index] += iCa;
+
+	/*
+    ca_[ index ] = Ca;
+    caConc_[ index ].setCa( Ca );
+	*/
 }
 
 double HSolve::getCaBasal( Id id ) const

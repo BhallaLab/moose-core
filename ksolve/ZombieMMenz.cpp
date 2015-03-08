@@ -13,6 +13,9 @@
 #include "FuncTerm.h"
 #include "SparseMatrix.h"
 #include "KinSparseMatrix.h"
+#include "VoxelPoolsBase.h"
+#include "../mesh/VoxelJunction.h"
+#include "XferInfo.h"
 #include "ZombiePoolInterface.h"
 #include "Stoich.h"
 
@@ -31,12 +34,20 @@ const Cinfo* ZombieMMenz::initCinfo()
 		// Shared Msg Definitions
 		//////////////////////////////////////////////////////////////
 
+    static string doc[] = {
+        "Name", "ZombieMMenz",
+        "Author", "Upi Bhalla",
+        "Description", "Zombie class for MM (Michaelis-Menten) enzyme."
+	};
+	static Dinfo< ZombieMMenz > dinfo;
 	static Cinfo zombieMMenzCinfo (
 		"ZombieMMenz",
 		EnzBase::initCinfo(),
 		0,
 		0,
-		new Dinfo< ZombieMMenz >()
+		&dinfo,
+        doc,
+        sizeof(doc)/sizeof(string)
 	);
 
 	return &zombieMMenzCinfo;
@@ -79,10 +90,14 @@ void ZombieMMenz::vRemesh( const Eref& e )
 // Field Definitions
 //////////////////////////////////////////////////////////////
 
+// Note that the units in the Stoich are where 1 uM = 1 molecule/voxel.
+// So we set the conc terms directly.
 void ZombieMMenz::vSetKm( const Eref& e, double v )
 {
 	Km_ = v;
 	stoich_->setMMenzKm( e, v );
+	//double volScale = convertConcToNumRateUsingMesh( e, subOut, 1 );
+	//stoich_->setMMenzKm( e, v * volScale );
 }
 
 double ZombieMMenz::vGetKm( const Eref& e ) const
@@ -94,12 +109,14 @@ void ZombieMMenz::vSetNumKm( const Eref& e, double v )
 {
 	double volScale = convertConcToNumRateUsingMesh( e, subOut, 1 );
 	Km_ = v / volScale;
-	setKm( e, Km_ );
+	stoich_->setMMenzKm( e, Km_ );
 }
 
 double ZombieMMenz::vGetNumKm( const Eref& e ) const
 {
-	return stoich_->getMMenzNumKm( e );
+	double volScale = convertConcToNumRateUsingMesh( e, subOut, 1 );
+	return Km_ * volScale;
+	// return stoich_->getMMenzNumKm( e );
 }
 
 void ZombieMMenz::vSetKcat( const Eref& e, double v )
@@ -136,10 +153,7 @@ void ZombieMMenz::setSolver( Id solver, Id enzId )
 	vector< Id > subvec;
 	vector< Id > prdvec;
 	unsigned int num = enzId.element()->getNeighbors( enzvec, enzFinfo );
-	assert( num == 1 );
 	num = enzId.element()->getNeighbors( subvec, subFinfo );
-	assert( num > 0 );
 	num = enzId.element()->getNeighbors( prdvec, prdFinfo );
-	assert( num > 0 );
-	stoich_->installMMenz( enzId, enzvec[0], subvec, prdvec );
+	stoich_->installMMenz( enzId, enzvec, subvec, prdvec );
 }

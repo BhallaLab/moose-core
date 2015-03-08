@@ -32,7 +32,14 @@ class Annotator
 		void setTextColor( string v );
 		string getIcon() const;
 		void setIcon( string v );
-
+		string getSolver() const;
+		void setSolver( string v );
+		double getRuntime() const;
+		void setRuntime( double v );
+		string getdirpath() const;
+		void setdirpath( string v );
+		string getmodeltype() const;
+		void setmodeltype( string v );
 		static const Cinfo* initCinfo();
 	private:
 		double x_;
@@ -42,6 +49,10 @@ class Annotator
 		string color_;
 		string textColor_;
 		string icon_;
+		string solver_;
+		double runtime_;
+		string dirpath_;
+		string modeltype_;
 };
 
 #endif // _M_ANNOTATOR_H

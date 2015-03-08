@@ -10,7 +10,9 @@
 #include "header.h"
 #include "FuncOrder.h"
 #include "HopFunc.h"
+#include "../msg/OneToAllMsg.h"
 #include "../shell/Shell.h"
+#include "../scheduling/Clock.h"
 
 Element::Element( Id id, const Cinfo* c, const string& name )
 	:	name_( name ),
@@ -18,6 +20,7 @@ Element::Element( Id id, const Cinfo* c, const string& name )
 		cinfo_( c ), 
 		msgBinding_( c->numBindIndex() ),
 		msgDigest_( c->numBindIndex() ),
+		tick_( -1 ),
 		isRewired_( false ),
 		isDoomed_( false )
 {
@@ -142,6 +145,114 @@ void Element::clearAllMsgs()
 	m_.clear();
 	msgBinding_.clear();
 	msgDigest_.clear();
+}
+
+/// virtual func, this base version must be called by all derived classes
+void Element::zombieSwap( const Cinfo* c )
+{
+	// cout << name_ << ", cname=" << c->name() << ", t0 = " << this->tick_ << ", t1 = " << Clock::lookupDefaultTick( c->name() ) << endl;
+	if ( tick_ == -1 ) { // Object is already disabled, let it be.
+		return;
+	}
+	if ( tick_ == -2 ) { // Object was a zombie and wants to come home.
+		int t = Clock::lookupDefaultTick( c->name() );
+		setTick( t );
+	} else if ( tick_ >= 0 ) { // disable clock, with option to return
+		if ( c->name().substr(0, 6) == "Zombie" ) {
+			setTick( -2 );
+		} else {
+			int t = Clock::lookupDefaultTick( c->name() );
+			setTick( t );
+		}
+	}
+}
+
+int Element::getTick() const
+{
+	return tick_;
+}
+
+void Element::innerSetTick( unsigned int tick )
+{
+	if ( tick < 32 )
+		tick_ = tick;
+}
+
+void Element::dropAllMsgsFromSrc( Id src ) 
+{
+	static Id clockId( 1 );
+	const Element* clock = clockId.element();
+	vector< ObjId > msgs;
+	for ( vector< ObjId >::const_iterator i = m_.begin(); 
+		i != m_.end(); ++i )
+	{
+		const Msg* m = Msg::getMsg( *i );
+		const Element* src;
+		if ( m->e1() == this ) {
+			src = m->e2();
+		} else {
+			src = m->e1();
+		}
+		if ( src == clock ) {
+			msgs.push_back( *i );
+		}
+	}
+	sort( msgs.begin(), msgs.end() ); 
+	// C++ detritus.
+	msgs.erase( unique( msgs.begin(), msgs.end() ), msgs.end() );
+	for( vector< ObjId >::iterator 
+					i = msgs.begin(); i != msgs.end(); ++i )
+		Msg::deleteMsg( *i );
+}
+
+static bool addClockMsg( unsigned int tick, Id tgt, const Finfo* f2 )
+{
+	Id clockId( 1 );
+	stringstream ss;
+	ss << "proc" << tick;
+	
+	const Finfo* f1 = clockId.element()->cinfo()->findFinfo( ss.str() );
+	assert( f1 );
+	assert( f2 );
+	Msg* m = new OneToAllMsg( clockId.eref(), tgt.element(), 0 );
+	if ( m ) {
+		if ( f1->addMsg( f2, m->mid(), clockId.element() ) ) {
+			return true;
+		}
+		delete m;
+	}
+	cout << "Error: Element::setTick: failed to connect " << tgt << 
+			" to clock\n";
+	return false;
+}
+
+void Element::setTick( int t )
+{
+	Id clockId( 1 );
+	if ( t == tick_ )
+		return;
+	if ( tick_ >= 0 ) { // Drop all messages coming here from clock.
+		dropAllMsgsFromSrc( clockId );
+	}
+	tick_ = t;
+	if ( t < 0 || t > 31 ) {  // Only 32 ticks available.
+		// Don't need to add new ticks.
+		return;
+	}
+	const Finfo* f2 = cinfo()->findFinfo( "init" );
+	if ( f2 && dynamic_cast< const SharedFinfo* >( f2 ) ) { 
+		// Must build init msg too. This comes on the previous tick.
+		assert( t > 0 );
+		addClockMsg( t-1, id(), f2 );
+	}
+	f2 = cinfo()->findFinfo( "proc" );
+	if ( f2 ) { 
+		addClockMsg( t, id(), f2 );
+	} else {
+		cout << "Element::setTick:Warning: Attempt to assign a tick to a '"
+		<< cinfo_->name() << "'.\nThis does not support process actions.\n";
+		tick_ = -1;
+	}
 }
 /////////////////////////////////////////////////////////////////////////
 // Msg Information

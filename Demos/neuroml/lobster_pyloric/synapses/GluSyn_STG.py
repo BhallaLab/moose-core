@@ -34,6 +34,10 @@ class GluSyn_STG(moose.SynChan):
         graded.value = 'True'
         mgblock = moose.Mstring(self.path+'/mgblockStr')
         mgblock.value = 'False'
+        # also needs a synhandler
+        moosesynhandler = moose.SimpleSynHandler(self.path+'/handler')
+        # connect the SimpleSynHandler to the SynChan (double exp)
+        moose.connect( moosesynhandler, 'activationOut', self, 'activation' )
         
         # ds/dt = s_inf/tau - s/tau = A - Bs
         # where A=s_inf/tau is activation, B is 1/tau

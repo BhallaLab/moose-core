@@ -171,6 +171,7 @@ class MsgElement: public Element
 		 */
 		void zombieSwap( const Cinfo* newCinfo ) {
 			replaceCinfo( newCinfo );
+			Element::zombieSwap( newCinfo );
 		}
 
 

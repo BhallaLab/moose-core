@@ -10,15 +10,29 @@
 #include <iostream>
 using namespace std;
 
-void runKineticsBenchmark1();
+void runKineticsBenchmark1( const string& method );
+void testIntFireNetwork( unsigned int runsteps );
+
 void mooseBenchmarks( unsigned int option )
 {
 	switch ( option ) {
 		case 1:
 			cout << "Kinetics benchmark 1: small model, Exp Euler, 10Ksec, OSC_Cspace.g\n";
-			runKineticsBenchmark1();
+			runKineticsBenchmark1( "ee" );
 			break;
 		case 2:
+			cout << "Kinetics benchmark 1: small model, Gsl Runge Kutta Fehlberg, 10Ksec, OSC_Cspace.g\n";
+			runKineticsBenchmark1( "gsl" );
+			break;
+		case 3:
+			cout << "Kinetics benchmark 1: small model, Gssa, 10Ksec, OSC_Cspace.g\n";
+			runKineticsBenchmark1( "gssa" );
+			break;
+
+		case 4:
+			cout << "intFire benchmark: 104576 synapses, pconnect = 0.1, 2e5 timesteps\n";
+			testIntFireNetwork( 200000 );
+			break;
 		default:
 			cout << "Unknown benchmark specified, quitting\n";
 			break;

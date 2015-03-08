@@ -8,23 +8,24 @@
 **********************************************************************/
 
 #include "header.h"
+#include "ElementValueFinfo.h"
 #include "ChanBase.h"
 
-static SrcFinfo1< double >* permeability()
+SrcFinfo1< double >* ChanBase::permeability()
 {
 	static SrcFinfo1< double > permeability( "permeabilityOut", 
 		"Conductance term going out to GHK object" );
 	return &permeability;
 }
 
-static SrcFinfo2< double, double >* channelOut()
+SrcFinfo2< double, double >* ChanBase::channelOut()
 {
 	static SrcFinfo2< double, double > channelOut( "channelOut", 
 		"Sends channel variables Gk and Ek to compartment" );
 	return &channelOut;
 }
 
-static SrcFinfo1< double >* IkOut()
+SrcFinfo1< double >* ChanBase::IkOut()
 {
 	static SrcFinfo1< double > IkOut( "IkOut", 
 		"Channel current. This message typically goes to concen"
@@ -37,6 +38,21 @@ const Cinfo* ChanBase::initCinfo()
 	/////////////////////////////////////////////////////////////////////
 	// Shared messages
 	/////////////////////////////////////////////////////////////////////
+	static DestFinfo process( "process", 
+		"Handles process call",
+		new ProcOpFunc< ChanBase >( &ChanBase::process ) );
+	static DestFinfo reinit( "reinit", 
+		"Handles reinit call",
+		new ProcOpFunc< ChanBase >( &ChanBase::reinit ) );
+
+	static Finfo* processShared[] =
+	{
+		&process, &reinit
+	};
+
+	static SharedFinfo proc( "proc", 
+		"Shared message to receive Process message from scheduler",
+		processShared, sizeof( processShared ) / sizeof( Finfo* ) );
 
 	/////////////////////////////////////////////////////////////////////
 	/// ChannelOut SrcFinfo defined above.
@@ -71,22 +87,34 @@ const Cinfo* ChanBase::initCinfo()
 // Field definitions
 ///////////////////////////////////////////////////////
 
-		static ValueFinfo< ChanBase, double > Gbar( "Gbar",
+		static ElementValueFinfo< ChanBase, double > Gbar( "Gbar",
 			"Maximal channel conductance",
 			&ChanBase::setGbar,
 			&ChanBase::getGbar
 		);
-		static ValueFinfo< ChanBase, double > Ek( "Ek", 
+		static ElementValueFinfo< ChanBase, double > modulation( "modulation",
+			"Modulation, i.e, scale factor for channel conductance."
+			"Note that this is a regular parameter, it is not "
+			"recomputed each timestep. Thus one can use a slow update, "
+			"say, from a molecule pool, to send a message to set "
+			"the modulation, and it will stay at the set value even if "
+			"the channel runs many timesteps before the next assignment. "
+			"This differs from the GENESIS semantics of a similar message,"
+			"which required update each timestep. ",
+			&ChanBase::setModulation,
+			&ChanBase::getModulation
+		);
+		static ElementValueFinfo< ChanBase, double > Ek( "Ek", 
 			"Reversal potential of channel",
 			&ChanBase::setEk,
 			&ChanBase::getEk
 		);
-		static ValueFinfo< ChanBase, double > Gk( "Gk",
+		static ElementValueFinfo< ChanBase, double > Gk( "Gk",
 			"Channel conductance variable",
 			&ChanBase::setGk,
 			&ChanBase::getGk
 		);
-		static ReadOnlyValueFinfo< ChanBase, double > Ik( "Ik",
+		static ReadOnlyElementValueFinfo< ChanBase, double > Ik( "Ik",
 			"Channel current variable",
 			&ChanBase::getIk
 		);
@@ -106,21 +134,23 @@ const Cinfo* ChanBase::initCinfo()
 		&channel,			// Shared
 		&ghk,				// Shared
 		&Gbar,				// Value
+		&modulation,		// Value
 		&Ek,				// Value
 		&Gk,				// Value
 		&Ik,				// ReadOnlyValue
-		IkOut(),				// Src
+		IkOut(),			// Src
+		&proc,				// Shared
 	};
 	
 	static string doc[] =
 	{
 		"Name", "ChanBase",
-		"Author", "Upinder S. Bhalla, 2007, NCBS",
+		"Author", "Upinder S. Bhalla, 2007-2014, NCBS",
 		"Description", "ChanBase: Base class for assorted ion channels."
 		"Presents a common interface for all of them. ",
 	};
 
-        static  Dinfo< ChanBase > dinfo;
+        static  ZeroSizeDinfo< int > dinfo;
         
 	static Cinfo ChanBaseCinfo(
 		"ChanBase",
@@ -143,13 +173,7 @@ static const Cinfo* chanBaseCinfo = ChanBase::initCinfo();
 // Constructor
 ///////////////////////////////////////////////////
 ChanBase::ChanBase()
-			:
-			Vm_( 0.0 ),
-			Gbar_( 0.0 ), Ek_( 0.0 ),
-			Gk_( 0.0 ), Ik_( 0.0 )
-{
-	;
-}
+{ ; }
 
 ChanBase::~ChanBase()
 {;}
@@ -157,42 +181,54 @@ ChanBase::~ChanBase()
 ///////////////////////////////////////////////////
 // Field function definitions
 ///////////////////////////////////////////////////
-
-void ChanBase::setGbar( double Gbar )
+//
+void ChanBase::setGbar( const Eref& e, double Gbar )
 {
-	Gbar_ = Gbar;
+	// Call virtual functions of derived classes for this operation.
+	vSetGbar( e, Gbar );
 }
 
-double ChanBase::getGbar() const
+double ChanBase::getGbar( const Eref& e ) const
 {
-	return Gbar_;
+	return vGetGbar( e );
 }
 
-void ChanBase::setEk( double Ek )
+void ChanBase::setModulation( const Eref& e, double modulation )
 {
-	Ek_ = Ek;
-}
-double ChanBase::getEk() const
-{
-	return Ek_;
+	// Call virtual functions of derived classes for this operation.
+	vSetModulation( e, modulation );
 }
 
-void ChanBase::setGk( double Gk )
+double ChanBase::getModulation( const Eref& e ) const
 {
-	Gk_ = Gk;
-}
-double ChanBase::getGk() const
-{
-	return Gk_;
+	return vGetModulation( e );
 }
 
-void ChanBase::setIk( double Ik )
+void ChanBase::setEk( const Eref& e, double Ek )
 {
-	Ik_ = Ik;
+	vSetEk( e, Ek );
 }
-double ChanBase::getIk() const
+double ChanBase::getEk( const Eref& e ) const
 {
-	return Ik_;
+	return vGetEk( e );
+}
+
+void ChanBase::setGk( const Eref& e, double Gk )
+{
+	vSetGk( e, Gk );
+}
+double ChanBase::getGk( const Eref& e ) const
+{
+	return vGetGk( e );
+}
+
+void ChanBase::setIk( const Eref& e, double Ik )
+{
+	vSetIk( e, Ik );
+}
+double ChanBase::getIk( const Eref& e ) const
+{
+	return vGetIk( e );
 }
 
 ///////////////////////////////////////////////////
@@ -201,7 +237,7 @@ double ChanBase::getIk() const
 
 void ChanBase::handleVm( double Vm )
 {
-	Vm_ = Vm;
+	vHandleVm( Vm );
 }
 
 ///////////////////////////////////////////////////
@@ -211,28 +247,11 @@ void ChanBase::handleVm( double Vm )
 
 void ChanBase::process(  const Eref& e, const ProcPtr info )
 {
-	channelOut()->send( e, Gk_, Ek_ );
-	// This is used if the channel connects up to a conc pool and
-	// handles influx of ions giving rise to a concentration change.
-	IkOut()->send( e, Ik_ );
-	// Needed by GHK-type objects
-	permeability()->send( e, Gk_ );
+	vProcess( e, info );
 }
 
 
 void ChanBase::reinit(  const Eref& e, const ProcPtr info )
 {
-	channelOut()->send( e, Gk_, Ek_ );
-	// Needed by GHK-type objects
-	permeability()->send( e, Gk_ );
-}
-
-void ChanBase::updateIk()
-{
-	Ik_ = ( Ek_ - Vm_ ) * Gk_;
-}
-
-double ChanBase::getVm() const
-{
-	return Vm_;
+	vReinit( e, info );
 }

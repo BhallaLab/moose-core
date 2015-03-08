@@ -340,25 +340,87 @@ bool matchInsideBrace( ObjId id, const string& inside )
 }
 
 /**
+ * Returns true if the name matches the wildcard string. Doesn't care about
+ * following characters in 'name'. Single character wildcards are 
+ * indicated with '?'
+ */
+bool alignedSingleWildcardMatch( const string& name, const string& wild )
+{
+	unsigned int len = wild.length();
+	if ( name.length() < len )
+		return false;
+	for ( unsigned int i = 0; i < len; i++ ) {
+		if ( wild[i] != '?' && name[i] != wild[i] )
+			return false;
+	}
+	return true;
+}
+
+/**
+ * Returns start index for match between string and wildcard using '?' to
+ * indicate single character matches.
+ * Scans forward along 'name' until it finds a match, or gives up.
+ * The entire wildcard must be matched, otherwise returns ~0U
+ * findWithSingleCharWildcard( "abc", 0, "a?c" ): return 0;
+ * findWithSingleCharWildcard( "xyzabc", 1, "a?c" ): return 3;
+ * findWithSingleCharWildcard( "xyzabb", 1, "a?c" ): return ~0U;
+ */
+unsigned int findWithSingleCharWildcard( 
+				const string& name, unsigned int start, const string& wild )
+{
+	unsigned int len = wild.length();
+	if ( len + start > name.length() )
+		return ~0;
+	unsigned int end = 1 + name.length() - len;
+	for ( unsigned int i = start; i < end; ++i ) {
+		if ( alignedSingleWildcardMatch( name.substr(i), wild ) )
+			return i;
+	}
+	return ~0;
+}
+
+/**
  * matchBeforeBrace checks to see if the wildcard string 'name' matches
  * up with the name of the id.
  * Rules:
- *      # may only be used once in the wildcard, but substitutes for any
- *      number of characters.
+ *      # may be used at multiple places in the wildcard.
+ *      It substitutes for any number of characters.
  *
  * 		? may be used any number of times in the wildcard, and
  * 		must substitute exactly for characters.
  *
  * 		If bracesInName, then the Id name itself includes braces.
  */
-bool matchBeforeBrace( ObjId id, const string& name )
+bool matchBeforeBrace( ObjId id, const string& wild )
 {
-	if ( name == "#" || name == "##" )
+	if ( wild == "#" || wild == "##" )
 		return 1;
 
 	string ename = id.element()->getName();
-	if ( name == ename )
+	if ( wild == ename )
 		return 1;
+
+
+	// Break the 'wild' into the sections that must match, at the #s.
+	// Then go through each of these sections doing a match to ename.
+	// If not found, then return false.
+	vector< string > chops;
+	Shell::chopString( wild, chops, '#' );
+	unsigned int prev = 0;
+	unsigned int start = 0;
+
+	for ( vector< string >::iterator 
+				i = chops.begin(); i != chops.end(); ++i ) {
+		start = findWithSingleCharWildcard( ename, prev, *i );
+		if ( start == ~0U )
+			return false;
+		if ( prev == 0 && start > 0 && wild[0] != '#' )
+			return false;
+		prev = start + i->length();
+	}
+	return true;
+
+	/*
 
 	string::size_type pre = name.find( "#" );
 	string::size_type post = name.rfind( "#" );
@@ -381,6 +443,7 @@ bool matchBeforeBrace( ObjId id, const string& name )
 		if ( name[i] != '?' && name[i] != ename[i] )
 			return false;
 	return true;
+	*/
 }
 
 /**
@@ -508,6 +571,31 @@ void testWildcard()
 	assert( bb == "zod##" );
 	assert( ib == "" );
 
+	bool ret = alignedSingleWildcardMatch( "a123456", "a123" );
+	assert( ret == true );
+	ret = alignedSingleWildcardMatch( "a123456", "1234" );
+	assert( ret == false );
+	ret = alignedSingleWildcardMatch( "a123456", "?1234" );
+	assert( ret == true );
+	ret = alignedSingleWildcardMatch( "a123456", "a????" );
+	assert( ret == true );
+	ret = alignedSingleWildcardMatch( "a123456", "??2??" );
+	assert( ret == true );
+	ret = alignedSingleWildcardMatch( "a123456", "??3??" );
+	assert( ret == false );
+	ret = alignedSingleWildcardMatch( "a1", "a?" );
+	assert( ret == true );
+
+	unsigned int j = findWithSingleCharWildcard( "a12345678", 0, "a123" );
+	assert( j == 0 );
+	j = findWithSingleCharWildcard( "a12345678", 0, "123" );
+	assert( j == 1 );
+	j = findWithSingleCharWildcard( "a12345678", 0, "?123" );
+	assert( j == 0 );
+	j = findWithSingleCharWildcard( "a12345678", 0, "?23456?" );
+	assert( j == 1 );
+	j = findWithSingleCharWildcard( "a12345678", 0, "??6?" );
+	assert( j == 4 );
 
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	Id a1 = shell->doCreate( "Neutral", Id(), "a1", 1 );
@@ -515,8 +603,9 @@ void testWildcard()
 	Id c2 = shell->doCreate( "Arith", a1, "c2", 1 );
 	Id c3 = shell->doCreate( "Arith", a1, "c3", 1 );
 	Id cIndex = shell->doCreate( "Neutral", a1, "c4", 1 );
+	Id c5 = shell->doCreate( "Neutral", a1, "Seg5_apical_1234_spine_234",1);
 
-	bool ret = matchBeforeBrace( a1, "a1" );
+	ret = matchBeforeBrace( a1, "a1" );
 	assert( ret );
 	ret = matchBeforeBrace( a1, "a2" );
 	assert( ret == 0 );
@@ -549,6 +638,33 @@ void testWildcard()
 	assert( ret == 1 );
 	ret = matchBeforeBrace( cIndex, "??" );
 	assert( ret == 1 );
+
+	ret = matchBeforeBrace( c5, "Seg?_apical_#_spine_#" );
+	assert( ret == true );
+	ret = matchBeforeBrace( c5, "#Seg?_apical_#_spine_#" );
+	assert( ret == true );
+	ret = matchBeforeBrace( c5, "#?_apical_#_spine_#" );
+	assert( ret == true );
+	ret = matchBeforeBrace( c5, "#5_apical_#_spine_#" );
+	assert( ret == true );
+	ret = matchBeforeBrace( c5, "#e?5_apical_#_spine_#" );
+	assert( ret == true );
+	ret = matchBeforeBrace( c5, "#e5_apical_#_spine_#" );
+	assert( ret == false );
+	ret = matchBeforeBrace( c5, "#Seg5_apical_#_spine_#" );
+	assert( ret == true );
+	ret = matchBeforeBrace( c5, "#Seg#_apical_#_spine_#" );
+	assert( ret == true );
+	ret = matchBeforeBrace( c5, "Seg#_apical_#_spine_#" );
+	assert( ret == true );
+	ret = matchBeforeBrace( c5, "Seg#_a????l_#_spine_#" );
+	assert( ret == true );
+	ret = matchBeforeBrace( c5, "#?_a????l_#_spine_#" );
+	assert( ret == true );
+	ret = matchBeforeBrace( c5, "Seg?_a?????l_#_spine_#" );
+	assert( ret == false );
+	ret = matchBeforeBrace( c5, "Seg#_spine_#" );
+	assert( ret == true );
 
 
 	ret = matchInsideBrace( a1, "TYPE=Neutral" );

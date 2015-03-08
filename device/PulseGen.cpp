@@ -114,7 +114,9 @@ const Cinfo* PulseGen::initCinfo()
                              new OpFunc2< PulseGen, unsigned int, double >(&PulseGen::setDelay));
     
     static DestFinfo input("input",
-                           "Handle incoming input that determines gating/triggering onset.",
+                           "Handle incoming input that determines gating/triggering onset. "
+                           "Note that although this is a double field, the underlying field is"
+                           " integer. So fractional part of input will be truncated",
                            new OpFunc1< PulseGen, double >(&PulseGen::input));
     ///////////////////////////////////////////////////////////////////
     // Shared messages

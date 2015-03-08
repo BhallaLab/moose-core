@@ -65,4 +65,4 @@ if __name__ == "__main__":
         filename = "allChannelsCell.net.xml"
     else:
         filename = sys.argv[1]
-loadGran98NeuroML_L123(filename)
+    loadGran98NeuroML_L123(filename)

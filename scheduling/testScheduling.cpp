@@ -83,7 +83,7 @@ void testClock()
 	const double runtime = 20.0;
 	Id clock(1);
 
-	bool ret = Field< double >::set( clock, "dt", 1.0);
+	bool ret = Field< double >::set( clock, "baseDt", 1.0);
 	assert( ret );
 	ret = LookupField< unsigned int, double >::set( clock, "tickDt", 0, 2.0);
 	assert( ret );
@@ -169,8 +169,21 @@ void testClock()
 	cout << "." << flush;
 }
 
+void testClockMessaging()
+{
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	// Clock* cdata = reinterpret_cast< Clock* >( Id(1).eref().data() );
+	Id syns = shell->doCreate( "SimpleSynHandler", Id(), "syns0", 10 );
+	Id fire = shell->doCreate( "IntFire", Id(), "fire0", 10 );
+
+	shell->doDelete( syns );
+	shell->doDelete( fire );
+	cout << "." << flush;
+}
+
 void testScheduling()
 {
+	testClockMessaging();
 	testClock();
 }
 

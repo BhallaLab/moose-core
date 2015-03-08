@@ -27,7 +27,7 @@ default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
 Shell.o:	Shell.h Neutral.h ../scheduling/Clock.h ../sbml/SbmlWriter.h ../sbml/SbmlReader.h
-ShellCopy.o:	Shell.h Neutral.h
+ShellCopy.o:	Shell.h Neutral.h ../scheduling/Clock.h
 ShellSetGet.o:	Shell.h
 ShellThreads.o:	Shell.h Neutral.h ../scheduling/Clock.h
 LoadModels.o:	Shell.h Neutral.h 

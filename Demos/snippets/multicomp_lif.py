@@ -139,9 +139,10 @@ def setup_two_cells():
     syn.tau1 = 1e-3
     syn.tau2 = 5e-3
     syn.Ek = 90e-3
-    syn.bufferTime = delayMax * 2
-    syn.numSynapses = 1
-    syn.synapse.delay = delayMax
+    synh = moose.SimpleSynHandler( syn.path + "/synh" )
+    moose.connect( synh, "activationOut", syn, "activation" )
+    synh.numSynapses = 1
+    synh.synapse.delay = delayMax
     moose.connect(b2, 'channel', syn, 'channel')
     ## Single message works most of the time but occassionally gives a
     ## core dump
@@ -152,7 +153,7 @@ def setup_two_cells():
     ## With Sparse message and random connectivity I did not get core
     ## dump.
     m = moose.connect(a1.spikegen, 'spikeOut',
-                      syn.synapse.vec, 'addSpike', 'Sparse')
+                      synh.synapse.vec, 'addSpike', 'Sparse')
     m.setRandomConnectivity(1.0, 1)
     stim = moose.PulseGen('/model/stim')
     stim.delay[0] = 100e-3
@@ -171,7 +172,7 @@ def setup_two_cells():
     syntab = moose.Table('%s/%s' % (data.path, 'Gk'))
     moose.connect(syntab, 'requestOut', syn, 'getGk')
     tables.append(syntab)
-    syn.synapse[0].delay = 1e-3
+    synh.synapse[0].delay = 1e-3
     syn.Gbar = 1e-6
     return tables
 

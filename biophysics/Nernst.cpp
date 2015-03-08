@@ -98,12 +98,15 @@ const Cinfo* Nernst::initCinfo()
 				"Immediately sends out the potential to all targets.",
 	};
 	
+	static Dinfo< Nernst > dinfo;
 	static const Cinfo NernstCinfo(
 		"Nernst",
 		Neutral::initCinfo(),
 		NernstFinfos,
 		sizeof( NernstFinfos ) / sizeof(Finfo *),
-		new Dinfo< Nernst >()
+		&dinfo,
+		doc,
+		sizeof( doc ) / sizeof( string )
 	);
 
 	return &NernstCinfo;

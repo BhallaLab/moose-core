@@ -614,9 +614,9 @@ void CubeMesh::innerSetCoords( const vector< double >& v)
 
 void CubeMesh::setCoords( const Eref& e, vector< double > v)
 {
-	double oldVol = getMeshEntryVolume( 0 );
+	// double oldVol = getMeshEntryVolume( 0 );
 	innerSetCoords( v );
-	transmitChange( e, oldVol );
+	ChemCompt::voxelVolOut()->send( e, vGetVoxelVolume() );
 }
 
 vector< double > CubeMesh::getCoords( const Eref& e ) const
@@ -749,46 +749,6 @@ double CubeMesh::vGetEntireVolume() const
 	return fabs( (x1_ - x0_) * (y1_ - y0_) * (z1_ - z0_) );
 }
 
-/////////////////////////////////////////////////////////////////////////
-// Utility function to tell target nodes that something has happened.
-/////////////////////////////////////////////////////////////////////////
-void CubeMesh::transmitChange( const Eref& e, double oldvol)
-{
-		/*
-	Id meshEntry( e.id().value() + 1 );
-	assert( 
-		meshEntry.eref().data() == reinterpret_cast< char* >( lookupEntry( 0 ) )
-	);
-	unsigned int totalNumEntries = nx_ * ny_ * nz_;
-	unsigned int localNumEntries = totalNumEntries;
-	unsigned int startEntry = 0;
-	vector< unsigned int > localIndices( localNumEntries ); // empty
-	for ( unsigned int i = 0; i < localNumEntries; ++i )
-		localIndices[i] = i;
-	vector< double > vols( localNumEntries, dx_ * dy_ * dz_ );
-	vector< vector< unsigned int > > outgoingEntries; // [node#][Entry#]
-	vector< vector< unsigned int > > incomingEntries; // [node#][Entry#]
-
-	// This function updates the size of the FieldDataHandler for the 
-	// MeshEntries.
-	DataHandler* dh = meshEntry.element()->dataHandler();
-	FieldDataHandlerBase* fdh = dynamic_cast< FieldDataHandlerBase* >( dh );
-	assert( fdh );
-	if ( totalNumEntries > fdh->getMaxFieldEntries() ) {
-		fdh->setMaxFieldEntries( localNumEntries );
-	}
-
-	// This message tells the Stoich about the new mesh, and also about
-	// how it communicates with other nodes.
-	meshSplit()->fastSend( e,
-		oldvol, vols, localIndices, outgoingEntries, incomingEntries );
-
-	// This func goes down to the MeshEntry to tell all the pools and
-	// Reacs to deal with the new mesh. They then update the stoich.
-	lookupEntry( 0 )->triggerRemesh( meshEntry.eref(),
-		oldvol, startEntry, localIndices, vols );
-		*/
-}
 
 //////////////////////////////////////////////////////////////////
 // FieldElement assignment stuff for MeshEntries
@@ -941,6 +901,23 @@ const vector< double >& CubeMesh::vGetVoxelVolume() const
 	return vol;
 }
 
+const vector< double >& CubeMesh::vGetVoxelMidpoint() const
+{
+	static vector< double > midpoint;
+	midpoint.resize( m2s_.size() * 3 );
+	for ( unsigned int i = 0; i < m2s_.size(); ++i ) // x coords. Lowest.
+		midpoint[i] = x0_ + ( 0.5 + (m2s_[i] % nx_ ) ) * dx_;
+	for ( unsigned int i = 0; i < m2s_.size(); ++i ) { // y coords. Middle.
+		unsigned int k = i + m2s_.size();
+		midpoint[k] = y0_ + ( 0.5 + ( (m2s_[i] / nx_) % ny_ ) ) * dy_;
+	}
+	for ( unsigned int i = 0; i < m2s_.size(); ++i ) { // z coords. Top.
+		unsigned int k = i + m2s_.size() * 2;
+		midpoint[k] = z0_ + ( 0.5 + ( m2s_[i] / ( nx_ * ny_ ) ) ) * dz_;
+	}
+	return midpoint;
+}
+
 const vector< double >& CubeMesh::getVoxelArea() const
 {
 	static vector< double > area;
@@ -960,12 +937,12 @@ bool CubeMesh::vSetVolumeNotRates( double vol )
 	// Leave x0,y0.z0 and nx,ny,nz the same. Do NOT update any rates.
 	double oldvol = vGetEntireVolume();
 	double linscale = pow( vol / oldvol , 1.0 / 3.0 );
-	x1_ *= linscale;
-	y1_ *= linscale;
-	z1_ *= linscale;
 	dx_ *= linscale;
 	dy_ *= linscale;
 	dz_ *= linscale;
+	x1_ = x0_ + dx_;
+	y1_ = y0_ + dy_;
+	z1_ = z0_ + dz_;
 
 	return true;
 }
@@ -1255,6 +1232,9 @@ void CubeMesh::defineIntersection( const CubeMesh* other,
 	ymax += dy_;
 	zmin -= dz_;
 	zmax += dz_;
+	swapIfBackward( xmin, xmax );
+	swapIfBackward( ymin, ymax );
+	swapIfBackward( zmin, zmax );
 }
 
 /**
@@ -1471,6 +1451,8 @@ void CubeMesh::matchCubeMeshEntries( const CubeMesh* other,
 
 	// Scan through the VoxelJunctions and populate their diffScale field
 	setDiffScale( other, ret );
+	// Scan through the VoxelJunctions and populate their volume field
+	setJunctionVol( other, ret );
 	sort( ret.begin(), ret.end() );
 }
 
@@ -1529,5 +1511,19 @@ void CubeMesh::setDiffScale( const CubeMesh* other,
 		} else {	
 			assert( 0 );
 		}
+	}
+}
+
+void CubeMesh::setJunctionVol( const CubeMesh* other,
+	   vector< VoxelJunction >& ret ) const
+{
+
+	double myVol = dx_ * dy_ * dz_;
+	double otherVol = other->dx_ * other->dy_ * other->dz_;
+	for ( vector< VoxelJunction >::iterator i = ret.begin();
+					i != ret.end(); ++i )
+	{
+		i->firstVol = myVol;
+		i->secondVol = otherVol;
 	}
 }

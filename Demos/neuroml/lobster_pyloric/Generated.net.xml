@@ -17,6 +17,9 @@ Network connection: LP_PY contains 1 individual synaptic connections
 Network connection: LP_ABPD contains 1 individual synaptic connections
 Network connection: PD_PY contains 1 individual synaptic connections
 
+Close to Fig 3e of Prinz et al 2004, Nat Neuro.
+Model converted by Aditya Gilra, 2013, from model of Prinz et al, 2003 and Prinz et al, 2004.
+
 </meta:notes>
 
 <meta:properties>
@@ -69,9 +72,9 @@ Network connection: PD_PY contains 1 individual synaptic connections
 
 
 
-<projections units="Physiological Units">
+        <projections units="Physiological Units">
     <projection name="PD_LP" source="AB_PD" target="LP">
-        <synapse_props synapse_type="DoubExpSyn_Ach" internal_delay="0.0" weight="20.0" threshold="-35.0">
+        <synapse_props synapse_type="DoubExpSyn_Ach" internal_delay="0.0" weight="6.0" threshold="-35.0">
         </synapse_props>
         <connections size="1">
             <connection id="0" pre_cell_id="0" pre_fraction_along="0.3273732" post_cell_id="0" post_fraction_along="0.52766025">
@@ -79,7 +82,7 @@ Network connection: PD_PY contains 1 individual synaptic connections
         </connections>
     </projection>
     <projection name="PY_LP" source="PY" target="LP">
-        <synapse_props synapse_type="DoubExpSyn_Glu" internal_delay="0.0" weight="2.0" threshold="-35.0">
+        <synapse_props synapse_type="DoubExpSyn_Glu" internal_delay="0.0" weight="6.0" threshold="-35.0">
         </synapse_props>
         <connections size="1">
             <connection id="0" pre_cell_id="0" pre_fraction_along="0.52467185" post_cell_id="0" post_fraction_along="0.7308613">
@@ -95,7 +98,7 @@ Network connection: PD_PY contains 1 individual synaptic connections
         </connections>
     </projection>
     <projection name="AB_LP" source="AB_PD" target="LP">
-        <synapse_props synapse_type="DoubExpSyn_Glu" internal_delay="0.0" weight="0.6" threshold="-35.0">
+        <synapse_props synapse_type="DoubExpSyn_Glu" internal_delay="0.0" weight="6.0" threshold="-35.0">
         </synapse_props>
         <connections size="1">
             <connection id="0" pre_cell_id="0" pre_fraction_along="0.27374882" post_cell_id="0" post_fraction_along="0.49563748">
@@ -103,7 +106,7 @@ Network connection: PD_PY contains 1 individual synaptic connections
         </connections>
     </projection>
     <projection name="LP_PY" source="LP" target="PY">
-        <synapse_props synapse_type="DoubExpSyn_Glu" internal_delay="0.0" weight="2.0" threshold="-35.0"><!-- 0.6 as per paper -->
+        <synapse_props synapse_type="DoubExpSyn_Glu" internal_delay="0.0" weight="0.6" threshold="-35.0"><!-- 0.2 as per Marder Fig 3e -->
         </synapse_props>
         <connections size="1">
             <connection id="0" pre_cell_id="0" pre_fraction_along="0.2146715" post_cell_id="0" post_fraction_along="0.44370753">
@@ -111,7 +114,7 @@ Network connection: PD_PY contains 1 individual synaptic connections
         </connections>
     </projection>
     <projection name="LP_ABPD" source="LP" target="AB_PD">
-        <synapse_props synapse_type="DoubExpSyn_Glu" internal_delay="0.0" weight="0.5" threshold="-35.0"><!-- 2.0 as per paper -->
+        <synapse_props synapse_type="DoubExpSyn_Glu" internal_delay="0.0" weight="6.0" threshold="-35.0">
         </synapse_props>
         <connections size="1">
             <connection id="0" pre_cell_id="0" pre_fraction_along="0.6073083" post_cell_id="0" post_fraction_along="0.64504874">
@@ -119,7 +122,7 @@ Network connection: PD_PY contains 1 individual synaptic connections
         </connections>
     </projection>
     <projection name="PD_PY" source="AB_PD" target="PY">
-        <synapse_props synapse_type="DoubExpSyn_Ach" internal_delay="0.0" weight="0.2" threshold="-35.0">
+        <synapse_props synapse_type="DoubExpSyn_Ach" internal_delay="0.0" weight="0.6" threshold="-35.0">
         </synapse_props>
         <connections size="1">
             <connection id="0" pre_cell_id="0" pre_fraction_along="0.49393272" post_cell_id="0" post_fraction_along="0.92773134">
@@ -129,5 +132,6 @@ Network connection: PD_PY contains 1 individual synaptic connections
 </projections>
 
             <!--There are no electrical inputs present in the network-->
+
 
 </networkml>

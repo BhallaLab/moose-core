@@ -41,16 +41,67 @@
 # the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 # Floor, Boston, MA 02110-1301, USA.
 # 
-# 
 
-# Code:
-
-import time
 import pylab
-
-import sys
-sys.path.append('../../python')
 import moose
+            
+def main():
+    """
+    This demo shows how to start, stop, and continue a simulation. 
+    This is commonly done when we want to run a model till settling, then
+    change a parameter or deliver a stimulus, and then continue the
+    simulation.
+
+    Here, the model is just the output of a PulseGen object which 
+    generates periodic pulses.
+    The demo shows how to start the simulation. using the 
+    *moose.reinit* command to reset the model to its initial state,
+    and *moose.start* command to run the model for the specified duration. 
+    We issue multiple *moose.start* commands and do different things to
+    the model between them. First, we change the delay of the pulseGen.
+    Then we show a number of ways to assign the timestep (dt) to the
+    table object in the simulation.
+    Note that throughout this simulation the pulsegen is going at a 
+    uniform rate, it is just being sampled by the output table at
+    different intervals.
+    """
+
+    dt = 0.1
+    steps = 100
+    simtime = dt * steps
+    # Pulsegen is on tick 0, we can pre-emptively set its dt.
+    moose.setClock(0, dt) 
+    table = setup_model()
+    pulse = moose.element( '/model/pulse' )
+    # The 'tick' field is on every object, we can use this to set its dt.
+    moose.setClock( table.tick, dt )
+    moose.reinit()
+    clock = moose.element('/clock')
+    print dt
+    print 'dt = ', dt, ', Total simulation time = ', simtime
+    print 'Running simulation for', simtime, 'seconds'
+    moose.start( simtime )
+    print 'Simulator time:', clock.currentTime
+    # Here we change the pulse delay and then run again.
+    pulse.delay[0] = 1.0
+    moose.start( simtime )
+
+    # We change the table tick and use a different dt for it:
+    table.tick = 2
+    moose.setClock( table.tick, dt * 2 )
+    moose.start( simtime )
+
+    # Here is yet another way to change clocks used by the table
+    moose.useClock( 9, '/model/pulse/tab', 'process' )
+    print table.tick
+    moose.setClock( 9, dt / 2.0 )
+    moose.start( simtime )
+
+    # Finally, here we change the pulse delay to 1 second and run again.
+
+    print 'Simulator time at end of simulation', clock.currentTime
+    pylab.plot(pylab.linspace(0, clock.currentTime, len(table.vector)), table.vector)    
+    pylab.show()
 
 def setup_model():
     model_container = moose.Neutral('/model')    
@@ -60,39 +111,7 @@ def setup_model():
     pulse.width[0] = 0.5
     table = moose.Table('%s/tab' % (pulse.path))
     moose.connect(table, 'requestOut', pulse, 'getOutputValue')
-    moose.setClock(0, 0.1)
-    moose.setClock(1, 0.1)
-    moose.setClock(2, 0.1)
-    moose.useClock(0, '%s,%s' % (pulse.path, table.path), 'process')
     return table
-            
-def startstop_demo():
-    """Starts a simulation for some steps, pauses midway with the
-    current data, runs till end."""
-    table = setup_model()
-    moose.reinit()
-    clock = moose.element('/clock')
-    dt = clock.tickDt[0]
-    print dt
-    steps = 100
-    simtime = dt * steps
-    print 'Total simulation time', simtime
-    t = simtime/2.0
-    print 'Running simulation for', t, 'seconds'
-    moose.start(t)
-    # moose.stop() # Somehow this does not work in single threaded Python script
-    pylab.plot(pylab.linspace(0, clock.currentTime, len(table.vector)), table.vector)    
-    pylab.show()
-    print 'Simulator time:', clock.currentTime
-    # How much of the total simulation time is left?
-    time_left_to_run = simtime - clock.currentTime
-    moose.start(time_left_to_run)
-    print 'Simulator time at end of simulation', clock.currentTime
-    pylab.plot(pylab.linspace(0, clock.currentTime, len(table.vector)), table.vector)    
-    pylab.show()
 
 if __name__ == '__main__':
-    startstop_demo()
-
-# 
-# startstop.py ends here
+    main()

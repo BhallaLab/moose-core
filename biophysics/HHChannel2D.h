@@ -21,7 +21,7 @@
 // Ported to asyn13 on 2014-05-30 by Subhasis Ray
 
 typedef double ( *PFDD )( double, double );
-class HHChannel2D: public ChanBase
+class HHChannel2D: public ChanCommon
 {
 #ifdef DO_UNIT_TESTS
 	friend void testHHChannel2D();
@@ -91,7 +91,7 @@ class HHChannel2D: public ChanBase
 		 * send back to the parent compartment through regular 
 		 * messages.
 		 */
-		void process( const Eref& e, ProcPtr p );
+		void vProcess( const Eref& e, ProcPtr p );
 
 		/**
 		 * Reinitializes the values for the channel. This involves
@@ -100,7 +100,7 @@ class HHChannel2D: public ChanBase
 		 * involves a similar cycle through the gates and then 
 		 * updates to the parent compartment as for the processFunc.
 		 */
-		void reinit( const Eref& e, ProcPtr p );
+		void vReinit( const Eref& e, ProcPtr p );
 		/**
 		 * Assign the local conc_ to the incoming conc from the
 		 * concentration calculations for the compartment. Typically

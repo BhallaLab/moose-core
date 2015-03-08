@@ -171,6 +171,9 @@ class Msg
 		 * Returns the most recently constructed msg.
 		 */
 		static const Msg* lastMsg();
+
+		/// True when MOOSE has been terminated and is being cleaned up.
+		static bool isLastTrump();
 	protected:
 		ObjId mid_; /// Index of this Msg on the msg_ vector.
 

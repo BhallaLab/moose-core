@@ -63,7 +63,30 @@ const Cinfo* Annotator::initCinfo()
 			&Annotator::setIcon,
 			&Annotator::getIcon
 		);
-
+		static ValueFinfo< Annotator, string > solver(
+			"solver",
+			"A string to specify solver to store for Gui",
+			&Annotator::setSolver,
+			&Annotator::getSolver
+		);
+		static ValueFinfo< Annotator, double > runtime(
+			"runtime",
+			"runtime field. Store runtime ",
+			&Annotator::setRuntime,
+			&Annotator::getRuntime
+		);
+		static ValueFinfo< Annotator, string > dirpath(
+			"dirpath",
+			"directory path for Gui",
+			&Annotator::setdirpath,
+			&Annotator::getdirpath
+		);
+		static ValueFinfo< Annotator, string > modeltype(
+			"modeltype",
+			"model type ",
+			&Annotator::setmodeltype,
+			&Annotator::getmodeltype
+		);
 	static Finfo* annotatorFinfos[] = {
 		&x,	// Value
 		&y,	// Value
@@ -72,6 +95,10 @@ const Cinfo* Annotator::initCinfo()
 		&color,	// Value
 		&textColor,	// Value
 		&icon,	// Value
+		&solver,
+		&runtime,
+		&dirpath,
+		&modeltype,
 	};
 
 	static Dinfo< Annotator > dinfo;
@@ -91,7 +118,7 @@ static const Cinfo* annotatorCinfo = Annotator::initCinfo();
 Annotator::Annotator()
 	: x_( 0.0 ), y_( 0.0 ), z_( 0.0 ), 
 		notes_( "" ), color_( "white" ), textColor_( "black" ), 
-		icon_( "sphere" )
+		icon_( "sphere" ),solver_( "gsl"),runtime_(100.0),dirpath_(""),modeltype_("")
 {
 	;
 }
@@ -164,4 +191,40 @@ string Annotator::getIcon() const
 void Annotator::setIcon( string v )
 {
 	icon_ = v;
+}
+string Annotator::getSolver() const
+{
+	return solver_;
+}
+
+void Annotator::setSolver( string v )
+{
+	solver_ = v;
+}
+double Annotator::getRuntime() const
+{
+	return runtime_;
+}
+
+void Annotator::setRuntime( double v )
+{
+	runtime_ = v;
+}
+string Annotator::getdirpath() const
+{
+	return dirpath_;
+}
+
+void Annotator::setdirpath( string v )
+{
+	dirpath_ = v;
+}
+string Annotator::getmodeltype() const
+{
+	return modeltype_;
+}
+
+void Annotator::setmodeltype( string v )
+{
+	modeltype_ = v;
 }

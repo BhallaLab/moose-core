@@ -6,16 +6,6 @@
 ## GNU Lesser General Public License version 2.1
 ## See the file COPYING.LIB for the full notice.
 #########################################################################
-# This example illustrates loading, and running a kinetic model 
-# for a bistable system, defined in kkit format. 
-# Defaults to the deterministic gsl method, you can pick the stochastic
-# one by 
-#     python filename gssa
-# The model starts out equally poised between sides b and c. 
-# Then there is a small tap to push it over to b.
-# Then we apply a moderate push to show that it is now very stably in this
-# state. it takes a strong push to take it over to c.
-# Then it takes a strong push to take it back to b.
 
 import moose
 import matplotlib.pyplot as plt
@@ -25,6 +15,23 @@ import numpy
 import sys
 
 def main():
+	"""
+	This example illustrates loading, and running a kinetic model 
+	for a bistable system, defined in kkit format. 
+	Defaults to the deterministic gsl method, you can pick the 
+	stochastic one by 
+
+	    ``python filename gssa``
+
+	The model starts out equally poised between sides **b** and **c**. 
+	Then there is a small molecular 'tap' to push it over to **b**.
+	Then we apply a moderate push to show that it is now very stably in
+	this state. it takes a strong push to take it over to **c**.
+	Then it takes a strong push to take it back to **b**.
+	This is a good model to use as the basis for running stochastically
+	and examining how state stability is affected by changing volume.
+	"""
+
 	solver = "gsl"  # Pick any of gsl, gssa, ee..
 	#solver = "gssa"  # Pick any of gsl, gssa, ee..
 	#moose.seed( 1234 ) # Needed if stochastic.
@@ -37,7 +44,6 @@ def main():
         # gives an interesting output
         compt = moose.element( '/model/kinetics' )
         compt.volume = 0.2e-19 
-        dt = moose.element( '/clock' ).dt
         r = moose.element( '/model/kinetics/equil' )
 
 	moose.reinit()
@@ -69,6 +75,7 @@ def main():
         imgplot = plt.imshow( img )
         ax = fig.add_subplot( 212 )
 	x = moose.wildcardFind( '/model/#graphs/conc#/#' )
+        dt = moose.element( '/clock' ).tickDt[18]
         t = numpy.arange( 0, x[0].vector.size, 1 ) * dt
         ax.plot( t, x[0].vector, 'r-', label=x[0].name )
         ax.plot( t, x[1].vector, 'g-', label=x[1].name )

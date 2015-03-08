@@ -41,6 +41,8 @@ SpineEntry::SpineEntry( Id shaft, Id head, unsigned int parent )
 	double hdia = Field< double >::get( head, "diameter" );
 	double hlength = Field< double >::get( head, "length" );
 
+	// cout << "SpineEntry: " << parent_ << " " << x0 << " " << x1 << " " << x2 << " : " << y0 << " " << y1<< " " << y2 << " : " << z0 << " " << z1 << " " << z2 << " " << hdia << endl;
+
 	root_.setX( x0 );
 	root_.setY( y0 );
 	root_.setZ( z0 );
@@ -82,6 +84,8 @@ SpineEntry::SpineEntry()
 	head_.setX( defaultLength * 2 );
 	head_.setY( 0 );
 	head_.setZ( 0 );
+
+
 
 	root_.setDia( defaultLength );
 	root_.setLength( defaultLength );
@@ -180,6 +184,15 @@ double SpineEntry::diffusionLength() const
 vector< double > SpineEntry::psdCoords() const
 {
 	vector< double > ret( 8, 0.0 );
+	double m0, m1, m2;
+	mid( m0, m1, m2 );
+	ret[0] = m0;
+	ret[1] = m1;
+	ret[2] = m2;
+	ret[3] = head_.getX() - m0;
+	ret[4] = head_.getY() - m1;
+	ret[5] = head_.getZ() - m2;
+	/*
 	ret[0] = head_.getX();
 	ret[1] = head_.getY();
 	ret[2] = head_.getZ();
@@ -188,6 +201,7 @@ vector< double > SpineEntry::psdCoords() const
 	ret[3] = ret[0] - m0;
 	ret[4] = ret[1] - m1;
 	ret[5] = ret[2] - m2;
+	*/
 	ret[6] = head_.getDia();
 	ret[7] = sqrt( ret[3] * ret[3] + ret[4] * ret[4] + ret[5] * ret[5] );
 

@@ -115,11 +115,11 @@ def addPlot( objpath, field, plot ):
 	moose.connect( tab, 'requestOut', obj, field )
 	return tab
 
-def dumpPlots( fname ):
-	t = numpy.arange( 0, 100.2, 0.2 ) # msec
+def dumpPlots():
 	plots = moose.wildcardFind( '/graphs/##[ISA=Table]' )
 	for x in moose.wildcardFind( '/graphs/##[ISA=Table]' ):
-		pylab.plot( t, x.vector, label=x.name)
+	    t = numpy.arange( 0, x.size ) * x.dt # msec
+	    pylab.plot( t, x.vector, label=x.name)
 
 	pylab.legend()
 	pylab.show()
@@ -135,34 +135,20 @@ def makeModel():
 	addPlot( '/model/apical_19', 'getVm', 'tipVm' )
 
 def testModel( useSolver ):
-	elecDt = 20e-6
-	chemDt = 1e-4
 	plotDt = 2e-4
-	plotName = 'gn.plot'
 	if ( useSolver ):
 		elecDt = 50e-6
 		chemDt = 2e-3
-		plotName = 'mcs.plot'
 
 	makeModel()
-	moose.setClock( 0, elecDt )
-	moose.setClock( 1, elecDt )
-	moose.setClock( 2, elecDt )
-	moose.setClock( 5, chemDt )
-	moose.setClock( 6, chemDt )
-	moose.setClock( 7, plotDt )
-	moose.setClock( 8, plotDt )
-	moose.useClock( 0, '/model/##[ISA=Compartment]', 'init' )
-	moose.useClock( 1, '/model/##[ISA=Compartment],/model/##[ISA=SpikeGen]', 'process' )
-	moose.useClock( 2, '/model/##[ISA=SynBase],/model/##[ISA=ChanBase],/model/##[ISA=CaConc]','process')
-	moose.useClock( 8, '/graphs/#', 'process' )
+	moose.setClock( 18, plotDt )
 
 	moose.reinit()
 	moose.start( 0.1 )
-	dumpPlots( plotName )
+	dumpPlots()
 
 def main():
-	testModel( 0 )
+	testModel( 1 )
 
 if __name__ == '__main__':
 	main()

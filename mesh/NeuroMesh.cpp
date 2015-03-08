@@ -42,15 +42,18 @@ static SrcFinfo4< Id, vector< Id >, vector< Id >, vector< unsigned int > >*
 	return &spineListOut;
 }
 
-static SrcFinfo3< Id, vector< double >, vector< unsigned int > >* 
+static SrcFinfo4< Id, vector< double >, 
+		vector< Id >, vector< unsigned int > >* 
 	psdListOut()
 {
-	static SrcFinfo3< Id, vector< double >, vector< unsigned int > >
+	static SrcFinfo4< Id, vector< double >, 
+			vector< Id >, vector< unsigned int > >
    		psdListOut(
 		"psdListOut",
 		"Tells PsdMesh to build a mesh. "
-		"Arguments: Cell Id, Coordinates of each psd, "
-		"index of matching parent voxels for each spine"
+		"Arguments: (Cell Id, Coordinates of each psd, "
+		"Id of electrical compartment mapped to each voxel, "
+		"index of matching parent voxels for each spine.) "
 		"The coordinates each have 8 entries:"
 		"xyz of centre of psd, xyz of vector perpendicular to psd, "
 		"psd diameter, "
@@ -226,6 +229,15 @@ const Cinfo* NeuroMesh::initCinfo()
 				&NeuroMesh::setCellPortion )
 		);
 
+		static DestFinfo setCellPortionList( "cellPortionList",
+			"Tells NeuroMesh to mesh up a subpart of a cell, using a list"
+			" of compartment Ids. For now assumed contiguous."
+			"The first argument is the cell Id. The second is a vector of"
+			"compartment ids to use for the subpart.",
+			new EpFunc2< NeuroMesh, Id, vector< ObjId > >(
+				&NeuroMesh::setCellPortion )
+		);
+
 		//////////////////////////////////////////////////////////////
 		// Field Elements
 		//////////////////////////////////////////////////////////////
@@ -244,6 +256,7 @@ const Cinfo* NeuroMesh::initCinfo()
 		&diffLength,			// Value
 		&geometryPolicy,		// Value
 		&setCellPortion,			// DestFinfo
+		&setCellPortionList,		// DestFinfo
 		spineListOut(),			// SrcFinfo
 		psdListOut(),			// SrcFinfo
 	};
@@ -484,8 +497,7 @@ void NeuroMesh::insertSingleDummy(
 	if ( nodes_[self].calculateLength( dummy ) < EPSILON ) {
 		double length = nodes_[self].getLength();
 		dummy.setX( x - length );
-		double temp = nodes_[self].calculateLength( dummy );
-		assert( doubleEq( temp, length ) );
+		assert( doubleEq( nodes_[self].calculateLength( dummy ), length) );
 	}
 	nodes_.push_back( dummy );
 }
@@ -591,7 +603,7 @@ void NeuroMesh::setCellPortion( const Eref& e,
 
 void NeuroMesh::separateOutSpines( const Eref& e )
 {
-		vector< Id > ids;
+		// vector< Id > ids;
 		/*
 		e.element()->getNeighbors( ids, spineListOut() );
 		if ( ids.size() > 0 ) {
@@ -615,9 +627,9 @@ void NeuroMesh::separateOutSpines( const Eref& e )
 				psdCoords.insert( psdCoords.end(), ret.begin(), ret.end() );
 				index[i] = i;
 			}
-			ids.clear();
-			e.element()->getNeighbors( ids, psdListOut() );
-			psdListOut()->send( e, cell_, psdCoords, index );
+			// ids.clear();
+			// e.element()->getNeighbors( ids, psdListOut() );
+			psdListOut()->send( e, cell_, psdCoords, head_, index );
 			/*
 			SetGet3< Id, vector< double >, vector< unsigned int > >::set( 
 					ids[0], "psdList", cell_, psdCoords, index );
@@ -644,7 +656,9 @@ void NeuroMesh::updateShaftParents()
 		if ( r >= 0.0 ) {
 			parent_[i] = index + nn.startFid();
 		} else {
-			assert( 0 );
+			cout << "Warning: NeuroMesh::updateShaftParents: may be"
+					" misaligned on " << i << "\n";
+			parent_[i] = index + nn.startFid();
 		}
 	}
 }
@@ -748,6 +762,29 @@ vector< unsigned int > NeuroMesh::getEndVoxelInCompt() const
 const vector< double >& NeuroMesh::vGetVoxelVolume() const
 {
 	return vs_;
+}
+
+const vector< double >& NeuroMesh::vGetVoxelMidpoint() const
+{
+	static vector< double > midpoint;
+	unsigned int num = vs_.size();
+	midpoint.resize( num * 3 );
+	vector< double >::iterator k = midpoint.begin();
+	for ( unsigned int i = 0; i < nodes_.size(); ++i ) {
+		const NeuroNode& nn = nodes_[i];
+		if ( !nn.isDummyNode() ) {
+			assert( nn.parent() < nodes_.size() );
+			const NeuroNode& parent = nodes_[ nn.parent() ];
+			for ( unsigned int j = 0; j < nn.getNumDivs(); ++j ) {
+				vector< double > coords = nn.getCoordinates( parent, j );
+				*k = ( coords[0] + coords[3] ) / 2.0;
+				*(k + num ) = ( coords[1] + coords[4] ) / 2.0;
+				*(k + 2 * num ) = ( coords[2] + coords[5] ) / 2.0;
+				k++;
+			}
+		}
+	}
+	return midpoint;
 }
 
 const vector< double >& NeuroMesh::getVoxelArea() const

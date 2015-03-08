@@ -149,7 +149,7 @@ class TestWildcardFind(unittest.TestCase):
     def setUp(self):
         self.x = moose.Neutral('/x', 10)
         self.y = moose.IntFire('/x[5]/y', 10)
-        self.z = moose.Neutral('/x[5]/z', 3)
+        self.z = moose.PulseGen('/x[5]/z', 3)
         self.u = moose.IntFire('/x[5]/z[2]/u', 10)
 
     def testAllData(self):
@@ -160,7 +160,7 @@ class TestWildcardFind(unittest.TestCase):
 
     def testIsA(self):
         yset = set(moose.wildcardFind('/x[5]/#[ISA=IntFire]'))
-        zset = set(moose.wildcardFind('/x[5]/#[ISA=Neutral]'))
+        zset = set(moose.wildcardFind('/x[5]/#[ISA=PulseGen]'))
         self.assertEqual(yset, set(self.y.vec))
         self.assertEqual(zset, set(self.z.vec))
 
@@ -209,31 +209,42 @@ class TestWildcardFind(unittest.TestCase):
 #         self.assertRaises(NameError, moose.element, 'abracadabra')
         
 
-# class TestMessages(unittest.TestCase):
-#     def setUp(self):
-#         path1 = '/comp%d' % (uuid.uuid4().int)
-#         path2 = '/comp%d' % (uuid.uuid4().int)
-#         self.src1 = moose.Compartment(path1)
-#         self.dest1 = moose.Compartment(path2)
+class TestMessages(unittest.TestCase):
+    def setUp(self):
+        path1 = '/comp%d' % (uuid.uuid4().int)
+        path2 = '/comp%d' % (uuid.uuid4().int)
+        self.src1 = moose.Compartment(path1)
+        self.dest1 = moose.Compartment(path2)        
 
-#     def testConnect(self):
-#         print 'Testing connect ...',
-#         self.assertTrue(self.src1.connect('raxial', self.dest1, 'axial'))
-#         outmsgs_src = self.src1.msgOut
-#         outmsgs_dest = self.dest1.msgOut
-#         self.assertEqual(len(outmsgs_dest), len(outmsgs_src))
-#         for ii in range(len(outmsgs_src)):
-#             self.assertEqual(outmsgs_src[ii], outmsgs_dest[ii])
-#             srcFieldsOnE1 = outmsgs_src[ii].getField('srcFieldsOnE1')
-#             self.assertEqual(srcFieldsOnE1[0], 'raxialOut')
-#             destFieldsOnE2 = outmsgs_src[ii].getField('destFieldsOnE2')
-#             self.assertEqual(destFieldsOnE2[0], 'handleRaxial')
-#         print 'OK'
+    def testConnect(self):
+        print 'Testing connect ...',
+        msg = self.src1.connect('raxial', self.dest1, 'axial')
+        outmsgs_src = self.src1.msgOut
+        outmsgs_dest = self.dest1.msgOut
+        self.assertEqual(len(outmsgs_dest), len(outmsgs_src))
+        for ii in range(len(outmsgs_src)):
+            self.assertEqual(outmsgs_src[ii], outmsgs_dest[ii])
+            srcFieldsOnE1 = outmsgs_src[ii].getField('srcFieldsOnE1')
+            self.assertEqual(srcFieldsOnE1[0], 'raxialOut')
+            destFieldsOnE2 = outmsgs_src[ii].getField('destFieldsOnE2')
+            self.assertEqual(destFieldsOnE2[0], 'handleRaxial')
+        print 'OK'
 
-#     def test_getInMessageDict(self):
-#         print 'Testing getInMessageDict ...',
-#         indict = self.src1.getInMessageDict()
-#         self.assertTrue('parentMsg' in indict)
+    def testDelete(self):
+        print 'Testing delete ...',
+        msg = self.src1.connect('raxial', self.dest1, 'axial')
+        src2 = moose.PulseGen('/pulsegen')
+        msg2 = moose.connect(src2, 'output', self.dest1, 'injectMsg')
+        moose.delete(msg)
+        # accessing deleted element should raise error
+        with self.assertRaises(ValueError):
+            p = msg.path
+        p = msg2.path # this should not raise any error
+
+    # def test_getInMessageDict(self):
+    #     print 'Testing getInMessageDict ...',
+    #     indict = self.src1.getInMessageDict()
+    #     self.assertTrue('parentMsg' in indict)
         
 
 # class TestNeighbors(unittest.TestCase):

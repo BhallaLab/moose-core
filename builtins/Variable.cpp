@@ -47,40 +47,73 @@
 
 #include "header.h"
 #include "Variable.h"
+#include "Function.h"
 
-template <typename T>  const Cinfo * Variable<T>::initCinfo(const char * name)
+const Cinfo * Variable::initCinfo()
 {
-    static ValueFinfo< Variable<T>, T > value(
+    static ValueFinfo< Variable, double > value(
         "value",
         "Variable value",
-        &Variable<T>::setValue,
-        &Variable<T>::getValue);
-
+        &Variable::setValue,
+        &Variable::getValue);
+    static DestFinfo input(
+        "input",
+        "Handles incoming variable value.",
+        new EpFunc1< Variable, double >( &Variable::epSetValue ));
+    
     static Finfo * variableFinfos[] = {
         &value,
+        &input
     };
-    static string _name(name);
     static string doc[] = {
-        "Name", _name,
+        "Name", "Variable",
         "Author", "Subhasis Ray",
-        "Description", "Variable for storing values."
+        "Description", "Variable for storing double values. This is used in Function class."
     };
-    static Dinfo< Variable<T> > dinfo;
-    static Cinfo variableCinfo(name,
+    static Dinfo< Variable > dinfo;
+    static Cinfo variableCinfo("Variable",
                                Neutral::initCinfo(),
                                variableFinfos,
                                sizeof(variableFinfos) / sizeof(Finfo*),
                                &dinfo,
                                doc,
                                sizeof(doc) / sizeof(string),
-                               true // is FieldElement
+                               true // is FieldElement, not to be created directly
                                );
     return & variableCinfo;                               
 }
 
-const Cinfo * doubleVariableCinfo = Variable<double>::initCinfo("Double");
-const Cinfo * longVariableCinfo = Variable<long>::initCinfo("Long");
-const Cinfo * unsignedVariableCinfo = Variable<unsigned long>::initCinfo("Unsigned"); // we do not care about low precision stuff
+static const Cinfo * variableCinfo = Variable::initCinfo();
+
+// This imitates Synapse::addMsgCallback
+// but does not seem to be used anywhere
+// - Subha, Tue Sep  9 19:37:11 IST 2014
+
+void Variable::addMsgCallback(const Eref& e, const string& finfoName, ObjId msg, unsigned int msgLookup)
+{
+    /*
+    if (finfoName == "input"){
+        ObjId pa = Neutral::parent(e);
+        Function * fn = reinterpret_cast< Function *>(pa.data());
+        unsigned int varNumber = fn->addVar();
+        SetGet2<unsigned int, unsigned int>::set(msg, "fieldIndex", msgLookup, varNumber);
+    }
+    */
+}
+
+// // This imitates Synapse::dropMsgCallback
+// void Variable::dropMsgCallback(
+//     const Eref& e, const string& finfoName, 
+//     ObjId msg, unsigned int msgLookup )
+// {
+// 	if ( finfoName == "input" ) {
+// 		ObjId pa = Neutral::parent( e );
+// 		SynHandlerBase* sh = 
+// 				reinterpret_cast< Function* >( pa.data() );
+// 		sh->dropVar( msgLookup );
+// 	}
+// }
+
 
 // 
 // Variable.cpp ends here

@@ -16,7 +16,13 @@ import sys, os
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath('../../python'))
+sys.path.insert(0, os.path.abspath('../../../python'))
+sys.path.append(os.path.abspath('../../../Demos/snippets'))
+sys.path.append(os.path.abspath('../../../Demos/tutorials/ChemicalOscillators'))
+sys.path.append(os.path.abspath('../../../Demos/tutorials/ChemicalBistables'))
+sys.path.append(os.path.abspath('../../../Demos/tutorials/ExcInhNet'))
+sys.path.append(os.path.abspath('../../../Demos/neuroml/lobster_pyloric'))
+sys.path.append(os.path.abspath('../../../Demos/tutorials/ExcInhNetCaPlasticity'))
 
 # -- General configuration -----------------------------------------------------
 
@@ -25,7 +31,11 @@ sys.path.insert(0, os.path.abspath('../../python'))
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'numpydoc']
+extensions = ['sphinx.ext.autodoc',
+              'sphinx.ext.mathjax',
+              'sphinx.ext.autosummary',
+              'sphinx.ext.viewcode',
+              'numpydoc']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -96,7 +106,8 @@ html_theme = 'default'
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-#html_theme_options = {}
+html_theme_options = {'stickysidebar': 'true',
+                      'sidebarwidth': '300'}
 
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []
@@ -189,14 +200,14 @@ latex_documents = [
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
-#latex_logo = None
+latex_logo = 'images/moose_logo.png'
 
 # For "manual" documents, if this is true, then toplevel headings are parts,
 # not chapters.
 #latex_use_parts = False
 
 # If true, show page references after internal links.
-#latex_show_pagerefs = False
+latex_show_pagerefs = True
 
 # If true, show URL addresses after external links.
 #latex_show_urls = False
@@ -205,7 +216,7 @@ latex_documents = [
 #latex_appendices = []
 
 # If false, no module index is generated.
-#latex_domain_indices = True
+latex_domain_indices = True
 
 
 # -- Options for manual page output --------------------------------------------
@@ -228,15 +239,18 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'MOOSE', u'MOOSE Documentation',
-   u'Upinder Bhalla, Niraj Dudani, Aditya Gilra, Aviral Goel, Subhasis Ray and Dilawar Singh', 'MOOSE', 'One line description of project.',
-   'Miscellaneous'),
+   u'Upinder Bhalla, Niraj Dudani, Aditya Gilra, Aviral Goel, Subhasis Ray and Dilawar Singh', 'MOOSE', 'MOOSE is the Multiscale Object-Oriented Simulation Environment.',
+   'Science'),
 ]
 
 # Documents to append as an appendix to all manuals.
 #texinfo_appendices = []
 
 # If false, no module index is generated.
-#texinfo_domain_indices = True
+texinfo_domain_indices = True
 
 # How to display URL addresses: 'footnote', 'no', or 'inline'.
 #texinfo_show_urls = 'footnote'
+
+#numpydoc option
+numpydoc_show_class_members = True

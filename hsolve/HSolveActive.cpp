@@ -156,8 +156,6 @@ void HSolveActive::advanceCalcium()
     vector< CurrentStruct >::iterator icurrent = current_.begin();
     vector< currentVecIter >::iterator iboundary = currentBoundary_.begin();
 
-    caActivation_.assign( caActivation_.size(), 0.0 );
-
     /*
      * caAdvance_: This flag determines how current flowing into a calcium pool
      * is computed. A value of 0 means that the membrane potential at the
@@ -212,6 +210,8 @@ void HSolveActive::advanceCalcium()
         *ica = icaconc->process( *icaactivation );
         ++ica, ++icaactivation;
     }
+
+    caActivation_.assign( caActivation_.size(), 0.0 );
 }
 
 void HSolveActive::advanceChannels( double dt )

@@ -21,6 +21,7 @@
 #include "ZombieCaConc.h"
 #include "../biophysics/HHGate.h"
 #include "../biophysics/ChanBase.h"
+#include "../biophysics/ChanCommon.h"
 #include "../biophysics/HHChannel.h"
 #include "ZombieHHChannel.h"
 #include "../shell/Shell.h"
@@ -169,12 +170,15 @@ const Cinfo* HSolve::initCinfo()
         "branching neuron models.",
     };
 
+    static Dinfo< HSolve > dinfo;
     static Cinfo hsolveCinfo(
         "HSolve",
         Neutral::initCinfo(),
         hsolveFinfos,
         sizeof( hsolveFinfos ) / sizeof( Finfo* ),
-        new Dinfo< HSolve >()
+		&dinfo,
+        doc,
+        sizeof(doc)/sizeof(string)
     );
 
     return &hsolveCinfo;
@@ -183,7 +187,7 @@ const Cinfo* HSolve::initCinfo()
 static const Cinfo* hsolveCinfo = HSolve::initCinfo();
 
 HSolve::HSolve()
-    : dt_( 0.0 )
+    : dt_( 50e-6 )
 {
     ;
 }
@@ -211,8 +215,6 @@ void HSolve::zombify( Eref hsolve ) const
 
     for ( i = compartmentId_.begin(); i != compartmentId_.end(); ++i )
 		temp.push_back( ObjId( *i, 0 ) );
-	Shell::dropClockMsgs( temp, "init" );
-	Shell::dropClockMsgs( temp, "process" );
     for ( i = compartmentId_.begin(); i != compartmentId_.end(); ++i )
         CompartmentBase::zombify( i->eref().element(),
 					   ZombieCompartment::initCinfo(), hsolve.id() );
@@ -220,16 +222,16 @@ void HSolve::zombify( Eref hsolve ) const
 	temp.clear();
     for ( i = caConcId_.begin(); i != caConcId_.end(); ++i )
 		temp.push_back( ObjId( *i, 0 ) );
-	Shell::dropClockMsgs( temp, "process" );
+	// Shell::dropClockMsgs( temp, "process" );
     for ( i = caConcId_.begin(); i != caConcId_.end(); ++i )
         CaConcBase::zombify( i->eref().element(), ZombieCaConc::initCinfo(), hsolve.id() );
 
 	temp.clear();
     for ( i = channelId_.begin(); i != channelId_.end(); ++i )
 		temp.push_back( ObjId( *i, 0 ) );
-	Shell::dropClockMsgs( temp, "process" );
     for ( i = channelId_.begin(); i != channelId_.end(); ++i )
-        ZombieHHChannel::zombify( hsolve.element(), i->eref().element() );
+        HHChannelBase::zombify( i->eref().element(),
+						ZombieHHChannel::initCinfo(), hsolve.id() );
 }
 
 void HSolve::setup( Eref hsolve )

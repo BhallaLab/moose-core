@@ -123,7 +123,7 @@ const Cinfo * Interpol::initCinfo()
     static string doc[] =
             {
                 "Name", "Interpol",
-                "Author", "Subhasis Ray, 2014, NCBS",
+                "Author", "Upinder Bhalla, Subhasis Ray, 2014, NCBS",
                 "Description", "Interpol: Interpolation class. "
                 "Handles lookup from a 1-dimensional array of real-numbered values."
                 "Returns 'y' value based on given 'x' value. "

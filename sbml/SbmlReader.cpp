@@ -36,7 +36,7 @@
 #include "../shell/Wildcard.h"
 //#include "../manager/SimManager.h"
 #include "SbmlReader.h"
-#include "../kinetics/FuncPool.h"
+//#include "../kinetics/FuncPool.h"
 #include "../external/debug/simple_logger.hpp"
 
 using namespace std;
@@ -105,16 +105,9 @@ Id SbmlReader::read( string filename, string location, string solverClass)
         string modelName;
         Id parentId;
         findModelParent ( Id(), location, parentId, modelName ) ;
-        Id parentId2 = parentId;
         Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
-        /*  As a policy model is created under /model and all the graphs are created under /data, if this file is invoke from Gui the /model is already created and path is passed, but if readSbml is called then only modelName is taken so making sure /model is the model path                                                                    */
-        //Id modelPath_ = s->doCreate("Neutral",parentId,"model",1,MooseGlobal);
-        if (parentId == Id()) {
-            Id parentId1 = s->doCreate("Neutral",parentId,"model",1,MooseGlobal);
-            parentId = parentId1;
-        }
-        Id base_ = s->doCreate( "Neutral", parentId, modelName, 1, MooseGlobal);
-            //Id base_ = s->doCreate( "SimManager", parentId, modelName, dims, true );
+        Id baseId_ = s->doCreate( "Neutral", parentId, modelName, 1, MooseGlobal);
+        Id base_ =s->doCreate("Neutral",baseId_,"model",1,MooseGlobal);
         assert( base_ != Id() );
         //Map Compartment's SBML id to Moose ID
         map< string,Id > comptSidMIdMap;
@@ -154,6 +147,19 @@ Id SbmlReader::read( string filename, string location, string solverClass)
                                 string plotValue;
                                 //double nodeValue;
                                 if(nodeName == "plots") {
+                                    Id graphs;
+                                    // Carrying on with the policy that all graphs will be created under /modelName
+                                    string datapath = baseId_.path() +"/data";
+                                    Id graphpath(datapath);
+                                    graphs = datapath;
+                                    graphs = s->doCreate("Neutral",baseId_,"data",1);
+                                    assert(graphs != Id());
+                                    Id graph;
+                                    string datagrph = graphs.path()+"/graph_1";
+                                    Id graph1(datagrph);
+                                    graph = s->doCreate("Neutral",graphs,"graph_0",1);
+                                    assert(graph != Id());
+                                    /*
                                     // if plots exist then will be placing at "/data"
                                     Id graphs;
                                     //Id dataId;
@@ -172,6 +178,7 @@ Id SbmlReader::read( string filename, string location, string solverClass)
                                         //    cout << "Id " << dataId;
                                         //    graphs = s->doCreate( "Neutral",dataId, "data", 1);
                                         assert( graphs != Id() );
+                                        */  
                                     plotValue = (grandChildNode.getChild(0).toXMLString()).c_str();
                                     istringstream pltVal(plotValue);
                                     string pltClean;
@@ -185,17 +192,21 @@ Id SbmlReader::read( string filename, string location, string solverClass)
                                             pltClean = pltClean.substr(pos+1,pltClean.length());
                                         replace(pltClean.begin(),pltClean.end(),'/','_');
                                         string plotName =  pltClean + ".conc";
-                                        Id pltPath(graphs.path());
+                                        Id pltPath(graph.path());
                                         Id tab = s->doCreate( "Table", pltPath, plotName, 1 );
                                         if (tab != Id())
                                             s->doAddMsg("Single",tab,"requestOut",plotSId,"getConc");
                                     }//while
-                                    /* passing /model and /data         */
+                                    /* passing /model and /data to clocks         */
+                                    //commented due to automatic scheduling
+                                    
+                                    /*
                                     string comptPath =base_.path()+"/##";
                                     s->doUseClock(comptPath,"process",4);
 
                                     string tablePath = graphs.path()+"/##[TYPE=Table]";
                                     s->doUseClock( tablePath, "process",8 );
+                                    */
                                 }//plots
                                 /*else
                                   nodeValue = atof ((grandChildNode.getChild(0).toXMLString()).c_str());
@@ -217,11 +228,24 @@ Id SbmlReader::read( string filename, string location, string solverClass)
             }//annotation Node
             else {
                 //4 for simdt and 8 for plotdt
-                s->doUseClock(base_.path()+"/##","process",4);
-                s->doUseClock(+"/data/##[TYPE=Table]","process",8);
-                s->doSetClock(4,0.1);
-                s->doSetClock(8,0.1);
-
+                //Harsha:Since scheduling is automatically done commeting this
+                
+                //s->doUseClock(base_.path()+"/##","process",4);
+                //s->doUseClock(+"/data/##[TYPE=Table]","process",8);
+                //s->doSetClock(4,0.1);
+                //s->doSetClock(8,0.1);
+                /*
+                s->doUseClock( "/data/##[TYPE=Table]", "proc", 16 );
+                double simdt = 0.1;
+                double plotdt = 1;
+                s->doSetClock( 11, simdt );
+                s->doSetClock( 12, simdt );
+                s->doSetClock( 13, simdt );
+                s->doSetClock( 14, simdt );
+                s->doSetClock( 16, plotdt );
+                s->doSetClock( 17, plotdt );
+                s->doSetClock( 18, plotdt );
+                */
             }
             vector< ObjId > compts;
             string comptpath = base_.path()+"/##[ISA=ChemCompt]";
@@ -229,7 +253,7 @@ Id SbmlReader::read( string filename, string location, string solverClass)
             vector< ObjId >::iterator i = compts.begin();
             string comptName = nameString(Field<string> :: get(ObjId(*i),"name"));
             string simpath = base_.path() + "/##";
-            s->doUseClock( simpath, "process", 4 );
+            //s->doUseClock( simpath, "process", 4 );
 
             //wildcardFind( plotpath, plots );
             //Id pathexist(base_.path()+"/kinetics");
@@ -248,7 +272,8 @@ Id SbmlReader::read( string filename, string location, string solverClass)
                sm->buildForSBML(base_.eref(),&q,solverClass);
                }
                */
-            return base_;
+            cout << "base_ " <<base_.path() << "baseId_ " << baseId_.path();
+            return baseId_;
         }
 
     } else
@@ -468,11 +493,15 @@ void SbmlReader::getRules() {
             if (v_iter != molSidMIdMap_.end()) {
                 Id rVariable = molSidMIdMap_.find(rule_variable)->second;
                 string rstring =molSidMIdMap_.find(rule_variable)->first;
-                Id sumId = shell->doCreate( "SumFunc", rVariable, "func", 1 );
-                rVariable.element()->zombieSwap( FuncPool::initCinfo() );
+                //Id sumId = shell->doCreate( "SumFunc", rVariable, "func", 1 );
+                Id sumId = shell->doCreate( "Function", rVariable, "func", 1 );
+                //rVariable.element()->zombieSwap( FuncPool::initCinfo() );
+                //ObjId ret = shell->doAddMsg( "single",
+                //                             ObjId( sumId, 0 ), "output",
+                //                             ObjId( rVariable, 0 ), "input" );
                 ObjId ret = shell->doAddMsg( "single",
-                                             ObjId( sumId, 0 ), "output",
-                                             ObjId( rVariable, 0 ), "input" );
+                                             ObjId( sumId, 0 ), "valueOut",
+                                             ObjId( rVariable, 0 ), "setN" );
                 assert( ret != ObjId() );
                 const ASTNode * ast = rule->getMath();
                 vector< string > ruleMembers;
@@ -1052,7 +1081,6 @@ void SbmlReader ::findModelParent( Id cwe, const string& path, Id& parentId, str
     // at the time it comes to SbmlReader.cpp
     //When run directly (command line readSBML() )it ignores the path and creates under '/' and filename takes as "SBMLtoMoose"
     //modelName = "test";
-    cout << "here " << path;
     string fullPath = path;
     if ( path.length() == 0 )
         parentId = cwe;
@@ -1104,7 +1132,6 @@ void SbmlReader::getGlobalParameter() {
         parmValueMap[id] = value;
     }
 }
-#endif // USE_SBML
 
 string SbmlReader::nameString( string str ) {
     string str1;
@@ -1123,4 +1150,4 @@ string SbmlReader::nameString( string str ) {
     } while ( i < len );
     return str;
 }
-
+#endif // USE_SBML

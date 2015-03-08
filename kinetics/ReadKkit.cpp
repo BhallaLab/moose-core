@@ -14,7 +14,6 @@
 #include "../utility/utility.h"
 #include "PoolBase.h"
 #include "Pool.h"
-#include "FuncPool.h"
 #include "BufPool.h"
 #include "ReacBase.h"
 #include "EnzBase.h"
@@ -123,7 +122,6 @@ void ReadKkit::setMoveOntoCompartment( bool v )
 Id  makeStandardElements( Id pa, const string& modelname )
 {
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
-	//cout << " kkit read " << pa << " " << modelname << " "<< MooseGlobal;
 	string modelPath = pa.path() + "/" + modelname;
 	if ( pa == Id() )
 		modelPath = "/" + modelname;
@@ -173,9 +171,9 @@ void setMethod( Shell* s, Id mgr, double simdt, double plotdt,
 			Field< Id >::set( stoich, "compartment", compt );
 			Field< Id >::set( stoich, "ksolve", ksolve );
 			Field< string >::set( stoich, "path", simpath );
-			simpath2 += "," + cpath + "/ksolve";
-			s->doUseClock( simpath2, "process", 4 );
-			s->doSetClock( 4, plotdt );
+			// simpath2 += "," + cpath + "/ksolve";
+			// s->doUseClock( simpath2, "process", 4 );
+			// s->doSetClock( 4, plotdt );
 	} else if ( m == "gssa" || m == "gsolve" || 
 		m == "gillespie" || m == "stochastic" ) {
 			Id gsolve = s->doCreate( "Gsolve", compt, "gsolve", 1 );
@@ -183,18 +181,26 @@ void setMethod( Shell* s, Id mgr, double simdt, double plotdt,
 			Field< Id >::set( stoich, "compartment", compt );
 			Field< Id >::set( stoich, "ksolve", gsolve );
 			Field< string >::set( stoich, "path", simpath );
-			simpath2 += "," + cpath + "/gsolve";
-			s->doUseClock( simpath2, "process", 4 );
-			s->doSetClock( 4, plotdt );
+			// simpath2 += "," + cpath + "/gsolve";
+			// s->doUseClock( simpath2, "process", 4 );
+			// s->doSetClock( 4, plotdt );
 	} else if ( m == "ee" || m == "neutral" ) {
-			s->doUseClock( simpath, "process", 4 );
-			s->doSetClock( 4, simdt );
+			// s->doUseClock( simpath, "process", 4 );
+			// s->doSetClock( 4, simdt );
 	} else {
 			cout << "ReadKkit::setMethod: option " << method <<
 					" not known, using Exponential Euler (ee)\n";
-			s->doUseClock( simpath, "process", 4 );
-			s->doSetClock( 4, simdt );
+			// s->doUseClock( simpath, "process", 4 );
+			// s->doSetClock( 4, simdt );
 	}
+	s->doUseClock( simpath2, "proc", 11 );
+	s->doSetClock( 11, simdt );
+	s->doSetClock( 12, simdt );
+	s->doSetClock( 13, simdt );
+	s->doSetClock( 14, simdt );
+	s->doSetClock( 16, plotdt );	// Gsolve and Ksolve
+	s->doSetClock( 17, plotdt );	// Stats objects
+	s->doSetClock( 18, plotdt );	// Table2 objects.
 }
 /**
  * The readcell function implements the old GENESIS cellreader
@@ -206,7 +212,7 @@ Id ReadKkit::read(
 	const string& filename, 
 	const string& modelname,
 	Id pa, const string& methodArg )
-{
+{   
 	string method = methodArg;
 	ifstream fin( filename.c_str() );
 	if (!fin){
@@ -222,7 +228,6 @@ Id ReadKkit::read(
 	Shell* s = reinterpret_cast< Shell* >( ObjId().data() );
 	Id mgr = makeStandardElements( pa, modelname );
 	assert( mgr != Id() );
-
 	baseId_ = mgr;
 	basePath_ = mgr.path();
 	enzCplxMols_.resize( 0 );
@@ -236,24 +241,34 @@ Id ReadKkit::read(
 
 	convertParametersToConcUnits();
 
-	s->doSetClock( 8, plotdt_ );
+	// s->doSetClock( 8, plotdt_ );
 	
-	string plotpath = basePath_ + "/graphs/##[TYPE=Table]," +
-			basePath_ + "/moregraphs/##[TYPE=Table]";
-	s->doUseClock( plotpath, "process", 8 );
+	// string plotpath = basePath_ + "/graphs/##[TYPE=Table]," + basePath_ + "/moregraphs/##[TYPE=Table]";
+	// s->doUseClock( plotpath, "process", 8 );
 
 	setMethod( s, mgr, simdt_, plotdt_, method );
 
+	//Harsha: Storing solver and runtime at model level rather than model level
+	Id kinetics( basePath_+"/kinetics");
+	assert(kinetics != Id());
+	Id cInfo = s->doCreate( "Annotator", basePath_, "info", 1 );
+	assert( cInfo != Id() );
+	Field< string > ::set(cInfo, "solver", method);
+	Field< double > ::set(cInfo, "runtime", maxtime_);
 	s->doReinit();
 	return mgr;
 }
 
 void ReadKkit::run()
 {
-	shell_->doSetClock( 4, simdt_ );
-	shell_->doSetClock( 5, simdt_ );
-	shell_->doSetClock( 8, plotdt_ );
-	shell_->doSetClock( 7, 0 );
+	shell_->doSetClock( 11, simdt_ );
+	shell_->doSetClock( 12, simdt_ );
+	shell_->doSetClock( 13, simdt_ );
+	shell_->doSetClock( 14, simdt_ );
+	shell_->doSetClock( 16, plotdt_ );
+	shell_->doSetClock( 17, plotdt_ );
+	shell_->doSetClock( 18, plotdt_ );
+	/*
 	string poolpath = basePath_ + "/kinetics/##[ISA=Pool]";
 	string reacpath = basePath_ + "/kinetics/##[ISA!=Pool]";
 	string plotpath = basePath_ + "/graphs/##[TYPE=Table]," + 
@@ -261,13 +276,18 @@ void ReadKkit::run()
 	shell_->doUseClock( reacpath, "process", 4 );
 	shell_->doUseClock( poolpath, "process", 5 );
 	shell_->doUseClock( plotpath, "process", 8 );
+	*/
 	shell_->doReinit();
 	if ( useVariableDt_ ) {
-		shell_->doSetClock( 4, fastdt_ );
-		shell_->doSetClock( 5, fastdt_ );
+		shell_->doSetClock( 11, fastdt_ );
+		shell_->doSetClock( 12, fastdt_ );
+		shell_->doSetClock( 13, fastdt_ );
+		shell_->doSetClock( 14, fastdt_ );
 		shell_->doStart( transientTime_ );
-		shell_->doSetClock( 4, simdt_ );
-		shell_->doSetClock( 5, simdt_ );
+		shell_->doSetClock( 11, simdt_ );
+		shell_->doSetClock( 12, simdt_ );
+		shell_->doSetClock( 13, simdt_ );
+		shell_->doSetClock( 14, simdt_ );
 		shell_->doStart( maxtime_ - transientTime_ );
 	} else {
 		shell_->doStart( maxtime_ );
@@ -278,8 +298,8 @@ void ReadKkit::dumpPlots( const string& filename )
 {
 	// ofstream fout ( filename.c_str() );
 	vector< ObjId > plots;
-	string plotpath = basePath_ + "/graphs/##[TYPE=Table]," + 
-		basePath_ + "/moregraphs/##[TYPE=Table]";
+	string plotpath = basePath_ + "/graphs/##[TYPE=Table2]," + 
+		basePath_ + "/moregraphs/##[TYPE=Table2]";
 	wildcardFind( plotpath, plots );
 	for ( vector< ObjId >::iterator 
 					i = plots.begin(); i != plots.end(); ++i )
@@ -414,7 +434,6 @@ ReadKkit::ParseMode ReadKkit::readInit( const string& line )
 		initdumpVersion_ = atoi( argv[2].c_str() );
 		return DATA;
 	}
-
 	return INIT;
 }
 
@@ -886,6 +905,7 @@ Id ReadKkit::buildInfo( Id parent,
 	map< string, int >& m, const vector< string >& args )
 {
 	Id info = shell_->doCreate( "Annotator", parent, "info", 1 );
+	//cout << "parent " << parent << " " << parent.path() << " info " << info.path();
 	assert( info != Id() );
 
 	double x = atof( args[ m[ "x" ] ].c_str() );
@@ -896,7 +916,6 @@ Id ReadKkit::buildInfo( Id parent,
 	Field< string >::set( info, "color", args[ m[ "xtree_fg_req" ] ] );
 	Field< string >::set( info, "textColor", 
 		args[ m[ "xtree_textfg_req" ] ] );
-
 	return info;
 }
 
@@ -1014,38 +1033,44 @@ void ReadKkit::buildSumTotal( const string& src, const string& dest )
 	assert( i != poolIds_.end() );
 	Id destId = i->second;
 	
-	// Don't bother on buffered pool.
-	if ( destId.element()->cinfo()->isA( "BufPool" ) ) 
-		return;
-
 	Id sumId;
 	// Check if the pool has not yet been converted to handle SumTots.
 	if ( destId.element()->cinfo()->name() == "Pool" ) {
-		sumId = shell_->doCreate( "SumFunc", destId, "func", 1 );
+		sumId = shell_->doCreate( "Function", destId, "func", 1 );
 		// Turn dest into a FuncPool.
-		destId.element()->zombieSwap( FuncPool::initCinfo() );
+		destId.element()->zombieSwap( BufPool::initCinfo() );
 
 		ObjId ret = shell_->doAddMsg( "single", 
-			ObjId( sumId, 0 ), "output",
-			ObjId( destId, 0 ), "input" ); 
+			ObjId( sumId, 0 ), "valueOut",
+			ObjId( destId, 0 ), "setN" ); 
 		assert( ret != ObjId() );
 	} else {
 		sumId = Neutral::child( destId.eref(), "func" );
 	}
 
 	if ( sumId == Id() ) {
-		cout << "Error: ReadKkit::buildSumTotal: could not make SumFunc on '"
+		cout << "Error: ReadKkit::buildSumTotal: could not make Function on '"
 		<< dest << "'\n";
 		return;
 	}
 	
 	Id srcId = findSumTotSrc( src );
+	unsigned int numVars = Field< unsigned int >::get( sumId, "numVars" );
+	ObjId xi( sumId.value() + 1, 0, numVars );
+	Field< unsigned int >::set( sumId, "numVars", numVars + 1 );
 
 	ObjId ret = shell_->doAddMsg( "single", 
 		ObjId( srcId, 0 ), "nOut",
-		ObjId( sumId, 0 ), "input" ); 
+		xi, "input" ); 
 	assert( ret != ObjId() );
 
+
+	stringstream ss;
+	for ( unsigned int i = 0; i < numVars; ++i ) {
+		ss << "x" << i << "+";
+	}
+	ss << "x" << numVars;
+	Field< string >::set( sumId, "expr", ss.str() );
 }
 
 /**
@@ -1134,7 +1159,7 @@ Id ReadKkit::buildPlot( const vector< string >& args )
 	Id pa = shell_->doFind( head ).id;
 	assert( pa != Id() );
 
-	Id plot = shell_->doCreate( "Table", pa, tail, 1 );
+	Id plot = shell_->doCreate( "Table2", pa, tail, 1 );
 	assert( plot != Id() );
 
 	temp = graph + "/" + tail;

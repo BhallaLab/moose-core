@@ -128,6 +128,7 @@ void ZombieCaConc::vProcess( const Eref& e, ProcPtr p )
 void ZombieCaConc::vCurrent( const Eref& e, double I )
 {
 	//~ activation_ += I;
+	hsolve_->iCa( e.id(), I );
 }
 
 void ZombieCaConc::vCurrentFraction( const Eref& e, double I, double fraction )

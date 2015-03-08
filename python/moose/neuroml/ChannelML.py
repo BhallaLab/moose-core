@@ -3,6 +3,7 @@
 ## Version 1.5 by Niraj Dudani, NCBS, Bangalore, India, 2012, ported to parallel MOOSE
 ## Version 1.6 by Aditya Gilra, NCBS, Bangalore, India, 2012, minor changes for parallel MOOSE
 ## Version 1.7 by Aditya Gilra, NCBS, Bangalore, India, 2013, further support for NeuroML 1.8.1
+## Version 1.8 by Aditya Gilra, NCBS, Bangalore, India, 2013, changes for new IntFire and SynHandler classes
 
 """
 NeuroML.py is the preferred interface. Use this only if NeuroML L1,L2,L3 files are misnamed/scattered.
@@ -18,10 +19,13 @@ import math
 
 import moose
 from moose.neuroml import utils
+from moose import utils as moose_utils
+from .. import print_utils as pu
 
 class ChannelML():
 
     def __init__(self,nml_params):
+
         self.cml='http://morphml.org/channelml/schema'
         self.nml_params = nml_params
         self.temperature = nml_params['temperature']
@@ -49,22 +53,41 @@ class ChannelML():
             Tfactor = 1.0
             Gfactor = 1.0
         else:
-            print "wrong units", units,": exiting ..."
+            pu.fatal("Wrong units %s exiting ..." % units)
             sys.exit(1)
         moose.Neutral('/library') # creates /library in MOOSE tree; elif present, wraps
-        if utils.neuroml_debug: print "loading synapse :",synapseElement.attrib['name'],"into /library ."
-        moosesynapse = moose.SynChan('/library/'+synapseElement.attrib['name'])
+        synname = synapseElement.attrib['name']
+        if utils.neuroml_debug: 
+           pu.info("Loading synapse : %s into /library" % synname)
+        moosesynapse = moose.SynChan('/library/'+synname)
         doub_exp_syn = synapseElement.find('./{'+self.cml+'}doub_exp_syn')
         moosesynapse.Ek = float(doub_exp_syn.attrib['reversal_potential'])*Vfactor
         moosesynapse.Gbar = float(doub_exp_syn.attrib['max_conductance'])*Gfactor
         moosesynapse.tau1 = float(doub_exp_syn.attrib['rise_time'])*Tfactor # seconds
         moosesynapse.tau2 = float(doub_exp_syn.attrib['decay_time'])*Tfactor # seconds
-        ### The delay and weight can be set only after connecting a spike event generator.
-        ### delay and weight are arrays: multiple event messages can be connected to a single synapse
+        ## The delay and weight can be set only after connecting a spike event generator.
+        ## delay and weight are arrays: multiple event messages can be connected to a single synapse
+
+        ## graded synapses are not supported by neuroml, so set to False here,
+        ## see my Demo/neuroml/lobster_pyloric/STG_net.py for how to still have graded synapses
         moosesynapse_graded = moose.Mstring(moosesynapse.path+'/graded')
         moosesynapse_graded.value = 'False'
         moosesynapse_mgblock = moose.Mstring(moosesynapse.path+'/mgblockStr')
         moosesynapse_mgblock.value = 'False'
+        ## check if STDP synapse is present or not
+        stdp_syn = synapseElement.find('./{'+self.cml+'}stdp_syn')
+        if stdp_syn is None:
+            moosesynhandler = moose.SimpleSynHandler('/library/'+synname+'/handler')
+        else:
+            moosesynhandler = moose.STDPSynHandler('/library/'+synname+'/handler')
+            moosesynhandler.aPlus0 = float(stdp_syn.attrib['del_weight_ltp'])
+            moosesynhandler.aMinus0 = float(stdp_syn.attrib['del_weight_ltd'])
+            moosesynhandler.tauPlus = float(stdp_syn.attrib['tau_ltp'])
+            moosesynhandler.tauMinus = float(stdp_syn.attrib['tau_ltd'])
+            moosesynhandler.weightMax = float(stdp_syn.attrib['max_syn_weight'])
+            moosesynhandler.weightMin = 0.0
+        ## connect the SimpleSynHandler or the STDPSynHandler to the SynChan (double exp)
+        moose.connect( moosesynhandler, 'activationOut', moosesynapse, 'activation' )
       
     def readChannelML(self,channelElement,params={},units="SI units"):
         ## I first calculate all functions assuming a consistent system of units.
@@ -81,12 +104,35 @@ class ChannelML():
             Gfactor = 1.0
             concfactor = 1.0
         else:
-            print "wrong units", units,": exiting ..."
+            pu.fatal("Wrong units %s. Existing" % units)
             sys.exit(1)
         moose.Neutral('/library') # creates /library in MOOSE tree; elif present, wraps
         channel_name = channelElement.attrib['name']
-        if utils.neuroml_debug: print "loading channel :", channel_name,"into /library ."
+        if utils.neuroml_debug: 
+           pu.info("Loading channel %s into /library" % channel_name)
+
         IVrelation = channelElement.find('./{'+self.cml+'}current_voltage_relation')
+        intfire = IVrelation.find('./{'+self.cml+'}integrate_and_fire')
+
+        if intfire is not None:
+            ## Below params need to be set while making an LIF compartment
+            moosechannel = moose.Neutral('/library/'+channel_name)
+            moosechannelval = moose.Mstring(moosechannel.path+'/vReset')
+            moosechannelval.value = str(float(intfire.attrib['v_reset'])*Vfactor)
+            moosechannelval = moose.Mstring(moosechannel.path+'/thresh')
+            moosechannelval.value = str(float(intfire.attrib['threshold'])*Vfactor)
+            moosechannelval = moose.Mstring(moosechannel.path+'/refracT')
+            moosechannelval.value = str(float(intfire.attrib['t_refrac'])*Tfactor)
+            ## refracG is currently not supported by moose.LIF
+            ## Confirm if g_refrac is a conductance density or not?
+            ## assuming g_refrac is a conductance density below
+            moosechannelval = moose.Mstring(moosechannel.path+'/refracG')
+            moosechannelval.value = str(float(intfire.attrib['g_refrac'])*Gfactor)
+            ## create an Mstring saying this is an integrate_and_fire mechanism
+            moosechannelval = moose.Mstring(moosechannel.path+'/integrate_and_fire')
+            moosechannelval.value = 'True'
+            return
+
         concdep = IVrelation.find('./{'+self.cml+'}conc_dependence')
         if concdep is None:
             moosechannel = moose.HHChannel('/library/'+channel_name)
@@ -113,7 +159,7 @@ class ChannelML():
         
         gates = IVrelation.findall('./{'+self.cml+'}gate')
         if len(gates)>3:
-            print "Sorry! Maximum x, y, and z (three) gates are possible in MOOSE/Genesis"
+            pu.fatal("Sorry! Maximum x, y, and z (three) gates are possible in MOOSE/Genesis")
             sys.exit()
         gate_full_name = [ 'gateX', 'gateY', 'gateZ' ] # These are the names that MOOSE uses to create gates.
         ## if impl_prefs tag is present change VMIN, VMAX and NDIVS
@@ -148,7 +194,7 @@ class ChannelML():
             self.gate_name = gate.attrib['name']
             for q10settings in IVrelation.findall('./{'+self.cml+'}q10_settings'):
                 ## self.temperature from neuro.utils
-                if 'gate' in q10settings.attrib.keys():
+                if 'gate' in list(q10settings.attrib.keys()):
                     if q10settings.attrib['gate'] == self.gate_name:
                         self.setQ10(q10settings)
                         break
@@ -195,7 +241,7 @@ class ChannelML():
                 if fn_name in ['alpha','beta']:
                     self.make_cml_function(transition, fn_name, concdep)
                 else:
-                    print "Unsupported transition ", name
+                    pu.fatal("Unsupported transition %s" % fn_name)
                     sys.exit()
             
             time_course = gate.find('./{'+self.cml+'}time_course')
@@ -295,10 +341,10 @@ class ChannelML():
                 #moosegate.dyB = dCa*concfactor
 
     def setQ10(self,q10settings):
-        if 'q10_factor' in q10settings.attrib.keys():
+        if 'q10_factor' in list(q10settings.attrib.keys()):
             self.q10factor = float(q10settings.attrib['q10_factor'])\
                 **((self.temperature-float(q10settings.attrib['experimental_temp']))/10.0)
-        elif 'fixed_q10' in q10settings.attrib.keys():
+        elif 'fixed_q10' in list(q10settings.attrib.keys()):
             self.q10factor = float(q10settings.attrib['fixed_q10'])
 
 
@@ -321,10 +367,11 @@ class ChannelML():
         ionSpecies = ionConcElement.find('./{'+self.cml+'}ion_species')
         if ionSpecies is not None:
             if not 'ca' in ionSpecies.attrib['name']:
-                print "Sorry, I cannot handle non-Ca-ion pools. Exiting ..."
+                pu.fatal("Sorry, I cannot handle non-Ca-ion pools. Exiting ...")
                 sys.exit(1)
         capoolName = ionConcElement.attrib['name']
-        print "loading Ca pool :",capoolName,"into /library ."
+
+        pu.info("Loading Ca pool %s into /library ." % capoolName)
         caPool = moose.CaConc('/library/'+capoolName)
         poolModel = ionConcElement.find('./{'+self.cml+'}decaying_pool_model')
         caPool.CaBasal = float(poolModel.attrib['resting_conc']) * concfactor
@@ -365,7 +412,7 @@ class ChannelML():
             expr_string = self.replace(expr_string, 'beta', 'self.beta(v'+ca_name+')')                
             fn = self.make_function( fn_name, fn_type, expr_string=expr_string, concdep=concdep )
         else:
-            print "Unsupported function type ", fn_type
+            pu.fatal("Unsupported function type %s "% fn_type)
             sys.exit()
                 
     def make_function(self, fn_name, fn_type, **kwargs):
@@ -399,7 +446,7 @@ class ChannelML():
                 allowed_locals['temp_adj_'+self.gate_name] = self.q10factor
                 for i,parameter in enumerate(self.parameters):
                     allowed_locals[parameter[0]] = self.parameters[i][1]
-                if kwargs.has_key('concdep'):
+                if 'concdep' in kwargs:
                     concdep = kwargs['concdep']
                     ## ca should appear as neuroML defined 'variable_name' to eval()
                     if concdep is not None:
@@ -421,3 +468,36 @@ class ChannelML():
 
     def replace(self, text, findstr, replacestr):
         return string.join(string.split(text,findstr),replacestr)
+
+def make_new_synapse(syn_name, postcomp, syn_name_full, nml_params):
+    ## if channel does not exist in library load it from xml file
+    if not moose.exists('/library/'+syn_name):
+        cmlR = ChannelML(nml_params)
+        model_filename = syn_name+'.xml'
+        model_path = utils.find_first_file(model_filename,nml_params['model_dir'])
+        if model_path is not None:
+            cmlR.readChannelMLFromFile(model_path)
+        else:
+            raise IOError(
+                'For mechanism {0}: files {1} not found under {2}.'.format(
+                    mechanismname, model_filename, self.model_dir
+                )
+            )
+    ## deep copies the library SynChan and SynHandler
+    ## to instances under postcomp named as <arg3>
+    synid = moose.copy(moose.element('/library/'+syn_name),postcomp,syn_name_full)
+    #synhandlerid = moose.copy(moose.element('/library/'+syn_name+'/handler'), postcomp,syn_name_full+'/handler') This line was a bug: double handler
+    synhandler = moose.element( synid.path + '/handler' )
+    syn = moose.SynChan(synid)
+    synhandler = moose.element(synid.path + '/handler') # returns SimpleSynHandler or STDPSynHandler
+
+    ## connect the SimpleSynHandler or the STDPSynHandler to the SynChan (double exp)
+    moose.connect( synhandler, 'activationOut', syn, 'activation' )
+    # mgblock connections if required
+    childmgblock = moose_utils.get_child_Mstring(syn,'mgblockStr')
+    #### connect the post compartment to the synapse
+    if childmgblock.value=='True': # If NMDA synapse based on mgblock, connect to mgblock
+        mgblock = moose.Mg_block(syn.path+'/mgblock')
+        moose.connect(postcomp,"channel", mgblock, "channel")
+    else: # if SynChan or even NMDAChan, connect normally
+        moose.connect(postcomp,"channel", syn, "channel")

@@ -6,9 +6,6 @@
 ## GNU Lesser General Public License version 2.1
 ## See the file COPYING.LIB for the full notice.
 #########################################################################
-# This example illustrates loading, and running a kinetic model 
-# for a bistable positive feedback system, defined in kkit format. 
-# This is based on Bhalla, Ram and Iyengar, Science 2002.
 
 import moose
 import matplotlib.pyplot as plt
@@ -18,6 +15,26 @@ import numpy
 import sys
 
 def main():
+        """
+        This example illustrates loading, and running a kinetic model 
+        for a bistable positive feedback system, defined in kkit format. 
+        This is based on Bhalla, Ram and Iyengar, Science 2002.
+
+        The core of this model is a positive feedback loop comprising of
+        the MAPK cascade, PLA2, and PKC. It receives PDGF and Ca2+ as 
+        inputs.
+
+        This model is quite a large one and due to some stiffness in its
+        equations, it runs somewhat slowly. 
+
+        The simulation illustrated here shows how the model starts out in
+        a state of low activity. It is induced to 'turn on' when a 
+        a PDGF stimulus is given for 400 seconds. 
+        After it has settled to the new 'on' state, model is made to 
+        'turn off'
+        by setting the system calcium levels to zero for a while. This
+        is a somewhat unphysiological manipulation!
+        """
         solver = "gsl"  # Pick any of gsl, gssa, ee..
         #solver = "gssa"  # Pick any of gsl, gssa, ee..
 	mfile = '../../Genesis_files/acc35.g'
@@ -29,7 +46,6 @@ def main():
         # gives an interesting output
         compt = moose.element( '/model/kinetics' )
         compt.volume = 5e-19 
-        dt = moose.element( '/clock' ).dt
 
 	moose.reinit()
 	moose.start( 500 ) 
@@ -49,7 +65,7 @@ def main():
         imgplot = plt.imshow( img )
         ax = fig.add_subplot( 212 )
 	x = moose.wildcardFind( '/model/#graphs/conc#/#' )
-        t = numpy.arange( 0, x[0].vector.size, 1 ) * dt
+        t = numpy.arange( 0, x[0].vector.size, 1 ) * x[0].dt
         ax.plot( t, x[0].vector, 'b-', label=x[0].name )
         ax.plot( t, x[1].vector, 'c-', label=x[1].name )
         ax.plot( t, x[2].vector, 'r-', label=x[2].name )

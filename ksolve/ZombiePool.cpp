@@ -9,6 +9,9 @@
 
 #include "header.h"
 #include "PoolBase.h"
+#include "VoxelPoolsBase.h"
+#include "../mesh/VoxelJunction.h"
+#include "XferInfo.h"
 #include "ZombiePoolInterface.h"
 #include "ZombiePool.h"
 #include "lookupVolumeFromMesh.h"
@@ -122,11 +125,7 @@ void ZombiePool::vSetConcInit( const Eref& e, double conc )
 	double n = NA * conc * lookupVolumeFromMesh( e );
 	vSetNinit( e, n );
 }
-
-double ZombiePool::vGetConcInit( const Eref& e ) const
-{
-	return vGetNinit( e ) / ( NA * lookupVolumeFromMesh( e ) );
-}
+// Do not get concInit from ZombiePool, the PoolBase handles it.
 
 void ZombiePool::vSetDiffConst( const Eref& e, double v )
 {

@@ -126,10 +126,10 @@ class Compartment: public CompartmentBase
 			double inject_;
 			double A_;
 			double B_;
+			double sumInject_;
 
 	private:
 			double invRm_;
-			double sumInject_;
 			double dt_;
 			static const double EPSILON;
 };

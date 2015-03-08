@@ -15,8 +15,7 @@
 
 """backend.py: 
 
-Last modified: Tue Jul 15, 2014  12:10PM
-
+Last modified: Wed Feb 11, 2015  06:01PM
 """
     
 __author__           = "Dilawar Singh"
@@ -42,16 +41,18 @@ class Backend(object):
         super(Backend, self).__init__()
         self.args = args
         self.compartments = []
+        self.chemEntities = []
         self.pulseGens = []
         self.tables = []
         self.synchans = []
+        self.msgs = { 'SingleMsg' : [], 'OneToAllMsg' : [] }
         # A set of tuple of sourceCompartment.path and targetCompartment.path
         self.connections = set()
         self.clock = _moose.wildcardFind('/clock')[0]
         self.clocks = []
         self.filled = False
 
-    def filterPaths(self, mooseObjs, ignorePat=None):
+    def filterPaths(self, mooseObjs, ignorePat):
         """Filter paths """
         def ignore(x):
             if ignorePat.search(x.path):
@@ -89,6 +90,23 @@ class Backend(object):
         self.clocks = _moose.wildcardFind("/##[TYPE=Clock]")
         return self.clocks
 
+    def getChemicalEntities(self, **kwargs):
+        """Get the following chemical entities:
+        ZombiePool 
+        ZombieEnz
+        ZombieReac
+        """
+        self.chemEntities = _moose.wildcardFind("/##[TYPE=ZombiePool]")
+        self.chemEntities += _moose.wildcardFind("/##[TYPE=ZombieEnz]")
+        self.chemEntities += _moose.wildcardFind("/##[TYPE=ZombieReac]")
+        return self.chemEntities
+
+    def getMsgs(self, **kwargs):
+        """Get all messages in MOOSE"""
+        self.msgs['SingleMsg'] = _moose.wildcardFind('/##[TYPE=SingleMsg]')
+        self.msgs['OneToAllMsg'] = _moose.wildcardFind('/##[TYPE=OneToAllMsg]')
+        return self.msgs
+
     def populateStoreHouse(self, **kwargs):
         """ Populate all data-structures related with Compartments, Tables, and
         pulse generators.
@@ -98,11 +116,27 @@ class Backend(object):
             return 
         print_utils.dump("INFO", "Getting moose-datastructure for backend.")
         self.getComparments(**kwargs)
+        self.getChemicalEntities(**kwargs)
         self.getTables(**kwargs)
         self.getPulseGens(**kwargs)
         self.getSynChans(**kwargs)
+        self.getMsgs(**kwargs)
         self.getClocks()
         self.filled = True
+
+    def clusterNodes(self):
+        """Cluster all compartments according to parent path and return them in
+        a dictionary """
+        population = defaultdict(set)
+        for c in self.compartments:
+            path = c.path
+            parentPath = '/'.join(path.split('/')[0:-1])
+            population[parentPath].add(path)
+            # Get their channels into cluster as well.
+            for channel in c.neighbors['channel']:
+                population[parentPath].add(channel.path)
+        return population
+
 
 
 ##

@@ -1,5 +1,5 @@
 /**********************************************************************
-*r This program is part of 'MOOSE', the
+** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment,
 ** also known as GENESIS 3 base code.
 **           copyright (C) 2003-2004 Upinder S. Bhalla. and NCBS
@@ -72,6 +72,7 @@ typedef unsigned short BindIndex;
 extern const double PI;	// Defined in consts.cpp
 extern const double NA; // Defined in consts.cpp
 extern const double FaradayConst; // Defined in consts.cpp
+extern const double GasConst; // Defined in consts.cpp
 
 class Element;
 class Eref;
@@ -111,6 +112,7 @@ class Neutral;
 #include "ProcOpFunc.h"
 #include "ValueFinfo.h"
 #include "LookupValueFinfo.h"
+#include "ValueFinfo.h"
 #include "SharedFinfo.h"
 #include "FieldElementFinfo.h"
 #include "FieldElement.h"

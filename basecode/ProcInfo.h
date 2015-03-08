@@ -7,14 +7,17 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+#ifndef  PROCINFO_INC
+#define  PROCINFO_INC
 class ProcInfo
 {
-	public:
-		ProcInfo() 
-			: dt( 1.0 ), currTime( 0.0 )
-			{;}
-		double dt;
-		double currTime;
+    public:
+        ProcInfo() 
+            : dt( 1.0 ), currTime( 0.0 )
+        {;}
+        double dt;
+        double currTime;
 };
 
 typedef const ProcInfo* ProcPtr;
+#endif   /* ----- #ifndef PROCINFO_INC  ----- */

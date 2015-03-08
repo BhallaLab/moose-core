@@ -10,6 +10,8 @@
 #ifndef _OPFUNCBASE_H
 #define _OPFUNCBASE_H
 
+#include "SrcFinfo.h"
+
 extern const unsigned char MooseSendHop;
 extern const unsigned char MooseSetHop;
 extern const unsigned char MooseSetVecHop;

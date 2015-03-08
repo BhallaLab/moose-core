@@ -15,10 +15,10 @@
 #include "../builtins/Arith.h"
 #include "Dinfo.h"
 #include <queue>
-#include "../biophysics/SpikeRingBuffer.h"
-#include "../biophysics/Synapse.h"
-#include "../biophysics/SynHandler.h"
 #include "../biophysics/IntFire.h"
+#include "../synapse/Synapse.h"
+#include "../synapse/SynHandlerBase.h"
+#include "../synapse/SimpleSynHandler.h"
 #include "SparseMatrix.h"
 #include "SparseMsg.h"
 #include "SingleMsg.h"
@@ -307,7 +307,7 @@ void testSetGetDouble()
 
 	string arg;
 	Id i2 = Id::nextId();
-	Id i3( i2.value() + 1 );
+	// Id i3( i2.value() + 1 );
 	Element* ret = new GlobalDataElement( i2, ic, "test2", size );
 	assert( ret );
 	ProcInfo p;
@@ -331,17 +331,17 @@ void testSetGetDouble()
 
 	cout << "." << flush;
 	delete i2.element();
-	delete i3.element();
+	// delete i3.element();
 }
 
 void testSetGetSynapse()
 {
-	const Cinfo* ic = IntFire::initCinfo();
+	const Cinfo* ssh = SimpleSynHandler::initCinfo();
 	unsigned int size = 100;
 
 	string arg;
-	Id cells = Id::nextId();
-	Element* temp = new GlobalDataElement( cells, ic, "test2", size );
+	Id handler = Id::nextId();
+	Element* temp = new GlobalDataElement( handler, ssh, "test2", size );
 	assert( temp );
 	vector< unsigned int > ns( size );
 	vector< vector< double > > delay( size );
@@ -353,10 +353,10 @@ void testSetGetSynapse()
 		}
 	}
 
-	bool ret = Field< unsigned int >::setVec( cells, "numSynapse", ns );
+	bool ret = Field< unsigned int >::setVec( handler, "numSynapse", ns );
 	assert( ret );
 	assert( temp->numData() == size );
-	Id syns( cells.value() + 1 );
+	Id syns( handler.value() + 1 );
 	for ( unsigned int i = 0; i < size; ++i ) {
 		ret = Field< double >::
 				setVec( ObjId( syns, i ), "delay", delay[i] );
@@ -366,14 +366,15 @@ void testSetGetSynapse()
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		assert( syns.element()->numField( i ) == i );
-		IntFire* fire = reinterpret_cast< IntFire* >( temp->data( i ) );
-		assert( fire->getNumSynapses() == i );
+		SimpleSynHandler* s = 
+				reinterpret_cast< SimpleSynHandler* >( temp->data( i ) );
+		assert( s->getNumSynapses() == i );
 		for ( unsigned int j = 0; j < i; ++j ) {
 			// ObjId oid( syns, i, j );
 			ObjId oid( syns, i, j );
 			double x = i * 1000 + j ;
 			double d = Field< double >::get( oid, "delay" );
-			double d2 = fire->getSynapse( j )->getDelay();
+			double d2 = s->getSynapse( j )->getDelay();
 			assert( doubleEq( d, x ) );
 			assert( doubleEq( d2, x ) );
 		}
@@ -385,13 +386,12 @@ void testSetGetSynapse()
 
 void testSetGetVec()
 {
-	const Cinfo* ic = IntFire::initCinfo();
-	// const Cinfo* sc = Synapse::initCinfo();
+	const Cinfo* sc = SimpleSynHandler::initCinfo();
 	unsigned int size = 100;
 
 	string arg;
 	Id i2 = Id::nextId();
-	Element* temp = new GlobalDataElement( i2, ic, "test2", size );
+	Element* temp = new GlobalDataElement( i2, sc, "test2", size );
 	assert( temp );
 
 	vector< unsigned int > numSyn( size, 0 );
@@ -404,8 +404,8 @@ void testSetGetVec()
 	assert( ret );
 
 	for ( unsigned int i = 0; i < size; ++i ) {
-		IntFire* fire = reinterpret_cast< IntFire* >( i2.element()->data( i ) );
-		assert( fire->getNumSynapses() == i );
+		SimpleSynHandler* ssh = reinterpret_cast< SimpleSynHandler* >( i2.element()->data( i ) );
+		assert( ssh->getNumSynapses() == i );
 	}
 
 	vector< unsigned int > getSyn;
@@ -434,15 +434,17 @@ void testSendSpike()
 	Id i2 = Id::nextId();
 	Element* temp = new GlobalDataElement( i2, ic, "test2", size );
 	assert( temp );
+	Id i3 = Id::nextId();
+	Element* temp2 = new GlobalDataElement( i3, sc, "syns", size );
+	assert( temp2 );
 	Eref e2 = i2.eref();
 	for ( unsigned int i = 0; i < size; ++i ) {
-		// Eref er( i2(), i );
-		ObjId oid( i2, i );
+		ObjId oid( i3, i );
 		bool ret = Field< unsigned int >::set( oid, "numSynapses", i );
 		assert( ret );
 	}
 
-	Id synId( i2.value() + 1 );
+	Id synId( i3.value() + 1 );
 	ObjId target( synId , 1 );
 
 	reinterpret_cast< Synapse* >(target.data())->setWeight( WEIGHT );
@@ -450,7 +452,7 @@ void testSendSpike()
 	SingleMsg *m = new SingleMsg( e2, target.eref(), 0 );
 	const Finfo* f1 = ic->findFinfo( "spikeOut" );
 	const Finfo* f2 = sc->findFinfo( "addSpike" );
-	bool ret = f1->addMsg( f2, m->mid(), e2.element() );
+	bool ret = f1->addMsg( f2, m->mid(), synId.element() );
 	assert( ret );
 
 	reinterpret_cast< IntFire* >(e2.data())->setVm( 1.0 );
@@ -467,8 +469,10 @@ void testSendSpike()
 	reinterpret_cast< IntFire* >(targetCell.data())->process( targetCell.eref(), &p );
 	Vm = Field< double >::get( targetCell, "Vm" );
 	assert( doubleEq( Vm , WEIGHT * ( 1.0 - DT / TAU ) ) );
-	cout << "." << flush;
 	delete i2.element();
+	delete i3.element();
+	delete synId.element();
+	cout << "." << flush;
 }
 
 void printSparseMatrix( const SparseMatrix< unsigned int >& m)
@@ -625,6 +629,17 @@ void testSparseMatrix2()
 			assert (n.get( i, j ) ==  m[i][k] );
 		}
 	}
+	n.clear();
+	n.setSize( 1, 100 );
+	for ( unsigned int i = 0; i < 100; ++i )
+		n.set( 0, i, 10 * i );
+	n.transpose();
+	for ( unsigned int i = 0; i < 100; ++i )
+		assert( n.get( i, 0 ) == 10 * i );
+	n.transpose();
+	for ( unsigned int i = 0; i < 100; ++i )
+		assert( n.get( 0, i ) == 10 * i );
+
 	/*
 	n.printInternal();
 	cout << "before transpose\n";
@@ -775,8 +790,9 @@ void testSparseMsg()
 	static const double connectionProbability = 0.1;
 	static const unsigned int runsteps = 5;
 	const Cinfo* ic = IntFire::initCinfo();
+	const Cinfo* sshc = SimpleSynHandler::initCinfo();
 	const Cinfo* sc = Synapse::initCinfo();
-	const Finfo* procFinfo = ic->findFinfo( "process" );
+	const Finfo* procFinfo = sshc->findFinfo( "process" );
 	assert( procFinfo );
 	const DestFinfo* df = dynamic_cast< const DestFinfo* >( procFinfo );
 	assert( df );
@@ -787,18 +803,20 @@ void testSparseMsg()
 
 	mtseed( 5489UL ); // The default value, but better to be explicit.
 
-	Id cells = Id::nextId();
-	// bool ret = ic->create( cells, "test2", size );
-	Element* t2 = new GlobalDataElement( cells, ic, "test2", size );
+	Id sshid = Id::nextId();
+	Element* t2 = new GlobalDataElement( sshid, sshc, "test2", size );
 	assert( t2 );
-	Id syns( cells.value() + 1 );
+	Id syns( sshid.value() + 1 );
+	Id cells = Id::nextId();
+	Element* t3 = new GlobalDataElement( cells, ic, "intFire", size );
+	assert( t3 );
 
-	SparseMsg* sm = new SparseMsg( t2, syns.element(), 0 );
+	SparseMsg* sm = new SparseMsg( t3, syns.element(), 0 );
 	assert( sm );
 	const Finfo* f1 = ic->findFinfo( "spikeOut" );
 	const Finfo* f2 = sc->findFinfo( "addSpike" );
 	assert( f1 && f2 );
-	f1->addMsg( f2, sm->mid(), t2 );
+	f1->addMsg( f2, sm->mid(), t3 );
 	sm->randomConnect( connectionProbability );
 
 	vector< double > temp( size, 0.0 );
@@ -820,7 +838,7 @@ void testSparseMsg()
 	vector< double > weight( size * fieldSize, 0.0 );
 	vector< double > delay( size * fieldSize, 0.0 );
 	for ( unsigned int i = 0; i < size; ++i ) {
-		ObjId id( cells, i );
+		ObjId id( sshid, i );
 		unsigned int numSyn = 
 				Field< unsigned int >::get( id, "numSynapse" );
 		unsigned int k = i * fieldSize;
@@ -840,12 +858,13 @@ void testSparseMsg()
 	p.dt = timestep;
 	for ( unsigned int i = 0; i < runsteps; ++i ) {
 		p.currTime += p.dt;
+		SetGet1< ProcInfo* >::setRepeat( sshid, "process", &p );
 		SetGet1< ProcInfo* >::setRepeat( cells, "process", &p );
 		// cells()->process( &p, df->getFid() );
 	}
 
-	delete syns.element();
-	delete cells.element();
+	delete t2;
+	delete t3;
 	cout << "." << flush;
 }
 
@@ -914,14 +933,12 @@ const Cinfo* TestId::initCinfo()
 
 void testSetRepeat()
 {
-	const Cinfo* ic = IntFire::initCinfo();
-	// const Cinfo* sc = Synapse::initCinfo();
+	const Cinfo* sc = SimpleSynHandler::initCinfo();
 	unsigned int size = 100;
 
 	string arg;
 	Id cell = Id::nextId();
-	// bool ret = ic->create( i2, "test2", size );
-	Element* temp = new GlobalDataElement( cell, ic, "cell", size );
+	Element* temp = new GlobalDataElement( cell, sc, "cell", size );
 	assert( temp );
 	vector< unsigned int > numSyn( size, 0 );
 	for ( unsigned int i = 0; i < size; ++i )
@@ -1433,7 +1450,7 @@ void testIsA()
 void testFinfoFields()
 {
 	const FinfoWrapper vmFinfo = IntFire::initCinfo()->findFinfo( "Vm" );
-	const FinfoWrapper synFinfo = IntFire::initCinfo()->findFinfo( "synapse" );
+	const FinfoWrapper synFinfo = SimpleSynHandler::initCinfo()->findFinfo( "synapse" );
 	const FinfoWrapper procFinfo = IntFire::initCinfo()->findFinfo( "proc" );
 	const FinfoWrapper processFinfo = IntFire::initCinfo()->findFinfo( "process" );
 	const FinfoWrapper reinitFinfo = IntFire::initCinfo()->findFinfo( "reinit" );
@@ -1479,7 +1496,7 @@ void testFinfoFields()
 	assert( reinitFinfo.type() == "const ProcInfo*" );
 
 	assert( spikeFinfo.getName() == "spikeOut" );
-	assert( spikeFinfo.docs() == "Sends out spike events" );
+	assert( spikeFinfo.docs() == "Sends out spike events. The argument is the timestamp of the spike. " );
 	assert( spikeFinfo.src().size() == 0 );
 	assert( spikeFinfo.dest().size() == 0 );
 	// cout << spikeFinfo->type() << endl;
@@ -1494,7 +1511,7 @@ void testFinfoFields()
 void testCinfoFields()
 {
 	assert( IntFire::initCinfo()->getDocs() == "" );
-	assert( IntFire::initCinfo()->getBaseClass() == "SynHandler" );
+	assert( SimpleSynHandler::initCinfo()->getBaseClass() == "SynHandlerBase" );
 
 	// We have a little bit of a hack here to cast away
 	// constness, due to the way the FieldElementFinfos
@@ -1509,40 +1526,38 @@ void testCinfoFields()
 	assert( cinfo->getSrcFinfo( 0 + nsf ) == cinfo->findFinfo( "spikeOut" ) );
 
 	unsigned int ndf = neutralCinfo->getNumDestFinfo();
-	assert( ndf == 22 );
-	unsigned int sdf = SynHandler::initCinfo()->getNumDestFinfo();
-	assert( sdf == 26 );
-	assert( cinfo->getNumDestFinfo() == 12 + sdf );
+	assert( ndf == 25 );
+	unsigned int sdf = IntFire::initCinfo()->getNumDestFinfo();
+	assert( sdf == 36 );
 
+	/*
 	assert( cinfo->getDestFinfo( 0+ndf )->name() == "setNumSynapses" );
 	assert( cinfo->getDestFinfo( 1+ndf )->name() == "getNumSynapses" );
 	assert( cinfo->getDestFinfo( 2+ndf )->name() == "setNumSynapse" );
 	assert( cinfo->getDestFinfo( 3+ndf )->name() == "getNumSynapse" );
+	*/
 
-	assert( cinfo->getDestFinfo( 0+sdf ) == cinfo->findFinfo( "setVm" ) );
-	assert( cinfo->getDestFinfo( 1+sdf ) == cinfo->findFinfo( "getVm" ) );
-	assert( cinfo->getDestFinfo( 2+sdf ) == cinfo->findFinfo( "setTau" ) );
-	assert( cinfo->getDestFinfo( 3+sdf ) == cinfo->findFinfo( "getTau" ) );
+	assert( cinfo->getDestFinfo( 0+ndf ) == cinfo->findFinfo( "setVm" ) );
+	assert( cinfo->getDestFinfo( 1+ndf ) == cinfo->findFinfo( "getVm" ) );
+	assert( cinfo->getDestFinfo( 2+ndf ) == cinfo->findFinfo( "setTau" ) );
+	assert( cinfo->getDestFinfo( 3+ndf ) == cinfo->findFinfo( "getTau" ) );
 
-	assert( cinfo->getDestFinfo( 4+sdf ) == cinfo->findFinfo( "setThresh" ) );
-	assert( cinfo->getDestFinfo( 5+sdf ) == cinfo->findFinfo( "getThresh" ) );
-	assert( cinfo->getDestFinfo( 6+sdf ) == cinfo->findFinfo( "setRefractoryPeriod" ) );
-	assert( cinfo->getDestFinfo( 7+sdf ) == cinfo->findFinfo( "getRefractoryPeriod" ) );
-	assert( cinfo->getDestFinfo( 8+sdf ) == cinfo->findFinfo( "setBufferTime" ) );
-	assert( cinfo->getDestFinfo( 9+sdf ) == cinfo->findFinfo( "getBufferTime" ) );
-	assert( cinfo->getDestFinfo( 10+sdf ) == cinfo->findFinfo( "process" ) );
-	assert( cinfo->getDestFinfo( 11+sdf ) == cinfo->findFinfo( "reinit" ) );
+	assert( cinfo->getDestFinfo( 4+ndf ) == cinfo->findFinfo( "setThresh" ) );
+	assert( cinfo->getDestFinfo( 5+ndf ) == cinfo->findFinfo( "getThresh" ) );
+	assert( cinfo->getDestFinfo( 6+ndf ) == cinfo->findFinfo( "setRefractoryPeriod" ) );
+	assert( cinfo->getDestFinfo( 7+ndf ) == cinfo->findFinfo( "getRefractoryPeriod" ) );
+	assert( cinfo->getDestFinfo( 8+ndf ) == cinfo->findFinfo( "activation" ) );
+	assert( cinfo->getDestFinfo( 9+ndf ) == cinfo->findFinfo( "process" ) );
+	assert( cinfo->getDestFinfo( 10+ndf ) == cinfo->findFinfo( "reinit" ) );
 
 
 	unsigned int nvf = neutralCinfo->getNumValueFinfo();
-	assert( nvf == 14 );
-	assert( cinfo->getNumValueFinfo() == 6 + nvf );
-	assert( cinfo->getValueFinfo( 0 + nvf ) == cinfo->findFinfo( "numSynapses" ) );
-	assert( cinfo->getValueFinfo( 1 + nvf ) == cinfo->findFinfo( "Vm" ) );
-	assert( cinfo->getValueFinfo( 2 + nvf ) == cinfo->findFinfo( "tau" ) );
-	assert( cinfo->getValueFinfo( 3 + nvf ) == cinfo->findFinfo( "thresh" ) );
-	assert( cinfo->getValueFinfo( 4 + nvf ) == cinfo->findFinfo( "refractoryPeriod" ) );
-	assert( cinfo->getValueFinfo( 5 + nvf ) == cinfo->findFinfo( "bufferTime" ) );
+	assert( nvf == 16 );
+	assert( cinfo->getNumValueFinfo() == 4 + nvf );
+	assert( cinfo->getValueFinfo( 0 + nvf ) == cinfo->findFinfo( "Vm" ) );
+	assert( cinfo->getValueFinfo( 1 + nvf ) == cinfo->findFinfo( "tau" ) );
+	assert( cinfo->getValueFinfo( 2 + nvf ) == cinfo->findFinfo( "thresh" ) );
+	assert( cinfo->getValueFinfo( 3 + nvf ) == cinfo->findFinfo( "refractoryPeriod" ) );
 
 	unsigned int nlf = neutralCinfo->getNumLookupFinfo();
 	assert( nlf == 3 ); // Neutral inserts a lookup field for neighbors
@@ -1569,11 +1584,11 @@ void testCinfoElements()
 	assert( intFireCinfoId != Id() );
 	assert( Field< string >::get( intFireCinfoId, "name" ) == "IntFire" );
 	assert( Field< string >::get( intFireCinfoId, "baseClass" ) == 
-					"SynHandler" );
+					"Neutral" );
 	Id intFireValueFinfoId( "/classes/IntFire/valueFinfo" );
 	unsigned int n = Field< unsigned int >::get( 
 		intFireValueFinfoId, "numData" );
-	assert( n == 5 );
+	assert( n == 4 );
 	Id intFireSrcFinfoId( "/classes/IntFire/srcFinfo" );
 	assert( intFireSrcFinfoId != Id() );
 	n = Field< unsigned int >::get( intFireSrcFinfoId, "numData" );
@@ -1581,7 +1596,7 @@ void testCinfoElements()
 	Id intFireDestFinfoId( "/classes/IntFire/destFinfo" );
 	assert( intFireDestFinfoId != Id() );
 	n = Field< unsigned int >::get( intFireDestFinfoId, "numData" );
-	assert( n == 12 );
+	assert( n == 11 );
 	
 	ObjId temp( intFireSrcFinfoId, 0 );
 	string foo = Field< string >::get( temp, "fieldName" );
@@ -1596,7 +1611,7 @@ void testCinfoElements()
 	temp = ObjId( intFireDestFinfoId, 7 );
 	string str = Field< string >::get( temp, "fieldName" );
 	assert( str == "getRefractoryPeriod");
-	temp = ObjId( intFireDestFinfoId, 11 );
+	temp = ObjId( intFireDestFinfoId, 10 );
 	str = Field< string >::get( temp, "fieldName" );
 	assert( str == "reinit" );
 	cout << "." << flush;

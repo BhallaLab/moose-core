@@ -13,7 +13,7 @@
 
 //typedef double ( *PFDD )( double, double );
 
-class MgBlock: public ChanBase
+class MgBlock: public ChanCommon
 {
 	public:
 		MgBlock();
@@ -46,7 +46,7 @@ class MgBlock: public ChanBase
 		 * send back to the parent compartment through regular 
 		 * messages.
 		 */
-		void process( const Eref& e, ProcPtr p );
+		void vProcess( const Eref& e, ProcPtr p );
 
 		/**
 		 * Reinitializes the values for the channel. This involves
@@ -55,13 +55,13 @@ class MgBlock: public ChanBase
 		 * involves a similar cycle through the gates and then 
 		 * updates to the parent compartment as for the processFunc.
 		 */
-		void reinit( const Eref& e, ProcPtr p );
+		void vReinit( const Eref& e, ProcPtr p );
 
 		/**
 		 * Assign the local Vm_ to the incoming Vm from the compartment
 		 */
 // 		void channelFunc( double Vm );
-		void origChannel( double Gk, double Ek );
+		void origChannel( const Eref& e, double Gk, double Ek );
 		
 		static const Cinfo* initCinfo();
 	private:

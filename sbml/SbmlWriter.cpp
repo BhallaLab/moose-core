@@ -13,8 +13,12 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
+#ifdef USE_SBML
+
 #include "header.h"
+#ifdef USE_SBML
 #include <sbml/SBMLTypes.h>
+#endif
 #include "SbmlWriter.h"
 #include "../shell/Wildcard.h"
 #include "../shell/Neutral.h"
@@ -27,6 +31,8 @@
 *  write a Model after validation
 */
 /* ToDo: Tables should be implemented
+		 Assignment rule is assumed to be addition since genesis file has just sumtotal
+		 But now "Function" function class exist so any arbitarary function can be read and written
  */
 
 using namespace std;
@@ -34,8 +40,6 @@ using namespace std;
 int SbmlWriter::write( string filepath,string target )
 {
   //cout << "Sbml Writer: " << filepath << " ---- " << target << endl;
-  //cout << "use_SBML:" << USE_SBML << endl;
-  
 #ifdef USE_SBML
   string::size_type loc;
   while ( ( loc = filepath.find( "\\" ) ) != string::npos ) 
@@ -78,24 +82,31 @@ int SbmlWriter::write( string filepath,string target )
   
   if ( i == fileextensions.end() )
     filepath += ".xml";
-  
-  //cout << " filepath " << filepath << " " << filename << endl;
-  
+  //std::pair<int, std::string > infoValue();
   SBMLDocument sbmlDoc;
   bool SBMLok = false;
   createModel( filename,sbmlDoc,target );
   SBMLok  = validateModel( &sbmlDoc );
   if ( SBMLok ) 
-    writeModel( &sbmlDoc, filepath );
+  {
+    return writeModel( &sbmlDoc, filepath );
+  }
   //delete sbmlDoc;
   if ( !SBMLok ) {
     cerr << "Errors encountered " << endl;
-    return 1;
+    return -1;
   }
   
 #endif     
-  return 0;
+  return -2;
 }
+
+/*
+1   - Write successful
+0   - Write failed
+-1  - Validation failed
+-2  - No libsbml support
+*/
 #ifdef USE_SBML
 
 //* Check : first will put a model in according to l3v1 with libsbml5.9.0 **/
@@ -110,11 +121,14 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
   sbmlDoc.setNamespaces(&xmlns);
   cremodel_ = sbmlDoc.createModel();
   cremodel_->setId(filename);
-  //cremodel_->setUnits(time);
+  cremodel_->setTimeUnits("second");
+  cremodel_->setExtentUnits("substance");
+  cremodel_->setSubstanceUnits("substance");
+  
   Id baseId(path);
     vector< ObjId > graphs;
   string plots;
-  wildcardFind(path+"/##[TYPE=Table]",graphs);
+  wildcardFind(path+"/##[TYPE=Table2]",graphs);
   
   for ( vector< ObjId >::iterator itrgrp = graphs.begin(); itrgrp != graphs.end();itrgrp++)
     {  
@@ -157,6 +171,7 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
   unit->setMultiplier(1);
   unit->setExponent(1.0);
   unit->setScale(0);
+
   //Getting Compartment from moose
   vector< ObjId > chemCompt;
   wildcardFind(path+"/##[ISA=ChemCompt]",chemCompt);
@@ -266,51 +281,55 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	      species_size = species_size+1;
 	      // true if species is amount, false: if species is concentration 
 	      sp->setHasOnlySubstanceUnits( true );
-	      
+	      string xyCord;
+	      // double x = Field <double> :: get(annotaId,"x");
+	      // double y = Field <double> :: get(annotaId,"y");
+	   	  // xyCord += "x:"+x+"y:"+y+";";   
+	      ostringstream modelAnno;
+  		  modelAnno << "<moose:ModelAnnotation>\n";
+  		  modelAnno << "<moose:xyCord> "<< xyCord<< "</moose:xyCord>\n";
+          modelAnno << "</moose:ModelAnnotation>";
+  		  XMLNode* xnode =XMLNode::convertStringToXMLNode( modelAnno.str() ,&xmlns);
+  		  sp->setAnnotation( xnode );	  
 	      // Buffered Molecule setting BoundaryCondition and constant has to be made true 
-	      if (objclass == "BufPool")
-		{sp->setBoundaryCondition(true);
-		  sp->setConstant(true);
-		}//zbufpool
-	      else
-		{ sp->setBoundaryCondition(false);
-		  sp->setConstant(false);
-		}
-	      // Funpool need to get SumFunPool 
-	      //Funpool is not set, setConstant
-	      if (objclass == "FuncPool")
-		{ 
-		  vector< Id > funpoolChildren = Field< vector< Id > >::get( *itrp, "children" );
-		  for ( vector< Id >::iterator itrfunpoolchild = funpoolChildren.begin();  itrfunpoolchild != funpoolChildren.end(); ++itrfunpoolchild )
-		    { 
-		      string funpoolclass = Field<string> :: get(*itrfunpoolchild,"className");
-		      if (funpoolclass == "SumFunc")
-			{vector < Id > sumfunpool = LookupField <string,vector < Id> >::get(*itrfunpoolchild, "neighbors","input");
-			  int sumtot_count = sumfunpool.size();
-			  if ( sumtot_count > 0 )
-			    { // For sumfunc pool boundingcondition has to made true,
-			      // if its acting in react or product for a reaction/enzyme and also funcpool
-			      vector < Id > connectreac = LookupField <string,vector < Id> >::get(*itrp, "neighbors","reac");
-			      if( connectreac.size() > 0)
-				sp->setBoundaryCondition(true);
-			      ostringstream sumtotal_formula;
-			      for(vector< Id >::iterator itrsumfunc = sumfunpool.begin();itrsumfunc != sumfunpool.end(); itrsumfunc++)
-				{  // Check with Upi: Finds the source pool for a SumTot. It also deals with cases whether source is an enz-substrate complex Readkkit.cpp
-				  ostringstream spId;
-				  sumtot_count -= 1;
-				  string clean_sumFuncname = cleanNameId(*itrsumfunc,index);
-				  if ( sumtot_count == 0 )
-				    sumtotal_formula << clean_sumFuncname;
-				  else
-				    sumtotal_formula << clean_sumFuncname << "+";
-				}
-			      Rule * rule =  cremodel_->createAssignmentRule();
-			      rule->setVariable( clean_poolname );
-			      rule->setFormula( sumtotal_formula.str() );
+	      if ( (objclass == "BufPool") || (objclass == "ZombieBufPool"))
+		  { sp->setBoundaryCondition(true);
+		  	
+		  	string Funcpoolname = Field<string> :: get(*itrp,"path");
+			Id funcId(Funcpoolname+"/func");
+			if (funcId != ObjId())
+			{   // if its acting in react or product for a reaction/enzyme and also funcpool
+				sp->setConstant(false);
+				Id funcparentId = Field<ObjId> :: get(funcId,"parent");
+				string f1 = Field <string> :: get(funcId,"path");
+				Id funcIdx(f1+"/x");
+				string f1x = Field <string> :: get(funcIdx,"path");
+				vector < Id > inputPool = LookupField <string,vector <Id> > :: get(funcIdx,"neighbors","input");
+				int sumtot_count = inputPool.size();
+				if (sumtot_count > 0)
+				{	ostringstream sumtotal_formula;
+					for(vector< Id >::iterator itrsumfunc = inputPool.begin();itrsumfunc != inputPool.end(); itrsumfunc++)
+					{
+						string sumpool = Field<string> :: get(*itrsumfunc,"name");
+						sumtot_count -= 1;
+				  		string clean_sumFuncname = cleanNameId(*itrsumfunc,index);
+				  		if ( sumtot_count == 0 )
+				    		sumtotal_formula << clean_sumFuncname;
+				  		else
+				    		sumtotal_formula << clean_sumFuncname << "+";
+					}
+					Rule * rule =  cremodel_->createAssignmentRule();
+			      	rule->setVariable( clean_poolname );
+			      	rule->setFormula( sumtotal_formula.str() );
 			    }
 			}
-		    }
-		} //zfunPool
+			else
+				sp->setConstant(true);
+		  }//zbufpool
+	      else
+			{ sp->setBoundaryCondition(false);
+		 	  sp->setConstant(false);
+			}
 	    } //itrp
 	  
 	  vector< ObjId > Compt_Reac;
@@ -403,7 +422,7 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	      string objname = Field < string> :: get(*itrE,"name");
 	      objname = nameString(objname);
 	      KineticLaw* kl;
-	      if (enzClass == "Enz")
+	      if ( (enzClass == "Enz") || (enzClass == "ZombieEnz"))
 		{// Complex Formation S+E -> SE*;
 		   reaction->setId( cleanEnzname);
 		   reaction->setName( objname);
@@ -495,7 +514,7 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 		   printParameters( kl,"k3",k3,"per_second" );
 
 		} //enzclass = Enz
-	      else if (enzClass == "MMenz")
+	      else if ( (enzClass == "MMenz") || (enzClass == "ZombieMMenz"))
 		{ reaction->setId( cleanEnzname);
 		  reaction->setName( objname);
 		  double Km = Field<double>::get(*itrE,"numKm");
@@ -959,3 +978,4 @@ bool SbmlWriter::validateModel( SBMLDocument* sbmlDoc )
       return ( numConsistencyErrors == 0 && numValidationErrors == 0 );
       }
 }
+#endif // USE_SBML

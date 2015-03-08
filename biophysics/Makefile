@@ -10,17 +10,17 @@
 TARGET = _biophysics.o
 
 OBJ = \
-	SpikeRingBuffer.o	\
-	SynHandler.o	\
 	IntFire.o	\
-	Synapse.o	\
 	SpikeGen.o	\
+	RandSpike.o	\
 	CompartmentDataHolder.o	\
 	CompartmentBase.o	\
 	Compartment.o	\
 	SymCompartment.o	\
 	GapJunction.o	\
 	ChanBase.o	\
+	ChanCommon.o	\
+	HHChannelBase.o	\
 	HHChannel.o	\
 	HHGate.o	\
 	HHGate2D.o	\
@@ -31,8 +31,8 @@ OBJ = \
 	Nernst.o	\
 	Neuron.o	\
 	ReadCell.o	\
-	SynChanBase.o	\
 	SynChan.o	\
+	NMDAChan.o	\
 	testBiophysics.o	\
 	IzhikevichNrn.o	\
 	DifShell.o	\
@@ -63,17 +63,20 @@ HEADERS = \
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
-SpikeRingBuffer.o:	SpikeRingBuffer.h
-SynHandler.o:	SpikeRingBuffer.h SynHandler.h Synapse.h 
-IntFire.o:	IntFire.h SpikeRingBuffer.h SynHandler.h Synapse.h 
+IntFire.o:	IntFire.h
 SpikeGen.o: SpikeGen.h
+RandSpike.o: RandSpike.h ../randnum/randnum.h
 CompartmentDataHolder.o: CompartmentDataHolder.h
 CompartmentBase.o: CompartmentBase.h CompartmentDataHolder.h
 Compartment.o: CompartmentBase.h Compartment.h
 SymCompartment.o: CompartmentBase.h Compartment.h SymCompartment.h
 ChanBase.o: ChanBase.h
-Leakage.o: Leakage.h ChanBase.h
+ChanCommon.o: ChanBase.h ChanCommon.h
+SynChan.o: SynChan.h ChanBase.h ChanCommon.h
+NMDAchan.o: NMDAChan.h SynChan.h ChanBase.h ChanCommon.h
+Leakage.o: Leakage.h ChanBase.h ChanCommon.h
 GapJunction.o: GapJunction.h
+HHChannelBase.o: ChanBase.h HHChannelBase.h HHGate.h
 HHChannel.o: ChanBase.h HHChannel.h HHGate.h
 HHGate.o: HHGate.h
 HHChannel2D.o: ChanBase.h HHChannel2D.h HHGate2D.h
@@ -87,15 +90,6 @@ ReadCell.o: CompartmentBase.h Compartment.h SymCompartment.h ReadCell.h ../shell
 IzhikevichNrn.o: IzhikevichNrn.h
 DifShell.o: DifShell.h
 testBiophysics.o: IntFire.h CompartmentBase.h Compartment.h HHChannel.h HHGate.h 
-#LeakyIaF.o: LeakyIaF.h
-#Synapse.o:	SynBase.h Synapse.h
-#GapJunction.o: GapJunction.h
-#NMDAChan.o: NMDAChan.h SynBase.h ChanBase.h Synapse.h SynChan.h
-#Nernst.o:	Nernst.h
-#MgBlock.o:	MgBlock.h
-#GHK.o:	GHK.h
-#HHGate2D.o:	../builtins/Interpol2D.h HHGate2D.h
-#HHChannel2D.o: ChanBase.h HHChannel2D.h HHGate2D.h
 VectorTable.o : VectorTable.h
 MarkovGslSolver.o : MarkovGslSolver.h 
 MatrixOps.o : MatrixOps.h

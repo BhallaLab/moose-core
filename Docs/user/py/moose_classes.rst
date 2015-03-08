@@ -1,13 +1,52 @@
 .. Documentation for all MOOSE classes and functions
 .. As visible in the Python module
-.. Auto-generated on July 10, 2014
+.. Auto-generated on October 01, 2014
 
-
+=============
 MOOSE Classes
-==================
+=============
+
+MOOSE builtin classes and their fields are listed here.
+
+
+Alphabetical listing of moose classes
+-------------------------------------
+
 .. py:class:: Adaptor
 
-   Averages and rescales values to couple different kinds of simulation
+   This is the adaptor class. It is used in interfacing different kinds of solver with each other, especially for electrical to chemical signeur models. The Adaptor class is the core of the API for interfacing between different solution engines. It is currently in use for interfacing between chemical and electrical simulations, but could be used for other cases such as mechanical models. The API for interfacing between solution engines rests on  the following capabilities of MOOSE:
+      1. The object-oriented interface with classes mapped to biological and modeling concepts such as electrical and chemical compartments, ion channels and molecular pools. 
+      2. The invisible mapping of Solvers (Objects implementing numerical engines) to the object-oriented interface. Solvers work behind the  scenes to update the objects. 
+      3. The messaging interface which allows any visible field to be  accessed and updated from any other object.  
+      4. The clock-based scheduler which drives operations of any subset of objects at any interval. For example, this permits the operations of field access and update to take place at quite different timescales  from the numerical engines. 
+      5. The implementation of Adaptor classes. These perform a linear transformation::
+             (y = scale * (x + inputOffset) + outputOffset )  
+         where y is output and x is the input. The input is the average of any number of sources (through messages) and any number of timesteps. The output goes to any number of targets, again through messages. 
+
+   It is worth adding that messages can transport arbitrary data structures, so it would also be possible to devise a complicated opaque message directly between solvers. The implementation of Adaptors working on visible fields does this much more transparently and gives the user  facile control over the scaling transformation. These adaptors are used especially in the rdesigneur framework of MOOSE, which enables multiscale reaction-diffusion and electrical signaling models. 
+
+   As an example of this API in operation, I consider two mappings:  
+      1. Calcium mapped from electrical to chemical computations. 
+      2. phosphorylation state of a channel mapped to the channel conductance. 
+
+   1. Calcium mapping. 
+         Problem statement. 
+	 Calcium is computed in the electrical solver as one or more pools that are fed by calcium currents, and is removed by an exponential  decay process. This calcium pool is non-diffusive in the current  electrical solver. It has to be mapped to chemical calcium pools at a different spatial discretization, which do diffuse.
+
+	 In terms of the list of capabilities described above, this is how the API works.
+	    1. The electrical model is partitioned into a number of electrical compartments, some of which have the 'electrical' calcium pool as child object in a UNIX filesystem-like tree. Thus the 'electrical' calcium is represented as an object with concentration, location and so on. 	
+	    2. The Solver computes the time-course of evolution of the calcium concentration. Whenever any function queries the 'concentration'	field of the calcium object, the Solver provides this value.  
+            3. Messaging couples the 'electrical' calcium pool concentration to the adaptor (see point 5). This can either be a 'push' operation, where the solver pushes out the calcium value at its internal update rate, or a 'pull' operation where the adaptor requests the calcium concentration.  
+	    4. The clock-based scheduler keeps the electrical and chemical solvers  	ticking away, but it also can drive the operations of the adaptor.  	Thus the rate of updates to and from the adaptor can be controlled.  
+	    5. The adaptor averages its inputs. Say the electrical solver is  	going at a timestep of 50 usec, and the chemical solver at 5000   	usec. The adaptor will take 100 samples of the electrical   	concentration, and average them to compute the 'input' to the  	linear scaling. Suppose that the electrical model has calcium units  	of micromolar, but has a zero baseline. The chemical model has  	units of millimolar and a baseline of 1e-4 millimolar. This gives:  
+  	           y = 0.001x + 1e-4 
+ 	       At the end of this calculation, the adaptor will typically 'push'  	its output to the chemical solver. Here we have similar situation  	to item (1), where the chemical entities are calcium pools in  	space, each with their own calcium concentration.  	The messaging (3) determines another aspect of the mapping here:   	the fan in or fan out. In this case, a single electrical   	compartment may house 10 chemical compartments. Then the output  	message from the adaptor goes to update the calcium pool   	concentration on the appropriate 10 objects representing calcium  	in each of the compartments.
+
+         In much the same manner, the phosphorylation state can regulate channel properties. 
+	 1. The chemical model contains spatially distributed chemical pools  	that represent the unphosphorylated state of the channel, which in  	this example is the conducting form. This concentration of this  	unphosphorylated state is affected by the various reaction-  	diffusion events handled by the chemical solver, below.  
+	 2. The chemical solver updates the concentrations  	of the pool objects as per reaction-diffusion calculations.  
+	 3. Messaging couples these concentration terms to the adaptor. In this  	case we have many chemical pool objects for every electrical  	compartment. There would be a single adaptor for each electrical  	compartment, and it would average all the input values for calcium  	concentration, one for each mesh point in the chemical calculation.  	As before, the access to these fields could be through a 'push'  	or a 'pull' operation.  
+	 4. The clock-based scheduler oeperates as above.  5. The adaptor averages the spatially distributed inputs from calcium,  	and now does a different linear transform. In this case it converts  	chemical concentration into the channel conductance. As before,  	the 'electrical' channel is an object (point 1) with a field for   	conductance, and this term is mapped into the internal data   	structures of the solver (point 2) invisibly to the user.
 
    .. py:attribute:: proc
 
@@ -69,14 +108,9 @@ MOOSE Classes
       double (*source message field*)      Sends the output value every timestep.
 
 
-   .. py:attribute:: requestInput
+   .. py:attribute:: requestOut
 
-      void (*source message field*)      Sends out the request. Issued from the process call.
-
-
-   .. py:attribute:: requestField
-
-      Pd (*source message field*)      Sends out a request to a generic double field. Issued from the process call.Works for any number of targets.
+      PSt6vectorIdSaIdEE (*source message field*)      Sends out a request to a field with a double or array of doubles. Issued from the process call.Works for any number of targets.
 
 
    .. py:attribute:: inputOffset
@@ -308,21 +342,6 @@ MOOSE Classes
 .. py:class:: BufPool
 
 
-   .. py:attribute:: proc
-
-      void (*shared message field*)      Shared message for process and reinit
-
-
-   .. py:method:: process
-
-      (*destination message field*)      Handles process call
-
-
-   .. py:method:: reinit
-
-      (*destination message field*)      Handles reinit call
-
-
 .. py:class:: CaConc
 
    CaConc: Calcium concentration pool. Takes current from a channel and keeps track of calcium buildup and depletion by a single exponential process.
@@ -366,12 +385,12 @@ MOOSE Classes
       (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
 
 
-   .. py:method:: setCa\_base
+   .. py:method:: setCa_base
 
       (*destination message field*)      Assigns field value.
 
 
-   .. py:method:: getCa\_base
+   .. py:method:: getCa_base
 
       (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
 
@@ -466,7 +485,7 @@ MOOSE Classes
       double (*value field*)      Basal Calcium concentration.
 
 
-   .. py:attribute:: Ca\_base
+   .. py:attribute:: Ca_base
 
       double (*value field*)      Basal Calcium concentration, synonym for CaBasal
 
@@ -508,6 +527,11 @@ MOOSE Classes
    .. py:attribute:: ghk
 
       void (*shared message field*)      Message to Goldman-Hodgkin-Katz object
+
+
+   .. py:attribute:: proc
+
+      void (*shared message field*)      Shared message to receive Process message from scheduler
 
 
    .. py:method:: Vm
@@ -553,6 +577,16 @@ MOOSE Classes
    .. py:method:: getIk
 
       (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: process
+
+      (*destination message field*)      Handles process call
+
+
+   .. py:method:: reinit
+
+      (*destination message field*)      Handles reinit call
 
 
    .. py:attribute:: channelOut
@@ -609,6 +643,11 @@ MOOSE Classes
       (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
 
 
+   .. py:method:: getVoxelMidpoint
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
    .. py:method:: getOneVoxelVolume
 
       (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
@@ -654,6 +693,11 @@ MOOSE Classes
       (*destination message field*)      Requests number of field entries in field array.The requesting Element must provide a handler for the returned value.
 
 
+   .. py:attribute:: voxelVolOut
+
+      vector<double> (*source message field*)      Sends updated voxel volume out to Ksolve, Gsolve, and Dsolve.Used to request a recalculation of rates and of initial numbers.
+
+
    .. py:attribute:: volume
 
       double (*value field*)      Volume of entire chemical domain.Assigning this only works if the chemical compartment hasonly a single voxel. Otherwise ignored.This function goes through all objects below this on thetree, and rescales their molecule #s and rates as per thevolume change. This keeps concentration the same, and alsomaintains rates as expressed in volume units.
@@ -662,6 +706,11 @@ MOOSE Classes
    .. py:attribute:: voxelVolume
 
       vector<double> (*value field*)      Vector of volumes of each of the voxels.
+
+
+   .. py:attribute:: voxelMidpoint
+
+      vector<double> (*value field*)      Vector of midpoint coordinates of each of the voxels. The size of this vector is 3N, where N is the number of voxels. The first N entries are for x, next N for y, last N are z. 
 
 
    .. py:attribute:: numDimensions
@@ -710,7 +759,90 @@ MOOSE Classes
 
 .. py:class:: Clock
 
-   Clock: Clock class. Handles sequencing of operations in simulations.Every object scheduled for operations in MOOSE is connected to oneof the 'Tick' entries on the Clock.The Clock manages ten 'Ticks', each of which has its own dt,which is an integral multiple of the base clock dt\_. On every clock step the ticks are examined to see which of themis due for updating. When a tick is updated, the 'process' call of all the objects scheduled on that tick is called.The default scheduling (should not be overridden) has the following assignment of classes to Ticks:0. Biophysics: Init call on Compartments in EE method1. Biophysics: Channels2. Biophysics: Process call on Compartments3. Undefined 4. Kinetics: Pools, or in ksolve mode: Mesh to handle diffusion5. Kinetics: Reacs, enzymes, etc, or in ksolve mode: Stoich/GSL6. Stimulus tables7. More stimulus tables8. Plots9. Postmaster. This must be called last of all and nothing else should use this Tick. The Postmaster is automatically scheduled at set up time. The Tick should be given the longest possible value, typically but not always equal to one of the other ticks, so as to batch the communications. For spiking-only communications, it is usually possible to space the communication tick by as much as 1-2 ms which is the axonal + synaptic delay.
+   Clock: Clock class. Handles sequencing of operations in simulations.Every object scheduled for operations in MOOSE is connected to oneof the 'Tick' entries on the Clock.
+   The Clock manages 32 'Ticks', each of which has its own dt,which is an integral multiple of the clock baseDt\_. On every clock step the ticks are examined to see which of themis due for updating. When a tick is updated, the 'process' call of all the objects scheduled on that tick is called. Order of execution: If a subset of ticks are scheduled for execution at a given timestep, then they will be executed in numerical order, lowest tick first and highest last. There is no guarantee of execution order for objects within a clock tick.
+   The clock provides default scheduling for all objects which can be accessed using Clock::lookupDefaultTick( className ). Specific items of note are that the output/file dump objects are second-last, and the postmaster is last on the order of Ticks. The clock also starts up with some default timesteps for each of these ticks, and this can be overridden using the shell command setClock, or by directly assigning tickStep values on the clock object. 
+   Which objects use which tick? As a rule of thumb, try this: 
+   Electrical/compartmental model calculations: Ticks 0-7 
+   Tables and output objects for electrical output: Tick 8 
+   Diffusion solver: Tick 10 
+   Chemical/compartmental model calculations: Ticks 11-17
+   Tables and output objects for chemical output: Tick 18 
+   Unassigned: Ticks 20-29 
+   Special: 30-31 
+   Data output is a bit special, since you may want to store data at different rates for electrical and chemical processes in the same model. Here you will have to specifically assign distinct clock ticks for the tables/fileIO objects handling output at different time-resolutions. Typically one uses tick 8 and 18.
+   Here are the detailed mappings of class to tick.
+   	Class				Tick		dt 
+   	DiffAmp				0		50e-6
+   	Interpol			0		50e-6
+   	PIDController			0		50e-6
+   	PulseGen			0		50e-6
+   	StimulusTable			0		50e-6
+   	testSched			0		50e-6
+   	VClamp				0		50e-6
+   	SynHandlerBase			1		50e-6
+   	SimpleSynHandler		1		50e-6
+   	CaConc				1		50e-6
+   	CaConcBase			1		50e-6
+   	DifShell			1		50e-6
+   	MgBlock				1		50e-6
+   	Nernst				1		50e-6
+   	RandSpike			1		50e-6
+   	ChanBase			2		50e-6
+   	IntFire				2		50e-6
+   	IntFireBase			2		50e-6
+   	LIF				2		50e-6
+   	IzhikevichNrn			2		50e-6
+   	SynChan				2		50e-6
+   	GapJunction			2		50e-6
+   	HHChannel			2		50e-6
+   	HHChannel2D			2		50e-6
+   	Leakage				2		50e-6
+   	MarkovChannel			2		50e-6
+   	MarkovGslSolver			2		50e-6
+   	MarkovRateTable			2		50e-6
+   	MarkovSolver			2		50e-6
+   	MarkovSolverBase		2		50e-6
+   	RC				2		50e-6
+   	Compartment (init)		3		50e-6
+   	CompartmentBase (init )		3		50e-6
+   	SymCompartment	(init)		3		50e-6
+   	Compartment 			4		50e-6
+   	CompartmentBase			4		50e-6
+   	SymCompartment			4		50e-6
+   	SpikeGen			5		50e-6
+   	HSolve				6		50e-6
+   	SpikeStats			7		50e-6
+   	Dsolve				10		0.01
+   	Adaptor				11		0.1
+   	Func				12		0.1
+   	Function			12		0.1
+   	Arith				12		0.1
+   	FuncBase			12		0.1
+   	FuncPool			12		0.1
+   	MathFunc			12		0.1
+   	SumFunc				12		0.1
+   	BufPool				13		0.1
+   	Pool				13		0.1
+   	PoolBase			13		0.1
+   	CplxEnzBase			14		0.1
+   	Enz				14		0.1
+   	EnzBase				14		0.1
+   	MMenz				14		0.1
+   	Reac				14		0.1
+   	ReacBase			14		0.1
+   	Gsolve	(init)			15		0.1
+   	Ksolve	(init)			15		0.1
+   	Gsolve				16		0.1
+   	Ksolve				16		0.1
+   	Stats				17		1
+   	Table				18		1
+   	TimeTable			18		1
+   	HDF5DataWriter			30		1
+   	HDF5WriterBase			30		1
+   	PostMaster			31		0.01
+   	
+   	Note that the other classes are not scheduled at all.
 
    .. py:attribute:: clockControl
 
@@ -719,60 +851,170 @@ MOOSE Classes
 
    .. py:attribute:: proc0
 
-      void (*shared message field*)      Shared proc/reinit message
+      void (*shared message field*)      Shared process/reinit message
 
 
    .. py:attribute:: proc1
 
-      void (*shared message field*)      Shared proc/reinit message
+      void (*shared message field*)      Shared process/reinit message
 
 
    .. py:attribute:: proc2
 
-      void (*shared message field*)      Shared proc/reinit message
+      void (*shared message field*)      Shared process/reinit message
 
 
    .. py:attribute:: proc3
 
-      void (*shared message field*)      Shared proc/reinit message
+      void (*shared message field*)      Shared process/reinit message
 
 
    .. py:attribute:: proc4
 
-      void (*shared message field*)      Shared proc/reinit message
+      void (*shared message field*)      Shared process/reinit message
 
 
    .. py:attribute:: proc5
 
-      void (*shared message field*)      Shared proc/reinit message
+      void (*shared message field*)      Shared process/reinit message
 
 
    .. py:attribute:: proc6
 
-      void (*shared message field*)      Shared proc/reinit message
+      void (*shared message field*)      Shared process/reinit message
 
 
    .. py:attribute:: proc7
 
-      void (*shared message field*)      Shared proc/reinit message
+      void (*shared message field*)      Shared process/reinit message
 
 
    .. py:attribute:: proc8
 
-      void (*shared message field*)      Shared proc/reinit message
+      void (*shared message field*)      Shared process/reinit message
 
 
    .. py:attribute:: proc9
 
-      void (*shared message field*)      Shared proc/reinit message
+      void (*shared message field*)      Shared process/reinit message
 
 
-   .. py:method:: setDt
+   .. py:attribute:: proc10
+
+      void (*shared message field*)      Shared process/reinit message
+
+
+   .. py:attribute:: proc11
+
+      void (*shared message field*)      Shared process/reinit message
+
+
+   .. py:attribute:: proc12
+
+      void (*shared message field*)      Shared process/reinit message
+
+
+   .. py:attribute:: proc13
+
+      void (*shared message field*)      Shared process/reinit message
+
+
+   .. py:attribute:: proc14
+
+      void (*shared message field*)      Shared process/reinit message
+
+
+   .. py:attribute:: proc15
+
+      void (*shared message field*)      Shared process/reinit message
+
+
+   .. py:attribute:: proc16
+
+      void (*shared message field*)      Shared process/reinit message
+
+
+   .. py:attribute:: proc17
+
+      void (*shared message field*)      Shared process/reinit message
+
+
+   .. py:attribute:: proc18
+
+      void (*shared message field*)      Shared process/reinit message
+
+
+   .. py:attribute:: proc19
+
+      void (*shared message field*)      Shared process/reinit message
+
+
+   .. py:attribute:: proc20
+
+      void (*shared message field*)      Shared process/reinit message
+
+
+   .. py:attribute:: proc21
+
+      void (*shared message field*)      Shared process/reinit message
+
+
+   .. py:attribute:: proc22
+
+      void (*shared message field*)      Shared process/reinit message
+
+
+   .. py:attribute:: proc23
+
+      void (*shared message field*)      Shared process/reinit message
+
+
+   .. py:attribute:: proc24
+
+      void (*shared message field*)      Shared process/reinit message
+
+
+   .. py:attribute:: proc25
+
+      void (*shared message field*)      Shared process/reinit message
+
+
+   .. py:attribute:: proc26
+
+      void (*shared message field*)      Shared process/reinit message
+
+
+   .. py:attribute:: proc27
+
+      void (*shared message field*)      Shared process/reinit message
+
+
+   .. py:attribute:: proc28
+
+      void (*shared message field*)      Shared process/reinit message
+
+
+   .. py:attribute:: proc29
+
+      void (*shared message field*)      Shared process/reinit message
+
+
+   .. py:attribute:: proc30
+
+      void (*shared message field*)      Shared process/reinit message
+
+
+   .. py:attribute:: proc31
+
+      void (*shared message field*)      Shared process/reinit message
+
+
+   .. py:method:: setBaseDt
 
       (*destination message field*)      Assigns field value.
 
 
-   .. py:method:: getDt
+   .. py:method:: getBaseDt
 
       (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
 
@@ -859,107 +1101,327 @@ MOOSE Classes
 
    .. py:attribute:: process0
 
-      PK8ProcInfo (*source message field*)      Process for Tick 0
+      PK8ProcInfo (*source message field*)      process for Tick 0
 
 
    .. py:attribute:: reinit0
 
-      PK8ProcInfo (*source message field*)      Reinit for Tick 0
+      PK8ProcInfo (*source message field*)      reinit for Tick 0
 
 
    .. py:attribute:: process1
 
-      PK8ProcInfo (*source message field*)      Process for Tick 1
+      PK8ProcInfo (*source message field*)      process for Tick 1
 
 
    .. py:attribute:: reinit1
 
-      PK8ProcInfo (*source message field*)      Reinit for Tick 1
+      PK8ProcInfo (*source message field*)      reinit for Tick 1
 
 
    .. py:attribute:: process2
 
-      PK8ProcInfo (*source message field*)      Process for Tick 2
+      PK8ProcInfo (*source message field*)      process for Tick 2
 
 
    .. py:attribute:: reinit2
 
-      PK8ProcInfo (*source message field*)      Reinit for Tick 2
+      PK8ProcInfo (*source message field*)      reinit for Tick 2
 
 
    .. py:attribute:: process3
 
-      PK8ProcInfo (*source message field*)      Process for Tick 3
+      PK8ProcInfo (*source message field*)      process for Tick 3
 
 
    .. py:attribute:: reinit3
 
-      PK8ProcInfo (*source message field*)      Reinit for Tick 3
+      PK8ProcInfo (*source message field*)      reinit for Tick 3
 
 
    .. py:attribute:: process4
 
-      PK8ProcInfo (*source message field*)      Process for Tick 4
+      PK8ProcInfo (*source message field*)      process for Tick 4
 
 
    .. py:attribute:: reinit4
 
-      PK8ProcInfo (*source message field*)      Reinit for Tick 4
+      PK8ProcInfo (*source message field*)      reinit for Tick 4
 
 
    .. py:attribute:: process5
 
-      PK8ProcInfo (*source message field*)      Process for Tick 5
+      PK8ProcInfo (*source message field*)      process for Tick 5
 
 
    .. py:attribute:: reinit5
 
-      PK8ProcInfo (*source message field*)      Reinit for Tick 5
+      PK8ProcInfo (*source message field*)      reinit for Tick 5
 
 
    .. py:attribute:: process6
 
-      PK8ProcInfo (*source message field*)      Process for Tick 6
+      PK8ProcInfo (*source message field*)      process for Tick 6
 
 
    .. py:attribute:: reinit6
 
-      PK8ProcInfo (*source message field*)      Reinit for Tick 6
+      PK8ProcInfo (*source message field*)      reinit for Tick 6
 
 
    .. py:attribute:: process7
 
-      PK8ProcInfo (*source message field*)      Process for Tick 7
+      PK8ProcInfo (*source message field*)      process for Tick 7
 
 
    .. py:attribute:: reinit7
 
-      PK8ProcInfo (*source message field*)      Reinit for Tick 7
+      PK8ProcInfo (*source message field*)      reinit for Tick 7
 
 
    .. py:attribute:: process8
 
-      PK8ProcInfo (*source message field*)      Process for Tick 8
+      PK8ProcInfo (*source message field*)      process for Tick 8
 
 
    .. py:attribute:: reinit8
 
-      PK8ProcInfo (*source message field*)      Reinit for Tick 8
+      PK8ProcInfo (*source message field*)      reinit for Tick 8
 
 
    .. py:attribute:: process9
 
-      PK8ProcInfo (*source message field*)      Process for Tick 9
+      PK8ProcInfo (*source message field*)      process for Tick 9
 
 
    .. py:attribute:: reinit9
 
-      PK8ProcInfo (*source message field*)      Reinit for Tick 9
+      PK8ProcInfo (*source message field*)      reinit for Tick 9
 
 
-   .. py:attribute:: dt
+   .. py:attribute:: process10
 
-      double (*value field*)      Base timestep for simulation
+      PK8ProcInfo (*source message field*)      process for Tick 10
+
+
+   .. py:attribute:: reinit10
+
+      PK8ProcInfo (*source message field*)      reinit for Tick 10
+
+
+   .. py:attribute:: process11
+
+      PK8ProcInfo (*source message field*)      process for Tick 11
+
+
+   .. py:attribute:: reinit11
+
+      PK8ProcInfo (*source message field*)      reinit for Tick 11
+
+
+   .. py:attribute:: process12
+
+      PK8ProcInfo (*source message field*)      process for Tick 12
+
+
+   .. py:attribute:: reinit12
+
+      PK8ProcInfo (*source message field*)      reinit for Tick 12
+
+
+   .. py:attribute:: process13
+
+      PK8ProcInfo (*source message field*)      process for Tick 13
+
+
+   .. py:attribute:: reinit13
+
+      PK8ProcInfo (*source message field*)      reinit for Tick 13
+
+
+   .. py:attribute:: process14
+
+      PK8ProcInfo (*source message field*)      process for Tick 14
+
+
+   .. py:attribute:: reinit14
+
+      PK8ProcInfo (*source message field*)      reinit for Tick 14
+
+
+   .. py:attribute:: process15
+
+      PK8ProcInfo (*source message field*)      process for Tick 15
+
+
+   .. py:attribute:: reinit15
+
+      PK8ProcInfo (*source message field*)      reinit for Tick 15
+
+
+   .. py:attribute:: process16
+
+      PK8ProcInfo (*source message field*)      process for Tick 16
+
+
+   .. py:attribute:: reinit16
+
+      PK8ProcInfo (*source message field*)      reinit for Tick 16
+
+
+   .. py:attribute:: process17
+
+      PK8ProcInfo (*source message field*)      process for Tick 17
+
+
+   .. py:attribute:: reinit17
+
+      PK8ProcInfo (*source message field*)      reinit for Tick 17
+
+
+   .. py:attribute:: process18
+
+      PK8ProcInfo (*source message field*)      process for Tick 18
+
+
+   .. py:attribute:: reinit18
+
+      PK8ProcInfo (*source message field*)      reinit for Tick 18
+
+
+   .. py:attribute:: process19
+
+      PK8ProcInfo (*source message field*)      process for Tick 19
+
+
+   .. py:attribute:: reinit19
+
+      PK8ProcInfo (*source message field*)      reinit for Tick 19
+
+
+   .. py:attribute:: process20
+
+      PK8ProcInfo (*source message field*)      process for Tick 20
+
+
+   .. py:attribute:: reinit20
+
+      PK8ProcInfo (*source message field*)      reinit for Tick 20
+
+
+   .. py:attribute:: process21
+
+      PK8ProcInfo (*source message field*)      process for Tick 21
+
+
+   .. py:attribute:: reinit21
+
+      PK8ProcInfo (*source message field*)      reinit for Tick 21
+
+
+   .. py:attribute:: process22
+
+      PK8ProcInfo (*source message field*)      process for Tick 22
+
+
+   .. py:attribute:: reinit22
+
+      PK8ProcInfo (*source message field*)      reinit for Tick 22
+
+
+   .. py:attribute:: process23
+
+      PK8ProcInfo (*source message field*)      process for Tick 23
+
+
+   .. py:attribute:: reinit23
+
+      PK8ProcInfo (*source message field*)      reinit for Tick 23
+
+
+   .. py:attribute:: process24
+
+      PK8ProcInfo (*source message field*)      process for Tick 24
+
+
+   .. py:attribute:: reinit24
+
+      PK8ProcInfo (*source message field*)      reinit for Tick 24
+
+
+   .. py:attribute:: process25
+
+      PK8ProcInfo (*source message field*)      process for Tick 25
+
+
+   .. py:attribute:: reinit25
+
+      PK8ProcInfo (*source message field*)      reinit for Tick 25
+
+
+   .. py:attribute:: process26
+
+      PK8ProcInfo (*source message field*)      process for Tick 26
+
+
+   .. py:attribute:: reinit26
+
+      PK8ProcInfo (*source message field*)      reinit for Tick 26
+
+
+   .. py:attribute:: process27
+
+      PK8ProcInfo (*source message field*)      process for Tick 27
+
+
+   .. py:attribute:: reinit27
+
+      PK8ProcInfo (*source message field*)      reinit for Tick 27
+
+
+   .. py:attribute:: process28
+
+      PK8ProcInfo (*source message field*)      process for Tick 28
+
+
+   .. py:attribute:: reinit28
+
+      PK8ProcInfo (*source message field*)      reinit for Tick 28
+
+
+   .. py:attribute:: process29
+
+      PK8ProcInfo (*source message field*)      process for Tick 29
+
+
+   .. py:attribute:: reinit29
+
+      PK8ProcInfo (*source message field*)      reinit for Tick 29
+
+
+   .. py:attribute:: process30
+
+      PK8ProcInfo (*source message field*)      process for Tick 30
+
+
+   .. py:attribute:: reinit30
+
+      PK8ProcInfo (*source message field*)      reinit for Tick 30
+
+
+   .. py:attribute:: process31
+
+      PK8ProcInfo (*source message field*)      process for Tick 31
+
+
+   .. py:attribute:: reinit31
+
+      PK8ProcInfo (*source message field*)      reinit for Tick 31
+
+
+   .. py:attribute:: baseDt
+
+      double (*value field*)      Base timestep for simulation. This is the smallest dt out of all the clock ticks. By definition all other timesteps are integral multiples of this, and are rounded to ensure that this is the case . 
 
 
    .. py:attribute:: runTime
@@ -1017,7 +1479,7 @@ MOOSE Classes
 
    .. py:attribute:: proc
 
-      void (*shared message field*)      This is a shared message to receive Process messages from the scheduler objects. The Process should be called \_second\_ in each clock tick, after the Init message.The first entry in the shared msg is a MsgDest for the Process operation. It has a single argument, ProcInfo, which holds lots of information about current time, thread, dt and so on. The second entry is a MsgDest for the Reinit operation. It also uses ProcInfo. 
+      void (*shared message field*)      This is a shared message to receive Process messages from the scheduler objects. The Process should be called `second` in each clock tick, after the Init message.The first entry in the shared msg is a MsgDest for the Process operation. It has a single argument, ProcInfo, which holds lots of information about current time, thread, dt and so on. The second entry is a MsgDest for the Reinit operation. It also uses ProcInfo. 
 
 
    .. py:attribute:: init
@@ -1937,25 +2399,26 @@ MOOSE Classes
 
    DifShell object: Models diffusion of an ion (typically calcium) within an electric compartment. A DifShell is an iso-concentration region with respect to the ion. Adjoining DifShells exchange flux of this ion, and also keep track of changes in concentration due to pumping, buffering and channel currents, by talking to the appropriate objects.
 
-   .. py:attribute:: process\_0
+   .. py:attribute:: process_0
 
       void (*shared message field*)      Here we create 2 shared finfos to attach with the Ticks. This is because we want to perform DifShell computations in 2 stages, much as in the Compartment object. In the first stage we send out the concentration value to other DifShells and Buffer elements. We also receive fluxes and currents and sum them up to compute ( dC / dt ). In the second stage we find the new C value using an explicit integration method. This 2-stage procedure eliminates the need to store and send prev\_C values, as was common in GENESIS.
 
 
-   .. py:attribute:: process\_1
+   .. py:attribute:: process_1
 
       void (*shared message field*)      Second process call
 
 
    .. py:attribute:: buffer
 
-      void (*shared message field*)      This is a shared message from a DifShell to a Buffer (FixBuffer or DifBuffer). During stage 0:
-        - DifShell sends ion concentration
-       - Buffer updates buffer concentration and sends it back immediately using a call-back.
-       - DifShell updates the time-derivative ( dC / dt ) 
+      void (*shared message field*)      This is a shared message from a DifShell to a Buffer (FixBuffer or DifBuffer). During stage 0::
+
+        * DifShell sends ion concentration
+        * Buffer updates buffer concentration and sends it back immediately using a call-back.
+        * DifShell updates the time-derivative ( dC / dt ) 
       
       During stage 1: 
-       - DifShell advances concentration C 
+       * DifShell advances concentration C 
       
       This scheme means that the Buffer does not need to be scheduled, and it does its computations when it receives a cue from the DifShell. May not be the best idea, but it saves us from doing the above computations in 3 stages instead of 2.
 
@@ -2322,25 +2785,6 @@ MOOSE Classes
    .. py:attribute:: outputValue
 
       double (*value field*)      Output of the amplifier, i.e. gain * (plus - minus).
-
-
-.. py:class:: Double
-
-   Variable for storing values.
-
-   .. py:method:: setValue
-
-      (*destination message field*)      Assigns field value.
-
-
-   .. py:method:: getValue
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
-
-
-   .. py:attribute:: value
-
-      double (*value field*)      Variable value
 
 
 .. py:class:: Dsolve
@@ -2796,9 +3240,9 @@ MOOSE Classes
    .. py:attribute:: mode
 
       unsigned int (*value field*)      Mode of operation: 
-       1: only the function value will be funculated
-       2: only the derivative will be funculated
-       3: both function value and derivative at current variable values will be funculated.
+       1: only the function value will be calculated
+       2: only the derivative will be calculated
+       3: both function value and derivative at current variable values will be calculated.
 
 
    .. py:attribute:: expr
@@ -2936,6 +3380,201 @@ MOOSE Classes
       (*destination message field*)      Handles input to control value of n\_
 
 
+.. py:class:: Function
+
+   Function: general purpose function calculator using real numbers. It can parse mathematical expression defining a function and evaluate it and/or its derivative for specified variable values. The variables can be input from other moose objects. Such variables must be named `x{i}` in the expression and the source field is connected to Function.x[i]'s setVar destination field. In case the input variable is not available as a source field, but is a value field, then the value can be requested by connecting the `requestOut` message to the `get{Field}` destination on the target object. Such variables must be specified in the expression as y{i} and connecting the messages should happen in the same order as the y indices. This class handles only real numbers (C-double). Predefined constants are: pi=3.141592..., e=2.718281...
+
+   .. py:attribute:: proc
+
+      void (*shared message field*)      This is a shared message to receive Process messages from the scheduler objects.The first entry in the shared msg is a MsgDest for the Process operation. It has a single argument, ProcInfo, which holds lots of information about current time, thread, dt and so on. The second entry is a MsgDest for the Reinit operation. It also uses ProcInfo. 
+
+
+   .. py:method:: getValue
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: getRate
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: getDerivative
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: setMode
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getMode
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: setExpr
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getExpr
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: setNumX
+
+      (*destination message field*)      Assigns number of field entries in field array.
+
+
+   .. py:method:: getNumX
+
+      (*destination message field*)      Requests number of field entries in field array.The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: setC
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getC
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: setIndependent
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getIndependent
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: process
+
+      (*destination message field*)      Handles process call, updates internal time stamp.
+
+
+   .. py:method:: reinit
+
+      (*destination message field*)      Handles reinit call.
+
+
+   .. py:attribute:: requestOut
+
+      PSt6vectorIdSaIdEE (*source message field*)      Sends request for input variable from a field on target object
+
+
+   .. py:attribute:: valueOut
+
+      double (*source message field*)      Evaluated value of the function for the current variable values.
+
+
+   .. py:attribute:: rateOut
+
+      double (*source message field*)      Value of time-derivative of the function for the current variable values
+
+
+   .. py:attribute:: derivativeOut
+
+      double (*source message field*)      Value of derivative of the function for the current variable values
+
+
+   .. py:attribute:: value
+
+      double (*value field*)      Result of the function evaluation with current variable values.
+
+
+   .. py:attribute:: rate
+
+      double (*value field*)      Derivative of the function at given variable values. This is computed as the difference of the current and previous value of the function divided by the time step.
+
+
+   .. py:attribute:: derivative
+
+      double (*value field*)      Derivative of the function at given variable values. This is calulated using 5-point stencil  <http://en.wikipedia.org/wiki/Five-point_stencil>__ at current value of independent variable. Note that unlike hand-calculated derivatives, numerical derivatives are not exact.
+
+
+   .. py:attribute:: mode
+
+      unsigned int (*value field*)      Mode of operation::
+ 
+       1: only the function value will be sent out.
+       2: only the derivative with respect to the independent variable will be sent out.
+       3: only rate (time derivative) will be sent out.
+       anything else: all three, value, derivative and rate will be sent out.
+      
+
+
+   .. py:attribute:: expr
+
+      string (*value field*)      Mathematical expression defining the function. The underlying parser
+      is muParser. Hence the available functions and operators are (from
+      muParser docs):
+      
+      Functions
+      Name        args    explanation
+      sin         1       sine function
+      cos         1       cosine function
+      tan         1       tangens function
+      asin        1       arcus sine function
+      acos        1       arcus cosine function
+      atan        1       arcus tangens function
+      sinh        1       hyperbolic sine function
+      cosh        1       hyperbolic cosine
+      tanh        1       hyperbolic tangens function
+      asinh       1       hyperbolic arcus sine function
+      acosh       1       hyperbolic arcus tangens function
+      atanh       1       hyperbolic arcur tangens function
+      log2        1       logarithm to the base 2
+      log10       1       logarithm to the base 10
+      log         1       logarithm to the base 10
+      ln  1       logarithm to base e (2.71828...)
+      exp         1       e raised to the power of x
+      sqrt        1       square root of a value
+      sign        1       sign function -1 if x<0; 1 if x>0
+      rint        1       round to nearest integer
+      abs         1       absolute value
+      min         var.    min of all arguments
+      max         var.    max of all arguments
+      sum         var.    sum of all arguments
+      avg         var.    mean value of all arguments
+      
+      Operators
+      Op  meaning         prioroty
+      =   assignement     -1
+      &&  logical and     1
+      ||  logical or      2
+      <=  less or equal   4
+      >=  greater or equal        4
+      !=  not equal       4
+      ==  equal   4
+      >   greater than    4
+      <   less than       4
+      +   addition        5
+      -   subtraction     5
+      *   multiplication  6
+      /   division        6
+      ^   raise x to the power of y       7
+      
+      ?:  if then else operator   C++ style syntax
+      
+
+
+   .. py:attribute:: independent
+
+      string (*value field*)      Index of independent variable. Differentiation is done based on this. Defaults to the first assigned variable.
+
+
+   .. py:attribute:: c
+
+      string,double (*lookup field*)      Constants used in the function. These must be assigned before specifying the function expression.
+
+
 .. py:class:: GapJunction
 
    Implementation of gap junction between two compartments. The shared
@@ -2961,7 +3600,7 @@ MOOSE Classes
 
    .. py:attribute:: proc
 
-      void (*shared message field*)      This is a shared message to receive Process messages from the scheduler objects. The Process should be called \_second\_ in each clock tick, after the Init message.The first entry in the shared msg is a MsgDest for the Process operation. It has a single argument, ProcInfo, which holds lots of information about current time, thread, dt and so on. The second entry is a MsgDest for the Reinit operation. It also uses ProcInfo. 
+      void (*shared message field*)      This is a shared message to receive Process messages from the scheduler objects. The Process should be called *second* in each clock tick, after the Init message.The first entry in the shared msg is a MsgDest for the Process operation. It has a single argument, ProcInfo, which holds lots of information about current time, thread, dt and so on. The second entry is a MsgDest for the Reinit operation. It also uses ProcInfo. 
 
 
    .. py:method:: Vm1
@@ -3070,6 +3709,11 @@ MOOSE Classes
       (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
 
 
+   .. py:method:: voxelVol
+
+      (*destination message field*)      Handles updates to all voxels. Comes from parent ChemCompt object.
+
+
    .. py:method:: process
 
       (*destination message field*)      Handles process call
@@ -3120,205 +3764,244 @@ MOOSE Classes
       unsigned int,vector<double> (*lookup field*)      vector of pool counts
 
 
+.. py:class:: HDF5DataWriter
+
+   HDF5 file writer for saving data tables. It saves the tables connected to it via `requestOut` field into an HDF5 file.  The path of the table is maintained in the HDF5 file, with a HDF5 group for each element above the table.
+   Thus, if you have a table `/data/VmTable` in MOOSE, then it will be written as an HDF5 table called `VmTable` inside an HDF5 Group called `data`.
+   However Table inside Table is considered a pathological case and is not handled.
+   At every process call it writes the contents of the tables to the file and clears the table vectors. You can explicitly force writing of the data via the `flush` function.
+
+   .. py:attribute:: proc
+
+      void (*shared message field*)      Shared message to receive process and reinit
+
+
+   .. py:method:: setFlushLimit
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getFlushLimit
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: process
+
+      (*destination message field*)      Handle process calls. Write data to file and clear all Table objects associated with this. Hence you want to keep it on a slow clock 1000 times or more slower than that for the tables.
+
+
+   .. py:method:: reinit
+
+      (*destination message field*)      Reinitialize the object. If the current file handle is valid, it tries to close that and open the file specified in current filename field.
+
+
+   .. py:attribute:: requestOut
+
+      PSt6vectorIdSaIdEE (*source message field*)      Sends request for a field to target object
+
+
+   .. py:attribute:: flushLimit
+
+      unsigned int (*value field*)      Buffer size limit for flushing the data from memory to file. Default is 4M doubles.
+
+
+.. py:class:: HDF5WriterBase
+
+   HDF5 file writer base class. This is not to be used directly. Instead, it should be subclassed to provide specific data writing functions. This class provides most basic properties like filename, file opening mode, file open status.
+
+   .. py:method:: setFilename
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getFilename
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: getIsOpen
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: setMode
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getMode
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: setChunkSize
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getChunkSize
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: setCompressor
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getCompressor
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: setCompression
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getCompression
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: setStringAttr
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getStringAttr
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: setDoubleAttr
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getDoubleAttr
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: setLongAttr
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getLongAttr
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: setStringVecAttr
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getStringVecAttr
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: setDoubleVecAttr
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getDoubleVecAttr
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: setLongVecAttr
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getLongVecAttr
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: flush
+
+      (*destination message field*)      Write all buffer contents to file and clear the buffers.
+
+
+   .. py:method:: close
+
+      (*destination message field*)      Close the underlying file. This is a safety measure so that file is not in an invalid state even if a crash happens at exit.
+
+
+   .. py:attribute:: filename
+
+      string (*value field*)      Name of the file associated with this HDF5 writer object.
+
+
+   .. py:attribute:: isOpen
+
+      bool (*value field*)      True if this object has an open file handle.
+
+
+   .. py:attribute:: mode
+
+      unsigned int (*value field*)      Depending on mode, if file already exists, if mode=1, data will be appended to existing file, if mode=2, file will be truncated, if  mode=4, no writing will happen.
+
+
+   .. py:attribute:: chunkSize
+
+      unsigned int (*value field*)      Chunksize for writing array data. Defaults to 100.
+
+
+   .. py:attribute:: compressor
+
+      string (*value field*)      Compression type for array data. zlib and szip are supported. Defaults to zlib.
+
+
+   .. py:attribute:: compression
+
+      unsigned int (*value field*)      Compression level for array data. Defaults to 6.
+
+
+   .. py:attribute:: stringAttr
+
+      string,string (*lookup field*)      String attributes. The key is attribute name, value is attribute value (string).
+
+
+   .. py:attribute:: doubleAttr
+
+      string,double (*lookup field*)      Double precision floating point attributes. The key is attribute name, value is attribute value (double).
+
+
+   .. py:attribute:: longAttr
+
+      string,long (*lookup field*)      Long integer attributes. The key is attribute name, value is attribute value (long).
+
+
+   .. py:attribute:: stringVecAttr
+
+      string,vector<string> (*lookup field*)      String vector attributes. The key is attribute name, value is attribute value (string).
+
+
+   .. py:attribute:: doubleVecAttr
+
+      string,vector<double> (*lookup field*)      Double vector attributes. The key is attribute name, value is attribute value (vector of double).
+
+
+   .. py:attribute:: longVecAttr
+
+      string,vector<long> (*lookup field*)      Long integer vector attributes. The key is attribute name, value is attribute value (vector of long).
+
+
 .. py:class:: HHChannel
 
    HHChannel: Hodgkin-Huxley type voltage-gated Ion channel. Something like the old tabchannel from GENESIS, but also presents a similar interface as hhchan from GENESIS.
 
-   .. py:attribute:: proc
-
-      void (*shared message field*)      This is a shared message to receive Process message from thescheduler. The first entry is a MsgDest for the Process operation. It has a single argument, ProcInfo, which holds lots of information about current time, thread, dt andso on.
-       The second entry is a MsgDest for the Reinit operation. It also uses ProcInfo.
-
-
-   .. py:method:: process
-
-      (*destination message field*)      Handles process call
-
-
-   .. py:method:: reinit
-
-      (*destination message field*)      Handles reinit call
-
-
-   .. py:method:: setXpower
-
-      (*destination message field*)      Assigns field value.
-
-
-   .. py:method:: getXpower
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
-
-
-   .. py:method:: setYpower
-
-      (*destination message field*)      Assigns field value.
-
-
-   .. py:method:: getYpower
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
-
-
-   .. py:method:: setZpower
-
-      (*destination message field*)      Assigns field value.
-
-
-   .. py:method:: getZpower
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
-
-
-   .. py:method:: setInstant
-
-      (*destination message field*)      Assigns field value.
-
-
-   .. py:method:: getInstant
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
-
-
-   .. py:method:: setX
-
-      (*destination message field*)      Assigns field value.
-
-
-   .. py:method:: getX
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
-
-
-   .. py:method:: setY
-
-      (*destination message field*)      Assigns field value.
-
-
-   .. py:method:: getY
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
-
-
-   .. py:method:: setZ
-
-      (*destination message field*)      Assigns field value.
-
-
-   .. py:method:: getZ
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
-
-
-   .. py:method:: setUseConcentration
-
-      (*destination message field*)      Assigns field value.
-
-
-   .. py:method:: getUseConcentration
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
-
-
-   .. py:method:: concen
-
-      (*destination message field*)      Incoming message from Concen object to specific conc to usein the Z gate calculations
-
-
-   .. py:method:: createGate
-
-      (*destination message field*)      Function to create specified gate.Argument: Gate type [X Y Z]
-
-
-   .. py:method:: setNumGateX
-
-      (*destination message field*)      Assigns number of field entries in field array.
-
-
-   .. py:method:: getNumGateX
-
-      (*destination message field*)      Requests number of field entries in field array.The requesting Element must provide a handler for the returned value.
-
-
-   .. py:method:: setNumGateY
-
-      (*destination message field*)      Assigns number of field entries in field array.
-
-
-   .. py:method:: getNumGateY
-
-      (*destination message field*)      Requests number of field entries in field array.The requesting Element must provide a handler for the returned value.
-
-
-   .. py:method:: setNumGateZ
-
-      (*destination message field*)      Assigns number of field entries in field array.
-
-
-   .. py:method:: getNumGateZ
-
-      (*destination message field*)      Requests number of field entries in field array.The requesting Element must provide a handler for the returned value.
-
-
-   .. py:attribute:: Xpower
-
-      double (*value field*)      Power for X gate
-
-
-   .. py:attribute:: Ypower
-
-      double (*value field*)      Power for Y gate
-
-
-   .. py:attribute:: Zpower
-
-      double (*value field*)      Power for Z gate
-
-
-   .. py:attribute:: instant
-
-      int (*value field*)      Bitmapped flag: bit 0 = Xgate, bit 1 = Ygate, bit 2 = ZgateWhen true, specifies that the lookup table value should beused directly as the state of the channel, rather than usedas a rate term for numerical integration for the state
-
-
-   .. py:attribute:: X
-
-      double (*value field*)      State variable for X gate
-
-
-   .. py:attribute:: Y
-
-      double (*value field*)      State variable for Y gate
-
-
-   .. py:attribute:: Z
-
-      double (*value field*)      State variable for Y gate
-
-
-   .. py:attribute:: useConcentration
-
-      int (*value field*)      Flag: when true, use concentration message rather than Vm tocontrol Z gate
-
-
 .. py:class:: HHChannel2D
 
    HHChannel2D: Hodgkin-Huxley type voltage-gated Ion channel. Something like the old tabchannel from GENESIS, but also presents a similar interface as hhchan from GENESIS.
-
-   .. py:attribute:: proc
-
-      void (*shared message field*)      This is a shared message to receive Process message from thescheduler. The first entry is a MsgDest for the Process operation. It has a single argument, ProcInfo, which holds lots of information about current time, thread, dt andso on.
-       The second entry is a MsgDest for the Reinit operation. It also uses ProcInfo.
-
-
-   .. py:method:: process
-
-      (*destination message field*)      Handles process call
-
-
-   .. py:method:: reinit
-
-      (*destination message field*)      Handles reinit call
-
 
    .. py:method:: setXindex
 
@@ -3510,6 +4193,170 @@ MOOSE Classes
       double (*value field*)      State variable for Y gate
 
 
+.. py:class:: HHChannelBase
+
+   HHChannelBase: Base class for Hodgkin-Huxley type voltage-gated Ion channels. Something like the old tabchannel from GENESIS, but also presents a similar interface as hhchan from GENESIS.
+
+   .. py:method:: setXpower
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getXpower
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: setYpower
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getYpower
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: setZpower
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getZpower
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: setInstant
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getInstant
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: setX
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getX
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: setY
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getY
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: setZ
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getZ
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: setUseConcentration
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getUseConcentration
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: concen
+
+      (*destination message field*)      Incoming message from Concen object to specific conc to usein the Z gate calculations
+
+
+   .. py:method:: createGate
+
+      (*destination message field*)      Function to create specified gate.Argument: Gate type [X Y Z]
+
+
+   .. py:method:: setNumGateX
+
+      (*destination message field*)      Assigns number of field entries in field array.
+
+
+   .. py:method:: getNumGateX
+
+      (*destination message field*)      Requests number of field entries in field array.The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: setNumGateY
+
+      (*destination message field*)      Assigns number of field entries in field array.
+
+
+   .. py:method:: getNumGateY
+
+      (*destination message field*)      Requests number of field entries in field array.The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: setNumGateZ
+
+      (*destination message field*)      Assigns number of field entries in field array.
+
+
+   .. py:method:: getNumGateZ
+
+      (*destination message field*)      Requests number of field entries in field array.The requesting Element must provide a handler for the returned value.
+
+
+   .. py:attribute:: Xpower
+
+      double (*value field*)      Power for X gate
+
+
+   .. py:attribute:: Ypower
+
+      double (*value field*)      Power for Y gate
+
+
+   .. py:attribute:: Zpower
+
+      double (*value field*)      Power for Z gate
+
+
+   .. py:attribute:: instant
+
+      int (*value field*)      Bitmapped flag: bit 0 = Xgate, bit 1 = Ygate, bit 2 = ZgateWhen true, specifies that the lookup table value should beused directly as the state of the channel, rather than usedas a rate term for numerical integration for the state
+
+
+   .. py:attribute:: X
+
+      double (*value field*)      State variable for X gate
+
+
+   .. py:attribute:: Y
+
+      double (*value field*)      State variable for Y gate
+
+
+   .. py:attribute:: Z
+
+      double (*value field*)      State variable for Y gate
+
+
+   .. py:attribute:: useConcentration
+
+      int (*value field*)      Flag: when true, use concentration message rather than Vm tocontrol Z gate
+
+
 .. py:class:: HHGate
 
    HHGate: Gate for Hodkgin-Huxley type channels, equivalent to the m and h terms on the Na squid channel and the n term on K. This takes the voltage and state variable from the channel, computes the new value of the state variable and a scaling, depending on gate power, for the conductance.
@@ -3656,7 +4503,10 @@ MOOSE Classes
 
    .. py:method:: setupGate
 
-      (*destination message field*)      Sets up one gate at a time using the alpha/beta form.Has 9 parameters, as follows:setupGate A B C D F xdivs xmin xmax is\_betaThis sets up the gate using the equation:y(x) = (A + B * x) / (C + exp((x + D) / F))Deprecated.
+      (*destination message field*)      Sets up one gate at a time using the alpha/beta form.Has 9 parameters, as follows:setupGate A B C D F xdivs xmin xmax is\_betaThis sets up the gate using the equation::
+         y(x) = (A + B * x) / (C + exp((x + D) / F))
+
+      *Deprecated.*
 
 
    .. py:attribute:: alpha
@@ -4174,14 +5024,9 @@ MOOSE Classes
       (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
 
 
-   .. py:method:: setBufferTime
+   .. py:method:: activation
 
-      (*destination message field*)      Assigns field value.
-
-
-   .. py:method:: getBufferTime
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+      (*destination message field*)      Handles value of synaptic activation arriving on this IntFire
 
 
    .. py:method:: process
@@ -4196,7 +5041,7 @@ MOOSE Classes
 
    .. py:attribute:: spikeOut
 
-      double (*source message field*)      Sends out spike events
+      double (*source message field*)      Sends out spike events. The argument is the timestamp of the spike. 
 
 
    .. py:attribute:: Vm
@@ -4219,9 +5064,58 @@ MOOSE Classes
       double (*value field*)      Minimum time between successive spikes
 
 
-   .. py:attribute:: bufferTime
+.. py:class:: IntFireBase
 
-      double (*value field*)      Duration of spike buffer.
+   Base class for Integrate-and-fire compartment.
+
+   .. py:method:: setThresh
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getThresh
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: setRefractoryPeriod
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getRefractoryPeriod
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: getHasFired
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: activation
+
+      (*destination message field*)      Handles value of synaptic activation arriving on this object
+
+
+   .. py:attribute:: spikeOut
+
+      double (*source message field*)      Sends out spike events. The argument is the timestamp of the spike. 
+
+
+   .. py:attribute:: thresh
+
+      double (*value field*)      firing threshold
+
+
+   .. py:attribute:: refractoryPeriod
+
+      double (*value field*)      Minimum time between successive spikes
+
+
+   .. py:attribute:: hasFired
+
+      bool (*value field*)      The object has fired within the last timestep
 
 
 .. py:class:: Interpol
@@ -4794,9 +5688,19 @@ MOOSE Classes
 .. py:class:: Ksolve
 
 
+   .. py:attribute:: xCompt
+
+      void (*shared message field*)      Shared message for pool exchange for cross-compartment reactions. Exchanges latest values of all pools that participate in such reactions.
+
+
    .. py:attribute:: proc
 
-      void (*shared message field*)      Shared message for process and reinit
+      void (*shared message field*)      Shared message for process and reinit. These are used for all regular Ksolve calculations including interfacing with the diffusion calculations by a Dsolve.
+
+
+   .. py:attribute:: init
+
+      void (*shared message field*)      Shared message for initProc and initReinit. This is used when the system has cross-compartment reactions. 
 
 
    .. py:method:: setMethod
@@ -4825,26 +5729,6 @@ MOOSE Classes
 
 
    .. py:method:: getEpsRel
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
-
-
-   .. py:method:: setStoich
-
-      (*destination message field*)      Assigns field value.
-
-
-   .. py:method:: getStoich
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
-
-
-   .. py:method:: setDsolve
-
-      (*destination message field*)      Assigns field value.
-
-
-   .. py:method:: getDsolve
 
       (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
 
@@ -4894,14 +5778,44 @@ MOOSE Classes
       (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
 
 
+   .. py:method:: getEstimatedDt
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: voxelVol
+
+      (*destination message field*)      Handles updates to all voxels. Comes from parent ChemCompt object.
+
+
+   .. py:method:: xComptIn
+
+      (*destination message field*)      Handles arriving pool 'n' values used in cross-compartment reactions.
+
+
    .. py:method:: process
 
-      (*destination message field*)      Handles process call
+      (*destination message field*)      Handles process call from Clock
 
 
    .. py:method:: reinit
 
-      (*destination message field*)      Handles reinit call
+      (*destination message field*)      Handles reinit call from Clock
+
+
+   .. py:method:: initProc
+
+      (*destination message field*)      Handles initProc call from Clock
+
+
+   .. py:method:: initReinit
+
+      (*destination message field*)      Handles initReinit call from Clock
+
+
+   .. py:attribute:: xComptOut
+
+      Id,vector<double> (*source message field*)      Sends 'n' of all molecules participating in cross-compartment reactions between any juxtaposed voxels between current compt and another compartment. This includes molecules local to this compartment, as well as proxy molecules belonging elsewhere. A(t+1) = (Alocal(t+1) + AremoteProxy(t+1)) - Alocal(t) A(t+1) = (Aremote(t+1) + Aproxy(t+1)) - Aproxy(t) Then we update A on the respective solvers with: Alocal(t+1) = Aproxy(t+1) = A(t+1) This is equivalent to sending dA over on each timestep. 
 
 
    .. py:attribute:: method
@@ -4917,16 +5831,6 @@ MOOSE Classes
    .. py:attribute:: epsRel
 
       double (*value field*)      Relative permissible integration error range.
-
-
-   .. py:attribute:: stoich
-
-      Id (*value field*)      Stoichiometry object for handling this reaction system.
-
-
-   .. py:attribute:: dsolve
-
-      Id (*value field*)      Diffusion solver object handling this reactin system.
 
 
    .. py:attribute:: compartment
@@ -4949,49 +5853,23 @@ MOOSE Classes
       unsigned int (*value field*)      Number of molecular pools in the entire reac-diff system, including variable, function and buffered.
 
 
+   .. py:attribute:: estimatedDt
+
+      double (*value field*)      Estimated timestep for reac system based on Euler error
+
+
    .. py:attribute:: nVec
 
       unsigned int,vector<double> (*lookup field*)      vector of pool counts. Index specifies which voxel.
 
 
+.. py:class:: LIF
+
+   Leaky Integrate-and-Fire neuron
+
 .. py:class:: Leakage
 
    Leakage: Passive leakage channel.
-
-   .. py:attribute:: proc
-
-      void (*shared message field*)      This is a shared message to receive Process message from the scheduler. The first entry is a MsgDest for the Process operation. It has a single argument, ProcInfo, which holds lots of information about current time, thread, dt and so on.
-      The second entry is a MsgDest for the Reinit operation. It also uses ProcInfo.
-
-
-   .. py:method:: process
-
-      (*destination message field*)      Handles process call
-
-
-   .. py:method:: reinit
-
-      (*destination message field*)      Handles reinit call
-
-
-.. py:class:: Long
-
-   Variable for storing values.
-
-   .. py:method:: setValue
-
-      (*destination message field*)      Assigns field value.
-
-
-   .. py:method:: getValue
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
-
-
-   .. py:attribute:: value
-
-      long (*value field*)      Variable value
-
 
 .. py:class:: MMenz
 
@@ -4999,21 +5877,6 @@ MOOSE Classes
 .. py:class:: MarkovChannel
 
    MarkovChannel : Multistate ion channel class.It deals with ion channels which can be found in one of multiple states, some of which are conducting. This implementation assumes the occurence of first order kinetics to calculate the probabilities of the channel being found in all states. Further, the rates of transition between these states can be constant, voltage-dependent or ligand dependent (only one ligand species). The current flow obtained from the channel is calculated in a deterministic method by solving the system of differential equations obtained from the assumptions above.
-
-   .. py:attribute:: proc
-
-      void (*shared message field*)      This is a shared message to receive Process message from thescheduler. The first entry is a MsgDest for the Process operation. It has a single argument, ProcInfo, which holds lots of information about current time, thread, dt andso on. The second entry is a MsgDest for the Reinit operation. It also uses ProcInfo.
-
-
-   .. py:method:: process
-
-      (*destination message field*)      Handles process call
-
-
-   .. py:method:: reinit
-
-      (*destination message field*)      Handles reinit call
-
 
    .. py:method:: setLigandConc
 
@@ -5754,43 +6617,27 @@ MOOSE Classes
 
    MgBlock: Hodgkin-Huxley type voltage-gated Ion channel. Something like the old tabchannel from GENESIS, but also presents a similar interface as hhchan from GENESIS.
 
-   .. py:attribute:: proc
-
-      void (*shared message field*)      This is a shared message to receive Process message from thescheduler. The first entry is a MsgDest for the Process operation. It has a single argument, ProcInfo, which holds lots of information about current time, thread, dt andso on.
-       The second entry is a MsgDest for the Reinit operation. It also uses ProcInfo.
-
-
-   .. py:method:: process
-
-      (*destination message field*)      Handles process call
-
-
-   .. py:method:: reinit
-
-      (*destination message field*)      Handles reinit call
-
-
    .. py:method:: origChannel
 
       (*destination message field*)      
 
 
-   .. py:method:: setKMg\_A
+   .. py:method:: setKMg_A
 
       (*destination message field*)      Assigns field value.
 
 
-   .. py:method:: getKMg\_A
+   .. py:method:: getKMg_A
 
       (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
 
 
-   .. py:method:: setKMg\_B
+   .. py:method:: setKMg_B
 
       (*destination message field*)      Assigns field value.
 
 
-   .. py:method:: getKMg\_B
+   .. py:method:: getKMg_B
 
       (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
 
@@ -5805,16 +6652,6 @@ MOOSE Classes
       (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
 
 
-   .. py:method:: setIk
-
-      (*destination message field*)      Assigns field value.
-
-
-   .. py:method:: getIk
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
-
-
    .. py:method:: setZk
 
       (*destination message field*)      Assigns field value.
@@ -5825,12 +6662,12 @@ MOOSE Classes
       (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
 
 
-   .. py:attribute:: KMg\_A
+   .. py:attribute:: KMg_A
 
       double (*value field*)      1/eta
 
 
-   .. py:attribute:: KMg\_B
+   .. py:attribute:: KMg_B
 
       double (*value field*)      1/gamma
 
@@ -5838,11 +6675,6 @@ MOOSE Classes
    .. py:attribute:: CMg
 
       double (*value field*)      [Mg] in mM
-
-
-   .. py:attribute:: Ik
-
-      double (*value field*)      Current through MgBlock
 
 
    .. py:attribute:: Zk
@@ -6300,6 +7132,21 @@ MOOSE Classes
       (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
 
 
+   .. py:method:: setTick
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getTick
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: getDt
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
    .. py:method:: getValueFields
 
       (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
@@ -6388,6 +7235,16 @@ MOOSE Classes
    .. py:attribute:: numField
 
       unsigned int (*value field*)      For a FieldElement: number of entries of self.For a regular Element: One.
+
+
+   .. py:attribute:: tick
+
+      int (*value field*)      Clock tick for this Element for periodic execution in the main simulation event loop. A default is normally assigned, based on object class, but one can override to any value between 0 and 19. Assigning to -1 means that the object is disabled and will not be called during simulation execution The actual timestep (dt) belonging to a clock tick is defined by the Clock object.
+
+
+   .. py:attribute:: dt
+
+      double (*value field*)      Timestep used for this Element. Zero if not scheduled.
 
 
    .. py:attribute:: valueFields
@@ -6538,7 +7395,7 @@ MOOSE Classes
       (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
 
 
-   .. py:method:: getE\_previous
+   .. py:method:: getE_previous
 
       (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
 
@@ -6605,7 +7462,9 @@ MOOSE Classes
 
    .. py:attribute:: outputValue
 
-      double (*value field*)      Output of the PIDController. This is given by:      gain * ( error + INTEGRAL[ error dt ] / tau\_i   + tau\_d * d(error)/dt )
+      double (*value field*)      Output of the PIDController. This is given by::
+         gain * ( error + INTEGRAL[ error dt ] / tau_i   + tau_d * d(error)/dt )
+
       Where gain = proportional gain (Kp), tau\_i = integral gain (Kp/Ki) and tau\_d = derivative gain (Kd/Kp). In control theory this is also known as the manipulated variable (MV)
 
 
@@ -6624,7 +7483,7 @@ MOOSE Classes
       double (*value field*)      The derivative term. This is (error - e\_previous)/dt.
 
 
-   .. py:attribute:: e\_previous
+   .. py:attribute:: e_previous
 
       double (*value field*)      The error term for previous step.
 
@@ -7023,7 +7882,7 @@ MOOSE Classes
 
    .. py:method:: input
 
-      (*destination message field*)      Handle incoming input that determines gating/triggering onset.
+      (*destination message field*)      Handle incoming input that determines gating/triggering onset. Note that although this is a double field, the underlying field is integer. So fractional part of input will be truncated
 
 
    .. py:method:: levelIn
@@ -7223,6 +8082,85 @@ MOOSE Classes
       double (*value field*)      Input value to the RC circuit.This is handled as an input current to the circuit.
 
 
+.. py:class:: RandSpike
+
+   RandSpike object, generates random spikes at.specified mean rate. Based closely on GENESIS randspike.
+
+   .. py:attribute:: proc
+
+      void (*shared message field*)      Shared message to receive Process message from scheduler
+
+
+   .. py:method:: process
+
+      (*destination message field*)      Handles process call
+
+
+   .. py:method:: reinit
+
+      (*destination message field*)      Handles reinit call
+
+
+   .. py:method:: setRate
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getRate
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: setRefractT
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getRefractT
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: setAbs_refract
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getAbs_refract
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: getHasFired
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:attribute:: spikeOut
+
+      double (*source message field*)      Sends out a trigger for an event.
+
+
+   .. py:attribute:: rate
+
+      double (*value field*)      Specifies rate for random spike train. Note that this isprobabilistic, so the instantaneous rate may differ. If the rate is assigned be message and it varies slowly then the average firing rate will approach the specified rate
+
+
+   .. py:attribute:: refractT
+
+      double (*value field*)      Refractory Time.
+
+
+   .. py:attribute:: abs_refract
+
+      double (*value field*)      Absolute refractory time. Synonym for refractT.
+
+
+   .. py:attribute:: hasFired
+
+      bool (*value field*)      True if RandSpike has just fired
+
+
 .. py:class:: Reac
 
 
@@ -7397,6 +8335,10 @@ MOOSE Classes
 
       (*destination message field*)      Deals with assignment of path to a given clock. Arguments: path, field, tick number. 
 
+
+.. py:class:: SimpleSynHandler
+
+   The SimpleSynHandler handles simple synapses without plasticity. It uses a priority queue to manage them.
 
 .. py:class:: SingleMsg
 
@@ -7607,12 +8549,12 @@ MOOSE Classes
       (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
 
 
-   .. py:method:: setAbs\_refract
+   .. py:method:: setAbs_refract
 
       (*destination message field*)      Assigns field value.
 
 
-   .. py:method:: getAbs\_refract
+   .. py:method:: getAbs_refract
 
       (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
 
@@ -7647,7 +8589,7 @@ MOOSE Classes
       double (*value field*)      Refractory Time.
 
 
-   .. py:attribute:: abs\_refract
+   .. py:attribute:: abs_refract
 
       double (*value field*)      Absolute refractory time. Synonym for refractT.
 
@@ -7660,6 +8602,35 @@ MOOSE Classes
    .. py:attribute:: edgeTriggered
 
       bool (*value field*)      When edgeTriggered = 0, the SpikeGen will fire an event in each timestep while incoming Vm is > threshold and at least abs\_refracttime has passed since last event. This may be problematic if the incoming Vm remains above threshold for longer than abs\_refract. Setting edgeTriggered to 1 resolves this as the SpikeGen generatesan event only on the rising edge of the incoming Vm and will remain idle unless the incoming Vm goes below threshold.
+
+
+.. py:class:: SpikeStats
+
+   Object to do some minimal stats on rate of a spike train. Derived from the Stats object and returns the same set of stats.Can take either predigested spike event input, or can handle a continuous sampling of membrane potential Vm and decide if a spike has occured based on a threshold.
+
+   .. py:method:: setThreshold
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getThreshold
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: addSpike
+
+      (*destination message field*)      Handles spike event time input, converts into a rate to do stats upon.
+
+
+   .. py:method:: Vm
+
+      (*destination message field*)      Handles continuous voltage input, can be coming in much than update rate of the SpikeStats. Looks for transitions above threshold to register the arrival of a spike. Doesn't do another spike till Vm falls below threshold. 
+
+
+   .. py:attribute:: threshold
+
+      double (*value field*)      Spiking threshold. If Vm crosses this going up then the SpikeStats object considers that a spike has happened and adds it to the stats.
 
 
 .. py:class:: SpineMesh
@@ -7708,6 +8679,41 @@ MOOSE Classes
       (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
 
 
+   .. py:method:: getWmean
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: getWsdev
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: getWsum
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: getWnum
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: setWindowLength
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getWindowLength
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: input
+
+      (*destination message field*)      Handles continuous value input as a time-series. Multiple inputs are allowed, they will be merged. 
+
+
    .. py:method:: process
 
       (*destination message field*)      Handles process call
@@ -7718,39 +8724,62 @@ MOOSE Classes
       (*destination message field*)      Handles reinit call
 
 
-   .. py:method:: process
+   .. py:attribute:: requestOut
 
-      (*destination message field*)      Handles process call
-
-
-   .. py:method:: reinit
-
-      (*destination message field*)      Handles reinit call
+      PSt6vectorIdSaIdEE (*source message field*)      Sends request for a field to target object
 
 
    .. py:attribute:: mean
 
-      double (*value field*)      Mean of all sampled values.
+      double (*value field*)      Mean of all sampled values or of spike rate.
 
 
    .. py:attribute:: sdev
 
-      double (*value field*)      Standard Deviation of all sampled values.
+      double (*value field*)      Standard Deviation of all sampled values, or of rate.
 
 
    .. py:attribute:: sum
 
-      double (*value field*)      Sum of all sampled values.
+      double (*value field*)      Sum of all sampled values, or total number of spikes.
 
 
    .. py:attribute:: num
 
-      unsigned int (*value field*)      Number of all sampled values.
+      unsigned int (*value field*)      Number of all sampled values, or total number of spikes.
+
+
+   .. py:attribute:: wmean
+
+      double (*value field*)      Mean of sampled values or of spike rate within window.
+
+
+   .. py:attribute:: wsdev
+
+      double (*value field*)      Standard Deviation of sampled values, or rate, within window.
+
+
+   .. py:attribute:: wsum
+
+      double (*value field*)      Sum of all sampled values, or total number of spikes, within window.
+
+
+   .. py:attribute:: wnum
+
+      unsigned int (*value field*)      Number of all sampled values, or total number of spikes, within window.
+
+
+   .. py:attribute:: windowLength
+
+      unsigned int (*value field*)      Number of bins for windowed stats. Ignores windowing if this value is zero. 
 
 
 .. py:class:: SteadyState
 
-   SteadyState: works out a steady-state value for a reaction system. It uses GSL heavily, and isn't even compiled if the flag isn't set. It finds the ss value closest to the initial conditions, defined by current molecular concentrations.If you want to find multiple stable states, use the MultiStable object,which operates a SteadyState object to find multiple states.If you want to carry out a dose-response calculation, use the DoseResponse object.If you want to follow a stable state in phase space, use the StateTrajectory object.
+   SteadyState: works out a steady-state value for a reaction system. This class uses the GSL multidimensional root finder algorithms to find the fixed points closest to the current molecular concentrations. When it finds the fixed points, it figures out eigenvalues of the solution, as a way to help classify the fixed points. Note that the method finds unstable as well as stable fixed points.
+    The SteadyState class also provides a utility function *randomInit()*	to randomly initialize the concentrations, within the constraints of stoichiometry. This is useful if you are trying to find the major fixed points of the system. Note that this is probabilistic. If a fixed point is in a very narrow range of state space the probability of finding it is small and you will have to run many iterations with different initial conditions to find it.
+    The numerical calculations used by the SteadyState solver are prone to failing on individual calculations. All is not lost, because the system reports the solutionStatus. It is recommended that you test this field after every calculation, so you can simply ignore cases where it failed and try again with different starting conditions.
+    Another rule of thumb is that the SteadyState object is more likely to succeed in finding solutions from a new starting point if you numerically integrate the chemical system for a short time (typically under 1 second) before asking it to find the fixed point. 
 
    .. py:method:: setStoich
 
@@ -8103,17 +9132,17 @@ MOOSE Classes
       (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
 
 
-   .. py:method:: getEstimatedDt
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
-
-
    .. py:method:: getNumVarPools
 
       (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
 
 
    .. py:method:: getNumAllPools
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: getNumProxyPools
 
       (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
 
@@ -8143,9 +9172,24 @@ MOOSE Classes
       (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
 
 
+   .. py:method:: getProxyPools
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
    .. py:method:: unzombify
 
       (*destination message field*)      Restore all zombies to their native state
+
+
+   .. py:method:: buildXreacs
+
+      (*destination message field*)      Build cross-reaction terms between current stoich and argument. This function scans the voxels at which there are junctions between different compartments, and orchestrates set up of interfaces between the Ksolves that implement the X reacs at those junctions. 
+
+
+   .. py:method:: filterXreacs
+
+      (*destination message field*)      Filter cross-reaction terms on current stoichThis function clears out absent rate terms that would otherwise try to compute cross reactions where the junctions are not present. 
 
 
    .. py:attribute:: path
@@ -8168,11 +9212,6 @@ MOOSE Classes
       Id (*value field*)      Id of chemical compartment class that works with this Stoich. Must be derived from class ChemCompt. If left unset then the system will be assumed to work in a non-diffusive, well-stirred cell. If it is going to be  used it must be assigned before the path is set.
 
 
-   .. py:attribute:: estimatedDt
-
-      double (*value field*)      Estimated timestep for reac system based on Euler error
-
-
    .. py:attribute:: numVarPools
 
       unsigned int (*value field*)      Number of time-varying pools to be computed by the numerical engine
@@ -8181,6 +9220,11 @@ MOOSE Classes
    .. py:attribute:: numAllPools
 
       unsigned int (*value field*)      Total number of pools handled by the numerical engine. This includes variable ones, buffered ones, and functions
+
+
+   .. py:attribute:: numProxyPools
+
+      unsigned int (*value field*)      Number of pools here by proxy as substrates of a cross-compartment reaction.
 
 
    .. py:attribute:: poolIdMap
@@ -8206,6 +9250,11 @@ MOOSE Classes
    .. py:attribute:: rowStart
 
       vector<unsigned int> (*value field*)      Row start for each block of entries and column indices
+
+
+   .. py:attribute:: proxyPools
+
+      Id,vector<Id> (*lookup field*)      Return vector of proxy pools for X-compt reactions between current stoich, and the argument, which is a StoichId. The returned pools belong to the compartment handling the Stoich specified in the argument. If no pools are found, return an empty vector.
 
 
 .. py:class:: SumFunc
@@ -8239,28 +9288,26 @@ MOOSE Classes
                                           
    In case of branching, the B-C part of the parent's axial resistance
    forms a Y with the A-B part of the children::
-
-                                     B'              
-                                     |               
-                                     /               
-                                     \              
-                                     /               
-                                     \              
-                                     /               
-                                     |A'             
-                      B              |               
-        A-----/\/\/\-----/\/\/\------|C        
-                                     |               
-                                     |A"            
-                                     /               
-                                     \              
-                                     /               
-                                     \              
-                                     /               
-                                     |               
-                                     B"             
-   
-      As per basic circuit analysis techniques, the C node is replaced using
+                                  B'              
+                                  |               
+                                  /               
+                                  \              
+                                  /               
+                                  \              
+                                  /               
+                                  |A'             
+                   B              |               
+     A-----/\/\/\-----/\/\/\------|C        
+                                  |               
+                                  |A"            
+                                  /               
+                                  \              
+                                  /               
+                                  \              
+                                  /               
+                                  |               
+                                  B"             
+   As per basic circuit analysis techniques, the C node is replaced using
    star-mesh transform. This requires all sibling compartments at a
    branch point to be connected via 'sibling' messages by the user (or
    by the cell reader in case of prototypes). For the same reason, the
@@ -8434,21 +9481,8 @@ MOOSE Classes
 
 .. py:class:: SynChan
 
-
-   .. py:attribute:: proc
-
-      void (*shared message field*)      Shared message to receive Process message from scheduler
-
-
-   .. py:method:: process
-
-      (*destination message field*)      Handles process call
-
-
-   .. py:method:: reinit
-
-      (*destination message field*)      Handles reinit call
-
+   SynChan: Synaptic channel incorporating  weight and delay. Does not handle actual arrival of synaptic  events, that is done by one of the derived classes of SynHandlerBase.
+   In use, the SynChan sits on the compartment connected to it by the **channel** message. One or more of the SynHandler objects connects to the SynChan through the **activation** message. The SynHandlers each manage multiple synapses, and the handlers can be fixed weight or have a learning rule. 
 
    .. py:method:: setTau1
 
@@ -8505,116 +9539,13 @@ MOOSE Classes
       bool (*value field*)      Flag. If true, the overall conductance is normalized by the number of individual synapses in this SynChan object.
 
 
-.. py:class:: SynChanBase
+.. py:class:: SynHandlerBase
 
-   SynChanBase: Base class for assorted ion channels.Presents a common interface for all of them.
+   Base class for handling synapse arrays converging onto a given channel or integrate-and-fire neuron. This class provides the interface for channels/intFires to connect to a range of synapse types, including simple synapses, synapses with different plasticity rules, and variants yet to be implemented.
 
-   .. py:attribute:: channel
+   .. py:attribute:: proc
 
-      void (*shared message field*)      This is a shared message to couple channel to compartment. The first entry is a MsgSrc to send Gk and Ek to the compartment The second entry is a MsgDest for Vm from the compartment.
-
-
-   .. py:attribute:: ghk
-
-      void (*shared message field*)      Message to Goldman-Hodgkin-Katz object
-
-
-   .. py:method:: Vm
-
-      (*destination message field*)      Handles Vm message coming in from compartment
-
-
-   .. py:method:: Vm
-
-      (*destination message field*)      Handles Vm message coming in from compartment
-
-
-   .. py:method:: setGbar
-
-      (*destination message field*)      Assigns field value.
-
-
-   .. py:method:: getGbar
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
-
-
-   .. py:method:: setEk
-
-      (*destination message field*)      Assigns field value.
-
-
-   .. py:method:: getEk
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
-
-
-   .. py:method:: setGk
-
-      (*destination message field*)      Assigns field value.
-
-
-   .. py:method:: getGk
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
-
-
-   .. py:method:: getIk
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
-
-
-   .. py:method:: setBufferTime
-
-      (*destination message field*)      Assigns field value.
-
-
-   .. py:method:: getBufferTime
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
-
-
-   .. py:attribute:: channelOut
-
-      double,double (*source message field*)      Sends channel variables Gk and Ek to compartment
-
-
-   .. py:attribute:: permeabilityOut
-
-      double (*source message field*)      Conductance term going out to GHK object
-
-
-   .. py:attribute:: IkOut
-
-      double (*source message field*)      Channel current. This message typically goes to concenobjects that keep track of ion concentration.
-
-
-   .. py:attribute:: Gbar
-
-      double (*value field*)      Maximal channel conductance
-
-
-   .. py:attribute:: Ek
-
-      double (*value field*)      Reversal potential of channel
-
-
-   .. py:attribute:: Gk
-
-      double (*value field*)      Channel conductance variable
-
-
-   .. py:attribute:: Ik
-
-      double (*value field*)      Channel current variable
-
-
-   .. py:attribute:: bufferTime
-
-      double (*value field*)      Duration of spike buffer.
-
-
-.. py:class:: SynHandler
+      void (*shared message field*)      Shared Finfo to receive Process messages from the clock.
 
 
    .. py:method:: setNumSynapses
@@ -8635,6 +9566,21 @@ MOOSE Classes
    .. py:method:: getNumSynapse
 
       (*destination message field*)      Requests number of field entries in field array.The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: process
+
+      (*destination message field*)      Handles 'process' call. Checks if any spike events are due forhandling at this timestep, and does learning rule stuff if needed
+
+
+   .. py:method:: reinit
+
+      (*destination message field*)      Handles 'reinit' call. Initializes all the synapses.
+
+
+   .. py:attribute:: activationOut
+
+      double (*source message field*)      Sends out level of activation on all synapses converging to this SynHandler
 
 
    .. py:attribute:: numSynapses
@@ -8721,7 +9667,7 @@ MOOSE Classes
 
    .. py:attribute:: requestOut
 
-      Pd (*source message field*)      Sends request for a field to target object
+      PSt6vectorIdSaIdEE (*source message field*)      Sends request for a field to target object
 
 
    .. py:attribute:: threshold
@@ -8889,44 +9835,16 @@ MOOSE Classes
       double (*value field*)      Current state of the time table.
 
 
-.. py:class:: Unsigned
-
-   Variable for storing values.
-
-   .. py:method:: setValue
-
-      (*destination message field*)      Assigns field value.
-
-
-   .. py:method:: getValue
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
-
-
-   .. py:attribute:: value
-
-      unsigned long (*value field*)      Variable value
-
-
 .. py:class:: VClamp
 
-   Voltage clamp object for holding neuronal compartments at a specific voltage. This implementation uses a builtin RC circuit to filter the
-   command input and then use a PID to bring the sensed voltage (Vm from
-   compartment) to the filtered command potential.
-   Usage: Connect the `currentOut` source of VClamp to `injectMsg`
-   dest of Compartment. Connect the `VmOut` source of Compartment to
-   `set\_sensed` dest of VClamp. Either set `command` field to a
-   fixed value, or connect an appropriate source of command potential
-   (like the `outputOut` message of an appropriately configured
-   PulseGen) to `set\_command` dest.
-
-   The default settings for the RC filter and PID controller should be
-   fine. For step change in command voltage, good defaults withintegration time step dt are as follows:
-   time constant of RC filter, tau = 5 * dt
-   proportional gain of PID, gain = Cm/dt where Cm is the membrane
-   capacitance of the compartment
-   integration time of PID, ti = dt
-   derivative time  of PID, td = 0
+   Voltage clamp object for holding neuronal compartments at a specific voltage.
+   This implementation uses a builtin RC circuit to filter the  command input and then use a PID to bring the sensed voltage (Vm from compartment) to the filtered command potential.
+   Usage: Connect the `currentOut` source of VClamp to `injectMsg` dest of Compartment. Connect the `VmOut` source of Compartment to `set\_sensed` dest of VClamp. Either set `command` field to a fixed value, or connect an appropriate source of command potential (like the `outputOut` message of an appropriately configured PulseGen) to `set\_command` dest.
+   The default settings for the RC filter and PID controller should be fine. For step change in command voltage, good defaults withintegration time step dt are as follows:
+       time constant of RC filter, tau = 5 * dt
+       proportional gain of PID, gain = Cm/dt where Cm is the membrane    capacitance of the compartment
+       integration time of PID, ti = dt
+       derivative time  of PID, td = 0
 
    .. py:attribute:: proc
 
@@ -9000,8 +9918,7 @@ MOOSE Classes
 
    .. py:method:: sensedIn
 
-      (*destination message field*)       The `VmOut` message of the Compartment object should be connected
-       here.
+      (*destination message field*)      The `VmOut` message of the Compartment object should be connected here.
 
 
    .. py:method:: commandIn
@@ -9042,36 +9959,56 @@ MOOSE Classes
    .. py:attribute:: mode
 
       unsigned int (*value field*)      Working mode of the PID controller.
-
-      mode = 0, standard PID with proportional, integral and derivative	all acting on the error.
-
-      mode = 1, derivative action based on command input
-
-      mode = 2, proportional action and derivative action are based on command input.
+      
+         mode = 0, standard PID with proportional, integral and derivative all acting on the error.
+      
+         mode = 1, derivative action based on command input
+      
+         mode = 2, proportional action and derivative action are based on command input.
 
 
    .. py:attribute:: ti
 
-      double (*value field*)      Integration time of the PID controller. Defaults to 1e9, i.e. integral
-      action is negligibly small.
+      double (*value field*)      Integration time of the PID controller. Defaults to 1e9, i.e. integral action is negligibly small.
 
 
    .. py:attribute:: td
 
-      double (*value field*)      Derivative time of the PID controller. This defaults to 0,
-      i.e. derivative action is unused.
+      double (*value field*)      Derivative time of the PID controller. This defaults to 0,i.e. derivative action is unused.
 
 
    .. py:attribute:: tau
 
-      double (*value field*)      Time constant of the lowpass filter at input of the PID
-      controller. This smooths out abrupt changes in the input. Set it to 
-      5 * dt or more to avoid overshoots.
+      double (*value field*)      Time constant of the lowpass filter at input of the PID controller. This smooths out abrupt changes in the input. Set it to  5 * dt or more to avoid overshoots.
 
 
    .. py:attribute:: gain
 
       double (*value field*)      Proportional gain of the PID controller.
+
+
+.. py:class:: Variable
+
+   Variable for storing double values. This is used in Function class.
+
+   .. py:method:: setValue
+
+      (*destination message field*)      Assigns field value.
+
+
+   .. py:method:: getValue
+
+      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
+
+
+   .. py:method:: setVar
+
+      (*destination message field*)      Handles incoming variable value.
+
+
+   .. py:attribute:: value
+
+      double (*value field*)      Variable value
 
 
 .. py:class:: VectorTable
@@ -9191,237 +10128,7 @@ MOOSE Classes
 
 .. py:class:: ZombieHHChannel
 
-
-   .. py:attribute:: proc
-
-      void (*shared message field*)      This is a shared message to receive Process message from thescheduler. The first entry is a MsgDest for the Process operation. It has a single argument, ProcInfo, which holds lots of information about current time, thread, dt andso on.
-       The second entry is a MsgDest for the Reinit operation. It also uses ProcInfo.
-
-
-   .. py:method:: process
-
-      (*destination message field*)      Handles process call
-
-
-   .. py:method:: reinit
-
-      (*destination message field*)      Handles reinit call
-
-
-   .. py:method:: setGbar
-
-      (*destination message field*)      Assigns field value.
-
-
-   .. py:method:: getGbar
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
-
-
-   .. py:method:: setEk
-
-      (*destination message field*)      Assigns field value.
-
-
-   .. py:method:: getEk
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
-
-
-   .. py:method:: setGk
-
-      (*destination message field*)      Assigns field value.
-
-
-   .. py:method:: getGk
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
-
-
-   .. py:method:: getIk
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
-
-
-   .. py:method:: setXpower
-
-      (*destination message field*)      Assigns field value.
-
-
-   .. py:method:: getXpower
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
-
-
-   .. py:method:: setYpower
-
-      (*destination message field*)      Assigns field value.
-
-
-   .. py:method:: getYpower
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
-
-
-   .. py:method:: setZpower
-
-      (*destination message field*)      Assigns field value.
-
-
-   .. py:method:: getZpower
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
-
-
-   .. py:method:: setInstant
-
-      (*destination message field*)      Assigns field value.
-
-
-   .. py:method:: getInstant
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
-
-
-   .. py:method:: setX
-
-      (*destination message field*)      Assigns field value.
-
-
-   .. py:method:: getX
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
-
-
-   .. py:method:: setY
-
-      (*destination message field*)      Assigns field value.
-
-
-   .. py:method:: getY
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
-
-
-   .. py:method:: setZ
-
-      (*destination message field*)      Assigns field value.
-
-
-   .. py:method:: getZ
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
-
-
-   .. py:method:: setUseConcentration
-
-      (*destination message field*)      Assigns field value.
-
-
-   .. py:method:: getUseConcentration
-
-      (*destination message field*)      Requests field value. The requesting Element must provide a handler for the returned value.
-
-
-   .. py:method:: concen
-
-      (*destination message field*)      Incoming message from Concen object to specific conc to usein the Z gate calculations
-
-
-   .. py:method:: createGate
-
-      (*destination message field*)      Function to create specified gate.Argument: Gate type [X Y Z]
-
-
-   .. py:method:: setNumGateX
-
-      (*destination message field*)      Assigns number of field entries in field array.
-
-
-   .. py:method:: getNumGateX
-
-      (*destination message field*)      Requests number of field entries in field array.The requesting Element must provide a handler for the returned value.
-
-
-   .. py:method:: setNumGateY
-
-      (*destination message field*)      Assigns number of field entries in field array.
-
-
-   .. py:method:: getNumGateY
-
-      (*destination message field*)      Requests number of field entries in field array.The requesting Element must provide a handler for the returned value.
-
-
-   .. py:method:: setNumGateZ
-
-      (*destination message field*)      Assigns number of field entries in field array.
-
-
-   .. py:method:: getNumGateZ
-
-      (*destination message field*)      Requests number of field entries in field array.The requesting Element must provide a handler for the returned value.
-
-
-   .. py:attribute:: Gbar
-
-      double (*value field*)      Maximal channel conductance
-
-
-   .. py:attribute:: Ek
-
-      double (*value field*)      Reversal potential of channel
-
-
-   .. py:attribute:: Gk
-
-      double (*value field*)      Channel conductance variable
-
-
-   .. py:attribute:: Ik
-
-      double (*value field*)      Channel current variable
-
-
-   .. py:attribute:: Xpower
-
-      double (*value field*)      Power for X gate
-
-
-   .. py:attribute:: Ypower
-
-      double (*value field*)      Power for Y gate
-
-
-   .. py:attribute:: Zpower
-
-      double (*value field*)      Power for Z gate
-
-
-   .. py:attribute:: instant
-
-      int (*value field*)      Bitmapped flag: bit 0 = Xgate, bit 1 = Ygate, bit 2 = ZgateWhen true, specifies that the lookup table value should beused directly as the state of the channel, rather than usedas a rate term for numerical integration for the state
-
-
-   .. py:attribute:: X
-
-      double (*value field*)      State variable for X gate
-
-
-   .. py:attribute:: Y
-
-      double (*value field*)      State variable for Y gate
-
-
-   .. py:attribute:: Z
-
-      double (*value field*)      State variable for Y gate
-
-
-   .. py:attribute:: useConcentration
-
-      int (*value field*)      Flag: when true, use concentration message rather than Vm tocontrol Z gate
-
+   ZombieHHChannel: Hodgkin-Huxley type voltage-gated Ion channel. Something like the old tabchannel from GENESIS, but also presents a similar interface as hhchan from GENESIS.
 
 .. py:class:: ZombieMMenz
 

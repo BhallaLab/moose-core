@@ -6,8 +6,8 @@
 # Maintainer: 
 # Created: Fri Jan 17 09:43:51 2014 (+0530)
 # Version: 
-# Last-Updated: 
-#           By: 
+# Last-Updated: Thu Oct  2 11:27:05 IST 2014
+#           By: Upi
 #     Update #: 0
 # URL: 
 # Keywords: 
@@ -84,31 +84,39 @@ net = moose.IntFire('/network', size)
 
 
 
-net == moose.element('/network[0]')
+net = moose.element('/network[0]')
 
+
+# You need now to provide synaptic input to the network
+
+synh = moose.SimpleSynHandler( '/network/synh', size )
+
+# These need to be connected to the nodes in the network
+
+moose.connect( synh, 'activationOut', net, 'activation', 'OneToOne' )
 
 
 # You can access the underlying vector of elements using the `vec` field on any element. This is very useful for vectorized field access:
 
 
 
-net.vec.bufferTime = [2 * delayMax] * size
+net.vec.Vm = [thresh / 2.0] * size
 
 
 
-# The right part of the assigment creates a Python list of length `size` with each element set to `2 * delayMax`, which is 8.0. You can index into the `vec` to access individual elements' field:
+# The right part of the assigment creates a Python list of length `size` with each element set to `thresh/2.0`, which is 0.4. You can index into the `vec` to access individual elements' field:
 
 
 
-print net.vec[1].bufferTime
+print net.vec[1].Vm
 
 
 
-# `IntFire` class has an `ElementField` called `synapse`. It is just like a `vec` above in terms of field access, but by default its size is 0.
+# `SimpleSynHandler` class has an `ElementField` called `synapse`. It is just like a `vec` above in terms of field access, but by default its size is 0.
 
 
 
-print len(net.synapse)
+print len(synh.synapse)
 
 
 
@@ -116,13 +124,13 @@ print len(net.synapse)
 
 
 
-net.numSynapses = 3
-print len(net.synapse)
+synh.numSynapses = 3
+print len(synh.synapse)
 
 
 
-net.synapse.num = 4
-print len(net.synapse)
+synh.synapse.num = 4
+print len(synh.synapse)
 
 
 
@@ -130,9 +138,9 @@ print len(net.synapse)
 
 
 
-print 'Before:', net.synapse[0].delay
-net.synapse[0].delay = 1.0
-print 'After:', net.synapse[0].delay
+print 'Before:', synh.synapse[0].delay
+synh.synapse[0].delay = 1.0
+print 'After:', synh.synapse[0].delay
 
 
 
@@ -140,8 +148,8 @@ print 'After:', net.synapse[0].delay
 
 
 
-net.synapse.weight = [0.2] * len(net.synapse)
-print net.synapse.weight
+synh.synapse.weight = [0.2] * len(synh.synapse)
+print synh.synapse.weight
 
 
 
@@ -151,15 +159,15 @@ print net.synapse.weight
 
 import random # We need this for random number generation
 from numpy import random as nprand
-for neuron in net.vec:
-    neuron.synapse.num = random.randint(1,10) # create synapse fields with random size between 1 and 10, end points included
+for syn in synh.vec:
+    syn.synapse.num = random.randint(1,10) # create synapse fields with random size between 1 and 10, end points included
     # Below is one (inefficient) way of setting the individual weights of the elements in 'synapse'
-    for ii in range(len(neuron.synapse)):
-        neuron.synapse[ii].weight = random.random() * weightMax
+    for ii in range(len(syn.synapse)):
+        syn.synapse[ii].weight = random.random() * weightMax
     # This is a more efficient way - rhs of `=` is list comprehension in Python and rather fast
-    neuron.synapse.delay = [delayMin + random.random() * delayMax for ii in range(len(neuron.synapse))]
+    syn.synapse.delay = [delayMin + random.random() * delayMax for ii in range(len(syn.synapse))]
     # An even faster way will be to use numpy.random.rand(size) which produces array of random numbers uniformly distributed between 0 and 1
-    neuron.synapse.delay = delayMin + nprand.rand(len(neuron.synapse)) * delayMax
+    syn.synapse.delay = delayMin + nprand.rand(len(syn.synapse)) * delayMax
     
 
 
@@ -168,9 +176,9 @@ for neuron in net.vec:
 
 
 
-for neuron in net.vec[:5]:
-    print 'Delays for synapses on ', neuron.path, ':', neuron.synapse.delay
-    print 'Weights for synapses on ', neuron.path, ':', neuron.synapse.weight
+for syn in synh.vec[:5]:
+    print 'Delays for synapses on ', syn.path, ':', syn.synapse.delay
+    print 'Weights for synapses on ', syn.path, ':', syn.synapse.weight
 
 
 

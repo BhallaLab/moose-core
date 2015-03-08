@@ -1,25 +1,28 @@
-include_directories(../basecode)
+include_directories(../basecode ../synapse)
 add_library(biophysics 
-	SpikeRingBuffer.cpp	
-	SynHandler.cpp	
 	IntFire.cpp	
-	Synapse.cpp	
 	SpikeGen.cpp	
+        RandSpike.cpp
 	CompartmentDataHolder.cpp	
 	CompartmentBase.cpp	
 	Compartment.cpp	
 	SymCompartment.cpp	
+        GapJunction.cpp
 	ChanBase.cpp	
+        ChanCommon.cpp
 	HHChannel.cpp	
+        HHChannelBase.cpp
+        HHChannel2D.cpp
 	HHGate.cpp	
 	HHGate2D.cpp	
 	HHChannel2D.cpp	
         CaConcBase.cpp
 	CaConc.cpp	
 	MgBlock.cpp	
+        Nernst.cpp
 	Neuron.cpp	
 	ReadCell.cpp	
-	SynChanBase.cpp	
+	#SynChanBase.cpp	
 	SynChan.cpp	
 	testBiophysics.cpp	
 	IzhikevichNrn.cpp	
@@ -35,7 +38,7 @@ add_library(biophysics
 	VClamp.cpp	
 	# LeakyIaF.cpp	
 	# GapJunction.cpp	
-	Nernst.cpp	
 	# GHK.cpp		
 	# NMDAChan.cpp	
+        testBiophysics.cpp
     )
