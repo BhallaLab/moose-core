@@ -11,7 +11,6 @@ KeyboardHandler::handle( const osgGA::GUIEventAdapter& ea
     {
         return false;
     }
-
     int key = ea.getKey();
     RECORD_INFO(to_string(ea.getKey()));
     // RECORD_INFO(to_string(ea.getModKeyMask()));
