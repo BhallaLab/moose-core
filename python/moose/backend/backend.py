@@ -51,6 +51,7 @@ class Backend(object):
         self.clock = _moose.wildcardFind('/clock')[0]
         self.clocks = []
         self.filled = False
+        self.root = '/'
 
     def filterPaths(self, mooseObjs, ignorePat):
         """Filter paths """
@@ -64,30 +65,30 @@ class Backend(object):
 
     def getComparments(self, **kwargs):
         '''Get all compartments in moose '''
-        self.compartments = _moose.wildcardFind('/##[TYPE=Compartment]')
-        zombiComps = _moose.wildcardFind('/##[TYPE=ZombieCompartment]')
+        self.compartments = _moose.wildcardFind('%s/##[TYPE=Compartment]'%self.root)
+        zombiComps = _moose.wildcardFind('%s/##[TYPE=ZombieCompartment]'%self.root)
         if zombiComps:
             self.compartments += zombiComps
         return self.compartments
 
     def getPulseGens(self, **kwargs):
         """ Get all the pulse generators """
-        self.pulseGens = _moose.wildcardFind('/##[TYPE=PulseGen]')
+        self.pulseGens = _moose.wildcardFind('%s/##[TYPE=PulseGen]'%self.root)
         return self.pulseGens
 
     def getTables(self, **kwargs):
         """ Get all table we are recording from"""
-        self.tables = _moose.wildcardFind('/##[TYPE=Table]')
+        self.tables = _moose.wildcardFind('%s/##[TYPE=Table]'%self.root)
         return self.tables
 
     def getSynChans(self, **kwargs):
         """Get all the SynChans """
-        self.synchans = _moose.wildcardFind('/##[TYPE=SynChan]')
+        self.synchans = _moose.wildcardFind('%s/##[TYPE=SynChan]'%self.root)
         return self.synchans
 
     def getClocks(self, **kwargs):
         """Get all clocks"""
-        self.clocks = _moose.wildcardFind("/##[TYPE=Clock]")
+        self.clocks = _moose.wildcardFind("%s/##[TYPE=Clock]"%self.root)
         return self.clocks
 
     def getChemicalEntities(self, **kwargs):
@@ -96,15 +97,15 @@ class Backend(object):
         ZombieEnz
         ZombieReac
         """
-        self.chemEntities = _moose.wildcardFind("/##[TYPE=ZombiePool]")
-        self.chemEntities += _moose.wildcardFind("/##[TYPE=ZombieEnz]")
-        self.chemEntities += _moose.wildcardFind("/##[TYPE=ZombieReac]")
+        self.chemEntities = _moose.wildcardFind("%s/##[TYPE=ZombiePool]"%self.root)
+        self.chemEntities += _moose.wildcardFind("%s/##[TYPE=ZombieEnz]"%self.root)
+        self.chemEntities += _moose.wildcardFind("%s/##[TYPE=ZombieReac]"%self.root)
         return self.chemEntities
 
     def getMsgs(self, **kwargs):
         """Get all messages in MOOSE"""
-        self.msgs['SingleMsg'] = _moose.wildcardFind('/##[TYPE=SingleMsg]')
-        self.msgs['OneToAllMsg'] = _moose.wildcardFind('/##[TYPE=OneToAllMsg]')
+        self.msgs['SingleMsg'] = _moose.wildcardFind('%s/##[TYPE=SingleMsg]'%self.root)
+        self.msgs['OneToAllMsg'] = _moose.wildcardFind('%s/##[TYPE=OneToAllMsg]'%self.root)
         return self.msgs
 
     def populateStoreHouse(self, **kwargs):
@@ -115,6 +116,7 @@ class Backend(object):
             print_utils.dump("INFO", "Moose elements are already acquired")
             return 
         print_utils.dump("INFO", "Getting moose-datastructure for backend.")
+        self.root = kwargs.get('root', '/')
         self.getComparments(**kwargs)
         self.getChemicalEntities(**kwargs)
         self.getTables(**kwargs)
