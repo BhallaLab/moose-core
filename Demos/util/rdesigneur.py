@@ -119,10 +119,12 @@ class rdesigneur:
         self.spineList = moose.wildcardFind( ep + '/#spine#[ISA=CompartmentBase],' + ep + '/#head#[ISA=CompartmentBase]' )
         if len( self.spineList ) == 0:
             self.spineList = moose.wildcardFind( ep + '/#head#[ISA=CompartmentBase]' )
+        nmdarList = moose.wildcardFind( ep + '/##[ISA=NMDAChan]' )
 
         self.comptList = moose.wildcardFind( ep + '/#[ISA=CompartmentBase]')
         print "Rdesigneur: Elec model has ", len( self.comptList ), \
-            " compartments and ", len( self.spineList ), " spines."
+            " compartments and ", len( self.spineList ), \
+            " spines with ", len( nmdarList ), " NMDARs"
 
         #moose.le( self.elecid )
 
@@ -137,6 +139,7 @@ class rdesigneur:
         moose.setClock( 10, self.diffDt )
         for i in range( 11, 18 ):
             moose.setClock( i, self.chemDt )
+        moose.setClock( 18, self.chemDt * 5.0 )
         hsolve = moose.HSolve( ep + '/hsolve' )
         hsolve.dt = self.elecDt
         hsolve.target = self.soma.path
@@ -165,10 +168,16 @@ class rdesigneur:
         y = np.cross( y, z )
         ylen = np.dot( y, y )
         if ylen < EPSILON:
-            y[1] = 1.0
-        else:
-            y = y / ylen
+            y[0] = np.sqrt( 2.0 )
+            y[1] = np.sqrt( 2.0 )
+            y[2] = 0.0
+            y = np.cross( y, z )
+            ylen = np.dot( y, y )
+            assert( ylen > EPSILON )
+        y = y / np.sqrt( ylen )
         x = np.cross( z, y )
+        xlen = np.dot( x, x )
+        assert( np.fabs( xlen - 1 ) < 1e-15 )
         return ( dendLength, x,y,z )
 
     ################################################################
@@ -230,6 +239,12 @@ class rdesigneur:
     # angle is angle (in radians) to rotate spine wrt x in plane xy.
     # Size is size scaling factor, 1 leaves as is.
     # x, y, z are unit vectors. Z is along the parent compt.
+    # We first shift the spine over so that it is offset by the parent compt
+    # diameter.
+    # We then need to reorient the spine which lies along (i,0,0) to
+    #   lie along x. X is a unit vector so this is done simply by 
+    #   multiplying each coord of the spine by x.
+    # Finally we rotate the spine around the z axis by the specified angle
     # k is index of this spine.
     def _addSpine( self, parent, spineProto, pos, angle, x, y, z, size, k ):
         spine = moose.copy( spineProto, parent.parent, 'spine' + str(k) )
@@ -251,6 +266,8 @@ class rdesigneur:
         origin[0] -= parent.diameter / 2.0 
         coords = np.array( coords )
         coords -= origin # place spine shaft base at origin.
+        rot = np.array( [x, [0,0,0], [0,0,0]] )
+        coords = np.dot( coords, rot )
         moose.delete( spine )
         moose.connect( parent, "raxial", kids[0], "axial" )
         self._reorientSpine( kids, coords, ppos, pos, size, angle, x, y, z )
@@ -301,9 +318,10 @@ class rdesigneur:
             else:
                 size = np.array( [1.0] * num )
 
-            print "insertSpines on ", i.name
-            p = 0.0
+            #print "insertSpines on ", i.name
+            p = pos[-1] / 2.0
             for j in zip( pos, theta, size ):
+                #print p, j[0], dendLength
                 self._addSpine( i, spineProto, p, angle, x, y, z, j[2], k )
                 k += 1
                 p += j[0]
@@ -327,30 +345,34 @@ class rdesigneur:
 
     def _loadElec( self, efile, elecname, combineSegments ):
         library = moose.Neutral( '/library' )
-        nm = NeuroML()
-        nm.readNeuroMLFromFile( efile, \
-                params = {'combineSegments': combineSegments, \
-                'createPotentialSynapses': True } )
-        if moose.exists( '/cells' ):
-            kids = moose.wildcardFind( '/cells/#' )
+        if ( efile[ len( efile ) - 2:] == ".p" ):
+            self.elecid = moose.loadModel( efile, self.model.path + '/' + elecname )
         else:
-            kids = moose.wildcardFind( '/library/#[ISA=Neuron],/library/#[TYPE=Neutral]' )
-            if ( kids[0].name == 'spine' ):
-                kids = kids[1:]
+            nm = NeuroML()
+            nm.readNeuroMLFromFile( efile, \
+                    params = {'combineSegments': combineSegments, \
+                    'createPotentialSynapses': True } )
+            if moose.exists( '/cells' ):
+                kids = moose.wildcardFind( '/cells/#' )
+            else:
+                kids = moose.wildcardFind( '/library/#[ISA=Neuron],/library/#[TYPE=Neutral]' )
+                if ( kids[0].name == 'spine' ):
+                    kids = kids[1:]
 
-        assert( len( kids ) > 0 )
-        self.elecid = kids[0]
-        temp = moose.wildcardFind( self.elecid.path + '/#[ISA=CompartmentBase]' )
-        moose.move( self.elecid, self.model )
-        self.elecid.name = elecname
-        self._transformNMDAR()
+            assert( len( kids ) > 0 )
+            self.elecid = kids[0]
+            temp = moose.wildcardFind( self.elecid.path + '/#[ISA=CompartmentBase]' )
+            moose.move( self.elecid, self.model )
+            self.elecid.name = elecname
+
+        self._transformNMDAR( self.elecid.path )
         kids = moose.wildcardFind( '/library/##[0]' )
         for i in kids:
             i.tick = -1
 
     #################################################################
-    def _transformNMDAR( self ):
-        for i in moose.wildcardFind( self.elecid.path + "/##/#NMDA#" ):
+    def _transformNMDAR( self, path ):
+        for i in moose.wildcardFind( path + "/##/#NMDA#[ISA!=NMDAChan" ):
             chanpath = i.path
             pa = i.parent
             i.name = '_temp'
@@ -631,9 +653,13 @@ class rdesigneur:
             if ( moose.exists( '/library/' + i[0] ) ):
                 chan = moose.copy( '/library/' + i[0], head )
                 chan.Gbar = i[1] * head.Cm / CM
+                print "CHAN = ", chan, chan.tick
+                moose.connect( head, 'channel', chan, 'channel' )
                 if i[2] and caTau > 0.0:
                     moose.connect( chan, 'IkOut', conc, 'current' )
             else:
                 print "Warning: addSpineProto: channel '", i[0], \
                     "' not found on /library."
+                moose.le( '/library' )
+        self._transformNMDAR( '/library/spine' )
         return spine
