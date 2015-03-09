@@ -1,7 +1,7 @@
-%Module moogli
+%Module _moogli
 
 %Import QtGui/QtGuimod.sip
-
+%Import QtOpenGL/QtOpenGLmod.sip
 class SelectInfo
 {
 %TypeHeaderCode
@@ -64,6 +64,31 @@ public:
     void
     set_peak_membrane_voltage(double peak_vm);
 
+    void
+    destroy_group(const char * group_id);
+
+    void
+    modify_group( const char *  group_id
+                , PyObject *    compartment_ids
+                , double        base_value
+                , double        peak_value
+                , PyObject *    base_color
+                , PyObject *    peak_color
+                );
+
+    void
+    create_group( const char *  group_id
+                , PyObject *    compartment_ids
+                , double        base_value
+                , double        peak_value
+                , PyObject *    base_color
+                , PyObject *    peak_color
+                );
+
+    void
+    set_color( const char * group_id
+             , PyObject   * values
+             );
 
 private:
 
@@ -116,4 +141,40 @@ private:
 signals:
     void compartment_dragged(const QString &compartment_id);
 
+};
+
+class MorphologyViewerWidget : public QGLWidget
+{
+%TypeHeaderCode
+#include "includes.hpp"
+#include "core/Morphology.hpp"
+#include "core/MorphologyViewerWidget.hpp"
+%End
+
+public:
+    Morphology * morphology;
+    MorphologyViewerWidget( Morphology * morphology
+                         , QWidget * parent             = 0
+                         , const QGLWidget* shareWidget = 0
+                         , Qt::WindowFlags f            = 0
+                         );
+
+    virtual
+    ~MorphologyViewerWidget();
+
+protected:
+
+    virtual void paintEvent( QPaintEvent* paintEvent );
+    virtual void paintGL();
+    virtual void resizeGL( int width, int height );
+
+    virtual void keyPressEvent( QKeyEvent* event );
+    virtual void keyReleaseEvent( QKeyEvent* event );
+
+    virtual void mouseMoveEvent( QMouseEvent* event );
+    virtual void mousePressEvent( QMouseEvent* event );
+    virtual void mouseReleaseEvent( QMouseEvent* event );
+    virtual void wheelEvent( QWheelEvent* event );
+
+    virtual bool event( QEvent* event );
 };
