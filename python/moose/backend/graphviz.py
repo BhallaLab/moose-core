@@ -291,7 +291,7 @@ def getConnectedCompartments(obj):
 # @brief Write a graphviz topology file.
 #
 # @param filename Name of the output file.
-# @param pat If set only this pat is searched, else every electrical and
+# @param root If set only this pat is searched, else every electrical and
 # chemical compartment is searched and dumped to graphviz file.
 # @param cluster. When set to true, cluster nodes together as per the root of their
 # path e.g. /library/cell1 and /library/cell2 are grouped together because they
@@ -300,7 +300,7 @@ def getConnectedCompartments(obj):
 # @param add_recorders (False). If true add tables to graph as well.
 #
 # @return None. 
-def writeGraphviz(filename=None, pat='/##', cluster=True, ignore=None, **kwargs):
+def writeGraphviz(filename=None, root='/', cluster=True, ignore=None, **kwargs):
     '''This is  a generic function. It takes the the pattern, search for paths
     and write a graphviz file.
     '''
@@ -314,7 +314,7 @@ def writeGraphviz(filename=None, pat='/##', cluster=True, ignore=None, **kwargs)
             )
 
     if not backend.moose_elems.filled:
-        backend.moose_elems.populateStoreHouse()
+        backend.moose_elems.populateStoreHouse(root=root)
 
     b = backend.moose_elems
     ignorePat = re.compile(r'^abcd')
