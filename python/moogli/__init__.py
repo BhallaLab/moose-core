@@ -20,6 +20,8 @@ class DynamicMorphologyViewerWidget(MorphologyViewerWidget):
     def start_cycle(self):
         if self.callback(self.morphology, self):
             self._timer.start(self.idletime)
+        else:
+            self._timer.timeout.disconnect(self.start_cycle)
         self.update()
 
 __all__ = [ "Morphology"
