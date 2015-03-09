@@ -130,17 +130,17 @@ class GraphicalView(QtGui.QGraphicsView):
             self.state["move"]["happened"] = False
             return
 
-        if self.move:
-            initial = self.mapToScene(self.state["press"]["pos"])
-            final = self.mapToScene(event.pos())
-            displacement = final - initial
-            #print("Displacement", displacement)
-            for item in self.selectedItems:
-                if isinstance(item, KineticsDisplayItem) and not isinstance(item,ComptItem) and not isinstance(item,CplxItem):
-                    item.moveBy(displacement.x(), displacement.y())
-                    self.layoutPt.positionChange(item.mobj.path)            
-            self.state["press"]["pos"] = event.pos()
-            return
+        # if self.move:
+        #     initial = self.mapToScene(self.state["press"]["pos"])
+        #     final = self.mapToScene(event.pos())
+        #     displacement = final - initial
+        #     #print("Displacement", displacement)
+        #     for item in self.selectedItems:
+        #         if isinstance(item, KineticsDisplayItem) and not isinstance(item,ComptItem) and not isinstance(item,CplxItem):
+        #             item.moveBy(displacement.x(), displacement.y())
+        #             self.layoutPt.positionChange(item.mobj.path)            
+        #     self.state["press"]["pos"] = event.pos()
+        #     return
 
         self.state["move"]["happened"] = True
         itemType = self.state["press"]["type"]
@@ -157,8 +157,8 @@ class GraphicalView(QtGui.QGraphicsView):
                 if not isinstance(item.parent(),FuncItem) and not isinstance(item.parent(),CplxItem):
                     self.removeConnector()
                     item.parent().moveBy(displacement.x(), displacement.y())
-                    if isinstance(item,PoolItem):
-                        for funcItem in item.childItems():
+                    if isinstance(item.parent(),PoolItem):
+                        for funcItem in item.parent().childItems():
                             if isinstance(funcItem,FuncItem):
                                 self.layoutPt.updateArrow(funcItem)
               
