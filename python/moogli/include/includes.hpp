@@ -16,6 +16,8 @@
 #include <chrono>
 #include <utility>
 #include <sstream>
+#include <cassert>
+#include <stdexcept>
 
 /******************************************************************************/
 /* OSG HEADERS                                                                */
@@ -28,9 +30,20 @@
 #include <osg/ref_ptr>
 #include <osgViewer/Viewer>
 #include <osg/MatrixTransform>
+#include <osg/DisplaySettings>
+#include <osg/ShapeDrawable>
+#include <osg/StateSet>
+
+#include <osgGA/EventQueue>
+#include <osgUtil/IntersectionVisitor>
+#include <osgUtil/PolytopeIntersector>
+
+#include <osgViewer/View>
+#include <osgViewer/ViewerEventHandlers>
 
 #include <osgViewer/ViewerEventHandlers>
 #include <osgViewer/CompositeViewer>
+#include <osgViewer/GraphicsWindow>
 
 #include <osgQt/GraphicsWindowQt>
 
@@ -48,6 +61,7 @@
 /* QT HEADERS                                                                 */
 /******************************************************************************/
 #include <QTimer>
+#include <QtOpenGL>
 #include <QApplication>
 #include <QGridLayout>
 #include <QScrollArea>
@@ -56,6 +70,10 @@
 #include <QDrag>
 #include <QToolBar>
 #include <QPushButton>
+#include <QDebug>
+#include <QKeyEvent>
+#include <QWheelEvent>
+
 /******************************************************************************/
 /* UTILITY HEADERS                                                            */
 /******************************************************************************/
@@ -69,3 +87,6 @@
 // #include "utility/conversions.hpp"
 #define ANY void
 #endif  /* __INCLUDES_HPP__ */
+
+
+

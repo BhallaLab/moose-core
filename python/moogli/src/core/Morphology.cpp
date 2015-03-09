@@ -572,7 +572,7 @@ Morphology::set_compartment_order(PyObject * compartment_order)
         RECORD_ERROR("Invalid data structure provided for compartment order.");
         Py_RETURN_FALSE;
     }
-    if(PySequence_Length(compartment_order) != _compartments.size())
+    if(static_cast<unsigned int>(PySequence_Length(compartment_order)) != _compartments.size())
     {
         RECORD_ERROR("Sequence doesn't include all compartments of the mode.");
         Py_RETURN_FALSE;
@@ -649,6 +649,127 @@ Morphology::set_membrane_voltages(PyObject * vms)
                                                      );
     }
 }
+
+
+void
+Morphology::destroy_group(const char * group_id)
+{
+    _groups.erase(group_id);
+}
+
+void
+Morphology::modify_group( const char * group_id
+                        , PyObject * compartment_ids
+                        , double base_value
+                        , double peak_value
+                        , PyObject * base_color
+                        , PyObject * peak_color
+                        )
+{
+    Vec4f base_color_vector( PyFloat_AS_DOUBLE(PySequence_GetItem(base_color, 0))
+                           , PyFloat_AS_DOUBLE(PySequence_GetItem(base_color, 1))
+                           , PyFloat_AS_DOUBLE(PySequence_GetItem(base_color, 2))
+                           , PyFloat_AS_DOUBLE(PySequence_GetItem(base_color, 3))
+                           );
+
+    Vec4f peak_color_vector( PyFloat_AS_DOUBLE(PySequence_GetItem(peak_color, 0))
+                           , PyFloat_AS_DOUBLE(PySequence_GetItem(peak_color, 1))
+                           , PyFloat_AS_DOUBLE(PySequence_GetItem(peak_color, 2))
+                           , PyFloat_AS_DOUBLE(PySequence_GetItem(peak_color, 3))
+                           );
+
+    unsigned int i;
+    unsigned int size = PySequence_Length(compartment_ids);
+    vector<Compartment *> compartments(size);
+
+    for(i = 0; i < size; ++i)
+    {
+        PyObject * object = PySequence_GetItem(compartment_ids, i);
+        compartments[i] = _compartments[string(PyString_AsString(object))];
+    }
+
+
+    _groups[group_id] = make_tuple( compartments
+                                  , base_value
+                                  , peak_value
+                                  , base_color_vector
+                                  , peak_color_vector
+                                  );
+
+}
+
+void
+Morphology::create_group( const char * group_id
+                     , PyObject * compartment_ids
+                     , double base_value
+                     , double peak_value
+                     , PyObject * base_color
+                     , PyObject * peak_color
+                     )
+{
+
+    group_map_t::iterator result = _groups.find(group_id);
+
+    if(result != _groups.end())
+    {
+        RECORD_ERROR("Overwriting existing group with group id => " + string(group_id));
+        return;
+    }
+
+
+    Vec4f base_color_vector( PyFloat_AS_DOUBLE(PySequence_GetItem(base_color, 0))
+                           , PyFloat_AS_DOUBLE(PySequence_GetItem(base_color, 1))
+                           , PyFloat_AS_DOUBLE(PySequence_GetItem(base_color, 2))
+                           , PyFloat_AS_DOUBLE(PySequence_GetItem(base_color, 3))
+                           );
+
+    Vec4f peak_color_vector( PyFloat_AS_DOUBLE(PySequence_GetItem(peak_color, 0))
+                           , PyFloat_AS_DOUBLE(PySequence_GetItem(peak_color, 1))
+                           , PyFloat_AS_DOUBLE(PySequence_GetItem(peak_color, 2))
+                           , PyFloat_AS_DOUBLE(PySequence_GetItem(peak_color, 3))
+                           );
+    unsigned int i;
+    unsigned int size = PySequence_Length(compartment_ids);
+    vector<Compartment *> compartments(size);
+
+    for(i = 0; i < size; ++i)
+    {
+        PyObject * object = PySequence_GetItem(compartment_ids, i);
+        compartments[i] = _compartments[string(PyString_AsString(object))];
+    }
+
+
+    _groups[group_id] = make_tuple( compartments
+                                  , base_value
+                                  , peak_value
+                                  , base_color_vector
+                                  , peak_color_vector
+                                  );
+}
+
+void
+Morphology::set_color( const char * group_id
+                     , PyObject   * values
+                     )
+{
+    auto compartments   = get<0>(_groups[group_id]);
+
+    if(static_cast<unsigned int>(compartments.size()) != PySequence_Length(values))
+    {
+        RECORD_ERROR("Number of values not the same as the number of compartments in the group =>" + string(group_id));
+        return;
+    }
+    for(int i = 0; i < PySequence_Length(values); ++i)
+    {
+        compartments[i] -> set_color( PyFloat_AS_DOUBLE(PySequence_GetItem(values, i))
+                                    , get<1>(_groups[group_id])
+                                    , get<2>(_groups[group_id])
+                                    , get<3>(_groups[group_id])
+                                    , get<4>(_groups[group_id])
+                                    );
+    }
+}
+
 
 Morphology::~Morphology()
 {
