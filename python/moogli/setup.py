@@ -84,13 +84,15 @@ undef_macros            =   [
                             ]
 
 
-moogli = Extension( name                  =   "moogli"
+moogli = Extension( name                  =   "_moogli"
                   , sources               =   [ "src/core/Morphology.cpp"
                                               , "src/core/Compartment.cpp"
                                               , "src/core/SelectInfo.cpp"
                                               , "src/core/KeyboardHandler.cpp"
                                               , "src/core/MorphologyViewer.cpp"
+                                              , "src/core/MorphologyViewerWidget.cpp"
                                               , "moc/MorphologyViewer.moc.cpp"
+                                              , "moc/MorphologyViewerWidget.moc.cpp"
                                               , "src/core/Selector.cpp"
                                               , "src/mesh/CylinderMesh.cpp"
                                               , "src/mesh/SphereMesh.cpp"
