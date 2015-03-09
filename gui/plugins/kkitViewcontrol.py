@@ -967,12 +967,15 @@ class GraphicalView(QtGui.QGraphicsView):
         if ( isinstance(moose.element(src),PoolBase) and ( (isinstance(moose.element(des),ReacBase) ) or isinstance(moose.element(des),EnzBase) )):
             moose.connect(src, 'reac', des, 'sub', 'OneToOne')
         elif(isinstance (moose.element(src),PoolBase) and (isinstance(moose.element(des),Function))):
-            moose.connect( src, 'nOut', des.x[des.numVars-1], 'input' )
-            if (des.numVars-1) == 0:
-                des.expr ='x'+str(des.numVars-1)
-            else:
-                des.expr = des.expr+'+x'+str(des.numVars-1)
+            numVariables = des.numVars
             des.numVars+=1
+            expr = ""
+            expr = (des.expr+'+'+'x'+str(numVariables))
+            expr = expr.lstrip("0 +")
+            expr = expr.replace(" ","")
+            des.expr = expr
+            moose.connect( src, 'nOut', des.x[numVariables], 'input' )
+
         elif( isinstance(moose.element(src),Function) and (moose.element(des).className=="Pool") ):
                 if ((element(des).parent).className != 'Enz'):
                     moose.connect(src, 'valueOut', des, 'increment', 'OneToOne')
