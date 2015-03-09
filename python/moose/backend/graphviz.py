@@ -3,7 +3,7 @@
 """graph_utils.py: Graph related utilties. It does not require networkx library.
 It writes files to be used with graphviz.
 
-Last modified: Sat Feb 14, 2015  06:19PM
+Last modified: Mon Mar 09, 2015  06:26PM
 
 """
     
@@ -39,6 +39,12 @@ def textToColor(text):
     textVal = '#{}'.format(textVal[2:])
     return textVal
 
+def short_label(label):
+    assert type(label) == str
+    label = label.split('/')[-1]
+    label = re.sub(r'\[\d+\]', '', label)
+    return label
+
 ##
 # @brief Write a graphviz file.
 class DotFile():
@@ -53,6 +59,9 @@ class DotFile():
         self.channelShape = 'doublecircle'
         self.synChanShape = 'Mcircle'
         self.synapseShape = 'star'
+        self.bufpoolShape = 'egg'
+        self.enzShape = 'star'
+        self.reacShape = 'rect'
         self.defaultNodeShape = 'point'
         self.nodes = set()
         # Keep nodes belonging to a subgraph/cluster.
@@ -101,7 +110,7 @@ class DotFile():
                 typeNode = kwargs[k]
                 if typeNode == moose.Compartment:
                     params['shape'] = self.compShape
-                    params['label'] = self.label(nodeName)
+                    params['label'] = self.short_label(nodeName)
                 elif typeNode == moose.HHChannel:
                     params = self.addHHCHannelNode(node, params)
                 elif typeNode == moose.SimpleSynHandler:
@@ -109,6 +118,15 @@ class DotFile():
                 elif typeNode == moose.SynChan:
                     params['shape'] = self.synChanShape
                     params['label'] = ''
+                elif typeNode == moose.ZombiePool:
+                    params['shape'] = self.bufpoolShape
+                    params['label'] = short_label(nodeName)
+                elif typeNode == moose.ZombieEnz:
+                    params['shape'] = self.enzShape
+                    params['label'] = short_label(nodeName)
+                elif typeNode == moose.ZombieReac:
+                    params['shape'] = self.reacShape
+                    params['label'] = short_label(nodeName)
                 else:
                     params['shape'] = self.defaultNodeShape
                     pass
@@ -207,6 +225,11 @@ class DotFile():
         self.addNode(nodeName, shape=self.tableShape)
         for s in sources:
             self.addEdge(s, table, label='table', color='blue')
+
+    def addChemElement(self, chemNode):
+        """Add a given moose.element representing chemical element to dot
+        file"""
+        self.addNode(chemNode)
 
 
     def writeDotFile(self, fileName, options):
@@ -322,7 +345,9 @@ def writeGraphviz(filename=None, root='/', cluster=True, ignore=None, **kwargs):
         ignorePat = re.compile(r'%s' % ignore, re.I)
         dotFile.setIgnorePat(ignorePat)
 
-    #chemList = b.filterPaths(b.chemEntities, ignorePat)
+    chemList = b.filterPaths(b.chemEntities, ignorePat)
+    [ dotFile.addChemElement(c) for c in chemList ]
+
     header = ["digraph mooseG{"]
     header.append('\ngraph[];')
     dotFile.textDict['header'].append('\n'.join(header))
