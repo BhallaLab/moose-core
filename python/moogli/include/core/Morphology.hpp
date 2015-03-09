@@ -16,7 +16,7 @@ private:
     typedef unordered_map<string, ref_ptr<LOD> > neuron_map_t;
     typedef unordered_map<string, unordered_set<Compartment *> > neuron_compartment_map_t;
     typedef unordered_map<string, unordered_set<string> > ontology_collection_t;
-
+    typedef unordered_map<string, tuple<vector<Compartment *>, double, double, Vec4f, Vec4f> > group_map_t;
     compartment_map_t           _compartments;
     vector<Compartment *>       _compartment_order;
     neuron_map_t                _neurons;
@@ -29,6 +29,7 @@ private:
     double                      _peak_vm;
     unsigned int _lightcount;
     ref_ptr<StateSet> _state_set;
+    group_map_t                 _groups;
 
 public:
 
@@ -127,6 +128,47 @@ public:
 
     void
     set_peak_membrane_voltage(double peak_vm);
+
+    void
+    destroy_group(const char * group_id);
+
+    void
+    modify_group( const char *  group_id
+                , PyObject *    compartment_ids
+                , double        base_value
+                , double        peak_value
+                , PyObject *    base_color
+                , PyObject *    peak_color
+                );
+
+    void
+    create_group( const char *  group_id
+                , PyObject *    compartment_ids
+                , double        base_value
+                , double        peak_value
+                , PyObject *    base_color
+                , PyObject *    peak_color
+                );
+
+    void
+    set_color( const char * group_id
+             , PyObject   * values
+             );
+
+    // void
+    // set_radius( const char * group_id
+    //           , PyObject   * values
+    //           );
+
+    // void
+    // set_height( const char * group_id
+    //           , PyObject   * values
+    //           );
+
+    // void
+    // set_size( const char * group_id
+    //         , PyObject   * values
+    //         )
 
     ~Morphology();
 
