@@ -5,13 +5,13 @@ from PyQt4 import QtOpenGL
 
 
 # from PyQt4.QtGui import *
-from _moogli import *
+from ._moogli import *
 from main import *
 
 class DynamicMorphologyViewerWidget(MorphologyViewerWidget):
     _timer = QtCore.QTimer()
 
-    def set_callback(self,callback, idletime = 2000):
+    def set_callback(self,callback, idletime = 0):
         self.callback = callback
         self.idletime = idletime
         self._timer.timeout.connect(self.start_cycle)
