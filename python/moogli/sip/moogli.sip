@@ -152,12 +152,79 @@ class MorphologyViewerWidget : public QGLWidget
 %End
 
 public:
+
+    double up_distance;
+    double down_distance;
+    double left_distance;
+    double right_distance;
+    double forward_distance;
+    double backward_distance;
+    double zoom_factor;
+    double roll_angle;
+    double pitch_angle;
+    double yaw_angle;
+
     Morphology * morphology;
     MorphologyViewerWidget( Morphology * morphology
                          , QWidget * parent             = 0
                          , const QGLWidget* shareWidget = 0
                          , Qt::WindowFlags f            = 0
                          );
+    void
+    add_view( int x
+            , int y
+            , int width
+            , int height
+            );
+    void
+    home(unsigned int index = 0);
+
+    void
+    forward( double distance
+           , unsigned int index = 0
+           );
+    void
+    backward( double distance
+            , unsigned int index = 0
+            );
+    void
+    left( double distance
+        , unsigned int index = 0
+        );
+    void
+    right( double distance
+         , unsigned int index = 0
+         );
+
+    void
+    up( double distance
+      , unsigned int index = 0
+      );
+
+    void
+    down( double distance
+        , unsigned int index = 0
+        );
+
+    void
+    zoom( double factor
+        , unsigned int index = 0
+        );
+
+    void
+    roll( double angle
+        , unsigned int index = 0
+        );
+
+    void
+    pitch( double angle
+         , unsigned int index = 0
+         );
+
+    void
+    yaw( double angle
+       , unsigned int index = 0
+       );
 
     virtual
     ~MorphologyViewerWidget();

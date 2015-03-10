@@ -10,18 +10,18 @@ class KeyboardHandler : public osgGA::GUIEventHandler
 {
 public:
 
-    double translate_up_factor      = 20.0;
-    double translate_down_factor    = 20.0;
-    double translate_left_factor    = 20.0;
-    double translate_right_factor   = 20.0;
-    double translate_forward_factor = 10.0;
-    double translate_backward_factor= 20.0;
-    double clockwise_roll_factor    = 5 * 3.14 / 180;
-    double clockwise_pitch_factor    = 5 * 3.14 / 180;
-    double clockwise_yaw_factor    = 5 * 3.14 / 180;
-    double counterclockwise_roll_factor    = 5 * 3.14 / 180;
-    double counterclockwise_pitch_factor    = 5 * 3.14 / 180;
-    double counterclockwise_yaw_factor    = 5 * 3.14 / 180;
+    constexpr static double translate_up_factor      = 20.0;
+    constexpr static double translate_down_factor    = 20.0;
+    constexpr static double translate_left_factor    = 20.0;
+    constexpr static double translate_right_factor   = 20.0;
+    constexpr static double translate_forward_factor = 10.0;
+    constexpr static double translate_backward_factor= 20.0;
+    constexpr static double clockwise_roll_factor    = 5 * 3.14 / 180;
+    constexpr static double clockwise_pitch_factor    = 5 * 3.14 / 180;
+    constexpr static double clockwise_yaw_factor    = 5 * 3.14 / 180;
+    constexpr static double counterclockwise_roll_factor    = 5 * 3.14 / 180;
+    constexpr static double counterclockwise_pitch_factor    = 5 * 3.14 / 180;
+    constexpr static double counterclockwise_yaw_factor    = 5 * 3.14 / 180;
 
 
     KeyboardHandler() {}
