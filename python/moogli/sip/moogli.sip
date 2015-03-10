@@ -176,6 +176,16 @@ public:
             , int width
             , int height
             );
+
+    void
+    split_horizontally( unsigned int view_index   = 0
+                      , unsigned int width_factor = 2
+                      );
+
+    void
+    split_vertically( unsigned int view_index    = 0
+                    , unsigned int height_factor = 2
+                    );
     void
     home(unsigned int index = 0);
 
