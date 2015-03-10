@@ -135,7 +135,7 @@ private:
     QGridLayout  *      _grid_layout;
     osgViewer::Viewer   _viewer;
 
-    Mode mode = MOUSE;
+    Mode mode;
     QToolBar * _toolbar;
     QPushButton * _toggle_mode_button;
     QPushButton * _home;
