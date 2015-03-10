@@ -92,9 +92,17 @@ def callback(morphology, viewer):
     morphology.set_color( "group-2"
                         , np.random.random_sample((34,))
                         )
+    viewer.roll(0.05, 0)
+    viewer.pitch(0.05, 1)
+    viewer.yaw(0.05, 2)
     return True
 
 viewer = moogli.DynamicMorphologyViewerWidget(morphology)
-viewer.show()
+viewer.showMaximized()
+viewer.split_horizontally(0)
+viewer.split_vertically(1)
+viewer.zoom(0.5, 0)
+viewer.zoom(0.5, 1)
+viewer.zoom(0.5, 2)
 viewer.set_callback(callback)
 app.exec_()
