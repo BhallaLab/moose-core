@@ -86,7 +86,7 @@ public:
         );
 
     void
-    roll( double angle = M_PI/180.0
+    roll( double angle
         , unsigned int index = 0
         );
 
