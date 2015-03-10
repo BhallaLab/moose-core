@@ -37,6 +37,7 @@ MorphologyViewer::MorphologyViewer( const char * name
                                     , window_name(window_name)
                                     , window_decoration(window_decoration)
 {
+    mode = MOUSE;
     select_info  = new SelectInfo();
     _grid_layout = new QGridLayout();
     _grid_layout->setContentsMargins(0,0,0,0);
@@ -107,6 +108,7 @@ MorphologyViewer::MorphologyViewer( Morphology * morphology
                                     , window_name(window_name)
                                     , window_decoration(window_decoration)
 {
+    mode = MOUSE;
     select_info  = new SelectInfo();
     _grid_layout = new QGridLayout();
     _grid_layout->setContentsMargins(0,0,0,0);
