@@ -116,8 +116,6 @@ class GraphicalView(QtGui.QGraphicsView):
                 self.removeConnector()
             elif itemType == ITEM:
                 self.showConnector(self.state["press"]["item"])
-                # compartment's rectangle size is calculated depending on children
-                self.layoutPt.comptChilrenBoundingRect()
             # self.layoutPt.plugin.mainWindow.objectEditSlot(self.state["press"]["item"].mobj, False)
         else:
             self.resetState()
@@ -241,8 +239,27 @@ class GraphicalView(QtGui.QGraphicsView):
 
         if clickedItemType == ITEM:
             if not self.state["move"]["happened"]:
+                print " move happened or not ",self.state["move"]["happened"]
                 self.showConnector(self.state["press"]["item"])
                 self.layoutPt.plugin.mainWindow.objectEditSlot(self.state["press"]["item"].mobj, True)
+                # compartment's rectangle size is calculated depending on children
+                #self.layoutPt.comptChilrenBoundingRect()
+                l = self.modelRoot
+                if self.modelRoot.find('/',1) > 0:
+                    l = self.modelRoot[0:self.modelRoot.find('/',1)]
+
+                linfo = moose.Annotator(l+'/info')
+                for k, v in self.layoutPt.qGraCompt.items():
+                    rectcompt = v.childrenBoundingRect()
+                    if linfo.modeltype == "new_kkit":
+                        #if newly built model then compartment is size is fixed for some size.
+                        comptBoundingRect = v.boundingRect()
+                        if not comptBoundingRect.contains(rectcompt):
+                            self.layoutPt.updateCompartmentSize(v)
+                    else:
+                        #if already built model then compartment size depends on max and min objects
+                        v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
+
             else:
                 if isinstance(self.state["release"]["item"], KineticsDisplayItem):
                     if not moose.element(self.state["press"]["item"].mobj) == moose.element(self.state["release"]["item"].mobj):
