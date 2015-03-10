@@ -15,12 +15,90 @@ class MorphologyViewerWidget : public QGLWidget
   Q_OBJECT
 
 public:
+
+    double up_distance;
+    double down_distance;
+    double left_distance;
+    double right_distance;
+    double forward_distance;
+    double backward_distance;
+    double zoom_factor;
+    double roll_angle;
+    double pitch_angle;
+    double yaw_angle;
+
     Morphology * morphology;
     MorphologyViewerWidget( Morphology * morphology
                           , QWidget * parent             = 0
                           , const QGLWidget* shareWidget = 0
                           , Qt::WindowFlags f            = 0
                           );
+    void
+    add_view( int x
+            , int y
+            , int width
+            , int height
+            );
+
+    void
+    split_horizontally( unsigned int view_index   = 0
+                      , unsigned int width_factor = 2
+                      );
+
+    void
+    split_vertically( unsigned int view_index    = 0
+                    , unsigned int height_factor = 2
+                    );
+
+    void
+    home(unsigned int index = 0);
+
+    void
+    forward( double distance
+           , unsigned int index = 0
+           );
+    void
+    backward( double distance
+            , unsigned int index = 0
+            );
+    void
+    left( double distance
+        , unsigned int index = 0
+        );
+    void
+    right( double distance
+         , unsigned int index = 0
+         );
+
+    void
+    up( double distance
+      , unsigned int index = 0
+      );
+
+    void
+    down( double distance
+        , unsigned int index = 0
+        );
+
+    void
+    zoom( double factor
+        , unsigned int index = 0
+        );
+
+    void
+    roll( double angle = M_PI/180.0
+        , unsigned int index = 0
+        );
+
+    void
+    pitch( double angle
+         , unsigned int index = 0
+         );
+
+    void
+    yaw( double angle
+       , unsigned int index = 0
+       );
 
     virtual
     ~MorphologyViewerWidget();
@@ -42,6 +120,25 @@ protected:
     virtual bool event( QEvent* event );
 
 private:
+    void
+    _get_transformation( unsigned int index
+                       ,  osg::Vec3d  & eye
+                       , osg::Vec3d  & center
+                       , double      & distance
+                       , osg::Vec3d  & up
+                       , osg::Vec3d  & look
+                       , osg::Vec3d  & side
+                       );
+
+    void
+    _set_transformation( unsigned int index
+                       , const osg::Vec3d & eye
+                       , const osg::Vec3d & center
+                       , const osg::Vec3d & up
+                       );
+
+    unsigned int
+    _get_view_index_with_focus();
 
     virtual void
     onHome();
@@ -60,7 +157,9 @@ private:
 
     osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> _graphics_window;
     osg::ref_ptr<osgViewer::CompositeViewer> _viewer;
-    osgGA::TrackballManipulator * _manipulator;
+
+    int _previous_width;
+    int _previous_height;
 };
 
 #endif /* _MORPHOLOGY_VIEWER_WIDGET_HPP_ */
