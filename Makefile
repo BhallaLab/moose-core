@@ -358,7 +358,7 @@ OBJLIBS =	\
 
 
 ifeq ($(USE_NEUROKIT),1)
-	NEUROKIT_COMMAND = cd ./python/moogli; python setup.py build;  cd ../../; mv ./python/moogli/build/lib.linux-x86_64-2.7/_moogli.so ./python/moogli;
+	NEUROKIT_COMMAND = cd ./python/moogli; python setup.py build;  cd ../../; cp ./python/moogli/build/*/_moogli.so ./python/moogli/;
 # else
 # 	NEUROKIT_COMMAND = ""
 endif
