@@ -981,6 +981,12 @@ class GraphicalView(QtGui.QGraphicsView):
         self.modelRoot = self.layoutPt.modelRoot
         callsetupItem = True
         #print " populate_srcdes ",src,des
+        srcClass =  moose.element(src).className
+        if 'Zombie' in srcClass:
+            srcClass = srcClass.split('Zombie')[1]
+        desClass = moose.element(des).className
+        if 'Zombie' in desClass:
+            desClass = desClass.split('Zombie')[1]
         if ( isinstance(moose.element(src),PoolBase) and ( (isinstance(moose.element(des),ReacBase) ) or isinstance(moose.element(des),EnzBase) )):
             #If one to tries to connect pool to Reac/Enz (substrate to Reac/Enz), check if already (product to Reac/Enz) exist.
             #If exist then connection not allowed one need to delete the msg and try connecting back.
@@ -993,8 +999,10 @@ class GraphicalView(QtGui.QGraphicsView):
             if found == False:
                 moose.connect(src, 'reac', des, 'sub', 'OneToOne')
             else:
-                srcdesString = moose.element(src).className+'--'+moose.element(des).className
-                QtGui.QMessageBox.information(None,'Connection Not possible','\'{srcdesString}\' is already connected. \nIf you wish to connect this object then first delete the exist connection'.format(srcdesString = srcdesString),QtGui.QMessageBox.Ok)
+                #srcdesString = moose.element(src).className+' is already connected to '+moose.element(des).className + ' as \'Substrate\' \n \nIf you wish to connect this object then first delete the exist connection'
+                
+                srcdesString = srcClass+' is already connected as '+ '\'Product\''+' to '+desClass +' \n \nIf you wish to connect this object then first delete the exist connection'
+                QtGui.QMessageBox.information(None,'Connection Not possible','{srcdesString}'.format(srcdesString = srcdesString),QtGui.QMessageBox.Ok)
             
         elif (isinstance (moose.element(src),PoolBase) and (isinstance(moose.element(des),Function))):
             numVariables = des.numVars
@@ -1019,17 +1027,17 @@ class GraphicalView(QtGui.QGraphicsView):
                 moose.connect(src, 'valueOut', des, 'setNumKf', 'OneToOne')
         elif (((isinstance(moose.element(src),ReacBase))or (isinstance(moose.element(src),EnzBase))) and (isinstance(moose.element(des),PoolBase))):
             found = False
-            print moose.showmsg(src)
-            for msg in des.msgIn:
-                if moose.element(msg.e1.path) == src:
+            for msg in src.msgOut:
+                if moose.element(msg.e2.path) == des:
                     if msg.srcFieldsOnE1[0] == "subOut":
                         found = True 
             if found == False:
                 moose.connect(src, 'prd', des, 'reac', 'OneToOne')
             else:
-                srcdesString = moose.element(src).className+'--'+moose.element(des).className
-                QtGui.QMessageBox.information(None,'Connection Not possible','\'{srcdesString}\' is already connected. \nIf you wish to connect this object then first delete the exist connection'.format(srcdesString = srcdesString),QtGui.QMessageBox.Ok)
-
+                # srcdesString = moose.element(src).className+'--'+moose.element(des).className
+                # QtGui.QMessageBox.information(None,'Connection Not possible','\'{srcdesString}\' is already connected. \nIf you wish to connect this object then first delete the exist connection'.format(srcdesString = srcdesString),QtGui.QMessageBox.Ok)
+                srcdesString = desClass+' is already connected as '+'\'Substrate\''+' to '+srcClass +' \n \nIf you wish to connect this object then first delete the exist connection'
+                QtGui.QMessageBox.information(None,'Connection Not possible','{srcdesString}'.format(srcdesString = srcdesString),QtGui.QMessageBox.Ok)
         # elif( isinstance(moose.element(src),ReacBase) and (isinstance(moose.element(des),PoolBase) ) ):
         #     moose.connect(src, 'prd', des, 'reac', 'OneToOne')
         # elif( isinstance(moose.element(src),EnzBase) and (isinstance(moose.element(des),PoolBase) ) ):
