@@ -239,7 +239,6 @@ class GraphicalView(QtGui.QGraphicsView):
 
         if clickedItemType == ITEM:
             if not self.state["move"]["happened"]:
-                print " move happened or not ",self.state["move"]["happened"]
                 self.showConnector(self.state["press"]["item"])
                 self.layoutPt.plugin.mainWindow.objectEditSlot(self.state["press"]["item"].mobj, True)
                 # compartment's rectangle size is calculated depending on children
@@ -859,6 +858,7 @@ class GraphicalView(QtGui.QGraphicsView):
         setupItem(self.modelRoot,self.layoutPt.srcdesConnection)
 
     def getMsgId(self,src,srcZero,srcOne,item):
+        print "$$$$$$$$$$$$$$$$$$$$$$$$$$ ",srcZero[0]
         for msg in srcZero[0].msgOut:
             msgIdforDeleting = " "
             if moose.element(msg.e2.path) == moose.element(srcOne[0].path):
@@ -982,8 +982,21 @@ class GraphicalView(QtGui.QGraphicsView):
         callsetupItem = True
         #print " populate_srcdes ",src,des
         if ( isinstance(moose.element(src),PoolBase) and ( (isinstance(moose.element(des),ReacBase) ) or isinstance(moose.element(des),EnzBase) )):
-            moose.connect(src, 'reac', des, 'sub', 'OneToOne')
-        elif(isinstance (moose.element(src),PoolBase) and (isinstance(moose.element(des),Function))):
+            #If one to tries to connect pool to Reac/Enz (substrate to Reac/Enz), check if already (product to Reac/Enz) exist.
+            #If exist then connection not allowed one need to delete the msg and try connecting back.
+            print moose.showmsg(src)
+            found = False
+            for msg in des.msgOut:
+                if moose.element(msg.e2.path) == src:
+                    if msg.srcFieldsOnE1[0] == "prdOut":
+                        found = True 
+            if found == False:
+                moose.connect(src, 'reac', des, 'sub', 'OneToOne')
+            else:
+                srcdesString = moose.element(src).className+'--'+moose.element(des).className
+                QtGui.QMessageBox.information(None,'Connection Not possible','\'{srcdesString}\' is already connected. \nIf you wish to connect this object then first delete the exist connection'.format(srcdesString = srcdesString),QtGui.QMessageBox.Ok)
+            
+        elif (isinstance (moose.element(src),PoolBase) and (isinstance(moose.element(des),Function))):
             numVariables = des.numVars
             des.numVars+=1
             expr = ""
@@ -993,21 +1006,34 @@ class GraphicalView(QtGui.QGraphicsView):
             des.expr = expr
             moose.connect( src, 'nOut', des.x[numVariables], 'input' )
 
-        elif( isinstance(moose.element(src),Function) and (moose.element(des).className=="Pool") ):
+        elif ( isinstance(moose.element(src),Function) and (moose.element(des).className=="Pool") ):
                 if ((element(des).parent).className != 'Enz'):
                     moose.connect(src, 'valueOut', des, 'increment', 'OneToOne')
                 else:
                     srcdesString = element(src).className+'-- EnzCplx'
                     QtGui.QMessageBox.information(None,'Connection Not possible','\'{srcdesString}\' not allowed to connect'.format(srcdesString = srcdesString),QtGui.QMessageBox.Ok)
                     callsetupItem = False
-        elif( isinstance(moose.element(src),Function) and (moose.element(des).className=="BufPool") ):
+        elif ( isinstance(moose.element(src),Function) and (moose.element(des).className=="BufPool") ):
                 moose.connect(src, 'valueOut', des, 'setConcInit', 'OneToOne')
-        elif( isinstance(moose.element(src),Function) and (isinstance(moose.element(des),ReacBase) ) ):
+        elif ( isinstance(moose.element(src),Function) and (isinstance(moose.element(des),ReacBase) ) ):
                 moose.connect(src, 'valueOut', des, 'setNumKf', 'OneToOne')
-        elif( isinstance(moose.element(src),ReacBase) and (isinstance(moose.element(des),PoolBase) ) ):
-            moose.connect(src, 'prd', des, 'reac', 'OneToOne')
-        elif( isinstance(moose.element(src),EnzBase) and (isinstance(moose.element(des),PoolBase) ) ):
-            moose.connect(src, 'prd', des, 'reac', 'OneToOne')
+        elif (((isinstance(moose.element(src),ReacBase))or (isinstance(moose.element(src),EnzBase))) and (isinstance(moose.element(des),PoolBase))):
+            found = False
+            print moose.showmsg(src)
+            for msg in des.msgIn:
+                if moose.element(msg.e1.path) == src:
+                    if msg.srcFieldsOnE1[0] == "subOut":
+                        found = True 
+            if found == False:
+                moose.connect(src, 'prd', des, 'reac', 'OneToOne')
+            else:
+                srcdesString = moose.element(src).className+'--'+moose.element(des).className
+                QtGui.QMessageBox.information(None,'Connection Not possible','\'{srcdesString}\' is already connected. \nIf you wish to connect this object then first delete the exist connection'.format(srcdesString = srcdesString),QtGui.QMessageBox.Ok)
+
+        # elif( isinstance(moose.element(src),ReacBase) and (isinstance(moose.element(des),PoolBase) ) ):
+        #     moose.connect(src, 'prd', des, 'reac', 'OneToOne')
+        # elif( isinstance(moose.element(src),EnzBase) and (isinstance(moose.element(des),PoolBase) ) ):
+        #     moose.connect(src, 'prd', des, 'reac', 'OneToOne')
         elif( isinstance(moose.element(src),StimulusTable) and (isinstance(moose.element(des),PoolBase) ) ):
             moose.connect(src, 'output', des, 'setConcInit', 'OneToOne')
         else:
