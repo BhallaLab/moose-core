@@ -228,6 +228,10 @@ MorphologyViewerWidget::keyPressEvent( QKeyEvent* event )
     // std::cout << "Index => " << view_index << std::endl;
     switch(event->key())
     {
+        case Qt::Key_Q          :   if(event->modifiers() & Qt::ControlModifier)
+                                    {
+                                        QApplication::quit();
+                                    }
         case Qt::Key_A          :   if(event->modifiers() & Qt::ShiftModifier)
                                     {
                                         split_vertically(view_index);
