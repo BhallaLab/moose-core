@@ -35,7 +35,7 @@ for popinfo in popdict.values():
 moose.reinit()
 
 SIMULATION_DELTA = 0.001
-SIMULATION_TIME  = 1.0
+SIMULATION_TIME  = 0.03
 
 ALL_COMPARTMENTS = map( lambda x : x.path
                       , moose.wildcardFind("/cells[0]/##[ISA=CompartmentBase]")
@@ -111,4 +111,5 @@ viewer.zoom(0.25)
 # It is necessary to call this function to start event handling.
 # The main event loop receives events from the window system and
 # dispatches these to the application widgets.
+
 app.exec_()
