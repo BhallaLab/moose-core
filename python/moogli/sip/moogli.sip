@@ -164,12 +164,15 @@ public:
     double pitch_angle;
     double yaw_angle;
 
-    Morphology * morphology;
-    MorphologyViewerWidget( Morphology * morphology
+    MorphologyViewerWidget( Morphology * morphology /Transfer/
                          , QWidget * parent             = 0
                          , const QGLWidget* shareWidget = 0
                          , Qt::WindowFlags f            = 0
                          );
+
+    Morphology *
+    get_morphology();
+
     void
     add_view( int x
             , int y

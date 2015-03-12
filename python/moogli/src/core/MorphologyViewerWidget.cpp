@@ -16,6 +16,8 @@ MorphologyViewerWidget::MorphologyViewerWidget( Morphology * morphology
                                                                                                        )
                                                                 )
                                               , _viewer( new osgViewer::CompositeViewer )
+                                              , capture_format("jpeg")
+                                              , capture_location("/home/aviral/moogli_test")
 {
 
     osg::StateSet* stateSet = morphology -> get_scene_graph()->getOrCreateStateSet();
@@ -36,8 +38,8 @@ MorphologyViewerWidget::MorphologyViewerWidget( Morphology * morphology
     // policy is not set by default. The default, Qt::NoFocus, will result in
     // keyboard events that are ignored.
     this->setFocusPolicy( Qt::StrongFocus );
-    this->setMinimumSize( 10
-                        , 10
+    this->setMinimumSize( 200
+                        , 200
                         );
 
     // Ensures that the widget receives mouse move events even though no
@@ -55,6 +57,12 @@ MorphologyViewerWidget::MorphologyViewerWidget( Morphology * morphology
     roll_angle          = M_PI / 36.0;
     pitch_angle         = M_PI / 36.0;
     yaw_angle           = M_PI / 36.0;
+}
+
+Morphology *
+MorphologyViewerWidget::get_morphology()
+{
+    return morphology;
 }
 
 void
@@ -154,9 +162,20 @@ MorphologyViewerWidget::add_view( int x
     osgViewer::View* view = new osgViewer::View();
     view->setCamera( camera );
     view->setSceneData( morphology -> get_scene_graph() );
-    view->addEventHandler( new osgViewer::StatsHandler );
+    // view->addEventHandler( new osgViewer::StatsHandler );
     view->setCameraManipulator( new osgGA::TrackballManipulator() );
     _viewer->addView( view );
+    unsigned int index = _viewer -> getNumViews() - 1;
+    QDir().mkdir((capture_location + "/" + to_string(index)).c_str());
+    auto* capture_operation =
+        new osgViewer::ScreenCaptureHandler::WriteToFile( capture_location + "/" + to_string(index)
+                                                        , capture_format
+                                                        );
+
+    // auto* capture_handler = new MorphologyCaptureHandler(
+    //     dynamic_cast<osgViewer::ScreenCaptureHandler::CaptureOperation *>(capture_operation)
+    //                                                            );
+    // view -> addEventHandler(capture_handler);
 }
 
 MorphologyViewerWidget::~MorphologyViewerWidget()
@@ -218,6 +237,15 @@ MorphologyViewerWidget::keyPressEvent( QKeyEvent* event )
                                         split_horizontally(view_index);
                                     }
                                     break;
+        // case Qt::Key_S          :   if(event->modifiers() & Qt::ShiftModifier)
+        //                             {
+        //                                 capture_continuous_toggle(view_index);
+        //                             }
+        //                             else
+        //                             {
+        //                                 capture_once(view_index);
+        //                             }
+                                    break;
         case Qt::Key_Space      :   home(view_index);
                                     break;
         case Qt::Key_Up         :   up(up_distance, view_index);
@@ -278,6 +306,22 @@ MorphologyViewerWidget::keyPressEvent( QKeyEvent* event )
         default                 :   break;
     }
 }
+
+// void
+// MorphologyViewerWidget::capture_continuous_toggle(unsigned int index)
+// {
+//     osgViewer::View * view = _viewer -> getView(index);
+//     auto * handler = dynamic_cast<MorphologyCaptureHandler *>((view -> getEventHandlers()).front().get());
+//     handler -> toggle_capture();
+// }
+
+// void
+// MorphologyViewerWidget::capture_once(unsigned int index)
+// {
+//     osgViewer::View * view = _viewer -> getView(index);
+//     auto * handler = dynamic_cast<MorphologyCaptureHandler *>((view -> getEventHandlers()).front().get());
+//     handler->setFramesToCapture(1);
+// }
 
 void
 MorphologyViewerWidget::home(unsigned int index)
