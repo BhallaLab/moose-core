@@ -47,7 +47,7 @@ moose.connect( table
 moose.reinit()
 
 SIMULATION_DELTA = 0.001
-SIMULATION_TIME  = 1.0
+SIMULATION_TIME  = 0.03
 
 ALL_COMPARTMENTS = map( lambda x : x.path
                       , moose.wildcardFind("/cells[0]/##[ISA=CompartmentBase]")
@@ -199,6 +199,18 @@ vm_visualizer = create_vm_visualizer()
 rm_visualizer = create_rm_visualizer()
 vm_visualizer.show()
 rm_visualizer.show()
+
+# http://stackoverflow.com/questions/15861839/error-upon-app-shutdown-qglcontextmakecurrent-cannot-make-invalid-context-cu
+def delete_gl_widget():
+    global vm_visualizer
+    global rm_visualizer
+    vm_visualizer.setParent(None)
+    del vm_visualizer
+    rm_visualizer.setParent(None)
+    del rm_visualizer
+
+QApplication.instance().aboutToQuit.connect( delete_gl_widget )
+
 
 # Enter the main event loop and wait until exit() is called.
 # It is necessary to call this function to start event handling.
