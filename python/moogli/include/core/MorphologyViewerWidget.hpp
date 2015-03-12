@@ -5,6 +5,7 @@
 #include "core/Morphology.hpp"
 #include "core/Selector.hpp"
 #include "KeyboardHandler.hpp"
+// #include "core/MorphologyCaptureHandler.hpp"
 #include "core/SelectInfo.hpp"
 #include <chrono>
 using namespace std;
@@ -27,7 +28,9 @@ public:
     double pitch_angle;
     double yaw_angle;
 
-    Morphology * morphology;
+    Morphology *
+    get_morphology();
+
     MorphologyViewerWidget( Morphology * morphology
                           , QWidget * parent             = 0
                           , const QGLWidget* shareWidget = 0
@@ -100,6 +103,12 @@ public:
        , unsigned int index = 0
        );
 
+    // void
+    // capture_continuous_toggle(unsigned int index);
+
+    // void
+    // capture_once(unsigned int index);
+
     virtual
     ~MorphologyViewerWidget();
 
@@ -160,6 +169,12 @@ private:
 
     int _previous_width;
     int _previous_height;
+
+    string capture_location;
+    string capture_format;
+
+    Morphology * morphology;
+
 };
 
 #endif /* _MORPHOLOGY_VIEWER_WIDGET_HPP_ */

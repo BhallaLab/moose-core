@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'MorphologyViewerWidget.hpp'
 **
-** Created: Tue Mar 10 18:01:34 2015
+** Created: Thu Mar 12 20:10:56 2015
 **      by: The Qt Meta Object Compiler version 63 (Qt 4.8.4)
 **
 ** WARNING! All changes made in this file will be lost!
