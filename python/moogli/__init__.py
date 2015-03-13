@@ -27,6 +27,7 @@ class DynamicMorphologyViewerWidget(MorphologyViewerWidget):
         else:
             self._timer.start(self.idletime)
 
+
 __all__ = [ "Morphology"
           , "MorphologyViewer"
           , "MorphologyViewerWidget"
