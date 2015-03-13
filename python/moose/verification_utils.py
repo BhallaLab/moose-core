@@ -192,7 +192,11 @@ class MooseTestCase( unittest.TestCase ):
     def test_clocks(self):
         """Tests if clocks are missing. """
         self.dump("Checking if clocks are available")
-        clock = self.mooseElems.clocks[0]
+        try:
+            clock = self.mooseElems.clocks[0]
+        except:
+            debug.dump("WARN", "Could not find any clock")
+            return 
         clockDtList = clock.dts
         if np.count_nonzero(clockDtList) < 1:
             debug.dump("FATAL"
