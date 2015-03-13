@@ -3,7 +3,7 @@
 """graph_utils.py: Graph related utilties. It does not require networkx library.
 It writes files to be used with graphviz.
 
-Last modified: Mon Mar 09, 2015  06:26PM
+Last modified: Fri Mar 13, 2015  06:08PM
 
 """
     
@@ -110,7 +110,7 @@ class DotFile():
                 typeNode = kwargs[k]
                 if typeNode == moose.Compartment:
                     params['shape'] = self.compShape
-                    params['label'] = self.short_label(nodeName)
+                    params['label'] = short_label(nodeName)
                 elif typeNode == moose.HHChannel:
                     params = self.addHHCHannelNode(node, params)
                 elif typeNode == moose.SimpleSynHandler:
@@ -144,7 +144,7 @@ class DotFile():
         node1 = self.fix(elem1.path)
         node2 = self.fix(elem2.path)
         if type(elem1) == type(elem2):
-            kwargs['dir'] = 'both'
+            kwargs['dir'] = 'none'
         elif type(elem1) == moose.HHChannel or type(elem2) == moose.HHChannel:
             kwargs['len'] = 0.1
             kwargs['weight'] = 10
@@ -211,21 +211,6 @@ class DotFile():
                     self.__total_synapses__ += 1
                     self.addEdge(pre, post, arrowhead='box')
 
-    def addPulseGen(self, pulseGen, compartments):
-        """Add a pulse-generator to dotfile """
-        nodeName = pulseGen.path
-        self.addNode(nodeName, shape=self.pulseShape)
-        for c in compartments:
-            self.addEdge(pulseGen, c, color='red', label='pulse') 
-
-
-    def addTable(self, table, sources):
-        """Add sources to table """
-        nodeName = table.path
-        self.addNode(nodeName, shape=self.tableShape)
-        for s in sources:
-            self.addEdge(s, table, label='table', color='blue')
-
     def addChemElement(self, chemNode):
         """Add a given moose.element representing chemical element to dot
         file"""
@@ -258,6 +243,8 @@ class DotFile():
         dotText += '\n'.join(self.textDict['edges'])
         dotText =  dotText + "\n}"
 
+        # If nodes_shape parameter is given, then draw all nodes with this
+        # shape.
         globalNodeShape = options.get('nodes_shape', None)
         if globalNodeShape:
             dotText = re.sub(r'shape=\"\w+\"'
@@ -352,33 +339,24 @@ def writeGraphviz(filename=None, root='/', cluster=True, ignore=None, **kwargs):
     header.append('\ngraph[];')
     dotFile.textDict['header'].append('\n'.join(header))
     
-    # Write messages are edges.
     for sm in b.msgs['SingleMsg']:
         srcs, tgts = b.filterPaths(sm.e1, ignorePat), b.filterPaths(sm.e2, ignorePat)
         for i, src in enumerate(srcs):
             tgt = tgts[i]
             if type(src) == moose.SimpleSynHandler:
                 dotFile.addSynHandler(src, tgt)
+            elif type(src) == moose.Table or type(tgt) == moose.Table:
+                pass
+            elif type(src) == moose.PulseGen or type(tgt) == moose.PulseGen:
+                pass
+            elif type(src) == moose.SpikeGen or type(tgt) == moose.SpikeGen:
+                pass
             else:
                 dotFile.addNode(src)
                 dotFile.addNode(tgt)
                 dotFile.addEdge(src, tgt)
     print_utils.dump("TODO", "OneToAllMsgs are not added to graphviz file")
             
-    # Now add the pulse-gen 
-    pulseGens = b.pulseGens
-    for p in pulseGens:
-        comps = getConnectedCompartments(p)
-        dotFile.addPulseGen(p, comps)
-        
-    # Now add tables
-    recorders = kwargs.get('add_recorders', False)
-    if recorders:
-        tables = b.tables 
-        for t in tables:
-            sources = t.neighbors['requestOut']
-            dotFile.addTable(t, sources)
-
     # If cluster is True then cluster the compartments together. Also create a
     # dictionary from which we can fetch the clustername of a compartment.
     # NOTE: THIS MUST BE THE LAST STEP BEFORE WRITING TO GRAPHVIZ FILE.
