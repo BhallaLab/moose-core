@@ -232,15 +232,18 @@ MorphologyViewerWidget::keyPressEvent( QKeyEvent* event )
                                     {
                                         QApplication::quit();
                                     }
-        case Qt::Key_A          :   if(event->modifiers() & Qt::ShiftModifier)
-                                    {
-                                        split_vertically(view_index);
-                                    }
-                                    else
-                                    {
-                                        split_horizontally(view_index);
-                                    }
-                                    break;
+        // case Qt::Key_P          :   if(event->modifiers() & Qt::ControlModifier)
+        //                             {
+        //                                 QApplication::quit();
+        //                             }
+        // case Qt::Key_S          :   if(event->modifiers() & Qt::ShiftModifier)
+        //                             {
+        //                                 toggle_horizontal_split();
+        //                             }
+        // case Qt::Key_Z          :   if(event->modifiers() & Qt::ShiftModifier)
+        //                             {
+        //                                 toggle_vertical_split();
+        //                             }
         // case Qt::Key_S          :   if(event->modifiers() & Qt::ShiftModifier)
         //                             {
         //                                 capture_continuous_toggle(view_index);
