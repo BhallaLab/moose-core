@@ -39,10 +39,12 @@ def textToColor(text):
     textVal = '#{}'.format(textVal[2:])
     return textVal
 
-def short_label(label):
+def short_label(label, len=-1):
     assert type(label) == str
     label = label.split('/')[-1]
     label = re.sub(r'\[\d+\]', '', label)
+    if len >= 0:
+        label = label[0:len]
     return label
 
 ##
@@ -110,7 +112,7 @@ class DotFile():
                 typeNode = kwargs[k]
                 if typeNode == moose.Compartment:
                     params['shape'] = self.compShape
-                    params['label'] = short_label(nodeName)
+                    params['label'] = short_label(nodeName, 0)
                 elif typeNode == moose.HHChannel:
                     params = self.addHHCHannelNode(node, params)
                 elif typeNode == moose.SimpleSynHandler:
@@ -158,8 +160,7 @@ class DotFile():
             #kwargs['len'] = 0.2
             pass
         else:
-            kwargs['len'] = 0.2
-            kwargs['weight'] = 100
+            #kwargs['len'] = 0.2
             kwargs['dir'] = 'none'
 
         # Between objects of same type, do not add multiple edges.
@@ -241,7 +242,7 @@ class DotFile():
 
         dotText += '\n'.join(self.textDict['nodes'])
         dotText += '\n'.join(self.textDict['edges'])
-        dotText =  dotText + "\n}"
+        dotText += "\n}"
 
         # If nodes_shape parameter is given, then draw all nodes with this
         # shape.
@@ -310,7 +311,7 @@ def getConnectedCompartments(obj):
 # @param add_recorders (False). If true add tables to graph as well.
 #
 # @return None. 
-def writeGraphviz(filename=None, root='/', cluster=True, ignore=None, **kwargs):
+def writeGraphviz(filename=None, root='', cluster=True, ignore=None, **kwargs):
     '''This is  a generic function. It takes the the pattern, search for paths
     and write a graphviz file.
     '''
@@ -362,12 +363,14 @@ def writeGraphviz(filename=None, root='/', cluster=True, ignore=None, **kwargs):
     # NOTE: THIS MUST BE THE LAST STEP BEFORE WRITING TO GRAPHVIZ FILE.
     subgraphDict = {}
     if cluster:
+        print_utils.info("Clustering nodes together")
         pops = b.clusterNodes()
         for pop in pops:
             clustername = pop.translate(None, '/[]')
             subgraphDict[clustername] = pops[pop]
             for x in pops[pop]: dotFile.subgraphDict[x] = clustername
     dotFile.textDict['subgraphs'] = subgraphDict
+
     dotFile.writeDotFile(filename, kwargs)
     return True
 
