@@ -100,7 +100,8 @@ Compartment::create_geometry( unsigned int lod_resolution
         for(unsigned int i = 0; i < lod_resolution; ++i)
         {
             geometries[i] = cylinder( _center
-                                   , _radius
+                                    , _distal_d   / 2.0
+                                    , _proximal_d / 2.0
                                    , _height
                                    , _direction
                                    , points
