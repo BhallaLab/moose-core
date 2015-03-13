@@ -106,8 +106,6 @@ class Backend(object):
         """Get all messages in MOOSE"""
         self.msgs['SingleMsg'] = _moose.wildcardFind('/##[TYPE=SingleMsg]')
         self.msgs['OneToAllMsg'] = _moose.wildcardFind('/##[TYPE=OneToAllMsg]')
-        from IPython import embed
-        embed()
         return self.msgs
 
     def populateStoreHouse(self, **kwargs):
