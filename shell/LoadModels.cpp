@@ -11,9 +11,11 @@
 #include "header.h"
 #include "Shell.h"
 #include "../utility/strutil.h"
+#include "../utility/Vec.h"
 #include "LoadModels.h" // For the ModelType enum.
 
 #include "../biophysics/ReadCell.h"
+#include "../biophysics/ReadSwc.h"
 #include "../kinetics/ReadKkit.h"
 #include "../kinetics/ReadCspace.h"
 
@@ -21,6 +23,9 @@ ModelType findModelType( string filename, ifstream& fin, string& line )
 {
 	if ( filename.substr( filename.length() - 2 ) == ".p" )
 		return DOTP;
+
+	if ( filename.substr( filename.length() - 4 ) == ".swc" )
+		return SWC;
 
 	getline( fin, line );
         line = trim(line);
@@ -134,6 +139,14 @@ Id Shell::doLoadModel( const string& fileName, const string& modelPath, const st
 				ReadCell rc;
 				return rc.read( fileName, modelName, parentId );
 				return Id();
+			}
+		case SWC:
+			{
+				cout << "In doLoadModel for SWC\n"; 
+				ReadSwc rs( fileName );
+				Id model = doCreate( "Neuron", parentId, modelName, 1 );
+				rs.build( model, 0.5e-3, 1.0, 1.0, 0.01 );
+				return model;
 			}
 		case KKIT: 
 			{
