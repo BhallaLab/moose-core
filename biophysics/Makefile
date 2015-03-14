@@ -31,6 +31,7 @@ OBJ = \
 	Nernst.o	\
 	Neuron.o	\
 	ReadCell.o	\
+	ReadSwc.o	\
 	SynChan.o	\
 	NMDAChan.o	\
 	testBiophysics.o	\
@@ -87,6 +88,7 @@ MgBlock.o:	MgBlock.h ChanBase.h
 Nernst.o:	Nernst.h
 Neuron.o:	Neuron.h
 ReadCell.o: CompartmentBase.h Compartment.h SymCompartment.h ReadCell.h ../shell/Shell.h ../utility/utility.h
+ReadSwc.o: CompartmentBase.h Compartment.h SymCompartment.h ReadSwc.h ../shell/Shell.h ../utility/Vec.h
 IzhikevichNrn.o: IzhikevichNrn.h
 DifShell.o: DifShell.h
 testBiophysics.o: IntFire.h CompartmentBase.h Compartment.h HHChannel.h HHGate.h 

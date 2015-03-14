@@ -19,7 +19,8 @@ import sys
 sys.path.append( '../util' )
 import rdesigneur as rd
 from PyQt4 import QtGui
-import moogli_viewer as mv
+#import moogli_viewer as mv
+import moogli
 
 RM = 1.0
 RA = 1.0
@@ -166,11 +167,13 @@ def main():
     plt.show()
 
     '''
+    '''
     app = QtGui.QApplication(sys.argv)
-    widget = mv.MoogliViewer( '/model' )
+    #widget = mv.MoogliViewer( '/model' )
+    morphology = moogli.read_morphology_from_moose( name="", path = '/model/elec' )
+    widget = moogli.MorphologyViewerWidget( morphology )
     widget.show()
     return app.exec_()
-    '''
     quit()
 
 def getMidpts( compt ):
