@@ -14,5 +14,6 @@ enum ModelType {
 	NEUROML,
 	NINEML,
 	SEDML,
-	CSPACE
+	CSPACE,
+	SWC
 };
