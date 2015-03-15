@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
 FILE(GLOB SIP_SRC *.sip)
 
-SET(GENERATED_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/sipmooglicmodule.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/sipmoogliMorphology.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/sipmoogliMorphologyViewer.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/sipmoogliSelectInfo.cpp
+SET(GENERATED_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/sip_mooglicmodule.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/sip_moogliMorphology.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/sip_moogliMorphologyViewer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/sip_moogliSelectInfo.cpp
     )
 
 SET(SIP_INCLUDES ${PYQT4_SIP_DIR})
