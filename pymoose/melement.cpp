@@ -246,7 +246,7 @@ extern "C" {
 #ifndef QUIET_MODE
         cout << "Created " << new_id << " path=" << path << " numData=" << numData << " isGlobal=" << isGlobal << " baseType=" << basetype_str << endl;
 #else
-        cout << "+";
+        //cout << "+";
 #endif
         instance->oid_ = ObjId(new_id);
         return 0;

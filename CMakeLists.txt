@@ -224,6 +224,7 @@ set(MOOSE_LIBRARIES
     randnum
     scheduling
     moose_mpi
+    biophysics 
     utility 
     muparser
     kinetics 
@@ -231,7 +232,6 @@ set(MOOSE_LIBRARIES
     mesh
     signeur
     tinyxml
-    biophysics 
     synapse
     diffusion 
     basecode
