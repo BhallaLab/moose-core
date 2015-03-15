@@ -1,4 +1,4 @@
-include_directories(../basecode ../synapse)
+include_directories(../basecode ../synapse ../utility)
 add_library(biophysics 
 	IntFire.cpp	
 	SpikeGen.cpp	
@@ -22,6 +22,7 @@ add_library(biophysics
         Nernst.cpp
 	Neuron.cpp	
 	ReadCell.cpp	
+        ReadSwc.cpp
 	#SynChanBase.cpp	
 	SynChan.cpp	
 	testBiophysics.cpp	
