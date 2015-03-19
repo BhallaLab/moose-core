@@ -135,7 +135,8 @@ double convertConcToNumRateUsingMesh( const Eref& e, const SrcFinfo* pools,
 			assert( toSub );
 			vector< double > subVols;
 			getReactantVols( e, toSub, subVols );
-			assert( subVols.size() > 0 );
+			if ( subVols.size() == 0 ) // no substrates!
+				return 1.0;
 			conv /= subVols[0] * NA;
 		}
 		/*
