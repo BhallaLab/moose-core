@@ -325,7 +325,10 @@ class GraphicalView(QtGui.QGraphicsView):
                         t = moose.element(cloneObj.parent().mobj)
                         name = t.name
                         if isinstance(cloneObj.parent().mobj,PoolBase):
-                            name += self.objExist(lKey.path,name,iP) 
+                            retValue = self.objExist(lKey.path,name,iP) 
+                            if retValue != None:
+                                name += retValue
+
                             pmooseCp = moose.copy(t,lKey.path,name,1)
                             #if moose.copy failed then check for path != '/'
                             if pmooseCp.path != '/':
@@ -346,7 +349,9 @@ class GraphicalView(QtGui.QGraphicsView):
                                 self.emit(QtCore.SIGNAL("dropped"),poolObj)
                             
                         if isinstance(cloneObj.parent().mobj,ReacBase):
-                            name += self.objExist(lKey.path,name,iR)
+                            retValue = self.objExist(lKey.path,name,iR)
+                            if retValue != None :
+                                name += retValue
                             rmooseCp = moose.copy(t,lKey.path,name,1)
                             if rmooseCp.path != '/':
                                 ct = moose.element(rmooseCp)
@@ -557,12 +562,18 @@ class GraphicalView(QtGui.QGraphicsView):
                                           )
 
     def objExist(self,path,name,index):
-        index += 1
-        fPath = path+'/'+name+'_'+str(index)
+        if index == 0:
+            fPath = path+'/'+name
+        else:
+            fPath = path+'/'+name+'_'+str(index)
         if moose.exists(fPath):
+            index += 1
             return self.objExist(path,name,index)
         else:
-            return ('_'+str(index))
+            if index == 0:
+                return
+            else:
+                return ('_'+str(index))
 
     def selectSelections(self, selections):
         for selection in selections :
