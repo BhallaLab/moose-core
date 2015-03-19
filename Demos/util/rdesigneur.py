@@ -47,8 +47,8 @@ class rdesigneur:
             combineSegments= True, \
             cellPortion = "/model/elec/#", \
             meshLambda= 2e-6, \
-            chemDt= 0.005, \
-            diffDt= 0.005, \
+            chemDt= 0.001, \
+            diffDt= 0.001, \
             elecDt= 50e-6, \
             adaptorList= [ \
                 ( 'psd', 'Ca_conc', 'Ca', 'Ca_input', \
@@ -569,6 +569,7 @@ class rdesigneur:
             elObj = moose.element( i[0].path + '/' + elecRelPath )
             if ( isElecToChem ):
                 elecFieldSrc = 'get' + capField
+                print ePath, elecFieldSrc, scale
                 moose.connect( i[3], 'requestOut', elObj, elecFieldSrc )
                 for j in range( i[1], i[2] ):
                     moose.connect( i[3], 'output', chemVec[j], 'setConc')

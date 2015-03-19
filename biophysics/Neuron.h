@@ -18,6 +18,8 @@
 class Neuron
 {
 	public:
+		void updateChanDistrib( const Eref& e,
+			string name, double max, string path, string func );
 			/**
 			 * Initializes the class info.
 			 */
