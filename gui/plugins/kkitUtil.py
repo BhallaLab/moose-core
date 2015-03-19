@@ -12,8 +12,10 @@ colormap_file.close()
 
 def getRandColor():
     color = (np.random.randint(low=0, high=255, size=3)).tolist()
-    return QColor(color[0],color[1],color[2])
-    
+    if not all((x <= 65 or x >= 105) for x in (color[0],color[1],color[2])):
+        return QColor(color[0],color[1],color[2])
+    else:
+        return getRandColor()
 
 def getColor(iteminfo):
     """ Getting a textcolor and background color for the given  mooseObject \
