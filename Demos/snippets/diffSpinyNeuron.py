@@ -20,6 +20,7 @@ diffdt = 0.001
 plotdt = 0.01
 animationdt = 0.01
 runtime = 1
+useGssa = False
 
 def makeModel():
     model = moose.Neutral( '/model' )
@@ -54,8 +55,12 @@ def makeModel():
 
     # Build the solvers. No need for diffusion in this version.
     ksolve0 = moose.Ksolve( '/model/chem/compt0/ksolve' )
-    ksolve1 = moose.Ksolve( '/model/chem/compt1/ksolve' )
-    ksolve2 = moose.Ksolve( '/model/chem/compt2/ksolve' )
+    if useGssa:
+        ksolve1 = moose.Gsolve( '/model/chem/compt1/ksolve' )
+        ksolve2 = moose.Gsolve( '/model/chem/compt2/ksolve' )
+    else:
+        ksolve1 = moose.Ksolve( '/model/chem/compt1/ksolve' )
+        ksolve2 = moose.Ksolve( '/model/chem/compt2/ksolve' )
     dsolve0 = moose.Dsolve( '/model/chem/compt0/dsolve' )
     dsolve1 = moose.Dsolve( '/model/chem/compt1/dsolve' )
     dsolve2 = moose.Dsolve( '/model/chem/compt2/dsolve' )
@@ -81,10 +86,14 @@ def makeModel():
     assert( stoich0.numRates == 1 )
     assert( stoich1.numVarPools == 1 )
     assert( stoich1.numProxyPools == 0 )
-    assert( stoich1.numRates == 1 )
+    if useGssa:
+        assert( stoich1.numRates == 2 )
+        assert( stoich2.numRates == 2 )
+    else:
+        assert( stoich1.numRates == 1 )
+        assert( stoich2.numRates == 1 )
     assert( stoich2.numVarPools == 1 )
     assert( stoich2.numProxyPools == 0 )
-    assert( stoich2.numRates == 1 )
     dsolve0.buildNeuroMeshJunctions( dsolve1, dsolve2 )
     stoich0.buildXreacs( stoich1 )
     stoich1.buildXreacs( stoich2 )
