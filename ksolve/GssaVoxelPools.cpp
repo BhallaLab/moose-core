@@ -276,6 +276,18 @@ void GssaVoxelPools::setVolumeAndDependencies( double vol )
 //////////////////////////////////////////////////////////////
 // Handle cross compartment reactions
 //////////////////////////////////////////////////////////////
+
+/*
+ * Not sure if we need it. Hold off for now.
+static double integralTransfer( double propensity )
+{
+	double t= floor( propensity );
+	if ( mtrand() < propensity - t )
+		return t + 1;
+	return t;
+}
+*/
+
 void GssaVoxelPools::xferIn( XferInfo& xf,
 	    unsigned int voxelIndex, const GssaSystem* g )
 {
@@ -288,6 +300,7 @@ void GssaVoxelPools::xferIn( XferInfo& xf,
 	for ( vector< unsigned int >::const_iterator 
 			k = xf.xferPoolIdx.begin(); k != xf.xferPoolIdx.end(); ++k ) {
 		double& x = s[*k];
+		// cout << x << "	i = " << *i << *j << "	m = " << *m << endl;
 		x += round( *i++ - *j );
 		if ( x < *m )  {
 			*m -= x;

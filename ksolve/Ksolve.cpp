@@ -447,7 +447,11 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 		dvalues[2] = 0;
 		dvalues[3] = stoichPtr_->getNumVarPools();
 		dsolvePtr_->getBlock( dvalues );
+		
 		/*
+		vector< double >::iterator i = dvalues.begin() + 4;
+		for ( ; i != dvalues.end(); ++i )
+			cout << *i << "	" << round( *i ) << endl;
 		getBlock( kvalues );
 		vector< double >::iterator d = dvalues.begin() + 4;
 		for ( vector< double >::iterator 
@@ -460,6 +464,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 	// Second, take the arrived xCompt reac values and update S with them.
 	for ( unsigned int i = 0; i < xfer_.size(); ++i ) {
 		const XferInfo& xf = xfer_[i];
+		// cout << xfer_.size() << "	" << xf.xferVoxel.size() << endl;
 		for ( unsigned int j = 0; j < xf.xferVoxel.size(); ++j ) {
 			pools_[xf.xferVoxel[j]].xferIn( 
 					xf.xferPoolIdx, xf.values, xf.lastValues, j );
