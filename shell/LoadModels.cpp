@@ -144,7 +144,10 @@ Id Shell::doLoadModel( const string& fileName, const string& modelPath, const st
 			{
 				cout << "In doLoadModel for SWC\n"; 
 				ReadSwc rs( fileName );
-				Id model = doCreate( "Neuron", parentId, modelName, 1 );
+				Id model = parentId;
+				if ( !parentId.element()->cinfo()->isA( "Neuron" ) ) {
+					model = doCreate( "Neuron", parentId, modelName, 1 );
+				}
 				rs.build( model, 0.5e-3, 1.0, 1.0, 0.01 );
 				return model;
 			}

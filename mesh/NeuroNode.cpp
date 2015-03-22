@@ -129,16 +129,30 @@ double NeuroNode::calculateLength( const CylBase& parent )
 	return ret;
 }
 
+/*
+ * This was put in to help debugging. Deprecated.
+static void bruteForceFind( const vector< NeuroNode >& nodes, Id id )
+{
+	for ( unsigned int i = 0; i < nodes.size(); ++i ) {
+		if ( nodes[i].elecCompt() == id ) {
+			cout << "bruteForceFind: nodes[" << i << "] has " << 
+					id.path() << endl;
+		}
+	}
+}
+*/
+
 /**
  * Finds all the compartments connected to current node, put them all into
  * the 'children' vector even if they may be 'parent' by the messaging.
  * This is because this function has to be robust enough to sort this out
  */
 void NeuroNode::findConnectedCompartments( 
-				const map< Id, unsigned int >& nodeMap)
+				const map< Id, unsigned int >& nodeMap,
+				const vector< NeuroNode >& nodes )
 {
-	static const Finfo* axialOut = Cinfo::find( "Compartment" )->findFinfo( "axialOut" );
-	static const Finfo* raxialOut = Cinfo::find( "Compartment" )->findFinfo( "raxialOut" );
+	static const Finfo* axialOut = Cinfo::find( "CompartmentBase" )->findFinfo( "axialOut" );
+	static const Finfo* raxialOut = Cinfo::find( "CompartmentBase" )->findFinfo( "raxialOut" );
 	static const Finfo* distalOut = Cinfo::find( "SymCompartment" )->findFinfo( "distalOut" );
 	static const Finfo* proximalOut = Cinfo::find( "SymCompartment" )->findFinfo( "proximalOut" );
 	static const Finfo* cylinderOut = Cinfo::find( "SymCompartment" )->findFinfo( "cylinderOut" );
@@ -162,14 +176,15 @@ void NeuroNode::findConnectedCompartments(
 		all.insert( all.end(), ret.begin(), ret.end() );
 		elecCompt_.element()->getNeighbors( ret, sumRaxialOut );
 		all.insert( all.end(), ret.begin(), ret.end() );
-	} else {
-		assert( cinfo->isA( "CompartmentBase" ) );
-		vector< Id > ret;
-		elecCompt_.element()->getNeighbors( ret, axialOut );
-		all.insert( all.end(), ret.begin(), ret.end() );
-		elecCompt_.element()->getNeighbors( ret, raxialOut );
-		all.insert( all.end(), ret.begin(), ret.end() );
 	}
+	// In addition, check if the bog standard messaging applies.
+	assert( cinfo->isA( "CompartmentBase" ) );
+	vector< Id > ret;
+	elecCompt_.element()->getNeighbors( ret, axialOut );
+	all.insert( all.end(), ret.begin(), ret.end() );
+	elecCompt_.element()->getNeighbors( ret, raxialOut );
+	all.insert( all.end(), ret.begin(), ret.end() );
+
 	sort( all.begin(), all.end() );
 	all.erase( unique( all.begin(), all.end() ), all.end() ); //@#$%&* C++
 	// Now we have a list of all compartments connected to the current one.
@@ -179,8 +194,12 @@ void NeuroNode::findConnectedCompartments(
 	// subset of compts in entire model. So we only want to explore those.
 	for ( unsigned int i = 0; i < all.size(); ++i ) {
 		map< Id, unsigned int >::const_iterator k = nodeMap.find( all[i] );
-		if ( k != nodeMap.end() )
+		if ( k != nodeMap.end() ) {
 			children_[i] = k->second;
+		} else {
+			cout << "Warning: NeuroNode::findConnectedCompartments: could not find compartment " << all[i].path() << endl;
+			// bruteForceFind( nodes, all[i] );
+		}
 	}
 }
 
@@ -260,6 +279,30 @@ unsigned int NeuroNode::findStartNode( const vector< NeuroNode >& nodes )
 	return somaIndex;
 }
 
+/** 
+ * static func
+ */
+void diagnoseTree( const vector< NeuroNode >& tree, 
+			   const vector< NeuroNode >& nodes )
+{
+	map< Id , const NeuroNode* > m;
+	for ( vector< NeuroNode >::const_iterator
+					i = tree.begin(); i != tree.end(); ++i ) {
+		m[ i->elecCompt() ] = &( *i );
+	}
+	unsigned int j = 0;
+	for ( vector< NeuroNode >::const_iterator
+					i = nodes.begin(); i != nodes.end(); ++i ) {
+		if ( m.find( i->elecCompt() ) == m.end() ) {
+			Id pa;
+			if ( i->parent() != ~0U && i->parent() < nodes.size() )
+				pa = nodes[ i->parent() ].elecCompt();
+			cout << j++ << "	" << i->elecCompt().path() << 
+					",	pa = " << i->parent() << ",	" << pa.path() << endl;
+		}
+	}
+}
+
 /**
  * Traverses the nodes list starting from the 'start' node, and sets up
  * correct parent-child information. This involves removing the 
@@ -284,7 +327,10 @@ void NeuroNode::traverse( vector< NeuroNode >& nodes, unsigned int start )
 	nodes[start].innerTraverse( tree, nodes, seen );
 
 	if ( tree.size() < nodes.size() ) {
-		cout << "Warning: NeuroNode::traverse() unable to traverse all nodes:" << tree.size() << " < numNodes = " << nodes.size() << endl;
+		cout << "Warning: NeuroNode::traverse() unable to traverse all nodes:\n";
+	   cout << "Traversed= " << tree.size() << " < total numNodes = " << nodes.size() << endl;
+	   cout << "This situation may arise if the CellPortion has disjoint compartments\n";
+		diagnoseTree( tree, nodes );
 	}
 	nodes = tree;
 }
@@ -336,11 +382,22 @@ void NeuroNode::buildTree(
 	}
 	if ( nodes.size() <= 1 )
 		return;
-	for ( unsigned int i = 0; i < nodes.size(); ++i )
+	for ( unsigned int i = 0; i < nodes.size(); ++i ) {
+		if ( nodeMap.find( nodes[i].elecCompt() ) != nodeMap.end() ) {
+			cout << "Warning: NeuroNode.buildTree(): Node[" << i <<
+				"] refers to existing compartment: " <<
+				nodes[i].elecCompt().path() << endl;
+		}
 		nodeMap[ nodes[i].elecCompt() ] = i;
+	}
+	assert( nodeMap.size() == nodes.size() );
 	for ( unsigned int i = 0; i < nodes.size(); ++i )
-		nodes[i].findConnectedCompartments( nodeMap );
-	removeDisconnectedNodes( nodes );
+		nodes[i].findConnectedCompartments( nodeMap, nodes );
+	unsigned int numRemoved = removeDisconnectedNodes( nodes );
+	if ( numRemoved > 0 ) {
+		cout << "Warning: NeuroNode::buildTree: Removed " <<
+				numRemoved << " nodes because they were not connected\n";
+	}
 	unsigned int start = findStartNode( nodes );
 	traverse( nodes, start );
 }
