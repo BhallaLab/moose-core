@@ -32,6 +32,7 @@ class ReadCell
 			const string& cellname,
 			Id parent );
 	
+		static void addChannelMessage( Id chan );
 	private:
 		bool innerRead( ifstream& fin );
 		bool readData( const string& line );
@@ -95,7 +96,6 @@ class ReadCell
 			vector< string >::iterator args );
 */
 		
-		void addChannelMessage( Id chan );
 		void countProtos();
 		
 		// For error messages

@@ -18,13 +18,47 @@
 class Neuron
 {
 	public:
-		void updateChanDistrib( const Eref& e,
-			string name, double max, string path, string func );
-			/**
-			 * Initializes the class info.
-			 */
-			static const Cinfo* initCinfo();
+		Neuron();
+		void setRM( double v );
+		double getRM() const;
+		void setRA( double v );
+		double getRA() const;
+		void setCM( double v );
+		double getCM() const;
+		void setEm( double v );
+		double getEm() const;
+		void setTheta( double v );
+		double getTheta() const;
+		void setPhi( double v );
+		double getPhi() const;
+		void setSourceFile( string v );
+		string getSourceFile() const;
+		void setCompartmentLengthInLambdas( double v );
+		double getCompartmentLengthInLambdas() const;
+		unsigned int getNumCompartments() const;
+		unsigned int getNumBranches() const;
+		void setChannelDistribution( vector< string > v );
+		vector< string > getChannelDistribution() const;
 
+		void assignChanDistrib( const Eref& e,
+			string name, string path, string func );
+		void clearChanDistrib( const Eref& e,
+			string name, string path );
+		void parseChanDistrib( const Eref& e );
+		/**
+		 * Initializes the class info.
+		 */
+		static const Cinfo* initCinfo();
+	private:
+		double RM_;
+		double RA_;
+		double CM_;
+		double Em_;
+		double theta_;
+		double phi_;
+		string sourceFile_;
+		double compartmentLengthInLambdas_;
+		vector< string > channelDistribution_;
 };
 
 // 

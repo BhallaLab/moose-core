@@ -131,9 +131,14 @@ Id ReadCell::read(
 	*/
 	
 	unsigned int size =  1;
-        
-	cell_ = shell_->doCreate( "Neuron", parent, cellName, size, MooseGlobal );
-	currCell_ = cell_;
+	if ( parent.element()->cinfo()->isA( "Neuron" ) ) {
+		cell_ = parent;
+		currCell_ = cell_;
+	} else {
+		cell_ = shell_->doCreate( "Neuron", parent, 
+						cellName, size, MooseGlobal );
+		currCell_ = cell_;
+	}
 	
 	if ( innerRead( fin ) ) {
 		return cell_;
