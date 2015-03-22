@@ -326,11 +326,12 @@ static Id makeCompt( Id parent,
 					compt.eref().data() );
 	double xa = seg.radius() * seg.radius() * PI * 1e-12;
 	len *= 1e-6;
-	cptr->setRm( er, RM / ( len * seg.radius() * PI ) );
+	double dia = seg.radius() * 2.0e-6;
+	cptr->setRm( er, RM / ( len * dia * PI ) );
 	cptr->setRa( er, RA * len / xa );
-	cptr->setCm( er, CM * ( len * seg.radius() * PI ) );
-	cptr->setDiameter( seg.radius() * 2.0e-6 );
-	cptr->setLength( len * 1e-6 );
+	cptr->setCm( er, CM * ( len * dia * PI ) );
+	cptr->setDiameter( dia );
+	cptr->setLength( len );
 	cptr->setX0( x0 * 1e-6 );
 	cptr->setY0( y0 * 1e-6 );
 	cptr->setZ0( z0 * 1e-6 );

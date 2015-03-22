@@ -96,7 +96,8 @@ class NeuroNode: public CylBase
 		 * enough to sort this out
  		 */
 		void findConnectedCompartments( 
-							const map< Id, unsigned int >& nodeMap);
+							const map< Id, unsigned int >& nodeMap,
+							const vector< NeuroNode >& nodes );
 
 		/**
  		 * Go through nodes vector and eliminate entries that have zero
@@ -184,6 +185,7 @@ class NeuroNode: public CylBase
 		 * refers instead to a dummy NeuroNode which has the coordinates.
 		 *
 		 * One of the nodes, typically the soma, will have no parent.
+		 * This is indicated by the value ~0U.
 		 */
 		unsigned int parent_; 
 

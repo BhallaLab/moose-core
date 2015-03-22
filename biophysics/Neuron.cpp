@@ -11,32 +11,217 @@
 #include "Neuron.h"
 #include "../shell/Shell.h"
 #include "../shell/Wildcard.h"
+#include "ReadCell.h"
+#include "../utility/Vec.h"
+#include "ReadSwc.h"
 
 #include "../external/muparser/muParser.h"
 
-static const double MinGbar = 0.01; // Physiol units per unit area. 
-
-/**
- * The initCinfo() function sets up the Compartment class.
- * This function uses the common trick of having an internal
- * static value which is created the first time the function is called.
- * There are several static arrays set up here. The ones which
- * use SharedFinfos are for shared messages where multiple kinds
- * of information go along the same connection.
- */
 const Cinfo* Neuron::initCinfo()
 {
-	static DestFinfo updateChanDistrib( "updateChanDistrib",
-	"Handles requests to update the channel distribution. Args are "
-	"chanName, Gbar, pathOnCell, function( geomPos, elecPos )"
-	" Note that the pathOnCell is relative to the parent Neuron ",
-	new EpFunc4< Neuron, string, double, string, string >(
-			&Neuron::updateChanDistrib )
+	/////////////////////////////////////////////////////////////////////
+	// ValueFinfos
+	/////////////////////////////////////////////////////////////////////
+	static ValueFinfo< Neuron, double > RM( "RM",
+		"Membrane resistivity, in ohm.m^2. Default value is 1.0.",
+		&Neuron::setRM,
+		&Neuron::getRM
 	);
+	static ValueFinfo< Neuron, double > RA( "RA",
+		"Axial resistivity of cytoplasm, in ohm.m. Default value is 1.0.",
+		&Neuron::setRA,
+		&Neuron::getRA
+	);
+	static ValueFinfo< Neuron, double > CM( "CM",
+		"Membrane Capacitance, in F/m^2. Default value is 0.01",
+		&Neuron::setCM,
+		&Neuron::getCM
+	);
+	static ValueFinfo< Neuron, double > Em( "Em",
+		"Resting membrane potential of compartments, in Volts. "
+		"Default value is -0.065.",
+		&Neuron::setEm,
+		&Neuron::getEm
+	);
+	static ValueFinfo< Neuron, double > theta( "theta",
+		"Angle to rotate cell geometry, around long axis of neuron. "
+		"Think Longitude. Units are radians. "
+		"Default value is zero, which means no rotation. ",
+		&Neuron::setTheta,
+		&Neuron::getTheta
+	);
+	static ValueFinfo< Neuron, double > phi( "phi",
+		"Angle to rotate cell geometry, around elevation of neuron. "
+		"Think Latitude. Units are radians. "
+		"Default value is zero, which means no rotation. ",
+		&Neuron::setPhi,
+		&Neuron::getPhi
+	);
+
+	static ValueFinfo< Neuron, string > sourceFile( "sourceFile",
+		"Name of source file from which to load a model. "
+		"Accepts swc and dotp formats at present. "
+		"Both these formats require that the appropriate channel "
+		"definitions should have been loaded into /library. ",
+		&Neuron::setSourceFile,
+		&Neuron::getSourceFile
+	);
+
+	static ValueFinfo< Neuron, double > compartmentLengthInLambdas( 
+		"compartmentLengthInLambdas",
+		"Electrotonic length to use for the largest compartment in the "
+		"model. Used to define subdivision of branches into compartments. "
+		"For example, if we set *compartmentLengthInLambdas*  to 0.1, "
+		"and *lambda* (electrotonic length) is 250 microns, then it "
+		"sets the compartment length to 25 microns. Thus a dendritic "
+		"branch of 500 microns is subdivided into 20 commpartments. "
+		"If the branch is shorter than *compartmentLengthInLambdas*, "
+		"then it is not subdivided. "
+		"If *compartmentLengthInLambdas* is set to 0 then the original "
+		"compartmental structure of the model is preserved. "
+		" Note that this routine does NOT merge branches, even if "
+		"*compartmentLengthInLambdas* is bigger than the branch. "
+		"While all this subdivision is being done, the Neuron class "
+		"preserves as detailed a geometry as it can, so it can rebuild "
+		"the more detailed version if needed. "
+		"Default value of *compartmentLengthInLambdas* is 0. ",
+		&Neuron::setCompartmentLengthInLambdas,
+		&Neuron::getCompartmentLengthInLambdas
+	);
+
+	static ValueFinfo< Neuron, vector< string > > channelDistribution( 
+		"channelDistribution",
+		"Specification for channel distribution on this neuron. "
+		"Each entry in the specification is a triplet of strings: \n"
+		"	(name, path, function) \n"
+		" which are collated into a 3N vector of strings to specify N "
+		" channel distributions. The string arguments for each spec are: \n"
+		"chanName, pathOnCell, function( r, L, len, dia ) \n"
+		"The function uses arguments:\n"
+		"	r: geometrical distance from soma, measured along dendrite, in metres.\n"
+		"	L: electrotonic distance (# of lambdas) from soma, along dend. No unts.\n"
+		"	len: length of compartment, in metres.\n"
+		"	dia: for diameter of compartment, in metres.\n"
+		"For Channels, the function does Gbar = func( r, L, len, dia).\n"
+		"For CaConc, the function does B = func( r, L, len, dia).\n"
+		"In both cases, if func() < 0 then the chan/CaConc is NOT created. "
+		"\n\n"
+		"For Rm, Ra, Cm, the function does func( r, L, len, dia ), " 
+		"and if func() < 0.0 then the value takes the default value based "
+		"on scaling of RM, RA, or CM by the geometry of the compartment "
+		"\n\n"
+		"Some example function forms might be: \n"
+		" r < 10e-6 ? 400 * len * dia * pi : 0.0 \n"
+		" ->Set channel Gbar to 400 S/m^2 only within 10 microns of soma\n"
+		"\n"
+		" L < 1.0 ? 100 * exp( -L ) * len * dia * pi : 0.0 \n"
+		" ->Set channel Gbar to an exponentially falling function of "
+		"electrotonic distance from soma, provided L is under 1.0 lambdas. "
+		"\n"
+		"The channelDistribution is parsed when the cell sourceFile is "
+		"loaded. The parsing of this table is equivalent to repeated calls "
+		"to *Neuron::assignChanDistrib()*, working through the entries in "
+		"the *channelDistribution* vector. ",
+		&Neuron::setChannelDistribution,
+		&Neuron::getChannelDistribution
+	);
+	
+	static ReadOnlyValueFinfo< Neuron, unsigned int > numCompartments( 
+		"numCompartments",
+		"Number of electrical compartments in model. ",
+		&Neuron::getNumCompartments
+	);
+
+	static ReadOnlyValueFinfo< Neuron, unsigned int > numBranches( 
+		"numBranches",
+		"Number of branches in dendrites. ",
+		&Neuron::getNumBranches
+	);
+
+	/////////////////////////////////////////////////////////////////////
+	// DestFinfos
+	/////////////////////////////////////////////////////////////////////
+	static DestFinfo assignChanDistrib( "assignChanDistrib",
+		"Handles requests to assign the channel distribution. Args are "
+		"chanName, pathOnCell, function( r, L, len, dia ) "
+		"The function uses arguments:\n"
+		"	r: geometrical distance from soma, measured along dendrite, in metres.\n"
+		"	L: electrotonic distance (# of lambdas) from soma, along dend. No unts.\n"
+		"	len: length of compartment, in metres.\n"
+		"	dia: for diameter of compartment, in metres.\n"
+		"For Channels, the function does Gbar = func( r, L, len, dia).\n"
+		"For CaConc, the function does B = func( r, L, len, dia).\n"
+		"In both cases, if func() < 0 then the chan/CaConc is NOT created. "
+		"\n\n"
+		"For Rm, Ra, Cm, the function does func( r, L, len, dia ), " 
+		"and if func() < 0.0 then the value takes the default value based "
+		"on scaling of RM, RA, or CM by the geometry of the compartment "
+		"\n\n"
+		"Some example function forms might be: \n"
+		" r < 10e-6 ? 400 * len * dia * pi : 0.0 \n"
+		" ->Set channel Gbar to 400 S/m^2 only within 10 microns of soma\n"
+		"\n"
+		" L < 1.0 ? 100 * exp( -e ) * len * dia * pi : 0.0 \n"
+		" ->Set channel Gbar to an exponentially falling function of "
+		"electrotonic distance from soma, provided L is under 1.0 lambdas. "
+		"\n"
+		"A dirty hack to get rid of a channel is to set the function to "
+		" 0. But you should preferably use clearChanDistrib instead.\n"
+		"\n\n Note that the pathOnCell is relative to the parent Neuron ",
+		new EpFunc3< Neuron, string, string, string >(
+			&Neuron::assignChanDistrib )
+	);
+	static DestFinfo clearChanDistrib( "clearChanDistrib",
+		"Clears out a previously assigned channel distribution. "
+		"Args are chanName, pathOnCell "
+		"\n\n Note that the pathOnCell is relative to the parent Neuron ",
+		new EpFunc2< Neuron, string, string >(
+			&Neuron::clearChanDistrib )
+	);
+	static DestFinfo parseChanDistrib( "parseChanDistrib",
+		"Parses a previously assigned vector of channel distributions. "
+		"These are located in the field *channelDistribution*. "
+		"When this function is called it builds the specified channels on "
+		"the cell model loaded over self.",
+		new EpFunc0< Neuron >(
+			&Neuron::parseChanDistrib )
+	);
+
+	/*
+	static DestFinfo decorateWithSpines( "decorateWithSpines",
+					proto
+					pathOnExistingCompts
+					spacing, spacingDistrib
+					sizeDistrib
+					angle, angleDistrib
+					rotation, rotationDistrib
+					*/
+	/*
+	static DestFinfo rotateInSpace( "rotateInSpace",
+		theta, phi
+	static DestFinfo transformInSpace( "transformInSpace",
+		transfMatrix(4x4)
+	static DestFinfo saveAsNeuroML( "saveAsNeuroML", fname )
+	static DestFinfo saveAsDotP( "saveAsDotP", fname )
+	static DestFinfo saveAsSwc( "saveAsSwc", fname )
+	*/
 	
 	static Finfo* neuronFinfos[] = 
 	{ 	
-		&updateChanDistrib,			// DestFinfo
+		&RM,						// ValueFinfo
+		&RA,						// ValueFinfo
+		&CM,						// ValueFinfo
+		&Em,						// ValueFinfo
+		&theta,						// ValueFinfo
+		&phi,						// ValueFinfo
+		&sourceFile,				// ValueFinfo
+		&compartmentLengthInLambdas,	// ValueFinfo
+		&numCompartments,			// ReadOnlyValueFinfo
+		&numBranches,				// ReadOnlyValueFinfo
+		&channelDistribution,		// ValueFinfo
+		&assignChanDistrib,			// DestFinfo
+		&clearChanDistrib,			// DestFinfo
+		&parseChanDistrib,			// DestFinfo
 	};
 	static string doc[] =
 	{
@@ -61,6 +246,140 @@ const Cinfo* Neuron::initCinfo()
 static const Cinfo* neuronCinfo = Neuron::initCinfo();
 
 ////////////////////////////////////////////////////////////////////////
+Neuron::Neuron()
+	: 
+			RM_( 1.0 ),
+			RA_( 1.0 ),
+			CM_( 0.01 ),
+			Em_( -0.065 ),
+			theta_( 0.0 ),
+			phi_( 0.0 ),
+			sourceFile_( "" ),
+			compartmentLengthInLambdas_( 0.2 )
+{;}
+////////////////////////////////////////////////////////////////////////
+// ValueFinfos
+////////////////////////////////////////////////////////////////////////
+
+void Neuron::setRM( double v )
+{
+	if ( v > 0.0 )
+		RM_ = v;
+	else
+		cout << "Warning:: Neuron::setRM: value must be +ve, is " << v << endl;
+}
+double Neuron::getRM() const
+{
+	return RM_;
+}
+
+void Neuron::setRA( double v )
+{
+	if ( v > 0.0 )
+		RA_ = v;
+	else
+		cout << "Warning:: Neuron::setRA: value must be +ve, is " << v << endl;
+}
+double Neuron::getRA() const
+{
+	return RA_;
+}
+
+void Neuron::setCM( double v )
+{
+	if ( v > 0.0 )
+		CM_ = v;
+	else
+		cout << "Warning:: Neuron::setCM: value must be +ve, is " << v << endl;
+}
+double Neuron::getCM() const
+{
+	return CM_;
+}
+
+
+void Neuron::setEm( double v )
+{
+	Em_ = v;
+}
+double Neuron::getEm() const
+{
+	return Em_;
+}
+
+
+void Neuron::setTheta( double v )
+{
+	theta_ = v;
+	// Do stuff here for rotating it.
+}
+double Neuron::getTheta() const
+{
+	return theta_;
+}
+
+
+void Neuron::setPhi( double v )
+{
+	phi_ = v;
+	// Do stuff here for rotating it.
+}
+double Neuron::getPhi() const
+{
+	return phi_;
+}
+
+
+void Neuron::setSourceFile( string v )
+{
+	sourceFile_ = v;
+	// Stuff here for loading it.
+}
+
+string Neuron::getSourceFile() const
+{
+	return sourceFile_;
+}
+
+
+void Neuron::setCompartmentLengthInLambdas( double v )
+{
+	compartmentLengthInLambdas_ = v;
+}
+double Neuron::getCompartmentLengthInLambdas() const
+{
+	return compartmentLengthInLambdas_;
+}
+
+unsigned int Neuron::getNumCompartments() const
+{
+	return 0;
+}
+
+unsigned int Neuron::getNumBranches() const
+{
+	return 0;
+}
+
+void Neuron::setChannelDistribution( vector< string > v )
+{
+	if ( v.size() % 3 != 0 ) {
+		cout << "Warning: Neuron::setChannelDistribution: vec must "
+				"have 3N entries. \n" << v.size() << " entries found."
+				"Value unchanged\n";
+		return;
+	}
+	channelDistribution_ = v;
+}
+
+vector< string > Neuron::getChannelDistribution() const
+{
+	return channelDistribution_;
+}
+
+
+////////////////////////////////////////////////////////////////////////
+// Stuff here for assignChanDistrib
 
 static void buildChildDistanceMap( 
 		const Eref& e, map< ObjId, pair< double, double > >& m )
@@ -104,13 +423,81 @@ static Id acquireChannel( Shell* shell, const string& name, ObjId compt )
 		}
 		chan = shell->doCopy( proto, compt, name, 1, false, false );
 		// May need to do additional msgs depending on the chan type.
-		shell->doAddMsg( "Single", compt, "channel", chan, "channel" );
+		if ( chan.element()->cinfo()->isA( "ChanBase" ) ) {
+			shell->doAddMsg( "Single", compt, "channel", chan, "channel" );
+		}
+		ReadCell::addChannelMessage( chan );
 	}
 	return chan;
 }
 
-void Neuron::updateChanDistrib( const Eref& e, 
-				string name, double max, string path, string func )
+static void assignParam( Shell* shell, ObjId compt
+				, double val, const string& name )
+{
+	// Only permit chans with val greater than zero.
+	if ( val > 0.0 ) {
+		if ( name == "Rm" ) {
+			Field< double >::set( compt, "Rm", val );
+		} else if ( name == "Ra" ) {
+			Field< double >::set( compt, "Ra", val );
+		} else if ( name == "Cm" ) {
+			Field< double >::set( compt, "Cm", val );
+		} else {
+			Id chan = acquireChannel( shell, name, compt );
+			if ( chan.element()->cinfo()->isA( "ChanBase" ) ) {
+				Field< double >::set( chan, "Gbar", val );
+			} else if ( chan.element()->cinfo()->isA( "CaConcBase" ) ) {
+				Field< double >::set( chan, "B", val );
+			}
+		}
+	}
+}
+
+static void evalChanParams( 
+	const string& name, const string& func,
+	vector< ObjId >& elist,
+   	const map< ObjId, pair< double, double > >& m )
+{
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	// Build the function
+	double r = 0; // geometrical distance arg
+	double L = 0; // electrical distance arg
+	double len = 0; // Length of compt in metres
+	double dia = 0; // Diameter of compt in metres
+	try {
+		mu::Parser parser;
+		parser.DefineVar( "r", &r );
+		parser.DefineVar( "L", &L );
+		parser.DefineVar( "len", &len );
+		parser.DefineVar( "dia", &dia );
+		parser.SetExpr( func );
+
+		// Go through the elist checking for the channels. If not there,
+		// build them. 
+		for ( vector< ObjId >::iterator 
+						i = elist.begin(); i != elist.end(); ++i) {
+			if ( i->element()->cinfo()->isA( "CompartmentBase" ) ) {
+				dia = Field< double >::get( *i, "diameter" );
+				len = Field< double >::get( *i, "length" );
+   				map< ObjId, pair< double, double > >::const_iterator j =
+						m.find( *i );
+				assert ( j != m.end() );
+				r = j->second.first;
+				L = j->second.second;
+
+				double val = parser.Eval();
+				assignParam( shell, *i, val, name );
+			}
+		}
+	}
+	catch ( mu::Parser::exception_type& err )
+	{
+		cout << err.GetMsg() << endl;
+	}
+}
+
+void Neuron::assignChanDistrib( const Eref& e, 
+				string name, string path, string func )
 {
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	// Go through all child compts recursively, figures out geom and
@@ -126,43 +513,21 @@ void Neuron::updateChanDistrib( const Eref& e,
 	shell->setCwe( oldCwe );
 	if ( elist.size() == 0 )
 		return;
+	evalChanParams( name, func, elist, m );
+}
 
-	// Build the function
-	double x = 0; // geometrical distance arg
-	double y = 0; // electrical distance arg
-	try {
-		mu::Parser parser;
-		parser.DefineVar( "g", &x );
-		parser.DefineVar( "e", &y );
-		parser.SetExpr( func );
+void Neuron::clearChanDistrib( const Eref& e, string name, string path )
+{
+	assignChanDistrib( e, name, path, "0" );
+}
 
-		// Go through the elist checking for the channels. If not there,
-		// build them. 
-		for ( vector< ObjId >::iterator 
-						i = elist.begin(); i != elist.end(); ++i) {
-			if ( i->element()->cinfo()->isA( "CompartmentBase" ) ) {
-				double dia = Field< double >::get( *i, "diameter" );
-				double len = Field< double >::get( *i, "length" );
-				double area = len * dia * dia * PI / 4.0;
-
-				const pair< double, double >& dist = m[*i];
-	
-				x = dist.first;
-				y = dist.second;
-				double gbar = parser.Eval();
-				// Only permit chans with cond greater than MinGbar
-				if ( gbar > MinGbar ) {
-					gbar *= area;
-
-					Id chan = acquireChannel( shell, name, *i );
-					Field< double >::set( chan, "Gbar", gbar );
-				}
-			}
-		}
-	}
-	catch ( mu::Parser::exception_type& err )
-	{
-		cout << err.GetMsg() << endl;
+void Neuron::parseChanDistrib( const Eref& e )
+{
+	for ( unsigned int i = 0; 3 * i < channelDistribution_.size(); ++i ) {
+		assignChanDistrib( e, 
+						channelDistribution_[i * 3],
+						channelDistribution_[i * 3 + 1],
+						channelDistribution_[i * 3 + 2] );
 	}
 }
 
