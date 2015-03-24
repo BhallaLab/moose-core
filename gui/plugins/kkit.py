@@ -1,10 +1,5 @@
 import sys
-#import math
-#import re
 from PyQt4 import QtGui, QtCore, Qt
-#import pygraphviz as pgv
-#sys.path.insert(0, '~/async/gui')
-#import numpy as np
 from default import *
 from moose import *
 #sys.path.append('plugins')
@@ -22,7 +17,7 @@ from PyQt4.QtGui import QColor
 import RunWidget
 from os.path import expanduser
 from setsolver import *
-#from DataTable import DataTable
+
 class KkitPlugin(MoosePlugin):
     """Default plugin for MOOSE GUI"""
     def __init__(self, *args):
@@ -611,7 +606,7 @@ class  KineticsWidget(EditorWidgetBase):
         endtype = srcdes_list[2]
         line = srcdes_list[3]
         source = element(next((k for k,v in self.mooseId_GObj.items() if v == src), None))
-        for l,v,o in self.object2line[src]:
+        for l,v,et,o in self.object2line[src]:
             if v == des and o ==line:
                 l.setPolygon(arrow)
                 arrowPen = l.pen()
@@ -639,10 +634,10 @@ class  KineticsWidget(EditorWidgetBase):
         elif isinstance(source,moose.StimulusTable):
             pen.setColor(QtCore.Qt.yellow)
         self.lineItem_dict[qgLineitem] = srcdes_list
-        self.object2line[ src ].append( ( qgLineitem, des,line,) )
-        self.object2line[ des ].append( ( qgLineitem, src,line, ) )
+        self.object2line[ src ].append( ( qgLineitem, des,endtype,line) )
+        self.object2line[ des ].append( ( qgLineitem, src,endtype,line ) )
         qgLineitem.setPen(pen)
-
+       
     def positionChange(self,mooseObject):
         #If the item position changes, the corresponding arrow's are calculated
         if isinstance(element(mooseObject),ChemCompt):
@@ -697,7 +692,7 @@ class  KineticsWidget(EditorWidgetBase):
         if qGTextitem not in self.object2line:
             return
         listItem = self.object2line[qGTextitem]
-        for ql, va,order in self.object2line[qGTextitem]:
+        for ql, va,endtype,order in self.object2line[qGTextitem]:
             srcdes = []
             srcdes = self.lineItem_dict[ql]
             # Checking if src (srcdes[0]) or des (srcdes[1]) is ZombieEnz,
