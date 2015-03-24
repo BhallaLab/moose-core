@@ -8,7 +8,6 @@ from setsolver import *
 from PyQt4 import QtSvg
 from moose import utils
 
-
 class GraphicalView(QtGui.QGraphicsView):
 
     def __init__(self, modelRoot,parent,border,layoutPt,createdItem):
@@ -48,7 +47,7 @@ class GraphicalView(QtGui.QGraphicsView):
         self.arrowsize = 2
         self.defaultComptsize = 5
         self.connectorlist = {"plot": None ,"clone": None,"move": None,"delete": None}
-
+        
     def setRefWidget(self,path):
         self.viewBaseType = path
     
@@ -771,7 +770,6 @@ class GraphicalView(QtGui.QGraphicsView):
     def deleteObj(self,item):
         self.rubberbandlist = item
         deleteSolver(self.layoutPt.modelRoot)
-        #print "self.rubberbandlist in deleteObj ",self.rubberbandlist
         for item in (qgraphicsitem for qgraphicsitem in self.rubberbandlist):
             #First Loop to remove all the enz b'cos if parent (which is a Pool) is removed,
             #then it will created problem at qgraphicalitem not having parent.
@@ -790,12 +788,42 @@ class GraphicalView(QtGui.QGraphicsView):
                                 self.layoutPt.plugin.view.getCentralWidget().plotWidgetContainer.plotAllData()
                 self.deleteItem(item)
 
+    def deleteObject2line(self,qpolygonline,src,des,endt):
+        object2lineInfo = self.layoutPt.object2line[des]
+        if len(object2lineInfo) == 1:
+            for polygon,objdes,endtype,numL in object2lineInfo:
+                if polygon == qpolygonline and objdes == src and endtype == endt:
+                    del(self.layoutPt.object2line[des])
+                else:
+                    print " check this condition when is len is single and else condition",qpolygonline, objdes,endtype
+        else:
+            n = 0
+            for polygon,objdes,endtype,numL in object2lineInfo:
+                if polygon == qpolygonline and objdes == src and endtype == endt:
+                    tup = object2lineInfo[:n]+object2lineInfo[n+1:]
+                    self.layoutPt.object2line[des] = tup
+                    #d[keyNo].append((a,b,c))
+                else:
+                    n = n+1
+        
     def deleteConnection(self,item):
         #Delete moose connection, i.e one can click on connection arrow and delete the connection
         deleteSolver(self.layoutPt.modelRoot)
         msgIdforDeleting = " "
         if isinstance(item,QtGui.QGraphicsPolygonItem):
             src = self.layoutPt.lineItem_dict[item]
+            lineItem_value = self.layoutPt.lineItem_dict[item]
+            i = iter(lineItem_value)
+            src  = i.next()
+            des  = i.next()
+            endt = i.next()
+            numl = i.next()
+            self.deleteObject2line(item,src,des,endt)
+            self.deleteObject2line(item,des,src,endt)
+            try:
+                del self.layoutPt.lineItem_dict[item]
+            except KeyError:
+                pass
             srcZero = [k for k, v in self.layoutPt.mooseId_GObj.iteritems() if v == src[0]]
             srcOne = [k for k, v in self.layoutPt.mooseId_GObj.iteritems() if v == src[1]]
             
@@ -898,6 +926,7 @@ class GraphicalView(QtGui.QGraphicsView):
 
     def deleteItem(self,item):
         #delete Items 
+
         self.layoutPt.plugin.mainWindow.objectEditSlot('/', False)
         if isinstance(item,KineticsDisplayItem):
             if moose.exists(item.mobj.path):
