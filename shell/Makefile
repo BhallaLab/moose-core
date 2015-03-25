@@ -30,7 +30,7 @@ Shell.o:	Shell.h Neutral.h ../scheduling/Clock.h ../sbml/SbmlWriter.h ../sbml/Sb
 ShellCopy.o:	Shell.h Neutral.h ../scheduling/Clock.h
 ShellSetGet.o:	Shell.h
 ShellThreads.o:	Shell.h Neutral.h ../scheduling/Clock.h
-LoadModels.o:	Shell.h Neutral.h 
+LoadModels.o:	Shell.h Neutral.h ../biophysics/SwcSegment.h ../biophysics/ReadSwc.h
 SaveModels.o:	Shell.h Neutral.h
 Neutral.o:	Neutral.h ../basecode/ElementValueFinfo.h
 Wildcard.o:	Wildcard.h Shell.h Neutral.h ../basecode/ElementValueFinfo.h
