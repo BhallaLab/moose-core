@@ -37,9 +37,12 @@ class Neuron
 		double getCompartmentLengthInLambdas() const;
 		unsigned int getNumCompartments() const;
 		unsigned int getNumBranches() const;
+		vector< double> getGeomDistFromSoma() const;
+		vector< double> getElecDistFromSoma() const;
 		void setChannelDistribution( vector< string > v );
 		vector< string > getChannelDistribution() const;
 
+		void buildSegmentTree( const Eref& e );
 		void assignChanDistrib( const Eref& e,
 			string name, string path, string func );
 		void clearChanDistrib( const Eref& e,
@@ -59,6 +62,10 @@ class Neuron
 		string sourceFile_;
 		double compartmentLengthInLambdas_;
 		vector< string > channelDistribution_;
+		vector< Id > segId_; /// Id of each Seg entry, below.
+		vector< SwcSegment > segs_;
+		vector< SwcBranch > branches_;
+
 };
 
 // 
