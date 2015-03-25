@@ -814,12 +814,12 @@ class GraphicalView(QtGui.QGraphicsView):
             src = self.layoutPt.lineItem_dict[item]
             lineItem_value = self.layoutPt.lineItem_dict[item]
             i = iter(lineItem_value)
-            src  = i.next()
-            des  = i.next()
+            source  = i.next()
+            destination  = i.next()
             endt = i.next()
             numl = i.next()
-            self.deleteObject2line(item,src,des,endt)
-            self.deleteObject2line(item,des,src,endt)
+            self.deleteObject2line(item,source,destination,endt)
+            self.deleteObject2line(item,destination,source,endt)
             try:
                 del self.layoutPt.lineItem_dict[item]
             except KeyError:
