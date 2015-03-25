@@ -8,12 +8,12 @@
 **********************************************************************/
 
 #include "header.h"
-#include "Neuron.h"
 #include "../shell/Shell.h"
 #include "../shell/Wildcard.h"
 #include "ReadCell.h"
 #include "../utility/Vec.h"
-#include "ReadSwc.h"
+#include "SwcSegment.h"
+#include "Neuron.h"
 
 #include "../external/muparser/muParser.h"
 
@@ -138,9 +138,32 @@ const Cinfo* Neuron::initCinfo()
 		&Neuron::getNumBranches
 	);
 
+	static ReadOnlyValueFinfo< Neuron, vector< double > > geomDistFromSoma( 
+		"geometricalDistanceFromSoma",
+		"geometrical distance of each segment from soma, as measured along "
+		"the dendrite.",
+		&Neuron::getGeomDistFromSoma
+	);
+
+	static ReadOnlyValueFinfo< Neuron, vector< double > > elecDistFromSoma( 
+		"electrotonicDistanceFromSoma",
+		"geometrical distance of each segment from soma, as measured along "
+		"the dendrite.",
+		&Neuron::getElecDistFromSoma
+	);
+
 	/////////////////////////////////////////////////////////////////////
 	// DestFinfos
 	/////////////////////////////////////////////////////////////////////
+	static DestFinfo buildSegmentTree( "buildSegmentTree",
+		"Build the reference segment tree structure using the child "
+		"compartments of the current Neuron. Fills in all the coords and "
+		"length constant information into the segments, for later use "
+		"when we build reduced compartment trees and channel "
+		"distributions. Should only be called once, since subsequent use "
+	   "on a reduced model will lose the original full cell geometry. ",
+		new EpFunc0< Neuron >( &Neuron::buildSegmentTree )
+	);
 	static DestFinfo assignChanDistrib( "assignChanDistrib",
 		"Handles requests to assign the channel distribution. Args are "
 		"chanName, pathOnCell, function( r, L, len, dia ) "
@@ -218,7 +241,10 @@ const Cinfo* Neuron::initCinfo()
 		&compartmentLengthInLambdas,	// ValueFinfo
 		&numCompartments,			// ReadOnlyValueFinfo
 		&numBranches,				// ReadOnlyValueFinfo
+		&geomDistFromSoma,			// ReadOnlyValueFinfo
+		&elecDistFromSoma,			// ReadOnlyValueFinfo
 		&channelDistribution,		// ValueFinfo
+		&buildSegmentTree,			// DestFinfo
 		&assignChanDistrib,			// DestFinfo
 		&clearChanDistrib,			// DestFinfo
 		&parseChanDistrib,			// DestFinfo
@@ -361,6 +387,22 @@ unsigned int Neuron::getNumBranches() const
 	return 0;
 }
 
+vector< double> Neuron::getGeomDistFromSoma() const
+{
+	vector< double > ret( segs_.size(), 0.0 );
+	for ( unsigned int i = 0; i < segs_.size(); ++i )
+		ret[i] = segs_[i].getGeomDistFromSoma();
+	return ret;
+}
+
+vector< double> Neuron::getElecDistFromSoma() const
+{
+	vector< double > ret( segs_.size(), 0.0 );
+	for ( unsigned int i = 0; i < segs_.size(); ++i )
+		ret[i] = segs_[i].getElecDistFromSoma();
+	return ret;
+}
+
 void Neuron::setChannelDistribution( vector< string > v )
 {
 	if ( v.size() % 3 != 0 ) {
@@ -380,6 +422,128 @@ vector< string > Neuron::getChannelDistribution() const
 
 ////////////////////////////////////////////////////////////////////////
 // Stuff here for assignChanDistrib
+
+static Id getComptParent( Id id )
+{
+	static const Finfo* axialFinfo = 
+			Cinfo::find( "Compartment" )->findFinfo( "raxialOut" );
+	static const Finfo* proximalFinfo = 
+			Cinfo::find( "SymCompartment" )->findFinfo( "proximalOut" );
+
+	if ( id.element()->cinfo()->isA( "CompartmentBase" ) ) {
+		vector< Id > ret;
+		id.element()->getNeighbors( ret, axialFinfo );
+		if ( ret.size() == 1 )
+			return ret[0];
+		// If it didn't find an axial, maybe it is a symCompt
+		if ( id.element()->cinfo()->isA( "SymCompartment" ) ) {
+			id.element()->getNeighbors( ret, proximalFinfo );
+			if ( ret.size() == 1 )
+				return ret[0];
+		}
+	}
+	return Id();
+}
+
+// Returns Id of soma
+Id fillSegIndex( 
+		const vector< Id >& kids, map< Id, unsigned int >& segIndex )
+{
+	Id soma;
+	for ( unsigned int i = 0; i < kids.size(); ++i ) {
+		const Id& k = kids[i];
+		if ( k.element()->cinfo()->isA( "CompartmentBase" ) ) {
+			segIndex[ k ] = i;
+			if ( k.element()->getName() == "soma" ) {
+				soma = k;
+			}
+		}
+	}
+	return soma;
+}
+
+static void fillSegments( vector< SwcSegment >& segs, 
+	const map< Id, unsigned int >& segIndex,
+	const vector< Id >& kids ) 
+{
+	segs.clear();
+	for ( unsigned int i = 0; i < kids.size(); ++i ) {
+		const Id& k = kids[i];
+		if ( k.element()->cinfo()->isA( "CompartmentBase" ) ) {
+			double x = Field< double >::get( k, "x" );
+			double y = Field< double >::get( k, "y" );
+			double z = Field< double >::get( k, "z" );
+			double dia = Field< double >::get( k, "diameter" );
+			Id pa = getComptParent( k );
+			unsigned int paIndex = ~0U; // soma
+			int comptType = 1; // soma
+			if ( pa != Id() ) {
+				map< Id, unsigned int >::const_iterator 
+					j = segIndex.find( pa );
+				if ( j != segIndex.end() ) {
+					paIndex = j->second;
+					comptType = 3; // generic dendrite
+				}
+			}
+			segs.push_back( 
+				SwcSegment( i, comptType, x, y, z, dia/2.0, paIndex ) );
+		}
+	}
+}
+
+/// Recursive function to fill in cumulative distances from soma.
+static void traverseCumulativeDistance( 
+	SwcSegment& self, vector< SwcSegment >& segs,
+   	const vector< Id >& lookupId,  double rSoma, double eSoma )
+{
+	self.setCumulativeDistance( rSoma, eSoma );
+	for ( unsigned int i = 0; i < self.kids().size(); ++i ) {
+		SwcSegment& kid = segs[ self.kids()[i] ];
+		double r = rSoma + kid.length( self );
+		Id kidId = lookupId[ self.kids()[i] ];
+		double Rm = Field< double >::get( kidId, "Rm" );
+		double Ra = Field< double >::get( kidId, "Ra" );
+		// Note that sqrt( Rm/Ra ) = lambda/length = 1/L.
+		double e = eSoma + sqrt( Ra / Rm );
+		traverseCumulativeDistance( kid, segs, lookupId, r, e );
+	}
+}
+
+/// Fills up vector of segments. First entry is soma.
+void Neuron::buildSegmentTree( const Eref& e )
+{
+	vector< Id > kids;
+	Neutral::children( e, kids );
+	map< Id, unsigned int > segIndex;
+
+	Id soma = fillSegIndex( kids, segIndex );
+	fillSegments( segs_, segIndex, kids );
+	int numPa = 0;
+	for ( unsigned int i = 0; i < segs_.size(); ++i ) {
+		if ( segs_[i].parent() == ~0U ) {
+			numPa++;
+		} else {
+			segs_[ segs_[i].parent() ].addChild( i );
+		}
+	}
+	for ( unsigned int i = 0; i < segs_.size(); ++i ) {
+		segs_[i].figureOutType();
+	}
+
+	if ( numPa != 1 ) {
+		cout << "Warning: Neuron.cpp: buildTree: numPa = " << numPa << endl;
+	}
+	segId_.clear();
+	segId_.resize( segIndex.size(), Id() );
+	for ( map< Id, unsigned int >::const_iterator 
+			i = segIndex.begin(); i != segIndex.end(); ++i ) {
+		assert( i->second < segId_.size() );
+		segId_[ i->second ] = i->first;
+	}
+	traverseCumulativeDistance( segs_[0], segs_, segId_, 0, 0 );
+}
+
+/////////////////////////////////////////////////////////////////////
 
 static void buildChildDistanceMap( 
 		const Eref& e, map< ObjId, pair< double, double > >& m )
