@@ -297,7 +297,7 @@ void nonMpiTests( Shell* s )
 		// testKinetics();
                 testKsolve();
 //		testKsolveProcess();
-//		testBiophysics();
+		testBiophysics();
 		testDiffusion();
         testHSolve();
 		// testGeom();
