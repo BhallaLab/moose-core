@@ -15,6 +15,7 @@
 #include "LoadModels.h" // For the ModelType enum.
 
 #include "../biophysics/ReadCell.h"
+#include "../biophysics/SwcSegment.h"
 #include "../biophysics/ReadSwc.h"
 #include "../kinetics/ReadKkit.h"
 #include "../kinetics/ReadCspace.h"
