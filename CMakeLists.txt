@@ -77,7 +77,7 @@ if(VERIFY)
 endif(VERIFY)
 
 # VERBOSITY OF OUTPUT
-option(VERBOSITY "SET MOOSE VERBOSITY LEVEL" 0)
+option(VERBOSITY "SET MOOSE VERBOSITY LEVEL" 1)
 if(VERBOSITY)
     message("++ Verbosity of output is ${VERBOSITY}. This is not implemented
     yet!")

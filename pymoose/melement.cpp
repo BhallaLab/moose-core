@@ -156,7 +156,7 @@ extern "C" {
                                    PyObject * kwargs)
     {
         unsigned int numData = 1;
-        char * path = NULL;
+        char * parsedPath = NULL;
         char * type = NULL;
         char _path[] = "path";
         char _dtype[] = "dtype";
@@ -170,13 +170,13 @@ extern "C" {
         PyTypeObject * mytype = Py_TYPE(self);
         string mytypename(mytype->tp_name);
         
-        // First try to parse the arguments as (path, n, g, dtype)
+        // First try to parse the arguments as (parsedPath, n, g, dtype)
         bool parse_success = false;
         if (PyArg_ParseTupleAndKeywords(args,
                                         kwargs,
                                         "s|IIs:moose_ObjId_init_from_path",
                                         kwlist,
-                                        &path,
+                                        &parsedPath,
                                         &numData,
                                         &isGlobal,
                                         &type)){
@@ -188,6 +188,12 @@ extern "C" {
         if (!parse_success){
             return -2;
         }
+
+        string path(parsedPath);
+        // Remove one or more instances of '/' by a single '/' e.g. //a -> /a,
+        // /a//b -> /a/b etc. 
+        path = fix(path);
+
         ostringstream err;
         // First see if there is an existing object with at path
         instance->oid_ = ObjId(path);
@@ -202,11 +208,12 @@ extern "C" {
         } else {
             basetype_str = string(type);            
         }
+
+
         // If oid_ is bad, it can be either a nonexistent path or the root.
         if (instance->oid_.bad()){
             // is this the root element?
-            string p(path);
-            if ((p == "/") || (p == "/root")){
+            if ((path == "/") || (path == "/root")){
                 if ((basetype == NULL) || PyType_IsSubtype(mytype, basetype)){
                     return 0;
                 }
