@@ -297,16 +297,17 @@ extern "C" {
     {
         string parent_path;
         string name;
-        string trimmed_path = trim(path);
-        size_t pos = trimmed_path.rfind("/");
+
+        size_t pos = path.rfind("/");
         if (pos != string::npos){
-            name = trimmed_path.substr(pos+1);
-            parent_path = trimmed_path.substr(0, pos);
+            name = path.substr(pos+1);
+            parent_path = path.substr(0, pos);
+            //cerr << "Parent path is : " << parent_path << endl;
         } else {
-            name = trimmed_path;
+            name = path;
         }
         // handle relative path
-        if (trimmed_path[0] != '/'){
+        if (path[0] != '/'){
             string current_path = SHELLPTR->getCwe().path();
             if (current_path != "/"){
                 parent_path = current_path + "/" + parent_path;
@@ -332,6 +333,7 @@ extern "C" {
         if (nId == Id() && path != "/" && path != "/root"){
             string message = "no such moose class : " + type;
             PyErr_SetString(PyExc_TypeError, message.c_str());
+
         }
 
 #ifdef ENABLE_LOGGER
@@ -378,19 +380,19 @@ extern "C" {
                                         &type)){
         // Parsing args successful, if any error happens now,
         // different argument processing will not help. Return error
-            string trimmed_path(path);
-            trimmed_path = trim(trimmed_path);
-            size_t length = trimmed_path.length();
+            string path(path);
+            path = trim(path);
+            size_t length = path.length();
             if (length <= 0){
                 PyErr_SetString(PyExc_ValueError,
                                 "moose_Id_init: path must be non-empty string.");
                 return -1;
             }
-            self->id_ = Id(trimmed_path);
+            self->id_ = Id(path);
             // Return already existing object
             if (self->id_ != Id() ||
-                trimmed_path == "/" ||
-                trimmed_path == "/root"){
+                path == "/" ||
+                path == "/root"){
                 if ((numData > 0) && (numData != Field<unsigned int>::get(self->id_, "numData"))){
                     PyErr_WarnEx(NULL, "moose_Id_init_: Length specified does not match that of existing object.", 1);
                 }
