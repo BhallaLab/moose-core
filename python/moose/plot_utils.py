@@ -100,14 +100,14 @@ def reformatTable(table, kwargs):
     """ Given a table return x and y vectors with proper scaling """
     if type(table) == moose.Table:
         vecY = table.vector 
-        vecX = range(len(vecY))
+        vecX = np.arange(len(vecY))
     elif type(table) == tuple:
         vecX, vecY = table
     xscale = kwargs.get('xscale', 1.0)
     yscale = kwargs.get('yscale', 1.0)
     return scaleAxis(vecX, vecY, xscale, yscale)
 
-def plotTable(table, standalone=True, file=None, **kwargs):
+def plotTable(table, **kwargs):
     """Plot a given table. It plots table.vector
 
     This function can scale the x-axis. By default, y-axis and x-axis scaling is
@@ -119,24 +119,27 @@ def plotTable(table, standalone=True, file=None, **kwargs):
     if not type(table) == moose.Table:
         msg = "Expected moose.Table, got {}".format( type(table) )
         raise TypeError(msg)
-    if standalone:
-        plt.figure()
 
     vecX, vecY = reformatTable(table, kwargs)
-    plt.plot(vecX, vecY)
-    if file and standalone:
-        pu.dump("PLOT", "Saving plot to {}".format(file))
-        plt.savefig(file)
-    elif standalone:
-        plt.show()
+    plt.plot(vecX, vecY, label = kwargs.get('label', ""))
+    plt.legend(loc='best', framealpha=0.4)
 
-def plotTables(tables, file=None, **kwargs):
+def plotTables(tables, outfile=None, **kwargs):
     """Plot a list of tables onto one figure only.
     """
-    assert type(tables) == list, "Expected a list of moose.Tables"
-    for t in tables:
-        plotTable(t, standalone = False, file = None, **kwargs)
-    if file:
+    assert type(tables) == dict, "Expected a dict of moose.Table"
+    plt.figure(figsize=(10, 1.5*len(tables)))
+    subplot = kwargs.get('subplot', True)
+    for i, tname in enumerate(tables):
+        if subplot:
+            plt.subplot(len(tables), 1, i)
+        yvec = tables[tname].vector 
+        xvec = np.linspace(0, moose.Clock('/clock').currentTime, len(yvec))
+        plt.plot(xvec, yvec, label=tname)
+        plt.legend(loc='best', framealpha=0.4)
+    
+    plt.tight_layout()
+    if outfile:
         pu.dump("PLOT", "Saving plots to file {}".format(file))
         try:
             plt.savefig(file)
