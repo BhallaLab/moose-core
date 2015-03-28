@@ -18,6 +18,10 @@ void tokenize(
         std::vector< std::string >& tokens );
 /** trims the leading and trailing white spaces */
 std::string trim(const std::string myString, const std::string& delimiters=" \t\r\n");
+
+/** Fix the user-given path whenever possible */
+std::string fix(const std::string myString, const std::string& delimiters=" \t\r\n");
+
 std::string& clean_type_name(std::string& arg);
 bool endswith(const std::string& full, const std::string& ending);
 // TODO: other std::string utilities to add
