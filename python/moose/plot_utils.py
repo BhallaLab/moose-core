@@ -140,9 +140,9 @@ def plotTables(tables, outfile=None, **kwargs):
     
     plt.tight_layout()
     if outfile:
-        pu.dump("PLOT", "Saving plots to file {}".format(file))
+        pu.dump("PLOT", "Saving plots to file {}".format(outfile))
         try:
-            plt.savefig(file)
+            plt.savefig(outfile)
         except Exception as e:
             pu.dump("WARN"
                     , "Failed to save figure, plotting onto a window"
