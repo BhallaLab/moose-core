@@ -434,7 +434,11 @@ double * _functionAddVar(const char *name, void *data)
         int index = atoi(strname.substr(1).c_str());
         if ((unsigned)index >= function->_varbuf.size()){
             function->_varbuf.resize(index+1, 0);
-            function->_varbuf[index] = new Variable();
+            for (unsigned ii = 0; ii <= index; ++ii){
+                if (function->_varbuf[ii] == 0){
+                    function->_varbuf[ii] = new Variable();
+                }
+            }
             function->_numVar = function->_varbuf.size();
         }
         ret = &(function->_varbuf[index]->value);        
@@ -442,7 +446,11 @@ double * _functionAddVar(const char *name, void *data)
         int index = atoi(strname.substr(1).c_str());
         if ((unsigned)index >= function->_pullbuf.size()){
             function->_pullbuf.resize(index+1, 0 );
-            function->_pullbuf[index] = new double();
+            for (unsigned ii = 0; ii <= index; ++ii){
+                if (function->_pullbuf[ii] == 0){
+                    function->_pullbuf[ii] = new double();
+                }
+            }
         }
         ret = function->_pullbuf[index];        
     } else {
@@ -490,6 +498,8 @@ void Function::setExpr(const Eref& eref, string expr)
 {
     _valid = false;
     _clearBuffer();
+    _varbuf.resize(_numVar);
+    // _pullbuf.resize(_num
     mu::varmap_type vars;
     try{
         _parser.SetExpr(expr);
