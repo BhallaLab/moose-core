@@ -13,7 +13,7 @@
 #include "CompartmentBase.h"
 #include "CompartmentDataHolder.h"
 
-static const double RANGE = 1.0e-15;
+static const double RANGE = 4.0e-17;
 using namespace moose;
 
 /*
@@ -368,7 +368,7 @@ bool CompartmentBase::rangeWarning( const string& field, double value )
 		cout << "Warning: Ignored attempt to set " << field <<
 				" of compartment " <<
 				// c->target().e->name() << 
-				" to less than " << RANGE << endl;
+				" to " << value << " as it is less than " << RANGE << endl;
 		return 1;
 	}
 	return 0;

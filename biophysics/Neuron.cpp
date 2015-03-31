@@ -12,6 +12,8 @@
 #include "../shell/Wildcard.h"
 #include "ReadCell.h"
 #include "../utility/Vec.h"
+#include "../randnum/Normal.h"
+#include "../randnum/randnum.h"
 #include "SwcSegment.h"
 #include "Neuron.h"
 
@@ -69,6 +71,7 @@ const Cinfo* Neuron::initCinfo()
 
 	static ValueFinfo< Neuron, double > compartmentLengthInLambdas( 
 		"compartmentLengthInLambdas",
+		"Units: meters (SI). \n"
 		"Electrotonic length to use for the largest compartment in the "
 		"model. Used to define subdivision of branches into compartments. "
 		"For example, if we set *compartmentLengthInLambdas*  to 0.1, "
@@ -125,6 +128,19 @@ const Cinfo* Neuron::initCinfo()
 		&Neuron::setChannelDistribution,
 		&Neuron::getChannelDistribution
 	);
+	static ValueFinfo< Neuron, vector< string > > spineSpecification( 
+		"spineSpecification",
+		"Specification for spine creation on this neuron. "
+		"Each entry in the specification is a string with the following "
+		"arguments: \n"
+		"protoName pathOnCell [spacing] [spacingDistrib] [sizeDistrib] "
+		"[angle] [angleDistrib] [rotation] [rotationDistrib]\n"
+		"Here the items in brackets are optional arguments. The default "
+		"spacing is 1e-6 metres and the rest of the defaults are zero. "
+		"Length units are metres and angle units are radians.",
+		&Neuron::setSpineSpecification,
+		&Neuron::getSpineSpecification
+	);
 	
 	static ReadOnlyValueFinfo< Neuron, unsigned int > numCompartments( 
 		"numCompartments",
@@ -164,6 +180,55 @@ const Cinfo* Neuron::initCinfo()
 	   "on a reduced model will lose the original full cell geometry. ",
 		new EpFunc0< Neuron >( &Neuron::buildSegmentTree )
 	);
+	static DestFinfo insertSpines( "insertSpines",
+		"This function inserts spines on a neuron, placing them "
+		"perpendicular to the dendrite axis and spaced away from the axis "
+		"by the diameter of the dendrite. The placement of spines is "
+		"controlled by a range of parameters. "
+		"Arguments:\n "
+		"spineid: is the parent object of the prototype spine. The "
+		" spine prototype can include any number of compartments, and each"
+		" can have any number of voltage and ligand-gated channels, as "
+		" well as CaConc and other mechanisms.\n"
+		"path: is a wildcard path string for parent compartments for "
+		" the new spines. "
+		"placement: is a vector of doubles with the parameters for "
+		" placing the spines. Zero to six arguments may be provided. "
+		" Default spacing is 1 micron, remaining defaults are 0.0. "
+		" The parameters within placement are: \n"
+		"    placement[0] = spacing: distance (metres) between spines. \n"
+		"    placement[1] = spacingDistrib (metres): the width of a \n"
+	    "    normal distribution around the spacing. \n"
+		"    placement[2] = sizeDistrib: Random scaling of spine size.\n"
+		"    placement[3] = angle: Angular rotation around the axis of "
+		"    the dendrite. 0 radians is facing away from the soma. \n"
+		"    placement[4] = angleDistrib: Scatter around angle. "
+		"    The simplest way to put the spine in any random position is "
+		" to have an angleDistrib of 2 pi. The algorithm selects any "
+		" angle in the linear range of the angle distrib to add to the "
+		" specified angle.\n"
+		"    placement[5] = rotation (radians): With each position along "
+		"    the dendrite the algorithm computes a new spine direction, "
+		"    using rotation to increment the angle. "
+		"    placement[6] = rotationDistrib. Scatter in rotation. ",
+		new EpFunc3< Neuron, Id, string, vector< double > >(
+			&Neuron::insertSpines )
+	);
+	static DestFinfo clearSpines( "clearSpines",
+		"Clears out all spines. ",
+		new EpFunc0< Neuron >(
+			&Neuron::clearSpines )
+	);
+	static DestFinfo parseSpines( "parseSpines",
+		"Parses a previously assigned vector of spine specifications. "
+		"This is located in the field *spineSpecification*. "
+		"When this function is called it builds the specified spines on "
+		"the cell model.",
+		new EpFunc0< Neuron >(
+			&Neuron::parseSpines )
+	);
+
+
 	static DestFinfo assignChanDistrib( "assignChanDistrib",
 		"Handles requests to assign the channel distribution. Args are "
 		"chanName, pathOnCell, function( r, L, len, dia ) "
@@ -211,15 +276,6 @@ const Cinfo* Neuron::initCinfo()
 	);
 
 	/*
-	static DestFinfo decorateWithSpines( "decorateWithSpines",
-					proto
-					pathOnExistingCompts
-					spacing, spacingDistrib
-					sizeDistrib
-					angle, angleDistrib
-					rotation, rotationDistrib
-					*/
-	/*
 	static DestFinfo rotateInSpace( "rotateInSpace",
 		theta, phi
 	static DestFinfo transformInSpace( "transformInSpace",
@@ -244,7 +300,11 @@ const Cinfo* Neuron::initCinfo()
 		&geomDistFromSoma,			// ReadOnlyValueFinfo
 		&elecDistFromSoma,			// ReadOnlyValueFinfo
 		&channelDistribution,		// ValueFinfo
+		&spineSpecification,		// ValueFinfo
 		&buildSegmentTree,			// DestFinfo
+		&insertSpines,				// DestFinfo
+		&clearSpines,				// DestFinfo
+		&parseSpines,				// DestFinfo
 		&assignChanDistrib,			// DestFinfo
 		&clearChanDistrib,			// DestFinfo
 		&parseChanDistrib,			// DestFinfo
@@ -281,7 +341,8 @@ Neuron::Neuron()
 			theta_( 0.0 ),
 			phi_( 0.0 ),
 			sourceFile_( "" ),
-			compartmentLengthInLambdas_( 0.2 )
+			compartmentLengthInLambdas_( 0.2 ),
+			spineIndex_( 0 )
 {;}
 ////////////////////////////////////////////////////////////////////////
 // ValueFinfos
@@ -419,9 +480,19 @@ vector< string > Neuron::getChannelDistribution() const
 	return channelDistribution_;
 }
 
+void Neuron::setSpineSpecification( vector< string > v )
+{
+	spineSpecification_ = v;
+}
+
+vector< string > Neuron::getSpineSpecification() const
+{
+	return spineSpecification_;
+}
 
 ////////////////////////////////////////////////////////////////////////
-// Stuff here for assignChanDistrib
+// Stuff here for parsing the compartment tree
+////////////////////////////////////////////////////////////////////////
 
 static Id getComptParent( Id id )
 {
@@ -450,6 +521,7 @@ Id fillSegIndex(
 		const vector< Id >& kids, map< Id, unsigned int >& segIndex )
 {
 	Id soma;
+	segIndex.clear();
 	for ( unsigned int i = 0; i < kids.size(); ++i ) {
 		const Id& k = kids[i];
 		if ( k.element()->cinfo()->isA( "CompartmentBase" ) ) {
@@ -514,10 +586,9 @@ void Neuron::buildSegmentTree( const Eref& e )
 {
 	vector< Id > kids;
 	Neutral::children( e, kids );
-	map< Id, unsigned int > segIndex;
 
-	Id soma = fillSegIndex( kids, segIndex );
-	fillSegments( segs_, segIndex, kids );
+	Id soma = fillSegIndex( kids, segIndex_ );
+	fillSegments( segs_, segIndex_, kids );
 	int numPa = 0;
 	for ( unsigned int i = 0; i < segs_.size(); ++i ) {
 		if ( segs_[i].parent() == ~0U ) {
@@ -534,47 +605,18 @@ void Neuron::buildSegmentTree( const Eref& e )
 		cout << "Warning: Neuron.cpp: buildTree: numPa = " << numPa << endl;
 	}
 	segId_.clear();
-	segId_.resize( segIndex.size(), Id() );
+	segId_.resize( segIndex_.size(), Id() );
 	for ( map< Id, unsigned int >::const_iterator 
-			i = segIndex.begin(); i != segIndex.end(); ++i ) {
+			i = segIndex_.begin(); i != segIndex_.end(); ++i ) {
 		assert( i->second < segId_.size() );
 		segId_[ i->second ] = i->first;
 	}
 	traverseCumulativeDistance( segs_[0], segs_, segId_, 0, 0 );
 }
 
-/////////////////////////////////////////////////////////////////////
-
-static void buildChildDistanceMap( 
-		const Eref& e, map< ObjId, pair< double, double > >& m )
-{
-	// Hack for testing: just find the geometrical distance to the soma,
-	// and assume electronic length is 0.5 mm.
-	
-	vector< Id > kids;
-	Neutral::children( e, kids );
-	Id soma;
-	for ( unsigned int i = 0; i < kids.size(); ++i ) {
-		if ( kids[i].element()->getName() == "soma" ) {
-			soma = kids[i];
-			break;
-		}
-	}
-
-	double x = Field< double >::get( soma, "x" );
-	double y = Field< double >::get( soma, "y" );
-	double z = Field< double >::get( soma, "z" );
-	for ( vector< Id >::iterator i = kids.begin(); i != kids.end(); ++i ) {
-		if ( i->element()->cinfo()->isA( "CompartmentBase" ) ) {
-			double cx = Field< double >::get( *i, "x0" );
-			double cy = Field< double >::get( *i, "y0" );
-			double cz = Field< double >::get( *i, "z0" );
-			double dist = 
-				sqrt( (x-cx)*(x-cx) + (y-cy)*(y-cy) + (z-cz)*(z-cz) );
-			m[ *i ] = pair< double, double >( dist, dist / 0.5e-3 );
-		}
-	}
-}
+////////////////////////////////////////////////////////////////////////
+// Stuff here for assignChanDistrib
+////////////////////////////////////////////////////////////////////////
 
 static Id acquireChannel( Shell* shell, const string& name, ObjId compt )
 {
@@ -617,10 +659,9 @@ static void assignParam( Shell* shell, ObjId compt
 	}
 }
 
-static void evalChanParams( 
+void Neuron::evalChanParams( 
 	const string& name, const string& func,
-	vector< ObjId >& elist,
-   	const map< ObjId, pair< double, double > >& m )
+	vector< ObjId >& elist )
 {
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	// Build the function
@@ -643,11 +684,12 @@ static void evalChanParams(
 			if ( i->element()->cinfo()->isA( "CompartmentBase" ) ) {
 				dia = Field< double >::get( *i, "diameter" );
 				len = Field< double >::get( *i, "length" );
-   				map< ObjId, pair< double, double > >::const_iterator j =
-						m.find( *i );
-				assert ( j != m.end() );
-				r = j->second.first;
-				L = j->second.second;
+				map< Id, unsigned int >:: const_iterator j = 
+					segIndex_.find( *i );
+				assert( j != segIndex_.end() );
+				assert( j->second < segs_.size() );
+				r = segs_[ j->second ].getGeomDistFromSoma();
+				L = segs_[ j->second ].getElecDistFromSoma();
 
 				double val = parser.Eval();
 				assignParam( shell, *i, val, name );
@@ -666,8 +708,8 @@ void Neuron::assignChanDistrib( const Eref& e,
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	// Go through all child compts recursively, figures out geom and
 	// electrotonic distance to the child. Puts in a map.
-	map< ObjId, pair< double, double > > m;
-	buildChildDistanceMap( e, m );
+	if ( segIndex_.size() == 0 && segs_.size() == 0 )
+		buildSegmentTree( e );
 
 	// build the elist of affected compartments.
 	vector< ObjId > elist;
@@ -677,12 +719,24 @@ void Neuron::assignChanDistrib( const Eref& e,
 	shell->setCwe( oldCwe );
 	if ( elist.size() == 0 )
 		return;
-	evalChanParams( name, func, elist, m );
+	evalChanParams( name, func, elist );
 }
 
 void Neuron::clearChanDistrib( const Eref& e, string name, string path )
 {
-	assignChanDistrib( e, name, path, "0" );
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< ObjId > elist;
+	ObjId oldCwe = shell->getCwe();
+	shell->setCwe( e.objId() );
+	path = path + "/" + name;
+	wildcardFind( path, elist );
+	shell->setCwe( oldCwe );
+	if ( elist.size() == 0 )
+		return;
+	for ( vector< ObjId >::iterator 
+		i = elist.begin(); i != elist.end(); ++i) {
+			shell->doDelete( *i );
+	}
 }
 
 void Neuron::parseChanDistrib( const Eref& e )
@@ -695,3 +749,351 @@ void Neuron::parseChanDistrib( const Eref& e )
 	}
 }
 
+////////////////////////////////////////////////////////////////////////
+// Stuff here for inserting spines.
+////////////////////////////////////////////////////////////////////////
+
+/**
+ * Utility function to return a coordinate system where 
+ * z is the direction of a dendritic segment, 
+ * x is the direction of spines outward from soma and perpendicular to z
+ * and y is the perpendicular to x and z.
+ */
+static double coordSystem( Id soma, Id dend, Vec& x, Vec& y, Vec& z )
+{
+	static const double EPSILON = 1e-20;
+	double x0 = Field< double >::get( dend, "x0" );
+	double y0 = Field< double >::get( dend, "y0" );
+	double z0 = Field< double >::get( dend, "z0" );
+	double x1 = Field< double >::get( dend, "x" );
+	double y1 = Field< double >::get( dend, "y" );
+	double z1 = Field< double >::get( dend, "z" );
+
+	Vec temp( x1-x0, y1-y0, z1-z0 );
+	double len = temp.length();
+	z = Vec( temp.a0()/len, temp.a1()/len, temp.a2()/len );
+
+	double sx0 = Field< double >::get( soma, "x0" );
+	double sy0 = Field< double >::get( soma, "y0" );
+	double sz0 = Field< double >::get( soma, "z0" );
+	Vec temp2( x0 - sx0, y0-sy0, z0-sz0 );
+	Vec y2 = temp.crossProduct( z );
+	double ylen = y2.length();
+	double ytemp = 1.0;
+	while ( ylen < EPSILON ) {
+		Vec t( ytemp , sqrt( 2.0 ), 0.0 );
+		y2 = t.crossProduct( z );
+		ylen = y2.length();
+		ytemp += 1.0;
+	}
+	y = Vec( y2.a0()/ylen, y2.a1()/ylen, y2.a2()/ylen );
+	x = z.crossProduct( y );
+	assert( doubleEq( x.length(), 1.0 ) );
+	return len;
+}
+
+/**
+ * Utility function to resize electrical compt electrical properties,
+ * including those of its child channels and calcium conc.
+ */
+static void scaleSpineCompt( Id compt, double size )
+{
+	vector< ObjId > chans;
+	allChildren( compt, "ISA=ChanBase", chans );
+	// wildcardFind( compt.path() + "/##[ISA=ChanBase]", chans );
+	double a = size * size;
+	for ( vector< ObjId >::iterator 
+					i = chans.begin(); i != chans.end(); ++i )
+	{
+		double gbar = Field< double >::get( *i, "Gbar" );
+		Field< double >::set( *i, "Gbar", gbar * a );
+	}
+
+	double v = size * size * size;
+	vector< ObjId > concs;
+	allChildren( compt, "ISA=CaConcBase", concs );
+	// wildcardFind( compt.path() + "/##[ISA=CaConcBase]", concs );
+	for ( vector< ObjId >::iterator 
+					i = concs.begin(); i != concs.end(); ++i )
+	{
+		double B = Field< double >::get( *i, "B" );
+		Field< double >::set( *i, "B", B * v );
+	}
+
+	double Rm = Field< double >::get( compt, "Rm" );
+	Field< double >::set( compt, "Rm", Rm / a );
+	double Cm = Field< double >::get( compt, "Cm" );
+	Field< double >::set( compt, "Cm", Cm * a );
+	double Ra = Field< double >::get( compt, "Ra" );
+	Field< double >::set( compt, "Ra", Ra / size );
+}
+
+
+/**
+ * Utility function to change coords of spine so as to reorient it.
+ */
+static void reorientSpine( vector< Id >& spineCompts, 
+				vector< Vec >& coords, 
+				Vec& parentPos, double pos, double angle, 
+				Vec& x, Vec& y, Vec& z )
+{
+	double c = cos( angle );
+	double s = sin( angle );
+	double omc = 1.0 - c;
+
+	Vec rot0( 		z.a0()*z.a0()*omc + c, 
+					z.a1()*z.a0()*omc - z.a2()*s ,
+					z.a2()*z.a0()*omc + z.a1()*s );
+
+	Vec rot1( 		z.a0()*z.a1()*omc + z.a2()*s, 
+					z.a1()*z.a1()*omc + c,
+            		z.a2()*z.a1()*omc - z.a0()*s );
+
+	Vec rot2(		z.a0()*z.a2()*omc - z.a1()*s, 
+					z.a1()*z.a2()*omc + z.a0()*s, 
+					z.a2()*z.a2()*omc + c );
+
+    Vec translation = z * pos + parentPos;
+	vector< Vec > ret( coords.size() );
+	for ( unsigned int i = 0; i < coords.size(); ++i ) {
+		ret[i] = Vec( 	rot0.dotProduct( coords[i] ) + translation.a0(), 
+						rot1.dotProduct( coords[i] ) + translation.a1(), 
+						rot2.dotProduct( coords[i] ) + translation.a2() );
+		
+	}
+    assert( spineCompts.size() * 2 == ret.size() );
+
+	for ( unsigned int i = 0; i < spineCompts.size(); ++i ) {
+		unsigned int j = 2 * i;
+		Field< double >::set( spineCompts[i], "x0", ret[j].a0() );
+		Field< double >::set( spineCompts[i], "y0", ret[j].a1() );
+		Field< double >::set( spineCompts[i], "z0", ret[j].a2() );
+		// cout << "(" << ret[j].a0() << ", " << ret[j].a1() << ", " << ret[j].a2() << ")";
+            j = j + 1;
+		Field< double >::set( spineCompts[i], "x", ret[j].a0() );
+		Field< double >::set( spineCompts[i], "y", ret[j].a1() );
+		Field< double >::set( spineCompts[i], "z", ret[j].a2() );
+		// cout << "(" << ret[j].a0() << ", " << ret[j].a1() << ", " << ret[j].a2() << ")\n";
+	}
+}
+
+/** 
+ * Utility function to add a single spine to the given parent.
+ * parent is parent compartment for this spine.
+ * spineProto is just that.
+ * pos is position (in metres ) along parent compartment
+ * angle is angle (in radians) to rotate spine wrt x in plane xy.
+ * Size is size scaling factor, 1 leaves as is.
+ * x, y, z are unit vectors. Z is along the parent compt.
+ * We first shift the spine over so that it is offset by the parent compt
+ * diameter.
+ * We then need to reorient the spine which lies along (i,0,0) to
+ * lie along x. X is a unit vector so this is done simply by 
+ * multiplying each coord of the spine by x.
+ * Finally we rotate the spine around the z axis by the specified angle
+ * k is index of this spine.
+ */
+
+static void addSpine( Id parentCompt, Id spineProto, 
+		double pos, double angle, 
+		Vec& x, Vec& y, Vec& z, 
+		double size, 
+		unsigned int k )
+{
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	Id parentObject = Neutral::parent( parentCompt );
+	stringstream sstemp;
+	sstemp << k;
+	string kstr = sstemp.str();
+	Id spine = shell->doCopy( spineProto, parentObject, "_spine" + kstr, 
+					1, true, false );
+	vector< Id > kids;
+	Neutral::children( spine.eref(), kids );
+	double x0 = Field< double >::get( parentCompt, "x0" );
+	double y0 = Field< double >::get( parentCompt, "y0" );
+	double z0 = Field< double >::get( parentCompt, "z0" );
+	double parentRadius = Field< double >::get( parentCompt, "diameter" )/2;
+	Vec ppos( x0, y0, z0 );
+	// First, build the coordinates vector for the spine. Assume that its
+	// major axis is along the unit vector [1,0,0].
+	vector< Vec > coords;
+	for ( vector< Id >::iterator i = kids.begin(); i != kids.end(); ++i )
+	{
+		if ( i->element()->cinfo()->isA( "CompartmentBase" ) ) {
+			i->element()->setName( i->element()->getName() + kstr );
+			x0 = Field< double >::get( *i, "x0" );
+			y0 = Field< double >::get( *i, "y0" );
+			z0 = Field< double >::get( *i, "z0" );
+			coords.push_back( Vec( x0 + parentRadius, y0, z0 ) );
+			double x = Field< double >::get( *i, "x" );
+			double y = Field< double >::get( *i, "y" );
+			double z = Field< double >::get( *i, "z" );
+			coords.push_back( Vec( x + parentRadius, y, z ) );
+			scaleSpineCompt( *i, size );
+			shell->doMove( *i, parentObject );
+		}
+	}
+	// Then, take the projection of this along the x vector passed in.
+	for( vector< Vec >::iterator i = coords.begin(); i != coords.end(); ++i)
+		*i = x * i->a0();
+	shell->doDelete( spine ); // get rid of the holder for the spine copy.
+	shell->doAddMsg( "Single", parentCompt, "raxial", kids[0], "axial" );
+	reorientSpine( kids, coords, ppos, pos, angle, x, y, z );
+}
+
+static void makeSpacingDistrib( vector< double >& pos, 
+				double spacing, double spacingDistrib )
+{
+	unsigned int num = pos.size();
+	if ( spacingDistrib > 0.0 ) {
+		Normal ns( spacing, spacingDistrib * spacingDistrib );
+		// We can't have a simple normal distrib, have to guarantee that
+		// we always move forward.
+		double x = 0.0;
+		while ( x <= 0.0 )
+			x = ns.getNextSample() / 2.0;
+		for ( unsigned int j = 0; j < num; ++j ) {
+			pos[j] = x;
+			double temp = 0.0;
+			while ( temp <= 0.0 )
+				temp = ns.getNextSample();
+			x += temp;
+		}
+	} else {
+		for ( unsigned int j = 0; j < num; ++j ) {
+			pos[j] = spacing * ( 0.5 + j );
+		}
+	}
+}
+
+// All angles in radians.
+static void makeAngleDistrib( vector< double >& theta, 
+				double angle, double angleDistrib, 
+				double rotation, double rotationDistrib )
+{
+	if ( angleDistrib > 0.0 )
+		angle += mtrand() * angleDistrib;
+	unsigned int num = theta.size();
+	if ( rotationDistrib > 0.0 ) {
+		Normal nr( rotation, rotationDistrib* rotationDistrib );
+		double x = angle;
+		for ( unsigned int j = 0; j < num; ++j ) {
+			theta[j] = x;
+			x += nr.getNextSample();
+		}
+	} else {
+		for ( unsigned int j = 0; j < num; ++j ) {
+			theta[j] = angle + rotation * ( 0.5 + j );
+		}
+	}
+}
+
+/**
+ * API function to add a series of spines.
+ * 
+ * The spineid is the parent object of the prototype spine. The 
+ * spine prototype can include any number of compartments, and each
+ * can have any number of voltage and ligand-gated channels, as well
+ * as CaConc and other mechanisms.
+ * The parentList is a list of Object Ids for parent compartments for
+ * the new spines
+ * The spacingDistrib is the width of a normal distribution around
+ * the spacing. Both are in metre units.
+ * The reference angle of 0 radians is facing away from the soma.
+ * In all cases we assume that the spine will be rotated so that its
+ * axis is perpendicular to the axis of the dendrite.
+ * The simplest way to put the spine in any random position is to have
+ * an angleDistrib of 2 pi. The algorithm selects any angle in the
+ * linear range of the angle distrib to add to the specified angle.
+ * With each position along the dendrite the algorithm computes a new
+ * spine direction, using rotation to increment the angle.
+ * Returns list of spines.
+ */
+
+void Neuron::insertSpines( const Eref& e, Id spineProto, string path, 
+				vector< double > placement )
+{
+	vector< ObjId > parentList;
+	double args[] = {1.0e-6, 0,0,0,0,0,0};
+	double& spacing = args[0];
+	double& spacingDistrib = args[1];
+	double& sizeDistrib = args[2];
+	double& angle = args[3];
+	double& angleDistrib = args[4];
+	double& rotation = args[5];
+	double& rotationDistrib = args[6];
+
+	vector< ObjId > somaList;
+	wildcardFind( e.id().path() + "/#soma#", somaList );
+	Id soma = somaList[0];
+
+	for ( unsigned int i = 0; i < 7 && i < placement.size(); ++i ) {
+		args[i] = placement[i];
+	}
+
+	if ( path[0] == '/' )
+		wildcardFind( path, parentList );
+	else 
+		wildcardFind( e.id().path() + "/" + path, parentList );
+	for ( unsigned int i = 0; i < parentList.size(); ++i ) {
+		Vec x, y, z;
+		double dendLength = coordSystem( soma, parentList[i], x, y, z );
+
+		// Have extra num entries to allow for the random spacing.
+		int num = dendLength / spacing + 2.0; 
+
+		vector< double > pos( num );
+		makeSpacingDistrib( pos, spacing, spacingDistrib );
+
+		vector< double > theta( num );
+		makeAngleDistrib( theta, angle, angleDistrib, 
+						rotation, rotationDistrib );
+
+		vector< double > size( num, 1.0 );
+		if ( sizeDistrib > 0.0 ) {
+			Normal nz( 1.0, sizeDistrib* sizeDistrib );
+			for ( int j = 0; j < num; ++j ) {
+				double s = 0.0;
+				while( s <= 0.1 ) // Arb cutoff. Exclude tiny spines.
+					s = nz.getNextSample();
+				size[j] = s;
+			}
+		}
+		for ( unsigned int j = 0; j < pos.size(); ++j ) {
+			if ( pos[j] > dendLength )
+				break;
+			addSpine( parentList[i], spineProto, pos[j], theta[j], 
+							x, y, z, size[j], spineIndex_++ );
+		}
+	}
+	cout << "Neuron::insertSpines: " << spineIndex_ << " spines inserted\n";
+}
+
+void Neuron::parseSpines( const Eref& e )
+{
+	for ( unsigned int i = 0; i < spineSpecification_.size(); ++i ) {
+		stringstream ss( spineSpecification_[i] );
+		string proto;
+		string path;
+		vector< double > args( 7, 0.0 );
+		args[0] = 1e-6;
+		ss >> proto >> path >> args[0] >> args[1] >> args[2] >> args[3] >> args[4] >> args[5] >> args[6];
+
+		Id spineProto;
+		if ( proto[0] == '/' )
+			spineProto = Id( proto );
+		else
+			spineProto = Id( "/library/" + proto );
+
+		if ( spineProto == Id() ) {
+			cout << "Warning: Neuron::parseSpines: Unable to find prototype spine: " << proto << endl;
+			return;
+		}
+
+		insertSpines( e, spineProto, path, args );
+	}
+}
+
+void Neuron::clearSpines( const Eref& e )
+{
+}
