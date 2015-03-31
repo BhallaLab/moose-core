@@ -17,7 +17,25 @@ using namespace std;
 #include "../utility/Vec.h"
 #include "SwcSegment.h"
 
-unsigned short SwcSegment::BadSegment = 8;
+const short SwcSegment::UNDEF = 0;
+const short SwcSegment::SOMA = 1;
+const short SwcSegment::AXON = 2;
+const short SwcSegment::DEND = 3;
+const short SwcSegment::APICAL = 4;
+const short SwcSegment::FORK = 5; // Assumed to be on regular dend
+const short SwcSegment::END = 6; // Assumed to be on regular dend
+const short SwcSegment::CUSTOM = 7;
+		// Here are a few more
+const short SwcSegment::BadSegment = 8;
+const short SwcSegment::AXON_FORK = 10;
+const short SwcSegment::AXON_END = 11;
+const short SwcSegment::APICAL_FORK = 12;
+const short SwcSegment::APICAL_END = 13;
+
+const string SwcSegment::typeName[] = { 
+	"undef", "soma", "axon", "dend", "apical", "dend_f", "dend_e", 
+	"custom", "bad", "undef",
+	"axon_f", "axon_e", "apical_f", "apical_e" };
 
 SwcSegment::SwcSegment( const string& line )
 		:
@@ -48,7 +66,7 @@ SwcSegment::SwcSegment( const string& line )
 	}
 }
 
-SwcSegment::SwcSegment( int i,  unsigned short type, 
+SwcSegment::SwcSegment( int i,  short type, 
 				double x, double y, double z, 
 				double r, int parent )
 				: 
@@ -75,14 +93,24 @@ double SwcSegment::L( const SwcSegment& other ) const
 
 void SwcSegment::figureOutType()
 {
-	if ( type_ == 1 ) // already defined as soma
+	if ( type_ == SOMA ) // already defined as soma
 		return;
-	if ( kids_.size() > 1 )
-		type_ = 5; // fork point
-	else if ( kids_.size() == 0 )
-		type_ = 6; // end point 
-	else if ( kids_.size() == 1 && ( type_ == 5 || type_ == 6 ) )
-		type_ = 3; // Fix it with the most generic option.
+	if ( type_ == DEND ) {
+		if ( kids_.size() > 1 )
+			type_ = FORK; // Dend fork point
+		else if ( kids_.size() == 0 )
+			type_ = END; // end point 
+	} else if ( type_ == APICAL ) {
+		if ( kids_.size() > 1 )
+			type_ = APICAL_FORK; // apical Dend fork point
+		else if ( kids_.size() == 0 )
+			type_ = APICAL_END; // apical end point 
+	} else if ( type_ == AXON ) {
+		if ( kids_.size() > 1 )
+			type_ = AXON_FORK; // apical Dend fork point
+		else if ( kids_.size() == 0 )
+			type_ = AXON_END; // apical end point 
+	}
 }
 
 //////////////////////////////////////////////////////////////////////

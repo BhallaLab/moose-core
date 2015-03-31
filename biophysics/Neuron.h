@@ -41,13 +41,23 @@ class Neuron
 		vector< double> getElecDistFromSoma() const;
 		void setChannelDistribution( vector< string > v );
 		vector< string > getChannelDistribution() const;
+		void setSpineSpecification( vector< string > v );
+		vector< string > getSpineSpecification() const;
 
 		void buildSegmentTree( const Eref& e );
+
+		void insertSpines( const Eref& e, Id spineProto, string path,
+			vector< double > placement );
+		void parseSpines( const Eref& e );
+		void clearSpines( const Eref& e );
+
 		void assignChanDistrib( const Eref& e,
 			string name, string path, string func );
 		void clearChanDistrib( const Eref& e,
 			string name, string path );
 		void parseChanDistrib( const Eref& e );
+		void evalChanParams( const string& name, const string& func, 
+						vector< ObjId >& elist );
 		/**
 		 * Initializes the class info.
 		 */
@@ -61,7 +71,12 @@ class Neuron
 		double phi_;
 		string sourceFile_;
 		double compartmentLengthInLambdas_;
+		unsigned int spineIndex_;
 		vector< string > channelDistribution_;
+		vector< string > spineSpecification_;
+
+		/// Map to look up Seg index from Id of associated compt.
+		map< Id, unsigned int > segIndex_; 
 		vector< Id > segId_; /// Id of each Seg entry, below.
 		vector< SwcSegment > segs_;
 		vector< SwcBranch > branches_;

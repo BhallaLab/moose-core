@@ -87,7 +87,7 @@ CaConcBase.o:	CaConcBase.h
 CaConc.o:	CaConcBase.h CaConc.h
 MgBlock.o:	MgBlock.h ChanBase.h
 Nernst.o:	Nernst.h
-Neuron.o:	Neuron.h
+Neuron.o:	Neuron.h SwcSegment.h
 ReadCell.o: CompartmentBase.h Compartment.h SymCompartment.h ReadCell.h ../shell/Shell.h ../utility/utility.h
 SwcSegment.o: SwcSegment.h ../utility/Vec.h
 ReadSwc.o: CompartmentBase.h Compartment.h SymCompartment.h SwcSegment.h ReadSwc.h ../shell/Shell.h ../utility/Vec.h

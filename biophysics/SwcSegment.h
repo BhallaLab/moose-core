@@ -27,19 +27,18 @@ class SwcSegment
 
 		SwcSegment( const string& line );
 
-		SwcSegment( int i,  unsigned short type, 
+		SwcSegment( int i,  short type, 
 						double x, double y, double z, 
 						double r, int parent );
 		bool OK() const
 		{
-			return type_ < BadSegment;
+			return type_!=BadSegment && type_!=UNDEF && type_!=CUSTOM;
 		}
 
 		void setBad() {
 			type_ = BadSegment;
 		}
 
-		static unsigned short BadSegment;
 
 		unsigned int parent() const {
 			return parent_;
@@ -101,6 +100,24 @@ class SwcSegment
 			return electrotonicDistanceFromSoma_;
 		}
 
+		// This is the original SWC set.
+		static const short UNDEF;
+		static const short SOMA;
+		static const short AXON;
+		static const short DEND;
+		static const short APICAL;
+		static const short FORK; // Assumed to be on regular dend
+		static const short END; // Assumed to be on regular dend
+		static const short CUSTOM;
+		// Here are a few more
+		static const short BadSegment;
+		static const short AXON_FORK;
+		static const short AXON_END;
+		static const short APICAL_FORK;
+		static const short APICAL_END;
+
+		static const string typeName[];
+
 	protected:
 		unsigned int myIndex_; /// Index of self
 		/**
@@ -115,7 +132,7 @@ class SwcSegment
 		 * 6 = end point
 		 * 7 = custom
 		 */
-		unsigned short type_; 
+		short type_; 
 		Vec v_;	/// coordinates of end of segment
 		double radius_; /// Radius of segment
 		unsigned int parent_; /// Index of parent. Is ~0 for soma.
