@@ -17,7 +17,6 @@
 #include "SymCompartment.h"
 #include <fstream>
 
-
 // Minimum allowed radius of segment, in microns
 static const double MinRadius = 0.05; 
 
@@ -192,19 +191,19 @@ void ReadSwc::parseBranches()
 
 void ReadSwc::diagnostics() const
 {
-	vector< int > diag( 8 );
-	static string diagName[] = {"undef", "soma", "axon", "dend", 
-			"apical dend", "fork", "end", "custom" };
+	vector< int > diag( 14 );
 	for ( unsigned int i = 0; i < segs_.size(); ++i ) {
 		const SwcSegment& s = segs_[i];
-		if ( s.type() < 8 )
+		if ( s.type() < 14 )
 			diag[s.type()]++;
 	}
-	for ( int i = 0; i < 8; ++i )
-		cout << diagName[i] << " :	" << diag[i] << endl;
+	for ( int i = 0; i < 14; ++i )
+		cout << SwcSegment::typeName[i] << " :	" << diag[i] << endl;
 
+	/*
 	for ( unsigned int i = 0; i < branches_.size(); ++i )
 		branches_[i].printDiagnostics();
+		*/
 }
 
 static Id makeCompt( Id parent, 
@@ -220,7 +219,7 @@ static Id makeCompt( Id parent,
 	if ( seg.parent() != ~0U ) {
 		len = seg.length( pa );
 		stringstream ss;
-		ss << "br" << i << "_" << j;
+		ss << SwcSegment::typeName[ seg.type() ] << "_" << i << "_" << j;
 		name = ss.str();
 		x0 = pa.vec().a0();
 		y0 = pa.vec().a1();
