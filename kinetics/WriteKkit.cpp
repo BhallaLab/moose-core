@@ -76,36 +76,38 @@ void writeHeader( ofstream& fout,
 	//"simundump geometry /kinetics/geometry 0 1.6667e-19 3 sphere \"\" white black 0 0 0\n\n";
 }
 
+string trimPath(Id id, Id  comptid)
+{	string path = Field <string> :: get(id,"path");
+	if (comptid != 0)
+	{ 	string comptname = Field < string > :: get(comptid,"name"); 
+	  	size_t pos = path.find( comptname );
+	  	return path.substr(pos-1);
+	}
+	else
+		return path;
+}
+
 Id getEnzCplx( Id id )
 {
 	vector < Id > srct = LookupField <string,vector < Id> >::get(id, "neighbors","cplxDest");
-	for (vector <Id> :: iterator rr = srct.begin(); rr != srct.end();rr++)
-	{
-		return *rr;
-	}
-	// static const Finfo* cplxFinfo = 
-	// 		CplxEnzBase::initCinfo()->findFinfo( "cplxDest" );
-	// vector< Id > ret;
-	// if ( id.element()->getNeighbours( ret, cplxFinfo ) > 0 )
-	// 	return ret[0];
-	// return Id();
+	return srct[0];
 }
 
 Id getEnzMol( Id id )
 {
 	vector < Id > srct = LookupField <string,vector < Id> >::get(id, "neighbors","enzDest");
-	for (vector <Id> :: iterator rr = srct.begin(); rr != srct.end();rr++)
-	{
-		return *rr;
-	}
+	return srct[0];
 }
 void writeEnz( ofstream& fout, Id id,
 				string colour, string textcolour,
 			 	double x, double y, Id comptid )
 {
 	string path = id.path();
-	size_t pos = path.find( "/kinetics" );
-	path = path.substr( pos );
+	// size_t pos = path.find( "/kinetics" );
+	// path = path.substr( pos );
+	string comptname = Field < string > :: get(comptid,"name"); 
+	size_t pos = path.find(comptname);
+	path = path.substr(pos-1);
 	double k1 = 0;
 	double k2 = 0;
 	double k3 = 0;
@@ -165,7 +167,7 @@ void writeReac( ofstream& fout, Id id,
 	double kf = Field< double >::get( id, "kf" );
 	double kb = Field< double >::get( id, "kb" );
 
-	fout << "simundump kreac /" << reacPar << "/" << reacname << " 0 " << 
+	fout << "simundump kreac " << trimPath(id,comptid) << " 0 " << 
 			kf << " " << kb << " \"\" " << 
 			colour << " " << textcolour << " " << x << " " << y << " 0\n";
 }
@@ -201,8 +203,8 @@ void writePool( ofstream& fout, Id id,
 			 	double x, double y, Id comptid )
 {
 	Id poolparentId = Field <ObjId>  :: get(id,"parent");
-	string poolPar  = Field <string> :: get(poolparentId,"name");
-
+	string poolPar  = Field <string> :: get(comptid,"name");
+	string poolPath = Field <string> :: get(id,"name");
 	string poolname = Field<string> :: get(id, "name");
 	double diffConst = Field< double >::get( id, "diffConst" );
 	double concInit = Field< double >::get( id, "concInit" );
@@ -213,7 +215,7 @@ void writePool( ofstream& fout, Id id,
 	//TODO: check with Upi what is this slave_enable
 	//unsigned int slave_enable = getSlaveEnable( id );
 	unsigned int slave_enable = 0;
-	fout << "simundump kpool /" << poolPar << "/"<< poolname << " 0 " <<
+	fout << "simundump kpool " << trimPath(id,comptid) << " 0 " <<
 			diffConst << " " <<
 			concInit << " " << 
 			conc << " " <<
@@ -225,7 +227,6 @@ void writePool( ofstream& fout, Id id,
 			poolPar << "/geometry " << 
 			colour << " " << textcolour << " " << x << " " << y << " 0\n";
 }
-
 void writePlot( ofstream& fout, Id id,
 				string colour, string textcolour,
 			 	double x, double y )
@@ -258,37 +259,6 @@ void writeFooter( ofstream& fout )
 	fout << "\nenddump\n";
 	fout << "complete_loading\n";
 }
-/*
-void getInfoFields( Id id, string& bg, string& fg, 
-				double& x, double& y, double side, double dx )
-{
-	Id info = findInfo( id );
-	if ( info != Id() ) {
-		bg = Field< string >::get( info, "color" );
-		fg = Field< string >::get( info, "textColor" );
-		x = Field< double >::get( info, "x" );
-		y = Field< double >::get( info, "y" );
-	} else {
-		bg = "cyan";
-		fg = "black";
-		x += dx;
-		if ( x > side ) {
-				x = 0;
-				y += dx;
-		}
-	}
-}
-*/
-string trimPath(Id id, Id  comptid)
-{	string path = Field <string> :: get(id,"path");
-	if (comptid != 0)
-	{ 	string comptname = Field < string > :: get(comptid,"name"); 
-	  	size_t pos = path.find( comptname );
-	  	return path.substr(pos-1);
-	}
-	else
-		return path;
-}
 
 void storeMMenzMsgs( Id enz, vector< string >& msgs, Id comptid )
 {
@@ -316,67 +286,36 @@ void storeMMenzMsgs( Id enz, vector< string >& msgs, Id comptid )
 		string s = "addmsg " + trimPath( *enzCl, comptid ) + " " + trimPath(enz, comptid) + " ENZYME n";
 		msgs.push_back( s );
 	}
-
-	/*
-	enz.element()->getNeighbors( targets, prdFinfo );
-	for ( vector< Id >::iterator i = targets.begin(); i != targets.end(); ++i ) {
-		string tgtPath = trimPath( i->path() );
-		string s = "addmsg " + enzPath + " " + tgtPath + " MM_PRD pA";
-		msgs.push_back( s );
-	}
-
-	targets.resize( 0 );
-	enz.element()->getNeighbors( targets, enzFinfo );
-	for ( vector< Id >::iterator i = targets.begin(); i != targets.end(); ++i ) {
-		string tgtPath = trimPath( i->path() );
-		string s = "addmsg " + tgtPath + " " + enzPath + " ENZYME n";
-		msgs.push_back( s );
-	}
-	*/
 }
 
 void storeCplxEnzMsgs( Id enz, vector< string >& msgs, Id comptid )
-{  return;
-}
-/*	static const Finfo* subFinfo = 
-			EnzBase::initCinfo()->findFinfo( "toSub" );
-	static const Finfo* prdFinfo = 
-			EnzBase::initCinfo()->findFinfo( "toPrd" );
-	// static const Finfo* enzFinfo = 
-	// 		CplxEnzBase::initCinfo()->findFinfo( "toEnz" );
-	// In GENESIS we don't need to explicitly connect up the enz cplx, so
-	// no need to deal with the toCplx msg.
-	vector< Id > targets;
-	
-	string enzPath = trimPath( enz.path() );
-	enz.element()->getNeighbors( targets, subFinfo );
-	for ( vector< Id >::iterator i = targets.begin(); i != targets.end(); ++i ) {
-		string tgtPath = trimPath( i->path() );
-		string s = "addmsg " + tgtPath + " " + enzPath + " SUBSTRATE n";
+{  Id enzparentId = Field <ObjId>  :: get(enz,"parent");
+	string enzPar  = Field <string> :: get(enzparentId,"name");
+	string enzName = Field<string> :: get(enz,"name");
+
+	vector < Id > srct = LookupField <string,vector < Id> >::get(enz, "neighbors","sub");
+	for (vector <Id> :: iterator rsub = srct.begin();rsub != srct.end();rsub++)
+	{	
+		string s = "addmsg " + trimPath(*rsub, comptid) + " " + trimPath(enz, comptid) + " SUBSTRATE n";
 		msgs.push_back( s );
-		s = "addmsg " + enzPath + " " + tgtPath + " REAC sA B";
+		s = "addmsg " + trimPath(enz, comptid) + " " + trimPath( *rsub, comptid ) + 	" REAC sA B";
 		msgs.push_back( s );
 	}
-
-	targets.resize( 0 );
-	enz.element()->getNeighbors( targets, prdFinfo );
-	for ( vector< Id >::iterator i = targets.begin(); i != targets.end(); ++i ) {
-		string tgtPath = trimPath( i->path() );
-		string s = "addmsg " + enzPath + " " + tgtPath + " MM_PRD pA";
+	vector < Id > prct = LookupField <string,vector < Id> >::get(enz, "neighbors","prd");
+	for (vector <Id> :: iterator rprd = prct.begin();rprd != prct.end();rprd++)
+	{
+		string s = "addmsg " + trimPath( enz, comptid ) + " " + trimPath(*rprd, comptid) + " MM_PRD pA";
 		msgs.push_back( s );
 	}
-
-	targets.resize( 0 );
-	// enz.element()->getNeighbors( targets, enzFinfo );
-	for ( vector< Id >::iterator i = targets.begin(); i != targets.end(); ++i ) {
-		string tgtPath = trimPath( i->path() );
-		string s = "addmsg " + tgtPath + " " + enzPath + " ENZYME n";
+	vector < Id > enzC = LookupField <string,vector < Id> >::get(enz, "neighbors","enzOut");
+	for (vector <Id> :: iterator enzCl = enzC.begin();enzCl != enzC.end();enzCl++)
+	{
+		string s = "addmsg " + trimPath( *enzCl, comptid ) + " " + trimPath(enz, comptid) + " ENZYME n";
 		msgs.push_back( s );
-		s = "addmsg " + enzPath + " " + tgtPath + " REAC eA B";
+		s = "addmsg " + trimPath( enz, comptid ) + " " + trimPath(*enzCl, comptid) + " REAC eA B";
 		msgs.push_back( s );
 	}
 }
-*/
 
 void storeEnzMsgs( Id enz, vector< string >& msgs, Id comptid )
 {
