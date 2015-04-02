@@ -921,13 +921,15 @@ static void addSpine( Id parentCompt, Id spineProto,
 	{
 		if ( i->element()->cinfo()->isA( "CompartmentBase" ) ) {
 			i->element()->setName( i->element()->getName() + kstr );
-			x0 = Field< double >::get( *i, "x0" );
-			y0 = Field< double >::get( *i, "y0" );
-			z0 = Field< double >::get( *i, "z0" );
+			x0 = Field< double >::get( *i, "x0" ) * size;
+			y0 = Field< double >::get( *i, "y0" ) * size;
+			z0 = Field< double >::get( *i, "z0" ) * size;
 			coords.push_back( Vec( x0 + parentRadius, y0, z0 ) );
-			double x = Field< double >::get( *i, "x" );
-			double y = Field< double >::get( *i, "y" );
-			double z = Field< double >::get( *i, "z" );
+			double x = Field< double >::get( *i, "x" ) * size;
+			double y = Field< double >::get( *i, "y" ) * size;
+			double z = Field< double >::get( *i, "z" ) * size;
+			double dia = Field< double >::get( *i, "diameter" ) * size;
+			Field< double >::set( *i, "diameter", dia );
 			coords.push_back( Vec( x + parentRadius, y, z ) );
 			scaleSpineCompt( *i, size );
 			shell->doMove( *i, parentObject );
@@ -946,6 +948,8 @@ static void makeSpacingDistrib( vector< double >& pos,
 {
 	unsigned int num = pos.size();
 	if ( spacingDistrib > 0.0 ) {
+		/*
+		 * Here again we need to get rid of the Normal RNG due to speed.
 		Normal ns( spacing, spacingDistrib * spacingDistrib );
 		// We can't have a simple normal distrib, have to guarantee that
 		// we always move forward.
@@ -958,6 +962,17 @@ static void makeSpacingDistrib( vector< double >& pos,
 			while ( temp <= 0.0 )
 				temp = ns.getNextSample();
 			x += temp;
+		}
+		*/
+		if ( spacingDistrib > spacing ) {
+			cout << "Warning: Neuron::makeSpacingDistrib: Distribution = "
+					<< spacingDistrib << " must be < spacing = " <<
+					spacing << ". Using " << spacing << endl;
+			spacingDistrib = spacing;
+		}
+		for ( unsigned int j = 0; j < num; ++j ) {
+			pos[j] = spacing * ( 0.5 + j ) + 
+					( 2.0*mtrand() - 1.0 ) * spacingDistrib;
 		}
 	} else {
 		for ( unsigned int j = 0; j < num; ++j ) {
@@ -975,11 +990,17 @@ static void makeAngleDistrib( vector< double >& theta,
 		angle += mtrand() * angleDistrib;
 	unsigned int num = theta.size();
 	if ( rotationDistrib > 0.0 ) {
+		/* Get rid of Normal RNG
 		Normal nr( rotation, rotationDistrib* rotationDistrib );
 		double x = angle;
 		for ( unsigned int j = 0; j < num; ++j ) {
 			theta[j] = x;
 			x += nr.getNextSample();
+		}
+		*/
+		for ( unsigned int j = 0; j < num; ++j ) {
+			theta[j] = angle + rotation * ( 0.5 + j ) +
+				(2.0*mtrand() - 1.0)  * rotationDistrib;
 		}
 	} else {
 		for ( unsigned int j = 0; j < num; ++j ) {
@@ -1050,6 +1071,10 @@ void Neuron::insertSpines( const Eref& e, Id spineProto, string path,
 						rotation, rotationDistrib );
 
 		vector< double > size( num, 1.0 );
+
+		/* The use of this RNG causes a 100x slowdown in spine setup!
+		 * It uses the alias method, I would have thought Box-Muller would
+		 * be faster but I won't worry about it for now.
 		if ( sizeDistrib > 0.0 ) {
 			Normal nz( 1.0, sizeDistrib* sizeDistrib );
 			for ( int j = 0; j < num; ++j ) {
@@ -1057,6 +1082,17 @@ void Neuron::insertSpines( const Eref& e, Id spineProto, string path,
 				while( s <= 0.1 ) // Arb cutoff. Exclude tiny spines.
 					s = nz.getNextSample();
 				size[j] = s;
+			}
+		}
+		*/
+		if ( sizeDistrib > 0.0 ) {
+			if ( sizeDistrib > 0.9 ) {
+				cout << "Warning: Neuron::insertSpines: sizeDistrib = " <<
+					   sizeDistrib << "	too big, using 0.9\n";
+				sizeDistrib = 0.9;
+			}
+			for ( int j = 0; j < num; ++j ) {
+				size[j] = mtrand() * 2.0 * sizeDistrib + 1.0 - sizeDistrib;
 			}
 		}
 		for ( unsigned int j = 0; j < pos.size(); ++j ) {
