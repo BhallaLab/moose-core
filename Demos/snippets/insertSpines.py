@@ -7,6 +7,7 @@ import os
 sys.path.append( '../util' )
 import rdesigneur as rd
 
+PI = 3.14
 frameRunTime = 0.0002
 runtime = 1.0
 inject = 5e-10
@@ -14,6 +15,19 @@ simdt = 5e-5
 RM = 1.0
 RA = 1.0
 CM = 0.01
+spineSpacing = 2.0e-6
+spineSpacingDistrib = 1.0e-6
+spineSizeDistrib = 0.5
+spineAngle = 0
+spineAngleDistrib = 2*PI
+spineRotation = 0
+spineRotationDistrib = 2*PI
+
+spineArgLine = str(spineSpacing) + ' ' + str(spineSpacingDistrib) + ' ' + \
+        str(spineSizeDistrib) + ' ' + \
+        str(spineAngle) + ' ' + str(spineAngleDistrib) + ' ' + \
+        str(spineRotation) + ' ' + str(spineRotationDistrib)
+
 
 def main():
     app = QtGui.QApplication(sys.argv)
@@ -25,8 +39,8 @@ def main():
              synList = (), chanList = (), caTau = 0.0 )
     moose.Neutral( '/model' )
     cell = moose.loadModel( filename, '/model/testSwc' )
-    cell[0].spineSpecification = [ 'spine #apical# 5e-6 1e-6 0.5 0 2 0 2',\
-        'spine #dend# 5e-6 1e-6 0.5 0 2 0 2' ]
+    cell[0].spineSpecification = [ 'spine #apical# '+ spineArgLine, \
+        'spine #dend# ' + spineArgLine ]
     cell[0].parseSpines()
     # moose.le( cell )
     for i in range( 8 ):
