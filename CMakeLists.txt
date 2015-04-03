@@ -40,6 +40,7 @@ set(INSTALL_INCLUDE_DIR include CACHE PATH "${CMAKE_INSTALL_PREFIX}/include/")
 #else()
     #message(WARNING "Continuing with unsupported compiler: ${CMAKE_CXX_COMPILER}")
 #endif()
+#set(CMAKE_CXX_COMPILER "clang++")
 
 ## Turn warning to error
 add_definitions(-Wall
@@ -120,10 +121,6 @@ endif()
 
 # python support: check for interpreter, sip, pyqt4
 FIND_PACKAGE(PythonDev REQUIRED)
-FIND_PACKAGE(SIP REQUIRED)
-FIND_PACKAGE(PyQt4 REQUIRED)
-FIND_PACKAGE(osgQt REQUIRED)
-
 ################################### SETUP BUILD ################################
 include_directories(msg basecode)
 add_executable(moose-bin basecode/main.cpp)
@@ -312,8 +309,13 @@ endif()
 
 ######################################## MOOGLI ################################
 # Moogli as external project
-OPTION(BUILD_MOOGLI "Build moogli extension." ON)
+OPTION(BUILD_MOOGLI "Build moogli extension." OFF)
 IF(BUILD_MOOGLI)
+    FIND_PACKAGE(SIP REQUIRED)
+    FIND_PACKAGE(PyQt4 REQUIRED)
+    FIND_PACKAGE(osgQt REQUIRED)
+
+
     MESSAGE("++ Building MOOGLI")
     #SET(MOOGL_SRC_PATH ${PROJECT_SOURCE_DIR}/python/moogli)
     SET(MOOGLI_BUILD_PATH ${CMAKE_BINARY_DIR}/_moogli)
