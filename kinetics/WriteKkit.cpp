@@ -80,7 +80,7 @@ string trimPath(Id id, Id  comptid)
 {	string path = Field <string> :: get(id,"path");
 	if (comptid != 0)
 	{ 	string comptname = Field < string > :: get(comptid,"name"); 
-	  	size_t pos = path.find( comptname );
+		size_t pos = path.find( comptname );
 	  	return path.substr(pos-1);
 	}
 	else
@@ -202,10 +202,7 @@ void writePool( ofstream& fout, Id id,
 				string colour, string textcolour,
 			 	double x, double y, Id comptid )
 {
-	Id poolparentId = Field <ObjId>  :: get(id,"parent");
 	string poolPar  = Field <string> :: get(comptid,"name");
-	string poolPath = Field <string> :: get(id,"name");
-	string poolname = Field<string> :: get(id, "name");
 	double diffConst = Field< double >::get( id, "diffConst" );
 	double concInit = Field< double >::get( id, "concInit" );
 	double conc = Field< double >::get( id, "conc" );
@@ -217,8 +214,8 @@ void writePool( ofstream& fout, Id id,
 	unsigned int slave_enable = 0;
 	fout << "simundump kpool " << trimPath(id,comptid) << " 0 " <<
 			diffConst << " " <<
-			concInit << " " << 
-			conc << " " <<
+			concInit * 1e3 << " " << 
+			conc * 1e3 << " " <<
 			n << " " <<
 			nInit << " " <<
 			0 << " " << 0 << " " << // mwt, nMin
@@ -411,7 +408,25 @@ void writeMsgs( ofstream& fout, const vector< string >& msgs )
 					i != msgs.end(); ++i )
 			fout << *i << endl;
 }
+void writeGroup(ofstream& fout,Id model)
+{ 	vector < ObjId> group;
+	int x = 10;
+	int y = 20;
+	int num = wildcardFind( model.path() + "/##[TYPE=Neutral]", group );
+	for ( vector< ObjId >::iterator itr = group.begin(); itr != group.end();itr++)
+	{	string path = Field<string>::get(*itr,"path");
+		size_t pos = path.find( "/kinetics" );
+		if (pos != -1)
+		{
+		path = path.substr( pos );
+		fout << "simundump group " << path << " 0 " << 
+			"blue" << " " << "green"	 << " x 0 0 \"\" defaultfile \\\n";
+		fout << "  defaultfile.g 0 0 0 " << x << " " << y << " 0\n";
+		}
 
+	}
+
+}
 void writeKkit( Id model, const string& fname )
 {		ofstream fout( fname.c_str(), ios::out );
 		vector< ObjId > chemCompt;
@@ -425,6 +440,8 @@ void writeKkit( Id model, const string& fname )
 		string fg = "black";
 		double x = 0;
 		double y = 0;
+		writeGroup(fout, model);
+		map < double,Id> compt_vol;
 		unsigned int num = wildcardFind( model.path() + "/##[ISA=ChemCompt]", chemCompt );
 		if ( num == 0 ) {
 			cout << "Warning: writeKkit:: No model found on " << model << 
@@ -444,7 +461,7 @@ void writeKkit( Id model, const string& fname )
       		ostringstream geometry;
 		   	geometry << "simundump geometry /" << comptname <<  "/geometry 0 " << size << " " << ndim << " sphere \"\" white black 0 0 0\n";
 			fout << geometry.str() << endl;	
-			
+			compt_vol.insert(pair< double, Id >(size,*itr));
 			/*  Species */
 			vector< ObjId > Compt_spe;
 		  	wildcardFind(comptPath+"/##[ISA=PoolBase]",Compt_spe);
@@ -498,17 +515,25 @@ void writeKkit( Id model, const string& fname )
 			}// reaction
 		} // Compartment
 	writeGui ( fout);
+
 	/* Table */
+
 	vector< ObjId > table;
 	wildcardFind(model.path()+"/##[ISA=Table2]",table);
+
 	for (vector <ObjId> :: iterator itrT= table.begin();itrT != table.end();itrT++)
 	{ 	
 		string tabPath = Field <string> :: get(*itrT,"path");
 		vector < Id > tabSrc = LookupField <string,vector < Id> >::get(*itrT, "neighbors","requestOut");
 		for (vector <Id> :: iterator tabItem= tabSrc.begin();tabItem != tabSrc.end();tabItem++)
 		{ 	string path = Field <string> :: get(*tabItem,"path");
-			Id parentId = Field <ObjId>  :: get(*tabItem,"parent");
-			string parentname = Field <string>  :: get(parentId,"name");
+			double vol = Field < double> :: get (*tabItem,"Volume");
+			//Trying to find the compartment name via volume
+			//otherwise if we go via parent, sometimes it might 
+			// get groupname so maped compartment Id and volume
+
+			Id parentId = compt_vol[vol];
+			string parentname = Field <string> :: get(parentId,"name");
 			Id annotaId(path+"/info");
 			double x = Field <double> :: get(annotaId,"x");
 	      	double y = Field <double> :: get(annotaId,"y");
