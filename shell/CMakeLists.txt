@@ -6,6 +6,7 @@ add_library(shell
 	LoadModels.cpp 
 	SaveModels.cpp 
 	Neutral.cpp	
+        ShellSetGet.cpp
 	Wildcard.cpp	
 	testShell.cpp	
     )
