@@ -1,11 +1,9 @@
 cmake_minimum_required(VERSION 2.8)
-include_directories(../basecode ../utility ../kinetics ../external/muparser)
+include_directories(../builtins ../basecode ../utility ../kinetics ../external/muparser)
 add_library(ksolve
 	KinSparseMatrix.cpp	
 	ZombiePool.cpp 
         ZombieFunction.cpp
-        KineticHub.cpp
-        StateScanner.cpp
         ZombieBufPool.cpp 
 	ZombieReac.cpp 
 	ZombieEnz.cpp 
