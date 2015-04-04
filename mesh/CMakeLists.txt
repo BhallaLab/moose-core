@@ -13,6 +13,5 @@ add_library(mesh
     SpineEntry.cpp
     SpineMesh.cpp
     PsdMesh.cpp
-    Boundary.cpp
     testMesh.cpp	
     )
