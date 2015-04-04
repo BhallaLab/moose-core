@@ -17,5 +17,6 @@ add_library(moose_builtins
     Interpol2D.cpp
     HDF5WriterBase.cpp
     HDF5DataWriter.cpp
+    SpikeStats.cpp
     testBuiltins.cpp
     )
