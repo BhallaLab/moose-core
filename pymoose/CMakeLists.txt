@@ -5,6 +5,7 @@ add_library(moosepython
     vec.cpp
     mfield.cpp
     pymooseinit.cpp
+    PyRun.cpp
     melement.cpp
     test_moosemodule.cpp 
     )

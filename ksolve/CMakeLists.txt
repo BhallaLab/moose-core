@@ -3,8 +3,10 @@ include_directories(../basecode ../utility ../kinetics ../external/muparser)
 add_library(ksolve
 	KinSparseMatrix.cpp	
 	ZombiePool.cpp 
+        ZombieFunction.cpp
+        KineticHub.cpp
+        StateScanner.cpp
         ZombieBufPool.cpp 
-        #ZombieFuncPool.cpp 
 	ZombieReac.cpp 
 	ZombieEnz.cpp 
 	ZombieMMenz.cpp 
