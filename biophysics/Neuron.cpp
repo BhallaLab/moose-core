@@ -167,6 +167,13 @@ const Cinfo* Neuron::initCinfo()
 		"the dendrite.",
 		&Neuron::getElecDistFromSoma
 	);
+	static ReadOnlyValueFinfo< Neuron, vector< ObjId > > compartments( 
+		"compartments",
+		"Vector of ObjIds of electricalcompartments. Order matches order "
+		"of segments, and also matches the order of the electrotonic and "
+		"geometricalDistranceFromSoma vectors. ",
+		&Neuron::getCompartments
+	);
 
 	/////////////////////////////////////////////////////////////////////
 	// DestFinfos
@@ -299,6 +306,7 @@ const Cinfo* Neuron::initCinfo()
 		&numBranches,				// ReadOnlyValueFinfo
 		&geomDistFromSoma,			// ReadOnlyValueFinfo
 		&elecDistFromSoma,			// ReadOnlyValueFinfo
+		&compartments,				// ReadOnlyValueFinfo
 		&channelDistribution,		// ValueFinfo
 		&spineSpecification,		// ValueFinfo
 		&buildSegmentTree,			// DestFinfo
@@ -440,12 +448,12 @@ double Neuron::getCompartmentLengthInLambdas() const
 
 unsigned int Neuron::getNumCompartments() const
 {
-	return 0;
+	return segId_.size();
 }
 
 unsigned int Neuron::getNumBranches() const
 {
-	return 0;
+	return branches_.size();
 }
 
 vector< double> Neuron::getGeomDistFromSoma() const
@@ -461,6 +469,14 @@ vector< double> Neuron::getElecDistFromSoma() const
 	vector< double > ret( segs_.size(), 0.0 );
 	for ( unsigned int i = 0; i < segs_.size(); ++i )
 		ret[i] = segs_[i].getElecDistFromSoma();
+	return ret;
+}
+
+vector< ObjId > Neuron::getCompartments() const
+{
+	vector< ObjId > ret( segId_.size() );
+	for ( unsigned int i = 0; i < segId_.size(); ++i )
+		ret[i] = segId_[i];
 	return ret;
 }
 
@@ -588,6 +604,11 @@ void Neuron::buildSegmentTree( const Eref& e )
 	Neutral::children( e, kids );
 
 	Id soma = fillSegIndex( kids, segIndex_ );
+	if ( kids.size() == 0 || soma == Id() ) {
+		cout << "Error: Neuron::buildSegmentTree( " << e.id().path() <<
+				" ): \n		Valid neuronal model not found.\n";
+		return;
+	}
 	fillSegments( segs_, segIndex_, kids );
 	int numPa = 0;
 	for ( unsigned int i = 0; i < segs_.size(); ++i ) {
@@ -638,20 +659,20 @@ static Id acquireChannel( Shell* shell, const string& name, ObjId compt )
 }
 
 static void assignParam( Shell* shell, ObjId compt
-				, double val, const string& name )
+				, double val, const string& name, double len, double dia )
 {
 	// Only permit chans with val greater than zero.
 	if ( val > 0.0 ) {
-		if ( name == "Rm" ) {
-			Field< double >::set( compt, "Rm", val );
-		} else if ( name == "Ra" ) {
-			Field< double >::set( compt, "Ra", val );
-		} else if ( name == "Cm" ) {
-			Field< double >::set( compt, "Cm", val );
+		if ( name == "Rm" || name == "RM" ) {
+			Field< double >::set( compt, "Rm", val / ( len  * dia * PI ) );
+		} else if ( name == "Ra" || name == "RA" ) {
+			Field< double >::set( compt, "Ra", val*len*4 / (dia*dia*PI) );
+		} else if ( name == "Cm" || name == "CM" ) {
+			Field< double >::set( compt, "Cm", val * len * dia * PI );
 		} else {
 			Id chan = acquireChannel( shell, name, compt );
 			if ( chan.element()->cinfo()->isA( "ChanBase" ) ) {
-				Field< double >::set( chan, "Gbar", val );
+				Field< double >::set( chan, "Gbar", val * len * dia * PI );
 			} else if ( chan.element()->cinfo()->isA( "CaConcBase" ) ) {
 				Field< double >::set( chan, "B", val );
 			}
@@ -692,7 +713,7 @@ void Neuron::evalChanParams(
 				L = segs_[ j->second ].getElecDistFromSoma();
 
 				double val = parser.Eval();
-				assignParam( shell, *i, val, name );
+				assignParam( shell, *i, val, name, len, dia );
 			}
 		}
 	}
@@ -1043,6 +1064,7 @@ void Neuron::insertSpines( const Eref& e, Id spineProto, string path,
 	double& angleDistrib = args[4];
 	double& rotation = args[5];
 	double& rotationDistrib = args[6];
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 
 	vector< ObjId > somaList;
 	wildcardFind( e.id().path() + "/#soma#", somaList );
@@ -1052,10 +1074,12 @@ void Neuron::insertSpines( const Eref& e, Id spineProto, string path,
 		args[i] = placement[i];
 	}
 
-	if ( path[0] == '/' )
-		wildcardFind( path, parentList );
-	else 
-		wildcardFind( e.id().path() + "/" + path, parentList );
+	// Do this juggle with cwe so that we can handle rel as well as
+	// absolute paths.
+	ObjId oldCwe = shell->getCwe();
+	shell->setCwe( e.objId() );
+	wildcardFind( path, parentList );
+	shell->setCwe( oldCwe );
 	for ( unsigned int i = 0; i < parentList.size(); ++i ) {
 		Vec x, y, z;
 		double dendLength = coordSystem( soma, parentList[i], x, y, z );

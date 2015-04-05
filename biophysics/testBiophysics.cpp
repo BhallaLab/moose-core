@@ -1559,6 +1559,7 @@ static void testNeuronBuildTree()
 	assert( doubleEq( g[1], 100.0e-6 ) );
 	assert( doubleEq( g[2], 300.0e-6 ) ); // 100 + 200 microns
 	assert( doubleEq( g[3], 600.0e-6 ) ); // 100 + 500 microns
+	shell->doDelete( nid );
 }
 
 
