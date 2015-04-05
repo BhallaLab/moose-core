@@ -39,6 +39,7 @@ class Neuron
 		unsigned int getNumBranches() const;
 		vector< double> getGeomDistFromSoma() const;
 		vector< double> getElecDistFromSoma() const;
+		vector< ObjId > getCompartments() const;
 		void setChannelDistribution( vector< string > v );
 		vector< string > getChannelDistribution() const;
 		void setSpineSpecification( vector< string > v );

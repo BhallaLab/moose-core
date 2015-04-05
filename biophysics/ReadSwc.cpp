@@ -18,7 +18,8 @@
 #include <fstream>
 
 // Minimum allowed radius of segment, in microns
-static const double MinRadius = 0.05; 
+// Believe it or not, some otherwise reasonable files do have smaller radii
+static const double MinRadius = 0.04; 
 
 ReadSwc::ReadSwc( const string& fname )
 {
