@@ -3,6 +3,8 @@
 
 Last modified: Sat Jan 18, 2014  05:01PM
 
+NOTE: Run in this directory only.
+
 """
     
 __author__           = "Dilawar Singh"
@@ -35,8 +37,9 @@ def checkMissingCMake():
         print("Following directories have Makefile but not a CMakeFiles.txt file.")
         print("%s" % "\t\n".join(makedirs - cmakedirs))
 
-def searchMakefiles(d):
-    for d, subd, fs in os.walk(d):
+def searchMakefiles(topdir):
+    for d, subd, fs in os.walk(topdir):
+        if "../_build" in d or ".." == d: continue
         if "CMakeLists.txt" in fs:
             cmakedirs.add(d)
             cmakefiles[d] = fs
@@ -79,8 +82,8 @@ def checkSrcs():
                     srcName))
     
 def main():
-    dir = sys.argv[1]
-    check(dir)
+    test_dir = sys.argv[1]
+    check(test_dir)
 
 
 if __name__ == '__main__':

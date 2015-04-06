@@ -4,6 +4,8 @@ add_library(ksolve
 	KinSparseMatrix.cpp	
 	ZombiePool.cpp 
         ZombieFunction.cpp
+        KineticHub.cpp
+        StateScanner.cpp
         ZombieBufPool.cpp 
 	ZombieReac.cpp 
 	ZombieEnz.cpp 
