@@ -88,6 +88,11 @@ else()
     add_definitions(-DQUIET_MODE)
 endif()
 
+option(ENABLE_CUDA "Enable GPU acceleration" ON)
+if(ENABLE_CUDA)
+    FIND_PACKAGE(CUDA REQUIRED)
+endif()
+
 # STATS INSIDE MOOSE
 option(ENABLE_LOGGER  "Enable MOOSE logger" OFF)
 if(ENABLE_LOGGER)
