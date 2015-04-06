@@ -24,6 +24,7 @@ add_library(basecode
 	HopFunc.cpp 
 	SparseMatrix.cpp 
 	doubleEq.cpp 
+        SparseMsg.cpp
         #PrepackedBuffer.cpp
 	testAsync.cpp	
     )
