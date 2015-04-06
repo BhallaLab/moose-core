@@ -139,6 +139,16 @@ public:
 
     set_analog_event_parameters(double parameter_normalization_factor);
 */
+
+    void
+    set_color( double value
+             , double base_value
+             , double peak_value
+             , Vec4f& base_color
+             , Vec4f& peak_color
+             );
+
+
     void
     set_membrane_voltage( double vm
                         , double peak_vm

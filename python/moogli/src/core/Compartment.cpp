@@ -100,7 +100,8 @@ Compartment::create_geometry( unsigned int lod_resolution
         for(unsigned int i = 0; i < lod_resolution; ++i)
         {
             geometries[i] = cylinder( _center
-                                   , _radius
+                                    , _distal_d   / 2.0
+                                    , _proximal_d / 2.0
                                    , _height
                                    , _direction
                                    , points
@@ -115,12 +116,32 @@ Compartment::create_geometry( unsigned int lod_resolution
 }
 
 void
-Compartment::_set_chromostat( double vm
-                            , double base_vm
-                            , double peak_vm
+Compartment::set_color( double value
+                      , double base_value
+                      , double peak_value
+                      , Vec4f& base_color
+                      , Vec4f& peak_color
+                      )
+{
+    _set_chromostat(value, base_value, peak_value);
+    // RECORD_INFO("Chromostat : " + to_string(_chromostat));
+    Vec4f color = base_color + (peak_color - base_color) * _chromostat;
+    Vec4Array * colors = new Vec4Array();
+    colors -> push_back(color);
+    for(auto & geometry : geometries)
+    {
+        geometry -> setColorArray(colors);
+        geometry -> setColorBinding( osg::Geometry::BIND_OVERALL );
+    }
+}
+
+void
+Compartment::_set_chromostat( double value
+                            , double base_value
+                            , double peak_value
                             )
 {
-    _chromostat = (vm - base_vm) / (peak_vm - base_vm);
+    _chromostat = (value - base_value) / (peak_value - base_value);
     if(_chromostat > 1.0)         { _chromostat = 1.0; }
     else if(_chromostat < 0.0)    { _chromostat = 0.0; }
 }

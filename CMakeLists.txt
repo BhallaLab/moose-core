@@ -40,6 +40,7 @@ set(INSTALL_INCLUDE_DIR include CACHE PATH "${CMAKE_INSTALL_PREFIX}/include/")
 #else()
     #message(WARNING "Continuing with unsupported compiler: ${CMAKE_CXX_COMPILER}")
 #endif()
+#set(CMAKE_CXX_COMPILER "clang++")
 
 ## Turn warning to error
 add_definitions(-Wall
@@ -65,7 +66,7 @@ else()
 endif()
 
 # DO UNIT TESTS 
-set(ENABLE_UNIT_TESTS 0)
+option(ENABLE_UNIT_TESTS "ENABLE UNIT TESTS IN MOOSE" ON)
 if(ENABLE_UNIT_TESTS)
     MESSAGE("++ Unit testing enabled.")
     add_definitions(-DDO_UNIT_TESTS)
@@ -77,7 +78,7 @@ if(VERIFY)
 endif(VERIFY)
 
 # VERBOSITY OF OUTPUT
-option(VERBOSITY "SET MOOSE VERBOSITY LEVEL" 0)
+option(VERBOSITY "SET MOOSE VERBOSITY LEVEL" 1)
 if(VERBOSITY)
     message("++ Verbosity of output is ${VERBOSITY}. This is not implemented
     yet!")
@@ -97,7 +98,7 @@ endif()
 # Default macros
 add_definitions(-DUSE_GENESIS_PARSER)
 
-option(DEBUG "Building with debugging support" 0)
+option(DEBUG "Building with debugging support" ON)
 if(DEBUG)
     set(CMAKE_BUILD_TYPE Debug)
 else()
@@ -107,23 +108,24 @@ endif()
 
 find_package(GSL 1.16 REQUIRED)
 
-find_package(LIBSBML)
-if(NOT LIBSBML_FOUND)
-    MESSAGE("+ LIBSBML NOT FOUND.  Disabling SBML support.")
-    ADD_DEFINITIONS(-UUSE_SBML)
+option(ENABLE_SBML "Enable SBML support" ON)
+if(ENABLE_SBML)
+    find_package(LIBSBML)
+    if(NOT LIBSBML_FOUND)
+        MESSAGE("+ LIBSBML NOT FOUND.  Disabling SBML support.")
+        ADD_DEFINITIONS(-UUSE_SBML)
+    else()
+        ADD_DEFINITIONS(-DUSE_SBML)
+        include_directories(${LIBSBML_INCLUDE_DIR})
+        find_package(BZip2 REQUIRED)
+        find_package(LibXML2 REQUIRED)
+    endif()
 else()
-    ADD_DEFINITIONS(-DUSE_SBML)
-    include_directories(${LIBSBML_INCLUDE_DIR})
-    find_package(BZip2 REQUIRED)
-    find_package(LibXML2 REQUIRED)
-endif()
+    SET(LIBSBML_FOUND FALSE)
+ENDIF()
 
 # python support: check for interpreter, sip, pyqt4
 FIND_PACKAGE(PythonDev REQUIRED)
-FIND_PACKAGE(SIP REQUIRED)
-FIND_PACKAGE(PyQt4 REQUIRED)
-FIND_PACKAGE(osgQt REQUIRED)
-
 ################################### SETUP BUILD ################################
 include_directories(msg basecode)
 add_executable(moose-bin basecode/main.cpp)
@@ -224,6 +226,7 @@ set(MOOSE_LIBRARIES
     randnum
     scheduling
     moose_mpi
+    biophysics 
     utility 
     muparser
     kinetics 
@@ -231,7 +234,6 @@ set(MOOSE_LIBRARIES
     mesh
     signeur
     tinyxml
-    biophysics 
     synapse
     diffusion 
     basecode
@@ -242,12 +244,14 @@ set(MOOSE_LIBRARIES
 
 target_link_libraries(moose
     ${MOOSE_LIBRARIES}
-    ${LOCAL_GSL_LIBRARIES}
     ${LIBRARIES}
     )
 
 target_link_libraries(moose-bin 
-    moose
+    "-Wl,--whole-archive"
+    ${MOOSE_LIBRARIES}
+    ${LIBRARIES}
+    "-Wl,--no-whole-archive"
     )
 
 ######################### BUILD PYMOOSE ########################################
@@ -312,8 +316,13 @@ endif()
 
 ######################################## MOOGLI ################################
 # Moogli as external project
-OPTION(BUILD_MOOGLI "Build moogli extension." ON)
+OPTION(BUILD_MOOGLI "Build moogli extension." OFF)
 IF(BUILD_MOOGLI)
+    FIND_PACKAGE(SIP REQUIRED)
+    FIND_PACKAGE(PyQt4 REQUIRED)
+    FIND_PACKAGE(osgQt REQUIRED)
+
+
     MESSAGE("++ Building MOOGLI")
     #SET(MOOGL_SRC_PATH ${PROJECT_SOURCE_DIR}/python/moogli)
     SET(MOOGLI_BUILD_PATH ${CMAKE_BINARY_DIR}/_moogli)

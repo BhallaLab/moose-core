@@ -314,6 +314,7 @@ void Gsolve::setRandInit( bool val )
 //////////////////////////////////////////////////////////////
 void Gsolve::process( const Eref& e, ProcPtr p )
 {
+	// cout << stoichPtr_ << "	dsolve = " <<	dsolvePtr_ << endl;
 	if ( !stoichPtr_ )
 		return;
 	// First, handle incoming diffusion values. Note potential for
@@ -329,14 +330,17 @@ void Gsolve::process( const Eref& e, ProcPtr p )
 		// one would use a stochastic (integral) diffusion method with 
 		// the GSSA, but in mixed models it may be more complicated.
 		vector< double >::iterator i = dvalues.begin() + 4;
-		for ( ; i != dvalues.end(); ++i )
+		for ( ; i != dvalues.end(); ++i ) {
+		//	cout << *i << "	" << round( *i ) << "		";
 			*i = round( *i );
+		}
 		setBlock( dvalues );
 	}
 	// Second, take the arrived xCompt reac values and update S with them.
 	// Here the roundoff issues are handled by the GssaVoxelPools functions
 	for ( unsigned int i = 0; i < xfer_.size(); ++i ) {
 		XferInfo& xf = xfer_[i];
+		// cout << xfer_.size() << "	" << xf.xferVoxel.size() << endl;
 		for ( unsigned int j = 0; j < xf.xferVoxel.size(); ++j ) {
 			pools_[xf.xferVoxel[j]].xferIn( xf, j, &sys_ );
 		}
@@ -615,7 +619,18 @@ unsigned int Gsolve::getVoxelIndex( const Eref& e ) const
 
 void Gsolve::setDsolve( Id dsolve )
 {
-		;
+	if ( dsolve == Id () ) {
+		dsolvePtr_ = 0;
+		dsolve_ = Id();
+	} else if ( dsolve.element()->cinfo()->isA( "Dsolve" ) ) {
+		dsolve_ = dsolve;
+		dsolvePtr_ = reinterpret_cast< ZombiePoolInterface* >( 
+						dsolve.eref().data() );
+	} else {
+		cout << "Warning: Gsolve::setDsolve: Object '" << dsolve.path() <<
+				"' should be class Dsolve, is: " << 
+				dsolve.element()->cinfo()->name() << endl;
+	}
 }
 
 

@@ -1,4 +1,4 @@
-include_directories(../basecode ../synapse)
+include_directories(../basecode ../synapse ../utility)
 add_library(biophysics 
 	IntFire.cpp	
 	SpikeGen.cpp	
@@ -22,8 +22,10 @@ add_library(biophysics
         Nernst.cpp
 	Neuron.cpp	
 	ReadCell.cpp	
-	#SynChanBase.cpp	
+        SwcSegment.cpp
+        ReadSwc.cpp
 	SynChan.cpp	
+        NMDAChan.cpp
 	testBiophysics.cpp	
 	IzhikevichNrn.cpp	
 	DifShell.cpp	
@@ -40,5 +42,4 @@ add_library(biophysics
 	# GapJunction.cpp	
 	# GHK.cpp		
 	# NMDAChan.cpp	
-        testBiophysics.cpp
     )

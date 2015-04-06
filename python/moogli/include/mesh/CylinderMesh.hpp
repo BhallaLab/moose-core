@@ -37,7 +37,8 @@ public:
 
     Geometry *
     operator()( Vec3f        center     = Vec3f(0.0f, 0.0f, 0.0f)
-              , float        radius     = 1.0f
+              , float        upper_radius = 1.0f
+              , float        lower_radius = 1.0f
               , float        height     = 1.0f
               , Vec3f        direction  = Vec3f(0.0f, 0.0f, 1.0f)
               , unsigned int points     = 10

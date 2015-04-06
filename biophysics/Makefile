@@ -31,6 +31,8 @@ OBJ = \
 	Nernst.o	\
 	Neuron.o	\
 	ReadCell.o	\
+	SwcSegment.o	\
+	ReadSwc.o	\
 	SynChan.o	\
 	NMDAChan.o	\
 	testBiophysics.o	\
@@ -73,7 +75,7 @@ SymCompartment.o: CompartmentBase.h Compartment.h SymCompartment.h
 ChanBase.o: ChanBase.h
 ChanCommon.o: ChanBase.h ChanCommon.h
 SynChan.o: SynChan.h ChanBase.h ChanCommon.h
-NMDAchan.o: NMDAChan.h SynChan.h ChanBase.h ChanCommon.h
+NMDAChan.o: NMDAChan.h SynChan.h ChanBase.h ChanCommon.h
 Leakage.o: Leakage.h ChanBase.h ChanCommon.h
 GapJunction.o: GapJunction.h
 HHChannelBase.o: ChanBase.h HHChannelBase.h HHGate.h
@@ -85,8 +87,10 @@ CaConcBase.o:	CaConcBase.h
 CaConc.o:	CaConcBase.h CaConc.h
 MgBlock.o:	MgBlock.h ChanBase.h
 Nernst.o:	Nernst.h
-Neuron.o:	Neuron.h
+Neuron.o:	Neuron.h SwcSegment.h
 ReadCell.o: CompartmentBase.h Compartment.h SymCompartment.h ReadCell.h ../shell/Shell.h ../utility/utility.h
+SwcSegment.o: SwcSegment.h ../utility/Vec.h
+ReadSwc.o: CompartmentBase.h Compartment.h SymCompartment.h SwcSegment.h ReadSwc.h ../shell/Shell.h ../utility/Vec.h
 IzhikevichNrn.o: IzhikevichNrn.h
 DifShell.o: DifShell.h
 testBiophysics.o: IntFire.h CompartmentBase.h Compartment.h HHChannel.h HHGate.h 

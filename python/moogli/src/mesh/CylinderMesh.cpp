@@ -106,7 +106,8 @@ CylinderMesh::unit(unsigned int points)
 
 Geometry *
 CylinderMesh::operator()( Vec3f        center
-                        , float        radius
+                        , float        upper_radius
+                        , float        lower_radius
                         , float        height
                         , Vec3f        direction
                         , unsigned int points
@@ -139,8 +140,8 @@ CylinderMesh::operator()( Vec3f        center
 
     for(i = 0; i < unit_vertices -> size() / 2; ++i)
     {
-        temp_vertex.set( radius * (*unit_vertices)[i][0]
-                       , radius * (*unit_vertices)[i][1]
+        temp_vertex.set( upper_radius * (*unit_vertices)[i][0]
+                       , upper_radius * (*unit_vertices)[i][1]
                        , height/2.0f
                        );
         (*vertices)[i] = rotate * temp_vertex + center;
@@ -150,8 +151,8 @@ CylinderMesh::operator()( Vec3f        center
 
     for(; i < unit_vertices -> size(); ++i)
     {
-        temp_vertex.set( radius * (*unit_vertices)[i][0]
-                       , radius * (*unit_vertices)[i][1]
+        temp_vertex.set( lower_radius * (*unit_vertices)[i][0]
+                       , lower_radius * (*unit_vertices)[i][1]
                        , -height/2.0f
                        );
         (*vertices)[i] = rotate * temp_vertex + center;

@@ -18,10 +18,69 @@
 class Neuron
 {
 	public:
-			/**
-			 * Initializes the class info.
-			 */
-			static const Cinfo* initCinfo();
+		Neuron();
+		void setRM( double v );
+		double getRM() const;
+		void setRA( double v );
+		double getRA() const;
+		void setCM( double v );
+		double getCM() const;
+		void setEm( double v );
+		double getEm() const;
+		void setTheta( double v );
+		double getTheta() const;
+		void setPhi( double v );
+		double getPhi() const;
+		void setSourceFile( string v );
+		string getSourceFile() const;
+		void setCompartmentLengthInLambdas( double v );
+		double getCompartmentLengthInLambdas() const;
+		unsigned int getNumCompartments() const;
+		unsigned int getNumBranches() const;
+		vector< double> getGeomDistFromSoma() const;
+		vector< double> getElecDistFromSoma() const;
+		vector< ObjId > getCompartments() const;
+		void setChannelDistribution( vector< string > v );
+		vector< string > getChannelDistribution() const;
+		void setSpineSpecification( vector< string > v );
+		vector< string > getSpineSpecification() const;
+
+		void buildSegmentTree( const Eref& e );
+
+		void insertSpines( const Eref& e, Id spineProto, string path,
+			vector< double > placement );
+		void parseSpines( const Eref& e );
+		void clearSpines( const Eref& e );
+
+		void assignChanDistrib( const Eref& e,
+			string name, string path, string func );
+		void clearChanDistrib( const Eref& e,
+			string name, string path );
+		void parseChanDistrib( const Eref& e );
+		void evalChanParams( const string& name, const string& func, 
+						vector< ObjId >& elist );
+		/**
+		 * Initializes the class info.
+		 */
+		static const Cinfo* initCinfo();
+	private:
+		double RM_;
+		double RA_;
+		double CM_;
+		double Em_;
+		double theta_;
+		double phi_;
+		string sourceFile_;
+		double compartmentLengthInLambdas_;
+		unsigned int spineIndex_;
+		vector< string > channelDistribution_;
+		vector< string > spineSpecification_;
+
+		/// Map to look up Seg index from Id of associated compt.
+		map< Id, unsigned int > segIndex_; 
+		vector< Id > segId_; /// Id of each Seg entry, below.
+		vector< SwcSegment > segs_;
+		vector< SwcBranch > branches_;
 
 };
 

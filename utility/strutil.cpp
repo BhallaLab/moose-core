@@ -65,8 +65,33 @@ std::string trim(const std::string myString, const string& delimiters)
     return "";    
 }
 
+std::string fix(const std::string userPath, const string& delimiters)
+{
+    string trimmedPath = trim(userPath, delimiters);
+
+    string fixedPath;
+
+    // In this loop, we check if there are more than one '/' together. If yes,
+    // then accept only first one and reject other.
+    for(unsigned int i = 0; i < trimmedPath.size(); ++i)
+    {
+        const char c = trimmedPath[i];
+        if('/' == c)
+        {
+            if('/' != fixedPath[fixedPath.size()-1])
+                fixedPath.push_back(c);
+        }
+        else
+            fixedPath.push_back(c);
+
+    }
+    return fixedPath;
+}
+
+
 int testTrim()
 {
+
     std::string testStrings [] = 
         {
             " space at beginning",

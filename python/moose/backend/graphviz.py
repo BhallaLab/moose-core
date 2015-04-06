@@ -3,7 +3,7 @@
 """graph_utils.py: Graph related utilties. It does not require networkx library.
 It writes files to be used with graphviz.
 
-Last modified: Sat Feb 14, 2015  06:19PM
+Last modified: Fri Mar 13, 2015  06:08PM
 
 """
     
@@ -39,6 +39,14 @@ def textToColor(text):
     textVal = '#{}'.format(textVal[2:])
     return textVal
 
+def short_label(label, len=-1):
+    assert type(label) == str
+    label = label.split('/')[-1]
+    label = re.sub(r'\[\d+\]', '', label)
+    if len >= 0:
+        label = label[0:len]
+    return label
+
 ##
 # @brief Write a graphviz file.
 class DotFile():
@@ -53,6 +61,9 @@ class DotFile():
         self.channelShape = 'doublecircle'
         self.synChanShape = 'Mcircle'
         self.synapseShape = 'star'
+        self.bufpoolShape = 'egg'
+        self.enzShape = 'star'
+        self.reacShape = 'rect'
         self.defaultNodeShape = 'point'
         self.nodes = set()
         # Keep nodes belonging to a subgraph/cluster.
@@ -101,7 +112,7 @@ class DotFile():
                 typeNode = kwargs[k]
                 if typeNode == moose.Compartment:
                     params['shape'] = self.compShape
-                    params['label'] = self.label(nodeName)
+                    params['label'] = short_label(nodeName, 0)
                 elif typeNode == moose.HHChannel:
                     params = self.addHHCHannelNode(node, params)
                 elif typeNode == moose.SimpleSynHandler:
@@ -109,6 +120,15 @@ class DotFile():
                 elif typeNode == moose.SynChan:
                     params['shape'] = self.synChanShape
                     params['label'] = ''
+                elif typeNode == moose.ZombiePool:
+                    params['shape'] = self.bufpoolShape
+                    params['label'] = short_label(nodeName)
+                elif typeNode == moose.ZombieEnz:
+                    params['shape'] = self.enzShape
+                    params['label'] = short_label(nodeName)
+                elif typeNode == moose.ZombieReac:
+                    params['shape'] = self.reacShape
+                    params['label'] = short_label(nodeName)
                 else:
                     params['shape'] = self.defaultNodeShape
                     pass
@@ -126,7 +146,7 @@ class DotFile():
         node1 = self.fix(elem1.path)
         node2 = self.fix(elem2.path)
         if type(elem1) == type(elem2):
-            kwargs['dir'] = 'both'
+            kwargs['dir'] = 'none'
         elif type(elem1) == moose.HHChannel or type(elem2) == moose.HHChannel:
             kwargs['len'] = 0.1
             kwargs['weight'] = 10
@@ -140,8 +160,7 @@ class DotFile():
             #kwargs['len'] = 0.2
             pass
         else:
-            kwargs['len'] = 0.2
-            kwargs['weight'] = 100
+            #kwargs['len'] = 0.2
             kwargs['dir'] = 'none'
 
         # Between objects of same type, do not add multiple edges.
@@ -193,20 +212,10 @@ class DotFile():
                     self.__total_synapses__ += 1
                     self.addEdge(pre, post, arrowhead='box')
 
-    def addPulseGen(self, pulseGen, compartments):
-        """Add a pulse-generator to dotfile """
-        nodeName = pulseGen.path
-        self.addNode(nodeName, shape=self.pulseShape)
-        for c in compartments:
-            self.addEdge(pulseGen, c, color='red', label='pulse') 
-
-
-    def addTable(self, table, sources):
-        """Add sources to table """
-        nodeName = table.path
-        self.addNode(nodeName, shape=self.tableShape)
-        for s in sources:
-            self.addEdge(s, table, label='table', color='blue')
+    def addChemElement(self, chemNode):
+        """Add a given moose.element representing chemical element to dot
+        file"""
+        self.addNode(chemNode)
 
 
     def writeDotFile(self, fileName, options):
@@ -233,8 +242,10 @@ class DotFile():
 
         dotText += '\n'.join(self.textDict['nodes'])
         dotText += '\n'.join(self.textDict['edges'])
-        dotText =  dotText + "\n}"
+        dotText += "\n}"
 
+        # If nodes_shape parameter is given, then draw all nodes with this
+        # shape.
         globalNodeShape = options.get('nodes_shape', None)
         if globalNodeShape:
             dotText = re.sub(r'shape=\"\w+\"'
@@ -291,7 +302,7 @@ def getConnectedCompartments(obj):
 # @brief Write a graphviz topology file.
 #
 # @param filename Name of the output file.
-# @param pat If set only this pat is searched, else every electrical and
+# @param root If set only this pat is searched, else every electrical and
 # chemical compartment is searched and dumped to graphviz file.
 # @param cluster. When set to true, cluster nodes together as per the root of their
 # path e.g. /library/cell1 and /library/cell2 are grouped together because they
@@ -300,7 +311,7 @@ def getConnectedCompartments(obj):
 # @param add_recorders (False). If true add tables to graph as well.
 #
 # @return None. 
-def writeGraphviz(filename=None, pat='/##', cluster=True, ignore=None, **kwargs):
+def writeGraphviz(filename=None, root='', cluster=True, ignore=None, **kwargs):
     '''This is  a generic function. It takes the the pattern, search for paths
     and write a graphviz file.
     '''
@@ -314,7 +325,7 @@ def writeGraphviz(filename=None, pat='/##', cluster=True, ignore=None, **kwargs)
             )
 
     if not backend.moose_elems.filled:
-        backend.moose_elems.populateStoreHouse()
+        backend.moose_elems.populateStoreHouse(root=root)
 
     b = backend.moose_elems
     ignorePat = re.compile(r'^abcd')
@@ -322,49 +333,44 @@ def writeGraphviz(filename=None, pat='/##', cluster=True, ignore=None, **kwargs)
         ignorePat = re.compile(r'%s' % ignore, re.I)
         dotFile.setIgnorePat(ignorePat)
 
-    #chemList = b.filterPaths(b.chemEntities, ignorePat)
+    chemList = b.filterPaths(b.chemEntities, ignorePat)
+    [ dotFile.addChemElement(c) for c in chemList ]
+
     header = ["digraph mooseG{"]
     header.append('\ngraph[];')
     dotFile.textDict['header'].append('\n'.join(header))
     
-    # Write messages are edges.
     for sm in b.msgs['SingleMsg']:
         srcs, tgts = b.filterPaths(sm.e1, ignorePat), b.filterPaths(sm.e2, ignorePat)
         for i, src in enumerate(srcs):
             tgt = tgts[i]
             if type(src) == moose.SimpleSynHandler:
                 dotFile.addSynHandler(src, tgt)
+            elif type(src) == moose.Table or type(tgt) == moose.Table:
+                pass
+            elif type(src) == moose.PulseGen or type(tgt) == moose.PulseGen:
+                pass
+            elif type(src) == moose.SpikeGen or type(tgt) == moose.SpikeGen:
+                pass
             else:
                 dotFile.addNode(src)
                 dotFile.addNode(tgt)
                 dotFile.addEdge(src, tgt)
     print_utils.dump("TODO", "OneToAllMsgs are not added to graphviz file")
             
-    # Now add the pulse-gen 
-    pulseGens = b.pulseGens
-    for p in pulseGens:
-        comps = getConnectedCompartments(p)
-        dotFile.addPulseGen(p, comps)
-        
-    # Now add tables
-    recorders = kwargs.get('add_recorders', False)
-    if recorders:
-        tables = b.tables 
-        for t in tables:
-            sources = t.neighbors['requestOut']
-            dotFile.addTable(t, sources)
-
     # If cluster is True then cluster the compartments together. Also create a
     # dictionary from which we can fetch the clustername of a compartment.
     # NOTE: THIS MUST BE THE LAST STEP BEFORE WRITING TO GRAPHVIZ FILE.
     subgraphDict = {}
     if cluster:
+        print_utils.info("Clustering nodes together")
         pops = b.clusterNodes()
         for pop in pops:
             clustername = pop.translate(None, '/[]')
             subgraphDict[clustername] = pops[pop]
             for x in pops[pop]: dotFile.subgraphDict[x] = clustername
     dotFile.textDict['subgraphs'] = subgraphDict
+
     dotFile.writeDotFile(filename, kwargs)
     return True
 

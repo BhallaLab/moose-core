@@ -1496,12 +1496,79 @@ void testNMDAChan()
 }
 #endif
 
+static Id addCompartment( const string& name, 
+				Id neuron, Id parent, 
+				double dx, double dy, double dz, double dia )
+{
+	static Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	double x0 = 0.0;
+	double y0 = 0.0;
+	double z0 = 0.0;
+	Id compt = shell->doCreate( "Compartment", neuron, name, 1 );
+	if ( parent != Id() ) {
+		ObjId mid = shell->doAddMsg( "single", 
+			parent, "axial", compt, "raxial" );
+		assert( mid != Id() );
+		x0 = Field< double >::get( parent, "x" );
+		y0 = Field< double >::get( parent, "y" );
+		z0 = Field< double >::get( parent, "z" );
+	}
+	Field< double >::set( compt, "x0", x0 );
+	Field< double >::set( compt, "y0", y0 );
+	Field< double >::set( compt, "z0", z0 );
+	Field< double >::set( compt, "x", x0 + dx );
+	Field< double >::set( compt, "y", y0 + dy );
+	Field< double >::set( compt, "z", z0 + dz );
+	double length = sqrt( dx*dx + dy*dy + dz*dz );
+	Field< double >::set( compt, "length", length );
+	Field< double >::set( compt, "diameter", dia );
+	Field< double >::set( compt, "Rm", 1.0 / ( PI * length * dia ) );
+	Field< double >::set( compt, "Cm", 0.01 * ( PI * length * dia ) );
+	Field< double >::set( compt, "Ra", 1 * length / ( PI*0.25*dia*dia ) );
+	return compt;
+}
+
+static void testNeuronBuildTree()
+{
+	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
+
+	Id nid = shell->doCreate( "Neuron", Id(), "n", 1 );
+	double somaDia = 5e-6;
+	double dendDia = 2e-6;
+	double branchDia = 1e-6;
+	Id soma = addCompartment ( "soma", nid, Id(), 10e-6, 0, 0, somaDia );
+	Id dend1 = addCompartment ( "dend1", nid, soma, 100e-6, 0, 0, dendDia);
+	Id branch1 = addCompartment ( "branch1", nid, dend1, 0, 200e-6, 0, branchDia );
+	Id branch2 = addCompartment ( "branch2", nid, dend1, 0, -500e-6, 0, branchDia );
+
+	SetGet0::set( nid, "buildSegmentTree" );
+
+	vector< double > e = Field< vector< double > >::get(
+					nid, "electrotonicDistanceFromSoma" );
+	vector< double > g = Field< vector< double > >::get(
+					nid, "geometricalDistanceFromSoma" );
+	assert( e.size() == 4 );
+	assert( doubleEq( e[0], 0.0 ) );
+	double dL = 100e-6 / sqrt( dendDia /4.0 );
+	assert( doubleEq( e[1], dL ) );
+	double bL1 = dL + 200e-6 / sqrt( branchDia /4.0 );
+	assert( doubleEq( e[2], bL1 ) );
+	double bL2 = dL + 500e-6 / sqrt( branchDia/4.0 );
+	assert( doubleEq( e[3], bL2 ) );
+	assert( doubleEq( g[0], 0.0 ) );
+	assert( doubleEq( g[1], 100.0e-6 ) );
+	assert( doubleEq( g[2], 300.0e-6 ) ); // 100 + 200 microns
+	assert( doubleEq( g[3], 600.0e-6 ) ); // 100 + 500 microns
+	shell->doDelete( nid );
+}
+
 
 // This tests stuff without using the messaging.
 void testBiophysics()
 {
 	testCompartment();
 	testVectorTable();
+	testNeuronBuildTree();
 #if 0
 	testMarkovSolverBase();
 	testMarkovSolver();
@@ -1517,11 +1584,11 @@ void testBiophysics()
 // This is applicable to tests that use the messaging and scheduling.
 void testBiophysicsProcess()
 {
-	testSynChan();
+	// testSynChan();
 	testIntFireNetwork();
 	testCompartmentProcess();
-	testMarkovGslSolver();
-	testMarkovChannel();
+	// testMarkovGslSolver();
+	// testMarkovChannel();
 #if 0
 	testHHChannel();
 #endif

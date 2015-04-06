@@ -73,7 +73,9 @@ const Cinfo* CaConcBase::initCinfo()
 		&CaConcBase::getTau
 	);
 	static ElementValueFinfo< CaConcBase, double > B( "B",
-		"Volume scaling factor",
+		"Volume scaling factor. "
+		"B = 1/(vol * F) so that it obeys:\n"
+		"dC/dt = B*I_Ca - C/tau",
         &CaConcBase::setB,
 		&CaConcBase::getB
 	);
