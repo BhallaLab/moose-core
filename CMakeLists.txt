@@ -66,7 +66,7 @@ else()
 endif()
 
 # DO UNIT TESTS 
-set(ENABLE_UNIT_TESTS 0)
+option(ENABLE_UNIT_TESTS "ENABLE UNIT TESTS IN MOOSE" ON)
 if(ENABLE_UNIT_TESTS)
     MESSAGE("++ Unit testing enabled.")
     add_definitions(-DDO_UNIT_TESTS)
@@ -98,7 +98,7 @@ endif()
 # Default macros
 add_definitions(-DUSE_GENESIS_PARSER)
 
-option(DEBUG "Building with debugging support" 0)
+option(DEBUG "Building with debugging support" ON)
 if(DEBUG)
     set(CMAKE_BUILD_TYPE Debug)
 else()
@@ -244,12 +244,14 @@ set(MOOSE_LIBRARIES
 
 target_link_libraries(moose
     ${MOOSE_LIBRARIES}
-    ${LOCAL_GSL_LIBRARIES}
     ${LIBRARIES}
     )
 
 target_link_libraries(moose-bin 
-    moose
+    "-Wl,--whole-archive"
+    ${MOOSE_LIBRARIES}
+    ${LIBRARIES}
+    "-Wl,--no-whole-archive"
     )
 
 ######################### BUILD PYMOOSE ########################################
