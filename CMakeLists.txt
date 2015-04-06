@@ -52,20 +52,21 @@ add_definitions(-Wall
 add_definitions(-fPIC)
 
 ## Enable/Disable 2011 stupport.
-include(CheckCXXCompilerFlag)
+## CUDA DOES NOT SUPPORT IT YET.
+#include(CheckCXXCompilerFlag)
 
-CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+#CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+#CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
 
-if(COMPILER_SUPPORTS_CXX11)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-elseif(COMPILER_SUPPORTS_CXX0X)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-else()
-    message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
-endif()
+#if(COMPILER_SUPPORTS_CXX11)
+    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+#elseif(COMPILER_SUPPORTS_CXX0X)
+    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+#else()
+    #message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+#endif()
 
-# DO UNIT TESTS 
+## DO UNIT TESTS 
 option(ENABLE_UNIT_TESTS "ENABLE UNIT TESTS IN MOOSE" ON)
 if(ENABLE_UNIT_TESTS)
     MESSAGE("++ Unit testing enabled.")
@@ -91,6 +92,7 @@ endif()
 option(ENABLE_CUDA "Enable GPU acceleration" ON)
 if(ENABLE_CUDA)
     FIND_PACKAGE(CUDA REQUIRED)
+    set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-gencode arch=compute_20,code=sm_20)
 endif()
 
 # STATS INSIDE MOOSE
