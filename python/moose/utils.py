@@ -40,15 +40,9 @@ from moose_constants import *
 import re
 # from PyQt4 import QtCore, Qt
 
-# Import functions from sub-libraries.
-plotTable = plot_utils.plotTable
-plotTables = plot_utils.plotTables
-saveTables = plot_utils.saveTables
-
 saveRecords = plot_utils.saveRecords
 plotRecords = plot_utils.plotRecords
 
-#
 recordAt = sim_utils.recordTarget
 recordTarget = sim_utils.recordTarget
 
@@ -58,6 +52,7 @@ warn = print_utils.warn
 error = print_utils.error
 debug = print_utils.debug
 log = print_utils.log
+dump = print_utils.dump
 
 # Verification related function.
 verify = verification_utils.verify
