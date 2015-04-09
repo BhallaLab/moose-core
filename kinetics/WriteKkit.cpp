@@ -166,15 +166,30 @@ void writeReac( ofstream& fout, Id id,
 				string colour, string textcolour,
 			 	double x, double y, Id comptid )
 {
-	//Id reacparentId = Field <ObjId>  :: get(id,"parent");
 	string reacPar  = Field <string> :: get(comptid,"name");
-
 	string reacname = Field<string> :: get(id, "name");
-	//size_t pos = path.find( "/kinetics" );
-	//path = path.substr( pos );
 	double kf = Field< double >::get( id, "kf" );
 	double kb = Field< double >::get( id, "kb" );
+	
+	unsigned int numSub = 
+			Field< unsigned int >::get( id, "numSubstrates" );
+	unsigned int numPrd = 
+			Field< unsigned int >::get( id, "numProducts" );
+	
+	int ns = 3;
+	if (numSub > 1)
+		ns = -3 * (numSub -1);
 
+	int np = 3;
+	if (numPrd > 1)
+		np = -3 * (numPrd -1);
+	
+	if (numSub > 0)
+		kf = kf * pow(10,ns);
+	
+	if (numPrd > 0)
+		kb = kb * pow(10,np);
+	
 	fout << "simundump kreac /kinetics" << trimPath(id,comptid) << " 0 " << 
 			kf << " " << kb << " \"\" " << 
 			colour << " " << textcolour << " " << x << " " << y << " 0\n";
@@ -221,23 +236,27 @@ void writePool( ofstream& fout, Id id,
 	stringstream geometryTemp ;
 	//TODO: check with Upi what is this slave_enable
 	//unsigned int slave_enable = getSlaveEnable( id );
+	//	"simobjdump kpool DiffConst CoInit Co n nInit mwt nMin vol slave_enable \\\n"
+  	//"  geomname xtree_fg_req xtree_textfg_req x y z\n"
+
 	unsigned int slave_enable = 0;
 	if (comptIndex > 0)
 		geometryTemp << "/geometry[" << comptIndex <<"]";
 	else
 		geometryTemp << "/geometry";
-	
+	//simobjdump kpool DiffConst CoInit Co n nInit mwt nMin vol slave_enable \
+
 	fout << "simundump kpool /kinetics" << trimPath(id,comptid) << " 0 " <<
 			diffConst << " " <<
-			concInit * 1e3 << " " << 
+			concInit * 1e3 << " " <<
 			conc * 1e3 << " " <<
 			n << " " <<
 			nInit << " " <<
 			0 << " " << 0 << " " << // mwt, nMin
-			volume * NA * 1e-3  << " " << // volscale
+			volume * NA * 1e-3 << " " << // volscale
 			slave_enable << //GENESIS FIELD HERE.
 			" /kinetics"<< geometryTemp.str() << " " <<
-			colour << " " << textcolour << " " << x << " " << y << " 0\n";
+			colour << " " << textcolour << " " << x << " " << y << " 0\n"; 
 }
 void writePlot( ofstream& fout, Id id,
 				string colour, string textcolour,
@@ -354,6 +373,28 @@ void storeReacMsgs( Id reac, vector< string >& msgs, Id comptid )
 		msgs.push_back( s );
 		s = "addmsg /kinetics" + trimPath(reac, comptid) + " /kinetics" + trimPath( *rprd,comptid ) + " REAC B A";
 		msgs.push_back( s );
+	}
+}
+
+void storeFunctionMsgs( Id func, vector< string >& msgs,map < double, pair<Id, int> > & compt_vol )
+{
+	// Get the msg sources into this Function object.
+	ObjId poolPath = Neutral::parent( func.eref() );
+	double poolvol = Field < double > :: get(poolPath,"Volume");
+	Id poolParentId = compt_vol[poolvol].first;
+	string poolParent = Field <string> :: get(compt_vol[poolvol].first,"name");
+	
+	Id xi(func.value()+1);
+	vector < Id > func_input = LookupField <string,vector < Id> >::get(xi, "neighbors","input");
+	
+	for (vector <Id> :: iterator funcIp = func_input.begin();funcIp != func_input.end();funcIp++)
+	{	string funcIp_path = Field < string > :: get(*funcIp,"path");
+		double vol = Field < double > :: get(*funcIp,"Volume");
+		Id parentId = compt_vol[vol].first;
+		string parentname = Field <string> :: get(parentId,"name");
+		string s = "addmsg /kinetics" + trimPath(*funcIp, parentId)+ " /kinetics" + trimPath(poolPath,poolParentId) +
+					" SUMTOTAL n nInit";
+		msgs.push_back(s);
 	}
 }
 
@@ -507,7 +548,11 @@ void writeKkit( Id model, const string& fname )
 			      		}
 			    }
 		  	} //species is closed
-	  		
+	  		vector< ObjId > Compt_Func;
+			wildcardFind(comptPath+"/##[ISA=Function]",Compt_Func);
+			for (vector <ObjId> :: iterator itrF= Compt_Func.begin();itrF != Compt_Func.end();itrF++)
+			{	storeFunctionMsgs( *itrF, msgs,compt_vol);
+			}
 	  		// Reaction 
 			vector< ObjId > Compt_Reac;
 			wildcardFind(comptPath+"/##[ISA=ReacBase]",Compt_Reac);
@@ -537,6 +582,7 @@ void writeKkit( Id model, const string& fname )
 			    writeEnz( fout, *itrE, bg, fg, x, y, compt->second.first);
 			    storeEnzMsgs( *itrE, msgs, compt->second.first);
 			}// reaction
+			
 		} //compatment loop
 	writeGui ( fout);
 
