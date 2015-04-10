@@ -1,0 +1,49 @@
+dia = ||diameter||
+len = ||comp_length||
+incompts = ||ncomp||
+entire_len = incompts * len
+runtime = ||run_time||
+
+create cable
+access cable
+nseg = incompts
+
+/*
+** Initialization routines
+*/
+
+proc geometry() {
+	L = entire_len
+	diam = dia
+	Ra = ||RA||
+}
+
+proc membrane() {
+	insert pas
+	g_pas = 1/40000
+	cm = 1.0
+	erev = ||Em||
+}
+
+/*
+** Simulation and output of data and graphics (graphics optional)
+*/
+
+proc run() { local io
+	geometry()
+	membrane()
+	v = ||Em|| t = 0
+	dt = ||dt||
+	io = 0
+	wopen("||data||")
+	fstim(1) fstim(0, 0, 0, ||run_time||, .100)
+        fprint("%g %g %g\n", t, v(||0||), v(||x||))
+	while (t < runtime) {
+	    fadvance()
+            /*fprint("%g %g %g\n", t, v(||0||), v(||x||))
+            */
+	}
+	wopen()
+}
+finitialize()
+run()
