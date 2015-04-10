@@ -15,18 +15,20 @@ __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
 import sys
+sys.path.append(sys.argv[1])
 import _profile
 import pylab
 import sqlite3 as sql
 from collections import defaultdict
+import os
 
 benchmark = defaultdict(list)
-
 dbFile = _profile.dbFile
 tableName = _profile.tableName
 
 def plotBenchmark(d):
-    db = sql.connect(dbFile)
+    print("INFO: Connection to %s" % dbFile)
+    db = sql.connect(os.path.join(d, dbFile))
     cur = db.cursor()
     for sim in ['moose', 'neuron']:
         query = """SELECT coretime, no_of_compartment FROM {} WHERE

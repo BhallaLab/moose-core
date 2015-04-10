@@ -17,7 +17,8 @@ __status__           = "Development"
 
 
 import sys
-sys.path.append('../../python/')
+sys.path.append('..')
+import _profile
 import moose
 import math
 import moose.utils as utils
@@ -26,7 +27,6 @@ import pylab
 import numpy as np
 import time
 import datetime
-import _profile
 
 pymoose_t_ = 0.0
 moose_t_ = 0.0
