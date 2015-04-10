@@ -1,15 +1,15 @@
 #!/bin/bash
 # This script generates benchamark.
-set -x
 set -e
-if [[ $# -lt 2 ]]; then
+if [[ $# -lt 1 ]]; then
     echo "USAGE: $0 dir_name"
     exit
 fi
 dir="$1"
 ( 
-echo "Working in $dir"
 cd $dir
+mkdir -p data
+echo "Working in $dir"
 for i in `seq 500 500 35000`
 do
     for j in `seq 1 1 3` 
