@@ -16,7 +16,7 @@ __status__           = "Development"
 import sqlite3 as sql 
 import sys
 
-dbFile = '{}/_profile.sqlite'.format(sys.argv[1])
+dbFile = '_profile.sqlite'
 conn_ = sql.connect(dbFile)
 cur_ = conn_.cursor()
 tableName = 'rallpack1'
