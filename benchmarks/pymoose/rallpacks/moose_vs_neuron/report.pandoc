@@ -1,0 +1,41 @@
+---
+title: MOOSE vs Neuron
+author: Dilawar Singh
+date : \today 
+header-includes:
+---
+
+# Aim
+
+To compare performance of MOOSE and NEURON on Rallpacks and on Migliore CA1-cell
+model.
+
+# Experiment details
+
+MOOSE is compiled with -O3 switch and Neuron 7.4 was compiled with default
+configuration. While benchmarking, we only computed the time before and after
+the execution of `moose.start()` function i.e. the time taken by MOOSE-C++ core
+to compute the model was taken into account. To be fair to NEURON, we disabled
+writing data to a file by NEURON.
+
+In MOOSE, default clock settings were used. Electrical `dt` is 50 micro-seconds,
+same as NEURON. However, clocks which read data has tick of 100 micro-seconds.
+
+# Observation
+
+## Rallpack 1
+
+A cable with n-compartments; stimulated at one end and potential is recorded at
+the other end. 
+
+Figure \ref{fig:rallpack1} shows the performance.
+
+![MOOSE vs NEURON, Rallpack-1 \label{fig:rallpack1}](./rallpack1/_benchmark.png)
+
+## Rallpack 3
+
+A cable with n-compartments, each having Hodgkin-Huxley type of ion-channels. 
+
+Figure \ref{fig:rallpack3} shows the performance.
+
+![MOOSE vs NEURON, Rallpack-3 \label{fig:rallpack3}](./rallpack3/_benchmark.png)
