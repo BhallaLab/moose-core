@@ -22,12 +22,9 @@ import re
 import sys
 import subprocess
 import time
-import datetime
-import sys
-sys.path.append('..')
-import _profile
+import profile
 
-templateFile = 'passive_cable_template.nrn'
+templateFile = './active_cable_template.nrn'
 
 
 def getNeuronScript(args, template):
@@ -59,11 +56,8 @@ def main(args):
         t = time.time()
         subprocess.check_call( cmd, shell=False)
         simTime = time.time() - t
-        print("++++ NEURON took %s sec" % simTime)
-        _profile.insert(simulator = 'neuron'
-                , no_of_compartment=args['ncomp']
-                , coretime = simTime
-                , runtime = simTime
+        profile.insert(simulator = 'neuron', no_of_compartment=args['ncomp']
+                , coretime = simTime, runtime=simTime
                 )
     else:
         print("Can't write to {}".format(outFile))
@@ -71,7 +65,7 @@ def main(args):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(
-            description = 'Rallpacks1: A passive cable with n compartmens'
+            description = 'Rallpacks3: A cable with n compartment with HHChannel'
             )
     parser.add_argument( '--tau'
             , default = 0.04
@@ -104,7 +98,7 @@ if __name__ == '__main__':
             , help = 'Lambda, what else?'
             )
     parser.add_argument( '--x'
-            , default = -1
+            , default = 999
             , type = int
             , help = 'Index of compartment at which membrane potential is recorded'
             ) 
