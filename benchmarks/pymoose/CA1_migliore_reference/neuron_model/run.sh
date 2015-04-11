@@ -1,3 +1,4 @@
 #!/bin/bash
 nrnivmodl
-nrniv -nogui ./fig2A.hoc
+echo "This model runs for 2 second"
+time nrniv -nogui ./fig2A.hoc
