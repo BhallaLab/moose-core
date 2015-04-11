@@ -14,10 +14,12 @@ Updated to match MOOSE implementation by Aditya Gilra, Jan, 2015.
 '''
 
 #import modules and functions to be used
-from brian import * # importing brian also does:
-                    # 'from pylab import *' which imports:
-                    # matplot like commands into the namespace, further
-                    # also can use np. for numpy and mpl. for matplotlib
+from brian2 import *   # importing brian also does:
+                        # 'from pylab import *' which imports:
+                        # matplot like commands into the namespace, further
+                        # also can use np. for numpy and mpl. for matplotlib
+#prefs.codegen.target='numpy'
+prefs.codegen.target='weave'
 import random
 import time
 
@@ -33,9 +35,6 @@ simtime = 0.2*second            # Simulation time
 defaultclock.dt = simdt         # Brian's default sim time step
 dt = defaultclock.dt/second     # convert to value in seconds
 
-clocknrn = Clock(dt=simdt,order=0)
-clocksyn = Clock(dt=simdt,order=1)
-
 # ###########################################
 # Neuron model
 # ###########################################
@@ -47,7 +46,7 @@ el = -65.*mV          # Resting potential
 vt = -45.*mV          # Spiking threshold
 taum = 20.*ms         # Membrane time constant
 vr = -55.*mV          # Reset potential
-inp = 20.1*mV/taum     # input I/C to each neuron
+inp = 20.1*mV/taum    # input I/C to each neuron
                       # same as setting el=-41 mV and inp=0
 taur = 0.5*ms         # Refractory period
 taudelay = 0.5*ms + dt*second      # synaptic delay
@@ -80,14 +79,16 @@ g = 5.0           # -gJ is the inh strength. For exc-inh balance g>~f(1-f)=4
 # Initialize neuron (sub)groups
 # ###########################################
 
-neurons=NeuronGroup(N,model=eqs_neurons,\
-    threshold='v>=vt',reset=vr,refractory=taur,clock=clocknrn)
-Pe=neurons.subgroup(NE)
-Pi=neurons.subgroup(NI)
+Pe=NeuronGroup(NE,model=eqs_neurons,\
+    threshold='v>=vt',reset='v=vr',refractory=taur)
+Pi=NeuronGroup(NI,model=eqs_neurons,\
+    threshold='v>=vt',reset='v=vr',refractory=taur)
 # not distributing uniformly to ensure match with MOOSE
 #Pe.v = uniform(el,vt+10*mV,NE)
 #Pi.v = uniform(el,vt+10*mV,NI)
-neurons.v = linspace(el/mV-20,vt/mV,N)*mV
+vrange = linspace(el/mV-20,vt/mV,N)*mV
+Pe.v = vrange[:NE]
+Pi.v = vrange[NE:N]
 
 # ###########################################
 # Connecting the network 
@@ -96,45 +97,50 @@ neurons.v = linspace(el/mV-20,vt/mV,N)*mV
 sparseness_e = fC*C/float(NE)
 sparseness_i = (1-fC)*C/float(NI)
 # Follow Dale's law -- exc (inh) neurons only have +ve (-ve) synapses.
-con_e = Synapses(Pe,neurons,'',pre='v_post+=J',clock=clocksyn)
-con_i = Synapses(Pi,neurons,'',pre='v_post+=-g*J',clock=clocksyn)
+con_ee = Synapses(Pe,Pe,'',pre='v_post+=J')
+con_ie = Synapses(Pe,Pi,'',pre='v_post+=J')
+con_ei = Synapses(Pi,Pe,'',pre='v_post+=-g*J')
+con_ii = Synapses(Pi,Pi,'',pre='v_post+=-g*J')
 # I don't use Brian's connect_random,
 #  instead I use the same algorithm and seed as in the MOOSE version
 #con_e.connect_random(sparseness=sparseness_e)
 #con_i.connect_random(sparseness=sparseness_i)
 ## Connections from some Exc/Inh neurons to each neuron
 random.seed(100) # set seed for reproducibility of simulations
+print "Creating connections (very slow, use the optimized script)"
 for i in range(0,N):
+    if i%100==0: print "Connecting post syn nrn",i
     ## draw excC number of neuron indices out of NmaxExc neurons
-    preIdxs = random.sample(range(NE),excC)
-    ## connect these presynaptically to i-th post-synaptic neuron
-    for synnum,preIdx in enumerate(preIdxs):
-        con_e[preIdx,i]=True
+    preIdxsE = random.sample(range(NE),excC)
     ## draw inhC=C-excC number of neuron indices out of inhibitory neurons
-    preIdxs = random.sample(range(N-NE),C-excC)
+    preIdxsI = random.sample(range(N-NE),C-excC)
     ## connect these presynaptically to i-th post-synaptic neuron
-    for synnum,preIdx in enumerate(preIdxs):
-        con_i[preIdx,i]=True
-con_e.delay = taudelay
-con_i.delay = taudelay
+    ## choose the synapses object based on whether post-syn nrn is exc or inh
+    if i<NE:
+        con_ee.connect(preIdxsE,i)
+        con_ei.connect(preIdxsI,i)
+    else:
+        con_ie.connect(preIdxsE,i-NE)
+        con_ii.connect(preIdxsI,i-NE)
+con_ee.delay = taudelay
+con_ie.delay = taudelay
+con_ei.delay = taudelay
+con_ii.delay = taudelay
 
 # ###########################################
 # Setting up monitors
 # ###########################################
 
 Nmon = N
-Nmon_exc = int(fexc*Nmon)
-Pe_mon = Pe.subgroup(Nmon_exc)
-sm_e = SpikeMonitor(Pe_mon)
-Pi_mon = Pi.subgroup(Nmon-Nmon_exc)
-sm_i = SpikeMonitor(Pi_mon)
+sm_e = SpikeMonitor(Pe)
+sm_i = SpikeMonitor(Pi)
 
 # Population monitor
-popm_e = PopulationRateMonitor(Pe,bin=1.*ms)
-popm_i = PopulationRateMonitor(Pi,bin=1.*ms)
+popm_e = PopulationRateMonitor(Pe)
+popm_i = PopulationRateMonitor(Pi)
 
 # voltage monitor
-sm_e_vm = StateMonitor(Pe,'v',record=range(10),clock=clocknrn)
+sm_e_vm = StateMonitor(Pe,'v',record=range(10))
 
 # ###########################################
 # Simulate
@@ -146,26 +152,32 @@ run(simtime,report='text')
 print 'inittime + runtime, t = ', time.time() - t1
 
 print "For g,J =",g,J,"mean exc rate =",\
-    sm_e.nspikes/float(Nmon_exc)/(simtime/second),'Hz.'
+    sm_e.num_spikes/float(NE)/(simtime/second),'Hz.'
 print "For g,J =",g,J,"mean inh rate =",\
-    sm_i.nspikes/float(Nmon-Nmon_exc)/(simtime/second),'Hz.'
+    sm_i.num_spikes/float(NI)/(simtime/second),'Hz.'
 
 # ###########################################
 # Analysis functions
 # ###########################################
 
-def rate_from_spiketrain(spiketimes,fulltime,dt,tau=50e-3):
+tau=50e-3
+sigma = tau/2.
+# normalized Gaussian kernel, integral with dt is normed to 1
+# to count as 1 spike smeared over a finite interval
+norm_factor = 1./(sqrt(2.*pi)*sigma)
+gauss_kernel = array([norm_factor*exp(-x**2/(2.*sigma**2))\
+    for x in arange(-5.*sigma,5.*sigma+dt,dt)])
+def rate_from_spiketrain(spikemon,fulltime,nrnidx=None):
     """
     Returns a rate series of spiketimes convolved with a Gaussian kernel;
     all times must be in SI units,
     remember to divide fulltime and dt by second
     """
-    sigma = tau/2.
-    # normalized Gaussian kernel, integral with dt is normed to 1
-    # to count as 1 spike smeared over a finite interval
-    norm_factor = 1./(sqrt(2.*pi)*sigma)
-    gauss_kernel = array([norm_factor*exp(-x**2/(2.*sigma**2))\
-        for x in arange(-5.*sigma,5.*sigma+dt,dt)])
+    if nrnidx is None:
+        spiketimes = spikemon.t # take spiketimes of all neurons
+    else:
+        # take spiketimes of only neuron index nrnidx
+        spiketimes = spikemon.t[where(spikemon.i==nrnidx)[0]]
     kernel_len = len(gauss_kernel)
     # need to accommodate half kernel_len on either side of fulltime
     rate_full = zeros(int(fulltime/dt)+kernel_len)
@@ -186,26 +198,28 @@ fig = figure()
 # Vm plots
 timeseries = arange(0,simtime/second+dt,dt)
 for i in range(3):
-    plot(timeseries[:len(sm_e_vm[i])],sm_e_vm[i])
+    plot(timeseries[:len(sm_e_vm.t)],sm_e_vm[i].v)
 
 fig = figure()
 # raster plots
 subplot(231)
-raster_plot(sm_e,ms=1.)
-title(str(Nmon_exc)+" exc neurons")
+plot(sm_e.t,sm_e.i,',')
+title(str(NE)+" exc neurons")
 xlabel("")
 xlim([0,simtime/second])
 subplot(234)
-raster_plot(sm_i,ms=1.)
-title(str(Nmon-Nmon_exc)+" inh neurons")
+plot(sm_i.t,sm_i.i,',')
+xlim([0,simtime/second])
+title(str(NI)+" inh neurons")
 subplot(232)
 
+print "plotting firing rates"
 # firing rates
 timeseries = arange(0,simtime/second+dt,dt)
 num_to_plot = 10
 #rates = []
 for nrni in range(num_to_plot):
-    rate = rate_from_spiketrain(sm_e[nrni],simtime/second,dt)
+    rate = rate_from_spiketrain(sm_e,simtime/second,nrni)
     plot(timeseries[:len(rate)],rate)
     #print mean(rate),len(sm_e[nrni])
     #rates.append(rate)
@@ -214,7 +228,7 @@ ylabel("Hz")
 ylim(0,300)
 subplot(235)
 for nrni in range(num_to_plot):
-    rate = rate_from_spiketrain(sm_i[nrni],simtime/second,dt)
+    rate = rate_from_spiketrain(sm_i,simtime/second,nrni)
     plot(timeseries[:len(rate)],rate)
     #print mean(rate),len(sm_i[nrni])
     #rates.append(rate)
@@ -224,24 +238,19 @@ ylim(0,300)
 xlabel("Time (s)")
 ylabel("Hz")
 
+print "plotting pop firing rates"
 # Population firing rates
 subplot(233)
 timeseries = arange(0,simtime/second,dt)
-allspikes = []
-for nrni in range(NE):
-    allspikes.extend(sm_e[nrni])
 #plot(timeseries,popm_e.smooth_rate(width=50.*ms,filter="gaussian"),color='grey')
-rate = rate_from_spiketrain(allspikes,simtime/second,dt)/float(NE)
+rate = rate_from_spiketrain(sm_e,simtime/second)/float(NE)
 plot(timeseries[:len(rate)],rate)
 title("Exc population rate")
 ylabel("Hz")
 subplot(236)
 timeseries = arange(0,simtime/second,dt)
-allspikes = []
-for nrni in range(NI):
-    allspikes.extend(sm_i[nrni])
 #plot(timeseries,popm_i.smooth_rate(width=50.*ms,filter="gaussian"),color='grey')
-rate = rate_from_spiketrain(allspikes,simtime/second,dt)/float(NI)
+rate = rate_from_spiketrain(sm_i,simtime/second)/float(NI)
 plot(timeseries[:len(rate)],rate)
 title("Inh population rate")
 xlabel("Time (s)")
