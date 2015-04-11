@@ -321,23 +321,12 @@ IF(BUILD_MOOGLI)
     FIND_PACKAGE(SIP REQUIRED)
     FIND_PACKAGE(PyQt4 REQUIRED)
     FIND_PACKAGE(osgQt REQUIRED)
-
-
-    MESSAGE("++ Building MOOGLI")
-    #SET(MOOGL_SRC_PATH ${PROJECT_SOURCE_DIR}/python/moogli)
     SET(MOOGLI_BUILD_PATH ${CMAKE_BINARY_DIR}/_moogli)
-    #FILE(MAKE_DIRECTORY ${MOOGLI_BUILD_PATH})
-    #ADD_CUSTOM_TARGET(moogli ALL
-        #COMMAND ${CMAKE_COMMAND} ${MOOGL_SRC_PATH}
-        #COMMAND make
-        #WORKING_DIRECTORY ${MOOGLI_BUILD_PATH}
-        #COMMENT "Building and installing MOOGLI"
-        #VERBATIM
-    #) 
+    MESSAGE("++ Building MOOGLI ${CMAKE_BUILD_TYPE}")
     add_subdirectory(${PROJECT_SOURCE_DIR}/python/moogli)
     INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/python/moogli/include)
     LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/python/moogli)
-else()
+else(BUILD_MOOGLI)
     MESSAGE("++ NOT building MOOGLI")
 endif()
 
