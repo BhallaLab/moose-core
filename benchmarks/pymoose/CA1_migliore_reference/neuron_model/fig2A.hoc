@@ -49,7 +49,7 @@ tot=0
 forall {tot=tot+nseg}
 distance()
 
-tstop=20
+tstop=20000
 
 b = new VBox()
 b.intercept(1)
