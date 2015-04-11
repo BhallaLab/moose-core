@@ -84,9 +84,10 @@ stim.del=1
 }
 
 forsec "axon" {   
-                insert nax gbar_nax=gna * AXONM
+                insert nax 
+                gbar_nax=gna*AXONM
                 insert kdr gkdrbar_kdr=gkdr
-                insert kap gkabar_kap = KMULTP
+                insert kap gkabar_kap=KMULTP
 }
 
 forsec "soma" {   
@@ -222,3 +223,4 @@ continuerun(tstop)
 proc runm() {
 runp(1)
 }
+runp(1)
