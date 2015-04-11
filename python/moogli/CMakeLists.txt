@@ -68,11 +68,11 @@ include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 include_directories(${OSGANIMATION_INCLUDE_DIR})
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/sip)
-#add_subdirectory(${PROJECT_SOURCE_DIR}/moc)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src)
 
 ADD_LIBRARY(_moogli SHARED 
     ${PROJECT_SOURCE_DIR}/moc/MorphologyViewer.moc.cpp
+    ${PROJECT_SOURCE_DIR}/moc/MorphologyViewerWidget.moc.cpp
     )
 
 SET(MOOGLI_BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/moogli)
