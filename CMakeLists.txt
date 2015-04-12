@@ -428,3 +428,39 @@ if(BUILD_MOOGLI)
         )
 
 endif(BUILD_MOOGLI)
+
+############################ CTEST ######################################
+
+ENABLE_TESTING()
+
+# If CTEST_OUTPUT_ON_FAILURE environment variable is set, the output is printed
+# onto the console if a test fails.
+SET(ENV{CTEST_OUTPUT_ON_FAILURE} ON)
+
+ADD_TEST(NAME moose-bin-raw-run
+    COMMAND echo q | moose-bin -u
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    )
+
+## PyMOOSE tests.
+ADD_TEST(NAME pymoose-test-mumbl
+    COMMAND ${PYTHON_EXECUTABLE} test_mumbl.py
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests/python
+    )
+ADD_TEST(NAME pymoose-test-pymoose
+    COMMAND ${PYTHON_EXECUTABLE} test_pymoose.py
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests/python
+    )
+ADD_TEST(NAME pymoose-test-synchan
+    COMMAND ${PYTHON_EXECUTABLE} test_synchan.py
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests/python
+    )
+ADD_TEST(NAME pymoose-test-function
+    COMMAND ${PYTHON_EXECUTABLE} test_function.py
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests/python
+    )
+ADD_TEST(NAME pymoose-test-vec
+    COMMAND ${PYTHON_EXECUTABLE} test_vec.py
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests/python
+    )
+    
