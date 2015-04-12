@@ -297,7 +297,7 @@ void diagnoseTree( const vector< NeuroNode >& tree,
 			Id pa;
 			if ( i->parent() != ~0U && i->parent() < nodes.size() )
 				pa = nodes[ i->parent() ].elecCompt();
-			cout << j++ << "	" << i->elecCompt().path() << 
+			cout << "diagnoseTree:" << j++ << "	" << i->elecCompt().path() << 
 					",	pa = " << i->parent() << ",	" << pa.path() << endl;
 		}
 	}
