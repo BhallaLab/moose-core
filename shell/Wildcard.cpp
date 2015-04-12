@@ -333,7 +333,11 @@ bool matchInsideBrace( ObjId id, const string& inside )
 		
 		return ( isEqual == isEquality );
 	} else if ( inside.substr( 0, 6 ) == "FIELD(" ) {
-		return wildcardFieldComparison( id, inside.substr( 6 ) );
+		if ( id.dataIndex == ALLDATA ) {
+			return wildcardFieldComparison( id.id, inside.substr( 6 ) );
+		} else {
+			return wildcardFieldComparison( id, inside.substr( 6 ) );
+		}
 	}
 
 	return false;
