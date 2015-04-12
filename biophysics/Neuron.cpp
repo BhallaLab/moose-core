@@ -106,18 +106,25 @@ const Cinfo* Neuron::initCinfo()
 		"	len: length of compartment, in metres.\n"
 		"	dia: for diameter of compartment, in metres.\n"
 		"For Channels, the function does Gbar = func( r, L, len, dia).\n"
+		"Note that the Gbar is automatically scaled by the area of the "
+		"compartment, you do not have to compute this.\n"
 		"For CaConc, the function does B = func( r, L, len, dia).\n"
 		"In both cases, if func() < 0 then the chan/CaConc is NOT created. "
 		"\n\n"
-		"For Rm, Ra, Cm, the function does func( r, L, len, dia ), " 
-		"and if func() < 0.0 then the value takes the default value based "
-		"on scaling of RM, RA, or CM by the geometry of the compartment "
+		"For RM, RA, CM, Em, initVm, the function does \n"
+		"	func( r, L, len, dia ) \n" 
+		"with automatic scaling of the RM, RA, or CM by the geometry "
+		"of the compartment. As before, "
+		"if func() < 0.0 then the default value is used. "
 		"\n\n"
-		"Some example function forms might be: \n"
-		" r < 10e-6 ? 400 * len * dia * pi : 0.0 \n"
-		" ->Set channel Gbar to 400 S/m^2 only within 10 microns of soma\n"
+		"Some example function forms might be for a channel Gbar: \n"
+		" r < 10e-6 ? 400 : 0.0 \n"
+		"equivalently, "
+		" ( sign(10e-6 - r) + 1) * 200 \n"
+		"Both of these forms instruct the function to "
+		"set channel Gbar to 400 S/m^2 only within 10 microns of soma\n"
 		"\n"
-		" L < 1.0 ? 100 * exp( -L ) * len * dia * pi : 0.0 \n"
+		" L < 1.0 ? 100 * exp( -L ) : 0.0 \n"
 		" ->Set channel Gbar to an exponentially falling function of "
 		"electrotonic distance from soma, provided L is under 1.0 lambdas. "
 		"\n"
@@ -538,16 +545,28 @@ Id fillSegIndex(
 {
 	Id soma;
 	segIndex.clear();
+	Id fatty;
+	double maxDia = 0.0;
 	for ( unsigned int i = 0; i < kids.size(); ++i ) {
 		const Id& k = kids[i];
 		if ( k.element()->cinfo()->isA( "CompartmentBase" ) ) {
 			segIndex[ k ] = i;
-			if ( k.element()->getName() == "soma" ) {
+			const string& s = k.element()->getName();
+			if ( s.find( "soma" ) != s.npos ||
+				s.find( "Soma" ) != s.npos ||
+				s.find( "SOMA" ) != s.npos ) {
 				soma = k;
+			}
+			double dia = Field< double >::get( k, "diameter" );
+			if ( dia > maxDia ) {
+				maxDia = dia;
+				fatty = k;
 			}
 		}
 	}
-	return soma;
+	if ( soma != Id() )
+		return soma;
+	return fatty; // Fallback.
 }
 
 static void fillSegments( vector< SwcSegment >& segs, 
@@ -669,6 +688,10 @@ static void assignParam( Shell* shell, ObjId compt
 			Field< double >::set( compt, "Ra", val*len*4 / (dia*dia*PI) );
 		} else if ( name == "Cm" || name == "CM" ) {
 			Field< double >::set( compt, "Cm", val * len * dia * PI );
+		} else if ( name == "Em" || name == "EM" ) {
+			Field< double >::set( compt, "Em", val );
+		} else if ( name == "initVm" || name == "INITVM" ) {
+			Field< double >::set( compt, "initVm", val );
 		} else {
 			Id chan = acquireChannel( shell, name, compt );
 			if ( chan.element()->cinfo()->isA( "ChanBase" ) ) {
@@ -927,7 +950,7 @@ static void addSpine( Id parentCompt, Id spineProto,
 	sstemp << k;
 	string kstr = sstemp.str();
 	Id spine = shell->doCopy( spineProto, parentObject, "_spine" + kstr, 
-					1, true, false );
+					1, false, false );
 	vector< Id > kids;
 	Neutral::children( spine.eref(), kids );
 	double x0 = Field< double >::get( parentCompt, "x0" );

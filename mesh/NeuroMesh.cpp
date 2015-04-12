@@ -463,7 +463,7 @@ Id NeuroMesh::putSomaAtStart( Id origSoma, unsigned int maxDiaIndex )
 		if ( strncasecmp( name.c_str(), "soma", 4 ) == 0 ) {
 			soma = nodes_[maxDiaIndex].elecCompt();
 		} else { 
-			cout << "Warning: named 'soma' compartment isn't biggest\n";
+			cout << "Warning: NeuroMesh::putSomaAtStart: named 'soma' compartment isn't biggest\n";
 			soma = nodes_[maxDiaIndex].elecCompt();
 		}
 	}

@@ -55,7 +55,8 @@ class rdesigneur:
                 True, 8e-5, 1.0 ), \
                 ( 'psd', 'glu', 'Gbar', 'tot_PSD_R', \
                 False, 0, 0.01 )], \
-            addSpineList= [] \
+            addSpineList= [], \
+            chanDistrib = [] \
             ):
         """ Constructor of the class """
         if moose.exists( modelPath ):
@@ -72,6 +73,7 @@ class rdesigneur:
         self.elecDt= elecDt
         self.adaptorList= adaptorList
         self.addSpineList = addSpineList
+        self.chanDistrib = chanDistrib
 
     ################################################################
 
@@ -150,85 +152,11 @@ class rdesigneur:
         self.efile = efile
         self.cfile = cfile
         self._loadElec( efile, 'tempelec', self.combineSegments )
+        if len( self.chanDistrib ) > 0:
+            self.elecid.channelDistribution = self.chanDistrib
+            self.elecid.parseChanDistrib()
         self._loadChem( cfile, 'tempchem' )
         self.buildFromMemory( self.model.path + '/tempelec', self.model.path + '/tempchem' )
-
-    ################################################################
-
-    # Utility function to return a coordinate system where 
-    # z is the direction of a dendritic segment, 
-    # x is the direction of spines outward from soma and perpendicular to z
-    # and y is the perpendicular to x and z.
-    def _coordSystem( self, soma, dend ):
-        EPSILON = 1e-20
-        z = np.array( [dend.x - dend.x0, dend.y - dend.y0, dend.z - dend.z0 ] )
-        dendLength = np.sqrt( np.dot( z, z ) )
-        z = z / dendLength
-        y = np.array( [dend.x0 - soma.x0, dend.y0 - soma.y0, dend.z0 - soma.z0 ] )
-        y = np.cross( y, z )
-        ylen = np.dot( y, y )
-        if ylen < EPSILON:
-            y[0] = np.sqrt( 2.0 )
-            y[1] = np.sqrt( 2.0 )
-            y[2] = 0.0
-            y = np.cross( y, z )
-            ylen = np.dot( y, y )
-            assert( ylen > EPSILON )
-        y = y / np.sqrt( ylen )
-        x = np.cross( z, y )
-        xlen = np.dot( x, x )
-        assert( np.fabs( xlen - 1 ) < 1e-15 )
-        return ( dendLength, x,y,z )
-
-    ################################################################
-    # Utility function to resize electrical compt electrical properties,
-    # including those of its child channels and calcium conc.
-    def _scaleSpineCompt( self, compt, size ):
-        chans = moose.wildcardFind( compt.path + '/##[ISA=ChanBase]' )
-        a = size * size
-        for i in chans:
-            i.Gbar *= a
-        concs = moose.wildcardFind( compt.path + '/##[ISA=CaConcBase]' )
-        for i in concs:
-            i.B *= size * size * size
-        compt.Rm /= a
-        compt.Cm *= a
-        compt.Ra /= size
-
-    ################################################################
-    # Utility function to change coords of spine so as to reorient it.
-    def _reorientSpine( self, spineCompts, coords, parentPos, pos, size, angle, x, y, z ):
-        rotationMatrix = []
-        c = np.cos( angle )
-        s = np.sin( angle )
-        omc = 1.0 - c
-        rotationMatrix.append( [\
-            z[0]*z[0]*omc + c, z[1]*z[0]*omc - z[2]*s, \
-            z[2]*z[0]*omc + z[1]*s ] )
-        rotationMatrix.append( [\
-            z[0]*z[1]*omc + z[2]*s, z[1]*z[1]*omc + c, \
-            z[2]*z[1]*omc - z[0]*s ] )
-        rotationMatrix.append( [\
-            z[0]*z[2]*omc - z[1]*s, z[1]*z[2]*omc + z[0]*s, \
-            z[2]*z[2]*omc + c ] )
-
-        rotationMatrix = np.array( rotationMatrix ) * size
-        translation = z * pos + parentPos
-        coords = np.transpose( coords )
-        ret = np.dot( rotationMatrix, coords ) 
-        ret = np.transpose( ret ) + translation
-        #print 'ret = ', np.shape( ret ), ret
-        assert( len( spineCompts ) * 2 == len( ret ) )
-        for i in range( len( spineCompts ) ):
-            j = i * 2
-            spineCompts[i].x0 = ret[j][0]
-            spineCompts[i].y0 = ret[j][1]
-            spineCompts[i].z0 = ret[j][2]
-            j = j + 1
-            spineCompts[i].x = ret[j][0]
-            spineCompts[i].y = ret[j][1]
-            spineCompts[i].z = ret[j][2]
-        #print 'r: ', ret[0], '\n', parentPos
 
     ################################################################
     # Utility function to add a single spine to the given parent.
@@ -273,8 +201,6 @@ class rdesigneur:
         self._reorientSpine( kids, coords, ppos, pos, size, angle, x, y, z )
 
     ################################################################
-    ## API function to add a series of spines.
-
     ## The spineid is the parent object of the prototype spine. The 
     ## spine prototype can include any number of compartments, and each
     ## can have any number of voltage and ligand-gated channels, as well
@@ -291,62 +217,28 @@ class rdesigneur:
     ## linear range of the angle distrib to add to the specified angle.
     ## With each position along the dendrite the algorithm computes a new
     ## spine direction, using rotation to increment the angle.
-    ## Returns list of spines.
-
-
-    def insertSpines( self, spineProto, parentList, \
-            spacing, spacingDistrib = 0.0, \
-            sizeDistrib = 0.0, \
-            angle = 0.0, angleDistrib = 0.0, \
-            rotation = 0.0, rotationDistrib = 0.0 ):
-        k = 0
-        for i in parentList:
-            dendLength, x,y,z = self._coordSystem( self.soma, i )
-            num = int( dendLength / spacing ) + 2
-            if ( spacingDistrib > 0.0 ):
-                pos = np.random.normal( spacing, spacingDistrib, num )
-            else:
-                pos = np.array( [spacing] * num )
-            if ( angleDistrib > 0.0 ):
-                angle += np.random.random() * angleDistrib
-            if ( rotationDistrib > 0.0 ):
-                theta = np.random.normal( rotation, rotationDistrib, num )
-            else:
-                theta = np.array( [rotation] * num )
-            if ( sizeDistrib > 0.0 ):
-                size = np.random.normal( 1.0, sizeDistrib, num )
-            else:
-                size = np.array( [1.0] * num )
-
-            #print "insertSpines on ", i.name
-            p = pos[-1] / 2.0
-            for j in zip( pos, theta, size ):
-                #print p, j[0], dendLength
-                self._addSpine( i, spineProto, p, angle, x, y, z, j[2], k )
-                k += 1
-                p += j[0]
-                angle += j[1]
-                #print 'angle = ', angle
-                if ( p > dendLength ):
-                    break
-
     ################################################################
     def _decorateWithSpines( self ):
+        args = []
         for i in self.addSpineList:
             if not moose.exists( '/library/' + i[0] ):
                 print 'Warning: _decorateWithSpines: spine proto ', i[0], ' not found.'
                 continue
-            spineProto = moose.element( '/library/' + i[0] )
-            parentList = moose.wildcardFind( self.elecid.path + '/' + i[1] )
-            self.insertSpines( spineProto, parentList, \
-                    i[2], i[3], i[4], i[5], i[6], i[7], i[8] )
+            s = ""
+            for j in range( 9 ):
+                s = s + str(i[j]) + ' '
+            args.append( s )
+        self.elecid.spineSpecification = args
+        self.elecid.parseSpines()
 
     ################################################################
 
     def _loadElec( self, efile, elecname, combineSegments ):
         library = moose.Neutral( '/library' )
         if ( efile[ len( efile ) - 2:] == ".p" ):
-            self.elecid = moose.loadModel( efile, self.model.path + '/' + elecname )
+            self.elecid = moose.loadModel( efile, self.model.path + '/' + elecname )[0]
+        elif ( efile[ len( efile ) - 4:] == ".swc" ):
+            self.elecid = moose.loadModel( efile, self.model.path + '/' + elecname )[0]
         else:
             nm = NeuroML()
             nm.readNeuroMLFromFile( efile, \
@@ -537,6 +429,9 @@ class rdesigneur:
             chemRelPath, isElecToChem, offset, scale ):
         mesh = moose.element( '/model/chem/' + meshName )
         elecComptList = mesh.elecComptList
+        if len( elecComptList ) == 0:
+            print "Warning: buildAdaptor: no elec compts in elecComptList on", mesh.path
+            return
         startVoxelInCompt = mesh.startVoxelInCompt
         endVoxelInCompt = mesh.endVoxelInCompt
         capField = elecField[0].capitalize() + elecField[1:]
@@ -552,9 +447,9 @@ class rdesigneur:
                 adName += elecRelPath[1-i]
                 break
         ad = moose.Adaptor( chemObj.path + adName, len( elecComptList ) )
+        print 'building ', len( elecComptList ), 'adaptors ', adName, \
+               ' for: ', mesh.name, elecRelPath, elecField, chemRelPath
         av = ad.vec
-        # print 'building ', len( elecComptList ), 'adaptors ', adName, \
-        #        ' for: ', mesh.name, elecRelPath, elecField, chemRelPath
         chemVec = moose.element( mesh.path + '/' + chemRelPath ).vec
     
         for i in zip( elecComptList, startVoxelInCompt, endVoxelInCompt, av ):
@@ -569,7 +464,7 @@ class rdesigneur:
             elObj = moose.element( i[0].path + '/' + elecRelPath )
             if ( isElecToChem ):
                 elecFieldSrc = 'get' + capField
-                print ePath, elecFieldSrc, scale
+                #print ePath, elecFieldSrc, scale
                 moose.connect( i[3], 'requestOut', elObj, elecFieldSrc )
                 for j in range( i[1], i[2] ):
                     moose.connect( i[3], 'output', chemVec[j], 'setConc')
@@ -624,7 +519,8 @@ class rdesigneur:
     # creates one and assigns the desired tau in seconds.
     # With the default arguments here it will create a glu, NMDA and LCa,
     # and add a Ca_conc.
-    def addSpineProto( self, name, RM, RA, CM, \
+    def addSpineProto( self, name = 'spine', \
+            RM = 1.0, RA = 1.0, CM = 0.01, \
             shaftLen = 1.e-6 , shaftDia = 0.2e-6, \
             headLen = 0.5e-6, headDia = 0.5e-6, \
             synList = ( ['glu', 0.0, 2e-3, 9e-3, 200.0, False],
@@ -654,7 +550,7 @@ class rdesigneur:
             if ( moose.exists( '/library/' + i[0] ) ):
                 chan = moose.copy( '/library/' + i[0], head )
                 chan.Gbar = i[1] * head.Cm / CM
-                print "CHAN = ", chan, chan.tick
+                #print "CHAN = ", chan, chan.tick
                 moose.connect( head, 'channel', chan, 'channel' )
                 if i[2] and caTau > 0.0:
                     moose.connect( chan, 'IkOut', conc, 'current' )

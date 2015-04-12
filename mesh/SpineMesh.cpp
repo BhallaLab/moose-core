@@ -458,7 +458,7 @@ void SpineMesh::innerSetNumEntries( unsigned int n )
 void SpineMesh::innerBuildDefaultMesh( const Eref& e,
 	double volume, unsigned int numEntries )
 {
-	cout << "Warning: attempt to build a default spine: not permitted\n";
+	cout << "Warning: SpineMesh::innerBuildDefaultMesh: attempt to build a default spine: not permitted\n";
 }
 
 //////////////////////////////////////////////////////////////////

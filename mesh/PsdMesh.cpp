@@ -394,7 +394,7 @@ void PsdMesh::innerSetNumEntries( unsigned int n )
 void PsdMesh::innerBuildDefaultMesh( const Eref& e,
 	double volume, unsigned int numEntries )
 {
-	cout << "Warning: attempt to build a default psd: not permitted\n";
+	cout << "Warning: PsdMesh::innerBuildDefaultMesh: attempt to build a default psd: not permitted\n";
 }
 
 //////////////////////////////////////////////////////////////////

@@ -52,7 +52,7 @@ ReadSwc::ReadSwc( const string& fname )
 		cleanZeroLength();
 		parseBranches();
 	}
-	cout << fname << "	: NumSegs = " << segs_.size() << 
+	cout << "ReadSwc: " << fname << "	: NumSegs = " << segs_.size() << 
 			", bad = " << badSegs <<
 			", Validated = " << valid << 
 			", numBranches = " << branches_.size() << 
@@ -83,7 +83,8 @@ bool ReadSwc::validate() const
 	}
 	bool valid = ( numStart == 1 && numOrphans == 0 && badRadius == 0 );
 	if ( !valid ) {
-		cout << "NumSegs = " << segs_.size() << 
+		cout << "ReadSwc::validate() failed: \nNumSegs = " << 
+				segs_.size() << 
 				", numStart = " << numStart <<
 				", orphans = " << numOrphans << 
 				", badIndex = " << badIndex <<
@@ -129,7 +130,7 @@ void ReadSwc::cleanZeroLength()
 			}
 			pa.replaceKids( temp );
 			s.setBad();
-			cout << "Cleaned zero length " << s.myIndex() << endl;
+			cout << "ReadSwc:: Cleaned zero length " << s.myIndex() << endl;
 		}
 	}
 }
@@ -199,7 +200,7 @@ void ReadSwc::diagnostics() const
 			diag[s.type()]++;
 	}
 	for ( int i = 0; i < 14; ++i )
-		cout << SwcSegment::typeName[i] << " :	" << diag[i] << endl;
+		cout << "ReadSwc::diagnostics: " << SwcSegment::typeName[i] << " :	" << diag[i] << endl;
 
 	/*
 	for ( unsigned int i = 0; i < branches_.size(); ++i )
