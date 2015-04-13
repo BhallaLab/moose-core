@@ -25,48 +25,18 @@ from datetime import datetime
 from collections import defaultdict
 
 import _moose
-import plot_utils
-import verification_utils
-import print_utils
+from plot_utils import *
+from verification_utils import verify
+from print_utils import *
 #import graph_utils
-import sim_utils
+from sim_utils import *
 
 from .backend import graphviz
-
 from .topology import topology
-
 from moose_constants import *
 
 import re
 # from PyQt4 import QtCore, Qt
-
-saveRecords = plot_utils.saveRecords
-plotRecords = plot_utils.plotRecords
-
-recordAt = sim_utils.recordTarget
-recordTarget = sim_utils.recordTarget
-
-# dump messages onto console
-info = print_utils.info
-warn = print_utils.warn
-error = print_utils.error
-debug = print_utils.debug
-log = print_utils.log
-dump = print_utils.dump
-
-# Verification related function.
-verify = verification_utils.verify
-
-# Topology and graph related functions.
-writeGraphviz  = graphviz.writeGraphviz
-writeNetwork = topology.writeNetwork
-
-# Some verification tests
-verify = verification_utils.verify
-
-# Simulation libarary
-import sim_utils
-run = sim_utils.run
 
 # tableEmitter = QtCore.QObject()
 # Harsha: Moved this fun from default to pymoose/moose/utils.py
