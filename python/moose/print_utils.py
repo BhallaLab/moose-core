@@ -16,6 +16,7 @@ __status__           = "Development"
 
 import inspect
 import sys
+import _moose as moose
 
 HEADER = '\033[95m'
 OKBLUE = '\033[94m'
@@ -114,3 +115,15 @@ def debug(msg): dump("DEBUG", msg)
 
 def log(label, msg): dump(label, msg)
 
+## Following prints the elements in model
+def modelInfo(path = '/##', **kwargs):
+    """Generate the list of all available moose-elements in model
+    """
+    info("Couting elements in model under %s" % path)
+    msg = []
+    types = [ "Table", "Table2", "Compartment", "Pool", "BufPool", "Enz", "Reac" ]
+    for t in types:
+        paths = moose.wildcardFind("{}[TYPE={}]".format(path, t))
+        if len(paths) > 0:
+            msg.append("{:>20} : {}".format(t, len(paths)))
+    return "\n".join(msg)
