@@ -36,6 +36,11 @@ OR
  then cells from MorphML and, finally the NetworkML.]
 
 For testing, you can also call this from the command line with a neuroML file as argument.
+However, the new relative import .ChannelML breaks calling it from commandline,
+ so have to do it on python / ipython terminal:
+In [1]: import moose
+In [2]: import moose.neuroml
+In [3]: moose.neuroml.loadNeuroML_L123('Generated.net.xml')
 """
 
 import moose
