@@ -519,14 +519,15 @@ vector< string > Neuron::getSpineSpecification() const
 
 static Id getComptParent( Id id )
 {
-	static const Finfo* axialFinfo = 
+	// raxial points towards soma.
+	static const Finfo* raxialFinfo = 
 			Cinfo::find( "Compartment" )->findFinfo( "raxialOut" );
 	static const Finfo* proximalFinfo = 
 			Cinfo::find( "SymCompartment" )->findFinfo( "proximalOut" );
 
 	if ( id.element()->cinfo()->isA( "CompartmentBase" ) ) {
 		vector< Id > ret;
-		id.element()->getNeighbors( ret, axialFinfo );
+		id.element()->getNeighbors( ret, raxialFinfo );
 		if ( ret.size() == 1 )
 			return ret[0];
 		// If it didn't find an axial, maybe it is a symCompt
@@ -898,6 +899,7 @@ static void reorientSpine( vector< Id >& spineCompts,
 					z.a2()*z.a2()*omc + c );
 
     Vec translation = z * pos + parentPos;
+    // Vec translation = parentPos;
 	vector< Vec > ret( coords.size() );
 	for ( unsigned int i = 0; i < coords.size(); ++i ) {
 		ret[i] = Vec( 	rot0.dotProduct( coords[i] ) + translation.a0(), 
@@ -983,7 +985,7 @@ static void addSpine( Id parentCompt, Id spineProto,
 	for( vector< Vec >::iterator i = coords.begin(); i != coords.end(); ++i)
 		*i = x * i->a0();
 	shell->doDelete( spine ); // get rid of the holder for the spine copy.
-	shell->doAddMsg( "Single", parentCompt, "raxial", kids[0], "axial" );
+	shell->doAddMsg( "Single", parentCompt, "axial", kids[0], "raxial" );
 	reorientSpine( kids, coords, ppos, pos, angle, x, y, z );
 }
 
@@ -1143,7 +1145,7 @@ void Neuron::insertSpines( const Eref& e, Id spineProto, string path,
 			}
 		}
 		for ( unsigned int j = 0; j < pos.size(); ++j ) {
-			if ( pos[j] > dendLength )
+			if ( pos[j] > dendLength || pos[j] < 0.0 )
 				break;
 			addSpine( parentList[i], spineProto, pos[j], theta[j], 
 							x, y, z, size[j], spineIndex_++ );
