@@ -372,6 +372,9 @@ void CylBase::matchCubeMeshEntries( const ChemCompt* compt,
 }
 
 // this is the function that does the actual calculation.
+// Returns radial distance from self to axis formed from parent to self.
+// also sends back linePos, the fraction along the line, and r, the 
+// radius of the parent tapering cylinder at the point of linePos.
 double CylBase::nearest( double x, double y, double z, 
 				const CylBase& parent,
 				double& linePos, double& r ) const
@@ -400,7 +403,9 @@ double CylBase::nearest( double x, double y, double z,
 
 	double ret = c.distance(pt);
 	linePos = k;
-	double rSlope = ( dia_ - parent.dia_ ) / numDivs_;
+	// For now I disable the positioning with a tapering cylinder.
+	// double rSlope = 0.5 * ( dia_ - parent.dia_ ) / numDivs_;
+	double rSlope = 0;
 	r = dia_/2.0 + k * numDivs_ * rSlope;
 	return ret;
 }
@@ -424,7 +429,7 @@ double CylBase::nearest( double x, double y, double z,
 		if ( index >= numDivs_ )
 			index = numDivs_ - 1;
 		// double ri = r0_ + (index + 0.5) * rSlope_;
-		if ( ret > r )
+		if ( ret > r * 1.01 ) // Handle roundoff
 			ret = -ret;
 	}
 	return ret;

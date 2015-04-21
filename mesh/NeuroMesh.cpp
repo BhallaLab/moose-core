@@ -288,6 +288,7 @@ NeuroMesh::NeuroMesh()
 		nodeIndex_(1, 0 ),
 		vs_( 1, NA * 1e-9 ),
 		area_( 1, 1.0e-12 ),
+		length_( 1, 1.0e-6 ),
 		diffLength_( 1.0e-6 ),
 		separateSpines_( false ),
 		geometryPolicy_( "default" ),
@@ -313,6 +314,7 @@ NeuroMesh& NeuroMesh::operator=( const NeuroMesh& other )
 	nodeIndex_ = other.nodeIndex_;
 	vs_ = other.vs_;
 	area_ = other.area_;
+	length_ = other.length_;
 	diffLength_ = other.diffLength_;
 	cell_ = other.cell_;
 	separateSpines_ = other.separateSpines_;
@@ -337,6 +339,10 @@ NeuroMesh::~NeuroMesh()
 void NeuroMesh::updateCoords()
 {
 	unsigned int startFid = 0;
+	if ( nodes_.size() <= 1 ){// One for soma and one for dummy pa of soma
+		buildStencil();
+		return;
+	}
 	for ( vector< NeuroNode >::iterator i = nodes_.begin();
 				i != nodes_.end(); ++i ) {
 		if ( !i->isDummyNode() ) {
@@ -505,11 +511,16 @@ void NeuroMesh::insertSingleDummy(
 void NeuroMesh::insertDummyNodes()
 {
 	// First deal with the soma, always positioned at node 0.
-	Id elec = nodes_[0].elecCompt();
-	double x = Field< double >::get( elec, "x0" );
-	double y = Field< double >::get( elec, "y0" );
-	double z = Field< double >::get( elec, "z0" );
-	insertSingleDummy( ~0U, 0, x, y, z );
+	unsigned int num = nodes_.size();
+	for ( unsigned int i = 0; i < num; ++i ) {
+		if ( nodes_[i].parent() == ~0U ) {
+			Id elec = nodes_[i].elecCompt();
+			double x = Field< double >::get( elec, "x0" );
+			double y = Field< double >::get( elec, "y0" );
+			double z = Field< double >::get( elec, "z0" );
+			insertSingleDummy( ~0U, i, x, y, z );
+		}
+	}
 
 	// Second pass: insert dummy nodes for children.
 	// Need to know if parent has multiple children, because each of
@@ -520,9 +531,9 @@ void NeuroMesh::insertDummyNodes()
 		vector< unsigned int > kids = nodes_[i].children();
 		if ( (!nodes_[i].isDummyNode()) && kids.size() > 1 ) {
 			for( unsigned int j = 0; j < kids.size(); ++j ) {
-				x = nodes_[i].getX(); // use coords of parent.
-				y = nodes_[i].getY();
-				z = nodes_[i].getZ();
+				double x = nodes_[i].getX(); // use coords of parent.
+				double y = nodes_[i].getY();
+				double z = nodes_[i].getZ();
 				insertSingleDummy( i, kids[j], x, y, z );
 				// Replace the old kid entry with the dummy
 				kids[j] = nodes_.size() - 1; 
@@ -577,7 +588,32 @@ void NeuroMesh::setCellPortion( const Eref& e, Id cell,
 	setCellPortion( e, cell, compts );
 }
 
+// Here we set a portion of a cell, specified by a vector of Ids. 
+// We optionally find all spines connected to this cell portion,
+// if the separateSpines flag is set.
+//
+void NeuroMesh::setCellPortion( const Eref& e,
+					Id cell, vector< ObjId > portion )
+{
+	// double oldVol = getMeshEntryVolume( 0 );
+	cell_ = cell;
+	if ( separateSpines_ ) {
+		NeuroNode::buildSpinyTree( portion, nodes_, shaft_, head_, parent_);
+		insertDummyNodes();
+		updateCoords();
+		updateShaftParents();
+		transmitSpineInfo( e );
+	} else {
+		NeuroNode::buildTree( nodes_, portion );
+		insertDummyNodes();
+		updateCoords();
+	}
+}
 
+/*
+ * Legacy version of function which started with a list of all compts
+ * to be undertaken, including the spines.
+ *
 // Here we set a portion of a cell, specified by a vector of Ids. We
 // also need to define the cell parent.
 void NeuroMesh::setCellPortion( const Eref& e,
@@ -597,21 +633,13 @@ void NeuroMesh::setCellPortion( const Eref& e,
 
 	// transmitChange( e, oldVol );
 	if ( separateSpines_ ) {
-		separateOutSpines( e );
+		transmitSpineInfo( e );
 	}
 }
+*/
 
-void NeuroMesh::separateOutSpines( const Eref& e )
+void NeuroMesh::transmitSpineInfo( const Eref& e )
 {
-		// vector< Id > ids;
-		/*
-		e.element()->getNeighbors( ids, spineListOut() );
-		if ( ids.size() > 0 ) {
-			SetGet4< Id, vector< Id >, vector< Id >, 
-					vector< unsigned int > >::set( 
-					ids[0], "spineList", cell_, shaft_, head_, parent_ );
-		}
-		*/
 		spineListOut()->send( e, cell_, shaft_, head_, parent_ );
 
 		vector< double > ret;
@@ -630,10 +658,6 @@ void NeuroMesh::separateOutSpines( const Eref& e )
 			// ids.clear();
 			// e.element()->getNeighbors( ids, psdListOut() );
 			psdListOut()->send( e, cell_, psdCoords, head_, index );
-			/*
-			SetGet3< Id, vector< double >, vector< unsigned int > >::set( 
-					ids[0], "psdList", cell_, psdCoords, index );
-					*/
 		}
 }
 
@@ -657,7 +681,10 @@ void NeuroMesh::updateShaftParents()
 			parent_[i] = index + nn.startFid();
 		} else {
 			cout << "Warning: NeuroMesh::updateShaftParents: may be"
-					" misaligned on " << i << "\n";
+					" misaligned on " << i << ", r=" << r << 
+					"\n pt=(" << x0 << "," << y0 << "," << z0 << ")" <<
+					"pa=(" << nn.getX() << "," << nn.getY() << "," << nn.getZ() << ")" <<
+					"\n";
 			parent_[i] = index + nn.startFid();
 		}
 	}
@@ -1059,6 +1086,8 @@ void NeuroMesh::innerBuildDefaultMesh( const Eref& e,
 double NeuroMesh::getAdx( unsigned int i, unsigned int& parentFid ) const
 {
 	const NeuroNode &nn = nodes_[ nodeIndex_[i] ];
+	if ( nn.isDummyNode() || nn.parent() == ~0U )
+		return -1; // No diffusion, bail out.
 	const NeuroNode *pa = &nodes_[ nn.parent() ];
 	double L1 = nn.getLength() / nn.getNumDivs();
 	double L2 = L1;

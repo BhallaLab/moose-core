@@ -39,7 +39,7 @@ NeuroNode::NeuroNode( const CylBase& cb,
 
 NeuroNode::NeuroNode( Id elecCompt )
 		:
-				parent_( 0 ),
+				parent_( ~0 ),
 				startFid_( 0 ),
 				elecCompt_( elecCompt ),
 				isSphere_( false )
@@ -59,7 +59,7 @@ NeuroNode::NeuroNode( Id elecCompt )
 
 NeuroNode::NeuroNode()
 		:
-				parent_( 0 ),
+				parent_( ~0 ),
 				startFid_( 0 ),
 				elecCompt_( Id() ),
 				isSphere_( false )
@@ -144,12 +144,10 @@ static void bruteForceFind( const vector< NeuroNode >& nodes, Id id )
 
 /**
  * Finds all the compartments connected to current node, put them all into
- * the 'children' vector even if they may be 'parent' by the messaging.
+ * the return vector even if they may be 'parent' by the messaging.
  * This is because this function has to be robust enough to sort this out
  */
-void NeuroNode::findConnectedCompartments( 
-				const map< Id, unsigned int >& nodeMap,
-				const vector< NeuroNode >& nodes )
+static vector< Id > findAllConnectedCompartments( Id  compt )
 {
 	static const Finfo* axialOut = Cinfo::find( "CompartmentBase" )->findFinfo( "axialOut" );
 	static const Finfo* raxialOut = Cinfo::find( "CompartmentBase" )->findFinfo( "raxialOut" );
@@ -164,29 +162,43 @@ void NeuroNode::findConnectedCompartments(
 	assert( cylinderOut );
 	assert( sumRaxialOut );
 
-	const Cinfo* cinfo = elecCompt_.element()->cinfo();
+	const Cinfo* cinfo = compt.element()->cinfo();
 	vector< Id > all;
 	if ( cinfo->isA( "SymCompartment" ) ) { // Check derived first.
 		vector< Id > ret;
-		elecCompt_.element()->getNeighbors( ret, distalOut );
+		compt.element()->getNeighbors( ret, distalOut );
 		all.insert( all.end(), ret.begin(), ret.end() );
-		elecCompt_.element()->getNeighbors( ret, proximalOut );
+		compt.element()->getNeighbors( ret, proximalOut );
 		all.insert( all.end(), ret.begin(), ret.end() );
-		elecCompt_.element()->getNeighbors( ret, cylinderOut );
+		compt.element()->getNeighbors( ret, cylinderOut );
 		all.insert( all.end(), ret.begin(), ret.end() );
-		elecCompt_.element()->getNeighbors( ret, sumRaxialOut );
+		compt.element()->getNeighbors( ret, sumRaxialOut );
 		all.insert( all.end(), ret.begin(), ret.end() );
 	}
 	// In addition, check if the bog standard messaging applies.
 	assert( cinfo->isA( "CompartmentBase" ) );
 	vector< Id > ret;
-	elecCompt_.element()->getNeighbors( ret, axialOut );
+	compt.element()->getNeighbors( ret, axialOut );
 	all.insert( all.end(), ret.begin(), ret.end() );
-	elecCompt_.element()->getNeighbors( ret, raxialOut );
+	compt.element()->getNeighbors( ret, raxialOut );
 	all.insert( all.end(), ret.begin(), ret.end() );
 
 	sort( all.begin(), all.end() );
 	all.erase( unique( all.begin(), all.end() ), all.end() ); //@#$%&* C++
+	// Now we have a list of all compartments connected to the current one.
+	return all;
+}
+
+/**
+ * Finds all the compartments connected to current node, put them all into
+ * the 'children' vector even if they may be 'parent' by the messaging.
+ * This is because this function has to be robust enough to sort this out
+ */
+void NeuroNode::findConnectedCompartments( 
+				const map< Id, unsigned int >& nodeMap,
+				const vector< NeuroNode >& nodes )
+{
+	vector< Id > all = findAllConnectedCompartments( elecCompt_ );
 	// Now we have a list of all compartments connected to the current one.
 	// Convert to node indices.
 	children_.resize( all.size() );
@@ -359,6 +371,146 @@ void NeuroNode::innerTraverse(
 	}
 	assert( tree.size() <= nodes.size() );
 }
+
+bool isPartOfDend( ObjId i )
+{
+	if ( i.element()->cinfo()->isA( "CompartmentBase" ) ) {
+		string name = i.element()->getName();
+		if ( name.find( "shaft" ) == string::npos &&
+			name.find( "neck" ) == string::npos && 
+			name.find( "spine" ) == string::npos &&
+			name.find( "head" ) == string::npos )
+	   	{
+			return true;
+		}
+	}
+	return false;
+}
+
+static bool checkForSpine( unsigned int dendIndex, Id compt,
+	vector< Id >& shaftId, vector< Id >& headId,
+	vector< unsigned int >& spineParent )
+{
+	const string& name = compt.element()->getName();
+	if ( name.find( "shaft" ) != string::npos ||
+		name.find( "neck" ) != string::npos ) {
+		spineParent.push_back( dendIndex );
+		shaftId.push_back( compt );
+		vector< Id > conn = findAllConnectedCompartments( compt );
+		bool foundHead = false;
+		for ( vector< Id >::iterator i = 
+						conn.begin(); i != conn.end(); ++i ) {
+			const string& n2 = i->element()->getName();
+			if ( n2.find( "spine" ) != string::npos ||
+				n2.find( "head" ) != string::npos ) {
+				headId.push_back( *i );
+				foundHead = true;
+				break;
+			}
+		}
+		if (!foundHead) {
+			headId.push_back( Id() );
+		}
+		return true;
+	}
+	return false;
+}
+
+/**
+ * spinyTraverse goes takes current dend entry and finds everything 
+ * connected to it, recursively. Paints the 'seen' entries with the
+ * latest index for the number seen so we keep track of which subgroup
+ * the dend set belongs to.
+ * This does a depth-first recursive traverse. Looks for spines
+ * on every dend compt found.
+ *
+ */
+static void spinyTraverse( unsigned int dendIndex, 
+	vector< Id >& dend, const map< Id, unsigned int >& dendMap,
+	vector< int >& seen, unsigned int numSeen,
+	vector< Id >& shaftId, vector< Id >& headId,
+	vector< int >& dendParent, vector< unsigned int >& spineParent
+   	)
+{
+	vector< Id > conn = findAllConnectedCompartments( dend[dendIndex] );
+	seen[ dendIndex ] = numSeen;
+	for ( vector< Id >::iterator i = conn.begin(); i != conn.end(); ++i ) {
+		map< Id, unsigned int >::const_iterator idLookup = 
+				dendMap.find( *i );
+		if ( idLookup != dendMap.end() ) {
+			if ( !seen[ idLookup->second ] ) {
+				dendParent[ idLookup->second ] = dendIndex;
+				spinyTraverse( idLookup->second, dend, dendMap, 
+					seen, numSeen,
+					shaftId, headId, dendParent, spineParent );
+			}
+		} else {
+			checkForSpine( dendIndex, *i, shaftId, headId, spineParent );
+		}
+	}
+}
+
+/**
+ * This function takes a list of elements and builds a tree.
+ * Info on any attached spines are placed in the 
+ * shaft_, head_, and parent_ vectors.
+ * The list of elements can be discontiguous.
+ * This is meant to be insensitive to vagaries
+ * in how the user has set up the compartment messaging, provided that 
+ * there is at least one recognized message between connected compartments.
+ *
+ * static function.
+ */
+void NeuroNode::buildSpinyTree( 
+	vector< ObjId >& elist, vector< NeuroNode >& nodes, 
+	vector< Id >& shaftId, vector< Id >& headId,
+	vector< unsigned int >& spineParent )
+{
+	nodes.clear();
+	sort( elist.begin(), elist.end() );
+	map< Id, unsigned int > dendMap;
+	vector< Id > dend;
+	for ( vector< ObjId >::iterator 
+		i = elist.begin(); i != elist.end(); ++i ) {
+		if ( isPartOfDend( *i ) ) {
+			dendMap[ *i ] = dend.size();
+			dend.push_back( *i );
+		}
+	}
+	vector< int > seen( dend.size(), 0 );
+	vector< int > dendParent( dend.size(), -1 );
+	int numSeen = 0;
+	for ( unsigned int i = 0; i < dend.size(); ++i ) {
+		if ( !seen[i] )
+			spinyTraverse( i, dend, dendMap, seen, ++numSeen, 
+			shaftId, headId, 
+			dendParent, spineParent );
+	}
+	if ( numSeen == 0 )
+		return;
+	for ( unsigned int i = 0; i < dend.size(); ++i )
+		nodes.push_back( NeuroNode( dend[i] ) );
+	for ( unsigned int i = 0; i < dend.size(); ++i )
+		nodes[i].setParentAndChildren( i, dendParent[i], nodes, dendMap );
+
+	if ( numSeen > 1 ) {
+		cout << "Warning: NeuroNode::buildSpinyTree: There are " <<
+			numSeen << " distinct subgroups on the given path\n";
+	}
+}
+
+void NeuroNode::setParentAndChildren( unsigned int index, int dendParent,
+	vector< NeuroNode >& nodes, const map< Id, unsigned int >& dendMap )
+{
+	parent_ = dendParent;
+	const map< Id, unsigned int >::const_iterator dendLookup =
+			dendMap.find( nodes[dendParent].elecCompt_ );
+	if ( dendLookup != dendMap.end() ) {
+		assert( dendLookup->second < nodes.size() );
+		nodes[ dendLookup->second ].addChild( index );
+	}
+}
+
 
 /**
  * This function takes a list of elements that include connected
