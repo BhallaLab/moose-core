@@ -1629,17 +1629,22 @@ extern "C" {
         if (!PyArg_ParseTuple(args, "Os: moose_saveModel", &source, &filename)){
             return NULL;
         }
-        if (PyString_Check(source)){
+        if (PyString_Check(source))
+        { 
+            
             char * srcPath = PyString_AsString(source);
-            if (!srcPath){
+            if (!srcPath)
+            { cout << " Niull ";
                 return NULL;
             }
+            assert(srcPath != NULL);
+            
             model = Id(string(srcPath));
-        } else if (Id_SubtypeCheck(source)){
+        } else if (Id_SubtypeCheck(source)){ 
             model = ((_Id*)source)->id_;
-        } else if (ObjId_SubtypeCheck(source)){
+        } else if (ObjId_SubtypeCheck(source)){ 
             model = ((_ObjId*)source)->oid_.id;
-        } else {
+        } else { 
             PyErr_SetString(PyExc_TypeError, "moose_saveModel: need an vec, element or string for first argument.");
             return NULL;
         }
@@ -2633,7 +2638,11 @@ extern "C" {
             oid = ObjId(path);
             //            cout << "Original Path " << path << ", Element Path: " << oid.path() << endl;
             if ( oid.bad() ){
-                PyErr_SetString(PyExc_ValueError, "moose_element: path does not exist");
+                PyErr_SetString(PyExc_ValueError, ( std::string("moose_element: '") 
+                                                  + std::string(path) 
+                                                  + std::string("' does not exist!")
+                                                  ).c_str()
+                               );
                 return NULL;
             }
             PyObject * new_obj = oid_to_element(oid);
