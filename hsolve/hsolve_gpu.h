@@ -8,25 +8,24 @@ struct GpuLookupRow
 						///< boundary for interpolation.
 };
 
-struct GpuLookupColumn
+struct LookupColumn
 {
+	LookupColumn() { ; }
 	unsigned int column;
+	//~ bool interpolate;
 };
 
 class GpuLookupTable
 {
 	public:
+		GpuLookupTable(){;}
+		GpuLookupTable(
+			double min, 
+			double max, 
+			unsigned int nDivs, 
+			unsigned int nSpecies);
 
-		double min_, max_, dx_;
-		unsigned int nPts_, nColumns_;
-		double * rows_d;
-		double *min_d, *max_d, *dx_d, *istate_d, *result_;
-		unsigned int *nPts_d, *nColumns_d;
-		double *table_d;
-		//__global__ void lookup_kernel(double *row_array, double *column_array, double *table_d, unsigned int nRows_d, unsigned int nColumns_d, double *istate, double dt, unsigned int set_size);
-		//__global__ void find_row_kernel(double * V_d, double * rows_d, double min, double max, double dx, int size);
-		GpuLookupTable();
-		GpuLookupTable(double *min, double *max, int *nDivs, unsigned int nSpecies);
+		
 		// void row(double V, double *row);
 		void addColumns(int species, double *C1, double *C2);
 
@@ -38,6 +37,20 @@ class GpuLookupTable
 
 		void destory();
 		
+	private:
+		vector< double >     table_;		///< Flattened table
+		double               min_;			///< min of the voltage / caConc range
+		double               max_;			///< max of the voltage / caConc range
+		unsigned int         nPts_;			///< Number of rows in the table.
+											///< Equal to nDivs + 2, so that
+											///< interpol. is safe at either end.
+		double               dx_;			///< This is the smallest difference:
+											///< (max - min) / nDivs
+		unsigned int         nColumns_;		///< (# columns) = 2 * (# species)	
+
+		double *rows_d;						// Device Array of rows
+		double *istate_d;					// Device Array of states
+		double *table_d;					// Device Array of tables	
 };
 
 void readDataInt(int *, char *, int);
