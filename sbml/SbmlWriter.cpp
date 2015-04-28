@@ -641,7 +641,7 @@ void SbmlWriter::getSubPrd(Reaction* rec,string type,string enztype,Id itrRE, in
 	}
       /* Updating list of object for annotation for Enzymatic reaction */
       if (re_enClass =="Enz")
-	nameList_.push_back(clean_name);
+		nameList_.push_back(clean_name);
 
       /* Rate law is also updated in rate_law string */
       //std::size_t found = clean_name.find("cplx");
