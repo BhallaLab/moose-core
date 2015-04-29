@@ -42,6 +42,8 @@ class Neuron
 		vector< ObjId > getCompartments() const;
 		void setChannelDistribution( vector< string > v );
 		vector< string > getChannelDistribution() const;
+		void setMechSpec( vector< string > v );
+		vector< string > getMechSpec() const;
 		void setSpineSpecification( vector< string > v );
 		vector< string > getSpineSpecification() const;
 
@@ -59,6 +61,14 @@ class Neuron
 		void parseChanDistrib( const Eref& e );
 		void evalChanParams( const string& name, const string& func, 
 						vector< ObjId >& elist );
+		
+		void parseMechSpec( const Eref& e );
+		void installMechanism(  const string& name,
+			const vector< ObjId >& elist, const vector< double >& val,
+			const vector< string >& line );
+		void evalExprForElist( const vector< ObjId >& elist,
+			const string& expn, vector< double >& val );
+
 		/**
 		 * Initializes the class info.
 		 */
@@ -75,6 +85,7 @@ class Neuron
 		unsigned int spineIndex_;
 		vector< string > channelDistribution_;
 		vector< string > spineSpecification_;
+		vector< string > mechSpec_;
 
 		/// Map to look up Seg index from Id of associated compt.
 		map< Id, unsigned int > segIndex_; 

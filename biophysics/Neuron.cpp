@@ -92,6 +92,86 @@ const Cinfo* Neuron::initCinfo()
 		&Neuron::getCompartmentLengthInLambdas
 	);
 
+	static ValueFinfo< Neuron, vector< string > > mechSpec( 
+		"mechSpec",
+		"Specification for distribution of mechanisms on dendrite. \n"
+		"These may include channels, CaConcen, spines, or "
+		"signaling systems. In addition parameters of the compartment "
+		"itself can also be specified. "
+		"Each entry in the specification begins with the name of the "
+		"prototype, followed by successive triplets of strings: \n"
+		"	(field, path, expression) \n"
+		" Each entry is terminated with an empty string. "
+		"The prototype is any object created in */library*, "
+		"but the electrical compartments themselves are identified with "
+		"a period: *.*\n"
+		"The triplets are as follows: \n"
+		"The *field* argument specifies the name of the parameter "
+		"that is to be assigned by the expression.\n"
+		"The *path* argument specifies a MOOSE wildcard path of the "
+		"electrical compartments on which the channel/spine/chem may "
+		"be placed. For example, '#' means put the channels everywhere. "
+		"'#apical#' means put the channels in all compartments which "
+	    "have the word 'apical' somewhere in their name."
+		"'soma' means put the channels only in the compartment named "
+		"'soma'.\n"
+		"The *expression* argument is a mathematical expression in "
+		"the muparser framework, which permits most operations including "
+		"trig and transcendental ones. Of course it also handles simple "
+		"numerical values like 1.0, 1e-10 and so on. "
+		"Available arguments for muParser are:\n"
+		" r, L, len, dia \n"
+		"	r: geometrical distance from soma, measured along dendrite, in metres.\n"
+		"	L: electrotonic distance (# of lambdas) from soma, along dend. No units.\n"
+		"	len: length of compartment, in metres.\n"
+		"	dia: for diameter of compartment, in metres.\n"
+		"Each of the mechanisms has a most-commonly-used field that "
+		"must be > 0 for the mechanism to be installed. For example, for "
+		"channels, if Field == Gbar, and func( r, L, len, dia) < 0, \n"
+		"then the channel is not installed. This feature is typically "
+		"used with the sign() or Heaviside H() function to limit range: "
+		"for example: H(1 - L) will only put channels closer than "
+		"one length constant from the soma, and zero elsewhere. \n"
+		"Available fields are: \n"
+		"Channels: Gbar (install), Ek \n"
+		"Electrical Compartments: RM, RA, CM, Em, initVm \n"
+		"CaConcen: shellDia (install), shellFrac (install), tau, min\n"
+		"Spines: spacing (install), spacingDistrib, sizeDistrib "
+		"startAngle, angleDistrib, rotation, rotationDistrib \n"
+		"Chem systems: scaleConcInit (install), concInit, nInit \n"
+		"Note that for chem systems the first use of *path* "
+		"specifies the electrical compartment(s) on which the system "
+		"is to be installed, and the scaleConcInit term scales /all/ "
+		"initial concs by the specified value. In subsequent parameter "
+		"triplets, the *path* specifies the name of the molecule to be "
+		"assigned, or the relative MOOSE path to this molecule, starting "
+		"from the chemical compartment in which the chemical system is "
+		"placed. \n"
+		"Unless otherwise noted, all fields are scaled appropriately by "
+		"the dimensions of their compartment. Thus the channel "
+		"maximal conductance Gbar is automatically scaled by the area "
+		"of the compartment, and the user does not need to insert this "
+		"scaling into the calculations.\n"
+		"All parameters are expressed in SI units. Concentration, for "
+		"example, is moles per cubic metre, which is equal to millimolar. "
+		"\n\n"
+		"Some example function forms might be for a channel Gbar: \n"
+		" r < 10e-6 ? 400 : 0.0 \n"
+		"		equivalently, \n"
+		" H(10e-6 - r) * 400 \n"
+		"		equivalently, \n"
+		" ( sign(10e-6 - r) + 1) * 200 \n"
+		"Each of these forms instruct the function to "
+		"set channel Gbar to 400 S/m^2 only within 10 microns of soma\n"
+		"\n"
+		" L < 1.0 ? 100 * exp( -L ) : 0.0 \n"
+		" ->Set channel Gbar to an exponentially falling function of "
+		"electrotonic distance from soma, provided L is under "
+		"1.0 lambdas. \n",
+		&Neuron::setMechSpec,
+		&Neuron::getMechSpec
+	);
+
 	static ValueFinfo< Neuron, vector< string > > channelDistribution( 
 		"channelDistribution",
 		"Specification for channel distribution on this neuron. "
@@ -288,6 +368,14 @@ const Cinfo* Neuron::initCinfo()
 		new EpFunc0< Neuron >(
 			&Neuron::parseChanDistrib )
 	);
+	static DestFinfo parseMechSpec( "parseMechSpec",
+		"Parses a previously assigned vector of mechanism specifications. "
+		"These are located in the field *mechSpec*. "
+		"When this function is called it builds the specified mechanisms "
+		"into the current neuron model.",
+		new EpFunc0< Neuron >(
+			&Neuron::parseMechSpec )
+	);
 
 	/*
 	static DestFinfo rotateInSpace( "rotateInSpace",
@@ -315,6 +403,7 @@ const Cinfo* Neuron::initCinfo()
 		&elecDistFromSoma,			// ReadOnlyValueFinfo
 		&compartments,				// ReadOnlyValueFinfo
 		&channelDistribution,		// ValueFinfo
+		&mechSpec,					// ValueFinfo
 		&spineSpecification,		// ValueFinfo
 		&buildSegmentTree,			// DestFinfo
 		&insertSpines,				// DestFinfo
@@ -323,6 +412,7 @@ const Cinfo* Neuron::initCinfo()
 		&assignChanDistrib,			// DestFinfo
 		&clearChanDistrib,			// DestFinfo
 		&parseChanDistrib,			// DestFinfo
+		&parseMechSpec,				// DestFinfo
 	};
 	static string doc[] =
 	{
@@ -501,6 +591,20 @@ void Neuron::setChannelDistribution( vector< string > v )
 vector< string > Neuron::getChannelDistribution() const
 {
 	return channelDistribution_;
+}
+
+void Neuron::setMechSpec( vector< string > v )
+{
+	if ( v.size() < 4 ) {
+		cout << "Warning: Neuron::setMechSpec: syntax: install proto path expr [field expr]...";
+		return;
+	}
+	mechSpec_ = v;
+}
+
+vector< string > Neuron::getMechSpec() const
+{
+	return mechSpec_;
 }
 
 void Neuron::setSpineSpecification( vector< string > v )
@@ -793,6 +897,279 @@ void Neuron::parseChanDistrib( const Eref& e )
 						channelDistribution_[i * 3 + 2] );
 	}
 }
+
+/////////////////////////////////////////////////////////////////////////
+// Here we set up the more general specification of mechanisms. Each
+// line is 
+// op proto path expr [field expr]...
+/////////////////////////////////////////////////////////////////////////
+static vector< vector< string > > specLines( const vector< string >& args )
+{
+	vector< string > line;
+	vector< vector< string > > ret;
+	for ( vector< string >::const_iterator
+					i = args.begin(); i != args.end(); ++i ) {
+		if ( *i == "" ) {
+			if ( line.size() < 4 || (line.size() - 4) % 2 != 0 ) {
+				cout << "Warning: Neuron::specLines: bad number of args on line num'" << ret.size() << "'\n";
+			} else {
+				ret.push_back( line );
+			}
+			line.clear();
+		} else {
+			line.push_back( *i );
+		}
+	}
+	return ret;
+}
+
+/**
+ * Evaluates expn for every CompartmentBase entry in elist. Pushes
+ * value, length and dia for each elist entry into the 'val' vector.
+ */
+void Neuron::evalExprForElist( const vector< ObjId >& elist,
+		const string& expn, vector< double >& val )
+{
+	val.clear();
+	val.reserve( elist.size() * 5 );
+	// Build the function
+	double p = 0; // geometrical path distance arg
+	double L = 0; // electrical distance arg
+	double len = 0; // Length of compt in metres
+	double dia = 0; // Diameter of compt in metres
+	try {
+		mu::Parser parser;
+		parser.DefineVar( "p", &p );
+		parser.DefineVar( "L", &L );
+		parser.DefineVar( "len", &len );
+		parser.DefineVar( "dia", &dia );
+		parser.SetExpr( expn );
+
+		// Go through the elist checking for the channels. If not there,
+		// build them. 
+		for ( vector< ObjId >::const_iterator 
+						i = elist.begin(); i != elist.end(); ++i) {
+			if ( i->element()->cinfo()->isA( "CompartmentBase" ) ) {
+				dia = Field< double >::get( *i, "diameter" );
+				len = Field< double >::get( *i, "length" );
+				map< Id, unsigned int >:: const_iterator j = 
+					segIndex_.find( *i );
+				assert( j != segIndex_.end() );
+				assert( j->second < segs_.size() );
+				p = segs_[ j->second ].getGeomDistFromSoma();
+				L = segs_[ j->second ].getElecDistFromSoma();
+
+				val.push_back( parser.Eval() );
+				val.push_back( p );
+				val.push_back( L );
+				val.push_back( len );
+				val.push_back( dia );
+			}
+		}
+	}
+	catch ( mu::Parser::exception_type& err )
+	{
+		cout << err.GetMsg() << endl;
+	}
+}
+
+static void doClassSpecificMessaging( Shell* shell, Id obj, ObjId compt )
+{
+	if ( obj.element()->cinfo()->isA( "ChanBase" ) ) {
+		shell->doAddMsg( "Single", compt, "channel", obj, "channel" );
+	}
+	ReadCell::addChannelMessage( obj );
+}
+
+static void buildFromProto( 
+		ObjId proto, 
+		const vector< ObjId >& elist, const vector< double >& val,
+		vector< ObjId >& mech )
+{
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	mech.clear();
+	mech.resize( elist.size() );
+	for ( unsigned int i = 0; i < elist.size(); ++i ) {
+		unsigned int j = i * 5;
+		if ( val[ j++ ] > 0 ) {
+			string name = proto.element()->getName();
+			Id obj = Neutral::child( elist[i].eref(), name );
+			if ( obj == Id() ) { // Need to copy it in from proto.
+				obj = shell->doCopy( proto, elist[i], name, 1, false, false );
+				doClassSpecificMessaging( shell, obj, elist[i] );
+			}
+			mech[i] = obj;
+		}
+	}
+}
+
+static void assignParam( Id obj, const string& field, 
+				double val, double len, double dia )
+{
+	if ( obj.element()->cinfo()->isA( "ChanBase" ) ) {
+		if ( field == "Gbar" ) {
+			if ( val > 0 )
+				Field< double >::set( obj, "Gbar", val * len * dia * PI );
+		} else if ( field == "Ek" ) {
+			Field< double >::set( obj, "Ek", val );
+		}
+	} else if ( obj.element()->cinfo()->isA( "CaConcBase" ) ) {
+		Field< double >::set( obj, "B", val );
+	}
+}
+
+static void setMechParams( 
+		const vector< ObjId >& mech,
+		const vector< ObjId >& elist, const vector< double >& val,
+		const string& field, const string& expr )
+{
+	double p = 0; // geometrical path distance arg
+	double L = 0; // electrical distance arg
+	double len = 0; // Length of compt in metres
+	double dia = 0; // Diameter of compt in metres
+	try {
+		mu::Parser parser;
+		parser.DefineVar( "p", &p );
+		parser.DefineVar( "L", &L );
+		parser.DefineVar( "len", &len );
+		parser.DefineVar( "dia", &dia );
+		parser.SetExpr( expr );
+
+		for ( unsigned int i = 0; i < elist.size(); ++i ) {
+			unsigned int j = i * 5;
+			if ( val[ j++ ] > 0 ) {
+				p = val[j++];
+				L = val[j++];
+				len = val[j++];
+				dia = val[j++];
+				double x = parser.Eval();
+				assignParam( mech[i], field, x, len, dia );
+			}
+		}
+	}
+	catch ( mu::Parser::exception_type& err )
+	{
+		cout << err.GetMsg() << endl;
+	}
+}
+
+static void assignSingleCompartmentParams( ObjId compt,
+			double val, const string& field, double len, double dia )
+{
+	// Only permit chans with val greater than zero.
+	if ( val > 0.0 ) {
+		if ( field == "Rm" || field == "RM" ) {
+			Field< double >::set( compt, "Rm", val / ( len  * dia * PI ) );
+		} else if ( field == "Ra" || field == "RA" ) {
+			Field< double >::set( compt, "Ra", val*len*4 / (dia*dia*PI) );
+		} else if ( field == "Cm" || field == "CM" ) {
+			Field< double >::set( compt, "Cm", val * len * dia * PI );
+		} else if ( field == "Em" || field == "EM" ) {
+			Field< double >::set( compt, "Em", val );
+		} else if ( field == "initVm" || field == "INITVM" ) {
+			Field< double >::set( compt, "initVm", val );
+		} else {
+			cout << "Warning: setCompartmentParam: field '" << field << 
+					"' not found\n";
+		}
+	}
+}
+
+static void setCompartmentParams( 
+		const vector< ObjId >& elist, const vector< double >& val,
+		const string& field, const string& expr )
+{
+	double p = 0; // geometrical path distance arg
+	double L = 0; // electrical distance arg
+	double len = 0; // Length of compt in metres
+	double dia = 0; // Diameter of compt in metres
+	try {
+		mu::Parser parser;
+		parser.DefineVar( "p", &p );
+		parser.DefineVar( "L", &L );
+		parser.DefineVar( "len", &len );
+		parser.DefineVar( "dia", &dia );
+		parser.SetExpr( expr );
+
+		for ( unsigned int i = 0; i < elist.size(); ++i ) {
+			unsigned int j = i * 5;
+			if ( val[ j++ ] > 0 ) {
+				p = val[j++];
+				L = val[j++];
+				len = val[j++];
+				dia = val[j++];
+				double x = parser.Eval();
+				assignSingleCompartmentParams( elist[i],
+					x, field, len, dia );
+			}
+		}
+	}
+	catch ( mu::Parser::exception_type& err )
+	{
+		cout << err.GetMsg() << endl;
+	}
+}
+
+void Neuron::parseMechSpec( const Eref& e )
+{
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< vector< string > > lines = specLines( mechSpec_ );
+	for ( unsigned int i = 0; i < lines.size(); ++i ) {
+		const string& op = lines[i][0];
+		const string& name = lines[i][1];
+		const string& path = lines[i][2];
+		const string& expr = lines[i][3];
+
+		vector< ObjId > elist;
+		// val records (expr, len, dia) for each entry in elist.
+		vector< double > val; 
+
+		ObjId oldCwe = shell->getCwe();
+		shell->setCwe( e.objId() );
+		wildcardFind( path, elist );
+		shell->setCwe( oldCwe );
+		evalExprForElist( elist, expr, val );
+		if ( op == "install" ) {
+			installMechanism( name, elist, val, lines[i] );
+		} else if ( op == "assign" ) {
+			// assignMechanism( name, elist, val, lines[i], false );
+		} else if ( op == "scale" ) {
+			// assignMechanism( name, elist, val, lines[i], true );
+		}
+	}
+}
+
+void Neuron::installMechanism( const string& name, 
+		const vector< ObjId >& elist, const vector< double >& val,
+		const vector< string >& line )
+{
+	assert( val.size() == 5 * elist.size() );
+	if ( name == "." ) {
+		for ( unsigned int i = 4; i < line.size(); i += 2 ) {
+			setCompartmentParams( elist, val, line[i], line[i+1] );
+		}
+	} else if ( name == "spine" ) { 
+		// Do something
+	} else { 
+		Id proto( "/library/" + name );
+		if ( proto == Id() ) {
+			cout << "Warning: Neuron::installMechanisms: proto '" << name << "' not found\n";
+		} else if ( proto.element()->cinfo()->isA( "ChemMesh" ) ) {
+			// Use provided elist to build reac system. Assigning
+			// params is a bit trickier, will have to use compartment
+			// coords which will be coarser than the chem coords.
+			// Assign params by building a new 'mech' vector to
+			// hold all pools under specified compts from elist.
+		} else {
+			vector< ObjId > mech( elist.size() );
+			buildFromProto( proto, elist, val, mech );
+			for ( unsigned int i = 4; i < line.size(); i += 2 ) {
+				setMechParams( mech, elist, val, line[i], line[i+1] );
+			}
+		}
+	}
+}
+
 
 ////////////////////////////////////////////////////////////////////////
 // Stuff here for inserting spines.

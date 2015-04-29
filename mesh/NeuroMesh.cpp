@@ -160,6 +160,36 @@ const Cinfo* NeuroMesh::initCinfo()
 			&NeuroMesh::getEndVoxelInCompt
 		);
 
+		static ReadOnlyValueFinfo< NeuroMesh, vector< int > > spineVoxelOnDendVoxel(
+			"spineVoxelOnDendVoxel",
+			"Voxel index of spine voxel on each dend voxel. Assume that "
+			"there is never more than one spine per dend voxel. If no "
+			"spine present, the entry is -1. Note that the "
+			"same index is used both for spine head and PSDs.",
+			&NeuroMesh::getSpineVoxelOnDendVoxel
+		);
+
+		static ReadOnlyLookupValueFinfo< NeuroMesh, ObjId, 
+				vector< unsigned int > > dendVoxelsOnCompartment(
+			"dendVoxelsOnCompartment",
+			"Returns vector of all chem voxels on specified electrical "
+			"compartment of the dendrite. Returns empty vec if none "
+			"found, or if the compartment isn't on the dendrite.",
+			&NeuroMesh::getDendVoxelsOnCompartment
+		);
+
+		static ReadOnlyLookupValueFinfo< NeuroMesh, ObjId, 
+				vector< unsigned int > > spineVoxelsOnCompartment(
+			"spineVoxelsOnCompartment",
+			"Returns vector of all chem voxels on specified electrical "
+			"compartment, which should be a spine head or shaft . "
+			"Returns empty vec if no chem voxels "
+			"found, or if the compartment isn't on the dendrite. "
+			"Note that spine and PSD voxel indices are the same for a "
+			"given spine head.",
+			&NeuroMesh::getSpineVoxelsOnCompartment
+		);
+
 		static ValueFinfo< NeuroMesh, double > diffLength(
 			"diffLength",
 			"Diffusive length constant to use for subdivisions. "
@@ -253,6 +283,9 @@ const Cinfo* NeuroMesh::initCinfo()
 		&elecComptMap,			// ReadOnlyValue
 		&startVoxelInCompt,			// ReadOnlyValue
 		&endVoxelInCompt,			// ReadOnlyValue
+		&spineVoxelOnDendVoxel,		// ReadOnlyValue
+		&dendVoxelsOnCompartment,	// ReadOnlyLookupValue
+		&spineVoxelsOnCompartment,	// ReadOnlyLookupValue
 		&diffLength,			// Value
 		&geometryPolicy,		// Value
 		&setCellPortion,			// DestFinfo
@@ -782,6 +815,37 @@ vector< unsigned int > NeuroMesh::getEndVoxelInCompt() const
 				i = nodes_.begin(); i != nodes_.end(); ++i ) {
 		if ( !i->isDummyNode() )
 			ret.push_back( i->startFid() + i->getNumDivs() );
+	}
+	return ret;
+}
+
+vector< int > NeuroMesh::getSpineVoxelOnDendVoxel() const
+{
+	vector< int > ret( nodeIndex_.size(), -1 ); //-1 means no spine present
+	for ( unsigned int i = 0; i < parent_.size(); ++i ) {
+		assert( parent_[i] < ret.size() );
+		ret[ parent_[i] ] = i;
+	}
+	return ret;
+}
+
+vector< unsigned int > NeuroMesh::getDendVoxelsOnCompartment(ObjId compt) const
+{
+	vector< unsigned int > ret;
+	for ( unsigned int i = 0; i < nodeIndex_.size(); ++i ) {
+		if ( nodes_[i].elecCompt() == compt.id )
+			ret.push_back(i);
+	}
+	return ret;
+}
+
+vector< unsigned int > NeuroMesh::getSpineVoxelsOnCompartment(ObjId compt) const
+{
+	vector< unsigned int > ret;
+	assert( shaft_.size() == head_.size() );
+	for ( unsigned int i = 0; i < shaft_.size(); ++i ) {
+		if ( shaft_[i] == compt.id || head_[i] == compt.id )
+			ret.push_back(i);
 	}
 	return ret;
 }
