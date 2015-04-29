@@ -115,6 +115,9 @@ class NeuroMesh: public MeshCompt
 		vector< Id > getElecComptMap() const;
 		vector< unsigned int > getStartVoxelInCompt() const;
 		vector< unsigned int > getEndVoxelInCompt() const;
+		vector< int > getSpineVoxelOnDendVoxel() const;
+		vector< unsigned int > getDendVoxelsOnCompartment( ObjId compt ) const;
+		vector< unsigned int > getSpineVoxelsOnCompartment( ObjId compt ) const;
 
 		vector< unsigned int > getParentVoxel() const;
 		const vector< double >& vGetVoxelVolume() const;
