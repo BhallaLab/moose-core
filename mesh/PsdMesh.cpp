@@ -39,6 +39,15 @@ const Cinfo* PsdMesh::initCinfo()
 			&PsdMesh::getThickness
 		);
 
+		static ReadOnlyValueFinfo< PsdMesh, vector< unsigned int > >
+			neuronVoxel 
+		(
+		 	"neuronVoxel",
+			"Vector of indices of voxels on parent NeuroMesh, from which "
+			"the respective spines emerge.",
+			&PsdMesh::getNeuronVoxel
+		);
+
 		static ReadOnlyValueFinfo< PsdMesh, vector< Id > > elecComptMap(
 			"elecComptMap",
 			"Vector of Ids of electrical compartments that map to each "
@@ -95,6 +104,7 @@ const Cinfo* PsdMesh::initCinfo()
 
 	static Finfo* psdMeshFinfos[] = {
 		&thickness,			// ValueFinfo
+		&neuronVoxel,		// ReadOnlyValueFinfo
 		&elecComptMap,		// ReadOnlyValueFinfo
 		&elecComptList,		// ReadOnlyValueFinfo
 		&startVoxelInCompt,		// ReadOnlyValueFinfo
@@ -163,6 +173,14 @@ double PsdMesh::getThickness() const
 void PsdMesh::setThickness( double v )
 {
 	thickness_ = v;
+}
+
+/**
+ * Returns index of voxel on NeuroMesh to which this spine is connected.
+ */
+vector< unsigned int > PsdMesh::getNeuronVoxel() const
+{
+	return parent_;
 }
 
 vector< Id > PsdMesh::getElecComptMap() const
