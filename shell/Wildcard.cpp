@@ -188,7 +188,7 @@ int singleLevelWildcard( ObjId start, const string& path, vector< ObjId >& ret )
 	unsigned int index = findBraceContent( path, beforeBrace, insideBrace );
 	if ( beforeBrace == "##" )
 		// recursive.
-		return allChildren( start, insideBrace, ret ); 
+		return allChildren( start, index, insideBrace, ret ); 
 
 	vector< Id > kids;
 	Neutral::children( start.eref(), kids );
@@ -199,7 +199,9 @@ int singleLevelWildcard( ObjId start, const string& path, vector< ObjId >& ret )
 			if ( index == ALLDATA ) {
 				for ( unsigned int j = 0; j < i->element()->numData(); ++j )
 					ret.push_back( ObjId( *i, j ) );
-			} else {
+			} else if ( i->element()->hasFields() && index < i->element()->numField( start.dataIndex ) ) {
+				ret.push_back( ObjId( *i, start.dataIndex, index ) );
+			} else if ( !i->element()->hasFields() && index < i->element()->numData() ) {
 				ret.push_back( ObjId( *i, index ) );
 			}
 		}
@@ -454,7 +456,8 @@ bool matchBeforeBrace( ObjId id, const string& wild )
  * Recursive function to compare all descendants and cram matches into ret.
  * Returns number of matches.
  */
-int allChildren( ObjId start, const string& insideBrace, vector< ObjId >& ret )
+int allChildren( ObjId start, 
+	unsigned int index, const string& insideBrace, vector< ObjId >& ret )
 {
 	unsigned int nret = ret.size();
 	vector< Id > kids;
@@ -463,15 +466,20 @@ int allChildren( ObjId start, const string& insideBrace, vector< ObjId >& ret )
 	for ( i = kids.begin(); i != kids.end(); i++ ) {
 		if ( i->element()->hasFields() ) {
 			if ( matchInsideBrace( *i, insideBrace ) ) {
-				ObjId oid( *i, start.dataIndex );
-				ret.push_back( oid );
+				if ( index == ALLDATA ) {
+					ObjId oid( *i, start.dataIndex );
+					ret.push_back( oid );
+				} else if (index < i->element()->numField( start.dataIndex ) ) {
+					ObjId oid( *i, start.dataIndex, index );
+					ret.push_back( oid );
+				}
 			}
 		} else {
 			for ( unsigned int j = 0; j < i->element()->numData(); ++j )
 		   	{
 				ObjId oid( *i, j );
-				allChildren( oid, insideBrace, ret );
-				if ( matchInsideBrace( oid, insideBrace ) )
+				allChildren( oid, index, insideBrace, ret );
+				if ( (index == ALLDATA || index == j) && matchInsideBrace( oid, insideBrace ) )
 					ret.push_back( oid );
 			}
 		}

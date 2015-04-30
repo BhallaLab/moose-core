@@ -1221,7 +1221,7 @@ static double coordSystem( Id soma, Id dend, Vec& x, Vec& y, Vec& z )
 static void scaleSpineCompt( Id compt, double size )
 {
 	vector< ObjId > chans;
-	allChildren( compt, "ISA=ChanBase", chans );
+	allChildren( compt, ALLDATA, "ISA=ChanBase", chans );
 	// wildcardFind( compt.path() + "/##[ISA=ChanBase]", chans );
 	double a = size * size;
 	for ( vector< ObjId >::iterator 
@@ -1233,7 +1233,7 @@ static void scaleSpineCompt( Id compt, double size )
 
 	double v = size * size * size;
 	vector< ObjId > concs;
-	allChildren( compt, "ISA=CaConcBase", concs );
+	allChildren( compt, ALLDATA, "ISA=CaConcBase", concs );
 	// wildcardFind( compt.path() + "/##[ISA=CaConcBase]", concs );
 	for ( vector< ObjId >::iterator 
 					i = concs.begin(); i != concs.end(); ++i )
