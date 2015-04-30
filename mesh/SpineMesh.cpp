@@ -121,6 +121,7 @@ const Cinfo* SpineMesh::initCinfo()
 
 	static Finfo* spineMeshFinfos[] = {
 		&parentVoxel,		// ReadOnlyValueFinfo
+		&neuronVoxel,		// ReadOnlyValueFinfo
 		&elecComptMap,		// ReadOnlyValueFinfo
 		&elecComptList,		// ReadOnlyValueFinfo
 		&startVoxelInCompt,		// ReadOnlyValueFinfo
