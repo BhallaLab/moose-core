@@ -158,6 +158,7 @@ def plotVector(vec, xvec = None, **options):
     """
 
     assert type(vec) == np.ndarray, "Expected type %s" % type(vec)
+    legend = options.get('legend', True)
 
     if xvec is None:
         clock = moose.Clock('/clock')
@@ -167,7 +168,9 @@ def plotVector(vec, xvec = None, **options):
 
     assert len(xx) == len(vec), "Expecting %s got %s" % (len(vec), len(xvec))
 
-    plt.plot(xx, vec, label=options.get('label', ''))
+    plt.plot(xx, vec, '--.', label=options.get('label', ''))
+    if legend:
+        plt.legend(loc='best', framealpha=0.4)
 
     if xvec is None:
         plt.xlabel = 'Time (sec)'
@@ -239,11 +242,11 @@ def plotRecords(dataDict, xvec = None, **kwargs):
         if plotThis:
             if not subplot: 
                 yvec = dataDict[k].vector
-                plotVector(yvec, xvec, **kwargs)
+                plotVector(yvec, xvec, label=k, **kwargs)
             else:
                 plt.subplot(len(dataDict), 1, i)
                 yvec = dataDict[k].vector
-                plotVector(yvec, xvec, **kwargs)
+                plotVector(yvec, xvec, label=k, **kwargs)
     try:
         plt.tight_layout()
     except: pass
