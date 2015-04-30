@@ -57,6 +57,7 @@ class PsdMesh: public MeshCompt
 		double getThickness() const;
 		void setThickness( double v );
 
+		vector< unsigned int > getNeuronVoxel() const;
 		vector< Id > getElecComptMap() const;
 
 		/// Returns index of first voxel mapping to elec compt
