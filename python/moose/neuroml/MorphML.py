@@ -454,14 +454,18 @@ class MorphML():
                             if cablegroupname == 'all':
                                 cablegroupstr4moose = "#"
                             else:
-                                cablegroupstr4moose = "#"+cablegroupname+"#"
+                                for cableid in self.cablegroupsDict[cablegroupname]:
+                                    for compartment in self.cellDictByCableId[cellname][1][cableid]:
+                                        cablegroupstr4moose += "#"+compartment.name+"#,"
+                                if cablegroupstr4moose[-1] == ',':
+                                    cablegroupstr4moose = cablegroupstr4moose[:-1] # remove last comma
                             inhomo_value = parameter.find(".//{"+self.bio+"}inhomogeneous_value")
                             inhomo_value_name = inhomo_value.attrib['param_name']
                             inhomo_value_value = inhomo_value.attrib['value']
                             ## inhomo_value_name refers to a variable name say 'p'
                             ##  specified in the cable group using the inhomogeneous_param tag
                             ##  look up the variable name say 'p' corresponding to inhomo_value_name
-                            ##  and replace it in the formula (inhomo_value_value) by 'L' which moose understand.
+                            ##  and replace it in the formula (inhomo_value_value) by 'L' which moose understands.
                             inhomo_namevars = self.cablegroupsInhomoparamsDict[cablegroupname]
                             var_replace = None
                             for (name,var) in inhomo_namevars:
@@ -472,8 +476,10 @@ class MorphML():
                                 ## only 'Path Length from root' (neuroml) 
                                 ##  = 'r' (moose) is supported currently in moose
                                 inhomo_eqn = inhomo_value_value.replace(var_replace,'r')
+                            inhomo_eqn = '('+inhomo_eqn+')*'+str(Gfactor)
+                                        # careful about physiol vs SI units
                             chan_distrib.extend((mechanismname,cablegroupstr4moose,inhomo_eqn))
-                                # use extend, not append, moose wants it this way
+                                        # use extend, not append, moose wants it this way
                         else:
                             pu.warn(["Yo programmer of MorphML import! You didn't"
                                     , " implement variable parameter %s " % parametername
