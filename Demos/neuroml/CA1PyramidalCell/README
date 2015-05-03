@@ -11,4 +11,8 @@ Some inhomogeneous channels in the dendrites, and some negative conductance (!) 
 Select the soma (graphical viewer or element tree) and click 'add field' on the right 'plot configuration' pane to plot Vm.
 Run the simulation and see the soma Vm.
 
-To test on the terminal, just run python CA1.py (pops up soma Vm).
+To test on the terminal, just run (hsolve is much faster):
+python CA1_hsolve.py <filename>
+python CA1.py <filename>
+<filename> can be one of CA1soma.net.xml, CA1.net.xml, or CA1inhomog.net.xml
+(pops up soma Vm) (if no filename is specified, the simgle compartment CA1 is used).
