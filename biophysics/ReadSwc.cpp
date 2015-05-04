@@ -115,7 +115,7 @@ void ReadSwc::cleanZeroLength()
 	for ( unsigned int i = 1; i < segs_.size(); ++i ) {
 		SwcSegment& s = segs_[i];
 		SwcSegment& pa = segs_[ s.parent() - 1 ];
-		if ( s.length( pa ) < EPSILON ) {
+		if ( s.distance( pa ) < EPSILON ) {
 			// Remove the zero length child from pa.kids_
 			vector< int > temp;
 			for ( unsigned int j = 0; j < pa.kids().size(); ++j ) {
@@ -151,8 +151,8 @@ void ReadSwc::traverseBranch( const SwcSegment& s,
 	do {
 		// Beware the indexing!
 		const SwcSegment& pa = segs_[prev->parent() - 1];
-		len += pa.length( *prev );
-		L += pa.L( *prev );
+		len += pa.distance( *prev );
+		L += pa.L( );
 		cable.push_back( pa.myIndex() );
 		prev = &pa;
 	} while ( (prev->parent() != ~0U) && (prev->kids().size() == 1) );
@@ -219,7 +219,7 @@ static Id makeCompt( Id parent,
 	Id compt;
 	double x0, y0, z0;
 	if ( seg.parent() != ~0U ) {
-		len = seg.length( pa );
+		len = seg.distance( pa );
 		stringstream ss;
 		ss << SwcSegment::typeName[ seg.type() ] << "_" << i << "_" << j;
 		name = ss.str();
