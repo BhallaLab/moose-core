@@ -37,6 +37,7 @@ class Neuron
 		double getCompartmentLengthInLambdas() const;
 		unsigned int getNumCompartments() const;
 		unsigned int getNumBranches() const;
+		vector< double> getPathDistFromSoma() const;
 		vector< double> getGeomDistFromSoma() const;
 		vector< double> getElecDistFromSoma() const;
 		vector< ObjId > getCompartments() const;
@@ -49,6 +50,28 @@ class Neuron
 
 		void buildSegmentTree( const Eref& e );
 
+		///////////////////////////////////////////////////////////////////
+		// MechSpec set
+		///////////////////////////////////////////////////////////////////
+		void updateSegmentLengths();
+		void installSpines( const vector< ObjId >& elist,
+			const vector< double >& val, const vector< string >& line );
+		void makeSpacingDistrib( 
+			const vector< ObjId >& elist, const vector< double >& val,
+			vector< unsigned int >& elistIndex, vector< double >& pos,
+			const vector< string >& line ) const;
+		void parseMechSpec( const Eref& e );
+		void installMechanism(  const string& name,
+			const vector< ObjId >& elist, const vector< double >& val,
+			const vector< string >& line );
+		void evalExprForElist( const vector< ObjId >& elist,
+			const string& expn, vector< double >& val );
+
+		///////////////////////////////////////////////////////////////////
+		// Old set
+		///////////////////////////////////////////////////////////////////
+		void makeSpacingDistrib( vector< double >& pos,
+			double spacing, double spacingDistrib );
 		void insertSpines( const Eref& e, Id spineProto, string path,
 			vector< double > placement );
 		void parseSpines( const Eref& e );
@@ -62,12 +85,6 @@ class Neuron
 		void evalChanParams( const string& name, const string& func, 
 						vector< ObjId >& elist );
 		
-		void parseMechSpec( const Eref& e );
-		void installMechanism(  const string& name,
-			const vector< ObjId >& elist, const vector< double >& val,
-			const vector< string >& line );
-		void evalExprForElist( const vector< ObjId >& elist,
-			const string& expn, vector< double >& val );
 
 		/**
 		 * Initializes the class info.
@@ -80,6 +97,7 @@ class Neuron
 		double Em_;
 		double theta_;
 		double phi_;
+		Id soma_;
 		string sourceFile_;
 		double compartmentLengthInLambdas_;
 		unsigned int spineIndex_;

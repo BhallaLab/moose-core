@@ -20,6 +20,7 @@ class SwcSegment
 	public:
 		SwcSegment()
 				: myIndex_( 0 ), type_( 0 ), radius_( 0.0 ),
+				length_( 0.0 ), L_( 0.0 ),
 				parent_( ~0U ), 
 				geometricalDistanceFromSoma_( 0.0 ),
 				electrotonicDistanceFromSoma_( 0.0 )
@@ -68,28 +69,45 @@ class SwcSegment
 			kids_ = kids;
 		}
 
-		double radius() const {
-			return radius_;
-		}
-
 		unsigned short type() const {
 			return type_;
 		}
 
-		double length( const SwcSegment& other ) const  {
-			return v_.distance( other.v_ );
+		double radius() const {
+			return radius_;
+		}
+		double length() const {
+			return length_;
 		}
 
-		double L( const SwcSegment& other ) const;
+		double L() const {
+			return L_;
+		}
+
+		double distance( const SwcSegment& other ) const  {
+			return v_.distance( other.v_ );
+		}
 
 		const Vec& vec() const {
 			return v_;
 		}
 
-		void setCumulativeDistance( double rSoma, double eSoma )
+		void setGeometricalDistanceFromSoma( const SwcSegment& soma )
 		{
-			geometricalDistanceFromSoma_ = rSoma;
+			geometricalDistanceFromSoma_ = v_.distance( soma.v_ );
+		}
+
+		void setCumulativeDistance( double len, double L,
+						double pSoma, double eSoma )
+		{
+			length_ = len;
+			L_ = L;
+			pathDistanceFromSoma_ = pSoma;
 			electrotonicDistanceFromSoma_ = eSoma;
+		}
+
+		double getPathDistFromSoma() const  {
+			return pathDistanceFromSoma_;
 		}
 		
 		double getGeomDistFromSoma() const  {
@@ -135,9 +153,14 @@ class SwcSegment
 		short type_; 
 		Vec v_;	/// coordinates of end of segment
 		double radius_; /// Radius of segment
+		double length_; /// Length of segment
+		double L_;		/// Number of length constants in segment.
 		unsigned int parent_; /// Index of parent. Is ~0 for soma.
 
-		/// dist from soma: not direct, but summed along dend
+		/// dist from soma: not direct, but threaded along dend
+		double pathDistanceFromSoma_; 
+
+		/// geometrical distance from soma.
 		double geometricalDistanceFromSoma_; 
 
 		/// electrotonic dist from soma, summed along dend.
@@ -157,8 +180,12 @@ class SwcBranch: public SwcSegment
 		double r0; /// Radius at beginning.
 		double r1; /// Radius at end.
 
-		/// Geometrical length of entire branch, summed along all segments.
+		/// Geometrical length of dendrite from soma
 		double geomLength;
+
+		/// Geometrical length of entire branch, summed along all segments.
+		double pathLength;
+
 
 		/**
 		 * Electrotonic length summed along all branch segments. This does
