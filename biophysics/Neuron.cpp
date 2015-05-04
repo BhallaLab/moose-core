@@ -19,6 +19,60 @@
 
 #include "../external/muparser/muParser.h"
 
+class nuParser: public mu::Parser
+{
+	public:
+		nuParser( const string& expr ):
+			mu::Parser(),
+			p(0.0), // geometrical path distance wound through dendrite
+			g(0.0), // geometrical path distance direct from soma.
+			L(0.0), // electrical distance arg
+			len(0.0), // Length of compt in metres
+			dia(0.0), // Diameter of compt in metres
+			oldVal(0.0), // Original value of field, if needed.
+			useOldVal( false ) // is the 'orig' field needed?
+		{
+			DefineVar( "p", &p );
+			DefineVar( "g", &g );
+			DefineVar( "L", &L );
+			DefineVar( "len", &len );
+			DefineVar( "dia", &dia );
+			DefineVar( "oldVal", &oldVal );
+			DefineFun( "H", nuParser::H );
+			if ( expr.find( "oldVal" ) != string::npos )
+				useOldVal = true;
+			SetExpr( expr );
+		}
+
+		/// Defines the order of arguments in the val array.
+		enum valArgs{ EXPR, P, G, EL, LEN, DIA, OLDVAL };
+
+		static double H( double arg ) { // Heaviside function.
+			return ( arg > 0.0);
+		}
+
+		double eval( vector< double >::const_iterator arg0 ) {
+			p = *(arg0 + nuParser::P );
+			g = *(arg0 + nuParser::G );
+			L = *(arg0 + nuParser::EL );
+			len = *(arg0 + nuParser::LEN );
+			dia = *(arg0 + nuParser::DIA );
+			oldVal = *(arg0 + nuParser::OLDVAL );
+			return Eval();
+		}
+
+		static const unsigned int numVal;
+		double p; // geometrical path distance arg
+		double g; // geometrical path distance arg
+		double L; // electrical distance arg
+		double len; // Length of compt in metres
+		double dia; // Diameter of compt in metres
+		double oldVal; // Old value of the field, used for relative scaling
+		bool useOldVal; // is the 'oldVal' field needed?
+};
+
+const unsigned int nuParser::numVal = 7;
+
 const Cinfo* Neuron::initCinfo()
 {
 	/////////////////////////////////////////////////////////////////////
@@ -241,10 +295,16 @@ const Cinfo* Neuron::initCinfo()
 		&Neuron::getNumBranches
 	);
 
+	static ReadOnlyValueFinfo< Neuron, vector< double > > pathDistFromSoma(
+		"pathDistanceFromSoma",
+		"geometrical path distance of each segment from soma, measured by "
+		"threading along the dendrite.",
+		&Neuron::getPathDistFromSoma
+	);
+
 	static ReadOnlyValueFinfo< Neuron, vector< double > > geomDistFromSoma( 
 		"geometricalDistanceFromSoma",
-		"geometrical distance of each segment from soma, as measured along "
-		"the dendrite.",
+		"geometrical distance of each segment from soma.",
 		&Neuron::getGeomDistFromSoma
 	);
 
@@ -399,6 +459,7 @@ const Cinfo* Neuron::initCinfo()
 		&compartmentLengthInLambdas,	// ValueFinfo
 		&numCompartments,			// ReadOnlyValueFinfo
 		&numBranches,				// ReadOnlyValueFinfo
+		&pathDistFromSoma,			// ReadOnlyValueFinfo
 		&geomDistFromSoma,			// ReadOnlyValueFinfo
 		&elecDistFromSoma,			// ReadOnlyValueFinfo
 		&compartments,				// ReadOnlyValueFinfo
@@ -551,6 +612,14 @@ unsigned int Neuron::getNumCompartments() const
 unsigned int Neuron::getNumBranches() const
 {
 	return branches_.size();
+}
+
+vector< double> Neuron::getPathDistFromSoma() const
+{
+	vector< double > ret( segs_.size(), 0.0 );
+	for ( unsigned int i = 0; i < segs_.size(); ++i )
+		ret[i] = segs_[i].getPathDistFromSoma();
+	return ret;
 }
 
 vector< double> Neuron::getGeomDistFromSoma() const
@@ -706,19 +775,40 @@ static void fillSegments( vector< SwcSegment >& segs,
 /// Recursive function to fill in cumulative distances from soma.
 static void traverseCumulativeDistance( 
 	SwcSegment& self, vector< SwcSegment >& segs,
-   	const vector< Id >& lookupId,  double rSoma, double eSoma )
+   	const vector< Id >& lookupId,  
+	double len, double L, double pSoma, double eSoma )
 {
-	self.setCumulativeDistance( rSoma, eSoma );
+	self.setCumulativeDistance( len, L, pSoma, eSoma );
 	for ( unsigned int i = 0; i < self.kids().size(); ++i ) {
 		SwcSegment& kid = segs[ self.kids()[i] ];
-		double r = rSoma + kid.length( self );
+		double segmentLength = kid.distance( self );
+		double p = pSoma + segmentLength;
 		Id kidId = lookupId[ self.kids()[i] ];
 		double Rm = Field< double >::get( kidId, "Rm" );
 		double Ra = Field< double >::get( kidId, "Ra" );
 		// Note that sqrt( Rm/Ra ) = lambda/length = 1/L.
-		double e = eSoma + sqrt( Ra / Rm );
-		traverseCumulativeDistance( kid, segs, lookupId, r, e );
+		double electrotonicLength = sqrt( Ra / Rm );
+		double e = eSoma + electrotonicLength;
+		traverseCumulativeDistance( kid, segs, lookupId, 
+						segmentLength, electrotonicLength, p, e );
 	}
+}
+
+void Neuron::updateSegmentLengths()
+{
+	double len = Field< double >::get( soma_, "length" );
+	double dia = Field< double >::get( soma_, "diameter" );
+	if ( len < dia )
+		len = dia;
+	double Rm = Field< double >::get( soma_, "Rm" );
+	double Ra = Field< double >::get( soma_, "Ra" );
+	double L = sqrt( Ra / Rm );
+
+	for ( unsigned int i = 0; i < segs_.size(); ++i ) {
+		segs_[i].setGeometricalDistanceFromSoma( segs_[0] );
+	}
+
+	traverseCumulativeDistance( segs_[0], segs_, segId_, len, L, 0, 0 );
 }
 
 /// Fills up vector of segments. First entry is soma.
@@ -727,8 +817,8 @@ void Neuron::buildSegmentTree( const Eref& e )
 	vector< Id > kids;
 	Neutral::children( e, kids );
 
-	Id soma = fillSegIndex( kids, segIndex_ );
-	if ( kids.size() == 0 || soma == Id() ) {
+	soma_ = fillSegIndex( kids, segIndex_ );
+	if ( kids.size() == 0 || soma_ == Id() ) {
 		cout << "Error: Neuron::buildSegmentTree( " << e.id().path() <<
 				" ): \n		Valid neuronal model not found.\n";
 		return;
@@ -756,8 +846,10 @@ void Neuron::buildSegmentTree( const Eref& e )
 		assert( i->second < segId_.size() );
 		segId_[ i->second ] = i->first;
 	}
-	traverseCumulativeDistance( segs_[0], segs_, segId_, 0, 0 );
+	updateSegmentLengths();
 }
+
+
 
 ////////////////////////////////////////////////////////////////////////
 // Stuff here for assignChanDistrib
@@ -901,7 +993,7 @@ void Neuron::parseChanDistrib( const Eref& e )
 /////////////////////////////////////////////////////////////////////////
 // Here we set up the more general specification of mechanisms. Each
 // line is 
-// op proto path expr [field expr]...
+// proto path field expr [field expr]...
 /////////////////////////////////////////////////////////////////////////
 static vector< vector< string > > specLines( const vector< string >& args )
 {
@@ -931,24 +1023,18 @@ void Neuron::evalExprForElist( const vector< ObjId >& elist,
 		const string& expn, vector< double >& val )
 {
 	val.clear();
-	val.reserve( elist.size() * 5 );
+	val.resize( elist.size() * nuParser::numVal );
 	// Build the function
-	double p = 0; // geometrical path distance arg
-	double L = 0; // electrical distance arg
 	double len = 0; // Length of compt in metres
 	double dia = 0; // Diameter of compt in metres
+	unsigned int valIndex = 0;
 	try {
-		mu::Parser parser;
-		parser.DefineVar( "p", &p );
-		parser.DefineVar( "L", &L );
-		parser.DefineVar( "len", &len );
-		parser.DefineVar( "dia", &dia );
-		parser.SetExpr( expn );
+		nuParser parser( expn );
 
 		// Go through the elist checking for the channels. If not there,
 		// build them. 
 		for ( vector< ObjId >::const_iterator 
-						i = elist.begin(); i != elist.end(); ++i) {
+			i = elist.begin(); i != elist.end(); ++i ) {
 			if ( i->element()->cinfo()->isA( "CompartmentBase" ) ) {
 				dia = Field< double >::get( *i, "diameter" );
 				len = Field< double >::get( *i, "length" );
@@ -956,15 +1042,21 @@ void Neuron::evalExprForElist( const vector< ObjId >& elist,
 					segIndex_.find( *i );
 				assert( j != segIndex_.end() );
 				assert( j->second < segs_.size() );
-				p = segs_[ j->second ].getGeomDistFromSoma();
-				L = segs_[ j->second ].getElecDistFromSoma();
+				val[valIndex + nuParser::P] = 
+						segs_[j->second].getPathDistFromSoma();
+				val[valIndex + nuParser::G] = 
+						segs_[j->second].getGeomDistFromSoma();
+				val[valIndex + nuParser::EL] = 
+						segs_[j->second].getElecDistFromSoma();
+				val[valIndex + nuParser::LEN] = len;
+				val[valIndex + nuParser::DIA] = dia;
+				// Can't assign oldVal on first arg
+				val[valIndex + nuParser::OLDVAL] = 0.0; 
 
-				val.push_back( parser.Eval() );
-				val.push_back( p );
-				val.push_back( L );
-				val.push_back( len );
-				val.push_back( dia );
+				val[valIndex + nuParser::EXPR] = parser.eval(
+						val.begin() + valIndex );
 			}
+			valIndex += nuParser::numVal;
 		}
 	}
 	catch ( mu::Parser::exception_type& err )
@@ -990,8 +1082,8 @@ static void buildFromProto(
 	mech.clear();
 	mech.resize( elist.size() );
 	for ( unsigned int i = 0; i < elist.size(); ++i ) {
-		unsigned int j = i * 5;
-		if ( val[ j++ ] > 0 ) {
+		unsigned int j = i * nuParser::numVal;
+		if ( val[ j + nuParser::EXPR ] > 0 ) {
 			string name = proto.element()->getName();
 			Id obj = Neutral::child( elist[i].eref(), name );
 			if ( obj == Id() ) { // Need to copy it in from proto.
@@ -1014,7 +1106,18 @@ static void assignParam( Id obj, const string& field,
 			Field< double >::set( obj, "Ek", val );
 		}
 	} else if ( obj.element()->cinfo()->isA( "CaConcBase" ) ) {
-		Field< double >::set( obj, "B", val );
+		if ( field == "CaBasal" || field == "tau" || field == "thick" ||
+		  field == "floor" || field == "ceiling" ) {
+			Field< double >::set( obj, field, val );
+		} else if ( field == "B" ) {
+			// The system obeys dC/dt = B*I_Ca - C/tau
+			// So B = arg/( vol * F ). Here the system provides vol and F,
+			// so the arg is just a scale factor over this, typically
+			// to be thought of in terms of buffering. Small B is more
+			// buffering.
+			Field< double >::set( obj, "B", val / 
+				( FaradayConst * len * dia * dia * PI / 4.0 ) );
+		}
 	}
 }
 
@@ -1023,26 +1126,14 @@ static void setMechParams(
 		const vector< ObjId >& elist, const vector< double >& val,
 		const string& field, const string& expr )
 {
-	double p = 0; // geometrical path distance arg
-	double L = 0; // electrical distance arg
-	double len = 0; // Length of compt in metres
-	double dia = 0; // Diameter of compt in metres
 	try {
-		mu::Parser parser;
-		parser.DefineVar( "p", &p );
-		parser.DefineVar( "L", &L );
-		parser.DefineVar( "len", &len );
-		parser.DefineVar( "dia", &dia );
-		parser.SetExpr( expr );
-
+		nuParser parser ( expr );
 		for ( unsigned int i = 0; i < elist.size(); ++i ) {
-			unsigned int j = i * 5;
-			if ( val[ j++ ] > 0 ) {
-				p = val[j++];
-				L = val[j++];
-				len = val[j++];
-				dia = val[j++];
-				double x = parser.Eval();
+			unsigned int j = i * nuParser::numVal;
+			if ( val[ j + nuParser::EXPR ] > 0 ) {
+				double len = val[j + nuParser::LEN ];
+				double dia = val[j + nuParser::DIA ];
+				double x = parser.eval( val.begin() + j );
 				assignParam( mech[i], field, x, len, dia );
 			}
 		}
@@ -1056,21 +1147,26 @@ static void setMechParams(
 static void assignSingleCompartmentParams( ObjId compt,
 			double val, const string& field, double len, double dia )
 {
-	// Only permit chans with val greater than zero.
+	if ( field == "initVm" || field == "INITVM" ) {
+		Field< double >::set( compt, "initVm", val );
+		return;
+	}
+	if ( field == "Em" || field == "EM" ) {
+		Field< double >::set( compt, "Em", val );
+		return;
+	}
 	if ( val > 0.0 ) {
-		if ( field == "Rm" || field == "RM" ) {
+		if ( field == "Rm" || field == "Ra" || field == "Cm" ) {
+			Field< double >::set( compt, field, val );
+		} else if ( field == "RM" ) {
 			Field< double >::set( compt, "Rm", val / ( len  * dia * PI ) );
-		} else if ( field == "Ra" || field == "RA" ) {
+		} else if ( field == "RA" ) {
 			Field< double >::set( compt, "Ra", val*len*4 / (dia*dia*PI) );
-		} else if ( field == "Cm" || field == "CM" ) {
+		} else if ( field == "CM" ) {
 			Field< double >::set( compt, "Cm", val * len * dia * PI );
-		} else if ( field == "Em" || field == "EM" ) {
-			Field< double >::set( compt, "Em", val );
-		} else if ( field == "initVm" || field == "INITVM" ) {
-			Field< double >::set( compt, "initVm", val );
 		} else {
 			cout << "Warning: setCompartmentParam: field '" << field << 
-					"' not found\n";
+				"' not found\n";
 		}
 	}
 }
@@ -1079,26 +1175,14 @@ static void setCompartmentParams(
 		const vector< ObjId >& elist, const vector< double >& val,
 		const string& field, const string& expr )
 {
-	double p = 0; // geometrical path distance arg
-	double L = 0; // electrical distance arg
-	double len = 0; // Length of compt in metres
-	double dia = 0; // Diameter of compt in metres
 	try {
-		mu::Parser parser;
-		parser.DefineVar( "p", &p );
-		parser.DefineVar( "L", &L );
-		parser.DefineVar( "len", &len );
-		parser.DefineVar( "dia", &dia );
-		parser.SetExpr( expr );
-
+		nuParser parser( expr );
 		for ( unsigned int i = 0; i < elist.size(); ++i ) {
-			unsigned int j = i * 5;
-			if ( val[ j++ ] > 0 ) {
-				p = val[j++];
-				L = val[j++];
-				len = val[j++];
-				dia = val[j++];
-				double x = parser.Eval();
+			unsigned int j = i * nuParser::numVal;
+			if ( val[ j + nuParser::EXPR ] > 0 ) {
+				double len = val[j + nuParser::LEN ];
+				double dia = val[j + nuParser::DIA ];
+				double x = parser.eval( val.begin() + j );
 				assignSingleCompartmentParams( elist[i],
 					x, field, len, dia );
 			}
@@ -1115,9 +1199,9 @@ void Neuron::parseMechSpec( const Eref& e )
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	vector< vector< string > > lines = specLines( mechSpec_ );
 	for ( unsigned int i = 0; i < lines.size(); ++i ) {
-		const string& op = lines[i][0];
-		const string& name = lines[i][1];
-		const string& path = lines[i][2];
+		const string& name = lines[i][0];
+		const string& path = lines[i][1];
+		// const string& field = lines[i][2]; // Not used.
 		const string& expr = lines[i][3];
 
 		vector< ObjId > elist;
@@ -1129,13 +1213,7 @@ void Neuron::parseMechSpec( const Eref& e )
 		wildcardFind( path, elist );
 		shell->setCwe( oldCwe );
 		evalExprForElist( elist, expr, val );
-		if ( op == "install" ) {
-			installMechanism( name, elist, val, lines[i] );
-		} else if ( op == "assign" ) {
-			// assignMechanism( name, elist, val, lines[i], false );
-		} else if ( op == "scale" ) {
-			// assignMechanism( name, elist, val, lines[i], true );
-		}
+		installMechanism( name, elist, val, lines[i] );
 	}
 }
 
@@ -1143,13 +1221,14 @@ void Neuron::installMechanism( const string& name,
 		const vector< ObjId >& elist, const vector< double >& val,
 		const vector< string >& line )
 {
-	assert( val.size() == 5 * elist.size() );
+	assert( val.size() == nuParser::numVal * elist.size() );
 	if ( name == "." ) {
-		for ( unsigned int i = 4; i < line.size(); i += 2 ) {
+		for ( unsigned int i = 2; i < line.size(); i += 2 ) {
 			setCompartmentParams( elist, val, line[i], line[i+1] );
 		}
 	} else if ( name == "spine" ) { 
-		// Do something
+		// Here I can't incrementally assign params, I need it all at once.
+		installSpines( elist, val, line );
 	} else { 
 		Id proto( "/library/" + name );
 		if ( proto == Id() ) {
@@ -1160,10 +1239,10 @@ void Neuron::installMechanism( const string& name,
 			// coords which will be coarser than the chem coords.
 			// Assign params by building a new 'mech' vector to
 			// hold all pools under specified compts from elist.
-		} else {
+		} else { // Things like channels and Ca conc.
 			vector< ObjId > mech( elist.size() );
 			buildFromProto( proto, elist, val, mech );
-			for ( unsigned int i = 4; i < line.size(); i += 2 ) {
+			for ( unsigned int i = 2; i < line.size(); i += 2 ) {
 				setMechParams( mech, elist, val, line[i], line[i+1] );
 			}
 		}
@@ -1366,7 +1445,7 @@ static void addSpine( Id parentCompt, Id spineProto,
 	reorientSpine( kids, coords, ppos, pos, angle, x, y, z );
 }
 
-static void makeSpacingDistrib( vector< double >& pos, 
+void Neuron::makeSpacingDistrib( vector< double >& pos, 
 				double spacing, double spacingDistrib )
 {
 	unsigned int num = pos.size();
@@ -1431,7 +1510,225 @@ static void makeAngleDistrib( vector< double >& theta,
 		}
 	}
 }
+	
+///////////////////////////////////////////////////////////////////////
+// Here are the mechSpec format line parsers
+///////////////////////////////////////////////////////////////////////
 
+// Return value for field if found, otherwise return a default string.
+string findArg( const vector<string>& line, const string& field )
+{
+	// line has: proto path [field val]...
+	assert( (line.size() % 2) != 1 );
+	for ( unsigned int i = 2; i < line.size(); i+=2 )
+		if ( line[i] == field )
+			return line[i+1];
+	string ret = "";
+	if ( field == "spacing" ) {
+		ret = "1.0e-6";
+	} else if ( field == "spacingDistrib" ) {
+		ret = "0";
+	} else if ( field == "size" ) {
+		ret = "1";
+	} else if ( field == "sizeDistrib" ) {
+		ret = "0";
+	} else if ( field == "angle" ) {
+		ret = "0";
+	} else if ( field == "angleDistrib" ) {
+		ret = "6.283185307";
+	} else if ( field == "rotation" ) {
+		ret = "0";
+	} else if ( field == "rotationDistrib" ) {
+		ret = "6.283185307"; // 2*PI
+	} else if ( field == "shaftLen" ) {
+		ret = "1.0e-6";
+	} else if ( field == "shaftDia" ) {
+		ret = "0.2e-6";
+	} else if ( field == "headLen" ) {
+		ret = "0.5e-6";
+	} else if ( field == "headDia" ) {
+		ret = "0.5e-6";
+	} else if ( field == "theta" ) {
+		ret = "0";
+	} else if ( field == "phi" ) {
+		ret = "1.5707963268"; // PI/2
+	}
+	return ret;
+}
+
+/// Add entries into the pos vector for a given compartment i.
+static void addPos( unsigned int i, 
+		double spacing, double spacingDistrib, 
+		double dendLength,
+		vector< unsigned int >& elistIndex,
+		vector< double >& pos )
+{
+	if ( spacingDistrib > 0.0 ) {
+		double position = spacing * 0.5 + 
+				( mtrand() - 0.5 ) * spacingDistrib;
+		while ( position < dendLength ) {
+			elistIndex.push_back( i );
+			pos.push_back( position );
+			position += spacing + ( mtrand() - 0.5 ) * spacingDistrib;
+		} 
+	} else {
+		for ( double position = spacing * 0.5; 
+				position < dendLength; position += spacing ) {
+			elistIndex.push_back( i );
+			pos.push_back( position );
+		}
+	}
+}
+
+void Neuron::makeSpacingDistrib( const vector< ObjId >& elist, 
+		const vector< double >& val,
+		vector< unsigned int >& elistIndex,
+		vector< double >& pos,
+		const vector< string >& line ) const
+{
+	string distribExpr = findArg( line, "spacingDistrib"  );
+	pos.resize( 0 );
+	elistIndex.resize( 0 );
+
+	try {
+		nuParser parser( distribExpr );
+
+		for ( unsigned int i = 0; i < elist.size(); ++i ) {
+			unsigned int j = i * nuParser::numVal;
+			if ( val[ j + nuParser::EXPR ] > 0 ) {
+				double spacing = val[ j + nuParser::EXPR ];
+				double spacingDistrib = parser.eval( val.begin() + j );
+				if ( spacingDistrib > spacing || spacingDistrib < 0 ) {
+					cout << "Warning: Neuron::makeSpacingDistrib: " << 
+						"0 < " << spacingDistrib << " < " << spacing <<
+						" fails on " << elist[i].path() << ". Using 0.\n";
+					spacingDistrib = 0.0;
+				}
+				map< Id, unsigned int>::const_iterator 
+					lookupDend = segIndex_.find( elist[i] );
+				if ( lookupDend != segIndex_.end() ) {
+					double dendLength = segs_[lookupDend->second].length();
+					addPos( i, spacing, spacingDistrib, 
+								dendLength, elistIndex, pos );
+				}
+			}
+		}
+	}
+	catch ( mu::Parser::exception_type& err )
+	{
+		cout << err.GetMsg() << endl;
+	}
+}
+
+static void makeAngleDistrib ( const vector< ObjId >& elist, 
+		const vector< double >& val, 
+		vector< unsigned int >& elistIndex,
+		vector< double >& theta,
+		const vector< string >& line )
+{
+	string angleExpr = findArg( line, "angle" );
+	string angleDistribExpr = findArg( line, "angleDistrib" );
+	// I won't bother with rotation and rotation distrb for now.
+	// Easy to add, but on reflection they don't make sense.
+	theta.clear();
+	theta.resize( elistIndex.size(), 0.0 );
+
+	try {
+		nuParser angleParser( angleExpr );
+		nuParser distribParser( angleDistribExpr );
+		unsigned int lastIndex = ~0U;
+		double angle = 0;
+		double angleDistrib = 0;
+		for ( unsigned int k = 0; k < elistIndex.size(); ++k ) {
+			unsigned int i = elistIndex[k];
+			if ( i != lastIndex ) {
+				lastIndex = i;
+				unsigned int j = i * nuParser::numVal;
+				angle = angleParser.eval( val.begin() + j );
+				angleDistrib = distribParser.eval( val.begin() + j);
+			}
+			if ( angleDistrib > 0 )
+				theta[k] = angle + ( mtrand() - 0.5 ) * angleDistrib;
+			else
+				theta[k] = angle;
+		}
+	}
+	catch ( mu::Parser::exception_type& err )
+	{
+		cout << err.GetMsg() << endl;
+	}
+}
+
+static void makeSizeDistrib ( const vector< ObjId >& elist, 
+		const vector< double >& val, 
+		vector< unsigned int >& elistIndex,
+		vector< double >& size,
+		const vector< string >& line )
+{
+	string sizeExpr = findArg( line, "size" );
+	string sizeDistribExpr = findArg( line, "sizeDistrib" );
+	size.clear();
+	size.resize( elistIndex.size(), 0.0 );
+
+	try {
+		nuParser sizeParser( sizeExpr );
+		nuParser distribParser( sizeDistribExpr );
+		unsigned int lastIndex = ~0U;
+		double sz = 1.0;
+		double sizeDistrib = 0;
+		for ( unsigned int k = 0; k < elistIndex.size(); ++k ) {
+			unsigned int i = elistIndex[k];
+			if ( i != lastIndex ) {
+				lastIndex = i;
+				unsigned int j = i * nuParser::numVal;
+				sz = sizeParser.eval( val.begin() + j );
+				sizeDistrib = distribParser.eval( val.begin() + j);
+			}
+			if ( sizeDistrib > 0 )
+				size[k] = sz + ( mtrand() - 0.5 ) * sizeDistrib;
+			else
+				size[k] = sz;
+		}
+	}
+	catch ( mu::Parser::exception_type& err )
+	{
+		cout << err.GetMsg() << endl;
+	}
+}
+
+void Neuron::installSpines( const vector< ObjId >& elist, 
+		const vector< double >& val, const vector< string >& line )
+{
+	Id spineProto( "/library/spine" );
+
+	if ( spineProto == Id() ) {
+		cout << "Warning: Neuron::installSpines: Unable to find prototype spine: /library/spine\n";
+		return;
+	}
+	// Look up elist index from pos index, since there may be many 
+	// spines on each segment.
+	vector< unsigned int > elistIndex; 
+	vector< double > pos; // spacing of the new spines along compt.
+	vector< double > theta; // Angle of spines
+	vector< double > size; // Size scaling of spines
+	pos.reserve( elist.size() );
+	elistIndex.reserve( elist.size() );
+
+	makeSpacingDistrib( elist, val, elistIndex, pos, line);
+	makeAngleDistrib( elist, val, elistIndex, theta, line );
+	makeSizeDistrib( elist, val, elistIndex, size, line );
+	for ( unsigned int k = 0; k < elistIndex.size(); ++k ) {
+		unsigned int i = elistIndex[k];
+		Vec x, y, z;
+		coordSystem( soma_, elist[i].id, x, y, z );
+		addSpine( elist[i], spineProto, pos[k], theta[k], 
+					x, y, z, size[k], k );
+	}
+}
+
+//////////////////////////////////////////////////////////////////////
+// Here are the oldstyle format functions
+//////////////////////////////////////////////////////////////////////
 /**
  * API function to add a series of spines.
  * 
