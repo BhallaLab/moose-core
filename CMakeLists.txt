@@ -119,6 +119,7 @@ if(ENABLE_SBML)
         include_directories(${LIBSBML_INCLUDE_DIR})
         find_package(BZip2 REQUIRED)
         find_package(LibXML2 REQUIRED)
+        find_package(ZLIB REQUIRED)
     endif()
 else()
     SET(LIBSBML_FOUND FALSE)
@@ -202,7 +203,9 @@ if(HDF5_FOUND)
 endif()
 
 if(LIBSBML_FOUND)
-    list(APPEND LIBRARIES moose_sbml ${LIBSBML_LIBRARY})
+    list(APPEND LIBRARIES moose_sbml ${LIBSBML_LIBRARY}
+        ${ZLIB_LIBRARIES}
+        )
 endif()
 
 if(LIBXML2_FOUND)
