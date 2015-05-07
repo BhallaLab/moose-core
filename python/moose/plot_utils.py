@@ -157,7 +157,7 @@ def plotVector(vec, xvec = None, **options):
     :param **kwargs: Optional to pass to maplotlib.
     """
 
-    assert type(vec) == np.ndarray, "Expected type %s" % type(vec)
+    assert type(vec) == np.ndarray, "Expected array, got %s" % type(vec)
     legend = options.get('legend', True)
 
     if xvec is None:
@@ -168,7 +168,7 @@ def plotVector(vec, xvec = None, **options):
 
     assert len(xx) == len(vec), "Expecting %s got %s" % (len(vec), len(xvec))
 
-    plt.plot(xx, vec, '--.', label=options.get('label', ''))
+    plt.plot(xx, vec, label=options.get('label', ''))
     if legend:
         plt.legend(loc='best', framealpha=0.4)
 
@@ -247,6 +247,49 @@ def plotRecords(dataDict, xvec = None, **kwargs):
                 plt.subplot(len(dataDict), 1, i)
                 yvec = dataDict[k].vector
                 plotVector(yvec, xvec, label=k, **kwargs)
+    if subplot:
+        try:
+            plt.tight_layout()
+        except: pass
+
+    if outfile:
+        pu.info("Writing plot to %s" % outfile)
+        plt.savefig("%s" % outfile)
+    else:
+        plt.show()
+
+
+def plot_records(data_dict, xvec = None, **kwargs):
+    """plot_records Plot given dictionary.
+
+    :param data_dict:
+    :param xvec: If None, use moose.Clock to generate xvec.
+    :param **kwargs:
+    """
+
+    legend = kwargs.get('legend', True)
+    outfile = kwargs.get('outfile', None)
+    subplot = kwargs.get('subplot', False)
+    filters = [ x.lower() for x in kwargs.get('filter', [])]
+
+    plt.figure(figsize=(10, 1.5*len(data_dict)))
+    for i, k in enumerate(data_dict):
+        pu.info("+ Plotting for %s" % k)
+        plotThis = False
+        if not filters: plotThis = True
+        for accept in filters:
+            if accept in k.lower(): 
+                plotThis = True
+                break
+                
+        if plotThis:
+            if not subplot: 
+                yvec = data_dict[k]
+                plotVector(yvec, xvec, label=k, **kwargs)
+            else:
+                plt.subplot(len(data_dict), 1, i)
+                yvec = data_dict[k]
+                plotVector(yvec, xvec, label=k, **kwargs)
     try:
         plt.tight_layout()
     except: pass
@@ -256,5 +299,4 @@ def plotRecords(dataDict, xvec = None, **kwargs):
         plt.savefig("%s" % outfile)
     else:
         plt.show()
-
 
