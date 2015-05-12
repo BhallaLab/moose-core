@@ -157,7 +157,7 @@ def plotVector(vec, xvec = None, **options):
     :param **kwargs: Optional to pass to maplotlib.
     """
 
-    assert type(vec) == np.ndarray, "Expected type %s" % type(vec)
+    #assert type(vec) == np.ndarray, "Expected type %s" % type(vec)
     legend = options.get('legend', True)
 
     if xvec is None:
@@ -247,6 +247,11 @@ def plotRecords(dataDict, xvec = None, **kwargs):
                 plt.subplot(len(dataDict), 1, i)
                 yvec = dataDict[k].vector
                 plotVector(yvec, xvec, label=k, **kwargs)
+
+    # title in Image.
+    if 'title' in kwargs:
+        plt.title(kwargs['title'])
+
     if subplot:
         try:
             plt.tight_layout()
@@ -290,9 +295,10 @@ def plot_records(data_dict, xvec = None, **kwargs):
                 plt.subplot(len(data_dict), 1, i)
                 yvec = data_dict[k]
                 plotVector(yvec, xvec, label=k, **kwargs)
-    try:
-        plt.tight_layout()
-    except: pass
+    if subplot:
+        try:
+            plt.tight_layout()
+        except: pass
 
     if outfile:
         pu.info("Writing plot to %s" % outfile)
