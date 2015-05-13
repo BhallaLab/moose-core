@@ -49,7 +49,7 @@ int testCudaHSolve(int argc, char * argv[])
     // double states[SAMPLE];
     /**************************/
 
-    /** Using Hardcoded Sizes **/
+    /** Using Sizes From Arguments **/
     double * rows, * columns, *C1, *C2, *voltages, *states;
     rows = (double *)malloc(sizeof(double) * SAMPLE);
     columns = (double *) malloc(sizeof(double) * SAMPLE);
@@ -147,7 +147,7 @@ void readDataInt(int * array, char * fileName, int num)
     fclose(file);
 }
 
-__global__ void lookup_kernel(double *row_array, double *column_array, double *table_d, unsigned int nRows_d, unsigned int nColumns_d, double *istate, double dt, unsigned int set_size)
+__global__ void lookup_kernel(double *row_array, double *column_array, double *table_d, unsigned int nRows_d, unsigned int nColumns, double *istate, double dt, unsigned int set_size)
 {
 
     int tId = threadIdx.x + blockIdx.x * blockDim.x;
@@ -171,43 +171,21 @@ __global__ void lookup_kernel(double *row_array, double *column_array, double *t
     istate[tId] = ( istate[tId] * ( 2.0 - temp ) + dt * C1 ) / temp;
 }
 
-GpuLookupTable::GpuLookupTable()
+GpuLookupTable::GpuLookupTable(double min, double max, unsigned int nDivs, unsigned int nSpecies)
 {
-
-}
-
-GpuLookupTable::GpuLookupTable(double *min, double *max, int *nDivs, unsigned int nSpecies)
-{
-    min_ = *min;
-    max_ = *max;
+    min_ = min;
+    max_ = max;
     // Number of points is 1 more than number of divisions.
     // Then add one more since we may interpolate at the last point in the table.
-    nPts_ = *nDivs + 1 + 1;
-    dx_= ( *max - *min ) / *nDivs;
+    nPts_ = nDivs + 1 + 1;
+    dx_= ( max - min ) / nDivs;
     // Every row has 2 entries for each type of gate
-    nColumns_ = 0;//2 * nSpecies;
+    nColumns_ = 2 * nSpecies;
 
-    cudaMalloc((void **)&min_d, sizeof(double));
-    cudaMalloc((void **)&max_d, sizeof(double));
-    cudaMalloc((void **)&nPts_d, sizeof(unsigned int));
-    cudaMalloc((void **)&dx_d, sizeof(double));
-    cudaMalloc((void **)&nColumns_d, sizeof(unsigned int));
-
-
-    cudaMemcpy( min_d, min, sizeof(double), cudaMemcpyHostToDevice);
-    cudaMemcpy( max_d, max, sizeof(double), cudaMemcpyHostToDevice);
-    cudaMemcpy( nPts_d, &nPts_, sizeof(unsigned int), cudaMemcpyHostToDevice);
-    cudaMemcpy( dx_d, &dx_, sizeof(double), cudaMemcpyHostToDevice);
-    cudaMemcpy( nColumns_d, &nColumns_, sizeof(unsigned int), cudaMemcpyHostToDevice);
 }
 
 void GpuLookupTable::destory()
 {
-    cudaFree(min_d);
-    cudaFree(max_d);
-    cudaFree(nPts_d);
-    cudaFree(dx_d);
-    cudaFree(nColumns_d);
     cudaFree(table_d);
     cudaFree(rows_d);
 }
