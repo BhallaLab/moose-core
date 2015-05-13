@@ -6,13 +6,18 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
-
+#define USE_CUDA
 #ifndef _RATE_LOOKUP_H
 #define _RATE_LOOKUP_H
 
 struct LookupRow
 {
 	double* row;		///< Pointer to the first column on a row
+	
+#ifdef USE_CUDA
+	unsigned int irow;			///< index to the first column on a row
+#endif
+
 	double fraction;	///< Fraction of V or Ca over and above the division
 						///< boundary for interpolation.
 };
@@ -54,7 +59,13 @@ public:
 	void row(
 		double x,
 		LookupRow& row );
-	
+
+#ifdef USE_CUDA
+	void row_gpu(vector<double>::iterator& x, 
+						vector<LookupRow>::iterator& row, 
+						unsigned int size);
+#endif
+
 	/// Actually performs the lookup and the linear interpolation
 	void lookup(
 		const LookupColumn& column,
@@ -73,6 +84,12 @@ private:
 	double               dx_;			///< This is the smallest difference:
 										///< (max - min) / nDivs
 	unsigned int         nColumns_;		///< (# columns) = 2 * (# species)
+
+#ifdef USE_CUDA
+	double				 *istate_d;		///< device array of istate
+	double 				 *table_d;		///< device array of the flattened table
+#endif
+
 };
 
 #endif // _RATE_LOOKUP_H

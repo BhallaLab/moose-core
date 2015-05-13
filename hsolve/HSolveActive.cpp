@@ -6,7 +6,7 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
-
+#define USE_CUDA
 #include "header.h"
 #include <queue>
 #include "HSolveStruct.h"
@@ -19,6 +19,7 @@
 #include "../biophysics/Compartment.h"
 #include "../biophysics/CaConcBase.h"
 #include "ZombieCaConc.h"
+
 using namespace moose;
 //~ #include "ZombieCompartment.h"
 //~ #include "ZombieCaConc.h"
@@ -216,6 +217,7 @@ void HSolveActive::advanceCalcium()
 
 void HSolveActive::advanceChannels( double dt )
 {
+
     vector< double >::iterator iv;
     vector< double >::iterator istate = state_.begin();
     vector< int >::iterator ichannelcount = channelCount_.begin();
@@ -230,17 +232,33 @@ void HSolveActive::advanceChannels( double dt )
 
     LookupRow vRow;
     double C1, C2;
+    unsigned int ca_begin_pos = 0;
+    unsigned int caRowCompt_begin_pos = 0;
     for ( iv = V_.begin(); iv != V_.end(); ++iv )
     {
         vTable_.row( *iv, vRow );
         icarowcompt = caRowCompt_.begin();
         caBoundary = ica + *icacount;
+        
+        
+        //The following codes compare the result from GPU and CPU.
+        //If differnt, assertion failure will be activated.
+        //Then proceed with CPU results.
+        //To use GPU results only, comment out the printf and de-comment the compiler macros and the two += operations.
+//#ifdef USE_CUDA        
+		printf("Starting to find rows using row_gpu: icacount:%u\n", *icacount);
+		caTable_.row_gpu(ica, icarowcompt, *icacount);
+		//icarowcompt += *icacount;
+		//ica += *icacount;
+//#else
         for ( ; ica < caBoundary; ++ica )
         {
-            caTable_.row( *ica, *icarowcompt );
+			LookupRow test;
+            caTable_.row( *ica, test );
+            assert(test.row == (*icarowcompt).row && test.fraction == (*icarowcompt).fraction);
             ++icarowcompt;
         }
-
+//#endif     
         /*
          * Optimize by moving "if ( instant )" outside the loop, because it is
          * rarely used. May also be able to avoid "if ( power )".
