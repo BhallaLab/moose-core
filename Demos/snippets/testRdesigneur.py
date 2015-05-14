@@ -32,13 +32,70 @@ numDendSegments = 50
 segLen = dendLen / numDendSegments
 spineSpacing = 2.0e-6
 spineSpacingDistrib = 0.0
+spineSize = 1.0
 spineSizeDistrib = 0.2
+spineAngle= 0.0
+spineAngleDistrib = 2*numpy.pi
+
+
+def makeCellProto( name ):
+    elec = moose.Neuron( '/library/' + name )
+    ecompt = []
+    for i in range( numDendSegments ):
+        ec = rd.buildCompt( elec, 'dend' + str(i), segLen, 2.0e-6, i * segLen, RM, RA, CM )
+        ecompt.append( ec )
+        if i > 0:
+            moose.connect( ecompt[i-1], 'axial', ec, 'raxial' )
+        else:
+            ec.name = "soma"
+    for i in ecompt:
+        i.z0 = i.x0
+        i.x0 = 0
+        i.z = i.x
+        i.x = 0
+
+def makeChemProto( name ):
+    chem = moose.Neutral( '/library/' + name )
+    for i in ( 'dend', 'spine', 'psd' ):
+        print 'making ', i
+        compt = moose.CubeMesh( chem.path + '/' + i )
+        compt.volume = 1e-18
+        ca = moose.Pool( compt.path + '/Ca' )
+        ca.concInit = 0.08e-3
+        ca.diffConst = 1e-12
+
 
 def makeModel():
+    moose.Neutral( '/library' )
+    makeCellProto( 'cellProto' )
+    makeChemProto( 'cProto' )
     rdes = rd.rdesigneur( useGssa = False, \
                 combineSegments = False, \
-                cellPortion = "/model/elec/#",  \
                 meshLambda = 1e-6, \
+            cellProto = [['cellProto', 'elec' ]] ,\
+            spineProto = [['makeSpineProto()', 'spine' ]] ,\
+            chemProto = [['cProto', 'chem' ]] ,\
+            spineDistrib = [ \
+                ['spine', '#', \
+                'spineSpacing', str( spineSpacing ), \
+                'spineSpacingDistrib', str( spineSpacingDistrib ), \
+                'angle', str( spineAngle ), \
+                'angleDistrib', str( spineAngleDistrib ), \
+                'size', str( spineSize ), \
+                'sizeDistrib', str( spineSizeDistrib ) ] \
+            ], \
+            chemDistrib = [ \
+                [ "chem", "#", "install", "1" ] \
+            ],
+            adaptorList = [ \
+                [ 'psd/Ca', 'conc', '.', 'inject', False, 0, 2e-9 ], \
+                ] \
+        )
+    rdes.buildModel( '/model' )
+
+
+
+    '''
                 adaptorList = [ \
                     ( 'psd', '.', 'inject', 'Ca', False, 0, 2e-9 ) \
                     ], \
@@ -52,7 +109,6 @@ def makeModel():
     rdes.addSpineProto( 'spine', RM, RA, CM, \
              synList = (), chanList = (), caTau = 0.0 )
     elec = moose.Neutral( '/tempelec' )
-    '''
     ecompt = rdes._buildCompt( elec, 'dend', 100e-6, 2.0e-6, 0, RM, RA, CM )
     ecompt.x0 = 0
     ecompt.x = 0
@@ -60,7 +116,6 @@ def makeModel():
     ecompt.y = 0
     ecompt.z0 = 0
     ecompt.z = 100e-6
-    '''
     ecompt = []
     for i in range( numDendSegments ):
         ec = rdes._buildCompt( elec, 'dend' + str(i), segLen, 2.0e-6, i * segLen, RM, RA, CM )
@@ -81,6 +136,7 @@ def makeModel():
         ca.concInit = 0.08e-3
         ca.diffConst = 1e-12
     rdes.buildFromMemory( '/tempelec', '/tempchem' )
+    '''
 
 def addPlot( objpath, field, plot, tick ):
     if moose.exists( objpath ):

@@ -1,13 +1,23 @@
+#########################################################################
+## This program is part of 'MOOSE', the
+## Messaging Object Oriented Simulation Environment.
+##           Copyright (C) 2015 Upinder S. Bhalla. and NCBS
+## It is made available under the terms of the
+## GNU Lesser General Public License version 2.1
+## See the file COPYING.LIB for the full notice.
+#########################################################################
+# This example illustrates loading a model from an SWC file, inserting
+# spines, and viewing it.
+
 import moogli
 import moose
-from moose import neuroml
 from PyQt4 import Qt, QtCore, QtGui
 import sys
 import os
 sys.path.append( '../util' )
 import rdesigneur as rd
 
-PI = 3.14
+PI = 3.14159265358979
 frameRunTime = 0.0002
 runtime = 1.0
 inject = 5e-10
@@ -17,6 +27,7 @@ RA = 1.0
 CM = 0.01
 spineSpacing = 2.0e-6
 spineSpacingDistrib = 1.0e-6
+spineSize = 1.0
 spineSizeDistrib = 0.5
 spineAngle = 0
 spineAngleDistrib = 2*PI
@@ -34,27 +45,28 @@ def main():
     filename = 'barrionuevo_cell1zr.CNG.swc'
     #filename = 'h10.CNG.swc'
     moose.Neutral( '/library' )
-    rdes = rd.rdesigneur()
-    rdes.addSpineProto( 'spine', RM, RA, CM, \
-             synList = (), chanList = (), caTau = 0.0 )
-    moose.Neutral( '/model' )
-    cell = moose.loadModel( filename, '/model/testSwc' )
-    cell[0].spineSpecification = [ 'spine #apical# '+ spineArgLine, \
-        'spine #dend# ' + spineArgLine ]
-    cell[0].parseSpines()
-    # moose.le( cell )
-    for i in range( 8 ):
-        moose.setClock( i, simdt )
-    hsolve = moose.HSolve( '/model/testSwc/hsolve' )
-    hsolve.dt = simdt
-    hsolve.target = '/model/testSwc/soma'
+    rdes = rd.rdesigneur( \
+            cellProto = [[ filename, 'elec' ] ],\
+            spineProto = [['makeSpineProto()', 'spine' ]] ,\
+            spineDistrib = [ \
+                ['spine', '#dend#', \
+                'spineSpacing', str( spineSpacing ), \
+                'spineSpacingDistrib', str( spineSpacingDistrib ), \
+                'angle', str( spineAngle ), \
+                'angleDistrib', str( spineAngleDistrib ), \
+                'size', str( spineSize ), \
+                'sizeDistrib', str( spineSizeDistrib ) ] \
+            ] \
+        )
+    rdes.buildModel( '/model' )
+    moose.le( '/model' )
     moose.reinit()
 
     # Now we set up the display
-    compts = moose.wildcardFind( "/model/testSwc/#[ISA=CompartmentBase]" )
+    compts = moose.wildcardFind( "/model/elec/#[ISA=CompartmentBase]" )
     compts[0].inject = inject
     ecomptPath = map( lambda x : x.path, compts )
-    morphology = moogli.read_morphology_from_moose(name = "", path = "/model/testSwc")
+    morphology = moogli.read_morphology_from_moose(name = "", path = "/model/elec")
     morphology.create_group( "group_all", ecomptPath, -0.08, 0.02, \
             [0.0, 0.5, 1.0, 1.0], [1.0, 0.0, 0.0, 0.9] ) 
 

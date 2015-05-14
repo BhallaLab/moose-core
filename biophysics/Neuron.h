@@ -36,17 +36,22 @@ class Neuron
 		void setCompartmentLengthInLambdas( double v );
 		double getCompartmentLengthInLambdas() const;
 		unsigned int getNumCompartments() const;
+		unsigned int getNumSpines() const;
 		unsigned int getNumBranches() const;
 		vector< double> getPathDistFromSoma() const;
 		vector< double> getGeomDistFromSoma() const;
 		vector< double> getElecDistFromSoma() const;
 		vector< ObjId > getCompartments() const;
-		void setChannelDistribution( vector< string > v );
-		vector< string > getChannelDistribution() const;
-		void setMechSpec( vector< string > v );
-		vector< string > getMechSpec() const;
-		void setSpineSpecification( vector< string > v );
-		vector< string > getSpineSpecification() const;
+		vector< ObjId > getExprElist( const Eref& e, string line ) const;
+		vector< double > getExprVal( const Eref& e, string line ) const;
+		vector< ObjId > getSpinesFromExpression( 
+							const Eref& e, string line ) const;
+		void setChannelDistribution( const Eref& e, vector< string > v );
+		vector< string > getChannelDistribution( const Eref& e ) const;
+		void setPassiveDistribution( const Eref& e, vector< string > v );
+		vector< string > getPassiveDistribution( const Eref& e ) const;
+		void setSpineDistribution( const Eref& e, vector< string > v );
+		vector< string > getSpineDistribution( const Eref& e ) const;
 
 		void buildSegmentTree( const Eref& e );
 
@@ -64,12 +69,18 @@ class Neuron
 		void installMechanism(  const string& name,
 			const vector< ObjId >& elist, const vector< double >& val,
 			const vector< string >& line );
+		void buildElist(
+				const Eref& e,
+				const vector< string >& line, vector< ObjId >& elist,
+				vector< double >& val );
+
 		void evalExprForElist( const vector< ObjId >& elist,
-			const string& expn, vector< double >& val );
+			const string& expn, vector< double >& val ) const;
 
 		///////////////////////////////////////////////////////////////////
 		// Old set
 		///////////////////////////////////////////////////////////////////
+		/*
 		void makeSpacingDistrib( vector< double >& pos,
 			double spacing, double spacingDistrib );
 		void insertSpines( const Eref& e, Id spineProto, string path,
@@ -84,6 +95,7 @@ class Neuron
 		void parseChanDistrib( const Eref& e );
 		void evalChanParams( const string& name, const string& func, 
 						vector< ObjId >& elist );
+						*/
 		
 
 		/**
@@ -102,11 +114,14 @@ class Neuron
 		double compartmentLengthInLambdas_;
 		unsigned int spineIndex_;
 		vector< string > channelDistribution_;
-		vector< string > spineSpecification_;
-		vector< string > mechSpec_;
+		vector< string > passiveDistribution_;
+		vector< string > spineDistribution_;
 
 		/// Map to look up Seg index from Id of associated compt.
 		map< Id, unsigned int > segIndex_; 
+		/// Look up seg index of parent compartment, from index of spine.
+		vector< unsigned int > spineParentIndex_; 
+		vector< vector< Id > > spines_; /// Id of each compt in each spine.
 		vector< Id > segId_; /// Id of each Seg entry, below.
 		vector< SwcSegment > segs_;
 		vector< SwcBranch > branches_;
