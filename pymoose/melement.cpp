@@ -933,6 +933,38 @@ extern "C" {
                 delete _value;
                 break;
             }
+            case 'X': {//SET_VECFIELD(Id, f)
+                if (!PySequence_Check(value)){
+                    PyErr_SetString(PyExc_TypeError, "For setting vector<Id> field, specified value must be a sequence." );
+                } else {
+                    Py_ssize_t length = PySequence_Length(value);
+                    vector<Id> _value;
+                    for ( int ii = 0; ii < length; ++ii){
+                        PyObject * vo = PySequence_GetItem(value, ii);
+                        Id v = ((_Id*)vo)->id_;
+                        Py_XDECREF(vo);
+                        _value.push_back(v);
+                    }
+                    ret = Field< vector < Id > >::set(self->oid_, string(field), _value);
+                }
+                break;
+            }              
+            case 'Y': {//SET_VECFIELD(ObjId, f)
+                if (!PySequence_Check(value)){
+                    PyErr_SetString(PyExc_TypeError, "For setting vector<ObjId> field, specified value must be a sequence." );
+                } else {
+                    Py_ssize_t length = PySequence_Length(value);
+                    vector<ObjId> _value;
+                    for ( int ii = 0; ii < length; ++ii){
+                        PyObject * vo = PySequence_GetItem(value, ii);
+                        ObjId v = ((_ObjId*)vo)->oid_;
+                        Py_XDECREF(vo);
+                        _value.push_back(v);
+                    }
+                    ret = Field< vector < ObjId > >::set(self->oid_, string(field), _value);
+                }
+                break;
+            }              
             default:                
                 break;
         }

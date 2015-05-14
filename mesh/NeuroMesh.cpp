@@ -91,7 +91,7 @@ const Cinfo* NeuroMesh::initCinfo()
 			&NeuroMesh::setCell,
 			&NeuroMesh::getCell
 		);
-		static ValueFinfo< NeuroMesh, vector< Id > > subTree(
+		static ElementValueFinfo< NeuroMesh, vector< ObjId > > subTree(
 			"subTree",
 			"Set of compartments to model. If they happen to be contiguous"
 			"then also set up diffusion between the compartments. Can also"
@@ -597,9 +597,10 @@ bool NeuroMesh::filterSpines( Id compt )
 // I assume 'cell' is the parent of the compartment tree.
 void NeuroMesh::setCell( const Eref& e, Id cell )
 {
-	vector< ObjId > compts;
-	wildcardFind( cell.path() + "/##", compts );
-	setCellPortion( e, cell, compts );
+	cell_ = cell;
+	// vector< ObjId > compts;
+	// wildcardFind( cell.path() + "/##", compts );
+	// setCellPortion( e, cell, compts );
 }
 
 /** 
@@ -733,14 +734,19 @@ Id NeuroMesh::getCell() const
 		return cell_;
 }
 
-void NeuroMesh::setSubTree( vector< Id > compartments )
+// Uses all compartments, and if they have spines on them adds those too.
+void NeuroMesh::setSubTree( const Eref& e, vector< ObjId > compartments )
 {
-		;
+	if ( cell_ != Id() && cell_.element()->cinfo()->isA( "Neuron" ) )
+		setCellPortion( e, cell_, compartments );
 }
 
-vector< Id > NeuroMesh::getSubTree() const
+vector< ObjId > NeuroMesh::getSubTree( const Eref& e ) const
 {
-		vector< Id > ret;
+		vector< Id > temp = getElecComptList();
+		vector< ObjId > ret( temp.size() );
+		for ( unsigned int i = 0; i < ret.size(); ++i )
+			ret[i] = temp[i];
 		return ret;
 }
 
