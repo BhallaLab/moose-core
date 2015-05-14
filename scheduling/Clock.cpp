@@ -870,6 +870,7 @@ void Clock::buildDefaultTick()
 	defaultTick_["Synapse"] = ~0U;
 	defaultTick_["TableBase"] = ~0U;
 	defaultTick_["Unsigned"] = ~0U;
+	defaultTick_["Variable"] = ~0U;
 	defaultTick_["VectorTable"] = ~0U;
 	defaultTick_["ZombieBufPool"] = ~0U;
 	defaultTick_["ZombieCaConc"] = ~0U;

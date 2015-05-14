@@ -88,8 +88,8 @@ class NeuroMesh: public MeshCompt
 		 * If the tree goes all the way out to the end of a particular 
 		 * branch then no entry needs to be put in.
 		 */
-		void setSubTree( vector< Id > compartments );
-		vector< Id > getSubTree() const;
+		void setSubTree( const Eref& e, vector< ObjId > compartments );
+		vector< ObjId > getSubTree( const Eref& e ) const;
 
 		/**
 		 * Flag. True if NeuroMesh should configure a separate SpineMesh.
