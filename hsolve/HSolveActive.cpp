@@ -248,6 +248,8 @@ void HSolveActive::advanceChannels( double dt )
 //#ifdef USE_CUDA        
 		printf("Starting to find rows using row_gpu: icacount:%u\n", *icacount);
 		caTable_.row_gpu(ica, icarowcompt, *icacount);
+		printf("Finish find rows using row_gpu. Press [Enter] to continue...\n");
+		getchar();
 		//icarowcompt += *icacount;
 		//ica += *icacount;
 //#else
@@ -255,7 +257,9 @@ void HSolveActive::advanceChannels( double dt )
         {
 			LookupRow test;
             caTable_.row( *ica, test );
-            assert(test.row == (*icarowcompt).row && test.fraction == (*icarowcompt).fraction);
+            if(!(test.row == (*icarowcompt).row && test.fraction == (*icarowcompt).fraction)){
+				printf("wrong result!\n");
+			}
             ++icarowcompt;
         }
 //#endif     

@@ -104,7 +104,6 @@ row_kernel(double * d_x,
 	//if(tid == 0) printf("kernel launch successful!\n");
 	
 	double x = d_x[tid];
-	LookupRow row = d_row[tid];
 	
 	if ( x < min )
 		x = min;
@@ -114,19 +113,19 @@ row_kernel(double * d_x,
 	double div = ( x - min ) / dx;
 	unsigned int integer = ( unsigned int )( div );
 	
-	row.fraction = div - integer;
-	row.row = address +  integer * nColumns;	
+	d_row[tid].fraction = div - integer;
+	d_row[tid].row = address +  integer * nColumns;	
 	
 }
 
 void LookupTable::row_gpu(vector<double>::iterator& x, vector<LookupRow>::iterator& row, unsigned int size){
 	
-	//printf("start row_gpu calculation...\n");
+	printf("start row_gpu calculation...\n");
 	
 	thrust::device_vector<double> d_x(size);
 	thrust::device_vector<LookupRow> d_row(size);
 	thrust::copy(x, x+size, d_x.begin());
-	thrust::copy(row, row+size, d_row.begin());
+	cudaDeviceSynchronize(); 
 	
 	double * d_x_p = thrust::raw_pointer_cast(d_x.data());
 	LookupRow * d_row_p = thrust::raw_pointer_cast(d_row.data());
@@ -139,13 +138,16 @@ void LookupTable::row_gpu(vector<double>::iterator& x, vector<LookupRow>::iterat
     cudaThreadSynchronize();
     cudaDeviceSynchronize(); 
     
-    //printf("kernel launch finished...\n");
+    printf("kernel launch finished...\n");
     LookupRow * h_row;
     h_row = (LookupRow *) malloc(sizeof(LookupRow)*size);
     cudaMemcpy(h_row, d_row_p, sizeof(LookupRow)*size, cudaMemcpyDeviceToHost);
+    cudaDeviceSynchronize(); 
     std::copy(h_row, h_row+size, row);
     
-    //printf("finish row_gpu calculation...\n");
+    free(h_row);
+    
+    printf("finish row_gpu calculation...\n");
 }
 #endif
 

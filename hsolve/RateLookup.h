@@ -13,10 +13,6 @@
 struct LookupRow
 {
 	double* row;		///< Pointer to the first column on a row
-	
-#ifdef USE_CUDA
-	unsigned int irow;			///< index to the first column on a row
-#endif
 
 	double fraction;	///< Fraction of V or Ca over and above the division
 						///< boundary for interpolation.
