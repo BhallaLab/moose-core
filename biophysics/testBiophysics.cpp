@@ -1530,6 +1530,7 @@ static Id addCompartment( const string& name,
 
 #include "../utility/Vec.h"
 #include "SwcSegment.h"
+#include "Spine.h"
 #include "Neuron.h"
 #include "../shell/Wildcard.h"
 static void testNeuronBuildTree()

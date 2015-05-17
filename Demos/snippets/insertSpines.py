@@ -31,14 +31,6 @@ spineSize = 1.0
 spineSizeDistrib = 0.5
 spineAngle = 0
 spineAngleDistrib = 2*PI
-spineRotation = 0
-spineRotationDistrib = 2*PI
-
-spineArgLine = str(spineSpacing) + ' ' + str(spineSpacingDistrib) + ' ' + \
-        str(spineSizeDistrib) + ' ' + \
-        str(spineAngle) + ' ' + str(spineAngleDistrib) + ' ' + \
-        str(spineRotation) + ' ' + str(spineRotationDistrib)
-
 
 def main():
     app = QtGui.QApplication(sys.argv)
@@ -49,7 +41,7 @@ def main():
             cellProto = [[ filename, 'elec' ] ],\
             spineProto = [['makeSpineProto()', 'spine' ]] ,\
             spineDistrib = [ \
-                ['spine', '#dend#', \
+                ['spine', '#apical#', \
                 'spineSpacing', str( spineSpacing ), \
                 'spineSpacingDistrib', str( spineSpacingDistrib ), \
                 'angle', str( spineAngle ), \
@@ -59,7 +51,6 @@ def main():
             ] \
         )
     rdes.buildModel( '/model' )
-    moose.le( '/model' )
     moose.reinit()
 
     # Now we set up the display

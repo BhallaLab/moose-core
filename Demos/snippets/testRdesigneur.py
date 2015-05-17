@@ -25,7 +25,7 @@ import moogli
 RM = 1.0
 RA = 1.0
 CM = 0.01
-runtime = 10.0
+runtime = 1.0
 diffConst = 1e-12
 dendLen = 100e-6
 numDendSegments = 50
