@@ -36,7 +36,6 @@ class Neuron
 		void setCompartmentLengthInLambdas( double v );
 		double getCompartmentLengthInLambdas() const;
 		unsigned int getNumCompartments() const;
-		unsigned int getNumSpines() const;
 		unsigned int getNumBranches() const;
 		vector< double> getPathDistFromSoma() const;
 		vector< double> getGeomDistFromSoma() const;
@@ -78,25 +77,15 @@ class Neuron
 			const string& expn, vector< double >& val ) const;
 
 		///////////////////////////////////////////////////////////////////
-		// Old set
+		// Interface for Spine class, used mostly in resizing spines.
 		///////////////////////////////////////////////////////////////////
-		/*
-		void makeSpacingDistrib( vector< double >& pos,
-			double spacing, double spacingDistrib );
-		void insertSpines( const Eref& e, Id spineProto, string path,
-			vector< double > placement );
-		void parseSpines( const Eref& e );
-		void clearSpines( const Eref& e );
+		Spine* lookupSpine( unsigned int index );
+		void setNumSpines( unsigned int num );
+		unsigned int getNumSpines() const;
 
-		void assignChanDistrib( const Eref& e,
-			string name, string path, string func );
-		void clearChanDistrib( const Eref& e,
-			string name, string path );
-		void parseChanDistrib( const Eref& e );
-		void evalChanParams( const string& name, const string& func, 
-						vector< ObjId >& elist );
-						*/
-		
+		const vector< Id >& spineIds( unsigned int index ) const;
+		const Id spineMesh( unsigned int index ) const;
+		const Id psdMesh( unsigned int index ) const;
 
 		/**
 		 * Initializes the class info.
@@ -112,7 +101,6 @@ class Neuron
 		Id soma_;
 		string sourceFile_;
 		double compartmentLengthInLambdas_;
-		unsigned int spineIndex_;
 		vector< string > channelDistribution_;
 		vector< string > passiveDistribution_;
 		vector< string > spineDistribution_;
@@ -122,6 +110,14 @@ class Neuron
 		/// Look up seg index of parent compartment, from index of spine.
 		vector< unsigned int > spineParentIndex_; 
 		vector< vector< Id > > spines_; /// Id of each compt in each spine.
+		/// Id of mesh associated with each spine. Typically all the same.
+		vector< Id > spineMesh_; 
+		/// Id of mesh associated with each PSD. Typically all the same.
+		vector< Id > psdMesh_; 
+
+		/// Holder for spine operations. Contains pointer to current Neuron.
+		Spine spineEntry_; 
+
 		vector< Id > segId_; /// Id of each Seg entry, below.
 		vector< SwcSegment > segs_;
 		vector< SwcBranch > branches_;

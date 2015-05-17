@@ -169,7 +169,7 @@ const Cinfo* ChemCompt::initCinfo()
 		&dinfo,
 		doc,
 		sizeof(doc)/sizeof( string ),
-		true // This IS a FieldElement, not be be created directly.
+		true // This is a base class, not be be created directly.
 	);
 
 	return &chemMeshCinfo;
