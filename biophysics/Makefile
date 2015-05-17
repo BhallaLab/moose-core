@@ -30,6 +30,7 @@ OBJ = \
 	MgBlock.o	\
 	Nernst.o	\
 	Neuron.o	\
+	Spine.o	\
 	ReadCell.o	\
 	SwcSegment.o	\
 	ReadSwc.o	\
@@ -88,6 +89,7 @@ CaConc.o:	CaConcBase.h CaConc.h
 MgBlock.o:	MgBlock.h ChanBase.h
 Nernst.o:	Nernst.h
 Neuron.o:	Neuron.h SwcSegment.h
+Spine.o:	Neuron.h SwcSegment.h Spine.h
 ReadCell.o: CompartmentBase.h Compartment.h SymCompartment.h ReadCell.h ../shell/Shell.h ../utility/utility.h
 SwcSegment.o: SwcSegment.h ../utility/Vec.h
 ReadSwc.o: CompartmentBase.h Compartment.h SymCompartment.h SwcSegment.h ReadSwc.h ../shell/Shell.h ../utility/Vec.h
