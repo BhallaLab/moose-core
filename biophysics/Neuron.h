@@ -53,6 +53,7 @@ class Neuron
 		vector< string > getSpineDistribution( const Eref& e ) const;
 
 		void buildSegmentTree( const Eref& e );
+		void setSpineAndPsdMesh( Id spineMesh, Id psdMesh );
 
 		///////////////////////////////////////////////////////////////////
 		// MechSpec set
@@ -84,8 +85,12 @@ class Neuron
 		unsigned int getNumSpines() const;
 
 		const vector< Id >& spineIds( unsigned int index ) const;
-		const Id spineMesh( unsigned int index ) const;
-		const Id psdMesh( unsigned int index ) const;
+		void scaleBufAndRates( unsigned int spineNum, 
+				double lenScale, double diaScale ) const;
+		void scaleShaftDiffusion( unsigned int spineNum, 
+						double len, double dia) const;
+		void scaleHeadDiffusion( unsigned int spineNum, 
+						double len, double dia) const;
 
 		/**
 		 * Initializes the class info.
@@ -111,9 +116,11 @@ class Neuron
 		vector< unsigned int > spineParentIndex_; 
 		vector< vector< Id > > spines_; /// Id of each compt in each spine.
 		/// Id of mesh associated with each spine. Typically all the same.
-		vector< Id > spineMesh_; 
+		vector< Id > spineStoich_; 
 		/// Id of mesh associated with each PSD. Typically all the same.
-		vector< Id > psdMesh_; 
+		vector< Id > psdStoich_; 
+		/// looks up spine/psd mesh index from FieldIndex of selected spine.
+		vector< unsigned int > spineToMeshOrdering_;
 
 		/// Holder for spine operations. Contains pointer to current Neuron.
 		Spine spineEntry_; 

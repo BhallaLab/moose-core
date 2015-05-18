@@ -1577,21 +1577,27 @@ static void testNeuronBuildTree()
 
 	//////////////////////////////////////////////////////////////////
 	// Here we test Neuron::evalExprForElist, which uses the muParser
+	// Note that the wildcard list starts with the spine which is not
+	// a compartment. So the indexing of the arrays e, p and g needs care.
 	vector< ObjId > elist;
 	wildcardFind( "/n/#", elist );
 	Neuron* n = reinterpret_cast< Neuron* >( nid.eref().data() );
 	vector< double > val;
 	n->evalExprForElist( elist, "p + g + L + len + dia + H(1-L)", val );
 	assert( val.size() == 7 * elist.size() );
+	unsigned int j = 0;
 	for ( unsigned int i = 0; i < elist.size(); ++i ) {
-		assert( val[i * 7] == p[i] + g[i] + e[i] + len[i] + dia[i] +
-						( 1.0 - e[i] > 0 ) );
-		assert( doubleEq( val[i * 7 + 1], p[i] ) );
-		assert( doubleEq( val[i * 7 + 2], g[i] ) );
-		assert( doubleEq( val[i * 7 + 3], e[i] ) );
-		assert( doubleEq( val[i * 7 + 4], len[i]  ));
-		assert( doubleEq( val[i * 7 + 5], dia[i] ) );
+		if ( !elist[i].element()->cinfo()->isA( "CompartmentBase" ) )
+			continue;
+		assert( val[i * 7] == p[j] + g[j] + e[j] + len[j] + dia[j] +
+						( 1.0 - e[j] > 0 ) );
+		assert( doubleEq( val[i * 7 + 1], p[j] ) );
+		assert( doubleEq( val[i * 7 + 2], g[j] ) );
+		assert( doubleEq( val[i * 7 + 3], e[j] ) );
+		assert( doubleEq( val[i * 7 + 4], len[j]  ));
+		assert( doubleEq( val[i * 7 + 5], dia[j] ) );
 		assert( doubleEq( val[i * 7 + 6], 0.0 ) );
+		j++;
 	}
 	//////////////////////////////////////////////////////////////////
 	// Here we test Neuron::makeSpacingDistrib, which uses the muParser
