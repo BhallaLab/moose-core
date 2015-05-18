@@ -371,6 +371,13 @@ const Cinfo* Neuron::initCinfo()
 	   "on a reduced model will lose the original full cell geometry. ",
 		new EpFunc0< Neuron >( &Neuron::buildSegmentTree )
 	);
+	static DestFinfo setSpineAndPsdMesh( "setSpineAndPsdMesh",
+		"Assigns the spine and psd mesh to the Neuron. This is used "
+		"to build up a mapping from Spine entries on the Neuron to "
+		"chem spines and PSDs, so that volume change operations from "
+		"the Spine can propagate to the chem systems.",
+		new OpFunc2< Neuron, Id, Id >( &Neuron::setSpineAndPsdMesh )
+	);
 
 	/*
 	static DestFinfo rotateInSpace( "rotateInSpace",
@@ -422,6 +429,7 @@ const Cinfo* Neuron::initCinfo()
 		&valuesFromExpression,		// ReadOnlyLookupValueFinfo
 		&spinesFromExpression,  	// ReadOnlyLookupValueFinfo
 		&buildSegmentTree,			// DestFinfo
+		&setSpineAndPsdMesh,		// DestFinfo
 		&spineFinfo,				// FieldElementFinfo
 	};
 	static string doc[] =
@@ -1099,6 +1107,54 @@ void Neuron::buildSegmentTree( const Eref& e )
 	updateSegmentLengths();
 }
 
+
+/// Fills up vector of segments. First entry is soma.
+void Neuron::setSpineAndPsdMesh( Id spineMesh, Id psdMesh )
+{
+	if ( !spineMesh.element()->cinfo()->isA( "SpineMesh" ) ) {
+		cout << "Error: Neuron::setSpineAndPsdMesh: '" << 
+				spineMesh.path() << "' is not a SpineMesh\n";
+		return;
+	}
+	if ( !psdMesh.element()->cinfo()->isA( "PsdMesh" ) ) {
+		cout << "Error: Neuron::setSpineAndPsdMesh: '" << 
+				psdMesh.path() << "' is not a PsdMesh\n";
+		return;
+	}
+	Id spineStoich = Neutral::child( spineMesh.eref(), "stoich" );
+	Id psdStoich = Neutral::child( psdMesh.eref(), "stoich" );
+	if ( spineStoich == Id() || psdStoich == Id() ) {
+		cout << "Error: Neuron::setSpineAndPsdMesh: Stoich child not found\n";
+		return;
+	}
+	
+	vector< Id > spineList = Field< vector< Id > >::get( 
+					spineMesh, "elecComptList" );
+	vector< Id > psdList = Field< vector< Id > >::get( 
+					psdMesh, "elecComptList" );
+	assert( spineList.size()== psdList.size() );
+	map< Id, unsigned int > spineMap; // spineMap[ SpineOnNeuron ] = index
+	for ( unsigned int i = 0; i < spines_.size(); ++i ) {
+		assert( spines_[i].size() > 1 );
+		spineMap[ spines_[i][1] ] = i;
+	}
+	// We don't want to clear this because we can use a single vector
+	// to overlay a number of spine meshes, since each will be a distinct
+	// subset of the full list of spines. None is used twice.
+	// spineToMeshOrdering_.clear();
+	for( unsigned int i = 0; i < spineList.size(); ++i ) {
+		map< Id, unsigned int >::iterator j = spineMap.find( spineList[i]);
+		if ( j == spineMap.end() ) {
+			cout << "Error: Neuron::setSpineAndPsdMesh: spine '" <<
+					spineList[i].path() << "' not found on Neuron\n";
+			return;
+		}
+		spineToMeshOrdering_[ j->second ] = i;
+		spineStoich_[ j->second ] = spineStoich;
+		psdStoich_[ j->second ] = psdStoich;
+	}
+}
+
 /////////////////////////////////////////////////////////////////////////
 // Here we set up the more general specification of mechanisms. Each
 // line is 
@@ -1604,16 +1660,28 @@ const vector< Id >& Neuron::spineIds( unsigned int index ) const
 	return fail;
 }
 
-const Id Neuron::spineMesh( unsigned int index ) const
+void Neuron::scaleBufAndRates( unsigned int spineNum, 
+				double lenScale, double diaScale ) const
 {
-	if ( index < spineMesh_.size() )
-		return spineMesh_[index];
-	return Id();
+	Id ss = spineStoich_[ spineNum ];
+	if ( ss == Id() ) {
+		cout << "Error: Neuron::scaleBufAndRates: unknown spineNum\n";
+		return;
+	}
+	/*
+	SetGet2< unsigned int, double >::set( ss, "scaleBufAndRates", 
+				spineToMeshOrdering_[spineNum], volScale );
+				*/
 }
 
-const Id Neuron::psdMesh( unsigned int index ) const
+void Neuron::scaleShaftDiffusion( unsigned int spineNum, 
+				double len, double dia) const
 {
-	if ( index < psdMesh_.size() )
-		return psdMesh_[index];
-	return Id();
+		;
+}
+
+void Neuron::scaleHeadDiffusion( unsigned int spineNum, 
+				double len, double dia) const
+{
+		;
 }
