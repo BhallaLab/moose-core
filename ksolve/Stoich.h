@@ -198,6 +198,9 @@ class Stoich
 
 		void filterXreacs();
 
+		/// Used to handle run-time size updates for spines.
+		void scaleBufsAndRates( unsigned int index, double volScale );
+
 		/**
 		 * Expands out list of compartment mappings of proxy reactions to
 		 * the appropriate entries on the rates_vector.

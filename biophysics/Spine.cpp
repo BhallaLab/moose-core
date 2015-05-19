@@ -138,15 +138,15 @@ void Spine::setShaftLength( const Eref& e, double len )
 			sl[0].element()->cinfo()->isA( "CompartmentBase" ) ) 
 	{ 
 		double origDia = Field< double >::get( sl[0], "diameter" );
+		double dx = Field< double >::get( sl[0], "x" );
+		double dy = Field< double >::get( sl[0], "y" );
+		double dz = Field< double >::get( sl[0], "z" );
 		SetGet2< double, double >::set( 
 			sl[0], "setGeomAndElec", len, origDia );
 
-		double dx = Field< double >::get( sl[0], "x" ) - 
-			Field< double >::get( sl[0], "x0" );
-		double dy = Field< double >::get( sl[0], "y" ) - 
-			Field< double >::get( sl[0], "y0" );
-		double dz = Field< double >::get( sl[0], "z" ) - 
-			Field< double >::get( sl[0], "z0" );
+		dx = Field< double >::get( sl[0], "x" ) - dx;
+		dy = Field< double >::get( sl[0], "y" ) - dy;
+		dz = Field< double >::get( sl[0], "z" ) - dz;
 
 		SetGet3< double, double, double >::set( sl[1], "displace",
 			dx, dy, dz );
