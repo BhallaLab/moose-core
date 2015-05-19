@@ -771,17 +771,3 @@ void Ksolve::print() const
 	}
 }
 
-
-/////////////////////////////////////////////////////////////////////////
-// Functions for resizing of specified voxels
-/////////////////////////////////////////////////////////////////////////
-
-/*
-void Ksolve::scaleBufAndRates( unsigned int index, double volScale )
-{
-		pools_[index].updateAllRateTerms( stoichPtr_->getRateTerms(), 
-			stoichPtr_->getNumCoreRates() );
-		// Something for the BufPools?
-
-} 
-*/

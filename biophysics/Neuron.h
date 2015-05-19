@@ -19,6 +19,7 @@ class Neuron
 {
 	public:
 		Neuron();
+		Neuron( const Neuron& other );
 		void setRM( double v );
 		double getRM() const;
 		void setRA( double v );

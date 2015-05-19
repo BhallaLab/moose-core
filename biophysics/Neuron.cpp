@@ -469,6 +469,24 @@ Neuron::Neuron()
 			compartmentLengthInLambdas_( 0.2 ),
 			spineEntry_( this )
 {;}
+
+// When copying Neuron, we next have to rerun buildSegmentTree() and 
+// setSpineAndPsdMesh
+Neuron::Neuron( const Neuron& other )
+	: 
+			RM_( other.RM_ ),
+			RA_( other.RA_ ),
+			CM_( other.CM_ ),
+			Em_( other.Em_ ),
+			theta_( other.theta_ ),
+			phi_( other.phi_ ),
+			sourceFile_( other.sourceFile_ ),
+			compartmentLengthInLambdas_(other.compartmentLengthInLambdas_),
+			channelDistribution_( other.channelDistribution_ ),
+			passiveDistribution_( other.passiveDistribution_ ),
+			spineDistribution_( other.spineDistribution_ ),
+			spineEntry_( this )
+{;}
 ////////////////////////////////////////////////////////////////////////
 // Some static utility functions.
 ////////////////////////////////////////////////////////////////////////
@@ -1628,6 +1646,12 @@ void Neuron::installSpines( const vector< ObjId >& elist,
 				x, y, z, size[k], k )
 		);
 	}
+	spineToMeshOrdering_.clear();
+	spineToMeshOrdering_.resize( spines_.size(), 0 );
+	spineStoich_.clear();
+	spineStoich_.resize( spines_.size() );
+	psdStoich_.clear();
+	psdStoich_.resize( spines_.size() );
 }
 ////////////////////////////////////////////////////////////////////////
 // Interface funcs for spines
@@ -1663,15 +1687,32 @@ const vector< Id >& Neuron::spineIds( unsigned int index ) const
 void Neuron::scaleBufAndRates( unsigned int spineNum, 
 				double lenScale, double diaScale ) const
 {
+	if ( spineStoich_.size() == 0 ) 
+		// Perhaps no chem stuff in model, but user could have forgotten
+		// to assign psd and spine meshes.
+		return;
+
+	if ( spineNum > spineStoich_.size() ) {
+		cout << "Error: Neuron::scaleBufAndRates: spineNum too big: " <<
+				spineNum << " >= " << spineStoich_.size() << endl;
+		return;
+	}
 	Id ss = spineStoich_[ spineNum ];
 	if ( ss == Id() ) {
 		cout << "Error: Neuron::scaleBufAndRates: unknown spineNum\n";
 		return;
 	}
-	/*
-	SetGet2< unsigned int, double >::set( ss, "scaleBufAndRates", 
+	Id ps = psdStoich_[ spineNum ];
+	if ( ps == Id() ) {
+		cout << "Error: Neuron::scaleBufAndRates: unknown psdNum\n";
+		return;
+	}
+	double volScale = lenScale * diaScale * diaScale;
+	SetGet2< unsigned int, double >::set( ss, "scaleBufsAndRates", 
 				spineToMeshOrdering_[spineNum], volScale );
-				*/
+	volScale = diaScale * diaScale;
+	SetGet2< unsigned int, double >::set( ps, "scaleBufsAndRates", 
+				spineToMeshOrdering_[spineNum], volScale );
 }
 
 void Neuron::scaleShaftDiffusion( unsigned int spineNum, 
