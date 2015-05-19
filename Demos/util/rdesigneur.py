@@ -130,7 +130,8 @@ class rdesigneur:
     def installCellFromProtos( self ):
         if self.stealCellFromLibrary:
             moose.move( self.elecid, self.model )
-            self.elecid.name = 'elec'
+            if self.elecid.name != 'elec':
+                self.elecid.name = 'elec'
         else:
             moose.copy( self.elecid, self.model, 'elec' )
             self.elecid = moose.element( self.model.path + '/elec' )
@@ -139,7 +140,8 @@ class rdesigneur:
             self.validateChem()
             if self.stealCellFromLibrary:
                 moose.move( self.chemid, self.model )
-                self.chemid.name = 'elec'
+                if self.chemid.name != 'chem':
+                    self.chemid.name = 'chem'
             else:
                 moose.copy( self.chemid, self.model, 'chem' )
                 self.chemid = moose.element( self.model.path + '/chem' )
@@ -219,7 +221,10 @@ class rdesigneur:
                 moose.copy( protoVec[0], '/library/' + protoVec[1] )
                 return True
             if moose.exists( '/library/' + protoVec[0] ):
-                moose.copy('/library/' + protoVec[0], '/library/', protoVec[1])
+                #moose.copy('/library/' + protoVec[0], '/library/', protoVec[1])
+                print 'renaming /library/' + protoVec[0] + ' to ' + protoVec[1]
+                moose.element( '/library/' + protoVec[0]).name = protoVec[1]
+                moose.le( '/library' )
                 return True
         # Check if there is a matching suffix for file type.
         if self.isKnownClassOrFile( protoVec[0], knownFileTypes ):
@@ -320,7 +325,6 @@ class rdesigneur:
                     "buildChemDistrib: No spine compartments found in path: '" \
                         + pair + "'" )
             # Build the neuroMesh
-            self.chemId = moose.element( '/library/' + i[0] )
             # Check if it is good. Need to catch the ValueError here.
             self._buildNeuroMesh()
             # Assign the solvers
@@ -844,6 +848,6 @@ def addSpineProto( name = 'spine', \
 
 # Wrapper function. This is used by the proto builder from rdesigneur
 def makeSpineProto( name ):
-    addSpineProto( name = name, chanList = ( ['Ca', 40.0, True],) )
+    addSpineProto( name = name, chanList = () )
 
 
