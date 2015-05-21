@@ -6,14 +6,17 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
-#define USE_CUDA
 #ifndef _RATE_LOOKUP_H
 #define _RATE_LOOKUP_H
+
+#ifndef USE_CUDA
+//#define USE_CUDA
+#endif
 
 struct LookupRow
 {
 	double* row;		///< Pointer to the first column on a row
-
+	int rowIndex;
 	double fraction;	///< Fraction of V or Ca over and above the division
 						///< boundary for interpolation.
 };

@@ -6,12 +6,27 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
-#define USE_CUDA
 #include <vector>
 #include <stdio.h>
 using namespace std;
 
 #include "RateLookup.h"
+
+#ifndef USE_CUDA
+//#define USE_CUDA
+#endif
+
+#ifndef DEBUG
+//#define DEBUG
+#endif
+
+#ifndef DEBUG_VERBOSE
+//#define DEBUG_VERBOSE
+#endif
+
+#ifndef DEBUG_STEP
+//#define DEBUG_STEP
+#endif
 
 #ifdef USE_CUDA
 #define BLOCK_WIDTH 256
@@ -81,6 +96,7 @@ void LookupTable::row( double x, LookupRow& row )
 	
 	row.fraction = div - integer;
 	row.row = &( table_.front() ) + integer * nColumns_;
+	row.rowIndex = integer * nColumns_;
 }
 
 #ifdef USE_CUDA
@@ -94,7 +110,7 @@ row_kernel(double * d_x,
 		   double dx,
 		   unsigned int nColumns, 
 		   unsigned int size,
-		   double * address)
+		   size_t address)
 {
 			   
 	int tid = threadIdx.x + blockIdx.x * blockDim.x;
@@ -114,31 +130,41 @@ row_kernel(double * d_x,
 	unsigned int integer = ( unsigned int )( div );
 	
 	d_row[tid].fraction = div - integer;
-	d_row[tid].row = address +  integer * nColumns;	
-	
+	d_row[tid].row = reinterpret_cast<double*>(address + sizeof(double) * integer * nColumns);	
+	d_row[tid].rowIndex = integer * nColumns;
 }
 
 void LookupTable::row_gpu(vector<double>::iterator& x, vector<LookupRow>::iterator& row, unsigned int size){
-	
+
+#ifdef DEBUG_VERBOSE
 	printf("start row_gpu calculation...\n");
+#endif	
+	std::vector<double> h_x(size);
+	std::copy(x, x + size, h_x.begin());
 	
 	thrust::device_vector<double> d_x(size);
 	thrust::device_vector<LookupRow> d_row(size);
-	thrust::copy(x, x+size, d_x.begin());
-	cudaDeviceSynchronize(); 
 	
 	double * d_x_p = thrust::raw_pointer_cast(d_x.data());
 	LookupRow * d_row_p = thrust::raw_pointer_cast(d_row.data());
 	
+	cudaMemcpy(d_x_p, &h_x.front(), sizeof(double)*size, cudaMemcpyHostToDevice);
+	cudaDeviceSynchronize(); 
+	
+	h_x.clear();
+	
     const dim3 gridSize(size/BLOCK_WIDTH + 1, 1, 1);
     const dim3 blockSize(BLOCK_WIDTH,1,1);
     
-    row_kernel<<<gridSize, blockSize>>>(d_x_p, d_row_p, min_, max_, dx_, nColumns_, size, &table_.front());	
+    size_t address = reinterpret_cast<size_t>(&table_.front());
+    
+    row_kernel<<<gridSize, blockSize>>>(d_x_p, d_row_p, min_, max_, dx_, nColumns_, size, address);	
     
     cudaThreadSynchronize();
     cudaDeviceSynchronize(); 
-    
+#ifdef DEBUG_VERBOSE    
     printf("kernel launch finished...\n");
+#endif
     LookupRow * h_row;
     h_row = (LookupRow *) malloc(sizeof(LookupRow)*size);
     cudaMemcpy(h_row, d_row_p, sizeof(LookupRow)*size, cudaMemcpyDeviceToHost);
@@ -146,8 +172,9 @@ void LookupTable::row_gpu(vector<double>::iterator& x, vector<LookupRow>::iterat
     std::copy(h_row, h_row+size, row);
     
     free(h_row);
-    
+#ifdef DEBUG_VERBOSE    
     printf("finish row_gpu calculation...\n");
+#endif 
 }
 #endif
 

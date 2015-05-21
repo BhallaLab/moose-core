@@ -6,7 +6,6 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
-#define USE_CUDA
 #include "header.h"
 #include <queue>
 #include "HSolveStruct.h"
@@ -19,6 +18,22 @@
 #include "../biophysics/Compartment.h"
 #include "../biophysics/CaConcBase.h"
 #include "ZombieCaConc.h"
+
+#ifndef USE_CUDA
+//#define USE_CUDA
+#endif
+
+#ifndef DEBUG
+//define DEBUG
+#endif
+
+#ifndef DEBUG_VERBOSE
+//#define DEBUG_VERBOSE
+#endif
+
+#ifndef DEBUG_STEP
+//#define DEBUG_STEP
+#endif
 
 using namespace moose;
 //~ #include "ZombieCompartment.h"
@@ -240,29 +255,29 @@ void HSolveActive::advanceChannels( double dt )
         icarowcompt = caRowCompt_.begin();
         caBoundary = ica + *icacount;
         
-        
-        //The following codes compare the result from GPU and CPU.
-        //If differnt, assertion failure will be activated.
-        //Then proceed with CPU results.
-        //To use GPU results only, comment out the printf and de-comment the compiler macros and the two += operations.
-//#ifdef USE_CUDA        
+#ifdef USE_CUDA      
+#ifdef DEBUG_VERBOSE  
 		printf("Starting to find rows using row_gpu: icacount:%u\n", *icacount);
+#endif
 		caTable_.row_gpu(ica, icarowcompt, *icacount);
-		printf("Finish find rows using row_gpu. Press [Enter] to continue...\n");
+#ifdef DEBUG_VERBOSE		
+		printf("Finish find rows using row_gpu.\n"); 
+#endif
+#ifdef DEBUG_INTERACTIVE
+		printf("Press [Enter] to continue...\n");
 		getchar();
-		//icarowcompt += *icacount;
-		//ica += *icacount;
-//#else
+#endif
+		icarowcompt += *icacount;
+		ica += *icacount;
+#else
         for ( ; ica < caBoundary; ++ica )
         {
-			LookupRow test;
-            caTable_.row( *ica, test );
-            if(!(test.row == (*icarowcompt).row && test.fraction == (*icarowcompt).fraction)){
-				printf("wrong result!\n");
-			}
+            caTable_.row( *ica, * icarowcompt );
+            printf("row: %d, fraction: %f.\n", icarowcompt->rowIndex, icarowcompt->fraction);
+            //getchar();
             ++icarowcompt;
         }
-//#endif     
+#endif     
         /*
          * Optimize by moving "if ( instant )" outside the loop, because it is
          * rarely used. May also be able to avoid "if ( power )".
