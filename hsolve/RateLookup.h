@@ -10,7 +10,7 @@
 #define _RATE_LOOKUP_H
 
 #ifndef USE_CUDA
-//#define USE_CUDA
+#define USE_CUDA
 #endif
 
 struct LookupRow

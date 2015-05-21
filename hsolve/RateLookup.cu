@@ -13,7 +13,7 @@ using namespace std;
 #include "RateLookup.h"
 
 #ifndef USE_CUDA
-//#define USE_CUDA
+#define USE_CUDA
 #endif
 
 #ifndef DEBUG

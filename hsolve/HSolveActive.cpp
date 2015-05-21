@@ -20,7 +20,7 @@
 #include "ZombieCaConc.h"
 
 #ifndef USE_CUDA
-//#define USE_CUDA
+#define USE_CUDA
 #endif
 
 #ifndef DEBUG
@@ -273,8 +273,7 @@ void HSolveActive::advanceChannels( double dt )
         for ( ; ica < caBoundary; ++ica )
         {
             caTable_.row( *ica, * icarowcompt );
-            printf("row: %d, fraction: %f.\n", icarowcompt->rowIndex, icarowcompt->fraction);
-            //getchar();
+            //printf("row: %d, fraction: %f.\n", icarowcompt->rowIndex, icarowcompt->fraction);
             ++icarowcompt;
         }
 #endif     
