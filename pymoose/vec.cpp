@@ -69,6 +69,7 @@
 #include "../utility/utility.h"
 #include "../randnum/randnum.h"
 #include "../shell/Shell.h"
+#include "../shell/Wildcard.h"
 
 #include "moosemodule.h"
 
@@ -447,7 +448,7 @@ extern "C" {
     // ObjId will destroy the containing element and invalidate all
     // the other ObjId with the same Id.
     // 2011-03-28 13:44:49 (+0530)
-    PyObject * deleteObjId(ObjId oid)
+    PyObject * deleteObjId(ObjId oid, bool fieldsonly)
     {
 #ifndef NDEBUG
         if (verbosity > 1){
@@ -468,6 +469,11 @@ extern "C" {
         // clean up the maps containing initialized lookup/dest/element fields
         for (unsigned int ii = begin; ii < end; ++ii){
             ObjId el(oid.id, ii);
+            vector<ObjId> children;
+            wildcardFind(el.path()+"/##", children);
+            for (unsigned int ii = 0; ii < children.size(); ++ii){
+                deleteObjId(children[ii], true);
+            }
 #ifndef NDEBUG
             if (verbosity > 1){
                 cout << "    Deleting ObjId " << el << endl;
@@ -498,7 +504,9 @@ extern "C" {
                 }
             }    
         }
-        SHELLPTR->doDelete(oid);
+        if (!fieldsonly){
+            SHELLPTR->doDelete(oid);
+        }
         Py_RETURN_NONE;
     }
     
@@ -511,7 +519,7 @@ extern "C" {
         if (!Id::isValid(self->id_)){
             RAISE_INVALID_ID(NULL, "moose_Id_delete");
         }
-        deleteObjId(self->id_);
+        deleteObjId(self->id_, true);
         self->id_ = Id();
         Py_CLEAR(self);
         Py_RETURN_NONE;
