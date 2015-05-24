@@ -723,26 +723,13 @@ extern "C" {
         static map<string, vector <PyGetSetDef>  > getset_defs;
         return getset_defs;
     }
-    
-    // Global storage for every LookupField we create.
-    map<string, PyObject *>& get_inited_lookupfields()
-    {
-        static map<string, PyObject *> inited_lookupfields;
-        return inited_lookupfields;
-    }
-    
-    map< string, PyObject * >& get_inited_destfields()
-    {
-        static map<string, PyObject * > inited_destfields;
-        return inited_destfields;
-    }
 
-    map< string, PyObject *>& get_inited_elementfields()
+    // Global storage for every LookupField/ElementField/DestField we create.
+    map< string, map< string, PyObject* > >& get_inited_fields()
     {
-        static map< string, PyObject *> inited_elementfields;
-        return inited_elementfields;
+        static map< string, map< string, PyObject* > > inited_fields;
+        return inited_fields;
     }
-    
     /**
        map of fields which are aliased in Python to avoid collision
        with Python keywords.
@@ -905,11 +892,13 @@ extern "C" {
         }
         finalized = true;
         Id shellId = getShell(0, NULL);
-        for (map<string, PyObject *>::iterator it =
-                     get_inited_lookupfields().begin();
-             it != get_inited_lookupfields().end();
-             ++it){
-            Py_XDECREF(it->second);
+        for (map<string, map<string, PyObject*> >::iterator objit =
+                     get_inited_fields().begin();
+             objit != get_inited_fields().end();
+             ++objit){
+            for (map< string, PyObject* >::iterator fieldit = objit->second.begin(); fieldit != objit->second.end(); ++ fieldit){
+                Py_XDECREF(fieldit->second);
+            }
         }
         // Clear the memory for PyGetSetDefs. The key
         // (name) was dynamically allocated using calloc. So was the
@@ -925,11 +914,6 @@ extern "C" {
             // }
         }
         get_getsetdefs().clear();
-        for (map<string, PyObject *>::iterator it = get_inited_destfields().begin();
-             it != get_inited_destfields().end();
-             ++it){
-            Py_XDECREF(it->second);
-        }
         SHELLPTR->doQuit();
         // // Destroy the Shell object
         // Neutral* ns = reinterpret_cast<Neutral*>(shellId.element()->data(0));
@@ -2316,12 +2300,14 @@ extern "C" {
             return NULL;
         }
         // If the DestField already exists, return it
-        string full_name = obj->oid_.path() +
-                "." + string(name);
-        map<string, PyObject * >::iterator it = get_inited_destfields().find(full_name);
-        if (it != get_inited_destfields().end()){
-            Py_INCREF(it->second);
-            return it->second;
+        string path = obj->oid_.path();
+        map<string, map< string, PyObject*> >::iterator objit = get_inited_fields().find(path);
+        if (objit != get_inited_fields().end()){
+            map< string, PyObject*>::iterator fieldit = objit->second.find(name);
+            if (fieldit != objit->second.end()){
+                Py_INCREF(fieldit->second);
+                return fieldit->second;
+            }
         }
         PyObject * args = PyTuple_New(2);
                 
@@ -2334,7 +2320,7 @@ extern "C" {
              * map, we must protect it by increasing refcount, else
              * will get gc-ed. */
             Py_INCREF(ret);
-            get_inited_destfields()[full_name] =  (PyObject*)ret;
+            get_inited_fields()[path][name] =  (PyObject*)ret;
         } else{
             Py_XDECREF((PyObject*)ret);
             ret = NULL;
@@ -2436,11 +2422,14 @@ extern "C" {
         }
         assert(name);
         // If the LookupField already exists, return it
-        string full_name = obj->oid_.path() + "." + string(name);
-        map<string, PyObject * >::iterator it = get_inited_lookupfields().find(full_name);
-        if (it != get_inited_lookupfields().end()){
-            Py_INCREF(it->second);
-            return it->second;
+        string path = obj->oid_.path();
+        map<string, map< string, PyObject*> >::iterator objit = get_inited_fields().find(path);
+        if (objit != get_inited_fields().end()){
+            map< string, PyObject*>::iterator fieldit = objit->second.find(name);
+            if (fieldit != objit->second.end()){
+                Py_INCREF(fieldit->second);
+                return fieldit->second;
+            }
         }
         /* Create a new instance of LookupField `name` and set it as
          * an attribute of the object self. Create the argument for
@@ -2452,7 +2441,7 @@ extern "C" {
         _Field * ret = PyObject_New(_Field, &moose_LookupField);
         if (moose_LookupField.tp_init((PyObject*)ret, args, NULL) == 0){
             Py_INCREF((PyObject*)ret);
-            get_inited_lookupfields()[full_name] =  (PyObject*)ret;
+            get_inited_fields()[path][name] =  (PyObject*)ret;
             /* must protect by increasing refcnt, else the lookupfinfo
              * gets gc-ed. */
         } else {
@@ -2518,14 +2507,15 @@ extern "C" {
             return NULL;
         }
         // If the ElementField already exists, return it
-        string full_name = obj->oid_.path() + "." + string(name);
-        // cout << "ElementField fullname: " << full_name << endl;
-        map<string, PyObject * >::iterator it = get_inited_elementfields().find(full_name);
-        if (it != get_inited_elementfields().end()){
-            Py_XINCREF(it->second);
-            return it->second;
+        string path = obj->oid_.path();
+        map<string, map< string, PyObject*> >::iterator objit = get_inited_fields().find(path);
+        if (objit != get_inited_fields().end()){
+            map< string, PyObject*>::iterator fieldit = objit->second.find(name);
+            if (fieldit != objit->second.end()){
+                Py_INCREF(fieldit->second);
+                return fieldit->second;
+            }
         }
-        
         // Create a new instance of ElementField `name` and set it as
         // an attribute of the object `self`.
         // 1. Create the argument for init method of ElementField.  This
@@ -2540,7 +2530,7 @@ extern "C" {
             // cache the finfo and protect by increasing refcnt, else
             // the finfo gets gc-ed.
             Py_INCREF((PyObject*)ret);
-            get_inited_elementfields()[full_name] =  (PyObject*)ret;
+            get_inited_fields()[path][name] =  (PyObject*)ret;
         } else {
             Py_DECREF((PyObject*)ret);
             ret = NULL;

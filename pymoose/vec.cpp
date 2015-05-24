@@ -456,55 +456,38 @@ extern "C" {
         }
 #endif
         string className = Field<string >::get(oid, "className");
-        vector <string> destFields = getFieldNames(className, "destFinfo");
-        vector <string> lookupFields = getFieldNames(className, "lookupFinfo");
-        vector <string> elementFields = getFieldNames(className, "elementFinfo");
+        // vector <string> destFields = getFieldNames(className, "destFinfo");
+        // vector <string> lookupFields = getFieldNames(className, "lookupFinfo");
+        // vector <string> elementFields = getFieldNames(className, "elementFinfo");
         unsigned int numData = Field<unsigned int>::get(oid, "numData");
-		unsigned int begin = 0;
-		unsigned int end = numData;
-		if ( oid.element()->cinfo()->isA( "Msg" ) ) {
-			begin = oid.dataIndex;
-			end = oid.dataIndex + 1;
-		}
+        unsigned int begin = 0;
+        unsigned int end = numData;
+        if ( oid.element()->cinfo()->isA( "Msg" ) ) {
+            begin = oid.dataIndex;
+            end = oid.dataIndex + 1;
+        }
         // clean up the maps containing initialized lookup/dest/element fields
         for (unsigned int ii = begin; ii < end; ++ii){
             ObjId el(oid.id, ii);
-            vector<ObjId> children;
-            wildcardFind(el.path()+"/##", children);
-            for (unsigned int ii = 0; ii < children.size(); ++ii){
-                deleteObjId(children[ii], true);
-            }
 #ifndef NDEBUG
             if (verbosity > 1){
                 cout << "    Deleting ObjId " << el << endl;
             }
 #endif
-            for (unsigned int fidx = 0; fidx < lookupFields.size(); ++fidx){
-                map<string, PyObject *>::iterator it =
-                        get_inited_lookupfields().find(el.path() + "." + lookupFields[fidx]);
-                if( it != get_inited_lookupfields().end()){
-                    Py_XDECREF(it->second);
-                    get_inited_lookupfields().erase(it);                    
+            vector<ObjId> children;
+            wildcardFind(el.path()+"/##", children);
+            children.push_back(oid);
+            for (unsigned int ii = 0; ii < children.size(); ++ii){
+                map<string, map< string, PyObject* > >::iterator oit = get_inited_fields().find(children[ii].path());
+                if (oit == get_inited_fields().end()){
+                    continue;
                 }
-            }
-            for (unsigned int fidx = 0; fidx < destFields.size(); ++fidx){
-                map<string, PyObject *>::iterator it =
-                        get_inited_destfields().find(el.path() + "." + destFields[fidx]);
-                if( it != get_inited_destfields().end()){
-                    Py_XDECREF(it->second);
-                    get_inited_destfields().erase(it);
+                for (map< string, PyObject *>::iterator fit = oit->second.begin();
+                     fit != oit->second.end(); ++fit){
+                    Py_XDECREF(fit->second);
                 }
-            }
-            for (unsigned int fidx = 0; fidx < elementFields.size(); ++fidx){
-                map<string, PyObject *>::iterator it =
-                        get_inited_elementfields().find(el.path() + "." + elementFields[fidx]);
-                if( it != get_inited_elementfields().end()){
-                    Py_XDECREF(it->second);
-                    get_inited_elementfields().erase(it);
-                }
-            }    
-        }
-        if (!fieldsonly){
+                get_inited_fields().erase(oit);
+            }            
             SHELLPTR->doDelete(oid);
         }
         Py_RETURN_NONE;
