@@ -1362,7 +1362,7 @@ extern "C" {
         if ( oid_.bad() ){
             RAISE_INVALID_ID(NULL, "moose_delete");
         }
-        deleteObjId(oid_);
+        deleteObjId(oid_, false);
         if (isId_){
             ((_Id*)obj)->id_ = Id();
         }
