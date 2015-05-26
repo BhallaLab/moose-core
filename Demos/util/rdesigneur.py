@@ -198,9 +198,13 @@ class rdesigneur:
                 protoType + "Proto: nargs should be 2, is " + \
                     str( len(protoVec)  ))
         if moose.exists( '/library/' + protoVec[1] ):
+            # Assume the job is already done, just skip it.
+            return True
+            '''
             raise BuildError( \
-                protoType + "Proto: object /library/'" + \
-                    protoVec[1] + "' already exists." )
+                protoType + "Proto: object /library/" + \
+                    protoVec[1] + " already exists." )
+            '''
         # Check and build the proto from a class name
         if protoVec[0][:5] == 'moose':
             protoName = protoVec[0][6:]
@@ -244,6 +248,26 @@ class rdesigneur:
                 self.elecid = moose.element( '/library/' + i[1] )
             else:
                 self._loadElec( i[0], i[1] ) 
+            '''
+            print 'later: ', self.elecid
+            moose.showfields( self.elecid )
+            moose.le( '/library' )
+            a = self.elecid
+            print a
+            moose.showfields( a )
+            print a.path
+            print moose.element( a.path )
+            b = moose.element( a.path )
+            print 'About to set RM on b'
+            b.RM = 4.321
+            print 'About to set RM on b using func'
+            b.setRM( 4.321 )
+            print 'About to set RM on a'
+            a.setRM( 1.234 )
+            print 'Set RM'
+            a.buildSegmentTree()
+            print 'BUILT'
+            '''
             self.elecid.buildSegmentTree()
 
     def buildSpineProto( self ):
@@ -518,12 +542,13 @@ class rdesigneur:
     def _loadElec( self, efile, elecname ):
         if ( efile[ len( efile ) - 2:] == ".p" ):
             self.elecid = moose.loadModel( efile, '/library/' + elecname)[0]
+            print self.elecid
         elif ( efile[ len( efile ) - 4:] == ".swc" ):
             self.elecid = moose.loadModel( efile, '/library/' + elecname)[0]
         else:
             nm = NeuroML()
             nm.readNeuroMLFromFile( efile, \
-                    params = {'combineSegments': combineSegments, \
+                    params = {'combineSegments': self.combineSegments, \
                     'createPotentialSynapses': True } )
             if moose.exists( '/cells' ):
                 kids = moose.wildcardFind( '/cells/#' )

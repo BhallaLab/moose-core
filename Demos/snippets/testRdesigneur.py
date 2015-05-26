@@ -88,7 +88,7 @@ def makeModel():
                 [ "chem", "#", "install", "1" ] \
             ],
             adaptorList = [ \
-                [ 'psd/Ca', 'conc', '.', 'inject', False, 0, 2e-9 ], \
+                [ 'psd/Ca', 'conc', '.', 'inject', 0, 2e-9 ], \
                 ] \
         )
     rdes.buildModel( '/model' )
