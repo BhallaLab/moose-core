@@ -1603,15 +1603,18 @@ static void testNeuronBuildTree()
 	// Here we test Neuron::makeSpacingDistrib, which uses the muParser
 	// n->evalExprForElist( elist, "H(p-50e-6)*5e-6", val );
 	n->evalExprForElist( elist, "H(p-100e-6)*5e-6", val );
+	vector< unsigned int > seglistIndex;
 	vector< unsigned int > elistIndex;
 	vector< double > pos;
 	vector< string > line; // empty, just use the default spacingDistrib=0
-	n->makeSpacingDistrib( elist, val, elistIndex, pos, line ); 
+	n->makeSpacingDistrib( elist, val, seglistIndex, elistIndex, pos, line ); 
 	assert( pos.size() == ((800 - 100)/5) );
 	assert( doubleEq( pos[0], 2.5e-6 ) );
 	assert( doubleEq( pos.back(), 500e-6 - 2.5e-6 ) );
-	assert( elistIndex[0] == 2 );
-	assert( elistIndex.back() == 3 );
+	assert( seglistIndex[0] == 2 );
+	assert( seglistIndex.back() == 3 );
+	assert( elistIndex[0] == 3 );
+	assert( elistIndex.back() == 4 );
 
 	shell->doDelete( nid );
 }

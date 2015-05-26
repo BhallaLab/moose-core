@@ -64,7 +64,9 @@ class Neuron
 			const vector< double >& val, const vector< string >& line );
 		void makeSpacingDistrib( 
 			const vector< ObjId >& elist, const vector< double >& val,
-			vector< unsigned int >& elistIndex, vector< double >& pos,
+			vector< unsigned int >& seglistIndex, 
+			vector< unsigned int >& elistIndex, 
+			vector< double >& pos,
 			const vector< string >& line ) const;
 		void parseMechSpec( const Eref& e );
 		void installMechanism(  const string& name,
@@ -114,7 +116,7 @@ class Neuron
 		/// Map to look up Seg index from Id of associated compt.
 		map< Id, unsigned int > segIndex_; 
 		/// Look up seg index of parent compartment, from index of spine.
-		vector< unsigned int > spineParentIndex_; 
+		vector< unsigned int > spineParentSegIndex_; 
 		vector< vector< Id > > spines_; /// Id of each compt in each spine.
 		/// Id of mesh associated with each spine. Typically all the same.
 		vector< Id > spineStoich_; 
