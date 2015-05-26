@@ -179,7 +179,7 @@ extern "C" {
     
     PyObject * moose_Id_repr(_Id * self);
     PyObject * moose_Id_str(_Id * self);
-    PyObject * deleteObjId(ObjId obj, bool fieldsonly); // inner function
+    PyObject * deleteObjId(ObjId obj); // inner function
     PyObject * moose_Id_delete(_Id * self);
     PyObject * moose_Id_getValue(_Id * self);
     PyObject * moose_Id_getPath(_Id * self);
@@ -282,7 +282,6 @@ extern "C" {
     PyObject * setDestFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type1, PyObject * arg2, char type2);
     Id getShell(int argc, char **argv);
     vector<int> pysequence_to_dimvec(PyObject * dims);
-    map<string, map <string, PyObject *> > & get_inited_fields();
     map<string, vector <PyGetSetDef> >& get_getsetdefs();
     map<string, PyTypeObject *>& get_moose_classes();
     int get_npy_typenum(const type_info& ctype);
