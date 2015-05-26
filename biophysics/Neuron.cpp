@@ -856,11 +856,11 @@ vector< ObjId > Neuron::getSpinesFromExpression(
 				const Eref& e, string line ) const
 {
 	vector< ObjId > temp = getExprElist( e, line );
-	// indexed by compt #, includes all compts in all spines.
+	// indexed by segIndex, includes all compts in all spines.
 	vector< vector< Id > > allSpinesPerCompt( segId_.size() ); 
 	for ( unsigned int i = 0; i < spines_.size(); ++i ) {
-		assert( allSpinesPerCompt.size() > spineParentIndex_[i] );
-		vector< Id >& s = allSpinesPerCompt[ spineParentIndex_[i] ];
+		assert( allSpinesPerCompt.size() > spineParentSegIndex_[i] );
+		vector< Id >& s = allSpinesPerCompt[ spineParentSegIndex_[i] ];
 		s.insert( s.end(), spines_[i].begin(), spines_[i].end() );
 	}
 	vector< ObjId >ret;
@@ -1477,9 +1477,10 @@ string findArg( const vector<string>& line, const string& field )
 }
 
 /// Add entries into the pos vector for a given compartment i.
-static void addPos( unsigned int i, 
+static void addPos( unsigned int segIndex, unsigned int eIndex,
 		double spacing, double spacingDistrib, 
 		double dendLength,
+		vector< unsigned int >& seglistIndex,
 		vector< unsigned int >& elistIndex,
 		vector< double >& pos )
 {
@@ -1487,14 +1488,16 @@ static void addPos( unsigned int i,
 		double position = spacing * 0.5 + 
 				( mtrand() - 0.5 ) * spacingDistrib;
 		while ( position < dendLength ) {
-			elistIndex.push_back( i );
+			seglistIndex.push_back( segIndex );
+			elistIndex.push_back( eIndex );
 			pos.push_back( position );
 			position += spacing + ( mtrand() - 0.5 ) * spacingDistrib;
 		} 
 	} else {
 		for ( double position = spacing * 0.5; 
 				position < dendLength; position += spacing ) {
-			elistIndex.push_back( i );
+			seglistIndex.push_back( segIndex );
+			elistIndex.push_back( eIndex );
 			pos.push_back( position );
 		}
 	}
@@ -1502,6 +1505,7 @@ static void addPos( unsigned int i,
 
 void Neuron::makeSpacingDistrib( const vector< ObjId >& elist, 
 		const vector< double >& val,
+		vector< unsigned int >& seglistIndex,
 		vector< unsigned int >& elistIndex,
 		vector< double >& pos,
 		const vector< string >& line ) const
@@ -1528,8 +1532,14 @@ void Neuron::makeSpacingDistrib( const vector< ObjId >& elist,
 					lookupDend = segIndex_.find( elist[i] );
 				if ( lookupDend != segIndex_.end() ) {
 					double dendLength = segs_[lookupDend->second].length();
-					addPos( lookupDend->second, spacing, spacingDistrib, 
-								dendLength, elistIndex, pos );
+					/////
+					//This is the problem line. Shouldn't we pass in i
+					//rather than lookupDend->second?
+					//addPos( lookupDend->second, spacing, spacingDistrib, 
+					//			dendLength, elistIndex, pos );
+					addPos( lookupDend->second, i, 
+								spacing, spacingDistrib, dendLength, 
+								seglistIndex, elistIndex, pos );
 				}
 			}
 		}
@@ -1634,11 +1644,12 @@ void Neuron::installSpines( const vector< ObjId >& elist,
 	pos.reserve( elist.size() );
 	elistIndex.reserve( elist.size() );
 
-	makeSpacingDistrib( elist, val, spineParentIndex_, pos, line);
-	makeAngleDistrib( elist, val, spineParentIndex_, theta, line );
-	makeSizeDistrib( elist, val, spineParentIndex_, size, line );
-	for ( unsigned int k = 0; k < spineParentIndex_.size(); ++k ) {
-		unsigned int i = spineParentIndex_[k];
+	makeSpacingDistrib( elist, val, 
+					spineParentSegIndex_, elistIndex, pos, line);
+	makeAngleDistrib( elist, val, elistIndex, theta, line );
+	makeSizeDistrib( elist, val, elistIndex, size, line );
+	for ( unsigned int k = 0; k < spineParentSegIndex_.size(); ++k ) {
+		unsigned int i = spineParentSegIndex_[k];
 		Vec x, y, z;
 		coordSystem( soma_, segId_[i], x, y, z );
 		spines_.push_back( 
@@ -1699,12 +1710,14 @@ void Neuron::scaleBufAndRates( unsigned int spineNum,
 	}
 	Id ss = spineStoich_[ spineNum ];
 	if ( ss == Id() ) {
-		cout << "Error: Neuron::scaleBufAndRates: unknown spineNum\n";
+		// The chem system for the spine may not have been defined.
+		// Later figure out how to deal with cases where there is a psd
+		// but no spine.
 		return;
 	}
 	Id ps = psdStoich_[ spineNum ];
 	if ( ps == Id() ) {
-		cout << "Error: Neuron::scaleBufAndRates: unknown psdNum\n";
+		// The chem system for the spine may not have been defined.
 		return;
 	}
 	double volScale = lenScale * diaScale * diaScale;
