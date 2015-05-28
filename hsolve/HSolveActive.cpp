@@ -6,7 +6,6 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
-
 #include "header.h"
 #include <queue>
 #include "HSolveStruct.h"
@@ -19,6 +18,23 @@
 #include "../biophysics/Compartment.h"
 #include "../biophysics/CaConcBase.h"
 #include "ZombieCaConc.h"
+
+#ifndef USE_CUDA
+#define USE_CUDA
+#endif
+
+#ifndef DEBUG
+//define DEBUG
+#endif
+
+#ifndef DEBUG_VERBOSE
+//#define DEBUG_VERBOSE
+#endif
+
+#ifndef DEBUG_STEP
+//#define DEBUG_STEP
+#endif
+
 using namespace moose;
 //~ #include "ZombieCompartment.h"
 //~ #include "ZombieCaConc.h"
@@ -216,6 +232,7 @@ void HSolveActive::advanceCalcium()
 
 void HSolveActive::advanceChannels( double dt )
 {
+
     vector< double >::iterator iv;
     vector< double >::iterator istate = state_.begin();
     vector< int >::iterator ichannelcount = channelCount_.begin();
@@ -230,17 +247,36 @@ void HSolveActive::advanceChannels( double dt )
 
     LookupRow vRow;
     double C1, C2;
+    unsigned int ca_begin_pos = 0;
+    unsigned int caRowCompt_begin_pos = 0;
     for ( iv = V_.begin(); iv != V_.end(); ++iv )
     {
         vTable_.row( *iv, vRow );
         icarowcompt = caRowCompt_.begin();
         caBoundary = ica + *icacount;
+        
+#ifdef USE_CUDA      
+#ifdef DEBUG_VERBOSE  
+		printf("Starting to find rows using row_gpu: icacount:%u\n", *icacount);
+#endif
+		caTable_.row_gpu(ica, icarowcompt, *icacount);
+#ifdef DEBUG_VERBOSE		
+		printf("Finish find rows using row_gpu.\n"); 
+#endif
+#ifdef DEBUG_INTERACTIVE
+		printf("Press [Enter] to continue...\n");
+		getchar();
+#endif
+		icarowcompt += *icacount;
+		ica += *icacount;
+#else
         for ( ; ica < caBoundary; ++ica )
         {
-            caTable_.row( *ica, *icarowcompt );
+            caTable_.row( *ica, * icarowcompt );
+            //printf("row: %d, fraction: %f.\n", icarowcompt->rowIndex, icarowcompt->fraction);
             ++icarowcompt;
         }
-
+#endif     
         /*
          * Optimize by moving "if ( instant )" outside the loop, because it is
          * rarely used. May also be able to avoid "if ( power )".
