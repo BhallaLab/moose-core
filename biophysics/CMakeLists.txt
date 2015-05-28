@@ -38,6 +38,7 @@ add_library(biophysics
 	MarkovSolverBase.cpp	
 	MarkovSolver.cpp	
 	VClamp.cpp	
+        Spine.cpp
 	# LeakyIaF.cpp	
 	# GapJunction.cpp	
 	# GHK.cpp		
