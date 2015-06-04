@@ -574,7 +574,8 @@ static void assignParam( Id obj, const string& field,
 			// So B = arg/( vol * F ). Here the system provides vol and F,
 			// so the arg is just a scale factor over this, typically
 			// to be thought of in terms of buffering. Small B is more
-			// buffering.
+			// buffering. This field is deprecated but used in legacy
+			// GENESIS scripts.
 			Field< double >::set( obj, "B", val / 
 				( FaradayConst * len * dia * dia * PI / 4.0 ) );
 		}
@@ -1275,6 +1276,10 @@ static double coordSystem( Id soma, Id dend, Vec& x, Vec& y, Vec& z )
 }
 
 /**
+ * Deprecated. All this is done in the CompartmentBase class using the
+ * function 
+	SetGet2< double, double >::set( *i, "setGeomAndElec", len, dia );
+
  * Utility function to resize electrical compt electrical properties,
  * including those of its child channels and calcium conc.
  */
@@ -1291,15 +1296,23 @@ static void scaleSpineCompt( Id compt, double size )
 		Field< double >::set( *i, "Gbar", gbar * a );
 	}
 
-	double v = size * size * size;
+	// double v = size * size * size;
 	vector< ObjId > concs;
 	allChildren( compt, ALLDATA, "ISA=CaConcBase", concs );
 	// wildcardFind( compt.path() + "/##[ISA=CaConcBase]", concs );
 	for ( vector< ObjId >::iterator 
 					i = concs.begin(); i != concs.end(); ++i )
 	{
-		double B = Field< double >::get( *i, "B" );
-		Field< double >::set( *i, "B", B * v );
+		// We assume that the 'thick' parameter is not supposed to scale,
+		// that is, if the user wants a 0.1 micron shell, it stays 0.1
+		// even if the diameter changes.
+		double dia = Field< double >::get( *i, "diameter" );
+		double length = Field< double >::get( *i, "length" );
+		Field< double >::set( *i, "diameter", size * dia );
+		Field< double >::set( *i, "length", size * length );
+		// The B field is deprecated. Don't fiddle with it.
+		// double B = Field< double >::get( *i, "B" );
+		// Field< double >::set( *i, "B", B * v );
 	}
 
 	double Rm = Field< double >::get( compt, "Rm" );
@@ -1414,9 +1427,17 @@ static vector< Id > addSpine( Id parentCompt, Id spineProto,
 			double y = Field< double >::get( *i, "y" ) * size;
 			double z = Field< double >::get( *i, "z" ) * size;
 			double dia = Field< double >::get( *i, "diameter" ) * size;
-			Field< double >::set( *i, "diameter", dia );
+			// Field< double >::set( *i, "diameter", dia );
+
+			double len = sqrt( 
+							(x-x0)*(x-x0) + 
+							(y-y0)*(y-y0) + 
+							(z-z0)*(z-z0) );
+			SetGet2< double, double >::set( *i, "setGeomAndElec", len, dia );
+
+
 			coords.push_back( Vec( x + parentRadius, y, z ) );
-			scaleSpineCompt( *i, size );
+			// scaleSpineCompt( *i, size );
 			shell->doMove( *i, parentObject );
 			ret.push_back( *i );
 		}
