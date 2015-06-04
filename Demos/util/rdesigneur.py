@@ -626,10 +626,7 @@ class rdesigneur:
         self._moveCompt( sortedComptList[1], self.spineCompt )
         self._moveCompt( sortedComptList[2], self.psdCompt )
         self.dendCompt.diffLength = self.meshLambda
-        self.dendCompt.cell = self.elecid
         self.dendCompt.subTree = self.cellPortionElist
-        #self.dendCompt.subTree = self.cellPortionElist+self.spineComptElist
-        #self.dendCompt.cellPortionList( self.elecid, self.cellPortionElist )
         moose.delete( self.chemid )
         self.chemid = newChemid
 
