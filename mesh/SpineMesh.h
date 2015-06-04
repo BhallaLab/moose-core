@@ -40,8 +40,6 @@ class SpineMesh: public MeshCompt
 
 		void updateCoords();
 
-		Id getCell() const; /// Return Id of parent cell.
-
 		//////////////////////////////////////////////////////////////////
 		// Field assignment stuff
 		//////////////////////////////////////////////////////////////////
@@ -129,7 +127,6 @@ class SpineMesh: public MeshCompt
 
 		void handleSpineList(
 			const Eref& e,
-			Id cell,
 			vector< Id > shaft, vector< Id > head, 
 			vector< unsigned int > parentVoxel );
 
@@ -178,8 +175,6 @@ class SpineMesh: public MeshCompt
 		static const Cinfo* initCinfo();
 
 	private:
-		/// Id of parent cell_ container.
-		Id cell_;
 		/**
 		 * These do the actual work.
 		 */
