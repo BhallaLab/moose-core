@@ -96,6 +96,22 @@ class rdesigneur:
 
 
     ################################################################
+    def _printModelStats( self ):
+        print "Rdesigneur: Elec model has", \
+            self.elecid.numCompartments, "compartments and", \
+            self.elecid.numSpines, "spines on", \
+            len( self.cellPortionElist ), "compartments."
+        if hasattr( self , 'chemid' ):
+            dmstoich = moose.element( self.dendCompt.path + '/stoich' )
+            smstoich = moose.element( self.spineCompt.path + '/stoich' )
+            pmstoich = moose.element( self.psdCompt.path + '/stoich' )
+            print "Chem part of model has ", \
+                self.dendCompt.mesh.num, "dendrite voxels X", \
+                dmstoich.numAllPools, "pools,\n    ", \
+                self.spineCompt.mesh.num, "spine voxels X", \
+                smstoich.numAllPools, "pools,", \
+                self.psdCompt.mesh.num, "psd voxels X", \
+                pmstoich.numAllPools, "pools."
 
     def buildModel( self, modelPath ):
         if not moose.exists( '/library' ):
@@ -120,9 +136,8 @@ class rdesigneur:
             self._configureSolvers()
             self.buildAdaptors()
             self._configureClocks()
-            print "Rdesigneur: Model has ", self.elecid.numCompartments, \
-            " compartments, ", self.elecid.numBranches, \
-            " branches, and ", self.elecid.numSpines, " spines."
+            self._printModelStats()
+
         except BuildError, msg:
             print "Error: rdesigneur: model build failed: ", msg
             moose.delete( self.model )
@@ -339,7 +354,6 @@ class rdesigneur:
             # be a global scaling factor.
             self.cellPortionElist = self.elecid.compartmentsFromExpression[ pair ]
             self.spineComptElist = self.elecid.spinesFromExpression[ pair ]
-            print 'len( compts), spines ', len( self.cellPortionElist ), len( self.spineComptElist )
             if len( self.cellPortionElist ) == 0:
                 raise BuildError( \
                     "buildChemDistrib: No elec compartments found in path: '" \
@@ -632,8 +646,6 @@ class rdesigneur:
         dmstoich.ksolve = dmksolve
         dmstoich.dsolve = dmdsolve
         dmstoich.path = self.dendCompt.path + "/##"
-        print 'Dend solver: numPools = ', dmdsolve.numPools, \
-            ', nvox= ', self.dendCompt.mesh.num, dmksolve.numAllVoxels
         # Put in spine solvers. Note that these get info from the dendCompt
         if self.useGssa:
             smksolve = moose.Gsolve( self.spineCompt.path + '/ksolve' )
@@ -645,8 +657,6 @@ class rdesigneur:
         smstoich.ksolve = smksolve
         smstoich.dsolve = smdsolve
         smstoich.path = self.spineCompt.path + "/##"
-        print 'spine num Pools = ', smstoich.numAllPools, \
-                ', nvox= ',  self.spineCompt.mesh.num, smksolve.numAllVoxels
         # Put in PSD solvers. Note that these get info from the dendCompt
         if self.useGssa:
             pmksolve = moose.Gsolve( self.psdCompt.path + '/ksolve' )
@@ -658,8 +668,6 @@ class rdesigneur:
         pmstoich.ksolve = pmksolve
         pmstoich.dsolve = pmdsolve
         pmstoich.path = self.psdCompt.path + "/##"
-        print 'psd num Pools = ', pmstoich.numAllPools, \
-                ', voxels=', self.psdCompt.mesh.num, pmksolve.numAllVoxels
     
         # Put in cross-compartment diffusion between ksolvers
         dmdsolve.buildNeuroMeshJunctions( smdsolve, pmdsolve )
@@ -834,7 +842,7 @@ def addSpineProto( name = 'spine', \
         shaftLen = 1.e-6 , shaftDia = 0.2e-6, \
         headLen = 0.5e-6, headDia = 0.5e-6, \
         synList = ( ['glu', 0.0, 2e-3, 9e-3, 200.0, False],
-                    ['NMDA', 0.0, 20e-3, 20e-3, 40.0, True] ),
+                    ['NMDA', 0.0, 20e-3, 20e-3, 80.0, True] ),
         chanList = ( ['LCa', 40.0, True ], ),
         caTau = 13.333e-3
         ):
@@ -848,9 +856,13 @@ def addSpineProto( name = 'spine', \
     if caTau > 0.0:
         conc = moose.CaConc( head.path + '/Ca_conc' )
         conc.tau = caTau
+        conc.length = head.length
+        conc.diameter = head.diameter
+        conc.thick = 0.0
+        # The 'B' field is deprecated.
         # B = 1/(ion_charge * Faraday * volume)
-        vol = head.length * head.diameter * head.diameter * PI / 4.0
-        conc.B = 1.0 / ( 2.0 * FaradayConst * vol )
+        #vol = head.length * head.diameter * head.diameter * PI / 4.0
+        #conc.B = 1.0 / ( 2.0 * FaradayConst * vol )
         conc.Ca_base = 0.0
     for i in synList:
         syn = buildSyn( i[0], head, i[1], i[2], i[3], i[4], CM )
