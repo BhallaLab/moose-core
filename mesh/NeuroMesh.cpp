@@ -684,7 +684,8 @@ vector< Id > NeuroMesh::getElecComptMap() const
 {
 	vector< Id > ret( nodeIndex_.size() );
 	for ( unsigned int i = 0; i < nodeIndex_.size(); ++i ) {
-		ret.push_back( nodes_[nodeIndex_[i]].elecCompt() );
+		ret[i] = nodes_[nodeIndex_[i]].elecCompt();
+		// cout << i << "	" << nodeIndex_[i] << "	" << ret[i] << endl;
 
 	}
 	return ret;

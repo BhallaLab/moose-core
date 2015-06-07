@@ -279,7 +279,7 @@ const Cinfo* Neuron::initCinfo()
 		"then the systemwill only put spines closer than "
 		"one length constant from the soma, and zero elsewhere. \n"
 		"Available spine parameters are: \n"
-		"spacing, spacingDistrib, size, sizeDistrib "
+		"spacing, minSpacing, size, sizeDistrib "
 		"angle, angleDistrib \n",
 		&Neuron::setSpineDistribution,
 		&Neuron::getSpineDistribution
@@ -325,9 +325,9 @@ const Cinfo* Neuron::initCinfo()
 	);
 	static ReadOnlyValueFinfo< Neuron, vector< ObjId > > compartments( 
 		"compartments",
-		"Vector of ObjIds of electricalcompartments. Order matches order "
+		"Vector of ObjIds of electrical compartments. Order matches order "
 		"of segments, and also matches the order of the electrotonic and "
-		"geometricalDistranceFromSoma vectors. ",
+		"geometricalDistanceFromSoma vectors. ",
 		&Neuron::getCompartments
 	);
 
@@ -1276,55 +1276,6 @@ static double coordSystem( Id soma, Id dend, Vec& x, Vec& y, Vec& z )
 }
 
 /**
- * Deprecated. All this is done in the CompartmentBase class using the
- * function 
-	SetGet2< double, double >::set( *i, "setGeomAndElec", len, dia );
-
- * Utility function to resize electrical compt electrical properties,
- * including those of its child channels and calcium conc.
- */
-static void scaleSpineCompt( Id compt, double size )
-{
-	vector< ObjId > chans;
-	allChildren( compt, ALLDATA, "ISA=ChanBase", chans );
-	// wildcardFind( compt.path() + "/##[ISA=ChanBase]", chans );
-	double a = size * size;
-	for ( vector< ObjId >::iterator 
-					i = chans.begin(); i != chans.end(); ++i )
-	{
-		double gbar = Field< double >::get( *i, "Gbar" );
-		Field< double >::set( *i, "Gbar", gbar * a );
-	}
-
-	// double v = size * size * size;
-	vector< ObjId > concs;
-	allChildren( compt, ALLDATA, "ISA=CaConcBase", concs );
-	// wildcardFind( compt.path() + "/##[ISA=CaConcBase]", concs );
-	for ( vector< ObjId >::iterator 
-					i = concs.begin(); i != concs.end(); ++i )
-	{
-		// We assume that the 'thick' parameter is not supposed to scale,
-		// that is, if the user wants a 0.1 micron shell, it stays 0.1
-		// even if the diameter changes.
-		double dia = Field< double >::get( *i, "diameter" );
-		double length = Field< double >::get( *i, "length" );
-		Field< double >::set( *i, "diameter", size * dia );
-		Field< double >::set( *i, "length", size * length );
-		// The B field is deprecated. Don't fiddle with it.
-		// double B = Field< double >::get( *i, "B" );
-		// Field< double >::set( *i, "B", B * v );
-	}
-
-	double Rm = Field< double >::get( compt, "Rm" );
-	Field< double >::set( compt, "Rm", Rm / a );
-	double Cm = Field< double >::get( compt, "Cm" );
-	Field< double >::set( compt, "Cm", Cm * a );
-	double Ra = Field< double >::get( compt, "Ra" );
-	Field< double >::set( compt, "Ra", Ra / size );
-}
-
-
-/**
  * Utility function to change coords of spine so as to reorient it.
  */
 static void reorientSpine( vector< Id >& spineCompts, 
@@ -1499,6 +1450,32 @@ string findArg( const vector<string>& line, const string& field )
 
 /// Add entries into the pos vector for a given compartment i.
 static void addPos( unsigned int segIndex, unsigned int eIndex,
+		double spacing, double minSpacing, 
+		double dendLength,
+		vector< unsigned int >& seglistIndex,
+		vector< unsigned int >& elistIndex,
+		vector< double >& pos )
+{
+	if ( minSpacing < spacing * 0.1 && minSpacing < 1e-7 )
+		minSpacing = spacing * 0.1;
+	if ( minSpacing > spacing * 0.5 )
+		minSpacing = spacing * 0.5;
+	unsigned int n = 1 + dendLength / minSpacing;
+	double dx = dendLength / n;
+	for( unsigned int i = 0; i < n; ++i ) {
+		if ( mtrand() < dx / spacing ) {
+			seglistIndex.push_back( segIndex );
+			elistIndex.push_back( eIndex );
+			pos.push_back( i * dx + dx*0.5 );
+		}
+	}
+}
+/*
+ * This version tries to put in Pos using simple increments from the
+ * start of each compt. Multiple issues including inability to put 
+ * spines in small compartments, even if many of them.
+ *
+static void addPos( unsigned int segIndex, unsigned int eIndex,
 		double spacing, double spacingDistrib, 
 		double dendLength,
 		vector< unsigned int >& seglistIndex,
@@ -1523,6 +1500,7 @@ static void addPos( unsigned int segIndex, unsigned int eIndex,
 		}
 	}
 }
+*/
 
 void Neuron::makeSpacingDistrib( const vector< ObjId >& elist, 
 		const vector< double >& val,
@@ -1553,11 +1531,6 @@ void Neuron::makeSpacingDistrib( const vector< ObjId >& elist,
 					lookupDend = segIndex_.find( elist[i] );
 				if ( lookupDend != segIndex_.end() ) {
 					double dendLength = segs_[lookupDend->second].length();
-					/////
-					//This is the problem line. Shouldn't we pass in i
-					//rather than lookupDend->second?
-					//addPos( lookupDend->second, spacing, spacingDistrib, 
-					//			dendLength, elistIndex, pos );
 					addPos( lookupDend->second, i, 
 								spacing, spacingDistrib, dendLength, 
 								seglistIndex, elistIndex, pos );
