@@ -522,6 +522,22 @@ static void doClassSpecificMessaging( Shell* shell, Id obj, ObjId compt )
 {
 	if ( obj.element()->cinfo()->isA( "ChanBase" ) ) {
 		shell->doAddMsg( "Single", compt, "channel", obj, "channel" );
+		// Add the message to the Ca pool if not defined
+		if ( obj.element()->getName().find_first_of( "Ca" ) != string::npos ) {
+			// Don't do it if we have the legacy GENESIS format
+			if ( Neutral::child( obj.eref(), "addmsg1" ) == Id() ) {
+				vector< ObjId > elist;
+				string path = Neutral::parent( obj ).path() + "/#[ISA=CaConcBase]";
+				// cout << "OK2 to Add Ca Msg for " << path << endl;
+				wildcardFind( path, elist );
+				if ( elist.size() > 0 ) {
+					// cout << "Added Ca Msg for " << obj.path() << endl;
+					ObjId mid = shell->doAddMsg( 
+						"single", obj, "IkOut", elist[0], "current" );
+					assert( !mid.bad());
+				}
+			}
+		}
 	}
 	ReadCell::addChannelMessage( obj );
 }
@@ -566,6 +582,9 @@ static void assignParam( Id obj, const string& field,
 			Field< double >::set( obj, "Ek", val );
 		}
 	} else if ( obj.element()->cinfo()->isA( "CaConcBase" ) ) {
+		Field< double >::set( obj, "length", len );
+		Field< double >::set( obj, "diameter", dia );
+		// cout << "len, dia = " << len << ", " << dia << endl;
 		if ( field == "CaBasal" || field == "tau" || field == "thick" ||
 		  field == "floor" || field == "ceiling" ) {
 			Field< double >::set( obj, field, val );

@@ -350,7 +350,7 @@ void CaConcBase::zombify( Element* orig, const Cinfo* zClass,
 	unsigned int num = orig->numLocalData();
 	if ( num == 0 )
 		return;
-	vector< double > data( num * 7 );
+	vector< double > data( num * 9 );
 
 	unsigned int j = 0;
 	for ( unsigned int i = 0; i < num; ++i ) {
@@ -364,7 +364,9 @@ void CaConcBase::zombify( Element* orig, const Cinfo* zClass,
 		data[j + 4] = cb->getCeiling( er );
 		data[j + 5] = cb->getFloor( er );
 		data[j + 6] = cb->getThickness( er );
-		j += 7;
+		data[j + 7] = cb->getLength( er );
+		data[j + 8] = cb->getDiameter( er );
+		j += 9;
 	}
 	orig->zombieSwap( zClass );
 	j = 0;
@@ -379,6 +381,8 @@ void CaConcBase::zombify( Element* orig, const Cinfo* zClass,
 		cb->setCeiling( er, data[j + 4] );
 		cb->setFloor( er, data[j + 5] );
 		cb->setThickness( er, data[j + 6] );
+		cb->setLength( er, data[j + 7] );
+		cb->setDiameter( er, data[j + 8] );
 		j += 7;
 	}
 }
