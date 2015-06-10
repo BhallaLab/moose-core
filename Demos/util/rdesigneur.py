@@ -18,6 +18,7 @@
 
 import moose
 import numpy as np
+import math
 from moose.neuroml.NeuroML import NeuroML
 from moose.neuroml.ChannelML import ChannelML
 
@@ -263,26 +264,6 @@ class rdesigneur:
                 self.elecid = moose.element( '/library/' + i[1] )
             else:
                 self._loadElec( i[0], i[1] ) 
-            '''
-            print 'later: ', self.elecid
-            moose.showfields( self.elecid )
-            moose.le( '/library' )
-            a = self.elecid
-            print a
-            moose.showfields( a )
-            print a.path
-            print moose.element( a.path )
-            b = moose.element( a.path )
-            print 'About to set RM on b'
-            b.RM = 4.321
-            print 'About to set RM on b using func'
-            b.setRM( 4.321 )
-            print 'About to set RM on a'
-            a.setRM( 1.234 )
-            print 'Set RM'
-            a.buildSegmentTree()
-            print 'BUILT'
-            '''
             self.elecid.buildSegmentTree()
 
     def buildSpineProto( self ):
@@ -471,7 +452,7 @@ class rdesigneur:
     def buildFromFile( self, efile, cfile ):
         self.efile = efile
         self.cfile = cfile
-        self._loadElec( efile, 'tempelec', self.combineSegments )
+        self._loadElec( efile, 'tempelec' )
         if len( self.chanDistrib ) > 0:
             self.elecid.channelDistribution = self.chanDistrib
             self.elecid.parseChanDistrib()
@@ -561,6 +542,7 @@ class rdesigneur:
             self.elecid = moose.loadModel( efile, '/library/' + elecname)[0]
         else:
             nm = NeuroML()
+            print "in _loadElec, combineSegments = ", self.combineSegments
             nm.readNeuroMLFromFile( efile, \
                     params = {'combineSegments': self.combineSegments, \
                     'createPotentialSynapses': True } )
@@ -822,6 +804,47 @@ def buildSyn( name, compt, Ek, tau1, tau2, Gbar, CM ):
     sh.numSynapses = 1
     sh.synapse[0].weight = 1
     return syn
+
+######################################################################
+# Utility function, borrowed from proto18.py, for making an LCa channel.
+# Based on Traub's 91 model, I believe.
+def make_LCa():
+        EREST_ACT = -0.060 #/* hippocampal cell resting potl */
+        ECA = 0.140 + EREST_ACT #// 0.080
+	if moose.exists( 'LCa' ):
+		return
+	Ca = moose.HHChannel( 'LCa' )
+	Ca.Ek = ECA
+	Ca.Gbar = 0
+	Ca.Gk = 0
+	Ca.Xpower = 2
+	Ca.Ypower = 1
+	Ca.Zpower = 0
+
+	xgate = moose.element( 'LCa/gateX' )
+	xA = np.array( [ 1.6e3, 0, 1.0, -1.0 * (0.065 + EREST_ACT), -0.01389, -20e3 * (0.0511 + EREST_ACT), 20e3, -1.0, -1.0 * (0.0511 + EREST_ACT), 5.0e-3, 3000, -0.1, 0.05 ] )
+        xgate.alphaParms = xA
+	ygate = moose.element( 'LCa/gateY' )
+	ygate.min = -0.1
+	ygate.max = 0.05
+	ygate.divs = 3000
+	yA = np.zeros( (ygate.divs + 1), dtype=float)
+	yB = np.zeros( (ygate.divs + 1), dtype=float)
+
+
+#Fill the Y_A table with alpha values and the Y_B table with (alpha+beta)
+	dx = (ygate.max - ygate.min)/ygate.divs
+	x = ygate.min
+	for i in range( ygate.divs + 1 ):
+		if ( x > EREST_ACT):
+			yA[i] = 5.0 * math.exp( -50 * (x - EREST_ACT) )
+		else:
+			yA[i] = 5.0
+		yB[i] = 5.0
+		x += dx
+	ygate.tableA = yA
+	ygate.tableB = yB
+        return Ca
     
     ################################################################
     # API function for building spine prototypes. Here we put in the
@@ -840,7 +863,7 @@ def addSpineProto( name = 'spine', \
         headLen = 0.5e-6, headDia = 0.5e-6, \
         synList = ( ['glu', 0.0, 2e-3, 9e-3, 200.0, False],
                     ['NMDA', 0.0, 20e-3, 20e-3, 80.0, True] ),
-        chanList = ( ['LCa', 40.0, True ], ),
+        chanList = ( ['Ca', 1.0, True ], ),
         caTau = 13.333e-3
         ):
     if not moose.exists( '/library' ):
@@ -868,15 +891,16 @@ def addSpineProto( name = 'spine', \
     for i in chanList:
         if ( moose.exists( '/library/' + i[0] ) ):
             chan = moose.copy( '/library/' + i[0], head )
-            chan.Gbar = i[1] * head.Cm / CM
-            #print "CHAN = ", chan, chan.tick
-            moose.connect( head, 'channel', chan, 'channel' )
-            if i[2] and caTau > 0.0:
-                moose.connect( chan, 'IkOut', conc, 'current' )
         else:
-            print "Warning: addSpineProto: channel '", i[0], \
-                "' not found on /library."
-            moose.le( '/library' )
+            moose.setCwe( head )
+            chan = make_LCa()
+            chan.name = i[0]
+            moose.setCwe( '/' )
+        chan.Gbar = i[1] * head.Cm / CM
+        print "CHAN = ", chan, chan.tick, chan.Gbar
+        moose.connect( head, 'channel', chan, 'channel' )
+        if i[2] and caTau > 0.0:
+            moose.connect( chan, 'IkOut', conc, 'current' )
     transformNMDAR( '/library/spine' )
     return spine
 
