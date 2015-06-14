@@ -280,8 +280,7 @@ bool matchName( ObjId id, unsigned int index,
 	  return false;
 	}
 
-	if ( index == ALLDATA || index == id.dataIndex || 
-			id.dataIndex == ALLDATA ) {
+	// if ( index == ALLDATA || index == id.dataIndex ) {
 		if ( matchBeforeBrace( id, beforeBrace ) ) {
 			if ( insideBrace.length() == 0 ) {
 				return true;
@@ -289,7 +288,7 @@ bool matchName( ObjId id, unsigned int index,
 				return matchInsideBrace( id, insideBrace );
 			}
 		}
-	}
+	// }
 	return 0;
 }
 
@@ -400,12 +399,15 @@ unsigned int findWithSingleCharWildcard(
 bool matchBeforeBrace( ObjId id, const string& wild )
 {
 	if ( wild == "#" || wild == "##" )
-		return 1;
+		return true;
 
 	string ename = id.element()->getName();
 	if ( wild == ename )
-		return 1;
+		return true;
 
+	// Check if the wildcard string has any # or ? symbols.
+	if ( wild.find_first_of( "#?" ) == string::npos )
+		return false;
 
 	// Break the 'wild' into the sections that must match, at the #s.
 	// Then go through each of these sections doing a match to ename.
@@ -503,7 +505,9 @@ int wildcardRelativeFind( ObjId start, const vector< string >& path,
 	int nret = 0;
 	vector< ObjId > currentLevelIds;
 	if ( depth == path.size() ) {
-		ret.push_back( start );
+		if ( ret.size() == 0 || ret.back() != start ) {
+			ret.push_back( start );
+		}
 		return 1;
 	}
 
@@ -782,6 +786,22 @@ void testWildcard()
 	assert( vec.size() == 15 );
 	vec.clear();
 	simpleWildcardFind( "/a1/x[2]/y[]", vec );
+	assert( vec.size() == 5 );
+
+	// Here I test exclusive wildcards, should NOT get additional terms.
+	Id xyzzy = shell->doCreate( "Arith", a1, "xyzzy", 5 );
+	Id xdotp = shell->doCreate( "Arith", a1, "x.P", 5 );
+	vec.clear();
+	simpleWildcardFind( "/a1/x", vec );
+	assert( vec.size() == 1 );
+	vec.clear();
+	simpleWildcardFind( "/a1/x[0]", vec );
+	assert( vec.size() == 1 );
+	vec.clear();
+	simpleWildcardFind( "/a1/x[2]", vec );
+	assert( vec.size() == 1 );
+	vec.clear();
+	simpleWildcardFind( "/a1/x[]", vec );
 	assert( vec.size() == 5 );
 
 	//a1.destroy();
