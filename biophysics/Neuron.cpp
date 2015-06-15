@@ -1,7 +1,7 @@
 /**********************************************************************
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment.
-**           Copyright (C) 2003-2007 Upinder S. Bhalla. and NCBS
+**           Copyright (C) 2003-2014 Upinder S. Bhalla. and NCBS
 ** It is made available under the terms of the
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
@@ -32,6 +32,9 @@ class nuParser: public mu::Parser
 			L(0.0), // electrical distance arg
 			len(0.0), // Length of compt in metres
 			dia(0.0), // Diameter of compt in metres
+			maxP(0.0), // Maximum value of *p* for this neuron.
+			maxG(0.0), // Maximum value of *g* for this neuron.
+			maxL(0.0), // Maximum value of *L* for this neuron.
 			oldVal(0.0), // Original value of field, if needed.
 			useOldVal( false ) // is the 'orig' field needed?
 		{
@@ -40,6 +43,9 @@ class nuParser: public mu::Parser
 			DefineVar( "L", &L );
 			DefineVar( "len", &len );
 			DefineVar( "dia", &dia );
+			DefineVar( "maxP", &maxP );
+			DefineVar( "maxG", &maxG );
+			DefineVar( "maxL", &maxL );
 			DefineVar( "oldVal", &oldVal );
 			DefineFun( "H", nuParser::H );
 			if ( expr.find( "oldVal" ) != string::npos )
@@ -48,7 +54,7 @@ class nuParser: public mu::Parser
 		}
 
 		/// Defines the order of arguments in the val array.
-		enum valArgs{ EXPR, P, G, EL, LEN, DIA, OLDVAL };
+		enum valArgs{ EXPR, P, G, EL, LEN, DIA, MAXP, MAXG, MAXL, OLDVAL };
 
 		static double H( double arg ) { // Heaviside function.
 			return ( arg > 0.0);
@@ -60,6 +66,9 @@ class nuParser: public mu::Parser
 			L = *(arg0 + nuParser::EL );
 			len = *(arg0 + nuParser::LEN );
 			dia = *(arg0 + nuParser::DIA );
+			maxP = *(arg0 + nuParser::MAXP );
+			maxG = *(arg0 + nuParser::MAXG );
+			maxL = *(arg0 + nuParser::MAXL );
 			oldVal = *(arg0 + nuParser::OLDVAL );
 			return Eval();
 		}
@@ -70,11 +79,14 @@ class nuParser: public mu::Parser
 		double L; // electrical distance arg
 		double len; // Length of compt in metres
 		double dia; // Diameter of compt in metres
+		double maxP; // Maximum value of p for this neuron.
+		double maxG; // Maximum value of p for this neuron.
+		double maxL; // Maximum value of L for this neuron.
 		double oldVal; // Old value of the field, used for relative scaling
 		bool useOldVal; // is the 'oldVal' field needed?
 };
 
-const unsigned int nuParser::numVal = 7;
+const unsigned int nuParser::numVal = 10;
 
 const Cinfo* Neuron::initCinfo()
 {
@@ -158,6 +170,9 @@ const Cinfo* Neuron::initCinfo()
 		"Arguments: proto path field expr [field expr]...\n"
 		" Each entry is terminated with an empty string. "
 		"The prototype is any object created in */library*, "
+		"If a channel matching the prototype name already exists, then "
+		"all subsequent operations are applied to the extant channel and "
+		"a new one is not created. "
 		"The paired arguments are as follows: \n"
 		"The *field* argument specifies the name of the parameter "
 		"that is to be assigned by the expression.\n"
@@ -166,12 +181,15 @@ const Cinfo* Neuron::initCinfo()
 		"trig and transcendental ones. Of course it also handles simple "
 		"numerical values like 1.0, 1e-10 and so on. "
 		"Available arguments for muParser are:\n"
-		" p, g, L, len, dia \n"
+		" p, g, L, len, dia, maxP, maxG, maxL \n"
 		"	p: path distance from soma, measured along dendrite, in metres.\n"
 		"	g: geometrical distance from soma, in metres.\n"
 		"	L: electrotonic distance (# of lambdas) from soma, along dend. No units.\n"
 		"	len: length of compartment, in metres.\n"
 		"	dia: for diameter of compartment, in metres.\n"
+		"	maxP: Maximum value of *p* for this neuron. \n"
+		"	maxG: Maximum value of *g* for this neuron. \n"
+		"	maxL: Maximum value of *L* for this neuron.\n"
 		"The expression for the first field must evaluate to > 0 "
 		"for the channel to be installed. For example, for "
 		"channels, if Field == Gbar, and func( r, L, len, dia) < 0, \n"
@@ -223,12 +241,15 @@ const Cinfo* Neuron::initCinfo()
 		"trig and transcendental ones. Of course it also handles simple "
 		"numerical values like 1.0, 1e-10 and so on. "
 		"Available arguments for muParser are:\n"
-		" p, g, L, len, dia \n"
+		" p, g, L, len, dia, maxP, maxG, maxL \n"
 		"	p: path distance from soma, measured along dendrite, in metres.\n"
 		"	g: geometrical distance from soma, in metres.\n"
 		"	L: electrotonic distance (# of lambdas) from soma, along dend. No units.\n"
 		"	len: length of compartment, in metres.\n"
 		"	dia: for diameter of compartment, in metres.\n"
+		"	maxP: Maximum value of *p* for this neuron. \n"
+		"	maxG: Maximum value of *g* for this neuron. \n"
+		"	maxL: Maximum value of *L* for this neuron.\n"
 		"Available fields are: \n"
 		"RM, RA, CM, Rm, Ra, Cm, Em, initVm \n"
 		"The first three fields are scaled appropriately by "
@@ -267,12 +288,15 @@ const Cinfo* Neuron::initCinfo()
 		"that is to be assigned by the expression.\n"
 		"The *expression* argument is a mathematical expression as above. "
 		"Available arguments for muParser are:\n"
-		" p, g, L, len, dia \n"
+		" p, g, L, len, dia, maxP, maxG, maxL \n"
 		"	p: path distance from soma, measured along dendrite, in metres.\n"
 		"	g: geometrical distance from soma, in metres.\n"
 		"	L: electrotonic distance (# of lambdas) from soma, along dend. No units.\n"
 		"	len: length of compartment, in metres.\n"
 		"	dia: for diameter of compartment, in metres.\n"
+		"	maxP: Maximum value of *p* for this neuron. \n"
+		"	maxG: Maximum value of *g* for this neuron. \n"
+		"	maxL: Maximum value of *L* for this neuron.\n"
 		"The expression for the *spacing* field must evaluate to > 0 for "
 		"the spine to be installed. For example, if the expresssion is\n"
 		"		H(1 - L) \n"
@@ -344,9 +368,9 @@ const Cinfo* Neuron::initCinfo()
 		"valuesFromExpression",
 		"Vector of values computed for each electrical compartment that "
 	   	"matches the 'path expression' pair in the argument string."
-		"This has 7 times the number of entries as # of compartments."
+		"This has 10 times the number of entries as # of compartments."
 		"For each compartment the entries are: \n"
-		"val, p, g, L, len, dia, 0",
+		"val, p, g, L, len, dia, maxP, maxG, maxL, 0",
 		&Neuron::getExprVal
 	);
 
@@ -465,6 +489,9 @@ Neuron::Neuron()
 			Em_( -0.065 ),
 			theta_( 0.0 ),
 			phi_( 0.0 ),
+			maxP_( 0.0 ),
+			maxG_( 0.0 ),
+			maxL_( 0.0 ),
 			sourceFile_( "" ),
 			compartmentLengthInLambdas_( 0.2 ),
 			spineEntry_( this )
@@ -480,6 +507,9 @@ Neuron::Neuron( const Neuron& other )
 			Em_( other.Em_ ),
 			theta_( other.theta_ ),
 			phi_( other.phi_ ),
+			maxP_( other.maxP_ ),
+			maxG_( other.maxG_ ),
+			maxL_( other.maxL_ ),
 			sourceFile_( other.sourceFile_ ),
 			compartmentLengthInLambdas_(other.compartmentLengthInLambdas_),
 			channelDistribution_( other.channelDistribution_ ),
@@ -1105,6 +1135,15 @@ void Neuron::updateSegmentLengths()
 	}
 
 	traverseCumulativeDistance( segs_[0], segs_, segId_, len, L, 0, 0 );
+	maxL_ = maxG_ = maxP_ = 0.0;
+	for ( unsigned int i = 0; i < segs_.size(); ++i ) {
+		double p = segs_[i].getPathDistFromSoma();
+		if ( maxP_ < p ) maxP_ = p;
+		double g = segs_[i].getGeomDistFromSoma();
+		if ( maxG_ < g ) maxG_ = g;
+		double L = segs_[i].getElecDistFromSoma();
+		if ( maxL_ < L ) maxL_ = L;
+	}
 }
 
 /// Fills up vector of segments. First entry is soma.
@@ -1234,6 +1273,9 @@ void Neuron::evalExprForElist( const vector< ObjId >& elist,
 						segs_[j->second].getElecDistFromSoma();
 					val[valIndex + nuParser::LEN] = len;
 					val[valIndex + nuParser::DIA] = dia;
+					val[valIndex + nuParser::MAXP] = maxP_;
+					val[valIndex + nuParser::MAXG] = maxG_;
+					val[valIndex + nuParser::MAXL] = maxL_;
 					// Can't assign oldVal on first arg
 					val[valIndex + nuParser::OLDVAL] = 0.0; 
 

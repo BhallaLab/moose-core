@@ -19,7 +19,6 @@ import sys
 sys.path.append( '../util' )
 import rdesigneur as rd
 from PyQt4 import QtGui
-#import moogli_viewer as mv
 import moogli
 
 RM = 1.0
@@ -92,51 +91,6 @@ def makeModel():
                 ] \
         )
     rdes.buildModel( '/model' )
-
-
-
-    '''
-                adaptorList = [ \
-                    ( 'psd', '.', 'inject', 'Ca', False, 0, 2e-9 ) \
-                    ], \
-                addSpineList = [ \
-                    ( 'spine', '#', \
-                    spineSpacing, spineSpacingDistrib, spineSizeDistrib, \
-                    0.0, 0.0, numpy.pi, numpy.pi / 2.0 ) \
-                    ]
-                )
-    # Make a 'bare' spine: No synchans, no ion chans, no Ca.
-    rdes.addSpineProto( 'spine', RM, RA, CM, \
-             synList = (), chanList = (), caTau = 0.0 )
-    elec = moose.Neutral( '/tempelec' )
-    ecompt = rdes._buildCompt( elec, 'dend', 100e-6, 2.0e-6, 0, RM, RA, CM )
-    ecompt.x0 = 0
-    ecompt.x = 0
-    ecompt.y0 = 0
-    ecompt.y = 0
-    ecompt.z0 = 0
-    ecompt.z = 100e-6
-    ecompt = []
-    for i in range( numDendSegments ):
-        ec = rdes._buildCompt( elec, 'dend' + str(i), segLen, 2.0e-6, i * segLen, RM, RA, CM )
-        ecompt.append( ec )
-        if i > 0:
-            moose.connect( ecompt[i-1], 'raxial', ec, 'axial' )
-    for i in ecompt:
-        i.z0 = i.x0
-        i.x0 = 0
-        i.z = i.x
-        i.x = 0
-
-    chem = moose.Neutral( '/tempchem' )
-    for i in ( 'dend', 'spine', 'psd' ):
-        compt = moose.CubeMesh( '/tempchem/' + i )
-        compt.volume = 1e-18
-        ca = moose.Pool( '/tempchem/' + i + '/Ca' )
-        ca.concInit = 0.08e-3
-        ca.diffConst = 1e-12
-    rdes.buildFromMemory( '/tempelec', '/tempchem' )
-    '''
 
 def addPlot( objpath, field, plot, tick ):
     if moose.exists( objpath ):
@@ -221,9 +175,6 @@ def main():
     p3.legend()
 
     plt.show()
-
-    '''
-    '''
     app = QtGui.QApplication(sys.argv)
     #widget = mv.MoogliViewer( '/model' )
     morphology = moogli.read_morphology_from_moose( name="", path = '/model/elec' )
