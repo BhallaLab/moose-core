@@ -106,6 +106,9 @@ class Neuron
 		double Em_;
 		double theta_;
 		double phi_;
+		double maxP_; // Maximum value of path dist from soma for this cell
+		double maxG_; // Maximum value of geom dist from soma for this cell
+		double maxL_; // Maximum value of elec dist from soma for this cell
 		Id soma_;
 		string sourceFile_;
 		double compartmentLengthInLambdas_;
