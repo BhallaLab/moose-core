@@ -492,7 +492,7 @@ void SbmlReader::getRules() {
             v_iter = molSidMIdMap_.find( rule_variable );
             if (v_iter != molSidMIdMap_.end()) {
                 Id rVariable = molSidMIdMap_.find(rule_variable)->second;
-                string rstring =molSidMIdMap_.find(rule_variable)->first;
+                //string rstring =molSidMIdMap_.find(rule_variable)->first;
                 //Id sumId = shell->doCreate( "SumFunc", rVariable, "func", 1 );
                 Id sumId = shell->doCreate( "Function", rVariable, "func", 1 );
                 //rVariable.element()->zombieSwap( FuncPool::initCinfo() );
@@ -509,11 +509,20 @@ void SbmlReader::getRules() {
                 printMembers( ast,ruleMembers );
                 for ( unsigned int rm = 0; rm < ruleMembers.size(); rm++ ) {
                     m_iter = molSidMIdMap_.find( ruleMembers[rm] );
+
                     if ( m_iter != molSidMIdMap_.end() ) {
                         Id rMember = molSidMIdMap_.find(ruleMembers[rm])->second;
+                        string rMember_str = molSidMIdMap_.find(ruleMembers[rm])->first;
+                        unsigned int numVars = Field< unsigned int >::get( sumId, "numVars" );
+                        ObjId xi( sumId.value() + 1, 0, numVars );
+                        Field< unsigned int >::set( sumId, "numVars", numVars + 1 );
+                        // ObjId ret = shell_->doAddMsg( "single", ObjId( srcId, 0 ), "nOut", xi, "input" ); 
                         ObjId ret = shell->doAddMsg( "single",
                                                      ObjId( rMember, 0 ), "nOut",
-                                                     ObjId( sumId, 0 ), "input" );
+                                                     xi, "input" );
+                        // ObjId ret = shell->doAddMsg( "single",
+                        //                              ObjId( rMember, 0 ), "nOut",
+                        //                              ObjId( sumId, 0 ), "input" );
                         string test = molSidMIdMap_.find(ruleMembers[rm])->first;
                     } else {
                         cerr << "SbmlReader::getRules: Assignment rule member is not a species" << endl;
