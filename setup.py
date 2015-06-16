@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sun Dec  7 20:32:02 2014 (+0530)
 # Version: 
-# Last-Updated: 
-#           By: 
-#     Update #: 0
+# Last-Updated: Tue Jun 16 15:40:30 2015 (-0400)
+#           By: Subhasis Ray
+#     Update #: 9
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -58,6 +58,7 @@ libraries installed.
 libSBML needs to be downloaded, built and installed separately.
 
 """
+import numpy as np
 CLASSIFIERS = ["Development Status :: 5 - Production/Stable",
                "Environment :: Console",
                "Intended Audience :: Science/Research",
@@ -139,6 +140,7 @@ SOURCES=['external/muparser/muParser.cpp',
          'biophysics/ReadCell.cpp',
          'biophysics/SynChan.cpp',
          'biophysics/NMDAChan.cpp',
+         'biophysics/Spine.cpp',
          'biophysics/testBiophysics.cpp',
          'biophysics/IzhikevichNrn.cpp',
          'biophysics/DifShell.cpp',
@@ -151,6 +153,8 @@ SOURCES=['external/muparser/muParser.cpp',
          'biophysics/MarkovSolverBase.cpp',
          'biophysics/MarkovSolver.cpp',
          'biophysics/VClamp.cpp',
+         'biophysics/SwcSegment.cpp',
+         'biophysics/ReadSwc.cpp',
          'builtins/Arith.cpp',
          'builtins/Group.cpp',
          'builtins/Mstring.cpp',
@@ -289,7 +293,7 @@ SOURCES=['external/muparser/muParser.cpp',
 
 INCLUDE_DIRS=['/usr/include',
               '/usr/local/include',
-              '/usr/lib/python2.7/site-packages/numpy/core/include', # needed explicitly on cygwin
+              np.get_include(), # needed explicitly on cygwin
               'external/muparser',
               'basecode',
               'biophysics',
@@ -330,7 +334,7 @@ DEFINE_MACROS = [('USE_GSL', None),
                  ('USE_HDF5', None)]
 
 EXTRA_LINK_ARGS = ['-L/usr/lib64', '-Wl,-R/usr/lib64'] # distutils disregards everything in LIBRARY_DIRS except /usr/local/lib, hence this
-PACKAGES = ['moose', 'moose.backend', 'moose.neuroml', 'mgui', 'mgui.plugins']
+PACKAGES = ['moose', 'moose.backend', 'moose.neuroml', 'mgui', 'mgui.plugins', 'moose.topology', 'moose.backend']
 SCRIPTS = ['gui/mgui.py']
 PACKAGE_DATA = {'moose': ['copyleft', 'README'], 'mgui': ['icons/*', 'colormaps/*', 'bioModels/*']}
 REQUIRES = ['numpy', 'gsl', 'hdf5', 'libsbml'] # using full-dependency
@@ -340,7 +344,7 @@ REQUIRES = ['numpy', 'gsl', 'hdf5', 'libsbml'] # using full-dependency
 DEPENDENCY_LINKS = ['git+git://git.savannah.gnu.org/gsl.git',
                     'svn+svn://svn.code.sf.net/p/sbml/code/trunk']
 
-EXTRAS_REQUIRE = ['matplotlib', 'PyQt4']
+EXTRAS_REQUIRE = ['matplotlib', 'PyQt4', 'suds']
 
 setup_info = dict(
     name=NAME,
