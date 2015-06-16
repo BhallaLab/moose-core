@@ -520,11 +520,20 @@ void SbmlReader::getRules() {
                         ObjId ret = shell->doAddMsg( "single",
                                                      ObjId( rMember, 0 ), "nOut",
                                                      xi, "input" );
+
                         // ObjId ret = shell->doAddMsg( "single",
                         //                              ObjId( rMember, 0 ), "nOut",
                         //                              ObjId( sumId, 0 ), "input" );
                         string test = molSidMIdMap_.find(ruleMembers[rm])->first;
-                    } else {
+                    stringstream ss;
+                    for ( unsigned int i = 0; i < numVars; ++i ) 
+                        {
+                            ss << "x" << i << "+";
+                        }
+                    ss << "x" << numVars;
+                    Field< string >::set( sumId, "expr", ss.str() );
+                    } 
+                    else {
                         cerr << "SbmlReader::getRules: Assignment rule member is not a species" << endl;
                         // In assignment rule there are constants instead of molecule which is yet to deal in moose.
                         errorFlag_ = true;
