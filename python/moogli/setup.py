@@ -1,17 +1,47 @@
 #!/usr/bin/env python
 
+"""If you see this error:
+
+sipAPI_moogli.h:13:21: fatal error: QMetaType: No such file or directory
+
+make sure you install Qt4 development libraries (
+`apt-get install libqt4-dev` on debian/ubuntu type systems).
+
+To obtain this for cygwin, use cygwin ports: 
+`cygstart -- /path/to/setup-x86.exe -K http://cygwinports.org/ports.gpg`
+
+and then select All->Libs->libQtGui4-devel for installation (type it in the
+search box to find it easily)
+
+########################################
+
+However, moogli does not compile on cygwin yet because the dependency
+OpenSceneGraph is not available for cygwin. If you want to try,
+OpenSceneGraph build instruction are here:
+
+http://trac.openscenegraph.org/projects/osg//wiki/Support/PlatformSpecifics/Cygwin
+
+and some patches from prior attempts here:
+
+https://cygwin.com/ml/cygwin-apps/2009-06/msg00134.html
+
+"""
+
 from distutils.core import setup, Extension
 import sipdistutils
+from PyQt4 import pyqtconfig
 import sys
 import os
 
+qcfg = pyqtconfig.Configuration()
+qcfg.pyqt_sip_flags
 remaining = sys.argv[1:]
 sys.argv = [ sys.argv[0]
            , 'build_ext'
-           , '--sip-opts=-I/usr/share/sip/PyQt4/ -e -g -x VendorID -t WS_X11 -x PyQt_NoPrintRangeBug -t Qt_4_8_0 -x Py_v3 -g'
+           , '--sip-opts=-I{} -e -g {}'.format(qcfg.pyqt_sip_dir, qcfg.pyqt_sip_flags)
            ]
 sys.argv.extend(remaining)
-# print(sys.argv)
+# print('###{}'.format(sys.argv))
 
 
 os.environ["CC"]="g++"
@@ -147,5 +177,3 @@ setup( name             =   'moogli'
                             }
 
      )
-
-
