@@ -128,6 +128,10 @@ class Neuron
 		/// looks up spine/psd mesh index from FieldIndex of selected spine.
 		vector< unsigned int > spineToMeshOrdering_;
 
+		// looks up spine/psd Dsolve::DiffJunction::VoxelJunction index 
+		//from FieldIndex of selected spine.
+		vector< unsigned int > spineToVoxelJunctionOrdering_;
+
 		/// Holder for spine operations. Contains pointer to current Neuron.
 		Spine spineEntry_; 
 
