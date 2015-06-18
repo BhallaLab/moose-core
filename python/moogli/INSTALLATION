@@ -16,6 +16,7 @@ python setup.py install --user
 libqt4-dev
 PyQT4
 python-qt4-dev 
+python-qt4-gl
 python-sip
 libopenscenegraph 
 libopenscenegraph-dev
