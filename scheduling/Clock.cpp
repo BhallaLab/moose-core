@@ -667,8 +667,6 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
 		return;
 	}
         
-        unsigned int notifyAt = 0;
-
 	buildTicks( e );
 	assert( currentStep_ == nSteps_ );
 	assert( activeTicks_.size() == activeTicksMap_.size() );
@@ -690,7 +688,6 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
 			++k;
 		}
 
-                ++notifyAt;
 
 #ifdef NOTIFY_AT_EACH_SECOND 
                 printf("Progress: @%f/%f\r", currentTime_, runTime_);
