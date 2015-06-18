@@ -49,47 +49,32 @@ class NeuroMesh: public MeshCompt
 		// Field assignment stuff
 		//////////////////////////////////////////////////////////////////
 
-		/**
-		 * Assigns the parent of all the cell compartments.
-		 */
-		void setCell( const Eref& e, Id cellmodel );
-		Id getCell( const Eref& e ) const;
-		Id getCell() const;
-
 		/** 
 		 * This overloaded function sets up a presumed contiguous set of
  		 * compartments, complains if they are not contiguous due to the 
 		 * check in NeuroNode::traverse.
  		 * 
-		 * I assume 'cell' is the parent of the compartment tree.
 		 * The 'path' argument specifies a wildcard list of compartments, 
 		 * which can be also a comma-separated explicit list. Does not 
 		 * have to be in any particular order.
-		 * The 'path' argument is based off the cell path.
  		 */
-		void setCellPortion( const Eref& e, Id cell,
-			string path	);
-		/**
-		 * Assigns a group of compartments to be used for the mesh.
-		 */
-		void setCellPortion( const Eref& e, 
-							Id cell, vector< ObjId > portion );
+		void setSubTreePath( const Eref& e, string path	);
+		string getSubTreePath( const Eref& e ) const;
 
 		/**
-		 * Separates out the spines attached to the selected groups of
-		 * compartments. Fills out spine, and if needed, psd list.
-		 */
-		void separateOutSpines( const Eref& e );
-
-		/**
-		 * The SubTree is a contiguous set of compartments to model.
+		 * The SubTree is a set of compartments to model.
 		 * The first entry is the root of the tree, closest to the soma.
-		 * The remaining entries are end-branches of the tree (inclusive).
-		 * If the tree goes all the way out to the end of a particular 
-		 * branch then no entry needs to be put in.
+		 * The system does handle non-contiguous sets.
 		 */
-		void setSubTree( vector< Id > compartments );
-		vector< Id > getSubTree() const;
+		void setSubTree( const Eref& e, vector< ObjId > compartments );
+		vector< ObjId > getSubTree( const Eref& e ) const;
+
+		/**
+		 * Transmits the information about spines to SpineMesh and
+		 * PsdMesh.
+		 */
+		void transmitSpineInfo( const Eref& e );
+
 
 		/**
 		 * Flag. True if NeuroMesh should configure a separate SpineMesh.
@@ -115,6 +100,9 @@ class NeuroMesh: public MeshCompt
 		vector< Id > getElecComptMap() const;
 		vector< unsigned int > getStartVoxelInCompt() const;
 		vector< unsigned int > getEndVoxelInCompt() const;
+		vector< int > getSpineVoxelOnDendVoxel() const;
+		vector< unsigned int > getDendVoxelsOnCompartment( ObjId compt ) const;
+		vector< unsigned int > getSpineVoxelsOnCompartment( ObjId compt ) const;
 
 		vector< unsigned int > getParentVoxel() const;
 		const vector< double >& vGetVoxelVolume() const;
@@ -282,6 +270,13 @@ class NeuroMesh: public MeshCompt
 		vector< NeuroNode > nodes_;
 
 		/**
+		 * Path of sub-tree used for the chemical model. This is undefined
+		 * if the user assigns the subtree as a vector of objects, which
+		 * is the case when using rdesigneur.
+		 */
+		string subTreePath_;
+
+		/**
 		 * nodeIndex_[fid_for_MeshEntry].
 		 * Looks up index of NeuroNode from the fid of each MeshEntry.
 		 * In other words, node# = nodeIndex_[ voxel# ].
@@ -307,9 +302,8 @@ class NeuroMesh: public MeshCompt
 		/// Pre-calculation of length of each MeshEntry
 		vector< double > length_;
 
-		double size_; /// Total Volume
+		// double size_; /// Total Volume
 		double diffLength_;	/// Max permitted length constant for diffusion
-		Id cell_; /// Base object for cell model.
 
 		/**
 		 * Flag. True if NeuroMesh should configure a separate SpineMesh.

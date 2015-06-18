@@ -20,18 +20,21 @@ import math
 import moose
 from moose.neuroml import utils
 from moose import utils as moose_utils
-from .. import print_utils as pu
+from moose import print_utils as pu
 
 class ChannelML():
 
     def __init__(self,nml_params):
 
         self.cml='http://morphml.org/channelml/schema'
-        self.nml_params = nml_params
         self.temperature = nml_params['temperature']
 
     def readChannelMLFromFile(self,filename,params={}):
-        """ specify params as a dict: e.g. temperature that you need to pass to channels """
+        """ specify params as a dict.
+            Currently none implemented.
+            For setting channel temperature,
+             pass in via nml_params during instance creation (see __init__())
+             or set <instance>.temperature."""
         tree = ET.parse(filename)
         channelml_element = tree.getroot()
         for channel in channelml_element.findall('.//{'+self.cml+'}channel_type'):

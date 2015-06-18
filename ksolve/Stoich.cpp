@@ -187,6 +187,13 @@ const Cinfo* Stoich::initCinfo()
 			"junctions are not present. ",
 			new OpFunc0< Stoich >( &Stoich::filterXreacs )
 		);
+		static DestFinfo scaleBufsAndRates( "scaleBufsAndRates",
+			"Args: voxel#, volRatio\n"
+			"Handles requests for runtime volume changes in the specified "
+			"voxel#, Used in adaptors changing spine vols.",
+			new OpFunc2< Stoich, unsigned int, double >( 
+					&Stoich::scaleBufsAndRates )
+		);
 
 		//////////////////////////////////////////////////////////////
 		// SrcFinfo Definitions
@@ -204,7 +211,7 @@ const Cinfo* Stoich::initCinfo()
 		&numVarPools,		// ReadOnlyValue
 		&numAllPools,		// ReadOnlyValue
 		&numProxyPools,		// ReadOnlyValue
-		&poolIdMap,		// ReadOnlyValue
+		&poolIdMap,			// ReadOnlyValue
 		&numRates,			// ReadOnlyValue
 		&matrixEntry,		// ReadOnlyValue
 		&columnIndex,		// ReadOnlyValue
@@ -214,6 +221,7 @@ const Cinfo* Stoich::initCinfo()
 		&unzombify,			// DestFinfo
 		&buildXreacs,		// DestFinfo
 		&filterXreacs,		// DestFinfo
+		&scaleBufsAndRates,	// DestFinfo
 	};
 
 	static Dinfo< Stoich > dinfo;
@@ -1870,3 +1878,15 @@ unsigned int Stoich::indexOfMatchingVolume( double vol ) const
 	return 0;
 }
 */
+
+
+/////////////////////////////////////////////////////////////////////////
+// Functions for resizing of specified voxels
+/////////////////////////////////////////////////////////////////////////
+
+void Stoich::scaleBufsAndRates( unsigned int index, double volScale )
+{
+	if ( !kinterface_ )
+			return;
+	kinterface_->pools( index )->scaleVolsBufsRates( volScale, this );
+}

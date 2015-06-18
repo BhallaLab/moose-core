@@ -239,19 +239,19 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	      // name in number place, as its build under site, but in SBML this is not possible
 	      // so adding enzsite_enzname_cplxname
 	      if (found!=std::string::npos)
-		{vector < Id > rct = LookupField <string,vector < Id> >::get(*itrp, "neighbors","reacDest");
-		  std::set < Id > rctprd;
-		  rctprd.insert(rct.begin(),rct.end());
-		  for (std::set < Id> :: iterator rRctPrd = rctprd.begin();rRctPrd!=rctprd.end();rRctPrd++)
-		    { 
-		      string enz = Field<string> :: get(*rRctPrd,"name");
-		      ObjId meshParent = Neutral::parent( rRctPrd->eref() );
-		      string enzPoolsite = Field<string>::get(ObjId(meshParent),"name") ;
-		      objname = nameString(enzPoolsite)+"_"+nameString(enz)+"_"+nameString(poolname);
-		    }
-		}
+			{	vector < Id > rct = LookupField <string,vector < Id> >::get(*itrp, "neighbors","reacDest");
+		  		std::set < Id > rctprd;
+		  		rctprd.insert(rct.begin(),rct.end());
+		  		for (std::set < Id> :: iterator rRctPrd = rctprd.begin();rRctPrd!=rctprd.end();rRctPrd++)
+		    	{ 
+			      string enz = Field<string> :: get(*rRctPrd,"name");
+			      ObjId meshParent = Neutral::parent( rRctPrd->eref() );
+			      string enzPoolsite = Field<string>::get(ObjId(meshParent),"name") ;
+			      objname = nameString(enzPoolsite)+"_"+nameString(enz)+"_"+nameString(poolname);
+			    }
+			}
 	      else
-		objname = nameString(poolname);
+			objname = nameString(poolname);
 	      
 	      sp->setName( objname);
 	      sp->setCompartment( clean_comptname );
@@ -640,8 +640,8 @@ void SbmlWriter::getSubPrd(Reaction* rec,string type,string enztype,Id itrRE, in
 	  mspr->setSpecies(clean_name);
 	}
       /* Updating list of object for annotation for Enzymatic reaction */
-      if (re_enClass =="Enz")
-	nameList_.push_back(clean_name);
+	   if (re_enClass =="Enz" or re_enClass == "ZombieEnz")
+		nameList_.push_back	(clean_name);
 
       /* Rate law is also updated in rate_law string */
       //std::size_t found = clean_name.find("cplx");
@@ -911,7 +911,6 @@ bool SbmlWriter::validateModel( SBMLDocument* sbmlDoc )
 	    }
 	  } 
       ostringstream oss;
-      //cout << "here in l 695 line" << endl;
       sbmlDoc->printErrors(oss);
       consistencyMessages = oss.str();
       }

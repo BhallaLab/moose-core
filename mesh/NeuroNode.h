@@ -159,6 +159,13 @@ class NeuroNode: public CylBase
  		*/
 		static void buildTree( vector< NeuroNode >& nodes, 
 						vector< ObjId > elist );
+		static void buildSpinyTree( 
+					vector< ObjId >& elist, vector< NeuroNode >& nodes,
+					vector< Id >& shaftId, vector< Id >& headId,
+					vector< unsigned int >& spineParent );
+		void setParentAndChildren( unsigned int index, int dendParent,
+				vector< NeuroNode >& nodes, 
+				const map< Id, unsigned int >& dendMap );
 
 		/**
 		 * Trims off all spines from tree. Does so by identifying a set of

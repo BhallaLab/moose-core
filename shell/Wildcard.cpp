@@ -188,7 +188,7 @@ int singleLevelWildcard( ObjId start, const string& path, vector< ObjId >& ret )
 	unsigned int index = findBraceContent( path, beforeBrace, insideBrace );
 	if ( beforeBrace == "##" )
 		// recursive.
-		return allChildren( start, insideBrace, ret ); 
+		return allChildren( start, index, insideBrace, ret ); 
 
 	vector< Id > kids;
 	Neutral::children( start.eref(), kids );
@@ -199,7 +199,9 @@ int singleLevelWildcard( ObjId start, const string& path, vector< ObjId >& ret )
 			if ( index == ALLDATA ) {
 				for ( unsigned int j = 0; j < i->element()->numData(); ++j )
 					ret.push_back( ObjId( *i, j ) );
-			} else {
+			} else if ( i->element()->hasFields() && index < i->element()->numField( start.dataIndex ) ) {
+				ret.push_back( ObjId( *i, start.dataIndex, index ) );
+			} else if ( !i->element()->hasFields() && index < i->element()->numData() ) {
 				ret.push_back( ObjId( *i, index ) );
 			}
 		}
@@ -278,8 +280,7 @@ bool matchName( ObjId id, unsigned int index,
 	  return false;
 	}
 
-	if ( index == ALLDATA || index == id.dataIndex || 
-			id.dataIndex == ALLDATA ) {
+	// if ( index == ALLDATA || index == id.dataIndex ) {
 		if ( matchBeforeBrace( id, beforeBrace ) ) {
 			if ( insideBrace.length() == 0 ) {
 				return true;
@@ -287,7 +288,7 @@ bool matchName( ObjId id, unsigned int index,
 				return matchInsideBrace( id, insideBrace );
 			}
 		}
-	}
+	// }
 	return 0;
 }
 
@@ -333,7 +334,11 @@ bool matchInsideBrace( ObjId id, const string& inside )
 		
 		return ( isEqual == isEquality );
 	} else if ( inside.substr( 0, 6 ) == "FIELD(" ) {
-		return wildcardFieldComparison( id, inside.substr( 6 ) );
+		if ( id.dataIndex == ALLDATA ) {
+			return wildcardFieldComparison( id.id, inside.substr( 6 ) );
+		} else {
+			return wildcardFieldComparison( id, inside.substr( 6 ) );
+		}
 	}
 
 	return false;
@@ -394,12 +399,15 @@ unsigned int findWithSingleCharWildcard(
 bool matchBeforeBrace( ObjId id, const string& wild )
 {
 	if ( wild == "#" || wild == "##" )
-		return 1;
+		return true;
 
 	string ename = id.element()->getName();
 	if ( wild == ename )
-		return 1;
+		return true;
 
+	// Check if the wildcard string has any # or ? symbols.
+	if ( wild.find_first_of( "#?" ) == string::npos )
+		return false;
 
 	// Break the 'wild' into the sections that must match, at the #s.
 	// Then go through each of these sections doing a match to ename.
@@ -450,7 +458,8 @@ bool matchBeforeBrace( ObjId id, const string& wild )
  * Recursive function to compare all descendants and cram matches into ret.
  * Returns number of matches.
  */
-int allChildren( ObjId start, const string& insideBrace, vector< ObjId >& ret )
+int allChildren( ObjId start, 
+	unsigned int index, const string& insideBrace, vector< ObjId >& ret )
 {
 	unsigned int nret = ret.size();
 	vector< Id > kids;
@@ -459,15 +468,20 @@ int allChildren( ObjId start, const string& insideBrace, vector< ObjId >& ret )
 	for ( i = kids.begin(); i != kids.end(); i++ ) {
 		if ( i->element()->hasFields() ) {
 			if ( matchInsideBrace( *i, insideBrace ) ) {
-				ObjId oid( *i, start.dataIndex );
-				ret.push_back( oid );
+				if ( index == ALLDATA ) {
+					ObjId oid( *i, start.dataIndex );
+					ret.push_back( oid );
+				} else if (index < i->element()->numField( start.dataIndex ) ) {
+					ObjId oid( *i, start.dataIndex, index );
+					ret.push_back( oid );
+				}
 			}
 		} else {
 			for ( unsigned int j = 0; j < i->element()->numData(); ++j )
 		   	{
 				ObjId oid( *i, j );
-				allChildren( oid, insideBrace, ret );
-				if ( matchInsideBrace( oid, insideBrace ) )
+				allChildren( oid, index, insideBrace, ret );
+				if ( (index == ALLDATA || index == j) && matchInsideBrace( oid, insideBrace ) )
 					ret.push_back( oid );
 			}
 		}
@@ -491,7 +505,9 @@ int wildcardRelativeFind( ObjId start, const vector< string >& path,
 	int nret = 0;
 	vector< ObjId > currentLevelIds;
 	if ( depth == path.size() ) {
-		ret.push_back( start );
+		if ( ret.size() == 0 || ret.back() != start ) {
+			ret.push_back( start );
+		}
 		return 1;
 	}
 
@@ -770,6 +786,22 @@ void testWildcard()
 	assert( vec.size() == 15 );
 	vec.clear();
 	simpleWildcardFind( "/a1/x[2]/y[]", vec );
+	assert( vec.size() == 5 );
+
+	// Here I test exclusive wildcards, should NOT get additional terms.
+	Id xyzzy = shell->doCreate( "Arith", a1, "xyzzy", 5 );
+	Id xdotp = shell->doCreate( "Arith", a1, "x.P", 5 );
+	vec.clear();
+	simpleWildcardFind( "/a1/x", vec );
+	assert( vec.size() == 1 );
+	vec.clear();
+	simpleWildcardFind( "/a1/x[0]", vec );
+	assert( vec.size() == 1 );
+	vec.clear();
+	simpleWildcardFind( "/a1/x[2]", vec );
+	assert( vec.size() == 1 );
+	vec.clear();
+	simpleWildcardFind( "/a1/x[]", vec );
 	assert( vec.size() == 5 );
 
 	//a1.destroy();

@@ -864,12 +864,14 @@ void Clock::buildDefaultTick()
 	defaultTick_["SingleMsg"] = ~0U;
 	defaultTick_["SparseMsg"] = ~0U;
 	defaultTick_["Species"] = ~0U;
+	defaultTick_["Spine"] = ~0U;
 	defaultTick_["SpineMesh"] = ~0U;
 	defaultTick_["SteadyState"] = ~0U;
 	defaultTick_["Stoich"] = ~0U;
 	defaultTick_["Synapse"] = ~0U;
 	defaultTick_["TableBase"] = ~0U;
 	defaultTick_["Unsigned"] = ~0U;
+	defaultTick_["Variable"] = ~0U;
 	defaultTick_["VectorTable"] = ~0U;
 	defaultTick_["ZombieBufPool"] = ~0U;
 	defaultTick_["ZombieCaConc"] = ~0U;
