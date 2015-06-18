@@ -88,6 +88,9 @@ else()
     add_definitions(-DQUIET_MODE)
 endif()
 
+# Whether to notify the user after 1 second of simulation.
+option(NOTIFY_AT_EACH_SECOND "Write * to console after 1 second of simulation" ON)
+
 # STATS INSIDE MOOSE
 option(ENABLE_LOGGER  "Enable MOOSE logger" OFF)
 if(ENABLE_LOGGER)
@@ -100,8 +103,10 @@ add_definitions(-DUSE_GENESIS_PARSER)
 
 option(DEBUG "Building with debugging support" ON)
 if(DEBUG)
+    MESSAGE("Building with DEBUG support.")
     set(CMAKE_BUILD_TYPE Debug)
 else()
+    MESSAGE("Building for Release")
     set(CMAKE_BUILD_TYPE Release)
     add_definitions(-UDO_UNIT_TESTS -O2)
 endif()
