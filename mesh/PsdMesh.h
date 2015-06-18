@@ -41,8 +41,6 @@ class PsdMesh: public MeshCompt
 
 		void updateCoords();
 
-		Id getCell() const; /// Return Id of parent cell.
-
 		/// Return voxel# on parent compartment on spine or dendrite.
 		unsigned int parent( unsigned int index ) const;
 
@@ -57,6 +55,7 @@ class PsdMesh: public MeshCompt
 		double getThickness() const;
 		void setThickness( double v );
 
+		vector< unsigned int > getNeuronVoxel() const;
 		vector< Id > getElecComptMap() const;
 
 		/// Returns index of first voxel mapping to elec compt
@@ -125,7 +124,6 @@ class PsdMesh: public MeshCompt
 
 		void handlePsdList(
 			const Eref& e,
-			Id cell,
 			vector< double > params,
 			vector< Id > elecCompts,
 			vector< unsigned int > parentVoxel );
@@ -171,8 +169,6 @@ class PsdMesh: public MeshCompt
 		/// Thickness of PSD
 		double thickness_;
 
-		/// Id of parent cell_ container.
-		Id cell_;
 		/**
 		 * These do the actual work.
 		 */

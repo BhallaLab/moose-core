@@ -19,6 +19,7 @@ from brian import * # importing brian also does:
                     # matplot like commands into the namespace, further
                     # also can use np. for numpy and mpl. for matplotlib
 import random
+import time
 
 np.random.seed(100) # set seed for reproducibility of simulations
 random.seed(100) # set seed for reproducibility of simulations
@@ -140,7 +141,9 @@ sm_e_vm = StateMonitor(Pe,'v',record=range(10),clock=clocknrn)
 # ###########################################
 
 print "Setup complete, running for",simtime,"at dt =",dt,"s."
+t1 = time.time()
 run(simtime,report='text')
+print 'inittime + runtime, t = ', time.time() - t1
 
 print "For g,J =",g,J,"mean exc rate =",\
     sm_e.nspikes/float(Nmon_exc)/(simtime/second),'Hz.'
@@ -191,6 +194,7 @@ subplot(231)
 raster_plot(sm_e,ms=1.)
 title(str(Nmon_exc)+" exc neurons")
 xlabel("")
+xlim([0,simtime/second])
 subplot(234)
 raster_plot(sm_i,ms=1.)
 title(str(Nmon-Nmon_exc)+" inh neurons")
@@ -237,7 +241,8 @@ allspikes = []
 for nrni in range(NI):
     allspikes.extend(sm_i[nrni])
 #plot(timeseries,popm_i.smooth_rate(width=50.*ms,filter="gaussian"),color='grey')
-plot(timeseries,rate_from_spiketrain(allspikes,simtime/second,dt)/float(NI))
+rate = rate_from_spiketrain(allspikes,simtime/second,dt)/float(NI)
+plot(timeseries[:len(rate)],rate)
 title("Inh population rate")
 xlabel("Time (s)")
 ylabel("Hz")

@@ -56,7 +56,20 @@ int wildcardFind(const string& n, vector<ObjId>& ret);
 /**
  * Recursive function to compare all descendants and cram matches into ret.
  * Returns number of matches.
+ * Index is either ALLDATA == ~0U, or a specified number.
+ * insideBrace is a string that can be empty, or specify one of the 
+ * expressions:
+ *   [TYPE==<string>]
+ *   [TYPE=<string>]
+ *   [CLASS=<string>]
+ *   [ISA=<string>]
+ *   [ISA==<string>]
+ *   [TYPE!=<string>]
+ *   [CLASS!=<string>]
+ *   [ISA!=<string>]
+ *   [FIELD(<fieldName)=<string>]
  */
-int allChildren( ObjId start, const string& insideBrace, vector< ObjId >& ret );
+int allChildren( ObjId start, unsigned int index, 
+				const string& insideBrace, vector< ObjId >& ret );
 
 #endif // _WILDCARD_H

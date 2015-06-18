@@ -516,7 +516,8 @@ void testSmallCellDiffn()
 	Id nm = s->doCreate( "NeuroMesh", model, "neuromesh", 1 );
 	Field< double >::set( nm, "diffLength", diffLength );
 	Field< string >::set( nm, "geometryPolicy", "cylinder" );
-	Field< Id >::set( nm, "cell", model );
+	Field< string >::set( nm, "subTreePath", "/model/#" );
+	//SetGet2< Id, string >::set( nm, "cellPortion", model, "/model/#" );
 	unsigned int ns = Field< unsigned int >::get( nm, "numSegments" );
 	assert( ns == 6 );
 	unsigned int ndc = Field< unsigned int >::get( nm, "numDiffCompts" );
@@ -612,7 +613,8 @@ void testCellDiffn()
 	Id nm = s->doCreate( "NeuroMesh", model, "neuromesh", 1 );
 	Field< double >::set( nm, "diffLength", diffLength );
 	Field< string >::set( nm, "geometryPolicy", "cylinder" );
-	Field< Id >::set( nm, "cell", model );
+	Field< string >::set( nm, "subTreePath", "/model/#" );
+	//SetGet2< Id, string >::set( nm, "cellPortion", model, "/model/#" );
 	unsigned int ns = Field< unsigned int >::get( nm, "numSegments" );
 	assert( ns == 6 );
 	unsigned int ndc = Field< unsigned int >::get( nm, "numDiffCompts" );
@@ -856,7 +858,8 @@ void testCalcJunction()
 	ObjId mid = s->doAddMsg( "Single", ObjId( nm ), "spineListOut", ObjId( sm ), "spineList" );
 	assert( !mid.bad() );
 	mid = s->doAddMsg( "Single", ObjId( nm ), "psdListOut", ObjId( pm ), "psdList" );
-	Field< Id >::set( nm, "cell", model );
+	Field< string >::set( nm, "subTreePath", "/model/#" );
+	//SetGet2< Id, string >::set( nm, "cellPortion", model, "/model/#" );
 
 	vector< Id > pools( 9 );
 	static string names[] = {"a", "b", "c", "b", "c", "d", "c", "d", "e" };

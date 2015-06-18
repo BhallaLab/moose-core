@@ -12,8 +12,9 @@
 #include "../randnum/randnum.h"
 #include "CompartmentBase.h"
 #include "CompartmentDataHolder.h"
+#include "../shell/Wildcard.h"
 
-static const double RANGE = 1.0e-15;
+static const double RANGE = 4.0e-17;
 using namespace moose;
 
 /*
@@ -289,6 +290,17 @@ const Cinfo* CompartmentBase::initCinfo()
 			"cables. Doesn't do anything.",
 			new OpFunc0< CompartmentBase >( &CompartmentBase::cable )
 		);
+		static DestFinfo displace( "displace", 
+			"Displaces compartment by specified vector",
+			new OpFunc3< CompartmentBase, double, double, double>(
+				   	&CompartmentBase::displace )
+		);
+		static DestFinfo setGeomAndElec( "setGeomAndElec", 
+			"Assigns length and dia and accounts for any electrical "
+			"scaling needed as a result.",
+			new EpFunc2< CompartmentBase, double, double>(
+				   	&CompartmentBase::setGeomAndElec )
+		);
 	///////////////////////////////////////////////////////////////////
 	static Finfo* compartmentFinfos[] = 
 	{
@@ -312,6 +324,8 @@ const Cinfo* CompartmentBase::initCinfo()
 		&randInject,		// DestFinfo
 		&injectMsg,			// DestFinfo
 		&cable,				// DestFinfo
+		&displace,			// DestFinfo
+		&setGeomAndElec,	// DestFinfo
 		&proc,				// SharedFinfo
 		&init,				// SharedFinfo
 		&channel,			// SharedFinfo
@@ -368,7 +382,7 @@ bool CompartmentBase::rangeWarning( const string& field, double value )
 		cout << "Warning: Ignored attempt to set " << field <<
 				" of compartment " <<
 				// c->target().e->name() << 
-				" to less than " << RANGE << endl;
+				" to " << value << " as it is less than " << RANGE << endl;
 		return 1;
 	}
 	return 0;
@@ -465,6 +479,16 @@ double CompartmentBase::getDiameter() const
 
 void CompartmentBase::setLength( double value )
 {
+	// If length is assigned correctly, also redo the end coords to match.
+	if ( value > 0 && length_ > 0 && 
+			doubleEq( length_ * length_, 
+			(x_-x0_)*(x_-x0_) + (y_-y0_)*(y_-y0_) + (z_-z0_)*(z_-z0_) ) ) {
+		double ratio = value / length_;
+		x_ = x0_ + ratio * ( x_ - x0_ );
+		y_ = y0_ + ratio * ( y_ - y0_ );
+		z_ = z0_ + ratio * ( z_ - z0_ );
+	}
+
 	length_ = value;
 }
 
@@ -473,9 +497,16 @@ double CompartmentBase::getLength() const
 	return length_;
 }
 
+void CompartmentBase::updateLength()
+{
+	length_ = sqrt( (x_-x0_)*(x_-x0_) + 
+					(y_-y0_)*(y_-y0_) + (z_-z0_)*(z_-z0_) );
+}
+
 void CompartmentBase::setX0( double value )
 {
 	x0_ = value;
+	updateLength();
 }
 
 double CompartmentBase::getX0() const
@@ -486,6 +517,7 @@ double CompartmentBase::getX0() const
 void CompartmentBase::setY0( double value )
 {
 	y0_ = value;
+	updateLength();
 }
 
 double CompartmentBase::getY0() const
@@ -496,6 +528,7 @@ double CompartmentBase::getY0() const
 void CompartmentBase::setZ0( double value )
 {
 	z0_ = value;
+	updateLength();
 }
 
 double CompartmentBase::getZ0() const
@@ -506,6 +539,7 @@ double CompartmentBase::getZ0() const
 void CompartmentBase::setX( double value )
 {
 	x_ = value;
+	updateLength();
 }
 
 double CompartmentBase::getX() const
@@ -516,6 +550,7 @@ double CompartmentBase::getX() const
 void CompartmentBase::setY( double value )
 {
 	y_ = value;
+	updateLength();
 }
 
 double CompartmentBase::getY() const
@@ -526,6 +561,7 @@ double CompartmentBase::getY() const
 void CompartmentBase::setZ( double value )
 {
 	z_ = value;
+	updateLength();
 }
 
 double CompartmentBase::getZ() const
@@ -585,6 +621,47 @@ void CompartmentBase::randInject( const Eref& e, double prob, double current)
 void CompartmentBase::cable()
 {
 	;
+}
+
+void CompartmentBase::displace( double dx, double dy, double dz )
+{
+	x0_ += dx;
+	x_ += dx;
+	y0_ += dy;
+	y_ += dy;
+	z0_ += dz;
+	z_ += dz;
+}
+
+void CompartmentBase::setGeomAndElec( const Eref& e,
+				double len, double dia )
+{
+	if ( length_ > 0 && diameter_ > 0 && len > 0 && dia > 0 &&
+			doubleEq( length_ * length_, 
+			(x_-x0_)*(x_-x0_) + (y_-y0_)*(y_-y0_) + (z_-z0_)*(z_-z0_) ) ) {
+		vSetRm( e, vGetRm( e ) * diameter_ * length_ / ( dia * len ) );
+		vSetCm( e, vGetCm( e ) * dia * len / ( diameter_ * length_ ) );
+		vSetRa( e, vGetRa( e ) * len * (diameter_ * diameter_) / 
+				( length_ * dia * dia ) );
+		// Rescale channel Gbars here
+		vector< ObjId > chans;
+		allChildren( e.objId(), ALLDATA, "ISA=ChanBase", chans );
+		for ( unsigned int i = 0; i < chans.size(); ++i ) {
+			double gbar = Field< double >::get( chans[i], "Gbar" );
+			gbar *= len * dia / ( length_ * diameter_ );
+			Field< double >::set( chans[i], "Gbar", gbar );
+		}
+		// Rescale CaConc sizes here
+		vector< ObjId > concs;
+		allChildren( e.objId(), ALLDATA, "ISA=CaConcBase", concs );
+		for ( unsigned int i = 0; i < concs.size(); ++i ) {
+			Field< double >::set( concs[i], "length", len );
+			Field< double >::set( concs[i], "diameter", dia );
+		}
+		
+		setLength( len );
+		setDiameter( dia );
+	}
 }
 
 //////////////////////////////////////////////////////////////////

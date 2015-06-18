@@ -69,6 +69,15 @@ Vec Vec::operator-( const Vec& other ) const {
 	return Vec( a0_ - other.a0_, a1_ - other.a1_, a2_ - other.a2_ );
 }
 
+Vec Vec::operator+( const Vec& other ) const {
+	return Vec( a0_ + other.a0_, a1_ + other.a1_, a2_ + other.a2_ );
+}
+
+Vec Vec::operator*( const double& other ) const {
+	return Vec( a0_ * other, a1_ * other, a2_ * other );
+}
+
+
 double Vec::distance( const Vec& other ) const
 {
 	return ( *this - other ).length();

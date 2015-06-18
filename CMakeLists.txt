@@ -40,6 +40,7 @@ set(INSTALL_INCLUDE_DIR include CACHE PATH "${CMAKE_INSTALL_PREFIX}/include/")
 #else()
     #message(WARNING "Continuing with unsupported compiler: ${CMAKE_CXX_COMPILER}")
 #endif()
+#set(CMAKE_CXX_COMPILER "clang++")
 
 ## Turn warning to error
 add_definitions(-Wall
@@ -61,11 +62,11 @@ if(COMPILER_SUPPORTS_CXX11)
 elseif(COMPILER_SUPPORTS_CXX0X)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 else()
-    message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+    message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support.")
 endif()
 
 # DO UNIT TESTS 
-set(ENABLE_UNIT_TESTS 0)
+option(ENABLE_UNIT_TESTS "ENABLE UNIT TESTS IN MOOSE" ON)
 if(ENABLE_UNIT_TESTS)
     MESSAGE("++ Unit testing enabled.")
     add_definitions(-DDO_UNIT_TESTS)
@@ -87,6 +88,9 @@ else()
     add_definitions(-DQUIET_MODE)
 endif()
 
+# Whether to notify the user after 1 second of simulation.
+option(NOTIFY_AT_EACH_SECOND "Write * to console after 1 second of simulation" ON)
+
 # STATS INSIDE MOOSE
 option(ENABLE_LOGGER  "Enable MOOSE logger" OFF)
 if(ENABLE_LOGGER)
@@ -97,33 +101,37 @@ endif()
 # Default macros
 add_definitions(-DUSE_GENESIS_PARSER)
 
-option(DEBUG "Building with debugging support" 0)
+option(DEBUG "Building with debugging support" ON)
 if(DEBUG)
+    MESSAGE("Building with DEBUG support.")
     set(CMAKE_BUILD_TYPE Debug)
 else()
+    MESSAGE("Building for Release")
     set(CMAKE_BUILD_TYPE Release)
     add_definitions(-UDO_UNIT_TESTS -O2)
 endif()
 
 find_package(GSL 1.16 REQUIRED)
 
-find_package(LIBSBML)
-if(NOT LIBSBML_FOUND)
-    MESSAGE("+ LIBSBML NOT FOUND.  Disabling SBML support.")
-    ADD_DEFINITIONS(-UUSE_SBML)
+option(ENABLE_SBML "Enable SBML support" ON)
+if(ENABLE_SBML)
+    find_package(LIBSBML)
+    if(NOT LIBSBML_FOUND)
+        MESSAGE("+ LIBSBML NOT FOUND.  Disabling SBML support.")
+        ADD_DEFINITIONS(-UUSE_SBML)
+    else()
+        ADD_DEFINITIONS(-DUSE_SBML)
+        include_directories(${LIBSBML_INCLUDE_DIR})
+        find_package(BZip2 REQUIRED)
+        find_package(LibXML2 REQUIRED)
+        find_package(ZLIB REQUIRED)
+    endif()
 else()
-    ADD_DEFINITIONS(-DUSE_SBML)
-    include_directories(${LIBSBML_INCLUDE_DIR})
-    find_package(BZip2 REQUIRED)
-    find_package(LibXML2 REQUIRED)
-endif()
+    SET(LIBSBML_FOUND FALSE)
+ENDIF()
 
 # python support: check for interpreter, sip, pyqt4
 FIND_PACKAGE(PythonDev REQUIRED)
-FIND_PACKAGE(SIP REQUIRED)
-FIND_PACKAGE(PyQt4 REQUIRED)
-FIND_PACKAGE(osgQt REQUIRED)
-
 ################################### SETUP BUILD ################################
 include_directories(msg basecode)
 add_executable(moose-bin basecode/main.cpp)
@@ -200,7 +208,9 @@ if(HDF5_FOUND)
 endif()
 
 if(LIBSBML_FOUND)
-    list(APPEND LIBRARIES moose_sbml ${LIBSBML_LIBRARY})
+    list(APPEND LIBRARIES moose_sbml ${LIBSBML_LIBRARY}
+        ${ZLIB_LIBRARIES}
+        )
 endif()
 
 if(LIBXML2_FOUND)
@@ -242,12 +252,14 @@ set(MOOSE_LIBRARIES
 
 target_link_libraries(moose
     ${MOOSE_LIBRARIES}
-    ${LOCAL_GSL_LIBRARIES}
     ${LIBRARIES}
     )
 
 target_link_libraries(moose-bin 
-    moose
+    "-Wl,--whole-archive"
+    ${MOOSE_LIBRARIES}
+    ${LIBRARIES}
+    "-Wl,--no-whole-archive"
     )
 
 ######################### BUILD PYMOOSE ########################################
@@ -312,23 +324,17 @@ endif()
 
 ######################################## MOOGLI ################################
 # Moogli as external project
-OPTION(BUILD_MOOGLI "Build moogli extension." ON)
+OPTION(BUILD_MOOGLI "Build moogli extension." OFF)
 IF(BUILD_MOOGLI)
-    MESSAGE("++ Building MOOGLI")
-    #SET(MOOGL_SRC_PATH ${PROJECT_SOURCE_DIR}/python/moogli)
-    SET(MOOGLI_BUILD_PATH ${CMAKE_BINARY_DIR}/_moogli)
-    #FILE(MAKE_DIRECTORY ${MOOGLI_BUILD_PATH})
-    #ADD_CUSTOM_TARGET(moogli ALL
-        #COMMAND ${CMAKE_COMMAND} ${MOOGL_SRC_PATH}
-        #COMMAND make
-        #WORKING_DIRECTORY ${MOOGLI_BUILD_PATH}
-        #COMMENT "Building and installing MOOGLI"
-        #VERBATIM
-    #) 
+    FIND_PACKAGE(SIP REQUIRED)
+    FIND_PACKAGE(PyQt4 REQUIRED)
+    FIND_PACKAGE(osgQt REQUIRED)
+    SET(MOOGLI_BUILD_PATH ${PROJECT_SOURCE_DIR}/python/moogli)
+    MESSAGE("++ Building MOOGLI in ${MOOGLI_BUILD_PATH}")
     add_subdirectory(${PROJECT_SOURCE_DIR}/python/moogli)
     INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/python/moogli/include)
     LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/python/moogli)
-else()
+else(BUILD_MOOGLI)
     MESSAGE("++ NOT building MOOGLI")
 endif()
 
@@ -430,3 +436,39 @@ if(BUILD_MOOGLI)
         )
 
 endif(BUILD_MOOGLI)
+
+############################ CTEST ######################################
+
+ENABLE_TESTING()
+
+# If CTEST_OUTPUT_ON_FAILURE environment variable is set, the output is printed
+# onto the console if a test fails.
+SET(ENV{CTEST_OUTPUT_ON_FAILURE} ON)
+
+ADD_TEST(NAME moose-bin-raw-run
+    COMMAND echo q | moose-bin -u
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    )
+
+## PyMOOSE tests.
+ADD_TEST(NAME pymoose-test-mumbl
+    COMMAND ${PYTHON_EXECUTABLE} test_mumbl.py
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests/python
+    )
+ADD_TEST(NAME pymoose-test-pymoose
+    COMMAND ${PYTHON_EXECUTABLE} test_pymoose.py
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests/python
+    )
+ADD_TEST(NAME pymoose-test-synchan
+    COMMAND ${PYTHON_EXECUTABLE} test_synchan.py
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests/python
+    )
+ADD_TEST(NAME pymoose-test-function
+    COMMAND ${PYTHON_EXECUTABLE} test_function.py
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests/python
+    )
+ADD_TEST(NAME pymoose-test-vec
+    COMMAND ${PYTHON_EXECUTABLE} test_vec.py
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests/python
+    )
+    

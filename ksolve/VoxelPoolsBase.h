@@ -194,6 +194,8 @@ class VoxelPoolsBase
 		 */
 		double getXreacScaleProducts( unsigned int i ) const;
 
+		void scaleVolsBufsRates( double ratio, const Stoich* stoichPtr );
+
 		/// Debugging utility
 		void print() const;
 

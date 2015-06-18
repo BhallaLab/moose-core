@@ -6,7 +6,7 @@ IF(USE_MPI)
 ENDIF(USE_MPI)
 
 add_library(moose_mpi 
-    ./PostMaster.cpp 
-    ./testMpi.cpp 
+    PostMaster.cpp 
+    testMpi.cpp 
     )
 
