@@ -666,6 +666,9 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
 		cout << "Clock::handleStart: Warning: simulation already in progress.\n Command ignored\n";
 		return;
 	}
+        
+        unsigned int notifyAt = 0;
+
 	buildTicks( e );
 	assert( currentStep_ == nSteps_ );
 	assert( activeTicks_.size() == activeTicksMap_.size() );
@@ -686,6 +689,14 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
 			}
 			++k;
 		}
+
+                ++notifyAt;
+
+#ifdef NOTIFY_AT_EACH_SECOND 
+                printf("Progress: @%f/%f\r", currentTime_, runTime_);
+
+#endif
+
 	}
 	info_.dt = dt_;
 	isRunning_ = false;
@@ -920,3 +931,5 @@ unsigned int Clock::lookupDefaultTick( const string& className )
 	}
 	return i->second;
 }
+
+
