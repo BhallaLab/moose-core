@@ -92,7 +92,7 @@ def le(el=None):
 
     Returns
     -------
-    None
+    List of path of child elements
 
     """
     if el is None:
@@ -106,6 +106,7 @@ def le(el=None):
     print 'Elements under', el.path
     for ch in el.children:
         print ch.path
+    return [child.path for child in el.children]
 
 ce = setCwe # ce is a GENESIS shorthand for change element.
 

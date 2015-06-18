@@ -1528,6 +1528,11 @@ static Id addCompartment( const string& name,
 	return compt;
 }
 
+#include "../utility/Vec.h"
+#include "SwcSegment.h"
+#include "Spine.h"
+#include "Neuron.h"
+#include "../shell/Wildcard.h"
 static void testNeuronBuildTree()
 {
 	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
@@ -1536,6 +1541,8 @@ static void testNeuronBuildTree()
 	double somaDia = 5e-6;
 	double dendDia = 2e-6;
 	double branchDia = 1e-6;
+	static double len[] = { 10e-6, 100e-6, 200e-6, 500e-6 };
+	static double dia[] = { somaDia, dendDia, branchDia, branchDia };
 	Id soma = addCompartment ( "soma", nid, Id(), 10e-6, 0, 0, somaDia );
 	Id dend1 = addCompartment ( "dend1", nid, soma, 100e-6, 0, 0, dendDia);
 	Id branch1 = addCompartment ( "branch1", nid, dend1, 0, 200e-6, 0, branchDia );
@@ -1547,6 +1554,8 @@ static void testNeuronBuildTree()
 					nid, "electrotonicDistanceFromSoma" );
 	vector< double > g = Field< vector< double > >::get(
 					nid, "geometricalDistanceFromSoma" );
+	vector< double > p = Field< vector< double > >::get(
+					nid, "pathDistanceFromSoma" );
 	assert( e.size() == 4 );
 	assert( doubleEq( e[0], 0.0 ) );
 	double dL = 100e-6 / sqrt( dendDia /4.0 );
@@ -1555,10 +1564,59 @@ static void testNeuronBuildTree()
 	assert( doubleEq( e[2], bL1 ) );
 	double bL2 = dL + 500e-6 / sqrt( branchDia/4.0 );
 	assert( doubleEq( e[3], bL2 ) );
+
+	assert( doubleEq( p[0], 0.0 ) );
+	assert( doubleEq( p[1], 100.0e-6 ) );
+	assert( doubleEq( p[2], 300.0e-6 ) ); // 100 + 200 microns
+	assert( doubleEq( p[3], 600.0e-6 ) ); // 100 + 500 microns
+
 	assert( doubleEq( g[0], 0.0 ) );
 	assert( doubleEq( g[1], 100.0e-6 ) );
-	assert( doubleEq( g[2], 300.0e-6 ) ); // 100 + 200 microns
-	assert( doubleEq( g[3], 600.0e-6 ) ); // 100 + 500 microns
+	assert( doubleEq( g[2], sqrt(5.0) * 100.0e-6 ) ); // 100 + 200 microns
+	assert( doubleEq( g[3], sqrt(26.0) * 100.0e-6 ) ); // 100 + 500 microns
+
+	//////////////////////////////////////////////////////////////////
+	// Here we test Neuron::evalExprForElist, which uses the muParser
+	// Note that the wildcard list starts with the spine which is not
+	// a compartment. So the indexing of the arrays e, p and g needs care.
+	vector< ObjId > elist;
+	wildcardFind( "/n/#", elist );
+	Neuron* n = reinterpret_cast< Neuron* >( nid.eref().data() );
+	vector< double > val;
+	n->evalExprForElist( elist, "p + g + L + len + dia + H(1-L)", val );
+	assert( val.size() == 7 * elist.size() );
+	unsigned int j = 0;
+	for ( unsigned int i = 0; i < elist.size(); ++i ) {
+		if ( !elist[i].element()->cinfo()->isA( "CompartmentBase" ) )
+			continue;
+		assert( val[i * 7] == p[j] + g[j] + e[j] + len[j] + dia[j] +
+						( 1.0 - e[j] > 0 ) );
+		assert( doubleEq( val[i * 7 + 1], p[j] ) );
+		assert( doubleEq( val[i * 7 + 2], g[j] ) );
+		assert( doubleEq( val[i * 7 + 3], e[j] ) );
+		assert( doubleEq( val[i * 7 + 4], len[j]  ));
+		assert( doubleEq( val[i * 7 + 5], dia[j] ) );
+		assert( doubleEq( val[i * 7 + 6], 0.0 ) );
+		j++;
+	}
+	//////////////////////////////////////////////////////////////////
+	// Here we test Neuron::makeSpacingDistrib, which uses the muParser
+	// n->evalExprForElist( elist, "H(p-50e-6)*5e-6", val );
+	n->evalExprForElist( elist, "H(p-100e-6)*5e-6", val );
+	vector< unsigned int > seglistIndex;
+	vector< unsigned int > elistIndex;
+	vector< double > pos;
+	vector< string > line; // empty, just use the default spacingDistrib=0
+	n->makeSpacingDistrib( elist, val, seglistIndex, elistIndex, pos, line ); 
+	assert( pos.size() == ((800 - 100)/5) );
+	assert( doubleEq( pos[0], 2.5e-6 ) );
+	assert( doubleEq( pos.back(), 500e-6 - 2.5e-6 ) );
+	assert( seglistIndex[0] == 2 );
+	assert( seglistIndex.back() == 3 );
+	assert( elistIndex[0] == 3 );
+	assert( elistIndex.back() == 4 );
+
+	shell->doDelete( nid );
 }
 
 

@@ -38,12 +38,14 @@
 
 extern char shortType(string);
 extern char innerType(char); // declared in utility.h, defined in utility/types.cpp
+
 extern "C" {
 
     // This had to be defined for py3k, but does not harm 2.
     struct module_state {
         PyObject *error;
     };
+
     
     // The endianness check is from:
     // http://stackoverflow.com/questions/2100331/c-macro-definition-to-determine-big-endian-or-little-endian-machine
@@ -280,11 +282,8 @@ extern "C" {
     PyObject * setDestFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type1, PyObject * arg2, char type2);
     Id getShell(int argc, char **argv);
     vector<int> pysequence_to_dimvec(PyObject * dims);
-    map<string, PyObject *>& get_inited_lookupfields();
-    map< string, PyObject * >& get_inited_destfields();
     map<string, vector <PyGetSetDef> >& get_getsetdefs();
     map<string, PyTypeObject *>& get_moose_classes();
-    map< string, PyObject *>& get_inited_elementfields();
     int get_npy_typenum(const type_info& ctype);
     string getFieldType(string className, string fieldName);
     const map<string, string>& get_field_alias();

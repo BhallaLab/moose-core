@@ -98,14 +98,13 @@ def scaleAxis(xvec, yvec, scaleX, scaleY):
 
 def reformatTable(table, kwargs):
     """ Given a table return x and y vectors with proper scaling """
+    clock = moose.Clock('/clock')
     if type(table) == moose.Table:
         vecY = table.vector 
-        vecX = np.arange(len(vecY))
+        vecX = np.arange(0, clock.currentTime, len(vecY))
     elif type(table) == tuple:
         vecX, vecY = table
-    xscale = kwargs.get('xscale', 1.0)
-    yscale = kwargs.get('yscale', 1.0)
-    return scaleAxis(vecX, vecY, xscale, yscale)
+    return (vecX, vecY)
 
 def plotTable(table, **kwargs):
     """Plot a given table. It plots table.vector
@@ -151,33 +150,6 @@ def plotTables(tables, outfile=None, **kwargs):
     else:
         plt.show()
 
-def saveTables(tables, file=None, **kwargs):
-    """Save a list to tables to a data file. """
-    assert type(tables) == list, "Expecting a list of moose.Table"
-    plots = []
-    xaxis = None
-    for t in tables:
-        vecX, vecY = reformatTable(t, kwargs)
-        plots.append(vecY)
-        if xaxis:
-            if xaxis != vecX:
-                raise UserWarning("Tables must have same x-axis")
-        else:
-            xaxis = vecX
-        tableText = ""
-        for i, x in enumerate(xaxis):
-            tableText += "{} ".format(x)
-            tableText += " ".join(['%s'%p[i] for p in plots])
-            tableText += "\n"
-    if file is None:
-        print(tableText)
-    else:
-        pu.dump("PLOT", "Saving tables data to file {}".format(file))
-        with open(file, "w") as f:
-            f.write(tableText)
-    
-   
-
 def plotVector(vec, xvec = None, **options):
     """plotVector: Plot a given vector. On x-axis, plot the time.
 
@@ -185,7 +157,8 @@ def plotVector(vec, xvec = None, **options):
     :param **kwargs: Optional to pass to maplotlib.
     """
 
-    assert type(vec) == np.ndarray, "Expected type %s" % type(vec)
+    #assert type(vec) == np.ndarray, "Expected type %s" % type(vec)
+    legend = options.get('legend', True)
 
     if xvec is None:
         clock = moose.Clock('/clock')
@@ -196,6 +169,8 @@ def plotVector(vec, xvec = None, **options):
     assert len(xx) == len(vec), "Expecting %s got %s" % (len(vec), len(xvec))
 
     plt.plot(xx, vec, label=options.get('label', ''))
+    if legend:
+        plt.legend(loc='best', framealpha=0.4)
 
     if xvec is None:
         plt.xlabel = 'Time (sec)'
@@ -220,21 +195,25 @@ def saveRecords(dataDict, xvec = None, **kwargs):
     assert type(dataDict) == dict, "Got %s" % type(dataDict)
 
     outfile = kwargs.get('outfile', 'data.moose')
+    clock = moose.Clock('/clock')
+    assert clock.currentTime > 0
 
-    filters = [ x.lower() for x in kwargs.get('filter', [])]
+    yvecs = []
+    text = [ "time," + ",".join(dataDict.keys()) ]
+    for k in dataDict:
+        yvec = dataDict[k].vector
+        yvecs.append(yvec)
+    if xvec is None: 
+        xvec = np.linspace(0, clock.currentTime, len(yvecs[0]))
+
+    for i, x in enumerate(xvec):
+        xline = "%s"%x
+        yline = ",".join([str(p[i]) for p in yvecs])
+        text.append("%s,%s" % (xline, yline))
+
     pu.info("Writing data to %s" % outfile)
     with open(outfile, 'w') as f:
-        for k in dataDict:
-            yvec = dataDict[k].vector
-            if xvec is None:
-                clock = moose.Clock('/clock')
-                xx = np.linspace(0, clock.currentTime, len(yvec))
-            else:
-                xx = xvec[:]
-            xline = ','.join([str(x) for x in xx])
-            yline = ','.join([str(y) for y in yvec])
-            f.write('"%s:x",%s\n' % (k, xline))
-            f.write('"%s:y",%s\n' % (k, yline))
+        f.write("\n".join(text))
     pu.info(" .. Done writing data to moose-data file")
 
 def plotRecords(dataDict, xvec = None, **kwargs):
@@ -263,17 +242,67 @@ def plotRecords(dataDict, xvec = None, **kwargs):
         if plotThis:
             if not subplot: 
                 yvec = dataDict[k].vector
-                plotVector(yvec, xvec, **kwargs)
+                plotVector(yvec, xvec, label=k, **kwargs)
             else:
                 plt.subplot(len(dataDict), 1, i)
                 yvec = dataDict[k].vector
-                plotVector(yvec, xvec, **kwargs)
-    try:
-        plt.tight_layout()
-    except: pass
+                plotVector(yvec, xvec, label=k, **kwargs)
+
+    # title in Image.
+    if 'title' in kwargs:
+        plt.title(kwargs['title'])
+
+    if subplot:
+        try:
+            plt.tight_layout()
+        except: pass
 
     if outfile:
         pu.info("Writing plot to %s" % outfile)
         plt.savefig("%s" % outfile)
     else:
         plt.show()
+
+
+def plot_records(data_dict, xvec = None, **kwargs):
+    """plot_records Plot given dictionary.
+
+    :param data_dict:
+    :param xvec: If None, use moose.Clock to generate xvec.
+    :param **kwargs:
+    """
+
+    legend = kwargs.get('legend', True)
+    outfile = kwargs.get('outfile', None)
+    subplot = kwargs.get('subplot', False)
+    filters = [ x.lower() for x in kwargs.get('filter', [])]
+
+    plt.figure(figsize=(10, 1.5*len(data_dict)))
+    for i, k in enumerate(data_dict):
+        pu.info("+ Plotting for %s" % k)
+        plotThis = False
+        if not filters: plotThis = True
+        for accept in filters:
+            if accept in k.lower(): 
+                plotThis = True
+                break
+                
+        if plotThis:
+            if not subplot: 
+                yvec = data_dict[k]
+                plotVector(yvec, xvec, label=k, **kwargs)
+            else:
+                plt.subplot(len(data_dict), 1, i)
+                yvec = data_dict[k]
+                plotVector(yvec, xvec, label=k, **kwargs)
+    if subplot:
+        try:
+            plt.tight_layout()
+        except: pass
+
+    if outfile:
+        pu.info("Writing plot to %s" % outfile)
+        plt.savefig("%s" % outfile)
+    else:
+        plt.show()
+

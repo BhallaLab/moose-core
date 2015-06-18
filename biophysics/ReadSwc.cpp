@@ -17,9 +17,9 @@
 #include "SymCompartment.h"
 #include <fstream>
 
-
 // Minimum allowed radius of segment, in microns
-static const double MinRadius = 0.05; 
+// Believe it or not, some otherwise reasonable files do have smaller radii
+static const double MinRadius = 0.04; 
 
 ReadSwc::ReadSwc( const string& fname )
 {
@@ -52,7 +52,7 @@ ReadSwc::ReadSwc( const string& fname )
 		cleanZeroLength();
 		parseBranches();
 	}
-	cout << fname << "	: NumSegs = " << segs_.size() << 
+	cout << "ReadSwc: " << fname << "	: NumSegs = " << segs_.size() << 
 			", bad = " << badSegs <<
 			", Validated = " << valid << 
 			", numBranches = " << branches_.size() << 
@@ -83,7 +83,8 @@ bool ReadSwc::validate() const
 	}
 	bool valid = ( numStart == 1 && numOrphans == 0 && badRadius == 0 );
 	if ( !valid ) {
-		cout << "NumSegs = " << segs_.size() << 
+		cout << "ReadSwc::validate() failed: \nNumSegs = " << 
+				segs_.size() << 
 				", numStart = " << numStart <<
 				", orphans = " << numOrphans << 
 				", badIndex = " << badIndex <<
@@ -114,7 +115,7 @@ void ReadSwc::cleanZeroLength()
 	for ( unsigned int i = 1; i < segs_.size(); ++i ) {
 		SwcSegment& s = segs_[i];
 		SwcSegment& pa = segs_[ s.parent() - 1 ];
-		if ( s.length( pa ) < EPSILON ) {
+		if ( s.distance( pa ) < EPSILON ) {
 			// Remove the zero length child from pa.kids_
 			vector< int > temp;
 			for ( unsigned int j = 0; j < pa.kids().size(); ++j ) {
@@ -129,7 +130,7 @@ void ReadSwc::cleanZeroLength()
 			}
 			pa.replaceKids( temp );
 			s.setBad();
-			cout << "Cleaned zero length " << s.myIndex() << endl;
+			cout << "ReadSwc:: Cleaned zero length " << s.myIndex() << endl;
 		}
 	}
 }
@@ -150,8 +151,8 @@ void ReadSwc::traverseBranch( const SwcSegment& s,
 	do {
 		// Beware the indexing!
 		const SwcSegment& pa = segs_[prev->parent() - 1];
-		len += pa.length( *prev );
-		L += pa.L( *prev );
+		len += pa.distance( *prev );
+		L += pa.L( );
 		cable.push_back( pa.myIndex() );
 		prev = &pa;
 	} while ( (prev->parent() != ~0U) && (prev->kids().size() == 1) );
@@ -192,19 +193,19 @@ void ReadSwc::parseBranches()
 
 void ReadSwc::diagnostics() const
 {
-	vector< int > diag( 8 );
-	static string diagName[] = {"undef", "soma", "axon", "dend", 
-			"apical dend", "fork", "end", "custom" };
+	vector< int > diag( 14 );
 	for ( unsigned int i = 0; i < segs_.size(); ++i ) {
 		const SwcSegment& s = segs_[i];
-		if ( s.type() < 8 )
+		if ( s.type() < 14 )
 			diag[s.type()]++;
 	}
-	for ( int i = 0; i < 8; ++i )
-		cout << diagName[i] << " :	" << diag[i] << endl;
+	for ( int i = 0; i < 14; ++i )
+		cout << "ReadSwc::diagnostics: " << SwcSegment::typeName[i] << " :	" << diag[i] << endl;
 
+	/*
 	for ( unsigned int i = 0; i < branches_.size(); ++i )
 		branches_[i].printDiagnostics();
+		*/
 }
 
 static Id makeCompt( Id parent, 
@@ -218,9 +219,9 @@ static Id makeCompt( Id parent,
 	Id compt;
 	double x0, y0, z0;
 	if ( seg.parent() != ~0U ) {
-		len = seg.length( pa );
+		len = seg.distance( pa );
 		stringstream ss;
-		ss << "br" << i << "_" << j;
+		ss << SwcSegment::typeName[ seg.type() ] << "_" << i << "_" << j;
 		name = ss.str();
 		x0 = pa.vec().a0();
 		y0 = pa.vec().a1();

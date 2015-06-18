@@ -26,27 +26,26 @@
 #include "../utility/numutil.h"
 #include "../shell/Wildcard.h"
 
-static SrcFinfo4< Id, vector< Id >, vector< Id >, vector< unsigned int > >* 
+static SrcFinfo3< vector< Id >, vector< Id >, vector< unsigned int > >* 
 	spineListOut()
 {
-	static SrcFinfo4< Id, vector< Id >, vector< Id >, vector< unsigned int > >
+	static SrcFinfo3< vector< Id >, vector< Id >, vector< unsigned int > >
    		spineListOut(
 		"spineListOut",
 		"Request SpineMesh to construct self based on list of electrical "
 		"compartments that this NeuroMesh has determined are spine shaft "
 		"and spine head respectively. Also passes in the info about where "
 		"each spine is connected to the NeuroMesh. "
-		"Arguments: Cell Id, shaft compartment Ids, head compartment Ids,"
+		"Arguments: shaft compartment Ids, head compartment Ids,"
 		"index of matching parent voxels for each spine"
 	);
 	return &spineListOut;
 }
 
-static SrcFinfo4< Id, vector< double >, 
-		vector< Id >, vector< unsigned int > >* 
+static SrcFinfo3< vector< double >, vector< Id >, vector< unsigned int > >*
 	psdListOut()
 {
-	static SrcFinfo4< Id, vector< double >, 
+	static SrcFinfo3< vector< double >, 
 			vector< Id >, vector< unsigned int > >
    		psdListOut(
 		"psdListOut",
@@ -67,38 +66,25 @@ const Cinfo* NeuroMesh::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// Field Definitions
 		//////////////////////////////////////////////////////////////
-		/*
-		static ReadOnlyValueFinfo< NeuroMesh, vector< unsigned int > > 
-			chemTree(
-			"chemTree",
-			"Branching structure of neuronal compartments."
-			"Ignores startNodes if any",
-			&NeuroMesh::getChemTree
-		);
-
-		static ReadOnlyValueFinfo< NeuroMesh, vector< double >  > cylCoords(
-			"cylCoords",
-			"End coordinates of cylinders in the NeuroMesh diffusive "
-			"compartments. Taken directly from the neuronal compartments."
-			"Organized as x, y, z. Length is therefore 3 * numCompts."
-			&NeuroMesh::getCylCoords
-		);
-		*/
-		static ElementValueFinfo< NeuroMesh, Id > cell(
-			"cell",
-			"Id for base element of cell model. Uses this to traverse the"
-			"entire tree of the cell to build the mesh.",
-			&NeuroMesh::setCell,
-			&NeuroMesh::getCell
-		);
-		static ValueFinfo< NeuroMesh, vector< Id > > subTree(
+		static ElementValueFinfo< NeuroMesh, vector< ObjId > > subTree(
 			"subTree",
-			"Set of compartments to model. If they happen to be contiguous"
-			"then also set up diffusion between the compartments. Can also"
+			"Set of compartments in which to embed chemical reaction "
+			"systems. If the compartments happen to be contiguous"
+			"then also set up diffusion between them. Can also"
 			"handle cases where the same cell is divided into multiple"
 			"non-diffusively-coupled compartments",
 			&NeuroMesh::setSubTree,
 			&NeuroMesh::getSubTree
+		);
+		static ElementValueFinfo< NeuroMesh, string > subTreePath(
+			"subTreePath",
+			"Set of compartments to model, defined as a path string. "
+			"If they happen to be contiguous "
+			"then also set up diffusion between the compartments. Can also"
+			"handle cases where the same cell is divided into multiple"
+			"non-diffusively-coupled compartments",
+			&NeuroMesh::setSubTreePath,
+			&NeuroMesh::getSubTreePath
 		);
 		static ValueFinfo< NeuroMesh, bool > separateSpines(
 			"separateSpines",
@@ -158,6 +144,36 @@ const Cinfo* NeuroMesh::initCinfo()
 			"Each elecCompt has one or more voxels. "
 			"The voxels in a compartment are numbered sequentially.",
 			&NeuroMesh::getEndVoxelInCompt
+		);
+
+		static ReadOnlyValueFinfo< NeuroMesh, vector< int > > spineVoxelOnDendVoxel(
+			"spineVoxelOnDendVoxel",
+			"Voxel index of spine voxel on each dend voxel. Assume that "
+			"there is never more than one spine per dend voxel. If no "
+			"spine present, the entry is -1. Note that the "
+			"same index is used both for spine head and PSDs.",
+			&NeuroMesh::getSpineVoxelOnDendVoxel
+		);
+
+		static ReadOnlyLookupValueFinfo< NeuroMesh, ObjId, 
+				vector< unsigned int > > dendVoxelsOnCompartment(
+			"dendVoxelsOnCompartment",
+			"Returns vector of all chem voxels on specified electrical "
+			"compartment of the dendrite. Returns empty vec if none "
+			"found, or if the compartment isn't on the dendrite.",
+			&NeuroMesh::getDendVoxelsOnCompartment
+		);
+
+		static ReadOnlyLookupValueFinfo< NeuroMesh, ObjId, 
+				vector< unsigned int > > spineVoxelsOnCompartment(
+			"spineVoxelsOnCompartment",
+			"Returns vector of all chem voxels on specified electrical "
+			"compartment, which should be a spine head or shaft . "
+			"Returns empty vec if no chem voxels "
+			"found, or if the compartment isn't on the dendrite. "
+			"Note that spine and PSD voxel indices are the same for a "
+			"given spine head.",
+			&NeuroMesh::getSpineVoxelsOnCompartment
 		);
 
 		static ValueFinfo< NeuroMesh, double > diffLength(
@@ -220,31 +236,13 @@ const Cinfo* NeuroMesh::initCinfo()
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
 
-		static DestFinfo setCellPortion( "cellPortion",
-			"Tells NeuroMesh to mesh up a subpart of a cell. For now"
-			"assumed contiguous."
-			"The first argument is the cell Id. The second is the wildcard"
-			"path of compartments to use for the subpart.",
-			new EpFunc2< NeuroMesh, Id, string >(
-				&NeuroMesh::setCellPortion )
-		);
-
-		static DestFinfo setCellPortionList( "cellPortionList",
-			"Tells NeuroMesh to mesh up a subpart of a cell, using a list"
-			" of compartment Ids. For now assumed contiguous."
-			"The first argument is the cell Id. The second is a vector of"
-			"compartment ids to use for the subpart.",
-			new EpFunc2< NeuroMesh, Id, vector< ObjId > >(
-				&NeuroMesh::setCellPortion )
-		);
-
 		//////////////////////////////////////////////////////////////
 		// Field Elements
 		//////////////////////////////////////////////////////////////
 
 	static Finfo* neuroMeshFinfos[] = {
-		&cell,			// Value
 		&subTree,		// Value
+		&subTreePath,		// Value
 		&separateSpines,	// Value
 		&numSegments,		// ReadOnlyValue
 		&numDiffCompts,		// ReadOnlyValue
@@ -253,10 +251,11 @@ const Cinfo* NeuroMesh::initCinfo()
 		&elecComptMap,			// ReadOnlyValue
 		&startVoxelInCompt,			// ReadOnlyValue
 		&endVoxelInCompt,			// ReadOnlyValue
+		&spineVoxelOnDendVoxel,		// ReadOnlyValue
+		&dendVoxelsOnCompartment,	// ReadOnlyLookupValue
+		&spineVoxelsOnCompartment,	// ReadOnlyLookupValue
 		&diffLength,			// Value
 		&geometryPolicy,		// Value
-		&setCellPortion,			// DestFinfo
-		&setCellPortionList,		// DestFinfo
 		spineListOut(),			// SrcFinfo
 		psdListOut(),			// SrcFinfo
 	};
@@ -285,9 +284,11 @@ static const Cinfo* neuroMeshCinfo = NeuroMesh::initCinfo();
 NeuroMesh::NeuroMesh()
 	:
 		nodes_(1),
+		subTreePath_( "Undefined" ),
 		nodeIndex_(1, 0 ),
 		vs_( 1, NA * 1e-9 ),
 		area_( 1, 1.0e-12 ),
+		length_( 1, 1.0e-6 ),
 		diffLength_( 1.0e-6 ),
 		separateSpines_( false ),
 		geometryPolicy_( "default" ),
@@ -301,7 +302,6 @@ NeuroMesh::NeuroMesh()
 NeuroMesh::NeuroMesh( const NeuroMesh& other )
 	:
 		diffLength_( other.diffLength_ ),
-		cell_( other.cell_ ),
 		separateSpines_( other.separateSpines_ ),
 		geometryPolicy_( other.geometryPolicy_ ),
 		surfaceGranularity_( other.surfaceGranularity_ )
@@ -313,8 +313,8 @@ NeuroMesh& NeuroMesh::operator=( const NeuroMesh& other )
 	nodeIndex_ = other.nodeIndex_;
 	vs_ = other.vs_;
 	area_ = other.area_;
+	length_ = other.length_;
 	diffLength_ = other.diffLength_;
-	cell_ = other.cell_;
 	separateSpines_ = other.separateSpines_;
 	geometryPolicy_ = other.geometryPolicy_;
 	return *this;
@@ -337,6 +337,10 @@ NeuroMesh::~NeuroMesh()
 void NeuroMesh::updateCoords()
 {
 	unsigned int startFid = 0;
+	if ( nodes_.size() <= 1 ){// One for soma and one for dummy pa of soma
+		buildStencil();
+		return;
+	}
 	for ( vector< NeuroNode >::iterator i = nodes_.begin();
 				i != nodes_.end(); ++i ) {
 		if ( !i->isDummyNode() ) {
@@ -412,10 +416,6 @@ void NeuroMesh::setGeometryPolicy( string v )
 	for ( vector< NeuroNode >::iterator 
 			i = nodes_.begin(); i != nodes_.end(); ++i )
 			i->setIsCylinder( isCylinder );
-	/*
-	if ( cell_ != Id() )
-		setCell( cell_ );
-		*/
 }
 
 string NeuroMesh::getGeometryPolicy() const
@@ -463,7 +463,7 @@ Id NeuroMesh::putSomaAtStart( Id origSoma, unsigned int maxDiaIndex )
 		if ( strncasecmp( name.c_str(), "soma", 4 ) == 0 ) {
 			soma = nodes_[maxDiaIndex].elecCompt();
 		} else { 
-			cout << "Warning: named 'soma' compartment isn't biggest\n";
+			cout << "Warning: NeuroMesh::putSomaAtStart: named 'soma' compartment isn't biggest\n";
 			soma = nodes_[maxDiaIndex].elecCompt();
 		}
 	}
@@ -505,11 +505,16 @@ void NeuroMesh::insertSingleDummy(
 void NeuroMesh::insertDummyNodes()
 {
 	// First deal with the soma, always positioned at node 0.
-	Id elec = nodes_[0].elecCompt();
-	double x = Field< double >::get( elec, "x0" );
-	double y = Field< double >::get( elec, "y0" );
-	double z = Field< double >::get( elec, "z0" );
-	insertSingleDummy( ~0U, 0, x, y, z );
+	unsigned int num = nodes_.size();
+	for ( unsigned int i = 0; i < num; ++i ) {
+		if ( nodes_[i].parent() == ~0U ) {
+			Id elec = nodes_[i].elecCompt();
+			double x = Field< double >::get( elec, "x0" );
+			double y = Field< double >::get( elec, "y0" );
+			double z = Field< double >::get( elec, "z0" );
+			insertSingleDummy( ~0U, i, x, y, z );
+		}
+	}
 
 	// Second pass: insert dummy nodes for children.
 	// Need to know if parent has multiple children, because each of
@@ -520,9 +525,9 @@ void NeuroMesh::insertDummyNodes()
 		vector< unsigned int > kids = nodes_[i].children();
 		if ( (!nodes_[i].isDummyNode()) && kids.size() > 1 ) {
 			for( unsigned int j = 0; j < kids.size(); ++j ) {
-				x = nodes_[i].getX(); // use coords of parent.
-				y = nodes_[i].getY();
-				z = nodes_[i].getZ();
+				double x = nodes_[i].getX(); // use coords of parent.
+				double y = nodes_[i].getY();
+				double z = nodes_[i].getZ();
 				insertSingleDummy( i, kids[j], x, y, z );
 				// Replace the old kid entry with the dummy
 				kids[j] = nodes_.size() - 1; 
@@ -550,69 +555,10 @@ bool NeuroMesh::filterSpines( Id compt )
 	return false;
 }
 
-// I assume 'cell' is the parent of the compartment tree.
-void NeuroMesh::setCell( const Eref& e, Id cell )
+
+void NeuroMesh::transmitSpineInfo( const Eref& e )
 {
-	vector< ObjId > compts;
-	wildcardFind( cell.path() + "/##", compts );
-	setCellPortion( e, cell, compts );
-}
-
-/** 
- * This overloaded function sets up a presumed contiguous set of
- * compartments, complains if they are not contiguous due to the check in
- * NeuroNode::traverse.
- * 
- * I assume 'cell' is the parent of the compartment tree.
- * The 'path' argument specifies a wildcard list of compartments, which
- * can be also a comma-separated explicit list. Does not have to be
- * in any particular order.
- * The 'path' argument is based off root.
- */
-void NeuroMesh::setCellPortion( const Eref& e, Id cell,
-	string path	)
-{
-	vector< ObjId > compts;
-	wildcardFind( path, compts );
-	setCellPortion( e, cell, compts );
-}
-
-
-// Here we set a portion of a cell, specified by a vector of Ids. We
-// also need to define the cell parent.
-void NeuroMesh::setCellPortion( const Eref& e,
-					Id cell, vector< ObjId > portion )
-{
-	// double oldVol = getMeshEntryVolume( 0 );
-	cell_ = cell;
-	NeuroNode::buildTree( nodes_, portion );
-	if ( separateSpines_ )
-		NeuroNode::filterSpines( nodes_, shaft_, head_, parent_ );
-	insertDummyNodes();
-
-	updateCoords();
-
-	if ( separateSpines_ )
-		updateShaftParents();
-
-	// transmitChange( e, oldVol );
-	if ( separateSpines_ ) {
-		separateOutSpines( e );
-	}
-}
-
-void NeuroMesh::separateOutSpines( const Eref& e )
-{
-		// vector< Id > ids;
-		/*
-		e.element()->getNeighbors( ids, spineListOut() );
-		if ( ids.size() > 0 ) {
-			SetGet4< Id, vector< Id >, vector< Id >, 
-					vector< unsigned int > >::set( 
-					ids[0], "spineList", cell_, shaft_, head_, parent_ );
-		}
-		*/
-		spineListOut()->send( e, cell_, shaft_, head_, parent_ );
+		spineListOut()->send( e, shaft_, head_, parent_ );
 
 		vector< double > ret;
 		vector< double > psdCoords;
@@ -629,11 +575,7 @@ void NeuroMesh::separateOutSpines( const Eref& e )
 			}
 			// ids.clear();
 			// e.element()->getNeighbors( ids, psdListOut() );
-			psdListOut()->send( e, cell_, psdCoords, head_, index );
-			/*
-			SetGet3< Id, vector< double >, vector< unsigned int > >::set( 
-					ids[0], "psdList", cell_, psdCoords, index );
-					*/
+			psdListOut()->send( e, psdCoords, head_, index );
 		}
 }
 
@@ -657,31 +599,53 @@ void NeuroMesh::updateShaftParents()
 			parent_[i] = index + nn.startFid();
 		} else {
 			cout << "Warning: NeuroMesh::updateShaftParents: may be"
-					" misaligned on " << i << "\n";
+					" misaligned on " << i << ", r=" << r << 
+					"\n pt=(" << x0 << "," << y0 << "," << z0 << ")" <<
+					"pa=(" << nn.getX() << "," << nn.getY() << "," << nn.getZ() << ")" <<
+					"\n";
 			parent_[i] = index + nn.startFid();
 		}
 	}
 }
 
-Id NeuroMesh::getCell( const Eref& e ) const
+// Uses all compartments, and if they have spines on them adds those too.
+void NeuroMesh::setSubTree( const Eref& e, vector< ObjId > compts )
 {
-		return cell_;
+	if ( separateSpines_ ) {
+		NeuroNode::buildSpinyTree( compts, nodes_, shaft_, head_, parent_);
+		insertDummyNodes();
+		updateCoords();
+		updateShaftParents();
+		transmitSpineInfo( e );
+	} else {
+		NeuroNode::buildTree( nodes_, compts );
+		insertDummyNodes();
+		updateCoords();
+	}
+	subTreePath_ = "Undefined: subTree set as a compartment list";
 }
 
-Id NeuroMesh::getCell() const
+vector< ObjId > NeuroMesh::getSubTree( const Eref& e ) const
 {
-		return cell_;
-}
-
-void NeuroMesh::setSubTree( vector< Id > compartments )
-{
-		;
-}
-
-vector< Id > NeuroMesh::getSubTree() const
-{
-		vector< Id > ret;
+		vector< Id > temp = getElecComptList();
+		vector< ObjId > ret( temp.size() );
+		for ( unsigned int i = 0; i < ret.size(); ++i )
+			ret[i] = temp[i];
 		return ret;
+}
+
+// Uses all compartments, and if they have spines on them adds those too.
+void NeuroMesh::setSubTreePath( const Eref& e, string path )
+{
+	vector< ObjId > compts;
+	wildcardFind( path, compts );
+	setSubTree( e, compts );
+	subTreePath_ = path;
+}
+
+string NeuroMesh::getSubTreePath( const Eref& e ) const
+{
+	return subTreePath_;
 }
 
 void NeuroMesh::setSeparateSpines( bool v )
@@ -720,7 +684,8 @@ vector< Id > NeuroMesh::getElecComptMap() const
 {
 	vector< Id > ret( nodeIndex_.size() );
 	for ( unsigned int i = 0; i < nodeIndex_.size(); ++i ) {
-		ret.push_back( nodes_[nodeIndex_[i]].elecCompt() );
+		ret[i] = nodes_[nodeIndex_[i]].elecCompt();
+		// cout << i << "	" << nodeIndex_[i] << "	" << ret[i] << endl;
 
 	}
 	return ret;
@@ -755,6 +720,37 @@ vector< unsigned int > NeuroMesh::getEndVoxelInCompt() const
 				i = nodes_.begin(); i != nodes_.end(); ++i ) {
 		if ( !i->isDummyNode() )
 			ret.push_back( i->startFid() + i->getNumDivs() );
+	}
+	return ret;
+}
+
+vector< int > NeuroMesh::getSpineVoxelOnDendVoxel() const
+{
+	vector< int > ret( nodeIndex_.size(), -1 ); //-1 means no spine present
+	for ( unsigned int i = 0; i < parent_.size(); ++i ) {
+		assert( parent_[i] < ret.size() );
+		ret[ parent_[i] ] = i;
+	}
+	return ret;
+}
+
+vector< unsigned int > NeuroMesh::getDendVoxelsOnCompartment(ObjId compt) const
+{
+	vector< unsigned int > ret;
+	for ( unsigned int i = 0; i < nodeIndex_.size(); ++i ) {
+		if ( nodes_[i].elecCompt() == compt.id )
+			ret.push_back(i);
+	}
+	return ret;
+}
+
+vector< unsigned int > NeuroMesh::getSpineVoxelsOnCompartment(ObjId compt) const
+{
+	vector< unsigned int > ret;
+	assert( shaft_.size() == head_.size() );
+	for ( unsigned int i = 0; i < shaft_.size(); ++i ) {
+		if ( shaft_[i] == compt.id || head_[i] == compt.id )
+			ret.push_back(i);
 	}
 	return ret;
 }
@@ -1059,6 +1055,8 @@ void NeuroMesh::innerBuildDefaultMesh( const Eref& e,
 double NeuroMesh::getAdx( unsigned int i, unsigned int& parentFid ) const
 {
 	const NeuroNode &nn = nodes_[ nodeIndex_[i] ];
+	if ( nn.isDummyNode() || nn.parent() == ~0U )
+		return -1; // No diffusion, bail out.
 	const NeuroNode *pa = &nodes_[ nn.parent() ];
 	double L1 = nn.getLength() / nn.getNumDivs();
 	double L2 = L1;
