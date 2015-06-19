@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Sat Oct 11 14:47:22 2014 (+0530)
 // Version: 
-// Last-Updated: 
-//           By: 
-//     Update #: 0
+// Last-Updated: Fri Jun 19 18:56:06 2015 (-0400)
+//           By: Subhasis Ray
+//     Update #: 15
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -276,7 +276,7 @@ void PyRun::trigger(const Eref& e, double input)
     if (PyDict_SetItemString(locals_, inputvar_.c_str(), value)){
         PyErr_Print();
     }
-    PyEval_EvalCode(runcompiled_, globals_, locals_);
+    PyEval_EvalCode((PyObject*)runcompiled_, globals_, locals_);
     if (PyErr_Occurred()){
         PyErr_Print ();
     }
@@ -367,9 +367,9 @@ void PyRun::reinit(const Eref& e, ProcPtr p)
             cerr << "Could not initialize locals dict" << endl;            
         }
     }
-    initcompiled_ = (PyCodeObject*)Py_CompileString(
+    initcompiled_ = (PYCODEOBJECT*)Py_CompileString(
         initstr_.c_str(),
-        Py_GetProgramName(),
+        get_program_name().c_str(),
         Py_file_input);
     if (!initcompiled_){
         cerr << "Error compiling initString" << endl;
@@ -380,9 +380,9 @@ void PyRun::reinit(const Eref& e, ProcPtr p)
             PyErr_Print ();
         }
     }
-    runcompiled_ = (PyCodeObject*)Py_CompileString(
+    runcompiled_ = (PYCODEOBJECT*)Py_CompileString(
         runstr_.c_str(),
-        Py_GetProgramName(),
+        get_program_name().c_str(),
         Py_file_input);
     if (!runcompiled_){
         cerr << "Error compiling runString" << endl;
