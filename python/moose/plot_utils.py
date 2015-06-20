@@ -157,7 +157,7 @@ def plotVector(vec, xvec = None, **options):
     :param **kwargs: Optional to pass to maplotlib.
     """
 
-    #assert type(vec) == np.ndarray, "Expected type %s" % type(vec)
+    assert type(vec) == np.ndarray, "Expected type %s" % type(vec)
     legend = options.get('legend', True)
 
     if xvec is None:
