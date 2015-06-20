@@ -47,6 +47,7 @@
 
 #include "header.h"
 #include "../utility/utility.h"
+#include "../utility/numutil.h"
 #include "Func.h"
 
 static SrcFinfo1<double> *valueOut()
