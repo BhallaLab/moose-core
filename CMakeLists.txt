@@ -233,16 +233,16 @@ set(MOOSE_LIBRARIES
     utility 
     muparser
     kinetics 
+    synapse
+    intfire
     hsolve 
     mesh
     signeur
     tinyxml
-    synapse
     diffusion 
     basecode
     device
     ksolve
-    intfire
     )
 
 target_link_libraries(moose
