@@ -67,7 +67,7 @@ class Backend(object):
                 return False
             return True
         if ignorePat:
-            mooseObjs = filter(ignore, mooseObjs)
+            mooseObjs = list(filter(ignore, mooseObjs))
         return mooseObjs
 
     def getComparments(self, **kwargs):

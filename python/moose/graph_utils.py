@@ -15,9 +15,9 @@ __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
 import sys
-import _moose
+from . import _moose
 import inspect
-import print_utils as debug
+from . import print_utils as debug
 import re
 
 pathPat = re.compile(r'.+?\[\d+\]$')

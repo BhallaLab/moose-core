@@ -16,9 +16,9 @@ __maintainer__       = "Dilawar Singh"
 __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
-import _moose
-import print_utils
-import verification_utils 
+from . import _moose
+from . import print_utils
+from . import verification_utils 
 
 def recordTarget(tablePath, target, field = 'vm', **kwargs):
     """Setup a table to record at given path.
