@@ -33,6 +33,11 @@ const double NATURAL_E = 2.718281828459045;
 #define M_PI 3.14159265358979323846             
 #endif
 
+#ifndef M_E
+#define M_E  2.7182818284590452353
+#endif
+
+
 /**
  * Functions for floating point comparisons
  */
