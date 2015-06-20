@@ -276,7 +276,7 @@ void PyRun::trigger(const Eref& e, double input)
     if (PyDict_SetItemString(locals_, inputvar_.c_str(), value)){
         PyErr_Print();
     }
-    PyEval_EvalCode((PyObject*)runcompiled_, globals_, locals_);
+    PyEval_EvalCode(runcompiled_, globals_, locals_);
     if (PyErr_Occurred()){
         PyErr_Print ();
     }
