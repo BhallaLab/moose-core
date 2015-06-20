@@ -44,9 +44,9 @@ def main():
     for p in [p1, p2, p3, p4]:
         m = objPathPat.match(p)
         if m:
-            print m.group(0)
+            print(m.group(0))
         else:
-            print("{} is invalid Obj path in moose".format( p ))
+            print(("{} is invalid Obj path in moose".format( p )))
 
 if __name__ == '__main__':
     main()
