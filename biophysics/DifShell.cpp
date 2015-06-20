@@ -10,7 +10,7 @@
 
 #include "header.h"
 #include "DifShell.h"
-#include "numutil.h"
+#include "../utility/numutil.h"
 #include <cmath>
 
 static SrcFinfo1< double >* concentrationOut()
