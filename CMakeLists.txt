@@ -336,10 +336,10 @@ else(BUILD_MOOGLI)
 endif()
 
 ######################### INSTALL ##############################################
-#install(TARGETS moose
-#    DESTINATION lib
-#    COMPONENT moose-core
-#    )
+install(TARGETS moose
+    DESTINATION lib
+    COMPONENT moose-core
+    )
 
 install(TARGETS moose-bin
     DESTINATION bin
