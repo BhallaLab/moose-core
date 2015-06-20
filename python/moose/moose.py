@@ -31,7 +31,8 @@
 
 # Code:
 
-import cStringIO
+from __future__ import print_function
+import io
 from contextlib import closing
 import warnings
 import platform
@@ -77,7 +78,7 @@ def pwe():
 
     """
     pwe_ = _moose.getCwe()
-    print pwe_.getPath()
+    print(pwe_.getPath())
     return pwe_
     
 def le(el=None):
@@ -103,9 +104,9 @@ def le(el=None):
         el = element(el)
     elif isinstance(el, vec):
         el = el[0]    
-    print 'Elements under', el.path
+    print('Elements under', el.path)
     for ch in el.children:
-        print ch.path
+        print(ch.path)
     return [child.path for child in el.children]
 
 ce = setCwe # ce is a GENESIS shorthand for change element.
@@ -165,7 +166,7 @@ def showfield(el, field='*', showtype=False):
         value_field_dict = getFieldDict(el.className, 'valueFinfo')
         max_type_len = max([len(dtype) for dtype in list(value_field_dict.values())])
         max_field_len = max([len(dtype) for dtype in list(value_field_dict.keys())])
-        print '\n[', el.path, ']'
+        print('\n[', el.path, ']')
         for key, dtype in list(value_field_dict.items()):
             if dtype == 'bad' or key == 'this' or key == 'dummy' or key == 'me' or dtype.startswith('vector') or 'ObjId' in dtype:
                 continue
@@ -175,11 +176,11 @@ def showfield(el, field='*', showtype=False):
                 # The following hack is for handling both Python 2 and
                 # 3. Directly putting the print command in the if/else
                 # clause causes syntax error in both systems.
-                print typestr,
-            print key.ljust(max_field_len + 4), '=', value
+                print(typestr, end=' ')
+            print(key.ljust(max_field_len + 4), '=', value)
     else:
         try:
-            print field, '=', el.getField(field)
+            print(field, '=', el.getField(field))
         except AttributeError:
             pass # Genesis silently ignores non existent fields
 
@@ -235,12 +236,12 @@ def showmsg(el):
 
     """
     obj = element(el)
-    print 'INCOMING:'
+    print('INCOMING:')
     for msg in obj.msgIn:
-        print msg.e2.path, msg.destFieldsOnE2, '<---', msg.e1.path, msg.srcFieldsOnE1
-    print 'OUTGOING:'
+        print(msg.e2.path, msg.destFieldsOnE2, '<---', msg.e1.path, msg.srcFieldsOnE1)
+    print('OUTGOING:')
     for msg in obj.msgOut:
-        print msg.e1.path, msg.srcFieldsOnE1, '--->', msg.e2.path, msg.destFieldsOnE2
+        print(msg.e1.path, msg.srcFieldsOnE1, '--->', msg.e2.path, msg.destFieldsOnE2)
 
 def getfielddoc(tokens, indent=''):
     """Return the documentation for field specified by `tokens`.
@@ -305,7 +306,7 @@ def getmoosedoc(tokens, inherited=False):
     
     """
     indent = '    '
-    with closing(cStringIO.StringIO()) as docstring:
+    with closing(io.StringIO()) as docstring:
         if not tokens:
             return ""
         try:
@@ -408,7 +409,7 @@ def doc(arg, inherited=True, paged=True):
     if pager:
         pager(text)
     else:
-        print text
+        print(text)
                 
 
 # 
