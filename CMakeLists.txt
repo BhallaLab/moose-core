@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 2.6)
-CMAKE_POLICY(SET CMP0004 OLD)
+set(CMAKE_LEGACY_CYGWIN_WIN32 0)
+cmake_minimum_required(VERSION 2.8)
 project(moose)
 
 SET(CMAKE_INSTALL_PREFIX /usr)
@@ -139,7 +139,6 @@ set_target_properties(moose PROPERTIES COMPILE_FLAGS  "-DMOOSE_LIB")
 # Setup GSL
 if(GSL_FOUND)
     add_definitions(-DUSE_GSL)
-    #add_dependencies(moose GSL)
 endif()
 
 
