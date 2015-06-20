@@ -47,6 +47,7 @@
 
 #include "header.h"
 #include "../utility/utility.h"
+#include "../utility/numutil.h"
 #include "Variable.h"
 
 #include "Function.h"

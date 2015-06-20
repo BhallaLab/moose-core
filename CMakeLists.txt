@@ -162,8 +162,7 @@ find_package(MPI REQUIRED)
 set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
 
 ############################ CYMOOSE related macros. ########################
-set(CYMOOSE 1)
-if(CYMOOSE)
+if(BUILD_CYMOOSE)
     add_definitions("-DCYMOOSE -DCYTHON")
 endif()
 
@@ -259,10 +258,10 @@ target_link_libraries(moose-bin
     )
 
 ######################### BUILD PYMOOSE ########################################
-set(BUILD_PYMOOSE 1)
+option(BUILD_PYMOOSE "Build native python extension of MOOSE" 1)
 if(BUILD_PYMOOSE)
+    message("++ Building native python extension of MOOSE")
     find_package(NumpyHeaders)
-
     if(PYTHON_NUMPY_FOUND)
         add_definitions(-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
         include_directories(${PYTHON_NUMPY_INCLUDE_DIR})
@@ -299,7 +298,9 @@ if(BUILD_PYMOOSE)
 endif(BUILD_PYMOOSE)
 
 ######################### CYMOOSE #############################################
-if(CYMOOSE)
+option(BUILD_CYMOOSE "Build python extension using Cython. Development version." 0)
+if(BUILD_CYMOOSE)
+    message("++ Building cython extension of MOOSE. Unstable and experimental.")
     add_library(cymoose SHARED cymoose/cymoose_methods.cxx)
     set_target_properties(moose PROPERTIES COMPILE_DEFINITIONS "CYMOOSE")
     if(DEBUG)
