@@ -1,5 +1,6 @@
 set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 cmake_minimum_required(VERSION 2.8)
+cmake_policy(SET CMP0004 OLD)
 project(moose)
 
 SET(CMAKE_INSTALL_PREFIX /usr)
@@ -336,10 +337,10 @@ else(BUILD_MOOGLI)
 endif()
 
 ######################### INSTALL ##############################################
-install(TARGETS moose
-    DESTINATION lib
-    COMPONENT moose-core
-    )
+#install(TARGETS moose
+#    DESTINATION lib
+#    COMPONENT moose-core
+#    )
 
 install(TARGETS moose-bin
     DESTINATION bin
