@@ -132,8 +132,8 @@ FIND_PACKAGE(PythonDev REQUIRED)
 ################################### SETUP BUILD ################################
 include_directories(msg basecode)
 add_executable(moose-bin basecode/main.cpp)
-add_library(moose SHARED basecode/main.cpp)
-set_target_properties(moose PROPERTIES COMPILE_FLAGS  "-DMOOSE_LIB")
+#add_library(moose SHARED basecode/main.cpp)
+#set_target_properties(moose PROPERTIES COMPILE_FLAGS  "-DMOOSE_LIB")
 
 ## GSL
 # Setup GSL
@@ -240,15 +240,15 @@ set(MOOSE_LIBRARIES
     signeur
     tinyxml
     diffusion 
-    basecode
-    device
     ksolve
+    device
+    basecode
     )
 
-target_link_libraries(moose
-    ${MOOSE_LIBRARIES}
-    ${LIBRARIES}
-    )
+#target_link_libraries(moose
+#    ${MOOSE_LIBRARIES}
+#    ${LIBRARIES}
+#    )
 
 target_link_libraries(moose-bin 
     "-Wl,--whole-archive"
@@ -336,10 +336,10 @@ else(BUILD_MOOGLI)
 endif()
 
 ######################### INSTALL ##############################################
-install(TARGETS moose
-    DESTINATION lib
-    COMPONENT moose-core
-    )
+#install(TARGETS moose
+#    DESTINATION lib
+#    COMPONENT moose-core
+#    )
 
 install(TARGETS moose-bin
     DESTINATION bin
