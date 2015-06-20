@@ -121,19 +121,19 @@ extern "C" {
          moose_Id_setField_doc},
         {NULL, NULL, 0, NULL},        /* Sentinel */        
     };
-
+    
     static PySequenceMethods IdSequenceMethods = {
         (lenfunc)moose_Id_getLength, // sq_length
         0, //sq_concat
         0, //sq_repeat
         (ssizeargfunc)moose_Id_getItem, //sq_item
-#ifndef PY3K
+#ifndef PY3K        
         (ssizessizeargfunc)moose_Id_getSlice, // getslice
+#else
+        0,
 #endif
         0, //sq_ass_item
-#ifndef PY3K
         0, // setslice
-#endif
         (objobjproc)moose_Id_contains, // sq_contains
         0, // sq_inplace_concat
         0 // sq_inplace_repeat
