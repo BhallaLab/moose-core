@@ -1791,6 +1791,7 @@ void testHopFunc()
 void testAsync( )
 {
 	showFields();
+#ifdef DO_UNIT_TESTS
 	testSendMsg();
 	testCreateMsg();
 	testSetGet();
@@ -1819,4 +1820,5 @@ void testAsync( )
 	testCinfoElements();
 	testMsgSrcDestFields();
 	testHopFunc();
+#endif
 }
