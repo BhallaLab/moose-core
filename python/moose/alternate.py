@@ -283,9 +283,9 @@ elements under current working element
 from functools import partial
 import warnings
 from collections import defaultdict
-import _moose
-from _moose import __version__, VERSION, SVN_REVISION, useClock, setClock, start, reinit, stop, isRunning, loadModel, getFieldDict, getField, Id, ObjId, exists, seed
-from _moose import wildcardFind as _wildcardFind # We override the original
+from . import _moose
+from ._moose import __version__, VERSION, SVN_REVISION, useClock, setClock, start, reinit, stop, isRunning, loadModel, getFieldDict, getField, Id, ObjId, exists, seed
+from ._moose import wildcardFind as _wildcardFind # We override the original
 import __main__ as main
 
 sequence_types = [ 'vector<double>',
@@ -668,7 +668,7 @@ class Neutral(object):
         return self.oid_.getFieldNames(ftype)
 
     def getNeighbors(self, fieldName):
-        if fieldName in getFieldDict(self.className).keys():
+        if fieldName in list(getFieldDict(self.className).keys()):
             return [eval('%s("%s")' % (id_[0].getField('class'), id_.getPath())) for id_ in self.oid_.getNeighbors(fieldName)]
         raise ValueError('%s: no such field on %s' % (fieldName, self.path))
         
@@ -825,7 +825,7 @@ def getCwe():
 def pwe():
     """Print present working element. Convenience function for GENESIS
     users."""
-    print _moose.getCwe().getPath()
+    print(_moose.getCwe().getPath())
     
 def connect(src, srcMsg, dest, destMsg, msgType='Single'):
     """Connect src object's source field specified by srcMsg to
@@ -842,9 +842,9 @@ def le(element=None):
         element = getCwe()[0]
     elif isinstance(element, str):
         element = Neutral(element)
-    print 'Elements under', element.path
+    print('Elements under', element.path)
     for ch in element.children:
-        print ch
+        print(ch)
 
 ce = setCwe
 
@@ -884,20 +884,20 @@ def showfield(element, field='*', showtype=False):
         element = Neutral(element)
     if field == '*':        
         value_field_dict = getFieldDict(element.className, 'valueFinfo')
-        max_type_len = max([len(dtype) for dtype in value_field_dict.values()])
-        max_field_len = max([len(dtype) for dtype in value_field_dict.keys()])
-        print 
-        print '[', element.path, ']'
-        for key, dtype in value_field_dict.items():
+        max_type_len = max([len(dtype) for dtype in list(value_field_dict.values())])
+        max_field_len = max([len(dtype) for dtype in list(value_field_dict.keys())])
+        print() 
+        print('[', element.path, ']')
+        for key, dtype in list(value_field_dict.items()):
             if dtype == 'bad' or key == 'this' or key == 'dummy' or key == 'me' or dtype.startswith('vector') or 'ObjId' in dtype:
                 continue
             value = element.oid_.getField(key)
             if showtype:
-                print dtype.ljust(max_type_len + 4),
-            print key.ljust(max_field_len + 4), '=', value
+                print(dtype.ljust(max_type_len + 4), end=' ')
+            print(key.ljust(max_field_len + 4), '=', value)
     else:
         try:
-            print field, '=', element.getField(field)
+            print(field, '=', element.getField(field))
         except AttributeError:
             pass # Genesis silently ignores non existent fields
 
@@ -1002,7 +1002,7 @@ def update_class(cls, class_id):
 def define_class(class_id):
     """Define a class based on Cinfo element with Id=class_id."""
     class_name = class_id[0].getField('name')
-    if class_name in globals().keys():
+    if class_name in list(globals().keys()):
         return
     base = class_id[0].getField('baseClass')
     if base != 'none':

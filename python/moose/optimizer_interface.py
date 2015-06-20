@@ -17,7 +17,7 @@
 # Code:
 
 import os
-import moose
+from . import moose
 
 class OptimizerInterface:
     """
