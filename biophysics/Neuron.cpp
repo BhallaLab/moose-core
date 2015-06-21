@@ -402,6 +402,13 @@ const Cinfo* Neuron::initCinfo()
 		"the Spine can propagate to the chem systems.",
 		new OpFunc2< Neuron, Id, Id >( &Neuron::setSpineAndPsdMesh )
 	);
+	static DestFinfo setSpineAndPsdDsolve( "setSpineAndPsdDsolve",
+		"Assigns the Dsolves used by spine and PSD to the Neuron. "
+		"This is used "
+		"to handle the rescaling of diffusion rates when spines are "
+		"resized. ",
+		new OpFunc2< Neuron, Id, Id >( &Neuron::setSpineAndPsdDsolve )
+	);
 
 	/*
 	static DestFinfo rotateInSpace( "rotateInSpace",
@@ -454,6 +461,7 @@ const Cinfo* Neuron::initCinfo()
 		&spinesFromExpression,  	// ReadOnlyLookupValueFinfo
 		&buildSegmentTree,			// DestFinfo
 		&setSpineAndPsdMesh,		// DestFinfo
+		&setSpineAndPsdDsolve,		// DestFinfo
 		&spineFinfo,				// FieldElementFinfo
 	};
 	static string doc[] =
@@ -1232,6 +1240,12 @@ void Neuron::setSpineAndPsdMesh( Id spineMesh, Id psdMesh )
 	}
 }
 
+void Neuron::setSpineAndPsdDsolve( Id spineDsolve, Id psdDsolve )
+{
+	headDsolve_ = spineDsolve;
+	psdDsolve_ = psdDsolve;
+}
+
 /////////////////////////////////////////////////////////////////////////
 // Here we set up the more general specification of mechanisms. Each
 // line is 
@@ -1783,14 +1797,39 @@ void Neuron::scaleBufAndRates( unsigned int spineNum,
 				spineToMeshOrdering_[spineNum], volScale );
 }
 
+/// Scale the diffusion parameters due to a change in the shaft dimensions
 void Neuron::scaleShaftDiffusion( unsigned int spineNum, 
 				double len, double dia) const
 {
-		;
+	double diffScale = dia * dia * 0.25 * PI / len;
+	SetGet2< unsigned int, double >::set( 
+		// Note that the buildNeuroMeshJunctions function is called
+		// on the dendDsolve with the args smdsolve, pmdsolve.
+		headDsolve_, "setDiffScale", 
+		spineToMeshOrdering_[ spineNum ], diffScale );
 }
 
+/// Scale the diffusion parameters due to a change in the head dimensions
 void Neuron::scaleHeadDiffusion( unsigned int spineNum, 
 				double len, double dia) const
 {
-		;
+	double vol = len * dia * dia * PI * 0.25;
+	double diffScale = dia * dia * 0.25 * PI / len;
+	unsigned int meshIndex = spineToMeshOrdering_[ spineNum ];
+	Id headCompt = Field< Id >::get( headDsolve_, "compartment" );
+	LookupField< unsigned int, double >::set( headCompt, "oneVoxelVolume",
+					meshIndex, vol );
+	Id psdCompt = Field< Id >::get( psdDsolve_, "compartment" );
+	double thick = Field< double >::get( psdCompt, "thickness" );
+	double psdVol = thick * dia * dia * PI * 0.25;
+	LookupField< unsigned int, double >::set( psdCompt, "oneVoxelVolume",
+					meshIndex, psdVol );
+	SetGet2< unsigned int, double >::set( 
+		headDsolve_, "setDiffVol1", meshIndex, vol );
+	SetGet2< unsigned int, double >::set( 
+		psdDsolve_, "setDiffVol2", meshIndex, vol );
+	SetGet2< unsigned int, double >::set( 
+		psdDsolve_, "setDiffVol1", meshIndex, psdVol );
+	SetGet2< unsigned int, double >::set( 
+		psdDsolve_, "setDiffScale", meshIndex, diffScale );
 }

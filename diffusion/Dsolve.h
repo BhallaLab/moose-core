@@ -53,6 +53,14 @@ class Dsolve: public ZombiePoolInterface
 		vector< double > getNvec( unsigned int pool ) const;
 		void setNvec( unsigned int pool, vector< double > vec );
 
+		/// LookupFied for examining cross-solver diffusion terms.
+		double getDiffVol1( unsigned int voxel ) const;
+		void setDiffVol1( unsigned int voxel, double vol );
+		double getDiffVol2( unsigned int voxel ) const;
+		void setDiffVol2( unsigned int voxel, double vol );
+		double getDiffScale( unsigned int voxel ) const;
+		void setDiffScale( unsigned int voxel, double scale );
+
 		//////////////////////////////////////////////////////////////////
 		// Dest Finfos
 		//////////////////////////////////////////////////////////////////

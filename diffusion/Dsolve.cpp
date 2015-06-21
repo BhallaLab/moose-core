@@ -90,6 +90,31 @@ const Cinfo* Dsolve::initCinfo()
 			&Dsolve::getCompartment
 		);
 
+		static LookupValueFinfo< Dsolve, unsigned int, double > diffVol1 (
+			"diffVol1",
+			"Volume used to set diffusion scaling: firstVol[ voxel# ] "
+			"Particularly relevant for diffusion between PSD and head.",
+			&Dsolve::setDiffVol1,
+			&Dsolve::getDiffVol1
+		);
+
+		static LookupValueFinfo< Dsolve, unsigned int, double > diffVol2 (
+			"diffVol2",
+			"Volume used to set diffusion scaling: secondVol[ voxel# ] "
+			"Particularly relevant for diffusion between spine and dend.",
+			&Dsolve::setDiffVol2,
+			&Dsolve::getDiffVol2
+		);
+
+		static LookupValueFinfo< Dsolve, unsigned int, double > diffScale (
+			"diffScale",
+			"Geometry term to set diffusion scaling: diffScale[ voxel# ] "
+			"Here the scaling term is given by cross-section area/length "
+			"Relevant for diffusion between spine head and dend, or PSD.",
+			&Dsolve::setDiffScale,
+			&Dsolve::getDiffScale
+		);
+
 
 		///////////////////////////////////////////////////////
 		// DestFinfo definitions
@@ -106,7 +131,7 @@ const Cinfo* Dsolve::initCinfo()
 			"Builds junctions between NeuroMesh, SpineMesh and PsdMesh",
 			new EpFunc2< Dsolve, Id, Id >( 
 					&Dsolve::buildNeuroMeshJunctions ) );
-		
+
 		///////////////////////////////////////////////////////
 		// Shared definitions
 		///////////////////////////////////////////////////////
@@ -127,6 +152,9 @@ const Cinfo* Dsolve::initCinfo()
 		&numAllVoxels,			// ReadOnlyValue
 		&nVec,				// LookupValue
 		&numPools,			// Value
+		&diffVol1,				// LookupValue
+		&diffVol2,				// LookupValue
+		&diffScale,				// LookupValue
 		&buildNeuroMeshJunctions, 	// DestFinfo
 		&proc,				// SharedFinfo
 	};
@@ -183,6 +211,72 @@ vector< double > Dsolve::getNvec( unsigned int pool ) const
 
 	cout << "Warning: Dsolve::setNvec: pool index out of range\n";
 	return ret;
+}
+
+static bool checkJn( const vector< DiffJunction >& jn, unsigned int voxel,
+				const string& info )
+{
+	if ( jn.size() < 1 ) {
+		cout << "Warning: Dsolve::" << info << ": junctions not defined.\n";
+		return false;
+	}
+	if ( jn[0].vj.size() < voxel + 1 ) {
+		cout << "Warning: Dsolve:: " << info << ": " << voxel <<
+				"out of range.\n";
+		return false;
+	}
+	return true;
+}
+
+void Dsolve::setDiffVol1( unsigned int voxel, double vol )
+{
+ 	if ( checkJn( junctions_, voxel, "setDiffVol1" ) ) {
+		VoxelJunction& vj = junctions_[0].vj[ voxel ];
+		vj.firstVol = vol;
+	}
+}
+
+double Dsolve::getDiffVol1( unsigned int voxel ) const
+{
+ 	if ( checkJn( junctions_, voxel, "getDiffVol1" ) ) {
+		const VoxelJunction& vj = junctions_[0].vj[ voxel ];
+		return vj.firstVol;
+	}
+	return 0.0;
+}
+
+void Dsolve::setDiffVol2( unsigned int voxel, double vol )
+{
+ 	if ( checkJn( junctions_, voxel, "setDiffVol2" ) ) {
+		VoxelJunction& vj = junctions_[0].vj[ voxel ];
+		vj.secondVol = vol;
+	}
+}
+
+double Dsolve::getDiffVol2( unsigned int voxel ) const
+{
+ 	if ( checkJn( junctions_, voxel, "getDiffVol2" ) ) {
+		const VoxelJunction& vj = junctions_[0].vj[ voxel ];
+		return vj.secondVol;
+	}
+	return 0.0;
+}
+
+void Dsolve::setDiffScale( unsigned int voxel, double adx )
+{
+ 	if ( checkJn( junctions_, voxel, "setDiffScale" ) ) {
+		VoxelJunction& vj = junctions_[0].vj[ voxel ];
+		vj.diffScale = adx;
+	}
+}
+
+double Dsolve::getDiffScale( unsigned int voxel ) const
+{
+ 	if ( checkJn( junctions_, voxel, "getDiffScale" ) ) {
+		const VoxelJunction& vj = junctions_[0].vj[ voxel ];
+		return vj.diffScale;
+	}
+	return 0.0;
 }
 
 //////////////////////////////////////////////////////////////

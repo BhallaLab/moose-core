@@ -134,7 +134,7 @@ void HSolve::setRa( Id id, double value )
 {
     unsigned int index = localIndex( id );
     assert( index < tree_.size() );
-    tree_[ index ].initVm = value;
+    tree_[ index ].Ra = value;
 }
 
 double HSolve::getInitVm( Id id ) const
