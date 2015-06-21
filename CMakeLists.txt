@@ -443,6 +443,16 @@ ENABLE_TESTING()
 # onto the console if a test fails.
 SET(ENV{CTEST_OUTPUT_ON_FAILURE} ON)
 
+if (CMAKE_CONFIGURATION_TYPES)
+    add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} 
+        --force-new-ctest-process --output-on-failure 
+        --build-config "Debug")
+else()
+    add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} 
+        --force-new-ctest-process
+        --output-on-failure)
+endif()
+
 ADD_TEST(NAME moose-bin-raw-run
     COMMAND echo q | moose-bin -u
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
