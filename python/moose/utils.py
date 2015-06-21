@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """utils.py:
 
     Utility functions for moose.
@@ -6,8 +5,9 @@
     Last modified: Mon Feb 23, 2015  08:34PM
 
 """
+from __future__ import print_function
 
-__author__           = 'Subhasis Ray, Aditya Gilra, Dilawar Singh, NCBS'
+__author__           = 'Subhasis Ray, Aditya Gilra, Dilawar Singh'
 __copyright__        = "Copyright 2013, NCBS Bangalore"
 __credits__          = ["NCBS Bangalore", "Bhalla Lab"]
 __license__          = "GPL"
