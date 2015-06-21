@@ -244,7 +244,7 @@ class rdesigneur:
                 #moose.copy('/library/' + protoVec[0], '/library/', protoVec[1])
                 print 'renaming /library/' + protoVec[0] + ' to ' + protoVec[1]
                 moose.element( '/library/' + protoVec[0]).name = protoVec[1]
-                moose.le( '/library' )
+                #moose.le( '/library' )
                 return True
         # Check if there is a matching suffix for file type.
         if self.isKnownClassOrFile( protoVec[0], knownFileTypes ):
@@ -652,11 +652,15 @@ class rdesigneur:
         dmdsolve.buildNeuroMeshJunctions( smdsolve, pmdsolve )
         # Put in cross-compartment reactions between ksolvers
         smstoich.buildXreacs( pmstoich )
+        #pmstoich.buildXreacs( smstoich )
         smstoich.buildXreacs( dmstoich )
-        #smstoich.buildXreacs( pmstoich )
         dmstoich.filterXreacs()
         smstoich.filterXreacs()
         pmstoich.filterXreacs()
+
+        # set up the connections so that the spine volume scaling can happen
+        self.elecid.setSpineAndPsdMesh( self.spineCompt, self.psdCompt )
+        self.elecid.setSpineAndPsdDsolve( smdsolve, pmdsolve )
     ################################################################
     
     def _loadChem( self, fname, chemName ):

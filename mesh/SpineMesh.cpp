@@ -310,6 +310,14 @@ double SpineMesh::getMeshEntryVolume( unsigned int fid ) const
 	assert( fid < spines_.size() );
 	return spines_[ fid % spines_.size() ].volume();
 }
+/// Virtual function to assign volume of mesh Entry.
+void SpineMesh::setMeshEntryVolume( unsigned int fid, double volume ) 
+{
+	if ( spines_.size() == 0 )
+		return;
+	assert( fid < spines_.size() );
+	spines_[ fid % spines_.size() ].setVolume( volume );
+}
 
 /// Virtual function to return coords of mesh Entry.
 /// For SpineMesh, coords are x1y1z1 x2y2z2 x3y3z3 r0 r1
