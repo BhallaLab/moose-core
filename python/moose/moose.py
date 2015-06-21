@@ -311,7 +311,7 @@ def getmoosedoc(tokens, inherited=False):
             return ""
         try:
             class_element = _moose.element('/classes/%s' % (tokens[0]))
-            docstring.write('%s\n' % (class_element.docs))
+            docstring.write(u'%s\n' % (class_element.docs))
         except ValueError:
             raise NameError('name \'%s\' not defined.' % (tokens[0]))
         if len(tokens) > 1:
