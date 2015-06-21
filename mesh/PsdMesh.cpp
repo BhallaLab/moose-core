@@ -177,9 +177,13 @@ void PsdMesh::setThickness( double v )
 
 /**
  * Returns index of voxel on NeuroMesh to which this spine is connected.
+ * This isn't such a great function, as it only works if the spine is
+ * sitting directly on the NeuroMesh. Otherwise it returns the vector
+ * of voxels of parent spine heads, which isn't what the name indicates.
  */
 vector< unsigned int > PsdMesh::getNeuronVoxel() const
 {
+	cout << "Warning: PsdMesh::getNeuronVoxel. Currently not working\n";
 	return parent_;
 }
 
@@ -223,7 +227,10 @@ unsigned int PsdMesh::innerGetDimensions() const
 void PsdMesh::handlePsdList( 
 		const Eref& e,
 		vector< double > diskCoords, //ctr(xyz), dir(xyz), dia, diffDist
+		// The elecCompt refers to the spine head elec compartment.
 		vector< Id > elecCompt,
+		// The parentVoxel is just a vector where parentVoxel[i] == i
+		// Thus the parent voxel is the spine head with the same index
 		vector< unsigned int > parentVoxel )
 {
 		double oldVol = getMeshEntryVolume( 0 );
@@ -305,6 +312,18 @@ double PsdMesh::getMeshEntryVolume( unsigned int fid ) const
 		return 1.0;
 	assert( fid < psd_.size() );
 	return thickness_ * psd_[ fid ].getDiffusionArea( pa_[fid], 0 );
+}
+
+/// Virtual function to assign volume of mesh Entry. Thickness not touched.
+void PsdMesh::setMeshEntryVolume( unsigned int fid, double volume )
+{
+	if ( psd_.size() == 0 ) // Default for meshes before init.
+		return;
+	assert( fid < psd_.size() );
+	vs_[fid] = volume;
+	area_[fid] = volume / thickness_;
+	double dia = 2.0 * sqrt( area_[fid] / PI );
+	psd_[ fid ].setDia( dia );
 }
 
 /// Virtual function to return coords of mesh Entry.
@@ -484,6 +503,9 @@ void PsdMesh::matchSpineMeshEntries( const ChemCompt* other,
 	}
 }
 
+// This only makes sense if the PSD is directly on the NeuroMesh, that is,
+// no spine shaft or head. In this case the parent_ vector must refer to
+// the parent compartment on the NeuroMesh.
 void PsdMesh::matchNeuroMeshEntries( const ChemCompt* other,
 	   vector< VoxelJunction >& ret ) const
 {
@@ -579,6 +601,7 @@ bool PsdMesh::vSetVolumeNotRates( double volume )
 	assert( vs_.size() == psd_.size() );
 	assert( area_.size() == psd_.size() );
 	assert( length_.size() == psd_.size() );
+	thickness_ *= linscale;
 	for ( unsigned int i = 0; i < psd_.size(); ++i ) {
 		psd_[i].setLength( psd_[i].getLength() * linscale );
 		psd_[i].setDia( psd_[i].getDia() * linscale );

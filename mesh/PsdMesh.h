@@ -42,6 +42,7 @@ class PsdMesh: public MeshCompt
 		void updateCoords();
 
 		/// Return voxel# on parent compartment on spine or dendrite.
+		/// For now PSD is always on spine, so it just returns the index.
 		unsigned int parent( unsigned int index ) const;
 
 		//////////////////////////////////////////////////////////////////
@@ -73,6 +74,8 @@ class PsdMesh: public MeshCompt
 		unsigned int getMeshDimensions( unsigned int fid ) const;
 		/// Virtual function to return volume of mesh Entry.
 		double getMeshEntryVolume( unsigned int fid ) const;
+		/// Virtual function to set volume of mesh Entry.
+		void setMeshEntryVolume( unsigned int fid, double volume );
 		/// Virtual function to return coords of mesh Entry.
 		vector< double > getCoordinates( unsigned int fid ) const;
 		/// Virtual function to return diffusion X-section area
