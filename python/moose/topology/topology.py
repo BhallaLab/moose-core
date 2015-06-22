@@ -41,7 +41,7 @@ class Network(object):
     def computeNodePositions(self):
         for n, d in self.graph.nodes(data=True):
             if d['type'] == moose.Compartment:
-                print d
+                print(d)
 
     def addMessage(self, m):
         e1, e2 = m.e1, m.e2
@@ -62,7 +62,7 @@ def writeNetwork(filename=None, **kwargs):
     network = Network(filename)
     network.build()
     if not filename:
-        print network.graph
+        print(network.graph)
         pu.debug("Plotting network")
         #nx.draw_networkx(network.graph, with_labels=False)
         #plt.show()
