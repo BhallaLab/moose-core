@@ -8,6 +8,9 @@ install:
     - wget ftp://ftp.gnu.org/gnu/gsl/gsl-1.16.tar.gz
     - tar -xzvf gsl-1.16.tar.gz
     - cd gsl-1.16 && ./configure --prefix=/usr && make && sudo make install
+    - wget http://sourceforge.net/projects/sbml/files/libsbml/5.11.4/stable/libSBML-5.11.4-core-src.tar.gz
+    - tar -xzvf libSBML-5.11.4-core-src.tar.gz 
+    - cd libSBML-5.11.4 && mkdir _build && cmake .. && make && sudo make install
 script: 
     - mkdir -p _build && cd _build && cmake -DDEBUG=OFF ..  && make
 
