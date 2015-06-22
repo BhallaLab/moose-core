@@ -2,6 +2,7 @@ cache: apt
 before_script: 
     - sudo apt-get install libhdf5-openmpi-dev
     - sudo apt-get install python-numpy python-setuptools
+    - sudo apt-get install libgsl0-dev 
     - sudo apt-get install make texinfo
 script: 
     - mkdir -p _build && cd _build && cmake -DDEBUG=OFF  && make
