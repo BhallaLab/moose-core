@@ -21,12 +21,12 @@ __status__           = "Development"
 
 import sys
 import sys
-import _moose as moose
+from . import _moose as moose
 import unittest
 import inspect
-import print_utils as debug
+from . import print_utils as debug
 import numpy as np
-from backend import backend
+from .backend import backend
 
 
 class MooseTestCase( unittest.TestCase ):
@@ -36,7 +36,7 @@ class MooseTestCase( unittest.TestCase ):
         caller = inspect.stack()[1][3]
         if type(msg) == list:
             msg = '\n\t|- '.join(msg)
-        print('[VERIFY] {:80s}[{}]'.format(msg, caller))
+        print(('[VERIFY] {:80s}[{}]'.format(msg, caller)))
         
     def setUp(self):
         '''Initialize storehouse

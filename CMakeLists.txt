@@ -1,5 +1,6 @@
-cmake_minimum_required(VERSION 2.6)
-
+set(CMAKE_LEGACY_CYGWIN_WIN32 0)
+cmake_minimum_required(VERSION 2.8)
+cmake_policy(SET CMP0004 OLD)
 project(moose)
 
 SET(CMAKE_INSTALL_PREFIX /usr)
@@ -21,6 +22,8 @@ if( CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT MSVC_IDE )
         Please delete them."
         )
 endif()
+################################# OS SPECIFIC ##################################
+
 
 ################################# CMKAE MACROS #################################
 
@@ -135,14 +138,13 @@ FIND_PACKAGE(PythonDev REQUIRED)
 ################################### SETUP BUILD ################################
 include_directories(msg basecode)
 add_executable(moose-bin basecode/main.cpp)
-add_library(moose SHARED basecode/main.cpp)
-set_target_properties(moose PROPERTIES COMPILE_FLAGS  "-DMOOSE_LIB")
+#add_library(moose SHARED basecode/main.cpp)
+#set_target_properties(moose PROPERTIES COMPILE_FLAGS  "-DMOOSE_LIB")
 
 ## GSL
 # Setup GSL
 if(GSL_FOUND)
     add_definitions(-DUSE_GSL)
-    add_dependencies(moose GSL)
 endif()
 
 
@@ -166,8 +168,7 @@ find_package(MPI REQUIRED)
 set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
 
 ############################ CYMOOSE related macros. ########################
-set(CYMOOSE 1)
-if(CYMOOSE)
+if(BUILD_CYMOOSE)
     add_definitions("-DCYMOOSE -DCYTHON")
 endif()
 
@@ -238,22 +239,22 @@ set(MOOSE_LIBRARIES
     utility 
     muparser
     kinetics 
+    synapse
+    intfire
     hsolve 
     mesh
     signeur
     tinyxml
-    synapse
     diffusion 
-    basecode
-    device
     ksolve
-    intfire
+    device
+    basecode
     )
 
-target_link_libraries(moose
-    ${MOOSE_LIBRARIES}
-    ${LIBRARIES}
-    )
+#target_link_libraries(moose
+#    ${MOOSE_LIBRARIES}
+#    ${LIBRARIES}
+#    )
 
 target_link_libraries(moose-bin 
     "-Wl,--whole-archive"
@@ -263,10 +264,10 @@ target_link_libraries(moose-bin
     )
 
 ######################### BUILD PYMOOSE ########################################
-set(BUILD_PYMOOSE 1)
+option(BUILD_PYMOOSE "Build native python extension of MOOSE" 1)
 if(BUILD_PYMOOSE)
+    message("++ Building native python extension of MOOSE")
     find_package(NumpyHeaders)
-
     if(PYTHON_NUMPY_FOUND)
         add_definitions(-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
         include_directories(${PYTHON_NUMPY_INCLUDE_DIR})
@@ -303,7 +304,9 @@ if(BUILD_PYMOOSE)
 endif(BUILD_PYMOOSE)
 
 ######################### CYMOOSE #############################################
-if(CYMOOSE)
+option(BUILD_CYMOOSE "Build python extension using Cython. Development version." 0)
+if(BUILD_CYMOOSE)
+    message("++ Building cython extension of MOOSE. Unstable and experimental.")
     add_library(cymoose SHARED cymoose/cymoose_methods.cxx)
     set_target_properties(moose PROPERTIES COMPILE_DEFINITIONS "CYMOOSE")
     if(DEBUG)
@@ -339,10 +342,10 @@ else(BUILD_MOOGLI)
 endif()
 
 ######################### INSTALL ##############################################
-install(TARGETS moose
-    LIBRARY DESTINATION lib
-    COMPONENT moose-core
-    )
+#install(TARGETS moose
+#    DESTINATION lib
+#    COMPONENT moose-core
+#    )
 
 install(TARGETS moose-bin
     DESTINATION bin
@@ -445,6 +448,16 @@ ENABLE_TESTING()
 # onto the console if a test fails.
 SET(ENV{CTEST_OUTPUT_ON_FAILURE} ON)
 
+if (CMAKE_CONFIGURATION_TYPES)
+    add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} 
+        --force-new-ctest-process --output-on-failure 
+        --build-config "Debug")
+else()
+    add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} 
+        --force-new-ctest-process
+        --output-on-failure)
+endif()
+
 ADD_TEST(NAME moose-bin-raw-run
     COMMAND echo q | moose-bin -u
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
@@ -472,3 +485,7 @@ ADD_TEST(NAME pymoose-test-vec
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests/python
     )
     
+ADD_TEST(NAME pymoose-snippets
+    COMMAND ${PYTHON_EXECUTABLE} test_snippets.py
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/Demos/snippets
+    )
