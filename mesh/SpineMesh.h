@@ -79,6 +79,8 @@ class SpineMesh: public MeshCompt
 		unsigned int getMeshDimensions( unsigned int fid ) const;
 		/// Virtual function to return volume of mesh Entry.
 		double getMeshEntryVolume( unsigned int fid ) const;
+		/// Virtual function to assign volume of mesh Entry.
+		void setMeshEntryVolume( unsigned int fid, double volume );
 		/// Virtual function to return coords of mesh Entry.
 		vector< double > getCoordinates( unsigned int fid ) const;
 		/// Virtual function to return diffusion X-section area

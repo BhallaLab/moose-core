@@ -50,6 +50,8 @@ class ChemCompt
 		 * Returns volume of specified voxel
 		 */
 		double getOneVoxelVolume( const Eref& e, unsigned int voxel ) const;
+		void setOneVoxelVolume( const Eref& e, unsigned int voxel, 
+						double volume );
 
 		/**
 		 * Returns # of dimensions of mesh. 
@@ -262,6 +264,11 @@ class ChemCompt
 		/// Virtual function to return volume of mesh Entry.
 		virtual double getMeshEntryVolume( unsigned int fid ) 
 			const = 0;
+		//
+		/// Virtual function to assign volume of mesh Entry. Does nothing
+		/// in most cases, but is operational in SpineMesh and PsdMesh.
+		virtual void setMeshEntryVolume( unsigned int fid, double volume );
+
 		/// Virtual function to return coords of mesh Entry.
 		virtual vector< double > getCoordinates( unsigned int fid ) 
 			const = 0;
