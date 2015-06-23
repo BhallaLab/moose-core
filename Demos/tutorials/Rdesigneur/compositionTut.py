@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 import sys
 import os
 from moose.neuroml.ChannelML import ChannelML
-sys.path.append('/home/bhalla/moose/trunk/Demos/util')
+sys.path.append('../../../Demos/util')
 import rdesigneur as rd
 
 PI = 3.14159265359
