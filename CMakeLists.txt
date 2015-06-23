@@ -455,7 +455,7 @@ else()
 endif()
 
 ADD_TEST(NAME moose-bin-raw-run
-    COMMAND moose-bin -u
+    COMMAND moose-bin -u -q
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     )
 
