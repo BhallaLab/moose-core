@@ -24,15 +24,13 @@ install:
     - wget ftp://ftp.gnu.org/gnu/gsl/gsl-1.16.tar.gz
     - tar -xzvf gsl-1.16.tar.gz
     - cd gsl-1.16 && ./configure --prefix=/usr && make && sudo make install && cd ..
-    - wget http://sourceforge.net/projects/sbml/files/libsbml/5.11.4/stable/libSBML-5.11.4-core-src.tar.gz
-    - tar -xzvf libSBML-5.11.4-core-src.tar.gz 
-    - cd libsbml-5.11.4 && ./configure --prefix=/usr --with-zlib --with-bzip2 && make && sudo make install && cd ..
-    - sudo pip install cpp-coveralls;
+      #- wget http://sourceforge.net/projects/sbml/files/libsbml/5.11.4/stable/libSBML-5.11.4-core-src.tar.gz
+      #- tar -xzvf libSBML-5.11.4-core-src.tar.gz 
+      #- cd libsbml-5.11.4 && ./configure --prefix=/usr --with-zlib --with-bzip2 && make && sudo make install && cd ..
 script: 
-    - mkdir -p _build && cd _build && cmake -DDEBUG=OFF ..  && make 
+    - mkdir -p _build && cd _build && cmake -DDEBUG=OFF -DCMAKE_VERBOSE_MAKEFILE=0 ..  && make VERBOSE=0
     - ctest ${CTEST_ARGS} --output-on-failure 
 
 after_success:
-    - if [[ "$CXX" == "g++" ]]; then
-         coveralls -b build -E ".*CMakeFiles.*" -e cli -e test -e tmp --gcov gcov-4.8 --gcov-options '\-lp' > /dev/null ;
-      fi
+    - sudo pip install cpp-coveralls;
+    - coveralls -b build -E ".*CMakeFiles.*" -e cli -e test -e tmp --gcov gcov-4.8 --gcov-options '\-lp' > /dev/null;
