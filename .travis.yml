@@ -1,13 +1,17 @@
 language: cpp
 compiler: 
     - gcc
-    - clang
+os:
+    - linux
+    - osx
+matrix:
+    allow_failures:
+        - os: osx
 branches:
     only:
         - master
         - trunk
 env:
-    - CTEST_MODEL=Experimental
     - CTEST_MODEL=Nightly 
 cache: apt
 before_script: 
@@ -23,8 +27,12 @@ install:
     - wget http://sourceforge.net/projects/sbml/files/libsbml/5.11.4/stable/libSBML-5.11.4-core-src.tar.gz
     - tar -xzvf libSBML-5.11.4-core-src.tar.gz 
     - cd libsbml-5.11.4 && ./configure --prefix=/usr --with-zlib --with-bzip2 && make && sudo make install && cd ..
-    - wget -qO- http://www.cmake.org/files/v3.1/cmake-3.1.0-Linux-x86_64.tar.gz | tar xvz
+    - sudo pip install cpp-coveralls;
 script: 
-    - mkdir -p _build && cd _build && cmake -DDEBUG=OFF ..  && make    
-    - ./cmake-3.1.0-Linux-x86_64/bin/ctest -VV -S 
+    - mkdir -p _build && cd _build && cmake -DDEBUG=OFF ..  && make 
+    - ctest ${CTEST_ARGS} --output-on-failure 
 
+after_success:
+    - if [[ "$CXX" == "g++" ]]; then
+         coveralls -b build -E ".*CMakeFiles.*" -e cli -e test -e tmp --gcov gcov-4.8 --gcov-options '\-lp' > /dev/null ;
+      fi
