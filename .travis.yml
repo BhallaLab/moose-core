@@ -1,3 +1,8 @@
+language: C++
+branches:
+    only:
+        - master
+        - trunk
 cache: apt
 before_script: 
     - sudo apt-get install libhdf5-openmpi-dev
