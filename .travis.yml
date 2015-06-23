@@ -11,6 +11,13 @@ branches:
     only:
         - master
         - trunk
+notifications:
+    email:
+        recipients:
+            - dilawar.s.rajput@gmail.com
+        on_success: change
+        on_failure: always
+
 env:
     - CTEST_MODEL=Nightly 
 cache: apt
