@@ -5,7 +5,7 @@ branches:
         - trunk
 cache: apt
 before_script: 
-    - sudo apt-get install libxml2-dev libbz2-dev libzlibg-dev
+    - sudo apt-get install libxml2-dev libbz2-dev 
     - sudo apt-get install libhdf5-openmpi-dev
     - sudo apt-get install python-numpy python-setuptools
     - sudo apt-get install make texinfo cmake 
