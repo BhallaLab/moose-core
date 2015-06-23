@@ -1,8 +1,14 @@
-language: C++
+language: cpp
+compiler: 
+    - gcc
+    - clang
 branches:
     only:
         - master
         - trunk
+env:
+    - CTEST_MODEL=Experimental
+    - CTEST_MODEL=Nightly 
 cache: apt
 before_script: 
     - sudo apt-get install libxml2-dev libbz2-dev 
@@ -17,6 +23,8 @@ install:
     - wget http://sourceforge.net/projects/sbml/files/libsbml/5.11.4/stable/libSBML-5.11.4-core-src.tar.gz
     - tar -xzvf libSBML-5.11.4-core-src.tar.gz 
     - cd libsbml-5.11.4 && ./configure --prefix=/usr --with-zlib --with-bzip2 && make && sudo make install && cd ..
+    - wget -qO- http://www.cmake.org/files/v3.1/cmake-3.1.0-Linux-x86_64.tar.gz | tar xvz
 script: 
     - mkdir -p _build && cd _build && cmake -DDEBUG=OFF ..  && make    
+    - ./cmake-3.1.0-Linux-x86_64/bin/ctest -VV -S 
 
