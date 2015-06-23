@@ -42,6 +42,7 @@ postTetTime = 0.1
 runtime = baselineTime + tetTime + postTetTime
 
 def buildRdesigneur():
+    '''
     ##################################################################
     # Here we define which prototypes are to be loaded in to the system.
     # Each specification has the format
@@ -55,6 +56,7 @@ def buildRdesigneur():
     # After loading the prototypes, there should be an object called 'name'
     # in the library.
     ##################################################################
+    '''
     cellProto = [ [ "./cells/" + elecFileName, "elec" ] ]
     chanProto = [
         ['./chans/hd.xml'], \
