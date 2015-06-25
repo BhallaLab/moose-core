@@ -1090,7 +1090,7 @@ double SbmlReader::transformUnits( double mvalue,UnitDefinition * ud,string type
             else if(unit->isSecond())
                 return lvalue;
             else {
-                cout << "check this units type " <<UnitKind_toString(unit->getKind());
+                cout << "- check this unit type " << UnitKind_toString(unit->getKind()) << endl;
                 return lvalue;
             }
         }

@@ -465,33 +465,32 @@ ADD_TEST(NAME moose-bin-raw-run
     )
 
 ## PyMOOSE tests.
-
-# Export the PYTHONPATH
+SET(TEST_DIRECTORY ${PROJECT_SOURCE_DIR}/tests/python)
 ADD_TEST(NAME pymoose-test-mumbl
     COMMAND ${PYTHON_EXECUTABLE} test_mumbl.py
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests/python
+    WORKING_DIRECTORY ${TEST_DIRECTORY}
     )
 ADD_TEST(NAME pymoose-test-pymoose
     COMMAND ${PYTHON_EXECUTABLE} test_pymoose.py
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests/python
+    WORKING_DIRECTORY ${TEST_DIRECTORY}
     )
 ADD_TEST(NAME pymoose-test-synchan
     COMMAND ${PYTHON_EXECUTABLE} test_synchan.py
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests/python
+    WORKING_DIRECTORY ${TEST_DIRECTORY}
     )
 ADD_TEST(NAME pymoose-test-function
     COMMAND ${PYTHON_EXECUTABLE} test_function.py
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests/python
+    WORKING_DIRECTORY ${TEST_DIRECTORY}
     )
 ADD_TEST(NAME pymoose-test-vec
     COMMAND ${PYTHON_EXECUTABLE} test_vec.py
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests/python
+    WORKING_DIRECTORY ${TEST_DIRECTORY}
     )
     
-#ADD_TEST(NAME pymoose-snippets
-    #COMMAND ${PYTHON_EXECUTABLE} test_snippets.py
-    #WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/Demos/snippets
-    #)
+ADD_TEST(NAME pymoose-test-sbml 
+    COMMAND ${PYTHON_EXECUTABLE} test_sbml.py
+    WORKING_DIRECTORY ${TEST_DIRECTORY}
+    )
 
 
 ####### CPack ###############################
