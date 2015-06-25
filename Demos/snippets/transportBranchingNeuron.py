@@ -54,7 +54,8 @@ def makeModel():
 
     compt0.diffLength = 1e-6 # This will be over 100 compartments.
     # This is the magic command that configures the diffusion compartments.
-    compt0.cell = cell 
+    compt0.subTreePath = "/model/cell/#"
+    #compt0.cell = cell 
 
     # Build the solvers. No need for diffusion in this version.
     ksolve0 = moose.Ksolve( '/model/chem/compt0/ksolve' )
