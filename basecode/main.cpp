@@ -385,7 +385,8 @@ int main( int argc, char** argv )
 		} else {
 			// Here we set off a little event loop to poll user input. 
 			// It deals with the doQuit call too.
-			Shell::launchParser(); 
+                        if(! quitFlag)
+                            Shell::launchParser(); 
 		}
 	} else {
 		PostMaster* p = reinterpret_cast< PostMaster* >( ObjId( 3 ).data());
