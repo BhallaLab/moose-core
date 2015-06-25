@@ -177,10 +177,10 @@ def autoCoordinates(meshEntry,srcdesConnection):
     ymin = 0.0
     ymax = 1.0
     G = nx.Graph()
-    for cmpt,memb in meshEntry.items():
+    for cmpt,memb in list(meshEntry.items()):
         for enzObj in find_index(memb,'enzyme'):
             G.add_node(enzObj.path)
-    for cmpt,memb in meshEntry.items():
+    for cmpt,memb in list(meshEntry.items()):
         for poolObj in find_index(memb,'pool'):
             G.add_node(poolObj.path)
         for cplxObj in find_index(memb,'cplx'):
@@ -189,24 +189,24 @@ def autoCoordinates(meshEntry,srcdesConnection):
         for reaObj in find_index(memb,'reaction'):
             G.add_node(reaObj.path)
         
-    for inn,out in srcdesConnection.items():
+    for inn,out in list(srcdesConnection.items()):
         if (inn.className =='ZombieReac'): arrowcolor = 'green'
         elif(inn.className =='ZombieEnz'): arrowcolor = 'red'
         else: arrowcolor = 'blue'
         if isinstance(out,tuple):
             if len(out[0])== 0:
-                print inn.className + ':' +inn.name + "  doesn't have input message"
+                print(inn.className + ':' +inn.name + "  doesn't have input message")
             else:
                 for items in (items for items in out[0] ):
                     G.add_edge(element(items[0]).path,inn.path)
             if len(out[1]) == 0:
-                print inn.className + ':' + inn.name + "doesn't have output mssg"
+                print(inn.className + ':' + inn.name + "doesn't have output mssg")
             else:
                 for items in (items for items in out[1] ):
                     G.add_edge(inn.path,element(items[0]).path)
         elif isinstance(out,list):
             if len(out) == 0:
-                print "Func pool doesn't have sumtotal"
+                print("Func pool doesn't have sumtotal")
             else:
                 for items in (items for items in out ):
                     G.add_edge(element(items[0]).path,inn.path)
@@ -216,7 +216,7 @@ def autoCoordinates(meshEntry,srcdesConnection):
     xcord = []
     ycord = []
     position = nx.spring_layout(G)
-    for item in position.items():
+    for item in list(position.items()):
         xy = item[1]
         ann = moose.Annotator(item[0]+'/info')
         ann.x = xy[0]
