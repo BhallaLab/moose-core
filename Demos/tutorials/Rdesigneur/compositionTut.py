@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 import sys
 import os
 from moose.neuroml.ChannelML import ChannelML
-sys.path.append('/home/bhalla/moose/trunk/Demos/util')
+sys.path.append('../../../Demos/util')
 import rdesigneur as rd
 
 PI = 3.14159265359
@@ -42,6 +42,7 @@ postTetTime = 0.1
 runtime = baselineTime + tetTime + postTetTime
 
 def buildRdesigneur():
+    '''
     ##################################################################
     # Here we define which prototypes are to be loaded in to the system.
     # Each specification has the format
@@ -55,6 +56,7 @@ def buildRdesigneur():
     # After loading the prototypes, there should be an object called 'name'
     # in the library.
     ##################################################################
+    '''
     cellProto = [ [ "./cells/" + elecFileName, "elec" ] ]
     chanProto = [
         ['./chans/hd.xml'], \

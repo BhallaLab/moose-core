@@ -106,10 +106,10 @@ add_definitions(-DUSE_GENESIS_PARSER)
 
 option(DEBUG "Building with debugging support" ON)
 if(DEBUG)
-    MESSAGE("Building with DEBUG support.")
+    MESSAGE("++ Building for Debug")
     set(CMAKE_BUILD_TYPE Debug)
 else()
-    MESSAGE("Building for Release")
+    MESSAGE("++ Build for Relase")
     set(CMAKE_BUILD_TYPE Release)
     add_definitions(-UDO_UNIT_TESTS -O2)
 endif()
@@ -120,9 +120,10 @@ option(ENABLE_SBML "Enable SBML support" ON)
 if(ENABLE_SBML)
     find_package(LIBSBML)
     if(NOT LIBSBML_FOUND)
-        MESSAGE("+ LIBSBML NOT FOUND.  Disabling SBML support.")
+        MESSAGE("++ LIBSBML NOT FOUND.  Disabling SBML support.")
         ADD_DEFINITIONS(-UUSE_SBML)
     else()
+        MESSAGE("++ SBML found. Support is ON")
         ADD_DEFINITIONS(-DUSE_SBML)
         include_directories(${LIBSBML_INCLUDE_DIR})
         find_package(BZip2 REQUIRED)
@@ -459,11 +460,13 @@ else()
 endif()
 
 ADD_TEST(NAME moose-bin-raw-run
-    COMMAND echo q | moose-bin -u
+    COMMAND moose-bin -u -q
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     )
 
 ## PyMOOSE tests.
+
+# Export the PYTHONPATH
 ADD_TEST(NAME pymoose-test-mumbl
     COMMAND ${PYTHON_EXECUTABLE} test_mumbl.py
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests/python
@@ -485,7 +488,63 @@ ADD_TEST(NAME pymoose-test-vec
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests/python
     )
     
-ADD_TEST(NAME pymoose-snippets
-    COMMAND ${PYTHON_EXECUTABLE} test_snippets.py
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/Demos/snippets
+#ADD_TEST(NAME pymoose-snippets
+    #COMMAND ${PYTHON_EXECUTABLE} test_snippets.py
+    #WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/Demos/snippets
+    #)
+
+
+####### CPack ###############################
+
+set(CPACK_GENERATOR "DEB;RPM;STGZ")
+set(CPACK_STRIP_FILES TRUE)
+set(CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE ON)
+#  We need to compile python scripts on the installation  host.
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dilawar Singh")
+set(CPACK_PACKAGE_CONTACT "dilawars@ncbs.res.in")
+#set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "MOOSE, The Neural Simulator")
+set(CPACK_PACKAGE_VERSION "3.0.1")
+set(CPACK_PACKAGE_VERSION_MAJOR "3")
+set(CPACK_PACKAGE_VERSION_MINOR "0")
+set(CPACK_PACKAGE_VERSION_PATCH "1")
+set(CPACK_PACKAGE_VENDOR "NCBS Bangalore")
+set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/README.md")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dilawar Singh <dilawars@ncbs.res.in>")
+set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "${PKGARCH}")
+set(CPACK_PACKAGE_FILE_NAME "moose-${CPACK_PACKAGE_VERSION}-Linux-${PKGARCH}")
+set(CPACK_STRIP_FILES moose)
+
+set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
+set(CPACK_DEBIAN_PACKAGE_DEPENDS 
+    "openmpi-bin
+    , python-matplotlib
+    , python-qt4, openscenegraph
+    , python-tornado, python-suds, python-nose, python-setuptools
+    , libxml2"
+)
+
+set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
+    "${DEBIAN_POSTINST_PATH};${DEBIAN_PRERM_PATH};"
     )
+
+## RPM 
+set(CPACK_RPM_PACKAGE_ARCHITECTURE "${RPMPKGARCH}")
+set(CPACK_RPM_SPEC_INSTALL_POST "/bin/true")
+set(CPACK_RPM_POST_INSTALL_SCRIPT_FILE "${RPM_POSTINST_PATH}")
+set(CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE "${RPM_PRERM_PATH}")
+
+# This has to be a single line.
+set(CPACK_RPM_PACKAGE_REQUIRES
+    "openmpi-devel python-matplotlib-qt4 python-qt4  python-tornado python-suds python-nose python-setuptools libxml2"
+    )
+
+# A workaround in RPM
+set(CPACK_RPM_SPEC_MORE_DEFINE "%define ignore \#")
+set(CPACK_RPM_USER_FILELIST "%ignore /" "%ignore /usr" "%ignore /usr/share" 
+    "%ignore /usr/share/applications"
+    "%ignore /tmp"
+    )
+
+include(CPack)
+
