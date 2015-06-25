@@ -4,7 +4,7 @@ import config
 from PyQt4 import QtGui, QtCore, Qt
 from moose import *
 from PyQt4.QtGui import QPixmap, QImage, QGraphicsPixmapItem
-from constants import *
+from .constants import *
 
 class KineticsDisplayItem(QtGui.QGraphicsWidget):
     """Base class for display elemenets in kinetics layout"""

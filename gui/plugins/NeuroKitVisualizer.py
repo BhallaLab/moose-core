@@ -12,7 +12,7 @@ from PyQt4.QtGui import QPainter
 from PyQt4.QtGui import QFont
 from PyQt4.QtCore import QPoint
 import moose
-import default
+from . import default
 import moogli
 
 class MorphologyEditor(moogli.MorphologyViewer):
@@ -26,12 +26,12 @@ class MorphologyEditor(moogli.MorphologyViewer):
         self.plugin = plugin
 
     def start(self):
-        self._timer.timeout.connect(self.next)
+        self._timer.timeout.connect(self.__next__)
         self._timer.start(0)
 
     @QtCore.pyqtSlot()
     def show(self):
-        self._timer.timeout.connect(self.next)
+        self._timer.timeout.connect(self.__next__)
         super(MorphologyEditor, self).show()
         self._timer.start(0)
 
@@ -40,7 +40,7 @@ class MorphologyEditor(moogli.MorphologyViewer):
         self._timer.stop()
         super(MorphologyEditor, self).hide()
 
-    def next(self):
+    def __next__(self):
         self.frame()
         info_id = self.select_info.get_id()
         info_event = self.select_info.get_event_type()
@@ -59,12 +59,12 @@ class MorphologySimulator(moogli.MorphologyViewer):
         self.plugin = plugin
 
     def start(self):
-        self._timer.timeout.connect(self.next)
+        self._timer.timeout.connect(self.__next__)
         self._timer.start(0)
 
     @QtCore.pyqtSlot()
     def show(self):
-        self._timer.timeout.connect(self.next)
+        self._timer.timeout.connect(self.__next__)
         super(MorphologySimulator, self).show()
         self._timer.start(0)
 
@@ -88,12 +88,12 @@ class MorphologySimulator(moogli.MorphologyViewer):
         drag.setPixmap(pixmap)
         # drag.setHotSpot(e.pos() - self.rect().topLeft())
         dropAction = drag.start(QtCore.Qt.MoveAction)
-        print(" => ", dropAction)
+        print((" => ", dropAction))
         self.select_info.set_event_type(0)
         self._timer.start(0)
         return
 
-    def next(self):
+    def __next__(self):
         self.frame()
         info_id = self.select_info.get_id()
         info_event = self.select_info.get_event_type()
