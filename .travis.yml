@@ -11,7 +11,6 @@ branches:
     only:
         - master
         - trunk
-        - experimental
 notifications:
     email:
         recipients:
