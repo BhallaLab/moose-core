@@ -31,12 +31,12 @@ extern void writeCspace (Id model, const string& fname );
 void Shell::doSaveModel( Id model, const string& fileName, bool qFlag )
 	   	const
 {
-	string modelFamily = Field< string >::get( model, "modelFamily" );
-	if ( modelFamily != "kinetic" ) {
-		cout << "Warning: Shell::doSaveModel: Do not know how to save "
-				"model of family '" << modelFamily << "'.\n";
-		return;
-	}
+	// string modelFamily = Field< string >::get( model, "modelFamily" );
+	// if ( modelFamily != "kinetic" ) {
+	// 	cout << "Warning: Shell::doSaveModel: Do not know how to save "
+	// 			"model of family '" << modelFamily << "'.\n";
+	// 	return;
+	// }
 
 	size_t pos = fileName.find( "." );
 	string fileType = fileName.substr( pos );
