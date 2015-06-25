@@ -182,11 +182,13 @@ class rdesigneur:
         if bracePos == -1:
             return False
 
-        if ( func.find( "::" ) != -1 ): # Function is in a file, load and check
-            raise BuildError( \
-                    protoName + "Proto: buildProtoFromFunction: external file function loading not yet implemented, '" + func )
-            # do stuff here and return True to say it is done
-            return True
+        modPos = func.find( "." )
+        if ( modPos != -1 ): # Function is in a file, load and check
+            module = func[0:modPos]
+            funcName = func[modPos+1:bracePos]
+            execfile( module + ".py" )
+            #eval( funcName + '(' + protoName + ')' )
+            #return True
         if not func[0:bracePos] in globals():
             raise BuildError( \
                 protoName + "Proto: global function '" +func+"' not known.")
@@ -232,7 +234,7 @@ class rdesigneur:
                             + protoVec[0] + "' not found." )
                 return True
 
-        if self.buildProtoFromFunction( protoVec[0], protoType ):
+        if self.buildProtoFromFunction( protoVec[0], protoVec[1] ):
             return True
         # Maybe the proto is already in memory
         # Avoid relative file paths going toward root
