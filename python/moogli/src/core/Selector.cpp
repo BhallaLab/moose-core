@@ -42,7 +42,7 @@ Selector::handle( const osgGA::GUIEventAdapter& ea
 
     if(select_info -> get_event_type() == 2)
     {
-        RECORD_INFO("Event Type => 2");
+        // RECORD_INFO("Event Type => 2");
         return true;
     }
 

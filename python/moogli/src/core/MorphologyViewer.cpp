@@ -210,8 +210,10 @@ MorphologyViewer::setup_toolbar()
     // _rotate_counterclockwise_z = new QPushButton();
     // _rotate_counterclockwise_z -> setText("CC z");
 
-
+    //Uncomment this to see the button
     _toolbar -> addWidget(_toggle_mode_button);
+
+
     // _toolbar -> setStyleSheet("background-color:black;");
     // _toolbar -> addWidget(_zoom_out);
     // _toolbar -> addWidget(_translate_positive_x);
@@ -226,7 +228,9 @@ MorphologyViewer::setup_toolbar()
     // _toolbar -> addWidget(_rotate_counterclockwise_x);
     // _toolbar -> addWidget(_rotate_counterclockwise_y);
     // _toolbar -> addWidget(_rotate_counterclockwise_z);
-    _grid_layout -> addWidget(_toolbar, 0, 0);
+
+    // Uncomment this line to add toolbar
+    //_grid_layout -> addWidget(_toolbar, 0, 0);
 }
 
 void
@@ -235,7 +239,7 @@ MorphologyViewer::create_view()
     QScrollArea* _scroll_area = new QScrollArea;
     _scroll_area -> setBackgroundRole(QPalette::Dark);
     _scroll_area -> setWidget(create_graphics_widget());
-    _grid_layout -> addWidget(_scroll_area, 1, 0);
+    _grid_layout -> addWidget(_scroll_area, 0, 0);
 }
 
 QWidget*
