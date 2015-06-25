@@ -37,7 +37,10 @@ spineAngle= 0.0
 spineAngleDistrib = 2*numpy.pi
 
 
+# Here we define a function that is used to make a cell prototype. Normally
+# it would load in a model from a file.
 def makeCellProto( name ):
+    print 'IN: makeCellProto( ', name, ')'
     elec = moose.Neuron( '/library/' + name )
     ecompt = []
     for i in range( numDendSegments ):
@@ -53,6 +56,10 @@ def makeCellProto( name ):
         i.z = i.x
         i.x = 0
 
+# This line is used so that rdesigneur knows about the cell proto function
+rd.makeCellProto = makeCellProto
+
+# This function is used to make the chem prototype. 
 def makeChemProto( name ):
     chem = moose.Neutral( '/library/' + name )
     for i in ( 'dend', 'spine', 'psd' ):
@@ -66,12 +73,14 @@ def makeChemProto( name ):
 
 def makeModel():
     moose.Neutral( '/library' )
-    makeCellProto( 'cellProto' )
+    # Here we illustrate building the chem proto directly. This is not
+    # good practice as it takes the model definition away from the 
+    # declaration of prototypes.
     makeChemProto( 'cProto' )
     rdes = rd.rdesigneur( useGssa = False, \
                 combineSegments = False, \
                 meshLambda = 1e-6, \
-            cellProto = [['cellProto', 'elec' ]] ,\
+            cellProto = [['makeCellProto()', 'elec' ]] ,\
             spineProto = [['makeSpineProto()', 'spine' ]] ,\
             chemProto = [['cProto', 'chem' ]] ,\
             spineDistrib = [ \
