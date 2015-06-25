@@ -234,10 +234,12 @@ Id ReadKkit::read(
 
 	innerRead( fin );
 
-	assignPoolCompartments();
-	assignReacCompartments();
-	assignEnzCompartments();
-	assignMMenzCompartments();
+	if ( moveOntoCompartment_ ) {
+		assignPoolCompartments();
+		assignReacCompartments();
+		assignEnzCompartments();
+		assignMMenzCompartments();
+	}
 
 	convertParametersToConcUnits();
 
@@ -247,6 +249,12 @@ Id ReadKkit::read(
 	// s->doUseClock( plotpath, "process", 8 );
 
 	setMethod( s, mgr, simdt_, plotdt_, method );
+	if ( !moveOntoCompartment_ ) {
+		assignPoolCompartments();
+		assignReacCompartments();
+		assignEnzCompartments();
+		assignMMenzCompartments();
+	}
 
 	//Harsha: Storing solver and runtime at model level rather than model level
 	Id kinetics( basePath_+"/kinetics");
@@ -712,10 +720,10 @@ void ReadKkit::assignPoolCompartments()
 		// compartments_.push_back( comptId );
 		for ( vector< Id >::iterator k = volCategories_[i].begin();
 			k != volCategories_[i].end(); ++k ) {
-			if ( moveOntoCompartment_ ) {
+			// if ( moveOntoCompartment_ ) {
 				if ( ! (getCompt( *k ).id == comptId ) )
 					shell_->doMove( *k, comptId );
-			}
+			// }
 		}
 	}
 }
@@ -746,10 +754,10 @@ void ReadKkit::assignReacCompartments()
 	for ( map< string, Id >::iterator i = reacIds_.begin(); 
 		i != reacIds_.end(); ++i ) {
 		Id compt = findParentComptOfReac( i->second );
-		if ( moveOntoCompartment_ ) {
+		// if ( moveOntoCompartment_ ) {
 			if ( ! (getCompt( i->second ).id == compt ) )
 				shell_->doMove( i->second, compt );
-		}
+		// }
 	}
 }
 

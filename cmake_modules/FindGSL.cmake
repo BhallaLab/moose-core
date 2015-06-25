@@ -65,8 +65,6 @@ ELSE(WIN32)
       EXEC_PROGRAM(${GSL_CONFIG}
         ARGS --prefix
         OUTPUT_VARIABLE GSL_PREFIX)
-      message(${GSL_PREFIX})
-
       SET(GSL_INCLUDE_DIR ${GSL_PREFIX}/include CACHE STRING INTERNAL)
 
       # set link libraries and link flags
