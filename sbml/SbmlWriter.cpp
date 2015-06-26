@@ -351,13 +351,32 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	  wildcardFind(comptPath+"/##[ISA=ReacBase]",Compt_Reac);
 	  //vector< Id > Compt_Reac = LookupField< string, vector< Id > >::get(*itr, "neighbors", "remeshReacs" );
 	  for (vector <ObjId> :: iterator itrR= Compt_Reac.begin();itrR != Compt_Reac.end();itrR++)
-	    { string cleanReacname = cleanNameId(*itrR,index);
+	    { bool writeAnnotation = false;
+	      string cleanReacname = cleanNameId(*itrR,index);
 	      string recClass = Field<string> :: get(*itrR,"className");
 	      string pathR = Field<string> :: get(*itrR,"path");
 	      Id annotaIdR(pathR+"/info");
 	      string noteClassR = Field<string> :: get(annotaIdR,"className");
 	      Reaction* reaction;
 	      reaction = cremodel_->createReaction(); 
+
+	      ObjId pa = Field< ObjId >::get( *itrR, "parent" );
+	      string parentclass = Field<string> :: get (pa,"className");
+	      string groupName = Field<string> :: get(pa,"name");
+	      ostringstream modelAnno;
+  		  modelAnno << "<moose:ModelAnnotation>\n";
+  		  //modelAnno << "<moose:xyCord> "<< xyCord<< "</moose:xyCord>\n";
+	      if (parentclass == "Neutral")
+	      	{   writeAnnotation = true;
+	      		modelAnno << "<moose:Group>"<< groupName << "</moose:Group>\n";		
+	      	}
+  		  
+  		  
+          modelAnno << "</moose:ModelAnnotation>";
+  		  XMLNode* xnode =XMLNode::convertStringToXMLNode( modelAnno.str() ,&xmlns);
+  		  if (writeAnnotation)
+  		  	reaction->setAnnotation( xnode );
+
 	      string notesR;
 	      if (noteClassR =="Annotator")
 		notesR = Field <string> :: get(annotaIdR,"notes");
@@ -419,7 +438,9 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	  vector< ObjId > Compt_Enz;
 	  wildcardFind(comptPath+"/##[ISA=EnzBase]",Compt_Enz);
 	  for (vector <ObjId> :: iterator itrE=Compt_Enz.begin();itrE != Compt_Enz.end();itrE++)
-	    { string enzClass = Field<string>::get(*itrE,"className");
+	    { bool writeAnnotation = false;
+	      cout << " Enz";
+	      string enzClass = Field<string>::get(*itrE,"className");
 	      string cleanEnzname = cleanNameId(*itrE,index);
 	      string pathE = Field < string > :: get(*itrE,"Path");
 	      Id annotaIdE(pathE+"/info");
@@ -427,8 +448,42 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	      Reaction* reaction;
 	      reaction = cremodel_->createReaction();
 	      string notesE;
+
+	      ObjId pa = Field< ObjId >::get( *itrE, "parent" );
+	      string parentclass = Field<string> :: get (pa,"className");
+	      cout << " parentClass " << parentclass;
+	      if (parentclass == "Neutral")
+	      {
+	      	string groupName = Field<string> :: get(pa,"name");
+	      	ostringstream modelAnno;
+  		  	modelAnno << "<moose:ModelAnnotation>\n";
+  		  	//modelAnno << "<moose:xyCord> "<< xyCord<< "</moose:xyCord>\n";
+	      	writeAnnotation = true;
+	      	modelAnno << "<moose:Group>"<< groupName << "</moose:Group>\n";
+  		   	modelAnno << "</moose:ModelAnnotation>";
+  		  	XMLNode* xnode =XMLNode::convertStringToXMLNode( modelAnno.str() ,&xmlns);
+  		  	if (writeAnnotation)
+  		  		reaction->setAnnotation( xnode );
+  		  }
+  		  else
+  		  { 
+  		  	ObjId ppa = Field< ObjId >::get( pa, "parent" );
+  			string parentclass = Field<string> :: get (ppa,"className");
+  			if (parentclass =="Neutral")
+  				{ string groupName = Field<string> :: get(ppa,"name");
+  				  ostringstream modelAnno;
+  				  modelAnno << "<moose:ModelAnnotation>\n";
+  				  writeAnnotation = true;
+  				  modelAnno << "<moose:Group>"<< groupName << "</moose:Group>\n";
+  				  modelAnno << "</moose:ModelAnnotation>";
+  				  XMLNode* xnode =XMLNode::convertStringToXMLNode( modelAnno.str() ,&xmlns);
+  				  if (writeAnnotation)
+  				  	reaction->setAnnotation( xnode );
+
+  				}
+  		  } //else
 	      if (noteClassE == "Annotator")
-		notesE = Field < string > ::get(annotaIdE,"Notes");
+			notesE = Field < string > ::get(annotaIdE,"Notes");
 	      if (notesE != "")
 		{ string cleanNotesE = nameString1(notesE);
 		  string notesStringE = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t"+cleanNotesE + "\n\t </body>"; 
