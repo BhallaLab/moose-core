@@ -2174,7 +2174,7 @@ extern "C" {
         PyTypeObject * new_class =
                 (PyTypeObject*)PyType_Type.tp_alloc(&PyType_Type, 0);
         // Py_TYPE(new_class) = &PyType_Type;
-        new_class->tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
+        new_class->tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HEAPTYPE;
         /*
         should we avoid Py_TPFLAGS_HEAPTYPE as it imposes certain
         limitations:

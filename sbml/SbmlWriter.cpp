@@ -228,8 +228,10 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	  int species_size = 1;
 	  string objname;
 	  for (vector <ObjId> :: iterator itrp = Compt_spe.begin();itrp != Compt_spe.end();itrp++)
-	    { string objclass = Field<string> :: get(*itrp,"className");
+	    { bool writeAnnotation = false;
+	      string objclass = Field<string> :: get(*itrp,"className");
 	      string clean_poolname = cleanNameId(*itrp,index);
+	      // cout << " searching for parent which may be compartment or Neutral" << getgroup <<endl;
 	      double initAmt = Field<double> :: get(*itrp,"nInit");
 	      Species *sp = cremodel_->createSpecies();
 	      sp->setId( clean_poolname );
@@ -264,6 +266,24 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	      //   At this point I am using item which is # number so directly using nInit
 	      //
 	      sp->setInitialAmount( initAmt ); 
+
+	      ObjId pa = Field< ObjId >::get( *itrp, "parent" );
+	      string parentclass = Field<string> :: get (pa,"className");
+	      string groupName = Field<string> :: get(pa,"name");
+	      ostringstream modelAnno;
+  		  modelAnno << "<moose:ModelAnnotation>\n";
+  		  //modelAnno << "<moose:xyCord> "<< xyCord<< "</moose:xyCord>\n";
+	      if (parentclass == "Neutral")
+	      	{   writeAnnotation = true;
+	      		modelAnno << "<moose:Group>"<< groupName << "</moose:Group>\n";		
+	      	}
+  		  
+  		  
+          modelAnno << "</moose:ModelAnnotation>";
+  		  XMLNode* xnode =XMLNode::convertStringToXMLNode( modelAnno.str() ,&xmlns);
+  		  if (writeAnnotation)
+  		  	sp->setAnnotation( xnode );
+
 	      string path = Field<string> :: get(*itrp,"path");
 	      Id annotaId( path+"/info");
 	      string noteClass = Field<string> :: get(annotaId,"className");
@@ -285,12 +305,7 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	      // double x = Field <double> :: get(annotaId,"x");
 	      // double y = Field <double> :: get(annotaId,"y");
 	   	  // xyCord += "x:"+x+"y:"+y+";";   
-	      ostringstream modelAnno;
-  		  modelAnno << "<moose:ModelAnnotation>\n";
-  		  modelAnno << "<moose:xyCord> "<< xyCord<< "</moose:xyCord>\n";
-          modelAnno << "</moose:ModelAnnotation>";
-  		  XMLNode* xnode =XMLNode::convertStringToXMLNode( modelAnno.str() ,&xmlns);
-  		  sp->setAnnotation( xnode );	  
+	   	  	  
 	      // Buffered Molecule setting BoundaryCondition and constant has to be made true 
 	      if ( (objclass == "BufPool") || (objclass == "ZombieBufPool"))
 		  { sp->setBoundaryCondition(true);

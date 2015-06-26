@@ -25,7 +25,7 @@ RM = 1.0
 RA = 1.0
 CM = 0.01
 spineSpacing = 2.0e-6
-spineSpacingDistrib = 1.0e-6
+minSpacing = 0.2e-6
 spineSize = 1.0
 spineSizeDistrib = 0.5
 spineAngle = 0
@@ -72,7 +72,7 @@ def main():
     model[0].spineDistribution = [ \
                 'spine', '#apical#', \
                 'spacing', str( spineSpacing ), \
-                'spacingDistrib', str( spineSpacingDistrib ), \
+                'spacingDistrib', str( minSpacing ), \
                 'angle', str( spineAngle ), \
                 'angleDistrib', str( spineAngleDistrib ), \
                 'size', str( spineSize ), \

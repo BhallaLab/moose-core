@@ -1,7 +1,7 @@
 /**********************************************************************
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment.
-**           Copyright (C) 2003-2007 Upinder S. Bhalla. and NCBS
+**           Copyright (C) 2003-2014 Upinder S. Bhalla. and NCBS
 ** It is made available under the terms of the
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
@@ -32,6 +32,9 @@ class nuParser: public mu::Parser
 			L(0.0), // electrical distance arg
 			len(0.0), // Length of compt in metres
 			dia(0.0), // Diameter of compt in metres
+			maxP(0.0), // Maximum value of *p* for this neuron.
+			maxG(0.0), // Maximum value of *g* for this neuron.
+			maxL(0.0), // Maximum value of *L* for this neuron.
 			oldVal(0.0), // Original value of field, if needed.
 			useOldVal( false ) // is the 'orig' field needed?
 		{
@@ -40,6 +43,9 @@ class nuParser: public mu::Parser
 			DefineVar( "L", &L );
 			DefineVar( "len", &len );
 			DefineVar( "dia", &dia );
+			DefineVar( "maxP", &maxP );
+			DefineVar( "maxG", &maxG );
+			DefineVar( "maxL", &maxL );
 			DefineVar( "oldVal", &oldVal );
 			DefineFun( "H", nuParser::H );
 			if ( expr.find( "oldVal" ) != string::npos )
@@ -48,7 +54,7 @@ class nuParser: public mu::Parser
 		}
 
 		/// Defines the order of arguments in the val array.
-		enum valArgs{ EXPR, P, G, EL, LEN, DIA, OLDVAL };
+		enum valArgs{ EXPR, P, G, EL, LEN, DIA, MAXP, MAXG, MAXL, OLDVAL };
 
 		static double H( double arg ) { // Heaviside function.
 			return ( arg > 0.0);
@@ -60,6 +66,9 @@ class nuParser: public mu::Parser
 			L = *(arg0 + nuParser::EL );
 			len = *(arg0 + nuParser::LEN );
 			dia = *(arg0 + nuParser::DIA );
+			maxP = *(arg0 + nuParser::MAXP );
+			maxG = *(arg0 + nuParser::MAXG );
+			maxL = *(arg0 + nuParser::MAXL );
 			oldVal = *(arg0 + nuParser::OLDVAL );
 			return Eval();
 		}
@@ -70,11 +79,14 @@ class nuParser: public mu::Parser
 		double L; // electrical distance arg
 		double len; // Length of compt in metres
 		double dia; // Diameter of compt in metres
+		double maxP; // Maximum value of p for this neuron.
+		double maxG; // Maximum value of p for this neuron.
+		double maxL; // Maximum value of L for this neuron.
 		double oldVal; // Old value of the field, used for relative scaling
 		bool useOldVal; // is the 'oldVal' field needed?
 };
 
-const unsigned int nuParser::numVal = 7;
+const unsigned int nuParser::numVal = 10;
 
 const Cinfo* Neuron::initCinfo()
 {
@@ -158,6 +170,9 @@ const Cinfo* Neuron::initCinfo()
 		"Arguments: proto path field expr [field expr]...\n"
 		" Each entry is terminated with an empty string. "
 		"The prototype is any object created in */library*, "
+		"If a channel matching the prototype name already exists, then "
+		"all subsequent operations are applied to the extant channel and "
+		"a new one is not created. "
 		"The paired arguments are as follows: \n"
 		"The *field* argument specifies the name of the parameter "
 		"that is to be assigned by the expression.\n"
@@ -166,12 +181,15 @@ const Cinfo* Neuron::initCinfo()
 		"trig and transcendental ones. Of course it also handles simple "
 		"numerical values like 1.0, 1e-10 and so on. "
 		"Available arguments for muParser are:\n"
-		" p, g, L, len, dia \n"
+		" p, g, L, len, dia, maxP, maxG, maxL \n"
 		"	p: path distance from soma, measured along dendrite, in metres.\n"
 		"	g: geometrical distance from soma, in metres.\n"
 		"	L: electrotonic distance (# of lambdas) from soma, along dend. No units.\n"
 		"	len: length of compartment, in metres.\n"
 		"	dia: for diameter of compartment, in metres.\n"
+		"	maxP: Maximum value of *p* for this neuron. \n"
+		"	maxG: Maximum value of *g* for this neuron. \n"
+		"	maxL: Maximum value of *L* for this neuron.\n"
 		"The expression for the first field must evaluate to > 0 "
 		"for the channel to be installed. For example, for "
 		"channels, if Field == Gbar, and func( r, L, len, dia) < 0, \n"
@@ -223,12 +241,15 @@ const Cinfo* Neuron::initCinfo()
 		"trig and transcendental ones. Of course it also handles simple "
 		"numerical values like 1.0, 1e-10 and so on. "
 		"Available arguments for muParser are:\n"
-		" p, g, L, len, dia \n"
+		" p, g, L, len, dia, maxP, maxG, maxL \n"
 		"	p: path distance from soma, measured along dendrite, in metres.\n"
 		"	g: geometrical distance from soma, in metres.\n"
 		"	L: electrotonic distance (# of lambdas) from soma, along dend. No units.\n"
 		"	len: length of compartment, in metres.\n"
 		"	dia: for diameter of compartment, in metres.\n"
+		"	maxP: Maximum value of *p* for this neuron. \n"
+		"	maxG: Maximum value of *g* for this neuron. \n"
+		"	maxL: Maximum value of *L* for this neuron.\n"
 		"Available fields are: \n"
 		"RM, RA, CM, Rm, Ra, Cm, Em, initVm \n"
 		"The first three fields are scaled appropriately by "
@@ -267,19 +288,22 @@ const Cinfo* Neuron::initCinfo()
 		"that is to be assigned by the expression.\n"
 		"The *expression* argument is a mathematical expression as above. "
 		"Available arguments for muParser are:\n"
-		" p, g, L, len, dia \n"
+		" p, g, L, len, dia, maxP, maxG, maxL \n"
 		"	p: path distance from soma, measured along dendrite, in metres.\n"
 		"	g: geometrical distance from soma, in metres.\n"
 		"	L: electrotonic distance (# of lambdas) from soma, along dend. No units.\n"
 		"	len: length of compartment, in metres.\n"
 		"	dia: for diameter of compartment, in metres.\n"
+		"	maxP: Maximum value of *p* for this neuron. \n"
+		"	maxG: Maximum value of *g* for this neuron. \n"
+		"	maxL: Maximum value of *L* for this neuron.\n"
 		"The expression for the *spacing* field must evaluate to > 0 for "
 		"the spine to be installed. For example, if the expresssion is\n"
 		"		H(1 - L) \n"
 		"then the systemwill only put spines closer than "
 		"one length constant from the soma, and zero elsewhere. \n"
 		"Available spine parameters are: \n"
-		"spacing, spacingDistrib, size, sizeDistrib "
+		"spacing, minSpacing, size, sizeDistrib "
 		"angle, angleDistrib \n",
 		&Neuron::setSpineDistribution,
 		&Neuron::getSpineDistribution
@@ -325,9 +349,9 @@ const Cinfo* Neuron::initCinfo()
 	);
 	static ReadOnlyValueFinfo< Neuron, vector< ObjId > > compartments( 
 		"compartments",
-		"Vector of ObjIds of electricalcompartments. Order matches order "
+		"Vector of ObjIds of electrical compartments. Order matches order "
 		"of segments, and also matches the order of the electrotonic and "
-		"geometricalDistranceFromSoma vectors. ",
+		"geometricalDistanceFromSoma vectors. ",
 		&Neuron::getCompartments
 	);
 
@@ -344,9 +368,9 @@ const Cinfo* Neuron::initCinfo()
 		"valuesFromExpression",
 		"Vector of values computed for each electrical compartment that "
 	   	"matches the 'path expression' pair in the argument string."
-		"This has 7 times the number of entries as # of compartments."
+		"This has 10 times the number of entries as # of compartments."
 		"For each compartment the entries are: \n"
-		"val, p, g, L, len, dia, 0",
+		"val, p, g, L, len, dia, maxP, maxG, maxL, 0",
 		&Neuron::getExprVal
 	);
 
@@ -377,6 +401,13 @@ const Cinfo* Neuron::initCinfo()
 		"chem spines and PSDs, so that volume change operations from "
 		"the Spine can propagate to the chem systems.",
 		new OpFunc2< Neuron, Id, Id >( &Neuron::setSpineAndPsdMesh )
+	);
+	static DestFinfo setSpineAndPsdDsolve( "setSpineAndPsdDsolve",
+		"Assigns the Dsolves used by spine and PSD to the Neuron. "
+		"This is used "
+		"to handle the rescaling of diffusion rates when spines are "
+		"resized. ",
+		new OpFunc2< Neuron, Id, Id >( &Neuron::setSpineAndPsdDsolve )
 	);
 
 	/*
@@ -430,6 +461,7 @@ const Cinfo* Neuron::initCinfo()
 		&spinesFromExpression,  	// ReadOnlyLookupValueFinfo
 		&buildSegmentTree,			// DestFinfo
 		&setSpineAndPsdMesh,		// DestFinfo
+		&setSpineAndPsdDsolve,		// DestFinfo
 		&spineFinfo,				// FieldElementFinfo
 	};
 	static string doc[] =
@@ -465,6 +497,9 @@ Neuron::Neuron()
 			Em_( -0.065 ),
 			theta_( 0.0 ),
 			phi_( 0.0 ),
+			maxP_( 0.0 ),
+			maxG_( 0.0 ),
+			maxL_( 0.0 ),
 			sourceFile_( "" ),
 			compartmentLengthInLambdas_( 0.2 ),
 			spineEntry_( this )
@@ -480,6 +515,9 @@ Neuron::Neuron( const Neuron& other )
 			Em_( other.Em_ ),
 			theta_( other.theta_ ),
 			phi_( other.phi_ ),
+			maxP_( other.maxP_ ),
+			maxG_( other.maxG_ ),
+			maxL_( other.maxL_ ),
 			sourceFile_( other.sourceFile_ ),
 			compartmentLengthInLambdas_(other.compartmentLengthInLambdas_),
 			channelDistribution_( other.channelDistribution_ ),
@@ -522,6 +560,22 @@ static void doClassSpecificMessaging( Shell* shell, Id obj, ObjId compt )
 {
 	if ( obj.element()->cinfo()->isA( "ChanBase" ) ) {
 		shell->doAddMsg( "Single", compt, "channel", obj, "channel" );
+		// Add the message to the Ca pool if not defined
+		if ( obj.element()->getName().find_first_of( "Ca" ) != string::npos ) {
+			// Don't do it if we have the legacy GENESIS format
+			if ( Neutral::child( obj.eref(), "addmsg1" ) == Id() ) {
+				vector< ObjId > elist;
+				string path = Neutral::parent( obj ).path() + "/#[ISA=CaConcBase]";
+				// cout << "OK2 to Add Ca Msg for " << path << endl;
+				wildcardFind( path, elist );
+				if ( elist.size() > 0 ) {
+					// cout << "Added Ca Msg for " << obj.path() << endl;
+					ObjId mid = shell->doAddMsg( 
+						"single", obj, "IkOut", elist[0], "current" );
+					assert( !mid.bad());
+				}
+			}
+		}
 	}
 	ReadCell::addChannelMessage( obj );
 }
@@ -566,6 +620,9 @@ static void assignParam( Id obj, const string& field,
 			Field< double >::set( obj, "Ek", val );
 		}
 	} else if ( obj.element()->cinfo()->isA( "CaConcBase" ) ) {
+		Field< double >::set( obj, "length", len );
+		Field< double >::set( obj, "diameter", dia );
+		// cout << "len, dia = " << len << ", " << dia << endl;
 		if ( field == "CaBasal" || field == "tau" || field == "thick" ||
 		  field == "floor" || field == "ceiling" ) {
 			Field< double >::set( obj, field, val );
@@ -574,7 +631,8 @@ static void assignParam( Id obj, const string& field,
 			// So B = arg/( vol * F ). Here the system provides vol and F,
 			// so the arg is just a scale factor over this, typically
 			// to be thought of in terms of buffering. Small B is more
-			// buffering.
+			// buffering. This field is deprecated but used in legacy
+			// GENESIS scripts.
 			Field< double >::set( obj, "B", val / 
 				( FaradayConst * len * dia * dia * PI / 4.0 ) );
 		}
@@ -1085,6 +1143,15 @@ void Neuron::updateSegmentLengths()
 	}
 
 	traverseCumulativeDistance( segs_[0], segs_, segId_, len, L, 0, 0 );
+	maxL_ = maxG_ = maxP_ = 0.0;
+	for ( unsigned int i = 0; i < segs_.size(); ++i ) {
+		double p = segs_[i].getPathDistFromSoma();
+		if ( maxP_ < p ) maxP_ = p;
+		double g = segs_[i].getGeomDistFromSoma();
+		if ( maxG_ < g ) maxG_ = g;
+		double L = segs_[i].getElecDistFromSoma();
+		if ( maxL_ < L ) maxL_ = L;
+	}
 }
 
 /// Fills up vector of segments. First entry is soma.
@@ -1173,6 +1240,12 @@ void Neuron::setSpineAndPsdMesh( Id spineMesh, Id psdMesh )
 	}
 }
 
+void Neuron::setSpineAndPsdDsolve( Id spineDsolve, Id psdDsolve )
+{
+	headDsolve_ = spineDsolve;
+	psdDsolve_ = psdDsolve;
+}
+
 /////////////////////////////////////////////////////////////////////////
 // Here we set up the more general specification of mechanisms. Each
 // line is 
@@ -1214,6 +1287,9 @@ void Neuron::evalExprForElist( const vector< ObjId >& elist,
 						segs_[j->second].getElecDistFromSoma();
 					val[valIndex + nuParser::LEN] = len;
 					val[valIndex + nuParser::DIA] = dia;
+					val[valIndex + nuParser::MAXP] = maxP_;
+					val[valIndex + nuParser::MAXG] = maxG_;
+					val[valIndex + nuParser::MAXL] = maxL_;
 					// Can't assign oldVal on first arg
 					val[valIndex + nuParser::OLDVAL] = 0.0; 
 
@@ -1273,43 +1349,6 @@ static double coordSystem( Id soma, Id dend, Vec& x, Vec& y, Vec& z )
 	assert( doubleEq( x.length(), 1.0 ) );
 	return len;
 }
-
-/**
- * Utility function to resize electrical compt electrical properties,
- * including those of its child channels and calcium conc.
- */
-static void scaleSpineCompt( Id compt, double size )
-{
-	vector< ObjId > chans;
-	allChildren( compt, ALLDATA, "ISA=ChanBase", chans );
-	// wildcardFind( compt.path() + "/##[ISA=ChanBase]", chans );
-	double a = size * size;
-	for ( vector< ObjId >::iterator 
-					i = chans.begin(); i != chans.end(); ++i )
-	{
-		double gbar = Field< double >::get( *i, "Gbar" );
-		Field< double >::set( *i, "Gbar", gbar * a );
-	}
-
-	double v = size * size * size;
-	vector< ObjId > concs;
-	allChildren( compt, ALLDATA, "ISA=CaConcBase", concs );
-	// wildcardFind( compt.path() + "/##[ISA=CaConcBase]", concs );
-	for ( vector< ObjId >::iterator 
-					i = concs.begin(); i != concs.end(); ++i )
-	{
-		double B = Field< double >::get( *i, "B" );
-		Field< double >::set( *i, "B", B * v );
-	}
-
-	double Rm = Field< double >::get( compt, "Rm" );
-	Field< double >::set( compt, "Rm", Rm / a );
-	double Cm = Field< double >::get( compt, "Cm" );
-	Field< double >::set( compt, "Cm", Cm * a );
-	double Ra = Field< double >::get( compt, "Ra" );
-	Field< double >::set( compt, "Ra", Ra / size );
-}
-
 
 /**
  * Utility function to change coords of spine so as to reorient it.
@@ -1414,9 +1453,17 @@ static vector< Id > addSpine( Id parentCompt, Id spineProto,
 			double y = Field< double >::get( *i, "y" ) * size;
 			double z = Field< double >::get( *i, "z" ) * size;
 			double dia = Field< double >::get( *i, "diameter" ) * size;
-			Field< double >::set( *i, "diameter", dia );
+			// Field< double >::set( *i, "diameter", dia );
+
+			double len = sqrt( 
+							(x-x0)*(x-x0) + 
+							(y-y0)*(y-y0) + 
+							(z-z0)*(z-z0) );
+			SetGet2< double, double >::set( *i, "setGeomAndElec", len, dia );
+
+
 			coords.push_back( Vec( x + parentRadius, y, z ) );
-			scaleSpineCompt( *i, size );
+			// scaleSpineCompt( *i, size );
 			shell->doMove( *i, parentObject );
 			ret.push_back( *i );
 		}
@@ -1478,6 +1525,32 @@ string findArg( const vector<string>& line, const string& field )
 
 /// Add entries into the pos vector for a given compartment i.
 static void addPos( unsigned int segIndex, unsigned int eIndex,
+		double spacing, double minSpacing, 
+		double dendLength,
+		vector< unsigned int >& seglistIndex,
+		vector< unsigned int >& elistIndex,
+		vector< double >& pos )
+{
+	if ( minSpacing < spacing * 0.1 && minSpacing < 1e-7 )
+		minSpacing = spacing * 0.1;
+	if ( minSpacing > spacing * 0.5 )
+		minSpacing = spacing * 0.5;
+	unsigned int n = 1 + dendLength / minSpacing;
+	double dx = dendLength / n;
+	for( unsigned int i = 0; i < n; ++i ) {
+		if ( mtrand() < dx / spacing ) {
+			seglistIndex.push_back( segIndex );
+			elistIndex.push_back( eIndex );
+			pos.push_back( i * dx + dx*0.5 );
+		}
+	}
+}
+/*
+ * This version tries to put in Pos using simple increments from the
+ * start of each compt. Multiple issues including inability to put 
+ * spines in small compartments, even if many of them.
+ *
+static void addPos( unsigned int segIndex, unsigned int eIndex,
 		double spacing, double spacingDistrib, 
 		double dendLength,
 		vector< unsigned int >& seglistIndex,
@@ -1502,6 +1575,7 @@ static void addPos( unsigned int segIndex, unsigned int eIndex,
 		}
 	}
 }
+*/
 
 void Neuron::makeSpacingDistrib( const vector< ObjId >& elist, 
 		const vector< double >& val,
@@ -1532,11 +1606,6 @@ void Neuron::makeSpacingDistrib( const vector< ObjId >& elist,
 					lookupDend = segIndex_.find( elist[i] );
 				if ( lookupDend != segIndex_.end() ) {
 					double dendLength = segs_[lookupDend->second].length();
-					/////
-					//This is the problem line. Shouldn't we pass in i
-					//rather than lookupDend->second?
-					//addPos( lookupDend->second, spacing, spacingDistrib, 
-					//			dendLength, elistIndex, pos );
 					addPos( lookupDend->second, i, 
 								spacing, spacingDistrib, dendLength, 
 								seglistIndex, elistIndex, pos );
@@ -1728,14 +1797,39 @@ void Neuron::scaleBufAndRates( unsigned int spineNum,
 				spineToMeshOrdering_[spineNum], volScale );
 }
 
+/// Scale the diffusion parameters due to a change in the shaft dimensions
 void Neuron::scaleShaftDiffusion( unsigned int spineNum, 
 				double len, double dia) const
 {
-		;
+	double diffScale = dia * dia * 0.25 * PI / len;
+	SetGet2< unsigned int, double >::set( 
+		// Note that the buildNeuroMeshJunctions function is called
+		// on the dendDsolve with the args smdsolve, pmdsolve.
+		headDsolve_, "setDiffScale", 
+		spineToMeshOrdering_[ spineNum ], diffScale );
 }
 
+/// Scale the diffusion parameters due to a change in the head dimensions
 void Neuron::scaleHeadDiffusion( unsigned int spineNum, 
 				double len, double dia) const
 {
-		;
+	double vol = len * dia * dia * PI * 0.25;
+	double diffScale = dia * dia * 0.25 * PI / len;
+	unsigned int meshIndex = spineToMeshOrdering_[ spineNum ];
+	Id headCompt = Field< Id >::get( headDsolve_, "compartment" );
+	LookupField< unsigned int, double >::set( headCompt, "oneVoxelVolume",
+					meshIndex, vol );
+	Id psdCompt = Field< Id >::get( psdDsolve_, "compartment" );
+	double thick = Field< double >::get( psdCompt, "thickness" );
+	double psdVol = thick * dia * dia * PI * 0.25;
+	LookupField< unsigned int, double >::set( psdCompt, "oneVoxelVolume",
+					meshIndex, psdVol );
+	SetGet2< unsigned int, double >::set( 
+		headDsolve_, "setDiffVol1", meshIndex, vol );
+	SetGet2< unsigned int, double >::set( 
+		psdDsolve_, "setDiffVol2", meshIndex, vol );
+	SetGet2< unsigned int, double >::set( 
+		psdDsolve_, "setDiffVol1", meshIndex, psdVol );
+	SetGet2< unsigned int, double >::set( 
+		psdDsolve_, "setDiffScale", meshIndex, diffScale );
 }

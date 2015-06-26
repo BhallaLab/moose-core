@@ -16,8 +16,8 @@ __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
 import matplotlib.pyplot as plt
-import _moose as moose
-import print_utils as pu 
+from . import _moose as moose
+from . import print_utils as pu 
 import numpy as np
 
 def plotAscii(yvec, xvec = None, file=None):
@@ -25,7 +25,7 @@ def plotAscii(yvec, xvec = None, file=None):
     If file is given then save data to file as well.
     """
     if xvec is None:
-        plotInTerminal(yvec, range( len(yvec) ), file=file)
+        plotInTerminal(yvec, list(range( len(yvec))), file=file)
     else:
         plotInTerminal(yvec, xvec, file=file)
 
@@ -61,7 +61,7 @@ def saveNumpyVec( yvec, xvec, file):
     """
     if file is None:
         return
-    print("[INFO] Saving plot data to file {}".format(file))
+    print(("[INFO] Saving plot data to file {}".format(file)))
     textLines = xyToString( yvec, xvec)
     with open(file, "w") as dataF:
         dataF.write(textLines)
@@ -70,7 +70,7 @@ def saveAsGnuplot( yvec, xvec, file):
     ''' Save the plot as stand-alone gnuplot script '''
     if file is None:
         return
-    print("[INFO] Saving plot data to a gnuplot-script: {}".format(file))
+    print(("[INFO] Saving plot data to a gnuplot-script: {}".format(file)))
     dataText = xyToString( yvec, xvec )
     text = []
     text.append("#!/bin/bash")
@@ -157,7 +157,7 @@ def plotVector(vec, xvec = None, **options):
     :param **kwargs: Optional to pass to maplotlib.
     """
 
-    #assert type(vec) == np.ndarray, "Expected type %s" % type(vec)
+    assert type(vec) == np.ndarray, "Expected type %s" % type(vec)
     legend = options.get('legend', True)
 
     if xvec is None:
@@ -199,7 +199,7 @@ def saveRecords(dataDict, xvec = None, **kwargs):
     assert clock.currentTime > 0
 
     yvecs = []
-    text = [ "time," + ",".join(dataDict.keys()) ]
+    text = [ "time," + ",".join(list(dataDict.keys())) ]
     for k in dataDict:
         yvec = dataDict[k].vector
         yvecs.append(yvec)

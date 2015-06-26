@@ -87,11 +87,11 @@ const Cinfo* PsdMesh::initCinfo()
 		static DestFinfo psdList( "psdList",
 			"Specifies the geometry of the spine,"
 			"and the associated parent voxel"
-			"Arguments: cell container, "
+			"Arguments: "
 			"disk params vector with 8 entries per psd, "
 			"vector of Ids of electrical compts mapped to voxels, "
 			"parent voxel index ",
-			new EpFunc4< PsdMesh, Id,
+			new EpFunc3< PsdMesh,
 				vector< double >,
 				vector< Id >,
 		   		vector< unsigned int > >(
@@ -177,9 +177,13 @@ void PsdMesh::setThickness( double v )
 
 /**
  * Returns index of voxel on NeuroMesh to which this spine is connected.
+ * This isn't such a great function, as it only works if the spine is
+ * sitting directly on the NeuroMesh. Otherwise it returns the vector
+ * of voxels of parent spine heads, which isn't what the name indicates.
  */
 vector< unsigned int > PsdMesh::getNeuronVoxel() const
 {
+	cout << "Warning: PsdMesh::getNeuronVoxel. Currently not working\n";
 	return parent_;
 }
 
@@ -214,11 +218,6 @@ void PsdMesh::updateCoords()
 	buildStencil();
 }
 
-Id PsdMesh::getCell() const
-{
-	return cell_;
-}
-
 unsigned int PsdMesh::innerGetDimensions() const
 {
 	return 2;
@@ -227,9 +226,11 @@ unsigned int PsdMesh::innerGetDimensions() const
 // Here we set up the psds.
 void PsdMesh::handlePsdList( 
 		const Eref& e,
-		Id cell,
 		vector< double > diskCoords, //ctr(xyz), dir(xyz), dia, diffDist
+		// The elecCompt refers to the spine head elec compartment.
 		vector< Id > elecCompt,
+		// The parentVoxel is just a vector where parentVoxel[i] == i
+		// Thus the parent voxel is the spine head with the same index
 		vector< unsigned int > parentVoxel )
 {
 		double oldVol = getMeshEntryVolume( 0 );
@@ -239,7 +240,6 @@ void PsdMesh::handlePsdList(
 		vs_.resize( parentVoxel.size() );
 		area_.resize( parentVoxel.size() );
 		length_.resize( parentVoxel.size() );
-		cell_ = cell;
 		elecCompt_ = elecCompt;
 
 		psd_.clear();
@@ -312,6 +312,18 @@ double PsdMesh::getMeshEntryVolume( unsigned int fid ) const
 		return 1.0;
 	assert( fid < psd_.size() );
 	return thickness_ * psd_[ fid ].getDiffusionArea( pa_[fid], 0 );
+}
+
+/// Virtual function to assign volume of mesh Entry. Thickness not touched.
+void PsdMesh::setMeshEntryVolume( unsigned int fid, double volume )
+{
+	if ( psd_.size() == 0 ) // Default for meshes before init.
+		return;
+	assert( fid < psd_.size() );
+	vs_[fid] = volume;
+	area_[fid] = volume / thickness_;
+	double dia = 2.0 * sqrt( area_[fid] / PI );
+	psd_[ fid ].setDia( dia );
 }
 
 /// Virtual function to return coords of mesh Entry.
@@ -483,32 +495,25 @@ void PsdMesh::matchSpineMeshEntries( const ChemCompt* other,
 {
 	const SpineMesh* sm = dynamic_cast< const SpineMesh* >( other );
 	assert( sm );
-	// Check if NeuroMesh is parent of psds. If so, simple.
-	if ( sm->getCell() == getCell() ) {
-		for ( unsigned int i = 0; i < psd_.size(); ++i ) {
-			double xda = psd_[i].getDiffusionArea( pa_[i], 0 ) / parentDist_[i];
-			ret.push_back( VoxelJunction( i, parent_[i], xda ) );
-			ret.back().firstVol = getMeshEntryVolume( i );
-			ret.back().secondVol = sm->getMeshEntryVolume( parent_[i] );
-		}
-	} else {
-		assert( 0 ); // Don't know how to do this yet.
+	for ( unsigned int i = 0; i < psd_.size(); ++i ) {
+		double xda = psd_[i].getDiffusionArea( pa_[i], 0 ) / parentDist_[i];
+		ret.push_back( VoxelJunction( i, parent_[i], xda ) );
+		ret.back().firstVol = getMeshEntryVolume( i );
+		ret.back().secondVol = sm->getMeshEntryVolume( parent_[i] );
 	}
 }
 
+// This only makes sense if the PSD is directly on the NeuroMesh, that is,
+// no spine shaft or head. In this case the parent_ vector must refer to
+// the parent compartment on the NeuroMesh.
 void PsdMesh::matchNeuroMeshEntries( const ChemCompt* other,
 	   vector< VoxelJunction >& ret ) const
 {
 	const NeuroMesh* nm = dynamic_cast< const NeuroMesh* >( other );
 	assert( nm );
-	// Check if NeuroMesh is parent of psds. If so, simple.
-	if ( nm->getCell() == getCell() ) {
-		for ( unsigned int i = 0; i < psd_.size(); ++i ) {
-			double xda = psd_[i].getDiffusionArea( pa_[i], 0) / parentDist_[i];
-			ret.push_back( VoxelJunction( i, parent_[i], xda ) );
-		}
-	} else {
-		assert( 0 ); // Don't know how to do this yet.
+	for ( unsigned int i = 0; i < psd_.size(); ++i ) {
+		double xda = psd_[i].getDiffusionArea( pa_[i], 0) / parentDist_[i];
+		ret.push_back( VoxelJunction( i, parent_[i], xda ) );
 	}
 }
 
@@ -596,6 +601,7 @@ bool PsdMesh::vSetVolumeNotRates( double volume )
 	assert( vs_.size() == psd_.size() );
 	assert( area_.size() == psd_.size() );
 	assert( length_.size() == psd_.size() );
+	thickness_ *= linscale;
 	for ( unsigned int i = 0; i < psd_.size(); ++i ) {
 		psd_[i].setLength( psd_[i].getLength() * linscale );
 		psd_[i].setDia( psd_[i].getDia() * linscale );
