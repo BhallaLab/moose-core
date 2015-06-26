@@ -253,7 +253,8 @@ class rdesigneur:
             return False
         else:
             raise BuildError( \
-                protoType + "Proto: File type'" + i[0] + "' not known." )
+                protoType + "Proto: File type '" + protoVec[0] + \
+                "' not known." )
         return True
 
     ################################################################
