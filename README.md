@@ -26,27 +26,19 @@ NeuroML, GENESIS kkit and cell.p formats, HDF5 and NSDF for data writing.
 
 # VERSION
 
-This is MOOSE 3.0.1 "Gulab Jamun"
+This is MOOSE 3.0.2pre "Ghevar"
 
-# ABOUT VERSION 3.0.1, Gulab Jamun
+# ABOUT VERSION 3.0.2, Ghevar
 
-The Gulab Jamun release is the second of series 3 of MOOSE releases.
+The Ghevar release is the third of series 3 of MOOSE releases.
 
-Gulab Juman is a classic North Indian sweet consisting of deep brown spheres
-involving milk solids, cardamom and other spices, floating in a rich syrup. 
+Ghevar is a Rajasthani sweet with a stiff porous body soaked in sugar syrup.
 
-MOOSE 3.0.1 is an evolutionary increment over 3.0.0::
+MOOSE 3.0.2pre is an evolutionary increment over 3.0.1::
 
-- The GUI moves into beta with substantially more kinetic modeling features, as
-well as an early release of the neuronal modeling interface in the GUI.
-
-- Multiscale modeling updates including better cross-compartment reactions,
-including stochasticity.
-
-- General robustness and error reporting improvements for solvers.
-
-- HSolver updates to handle NMDA and other channels with Ca currents.
-
+- There has been substantial development on the multiscale modeling front, with
+the implementation of the rdesigneur class and affiliated features. 
+- MOOSE can now read NeuroMorpho .swc files natively.
 
 # LICENSE
 
@@ -175,6 +167,8 @@ model specification. The same loadModel function can be used for this but you
 need to have all the channels used in the .p file preloaded in /library:
 
     moose.loadModel(prototype_file_path, modelname )
+
+MOOSE can also read .swc files from NeuroMorpho.org.
 
 # Documentation
 
