@@ -12,6 +12,7 @@
 #include "../randnum/randnum.h"
 #include "CompartmentBase.h"
 #include "CompartmentDataHolder.h"
+#include "../shell/Wildcard.h"
 
 static const double RANGE = 4.0e-17;
 using namespace moose;
@@ -295,7 +296,7 @@ const Cinfo* CompartmentBase::initCinfo()
 				   	&CompartmentBase::displace )
 		);
 		static DestFinfo setGeomAndElec( "setGeomAndElec", 
-			"Assignes length and dia and accounts for any electrical "
+			"Assigns length and dia and accounts for any electrical "
 			"scaling needed as a result.",
 			new EpFunc2< CompartmentBase, double, double>(
 				   	&CompartmentBase::setGeomAndElec )
@@ -642,6 +643,22 @@ void CompartmentBase::setGeomAndElec( const Eref& e,
 		vSetCm( e, vGetCm( e ) * dia * len / ( diameter_ * length_ ) );
 		vSetRa( e, vGetRa( e ) * len * (diameter_ * diameter_) / 
 				( length_ * dia * dia ) );
+		// Rescale channel Gbars here
+		vector< ObjId > chans;
+		allChildren( e.objId(), ALLDATA, "ISA=ChanBase", chans );
+		for ( unsigned int i = 0; i < chans.size(); ++i ) {
+			double gbar = Field< double >::get( chans[i], "Gbar" );
+			gbar *= len * dia / ( length_ * diameter_ );
+			Field< double >::set( chans[i], "Gbar", gbar );
+		}
+		// Rescale CaConc sizes here
+		vector< ObjId > concs;
+		allChildren( e.objId(), ALLDATA, "ISA=CaConcBase", concs );
+		for ( unsigned int i = 0; i < concs.size(); ++i ) {
+			Field< double >::set( concs[i], "length", len );
+			Field< double >::set( concs[i], "diameter", dia );
+		}
+		
 		setLength( len );
 		setDiameter( dia );
 	}

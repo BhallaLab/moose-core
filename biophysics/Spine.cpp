@@ -21,31 +21,31 @@ const Cinfo* Spine::initCinfo()
 		//////////////////////////////////////////////////////////////
 		static ElementValueFinfo< Spine, double > shaftLength (
 			"shaftLength",
-			"Length of spine shaft..",
+			"Length of spine shaft.",
 			&Spine::setShaftLength,
 			&Spine::getShaftLength
 		);
 		static ElementValueFinfo< Spine, double > shaftDiameter (
 			"shaftDiameter",
-			"Diameter of spine shaft..",
+			"Diameter of spine shaft.",
 			&Spine::setShaftDiameter,
 			&Spine::getShaftDiameter
 		);
 		static ElementValueFinfo< Spine, double > headLength (
 			"headLength",
-			"Length of spine head...",
+			"Length of spine head.",
 			&Spine::setHeadLength,
 			&Spine::getHeadLength
 		);
 		static ElementValueFinfo< Spine, double > headDiameter (
 			"headDiameter",
-			"Diameter of spine head..",
+			"Diameter of spine head.",
 			&Spine::setHeadDiameter,
 			&Spine::getHeadDiameter
 		);
 		static ElementValueFinfo< Spine, double > totalLength (
 			"totalLength",
-			"Length of entire spine",
+			"Length of entire spine.",
 			&Spine::setTotalLength,
 			&Spine::getTotalLength
 		);

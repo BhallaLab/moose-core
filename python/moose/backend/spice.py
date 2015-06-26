@@ -17,7 +17,7 @@ __maintainer__       = "Dilawar Singh"
 __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
-from backend  import Backend 
+from .backend  import Backend 
 import print_utils as debug
 
 import os 
@@ -275,7 +275,7 @@ def main():
     p.delay[1] = 0.08
     p.connect('output', c1, 'injectMsg')
     s = Spice()
-    print s.writeSpice( output='test_spice.spice' )
+    print(s.writeSpice( output='test_spice.spice' ))
 
 if __name__ == '__main__':
     main()

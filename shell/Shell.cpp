@@ -780,7 +780,7 @@ void Shell::innerCreate( string type, ObjId parent, Id newElm, string name,
 {
 	const Cinfo* c = Cinfo::find( type );
 	if ( c ) {
-		Element* ret;
+		Element* ret = 0;
 		switch ( nb.policy ) {
 			case MooseGlobal:
 				ret = new GlobalDataElement( newElm, c, name, nb.numData );
@@ -1007,7 +1007,7 @@ bool Shell::innerUseClock( string path, string field, unsigned int tick,
 	vector< ObjId > list;
 	wildcardFind( path, list ); // By default scans only Elements.
 	if ( list.size() == 0 ) {
-		cout << "Warning: Shell::innerUseClock: no Elements found on path " << path << endl;
+		// cout << "Warning: Shell::innerUseClock: no Elements found on path " << path << endl;
 		return 0;
 	}
 	// string tickField = "proc";

@@ -1,5 +1,6 @@
-cmake_minimum_required(VERSION 2.6)
-
+set(CMAKE_LEGACY_CYGWIN_WIN32 0)
+cmake_minimum_required(VERSION 2.8)
+cmake_policy(SET CMP0004 OLD)
 project(moose)
 
 SET(CMAKE_INSTALL_PREFIX /usr)
@@ -21,6 +22,8 @@ if( CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT MSVC_IDE )
         Please delete them."
         )
 endif()
+################################# OS SPECIFIC ##################################
+
 
 ################################# CMKAE MACROS #################################
 
@@ -88,6 +91,9 @@ else()
     add_definitions(-DQUIET_MODE)
 endif()
 
+# Whether to notify the user after 1 second of simulation.
+option(NOTIFY_AT_EACH_SECOND "Write * to console after 1 second of simulation" ON)
+
 # STATS INSIDE MOOSE
 option(ENABLE_LOGGER  "Enable MOOSE logger" OFF)
 if(ENABLE_LOGGER)
@@ -100,8 +106,10 @@ add_definitions(-DUSE_GENESIS_PARSER)
 
 option(DEBUG "Building with debugging support" ON)
 if(DEBUG)
+    MESSAGE("++ Building for Debug")
     set(CMAKE_BUILD_TYPE Debug)
 else()
+    MESSAGE("++ Build for Relase")
     set(CMAKE_BUILD_TYPE Release)
     add_definitions(-UDO_UNIT_TESTS -O2)
 endif()
@@ -112,9 +120,10 @@ option(ENABLE_SBML "Enable SBML support" ON)
 if(ENABLE_SBML)
     find_package(LIBSBML)
     if(NOT LIBSBML_FOUND)
-        MESSAGE("+ LIBSBML NOT FOUND.  Disabling SBML support.")
+        MESSAGE("++ LIBSBML NOT FOUND.  Disabling SBML support.")
         ADD_DEFINITIONS(-UUSE_SBML)
     else()
+        MESSAGE("++ SBML found. Support is ON")
         ADD_DEFINITIONS(-DUSE_SBML)
         include_directories(${LIBSBML_INCLUDE_DIR})
         find_package(BZip2 REQUIRED)
@@ -130,14 +139,13 @@ FIND_PACKAGE(PythonDev REQUIRED)
 ################################### SETUP BUILD ################################
 include_directories(msg basecode)
 add_executable(moose-bin basecode/main.cpp)
-add_library(moose SHARED basecode/main.cpp)
-set_target_properties(moose PROPERTIES COMPILE_FLAGS  "-DMOOSE_LIB")
+#add_library(moose SHARED basecode/main.cpp)
+#set_target_properties(moose PROPERTIES COMPILE_FLAGS  "-DMOOSE_LIB")
 
 ## GSL
 # Setup GSL
 if(GSL_FOUND)
     add_definitions(-DUSE_GSL)
-    add_dependencies(moose GSL)
 endif()
 
 
@@ -161,8 +169,7 @@ find_package(MPI REQUIRED)
 set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
 
 ############################ CYMOOSE related macros. ########################
-set(CYMOOSE 1)
-if(CYMOOSE)
+if(BUILD_CYMOOSE)
     add_definitions("-DCYMOOSE -DCYTHON")
 endif()
 
@@ -233,22 +240,22 @@ set(MOOSE_LIBRARIES
     utility 
     muparser
     kinetics 
+    synapse
+    intfire
     hsolve 
     mesh
     signeur
     tinyxml
-    synapse
     diffusion 
-    basecode
-    device
     ksolve
-    intfire
+    device
+    basecode
     )
 
-target_link_libraries(moose
-    ${MOOSE_LIBRARIES}
-    ${LIBRARIES}
-    )
+#target_link_libraries(moose
+#    ${MOOSE_LIBRARIES}
+#    ${LIBRARIES}
+#    )
 
 target_link_libraries(moose-bin 
     "-Wl,--whole-archive"
@@ -258,10 +265,10 @@ target_link_libraries(moose-bin
     )
 
 ######################### BUILD PYMOOSE ########################################
-set(BUILD_PYMOOSE 1)
+option(BUILD_PYMOOSE "Build native python extension of MOOSE" 1)
 if(BUILD_PYMOOSE)
+    message("++ Building native python extension of MOOSE")
     find_package(NumpyHeaders)
-
     if(PYTHON_NUMPY_FOUND)
         add_definitions(-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
         include_directories(${PYTHON_NUMPY_INCLUDE_DIR})
@@ -298,7 +305,9 @@ if(BUILD_PYMOOSE)
 endif(BUILD_PYMOOSE)
 
 ######################### CYMOOSE #############################################
-if(CYMOOSE)
+option(BUILD_CYMOOSE "Build python extension using Cython. Development version." 0)
+if(BUILD_CYMOOSE)
+    message("++ Building cython extension of MOOSE. Unstable and experimental.")
     add_library(cymoose SHARED cymoose/cymoose_methods.cxx)
     set_target_properties(moose PROPERTIES COMPILE_DEFINITIONS "CYMOOSE")
     if(DEBUG)
@@ -334,10 +343,10 @@ else(BUILD_MOOGLI)
 endif()
 
 ######################### INSTALL ##############################################
-install(TARGETS moose
-    LIBRARY DESTINATION lib
-    COMPONENT moose-core
-    )
+#install(TARGETS moose
+#    DESTINATION lib
+#    COMPONENT moose-core
+#    )
 
 install(TARGETS moose-bin
     DESTINATION bin
@@ -440,12 +449,24 @@ ENABLE_TESTING()
 # onto the console if a test fails.
 SET(ENV{CTEST_OUTPUT_ON_FAILURE} ON)
 
+if (CMAKE_CONFIGURATION_TYPES)
+    add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} 
+        --force-new-ctest-process --output-on-failure 
+        --build-config "Debug")
+else()
+    add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} 
+        --force-new-ctest-process
+        --output-on-failure)
+endif()
+
 ADD_TEST(NAME moose-bin-raw-run
-    COMMAND echo q | moose-bin -u
+    COMMAND moose-bin -u -q
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     )
 
 ## PyMOOSE tests.
+
+# Export the PYTHONPATH
 ADD_TEST(NAME pymoose-test-mumbl
     COMMAND ${PYTHON_EXECUTABLE} test_mumbl.py
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests/python
@@ -467,3 +488,63 @@ ADD_TEST(NAME pymoose-test-vec
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests/python
     )
     
+#ADD_TEST(NAME pymoose-snippets
+    #COMMAND ${PYTHON_EXECUTABLE} test_snippets.py
+    #WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/Demos/snippets
+    #)
+
+
+####### CPack ###############################
+
+set(CPACK_GENERATOR "DEB;RPM;STGZ")
+set(CPACK_STRIP_FILES TRUE)
+set(CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE ON)
+#  We need to compile python scripts on the installation  host.
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dilawar Singh")
+set(CPACK_PACKAGE_CONTACT "dilawars@ncbs.res.in")
+#set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "MOOSE, The Neural Simulator")
+set(CPACK_PACKAGE_VERSION "3.0.1")
+set(CPACK_PACKAGE_VERSION_MAJOR "3")
+set(CPACK_PACKAGE_VERSION_MINOR "0")
+set(CPACK_PACKAGE_VERSION_PATCH "1")
+set(CPACK_PACKAGE_VENDOR "NCBS Bangalore")
+set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/README.md")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dilawar Singh <dilawars@ncbs.res.in>")
+set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "${PKGARCH}")
+set(CPACK_PACKAGE_FILE_NAME "moose-${CPACK_PACKAGE_VERSION}-Linux-${PKGARCH}")
+set(CPACK_STRIP_FILES moose)
+
+set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
+set(CPACK_DEBIAN_PACKAGE_DEPENDS 
+    "openmpi-bin
+    , python-matplotlib
+    , python-qt4, openscenegraph
+    , python-tornado, python-suds, python-nose, python-setuptools
+    , libxml2"
+)
+
+set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
+    "${DEBIAN_POSTINST_PATH};${DEBIAN_PRERM_PATH};"
+    )
+
+## RPM 
+set(CPACK_RPM_PACKAGE_ARCHITECTURE "${RPMPKGARCH}")
+set(CPACK_RPM_SPEC_INSTALL_POST "/bin/true")
+set(CPACK_RPM_POST_INSTALL_SCRIPT_FILE "${RPM_POSTINST_PATH}")
+set(CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE "${RPM_PRERM_PATH}")
+
+# This has to be a single line.
+set(CPACK_RPM_PACKAGE_REQUIRES
+    "openmpi-devel python-matplotlib-qt4 python-qt4  python-tornado python-suds python-nose python-setuptools libxml2"
+    )
+
+# A workaround in RPM
+set(CPACK_RPM_SPEC_MORE_DEFINE "%define ignore \#")
+set(CPACK_RPM_USER_FILELIST "%ignore /" "%ignore /usr" "%ignore /usr/share" 
+    "%ignore /usr/share/applications"
+    "%ignore /tmp"
+    )
+
+include(CPack)
+

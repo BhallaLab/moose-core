@@ -20,6 +20,7 @@ add_library(ksolve
         ZombiePoolInterface.cpp
         testKsolve.cpp
     )
-if(USE_GSL)
-    target_link_libraries(ksolve gsl gslcblas)
-endif()
+
+#if(USE_GSL)
+    #target_link_libraries(ksolve gsl gslcblas)
+#endif()

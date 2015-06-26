@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Sat Oct 11 14:40:45 2014 (+0530)
 // Version: 
-// Last-Updated: 
-//           By: 
-//     Update #: 0
+// Last-Updated: Fri Jun 19 18:54:49 2015 (-0400)
+//           By: Subhasis Ray
+//     Update #: 31
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -48,6 +48,29 @@
 #ifndef _PYCALL_H
 #define _PYCALL_H
 
+#include <climits>
+
+#if PY_MAJOR_VERSION >= 3
+#define PYCODEOBJECT PyObject
+
+string get_program_name()
+{
+  wchar_t * progname = Py_GetProgramName();
+  char buffer[PATH_MAX+1];
+  size_t ret = wcstombs(buffer, progname, PATH_MAX);
+  buffer[ret] = '\0';
+  return string(buffer);
+}
+#else
+#define PYCODEOBJECT PyCodeObject
+
+string get_program_name()
+{
+  char * progname = Py_GetProgramName();
+  return string(progname);
+}
+#endif
+  
 /**
    PyRun allows caling Python functions from moose.
  */
@@ -97,8 +120,8 @@ protected:
     string runstr_; // statement str for running in each process call
     PyObject * globals_; // global env dict
     PyObject * locals_; // local env dict
-    PyCodeObject * runcompiled_; // compiled form of procstr_
-    PyCodeObject * initcompiled_; // coimpiled form of initstr_
+    PYCODEOBJECT * runcompiled_; // compiled form of procstr_
+    PYCODEOBJECT * initcompiled_; // coimpiled form of initstr_
     string inputvar_; // identifier for input variable.
     string outputvar_; // identifier for output variable
 };

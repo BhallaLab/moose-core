@@ -74,9 +74,11 @@ def example():
     hdfwriter.doubleVecAttr['c[0]/dvec'] = [3.141592, 2.71828]
     hdfwriter.longVecAttr['c[0]/lvec'] = [3, 14, 1592, 271828]
     
-    moose.setClock(0, 1e-5)
-    moose.setClock(1, 1e-5)
-    moose.setClock(2, 1e-5)
+    vm_tab = moose.Table('Vm')
+    moose.connect(vm_tab, 'requestOut', comp, 'getVm')
+    moose.setClock(0, 1e-3)
+    moose.setClock(1, 1e-3)
+    moose.setClock(2, 1e-3)
     moose.useClock(0, '/c', 'init')
     moose.useClock(1, '/##[TYPE!=HDF5DataWriter]', 'process')
     moose.useClock(2, '/##[TYPE=HDF5DataWriter]', 'process')
@@ -85,6 +87,7 @@ def example():
     comp.inject = 0.1
     moose.start(30.0)
     hdfwriter.close()
+    vm_tab.plainPlot('hdfdemo_Vm.csv')
     print 'Finished simulation. Data was saved in', hdfwriter.filename
 
    

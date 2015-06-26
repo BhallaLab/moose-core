@@ -34,7 +34,7 @@ static SrcFinfo3< Id, vector< double >, vector< unsigned int > >*
    		psdListOut(
 		"psdListOut",
 		"Tells PsdMesh to build a mesh. "
-		"Arguments: Cell Id, Coordinates of each psd, "
+		"Arguments: Coordinates of each psd, "
 		"index of matching parent voxels for each spine"
 		"The coordinates each have 8 entries:"
 		"xyz of centre of psd, xyz of vector perpendicular to psd, "
@@ -108,9 +108,9 @@ const Cinfo* SpineMesh::initCinfo()
 		static DestFinfo spineList( "spineList",
 			"Specifies the list of electrical compartments for the spine,"
 			"and the associated parent voxel"
-			"Arguments: cell container, shaft compartments, "
+			"Arguments: shaft compartments, "
 			"head compartments, parent voxel index ",
-			new EpFunc4< SpineMesh, Id, vector< Id >, vector< Id >,
+			new EpFunc3< SpineMesh, vector< Id >, vector< Id >,
 		   	vector< unsigned int > >(
 				&SpineMesh::handleSpineList )
 		);
@@ -237,11 +237,6 @@ void SpineMesh::updateCoords()
 	buildStencil();
 }
 
-Id SpineMesh::getCell() const
-{
-	return cell_;
-}
-
 unsigned int SpineMesh::innerGetDimensions() const
 {
 	return 3;
@@ -249,8 +244,7 @@ unsigned int SpineMesh::innerGetDimensions() const
 
 // Here we set up the spines. We don't permit heads without shafts.
 void SpineMesh::handleSpineList( 
-		const Eref& e, Id cell,
-		vector< Id > shaft, vector< Id > head, 
+		const Eref& e, vector< Id > shaft, vector< Id > head, 
 		vector< unsigned int > parentVoxel )
 {
 		double oldVol = getMeshEntryVolume( 0 );
@@ -260,7 +254,6 @@ void SpineMesh::handleSpineList(
 		vs_.resize( head.size() );
 		area_.resize( head.size() );
 		length_.resize( head.size() );
-		cell_ = cell;
 
 		vector< double > ret;
 		vector< double > psdCoords;
@@ -275,7 +268,6 @@ void SpineMesh::handleSpineList(
 			area_[i] = spines_[i].rootArea();
 			length_[i] = spines_[i].diffusionLength();
 		}
-		// psdListOut()->send( e ), cell_, psdCoords, index );
 
 		updateCoords();
 		Id meshEntry( e.id().value() + 1 );
@@ -317,6 +309,14 @@ double SpineMesh::getMeshEntryVolume( unsigned int fid ) const
 		return 1.0;
 	assert( fid < spines_.size() );
 	return spines_[ fid % spines_.size() ].volume();
+}
+/// Virtual function to assign volume of mesh Entry.
+void SpineMesh::setMeshEntryVolume( unsigned int fid, double volume ) 
+{
+	if ( spines_.size() == 0 )
+		return;
+	assert( fid < spines_.size() );
+	spines_[ fid % spines_.size() ].setVolume( volume );
 }
 
 /// Virtual function to return coords of mesh Entry.
@@ -544,17 +544,12 @@ void SpineMesh::matchNeuroMeshEntries( const ChemCompt* other,
 {
 	const NeuroMesh* nm = dynamic_cast< const NeuroMesh* >( other );
 	assert( nm );
-	// Check if NeuroMesh is parent of spines. If so, simple.
-	if ( nm->getCell() == getCell() ) {
-		for ( unsigned int i = 0; i < spines_.size(); ++i ) {
-			double xda = spines_[i].rootArea() / spines_[i].diffusionLength();
-			ret.push_back( VoxelJunction( i, spines_[i].parent(), xda ) );
-			ret.back().firstVol = spines_[i].volume();
-			ret.back().secondVol = 
-					nm->getMeshEntryVolume( spines_[i].parent() );
-		}
-	} else {
-		assert( 0 ); // Don't know how to do this yet.
+	for ( unsigned int i = 0; i < spines_.size(); ++i ) {
+		double xda = spines_[i].rootArea() / spines_[i].diffusionLength();
+		ret.push_back( VoxelJunction( i, spines_[i].parent(), xda ) );
+		ret.back().firstVol = spines_[i].volume();
+		ret.back().secondVol = 
+				nm->getMeshEntryVolume( spines_[i].parent() );
 	}
 }
 

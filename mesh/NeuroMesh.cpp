@@ -26,27 +26,26 @@
 #include "../utility/numutil.h"
 #include "../shell/Wildcard.h"
 
-static SrcFinfo4< Id, vector< Id >, vector< Id >, vector< unsigned int > >* 
+static SrcFinfo3< vector< Id >, vector< Id >, vector< unsigned int > >* 
 	spineListOut()
 {
-	static SrcFinfo4< Id, vector< Id >, vector< Id >, vector< unsigned int > >
+	static SrcFinfo3< vector< Id >, vector< Id >, vector< unsigned int > >
    		spineListOut(
 		"spineListOut",
 		"Request SpineMesh to construct self based on list of electrical "
 		"compartments that this NeuroMesh has determined are spine shaft "
 		"and spine head respectively. Also passes in the info about where "
 		"each spine is connected to the NeuroMesh. "
-		"Arguments: Cell Id, shaft compartment Ids, head compartment Ids,"
+		"Arguments: shaft compartment Ids, head compartment Ids,"
 		"index of matching parent voxels for each spine"
 	);
 	return &spineListOut;
 }
 
-static SrcFinfo4< Id, vector< double >, 
-		vector< Id >, vector< unsigned int > >* 
+static SrcFinfo3< vector< double >, vector< Id >, vector< unsigned int > >*
 	psdListOut()
 {
-	static SrcFinfo4< Id, vector< double >, 
+	static SrcFinfo3< vector< double >, 
 			vector< Id >, vector< unsigned int > >
    		psdListOut(
 		"psdListOut",
@@ -67,38 +66,25 @@ const Cinfo* NeuroMesh::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// Field Definitions
 		//////////////////////////////////////////////////////////////
-		/*
-		static ReadOnlyValueFinfo< NeuroMesh, vector< unsigned int > > 
-			chemTree(
-			"chemTree",
-			"Branching structure of neuronal compartments."
-			"Ignores startNodes if any",
-			&NeuroMesh::getChemTree
-		);
-
-		static ReadOnlyValueFinfo< NeuroMesh, vector< double >  > cylCoords(
-			"cylCoords",
-			"End coordinates of cylinders in the NeuroMesh diffusive "
-			"compartments. Taken directly from the neuronal compartments."
-			"Organized as x, y, z. Length is therefore 3 * numCompts."
-			&NeuroMesh::getCylCoords
-		);
-		*/
-		static ElementValueFinfo< NeuroMesh, Id > cell(
-			"cell",
-			"Id for base element of cell model. Uses this to traverse the"
-			"entire tree of the cell to build the mesh.",
-			&NeuroMesh::setCell,
-			&NeuroMesh::getCell
-		);
 		static ElementValueFinfo< NeuroMesh, vector< ObjId > > subTree(
 			"subTree",
-			"Set of compartments to model. If they happen to be contiguous"
-			"then also set up diffusion between the compartments. Can also"
+			"Set of compartments in which to embed chemical reaction "
+			"systems. If the compartments happen to be contiguous"
+			"then also set up diffusion between them. Can also"
 			"handle cases where the same cell is divided into multiple"
 			"non-diffusively-coupled compartments",
 			&NeuroMesh::setSubTree,
 			&NeuroMesh::getSubTree
+		);
+		static ElementValueFinfo< NeuroMesh, string > subTreePath(
+			"subTreePath",
+			"Set of compartments to model, defined as a path string. "
+			"If they happen to be contiguous "
+			"then also set up diffusion between the compartments. Can also"
+			"handle cases where the same cell is divided into multiple"
+			"non-diffusively-coupled compartments",
+			&NeuroMesh::setSubTreePath,
+			&NeuroMesh::getSubTreePath
 		);
 		static ValueFinfo< NeuroMesh, bool > separateSpines(
 			"separateSpines",
@@ -250,31 +236,13 @@ const Cinfo* NeuroMesh::initCinfo()
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
 
-		static DestFinfo setCellPortion( "cellPortion",
-			"Tells NeuroMesh to mesh up a subpart of a cell. For now"
-			"assumed contiguous."
-			"The first argument is the cell Id. The second is the wildcard"
-			"path of compartments to use for the subpart.",
-			new EpFunc2< NeuroMesh, Id, string >(
-				&NeuroMesh::setCellPortion )
-		);
-
-		static DestFinfo setCellPortionList( "cellPortionList",
-			"Tells NeuroMesh to mesh up a subpart of a cell, using a list"
-			" of compartment Ids. For now assumed contiguous."
-			"The first argument is the cell Id. The second is a vector of"
-			"compartment ids to use for the subpart.",
-			new EpFunc2< NeuroMesh, Id, vector< ObjId > >(
-				&NeuroMesh::setCellPortion )
-		);
-
 		//////////////////////////////////////////////////////////////
 		// Field Elements
 		//////////////////////////////////////////////////////////////
 
 	static Finfo* neuroMeshFinfos[] = {
-		&cell,			// Value
 		&subTree,		// Value
+		&subTreePath,		// Value
 		&separateSpines,	// Value
 		&numSegments,		// ReadOnlyValue
 		&numDiffCompts,		// ReadOnlyValue
@@ -288,8 +256,6 @@ const Cinfo* NeuroMesh::initCinfo()
 		&spineVoxelsOnCompartment,	// ReadOnlyLookupValue
 		&diffLength,			// Value
 		&geometryPolicy,		// Value
-		&setCellPortion,			// DestFinfo
-		&setCellPortionList,		// DestFinfo
 		spineListOut(),			// SrcFinfo
 		psdListOut(),			// SrcFinfo
 	};
@@ -318,6 +284,7 @@ static const Cinfo* neuroMeshCinfo = NeuroMesh::initCinfo();
 NeuroMesh::NeuroMesh()
 	:
 		nodes_(1),
+		subTreePath_( "Undefined" ),
 		nodeIndex_(1, 0 ),
 		vs_( 1, NA * 1e-9 ),
 		area_( 1, 1.0e-12 ),
@@ -335,7 +302,6 @@ NeuroMesh::NeuroMesh()
 NeuroMesh::NeuroMesh( const NeuroMesh& other )
 	:
 		diffLength_( other.diffLength_ ),
-		cell_( other.cell_ ),
 		separateSpines_( other.separateSpines_ ),
 		geometryPolicy_( other.geometryPolicy_ ),
 		surfaceGranularity_( other.surfaceGranularity_ )
@@ -349,7 +315,6 @@ NeuroMesh& NeuroMesh::operator=( const NeuroMesh& other )
 	area_ = other.area_;
 	length_ = other.length_;
 	diffLength_ = other.diffLength_;
-	cell_ = other.cell_;
 	separateSpines_ = other.separateSpines_;
 	geometryPolicy_ = other.geometryPolicy_;
 	return *this;
@@ -451,10 +416,6 @@ void NeuroMesh::setGeometryPolicy( string v )
 	for ( vector< NeuroNode >::iterator 
 			i = nodes_.begin(); i != nodes_.end(); ++i )
 			i->setIsCylinder( isCylinder );
-	/*
-	if ( cell_ != Id() )
-		setCell( cell_ );
-		*/
 }
 
 string NeuroMesh::getGeometryPolicy() const
@@ -594,87 +555,10 @@ bool NeuroMesh::filterSpines( Id compt )
 	return false;
 }
 
-// I assume 'cell' is the parent of the compartment tree.
-void NeuroMesh::setCell( const Eref& e, Id cell )
-{
-	cell_ = cell;
-	// vector< ObjId > compts;
-	// wildcardFind( cell.path() + "/##", compts );
-	// setCellPortion( e, cell, compts );
-}
-
-/** 
- * This overloaded function sets up a presumed contiguous set of
- * compartments, complains if they are not contiguous due to the check in
- * NeuroNode::traverse.
- * 
- * I assume 'cell' is the parent of the compartment tree.
- * The 'path' argument specifies a wildcard list of compartments, which
- * can be also a comma-separated explicit list. Does not have to be
- * in any particular order.
- * The 'path' argument is based off root.
- */
-void NeuroMesh::setCellPortion( const Eref& e, Id cell,
-	string path	)
-{
-	vector< ObjId > compts;
-	wildcardFind( path, compts );
-	setCellPortion( e, cell, compts );
-}
-
-// Here we set a portion of a cell, specified by a vector of Ids. 
-// We optionally find all spines connected to this cell portion,
-// if the separateSpines flag is set.
-//
-void NeuroMesh::setCellPortion( const Eref& e,
-					Id cell, vector< ObjId > portion )
-{
-	// double oldVol = getMeshEntryVolume( 0 );
-	cell_ = cell;
-	if ( separateSpines_ ) {
-		NeuroNode::buildSpinyTree( portion, nodes_, shaft_, head_, parent_);
-		insertDummyNodes();
-		updateCoords();
-		updateShaftParents();
-		transmitSpineInfo( e );
-	} else {
-		NeuroNode::buildTree( nodes_, portion );
-		insertDummyNodes();
-		updateCoords();
-	}
-}
-
-/*
- * Legacy version of function which started with a list of all compts
- * to be undertaken, including the spines.
- *
-// Here we set a portion of a cell, specified by a vector of Ids. We
-// also need to define the cell parent.
-void NeuroMesh::setCellPortion( const Eref& e,
-					Id cell, vector< ObjId > portion )
-{
-	// double oldVol = getMeshEntryVolume( 0 );
-	cell_ = cell;
-	NeuroNode::buildTree( nodes_, portion );
-	if ( separateSpines_ )
-		NeuroNode::filterSpines( nodes_, shaft_, head_, parent_ );
-	insertDummyNodes();
-
-	updateCoords();
-
-	if ( separateSpines_ )
-		updateShaftParents();
-
-	// transmitChange( e, oldVol );
-	if ( separateSpines_ ) {
-		transmitSpineInfo( e );
-	}
-}
-*/
 
 void NeuroMesh::transmitSpineInfo( const Eref& e )
 {
-		spineListOut()->send( e, cell_, shaft_, head_, parent_ );
+		spineListOut()->send( e, shaft_, head_, parent_ );
 
 		vector< double > ret;
 		vector< double > psdCoords;
@@ -691,7 +575,7 @@ void NeuroMesh::transmitSpineInfo( const Eref& e )
 			}
 			// ids.clear();
 			// e.element()->getNeighbors( ids, psdListOut() );
-			psdListOut()->send( e, cell_, psdCoords, head_, index );
+			psdListOut()->send( e, psdCoords, head_, index );
 		}
 }
 
@@ -724,21 +608,21 @@ void NeuroMesh::updateShaftParents()
 	}
 }
 
-Id NeuroMesh::getCell( const Eref& e ) const
-{
-		return cell_;
-}
-
-Id NeuroMesh::getCell() const
-{
-		return cell_;
-}
-
 // Uses all compartments, and if they have spines on them adds those too.
-void NeuroMesh::setSubTree( const Eref& e, vector< ObjId > compartments )
+void NeuroMesh::setSubTree( const Eref& e, vector< ObjId > compts )
 {
-	if ( cell_ != Id() && cell_.element()->cinfo()->isA( "Neuron" ) )
-		setCellPortion( e, cell_, compartments );
+	if ( separateSpines_ ) {
+		NeuroNode::buildSpinyTree( compts, nodes_, shaft_, head_, parent_);
+		insertDummyNodes();
+		updateCoords();
+		updateShaftParents();
+		transmitSpineInfo( e );
+	} else {
+		NeuroNode::buildTree( nodes_, compts );
+		insertDummyNodes();
+		updateCoords();
+	}
+	subTreePath_ = "Undefined: subTree set as a compartment list";
 }
 
 vector< ObjId > NeuroMesh::getSubTree( const Eref& e ) const
@@ -748,6 +632,20 @@ vector< ObjId > NeuroMesh::getSubTree( const Eref& e ) const
 		for ( unsigned int i = 0; i < ret.size(); ++i )
 			ret[i] = temp[i];
 		return ret;
+}
+
+// Uses all compartments, and if they have spines on them adds those too.
+void NeuroMesh::setSubTreePath( const Eref& e, string path )
+{
+	vector< ObjId > compts;
+	wildcardFind( path, compts );
+	setSubTree( e, compts );
+	subTreePath_ = path;
+}
+
+string NeuroMesh::getSubTreePath( const Eref& e ) const
+{
+	return subTreePath_;
 }
 
 void NeuroMesh::setSeparateSpines( bool v )
@@ -786,7 +684,8 @@ vector< Id > NeuroMesh::getElecComptMap() const
 {
 	vector< Id > ret( nodeIndex_.size() );
 	for ( unsigned int i = 0; i < nodeIndex_.size(); ++i ) {
-		ret.push_back( nodes_[nodeIndex_[i]].elecCompt() );
+		ret[i] = nodes_[nodeIndex_[i]].elecCompt();
+		// cout << i << "	" << nodeIndex_[i] << "	" << ret[i] << endl;
 
 	}
 	return ret;

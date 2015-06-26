@@ -18,6 +18,7 @@
 
 import moose
 import numpy as np
+import math
 from moose.neuroml.NeuroML import NeuroML
 from moose.neuroml.ChannelML import ChannelML
 
@@ -96,6 +97,22 @@ class rdesigneur:
 
 
     ################################################################
+    def _printModelStats( self ):
+        print "Rdesigneur: Elec model has", \
+            self.elecid.numCompartments, "compartments and", \
+            self.elecid.numSpines, "spines on", \
+            len( self.cellPortionElist ), "compartments."
+        if hasattr( self , 'chemid' ):
+            dmstoich = moose.element( self.dendCompt.path + '/stoich' )
+            smstoich = moose.element( self.spineCompt.path + '/stoich' )
+            pmstoich = moose.element( self.psdCompt.path + '/stoich' )
+            print "Chem part of model has ", \
+                self.dendCompt.mesh.num, "dendrite voxels X", \
+                dmstoich.numAllPools, "pools,\n    ", \
+                self.spineCompt.mesh.num, "spine voxels X", \
+                smstoich.numAllPools, "pools,", \
+                self.psdCompt.mesh.num, "psd voxels X", \
+                pmstoich.numAllPools, "pools."
 
     def buildModel( self, modelPath ):
         if not moose.exists( '/library' ):
@@ -120,9 +137,8 @@ class rdesigneur:
             self._configureSolvers()
             self.buildAdaptors()
             self._configureClocks()
-            print "Rdesigneur: Model has ", self.elecid.numCompartments, \
-            " compartments, ", self.elecid.numBranches, \
-            " branches, and ", self.elecid.numSpines, " spines."
+            self._printModelStats()
+
         except BuildError, msg:
             print "Error: rdesigneur: model build failed: ", msg
             moose.delete( self.model )
@@ -166,11 +182,13 @@ class rdesigneur:
         if bracePos == -1:
             return False
 
-        if ( func.find( "::" ) != -1 ): # Function is in a file, load and check
-            raise BuildError( \
-                    protoName + "Proto: buildProtoFromFunction: external file function loading not yet implemented, '" + func )
-            # do stuff here and return True to say it is done
-            return True
+        modPos = func.find( "." )
+        if ( modPos != -1 ): # Function is in a file, load and check
+            module = func[0:modPos]
+            funcName = func[modPos+1:bracePos]
+            execfile( module + ".py" )
+            #eval( funcName + '(' + protoName + ')' )
+            #return True
         if not func[0:bracePos] in globals():
             raise BuildError( \
                 protoName + "Proto: global function '" +func+"' not known.")
@@ -216,7 +234,7 @@ class rdesigneur:
                             + protoVec[0] + "' not found." )
                 return True
 
-        if self.buildProtoFromFunction( protoVec[0], protoType ):
+        if self.buildProtoFromFunction( protoVec[0], protoVec[1] ):
             return True
         # Maybe the proto is already in memory
         # Avoid relative file paths going toward root
@@ -228,7 +246,7 @@ class rdesigneur:
                 #moose.copy('/library/' + protoVec[0], '/library/', protoVec[1])
                 print 'renaming /library/' + protoVec[0] + ' to ' + protoVec[1]
                 moose.element( '/library/' + protoVec[0]).name = protoVec[1]
-                moose.le( '/library' )
+                #moose.le( '/library' )
                 return True
         # Check if there is a matching suffix for file type.
         if self.isKnownClassOrFile( protoVec[0], knownFileTypes ):
@@ -248,26 +266,6 @@ class rdesigneur:
                 self.elecid = moose.element( '/library/' + i[1] )
             else:
                 self._loadElec( i[0], i[1] ) 
-            '''
-            print 'later: ', self.elecid
-            moose.showfields( self.elecid )
-            moose.le( '/library' )
-            a = self.elecid
-            print a
-            moose.showfields( a )
-            print a.path
-            print moose.element( a.path )
-            b = moose.element( a.path )
-            print 'About to set RM on b'
-            b.RM = 4.321
-            print 'About to set RM on b using func'
-            b.setRM( 4.321 )
-            print 'About to set RM on a'
-            a.setRM( 1.234 )
-            print 'Set RM'
-            a.buildSegmentTree()
-            print 'BUILT'
-            '''
             self.elecid.buildSegmentTree()
 
     def buildSpineProto( self ):
@@ -339,7 +337,6 @@ class rdesigneur:
             # be a global scaling factor.
             self.cellPortionElist = self.elecid.compartmentsFromExpression[ pair ]
             self.spineComptElist = self.elecid.spinesFromExpression[ pair ]
-            print 'len( compts), spines ', len( self.cellPortionElist ), len( self.spineComptElist )
             if len( self.cellPortionElist ) == 0:
                 raise BuildError( \
                     "buildChemDistrib: No elec compartments found in path: '" \
@@ -457,7 +454,7 @@ class rdesigneur:
     def buildFromFile( self, efile, cfile ):
         self.efile = efile
         self.cfile = cfile
-        self._loadElec( efile, 'tempelec', self.combineSegments )
+        self._loadElec( efile, 'tempelec' )
         if len( self.chanDistrib ) > 0:
             self.elecid.channelDistribution = self.chanDistrib
             self.elecid.parseChanDistrib()
@@ -547,6 +544,7 @@ class rdesigneur:
             self.elecid = moose.loadModel( efile, '/library/' + elecname)[0]
         else:
             nm = NeuroML()
+            print "in _loadElec, combineSegments = ", self.combineSegments
             nm.readNeuroMLFromFile( efile, \
                     params = {'combineSegments': self.combineSegments, \
                     'createPotentialSynapses': True } )
@@ -612,10 +610,7 @@ class rdesigneur:
         self._moveCompt( sortedComptList[1], self.spineCompt )
         self._moveCompt( sortedComptList[2], self.psdCompt )
         self.dendCompt.diffLength = self.meshLambda
-        self.dendCompt.cell = self.elecid
         self.dendCompt.subTree = self.cellPortionElist
-        #self.dendCompt.subTree = self.cellPortionElist+self.spineComptElist
-        #self.dendCompt.cellPortionList( self.elecid, self.cellPortionElist )
         moose.delete( self.chemid )
         self.chemid = newChemid
 
@@ -632,8 +627,6 @@ class rdesigneur:
         dmstoich.ksolve = dmksolve
         dmstoich.dsolve = dmdsolve
         dmstoich.path = self.dendCompt.path + "/##"
-        print 'Dend solver: numPools = ', dmdsolve.numPools, \
-            ', nvox= ', self.dendCompt.mesh.num, dmksolve.numAllVoxels
         # Put in spine solvers. Note that these get info from the dendCompt
         if self.useGssa:
             smksolve = moose.Gsolve( self.spineCompt.path + '/ksolve' )
@@ -645,8 +638,6 @@ class rdesigneur:
         smstoich.ksolve = smksolve
         smstoich.dsolve = smdsolve
         smstoich.path = self.spineCompt.path + "/##"
-        print 'spine num Pools = ', smstoich.numAllPools, \
-                ', nvox= ',  self.spineCompt.mesh.num, smksolve.numAllVoxels
         # Put in PSD solvers. Note that these get info from the dendCompt
         if self.useGssa:
             pmksolve = moose.Gsolve( self.psdCompt.path + '/ksolve' )
@@ -658,18 +649,20 @@ class rdesigneur:
         pmstoich.ksolve = pmksolve
         pmstoich.dsolve = pmdsolve
         pmstoich.path = self.psdCompt.path + "/##"
-        print 'psd num Pools = ', pmstoich.numAllPools, \
-                ', voxels=', self.psdCompt.mesh.num, pmksolve.numAllVoxels
     
         # Put in cross-compartment diffusion between ksolvers
         dmdsolve.buildNeuroMeshJunctions( smdsolve, pmdsolve )
         # Put in cross-compartment reactions between ksolvers
         smstoich.buildXreacs( pmstoich )
+        #pmstoich.buildXreacs( smstoich )
         smstoich.buildXreacs( dmstoich )
-        #smstoich.buildXreacs( pmstoich )
         dmstoich.filterXreacs()
         smstoich.filterXreacs()
         pmstoich.filterXreacs()
+
+        # set up the connections so that the spine volume scaling can happen
+        self.elecid.setSpineAndPsdMesh( self.spineCompt, self.psdCompt )
+        self.elecid.setSpineAndPsdDsolve( smdsolve, pmdsolve )
     ################################################################
     
     def _loadChem( self, fname, chemName ):
@@ -817,6 +810,47 @@ def buildSyn( name, compt, Ek, tau1, tau2, Gbar, CM ):
     sh.numSynapses = 1
     sh.synapse[0].weight = 1
     return syn
+
+######################################################################
+# Utility function, borrowed from proto18.py, for making an LCa channel.
+# Based on Traub's 91 model, I believe.
+def make_LCa():
+        EREST_ACT = -0.060 #/* hippocampal cell resting potl */
+        ECA = 0.140 + EREST_ACT #// 0.080
+	if moose.exists( 'LCa' ):
+		return
+	Ca = moose.HHChannel( 'LCa' )
+	Ca.Ek = ECA
+	Ca.Gbar = 0
+	Ca.Gk = 0
+	Ca.Xpower = 2
+	Ca.Ypower = 1
+	Ca.Zpower = 0
+
+	xgate = moose.element( 'LCa/gateX' )
+	xA = np.array( [ 1.6e3, 0, 1.0, -1.0 * (0.065 + EREST_ACT), -0.01389, -20e3 * (0.0511 + EREST_ACT), 20e3, -1.0, -1.0 * (0.0511 + EREST_ACT), 5.0e-3, 3000, -0.1, 0.05 ] )
+        xgate.alphaParms = xA
+	ygate = moose.element( 'LCa/gateY' )
+	ygate.min = -0.1
+	ygate.max = 0.05
+	ygate.divs = 3000
+	yA = np.zeros( (ygate.divs + 1), dtype=float)
+	yB = np.zeros( (ygate.divs + 1), dtype=float)
+
+
+#Fill the Y_A table with alpha values and the Y_B table with (alpha+beta)
+	dx = (ygate.max - ygate.min)/ygate.divs
+	x = ygate.min
+	for i in range( ygate.divs + 1 ):
+		if ( x > EREST_ACT):
+			yA[i] = 5.0 * math.exp( -50 * (x - EREST_ACT) )
+		else:
+			yA[i] = 5.0
+		yB[i] = 5.0
+		x += dx
+	ygate.tableA = yA
+	ygate.tableB = yB
+        return Ca
     
     ################################################################
     # API function for building spine prototypes. Here we put in the
@@ -834,8 +868,8 @@ def addSpineProto( name = 'spine', \
         shaftLen = 1.e-6 , shaftDia = 0.2e-6, \
         headLen = 0.5e-6, headDia = 0.5e-6, \
         synList = ( ['glu', 0.0, 2e-3, 9e-3, 200.0, False],
-                    ['NMDA', 0.0, 20e-3, 20e-3, 40.0, True] ),
-        chanList = ( ['LCa', 40.0, True ], ),
+                    ['NMDA', 0.0, 20e-3, 20e-3, 80.0, True] ),
+        chanList = ( ['Ca', 1.0, True ], ),
         caTau = 13.333e-3
         ):
     if not moose.exists( '/library' ):
@@ -848,9 +882,13 @@ def addSpineProto( name = 'spine', \
     if caTau > 0.0:
         conc = moose.CaConc( head.path + '/Ca_conc' )
         conc.tau = caTau
+        conc.length = head.length
+        conc.diameter = head.diameter
+        conc.thick = 0.0
+        # The 'B' field is deprecated.
         # B = 1/(ion_charge * Faraday * volume)
-        vol = head.length * head.diameter * head.diameter * PI / 4.0
-        conc.B = 1.0 / ( 2.0 * FaradayConst * vol )
+        #vol = head.length * head.diameter * head.diameter * PI / 4.0
+        #conc.B = 1.0 / ( 2.0 * FaradayConst * vol )
         conc.Ca_base = 0.0
     for i in synList:
         syn = buildSyn( i[0], head, i[1], i[2], i[3], i[4], CM )
@@ -859,15 +897,16 @@ def addSpineProto( name = 'spine', \
     for i in chanList:
         if ( moose.exists( '/library/' + i[0] ) ):
             chan = moose.copy( '/library/' + i[0], head )
-            chan.Gbar = i[1] * head.Cm / CM
-            #print "CHAN = ", chan, chan.tick
-            moose.connect( head, 'channel', chan, 'channel' )
-            if i[2] and caTau > 0.0:
-                moose.connect( chan, 'IkOut', conc, 'current' )
         else:
-            print "Warning: addSpineProto: channel '", i[0], \
-                "' not found on /library."
-            moose.le( '/library' )
+            moose.setCwe( head )
+            chan = make_LCa()
+            chan.name = i[0]
+            moose.setCwe( '/' )
+        chan.Gbar = i[1] * head.Cm / CM
+        print "CHAN = ", chan, chan.tick, chan.Gbar
+        moose.connect( head, 'channel', chan, 'channel' )
+        if i[2] and caTau > 0.0:
+            moose.connect( chan, 'IkOut', conc, 'current' )
     transformNMDAR( '/library/spine' )
     return spine
 
