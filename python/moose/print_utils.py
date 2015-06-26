@@ -16,7 +16,7 @@ __status__           = "Development"
 
 import inspect
 import sys
-import _moose as moose
+from . import _moose as moose
 
 HEADER = '\033[95m'
 OKBLUE = '\033[94m'
@@ -93,13 +93,13 @@ def dump(label, msg, frame=None, exception=None):
 
 
     if not frame :
-        print(prefix+"{0}".format(colored(msg,label)))
+        print((prefix+"{0}".format(colored(msg,label))))
     else :
         filename = frame.f_code.co_filename
         filename = "/".join(filename.split("/")[-2:])
-        print(prefix+"@{0}:{1} {2}".format(filename, frame.f_lineno, colored(msg, label)))
+        print((prefix+"@{0}:{1} {2}".format(filename, frame.f_lineno, colored(msg, label))))
     if exception:
-        print(" [Expcetion] {0}".format(exception))
+        print((" [Expcetion] {0}".format(exception)))
 
 def info(msg): dump("INFO", msg)
 def warn(msg): dump("WARN", msg)

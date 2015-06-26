@@ -31,7 +31,7 @@ from collections import defaultdict
 import re
 import networkx as nx
 import numpy as np
-import moose 
+from . import moose 
 
 def moosegraph(element, ies=['childMsg'], ied=['parentMsg'], iv=[], keep_solitary=False):
     """Create a graph out of all objects under teh element
@@ -170,7 +170,7 @@ class TestMooseGraph(unittest.TestCase):
 
     def test_edgelabels(self):
         for ee in self.graph.edges():
-            keys = self.graph.edge[ee[0]][ee[1]].keys()
+            keys = list(self.graph.edge[ee[0]][ee[1]].keys())
             self.assertTrue('src' in keys)
             self.assertTrue('dest' in keys)
 

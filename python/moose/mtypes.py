@@ -46,7 +46,7 @@
 # Code:
 
 import re
-import moose
+from . import moose
 
 ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ## !! This was stolen from
@@ -102,7 +102,7 @@ def getType(filename, mode='t'):
     mtype = None
     msubtype = None
     if mode == 't':
-        for typename, typefunc in typeChecks.items():
+        for typename, typefunc in list(typeChecks.items()):
             if typefunc(filename):
                 return typename
     return None
@@ -142,7 +142,7 @@ def isNeuroML(filename):
     """
     doc = md.parse(filename)
     for child in doc.childNodes:
-        print child.nodeName, child.nodeType == child.ELEMENT_NODE
+        print(child.nodeName, child.nodeType == child.ELEMENT_NODE)
         if child.nodeType == child.ELEMENT_NODE and \
                 (child.nodeName == 'networkml' or \
                      child.nodeName == 'morphml' or \

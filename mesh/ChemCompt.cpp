@@ -56,11 +56,12 @@ const Cinfo* ChemCompt::initCinfo()
 			&ChemCompt::getVoxelMidpoint
 		);
 
-		static ReadOnlyLookupElementValueFinfo< 
+		static LookupElementValueFinfo< 
 				ChemCompt, unsigned int, double > 
 			oneVoxelVolume(
 			"oneVoxelVolume",
 			"Volume of specified voxel.",
+			&ChemCompt::setOneVoxelVolume,
 			&ChemCompt::getOneVoxelVolume
 		);
 
@@ -310,6 +311,17 @@ double ChemCompt::getOneVoxelVolume( const Eref& e, unsigned int dataIndex ) con
 	return this->getMeshEntryVolume( dataIndex );
 }
 
+void ChemCompt::setOneVoxelVolume( const Eref& e, unsigned int dataIndex, 
+				double volume ) 
+{
+	this->setMeshEntryVolume( dataIndex, volume );
+}
+
+// A virtual function, meant to be overridden.
+void ChemCompt::setMeshEntryVolume( unsigned int dataIndex, double volume )
+{
+	cout << "Warning: ChemCompt::setMeshEntryVolume: Undefined except for PSD and spine mesh.\n";
+}
 
 unsigned int ChemCompt::getDimensions() const
 {

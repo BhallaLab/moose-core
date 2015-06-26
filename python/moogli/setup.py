@@ -2,16 +2,19 @@
 
 from distutils.core import setup, Extension
 import sipdistutils
+from PyQt4 import pyqtconfig
 import sys
 import os
 
+qcfg = pyqtconfig.Configuration()
+qcfg.pyqt_sip_flags
 remaining = sys.argv[1:]
 sys.argv = [ sys.argv[0]
            , 'build_ext'
-           , '--sip-opts=-I/usr/share/sip/PyQt4/ -e -g -x VendorID -t WS_X11 -x PyQt_NoPrintRangeBug -t Qt_4_8_0 -x Py_v3 -g'
+           , '--sip-opts=-I{} -e -g {}'.format(qcfg.pyqt_sip_dir, qcfg.pyqt_sip_flags)
            ]
 sys.argv.extend(remaining)
-# print(sys.argv)
+# print('###{}'.format(sys.argv))
 
 
 os.environ["CC"]="g++"
@@ -147,5 +150,3 @@ setup( name             =   'moogli'
                             }
 
      )
-
-

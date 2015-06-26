@@ -1,4 +1,4 @@
-import moose as _moose
+from . import moose as _moose
 
 _tick = 8
 _base = '/_utils'
@@ -109,7 +109,7 @@ def record( obj, field = None, label = None ):
 	if hasattr( obj, '__iter__' ):
 		return [ record( o, field, label ) for o in obj ]
 	
-	if isinstance( obj, basestring ):
+	if isinstance( obj, str ):
 		obj = _moose.element( obj )
 	
 	if field is None:
@@ -182,7 +182,7 @@ def saveCSV(
 		if header:
 			writer.writerow( header )
 		
-		writer.writerows( zip( *plots ) )
+		writer.writerows( list(zip( *plots )) )
 
 def saveXPLOT(
 		fileName,
@@ -218,7 +218,7 @@ def show(
 	try:
 		from matplotlib import pyplot as plt
 	except ImportError:
-		print "Warning: recording.show(): Cannot find 'matplotlib'. Not showing plots."
+		print("Warning: recording.show(): Cannot find 'matplotlib'. Not showing plots.")
 		return
 	
 	plots = _selectedPlots( selected )
@@ -230,7 +230,7 @@ def show(
 		if not combine:
 			plt.figure()
 		
-		print _label( plot )
+		print(_label( plot ))
 		plt.plot( plot.time, plot.values, label = _label( plot ) )
 	
 	plt.legend()

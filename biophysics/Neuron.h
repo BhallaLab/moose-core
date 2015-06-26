@@ -55,6 +55,7 @@ class Neuron
 
 		void buildSegmentTree( const Eref& e );
 		void setSpineAndPsdMesh( Id spineMesh, Id psdMesh );
+		void setSpineAndPsdDsolve( Id spineDsolve, Id psdDsolve );
 
 		///////////////////////////////////////////////////////////////////
 		// MechSpec set
@@ -106,6 +107,9 @@ class Neuron
 		double Em_;
 		double theta_;
 		double phi_;
+		double maxP_; // Maximum value of path dist from soma for this cell
+		double maxG_; // Maximum value of geom dist from soma for this cell
+		double maxL_; // Maximum value of elec dist from soma for this cell
 		Id soma_;
 		string sourceFile_;
 		double compartmentLengthInLambdas_;
@@ -118,12 +122,19 @@ class Neuron
 		/// Look up seg index of parent compartment, from index of spine.
 		vector< unsigned int > spineParentSegIndex_; 
 		vector< vector< Id > > spines_; /// Id of each compt in each spine.
-		/// Id of mesh associated with each spine. Typically all the same.
+		/// Id of stoich associated with each spine. Typically all the same.
 		vector< Id > spineStoich_; 
-		/// Id of mesh associated with each PSD. Typically all the same.
+		/// Id of stoich associated with each PSD. Typically all the same.
 		vector< Id > psdStoich_; 
 		/// looks up spine/psd mesh index from FieldIndex of selected spine.
 		vector< unsigned int > spineToMeshOrdering_;
+
+		Id headDsolve_; /// Id of the Dsolve for the head compt.
+		Id psdDsolve_; /// Id of the Dsolve for the PSD compt.
+		// looks up spine/psd Dsolve::DiffJunction::VoxelJunction index 
+		//from FieldIndex of selected spine.
+		// Turns out this is the same as spineToMeshOrdering.
+		//vector< unsigned int > spineToVoxelJunctionOrdering_;
 
 		/// Holder for spine operations. Contains pointer to current Neuron.
 		Spine spineEntry_; 

@@ -36,7 +36,7 @@ def makeModel():
 
     compt0.diffLength = 1e-6 # This will be over 100 compartments.
     # This is the magic command that configures the diffusion compartments.
-    compt0.cell = cell 
+    compt0.subTreePath = cell.path + "/#"
     moose.showfields( compt0 )
 
     # Build the solvers. No need for diffusion in this version.

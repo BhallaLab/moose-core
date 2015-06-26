@@ -21,9 +21,9 @@ import math
 from os import path
 import moose
 from moose import utils as moose_utils
-from .. import print_utils as pu
+from moose import print_utils as pu
 from moose.neuroml import utils as neuroml_utils
-from .ChannelML import ChannelML, make_new_synapse
+from moose.neuroml.ChannelML import ChannelML, make_new_synapse
 
 class MorphML():
 
@@ -41,7 +41,10 @@ class MorphML():
 
     def readMorphMLFromFile(self,filename,params={}):
         """
-        specify global params as a dict (presently none implemented)
+        specify params for this MorphML file as a dict:
+         presently combineSegments and createPotentialSynapses are implemented.
+         See readMorphML().
+        See also nml_params in __init__().
         returns { cellname1 : (segDict,cableDict), ... }
         see readMorphML(...) for segDict and cableDict
         """
@@ -70,7 +73,9 @@ class MorphML():
             (distalx,distaly,distalz),diameter,length,[potential_syn1, ... ] ] , ... }
         segname is "<name>_<segid>" because 1) guarantees uniqueness,
             & 2) later scripts obtain segid from the compartment's name!
-        and cableDict = { cablegroupname : [campartment1name, compartment2name, ... ], ... }
+        and cableDict = { cablegroupname : [campartment1name, compartment2name, ... ], ... }.
+        params is dict which can contain, combineSegments and/or createPotentialSynapses,
+         both boolean.
         """
         if lengthUnits in ['micrometer','micron']:
             self.length_factor = 1e-6
@@ -434,60 +439,51 @@ class MorphML():
                                     , " in mechanism %s " % mechanismname ]
                                     )
                 
-                ## variable parameters: only gmax variation is supported
-                ##  varying with electrotonic L and/or length r from soma along dendrite,
-                ##  dia, and len of compartment i.e. gmax = f(L,r,dia,len)
+                ## variable parameters:
+                ##  varying with:
+                ##  p, g, L, len, dia 
+                ##	p: path distance from soma, measured along dendrite, in metres.
+                ##	g: geometrical distance from soma, in metres.
+                ##	L: electrotonic distance (# of lambdas) from soma, along dend. No units.
+                ##	len: length of compartment, in metres.
+                ##	dia: for diameter of compartment, in metres.
                 var_params = mechanism.findall(".//{"+self.bio+"}variable_parameter")
                 if len(var_params) > 0:
-                    ## if variable params are present, check for gmax
+                    ## if variable params are present
                     ##  and use MOOSE to apply the variable formula
                     for parameter in var_params:
                         parametername = parameter.attrib['name']
-                        print parametername
-                        if parametername in ['gmax']:
-                            cablegroupstr4moose = ""
-                            ## the neuroml spec says there should be a single group in a variable_parameter
-                            ##  of course user can always have multiple variable_parameter tags,
-                            ##  if user wants multiple groups conforming to neuroml specs.
-                            group = parameter.find(".//{"+self.bio+"}group")
-                            cablegroupname = group.text
-                            if cablegroupname == 'all':
-                                cablegroupstr4moose = "#"
-                            else:
-                                for cableid in self.cablegroupsDict[cablegroupname]:
-                                    for compartment in self.cellDictByCableId[cellname][1][cableid]:
-                                        cablegroupstr4moose += "#"+compartment.name+"#,"
-                                if cablegroupstr4moose[-1] == ',':
-                                    cablegroupstr4moose = cablegroupstr4moose[:-1] # remove last comma
-                            inhomo_value = parameter.find(".//{"+self.bio+"}inhomogeneous_value")
-                            inhomo_value_name = inhomo_value.attrib['param_name']
-                            inhomo_value_value = inhomo_value.attrib['value']
-                            ## inhomo_value_name refers to a variable name say 'p'
-                            ##  specified in the cable group using the inhomogeneous_param tag
-                            ##  look up the variable name say 'p' corresponding to inhomo_value_name
-                            ##  and replace it in the formula (inhomo_value_value) by 'L' which moose understands.
-                            inhomo_namevars = self.cablegroupsInhomoparamsDict[cablegroupname]
-                            var_replace = None
-                            for (name,var) in inhomo_namevars:
-                                if inhomo_value_name == name:
-                                    var_replace = var
-                                    break
-                            if var_replace is not None:
-                                ## only 'Path Length from root' (neuroml) 
-                                ##  = 'r' (moose) is supported currently in moose
-                                inhomo_eqn = inhomo_value_value.replace(var_replace,'r')
-                            inhomo_eqn = '('+inhomo_eqn+')*'+str(Gfactor)
-                                        # careful about physiol vs SI units
-                            chan_distrib.extend((mechanismname,cablegroupstr4moose,inhomo_eqn))
-                                        # use extend, not append, moose wants it this way
+                        cablegroupstr4moose = ""
+                        ## the neuroml spec says there should be a single group in a variable_parameter
+                        ##  of course user can always have multiple variable_parameter tags,
+                        ##  if user wants multiple groups conforming to neuroml specs.
+                        group = parameter.find(".//{"+self.bio+"}group")
+                        cablegroupname = group.text
+                        if cablegroupname == 'all':
+                            cablegroupstr4moose = "#"
                         else:
-                            pu.warn(["Yo programmer of MorphML import! You didn't"
-                                    , " implement variable parameter %s " % parametername
-                                    , " in mechanism %s " % mechanismname ])
+                            for cableid in self.cablegroupsDict[cablegroupname]:
+                                for compartment in self.cellDictByCableId[cellname][1][cableid]:
+                                    cablegroupstr4moose += "#"+compartment.name+"#,"
+                            if cablegroupstr4moose[-1] == ',':
+                                cablegroupstr4moose = cablegroupstr4moose[:-1] # remove last comma
+                        inhomo_value = parameter.find(".//{"+self.bio+"}inhomogeneous_value")
+                        inhomo_value_name = inhomo_value.attrib['param_name']
+                        inhomo_value_value = inhomo_value.attrib['value']
+                        if parametername == 'gmax':
+                            inhomo_eqn = '('+inhomo_value_value+')*'+str(Gfactor)
+                                        # careful about physiol vs SI units
+                        else:
+                            inhomo_eqn = inhomo_value_value
+                            pu.warn('Physiol. vs SI units translation not'
+                            ' implemented for parameter '+parametername+
+                            'in channel '+mechanismname)+'. Use SI units'
+                            'or ask for implementation.'
+                        chan_distrib.extend((mechanismname,cablegroupstr4moose,parametername,inhomo_eqn,""))
+                                    # use extend, not append, moose wants it this way
             ## get mooose to parse the variable parameter gmax channel distributions
-            pu.info("Some channels' gmax-s distributed as per "+str(chan_distrib))
+            #pu.info("Some channel parameters distributed as per "+str(chan_distrib))
             moosecell.channelDistribution = chan_distrib
-            moosecell.parseChanDistrib()
             #### Connect the Ca pools and channels
             #### Am connecting these at the very end so that all channels and pools have been created
             #### Note: this function is in moose.utils not moose.neuroml.utils !

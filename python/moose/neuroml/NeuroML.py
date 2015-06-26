@@ -46,14 +46,14 @@ In [3]: moose.neuroml.loadNeuroML_L123('Generated.net.xml')
 import moose
 from moose.utils import *
 from xml.etree import cElementTree as ET
-from .ChannelML import ChannelML
-from .MorphML import MorphML
-from .NetworkML import NetworkML
+from moose.neuroml.ChannelML import ChannelML
+from moose.neuroml.MorphML import MorphML
+from moose.neuroml.NetworkML import NetworkML
 
 import string
 
 from moose.neuroml.utils import *
-from .. import print_utils as pu
+from moose import print_utils as pu
 
 import sys
 from os import path
@@ -117,7 +117,7 @@ class NeuroML():
                 ## ideally I should read in extra params
                 ## from within the channel_type element and put those in also.
                 ## Global params should override local ones.
-                cmlR.readChannelML(channel,params={},units=self.channelUnits)
+                cmlR.readChannelML(channel,params=params,units=self.channelUnits)
             for synapse in channels.findall('.//{'+cml_ns+'}synapse_type'):
                 cmlR.readSynapseML(synapse,units=self.channelUnits)
             for ionConc in channels.findall('.//{'+cml_ns+'}ion_concentration'):
@@ -128,7 +128,7 @@ class NeuroML():
         self.cellsDict = cellsDict
         for cells in root_element.findall('.//{'+neuroml_ns+'}cells'):
             for cell in cells.findall('.//{'+neuroml_ns+'}cell'):
-                cellDict = mmlR.readMorphML(cell,params={},lengthUnits=self.lengthUnits)
+                cellDict = mmlR.readMorphML(cell,params=params,lengthUnits=self.lengthUnits)
                 self.cellsDict.update(cellDict)
 
         ## check if there are populations in this NML files,
@@ -157,5 +157,5 @@ if __name__ == "__main__":
     if len(sys.argv)<2:
         print("You need to specify the neuroml filename.")
         sys.exit(1)
-    loadNeuroML_L123(sys.argv[1])
+    print loadNeuroML_L123(sys.argv[1])
     

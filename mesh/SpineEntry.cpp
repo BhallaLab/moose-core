@@ -178,7 +178,11 @@ double SpineEntry::rootArea() const
 
 double SpineEntry::diffusionLength() const
 {
-	return shaft_.getLength() + 0.5 * head_.getLength();
+	// I've simplified this because a) it doesn't make much sense to add
+	// a diffusion length with a different axial size and b) it makes the
+	// resizing hugely complicated.
+	// return shaft_.getLength() + 0.5 * head_.getLength();
+	return shaft_.getLength();
 }
 
 vector< double > SpineEntry::psdCoords() const
