@@ -104,14 +104,14 @@ endif()
 # Default macros
 add_definitions(-DUSE_GENESIS_PARSER)
 
-option(DEBUG "Building with debugging support" ON)
+option(DEBUG "Building with debugging support" OFF)
 if(DEBUG)
     MESSAGE("++ Building for Debug")
     set(CMAKE_BUILD_TYPE Debug)
 else()
     MESSAGE("++ Build for Relase")
     set(CMAKE_BUILD_TYPE Release)
-    add_definitions(-UDO_UNIT_TESTS -O2)
+    add_definitions(-UDO_UNIT_TESTS -O3)
 endif()
 
 find_package(GSL 1.16 REQUIRED)
@@ -201,8 +201,6 @@ add_subdirectory(examples)
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/moogli/include)
 LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/moogli/lib)
-
-
 
 set(LIBRARIES ${BZIP2_LIBRARIES} ${LibXML2_LIBRARIES})
 if(HDF5_FOUND)
