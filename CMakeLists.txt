@@ -465,10 +465,10 @@ ADD_TEST(NAME moose-bin-raw-run
 ## PyMOOSE tests.
 
 # Export the PYTHONPATH
-ADD_TEST(NAME pymoose-test-mumbl
-    COMMAND ${PYTHON_EXECUTABLE} test_mumbl.py
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests/python
-    )
+#ADD_TEST(NAME pymoose-test-mumbl
+    #COMMAND ${PYTHON_EXECUTABLE} test_mumbl.py
+    #WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests/python
+#    )
 ADD_TEST(NAME pymoose-test-pymoose
     COMMAND ${PYTHON_EXECUTABLE} test_pymoose.py
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests/python
