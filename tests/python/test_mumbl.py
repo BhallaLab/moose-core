@@ -31,6 +31,7 @@ __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
 import sys
+sys.path.append('../../python')
 import moose
 import moose.neuroml as nml
 import moose.utils as utils
@@ -48,10 +49,10 @@ def main():
     moose.reinit()
     utils.run(0.1, verify=True)
     graphviz.writeGraphviz(__file__+".dot", ignore='/library')
-    utils.plotRecords({ 'Dend 37' : table1, 'Soma 0' : table2 }
-            , outfile = '%s.png' % sys.argv[0]
-            , subplot = True
-            )
+    #utils.plotRecords({ 'Dend 37' : table1, 'Soma 0' : table2 }
+            #, outfile = '%s.png' % sys.argv[0]
+            #, subplot = True
+            #)
     
 if __name__ == '__main__':
     main()
