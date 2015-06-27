@@ -8,6 +8,7 @@
 Last modified: Sun Feb 15, 2015  12:21PM
 
 """
+from __future__ import print_function
     
 __author__           = "Dilawar Singh"
 __copyright__        = "Copyright 2013, NCBS Bangalore"
@@ -17,7 +18,6 @@ __version__          = "1.0.0"
 __maintainer__       = "Dilawar Singh"
 __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
-
 
 import sys
 import sys
