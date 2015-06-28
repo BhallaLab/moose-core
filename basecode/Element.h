@@ -334,6 +334,18 @@ class Element
 				) const;
 
 		/**
+		 * Fills in matching vectors of destination ObjIds and the
+		 * destination function, for the specified source Finfo and
+		 * dataId on this Element. 
+		 * Used in Neutral::msgDests and Neutral::msgDestFunctions.
+		 * Returns number of dests found.
+		 */
+		unsigned int getMsgSourceAndSender( FuncId fid,
+				vector< ObjId >& src, 
+				vector< string >& sender
+				) const;
+
+		/**
 		 * Enumerates msg targets. Will get confused if some
 		 * are across nodes.
 		 */
