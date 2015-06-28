@@ -1670,4 +1670,6 @@ void testBiophysics()
 {;}
 void testBiophysicsProcess()
 {;}
+void testIntFireNetwork( unsigned int unsteps = 5 )
+{;}
 #endif
