@@ -741,6 +741,31 @@ unsigned int Element::getMsgTargetAndFunctions( DataId srcDataId,
 	return tgt.size();
 }
 
+// Returns multiple Obj sources and their srcFinfo names.
+unsigned int Element::getMsgSourceAndSender( FuncId fid, 
+				vector< ObjId >& srcObj,
+				vector< string >& sender ) const
+{
+	for ( vector< ObjId >::const_iterator i = m_.begin(); 
+		i != m_.end(); ++i )
+	{
+		const Msg* m = Msg::getMsg( *i );
+		const Element* src;
+		if ( m->e1() == this ) {
+			src = m->e2();
+		} else {
+			src = m->e1();
+		}
+		unsigned int ret = src->findBinding( MsgFuncBinding( *i, fid ) );
+		if ( ret != ~0U ) {
+			// problem here, to get dataId
+			srcObj.push_back( ObjId( src->id(), 0 ) ); 
+			sender.push_back( src->cinfo()->srcFinfoName( ret ) );
+		}
+	}
+	return srcObj.size();
+}
+
 vector< ObjId > Element::getMsgTargets( DataId srcDataId,
 				const SrcFinfo* finfo  ) const
 {
