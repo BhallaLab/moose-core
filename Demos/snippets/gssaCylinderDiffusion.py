@@ -137,7 +137,7 @@ def makePlots():
     plt.xlabel( 'Cylinder voxel #' )
     plt.legend()
     timelabel = plt.text( 10, concA * 3, 'time = 0.0' )
-    #fig.canvas.draw()
+    fig.canvas.draw()
     plt.ylim( 0, 4.0 * concA )
     return( fig, dynamic, timelabel, aline, bline, cline, dline )
 
@@ -152,7 +152,7 @@ def updatePlots( plotlist, time ):
     plotlist[4].set_ydata( b.conc )
     plotlist[5].set_ydata( c.conc )
     plotlist[6].set_ydata( d.conc )
-    #plotlist[0].canvas.draw()
+    plotlist[0].canvas.draw()
     
 
 def main():
@@ -189,7 +189,7 @@ def main():
     print atot2/atot, btot2/btot, ctot2/ctot, dtot2/dtot
     print 'Initial to final (b+c)=', (btot2 + ctot2) / (btot + ctot )
     print "\nHit 'enter' to exit"
-    #raw_input()
+    raw_input()
 
     quit()
 

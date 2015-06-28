@@ -184,10 +184,10 @@ void writeReac( ofstream& fout, Id id,
 	if (numPrd > 1)
 		np = -3 * (numPrd -1);
 	
-	if (numSub > 0)
+	if (numSub > 1)
 		kf = kf * pow(10,ns);
 	
-	if (numPrd > 0)
+	if (numPrd > 1)
 		kb = kb * pow(10,np);
 	
 	fout << "simundump kreac /kinetics" << trimPath(id,comptid) << " 0 " << 
