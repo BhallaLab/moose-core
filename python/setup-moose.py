@@ -34,7 +34,7 @@ import os
 from setuptools import setup
 
 setup(
-        name='python-moose',
+        name='moose',
         version='3.0.2',
         description='MOOSE python scripting module.',
         author='Dilwar Singh',
