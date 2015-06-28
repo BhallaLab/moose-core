@@ -40,7 +40,7 @@ setup(
         author='Dilwar Singh',
         author_email='dilawars@ncbs.res.in',
         url='http://moose.ncbs.res.in',
-        packages=['libmumbl', 'moose', 'moose.neuroml', 'moose.backend', 'moose.topology'],
+        packages=['libmumbl', 'moose', 'moose.kkit', 'moose.neuroml', 'moose.backend', 'moose.topology'],
         package_dir = { 'moose' : 'moose' , 'libmumbl' : 'libmumbl' },
         package_data = { 'moose' : ['_moose.so'] },
     ) 
