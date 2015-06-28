@@ -26,14 +26,6 @@ Description: MOOSE is the Multiscale Object-Oriented Simulation Environment.
  network models using OpenGL and also using OpenSceneGraph	
 
 
-Package: moose-dev
-Architecture: any
-Depends: bzip2, libxml2, libhdf5-7, libgsl0ldbl
-Suggests: moose-python, moose-gui, moose-moogli, moose-doc
-Description: Development library
- .
- This package installs C++ base of MOOSE simulator. This is barebone installation for cluster nodes. For general use, see moose-gui and moose-python.
-
 Package: moose-python
 Architecture: any
 Depends: python-numpy, python-matplotlib, python-nose, libxml2, python-networkx, moose-doc, python-setuptools, python-suds, libhdf5-7, libgsl0ldbl
