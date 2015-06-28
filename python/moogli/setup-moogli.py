@@ -43,6 +43,6 @@ setup(
         options={'build' : {'build_base' : '/tmp' } },
         packages=[ 'moogli'] ,
         package_dir = { 'moogli' : 'moogli' },
-        package_data = { 'moogli' : ['moogli.so'] },
+        package_data = { 'moogli' : ['_moogli.so'] },
         #install_requires = [ 'sip' ],
     )
