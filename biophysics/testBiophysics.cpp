@@ -31,6 +31,8 @@ extern void testMarkovSolverBase();	//Defined in MarkovSolverBase.cpp
 extern void testMarkovSolver();		//Defined in MarkovSolver.cpp
 */
 
+#ifdef DO_UNIT_TESTS
+
 // Use a larger value of runsteps when benchmarking
 void testIntFireNetwork( unsigned int runsteps = 5 )
 {
@@ -230,7 +232,6 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
 	shell->doDelete( fire );
 }
 
-#ifdef DO_UNIT_TESTS
 
 static const double EREST = -0.07;
 
