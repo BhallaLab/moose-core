@@ -11,5 +11,5 @@ override_dh_auto_build:
 
 # consider using -DUSE_VERSIONED_DIR=ON if backporting
 override_dh_auto_configure:
-	dh_auto_configure --buildsystem=cmake -- -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE=OFF -DDEBUG=OFF -DCMAKE_INSTALL_PREFIX=debian/tmp
+	dh_auto_configure --buildsystem=cmake -- -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE=OFF -DDEBUG=OFF -DCMAKE_INSTALL_PREFIX=debian/tmp/usr/
 
