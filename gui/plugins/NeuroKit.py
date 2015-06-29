@@ -31,9 +31,9 @@ __status__      =   "Development"
 # from msearch import SearchWidget
 # from checkcombobox import CheckComboBox
 import sys
-import default
-import NeuroKitEditor
-import NeuroKitRunner
+from . import default
+from . import NeuroKitEditor
+from . import NeuroKitRunner
 import mplugin
 import moose
 from PyQt4.QtGui import QWidget
