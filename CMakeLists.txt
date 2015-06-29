@@ -485,9 +485,12 @@ ADD_TEST(NAME pymoose-test-vec
     COMMAND ${PYTHON_EXECUTABLE} test_vec.py
     WORKING_DIRECTORY ${TEST_DIRECTORY}
     )
-    
 ADD_TEST(NAME pymoose-test-sbml 
     COMMAND ${PYTHON_EXECUTABLE} test_sbml.py
+    WORKING_DIRECTORY ${TEST_DIRECTORY}
+    )
+ADD_TEST(NAME pymoose-test-kkit 
+    COMMAND ${PYTHON_EXECUTABLE} test_kkit.py
     WORKING_DIRECTORY ${TEST_DIRECTORY}
     )
 
