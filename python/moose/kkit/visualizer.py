@@ -22,7 +22,6 @@ try:
     import networkx as nx
 except:
     warnings.warn("Module networkx is not found. You can't use this module")
-    return
 
 
 def short_label(path, len = -1):
