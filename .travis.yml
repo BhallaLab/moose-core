@@ -30,7 +30,7 @@ before_script:
 install:
     - wget ftp://ftp.gnu.org/gnu/gsl/gsl-1.16.tar.gz
     - tar -xzvf gsl-1.16.tar.gz
-    - cd gsl-1.16 && ./configure --prefix=/usr && make && make install
+    - cd gsl-1.16 && ./configure --prefix=/usr && make && sudo make install
 script: 
     - mkdir -p _build && cd _build && cmake -DDEBUG=OFF ..  && make
 
