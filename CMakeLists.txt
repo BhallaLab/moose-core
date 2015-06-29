@@ -398,6 +398,7 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/Demos
 install(CODE
     "execute_process(COMMAND ${PYTHON_EXECUTABLE} setup-moose.py install
         --record install_menifest_moose-python.txt
+        --prefix ${CMAKE_INSTALL_PREFIX} 
     WORKING_DIRECTORY ${PROJECT_PYTHON_PATH})"
     COMPONENT moose
     )
@@ -409,6 +410,7 @@ if(BUILD_MOOGLI)
     install(CODE
         "execute_process(COMMAND ${PYTHON_EXECUTABLE} setup-moogli.py install
         --record install_menifest_moogli.txt
+        --prefix ${CMAKE_INSTALL_PREFIX} 
         WORKING_DIRECTORY ${PROJECT_PYTHON_PATH})"
         COMPONENT moogli
         )
