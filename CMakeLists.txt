@@ -413,8 +413,8 @@ if(BUILD_MOOGLI)
         COMPONENT moogli
         )
     
-    install(CODE "MESSAGE(\"++ Installed moogli using setuptools. You can
-        uninstall it using python-pip\")"
+    install(CODE "MESSAGE(\"++ Installed moose-python and moogli using setuptools. You can
+        uninstall them using python-pip\")"
         )
 
 endif(BUILD_MOOGLI)
