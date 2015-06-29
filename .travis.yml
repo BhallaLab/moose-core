@@ -7,7 +7,6 @@ branches:
         - master
         - trunk
 env:
-    - CTEST_MODEL=Experimental
     - CTEST_MODEL=Nightly 
 cache: apt
 before_script: 
