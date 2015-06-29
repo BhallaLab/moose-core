@@ -17,13 +17,11 @@ import sys
 import os
 import warnings
 from collections import defaultdict
+import re
 try:
     import networkx as nx
 except:
     warnings.warn("Module networkx is not found. You can't use this module")
-    return
-
-import re
 
 def short_label(path, len = -1):
     label = path.split('/')[-1]
@@ -112,12 +110,10 @@ class KKIT():
                 self.edges[(B, A)] = words[3:]
             elif edgeType.upper() == "MM_PRD":
                 self.edges[(B, A)] = words[3:]
-
             else:
-                print("msgtype %s not supported" % edgeType)
+                warnings.warn("msgtype %s not supported" % edgeType)
         else:
-            #print("%s not supported yet" % words[0])
-            pass
+            warnings.warn("%s not supported yet" % words[0])
 
     def build_model(self):
         '''Build kkit model '''
