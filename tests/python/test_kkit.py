@@ -14,7 +14,6 @@ __status__           = "Development"
 import moose
 import moose.utils as mu
 import sys
-import moose.kkit as kkit
 import pylab
 import os
 
