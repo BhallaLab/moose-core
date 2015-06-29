@@ -486,7 +486,7 @@ ADD_TEST(NAME pymoose-test-vec
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests/python
     )
     
-ADD_TEST(NAME pymoose-snippets
-    COMMAND ${PYTHON_EXECUTABLE} test_snippets.py
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/Demos/snippets
-    )
+#ADD_TEST(NAME pymoose-snippets
+    #COMMAND ${PYTHON_EXECUTABLE} test_snippets.py
+    #WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/Demos/snippets
+    #)
