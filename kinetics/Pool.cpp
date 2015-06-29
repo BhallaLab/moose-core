@@ -33,11 +33,6 @@ const Cinfo* Pool::initCinfo()
 			new OpFunc1< Pool, double >( &Pool::decrement )
 		);
 
-		static DestFinfo nIn( "nIn",
-			"Set the number of molecules by specified amount",
-			new OpFunc1< Pool, double >( &Pool::nIn )
-		);
-
 		//////////////////////////////////////////////////////////////
 		// SrcFinfo Definitions: All inherited.
 		//////////////////////////////////////////////////////////////
@@ -47,7 +42,6 @@ const Cinfo* Pool::initCinfo()
 	static Finfo* poolFinfos[] = {
 		&increment,			// DestFinfo
 		&decrement,			// DestFinfo
-                &nIn,
 	};
 
 	static Dinfo< Pool > dinfo;
@@ -137,13 +131,6 @@ void Pool::decrement( double val )
 		A_ -= val;
 	else
 		B_ += val;
-}
-
-void Pool::nIn( double val)
-{
-    n_ = val;
-    B_ = 0;
-    A_ = 0;
 }
 
 /*
