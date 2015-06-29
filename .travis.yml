@@ -1,25 +1,8 @@
-language: cpp
-compiler: 
-    - gcc
-os:
-    - linux
-    - osx
-matrix:
-    allow_failures:
-        - os: osx
+language: C++
 branches:
     only:
         - master
         - trunk
-notifications:
-    email:
-        recipients:
-            - dilawar.s.rajput@gmail.com
-        on_success: change
-        on_failure: always
-
-env:
-    - CTEST_MODEL=Nightly 
 cache: apt
 before_script: 
     - sudo apt-get install libxml2-dev libbz2-dev 
