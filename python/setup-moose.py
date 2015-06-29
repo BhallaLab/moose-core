@@ -35,17 +35,12 @@ from setuptools import setup
 
 setup(
         name='moose',
-        version='3.0.1',
-        description='Python scripting support in MOOSE, and MOOGLI',
+        version='3.0.2',
+        description='MOOSE python scripting module.',
         author='Dilwar Singh',
         author_email='dilawars@ncbs.res.in',
         url='http://moose.ncbs.res.in',
-        options={'build' : {'build_base' : '/tmp' } },
-        packages=['libmumbl'
-            , 'moose', 'moose.neuroml', 'moose.backend'
-            ],
-        package_dir = { 'moose' : 'moose'
-            , 'libmumbl' : 'libmumbl'
-            },
+        packages=['libmumbl', 'moose', 'moose.kkit', 'moose.neuroml', 'moose.backend', 'moose.topology'],
+        package_dir = { 'moose' : 'moose' , 'libmumbl' : 'libmumbl' },
         package_data = { 'moose' : ['_moose.so'] },
     ) 

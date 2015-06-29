@@ -68,20 +68,14 @@ https://sourceforge.net/projects/moose/
 
 Python interface for core MOOSE API
 
-- Python2       ( >= 2.7.x)         REQUIRED For building the MOOSE Python bindings 
-- Python-dev    ( >= 2.7.x)         REQUIRED Python development headers and libraries 
-- NumPy         ( >= 1.6.x)         REQUIRED For numerical computation in PyMOOSE 
-- H5py          (2.3.x)             REQUIRED For reading and writing data to HDF5 files
-
-
-### Chemical Kinetics Network Simulations   OPTIONAL
-
 - GSL     (1.16.x)                      REQUIRED For core moose numerical computation
 - PyQt4         (4.8.x)                 REQUIRED For Python GUI    
 - Matplotlib    ( >= 1.1.x)             REQUIRED For plotting simulation results
 - SBML          (5.9.x)                 OPTIONAL For reading and writing signalling models to SBML files
 
 ### Compartmental Model Visualization       OPTIONAL
+
+
 
 - GSL     (1.16.x)                      REQUIRED For core moose numerical computation
 - OSG           (3.2.x)                 REQUIRED For 3D rendering and simulation of neuronal models

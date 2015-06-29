@@ -23,6 +23,7 @@ try:
 except:
     warnings.warn("Module networkx is not found. You can't use this module")
 
+
 def short_label(path, len = -1):
     label = path.split('/')[-1]
     if len > -1:
@@ -51,8 +52,8 @@ class KKIT():
     def simundump(self, words):
         name = words[0]
         if name not in self.simobjsDict:
-            print(("simobjdump: %s not declared " % name))
-            print(("+ Avaialable are: %s" % '\n\t'.join(list(self.simobjsDict.keys()))))
+            print("simobjdump: %s not declared " % name)
+            print("+ Avaialable are: %s" % '\n\t'.join(self.simobjsDict.keys()))
         #if len(words[1:]) != len(self.simobjsDict[name]):
             #print("[WARN] Mismatch in parameters")
             #print("+ %s" % zip(self.simobjsDict[name], words))
@@ -83,7 +84,7 @@ class KKIT():
             self.G.node[n]['type'] = nType
             self.G.node[n]['shape'] = shape
         dotFile = "{}.dot".format(self.modelFilePath)
-        print(("[INFO] Writing dot file to %s" % dotFile))
+        print("[INFO] Writing dot file to %s" % dotFile)
         nx.write_dot(self.G, dotFile)
 
         

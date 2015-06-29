@@ -141,7 +141,7 @@ def plotTables(tables, outfile=None, **kwargs):
     if outfile:
         pu.dump("PLOT", "Saving plots to file {}".format(outfile))
         try:
-            plt.savefig(outfile)
+            plt.savefig(outfile, transparent=True)
         except Exception as e:
             pu.dump("WARN"
                     , "Failed to save figure, plotting onto a window"
@@ -181,7 +181,7 @@ def plotVector(vec, xvec = None, **options):
     plt.title = options.get('title', '')
 
     if(options.get('legend', True)):
-        plt.legend(loc='best', framealpha=0.4, prop={'size' : 6})
+        plt.legend(loc='best', framealpha=0.4, prop={'size' : 9})
 
 
 def saveRecords(dataDict, xvec = None, **kwargs):
@@ -230,6 +230,7 @@ def plotRecords(dataDict, xvec = None, **kwargs):
     filters = [ x.lower() for x in kwargs.get('filter', [])]
 
     plt.figure(figsize=(10, 1.5*len(dataDict)))
+    #plt.rcParams.update( { 'font-size' : 10 } )
     for i, k in enumerate(dataDict):
         pu.info("+ Plotting for %s" % k)
         plotThis = False
@@ -259,7 +260,7 @@ def plotRecords(dataDict, xvec = None, **kwargs):
 
     if outfile:
         pu.info("Writing plot to %s" % outfile)
-        plt.savefig("%s" % outfile)
+        plt.savefig("%s" % outfile, transparent=True)
     else:
         plt.show()
 
@@ -302,7 +303,7 @@ def plot_records(data_dict, xvec = None, **kwargs):
 
     if outfile:
         pu.info("Writing plot to %s" % outfile)
-        plt.savefig("%s" % outfile)
+        plt.savefig("%s" % outfile, transparent=True)
     else:
         plt.show()
 
