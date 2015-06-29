@@ -43,7 +43,6 @@ setup(
         options={'build' : {'build_base' : '/tmp' } },
         packages=['libmumbl'
             , 'moose', 'moose.neuroml', 'moose.backend'
-            , 'moogli'
             ],
         package_dir = { 'moose' : 'moose'
             , 'libmumbl' : 'libmumbl'
