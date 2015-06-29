@@ -27,12 +27,10 @@ install:
     - wget http://sourceforge.net/projects/sbml/files/libsbml/5.11.4/stable/libSBML-5.11.4-core-src.tar.gz
     - tar -xzvf libSBML-5.11.4-core-src.tar.gz 
     - cd libsbml-5.11.4 && ./configure --prefix=/usr --with-zlib --with-bzip2 && make && sudo make install && cd ..
-    - sudo pip install cpp-coveralls;
 script: 
-    - mkdir -p _build && cd _build && cmake -DDEBUG=OFF ..  && make 
+    - mkdir -p _build && cd _build && cmake -DDEBUG=OFF ..  && make VERBOSE=0
     - ctest ${CTEST_ARGS} --output-on-failure 
 
 after_success:
-    - if [[ "$CXX" == "g++" ]]; then
-         coveralls -b build -E ".*CMakeFiles.*" -e cli -e test -e tmp --gcov gcov-4.8 --gcov-options '\-lp' > /dev/null ;
-      fi
+    - sudo pip install cpp-coveralls;
+    - coveralls -b build -E ".*CMakeFiles.*" -e cli -e test -e tmp --gcov gcov-4.8 --gcov-options '\-lp' > /dev/null;
