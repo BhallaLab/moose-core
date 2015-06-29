@@ -67,5 +67,4 @@ libQGLViewer-2.3.15-py) and untar contents.
 
 On Ubuntu, following packages should suffice:
 
-    $ sudo apt-get install python-qt4-dev python-qt4-gl libopenscenegraph-dev python-sip-dev
-    libqt4-dev 
+    $ sudo apt-get install 
