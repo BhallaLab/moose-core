@@ -1,13 +1,13 @@
-from __future__ import print_function
+
 import sys
 from PyQt4 import Qt, QtGui, QtCore
 from PyQt4.QtCore import QObject
 from PyQt4.QtCore import pyqtSignal
 from PyQt4.QtGui import QColor
 from PyQt4.QtGui import QGroupBox
-from PreferencesView import PreferencesView
+from .PreferencesView import PreferencesView
 import moose
-from defines import *
+from .defines import *
 import json
 import os
 

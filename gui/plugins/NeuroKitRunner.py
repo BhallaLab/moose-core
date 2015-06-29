@@ -9,7 +9,7 @@ from mplugin import RunBase
 from mplot import CanvasWidget
 import RunWidget
 from PlotWidgetContainer import PlotWidgetContainer
-from NeuroKitVisualizer import MorphologySimulator
+from .NeuroKitVisualizer import MorphologySimulator
 from PyQt4 import QtGui, Qt
 from PyQt4.QtGui import QLabel
 from PyQt4.QtGui import QWidget
@@ -19,7 +19,7 @@ from PyQt4.QtGui import QGridLayout
 from PyQt4.QtGui import QTextEdit
 import pprint
 # from PyQt4.QtGui import QToolBa
-from default import *
+from .default import *
 import moose
 import neuroextractor
 import moogli
@@ -74,7 +74,7 @@ class NeuroKitRunner(RunView):
         self.morphology          =  self.createMorphology(self.geometry)
 
         self.morphology.set_compartment_order(
-            map(lambda x : x.path, self.compartmentOrder)
+            [x.path for x in self.compartmentOrder]
                                            )
 
         self.vms = np.empty(len(self.compartmentOrder), dtype=np.float, order='C')
