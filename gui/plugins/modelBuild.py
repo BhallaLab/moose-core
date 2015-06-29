@@ -1,9 +1,9 @@
 import moose
-from .kkitQGraphics import * 
-from .kkitOrdinateUtil import *
-from .kkitUtil import *
+from kkitQGraphics import * 
+from kkitOrdinateUtil import *
+from kkitUtil import *
 import PyQt4
-from .setsolver import *
+from setsolver import *
 
 def updateCompartmentSize(qGraCompt):
     childBoundingRect = qGraCompt.childrenBoundingRect()
@@ -56,7 +56,7 @@ def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
         mobj = moose.CubeMesh(modelpath.path+'/'+string_num)
         mobj.volume = 1e-15
         mesh = moose.element(mobj.path+'/mesh')
-        print("modelBuid ",view.sceneContainerPt.sceneRect())
+        print "modelBuid ",view.sceneContainerPt.sceneRect()
         qGItem = ComptItem(scene,pos.toPoint().x(),pos.toPoint().y(),800,500,mobj)
         qGItem.setPen(QtGui.QPen(Qt.QColor(66,66,66,100), 5, Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin))
         view.sceneContainerPt.addItem(qGItem)
@@ -262,7 +262,7 @@ def createObj(scene,view,modelpath,string,pos,layoutPt):
             return
 
     if itemAt != None:
-        if string in list(layoutPt.createdItem.keys()):
+        if string in layoutPt.createdItem.keys():
             num = layoutPt.createdItem[string]
             layoutPt.createdItem[string]+=1
         else:
