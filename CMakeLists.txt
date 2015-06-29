@@ -407,6 +407,13 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/Demos
     COMPONENT moose-python
     )
 
+install(CODE
+    "execute_process(COMMAND ${PYTHON_EXECUTABLE} setup-moose.py install
+        --record install_menifest_moose-python.txt
+    WORKING_DIRECTORY ${PROJECT_PYTHON_PATH})"
+    COMPONENT moose
+    )
+
 
 if(BUILD_MOOGLI)
 
@@ -428,9 +435,10 @@ if(BUILD_MOOGLI)
         )
 
     install(CODE
-        "execute_process(COMMAND ${PYTHON_EXECUTABLE} setup-moogli.py install 
-        WORKING_DIRECTORY ${MOOGLI_TEMP_DIR})"
-        COMPONENT moose
+        "execute_process(COMMAND ${PYTHON_EXECUTABLE} setup-moogli.py install
+        --record install_menifest_moogli.txt
+        WORKING_DIRECTORY ${PROJECT_PYTHON_PATH})"
+        COMPONENT moogli
         )
     
     install(CODE "MESSAGE(\"++ Installed moogli using setuptools. You can
