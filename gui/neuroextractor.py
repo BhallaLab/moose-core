@@ -53,13 +53,7 @@ def etype(element):
     return element_type
 
 def recurse(element, func, classType):
-    print element.children
-    result = {}
-    for child in element.children:
-        try:
-            if isinstance(child[0], classType):
-                key,value = func(child[0])
-                result[key] = value
-        except:
-            pass
-    return result
+    return dict( [ func(child[0]) for child in element.children
+                                  if isinstance(child, classType)
+                 ]
+               )
