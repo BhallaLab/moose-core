@@ -1,7 +1,7 @@
 from PyQt4.QtGui import QPolygonF
 from PyQt4.QtCore import QLineF,QPointF
 import math
-from kkitQGraphics import PoolItem #, ReacItem,EnzItem,CplxItem,ComptItem
+from .kkitQGraphics import PoolItem #, ReacItem,EnzItem,CplxItem,ComptItem
 
 ''' One to need to pass the source, destination,endtype and order for drawing the arrow between 2 object \
     endtype is to check if needs arrow head (arrowhead for product and sumtotal) \
@@ -71,9 +71,9 @@ def calcArrow(srcdes_list,itemignoreZooming,iconScale):
     destIntersects, lineDestPoint = calcLineRectIntersection(desRect, tmpLine)
 
     if not srcIntersects:
-        print 'Source does not intersect line. Arrow points:',lineSrcPoint,src.mobj.name, src.mobj.className
+        print('Source does not intersect line. Arrow points:',lineSrcPoint,src.mobj.name, src.mobj.className)
     if not destIntersects:
-        print 'Dest does not intersect line. Arrow points:', lineDestPoint,  des.mobj.name, des.mobj.className
+        print('Dest does not intersect line. Arrow points:', lineDestPoint,  des.mobj.name, des.mobj.className)
 
     '''src and des are connected with line co-ordinates
        Arrow head is drawned if the distance between src and des line is >8 just for clean appeareance

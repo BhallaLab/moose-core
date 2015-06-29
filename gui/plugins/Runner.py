@@ -59,9 +59,9 @@ class Runner(QObject):
         # print(self.simulationInterval)
         # print(self.runSequence)
         self.simulationStarted.emit(self.clock.currentTime + self.runTime)
-        QTimer.singleShot(0, self.next)
+        QTimer.singleShot(0, self.__next__)
 
-    def next(self):
+    def __next__(self):
         if self.pause:
             return
         if len(self.runSequence) == 0:
@@ -69,19 +69,19 @@ class Runner(QObject):
             return
         moose.start(self.runSequence.pop(0))
         self.simulationProgressed.emit(self.clock.currentTime)
-        QTimer.singleShot(0, self.next)
+        QTimer.singleShot(0, self.__next__)
 
     def pauseSimulation(self):
         self.pause = True
 
     def unpauseSimulation(self):
         self.pause = False
-        self.next()
+        next(self)
 
     def togglePauseSimulation(self):
         if self.pause :
             self.pause = False
-            self.next()
+            next(self)
         else:
             self.pause = True
 
