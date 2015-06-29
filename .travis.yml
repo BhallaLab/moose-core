@@ -31,6 +31,4 @@ script:
     - mkdir -p _build && cd _build && cmake -DDEBUG=OFF -DCMAKE_VERBOSE_MAKEFILE=0 ..  && make VERBOSE=0
 
 after_success:
-    - sudo pip install cpp-coveralls;
     - ctest ${CTEST_ARGS} --output-on-failure 
-    - coveralls -b build -E ".*CMakeFiles.*" -e cli -e test -e tmp --gcov gcov-4.8 --gcov-options '\-lp' > /dev/null;
