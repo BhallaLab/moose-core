@@ -68,7 +68,6 @@ class Pool: public PoolBase
 		//////////////////////////////////////////////////////////////////
 		void increment( double val );
 		void decrement( double val );
-                void nIn( double val );
 
 		//////////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();
