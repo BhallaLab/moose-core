@@ -1,0 +1,15 @@
+#!/usr/bin/make -f
+# export DH_VERBOSE=1
+%:
+	dh "$@"  --buildsystem=cmake
+
+verride_dh_auto_clean:
+	dh_auto_clean --buildsystem=cmake
+
+override_dh_auto_build:
+	dh_auto_build --buildsystem=cmake
+
+# consider using -DUSE_VERSIONED_DIR=ON if backporting
+override_dh_auto_configure:
+	dh_auto_configure --buildsystem=cmake -- -DCMAKE_BUILD_TYPE=Release -DDEBUG=OFF
+

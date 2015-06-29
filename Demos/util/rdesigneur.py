@@ -187,8 +187,8 @@ class rdesigneur:
             module = func[0:modPos]
             funcName = func[modPos+1:bracePos]
             execfile( module + ".py" )
-            #eval( funcName + '(' + protoName + ')' )
-            #return True
+            eval( funcName + "('" + protoName + "')" )
+            return True
         if not func[0:bracePos] in globals():
             raise BuildError( \
                 protoName + "Proto: global function '" +func+"' not known.")
@@ -253,7 +253,8 @@ class rdesigneur:
             return False
         else:
             raise BuildError( \
-                protoType + "Proto: File type'" + i[0] + "' not known." )
+                protoType + "Proto: File type '" + protoVec[0] + \
+                "' not known." )
         return True
 
     ################################################################
