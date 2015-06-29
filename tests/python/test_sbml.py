@@ -11,6 +11,8 @@ __maintainer__       = "Dilawar Singh"
 __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
+import sys
+sys.path.append('../../python')
 import moose
 import moose.utils as mu
 import sys
