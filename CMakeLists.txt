@@ -1,8 +1,8 @@
 set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 cmake_minimum_required(VERSION 2.8)
 cmake_policy(SET CMP0004 OLD)
-project(moose)
 
+project(moose)
 SET(CMAKE_INSTALL_PREFIX /usr)
 
 # This snippet is from LLVM project.
@@ -22,6 +22,19 @@ if( CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT MSVC_IDE )
         Please delete them."
         )
 endif()
+
+# uninstall target
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+    IMMEDIATE @ONLY
+    )
+
+add_custom_target(uninstall
+    COMMAND ${CMAKE_COMMAND} -P
+    ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
+    )
+
 ################################# OS SPECIFIC ##################################
 
 
@@ -34,16 +47,6 @@ set(INSTALL_BIN_DIR bin CACHE PATH "${CMAKE_INSTALL_PREFIX}/bin")
 set(INSTALL_INCLUDE_DIR include CACHE PATH "${CMAKE_INSTALL_PREFIX}/include/")
 
 ########################### COMPILER MACROS #####################################
-# Compiler 
-
-#if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    #set(CMAKE_CXX_COMPILER "clang++")
-#elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    #set(CMAKE_CXX_COMPILER "g++")
-#else()
-    #message(WARNING "Continuing with unsupported compiler: ${CMAKE_CXX_COMPILER}")
-#endif()
-#set(CMAKE_CXX_COMPILER "clang++")
 
 ## Turn warning to error
 add_definitions(-Wall
@@ -68,13 +71,7 @@ else()
     message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support.")
 endif()
 
-# DO UNIT TESTS 
-option(ENABLE_UNIT_TESTS "ENABLE UNIT TESTS IN MOOSE" ON)
-if(ENABLE_UNIT_TESTS)
-    MESSAGE("++ Unit testing enabled.")
-    add_definitions(-DDO_UNIT_TESTS)
-endif()
-
+############################ BUILD CONFIGURATION #################################
 set(VERIFY 1)
 if(VERIFY)
     add_definitions(-DSANITY_CHECK -DARGS_CHECK -DRESULT_CHECK -DVALUE_CHECK)
@@ -104,18 +101,23 @@ endif()
 # Default macros
 add_definitions(-DUSE_GENESIS_PARSER)
 
+## Unit testing and debug mode.
 option(DEBUG "Building with debugging support" OFF)
-if(DEBUG)
-    MESSAGE("Building with DEBUG support.")
+option(ENABLE_UNIT_TESTS "ENABLE UNIT TESTS IN MOOSE" ON)
+if(ENABLE_UNIT_TESTS AND DEBUG)
+    MESSAGE("++ Building for Debug/ Unit testing")
+    add_definitions(-DDO_UNIT_TESTS)
     set(CMAKE_BUILD_TYPE Debug)
 else()
-    MESSAGE("Building for Release")
+    MESSAGE("++ Build for Relase/ No unit tests.")
     set(CMAKE_BUILD_TYPE Release)
     add_definitions(-UDO_UNIT_TESTS -O3)
 endif()
 
-find_package(GSL 1.16 REQUIRED)
 
+#### DEPENDENCIES
+
+find_package(GSL 1.16 REQUIRED)
 option(ENABLE_SBML "Enable SBML support" ON)
 if(ENABLE_SBML)
     find_package(LIBSBML)
@@ -136,6 +138,7 @@ ENDIF()
 
 # python support: check for interpreter, sip, pyqt4
 FIND_PACKAGE(PythonDev REQUIRED)
+
 ################################### SETUP BUILD ################################
 include_directories(msg basecode)
 add_executable(moose-bin basecode/main.cpp)
@@ -147,7 +150,6 @@ add_executable(moose-bin basecode/main.cpp)
 if(GSL_FOUND)
     add_definitions(-DUSE_GSL)
 endif()
-
 
 ## Setup hdf5
 find_package(HDF5)
@@ -250,11 +252,6 @@ set(MOOSE_LIBRARIES
     basecode
     )
 
-#target_link_libraries(moose
-#    ${MOOSE_LIBRARIES}
-#    ${LIBRARIES}
-#    )
-
 target_link_libraries(moose-bin 
     "-Wl,--whole-archive"
     ${MOOSE_LIBRARIES}
@@ -264,8 +261,13 @@ target_link_libraries(moose-bin
 
 ######################### BUILD PYMOOSE ########################################
 option(BUILD_PYMOOSE "Build native python extension of MOOSE" 1)
+
+# Root of all python module.
+SET(PROJECT_PYTHON_PATH ${CMAKE_CURRENT_SOURCE_DIR}/python)
 if(BUILD_PYMOOSE)
     message("++ Building native python extension of MOOSE")
+    set(PYMOOSE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/python/moose")
+
     find_package(NumpyHeaders)
     if(PYTHON_NUMPY_FOUND)
         add_definitions(-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
@@ -287,7 +289,7 @@ if(BUILD_PYMOOSE)
 
     set_target_properties(_moose PROPERTIES COMPILE_DEFINITIONS "PYMOOSE")
     set_target_properties(_moose PROPERTIES 
-        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/python/moose"
+        LIBRARY_OUTPUT_DIRECTORY ${PYMOOSE_OUTPUT_DIRECTORY}
         PREFIX ""
         )
     list(APPEND LIBRARIES ${PYTHON_LIBRARIES})
@@ -325,13 +327,15 @@ if(BUILD_CYMOOSE)
 endif()
 
 ######################################## MOOGLI ################################
+
 # Moogli as external project
 OPTION(BUILD_MOOGLI "Build moogli extension." OFF)
 IF(BUILD_MOOGLI)
+    SET(MOOGLI_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/python/moogli)
+
     FIND_PACKAGE(SIP REQUIRED)
     FIND_PACKAGE(PyQt4 REQUIRED)
     FIND_PACKAGE(osgQt REQUIRED)
-    SET(MOOGLI_BUILD_PATH ${PROJECT_SOURCE_DIR}/python/moogli)
     MESSAGE("++ Building MOOGLI in ${MOOGLI_BUILD_PATH}")
     add_subdirectory(${PROJECT_SOURCE_DIR}/python/moogli)
     INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/python/moogli/include)
@@ -341,10 +345,6 @@ else(BUILD_MOOGLI)
 endif()
 
 ######################### INSTALL ##############################################
-#install(TARGETS moose
-#    DESTINATION lib
-#    COMPONENT moose-core
-#    )
 
 install(TARGETS moose-bin
     DESTINATION bin
