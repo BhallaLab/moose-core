@@ -1,6 +1,6 @@
-Build Status - master (This is stable branch): [![Build Status - master](https://travis-ci.org/BhallaLab/moose.svg?branch=master)](https://travis-ci.org/BhallaLab/moose)
+Status of branch trunk: [![Build Status - trunk](https://travis-ci.org/BhallaLab/moose.svg?branch=trunk)](https://travis-ci.org/BhallaLab/moose) . This branch is current development branch. 
 
-Build Status - trunk (This is development branch) [![Build Status - trunk](https://travis-ci.org/BhallaLab/moose.svg?branch=trunk)](https://travis-ci.org/BhallaLab/moose)
+Status of master: [![Build Status - master](https://travis-ci.org/BhallaLab/moose.svg?branch=master)](https://travis-ci.org/BhallaLab/moose). This branch keeps the stable version of development branch.
 
 # MOOSE
 
@@ -63,6 +63,7 @@ https://sourceforge.net/projects/moose/
 - GSL (1.16.x) OPTIONAL For core moose numerical computation
 - OpenMPI (1.8.x) OPTIONAL For running moose in parallel on clusters
 
+<<<<<<< HEAD
 
 ## PyMOOSE                      REQUIRED except on cluster worker nodes
 
@@ -72,16 +73,57 @@ Python interface for core MOOSE API
 - Python-dev    ( >= 2.7.x)         REQUIRED Python development headers and libraries 
 - NumPy         ( >= 1.6.x)         REQUIRED For numerical computation in PyMOOSE 
 - H5py          (2.3.x)             REQUIRED For reading and writing data to HDF5 files
+### Chemical Kinetics Network Simulations   OPTIONAL
 
+- GSL     (1.16.x)                      REQUIRED
+----------------
+For core moose numerical computation
+
+- PyQt4         (4.8.x)                 REQUIRED
+---------------------
+For Python GUI    
+
+- Matplotlib    ( >= 1.1.x)             REQUIRED
+-------------------------
+For plotting simulation results
+>>>>>>> Formatted README file in markdown format. [ci skip]
+
+- SBML          (5.9.x)                 OPTIONAL
+---------------------
+For reading and writing signalling models to SBML files
 
 ### Chemical Kinetics Network Simulations   OPTIONAL
 
+<<<<<<< HEAD
 - GSL     (1.16.x)                      REQUIRED For core moose numerical computation
 - PyQt4         (4.8.x)                 REQUIRED For Python GUI    
 - Matplotlib    ( >= 1.1.x)             REQUIRED For plotting simulation results
 - SBML          (5.9.x)                 OPTIONAL For reading and writing signalling models to SBML files
 
 ### Compartmental Model Visualization       OPTIONAL
+=======
+
+### Compartmental Model Visualization       OPTIONAL
+- GSL     (1.16.x)                      REQUIRED
+----------------
+For core moose numerical computation
+
+- OSG           (3.2.x)                 REQUIRED
+---------------------
+For 3D rendering and simulation of neuronal models
+
+- Qt4           (4.8.x)                 REQUIRED
+---------------------
+For C++ GUI of Moogli
+
+- PyQt4         (4.8.x)                 REQUIRED
+---------------------
+For Python GUI    
+
+- Matplotlib    ( >= 1.1.x)             REQUIRED
+-------------------------
+For plotting simulation results
+>>>>>>> Formatted README file in markdown format. [ci skip]
 
 - GSL     (1.16.x)                      REQUIRED For core moose numerical computation
 - OSG           (3.2.x)                 REQUIRED For 3D rendering and simulation of neuronal models
