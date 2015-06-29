@@ -55,7 +55,7 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 import unittest
 sys.path.append('..')
-from .default import PlotWidget
+from default import PlotWidget
 import moose
 import config
 

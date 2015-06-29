@@ -1,10 +1,10 @@
 import sys
-from .modelBuild import *
-from .constants import *
+from modelBuild import *
+from constants import *
 from PyQt4.QtGui import QPixmap, QImage, QPen, QGraphicsPixmapItem, QGraphicsLineItem
 from PyQt4.QtCore import pyqtSignal
-from .kkitUtil import getColor
-from .setsolver import *
+from kkitUtil import getColor
+from setsolver import *
 from PyQt4 import QtSvg
 from moose import utils
 
@@ -247,7 +247,7 @@ class GraphicalView(QtGui.QGraphicsView):
                     l = self.modelRoot[0:self.modelRoot.find('/',1)]
 
                 linfo = moose.Annotator(l+'/info')
-                for k, v in list(self.layoutPt.qGraCompt.items()):
+                for k, v in self.layoutPt.qGraCompt.items():
                     rectcompt = v.childrenBoundingRect()
                     if linfo.modeltype == "new_kkit":
                         #if newly built model then compartment is size is fixed for some size.
@@ -318,7 +318,7 @@ class GraphicalView(QtGui.QGraphicsView):
                             ## if there is change in 'Topology' of the model
                             ## or if copy has to made then oject should be in unZombify mode
                         deleteSolver(self.modelRoot)
-                        lKey = [key for key, value in self.layoutPt.qGraCompt.items() if value == itemAtView][0]
+                        lKey = [key for key, value in self.layoutPt.qGraCompt.iteritems() if value == itemAtView][0]
                         iR = 0
                         iP = 0
                         t = moose.element(cloneObj.parent().mobj)
@@ -478,7 +478,7 @@ class GraphicalView(QtGui.QGraphicsView):
 
     def removeConnector(self):
         try:
-            for l,k in list(self.connectorlist.items()):
+            for l,k in self.connectorlist.items():
                 if k is not None:
                     self.sceneContainerPt.removeItem(k)
                     self.connectorlist[l] = None
@@ -500,7 +500,7 @@ class GraphicalView(QtGui.QGraphicsView):
         self.connectionSource = item
         rectangle = item.boundingRect()
 
-        for l in list(self.connectorlist.keys()):
+        for l in self.connectorlist.keys():
             self.xDisp = 0
             self.yDisp = 0
             self.connectionSign = None
@@ -661,7 +661,7 @@ class GraphicalView(QtGui.QGraphicsView):
         '''
 
     def updateItemTransformationMode(self, on):
-        for v in list(self.sceneContainerPt.items()):
+        for v in self.sceneContainerPt.items():
             if( not isinstance(v,ComptItem)):
                 #if ( isinstance(v, PoolItem) or isinstance(v, ReacItem) or isinstance(v, EnzItem) or isinstance(v, CplxItem) ):
                 if isinstance(v,KineticsDisplayItem):
@@ -695,7 +695,7 @@ class GraphicalView(QtGui.QGraphicsView):
             self.fitInView(self.sceneContainerPt.itemsBoundingRect().x()-10,self.sceneContainerPt.itemsBoundingRect().y()-10,self.sceneContainerPt.itemsBoundingRect().width()+20,self.sceneContainerPt.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
 
     def updateScale( self, scale ):
-        for item in list(self.sceneContainerPt.items()):
+        for item in self.sceneContainerPt.items():
             if isinstance(item,KineticsDisplayItem):
                 item.refresh(scale)
                 #iteminfo = item.mobj.path+'/info'
@@ -795,7 +795,7 @@ class GraphicalView(QtGui.QGraphicsView):
                 if polygon == qpolygonline and objdes == src and endtype == endt:
                     del(self.layoutPt.object2line[des])
                 else:
-                    print(" check this condition when is len is single and else condition",qpolygonline, objdes,endtype)
+                    print " check this condition when is len is single and else condition",qpolygonline, objdes,endtype
         else:
             n = 0
             for polygon,objdes,endtype,numL in object2lineInfo:
@@ -814,18 +814,18 @@ class GraphicalView(QtGui.QGraphicsView):
             src = self.layoutPt.lineItem_dict[item]
             lineItem_value = self.layoutPt.lineItem_dict[item]
             i = iter(lineItem_value)
-            source  = next(i)
-            destination  = next(i)
-            endt = next(i)
-            numl = next(i)
+            source  = i.next()
+            destination  = i.next()
+            endt = i.next()
+            numl = i.next()
             self.deleteObject2line(item,source,destination,endt)
             self.deleteObject2line(item,destination,source,endt)
             try:
                 del self.layoutPt.lineItem_dict[item]
             except KeyError:
                 pass
-            srcZero = [k for k, v in self.layoutPt.mooseId_GObj.items() if v == src[0]]
-            srcOne = [k for k, v in self.layoutPt.mooseId_GObj.items() if v == src[1]]
+            srcZero = [k for k, v in self.layoutPt.mooseId_GObj.iteritems() if v == src[0]]
+            srcOne = [k for k, v in self.layoutPt.mooseId_GObj.iteritems() if v == src[1]]
             
             if isinstance (moose.element(srcZero[0]),moose.MMenz):
                 gItem =self.layoutPt.mooseId_GObj[moose.element(srcZero[0])]
@@ -957,7 +957,7 @@ class GraphicalView(QtGui.QGraphicsView):
                                 # when enz is removed the connection is removed, 
                                 # but when pool tried to remove then qgraphicscene says 
                                 # "item scene is different from this scene"
-                                sceneItems = list(self.sceneContainerPt.items())
+                                sceneItems = self.sceneContainerPt.items()
                                 if l[0] in sceneItems:
                                     #deleting the connection which is connected to Enz
                                     self.sceneContainerPt.removeItem(l[0])
@@ -965,13 +965,13 @@ class GraphicalView(QtGui.QGraphicsView):
                             self.sceneContainerPt.removeItem(gItem)
 
                 for l in self.layoutPt.object2line[item]:
-                    sceneItems = list(self.sceneContainerPt.items())
+                    sceneItems = self.sceneContainerPt.items()
                     if l[0] in sceneItems:
                         self.sceneContainerPt.removeItem(l[0])
                 self.sceneContainerPt.removeItem(item)
                 moose.delete(item.mobj)
-                for key, value in list(self.layoutPt.object2line.items()):
-                    self.layoutPt.object2line[key] = [tup for tup in value if tup[1] != item]
+                for key, value in self.layoutPt.object2line.items():
+                    self.layoutPt.object2line[key] = filter( lambda tup: tup[1] != item ,value)
                 self.layoutPt.getMooseObj()
                 setupItem(self.modelRoot,self.layoutPt.srcdesConnection) 
 
