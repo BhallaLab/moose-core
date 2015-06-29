@@ -384,19 +384,7 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/gui
     COMPONENT moose-gui
     )
 
-# and the python dependencies
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/python/moose
-    DESTINATION lib/moose/python
-    COMPONENT moose-python
-    )
-
-# and the python dependencies
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/python/libmumbl
-    DESTINATION lib/moose/python
-    COMPONENT moose-python
-    )
-
-INSTALL(FILES ${PROJECT_SOURCE_DIR}/python/setup.py
+INSTALL(FILES ${PROJECT_SOURCE_DIR}/python/setup-moose.py
     DESTINATION lib/moose
     COMPONENT moose-python
     )
@@ -417,23 +405,7 @@ install(CODE
 
 if(BUILD_MOOGLI)
 
-    SET(MOOGLI_TEMP_DIR ${MOOGLI_BUILD_PATH})
-
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/python/moogli/_moogli/moogli.so
-        DESTINATION ${MOOGLI_TEMP_DIR}/moogli
-        COMPONENT moose
-        )
-
-    install(FILES ${PROJECT_SOURCE_DIR}/python/moogli/__init__.py
-        DESTINATION ${MOOGLI_TEMP_DIR}/moogli
-        COMPONENT moose
-        )
-
-    install(FILES ${PROJECT_SOURCE_DIR}/python/setup-moogli.py
-        DESTINATION ${MOOGLI_TEMP_DIR}
-        COMPONENT moose
-        )
-
+    SET(MOOGLI_INSTALL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/python/moogli)
     install(CODE
         "execute_process(COMMAND ${PYTHON_EXECUTABLE} setup-moogli.py install
         --record install_menifest_moogli.txt
