@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 import PyQt4
 from PyQt4 import Qt, QtGui, QtCore
 from PyQt4.QtCore import pyqtSignal
