@@ -58,7 +58,9 @@ libraries installed.
 libSBML needs to be downloaded, built and installed separately.
 
 """
+
 import numpy as np
+
 CLASSIFIERS = ["Development Status :: 5 - Production/Stable",
                "Environment :: Console",
                "Intended Audience :: Science/Research",
@@ -71,7 +73,7 @@ CLASSIFIERS = ["Development Status :: 5 - Production/Stable",
 NAME='moose'
 DESCRIPTION = 'MOOSE is the Multiscale Object Oriented Simulation Environment'
 
-fid = open('README', 'r')
+fid = open('README.md', 'r')
 long_description = fid.read()
 fid.close()
 idx = max(0, long_description.find('MOOSE is the'))
@@ -293,7 +295,7 @@ SOURCES=['external/muparser/muParser.cpp',
 
 INCLUDE_DIRS=['/usr/include',
               '/usr/local/include',
-              np.get_include(), # needed explicitly on cygwin
+              np.get_include(), 
               'external/muparser',
               'basecode',
               'biophysics',
@@ -334,9 +336,9 @@ DEFINE_MACROS = [('USE_GSL', None),
                  ('USE_HDF5', None)]
 
 EXTRA_LINK_ARGS = ['-L/usr/lib64', '-Wl,-R/usr/lib64'] # distutils disregards everything in LIBRARY_DIRS except /usr/local/lib, hence this
-PACKAGES = ['moose', 'moose.backend', 'moose.neuroml', 'mgui', 'mgui.plugins', 'moose.topology', 'moose.backend']
+PACKAGES = ['moose', 'moose.backend', 'moose.neuroml', 'mgui', 'mgui.plugins', 'moose.topology', 'moogli']
 SCRIPTS = ['gui/mgui.py']
-PACKAGE_DATA = {'moose': ['copyleft', 'README'], 'mgui': ['icons/*', 'colormaps/*', 'bioModels/*']}
+PACKAGE_DATA = {'moose': ['copyleft', 'README.md'], 'mgui': ['icons/*', 'colormaps/*', 'bioModels/*']}
 REQUIRES = ['numpy', 'gsl', 'hdf5', 'libsbml'] # using full-dependency
 # python-libsbml, although available on PyPI, does not build with pip
 # install and gsl is a C library. The links are just for informing the
@@ -360,7 +362,11 @@ setup_info = dict(
     packages=PACKAGES,
     package_data=PACKAGE_DATA,
     requires=REQUIRES,
-    package_dir={'': 'python', 'mgui': 'gui'}
+    package_dir={'': 'python', 'mgui': 'gui'},
+    entry_points={
+        'gui_scripts': [
+            'moose = mgui.mgui:main']},
+    #scripts=SCRIPTS,
 )
 
 try:
@@ -382,7 +388,7 @@ moose_module = Extension(
     define_macros=DEFINE_MACROS,
     extra_link_args=EXTRA_LINK_ARGS
 )
-print moose_module.runtime_library_dirs
+print((moose_module.runtime_library_dirs))
 
 setup_info['ext_modules'] = [moose_module]
 setup(**setup_info)
