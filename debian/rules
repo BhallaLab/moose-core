@@ -40,7 +40,9 @@ override_dh_auto_configure:
 override_dh_auto_install:
 	# Distable python install
 	cd $(BUILD_DIR_MOOSE) && make install 
-	cd python && python setup-moose.py install --root=debian/moose --install-layout=deb 
+	cd python && python setup-moose.py install --root=debian/tmp --install-layout=deb 
+	cd python && python setup-moogli.py install --root=debian/tmp --install-layout=deb 
+
 
 
 
