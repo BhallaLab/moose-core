@@ -30,7 +30,8 @@ override_dh_auto_clean:
 override_dh_auto_configure:
 	#dh_auto_configure --buildsystem=cmake -- -DCMAKE_BUILD_TYPE=Release -DDEBUG=OFF 
 	mkdir -p $(BUILD_DIR_MOOSE)
-	cd $(BUILD_DIR_MOOSE) && cmake -DDEBUG=OFF -DBUILD_MOOGLI=ON -DCMAKE_VERBOSE_MAKEFILE=OFF ..
+	cd $(BUILD_DIR_MOOSE) && cmake -DDEBUG=OFF -DBUILD_MOOGLI=ON \
+	    -DCMAKE_INSTALL_PREFIX=debian/tmp/usr -DCMAKE_VERBOSE_MAKEFILE=OFF ..
 
 override_dh_auto_build:
 	#dh_auto_build --buildsystem=cmake
