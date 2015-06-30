@@ -301,7 +301,14 @@ extern "C" {
         long long id = (long long)(self->oid_.id.value());
         long dataIndex = self->oid_.dataIndex;
         long fieldIndex = self->oid_.fieldIndex;
-        return id << 48 | dataIndex << 16 | fieldIndex;
+        /* attempt to make it with 32 bit system - assuming id will
+         * have its value within least significant 16 bits and
+         * dataIndex and fieldIndex will be limited to first 8 bits */
+        if (sizeof(size_t) == 8){
+            return id << 48 | dataIndex << 16 | fieldIndex;
+        } else {
+            return id << 16 | dataIndex << 8 | fieldIndex;
+        }
     }
     
     PyObject * moose_ObjId_repr(_ObjId * self)
