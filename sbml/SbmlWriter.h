@@ -44,6 +44,7 @@ class SbmlWriter
 		void getModifier(ModifierSpeciesReference* mspr,vector < Id> mod, int index,ostringstream& rate_law,double &rct_order,bool w);
 		void printParameters( KineticLaw* kl,string k,double kvalue,string unit );
 		string findNotes(Id itr);
+		string getGroupinfo(Id itr);
 #endif
 };
 //extern const Cinfo* initCinfo();
