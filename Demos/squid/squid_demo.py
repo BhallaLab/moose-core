@@ -567,10 +567,15 @@ class SquidGui(QtGui.QMainWindow):
         self._gk_plot.set_data(time_series, gk)
         time_series = numpy.linspace(0, self._plotdt * len(gna), len(gna))
         self._gna_plot.set_data(time_series, gna)
+        # self._vm_axes.margins(y=0.1)
+        # self._g_axes.margin(y=0.1)
+        # self._im_axes.margins(y=0.1)
+        # self._i_axes.margins(y=0.1)
         if self._autoscaleAction.isChecked():
             for axis in self._plotFigure.axes:
                 axis.relim()
-                axis.set_autoscale_on(True)
+                axis.margins(0.1, 0.1)
+                axis.autoscale_view(tight=True)
         else:
             self._vm_axes.set_ylim(-20.0, 120.0)
             self._g_axes.set_ylim(0.0, 0.5)
@@ -615,6 +620,7 @@ class SquidGui(QtGui.QMainWindow):
             for axis in self._statePlotFigure.axes:
                 axis.relim()
                 axis.set_autoscale_on(True)
+                axis.autoscale_view(True)
         self._statePlotCanvas.draw()
 
     def _runSlot(self):
@@ -635,7 +641,8 @@ class SquidGui(QtGui.QMainWindow):
             secondDelay = firstWidth
             secondWidth = float(str(self._clampTimeEdit.text()))
             secondLevel = float(str(self._clampVEdit.text()))
-            self._im_axes.set_ylim(-10.0, 10.0)
+            if not self._autoscaleAction.isChecked():
+                self._im_axes.set_ylim(-10.0, 10.0)
         else:
             clampMode = 'iclamp'
             baseLevel = float(str(self._baseCurrentEdit.text()))
@@ -646,7 +653,8 @@ class SquidGui(QtGui.QMainWindow):
             secondLevel = float(str(self._secondPulseEdit.text()))
             secondWidth = float(str(self._secondPulseWidthEdit.text()))
             singlePulse = (self._pulseMode.currentIndex() == 0)
-            self._im_axes.set_ylim(-0.4, 0.4)
+            if not self._autoscaleAction.isChecked():
+                self._im_axes.set_ylim(-0.4, 0.4)
         self.squid_setup.clamp_ckt.configure_pulses(baseLevel=baseLevel,
                                                     firstDelay=firstDelay,
                                                     firstWidth=firstWidth,
@@ -748,6 +756,7 @@ class SquidGui(QtGui.QMainWindow):
             for axis in (self._plotFigure.axes + self._statePlotFigure.axes):            
                 axis.relim()
                 axis.set_autoscale_on(True)
+                axis.autoscale_view(True)
         else:
             for axis in self._plotFigure.axes:
                 axis.set_autoscale_on(False)            
@@ -801,7 +810,6 @@ class SquidGui(QtGui.QMainWindow):
         QtGui.qApp.closeAllWindows()
 
     def _showBioPhysicsHelp(self):
-        print '11111'
         self._createHelpMessage()
         self._helpMessageText.setText('<html><p>%s</p><p>%s</p><p>%s</p><p>%s</p><p>%s</p></html>' % 
                                       (tooltip_Nernst, 
