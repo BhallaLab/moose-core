@@ -363,19 +363,19 @@ install(FILES ${PROJECT_SOURCE_DIR}/scripts/moose
 
 install(PROGRAMS ${PROJECT_SOURCE_DIR}/scripts/moosegui
     DESTINATION bin
-    COMPONENT moose-gui
+    COMPONENT moose-gui 
     )
 
 ## Install the icon
 install(FILES ${PROJECT_SOURCE_DIR}/gui/icons/moose_icon.png 
     DESTINATION share/moose
-    COMPONENT moose-python
+    COMPONENT moose-gui
     )
 
 # And the desktop file.
 install(FILES ${PROJECT_SOURCE_DIR}/scripts/moose.desktop
     DESTINATION share/applications
-    COMPONENT moose-python
+    COMPONENT moose-gui
     )
 
 # And the gui
@@ -392,30 +392,33 @@ INSTALL(FILES ${PROJECT_SOURCE_DIR}/python/setup-moose.py
 ## The demos goes here.
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/Demos
     DESTINATION share/moose
-    COMPONENT moose-python
+    COMPONENT moose-gui
     )
 
-install(CODE
-    "execute_process(COMMAND ${PYTHON_EXECUTABLE} setup-moose.py install
-        --record install_menifest_moose-python.txt
-    WORKING_DIRECTORY ${PROJECT_PYTHON_PATH})"
-    COMPONENT moose
-    )
+#install(CODE
+    #"execute_process(COMMAND ${PYTHON_EXECUTABLE} setup-moose.py install
+        #--record install_menifest_moose-python.txt
+        #--prefix=${CMAKE_INSTALL_PREFIX}
+    #WORKING_DIRECTORY ${PROJECT_PYTHON_PATH})"
+    #COMPONENT moose
+    #)
 
 
 if(BUILD_MOOGLI)
 
     SET(MOOGLI_INSTALL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/python/moogli)
-    install(CODE
-        "execute_process(COMMAND ${PYTHON_EXECUTABLE} setup-moogli.py install
-        --record install_menifest_moogli.txt
-        WORKING_DIRECTORY ${PROJECT_PYTHON_PATH})"
-        COMPONENT moogli
-        )
+
+    #install(CODE
+        #"execute_process(COMMAND ${PYTHON_EXECUTABLE} setup-moogli.py install
+        #--record install_menifest_moogli.txt
+        #--prefix=${CMAKE_INSTALL_PREFIX}
+        #WORKING_DIRECTORY ${PROJECT_PYTHON_PATH})"
+        #COMPONENT moogli
+        #)
     
-    install(CODE "MESSAGE(\"++ Installed moose-python and moogli using setuptools. You can
-        uninstall them using python-pip\")"
-        )
+    #install(CODE "MESSAGE(\"++ Installed moose-python and moogli using setuptools. You can
+        #uninstall them using python-pip\")"
+        #)
 
 endif(BUILD_MOOGLI)
 
