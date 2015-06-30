@@ -77,8 +77,8 @@ def create_model():
 
     """
     model = moose.Neutral('/model')
-    nrn_a = create_1comp_neuron('/model/neuron_A')
-    nrn_b = create_1comp_neuron('/model/neuron_B')
+    nrn_a = create_1comp_neuron('/model/neuron_A')[0]
+    nrn_b = create_1comp_neuron('/model/neuron_B')[0]
     #: SynChan for post synaptic neuron
     synchan = moose.SynChan('/model/neuron_B/synchan')
     synchan.Gbar = 1e-8

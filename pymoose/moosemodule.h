@@ -150,7 +150,7 @@ extern "C" {
     typedef struct {
         PyObject_HEAD
         char * name;
-        ObjId owner;
+        _ObjId * owner;
         ObjId myoid; // This is a placeholder for {Id, dataId} combo with fieldIndex=0, used only for fieldelements
     } _Field;
     //////////////////////////////////////////
@@ -223,7 +223,7 @@ extern "C" {
     // Methods for LookupField
     ////////////////////////////////////////////
     int moose_Field_init(_Field * self, PyObject * args, PyObject * kwds);
-    /* void moose_Field_dealloc(_Field * self); */
+    void moose_Field_dealloc(_Field * self);
     long moose_Field_hash(_Field * self);
     PyObject * moose_Field_repr(_Field * self);
     PyObject * moose_LookupField_getItem(_Field * self, PyObject * key);
