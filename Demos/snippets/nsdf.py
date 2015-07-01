@@ -58,8 +58,8 @@ def setup_model():
     model = moose.Neutral('/model')
     pulse = moose.PulseGen('/model/pulse')
     pulse.level[0] = 1.0
-    pulse.delay[0] = 0.5
-    pulse.width[0] = 1.0
+    pulse.delay[0] = 10
+    pulse.width[0] = 20
     t_lead = moose.SpikeGen('/model/t_lead')
     t_lead.threshold = 0.5
     moose.connect(pulse, 'output', t_lead,'Vm');
@@ -76,6 +76,10 @@ def setup_model():
     moose.connect(t_lead, 'spikeOut', nsdf.eventInput[0], 'input')
     tab = moose.Table('spiketab')
     tab.threshold = t_lead.threshold
+    clock = moose.element('/clock')
+    for ii in range(32):
+        moose.setClock(ii, 1)
+    moose.useClock(30, nsdf.path, 'process')
     moose.connect(pulse, 'output', tab, 'spike')
     moose.reinit()
     moose.start(100)
