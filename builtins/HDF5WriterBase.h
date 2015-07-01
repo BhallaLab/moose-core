@@ -36,7 +36,6 @@
 hid_t require_attribute(hid_t file_id, string path,
                         hid_t data_type, hid_t data_id);
 
-hid_t createDataset2D(hid_t parent, string name, unsigned int rows);
 
 class HDF5WriterBase
 {
@@ -77,6 +76,7 @@ class HDF5WriterBase
     
   protected:
     herr_t openFile();
+    hid_t createDataset2D(hid_t parent, string name, unsigned int rows);
     
     /// map from element path to nodes in hdf5file.  Multiple MOOSE
     /// tables can be written to the single file corresponding to a
