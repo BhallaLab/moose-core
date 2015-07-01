@@ -80,20 +80,30 @@ hid_t require_attribute(hid_t file_id, string path,
    Create a 2D dataset under parent with name. It will have specified
    number of rows and unlimited columns.
  */
-hid_t createDataset2D(hid_t parent, string name, unsigned int rows)
+hid_t HDF5WriterBase::createDataset2D(hid_t parent, string name, unsigned int rows)
 {
     if (parent < 0){
         return 0;
     }    
     herr_t status;
-    // TODO: see if we really need chunking here
-    // hsize_t chunkdims[] = {chunkSize_, chunkSize_};
-    // hid_t chunk_params = H5Pcreate(H5P_DATASET_CREATE);
-    // status = H5Pset_chunk(chunk_params, 1, chunk_dims);
+    // we need chunking here to allow extensibility
+    hsize_t chunkdims[] = {rows, chunkSize_};
+    hid_t chunk_params = H5Pcreate(H5P_DATASET_CREATE);
+    status = H5Pset_chunk(chunk_params, 2, chunkdims);
+    assert(status >= 0);
+    if (compressor_ == "zlib"){
+        status = H5Pset_deflate(chunk_params, compression_);
+    } else if (compressor_ == "szip"){
+        // this needs more study
+        unsigned sz_opt_mask = H5_SZIP_NN_OPTION_MASK;
+        status = H5Pset_szip(chunk_params, sz_opt_mask,
+                             HDF5WriterBase::CHUNK_SIZE);
+    }
     hsize_t dims[2] = {rows, 0};
-    hsize_t maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
+    hsize_t maxdims[2] = {rows, H5S_UNLIMITED};
     hid_t dataspace = H5Screate_simple(2, dims, maxdims);
-    hid_t dset = H5Dcreate2(parent, name.c_str(), H5T_NATIVE_DOUBLE, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    hid_t dset = H5Dcreate2(parent, name.c_str(), H5T_NATIVE_DOUBLE, dataspace, H5P_DEFAULT, chunk_params, H5P_DEFAULT);
+    H5Pclose(chunk_params);
     H5Sclose(dataspace);
     return dset;
 }

@@ -93,7 +93,7 @@ class NSDFWriter: public HDF5DataWriter
   protected:    
     hid_t getEventDataset(string srcPath, string srcField);
     void sortOutUniformSources(const Eref& eref);
-    hid_t getUniformDataset(string srcPath, string srcField);
+    /* hid_t getUniformDataset(string srcPath, string srcField); */
     map <string, string> env_; // environment attributes
     vector < hid_t > eventDatasets_;
     // event times data_ and datasets_ inherited from HDF5DataWriter
@@ -128,12 +128,15 @@ class NSDFWriter: public HDF5DataWriter
     // The last number of rows in each dataset
     // (/data/uniform/className/fieldName -> size)
 
-    map< string, unsigned int > classFieldToRows_;
+    map< string, vector< unsigned int > > classFieldToSrcIndex_;
     // the index of the recorded field in its dataset (objectPath/fieldName -> index)
     map< string, unsigned int > objectFieldToIndex_;
     // objectPath -> field - just for reuse later - avoid repeating
     // extraction of field name from func_.
     vector < pair< string, string > > objectField_;
+    map< string, vector < string > > classFieldToObjectField_;
+    vector < string > vars_;
+    
 };
 #endif // _NSDFWRITER_H
 #endif // USE_HDF5
