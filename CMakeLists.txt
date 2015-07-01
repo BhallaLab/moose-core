@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 cmake_policy(SET CMP0004 OLD)
 
 project(moose)
-SET(CMAKE_INSTALL_PREFIX /usr)
+option(CMAKE_INSTALL_PREFIX "Install prefix" /usr)
 
 # This snippet is from LLVM project.
 # Sanity check our source directory to make sure that we are not trying to
@@ -40,7 +40,7 @@ add_custom_target(uninstall
 
 ################################# CMKAE MACROS #################################
 
-set(CMAKE_VERBOSE_MAKEFILE TRUE)
+option(CMAKE_VERBOSE_MAKEFILE "Set makefile verbose" FALSE)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules")
 set(INSTALL_LIB_DIR lib CACHE PATH "${CMAKE_INSTALL_PREFIX}/lib")
 set(INSTALL_BIN_DIR bin CACHE PATH "${CMAKE_INSTALL_PREFIX}/bin")
@@ -363,19 +363,19 @@ install(FILES ${PROJECT_SOURCE_DIR}/scripts/moose
 
 install(PROGRAMS ${PROJECT_SOURCE_DIR}/scripts/moosegui
     DESTINATION bin
-    COMPONENT moose-gui
+    COMPONENT moose-gui 
     )
 
 ## Install the icon
 install(FILES ${PROJECT_SOURCE_DIR}/gui/icons/moose_icon.png 
     DESTINATION share/moose
-    COMPONENT moose-python
+    COMPONENT moose-gui
     )
 
 # And the desktop file.
 install(FILES ${PROJECT_SOURCE_DIR}/scripts/moose.desktop
     DESTINATION share/applications
-    COMPONENT moose-python
+    COMPONENT moose-gui
     )
 
 # And the gui
@@ -384,7 +384,7 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/gui
     COMPONENT moose-gui
     )
 
-INSTALL(FILES ${PROJECT_SOURCE_DIR}/python/setup-moose.py
+install(FILES ${PROJECT_SOURCE_DIR}/python/setup-moose.py
     DESTINATION lib/moose
     COMPONENT moose-python
     )
@@ -392,29 +392,33 @@ INSTALL(FILES ${PROJECT_SOURCE_DIR}/python/setup-moose.py
 ## The demos goes here.
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/Demos
     DESTINATION share/moose
+    COMPONENT moose-gui
+    )
+
+# Both moose and moogli python directory are added here.
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/python/moose
+    ${PROJECT_SOURCE_DIR}/python/libmumbl
+    DESTINATION usr/share/moose
     COMPONENT moose-python
     )
 
-install(CODE
-    "execute_process(COMMAND ${PYTHON_EXECUTABLE} setup-moose.py install
-        --record install_menifest_moose-python.txt
-    WORKING_DIRECTORY ${PROJECT_PYTHON_PATH})"
-    COMPONENT moose
+install(FILES ${PROJECT_SOURCE_DIR}/python/setup-moose.py
+    DESTINATION usr/share/moose
+    COMPONENT moose-python
     )
-
 
 if(BUILD_MOOGLI)
 
     SET(MOOGLI_INSTALL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/python/moogli)
-    install(CODE
-        "execute_process(COMMAND ${PYTHON_EXECUTABLE} setup-moogli.py install
-        --record install_menifest_moogli.txt
-        WORKING_DIRECTORY ${PROJECT_PYTHON_PATH})"
-        COMPONENT moogli
+
+    install(DIRECTORY ${PROJECT_SOURCE_DIR}/python/moogli
+        DESTINATION usr/share/moogli
+        COMPONENT moose-moogli
         )
-    
-    install(CODE "MESSAGE(\"++ Installed moose-python and moogli using setuptools. You can
-        uninstall them using python-pip\")"
+
+    install(FILES ${PROJECT_SOURCE_DIR}/python/setup-moogli.py
+        DESTINATION usr/share/moogli
+        COMPONENT moose-moogli
         )
 
 endif(BUILD_MOOGLI)
