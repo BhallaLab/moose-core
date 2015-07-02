@@ -114,7 +114,6 @@ extern "C" {
         self->owner = ((_ObjId*)owner);
         Py_INCREF(self->owner);
         ObjId tmp = ((_ObjId*)owner)->oid_;
-        cout << "$$$$ " << tmp.path() << endl;                  
         size_t size = strlen(fieldName);
         char * name = (char*)calloc(size+1, sizeof(char));
         strncpy(name, fieldName, size);
