@@ -1,14 +1,14 @@
 /*******************************************************************
  * File:            SbmlWriter.cpp
  * Description:      
- * Author:          
- * E-mail:          
+ * Author:       	HarshaRani   
+ * E-mail:          hrani@ncbs.res.in
  ********************************************************************/
 /**********************************************************************
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment,
 ** also known as GENESIS 3 base code.
-**  copyright (C) 2003-2007 Upinder S. Bhalla. and NCBS
+**  copyright (C) 2003-2015 Upinder S. Bhalla. and NCBS
 ** It is made available under the terms of the
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
@@ -644,18 +644,14 @@ string SbmlWriter :: getGroupinfo(Id itr)
 	if (parentclass == "CubeMesh" or parentclass == "CyclMesh")
 		return (groupName);
 	else if (parentclass == "Neutral")
-	{   groupName = Field<string> :: get(pa,"name");
-		return(groupName);
-	}
-  		  
+		groupName = Field<string> :: get(pa,"name");	  
   	else if ((parentclass == "Enz") or (parentclass == "ZombieEnz"))
   	{ 
   	 	ObjId ppa = Field< ObjId >::get( pa, "parent" );
 	   	string parentParentclass = Field<string> :: get (ppa,"className");
 	   	if (parentParentclass == "Neutral")
-	   	{ groupName = Field<string> :: get(ppa,"name");
-	   	 return(groupName);
-	   	}
+	   		groupName = Field<string> :: get(ppa,"name");
+	   	
 	   	else if ( parentParentclass == "Pool" or parentParentclass == "ZombiePool" or
 	     	          parentParentclass == "BufPool" or parentParentclass == "ZombieBufPool")
 	   	{
@@ -663,62 +659,18 @@ string SbmlWriter :: getGroupinfo(Id itr)
 	   		string pathtt = Field < string > :: get(poolpa,"path");
 	   		parentParentclass = Field<string> :: get (poolpa,"className");
 	   		if (parentParentclass == "Neutral")
-	   	  	{ groupName = Field<string> :: get(poolpa,"name");
-	   	  	  return(groupName);
-	   		}
+	   	  		groupName = Field<string> :: get(poolpa,"name");
+	   	  	  
       	}
     }//else if
     else
   	{  	ObjId ppa = Field< ObjId >::get( pa, "parent" );
 		string parentclass = Field<string> :: get (ppa,"className");
 		if (parentclass =="Neutral")
-		{   groupName = Field<string> :: get(ppa,"name");
-			return (groupName);
-		}
+			groupName = Field<string> :: get(ppa,"name");
 	} //else
-	/*
-	if (parentclass == "Neutral")
-	{   groupName = Field<string> :: get(pa,"name");
-		//enzAnno += "<moose:Group>"+groupName+"</moose:Group>\n";
-		return (groupName);
-  	}
-  	else
-  	{ 
-	  	ObjId ppa = Field< ObjId >::get( pa, "parent" );
-		string parentclass = Field<string> :: get (ppa,"className");
-		if (parentclass =="Neutral")
-			{   groupName = Field<string> :: get(ppa,"name");
-				//enzAnno += "<moose:Group>"+groupName+"</moose:Group>\n";
-				return (groupName);
-			}
-	  } //else
-	*/
+	return( groupName);
 }
-/*
-std::pair<bool,string> SbmlWriter:: getGroupinfo(Id itr)
-{   ObjId pa = Field< ObjId >::get( *itr, "parent" );
-	string parentclass = Field<string> :: get (pa,"className");
-	string groupName;
-	if (parentclass == "Neutral")
-	{   groupExist = true;
-		groupName = Field<string> :: get(pa,"name");
-		//enzAnno += "<moose:Group>"+groupName+"</moose:Group>\n";
-		return (true,groupName)
-  	}
-  	else
-  	{ 
-	  	ObjId ppa = Field< ObjId >::get( pa, "parent" );
-		string parentclass = Field<string> :: get (ppa,"className");
-		if (parentclass =="Neutral")
-			{   groupExist = true;
-				groupName = Field<string> :: get(ppa,"name");
-				//enzAnno += "<moose:Group>"+groupName+"</moose:Group>\n";
-				return (true,groupName)
-			}
-	  } //else
-
-}//getGroup
-*/
 bool SbmlWriter::writeModel( const SBMLDocument* sbmlDoc, const string& filename )
 {
   SBMLWriter sbmlWriter;
