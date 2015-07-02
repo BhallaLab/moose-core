@@ -1,56 +1,13 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/bin/sh -e
 
-"""
-This script calls the documentation generators used by moose.
-"""
+echo "###############################################################"
+echo "# Generating C++ Documentation                                #"
+echo "###############################################################"
+doxygen ./Doxyfile.full 
 
-__author__      =   "Aviral Goel"
-__credits__     =   ["Upi Lab"]
-__license__     =   "GPL3"
-__version__     =   "1.0.0"
-__maintainer__  =   "Aviral Goel"
-__email__       =   "goel.aviral@gmail.com"
-__status__      =   "Development"
+echo "##############################################################"
+echo "# Generating Python Documentation                            #"
+echo "##############################################################"
 
+(cd Docs/user/py; make html)
 
-
-import subprocess
-import os
-
-if not os.path.isdir('docs'):
-    os.makedirs('docs')
-
-print("#######################################################################")
-print("Generating Documentation")
-print("#######################################################################")
-print("")
-print("")
-
-
-# print("=======================================================================")
-# print("Running Doxygen")
-# print("=======================================================================")
-# print("")
-# subprocess.check_call(["doxygen"], shell=True, cwd= "../")
-# print("")
-# print("=======================================================================")
-
-print("=======================================================================")
-print("Running Epydoc")
-print("=======================================================================")
-print("")
-try:
-    subprocess.check_call(["epydoc --config=./Docs/config/epydoc.cfg"], shell=True, cwd= "./")
-except OSError:
-    print("Epydoc not found!!!")
-print("")
-print("=======================================================================")
-
-# print("=======================================================================")
-# print("Running Sphinx")
-# print("=======================================================================")
-# print("")
-# subprocess.check_call(["doxygen"], shell=True, cwd= "../")
-# print("")
-# print("=======================================================================")
