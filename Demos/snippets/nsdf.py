@@ -48,6 +48,8 @@
 dump data in NSDF format"""
 
 import numpy as np
+from datetime import datetime
+import getpass
 
 import moose
 
@@ -81,9 +83,28 @@ def setup_model():
         moose.setClock(ii, 1)
     moose.useClock(30, nsdf.path, 'process')
     moose.connect(pulse, 'output', tab, 'spike')
+    print datetime.now().isoformat()
     moose.reinit()
     moose.start(100)
+    print datetime.now().isoformat()
     np.savetxt('nsdf.txt', tab.vector)
+    ###################################
+    # Set the environment attributes
+    ###################################
+    nsdf.stringAttr['title'] = 'NSDF writing demo for moose'
+    nsdf.stringAttr['description'] = '''An example of writing data to NSDF file from MOOSE simulation. In
+this simulation we generate square pules from a PulseGen object and
+use a SpikeGen to detect the threshold crossing events of rising
+edges. We store the pulsegen output as Uniform data and the threshold
+crossing times as Event data. '''    
+    nsdf.stringAttr['creator'] = getpass.getuser()
+    nsdf.stringVecAttr['software'] = ['python2.7', 'moose3' ]
+    nsdf.stringVecAttr['method'] = ['']
+    nsdf.stringAttr['rights'] = ''
+    nsdf.stringAttr['license'] = 'CC-BY-NC'
+
+    
+
 
 if __name__ == '__main__':
     setup_model()

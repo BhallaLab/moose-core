@@ -48,6 +48,9 @@
 
 #include "hdf5.h"
 
+#include <ctime>
+#include <iomanip>
+
 #include "header.h"
 #include "../utility/utility.h"
 
@@ -59,6 +62,22 @@
 
 const char* const EVENTPATH ="/data/event";
 const char* const UNIFORMPATH ="/data/uniform";
+
+string iso_time(time_t * t)
+{
+    struct tm * timeinfo;
+    if (t == NULL){
+        time_t current;
+        std::time(&current);
+        timeinfo = std::gmtime(&current);
+    } else {
+        timeinfo = std::gmtime(std::time(t));
+    }
+    assert(timeinfo != NULL);
+    char buf[32];
+    strftime(buf, 32, "%FT%T", timeinfo);
+    return string(buf);
+}
 
 const Cinfo * NSDFWriter::initCinfo()
 {    
@@ -225,6 +244,8 @@ void NSDFWriter::openUniformData(const Eref &eref)
         hid_t tmp = -1;
         tokenize(it->first, "/", tokens);
         hid_t prev = uniformGroup_;
+        vector < string > srclist;
+        
         for( unsigned int ii = 0; ii < tokens.size() - 1; ++ii){
             exists = H5Lexists(prev, tokens[ii].c_str(), H5P_DEFAULT);
             if (exists > 0){
@@ -236,6 +257,7 @@ void NSDFWriter::openUniformData(const Eref &eref)
                 status = H5Gclose(prev);
             }
             prev = tmp;
+            srclist.push_back(src_[it->second[ii]].path());
         }
         exists = H5Lexists(prev, tokens.back().c_str(), H5P_DEFAULT);
         if (exists == 0){
@@ -243,6 +265,7 @@ void NSDFWriter::openUniformData(const Eref &eref)
             classFieldToUniform_[it->first] = dataset;
             // TODO: Add the list of sources as an attribute
             writeScalarAttr<string>(dataset, "field", tokens.back());
+            writeVectorAttr<string>(dataset, "source", srclist);
         }
         H5Gclose(prev);
     }
@@ -442,6 +465,10 @@ hid_t NSDFWriter::getEventDataset(string srcPath, string srcField)
 
 void NSDFWriter::flush()
 {
+    // We need to update the tend on each write since we do not know
+    // when the simulation is getting over and when it is just paused.
+    writeScalarAttr<string>(filehandle_, "tend", iso_time(NULL));    
+    
     // append all uniform data
     for (map< string, hid_t>::iterator it = classFieldToUniform_.begin();
          it != classFieldToUniform_.end(); ++it){
@@ -508,6 +535,9 @@ void NSDFWriter::reinit(const Eref& eref, const ProcPtr proc)
         filename_ = "moose_data.nsdf.h5";
     }
     openFile();
+    writeScalarAttr<string>(filehandle_, "created", iso_time(0));
+    writeScalarAttr<string>(filehandle_, "tstart", iso_time(0));
+    writeScalarAttr<string>(filehandle_, "nsdf_version", "1.0");
     openUniformData(eref);
     openEventData(eref);
     herr_t err = writeEnv();
