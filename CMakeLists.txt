@@ -149,6 +149,7 @@ add_executable(moose-bin basecode/main.cpp)
 # Setup GSL
 if(GSL_FOUND)
     add_definitions(-DUSE_GSL)
+    include_directories(${GSL_INCLUDE_DIR})
 endif()
 
 ## Setup hdf5
@@ -255,8 +256,8 @@ set(MOOSE_LIBRARIES
 target_link_libraries(moose-bin 
     "-Wl,--whole-archive"
     ${MOOSE_LIBRARIES}
-    ${LIBRARIES}
     "-Wl,--no-whole-archive"
+    ${LIBRARIES}
     )
 
 ######################### BUILD PYMOOSE ########################################
