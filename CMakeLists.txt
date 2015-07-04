@@ -257,6 +257,7 @@ target_link_libraries(moose-bin
     "-Wl,--whole-archive"
     ${MOOSE_LIBRARIES}
     ${LIBRARIES}
+    "-Wl,--no-whole-archive"
     )
 
 ######################### BUILD PYMOOSE ########################################
@@ -299,6 +300,7 @@ if(BUILD_PYMOOSE)
         "-Wl,--whole-archive"
         ${MOOSE_LIBRARIES}
         ${LIBRARIES}
+        "-Wl,--no-whole-archive"
         )
 
 endif(BUILD_PYMOOSE)
@@ -321,6 +323,7 @@ if(BUILD_CYMOOSE)
         "-Wl,--whole-archive"
         ${MOOSE_LIBRARIES}
         ${LIBRARIES}
+        "-Wl,--no-whole-archive"
         )
 endif()
 
