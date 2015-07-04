@@ -210,12 +210,12 @@ def create_1comp_neuron(path, number=1):
     comps.Rm = 1 / (0.3e-3 * sarea * 1e4)
     container = comps[0].parent.path
     #: Here we create copies of the prototype channels
-    nachan = moose.copy(create_na_proto(), container, 'na', number)
+    nachan = moose.copy(create_na_proto(), container, 'na_{}'.format(comps.name), number)
     #: Gbar_Na = 120 mS/cm^2
-    nachan.Gbar = 120e-3 * sarea * 1e4
+    nachan.Gbar = [120e-3 * sarea * 1e4] * len(nachan)
     nachan.Ek = 115e-3 + EREST_ACT
     moose.connect(nachan, 'channel', comps, 'channel', 'OneToOne')
-    kchan = moose.copy(create_k_proto(), container, 'k', number)
+    kchan = moose.copy(create_k_proto(), container, 'k_{}'.format(comps.name), number)
     #: Gbar_K = 36 mS/cm^2
     kchan.Gbar = 36e-3 * sarea * 1e4
     kchan.Ek = -12e-3 + EREST_ACT

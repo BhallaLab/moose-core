@@ -107,12 +107,14 @@ extern "C" {
             PyErr_SetString(PyExc_TypeError, "Owner must be subtype of ObjId");
             return -1;
         }
-        self->owner = ((_ObjId*)owner)->oid_;
-        if (!Id::isValid(self->owner.id)){
+        if (!Id::isValid(((_ObjId*)owner)->oid_.id)){
             Py_DECREF(self);
             RAISE_INVALID_ID(-1, "moose_Field_init");
         }
-        Py_INCREF(owner);
+        self->owner = ((_ObjId*)owner);
+        Py_INCREF(self->owner);
+        ObjId tmp = ((_ObjId*)owner)->oid_;
+        cout << "$$$$ " << tmp.path() << endl;                  
         size_t size = strlen(fieldName);
         char * name = (char*)calloc(size+1, sizeof(char));
         strncpy(name, fieldName, size);
@@ -132,13 +134,20 @@ extern "C" {
     //     self->ob_type->tp_free((PyObject*)self);
     // }
 
+    void moose_Field_dealloc(_Field * self)
+    {
+        Py_DECREF(self->owner);
+        self->ob_type->tp_free((PyObject*)self);
+    }
+        
+
     /// Return the hash of the string `{objectpath}.{fieldName}`
     long moose_Field_hash(_Field * self)
     {
-        if (!Id::isValid(self->owner.id)){
+        if (!Id::isValid(self->owner->oid_.id)){
             RAISE_INVALID_ID(-1, "moose_Field_hash");
         }
-        string fieldPath = self->owner.path() + "." + self->name;
+        string fieldPath = self->owner->oid_.path() + "." + self->name;
         PyObject * path = PyString_FromString(fieldPath.c_str());
         long hash = PyObject_Hash(path);
         Py_XDECREF(path);
@@ -148,11 +157,11 @@ extern "C" {
     /// String representation of fields is `{objectpath}.{fieldName}`
     PyObject * moose_Field_repr(_Field * self)
     {
-        if (!Id::isValid(self->owner.id)){
+        if (!Id::isValid(self->owner->oid_.id)){
             RAISE_INVALID_ID(NULL, "moose_Field_repr");
         }
         ostringstream fieldPath;
-        fieldPath << self->owner.path() << "." << self->name;
+        fieldPath << self->owner->oid_.path() << "." << self->name;
         return PyString_FromString(fieldPath.str().c_str());
     }
 
@@ -175,7 +184,7 @@ extern "C" {
         "moose.Field",                                  /* tp_name */
         sizeof(_Field),                                 /* tp_basicsize */
         0,                                              /* tp_itemsize */
-        0, //(destructor)moose_Field_dealloc,                /* tp_dealloc */
+        (destructor)moose_Field_dealloc,                /* tp_dealloc */
         0,                                              /* tp_print */
         0,                                              /* tp_getattr */
         0,                                              /* tp_setattr */
@@ -214,13 +223,13 @@ extern "C" {
 
     PyObject * moose_LookupField_getItem(_Field * self, PyObject * key)
     {
-        return getLookupField(self->owner, self->name, key);
+        return getLookupField(self->owner->oid_, self->name, key);
     }
 
     int moose_LookupField_setItem(_Field * self, PyObject * key,
                                          PyObject * value)
     {
-        return setLookupField(self->owner,
+        return setLookupField(self->owner->oid_,
                               self->name, key, value);
     }
 
@@ -309,10 +318,7 @@ extern "C" {
             Py_DECREF(arg);
         }
         // Call ObjId._setDestField with the new arguments
-        _ObjId * obj = PyObject_New(_ObjId, &ObjIdType);
-        obj->oid_ = ((_Field*)self)->owner;
-        PyObject * ret = moose_ObjId_setDestField(obj, newargs);
-        Py_DECREF((PyObject*)obj);
+        PyObject * ret = moose_ObjId_setDestField(((_Field*)self)->owner, newargs);
         return ret;
     }
 
@@ -495,7 +501,7 @@ extern "C" {
     int moose_ElementField_init(_Field * self, PyObject * args, PyObject * kwargs)
     {
         moose_Field_init(self, args, kwargs);
-        string path = self->owner.path()+"/";
+        string path = self->owner->oid_.path()+"/";
         path += string(self->name);
         self->myoid = ObjId(path);
         return 0;
@@ -503,18 +509,18 @@ extern "C" {
 
     PyObject * moose_ElementField_getNum(_Field * self, void * closure)
     {
-        if (self->owner.bad()){
+        if (self->owner->oid_.bad()){
             RAISE_INVALID_ID(NULL, "moose_ElementField_getNum");
         }
 		string name = self->name;
 		name[0] = toupper( name[0] );
-        unsigned int num = Field<unsigned int>::get(self->owner, "num" + name);
+        unsigned int num = Field<unsigned int>::get(self->myoid, "numField");
         return Py_BuildValue("I", num);
     }
 
     int moose_ElementField_setNum(_Field * self, PyObject * args, void * closure)
     {
-        if (self->owner.bad()){
+        if (self->owner->oid_.bad()){
             RAISE_INVALID_ID(-1, "moose_ElementField_setNum");
         }
         unsigned int num;
@@ -532,7 +538,7 @@ extern "C" {
 
     Py_ssize_t moose_ElementField_getLen(_Field * self, void * closure)
     {
-        if (self->owner.bad()){
+        if (self->owner->oid_.bad()){
             RAISE_INVALID_ID(-1, "moose_ElementField_getLen");
         }
         unsigned int num = Field<unsigned int>::get(self->myoid, "numField");
@@ -541,19 +547,19 @@ extern "C" {
 
     PyObject * moose_ElementField_getPath(_Field * self, void * closure)
     {
-        if (!Id::isValid(self->owner.id)){
+        if (!Id::isValid(self->owner->oid_.id)){
             RAISE_INVALID_ID(NULL, "moose_ElementField_setNum");
         }
-        string path = Id(self->owner.path() + "/" + string(self->name)).path();
+        string path = Id(self->owner->oid_.path() + "/" + string(self->name)).path();
         return Py_BuildValue("s", path.c_str());
     }
 
     PyObject * moose_ElementField_getId(_Field * self, void * closure)
     {
-        if (self->owner.bad()){
+        if (self->owner->oid_.bad()){
             RAISE_INVALID_ID(NULL, "moose_ElementField_setNum");
         }
-        Id myId(self->owner.path() + "/" + string(self->name));
+        Id myId(self->owner->oid_.path() + "/" + string(self->name));
         _Id * new_id = PyObject_New(_Id, &IdType);
         new_id->id_ = myId;
         return (PyObject*)new_id;
@@ -565,21 +571,20 @@ extern "C" {
     }
     PyObject * moose_ElementField_getOwner(_Field * self, void * closure)
     {
-        _ObjId * owner = PyObject_New(_ObjId, &ObjIdType);
-        owner->oid_ = self->owner;
-        return (PyObject*)owner;
+        Py_INCREF(self->owner);
+        return (PyObject*)self->owner;
     }
     PyObject * moose_ElementField_getDataId(_Field * self, void * closure)
     {
-        if (self->owner.bad()){
+        if (self->owner->oid_.bad()){
             RAISE_INVALID_ID(NULL, "moose_ElementField_getItem");
         }
-        return Py_BuildValue("I", self->owner.dataIndex);
+        return Py_BuildValue("I", self->owner->oid_.dataIndex);
     }
 
     PyObject * moose_ElementField_getItem(_Field * self, Py_ssize_t index)
     {
-        if (self->owner.bad()){
+        if (self->owner->oid_.bad()){
             RAISE_INVALID_ID(NULL, "moose_ElementField_getItem");
         }
         int len = Field<unsigned int>::get(self->myoid, "numField");
@@ -596,9 +601,9 @@ extern "C" {
             return NULL;
         }
         // _ObjId * oid = PyObject_New(_ObjId, &ObjIdType);
-        // cout << "Element field: " << self->name << ", owner: " << self->owner.path() << endl;
+        // cout << "Element field: " << self->name << ", owner: " << self->owner->oid_.path() << endl;
         // stringstream path;
-        // path << self->owner.path() << "/" << self->name << "[" << index << "]";
+        // path << self->owner->oid_.path() << "/" << self->name << "[" << index << "]";
         // cout << "moose_ElementField_getItem:: path=" << path.str();
         // oid->oid_ = ObjId(self->myoid.id, self->myoid.dataIndex, index);
         // return (PyObject*)oid;
@@ -611,10 +616,9 @@ extern "C" {
         assert(start >= 0);
         assert(end >= 0);
 
-        if (self->owner.bad()){
+        if (self->owner->oid_.bad()){
             RAISE_INVALID_ID(NULL, "moose_ElementField_getSlice");
         }        
-        extern PyTypeObject ObjIdType;
         Py_ssize_t len = Field<unsigned int>::get(self->myoid, "numField");
         while (start < 0){
             start += len;
@@ -646,7 +650,7 @@ extern "C" {
     {
         int new_attr = 0;
         PyObject * ret = NULL;
-        if (self->owner.bad()){
+        if (self->owner->oid_.bad()){
             RAISE_INVALID_ID(NULL, "moose_ElementField_getSlice");
         }
         char * field = PyString_AsString(attr);

@@ -233,7 +233,7 @@ void HDF5DataWriter::reinit(const Eref & e, ProcPtr p)
         }
         assert(varname.length() > 0);
         string path = src_[ii].path() + "/" + varname;
-        hid_t dataset_id = get_dataset(path);
+        hid_t dataset_id = getDataset(path);
         datasets_.push_back(dataset_id);
     }
     data_.resize(src_.size());
@@ -242,27 +242,27 @@ void HDF5DataWriter::reinit(const Eref & e, ProcPtr p)
 /**
    Traverse the path of an object in HDF5 file, checking existence of
    groups in the path and creating them if required.  */
-hid_t HDF5DataWriter::get_dataset(string path)
+hid_t HDF5DataWriter::getDataset(string path)
 {
     if (filehandle_ < 0){
         return -1;
     }
     herr_t status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
     // Create the groups corresponding to this path
-    vector<string> path_tokens;
-    tokenize(path, "/", path_tokens);
+    vector<string> pathTokens;
+    tokenize(path, "/", pathTokens);
     hid_t prev_id = filehandle_;
     hid_t id = -1;
-    for ( unsigned int ii = 0; ii < path_tokens.size()-1; ++ii ){
+    for ( unsigned int ii = 0; ii < pathTokens.size()-1; ++ii ){
         // check if object exists
-        htri_t exists = H5Lexists(prev_id, path_tokens[ii].c_str(),
+        htri_t exists = H5Lexists(prev_id, pathTokens[ii].c_str(),
                                   H5P_DEFAULT);
         if (exists > 0){
             // try to open existing group
-            id = H5Gopen2(prev_id, path_tokens[ii].c_str(), H5P_DEFAULT);
+            id = H5Gopen2(prev_id, pathTokens[ii].c_str(), H5P_DEFAULT);
         } else if (exists == 0) {
             // If that fails, try to create a group
-            id = H5Gcreate2(prev_id, path_tokens[ii].c_str(),
+            id = H5Gcreate2(prev_id, pathTokens[ii].c_str(),
                             H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         } 
         if ((exists < 0) || (id < 0)){
@@ -271,7 +271,7 @@ hid_t HDF5DataWriter::get_dataset(string path)
             // perhaps at the level of hdf5 or file system).
             cerr << "Error: failed to open/create group: ";
             for (unsigned int jj = 0; jj <= ii; ++jj){
-                cerr << "/" << path_tokens[jj];
+                cerr << "/" << pathTokens[jj];
             }
             cerr << endl;
             prev_id = -1;            
@@ -283,13 +283,13 @@ hid_t HDF5DataWriter::get_dataset(string path)
         }
         prev_id = id;
     }
-    string name = path_tokens[path_tokens.size()-1];
+    string name = pathTokens[pathTokens.size()-1];
     htri_t exists = H5Lexists(prev_id, name.c_str(), H5P_DEFAULT);
     hid_t dataset_id = -1;
     if (exists > 0){
         dataset_id = H5Dopen2(prev_id, name.c_str(), H5P_DEFAULT);
     } else if (exists == 0){
-        dataset_id = create_dataset(prev_id, name);
+        dataset_id = createDataset(prev_id, name);
     } else {
         cerr << "Error: H5Lexists returned "
              << exists << " for path \""
@@ -301,7 +301,7 @@ hid_t HDF5DataWriter::get_dataset(string path)
 /**
    Create a new 1D dataset. Make it extensible.
 */
-hid_t HDF5DataWriter::create_dataset(hid_t parent_id, string name)
+hid_t HDF5DataWriter::createDataset(hid_t parent_id, string name)
 {
     herr_t status;
     hsize_t dims[1] = {0};
@@ -322,6 +322,8 @@ hid_t HDF5DataWriter::create_dataset(hid_t parent_id, string name)
     hid_t dataset_id = H5Dcreate2(parent_id, name.c_str(),
                                   H5T_NATIVE_DOUBLE, dataspace,
                                   H5P_DEFAULT, chunk_params, H5P_DEFAULT);
+    H5Sclose(dataspace);
+    H5Pclose(chunk_params);
     return dataset_id;
 }
 
