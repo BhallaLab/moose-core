@@ -16,6 +16,7 @@ OBJ = \
 	Func.o \
 	Function.o	\
 	Variable.o	\
+	InputVariable.o	\
 	TableBase.o	\
 	Table.o	\
 	Interpol.o	\
@@ -26,6 +27,7 @@ OBJ = \
 	Interpol2D.o \
 	HDF5WriterBase.o	\
 	HDF5DataWriter.o	\
+	NSDFWriter.o	\
 	testBuiltins.o	\
 
 HEADERS = \

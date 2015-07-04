@@ -35,6 +35,7 @@
 // Code:
 #ifdef USE_HDF5
 #ifndef _HDF5DATAWRITER_H
+#define _HDF5DATAWRITER_H
 
 #include "HDF5WriterBase.h"
 
@@ -59,8 +60,8 @@ class HDF5DataWriter: public HDF5WriterBase
     vector <string> func_;
     vector <hid_t> datasets_;
     unsigned long steps_;
-    hid_t get_dataset(string path);
-    hid_t create_dataset(hid_t parent, string name);
+    hid_t getDataset(string path);
+    hid_t createDataset(hid_t parent, string name);
     herr_t appendToDataset(hid_t dataset, const vector<double>& data);
 };
 #endif // _HDF5DATAWRITER_H

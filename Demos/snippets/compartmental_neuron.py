@@ -45,8 +45,8 @@
 
 # Code:
 import sys
+import numpy as np
 sys.path.append('../../python') # in case we do not have moose/python in PYTHONPATH
-import pylab
 import moose
 # Create the somatic compartment
 model = moose.Neutral('/model') # This is a container for the model
@@ -73,7 +73,9 @@ moose.connect(soma, 'raxial', axon, 'axial')
 # Setup data recording
 data = moose.Neutral('/data')
 axon_Vm = moose.Table('/data/axon_Vm')
+axon_Vm2 = moose.Table('/data/axon_Vm2')
 moose.connect(axon_Vm, 'requestOut', axon, 'getVm')
+moose.connect(axon_Vm2, 'requestOut', axon, 'getVm')
 
 # Now schedule the sequence of operations and time resolutions
 moose.setClock(0, 0.025e-3)
@@ -85,6 +87,7 @@ moose.setClock(2, 0.25e-3)
 moose.useClock(0, '/model/#[TYPE=Compartment]', 'init') 
 moose.useClock(1, '/model/#[TYPE=Compartment]', 'process')
 moose.useClock(2, axon_Vm.path, 'process')
+moose.useClock(2, axon_Vm2.path, 'process')
 # Now initialize everything and get set
 moose.reinit()
 
@@ -107,9 +110,9 @@ soma.inject = 0.0
 # Run for 500 ms
 moose.start(500e-3)
 clock = moose.Clock('/clock') # Get a handle to the global clock
-pylab.plot(pylab.linspace(0, clock.currentTime, len(axon_Vm.vector)), axon_Vm.vector, label='Vm of axon')
-pylab.legend()
-pylab.show()
+time = np.linspace(0, clock.currentTime, len(axon_Vm.vector))
+data = np.vstack((time, axon_Vm.vector, axon_Vm2.vector))
+np.savetxt('compartmental_neuron.csv', data.T, header='time, Vm')
 
 # 
 # compartmental_neuron.py ends here
