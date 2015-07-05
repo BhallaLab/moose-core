@@ -76,6 +76,8 @@ class HDF5WriterBase
     
   protected:
     herr_t openFile();
+    hid_t createDataset(hid_t parent, string name);
+    herr_t appendToDataset(hid_t dataset, const vector<double>& data);
     hid_t createDataset2D(hid_t parent, string name, unsigned int rows);
     
     /// map from element path to nodes in hdf5file.  Multiple MOOSE

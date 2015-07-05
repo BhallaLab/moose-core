@@ -74,6 +74,7 @@ class NSDFWriter: public HDF5DataWriter
     void setEnvironment(string key, string value);
     // the model tree rooted here is to be copied to NSDF file
     void setModelRoot(string root);
+    string getModelRoot() const;
     InputVariable *getEventInput(unsigned int index);
     void setNumEventInputs(unsigned int num);
     unsigned int getNumEventInputs() const;
@@ -82,7 +83,7 @@ class NSDFWriter: public HDF5DataWriter
     void closeUniformData();
     void openEventData(const Eref &eref);
     void closeEventData();
-    herr_t writeEnv();    
+    void writeModelTree();
     // Sort the incoming data lines according to source object/field.
     void process(const Eref &e, ProcPtr p);
     void reinit(const Eref &e, ProcPtr p);
@@ -136,6 +137,7 @@ class NSDFWriter: public HDF5DataWriter
     vector < pair< string, string > > objectField_;
     map< string, vector < string > > classFieldToObjectField_;
     vector < string > vars_;
+    string modelRoot_;
     
 };
 #endif // _NSDFWRITER_H
