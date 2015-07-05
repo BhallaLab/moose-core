@@ -61,8 +61,6 @@ class HDF5DataWriter: public HDF5WriterBase
     vector <hid_t> datasets_;
     unsigned long steps_;
     hid_t getDataset(string path);
-    hid_t createDataset(hid_t parent, string name);
-    herr_t appendToDataset(hid_t dataset, const vector<double>& data);
 };
 #endif // _HDF5DATAWRITER_H
 #endif // USE_HDF5
