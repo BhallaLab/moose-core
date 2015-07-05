@@ -53,10 +53,13 @@ ELSE(WIN32)
      
     # GSL_CONFIG must be cleared. This script may be called again after installing
     # the proper version of gsl
-    unset(GSL_CONFIG CACHE)
-    set(GSL_CONFIG "GSL_CONFIG-NOTFOUND")
-    if($ENV{GSL_HOME})
+    if(EXISTS "$ENV{GSL_HOME}")
 	set(GSL_CONFIG "$ENV{GSL_HOME}/bin/gsl-config")
+	MESSAGE("++ DEBUG From environment variable: ${GSL_CONFIG}")
+	unset(GSL_INCLUDE_DIR CACHE)
+        unset(GSL_LIBRARIES CACHE)
+        unset(GSL_VERSION CACHE)
+        unset(GSL_CONFIG_LIBS CACHE)
     else()
 	FIND_PROGRAM(GSL_CONFIG gsl-config
 			${GSL_CONFIG_PREFER_PATH}
