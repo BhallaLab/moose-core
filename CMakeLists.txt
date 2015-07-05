@@ -206,7 +206,7 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/moogli/include)
 LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/moogli/lib)
 
 # These are always shared libraries.
-set(SYSTEM_LIBRARIES ${BZIP2_LIBRARIES} ${LibXML2_LIBRARIES} ${BZIP2_LIBRARIES})
+set(SYSTEM_LIBRARIES ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES} ${LibXML2_LIBRARIES} ${BZIP2_LIBRARIES})
 
 # These libraries could be static of dynamic.
 set(LIBRARIES "")
