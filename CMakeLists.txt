@@ -125,7 +125,7 @@ if(ENABLE_SBML)
         MESSAGE("++ LIBSBML NOT FOUND.  Disabling SBML support.")
         ADD_DEFINITIONS(-UUSE_SBML)
     else()
-        MESSAGE("++ SBML found. Support is ON")
+        MESSAGE("++ SBML found. Support is ON: ${LIBSBML_LIBRARY}")
         ADD_DEFINITIONS(-DUSE_SBML)
         include_directories(${LIBSBML_INCLUDE_DIR})
         find_package(BZip2 REQUIRED)
@@ -205,19 +205,18 @@ add_subdirectory(examples)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/moogli/include)
 LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/moogli/lib)
 
-set(LIBRARIES ${BZIP2_LIBRARIES} ${LibXML2_LIBRARIES})
+# These are always shared libraries.
+set(SYSTEM_LIBRARIES ${BZIP2_LIBRARIES} ${LibXML2_LIBRARIES} ${BZIP2_LIBRARIES})
+
+# These libraries could be static of dynamic.
+set(LIBRARIES "")
+
 if(HDF5_FOUND)
-    list(APPEND LIBRARIES ${HDF5_LIBRARY})
+    list(APPEND SYSTEM_LIBRARIES ${HDF5_LIBRARY})
 endif()
 
 if(LIBSBML_FOUND)
-    list(APPEND LIBRARIES moose_sbml ${LIBSBML_LIBRARY}
-        ${ZLIB_LIBRARIES}
-        )
-endif()
-
-if(LIBXML2_FOUND)
-    list(APPEND LIBRARIES ${LibXML2_LIBRARIES})
+    list(APPEND LIBRARIES moose_sbml ${LIBSBML_LIBRARY})
 endif()
 
 if(GSL_FOUND)
@@ -225,8 +224,9 @@ if(GSL_FOUND)
 endif()
 
 if(READLINE_FOUND AND TERMCAP_FOUND)
-    list(APPEND LIBRARIES ${Readline_LIBRARY} ${TERMCAP_LIBRARY})
+    list(APPEND SYSTEM_LIBRARIES ${Readline_LIBRARY} ${TERMCAP_LIBRARY})
 endif()
+
 
 ###################################### LINKING #################################
 set(MOOSE_LIBRARIES
@@ -258,6 +258,7 @@ target_link_libraries(moose-bin
     ${MOOSE_LIBRARIES}
     ${LIBRARIES}
     "-Wl,--no-whole-archive"
+    ${SYSTEM_LIBRARIES}
     )
 
 ######################### BUILD PYMOOSE ########################################
@@ -301,6 +302,7 @@ if(BUILD_PYMOOSE)
         ${MOOSE_LIBRARIES}
         ${LIBRARIES}
         "-Wl,--no-whole-archive"
+        ${SYSTEM_LIBRARIES}
         )
 
 endif(BUILD_PYMOOSE)
@@ -324,6 +326,7 @@ if(BUILD_CYMOOSE)
         ${MOOSE_LIBRARIES}
         ${LIBRARIES}
         "-Wl,--no-whole-archive"
+        ${SYSTEM_LIBRARIES}
         )
 endif()
 
