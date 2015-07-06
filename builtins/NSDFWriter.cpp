@@ -47,6 +47,7 @@
 #ifdef USE_HDF5
 
 #include "hdf5.h"
+#include "hdf5_hl.h"
 
 #include <ctime>
 #include <deque>
@@ -63,6 +64,8 @@
 const char* const EVENTPATH = "/data/event";
 const char* const UNIFORMPATH = "/data/uniform";
 const char* const MODELTREEPATH = "/model/modeltree";
+const char* const MAPUNIFORMSRC = "/map/uniform";
+const char* const MAPEVENTSRC = "/map/event";
 
 string iso_time(time_t * t)
 {
@@ -287,6 +290,68 @@ void NSDFWriter::openUniformData(const Eref &eref)
     }
 }
 
+/**
+   create the DS for uniform data.
+ */
+void NSDFWriter::createUniformMap()
+{
+    // Create the container for all the DS
+    // TODO: make a common function like `mkdir -p` to avoid repeating this
+    htri_t exists;
+    herr_t status;
+    vector<string> pathTokens;
+    tokenize(MAPUNIFORMSRC, "/", pathTokens);
+    hid_t prev = filehandle_, uniformMapContainer;
+    for (unsigned int ii = 0; ii < pathTokens.size(); ++ii){
+        exists = H5Lexists(prev, pathTokens[ii].c_str(), H5P_DEFAULT);
+        if (exists > 0){
+            uniformMapContainer = H5Gopen2(prev, pathTokens[ii].c_str(), H5P_DEFAULT);
+        } else {
+            uniformMapContainer = H5Gcreate2(prev, pathTokens[ii].c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        }
+        if (prev != filehandle_){
+            status = H5Gclose(prev);
+        }
+        prev = uniformMapContainer;
+    }
+    // Create the DS themselves
+    for (map< string, vector < unsigned int > >::iterator ii = classFieldToSrcIndex_.begin(); ii != classFieldToSrcIndex_.end(); ++ii){
+        pathTokens.clear();
+        tokenize(ii->first, "/", pathTokens);
+        prev = uniformMapContainer;
+        hid_t tmp;
+        for (unsigned int jj = 0; jj < pathTokens.size() - 1; ++jj){
+            exists = H5Lexists(prev, pathTokens[jj].c_str(), H5P_DEFAULT);
+            if (exists > 0){
+                tmp = H5Gopen2(prev, pathTokens[jj].c_str(), H5P_DEFAULT);
+            } else {
+                tmp = H5Gcreate2(prev, pathTokens[jj].c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+            }
+            if (prev != uniformMapContainer){
+                status = H5Gclose(prev);
+            }
+            prev = tmp;
+        }
+        vector < string > srclist;
+        
+
+        const char ** sources = (const char **)calloc(ii->second.size(), sizeof(const char*));
+        for (unsigned int jj = 0; jj < ii->second.size(); ++jj){
+            sources[jj] = src_[ii->second[jj]].path().c_str();
+        }
+        hid_t ds = createStringDataset(prev, pathTokens.back(), (hsize_t)srclist.size(), (hsize_t)0);
+        hid_t memtype = H5Tcopy(H5T_C_S1);
+        status = H5Tset_size(memtype, H5T_VARIABLE);
+        status = H5Dwrite(ds, memtype,  H5S_ALL, H5S_ALL, H5P_DEFAULT, sources);
+        free(sources);
+        status = H5DSset_scale(ds, "source");
+        status = H5DSattach_scale(classFieldToUniform_[ii->first], ds, 0);
+        status = H5DSset_label(classFieldToUniform_[ii->first], 0, "source");
+        status = H5Dclose(ds);
+        status = H5Tclose(memtype);                          
+    } 
+}
+
 void NSDFWriter::closeEventData()
 {
     for (unsigned int ii = 0; ii < eventDatasets_.size(); ++ii){
@@ -394,7 +459,7 @@ hid_t NSDFWriter::getEventDataset(string srcPath, string srcField)
     }    
     stringstream dsetname;
     dsetname << source.id.value() <<"_" << source.dataIndex << "_" << source.fieldIndex;
-    hid_t dataset = createDataset(container, dsetname.str().c_str());
+    hid_t dataset = createDoubleDataset(container, dsetname.str().c_str());
     status = writeScalarAttr<string>(dataset, "source", source.path());
     assert(status >= 0);
     status = writeScalarAttr<string>(dataset, "field", srcField);
@@ -490,6 +555,7 @@ void NSDFWriter::reinit(const Eref& eref, const ProcPtr proc)
     }
     openEventData(eref);
     writeModelTree();
+    createUniformMap();
     steps_ = 0;
 }
 
@@ -520,7 +586,7 @@ void NSDFWriter::process(const Eref& eref, ProcPtr proc)
     // }
     NSDFWriter::flush();
     steps_ = 0;
-}
+ }
 
 NSDFWriter& NSDFWriter::operator=( const NSDFWriter& other)
 {
