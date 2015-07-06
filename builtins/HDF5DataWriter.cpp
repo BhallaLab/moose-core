@@ -289,7 +289,7 @@ hid_t HDF5DataWriter::getDataset(string path)
     if (exists > 0){
         dataset_id = H5Dopen2(prev_id, name.c_str(), H5P_DEFAULT);
     } else if (exists == 0){
-        dataset_id = createDataset(prev_id, name);
+        dataset_id = createDoubleDataset(prev_id, name);
     } else {
         cerr << "Error: H5Lexists returned "
              << exists << " for path \""

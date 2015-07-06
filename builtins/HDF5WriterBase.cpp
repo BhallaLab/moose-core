@@ -79,11 +79,11 @@ hid_t require_attribute(hid_t file_id, string path,
 /**
    Create a new 1D dataset. Make it extensible.
 */
-hid_t HDF5WriterBase::createDataset(hid_t parent_id, string name)
+hid_t HDF5WriterBase::createDoubleDataset(hid_t parent_id, std::string name, hsize_t size, hsize_t maxsize)
 {
     herr_t status;
-    hsize_t dims[1] = {0};
-    hsize_t maxdims[] = {H5S_UNLIMITED};
+    hsize_t dims[1] = {size};
+    hsize_t maxdims[] = {maxsize};
     hsize_t chunk_dims[] = {chunkSize_};
     hid_t chunk_params = H5Pcreate(H5P_DATASET_CREATE);
     status = H5Pset_chunk(chunk_params, 1, chunk_dims);
@@ -104,6 +104,38 @@ hid_t HDF5WriterBase::createDataset(hid_t parent_id, string name)
     H5Pclose(chunk_params);
     return dataset_id;
 }
+
+hid_t HDF5WriterBase::createStringDataset(hid_t parent_id, string name, hsize_t size, hsize_t maxsize)
+{
+    herr_t status;
+    hid_t ftype = H5Tcopy(H5T_C_S1);
+    if (H5Tset_size(ftype, H5T_VARIABLE) < 0){
+        return -1;
+    }
+    hsize_t dims[1] = {size};
+    hsize_t maxdims[] = {maxsize};
+    hsize_t chunk_dims[] = {chunkSize_};
+    hid_t chunk_params = H5Pcreate(H5P_DATASET_CREATE);
+    status = H5Pset_chunk(chunk_params, 1, chunk_dims);
+    assert( status >= 0 );
+    if (compressor_ == "zlib"){
+        status = H5Pset_deflate(chunk_params, compression_);
+    } else if (compressor_ == "szip"){
+        // this needs more study
+        unsigned sz_opt_mask = H5_SZIP_NN_OPTION_MASK;
+        status = H5Pset_szip(chunk_params, sz_opt_mask,
+                             HDF5WriterBase::CHUNK_SIZE);
+    }
+    hid_t dataspace = H5Screate_simple(1, dims, maxdims);            
+    hid_t dataset_id = H5Dcreate2(parent_id, name.c_str(),
+                                  ftype, dataspace,
+                                  H5P_DEFAULT, chunk_params, H5P_DEFAULT);
+    H5Sclose(dataspace);
+    H5Tclose(ftype);
+    H5Pclose(chunk_params);    
+    return dataset_id;
+}
+
 
 /**
    Append a vector to a specified dataset and return the error status
