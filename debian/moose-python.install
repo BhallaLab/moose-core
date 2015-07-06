@@ -1,4 +1,2 @@
-/usr/lib/moose/moose
-/usr/lib/moose/setup.py
-/usr/lib/moose/libmumbl
-/usr/share/moose/demos
+bin/moose-bin
+usr/share/moose
