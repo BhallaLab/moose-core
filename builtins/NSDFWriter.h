@@ -83,6 +83,7 @@ class NSDFWriter: public HDF5DataWriter
     void closeUniformData();
     void openEventData(const Eref &eref);
     void closeEventData();
+    void createUniformMap();
     void writeModelTree();
     // Sort the incoming data lines according to source object/field.
     void process(const Eref &e, ProcPtr p);
