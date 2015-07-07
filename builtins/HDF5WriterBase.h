@@ -36,6 +36,7 @@
 hid_t require_attribute(hid_t file_id, string path,
                         hid_t data_type, hid_t data_id);
 
+hid_t require_group(hid_t file_id, string path);
 
 class HDF5WriterBase
 {
