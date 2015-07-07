@@ -57,6 +57,8 @@ def setup_model():
     """Setup a dummy model with a pulsegen and a spikegen detecting the
     leading edges of the pulses. We record the pulse output as Uniform
     data and leading edge time as Event data."""
+    simtime = 100.0
+    dt = 1e-3
     model = moose.Neutral('/model')
     pulse = moose.PulseGen('/model/pulse')
     pulse.level[0] = 1.0
@@ -68,6 +70,7 @@ def setup_model():
     nsdf = moose.NSDFWriter('/model/writer')
     nsdf.filename = 'nsdf_demo.h5'
     nsdf.mode = 2 #overwrite existing file
+    nsdf.flushLimit = 100
     moose.connect(nsdf, 'requestOut', pulse, 'getOutputValue')
     print 'event input', nsdf.eventInput, nsdf.eventInput.num
     print nsdf
@@ -80,12 +83,11 @@ def setup_model():
     tab.threshold = t_lead.threshold
     clock = moose.element('/clock')
     for ii in range(32):
-        moose.setClock(ii, 1)
-    moose.useClock(30, nsdf.path, 'process')
+        moose.setClock(ii, dt)
     moose.connect(pulse, 'output', tab, 'spike')
     print datetime.now().isoformat()
     moose.reinit()
-    moose.start(100)
+    moose.start(simtime)
     print datetime.now().isoformat()
     np.savetxt('nsdf.txt', tab.vector)
     ###################################
@@ -102,8 +104,14 @@ crossing times as Event data. '''
     nsdf.stringVecAttr['method'] = ['']
     nsdf.stringAttr['rights'] = ''
     nsdf.stringAttr['license'] = 'CC-BY-NC'
-
-    
+    # Specify units. MOOSE is unit agnostic, so we explicitly set the
+    # unit attibutes on individual datasets
+    nsdf.stringAttr['/data/uniform/PulseGen/outputValue/tunit'] = 's'
+    nsdf.stringAttr['/data/uniform/PulseGen/outputValue/unit'] = 'A'
+    eventDataPath = '/data/event/SpikeGen/spikeOut/{}_{}_{}/unit'.format(t_lead.vec.value,
+                                                                         t_lead.getDataIndex(), 
+                                                                         t_lead.getFieldIndex())
+    nsdf.stringAttr[eventDataPath] = 's'
 
 
 if __name__ == '__main__':
