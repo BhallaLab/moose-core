@@ -64,6 +64,9 @@ Here we'll show how to store and dump from a table and also using HDF5.
 .. automodule:: hdfdemo
    :members:
 
+.. automodule:: nsdf
+   :members:
+
 Computing arbitrary functions on the fly
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Sometimes you want to calculate arbitrary function of the state
