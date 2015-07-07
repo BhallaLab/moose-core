@@ -44,8 +44,55 @@
 # 
 
 # Code:
-"""This script is for demonstrating the use of NSDFWriter class to
-dump data in NSDF format"""
+"""NSDF : Neuroscience Simulation Data Format
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+NSDF is an HDF5 based format for storing data from neuroscience
+simulation.
+
+This script is for demonstrating the use of NSDFWriter class to
+dump data in NSDF format.
+
+The present implementation of NSDFWriter puts all value fields
+connected to its requestData into
+/data/uniform/{className}/{fieldName} 2D dataset - each row
+corresponding to one object.
+
+Event data are stored in
+/data/event/{className}/{fieldName}/{Id}_{dataIndex}_{fieldIndex}
+where the last component is the string representation of the ObjId of
+the source.
+
+The model tree (starting below root element) is saved as a tree of
+groups under /model/modeltree (one could easily add the fields as
+atributes with a little bit of more code).
+
+The mapping between data source and uniformly sampled data is stored
+as a dimension scale in /map/uniform/{className}/{fieldName}. That for
+event data is stored as a compound dataset in
+/map/event/{className}/{fieldName} with a [source, data] columns.
+
+The start and end timestamps of the simulation are saved as file
+attributes: C/C++ time functions have this limitation that they give
+resolution up to a second, this means for simulation lasting < 1 s the
+two timestamps may be identical.
+
+Much of the environment specification is set as HDF5 attributes (which
+is a generic feature from HDF5WriterBase).
+
+MOOSE is unit agnostic at present so unit specification is not
+implemented in NSDFWriter. But units can be easily added as dataset
+attribute if desired as shown in this example.
+
+
+References: 
+
+Ray, Chintaluri, Bhalla and Wojcik. NSDF: Neuroscience Simulation
+Data Format (submitted).
+
+http://nsdf.readthedocs.org/en/latest/
+
+"""
 
 import numpy as np
 from datetime import datetime
@@ -54,9 +101,13 @@ import getpass
 import moose
 
 def setup_model():
-    """Setup a dummy model with a pulsegen and a spikegen detecting the
-    leading edges of the pulses. We record the pulse output as Uniform
-    data and leading edge time as Event data."""
+    """Setup a dummy model with a PulseGen and a SpikeGen. The SpikeGen
+    detects the leading edges of the pulses created by the PulseGen
+    and sends out the event times. We record the PulseGen outputValue
+    as Uniform data and leading edge time as Event data in the NSDF
+    file.
+
+    """
     simtime = 100.0
     dt = 1e-3
     model = moose.Neutral('/model')
