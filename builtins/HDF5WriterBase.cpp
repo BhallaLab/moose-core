@@ -37,6 +37,7 @@
 #include "hdf5.h"
 
 #include "header.h"
+#include "../utility/utility.h"
 
 #include "HDF5WriterBase.h"
 
@@ -74,6 +75,36 @@ hid_t require_attribute(hid_t file_id, string path,
                                    data_type, data_id,
                                    H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }   
+}
+
+/**
+   Create or open group at specified path.
+ */
+hid_t require_group(hid_t file, string path)
+{
+    vector<string> pathTokens;
+    tokenize(path, "/", pathTokens);
+    hid_t prev = file, current;
+    htri_t exists;
+    // Open the container for the event maps
+    for (unsigned int ii = 0; ii < pathTokens.size(); ++ii){
+        exists = H5Lexists(prev, pathTokens[ii].c_str(), H5P_DEFAULT);
+        if (exists > 0){
+            current = H5Gopen2(prev, pathTokens[ii].c_str(), H5P_DEFAULT);
+        } else {
+            current = H5Gcreate2(prev, pathTokens[ii].c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        }
+        if (prev != file){
+            if(H5Gclose(prev) < 0){
+                return -1;
+            }
+        }
+        if (current < 0){
+            return current;
+        }
+        prev = current;
+    }
+    return current;
 }
 
 /**
