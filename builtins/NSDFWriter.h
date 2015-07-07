@@ -51,6 +51,14 @@
 #include "InputVariable.h"
 
 /**
+   compound data type for storing source->data mapping for event data
+*/
+typedef struct {
+    const char * source;
+    hobj_ref_t data;
+} map_type;
+
+/**
    NSDFWriter dumps data in NSDF file format.
 
    - As of June 2015, MOOSE uses fixed time steps for updating field
@@ -83,6 +91,8 @@ class NSDFWriter: public HDF5DataWriter
     void closeUniformData();
     void openEventData(const Eref &eref);
     void closeEventData();
+    void createUniformMap();
+    void createEventMap();
     void writeModelTree();
     // Sort the incoming data lines according to source object/field.
     void process(const Eref &e, ProcPtr p);
@@ -109,6 +119,8 @@ class NSDFWriter: public HDF5DataWriter
     hid_t dataGroup_; // handle for data container.
     hid_t modelGroup_; // handle for model container
     hid_t mapGroup_; // handle for map container
+    map< string, vector< hid_t > > classFieldToEvent_;
+    map< string, vector< string > > classFieldToEventSrc_;
     map< string, hid_t > classFieldToUniform_;
     // maps a path.srcFinfo to the <target dataset, row index > for
     // storing uniform data in dataset.
