@@ -47,6 +47,7 @@
 #ifdef USE_HDF5
 
 #include "hdf5.h"
+#include "hdf5_hl.h"
 
 #include <ctime>
 #include <deque>
@@ -63,6 +64,8 @@
 const char* const EVENTPATH = "/data/event";
 const char* const UNIFORMPATH = "/data/uniform";
 const char* const MODELTREEPATH = "/model/modeltree";
+const char* const MAPUNIFORMSRC = "/map/uniform";
+const char* const MAPEVENTSRC = "/map/event";
 
 string iso_time(time_t * t)
 {
@@ -226,21 +229,8 @@ void NSDFWriter::openUniformData(const Eref &eref)
     sortOutUniformSources(eref);
     htri_t exists;
     herr_t status;
-    if (dataGroup_ < 0){
-        exists = H5Lexists(filehandle_, "data", H5P_DEFAULT);
-        if (exists > 0){
-            dataGroup_ = H5Gopen2(filehandle_, "data", H5P_DEFAULT);
-        } else if (exists == 0){
-            dataGroup_ = H5Gcreate2(filehandle_, "data", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-        }
-    }
     if (uniformGroup_ < 0){
-        exists = H5Lexists(dataGroup_, "uniform", H5P_DEFAULT);
-        if (exists > 0){
-            uniformGroup_ = H5Gopen2(dataGroup_, "uniform", H5P_DEFAULT);
-        } else if (exists == 0){
-            uniformGroup_ = H5Gcreate2(dataGroup_, "uniform", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-        }
+        uniformGroup_ = require_group(filehandle_, UNIFORMPATH);
     }
 
     // create the datasets and map them to className/field
@@ -248,43 +238,52 @@ void NSDFWriter::openUniformData(const Eref &eref)
          it != classFieldToSrcIndex_.end();
          ++it){
         vector< string > tokens;
-        hid_t tmp = -1;
         tokenize(it->first, "/", tokens);
-        hid_t prev = uniformGroup_;
+        string className = tokens[0];
+        string fieldName = tokens[1];
+        hid_t container = require_group(uniformGroup_, className);
         vector < string > srclist;
-        
-        for( unsigned int ii = 0; ii < tokens.size() - 1; ++ii){
-            exists = H5Lexists(prev, tokens[ii].c_str(), H5P_DEFAULT);
-            if (exists > 0){
-                tmp = H5Gopen2(prev, tokens[ii].c_str(), H5P_DEFAULT);
-            } else {
-                tmp = H5Gcreate2(prev, tokens[ii].c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-            }
-            if (prev != uniformGroup_){
-                status = H5Gclose(prev);
-            }
-            prev = tmp;
-            srclist.push_back(src_[it->second[ii]].path());
-        }
-        exists = H5Lexists(prev, tokens.back().c_str(), H5P_DEFAULT);
-        if (exists == 0){
-            hid_t dataset = createDataset2D(prev, tokens.back().c_str(), it->second.size());
-            classFieldToUniform_[it->first] = dataset;
-            // TODO: Add the list of sources as an attribute
-            writeScalarAttr<string>(dataset, "field", tokens.back());
-            writeVectorAttr<string>(dataset, "source", srclist);
-        }
-        H5Gclose(prev);
+        hid_t dataset = createDataset2D(container, fieldName.c_str(), it->second.size());
+        classFieldToUniform_[it->first] = dataset;
+        writeScalarAttr<string>(dataset, "field", fieldName);
+        H5Gclose(container);
     }
-    
-    for (unsigned int ii = 0; ii < src_.size(); ++ii){
-        string classField = Field<string>::get(src_[ii], "className") + "/" + vars_[ii];
-        map< string, hid_t>::iterator dit = classFieldToUniform_.find(classField);
-        if (dit == classFieldToUniform_.end()){
-            cerr << "Error: NSDFWriter::openUniformData - could not find dataset " << classField << endl;
-            continue;
+}
+
+/**
+   create the DS for uniform data.
+ */
+void NSDFWriter::createUniformMap()
+{
+    // Create the container for all the DS
+    // TODO: make a common function like `mkdir -p` to avoid repeating this
+    htri_t exists;
+    herr_t status;
+    hid_t uniformMapContainer = require_group(filehandle_, MAPUNIFORMSRC);
+    // Create the DS themselves
+    for (map< string, vector < unsigned int > >::iterator ii = classFieldToSrcIndex_.begin();
+         ii != classFieldToSrcIndex_.end(); ++ii){
+        vector < string > pathTokens;
+        tokenize(ii->first, "/", pathTokens);
+        string className = pathTokens[0];
+        string fieldName = pathTokens[1];
+        hid_t container = require_group(uniformMapContainer, className);
+        vector < string > srclist;
+        const char ** sources = (const char **)calloc(ii->second.size(), sizeof(const char*));
+        for (unsigned int jj = 0; jj < ii->second.size(); ++jj){
+            sources[jj] = src_[ii->second[jj]].path().c_str();
         }
-    }
+        hid_t ds = createStringDataset(container, fieldName, (hsize_t)srclist.size(), (hsize_t)0);
+        hid_t memtype = H5Tcopy(H5T_C_S1);
+        status = H5Tset_size(memtype, H5T_VARIABLE);
+        status = H5Dwrite(ds, memtype,  H5S_ALL, H5S_ALL, H5P_DEFAULT, sources);
+        free(sources);
+        status = H5DSset_scale(ds, "source");
+        status = H5DSattach_scale(classFieldToUniform_[ii->first], ds, 0);
+        status = H5DSset_label(classFieldToUniform_[ii->first], 0, "source");
+        status = H5Dclose(ds);
+        status = H5Tclose(memtype);                          
+    } 
 }
 
 void NSDFWriter::closeEventData()
@@ -336,6 +335,63 @@ void NSDFWriter::openEventData(const Eref &eref)
     }
 }
 
+void NSDFWriter::createEventMap()
+{
+    herr_t status;    
+    hid_t eventMapContainer = require_group(filehandle_, MAPEVENTSRC);
+    // Open the container for the event maps
+    // Create the Datasets themselves (one for each field - each row
+    // for one object).
+    for (map< string, vector < string > >::iterator ii = classFieldToEventSrc_.begin();
+         ii != classFieldToEventSrc_.end();
+         ++ii){
+        vector < string > pathTokens;
+        tokenize(ii->first, "/", pathTokens);
+        string className = pathTokens[0];
+        string fieldName = pathTokens[1];
+        hid_t classGroup = require_group(eventMapContainer, className);
+        hid_t strtype = H5Tcopy(H5T_C_S1);
+        status = H5Tset_size(strtype, H5T_VARIABLE);
+        // create file space
+        hid_t ftype = H5Tcreate(H5T_COMPOUND, sizeof(hvl_t) +sizeof(hobj_ref_t));
+        status = H5Tinsert(ftype, "source", 0, strtype);
+        status = H5Tinsert(ftype, "data", sizeof(hvl_t), H5T_STD_REF_OBJ);
+        hsize_t dims[1] = {ii->second.size()};
+        hid_t space = H5Screate_simple(1, dims, NULL);
+        // The dataset for mapping is named after the field
+        hid_t ds = H5Dcreate2(classGroup, fieldName.c_str(), ftype, space,
+                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        status = H5Sclose(space);
+        map_type * buf = (map_type*)calloc(ii->second.size(), sizeof(map_type));
+        // Populate the buffer entries with source uid and data
+        // reference
+        for (unsigned int jj = 0; jj < ii->second.size(); ++jj){
+            buf->source = ii->second[jj].c_str();
+            char * dsname = (char*)calloc(256, sizeof(char));
+            ssize_t size = H5Iget_name(classFieldToEvent_[ii->first][jj], dsname, 255);
+            if (size > 255){
+                free(dsname);
+                dsname = (char*)calloc(size, sizeof(char));
+                size = H5Iget_name(classFieldToEvent_[ii->first][jj], dsname, 255);
+            }
+            status = H5Rcreate(&(buf->data), filehandle_, dsname, H5R_OBJECT, -1);
+            free(dsname);
+            assert(status >= 0);            
+        }
+        // create memory space
+        hid_t memtype = H5Tcreate(H5T_COMPOUND, sizeof(map_type));
+        status = H5Tinsert(memtype, "source",
+                           HOFFSET(map_type, source), strtype);
+        status = H5Tinsert(memtype, "data",
+                           HOFFSET(map_type, data), H5T_STD_REF_OBJ);
+        status = H5Dwrite(ds, memtype,  H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+        free(buf);
+        status = H5Tclose(strtype);
+        status = H5Tclose(ftype);
+        status = H5Tclose(memtype);
+        status = H5Dclose(ds);
+    }
+}
 
 /**
    Create or retrieve a dataset for an event input.  The dataset path
@@ -347,9 +403,8 @@ void NSDFWriter::openEventData(const Eref &eref)
  */
 hid_t NSDFWriter::getEventDataset(string srcPath, string srcField)
 {
-    string path = srcPath + "." + srcField;
-            
-    map< string, hid_t >::iterator it = eventSrcDataset_.find(path);
+    string eventSrcPath = srcPath + string("/") + srcField;
+    map< string, hid_t >::iterator it = eventSrcDataset_.find(eventSrcPath);
     if (it != eventSrcDataset_.end()){
         return it->second;
     }
@@ -357,50 +412,19 @@ hid_t NSDFWriter::getEventDataset(string srcPath, string srcField)
     herr_t status;
     htri_t exists = -1;
     string className = Field<string>::get(source, "className");
-    vector<string> pathTokens;
-    tokenize(EVENTPATH, "/", pathTokens);
-    pathTokens.push_back(className);
-    pathTokens.push_back(srcField);
-    hid_t container = -1;
-    hid_t prev = filehandle_;
-    for (unsigned int ii = 0; ii < pathTokens.size(); ++ii){
-        exists = H5Lexists(prev, pathTokens[ii].c_str(),
-                                  H5P_DEFAULT);
-        if (exists > 0){
-            // try to open existing group
-            container = H5Gopen2(prev, pathTokens[ii].c_str(), H5P_DEFAULT);
-        } else if (exists == 0) {
-            // If that fails, try to create a group
-            container = H5Gcreate2(prev, pathTokens[ii].c_str(),
-                            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-        } 
-        if ((exists < 0) || (container < 0)){
-            // Failed to open/create a group, print the
-            // offending path (for debugging; the error is
-            // perhaps at the level of hdf5 or file system).
-            cerr << "Error: failed to open/create group: ";
-            for (unsigned int jj = 0; jj <= ii; ++jj){
-                cerr << "/" << pathTokens[jj];
-            }
-            cerr << endl;
-            prev = -1;            
-        }
-        if (prev >= 0  && prev != filehandle_){
-            // Successfully opened/created new group, close the old group
-            status = H5Gclose(prev);
-            assert( status >= 0 );
-        }
-        prev = container;
-    }    
+    string path = EVENTPATH + string("/") + className + string("/") + srcField;
+    hid_t container = require_group(filehandle_, path);
     stringstream dsetname;
     dsetname << source.id.value() <<"_" << source.dataIndex << "_" << source.fieldIndex;
-    hid_t dataset = createDataset(container, dsetname.str().c_str());
-    status = writeScalarAttr<string>(dataset, "source", source.path());
+    hid_t dataset = createDoubleDataset(container, dsetname.str().c_str());
+    classFieldToEvent_[className + "/" + srcField].push_back(dataset);
+    classFieldToEventSrc_[className + "/" + srcField].push_back(srcPath);
+    status = writeScalarAttr<string>(dataset, "source", srcPath);
     assert(status >= 0);
     status = writeScalarAttr<string>(dataset, "field", srcField);
     assert(status >= 0);
-    eventSrcDataset_[path] = dataset;
-    return dataset;    
+    eventSrcDataset_[eventSrcPath] = dataset;
+    return dataset;
 }
 
 void NSDFWriter::flush()
@@ -490,6 +514,8 @@ void NSDFWriter::reinit(const Eref& eref, const ProcPtr proc)
     }
     openEventData(eref);
     writeModelTree();
+    createUniformMap();
+    createEventMap();
     steps_ = 0;
 }
 
@@ -520,7 +546,7 @@ void NSDFWriter::process(const Eref& eref, ProcPtr proc)
     // }
     NSDFWriter::flush();
     steps_ = 0;
-}
+ }
 
 NSDFWriter& NSDFWriter::operator=( const NSDFWriter& other)
 {
@@ -584,42 +610,29 @@ string NSDFWriter::getModelRoot() const
 void NSDFWriter::writeModelTree()
 {
     vector< string > tokens;
-    tokenize(MODELTREEPATH, "/", tokens);
-    tokens.push_back(ObjId(modelRoot_).element()->getName());
-    assert(filehandle_ > 0);
-    hid_t prev = filehandle_;
+    ObjId mRoot(modelRoot_);
+    string rootPath = MODELTREEPATH + string("/") + mRoot.element()->getName();
+    hid_t rootGroup = require_group(filehandle_, rootPath);
     hid_t tmp;
     htri_t exists;
     herr_t status;
-    // create up to the root
-    for( unsigned int ii = 0; ii < tokens.size() - 1; ++ii){
-        exists = H5Lexists(prev, tokens[ii].c_str(), H5P_DEFAULT);
-        if (exists > 0){
-            tmp = H5Gopen2(prev, tokens[ii].c_str(), H5P_DEFAULT);
-        } else {
-            tmp = H5Gcreate2(prev, tokens[ii].c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-        }
-        if (prev != filehandle_){
-            status = H5Gclose(prev);
-        }
-        prev = tmp;
-    }
     deque<Id> nodeQueue;
     deque<hid_t> h5nodeQueue;
-    nodeQueue.push_back(ObjId(modelRoot_));
-    h5nodeQueue.push_back(prev);
-    // NOTE: need to clarify what happens with array elements. We can
-    // one node per vec and set a count field for the number of
+    nodeQueue.push_back(mRoot);
+    h5nodeQueue.push_back(rootGroup);
+    // TODO: need to clarify what happens with array elements. We can
+    // have one node per vec and set a count field for the number of
     // elements
     while (nodeQueue.size() > 0){
         ObjId node = nodeQueue.front();
         nodeQueue.pop_front();
-        prev = h5nodeQueue.front();;
+        hid_t prev = h5nodeQueue.front();;
         h5nodeQueue.pop_front();
         vector < Id > children;
         Neutral::children(node.eref(), children);
         for ( unsigned int ii = 0; ii < children.size(); ++ii){
             string name = children[ii].element()->getName();
+            // skip the system elements
             if (children[ii].path() == "/Msgs"
                 || children[ii].path() == "/clock"
                 || children[ii].path() == "/classes"
