@@ -197,11 +197,8 @@ class rdesigneur:
 
     # Class or file options. True if extension is found in 
     def isKnownClassOrFile( self, name, suffices ):
-        periodPos = name.find( '.' )
-        if periodPos == -1:
-            return False
         for i in suffices:
-            if name.find( i ) > periodPos :
+            if name.rfind( '.'+i ) >= 0 :
                 return True
         return False
 
