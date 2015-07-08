@@ -1,15 +1,44 @@
 #!/usr/bin/make -f
+
 # export DH_VERBOSE=1
+export BUILD_DIR_MOOSE=_build
+NPROCS := 1
+OS := $(shell uname)
+ifeq ($J,)
+    ifeq ($(OS),Linux)
+    NPROCS := $(shell grep -c ^processor /proc/cpuinfo)
+else ifeq ($(OS),Darwin)
+    NPROCS := $(shell system_profiler | awk '/Number of CPUs/ {print $$4}{next;}')
+endif # $(OS)
+else
+    NPROCS := $J
+endif # $J
+export NPROCS
+PYTHON_LIBS=$(shell python -c  "import site; print site.getsitepackages()[1]")
+export PYTHONPATH=$(shell pwd)/../debian/tmp/$(PYTHON_LIBS))
+
+## Here goes the debian make.
+
 %:
-	dh "$@"  --buildsystem=cmake
+	dh "$@" 
 
-verride_dh_auto_clean:
+override_dh_auto_clean:
+	rm -rf $(BUILD_DIR_MOOSE)
 	dh_auto_clean --buildsystem=cmake
-
-override_dh_auto_build:
-	dh_auto_build --buildsystem=cmake
 
 # consider using -DUSE_VERSIONED_DIR=ON if backporting
 override_dh_auto_configure:
-	dh_auto_configure --buildsystem=cmake -- -DCMAKE_BUILD_TYPE=Release -DDEBUG=OFF
+	#dh_auto_configure --buildsystem=cmake -- -DCMAKE_BUILD_TYPE=Release -DDEBUG=OFF 
+	mkdir -p $(BUILD_DIR_MOOSE)
+	cd $(BUILD_DIR_MOOSE) && cmake -DDEBUG=OFF -DBUILD_MOOGLI=ON \
+	    -DCMAKE_INSTALL_PREFIX=../debian/tmp/usr -DCMAKE_VERBOSE_MAKEFILE=OFF ..
 
+override_dh_auto_build:
+	#dh_auto_build --buildsystem=cmake
+	cd $(BUILD_DIR_MOOSE) && make -j$(NPROCS) VERBOSE=0
+
+override_dh_auto_install:
+	cd $(BUILD_DIR_MOOSE) && make install
+
+override_dh_shlibdeps:
+	dh_shlibdeps --dpkg-shlibdeps-params=--ignore-missing-info
