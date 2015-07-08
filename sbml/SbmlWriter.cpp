@@ -132,14 +132,50 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
   
   for ( vector< ObjId >::iterator itrgrp = graphs.begin(); itrgrp != graphs.end();itrgrp++)
     {  
+    	vector< ObjId > msgMgrs = 
+                Field< vector< ObjId > >::get( *itrgrp, "msgOut" );
+      	for (unsigned int i = 0; i < msgMgrs.size();++i)
+      	{
+      		Id msgId = Field< Id >::get( msgMgrs[i], "e2" );
+   			string msgpath = Field <string> :: get(msgId,"path");
+   			std::size_t found = msgpath.find('/', 1);
+   			string str2 = msgpath.substr(found,msgpath.length());
+   			vector<string> msgdest = Field< vector<string> >::get( msgMgrs[i], "destFieldsOnE2" );
+   			// for (unsigned int j =0; j < msgdest.size(); ++j)
+   			// 	cout << " msgdest " << msgdest[j]<< endl;
+   			plots += str2+";";
+      	}
+
+      // vector< Id > graphsrc =LookupField< string, vector< Id > >::get(*itrgrp, "neighbors", "requestOut" );
+      // for (vector <Id> :: iterator itrsrc = graphsrc.begin();itrsrc != graphsrc.end();itrsrc++)
+      // 	{string species = nameString(Field<string> :: get(*itrsrc,"name"));
+      // 	}	
+      /*
       vector< Id > graphsrc =LookupField< string, vector< Id > >::get(*itrgrp, "neighbors", "requestOut" );
       for (vector <Id> :: iterator itrsrc = graphsrc.begin();itrsrc != graphsrc.end();itrsrc++)
 	{  string species = nameString(Field<string> :: get(*itrsrc,"name"));
+	   string speciespath = (Field<string> :: get(*itrsrc,"path"));
+		cout << " \n species name " << species<<  " " << speciespath<< endl;
+	   vector< ObjId > msgMgrs = 
+                Field< vector< ObjId > >::get( *itrsrc, "msgOut" );
+       for ( unsigned int i = 0; i <  msgMgrs.size(); ++i )
+       {    string msgclssname = Field< string >::get( msgMgrs[i], "className" );
+   			Id msgId = Field< Id >::get( msgMgrs[i], "e2" );
+   			string msgpath = Field <string> :: get(msgId,"path");
+   			vector<string> msgdest = Field< vector<string> >::get( msgMgrs[i], "destFieldsOnE2" );
+   			// for (unsigned int j =0; j < msgdest.size(); ++j)
+   			// 	cout << "msgdest " << msgdest[j]<< endl;
+      //  		cout << i << " msg " << msgMgrs[i] << " msgpath " << msgpath<<endl;
+       		
+       }
+
+
 	   Id comptId = getCompt(*itrsrc).id;
 	   string speciesCompt = nameString(Field<string> :: get(comptId,"name"));
 	   plots += "/"+speciesCompt+"/"+species+";";
 	   
 	}
+	*/
     }
   
   ostringstream modelAnno;
@@ -196,13 +232,12 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	{ 
 	  string comptName = Field<string>::get(*itr,"name");
 	  string comptPath = Field<string>::get(*itr,"path");
-  	  ostringstream cid;
+	  ostringstream cid;
 	  cid << *itr  << "_" << index;
 	  comptName = nameString(comptName);
 	  string comptname_id = comptName + "_" + cid.str() + "_";
 	  //changeName(comptname,cid.str());
 	  string clean_comptname = idBeginWith(comptname_id);
-
 	  double size = Field<double>::get(ObjId(*itr,index),"Volume");
 	  unsigned int ndim = Field<unsigned int>::get(ObjId(*itr,index),"NumDimensions");
 	  
@@ -275,66 +310,20 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	  		  	XMLNode* xnode =XMLNode::convertStringToXMLNode( modelAnno.str() ,&xmlns);
 	  		  	sp->setAnnotation( xnode );
 		  	}
-	      /*
-	      ObjId pa = Field< ObjId >::get( *itrp, "parent" );
-	      string parentclass = Field<string> :: get (pa,"className");
-	      string groupName = Field<string> :: get(pa,"name");
-	      ostringstream modelAnno;
-	      string path1 = Field<string> :: get(*itrp,"path");  
-	      modelAnno << "<moose:ModelAnnotation>\n";
-  		  //modelAnno << "<moose:xyCord> "<< xyCord<< "</moose:xyCord>\n";
 
-  		  //#Harsha: Note: At this time I am assuming that if group exist 
-  		  //  1. for 'pool' its between compartment and pool, /modelpath/Compartment/Group/pool 
-  		  //  2. for 'enzComplx' in case of ExpilcityEnz its would be, /modelpath/Compartment/Group/Pool/Enz/Pool_cplx 
-		  // For these cases I have check, but there may be a subgroup may exist then this bit of code need to cleanup
-		  // further down
-	      if (parentclass == "Neutral")
-	      	{   writeAnnotation = true;
-	      		modelAnno << "<moose:Group>"<< groupName << "</moose:Group>\n";		
-	      	}
-  		  
-  		  else if ((parentclass == "Enz") or (parentclass == "ZombieEnz"))
-  		  { 
-  		  	ObjId ppa = Field< ObjId >::get( pa, "parent" );
-	      	string parentParentclass = Field<string> :: get (ppa,"className");
-	      	string groupName = Field<string> :: get(ppa,"name");
-	      	if (parentParentclass == "Neutral")
-	      	{ writeAnnotation = true;
-	      	  modelAnno << "<moose:Group>"<< groupName << "</moose:Group>\n";		
-	      	}
-	      	else if ( parentParentclass == "Pool" or parentParentclass == "ZombiePool" or
-	      	          parentParentclass == "BufPool" or parentParentclass == "ZombieBufPool")
-	      	{
-	      		ObjId poolpa = Field< ObjId >::get( ppa, "parent" );
-	      		string pathtt = Field < string > :: get(poolpa,"path");
-	      		parentParentclass = Field<string> :: get (poolpa,"className");
-	      		string groupName = Field<string> :: get(poolpa,"name");
-	      		if (parentParentclass == "Neutral")
-	    	  	{ writeAnnotation = true;
-	      		  modelAnno << "<moose:Group>"<< groupName << "</moose:Group>\n";		
-	      		}
-	      	}
-	      	
-  		  }//else if
-          modelAnno << "</moose:ModelAnnotation>";
-  		  XMLNode* xnode =XMLNode::convertStringToXMLNode( modelAnno.str() ,&xmlns);
-  		  if (writeAnnotation)
-  		  	sp->setAnnotation( xnode );
-		*/
 	      string path = Field<string> :: get(*itrp,"path");
 	      Id annotaId( path+"/info");
 	      string noteClass = Field<string> :: get(annotaId,"className");
 	      string notes;
 	      if (noteClass =="Annotator")
-		{ string notes = Field <string> :: get(annotaId,"notes");
-		  if (notes != "")
-		    { string cleanNotes = nameString1(notes);
-		      string notesString = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t"+
-			cleanNotes + "\n\t </body>"; 
-		      sp->setNotes(notesString);
-		    }
-		}
+			{ string notes = Field <string> :: get(annotaId,"notes");
+			  if (notes != "")
+			    { 	string cleanNotes = nameString1(notes);
+		    	  	string notesString = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t"+
+				  	cleanNotes + "\n\t </body>"; 
+		      		sp->setNotes(notesString);
+		    	}
+			}
 	      sp->setUnits("substance");
 	      species_size = species_size+1;
 	      // true if species is amount, false: if species is concentration 
