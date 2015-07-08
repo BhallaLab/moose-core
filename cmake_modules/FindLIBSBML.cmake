@@ -41,6 +41,7 @@ find_library(LIBSBML_LIBRARY
     NAMES sbml-static 
           sbml
           libsbml-static 
+          libsbml-static
           libsbml
     PATHS $ENV{LIBSBML_DIR}/lib
           $ENV{LIBSBML_DIR}

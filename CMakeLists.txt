@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 cmake_policy(SET CMP0004 OLD)
 
 project(moose)
-SET(CMAKE_INSTALL_PREFIX /usr)
+option(CMAKE_INSTALL_PREFIX "Install prefix" /usr)
 
 # This snippet is from LLVM project.
 # Sanity check our source directory to make sure that we are not trying to
@@ -40,7 +40,7 @@ add_custom_target(uninstall
 
 ################################# CMKAE MACROS #################################
 
-set(CMAKE_VERBOSE_MAKEFILE TRUE)
+option(CMAKE_VERBOSE_MAKEFILE "Set makefile verbose" FALSE)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules")
 set(INSTALL_LIB_DIR lib CACHE PATH "${CMAKE_INSTALL_PREFIX}/lib")
 set(INSTALL_BIN_DIR bin CACHE PATH "${CMAKE_INSTALL_PREFIX}/bin")
@@ -125,7 +125,7 @@ if(ENABLE_SBML)
         MESSAGE("++ LIBSBML NOT FOUND.  Disabling SBML support.")
         ADD_DEFINITIONS(-UUSE_SBML)
     else()
-        MESSAGE("++ SBML found. Support is ON")
+        MESSAGE("++ SBML found. Support is ON: ${LIBSBML_LIBRARY}")
         ADD_DEFINITIONS(-DUSE_SBML)
         include_directories(${LIBSBML_INCLUDE_DIR})
         find_package(BZip2 REQUIRED)
@@ -149,6 +149,7 @@ add_executable(moose-bin basecode/main.cpp)
 # Setup GSL
 if(GSL_FOUND)
     add_definitions(-DUSE_GSL)
+    include_directories(${GSL_INCLUDE_DIR})
 endif()
 
 ## Setup hdf5
@@ -204,19 +205,18 @@ add_subdirectory(examples)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/moogli/include)
 LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/moogli/lib)
 
-set(LIBRARIES ${BZIP2_LIBRARIES} ${LibXML2_LIBRARIES})
+# These are always shared libraries.
+set(SYSTEM_LIBRARIES ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES} ${LibXML2_LIBRARIES} ${BZIP2_LIBRARIES})
+
+# These libraries could be static of dynamic.
+set(LIBRARIES "")
+
 if(HDF5_FOUND)
-    list(APPEND LIBRARIES ${HDF5_LIBRARY})
+    list(APPEND SYSTEM_LIBRARIES ${HDF5_LIBRARY})
 endif()
 
 if(LIBSBML_FOUND)
-    list(APPEND LIBRARIES moose_sbml ${LIBSBML_LIBRARY}
-        ${ZLIB_LIBRARIES}
-        )
-endif()
-
-if(LIBXML2_FOUND)
-    list(APPEND LIBRARIES ${LibXML2_LIBRARIES})
+    list(APPEND LIBRARIES moose_sbml ${LIBSBML_LIBRARY})
 endif()
 
 if(GSL_FOUND)
@@ -224,8 +224,9 @@ if(GSL_FOUND)
 endif()
 
 if(READLINE_FOUND AND TERMCAP_FOUND)
-    list(APPEND LIBRARIES ${Readline_LIBRARY} ${TERMCAP_LIBRARY})
+    list(APPEND SYSTEM_LIBRARIES ${Readline_LIBRARY} ${TERMCAP_LIBRARY})
 endif()
+
 
 ###################################### LINKING #################################
 set(MOOSE_LIBRARIES
@@ -257,6 +258,7 @@ target_link_libraries(moose-bin
     ${MOOSE_LIBRARIES}
     ${LIBRARIES}
     "-Wl,--no-whole-archive"
+    ${SYSTEM_LIBRARIES}
     )
 
 ######################### BUILD PYMOOSE ########################################
@@ -298,8 +300,9 @@ if(BUILD_PYMOOSE)
         moosepython  
         "-Wl,--whole-archive"
         ${MOOSE_LIBRARIES}
-        "-Wl,--no-whole-archive"
         ${LIBRARIES}
+        "-Wl,--no-whole-archive"
+        ${SYSTEM_LIBRARIES}
         )
 
 endif(BUILD_PYMOOSE)
@@ -321,8 +324,9 @@ if(BUILD_CYMOOSE)
     target_link_libraries(cymoose 
         "-Wl,--whole-archive"
         ${MOOSE_LIBRARIES}
-        "-Wl,--no-whole-archive"
         ${LIBRARIES}
+        "-Wl,--no-whole-archive"
+        ${SYSTEM_LIBRARIES}
         )
 endif()
 
@@ -335,7 +339,7 @@ IF(BUILD_MOOGLI)
 
     FIND_PACKAGE(SIP REQUIRED)
     FIND_PACKAGE(PyQt4 REQUIRED)
-    FIND_PACKAGE(osgQt REQUIRED)
+    #FIND_PACKAGE(osgQt REQUIRED)
     MESSAGE("++ Building MOOGLI in ${MOOGLI_BUILD_PATH}")
     add_subdirectory(${PROJECT_SOURCE_DIR}/python/moogli)
     INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/python/moogli/include)
@@ -363,19 +367,19 @@ install(FILES ${PROJECT_SOURCE_DIR}/scripts/moose
 
 install(PROGRAMS ${PROJECT_SOURCE_DIR}/scripts/moosegui
     DESTINATION bin
-    COMPONENT moose-gui
+    COMPONENT moose-gui 
     )
 
 ## Install the icon
 install(FILES ${PROJECT_SOURCE_DIR}/gui/icons/moose_icon.png 
     DESTINATION share/moose
-    COMPONENT moose-python
+    COMPONENT moose-gui
     )
 
 # And the desktop file.
 install(FILES ${PROJECT_SOURCE_DIR}/scripts/moose.desktop
     DESTINATION share/applications
-    COMPONENT moose-python
+    COMPONENT moose-gui
     )
 
 # And the gui
@@ -384,7 +388,7 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/gui
     COMPONENT moose-gui
     )
 
-INSTALL(FILES ${PROJECT_SOURCE_DIR}/python/setup-moose.py
+install(FILES ${PROJECT_SOURCE_DIR}/python/setup-moose.py
     DESTINATION lib/moose
     COMPONENT moose-python
     )
@@ -392,29 +396,33 @@ INSTALL(FILES ${PROJECT_SOURCE_DIR}/python/setup-moose.py
 ## The demos goes here.
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/Demos
     DESTINATION share/moose
+    COMPONENT moose-gui
+    )
+
+# Both moose and moogli python directory are added here.
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/python/moose
+    ${PROJECT_SOURCE_DIR}/python/libmumbl
+    DESTINATION usr/share/moose
     COMPONENT moose-python
     )
 
-install(CODE
-    "execute_process(COMMAND ${PYTHON_EXECUTABLE} setup-moose.py install
-        --record install_menifest_moose-python.txt
-    WORKING_DIRECTORY ${PROJECT_PYTHON_PATH})"
-    COMPONENT moose
+install(FILES ${PROJECT_SOURCE_DIR}/python/setup-moose.py
+    DESTINATION usr/share/moose
+    COMPONENT moose-python
     )
-
 
 if(BUILD_MOOGLI)
 
     SET(MOOGLI_INSTALL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/python/moogli)
-    install(CODE
-        "execute_process(COMMAND ${PYTHON_EXECUTABLE} setup-moogli.py install
-        --record install_menifest_moogli.txt
-        WORKING_DIRECTORY ${PROJECT_PYTHON_PATH})"
-        COMPONENT moogli
+
+    install(DIRECTORY ${PROJECT_SOURCE_DIR}/python/moogli
+        DESTINATION usr/share/moogli
+        COMPONENT moose-moogli
         )
-    
-    install(CODE "MESSAGE(\"++ Installed moose-python and moogli using setuptools. You can
-        uninstall them using python-pip\")"
+
+    install(FILES ${PROJECT_SOURCE_DIR}/python/setup-moogli.py
+        DESTINATION usr/share/moogli
+        COMPONENT moose-moogli
         )
 
 endif(BUILD_MOOGLI)
@@ -471,16 +479,16 @@ ADD_TEST(NAME pymoose-test-vec
     WORKING_DIRECTORY ${TEST_DIRECTORY}
     )
 
-ADD_TEST(NAME pymoose-test-sbml 
-    COMMAND ${PYTHON_EXECUTABLE} test_sbml.py
-    WORKING_DIRECTORY ${TEST_DIRECTORY}
-    )
-
-ADD_TEST(NAME pymoose-test-kkit 
-    COMMAND ${PYTHON_EXECUTABLE} test_kkit.py
-    WORKING_DIRECTORY ${TEST_DIRECTORY}
-    )
-
+#ADD_TEST(NAME pymoose-test-sbml 
+#    COMMAND ${PYTHON_EXECUTABLE} test_sbml.py
+#    WORKING_DIRECTORY ${TEST_DIRECTORY}
+#    )
+#
+#ADD_TEST(NAME pymoose-test-kkit 
+#    COMMAND ${PYTHON_EXECUTABLE} test_kkit.py
+#    WORKING_DIRECTORY ${TEST_DIRECTORY}
+#    )
+#
 
 ####### CPack ###############################
 
