@@ -1,14 +1,14 @@
 /*******************************************************************
  * File:            SbmlReader.cpp
  * Description:
- * Author: HarshaRani
- * E-mail: hrani@ncbs.res.in
+ * Author:          HarshaRani
+ * E-mail:          hrani@ncbs.res.in
  ********************************************************************/
 /**********************************************************************
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment,
 ** also known as GENESIS 3 base code.
-**           copyright (C) 2003-2007 Upinder S. Bhalla. and NCBS
+**           copyright (C) 2003-2015 Upinder S. Bhalla. and NCBS
 ** It is made available under the terms of the
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
@@ -63,7 +63,7 @@ map< string,double> :: iterator pvm_iter;
          ----when stoichiometry is rational number 22
 	 ---- For Michaelis¡VMenten kinetics km is not defined which is most of the case
 	      need to calculate
-              */
+*/
 
 /**
  * @brief Reads a given SBML file and loads it into MOOSE.
@@ -119,7 +119,6 @@ Id SbmlReader::read( string filename, string location, string solverClass)
 
         if ( !errorFlag_ )
             molSidcmptMIdMap = createMolecule( comptSidMIdMap);
-
         if ( !errorFlag_ )
             getRules();
 
@@ -191,6 +190,14 @@ Id SbmlReader::read( string filename, string location, string solverClass)
                                         if (pos != std::string::npos)
                                             pltClean = pltClean.substr(pos+1,pltClean.length());
                                         replace(pltClean.begin(),pltClean.end(),'/','_');
+                                        size_t Iindex = 0;
+                                        while(true)
+                                            { size_t sindex = pltClean.find('[',Iindex);
+                                              size_t eindex = pltClean.find(']',Iindex);
+                                              if (sindex == std::string::npos) break;
+                                              pltClean.erase(sindex,eindex-sindex+1);
+                                              Iindex = eindex;
+                                            } //while true
                                         string plotName =  pltClean + ".conc";
                                         Id pltPath(graph.path());
                                         Id tab = s->doCreate( "Table", pltPath, plotName, 1 );
@@ -378,6 +385,26 @@ const SbmlReader::sbmlStr_mooseId SbmlReader::createMolecule( map< string,Id > &
 
     for ( int sindex = 0; sindex < num_species; sindex++ ) {
         Species* spe = model_->getSpecies(sindex);
+        string groupName;
+        XMLNode * annotationSpe = spe->getAnnotation();
+            if( annotationSpe != NULL ) {
+                unsigned int num_children = annotationSpe->getNumChildren();
+                for( unsigned int child_no = 0; child_no < num_children; child_no++ ) {
+                    XMLNode childNode = annotationSpe->getChild( child_no );
+                    if ( childNode.getPrefix() == "moose" && childNode.getName() == "ModelAnnotation" ) {
+                        unsigned int num_gchildren = childNode.getNumChildren();
+                        for( unsigned int gchild_no = 0; gchild_no < num_gchildren; gchild_no++ ) {
+                            XMLNode &grandChildNode = childNode.getChild( gchild_no );
+                            string nodeName = grandChildNode.getName();
+                            if (nodeName == "Group")
+                            {   groupName = (grandChildNode.getChild(0).toXMLString()).c_str();
+                                //group = shell->doCreate( "Neutral", mgr, "groups", 1, MooseGlobal );
+                                // assert( group != Id() );
+                            }
+                        } //gchild
+                    } //moose and modelAnnotation
+                } //child
+            }//annotation Node
         if (!spe) {
             continue;
         }
@@ -427,6 +454,20 @@ const SbmlReader::sbmlStr_mooseId SbmlReader::createMolecule( map< string,Id > &
         }
         Id comptEl = comptSidMIdMap[compt];
         Id meshEntry = Neutral::child( comptEl.eref(), "mesh" );
+        string comptPath = Field<string> :: get(comptEl,"path");
+        string groupString = comptPath+'/'+groupName;
+
+        Id groupId;
+        if (!groupName.empty())
+        {
+            groupId = Id( comptPath + "/"+groupName );
+            if ( groupId == Id() ) 
+                groupId = shell->doCreate( "Neutral", comptEl, groupName, 1 );
+            assert( groupId != Id() );
+            
+        }
+        
+        
         bool constant = spe->getConstant();
         bool boundaryCondition = spe->getBoundaryCondition();
         if (boundaryCondition == true)
@@ -435,9 +476,18 @@ const SbmlReader::sbmlStr_mooseId SbmlReader::createMolecule( map< string,Id > &
         //If constant is true then its equivalent to BuffPool in moose
         if (constant == true)
             //if( (boundaryCondition == true) && (constant==false))
-            pool = shell->doCreate("BufPool",comptEl,name,1);
+            if (groupId == Id())
+                pool = shell->doCreate("BufPool",comptEl,name,1);
+            else
+                pool = shell->doCreate("BufPool",groupId,name,1);
+            
         else
-            pool = shell->doCreate("Pool", comptEl, name ,1);
+            if (groupId == Id())
+                pool = shell->doCreate("Pool", comptEl, name ,1);
+            
+            else
+                pool = shell->doCreate("Pool", groupId, name ,1);
+                
         molSidcmptMIdMap[id] = comptEl;
         if(pool != Id())
         {   
@@ -635,8 +685,38 @@ void SbmlReader::createReaction(const map< string, Id > &molSidcmptMIdMap ) {
                     Id comptRef = molSidcmptMIdMap.find(sp)->second; //gives compartment of sp
                     Id meshEntry = Neutral::child( comptRef.eref(), "mesh" );
                     Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
-
-                    reaction_ = shell->doCreate("Reac", comptRef, name, 1);
+                    string groupName;
+                    XMLNode * annotationRea = reac->getAnnotation();
+                    if( annotationRea != NULL ) {
+                        unsigned int num_children = annotationRea->getNumChildren();
+                        for( unsigned int child_no = 0; child_no < num_children; child_no++ ) {
+                            XMLNode childNode = annotationRea->getChild( child_no );
+                            if ( childNode.getPrefix() == "moose" && childNode.getName() == "ModelAnnotation" ) {
+                                unsigned int num_gchildren = childNode.getNumChildren();
+                                for( unsigned int gchild_no = 0; gchild_no < num_gchildren; gchild_no++ ) {
+                                    XMLNode &grandChildNode = childNode.getChild( gchild_no );
+                                    string nodeName = grandChildNode.getName();
+                                    if (nodeName == "Group")
+                                        groupName = (grandChildNode.getChild(0).toXMLString()).c_str();
+                                } //gchild
+                            } //moose and modelAnnotation
+                        } //child
+                    }//annotation Node
+                    string comptPath = Field<string> :: get(comptRef,"path");
+                    string groupString = comptPath+'/'+groupName;
+                    Id groupId;
+                    if (!groupName.empty())
+                    {
+                        groupId = Id( comptPath + "/"+groupName );
+                        if ( groupId == Id() ) 
+                            groupId = shell->doCreate( "Neutral", comptRef, groupName, 1 );
+                        assert( groupId != Id() );
+                    }
+                    if (groupId == Id())
+                        reaction_ = shell->doCreate("Reac", comptRef, name, 1);
+                    else
+                        reaction_ = shell->doCreate("Reac", groupId, name, 1);
+                    
                     //shell->doAddMsg( "Single", meshEntry, "remeshReacs", reaction_, "remesh");
                     //Get Substrate
                     addSubPrd(reac,reaction_,"sub");
@@ -1090,7 +1170,8 @@ double SbmlReader::transformUnits( double mvalue,UnitDefinition * ud,string type
             else if(unit->isSecond())
                 return lvalue;
             else {
-                cout << "- check this unit type " << UnitKind_toString(unit->getKind()) << endl;
+		 //#harsha : for Time being I have commented plz don't uncomment this like.
+                //cout << "- check this unit type " << UnitKind_toString(unit->getKind()) << endl;
                 return lvalue;
             }
         }
