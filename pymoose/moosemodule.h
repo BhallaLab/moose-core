@@ -197,7 +197,7 @@ extern "C" {
     ///////////////////////////////////////////
     // Methods for ObjId class
     ///////////////////////////////////////////
-    int moose_ObjId_init(PyObject * self, PyObject * args, PyObject * kwargs);
+    int moose_ObjId_init(_ObjId * self, PyObject * args, PyObject * kwargs);
     long moose_ObjId_hash(_ObjId * self);
     PyObject * moose_ObjId_repr(_ObjId * self);
     PyObject * moose_ObjId_getattro(_ObjId * self, PyObject * attr);
