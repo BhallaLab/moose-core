@@ -900,6 +900,13 @@ extern "C" {
             // }
         }
         get_getsetdefs().clear();
+        // deallocate the class names calloc-ed at initialization.
+        for(map< string, PyTypeObject* >::iterator it = get_moose_classes().begin();
+            it != get_moose_classes().end(); ++it){
+            PyTypeObject * classObject = it->second;
+            free(classObject->tp_name);
+        }
+        get_moose_classes().clear();
         SHELLPTR->doQuit();
         Msg::clearAllMsgs();
         Id::clearAllElements();
@@ -2174,8 +2181,16 @@ extern "C" {
         PyTypeObject * new_class =
                 (PyTypeObject*)PyType_Type.tp_alloc(&PyType_Type, 0);
         // Py_TYPE(new_class) = &PyType_Type;
-        new_class->tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HEAPTYPE;
+        new_class->tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE; // | Py_TPFLAGS_HEAPTYPE;
         /*
+          Thu Jul 9 09:58:09 IST 2015 - commenting out
+          Py_TPFLAGS_HEAPTYPE because it causes segfault on accessing
+          __class__ attribute of instances. Bug # 168. Another
+          possible solution would be to catch __class__ request in
+          tp_getattro and INCREF the class object when returning the
+          same.
+
+          ------
         should we avoid Py_TPFLAGS_HEAPTYPE as it imposes certain
         limitations:
         http://mail.python.org/pipermail/python-dev/2009-July/090921.html
@@ -2531,18 +2546,6 @@ extern "C" {
         return (PyObject*)new_obj;
     }
 
-    // int isValid(ObjId oid){
-    //         if (!oid.id_.isValid()){
-    //             PyErr_SetString(PyExc_ValueError, "Invalid id specified");
-    //             return 0;
-    //         }
-    //         numData = Field<unsigned int>::get(oid, "numData");
-    //         if 
-    //         if (numData <= did){
-    //             PyErr_SetString(PyExc_IndexError, "dataId out of range.");
-    //             return 0;
-    //         }
-    // }
     PyDoc_STRVAR(moose_element_documentation,
                  "moose.element(arg) -> moose object\n"
                  "\n"

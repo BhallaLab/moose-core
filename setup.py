@@ -1,48 +1,48 @@
-# setup.py --- 
-# 
+# setup.py ---
+#
 # Filename: setup.py
-# Description: 
+# Description:
 # Author: subha
-# Maintainer: 
+# Maintainer:
 # Created: Sun Dec  7 20:32:02 2014 (+0530)
-# Version: 
+# Version:
 # Last-Updated: Tue Jun 16 15:40:30 2015 (-0400)
 #           By: Subhasis Ray
 #     Update #: 9
-# URL: 
-# Keywords: 
-# Compatibility: 
-# 
-# 
+# URL:
+# Keywords:
+# Compatibility:
+#
+#
 
-# Commentary: 
-# 
-# 
-# 
-# 
+# Commentary:
+#
+#
+#
+#
 
 # Change log:
-# 
-# 
-# 
-# 
+#
+#
+#
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
 # published by the Free Software Foundation; either version 3, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; see the file COPYING.  If not, write to
 # the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 # Floor, Boston, MA 02110-1301, USA.
 
-# 
-# 
+#
+#
 
 # Code:
 """
@@ -114,7 +114,7 @@ SOURCES=['external/muparser/muParser.cpp',
          'basecode/SetGet.cpp',
          'basecode/OpFuncBase.cpp',
          'basecode/EpFunc.cpp',
-         'basecode/HopFunc.cpp', 
+         'basecode/HopFunc.cpp',
          'basecode/SparseMatrix.cpp',
          'basecode/doubleEq.cpp',
          'basecode/testAsync.cpp',
@@ -268,7 +268,7 @@ SOURCES=['external/muparser/muParser.cpp',
          'sbml/SbmlWriter.cpp',
          'sbml/SbmlReader.cpp',
          'scheduling/Clock.cpp',
-         'scheduling/testScheduling.cpp',             
+         'scheduling/testScheduling.cpp',
          'shell/Shell.cpp',
          'shell/ShellCopy.cpp',
          'shell/ShellThreads.cpp',
@@ -297,7 +297,7 @@ SOURCES=['external/muparser/muParser.cpp',
 
 INCLUDE_DIRS=['/usr/include',
               '/usr/local/include',
-              np.get_include(), 
+              np.get_include(),
               'external/muparser',
               'basecode',
               'biophysics',
@@ -321,20 +321,22 @@ INCLUDE_DIRS=['/usr/include',
               'synapse',
               'utility']
 
-LIBRARIES = ['gsl',
-             'gslcblas', # required to avoid undefined refs on import
-             'hdf5',
-             'sbml']
+LIBRARIES = ['gsl'
+            , 'gslcblas'  # required to avoid undefined refs on import
+            , 'hdf5'
+            , 'sbml'
+            , 'hdf5_hl'   # required to avoid undefined refs on import
+            ]
 
 LIBRARY_DIRS = ['/usr/lib64', '/usr/lib', '/usr/local/lib']
 
-DEFINE_MACROS = [('USE_GSL', None), 
+DEFINE_MACROS = [('USE_GSL', None),
                  ('USE_HDF5', None),
                  ('NDEBUG', None),
                  ('USE_NUMPY', None),
                  ('H5_NO_DEPRECATED_SYMBOLS', None),
                  ('PYMOOSE', None),
-                 ('USE_SBML', None), 
+                 ('USE_SBML', None),
                  ('USE_HDF5', None)]
 
 EXTRA_LINK_ARGS = ['-L/usr/lib64', '-Wl,-R/usr/lib64'] # distutils disregards everything in LIBRARY_DIRS except /usr/local/lib, hence this
@@ -347,8 +349,8 @@ REQUIRES = ['numpy', 'gsl', 'hdf5', 'libsbml'] # using full-dependency
 # users.
 DEPENDENCY_LINKS = ['git+git://git.savannah.gnu.org/gsl.git',
                     'svn+svn://svn.code.sf.net/p/sbml/code/trunk']
-
-EXTRAS_REQUIRE = ['matplotlib', 'PyQt4', 'suds']
+INSTALL_REQUIRES = "requirements.txt"
+EXTRAS_REQUIRE = {} #['matplotlib', 'PyQt4', 'suds']
 
 setup_info = dict(
     name=NAME,
@@ -373,7 +375,7 @@ setup_info = dict(
 
 try:
     from setuptools import setup
-    from setuptools.extenion import Extension
+    from setuptools.extension import Extension
     setup_info['install_requires'] = INSTALL_REQUIRES
     setup_info['extras_require'] = EXTRAS_REQUIRE
     setup_info['dependency_links'] = DEPENDENCY_LINKS
@@ -397,5 +399,5 @@ setup(**setup_info)
 
 
 
-# 
+#
 # setup.py ends here

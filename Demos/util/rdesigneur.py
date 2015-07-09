@@ -15,7 +15,8 @@
 ## latter in the former, including mapping entities like calcium and 
 ## channel conductances, between them.
 ##########################################################################
-
+import imp
+import os
 import moose
 import numpy as np
 import math
@@ -184,11 +185,20 @@ class rdesigneur:
 
         modPos = func.find( "." )
         if ( modPos != -1 ): # Function is in a file, load and check
-            module = func[0:modPos]
+            pathTokens = func[0:modPos].split('/')
+            pathTokens = ['/'] + pathTokens
+            modulePath = os.path.join(*pathTokens[:-1])
+            moduleName = pathTokens[-1]
             funcName = func[modPos+1:bracePos]
-            execfile( module + ".py" )
-            eval( funcName + "('" + protoName + "')" )
-            return True
+            moduleFile, pathName, description = imp.find_module(moduleName, [modulePath])
+            try:
+                module = imp.load_module(moduleName, moduleFile, pathName, description)
+                funcObj = getattr(module, funcName)
+                funcObj(protoName)
+                return True
+            finally:
+                moduleFile.close()
+            return False
         if not func[0:bracePos] in globals():
             raise BuildError( \
                 protoName + "Proto: global function '" +func+"' not known.")
@@ -197,11 +207,8 @@ class rdesigneur:
 
     # Class or file options. True if extension is found in 
     def isKnownClassOrFile( self, name, suffices ):
-        periodPos = name.find( '.' )
-        if periodPos == -1:
-            return False
         for i in suffices:
-            if name.find( i ) > periodPos :
+            if name.rfind( '.'+i ) >= 0 :
                 return True
         return False
 

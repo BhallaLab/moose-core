@@ -2,8 +2,10 @@
 # EMAIL-ID  : aviralg@ncbs.res.in
 
 # MOOSE Dependencies
+libgsl0-dev
 libgsl0ldbl
 libhdf5-dev
+libxml2-dev
 
 # GUI Dependencies
 libqt4-dev
