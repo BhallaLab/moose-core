@@ -32,7 +32,7 @@
 # Code:
 
 from __future__ import print_function
-import io
+from StringIO import StringIO 
 from contextlib import closing
 import warnings
 import platform
@@ -306,12 +306,12 @@ def getmoosedoc(tokens, inherited=False):
     
     """
     indent = '    '
-    with closing(io.StringIO()) as docstring:
+    with closing(StringIO()) as docstring:
         if not tokens:
             return ""
         try:
             class_element = _moose.element('/classes/%s' % (tokens[0]))
-            docstring.write(u'%s\n' % (class_element.docs))
+            docstring.write('%s\n' % (class_element.docs))
         except ValueError:
             raise NameError('name \'%s\' not defined.' % (tokens[0]))
         if len(tokens) > 1:
