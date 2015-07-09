@@ -2176,6 +2176,11 @@ extern "C" {
         // Py_TYPE(new_class) = &PyType_Type;
         new_class->tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE; // | Py_TPFLAGS_HEAPTYPE;
         /*
+          Thu Jul 9 09:58:09 IST 2015 - commenting out
+          Py_TPFLAGS_HEAPTYPE because it causes segfault on accessing
+          __class__ attribute of instances. Bug # 168.
+
+          ------
         should we avoid Py_TPFLAGS_HEAPTYPE as it imposes certain
         limitations:
         http://mail.python.org/pipermail/python-dev/2009-July/090921.html
