@@ -58,6 +58,7 @@
 #include "HDF5WriterBase.h"
 #include "HDF5DataWriter.h"
 
+#include "InputVariable.h"
 #include "NSDFWriter.h"
 
 

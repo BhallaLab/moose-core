@@ -48,7 +48,7 @@
 #ifndef _NSDFWRITER_H
 
 #include "HDF5DataWriter.h"
-#include "InputVariable.h"
+// #include "InputVariable.h"
 
 /**
    compound data type for storing source->data mapping for event data
