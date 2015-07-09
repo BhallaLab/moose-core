@@ -90,7 +90,7 @@ extern "C" {
         return NULL;
     }
 
-    int moose_ObjId_init_from_id(PyObject * self, PyObject * args, PyObject * kwargs)
+    int moose_ObjId_init_from_id(_ObjId * self, PyObject * args, PyObject * kwargs)
     {
         extern PyTypeObject ObjIdType;
         // The char arrays are to avoid deprecation warning
@@ -98,7 +98,6 @@ extern "C" {
         char _dataIndex[] = "dataIndex";
         char _fieldIndex[] = "fieldIndex";
         static char * kwlist[] = {_id, _dataIndex, _fieldIndex, NULL};
-        _ObjId * instance = (_ObjId*)self;
         unsigned int id = 0, data = 0, field = 0;
         PyObject * obj = NULL;
         if (PyArg_ParseTupleAndKeywords(args, kwargs,
@@ -109,30 +108,25 @@ extern "C" {
             if (!Id::isValid(id)){
                 RAISE_INVALID_ID(-1, "moose_ObjId_init_from_id");
             }
-            instance->oid_ = ObjId(Id(id), data, field );
-            if (instance->oid_.bad()){
+            self->oid_ = ObjId(Id(id), data, field );
+            if (self->oid_.bad()){
                 PyErr_SetString(PyExc_ValueError, "Invalid ObjId");
                 return -1;
             }
             return 0;
         }
         PyErr_Clear();
-        if (PyArg_ParseTupleAndKeywords(args,
-                                        kwargs,
+        if (PyArg_ParseTupleAndKeywords(args, kwargs,
                                         "O|III:moose_ObjId_init_from_id",
-                                        kwlist,
-                                        &obj,
-                                        &data,
-                                        &field
-                                        )){
+                                        kwlist, &obj, &data, &field)){
             PyErr_Clear();
             // If first argument is an Id object, construct an ObjId out of it
             if (Id_Check(obj)){
                 if (!Id::isValid(((_Id*)obj)->id_)){
                     RAISE_INVALID_ID(-1, "moose_ObjId_init_from_id");
                 }                    
-                instance->oid_ = ObjId(((_Id*)obj)->id_, data, field );
-                if (instance->oid_.bad()){
+                self->oid_ = ObjId(((_Id*)obj)->id_, data, field );
+                if (self->oid_.bad()){
                     PyErr_SetString(PyExc_ValueError, "Invalid dataIndex/fieldIndex.");
                     return -1;
                 }
@@ -141,8 +135,8 @@ extern "C" {
                 if (!Id::isValid(((_ObjId*)obj)->oid_.id)){
                     RAISE_INVALID_ID(-1, "moose_ObjId_init_from_id");
                 }                    
-                instance->oid_ = ((_ObjId*)obj)->oid_;
-                if (instance->oid_.bad()){
+                self->oid_ = ((_ObjId*)obj)->oid_;
+                if (self->oid_.bad()){
                     PyErr_SetString(PyExc_ValueError, "Invalid ObjId");
                     return -1;
                 }
@@ -152,7 +146,7 @@ extern "C" {
         return -1;
     }
 
-    int moose_ObjId_init_from_path(PyObject * self, PyObject * args,
+    int moose_ObjId_init_from_path(_ObjId * self, PyObject * args,
                                    PyObject * kwargs)
     {
         unsigned int numData = 1;
@@ -165,21 +159,16 @@ extern "C" {
         unsigned int isGlobal = 0;
         static char * kwlist [] = {_path, _size, _global, _dtype, NULL};
         static const string default_type = "Neutral";
-        _ObjId * instance = (_ObjId*)self;
-        instance->oid_ = ObjId( 0, BADINDEX );
+        self->oid_ = ObjId( 0, BADINDEX );
         PyTypeObject * mytype = Py_TYPE(self);
         string mytypename(mytype->tp_name);
         
         // First try to parse the arguments as (parsedPath, n, g, dtype)
         bool parse_success = false;
-        if (PyArg_ParseTupleAndKeywords(args,
-                                        kwargs,
+        if (PyArg_ParseTupleAndKeywords(args, kwargs,
                                         "s|IIs:moose_ObjId_init_from_path",
-                                        kwlist,
-                                        &parsedPath,
-                                        &numData,
-                                        &isGlobal,
-                                        &type)){
+                                        kwlist, &parsedPath, &numData,
+                                        &isGlobal, &type)){
             parse_success = true;
         }
         // we need to clear the parse error so that the callee can try
@@ -196,8 +185,8 @@ extern "C" {
 
         ostringstream err;
         // First see if there is an existing object with at path
-        instance->oid_ = ObjId(path);
-        PyTypeObject * basetype = getBaseClass(self);
+        self->oid_ = ObjId(path);
+        PyTypeObject * basetype = getBaseClass((PyObject*)self);
         string basetype_str;
         if (type == NULL){
             if (basetype == NULL){
@@ -211,16 +200,14 @@ extern "C" {
 
 
         // If oid_ is bad, it can be either a nonexistent path or the root.
-        if (instance->oid_.bad()){
+        if (self->oid_.bad()){
             // is this the root element?
             if ((path == "/") || (path == "/root")){
                 if ((basetype == NULL) || PyType_IsSubtype(mytype, basetype)){
                     return 0;
                 }
-                err << "cannot convert "
-                    << Field<string>::get(instance->oid_, "className")
-                    << " to "
-                    << mytypename
+                err << "cannot convert " << Field<string>::get(self->oid_, "className")
+                    << " to " << mytypename
                     << "To get the existing object use `moose.element(obj)` instead.";
                 PyErr_SetString(PyExc_TypeError, err.str().c_str());
                 return -1;
@@ -235,7 +222,7 @@ extern "C" {
             // element exists at this path, but it does not inherit from any moose class.
             // throw an error
             err << "cannot convert "
-                << Field<string>::get(instance->oid_, "className")
+                << Field<string>::get(self->oid_, "className")
                 << " to "
                 << basetype_str
                 << ". To get the existing object use `moose.element(obj)` instead.";
@@ -255,14 +242,14 @@ extern "C" {
 #else
         //cout << "+";
 #endif
-        instance->oid_ = ObjId(new_id);
+        self->oid_ = ObjId(new_id);
         return 0;
     }
         
-    int moose_ObjId_init(PyObject * self, PyObject * args,
+    int moose_ObjId_init(_ObjId * self, PyObject * args,
                          PyObject * kwargs)
     {
-        if (self && !PyObject_IsInstance(self, (PyObject*)Py_TYPE(self))){
+        if (self && !PyObject_IsInstance((PyObject*)self, (PyObject*)Py_TYPE((PyObject*)self))){
             ostringstream error;
             error << "Expected an melement or subclass. Found "
                   << Py_TYPE(self)->tp_name;
@@ -323,6 +310,19 @@ extern "C" {
              << "path=" << self->oid_.path() << ">";
         return PyString_FromString(repr.str().c_str());
     } // !  moose_ObjId_repr
+
+    PyObject * moose_ObjId_str(_ObjId * self)
+    {
+        if (!Id::isValid(self->oid_.id)){
+            RAISE_INVALID_ID(NULL, "moose_ObjId_str");
+        }
+        ostringstream repr;
+        repr << "<moose." << Field<string>::get(self->oid_, "className") << ": "
+             << "id=" << self->oid_.id.value() << ", "
+             << "dataIndex=" << self->oid_.dataIndex << ", "
+             << "path=" << self->oid_.path() << ">";
+        return PyString_FromString(repr.str().c_str());
+    } // !  moose_ObjId_str
 
     PyDoc_STRVAR(moose_ObjId_getId_documentation,
                  "getId() -> vec\n"
@@ -2026,7 +2026,7 @@ PyObject* setDestFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type1
         0,                                  /* tp_as_mapping */
         (hashfunc)moose_ObjId_hash,         /* tp_hash */
         0,                                  /* tp_call */
-        (reprfunc)moose_ObjId_repr,         /* tp_str */
+        (reprfunc)moose_ObjId_str,         /* tp_str */
         (getattrofunc)moose_ObjId_getattro, /* tp_getattro */
         (setattrofunc)moose_ObjId_setattro, /* tp_setattro */
         0,                                  /* tp_as_buffer */
