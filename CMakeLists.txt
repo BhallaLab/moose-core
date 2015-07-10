@@ -24,14 +24,14 @@ if( CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT MSVC_IDE )
 endif()
 
 ## NOTE: PyMOOSE might break with c++11 support. Disable it.
-##set(CMAKE_CXX_COMPILER "clang++")
-#if(COMPILER_SUPPORTS_CXX11)
-    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-#elseif(COMPILER_SUPPORTS_CXX0X)
-    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-#else()
-    #message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support.")
-#endif()
+#set(CMAKE_CXX_COMPILER "clang++")
+if(COMPILER_SUPPORTS_CXX11)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+elseif(COMPILER_SUPPORTS_CXX0X)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+else()
+    message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support.")
+endif()
 
 # uninstall target
 configure_file(
