@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Tue Jul 23 20:27:30 2013 (+0530)
+// Last-Updated: Fri Jul 10 10:02:45 2015 (+0530)
 //           By: subha
-//     Update #: 11006
+//     Update #: 11007
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -140,6 +140,28 @@ extern void speedTestMultiNodeIntFireNetwork(
 	extern void testSmoldyn();
 #endif
 extern void mooseBenchmarks( unsigned int option );
+
+/**
+   Utility function to get all the individual elements when ALLDATA is dataIndex.
+*/
+vector<ObjId> all_elements(Id id)
+{
+    vector<ObjId> ret;
+    unsigned int ii = 0; // storage for dataIndex
+    unsigned int jj = 0; // storage for fieldIndex
+    unsigned int * iptr = &ii; // this will point to the fastest changing index
+    unsigned int length;
+    if (id.element()->hasFields()){
+        iptr = &jj;
+        length = Field< unsigned int>::get(id, "numField");
+    } else {
+        length = id.element()->numData();
+        }
+    for (*iptr = 0; *iptr < length; ++(*iptr)){
+        ret.push_back(ObjId(id, ii, jj));
+    }
+    return ret;
+}
 
 
 // C-wrapper to be used by Python
@@ -901,12 +923,12 @@ extern "C" {
         }
         get_getsetdefs().clear();
         // deallocate the class names calloc-ed at initialization.
-        for(map< string, PyTypeObject* >::iterator it = get_moose_classes().begin();
-            it != get_moose_classes().end(); ++it){
-            PyTypeObject * classObject = it->second;
-            free(classObject->tp_name);
-        }
-        get_moose_classes().clear();
+        // for(map< string, PyTypeObject* >::iterator it = get_moose_classes().begin();
+        //     it != get_moose_classes().end(); ++it){
+        //     PyTypeObject * classObject = it->second;
+        //     free(classObject->tp_name); // skipping this as not sure whether this is useful - all gets deallocated at exit anyways.
+        // }
+        // get_moose_classes().clear();
         SHELLPTR->doQuit();
         Msg::clearAllMsgs();
         Id::clearAllElements();
@@ -2018,27 +2040,6 @@ extern "C" {
     PyObject * moose_rand(PyObject * dummy)
     {
         return PyFloat_FromDouble(mtrand());
-    }
-    /**
-       Utility function to get all the individual elements when ALLDATA is dataIndex.
-    */
-    vector<ObjId> all_elements(Id id)
-    {
-        vector<ObjId> ret;
-        unsigned int ii = 0; // storage for dataIndex
-        unsigned int jj = 0; // storage for fieldIndex
-        unsigned int * iptr = &ii; // this will point to the fastest changing index
-        unsigned int length;
-        if (id.element()->hasFields()){
-            iptr = &jj;
-            length = Field< unsigned int>::get(id, "numField");
-        } else {
-            length = id.element()->numData();
-        }
-        for (*iptr = 0; *iptr < length; ++(*iptr)){
-            ret.push_back(ObjId(id, ii, jj));
-        }
-        return ret;
     }
     
     PyDoc_STRVAR(moose_wildcardFind_documentation,
