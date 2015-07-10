@@ -37,6 +37,6 @@ install:
       #- cd libsbml-5.11.4 && ./configure --prefix=/usr --with-zlib --with-bzip2 && make && sudo make install && cd ..
 script: 
     - mkdir -p _build && cd _build && cmake -DDEBUG=OFF -DCMAKE_VERBOSE_MAKEFILE=0 ..  && make VERBOSE=0
+    - ctest ${CTEST_ARGS} --output-on-failure 
 
 after_success:
-    - ctest ${CTEST_ARGS} --output-on-failure 
