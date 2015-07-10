@@ -189,15 +189,23 @@ Id SbmlReader::read( string filename, string location, string solverClass)
                                         unsigned pos = pltClean.find('/');
                                         if (pos != std::string::npos)
                                             pltClean = pltClean.substr(pos+1,pltClean.length());
-                                        replace(pltClean.begin(),pltClean.end(),'/','_');
-                                        size_t Iindex = 0;
-                                        while(true)
-                                            { size_t sindex = pltClean.find('[',Iindex);
-                                              size_t eindex = pltClean.find(']',Iindex);
-                                              if (sindex == std::string::npos) break;
-                                              pltClean.erase(sindex,eindex-sindex+1);
-                                              Iindex = eindex;
-                                            } //while true
+                                        /*
+                                        #Harsha:To create a tableName, e.g:'/compartmentName/groupName/ObjectName'
+                                        #       I have changed '/' to '@' and To keep the index of the ObjectName
+                                        #       I have changed '[' to '<' and ']' to '>'.
+                                        #       The same is follwed in the GUI
+                                        */
+                                        replace(pltClean.begin(),pltClean.end(),'/','@');
+                                        replace(pltClean.begin(),pltClean.end(),'[','<');
+                                        replace(pltClean.begin(),pltClean.end(),']','>');
+                                        // size_t Iindex = 0;
+                                        // while(true)
+                                        //     { size_t sindex = pltClean.find('[',Iindex);
+                                        //       size_t eindex = pltClean.find(']',Iindex);
+                                        //       if (sindex == std::string::npos) break;
+                                        //       pltClean.erase(sindex,eindex-sindex+1);
+                                        //       Iindex = eindex;
+                                        //     } //while true
                                         string plotName =  pltClean + ".conc";
                                         Id pltPath(graph.path());
                                         Id tab = s->doCreate( "Table", pltPath, plotName, 1 );
@@ -279,7 +287,7 @@ Id SbmlReader::read( string filename, string location, string solverClass)
                sm->buildForSBML(base_.eref(),&q,solverClass);
                }
                */
-            cout << "base_ " <<base_.path() << "baseId_ " << baseId_.path();
+            //cout << "base_ " <<base_.path() << "baseId_ " << baseId_.path();
             return baseId_;
         }
 
@@ -376,7 +384,7 @@ const SbmlReader::sbmlStr_mooseId SbmlReader::createMolecule( map< string,Id > &
     map< string, Id >molSidcmptMIdMap;
     double transvalue = 0.0;
     int num_species = model_->getNumSpecies();
-
+    cout << "number of Pools " << model_->getNumSpecies()<<endl;
     if (num_species == 0) {
         baseId = Id();
         errorFlag_ = true;
@@ -385,26 +393,7 @@ const SbmlReader::sbmlStr_mooseId SbmlReader::createMolecule( map< string,Id > &
 
     for ( int sindex = 0; sindex < num_species; sindex++ ) {
         Species* spe = model_->getSpecies(sindex);
-        string groupName;
-        XMLNode * annotationSpe = spe->getAnnotation();
-            if( annotationSpe != NULL ) {
-                unsigned int num_children = annotationSpe->getNumChildren();
-                for( unsigned int child_no = 0; child_no < num_children; child_no++ ) {
-                    XMLNode childNode = annotationSpe->getChild( child_no );
-                    if ( childNode.getPrefix() == "moose" && childNode.getName() == "ModelAnnotation" ) {
-                        unsigned int num_gchildren = childNode.getNumChildren();
-                        for( unsigned int gchild_no = 0; gchild_no < num_gchildren; gchild_no++ ) {
-                            XMLNode &grandChildNode = childNode.getChild( gchild_no );
-                            string nodeName = grandChildNode.getName();
-                            if (nodeName == "Group")
-                            {   groupName = (grandChildNode.getChild(0).toXMLString()).c_str();
-                                //group = shell->doCreate( "Neutral", mgr, "groups", 1, MooseGlobal );
-                                // assert( group != Id() );
-                            }
-                        } //gchild
-                    } //moose and modelAnnotation
-                } //child
-            }//annotation Node
+        
         if (!spe) {
             continue;
         }
@@ -455,12 +444,15 @@ const SbmlReader::sbmlStr_mooseId SbmlReader::createMolecule( map< string,Id > &
         Id comptEl = comptSidMIdMap[compt];
         Id meshEntry = Neutral::child( comptEl.eref(), "mesh" );
         string comptPath = Field<string> :: get(comptEl,"path");
+
+        // Get groupName if exist in annotation (in case of Genesis)
+        XMLNode * annotationSpe = spe->getAnnotation();
+        string groupName = getAnnotation_Spe_Reac(annotationSpe);
         string groupString = comptPath+'/'+groupName;
 
         Id groupId;
         if (!groupName.empty())
-        {
-            groupId = Id( comptPath + "/"+groupName );
+        {   groupId = Id( comptPath + "/"+groupName );
             if ( groupId == Id() ) 
                 groupId = shell->doCreate( "Neutral", comptEl, groupName, 1 );
             assert( groupId != Id() );
@@ -622,6 +614,7 @@ void SbmlReader::createReaction(const map< string, Id > &molSidcmptMIdMap ) {
     map< string,EnzymeInfo >enzInfoMap;
 
     for ( unsigned int r = 0; r < model_->getNumReactions(); r++ ) {
+        cout << "number of Enzyme and Reaction " << model_->getNumReactions() <<endl;
         Id reaction_;
         reac = model_->getReaction( r );
         noOfsub_ = 0;
@@ -685,29 +678,16 @@ void SbmlReader::createReaction(const map< string, Id > &molSidcmptMIdMap ) {
                     Id comptRef = molSidcmptMIdMap.find(sp)->second; //gives compartment of sp
                     Id meshEntry = Neutral::child( comptRef.eref(), "mesh" );
                     Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
-                    string groupName;
+                    
+                    // Get groupName if exist in annotation (in case of Genesis)
                     XMLNode * annotationRea = reac->getAnnotation();
-                    if( annotationRea != NULL ) {
-                        unsigned int num_children = annotationRea->getNumChildren();
-                        for( unsigned int child_no = 0; child_no < num_children; child_no++ ) {
-                            XMLNode childNode = annotationRea->getChild( child_no );
-                            if ( childNode.getPrefix() == "moose" && childNode.getName() == "ModelAnnotation" ) {
-                                unsigned int num_gchildren = childNode.getNumChildren();
-                                for( unsigned int gchild_no = 0; gchild_no < num_gchildren; gchild_no++ ) {
-                                    XMLNode &grandChildNode = childNode.getChild( gchild_no );
-                                    string nodeName = grandChildNode.getName();
-                                    if (nodeName == "Group")
-                                        groupName = (grandChildNode.getChild(0).toXMLString()).c_str();
-                                } //gchild
-                            } //moose and modelAnnotation
-                        } //child
-                    }//annotation Node
+                    string groupName = getAnnotation_Spe_Reac(annotationRea);
+                    
                     string comptPath = Field<string> :: get(comptRef,"path");
                     string groupString = comptPath+'/'+groupName;
                     Id groupId;
                     if (!groupName.empty())
-                    {
-                        groupId = Id( comptPath + "/"+groupName );
+                    {   groupId = Id( comptPath + "/"+groupName );
                         if ( groupId == Id() ) 
                             groupId = shell->doCreate( "Neutral", comptRef, groupName, 1 );
                         assert( groupId != Id() );
@@ -737,9 +717,9 @@ void SbmlReader::createReaction(const map< string, Id > &molSidcmptMIdMap ) {
                             return;
                         else if ( !errorFlag_ ) {
                             //cout << " Reaction name " << name << " kf " << rate[0] << " kb " << rate[1]<<endl;
-
-                            Field < double > :: set( reaction_, "Kf", rate[0] );
-                            Field < double > :: set( reaction_, "Kb", rate[1] );
+                            cout << " rate[0] " << rate[0] << " 1 " << rate[1];
+                            Field < double > :: set( reaction_, "numKf", rate[0] );
+                            Field < double > :: set( reaction_, "numKb", rate[1] );
                             /*if (numRcts > 1)
                             rate[0] = rate[0]*pow(1e3,1.0);
                                  cout << "Reaction " << id << " " << name << " " << rate[0] << "  " << rate[1]<<endl;
@@ -794,6 +774,29 @@ void SbmlReader::setupEnzymaticReaction( const EnzymeInfo & einfo,string enzname
 }
 
 /*  get annotation  */
+string SbmlReader :: getAnnotation_Spe_Reac(XMLNode * annotationSpe_Rec)
+{   string groupName = "";
+    //XMLNode * annotationSpe_Rec = spe_rec->getAnnotation();
+    if( annotationSpe_Rec != NULL ) {
+        unsigned int num_children = annotationSpe_Rec->getNumChildren();
+        for( unsigned int child_no = 0; child_no < num_children; child_no++ ) {
+            XMLNode childNode = annotationSpe_Rec->getChild( child_no );
+            if ( childNode.getPrefix() == "moose" && childNode.getName() == "ModelAnnotation" ) {
+                unsigned int num_gchildren = childNode.getNumChildren();
+                for( unsigned int gchild_no = 0; gchild_no < num_gchildren; gchild_no++ ) {
+                    XMLNode &grandChildNode = childNode.getChild( gchild_no );
+                    string nodeName = grandChildNode.getName();
+                    if (nodeName == "Group")
+                    {   groupName = (grandChildNode.getChild(0).toXMLString()).c_str();
+                        //group = shell->doCreate( "Neutral", mgr, "groups", 1, MooseGlobal );
+                        // assert( group != Id() );
+                    }
+                } //gchild
+            } //moose and modelAnnotation
+        } //child
+        }//annotation Node
+    return groupName;
+}
 string SbmlReader::getAnnotation( Reaction* reaction,map<string,EnzymeInfo> &enzInfoMap ) {
     XMLNode * annotationNode = reaction->getAnnotation();
     EnzymeInfo einfo;
