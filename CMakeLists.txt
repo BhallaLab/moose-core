@@ -143,7 +143,7 @@ FIND_PACKAGE(PythonDev REQUIRED)
 
 ################################### SETUP BUILD ################################
 include_directories(msg basecode)
-add_executable(moose-bin basecode/main.cpp)
+add_executable(moose.bin basecode/main.cpp)
 #add_library(moose SHARED basecode/main.cpp)
 #set_target_properties(moose PROPERTIES COMPILE_FLAGS  "-DMOOSE_LIB")
 
@@ -257,7 +257,7 @@ set(MOOSE_LIBRARIES
     basecode
     )
 
-target_link_libraries(moose-bin 
+target_link_libraries(moose.bin 
     "-Wl,--whole-archive"
     ${MOOSE_LIBRARIES}
     ${LIBRARIES}
@@ -354,7 +354,7 @@ endif()
 
 ######################### INSTALL ##############################################
 
-install(TARGETS moose-bin
+install(TARGETS moose.bin
     DESTINATION bin
     COMPONENT moose-core
     )
@@ -449,8 +449,8 @@ else()
         --output-on-failure)
 endif()
 
-ADD_TEST(NAME moose-bin-raw-run
-    COMMAND moose-bin -u -q
+ADD_TEST(NAME moose.bin-raw-run
+    COMMAND moose.bin -u -q
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     )
 
