@@ -46,6 +46,7 @@
 
 #ifdef USE_HDF5
 #ifndef _NSDFWRITER_H
+#define _NSDFWRITER_H
 
 #include "HDF5DataWriter.h"
 
