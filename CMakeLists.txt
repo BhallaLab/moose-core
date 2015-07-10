@@ -215,7 +215,7 @@ set(SYSTEM_LIBRARIES ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES} ${LibXML2_LIBRARIES} $
 # These libraries could be static of dynamic.
 set(LIBRARIES "")
 
-if(HDF5_FOUND)
+if(FOUND_HDF5)
     list(APPEND SYSTEM_LIBRARIES ${HDF5_LIBRARIES})
 endif()
 
