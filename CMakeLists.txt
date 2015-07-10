@@ -23,6 +23,16 @@ if( CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT MSVC_IDE )
         )
 endif()
 
+## NOTE: PyMOOSE might break with c++11 support. Disable it.
+##set(CMAKE_CXX_COMPILER "clang++")
+#if(COMPILER_SUPPORTS_CXX11)
+    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+#elseif(COMPILER_SUPPORTS_CXX0X)
+    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+#else()
+    #message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support.")
+#endif()
+
 # uninstall target
 configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
@@ -62,14 +72,6 @@ include(CheckCXXCompilerFlag)
 
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
 CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-
-if(COMPILER_SUPPORTS_CXX11)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-elseif(COMPILER_SUPPORTS_CXX0X)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-else()
-    message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support.")
-endif()
 
 ############################ BUILD CONFIGURATION #################################
 set(VERIFY 1)
@@ -154,10 +156,12 @@ endif()
 
 ## Setup hdf5
 find_package(HDF5)
-if(HDF5_FOUND)
+if(FOUND_HDF5)
     add_definitions(-DUSE_HDF5)
     include_directories(${HDF5_INCLUDE_DIR})
-endif(HDF5_FOUND)
+else(FOUND_HDF5)
+    message("++ HDF5 not found. Disabling support")
+endif(FOUND_HDF5)
 
 find_package(Termcap)
 find_package(Readline)
@@ -212,7 +216,7 @@ set(SYSTEM_LIBRARIES ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES} ${LibXML2_LIBRARIES} $
 set(LIBRARIES "")
 
 if(HDF5_FOUND)
-    list(APPEND SYSTEM_LIBRARIES ${HDF5_LIBRARY})
+    list(APPEND SYSTEM_LIBRARIES ${HDF5_LIBRARIES})
 endif()
 
 if(LIBSBML_FOUND)

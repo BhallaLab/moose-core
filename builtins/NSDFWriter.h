@@ -50,7 +50,7 @@
 
 #include "HDF5DataWriter.h"
 
-class InputVariable;
+//class InputVariable;
 
 /**
    compound data type for storing source->data mapping for event data
