@@ -48,9 +48,9 @@
 #include "header.h"
 #include "hdf5.h"
 
+#include "NSDFWriter.h"
 #include "InputVariable.h"
 
-#include "NSDFWriter.h"
 
 const Cinfo * InputVariable::initCinfo()
 {
