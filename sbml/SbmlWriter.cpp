@@ -141,41 +141,8 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
    			std::size_t found = msgpath.find('/', 1);
    			string str2 = msgpath.substr(found,msgpath.length());
    			vector<string> msgdest = Field< vector<string> >::get( msgMgrs[i], "destFieldsOnE2" );
-   			// for (unsigned int j =0; j < msgdest.size(); ++j)
-   			// 	cout << " msgdest " << msgdest[j]<< endl;
    			plots += str2+";";
       	}
-
-      // vector< Id > graphsrc =LookupField< string, vector< Id > >::get(*itrgrp, "neighbors", "requestOut" );
-      // for (vector <Id> :: iterator itrsrc = graphsrc.begin();itrsrc != graphsrc.end();itrsrc++)
-      // 	{string species = nameString(Field<string> :: get(*itrsrc,"name"));
-      // 	}	
-      /*
-      vector< Id > graphsrc =LookupField< string, vector< Id > >::get(*itrgrp, "neighbors", "requestOut" );
-      for (vector <Id> :: iterator itrsrc = graphsrc.begin();itrsrc != graphsrc.end();itrsrc++)
-	{  string species = nameString(Field<string> :: get(*itrsrc,"name"));
-	   string speciespath = (Field<string> :: get(*itrsrc,"path"));
-		cout << " \n species name " << species<<  " " << speciespath<< endl;
-	   vector< ObjId > msgMgrs = 
-                Field< vector< ObjId > >::get( *itrsrc, "msgOut" );
-       for ( unsigned int i = 0; i <  msgMgrs.size(); ++i )
-       {    string msgclssname = Field< string >::get( msgMgrs[i], "className" );
-   			Id msgId = Field< Id >::get( msgMgrs[i], "e2" );
-   			string msgpath = Field <string> :: get(msgId,"path");
-   			vector<string> msgdest = Field< vector<string> >::get( msgMgrs[i], "destFieldsOnE2" );
-   			// for (unsigned int j =0; j < msgdest.size(); ++j)
-   			// 	cout << "msgdest " << msgdest[j]<< endl;
-      //  		cout << i << " msg " << msgMgrs[i] << " msgpath " << msgpath<<endl;
-       		
-       }
-
-
-	   Id comptId = getCompt(*itrsrc).id;
-	   string speciesCompt = nameString(Field<string> :: get(comptId,"name"));
-	   plots += "/"+speciesCompt+"/"+species+";";
-	   
-	}
-	*/
     }
   
   ostringstream modelAnno;
@@ -212,8 +179,7 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
   vector< ObjId > chemCompt;
   wildcardFind(path+"/##[ISA=ChemCompt]",chemCompt);
   for ( vector< ObjId >::iterator itr = chemCompt.begin(); itr != chemCompt.end();itr++)
-    { //cout << "itr " << *itr << "name " << itr->eref() <<endl;
-      //TODO: CHECK need to check how do I get ObjectDimensions
+    { //TODO: CHECK need to check how do I get ObjectDimensions
       vector < unsigned int>dims;
       unsigned int dims_size;
       
@@ -265,7 +231,6 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	  for (vector <ObjId> :: iterator itrp = Compt_spe.begin();itrp != Compt_spe.end();itrp++)
 	    { string objclass = Field<string> :: get(*itrp,"className");
 	      string clean_poolname = cleanNameId(*itrp,index);
-	      // cout << " searching for parent which may be compartment or Neutral" << getgroup <<endl;
 	      double initAmt = Field<double> :: get(*itrp,"nInit");
 	      Species *sp = cremodel_->createSpecies();
 	      sp->setId( clean_poolname );
@@ -301,7 +266,7 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	      //
 	      sp->setInitialAmount( initAmt ); 
 	      string groupName = getGroupinfo(*itrp);
-		  if (!groupName.empty())
+	  	  if (!groupName.empty())
 			{ 
 		       	ostringstream modelAnno;
 	  		  	modelAnno << "<moose:ModelAnnotation>\n";
