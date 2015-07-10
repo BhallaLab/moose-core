@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Thu Oct  4 20:04:06 2012 (+0530)
+# Last-Updated: Fri Jul 10 11:54:30 2015 (+0530)
 #           By: subha
-#     Update #: 2170
+#     Update #: 2172
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -268,14 +268,30 @@ def getfielddoc(tokens, indent=''):
         If the specified fieldName is not present in the specified class.
     """
     assert(len(tokens) > 1)
-    class_element = _moose.element('/classes/'+tokens[0])
-    for finfo in class_element.children:
-        for field_element in finfo:
-            if field_element.fieldName == tokens[1]: # TODO - this name clashes with Neutral.name.
-                return '%s%s.%s: %s - %s\n\t%s\n' % \
-                    (indent, tokens[0], tokens[1], 
-                     field_element.type, field_element.path.split('/')[-1].split('[')[0], field_element.docs)    
-    raise NameError('`%s` has no field called `%s`' 
+    classname = tokens[0]
+    fieldname = tokens[1]
+    while True:
+        try:
+            classelement = _moose.element('/classes/' + classname)
+            for finfo in classelement.children:
+                for fieldelement in finfo:
+                    baseinfo = '' 
+                    if classname != tokens[0]:
+                        baseinfo = ' (inherited from {})'.format(classname)
+                    if fieldelement.fieldName == fieldname:
+                        # The field elements are
+                        # /classes/{ParentClass}[0]/{fieldElementType}[N].
+                        finfotype = fieldelement.name
+                        return '{indent}{classname}.{fieldname}: type={type}, finfotype={finfotype}{baseinfo}\n\t{docs}\n'.format(
+                            indent=indent, classname=tokens[0],
+                            fieldname=fieldname,
+                            type=fieldelement.type,
+                            finfotype=finfotype,
+                            baseinfo=baseinfo,
+                            docs=fieldelement.docs)
+            classname = classelement.baseClass
+        except ValueError:
+            raise NameError('`%s` has no field called `%s`' 
                     % (tokens[0], tokens[1]))
                     
     
@@ -311,12 +327,12 @@ def getmoosedoc(tokens, inherited=False):
             return ""
         try:
             class_element = _moose.element('/classes/%s' % (tokens[0]))
-            docstring.write('%s\n' % (class_element.docs))
         except ValueError:
             raise NameError('name \'%s\' not defined.' % (tokens[0]))
         if len(tokens) > 1:
             docstring.write(getfielddoc(tokens))
         else:
+            docstring.write('%s\n' % (class_element.docs))
             append_finfodocs(tokens[0], docstring, indent)
             if inherited:
                 mro = eval('_moose.%s' % (tokens[0])).mro()
