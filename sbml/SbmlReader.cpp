@@ -384,7 +384,6 @@ const SbmlReader::sbmlStr_mooseId SbmlReader::createMolecule( map< string,Id > &
     map< string, Id >molSidcmptMIdMap;
     double transvalue = 0.0;
     int num_species = model_->getNumSpecies();
-    cout << "number of Pools " << model_->getNumSpecies()<<endl;
     if (num_species == 0) {
         baseId = Id();
         errorFlag_ = true;
@@ -614,7 +613,6 @@ void SbmlReader::createReaction(const map< string, Id > &molSidcmptMIdMap ) {
     map< string,EnzymeInfo >enzInfoMap;
 
     for ( unsigned int r = 0; r < model_->getNumReactions(); r++ ) {
-        cout << "number of Enzyme and Reaction " << model_->getNumReactions() <<endl;
         Id reaction_;
         reac = model_->getReaction( r );
         noOfsub_ = 0;
