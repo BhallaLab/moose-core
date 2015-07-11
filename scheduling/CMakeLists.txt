@@ -3,8 +3,8 @@ file(GLOB scheduling_SRC
     "*.cpp"
 )
 
-IF(NOTIFY_AT_EACH_SECOND)
-    ADD_DEFINITIONS("-DNOTIFY_AT_EACH_SECOND")
+IF(NOTIFY_PROGRESS)
+    ADD_DEFINITIONS("-DNOTIFY_PROGRESS")
 ENDIF()
 
 include_directories(../msg)

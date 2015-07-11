@@ -36,7 +36,7 @@ install:
       #- tar -xzvf libSBML-5.11.4-core-src.tar.gz 
       #- cd libsbml-5.11.4 && ./configure --prefix=/usr --with-zlib --with-bzip2 && make && sudo make install && cd ..
 script: 
-    - mkdir -p _build && cd _build && cmake -DDEBUG=ON .. && make VERBOSE=0
-    - ctest ${CTEST_ARGS} --output-on-failure 
+    - mkdir -p _build && cd _build && cmake -DDEBUG=ON .. && make
+    - ctest --output-on-failure 
 
 after_success:
