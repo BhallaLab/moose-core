@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Jul 12 11:53:50 2013 (+0530)
 # Version: 
-# Last-Updated: Thu Jul 18 18:27:43 2013 (+0530)
+# Last-Updated: Sat Jul 11 18:59:17 2015 (+0530)
 #           By: subha
-#     Update #: 717
+#     Update #: 730
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -101,8 +101,7 @@ class HHChanView(QtGui.QWidget):
             return self.controlPanel
 
     def getChannels(self, root='/library'):
-        if isinstance(root, str):
-            root = moose.element(root)
+        root = moose.element(root)
         for channel in moose.wildcardFind('%s/#[ISA=HHChannel]' % (root.path)):
             self.channels[channel.name] = channel
         return self.channels
@@ -154,12 +153,16 @@ class HHChanView(QtGui.QWidget):
         self.mhaxes.set_title('Activation/Inactivation')
         self.tauaxes = self.figure.add_subplot(2, 1, 2)
         self.tauaxes.set_title('Tau')
+        print self.channels
         for item in self.getChannelListWidget().selectedItems():
+            print item.text()
             chan = self.channels[str(item.text())]
             if chan.Xpower > 0:
-                self.__plotGate(chan.gateX.path)
+                path = '{}/gateX'.format(chan.path)
+                self.__plotGate(path)
             if chan.Ypower > 0:
-                self.__plotGate(chan.gateY.path)
+                path = '{}/gateY'.format(chan.path)
+                self.__plotGate(path)
             # if chan.Zpower > 0:
             #     self.__plotGate(chan.gateZ.path, mlabel='z', taulabel='tau-z')
         self.mhaxes.legend()
@@ -443,8 +446,9 @@ class CellView(QtGui.QWidget):
 
 if __name__ == '__main__':
     app = QtGui.QApplication([])
-    # win = HHChanView()
+    win1 = HHChanView()
     win = CellView()
+    win1.show()
     win.show()
     sys.exit(app.exec_())
 
