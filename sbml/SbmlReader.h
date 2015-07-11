@@ -70,6 +70,7 @@ private:
     void pushParmstoVector( const ASTNode* p,vector <string> & parameters );
     void getParameters( const ASTNode* node,vector <string> & parameters );
     void setupMMEnzymeReaction( Reaction * reac,string id ,string name,const map<string, Id> &);
+    string getAnnotation_Spe_Reac( XMLNode * annotationSpe_Rec );
     string getAnnotation( Reaction* reaction,map<string,EnzymeInfo> & );
     void setupEnzymaticReaction( const EnzymeInfo & einfo,string name,const map< string, Id > & ,string name1);
     void findModelParent( Id cwe, const string& path,Id& parentId, string& modelName );

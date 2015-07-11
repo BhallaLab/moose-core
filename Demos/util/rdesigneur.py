@@ -753,7 +753,7 @@ class rdesigneur:
     # prototypes.
     #################################################################
 def transformNMDAR( path ):
-    for i in moose.wildcardFind( path + "/##/#NMDA#[ISA!=NMDAChan" ):
+    for i in moose.wildcardFind( path + "/##/#NMDA#[ISA!=NMDAChan]" ):
         chanpath = i.path
         pa = i.parent
         i.name = '_temp'
@@ -812,6 +812,7 @@ def buildSyn( name, compt, Ek, tau1, tau2, Gbar, CM ):
     syn.tau1 = tau1
     syn.tau2 = tau2
     syn.Gbar = Gbar * compt.Cm / CM
+    #print "BUILD SYN: ", name, Gbar, syn.Gbar, CM
     moose.connect( compt, 'channel', syn, 'channel' )
     sh = moose.SimpleSynHandler( syn.path + '/sh' )
     moose.connect( sh, 'activationOut', syn, 'activation' )
@@ -911,7 +912,7 @@ def addSpineProto( name = 'spine', \
             chan.name = i[0]
             moose.setCwe( '/' )
         chan.Gbar = i[1] * head.Cm / CM
-        print "CHAN = ", chan, chan.tick, chan.Gbar
+        #print "CHAN = ", chan, chan.tick, chan.Gbar
         moose.connect( head, 'channel', chan, 'channel' )
         if i[2] and caTau > 0.0:
             moose.connect( chan, 'IkOut', conc, 'current' )

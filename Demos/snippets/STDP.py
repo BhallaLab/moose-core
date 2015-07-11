@@ -9,6 +9,8 @@
 #**********************************************************************/
 
 ##### Author: Aditya Gilra, NCBS, Bangalore, October, 2014.  
+##### Fixed numpy imports and global variables: Subhasis Ray, Fri Jul 10 19:34:53 IST 2015
+
 
 '''
 Connect two cells via a plastic synapse (STDPSynHandler).  
@@ -19,7 +21,7 @@ This ia a pseudo-STDP protocol and we get the STDP rule.
 
 import moose
 import matplotlib.pyplot as plt
-import numpy as np
+from numpy import arange, array
 
 # ###########################################
 # Neuron models
@@ -32,12 +34,19 @@ Vreset = -55e-3 # V     # in current steps, Vreset is same as pedestal
 R = 1e8 # Ohm
 tau = 10e-3 # s
 refrT = 2e-3 # s
+network = None
+syn = None
+Vms = None
+weight = 0.0
+spikes = None
+dt = 1e-6
 
 def setupModel():
     '''
     Set up two LIF neurons and connect them by an STDPSynHandler.
     Set up some tables, and reinit MOOSE before simulation.
     '''
+    global network, syn, Vms, weight, spikes, dt
     # ###########################################
     # Initialize neuron group
     # ###########################################
@@ -118,12 +127,13 @@ def setupModel():
     moose.setClock( 9, dt )
     moose.reinit()
 
+
 # function to make the aPlus and aMinus settle to equilibrium values
-settletime = 100e-3 # s
 def reset_settle():
     """ Call this between every pre-post pair
     to reset the neurons and make them settle to rest.
     """
+    settletime = 100e-3 # s
     syn.synapse[0].weight = weight # V
     moose.start(settletime)
 
@@ -141,7 +151,7 @@ def main():
     '''
     On the command-line, in Demos/snippets directory, run ``python STDP.py``
     '''
-
+    setupModel()
     dwlist_neg = []
     ddt = 2e-3 # s
     t_extent = 20e-3 # s
