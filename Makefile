@@ -429,6 +429,8 @@ endif
 # There are some unix/gcc specific paths here. Should be cleaned up in future.
 pymoose: python/moose/_moose.so
 pymoose: CXXFLAGS += -DPYMOOSE $(PYTHON_CFLAGS)
+# fix: add include dir for numpy headers required by pymoose/moosemodule.cpp
+pymoose: CXXFLAGS += -I$(shell python -c 'from numpy import get_include; print get_include()')
 pymoose: OBJLIBS += pymoose/_pymoose.o
 pymoose: LDFLAGS += $(PYTHON_LDFLAGS)
 export CXXFLAGS
