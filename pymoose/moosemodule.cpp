@@ -78,7 +78,7 @@
 #include <Python.h>
 #include <structmember.h> // This defines the type id macros like T_STRING
 #ifdef USE_NUMPY
-#include "numpy/arrayobject.h"
+#include <numpy/arrayobject.h>
 #endif
 
 #include <iostream>
