@@ -104,56 +104,60 @@ class NetworkML():
             [ self.createProjection(proj, Efactor, Tfactor) for proj in projections ]
 
         _logger.info("Creating inputs in /elec ... ")
-        self.createInputs() # create inputs (only current pulse supported)
+        allinputs = self.network.findall(".//{"+nml_ns+"}inputs")
+        for inputs in allinputs:
+            units = inputs.attrib['units']
+            # see pg 219 (sec 13.2) of Book of Genesis
+            if units == 'Physiological Units': 
+                Vfactor, Tfactor, Ifactor = 1e-3, 1e-3, 1e-6 
+            else:
+                Vfactor, Tfactor, Ifactor = 1.0, 1.0, 1.0
+            [ self.createInput(inputelem, Vfactor, Tfactor, Ifactor) for
+                    inputelem in self.network.findall(".//{"+nml_ns+"}input") 
+                    ]
+
         return (self.populationDict,self.projectionDict)
 
-    def createInputs(self):
-        for inputs in self.network.findall(".//{"+nml_ns+"}inputs"):
-            units = inputs.attrib['units']
-            if units == 'Physiological Units': # see pg 219 (sec 13.2) of Book of Genesis
-                Vfactor = 1e-3 # V from mV
-                Tfactor = 1e-3 # s from ms
-                Ifactor = 1e-6 # A from microA
-            else:
-                Vfactor = 1.0
-                Tfactor = 1.0
-                Ifactor = 1.0
-            for inputelem in inputs.findall(".//{"+nml_ns+"}input"):
-                inputname = inputelem.attrib['name']
-                pulseinput = inputelem.find(".//{"+nml_ns+"}pulse_input")
-                if pulseinput is not None:
-                    ## If /elec doesn't exists it creates /elec
-                    ## and returns a reference to it. If it does,
-                    ## it just returns its reference.
-                    moose.Neutral('/elec')
-                    pulsegen = moose.PulseGen('/elec/pulsegen_'+inputname)
-                    iclamp = moose.DiffAmp('/elec/iclamp_'+inputname)
-                    iclamp.saturation = 1e6
-                    iclamp.gain = 1.0
-                    pulsegen.trigMode = 0 # free run
-                    pulsegen.baseLevel = 0.0
-                    pulsegen.firstDelay = float(pulseinput.attrib['delay'])*Tfactor
-                    pulsegen.firstWidth = float(pulseinput.attrib['duration'])*Tfactor
-                    pulsegen.firstLevel = float(pulseinput.attrib['amplitude'])*Ifactor
-                    pulsegen.secondDelay = 1e6 # to avoid repeat
-                    pulsegen.secondLevel = 0.0
-                    pulsegen.secondWidth = 0.0
-                    ## do not set count to 1, let it be at 2 by default
-                    ## else it will set secondDelay to 0.0 and repeat the first pulse!
-                    #pulsegen.count = 1
-                    moose.connect(pulsegen,'output',iclamp,'plusIn')
-                    target = inputelem.find(".//{"+nml_ns+"}target")
-                    population = target.attrib['population']
-                    for site in target.findall(".//{"+nml_ns+"}site"):
-                        cell_id = site.attrib['cell_id']
-                        if 'segment_id' in site.attrib: segment_id = site.attrib['segment_id']
-                        else: segment_id = 0 # default segment_id is specified to be 0
-                        ## population is populationname, self.populationDict[population][0] is cellname
-                        cell_name = self.populationDict[population][0]
-                        segment_path = self.populationDict[population][1][int(cell_id)].path+'/'+\
-                            self.cellSegmentDict[cell_name][0][segment_id][0]
-                        compartment = moose.Compartment(segment_path)
-                        moose.connect(iclamp,'output',compartment,'injectMsg')
+    def createInput(self, inputelem, Vfactor, Tfactor, Ifactor):
+        """Create input """
+        inputname = inputelem.attrib['name']
+        pulseinput = inputelem.find(".//{"+nml_ns+"}pulse_input")
+        if pulseinput is not None:
+            ## If /elec doesn't exists it creates /elec
+            ## and returns a reference to it. If it does,
+            ## it just returns its reference.
+            moose.Neutral('/elec')
+            pulsegen = moose.PulseGen('/elec/pulsegen_'+inputname)
+            iclamp = moose.DiffAmp('/elec/iclamp_'+inputname)
+            iclamp.saturation = 1e6
+            iclamp.gain = 1.0
+            pulsegen.trigMode = 0 # free run
+            pulsegen.baseLevel = 0.0
+            pulsegen.firstDelay = float(pulseinput.attrib['delay'])*Tfactor
+            pulsegen.firstWidth = float(pulseinput.attrib['duration'])*Tfactor
+            pulsegen.firstLevel = float(pulseinput.attrib['amplitude'])*Ifactor
+            pulsegen.secondDelay = 1e6 # to avoid repeat
+            pulsegen.secondLevel = 0.0
+            pulsegen.secondWidth = 0.0
+            ## do not set count to 1, let it be at 2 by default
+            ## else it will set secondDelay to 0.0 and repeat the first pulse!
+            #pulsegen.count = 1
+            moose.connect(pulsegen,'output',iclamp,'plusIn')
+            target = inputelem.find(".//{"+nml_ns+"}target")
+            population = target.attrib['population']
+            for site in target.findall(".//{"+nml_ns+"}site"):
+                cell_id = site.attrib['cell_id']
+                if 'segment_id' in site.attrib: segment_id = site.attrib['segment_id']
+                else: segment_id = 0 # default segment_id is specified to be 0
+                ## population is populationname, self.populationDict[population][0] is cellname
+                cell_name = self.populationDict[population][0]
+                segment_path = self.populationDict[population][1][int(cell_id)].path+'/'+\
+                    self.cellSegmentDict[cell_name][0][segment_id][0]
+                compartment = moose.Compartment(segment_path)
+                _logger.debug("Connecting {}:output to {}:injectMst".format(
+                    iclamp, compartment)
+                    )
+                moose.connect(iclamp,'output',compartment,'injectMsg')
 
     def createPopulation(self, population):
         """Create a population with given cell type """
