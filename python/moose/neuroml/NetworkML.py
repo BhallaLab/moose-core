@@ -22,6 +22,24 @@ import moose
 from moose.neuroml.utils import meta_ns, nml_ns, find_first_file, tweak_model
 from moose import utils
 
+import logging
+logging.basicConfig(level=logging.DEBUG,
+    format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+    datefmt='%m-%d %H:%M',
+    filename='/tmp/moose_neuroml.log',
+    filemode='w')
+
+# define a Handler which writes INFO messages or higher to the sys.stderr
+console = logging.StreamHandler()
+console.setLevel(logging.INFO)
+# set a format which is simpler for console use
+formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
+# tell the handler to use this format
+console.setFormatter(formatter)
+# add the handler to the root logger
+logging.getLogger('moose.nml.channelml').addHandler(console)
+_logger = logging.getLogger('moose.nml.channelml')
+
 class NetworkML():
 
     def __init__(self, nml_params):
@@ -53,12 +71,12 @@ class NetworkML():
             to ask neuroml to combine segments belonging to a cable
             (Neuron generates multiple segments per section).
         """
-        print("reading file ... ", filename)
+        _logger.info("Reading file %s " % filename)
         tree = ET.parse(filename)
         root_element = tree.getroot()
-        print("Tweaking model ... ")
+        _logger.info("Tweaking model ... ")
         tweak_model(root_element, params)
-        print("Loading model into MOOSE ... ")
+        _logger.info("Loading model into MOOSE ... ")
         return self.readNetworkML(root_element,cellSegmentDict,params,root_element.attrib['lengthUnits'])
 
     def readNetworkML(self,network,cellSegmentDict,params={},lengthUnits="micrometer"):
@@ -73,11 +91,15 @@ class NetworkML():
         self.network = network
         self.cellSegmentDict = cellSegmentDict
         self.params = params
-        print("creating populations ... ")
-        self.createPopulations() # create cells
-        print("creating connections ... ")
+
+        self.populationDict = {}
+        [ self.createPopulation(pop) for pop in 
+                self.network.findall(".//{"+nml_ns+"}population")
+                ]
+
+        _logger.info("Creating connections ... ")
         self.createProjections() # create connections
-        print("creating inputs in /elec ... ")
+        _logger.info("Creating inputs in /elec ... ")
         self.createInputs() # create inputs (only current pulse supported)
         return (self.populationDict,self.projectionDict)
 
@@ -129,52 +151,58 @@ class NetworkML():
                         compartment = moose.Compartment(segment_path)
                         moose.connect(iclamp,'output',compartment,'injectMsg')
 
-    def createPopulations(self):
-        self.populationDict = {}
-        for population in self.network.findall(".//{"+nml_ns+"}population"):
-            cellname = population.attrib["cell_type"]
-            populationname = population.attrib["name"]
-            print("loading", populationname)
+    def createPopulation(self, population):
+        """Create a population with given cell type """
+        cellname = population.attrib["cell_type"]
+        populationname = population.attrib["name"]
+
+        if not moose.exists('/library/'+cellname):
             ## if cell does not exist in library load it from xml file
-            if not moose.exists('/library/'+cellname):
-                mmlR = MorphML(self.nml_params)
-                model_filenames = (cellname+'.xml', cellname+'.morph.xml')
-                success = False
-                for model_filename in model_filenames:
-                    model_path = find_first_file(model_filename,self.model_dir)
-                    if model_path is not None:
-                        cellDict = mmlR.readMorphMLFromFile(model_path, self.params)
-                        success = True
-                        break
-                if not success:
-                    raise IOError(
-                        'For cell {0}: files {1} not found under {2}.'.format(
-                            cellname, model_filenames, self.model_dir
-                        )
+            mmlR = MorphML(self.nml_params)
+            model_filenames = (cellname+'.xml', cellname+'.morph.xml')
+            success = False
+            for model_filename in model_filenames:
+                model_path = find_first_file(model_filename,self.model_dir)
+                if model_path is not None:
+                    cellDict = mmlR.readMorphMLFromFile(model_path, self.params)
+                    success = True
+                    break
+            if not success:
+                raise IOError(
+                    'For cell {0}: files {1} not found under {2}.'.format(
+                        cellname, model_filenames, self.model_dir
                     )
-                self.cellSegmentDict.update(cellDict)
-            libcell = moose.Neuron('/library/'+cellname) #added cells as a Neuron class.
-            self.populationDict[populationname] = (cellname,{})
-            moose.Neutral('/cells')
-            for instance in population.findall(".//{"+nml_ns+"}instance"):
-                instanceid = instance.attrib['id']
-                location = instance.find('./{'+nml_ns+'}location')
-                rotationnote = instance.find('./{'+meta_ns+'}notes')
-                if rotationnote is not None:
-                    ## the text in rotationnote is zrotation=xxxxxxx
-                    zrotation = float(string.split(rotationnote.text,'=')[1])
-                else:
-                    zrotation = 0
-                ## deep copies the library cell to an instance under '/cells' named as <arg3>
-                ## /cells is useful for scheduling clocks as all sim elements are in /cells
-                cellid = moose.copy(libcell,moose.Neutral('/cells'),populationname+"_"+instanceid)
-                cell = moose.Neuron(cellid)
-                self.populationDict[populationname][1][int(instanceid)]=cell
-                x = float(location.attrib['x'])*self.length_factor
-                y = float(location.attrib['y'])*self.length_factor
-                z = float(location.attrib['z'])*self.length_factor
-                self.translate_rotate(cell,x,y,z,zrotation)
-                
+                )
+            self.cellSegmentDict.update(cellDict)
+
+        libcell = moose.Neuron('/library/'+cellname) #added cells as a Neuron class.
+        self.populationDict[populationname] = (cellname,{})
+        moose.Neutral('/cells')
+        _logger.info(
+                "Creating population {} of cell type {}".format(
+                    populationname, cellname
+                    )
+                )
+
+        for instance in population.findall(".//{"+nml_ns+"}instance"):
+            instanceid = instance.attrib['id']
+            location = instance.find('./{'+nml_ns+'}location')
+            rotationnote = instance.find('./{'+meta_ns+'}notes')
+            if rotationnote is not None:
+                ## the text in rotationnote is zrotation=xxxxxxx
+                zrotation = float(string.split(rotationnote.text,'=')[1])
+            else:
+                zrotation = 0
+            ## deep copies the library cell to an instance under '/cells' named as <arg3>
+            ## /cells is useful for scheduling clocks as all sim elements are in /cells
+            cellid = moose.copy(libcell,moose.Neutral('/cells'),populationname+"_"+instanceid)
+            cell = moose.Neuron(cellid)
+            self.populationDict[populationname][1][int(instanceid)]=cell
+            x = float(location.attrib['x'])*self.length_factor
+            y = float(location.attrib['y'])*self.length_factor
+            z = float(location.attrib['z'])*self.length_factor
+            self.translate_rotate(cell,x,y,z,zrotation)
+            
     def translate_rotate(self,obj,x,y,z,ztheta): # recursively translate all compartments under obj
         for childId in obj.children:
             try:
@@ -216,7 +244,7 @@ class NetworkML():
                 Tfactor = 1.0
         for projection in self.network.findall(".//{"+nml_ns+"}projection"):
             projectionname = projection.attrib["name"]
-            print("setting",projectionname)
+            _logger.info("Setting %s" % projectionname)
             source = projection.attrib["source"]
             target = projection.attrib["target"]
             self.projectionDict[projectionname] = (source,target,[])
