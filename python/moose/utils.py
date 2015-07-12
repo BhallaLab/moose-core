@@ -32,10 +32,12 @@ from .print_utils import *
 from .sim_utils import *
 
 from .backend import graphviz
+from .backend.summary import summary
 from .topology import topology
 from .moose_constants import *
 
 import re
+
 # from PyQt4 import QtCore, Qt
 
 # tableEmitter = QtCore.QObject()

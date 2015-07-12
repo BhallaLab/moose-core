@@ -154,10 +154,15 @@ class NetworkML():
                 segment_path = self.populationDict[population][1][int(cell_id)].path+'/'+\
                     self.cellSegmentDict[cell_name][0][segment_id][0]
                 compartment = moose.Compartment(segment_path)
+                _logger.debug("Adding pulse at {}: {}".format(
+                    segment_path, pulsegen.firstLevel )
+                    )
+                    
                 _logger.debug("Connecting {}:output to {}:injectMst".format(
                     iclamp, compartment)
                     )
-                moose.connect(iclamp,'output',compartment,'injectMsg')
+
+                moose.connect(iclamp, 'output', compartment, 'injectMsg')
 
     def createPopulation(self, population):
         """Create a population with given cell type """
