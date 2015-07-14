@@ -12,7 +12,6 @@ import os
 os.environ['NUMPTHREADS'] = '1'
 import sys
 sys.path.append('../../../python/')
-
 import moose
 from moose.utils import *
 import moose.utils as mu
@@ -49,7 +48,9 @@ def loadGran98NeuroML_L123(filename):
     ylabel('Voltage (V)')
     print("Showing plots ...")
     show( block = False )
-    savefig( "%s.png" % __file__)
+    outfile = "%s.png" % __file__
+    print("Writing results to %s" % outfile)
+    savefig(outfile)
 
 if __name__ == "__main__":
     if len(sys.argv)<2:
