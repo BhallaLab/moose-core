@@ -103,9 +103,9 @@ class NetworkML():
                 Tfactor = 1.0
             [ self.createProjection(proj, Efactor, Tfactor) for proj in projections ]
 
-        _logger.info("Creating inputs in /elec ... ")
         allinputs = self.network.findall(".//{"+nml_ns+"}inputs")
         for inputs in allinputs:
+            _logger.info("Creating input under /elec ")
             units = inputs.attrib['units']
             # see pg 219 (sec 13.2) of Book of Genesis
             if units == 'Physiological Units': 
@@ -133,6 +133,8 @@ class NetworkML():
             iclamp.gain = 1.0
             pulsegen.trigMode = 0 # free run
             pulsegen.baseLevel = 0.0
+            _logger.debug("Tfactor, Ifactor: %s, %s" % (Tfactor, Ifactor))
+            _logger.debug("Pulsegen attributes: %s" % str(pulseinput.attrib))
             pulsegen.firstDelay = float(pulseinput.attrib['delay'])*Tfactor
             pulsegen.firstWidth = float(pulseinput.attrib['duration'])*Tfactor
             pulsegen.firstLevel = float(pulseinput.attrib['amplitude'])*Ifactor
