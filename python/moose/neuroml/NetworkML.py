@@ -192,7 +192,7 @@ class NetworkML():
         self.populationDict[populationname] = (cellname,{})
         moose.Neutral('/cells')
         _logger.info(
-                "Creating population {} of cell type {}".format(
+                "Creating population {0} of cell type {1}".format(
                     populationname, cellname
                     )
                 )
