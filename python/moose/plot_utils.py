@@ -135,7 +135,8 @@ def plotTables(tables, outfile=None, **kwargs):
         yvec = tables[tname].vector 
         xvec = np.linspace(0, moose.Clock('/clock').currentTime, len(yvec))
         plt.plot(xvec, yvec, label=tname)
-        plt.legend(loc='best', framealpha=0.4)
+        plt.legend(loc='best')
+        #plt.legend(loc='best', framealpha=0.4)
     
     plt.tight_layout()
     if outfile:
@@ -170,7 +171,9 @@ def plotVector(vec, xvec = None, **options):
 
     plt.plot(xx, vec, label=options.get('label', ''))
     if legend:
-        plt.legend(loc='best', framealpha=0.4)
+        # This works with matplotlib 1.4.x
+        #plt.legend(loc='best', framealpha=0.4)
+        plt.legend(loc='best') #, framealpha=0.4)
 
     if xvec is None:
         plt.xlabel = 'Time (sec)'
@@ -181,7 +184,9 @@ def plotVector(vec, xvec = None, **options):
     plt.title = options.get('title', '')
 
     if(options.get('legend', True)):
-        plt.legend(loc='best', framealpha=0.4, prop={'size' : 9})
+        plt.legend(loc='best',  prop={'size' : 9})
+        # Only if matplotlib 1.4.x
+        #plt.legend(loc='best', framealpha=0.4, prop={'size' : 9})
 
 
 def saveRecords(dataDict, xvec = None, **kwargs):
