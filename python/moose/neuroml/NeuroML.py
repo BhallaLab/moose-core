@@ -50,13 +50,19 @@ from moose.neuroml.ChannelML import ChannelML
 from moose.neuroml.MorphML import MorphML
 from moose.neuroml.NetworkML import NetworkML
 
-import string
-
 from moose.neuroml.utils import *
-from moose import print_utils as pu
 
 import sys
 from os import path
+
+import logging
+console = logging.StreamHandler()
+console.setLevel(logging.INFO)
+formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
+console.setFormatter(formatter)
+_logger = logging.getLogger('moose.nml.neuroml')
+_logger.addHandler(console)
+
 
 class NeuroML():
 
@@ -70,7 +76,7 @@ class NeuroML():
         Returns (populationDict,projectionDict),
          see doc string of NetworkML.readNetworkML() for details.
         """
-        pu.info("Loading neuroml file %s " % filename)
+        _logger.info("Loading neuroml file %s " % filename)
 
         moose.Neutral('/library') # creates /library in MOOSE tree; elif present, wraps
         tree = ET.parse(filename)
@@ -103,13 +109,14 @@ class NeuroML():
                         self.temperature = float(tag.find('.//{'+meta_ns+'}value').text)
                         self.temperature_default = False
         if self.temperature_default:
-            print(("Using default temperature of", self.temperature,"degrees Celsius."))
+            _logger.info("Using default temperature of %s degree Celsius" % self.temperature)
         self.nml_params = {
                 'temperature':self.temperature,
                 'model_dir':self.model_dir,
         }
 
-        #print "Loading channels and synapses into MOOSE /library ..."
+
+        _logger.debug("Loading channels and synapses into MOOSE /library ...")
         cmlR = ChannelML(self.nml_params)
         for channels in root_element.findall('.//{'+neuroml_ns+'}channels'):
             self.channelUnits = channels.attrib['units']
@@ -123,7 +130,7 @@ class NeuroML():
             for ionConc in channels.findall('.//{'+cml_ns+'}ion_concentration'):
                 cmlR.readIonConcML(ionConc,units=self.channelUnits)
 
-        #print "Loading cell definitions into MOOSE /library ..."
+        _logger.debug("Loading cell definitions into MOOSE /library ...")
         mmlR = MorphML(self.nml_params)
         self.cellsDict = cellsDict
         for cells in root_element.findall('.//{'+neuroml_ns+'}cells'):
@@ -137,7 +144,7 @@ class NeuroML():
             and root_element.find('.//{'+nml_ns+'}populations') is None:
             return (self.cellsDict,'no populations (L3 NetworkML) found.')
         else:
-            #print "Loading individual cells into MOOSE root ... "
+            _logger.debug("Loading individual cells into MOOSE root ... ")
             nmlR = NetworkML(self.nml_params)
             return nmlR.readNetworkML(root_element,self.cellsDict,\
                     params=params,lengthUnits=self.lengthUnits)
@@ -155,7 +162,7 @@ def loadNeuroML_L123(filename):
 
 if __name__ == "__main__":
     if len(sys.argv)<2:
-        print("You need to specify the neuroml filename.")
+        _logger.error("You need to specify the neuroml filename.")
         sys.exit(1)
-    print loadNeuroML_L123(sys.argv[1])
+    print(loadNeuroML_L123(sys.argv[1]))
     

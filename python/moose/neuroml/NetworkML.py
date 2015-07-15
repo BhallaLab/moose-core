@@ -156,11 +156,11 @@ class NetworkML():
                 segment_path = self.populationDict[population][1][int(cell_id)].path+'/'+\
                     self.cellSegmentDict[cell_name][0][segment_id][0]
                 compartment = moose.Compartment(segment_path)
-                _logger.debug("Adding pulse at {}: {}".format(
+                _logger.debug("Adding pulse at {0}: {1}".format(
                     segment_path, pulsegen.firstLevel )
                     )
                     
-                _logger.debug("Connecting {}:output to {}:injectMst".format(
+                _logger.debug("Connecting {0}:output to {1}:injectMst".format(
                     iclamp, compartment)
                     )
 
