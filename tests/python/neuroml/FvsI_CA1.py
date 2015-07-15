@@ -19,59 +19,47 @@ os.environ['NUMPTHREADS'] = '1'
 import sys
 sys.path.append('./../../python/')
 import moose
-from moose.utils import *
-import moose.utils as mu
 from moose.neuroml.NeuroML import NeuroML
 
 from pylab import *
 import numpy as np
+import unittest
 
-try:
-    import unittest2 as unittest
-except:
-    import unittest
+soma_ = None 
+cellSpikeTable_ = None
 
-RUNTIME = 1.0 # s
+def loadModel(filename):
+    global soma_, cellSpikeTable_
+    neuromlR = NeuroML()
+    neuromlR.readNeuroMLFromFile(filename)
+    libcell = moose.Neuron('/library/CA1soma')
+    CA1Cellid = moose.copy(libcell,moose.Neutral('/cells'),'CA1')
+    CA1Cell = moose.Neuron(CA1Cellid)
 
-injectmax = 2e-12 # Amperes
-
-neuromlR = NeuroML()
-neuromlR.readNeuroMLFromFile('cells_channels/CA1soma.morph.xml')
-libcell = moose.Neuron('/library/CA1soma')
-CA1Cellid = moose.copy(libcell,moose.Neutral('/cells'),'CA1')
-CA1Cell = moose.Neuron(CA1Cellid)
-#printCellTree(CA1Cell)
-
-## edge-detect the spikes using spike-gen (table does not have edge detect)
-spikeGen = moose.SpikeGen(CA1Cell.path+'/spikeGen')
-spikeGen.threshold = -30e-3 # V
-CA1CellSoma = moose.Compartment(CA1Cell.path+'/Seg0_soma_0_0')
-CA1CellSoma.inject = 0 # by default the cell has a current injection
-moose.connect(CA1CellSoma,'VmOut',spikeGen,'Vm')
-## save spikes in table
-table_path = moose.Neutral(CA1Cell.path+'/data').path
-CA1CellSpikesTable = moose.Table(table_path+'/spikesTable')
-moose.connect(spikeGen,'spikeOut',CA1CellSpikesTable,'input')
-
-cells_path = '/cells'
-
-## Loop through different current injections
-freqList = []
+    spikeGen = moose.SpikeGen(CA1Cell.path+'/spikeGen')
+    spikeGen.threshold = -30e-3 # V
+    soma_ = moose.Compartment(CA1Cell.path+'/Seg0_soma_0_0')
+    soma_.inject = 0 # by default the cell has a current injection
+    moose.connect(soma_,'VmOut',spikeGen,'Vm')
+    table_path = moose.Neutral(CA1Cell.path+'/data').path
+    cellSpikeTable_ = moose.Table(table_path+'/spikesTable')
+    moose.connect(spikeGen,'spikeOut', cellSpikeTable_,'input')
 
 def applyCurrent(currenti):
-    global freqList
+    global soma_, cellSpikeTable_
     moose.reinit()
-    CA1CellSoma.inject = currenti
-    moose.start(RUNTIME)
-    spikesList = array(CA1CellSpikesTable.vector)
+    soma_.inject = currenti
+    moose.start(1.0)
+    spikesList = array(cellSpikeTable_.vector)
     if len(spikesList)>0:
         spikesList = spikesList[where(spikesList>0.0)[0]]
         spikesNow = len(spikesList)
     else: 
         spikesNow = 0.0
     print("For injected current {0}, no of spikes in {1} second: {2}".format(
-        currenti, RUNTIME, spikesNow )
+        currenti, 1.0, spikesNow )
         )
-    freqList.append( spikesNow/float(RUNTIME) )
     return spikesNow
 
+def ca1_main( currenti):
+    return applyCurrent(currenti)
