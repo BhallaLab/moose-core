@@ -1,26 +1,36 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-## all SI units
-########################################################################################
+
+"""
+All SI units
 ## Plot the firing rate vs current injection curve for a Cerebellar Granule Cell neuron
+
 ## Author: Aditya Gilra
 ## Creation Date: 2012-07-12
 ## Modification Date: 2012-07-12
-########################################################################################
+
+                    Wednesday 15 July 2015 09:46:36 AM IST
+                    Added unittest
+                    Modified for testing with ctest.
+"""
 
 import os
 os.environ['NUMPTHREADS'] = '1'
 import sys
-sys.path.append('.')
+sys.path.append('./../../python/')
 import moose
 from moose.utils import *
-
+import moose.utils as mu
 from moose.neuroml.NeuroML import NeuroML
 
 from pylab import *
+import numpy as np
 
-SIMDT = 25e-6 # s
-PLOTDT = 25e-6 # s
+try:
+    import unittest2 as unittest
+except:
+    import unittest
+
 RUNTIME = 1.0 # s
 
 injectmax = 2e-12 # Amperes
@@ -43,18 +53,13 @@ table_path = moose.Neutral(CA1Cell.path+'/data').path
 CA1CellSpikesTable = moose.Table(table_path+'/spikesTable')
 moose.connect(spikeGen,'spikeOut',CA1CellSpikesTable,'input')
 
-#CA1CellVmTable = moose.Table(table_path+'/vmTable')
-#moose.connect(CA1CellSoma,'VmOut',CA1CellVmTable,'input')
-
 cells_path = '/cells'
-
-## from moose_utils.py sets clocks and resets/reinits
-resetSim(['/cells'],SIMDT,PLOTDT,simmethod='hsolve') # from moose.utils
 
 ## Loop through different current injections
 freqList = []
-currentvec = arange(0, injectmax, injectmax/50.0)
-for currenti in currentvec:
+
+def applyCurrent(currenti):
+    global freqList
     moose.reinit()
     CA1CellSoma.inject = currenti
     moose.start(RUNTIME)
@@ -62,15 +67,11 @@ for currenti in currentvec:
     if len(spikesList)>0:
         spikesList = spikesList[where(spikesList>0.0)[0]]
         spikesNow = len(spikesList)
-    else: spikesNow = 0.0
-    print "For injected current =",currenti,\
-        "number of spikes in",RUNTIME,"seconds =",spikesNow
+    else: 
+        spikesNow = 0.0
+    print("For injected current {0}, no of spikes in {1} second: {2}".format(
+        currenti, RUNTIME, spikesNow )
+        )
     freqList.append( spikesNow/float(RUNTIME) )
+    return spikesNow
 
-## plot the F vs I curve of the neuron
-figure(facecolor='w')
-plot(currentvec, freqList,'o-')
-xlabel('time (s)')
-ylabel('frequency (Hz)')
-title('HH single-compartment Cell')
-show()
