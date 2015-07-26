@@ -26,16 +26,11 @@ cdef class PyObjId:
             self.path_ = self.path
         return msg.format(self.path_)
 
-    def __cinit__(self, id_ = None, dataIndex = None, fieldIndex = None, path =
-            None):
-        if path:
-            #self.thisptr = new _ObjId.ObjId(path)
-            #self.pId = self.thisptr.id
-            return 
+    def __cinit__(self, id_ = None
+            , dataIndex = None, fieldIndex = None, string path = ""):
 
-        if id_:
-            #self.thisptr = new _ObjId.ObjId(id_)
-            pass
+        if path.size() > 0:
+            self.thisptr = new _ObjId.ObjId(path)
 
 
     property path:
