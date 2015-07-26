@@ -311,17 +311,17 @@ if(BUILD_PYMOOSE)
 endif(BUILD_PYMOOSE)
 
 ######################### CYMOOSE #############################################
-option(BUILD_CYMOOSE "Build python extension using Cython. Development version." 0)
+option(BUILD_CYMOOSE "Build python extension using Cython. Development version." ON)
 if(BUILD_CYMOOSE)
     message("++ Building cython extension of MOOSE. Unstable and experimental.")
     add_library(cymoose SHARED cymoose/cymoose_methods.cxx)
-    set_target_properties(moose PROPERTIES COMPILE_DEFINITIONS "CYMOOSE")
+    set_target_properties(cymoose PROPERTIES COMPILE_DEFINITIONS "CYMOOSE")
     if(DEBUG)
         add_definitions("-g -Wall")
     endif()
 
     set_target_properties(cymoose PROPERTIES 
-            LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/cymoose"
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/cymoose"
             )
 
     target_link_libraries(cymoose 
