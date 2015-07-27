@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Fri Jun 26 07:21:56 2015 (-0400)
 // Version: 
-// Last-Updated: 
-//           By: 
-//     Update #: 0
+// Last-Updated: Thu Jul 23 08:54:24 2015 (-0400)
+//           By: subha
+//     Update #: 2
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -45,6 +45,7 @@
 
 // Code:
 
+#ifdef USE_HDF5
 #include "header.h"
 #include "hdf5.h"
 
@@ -101,7 +102,7 @@ void InputVariable::epSetValue( const Eref& eref, double value)
         owner_->setInput(eref.fieldIndex(), value);
     }
 }
-
+#endif
 
 // 
 // InputVariable.cpp ends here
