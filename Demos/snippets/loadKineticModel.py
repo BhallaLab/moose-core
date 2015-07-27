@@ -14,11 +14,7 @@
 # defines a couple of plots and sets the runtime to 100 seconds. The
 # script dumps the output into an xplot file called data.plot and the
 # saved version into saveReaction.g
-# Since it is dealing with kkit models which may span compartments, the
-# 'solver' argument is prefixed with 'old_'. This tells the readKkit
-# function to put the entire model tree on the 'kinetics' compartment
-# which confuses the volume scaling but lets the solver handle the
-# entire model.
+
 
 import moose
 import pylab
@@ -26,7 +22,7 @@ import numpy
 import sys
 
 def main():
-        solver = "old_gsl"  # Pick any of gsl, gssa, ee..
+        solver = "gsl"  # Pick any of gsl, gssa, ee..
 	mfile = '../Genesis_files/kkit_objects_example.g'
 	runtime = 20.0
 	if ( len( sys.argv ) >= 3 ):
