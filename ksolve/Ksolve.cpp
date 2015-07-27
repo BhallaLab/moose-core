@@ -506,6 +506,7 @@ void Ksolve::reinit( const Eref& e, ProcPtr p )
 		cout << "Warning:Ksolve::reinit: Reaction system not initialized\n";
 		return;
 	}
+	// cout << "************************* path = " << e.id().path() << endl;
 	for ( unsigned int i = 0; i < xfer_.size(); ++i ) {
 		const XferInfo& xf = xfer_[i];
 		for ( unsigned int j = 0; j < xf.xferVoxel.size(); ++j ) {
@@ -552,6 +553,7 @@ void Ksolve::initReinit( const Eref& e, ProcPtr p )
 	for ( unsigned int i = 0; i < xfer_.size(); ++i ) {
 		XferInfo& xf = xfer_[i];
 		unsigned int size = xf.xferPoolIdx.size() * xf.xferVoxel.size();
+//		xf.values.assign( size, 0.0 );
 		xf.lastValues.assign( size, 0.0 );
 		for ( unsigned int j = 0; j < xf.xferVoxel.size(); ++j ) {
 			unsigned int vox = xf.xferVoxel[j];
