@@ -31,6 +31,9 @@ typedef struct {
     double k2;
     double k3;
     int stage;
+    string group;
+    string xcord;
+    string ycord;
 } EnzymeInfo;
 
 class SbmlReader {
@@ -70,7 +73,7 @@ private:
     void pushParmstoVector( const ASTNode* p,vector <string> & parameters );
     void getParameters( const ASTNode* node,vector <string> & parameters );
     void setupMMEnzymeReaction( Reaction * reac,string id ,string name,const map<string, Id> &);
-    string getAnnotation_Spe_Reac( XMLNode * annotationSpe_Rec );
+    pair<string, pair<string, string> > getAnnotation_Spe_Reac( XMLNode * annotationSpe_Rec );
     string getAnnotation( Reaction* reaction,map<string,EnzymeInfo> & );
     void setupEnzymaticReaction( const EnzymeInfo & einfo,string name,const map< string, Id > & ,string name1);
     void findModelParent( Id cwe, const string& path,Id& parentId, string& modelName );
