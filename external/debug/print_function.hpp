@@ -30,7 +30,7 @@
 #include <string>
 #include <map>
 #include <iomanip>
-#include <sys/ioctl.h>
+//#include <sys/ioctl.h>
 
 #define T_RESET       "\033[0m"
 #define T_BLACK       "\033[30m"      /* Black */
