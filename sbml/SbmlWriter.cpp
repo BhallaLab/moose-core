@@ -301,37 +301,42 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	      // Buffered Molecule setting BoundaryCondition and constant has to be made true 
 	      if ( (objclass == "BufPool") || (objclass == "ZombieBufPool"))
 		  { sp->setBoundaryCondition(true);
-		  	
 		  	string Funcpoolname = Field<string> :: get(*itrp,"path");
-			Id funcId(Funcpoolname+"/func");
-			if (funcId != ObjId())
-			{   // if its acting in react or product for a reaction/enzyme and also funcpool
-				sp->setConstant(false);
-				Id funcparentId = Field<ObjId> :: get(funcId,"parent");
-				string f1 = Field <string> :: get(funcId,"path");
-				Id funcIdx(f1+"/x");
-				string f1x = Field <string> :: get(funcIdx,"path");
-				vector < Id > inputPool = LookupField <string,vector <Id> > :: get(funcIdx,"neighbors","input");
-				int sumtot_count = inputPool.size();
-				if (sumtot_count > 0)
-				{	ostringstream sumtotal_formula;
-					for(vector< Id >::iterator itrsumfunc = inputPool.begin();itrsumfunc != inputPool.end(); itrsumfunc++)
-					{
-						string sumpool = Field<string> :: get(*itrsumfunc,"name");
-						sumtot_count -= 1;
-				  		string clean_sumFuncname = cleanNameId(*itrsumfunc,index);
-				  		if ( sumtot_count == 0 )
-				    		sumtotal_formula << clean_sumFuncname;
-				  		else
-				    		sumtotal_formula << clean_sumFuncname << "+";
-					}
-					Rule * rule =  cremodel_->createAssignmentRule();
-			      	rule->setVariable( clean_poolname );
-			      	rule->setFormula( sumtotal_formula.str() );
-			    }
-			}
-			else
-				sp->setConstant(true);
+		  	vector< Id > children = Field< vector< Id > >::get( *itrp, "children" );
+		  	for ( vector< Id >::iterator i = children.begin(); i != children.end(); ++i ) 
+		  	{	string funcpath = Field <string> :: get(*i,"path");
+		  		string clsname = Field <string> :: get(*i,"className");
+		  		if (clsname == "Function")
+		  		{ 	sp->setConstant(false);
+		  			
+		  		  	Id funcIdx(funcpath+"/x");
+					string f1x = Field <string> :: get(funcIdx,"path");
+					vector < Id > inputPool = LookupField <string,vector <Id> > :: get(funcIdx,"neighbors","input");
+					int sumtot_count = inputPool.size();
+					if (sumtot_count > 0)
+					{	ostringstream sumtotal_formula;
+						for(vector< Id >::iterator itrsumfunc = inputPool.begin();itrsumfunc != inputPool.end(); itrsumfunc++)
+						{
+							string sumpool = Field<string> :: get(*itrsumfunc,"name");
+							sumtot_count -= 1;
+				  			string clean_sumFuncname = cleanNameId(*itrsumfunc,index);
+				  			if ( sumtot_count == 0 )
+				    			sumtotal_formula << clean_sumFuncname;
+				  			else
+				    			sumtotal_formula << clean_sumFuncname << "+";
+						}
+						Rule * rule =  cremodel_->createAssignmentRule();
+			      		rule->setVariable( clean_poolname );
+			      		rule->setFormula( sumtotal_formula.str() );
+			    	}
+		  		}
+		  		else
+		  		{ 
+		 	  	  sp->setConstant(false);
+		  		}
+		  	} //for
+		  	
+		  	
 		  }//zbufpool
 	      else
 			{ sp->setBoundaryCondition(false);
