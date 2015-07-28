@@ -315,8 +315,7 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	      
 	      // Buffered Molecule setting BoundaryCondition and constant has to be made true 
 	      if ( (objclass == "BufPool") || (objclass == "ZombieBufPool"))
-		  { 
-		  	
+		  {	sp->setBoundaryCondition(true);
 		  	string Funcpoolname = Field<string> :: get(*itrp,"path");
 		  	vector< Id > children = Field< vector< Id > >::get( *itrp, "children" );
 		  	for ( vector< Id >::iterator i = children.begin(); i != children.end(); ++i ) 
