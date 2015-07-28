@@ -313,23 +313,26 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	  		  	sp->setAnnotation( xnode );
 	      }
 	      
-	      // Buffered Molecule setting BoundaryCondition and constant has to be made true 
+	      // Setting BoundaryCondition and constant as per this rule for BufPool
+	      //  -constanst  -boundaryCondition  -has assignment/rate Rule  -can be part of sub/prd
+	      //	false	        true              yes                       yes   
+	      //    true            true               no                       yes
 	      if ( (objclass == "BufPool") || (objclass == "ZombieBufPool"))
-		  {	sp->setBoundaryCondition(true);
+		  {	 //BoundaryCondition is made for buff pool
+		  	sp->setBoundaryCondition(true);
 		  	string Funcpoolname = Field<string> :: get(*itrp,"path");
 		  	vector< Id > children = Field< vector< Id > >::get( *itrp, "children" );
 		  	for ( vector< Id >::iterator i = children.begin(); i != children.end(); ++i ) 
 		  	{	string funcpath = Field <string> :: get(*i,"path");
 		  		string clsname = Field <string> :: get(*i,"className");
 		  		if (clsname == "Function")
-		  		{ 	sp->setConstant(false);
-		  			
-		  		  	Id funcIdx(funcpath+"/x");
+		  		{  	Id funcIdx(funcpath+"/x");
 					string f1x = Field <string> :: get(funcIdx,"path");
 					vector < Id > inputPool = LookupField <string,vector <Id> > :: get(funcIdx,"neighbors","input");
 					int sumtot_count = inputPool.size();
 					if (sumtot_count > 0)
-					{	ostringstream sumtotal_formula;
+					{	sp->setConstant(false);
+						ostringstream sumtotal_formula;
 						for(vector< Id >::iterator itrsumfunc = inputPool.begin();itrsumfunc != inputPool.end(); itrsumfunc++)
 						{
 							string sumpool = Field<string> :: get(*itrsumfunc,"name");
@@ -344,25 +347,18 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 			      		rule->setVariable( clean_poolname );
 			      		rule->setFormula( sumtotal_formula.str() );
 			    	}
+			    	else
+			    		cout << "assignment rule is not found for \" "<< poolname << " \" but function might have constant as variable"<<endl;
 		  		}
+		  		//If assignment rule is not found then constant is made true
 		  		else
-		  		{ 
-		 	  	  sp->setConstant(false);
-		  		}
-		  	}
-		  	/*
-			Id funcId(Funcpoolname+"/func");
-			if (funcId != ObjId())
-			{   // if its acting in react or product for a reaction/enzyme and also funcpool
-				sp->setConstant(false);
-				
-			}
-			else
-				sp->setConstant(true);
-			*/
+		  			sp->setConstant(true);
+		  		
+		  	} //for vector
 		  }//zbufpool
 	      else
-			{ sp->setBoundaryCondition(false);
+			{  //if not bufpool then Pool, then 
+			  sp->setBoundaryCondition(false);
 		 	  sp->setConstant(false);
 			}
 	    } //itrp
