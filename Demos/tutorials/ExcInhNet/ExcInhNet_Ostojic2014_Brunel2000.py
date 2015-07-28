@@ -63,8 +63,8 @@ NI = N-NE         # Number of inhibitory cells
 # Simulation parameters
 #############################################
 
-simtime = 0.2      #s # Simulation time
-dt = 1e-6         #s # time step
+simtime = 10.0    #s # Simulation time
+dt = 1e-5         #s # time step
 
 #############################################
 # Network parameters: synapses (not for ExcInhNetBase)
@@ -147,16 +147,15 @@ class ExcInhNetBase:
             self._init_plots()
         
         # moose simulation
-        moose.useClock( 0, '/network/syns', 'process' )
-        moose.useClock( 1, '/network', 'process' )
-        moose.useClock( 2, '/plotSpikes', 'process' )
-        moose.useClock( 3, '/plotVms', 'process' )
-        moose.useClock( 3, '/plotWeights', 'process' )
-        moose.setClock( 0, dt )
-        moose.setClock( 1, dt )
-        moose.setClock( 2, dt )
-        moose.setClock( 3, dt )
-        moose.setClock( 9, dt )
+        # moose auto-schedules
+        #moose.useClock( 0, '/network/syns', 'process' )
+        #moose.useClock( 1, '/network', 'process' )
+        #moose.useClock( 2, '/plotSpikes', 'process' )
+        #moose.useClock( 3, '/plotVms', 'process' )
+        #moose.useClock( 3, '/plotWeights', 'process' )
+        for i in range(10):
+            moose.setClock( i, dt )
+
         t1 = time.time()
         print 'reinit MOOSE'
         moose.reinit()

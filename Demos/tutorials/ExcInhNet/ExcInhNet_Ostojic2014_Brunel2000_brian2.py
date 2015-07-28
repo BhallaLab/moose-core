@@ -11,6 +11,7 @@ Tested with Brian 1.4.1
 
 Written by Aditya Gilra, CAMP 2014, Bangalore, 20 June, 2014.
 Updated to match MOOSE implementation by Aditya Gilra, Jan, 2015.
+Currently, simtime and dt are modified to compare across MOOSE, Brian1 and Brian2.
 '''
 
 #import modules and functions to be used
@@ -19,7 +20,8 @@ from brian2 import *   # importing brian also does:
                         # matplot like commands into the namespace, further
                         # also can use np. for numpy and mpl. for matplotlib
 #prefs.codegen.target='numpy'
-prefs.codegen.target='weave'
+#prefs.codegen.target='weave'
+set_device('cpp_standalone')
 import random
 import time
 
@@ -30,8 +32,8 @@ random.seed(100) # set seed for reproducibility of simulations
 # Simulation parameters
 # ###########################################
 
-simdt = 0.001*ms
-simtime = 0.2*second            # Simulation time
+simdt = 0.01*ms
+simtime = 10.0*second            # Simulation time
 defaultclock.dt = simdt         # Brian's default sim time step
 dt = defaultclock.dt/second     # convert to value in seconds
 
@@ -116,8 +118,8 @@ for j in range(0,N):
     conn_j += [j]*(C-excC)
 con.connect(conn_i,conn_j)
 con.delay = taudelay
-con.w[:NE,:] = J
-con.w[NE:N,:] = -g*J
+con.w['i<NE'] = J
+con.w['i>=NE'] = -g*J
 
 # ###########################################
 # Setting up monitors
@@ -139,6 +141,7 @@ sm_vm = StateMonitor(P,'v',record=range(10)+range(NE,NE+10))
 print "Setup complete, running for",simtime,"at dt =",dt,"s."
 t1 = time.time()
 run(simtime,report='text')
+device.build(directory='output', compile=True, run=True, debug=False)
 print 'inittime + runtime, t = ', time.time() - t1
 
 #print "For g,J =",g,J,"mean exc rate =",\
