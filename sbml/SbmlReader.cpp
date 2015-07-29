@@ -464,7 +464,7 @@ const SbmlReader::sbmlStr_mooseId SbmlReader::createMolecule( map< string,Id > &
         // if (boundaryCondition == true)
         //     cout << name << " species having BoundaryCondition true " <<endl;
         Id pool;
-        //If constant is true then its equivalent to BuffPool in moose
+        //If constant or boundary condition is true then its equivalent to BuffPool in moose
         if (boundaryCondition == true)
             //if( (boundaryCondition == true) && (constant==false))
             if (groupId == Id())
