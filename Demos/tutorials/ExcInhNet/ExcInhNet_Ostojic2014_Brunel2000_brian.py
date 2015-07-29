@@ -11,6 +11,7 @@ Tested with Brian 1.4.1
 
 Written by Aditya Gilra, CAMP 2014, Bangalore, 20 June, 2014.
 Updated to match MOOSE implementation by Aditya Gilra, Jan, 2015.
+Currently, simtime and dt are modified to compare across MOOSE, Brian1 and Brian2.
 '''
 
 #import modules and functions to be used
@@ -28,8 +29,8 @@ random.seed(100) # set seed for reproducibility of simulations
 # Simulation parameters
 # ###########################################
 
-simdt = 0.001*ms
-simtime = 0.2*second            # Simulation time
+simdt = 0.01*ms
+simtime = 10.0*second            # Simulation time
 defaultclock.dt = simdt         # Brian's default sim time step
 dt = defaultclock.dt/second     # convert to value in seconds
 
@@ -194,7 +195,7 @@ subplot(231)
 raster_plot(sm_e,ms=1.)
 title(str(Nmon_exc)+" exc neurons")
 xlabel("")
-xlim([0,simtime/second])
+xlim([0,simtime/ms])
 subplot(234)
 raster_plot(sm_i,ms=1.)
 title(str(Nmon-Nmon_exc)+" inh neurons")

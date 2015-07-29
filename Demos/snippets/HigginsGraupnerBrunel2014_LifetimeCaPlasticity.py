@@ -111,16 +111,16 @@ moose.connect( WtTable, 'requestOut', syn.synapse[0], 'getWeight')
 
 dt = 1e-3 # s
 # moose simulation
-moose.useClock( 0, '/syn', 'process' )
-moose.useClock( 1, '/pre', 'process' )
-moose.useClock( 1, '/post', 'process' )
-moose.useClock( 3, '/plotCa', 'process' )
-moose.useClock( 3, '/plotWeight', 'process' )
-moose.setClock( 0, dt )
-moose.setClock( 1, dt )
-moose.setClock( 2, dt )
-moose.setClock( 3, dt )
-moose.setClock( 9, dt )
+#moose.useClock( 0, '/syn', 'process' )
+#moose.useClock( 1, '/pre', 'process' )
+#moose.useClock( 1, '/post', 'process' )
+# I think MOOSE uses a different clock than 3 for Tables
+# anyway, we use the default one and set all clocks to dt below
+#moose.useClock( 3, '/plotCa', 'process' )
+#moose.useClock( 3, '/plotWeight', 'process' )
+## use setClock to set the dt different from default dt
+for i in range(10):
+    moose.setClock( i, dt )
 
 moose.seed(100)
 moose.reinit()

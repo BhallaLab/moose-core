@@ -19,9 +19,11 @@ Author: Aditya Gilra, NCBS, Bangalore, October, 2014.
 
 This uses the Ca-based plasticity rule of:  
     Graupner, Michael, and Nicolas Brunel. 2012.
-    Calcium-Based Plasticity Model Explains Sensitivity of Synaptic Changes to Spike Pattern, Rate, and Dendritic Location.
+    Calcium-Based Plasticity Model Explains Sensitivity
+     of Synaptic Changes to Spike Pattern, Rate, and Dendritic Location.
     Proceedings of the National Academy of Sciences, February, 201109359.
-The Ca-based bistable synapse has been implemented as the GraupnerBrunel2012CaPlasticitySynHandler class.
+The Ca-based bistable synapse has been implemented as the 
+    GraupnerBrunel2012CaPlasticitySynHandler MOOSE class.
 '''
 
 ## import modules and functions to be used
@@ -30,13 +32,15 @@ import matplotlib.pyplot as plt
 import random
 import time
 import moose
+import pickle
+import os,sys
 
 np.random.seed(100) # set seed for reproducibility of simulations
 random.seed(100) # set seed for reproducibility of simulations
 moose.seed(100) # set seed for reproducibility of simulations
 
 #############################################
-# All parameters as per:
+# All parameters as per (except N (/10), C (/10), J (*10), dt (*100)):
 # David Higgins, Michael Graupner, Nicolas Brunel
 #     Memory Maintenance in Synapses with Calcium-Based
 #     Plasticity in the Presence of Background Activity
@@ -56,7 +60,7 @@ Rm = 20e6    #Ohm       # Only taum is needed, but LIF neuron accepts
 Cm = 1e-9    #F         # Rm and Cm and constructs taum=Rm*Cm
 taum = Rm*Cm #s         # Membrane time constant is 20 ms
 vr = -60e-3  #V         # Reset potential
-Iinject = 10e-3/Rm      # constant current injection into LIF neuron
+Iinject = 11.5e-3/Rm    # constant current injection into LIF neuron
                         # same as setting el=-70+15=-55 mV and inp=0
 noiseInj = True         # inject noisy current into each cell: boolean
 noiseInjSD = 5e-3/Rm #A # SD of noise added to 'current'
@@ -66,17 +70,18 @@ noiseInjSD = 5e-3/Rm #A # SD of noise added to 'current'
 # Network parameters: numbers
 #############################################
 
-N = 1000          # Total number of neurons
-fexc = 0.8        # Fraction of exc neurons
-NE = int(fexc*N)  # Number of excitatory cells
-NI = N-NE         # Number of inhibitory cells 
+red_fact = 10           # reduction factor for N,C,J
+N = 10000/red_fact      # Total number of neurons # 10000 in paper
+fexc = 0.8              # Fraction of exc neurons
+NE = int(fexc*N)        # Number of excitatory cells
+NI = N-NE               # Number of inhibitory cells 
 
 #############################################
 # Simulation parameters
 #############################################
 
-simtime = 1.0     #s # Simulation time
-dt = 1e-3         #s # time step
+simtime = 30.0          #s # Simulation time
+dt = 1e-3               #s # time step # 1e-5 in paper
 
 #############################################
 # Network parameters: synapses (not for ExcInhNetBase)
@@ -87,20 +92,24 @@ dt = 1e-3         #s # time step
 ## Since LIF neuron used below is derived from Compartment class,
 ## conductance-based synapses (SynChan class) can also be used.
 
-C = 100           # Number of incoming connections on each neuron (exc or inh)
+C = 500/red_fact  # Number of incoming connections on each neuron (exc or inh)
+                  # 5% conn prob between any two neurons
+                  # Since we reduced N from 10000 to 1000, C = 50 instead of 500
+                  #  but we need to increase J by 10 to maintain total input per neuron
 fC = fexc         # fraction fC incoming connections are exc, rest inhibitory
-J = 0.2e-3 #V     # exc strength is J (in V as we add to voltage)
+J = 0.1e-3 #V     # exc strength is J (in V as we add to voltage) # 0.1 in paper
                   # Critical J is ~ 0.45e-3 V in paper for N = 10000, C = 1000
                   # See what happens for J = 0.2e-3 V versus J = 0.8e-3 V
+J *= red_fact     # Multiply J by red_fact to compensate C/red_fact.
 g = 4.0           # -gJ is the inh strength. For exc-inh balance g >~ f(1-f)=4
-syndelay = dt     # synaptic delay:
+syndelay = dt     # synaptic delay is same as time step
 refrT = 0.0 # s   # absolute refractory time
 
 #############################################
 # Ca Plasticity parameters: synapses (not for ExcInhNetBase)
 #############################################
 
-CaPlasticity = True    # set it True or False to turn on/off plasticity
+CaPlasticity = True     # set it True or False to turn on/off plasticity
 tauCa = 22.6936e-3      # s # Ca decay time scale
 tauSyn = 346.3615       # s # synaptic plasticity time scale
 ## in vitro values in Higgins et al 2014, faster plasticity
@@ -109,6 +118,9 @@ CaPost = 1.2964         # mM
 ## in vivo values in Higgins et al 2014, slower plasticity
 #CaPre = 0.33705         # mM
 #CaPost = 0.74378        # mM
+### accelerated values compared to Higgins et al 2014, faster plasticity
+#CaPre = 1.2             # mM
+#CaPost = 2.0            # mM
 delayD = 4.6098e-3      # s # CaPre is added to Ca after this delay
                         # proxy for rise-time of NMDA
 thetaD = 1.0            # mM # depression threshold for Ca
@@ -116,11 +128,12 @@ thetaP = 1.3            # mM # potentiation threshold for Ca
 gammaD = 331.909        # factor for depression term
 gammaP = 725.085        # factor for potentiation term
 
-eqWeight = 0.5          # initial synaptic weight
+#eqWeight = 0.5          # initial synaptic weight
                         # gammaP/(gammaP+gammaD) = eq weight w/o noise
                         # but see eqn (22), noiseSD also appears
+eqWeight = 0.15         # from Fig 5 of Higgins et al, simulated, in vitro params
 
-bistable = True        # if bistable is True, use bistable potential for weights
+bistable = False       # if bistable is True, use bistable potential for weights
 noisy = True           # use noisy weight updates given by noiseSD
 noiseSD = 3.3501        # if noisy, use noiseSD (3.3501 from Higgins et al 2014)
 #noiseSD = 0.1           # if bistable==False, use a smaller noise than in Higgins et al 2014
@@ -189,6 +202,7 @@ class ExcInhNetBase:
         self.T = np.ceil(simtime/dt)
         self.trange = np.arange(0,self.simtime,dt)   
 
+        print "Noise injections being set ..."
         for i in range(self.N):
             if noiseInj:
                 ## Gaussian white noise SD added every dt interval should be
@@ -204,28 +218,32 @@ class ExcInhNetBase:
                                                         # as x value for interpolation
                 self.noiseTables.vec[i].stopTime = self.simtime
         
+        print "init membrane potentials being set ... "
         self._init_network(**kwargs)
+        print "initializing plots ... "
         if plotif:
             self._init_plots()
         
-        # moose simulation
-        moose.useClock( 1, '/network', 'process' )
-        moose.useClock( 2, '/plotSpikes', 'process' )
-        moose.useClock( 3, '/plotVms', 'process' )
-        if CaPlasticity:
-            moose.useClock( 3, '/plotWeights', 'process' )
-            moose.useClock( 3, '/plotCa', 'process' )
-        moose.setClock( 0, dt )
-        moose.setClock( 1, dt )
-        moose.setClock( 2, dt )
-        moose.setClock( 3, dt )
-        moose.setClock( 9, dt )
+        ## MOOSE simulation
+        
+        ## MOOSE assigns clocks by default, no need to set manually
+        #print "setting clocks ... "
+        #moose.useClock( 1, '/network', 'process' )
+        #moose.useClock( 2, '/plotSpikes', 'process' )
+        #moose.useClock( 3, '/plotVms', 'process' )
+        #if CaPlasticity:
+        #    moose.useClock( 3, '/plotWeights', 'process' )
+        #    moose.useClock( 3, '/plotCa', 'process' )
+        ## Do need to set the dt for MOOSE clocks
+        for i in range(10):
+            moose.setClock( i, dt )
+
         t1 = time.time()
         print 'reinit MOOSE -- takes a while ~20s.'
         moose.reinit()
         print 'reinit time t = ', time.time() - t1
         t1 = time.time()
-        print 'starting'
+        print 'starting run ...'
         moose.start(self.simtime)
         print 'runtime, t = ', time.time() - t1
 
@@ -308,19 +326,33 @@ class ExcInhNet(ExcInhNetBase):
         
     def _init_plots(self):
         ExcInhNetBase._init_plots(self)
-        self.recN = 5 # number of neurons for which to record weights and Ca
         if CaPlasticity:
+            self.recNCa = 5 # number of synapses for which to record Ca
+                            #  as range(self.N) is too large
+            self.recNwt = 20 # number of synapses for which to record weights
+
             ## make tables to store weights of recN exc synapses
-            ## for each post-synaptic exc neuron
-            self.weights = moose.Table( '/plotWeights', self.excC*self.recN )
-            for i in range(self.recN):      # range(self.N) is too large
+            self.weightsEq = moose.Table( '/plotWeightsEq', self.recNwt )
+            wtidx = 0
+            for i in range(self.N):
                 for j in range(self.excC):
-                    moose.connect( self.weights.vec[self.excC*i+j], 'requestOut',
-                        self.synsEE.vec[i*self.excC+j].synapse[0], 'getWeight')            
-            self.CaTables = moose.Table( '/plotCa', self.recN )
-            for i in range(self.recN):      # range(self.N) is too large
+                    if self.excC*i+j not in self.potSyns:
+                        moose.connect( self.weightsEq.vec[wtidx], 'requestOut',
+                            self.synsEE.vec[i*self.excC+j].synapse[0], 'getWeight')
+                        wtidx += 1
+                        if wtidx >= self.recNwt: break
+                ## break only breaks out of one loop, hence repeated here!
+                if wtidx >= self.recNwt: break
+
+            self.weightsUp = moose.Table( '/plotWeightsUp', self.recNwt )
+            for i in range(self.recNwt):      # range(self.N) is too large
+                moose.connect( self.weightsUp.vec[i], 'requestOut',
+                    self.synsEE.vec[self.potSyns[i]].synapse[0], 'getWeight')
+                    
+            self.CaTables = moose.Table( '/plotCa', self.recNCa )
+            for i in range(self.recNCa):      # range(self.N) is too large
                 moose.connect( self.CaTables.vec[i], 'requestOut',
-                        self.synsEE.vec[i*self.excC+j], 'getCa')            
+                        self.synsEE.vec[i*self.excC], 'getCa')            
 
     def _setup_network(self):
         ## Set up the neurons without connections
@@ -348,7 +380,7 @@ class ExcInhNet(ExcInhNetBase):
         else:
             self.synsEE = moose.SimpleSynHandler( \
                 '/network/synsEE', self.NmaxExc*self.excC )
-        moose.useClock( 0, '/network/synsEE', 'process' )
+        #moose.useClock( 0, '/network/synsEE', 'process' )
 
         ## I to E synapses are not plastic
         self.synsIE = moose.SimpleSynHandler( '/network/synsIE', self.NmaxExc )
@@ -363,12 +395,15 @@ class ExcInhNet(ExcInhNetBase):
                 self.network.vec[i], 'activation' )
 
         ## Connections from some Exc/Inh neurons to each Exc neuron
+        self.potSyns = []           # list of potentiated synapses
         for i in range(0,self.NmaxExc):
             self.synsIE.vec[i].numSynapses = self.incC-self.excC
 
             ## Connections from some Exc neurons to each Exc neuron
             ## draw excC number of neuron indices out of NmaxExc neurons
-            preIdxs = random.sample(range(self.NmaxExc),self.excC)
+            prelist = range(self.NmaxExc)
+            prelist.remove(i)       # disallow autapse
+            preIdxs = random.sample(prelist,self.excC)
             ## connect these presynaptically to i-th post-synaptic neuron
             for synnum,preIdx in enumerate(preIdxs):
                 synidx = i*self.excC+synnum
@@ -402,8 +437,8 @@ class ExcInhNet(ExcInhNetBase):
                     synHand.weightMax = 1.0 # bounds on the weight
                     synHand.weightMin = 0.0
                     synHand.weightScale = \
-                                self.J*2.0    # 0.2 mV, weight*weightScale is activation
-                                              # typically weight <~ 0.5, so activation <~ J
+                                self.J*2.0  # 0.2 mV, weight*weightScale is activation
+                                            # typically weight <~ 0.5, so activation <~ J
                     synHand.noisy = noisy
                     synHand.noiseSD = noiseSD
                     synHand.bistable = bistable
@@ -414,10 +449,12 @@ class ExcInhNet(ExcInhNetBase):
                                             # weightScale = 2*J
                                             # weight <~ 0.5
                     ## Randomly set 5% of them to be 1.0
+                    ##  for Fig 5 of paper
                     if np.random.uniform()<0.05:
                         synij.weight = 1.0
+                        self.potSyns.append(synidx)
                 else:
-                    synij.weight = self.J   # no weightScale here, activation = weight
+                    synij.weight = self.J   # no weightScale if not plastic, activation = weight
 
             ## Connections from some Inh neurons to each Exc neuron
             ## draw inhC=incC-excC number of neuron indices out of inhibitory neurons
@@ -446,7 +483,9 @@ class ExcInhNet(ExcInhNetBase):
                 synij.weight = self.J   # activation = weight
 
             ## draw inhC=incC-excC number of neuron indices out of inhibitory neurons
-            preIdxs = random.sample(range(self.NmaxExc,self.N),self.incC-self.excC)
+            prelist = range(self.NmaxExc,self.N)
+            prelist.remove(i+self.NmaxExc)      # disallow autapse
+            preIdxs = random.sample(prelist,self.incC-self.excC)
             ## connect these presynaptically to i-th post-synaptic neuron
             for synnum,preIdx in enumerate(preIdxs):
                 synij = self.synsI.vec[i].synapse[ self.excC + synnum ]
@@ -455,14 +494,14 @@ class ExcInhNet(ExcInhNetBase):
                 synij.delay = syndelay
                 synij.weight = -self.scaleI*self.J  # activation = weight
 
-        moose.useClock( 0, '/network/synsIE', 'process' )
-        moose.useClock( 0, '/network/synsI', 'process' )
+        #moose.useClock( 0, '/network/synsIE', 'process' )
+        #moose.useClock( 0, '/network/synsI', 'process' )
 
 #############################################
 # Analysis functions
 #############################################
 
-def rate_from_spiketrain(spiketimes,fulltime,dt,tau=50e-3):
+def rate_from_spiketrain(spiketimes,fulltime,dt,tau=200e-3):
     """
     Returns a rate series of spiketimes convolved with a Gaussian kernel;
     all times must be in SI units.
@@ -486,8 +525,155 @@ def rate_from_spiketrain(spiketimes,fulltime,dt,tau=50e-3):
     return rate_full[kernel_len/2:kernel_len/2+int(fulltime/dt)]
 
 #############################################
-# Make plots
+# Make plots, save data
 #############################################
+
+def save_data(net):
+    f = open("fig5_data.pickle", "wb")
+    timeseries = net.trange
+    pickle.dump((timeseries,simtime,dt),f)
+    pickle.dump((net.N,net.NmaxExc),f)
+    for nrni in range(net.N):
+        pickle.dump(net.spikes.vec[nrni].vector,f)
+    pickle.dump(net.spikesExc.vector,f)
+    pickle.dump(net.spikesInh.vector,f)
+    if CaPlasticity:
+        pickle.dump(net.recNCa,f)
+        for i in range(net.recNCa):
+            pickle.dump(net.CaTables.vec[i].vector[:len(timeseries)],f)
+        pickle.dump(net.recNwt,f)
+        for i,wtarray in enumerate(net.weightsEq.vec):
+            pickle.dump(wtarray.vector[:len(timeseries)],f)
+        for i,wtarray in enumerate(net.weightsUp.vec):
+            pickle.dump(wtarray.vector[:len(timeseries)],f)
+        ## all EE weights are used for a histogram
+        weights = [ net.synsEE.vec[i*net.excC+j].synapse[0].weight \
+                    for i in range(net.NmaxExc) for j in range(net.excC) ]    
+        pickle.dump(weights,f)
+    f.close()
+
+####### figure defaults
+label_fontsize = 8 # pt
+plot_linewidth = 0.5 # pt
+linewidth = 1.0#0.5
+axes_linewidth = 0.5
+marker_size = 3.0 # markersize=<...>
+cap_size = 2.0 # for errorbar caps, capsize=<...>
+columnwidth = 85/25.4 # inches
+twocolumnwidth = 174/25.4 # inches
+linfig_height = columnwidth*2.0/3.0
+fig_dpi = 300
+
+def set_tick_widths(ax,tick_width):
+    for tick in ax.xaxis.get_major_ticks():
+        tick.tick1line.set_markeredgewidth(tick_width)
+        tick.tick2line.set_markeredgewidth(tick_width)
+    for tick in ax.xaxis.get_minor_ticks():
+        tick.tick1line.set_markeredgewidth(tick_width)
+        tick.tick2line.set_markeredgewidth(tick_width)
+    for tick in ax.yaxis.get_major_ticks():
+        tick.tick1line.set_markeredgewidth(tick_width)
+        tick.tick2line.set_markeredgewidth(tick_width)
+    for tick in ax.yaxis.get_minor_ticks():
+        tick.tick1line.set_markeredgewidth(tick_width)
+        tick.tick2line.set_markeredgewidth(tick_width)
+
+def axes_labels(ax,xtext,ytext,adjustpos=False,\
+                    fontsize=label_fontsize,xpad=None,ypad=None):
+    ax.set_xlabel(xtext,fontsize=fontsize,labelpad=xpad)
+    # increase xticks text sizes
+    for label in ax.get_xticklabels():
+        label.set_fontsize(fontsize)
+    ax.set_ylabel(ytext,fontsize=fontsize,labelpad=ypad)
+    # increase yticks text sizes
+    for label in ax.get_yticklabels():
+        label.set_fontsize(fontsize)
+    if adjustpos:
+        ## [left,bottom,width,height]
+        ax.set_position([0.135,0.125,0.84,0.75])
+    set_tick_widths(ax,axes_linewidth)
+
+def biglegend(legendlocation='upper right',ax=None,\
+                    fontsize=label_fontsize, **kwargs):
+    if ax is not None:
+        leg=ax.legend(loc=legendlocation, **kwargs)
+    else:
+        leg=plt.legend(loc=legendlocation, **kwargs)
+    # increase legend text sizes
+    for t in leg.get_texts():
+        t.set_fontsize(fontsize)
+
+def load_plot_Fig5():
+    if os.path.isfile("fig5_data.pickle"):
+        f = open("fig5_data.pickle", "rb")
+    else:
+        print "You need to simulate first before loading data file."
+        print "re-run with sim as a command line argument."
+        sys.exit()
+    fig = plt.figure(facecolor="w",\
+            figsize=(columnwidth,linfig_height),dpi=fig_dpi)
+    timeseries,simtime,dt = pickle.load(f)
+
+    ## population firing rates
+    N,NmaxExc = pickle.load(f)
+    ax = plt.subplot(211)
+    for nrni in range(N):
+        strain = pickle.load(f)
+        #plt.plot(strain,[nrni]*len(strain),'.')
+    strainExc = pickle.load(f)
+    rate = rate_from_spiketrain(np.array(strainExc),simtime,dt)\
+            /float(NmaxExc) # per neuron
+    plt.plot(timeseries/60,rate,label="exc",linewidth=plot_linewidth)
+    strainInh = pickle.load(f)
+    rate = rate_from_spiketrain(np.array(strainInh),simtime,dt)\
+            /float(N-NmaxExc) # per neuron
+    plt.plot(timeseries/60,rate,label="inh",linewidth=plot_linewidth)
+    #biglegend()
+    plt.ylim(0,2)
+    plt.xticks([])
+    axes_labels(ax,"","mean rate (Hz)")
+        
+    if CaPlasticity:
+        NCa = pickle.load(f)
+        #plt.subplot(312)
+        caconcs = []
+        for i in range(NCa):
+            caconcs.append(pickle.load(f))
+        #plt.plot(timeseries/60,np.mean(caconcs,axis=0))
+
+        ax = plt.subplot(212)
+        Nwt = pickle.load(f)
+        wtarrayseq = []
+        for i in range(Nwt):
+            wtarray = pickle.load(f)
+            wtarrayseq.append(wtarray)
+            plt.plot(timeseries/60,wtarray,color='#ffaaaa',\
+                                linewidth=plot_linewidth)
+
+        wtarraysup = []
+        for i in range(Nwt):
+            wtarray = pickle.load(f)
+            wtarraysup.append(wtarray)
+            plt.plot(timeseries/60,wtarray,color='#aaaaff',\
+                                linewidth=plot_linewidth)
+        plt.plot(timeseries/60,np.mean(wtarrayseq,axis=0),color='r',\
+                                linewidth=plot_linewidth)
+        plt.plot(timeseries/60,np.mean(wtarraysup,axis=0),color='b',\
+                                linewidth=plot_linewidth)
+        #plt.title("Evolution of efficacies",fontsize=label_fontsize)
+        axes_labels(ax,"Time (min)","Efficacy")
+
+        #plt.subplot(133)
+        ### all EE weights are used for a histogram
+        weights = pickle.load(f)  
+        #plt.hist(weights, bins=100)
+        #plt.title("Histogram of efficacies")
+        #plt.xlabel("Efficacy (arb)")
+        #plt.ylabel("# per bin")
+
+    fig.tight_layout()
+    f.close()
+    fig.savefig("HGB2014_Fig5ab_MOOSE.tif",dpi=fig_dpi)
 
 def extra_plots(net):
     ## extra plots apart from the spike rasters
@@ -544,7 +730,7 @@ def extra_plots(net):
     if CaPlasticity:
         ## Ca versus time in post-synaptic neurons
         plt.figure()
-        for i in range(net.recN):      # range(net.N) is too large
+        for i in range(net.recNCa):      # range(net.N) is too large
             plt.plot(timeseries,\
                 net.CaTables.vec[i].vector[:len(timeseries)])
         plt.title("Evolution of Ca in some neurons")
@@ -552,10 +738,15 @@ def extra_plots(net):
         plt.ylabel("Ca (mM)")
 
         plt.figure()
-        for i in range(net.recN):      # range(net.N) is too large
-            for j in range(net.excC):
-                plt.plot(timeseries,\
-                    net.weights.vec[net.excC*i+j].vector[:len(timeseries)])
+        wtarrays = np.zeros((len(timeseries),net.recNwt))
+        for i,wtarray in enumerate(net.weightsEq.vec):
+            wtarrays[:,i] = wtarray.vector[:len(timeseries)]
+            plt.plot(timeseries,wtarrays[:,i],color='r',alpha=0.2)
+        plt.plot(timeseries,np.mean(wtarrays,axis=1),color='r')
+        for i,wtarray in enumerate(net.weightsUp.vec):
+            wtarrays[:,i] = wtarray.vector[:len(timeseries)]
+            plt.plot(timeseries,wtarrays[:,i],color='b',alpha=0.2)
+        plt.plot(timeseries,np.mean(wtarrays,axis=1),color='b')
         plt.title("Evolution of some efficacies")
         plt.xlabel("Time (s)")
         plt.ylabel("Efficacy")
@@ -570,17 +761,23 @@ def extra_plots(net):
         plt.ylabel("# per bin")
 
 if __name__=='__main__':
-    ## ExcInhNetBase has unconnected neurons,
-    ## ExcInhNet connects them
-    ## Instantiate either ExcInhNetBase or ExcInhNet below
-    #net = ExcInhNetBase(N=N)
-    net = ExcInhNet(N=N)
-    print net
-    ## Important to distribute the initial Vm-s
-    ## else weak coupling gives periodic synchronous firing
-    net.simulate(simtime,plotif=True,\
-        v0=np.random.uniform(el-20e-3,vt,size=N))
+    if 'sim' in sys.argv:
+        ## ExcInhNetBase has unconnected neurons,
+        ## ExcInhNet connects them
+        ## Instantiate either ExcInhNetBase or ExcInhNet below
+        #net = ExcInhNetBase(N=N)
+        net = ExcInhNet(N=N)
+        print net
+        ## Important to distribute the initial Vm-s
+        ## else weak coupling gives periodic synchronous firing
+        print "Preparing to simulate ... "
+        net.simulate(simtime,plotif=True,\
+            v0=np.random.uniform(el-10e-3,vt+1e-3,size=N))
 
-    extra_plots(net)
-    plt.show()
-    
+        save_data(net)
+        #extra_plots(net)
+    else:
+        print "just plotting old results for Fig 5."
+        print "To simulate and save, give sim as commandline argument."
+        load_plot_Fig5()
+        plt.show()

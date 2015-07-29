@@ -11,6 +11,7 @@ Tested with Brian 1.4.1
 
 Written by Aditya Gilra, CAMP 2014, Bangalore, 20 June, 2014.
 Updated to match MOOSE implementation by Aditya Gilra, Jan, 2015.
+Currently, simtime and dt are modified to compare across MOOSE, Brian1 and Brian2.
 '''
 
 #import modules and functions to be used

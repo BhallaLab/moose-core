@@ -17,7 +17,7 @@
 * Change log:
 
 * Originally created by Siji for l2v4 for 'trunk ' branch
-* Modified / adapted to 'asyn13' branch Harsharani for both l2v4 and l3v1
+* Modified / adapted Harsharani for both l2v4 and l3v1
 ***************/
 
 
@@ -48,7 +48,7 @@ map< string,double> :: iterator pvm_iter;
       --Need to add group
       --Need to deal with compartment outside
     -Molecule
-      -- Need to add group
+      -- Need to add group (done commited to 6964)
       -- Func pool and its math calculation need to be added.
     -Loading Model from SBML
       --Tested 1-30 testcase example model provided by l3v1 and l2v4 std.
@@ -366,7 +366,6 @@ map< string,Id > SbmlReader::createCompartment(string location, Id parentId, str
                 name = id;
         }
 
-//        cerr << "Creating under " << base_.path() << " : " << name << endl;
         Id compt = s->doCreate( "CubeMesh", base_, name,  1);
         comptSidMIdMap[id] = compt;
         if (size != 0.0)
@@ -446,7 +445,10 @@ const SbmlReader::sbmlStr_mooseId SbmlReader::createMolecule( map< string,Id > &
 
         // Get groupName if exist in annotation (in case of Genesis)
         XMLNode * annotationSpe = spe->getAnnotation();
-        string groupName = getAnnotation_Spe_Reac(annotationSpe);
+        pair<string,pair<string, string> > group = getAnnotation_Spe_Reac(annotationSpe);
+        string groupName = group.first;
+        string xCord = group.second.first;
+        string yCord = group.second.second;
         string groupString = comptPath+'/'+groupName;
 
         Id groupId;
@@ -457,15 +459,13 @@ const SbmlReader::sbmlStr_mooseId SbmlReader::createMolecule( map< string,Id > &
             assert( groupId != Id() );
             
         }
-        
-        
         bool constant = spe->getConstant();
         bool boundaryCondition = spe->getBoundaryCondition();
-        if (boundaryCondition == true)
-            cout << "Pools having BoundaryCondition true " << name <<endl;
+        // if (boundaryCondition == true)
+        //     cout << name << " species having BoundaryCondition true " <<endl;
         Id pool;
-        //If constant is true then its equivalent to BuffPool in moose
-        if (constant == true)
+        //If constant or boundary condition is true then its equivalent to BuffPool in moose
+        if (boundaryCondition == true)
             //if( (boundaryCondition == true) && (constant==false))
             if (groupId == Id())
                 pool = shell->doCreate("BufPool",comptEl,name,1);
@@ -482,8 +482,6 @@ const SbmlReader::sbmlStr_mooseId SbmlReader::createMolecule( map< string,Id > &
         molSidcmptMIdMap[id] = comptEl;
         if(pool != Id())
         {   
-
-
             //Map to Molecule SBML id to Moose Id
             molSidMIdMap_[id] = pool;
 
@@ -513,8 +511,20 @@ const SbmlReader::sbmlStr_mooseId SbmlReader::createMolecule( map< string,Id > &
                 initvalue *=transvalue;
                 Field <double> :: set(pool, "concInit",initvalue);
             }
-            //cout << " poolMap_ "<< name << " " <<transvalue << " "<< hasonlySubUnit;
             //poolMap_.insert(make_pair(id,make_tuple(name,transvalue,hasonlySubUnit)));
+        if (!xCord.empty() and !yCord.empty())
+        { 
+            Id poolInfo;
+            string poolPath = Field<string> :: get(pool,"path");
+            poolInfo = Id( poolPath + "/info");
+            if ( poolInfo == Id() ) 
+                poolInfo = shell->doCreate( "Annotator", pool, "info", 1 );
+            assert( poolInfo != Id() );
+            double x = atof( xCord.c_str() );
+            double y = atof( yCord.c_str() );
+            Field< double >::set( poolInfo, "x", x );
+            Field< double >::set( poolInfo, "y", y );
+        }
         }//Pool_ != Id()
     }
     return molSidcmptMIdMap;
@@ -529,7 +539,6 @@ void SbmlReader::getRules() {
     //  cout << "\n ##### Need to populate funcpool and sumtotal which is pending due to equations \n";
     Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
     for ( unsigned int r = 0; r < nr; r++ ) {
-
         Rule * rule = model_->getRule(r);
         bool assignRule = rule->isAssignment();
         if ( assignRule ) {
@@ -554,9 +563,10 @@ void SbmlReader::getRules() {
                 vector< string > ruleMembers;
                 ruleMembers.clear();
                 printMembers( ast,ruleMembers );
+                string rulePar = "";
+                string comma = "";
                 for ( unsigned int rm = 0; rm < ruleMembers.size(); rm++ ) {
                     m_iter = molSidMIdMap_.find( ruleMembers[rm] );
-
                     if ( m_iter != molSidMIdMap_.end() ) {
                         Id rMember = molSidMIdMap_.find(ruleMembers[rm])->second;
                         string rMember_str = molSidMIdMap_.find(ruleMembers[rm])->first;
@@ -581,21 +591,35 @@ void SbmlReader::getRules() {
                     Field< string >::set( sumId, "expr", ss.str() );
                     } 
                     else {
-                        cerr << "SbmlReader::getRules: Assignment rule member is not a species" << endl;
+                        
+                        rulePar +=  comma;
+                        rulePar += ruleMembers[rm];
+                        comma = ',';
                         // In assignment rule there are constants instead of molecule which is yet to deal in moose.
                         errorFlag_ = true;
                     }
                 }
+                if (!rulePar.empty())
+                {   string t = "SbmlReader::getRules: Assignment rule \"";
+                    t += rule_variable;
+                    t += "\" variable member \"";
+                    t += rulePar;
+                    t += "\" is not a species not handle in moose";
+                    cerr << t<< endl;
+                }
+
             }
         }
         bool rateRule = rule->isRate();
         if ( rateRule ) {
-            cout << "warning : for now Rate Rule is not handled " << endl;
+            string rule_variable1 = rule->getVariable();
+            cout << "Warning : For now this \"" << rule_variable1 << "\" rate Rule is not handled in moose "  << endl;
             errorFlag_ = true;
         }
         bool  algebRule = rule->isAlgebraic();
         if ( algebRule ) {
-            cout << "warning: for now Algebraic Rule is not handled" << endl;
+            string rule_variable1 = rule->getVariable();
+            cout << "Warning: For now this " << rule_variable1 <<" Algebraic Rule is not handled in moose" << endl;
             errorFlag_ = true;
         }
     }
@@ -633,14 +657,15 @@ void SbmlReader::createReaction(const map< string, Id > &molSidcmptMIdMap ) {
                 name = id;
         }
         string grpname = getAnnotation( reac,enzInfoMap );
-        if ( (grpname != "") && (enzInfoMap[grpname].stage == 3) ) {
+       
+       if ( (grpname != "") && (enzInfoMap[grpname].stage == 3) )
             setupEnzymaticReaction( enzInfoMap[grpname],grpname ,molSidcmptMIdMap,name);
-        }
-        //if (grpname != "")
+        
+        // if (grpname != "")
         // {
-        //cout << "\n enz matic reaction " << enzInfoMap[grpname].stage;
-        //setupEnzymaticReaction( enzInfoMap[grpname],grpname ,molSidcmptMIdMap);
-        //}
+        // cout << "\n enz matic reaction " << enzInfoMap[grpname].stage;
+        // setupEnzymaticReaction( enzInfoMap[grpname],grpname ,molSidcmptMIdMap,name);
+        // }
 
         else if ( grpname == "" ) {
             if (reac->getNumModifiers() > 0)
@@ -652,35 +677,25 @@ void SbmlReader::createReaction(const map< string, Id > &molSidcmptMIdMap ) {
                     cout<<"warning: for now fast attribute is not handled"<<endl;
                     errorFlag_ = true;
                 }
+                // Get groupName if exist in annotation (in case of Genesis)
+                XMLNode * annotationRea = reac->getAnnotation();
+                //string groupName = getAnnotation_Spe_Reac(annotationRea);
+                pair<string, pair<string,string> > group = getAnnotation_Spe_Reac(annotationRea);
+                string groupName = group.first;
+                string xCord = group.second.first;
+                string yCord = group.second.second;
+                
                 int numRcts = reac->getNumReactants();
                 int numPdts = reac->getNumProducts();
-                if ( numRcts == 0 && numPdts != 0 ) {
-                    cout << "Reaction with zero Substrate is not possible but exist in this model";
-                    const SpeciesReference* pdt = reac->getProduct( 0 );
-                    std::string spName = pdt->getSpecies();
-                    Id parent = molSidcmptMIdMap.find( spName )->second; //gives compartment of spName
-                    cout << " \n \t ################################# Sub = 0 and prd != 0 need to the reac ############### ";
+                if (numRcts != 0 )
+                {  // In moose, reactions compartment are decided from first Substrate compartment info
+                   // substrate is missing then I get compartment from Reaction itself.
+                   // Ideally  that reaction should not be created but at this point I am putting a warning that substrate is missing
                     const SpeciesReference* rect=reac->getReactant(0);
                     std::string sp=rect->getSpecies();
                     Id comptRef = molSidcmptMIdMap.find(sp)->second; //gives compartment of sp
                     Id meshEntry = Neutral::child( comptRef.eref(), "mesh" );
                     Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
-                    reaction_ = shell->doCreate("Reac", meshEntry, name, 1);
-                    //shell->doAddMsg( "Single", meshEntry, "remeshReacs", reaction_, "remesh");
-                    //Get Substrate
-                    addSubPrd(reac,reaction_,"prd");
-                } //if numRcts == 0
-                else {
-                    const SpeciesReference* rect=reac->getReactant(0);
-                    std::string sp=rect->getSpecies();
-                    Id comptRef = molSidcmptMIdMap.find(sp)->second; //gives compartment of sp
-                    Id meshEntry = Neutral::child( comptRef.eref(), "mesh" );
-                    Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
-                    
-                    // Get groupName if exist in annotation (in case of Genesis)
-                    XMLNode * annotationRea = reac->getAnnotation();
-                    string groupName = getAnnotation_Spe_Reac(annotationRea);
-                    
                     string comptPath = Field<string> :: get(comptRef,"path");
                     string groupString = comptPath+'/'+groupName;
                     Id groupId;
@@ -694,19 +709,29 @@ void SbmlReader::createReaction(const map< string, Id > &molSidcmptMIdMap ) {
                         reaction_ = shell->doCreate("Reac", comptRef, name, 1);
                     else
                         reaction_ = shell->doCreate("Reac", groupId, name, 1);
-                    
+
                     //shell->doAddMsg( "Single", meshEntry, "remeshReacs", reaction_, "remesh");
                     //Get Substrate
-                    addSubPrd(reac,reaction_,"sub");
-
+                    if (numRcts != 0)
+                        addSubPrd(reac,reaction_,"sub");
                     //Get Product
-                    addSubPrd(reac,reaction_,"prd");
-                }
-                if (reaction_ != Id() )
-                {
+                    if (numPdts != 0)
+                        addSubPrd(reac,reaction_,"prd");
+
+                    if (!xCord.empty() and !yCord.empty())
+                    {  Id reacInfo;
+                        string reacPath = Field<string> :: get(reaction_,"path");
+                        reacInfo = Id( reacPath + "/info");
+                        if ( reacInfo == Id() ) 
+                            reacInfo = shell->doCreate( "Annotator", reaction_, "info", 1 );
+                        assert( reacInfo != Id() );
+                        double x = atof( xCord.c_str() );
+                        double y = atof( yCord.c_str() );
+                        Field< double >::set( reacInfo, "x", x );
+                        Field< double >::set( reacInfo, "y", y );
+                    }
                     if ( reac->isSetKineticLaw() ) {
                         KineticLaw * klaw=reac->getKineticLaw();
-
                         //vector< double > rate = getKLaw( klaw,rev );
                         vector< double > rate;
                         rate.clear();
@@ -714,19 +739,18 @@ void SbmlReader::createReaction(const map< string, Id > &molSidcmptMIdMap ) {
                         if ( errorFlag_ )
                             return;
                         else if ( !errorFlag_ ) {
-                            //cout << " Reaction name " << name << " kf " << rate[0] << " kb " << rate[1]<<endl;
-                            cout << " rate[0] " << rate[0] << " 1 " << rate[1];
                             Field < double > :: set( reaction_, "numKf", rate[0] );
                             Field < double > :: set( reaction_, "numKb", rate[1] );
                             /*if (numRcts > 1)
                             rate[0] = rate[0]*pow(1e3,1.0);
-                                 cout << "Reaction " << id << " " << name << " " << rate[0] << "  " << rate[1]<<endl;
                                  Field < double > :: set( reaction_, "Kf", rate[0] );
                                  Field < double > :: set( reaction_, "Kb", rate[1] );
                                  */
                         }
                     } //issetKineticLaw
                 }
+                else
+                    cout << " Warning:Reaction \" " << name << "\" doesnot have substrate, this is not read into moose"<<endl;
             } //else
         } // else grpname == ""
     }//for unsigned
@@ -735,18 +759,23 @@ void SbmlReader::createReaction(const map< string, Id > &molSidcmptMIdMap ) {
 /* Enzymatic Reaction  */
 void SbmlReader::setupEnzymaticReaction( const EnzymeInfo & einfo,string enzname, const map< string, Id > &molSidcmptMIdMap,string name1) {
     string enzPool = einfo.enzyme;
-
     Id comptRef = molSidcmptMIdMap.find(enzPool)->second; //gives compartment of sp
     Id meshEntry = Neutral::child( comptRef.eref(), "mesh" );
     Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
-
+    string xCord = einfo.xcord;
+    string yCord = einfo.ycord;
     //Creating enz pool to enzyme site
     Id enzPoolId = molSidMIdMap_.find(enzPool)->second;
+
+    string enzparentpath = Field<string> :: get(enzPoolId,"path");
+    Id enzId = Id( enzparentpath + "/"+name1 );
+    
     Id enzyme_ = shell->doCreate("Enz", enzPoolId, name1, 1);
     //shell->doAddMsg( "Single", meshEntry, "remeshReacs", enzyme_, "remesh");
     if (enzyme_ != Id())
     {
         Id complex = einfo.complex;
+        string clxpath = Field<string> :: get(complex,"path");
         //Moving enzyme site under enzyme
         shell->doMove(complex,enzyme_);
         shell->doAddMsg("OneToAll",enzyme_,"cplx",complex,"reac");
@@ -768,12 +797,26 @@ void SbmlReader::setupEnzymaticReaction( const EnzymeInfo & einfo,string enzname
         Field < double > :: set( enzyme_, "k3", einfo.k3 );
         Field < double > :: set( enzyme_, "k2", einfo.k2 );
         Field < double > :: set( enzyme_, "k1", einfo.k1 );
+        if (!xCord.empty() and !yCord.empty())
+        {  Id enzInfo;
+            string enzPath = Field<string> :: get(enzyme_,"path");
+            enzInfo = Id( enzPath + "/info");
+            if ( enzInfo == Id() ) 
+                enzInfo = shell->doCreate( "Annotator", enzyme_, "info", 1 );
+            assert( enzInfo != Id() );
+            double x = atof( xCord.c_str() );
+            double y = atof( yCord.c_str() );
+            Field< double >::set( enzInfo, "x", x );
+            Field< double >::set( enzInfo, "y", y );
+        } //xCord.empty
     }//enzyme_
 }
 
 /*  get annotation  */
-string SbmlReader :: getAnnotation_Spe_Reac(XMLNode * annotationSpe_Rec)
+pair<string, pair< string, string> > SbmlReader :: getAnnotation_Spe_Reac(XMLNode * annotationSpe_Rec)
 {   string groupName = "";
+    string xcord = "";
+    string ycord = "";
     //XMLNode * annotationSpe_Rec = spe_rec->getAnnotation();
     if( annotationSpe_Rec != NULL ) {
         unsigned int num_children = annotationSpe_Rec->getNumChildren();
@@ -789,16 +832,22 @@ string SbmlReader :: getAnnotation_Spe_Reac(XMLNode * annotationSpe_Rec)
                         //group = shell->doCreate( "Neutral", mgr, "groups", 1, MooseGlobal );
                         // assert( group != Id() );
                     }
+                    else if (nodeName == "xCord")
+                        xcord = (grandChildNode.getChild(0).toXMLString()).c_str();
+                    else if (nodeName == "yCord")
+                        ycord = (grandChildNode.getChild(0).toXMLString()).c_str();
+                    
                 } //gchild
             } //moose and modelAnnotation
         } //child
         }//annotation Node
-    return groupName;
+    return make_pair(groupName, make_pair(xcord,ycord));
 }
 string SbmlReader::getAnnotation( Reaction* reaction,map<string,EnzymeInfo> &enzInfoMap ) {
     XMLNode * annotationNode = reaction->getAnnotation();
     EnzymeInfo einfo;
-    string grpname = "",stage;
+    string grpname = "",stage,group;
+    string xcord,ycord;
 
     if( annotationNode != NULL ) {
         unsigned int num_children = annotationNode->getNumChildren();
@@ -825,19 +874,34 @@ string SbmlReader::getAnnotation( Reaction* reaction,map<string,EnzymeInfo> &enz
                     else if ( nodeName == "substrates") {
                         Id elem = molSidMIdMap_.find(nodeValue)->second;
                         einfo.substrates.push_back(elem);
-                    } else if ( nodeName == "product" ) {
+                    } 
+                    else if ( nodeName == "product" ) {
                         Id elem = molSidMIdMap_.find(nodeValue)->second;
                         einfo.products.push_back(elem);
-                    } else if ( nodeName == "groupName" )
+                    }
+                    else if ( nodeName == "groupName" )
                         grpname = nodeValue;
+                    
                     else if ( nodeName == "stage" )
                         stage = nodeValue;
+
+                    else if ( nodeName == "Group" )
+                        einfo.group = nodeValue;
+                    
+                    else if ( nodeName == "xCord" )
+                        einfo.xcord = nodeValue;
+                    
+                    else if ( nodeName == "yCord" )
+                        einfo.ycord = nodeValue;
                 }
                 if ( stage == "1" ) {
                     enzInfoMap[grpname].substrates = einfo.substrates;
                     enzInfoMap[grpname].enzyme = einfo.enzyme;
                     einfo.stage = 1;
                     enzInfoMap[grpname].stage = einfo.stage;
+                    enzInfoMap[grpname].group = einfo.group;
+                    enzInfoMap[grpname].xcord = einfo.xcord;
+                    enzInfoMap[grpname].ycord = einfo.ycord;
                     KineticLaw * klaw=reaction->getKineticLaw();
                     vector< double > rate ;
                     rate.clear();
@@ -878,12 +942,20 @@ void SbmlReader::setupMMEnzymeReaction( Reaction * reac,string rid,string rname,
         rid.erase( loc,strlen-loc );
     }
     unsigned int num_modifr = reac->getNumModifiers();
+    // Get groupName if exist in annotation (in case of Genesis)
+    XMLNode * annotationRea = reac->getAnnotation();
+    //string groupName = getAnnotation_Spe_Reac(annotationRea);
+    pair<string, pair<string,string> > group = getAnnotation_Spe_Reac(annotationRea);
+    string groupName = group.first;
+    string xCord = group.second.first;
+    string yCord = group.second.second;
     for ( unsigned int m = 0; m < num_modifr; m++ ) {
         const ModifierSpeciesReference* modifr=reac->getModifier( m );
         std::string sp = modifr->getSpecies();
         Id enzyme_;
         Id E = molSidMIdMap_.find(sp)->second;
-
+        string Epath = Field<string> :: get(E,"path");
+        //cout << " \n \n  epath" << Epath;
         Id comptRef = molSidcmptMIdMap.find(sp)->second; //gives compartment of sp
         Id meshEntry = Neutral::child( comptRef.eref(), "mesh" );
         Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
@@ -892,7 +964,18 @@ void SbmlReader::setupMMEnzymeReaction( Reaction * reac,string rid,string rname,
         {   //shell->doAddMsg( "Single", meshEntry, "remeshReacs", enzyme_, "remesh");
             if (E != Id())
                 shell->doAddMsg("Single",E,"nOut",enzyme_,"enzDest");
-
+            if (!xCord.empty() and !yCord.empty())
+            {  Id enzInfo;
+                string enzPath = Field<string> :: get(enzyme_,"path");
+                enzInfo = Id( enzPath + "/info");
+                if ( enzInfo == Id() ) 
+                    enzInfo = shell->doCreate( "Annotator", enzyme_, "info", 1 );
+                assert( enzInfo != Id() );
+                double x = atof( xCord.c_str() );
+                double y = atof( yCord.c_str() );
+                Field< double >::set( enzInfo, "x", x );
+                Field< double >::set( enzInfo, "y", y );
+            }
             KineticLaw * klaw=reac->getKineticLaw();
             vector< double > rate;
             rate.clear();
@@ -1128,6 +1211,8 @@ void SbmlReader::addSubPrd(Reaction * reac,Id reaction_,string type) {
 */
 
 double SbmlReader::transformUnits( double mvalue,UnitDefinition * ud,string type, bool hasonlySubUnit ) {
+    assert (ud);
+
     double lvalue = mvalue;
     if (type == "compartment") {
         for ( unsigned int ut = 0; ut < ud->getNumUnits(); ut++ ) {

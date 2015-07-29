@@ -59,29 +59,44 @@ https://sourceforge.net/projects/moose/
 
 ## Core MOOSE
 
-- g++ (>= 4.6.x)  REQUIRED For building the C++ MOOSE core.
-- GSL (1.16.x) OPTIONAL For core moose numerical computation
-- OpenMPI (1.8.x) OPTIONAL For running moose in parallel on clusters
-
+- g++     (>= 4.6.x)  REQUIRED For building the C++ MOOSE core.
+- GSL     (1.16.x)    OPTIONAL For core moose numerical computation
+- OpenMPI (1.8.x)     OPTIONAL For running moose in parallel on clusters
+- SBML    (5.9.x)     OPTIONAL For reading and writing signalling models in SBML format
+- HDF5    (1.8.x)     OPTIONAL For reading and writing data in HDF5 based formats
 
 ## PyMOOSE                      REQUIRED except on cluster worker nodes
 
 Python interface for core MOOSE API
 
-- GSL     (1.16.x)                      REQUIRED For core moose numerical computation
+In addition to core MOOSE requirements:
+
+Python2    ( >= 2.7.x) REQUIRED For building the MOOSE Python bindings
+Python-dev ( >= 2.7.x) REQUIRED Python development headers and libraries
+NumPy      ( >= 1.6.x) REQUIRED For array interface
+
+
+## Graphical User Interface
+
+
 - PyQt4         (4.8.x)                 REQUIRED For Python GUI    
 - Matplotlib    ( >= 1.1.x)             REQUIRED For plotting simulation results
-- SBML          (5.9.x)                 OPTIONAL For reading and writing signalling models to SBML files
+- suds		(0.4)			REQUIRED For accessing models hosted on biomodels database.
+
 
 ### Compartmental Model Visualization       OPTIONAL
 
 
-
 - GSL     (1.16.x)                      REQUIRED For core moose numerical computation
-- OSG           (3.2.x)                 REQUIRED For 3D rendering and simulation of neuronal models
-- Qt4           (4.8.x)                 REQUIRED For C++ GUI of Moogli
-- PyQt4         (4.8.x)                 REQUIRED For Python GUI    
-- Matplotlib    ( >= 1.1.x)             REQUIRED For plotting simulation results
+- OSG     (3.2.x)                       REQUIRED For 3D rendering and simulation of neuronal models
+- Qt4     (4.8.x)                       REQUIRED For C++ GUI of Moogli
+
+
+## Demos
+
+- PyQt4      (4.8.x)    OPTIONAL GUI in squid demo, Traub et al 2005 demo.
+- NetworkX   (1.x)	OPTIONAL display neuronal topology in Traub et al 2005 demo.
+- Pygraphviz (1.x)	OPTIONAL display neuronal topology in Traub et al 2005 demo.
 
 # AUTHORS
 

@@ -56,7 +56,6 @@ def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
         mobj = moose.CubeMesh(modelpath.path+'/'+string_num)
         mobj.volume = 1e-15
         mesh = moose.element(mobj.path+'/mesh')
-        print "modelBuid ",view.sceneContainerPt.sceneRect()
         qGItem = ComptItem(scene,pos.toPoint().x(),pos.toPoint().y(),800,500,mobj)
         qGItem.setPen(QtGui.QPen(Qt.QColor(66,66,66,100), 5, Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin))
         view.sceneContainerPt.addItem(qGItem)
@@ -88,6 +87,7 @@ def checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt):
         #     print " Dropping not possible, Pool needs Compartment as its parent"
         # else:
             # mobj = compartment
+
         if string == "Pool":
             poolObj = moose.Pool(mobj.path+'/'+string_num)
             poolinfo = moose.Annotator(poolObj.path+'/info')
@@ -262,13 +262,28 @@ def createObj(scene,view,modelpath,string,pos,layoutPt):
             return
 
     if itemAt != None:
-        if string in layoutPt.createdItem.keys():
-            num = layoutPt.createdItem[string]
-            layoutPt.createdItem[string]+=1
+        itemAtView = view.sceneContainerPt.itemAt(view.mapToScene(event_pos))
+        itemClass = type(itemAtView).__name__
+        if ( itemClass == 'QGraphicsRectItem'):
+            mobj = itemAtView.parentItem().mobj
         else:
-            layoutPt.createdItem[string] =1
+            mobj = itemAtView.mobj
+        compartment = findCompartment(mobj)
+        mobj = compartment
+        num = 0;
+        string,num = findUniqId(mobj,string,num)
     checkCreate(scene,view,modelpath,string,num,event_pos,layoutPt)
-    
+
+def findUniqId(mobj,string,num):
+    if num == 0:
+        path = mobj.path+'/'+string;
+    else:
+        path = mobj.path+'/'+string+str(num);
+    if not moose.exists(path):
+        return(string,num)
+    else:
+        num +=1;
+        return(findUniqId(mobj,string,num))
 def findCompartment(mooseObj):
     if mooseObj.path == '/':
         return None
