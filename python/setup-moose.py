@@ -31,7 +31,7 @@ __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
 import os
-from setuptools import setup
+from distutils.core import setup
 
 setup(
         name='moose',
