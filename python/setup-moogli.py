@@ -31,7 +31,7 @@ __email__            = "aviralg@ncbs.res.in"
 __status__           = "Development"
 
 import os
-from setuptools import setup
+from distutils.core import setup
 
 setup(
         name='moogli',
