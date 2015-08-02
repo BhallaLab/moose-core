@@ -61,7 +61,7 @@ class KkitPlugin(MoosePlugin):
         if filename:
             filename = filename+extension
             if filters[str(filter_)] == 'SBML':
-                writeerror = moose.writeSBML(str(filename),self.modelRoot)
+                writeerror = moose.writeSBML(self.modelRoot,str(filename))
                 if writeerror == -2:
                     QtGui.QMessageBox.warning(None,'Could not save the Model','\n WriteSBML :  This copy of MOOSE has not been compiled with SBML writing support.')
                 elif writeerror == -1:

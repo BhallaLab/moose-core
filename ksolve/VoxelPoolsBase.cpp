@@ -195,10 +195,15 @@ void VoxelPoolsBase::xferInOnlyProxies(
 {
 	unsigned int offset = voxelIndex * poolIndex.size();
 	vector< double >::const_iterator i = values.begin() + offset;
+	unsigned int proxyEndIndex = stoichPtr_->getNumVarPools() + 
+				stoichPtr_->getNumProxyPools();
 	for ( vector< unsigned int >::const_iterator 
 			k = poolIndex.begin(); k != poolIndex.end(); ++k ) {
-		if ( *k >= S_.size() - numProxyPools ) {
-			Sinit_[*k] = S_[*k] += *i;
+		// if ( *k >= S_.size() - numProxyPools )
+		if ( *k >= stoichPtr_->getNumVarPools() && *k < proxyEndIndex ) {
+			// cout << S_[*k] << ", " << Sinit_[*k] << ", " << *i <<  endl;
+			Sinit_[*k] = *i;
+			S_[*k] = *i;
 		}
 		i++;
 	}
@@ -271,12 +276,14 @@ void VoxelPoolsBase::forwardReacVolumeFactor( unsigned int i, double volume )
 {
 	assert( i < xReacScaleSubstrates_.size() );
 	xReacScaleSubstrates_[i] *= volume / getVolume();
+	// cout << "forwardReacVolumeFactor[" << i << "] = " << xReacScaleSubstrates_[i] <<endl;
 }
 
 void VoxelPoolsBase::backwardReacVolumeFactor( unsigned int i, double volume )
 {
 	assert( i < xReacScaleProducts_.size() );
 	xReacScaleProducts_[i] *= volume / getVolume();
+	// cout << "backwardReacVolumeFactor[" << i << "] = "<< xReacScaleProducts_[i] <<endl;
 }
 
 double VoxelPoolsBase::getXreacScaleSubstrates( unsigned int i ) const
@@ -372,5 +379,10 @@ void VoxelPoolsBase::print() const
 	for ( unsigned int i = 0; i < xReacScaleSubstrates_.size(); ++i ) {
 		cout << i << "	" << xReacScaleSubstrates_[i] << "	" <<
 				xReacScaleProducts_[i] << endl;
+	}
+	cout << "##############    RATES    ######################\n";
+	for ( unsigned int i = 0; i < rates_.size(); ++i ) {
+		cout << i << "	:	" << rates_[i]->getR1() << ",	" << 
+				rates_[i]->getR2() << endl;
 	}
 }

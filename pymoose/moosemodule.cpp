@@ -1524,10 +1524,10 @@ extern "C" {
     PyObject * moose_writeSBML(PyObject * dummy, PyObject * args)
     {
         char * fname = NULL, * modelpath = NULL;
-        if(!PyArg_ParseTuple(args, "ss:moose_writeSBML", &fname, &modelpath)){
+        if(!PyArg_ParseTuple(args, "ss:moose_writeSBML", &modelpath, &fname)){
             return NULL;
         }        
-        int ret = SHELLPTR->doWriteSBML(string(fname), string(modelpath));
+        int ret = SHELLPTR->doWriteSBML(string(modelpath),string(fname));
         return Py_BuildValue("i", ret);
     }
   

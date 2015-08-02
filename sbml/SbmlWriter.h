@@ -25,7 +25,7 @@ class SbmlWriter
 	public:
 		SbmlWriter() {;}
 		~SbmlWriter() {;}
-		int write( string filename, string location );
+		int write( string location, string filename );
 #ifdef USE_SBML
 		void createModel( string filename, SBMLDocument& doc ,string target);
 		bool validateModel(SBMLDocument* sbmlDoc );

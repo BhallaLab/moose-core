@@ -43,6 +43,7 @@ sys.path.append('../../../python')
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+import pygraphviz
 import networkx as nx
 import moose
 import cells
