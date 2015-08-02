@@ -91,7 +91,7 @@ USE_NUMPY=1
 # Debug mode:
 
 ifeq ($(BUILD),debug)
-CXXFLAGS = -g -fpermissive -fno-strict-aliasing -fPIC -fno-inline-functions -Wall -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
+CXXFLAGS = -g -O0 -fpermissive -fno-strict-aliasing -fPIC -fno-inline-functions -Wall -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
 USE_GSL = true
 endif
 # Optimized mode:
@@ -296,7 +296,7 @@ endif
 
 ifeq ($(USE_HDF5),1)
 	CXXFLAGS+= -DUSE_HDF5  -DH5_NO_DEPRECATED_SYMBOLS -I/usr/local/hdf5/include
-	LIBS+= -lhdf5 -L/usr/local/hdf5/lib
+	LIBS+= -lhdf5 -lhdf5_hl -L/usr/local/hdf5/lib 
 endif
 
 LD = ld
@@ -403,7 +403,7 @@ PYTHON_CFLAGS := $(shell python-config --includes) \
     -fstack-protector --param=ssp-buffer-size=4
 
 PYTHON_LDFLAGS := -L/usr/lib/$(INSTALLED_PYTHON) \
-    -Xlinker -export-dynamic -Wl,-O1 -Wl,-Bsymbolic-functions
+    -Xlinker -export-dynamic -Wl,-O0 -Wl,-Bsymbolic-functions
 endif # ifneq ($(BUILD),debug)
 endif # ifeq ($(PYTHON),3)
 PYTHON_VERSION_MAJOR := $(word 1,${PYTHON_VERSION})
@@ -424,11 +424,13 @@ PYTHON_CFLAGS := -I/usr/include/$(INSTALLED_PYTHON) -fno-strict-aliasing \
     --param=ssp-buffer-size=4 \
     -Wformat -Wformat-security -Werror=format-security
 
-PYTHON_LDFLAGS := -L/usr/lib/$(INSTALLED_PYTHON)  -Xlinker -export-dynamic -Wl,-O1 -Wl,-Bsymbolic-functions
+PYTHON_LDFLAGS := -L/usr/lib/$(INSTALLED_PYTHON)  -Xlinker -export-dynamic -Wl,-O0 -Wl,-Bsymbolic-functions
 endif
 # There are some unix/gcc specific paths here. Should be cleaned up in future.
 pymoose: python/moose/_moose.so
 pymoose: CXXFLAGS += -DPYMOOSE $(PYTHON_CFLAGS)
+# fix: add include dir for numpy headers required by pymoose/moosemodule.cpp
+pymoose: CXXFLAGS += -I$(shell python -c 'from numpy import get_include; print get_include()')
 pymoose: OBJLIBS += pymoose/_pymoose.o
 pymoose: LDFLAGS += $(PYTHON_LDFLAGS)
 export CXXFLAGS

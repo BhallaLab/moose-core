@@ -19,68 +19,87 @@ import sys
 sys.path.append( '../util' )
 import rdesigneur as rd
 from PyQt4 import QtGui
-#import moogli_viewer as mv
 import moogli
 
 RM = 1.0
 RA = 1.0
 CM = 0.01
-runtime = 10.0
+runtime = 1.0
 diffConst = 1e-12
 dendLen = 100e-6
 numDendSegments = 50
 segLen = dendLen / numDendSegments
 spineSpacing = 2.0e-6
 spineSpacingDistrib = 0.0
+spineSize = 1.0
 spineSizeDistrib = 0.2
+spineAngle= 0.0
+spineAngleDistrib = 2*numpy.pi
 
-def makeModel():
-    rdes = rd.rdesigneur( useGssa = False, \
-                combineSegments = False, \
-                cellPortion = "/model/elec/#",  \
-                meshLambda = 1e-6, \
-                adaptorList = [ \
-                    ( 'psd', '.', 'inject', 'Ca', False, 0, 2e-9 ) \
-                    ], \
-                addSpineList = [ \
-                    ( 'spine', '#', \
-                    spineSpacing, spineSpacingDistrib, spineSizeDistrib, \
-                    0.0, 0.0, numpy.pi, numpy.pi / 2.0 ) \
-                    ]
-                )
-    # Make a 'bare' spine: No synchans, no ion chans, no Ca.
-    rdes.addSpineProto( 'spine', RM, RA, CM, \
-             synList = (), chanList = (), caTau = 0.0 )
-    elec = moose.Neutral( '/tempelec' )
-    '''
-    ecompt = rdes._buildCompt( elec, 'dend', 100e-6, 2.0e-6, 0, RM, RA, CM )
-    ecompt.x0 = 0
-    ecompt.x = 0
-    ecompt.y0 = 0
-    ecompt.y = 0
-    ecompt.z0 = 0
-    ecompt.z = 100e-6
-    '''
+
+# Here we define a function that is used to make a cell prototype. Normally
+# it would load in a model from a file.
+def makeCellProto( name ):
+    print 'IN: makeCellProto( ', name, ')'
+    elec = moose.Neuron( '/library/' + name )
     ecompt = []
     for i in range( numDendSegments ):
-        ec = rdes._buildCompt( elec, 'dend' + str(i), segLen, 2.0e-6, i * segLen, RM, RA, CM )
+        ec = rd.buildCompt( elec, 'dend' + str(i), segLen, 2.0e-6, i * segLen, RM, RA, CM )
         ecompt.append( ec )
         if i > 0:
-            moose.connect( ecompt[i-1], 'raxial', ec, 'axial' )
+            moose.connect( ecompt[i-1], 'axial', ec, 'raxial' )
+        else:
+            ec.name = "soma"
     for i in ecompt:
         i.z0 = i.x0
         i.x0 = 0
         i.z = i.x
         i.x = 0
 
-    chem = moose.Neutral( '/tempchem' )
+# This line is used so that rdesigneur knows about the cell proto function
+rd.makeCellProto = makeCellProto
+
+# This function is used to make the chem prototype. 
+def makeChemProto( name ):
+    chem = moose.Neutral( '/library/' + name )
     for i in ( 'dend', 'spine', 'psd' ):
-        compt = moose.CubeMesh( '/tempchem/' + i )
+        print 'making ', i
+        compt = moose.CubeMesh( chem.path + '/' + i )
         compt.volume = 1e-18
-        ca = moose.Pool( '/tempchem/' + i + '/Ca' )
+        ca = moose.Pool( compt.path + '/Ca' )
         ca.concInit = 0.08e-3
         ca.diffConst = 1e-12
-    rdes.buildFromMemory( '/tempelec', '/tempchem' )
+
+
+def makeModel():
+    moose.Neutral( '/library' )
+    # Here we illustrate building the chem proto directly. This is not
+    # good practice as it takes the model definition away from the 
+    # declaration of prototypes.
+    makeChemProto( 'cProto' )
+    rdes = rd.rdesigneur( useGssa = False, \
+                combineSegments = False, \
+                meshLambda = 1e-6, \
+            cellProto = [['makeCellProto()', 'elec' ]] ,\
+            spineProto = [['makeSpineProto()', 'spine' ]] ,\
+            chemProto = [['cProto', 'chem' ]] ,\
+            spineDistrib = [ \
+                ['spine', '#', \
+                'spineSpacing', str( spineSpacing ), \
+                'spineSpacingDistrib', str( spineSpacingDistrib ), \
+                'angle', str( spineAngle ), \
+                'angleDistrib', str( spineAngleDistrib ), \
+                'size', str( spineSize ), \
+                'sizeDistrib', str( spineSizeDistrib ) ] \
+            ], \
+            chemDistrib = [ \
+                [ "chem", "#", "install", "1" ] \
+            ],
+            adaptorList = [ \
+                [ 'psd/Ca', 'conc', '.', 'inject', 0, 2e-9 ], \
+                ] \
+        )
+    rdes.buildModel( '/model' )
 
 def addPlot( objpath, field, plot, tick ):
     if moose.exists( objpath ):
@@ -165,9 +184,6 @@ def main():
     p3.legend()
 
     plt.show()
-
-    '''
-    '''
     app = QtGui.QApplication(sys.argv)
     #widget = mv.MoogliViewer( '/model' )
     morphology = moogli.read_morphology_from_moose( name="", path = '/model/elec' )

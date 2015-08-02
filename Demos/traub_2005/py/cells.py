@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Mar  9 23:17:17 2012 (+0530)
 # Version: 
-# Last-Updated: Mon Jun 24 18:02:15 2013 (+0530)
+# Last-Updated: Fri Jul 10 15:56:23 2015 (+0530)
 #           By: subha
-#     Update #: 689
+#     Update #: 692
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -202,6 +202,9 @@ class CellBase(moose.Neuron):
             path_tokens = path.rpartition('/')
             moose.copy(self.prototype, path_tokens[0], path_tokens[-1])
         moose.Neutral.__init__(self, path)
+        self.solver = moose.HSolve('{}/solver'.format(path, 'solver'))
+        self.solver.target = path
+        self.solver.dt = config.simulationSettings.simulationDt
         
     def comp(self, number):
         path = '%s/comp_%d' % (self.path, number)

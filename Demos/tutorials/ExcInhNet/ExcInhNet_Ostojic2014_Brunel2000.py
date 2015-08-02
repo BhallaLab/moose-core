@@ -63,8 +63,8 @@ NI = N-NE         # Number of inhibitory cells
 # Simulation parameters
 #############################################
 
-simtime = 0.2      #s # Simulation time
-dt = 0.001e-3         #s # time step
+simtime = 10.0    #s # Simulation time
+dt = 1e-5         #s # time step
 
 #############################################
 # Network parameters: synapses (not for ExcInhNetBase)
@@ -147,18 +147,17 @@ class ExcInhNetBase:
             self._init_plots()
         
         # moose simulation
-        moose.useClock( 0, '/network/syns', 'process' )
-        moose.useClock( 1, '/network', 'process' )
-        moose.useClock( 2, '/plotSpikes', 'process' )
-        moose.useClock( 3, '/plotVms', 'process' )
-        moose.useClock( 3, '/plotWeights', 'process' )
-        moose.setClock( 0, dt )
-        moose.setClock( 1, dt )
-        moose.setClock( 2, dt )
-        moose.setClock( 3, dt )
-        moose.setClock( 9, dt )
+        # moose auto-schedules
+        #moose.useClock( 0, '/network/syns', 'process' )
+        #moose.useClock( 1, '/network', 'process' )
+        #moose.useClock( 2, '/plotSpikes', 'process' )
+        #moose.useClock( 3, '/plotVms', 'process' )
+        #moose.useClock( 3, '/plotWeights', 'process' )
+        for i in range(10):
+            moose.setClock( i, dt )
+
         t1 = time.time()
-        print 'reinit MOOSE -- takes a while ~20s.'
+        print 'reinit MOOSE'
         moose.reinit()
         print 'reinit time t = ', time.time() - t1
         t1 = time.time()
@@ -361,7 +360,7 @@ def extra_plots(net):
     #    /float(net.NmaxExc) # per neuron
     rate = rate_from_spiketrain(allspikes,simtime,dt)\
         /float(net.NmaxExc) # per neuron
-    plt.plot(timeseries,rate)
+    plt.plot(timeseries[:len(rate)],rate)
     #plt.ylim(0,100)
     plt.title("Exc population rate")
     plt.ylabel("Hz")
@@ -369,7 +368,7 @@ def extra_plots(net):
     plt.subplot(224)
     rate = rate_from_spiketrain(net.spikesInh.vector,simtime,dt)\
         /float(net.N-net.NmaxExc) # per neuron    
-    plt.plot(timeseries[:rate],rate)
+    plt.plot(timeseries[:len(rate)],rate)
     #plt.ylim(0,100)
     plt.title("Inh population rate")
     plt.xlabel("Time (s)")

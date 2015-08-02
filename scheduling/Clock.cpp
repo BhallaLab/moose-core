@@ -406,6 +406,7 @@ const Cinfo* Clock::initCinfo()
 		"	Table2				18		1\n"
 		"	HDF5DataWriter			30		1\n"
 		"	HDF5WriterBase			30		1\n"
+		"	NSDFWriter			30		1\n"
                 "       PyRun                           30              1\n"
 		"	PostMaster			31		0.01\n"
 		"	\n"
@@ -666,6 +667,7 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
 		cout << "Clock::handleStart: Warning: simulation already in progress.\n Command ignored\n";
 		return;
 	}
+        
 	buildTicks( e );
 	assert( currentStep_ == nSteps_ );
 	assert( activeTicks_.size() == activeTicksMap_.size() );
@@ -686,6 +688,13 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
 			}
 			++k;
 		}
+
+
+#ifdef NOTIFY_PROGRESS
+                printf("Progress: @%f/%f\r", currentTime_, runTime_);
+
+#endif
+
 	}
 	info_.dt = dt_;
 	isRunning_ = false;
@@ -832,6 +841,7 @@ void Clock::buildDefaultTick()
 	defaultTick_["Table2"] = 18;
 	defaultTick_["HDF5DataWriter"] = 30;
 	defaultTick_["HDF5WriterBase"] = 30;
+	defaultTick_["NSDFWriter"] = 30;
         defaultTick_["PyRun"] = 30;
         
 	defaultTick_["PostMaster"] = 31;
@@ -864,12 +874,14 @@ void Clock::buildDefaultTick()
 	defaultTick_["SingleMsg"] = ~0U;
 	defaultTick_["SparseMsg"] = ~0U;
 	defaultTick_["Species"] = ~0U;
+	defaultTick_["Spine"] = ~0U;
 	defaultTick_["SpineMesh"] = ~0U;
 	defaultTick_["SteadyState"] = ~0U;
 	defaultTick_["Stoich"] = ~0U;
 	defaultTick_["Synapse"] = ~0U;
 	defaultTick_["TableBase"] = ~0U;
 	defaultTick_["Unsigned"] = ~0U;
+	defaultTick_["Variable"] = ~0U;
 	defaultTick_["VectorTable"] = ~0U;
 	defaultTick_["ZombieBufPool"] = ~0U;
 	defaultTick_["ZombieCaConc"] = ~0U;
@@ -918,3 +930,5 @@ unsigned int Clock::lookupDefaultTick( const string& className )
 	}
 	return i->second;
 }
+
+

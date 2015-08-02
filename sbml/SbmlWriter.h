@@ -1,14 +1,14 @@
 /*******************************************************************
  * File:            SbmlWriter.h
  * Description:      
- * Author:          
- * E-mail:          
+ * Author:          HarsnaRani
+ * E-mail:          hrani@ncbs.res.in
  ********************************************************************/
 /**********************************************************************
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment,
 ** also known as GENESIS 3 base code.
-**           copyright (C) 2003-2007 Upinder S. Bhalla. and NCBS
+**           copyright (C) 2003-2015 Upinder S. Bhalla. and NCBS
 ** It is made available under the terms of the
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
@@ -25,7 +25,7 @@ class SbmlWriter
 	public:
 		SbmlWriter() {;}
 		~SbmlWriter() {;}
-		int write( string filename, string location );
+		int write( string location, string filename );
 #ifdef USE_SBML
 		void createModel( string filename, SBMLDocument& doc ,string target);
 		bool validateModel(SBMLDocument* sbmlDoc );
@@ -44,6 +44,7 @@ class SbmlWriter
 		void getModifier(ModifierSpeciesReference* mspr,vector < Id> mod, int index,ostringstream& rate_law,double &rct_order,bool w);
 		void printParameters( KineticLaw* kl,string k,double kvalue,string unit );
 		string findNotes(Id itr);
+		string getGroupinfo(Id itr);
 #endif
 };
 //extern const Cinfo* initCinfo();

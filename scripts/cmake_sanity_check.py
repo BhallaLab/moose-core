@@ -44,8 +44,11 @@ def searchMakefiles(topdir):
             cmakedirs.add(d)
             cmakefiles[d] = fs
         if "Makefile" in fs:
-            makedirs.add(d)
-            makefiles[d] = fs
+            if "_build" in d:
+                continue
+            else:
+                makedirs.add(d)
+                makefiles[d] = fs
         else: pass
 
 def checkSrcs():
@@ -56,7 +59,11 @@ def checkSrcs():
     for d in makefiles:
         with open(os.path.join(d, "Makefile"), "r") as f:
             txt = f.read()
-            srcs = objPat.findall(txt)
+            for i in txt.split("\n\n"):
+                if "OBJ =" in i.upper():
+                    for j in i.split():
+                        if ".o" in j.strip():
+                            srcs.append("%s"%(j.strip()))
         try:
             with open(os.path.join(d, "CMakeLists.txt"), "r") as f:
                 txt = f.read()
@@ -70,7 +77,7 @@ def checkSrcs():
             if objName in srcs:
                 pass
             else:
-                #print(" Failed: In dir {}, CMake is creating extra object {}".format(d, objName))
+                print(" Failed: In dir {}, CMake is creating extra object {}".format(d, objName))
 
                 pass
         print("[TEST 3] Checking if CMake is missing some objects")

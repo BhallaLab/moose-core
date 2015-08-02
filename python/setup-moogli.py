@@ -35,14 +35,12 @@ from setuptools import setup
 
 setup(
         name='moogli',
-        version='1.0',
+        version='1.0.1',
         description='Visualizer for nerual simulation',
         author='Aviral Goel',
         author_email='aviralg@ncbs.res.in',
         url='http://moose.ncbs.res.in/moogli',
-        options={'build' : {'build_base' : '/tmp' } },
         packages=[ 'moogli'] ,
         package_dir = { 'moogli' : 'moogli' },
-        package_data = { 'moogli' : ['moogli.so'] },
-        #install_requires = [ 'sip' ],
+        package_data = { 'moogli' : ['_moogli.so'] },
     )

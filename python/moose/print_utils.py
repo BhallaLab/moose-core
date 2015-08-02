@@ -16,6 +16,7 @@ __status__           = "Development"
 
 import inspect
 import sys
+from . import _moose as moose
 
 HEADER = '\033[95m'
 OKBLUE = '\033[94m'
@@ -92,13 +93,13 @@ def dump(label, msg, frame=None, exception=None):
 
 
     if not frame :
-        print(prefix+"{0}".format(colored(msg,label)))
+        print((prefix+"{0}".format(colored(msg,label))))
     else :
         filename = frame.f_code.co_filename
         filename = "/".join(filename.split("/")[-2:])
-        print(prefix+"@{0}:{1} {2}".format(filename, frame.f_lineno, colored(msg, label)))
+        print((prefix+"@{0}:{1} {2}".format(filename, frame.f_lineno, colored(msg, label))))
     if exception:
-        print(" [Expcetion] {0}".format(exception))
+        print((" [Expcetion] {0}".format(exception)))
 
 def info(msg): dump("INFO", msg)
 def warn(msg): dump("WARN", msg)
@@ -114,3 +115,15 @@ def debug(msg): dump("DEBUG", msg)
 
 def log(label, msg): dump(label, msg)
 
+## Following prints the elements in model
+def modelInfo(path = '/##', **kwargs):
+    """Generate the list of all available moose-elements in model
+    """
+    info("Couting elements in model under %s" % path)
+    msg = []
+    types = [ "Table", "Table2", "Compartment", "Pool", "BufPool", "Enz", "Reac" ]
+    for t in types:
+        paths = moose.wildcardFind("{}[TYPE={}]".format(path, t))
+        if len(paths) > 0:
+            msg.append("{:>20} : {}".format(t, len(paths)))
+    return "\n".join(msg)

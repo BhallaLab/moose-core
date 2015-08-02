@@ -3,22 +3,20 @@ include_directories(../basecode ../utility ../kinetics ../external/debug)
 
 
 add_library(hsolve
-    Cell.cpp
-    HinesMatrix.cpp
-    HSolveActive.cpp
-    HSolveActiveSetup.cpp
-    HSolve.cpp
-    #HSolveHub.cpp
-    HSolveInterface.cpp
-    HSolvePassive.cpp
-    HSolveStruct.cpp
-    HSolveUtils.cpp
-    #RateLookup.cpp
-    testHSolve.cpp
-    ZombieCaConc.cpp
-    ZombieCompartment.cpp
-    ZombieHHChannel.cpp
-    )
+    	HSolveStruct.cpp 
+	HinesMatrix.cpp 
+	HSolvePassive.cpp 
+	RateLookup.cpp 
+	HSolveActive.cpp 
+	HSolveActiveSetup.cpp 
+	HSolveInterface.cpp 
+	HSolve.cpp 
+	HSolveUtils.cpp 
+	testHSolve.cpp 
+	ZombieCompartment.cpp 
+	ZombieCaConc.cpp 
+	ZombieHHChannel.cpp 
+)
 
 if(ENABLE_CUDA)
     FILE(GLOB CUDA_SRC *.cu)

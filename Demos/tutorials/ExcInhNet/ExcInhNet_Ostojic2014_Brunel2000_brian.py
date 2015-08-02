@@ -11,6 +11,7 @@ Tested with Brian 1.4.1
 
 Written by Aditya Gilra, CAMP 2014, Bangalore, 20 June, 2014.
 Updated to match MOOSE implementation by Aditya Gilra, Jan, 2015.
+Currently, simtime and dt are modified to compare across MOOSE, Brian1 and Brian2.
 '''
 
 #import modules and functions to be used
@@ -19,6 +20,7 @@ from brian import * # importing brian also does:
                     # matplot like commands into the namespace, further
                     # also can use np. for numpy and mpl. for matplotlib
 import random
+import time
 
 np.random.seed(100) # set seed for reproducibility of simulations
 random.seed(100) # set seed for reproducibility of simulations
@@ -27,8 +29,8 @@ random.seed(100) # set seed for reproducibility of simulations
 # Simulation parameters
 # ###########################################
 
-simdt = 0.001*ms
-simtime = 0.2*second            # Simulation time
+simdt = 0.01*ms
+simtime = 10.0*second            # Simulation time
 defaultclock.dt = simdt         # Brian's default sim time step
 dt = defaultclock.dt/second     # convert to value in seconds
 
@@ -140,7 +142,9 @@ sm_e_vm = StateMonitor(Pe,'v',record=range(10),clock=clocknrn)
 # ###########################################
 
 print "Setup complete, running for",simtime,"at dt =",dt,"s."
+t1 = time.time()
 run(simtime,report='text')
+print 'inittime + runtime, t = ', time.time() - t1
 
 print "For g,J =",g,J,"mean exc rate =",\
     sm_e.nspikes/float(Nmon_exc)/(simtime/second),'Hz.'
@@ -191,6 +195,7 @@ subplot(231)
 raster_plot(sm_e,ms=1.)
 title(str(Nmon_exc)+" exc neurons")
 xlabel("")
+xlim([0,simtime/ms])
 subplot(234)
 raster_plot(sm_i,ms=1.)
 title(str(Nmon-Nmon_exc)+" inh neurons")
@@ -237,7 +242,8 @@ allspikes = []
 for nrni in range(NI):
     allspikes.extend(sm_i[nrni])
 #plot(timeseries,popm_i.smooth_rate(width=50.*ms,filter="gaussian"),color='grey')
-plot(timeseries,rate_from_spiketrain(allspikes,simtime/second,dt)/float(NI))
+rate = rate_from_spiketrain(allspikes,simtime/second,dt)/float(NI)
+plot(timeseries[:len(rate)],rate)
 title("Inh population rate")
 xlabel("Time (s)")
 ylabel("Hz")

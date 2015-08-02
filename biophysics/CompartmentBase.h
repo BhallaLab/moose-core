@@ -133,6 +133,12 @@ class CompartmentBase
 			 */
 			void cable();
 
+			/// Displaces compartment by specified distance vector.
+			void displace( double dx, double dy, double dz );
+
+			/// Scales electrical values along with setting length, dia
+			void setGeomAndElec( const Eref& e, 
+							double length, double dia );
 			/////////////////////////////////////////////////////////////
 			// Here we define the virtual functions for each of the above
 			// wrappers.
@@ -227,6 +233,11 @@ class CompartmentBase
 			 * must be > 0
 			 */
 			bool rangeWarning( const string& field, double value );
+
+			/**
+			 * A utility function update length if any of the coords change
+			 */
+			void updateLength();
 
 			/**
 			 * Initializes the class info.

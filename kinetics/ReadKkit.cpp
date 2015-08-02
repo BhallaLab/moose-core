@@ -149,15 +149,76 @@ Id  makeStandardElements( Id pa, const string& modelname )
 	return mgr;
 }
 
+static void positionCompt( ObjId compt, double side, bool shiftUp )
+{
+	double y0 = Field< double >::get( compt, "y0" );
+	double y1 = Field< double >::get( compt, "y1" );
+	if ( shiftUp ) {
+		Field< double >::set( compt, "y0", y0 + side );
+		Field< double >::set( compt, "y1", y1 + side );
+	} else {
+		Field< double >::set( compt, "y0", y0 - y1 );
+		Field< double >::set( compt, "y1", 0 );
+	}
+}
+
+void makeSolverOnCompt( Shell* s, const vector< ObjId >& compts, 
+				bool isGsolve )
+{
+	if ( compts.size() > 3 ) {
+		cout << "Warning: ReadKkit::makeSolverOnCompt: Cannot handle " <<
+			   compts.size() << " chemical compartments\n";
+		return;
+	}
+	vector< Id > stoichVec;
+	if ( compts.size() == 2 ) {
+		double side = Field< double >::get( compts[1], "dy" );
+		positionCompt( compts[0], side, true );
+	}
+	if ( compts.size() == 3 ) {
+		double side = Field< double >::get( compts[1], "dy" );
+		positionCompt( compts[0], side, true );
+		positionCompt( compts[2], side, false );
+	}
+	
+	for ( vector< ObjId >::const_iterator 
+					i = compts.begin(); i != compts.end(); ++i ) {
+		string simpath = i->path() + "/##";
+		Id ksolve;
+		if ( isGsolve )
+			ksolve = s->doCreate( "Gsolve", *i, "gsolve", 1 );
+		else
+			ksolve = s->doCreate( "Ksolve", *i, "ksolve", 1 );
+		Id stoich = s->doCreate( "Stoich", *i, "stoich", 1 );
+		stoichVec.push_back( stoich );
+		Field< Id >::set( stoich, "compartment", *i );
+		Field< Id >::set( stoich, "ksolve", ksolve );
+		Field< string >::set( stoich, "path", simpath );
+	}
+	if ( stoichVec.size() == 2 ) {
+		SetGet1< Id >::set( stoichVec[1], "buildXreacs", stoichVec[0] );
+	}
+	if ( stoichVec.size() == 3 ) {
+		SetGet1< Id >::set( stoichVec[1], "buildXreacs", stoichVec[0] );
+		SetGet1< Id >::set( stoichVec[1], "buildXreacs", stoichVec[2] );
+	}
+	for ( vector< Id >::iterator 
+					i = stoichVec.begin(); i != stoichVec.end(); ++i ) {
+		SetGet0::set( *i, "filterXreacs" );
+	}
+}
+
 void setMethod( Shell* s, Id mgr, double simdt, double plotdt, 
 				const string& method )
 {
+	vector< ObjId > ret;
+	simpleWildcardFind( mgr.path() + "/#[ISA=ChemCompt]", ret );
+	assert( ret.size() > 0 );
+				
 	Id compt( mgr.path() + "/kinetics" );
 	assert( compt != Id() );
-	string cpath = compt.path();
-	string simpath = cpath + "/##[]";
-	string simpath2 = cpath + "/##[ISA=StimulusTable]," +
-			cpath + "/##[ISA=PulseGen]";
+	string simpath2 = mgr.path() + "/##[ISA=StimulusTable]," +
+			mgr.path() + "/##[ISA=PulseGen]";
 
 	string m = lower( method );
 	if ( m == "rk4" ) {
@@ -166,24 +227,10 @@ void setMethod( Shell* s, Id mgr, double simdt, double plotdt,
 	}	
 	if ( m == "ksolve" || m == "gsl" || 
 		m == "rk5" || m == "rkf" || m == "rk" ) {
-			Id ksolve = s->doCreate( "Ksolve", compt, "ksolve", 1 );
-			Id stoich = s->doCreate( "Stoich", compt, "stoich", 1 );
-			Field< Id >::set( stoich, "compartment", compt );
-			Field< Id >::set( stoich, "ksolve", ksolve );
-			Field< string >::set( stoich, "path", simpath );
-			// simpath2 += "," + cpath + "/ksolve";
-			// s->doUseClock( simpath2, "process", 4 );
-			// s->doSetClock( 4, plotdt );
+			makeSolverOnCompt( s, ret, false );
 	} else if ( m == "gssa" || m == "gsolve" || 
 		m == "gillespie" || m == "stochastic" ) {
-			Id gsolve = s->doCreate( "Gsolve", compt, "gsolve", 1 );
-			Id stoich = s->doCreate( "Stoich", compt, "stoich", 1 );
-			Field< Id >::set( stoich, "compartment", compt );
-			Field< Id >::set( stoich, "ksolve", gsolve );
-			Field< string >::set( stoich, "path", simpath );
-			// simpath2 += "," + cpath + "/gsolve";
-			// s->doUseClock( simpath2, "process", 4 );
-			// s->doSetClock( 4, plotdt );
+			makeSolverOnCompt( s, ret, true );
 	} else if ( m == "ee" || m == "neutral" ) {
 			// s->doUseClock( simpath, "process", 4 );
 			// s->doSetClock( 4, simdt );
@@ -198,6 +245,7 @@ void setMethod( Shell* s, Id mgr, double simdt, double plotdt,
 	s->doSetClock( 12, simdt );
 	s->doSetClock( 13, simdt );
 	s->doSetClock( 14, simdt );
+	s->doSetClock( 15, plotdt );	// Gsolve and Ksolve
 	s->doSetClock( 16, plotdt );	// Gsolve and Ksolve
 	s->doSetClock( 17, plotdt );	// Stats objects
 	s->doSetClock( 18, plotdt );	// Table2 objects.
@@ -233,11 +281,19 @@ Id ReadKkit::read(
 	enzCplxMols_.resize( 0 );
 
 	innerRead( fin );
-
 	assignPoolCompartments();
 	assignReacCompartments();
 	assignEnzCompartments();
 	assignMMenzCompartments();
+
+	/*
+	if ( moveOntoCompartment_ ) {
+		assignPoolCompartments();
+		assignReacCompartments();
+		assignEnzCompartments();
+		assignMMenzCompartments();
+	}
+	*/
 
 	convertParametersToConcUnits();
 
@@ -247,6 +303,14 @@ Id ReadKkit::read(
 	// s->doUseClock( plotpath, "process", 8 );
 
 	setMethod( s, mgr, simdt_, plotdt_, method );
+	/*
+	if ( !moveOntoCompartment_ ) {
+		assignPoolCompartments();
+		assignReacCompartments();
+		assignEnzCompartments();
+		assignMMenzCompartments();
+	}
+	*/
 
 	//Harsha: Storing solver and runtime at model level rather than model level
 	Id kinetics( basePath_+"/kinetics");
@@ -544,8 +608,7 @@ void ReadKkit::call( const vector< string >& args)
 					notes += space + args[i].substr( start, end );
 					space = " ";
 				}
-				bool OK = Field< string >::set( obj, "notes", notes );
-				assert( OK );
+			   	Field< string >::set( obj, "notes", notes );
 			}
 		}
 	}
@@ -712,10 +775,10 @@ void ReadKkit::assignPoolCompartments()
 		// compartments_.push_back( comptId );
 		for ( vector< Id >::iterator k = volCategories_[i].begin();
 			k != volCategories_[i].end(); ++k ) {
-			if ( moveOntoCompartment_ ) {
+			// if ( moveOntoCompartment_ ) {
 				if ( ! (getCompt( *k ).id == comptId ) )
 					shell_->doMove( *k, comptId );
-			}
+			// }
 		}
 	}
 }
@@ -727,9 +790,8 @@ Id findParentComptOfReac( Id reac )
 	assert( subFinfo );
 
 		vector< Id > subVec;
-		unsigned int numSub = 
-				reac.element()->getNeighbors( subVec, subFinfo );
-		assert( numSub > 0 );
+		reac.element()->getNeighbors( subVec, subFinfo );
+		assert( subVec.size() > 0 );
 		// For now just put the reac in the compt belonging to the 
 		// first substrate
 		return getCompt( subVec[0] );
@@ -746,10 +808,10 @@ void ReadKkit::assignReacCompartments()
 	for ( map< string, Id >::iterator i = reacIds_.begin(); 
 		i != reacIds_.end(); ++i ) {
 		Id compt = findParentComptOfReac( i->second );
-		if ( moveOntoCompartment_ ) {
+		// if ( moveOntoCompartment_ ) {
 			if ( ! (getCompt( i->second ).id == compt ) )
 				shell_->doMove( i->second, compt );
-		}
+		// }
 	}
 }
 
@@ -766,9 +828,8 @@ Id findMeshOfEnz( Id enz )
 	assert( enzFinfo );
 
 		vector< Id > enzVec;
-		unsigned int numEnz = 
-				enz.element()->getNeighbors( enzVec, enzFinfo );
-		assert( numEnz == 1 );
+		enz.element()->getNeighbors( enzVec, enzFinfo );
+		assert( enzVec.size() == 1 );
 		vector< Id > meshEntries;
 		return getCompt( enzVec[0] );
 }
@@ -1235,8 +1296,7 @@ unsigned int ReadKkit::loadTab( const vector< string >& args )
 	for ( unsigned int i = start; i < args.size(); ++i ) {
 		tabEntries_.push_back( atof( args[i].c_str() ) );
 	}
-	bool ok = Field< vector< double > >::set( tab, "vector", tabEntries_ );
-	assert( ok );
+	Field< vector< double > >::set( tab, "vector", tabEntries_ );
 
 	// cout << "Loading table for " << args[0] << "," << args[1] << "," << clean << endl;
 	

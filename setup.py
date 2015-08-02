@@ -1,48 +1,48 @@
-# setup.py --- 
-# 
+# setup.py ---
+#
 # Filename: setup.py
-# Description: 
+# Description:
 # Author: subha
-# Maintainer: 
+# Maintainer:
 # Created: Sun Dec  7 20:32:02 2014 (+0530)
-# Version: 
-# Last-Updated: 
-#           By: 
-#     Update #: 0
-# URL: 
-# Keywords: 
-# Compatibility: 
-# 
-# 
+# Version:
+# Last-Updated: Tue Jun 16 15:40:30 2015 (-0400)
+#           By: Subhasis Ray
+#     Update #: 9
+# URL:
+# Keywords:
+# Compatibility:
+#
+#
 
-# Commentary: 
-# 
-# 
-# 
-# 
+# Commentary:
+#
+#
+#
+#
 
 # Change log:
-# 
-# 
-# 
-# 
+#
+#
+#
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
 # published by the Free Software Foundation; either version 3, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; see the file COPYING.  If not, write to
 # the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 # Floor, Boston, MA 02110-1301, USA.
 
-# 
-# 
+#
+#
 
 # Code:
 """
@@ -58,6 +58,9 @@ libraries installed.
 libSBML needs to be downloaded, built and installed separately.
 
 """
+
+import numpy as np
+
 CLASSIFIERS = ["Development Status :: 5 - Production/Stable",
                "Environment :: Console",
                "Intended Audience :: Science/Research",
@@ -70,7 +73,7 @@ CLASSIFIERS = ["Development Status :: 5 - Production/Stable",
 NAME='moose'
 DESCRIPTION = 'MOOSE is the Multiscale Object Oriented Simulation Environment'
 
-fid = open('README', 'r')
+fid = open('README.md', 'r')
 long_description = fid.read()
 fid.close()
 idx = max(0, long_description.find('MOOSE is the'))
@@ -111,7 +114,7 @@ SOURCES=['external/muparser/muParser.cpp',
          'basecode/SetGet.cpp',
          'basecode/OpFuncBase.cpp',
          'basecode/EpFunc.cpp',
-         'basecode/HopFunc.cpp', 
+         'basecode/HopFunc.cpp',
          'basecode/SparseMatrix.cpp',
          'basecode/doubleEq.cpp',
          'basecode/testAsync.cpp',
@@ -139,6 +142,7 @@ SOURCES=['external/muparser/muParser.cpp',
          'biophysics/ReadCell.cpp',
          'biophysics/SynChan.cpp',
          'biophysics/NMDAChan.cpp',
+         'biophysics/Spine.cpp',
          'biophysics/testBiophysics.cpp',
          'biophysics/IzhikevichNrn.cpp',
          'biophysics/DifShell.cpp',
@@ -151,12 +155,15 @@ SOURCES=['external/muparser/muParser.cpp',
          'biophysics/MarkovSolverBase.cpp',
          'biophysics/MarkovSolver.cpp',
          'biophysics/VClamp.cpp',
+         'biophysics/SwcSegment.cpp',
+         'biophysics/ReadSwc.cpp',
          'builtins/Arith.cpp',
          'builtins/Group.cpp',
          'builtins/Mstring.cpp',
          'builtins/Func.cpp',
          'builtins/Function.cpp',
          'builtins/Variable.cpp',
+         'builtins/InputVariable.cpp',
          'builtins/TableBase.cpp',
          'builtins/Table.cpp',
          'builtins/Interpol.cpp',
@@ -167,6 +174,7 @@ SOURCES=['external/muparser/muParser.cpp',
          'builtins/Interpol2D.cpp',
          'builtins/HDF5WriterBase.cpp',
          'builtins/HDF5DataWriter.cpp',
+         'builtins/NSDFWriter.cpp',
          'builtins/testBuiltins.cpp',
          'device/PulseGen.cpp',
          'device/DiffAmp.cpp',
@@ -260,7 +268,7 @@ SOURCES=['external/muparser/muParser.cpp',
          'sbml/SbmlWriter.cpp',
          'sbml/SbmlReader.cpp',
          'scheduling/Clock.cpp',
-         'scheduling/testScheduling.cpp',             
+         'scheduling/testScheduling.cpp',
          'shell/Shell.cpp',
          'shell/ShellCopy.cpp',
          'shell/ShellThreads.cpp',
@@ -289,7 +297,7 @@ SOURCES=['external/muparser/muParser.cpp',
 
 INCLUDE_DIRS=['/usr/include',
               '/usr/local/include',
-              '/usr/lib/python2.7/site-packages/numpy/core/include', # needed explicitly on cygwin
+              np.get_include(),
               'external/muparser',
               'basecode',
               'biophysics',
@@ -313,34 +321,36 @@ INCLUDE_DIRS=['/usr/include',
               'synapse',
               'utility']
 
-LIBRARIES = ['gsl',
-             'gslcblas', # required to avoid undefined refs on import
-             'hdf5',
-             'sbml']
+LIBRARIES = ['gsl'
+            , 'gslcblas'  # required to avoid undefined refs on import
+            , 'hdf5'
+            , 'sbml'
+            , 'hdf5_hl'   # required to avoid undefined refs on import
+            ]
 
 LIBRARY_DIRS = ['/usr/lib64', '/usr/lib', '/usr/local/lib']
 
-DEFINE_MACROS = [('USE_GSL', None), 
+DEFINE_MACROS = [('USE_GSL', None),
                  ('USE_HDF5', None),
                  ('NDEBUG', None),
                  ('USE_NUMPY', None),
                  ('H5_NO_DEPRECATED_SYMBOLS', None),
                  ('PYMOOSE', None),
-                 ('USE_SBML', None), 
+                 ('USE_SBML', None),
                  ('USE_HDF5', None)]
 
 EXTRA_LINK_ARGS = ['-L/usr/lib64', '-Wl,-R/usr/lib64'] # distutils disregards everything in LIBRARY_DIRS except /usr/local/lib, hence this
-PACKAGES = ['moose', 'moose.backend', 'moose.neuroml', 'mgui', 'mgui.plugins']
+PACKAGES = ['moose', 'moose.backend', 'moose.neuroml', 'mgui', 'mgui.plugins', 'moose.topology', 'moogli']
 SCRIPTS = ['gui/mgui.py']
-PACKAGE_DATA = {'moose': ['copyleft', 'README'], 'mgui': ['icons/*', 'colormaps/*', 'bioModels/*']}
+PACKAGE_DATA = {'moose': ['copyleft', 'README.md'], 'mgui': ['icons/*', 'colormaps/*', 'bioModels/*']}
 REQUIRES = ['numpy', 'gsl', 'hdf5', 'libsbml'] # using full-dependency
 # python-libsbml, although available on PyPI, does not build with pip
 # install and gsl is a C library. The links are just for informing the
 # users.
 DEPENDENCY_LINKS = ['git+git://git.savannah.gnu.org/gsl.git',
                     'svn+svn://svn.code.sf.net/p/sbml/code/trunk']
-
-EXTRAS_REQUIRE = ['matplotlib', 'PyQt4']
+INSTALL_REQUIRES = "requirements.txt"
+EXTRAS_REQUIRE = {} #['matplotlib', 'PyQt4', 'suds']
 
 setup_info = dict(
     name=NAME,
@@ -356,12 +366,16 @@ setup_info = dict(
     packages=PACKAGES,
     package_data=PACKAGE_DATA,
     requires=REQUIRES,
-    package_dir={'': 'python', 'mgui': 'gui'}
+    package_dir={'': 'python', 'mgui': 'gui'},
+    entry_points={
+        'gui_scripts': [
+            'moose = mgui.mgui:main']},
+    #scripts=SCRIPTS,
 )
 
 try:
     from setuptools import setup
-    from setuptools.extenion import Extension
+    from setuptools.extension import Extension
     setup_info['install_requires'] = INSTALL_REQUIRES
     setup_info['extras_require'] = EXTRAS_REQUIRE
     setup_info['dependency_links'] = DEPENDENCY_LINKS
@@ -378,12 +392,12 @@ moose_module = Extension(
     define_macros=DEFINE_MACROS,
     extra_link_args=EXTRA_LINK_ARGS
 )
-print moose_module.runtime_library_dirs
+print((moose_module.runtime_library_dirs))
 
 setup_info['ext_modules'] = [moose_module]
 setup(**setup_info)
 
 
 
-# 
+#
 # setup.py ends here

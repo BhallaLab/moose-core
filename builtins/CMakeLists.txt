@@ -8,6 +8,7 @@ add_library(moose_builtins
     Func.cpp
     Function.cpp
     Variable.cpp
+    InputVariable.cpp
     TableBase.cpp
     Table.cpp
     Interpol.cpp
@@ -16,6 +17,7 @@ add_library(moose_builtins
     Stats.cpp
     Interpol2D.cpp
     HDF5WriterBase.cpp
+    NSDFWriter.cpp
     HDF5DataWriter.cpp
     SpikeStats.cpp
     testBuiltins.cpp

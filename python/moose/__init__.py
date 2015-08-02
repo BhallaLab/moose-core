@@ -22,8 +22,4 @@ Builtin functions and classes in moose module (Python only)
 -----------------------------------------------------------
 
 """
-
-__version__ = '$Revision: 4454$'
-# $Source$
-
 from .moose import *

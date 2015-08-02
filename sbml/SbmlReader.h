@@ -1,14 +1,14 @@
 /*******************************************************************
  * File:            SbmlReader.h
  * Description:
- * Author:
- * E-mail:
+ * Author:          HarshaRani G.V
+ * E-mail:          hrani@ncbs.res.in
  ********************************************************************/
 /**********************************************************************
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment,
 ** also known as GENESIS 3 base code.
-**           copyright (C) 2003-2007 Upinder S. Bhalla. and NCBS
+**           copyright (C) 2003-2015 Upinder S. Bhalla. and NCBS
 ** It is made available under the terms of the
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
@@ -31,6 +31,9 @@ typedef struct {
     double k2;
     double k3;
     int stage;
+    string group;
+    string xcord;
+    string ycord;
 } EnzymeInfo;
 
 class SbmlReader {
@@ -70,6 +73,7 @@ private:
     void pushParmstoVector( const ASTNode* p,vector <string> & parameters );
     void getParameters( const ASTNode* node,vector <string> & parameters );
     void setupMMEnzymeReaction( Reaction * reac,string id ,string name,const map<string, Id> &);
+    pair<string, pair<string, string> > getAnnotation_Spe_Reac( XMLNode * annotationSpe_Rec );
     string getAnnotation( Reaction* reaction,map<string,EnzymeInfo> & );
     void setupEnzymaticReaction( const EnzymeInfo & einfo,string name,const map< string, Id > & ,string name1);
     void findModelParent( Id cwe, const string& path,Id& parentId, string& modelName );

@@ -35,6 +35,9 @@
 
 hid_t require_attribute(hid_t file_id, string path,
                         hid_t data_type, hid_t data_id);
+
+hid_t require_group(hid_t file_id, string path);
+
 class HDF5WriterBase
 {
   public:
@@ -74,6 +77,12 @@ class HDF5WriterBase
     
   protected:
     herr_t openFile();
+    // C++ sucks - does not allow template specialization inside class
+    hid_t createDoubleDataset(hid_t parent, std::string name, hsize_t size=0, hsize_t maxsize=H5S_UNLIMITED);
+    hid_t createStringDataset(hid_t parent, std::string name, hsize_t size=0, hsize_t maxsize=H5S_UNLIMITED);
+            
+    herr_t appendToDataset(hid_t dataset, const vector<double>& data);
+    hid_t createDataset2D(hid_t parent, string name, unsigned int rows);
     
     /// map from element path to nodes in hdf5file.  Multiple MOOSE
     /// tables can be written to the single file corresponding to a
@@ -96,6 +105,7 @@ class HDF5WriterBase
     string compressor_; // can be zlib or szip
     unsigned int compression_;
 };
+
 
 template <typename A> herr_t writeScalarAttr(hid_t file_id, string path, A value)
 {

@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Thu Oct  4 20:04:06 2012 (+0530)
+# Last-Updated: Fri Jul 10 11:54:30 2015 (+0530)
 #           By: subha
-#     Update #: 2170
+#     Update #: 2172
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -31,7 +31,8 @@
 
 # Code:
 
-import cStringIO
+from __future__ import print_function
+from StringIO import StringIO 
 from contextlib import closing
 import warnings
 import platform
@@ -77,7 +78,7 @@ def pwe():
 
     """
     pwe_ = _moose.getCwe()
-    print pwe_.getPath()
+    print(pwe_.getPath())
     return pwe_
     
 def le(el=None):
@@ -92,7 +93,7 @@ def le(el=None):
 
     Returns
     -------
-    None
+    List of path of child elements
 
     """
     if el is None:
@@ -103,9 +104,10 @@ def le(el=None):
         el = element(el)
     elif isinstance(el, vec):
         el = el[0]    
-    print 'Elements under', el.path
+    print('Elements under', el.path)
     for ch in el.children:
-        print ch.path
+        print(ch.path)
+    return [child.path for child in el.children]
 
 ce = setCwe # ce is a GENESIS shorthand for change element.
 
@@ -164,7 +166,7 @@ def showfield(el, field='*', showtype=False):
         value_field_dict = getFieldDict(el.className, 'valueFinfo')
         max_type_len = max([len(dtype) for dtype in list(value_field_dict.values())])
         max_field_len = max([len(dtype) for dtype in list(value_field_dict.keys())])
-        print '\n[', el.path, ']'
+        print('\n[', el.path, ']')
         for key, dtype in list(value_field_dict.items()):
             if dtype == 'bad' or key == 'this' or key == 'dummy' or key == 'me' or dtype.startswith('vector') or 'ObjId' in dtype:
                 continue
@@ -174,11 +176,11 @@ def showfield(el, field='*', showtype=False):
                 # The following hack is for handling both Python 2 and
                 # 3. Directly putting the print command in the if/else
                 # clause causes syntax error in both systems.
-                print typestr,
-            print key.ljust(max_field_len + 4), '=', value
+                print(typestr, end=' ')
+            print(key.ljust(max_field_len + 4), '=', value)
     else:
         try:
-            print field, '=', el.getField(field)
+            print(field, '=', el.getField(field))
         except AttributeError:
             pass # Genesis silently ignores non existent fields
 
@@ -234,12 +236,12 @@ def showmsg(el):
 
     """
     obj = element(el)
-    print 'INCOMING:'
+    print('INCOMING:')
     for msg in obj.msgIn:
-        print msg.e2.path, msg.destFieldsOnE2, '<---', msg.e1.path, msg.srcFieldsOnE1
-    print 'OUTGOING:'
+        print(msg.e2.path, msg.destFieldsOnE2, '<---', msg.e1.path, msg.srcFieldsOnE1)
+    print('OUTGOING:')
     for msg in obj.msgOut:
-        print msg.e1.path, msg.srcFieldsOnE1, '--->', msg.e2.path, msg.destFieldsOnE2
+        print(msg.e1.path, msg.srcFieldsOnE1, '--->', msg.e2.path, msg.destFieldsOnE2)
 
 def getfielddoc(tokens, indent=''):
     """Return the documentation for field specified by `tokens`.
@@ -266,14 +268,30 @@ def getfielddoc(tokens, indent=''):
         If the specified fieldName is not present in the specified class.
     """
     assert(len(tokens) > 1)
-    class_element = _moose.element('/classes/'+tokens[0])
-    for finfo in class_element.children:
-        for field_element in finfo:
-            if field_element.fieldName == tokens[1]: # TODO - this name clashes with Neutral.name.
-                return '%s%s.%s: %s - %s\n\t%s\n' % \
-                    (indent, tokens[0], tokens[1], 
-                     field_element.type, field_element.path.split('/')[-1].split('[')[0], field_element.docs)    
-    raise NameError('`%s` has no field called `%s`' 
+    classname = tokens[0]
+    fieldname = tokens[1]
+    while True:
+        try:
+            classelement = _moose.element('/classes/' + classname)
+            for finfo in classelement.children:
+                for fieldelement in finfo:
+                    baseinfo = '' 
+                    if classname != tokens[0]:
+                        baseinfo = ' (inherited from {})'.format(classname)
+                    if fieldelement.fieldName == fieldname:
+                        # The field elements are
+                        # /classes/{ParentClass}[0]/{fieldElementType}[N].
+                        finfotype = fieldelement.name
+                        return '{indent}{classname}.{fieldname}: type={type}, finfotype={finfotype}{baseinfo}\n\t{docs}\n'.format(
+                            indent=indent, classname=tokens[0],
+                            fieldname=fieldname,
+                            type=fieldelement.type,
+                            finfotype=finfotype,
+                            baseinfo=baseinfo,
+                            docs=fieldelement.docs)
+            classname = classelement.baseClass
+        except ValueError:
+            raise NameError('`%s` has no field called `%s`' 
                     % (tokens[0], tokens[1]))
                     
     
@@ -304,17 +322,17 @@ def getmoosedoc(tokens, inherited=False):
     
     """
     indent = '    '
-    with closing(cStringIO.StringIO()) as docstring:
+    with closing(StringIO()) as docstring:
         if not tokens:
             return ""
         try:
             class_element = _moose.element('/classes/%s' % (tokens[0]))
-            docstring.write('%s\n' % (class_element.docs))
         except ValueError:
             raise NameError('name \'%s\' not defined.' % (tokens[0]))
         if len(tokens) > 1:
             docstring.write(getfielddoc(tokens))
         else:
+            docstring.write('%s\n' % (class_element.docs))
             append_finfodocs(tokens[0], docstring, indent)
             if inherited:
                 mro = eval('_moose.%s' % (tokens[0])).mro()
@@ -407,7 +425,7 @@ def doc(arg, inherited=True, paged=True):
     if pager:
         pager(text)
     else:
-        print text
+        print(text)
                 
 
 # 

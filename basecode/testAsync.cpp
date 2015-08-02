@@ -1742,6 +1742,21 @@ void testMsgSrcDestFields()
 	assert( func[0] == "d2" );
 
 	//////////////////////////////////////////////////////////////
+	// getMsgSourceAndSender
+	//////////////////////////////////////////////////////////////
+	vector< ObjId > source;
+	vector< string > sender;
+	FuncId fid = 
+		static_cast< const DestFinfo* >( Test::sharedVec[5] )->getFid();
+	unsigned int numSrc = t2.element()->getMsgSourceAndSender( 
+					fid, source, sender );
+	assert( numSrc == 1 );
+	assert( source.size() == 1 );
+	assert( source[0] == tgt[0] );
+	assert( sender[0] == Test::sharedVec[4]->name() );
+	cout << "." << flush;
+
+	//////////////////////////////////////////////////////////////
 	// Clean up.
 	//////////////////////////////////////////////////////////////
 	t1.destroy();
@@ -1791,6 +1806,7 @@ void testHopFunc()
 void testAsync( )
 {
 	showFields();
+#ifdef DO_UNIT_TESTS
 	testSendMsg();
 	testCreateMsg();
 	testSetGet();
@@ -1819,4 +1835,5 @@ void testAsync( )
 	testCinfoElements();
 	testMsgSrcDestFields();
 	testHopFunc();
+#endif
 }

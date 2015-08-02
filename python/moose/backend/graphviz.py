@@ -21,7 +21,7 @@ from .. import _moose as moose
 from .. import print_utils
 import inspect
 import re
-import backend
+from . import backend
 from collections import defaultdict
 
 pathPat = re.compile(r'.+?\[\d+\]$')
@@ -134,7 +134,7 @@ class DotFile():
                     pass
             else:
                 params[k] = kwargs[k]
-        if 'label' not in params.keys():
+        if 'label' not in list(params.keys()):
             params['label'] = self.label(nodeName)
         nodeText = '"{}" [{}];'.format(nodeName, dictToString(params))
         self.textDict['nodes'].append(nodeText)

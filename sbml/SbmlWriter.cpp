@@ -1,14 +1,14 @@
 /*******************************************************************
  * File:            SbmlWriter.cpp
  * Description:      
- * Author:          
- * E-mail:          
+ * Author:       	HarshaRani   
+ * E-mail:          hrani@ncbs.res.in
  ********************************************************************/
 /**********************************************************************
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment,
 ** also known as GENESIS 3 base code.
-**  copyright (C) 2003-2007 Upinder S. Bhalla. and NCBS
+**  copyright (C) 2003-2015 Upinder S. Bhalla. and NCBS
 ** It is made available under the terms of the
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
@@ -37,7 +37,7 @@
 
 using namespace std;
 
-int SbmlWriter::write( string filepath,string target )
+int SbmlWriter::write( string target , string filepath)
 {
   //cout << "Sbml Writer: " << filepath << " ---- " << target << endl;
 #ifdef USE_SBML
@@ -86,6 +86,7 @@ int SbmlWriter::write( string filepath,string target )
   SBMLDocument sbmlDoc;
   bool SBMLok = false;
   createModel( filename,sbmlDoc,target );
+  //cout << " sbmlDoc " <<sbmlDoc.toSBML()<<endl;
   SBMLok  = validateModel( &sbmlDoc );
   if ( SBMLok ) 
   {
@@ -132,14 +133,17 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
   
   for ( vector< ObjId >::iterator itrgrp = graphs.begin(); itrgrp != graphs.end();itrgrp++)
     {  
-      vector< Id > graphsrc =LookupField< string, vector< Id > >::get(*itrgrp, "neighbors", "requestOut" );
-      for (vector <Id> :: iterator itrsrc = graphsrc.begin();itrsrc != graphsrc.end();itrsrc++)
-	{  string species = nameString(Field<string> :: get(*itrsrc,"name"));
-	   Id comptId = getCompt(*itrsrc).id;
-	   string speciesCompt = nameString(Field<string> :: get(comptId,"name"));
-	   plots += "/"+speciesCompt+"/"+species+";";
-	   
-	}
+    	vector< ObjId > msgMgrs = 
+                Field< vector< ObjId > >::get( *itrgrp, "msgOut" );
+      	for (unsigned int i = 0; i < msgMgrs.size();++i)
+      	{
+      		Id msgId = Field< Id >::get( msgMgrs[i], "e2" );
+   			string msgpath = Field <string> :: get(msgId,"path");
+   			std::size_t found = msgpath.find('/', 1);
+   			string str2 = msgpath.substr(found,msgpath.length());
+   			vector<string> msgdest = Field< vector<string> >::get( msgMgrs[i], "destFieldsOnE2" );
+   			plots += str2+";";
+      	}
     }
   
   ostringstream modelAnno;
@@ -176,8 +180,7 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
   vector< ObjId > chemCompt;
   wildcardFind(path+"/##[ISA=ChemCompt]",chemCompt);
   for ( vector< ObjId >::iterator itr = chemCompt.begin(); itr != chemCompt.end();itr++)
-    { //cout << "itr " << *itr << "name " << itr->eref() <<endl;
-      //TODO: CHECK need to check how do I get ObjectDimensions
+    { //TODO: CHECK need to check how do I get ObjectDimensions
       vector < unsigned int>dims;
       unsigned int dims_size;
       
@@ -196,13 +199,12 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	{ 
 	  string comptName = Field<string>::get(*itr,"name");
 	  string comptPath = Field<string>::get(*itr,"path");
-  	  ostringstream cid;
+	  ostringstream cid;
 	  cid << *itr  << "_" << index;
 	  comptName = nameString(comptName);
 	  string comptname_id = comptName + "_" + cid.str() + "_";
 	  //changeName(comptname,cid.str());
 	  string clean_comptname = idBeginWith(comptname_id);
-
 	  double size = Field<double>::get(ObjId(*itr,index),"Volume");
 	  unsigned int ndim = Field<unsigned int>::get(ObjId(*itr,index),"NumDimensions");
 	  
@@ -239,19 +241,19 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	      // name in number place, as its build under site, but in SBML this is not possible
 	      // so adding enzsite_enzname_cplxname
 	      if (found!=std::string::npos)
-		{vector < Id > rct = LookupField <string,vector < Id> >::get(*itrp, "neighbors","reacDest");
-		  std::set < Id > rctprd;
-		  rctprd.insert(rct.begin(),rct.end());
-		  for (std::set < Id> :: iterator rRctPrd = rctprd.begin();rRctPrd!=rctprd.end();rRctPrd++)
-		    { 
-		      string enz = Field<string> :: get(*rRctPrd,"name");
-		      ObjId meshParent = Neutral::parent( rRctPrd->eref() );
-		      string enzPoolsite = Field<string>::get(ObjId(meshParent),"name") ;
-		      objname = nameString(enzPoolsite)+"_"+nameString(enz)+"_"+nameString(poolname);
-		    }
-		}
+			{	vector < Id > rct = LookupField <string,vector < Id> >::get(*itrp, "neighbors","reacDest");
+		  		std::set < Id > rctprd;
+		  		rctprd.insert(rct.begin(),rct.end());
+		  		for (std::set < Id> :: iterator rRctPrd = rctprd.begin();rRctPrd!=rctprd.end();rRctPrd++)
+		    	{ 
+			      string enz = Field<string> :: get(*rRctPrd,"name");
+			      ObjId meshParent = Neutral::parent( rRctPrd->eref() );
+			      string enzPoolsite = Field<string>::get(ObjId(meshParent),"name") ;
+			      objname = nameString(enzPoolsite)+"_"+nameString(enz)+"_"+nameString(poolname);
+			    }
+			}
 	      else
-		objname = nameString(poolname);
+			objname = nameString(poolname);
 	      
 	      sp->setName( objname);
 	      sp->setCompartment( clean_comptname );
@@ -264,70 +266,99 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	      //   At this point I am using item which is # number so directly using nInit
 	      //
 	      sp->setInitialAmount( initAmt ); 
+	      
+	      string groupName = getGroupinfo(*itrp);
 	      string path = Field<string> :: get(*itrp,"path");
-	      Id annotaId( path+"/info");
-	      string noteClass = Field<string> :: get(annotaId,"className");
-	      string notes;
-	      if (noteClass =="Annotator")
-		{ string notes = Field <string> :: get(annotaId,"notes");
-		  if (notes != "")
-		    { string cleanNotes = nameString1(notes);
-		      string notesString = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t"+
-			cleanNotes + "\n\t </body>"; 
-		      sp->setNotes(notesString);
-		    }
-		}
+	      ostringstream speciAnno,speciGpname,specixyCord;
+	      bool speciannoexist = false;
+	      double x,y;
+	      Id annotaIdS( path+"/info");
+
+	      if (annotaIdS != Id())
+	      	{   string noteClass = Field<string> :: get(annotaIdS,"className");
+	      		x = Field <double> :: get(annotaIdS,"x");
+	        	y = Field <double> :: get(annotaIdS,"y");
+	        	specixyCord << "<moose:xCord>" << x << "</moose:xCord>\n";
+	  			specixyCord << "<moose:yCord>" << y << "</moose:yCord>\n";
+	  			speciannoexist = true;
+	  		
+	      		string notes;
+	      		if (noteClass =="Annotator")
+				{ string notes = Field <string> :: get(annotaIdS,"notes");
+			  		if (notes != "")	
+			    	{ 	string cleanNotes = nameString1(notes);
+		    	  		string notesString = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t"+
+				  		cleanNotes + "\n\t </body>"; 
+		      			sp->setNotes(notesString);
+		    		}
+				}
+			}
 	      sp->setUnits("substance");
 	      species_size = species_size+1;
 	      // true if species is amount, false: if species is concentration 
 	      sp->setHasOnlySubstanceUnits( true );
-	      string xyCord;
-	      // double x = Field <double> :: get(annotaId,"x");
-	      // double y = Field <double> :: get(annotaId,"y");
-	   	  // xyCord += "x:"+x+"y:"+y+";";   
-	      ostringstream modelAnno;
-  		  modelAnno << "<moose:ModelAnnotation>\n";
-  		  modelAnno << "<moose:xyCord> "<< xyCord<< "</moose:xyCord>\n";
-          modelAnno << "</moose:ModelAnnotation>";
-  		  XMLNode* xnode =XMLNode::convertStringToXMLNode( modelAnno.str() ,&xmlns);
-  		  sp->setAnnotation( xnode );	  
-	      // Buffered Molecule setting BoundaryCondition and constant has to be made true 
+	      if (!groupName.empty())
+	      	{	speciGpname << "<moose:Group>"<< groupName << "</moose:Group>\n";
+	      		speciannoexist = true;
+	      	}
+	      if (speciannoexist)
+	      {		ostringstream speciAnno;
+	  		  	speciAnno << "<moose:ModelAnnotation>\n";
+	  		  	if (!speciGpname.str().empty())
+	  				speciAnno << speciGpname.str();
+	  			if (!specixyCord.str().empty())
+	  				speciAnno <<specixyCord.str();
+	  			speciAnno << "</moose:ModelAnnotation>";
+	  			XMLNode* xnode =XMLNode::convertStringToXMLNode( speciAnno.str() ,&xmlns);
+	  		  	sp->setAnnotation( xnode );
+	      }
+	      
+	      // Setting BoundaryCondition and constant as per this rule for BufPool
+	      //  -constanst  -boundaryCondition  -has assignment/rate Rule  -can be part of sub/prd
+	      //	false	        true              yes                       yes   
+	      //    true            true               no                       yes
 	      if ( (objclass == "BufPool") || (objclass == "ZombieBufPool"))
-		  { sp->setBoundaryCondition(true);
-		  	
+		  {	 //BoundaryCondition is made for buff pool
+		  	sp->setBoundaryCondition(true);
 		  	string Funcpoolname = Field<string> :: get(*itrp,"path");
-			Id funcId(Funcpoolname+"/func");
-			if (funcId != ObjId())
-			{   // if its acting in react or product for a reaction/enzyme and also funcpool
-				sp->setConstant(false);
-				Id funcparentId = Field<ObjId> :: get(funcId,"parent");
-				string f1 = Field <string> :: get(funcId,"path");
-				Id funcIdx(f1+"/x");
-				string f1x = Field <string> :: get(funcIdx,"path");
-				vector < Id > inputPool = LookupField <string,vector <Id> > :: get(funcIdx,"neighbors","input");
-				int sumtot_count = inputPool.size();
-				if (sumtot_count > 0)
-				{	ostringstream sumtotal_formula;
-					for(vector< Id >::iterator itrsumfunc = inputPool.begin();itrsumfunc != inputPool.end(); itrsumfunc++)
-					{
-						string sumpool = Field<string> :: get(*itrsumfunc,"name");
-						sumtot_count -= 1;
-				  		string clean_sumFuncname = cleanNameId(*itrsumfunc,index);
-				  		if ( sumtot_count == 0 )
-				    		sumtotal_formula << clean_sumFuncname;
-				  		else
-				    		sumtotal_formula << clean_sumFuncname << "+";
-					}
-					Rule * rule =  cremodel_->createAssignmentRule();
-			      	rule->setVariable( clean_poolname );
-			      	rule->setFormula( sumtotal_formula.str() );
-			    }
-			}
-			else
-				sp->setConstant(true);
+		  	vector< Id > children = Field< vector< Id > >::get( *itrp, "children" );
+		  	for ( vector< Id >::iterator i = children.begin(); i != children.end(); ++i ) 
+		  	{	string funcpath = Field <string> :: get(*i,"path");
+		  		string clsname = Field <string> :: get(*i,"className");
+		  		if (clsname == "Function")
+		  		{  	Id funcIdx(funcpath+"/x");
+					string f1x = Field <string> :: get(funcIdx,"path");
+					vector < Id > inputPool = LookupField <string,vector <Id> > :: get(funcIdx,"neighbors","input");
+					int sumtot_count = inputPool.size();
+					if (sumtot_count > 0)
+					{	sp->setConstant(false);
+						ostringstream sumtotal_formula;
+						for(vector< Id >::iterator itrsumfunc = inputPool.begin();itrsumfunc != inputPool.end(); itrsumfunc++)
+						{
+							string sumpool = Field<string> :: get(*itrsumfunc,"name");
+							sumtot_count -= 1;
+				  			string clean_sumFuncname = cleanNameId(*itrsumfunc,index);
+				  			if ( sumtot_count == 0 )
+				    			sumtotal_formula << clean_sumFuncname;
+				  			else
+				    			sumtotal_formula << clean_sumFuncname << "+";
+						}
+						Rule * rule =  cremodel_->createAssignmentRule();
+			      		rule->setVariable( clean_poolname );
+			      		rule->setFormula( sumtotal_formula.str() );
+			    	}
+			    	else
+			    		cout << "assignment rule is not found for \" "<< poolname << " \" but function might have constant as variable"<<endl;
+		  		}
+		  		//If assignment rule is not found then constant is made true
+		  		else
+		  			sp->setConstant(true);
+		  		
+		  	} //for vector
 		  }//zbufpool
 	      else
-			{ sp->setBoundaryCondition(false);
+			{  //if not bufpool then Pool, then 
+			  sp->setBoundaryCondition(false);
 		 	  sp->setConstant(false);
 			}
 	    } //itrp
@@ -336,22 +367,55 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	  wildcardFind(comptPath+"/##[ISA=ReacBase]",Compt_Reac);
 	  //vector< Id > Compt_Reac = LookupField< string, vector< Id > >::get(*itr, "neighbors", "remeshReacs" );
 	  for (vector <ObjId> :: iterator itrR= Compt_Reac.begin();itrR != Compt_Reac.end();itrR++)
-	    { string cleanReacname = cleanNameId(*itrR,index);
-	      string recClass = Field<string> :: get(*itrR,"className");
-	      string pathR = Field<string> :: get(*itrR,"path");
-	      Id annotaIdR(pathR+"/info");
-	      string noteClassR = Field<string> :: get(annotaIdR,"className");
+	    { 
 	      Reaction* reaction;
 	      reaction = cremodel_->createReaction(); 
-	      string notesR;
-	      if (noteClassR =="Annotator")
-		notesR = Field <string> :: get(annotaIdR,"notes");
-	      if (notesR != ""){
-		string cleanNotesR = nameString1(notesR);
-		string notesStringR = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t"+
-		  cleanNotesR + "\n\t </body>"; 
-		reaction->setNotes(notesStringR);
-	      }
+	      string cleanReacname = cleanNameId(*itrR,index);
+	      string recClass = Field<string> :: get(*itrR,"className");
+	      string pathR = Field<string> :: get(*itrR,"path");
+	      ostringstream reactAnno,reactGpname,reactxyCord;
+	      bool reactannoexist = false;
+	      string noteClassR;
+	      double x,y;
+	      Id annotaIdR(pathR+"/info");
+	      if (annotaIdR != Id())
+	      {
+	      	noteClassR = Field<string> :: get(annotaIdR,"className");
+	      	x = Field <double> :: get(annotaIdR,"x");
+	        y = Field <double> :: get(annotaIdR,"y");
+	        reactxyCord << "<moose:xCord>" << x << "</moose:xCord>\n";
+	  		reactxyCord << "<moose:yCord>" << y << "</moose:yCord>\n";
+	  		reactannoexist = true;
+	  		string notesR;
+	      	if (noteClassR =="Annotator")
+	      	{
+				notesR = Field <string> :: get(annotaIdR,"notes");
+	      		if (notesR != "")
+	        	{	string cleanNotesR = nameString1(notesR);
+					string notesStringR = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t"+
+		  			cleanNotesR + "\n\t </body>"; 
+					reaction->setNotes(notesStringR);
+	      		}
+	      	}
+	      }	
+	      
+	      string groupName = getGroupinfo(*itrR);
+	      if (!groupName.empty())
+	      	{	reactGpname << "<moose:Group>"<< groupName << "</moose:Group>\n";
+	      		reactannoexist = true;
+	      	}
+	      if (reactannoexist)
+	      {		ostringstream reactAnno;
+	  		  	reactAnno << "<moose:ModelAnnotation>\n";
+	  		  	if (!reactGpname.str().empty())
+	  				reactAnno << reactGpname.str();
+	  			if (!reactxyCord.str().empty())
+	  				reactAnno <<reactxyCord.str();
+	  			reactAnno << "</moose:ModelAnnotation>";
+	  			XMLNode* xnode =XMLNode::convertStringToXMLNode( reactAnno.str() ,&xmlns);
+	  		  	reaction->setAnnotation( xnode );
+	      }	
+	      
 	      string objname = Field<string> :: get(*itrR,"name");
 	      objname = nameString(objname);
 
@@ -407,146 +471,180 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	    { string enzClass = Field<string>::get(*itrE,"className");
 	      string cleanEnzname = cleanNameId(*itrE,index);
 	      string pathE = Field < string > :: get(*itrE,"Path");
-	      Id annotaIdE(pathE+"/info");
-	      string noteClassE = Field < string > :: get(annotaIdE,"className");
 	      Reaction* reaction;
 	      reaction = cremodel_->createReaction();
+	      ostringstream enzAnno,enzGpname,enzxyCord;
+	      string noteClassE;
 	      string notesE;
-	      if (noteClassE == "Annotator")
-		notesE = Field < string > ::get(annotaIdE,"Notes");
-	      if (notesE != "")
-		{ string cleanNotesE = nameString1(notesE);
-		  string notesStringE = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t"+cleanNotesE + "\n\t </body>"; 
-		  reaction->setNotes(notesStringE);
-		}
+	      double x,y;
+	      bool enzAnnoexist = false;
+	      Id annotaIdE(pathE+"/info");
+	      if (annotaIdE != Id())
+	      {
+	      	noteClassE = Field<string> :: get(annotaIdE,"className");
+	      	x = Field <double> :: get(annotaIdE,"x");
+	        y = Field <double> :: get(annotaIdE,"y");
+	        enzxyCord << "<moose:xCord>" << x << "</moose:xCord>\n";
+	  		enzxyCord << "<moose:yCord>" << y << "</moose:yCord>\n";
+	  		enzAnnoexist = true;
+	  		if (noteClassE =="Annotator")
+	      	{
+				notesE = Field <string> :: get(annotaIdE,"notes");
+	      		if (notesE != "")
+	        	{	string cleanNotesE = nameString1(notesE);
+					string notesStringE = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t"+
+		  			cleanNotesE + "\n\t </body>"; 
+					reaction->setNotes(notesStringE);
+	      		}
+	      	}
+	      }	
+	      
+	      string groupName = getGroupinfo(*itrE);
+	      if (!groupName.empty())
+	      	{	enzGpname << "<moose:Group>"<< groupName << "</moose:Group>\n";
+	      		enzAnnoexist = true;
+	      	}
 	      string objname = Field < string> :: get(*itrE,"name");
 	      objname = nameString(objname);
 	      KineticLaw* kl;
 	      if ( (enzClass == "Enz") || (enzClass == "ZombieEnz"))
-		{// Complex Formation S+E -> SE*;
-		   reaction->setId( cleanEnzname);
-		   reaction->setName( objname);
-		   reaction->setFast ( false );
-		   reaction->setReversible( true);
-		   string enzname = Field<string> :: get(*itrE,"name");
-		   ostringstream enzid;
-		   enzid << (*itrE) <<"_"<<index;
-		   enzname = nameString(enzname);
-		   string enzNameAnno = enzname;
-		   ostringstream Objid;
-		   Objid << (*itrE) <<"_"<<index <<"_";
-		   string enzName = enzname + "_" + Objid.str();
-		   enzName = idBeginWith( enzName );
-		   string enzAnno = "<moose:EnzymaticReaction>";
-		   double k1 = Field<double>::get(*itrE,"k1");
-		   double k2 = Field<double>::get(*itrE,"k2");
-		   
-		   ostringstream rate_law;
-		   double rct_order = 0.0,prd_order=0.0;
-		   rate_law << "k1";
-		   getSubPrd(reaction,"enzOut","sub",*itrE,index,rate_law,rct_order,true,enzClass);
-		   for(unsigned int i =0;i<nameList_.size();i++)
-		     enzAnno += "<moose:enzyme>"+nameList_[i]+"</moose:enzyme>\n";
-		   
-		   getSubPrd(reaction,"sub","",*itrE,index,rate_law,rct_order,true,enzClass);
-		   for (unsigned int i =0;i<nameList_.size();i++)
-		     enzAnno += "<moose:substrates>"+nameList_[i]+"</moose:substrates>\n";
-		   
-		   // product 
-		   rate_law << "-" << "k2";
-		   getSubPrd(reaction,"cplxDest","prd",*itrE,index,rate_law,prd_order,true,enzClass);
-		   for(unsigned int i =0;i<nameList_.size();i++)
-		     enzAnno += "<moose:product>"+nameList_[i]+"</moose:product>\n";
-		   enzAnno += "<moose:groupName>"+enzName+"</moose:groupName>\n";
-		   enzAnno += "<moose:stage>1</moose:stage> \n";
-		   enzAnno += "</moose:EnzymaticReaction>";
-		   
-		   XMLNode* xnode =XMLNode::convertStringToXMLNode( enzAnno ,&xmlns);
-		   reaction->setAnnotation( xnode );	
-		   kl = reaction->createKineticLaw();
-		   kl->setFormula( rate_law.str() );
-		   string unit=parmUnit( rct_order-1 );
-		   printParameters( kl,"k1",k1,unit ); 
-		   string punit=parmUnit( prd_order-1 );
-		   printParameters( kl,"k2",k2,punit ); 
-		   // 2 Stage SE* -> E+P  
-		   
-		   Objid << "Product_formation";
-		   string enzName1 = enzname + "_" + Objid.str() + "_";
-		   enzName1 = idBeginWith( enzName1 );
-		   //Reaction* reaction;
-		   reaction = cremodel_->createReaction(); 
-		   reaction->setId( enzName1 );
-		   reaction->setName( objname);
-		   reaction->setFast( false );
-		   reaction->setReversible( false );
-		   
-		   if (notesE != ""){
-		     string cleanNotesE = nameString1(notesE);
-		     string notesStringE = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t"+
-		       cleanNotesE + "\n\t </body>"; 
-		     reaction->setNotes(notesStringE);
-		   }
-		   double k3 = Field<double>::get(*itrE,"k3");
-		   double erct_order = 0.0,eprd_order = 0.0;
-		   ostringstream enzrate_law;
-		   enzrate_law << "k3";
-		   string enzAnno2 = "<moose:EnzymaticReaction>";
-		   getSubPrd(reaction,"cplxDest","sub",*itrE,index,enzrate_law,erct_order,true,enzClass);
-		   for(unsigned int i =0;i<nameList_.size();i++)
-		     enzAnno2 +=  "<moose:complex>"+nameList_[i]+"</moose:complex>\n";
-		   
-		   getSubPrd(reaction,"enzOut","prd",*itrE,index,enzrate_law,eprd_order,false,enzClass);
-		   for(unsigned int i =0;i<nameList_.size();i++)
-		     enzAnno2 += "<moose:enzyme>"+nameList_[i]+"</moose:enzyme>\n";
-		   getSubPrd(reaction,"prd","",*itrE,index,enzrate_law,eprd_order,false,enzClass);
-		   for(unsigned int i =0;i<nameList_.size();i++)
-		     enzAnno2 += "<moose:product>"+nameList_[i]+"</moose:product>\n";
-		   
-		   enzAnno2 += "<moose:groupName>"+enzName+"</moose:groupName>\n";
-		   enzAnno2 += "<moose:stage>2</moose:stage> \n";
-		   enzAnno2 += "</moose:EnzymaticReaction>";
-		   XMLNode* xnode2 =XMLNode::convertStringToXMLNode( enzAnno2 ,&xmlns);
-		   reaction->setAnnotation( xnode2 );	
-		   
-		   kl = reaction->createKineticLaw();
-		   kl->setFormula( enzrate_law.str() );
-		   printParameters( kl,"k3",k3,"per_second" );
+			{// Complex Formation S+E -> SE*;
+		   		reaction->setId( cleanEnzname);
+			   	reaction->setName( objname);
+			   	reaction->setFast ( false );
+			   	reaction->setReversible( true);
+			   	string enzname = Field<string> :: get(*itrE,"name");
+			   	ostringstream enzid;
+			   	enzid << (*itrE) <<"_"<<index;
+			   	enzname = nameString(enzname);
+			   	string enzNameAnno = enzname;
+			   	ostringstream Objid;
+			   	Objid << (*itrE) <<"_"<<index <<"_";
+			   	string enzName = enzname + "_" + Objid.str();
+			   	enzName = idBeginWith( enzName );
+			   	ostringstream enzAnno;
+			   	enzAnno <<"<moose:EnzymaticReaction>";
+			   	string groupName = getGroupinfo(*itrE);
+		       	// if (!groupName.empty())
+		       	// 	enzAnno << "<moose:Group>"<<groupName<<"</moose:Group>";
+				double k1 = Field<double>::get(*itrE,"k1");
+			   	double k2 = Field<double>::get(*itrE,"k2");
+		   	   	ostringstream rate_law;
+		   	   	double rct_order = 0.0,prd_order=0.0;
+		   		rate_law << "k1";
+		   		getSubPrd(reaction,"enzOut","sub",*itrE,index,rate_law,rct_order,true,enzClass);
+		   		for(unsigned int i =0;i<nameList_.size();i++)
+		     		enzAnno << "<moose:enzyme>"<<nameList_[i]<<"</moose:enzyme>\n";
+		   		getSubPrd(reaction,"sub","",*itrE,index,rate_law,rct_order,true,enzClass);
+		   		for (unsigned int i =0;i<nameList_.size();i++)
+		     		enzAnno << "<moose:substrates>"<<nameList_[i]<<"</moose:substrates>\n";
+		   		// product 
+		   		rate_law << "-" << "k2";
+		   		getSubPrd(reaction,"cplxDest","prd",*itrE,index,rate_law,prd_order,true,enzClass);
+		   		for(unsigned int i =0;i<nameList_.size();i++)
+		     		enzAnno << "<moose:product>"<<nameList_[i]<<"</moose:product>\n";
+		   		
+		   		enzAnno <<"<moose:groupName>"<<enzName<<"</moose:groupName>\n";
+		   		enzAnno << "<moose:stage>1</moose:stage> \n";
+		   		// if (!enzGpname.str().empty())
+	  				// enzAnno << enzGpname.str();
+	  			if (!enzxyCord.str().empty())
+	  				enzAnno <<enzxyCord.str();
+		   		enzAnno << "</moose:EnzymaticReaction>";
 
-		} //enzclass = Enz
+		   		XMLNode* xnode =XMLNode::convertStringToXMLNode( enzAnno.str() ,&xmlns);
+		   		reaction->setAnnotation( xnode );	
+		   		kl = reaction->createKineticLaw();
+		   		kl->setFormula( rate_law.str() );
+		   		string unit=parmUnit( rct_order-1 );
+		   		printParameters( kl,"k1",k1,unit ); 
+		   		string punit=parmUnit( prd_order-1 );
+		   		printParameters( kl,"k2",k2,punit ); 
+		   		// 2 Stage SE* -> E+P  
+		   
+		   		Objid << "Product_formation";
+		   		string enzName1 = enzname + "_" + Objid.str() + "_";
+		   		enzName1 = idBeginWith( enzName1 );
+		   		//Reaction* reaction;
+		   		reaction = cremodel_->createReaction(); 
+		   		reaction->setId( enzName1 );
+		   		reaction->setName( objname);
+		   		reaction->setFast( false );
+		   		reaction->setReversible( false );
+		  		if (notesE != ""){
+		     		string cleanNotesE = nameString1(notesE);
+		     		string notesStringE = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t"+
+		       		cleanNotesE + "\n\t </body>"; 
+		     		reaction->setNotes(notesStringE);
+		   		}
+		   		double k3 = Field<double>::get(*itrE,"k3");
+		   		double erct_order = 0.0,eprd_order = 0.0;
+		   		ostringstream enzrate_law;
+		   		enzrate_law << "k3";
+		   		string enzAnno2 = "<moose:EnzymaticReaction>";
+		   		
+		   		getSubPrd(reaction,"cplxDest","sub",*itrE,index,enzrate_law,erct_order,true,enzClass);
+		   		for(unsigned int i =0;i<nameList_.size();i++)
+		     		enzAnno2 +=  "<moose:complex>"+nameList_[i]+"</moose:complex>\n";
+		   		
+		   		getSubPrd(reaction,"enzOut","prd",*itrE,index,enzrate_law,eprd_order,false,enzClass);
+		   		for(unsigned int i =0;i<nameList_.size();i++)
+		     		enzAnno2 += "<moose:enzyme>"+nameList_[i]+"</moose:enzyme>\n";
+		   
+		   		getSubPrd(reaction,"prd","",*itrE,index,enzrate_law,eprd_order,false,enzClass);
+		   		for(unsigned int i =0;i<nameList_.size();i++)
+		     		enzAnno2 += "<moose:product>"+nameList_[i]+"</moose:product>\n";
+		   		
+		   		enzAnno2 += "<moose:groupName>"+enzName+"</moose:groupName>\n";
+		   		enzAnno2 += "<moose:stage>2</moose:stage> \n";
+		   		enzAnno2 += "</moose:EnzymaticReaction>";
+		   		XMLNode* xnode2 =XMLNode::convertStringToXMLNode( enzAnno2 ,&xmlns);
+		   		reaction->setAnnotation( xnode2 );	
+		   		kl = reaction->createKineticLaw();
+		   		kl->setFormula( enzrate_law.str() );
+		   		printParameters( kl,"k3",k3,"per_second" );
+		   	} //enzclass = Enz
 	      else if ( (enzClass == "MMenz") || (enzClass == "ZombieMMenz"))
-		{ reaction->setId( cleanEnzname);
-		  reaction->setName( objname);
-		  double Km = Field<double>::get(*itrE,"numKm");
-		  double kcat = Field<double>::get(*itrE,"kcat");
-		  reaction->setReversible( false );
-		  reaction->setFast( false );
-		  // Substrate 
-		  ostringstream rate_law,sRate_law,fRate_law;
-		  double rct_order = 0.0,prd_order=0.0;
-		  
-		  getSubPrd(reaction,"sub","",*itrE,index,rate_law,rct_order,true,enzClass);
-		  sRate_law << rate_law.str();
-		  
-		  // Modifier 
-		  getSubPrd(reaction,"enzDest","",*itrE,index,rate_law,rct_order,true,enzClass);
-		  
-		   // product 
-		  getSubPrd(reaction,"prd","",*itrE,index,rate_law,prd_order,false,enzClass);
-		  
-		  kl = reaction->createKineticLaw();
-		  
-		   string s = sRate_law.str();
-		   if(!s.empty()) {
-		     s = s.substr(1); 
-		   } 
-		   fRate_law << "kcat" << rate_law.str() << "/" << "(" << "Km" << " +" << s << ")"<<endl;
-		   kl->setFormula( fRate_law.str() );
-		   kl->setNotes("<body xmlns=\"http://www.w3.org/1999/xhtml\">\n\t\t" + fRate_law.str() + "\n\t </body>");
-		   printParameters( kl,"Km",Km,"substance" ); 
-		   string kcatUnit = parmUnit( 0 );
-		   printParameters( kl,"kcat",kcat,kcatUnit );
-		}
+			{ 
+				reaction->setId( cleanEnzname);
+		  		reaction->setName( objname);
+				string groupName = getGroupinfo(*itrE);
+				if (enzAnnoexist)
+				{	ostringstream MMenzAnno;
+		  		  	MMenzAnno << "<moose:ModelAnnotation>\n";
+		  		  // 	if (!enzGpname.str().empty())
+	  					// MMenzAnno << enzGpname.str();
+	  				if (!enzxyCord.str().empty())
+	  					MMenzAnno <<enzxyCord.str();
+		  		   	MMenzAnno << "</moose:ModelAnnotation>";
+		  		  	XMLNode* xnode =XMLNode::convertStringToXMLNode( MMenzAnno.str() ,&xmlns);
+		  		  	reaction->setAnnotation( xnode );
+		  		}	
+		  		double Km = Field<double>::get(*itrE,"numKm");
+		  		double kcat = Field<double>::get(*itrE,"kcat");
+		  		reaction->setReversible( false );
+		  		reaction->setFast( false );
+		  		// Substrate 
+		  		ostringstream rate_law,sRate_law,fRate_law;
+		  		double rct_order = 0.0,prd_order=0.0;
+		  		getSubPrd(reaction,"sub","",*itrE,index,rate_law,rct_order,true,enzClass);
+		  		sRate_law << rate_law.str();
+		  		// Modifier 
+		  		getSubPrd(reaction,"enzDest","",*itrE,index,rate_law,rct_order,true,enzClass);
+		  		// product 
+		  		getSubPrd(reaction,"prd","",*itrE,index,rate_law,prd_order,false,enzClass);
+		  		kl = reaction->createKineticLaw();
+		  		string s = sRate_law.str();
+		   		if(!s.empty()) {
+		     	s = s.substr(1); 
+		   		} 
+		   		fRate_law << "kcat" << rate_law.str() << "/" << "(" << "Km" << " +" << s << ")"<<endl;
+		   		kl->setFormula( fRate_law.str() );
+		   		kl->setNotes("<body xmlns=\"http://www.w3.org/1999/xhtml\">\n\t\t" + fRate_law.str() + "\n\t </body>");
+		   		printParameters( kl,"Km",Km,"substance" ); 
+		   		string kcatUnit = parmUnit( 0 );
+		   		printParameters( kl,"kcat",kcat,kcatUnit );
+			} //enzClass == "MMenz"
 	      
 	    } //itrE
 	  // Enzyme End
@@ -558,7 +656,47 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 #endif
 
 /** Writes the given SBMLDocument to the given file. **/
- 
+
+string SbmlWriter :: getGroupinfo(Id itr)
+{   //#Harsha: Note: At this time I am assuming that if group exist 
+  	//  1. for 'pool' its between compartment and pool, /modelpath/Compartment/Group/pool 
+  	//  2. for 'enzComplx' in case of ExpilcityEnz its would be, /modelpath/Compartment/Group/Pool/Enz/Pool_cplx 
+	// For these cases I have check, but there may be a subgroup may exist then this bit of code need to cleanup
+	// further down
+
+	ObjId pa = Field< ObjId >::get( itr, "parent" );
+	string parentclass = Field<string> :: get (pa,"className");
+	string groupName;
+	if (parentclass == "CubeMesh" or parentclass == "CyclMesh")
+		return (groupName);
+	else if (parentclass == "Neutral")
+		groupName = Field<string> :: get(pa,"name");	  
+  	else if ((parentclass == "Enz") or (parentclass == "ZombieEnz"))
+  	{ 
+  	 	ObjId ppa = Field< ObjId >::get( pa, "parent" );
+	   	string parentParentclass = Field<string> :: get (ppa,"className");
+	   	if (parentParentclass == "Neutral")
+	   		groupName = Field<string> :: get(ppa,"name");
+	   	
+	   	else if ( parentParentclass == "Pool" or parentParentclass == "ZombiePool" or
+	     	          parentParentclass == "BufPool" or parentParentclass == "ZombieBufPool")
+	   	{
+	   		ObjId poolpa = Field< ObjId >::get( ppa, "parent" );
+	   		string pathtt = Field < string > :: get(poolpa,"path");
+	   		parentParentclass = Field<string> :: get (poolpa,"className");
+	   		if (parentParentclass == "Neutral")
+	   	  		groupName = Field<string> :: get(poolpa,"name");
+	   	  	  
+      	}
+    }//else if
+    else
+  	{  	ObjId ppa = Field< ObjId >::get( pa, "parent" );
+		string parentclass = Field<string> :: get (ppa,"className");
+		if (parentclass =="Neutral")
+			groupName = Field<string> :: get(ppa,"name");
+	} //else
+	return( groupName);
+}
 bool SbmlWriter::writeModel( const SBMLDocument* sbmlDoc, const string& filename )
 {
   SBMLWriter sbmlWriter;
@@ -640,8 +778,8 @@ void SbmlWriter::getSubPrd(Reaction* rec,string type,string enztype,Id itrRE, in
 	  mspr->setSpecies(clean_name);
 	}
       /* Updating list of object for annotation for Enzymatic reaction */
-      if (re_enClass =="Enz")
-	nameList_.push_back(clean_name);
+	   if (re_enClass =="Enz" or re_enClass == "ZombieEnz")
+		nameList_.push_back	(clean_name);
 
       /* Rate law is also updated in rate_law string */
       //std::size_t found = clean_name.find("cplx");
@@ -911,7 +1049,6 @@ bool SbmlWriter::validateModel( SBMLDocument* sbmlDoc )
 	    }
 	  } 
       ostringstream oss;
-      //cout << "here in l 695 line" << endl;
       sbmlDoc->printErrors(oss);
       consistencyMessages = oss.str();
       }

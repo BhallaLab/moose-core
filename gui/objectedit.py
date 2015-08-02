@@ -262,7 +262,7 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
                     flag |= QtCore.Qt.ItemIsEditable
             
             if isinstance(self.mooseObject, moose.PoolBase) or isinstance(self.mooseObject,moose.Function): 
-                if field == 'volume' or field == 'expr':
+                if field == 'volume':# or field == 'expr':
                     pass
                 elif setter in self.mooseObject.getFieldNames('destFinfo'):
                     flag |= QtCore.Qt.ItemIsEditable

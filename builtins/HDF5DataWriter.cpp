@@ -233,7 +233,7 @@ void HDF5DataWriter::reinit(const Eref & e, ProcPtr p)
         }
         assert(varname.length() > 0);
         string path = src_[ii].path() + "/" + varname;
-        hid_t dataset_id = get_dataset(path);
+        hid_t dataset_id = getDataset(path);
         datasets_.push_back(dataset_id);
     }
     data_.resize(src_.size());
@@ -242,27 +242,28 @@ void HDF5DataWriter::reinit(const Eref & e, ProcPtr p)
 /**
    Traverse the path of an object in HDF5 file, checking existence of
    groups in the path and creating them if required.  */
-hid_t HDF5DataWriter::get_dataset(string path)
+hid_t HDF5DataWriter::getDataset(string path)
 {
     if (filehandle_ < 0){
         return -1;
     }
     herr_t status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
     // Create the groups corresponding to this path
-    vector<string> path_tokens;
-    tokenize(path, "/", path_tokens);
+    string::size_type lastslash = path.find_last_of("/");
+    vector<string> pathTokens;
+    tokenize(path, "/", pathTokens);
     hid_t prev_id = filehandle_;
     hid_t id = -1;
-    for ( unsigned int ii = 0; ii < path_tokens.size()-1; ++ii ){
+    for ( unsigned int ii = 0; ii < pathTokens.size()-1; ++ii ){
         // check if object exists
-        htri_t exists = H5Lexists(prev_id, path_tokens[ii].c_str(),
+        htri_t exists = H5Lexists(prev_id, pathTokens[ii].c_str(),
                                   H5P_DEFAULT);
         if (exists > 0){
             // try to open existing group
-            id = H5Gopen2(prev_id, path_tokens[ii].c_str(), H5P_DEFAULT);
+            id = H5Gopen2(prev_id, pathTokens[ii].c_str(), H5P_DEFAULT);
         } else if (exists == 0) {
             // If that fails, try to create a group
-            id = H5Gcreate2(prev_id, path_tokens[ii].c_str(),
+            id = H5Gcreate2(prev_id, pathTokens[ii].c_str(),
                             H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         } 
         if ((exists < 0) || (id < 0)){
@@ -271,7 +272,7 @@ hid_t HDF5DataWriter::get_dataset(string path)
             // perhaps at the level of hdf5 or file system).
             cerr << "Error: failed to open/create group: ";
             for (unsigned int jj = 0; jj <= ii; ++jj){
-                cerr << "/" << path_tokens[jj];
+                cerr << "/" << pathTokens[jj];
             }
             cerr << endl;
             prev_id = -1;            
@@ -283,78 +284,19 @@ hid_t HDF5DataWriter::get_dataset(string path)
         }
         prev_id = id;
     }
-    string name = path_tokens[path_tokens.size()-1];
+    string name = pathTokens[pathTokens.size()-1];
     htri_t exists = H5Lexists(prev_id, name.c_str(), H5P_DEFAULT);
     hid_t dataset_id = -1;
     if (exists > 0){
         dataset_id = H5Dopen2(prev_id, name.c_str(), H5P_DEFAULT);
     } else if (exists == 0){
-        dataset_id = create_dataset(prev_id, name);
+        dataset_id = createDoubleDataset(prev_id, name);
     } else {
         cerr << "Error: H5Lexists returned "
              << exists << " for path \""
              << path << "\"" << endl;
     }
     return dataset_id;
-}
-
-/**
-   Create a new 1D dataset. Make it extensible.
-*/
-hid_t HDF5DataWriter::create_dataset(hid_t parent_id, string name)
-{
-    herr_t status;
-    hsize_t dims[1] = {0};
-    hsize_t maxdims[] = {H5S_UNLIMITED};
-    hsize_t chunk_dims[] = {chunkSize_};
-    hid_t chunk_params = H5Pcreate(H5P_DATASET_CREATE);
-    status = H5Pset_chunk(chunk_params, 1, chunk_dims);
-    assert( status >= 0 );
-    if (compressor_ == "zlib"){
-        status = H5Pset_deflate(chunk_params, compression_);
-    } else if (compressor_ == "szip"){
-        // this needs more study
-        unsigned sz_opt_mask = H5_SZIP_NN_OPTION_MASK;
-        status = H5Pset_szip(chunk_params, sz_opt_mask,
-                             HDF5WriterBase::CHUNK_SIZE);
-    }
-    hid_t dataspace = H5Screate_simple(1, dims, maxdims);            
-    hid_t dataset_id = H5Dcreate2(parent_id, name.c_str(),
-                                  H5T_NATIVE_DOUBLE, dataspace,
-                                  H5P_DEFAULT, chunk_params, H5P_DEFAULT);
-    return dataset_id;
-}
-
-/**
-   Append a vector to a specified dataset and return the error status
-   of the write operation. */
-herr_t HDF5DataWriter::appendToDataset(hid_t dataset_id, const vector< double >& data)
-{
-    herr_t status;
-    if (dataset_id < 0){
-        return -1;
-    }
-    hid_t filespace = H5Dget_space(dataset_id);
-    if (filespace < 0){
-        return -1;
-    }
-    if (data.size() == 0){
-        return 0;
-    }
-    hsize_t size = H5Sget_simple_extent_npoints(filespace) + data.size();
-    status = H5Dset_extent(dataset_id, &size);
-    if (status < 0){
-        return status;
-    }
-    filespace = H5Dget_space(dataset_id);
-    hsize_t size_increment = data.size();
-    hid_t memspace = H5Screate_simple(1, &size_increment, NULL);
-    hsize_t start = size - data.size();
-    H5Sselect_hyperslab(filespace, H5S_SELECT_SET, &start, NULL,
-                        &size_increment, NULL);
-    status = H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE, memspace, filespace,
-                      H5P_DEFAULT, &data[0]);
-    return status;
 }
 
 void HDF5DataWriter::setFlushLimit(unsigned int value)

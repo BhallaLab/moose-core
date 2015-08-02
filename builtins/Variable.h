@@ -68,7 +68,7 @@ public:
         value = v;
     }
 
-    void epSetValue(const Eref & e, double v)
+    virtual void epSetValue(const Eref & e, double v)
     {
         value = v;
     }

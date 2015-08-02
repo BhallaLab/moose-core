@@ -52,7 +52,7 @@ ReadSwc::ReadSwc( const string& fname )
 		cleanZeroLength();
 		parseBranches();
 	}
-	cout << fname << "	: NumSegs = " << segs_.size() << 
+	cout << "ReadSwc: " << fname << "	: NumSegs = " << segs_.size() << 
 			", bad = " << badSegs <<
 			", Validated = " << valid << 
 			", numBranches = " << branches_.size() << 
@@ -83,7 +83,8 @@ bool ReadSwc::validate() const
 	}
 	bool valid = ( numStart == 1 && numOrphans == 0 && badRadius == 0 );
 	if ( !valid ) {
-		cout << "NumSegs = " << segs_.size() << 
+		cout << "ReadSwc::validate() failed: \nNumSegs = " << 
+				segs_.size() << 
 				", numStart = " << numStart <<
 				", orphans = " << numOrphans << 
 				", badIndex = " << badIndex <<
@@ -114,7 +115,7 @@ void ReadSwc::cleanZeroLength()
 	for ( unsigned int i = 1; i < segs_.size(); ++i ) {
 		SwcSegment& s = segs_[i];
 		SwcSegment& pa = segs_[ s.parent() - 1 ];
-		if ( s.length( pa ) < EPSILON ) {
+		if ( s.distance( pa ) < EPSILON ) {
 			// Remove the zero length child from pa.kids_
 			vector< int > temp;
 			for ( unsigned int j = 0; j < pa.kids().size(); ++j ) {
@@ -129,7 +130,7 @@ void ReadSwc::cleanZeroLength()
 			}
 			pa.replaceKids( temp );
 			s.setBad();
-			cout << "Cleaned zero length " << s.myIndex() << endl;
+			cout << "ReadSwc:: Cleaned zero length " << s.myIndex() << endl;
 		}
 	}
 }
@@ -150,8 +151,8 @@ void ReadSwc::traverseBranch( const SwcSegment& s,
 	do {
 		// Beware the indexing!
 		const SwcSegment& pa = segs_[prev->parent() - 1];
-		len += pa.length( *prev );
-		L += pa.L( *prev );
+		len += pa.distance( *prev );
+		L += pa.L( );
 		cable.push_back( pa.myIndex() );
 		prev = &pa;
 	} while ( (prev->parent() != ~0U) && (prev->kids().size() == 1) );
@@ -199,7 +200,7 @@ void ReadSwc::diagnostics() const
 			diag[s.type()]++;
 	}
 	for ( int i = 0; i < 14; ++i )
-		cout << SwcSegment::typeName[i] << " :	" << diag[i] << endl;
+		cout << "ReadSwc::diagnostics: " << SwcSegment::typeName[i] << " :	" << diag[i] << endl;
 
 	/*
 	for ( unsigned int i = 0; i < branches_.size(); ++i )
@@ -218,7 +219,7 @@ static Id makeCompt( Id parent,
 	Id compt;
 	double x0, y0, z0;
 	if ( seg.parent() != ~0U ) {
-		len = seg.length( pa );
+		len = seg.distance( pa );
 		stringstream ss;
 		ss << SwcSegment::typeName[ seg.type() ] << "_" << i << "_" << j;
 		name = ss.str();

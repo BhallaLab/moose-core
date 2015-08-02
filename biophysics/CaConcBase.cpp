@@ -74,15 +74,30 @@ const Cinfo* CaConcBase::initCinfo()
 	);
 	static ElementValueFinfo< CaConcBase, double > B( "B",
 		"Volume scaling factor. "
+		"Deprecated. This is a legacy field from GENESIS and exposes "
+		"internal calculations. Please do not use. \n"
 		"B = 1/(vol * F) so that it obeys:\n"
 		"dC/dt = B*I_Ca - C/tau",
         &CaConcBase::setB,
 		&CaConcBase::getB
 	);
 	static ElementValueFinfo< CaConcBase, double > thick( "thick",
-		"Thickness of Ca shell.",
+		"Thickness of Ca shell, assumed cylindrical. Legal range is "
+		"between zero and the radius. If outside this range it is "
+		"taken as the radius. Default zero, ie, the shell is the entire "
+	    "thickness of the cylinder", 	
         &CaConcBase::setThickness,
 		&CaConcBase::getThickness
+	);
+	static ElementValueFinfo< CaConcBase, double > length( "length",
+		"Length of Ca shell, assumed cylindrical",
+        &CaConcBase::setLength,
+		&CaConcBase::getLength
+	);
+	static ElementValueFinfo< CaConcBase, double > diameter( "diameter",
+		"Diameter of Ca shell, assumed cylindrical",
+        &CaConcBase::setDiameter,
+		&CaConcBase::getDiameter
 	);
 	static ElementValueFinfo< CaConcBase, double > ceiling( "ceiling",
 		"Ceiling value for Ca concentration. If Ca > ceiling, Ca = ceiling. If ceiling <= 0.0, there is no upper limit on Ca concentration value.",
@@ -134,6 +149,8 @@ const Cinfo* CaConcBase::initCinfo()
 		&tau,		// Value
 		&B,			// Value
 		&thick,		// Value
+		&diameter,	// Value
+		&length,	// Value
 		&ceiling,	// Value
 		&floor,		// Value
 		&current,	// Dest
@@ -237,14 +254,47 @@ double CaConcBase::getFloor( const Eref& e ) const
 	return vGetFloor( e );
 }
 
-// Don't seem to be used at present.
+void CaConcBase::updateDimensions( const Eref& e )
+{
+	double vol = PI * diameter_ * diameter_ * length_ * 0.25;
+	if ( thickness_ > 0 && thickness_ < diameter_/2.0 ) {
+		double coreRadius = diameter_ / 2.0 - thickness_;
+		vol -= PI * coreRadius * coreRadius * length_;
+	}
+	double B = 1.0 / ( FaradayConst * vol );
+	vSetB( e, B );
+}
+
 void CaConcBase::setThickness( const Eref& e, double thickness )
 {
     thickness_ = thickness;
+	updateDimensions( e );
 }
+
 double CaConcBase::getThickness( const Eref& e ) const
 {
 	return thickness_;
+}
+
+void CaConcBase::setDiameter( const Eref& e, double diameter )
+{
+    diameter_ = diameter;
+	updateDimensions( e );
+}
+
+double CaConcBase::getDiameter( const Eref& e ) const
+{
+	return diameter_;
+}
+
+void CaConcBase::setLength( const Eref& e, double length )
+{
+    length_ = length;
+	updateDimensions( e );
+}
+double CaConcBase::getLength( const Eref& e ) const
+{
+	return length_;
 }
 
 ///////////////////////////////////////////////////
@@ -300,7 +350,7 @@ void CaConcBase::zombify( Element* orig, const Cinfo* zClass,
 	unsigned int num = orig->numLocalData();
 	if ( num == 0 )
 		return;
-	vector< double > data( num * 7 );
+	vector< double > data( num * 9 );
 
 	unsigned int j = 0;
 	for ( unsigned int i = 0; i < num; ++i ) {
@@ -314,7 +364,9 @@ void CaConcBase::zombify( Element* orig, const Cinfo* zClass,
 		data[j + 4] = cb->getCeiling( er );
 		data[j + 5] = cb->getFloor( er );
 		data[j + 6] = cb->getThickness( er );
-		j += 7;
+		data[j + 7] = cb->getLength( er );
+		data[j + 8] = cb->getDiameter( er );
+		j += 9;
 	}
 	orig->zombieSwap( zClass );
 	j = 0;
@@ -329,6 +381,8 @@ void CaConcBase::zombify( Element* orig, const Cinfo* zClass,
 		cb->setCeiling( er, data[j + 4] );
 		cb->setFloor( er, data[j + 5] );
 		cb->setThickness( er, data[j + 6] );
+		cb->setLength( er, data[j + 7] );
+		cb->setDiameter( er, data[j + 8] );
 		j += 7;
 	}
 }

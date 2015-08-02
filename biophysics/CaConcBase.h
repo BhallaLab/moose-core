@@ -76,6 +76,10 @@ class CaConcBase
         double getFloor( const Eref& e ) const;
         void setThickness( const Eref& e, double val );
         double getThickness( const Eref& e ) const;
+        void setLength( const Eref& e, double val );
+        double getLength( const Eref& e ) const;
+        void setDiameter( const Eref& e, double val );
+        double getDiameter( const Eref& e ) const;
 		///////////////////////////////////////////////////////////////
 		// Virtual Field handling functions
 		///////////////////////////////////////////////////////////////
@@ -93,6 +97,8 @@ class CaConcBase
         virtual double vGetFloor( const Eref& e ) const = 0;
 
 		///////////////////////////////////////////////////////////////
+		// Utility function in case length, dia or thickness is updated
+		void updateDimensions( const Eref& e );
 		
 		/// Used to set up the solver. Dummy for regular classes.
 		virtual void vSetSolver( const Eref& e, Id hsolve );
@@ -114,6 +120,8 @@ class CaConcBase
 		static const Cinfo* initCinfo();
 	private:
 		double thickness_;
+		double diameter_;
+		double length_;
 };
 
 

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """utils.py:
 
     Utility functions for moose.
@@ -6,8 +5,9 @@
     Last modified: Mon Feb 23, 2015  08:34PM
 
 """
+from __future__ import print_function
 
-__author__           = 'Subhasis Ray, Aditya Gilra, Dilawar Singh, NCBS'
+__author__           = 'Subhasis Ray, Aditya Gilra, Dilawar Singh'
 __copyright__        = "Copyright 2013, NCBS Bangalore"
 __credits__          = ["NCBS Bangalore", "Bhalla Lab"]
 __license__          = "GPL"
@@ -24,54 +24,19 @@ import math
 from datetime import datetime
 from collections import defaultdict
 
-import _moose
-import plot_utils
-import verification_utils
-import print_utils
+from . import _moose
+from .plot_utils import *
+from .verification_utils import verify
+from .print_utils import *
 #import graph_utils
-import sim_utils
+from .sim_utils import *
 
 from .backend import graphviz
-
 from .topology import topology
-
-from moose_constants import *
+from .moose_constants import *
 
 import re
 # from PyQt4 import QtCore, Qt
-
-# Import functions from sub-libraries.
-plotTable = plot_utils.plotTable
-plotTables = plot_utils.plotTables
-saveTables = plot_utils.saveTables
-
-saveRecords = plot_utils.saveRecords
-plotRecords = plot_utils.plotRecords
-
-#
-recordAt = sim_utils.recordTarget
-recordTarget = sim_utils.recordTarget
-
-# dump messages onto console
-info = print_utils.info
-warn = print_utils.warn
-error = print_utils.error
-debug = print_utils.debug
-log = print_utils.log
-
-# Verification related function.
-verify = verification_utils.verify
-
-# Topology and graph related functions.
-writeGraphviz  = graphviz.writeGraphviz
-writeNetwork = topology.writeNetwork
-
-# Some verification tests
-verify = verification_utils.verify
-
-# Simulation libarary
-import sim_utils
-run = sim_utils.run
 
 # tableEmitter = QtCore.QObject()
 # Harsha: Moved this fun from default to pymoose/moose/utils.py
@@ -206,7 +171,7 @@ def readtable(table, filename, separator=None):
         elif len(token) == 2:
             table[int(token[0])] = float(token[1])
         else:
-            print "pymoose.readTable(", table, ",", filename, ",", separator, ") - line#", line_no, " does not fit."
+            print("pymoose.readTable(", table, ",", filename, ",", separator, ") - line#", line_no, " does not fit.")
 
 def getfields(moose_object):
     """Returns a dictionary of the fields and values in this object."""
@@ -372,7 +337,7 @@ def printtree(root, vchar='|', hchar='__', vcount=1, depth=0, prefix='', is_last
         print(prefix)
 
     if depth != 0:
-        print prefix + hchar,
+        print(prefix + hchar, end=' ')
         if is_last:
             index = prefix.rfind(vchar)
             prefix = prefix[:index] + ' ' * (len(hchar) + len(vchar)) + vchar
@@ -381,7 +346,7 @@ def printtree(root, vchar='|', hchar='__', vcount=1, depth=0, prefix='', is_last
     else:
         prefix = prefix + vchar
 
-    print(root.name)
+    print((root.name))
     children = []
     for child_vec in root.children:
         try:
@@ -406,7 +371,7 @@ def df_traverse(root, operation, *args):
         return
     operation(root, *args)
     for child in root.children:
-    	childNode = _moose.Neutral(child)
+        childNode = _moose.Neutral(child)
         df_traverse(childNode, operation, *args)
     root._visited = True
 
@@ -478,7 +443,7 @@ def readcell_scrambled(filename, target, method='ee'):
             current_compt_params.append(tmpline)
             continue
         node, parent, rest, = tmpline.partition(' ')
-        print '22222222', node, parent
+        print('22222222', node, parent)
         if (parent == "none"):
             if (root is None):
                 root = node
@@ -494,7 +459,7 @@ def readcell_scrambled(filename, target, method='ee'):
         current = stack.pop()
         children = graph[current]
         stack.extend(children)
-        print '#########"', current, '": ', data[current]
+        print('#########"', current, '": ', data[current])
         tmpfile.write(data[current])
     tmpfile.close()
     ret = _moose.loadModel(tmpfilename, target, method)
@@ -516,10 +481,10 @@ def updateTicks(tickDtMap):
     values are assigned to the ticks.
 
     """
-    for tickNo, dt in tickDtMap.items():
+    for tickNo, dt in list(tickDtMap.items()):
         if tickNo >= 0 and dt > 0.0:
             _moose.setClock(tickNo, dt)
-    if all([(v == 0) for v in tickDtMap.values()]):
+    if all([(v == 0) for v in list(tickDtMap.values())]):
         setDefaultDt()
 
 def assignTicks(tickTargetMap):
@@ -533,8 +498,8 @@ def assignTicks(tickTargetMap):
     """
     if len(tickTargetMap) == 0:
         assignDefaultTicks()
-    for tickNo, target in tickTargetMap.items():
-        if not isinstance(target, basestring):
+    for tickNo, target in list(tickTargetMap.items()):
+        if not isinstance(target, str):
             if len(target) == 1:
                 _moose.useClock(tickNo, target[0], 'process')
             elif len(target) == 2:
@@ -633,7 +598,7 @@ def stepRun(simtime, steptime, verbose=True, logger=None):
     if verbose:
         msg = 'Starting simulation for %g' % (simtime)
         if logger is None:
-            print msg
+            print(msg)
         else:
             logger.info(msg)
     ts = datetime.now()
@@ -645,7 +610,7 @@ def stepRun(simtime, steptime, verbose=True, logger=None):
         if verbose:
             msg = 'Simulated till %g. Left: %g. %g of simulation took: %g s' % (clock.currentTime, simtime - clock.currentTime, steptime, td.days * 86400 + td.seconds + 1e-6 * td.microseconds)
             if logger is None:
-                print msg
+                print(msg)
             else:
                 logger.info(msg)
 
@@ -654,7 +619,7 @@ def stepRun(simtime, steptime, verbose=True, logger=None):
         if verbose:
             msg = 'Running the remaining %g.' % (remaining)
             if logger is None:
-                print msg
+                print(msg)
             else:
                 logger.info(msg)
         _moose.start(remaining)
@@ -664,7 +629,7 @@ def stepRun(simtime, steptime, verbose=True, logger=None):
     if verbose:
         msg = 'Finished simulation of %g with minimum dt=%g in %g s' % (simtime, dt, td.days * 86400 + td.seconds + 1e-6 * td.microseconds)
         if logger is None:
-            print msg
+            print(msg)
         else:
             logger.info(msg)
 
@@ -675,7 +640,7 @@ def stepRun(simtime, steptime, verbose=True, logger=None):
 def resetSim(simpaths, simdt, plotdt, simmethod='hsolve'):
     """ For each of the MOOSE paths in simpaths, this sets the clocks and finally resets MOOSE.
     If simmethod=='hsolve', it sets up hsolve-s for each Neuron under simpaths, and clocks for hsolve-s too. """
-    print 'Solver:', simmethod
+    print('Solver:', simmethod)
     _moose.setClock(INITCLOCK, simdt)
     _moose.setClock(ELECCLOCK, simdt) # The hsolve and ee methods use clock 1
     _moose.setClock(CHANCLOCK, simdt) # hsolve uses clock 2 for mg_block, nmdachan and others.
@@ -710,14 +675,14 @@ def resetSim(simpaths, simdt, plotdt, simmethod='hsolve'):
         ## else just put a clock on the hsolve:
         ## hsolve takes care of the clocks for the biophysics
         if 'hsolve' not in simmethod.lower():
-            print 'Using exp euler'
+            print('Using exp euler')
             _moose.useClock(INITCLOCK, simpath+'/##[TYPE=Compartment]', 'init')
             _moose.useClock(ELECCLOCK, simpath+'/##[TYPE=Compartment]', 'process')
             _moose.useClock(CHANCLOCK, simpath+'/##[TYPE=HHChannel]', 'process')
             _moose.useClock(POOLCLOCK, simpath+'/##[TYPE=CaConc]', 'process')
             _moose.useClock(POOLCLOCK, simpath+'/##[TYPE=Func]', 'process')
         else: # use hsolve, one hsolve for each Neuron
-            print 'Using hsolve'
+            print('Using hsolve')
             element = _moose.Neutral(simpath)
             for childid in element.children:
                 childobj = _moose.Neutral(childid)
@@ -780,7 +745,7 @@ def printNetTree():
     for id in root.children: # all subelements of 'root'
         if _moose.Neutral(id).className == 'Cell':
             cell = _moose.Cell(id)
-            print "-------------------- CELL : ",cell.name," ---------------------------"
+            print("-------------------- CELL : ",cell.name," ---------------------------")
             printCellTree(cell)
 
 def printCellTree(cell):
@@ -794,7 +759,7 @@ def printCellTree(cell):
     """
     for compartmentid in cell.children: # compartments
         comp = _moose.Compartment(compartmentid)
-        print "  |-",comp.path, 'l=',comp.length, 'd=',comp.diameter, 'Rm=',comp.Rm, 'Ra=',comp.Ra, 'Cm=',comp.Cm, 'EM=',comp.Em
+        print("  |-",comp.path, 'l=',comp.length, 'd=',comp.diameter, 'Rm=',comp.Rm, 'Ra=',comp.Ra, 'Cm=',comp.Cm, 'EM=',comp.Em)
         #for inmsg in comp.inMessages():
         #    print "    |---", inmsg
         #for outmsg in comp.outMessages():
@@ -812,23 +777,23 @@ def printRecursiveTree(elementid, level):
         classname = childobj.className
         if classname in ['SynChan','KinSynChan']:
             childobj = _moose.SynChan(childid)
-            print spacefill+"|--", childobj.name, childobj.className, 'Gbar=',childobj.Gbar, 'numSynapses=', childobj.numSynapses
+            print(spacefill+"|--", childobj.name, childobj.className, 'Gbar=',childobj.Gbar, 'numSynapses=', childobj.numSynapses)
             return # Have yet to figure out the children of SynChan, currently not going deeper
         elif classname in ['HHChannel', 'HHChannel2D']:
             childobj = _moose.HHChannel(childid)
-            print spacefill+"|--", childobj.name, childobj.className, 'Gbar=',childobj.Gbar, 'Ek=',childobj.Ek
+            print(spacefill+"|--", childobj.name, childobj.className, 'Gbar=',childobj.Gbar, 'Ek=',childobj.Ek)
         elif classname in ['CaConc']:
             childobj = _moose.CaConc(childid)
-            print spacefill+"|--", childobj.name, childobj.className, 'thick=',childobj.thick, 'B=',childobj.B
+            print(spacefill+"|--", childobj.name, childobj.className, 'thick=',childobj.thick, 'B=',childobj.B)
         elif classname in ['Mg_block']:
             childobj = _moose.Mg_block(childid)
-            print spacefill+"|--", childobj.name, childobj.className, 'CMg',childobj.CMg, 'KMg_A',childobj.KMg_A, 'KMg_B',childobj.KMg_B
+            print(spacefill+"|--", childobj.name, childobj.className, 'CMg',childobj.CMg, 'KMg_A',childobj.KMg_A, 'KMg_B',childobj.KMg_B)
         elif classname in ['SpikeGen']:
             childobj = _moose.SpikeGen(childid)
-            print spacefill+"|--", childobj.name, childobj.className, 'threshold',childobj.threshold
+            print(spacefill+"|--", childobj.name, childobj.className, 'threshold',childobj.threshold)
         elif classname in ['Func']:
             childobj = _moose.Func(childid)
-            print spacefill+"|--", childobj.name, childobj.className, 'expr',childobj.expr
+            print(spacefill+"|--", childobj.name, childobj.className, 'expr',childobj.expr)
         elif classname in ['Table']: # Table gives segfault if printRecursiveTree is called on it
             return # so go no deeper
         #for inmsg in childobj.inMessages():
@@ -1026,7 +991,7 @@ def connect_CaConc(compartment_list, temperature=None):
 import uuid
 import unittest
 import sys
-from cStringIO import StringIO as _sio
+from io import StringIO as _sio
 
 class _TestMooseUtils(unittest.TestCase):
     def test_printtree(self):
@@ -1120,7 +1085,7 @@ cell1
         self.assertAlmostEqual(soma.y, 0.0, sigfig)
         self.assertAlmostEqual(soma.z, soma.diameter/2.0, sigfig)
         for ii, comp in enumerate(comps):
-            print comp.path, ii
+            print(comp.path, ii)
             self.assertAlmostEqual(comp.x0, 0, sigfig)
             self.assertAlmostEqual(comp.y0, 0.0, sigfig)
             self.assertAlmostEqual(comp.z0, soma.diameter/2.0 + ii * 100e-6, sigfig)

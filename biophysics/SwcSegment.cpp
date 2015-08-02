@@ -74,6 +74,8 @@ SwcSegment::SwcSegment( int i,  short type,
 						type_( type ),
 						v_( x, y, z ),
 						radius_( r ),
+						length_( 0.0 ),
+						L_( 0.0 ),
 						geometricalDistanceFromSoma_( 0.0 ),
 						electrotonicDistanceFromSoma_( 0.0 )
 {
@@ -81,14 +83,6 @@ SwcSegment::SwcSegment( int i,  short type,
 		parent_ = parent;
 	else
 		parent_ = ~0U;
-}
-
-double SwcSegment::L( const SwcSegment& other ) const 
-{
-	double r = ( radius_ < other.radius_ ) ? radius_:other.radius_;
-	if ( r > 0.0 )
-		return v_.distance( other.v_ ) / sqrt( r );
-	return 1.0;
 }
 
 void SwcSegment::figureOutType()
