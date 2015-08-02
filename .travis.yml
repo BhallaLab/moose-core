@@ -42,5 +42,8 @@ script:
     - make  # using makefile
     - mkdir -p _build && cd _build && cmake -DDEBUG=ON -DBUILD_MOOGLI=ON .. && make
 
+script: 
+    - mkdir -p _build && cd _build && cmake -DDEBUG=ON .. && make
+   
 after_success:
     - ctest --output-on-failure 

@@ -182,7 +182,6 @@ else()
     add_definitions(-UUSE_MPI)
 endif()
 
-
 ############################ CYMOOSE related macros. ########################
 if(BUILD_CYMOOSE)
     add_definitions("-DCYMOOSE -DCYTHON")
@@ -239,9 +238,9 @@ if(READLINE_FOUND AND TERMCAP_FOUND)
     list(APPEND SYSTEM_LIBRARIES ${Readline_LIBRARY} ${TERMCAP_LIBRARY})
 endif()
 
-if(MPI_CXX_FOUND)
-    list(APPEND SYSTEM_LIBRARIES ${MPI_CXX_LIBRARIES})
-endif()
+#if(MPI_CXX_FOUND)
+#    list(APPEND SYSTEM_LIBRARIES ${MPI_CXX_LIBRARIES})
+#endif()
 
 
 ###################################### LINKING #################################
@@ -531,7 +530,6 @@ set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
 set(CPACK_DEBIAN_PACKAGE_DEPENDS 
     "openmpi-bin
     , python-matplotlib
-    , libhdf5-openmpi
     , python-qt4, openscenegraph
     , python-tornado, python-suds, python-nose, python-setuptools
     , libxml2"
