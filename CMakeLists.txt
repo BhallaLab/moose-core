@@ -127,7 +127,7 @@ if(ENABLE_SBML)
         ADD_DEFINITIONS(-UUSE_SBML)
     else()
         MESSAGE("++ SBML found. Support is ON: ${LIBSBML_LIBRARY}")
-        ADD_DEFINITIONS(-DUSE_SBML)
+        add_definitions(-DUSE_SBML)
         include_directories(${LIBSBML_INCLUDE_DIR})
         find_package(BZip2 REQUIRED)
         find_package(LibXML2 REQUIRED)
@@ -316,7 +316,7 @@ if(BUILD_PYMOOSE)
         moosepython  
         "-Wl,--whole-archive"
         ${MOOSE_LIBRARIES}
-        ${LIBRARIES}
+        ${STATIC_LIBRARIES}
         "-Wl,--no-whole-archive"
         ${SYSTEM_LIBRARIES}
         )
