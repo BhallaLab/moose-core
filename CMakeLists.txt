@@ -343,6 +343,7 @@ if(BUILD_PYMOOSE)
 install(CODE 
     "
     execute_process(COMMAND pip install --upgrade moose-${MOOSE_VERSION}.tar.gz
+        --root ${CMAKE_INSTALL_PREFIX}
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         )
     "
