@@ -38,12 +38,9 @@ install:
     - wget http://sourceforge.net/projects/sbml/files/libsbml/5.11.4/stable/libSBML-5.11.4-core-src.tar.gz
     - tar -xzvf libSBML-5.11.4-core-src.tar.gz 
     - cd libsbml-5.11.4 && ./configure --prefix=/usr --with-zlib --with-bzip2 --with-libxml && make && sudo make install && cd ..
-script: 
-    - make  # using makefile
-    - mkdir -p _build && cd _build && cmake -DDEBUG=ON -DBUILD_MOOGLI=ON .. && make
 
 script: 
-    - mkdir -p _build && cd _build && cmake -DDEBUG=ON .. && make
+    - mkdir -p _build && cd _build && cmake -DDEBUG=ON .. && make -j4
    
 after_success:
     - ctest --output-on-failure 
