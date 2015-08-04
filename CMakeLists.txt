@@ -171,16 +171,16 @@ if(READLINE_FOUND AND TERMCAP_FOUND)
 endif()
 
 # Openmpi
-find_package(MPI)
-if(MPI_CXX_FOUND)
-    message("++ Using MPI from ${MPI_CXX_INCLUDE_PATH}")
-    include_directories(${MPI_CXX_INCLUDE_PATH})
-    #set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
-    add_definitions(-DUSE_MPI)
-else()
-    message("++ Cound not find MPI")
-    add_definitions(-UUSE_MPI)
-endif()
+##find_package(MPI)
+##if(MPI_CXX_FOUND)
+##    message("++ Using MPI from ${MPI_CXX_INCLUDE_PATH}")
+##    include_directories(${MPI_CXX_INCLUDE_PATH})
+##    #set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
+##    add_definitions(-DUSE_MPI)
+##else()
+##    message("++ Cound not find MPI")
+##    add_definitions(-UUSE_MPI)
+##endif()
 
 ############################ CYMOOSE related macros. ########################
 if(BUILD_CYMOOSE)
@@ -243,6 +243,7 @@ endif()
 #    list(APPEND SYSTEM_LIBRARIES ${MPI_CXX_LIBRARIES})
 #endif()
 
+MESSAGE("[DEBUG] STATIC_LIBRARIES : ${STATIC_LIBRARIES}")
 
 ###################################### LINKING #################################
 set(MOOSE_LIBRARIES
