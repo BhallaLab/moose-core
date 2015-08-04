@@ -217,7 +217,7 @@ add_subdirectory(examples)
 set(SYSTEM_LIBRARIES ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES} ${LibXML2_LIBRARIES} ${BZIP2_LIBRARIES})
 
 # These libraries could be static of dynamic.
-option(STATIC_LIBRARIES "Static libraries to link. These can be passed from outside project" "")
+set(STATIC_LIBRARIES  "")
 
 if(FOUND_HDF5)
     list(APPEND SYSTEM_LIBRARIES ${HDF5_LIBRARIES})
@@ -272,7 +272,7 @@ set(MOOSE_LIBRARIES
 target_link_libraries(moose.bin 
     "-Wl,--whole-archive"
     ${MOOSE_LIBRARIES}
-    ${LIBRARIES}
+    ${STATIC_LIBRARIES}
     "-Wl,--no-whole-archive"
     ${SYSTEM_LIBRARIES}
     )
