@@ -1,6 +1,6 @@
-Build Status - master (This is stable branch): [![Build Status - master](https://travis-ci.org/BhallaLab/moose.svg?branch=master)](https://travis-ci.org/BhallaLab/moose)
+Build Status - master (This is stable branch): [![Build Status - master](https://travis-ci.org/BhallaLab/moose-core.svg?branch=master)](https://travis-ci.org/BhallaLab/moose-core)
 
-Build Status - trunk (This is development branch) [![Build Status - trunk](https://travis-ci.org/BhallaLab/moose.svg?branch=trunk)](https://travis-ci.org/BhallaLab/moose)
+Build Status - trunk (This is development branch) [![Build Status - trunk](https://travis-ci.org/BhallaLab/moose-core.svg?branch=trunk)](https://travis-ci.org/BhallaLab/moose-core)
 
 # MOOSE
 
