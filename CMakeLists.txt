@@ -212,9 +212,6 @@ add_subdirectory(synapse)
 add_subdirectory(intfire)
 add_subdirectory(examples)
 
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/moogli/include)
-LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/moogli/lib)
-
 # These are always shared libraries.
 set(SYSTEM_LIBRARIES ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES} ${LibXML2_LIBRARIES} ${BZIP2_LIBRARIES})
 
@@ -344,23 +341,6 @@ if(BUILD_CYMOOSE)
         )
 endif()
 
-######################################## MOOGLI ################################
-
-# Moogli as external project
-OPTION(BUILD_MOOGLI "Build moogli extension." OFF)
-IF(BUILD_MOOGLI)
-    SET(MOOGLI_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/python/moogli)
-
-    FIND_PACKAGE(SIP REQUIRED)
-    FIND_PACKAGE(PyQt4 REQUIRED)
-    #FIND_PACKAGE(osgQt REQUIRED)
-    MESSAGE("++ Building MOOGLI in ${MOOGLI_BUILD_PATH}")
-    add_subdirectory(${PROJECT_SOURCE_DIR}/python/moogli)
-    INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/python/moogli/include)
-    LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/python/moogli)
-else(BUILD_MOOGLI)
-    MESSAGE("++ NOT building MOOGLI")
-endif()
 
 ######################### INSTALL ##############################################
 
@@ -379,41 +359,11 @@ install(FILES ${PROJECT_SOURCE_DIR}/scripts/moose
     COMPONENT moose-core
     )
 
-install(PROGRAMS ${PROJECT_SOURCE_DIR}/scripts/moosegui
-    DESTINATION bin
-    COMPONENT moose-gui 
-    )
-
-## Install the icon
-install(FILES ${PROJECT_SOURCE_DIR}/gui/icons/moose_icon.png 
-    DESTINATION share/moose
-    COMPONENT moose-gui
-    )
-
-# And the desktop file.
-install(FILES ${PROJECT_SOURCE_DIR}/scripts/moose.desktop
-    DESTINATION share/applications
-    COMPONENT moose-gui
-    )
-
-# And the gui
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/gui
-    DESTINATION lib/moose
-    COMPONENT moose-gui
-    )
-
 install(FILES ${PROJECT_SOURCE_DIR}/python/setup-moose.py
     DESTINATION lib/moose
     COMPONENT moose-python
     )
 
-## The demos goes here.
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/Demos
-    DESTINATION share/moose
-    COMPONENT moose-gui
-    )
-
-# Both moose and moogli python directory are added here.
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/python/moose
     ${PROJECT_SOURCE_DIR}/python/libmumbl
     DESTINATION usr/share/moose
@@ -424,22 +374,6 @@ install(FILES ${PROJECT_SOURCE_DIR}/python/setup-moose.py
     DESTINATION usr/share/moose
     COMPONENT moose-python
     )
-
-if(BUILD_MOOGLI)
-
-    SET(MOOGLI_INSTALL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/python/moogli)
-
-    install(DIRECTORY ${PROJECT_SOURCE_DIR}/python/moogli
-        DESTINATION usr/share/moogli
-        COMPONENT moose-moogli
-        )
-
-    install(FILES ${PROJECT_SOURCE_DIR}/python/setup-moogli.py
-        DESTINATION usr/share/moogli
-        COMPONENT moose-moogli
-        )
-
-endif(BUILD_MOOGLI)
 
 ############################ CTEST ######################################
 
