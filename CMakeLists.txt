@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 2.8)
 cmake_policy(SET CMP0004 OLD)
 
 project(moose)
-option(CMAKE_INSTALL_PREFIX "Install prefix" /usr)
 
 # This snippet is from LLVM project.
 # Sanity check our source directory to make sure that we are not trying to
