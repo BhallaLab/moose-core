@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 cmake_policy(SET CMP0004 OLD)
 
 project(moose)
+set(MOOSE_VERSION "3.0.2")
 
 # This snippet is from LLVM project.
 # Sanity check our source directory to make sure that we are not trying to
@@ -316,31 +317,15 @@ if(BUILD_PYMOOSE)
         ${SYSTEM_LIBRARIES}
         )
 
-endif(BUILD_PYMOOSE)
-
-######################### CYMOOSE #############################################
-option(BUILD_CYMOOSE "Build python extension using Cython. Development version." 0)
-if(BUILD_CYMOOSE)
-    message("++ Building cython extension of MOOSE. Unstable and experimental.")
-    add_library(cymoose SHARED cymoose/cymoose_methods.cxx)
-    set_target_properties(moose PROPERTIES COMPILE_DEFINITIONS "CYMOOSE")
-    if(DEBUG)
-        add_definitions("-g -Wall")
-    endif()
-
-    set_target_properties(cymoose PROPERTIES 
-            LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/cymoose"
-            )
-
-    target_link_libraries(cymoose 
-        "-Wl,--whole-archive"
-        ${MOOSE_LIBRARIES}
-        ${LIBRARIES}
-        "-Wl,--no-whole-archive"
-        ${SYSTEM_LIBRARIES}
+    # create a source distribution.
+    add_custom_command(TARGET _moose
+        POST_BUILD
+        COMMAND ${PYTHON_EXECUTABLE} setup.py sdist --dist-dir ${CMAKE_BINARY_DIR}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/python
+        VERBATIM
         )
-endif()
 
+endif(BUILD_PYMOOSE)
 
 ######################### INSTALL ##############################################
 
@@ -354,26 +339,16 @@ install(PROGRAMS ${PROJECT_SOURCE_DIR}/scripts/moose
     COMPONENT moose-core
     )
 
-install(FILES ${PROJECT_SOURCE_DIR}/scripts/moose
-    DESTINATION bin
-    COMPONENT moose-core
+if(BUILD_PYMOOSE)
+install(CODE 
+    "
+    execute_process(COMMAND pip install --upgrade moose-${MOOSE_VERSION}.tar.gz
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        )
+    "
     )
 
-install(FILES ${PROJECT_SOURCE_DIR}/python/setup-moose.py
-    DESTINATION lib/moose
-    COMPONENT moose-python
-    )
-
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/python/moose
-    ${PROJECT_SOURCE_DIR}/python/libmumbl
-    DESTINATION usr/share/moose
-    COMPONENT moose-python
-    )
-
-install(FILES ${PROJECT_SOURCE_DIR}/python/setup-moose.py
-    DESTINATION usr/share/moose
-    COMPONENT moose-python
-    )
+endif(BUILD_PYMOOSE)
 
 ############################ CTEST ######################################
 
