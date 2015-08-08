@@ -12,6 +12,7 @@ set(MOOSE_VERSION "3.0.2")
 # (which would end up getting picked up by header search, instead of the correct
 # versions).
 
+MESSAGE("+++ CMAKE_INSTALL_PREFIX : ${CMAKE_INSTALL_PREFIX}")
 if( CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT MSVC_IDE )
     message(FATAL_ERROR 
         "In-source builds are not allowed.
@@ -51,9 +52,6 @@ add_custom_target(uninstall
 ################################# CMKAE MACROS #################################
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules")
-set(INSTALL_LIB_DIR lib CACHE PATH "${CMAKE_INSTALL_PREFIX}/lib")
-set(INSTALL_BIN_DIR bin CACHE PATH "${CMAKE_INSTALL_PREFIX}/bin")
-set(INSTALL_INCLUDE_DIR include CACHE PATH "${CMAKE_INSTALL_PREFIX}/include/")
 
 ########################### COMPILER MACROS #####################################
 
@@ -118,24 +116,19 @@ endif()
 
 #### DEPENDENCIES
 
-find_package(GSL 1.16 REQUIRED)
-option(ENABLE_SBML "Enable SBML support" ON)
-if(ENABLE_SBML)
-    find_package(LIBSBML)
-    if(NOT LIBSBML_FOUND)
-        MESSAGE("++ LIBSBML NOT FOUND.  Disabling SBML support.")
-        ADD_DEFINITIONS(-UUSE_SBML)
-    else()
-        MESSAGE("++ SBML found. Support is ON: ${LIBSBML_LIBRARY}")
-        add_definitions(-DUSE_SBML)
-        include_directories(${LIBSBML_INCLUDE_DIR})
-        find_package(BZip2 REQUIRED)
-        find_package(LibXML2 REQUIRED)
-        find_package(ZLIB REQUIRED)
-    endif()
+
+find_package(LIBSBML)
+if(NOT LIBSBML_FOUND)
+    MESSAGE("++ LIBSBML NOT FOUND.  Disabling SBML support.")
+    ADD_DEFINITIONS(-UUSE_SBML)
 else()
-    SET(LIBSBML_FOUND FALSE)
-ENDIF()
+    MESSAGE("++ SBML found. Support is ON: ${LIBSBML_LIBRARY}")
+    add_definitions(-DUSE_SBML)
+    include_directories(${LIBSBML_INCLUDE_DIR})
+    find_package(BZip2 REQUIRED)
+    find_package(LibXML2 REQUIRED)
+    find_package(ZLIB REQUIRED)
+endif()
 
 # python support: check for interpreter, sip, pyqt4
 FIND_PACKAGE(PythonDev REQUIRED)
@@ -147,7 +140,7 @@ add_executable(moose.bin basecode/main.cpp)
 #set_target_properties(moose PROPERTIES COMPILE_FLAGS  "-DMOOSE_LIB")
 
 ## GSL
-# Setup GSL
+find_package(GSL 1.16 REQUIRED)
 if(GSL_FOUND)
     add_definitions(-DUSE_GSL)
     include_directories(${GSL_INCLUDE_DIR})
@@ -214,36 +207,43 @@ add_subdirectory(intfire)
 add_subdirectory(examples)
 
 # These are always shared libraries.
-set(SYSTEM_LIBRARIES ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES} ${LibXML2_LIBRARIES} ${BZIP2_LIBRARIES})
+set(SYSTEM_SHARED_LIBS ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES} ${LibXML2_LIBRARIES} ${BZIP2_LIBRARIES})
 
 # These libraries could be static of dynamic.
-set(STATIC_LIBRARIES  "")
+# When building packages on OBS or launchpad, we build static library of a
+# dependencies if a correct version is not found. 
+# Here we make sure that the correct static version is linked; if a correct
+# shared version is found then link the shared version in SYSTEM_SHARED_LIBS.
+
+# If CMAKE_STATIC_LIBRARIES are mentiond on command line, use it as list.
+if(CMAKE_STATIC_LIBRARIES) 
+    STRING(REPLACE " " ";" STATIC_LIBRARIES ${CMAKE_STATIC_LIBRARIES})
+else()
+    set(STATIC_LIBRARIES  "")
+endif()
 
 if(FOUND_HDF5)
-    list(APPEND SYSTEM_LIBRARIES ${HDF5_LIBRARIES})
+    list(APPEND SYSTEM_SHARED_LIBS ${HDF5_LIBRARIES})
 endif()
 
-if(LIBSBML_FOUND)
-    list(APPEND STATIC_LIBRARIES moose_sbml)
-endif()
-
+LIST(APPEND STATIC_LIBRARIES moose_sbml)
 if(LIBSBML_FOUND AND NOT LOCAL_SBML)
-    list(APPEND SYSTEM_LIBRARIES ${LIBSBML_LIBRARY})
+    list(APPEND SYSTEM_SHARED_LIBS ${LIBSBML_LIBRARY})
 endif()
 
 if(GSL_FOUND AND NOT LOCAL_GSL)
-    list(APPEND SYSTEM_LIBRARIES ${GSL_LIBRARIES})
+    list(APPEND SYSTEM_SHARED_LIBS ${GSL_LIBRARIES})
 endif()
 
 if(READLINE_FOUND AND TERMCAP_FOUND)
-    list(APPEND SYSTEM_LIBRARIES ${Readline_LIBRARY} ${TERMCAP_LIBRARY})
+    list(APPEND SYSTEM_SHARED_LIBS ${Readline_LIBRARY} ${TERMCAP_LIBRARY})
 endif()
 
 #if(MPI_CXX_FOUND)
-#    list(APPEND SYSTEM_LIBRARIES ${MPI_CXX_LIBRARIES})
+#    list(APPEND SYSTEM_SHARED_LIBS ${MPI_CXX_LIBRARIES})
 #endif()
 
-MESSAGE("[DEBUG] STATIC_LIBRARIES : ${STATIC_LIBRARIES}")
+MESSAGE(STATUS "STATIC_LIBRARIES : ${STATIC_LIBRARIES}")
 
 ###################################### LINKING #################################
 set(MOOSE_LIBRARIES
@@ -275,7 +275,7 @@ target_link_libraries(moose.bin
     ${MOOSE_LIBRARIES}
     ${STATIC_LIBRARIES}
     "-Wl,--no-whole-archive"
-    ${SYSTEM_LIBRARIES}
+    ${SYSTEM_SHARED_LIBS}
     )
 
 ######################### BUILD PYMOOSE ########################################
@@ -302,16 +302,12 @@ if(BUILD_PYMOOSE)
     add_subdirectory(pymoose)
     add_library(_moose SHARED pymoose/moosemodule.cpp)
 
-    if(LOCAL_GSL)
-        add_dependencies(_moose GSL)
-    endif()
-
     set_target_properties(_moose PROPERTIES COMPILE_DEFINITIONS "PYMOOSE")
     set_target_properties(_moose PROPERTIES 
         LIBRARY_OUTPUT_DIRECTORY ${PYMOOSE_OUTPUT_DIRECTORY}
         PREFIX ""
         )
-    list(APPEND LIBRARIES ${PYTHON_LIBRARIES})
+    list(APPEND SYSTEM_SHARED_LIBS ${PYTHON_LIBRARIES})
     target_link_libraries(
         _moose 
         moosepython  
@@ -319,7 +315,7 @@ if(BUILD_PYMOOSE)
         ${MOOSE_LIBRARIES}
         ${STATIC_LIBRARIES}
         "-Wl,--no-whole-archive"
-        ${SYSTEM_LIBRARIES}
+        ${SYSTEM_SHARED_LIBS}
         )
 
     # create a source distribution.
@@ -347,8 +343,7 @@ install(PROGRAMS ${PROJECT_SOURCE_DIR}/scripts/moose
 if(BUILD_PYMOOSE)
 install(CODE 
     "
-    execute_process(COMMAND easy_install -U --prefix ${CMAKE_INSTALL_PREFIX} 
-        moose-${MOOSE_VERSION}.tar.gz
+    execute_process(COMMAND pip install moose-${MOOSE_VERSION}.tar.gz
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         )
     "
@@ -359,20 +354,6 @@ endif(BUILD_PYMOOSE)
 ############################ CTEST ######################################
 
 ENABLE_TESTING()
-
-# If CTEST_OUTPUT_ON_FAILURE environment variable is set, the output is printed
-# onto the console if a test fails.
-SET(ENV{CTEST_OUTPUT_ON_FAILURE} ON)
-
-if (CMAKE_CONFIGURATION_TYPES)
-    add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} 
-        --force-new-ctest-process --output-on-failure 
-        --build-config "Debug")
-else()
-    add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} 
-        --force-new-ctest-process
-        --output-on-failure)
-endif()
 
 ADD_TEST(NAME moose.bin-raw-run
     COMMAND moose.bin -u -q
