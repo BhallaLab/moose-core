@@ -3,5 +3,5 @@ Name=MOOSE
 Exec=moosegui
 Type=Application
 Version=3.0
-Icon=moose.png
+Icon=/usr/share/applications/moose.png
 Categories=Education;Biology;Science;Neuroscience;
