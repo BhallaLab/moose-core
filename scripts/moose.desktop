@@ -4,5 +4,5 @@ GenericName=MOOSE
 Exec=moosegui
 Type=Application
 Version=3.0
-Icon=moose.png
+Icon=/usr/share/icons/moose/moose.png
 Categories=Education;Biology;Science;Neuroscience;
