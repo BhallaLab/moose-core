@@ -32,7 +32,13 @@ from .print_utils import *
 from .sim_utils import *
 
 from .backend import graphviz
-from .topology import topology
+try:
+    from .topology import topology
+except Exception as e:
+    warn("moose-library topology could not be imported because of "
+         " missing dependency, most likely python-networkx."
+        )
+
 from .moose_constants import *
 
 import re
