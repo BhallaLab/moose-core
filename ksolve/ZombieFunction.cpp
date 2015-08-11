@@ -224,6 +224,7 @@ void ZombieFunction::setSolver( Id ksolve, Id dsolve )
 void ZombieFunction::zombify( Element* orig, const Cinfo* zClass,
 					Id ksolve, Id dsolve )
 {
+	//cout << "ZombieFunction::zombify: " << orig->id().path() << endl;
 	if ( orig->cinfo() == zClass )
 			return;
 	// unsigned int start = orig->localDataStart();
