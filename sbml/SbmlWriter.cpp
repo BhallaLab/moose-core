@@ -139,10 +139,22 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
       	{
       		Id msgId = Field< Id >::get( msgMgrs[i], "e2" );
    			string msgpath = Field <string> :: get(msgId,"path");
-   			std::size_t found = msgpath.find('/', 1);
-   			string str2 = msgpath.substr(found,msgpath.length());
-   			vector<string> msgdest = Field< vector<string> >::get( msgMgrs[i], "destFieldsOnE2" );
-   			plots += str2+";";
+   			string msgname = Field <string> :: get(msgId,"name");
+   			string Clean_msgname = nameString(msgname);
+   			ObjId compartment(msgpath);
+   			//starting with compartment Level
+			while( Field<string>::get(compartment,"className") != "CubeMesh"
+		 		&& Field<string>::get(compartment,"className") != "CylMesh"
+		 		)
+		 		compartment = Field<ObjId> :: get(compartment, "parent");
+			string cmpt	 = Field < string > :: get(compartment,"name");
+			std::size_t found = msgpath.find(cmpt);
+			string path = msgpath.substr(found-1,msgpath.length());
+			std::size_t found1 = path.rfind(msgname);
+			//Replacing the clean_name like "." is replace _dot_ etc
+			string plotpath = path.replace(found1,path.length(),Clean_msgname);
+			plots += plotpath+";";
+   			
       	}
     }
   
