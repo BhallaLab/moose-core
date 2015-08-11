@@ -334,6 +334,8 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 		  	sp->setBoundaryCondition(true);
 		  	string Funcpoolname = Field<string> :: get(*itrp,"path");
 		  	vector< Id > children = Field< vector< Id > >::get( *itrp, "children" );
+		  	if (children.size() == 0)
++				sp->setConstant(true);
 		  	for ( vector< Id >::iterator i = children.begin(); i != children.end(); ++i ) 
 		  	{	string funcpath = Field <string> :: get(*i,"path");
 		  		string clsname = Field <string> :: get(*i,"className");
