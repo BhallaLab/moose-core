@@ -31,59 +31,6 @@ const Cinfo* ZombieFunction::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// Field Definitions: mostly inherited from Function
 		//////////////////////////////////////////////////////////////
-    static ElementValueFinfo< ZombieFunction, string > expr(
-        "expr",
-        "Mathematical expression defining the function. The underlying parser\n"
-        "is muParser. Hence the available functions and operators are (from\n"
-        "muParser docs):\n"
-        "\nFunctions\n"
-        "Name        args    explanation\n"
-        "sin         1       sine function\n"
-        "cos         1       cosine function\n"
-        "tan         1       tangens function\n"
-        "asin        1       arcus sine function\n"
-        "acos        1       arcus cosine function\n"
-        "atan        1       arcus tangens function\n"
-        "sinh        1       hyperbolic sine function\n"
-        "cosh        1       hyperbolic cosine\n"
-        "tanh        1       hyperbolic tangens function\n"
-        "asinh       1       hyperbolic arcus sine function\n"
-        "acosh       1       hyperbolic arcus tangens function\n"
-        "atanh       1       hyperbolic arcur tangens function\n"
-        "log2        1       logarithm to the base 2\n"
-        "log10       1       logarithm to the base 10\n"
-        "log         1       logarithm to the base 10\n"
-        "ln  1       logarithm to base e (2.71828...)\n"
-        "exp         1       e raised to the power of x\n"
-        "sqrt        1       square root of a value\n"
-        "sign        1       sign function -1 if x<0; 1 if x>0\n"
-        "rint        1       round to nearest integer\n"
-        "abs         1       absolute value\n"
-        "min         var.    min of all arguments\n"
-        "max         var.    max of all arguments\n"
-        "sum         var.    sum of all arguments\n"
-        "avg         var.    mean value of all arguments\n"
-        "\nOperators\n"
-        "Op  meaning         prioroty\n"
-        "=   assignement     -1\n"
-        "&&  logical and     1\n"
-        "||  logical or      2\n"
-        "<=  less or equal   4\n"
-        ">=  greater or equal        4\n"
-        "!=  not equal       4\n"
-        "==  equal   4\n"
-        ">   greater than    4\n"
-        "<   less than       4\n"
-        "+   addition        5\n"
-        "-   subtraction     5\n"
-        "*   multiplication  6\n"
-        "/   division        6\n"
-        "^   raise x to the power of y       7\n"
-        "\n"
-        "?:  if then else operator   C++ style syntax\n",
-        &ZombieFunction::setExpr,
-        &Function::getExpr);
-
 	
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions: All inherited from Function
@@ -123,7 +70,6 @@ const Cinfo* ZombieFunction::initCinfo()
 	// present in many voxels.
     static Finfo *functionFinfos[] =
             {
-                &expr,
                 &proc,
             };
 
@@ -224,6 +170,7 @@ void ZombieFunction::setSolver( Id ksolve, Id dsolve )
 void ZombieFunction::zombify( Element* orig, const Cinfo* zClass,
 					Id ksolve, Id dsolve )
 {
+	//cout << "ZombieFunction::zombify: " << orig->id().path() << endl;
 	if ( orig->cinfo() == zClass )
 			return;
 	// unsigned int start = orig->localDataStart();

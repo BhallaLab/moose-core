@@ -53,6 +53,8 @@
 #include "Function.h"
 #include "ElementValueFinfo.h"
 
+static const double TriggerThreshold = 0.0;
+
 static SrcFinfo1<double> *valueOut()
 {
     static SrcFinfo1<double> valueOut("valueOut",
@@ -114,6 +116,14 @@ const Cinfo * Function::initCinfo()
         " anything else: all three, value, derivative and rate will be sent out.\n",
         &Function::setMode,
         &Function::getMode);
+    static ValueFinfo< Function, bool > useTrigger(
+        "useTrigger",
+        "When *false*, disables event-driven calculation and turns on "
+		"Process-driven calculations. \n"
+        "When *true*, enables event-driven calculation and turns off "
+		"Process-driven calculations. \n",
+        &Function::setUseTrigger,
+        &Function::getUseTrigger);
     static ElementValueFinfo< Function, string > expr(
         "expr",
         "Mathematical expression defining the function. The underlying parser\n"
@@ -147,8 +157,8 @@ const Cinfo * Function::initCinfo()
         "sum         var.    sum of all arguments\n"
         "avg         var.    mean value of all arguments\n"
         "\nOperators\n"
-        "Op  meaning         prioroty\n"
-        "=   assignement     -1\n"
+        "Op  meaning         priority\n"
+        "=   assignment     -1\n"
         "&&  logical and     1\n"
         "||  logical or      2\n"
         "<=  less or equal   4\n"
@@ -224,6 +234,12 @@ const Cinfo * Function::initCinfo()
                              "for the Reinit operation. It also uses ProcInfo. ",
                              processShared, sizeof( processShared ) / sizeof( Finfo* )
                              );
+	/*
+    static DestFinfo trigger( "trigger",
+		"Handles trigger input. Argument is timestamp of event. This is "
+		"compatible with spike events as well as chemical ones. ",
+        new OpFunc1< Function, double >( &Function::trigger ) );
+		*/
 
     static Finfo *functionFinfos[] =
             {
@@ -289,7 +305,8 @@ const Cinfo * Function::initCinfo()
 static const Cinfo * functionCinfo = Function::initCinfo();
 
 Function::Function(): _valid(false), _numVar(0), _lastValue(0.0),
-                      _value(0.0), _rate(0.0), _mode(1), _stoich(0)
+                      _value(0.0), _rate(0.0), _mode(1), 
+					  _useTrigger( false ), _stoich(0)
 {
     _parser.SetVarFactory(_functionAddVar, this);
     // Adding pi and e, the defaults are `_pi` and `_e`
@@ -310,7 +327,9 @@ Function::Function(): _valid(false), _numVar(0), _lastValue(0.0),
 Function::Function(const Function& rhs): _numVar(rhs._numVar),
                                          _lastValue(rhs._lastValue),
                                          _value(rhs._value), _rate(rhs._rate),
-                                         _mode(rhs._mode), _stoich(0)
+                                         _mode(rhs._mode),
+										 _useTrigger( rhs._useTrigger),
+										 _stoich(0)
 {
 	static Eref er;
     _independent = rhs._independent;
@@ -435,7 +454,7 @@ double * _functionAddVar(const char *name, void *data)
         int index = atoi(strname.substr(1).c_str());
         if ((unsigned)index >= function->_varbuf.size()){
             function->_varbuf.resize(index+1, 0);
-            for (unsigned ii = 0; ii <= index; ++ii){
+            for (int ii = 0; ii <= index; ++ii){
                 if (function->_varbuf[ii] == 0){
                     function->_varbuf[ii] = new Variable();
                 }
@@ -447,7 +466,7 @@ double * _functionAddVar(const char *name, void *data)
         int index = atoi(strname.substr(1).c_str());
         if ((unsigned)index >= function->_pullbuf.size()){
             function->_pullbuf.resize(index+1, 0 );
-            for (unsigned ii = 0; ii <= index; ++ii){
+            for (int ii = 0; ii <= index; ++ii){
                 if (function->_pullbuf[ii] == 0){
                     function->_pullbuf[ii] = new double();
                 }
@@ -539,6 +558,16 @@ unsigned int Function::getMode() const
     return _mode;
 }
 
+void Function::setUseTrigger(bool useTrigger )
+{
+    _useTrigger = useTrigger;
+}
+
+bool Function::getUseTrigger() const
+{
+    return _useTrigger;
+}
+
 double Function::getValue() const
 {
     double value = 0.0;
@@ -617,6 +646,7 @@ unsigned int Function::getNumVar() const
 
 void Function::setVar(unsigned int index, double value)
 {
+	cout << "varbuf[" << index << "]->setValue(" << value << ")\n";
     if (index < _varbuf.size()){    
         _varbuf[index]->setValue(value);
     } else {
@@ -667,6 +697,10 @@ void Function::process(const Eref &e, ProcPtr p)
     }
     _value = getValue();
     _rate = (_value - _lastValue) / p->dt;
+	if ( _useTrigger && _value < TriggerThreshold ) {
+    	_lastValue = _value;
+		return;
+	}
     switch (_mode){
         case 1: {
             valueOut()->send(e, _value);
