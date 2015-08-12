@@ -516,6 +516,12 @@ unsigned int Function::addVar()
 
 void Function::setExpr(const Eref& eref, string expr)
 {
+	this->innerSetExpr( eref, expr ); // Refer to the virtual function here.
+}
+
+// Virtual function, this does the work.
+void Function::innerSetExpr(const Eref& eref, string expr)
+{
     _valid = false;
     _clearBuffer();
     _varbuf.resize(_numVar);

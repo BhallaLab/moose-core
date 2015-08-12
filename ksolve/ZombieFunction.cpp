@@ -123,14 +123,16 @@ void ZombieFunction::reinit(const Eref &e, ProcPtr p)
 // Field Definitions
 //////////////////////////////////////////////////////////////
 
-void ZombieFunction::setExpr( const Eref& e, string v )
+void ZombieFunction::innerSetExpr( const Eref& e, string v )
 {
-	Function::setExpr( e, v );
+	Function::innerSetExpr( e, v );
 	if ( _stoich ) {
 		Stoich* s = reinterpret_cast< Stoich* >( _stoich );
 		s->setFunctionExpr( e, v );
 	} else {
-		cout << "Warning: ZombieFunction::setExpr: specified entry is not a FuncRateTerm.\n";
+		// I had this warning here but it is triggered needlessly when we
+		// do an assignment of the Zombie function. So removed.
+		// cout << "Warning: ZombieFunction::setExpr: Stoich not set.\n";
 	}
 }
 
@@ -143,11 +145,13 @@ void ZombieFunction::setSolver( Id ksolve, Id dsolve )
 	if ( ksolve.element()->cinfo()->isA( "Ksolve" ) ||
 					ksolve.element()->cinfo()->isA( "Gsolve" ) ) {
 		Id sid = Field< Id >::get( ksolve, "stoich" );
-			_stoich = ObjId( sid, 0 ).data();
+		_stoich = ObjId( sid, 0 ).data();
+		if ( _stoich == 0 )
+			cout << "Warning:ZombieFunction::setSolver: Empty Stoich on Ksolve" << ksolve.path() << endl;
 	} else if ( ksolve == Id() ) {
 			_stoich = 0;
 	} else {
-			cout << "Warning:ZombieFunction::vSetSolver: solver class " << 
+			cout << "Warning:ZombieFunction::setSolver: solver class " << 
 					ksolve.element()->cinfo()->name() << 
 					" not known.\nShould be Ksolve or Gsolve\n";
 			_stoich = 0;
@@ -181,6 +185,21 @@ void ZombieFunction::zombify( Element* orig, const Cinfo* zClass,
 		cout << "ZombieFunction::zombify: Warning: ZombieFunction doesn't\n"
 				"handle volumes yet. Proceeding without this.\n";
 
+	Function* f = reinterpret_cast< Function *>( Eref( orig, 0 ).data() );
+	Function temp = *f;
+	orig->zombieSwap( zClass );
+	if ( zClass == ZombieFunction::initCinfo() ) { // call SetSolver
+		ZombieFunction* zf = reinterpret_cast< ZombieFunction *>(
+						Eref( orig, 0 ).data() );
+		*zf = *static_cast< ZombieFunction* >(&temp);
+		zf->setSolver( ksolve, dsolve );
+	} else {
+		Function* nf = 
+					reinterpret_cast< Function *>(Eref( orig, 0 ).data());
+		*nf = temp;
+	}
+
+	/*
 	// We can swap the class because the class data is identical, just 
 	// the moose expr and process handlers are different.
 	if ( orig->cinfo() == ZombieFunction::initCinfo() ) { // unzombify
@@ -191,4 +210,5 @@ void ZombieFunction::zombify( Element* orig, const Cinfo* zClass,
 						Eref( orig, 0 ).data() );
 		zf->setSolver( ksolve, dsolve );
 	}
+	*/
 }

@@ -1179,9 +1179,11 @@ void Stoich::unZombifyModel()
 	static const Cinfo* reacCinfo = Cinfo::find( "Reac" );
 	static const Cinfo* enzCinfo = Cinfo::find( "Enz" );
 	static const Cinfo* mmEnzCinfo = Cinfo::find( "MMenz" );
+	static const Cinfo* functionCinfo = Cinfo::find( "Function");
 	static const Cinfo* zombieReacCinfo = Cinfo::find( "ZombieReac");
 	static const Cinfo* zombieMMenzCinfo = Cinfo::find( "ZombieMMenz");
 	static const Cinfo* zombieEnzCinfo = Cinfo::find( "ZombieEnz");
+	static const Cinfo* zombieFunctionCinfo = Cinfo::find( "ZombieFunction");
 	assert (idMap_.size() == numVarPools_ + numBufPools_ +
 					offSolverPools_.size() );
 
@@ -1213,6 +1215,10 @@ void Stoich::unZombifyModel()
 	for ( vector< Id >::iterator i = funcMap_.begin(); 
 						i != funcMap_.end(); ++i ) {
 		Element* e = i->element();
+		if ( e != 0 && e->cinfo() == zombieFunctionCinfo ) {
+			ZombieFunction::zombify( e, functionCinfo, Id(), Id() );
+			cout << "ZombieFucntion unziobvify: " << e->getTick() << endl;
+		}
 		if ( e != 0 && e->getTick() == -2 ) {
 			int t = Clock::lookupDefaultTick( e->cinfo()->name() );
 			e->setTick( t );
