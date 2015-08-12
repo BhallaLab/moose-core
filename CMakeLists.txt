@@ -321,7 +321,7 @@ if(BUILD_PYMOOSE)
 endif(BUILD_PYMOOSE)
 
 ## Moose documentation
-option(WITH_DOC "Build documentation using python-sphinx and doxygen" ON)
+option(WITH_DOC "Build documentation using python-sphinx and doxygen" OFF)
 if(WITH_DOC)
     FIND_PACKAGE(Sphinx REQUIRED)
     MESSAGE(STATUS "Build documentation.")
