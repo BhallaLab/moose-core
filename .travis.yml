@@ -41,7 +41,7 @@ install:
     - cd libsbml-5.11.4 && ./configure --prefix=/usr --with-zlib --with-bzip2 --with-libxml && make && sudo make install && cd ..
 
 script: 
-    - mkdir -p _build && cd _build && cmake -DDEBUG=ON -DWITH_DOC=ON .. && make -j4
+    - mkdir -p _build && cd _build && cmake -DDEBUG=ON -DWITH_DOC=ON .. && make -j`nproc`
    
 after_success:
     - ctest --output-on-failure 
