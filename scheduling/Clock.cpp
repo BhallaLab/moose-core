@@ -888,6 +888,7 @@ void Clock::buildDefaultTick()
 	defaultTick_["ZombieCompartment"] = ~0U;
 	defaultTick_["ZombieEnz"] = ~0U;
 	// defaultTick_["ZombieFuncPool"] = ~0U;
+	defaultTick_["ZombieFunction"] = ~0U;
 	defaultTick_["ZombieHHChannel"] = ~0U;
 	defaultTick_["ZombieMMenz"] = ~0U;
 	defaultTick_["ZombiePool"] = ~0U;

@@ -127,6 +127,12 @@ const Cinfo* Dsolve::initCinfo()
 			"Handles reinit call",
 			new ProcOpFunc< Dsolve >( &Dsolve::reinit ) );
 
+		static DestFinfo buildMeshJunctions( "buildMeshJunctions",
+			"Builds junctions between mesh on current Dsolve, and another"
+			" Dsolve. The meshes have to be compatible. ",
+			new EpFunc1< Dsolve, Id >( 
+					&Dsolve::buildMeshJunctions ) );
+
 		static DestFinfo buildNeuroMeshJunctions( "buildNeuroMeshJunctions",
 			"Builds junctions between NeuroMesh, SpineMesh and PsdMesh",
 			new EpFunc2< Dsolve, Id, Id >( 
@@ -155,6 +161,7 @@ const Cinfo* Dsolve::initCinfo()
 		&diffVol1,				// LookupValue
 		&diffVol2,				// LookupValue
 		&diffScale,				// LookupValue
+		&buildMeshJunctions, 	// DestFinfo
 		&buildNeuroMeshJunctions, 	// DestFinfo
 		&proc,				// SharedFinfo
 	};
@@ -590,12 +597,28 @@ void Dsolve::buildNeuroMeshJunctions( const Eref& e, Id spineD, Id psdD )
 		return;
 	}
 
-	buildMeshJunctions( spineD, e.id() );
-	buildMeshJunctions( psdD, spineD );
+	innerBuildMeshJunctions( spineD, e.id() );
+	innerBuildMeshJunctions( psdD, spineD );
+}
+
+void Dsolve::buildMeshJunctions( const Eref& e, Id other )
+{
+	Id otherMesh;
+	if ( other.element()->cinfo()->isA( "Dsolve" ) ) {
+		otherMesh = Field< Id >::get( other, "compartment" );
+		if ( compartment_.element()->cinfo()->isA( "ChemCompt" ) && 
+			otherMesh.element()->cinfo()->isA( "ChemCompt" ) ) {
+			innerBuildMeshJunctions( e.id(), other );
+			return;
+		}
+	}
+	cout << "Warning: Dsolve::buildMeshJunctions: one of '" <<
+		compartment_.path() << ", " << otherMesh.path() << 
+		"' is not a Mesh\n";
 }
 
 // Static utility func for building junctions
-void Dsolve::buildMeshJunctions( Id self, Id other )
+void Dsolve::innerBuildMeshJunctions( Id self, Id other )
 {
 	DiffJunction jn; // This is based on the Spine Dsolver.
 	jn.otherDsolve = other.value();

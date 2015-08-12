@@ -154,11 +154,12 @@ void Element::zombieSwap( const Cinfo* c )
 	if ( tick_ == -1 ) { // Object is already disabled, let it be.
 		return;
 	}
-	if ( tick_ == -2 ) { // Object was a zombie and wants to come home.
+	bool zombieInName = ( c->name().substr(0, 6) == "Zombie" );
+	if ( tick_ == -2 && !zombieInName ) { // Object was a zombie and wants to come home.
 		int t = Clock::lookupDefaultTick( c->name() );
 		setTick( t );
 	} else if ( tick_ >= 0 ) { // disable clock, with option to return
-		if ( c->name().substr(0, 6) == "Zombie" ) {
+		if ( zombieInName ) {
 			setTick( -2 );
 		} else {
 			int t = Clock::lookupDefaultTick( c->name() );

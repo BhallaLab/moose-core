@@ -74,6 +74,7 @@ Stoich.o:		RateTerm.h FuncTerm.h FuncRateTerm.h Stoich.h ../kinetics/PoolBase.h 
 ZombieReac.o:		RateTerm.h FuncTerm.h Stoich.h ../kinetics/ReacBase.h ../kinetics/lookupVolumeFromMesh.h ../basecode/SparseMatrix.h KinSparseMatrix.h ZombieReac.h
 ZombieEnz.o:		RateTerm.h FuncTerm.h Stoich.h ../kinetics/EnzBase.h ../kinetics/CplxEnzBase.h ../kinetics/lookupVolumeFromMesh.h ../basecode/SparseMatrix.h KinSparseMatrix.h ZombieEnz.h
 ZombieMMenz.o:		RateTerm.h FuncTerm.h Stoich.h ../kinetics/EnzBase.h ../kinetics/lookupVolumeFromMesh.h ../basecode/SparseMatrix.h KinSparseMatrix.h ZombieMMenz.h
+ZombieFunction.o:		RateTerm.h FuncTerm.h Stoich.h ../builtins/Function.h ZombieFunction.h
 Ksolve.o:		RateTerm.h Stoich.h Ksolve.h VoxelPoolsBase.h VoxelPools.h OdeSystem.h ZombiePoolInterface.h
 SteadyState.o:	SteadyState.h ../basecode/SparseMatrix.h KinSparseMatrix.h RateTerm.h FuncTerm.h Stoich.h ../randnum/randnum.h
 Gsolve.o:		RateTerm.h Stoich.h Gsolve.h VoxelPoolsBase.h VoxelPools.h GssaSystem.h ZombiePoolInterface.h ../basecode/SparseMatrix.h KinSparseMatrix.h
