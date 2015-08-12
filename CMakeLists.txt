@@ -116,7 +116,6 @@ endif()
 
 #### DEPENDENCIES
 
-
 find_package(LIBSBML)
 if(NOT LIBSBML_FOUND)
     MESSAGE("++ LIBSBML NOT FOUND.  Disabling SBML support.")
@@ -174,11 +173,6 @@ endif()
 ##    message("++ Cound not find MPI")
 ##    add_definitions(-UUSE_MPI)
 ##endif()
-
-############################ CYMOOSE related macros. ########################
-if(BUILD_CYMOOSE)
-    add_definitions("-DCYMOOSE -DCYTHON")
-endif()
 
 # Add subdirectroeis
 add_subdirectory(basecode)
@@ -317,16 +311,30 @@ if(BUILD_PYMOOSE)
         "-Wl,--no-whole-archive"
         ${SYSTEM_SHARED_LIBS}
         )
-
-    # create a source distribution.
+    # Also generate the documents
     add_custom_command(TARGET _moose
         POST_BUILD
-        COMMAND ${PYTHON_EXECUTABLE} setup.py sdist --dist-dir ${CMAKE_BINARY_DIR}
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/python
+        COMMAND ./docgen
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         VERBATIM
         )
-
 endif(BUILD_PYMOOSE)
+
+## Moose documentation
+option(WITH_DOC "Build documentation using python-sphinx and doxygen" ON)
+if(WITH_DOC)
+    FIND_PACKAGE(Sphinx REQUIRED)
+    MESSAGE(STATUS "Build documentation.")
+    set(USER_DOC_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Docs/user/py/_build/html)
+    set(DEVELOPER_DOC_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Docs/developer/html)
+    ADD_CUSTOM_TARGET(docs ALL
+        COMMAND ./docgen
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMENT "Generating html doc using sphinx and doxygen"
+        VERBATIM
+        )
+endif(WITH_DOC)
+
 
 ######################### INSTALL ##############################################
 
@@ -348,8 +356,19 @@ install(CODE
         )
     "
     )
-
 endif(BUILD_PYMOOSE)
+
+if(WITH_DOC)
+    message(STATUS "Installing moose doc")
+    install(DIRECTORY ${USER_DOC_OUTPUT_DIR}
+        DESTINATION share/doc/moose
+        COMPONENT moose-doc
+        )
+
+    install(DIRECTORY ${DEVELOPER_DOC_OUTPUT_DIR}
+        DESTINATION share/doc/moose/developer
+        )
+endif()
 
 ############################ CTEST ######################################
 
