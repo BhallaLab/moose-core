@@ -327,12 +327,20 @@ if(WITH_DOC)
     MESSAGE(STATUS "Build documentation.")
     set(USER_DOC_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Docs/user/py/_build/html)
     set(DEVELOPER_DOC_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Docs/developer/html)
-    ADD_CUSTOM_TARGET(docs ALL
-        COMMAND ./docgen
+    ADD_CUSTOM_COMMAND(TARGET moose.bin POST_BUILD
+        COMMAND doxygen ./Doxyfile.full
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        )
+
+    ADD_CUSTOM_COMMAND(TARGET _moose POST_BUILD
+        COMMAND make html
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Docs/user/py
         COMMENT "Generating html doc using sphinx and doxygen"
         VERBATIM
         )
+
+else(WITH_DOC)
+    message(STATUS "Not building MOOSE documentation")
 endif(WITH_DOC)
 
 
