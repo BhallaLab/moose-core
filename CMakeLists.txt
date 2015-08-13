@@ -46,8 +46,22 @@ add_custom_target(uninstall
     ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
     )
 
-################################# OS SPECIFIC ##################################
+################################# CMAKE OPTIONS ##################################
 
+option(WITH_DOC "Build documentation using python-sphinx and doxygen" OFF)
+
+option(VERBOSITY "SET MOOSE VERBOSITY LEVEL" 0)
+
+# Whether to notify the user after 1 second of simulation.
+option(NOTIFY_PROGRESS "Show progress of simulation" ON)
+
+# STATS INSIDE MOOSE. TODO: Remove it and add support for gprof
+option(ENABLE_LOGGER  "Enable MOOSE logger" OFF)
+
+## Unit testing and debug mode.
+option(DEBUG "Building with debugging support" OFF)
+option(ENABLE_UNIT_TESTS "ENABLE UNIT TESTS IN MOOSE" ON)
+option(WITH_PYTHON "Build native python extension of MOOSE" ON)
 
 ################################# CMKAE MACROS #################################
 
@@ -77,7 +91,6 @@ if(VERIFY)
 endif(VERIFY)
 
 # VERBOSITY OF OUTPUT
-option(VERBOSITY "SET MOOSE VERBOSITY LEVEL" 0)
 if(VERBOSITY)
     message("++ Verbosity of output is ${VERBOSITY}. This is not implemented
     yet!")
@@ -87,11 +100,6 @@ else()
     add_definitions(-DQUIET_MODE)
 endif()
 
-# Whether to notify the user after 1 second of simulation.
-option(NOTIFY_PROGRESS "Show progress of simulation" ON)
-
-# STATS INSIDE MOOSE
-option(ENABLE_LOGGER  "Enable MOOSE logger" OFF)
 if(ENABLE_LOGGER)
     message("++ LOGGER ENABLED")
     add_definitions(-DENABLE_LOGGER)
@@ -100,9 +108,6 @@ endif()
 # Default macros
 add_definitions(-DUSE_GENESIS_PARSER)
 
-## Unit testing and debug mode.
-option(DEBUG "Building with debugging support" OFF)
-option(ENABLE_UNIT_TESTS "ENABLE UNIT TESTS IN MOOSE" ON)
 if(ENABLE_UNIT_TESTS AND DEBUG)
     MESSAGE("++ Building for Debug/ Unit testing")
     add_definitions(-DDO_UNIT_TESTS)
@@ -272,12 +277,20 @@ target_link_libraries(moose.bin
     ${SYSTEM_SHARED_LIBS}
     )
 
-######################### BUILD PYMOOSE ########################################
-option(BUILD_PYMOOSE "Build native python extension of MOOSE" 1)
+IF(WITH_DOC)
+    FIND_PACKAGE(Doxygen REQUIRED)
+    add_custom_command(TARGET moose.bin POST_BUILD
+        COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.full
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMENT "Building developer documentation"
+        VERBATIM
+        )
+ENDIF(WITH_DOC)
 
+######################### BUILD PYMOOSE ########################################
 # Root of all python module.
 SET(PROJECT_PYTHON_PATH ${CMAKE_CURRENT_SOURCE_DIR}/python)
-if(BUILD_PYMOOSE)
+if(WITH_PYTHON)
     message("++ Building native python extension of MOOSE")
     set(PYMOOSE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/python/moose")
 
@@ -311,41 +324,36 @@ if(BUILD_PYMOOSE)
         "-Wl,--no-whole-archive"
         ${SYSTEM_SHARED_LIBS}
         )
+
     # Also generate the documents
+IF(WITH_DOC)
+    FIND_PROGRAM(Sphinx REQUIRED)
     add_custom_command(TARGET _moose
         POST_BUILD
-        COMMAND ./docgen
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        VERBATIM
-        )
-endif(BUILD_PYMOOSE)
-
-## Moose documentation
-option(WITH_DOC "Build documentation using python-sphinx and doxygen" OFF)
-if(WITH_DOC)
-    FIND_PACKAGE(Sphinx REQUIRED)
-    MESSAGE(STATUS "Build documentation.")
-    set(USER_DOC_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Docs/user/py/_build/html)
-    set(DEVELOPER_DOC_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Docs/developer/html)
-    ADD_CUSTOM_TARGET(docs ALL
-        COMMAND ./docgen
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        COMMENT "Generating html doc using sphinx and doxygen"
+        COMMAND make html
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Docs/user/py
+        COMMENT "Building user doc using python-sphinx"
         VERBATIM
         )
 endif(WITH_DOC)
+endif(WITH_PYTHON)
 
 ## MOOGLI
 OPTION(BUILD_MOOGLI "Build moogli extension." OFF)
 IF(BUILD_MOOGLI)
-    SET(MOOGLI_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/python/moogli)
-    FIND_PACKAGE(SIP REQUIRED)
-    FIND_PACKAGE(PyQt4 REQUIRED)
-    #FIND_PACKAGE(osgQt REQUIRED)
-    MESSAGE("++ Building MOOGLI in ${MOOGLI_BUILD_PATH}")
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/python/moogli)
-    INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/python/moogli/include)
-    LINK_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/python/moogli)
+    MESSAGE(STATUS "Building MOOGLI")
+    SET(MOOGLI_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/python/moogli)
+    set(MOOGLI_OUT_FILE ${MOOGLI_SOURCE_DIR}/_moogli.so)
+    add_custom_target(moogli ALL
+        DEPENDS ${MOOGLI_OUT_FILE}
+        )
+    add_custom_command(OUTPUT ${MOOGLI_OUT_FILE}
+        COMMAND ${CMAKE_COMMAND} ${MOOGLI_SOURCE_DIR}
+        COMMAND $(MAKE)
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        VERBATIM
+        COMMENT "Building MOOGLI"
+        )
 else(BUILD_MOOGLI)
     MESSAGE("++ NOT building MOOGLI")
 endif(BUILD_MOOGLI)
@@ -362,7 +370,7 @@ install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/moose
     COMPONENT moose-core
     )
 
-if(BUILD_PYMOOSE)
+if(WITH_PYTHON)
 install(CODE 
     "
     execute_process(COMMAND easy_install -U moose-${MOOSE_VERSION}.tar.gz
@@ -370,7 +378,7 @@ install(CODE
         )
     "
     )
-endif(BUILD_PYMOOSE)
+endif(WITH_PYTHON)
 
 if(WITH_DOC)
     message(STATUS "Installing moose doc")
