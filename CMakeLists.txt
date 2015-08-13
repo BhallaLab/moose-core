@@ -371,10 +371,10 @@ IF(BUILD_MOOGLI)
     # default option. 
     # USEFUL for packaging.
     if(NOT MOOGLI_DIST_DIR)
-        set(MOOGLI_DIST_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-    endif(MOOGLI_DIST_DIR)
-    message(STATUS "Location of moogli source distribution: ${MOOGLI_DIST_DIR}")
+        set(MOOGLI_DIST_DIR ${CMAKE_CURRENT_BINARY_DIR})
+    endif()
 
+    message(STATUS "Location of moogli source distribution: ${MOOGLI_DIST_DIR}")
     add_custom_command(OUTPUT ${MOOGLI_OUT_FILE}
         COMMAND ${CMAKE_COMMAND} -DMOOGLI_DIST_DIR=${MOOGLI_DIST_DIR} ${MOOGLI_SOURCE_DIR}
         COMMAND $(MAKE)
