@@ -9,5 +9,5 @@ echo "##############################################################"
 echo "# Generating Python Documentation                            #"
 echo "##############################################################"
 
-(cd Docs/user/py; make html)
+( cd Docs/user/py && make html || true )
 
