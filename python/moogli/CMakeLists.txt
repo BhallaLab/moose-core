@@ -112,12 +112,12 @@ TARGET_LINK_LIBRARIES(_moogli
 
 # Build python source distribution of moogli
 FIND_PACKAGE(PythonInterp REQUIRED)
-option(MOOGLI_DIST_DIR "Source distribution is generated in this directory"
-    ${CMAKE_CURRENT_BINARY_DIR}
-    )
+
+# "Source distribution is generated in this directory, default ${CMAKE_CURRENT_BINARY_DIR})
+set(MOOGLI_DIST_DIR ${CMAKE_CURRENT_BINARY_DIR})
 ADD_CUSTOM_COMMAND(TARGET _moogli POST_BUILD
-    COMMAND ${PYTHON_EXECUTABLE} setup.py sdist --dist-dir ${MOOGLI_DIST_DIR}
+    COMMAND ${PYTHON_EXECUTABLE} cmake_modules/setup.py sdist --dist-dir ${MOOGLI_DIST_DIR}
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    COMMENT "Generating MOOGLI source distribution"
+    COMMENT "Generating MOOGLI source distribution in ${MOOGLI_DIST_DIR}"
     VERBATIM
     )
