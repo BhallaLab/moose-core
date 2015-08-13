@@ -4,6 +4,7 @@ cmake_policy(SET CMP0004 OLD)
 
 project(moose)
 set(MOOSE_VERSION "3.0.2")
+set(MOOGLI_VERSION "1.0")
 
 # This snippet is from LLVM project.
 # Sanity check our source directory to make sure that we are not trying to
@@ -392,8 +393,9 @@ install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/moose
 if(WITH_PYTHON)
 install(CODE 
     "
-    execute_process(COMMAND easy_install -U moose-${MOOSE_VERSION}.tar.gz
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    execute_process(COMMAND easy_install  --prefix ${CMAKE_INSTALL_PREFIX} 
+        --uprade moose-${MOOSE_VERSION}.tar.gz
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         )
     "
     )
@@ -412,7 +414,15 @@ if(WITH_DOC)
 endif()
 
 if(BUILD_MOOGLI)
-    message(STATUS "Installing moogli")
+    install(CODE
+        "
+        execute_process(COMMAND easy_install
+            --prefix ${CMAKE_INSTALL_PREFIX}
+            --upgrade moogli-${MOOGLI_VERSION}.tar.gz
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+            )
+        "
+        )
 endif(BUILD_MOOGLI)
     
 
