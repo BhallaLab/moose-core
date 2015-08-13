@@ -366,8 +366,17 @@ IF(BUILD_MOOGLI)
         DEPENDS ${MOOGLI_OUT_FILE}
         )
 
+    # This variable controls where to save the moogli source distribution. If no
+    # option is passed from command line then use current build directory as
+    # default option. 
+    # USEFUL for packaging.
+    if(NOT MOOGLI_DIST_DIR)
+        set(MOOGLI_DIST_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+    endif(MOOGLI_DIST_DIR)
+    message(STATUS "Location of moogli source distribution: ${MOOGLI_DIST_DIR}")
+
     add_custom_command(OUTPUT ${MOOGLI_OUT_FILE}
-        COMMAND ${CMAKE_COMMAND} -DMOOGLI_DIST_DIR=${CMAKE_CURRENT_BINARY_DIR} ${MOOGLI_SOURCE_DIR}
+        COMMAND ${CMAKE_COMMAND} -DMOOGLI_DIST_DIR=${MOOGLI_DIST_DIR} ${MOOGLI_SOURCE_DIR}
         COMMAND $(MAKE)
         WORKING_DIRECTORY ${MOOGLI_BUILD_DIR}
         VERBATIM
