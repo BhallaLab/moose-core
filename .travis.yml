@@ -45,6 +45,8 @@ install:
     - cd libsbml-5.9.0 && ./configure --prefix=/usr --with-zlib --with-bzip2 --with-libxml && make && sudo make install && cd ..
 
 script:
+    - make BUILD=debug USE_NEUROKIT=1 
     - mkdir -p _build && cd _build && cmake -DDEBUG=ON -DWITH_DOC=ON -DBUILD_MOOGLI=ON .. && make
+
 after_success:
     - ctest --output-on-failure

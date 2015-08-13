@@ -1,4 +1,5 @@
-MOOSE can be built using cmake. 
+MOOSE can also be built using cmake along with gnu-make. Instructions to build
+MOOSE with gnu-make are described in file `INSTALL`.
 
 # Building and installing moose
 
