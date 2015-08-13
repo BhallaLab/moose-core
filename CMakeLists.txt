@@ -327,22 +327,28 @@ if(WITH_DOC)
     MESSAGE(STATUS "Build documentation.")
     set(USER_DOC_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Docs/user/py/_build/html)
     set(DEVELOPER_DOC_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Docs/developer/html)
-    ADD_CUSTOM_COMMAND(TARGET moose.bin POST_BUILD
-        COMMAND doxygen ./Doxyfile.full
+    ADD_CUSTOM_TARGET(docs ALL
+        COMMAND ./docgen
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        )
-
-    ADD_CUSTOM_COMMAND(TARGET _moose POST_BUILD
-        COMMAND make html
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Docs/user/py
         COMMENT "Generating html doc using sphinx and doxygen"
         VERBATIM
         )
-
-else(WITH_DOC)
-    message(STATUS "Not building MOOSE documentation")
 endif(WITH_DOC)
 
+## MOOGLI
+OPTION(BUILD_MOOGLI "Build moogli extension." OFF)
+IF(BUILD_MOOGLI)
+    SET(MOOGLI_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/python/moogli)
+    FIND_PACKAGE(SIP REQUIRED)
+    FIND_PACKAGE(PyQt4 REQUIRED)
+    #FIND_PACKAGE(osgQt REQUIRED)
+    MESSAGE("++ Building MOOGLI in ${MOOGLI_BUILD_PATH}")
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/python/moogli)
+    INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/python/moogli/include)
+    LINK_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/python/moogli)
+else(BUILD_MOOGLI)
+    MESSAGE("++ NOT building MOOGLI")
+endif(BUILD_MOOGLI)
 
 ######################### INSTALL ##############################################
 
@@ -351,7 +357,7 @@ install(TARGETS moose.bin
     COMPONENT moose-core
     )
 
-install(PROGRAMS ${PROJECT_SOURCE_DIR}/scripts/moose
+install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/moose
     DESTINATION bin
     COMPONENT moose-core
     )
@@ -359,7 +365,7 @@ install(PROGRAMS ${PROJECT_SOURCE_DIR}/scripts/moose
 if(BUILD_PYMOOSE)
 install(CODE 
     "
-    execute_process(COMMAND pip install moose-${MOOSE_VERSION}.tar.gz
+    execute_process(COMMAND easy_install -U moose-${MOOSE_VERSION}.tar.gz
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         )
     "
@@ -377,6 +383,10 @@ if(WITH_DOC)
         DESTINATION share/doc/moose/developer
         )
 endif()
+
+if(BUILD_MOOGLI)
+    message(STATUS "Installing moogli")
+    
 
 ############################ CTEST ######################################
 
