@@ -325,8 +325,16 @@ if(WITH_PYTHON)
         ${SYSTEM_SHARED_LIBS}
         )
 
-    # Also generate the documents
+    add_custom_command(TARGET _moose POST_BUILD
+        COMMAND ${PYTHON_EXECUTABLE} setup.py sdist --dist-dir
+        ${CMAKE_CURRENT_BINARY_DIR}
+        WORKING_DIRECTORY ${PROJECT_PYTHON_PATH}
+        COMMENT "Generating moose source distribution using setuptools"
+        VERBATIM
+        )
+
 IF(WITH_DOC)
+    # Also generate the documents
     FIND_PROGRAM(Sphinx REQUIRED)
     add_custom_command(TARGET _moose
         POST_BUILD
@@ -343,19 +351,30 @@ OPTION(BUILD_MOOGLI "Build moogli extension." OFF)
 IF(BUILD_MOOGLI)
     MESSAGE(STATUS "Building MOOGLI")
     SET(MOOGLI_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/python/moogli)
-    set(MOOGLI_OUT_FILE ${MOOGLI_SOURCE_DIR}/_moogli.so)
+
+    # Build directory of MOOGLI can't be same as of moose which is
+    # ${CMAKE_CURRENT_BINARY_DIR}. If they are same both project will try to
+    # create CMAKECache file in same directory which is an error.
+    SET(MOOGLI_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/_moogli_bin)
+    FILE(MAKE_DIRECTORY ${MOOGLI_BUILD_DIR})
+
+    # After successful run, we should get a source distribution of moogli in
+    # current build directory.
+    set(MOOGLI_OUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/moogli.tar.gz)
     add_custom_target(moogli ALL
         DEPENDS ${MOOGLI_OUT_FILE}
         )
+
     add_custom_command(OUTPUT ${MOOGLI_OUT_FILE}
-        COMMAND ${CMAKE_COMMAND} ${MOOGLI_SOURCE_DIR}
+        COMMAND ${CMAKE_COMMAND} -DMOOGLI_DIST_DIR=${CMAKE_CURRENT_BINARY_DIR} ${MOOGLI_SOURCE_DIR}
         COMMAND $(MAKE)
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        WORKING_DIRECTORY ${MOOGLI_BUILD_DIR}
         VERBATIM
         COMMENT "Building MOOGLI"
         )
+
 else(BUILD_MOOGLI)
-    MESSAGE("++ NOT building MOOGLI")
+    MESSAGE(STATUS "NOT building MOOGLI")
 endif(BUILD_MOOGLI)
 
 ######################### INSTALL ##############################################
