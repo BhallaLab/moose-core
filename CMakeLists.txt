@@ -386,6 +386,7 @@ endif()
 
 if(BUILD_MOOGLI)
     message(STATUS "Installing moogli")
+endif(BUILD_MOOGLI)
     
 
 ############################ CTEST ######################################
