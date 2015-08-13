@@ -403,7 +403,7 @@ if(WITH_PYTHON)
 install(CODE 
     "
     execute_process(COMMAND easy_install  --prefix ${CMAKE_INSTALL_PREFIX} 
-        --uprade moose-${MOOSE_VERSION}.tar.gz
+        --upgrade moose-${MOOSE_VERSION}.tar.gz
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         )
     "
@@ -472,6 +472,15 @@ ADD_TEST(NAME pymoose-test-vec
     COMMAND ${PYTHON_EXECUTABLE} test_vec.py
     WORKING_DIRECTORY ${TEST_DIRECTORY}
     )
+
+if(BUILD_MOOGLI)
+    ADD_TEST(NAME moogli_sanity_test
+        COMMAND ${PYTHON_EXECUTABLE} test_moogli.py
+        WORKING_DIRECTORY ${TEST_DIRECTORY}
+        )
+
+endif(BUILD_MOOGLI)
+
 
 #ADD_TEST(NAME pymoose-test-sbml 
 #    COMMAND ${PYTHON_EXECUTABLE} test_sbml.py
