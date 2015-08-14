@@ -81,18 +81,11 @@ void showError(mu::Parser::exception_type &e)
 
 void FuncTerm::setExpr( const string& expr )
 {
-	// mu::varmap_type vars;
 	try {
 		parser_.SetExpr( expr );
-		/*
-		mu::varmap_type vars = parser_.GetUsedVar();
-		if ( reactantIndex_.size() < vars.size() )
-			reactantIndex_.resize( vars.size() ); // Try to prevent segvs.
-			*/
 		expr_ = expr;
 	} catch(mu::Parser::exception_type &e) {
 		showError(e);
-		//_clearBuffer();
 		return;
 	}
 }

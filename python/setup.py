@@ -17,8 +17,6 @@
 
     Script to install python targets.
 
-Last modified: Sat Jan 18, 2014  05:01PM
-
 """
     
 __author__           = "Dilawar Singh"
@@ -40,7 +38,12 @@ setup(
         author='Dilwar Singh',
         author_email='dilawars@ncbs.res.in',
         url='http://moose.ncbs.res.in',
-        packages=['libmumbl', 'moose', 'moose.kkit', 'moose.neuroml', 'moose.backend', 'moose.topology'],
-        package_dir = { 'moose' : 'moose' , 'libmumbl' : 'libmumbl' },
+        packages=['libmumbl', 'rdesigneur'
+            , 'moose', 'moose.kkit', 'moose.neuroml', 'moose.backend', 'moose.topology'
+            ],
+        package_dir = { 'moose' : 'moose' 
+            , 'libmumbl' : 'libmumbl' 
+            , 'rdesigneur' : 'rdesigneur'
+            },
         package_data = { 'moose' : ['_moose.so'] },
     ) 

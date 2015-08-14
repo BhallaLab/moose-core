@@ -121,7 +121,11 @@ def plotTable(table, **kwargs):
 
     vecX, vecY = reformatTable(table, kwargs)
     plt.plot(vecX, vecY, label = kwargs.get('label', ""))
-    plt.legend(loc='best', framealpha=0.4)
+    # This may not be available on older version of matplotlib.
+    try:
+        plt.legend(loc='best', framealpha=0.4)
+    except:
+        plt.legend(loc='best')
 
 def plotTables(tables, outfile=None, **kwargs):
     """Plot a list of tables onto one figure only.
@@ -135,7 +139,12 @@ def plotTables(tables, outfile=None, **kwargs):
         yvec = tables[tname].vector 
         xvec = np.linspace(0, moose.Clock('/clock').currentTime, len(yvec))
         plt.plot(xvec, yvec, label=tname)
-        plt.legend(loc='best', framealpha=0.4)
+
+        # This may not be available on older version of matplotlib.
+        try:
+            plt.legend(loc='best', framealpha=0.4)
+        except:
+            plt.legend(loc = 'best')
     
     plt.tight_layout()
     if outfile:
@@ -170,7 +179,11 @@ def plotVector(vec, xvec = None, **options):
 
     plt.plot(xx, vec, label=options.get('label', ''))
     if legend:
-        plt.legend(loc='best', framealpha=0.4)
+        # This may not be available on older version of matplotlib.
+        try:
+            plt.legend(loc='best', framealpha=0.4)
+        except:
+            plt.legend(loc='best')
 
     if xvec is None:
         plt.xlabel = 'Time (sec)'
@@ -181,7 +194,10 @@ def plotVector(vec, xvec = None, **options):
     plt.title = options.get('title', '')
 
     if(options.get('legend', True)):
-        plt.legend(loc='best', framealpha=0.4, prop={'size' : 9})
+        try:
+            plt.legend(loc='best', framealpha=0.4, prop={'size' : 9})
+        except:
+            plt.legend(loc='best', prop={'size' : 9})
 
 
 def saveRecords(dataDict, xvec = None, **kwargs):
