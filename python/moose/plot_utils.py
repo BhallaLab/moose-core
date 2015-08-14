@@ -267,7 +267,7 @@ def plotRecords(dataDict, xvec = None, **kwargs):
 
     # title in Image.
     if 'title' in kwargs:
-        plt.title(kwargs['title'])
+        plt.title = kwargs['title'] 
 
     if subplot:
         try:
