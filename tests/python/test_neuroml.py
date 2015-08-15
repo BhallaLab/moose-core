@@ -15,6 +15,7 @@ __status__           = "Development"
 
 
 import unittest
+import platform
 
 from neuroml.FvsI_CA1 import ca1_main, loadModel
 from neuroml.CA1 import loadGran98NeuroML_L123
@@ -31,7 +32,8 @@ class CA1Test( unittest.TestCase ):
 
     def test_injected_current_and_spikes(self):
         #self.assertEqual( 00, ca1_main('./neuroml/cells_channels/CA1.morph.xml', 2.0e-13))
-        self.assertEqual(8, loadGran98NeuroML_L123('neuroml/CA1soma.net.xml'))
+        self.assertEqual(9, loadGran98NeuroML_L123('neuroml/CA1soma.net.xml'))
+
 
     
 if __name__ == '__main__':

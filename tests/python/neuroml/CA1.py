@@ -8,6 +8,7 @@ sys.path.append('../../../python/')
 import moose
 from moose.utils import *
 import moose.utils as mu
+import count
 
 from moose.neuroml.NeuroML import NeuroML
 
@@ -17,7 +18,7 @@ import unittest
 
 simdt = 10e-6 # s
 plotdt = 10e-6 # s
-runtime = 0.2 # s
+runtime = 0.19 # s
 
 def loadGran98NeuroML_L123(filename):
     neuromlR = NeuroML()
@@ -29,7 +30,7 @@ def loadGran98NeuroML_L123(filename):
     moose.reinit()
     moose.start(runtime)
     tvec = arange(0.0,runtime,simdt)
-    res =  mu.spike_train_simple_stat( somaVm.vector )
+    res =  count.spike_train_simple_stat( somaVm.vector )
     return res['number of spikes']
 
 if __name__ == "__main__":
