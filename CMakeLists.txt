@@ -368,6 +368,15 @@ IF(BUILD_MOOGLI)
     add_custom_target(moogli ALL
         DEPENDS ${MOOGLI_OUT_FILE}
         )
+
+    add_custom_command(OUTPUT ${MOOGLI_OUT_FILE}
+        COMMAND ${CMAKE_COMMAND} -DMOOGLI_DIST_DIR=${CMAKE_BINARY_DIR} ${MOOGLI_SOURCE_DIR}
+        COMMAND $(MAKE)
+        WORKING_DIRECTORY ${MOOGLI_BUILD_DIR}
+        COMMENT "Building MOOGLI extension"
+        VERBATIM
+        )
+
 else(BUILD_MOOGLI)
     MESSAGE(STATUS "NOT building MOOGLI")
 endif(BUILD_MOOGLI)
