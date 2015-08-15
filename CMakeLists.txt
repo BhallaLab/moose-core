@@ -361,7 +361,10 @@ IF(BUILD_MOOGLI)
 
     # After successful run, we should get a source distribution of moogli in
     # current build directory.
-    set(MOOGLI_OUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/moogli-${MOOGLI_VERSION}.tar.gz)
+
+    # NOTE: moogli source distribution does not have version information. python
+    # setup.py sdist does not append versioning information.
+    set(MOOGLI_OUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/moogli.tar.gz)
     add_custom_target(moogli ALL
         DEPENDS ${MOOGLI_OUT_FILE}
         )
