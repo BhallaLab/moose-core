@@ -383,7 +383,7 @@ endif(BUILD_MOOGLI)
 
 
 ######################### CYMOOSE #############################################
-option(BUILD_CYMOOSE "Build python extension using Cython. Development version." ON)
+option(BUILD_CYMOOSE "Build python extension using Cython. Development version." OFF)
 if(BUILD_CYMOOSE)
     message("++ Building cython extension of MOOSE. Unstable and experimental.")
     add_library(cymoose SHARED cymoose/cymoose_methods.cxx)
