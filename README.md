@@ -1,7 +1,5 @@
 Build Status - master (This is current development branch): [![Build Status - master](https://travis-ci.org/BhallaLab/moose-core.svg?branch=master)](https://travis-ci.org/BhallaLab/moose-core)
 
-Build Status - trunk (This branch is less frequently updated and likely to contain more stable code) [![Build Status - trunk](https://travis-ci.org/BhallaLab/moose-core.svg?branch=trunk)](https://travis-ci.org/BhallaLab/moose-core)
-
 # MOOSE
 
 MOOSE is the Multiscale Object-Oriented Simulation Environment. It is designed
