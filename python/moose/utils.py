@@ -30,7 +30,6 @@ from .verification_utils import verify
 from .print_utils import *
 #import graph_utils
 from .sim_utils import *
-from .analysis import *
 
 from .backend import graphviz
 try:

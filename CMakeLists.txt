@@ -361,10 +361,14 @@ IF(BUILD_MOOGLI)
 
     # After successful run, we should get a source distribution of moogli in
     # current build directory.
-    set(MOOGLI_OUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/moogli.tar.gz)
+    set(MOOGLI_OUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/moogli-${MOOGLI_VERSION}.tar.gz)
     add_custom_target(moogli ALL
         DEPENDS ${MOOGLI_OUT_FILE}
         )
+else(BUILD_MOOGLI)
+    MESSAGE(STATUS "NOT building MOOGLI")
+endif(BUILD_MOOGLI)
+
 
 ######################### CYMOOSE #############################################
 option(BUILD_CYMOOSE "Build python extension using Cython. Development version." ON)
@@ -404,9 +408,7 @@ if(WITH_DOC)
         COMMENT "Building MOOGLI"
         )
 
-else(BUILD_MOOGLI)
-    MESSAGE(STATUS "NOT building MOOGLI")
-endif(BUILD_MOOGLI)
+endif(WITH_DOC)
 
 ######################### INSTALL ##############################################
 
@@ -463,57 +465,3 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake_moose_ctest.cmake)
 ############################ CPACK ######################################
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake_moose_cpack.cmake)
 
-ADD_TEST(NAME moose.bin-raw-run
-    COMMAND moose.bin -u -q
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    )
-
-## PyMOOSE tests.
-
-SET(TEST_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests/python)
-
-#ADD_TEST(NAME pymoose-test-mumbl
-    #COMMAND ${PYTHON_EXECUTABLE} test_mumbl.py
-    #WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests/python
-#    )
-
-# Need to fix these test suits with python-2.6 without unittest2. 
-#ADD_TEST(NAME pymoose-test-pymoose
-#    COMMAND ${PYTHON_EXECUTABLE} test_pymoose.py
-#    WORKING_DIRECTORY ${TEST_DIRECTORY}
-#    )
-
-ADD_TEST(NAME pymoose-test-synchan
-    COMMAND ${PYTHON_EXECUTABLE} test_synchan.py
-    WORKING_DIRECTORY ${TEST_DIRECTORY}
-    )
-
-ADD_TEST(NAME pymoose-test-function
-    COMMAND ${PYTHON_EXECUTABLE} test_function.py
-    WORKING_DIRECTORY ${TEST_DIRECTORY}
-    )
-
-ADD_TEST(NAME pymoose-test-vec
-    COMMAND ${PYTHON_EXECUTABLE} test_vec.py
-    WORKING_DIRECTORY ${TEST_DIRECTORY}
-    )
-
-if(BUILD_MOOGLI)
-    ADD_TEST(NAME moogli_sanity_test
-        COMMAND ${PYTHON_EXECUTABLE} test_moogli.py
-        WORKING_DIRECTORY ${TEST_DIRECTORY}
-        )
-
-endif(BUILD_MOOGLI)
-
-
-#ADD_TEST(NAME pymoose-test-sbml 
-#    COMMAND ${PYTHON_EXECUTABLE} test_sbml.py
-#    WORKING_DIRECTORY ${TEST_DIRECTORY}
-#    )
-#
-#ADD_TEST(NAME pymoose-test-kkit 
-#    COMMAND ${PYTHON_EXECUTABLE} test_kkit.py
-#    WORKING_DIRECTORY ${TEST_DIRECTORY}
-#    )
-#
