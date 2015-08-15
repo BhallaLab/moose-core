@@ -5,4 +5,4 @@ Exec=moosegui
 Type=Application
 Version=3.0
 Icon=/usr/share/icons/moose/moose.png
-Categories=Education;Biology;Science;Neuroscience;
+Categories=Education;Science;Education;Chemistry;

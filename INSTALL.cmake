@@ -1,4 +1,5 @@
-MOOSE can be built using cmake. 
+MOOSE can also be built using cmake along with gnu-make. Instructions to build
+MOOSE with gnu-make are described in file `INSTALL`.
 
 # Building and installing moose
 
@@ -23,7 +24,7 @@ For python module of MOOSE, following additional packages are required:
 For python-gui, we need some more addtional packages
     
 - matplotlib
-- setuptools  (cmake uses it to install python module: pymoose)
+- setuptools  (cmake uses it to install moose python extension and moogli)
 - suds 
 - Python bindings for Qt4 or higher
 - Python OpenGL
@@ -37,14 +38,26 @@ On Ubuntu-120.4 or higher, these can be installed with:
 
     $ mkdir _build
     $ cd _build 
-    $ cmake ..
+    $ cmake -DBUILD_MOOGLI=OFF -DWITH_DOC=OFF ..
     $ make 
+    $ ctest --output-on-failure
+
+This will build moose and its python extentions, `ctest` will run few tests to
+check if build process was successful.
+
+If you also want MOOGLI then pass `-DBUILD_MOOGLI=ON`.  Also see the section
+__Building and installing moogli__ for more details about its dependencies.
+
+To install MOOSE into non-standard directory, pass additional argument
+`-DCMAKE_INSTALL_PREFIX=path/to/install/dir` to cmake.
+
+After that installation is pretty easy.
 
 ## Install
 
     $ sudo make install
 
-# Building and install moogli 
+# Building and installing moogli 
 
 MOOGLI is subproject of moogli for visualizing models. Details can be found
 [here](http://moose.ncbs.res.in/moogli).

@@ -4,6 +4,7 @@ cmake_policy(SET CMP0004 OLD)
 
 project(moose)
 set(MOOSE_VERSION "3.0.2")
+set(MOOGLI_VERSION "1.0")
 
 # This snippet is from LLVM project.
 # Sanity check our source directory to make sure that we are not trying to
@@ -46,8 +47,22 @@ add_custom_target(uninstall
     ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
     )
 
-################################# OS SPECIFIC ##################################
+################################# CMAKE OPTIONS ##################################
 
+option(WITH_DOC "Build documentation using python-sphinx and doxygen" OFF)
+
+option(VERBOSITY "SET MOOSE VERBOSITY LEVEL" 0)
+
+# Whether to notify the user after 1 second of simulation.
+option(NOTIFY_PROGRESS "Show progress of simulation" ON)
+
+# STATS INSIDE MOOSE. TODO: Remove it and add support for gprof
+option(ENABLE_LOGGER  "Enable MOOSE logger" OFF)
+
+## Unit testing and debug mode.
+option(DEBUG "Building with debugging support" OFF)
+option(ENABLE_UNIT_TESTS "ENABLE UNIT TESTS IN MOOSE" ON)
+option(WITH_PYTHON "Build native python extension of MOOSE" ON)
 
 ################################# CMKAE MACROS #################################
 
@@ -77,7 +92,6 @@ if(VERIFY)
 endif(VERIFY)
 
 # VERBOSITY OF OUTPUT
-option(VERBOSITY "SET MOOSE VERBOSITY LEVEL" 0)
 if(VERBOSITY)
     message("++ Verbosity of output is ${VERBOSITY}. This is not implemented
     yet!")
@@ -87,11 +101,6 @@ else()
     add_definitions(-DQUIET_MODE)
 endif()
 
-# Whether to notify the user after 1 second of simulation.
-option(NOTIFY_PROGRESS "Show progress of simulation" ON)
-
-# STATS INSIDE MOOSE
-option(ENABLE_LOGGER  "Enable MOOSE logger" OFF)
 if(ENABLE_LOGGER)
     message("++ LOGGER ENABLED")
     add_definitions(-DENABLE_LOGGER)
@@ -100,9 +109,6 @@ endif()
 # Default macros
 add_definitions(-DUSE_GENESIS_PARSER)
 
-## Unit testing and debug mode.
-option(DEBUG "Building with debugging support" OFF)
-option(ENABLE_UNIT_TESTS "ENABLE UNIT TESTS IN MOOSE" ON)
 if(ENABLE_UNIT_TESTS AND DEBUG)
     MESSAGE("++ Building for Debug/ Unit testing")
     add_definitions(-DDO_UNIT_TESTS)
@@ -272,12 +278,20 @@ target_link_libraries(moose.bin
     ${SYSTEM_SHARED_LIBS}
     )
 
-######################### BUILD PYMOOSE ########################################
-option(BUILD_PYMOOSE "Build native python extension of MOOSE" 1)
+IF(WITH_DOC)
+    FIND_PACKAGE(Doxygen REQUIRED)
+    add_custom_command(TARGET moose.bin POST_BUILD
+        COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.full
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMENT "Building developer documentation"
+        VERBATIM
+        )
+ENDIF(WITH_DOC)
 
+######################### BUILD PYMOOSE ########################################
 # Root of all python module.
 SET(PROJECT_PYTHON_PATH ${CMAKE_CURRENT_SOURCE_DIR}/python)
-if(BUILD_PYMOOSE)
+if(WITH_PYTHON)
     message("++ Building native python extension of MOOSE")
     set(PYMOOSE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/python/moose")
 
@@ -311,14 +325,46 @@ if(BUILD_PYMOOSE)
         "-Wl,--no-whole-archive"
         ${SYSTEM_SHARED_LIBS}
         )
-    # Also generate the documents
-    add_custom_command(TARGET _moose
-        POST_BUILD
-        COMMAND ./docgen
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+
+    add_custom_command(TARGET _moose POST_BUILD
+        COMMAND ${PYTHON_EXECUTABLE} setup.py sdist --dist-dir
+        ${CMAKE_CURRENT_BINARY_DIR}
+        WORKING_DIRECTORY ${PROJECT_PYTHON_PATH}
+        COMMENT "Generating moose source distribution using setuptools"
         VERBATIM
         )
-endif(BUILD_PYMOOSE)
+
+IF(WITH_DOC)
+    # Also generate the documents
+    FIND_PROGRAM(Sphinx REQUIRED)
+    add_custom_command(TARGET _moose
+        POST_BUILD
+        COMMAND make html
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Docs/user/py
+        COMMENT "Building user doc using python-sphinx"
+        VERBATIM
+        )
+endif(WITH_DOC)
+endif(WITH_PYTHON)
+
+## MOOGLI
+OPTION(BUILD_MOOGLI "Build moogli extension." OFF)
+IF(BUILD_MOOGLI)
+    MESSAGE(STATUS "Building MOOGLI")
+    SET(MOOGLI_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/python/moogli)
+
+    # Build directory of MOOGLI can't be same as of moose which is
+    # ${CMAKE_CURRENT_BINARY_DIR}. If they are same both project will try to
+    # create CMAKECache file in same directory which is an error.
+    SET(MOOGLI_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/_moogli_bin)
+    FILE(MAKE_DIRECTORY ${MOOGLI_BUILD_DIR})
+
+    # After successful run, we should get a source distribution of moogli in
+    # current build directory.
+    set(MOOGLI_OUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/moogli.tar.gz)
+    add_custom_target(moogli ALL
+        DEPENDS ${MOOGLI_OUT_FILE}
+        )
 
 ######################### CYMOOSE #############################################
 option(BUILD_CYMOOSE "Build python extension using Cython. Development version." ON)
@@ -355,9 +401,12 @@ if(WITH_DOC)
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Generating html doc using sphinx and doxygen"
         VERBATIM
+        COMMENT "Building MOOGLI"
         )
-endif(WITH_DOC)
 
+else(BUILD_MOOGLI)
+    MESSAGE(STATUS "NOT building MOOGLI")
+endif(BUILD_MOOGLI)
 
 ######################### INSTALL ##############################################
 
@@ -366,20 +415,21 @@ install(TARGETS moose.bin
     COMPONENT moose-core
     )
 
-install(PROGRAMS ${PROJECT_SOURCE_DIR}/scripts/moose
+install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/moose
     DESTINATION bin
     COMPONENT moose-core
     )
 
-if(BUILD_PYMOOSE)
+if(WITH_PYTHON)
 install(CODE 
     "
-    execute_process(COMMAND pip install moose-${MOOSE_VERSION}.tar.gz
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    execute_process(COMMAND easy_install  --prefix ${CMAKE_INSTALL_PREFIX} 
+        --upgrade moose-${MOOSE_VERSION}.tar.gz
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         )
     "
     )
-endif(BUILD_PYMOOSE)
+endif(WITH_PYTHON)
 
 if(WITH_DOC)
     message(STATUS "Installing moose doc")
@@ -392,6 +442,19 @@ if(WITH_DOC)
         DESTINATION share/doc/moose/developer
         )
 endif()
+
+if(BUILD_MOOGLI)
+    install(CODE
+        "
+        execute_process(COMMAND easy_install
+            --prefix ${CMAKE_INSTALL_PREFIX}
+            --upgrade moogli-${MOOGLI_VERSION}.tar.gz
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+            )
+        "
+        )
+endif(BUILD_MOOGLI)
+    
 
 ############################ CTEST ######################################
 
@@ -414,10 +477,11 @@ SET(TEST_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests/python)
     #WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests/python
 #    )
 
-ADD_TEST(NAME pymoose-test-pymoose
-    COMMAND ${PYTHON_EXECUTABLE} test_pymoose.py
-    WORKING_DIRECTORY ${TEST_DIRECTORY}
-    )
+# Need to fix these test suits with python-2.6 without unittest2. 
+#ADD_TEST(NAME pymoose-test-pymoose
+#    COMMAND ${PYTHON_EXECUTABLE} test_pymoose.py
+#    WORKING_DIRECTORY ${TEST_DIRECTORY}
+#    )
 
 ADD_TEST(NAME pymoose-test-synchan
     COMMAND ${PYTHON_EXECUTABLE} test_synchan.py
@@ -433,6 +497,15 @@ ADD_TEST(NAME pymoose-test-vec
     COMMAND ${PYTHON_EXECUTABLE} test_vec.py
     WORKING_DIRECTORY ${TEST_DIRECTORY}
     )
+
+if(BUILD_MOOGLI)
+    ADD_TEST(NAME moogli_sanity_test
+        COMMAND ${PYTHON_EXECUTABLE} test_moogli.py
+        WORKING_DIRECTORY ${TEST_DIRECTORY}
+        )
+
+endif(BUILD_MOOGLI)
+
 
 #ADD_TEST(NAME pymoose-test-sbml 
 #    COMMAND ${PYTHON_EXECUTABLE} test_sbml.py

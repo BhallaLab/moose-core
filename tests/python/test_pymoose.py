@@ -58,7 +58,7 @@ class TestNeutral(unittest.TestCase):
         # sourceforge. Currently disabling this test so build can pass on
         # launchpad.
 
-        if platform.architecture()[0] == '32bit':
+        if platform.architecture()[0] != '64bit':
             return True
 
         oidlist = [moose.Neutral('x_%d' % (ii), n=2**10) for ii in range(2**6)]

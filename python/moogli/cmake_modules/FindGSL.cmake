@@ -48,27 +48,15 @@ IF(WIN32)
   
 ELSE(WIN32)
   IF(UNIX) 
-    SET(GSL_CONFIG_PREFER_PATH "$ENV{GSL_HOME}/bin")
-    MESSAGE("++ DEBUG: GSL_CONFIG_PREFER_PATH: ${GSL_CONFIG_PREFER_PATH}")
-     
-    # GSL_CONFIG must be cleared. This script may be called again after installing
-    # the proper version of gsl
-    if(EXISTS "$ENV{GSL_HOME}")
-	set(GSL_CONFIG "$ENV{GSL_HOME}/bin/gsl-config")
-	MESSAGE("++ DEBUG From environment variable: ${GSL_CONFIG}")
-	set(GSL_INCLUDE_DIR)
-        set(GSL_LIBRARIES)
-        set(GSL_VERSION)
-        set(GSL_CONFIG_LIBS)
-    else()
-	FIND_PROGRAM(GSL_CONFIG gsl-config
-			${GSL_CONFIG_PREFER_PATH}
-			$ENV{LIB_DIR}/bin
-			/usr/local/bin/
-			/usr/bin/
-		    )
-    endif()
-    MESSAGE("DBG GSL_CONFIG ${GSL_CONFIG}")
+    SET(GSL_CONFIG_PREFER_PATH "$ENV{GSL_HOME}/bin" CACHE STRING "preferred path to GSL (gsl-config)")
+    FIND_PROGRAM(GSL_CONFIG gsl-config
+      ${GSL_CONFIG_PREFER_PATH}
+      $ENV{LIB_DIR}/bin
+      /usr/local/bin/
+      /usr/bin/
+      )
+    # MESSAGE("DBG GSL_CONFIG ${GSL_CONFIG}")
+    
     IF (GSL_CONFIG) 
       # set CXXFLAGS to be fed into CXX_FLAGS by the user:
       SET(GSL_CXX_FLAGS "`${GSL_CONFIG} --cflags`")
@@ -77,6 +65,8 @@ ELSE(WIN32)
       EXEC_PROGRAM(${GSL_CONFIG}
         ARGS --prefix
         OUTPUT_VARIABLE GSL_PREFIX)
+      message(${GSL_PREFIX})
+
       SET(GSL_INCLUDE_DIR ${GSL_PREFIX}/include CACHE STRING INTERNAL)
 
       # set link libraries and link flags
