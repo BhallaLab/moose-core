@@ -1,5 +1,7 @@
 ENABLE_TESTING()
 
+FIND_PACKAGE(PythonInterp REQUIRED)
+
 # If CTEST_OUTPUT_ON_FAILURE environment variable is set, the output is printed
 # onto the console if a test fails.
 SET(ENV{CTEST_OUTPUT_ON_FAILURE} ON)
