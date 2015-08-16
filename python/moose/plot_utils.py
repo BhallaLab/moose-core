@@ -23,7 +23,6 @@ except:
         matplotlib.use('TkAgg')
     except:
         matplotlib.use('Agg')
-
 import matplotlib.pyplot as plt
 from . import _moose as moose
 from . import print_utils as pu 
