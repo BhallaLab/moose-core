@@ -12,8 +12,6 @@ from moose.utils import *
 
 from moose.neuroml.NeuroML import NeuroML
 
-from pylab import *
-
 simdt = 10e-6 # s
 plotdt = 10e-6 # s
 runtime = 0.2 # s
@@ -37,12 +35,6 @@ def loadGran98NeuroML_L123(filename,params):
     print "Running ... "
     moose.start(runtime)
     tvec = arange(0.0,runtime,simdt)
-    plot(tvec,somaVm.vector[1:])
-    title('Soma Vm')
-    xlabel('time (s)')
-    ylabel('Voltage (V)')
-    print "Showing plots ..."
-    show()
 
 if __name__ == "__main__":
     if len(sys.argv)<2:

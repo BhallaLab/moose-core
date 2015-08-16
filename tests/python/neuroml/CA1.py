@@ -12,8 +12,6 @@ import count
 
 from moose.neuroml.NeuroML import NeuroML
 
-from pylab import *
-
 import unittest
 
 simdt = 10e-6 # s

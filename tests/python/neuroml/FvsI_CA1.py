@@ -21,7 +21,6 @@ sys.path.append('./../../python/')
 import moose
 from moose.neuroml.NeuroML import NeuroML
 
-from pylab import *
 import numpy as np
 import unittest
 
