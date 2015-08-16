@@ -14,26 +14,23 @@ __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
 
-import unittest
-import platform
-
 from neuroml.FvsI_CA1 import ca1_main, loadModel
 from neuroml.CA1 import loadGran98NeuroML_L123
 
+def test_all():
+    test_ca1()
+    test_gran()
 
-class CA1Test( unittest.TestCase ):
+def test_ca1():
+    loadModel('./neuroml/cells_channels/CA1soma.morph.xml')
+    assert 10 == ca1_main(4e-13)
+    assert 20 == ca1_main(8e-13)
+    assert 29 == ca1_main(14e-13)
+    assert 34 == ca1_main(18e-13)
 
-    def test_injected_current_and_frequency(self):
-        loadModel('./neuroml/cells_channels/CA1soma.morph.xml')
-        self.assertEqual( 10, ca1_main(4.0e-13))
-        self.assertEqual( 20, ca1_main(8.0e-13))
-        self.assertEqual( 29, ca1_main(14.0e-13))
-        self.assertEqual( 34, ca1_main(18.0e-13))
+def test_gran():
+    assert loadGran98NeuroML_L123('neuroml/CA1soma.net.xml') in [8,9]
 
-    def test_injected_current_and_spikes(self):
-        #self.assertEqual( 00, ca1_main('./neuroml/cells_channels/CA1.morph.xml', 2.0e-13))
-        # On 32 bit platforms, no of spikes are 8 while on 64 bit it is 9.
-        self.assertIn(loadGran98NeuroML_L123('neuroml/CA1soma.net.xml'), [8, 9])
-    
 if __name__ == '__main__':
-    unittest.main()
+    #unittest.main()
+    test_all()
