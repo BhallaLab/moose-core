@@ -19,6 +19,7 @@ import numpy as np
 def locate_spike_in_spike_train( vec, threshold ):
     """Return a list of instance where a spike has occured in vec """
 
+    vec = np.array( vec )
     nSpikes = 0
     spikeBegin, spikeEnds = False, False
     spikeList = []
@@ -39,6 +40,7 @@ def spike_train_simple_stat( vec, threshold = 0.0, **kwargs ):
     vec.
 
     """
+    vec = np.array(vec)
     result = {}
     nSpikes, spikeList = locate_spike_in_spike_train(vec, threshold)
     if len(spikeList) > 1:
