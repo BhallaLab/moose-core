@@ -9,6 +9,7 @@ import moose
 from moose.utils import *
 import moose.utils as mu
 import count
+import numpy as np
 
 from moose.neuroml.NeuroML import NeuroML
 
@@ -27,7 +28,7 @@ def loadGran98NeuroML_L123(filename):
     soma = moose.Compartment(soma_path)
     moose.reinit()
     moose.start(runtime)
-    tvec = arange(0.0,runtime,simdt)
+    tvec = np.arange(0.0,runtime,simdt)
     res =  count.spike_train_simple_stat( somaVm.vector )
     return res['number of spikes']
 
