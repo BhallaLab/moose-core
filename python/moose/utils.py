@@ -34,18 +34,21 @@ try:
 except Exception as e:
     warnings.warn("Failed to plotting utilities: %s" % e)
 
-from .verification_utils import verify
-from .print_utils import *
-#import graph_utils
+try:
+    from .verification_utils import verify
+except:
+    pass
+
+try: from .print_utils import *
+except: pass
+
 from .sim_utils import *
 
-from .backend import graphviz
-try:
-    from .topology import topology
-except Exception as e:
-    warn("moose-library topology could not be imported because of "
-         " missing dependency, most likely python-networkx."
-        )
+try: from .backend import graphviz
+except: pass
+
+try: from .topology import topology
+except Exception as e: pass
 
 from .moose_constants import *
 
