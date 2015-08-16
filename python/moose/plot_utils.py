@@ -15,6 +15,15 @@ __maintainer__       = "Dilawar Singh"
 __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
+import matplotlib
+try:
+    matplotlib.use('Qt4Agg')
+except:
+    try:
+        matplotlib.use('TkAgg')
+    except:
+        matplotlib.use('Agg')
+
 import matplotlib.pyplot as plt
 from . import _moose as moose
 from . import print_utils as pu 
