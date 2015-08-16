@@ -33,10 +33,7 @@ class CA1Test( unittest.TestCase ):
     def test_injected_current_and_spikes(self):
         #self.assertEqual( 00, ca1_main('./neuroml/cells_channels/CA1.morph.xml', 2.0e-13))
         # On 32 bit platforms, no of spikes are 8 while on 64 bit it is 9.
-        self.assertIn(loadGran98NeuroML_L123('neuroml/CA1soma.net.xml', [8, 9])
-
-
-
+        self.assertIn(loadGran98NeuroML_L123('neuroml/CA1soma.net.xml'), [8, 9])
     
 if __name__ == '__main__':
     unittest.main()
