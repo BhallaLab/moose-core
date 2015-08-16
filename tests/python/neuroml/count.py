@@ -16,13 +16,13 @@ __status__           = "Development"
 
 import numpy as np
 
-def locate_spike_in_spike_train( vector, threshold ):
-    """Return a list of instance where a spike has occured in vector """
+def locate_spike_in_spike_train( vec, threshold ):
+    """Return a list of instance where a spike has occured in vec """
 
     nSpikes = 0
     spikeBegin, spikeEnds = False, False
     spikeList = []
-    for i, x in enumerate(vector):
+    for i, x in enumerate(vec):
         if x > threshold:
             if not spikeBegin:
                 spikeBegin, spikeEnds = True, False
@@ -34,13 +34,13 @@ def locate_spike_in_spike_train( vector, threshold ):
                 nSpikes += 1
     return nSpikes, spikeList
 
-def spike_train_simple_stat( vector, threshold = 0.0, **kwargs ):
+def spike_train_simple_stat( vec, threshold = 0.0, **kwargs ):
     """Compute number of spikes, mean and variance of spike intervals in a given
-    vector.
+    vec.
 
     """
     result = {}
-    nSpikes, spikeList = locate_spike_in_spike_train(vector, threshold)
+    nSpikes, spikeList = locate_spike_in_spike_train(vec, threshold)
     if len(spikeList) > 1:
         diffIndex = np.diff(spikeList)
         meanSteps = np.mean(diffIndex)
@@ -51,7 +51,7 @@ def spike_train_simple_stat( vector, threshold = 0.0, **kwargs ):
     result['number of spikes'] = nSpikes
     result['mean spike-interval'] = meanSteps 
     result['variance spike-interval'] = varSteps
-    result['min'] = vector.min()
-    result['max'] = vector.max()
-    result['variance'] = np.var(vector)
+    result['min'] = vec.min()
+    result['max'] = vec.max()
+    result['variance'] = np.var(vec)
     return result
