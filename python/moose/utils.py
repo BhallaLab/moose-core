@@ -25,7 +25,18 @@ from datetime import datetime
 from collections import defaultdict
 
 from . import _moose
+
+## Fix the backend.
+import matplotlib
+try:
+    matplotlib.use('Qt4Agg')
+except:
+    try:
+        matplotlib.use('TkAgg')
+    except:
+        matplotlib.use('Agg')
 from .plot_utils import *
+
 from .verification_utils import verify
 from .print_utils import *
 #import graph_utils
