@@ -61,6 +61,7 @@ option(ENABLE_LOGGER  "Enable MOOSE logger" OFF)
 
 ## Unit testing and debug mode.
 option(DEBUG "Building with debugging support" OFF)
+option(GPROF "Build of gprof support" OFF)
 option(ENABLE_UNIT_TESTS "ENABLE UNIT TESTS IN MOOSE" ON)
 option(WITH_PYTHON "Build native python extension of MOOSE" ON)
 
@@ -117,6 +118,11 @@ else()
     MESSAGE("++ Build for Relase/ No unit tests.")
     set(CMAKE_BUILD_TYPE Release)
     add_definitions(-UDO_UNIT_TESTS -O3)
+endif()
+
+if(GPROF AND DEBUG)
+    message(STATUS "Compiling with GPROF")
+    add_definitions(-pg)
 endif()
 
 

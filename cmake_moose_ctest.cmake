@@ -36,6 +36,8 @@ ADD_TEST(NAME pymoose-test-vec
     WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
     )
 
+
+# Do not run this test after packaging.
 ADD_TEST(NAME pymoose-neuroml-reader-test 
     COMMAND ${PYTHON_EXECUTABLE} test_neuroml.py
     WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
@@ -43,11 +45,13 @@ ADD_TEST(NAME pymoose-neuroml-reader-test
 
 #ADD_TEST(NAME pymoose-test-sbml 
 #    COMMAND ${PYTHON_EXECUTABLE} test_sbml.py
+#    CONFIGURATIONS Nightly
 #    WORKING_DIRECTORY ${TEST_DIRECTORY}
 #    )
 #
 #ADD_TEST(NAME pymoose-test-kkit 
 #    COMMAND ${PYTHON_EXECUTABLE} test_kkit.py
+#    CONFIGURATIONS Nightly
 #    WORKING_DIRECTORY ${TEST_DIRECTORY}
 #    )
 #
