@@ -123,6 +123,7 @@ endif()
 if(GPROF AND DEBUG)
     message(STATUS "Compiling with GPROF")
     add_definitions(-pg)
+    set(CMAKE_EXE_LINKER_FLAGS_DEBUG "-pg")
 endif()
 
 
