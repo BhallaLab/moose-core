@@ -69,9 +69,9 @@ Python interface for core MOOSE API
 
 In addition to core MOOSE requirements:
 
-Python2    ( >= 2.7.x) REQUIRED For building the MOOSE Python bindings
-Python-dev ( >= 2.7.x) REQUIRED Python development headers and libraries
-NumPy      ( >= 1.6.x) REQUIRED For array interface
+- Python2    ( >= 2.7.x) REQUIRED For building the MOOSE Python bindings
+- Python-dev ( >= 2.7.x) REQUIRED Python development headers and libraries
+- NumPy      ( >= 1.6.x) REQUIRED For array interface
 
 
 ## Graphical User Interface
