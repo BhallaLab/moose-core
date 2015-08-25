@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Thu Jun 18 23:16:11 2015 (-0400)
 // Version: 
-// Last-Updated: 
-//           By: 
-//     Update #: 0
+// Last-Updated: Tue Aug 25 01:48:10 2015 (-0400)
+//           By: subha
+//     Update #: 14
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -269,15 +269,22 @@ void NSDFWriter::createUniformMap()
         string className = pathTokens[0];
         string fieldName = pathTokens[1];
         hid_t container = require_group(uniformMapContainer, className);
-        vector < string > srclist;
         const char ** sources = (const char **)calloc(ii->second.size(), sizeof(const char*));
         for (unsigned int jj = 0; jj < ii->second.size(); ++jj){
             sources[jj] = src_[ii->second[jj]].path().c_str();
+#ifndef NDEBUG
+            cout << "creating uniform map: " << jj << "="<< sources[jj] <<endl;
+#endif
         }
-        hid_t ds = createStringDataset(container, fieldName, (hsize_t)srclist.size(), (hsize_t)0);
+        hid_t ds = createStringDataset(container, fieldName, (hsize_t)ii->second.size(), (hsize_t)ii->second.size());
         hid_t memtype = H5Tcopy(H5T_C_S1);
         status = H5Tset_size(memtype, H5T_VARIABLE);
-        status = H5Dwrite(ds, memtype,  H5S_ALL, H5S_ALL, H5P_DEFAULT, sources);
+        assert(status >= 0);
+        status = H5Dwrite(ds, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, sources);
+#ifndef NDEBUG        
+        cout << "Write dataset: status=" << status << endl;
+#endif
+        assert(status >= 0);
         free(sources);
         status = H5DSset_scale(ds, "source");
         status = H5DSattach_scale(classFieldToUniform_[ii->first], ds, 0);
@@ -401,7 +408,7 @@ void NSDFWriter::createEventMap()
    path : {source_object_id}.{source_field_name}
 
    TODO: check the returned hid_t and show appropriate error messages.
- */
+*/
 hid_t NSDFWriter::getEventDataset(string srcPath, string srcField)
 {
     string eventSrcPath = srcPath + string("/") + srcField;
