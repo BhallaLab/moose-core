@@ -1737,7 +1737,9 @@ double Stoich::getR2( const Eref& e ) const
 void Stoich::setFunctionExpr( const Eref& e, string expr )
 {
 	unsigned int index = convertIdToReacIndex( e.id() );
-	FuncRate* fr = dynamic_cast< FuncRate* >( rates_[index] );
+	FuncRate* fr = 0;
+	if ( index < rates_.size() )
+		fr = dynamic_cast< FuncRate* >( rates_[index] );
 	if ( fr ) {
 		fr->setExpr( expr );
 	} else {
