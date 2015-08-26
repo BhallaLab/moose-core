@@ -28,6 +28,7 @@ OBJ = \
 	HDF5WriterBase.o	\
 	HDF5DataWriter.o	\
 	NSDFWriter.o	\
+	testNSDF.o	\
 	testBuiltins.o	\
 
 HEADERS = \

@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Thu Jun 18 23:16:11 2015 (-0400)
 // Version: 
-// Last-Updated: Tue Aug 25 01:48:10 2015 (-0400)
+// Last-Updated: Tue Aug 25 23:41:33 2015 (-0400)
 //           By: subha
-//     Update #: 14
+//     Update #: 33
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -269,12 +269,10 @@ void NSDFWriter::createUniformMap()
         string className = pathTokens[0];
         string fieldName = pathTokens[1];
         hid_t container = require_group(uniformMapContainer, className);
-        const char ** sources = (const char **)calloc(ii->second.size(), sizeof(const char*));
+        char ** sources = (char **)calloc(ii->second.size(), sizeof(char*));
         for (unsigned int jj = 0; jj < ii->second.size(); ++jj){
-            sources[jj] = src_[ii->second[jj]].path().c_str();
-#ifndef NDEBUG
-            cout << "creating uniform map: " << jj << "="<< sources[jj] <<endl;
-#endif
+            sources[jj] = (char*)calloc(src_[ii->second[jj]].path().length()+1, sizeof(char));
+            strcpy(sources[jj],src_[ii->second[jj]].path().c_str());
         }
         hid_t ds = createStringDataset(container, fieldName, (hsize_t)ii->second.size(), (hsize_t)ii->second.size());
         hid_t memtype = H5Tcopy(H5T_C_S1);
@@ -285,6 +283,9 @@ void NSDFWriter::createUniformMap()
         cout << "Write dataset: status=" << status << endl;
 #endif
         assert(status >= 0);
+        for (unsigned int jj = 0; jj < ii->second.size(); ++jj){
+            free(sources[jj]);
+        }
         free(sources);
         status = H5DSset_scale(ds, "source");
         status = H5DSattach_scale(classFieldToUniform_[ii->first], ds, 0);
