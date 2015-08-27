@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Sat Feb 25 14:42:03 2012 (+0530)
 // Version: 
-// Last-Updated: Tue Aug 25 01:54:30 2015 (-0400)
+// Last-Updated: Thu Aug 27 01:35:46 2015 (-0400)
 //           By: subha
-//     Update #: 294
+//     Update #: 295
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -166,7 +166,7 @@ hid_t HDF5WriterBase::createStringDataset(hid_t parent_id, string name, hsize_t 
                              HDF5WriterBase::CHUNK_SIZE);
     }
     hid_t dataspace = H5Screate_simple(1, dims, maxdims);            
-    hid_t dataset_id = H5Dcreate(parent_id, name.c_str(),
+    hid_t dataset_id = H5Dcreate2(parent_id, name.c_str(),
                                   ftype, dataspace,
                                   H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Sclose(dataspace);
