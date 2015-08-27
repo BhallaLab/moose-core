@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Sat Feb 25 14:39:19 2012 (+0530)
 // Version: 
-// Last-Updated: Wed Nov 14 17:58:53 2012 (+0530)
+// Last-Updated: Tue Aug 25 23:11:28 2015 (-0400)
 //           By: subha
-//     Update #: 53
+//     Update #: 57
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -76,6 +76,8 @@ class HDF5WriterBase
     static const Cinfo* initCinfo();
     
   protected:
+    friend void testCreateStringDataset();
+    
     herr_t openFile();
     // C++ sucks - does not allow template specialization inside class
     hid_t createDoubleDataset(hid_t parent, std::string name, hsize_t size=0, hsize_t maxsize=H5S_UNLIMITED);
@@ -104,6 +106,7 @@ class HDF5WriterBase
     unsigned int chunkSize_;
     string compressor_; // can be zlib or szip
     unsigned int compression_;
+
 };
 
 

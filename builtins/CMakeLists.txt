@@ -21,4 +21,5 @@ add_library(moose_builtins
     HDF5DataWriter.cpp
     SpikeStats.cpp
     testBuiltins.cpp
+    testNSDF.cpp
     )

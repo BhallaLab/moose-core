@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Sat Feb 25 14:42:03 2012 (+0530)
 // Version: 
-// Last-Updated: Wed Nov 14 18:39:19 2012 (+0530)
+// Last-Updated: Thu Aug 27 01:35:46 2015 (-0400)
 //           By: subha
-//     Update #: 282
+//     Update #: 295
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -115,7 +115,11 @@ hid_t HDF5WriterBase::createDoubleDataset(hid_t parent_id, std::string name, hsi
     herr_t status;
     hsize_t dims[1] = {size};
     hsize_t maxdims[] = {maxsize};
-    hsize_t chunk_dims[] = {chunkSize_};
+    hsize_t _chunkSize = chunkSize_;
+    if (_chunkSize > maxsize){
+        _chunkSize = maxsize;
+    }
+    hsize_t chunk_dims[] = {_chunkSize};
     hid_t chunk_params = H5Pcreate(H5P_DATASET_CREATE);
     status = H5Pset_chunk(chunk_params, 1, chunk_dims);
     assert( status >= 0 );
@@ -143,9 +147,13 @@ hid_t HDF5WriterBase::createStringDataset(hid_t parent_id, string name, hsize_t 
     if (H5Tset_size(ftype, H5T_VARIABLE) < 0){
         return -1;
     }
-    hsize_t dims[1] = {size};
+    hsize_t dims[] = {size};
     hsize_t maxdims[] = {maxsize};
-    hsize_t chunk_dims[] = {chunkSize_};
+    hsize_t _chunkSize = chunkSize_;
+    if (maxsize < _chunkSize){
+        _chunkSize = maxsize;
+    }
+    hsize_t chunk_dims[] = {_chunkSize};
     hid_t chunk_params = H5Pcreate(H5P_DATASET_CREATE);
     status = H5Pset_chunk(chunk_params, 1, chunk_dims);
     assert( status >= 0 );
@@ -160,7 +168,7 @@ hid_t HDF5WriterBase::createStringDataset(hid_t parent_id, string name, hsize_t 
     hid_t dataspace = H5Screate_simple(1, dims, maxdims);            
     hid_t dataset_id = H5Dcreate2(parent_id, name.c_str(),
                                   ftype, dataspace,
-                                  H5P_DEFAULT, chunk_params, H5P_DEFAULT);
+                                  H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Sclose(dataspace);
     H5Tclose(ftype);
     H5Pclose(chunk_params);    
