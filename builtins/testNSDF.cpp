@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Tue Aug 25 22:36:07 2015 (-0400)
 // Version: 
-// Last-Updated: Tue Aug 25 23:43:32 2015 (-0400)
+// Last-Updated: Thu Aug 27 02:10:16 2015 (-0400)
 //           By: subha
-//     Update #: 41
+//     Update #: 42
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -91,7 +91,7 @@ testCreateStringDataset()
 {
     ;
 }
-#endif
+#endif // USE_HDF5
 
 void testNSDF()
 {
