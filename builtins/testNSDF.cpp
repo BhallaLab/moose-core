@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Tue Aug 25 22:36:07 2015 (-0400)
 // Version: 
-// Last-Updated: Thu Aug 27 02:10:16 2015 (-0400)
+// Last-Updated: Sat Aug 29 12:34:08 2015 (-0400)
 //           By: subha
-//     Update #: 42
+//     Update #: 43
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -87,7 +87,7 @@ void testCreateStringDataset()
 }
 
 #else // dummy function
-testCreateStringDataset()
+void testCreateStringDataset()
 {
     ;
 }
