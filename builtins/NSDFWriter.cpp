@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Thu Jun 18 23:16:11 2015 (-0400)
 // Version: 
-// Last-Updated: Tue Aug 25 23:41:33 2015 (-0400)
+// Last-Updated: Sat Aug 29 12:41:00 2015 (-0400)
 //           By: subha
-//     Update #: 33
+//     Update #: 38
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -61,6 +61,8 @@
 #include "InputVariable.h"
 #include "NSDFWriter.h"
 
+extern template herr_t writeScalarAttr(hid_t file_id, string path, string value);
+extern template herr_t writeScalarAttr(hid_t file_id, string path, double value);
 
 const char* const EVENTPATH = "/data/event";
 const char* const UNIFORMPATH = "/data/uniform";
@@ -654,7 +656,7 @@ void NSDFWriter::writeModelTree()
             } else {
                 tmp = H5Gcreate2(prev, name.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
             }
-            writeScalarAttr(tmp, "uid", children[ii].path());
+            writeScalarAttr< string >(tmp, "uid", children[ii].path());
             nodeQueue.push_back(children[ii]);
             h5nodeQueue.push_back(tmp);
         }
