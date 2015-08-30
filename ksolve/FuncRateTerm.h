@@ -15,8 +15,9 @@
  *
  * dtarget/dt = func( x0, x1, x2..., t )
  *
- * The values x0, x1, x2 are expected to be concentrations so that they
- * do not depend on volume.
+ * The values x0, x1, x2.. are numbers at this point. So is the rate
+ * output of this function. There may be a problem
+ * if there is a volume change. 
  */
 class FuncRate: public ExternReac
 {
