@@ -1,25 +1,30 @@
 #include "core/MorphologyViewerWidget.hpp"
 
 MorphologyViewerWidget::MorphologyViewerWidget( Morphology * morphology
-                                            , QWidget * parent
-                                            , const QGLWidget* share_widget
-                                            , Qt::WindowFlags f
-                                            ) : morphology(morphology)
-                                              , QGLWidget( parent
-                                                         , share_widget
-                                                         , f
-                                                         )
-                                              , _graphics_window( new osgViewer::GraphicsWindowEmbedded( this->x()
-                                                                                                       , this->y()
-                                                                                                       , this->width()
-                                                                                                       , this->height()
-                                                                                                       )
-                                                                )
-                                              , _viewer( new osgViewer::CompositeViewer )
-                                              , capture_format("jpeg")
-                                              , capture_location("/home/aviral/moogli_test")
+                                              , QWidget * parent
+                                              , const QGLWidget* share_widget
+                                              , Qt::WindowFlags f
+                                              ) : morphology(morphology)
+                                                , QGLWidget( parent
+                                                           , share_widget
+                                                           , f
+                                                           )
+                                                , capture_format("jpeg")
+                                                , capture_location("/home/aviral/moogli_test")
 {
+    QGLWidget::setFormat(QGLFormat(QGL::SampleBuffers));
+    _viewer = new osgViewer::CompositeViewer();
+    osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits();
+    traits->x = this -> x();
+    traits->y = this -> y();
+    traits->width = this -> width();
+    traits->height = this -> height();
+    traits->windowDecoration = false;
+    traits->doubleBuffer = true;
+    traits->sharedContext = 0;
+    traits->samples = 4;
 
+    _graphics_window = new osgViewer::GraphicsWindowEmbedded(traits.get());
     osg::StateSet* stateSet = morphology -> get_scene_graph()->getOrCreateStateSet();
     osg::Material* material = new osg::Material;
 
@@ -27,7 +32,6 @@ MorphologyViewerWidget::MorphologyViewerWidget( Morphology * morphology
 
     stateSet->setAttributeAndModes( material, osg::StateAttribute::ON );
     stateSet->setMode( GL_DEPTH_TEST, osg::StateAttribute::ON );
-
     _previous_width  = this -> width();
     _previous_height = this -> height();
     add_view(0,0,this -> width(), this -> height());
