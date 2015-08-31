@@ -770,6 +770,16 @@ Morphology::set_color( const char * group_id
     }
 }
 
+void
+Morphology::set_compartment_color(const char * compartment_id, PyObject * color)
+{
+  osg::Vec4f color_( PyFloat_AS_DOUBLE(PySequence_GetItem(color, 0))
+             , PyFloat_AS_DOUBLE(PySequence_GetItem(color, 1))
+             , PyFloat_AS_DOUBLE(PySequence_GetItem(color, 2))
+             , PyFloat_AS_DOUBLE(PySequence_GetItem(color, 3))
+             );
+  _compartments[compartment_id] -> set_color(color_);
+}
 
 Morphology::~Morphology()
 {

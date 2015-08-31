@@ -148,6 +148,8 @@ public:
              , Vec4f& peak_color
              );
 
+    void
+    set_color(osg::Vec4f& color);
 
     void
     set_membrane_voltage( double vm

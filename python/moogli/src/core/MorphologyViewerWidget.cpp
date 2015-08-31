@@ -139,6 +139,16 @@ MorphologyViewerWidget::split_vertically( unsigned int view_index
 }
 
 void
+MorphologyViewerWidget::set_background_color(float r, float g, float b, float a)
+{
+    unsigned int view_index = _get_view_index_with_focus();
+    osgViewer::View * view = _viewer -> getView(view_index);
+    osg::Camera* camera = view->getCamera();
+    camera ->setClearColor(osg::Vec4(r, g, b, a));
+}
+
+
+void
 MorphologyViewerWidget::add_view( int x
                                 , int y
                                 , int width

@@ -80,6 +80,8 @@ public:
                    , double          distal_z
                    , double          distal_d
                    );
+    void
+    set_compartment_color(const char * compartment_id, PyObject * color);
 
     bool
     remove_compartment(const string & compartment_id);
