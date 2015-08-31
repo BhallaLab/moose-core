@@ -690,7 +690,7 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
 		}
 
 #ifdef NOTIFY_PROGRESS
-                printf(stdout, "Progress: @%f/%f\r", currentTime_, runTime_);
+                fprintf(stdout, "Progress: @%f/%f\r", currentTime_, runTime_);
 
 #endif
 
