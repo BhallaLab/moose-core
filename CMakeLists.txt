@@ -54,7 +54,7 @@ option(WITH_DOC "Build documentation using python-sphinx and doxygen" OFF)
 option(VERBOSITY "SET MOOSE VERBOSITY LEVEL" 0)
 
 # Whether to notify the user after 1 second of simulation.
-option(NOTIFY_PROGRESS "Show progress of simulation" ON)
+option(NOTIFY_PROGRESS "Show progress of simulation" OFF)
 
 # STATS INSIDE MOOSE. TODO: Remove it and add support for gprof
 option(ENABLE_LOGGER  "Enable MOOSE logger" OFF)
