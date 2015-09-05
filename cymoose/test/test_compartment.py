@@ -5,6 +5,7 @@ import os
 os.environ['LD_LIBRARY_PATH'] = '.'
 sys.path.append(".")
 import time
+
 if len(sys.argv) > 1:
     print("Importing pymoose")
     import moose
@@ -26,6 +27,6 @@ if __name__ == "__main__":
     b.Vm = 0.09
     assert b.Vm == 0.09, b.Vm
     print("Getting jsetting Vm passed")
-    msg = moose.connect("Single", c, "Vm", b, "Vm")
-    print msg
+    #msg = moose.connect("Single", c, "Vm", b, "Vm")
+    #print msg
 

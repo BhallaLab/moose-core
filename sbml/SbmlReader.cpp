@@ -208,7 +208,7 @@ Id SbmlReader::read( string filename, string location, string solverClass)
                                         //     } //while true
                                         string plotName =  pltClean + ".conc";
                                         Id pltPath(graph.path());
-                                        Id tab = s->doCreate( "Table", pltPath, plotName, 1 );
+                                        Id tab = s->doCreate( "Table2", pltPath, plotName, 1 );
                                         if (tab != Id())
                                             s->doAddMsg("Single",tab,"requestOut",plotSId,"getConc");
                                     }//while

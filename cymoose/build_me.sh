@@ -3,7 +3,7 @@ export LDFLAGS="-L. -L/usr/lib -L/usr/local/lib -L/usr/lib/mpi/gcc/openmpi/lib/"
 if [ $# -lt 1 ]; then
     CXX="clang++" \
     CC="clang++" \
-    LDFLAGS="-L. -L/usr/lib -L/usr/local/lib -L/usr/lib/mpi/gcc/openmpi/lib/" \
+    LDFLAGS="-L. -L/usr/lib -L/usr/local/lib" # -L/usr/lib/mpi/gcc/openmpi/lib/" \
     python ./setup.py build_ext --inplace
 else
     echo "Just testing"

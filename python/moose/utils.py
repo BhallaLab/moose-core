@@ -21,21 +21,39 @@ import symbol
 import string
 import os
 import math
+import warnings
 from datetime import datetime
 from collections import defaultdict
 
 from . import _moose
-from .plot_utils import *
-from .verification_utils import verify
-from .print_utils import *
-#import graph_utils
+
+## Fix the backend.
+import matplotlib
+try:
+    from .plot_utils import *
+except Exception as e:
+    warnings.warn("Failed to plotting utilities: %s" % e)
+
+try:
+    from .verification_utils import verify
+except:
+    pass
+
+try: from .print_utils import *
+except: pass
+
 from .sim_utils import *
 
-from .backend import graphviz
-from .topology import topology
+try: from .backend import graphviz
+except: pass
+
+try: from .topology import topology
+except Exception as e: pass
+
 from .moose_constants import *
 
 import re
+
 # from PyQt4 import QtCore, Qt
 
 # tableEmitter = QtCore.QObject()

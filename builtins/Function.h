@@ -64,6 +64,7 @@ class Function
     Function();
     Function(const Function& rhs);
     ~Function();
+    virtual void innerSetExpr( const Eref& e, string expr);
     void setExpr( const Eref& e, string expr);
     string getExpr( const Eref& e ) const;
     
@@ -86,6 +87,10 @@ class Function
     // get/set operation mode
     void setMode(unsigned int mode);
     unsigned int getMode() const;
+
+	// set/get flag to use trigger mode.
+    void setUseTrigger(bool useTrigger);
+    bool getUseTrigger() const;
 
     void setNumVar(unsigned int num);
     unsigned int getNumVar() const;
@@ -118,6 +123,7 @@ protected:
     double _value;
     double _rate;
     unsigned int _mode;
+    bool _useTrigger;
      // this stores variables received via incoming messages, identifiers of the form x{i} are included in this
     vector<Variable *> _varbuf;
     // this stores variable values pulled by sending request. identifiers of the form y{i} are included in this

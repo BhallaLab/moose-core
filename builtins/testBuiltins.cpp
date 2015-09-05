@@ -18,6 +18,8 @@
 
 #include "../shell/Shell.h"
 
+extern void testNSDF();
+
 void testArith()
 {
 	Id a1id = Id::nextId();
@@ -423,6 +425,7 @@ void testBuiltins()
 {
 	testArith();
 	testTable();
+        testNSDF();
 }
 
 void testBuiltinsProcess()

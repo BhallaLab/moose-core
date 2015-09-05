@@ -168,7 +168,11 @@ typically:
        serve as the enzyme-substrate complex.  Other less-used
        components include Michaelis-Menten enzymes **moose.MMenz**, input
        tables, pulse generators and so on. These are illustrated in other
-       examples.
+       examples. All these reaction components should be child objects
+       of the compartment, since this defines what volume they will occupy. 
+       Specifically , a pool or reaction object must be placed somewhere 
+       below the compartment in the object tree for the volume to be 
+       set correctly and for the solvers to know what to use.
     #. Assign parameters for the components. 
 
         * Compartments have a **volume**, and each subtype will have 

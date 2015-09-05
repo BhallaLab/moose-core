@@ -139,10 +139,22 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
       	{
       		Id msgId = Field< Id >::get( msgMgrs[i], "e2" );
    			string msgpath = Field <string> :: get(msgId,"path");
-   			std::size_t found = msgpath.find('/', 1);
-   			string str2 = msgpath.substr(found,msgpath.length());
-   			vector<string> msgdest = Field< vector<string> >::get( msgMgrs[i], "destFieldsOnE2" );
-   			plots += str2+";";
+   			string msgname = Field <string> :: get(msgId,"name");
+   			string Clean_msgname = nameString(msgname);
+   			ObjId compartment(msgpath);
+   			//starting with compartment Level
+			while( Field<string>::get(compartment,"className") != "CubeMesh"
+		 		&& Field<string>::get(compartment,"className") != "CylMesh"
+		 		)
+		 		compartment = Field<ObjId> :: get(compartment, "parent");
+			string cmpt	 = Field < string > :: get(compartment,"name");
+			std::size_t found = msgpath.find(cmpt);
+			string path = msgpath.substr(found-1,msgpath.length());
+			std::size_t found1 = path.rfind(msgname);
+			//Replacing the clean_name like "." is replace _dot_ etc
+			string plotpath = path.replace(found1,path.length(),Clean_msgname);
+			plots += plotpath+";";
+   			
       	}
     }
   
@@ -278,9 +290,9 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	      	{   string noteClass = Field<string> :: get(annotaIdS,"className");
 	      		x = Field <double> :: get(annotaIdS,"x");
 	        	y = Field <double> :: get(annotaIdS,"y");
-	        	specixyCord << "<moose:xCord>" << x << "</moose:xCord>\n";
-	  			specixyCord << "<moose:yCord>" << y << "</moose:yCord>\n";
-	  			speciannoexist = true;
+	     		// specixyCord << "<moose:xCord>" << x << "</moose:xCord>\n";
+	  			// specixyCord << "<moose:yCord>" << y << "</moose:yCord>\n";
+	  			// speciannoexist = true;
 	  		
 	      		string notes;
 	      		if (noteClass =="Annotator")
@@ -322,10 +334,12 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 		  	sp->setBoundaryCondition(true);
 		  	string Funcpoolname = Field<string> :: get(*itrp,"path");
 		  	vector< Id > children = Field< vector< Id > >::get( *itrp, "children" );
+		  	if (children.size() == 0)
++				sp->setConstant(true);
 		  	for ( vector< Id >::iterator i = children.begin(); i != children.end(); ++i ) 
 		  	{	string funcpath = Field <string> :: get(*i,"path");
 		  		string clsname = Field <string> :: get(*i,"className");
-		  		if (clsname == "Function")
+		  		if (clsname == "Function" or clsname == "ZombieFunction")
 		  		{  	Id funcIdx(funcpath+"/x");
 					string f1x = Field <string> :: get(funcIdx,"path");
 					vector < Id > inputPool = LookupField <string,vector <Id> > :: get(funcIdx,"neighbors","input");
@@ -383,9 +397,9 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	      	noteClassR = Field<string> :: get(annotaIdR,"className");
 	      	x = Field <double> :: get(annotaIdR,"x");
 	        y = Field <double> :: get(annotaIdR,"y");
-	        reactxyCord << "<moose:xCord>" << x << "</moose:xCord>\n";
-	  		reactxyCord << "<moose:yCord>" << y << "</moose:yCord>\n";
-	  		reactannoexist = true;
+	    	// reactxyCord << "<moose:xCord>" << x << "</moose:xCord>\n";
+	  		// reactxyCord << "<moose:yCord>" << y << "</moose:yCord>\n";
+	  		// reactannoexist = true;
 	  		string notesR;
 	      	if (noteClassR =="Annotator")
 	      	{
@@ -484,9 +498,9 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	      	noteClassE = Field<string> :: get(annotaIdE,"className");
 	      	x = Field <double> :: get(annotaIdE,"x");
 	        y = Field <double> :: get(annotaIdE,"y");
-	        enzxyCord << "<moose:xCord>" << x << "</moose:xCord>\n";
-	  		enzxyCord << "<moose:yCord>" << y << "</moose:yCord>\n";
-	  		enzAnnoexist = true;
+	    	// enzxyCord << "<moose:xCord>" << x << "</moose:xCord>\n";
+	  		// enzxyCord << "<moose:yCord>" << y << "</moose:yCord>\n";
+	  		// enzAnnoexist = true;
 	  		if (noteClassE =="Annotator")
 	      	{
 				notesE = Field <string> :: get(annotaIdE,"notes");
@@ -609,6 +623,7 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 				reaction->setId( cleanEnzname);
 		  		reaction->setName( objname);
 				string groupName = getGroupinfo(*itrE);
+				/*
 				if (enzAnnoexist)
 				{	ostringstream MMenzAnno;
 		  		  	MMenzAnno << "<moose:ModelAnnotation>\n";
@@ -619,7 +634,8 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 		  		   	MMenzAnno << "</moose:ModelAnnotation>";
 		  		  	XMLNode* xnode =XMLNode::convertStringToXMLNode( MMenzAnno.str() ,&xmlns);
 		  		  	reaction->setAnnotation( xnode );
-		  		}	
+		  		}
+		  		*/	
 		  		double Km = Field<double>::get(*itrE,"numKm");
 		  		double kcat = Field<double>::get(*itrE,"kcat");
 		  		reaction->setReversible( false );

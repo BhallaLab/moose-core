@@ -136,6 +136,18 @@ Compartment::set_color( double value
 }
 
 void
+Compartment::set_color(Vec4& color)
+{
+  Vec4Array * colors = new Vec4Array();
+  colors -> push_back(color);
+  for(auto & geometry : geometries)
+    {
+      geometry -> setColorArray(colors);
+      geometry -> setColorBinding( osg::Geometry::BIND_OVERALL );
+    }
+}
+
+void
 Compartment::_set_chromostat( double value
                             , double base_value
                             , double peak_value

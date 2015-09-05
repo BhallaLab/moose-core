@@ -90,6 +90,11 @@ public:
              , PyObject   * values
              );
 
+    void
+    set_compartment_color( const char * compartment_id
+                         , PyObject * color
+                         );
+
 private:
 
     Morphology(const Morphology &);
@@ -169,6 +174,9 @@ public:
                          , const QGLWidget* shareWidget = 0
                          , Qt::WindowFlags f            = 0
                          );
+
+    void
+    set_background_color(float r, float g, float b, float a);
 
     Morphology *
     get_morphology();

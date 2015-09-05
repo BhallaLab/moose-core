@@ -10,4 +10,5 @@ cdef extern from "../basecode/ObjId.h":
         ObjId() 
         ObjId(_Id.Id id)
         ObjId(_Id.Id id, unsigned int dataIndex, unsigned int fieldIndex)
+        ObjId(string path)
         string path()

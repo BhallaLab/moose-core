@@ -307,8 +307,7 @@ MorphologyViewer::create_graphics_widget()
     // manipulator -> updateCamera(* camera);
     _viewer.addEventHandler(new osgViewer::WindowSizeHandler());
     _viewer.setQuitEventSetsDone(false);
-    osgQt::GraphicsWindowQt* gw =
-    (osgQt::GraphicsWindowQt*)(camera -> getGraphicsContext());
+    osgQt::GraphicsWindowQt* gw = (osgQt::GraphicsWindowQt*)(camera -> getGraphicsContext());
     gw -> getGLWidget() -> setForwardKeyEvents(true);
     // QGLFormat format;
     // QGLFormat::setDefaultFormat(format);

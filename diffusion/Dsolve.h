@@ -82,11 +82,18 @@ class Dsolve: public ZombiePoolInterface
 		void buildNeuroMeshJunctions( const Eref& e, Id spineD, Id psdD );
 
 		/**
+		 * Builds junctions between current Dsolve and another. For this
+		 * to work the respective meshes must be compatible.
+		 * These junctions handle diffusion between different meshes.
+		 */
+		void buildMeshJunctions( const Eref& e, Id other );
+
+		/**
 		 * buildMeshJunctions is the inner utility function for building 
 		 * the junction between any specified pair of Dsolves.
 		 * Note that it builds the junction on the 'self' Dsolve.
 		 */
-		static void buildMeshJunctions( Id self, Id other );
+		static void innerBuildMeshJunctions( Id self, Id other );
 
 		/**
 		 * Computes flux through a junction between diffusion solvers.

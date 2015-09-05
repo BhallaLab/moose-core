@@ -1,9 +1,5 @@
 #  Build folder 
-gsl/include
-gsl/lib
-external/gsl-1.16
 .svn
-buildMooseUsingCmake
 tags
 *.plot
 *.gnuplot
@@ -58,10 +54,10 @@ tags
 *.i*86
 *.x86_64
 *.hex
+moose
 
 CMakeCache.txt
 CMakeFiles
-Makefile
 cmake_install.cmake
 install_manifest.txt
 

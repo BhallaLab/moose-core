@@ -1,6 +1,4 @@
-Build Status - master (This is stable branch): [![Build Status - master](https://travis-ci.org/BhallaLab/moose.svg?branch=master)](https://travis-ci.org/BhallaLab/moose)
-
-Build Status - trunk (This is development branch) [![Build Status - trunk](https://travis-ci.org/BhallaLab/moose.svg?branch=trunk)](https://travis-ci.org/BhallaLab/moose)
+Build Status - master (This is current development branch): [![Build Status - master](https://travis-ci.org/BhallaLab/moose-core.svg?branch=master)](https://travis-ci.org/BhallaLab/moose-core)
 
 # MOOSE
 
@@ -71,9 +69,9 @@ Python interface for core MOOSE API
 
 In addition to core MOOSE requirements:
 
-Python2    ( >= 2.7.x) REQUIRED For building the MOOSE Python bindings
-Python-dev ( >= 2.7.x) REQUIRED Python development headers and libraries
-NumPy      ( >= 1.6.x) REQUIRED For array interface
+- Python2    ( >= 2.7.x) REQUIRED For building the MOOSE Python bindings
+- Python-dev ( >= 2.7.x) REQUIRED Python development headers and libraries
+- NumPy      ( >= 1.6.x) REQUIRED For array interface
 
 
 ## Graphical User Interface

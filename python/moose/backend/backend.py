@@ -46,6 +46,7 @@ class Backend(object):
         self.tables = []
         self.synchans = []
         self.msgs = { 'SingleMsg' : [], 'OneToAllMsg' : [] }
+        self.channels = []
         # A set of tuple of sourceCompartment.path and targetCompartment.path
         self.connections = set()
         self.clock = _moose.wildcardFind('/clock')[0]
@@ -77,6 +78,11 @@ class Backend(object):
         if zombiComps:
             self.compartments += zombiComps
         return self.compartments
+
+    def getChannels(self, **kwargs):
+        self.channels = self.search('%s/##[TYPE=HHChannel]'%self.root)
+        self.channels += self.search('%s/##[TYPE=HHChannel2D]'%self.root)
+        return self.channels
 
     def getPulseGens(self, **kwargs):
         """ Get all the pulse generators """
@@ -130,6 +136,7 @@ class Backend(object):
         self.getPulseGens(**kwargs)
         self.getSynChans(**kwargs)
         self.getMsgs(**kwargs)
+        self.getChannels(**kwargs)
         self.getClocks()
         self.filled = True
 

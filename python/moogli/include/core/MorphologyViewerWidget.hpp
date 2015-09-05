@@ -52,6 +52,8 @@ public:
     split_vertically( unsigned int view_index    = 0
                     , unsigned int height_factor = 2
                     );
+    void
+    set_background_color(float r, float g, float b, float a);
 
     void
     home(unsigned int index = 0);

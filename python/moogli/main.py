@@ -1,4 +1,4 @@
-import _moogli
+import moogli
 
 """
 class Visualizer(MorphologyViewer):
@@ -76,7 +76,7 @@ PROXIMAL_DISTAL = 2
 
 def read_morphology_from_moose(name = "", path = "", radius = DISTAL):
     import moose
-    morphology = _moogli.Morphology(name, 1)
+    morphology = moogli.Morphology(name)
     compartments = moose.wildcardFind(path + "/##[ISA=CompartmentBase]")
     for compartment in compartments:
         distal_diameter = compartment.diameter

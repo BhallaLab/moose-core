@@ -1,8 +1,9 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 # setup SIP variables
 PROJECT(moogli)
-
 SET(CMAKE_VERBOSE_MAKEFILE ON)
+
+SET(PROJECT_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake_modules")
 
 MESSAGE("++ Reading module files from ${CMAKE_MODULE_PATH}")
@@ -77,10 +78,11 @@ ADD_LIBRARY(_moogli SHARED
 
 # Set MOOGLI paths if they are not already set.
 IF(NOT MOOGLI_BUILD_PATH)
-    SET(MOOGLI_BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/moogli)
+    SET(MOOGLI_BUILD_PATH ${CMAKE_CURRENT_SOURCE_DIR})
     FILE(MAKE_DIRECTORY ${MOOGLI_BUILD_PATH})
 ENDIF()
 
+MESSAGE(STATUS "Building moogli in ${MOOGLI_BUILD_PATH}")
 SET_TARGET_PROPERTIES(_moogli PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${MOOGLI_BUILD_PATH}"
     PREFIX ""
@@ -108,3 +110,29 @@ TARGET_LINK_LIBRARIES(_moogli
     osgText
     )
 
+# Build python source distribution of moogli
+FIND_PACKAGE(PythonInterp REQUIRED)
+
+# "Source distribution is generated in this directory, default ${CMAKE_CURRENT_BINARY_DIR})
+if(NOT MOOGLI_DIST_DIR)
+    set(MOOGLI_DIST_DIR ${CMAKE_CURRENT_BINARY_DIR})
+endif()
+
+# create the source distribution for moogli, but do not use default setup.py
+# which is used to build moogli without cmake. Use cmake_module/setup.py file.
+# We need to copy the whole folder and replace the setup.py by our
+# cmake_modules/setup.py file. This is a Hack and should have been avoided.
+SET(MOOGLI_TEMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/_temp_moogli)
+FILE(MAKE_DIRECTORY ${MOOGLI_TEMP_DIR})
+FILE(COPY ${PROJECT_SOURCE_DIR}/ DESTINATION ${MOOGLI_TEMP_DIR}
+    PATTERN "_temp_moogli" EXCLUDE
+    )
+ADD_CUSTOM_COMMAND(TARGET _moogli POST_BUILD
+    # dont use cmake copy_directory. It goes nuts on recursive copying.
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/_moogli.so ${MOOGLI_TEMP_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/cmake_modules/setup.py ${MOOGLI_TEMP_DIR}/setup.py
+    COMMAND ${PYTHON_EXECUTABLE} setup.py sdist --dist-dir ${MOOGLI_DIST_DIR}
+    WORKING_DIRECTORY ${MOOGLI_TEMP_DIR}
+    COMMENT "Generating MOOGLI source distribution in ${MOOGLI_DIST_DIR}"
+    VERBATIM
+    )
