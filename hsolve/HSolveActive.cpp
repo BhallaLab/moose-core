@@ -11,7 +11,6 @@
 #include "HSolveStruct.h"
 #include "HinesMatrix.h"
 #include "HSolvePassive.h"
-#include "RateLookup.h"
 #include "HSolveActive.h"
 #include "HSolve.h"
 #include "../biophysics/CompartmentBase.h"
@@ -19,23 +18,35 @@
 #include "../biophysics/CaConcBase.h"
 #include "ZombieCaConc.h"
 
-#ifndef USE_CUDA
-#define USE_CUDA
+#include "CudaGlobal.h"
+#include "RateLookup.h"
+
+#ifdef USE_CUDA
+#include <thrust/device_vector.h>
+#include <thrust/host_vector.h>
 #endif
 
-#ifndef DEBUG
-//define DEBUG
-#endif
+#include <sys/time.h>
 
-#ifndef DEBUG_VERBOSE
-//#define DEBUG_VERBOSE
-#endif
+typedef unsigned long long u64;
 
-#ifndef DEBUG_STEP
-//#define DEBUG_STEP
-#endif
+/* get microseconds (us) */
+u64 getTime()
+{
+ struct timeval tv;
+
+ gettimeofday(&tv, NULL);
+
+ u64 ret = tv.tv_usec;
+
+ ret += (tv.tv_sec * 1000 * 1000);
+
+ return ret;
+}
 
 using namespace moose;
+using namespace thrust;
+
 //~ #include "ZombieCompartment.h"
 //~ #include "ZombieCaConc.h"
 
@@ -48,6 +59,16 @@ const int HSolveActive::INSTANT_Z = 4;
 HSolveActive::HSolveActive()
 {
     caAdvance_ = 1;
+    
+#ifdef USE_CUDA    
+	current_ca_position = 0;
+	is_inited_ = 0;
+	for(int i = 0; i < 10; ++i)
+	{
+		total_time[i] = 0;
+	}
+	total_count = 0;
+#endif
 
     // Default lookup table size
     //~ vDiv_ = 3000;    // for voltage
@@ -57,8 +78,35 @@ HSolveActive::HSolveActive()
 //////////////////////////////////////////////////////////////////////
 // Solving differential equations
 //////////////////////////////////////////////////////////////////////
-void HSolveActive::step( ProcPtr info )
+
+/*
+ * A debug function to profile the performance of selected modules.
+ */
+void update_info(double* time, int func, int elapsed, int count, double dt)
 {
+	time[func] += elapsed / 1000.0f;
+	char * str;
+	if(count >= (0.2/dt) - 1)
+	{
+		switch(func)
+		{
+			case 0: str = "advanceChannels";break;
+			case 1: str = "calculateChannelCurrents";break;
+			case 2: str = "updateMatrix";break;
+			case 3: str = "forwardEliminate";break;
+			case 4: str = "backwardSubstitute";break;
+			case 5: str = "advanceCalcium";break;
+			case 6: str = "advanceSynChans";break;
+			case 7: str = "sendValues";break;
+			case 8: str = "sendSpikes";break;
+			case 9: str = "externalCurrent_.assign";break;
+			default: str = "Unkown";break;
+		}
+		printf("Function %s takes %fs.\n", str, time[func]/ 1000.0f);
+	}
+}
+void HSolveActive::step( ProcPtr info )
+{	
     if ( nCompt_ <= 0 )
         return;
 
@@ -66,19 +114,70 @@ void HSolveActive::step( ProcPtr info )
     {
         current_.resize( channel_.size() );
     }
-
+    
+    total_count ++;
+    
+	  u64 start_time, end_time;
+    start_time = getTime();
+    
     advanceChannels( info->dt );
+    
+    end_time = getTime();
+    update_info(total_time, 0, end_time - start_time, total_count ,info->dt);
+    start_time = end_time;
+    
     calculateChannelCurrents();
+    
+    end_time = getTime();
+    update_info(total_time, 1, end_time - start_time, total_count ,info->dt);
+    start_time = end_time;   
+    
     updateMatrix();
+    end_time = getTime();
+    update_info(total_time, 2, end_time - start_time, total_count ,info->dt);
+    start_time = end_time;   
+        
     HSolvePassive::forwardEliminate();
+    
+    end_time = getTime();
+    update_info(total_time, 3, end_time - start_time, total_count ,info->dt);
+    start_time = end_time;   
+        
     HSolvePassive::backwardSubstitute();
+    
+    end_time = getTime();
+    update_info(total_time, 4, end_time - start_time, total_count ,info->dt);
+    start_time = end_time;   
+        
     advanceCalcium();
+    
+    end_time = getTime();
+    update_info(total_time, 5, end_time - start_time, total_count ,info->dt);
+    start_time = end_time;   
+        
     advanceSynChans( info );
-
+    
+    end_time = getTime();
+    update_info(total_time, 6, end_time - start_time, total_count ,info->dt);
+    start_time = end_time;   
+    
     sendValues( info );
+    
+    end_time = getTime();
+    update_info(total_time, 7, end_time - start_time, total_count ,info->dt);
+    start_time = end_time;   
+        
     sendSpikes( info );
+     
+    end_time = getTime();
+    update_info(total_time, 8, end_time - start_time, total_count ,info->dt);
+    start_time = end_time;   
+       
 
     externalCurrent_.assign( externalCurrent_.size(), 0.0 );
+    
+    end_time = getTime();
+    update_info(total_time, 9, end_time - start_time, total_count ,info->dt);
 }
 
 void HSolveActive::calculateChannelCurrents()
@@ -246,37 +345,165 @@ void HSolveActive::advanceChannels( double dt )
     vector< LookupRow* >::iterator icarow = caRow_.begin();
 
     LookupRow vRow;
+#ifdef USE_CUDA
+#ifdef DEBUG_STEP
+    printf("Press [ENTER] to start advanceChannels...\n");
+    getchar();
+#endif    
+
+    vector<double> caRow_ac;
+    vector<LookupColumn> column_ac;
+    
+    iv = V_.begin();
+
+    double * v_row_array_d;
+
+    /*
+     * If number of compartments are not sufficiently large,
+     * we use CPU to calculate for rows.
+     * However, here 1024 is a magic value. It could be optimized
+     * by testing out different values.
+     */
+    if(V_.size() < 1024)
+    {
+        vector<double> v_row_temp(V_.size());
+        vector<double>::iterator v_row_iter = v_row_temp.begin();
+        for(u32 i = 0 ; i < V_.size(); ++i)
+        {
+            vTable_.row(*iv, *v_row_iter);
+            iv++;
+            v_row_iter++;
+        }       
+
+        copy_to_device(&v_row_array_d, &v_row_temp.front(), V_.size());
+
+    } else {
+        vTable_.row_gpu(iv, &v_row_array_d, V_.size());
+    }
+
+#if defined(DEBUG_) && defined(DEBUG_VERBOSE) 
+    printf("Trying to access v_row_array_d...\n");
+    
+    std::vector<double> h_row(V_.size());
+    cudaSafeCall(cudaMemcpy(&h_row.front(), v_row_array_d, sizeof(double) * V_.size(), cudaMemcpyDeviceToHost));
+    printf("row 0 is %f.\n", h_row[0]);
+    printf("last row is %f.\n", h_row[V_.size() - 1]);
+#ifdef DEBUG_STEP
+    getchar();
+#endif    
+#endif  
+
+
+#if defined(DEBUG_) && defined(DEBUG_VERBOSE) 
+    printf("Starting converting caRow_ to caRow_ac...\n");
+#ifdef DEBUG_STEP
+    getchar();
+#endif    
+#endif 
+    
+    /*
+     * Convert rows from row structs to double values
+     * in order to reduce memory usage.
+     */
+    caRow_ac.resize(caRow_.size());
+    for(u32 i = 0; i < caRow_.size(); ++i)
+    {
+        if(caRow_[i])
+        {
+            caRow_ac[i] = caRow_[i]->rowIndex + caRow_[i]->fraction;
+        } 
+        else
+        {
+            caRow_ac[i] = -1.0f;
+        } 
+       
+    }
+
+#if defined(DEBUG_) && defined(DEBUG_VERBOSE)   
+    printf("Starting find-row for caRowCompt_ and vRow_ac construction...\n");
+#ifdef DEBUG_STEP
+    getchar();
+#endif    
+#endif
+
+    for (int i = 0; i < V_.size(); ++i) {
+        icarowcompt = caRowCompt_.begin();
+        caBoundary = ica + *icacount;
+        
+        for ( ; ica < caBoundary; ++ica )
+        {
+            caTable_.row( *ica, * icarowcompt );
+            ++icarowcompt;
+        }
+        
+        ++icacount;
+    }
+
+#if defined(DEBUG_) && defined(DEBUG_VERBOSE)  
+    printf("Finish preparing CUDA advanceChannel! \n");
+    printf("Starting kernel...\n");
+#ifdef DEBUG_STEP
+    getchar();
+#endif    
+#endif    
+
+    /*
+     * Copy static infos, such as mappings and indices.
+     * Such infos will be kept in device memory until the
+     * program exits. Therefore copy_data function will 
+     * check if the copy has been done before. 
+     * This function will only be executed once so no worry
+     * about the performance.
+     * See AdvanceChannel.cu for more details.
+     */
+    copy_data(column_,
+    		  &column_d,
+    		  &is_inited_,
+    		  channel_data_,
+    		  &channel_data_d,
+    		  HSolveActive::INSTANT_X,
+              HSolveActive::INSTANT_Y,
+              HSolveActive::INSTANT_Z);
+
+    /* 
+     * The call to the function that does the actual
+     * calculations.
+     * See AdvanceChannel.cu for more details.
+     */
+    advanceChannel_gpu(v_row_array_d, 
+                       caRow_ac, 
+                       column_d, 
+                       vTable_, 
+                       caTable_, 
+                       &state_.front(), 
+                       channel_data_d,
+                       dt,
+                       (int)(column_.size()),
+                       (int)(channel_data_.size()),
+                       V_.size());
+
+    caRow_ac.clear();
+
+#if defined(DEBUG_) && defined(DEBUG_VERBOSE)  
+    printf("Finish launching CUDA advanceChannel! \n");
+#ifdef DEBUG_STEP
+    getchar();
+#endif    
+#endif 
+#else    
     double C1, C2;
-    unsigned int ca_begin_pos = 0;
-    unsigned int caRowCompt_begin_pos = 0;
+
     for ( iv = V_.begin(); iv != V_.end(); ++iv )
     {
         vTable_.row( *iv, vRow );
         icarowcompt = caRowCompt_.begin();
         caBoundary = ica + *icacount;
         
-#ifdef USE_CUDA      
-#ifdef DEBUG_VERBOSE  
-		printf("Starting to find rows using row_gpu: icacount:%u\n", *icacount);
-#endif
-		caTable_.row_gpu(ica, icarowcompt, *icacount);
-#ifdef DEBUG_VERBOSE		
-		printf("Finish find rows using row_gpu.\n"); 
-#endif
-#ifdef DEBUG_INTERACTIVE
-		printf("Press [Enter] to continue...\n");
-		getchar();
-#endif
-		icarowcompt += *icacount;
-		ica += *icacount;
-#else
         for ( ; ica < caBoundary; ++ica )
         {
             caTable_.row( *ica, * icarowcompt );
-            //printf("row: %d, fraction: %f.\n", icarowcompt->rowIndex, icarowcompt->fraction);
             ++icarowcompt;
-        }
-#endif     
+        }   
         /*
          * Optimize by moving "if ( instant )" outside the loop, because it is
          * rarely used. May also be able to avoid "if ( power )".
@@ -348,6 +575,12 @@ void HSolveActive::advanceChannels( double dt )
 
         ++ichannelcount, ++icacount;
     }
+#endif
+      
+}
+LookupColumn * HSolveActive::get_column_d()
+{
+	return column_d;
 }
 
 /**

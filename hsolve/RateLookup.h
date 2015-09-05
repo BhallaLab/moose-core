@@ -9,9 +9,9 @@
 #ifndef _RATE_LOOKUP_H
 #define _RATE_LOOKUP_H
 
-#ifndef USE_CUDA
-#define USE_CUDA
-#endif
+#include "CudaGlobal.h"
+
+using namespace std;
 
 struct LookupRow
 {
@@ -42,8 +42,8 @@ public:
 	/// Adds the columns for a given species. Columns supplied are C1 and C2
 	void addColumns(
 		int species,
-		const vector< double >& C1,
-		const vector< double >& C2 );
+		const std::vector< double >& C1,
+		const std::vector< double >& C2 );
 		//~ const vector< double >& C2,
 		//~ bool interpolate );
 	
@@ -55,16 +55,28 @@ public:
 	 * Returns the row corresponding to x in the "row" parameter.
 	 * i.e., returns the leftover fraction and the row's start address.
 	 */
-	void row(
-		double x,
-		LookupRow& row );
+	void row(double x,LookupRow& row );
 
 #ifdef USE_CUDA
+	void row(double x,double& row);
+	void row_gpu(vector<double>::iterator& x, 
+				 double ** row, 
+				 unsigned int size);
 	void row_gpu(vector<double>::iterator& x, 
 						vector<LookupRow>::iterator& row, 
 						unsigned int size);
+    unsigned int get_num_of_points();
+    unsigned int get_num_of_columns();
+    vector<double> get_table();	
+    double get_min();
+    double get_max();
+    double get_dx();		
+    double * get_state_d();
+    double * get_table_d();
+    bool is_set();	
+    bool set_is_set(bool set_val);	
+    void copy_table();
 #endif
-
 	/// Actually performs the lookup and the linear interpolation
 	void lookup(
 		const LookupColumn& column,
@@ -85,9 +97,11 @@ private:
 	unsigned int         nColumns_;		///< (# columns) = 2 * (# species)
 
 #ifdef USE_CUDA
-	double				 *istate_d;		///< device array of istate
+	double				 *state_d;		///< device array of istate
 	double 				 *table_d;		///< device array of the flattened table
-#endif
+	bool is_set_;
+#endif	
+
 
 };
 

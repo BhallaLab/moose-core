@@ -10,29 +10,13 @@
 #include <stdio.h>
 using namespace std;
 
+#include "CudaGlobal.h"
 #include "RateLookup.h"
 
-#ifndef USE_CUDA
-#define USE_CUDA
-#endif
-
-#ifndef DEBUG
-//#define DEBUG
-#endif
-
-#ifndef DEBUG_VERBOSE
-//#define DEBUG_VERBOSE
-#endif
-
-#ifndef DEBUG_STEP
-//#define DEBUG_STEP
-#endif
-
 #ifdef USE_CUDA
-#define BLOCK_WIDTH 256
-#include <cuda.h>
 #include <thrust/copy.h>
 #include <thrust/device_vector.h>
+#include <thrust/host_vector.h>
 #endif
 
 
@@ -50,7 +34,7 @@ LookupTable::LookupTable(
 	
 	//~ interpolate_.resize( nSpecies );
 	table_.resize( nPts_ * nColumns_ );
-	
+	is_set_ = false;
 }
 
 void LookupTable::addColumns(
@@ -86,6 +70,7 @@ void LookupTable::column( unsigned int species, LookupColumn& column )
 
 void LookupTable::row( double x, LookupRow& row )
 {
+
 	if ( x < min_ )
 		x = min_;
 	else if ( x > max_ )
@@ -97,13 +82,104 @@ void LookupTable::row( double x, LookupRow& row )
 	row.fraction = div - integer;
 	row.row = &( table_.front() ) + integer * nColumns_;
 	row.rowIndex = integer * nColumns_;
+
 }
 
 #ifdef USE_CUDA
+/*
+ * Calculate row as a double value instead of row struct.
+ */
+void LookupTable::row(double x,double& row)
+{
+	if ( x < min_ )
+		x = min_;
+	else if ( x > max_ )
+		x = max_;
+	
+	double div = ( x - min_ ) / dx_;
+	unsigned int integer = ( unsigned int )( div );
+	row = integer * nColumns_ + (div - integer);
+}
 
+
+/*
+ * Copy the lookup table into device memory.
+ * Only need to be done once since the table is
+ * static and remains unchanged.
+ */
+void LookupTable::copy_table()
+{
+
+	int size =LookupTable::table_.size();
+	if(size <= 0) 
+	{
+		size = 0;
+	}
+
+	if(size > 0)
+	{
+		cudaSafeCall(cudaMalloc((void **)&(LookupTable::table_d),
+								size * sizeof(double))); 
+
+		cudaSafeCall(cudaMemcpy(LookupTable::table_d,
+								&(LookupTable::table_.front()), 
+								size * sizeof(double), 
+								cudaMemcpyHostToDevice));		
+	}
+
+}
+double * LookupTable::get_state_d()
+{
+	return  LookupTable::state_d;
+}
+double * LookupTable::get_table_d()
+{
+	return  LookupTable::table_d;
+}
+bool LookupTable::is_set()
+{
+	return LookupTable::is_set_;
+}
+bool LookupTable::set_is_set(bool set_val)
+{
+	LookupTable::is_set_ = set_val;
+	return LookupTable::is_set();
+}
+unsigned int LookupTable::get_num_of_points()
+{
+    return LookupTable::nPts_;
+}
+     
+unsigned int LookupTable::get_num_of_columns()
+{
+    return LookupTable::nColumns_;
+}
+vector<double> LookupTable::get_table()
+{
+    return LookupTable::table_;
+}
+
+double LookupTable::get_min()
+{
+	return min_;
+}
+
+double LookupTable::get_max()
+{
+	return max_;
+}
+
+double LookupTable::get_dx()
+{
+	return dx_;
+}
+
+/*
+ * GPU lookup kernel using row structs
+ */
 __global__
 void
-row_kernel(double * d_x, 
+(double * d_x, 
 		   LookupRow * d_row, 
 		   double min,
 		   double max, 
@@ -116,8 +192,6 @@ row_kernel(double * d_x,
 	int tid = threadIdx.x + blockIdx.x * blockDim.x;
 	
 	if(tid >= size) return;
-	
-	//if(tid == 0) printf("kernel launch successful!\n");
 	
 	double x = d_x[tid];
 	
@@ -134,47 +208,126 @@ row_kernel(double * d_x,
 	d_row[tid].rowIndex = integer * nColumns;
 }
 
-void LookupTable::row_gpu(vector<double>::iterator& x, vector<LookupRow>::iterator& row, unsigned int size){
+/*
+ * GPU lookup kernel using double values for rows
+ */
+__global__
+void
+row_kernel(double * d_x, 
+		   double * row, 
+		   double min,
+		   double max, 
+		   double dx,
+		   unsigned int nColumns, 
+		   unsigned int size)
+{
+			   
+	int tid = threadIdx.x + blockIdx.x * blockDim.x;
+	
+	if(tid >= size) return;
+	
+	double x = d_x[tid];
+	
+	if ( x < min )
+		x = min;
+	else if ( x > max )
+		x = max;
+	
+	double div = ( x - min ) / dx;
+	unsigned int integer = ( unsigned int )( div );
+	
+	row[tid] = integer * nColumns + double(div - integer);
+	
+}
+
+
+/*
+ * Driver function for lookup kernel using row struct.
+ */
+void LookupTable::row_gpu(vector<double>::iterator& x, vector<LookupRow>::iterator& row, unsigned int size)
+{
 
 #ifdef DEBUG_VERBOSE
 	printf("start row_gpu calculation...\n");
 #endif	
-	std::vector<double> h_x(size);
-	std::copy(x, x + size, h_x.begin());
-	
+
 	thrust::device_vector<double> d_x(size);
 	thrust::device_vector<LookupRow> d_row(size);
 	
+	thrust::copy(x, x + size, d_x.begin());
+	thrust::copy(row, row + size, d_row.begin());
+
 	double * d_x_p = thrust::raw_pointer_cast(d_x.data());
 	LookupRow * d_row_p = thrust::raw_pointer_cast(d_row.data());
-	
-	cudaMemcpy(d_x_p, &h_x.front(), sizeof(double)*size, cudaMemcpyHostToDevice);
-	cudaDeviceSynchronize(); 
-	
-	h_x.clear();
-	
-    const dim3 gridSize(size/BLOCK_WIDTH + 1, 1, 1);
-    const dim3 blockSize(BLOCK_WIDTH,1,1);
+    dim3 gridSize(size/BLOCK_WIDTH + 1, 1, 1);
+    dim3 blockSize(BLOCK_WIDTH,1,1);
+
+    if(size <= BLOCK_WIDTH)
+    {
+    	gridSize.x = 1;
+    	blockSize.x = size;
+    }
     
     size_t address = reinterpret_cast<size_t>(&table_.front());
     
-    row_kernel<<<gridSize, blockSize>>>(d_x_p, d_row_p, min_, max_, dx_, nColumns_, size, address);	
+    row_kernel<<<gridSize, blockSize>>>(d_x_p, 
+    									d_row_p, 
+    									min_, 
+    									max_, 
+    									dx_, 
+    									nColumns_, 
+    									size, 
+    									address);	
     
-    cudaThreadSynchronize();
-    cudaDeviceSynchronize(); 
+    cudaSafeCall(cudaDeviceSynchronize()); 
+
 #ifdef DEBUG_VERBOSE    
     printf("kernel launch finished...\n");
 #endif
-    LookupRow * h_row;
-    h_row = (LookupRow *) malloc(sizeof(LookupRow)*size);
-    cudaMemcpy(h_row, d_row_p, sizeof(LookupRow)*size, cudaMemcpyDeviceToHost);
-    cudaDeviceSynchronize(); 
-    std::copy(h_row, h_row+size, row);
-    
-    free(h_row);
+    thrust::copy(d_row.begin(), d_row.end(), row);
+
 #ifdef DEBUG_VERBOSE    
     printf("finish row_gpu calculation...\n");
 #endif 
+}
+
+/*
+ * Driver function for lookup kernel using double values.
+ */
+void LookupTable::row_gpu(vector<double>::iterator& x, double ** row, unsigned int size)
+{
+
+#ifdef DEBUG_VERBOSE
+	printf("start row_gpu calculation...\n");
+#endif	
+
+	thrust::device_vector<double> d_x(size);	
+	cudaSafeCall(cudaMalloc((void**)row, sizeof(double) * size));	
+	thrust::copy(x, x + size, d_x.begin());
+	double * d_x_p = thrust::raw_pointer_cast(d_x.data());
+
+    dim3 gridSize(size/BLOCK_WIDTH + 1, 1, 1);
+    dim3 blockSize(BLOCK_WIDTH,1,1);
+
+    if(size <= BLOCK_WIDTH)
+    {
+    	gridSize.x = 1;
+    	blockSize.x = size;
+    }
+    
+    row_kernel<<<gridSize, blockSize>>>(d_x_p, 
+    									*row, 
+    									min_, 
+    									max_, 
+    									dx_, 
+    									nColumns_, 
+    									size);	
+    cudaCheckError();
+    cudaSafeCall(cudaDeviceSynchronize()); 
+
+#ifdef DEBUG_VERBOSE    
+    printf("kernel launch finished...\n");
+#endif
 }
 #endif
 
