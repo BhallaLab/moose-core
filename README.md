@@ -1,6 +1,4 @@
-Build Status - master (This is current development branch): [![Build Status - master](https://travis-ci.org/BhallaLab/moose-core.svg?branch=master)](https://travis-ci.org/BhallaLab/moose-core)
-
-[![Documentation Status](https://readthedocs.org/projects/moose-core/badge/?version=latest)](https://readthedocs.org/projects/moose-core/?badge=latest)
+[![Build Status - master](https://travis-ci.org/BhallaLab/moose-core.svg?branch=master)](https://travis-ci.org/BhallaLab/moose-core) [![Documentation Status](https://readthedocs.org/projects/moose-core/badge/?version=latest)](https://readthedocs.org/projects/moose-core/?badge=latest)
 
 # MOOSE
 
