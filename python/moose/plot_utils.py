@@ -186,12 +186,12 @@ def plotVector(vec, xvec = None, **options):
             plt.legend(loc='best')
 
     if xvec is None:
-        plt.xlabel = 'Time (sec)'
+        plt.xlabel('Time (sec)')
     else:
-        plt.xlabel = options.get('xlabel', '')
+        plt.xlabel(options.get('xlabel', ''))
     
     plt.ylabel = options.get('ylabel', '')
-    plt.title = options.get('title', '')
+    plt.title(options.get('title', ''))
 
     if(options.get('legend', True)):
         try:
@@ -267,7 +267,7 @@ def plotRecords(dataDict, xvec = None, **kwargs):
 
     # title in Image.
     if 'title' in kwargs:
-        plt.title = kwargs['title'] 
+        plt.title(kwargs['title'])
 
     if subplot:
         try:
