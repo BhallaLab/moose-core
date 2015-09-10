@@ -1,3 +1,14 @@
+""" Chemical Signalling model loaded into moose can be save into Genesis-Kkit format """
+    
+__author__           = "Harsha Rani"
+__copyright__        = "Copyright 2015, Harsha Rani and NCBS Bangalore"
+__credits__          = ["NCBS Bangalore"]
+__license__          = "GNU GPL"
+__version__          = "1.0.0"
+__maintainer__       = "Harsha Rani"
+__email__            = "hrani@ncbs.res.in"
+__status__           = "Development"
+
 import sys
 import random
 from moose import wildcardFind, element, loadModel, ChemCompt, exists, Annotator, Pool, ZombiePool,PoolBase,CplxEnzBase,Function,ZombieFunction
@@ -26,6 +37,8 @@ GENESIS_COLOR_SEQUENCE = ((248, 0, 255), (240, 0, 255), (232, 0, 255), (224, 0, 
 #		--StimulusTable
 
 def write( modelpath, filename,sceneitems=None):
+	filename = filename[:filename.find('.')]
+	filename = filename+'.g'
 	global NA 
 	NA = 6.0221415e23
 	global xmin,xmax,ymin,ymax
@@ -337,7 +350,7 @@ def writePool(modelpath,f,volIndex ):
 			textcolor = getColorCheck(textcolor,GENESIS_COLOR_SEQUENCE)
 		geometryName = volIndex[p.volume]
 		volume = p.volume * NA * 1e-3
-		print " pool name ",trimPath(p)
+		
 		f.write("simundump kpool /kinetics/" + trimPath(p) + " 0 " +
 			str(p.diffConst) + " " +
 			str(0) + " " +
@@ -570,9 +583,9 @@ if __name__ == "__main__":
 	
 	filename = sys.argv[1]
 	modelpath = filename[0:filename.find('.')]
-	loadModel('/home/harsha/genesis_files/gfile/'+filename,'/'+modelpath,"gsl")
-	output = '/home/harsha/Desktop/moose2genesis/moosefolder_cmd__sep2_'+filename
-	written = writeGenesis('/'+modelpath,output)
+	loadModel(filename,'/'+modelpath,"gsl")
+	output = filename.g
+	written = write('/'+modelpath,output)
 	if written:
 		print " file written to ",output
 	else:
