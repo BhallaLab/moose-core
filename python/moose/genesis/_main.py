@@ -293,7 +293,7 @@ def storePlotMsgs( tgraphs,f):
 					bg = Annotator(bgPath).color
 					bg = getColorCheck(bg,GENESIS_COLOR_SEQUENCE)
 					tabPath = re.sub("\[[0-9]+\]", "", tabPath)
-					s = s+"addmsg /kinetics/" + trimPath( poolEle ) + " /" + tabPath + \
+					s = s+"addmsg /kinetics/" + trimPath( poolEle ) + " " + tabPath + \
 			 			" PLOT Co *" + poolName + " *" + bg +"\n";
 	f.write(s)
 	
