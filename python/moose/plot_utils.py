@@ -209,6 +209,9 @@ def saveRecords(dataDict, xvec = None, **kwargs):
     """
 
     assert type(dataDict) == dict, "Got %s" % type(dataDict)
+    if len(dataDict) == 0:
+        pu.warn("No data in dictionary to save.")
+        return False
 
     outfile = kwargs.get('outfile', 'data.moose')
     clock = moose.Clock('/clock')
@@ -230,7 +233,6 @@ def saveRecords(dataDict, xvec = None, **kwargs):
     pu.info("Writing data to %s" % outfile)
     with open(outfile, 'w') as f:
         f.write("\n".join(text))
-    pu.info(" .. Done writing data to moose-data file")
 
 def plotRecords(dataDict, xvec = None, **kwargs):
     """plotRecords Plot given records in dictionary.
