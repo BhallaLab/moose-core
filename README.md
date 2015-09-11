@@ -104,7 +104,7 @@ In addition to core MOOSE requirements:
 - G.V.HarshaRani        -   Web page design, SBML support, Kinetikit Plugin Development
 - Aditya Gilra          -   NeuroML reader development, integrate-and-fire neurons/networks, STDP
 - Aviral Goel           -   Moogli/Neurokit Development
-- Dilawar Singh         -   Packaging
+- Dilawar Singh         - [Packaging](https://github.com/BhallaLab/moose-full/blob/master/README.md)
 
 
 # Support:
