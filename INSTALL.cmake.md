@@ -5,16 +5,21 @@ MOOSE with gnu-make are described in file `INSTALL`.
 
 ## Download the latest source code of moose from github or sourceforge.
 
-    $ git clone -b master https://github.com/BhallaLab/moose 
+    $ git clone -b master https://github.com/BhallaLab/moose-core
     $ cd moose
 
-## Install dependencies 
+## Install dependencies
 
 For moose-core:
 
 - gsl-1.16 or higher.
-- libsbml (optional)
 - libhdf5 
+- libsbml (optional)
+
+    Make sure that `libsml` is installed with `zlib` and `lxml` support.
+    Otherwise you will face some linking error when building MOOSE. Library
+    `sbml` also have `cmake` based build system, which should compile `libsml`
+    with desired flags.
 
 For python module of MOOSE, following additional packages are required:
 
