@@ -10,6 +10,7 @@ matrix:
 branches:
     only:
         - master
+        - mpi
 notifications:
     email:
         recipients:
