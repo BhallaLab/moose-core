@@ -36,8 +36,10 @@ before_script:
 before_install:
     - sbmlurl="http://sourceforge.net/projects/sbml/files/libsbml/5.9.0/stable/Linux/64-bit/libSBML-5.9.0-Linux-x64.deb"
     - wget "$sbmlurl" -O libsbml.deb && sudo dpkg -i libsbml.deb 
-    - wget "http://ftp.debian.org/debian/pool/main/g/gsl/libgsl0-dev_1.16+dfsg-4_amd64.deb" -O gsl_1.16.deb
+    - wget http://ftp.debian.org/debian/pool/main/g/gsl/libgsl0ldbl_1.16+dfsg-4_amd64.deb -O gsl_1.16.deb
     - sudo dpkg -i gsl_1.16.deb
+    - wget "http://ftp.debian.org/debian/pool/main/g/gsl/libgsl0-dev_1.16+dfsg-4_amd64.deb" -O gsl_1.16-dev.deb
+    - sudo dpkg -i gsl_1.16-dev.deb
 
 install:
     - wget ftp://ftp.gnu.org/gnu/gsl/gsl-1.16.tar.gz
