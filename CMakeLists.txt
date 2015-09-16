@@ -142,9 +142,6 @@ else()
     find_package(ZLIB REQUIRED)
 endif()
 
-# python support: check for interpreter, sip, pyqt4
-FIND_PACKAGE(PythonDev REQUIRED)
-
 ################################### SETUP BUILD ################################
 include_directories(msg basecode)
 add_executable(moose.bin basecode/main.cpp)
@@ -299,6 +296,7 @@ ENDIF(WITH_DOC)
 # Root of all python module.
 SET(PROJECT_PYTHON_PATH ${CMAKE_CURRENT_SOURCE_DIR}/python)
 if(WITH_PYTHON)
+    set(Python_ADDITIONAL_VERSION 2.6 2.7)
     message("++ Building native python extension of MOOSE")
     set(PYMOOSE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/python/moose")
 

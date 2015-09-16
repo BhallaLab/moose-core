@@ -39,7 +39,8 @@
 #============================================================================
 
 # Finding NumPy involves calling the Python interpreter
-set(Python_ADDITIONAL_VERSIONS 2.7 2.6)
+set(Python_ADDITIONAL_VERSIONS "2.6 2.7")
+MESSAGE("Python_ADDITIONAL_VERSIONS ${Python_ADDITIONAL_VERSIONS}")
 if(NumPy_FIND_REQUIRED)
     find_package(PythonInterp REQUIRED)
 else()
