@@ -101,7 +101,7 @@ else()
     add_definitions(-DQUIET_MODE)
 endif()
 
-option(ENABLE_CUDA "Enable GPU acceleration" ON)
+option(ENABLE_CUDA "Enable GPU acceleration" OFF)
 if(ENABLE_CUDA)
     FIND_PACKAGE(CUDA REQUIRED)
     set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-gencode arch=compute_20,code=sm_20)
