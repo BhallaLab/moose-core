@@ -24,10 +24,7 @@
 #include "HSolveStruct.h"
 #include "HinesMatrix.h"
 #include "HSolvePassive.h"
-
-#include "CudaGlobal.h"
 #include "RateLookup.h"
-#include <thrust/scan.h>
 
 class HSolveActive: public HSolvePassive
 {
@@ -39,7 +36,7 @@ public:
     void setup( Id seed, double dt );
     void step( ProcPtr info );			///< Equivalent to process
     void reinit( ProcPtr info );
-    LookupColumn * get_column_d();
+
 protected:
     /**
      * Solver parameters: exposed as fields in MOOSE
@@ -134,27 +131,7 @@ protected:
 		*   Tells you which compartments have external calcium-dependent
 		*   channels so that you can send out Calcium concentrations in only
 		*   those compartments. */
-#ifdef USE_CUDA    
-		double total_time[10];
-		int total_count;
-    int                       current_ca_position;
-    vector<ChannelData>		  channel_data_;
-    ChannelData 			  * channel_data_d;
-    void copy_to_device(double ** v_row_array, double * v_row_temp, int size);
-    LookupColumn			  *column_d;
-    int                       is_inited_;
-	void copy_data(std::vector<LookupColumn>& column,
-                             LookupColumn **            column_dd,
-                             int *                      is_inited,
-                             vector<ChannelData>&       channel_data,
-                             ChannelData **             channel_data_dd,
-                             const int                  x,
-                             const int                  y,
-                             const int                  z);
-#endif
-    static const int INSTANT_X;
-    static const int INSTANT_Y;
-    static const int INSTANT_Z;
+
 private:
     /**
      * Setting up of data structures: Defined in HSolveActiveSetup.cpp
@@ -190,22 +167,9 @@ private:
     void sendSpikes( ProcPtr info );
     void sendValues( ProcPtr info );
 
-#ifdef USE_CUDA
-	void advanceChannel_gpu(
-    double *                          v_row,
-    vector<double>&                   caRow,
-    LookupColumn                    * column,                                           
-    LookupTable&                     vTable,
-    LookupTable&                     caTable,                       
-    double                          * istate,
-    ChannelData                     * channel,
-    double                          dt,
-    int                             set_size,
-    int                             channel_size,
-    int                             num_of_compartment
-    );
-#endif
-
+    static const int INSTANT_X;
+    static const int INSTANT_Y;
+    static const int INSTANT_Z;
 };
 
 #endif // _HSOLVE_ACTIVE_H
