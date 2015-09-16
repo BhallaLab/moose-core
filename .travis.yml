@@ -42,13 +42,7 @@ before_install:
     - sudo dpkg -i gsl_1.16-dev.deb
 
 install:
-    - wget ftp://ftp.gnu.org/gnu/gsl/gsl-1.16.tar.gz
-    - tar -xzvf gsl-1.16.tar.gz
-    - cd gsl-1.16 
-    - ./configure --prefix=/usr > /dev/null
-    - make > /dev/null
-    - sudo make install  > /dev/null
-    - cd ..
+    - echo "nothing to do here"
 
 script:
     - make BUILD=debug USE_NEUROKIT=1 && make clean
