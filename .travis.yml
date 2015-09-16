@@ -40,13 +40,8 @@ install:
     - make > /dev/null
     - sudo make install  > /dev/null
     - cd ..
-    - wget http://sourceforge.net/projects/sbml/files/libsbml/5.9.0/stable/libSBML-5.9.0-core-src.tar.gz
-    - tar -xzvf libSBML-5.9.0-core-src.tar.gz 
-    - cd libsbml-5.9.0 
-    - ./configure --prefix=/usr --with-zlib --with-bzip2 --with-libxml > /dev/null 
-    - make > /dev/null 
-    - sudo make install > /dev/null
-    - cd ..
+    - sbmlurl="http://sourceforge.net/projects/sbml/files/libsbml/5.9.0/stable/Linux/64-bit/libSBML-5.9.0-Linux-x64.deb"
+    - sudo -E wget "$sbmlurl" -O "libsbml.deb" && sudo -E dpkg -i "libsbml.deb" && sudo -E rm -rf "libsbml.deb"
 
 script:
     - make BUILD=debug USE_NEUROKIT=1 && make clean
