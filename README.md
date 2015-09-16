@@ -1,4 +1,5 @@
 Build Status - master (This is current development branch): [![Build Status - master](https://travis-ci.org/BhallaLab/moose-core.svg?branch=master)](https://travis-ci.org/BhallaLab/moose-core)
+Build Status - mpi (with openmpi): [![Build Status - mpi](https://travis-ci.org/BhallaLab/moose-core.svg?branch=mpi)](https://travis-ci.org/BhallaLab/moose-core)
 
 # MOOSE
 
