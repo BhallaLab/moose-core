@@ -9,6 +9,7 @@ matrix:
         - os: osx
 branches:
     only:
+        - master
         - mpi
 notifications:
     email:
@@ -30,7 +31,10 @@ before_script:
     - sudo apt-get install python-suds python-matplotlib
     - sudo apt-get install python-qt4-dev python-qt4-gl python-sip-dev libqt4-dev libopenscenegraph-dev
     - sudo apt-get install doxygen python-sphinx
-    - sudo apt-get install libopenmpi-dev openmpi-common
+
+before_install:
+    - sbmlurl="http://sourceforge.net/projects/sbml/files/libsbml/5.9.0/stable/Linux/64-bit/libSBML-5.9.0-Linux-x64.deb"
+    - wget "$sbmlurl" -O "libsbml.deb" && sudo dpkg -i "libsbml.deb" 
 
 install:
     - wget ftp://ftp.gnu.org/gnu/gsl/gsl-1.16.tar.gz
@@ -40,8 +44,6 @@ install:
     - make > /dev/null
     - sudo make install  > /dev/null
     - cd ..
-    - sbmlurl="http://sourceforge.net/projects/sbml/files/libsbml/5.9.0/stable/Linux/64-bit/libSBML-5.9.0-Linux-x64.deb"
-    - wget "$sbmlurl" -O libsbml.deb && sudo dpkg -i libsbml.deb
 
 script:
     - make BUILD=debug USE_NEUROKIT=1 && make clean
