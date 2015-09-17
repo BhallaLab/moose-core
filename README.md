@@ -1,5 +1,4 @@
-Build Status - master (This is current development branch): [![Build Status - master](https://travis-ci.org/BhallaLab/moose-core.svg?branch=master)](https://travis-ci.org/BhallaLab/moose-core)
-Build Status - mpi (with openmpi): [![Build Status - mpi](https://travis-ci.org/BhallaLab/moose-core.svg?branch=mpi)](https://travis-ci.org/BhallaLab/moose-core)
+[![Build Status - master](https://travis-ci.org/BhallaLab/moose-core.svg?branch=master)](https://travis-ci.org/BhallaLab/moose-core) [![Documentation Status](https://readthedocs.org/projects/moose-core/badge/?version=latest)](https://readthedocs.org/projects/moose-core/?badge=latest)
 
 # MOOSE
 
@@ -105,7 +104,7 @@ In addition to core MOOSE requirements:
 - G.V.HarshaRani        -   Web page design, SBML support, Kinetikit Plugin Development
 - Aditya Gilra          -   NeuroML reader development, integrate-and-fire neurons/networks, STDP
 - Aviral Goel           -   Moogli/Neurokit Development
-- Dilawar Singh         -   Packaging
+- Dilawar Singh         - [Packaging](https://github.com/BhallaLab/moose-full/blob/master/README.md)
 
 
 # Support:

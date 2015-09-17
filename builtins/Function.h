@@ -117,6 +117,7 @@ class Function
 
 protected:
     friend double * _functionAddVar(const char * name, void *data);
+    double _t; // local storage for current time
     mutable bool _valid;
     unsigned int _numVar;
     double _lastValue;
