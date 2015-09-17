@@ -50,7 +50,7 @@ http://moose.ncbs.res.in/
 
 # SOURCE REPOSITORY
 
-https://sourceforge.net/projects/moose/
+Old [SourceForge repository](https://sourceforge.net/projects/moose/) is no longer maintained. Current source repository is hosted on [github](https://github.com/BhallaLab/moose-core) with almost all revision history.
 
 
 # REQUIREMENTS
