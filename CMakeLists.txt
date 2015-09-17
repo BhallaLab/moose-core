@@ -64,7 +64,7 @@ option(DEBUG "Building with debugging support" OFF)
 option(GPROF "Build of gprof support" OFF)
 option(ENABLE_UNIT_TESTS "ENABLE UNIT TESTS IN MOOSE" ON)
 option(WITH_PYTHON "Build native python extension of MOOSE" ON)
-option(WITH_MPI  "Enable OPENMPI support" ON)
+option(WITH_MPI  "Enable OPENMPI support" OFF)
 
 ################################# CMKAE MACROS #################################
 
