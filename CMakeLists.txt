@@ -64,6 +64,7 @@ option(DEBUG "Building with debugging support" OFF)
 option(GPROF "Build of gprof support" OFF)
 option(ENABLE_UNIT_TESTS "ENABLE UNIT TESTS IN MOOSE" ON)
 option(WITH_PYTHON "Build native python extension of MOOSE" ON)
+option(WITH_MPI  "Enable OPENMPI support" ON)
 
 ################################# CMKAE MACROS #################################
 
@@ -173,16 +174,18 @@ if(READLINE_FOUND AND TERMCAP_FOUND)
 endif()
 
 # Openmpi
-##find_package(MPI)
-##if(MPI_CXX_FOUND)
-##    message("++ Using MPI from ${MPI_CXX_INCLUDE_PATH}")
-##    include_directories(${MPI_CXX_INCLUDE_PATH})
-##    #set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
-##    add_definitions(-DUSE_MPI)
-##else()
-##    message("++ Cound not find MPI")
-##    add_definitions(-UUSE_MPI)
-##endif()
+if(WITH_MPI)
+    find_package(MPI)
+    if(MPI_CXX_FOUND)
+        message("++ Using MPI from ${MPI_CXX_INCLUDE_PATH}")
+        include_directories(${MPI_CXX_INCLUDE_PATH})
+        #set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
+        add_definitions(-DUSE_MPI)
+    else()
+        message("++ Cound not find MPI")
+        add_definitions(-UUSE_MPI)
+    endif()
+endif(WITH_MPI)
 
 # Add subdirectroeis
 add_subdirectory(basecode)
@@ -245,9 +248,11 @@ if(READLINE_FOUND AND TERMCAP_FOUND)
     list(APPEND SYSTEM_SHARED_LIBS ${Readline_LIBRARY} ${TERMCAP_LIBRARY})
 endif()
 
-#if(MPI_CXX_FOUND)
-#    list(APPEND SYSTEM_SHARED_LIBS ${MPI_CXX_LIBRARIES})
-#endif()
+if(WITH_MPI)
+    if(MPI_CXX_FOUND)
+        list(APPEND SYSTEM_SHARED_LIBS ${MPI_CXX_LIBRARIES})
+    endif()
+endif(WITH_MPI)
 
 ###################################### LINKING #################################
 set(MOOSE_LIBRARIES
