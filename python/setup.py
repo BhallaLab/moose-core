@@ -38,12 +38,16 @@ setup(
         author='Dilwar Singh',
         author_email='dilawars@ncbs.res.in',
         url='http://moose.ncbs.res.in',
-        packages=['libmumbl', 'rdesigneur'
-            , 'moose', 'moose.kkit', 'moose.neuroml', 'moose.backend', 'moose.topology'
+        packages=['libmumbl'
+            , 'rdesigneur'
+            , 'moose', 'moose.kkit', 'moose.neuroml'
+            , 'moose.backend', 'moose.topology'
+            , 'moose.genesis'
             ],
         package_dir = { 'moose' : 'moose' 
             , 'libmumbl' : 'libmumbl' 
             , 'rdesigneur' : 'rdesigneur'
+            , 'genesis' : 'genesis'
             },
         package_data = { 'moose' : ['_moose.so'] },
     ) 
