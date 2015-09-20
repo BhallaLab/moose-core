@@ -41,6 +41,10 @@ class Spine
 		double getHeadLength( const Eref& e ) const;
 		void setHeadDiameter( const Eref& e, double dia );
 		double getHeadDiameter( const Eref& e ) const;
+		void setHeadVolume( const Eref& e, double vol );
+		double getHeadVolume( const Eref& e ) const;
+		void setPsdArea( const Eref& e, double area );
+		double getPsdArea( const Eref& e ) const;
 
 		void setTotalLength( const Eref& e, double len );
 		double getTotalLength( const Eref& e ) const;
@@ -52,6 +56,11 @@ class Spine
 		// Incline to dend, radians. Default is normal to dend and is 0.
 		void setInclination( const Eref& e, double phi ); 
 		double getInclination( const Eref& e ) const;
+
+		void setMinimumSize( const Eref& e, double len );
+		double getMinimumSize( const Eref& e ) const;
+		void setMaximumSize( const Eref& e, double len );
+		double getMaximumSize( const Eref& e ) const;
 
 		// Assign to specific vector. Length of vector does size scaling.
 		//void setVectorDirection( const Eref& e, vector< double > dir ); 
@@ -67,6 +76,14 @@ class Spine
 		static const Cinfo* initCinfo();
 	private:
 		const Neuron* parent_;
+		/**
+		 * Used as a sanity check for assigning dimensions, to avoid
+		 * unreasonable physiological values. 
+		 * Defaults to 20 nanometers, which is somewhat smaller than the
+		 * 30 nm size estimated for synaptic vesicles.
+		 */
+		double minimumSize_;
+		double maximumSize_;
 };
 
 #endif	// _SPINE_H

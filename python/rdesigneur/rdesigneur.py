@@ -378,9 +378,9 @@ class rdesigneur:
                 mesh, name = self.findMeshOnName( i[2] )
                 if  mesh == "":
                     raise BuildError( "buildAdaptors: Failed for " + i[2] )
-                self._buildAdaptor( mesh, i[0], i[1], name, True, i[4], i[5] )
+                self._buildAdaptor( mesh, i[0], i[1], name, i[3], True, i[4], i[5] )
             else:
-                self._buildAdaptor( mesh, i[2], i[3], name, False, i[4], i[5] )
+                self._buildAdaptor( mesh, i[2], i[3], name, i[1], False, i[4], i[5] )
 
 
     ################################################################
@@ -456,6 +456,7 @@ class rdesigneur:
 
         self._configureSolvers()
         for i in self.adaptorList:
+            print i
             self._buildAdaptor( i[0],i[1],i[2],i[3],i[4],i[5],i[6] )
 
     ################################################################
@@ -701,9 +702,26 @@ class rdesigneur:
         moose.delete( a )
     ################################################################
     def _buildAdaptor( self, meshName, elecRelPath, elecField, \
-            chemRelPath, isElecToChem, offset, scale ):
+            chemRelPath, chemField, isElecToChem, offset, scale ):
         mesh = moose.element( '/model/chem/' + meshName )
-        elecComptList = mesh.elecComptList
+        #elecComptList = mesh.elecComptList
+        if elecRelPath == 'spine':
+            elecComptList = moose.vec( mesh.elecComptList[0].path + '/../spine' )
+        else:
+            elecComptList = mesh.elecComptList
+
+        '''
+        for i in elecComptList:
+            print i.diameter
+        print len( elecComptList[0] )
+        print elecComptList[0][0].parent.path
+        print "--------------------------------------"
+        spine = moose.vec( elecComptList[0].path + '/../spine' )
+        for i in spine:
+            print i.headDiameter
+
+        moose.le( elecComptList[0][0].parent )
+        '''
         if len( elecComptList ) == 0:
             raise BuildError( \
                 "buildAdaptor: no elec compts in elecComptList on: " + \
@@ -711,6 +729,7 @@ class rdesigneur:
         startVoxelInCompt = mesh.startVoxelInCompt
         endVoxelInCompt = mesh.endVoxelInCompt
         capField = elecField[0].capitalize() + elecField[1:]
+        capChemField = chemField[0].capitalize() + chemField[1:]
         chemPath = mesh.path + '/' + chemRelPath
         if not( moose.exists( chemPath ) ):
             raise BuildError( \
@@ -732,22 +751,28 @@ class rdesigneur:
             i[3].inputOffset = 0.0
             i[3].outputOffset = offset
             i[3].scale = scale
-            ePath = i[0].path + '/' + elecRelPath
-            if not( moose.exists( ePath ) ):
-                raise BuildError( \
+            if elecRelPath == 'spine':
+                elObj = i[0]
+            else:
+                ePath = i[0].path + '/' + elecRelPath
+                if not( moose.exists( ePath ) ):
+                    raise BuildError( \
                         "Error: buildAdaptor: no elec obj in " + ePath )
-            elObj = moose.element( i[0].path + '/' + elecRelPath )
+                elObj = moose.element( i[0].path + '/' + elecRelPath )
             if ( isElecToChem ):
                 elecFieldSrc = 'get' + capField
+                chemFieldDest = 'set' + capChemField
                 #print ePath, elecFieldSrc, scale
                 moose.connect( i[3], 'requestOut', elObj, elecFieldSrc )
                 for j in range( i[1], i[2] ):
-                    moose.connect( i[3], 'output', chemVec[j], 'setConc')
+                    moose.connect( i[3], 'output', chemVec[j],chemFieldDest)
             else:
+                chemFieldSrc = 'get' + capChemField
                 elecFieldDest = 'set' + capField
                 for j in range( i[1], i[2] ):
-                    moose.connect( i[3], 'requestOut', chemVec[j], 'getConc')
-                moose.connect( i[3], 'output', elObj, elecFieldDest )
+                    moose.connect( i[3], 'requestOut', chemVec[j], chemFieldSrc)
+                    print i[3].path, 'requestOut', chemVec[j].path, chemFieldSrc 
+                msg = moose.connect( i[3], 'output', elObj, elecFieldDest )
 
     #################################################################
     # Here we have a series of utility functions for building cell

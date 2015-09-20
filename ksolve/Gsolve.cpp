@@ -20,8 +20,11 @@
 #include "GssaSystem.h"
 #include "Stoich.h"
 #include "GssaVoxelPools.h"
+#include "../randnum/randnum.h"
 
 #include "Gsolve.h"
+
+#define SIMPLE_ROUNDING 0
 
 const unsigned int OFFNODE = ~0;
 
@@ -332,7 +335,15 @@ void Gsolve::process( const Eref& e, ProcPtr p )
 		vector< double >::iterator i = dvalues.begin() + 4;
 		for ( ; i != dvalues.end(); ++i ) {
 		//	cout << *i << "	" << round( *i ) << "		";
+#if SIMPLE_ROUNDING
 			*i = round( *i );
+#else
+			double base = floor( *i );
+			if ( mtrand() > *i - base )
+				*i = base;
+			else
+				*i = base + 1.0;
+#endif
 		}
 		setBlock( dvalues );
 	}
