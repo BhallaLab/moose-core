@@ -32,7 +32,7 @@ import matplotlib
 try:
     from .plot_utils import *
 except Exception as e:
-    warnings.warn("Failed to plotting utilities: %s" % e)
+    warnings.warn("Failed to importing plotting utilities: %s" % e)
 
 try:
     from .verification_utils import verify
