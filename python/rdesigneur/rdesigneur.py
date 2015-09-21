@@ -771,7 +771,6 @@ class rdesigneur:
                 elecFieldDest = 'set' + capField
                 for j in range( i[1], i[2] ):
                     moose.connect( i[3], 'requestOut', chemVec[j], chemFieldSrc)
-                    print i[3].path, 'requestOut', chemVec[j].path, chemFieldSrc 
                 msg = moose.connect( i[3], 'output', elObj, elecFieldDest )
 
     #################################################################
