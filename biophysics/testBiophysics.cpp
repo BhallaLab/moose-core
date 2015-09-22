@@ -1548,6 +1548,9 @@ static void testNeuronBuildTree()
 	Id dend1 = addCompartment ( "dend1", nid, soma, 100e-6, 0, 0, dendDia);
 	Id branch1 = addCompartment ( "branch1", nid, dend1, 0, 200e-6, 0, branchDia );
 	Id branch2 = addCompartment ( "branch2", nid, dend1, 0, -500e-6, 0, branchDia );
+	static double x[] = { 10e-6, 110e-6, 110e-6, 110e-6 };
+	static double y[] = {0, 0, 200e-6, -500e-6};
+	static double z[] = {0, 0, 0, 0};
 
 	SetGet0::set( nid, "buildSegmentTree" );
 
@@ -1580,7 +1583,7 @@ static void testNeuronBuildTree()
 	// Here we test Neuron::evalExprForElist, which uses the muParser
 	// Note that the wildcard list starts with the spine which is not
 	// a compartment. So the indexing of the arrays e, p and g needs care.
-	unsigned int nuParserNumVal = 10;
+	unsigned int nuParserNumVal = 13;
 	vector< ObjId > elist;
 	wildcardFind( "/n/#", elist );
 	Neuron* n = reinterpret_cast< Neuron* >( nid.eref().data() );
@@ -1609,7 +1612,10 @@ static void testNeuronBuildTree()
 		assert( doubleEq( val[i * nuParserNumVal + 6], maxP ) );
 		assert( doubleEq( val[i * nuParserNumVal + 7], maxG ) );
 		assert( doubleEq( val[i * nuParserNumVal + 8], maxL ) );
-		assert( doubleEq( val[i * nuParserNumVal + 9], 0.0 ) );
+		assert( doubleEq( val[i * nuParserNumVal + 9], x[j] ) );
+		assert( doubleEq( val[i * nuParserNumVal + 10], y[j] ) );
+		assert( doubleEq( val[i * nuParserNumVal + 11], z[j] ) );
+		assert( doubleEq( val[i * nuParserNumVal + 12], 0.0 ) );
 		j++;
 	}
 	//////////////////////////////////////////////////////////////////
