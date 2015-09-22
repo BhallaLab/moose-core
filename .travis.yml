@@ -10,20 +10,19 @@ matrix:
 branches:
     only:
         - master
+        - mpi
 notifications:
     email:
         recipients:
             - dilawar.s.rajput@gmail.com
-            - aviralg@ncbs.res.in
-            - hrani@ncbs.res.in
             - bhalla@ncbs.res.in
-            - ray.subhasis@gmail.com
         on_success: change
         on_failure: always
 
 env:
     - CTEST_MODEL=Nightly
 cache: apt
+
 before_script:
     - sudo apt-get update -qq
     - sudo apt-get install libxml2-dev libbz2-dev
@@ -34,21 +33,16 @@ before_script:
     - sudo apt-get install python-qt4-dev python-qt4-gl python-sip-dev libqt4-dev libopenscenegraph-dev
     - sudo apt-get install doxygen python-sphinx
 
+before_install:
+    - sbmlurl="http://sourceforge.net/projects/sbml/files/libsbml/5.9.0/stable/Linux/64-bit/libSBML-5.9.0-Linux-x64.deb"
+    - wget "$sbmlurl" -O libsbml.deb && sudo dpkg -i libsbml.deb 
+    - wget http://ftp.debian.org/debian/pool/main/g/gsl/libgsl0ldbl_1.16+dfsg-4_amd64.deb -O gsl_1.16.deb
+    - sudo dpkg -i gsl_1.16.deb
+    - wget "http://ftp.debian.org/debian/pool/main/g/gsl/libgsl0-dev_1.16+dfsg-4_amd64.deb" -O gsl_1.16-dev.deb
+    - sudo dpkg -i gsl_1.16-dev.deb
+
 install:
-    - wget ftp://ftp.gnu.org/gnu/gsl/gsl-1.16.tar.gz
-    - tar -xzvf gsl-1.16.tar.gz
-    - cd gsl-1.16 
-    - ./configure --prefix=/usr > /dev/null
-    - make > /dev/null
-    - sudo make install  > /dev/null
-    - cd ..
-    - wget http://sourceforge.net/projects/sbml/files/libsbml/5.9.0/stable/libSBML-5.9.0-core-src.tar.gz
-    - tar -xzvf libSBML-5.9.0-core-src.tar.gz 
-    - cd libsbml-5.9.0 
-    - ./configure --prefix=/usr --with-zlib --with-bzip2 --with-libxml > /dev/null 
-    - make > /dev/null 
-    - sudo make install > /dev/null
-    - cd ..
+    - echo "nothing to do here"
 
 script:
     - make BUILD=debug USE_NEUROKIT=1 && make clean

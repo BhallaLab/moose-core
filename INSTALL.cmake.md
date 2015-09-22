@@ -5,16 +5,27 @@ MOOSE with gnu-make are described in file `INSTALL`.
 
 ## Download the latest source code of moose from github or sourceforge.
 
-    $ git clone -b master https://github.com/BhallaLab/moose 
+    $ git clone -b master https://github.com/BhallaLab/moose-core
     $ cd moose
 
-## Install dependencies 
+## Install dependencies
 
 For moose-core:
 
 - gsl-1.16 or higher.
-- libsbml (optional)
 - libhdf5 
+- libsbml (optional)
+
+    Make sure that `libsml` is installed with `zlib` and `lxml` support.
+    If you are using buildtools, then use the following to install libsbml.
+
+        - wget http://sourceforge.net/projects/sbml/files/libsbml/5.9.0/stable/libSBML-5.9.0-core-src.tar.gz
+        - tar -xzvf libSBML-5.9.0-core-src.tar.gz 
+        - cd libsbml-5.9.0 
+        - ./configure --prefix=/usr --with-zlib --with-bzip2 --with-libxml 
+        - make 
+        - ctest --output-on-failure # optional
+        - sudo make install 
 
 For python module of MOOSE, following additional packages are required:
 
@@ -82,3 +93,10 @@ On Ubuntu, following packages should suffice:
 
     $ sudo apt-get install python-qt4-dev python-qt4-gl libopenscenegraph-dev python-sip-dev
     libqt4-dev 
+
+
+### Travis
+
+We use `Travis-CI` to build MOOSE after every commit. You can see `.travis.yml`
+file in our repository. It has all instructions to build MOOSE on `Ubuntu-12.04
+64bit` server.

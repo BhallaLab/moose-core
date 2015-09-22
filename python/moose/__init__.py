@@ -23,3 +23,5 @@ Builtin functions and classes in moose module (Python only)
 
 """
 from .moose import *
+import genesis
+

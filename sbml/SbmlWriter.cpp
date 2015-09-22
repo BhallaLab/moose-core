@@ -339,7 +339,7 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 		  	for ( vector< Id >::iterator i = children.begin(); i != children.end(); ++i ) 
 		  	{	string funcpath = Field <string> :: get(*i,"path");
 		  		string clsname = Field <string> :: get(*i,"className");
-		  		if (clsname == "Function")
+		  		if (clsname == "Function" or clsname == "ZombieFunction")
 		  		{  	Id funcIdx(funcpath+"/x");
 					string f1x = Field <string> :: get(funcIdx,"path");
 					vector < Id > inputPool = LookupField <string,vector <Id> > :: get(funcIdx,"neighbors","input");
