@@ -147,6 +147,8 @@ public:
              , Vec4f& base_color
              , Vec4f& peak_color
              );
+    void
+    set_distal_diameter(double d);
 
     void
     set_color(osg::Vec4f& color);

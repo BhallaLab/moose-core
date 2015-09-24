@@ -241,6 +241,22 @@ Morphology::_create_light( const Vec4& position
 // }
 
 bool
+Morphology::set_compartment_diameter( const char * compartment_id
+                                    , double distal_d
+                                    )
+{
+    Compartment * compartment = _compartments[compartment_id];
+    compartment -> set_distal_diameter(distal_d);
+    compartment -> create_geometry( lod_resolution
+                                  , lod_distance_delta
+                                  , min_points
+                                  , points_delta
+                                  , _state_set.get()
+                                  );
+    return true;
+}
+
+bool
 Morphology::add_compartment( const string &  compartment_id
                            , const string &  neuron_id
                            , double          proximal_x

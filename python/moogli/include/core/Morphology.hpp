@@ -80,6 +80,12 @@ public:
                    , double          distal_z
                    , double          distal_d
                    );
+
+    bool
+    set_compartment_diameter( const char * compartment_id
+                            , double distal_d
+                            );
+
     void
     set_compartment_color(const char * compartment_id, PyObject * color);
 

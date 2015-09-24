@@ -45,6 +45,10 @@ public:
                    , double          distal_z
                    , double          distal_d
                    );
+    bool
+    set_compartment_diameter( const char * compartment_id
+                            , double distal_d
+                            );
 
     PyObject *
     set_compartment_order(PyObject * compartment_order);

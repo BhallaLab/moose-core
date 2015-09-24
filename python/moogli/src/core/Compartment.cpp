@@ -62,6 +62,12 @@ Compartment::set_distal_parameters( double x
 }
 
 void
+Compartment::set_distal_diameter(double d)
+{
+    _distal_d = d;
+}
+
+void
 Compartment::create_geometry( unsigned int lod_resolution
                             , float lod_distance_delta
                             , unsigned int min_points
