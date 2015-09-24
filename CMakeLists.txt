@@ -54,7 +54,7 @@ option(WITH_DOC "Build documentation using python-sphinx and doxygen" OFF)
 option(VERBOSITY "SET MOOSE VERBOSITY LEVEL" 0)
 
 # Whether to notify the user after 1 second of simulation.
-option(NOTIFY_PROGRESS "Show progress of simulation" ON)
+option(NOTIFY_PROGRESS "Show progress of simulation" OFF)
 
 # STATS INSIDE MOOSE. TODO: Remove it and add support for gprof
 option(ENABLE_LOGGER  "Enable MOOSE logger" OFF)
@@ -64,6 +64,7 @@ option(DEBUG "Building with debugging support" OFF)
 option(GPROF "Build of gprof support" OFF)
 option(ENABLE_UNIT_TESTS "ENABLE UNIT TESTS IN MOOSE" ON)
 option(WITH_PYTHON "Build native python extension of MOOSE" ON)
+option(WITH_MPI  "Enable OPENMPI support" OFF)
 
 ################################# CMKAE MACROS #################################
 
@@ -142,9 +143,6 @@ else()
     find_package(ZLIB REQUIRED)
 endif()
 
-# python support: check for interpreter, sip, pyqt4
-FIND_PACKAGE(PythonDev REQUIRED)
-
 ################################### SETUP BUILD ################################
 include_directories(msg basecode)
 add_executable(moose.bin basecode/main.cpp)
@@ -176,16 +174,20 @@ if(READLINE_FOUND AND TERMCAP_FOUND)
 endif()
 
 # Openmpi
-##find_package(MPI)
-##if(MPI_CXX_FOUND)
-##    message("++ Using MPI from ${MPI_CXX_INCLUDE_PATH}")
-##    include_directories(${MPI_CXX_INCLUDE_PATH})
-##    #set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
-##    add_definitions(-DUSE_MPI)
-##else()
-##    message("++ Cound not find MPI")
-##    add_definitions(-UUSE_MPI)
-##endif()
+if(WITH_MPI)
+    find_package(MPI REQUIRED)
+    if(MPI_CXX_FOUND)
+        message("++ Using MPI from ${MPI_CXX_INCLUDE_PATH}")
+        include_directories(${MPI_CXX_INCLUDE_PATH})
+        set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
+        add_definitions(-DUSE_MPI)
+        SET(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
+        SET(CMAKE_C_COMPILER ${MPI_C_COMPILER})
+    else()
+        message("++ Cound not find MPI")
+        add_definitions(-UUSE_MPI)
+    endif()
+endif(WITH_MPI)
 
 # Add subdirectroeis
 add_subdirectory(basecode)
@@ -248,9 +250,11 @@ if(READLINE_FOUND AND TERMCAP_FOUND)
     list(APPEND SYSTEM_SHARED_LIBS ${Readline_LIBRARY} ${TERMCAP_LIBRARY})
 endif()
 
-#if(MPI_CXX_FOUND)
-#    list(APPEND SYSTEM_SHARED_LIBS ${MPI_CXX_LIBRARIES})
-#endif()
+if(WITH_MPI)
+    if(MPI_CXX_FOUND)
+        list(APPEND SYSTEM_SHARED_LIBS ${MPI_CXX_LIBRARIES})
+    endif()
+endif(WITH_MPI)
 
 ###################################### LINKING #################################
 set(MOOSE_LIBRARIES
@@ -299,6 +303,7 @@ ENDIF(WITH_DOC)
 # Root of all python module.
 SET(PROJECT_PYTHON_PATH ${CMAKE_CURRENT_SOURCE_DIR}/python)
 if(WITH_PYTHON)
+    set(Python_ADDITIONAL_VERSION 2.6 2.7)
     message("++ Building native python extension of MOOSE")
     set(PYMOOSE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/python/moose")
 
