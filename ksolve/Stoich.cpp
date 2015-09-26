@@ -1217,7 +1217,7 @@ void Stoich::unZombifyModel()
 		Element* e = i->element();
 		if ( e != 0 && e->cinfo() == zombieFunctionCinfo ) {
 			ZombieFunction::zombify( e, functionCinfo, Id(), Id() );
-			cout << "ZombieFucntion unziobvify: " << e->getTick() << endl;
+			//cout << "ZombieFunction unzombify: " << e->getTick() << endl;
 		}
 		if ( e != 0 && e->getTick() == -2 ) {
 			int t = Clock::lookupDefaultTick( e->cinfo()->name() );

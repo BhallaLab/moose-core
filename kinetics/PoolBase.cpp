@@ -277,9 +277,15 @@ void PoolBase::setConcInit( const Eref& e, double c )
 	vSetConcInit( e, c );
 }
 
-double PoolBase::getConcInit( const Eref& e ) const
+double PoolBase::vGetConcInit( const Eref& e ) const
 {
 	return concInit_;
+}
+
+double PoolBase::getConcInit( const Eref& e ) const
+{
+	// return concInit_;
+	return vGetConcInit( e );
 }
 
 void PoolBase::setDiffConst( const Eref& e, double v )

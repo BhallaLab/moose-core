@@ -35,6 +35,9 @@ class nuParser: public mu::Parser
 			maxP(0.0), // Maximum value of *p* for this neuron.
 			maxG(0.0), // Maximum value of *g* for this neuron.
 			maxL(0.0), // Maximum value of *L* for this neuron.
+			x(0.0), // X position of segment.
+			y(0.0), // Y position of segment.
+			z(0.0), // Z position of segment.
 			oldVal(0.0), // Original value of field, if needed.
 			useOldVal( false ) // is the 'orig' field needed?
 		{
@@ -46,6 +49,9 @@ class nuParser: public mu::Parser
 			DefineVar( "maxP", &maxP );
 			DefineVar( "maxG", &maxG );
 			DefineVar( "maxL", &maxL );
+			DefineVar( "x", &x );
+			DefineVar( "y", &y );
+			DefineVar( "z", &z );
 			DefineVar( "oldVal", &oldVal );
 			DefineFun( "H", nuParser::H );
 			if ( expr.find( "oldVal" ) != string::npos )
@@ -54,7 +60,8 @@ class nuParser: public mu::Parser
 		}
 
 		/// Defines the order of arguments in the val array.
-		enum valArgs{ EXPR, P, G, EL, LEN, DIA, MAXP, MAXG, MAXL, OLDVAL };
+		enum valArgs{ EXPR, P, G, EL, LEN, DIA, MAXP, MAXG, MAXL,
+			   X, Y, Z,	OLDVAL };
 
 		static double H( double arg ) { // Heaviside function.
 			return ( arg > 0.0);
@@ -69,6 +76,9 @@ class nuParser: public mu::Parser
 			maxP = *(arg0 + nuParser::MAXP );
 			maxG = *(arg0 + nuParser::MAXG );
 			maxL = *(arg0 + nuParser::MAXL );
+			x = *(arg0 + nuParser::X );
+			y = *(arg0 + nuParser::Y );
+			z = *(arg0 + nuParser::Z );
 			oldVal = *(arg0 + nuParser::OLDVAL );
 			return Eval();
 		}
@@ -82,11 +92,14 @@ class nuParser: public mu::Parser
 		double maxP; // Maximum value of p for this neuron.
 		double maxG; // Maximum value of p for this neuron.
 		double maxL; // Maximum value of L for this neuron.
+		double x; // X position of segment in metres
+		double y; // Y position of segment in metres
+		double z; // Z position of segment in metres
 		double oldVal; // Old value of the field, used for relative scaling
 		bool useOldVal; // is the 'oldVal' field needed?
 };
 
-const unsigned int nuParser::numVal = 10;
+const unsigned int nuParser::numVal = 13;
 
 const Cinfo* Neuron::initCinfo()
 {
@@ -368,9 +381,9 @@ const Cinfo* Neuron::initCinfo()
 		"valuesFromExpression",
 		"Vector of values computed for each electrical compartment that "
 	   	"matches the 'path expression' pair in the argument string."
-		"This has 10 times the number of entries as # of compartments."
+		"This has 13 times the number of entries as # of compartments."
 		"For each compartment the entries are: \n"
-		"val, p, g, L, len, dia, maxP, maxG, maxL, 0",
+		"val, p, g, L, len, dia, maxP, maxG, maxL, x, y, z, 0",
 		&Neuron::getExprVal
 	);
 
@@ -1290,6 +1303,9 @@ void Neuron::evalExprForElist( const vector< ObjId >& elist,
 					val[valIndex + nuParser::MAXP] = maxP_;
 					val[valIndex + nuParser::MAXG] = maxG_;
 					val[valIndex + nuParser::MAXL] = maxL_;
+					val[valIndex + nuParser::X] = segs_[j->second].vec().a0();
+					val[valIndex + nuParser::Y] = segs_[j->second].vec().a1();
+					val[valIndex + nuParser::Z] = segs_[j->second].vec().a2();
 					// Can't assign oldVal on first arg
 					val[valIndex + nuParser::OLDVAL] = 0.0; 
 

@@ -114,6 +114,12 @@ void VoxelPoolsBase::scaleVolsBufsRates(
 	for ( vector< double >::iterator 
 					i = Sinit_.begin(); i != Sinit_.end(); ++i )
 		*i *= ratio; // Scale Bufs
+	// Here we also need to set the Ns for the buffered pools.
+	unsigned int start = stoichPtr_->getNumVarPools();
+	unsigned int end = start + stoichPtr_->getNumBufPools();
+	assert( end == Sinit_.size() );
+	for ( unsigned int i = start; i < end; ++i )
+		S_[i] = Sinit_[i];
 
 	// Scale rates. Start by clearing out old rates if any
 	for ( unsigned int i = 0; i < rates_.size(); ++i )

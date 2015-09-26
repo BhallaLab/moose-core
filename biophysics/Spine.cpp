@@ -39,27 +39,72 @@ const Cinfo* Spine::initCinfo()
 		);
 		static ElementValueFinfo< Spine, double > headDiameter (
 			"headDiameter",
-			"Diameter of spine head.",
+			"Diameter of spine head, and also the diameter of the PSD. ",
 			&Spine::setHeadDiameter,
 			&Spine::getHeadDiameter
 		);
+		static ElementValueFinfo< Spine, double > psdArea (
+			"psdArea",
+			"Area of the Post synaptic density, PSD. This is the same as "
+			"the cross-section area of spine head, perpendicular to shaft. "
+			"Assumes that the head is a cylinder and that its length "
+			"does not change. \n"
+			"This is useful to scale # of surface molecules on the PSD. ",
+			&Spine::setPsdArea,
+			&Spine::getPsdArea
+		);
+		static ElementValueFinfo< Spine, double > headVolume (
+			"headVolume",
+			"Volume of spine head, treating it as a cylinder. When this is "
+			"scaled by the user, both the diameter and the length of the "
+			"spine head scale by the cube root of the ratio to the "
+			"previous volume. The diameter of the PSD is pegged to the "
+			"diameter fo the spine head. \n"
+			"This is useful to scale total # of molecules in the head. ",
+			&Spine::setHeadVolume,
+			&Spine::getHeadVolume
+		);
 		static ElementValueFinfo< Spine, double > totalLength (
 			"totalLength",
-			"Length of entire spine.",
+			"Length of entire spine. Scales both the length of the shaft "
+			"and of the spine head, without changing any of the diameters.",
 			&Spine::setTotalLength,
 			&Spine::getTotalLength
 		);
 		static ElementValueFinfo< Spine, double > angle (
 			"angle",
-			"angle of spine around shaft. Longitude. 0 is away from soma",
+			"Angle of spine around shaft. Longitude. 0 is away from soma. "
+			"Not yet implemented. ",
 			&Spine::setAngle,
 			&Spine::getAngle
 		);
 		static ElementValueFinfo< Spine, double > inclination (
 			"inclination",
-			"inclination of spine with ref to shaft. Normal is 0.",
+			"inclination of spine with ref to shaft. Normal is 0. "
+			"Not yet activated. ",
 			&Spine::setInclination,
 			&Spine::getInclination
+		);
+		static ElementValueFinfo< Spine, double > minimumSize (
+			"minimumSize",
+			"Sanity check for the smallest permitted length or diameter. "
+			"Used to avoid unreasonable physiological values, which "
+		    "are all too easily reached when simulations run unbounded. "
+		 	"Defaults to 20 nanometers, which is somewhat smaller than the "
+		 	"30 nm size estimated for synaptic vesicles. "
+			"Does *not* retroactively resize anything. ",
+			&Spine::setMinimumSize,
+			&Spine::getMinimumSize
+		);
+		static ElementValueFinfo< Spine, double > maximumSize (
+			"maximumSize",
+			"Sanity check for the largest permitted length or diameter. "
+			"Used to avoid unreasonable physiological values, which "
+		    "are all too easily reached when simulations run unbounded. "
+		 	"Defaults to 10 microns, which is a pretty monstrous spine. "
+			"Does *not* retroactively resize anything. ",
+			&Spine::setMaximumSize,
+			&Spine::getMaximumSize
 		);
 
 		//////////////////////////////////////////////////////////////
@@ -74,11 +119,13 @@ const Cinfo* Spine::initCinfo()
 		//////////////////////////////////////////////////////////////
 
 	static Finfo* spineFinfos[] = {
-		&shaftLength,		// Readonly Value
-		&shaftDiameter,		// Readonly Value
-		&headLength,		// Readonly Value
-		&headDiameter,		// Readonly Value
-		&totalLength,		// Readonly Value
+		&shaftLength,		// Value
+		&shaftDiameter,		// Value
+		&headLength,		// Value
+		&headDiameter,		// Value
+		&psdArea,			// Value
+		&headVolume,		// Value
+		&totalLength,		// Value
 	};
 
 	static string doc[] = 
@@ -111,11 +158,15 @@ const Cinfo* Spine::initCinfo()
 static const Cinfo* spineCinfo = Spine::initCinfo();
 
 Spine::Spine()
-	: parent_( 0 )
+	: parent_( 0 ),
+		minimumSize_( 20.0e-9 ),	// 20 nanometres
+		maximumSize_( 10.0e-6 )		// 10 microns
 {;}
 
 Spine::Spine( const Neuron* parent )
-	: parent_( parent )
+	: parent_( parent ),
+		minimumSize_( 20.0e-9 ),	// 20 nanometres
+		maximumSize_( 10.0e-6 )		// 10 microns
 {;}
 
 //////////////////////////////////////////////////////////////
@@ -133,6 +184,10 @@ double Spine::getShaftLength( const Eref& e ) const
 
 void Spine::setShaftLength( const Eref& e, double len )
 {
+	if ( len < minimumSize_ )
+		len = minimumSize_;
+	else if ( len > maximumSize_ )
+		len = maximumSize_;
 	vector< Id > sl = parent_->spineIds( e.fieldIndex() );
 	if ( sl.size() > 1 && 
 			sl[0].element()->cinfo()->isA( "CompartmentBase" ) ) 
@@ -170,6 +225,11 @@ double Spine::getShaftDiameter( const Eref& e ) const
 
 void Spine::setShaftDiameter( const Eref& e, double dia )
 {
+	if ( dia < minimumSize_ )
+		dia = minimumSize_;
+	else if ( dia > maximumSize_ )
+		dia = maximumSize_;
+
 	vector< Id > sl = parent_->spineIds( e.fieldIndex() );
 	if ( sl.size() > 1 && 
 					sl[0].element()->cinfo()->isA( "CompartmentBase") )
@@ -193,6 +253,11 @@ double Spine::getHeadLength( const Eref& e ) const
 
 void Spine::setHeadLength( const Eref& e, double len )
 {
+	if ( len < minimumSize_ )
+		len = minimumSize_;
+	else if ( len > maximumSize_ )
+		len = maximumSize_;
+
 	vector< Id > sl = parent_->spineIds( e.fieldIndex() );
 	if ( sl.size() > 1 && 
 					sl[1].element()->cinfo()->isA( "CompartmentBase") ) 
@@ -223,6 +288,10 @@ double Spine::getHeadDiameter( const Eref& e ) const
 
 void Spine::setHeadDiameter( const Eref& e, double dia )
 {
+	if ( dia < minimumSize_ )
+		dia = minimumSize_;
+	else if ( dia > maximumSize_ )
+		dia = maximumSize_;
 	vector< Id > sl = parent_->spineIds( e.fieldIndex() );
 	if ( sl.size() > 1 && 
 			sl[0].element()->cinfo()->isA( "CompartmentBase") )
@@ -237,6 +306,55 @@ void Spine::setHeadDiameter( const Eref& e, double dia )
 	}
 }
 
+double Spine::getPsdArea( const Eref& e ) const
+{
+	double ret = getHeadDiameter( e );
+	return ret * ret * PI / 4.0;
+}
+
+void Spine::setPsdArea( const Eref& e, double area )
+{
+	if ( area < 0 ) {
+		setHeadDiameter( e, minimumSize_ );
+	} else  {
+		double dia = 2.0 * sqrt( area / PI );
+		setHeadDiameter( e, dia );
+	}
+}
+
+double Spine::getHeadVolume( const Eref& e ) const
+{
+	double dia = getHeadDiameter( e );
+	return getHeadLength( e ) * dia * dia * PI / 4.0;
+}
+
+// Handle like a cylinder of equal length and dia. vol = PI*dia*dia*len/4
+void Spine::setHeadVolume( const Eref& e, double volume )
+{
+	if ( volume < 0 )
+		volume = 0.0;
+	double dia = pow( volume * 4.0 / PI, 1.0/3.0 );
+	if ( dia < minimumSize_ )
+		volume = pow( minimumSize_, 3.0 ) * PI / 4.0;
+	else if ( dia > maximumSize_ )
+		volume = pow( maximumSize_, 3.0 ) * PI / 4.0;
+
+	vector< Id > sl = parent_->spineIds( e.fieldIndex() );
+	if ( sl.size() > 1 && 
+			sl[0].element()->cinfo()->isA( "CompartmentBase") )
+	{
+		double origLen = Field< double >::get( sl[1], "length" );
+		double origDia = Field< double >::get( sl[1], "diameter" );
+		double oldVolume = origLen * origDia * origDia * PI / 4.0;
+		double ratio = pow( volume / oldVolume, 1.0/3.0 );
+
+		SetGet2< double, double >::set( 
+			sl[1], "setGeomAndElec", origLen * ratio, origDia * ratio );
+		parent_->scaleHeadDiffusion( e.fieldIndex(), origLen * ratio, origDia * ratio );
+		parent_->scaleBufAndRates( e.fieldIndex(), ratio, ratio );
+	}
+}
+
 double Spine::getTotalLength( const Eref& e ) const
 {
 	return getHeadLength( e ) + getShaftLength( e );
@@ -247,8 +365,17 @@ void Spine::setTotalLength( const Eref& e, double len )
 	double shaftLen = getShaftLength( e );
 	double headLen = getHeadLength( e );
 	double totLen = shaftLen + headLen;
-	setShaftLength( e, shaftLen * len / totLen );
-	setHeadLength( e, headLen * len / totLen );
+
+	shaftLen *= len / totLen;
+	headLen *= len / totLen;
+
+	/// Don't set this if either of them is out of range.
+	if ( shaftLen < minimumSize_ || shaftLen > maximumSize_ ||
+		headLen < minimumSize_ || headLen > maximumSize_ )
+		return;
+
+	setShaftLength( e, shaftLen );
+	setHeadLength( e, headLen );
 }
 
 double Spine::getAngle( const Eref& e ) const
@@ -269,4 +396,24 @@ double Spine::getInclination( const Eref& e ) const
 void Spine::setInclination( const Eref& e, double theta )
 {	
 	;
+}
+
+double Spine::getMinimumSize( const Eref& e ) const
+{
+	return minimumSize_;
+}
+
+void Spine::setMinimumSize( const Eref& e, double len )
+{
+	minimumSize_ = len;
+}
+
+double Spine::getMaximumSize( const Eref& e ) const
+{
+	return maximumSize_;
+}
+
+void Spine::setMaximumSize( const Eref& e, double len )
+{
+	maximumSize_ = len;
 }

@@ -338,9 +338,13 @@ void GssaVoxelPools::xferInOnlyProxies(
 {
 	unsigned int offset = voxelIndex * poolIndex.size();
 	vector< double >::const_iterator i = values.begin() + offset;
+	unsigned int proxyEndIndex = stoichPtr_->getNumVarPools() + 
+			stoichPtr_->getNumProxyPools();
 	for ( vector< unsigned int >::const_iterator 
 			k = poolIndex.begin(); k != poolIndex.end(); ++k ) {
-		if ( *k >= size() - numProxyPools ) {
+		// if ( *k >= size() - numProxyPools ) 
+		if ( *k >= stoichPtr_->getNumVarPools() && *k < proxyEndIndex )
+		{
 			varSinit()[*k] = (varS()[*k] += round( *i ));
 		}
 		i++;

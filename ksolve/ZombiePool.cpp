@@ -125,7 +125,15 @@ void ZombiePool::vSetConcInit( const Eref& e, double conc )
 	double n = NA * conc * lookupVolumeFromMesh( e );
 	vSetNinit( e, n );
 }
+
 // Do not get concInit from ZombiePool, the PoolBase handles it.
+// Reconsider this, since for arrays of ZombiePools we end up with problems
+// in that there is just  a single PoolBase so all the concInits are 
+// the same. Here is a reimplementation.
+double ZombiePool::vGetConcInit( const Eref& e ) const
+{
+	return vGetNinit( e ) / (NA * lookupVolumeFromMesh( e ) );
+}
 
 void ZombiePool::vSetDiffConst( const Eref& e, double v )
 {
