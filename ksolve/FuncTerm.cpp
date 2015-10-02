@@ -86,7 +86,8 @@ void FuncTerm::setExpr( const string& expr )
 		expr_ = expr;
 	} catch(mu::Parser::exception_type &e) {
 		showError(e);
-		return;
+		//return;
+                throw(e);
 	}
 }
 
