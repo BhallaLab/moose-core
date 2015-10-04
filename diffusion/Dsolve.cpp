@@ -326,13 +326,20 @@ void Dsolve::calcJunction( const DiffJunction& jn, double dt )
 		if ( myDv.getDiffConst() < EPSILON )
 			continue;
 		DiffPoolVec& otherDv = other->pools_[ jn.otherPools[i] ];
+		if ( otherDv.getDiffConst() < EPSILON )
+			continue;
+		// This geom mean is used in case we have the odd situation of
+		// different diffusion constants.
+		double effectiveDiffConst = 
+			sqrt( myDv.getDiffConst() * otherDv.getDiffConst() );
 		for ( vector< VoxelJunction >::const_iterator
 			j = jn.vj.begin(); j != jn.vj.end(); ++j ) {
 			double myN = myDv.getN( j->first );
 			double otherN = otherDv.getN( j->second );
 			// Here we do an exp Euler calculation
 			// rf is rate from self to other.
-			double k = myDv.getDiffConst() * j->diffScale; 
+			// double k = myDv.getDiffConst() * j->diffScale; 
+			double k = effectiveDiffConst * j->diffScale; 
 			double lastN = myN;
 			myN = integ( myN, 
 				k * myN / j->firstVol, 
@@ -402,6 +409,9 @@ void Dsolve::setStoich( Id id )
 			pools_[ poolIndex ].setId( pid.value() );
 			pools_[ poolIndex ].setDiffConst( diffConst );
 			pools_[ poolIndex ].setMotorConst( motorConst );
+			//cout << i << " poolIndex=" <<  poolIndex <<
+			//		", id=" << pid.value() << 
+			//		", name=" << pid.element()->getName() << endl;
 		}
 	}
 }
