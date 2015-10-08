@@ -852,6 +852,8 @@ double NeuroMesh::getMeshEntryVolume( unsigned int fid ) const
 	assert( nodeIndex_[fid] < nodes_.size() );
 	const NeuroNode& node = nodes_[ nodeIndex_[fid] ];
 	assert( fid >= node.startFid() );
+	if ( node.parent() == ~0U )
+		return node.voxelVolume( node, fid - node.startFid() );
 	assert ( node.parent() < nodes_.size() );
 	const NeuroNode& parent = nodes_[ node.parent() ];
 	return node.voxelVolume( parent, fid - node.startFid() );

@@ -330,7 +330,7 @@ void Ksolve::setStoich( Id stoich )
 		// ode.initStepSize = getEstimatedDt();
 		ode.initStepSize = 0.01; // This will be overridden at reinit.
 #ifdef USE_GSL
-		ode.gslSys.dimension = stoichPtr_->getNumAllPools() + stoichPtr_->getNumProxyPools();
+		ode.gslSys.dimension = stoichPtr_->getNumAllPools();
 		if ( ode.gslSys.dimension == 0 )
 			return; // No pools, so don't bother.
 		innerSetMethod( ode, method_ );
@@ -415,8 +415,7 @@ void Ksolve::setNvec( unsigned int voxel, vector< double > nVec )
 double Ksolve::getEstimatedDt() const
 {
 	static const double EPSILON = 1e-15;
-	vector< double > s( stoichPtr_->getNumAllPools() + 
-					stoichPtr_->getNumProxyPools(), 1.0 );
+	vector< double > s( stoichPtr_->getNumAllPools(), 1.0 );
 	vector< double > v( stoichPtr_->getNumRates(), 0.0 );
 	double maxVel = 0.0;
 	if ( pools_.size() > 0.0 ) {
