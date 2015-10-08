@@ -200,13 +200,20 @@ def plotVector(vec, xvec = None, **options):
             plt.legend(loc='best', prop={'size' : 9})
 
 
-def saveRecords(dataDict, xvec = None, **kwargs):
+def saveRecords(records, xvec = None, **kwargs):
     """saveRecords Given a dictionary of data with (key, vector) pair, it saves
     them.
 
     :param dataDict:
     :param **kwargs:
     """
+
+    dataDict = {}
+    if kwargs.get('sorted', True):
+        for k in sorted(records.keys(), key=str.lower):
+            dataDict[k] = records[k]
+    else:
+        dataDict = records
 
     assert type(dataDict) == dict, "Got %s" % type(dataDict)
     if len(dataDict) == 0:
@@ -234,13 +241,16 @@ def saveRecords(dataDict, xvec = None, **kwargs):
     with open(outfile, 'w') as f:
         f.write("\n".join(text))
 
-def plotRecords(dataDict, xvec = None, **kwargs):
+def plotRecords(records, xvec = None, **kwargs):
     """plotRecords Plot given records in dictionary.
 
-    :param dataDict:
+    :param records:
     :param xvec: If None, use moose.Clock to generate xvec.
     :param **kwargs:
     """
+    dataDict = {}
+    for k in sorted(records.keys(), key=str.lower):
+        dataDict[k] = records[k]
 
     legend = kwargs.get('legend', True)
     outfile = kwargs.get('outfile', None)

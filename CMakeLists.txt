@@ -65,6 +65,7 @@ option(GPROF "Build of gprof support" OFF)
 option(ENABLE_UNIT_TESTS "ENABLE UNIT TESTS IN MOOSE" ON)
 option(WITH_PYTHON "Build native python extension of MOOSE" ON)
 option(WITH_MPI  "Enable OPENMPI support" OFF)
+option(WITH_CURSES "Enable ncurses" OFF)
 
 ################################# CMKAE MACROS #################################
 
@@ -438,12 +439,10 @@ endif(WITH_DOC)
 
 install(TARGETS moose.bin
     DESTINATION bin
-    COMPONENT moose-core
     )
 
 install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/moose
     DESTINATION bin
-    COMPONENT moose-core
     )
 
 if(WITH_PYTHON)
@@ -461,7 +460,6 @@ if(WITH_DOC)
     message(STATUS "Installing moose doc")
     install(DIRECTORY ${USER_DOC_OUTPUT_DIR}
         DESTINATION share/doc/moose
-        COMPONENT moose-doc
         )
 
     install(DIRECTORY ${DEVELOPER_DOC_OUTPUT_DIR}

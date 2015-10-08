@@ -567,6 +567,7 @@ unsigned int Stoich::getNumFuncs() const
 const FuncTerm* Stoich::funcs( unsigned int i ) const
 {
 	assert( i < funcs_.size() );
+        assert( funcs_[i]);
 	return funcs_[i];
 }
 

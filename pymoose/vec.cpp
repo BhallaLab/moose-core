@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Mon Jul 22 16:46:37 2013 (+0530)
 // Version: 
-// Last-Updated: Tue Jul 23 19:10:11 2013 (+0530)
+// Last-Updated: Fri Sep 25 23:00:48 2015 (-0400)
 //           By: subha
-//     Update #: 58
+//     Update #: 80
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -152,7 +152,7 @@ extern "C" {
     PyDoc_STRVAR(moose_Id_doc,
                  "An object uniquely identifying a moose array-element.\n"
                  "\n"
-                 "array-elements are narray-like objects which can have one or more"
+                 "array-elements are array-like objects which can have one or more"
                  " single-elements within them."
                  " vec can be traversed like a Python sequence and is item is an"
                  " element identifying single-objects contained in the array element.\n"
@@ -161,12 +161,39 @@ extern "C" {
                  " but as long as they have the same path/id value, they all point to"
                  " the same entity in MOOSE.\n"
                  "\n"
-                 "Field access to ematrices are vectorized. For example, vec.name returns a"
-                 " tuple containing the names of all the single-elements in this"
+                 "Field access are vectorized. For example, if `comp` is a vec of"
+                 " Compartments, which has a field called `Vm` for membrane voltage, then"
+                 " `comp.Vm` returns a"
+                 " tuple containing the `Vm` value of all the single-elements in this"
                  " vec. There are a few special fields that are unique for vec and are not"
-                 " vectorized. These are `path`, `value`, `shape` and `className`."
+                 " vectorized. These are `path`, `name`, `value`, `shape` and `className`."
                  " There are two ways an vec can be initialized, (1) create a new array"
                  " element or (2) create a reference to an existing object.\n"
+                 "\n    Fields:"
+                 "\n    -------"
+                 "\n    path : str"
+                 "\n       Path of the vec. In moose vecs are organized in a tree structure"
+                 " like unix file system and the paths follow the same convention."
+                 "\n"
+                 "\n    name : str"
+                 "\n        Name of the vec."
+                 "\n"
+                 "\n    value : int/long"                 
+                 "\n        Numeric identifier of the vec. This is unique within a single"
+                 " execution. vec comparison is based on this value and its hash is also"
+                 " this. So you can compare and sort vecs and use them as dict keys."
+                 "\n"
+                 "\n    shape : tuple of ints"
+                 "\n        Dimensions of the vec (as shape in numpy.ndarray). Currently only"
+                 " one-dimensional vecs are implemented."
+                 "\n"
+                 "\n    className: str"                 
+                 "\n         The class of the moose object this vec contains. MOOSE core"
+                 " implements its own class system independent of Python. pymoose creates"
+                 " thin wrappers around them. This field provides you the moose class"
+                 " name as defined in C++"
+                 "\n"
+                 "\n Constructor:"
                  "\n"
                  "\n    vec(self, path=path, n=size, g=isGlobal, dtype=className)"
                  "\n    "
