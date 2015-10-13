@@ -209,10 +209,13 @@ def saveRecords(records, xvec = None, **kwargs):
     """
 
     dataDict = {}
-    if kwargs.get('sorted', True):
-        for k in sorted(records.keys(), key=str.lower):
-            dataDict[k] = records[k]
-    else:
+    try:
+        if kwargs.get('sorted', True):
+            for k in sorted(records.keys(), key=str.lower):
+                dataDict[k] = records[k]
+        else:
+            dataDict = records
+    except Exception as e:
         dataDict = records
 
     assert type(dataDict) == dict, "Got %s" % type(dataDict)
@@ -249,8 +252,11 @@ def plotRecords(records, xvec = None, **kwargs):
     :param **kwargs:
     """
     dataDict = {}
-    for k in sorted(records.keys(), key=str.lower):
-        dataDict[k] = records[k]
+    try:
+        for k in sorted(records.keys(), key=str.lower):
+            dataDict[k] = records[k]
+    except Exception as e:
+        dataDict = records
 
     legend = kwargs.get('legend', True)
     outfile = kwargs.get('outfile', None)
