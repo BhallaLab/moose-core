@@ -271,7 +271,7 @@ class rdesigneur:
     def buildCellProto( self ):
         for i in self.cellProtoList:
             if self.checkAndBuildProto( "cell", i, \
-                ["Compartment", "SymCompartment"], ["swc", "p", "nml"] ):
+                ["Compartment", "SymCompartment"], ["swc", "p", "nml", "xml"] ):
                 self.elecid = moose.element( '/library/' + i[1] )
             else:
                 self._loadElec( i[0], i[1] )
@@ -280,7 +280,7 @@ class rdesigneur:
     def buildSpineProto( self ):
         for i in self.spineProtoList:
             if not self.checkAndBuildProto( "spine", i, \
-                ["Compartment", "SymCompartment"], ["swc", "p", "nml"] ):
+                ["Compartment", "SymCompartment"], ["swc", "p", "nml", "xml"] ):
                 self._loadElec( i[0], i[1] )
 
     def parseChanName( self, name ):
