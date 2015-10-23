@@ -118,7 +118,7 @@ void KinSparseMatrix::fireReac( unsigned int reacIndex, vector< double >& S )
 		colIndex_.begin() + rowBeginIndex;
 
 	for ( vector< int >::const_iterator i = rowBegin; i != rowEnd; ++i ) {
-		assert( S[ *molIndex ] + *i >= 0.0 );
+		// assert( S[ *molIndex ] + *i >= 0.0 );
 		S[ *molIndex++ ] += *i;
 	}
 }

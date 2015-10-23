@@ -326,13 +326,20 @@ void Dsolve::calcJunction( const DiffJunction& jn, double dt )
 		if ( myDv.getDiffConst() < EPSILON )
 			continue;
 		DiffPoolVec& otherDv = other->pools_[ jn.otherPools[i] ];
+		if ( otherDv.getDiffConst() < EPSILON )
+			continue;
+		// This geom mean is used in case we have the odd situation of
+		// different diffusion constants.
+		double effectiveDiffConst = 
+			sqrt( myDv.getDiffConst() * otherDv.getDiffConst() );
 		for ( vector< VoxelJunction >::const_iterator
 			j = jn.vj.begin(); j != jn.vj.end(); ++j ) {
 			double myN = myDv.getN( j->first );
 			double otherN = otherDv.getN( j->second );
 			// Here we do an exp Euler calculation
 			// rf is rate from self to other.
-			double k = myDv.getDiffConst() * j->diffScale; 
+			// double k = myDv.getDiffConst() * j->diffScale; 
+			double k = effectiveDiffConst * j->diffScale; 
 			double lastN = myN;
 			myN = integ( myN, 
 				k * myN / j->firstVol, 
@@ -388,10 +395,11 @@ void Dsolve::setStoich( Id id )
 	poolMap_.pop_back();
 
 	path_ = Field< string >::get( stoich_, "path" );
+	cout << "Pool Info for stoich " << id.path() << endl;
 
 	for ( unsigned int i = 0; i < poolMap_.size(); ++i ) {
 		unsigned int poolIndex = poolMap_[i];
-		if ( poolIndex < pools_.size() ) {
+		if ( poolIndex != ~0U && poolIndex < pools_.size() ) {
 			// assert( poolIndex < pools_.size() );
 			Id pid( i + poolMapStart_ );
 			assert( pid.element()->cinfo()->isA( "PoolBase" ) );
@@ -402,6 +410,11 @@ void Dsolve::setStoich( Id id )
 			pools_[ poolIndex ].setId( pid.value() );
 			pools_[ poolIndex ].setDiffConst( diffConst );
 			pools_[ poolIndex ].setMotorConst( motorConst );
+			/*
+			cout << i << " poolIndex=" <<  poolIndex <<
+					", id=" << pid.value() << 
+					", name=" << pid.element()->getName() << endl;
+					*/
 		}
 	}
 }
@@ -617,6 +630,20 @@ void Dsolve::buildMeshJunctions( const Eref& e, Id other )
 		"' is not a Mesh\n";
 }
 
+void printJunction( Id self, Id other, const DiffJunction& jn )
+{
+	cout << "Junction between " << self.path() << ", " << other.path() << endl;
+	cout << "Pool indices: myPools, otherPools\n";
+	for ( unsigned int i = 0; i < jn.myPools.size(); ++i )
+		cout << i << "	" << jn.myPools[i] << "	" << jn.otherPools[i] << endl;
+	cout << "Voxel junctions: first	second	firstVol	secondVol	diffScale\n";
+	for ( unsigned int i = 0; i < jn.vj.size(); ++i ) {
+		cout << i << "	" << jn.vj[i].first << "	" << jn.vj[i].second <<
+		"	" << jn.vj[i].firstVol << "	" << jn.vj[i].secondVol <<
+			   "	" << jn.vj[i].diffScale <<	endl;
+	}
+}
+
 // Static utility func for building junctions
 void Dsolve::innerBuildMeshJunctions( Id self, Id other )
 {
@@ -660,6 +687,7 @@ void Dsolve::innerBuildMeshJunctions( Id self, Id other )
 		i->secondVol = otherVols[i->second];
 	}
 
+	// printJunction( self, other, jn );
 	mySolve->junctions_.push_back( jn );
 }
 

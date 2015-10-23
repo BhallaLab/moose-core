@@ -155,6 +155,8 @@ void testSetupReac()
 
 void testBuildStoich()
 {
+		// In the updated version, we have reordered all pools and reacs by
+		// Id number, modulo varPools then bufPOols.
 		// Matrix looks like:
 		// Reac Name	R1	R2	e1a	e1b	e2
 		// MolName	
@@ -181,19 +183,6 @@ void testBuildStoich()
 		// D			-1	0	0	0	0
 		// tot1			0	0	0	0	0
 		//
-		// But the reacs have also been reordered:
-		// 	Reac Name	e1a     e1b     e2     R1       R2
-		// 	A			0       0       0       -1      0
-		// 	B			0       0       0       1       -2
-		// 	C			-1      0       0       0       1
-		// 	E			0       1       -1      0       0
-		// 	F			0       0       1       0       0
-		// 	enz1		-1      1       0       0       0
-		// 	enz2		0       0       0       0       0
-		// 	e1cplx		1       -1      0       0       0
-		// 	D			0       0       0       -1      0
-		// 	tot1		0       0       0       0       0
-		//
 		// (This is the output of the print command on the sparse matrix.)
 		//
 	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
@@ -204,7 +193,9 @@ void testBuildStoich()
 	Field< Id >::set( stoich, "ksolve", ksolve );
 
 	// Used to get at the stoich matrix from gdb.
-	// Stoich* stoichPtr = reinterpret_cast< Stoich* >( stoich.eref().data() );
+#ifndef NDEBUG
+	Stoich* stoichPtr = reinterpret_cast< Stoich* >( stoich.eref().data() );
+#endif
 	
 	Field< string >::set( stoich, "path", "/kinetics/##" );
 
@@ -226,8 +217,8 @@ void testBuildStoich()
 	assert( entries[0] == -1 );
 	assert( entries[1] == 1 );
 	assert( entries[2] == -2 );
-	assert( entries[3] == -1 );
-	assert( entries[4] == 1 );
+	assert( entries[3] == 1 );
+	assert( entries[4] == -1 );
 	assert( entries[5] == 1 );
 	assert( entries[6] == -1 );
 	assert( entries[7] == 1 );

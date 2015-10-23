@@ -537,7 +537,7 @@ void Gsolve::fillMathDep()
 {
 	// create map of funcs that depend on specified molecule.
 	vector< vector< unsigned int > > funcMap( 
-			stoichPtr_->getNumAllPools() + stoichPtr_->getNumProxyPools() );
+			stoichPtr_->getNumAllPools() );
 	unsigned int numFuncs = stoichPtr_->getNumFuncs();
 	for ( unsigned int i = 0; i < numFuncs; ++i ) {
 		const FuncTerm *f = stoichPtr_->funcs( i );

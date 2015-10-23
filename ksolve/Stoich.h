@@ -66,7 +66,7 @@ class Stoich
 		unsigned int getNumBufPools() const;
 
 		/**
-		 *  Returns total number of local pools. Leaves out the pools whose
+		 *  Returns total number of pools. Includes the pools whose
 		 *  actual calculations happen on another solver, but are given a
 		 *  proxy here in order to handle cross-compartment reactions.
 		 */
@@ -166,15 +166,20 @@ class Stoich
 		 * the internal indices for pools and reacs that are used in the
 		 * solver. In addition to the elist, it also scans through the
 		 * offSolverPools and offSolverReacs to build the map.
-		 */
 		void allocateObjMap( const vector< Id >& elist );
+		 */
 
 		/// Using the computed array sizes, now allocate space for them.
 		void resizeArrays();
 		/// Identifies and allocates objects in the Stoich.
-		void allocateModelObject( Id id, vector< Id >& bufPools );
+		void allocateModelObject( Id id );
 		/// Calculate sizes of all arrays, and allocate them.
 		void allocateModel( const vector< Id >& elist );
+
+		/// Functions to build the maps between Ids and internal indices
+		void buildPoolLookup();
+		void buildRateTermLookup();
+		void buildFuncLookup();
 
 		/**
 		 * This function is used when the stoich class is employed by a 
@@ -204,8 +209,8 @@ class Stoich
 		/**
 		 * Expands out list of compartment mappings of proxy reactions to
 		 * the appropriate entries on the rates_vector.
-		 */
 		void comptsOnCrossReacTerms( vector< pair< Id, Id > >& xr ) const;
+		 */
 
 		/**
 		 * Used to set up and update all cross solver reac terms and
@@ -483,7 +488,7 @@ class Stoich
 		//////////////////////////////////////////////////////////////////
 		static const unsigned int PoolIsNotOnSolver;
 		static const Cinfo* initCinfo();
-	protected:
+	private:
 		/**
 		 * True if the stoich matrix is set up to handle only one-way 
 		 * reactions, as is needed in the case of the Gillespie algorithm.
@@ -536,7 +541,7 @@ class Stoich
 		/// The FuncTerms handle mathematical ops on mol levels.
 		vector< FuncTerm* > funcs_;
 
-		/// N_ is the stoichiometry matrix.
+		/// N_ is the stoichiometry matrix. All pools * all reac terms.
 		KinSparseMatrix N_;
 
 		/**
@@ -548,45 +553,84 @@ class Stoich
 		 * Assume no arrays. Each Pool/reac etc must be a unique
 		 * Element. Later we'll deal with diffusion.
 		 */
-		vector< unsigned int > objMap_;
+		// vector< unsigned int > objMap_;
 		/**
 		 * Minor efficiency: We will usually have a set of objects that are
 		 * nearly contiguous in the map. May as well start with the first of
 		 * them.
 		 */
-		unsigned int objMapStart_;
+		// unsigned int objMapStart_;
+		//
+		///////////////////////////////////////////////////////////
+		// Here we have the vectors of the different kinds of objects
+		// managed by the Stoich
+		///////////////////////////////////////////////////////////
 
 		/**
-		 * Map back from mol index to Id. Primarily for debugging.
+		 * Vector of variablePool Ids.
 		 */
-		vector< Id > idMap_;
+		vector< Id > varPoolVec_;
 
 		/**
-		 * Map back from reac index to Id. Needed to unzombify
+		 * Vector of bufPool Ids.
 		 */
-		vector< Id > reacMap_;
+		vector< Id > bufPoolVec_;
+
+		/**
+		 * These are pools that were not in the original scope of the 
+		 * solver, but have to be brought in because they are reactants
+		 * of one or more of the offSolverReacs.
+		 */
+		vector< Id > offSolverPoolVec_;
+
+		/**
+		 * Vector of reaction ids.
+		 */
+		vector< Id > reacVec_;
+		vector< Id > offSolverReacVec_;
 
 		/**
 		 * Map back from enz index to Id. Needed to unzombify
 		 */
-		vector< Id > enzMap_;
+		vector< Id > enzVec_;
+		vector< Id > offSolverEnzVec_;
 
 		/**
 		 * Map back from enz index to Id. Needed to unzombify
 		 */
-		vector< Id > mmEnzMap_;
+		vector< Id > mmEnzVec_;
+		vector< Id > offSolverMMenzVec_;
+
+		/**
+		 * Vector of funcs controlling pool number, that is N.
+		 */
+		vector< Id > poolFuncVec_;
 		
 		/**
-		 * Vector of all funcs. Needed to unzombify
+		 * Vector of funcs controlling pool increment, that is dN/dt
+		 * This is handled as a rateTerm.
 		 */
-		vector< Id > funcMap_;
+		vector< Id > incrementFuncVec_;
+
+		/**
+		 * Vector of funcs controlling reac rate, that is numKf
+		 * This is handled as a rateTerm.
+		 */
+		vector< Id > reacFuncVec_;
+
+		///////////////////////////////////////////////////////////////
+		// Here we have maps to look up objects from their ids.
+		///////////////////////////////////////////////////////////////
+		map< Id, unsigned int > poolLookup_;
+		map< Id, unsigned int > rateTermLookup_;
+		map< Id, unsigned int > funcLookup_;
 
 		/**
 		 * Number of variable molecules that the solver deals with,
 		 * that are local to the solver.
 		 *
 		 */
-		unsigned int numVarPools_;
+		// unsigned int numVarPools_;
 
 		/**
 		 * Number of variable molecules that the solver deals with,
@@ -598,12 +642,18 @@ class Stoich
 		/**
 		 * Number of buffered molecules
 		 */
-		unsigned int numBufPools_;
+		// unsigned int numBufPools_;
+
+		/**
+		 * Looks up the rate term from the Id for a reac, enzyme, or func.
+		map< Id, unsigned int > rateTermLookup_;
+		 */
+		
 		/**
 		 * Number functions, currently only the ones controlling molecule
 		 * numbers, like sumtotals.
-		 */
 		unsigned int numFunctions_;
+		 */
 
 		/**
 		 * Number of reactions in the solver model. This includes 
@@ -611,8 +661,8 @@ class Stoich
 		 * enzyme reactions E + S <---> E.S ---> E + P
 		 * and MM enzyme reactions rate = E.S.kcat / ( Km + S )
 		 * The enzyme reactions count as two reaction steps.
-		 */
 		unsigned int numReac_;
+		 */
 
 		/**
 		 * Flag to track status of Stoich object.
@@ -628,12 +678,6 @@ class Stoich
 		//////////////////////////////////////////////////////////////////
 		// Off-solver stuff
 		//////////////////////////////////////////////////////////////////
-		/**
-		 * These are pools that were not in the original scope of the 
-		 * solver, but have to be brought in because they are reactants
-		 * of one or more of the offSolverReacs.
-		 */
-		vector< Id > offSolverPools_;
 
 		/**
 		 * Map of vectors of Ids of offSolver pools. 
@@ -646,14 +690,16 @@ class Stoich
 
 		/**
 		 * Tracks the reactions that go off the current solver.
-		 */
 		vector< Id > offSolverReacs_;
+		 */
 
 		/**
 		 * Which compartment(s) does the off solver reac connect to?
 		 * Usually it is just one, in which case the second id is Id()
 		 */
 		vector< pair< Id, Id > > offSolverReacCompts_;
+		vector< pair< Id, Id > > offSolverEnzCompts_;
+		vector< pair< Id, Id > > offSolverMMenzCompts_;
 
 		/**
 		 * subComptVec_[rateTermIndex][substrate#]: Identifies compts

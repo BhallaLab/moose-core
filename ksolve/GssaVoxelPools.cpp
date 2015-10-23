@@ -301,7 +301,14 @@ void GssaVoxelPools::xferIn( XferInfo& xf,
 			k = xf.xferPoolIdx.begin(); k != xf.xferPoolIdx.end(); ++k ) {
 		double& x = s[*k];
 		// cout << x << "	i = " << *i << *j << "	m = " << *m << endl;
-		x += round( *i++ - *j );
+		double dx = *i++ - *j++;
+		double base = floor( dx );
+		if ( mtrand() > dx - base )
+			x += base;
+		else
+			x += base + 1.0;
+		
+		// x += round( *i++ - *j );
 		if ( x < *m )  {
 			*m -= x;
 			x = 0;
@@ -314,7 +321,7 @@ void GssaVoxelPools::xferIn( XferInfo& xf,
 		// hasChanged |= ( fabs( x - *j ) < 0.1 ); // they are all integers.
 		hasChanged |= ( y > 0.1 ); // they are all integers.
 		*/
-		j++;
+		// j++;
 		m++;
 	}
 	// If S has changed, then I should update rates of all affected reacs.
@@ -345,7 +352,12 @@ void GssaVoxelPools::xferInOnlyProxies(
 		// if ( *k >= size() - numProxyPools ) 
 		if ( *k >= stoichPtr_->getNumVarPools() && *k < proxyEndIndex )
 		{
-			varSinit()[*k] = (varS()[*k] += round( *i ));
+			double base = floor( *i );
+			if ( mtrand() > *i - base )
+				varSinit()[*k] = (varS()[*k] += base );
+			else
+				varSinit()[*k] = (varS()[*k] += base + 1.0 );
+			// varSinit()[*k] = (varS()[*k] += round( *i ));
 		}
 		i++;
 	}
