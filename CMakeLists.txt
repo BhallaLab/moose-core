@@ -78,10 +78,10 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules")
 
 ## Turn warning to error
 add_definitions(-Wall
-    #-Wno-return-type-c-linkage
+    -Wno-return-type-c-linkage
     -Wno-unused-variable
     -Wno-unused-function
-    #-Wno-unused-private-field
+    -Wno-unused-private-field
     )
 add_definitions(-fPIC)
 
@@ -220,7 +220,9 @@ add_subdirectory(intfire)
 add_subdirectory(examples)
 
 # These are always shared libraries.
-set(SYSTEM_SHARED_LIBS ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES} ${LibXML2_LIBRARIES} ${BZIP2_LIBRARIES})
+set(SYSTEM_SHARED_LIBS ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES} 
+    ${LibXML2_LIBRARIES} ${BZIP2_LIBRARIES}
+    )
 
 # These libraries could be static of dynamic.
 # When building packages on OBS or launchpad, we build static library of a
@@ -286,10 +288,10 @@ set(MOOSE_LIBRARIES
     )
 
 target_link_libraries(moose.bin 
-    #"-Wl,--whole-archive"
+    "-Wl,--whole-archive"
     ${MOOSE_LIBRARIES}
     ${STATIC_LIBRARIES}
-    #"-Wl,--no-whole-archive"
+    "-Wl,--no-whole-archive"
     ${SYSTEM_SHARED_LIBS}
     )
 
@@ -324,7 +326,7 @@ if(WITH_PYTHON)
     find_package(PythonDev REQUIRED)
     include_directories(${PYTHON_INCLUDE_DIRS})
     add_subdirectory(pymoose)
-    add_library(_moose SHARED pymoose/moosemodule.cpp)
+    add_library(_moose MODULE pymoose/moosemodule.cpp)
 
     set_target_properties(_moose PROPERTIES COMPILE_DEFINITIONS "PYMOOSE")
     set_target_properties(_moose PROPERTIES 
@@ -335,10 +337,11 @@ if(WITH_PYTHON)
     target_link_libraries(
         _moose 
         moosepython  
-        #"-Wl,--whole-archive"
+        "-Wl,--whole-archive"
+        -static
         ${MOOSE_LIBRARIES}
         ${STATIC_LIBRARIES}
-        #"-Wl,--no-whole-archive"
+        "-Wl,--no-whole-archive"
         ${SYSTEM_SHARED_LIBS}
         )
 
