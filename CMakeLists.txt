@@ -47,6 +47,9 @@ add_custom_target(uninstall
     ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
     )
 
+################################# OS Specific ##################################
+CMAKE_POLICY(SET CMP0042 NEW)
+
 ################################# CMAKE OPTIONS ##################################
 
 option(WITH_DOC "Build documentation using python-sphinx and doxygen" OFF)
@@ -57,7 +60,7 @@ option(VERBOSITY "SET MOOSE VERBOSITY LEVEL" 0)
 option(NOTIFY_PROGRESS "Show progress of simulation" OFF)
 
 # STATS INSIDE MOOSE. TODO: Remove it and add support for gprof
-option(ENABLE_LOGGER  "Enable MOOSE logger" OFF)
+option(ENABLE_LOGGER  "Enable MOOSE logger [Deprecated]" OFF)
 
 ## Unit testing and debug mode.
 option(DEBUG "Building with debugging support" OFF)
@@ -200,7 +203,7 @@ add_subdirectory(biophysics)
 add_subdirectory(builtins)
 add_subdirectory(utility)
 add_subdirectory(external/muparser)
-add_subdirectory(external/debug)
+#add_subdirectory(external/debug)
 add_subdirectory(external/tinyxml)
 add_subdirectory(mesh)
 add_subdirectory(sbml)
@@ -283,10 +286,10 @@ set(MOOSE_LIBRARIES
     )
 
 target_link_libraries(moose.bin 
-    "-Wl,--whole-archive"
+    #"-Wl,--whole-archive"
     ${MOOSE_LIBRARIES}
     ${STATIC_LIBRARIES}
-    "-Wl,--no-whole-archive"
+    #"-Wl,--no-whole-archive"
     ${SYSTEM_SHARED_LIBS}
     )
 
@@ -332,10 +335,10 @@ if(WITH_PYTHON)
     target_link_libraries(
         _moose 
         moosepython  
-        "-Wl,--whole-archive"
+        #"-Wl,--whole-archive"
         ${MOOSE_LIBRARIES}
         ${STATIC_LIBRARIES}
-        "-Wl,--no-whole-archive"
+        #"-Wl,--no-whole-archive"
         ${SYSTEM_SHARED_LIBS}
         )
 
