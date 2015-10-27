@@ -45,8 +45,8 @@
 
 // Code:
 
-#ifndef _FUNCTION_H
-#define _FUNCTION_H
+#ifndef _MOOSE_FUNCTION_H_
+#define _MOOSE_FUNCTION_H_
 
 #include "muParser.h"
 
@@ -142,4 +142,4 @@ protected:
 
 
 // 
-// Function.h ends here
+//// Function.h ends here
