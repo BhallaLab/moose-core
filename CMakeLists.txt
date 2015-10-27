@@ -48,6 +48,7 @@ add_custom_target(uninstall
     )
 
 ################################# OS Specific ##################################
+MESSAGE(STATUS "Operating system: ${CMAKE_SYSTEM_NAME}")
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     CMAKE_POLICY(SET CMP0042 NEW)
     set(MACOSX TRUE)
@@ -293,18 +294,10 @@ set(MOOSE_LIBRARIES
     )
 
 target_link_libraries(moose.bin 
-IF(MACOSX)
     "-Wl,-all_load"
-else()
-    "-Wl,--whole-archive"
-endif()
     ${MOOSE_LIBRARIES}
     ${STATIC_LIBRARIES}
-if(MACOSX)
     "-Wl,-noall_load"
-else()
-    "-Wl,--no-whole-archive"
-endif(MACOSX)
     ${SYSTEM_SHARED_LIBS}
     )
 
@@ -339,7 +332,7 @@ if(WITH_PYTHON)
     find_package(PythonDev REQUIRED)
     include_directories(${PYTHON_INCLUDE_DIRS})
     add_subdirectory(pymoose)
-    add_library(_moose SHARED pymoose/moosemodule.cpp)
+    add_library(_moose MODULE pymoose/moosemodule.cpp)
 
     set_target_properties(_moose PROPERTIES COMPILE_DEFINITIONS "PYMOOSE")
     set_target_properties(_moose PROPERTIES 
@@ -350,18 +343,10 @@ if(WITH_PYTHON)
     target_link_libraries(
         _moose 
         moosepython  
-IF(MACOSX)
         "-Wl,-all_load"
-ELSE()
-        "-Wl,--whole-archive"
-endif()
         ${MOOSE_LIBRARIES}
         ${STATIC_LIBRARIES}
-IF(MACOSX)
         "-Wl,-noall_load"
-ELSE()
-        "-Wl,--no-whole-archive"
-ENDIF(MACOSX)
         ${SYSTEM_SHARED_LIBS}
         )
 
