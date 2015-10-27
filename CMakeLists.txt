@@ -47,6 +47,15 @@ add_custom_target(uninstall
     ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
     )
 
+################################# OS Specific ##################################
+MESSAGE(STATUS "Operating system: ${CMAKE_SYSTEM_NAME}")
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    CMAKE_POLICY(SET CMP0042 NEW)
+    set(MACOSX TRUE)
+else()
+    set(MACOSX FALSE)
+endif()
+
 ################################# CMAKE OPTIONS ##################################
 
 option(WITH_DOC "Build documentation using python-sphinx and doxygen" OFF)
@@ -57,7 +66,7 @@ option(VERBOSITY "SET MOOSE VERBOSITY LEVEL" 0)
 option(NOTIFY_PROGRESS "Show progress of simulation" OFF)
 
 # STATS INSIDE MOOSE. TODO: Remove it and add support for gprof
-option(ENABLE_LOGGER  "Enable MOOSE logger" OFF)
+option(ENABLE_LOGGER  "Enable MOOSE logger [Deprecated]" OFF)
 
 ## Unit testing and debug mode.
 option(DEBUG "Building with debugging support" OFF)
@@ -75,10 +84,10 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules")
 
 ## Turn warning to error
 add_definitions(-Wall
-    #-Wno-return-type-c-linkage
+    -Wno-return-type-c-linkage
     -Wno-unused-variable
     -Wno-unused-function
-    #-Wno-unused-private-field
+    -Wno-unused-private-field
     )
 add_definitions(-fPIC)
 
@@ -200,7 +209,7 @@ add_subdirectory(biophysics)
 add_subdirectory(builtins)
 add_subdirectory(utility)
 add_subdirectory(external/muparser)
-add_subdirectory(external/debug)
+#add_subdirectory(external/debug)
 add_subdirectory(external/tinyxml)
 add_subdirectory(mesh)
 add_subdirectory(sbml)
@@ -217,7 +226,9 @@ add_subdirectory(intfire)
 add_subdirectory(examples)
 
 # These are always shared libraries.
-set(SYSTEM_SHARED_LIBS ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES} ${LibXML2_LIBRARIES} ${BZIP2_LIBRARIES})
+set(SYSTEM_SHARED_LIBS ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES} 
+    ${LibXML2_LIBRARIES} ${BZIP2_LIBRARIES}
+    )
 
 # These libraries could be static of dynamic.
 # When building packages on OBS or launchpad, we build static library of a
@@ -282,13 +293,24 @@ set(MOOSE_LIBRARIES
     basecode
     )
 
-target_link_libraries(moose.bin 
-    "-Wl,--whole-archive"
-    ${MOOSE_LIBRARIES}
-    ${STATIC_LIBRARIES}
-    "-Wl,--no-whole-archive"
-    ${SYSTEM_SHARED_LIBS}
-    )
+# MAC linker does not understand many of gnu-ld options.
+IF(MACOSX)
+    target_link_libraries(moose.bin 
+        "-Wl,-all_load"
+        ${MOOSE_LIBRARIES}
+        ${STATIC_LIBRARIES}
+        "-Wl,-noall_load"
+        ${SYSTEM_SHARED_LIBS}
+        )
+ELSE(MACOSX)
+    target_link_libraries(moose.bin 
+        "-Wl,--whole-archive"
+        ${MOOSE_LIBRARIES}
+        ${STATIC_LIBRARIES}
+        "-Wl,--no-whole-archive"
+        ${SYSTEM_SHARED_LIBS}
+        )
+ENDIF(MACOSX)
 
 IF(WITH_DOC)
     FIND_PACKAGE(Doxygen REQUIRED)
@@ -321,7 +343,7 @@ if(WITH_PYTHON)
     find_package(PythonDev REQUIRED)
     include_directories(${PYTHON_INCLUDE_DIRS})
     add_subdirectory(pymoose)
-    add_library(_moose SHARED pymoose/moosemodule.cpp)
+    add_library(_moose MODULE pymoose/moosemodule.cpp)
 
     set_target_properties(_moose PROPERTIES COMPILE_DEFINITIONS "PYMOOSE")
     set_target_properties(_moose PROPERTIES 
@@ -329,6 +351,18 @@ if(WITH_PYTHON)
         PREFIX ""
         )
     list(APPEND SYSTEM_SHARED_LIBS ${PYTHON_LIBRARIES})
+
+IF(MACOSX)
+    target_link_libraries(
+        _moose 
+        moosepython  
+        "-Wl,-all_load"
+        ${MOOSE_LIBRARIES}
+        ${STATIC_LIBRARIES}
+        "-Wl,-noall_load"
+        ${SYSTEM_SHARED_LIBS}
+        )
+ELSE(MACOSX)
     target_link_libraries(
         _moose 
         moosepython  
@@ -338,6 +372,7 @@ if(WITH_PYTHON)
         "-Wl,--no-whole-archive"
         ${SYSTEM_SHARED_LIBS}
         )
+ENDIF(MACOSX)
 
     add_custom_command(TARGET _moose POST_BUILD
         COMMAND ${PYTHON_EXECUTABLE} setup.py sdist --dist-dir
@@ -409,6 +444,15 @@ if(BUILD_CYMOOSE)
         LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/cymoose"
             )
 
+IF(MACOSX)
+    target_link_libraries(cymoose 
+        "-Wl,-all_load"
+        ${MOOSE_LIBRARIES}
+        ${LIBRARIES}
+        "-Wl,-noall_load"
+        ${SYSTEM_LIBRARIES}
+        )
+ELSE(MACOSX)
     target_link_libraries(cymoose 
         "-Wl,--whole-archive"
         ${MOOSE_LIBRARIES}
@@ -416,6 +460,8 @@ if(BUILD_CYMOOSE)
         "-Wl,--no-whole-archive"
         ${SYSTEM_LIBRARIES}
         )
+ENDIF(MACOSX)
+
 endif(BUILD_CYMOOSE)
 
 ## Moose documentation
