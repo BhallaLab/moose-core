@@ -208,18 +208,11 @@ def saveRecords(records, xvec = None, **kwargs):
     :param **kwargs:
     """
 
-    dataDict = {}
-    try:
-        if kwargs.get('sorted', True):
-            for k in sorted(records.keys(), key=str.lower):
-                dataDict[k] = records[k]
-        else:
-            dataDict = records
-    except Exception as e:
-        dataDict = records
+    sortedData = records.items()
+    if kwargs.get('sorted', True):
+        sortedData = sorted(sortedData)
 
-    assert type(dataDict) == dict, "Got %s" % type(dataDict)
-    if len(dataDict) == 0:
+    if len(sortedData) == 0:
         pu.warn("No data in dictionary to save.")
         return False
 
@@ -228,9 +221,9 @@ def saveRecords(records, xvec = None, **kwargs):
     assert clock.currentTime > 0
 
     yvecs = []
-    text = [ "time," + ",".join(list(dataDict.keys())) ]
-    for k in dataDict:
-        yvec = dataDict[k].vector
+    text = [ "time," + ",".join([ x[0] for x in sortedData ]) ]
+    for k, v in sortedData:
+        yvec = v.vector
         yvecs.append(yvec)
     if xvec is None: 
         xvec = np.linspace(0, clock.currentTime, len(yvecs[0]))
