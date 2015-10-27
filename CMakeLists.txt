@@ -293,13 +293,24 @@ set(MOOSE_LIBRARIES
     basecode
     )
 
-target_link_libraries(moose.bin 
-    "-Wl,-all_load"
-    ${MOOSE_LIBRARIES}
-    ${STATIC_LIBRARIES}
-    "-Wl,-noall_load"
-    ${SYSTEM_SHARED_LIBS}
-    )
+# MAC linker does not understand many of gnu-ld options.
+IF(MACOSX)
+    target_link_libraries(moose.bin 
+        "-Wl,-all_load"
+        ${MOOSE_LIBRARIES}
+        ${STATIC_LIBRARIES}
+        "-Wl,-noall_load"
+        ${SYSTEM_SHARED_LIBS}
+        )
+ELSE(MACOSX)
+    target_link_libraries(moose.bin 
+        "-Wl,--whole-archive"
+        ${MOOSE_LIBRARIES}
+        ${STATIC_LIBRARIES}
+        "-Wl,--no-whole-archive"
+        ${SYSTEM_SHARED_LIBS}
+        )
+ENDIF(MACOSX)
 
 IF(WITH_DOC)
     FIND_PACKAGE(Doxygen REQUIRED)
@@ -340,6 +351,8 @@ if(WITH_PYTHON)
         PREFIX ""
         )
     list(APPEND SYSTEM_SHARED_LIBS ${PYTHON_LIBRARIES})
+
+IF(MACOSX)
     target_link_libraries(
         _moose 
         moosepython  
@@ -349,6 +362,17 @@ if(WITH_PYTHON)
         "-Wl,-noall_load"
         ${SYSTEM_SHARED_LIBS}
         )
+ELSE(MACOSX)
+    target_link_libraries(
+        _moose 
+        moosepython  
+        "-Wl,--whole-archive"
+        ${MOOSE_LIBRARIES}
+        ${STATIC_LIBRARIES}
+        "-Wl,--no-whole-archive"
+        ${SYSTEM_SHARED_LIBS}
+        )
+ENDIF(MACOSX)
 
     add_custom_command(TARGET _moose POST_BUILD
         COMMAND ${PYTHON_EXECUTABLE} setup.py sdist --dist-dir
@@ -420,6 +444,15 @@ if(BUILD_CYMOOSE)
         LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/cymoose"
             )
 
+IF(MACOSX)
+    target_link_libraries(cymoose 
+        "-Wl,-all_load"
+        ${MOOSE_LIBRARIES}
+        ${LIBRARIES}
+        "-Wl,-noall_load"
+        ${SYSTEM_LIBRARIES}
+        )
+ELSE(MACOSX)
     target_link_libraries(cymoose 
         "-Wl,--whole-archive"
         ${MOOSE_LIBRARIES}
@@ -427,6 +460,8 @@ if(BUILD_CYMOOSE)
         "-Wl,--no-whole-archive"
         ${SYSTEM_LIBRARIES}
         )
+ENDIF(MACOSX)
+
 endif(BUILD_CYMOOSE)
 
 ## Moose documentation
