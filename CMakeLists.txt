@@ -494,7 +494,7 @@ if(WITH_PYTHON)
 
     install(CODE 
         "
-        execute_process(COMMAND easy_install  
+        execute_process(COMMAND easy_install --prefix ${CMAKE_INSTALL_PREFIX}
             --upgrade moose-${MOOSE_VERSION}.tar.gz
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
             )
@@ -518,6 +518,7 @@ if(BUILD_MOOGLI)
     install(CODE
         "
         execute_process(COMMAND easy_install
+            --prefix ${CMAKE_INSTALL_PREFIX}
             --upgrade moogli-${MOOGLI_VERSION}.tar.gz
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
             )
