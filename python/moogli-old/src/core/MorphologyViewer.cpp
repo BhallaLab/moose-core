@@ -271,6 +271,7 @@ MorphologyViewer::create_graphics_widget()
     }
 
     _viewer.setCamera(camera);
+    _viewer.setLightingMode(osg::View::SKY_LIGHT);
     _viewer.setThreadingModel(osgViewer::Viewer::SingleThreaded);
     _viewer.setSceneData(_morphology -> get_scene_graph().get());
 
@@ -421,13 +422,32 @@ MorphologyViewer::create_camera()
     camera -> setGraphicsContext(new osgQt::GraphicsWindowQt(traits));
     camera-> setClearColor(clear_color);
     osg::StateSet* stateset = camera -> getOrCreateStateSet();
-    stateset->setGlobalDefaults();
-    stateset -> setMode( GL_BLEND, StateAttribute::ON );
-    camera->setCullingMode( CullSettings::NEAR_PLANE_CULLING
-                          | CullSettings::FAR_PLANE_CULLING
-                          | CullSettings::VIEW_FRUSTUM_CULLING
-                          | CullSettings::SMALL_FEATURE_CULLING
-                          );
+    //stateset->setGlobalDefaults();
+    osg::Material* material = new osg::Material;
+
+    material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
+    material->setAlpha(osg::Material::FRONT_AND_BACK, 1.0);
+    material->setShininess(osg::Material::FRONT_AND_BACK, 128.0);
+    material->setAmbient(osg::Material::FRONT_AND_BACK,
+                         osg::Vec4(1.0, 1.0, 1.0, 1.0));
+    material->setDiffuse(osg::Material::FRONT_AND_BACK,
+                         osg::Vec4(1.0, 1.0, 1.0, 1.0));
+ 
+    stateset->setAttributeAndModes(material, osg::StateAttribute::ON); 
+    stateset -> setMode( GL_RESCALE_NORMAL, StateAttribute::ON );
+    stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
+    stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
+    stateset->setMode( GL_ALPHA_TEST
+                     , osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE
+                     ); // just added this now
+    // as a test but still
+    // no luck
+ 
+    // camera->setCullingMode( CullSettings::NEAR_PLANE_CULLING
+    //                       | CullSettings::FAR_PLANE_CULLING
+    //                       | CullSettings::VIEW_FRUSTUM_CULLING
+    //                       | CullSettings::SMALL_FEATURE_CULLING
+    //                       );
 
     camera-> setViewport( new osg::Viewport( 0
                                            , 0
@@ -456,7 +476,7 @@ MorphologyViewer::create_camera()
     // OSG renders transparent polygons after opaque ones.
     // Depth * depth = new Depth();
     // depth -> setWriteMask( true );
-    // _state_set->setAttributeAndModes( depth, StateAttribute::ON );
+    // _state_set -> setAttributeAndModes( depth, StateAttribute::ON );
 
 
     return camera;

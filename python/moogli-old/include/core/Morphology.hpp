@@ -3,6 +3,7 @@
 
 #include "includes.hpp"
 #include "core/Compartment.hpp"
+#include "callbacks/GeometryUpdateCallback.hpp"
 // #include "core/Neuron.hpp"
 
 using namespace std;
@@ -56,8 +57,8 @@ public:
               );
 
     bool
-    add_compartment( const string &  compartment_id
-                   , const string &  neuron_id
+    add_compartment( const string    compartment_id
+                   , const string    neuron_id
                    , double          proximal_x
                    , double          proximal_y
                    , double          proximal_z
@@ -80,32 +81,40 @@ public:
                    , double          distal_z
                    , double          distal_d
                    );
+    bool
+    subdivide_compartment(const string compartment_id, unsigned int divisions);
+
+    bool
+    set_compartment_diameter( const char * compartment_id
+                            , double distal_d
+                            );
+
     void
     set_compartment_color(const char * compartment_id, PyObject * color);
 
     bool
-    remove_compartment(const string & compartment_id);
+    remove_compartment(const string compartment_id);
 
     bool
-    remove_neuron(const string & neuron_id);
+    remove_neuron(const string neuron_id);
 
     bool
-    neuron_is_hidden(const string & neuron_id);
+    neuron_is_hidden(const string neuron_id);
 
     bool
-    compartment_is_hidden(const string & compartment_id);
+    compartment_is_hidden(const string compartment_id);
 
     bool
-    hide_compartment(const string & compartment_id);
+    hide_compartment(const string compartment_id);
 
     bool
-    show_compartment(const string & compartment_id);
+    show_compartment(const string compartment_id);
 
     bool
-    hide_neuron(const string & neuron_id);
+    hide_neuron(const string neuron_id);
 
     bool
-    show_neuron(const string & neuron_id);
+    show_neuron(const string neuron_id);
 
     ref_ptr<MatrixTransform>
     get_scene_graph();
