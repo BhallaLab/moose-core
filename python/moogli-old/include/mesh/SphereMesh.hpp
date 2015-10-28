@@ -1,5 +1,5 @@
-#ifndef _CYLINDER_MESH_HPP_
-#define _CYLINDER_MESH_HPP_
+#ifndef _SPHERE_MESH_HPP_
+#define _SPHERE_MESH_HPP_
 
 #include <osg/Shape>
 #include <osg/Geometry>
@@ -24,27 +24,27 @@
 #include <string>
 #include <vector>
 
-#include "constants.hpp"
-
 using namespace std;
 using namespace osg;
 
-class CylinderMesh
+class SphereMesh
 {
 public:
 
-    CylinderMesh();
+    SphereMesh();
 
     Geometry *
-    operator()( Vec3f        center     = Vec3f(0.0f, 0.0f, 0.0f)
-              , float        upper_radius = 1.0f
-              , float        lower_radius = 1.0f
-              , float        height     = 1.0f
-              , Vec3f        direction  = Vec3f(0.0f, 0.0f, 1.0f)
-              , unsigned int points     = 10
-              , const Vec4&  color      = COMPARTMENT_COLOR
+    operator()( Vec3f        center = Vec3f(0.0f, 0.0f, 0.0f)
+              , float        radius = 1.0f
+              , unsigned int points = 10
               );
 
+    void
+    operator()( osg::Geometry * sphere_geometry
+                , Vec3f      center = Vec3f(0.0f, 0.0f, 0.0f)
+              , float        radius = 1.0f
+              , unsigned int points = 10
+              );
 private:
 
     unordered_map< unsigned int
@@ -52,7 +52,7 @@ private:
                               , const DrawElementsUShort * const
                               , const Vec3Array * const
                               >
-                 > cylinders;
+                 > spheres;
 
     const tuple< const Vec3Array * const
                , const DrawElementsUShort * const
@@ -61,4 +61,4 @@ private:
     unit(unsigned int points = 10);
 };
 
-#endif /* _CYLINDER_MESH_HPP_ */
+#endif /* _SPHERE_MESH_HPP_ */
