@@ -371,7 +371,7 @@ export LIBS
 export USE_GSL
 export USE_SBML
 
-all: moose pymoose neurokit
+all: moose pymoose
 
 neurokit: ./python/moogli/setup.py
 	$(NEUROKIT_COMMAND)
