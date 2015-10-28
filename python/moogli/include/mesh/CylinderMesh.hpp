@@ -44,6 +44,16 @@ public:
               , unsigned int points     = 10
               , const Vec4&  color      = COMPARTMENT_COLOR
               );
+    void
+    operator()( osg::Geometry * cylinder_geometry
+              , Vec3f        center
+              , float        upper_radius
+              , float        lower_radius
+              , float        height
+              , Vec3f        direction
+              , unsigned int points    = 10
+                , const Vec4& color    = COMPARTMENT_COLOR
+              );
 
 private:
 

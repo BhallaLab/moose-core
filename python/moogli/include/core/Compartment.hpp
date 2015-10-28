@@ -21,12 +21,16 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 /// Compartment identifier. This should be unique for each compartment.
 ////////////////////////////////////////////////////////////////////////////////
-    const string & id;
+    const string id;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Identifier for the neuron containing the compartment. This should be unique for each neuron.
 ////////////////////////////////////////////////////////////////////////////////
-    const string & neuron_id;
+    const string neuron_id;
+
+    bool _color_updated;
+    bool _proximal_d_updated;
+    bool _distal_d_updated;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Vector for storing the geometries of the compartment at different resolutions. This is needed for the level of detail implementation. Each compartment needs to store a reference to its geometries as it has to change the geometry color when an event is triggered.
@@ -130,6 +134,13 @@ public:
                    , unsigned int points_delta
                    , StateSet * state_set
                    );
+    void
+    update_geometry( unsigned int lod_resolution
+                   , float lod_distance_delta
+                   , unsigned int min_points
+                   , unsigned int points_delta
+                   , StateSet * state_set
+                   );
 /*
     trigger_digital_event();
 
@@ -151,6 +162,9 @@ public:
     set_distal_diameter(double d);
 
     void
+    set_proximal_diameter(double d);
+
+    void
     set_color(osg::Vec4f& color);
 
     void
@@ -161,7 +175,6 @@ public:
                         , Vec4f& final_color
                         );
 
-private:
 
     void
     _set_chromostat( double vm
