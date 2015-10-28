@@ -75,7 +75,7 @@ void
 Morphology::_initialize_state_set()
 {
 
-    //1 _state_set -> setMode( GL_RESCALE_NORMAL, StateAttribute::ON );
+     _state_set -> setMode( GL_RESCALE_NORMAL, StateAttribute::ON );
     //3 _state_set -> setMode( GL_BLEND, StateAttribute::ON );
     //4 _state_set -> setRenderingHint( StateSet::TRANSPARENT_BIN );
 
@@ -87,16 +87,33 @@ Morphology::_initialize_state_set()
     // OSG renders transparent polygons after opaque ones.
     Depth * depth = new Depth();
     depth -> setWriteMask( true );
-    _state_set->setAttributeAndModes( depth, StateAttribute::ON );
+    _state_set->setAttributeAndModes(depth, StateAttribute::ON);
 
     // _state_set -> setAttribute(_create_material(), StateAttribute::ON);
 
     // _state_set -> setMode(GL_LIGHTING, StateAttribute::ON);
 
     // _state_set -> setAttribute(_create_shade_model());
+    //_state_set->setGlobalDefaults();
+    osg::Material* material = new osg::Material;
 
+    material -> setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
+    material -> setAlpha(osg::Material::FRONT_AND_BACK, 1.0);
+    material -> setShininess(osg::Material::FRONT_AND_BACK, 128.0);
+    material -> setAmbient( osg::Material::FRONT_AND_BACK
+                          , osg::Vec4(1.0, 1.0, 1.0, 1.0)
+                          );
+    material -> setDiffuse( osg::Material::FRONT_AND_BACK
+                          , osg::Vec4(1.0, 1.0, 1.0, 1.0)
+                          );
+    _state_set -> setAttributeAndModes(material, osg::StateAttribute::ON);
+    _state_set -> setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
+    _state_set -> setMode(GL_BLEND, osg::StateAttribute::ON);
+    _state_set -> setMode( GL_ALPHA_TEST
+                         , osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE
+                         ); // just added this now
 
-    // _matrix_transform -> setStateSet(_state_set.get());
+    _matrix_transform -> setStateSet(_state_set.get());
 }
 
 Material *
@@ -245,20 +262,28 @@ Morphology::set_compartment_diameter( const char * compartment_id
                                     , double distal_d
                                     )
 {
-    Compartment * compartment = _compartments[compartment_id];
+    auto result = _compartments.find(compartment_id);
+    if (result == _compartments.end())
+    {
+         RECORD_ERROR(std::string(compartment_id) + " does not exist!");
+         return false;
+    }
+    Compartment * compartment = result -> second;
     compartment -> set_distal_diameter(distal_d);
-    compartment -> create_geometry( lod_resolution
-                                  , lod_distance_delta
-                                  , min_points
-                                  , points_delta
-                                  , _state_set.get()
-                                  );
+    compartment -> set_proximal_diameter(distal_d);
+    // compartment -> update_geometry( lod_resolution
+    //                               , lod_distance_delta
+    //                               , min_points
+    //                               , points_delta
+    //                               , _state_set.get()
+    //                               );
+    // // RECORD_ERROR("");
     return true;
 }
 
 bool
-Morphology::add_compartment( const string &  compartment_id
-                           , const string &  neuron_id
+Morphology::add_compartment( const string    compartment_id
+                           , const string    neuron_id
                            , double          proximal_x
                            , double          proximal_y
                            , double          proximal_z
@@ -269,28 +294,31 @@ Morphology::add_compartment( const string &  compartment_id
                            , double          distal_d
                            )
 {
-    // RECORD_INFO( "Compartment => " + compartment_id
-    //            + "Neuron      => " + neuron_id
-    //            );
+    RECORD_ERROR("Compartment => " + compartment_id);
+    RECORD_ERROR("Neuron      => " + neuron_id);
 
     _add_neuron(neuron_id);
 
+    RECORD_ERROR("Compartment => " + compartment_id);
     Compartment * compartment = new Compartment( compartment_id
                                                , neuron_id
                                                );
 
+    RECORD_ERROR("Compartment => " + compartment_id);
     compartment -> set_proximal_parameters( proximal_x
                                           , proximal_y
                                           , proximal_z
                                           , proximal_d
                                           );
 
+    RECORD_ERROR("Compartment => " + compartment_id);
     compartment -> set_distal_parameters( distal_x
                                         , distal_y
                                         , distal_z
                                         , distal_d
                                         );
 
+    RECORD_ERROR("Compartment => " + compartment_id);
     compartment -> create_geometry( lod_resolution
                                   , lod_distance_delta
                                   , min_points
@@ -298,9 +326,11 @@ Morphology::add_compartment( const string &  compartment_id
                                   , _state_set.get()
                                   );
 
+    RECORD_ERROR("Compartment => " + compartment_id);
     pair<compartment_map_t::iterator ,bool> result =
         _compartments.insert(make_pair(compartment_id, compartment));
 
+    RECORD_ERROR("Compartment => " + compartment_id);
     if(! result.second)
     {
         RECORD_ERROR(compartment_id + " already exists!");
@@ -308,10 +338,11 @@ Morphology::add_compartment( const string &  compartment_id
     }
     else
     {
+        RECORD_ERROR("Compartment => " + compartment_id);
         _neurons_compartments[neuron_id].insert(compartment);
         _attach_compartment_geometry(compartment);
     }
-
+    RECORD_ERROR("Compartment Added " + compartment_id);
     return result.second;
 }
 
@@ -397,7 +428,7 @@ function logs if all elements are inserted or not. returns the current size of m
 
 
 bool
-Morphology::remove_compartment(const string & compartment_id)
+Morphology::remove_compartment(const string compartment_id)
 {
 
     compartment_map_t::iterator result =
@@ -420,9 +451,62 @@ Morphology::remove_compartment(const string & compartment_id)
     return true;
 }
 
+bool
+Morphology::subdivide_compartment(const string compartment_id, unsigned int divisions)
+{
+    compartment_map_t::iterator result =
+    _compartments.find(compartment_id);
+
+    if(result == _compartments.end())
+    {
+        RECORD_ERROR(compartment_id + " does not exist.");
+        return false;
+    }
+    RECORD_ERROR(std::to_string(divisions));
+    RECORD_ERROR("Subdividing Compartment => " + compartment_id);
+    Compartment * compartment = result -> second;
+    cerr << "Compartment Pointer => " << compartment << std::endl;
+    Vec4f electrical_proximal(compartment -> _proximal, compartment -> _proximal_d);
+    Vec4f electrical_distal(compartment -> _distal, compartment -> _distal_d);
+
+    Vec4f direction = electrical_distal - electrical_proximal;
+    Vec4f chemical_proximal = electrical_proximal;
+    Vec4f chemical_distal;
+    for(uint i = 0; i < divisions; ++i)
+    {
+        RECORD_ERROR(std::to_string(i));
+        chemical_proximal = electrical_proximal + direction * (i + 0.0f) / divisions;
+        chemical_distal = electrical_proximal + direction * (i + 1.0) / divisions;
+        RECORD_ERROR("Adding subdivided compartment => " + compartment -> id + std::string("/") + std::to_string(i));
+        RECORD_ERROR(compartment -> neuron_id);
+        RECORD_ERROR(std::to_string(chemical_proximal.x()));
+        RECORD_ERROR(std::to_string(chemical_proximal.y()));
+        RECORD_ERROR(std::to_string(chemical_proximal.z()));
+        RECORD_ERROR(std::to_string(chemical_proximal.w()));
+        RECORD_ERROR(std::to_string(chemical_distal.x()));
+        RECORD_ERROR(std::to_string(chemical_distal.y()));
+        RECORD_ERROR(std::to_string(chemical_distal.z()));
+        RECORD_ERROR(std::to_string(chemical_distal.w()));
+        add_compartment( compartment -> id + std::string("/") + std::to_string(i)
+                       , compartment -> neuron_id
+                       , chemical_proximal.x()
+                       , chemical_proximal.y()
+                       , chemical_proximal.z()
+                       , chemical_proximal.w()
+                       , chemical_distal.x()
+                       , chemical_distal.y()
+                       , chemical_distal.z()
+                       , chemical_distal.w()
+                       );
+    }
+    RECORD_ERROR("Outside");
+    hide_compartment(compartment -> id);
+    RECORD_ERROR("Hid Compartment");
+    return true;
+}
 
 bool
-Morphology::remove_neuron(const string & neuron_id)
+Morphology::remove_neuron(const string neuron_id)
 {
     neuron_map_t::iterator iter =
         _neurons.find(neuron_id);
@@ -451,7 +535,7 @@ Morphology::remove_neuron(const string & neuron_id)
 }
 
 bool
-Morphology::neuron_is_hidden(const string & neuron_id)
+Morphology::neuron_is_hidden(const string neuron_id)
 {
     neuron_map_t::iterator result =
         _neurons.find(neuron_id);
@@ -467,7 +551,7 @@ Morphology::neuron_is_hidden(const string & neuron_id)
 }
 
 bool
-Morphology::compartment_is_hidden(const string & compartment_id)
+Morphology::compartment_is_hidden(const string compartment_id)
 {
     compartment_map_t::iterator result =
         _compartments.find(compartment_id);
@@ -514,12 +598,14 @@ Morphology::_attach_compartment_geometry(Compartment * compartment)
     for(unsigned int i = 0; i < lod_resolution; ++i)
     {
         Geode * geode = (Geode *)(neuron -> getChild(i));
-        geode -> addDrawable(compartment -> geometries[i].get());
+        Geometry * geometry = compartment -> geometries[i].get();
+        geometry -> setUpdateCallback(new GeometryUpdateCallback(compartment, min_points));
+        geode -> addDrawable(geometry);
     }
 }
 
 bool
-Morphology::hide_neuron(const string & neuron_id)
+Morphology::hide_neuron(const string neuron_id)
 {
     neuron_map_t::iterator result =
         _neurons.find(neuron_id);
@@ -535,7 +621,7 @@ Morphology::hide_neuron(const string & neuron_id)
 }
 
 bool
-Morphology::show_neuron(const string & neuron_id)
+Morphology::show_neuron(const string neuron_id)
 {
     neuron_map_t::iterator result =
         _neurons.find(neuron_id);
@@ -551,7 +637,7 @@ Morphology::show_neuron(const string & neuron_id)
 }
 
 bool
-Morphology::show_compartment(const string & compartment_id)
+Morphology::show_compartment(const string compartment_id)
 {
     compartment_map_t::iterator result =
         _compartments.find(compartment_id);
@@ -566,7 +652,7 @@ Morphology::show_compartment(const string & compartment_id)
 }
 
 bool
-Morphology::hide_compartment(const string & compartment_id)
+Morphology::hide_compartment(const string compartment_id)
 {
     compartment_map_t::iterator result =
         _compartments.find(compartment_id);

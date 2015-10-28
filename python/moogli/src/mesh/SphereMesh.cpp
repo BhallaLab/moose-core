@@ -121,9 +121,18 @@ SphereMesh::operator()( Vec3f        center
                       )
 {
     Geometry* sphere_geometry = new Geometry();
+    operator()(sphere_geometry, center, radius, points);
+    return sphere_geometry;
+}
 
+void
+SphereMesh::operator()( osg::Geometry * sphere_geometry
+                      , Vec3f        center
+                      , float        radius
+                      , unsigned int points
+                      )
+{
     const auto arrays = unit(points);
-
     const auto unit_vertices = get<0>(arrays);
     const auto unit_indices  = get<1>(arrays);
     const auto unit_normals  = get<2>(arrays);
@@ -149,6 +158,4 @@ SphereMesh::operator()( Vec3f        center
     colors -> push_back(osg::Vec4(1.0f, 0.0f, 0.0f, 1.0f)); //color);
     sphere_geometry -> setColorArray(colors);
     sphere_geometry -> setColorBinding( osg::Geometry::BIND_OVERALL );
-
-    return sphere_geometry;
 }

@@ -45,6 +45,13 @@ public:
                    , double          distal_z
                    , double          distal_d
                    );
+
+    bool
+    subdivide_compartment( const char * compartment_id
+                         , unsigned int divisions
+                         );
+
+
     bool
     set_compartment_diameter( const char * compartment_id
                             , double distal_d

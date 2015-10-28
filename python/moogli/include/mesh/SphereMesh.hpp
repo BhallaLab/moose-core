@@ -39,6 +39,12 @@ public:
               , unsigned int points = 10
               );
 
+    void
+    operator()( osg::Geometry * sphere_geometry
+                , Vec3f      center = Vec3f(0.0f, 0.0f, 0.0f)
+              , float        radius = 1.0f
+              , unsigned int points = 10
+              );
 private:
 
     unordered_map< unsigned int
