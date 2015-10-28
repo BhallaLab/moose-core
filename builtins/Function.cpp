@@ -82,6 +82,7 @@ static SrcFinfo1< vector < double > *> *requestOut()
         "requestOut",
         "Sends request for input variable from a field on target object");
     return &requestOut;
+
 }
 
 const Cinfo * Function::initCinfo()
