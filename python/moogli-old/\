@@ -50,6 +50,7 @@ class Morphology(_moogli.Morphology):
                 color = map(operator.add, base_color, [ normalized_value * x for x in map(operator.sub, peak_color, base_color)])
             self.set_compartment_color(compartment_id, color)
 
+   def create
 
 __all__ = [ "Morphology"
           , "MorphologyViewer"
