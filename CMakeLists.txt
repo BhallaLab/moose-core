@@ -496,7 +496,7 @@ if(WITH_PYTHON)
     install(CODE 
         "
         execute_process(
-            COMMAND ${CMAKE_COMMAND} -E tar xvf ${MOOSE_SRC_TAR} -C /tmp
+            COMMAND tar xvf ${MOOSE_SRC_TAR} -C /tmp
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
             )
         execute_process(
