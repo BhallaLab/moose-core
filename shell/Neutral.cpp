@@ -70,7 +70,7 @@ const Cinfo* Neutral::initCinfo()
 			&Neutral::getNumField );
 
 	static ReadOnlyElementValueFinfo< Neutral, unsigned int > id(
-		"id",
+		"idValue",
 		"Object id of self, converted to an unsigned int.",
 			&Neutral::getId );
 

@@ -45,7 +45,7 @@ class Visualizer(MorphologyViewer):
 def main():
     app = QtGui.QApplication(sys.argv)
     filename = os.path.join( os.path.split(os.path.realpath(__file__))[0]
-                           , "../../Demos/neuroml/CA1/CA1.morph.pop.xml")
+                           , "../../Demos/)neuroml/CA1/CA1.morph.pop.xml")
 
 
     # filename = os.path.join( os.path.split(os.path.realpath(__file__))[0]
@@ -74,10 +74,11 @@ AVERAGED        = 1
 PROXIMAL_DISTAL = 2
 
 
-def read_morphology_from_moose(name = "", path = "", radius = DISTAL):
+def read_morphology_from_moose(name = "", path = "", radius = DISTAL, points = 10):
     import moose
-    morphology = moogli.Morphology(name)
+    morphology = moogli.Morphology(name, points = points)
     compartments = moose.wildcardFind(path + "/##[ISA=CompartmentBase]")
+    print compartments
     for compartment in compartments:
         distal_diameter = compartment.diameter
         try:
@@ -93,15 +94,15 @@ def read_morphology_from_moose(name = "", path = "", radius = DISTAL):
                                                    + proximal_diameter
                                                    ) / 2.0
 
-        morphology.add_compartment(     compartment.path
-                                       , compartment.parent.path
-                                       , compartment.x0          * 10000000
-                                       , compartment.y0          * 10000000
-                                       , compartment.z0          * 10000000
-                                       , proximal_diameter       * 10000000
-                                       , compartment.x           * 10000000
-                                       , compartment.y           * 10000000
-                                       , compartment.z           * 10000000
-                                       , distal_diameter         * 10000000
-                                       )
+        morphology.add_compartment( compartment.path
+                                  , compartment.parent.path
+                                  , compartment.x0          * 10000000
+                                  , compartment.y0          * 10000000
+                                  , compartment.z0          * 10000000
+                                  , proximal_diameter       * 10000000
+                                  , compartment.x           * 10000000
+                                  , compartment.y           * 10000000
+                                  , compartment.z           * 10000000
+                                  , distal_diameter         * 10000000
+                                  )
     return morphology

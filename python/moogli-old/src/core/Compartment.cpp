@@ -7,7 +7,11 @@ Compartment::Compartment( const string & id
                         , const string & neuron
                         ) : id(id)
                           , neuron_id(neuron)
-{ }
+{
+  _color_updated = false;
+  _proximal_d_updated = false;
+  _distal_d_updated = false;
+}
 
 void
 Compartment::set_proximal_parameters( const Vec3d & center
@@ -62,6 +66,21 @@ Compartment::set_distal_parameters( double x
 }
 
 void
+Compartment::set_distal_diameter(double d)
+{
+    _distal_d = d;
+    _distal_d_updated = true;
+}
+
+void
+Compartment::set_proximal_diameter(double d)
+{
+  _proximal_d = d;
+  _proximal_d_updated = true;
+}
+
+
+void
 Compartment::create_geometry( unsigned int lod_resolution
                             , float lod_distance_delta
                             , unsigned int min_points
@@ -69,7 +88,9 @@ Compartment::create_geometry( unsigned int lod_resolution
                             , StateSet * state_set
                             )
 {
-    geometries.assign(lod_resolution, ref_ptr<Geometry>());
+    RECORD_ERROR("Creating geometry for " + id);
+    geometries.assign(lod_resolution, osg::ref_ptr<osg::Geometry>());
+
     _center          = (_distal + _proximal) / 2.0;
     _direction       = _distal - _proximal;
     _height          = _direction.normalize();
@@ -78,16 +99,68 @@ Compartment::create_geometry( unsigned int lod_resolution
     unsigned int points = lod_resolution * points_delta + min_points - points_delta;
 
     //Floating point comparison is being done with compare_double function.
-    if(  (compare_double(_height, _radius, 0.01f) == 0)
-      || (compare_double(_height, 0.0f, 0.01f) == 0)
-      )
+    if(_height == 0.0f) //(compare_double(_height, 0.0f, 0.001f) == 0))
+    {
+      RECORD_ERROR("Making Sphere!");
+        for(unsigned int i = 0; i < lod_resolution; ++i)
+        {
+          geometries[i] = sphere(_center
+                  , _radius
+                  , points
+                  );
+            // geometries[i] -> setNodeMask(0xffffffff);
+
+            geometries[i] -> setName(id);
+            points        -= points_delta;
+            geometries[i] -> setStateSet(state_set);
+        }
+    }
+    else
     {
         for(unsigned int i = 0; i < lod_resolution; ++i)
         {
-            geometries[i] = sphere( _center
-                                  , _radius
-                                  , points
-                                  );
+          geometries[i] = cylinder(_center
+                  , _distal_d   / 2.0
+                  , _proximal_d / 2.0
+                  , _height
+                  , _direction
+                  , points
+                  );
+            // geometries[i] -> setNodeMask(0xffffffff);
+            geometries[i] -> setName(id);
+            points -= points_delta;
+            geometries[i] -> setStateSet(state_set);
+
+        }
+    }
+}
+
+void
+Compartment::update_geometry( unsigned int lod_resolution
+                            , float lod_distance_delta
+                            , unsigned int min_points
+                            , unsigned int points_delta
+                            , StateSet * state_set
+                            )
+{
+    _center          = (_distal + _proximal) / 2.0;
+    _direction       = _distal - _proximal;
+    _height          = _direction.normalize();
+    _radius          = (_proximal_d + _distal_d) / 4.0;
+
+    unsigned int points = lod_resolution * points_delta + min_points - points_delta;
+
+    //Floating point comparison is being done with compare_double function.
+    if(_height == 0.0f)
+    {
+        RECORD_ERROR("Making Sphere");
+        for(unsigned int i = 0; i < lod_resolution; ++i)
+        {
+            sphere( geometries[i].get()
+                  , _center
+                  , _radius
+                  , points
+                  );
             // geometries[i] -> setNodeMask(0xffffffff);
 
             geometries[i] -> setName(id);
@@ -99,18 +172,18 @@ Compartment::create_geometry( unsigned int lod_resolution
     {
         for(unsigned int i = 0; i < lod_resolution; ++i)
         {
-            geometries[i] = cylinder( _center
-                                    , _distal_d   / 2.0
-                                    , _proximal_d / 2.0
-                                   , _height
-                                   , _direction
-                                   , points
-                                   );
+            cylinder( geometries[i].get()
+                    , _center
+                    , _distal_d   / 2.0
+                    , _proximal_d / 2.0
+                    , _height
+                    , _direction
+                    , points
+                    );
             // geometries[i] -> setNodeMask(0xffffffff);
-            geometries[i] -> setName(id);
+            // geometries[i] -> setName(id);
             points -= points_delta;
             // geometries[i] -> getOrCreateStateSet();
-
         }
     }
 }

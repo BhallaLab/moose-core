@@ -6,9 +6,9 @@
 # Maintainer:
 # Created: Sun Dec  7 20:32:02 2014 (+0530)
 # Version:
-# Last-Updated: Tue Jun 16 15:40:30 2015 (-0400)
+# Last-Updated: Tue Oct 27 14:55:03 2015 (-0400)
 #           By: Subhasis Ray
-#     Update #: 9
+#     Update #: 17
 # URL:
 # Keywords:
 # Compatibility:
@@ -175,6 +175,7 @@ SOURCES=['external/muparser/muParser.cpp',
          'builtins/HDF5WriterBase.cpp',
          'builtins/HDF5DataWriter.cpp',
          'builtins/NSDFWriter.cpp',
+         'builtins/testNSDF.cpp',
          'builtins/testBuiltins.cpp',
          'device/PulseGen.cpp',
          'device/DiffAmp.cpp',
@@ -227,6 +228,7 @@ SOURCES=['external/muparser/muParser.cpp',
          'ksolve/ZombieReac.cpp',
          'ksolve/ZombieEnz.cpp',
          'ksolve/ZombieMMenz.cpp',
+         'ksolve/ZombieFunction.cpp',
          'ksolve/VoxelPoolsBase.cpp',
          'ksolve/VoxelPools.cpp',
          'ksolve/GssaVoxelPools.cpp',
@@ -340,16 +342,15 @@ DEFINE_MACROS = [('USE_GSL', None),
                  ('USE_HDF5', None)]
 
 EXTRA_LINK_ARGS = ['-L/usr/lib64', '-Wl,-R/usr/lib64'] # distutils disregards everything in LIBRARY_DIRS except /usr/local/lib, hence this
-PACKAGES = ['moose', 'moose.backend', 'moose.neuroml', 'mgui', 'mgui.plugins', 'moose.topology', 'moogli']
-SCRIPTS = ['gui/mgui.py']
+PACKAGES = ['moose', 'moose.backend', 'moose.neuroml', 'moose.topology']
 PACKAGE_DATA = {'moose': ['copyleft', 'README.md'], 'mgui': ['icons/*', 'colormaps/*', 'bioModels/*']}
-REQUIRES = ['numpy', 'gsl', 'hdf5', 'libsbml'] # using full-dependency
+REQUIRES = ['numpy'] #, 'gsl', 'hdf5', 'libsbml'] # using full-dependency
 # python-libsbml, although available on PyPI, does not build with pip
 # install and gsl is a C library. The links are just for informing the
 # users.
 DEPENDENCY_LINKS = ['git+git://git.savannah.gnu.org/gsl.git',
                     'svn+svn://svn.code.sf.net/p/sbml/code/trunk']
-INSTALL_REQUIRES = "requirements.txt"
+INSTALL_REQUIRES = None # "requirements.txt"
 EXTRAS_REQUIRE = {} #['matplotlib', 'PyQt4', 'suds']
 
 setup_info = dict(
@@ -366,10 +367,7 @@ setup_info = dict(
     packages=PACKAGES,
     package_data=PACKAGE_DATA,
     requires=REQUIRES,
-    package_dir={'': 'python', 'mgui': 'gui'},
-    entry_points={
-        'gui_scripts': [
-            'moose = mgui.mgui:main']},
+    package_dir={'': 'python'},
     #scripts=SCRIPTS,
 )
 

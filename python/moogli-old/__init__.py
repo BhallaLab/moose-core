@@ -31,11 +31,11 @@ class DynamicMorphologyViewerWidget(_moogli.MorphologyViewerWidget):
 
 
 class Morphology(_moogli.Morphology):
-    def __init__(self, name = ""):
-        _moogli.Morphology.__init__(self, name, 1)
+    def __init__(self, name = "", points = 10):
+        _moogli.Morphology.__init__(self, name, 1, 50.0, points, 2)
         self._groups = {}
 
-    def create_group(self, group_id, compartment_ids, base_value, peak_value, base_color, peak_color = None):
+    def create_group(self, group_id, compartment_ids, base_value = None, peak_value = None, base_color = None, peak_color = None):
         self._groups[group_id] = (compartment_ids, base_value, peak_value, base_color, peak_color)
 
     def set_color(self, group_id, values):
@@ -50,6 +50,15 @@ class Morphology(_moogli.Morphology):
                 color = map(operator.add, base_color, [ normalized_value * x for x in map(operator.sub, peak_color, base_color)])
             self.set_compartment_color(compartment_id, color)
 
+    def set_diameter(self, group_id, values):
+        compartment_ids = self._groups[group_id][0]
+        # print zip(compartment_ids, values)
+        for (compartment_id, diameter) in zip(compartment_ids, values):
+            diameter = diameter * 10000000.0
+            # print diameter
+            # print compartment_id
+            self.set_compartment_diameter(compartment_id, diameter)
+        # [self.set_compartment_diameter(values[0], values[1] * 10e7) for values in zip(compartment_ids, values)]
 
 __all__ = [ "Morphology"
           , "MorphologyViewer"
