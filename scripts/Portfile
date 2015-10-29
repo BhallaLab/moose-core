@@ -16,7 +16,7 @@ long_description        MOOSE is the Multiscale Object-Oriented Simulation \
 homepage                http://moose.ncbs.res.in
 fetch.type              git
 fetch.ignore_sslcert    yes
-git.url                 https://github.com/dilawar/moose-core
+git.url                 https://github.com/BhallaLab/moose-core
 git.branch              master
 license                 GPL-3
 
