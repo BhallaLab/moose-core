@@ -398,8 +398,8 @@ endif(WITH_PYTHON)
 ## MOOGLI
 OPTION(BUILD_MOOGLI "Build moogli extension." OFF)
 IF(BUILD_MOOGLI)
-    MESSAGE(STATUS "Building MOOGLI")
-    SET(MOOGLI_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/python/moogli)
+    MESSAGE(STATUS "Building [OLD] MOOGLI")
+    SET(MOOGLI_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/python/moogli-old)
 
     # Build directory of MOOGLI can't be same as of moose which is
     # ${CMAKE_CURRENT_BINARY_DIR}. If they are same both project will try to
