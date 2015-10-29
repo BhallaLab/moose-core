@@ -295,7 +295,7 @@ else
 endif
 
 ifeq ($(USE_HDF5),1)
-	CXXFLAGS+= -DUSE_HDF5  -DH5_NO_DEPRECATED_SYMBOLS -I/usr/local/hdf5/include
+	CXXFLAGS+= -DUSE_HDF5  -DH5_NO_DEPRECATED_SYMBOLS -I/usr/local/hdf5/include -I/usr/include/hdf5/serial
 	LIBS+= -lhdf5 -lhdf5_hl -L/usr/local/hdf5/lib -L/usr/lib/x86_64-linux-gnu/hdf5/serial/
 endif
 
