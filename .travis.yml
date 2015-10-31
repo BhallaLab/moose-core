@@ -3,14 +3,11 @@ compiler:
     - gcc
     - clang
 os:
-    - linux
-matrix:
-    allow_failures:
-        - os: osx
+    - osx
 branches:
     only:
         - master
-        - macos
+        - osx
 notifications:
     email:
         recipients:
@@ -26,22 +23,11 @@ env:
 cache: apt
 
 before_script:
-    - sudo apt-get update -qq
-    - sudo apt-get install libxml2-dev libbz2-dev
-    - sudo apt-get install libhdf5-serial-dev
-    - sudo apt-get install python-numpy python-setuptools python-networkx
-    - sudo apt-get install make texinfo cmake
-    - sudo apt-get install python-suds python-matplotlib
-    - sudo apt-get install python-qt4-dev python-qt4-gl python-sip-dev libqt4-dev libopenscenegraph-dev
-    - sudo apt-get install doxygen python-sphinx
-
-before_install:
-    - sbmlurl="http://sourceforge.net/projects/sbml/files/libsbml/5.9.0/stable/Linux/64-bit/libSBML-5.9.0-Linux-x64.deb"
-    - wget "$sbmlurl" -O libsbml.deb && sudo dpkg -i libsbml.deb 
-    - wget http://ftp.debian.org/debian/pool/main/g/gsl/libgsl0ldbl_1.16+dfsg-4_amd64.deb -O gsl_1.16.deb
-    - sudo dpkg -i gsl_1.16.deb
-    - wget "http://ftp.debian.org/debian/pool/main/g/gsl/libgsl0-dev_1.16+dfsg-4_amd64.deb" -O gsl_1.16-dev.deb
-    - sudo dpkg -i gsl_1.16-dev.deb
+    - brew install gsl hdf5 python cmake 
+    - brew install homebrew/python/numpy 
+    - brew install homebrew/python/matplotlib
+    - brew install pyqt
+    - brew install openscenegraph
 
 install:
     - echo "nothing to do here"
