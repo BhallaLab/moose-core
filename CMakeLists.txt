@@ -13,7 +13,7 @@ set(MOOGLI_VERSION "1.0")
 # (which would end up getting picked up by header search, instead of the correct
 # versions).
 
-MESSAGE("+++ CMAKE_INSTALL_PREFIX : ${CMAKE_INSTALL_PREFIX}")
+MESSAGE("++ CMAKE_INSTALL_PREFIX : ${CMAKE_INSTALL_PREFIX}")
 if( CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT MSVC_IDE )
     message(FATAL_ERROR 
         "In-source builds are not allowed.
@@ -46,6 +46,8 @@ add_custom_target(uninstall
     COMMAND ${CMAKE_COMMAND} -P
     ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
     )
+
+link_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 ################################# OS Specific ##################################
 MESSAGE(STATUS "Operating system: ${CMAKE_SYSTEM_NAME}")
@@ -153,10 +155,11 @@ endif()
 
 ################################### SETUP BUILD ################################
 include_directories(msg basecode)
-add_executable(moose.bin basecode/main.cpp 
-    )
-#add_library(moose SHARED basecode/main.cpp)
-#set_target_properties(moose PROPERTIES COMPILE_FLAGS  "-DMOOSE_LIB")
+add_executable(moose.bin basecode/main.cpp)
+
+add_library(libmoose SHARED basecode/main.cpp)
+set_target_properties(libmoose PROPERTIES COMPILE_FLAGS  "-DMOOSE_LIB")
+set_target_properties(libmoose PROPERTIES PREFIX "")
 
 ## GSL
 find_package(GSL 1.16 REQUIRED)
@@ -292,17 +295,16 @@ set(MOOSE_LIBRARIES
     basecode
     )
 
+
 # MAC linker does not understand many of gnu-ld options.
 IF(MACOSX)
-    target_link_libraries(moose.bin 
+    target_link_libraries(libmoose
         "-Wl,-all_load"
         ${MOOSE_LIBRARIES}
         ${STATIC_LIBRARIES}
-        "-Wl,-noall_load"
-        ${SYSTEM_SHARED_LIBS}
         )
 ELSE(MACOSX)
-    target_link_libraries(moose.bin 
+    target_link_libraries(libmoose 
         "-Wl,--whole-archive"
         ${MOOSE_LIBRARIES}
         ${STATIC_LIBRARIES}
@@ -311,9 +313,13 @@ ELSE(MACOSX)
         )
 ENDIF(MACOSX)
 
+target_link_libraries(moose.bin
+    LINK_PUBLIC moose
+    )
+
 IF(WITH_DOC)
     FIND_PACKAGE(Doxygen REQUIRED)
-    add_custom_command(TARGET moose.bin POST_BUILD
+    add_custom_command(TARGET libmoose POST_BUILD
         COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.full
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Building developer documentation"
@@ -352,13 +358,13 @@ if(WITH_PYTHON)
     list(APPEND SYSTEM_SHARED_LIBS ${PYTHON_LIBRARIES})
 
 IF(MACOSX)
-    target_link_libraries(
-        _moose 
+    target_link_libraries( _moose 
         moosepython  
         "-Wl,-all_load"
         ${MOOSE_LIBRARIES}
         ${STATIC_LIBRARIES}
-        "-Wl,-noall_load"
+        )
+    target_link_libraries(_moose
         ${SYSTEM_SHARED_LIBS}
         )
 ELSE(MACOSX)
@@ -486,6 +492,10 @@ install(TARGETS moose.bin
     DESTINATION bin
     )
 
+install(TARGETS libmoose
+    DESTINATION lib
+    )
+
 install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/moose
     DESTINATION bin
     )
@@ -496,7 +506,7 @@ if(WITH_PYTHON)
     install(CODE 
         "
         execute_process(
-            COMMAND ${CMAKE_COMMAND} -E tar xvf ${MOOSE_SRC_TAR} -C /tmp
+            COMMAND tar xvf ${MOOSE_SRC_TAR} -C /tmp
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
             )
         execute_process(
