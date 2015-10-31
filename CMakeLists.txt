@@ -153,10 +153,10 @@ endif()
 
 ################################### SETUP BUILD ################################
 include_directories(msg basecode)
-add_executable(moose.bin basecode/main.cpp 
-    )
-#add_library(moose SHARED basecode/main.cpp)
-#set_target_properties(moose PROPERTIES COMPILE_FLAGS  "-DMOOSE_LIB")
+add_executable(moose.bin basecode/main.cpp)
+
+add_library(moose SHARED basecode/main.cpp)
+set_target_properties(moose PROPERTIES COMPILE_FLAGS  "-DMOOSE_LIB")
 
 ## GSL
 find_package(GSL 1.16 REQUIRED)
@@ -294,26 +294,35 @@ set(MOOSE_LIBRARIES
 
 # MAC linker does not understand many of gnu-ld options.
 IF(MACOSX)
-    target_link_libraries(moose.bin 
+    target_link_libraries(moose
         "-Wl,-all_load"
         ${MOOSE_LIBRARIES}
         ${STATIC_LIBRARIES}
-        "-Wl,-noall_load"
+        )
+    target_link_libraries(moose
         ${SYSTEM_SHARED_LIBS}
         )
+
+    target_link_libraries(moose.bin
+        moose
+        )
 ELSE(MACOSX)
-    target_link_libraries(moose.bin 
+    target_link_libraries(moose 
         "-Wl,--whole-archive"
         ${MOOSE_LIBRARIES}
         ${STATIC_LIBRARIES}
         "-Wl,--no-whole-archive"
         ${SYSTEM_SHARED_LIBS}
         )
+    target_link_libraries(moose.bin
+        moose
+        )
+
 ENDIF(MACOSX)
 
 IF(WITH_DOC)
     FIND_PACKAGE(Doxygen REQUIRED)
-    add_custom_command(TARGET moose.bin POST_BUILD
+    add_custom_command(TARGET moose POST_BUILD
         COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.full
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Building developer documentation"
@@ -352,13 +361,13 @@ if(WITH_PYTHON)
     list(APPEND SYSTEM_SHARED_LIBS ${PYTHON_LIBRARIES})
 
 IF(MACOSX)
-    target_link_libraries(
-        _moose 
+    target_link_libraries( _moose 
         moosepython  
         "-Wl,-all_load"
         ${MOOSE_LIBRARIES}
         ${STATIC_LIBRARIES}
-        "-Wl,-noall_load"
+        )
+    target_link_libraries(_moose
         ${SYSTEM_SHARED_LIBS}
         )
 ELSE(MACOSX)
@@ -484,6 +493,10 @@ endif(WITH_DOC)
 
 install(TARGETS moose.bin
     DESTINATION bin
+    )
+
+install(TARGETS moose
+    DESTINATION lib
     )
 
 install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/moose
