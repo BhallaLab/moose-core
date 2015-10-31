@@ -48,3 +48,9 @@ build.pre_args          ""
 build.post_args         ""
 
 test.cmd                cd _build && ctest --output-on-failure
+
+##destroot.cmd            cd _build && make install DESTDIR=${destdir}
+##destroot.args           ""
+##destroot.pre_args       ""
+##destroot.post_args      ""
+##destroot.destdir        prefix=${destroot}/${prefix}

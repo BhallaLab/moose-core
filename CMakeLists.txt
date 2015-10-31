@@ -303,6 +303,11 @@ IF(MACOSX)
         ${MOOSE_LIBRARIES}
         ${STATIC_LIBRARIES}
         )
+
+    target_link_libraries(libmoose
+        ${SYSTEM_SHARED_LIBS}
+        )
+
 ELSE(MACOSX)
     target_link_libraries(libmoose 
         "-Wl,--whole-archive"
