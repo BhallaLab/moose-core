@@ -318,6 +318,7 @@ ELSE(MACOSX)
         )
 ENDIF(MACOSX)
 
+add_dependencies(moose.bin libmoose)
 target_link_libraries(moose.bin
     LINK_PUBLIC moose
     )
