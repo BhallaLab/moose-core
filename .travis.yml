@@ -20,12 +20,11 @@ env:
 cache: apt
 
 before_script:
-    - brew install gsl hdf5 python 
+    - brew install gsl hdf5 python cmake 
     - brew install homebrew/python/numpy 
     - brew install homebrew/python/matplotlib
     - brew install pyqt
     - brew install openscenegraph
-
 
 install:
     - echo "nothing to do here"
