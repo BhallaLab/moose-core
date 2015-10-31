@@ -143,10 +143,8 @@ endif()
 find_package(LIBSBML)
 if(NOT LIBSBML_FOUND)
     MESSAGE("++ LIBSBML NOT FOUND.  Disabling SBML support.")
-    ADD_DEFINITIONS(-UUSE_SBML)
 else()
     MESSAGE("++ SBML found. Support is ON: ${LIBSBML_LIBRARY}")
-    add_definitions(-DUSE_SBML)
     include_directories(${LIBSBML_INCLUDE_DIR})
     find_package(BZip2 REQUIRED)
     find_package(LibXML2 REQUIRED)
@@ -155,7 +153,8 @@ endif()
 
 ################################### SETUP BUILD ################################
 include_directories(msg basecode)
-add_executable(moose.bin basecode/main.cpp)
+add_executable(moose.bin basecode/main.cpp 
+    )
 #add_library(moose SHARED basecode/main.cpp)
 #set_target_properties(moose PROPERTIES COMPILE_FLAGS  "-DMOOSE_LIB")
 
@@ -492,14 +491,21 @@ install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/moose
     )
 
 if(WITH_PYTHON)
-install(CODE 
-    "
-    execute_process(COMMAND easy_install  --prefix ${CMAKE_INSTALL_PREFIX} 
-        --upgrade moose-${MOOSE_VERSION}.tar.gz
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    SET(MOOSE_SRC_TAR ${CMAKE_CURRENT_BINARY_DIR}/moose-${MOOSE_VERSION}.tar.gz)
+
+    install(CODE 
+        "
+        execute_process(
+            COMMAND ${CMAKE_COMMAND} -E tar xvf ${MOOSE_SRC_TAR} -C /tmp
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+            )
+        execute_process(
+            COMMAND ${PYTHON_EXECUTABLE} setup.py install 
+            WORKING_DIRECTORY /tmp/moose-${MOOSE_VERSION}
+            )
+        "
         )
-    "
-    )
+
 endif(WITH_PYTHON)
 
 if(WITH_DOC)
@@ -513,17 +519,18 @@ if(WITH_DOC)
         )
 endif()
 
-if(BUILD_MOOGLI)
-    install(CODE
-        "
-        execute_process(COMMAND easy_install
-            --prefix ${CMAKE_INSTALL_PREFIX}
-            --upgrade moogli-${MOOGLI_VERSION}.tar.gz
-            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-            )
-        "
-        )
-endif(BUILD_MOOGLI)
+## TODO: Use python setup.py install to make sure that it installs with MacPort
+## and any Unix-like system.
+##if(BUILD_MOOGLI)
+##    install(CODE
+##        "
+##        execute_process(COMMAND easy_install
+##            --prefix ${CMAKE_INSTALL_PREFIX}
+##            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+##            )
+##        "
+##        )
+##endif(BUILD_MOOGLI)
     
 
 ############################ CTEST ######################################
@@ -532,4 +539,3 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake_moose_ctest.cmake)
 
 ############################ CPACK ######################################
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake_moose_cpack.cmake)
-

@@ -50,5 +50,17 @@ set(CPACK_RPM_USER_FILELIST "%ignore /" "%ignore /usr" "%ignore /usr/share"
     "%ignore /tmp"
     )
 
-include(CPack)
+## Apple support
+if(APPLE)
 
+    MESSAGE("++ Mac BUNDLE ON for ${CMAKE_PROJECT_NAME}")
+    ## Mac bundle
+    SET(BUNDLE_NAME ${CMAKE_PROJECT_NAME})
+    SET(CPACK_BUNDLE_NAME ${BUNDLE_NAME})
+
+    SET_TARGET_PROPERTIES(moose.bin PROPERTIES MACOSX_BUNDLE TRUE)
+    SET_TARGET_PROPERTIES(_moose PROPERTIES MACOSX_BUNDLE TRUE)
+
+endif(APPLE)
+
+include(CPack)
