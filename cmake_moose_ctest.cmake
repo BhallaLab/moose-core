@@ -55,9 +55,9 @@ ADD_TEST(NAME pymoose-neuroml-reader-test
 #    WORKING_DIRECTORY ${TEST_DIRECTORY}
 #    )
 #
-if(BUILD_MOOGLI)
-    ADD_TEST(NAME moogli_sanity_test
-        COMMAND ${PYTHON_EXECUTABLE} test_moogli.py
-        WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
-        )
+#if(BUILD_MOOGLI)
+#    ADD_TEST(NAME moogli_sanity_test
+#        COMMAND ${PYTHON_EXECUTABLE} test_moogli.py
+#        WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
+#        )
 endif(BUILD_MOOGLI)
