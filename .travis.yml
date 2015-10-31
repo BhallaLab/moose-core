@@ -1,21 +1,23 @@
 language: cpp
 compiler:
     - gcc
+    - clang
 os:
     - linux
-    - osx
 matrix:
     allow_failures:
         - os: osx
 branches:
     only:
         - master
-        - mpi
+        - macos
 notifications:
     email:
         recipients:
             - dilawar.s.rajput@gmail.com
             - bhalla@ncbs.res.in
+            - aviralg@ncbs.res.in
+            - hrani@ncbs.res.in
         on_success: change
         on_failure: always
 
