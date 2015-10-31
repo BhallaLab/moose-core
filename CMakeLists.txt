@@ -361,7 +361,13 @@ if(WITH_PYTHON)
         LIBRARY_OUTPUT_DIRECTORY ${PYMOOSE_OUTPUT_DIRECTORY}
         PREFIX ""
         )
+
+if(MACOSX)
+    set(CMAKE_MODULE_LINKER_FLAGS "-undefined dynamic_lookup")
+    MESSAGE(STATUS "ADDING some linker flags ${CMAKE_EXE_LINKER_FLAGS}")
+else(MACOSX)
     list(APPEND SYSTEM_SHARED_LIBS ${PYTHON_LIBRARIES})
+endif(MACOSX)
 
 IF(MACOSX)
     target_link_libraries( _moose 
