@@ -112,7 +112,7 @@ template < class T, class F > class FieldElementFinfo: public FieldElementFinfoB
 				getNumField_( getNumField )
 		{
 				string setname = "setNum" + name;
-				setname[6] = toupper( setname[6] );
+				setname[6] = std::toupper( setname[6] );
 				// setNumField is a tricky operation, because it may require
 				// cross-node rescaling of the 
 				// FieldDataHandler::fieldDimension. To acheive this we
@@ -124,7 +124,7 @@ template < class T, class F > class FieldElementFinfo: public FieldElementFinfoB
 					new OpFunc1< T, unsigned int >( setNumField ) );
 
 				string getname = "getNum" + name;
-				getname[6] = toupper( getname[6] );
+				getname[6] = std::toupper( getname[6] );
 				getNum_ = new DestFinfo(
 					getname,
 					"Requests number of field entries in field array."
