@@ -14,7 +14,9 @@ env:
 cache: apt
 
 before_script:
-    - brew install gsl hdf5 python cmake 
+    - brew install gsl
+    - brew install homebrew/science/hdf5 
+    - brew install python cmake 
     - brew install homebrew/python/numpy 
     - brew install homebrew/python/matplotlib
     - brew install pyqt
