@@ -4,13 +4,6 @@ compiler:
     - clang
 os:
     - linux
-matrix:
-    allow_failures:
-        - os: osx
-branches:
-    only:
-        - master
-        - macos
 notifications:
     email:
         recipients:
