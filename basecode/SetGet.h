@@ -30,7 +30,7 @@ template< class T, class A >
 A localGet( const Eref& er, string field )
 {
 	string fullFieldName = "get" + field;
-	fullFieldName[3] = toupper( fullFieldName[3] );
+	fullFieldName[3] = std::toupper( fullFieldName[3] );
 	const Finfo* finfo = er.element()->cinfo()->findFinfo( fullFieldName );
 	assert( finfo );
 	
@@ -245,7 +245,7 @@ template< class A > class Field: public SetGet1< A >
 		static bool set( const ObjId& dest, const string& field, A arg )
 		{
 			string temp = "set" + field;
-			temp[3] = toupper( temp[3] );
+			temp[3] = std::toupper( temp[3] );
 			return SetGet1< A >::set( dest, temp, arg );
 		}
 
@@ -253,7 +253,7 @@ template< class A > class Field: public SetGet1< A >
 			const vector< A >& arg )
 		{
 			string temp = "set" + field;
-			temp[3] = toupper( temp[3] );
+			temp[3] = std::toupper( temp[3] );
 			return SetGet1< A >::setVec( destId, temp, arg );
 		}
 
@@ -261,7 +261,7 @@ template< class A > class Field: public SetGet1< A >
 			A arg )
 		{
 			string temp = "set" + field;
-			temp[3] = toupper( temp[3] );
+			temp[3] = std::toupper( temp[3] );
 			return SetGet1< A >::setRepeat( destId, temp, arg );
 		}
 
@@ -286,7 +286,7 @@ template< class A > class Field: public SetGet1< A >
 			ObjId tgt( dest );
 			FuncId fid;
 			string fullFieldName = "get" + field;
-			fullFieldName[3] = toupper( fullFieldName[3] );
+			fullFieldName[3] = std::toupper( fullFieldName[3] );
 			const OpFunc* func = SetGet::checkSet( fullFieldName, tgt, fid );
 			const GetOpFuncBase< A >* gof = 
 					dynamic_cast< const GetOpFuncBase< A >* >( func );
@@ -321,7 +321,7 @@ template< class A > class Field: public SetGet1< A >
 			ObjId tgt( dest );
 			FuncId fid;
 			string fullFieldName = "get" + field;
-			fullFieldName[3] = toupper( fullFieldName[3] );
+			fullFieldName[3] = std::toupper( fullFieldName[3] );
 			const OpFunc* func = SetGet::checkSet( fullFieldName, tgt, fid );
 			const GetOpFuncBase< A >* gof = 
 					dynamic_cast< const GetOpFuncBase< A >* >( func );
@@ -468,7 +468,7 @@ template< class L, class A > class LookupField: public SetGet2< L, A >
 			L index, A arg )
 		{
 			string temp = "set" + field;
-			temp[3] = toupper( temp[3] );
+			temp[3] = std::toupper( temp[3] );
 			return SetGet2< L, A >::set( dest, temp, index, arg );
 		}
 
@@ -480,7 +480,7 @@ template< class L, class A > class LookupField: public SetGet2< L, A >
 			const vector< L >& index, const vector< A >& arg )
 		{
 			string temp = "set" + field;
-			temp[3] = toupper( temp[3] );
+			temp[3] = std::toupper( temp[3] );
 			return SetGet2< L, A >::setVec( destId, temp, index, arg );
 		}
 
@@ -494,7 +494,7 @@ template< class L, class A > class LookupField: public SetGet2< L, A >
 			const vector< L >& index, const vector< A >& arg )
 		{
 			string temp = "set" + field;
-			temp[3] = toupper( temp[3] );
+			temp[3] = std::toupper( temp[3] );
 			return SetGet2< L, A >::setVec( dest, temp, index, arg );
 		}
 
@@ -534,7 +534,7 @@ template< class L, class A > class LookupField: public SetGet2< L, A >
 			ObjId tgt( dest );
 			FuncId fid;
 			string fullFieldName = "get" + field;
-			fullFieldName[3] = toupper( fullFieldName[3] );
+			fullFieldName[3] = std::toupper( fullFieldName[3] );
 			const OpFunc* func = SetGet::checkSet( fullFieldName, tgt, fid);
 			const LookupGetOpFuncBase< L, A >* gof = 
 				dynamic_cast< const LookupGetOpFuncBase< L, A >* >( func );
@@ -577,7 +577,7 @@ template< class L, class A > class LookupField: public SetGet2< L, A >
 			ObjId tgt( dest );
 			FuncId fid;
 			string fullFieldName = "get" + field;
-			fullFieldName[3] = toupper( fullFieldName[3] );
+			fullFieldName[3] = std::toupper( fullFieldName[3] );
 			const OpFunc* func = SetGet::checkSet( fullFieldName, tgt, fid );
 			const LookupGetOpFuncBase< L, A >* gof = 
 				dynamic_cast< const LookupGetOpFuncBase< L, A >* >( func );
