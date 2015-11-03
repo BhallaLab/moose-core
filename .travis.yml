@@ -27,5 +27,5 @@ install:
 
 script:
     - make BUILD=debug USE_NEUROKIT=1 && make clean
-    - mkdir -p _build && cd _build && cmake -DDEBUG=ON -DWITH_DOC=ON -DBUILD_MOOGLI=ON .. && make
+    - mkdir -p _build && cd _build && cmake -DDEBUG=ON -DWITH_DOC=ON .. && make
     - ctest --output-on-failure
