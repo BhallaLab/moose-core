@@ -4,7 +4,6 @@ cmake_policy(SET CMP0004 OLD)
 
 project(moose)
 set(MOOSE_VERSION "3.0.2")
-set(MOOGLI_VERSION "1.0")
 
 # This snippet is from LLVM project.
 # Sanity check our source directory to make sure that we are not trying to
@@ -412,41 +411,6 @@ IF(WITH_DOC)
 endif(WITH_DOC)
 endif(WITH_PYTHON)
 
-## MOOGLI
-OPTION(BUILD_MOOGLI "Build moogli extension." OFF)
-IF(BUILD_MOOGLI)
-    MESSAGE(STATUS "Building [OLD] MOOGLI")
-    SET(MOOGLI_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/python/moogli-old)
-
-    # Build directory of MOOGLI can't be same as of moose which is
-    # ${CMAKE_CURRENT_BINARY_DIR}. If they are same both project will try to
-    # create CMAKECache file in same directory which is an error.
-    SET(MOOGLI_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/_moogli_bin)
-    FILE(MAKE_DIRECTORY ${MOOGLI_BUILD_DIR})
-
-    # After successful run, we should get a source distribution of moogli in
-    # current build directory.
-
-    # NOTE: moogli source distribution does not have version information. python
-    # setup.py sdist does not append versioning information.
-    set(MOOGLI_OUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/moogli.tar.gz)
-    add_custom_target(moogli ALL
-        DEPENDS ${MOOGLI_OUT_FILE}
-        )
-
-    add_custom_command(OUTPUT ${MOOGLI_OUT_FILE}
-        COMMAND ${CMAKE_COMMAND} -DMOOGLI_DIST_DIR=${CMAKE_BINARY_DIR} ${MOOGLI_SOURCE_DIR}
-        COMMAND $(MAKE)
-        WORKING_DIRECTORY ${MOOGLI_BUILD_DIR}
-        COMMENT "Building MOOGLI extension"
-        VERBATIM
-        )
-
-else(BUILD_MOOGLI)
-    MESSAGE(STATUS "NOT building MOOGLI")
-endif(BUILD_MOOGLI)
-
-
 ######################### CYMOOSE #############################################
 option(BUILD_CYMOOSE "Build python extension using Cython. Development version." OFF)
 if(BUILD_CYMOOSE)
@@ -492,8 +456,6 @@ if(WITH_DOC)
         COMMAND ./docgen
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Generating html doc using sphinx and doxygen"
-        VERBATIM
-        COMMENT "Building MOOGLI"
         )
 
 endif(WITH_DOC)
