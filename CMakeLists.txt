@@ -503,20 +503,6 @@ if(WITH_DOC)
         )
 endif()
 
-## TODO: Use python setup.py install to make sure that it installs with MacPort
-## and any Unix-like system.
-##if(BUILD_MOOGLI)
-##    install(CODE
-##        "
-##        execute_process(COMMAND easy_install
-##            --prefix ${CMAKE_INSTALL_PREFIX}
-##            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-##            )
-##        "
-##        )
-##endif(BUILD_MOOGLI)
-    
-
 ############################ CTEST ######################################
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake_moose_ctest.cmake)
