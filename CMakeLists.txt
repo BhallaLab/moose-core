@@ -390,13 +390,13 @@ ELSE(MACOSX)
         )
 ENDIF(MACOSX)
 
-    add_custom_command(TARGET _moose POST_BUILD
-        COMMAND ${PYTHON_EXECUTABLE} setup.py sdist --dist-dir
-        ${CMAKE_CURRENT_BINARY_DIR}
-        WORKING_DIRECTORY ${PROJECT_PYTHON_PATH}
-        COMMENT "Generating moose source distribution using setuptools"
-        VERBATIM
-        )
+add_custom_command(TARGET _moose POST_BUILD
+    COMMAND ${PYTHON_EXECUTABLE} setup.py sdist --dist-dir
+    ${CMAKE_CURRENT_BINARY_DIR}
+    WORKING_DIRECTORY ${PROJECT_PYTHON_PATH}
+    COMMENT "Generating moose source distribution using setuptools"
+    VERBATIM
+    )
 
 IF(WITH_DOC)
     # Also generate the documents
@@ -475,21 +475,15 @@ install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/moose
     )
 
 if(WITH_PYTHON)
-    SET(MOOSE_SRC_TAR ${CMAKE_CURRENT_BINARY_DIR}/moose-${MOOSE_VERSION}.tar.gz)
-
     install(CODE 
         "
         execute_process(
-            COMMAND tar xvf ${MOOSE_SRC_TAR} -C /tmp
-            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-            )
-        execute_process(
-            COMMAND ${PYTHON_EXECUTABLE} setup.py install 
-            WORKING_DIRECTORY /tmp/moose-${MOOSE_VERSION}
+            COMMAND ${PYTHON_EXECUTABLE} setup.py install
+                --prefix=${CMAKE_INSTALL_PREFIX}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/python
             )
         "
         )
-
 endif(WITH_PYTHON)
 
 if(WITH_DOC)
