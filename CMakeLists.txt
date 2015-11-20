@@ -46,6 +46,7 @@ add_custom_target(uninstall
     ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
     )
 
+# This is for testing purpose.
 link_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 ################################# OS Specific ##################################
@@ -83,12 +84,13 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules")
 
 ########################### COMPILER MACROS #####################################
 
-## Turn warning to error
+# Turn warning to error: Not all of the options may be supported on all
+# versions of compilers. be careful here.
 add_definitions(-Wall
-    -Wno-return-type-c-linkage
+    #-Wno-return-type-c-linkage
     -Wno-unused-variable
     -Wno-unused-function
-    -Wno-unused-private-field
+    #-Wno-unused-private-field
     )
 add_definitions(-fPIC)
 
@@ -364,8 +366,6 @@ if(WITH_PYTHON)
 if(MACOSX)
     set(CMAKE_MODULE_LINKER_FLAGS "-undefined dynamic_lookup")
     MESSAGE(STATUS "ADDING some linker flags ${CMAKE_EXE_LINKER_FLAGS}")
-else(MACOSX)
-    list(APPEND SYSTEM_SHARED_LIBS ${PYTHON_LIBRARIES})
 endif(MACOSX)
 
 IF(MACOSX)
@@ -390,13 +390,13 @@ ELSE(MACOSX)
         )
 ENDIF(MACOSX)
 
-add_custom_command(TARGET _moose POST_BUILD
-    COMMAND ${PYTHON_EXECUTABLE} setup.py sdist --dist-dir
-    ${CMAKE_CURRENT_BINARY_DIR}
-    WORKING_DIRECTORY ${PROJECT_PYTHON_PATH}
-    COMMENT "Generating moose source distribution using setuptools"
-    VERBATIM
-    )
+    add_custom_command(TARGET _moose POST_BUILD
+        COMMAND ${PYTHON_EXECUTABLE} setup.py sdist --dist-dir
+        ${CMAKE_CURRENT_BINARY_DIR}
+        WORKING_DIRECTORY ${PROJECT_PYTHON_PATH}
+        COMMENT "Generating moose source distribution using setuptools"
+        VERBATIM
+        )
 
 IF(WITH_DOC)
     # Also generate the documents
@@ -475,15 +475,21 @@ install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/moose
     )
 
 if(WITH_PYTHON)
+    SET(MOOSE_SRC_TAR ${CMAKE_CURRENT_BINARY_DIR}/moose-${MOOSE_VERSION}.tar.gz)
+
     install(CODE 
         "
         execute_process(
-            COMMAND ${PYTHON_EXECUTABLE} setup.py install
-                --prefix=${CMAKE_INSTALL_PREFIX}
-            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/python
+            COMMAND tar xvf ${MOOSE_SRC_TAR} -C /tmp
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+            )
+        execute_process(
+            COMMAND ${PYTHON_EXECUTABLE} setup.py install --prefix=${CMAKE_INSTALL_PREFIX}
+            WORKING_DIRECTORY /tmp/moose-${MOOSE_VERSION}
             )
         "
         )
+
 endif(WITH_PYTHON)
 
 if(WITH_DOC)
@@ -496,6 +502,20 @@ if(WITH_DOC)
         DESTINATION share/doc/moose/developer
         )
 endif()
+
+## TODO: Use python setup.py install to make sure that it installs with MacPort
+## and any Unix-like system.
+##if(BUILD_MOOGLI)
+##    install(CODE
+##        "
+##        execute_process(COMMAND easy_install
+##            --prefix ${CMAKE_INSTALL_PREFIX}
+##            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+##            )
+##        "
+##        )
+##endif(BUILD_MOOGLI)
+    
 
 ############################ CTEST ######################################
 
