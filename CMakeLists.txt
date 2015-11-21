@@ -180,9 +180,6 @@ add_executable(moose.bin basecode/main.cpp)
 add_library(libmoose SHARED basecode/main.cpp)
 set_target_properties(libmoose PROPERTIES COMPILE_FLAGS  "-DMOOSE_LIB")
 set_target_properties(libmoose PROPERTIES PREFIX "")
-set_target_properties(libmoose 
-    PROPERTIES VERSION ${MOOSE_VERSION} SOVERSION ${MOOSE_VERSION}
-    )
 
 ## GSL
 add_definitions(-DUSE_GSL)
