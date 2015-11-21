@@ -140,13 +140,23 @@ if(GPROF AND DEBUG)
     set(CMAKE_EXE_LINKER_FLAGS_DEBUG "-pg")
 endif()
 
-
-#### DEPENDENCIES
-
+# DEPENDENCIES
 find_package(LIBSBML)
-if(NOT LIBSBML_FOUND)
-    MESSAGE("++ LIBSBML NOT FOUND.  Disabling SBML support.")
-else()
+if(SBML_STATIC_HOME)
+    MESSAGE("++ Using local SBML. Support is ON")
+    include_directories(${SBML_STATIC_HOME}/include)
+    find_library(LIBSBML_LIBRARY
+        NAMES libsbml_static.a libsbml.a
+        PATHS ${SBML_STATIC_HOME}/lib ${SBML_STATIC_HOME}/lib64
+        NO_DEFAULT_PATH
+        )
+    MESSAGE("++ Using static sbml library: ${LIBSBML_LIBRARY}")
+    IF(LIBSBML_LIBRARY)
+        set(LIBSBML_FOUND ON)
+    ENDIF()
+endif()
+
+if(LIBSBML_FOUND)
     MESSAGE("++ SBML found. Support is ON: ${LIBSBML_LIBRARY}")
     include_directories(${LIBSBML_INCLUDE_DIR})
     find_package(BZip2 REQUIRED)
@@ -163,11 +173,27 @@ set_target_properties(libmoose PROPERTIES COMPILE_FLAGS  "-DMOOSE_LIB")
 set_target_properties(libmoose PROPERTIES PREFIX "")
 
 ## GSL
-find_package(GSL 1.16 REQUIRED)
-if(GSL_FOUND)
-    add_definitions(-DUSE_GSL)
-    include_directories(${GSL_INCLUDE_DIR})
-endif()
+add_definitions(-DUSE_GSL)
+
+# If GSL_STATIC_HOME is set, we use it to search for static gsl libs.
+IF(GSL_STATIC_HOME)
+    SET(GSL_INCLUDE_DIR "${GSL_STATIC_HOME}/include")
+    find_library(GSL_LIBRARY 
+        NAME libgsl.a 
+        PATHS ${GSL_STATIC_HOME}/lib ${GSL_STATIC_HOME}/lib64
+        NO_DEFAULT_PATH
+        )
+    find_library(GSLCBLAS_LIBRARY
+        NAME libgslcblas.a 
+        PATHS ${GSL_STATIC_HOME}/lib ${GSL_STATIC_HOME}/lib64 
+        NO_DEFAULT_PATH
+        )
+    SET(GSL_LIBRARIES ${GSL_LIBRARY} ${GSLCBLAS_LIBRARY})
+    MESSAGE("++ GSL_LIBRARIES ${GSL_LIBRARIES}")
+ELSE(LOCAL_GSL)
+    find_package(GSL 1.16 REQUIRED)
+ENDIF()
+include_directories(${GSL_INCLUDE_DIR})
 
 ## Setup hdf5
 find_package(HDF5)
@@ -247,18 +273,18 @@ if(FOUND_HDF5)
 endif()
 
 LIST(APPEND STATIC_LIBRARIES moose_sbml)
-if(LIBSBML_FOUND AND NOT LOCAL_SBML)
+IF(SBML_STATIC_HOME)
+    list(APPEND STATIC_LIBRARIES ${LIBSBML_LIBRARY})
+ELSEIF()
     list(APPEND SYSTEM_SHARED_LIBS ${LIBSBML_LIBRARY})
-elseif(LIBSBML_FOUND)
-    list(APPEND STATIC_LIBRARIES ${STATIC_SBML_LIBRARY})
-endif()
+ENDIF()
 
-if(GSL_FOUND AND NOT LOCAL_GSL)
+
+if(GSL_STATIC_HOME)
+    MESSAGE(STATUS "Using STATIC gsl libraries: ${GSL_LIBRARIES}")
+    list(APPEND STATIC_LIBRARIES ${GSL_LIBRARIES})
+elseif(GSL_STATIC_HOME)
     list(APPEND SYSTEM_SHARED_LIBS ${GSL_LIBRARIES})
-elseif(GSL_FOUND)
-    list(APPEND STATIC_LIBRARIES ${STATIC_GSL_LIBRARY}
-        ${STATIC_GSLBLAS_LIBRARY}
-        )
 endif()
 
 if(READLINE_FOUND AND TERMCAP_FOUND)
