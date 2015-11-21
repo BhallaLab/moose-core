@@ -1,5 +1,6 @@
 set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 cmake_minimum_required(VERSION 2.6)
+
 cmake_policy(SET CMP0004 OLD)
 
 project(moose)
@@ -77,6 +78,15 @@ option(ENABLE_UNIT_TESTS "ENABLE UNIT TESTS IN MOOSE" ON)
 option(WITH_PYTHON "Build native python extension of MOOSE" ON)
 option(WITH_MPI  "Enable OPENMPI support" OFF)
 option(WITH_CURSES "Enable ncurses" OFF)
+# If GSL_STATIC_HOME is set, we use it to search for static gsl libs.
+option(GSL_STATIC_HOME 
+    "installation prefix where static gsl library can be found" 
+    OFF
+    )
+option(SBML_STATIC_HOME 
+    "installation prefix where static sbml library can be found"
+    OFF
+    )
 
 ################################# CMKAE MACROS #################################
 
@@ -115,7 +125,6 @@ else()
     message("++ Moose will be quiet")
     add_definitions(-DQUIET_MODE)
 endif()
-
 if(ENABLE_LOGGER)
     message("++ LOGGER ENABLED")
     add_definitions(-DENABLE_LOGGER)
@@ -171,11 +180,13 @@ add_executable(moose.bin basecode/main.cpp)
 add_library(libmoose SHARED basecode/main.cpp)
 set_target_properties(libmoose PROPERTIES COMPILE_FLAGS  "-DMOOSE_LIB")
 set_target_properties(libmoose PROPERTIES PREFIX "")
+set_target_properties(libmoose 
+    PROPERTIES VERSION ${MOOSE_VERSION} SOVERSION ${MOOSE_VERSION}
+    )
 
 ## GSL
 add_definitions(-DUSE_GSL)
 
-# If GSL_STATIC_HOME is set, we use it to search for static gsl libs.
 IF(GSL_STATIC_HOME)
     SET(GSL_INCLUDE_DIR "${GSL_STATIC_HOME}/include")
     find_library(GSL_LIBRARY 
@@ -189,10 +200,12 @@ IF(GSL_STATIC_HOME)
         NO_DEFAULT_PATH
         )
     SET(GSL_LIBRARIES ${GSL_LIBRARY} ${GSLCBLAS_LIBRARY})
-    MESSAGE("++ GSL_LIBRARIES ${GSL_LIBRARIES}")
-ELSE(LOCAL_GSL)
+    set(GSL_INCLUDE_DIR ${GSL_STATIC_HOME}/include)
+    MESSAGE("++ STATIC GSL_LIBRARIES ${GSL_LIBRARIES}")
+ELSE()
     find_package(GSL 1.16 REQUIRED)
 ENDIF()
+
 include_directories(${GSL_INCLUDE_DIR})
 
 ## Setup hdf5
@@ -283,7 +296,8 @@ ENDIF()
 if(GSL_STATIC_HOME)
     MESSAGE(STATUS "Using STATIC gsl libraries: ${GSL_LIBRARIES}")
     list(APPEND STATIC_LIBRARIES ${GSL_LIBRARIES})
-elseif(GSL_STATIC_HOME)
+else()
+    MESSAGE(STATUS "Using system gsl : ${GSL_LIBRARIES}")
     list(APPEND SYSTEM_SHARED_LIBS ${GSL_LIBRARIES})
 endif()
 
