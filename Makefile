@@ -163,6 +163,8 @@ endif
 
 # Insert the svn revision no. into the code as a preprocessor macro.
 # Only for release versions we want to pass SVN=0 to make.
+# No more SVN so pass zero
+SVN=0
 ifndef SVN
 SVN?=1
 endif
