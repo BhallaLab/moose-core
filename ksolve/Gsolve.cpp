@@ -684,7 +684,11 @@ void Gsolve::setNinit( const Eref& e, double v )
 			if ( sys_.isReady )
 				pools_[vox].refreshAtot( &sys_ ); 
 		} else {
-			pools_[vox].setNinit( getPoolIndex( e ), round( v ) );
+			// I now do the rounding at reinit time. It is better there as
+			// it can give a distinct value each cycle. It is also better
+			// to keep the full resolution of Ninit for volume scaling.
+			// pools_[vox].setNinit( getPoolIndex( e ), round( v ) );
+			pools_[vox].setNinit( getPoolIndex( e ), v );
 		}
 	}
 }
