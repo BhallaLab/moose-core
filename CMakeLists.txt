@@ -360,9 +360,15 @@ ELSE(MACOSX)
 ENDIF(MACOSX)
 
 add_dependencies(moose.bin libmoose)
-target_link_libraries(moose.bin
-    LINK_PUBLIC moose
-    )
+
+IF(CMAKE_VERSION VERSION_LESS "2.8.0")
+    MESSAGE(STATUS "Using a fix for cmake ( < 2.8)")
+    target_link_libraries(moose.bin PUBLIC moose) 
+ELSE()
+    target_link_libraries(moose.bin
+        LINK_PUBLIC moose
+        )
+ENDIF()
 
 IF(WITH_DOC)
     FIND_PACKAGE(Doxygen REQUIRED)
