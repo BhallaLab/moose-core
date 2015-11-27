@@ -168,9 +168,7 @@ endif()
 if(LIBSBML_FOUND)
     MESSAGE("++ SBML found. Support is ON: ${LIBSBML_LIBRARY}")
     include_directories(${LIBSBML_INCLUDE_DIR})
-    find_package(BZip2 REQUIRED)
     find_package(LibXML2 REQUIRED)
-    find_package(ZLIB REQUIRED)
 endif()
 
 ################################### SETUP BUILD ################################
@@ -265,9 +263,7 @@ add_subdirectory(intfire)
 add_subdirectory(examples)
 
 # These are always shared libraries.
-set(SYSTEM_SHARED_LIBS ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES} 
-    ${LibXML2_LIBRARIES} ${BZIP2_LIBRARIES}
-    )
+set(SYSTEM_SHARED_LIBS ${LibXML2_LIBRARIES})
 
 # These libraries could be static of dynamic.
 # When building packages on OBS or launchpad, we build static library of a
