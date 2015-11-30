@@ -365,7 +365,15 @@ void Gsolve::process( const Eref& e, ProcPtr p )
 		}
 	}
 
-	// Fourth, update the mol #s
+	// Fourth: Fix the rates if we have had any diffusion or xreacs 
+	// happening. This is very inefficient at this point, need to fix.
+	if ( dsolvePtr_ || xfer_.size() > 0 ) {
+		for ( vector< GssaVoxelPools >::iterator 
+					i = pools_.begin(); i != pools_.end(); ++i ) {
+			i->refreshAtot( &sys_ );
+		}
+	}
+	// Fifth, update the mol #s
 	for ( vector< GssaVoxelPools >::iterator 
 					i = pools_.begin(); i != pools_.end(); ++i ) {
 		i->advance( p, &sys_ );
