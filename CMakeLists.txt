@@ -87,6 +87,10 @@ option(SBML_STATIC_HOME
     "installation prefix where static sbml library can be found"
     OFF
     )
+option(HDF5_STATIC_HOME
+    "installation prefix where static hdf5 library can be found"
+    OFF
+    )
 
 ################################# CMKAE MACROS #################################
 
@@ -149,6 +153,8 @@ if(GPROF AND DEBUG)
     set(CMAKE_EXE_LINKER_FLAGS_DEBUG "-pg")
 endif()
 
+################################### SETUP BUILD ################################
+
 # DEPENDENCIES
 find_package(LIBSBML)
 if(SBML_STATIC_HOME)
@@ -171,7 +177,6 @@ if(LIBSBML_FOUND)
     find_package(LibXML2 REQUIRED)
 endif()
 
-################################### SETUP BUILD ################################
 include_directories(msg basecode)
 add_executable(moose.bin basecode/main.cpp)
 
@@ -204,13 +209,25 @@ ENDIF()
 include_directories(${GSL_INCLUDE_DIR})
 
 ## Setup hdf5
-find_package(HDF5)
-if(FOUND_HDF5)
+IF(HDF5_STATIC_HOME)
+    SET(HDF5_INCLUDE_DIR "${HDF5_STATIC_HOME}/include")
+    find_library(HDF5_LIBRARIES 
+        NAME libhdf5-static.a
+        PATHS ${HDF5_STATIC_HOME}/lib ${HDF5_STATIC_HOME}/lib64
+        NO_DEFAULT_PATH
+        )
     add_definitions(-DUSE_HDF5)
     include_directories(${HDF5_INCLUDE_DIR})
-else(FOUND_HDF5)
-    message("++ HDF5 not found. Disabling support")
-endif(FOUND_HDF5)
+ELSE(HDF5_STATIC_HOME)
+    find_package(HDF5)
+    if(FOUND_HDF5)
+        add_definitions(-DUSE_HDF5)
+        include_directories(${HDF5_INCLUDE_DIR})
+    else(FOUND_HDF5)
+        message(STATUS "HDF5 not found. Disabling support")
+    endif(FOUND_HDF5)
+ENDIF(HDF5_STATIC_HOME)
+
 
 find_package(Termcap)
 find_package(Readline)
