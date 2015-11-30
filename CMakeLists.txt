@@ -168,9 +168,7 @@ endif()
 if(LIBSBML_FOUND)
     MESSAGE("++ SBML found. Support is ON: ${LIBSBML_LIBRARY}")
     include_directories(${LIBSBML_INCLUDE_DIR})
-    find_package(BZip2 REQUIRED)
     find_package(LibXML2 REQUIRED)
-    find_package(ZLIB REQUIRED)
 endif()
 
 ################################### SETUP BUILD ################################
@@ -265,9 +263,7 @@ add_subdirectory(intfire)
 add_subdirectory(examples)
 
 # These are always shared libraries.
-set(SYSTEM_SHARED_LIBS ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES} 
-    ${LibXML2_LIBRARIES} ${BZIP2_LIBRARIES}
-    )
+set(SYSTEM_SHARED_LIBS ${LibXML2_LIBRARIES})
 
 # These libraries could be static of dynamic.
 # When building packages on OBS or launchpad, we build static library of a
@@ -357,9 +353,15 @@ ELSE(MACOSX)
 ENDIF(MACOSX)
 
 add_dependencies(moose.bin libmoose)
-target_link_libraries(moose.bin
-    LINK_PUBLIC moose
-    )
+
+IF(CMAKE_VERSION VERSION_LESS "2.8.0")
+    MESSAGE(STATUS "Using a fix for cmake ( < 2.8)")
+    target_link_libraries(moose.bin PUBLIC moose) 
+ELSE()
+    target_link_libraries(moose.bin
+        LINK_PUBLIC moose
+        )
+ENDIF()
 
 IF(WITH_DOC)
     FIND_PACKAGE(Doxygen REQUIRED)
@@ -379,16 +381,7 @@ if(WITH_PYTHON)
     message("++ Building native python extension of MOOSE")
     set(PYMOOSE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/python/moose")
 
-    find_package(NumpyHeaders)
-    if(PYTHON_NUMPY_FOUND)
-        add_definitions(-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
-        include_directories(${PYTHON_NUMPY_INCLUDE_DIR})
-        add_definitions(-DUSE_NUMPY)
-    else()
-        message(WARNING "Could not find numpy/arrayobject.h in usual places")
-        add_definitions(-UUSE_NUMPY)
-    endif()
-
+    find_package(NumPy REQUIRED)
     find_package(PythonDev REQUIRED)
     include_directories(${PYTHON_INCLUDE_DIRS})
     add_subdirectory(pymoose)
