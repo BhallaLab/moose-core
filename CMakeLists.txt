@@ -217,7 +217,7 @@ IF(HDF5_STATIC_HOME)
         NO_DEFAULT_PATH
         )
     find_library(HDF5_HL_LIBRARY
-        NAME libdf_hl-static.a
+        NAME libhdf5_hl-static.a
         PATHS ${HDF5_STATIC_HOME}/lib ${HDF5_STATIC_HOME}/lib64
         NO_DEFAULT_PATH
         )
