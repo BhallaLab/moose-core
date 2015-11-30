@@ -211,11 +211,17 @@ include_directories(${GSL_INCLUDE_DIR})
 ## Setup hdf5
 IF(HDF5_STATIC_HOME)
     SET(HDF5_INCLUDE_DIR "${HDF5_STATIC_HOME}/include")
-    find_library(HDF5_LIBRARIES 
+    find_library(HDF5_LIBRARY 
         NAME libhdf5-static.a
         PATHS ${HDF5_STATIC_HOME}/lib ${HDF5_STATIC_HOME}/lib64
         NO_DEFAULT_PATH
         )
+    find_library(HDF5_HL_LIBRARY
+        NAME libdf_hl-static.a
+        PATHS ${HDF5_STATIC_HOME}/lib ${HDF5_STATIC_HOME}/lib64
+        NO_DEFAULT_PATH
+        )
+    SET(HDF5_LIBRARIES ${HDF5_LIBRARY} ${HDF5_HL_LIBRARY})
     add_definitions(-DUSE_HDF5)
     include_directories(${HDF5_INCLUDE_DIR})
 ELSE(HDF5_STATIC_HOME)
@@ -291,7 +297,9 @@ set(SYSTEM_SHARED_LIBS ${LibXML2_LIBRARIES})
 # If CMAKE_STATIC_LIBRARIES are mentiond on command line, use it as list.
 set(STATIC_LIBRARIES  "")
 
-if(FOUND_HDF5)
+if(HDF5_STATIC_HOME)
+    list(APPEND STATIC_LIBRARIES ${HDF5_LIBRARIES})
+elseif(FOUND_HDF5)
     list(APPEND SYSTEM_SHARED_LIBS ${HDF5_LIBRARIES})
 endif()
 
