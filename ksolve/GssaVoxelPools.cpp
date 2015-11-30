@@ -95,8 +95,11 @@ unsigned int GssaVoxelPools::pickReac() const
 	// report a linear time version.
 	for ( vector< double >::const_iterator 
 			i = v_.begin(); i != v_.end(); ++i ) {
-		if ( r < ( sum += *i ) )
+		if ( r < ( sum += *i ) ) {
+			double vel = getReacVelocity( i - v_.begin(), S() );
+			assert( vel >= 0 );
 			return static_cast< unsigned int >( i - v_.begin() );
+		}
 	}
 	return v_.size();
 }
@@ -179,6 +182,7 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
 		// num molecules.
 		for ( unsigned int i = 0; i < numVarPools; ++i ) {
 			double base = floor( n[i] );
+			assert( base >= 0.0 );
 			double frac = n[i] - base;
 			// if ( gsl_rng_uniform( rng ) > frac )
 			if ( mtrand() > frac )
@@ -256,7 +260,11 @@ void GssaVoxelPools::updateReacVelocities( const GssaSystem* g,
 double GssaVoxelPools::getReacVelocity( 
 				unsigned int r, const double* s ) const
 {
-	return rates_[r]->operator()( s );
+	double v = rates_[r]->operator()( s );
+	assert( v >= 0.0 );
+	return v;
+
+	// return rates_[r]->operator()( s );
 }
 
 void GssaVoxelPools::setStoich( const Stoich* stoichPtr )

@@ -84,9 +84,13 @@ void KinSparseMatrix::getGillespieDependence(
 		
 		while ( j < jend && k < kend ) {
 			if ( colIndex_[ j ] == colIndex_[ k ] ) {
+				/* Pre 28 Nov 2015. Why below zero? Shouldn't it be any?
 				if ( N_[ k ] < 0 ) {
 					deps.push_back( i );
 				}
+				*/
+				assert( round( N_[k] ) != 0 );
+				deps.push_back( i );
 				++j;
 				++k;
 			} else if ( colIndex_[ j ] < colIndex_[ k ] ) {
@@ -118,7 +122,7 @@ void KinSparseMatrix::fireReac( unsigned int reacIndex, vector< double >& S )
 		colIndex_.begin() + rowBeginIndex;
 
 	for ( vector< int >::const_iterator i = rowBegin; i != rowEnd; ++i ) {
-		// assert( S[ *molIndex ] + *i >= 0.0 );
+		assert( S[ *molIndex ] + *i >= 0.0 );
 		S[ *molIndex++ ] += *i;
 	}
 }
