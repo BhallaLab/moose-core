@@ -410,6 +410,7 @@ if(WITH_PYTHON)
     find_package(PythonDev REQUIRED)
     include_directories(${PYTHON_INCLUDE_DIRS})
     add_subdirectory(pymoose)
+
     add_library(_moose MODULE pymoose/moosemodule.cpp)
 
     set_target_properties(_moose PROPERTIES COMPILE_DEFINITIONS "PYMOOSE")
@@ -425,8 +426,8 @@ endif(MACOSX)
 
 IF(MACOSX)
     target_link_libraries( _moose 
-        moosepython  
         "-Wl,-all_load"
+        moosepython  
         ${MOOSE_LIBRARIES}
         ${STATIC_LIBRARIES}
         )
@@ -434,10 +435,9 @@ IF(MACOSX)
         ${SYSTEM_SHARED_LIBS}
         )
 ELSE(MACOSX)
-    target_link_libraries(
-        _moose 
-        moosepython  
+    target_link_libraries(_moose 
         "-Wl,--whole-archive"
+        moosepython  
         ${MOOSE_LIBRARIES}
         ${STATIC_LIBRARIES}
         "-Wl,--no-whole-archive"
