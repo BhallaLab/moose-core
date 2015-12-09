@@ -521,11 +521,11 @@ void Ksolve::process( const Eref& e, ProcPtr p )
         //Rahul - using these two variables do divide the loop. 
 
 
-        //   int numBlocks = num_threads;
-        //   int blockSize = poolSize/numBlocks;
-
-        int blockSize = 8; //Represents how many iteration per task
-        int numBlocks = poolSize/blockSize; // How many such tasks
+        unsigned int num_threads = omp_get_num_threads();
+        int numBlocks = num_threads;
+        int blockSize = poolSize/numBlocks;
+        //int blockSize = 8; //Represents how many iteration per task
+        //int numBlocks = poolSize/blockSize; // How many such tasks
 
         int remainder = poolSize % blockSize;
 
