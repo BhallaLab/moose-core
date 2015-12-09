@@ -107,14 +107,13 @@ add_definitions(-Wall
     #-Wno-unused-private-field
     )
 add_definitions(-fPIC)
+## DO UNIT TESTS 
+option(ENABLE_UNIT_TESTS "ENABLE UNIT TESTS IN MOOSE" ON)
+if(ENABLE_UNIT_TESTS)
+    MESSAGE("++ Unit testing enabled.")
+    add_definitions(-DDO_UNIT_TESTS)
+endif()
 
-## Enable/Disable 2011 stupport.
-include(CheckCXXCompilerFlag)
-
-CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-
-############################ BUILD CONFIGURATION #################################
 set(VERIFY 1)
 if(VERIFY)
     add_definitions(-DSANITY_CHECK -DARGS_CHECK -DRESULT_CHECK -DVALUE_CHECK)
@@ -245,20 +244,19 @@ endif()
 
 # Openmpi
 if(WITH_MPI)
-    MESSAGE("++ Building with MPI")
     find_package(MPI REQUIRED)
+    set(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
+    set(CMAKE_C_COMPILER ${MPI_C_COMPILER})
     if(MPI_CXX_FOUND)
         message("++ Using MPI from ${MPI_CXX_INCLUDE_PATH}")
         include_directories(${MPI_CXX_INCLUDE_PATH})
-        set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_CXX_COMPILE_FLAGS})
-        set(CMAKE_EXE_LINKER_FLAGS ${MPI_CXX_LINK_FLAGS})
+        set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
         add_definitions(-DUSE_MPI)
         SET(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
         MESSAGE(STATUS "MPI compiler: ${MPI_CXX_COMPILER}")
         SET(CMAKE_C_COMPILER ${MPI_C_COMPILER})
     else()
-        message("++ Cound not find MPI")
-        add_definitions(-UUSE_MPI)
+        MESSAGE(FATAL_ERROR "No openmpi installed on this machine")
     endif()
 endif(WITH_MPI)
 
@@ -330,6 +328,8 @@ if(WITH_MPI)
     if(MPI_CXX_FOUND)
         MESSAGE(STATUS "MPI libraries ${MPI_CXX_LIBRARIES}")
         list(APPEND SYSTEM_SHARED_LIBS ${MPI_CXX_LIBRARIES} gomp)
+    else()
+        MESSAGE(FATAL_ERROR "No openmpi/c++ library found on this machine")
     endif()
 endif(WITH_MPI)
 
