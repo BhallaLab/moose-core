@@ -6,7 +6,7 @@
 # This programme illustrates building a panel of multiscale models to
 # test neuronal plasticity in different contexts.
 ########################################################################
-#import moogli
+
 import numpy
 import time
 import pylab
@@ -159,6 +159,8 @@ def main():
     rdes.buildModel( '/model' )
     assert( moose.exists( '/model' ) )
     moose.element( '/model/elec/hsolve' ).tick = -1
+    for i in range( 0, 10 ):
+        moose.setClock( i, 10000 )
     for i in range( 10, 18 ):
         moose.setClock( i, dt )
     moose.setClock( 18, plotdt )
@@ -191,7 +193,7 @@ def main():
     moose.start( postLtdTime )
     print 'real time = ', time.time() - t1
 
-    displayPlots()
+    # displayPlots()
 
 if __name__ == '__main__':
     main()
