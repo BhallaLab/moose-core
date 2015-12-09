@@ -76,7 +76,7 @@ option(DEBUG "Building with debugging support" OFF)
 option(GPROF "Build of gprof support" OFF)
 option(ENABLE_UNIT_TESTS "ENABLE UNIT TESTS IN MOOSE" ON)
 option(WITH_PYTHON "Build native python extension of MOOSE" ON)
-option(WITH_MPI  "Enable OPENMPI support" OFF)
+option(WITH_MPI  "Enable OPENMPI support" ON)
 option(WITH_CURSES "Enable ncurses" OFF)
 # If GSL_STATIC_HOME is set, we use it to search for static gsl libs.
 option(GSL_STATIC_HOME 
@@ -245,13 +245,16 @@ endif()
 
 # Openmpi
 if(WITH_MPI)
+    MESSAGE("++ Building with MPI")
     find_package(MPI REQUIRED)
     if(MPI_CXX_FOUND)
         message("++ Using MPI from ${MPI_CXX_INCLUDE_PATH}")
         include_directories(${MPI_CXX_INCLUDE_PATH})
-        set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
+        set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_CXX_COMPILE_FLAGS})
+        set(CMAKE_EXE_LINKER_FLAGS ${MPI_CXX_LINK_FLAGS})
         add_definitions(-DUSE_MPI)
         SET(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
+        MESSAGE(STATUS "MPI compiler: ${MPI_CXX_COMPILER}")
         SET(CMAKE_C_COMPILER ${MPI_C_COMPILER})
     else()
         message("++ Cound not find MPI")
@@ -325,7 +328,8 @@ endif()
 
 if(WITH_MPI)
     if(MPI_CXX_FOUND)
-        list(APPEND SYSTEM_SHARED_LIBS ${MPI_CXX_LIBRARIES})
+        MESSAGE(STATUS "MPI libraries ${MPI_CXX_LIBRARIES}")
+        list(APPEND SYSTEM_SHARED_LIBS ${MPI_CXX_LIBRARIES} gomp)
     endif()
 endif(WITH_MPI)
 
@@ -373,6 +377,8 @@ ELSE(MACOSX)
         ${MOOSE_LIBRARIES}
         ${STATIC_LIBRARIES}
         "-Wl,--no-whole-archive"
+        )
+    target_link_libraries(libmoose
         ${SYSTEM_SHARED_LIBS}
         )
 ENDIF(MACOSX)

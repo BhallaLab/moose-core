@@ -6,12 +6,15 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
+#include <omp.h>
 #include "header.h"
 #ifdef USE_GSL
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_odeiv2.h>
 #endif
+
+#include <unistd.h>
 
 #include "OdeSystem.h"
 #include "VoxelPoolsBase.h"
@@ -33,6 +36,11 @@
 #include "Ksolve.h"
 
 const unsigned int OFFNODE = ~0;
+
+
+//Rahul - adding a few unncessarily stuff to understand the code better...
+clock_t start_timer;
+static double duration = 0;
 
 // static function
 SrcFinfo2< Id, vector< double > >* Ksolve::xComptOut() {
@@ -436,6 +444,9 @@ double Ksolve::getEstimatedDt() const
 //////////////////////////////////////////////////////////////
 void Ksolve::process( const Eref& e, ProcPtr p )
 {
+//Rahul - starting the timer to measure the time taken in the process function
+
+
 	if ( isBuilt_ == false )
 		return;
 	// First, handle incoming diffusion values, update S with those.
@@ -460,29 +471,93 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 		*/
 		setBlock( dvalues );
 	}
+
+//	 omp_set_num_threads(4);
 	// Second, take the arrived xCompt reac values and update S with them.
-	for ( unsigned int i = 0; i < xfer_.size(); ++i ) {
+
+	for ( unsigned int i = 0; i < xfer_.size(); ++i ) 
+	{
 		const XferInfo& xf = xfer_[i];
 		// cout << xfer_.size() << "	" << xf.xferVoxel.size() << endl;
-		for ( unsigned int j = 0; j < xf.xferVoxel.size(); ++j ) {
-			pools_[xf.xferVoxel[j]].xferIn( 
-					xf.xferPoolIdx, xf.values, xf.lastValues, j );
+		for ( unsigned int j = 0; j < xf.xferVoxel.size(); ++j ) 
+		{
+			pools_[xf.xferVoxel[j]].xferIn(xf.xferPoolIdx, xf.values, xf.lastValues, j );
 		}
 	}
+
+
 	// Third, record the current value of pools as the reference for the
 	// next cycle.
-	for ( unsigned int i = 0; i < xfer_.size(); ++i ) {
+	for ( unsigned int i = 0; i < xfer_.size(); ++i ) 
+	{
 		XferInfo& xf = xfer_[i];
-		for ( unsigned int j = 0; j < xf.xferVoxel.size(); ++j ) {
+		for ( unsigned int j = 0; j < xf.xferVoxel.size(); ++j ) 
+		{
 			pools_[xf.xferVoxel[j]].xferOut( j, xf.lastValues, xf.xferPoolIdx );
 		}
 	}
 
-	// Fourth, do the numerical integration for all reactions.
-	for ( vector< VoxelPools >::iterator 
-				i = pools_.begin(); i != pools_.end(); ++i ) {
-		i->advance( p );
-	}
+	int nprocessors = omp_get_max_threads();
+   int num_threads = 4;
+	omp_set_num_threads(num_threads);
+   int poolSize = pools_.size();
+
+
+//Changing the iterator of for loop from != to < due to OpenMP restricions
+// Fourth, do the numerical integration for all reactions.
+ 	start_timer = clock();
+
+
+//Rahul - This for loop is to be parallelized.... lets do it using openmp for pragma
+//   #pragma omp parallel for firstprivate(p)
+//	for ( vector< VoxelPools >::iterator i = pools_.begin(); i < pools_.end(); ++i ) 
+//		i->advance( p );
+
+
+	
+//Rahul - trying with task-based paralllelism with generic iteration number
+//Rahul - using these two variables do divide the loop. 
+
+
+//   int numBlocks = num_threads;
+//   int blockSize = poolSize/numBlocks;
+
+   int blockSize = 8; //Represents how many iteration per task
+   int numBlocks = poolSize/blockSize; // How many such tasks
+
+   int remainder = poolSize % blockSize;
+
+#pragma omp parallel 
+#pragma omp single
+{
+        vector<VoxelPools>::iterator i = pools_.begin();
+        int iterator = 0;
+        int j = 0;
+
+        while(iterator < numBlocks)
+        {
+                vector<VoxelPools>::iterator threadIterator = i;
+               #pragma omp task
+               {
+                   for(j = 0; j < blockSize ; threadIterator++,j++)
+                          threadIterator->advance( p );
+               }
+
+                iterator++;
+                for(j = 0; j < blockSize ;j++) i++;
+        }
+
+         for(j = 0; j < remainder ; j++, ++i)
+        //          #pragma omp task
+                   i->advance( p );
+        
+#pragma omp taskwait
+}
+
+	duration += (clock() - start_timer) / (double) CLOCKS_PER_SEC;
+//	cout << "Time taken in Ksolve:: process function is " << duration << "secs" <<  endl;
+
+
 	// Finally, assemble and send the integrated values off for the Dsolve.
 	if ( dsolvePtr_ ) {
 		vector< double > kvalues( 4 );
@@ -493,6 +568,8 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 		getBlock( kvalues );
 		dsolvePtr_->setBlock( kvalues );
 	}
+
+
 }
 
 void Ksolve::reinit( const Eref& e, ProcPtr p )
