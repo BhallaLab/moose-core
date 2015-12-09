@@ -447,6 +447,8 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 //Rahul - starting the timer to measure the time taken in the process function
 
 
+        static unsigned int usedThreads = 0;
+
 	if ( isBuilt_ == false )
 		return;
 	// First, handle incoming diffusion values, update S with those.
@@ -532,6 +534,12 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 #pragma omp parallel 
 #pragma omp single
         {
+            if( usedThreads == 0)
+            {
+                usedThreads = omp_get_num_threads();
+                cout << "Info: Threads used: " << usedThreads << endl;
+            }
+
             vector<VoxelPools>::iterator i = pools_.begin();
             int iterator = 0;
             int j = 0;

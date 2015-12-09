@@ -375,9 +375,6 @@ void Shell::doQuit()
 
 void Shell::doStart( double runtime )
 {
-    unsigned int num_threads = omp_get_num_threads();
-    cout << "Info: Number of threads " << num_threads << endl; 
-
 #ifdef ENABLE_LOGGER
         clock_t t = clock();
         stringstream ss;
