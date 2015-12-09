@@ -11,8 +11,6 @@ notifications:
         recipients:
             - dilawar.s.rajput@gmail.com
             - bhalla@ncbs.res.in
-            - aviralg@ncbs.res.in
-            - hrani@ncbs.res.in
         on_success: change
         on_failure: always
 
@@ -38,5 +36,5 @@ install:
     - echo "nothing to do here"
 
 script:
-    - mkdir -p _build && cd _build && cmake -DWITH_MPI=ON .. && make -j`nproc`
-    - ctest --output-on-failure
+    - mkdir -p _build && cd _build && cmake -DDEBUG=ON -DWITH_DOC=ON -DBUILD_MOOGLI=ON .. && make
+    - ctest -V
