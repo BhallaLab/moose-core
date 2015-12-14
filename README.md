@@ -40,8 +40,9 @@ the implementation of the rdesigneur class and affiliated features.
 
 # LICENSE
 
-MOOSE is released under GPLv3.
-
+MOOSE is released under the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or (at
+your option) any later version.
 
 # HOMEPAGE 
 
