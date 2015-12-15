@@ -520,6 +520,7 @@ unsigned int Function::addVar()
 
 void Function::setExpr(const Eref& eref, string expr)
 {
+        cerr << eref.objId().path() << " : Setting expression " << expr << endl;
 	this->innerSetExpr( eref, expr ); // Refer to the virtual function here.
 }
 
