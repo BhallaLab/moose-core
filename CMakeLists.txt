@@ -484,11 +484,9 @@ IF(MACOSX)
         )
 ELSE(MACOSX)
     target_link_libraries(_moose 
-        "-Wl,--whole-archive"
         moosepython  
         ${MOOSE_LIBRARIES}
         ${STATIC_LIBRARIES}
-        "-Wl,--no-whole-archive"
         ${SYSTEM_SHARED_LIBS}
         )
 ENDIF(MACOSX)
@@ -538,10 +536,8 @@ IF(MACOSX)
         )
 ELSE(MACOSX)
     target_link_libraries(cymoose 
-        "-Wl,--whole-archive"
         ${MOOSE_LIBRARIES}
         ${LIBRARIES}
-        "-Wl,--no-whole-archive"
         ${SYSTEM_LIBRARIES}
         )
 ENDIF(MACOSX)
