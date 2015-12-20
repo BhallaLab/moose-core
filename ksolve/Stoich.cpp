@@ -632,16 +632,16 @@ static bool isOffSolverReac( const Element* e, Id myCompt,
 	for ( vector< Id >::const_iterator 
 			j = neighbors.begin(); j != neighbors.end(); ++j )
 	{
-		if ( j->element()->cinfo()->isA( "BufPool" ) ) {
-			cout << "Warning: Avoid BufPool: " << j->path() << 
-				   "\n as reactant in cross-compartment reactions\n";
-		}
 		Id otherCompt = getCompt( *j );
 		if ( myCompt != otherCompt ) {
 			// offSolverPools.push_back( *j );
 			poolCompts.push_back( otherCompt );
 			poolComptMap[ *j ] = otherCompt; // Avoids duplication of pools
 			ret = true;
+			if ( j->element()->cinfo()->isA( "BufPool" ) ) {
+				cout << "Warning: Avoid BufPool: " << j->path() << 
+				   	"\n as reactant in cross-compartment reactions\n";
+			}
 		}
 	}
 	return ret;
@@ -1157,6 +1157,46 @@ void Stoich::comptsOnCrossReacTerms( vector< pair< Id, Id > >& xr ) const
 // Model zombification functions
 //////////////////////////////////////////////////////////////
 
+/// Returns Function, if any, acting as src of specified msg into pa.
+static Id findFuncMsgSrc( Id pa, const string& msg )
+{
+	const Finfo *finfo = pa.element()->cinfo()->findFinfo( msg );
+	if ( !finfo ) return Id();
+	vector< Id > ret;
+	if ( pa.element()->getNeighbors( ret, finfo ) > 0 ) {
+		if ( ret[0].element()->cinfo()->isA( "Function" ) )
+			return ret[0];
+	}
+	return Id(); // failure
+
+
+	/*
+	cout << "fundFuncMsgSrc:: convert to DestFinfo\n";
+	const DestFinfo *df = dynamic_cast< const DestFinfo* >( finfo );
+	if ( !df ) return Id();
+	FuncId fid = df->getFid();
+
+	cout << "fundFuncMsgSrc:: findCaller\n";
+	ObjId caller = pa.element()->findCaller( fid );
+	if ( caller.bad() )
+		return Id();
+	cout << "Found Func for " << pa.path() << " on " << msg << endl;
+	cout << "Func was " << caller.path() << endl;
+	return caller.id;
+	*/
+
+/*
+	vector< Id > kids = Neutral::getChildren( pa.eref() );
+	for ( vector< Id >::iterator i = kids.begin(); i != kids.end(); ++i )
+		if ( i->element()->cinfo()->isA( "Function" ) )
+			return( *i );
+	return Id();
+*/
+
+}
+
+
+
 // e is the stoich Eref, elist is list of all Ids to zombify.
 void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 {
@@ -1171,8 +1211,7 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 	static const Cinfo* zombieMMenzCinfo = Cinfo::find( "ZombieMMenz");
 	static const Cinfo* zombieEnzCinfo = Cinfo::find( "ZombieEnz");
 	static const Cinfo* zfCinfo = Cinfo::find( "ZombieFunction" );
-	static const Finfo* funcSrcFinfo = Cinfo::find( "Function")->
-			findFinfo( "valueOut" );
+	// static const Finfo* funcSrcFinfo = Cinfo::find( "Function")->findFinfo( "valueOut" );
 	// vector< Id > meshEntries;
 	vector< Id > temp = elist;
 
@@ -1183,6 +1222,9 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 	for ( vector< Id >::const_iterator i = temp.begin(); i != temp.end(); ++i ){
 		Element* ei = i->element();
 		if ( ei->cinfo() == poolCinfo ) {
+			// We need to check the increment message before we zombify the
+			// pool, because ZombiePool doesn't have this message.
+			Id funcId = findFuncMsgSrc( *i, "increment" );
 			double concInit = 
 				Field< double >::get( ObjId( ei->id(), 0 ), "concInit" );
 			PoolBase::zombify( ei, zombiePoolCinfo, ksolve_, dsolve_ );
@@ -1192,16 +1234,12 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 				Field< double >::set( oi, "concInit", concInit );
 			}
 			// Look for func setting rate of change of pool
-			Id funcId = Neutral::child( i->eref(), "func" );
-			Element* fe = funcId.element();
+			// Id funcId = Neutral::child( i->eref(), "func" );
 			if ( funcId != Id() ) {
-				vector< Id > ret;
-				fe->getNeighbors( ret, funcSrcFinfo );
-				if ( ret.size() > 0 && ret[0] == *i ) {
-					assert( fe->cinfo()->isA( "Function" ) );
-					installAndUnschedFuncRate( funcId, (*i) );
-					ZombieFunction::zombify( fe, zfCinfo,ksolve_,dsolve_);
-				}
+				cout << "Found Msg src for increment at " << funcId.path() << endl;
+				Element* fe = funcId.element();
+				installAndUnschedFuncRate( funcId, (*i) );
+				ZombieFunction::zombify( fe, zfCinfo,ksolve_,dsolve_);
 			}
 		}
 		else if ( ei->cinfo() == bufPoolCinfo ) {
@@ -1214,30 +1252,22 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 				Field< double >::set( oi, "concInit", concInit );
 			}
 			// Look for func setting conc of pool
-			Id funcId = Neutral::child( i->eref(), "func" );
+			// Id funcId = Neutral::child( i->eref(), "func" );
+			Id funcId = findFuncMsgSrc( *i, "setN" );
 			if ( funcId != Id() ) {
 				Element* fe = funcId.element();
-				vector< Id > ret;
-				fe->getNeighbors( ret, funcSrcFinfo );
-				if ( ret.size() > 0 && ret[0] == *i ) {
-					assert( fe->cinfo()->isA( "Function" ) );
-					installAndUnschedFunc( funcId, (*i) );
-					ZombieFunction::zombify( fe, zfCinfo,ksolve_,dsolve_);
-				}
+				installAndUnschedFunc( funcId, (*i) );
+				ZombieFunction::zombify( fe, zfCinfo,ksolve_,dsolve_);
 			}
 		}
 		else if ( ei->cinfo() == reacCinfo ) {
 			ReacBase::zombify( ei, zombieReacCinfo, e.id() );
-			Id funcId = Neutral::child( i->eref(), "func" );
+			// Id funcId = Neutral::child( i->eref(), "func" );
+			Id funcId = findFuncMsgSrc( *i, "setNumKf" );
 			if ( funcId != Id() ) {
 				Element* fe = funcId.element();
-				vector< Id > ret;
-				fe->getNeighbors( ret, funcSrcFinfo );
-				if ( ret.size() > 0 && ret[0] == *i ) {
-					assert( fe->cinfo()->isA( "Function" ) );
-					installAndUnschedFuncReac( funcId, (*i) );
-					ZombieFunction::zombify( fe, zfCinfo,ksolve_,dsolve_);
-				}
+				installAndUnschedFuncReac( funcId, (*i) );
+				ZombieFunction::zombify( fe, zfCinfo,ksolve_,dsolve_);
 			}
 		}
 		else if ( ei->cinfo() == mmEnzCinfo ) {

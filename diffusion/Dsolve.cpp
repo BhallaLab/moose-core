@@ -395,7 +395,7 @@ void Dsolve::setStoich( Id id )
 	poolMap_.pop_back();
 
 	path_ = Field< string >::get( stoich_, "path" );
-	cout << "Pool Info for stoich " << id.path() << endl;
+	// cout << "Pool Info for stoich " << id.path() << endl;
 
 	for ( unsigned int i = 0; i < poolMap_.size(); ++i ) {
 		unsigned int poolIndex = poolMap_[i];
