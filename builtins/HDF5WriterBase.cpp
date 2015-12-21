@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Sat Feb 25 14:42:03 2012 (+0530)
 // Version: 
-// Last-Updated: Thu Aug 27 01:35:46 2015 (-0400)
+// Last-Updated: Sun Dec 20 23:20:44 2015 (-0500)
 //           By: subha
-//     Update #: 295
+//     Update #: 298
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -530,15 +530,7 @@ HDF5WriterBase::HDF5WriterBase():
 HDF5WriterBase::~HDF5WriterBase()
 {
     // derived classes should flush data in their own destructors
-    if (filehandle_ < 0){
-        return;
-    }
-    flush();
-    herr_t err = H5Fclose(filehandle_);
-    filehandle_ = -1;
-    if (err < 0){
-        cerr << "Error: Error occurred when closing file. Error code: " << err << endl;
-    }
+    close();
 }
 
 void HDF5WriterBase::setFilename(string filename)
