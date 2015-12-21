@@ -107,8 +107,9 @@ void KinSparseMatrix::getGillespieDependence(
 /**
  * This too operates on the transposed matrix, because we need to get all
  * the molecules for a given reac: a column in the original N matrix.
+ * Direction [-1,+1] specifies whether the reaction is forward or backward.
  */
-void KinSparseMatrix::fireReac( unsigned int reacIndex, vector< double >& S ) 
+void KinSparseMatrix::fireReac( unsigned int reacIndex, vector< double >& S, double direction ) 
 	const
 {
 	assert( ncolumns_ == S.size() && reacIndex < nrows_ );
@@ -122,8 +123,11 @@ void KinSparseMatrix::fireReac( unsigned int reacIndex, vector< double >& S )
 		colIndex_.begin() + rowBeginIndex;
 
 	for ( vector< int >::const_iterator i = rowBegin; i != rowEnd; ++i ) {
-		assert( S[ *molIndex ] + *i >= 0.0 );
-		S[ *molIndex++ ] += *i;
+		double& x = S[ *molIndex++ ];
+		x += *i * direction;
+		x *= (x > 0 );
+		// assert( S[ *molIndex ] + *i * direction >= 0.0 );
+		// S[ *molIndex++ ] += *i * direction;
 	}
 }
 

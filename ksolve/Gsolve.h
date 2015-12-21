@@ -65,7 +65,8 @@ class Gsolve: public ZombiePoolInterface
 		//////////////////////////////////////////////////////////////////
 		void rebuildGssaSystem();
 		void fillMmEnzDep();
-		void fillMathDep();
+		void fillPoolFuncDep();
+		void fillIncrementFuncDep();
 		void insertMathDepReacs( unsigned int mathDepIndex,
 			unsigned int firedReac );
 		void makeReacDepsUnique();

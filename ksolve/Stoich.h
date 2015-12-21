@@ -218,6 +218,13 @@ class Stoich
 		 * also work if there has been a change in voxelization.
 		 */
 		void setupCrossSolverReacVols() const;
+
+		/**
+		 * Finds all the input molecules contributing to any of the
+		 * Function cases: poolFunc, incrementFunc or reacFunc
+		void inputsToPoolFuncs( 
+				vector< pair< Id, vector< unsigned int > > >& ret ) const;
+		 */
 		//////////////////////////////////////////////////////////////////
 		// Zombification functions.
 		//////////////////////////////////////////////////////////////////
