@@ -23,7 +23,7 @@ class GssaVoxelPools: public VoxelPoolsBase
 		//////////////////////////////////////////////////////////////////
 		void advance( const ProcInfo* p );
 		void updateDependentMathExpn( 
-				const GssaSystem* g, unsigned int rindex );
+				const GssaSystem* g, unsigned int rindex, double time );
 		void updateDependentRates( 
 			const vector< unsigned int >& deps, const Stoich* stoich );
 		unsigned int pickReac() const;

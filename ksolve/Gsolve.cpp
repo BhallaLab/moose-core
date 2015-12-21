@@ -15,6 +15,7 @@
 
 #include "RateTerm.h"
 #include "FuncTerm.h"
+#include "FuncRateTerm.h"
 #include "SparseMatrix.h"
 #include "KinSparseMatrix.h"
 #include "GssaSystem.h"
@@ -481,7 +482,8 @@ void Gsolve::rebuildGssaSystem()
 		sys_.transposeN.getGillespieDependence( i, dep[i] );
 	}
 	fillMmEnzDep();
-	fillMathDep();
+	fillPoolFuncDep();
+	fillIncrementFuncDep();
 	makeReacDepsUnique();
 	for ( vector< GssaVoxelPools >::iterator 
 					i = pools_.begin(); i != pools_.end(); ++i ) {
@@ -535,12 +537,129 @@ void Gsolve::fillMmEnzDep()
 }
 
 /**
- * Fill in dependency list for all MathExpns on reactions.
- * Note that when a MathExpn updates, it alters a further
- * molecule, that may be a substrate for another reaction.
- * So we need to also add further dependent reactions.
- * In principle we might also cascade to deeper MathExpns. Later.
+ * Here we fill in the dependencies involving poolFuncs. These are
+ * the functions that evaluate an expression and assign directly to the
+ * # of a target molecule. 
+ * There are two dependencies:
+ * 1. When a reaction fires, all the Functions that depend on the reactants
+ * must update their target molecule. This is in sys_.dependentMathExpn[].
+ * 2. All the reactions that depend on the updated target molecules must
+ * now recompute their propensity. This, along with other reac dependencies,
+ * is in sys_.dependency[].
  */
+void Gsolve::fillPoolFuncDep()
+{
+	// create map of funcs that depend on specified molecule.
+	vector< vector< unsigned int > > funcMap( 
+			stoichPtr_->getNumAllPools() );
+	unsigned int numFuncs = stoichPtr_->getNumFuncs();
+	for ( unsigned int i = 0; i < numFuncs; ++i ) {
+		const FuncTerm *f = stoichPtr_->funcs( i );
+		vector< unsigned int > molIndex = f->getReactantIndex();
+		for ( unsigned int j = 0; j < molIndex.size(); ++j )
+			funcMap[ molIndex[j] ].push_back( i );
+	}
+	// The output of each func is a mol indexed as 
+	// numVarMols + numBufMols + i
+	unsigned int numRates = stoichPtr_->getNumRates();
+	sys_.dependentMathExpn.resize( numRates );
+	vector< unsigned int > indices;
+	for ( unsigned int i = 0; i < numRates; ++i ) {
+		vector< unsigned int >& dep = sys_.dependentMathExpn[ i ];
+		dep.resize( 0 );
+		// Extract the row of all molecules that depend on the reac.
+		const int* entry;
+		const unsigned int* colIndex;
+		unsigned int numInRow = 
+				sys_.transposeN.getRow( i, &entry, &colIndex );
+		for ( unsigned int j = 0; j < numInRow; ++j ) {
+			unsigned int molIndex = colIndex[j];
+			vector< unsigned int >& funcs = funcMap[ molIndex ];
+			dep.insert( dep.end(), funcs.begin(), funcs.end() );
+			for ( unsigned int k = 0; k < funcs.size(); ++k ) {
+				// unsigned int outputMol = funcs[k] + funcOffset;
+				unsigned int outputMol = stoichPtr_->funcs( funcs[k] )->getTarget();
+				// Insert reac deps here. Columns are reactions.
+				vector< int > e; // Entries: we don't need.
+				vector< unsigned int > c; // Column index: the reactions.
+				stoichPtr_->getStoichiometryMatrix().
+						getRow( outputMol, e, c );
+				// Each of the reacs (col entries) depend on this func.
+				vector< unsigned int > rdep = sys_.dependency[i];
+				rdep.insert( rdep.end(), c.begin(), c.end() );
+			}
+		}
+	}
+}
+
+/**
+ * Here we fill in the dependencies involving incrementFuncs. These are
+ * the functions that evaluate an expression that specifies rate of change
+ * of # of a target molecule. 
+ * There are two dependencies:
+ * 1. When a reaction fires, all the incrementFuncs that depend on the 
+ * reactants must update their rates. This is added to sys_.dependency[]
+ * which is the usual handler for reac dependencies. Note that the inputs
+ * to the incrementFuncs are NOT present in the stoichiometry matrix, so
+ * this has to be done as a separate step.
+ * 2. When the incrementFunc fires, then downstream reacs must update
+ * their rates. This is handled by default with the regular dependency
+ * calculations, since incrementFuncs are treated like regular reactions.
+ */
+void Gsolve::fillIncrementFuncDep()
+{
+	// create map of funcs that depend on specified molecule.
+	vector< vector< unsigned int > > funcMap( 
+			stoichPtr_->getNumAllPools() );
+	const vector< RateTerm* >& rates = stoichPtr_->getRateTerms();
+	vector< FuncRate* > incrementRates;
+	vector< unsigned int > incrementRateIndex;
+	const vector< RateTerm* >::const_iterator q;
+	for ( unsigned int i = 0; i < rates.size(); ++i ) {
+		FuncRate *term = 
+			dynamic_cast< FuncRate* >( rates[i] );
+		if (term) {
+			incrementRates.push_back( term );
+			incrementRateIndex.push_back( i );
+		}
+	}
+
+	for ( unsigned int k = 0; k < incrementRates.size(); ++k ) {
+		const vector< unsigned int >& molIndex = 
+				incrementRates[k]->getFuncArgIndex();
+		for ( unsigned int j = 0; j < molIndex.size(); ++j )
+			funcMap[ molIndex[j] ].push_back( incrementRateIndex[k] );
+	}
+		
+	unsigned int numRates = stoichPtr_->getNumRates();
+	sys_.dependentMathExpn.resize( numRates );
+	vector< unsigned int > indices;
+	for ( unsigned int i = 0; i < numRates; ++i ) {
+		// Algorithm:
+		// 1.Go through stoich matrix finding all the poolIndices affected
+		// by each Rate Term.
+		// 2.Use funcMap to look up FuncRateTerms affected by these indices
+		// 3. Add the rateTerm->FuncRateTerm mapping to the dependencies.
+
+		const int* entry;
+		const unsigned int* colIndex;
+		unsigned int numInRow = 
+				sys_.transposeN.getRow( i, &entry, &colIndex );
+		// 1.Go through stoich matrix finding all the poolIndices affected
+		// by each Rate Term.
+		for ( unsigned int j = 0; j < numInRow; ++j ) { 
+			unsigned int molIndex = colIndex[j]; // Affected poolIndex
+
+		// 2.Use funcMap to look up FuncRateTerms affected by these indices
+			vector< unsigned int >& funcs = funcMap[ molIndex ];
+		// 3. Add the rateTerm->FuncRateTerm mapping to the dependencies.
+			vector< unsigned int >& rdep = sys_.dependency[i];
+			rdep.insert( rdep.end(), funcs.begin(), funcs.end() );
+		}
+	}
+}
+
+/*
 void Gsolve::fillMathDep()
 {
 	// create map of funcs that depend on specified molecule.
@@ -586,6 +705,7 @@ void Gsolve::fillMathDep()
 		}
 	}
 }
+*/
 
 /**
  * Inserts reactions that depend on molecules modified by the
@@ -608,15 +728,22 @@ void Gsolve::insertMathDepReacs( unsigned int mathDepIndex,
 }
 
 // Clean up dependency lists: Ensure only unique entries.
+// Also a reac cannot depend on itself.
 void Gsolve::makeReacDepsUnique()
 {
 	unsigned int numRates = stoichPtr_->getNumRates();
 	for ( unsigned int i = 0; i < numRates; ++i ) {
 		vector< unsigned int >& dep = sys_.dependency[ i ];
+		// Here we want to remove self-entries as well as duplicates.
+		sort( dep.begin(), dep.end() );
+		vector< unsigned int >::iterator k = dep.begin();
+
 		/// STL stuff follows, with the usual weirdness.
 		vector< unsigned int >::iterator pos = 
 			unique( dep.begin(), dep.end() );
 		dep.resize( pos - dep.begin() );
+		/*
+		*/
 	}
 }
 

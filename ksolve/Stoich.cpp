@@ -401,6 +401,45 @@ void Stoich::setupCrossSolverReacVols() const
 	kinterface_->setupCrossSolverReacVols( subComptVec_, prdComptVec_);
 }
 
+/*
+// Utility function for getting inputs to a single Function object.
+static vector< ObjId > inputsToFunc( Id func )
+{
+	static const Finfo* inputFinfo = 
+			Cinfo::find( "Variable" )->findFinfo("input");
+	static const DestFinfo* df = dynamic_cast< const DestFinfo* >( inputFinfo );
+	assert( df );
+	static FuncId fid = df->funcId();
+	assert( func.element()->cinfo()->isA( "Function" );
+	unsigned int numInputs = Field< unsigned int >::get( func, "numVars" );
+	Id varId( func.value() );
+	vector< ObjId > caller;
+	varId.element()->getInputMsgs( caller, fid );
+	cout << "NUM Inputs = " << numInputs << ", numObjId = " << caller.size() << endl;
+	return caller;
+}
+
+// routine to get all inputs (pool Ids) to Pool Functions
+void Stoich::inputsToPoolFuncs( 
+		vector< pair< Id, vector< unsigned int> >& ret ) const 
+{
+	ret.clear();
+	vector< Id >::iterator i;
+	vector< ObjId >::iterator j;
+	for ( i = poolFuncVec_.begin(); i != poolFuncVec_.end(); ++i )
+		vector< ObjId > ovec = inputsToFunc( *i );
+		vector< unsigned int > poolIndex;
+		poolIndex.reserve( ovec.size() );
+		for ( j = ovec.begin(); j != ovec.end(); ++j ) {
+			unsigned int poolIndex = 
+			poolIndex.push_back( convertIdToPoolIndex( j->id ) );
+		}
+		ret.push_back( pair( *i, poolIndex) );
+	return ret;
+}
+*/
+
+//////////////////////////////////////////////////////////////////////
 
 string Stoich::getPath( const Eref& e ) const
 {
@@ -1236,7 +1275,7 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 			// Look for func setting rate of change of pool
 			// Id funcId = Neutral::child( i->eref(), "func" );
 			if ( funcId != Id() ) {
-				cout << "Found Msg src for increment at " << funcId.path() << endl;
+				// cout << "Found Msg src for increment at " << funcId.path() << endl;
 				Element* fe = funcId.element();
 				installAndUnschedFuncRate( funcId, (*i) );
 				ZombieFunction::zombify( fe, zfCinfo,ksolve_,dsolve_);
