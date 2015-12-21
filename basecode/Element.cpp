@@ -683,6 +683,8 @@ unsigned int Element::getOutputs( vector< Id >& ret, const SrcFinfo* finfo )
 	
 	const vector< MsgFuncBinding >* msgVec =
 		getMsgAndFunc( finfo->getBindIndex() );
+	if ( !msgVec )
+		return 0;
 	for ( unsigned int i = 0; i < msgVec->size(); ++i ) {
 		const Msg* m = Msg::getMsg( (*msgVec)[i].mid );
 		assert( m );
@@ -818,14 +820,15 @@ unsigned int Element::getInputs( vector< Id >& ret, const DestFinfo* finfo )
 unsigned int Element::getNeighbors( vector< Id >& ret, const Finfo* finfo )
 	const
 {
-	assert( finfo );
+	ret.resize( 0 );
+	if ( !finfo )
+		return 0;
 	
 	const SrcFinfo* srcF = dynamic_cast< const SrcFinfo* >( finfo );
 	const DestFinfo* destF = dynamic_cast< const DestFinfo* >( finfo );
 	const SharedFinfo* sharedF = dynamic_cast< const SharedFinfo* >( finfo );
 	assert( srcF || destF || sharedF );
 
-	ret.resize( 0 );
 	
 	if ( srcF )
 		return getOutputs( ret, srcF );
