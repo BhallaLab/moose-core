@@ -166,7 +166,7 @@ def plotVector(vec, xvec = None, **options):
     :param **kwargs: Optional to pass to maplotlib.
     """
 
-    assert type(vec) == np.ndarray, "Expected type %s" % type(vec)
+    # assert type(vec) == np.ndarray, "Expected type %s" % type(vec)
     legend = options.get('legend', True)
 
     if xvec is None:
@@ -270,7 +270,6 @@ def plotRecords(records, xvec = None, **kwargs):
         if plotThis:
             if not subplot: 
                 yvec = dataDict[k].vector
-                plotVector(yvec, xvec, label=k, **kwargs)
             else:
                 plt.subplot(len(dataDict), 1, i)
                 yvec = dataDict[k].vector
