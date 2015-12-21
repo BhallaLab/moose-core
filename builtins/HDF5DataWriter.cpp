@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Sat Feb 25 16:03:59 2012 (+0530)
 // Version: 
-// Last-Updated: Wed Nov 14 18:47:02 2012 (+0530)
+// Last-Updated: Sun Dec 20 23:16:02 2015 (-0500)
 //           By: subha
-//     Update #: 735
+//     Update #: 741
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -122,6 +122,11 @@ HDF5DataWriter::HDF5DataWriter(): flushLimit_(4*1024*1024), steps_(0)
 
 HDF5DataWriter::~HDF5DataWriter()
 {
+    close();
+}
+
+void HDF5DataWriter::close()
+{
     if (filehandle_ < 0){
         return;
     }
@@ -137,7 +142,7 @@ HDF5DataWriter::~HDF5DataWriter()
             }
         }
     }
-    filehandle_ = -1;
+    HDF5WriterBase::close();
 }
 
 void HDF5DataWriter::flush()
