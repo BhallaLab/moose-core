@@ -1,4 +1,4 @@
-Build Status - master (This is current development branch): [![Build Status - master](https://travis-ci.org/BhallaLab/moose-core.svg?branch=master)](https://travis-ci.org/BhallaLab/moose-core)
+[![Build Status - master](https://travis-ci.org/BhallaLab/moose-core.svg?branch=master)](https://travis-ci.org/BhallaLab/moose-core) [![Documentation Status](https://readthedocs.org/projects/moose-core/badge/?version=latest)](https://readthedocs.org/projects/moose-core/?badge=latest)
 
 # MOOSE
 
@@ -40,8 +40,9 @@ the implementation of the rdesigneur class and affiliated features.
 
 # LICENSE
 
-MOOSE is released under GPLv3.
-
+MOOSE is released under the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or (at
+your option) any later version.
 
 # HOMEPAGE 
 
@@ -50,7 +51,7 @@ http://moose.ncbs.res.in/
 
 # SOURCE REPOSITORY
 
-https://sourceforge.net/projects/moose/
+Old [SourceForge repository](https://sourceforge.net/projects/moose/) is no longer maintained. Current source repository is hosted on [github](https://github.com/BhallaLab/moose-core) with almost all revision history.
 
 
 # REQUIREMENTS
@@ -104,7 +105,7 @@ In addition to core MOOSE requirements:
 - G.V.HarshaRani        -   Web page design, SBML support, Kinetikit Plugin Development
 - Aditya Gilra          -   NeuroML reader development, integrate-and-fire neurons/networks, STDP
 - Aviral Goel           -   Moogli/Neurokit Development
-- Dilawar Singh         -   Packaging
+- Dilawar Singh         - [Packaging](https://github.com/BhallaLab/moose-full/blob/master/README.md)
 
 
 # Support:
@@ -145,16 +146,16 @@ simulation, which will have been been stored in tables somewhere in the model:
 
 # Examples, tutorials and Demos: 
 
-Look in the Demos directory for sample code. 
+Look in the [moose-examples repository](https://github.com/BhallaLab/moose-examples) for sample code. 
 
-- Demos/tutorials: Standalone scripts meant for teaching. Students are expected
+- [tutorials](https://github.com/BhallaLab/moose-examples/tree/master/tutorials): Standalone scripts meant for teaching. Students are expected
   to modify the scripts to learn the principles of the models.
-- Demos/squid: The Hodkin-Huxley squid model, fully graphical interface.
-- Demos/Genesis_files: A number of kinetics models used in MOOSE demos.
-- Demos/neuroml: A number of NeuroML models used in MOOSE demos
-- Demos/traub_2005: Example scripts for each of the individual cell models from
+- [squid](https://github.com/BhallaLab/moose-examples/tree/master/squid): The Hodkin-Huxley squid model, fully graphical interface.
+- [Genesis_files](https://github.com/BhallaLab/moose-examples/tree/master/Genesis_files): A number of kinetics models used in MOOSE demos.
+- [neuroml](https://github.com/BhallaLab/moose-examples/tree/master/neuroml): A number of NeuroML models used in MOOSE demos
+- [traub_2005](https://github.com/BhallaLab/moose-examples/tree/master/traub_2005): Example scripts for each of the individual cell models from
   the Traub 2005 thalamocortical model.
-- Demos/snippets: Code snippets that can be used as building blocks and to
+- [snippets](https://github.com/BhallaLab/moose-examples/tree/master/snippets): Code snippets that can be used as building blocks and to
   illustrate how to use certain kinds of objects in MOOSE. These snippets are
   all meant to run as individual files.
 

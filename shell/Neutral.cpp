@@ -62,13 +62,29 @@ const Cinfo* Neutral::initCinfo()
 			&Neutral::setNumData,
 			&Neutral::getNumData );
 
-	static ElementValueFinfo< Neutral, unsigned int > 
-		numField( 
+	static ElementValueFinfo< Neutral, unsigned int > numField( 
 		"numField",
 		"For a FieldElement: number of entries of self."
 		"For a regular Element: One.",
 			&Neutral::setNumField,
 			&Neutral::getNumField );
+
+	static ReadOnlyElementValueFinfo< Neutral, unsigned int > id(
+		"idValue",
+		"Object id of self, converted to an unsigned int.",
+			&Neutral::getId );
+
+	static ReadOnlyElementValueFinfo< Neutral, unsigned int > index( 
+		"index",
+		"For a FieldElement: Object index of parent."
+		"For a regular Element: Object index (dataId) of self.",
+			&Neutral::getIndex );
+
+	static ReadOnlyElementValueFinfo< Neutral, unsigned int > fieldIndex( 
+		"fieldIndex",
+		"For a FieldElement: field Index of self."
+		"For a regular Element: zero.",
+			&Neutral::getFieldIndex );
 
 	static ElementValueFinfo< Neutral, int > 
 		tick( 
@@ -203,6 +219,9 @@ const Cinfo* Neutral::initCinfo()
 		&className,				// ReadOnlyValue
 		&numData,				// Value
 		&numField,				// Value
+		&id,					// ReadOnlyValue
+		&index,					// ReadOnlyValue
+		&fieldIndex,			// ReadOnlyValue
 		&tick,					// Value
 		&dt,					// ReadOnlyValue
 		&valueFields,			// ReadOnlyValue
@@ -391,6 +410,21 @@ void Neutral::setNumField( const Eref& e, unsigned int num )
 	assert( e.isDataHere() );
 	unsigned int rawIndex = e.element()->rawIndex( e.dataIndex() );
 	e.element()->resizeField( rawIndex, num );
+}
+
+unsigned int Neutral::getId( const Eref& e ) const
+{
+	return e.id().value();
+}
+
+unsigned int Neutral::getIndex( const Eref& e ) const
+{
+	return e.dataIndex();
+}
+
+unsigned int Neutral::getFieldIndex( const Eref& e ) const
+{
+	return e.fieldIndex();
 }
 
 int Neutral::getTick( const Eref& e ) const

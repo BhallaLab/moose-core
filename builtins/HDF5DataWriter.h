@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Sat Feb 25 15:47:23 2012 (+0530)
 // Version: 
-// Last-Updated: Mon Feb 27 09:58:21 2012 (+0530)
-//           By: Subhasis Ray
-//     Update #: 44
+// Last-Updated: Sun Dec 20 23:17:22 2015 (-0500)
+//           By: subha
+//     Update #: 45
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -50,6 +50,7 @@ class HDF5DataWriter: public HDF5WriterBase
     void process(const Eref &e, ProcPtr p);
     void reinit(const Eref &e, ProcPtr p);
     virtual void flush();
+    virtual void close();
     static const Cinfo* initCinfo();
   protected:
     unsigned int flushLimit_;

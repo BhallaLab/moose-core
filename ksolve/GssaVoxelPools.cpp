@@ -59,14 +59,12 @@ GssaVoxelPools::~GssaVoxelPools()
 //////////////////////////////////////////////////////////////
 
 void GssaVoxelPools::updateDependentMathExpn( 
-				const GssaSystem* g, unsigned int rindex )
+				const GssaSystem* g, unsigned int rindex, double time )
 {
 	const vector< unsigned int >& deps = g->dependentMathExpn[ rindex ];
 	for( vector< unsigned int >::const_iterator 
 			i = deps.begin(); i != deps.end(); ++i ) {
-			// Future fix: Need to get current time in here.
-			g->stoich->funcs( *i )->evalPool( varS(), 0.0 );
-		// varS()[ *i + offset] = g->stoich->funcs( *i )->operator()( S(), t_);
+			g->stoich->funcs( *i )->evalPool( varS(), time );
 	}
 }
 
@@ -75,9 +73,9 @@ void GssaVoxelPools::updateDependentRates(
 {
 	for ( vector< unsigned int >::const_iterator
 			i = deps.begin(); i != deps.end(); ++i ) {
-		atot_ -= v_[ *i ];
+		atot_ -= fabs( v_[ *i ] );
 		// atot_ += ( v[ *i ] = ( *rates_[ *i ] )( S() );
-		atot_ += ( v_[ *i ] = getReacVelocity( *i, S() ) );
+		atot_ += fabs( v_[ *i ] = getReacVelocity( *i, S() ) );
 	}
 }
 
@@ -95,8 +93,11 @@ unsigned int GssaVoxelPools::pickReac() const
 	// report a linear time version.
 	for ( vector< double >::const_iterator 
 			i = v_.begin(); i != v_.end(); ++i ) {
-		if ( r < ( sum += *i ) )
+		if ( r < ( sum += fabs( *i ) ) ) {
+			// double vel = fabs( getReacVelocity( i - v_.begin(), S() ) );
+			// assert( vel >= 0 );
 			return static_cast< unsigned int >( i - v_.begin() );
+		}
 	}
 	return v_.size();
 }
@@ -118,7 +119,7 @@ bool GssaVoxelPools::refreshAtot( const GssaSystem* g )
 	atot_ = 0;
 	for ( vector< double >::const_iterator 
 			i = v_.begin(); i != v_.end(); ++i )
-		atot_ += *i;
+		atot_ += fabs(*i);
 	atot_ *= SAFETY_FACTOR;
 	// Check if the system is in a stuck state. If so, terminate.
 	if ( atot_ <= 0.0 ) {
@@ -147,7 +148,7 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
 			// We had a roundoff error, fixed it, but now need to be sure
 			// we only fire a reaction where this is permissible.
 			for ( unsigned int i = v_.size(); i > 0; --i ) {
-				if ( v_[i-1] > 0.0 ) {
+				if ( fabs( v_[i-1] ) > 0.0 ) {
 					rindex = i - 1;
 					break;
 				}
@@ -155,14 +156,15 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
 			assert( rindex < v_.size() );
 		}
 
-		g->transposeN.fireReac( rindex, Svec() );
+		double sign = double(v_[rindex] >= 0) - double(0 > v_[rindex] );
+		g->transposeN.fireReac( rindex, Svec(), sign );
 		double r = mtrand();
 		while ( r <= 0.0 ) {
 			r = mtrand();
 		}
 		t_ -= ( 1.0 / atot_ ) * log( r );
-		g->stoich->updateFuncs( varS(), t_ );
-		updateDependentMathExpn( g, rindex );
+		// g->stoich->updateFuncs( varS(), t_ ); // Handled next line.
+		updateDependentMathExpn( g, rindex, t_ );
 		updateDependentRates( g->dependency[ rindex ], g->stoich );
 	}
 }
@@ -179,6 +181,7 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
 		// num molecules.
 		for ( unsigned int i = 0; i < numVarPools; ++i ) {
 			double base = floor( n[i] );
+			assert( base >= 0.0 );
 			double frac = n[i] - base;
 			// if ( gsl_rng_uniform( rng ) > frac )
 			if ( mtrand() > frac )
@@ -256,7 +259,11 @@ void GssaVoxelPools::updateReacVelocities( const GssaSystem* g,
 double GssaVoxelPools::getReacVelocity( 
 				unsigned int r, const double* s ) const
 {
-	return rates_[r]->operator()( s );
+	double v = rates_[r]->operator()( s );
+	// assert( v >= 0.0 );
+	return v;
+
+	// return rates_[r]->operator()( s );
 }
 
 void GssaVoxelPools::setStoich( const Stoich* stoichPtr )
@@ -301,7 +308,14 @@ void GssaVoxelPools::xferIn( XferInfo& xf,
 			k = xf.xferPoolIdx.begin(); k != xf.xferPoolIdx.end(); ++k ) {
 		double& x = s[*k];
 		// cout << x << "	i = " << *i << *j << "	m = " << *m << endl;
-		x += round( *i++ - *j );
+		double dx = *i++ - *j++;
+		double base = floor( dx );
+		if ( mtrand() > dx - base )
+			x += base;
+		else
+			x += base + 1.0;
+		
+		// x += round( *i++ - *j );
 		if ( x < *m )  {
 			*m -= x;
 			x = 0;
@@ -314,7 +328,7 @@ void GssaVoxelPools::xferIn( XferInfo& xf,
 		// hasChanged |= ( fabs( x - *j ) < 0.1 ); // they are all integers.
 		hasChanged |= ( y > 0.1 ); // they are all integers.
 		*/
-		j++;
+		// j++;
 		m++;
 	}
 	// If S has changed, then I should update rates of all affected reacs.
@@ -338,10 +352,19 @@ void GssaVoxelPools::xferInOnlyProxies(
 {
 	unsigned int offset = voxelIndex * poolIndex.size();
 	vector< double >::const_iterator i = values.begin() + offset;
+	unsigned int proxyEndIndex = stoichPtr_->getNumVarPools() + 
+			stoichPtr_->getNumProxyPools();
 	for ( vector< unsigned int >::const_iterator 
 			k = poolIndex.begin(); k != poolIndex.end(); ++k ) {
-		if ( *k >= size() - numProxyPools ) {
-			varSinit()[*k] = (varS()[*k] += round( *i ));
+		// if ( *k >= size() - numProxyPools ) 
+		if ( *k >= stoichPtr_->getNumVarPools() && *k < proxyEndIndex )
+		{
+			double base = floor( *i );
+			if ( mtrand() > *i - base )
+				varSinit()[*k] = (varS()[*k] += base );
+			else
+				varSinit()[*k] = (varS()[*k] += base + 1.0 );
+			// varSinit()[*k] = (varS()[*k] += round( *i ));
 		}
 		i++;
 	}

@@ -23,4 +23,5 @@ Builtin functions and classes in moose module (Python only)
 
 """
 from .moose import *
-from .writekkit import writeKkit
+# import genesis
+

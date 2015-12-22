@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Fri Jul 10 11:54:30 2015 (+0530)
-#           By: subha
-#     Update #: 2172
+# Last-Updated: Tue Oct 27 15:00:31 2015 (-0400)
+#           By: Subhasis Ray
+#     Update #: 2182
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -32,7 +32,6 @@
 # Code:
 
 from __future__ import print_function
-from StringIO import StringIO 
 from contextlib import closing
 import warnings
 import platform
@@ -40,6 +39,10 @@ import pydoc
 _py3k = False
 if int(platform.python_version_tuple()[0]) >= 3:
     _py3k = True
+    from io import StringIO
+else:
+    from StringIO import StringIO 
+    
 from collections import defaultdict
 from . import _moose
 from ._moose import *

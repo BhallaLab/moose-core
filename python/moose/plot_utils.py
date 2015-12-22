@@ -186,12 +186,12 @@ def plotVector(vec, xvec = None, **options):
             plt.legend(loc='best')
 
     if xvec is None:
-        plt.xlabel = 'Time (sec)'
+        plt.xlabel('Time (sec)')
     else:
-        plt.xlabel = options.get('xlabel', '')
+        plt.xlabel(options.get('xlabel', ''))
     
     plt.ylabel = options.get('ylabel', '')
-    plt.title = options.get('title', '')
+    plt.title(options.get('title', ''))
 
     if(options.get('legend', True)):
         try:
@@ -200,7 +200,7 @@ def plotVector(vec, xvec = None, **options):
             plt.legend(loc='best', prop={'size' : 9})
 
 
-def saveRecords(dataDict, xvec = None, **kwargs):
+def saveRecords(records, xvec = None, **kwargs):
     """saveRecords Given a dictionary of data with (key, vector) pair, it saves
     them.
 
@@ -208,16 +208,22 @@ def saveRecords(dataDict, xvec = None, **kwargs):
     :param **kwargs:
     """
 
-    assert type(dataDict) == dict, "Got %s" % type(dataDict)
+    sortedData = records.items()
+    if kwargs.get('sorted', True):
+        sortedData = sorted(sortedData)
+
+    if len(sortedData) == 0:
+        pu.warn("No data in dictionary to save.")
+        return False
 
     outfile = kwargs.get('outfile', 'data.moose')
     clock = moose.Clock('/clock')
     assert clock.currentTime > 0
 
     yvecs = []
-    text = [ "time," + ",".join(list(dataDict.keys())) ]
-    for k in dataDict:
-        yvec = dataDict[k].vector
+    text = [ "time," + ",".join([ x[0] for x in sortedData ]) ]
+    for k, v in sortedData:
+        yvec = v.vector
         yvecs.append(yvec)
     if xvec is None: 
         xvec = np.linspace(0, clock.currentTime, len(yvecs[0]))
@@ -230,15 +236,20 @@ def saveRecords(dataDict, xvec = None, **kwargs):
     pu.info("Writing data to %s" % outfile)
     with open(outfile, 'w') as f:
         f.write("\n".join(text))
-    pu.info(" .. Done writing data to moose-data file")
 
-def plotRecords(dataDict, xvec = None, **kwargs):
+def plotRecords(records, xvec = None, **kwargs):
     """plotRecords Plot given records in dictionary.
 
-    :param dataDict:
+    :param records:
     :param xvec: If None, use moose.Clock to generate xvec.
     :param **kwargs:
     """
+    dataDict = {}
+    try:
+        for k in sorted(records.keys(), key=str.lower):
+            dataDict[k] = records[k]
+    except Exception as e:
+        dataDict = records
 
     legend = kwargs.get('legend', True)
     outfile = kwargs.get('outfile', None)
@@ -267,7 +278,7 @@ def plotRecords(dataDict, xvec = None, **kwargs):
 
     # title in Image.
     if 'title' in kwargs:
-        plt.title = kwargs['title'] 
+        plt.title(kwargs['title'])
 
     if subplot:
         try:

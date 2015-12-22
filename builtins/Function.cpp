@@ -82,6 +82,7 @@ static SrcFinfo1< vector < double > *> *requestOut()
         "requestOut",
         "Sends request for input variable from a field on target object");
     return &requestOut;
+
 }
 
 const Cinfo * Function::initCinfo()
@@ -304,7 +305,7 @@ const Cinfo * Function::initCinfo()
 
 static const Cinfo * functionCinfo = Function::initCinfo();
 
-Function::Function(): _valid(false), _numVar(0), _lastValue(0.0),
+Function::Function(): _t(0.0), _valid(false), _numVar(0), _lastValue(0.0),
                       _value(0.0), _rate(0.0), _mode(1), 
 					  _useTrigger( false ), _stoich(0)
 {
@@ -473,9 +474,12 @@ double * _functionAddVar(const char *name, void *data)
             }
         }
         ret = function->_pullbuf[index];        
+    } else if (strname == "t"){
+        ret = &function->_t;
     } else {
-        cerr << "Got an undefined constant " << name << endl
-             << "You must define the constants beforehand using LookupField c: c[name]"
+        cerr << "Got an undefined symbol: " << name << endl
+             << "Variables must be named xi, yi, where i is integer index."
+	     << " You must define the constants beforehand using LookupField c: c[name]"
                 " = value"
              << endl;
         throw mu::ParserError("Undefined constant.");
@@ -701,6 +705,7 @@ void Function::process(const Eref &e, ProcPtr p)
          ++ii){
         *_pullbuf[ii] = databuf[ii];        
     }
+    _t = p->currTime;
     _value = getValue();
     _rate = (_value - _lastValue) / p->dt;
 	if ( _useTrigger && _value < TriggerThreshold ) {
@@ -741,6 +746,7 @@ void Function::reinit(const Eref &e, ProcPtr p)
         setExpr(e, "0.0");
         _valid = false;
     }
+    _t = p->currTime;
     _value = 0.0;
     _lastValue = 0.0;
     _rate = 0.0;

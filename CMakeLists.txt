@@ -1,10 +1,10 @@
 set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 cmake_minimum_required(VERSION 2.6)
+
 cmake_policy(SET CMP0004 OLD)
 
 project(moose)
 set(MOOSE_VERSION "3.0.2")
-set(MOOGLI_VERSION "1.0")
 
 # This snippet is from LLVM project.
 # Sanity check our source directory to make sure that we are not trying to
@@ -13,7 +13,7 @@ set(MOOGLI_VERSION "1.0")
 # (which would end up getting picked up by header search, instead of the correct
 # versions).
 
-MESSAGE("+++ CMAKE_INSTALL_PREFIX : ${CMAKE_INSTALL_PREFIX}")
+MESSAGE("++ CMAKE_INSTALL_PREFIX : ${CMAKE_INSTALL_PREFIX}")
 if( CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT MSVC_IDE )
     message(FATAL_ERROR 
         "In-source builds are not allowed.
@@ -47,6 +47,18 @@ add_custom_target(uninstall
     ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
     )
 
+# This is for testing purpose.
+link_directories(${CMAKE_CURRENT_BINARY_DIR})
+
+################################# OS Specific ##################################
+MESSAGE(STATUS "Operating system: ${CMAKE_SYSTEM_NAME}")
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    CMAKE_POLICY(SET CMP0042 NEW)
+    set(MACOSX TRUE)
+else()
+    set(MACOSX FALSE)
+endif()
+
 ################################# CMAKE OPTIONS ##################################
 
 option(WITH_DOC "Build documentation using python-sphinx and doxygen" OFF)
@@ -57,13 +69,28 @@ option(VERBOSITY "SET MOOSE VERBOSITY LEVEL" 0)
 option(NOTIFY_PROGRESS "Show progress of simulation" OFF)
 
 # STATS INSIDE MOOSE. TODO: Remove it and add support for gprof
-option(ENABLE_LOGGER  "Enable MOOSE logger" OFF)
+option(ENABLE_LOGGER  "Enable MOOSE logger [Deprecated]" OFF)
 
 ## Unit testing and debug mode.
 option(DEBUG "Building with debugging support" OFF)
 option(GPROF "Build of gprof support" OFF)
 option(ENABLE_UNIT_TESTS "ENABLE UNIT TESTS IN MOOSE" ON)
 option(WITH_PYTHON "Build native python extension of MOOSE" ON)
+option(WITH_MPI  "Enable OPENMPI support" OFF)
+option(WITH_CURSES "Enable ncurses" OFF)
+# If GSL_STATIC_HOME is set, we use it to search for static gsl libs.
+option(GSL_STATIC_HOME 
+    "installation prefix where static gsl library can be found" 
+    OFF
+    )
+option(SBML_STATIC_HOME 
+    "installation prefix where static sbml library can be found"
+    OFF
+    )
+option(HDF5_STATIC_HOME
+    "installation prefix where static hdf5 library can be found"
+    OFF
+    )
 
 ################################# CMKAE MACROS #################################
 
@@ -71,7 +98,8 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules")
 
 ########################### COMPILER MACROS #####################################
 
-## Turn warning to error
+# Turn warning to error: Not all of the options may be supported on all
+# versions of compilers. be careful here.
 add_definitions(-Wall
     #-Wno-return-type-c-linkage
     -Wno-unused-variable
@@ -149,46 +177,87 @@ if(GPROF AND DEBUG)
     set(CMAKE_EXE_LINKER_FLAGS_DEBUG "-pg")
 endif()
 
+################################### SETUP BUILD ################################
 
-#### DEPENDENCIES
-
+# DEPENDENCIES
 find_package(LIBSBML)
-if(NOT LIBSBML_FOUND)
-    MESSAGE("++ LIBSBML NOT FOUND.  Disabling SBML support.")
-    ADD_DEFINITIONS(-UUSE_SBML)
-else()
-    MESSAGE("++ SBML found. Support is ON: ${LIBSBML_LIBRARY}")
-    add_definitions(-DUSE_SBML)
-    include_directories(${LIBSBML_INCLUDE_DIR})
-    find_package(BZip2 REQUIRED)
-    find_package(LibXML2 REQUIRED)
-    find_package(ZLIB REQUIRED)
+if(SBML_STATIC_HOME)
+    MESSAGE("++ Using local SBML. Support is ON")
+    include_directories(${SBML_STATIC_HOME}/include)
+    find_library(LIBSBML_LIBRARY
+        NAMES libsbml_static.a libsbml.a
+        PATHS ${SBML_STATIC_HOME}/lib ${SBML_STATIC_HOME}/lib64
+        NO_DEFAULT_PATH
+        )
+    MESSAGE("++ Using static sbml library: ${LIBSBML_LIBRARY}")
+    IF(LIBSBML_LIBRARY)
+        set(LIBSBML_FOUND ON)
+    ENDIF()
 endif()
 
-# python support: check for interpreter, sip, pyqt4
-FIND_PACKAGE(PythonDev REQUIRED)
+if(LIBSBML_FOUND)
+    MESSAGE("++ SBML found. Support is ON: ${LIBSBML_LIBRARY}")
+    include_directories(${LIBSBML_INCLUDE_DIR})
+    find_package(LibXML2 REQUIRED)
+endif()
 
-################################### SETUP BUILD ################################
 include_directories(msg basecode)
 add_executable(moose.bin basecode/main.cpp)
-#add_library(moose SHARED basecode/main.cpp)
-#set_target_properties(moose PROPERTIES COMPILE_FLAGS  "-DMOOSE_LIB")
+
+add_library(libmoose SHARED basecode/main.cpp)
+set_target_properties(libmoose PROPERTIES COMPILE_FLAGS  "-DMOOSE_LIB")
+set_target_properties(libmoose PROPERTIES PREFIX "")
 
 ## GSL
-find_package(GSL 1.16 REQUIRED)
-if(GSL_FOUND)
-    add_definitions(-DUSE_GSL)
-    include_directories(${GSL_INCLUDE_DIR})
-endif()
+add_definitions(-DUSE_GSL)
+
+IF(GSL_STATIC_HOME)
+    SET(GSL_INCLUDE_DIR "${GSL_STATIC_HOME}/include")
+    find_library(GSL_LIBRARY 
+        NAME libgsl.a 
+        PATHS ${GSL_STATIC_HOME}/lib ${GSL_STATIC_HOME}/lib64
+        NO_DEFAULT_PATH
+        )
+    find_library(GSLCBLAS_LIBRARY
+        NAME libgslcblas.a 
+        PATHS ${GSL_STATIC_HOME}/lib ${GSL_STATIC_HOME}/lib64 
+        NO_DEFAULT_PATH
+        )
+    SET(GSL_LIBRARIES ${GSL_LIBRARY} ${GSLCBLAS_LIBRARY})
+    set(GSL_INCLUDE_DIR ${GSL_STATIC_HOME}/include)
+    MESSAGE("++ STATIC GSL_LIBRARIES ${GSL_LIBRARIES}")
+ELSE()
+    find_package(GSL 1.16 REQUIRED)
+ENDIF()
+
+include_directories(${GSL_INCLUDE_DIR})
 
 ## Setup hdf5
-find_package(HDF5)
-if(FOUND_HDF5)
+IF(HDF5_STATIC_HOME)
+    SET(HDF5_INCLUDE_DIR "${HDF5_STATIC_HOME}/include")
+    find_library(HDF5_LIBRARY 
+        NAME libhdf5-static.a
+        PATHS ${HDF5_STATIC_HOME}/lib ${HDF5_STATIC_HOME}/lib64
+        NO_DEFAULT_PATH
+        )
+    find_library(HDF5_HL_LIBRARY
+        NAME libhdf5_hl-static.a
+        PATHS ${HDF5_STATIC_HOME}/lib ${HDF5_STATIC_HOME}/lib64
+        NO_DEFAULT_PATH
+        )
+    SET(HDF5_LIBRARIES ${HDF5_LIBRARY} ${HDF5_HL_LIBRARY})
     add_definitions(-DUSE_HDF5)
     include_directories(${HDF5_INCLUDE_DIR})
-else(FOUND_HDF5)
-    message("++ HDF5 not found. Disabling support")
-endif(FOUND_HDF5)
+ELSE(HDF5_STATIC_HOME)
+    find_package(HDF5)
+    if(FOUND_HDF5)
+        add_definitions(-DUSE_HDF5)
+        include_directories(${HDF5_INCLUDE_DIR})
+    else(FOUND_HDF5)
+        message(STATUS "HDF5 not found. Disabling support")
+    endif(FOUND_HDF5)
+ENDIF(HDF5_STATIC_HOME)
+
 
 find_package(Termcap)
 find_package(Readline)
@@ -199,16 +268,20 @@ if(READLINE_FOUND AND TERMCAP_FOUND)
 endif()
 
 # Openmpi
-##find_package(MPI)
-##if(MPI_CXX_FOUND)
-##    message("++ Using MPI from ${MPI_CXX_INCLUDE_PATH}")
-##    include_directories(${MPI_CXX_INCLUDE_PATH})
-##    #set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
-##    add_definitions(-DUSE_MPI)
-##else()
-##    message("++ Cound not find MPI")
-##    add_definitions(-UUSE_MPI)
-##endif()
+if(WITH_MPI)
+    find_package(MPI REQUIRED)
+    if(MPI_CXX_FOUND)
+        message("++ Using MPI from ${MPI_CXX_INCLUDE_PATH}")
+        include_directories(${MPI_CXX_INCLUDE_PATH})
+        set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
+        add_definitions(-DUSE_MPI)
+        SET(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
+        SET(CMAKE_C_COMPILER ${MPI_C_COMPILER})
+    else()
+        message("++ Cound not find MPI")
+        add_definitions(-UUSE_MPI)
+    endif()
+endif(WITH_MPI)
 
 # Add subdirectroeis
 add_subdirectory(basecode)
@@ -220,7 +293,7 @@ add_subdirectory(biophysics)
 add_subdirectory(builtins)
 add_subdirectory(utility)
 add_subdirectory(external/muparser)
-add_subdirectory(external/debug)
+#add_subdirectory(external/debug)
 add_subdirectory(external/tinyxml)
 add_subdirectory(mesh)
 add_subdirectory(sbml)
@@ -237,7 +310,7 @@ add_subdirectory(intfire)
 add_subdirectory(examples)
 
 # These are always shared libraries.
-set(SYSTEM_SHARED_LIBS ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES} ${LibXML2_LIBRARIES} ${BZIP2_LIBRARIES})
+set(SYSTEM_SHARED_LIBS ${LibXML2_LIBRARIES})
 
 # These libraries could be static of dynamic.
 # When building packages on OBS or launchpad, we build static library of a
@@ -248,32 +321,37 @@ set(SYSTEM_SHARED_LIBS ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES} ${LibXML2_LIBRARIES}
 # If CMAKE_STATIC_LIBRARIES are mentiond on command line, use it as list.
 set(STATIC_LIBRARIES  "")
 
-if(FOUND_HDF5)
+if(HDF5_STATIC_HOME)
+    list(APPEND STATIC_LIBRARIES ${HDF5_LIBRARIES})
+elseif(FOUND_HDF5)
     list(APPEND SYSTEM_SHARED_LIBS ${HDF5_LIBRARIES})
 endif()
 
 LIST(APPEND STATIC_LIBRARIES moose_sbml)
-if(LIBSBML_FOUND AND NOT LOCAL_SBML)
+IF(SBML_STATIC_HOME)
+    list(APPEND STATIC_LIBRARIES ${LIBSBML_LIBRARY})
+ELSEIF()
     list(APPEND SYSTEM_SHARED_LIBS ${LIBSBML_LIBRARY})
-elseif(LIBSBML_FOUND)
-    list(APPEND STATIC_LIBRARIES ${STATIC_SBML_LIBRARY})
-endif()
+ENDIF()
 
-if(GSL_FOUND AND NOT LOCAL_GSL)
+
+if(GSL_STATIC_HOME)
+    MESSAGE(STATUS "Using STATIC gsl libraries: ${GSL_LIBRARIES}")
+    list(APPEND STATIC_LIBRARIES ${GSL_LIBRARIES})
+else()
+    MESSAGE(STATUS "Using system gsl : ${GSL_LIBRARIES}")
     list(APPEND SYSTEM_SHARED_LIBS ${GSL_LIBRARIES})
-elseif(GSL_FOUND)
-    list(APPEND STATIC_LIBRARIES ${STATIC_GSL_LIBRARY}
-        ${STATIC_GSLBLAS_LIBRARY}
-        )
 endif()
 
 if(READLINE_FOUND AND TERMCAP_FOUND)
     list(APPEND SYSTEM_SHARED_LIBS ${Readline_LIBRARY} ${TERMCAP_LIBRARY})
 endif()
 
-#if(MPI_CXX_FOUND)
-#    list(APPEND SYSTEM_SHARED_LIBS ${MPI_CXX_LIBRARIES})
-#endif()
+if(WITH_MPI)
+    if(MPI_CXX_FOUND)
+        list(APPEND SYSTEM_SHARED_LIBS ${MPI_CXX_LIBRARIES})
+    endif()
+endif(WITH_MPI)
 
 ###################################### LINKING #################################
 set(MOOSE_LIBRARIES
@@ -300,17 +378,43 @@ set(MOOSE_LIBRARIES
     basecode
     )
 
-target_link_libraries(moose.bin 
-    "-Wl,--whole-archive"
-    ${MOOSE_LIBRARIES}
-    ${STATIC_LIBRARIES}
-    "-Wl,--no-whole-archive"
-    ${SYSTEM_SHARED_LIBS}
-    )
+
+# MAC linker does not understand many of gnu-ld options.
+IF(MACOSX)
+    target_link_libraries(libmoose
+        "-Wl,-all_load"
+        ${MOOSE_LIBRARIES}
+        ${STATIC_LIBRARIES}
+        )
+
+    target_link_libraries(libmoose
+        ${SYSTEM_SHARED_LIBS}
+        )
+
+ELSE(MACOSX)
+    target_link_libraries(libmoose 
+        "-Wl,--whole-archive"
+        ${MOOSE_LIBRARIES}
+        ${STATIC_LIBRARIES}
+        "-Wl,--no-whole-archive"
+        ${SYSTEM_SHARED_LIBS}
+        )
+ENDIF(MACOSX)
+
+add_dependencies(moose.bin libmoose)
+
+IF(CMAKE_VERSION VERSION_LESS "2.8.0")
+    MESSAGE(STATUS "Using a fix for cmake ( < 2.8)")
+    target_link_libraries(moose.bin PUBLIC moose) 
+ELSE()
+    target_link_libraries(moose.bin
+        LINK_PUBLIC moose
+        )
+ENDIF()
 
 IF(WITH_DOC)
     FIND_PACKAGE(Doxygen REQUIRED)
-    add_custom_command(TARGET moose.bin POST_BUILD
+    add_custom_command(TARGET libmoose POST_BUILD
         COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.full
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Building developer documentation"
@@ -322,39 +426,48 @@ ENDIF(WITH_DOC)
 # Root of all python module.
 SET(PROJECT_PYTHON_PATH ${CMAKE_CURRENT_SOURCE_DIR}/python)
 if(WITH_PYTHON)
+    set(Python_ADDITIONAL_VERSION 2.6 2.7)
     message("++ Building native python extension of MOOSE")
     set(PYMOOSE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/python/moose")
 
-    find_package(NumpyHeaders)
-    if(PYTHON_NUMPY_FOUND)
-        add_definitions(-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
-        include_directories(${PYTHON_NUMPY_INCLUDE_DIR})
-        add_definitions(-DUSE_NUMPY)
-    else()
-        message(WARNING "Could not find numpy/arrayobject.h in usual places")
-        add_definitions(-UUSE_NUMPY)
-    endif()
-
+    find_package(NumPy REQUIRED)
     find_package(PythonDev REQUIRED)
     include_directories(${PYTHON_INCLUDE_DIRS})
     add_subdirectory(pymoose)
-    add_library(_moose SHARED pymoose/moosemodule.cpp)
+
+    add_library(_moose MODULE pymoose/moosemodule.cpp)
 
     set_target_properties(_moose PROPERTIES COMPILE_DEFINITIONS "PYMOOSE")
     set_target_properties(_moose PROPERTIES 
         LIBRARY_OUTPUT_DIRECTORY ${PYMOOSE_OUTPUT_DIRECTORY}
         PREFIX ""
         )
-    list(APPEND SYSTEM_SHARED_LIBS ${PYTHON_LIBRARIES})
-    target_link_libraries(
-        _moose 
+
+if(MACOSX)
+    set(CMAKE_MODULE_LINKER_FLAGS "-undefined dynamic_lookup")
+    MESSAGE(STATUS "ADDING some linker flags ${CMAKE_EXE_LINKER_FLAGS}")
+endif(MACOSX)
+
+IF(MACOSX)
+    target_link_libraries( _moose 
+        "-Wl,-all_load"
         moosepython  
+        ${MOOSE_LIBRARIES}
+        ${STATIC_LIBRARIES}
+        )
+    target_link_libraries(_moose
+        ${SYSTEM_SHARED_LIBS}
+        )
+ELSE(MACOSX)
+    target_link_libraries(_moose 
         "-Wl,--whole-archive"
+        moosepython  
         ${MOOSE_LIBRARIES}
         ${STATIC_LIBRARIES}
         "-Wl,--no-whole-archive"
         ${SYSTEM_SHARED_LIBS}
         )
+ENDIF(MACOSX)
 
     add_custom_command(TARGET _moose POST_BUILD
         COMMAND ${PYTHON_EXECUTABLE} setup.py sdist --dist-dir
@@ -377,41 +490,6 @@ IF(WITH_DOC)
 endif(WITH_DOC)
 endif(WITH_PYTHON)
 
-## MOOGLI
-OPTION(BUILD_MOOGLI "Build moogli extension." OFF)
-IF(BUILD_MOOGLI)
-    MESSAGE(STATUS "Building MOOGLI")
-    SET(MOOGLI_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/python/moogli)
-
-    # Build directory of MOOGLI can't be same as of moose which is
-    # ${CMAKE_CURRENT_BINARY_DIR}. If they are same both project will try to
-    # create CMAKECache file in same directory which is an error.
-    SET(MOOGLI_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/_moogli_bin)
-    FILE(MAKE_DIRECTORY ${MOOGLI_BUILD_DIR})
-
-    # After successful run, we should get a source distribution of moogli in
-    # current build directory.
-
-    # NOTE: moogli source distribution does not have version information. python
-    # setup.py sdist does not append versioning information.
-    set(MOOGLI_OUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/moogli.tar.gz)
-    add_custom_target(moogli ALL
-        DEPENDS ${MOOGLI_OUT_FILE}
-        )
-
-    add_custom_command(OUTPUT ${MOOGLI_OUT_FILE}
-        COMMAND ${CMAKE_COMMAND} -DMOOGLI_DIST_DIR=${CMAKE_BINARY_DIR} ${MOOGLI_SOURCE_DIR}
-        COMMAND $(MAKE)
-        WORKING_DIRECTORY ${MOOGLI_BUILD_DIR}
-        COMMENT "Building MOOGLI extension"
-        VERBATIM
-        )
-
-else(BUILD_MOOGLI)
-    MESSAGE(STATUS "NOT building MOOGLI")
-endif(BUILD_MOOGLI)
-
-
 ######################### CYMOOSE #############################################
 option(BUILD_CYMOOSE "Build python extension using Cython. Development version." OFF)
 if(BUILD_CYMOOSE)
@@ -426,6 +504,15 @@ if(BUILD_CYMOOSE)
         LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/cymoose"
             )
 
+IF(MACOSX)
+    target_link_libraries(cymoose 
+        "-Wl,-all_load"
+        ${MOOSE_LIBRARIES}
+        ${LIBRARIES}
+        "-Wl,-noall_load"
+        ${SYSTEM_LIBRARIES}
+        )
+ELSE(MACOSX)
     target_link_libraries(cymoose 
         "-Wl,--whole-archive"
         ${MOOSE_LIBRARIES}
@@ -433,6 +520,8 @@ if(BUILD_CYMOOSE)
         "-Wl,--no-whole-archive"
         ${SYSTEM_LIBRARIES}
         )
+ENDIF(MACOSX)
+
 endif(BUILD_CYMOOSE)
 
 ## Moose documentation
@@ -446,8 +535,6 @@ if(WITH_DOC)
         COMMAND ./docgen
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Generating html doc using sphinx and doxygen"
-        VERBATIM
-        COMMENT "Building MOOGLI"
         )
 
 endif(WITH_DOC)
@@ -456,30 +543,38 @@ endif(WITH_DOC)
 
 install(TARGETS moose.bin
     DESTINATION bin
-    COMPONENT moose-core
+    )
+
+install(TARGETS libmoose
+    DESTINATION lib
     )
 
 install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/moose
     DESTINATION bin
-    COMPONENT moose-core
     )
 
 if(WITH_PYTHON)
-install(CODE 
-    "
-    execute_process(COMMAND easy_install  --prefix ${CMAKE_INSTALL_PREFIX} 
-        --upgrade moose-${MOOSE_VERSION}.tar.gz
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    SET(MOOSE_SRC_TAR ${CMAKE_CURRENT_BINARY_DIR}/moose-${MOOSE_VERSION}.tar.gz)
+
+    install(CODE 
+        "
+        execute_process(
+            COMMAND tar xvf ${MOOSE_SRC_TAR} -C /tmp
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+            )
+        execute_process(
+            COMMAND ${PYTHON_EXECUTABLE} setup.py install --prefix=${CMAKE_INSTALL_PREFIX}
+            WORKING_DIRECTORY /tmp/moose-${MOOSE_VERSION}
+            )
+        "
         )
-    "
-    )
+
 endif(WITH_PYTHON)
 
 if(WITH_DOC)
     message(STATUS "Installing moose doc")
     install(DIRECTORY ${USER_DOC_OUTPUT_DIR}
         DESTINATION share/doc/moose
-        COMPONENT moose-doc
         )
 
     install(DIRECTORY ${DEVELOPER_DOC_OUTPUT_DIR}
@@ -487,17 +582,18 @@ if(WITH_DOC)
         )
 endif()
 
-if(BUILD_MOOGLI)
-    install(CODE
-        "
-        execute_process(COMMAND easy_install
-            --prefix ${CMAKE_INSTALL_PREFIX}
-            --upgrade moogli-${MOOGLI_VERSION}.tar.gz
-            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-            )
-        "
-        )
-endif(BUILD_MOOGLI)
+## TODO: Use python setup.py install to make sure that it installs with MacPort
+## and any Unix-like system.
+##if(BUILD_MOOGLI)
+##    install(CODE
+##        "
+##        execute_process(COMMAND easy_install
+##            --prefix ${CMAKE_INSTALL_PREFIX}
+##            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+##            )
+##        "
+##        )
+##endif(BUILD_MOOGLI)
     
 
 ############################ CTEST ######################################
@@ -506,4 +602,3 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake_moose_ctest.cmake)
 
 ############################ CPACK ######################################
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake_moose_cpack.cmake)
-

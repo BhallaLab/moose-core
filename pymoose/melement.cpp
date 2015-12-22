@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Mon Jul 22 16:50:41 2013 (+0530)
 // Version: 
-// Last-Updated: Tue Jul 23 20:35:28 2013 (+0530)
+// Last-Updated: Fri Sep 25 23:02:53 2015 (-0400)
 //           By: subha
-//     Update #: 75
+//     Update #: 76
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -1993,7 +1993,7 @@ PyObject* setDestFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type1
                  "Attributes\n"
                  "----------\n"
                  "vec : moose.vec\n"
-                 "    The vec containing this element\n"
+                 "    The vec containing this element. `vec` wraps the Id of the object in MOOSE C++ API.\n"
                  "\n"
                  "dindex : int\n"
                  "    index of this element in the container vec\n"

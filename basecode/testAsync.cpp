@@ -1526,9 +1526,9 @@ void testCinfoFields()
 	assert( cinfo->getSrcFinfo( 0 + nsf ) == cinfo->findFinfo( "spikeOut" ) );
 
 	unsigned int ndf = neutralCinfo->getNumDestFinfo();
-	assert( ndf == 25 );
+	assert( ndf == 28 );
 	unsigned int sdf = IntFire::initCinfo()->getNumDestFinfo();
-	assert( sdf == 36 );
+	assert( sdf == 39 );
 
 	/*
 	assert( cinfo->getDestFinfo( 0+ndf )->name() == "setNumSynapses" );
@@ -1552,7 +1552,7 @@ void testCinfoFields()
 
 
 	unsigned int nvf = neutralCinfo->getNumValueFinfo();
-	assert( nvf == 16 );
+	assert( nvf == 19 );
 	assert( cinfo->getNumValueFinfo() == 4 + nvf );
 	assert( cinfo->getValueFinfo( 0 + nvf ) == cinfo->findFinfo( "Vm" ) );
 	assert( cinfo->getValueFinfo( 1 + nvf ) == cinfo->findFinfo( "tau" ) );

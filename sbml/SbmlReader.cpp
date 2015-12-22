@@ -37,7 +37,6 @@
 //#include "../manager/SimManager.h"
 #include "SbmlReader.h"
 //#include "../kinetics/FuncPool.h"
-#include "../external/debug/simple_logger.hpp"
 
 using namespace std;
 map< string,double > parmValueMap;
@@ -323,8 +322,6 @@ map< string,Id > SbmlReader::createCompartment(string location, Id parentId, str
     if (num_compts == 0) {
         errorFlag_ = true;
         stringstream ss;
-        ss << "No compartment found in given model: " << endl;
-        logger.dump("SBML", ss.str());
         return comptSidMIdMap;
     }
 

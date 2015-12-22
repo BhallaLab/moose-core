@@ -132,6 +132,13 @@ class Neutral
 		void setNumField( const Eref& e, unsigned int num );
 		unsigned int getNumField( const Eref& e ) const;
 
+		/// Id is the Id of the object, converted to unsigned int.
+		unsigned int getId( const Eref& e ) const;
+		/// Index is the dataIndex of the object
+		unsigned int getIndex( const Eref& e ) const;
+		/// fieldIndex specifies field entry if FieldElement. Otherwise zero
+		unsigned int getFieldIndex( const Eref& e ) const;
+
 		/**
 		 * The clock Tick specifies the timing and order of execution
 		 * of the 'process' action of this object in the simulation. 
