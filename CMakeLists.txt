@@ -123,7 +123,7 @@ endif(VERIFY)
 if(VERBOSITY)
     message("++ Verbosity of output is ${VERBOSITY}. This is not implemented
     yet!")
-    add_definitions(-DVERBOSITY=${VERBOSITY})
+    add_definitions(-DVERBOSITY=${VERBOSITY} -DDEBUG_VERBOSE)
 else()
     message("++ Moose will be quiet")
     add_definitions(-DQUIET_MODE)
@@ -469,13 +469,13 @@ ELSE(MACOSX)
         )
 ENDIF(MACOSX)
 
-    add_custom_command(TARGET _moose POST_BUILD
-        COMMAND ${PYTHON_EXECUTABLE} setup.py sdist --dist-dir
-        ${CMAKE_CURRENT_BINARY_DIR}
-        WORKING_DIRECTORY ${PROJECT_PYTHON_PATH}
-        COMMENT "Generating moose source distribution using setuptools"
-        VERBATIM
-        )
+##add_custom_command(TARGET _moose POST_BUILD
+##    COMMAND ${PYTHON_EXECUTABLE} setup.py sdist --dist-dir
+##    ${CMAKE_CURRENT_BINARY_DIR}
+##    WORKING_DIRECTORY ${PROJECT_PYTHON_PATH}
+##    COMMENT "Generating moose source distribution using setuptools"
+##    VERBATIM
+##    )
 
 IF(WITH_DOC)
     # Also generate the documents

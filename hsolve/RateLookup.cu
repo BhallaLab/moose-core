@@ -248,37 +248,41 @@ void LookupTable::row_gpu(vector<double>::iterator& x, vector<LookupRow>::iterat
 {
 
 #ifdef DEBUG_VERBOSE
-	printf("start row_gpu calculation...\n");
+    printf("start row_gpu calculation...\n");
 #endif	
 
-	thrust::device_vector<double> d_x(size);
-	thrust::device_vector<LookupRow> d_row(size);
-	
-	thrust::copy(x, x + size, d_x.begin());
-	thrust::copy(row, row + size, d_row.begin());
+    printf("A\n");
+    thrust::device_vector<double> d_x(size);
+    thrust::device_vector<LookupRow> d_row(size);
 
-	double * d_x_p = thrust::raw_pointer_cast(d_x.data());
-	LookupRow * d_row_p = thrust::raw_pointer_cast(d_row.data());
+    thrust::copy(x, x + size, d_x.begin());
+    thrust::copy(row, row + size, d_row.begin());
+
+    printf("AA\n");
+
+    double * d_x_p = thrust::raw_pointer_cast(d_x.data());
+    LookupRow * d_row_p = thrust::raw_pointer_cast(d_row.data());
     dim3 gridSize(size/BLOCK_WIDTH + 1, 1, 1);
     dim3 blockSize(BLOCK_WIDTH,1,1);
 
     if(size <= BLOCK_WIDTH)
     {
-    	gridSize.x = 1;
-    	blockSize.x = size;
+        gridSize.x = 1;
+        blockSize.x = size;
     }
-    
+
     size_t address = reinterpret_cast<size_t>(&table_.front());
-    
+
+    printf("AAA\n");
     row_kernel<<<gridSize, blockSize>>>(d_x_p, 
-    									d_row_p, 
-    									min_, 
-    									max_, 
-    									dx_, 
-    									nColumns_, 
-    									size, 
-    									address);	
-    
+            d_row_p, 
+            min_, 
+            max_, 
+            dx_, 
+            nColumns_, 
+            size, 
+            address);	
+
     cudaSafeCall(cudaDeviceSynchronize()); 
 
 #ifdef DEBUG_VERBOSE    
