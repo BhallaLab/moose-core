@@ -132,8 +132,6 @@ endif()
 option(ENABLE_CUDA "Enable GPU acceleration" ON)
 if(ENABLE_CUDA)
     FIND_PACKAGE(CUDA REQUIRED)
-    set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-gencode arch=compute_20,code=sm_20)
-    SET(CMAKE_CXX_FLAGS -fPIC)
 else()
     ## Enable/Disable 2011 stupport.
     ## CUDA DOES NOT SUPPORT IT YET.

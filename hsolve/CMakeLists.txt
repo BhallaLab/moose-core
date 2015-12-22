@@ -1,8 +1,14 @@
 cmake_minimum_required(VERSION 2.8)
 include_directories(../basecode ../utility ../kinetics ../external/debug)
 
+option(DEBUG_CUDA "Enable CUDA debug macros" OFF)
+if(DEBUG_CUDA)
+    add_definitions(-DDEBUG_CUDA)
+endif()
 
 if(ENABLE_CUDA)
+    SET(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-gencode arch=compute_30,code=sm_30)
+    SET(CMAKE_CXX_FLAGS -fPIC)
     FILE(GLOB CUDA_SRC *.cu)
     INCLUDE_DIRECTORIES(${CUDA_INCLUDE_DIRS})
     CUDA_COMPILE(HSOLVE_CUDA_OBJS ${CUDA_SRC})

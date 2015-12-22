@@ -145,12 +145,9 @@ void HSolveActive::copy_data(std::vector<LookupColumn>& column,
                                 cudaMemcpyHostToDevice));
         const int xyz[3] = {x,y,z};
 
-        cudaError_t stat = cudaMemcpyToSymbol(instant_xyz_d, xyz, sizeof(int)*3,
-                0, cudaMemcpyHostToDevice);
-
-#ifdef DEBUG_VERBOSE
-        printf("%s\n", cudaGetErrorString(stat));
-#endif
+        cudaSafeCall(cudaMemcpyToSymbol(instant_xyz_d, xyz, sizeof(int)*3,
+                0, cudaMemcpyHostToDevice)
+                );
 
     }
 }

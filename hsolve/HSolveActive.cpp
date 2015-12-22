@@ -117,67 +117,91 @@ void HSolveActive::step( ProcPtr info )
     
     total_count ++;
     
-	  u64 start_time, end_time;
+#ifdef PROFILE_CUDA
+    u64 start_time, end_time;
     start_time = getTime();
+#endif
     
     advanceChannels( info->dt );
     
+#ifdef PROFILE_CUDA
     end_time = getTime();
     update_info(total_time, 0, end_time - start_time, total_count ,info->dt);
     start_time = end_time;
+#endif
     
     calculateChannelCurrents();
-    
+
+#ifdef PROFILE_CUDA
     end_time = getTime();
     update_info(total_time, 1, end_time - start_time, total_count ,info->dt);
     start_time = end_time;   
+#endif
     
     updateMatrix();
+
+#ifdef PROFILE_CUDA
     end_time = getTime();
     update_info(total_time, 2, end_time - start_time, total_count ,info->dt);
     start_time = end_time;   
+#endif
         
     HSolvePassive::forwardEliminate();
     
+#ifdef PROFILE_CUDA
     end_time = getTime();
     update_info(total_time, 3, end_time - start_time, total_count ,info->dt);
     start_time = end_time;   
+#endif
         
     HSolvePassive::backwardSubstitute();
     
+#ifdef PROFILE_CUDA
     end_time = getTime();
     update_info(total_time, 4, end_time - start_time, total_count ,info->dt);
     start_time = end_time;   
+#endif
         
     advanceCalcium();
     
+#ifdef PROFILE_CUDA
     end_time = getTime();
     update_info(total_time, 5, end_time - start_time, total_count ,info->dt);
     start_time = end_time;   
+#endif
         
     advanceSynChans( info );
     
+#ifdef PROFILE_CUDA
     end_time = getTime();
     update_info(total_time, 6, end_time - start_time, total_count ,info->dt);
     start_time = end_time;   
+#endif
     
     sendValues( info );
     
+#ifdef PROFILE_CUDA
     end_time = getTime();
     update_info(total_time, 7, end_time - start_time, total_count ,info->dt);
     start_time = end_time;   
+#endif
         
     sendSpikes( info );
      
+#ifdef PROFILE_CUDA
     end_time = getTime();
     update_info(total_time, 8, end_time - start_time, total_count ,info->dt);
     start_time = end_time;   
+#endif
        
 
     externalCurrent_.assign( externalCurrent_.size(), 0.0 );
     
+#ifdef PROFILE_CUDA
     end_time = getTime();
     update_info(total_time, 9, end_time - start_time, total_count ,info->dt);
+#endif
+
 }
 
 void HSolveActive::calculateChannelCurrents()

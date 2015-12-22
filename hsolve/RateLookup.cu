@@ -251,14 +251,11 @@ void LookupTable::row_gpu(vector<double>::iterator& x, vector<LookupRow>::iterat
     printf("start row_gpu calculation...\n");
 #endif	
 
-    printf("A\n");
     thrust::device_vector<double> d_x(size);
     thrust::device_vector<LookupRow> d_row(size);
 
     thrust::copy(x, x + size, d_x.begin());
     thrust::copy(row, row + size, d_row.begin());
-
-    printf("AA\n");
 
     double * d_x_p = thrust::raw_pointer_cast(d_x.data());
     LookupRow * d_row_p = thrust::raw_pointer_cast(d_row.data());
@@ -273,7 +270,6 @@ void LookupTable::row_gpu(vector<double>::iterator& x, vector<LookupRow>::iterat
 
     size_t address = reinterpret_cast<size_t>(&table_.front());
 
-    printf("AAA\n");
     row_kernel<<<gridSize, blockSize>>>(d_x_p, 
             d_row_p, 
             min_, 
