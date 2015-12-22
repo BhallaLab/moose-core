@@ -179,7 +179,7 @@ double LookupTable::get_dx()
  */
 __global__
 void
-(double * d_x, 
+row_kernel(double * d_x, 
 		   LookupRow * d_row, 
 		   double min,
 		   double max, 
