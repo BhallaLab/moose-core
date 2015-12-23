@@ -1,6 +1,10 @@
 # Issue 34 on github.
+import sys
+sys.path.append('../../python')
+
 import moose
 import moose.utils as mu
+print("using moose from: %s" % moose.__file__)
 
 compt = moose.CubeMesh('/compt')
 compt.volume = 1e-20
