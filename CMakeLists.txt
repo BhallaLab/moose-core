@@ -409,8 +409,11 @@ if(WITH_PYTHON)
     find_package(NumPy REQUIRED)
     find_package(PythonDev REQUIRED)
     include_directories(${PYTHON_INCLUDE_DIRS})
+
     add_subdirectory(pymoose)
 
+    include_directories(${NUMPY_INCLUDE_DIRS})
+    add_definitions(-DUSE_NUMPY)
     add_library(_moose MODULE pymoose/moosemodule.cpp)
 
     set_target_properties(_moose PROPERTIES COMPILE_DEFINITIONS "PYMOOSE")
