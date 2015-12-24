@@ -86,7 +86,7 @@ HopFunc.o:	HopFunc.h ../mpi/PostMaster.h
 global.o:       global.h 
 
 .cpp.o:
-	$(CXX) $(CXXFLAGS) -I../msg $< -c
+	$(CXX) $(CXXFLAGS) -I../msg -I.. $< -c
 
 .PHONY: pymoose
 
