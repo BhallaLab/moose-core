@@ -10,17 +10,17 @@
 #include "header.h"
 #include "ElementValueFinfo.h"
 #include "LookupElementValueFinfo.h"
-#include "../shell/Shell.h"
-#include "../shell/Wildcard.h"
+#include "shell/Shell.h"
+#include "shell/Wildcard.h"
 #include "ReadCell.h"
-#include "../utility/Vec.h"
-#include "../randnum/Normal.h"
-#include "../randnum/randnum.h"
+#include "utility/Vec.h"
+#include "randnum/Normal.h"
+#include "randnum/randnum.h"
 #include "SwcSegment.h"
 #include "Spine.h"
 #include "Neuron.h"
 
-#include "../external/muparser/muParser.h"
+#include "muParser.h"
 
 class nuParser: public mu::Parser
 {
