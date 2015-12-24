@@ -1,7 +1,6 @@
 language: cpp
 compiler:
     - gcc
-    - clang
 os:
     - linux
 notifications:
@@ -17,6 +16,10 @@ notifications:
 env:
     - CTEST_MODEL=Nightly
 cache: apt
+
+matrix:
+    allow_failures:
+        - compiler: clang
 
 before_script:
     - sudo apt-get update -qq

@@ -144,4 +144,23 @@ static ostringstream assertStream;
     assertStream << msg; \
     throw FatalTestFailure( assertStream.str() ); \
 
+#define ASSERT_EQ(a, b, token)  \
+    if( (a) != (b)) { \
+        assertStream.str(""); \
+        LOCATION(assertStream) \
+        assertStream << "Expected " << a << ", received " << b  << endl; \
+        assertStream << token << endl; \
+        throw FatalTestFailure(assertStream.str()); \
+    }
+
+#define ASSERT_NEQ(a, b, token)  \
+    if( (a) == (b)) { \
+        assertStream.str(""); \
+        LOCATION(assertStream); \
+        assertStream << "Not expected " << a << endl; \
+        assertStream << token << endl; \
+        throw FatalTestFailure(assertStream.str()); \
+    }
+
+
 #endif   /* ----- #ifndef TESTING_MACROS_INC  ----- */
