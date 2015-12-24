@@ -1,7 +1,5 @@
-file(GLOB files_SRC 
-    "*.h"
-    "*.cpp"
-)
+cmake_minimum_required(VERSION 2.6)
+file(GLOB files_SRC "src/*.cpp")
 include_directories(../msg)
-include_directories(../basecode)
+include_directories(../basecode ./include)
 add_library(muparser ${files_SRC})

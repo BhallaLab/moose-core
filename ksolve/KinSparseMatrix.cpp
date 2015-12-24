@@ -16,7 +16,7 @@
 //#include "../utility/utility.h" // isnan is undefined in VC++ and BC5, utility.h contains a workaround macro
 using namespace std;
 #include "SparseMatrix.h"
-#include "../utility/numutil.h"
+#include "utility/numutil.h"
 #include "KinSparseMatrix.h"
 
 
