@@ -4,33 +4,36 @@
 TARGET = _muparser.o
 
 OBJ = \
-	muParser.o	\
-	muParserBase.o	\
-	muParserTokenReader.o	\
-	muParserError.o	\
-	muParserCallback.o	\
-	muParserBytecode.o
+    src/muParserBase.o \
+    src/muParserBytecode.o \
+    src/muParserCallback.o \
+    src/muParser.o  \
+    src/muParserDLL.o \
+    src/muParserError.o \
+    src/muParserInt.o \
+    src/muParserTest.o \
+    src/muParserTokenReader.o \
 
 HEADERS = \
-	muParser.h	\
-	muParserBase.h	\
-	muParserBytecode.h	\
-	muParserCallback.h	\
-	muParserDef.h	\
-	muParserError.h	\
-	muParserFixes.h	\
-	muParserStack.h	\
-	muParserToken.h	\
-	muParserTokenReader.h		\
-	muParserTemplateMagic.h	\
+	include/muParser.h	\
+	include/muParserBase.h	\
+	include/muParserBytecode.h	\
+	include/muParserCallback.h	\
+	include/muParserDef.h	\
+	include/muParserError.h	\
+	include/muParserFixes.h	\
+	include/muParserStack.h	\
+	include/muParserToken.h	\
+	include/muParserTokenReader.h		\
+	include/muParserTemplateMagic.h	\
 
 
 default: $(TARGET)
 
 $(OBJ): $(HEADERS)
 
-.cpp.o:
-	$(CXX) $(CXXFLAGS) -I. $< -c
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -I. -Iinclude $< -c -o $@
 
 $(TARGET):	$(OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ)

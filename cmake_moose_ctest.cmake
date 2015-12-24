@@ -47,24 +47,20 @@ ADD_TEST(NAME pymoose-neuroml-reader-test
     WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
     )
 
+ADD_TEST(NAME pymoose-nsdf-sanity-test
+    COMMAND ${PYTHON_EXECUTABLE} test_nsdf.py
+    WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
+    )
 
-#ADD_TEST(NAME pymoose-test-sbml 
-#    COMMAND ${PYTHON_EXECUTABLE} test_sbml.py
-#    CONFIGURATIONS Nightly
-#    WORKING_DIRECTORY ${TEST_DIRECTORY}
-#    )
-#
-#ADD_TEST(NAME pymoose-test-kkit 
-#    COMMAND ${PYTHON_EXECUTABLE} test_kkit.py
-#    CONFIGURATIONS Nightly
-#    WORKING_DIRECTORY ${TEST_DIRECTORY}
-#    )
-#
-if(BUILD_MOOGLI)
+##IF(WITH_SBML)
+##    ADD_TEST(NAME pymoose-test-sbml 
+##        COMMAND ${PYTHON_EXECUTABLE} test_sbml.py
+##        WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
+##        )
+##ENDIF(WITH_SBML)
 
-#    ADD_TEST(NAME moogli_sanity_test
-#        COMMAND ${PYTHON_EXECUTABLE} test_moogli.py
-#        WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
-#        )
+##ADD_TEST(NAME pymoose-test-kkit 
+##    COMMAND ${PYTHON_EXECUTABLE} test_kkit.py
+##    WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
+##    )
 
-endif(BUILD_MOOGLI)

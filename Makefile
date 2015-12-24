@@ -400,7 +400,7 @@ PYTHON_LDFLAGS := $(shell python-config --ldflags)
 else
 PYTHON_CFLAGS := $(shell python-config --includes) \
     -fno-strict-aliasing -fwrapv \
-    # -Wstrict-prototypes  \ # This option is not supported by g++-4.8
+    -Wstrict-prototypes  \
     -Wformat -Wformat-security -Werror=format-security \
     -fstack-protector --param=ssp-buffer-size=4
 
