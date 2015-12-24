@@ -3,7 +3,6 @@ import sys
 sys.path.append('../../python')
 import moose
 import moose.utils as mu
-print("Using moose frome: %s" % moose.__file__)
 
 compt = moose.CubeMesh('/compt')
 compt.volume = 1e-20
@@ -12,7 +11,10 @@ molecules = [ "ca", "S", "S1", "Sp" ]
 pools = {}
 tables = {}
 for m in molecules:
-    pools[m] = moose.Pool('/compt/%s' % m)
+    if m == 'S1':
+        pools[m] = moose.BufPool('/compt/%s' % m)
+    else:
+        pools[m] = moose.Pool('/compt/%s' % m)
     t = moose.Table2("/table%s" % m)
     tables[m] = t
     moose.connect(t, 'requestOut', pools[m], 'getConc')
@@ -20,9 +22,9 @@ for m in molecules:
 pools['ca'].nInit = 20
 
 r_p0_p1 = moose.Reac('/compt/reacA')
-funA = moose.Function('/compt/funcA')
+funA = moose.Function('/compt/S1/func')
 funA.expr = "{0}*(y0/{1})^6/(1+(y0/{1})^3)^2".format("1.5", "0.7e-3")
-print("Setting expr: %s" % funA.expr)
+print funA.expr
 moose.connect(funA, 'requestOut',  pools['ca'], 'getConc')
 moose.connect(funA, 'valueOut', pools['S1'], 'setConc')
 moose.connect(r_p0_p1, 'sub', pools['S'], 'reac')

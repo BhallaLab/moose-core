@@ -20,7 +20,7 @@
 #include "Spine.h"
 #include "Neuron.h"
 
-#include "../external/muparser/muParser.h"
+#include "muParser.h"
 
 class nuParser: public mu::Parser
 {
