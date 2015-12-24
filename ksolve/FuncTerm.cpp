@@ -29,6 +29,7 @@ using namespace std;
 
 FuncTerm::FuncTerm()
 	: reactantIndex_( 1, 0 ),
+		volScale_( 1.0 ),
 		target_( ~0U)
 {
 	args_ = 0;
@@ -106,11 +107,22 @@ const unsigned int FuncTerm::getTarget() const
 	return target_;
 }
 
+void FuncTerm::setVolScale( double vs )
+{
+	volScale_ = vs;
+}
+
+double FuncTerm::getVolScale() const
+{
+	return volScale_;
+}
+
 const FuncTerm& FuncTerm::operator=( const FuncTerm& other )
 {
 	args_ = 0; // Don't delete it, the original one is still using it.
 	parser_ = other.parser_;
 	expr_ = other.expr_;
+	volScale_ = other.volScale_;
 	target_ = other.target_;
 	setReactantIndex( other.reactantIndex_ );
 	return *this;
@@ -128,7 +140,7 @@ double FuncTerm::operator() ( const double* S, double t ) const
 	for ( i = 0; i < reactantIndex_.size(); ++i )
 		args_[i] = S[reactantIndex_[i]];
 	args_[i] = t;
-	return parser_.Eval();
+	return parser_.Eval() * volScale_;
 }
 
 void FuncTerm::evalPool( double* S, double t ) const
@@ -139,5 +151,5 @@ void FuncTerm::evalPool( double* S, double t ) const
 	for ( i = 0; i < reactantIndex_.size(); ++i )
 		args_[i] = S[reactantIndex_[i]];
 	args_[i] = t;
-	S[ target_] = parser_.Eval();
+	S[ target_] = parser_.Eval() * volScale_;
 }

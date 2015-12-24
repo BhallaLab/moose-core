@@ -1020,7 +1020,7 @@ void Stoich::buildFuncLookup()
 // Stoich building stuff here for installing model components.
 ///////////////////////////////////////////////////////////////////
 
-void Stoich::installAndUnschedFunc( Id func, Id pool )
+void Stoich::installAndUnschedFunc( Id func, Id pool, double volScale )
 {
 	static const Cinfo* varCinfo = Cinfo::find( "Variable" );
 	static const Finfo* funcSrcFinfo = varCinfo->findFinfo( "input" );
@@ -1049,6 +1049,7 @@ void Stoich::installAndUnschedFunc( Id func, Id pool )
 	ft->setExpr( expr );
 	// Tie the output of the FuncTerm to the pool it controls.
 	ft->setTarget( convertIdToPoolIndex( pool ) );
+	ft->setVolScale( volScale );
 	unsigned int funcIndex = convertIdToFuncIndex( func );
 	assert( funcIndex != ~0U );
 	funcs_[ funcIndex ] = ft;
@@ -1234,7 +1235,26 @@ static Id findFuncMsgSrc( Id pa, const string& msg )
 
 }
 
-
+Id Stoich::zombifyPoolFuncWithScaling( Id pool ) 
+{
+	static const Cinfo* zfCinfo = Cinfo::find( "ZombieFunction" );
+	Id funcId = findFuncMsgSrc( pool, "setN" );
+	if ( funcId != Id() ) {
+		Element* fe = funcId.element();
+		installAndUnschedFunc( funcId, pool, 1.0 );
+		ZombieFunction::zombify( fe, zfCinfo,ksolve_,dsolve_);
+	} else {
+		funcId = findFuncMsgSrc( pool, "setConc" );
+		if ( funcId != Id() ) {
+			// cout << "Warning: Stoich::zombifyModel: Prefer to use setN rather than setConc:" << pool.path() << endl;
+			Element* fe = funcId.element();
+			double vol = Field< double >::get( pool, "volume" );
+			installAndUnschedFunc( funcId, pool, vol * NA );
+			ZombieFunction::zombify( fe, zfCinfo,ksolve_,dsolve_);
+		}
+	}
+	return funcId;
+}
 
 // e is the stoich Eref, elist is list of all Ids to zombify.
 void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
@@ -1266,12 +1286,6 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 			Id funcId = findFuncMsgSrc( *i, "increment" );
 			double concInit = 
 				Field< double >::get( ObjId( ei->id(), 0 ), "concInit" );
-			PoolBase::zombify( ei, zombiePoolCinfo, ksolve_, dsolve_ );
-			ei->resize( numVoxels_ );
-			for ( unsigned int j = 0; j < numVoxels_; ++j ) {
-				ObjId oi( ei->id(), j );
-				Field< double >::set( oi, "concInit", concInit );
-			}
 			// Look for func setting rate of change of pool
 			// Id funcId = Neutral::child( i->eref(), "func" );
 			if ( funcId != Id() ) {
@@ -1279,24 +1293,36 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 				Element* fe = funcId.element();
 				installAndUnschedFuncRate( funcId, (*i) );
 				ZombieFunction::zombify( fe, zfCinfo,ksolve_,dsolve_);
+			} else {
+				funcId = zombifyPoolFuncWithScaling( *i );
 			}
-		}
-		else if ( ei->cinfo() == bufPoolCinfo ) {
-			double concInit = 
-				Field< double >::get( ObjId( ei->id(), 0 ), "concInit" );
-			PoolBase::zombify( ei, zombieBufPoolCinfo, ksolve_, dsolve_ );
+			PoolBase::zombify( ei, zombiePoolCinfo, ksolve_, dsolve_ );
 			ei->resize( numVoxels_ );
 			for ( unsigned int j = 0; j < numVoxels_; ++j ) {
 				ObjId oi( ei->id(), j );
 				Field< double >::set( oi, "concInit", concInit );
 			}
+		}
+		else if ( ei->cinfo() == bufPoolCinfo ) {
+			double concInit = 
+				Field< double >::get( ObjId( ei->id(), 0 ), "concInit" );
 			// Look for func setting conc of pool
 			// Id funcId = Neutral::child( i->eref(), "func" );
-			Id funcId = findFuncMsgSrc( *i, "setN" );
-			if ( funcId != Id() ) {
-				Element* fe = funcId.element();
-				installAndUnschedFunc( funcId, (*i) );
-				ZombieFunction::zombify( fe, zfCinfo,ksolve_,dsolve_);
+			Id funcId = zombifyPoolFuncWithScaling( *i );
+			if ( funcId == Id() ) {
+				funcId = findFuncMsgSrc( *i, "increment" );
+				if ( funcId != Id() ) {
+					cout << "Warning: Stoich::zombifyModel: Probably you don't want to send increment to a BufPool:" << i->path() << endl;
+					Element* fe = funcId.element();
+					installAndUnschedFuncRate( funcId, (*i) );
+					ZombieFunction::zombify( fe, zfCinfo,ksolve_,dsolve_);
+				}
+			}
+			PoolBase::zombify( ei, zombieBufPoolCinfo, ksolve_, dsolve_ );
+			ei->resize( numVoxels_ );
+			for ( unsigned int j = 0; j < numVoxels_; ++j ) {
+				ObjId oi( ei->id(), j );
+				Field< double >::set( oi, "concInit", concInit );
 			}
 		}
 		else if ( ei->cinfo() == reacCinfo ) {
@@ -1307,6 +1333,11 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 				Element* fe = funcId.element();
 				installAndUnschedFuncReac( funcId, (*i) );
 				ZombieFunction::zombify( fe, zfCinfo,ksolve_,dsolve_);
+				/*
+			} else {
+				cout << "Warning: Stoich::zombifyModel: Failed to connect Func to Reac :" << i->path() << endl;
+				return;
+				*/
 			}
 		}
 		else if ( ei->cinfo() == mmEnzCinfo ) {
