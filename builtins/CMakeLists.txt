@@ -1,6 +1,6 @@
 include_directories(../msg)
 include_directories(../basecode)
-include_directories(../external/muparser)
+include_directories(../external/muparser/include)
 add_library(moose_builtins
     Arith.cpp
     Group.cpp
