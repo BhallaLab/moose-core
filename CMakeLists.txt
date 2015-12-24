@@ -108,8 +108,8 @@ add_definitions(-Wall
     )
 add_definitions(-fPIC)
 ## DO UNIT TESTS 
-option(ENABLE_UNIT_TESTS "ENABLE UNIT TESTS IN MOOSE" ON)
 if(ENABLE_UNIT_TESTS)
+    set(DEBUG ON)
     MESSAGE("++ Unit testing enabled.")
     add_definitions(-DDO_UNIT_TESTS)
 endif()

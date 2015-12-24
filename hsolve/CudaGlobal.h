@@ -5,7 +5,7 @@
 
 #ifdef USE_CUDA
 
-#define BLOCK_WIDTH 128
+#define BLOCK_WIDTH 64
 
 #ifndef DEBUG_
 #define DEBUG_
