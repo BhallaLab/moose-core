@@ -12,25 +12,25 @@ OBJ = \
 	muParserBytecode.o
 
 HEADERS = \
-	muParser.h	\
-	muParserBase.h	\
-	muParserBytecode.h	\
-	muParserCallback.h	\
-	muParserDef.h	\
-	muParserError.h	\
-	muParserFixes.h	\
-	muParserStack.h	\
-	muParserToken.h	\
-	muParserTokenReader.h		\
-	muParserTemplateMagic.h	\
+	include/muParser.h	\
+	include/muParserBase.h	\
+	include/muParserBytecode.h	\
+	include/muParserCallback.h	\
+	include/muParserDef.h	\
+	include/muParserError.h	\
+	include/muParserFixes.h	\
+	include/muParserStack.h	\
+	include/muParserToken.h	\
+	include/muParserTokenReader.h		\
+	include/muParserTemplateMagic.h	\
 
 
 default: $(TARGET)
 
 $(OBJ): $(HEADERS)
 
-.cpp.o:
-	$(CXX) $(CXXFLAGS) -I. $< -c
+%.o: src/%.cpp
+	$(CXX) $(CXXFLAGS) -Iinclude $< -c
 
 $(TARGET):	$(OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ)

@@ -34,7 +34,7 @@ HEADERS = \
 	../basecode/SparseMatrix.h \
 	../basecode/ElementValueFinfo.h \
 	RateTerm.h \
-	../external/muparser/muParser.h \
+	../external/muparser/include/muParser.h \
 	FuncTerm.h \
 	KinSparseMatrix.h \
 	XferInfo.h \
@@ -90,7 +90,7 @@ $(GSL_OBJ) : $(HEADERS)
 endif # !USE_GSL
 
 .cpp.o:
-	$(CXX) $(CXXFLAGS) $(GSL_FLAGS) $(SMOLDYN_FLAGS) -I.. -I../basecode -I../msg -I../kinetics -I../mesh -I../external/muparser -I../builtins $< -c
+	$(CXX) $(CXXFLAGS) $(GSL_FLAGS) $(SMOLDYN_FLAGS) -I.. -I../basecode -I../msg -I../kinetics -I../mesh -I../external/muparser/include -I../builtins $< -c
 
 $(TARGET):		$(OBJ) $(GSL_OBJ) $(SMOLDYN_OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ) $(GSL_OBJ) $(GSL_LIBS) $(SMOLDYN_OBJ) $(SMOLDYN_LIB_PATH) $(SMOLDYN_LIBS) 
