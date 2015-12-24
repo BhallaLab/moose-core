@@ -78,6 +78,11 @@ option(ENABLE_UNIT_TESTS "ENABLE UNIT TESTS IN MOOSE" ON)
 option(WITH_PYTHON "Build native python extension of MOOSE" ON)
 option(WITH_MPI  "Enable OPENMPI support" OFF)
 option(WITH_CURSES "Enable ncurses" OFF)
+
+# If SBML is available, it will automaticall enable the support. If ON, then
+# libSBML must be present.
+option(WITH_SBML  "Enable SBML support" OFF)
+
 # If GSL_STATIC_HOME is set, we use it to search for static gsl libs.
 option(GSL_STATIC_HOME 
     "installation prefix where static gsl library can be found" 
@@ -155,8 +160,12 @@ endif()
 
 ################################### SETUP BUILD ################################
 
-# DEPENDENCIES
-find_package(LIBSBML)
+IF(WITH_SBML)
+    find_package(LIBSBML REQUIRED)
+ELSE(WITH_SBML)
+    find_package(LIBSBML)
+ENDIF()
+
 if(SBML_STATIC_HOME)
     MESSAGE("++ Using local SBML. Support is ON")
     include_directories(${SBML_STATIC_HOME}/include)
@@ -175,6 +184,9 @@ if(LIBSBML_FOUND)
     MESSAGE("++ SBML found. Support is ON: ${LIBSBML_LIBRARY}")
     include_directories(${LIBSBML_INCLUDE_DIR})
     find_package(LibXML2 REQUIRED)
+else()
+    MESSAGE(STATUS "No sbml support")
+    SET(WITH_SBML OFF)
 endif()
 
 include_directories(msg basecode)
