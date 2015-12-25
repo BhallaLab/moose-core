@@ -246,6 +246,13 @@ class Stoich
 
 		void zombifyChemCompt( Id compt );
 
+		/**
+		 * Utility function to find if incoming message assigns N or conc,
+		 * and to appropriately zombify the function and set up its 
+		 * parameters including volume scaling.
+		 */
+		Id zombifyPoolFuncWithScaling( Id pool );
+
 		unsigned int convertIdToReacIndex( Id id ) const;
 		unsigned int convertIdToPoolIndex( Id id ) const;
 		unsigned int convertIdToFuncIndex( Id id ) const;
@@ -305,7 +312,7 @@ class Stoich
 		 * This installs a FuncTerm, which evaluates a function to specify
 		 * the conc of the specific pool. The pool is a BufPool.
 		 */
-		void installAndUnschedFunc( Id func, Id pool );
+		void installAndUnschedFunc( Id func, Id pool, double volScale );
 
 		/**
 		 * This installs a FuncRate, which evaluates a function to specify
