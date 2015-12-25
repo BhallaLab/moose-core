@@ -6,7 +6,12 @@ import numpy as np
 from datetime import datetime
 import getpass
 import os
+
+# Use in-repo moose to install.
+import sys
+sys.path = ['../../python'] + sys.path
 import moose
+print('using moose from: %s' % moose.__file__)
 
 global nsdf
 
