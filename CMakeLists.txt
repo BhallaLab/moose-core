@@ -219,28 +219,27 @@ IF(GSL_STATIC_HOME)
     SET(GSL_LIBRARIES ${GSL_LIBRARY} ${GSLCBLAS_LIBRARY})
     set(GSL_INCLUDE_DIR ${GSL_STATIC_HOME}/include)
     MESSAGE(STATUS "STATIC GSL_LIBRARIES ${GSL_LIBRARIES}")
+    set(GSL_FOUND TRUE)
 ELSE()
     find_package(GSL 1.16)
+    IF(NOT GSL_FOUND)
+        MESSAGE(FATAL_ERROR 
+            "=====================================================================\n"
+            " FATAL gsl(>1.16) not found.\n\n"
+            " MOOSE requires Gnu Scientific Library (GSL) 1.16 or higher. \n"
+            " Please install the `dev` or `devel` package e.g. \n"
+            "     $ sudo apt-get install libgsl0-dev \n"
+            "     $ sudo yum install libgsl-devel \n"
+            "     $ brew install gsl \n\n"
+            " Or build and install gsl from source code \n"
+            "     https://www.gnu.org/software/gsl/ \n"
+            " After installing gsl, rerun cmake.\n\n"
+            " If you install gsl in non-standard place, set the GSL_HOME environment \n"
+            " variable. CMAKE use this to search for required files. \n"
+            "====================================================================\n"
+            )
+    ENDIF(NOT GSL_FOUND)
 ENDIF()
-include_directories(${GSL_INCLUDE_DIR})
-
-IF(NOT GSL_FOUND)
-    MESSAGE(FATAL_ERROR 
-        "=====================================================================\n"
-        " FATAL gsl(>1.16) not found.\n\n"
-        " MOOSE requires Gnu Scientific Library (GSL) 1.16 or higher. \n"
-        " Please install the `dev` or `devel` package e.g. \n"
-        "     $ sudo apt-get install libgsl0-dev \n"
-        "     $ sudo yum install libgsl-devel \n"
-        "     $ brew install gsl \n\n"
-        " Or build and install gsl from source code \n"
-        "     https://www.gnu.org/software/gsl/ \n"
-        " After installing gsl, rerun cmake.\n\n"
-        " If you install gsl in non-standard place, set the GSL_HOME environment \n"
-        " variable. CMAKE use this to search for required files. \n"
-        "====================================================================\n"
-        )
-ENDIF(NOT GSL_FOUND)
 
 ## Setup hdf5
 IF(HDF5_STATIC_HOME)
