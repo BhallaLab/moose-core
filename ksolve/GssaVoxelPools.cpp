@@ -61,10 +61,19 @@ GssaVoxelPools::~GssaVoxelPools()
 void GssaVoxelPools::updateDependentMathExpn( 
 				const GssaSystem* g, unsigned int rindex, double time )
 {
+	// The issue is that if the expression depends on t, we really need
+	// to update it every timestep. But then a cascading set of reacs
+	// should also be updated.
+	/*
 	const vector< unsigned int >& deps = g->dependentMathExpn[ rindex ];
 	for( vector< unsigned int >::const_iterator 
 			i = deps.begin(); i != deps.end(); ++i ) {
 			g->stoich->funcs( *i )->evalPool( varS(), time );
+	}
+	*/
+	unsigned int numFuncs = g->stoich->getNumFuncs();
+	for( unsigned int i = 0; i < numFuncs; ++i ) {
+			g->stoich->funcs( i )->evalPool( varS(), time );
 	}
 }
 
