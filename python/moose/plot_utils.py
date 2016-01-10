@@ -2,7 +2,7 @@
 
 """plot_utils.py: Some utility function for plotting data in moose.
 
-Last modified: Mon May 26, 2014  10:18AM
+Last modified: Sun Jan 10, 2016  04:04PM
 
 """
     
@@ -201,41 +201,30 @@ def plotVector(vec, xvec = None, **options):
 
 
 def saveRecords(records, xvec = None, **kwargs):
-    """saveRecords Given a dictionary of data with (key, vector) pair, it saves
-    them.
+    """saveRecords 
+    Given a dictionary of data with (key, numpy array) pair, it saves them to a
+    file 'outfile'
 
+    :param outfile
     :param dataDict:
     :param **kwargs:
     """
-
-    sortedData = records.items()
-    if kwargs.get('sorted', True):
-        sortedData = sorted(sortedData)
-
-    if len(sortedData) == 0:
+    if len(records) == 0:
         pu.warn("No data in dictionary to save.")
         return False
 
     outfile = kwargs.get('outfile', 'data.moose')
     clock = moose.Clock('/clock')
     assert clock.currentTime > 0
-
-    yvecs = []
-    text = [ "time," + ",".join([ x[0] for x in sortedData ]) ]
-    for k, v in sortedData:
-        yvec = v.vector
+    yvecs = [ ]
+    text = "time," + ",".join([ str(x) for x in records ])
+    for k in records:
+        yvec = records[k].vector
         yvecs.append(yvec)
-    if xvec is None: 
-        xvec = np.linspace(0, clock.currentTime, len(yvecs[0]))
-
-    for i, x in enumerate(xvec):
-        xline = "%s"%x
-        yline = ",".join([str(p[i]) for p in yvecs])
-        text.append("%s,%s" % (xline, yline))
-
-    pu.info("Writing data to %s" % outfile)
-    with open(outfile, 'w') as f:
-        f.write("\n".join(text))
+    xvec = np.linspace(0, clock.currentTime, len(yvecs[0]))
+    yvecs = [ xvec ] + yvecs
+    np.savetxt(outfile, np.array(yvecs).T, delimiter=',', header = text)
+    pu.info("Done writing data to %s" % outfile)
 
 def plotRecords(records, xvec = None, **kwargs):
     """plotRecords Plot given records in dictionary.
