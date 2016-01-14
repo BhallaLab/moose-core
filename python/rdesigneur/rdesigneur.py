@@ -417,7 +417,7 @@ class rdesigneur:
     ################################################################
     # Here we set up the plots. Dummy for cases that don't match conditions
     ################################################################
-    def collapseElistToPathAndClass( comptList, path, className ):
+    def _collapseElistToPathAndClass( self, comptList, path, className ):
         dummy = moose.element( '/' )
         ret = [ dummy ] * len( comptList )
         j = 0
@@ -440,8 +440,8 @@ class rdesigneur:
             return (), ""
 
         kf = knownFields[field] # Find the field to decide type.
-        if ( field == 'Ca' ):
-            objList = collapseElistToPathAndClass( comptList, plotSpec[2], "CaConcBase" )
+        if ( kf[0] == 'CaConcBase' or kf[0] == 'ChanBase' ):
+            objList = self._collapseElistToPathAndClass( comptList, plotSpec[2], kf[0] )
             return objList, kf[1]
         elif (field == 'n' or field == 'conc' ):
             path = plotSpec[2]
@@ -472,6 +472,9 @@ class rdesigneur:
                 'Vm':('CompartmentBase', 'getVm'),
                 'Im':('CompartmentBase', 'getVm'),
                 'inject':('CompartmentBase', 'getInject'),
+                'Gbar':('ChanBase', 'getGbar'),
+                'Gk':('ChanBase', 'getGk'),
+                'Ik':('ChanBase', 'getIk'),
                 'Ca':('CaConcBase', 'getCa'),
                 'n':('PoolBase', 'getN'),
                 'conc':('PoolBase', 'getConc' )
@@ -911,6 +914,7 @@ class rdesigneur:
     ################################################################
     def _buildAdaptor( self, meshName, elecRelPath, elecField, \
             chemRelPath, chemField, isElecToChem, offset, scale ):
+        print "offset = ", offset, ", scale = ", scale
         mesh = moose.element( '/model/chem/' + meshName )
         #elecComptList = mesh.elecComptList
         if elecRelPath == 'spine':

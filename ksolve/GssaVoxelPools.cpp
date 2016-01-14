@@ -61,10 +61,23 @@ GssaVoxelPools::~GssaVoxelPools()
 void GssaVoxelPools::updateDependentMathExpn( 
 				const GssaSystem* g, unsigned int rindex, double time )
 {
+	// The issue is that if the expression depends on t, we really need
+	// to update it every timestep. But then a cascading set of reacs
+	// should also be updated.
+	// The lower commented block has all funcs updated every time step, 
+	// but this too
+	// doesn't update the cascading reacs. So this is now handled by the
+	// useClockedUpdate flag, and we use the upper block here instead.
+	/*
 	const vector< unsigned int >& deps = g->dependentMathExpn[ rindex ];
 	for( vector< unsigned int >::const_iterator 
 			i = deps.begin(); i != deps.end(); ++i ) {
 			g->stoich->funcs( *i )->evalPool( varS(), time );
+	}
+	*/
+	unsigned int numFuncs = g->stoich->getNumFuncs();
+	for( unsigned int i = 0; i < numFuncs; ++i ) {
+			g->stoich->funcs( i )->evalPool( varS(), time );
 	}
 }
 
@@ -126,6 +139,24 @@ bool GssaVoxelPools::refreshAtot( const GssaSystem* g )
 		return false;
 	}
 	return true;
+}
+
+/**
+ * Recalculates the time for the next event. Used when we have a clocked
+ * update of rates due to timed functions. In such cases the propensities
+ * may change invisibly, so we need to update time estimates
+ */ 
+void GssaVoxelPools::recalcTime( const GssaSystem* g, double currTime )
+{
+	updateDependentMathExpn( g, 0, currTime );
+	refreshAtot( g );
+	assert( t_ > currTime );
+	t_ = currTime;
+	double r = mtrand();
+	while ( r <= 0.0 ) {
+		r = mtrand();
+	}
+	t_ -= ( 1.0 / atot_ ) * log( r );
 }
 
 void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
