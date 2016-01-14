@@ -96,7 +96,8 @@ const Cinfo* Gsolve::initCinfo()
 
 		static ValueFinfo< Gsolve, bool > useRandInit(
 			"useRandInit",
-			"Flag: True when using probabilistic (random) rounding. "
+			"Flag: True when using probabilistic (random) rounding.\n "
+			"Default: True.\n "
 			"When initializing the mol# from floating-point Sinit values, "
 			"we have two options. One is to look at each Sinit, and round "
 			"to the nearest integer. The other is to look at each Sinit, "
@@ -107,6 +108,19 @@ const Cinfo* Gsolve::initCinfo()
 			"the flag is true. ",
 			&Gsolve::setRandInit,
 			&Gsolve::getRandInit
+		);
+
+		static ValueFinfo< Gsolve, bool > useClockedUpdate(
+			"useClockedUpdate",
+			"Flag: True to cause all reaction propensities to be updated "
+			"on every clock tick.\n"
+			"Default: False.\n"
+			"This flag should be set when the reaction system "
+			"includes a function with a dependency on time or on external "
+			"events. It has a significant speed penalty so the flag "
+			"should not be set unless there are such functions. " ,
+			&Gsolve::setClockedUpdate,
+			&Gsolve::getClockedUpdate
 		);
 
 		///////////////////////////////////////////////////////
@@ -183,6 +197,7 @@ const Cinfo* Gsolve::initCinfo()
 		&xCompt,			// SharedFinfo
 		// Here we put new fields that were not there in the Ksolve. 
 		&useRandInit,		// Value
+		&useClockedUpdate,	// Value
 	};
 	
 	static Dinfo< Gsolve > dinfo;
@@ -208,7 +223,8 @@ Gsolve::Gsolve()
 		pools_( 1 ),
 		startVoxel_( 0 ),
 		dsolve_(),
-		dsolvePtr_( 0 )
+		dsolvePtr_( 0 ),
+		useClockedUpdate_( false )
 {;}
 
 Gsolve::~Gsolve()
@@ -313,6 +329,16 @@ void Gsolve::setRandInit( bool val )
 	sys_.useRandInit = val;
 }
 
+bool Gsolve::getClockedUpdate() const
+{
+	return useClockedUpdate_;
+}
+
+void Gsolve::setClockedUpdate( bool val )
+{
+	useClockedUpdate_ = val;
+}
+
 //////////////////////////////////////////////////////////////
 // Process operations.
 //////////////////////////////////////////////////////////////
@@ -374,11 +400,18 @@ void Gsolve::process( const Eref& e, ProcPtr p )
 			i->refreshAtot( &sys_ );
 		}
 	}
-	// Fifth, update the mol #s
+	// Fifth, update the mol #s.
+	// First we advance the simulation.
 	for ( vector< GssaVoxelPools >::iterator 
 					i = pools_.begin(); i != pools_.end(); ++i ) {
 		i->advance( p, &sys_ );
 	}
+	if ( useClockedUpdate_ ) { // Check if a clocked stim is to be updated
+		for ( vector< GssaVoxelPools >::iterator 
+					i = pools_.begin(); i != pools_.end(); ++i ) {
+			i->recalcTime( &sys_, p->currTime );
+		}
+	} 
 
 	// Finally, assemble and send the integrated values off for the Dsolve.
 	if ( dsolvePtr_ ) {
