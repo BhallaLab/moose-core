@@ -1,7 +1,13 @@
 set(CMAKE_LEGACY_CYGWIN_WIN32 0)
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.6.0 FATAL_ERROR)
 
-cmake_policy(SET CMP0004 OLD)
+if(COMMAND cmake_policy)
+    cmake_policy(SET CMP0003 NEW)
+    cmake_policy(SET CMP0004 OLD)
+    if(POLICY CMP0050)
+        cmake_policy(SET CMP0050 OLD)
+    endif(POLICY CMP0050)
+endif(COMMAND cmake_policy)
 
 project(moose)
 set(MOOSE_VERSION "3.0.2")
@@ -13,26 +19,17 @@ set(MOOSE_VERSION "3.0.2")
 # (which would end up getting picked up by header search, instead of the correct
 # versions).
 
-MESSAGE("++ CMAKE_INSTALL_PREFIX : ${CMAKE_INSTALL_PREFIX}")
+MESSAGE(STATUS "CMAKE_INSTALL_PREFIX : ${CMAKE_INSTALL_PREFIX}")
 if( CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT MSVC_IDE )
     message(FATAL_ERROR 
-        "In-source builds are not allowed.
-        CMake would overwrite the makefiles distributed with Moose.
-        Please create a directory and run cmake from there, passing the path
-        to this source directory as the last argument.
-        This process created the file `CMakeCache.txt' and the directory `CMakeFiles'.
-        Please delete them."
+        "======================================================================\n"
+        "In-source builds are not allowed. Remove CMakeCache.txt and CMakeFiles\n"
+        "directory and do something like this inside this directory \n"
+        "    $ mkdir _build_dir \n"
+        "    $ cd _build_dir  \n"
+        "    $ cmake ..  \n"
+        "===================================================================== \n"
         )
-endif()
-
-## NOTE: PyMOOSE might break with c++11 support. Disable it.
-#set(CMAKE_CXX_COMPILER "clang++")
-if(COMPILER_SUPPORTS_CXX11)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-elseif(COMPILER_SUPPORTS_CXX0X)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-else()
-    message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support.")
 endif()
 
 # uninstall target
@@ -72,28 +69,28 @@ option(NOTIFY_PROGRESS "Show progress of simulation" OFF)
 option(ENABLE_LOGGER  "Enable MOOSE logger [Deprecated]" OFF)
 
 ## Unit testing and debug mode.
-option(DEBUG "Building with debugging support" OFF)
-option(GPROF "Build of gprof support" OFF)
-option(ENABLE_UNIT_TESTS "ENABLE UNIT TESTS IN MOOSE" ON)
-option(WITH_PYTHON "Build native python extension of MOOSE" ON)
-option(WITH_MPI  "Enable OPENMPI support" OFF)
-option(WITH_CURSES "Enable ncurses" OFF)
+option(DEBUG "Build with debug support" OFF)
+option(GPROF "Build for profiling using gprof" OFF)
+option(ENABLE_UNIT_TESTS "Enable unit tests (DEBUG should also be ON)" OFF)
+option(WITH_PYTHON "Build native python extension" ON)
+option(WITH_MPI  "Enable Openmpi support" OFF)
+option(WITH_CURSES "Enable ncurses support (deprecated)" OFF)
 
 # If SBML is available, it will automaticall enable the support. If ON, then
 # libSBML must be present.
-option(WITH_SBML  "Enable SBML support" OFF)
+option(WITH_SBML  "Enable SBML support. Automatically detected." OFF)
 
 # If GSL_STATIC_HOME is set, we use it to search for static gsl libs.
 option(GSL_STATIC_HOME 
-    "installation prefix where static gsl library can be found" 
+    "Installation prefix where static gsl library can be found" 
     OFF
     )
 option(SBML_STATIC_HOME 
-    "installation prefix where static sbml library can be found"
+    "Installation prefix where static sbml library can be found"
     OFF
     )
 option(HDF5_STATIC_HOME
-    "installation prefix where static hdf5 library can be found"
+    "Installation prefix where static hdf5 library can be found"
     OFF
     )
 
@@ -113,47 +110,44 @@ add_definitions(-Wall
     )
 add_definitions(-fPIC)
 
-## Enable/Disable 2011 stupport.
-include(CheckCXXCompilerFlag)
+if(COMPILER_SUPPORTS_CXX11)
+    MESSAGE(STATUS "Your compiler supports c++11 features. Enabling it")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+elseif(COMPILER_SUPPORTS_CXX0X)
+    MESSAGE(STATUS "Your compiler supports c++0x features. Enabling it")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+else()
+    message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support.")
+endif()
 
-CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
 
 ############################ BUILD CONFIGURATION #################################
-set(VERIFY 1)
-if(VERIFY)
-    add_definitions(-DSANITY_CHECK -DARGS_CHECK -DRESULT_CHECK -DVALUE_CHECK)
-endif(VERIFY)
 
 # VERBOSITY OF OUTPUT
 if(VERBOSITY)
-    message("++ Verbosity of output is ${VERBOSITY}. This is not implemented
+    message(STATUS "Verbosity of output is ${VERBOSITY}. This is not implemented
     yet!")
     add_definitions(-DVERBOSITY=${VERBOSITY})
 else()
-    message("++ Moose will be quiet")
+    message(STATUS "Moose will be quiet")
     add_definitions(-DQUIET_MODE)
-endif()
-if(ENABLE_LOGGER)
-    message("++ LOGGER ENABLED")
-    add_definitions(-DENABLE_LOGGER)
 endif()
 
 # Default macros
 add_definitions(-DUSE_GENESIS_PARSER)
 
 if(ENABLE_UNIT_TESTS AND DEBUG)
-    MESSAGE("++ Building for Debug/ Unit testing")
+    MESSAGE(STATUS "Building for Debug/Unit testing")
     add_definitions(-DDO_UNIT_TESTS)
     set(CMAKE_BUILD_TYPE Debug)
 else()
-    MESSAGE("++ Build for Relase/ No unit tests.")
+    MESSAGE(STATUS "Building for Release/No unit tests.")
     set(CMAKE_BUILD_TYPE Release)
     add_definitions(-UDO_UNIT_TESTS -O3)
 endif()
 
 if(GPROF AND DEBUG)
-    message(STATUS "Compiling with GPROF")
+    message(STATUS "Compiling with profiling with gprof")
     add_definitions(-pg)
     set(CMAKE_EXE_LINKER_FLAGS_DEBUG "-pg")
 endif()
@@ -167,25 +161,36 @@ ELSE(WITH_SBML)
 ENDIF()
 
 if(SBML_STATIC_HOME)
-    MESSAGE("++ Using local SBML. Support is ON")
+    MESSAGE(STATUS "Using local SBML. Support is ON")
     include_directories(${SBML_STATIC_HOME}/include)
     find_library(LIBSBML_LIBRARY
         NAMES libsbml_static.a libsbml.a
         PATHS ${SBML_STATIC_HOME}/lib ${SBML_STATIC_HOME}/lib64
         NO_DEFAULT_PATH
         )
-    MESSAGE("++ Using static sbml library: ${LIBSBML_LIBRARY}")
+    MESSAGE(STATUS "Using static sbml library: ${LIBSBML_LIBRARY}")
     IF(LIBSBML_LIBRARY)
         set(LIBSBML_FOUND ON)
     ENDIF()
 endif()
 
 if(LIBSBML_FOUND)
-    MESSAGE("++ SBML found. Support is ON: ${LIBSBML_LIBRARY}")
+    MESSAGE(STATUS "SBML found. Support is ON: ${LIBSBML_LIBRARY}")
     include_directories(${LIBSBML_INCLUDE_DIR})
     find_package(LibXML2 REQUIRED)
 else()
-    MESSAGE(STATUS "No sbml support")
+    MESSAGE(
+        "======================================================================\n"
+        "libsbml NOT found. \n\n"
+        "If you want to compile with SBML support, download and install \n"
+        "libsbml-5.9.0 from: \n"
+        "http://sourceforge.net/projects/sbml/files/libsbml/5.9.0/stable/ and\n"
+        "rerun cmake.\n\n"
+        "If you don't want SBML support then continue with `make`.\n\n"
+        "If you install libsbml to non-standard place, let the cmake know by\n"
+        "exporting environment variable SBML_DIR to the location.\n"
+        "=====================================================================\n"
+        )
     SET(WITH_SBML OFF)
 endif()
 
@@ -213,12 +218,28 @@ IF(GSL_STATIC_HOME)
         )
     SET(GSL_LIBRARIES ${GSL_LIBRARY} ${GSLCBLAS_LIBRARY})
     set(GSL_INCLUDE_DIR ${GSL_STATIC_HOME}/include)
-    MESSAGE("++ STATIC GSL_LIBRARIES ${GSL_LIBRARIES}")
+    MESSAGE(STATUS "STATIC GSL_LIBRARIES ${GSL_LIBRARIES}")
+    set(GSL_FOUND TRUE)
 ELSE()
-    find_package(GSL 1.16 REQUIRED)
+    find_package(GSL 1.16)
+    IF(NOT GSL_FOUND)
+        MESSAGE(FATAL_ERROR 
+            "=====================================================================\n"
+            " FATAL gsl(>1.16) not found.\n\n"
+            " MOOSE requires Gnu Scientific Library (GSL) 1.16 or higher. \n"
+            " Please install the `dev` or `devel` package e.g. \n"
+            "     $ sudo apt-get install libgsl0-dev \n"
+            "     $ sudo yum install libgsl-devel \n"
+            "     $ brew install gsl \n\n"
+            " Or build and install gsl from source code \n"
+            "     https://www.gnu.org/software/gsl/ \n"
+            " After installing gsl, rerun cmake.\n\n"
+            " If you install gsl in non-standard place, set the GSL_HOME environment \n"
+            " variable. CMAKE use this to search for required files. \n"
+            "====================================================================\n"
+            )
+    ENDIF(NOT GSL_FOUND)
 ENDIF()
-
-include_directories(${GSL_INCLUDE_DIR})
 
 ## Setup hdf5
 IF(HDF5_STATIC_HOME)
@@ -242,7 +263,19 @@ ELSE(HDF5_STATIC_HOME)
         add_definitions(-DUSE_HDF5)
         include_directories(${HDF5_INCLUDE_DIR})
     else(FOUND_HDF5)
-        message(STATUS "HDF5 not found. Disabling support")
+        message(
+            "==================================================================\n"
+            " HDF5 not found. Disabling support. Required for nsdf. \n\n"
+            " If you need hdf5 support, please install hdf5-dev or hdf5-devel\n"
+            " package or equivalent.\n\n"
+            "     $ sudo apt-get install libhdf5-dev \n"
+            "     $ sudo yum install libhdf5-devel \n"
+            "     $ brew install hdf5 \n\n"
+            " Otherwise, continue with 'make' and 'make install' \n"
+            " If you install hdf5 to non-standard path, export environment \n"
+            " variable HDF5_HOME to the location. Rerun cmake \n"
+            "================================================================ \n"
+            )
     endif(FOUND_HDF5)
 ENDIF(HDF5_STATIC_HOME)
 
@@ -259,14 +292,14 @@ endif()
 if(WITH_MPI)
     find_package(MPI REQUIRED)
     if(MPI_CXX_FOUND)
-        message("++ Using MPI from ${MPI_CXX_INCLUDE_PATH}")
+        message(STATUS "Using MPI from ${MPI_CXX_INCLUDE_PATH}")
         include_directories(${MPI_CXX_INCLUDE_PATH})
         set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
         add_definitions(-DUSE_MPI)
         SET(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
         SET(CMAKE_C_COMPILER ${MPI_C_COMPILER})
     else()
-        message("++ Cound not find MPI")
+        message(STATUS "Cound not find MPI")
         add_definitions(-UUSE_MPI)
     endif()
 endif(WITH_MPI)
@@ -281,7 +314,6 @@ add_subdirectory(biophysics)
 add_subdirectory(builtins)
 add_subdirectory(utility)
 add_subdirectory(external/muparser)
-#add_subdirectory(external/debug)
 add_subdirectory(external/tinyxml)
 add_subdirectory(mesh)
 add_subdirectory(sbml)
@@ -415,7 +447,7 @@ ENDIF(WITH_DOC)
 SET(PROJECT_PYTHON_PATH ${CMAKE_CURRENT_SOURCE_DIR}/python)
 if(WITH_PYTHON)
     set(Python_ADDITIONAL_VERSION 2.6 2.7)
-    message("++ Building native python extension of MOOSE")
+    message(STATUS "Building native python extension of MOOSE")
     set(PYMOOSE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/python/moose")
 
     find_package(NumPy REQUIRED)
@@ -426,6 +458,7 @@ if(WITH_PYTHON)
 
     include_directories(${NUMPY_INCLUDE_DIRS})
     add_definitions(-DUSE_NUMPY)
+
     add_library(_moose MODULE pymoose/moosemodule.cpp)
 
     set_target_properties(_moose PROPERTIES COMPILE_DEFINITIONS "PYMOOSE")
@@ -484,7 +517,7 @@ endif(WITH_PYTHON)
 ######################### CYMOOSE #############################################
 option(BUILD_CYMOOSE "Build python extension using Cython. Development version." OFF)
 if(BUILD_CYMOOSE)
-    message("++ Building cython extension of MOOSE. Unstable and experimental.")
+    message(STATUS "Building experimental cython extension of MOOSE.")
     add_library(cymoose SHARED cymoose/cymoose_methods.cxx)
     set_target_properties(cymoose PROPERTIES COMPILE_DEFINITIONS "CYMOOSE")
     if(DEBUG)
@@ -573,19 +606,15 @@ if(WITH_DOC)
         )
 endif()
 
-## TODO: Use python setup.py install to make sure that it installs with MacPort
-## and any Unix-like system.
-##if(BUILD_MOOGLI)
-##    install(CODE
-##        "
-##        execute_process(COMMAND easy_install
-##            --prefix ${CMAKE_INSTALL_PREFIX}
-##            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-##            )
-##        "
-##        )
-##endif(BUILD_MOOGLI)
-    
+# Print message to start build process
+if(${CMAKE_BUILD_TOOL} MATCHES "make")
+    MESSAGE(
+        "=======================================\n"
+        "Now run 'make' to build  MOOSE \n"
+        "=======================================\n"
+        )
+endif()
+
 
 ############################ CTEST ######################################
 
