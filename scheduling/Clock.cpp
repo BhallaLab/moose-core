@@ -53,6 +53,8 @@
 
 // Declaration of some static variables.
 const unsigned int Clock::numTicks = 32;
+/// minimumDt is smaller than any known event on the scales MOOSE handles.
+const double minimumDt = 1e-7; 
 map< string, unsigned int > Clock::defaultTick_;
 vector< double > Clock::defaultDt_;
 
@@ -562,6 +564,13 @@ unsigned int Clock::getTickStep( unsigned int i ) const
 void Clock::setTickDt( unsigned int i, double v )
 {
 	unsigned int numUsed = 0;
+	if ( v < minimumDt ) { 
+		cout << "Warning: Clock::setTickDt: " << v << 
+				" is smaller than minimum allowed timestep " <<
+				minimumDt << endl;
+		cout << "dt not set\n";
+		return;
+	}
 	for ( unsigned int j = 0; j < numTicks; ++j )
 		numUsed += ( ticks_[j] != 0 );
 	if ( numUsed == 0 ) {
