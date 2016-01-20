@@ -544,13 +544,13 @@ Finally, we run the simulation for 300 ms ::
 
 The data will be recorded by the ``soma_vm`` table, which is referenced
 by the variable ``vmtab``. The ``Table`` class provides a numpy array
-interface to its content. The field is ``vec``. So you can easily plot
+interface to its content. The field is ``vector``. So you can easily plot
 the membrane potential using the `matplotlib <http://matplotlib.org/>`__
 library. ::
 
         >>> import pylab
-        >>> t = pylab.linspace(0, 300e-3, len(vmtab.vec))
-        >>> pylab.plot(t, vmtab.vec)
+        >>> t = pylab.linspace(0, 300e-3, len(vmtab.vector))
+        >>> pylab.plot(t, vmtab.vector)
         >>> pylab.show()
 	
 The first line imports the pylab submodule from matplotlib. This useful
