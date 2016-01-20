@@ -1,2 +1,7 @@
-doxygen documentation/cpp/Doxyfile
-make --directory=documentation/python html
+orginal=$(echo `pwd`)
+#Source code documentation generation code
+#All the files will be created in cpp/html folder
+cd doxygen
+doxygen Doxyfile
+cd $orginal
+
