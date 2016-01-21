@@ -113,7 +113,9 @@ coverage.xml
 *.pot
 
 # Sphinx documentation
-docs/_build/
+Docs/user/py/_build/
+# doxygen documentation
+Docs/doxygen/cpp
 
 [._]*.s[a-w][a-z]
 [._]s[a-w][a-z]

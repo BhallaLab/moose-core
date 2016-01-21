@@ -3,7 +3,9 @@ Getting started with python scripting for MOOSE
 ***********************************************
 
 .. :Author: Subhasis Ray
-.. :Date:   December 12, 2012, Updated: September 9, 2014
+.. :Date:   December 12, 2012, 
+.. :Last-Updated: Jan 21, 2016
+.. :By:	    Harsha Rani
 		  
 .. _quickstart-intro:
 
@@ -611,7 +613,7 @@ references to ``soma`` in the example this way ::
 Any MOOSE class can be extended in Python. But any additional attributes
 added in Python are invisible to MOOSE. So those can be used for
 functionalities at the Python level only. You can see
-``Demos/squid/squid.py`` for an example.
+``moose-examples/squid/squid.py`` for an example.
 
 ``Finfos``
 ----------
@@ -642,10 +644,10 @@ Moving on
 
 Now you know the basics of pymoose and how to access the help
 system. You can figure out how to do specific things by looking at the
-:doc:`moose_cookbook`.  In addition, the ``Demos/snippets`` directory
+:doc:`moose_cookbook`.  In addition, the ``moose-examples/snippets`` directory
 in your MOOSE installation has small executable python scripts that
 show usage of specific classes or functionalities. Beyond that you can
-browse the code in the ``Demos`` directory to see some more complex
+browse the code in the ``moose-examples`` directory to see some more complex
 models.
 
 MOOSE is backward compatible with GENESIS and most GENESIS classes have
