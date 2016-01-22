@@ -210,7 +210,7 @@ voltage ``Em`` is in series with the resistor, as shown below:
 
 
 
-.. figure:: images/neuronalcompartment.jpg
+.. figure:: ../../images/neuronalcompartment.jpg
    :alt: **Passive neuronal compartment**
 
    **Passive neuronal compartment**
