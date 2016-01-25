@@ -131,7 +131,16 @@ endif()
 
 option(ENABLE_CUDA "Enable GPU acceleration" ON)
 if(ENABLE_CUDA)
-    FIND_PACKAGE(CUDA REQUIRED)
+    FIND_PACKAGE(CUDA)
+    IF(CUDA_FOUND)
+        MESSAGE(STATUS "Using CUDA ${CUDA_VERSION}")
+    ELSE()
+        MESSAGE(FATAL_ERROR "I could not locate CUDA!\n"
+        "If CUDA is installed in non-standard place use -DCUDA_TOOLKIT_ROOT_DIR"
+        " to specify the PATH to CUDA e.g. \n"
+        "   $ cmake -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-7.5 .." 
+        )
+    ENDIF()
 else()
     ## Enable/Disable 2011 stupport.
     ## CUDA DOES NOT SUPPORT IT YET.
