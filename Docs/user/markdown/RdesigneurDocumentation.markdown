@@ -90,7 +90,7 @@ discharges.
 	import moose
 	import rdesigneur as rd
 	rdes = rd.rdesigneur(
-		stimList = [['soma', '1', 'inject', 'sign((t - 0.1) * (0.2 - t) )*1e-8' ]],
+		stimList = [['soma', '1', 'inject', '(t>0.1 && t<0.2) * 2e-8']],
 		plotList = [['soma', '1', 'Vm', 'Soma membrane potential']],
 	)
 	rdes.buildModel()
@@ -113,9 +113,8 @@ The *stimList* defines a stimulus. Each entry has four arguments:
 	as a function of time. Here we use the function sign(x),
 	where sign(x) == +1 for x > 0, 0 for x = 0 and -1 for x < 0. 
 
-To summarise this, the *stimList* here means *inject a current of -10nA to the
-soma up to 0.1 s, then inject +10nA up to 0.2 s, then inject -10 nA till the
-end of the simulation*.
+To summarise this, the *stimList* here means *inject a current of 20nA to the
+soma between the times of 0.1 and 0.2 s*.
 
 The *plotList* defines what to plot. It has a similar set of arguments:
 
@@ -124,7 +123,13 @@ These mean the same thing as for the stimList except for the title of the plot.
 
 The *rdes.display()* function causes the plots to be displayed.
 
-![Plot for current input to passive compartment](/home/bhalla/moose/master/moose-core/Docs/user/markdown/images/test2.png)
+![Plot for current input to passive compartment](../../images/rdes2_passive_squid.png)
+
+When we run this we see an initial depolarization as the soma settles from its
+initial -65 mV to a resting Em = -54.4 mV. These are the original HH values, see
+the example above. At t = 0.1 seconds there is another depolarization due
+to the current injection, and at t = 0.2 seconds this goes back to the resting
+potential.
 
 ### HH Squid model in a single compartment
 Here we put the Hodgkin-Huxley squid model channels into a passive compartment.
@@ -150,7 +155,8 @@ The HH channels are predefined as prototype channels for Rdesigneur,
 
 Here we introduce two new model specification lines:
 
-+	chanProto: This specifies which ion channels will be used in the model.
++	**chanProto**: This specifies which ion channels will be used in the 
+	model.
 	Each entry here has two fields: the source of the channel definition,
 	and (optionally) the name of the channel.
 	In this example we specify two channels, an Na and a K channel using
@@ -160,7 +166,7 @@ Here we introduce two new model specification lines:
 	but we can also specify our own functions for making prototypes.
 	We could also have specified the channel prototype using the name
 	of a channel definition file in ChannelML (a subset of NeuroML) format.
-+	chanDistrib: This specifies  *where* the channels should be placed
++	**chanDistrib**: This specifies  *where* the channels should be placed
 	over the geometry of the cell. Each entry in the chanDistrib list 
 	specifies the distribution of parameters for one channel using four 
 	entries: 
@@ -178,6 +184,9 @@ Here we introduce two new model specification lines:
 As before we apply a somatic current pulse. Since we now have HH channels in
 the model, this generates action potentials.
 
+![Plot for HH squid simulation ](../../images/rdes3_squid.png)
+
+
 ### Reaction system in a single compartment
 Here we use the compartment as a place in which to embed a chemical model.
 The chemical oscillator model is predefined in the rdesigneur prototypes.
@@ -186,22 +195,20 @@ The chemical oscillator model is predefined in the rdesigneur prototypes.
 	import pylab
 	import rdesigneur as rd
 	rdes = rd.rdesigneur(
-    	turnOffElec = True,
-    	diffusionLength = 1e-3, # The default diffusion length is 2 microns
-    	chemProto = [['make_Chem_Oscillator()', 'osc']],
-    	chemDistrib = [['osc', 'soma', 'install', '1' ]], 
-    	plotList = [['soma', '1', 'dend/a', 'conc', 'a Conc'],
-        	['soma', '1', 'dend/b', 'conc', 'b Conc']]
+    		turnOffElec = True,
+    		diffusionLength = 1e-3, # Default diffusion length is 2 microns
+    		chemProto = [['make_Chem_Oscillator()', 'osc']],
+    		chemDistrib = [['osc', 'soma', 'install', '1' ]],
+    		plotList = [['soma', '1', 'dend/a', 'conc', 'a Conc'],
+        		['soma', '1', 'dend/b', 'conc', 'b Conc']]
 	)
-
 	rdes.buildModel()
-	bv = moose.vec( '/model/chem/dend/b' )
-	bv[0].concInit *= 2
+	b = moose.element( '/model/chem/dend/b' )
+	b.concInit *= 5
 	moose.reinit()
 	moose.start( 200 )
-
+	
 	rdes.display()
-
 
 In this special case we set the turnOffElec flag to True, so that Rdesigneur 
 only sets up chemical and not electrical calculations.  This makes the 
@@ -213,54 +220,159 @@ bigger than the 0.5 mm squid axon segment in the default compartment. If you
 don't do this the system will subdivide the compartment into 2 micron voxels for
 the purposes of putting in a reaction-diffusion system, which we discuss below.
 
+There are a couple of lines to change the initial concentration of the 
+molecular pool b. It is scaled up 5x to give rise to slowly decaying 
+oscillations.
+
+![Plot for single-compartment reaction simulation ](../../images/rdes4_osc.png)
+
 ### Reaction-diffusion system
 
 In order to see what a reaction-diffusion system looks like, delete the
-`diffusionLength` expression in the previous example: 
+`diffusionLength` expression in the previous example and add a couple of lines
+to set up 3-D graphics for the reaction-diffusion product: 
+
+	import moose
+	import pylab
+	import rdesigneur as rd
+	rdes = rd.rdesigneur(
+    		turnOffElec = True,
+    		chemProto = [['make_Chem_Oscillator()', 'osc']],
+    		chemDistrib = [['osc', 'soma', 'install', '1' ]],
+    		plotList = [['soma', '1', 'dend/a', 'conc', 'Concentration of a'],
+        		['soma', '1', 'dend/b', 'conc', 'Concentration of b']],
+    		moogList = [['soma', '1', 'dend/a', 'conc', 'a Conc', 0, 360 ]]
+	)
+
+	rdes.buildModel()
+	bv = moose.vec( '/model/chem/dend/b' )
+	bv[0].concInit *= 2
+	bv[-1].concInit *= 2
+	moose.reinit()
+
+	rdes.displayMoogli( 1, 400, 0.001 )
+
+
+
+This is the line we deleted. 
 
     	`diffusionLength = 1e-3,`
 
-This tells the system to use the default 2 micron diffusion length. 
+With this change we permit
+*rdesigneur* to use the default diffusion length of 2 microns. 
 The 500-micron axon segment is now subdivided into 250 voxels, each of 
 which has a reaction system and diffusing molecules. To make it more 
-picturesque, we can add a line after the plotList, to display the outcome 
+picturesque, we have added a line after the plotList, to display the outcome 
 in 3-D:
 
-    	`moogliList = [['soma', '1', 'dend/a', 'conc', 'b Conc']]`
+	'moogList = [['soma', '1', 'dend/a', 'conc', 'a Conc', 0, 360 ]]'
+
+This line says: take the model compartments defined by `soma` as the region
+to display, do so throughout the the geometry (the `1` signifies this), and
+over this range find the chemical entity defined by `dend/a`. For each `a`
+molecule, find the `conc` and dsiplay it. There are two optional arguments, 
+`0` and `360`, which specify the low and high value of the displayed variable.
+
+In order to initially break the symmetry of the system, we change the initial
+concentration of molecule b at each end of the cylinder:
+
+	bv[0].concInit *= 2
+	bv[-1].concInit *= 2
+
+If we didn't do this the entire system would go through a few cycles of 
+decaying oscillation and then reach a boring, spatially uniform, steady state.
+Try putting an initial symmetry break elsewhere to see what happens.
+
+To display the concenctration changes in the 3-D soma as the simulation runs,
+we use the line
+
+	`rdes.displayMoogli( 1, 400, 0.001 )`
+
+The arguments mean: *displayMoogli( frametime, runtime, rotation )*
+Here, 
+
+	frametime = time by which simulation advances between display updates
+	runtime = Total simulated time
+	rotation = angle by which display rotates in each frame, in radians.
+
+When we run this, we first get a 3-D display with the oscillating 
+reaction-diffusion system making its way inward from the two ends. After the
+simulation ends the plots for all compartments for the whole run come up.
+
+![Display for oscillatory reaction-diffusion simulation ](../../images/rdes5_reacdiff.png)
 
 ### Make a toy multiscale model with electrical and chemical signaling.
-Now we put together the previous two models. In this toy model we have a
+Now we put together chemical and electrical models. In this toy model we have an
 HH-squid type single compartment electrical model, cohabiting with a chemical
 oscillator. The chemical oscillator regulates K+ channel amounts, and the
 average membrane potential regulates the amounts of a reactant in the 
 chemical oscillator. This is a recipe for some strange firing patterns.
 
-
 	import moose
 	import pylab
 	import rdesigneur as rd
-	rdes = rd.buildRdesigneur(
-		chanProto = [['makeHHNa()', 'Na'], ['makeHHK()', 'K']],
-		chanDistrib = [ 
-			['Na', 'soma', 'Gbar', '1250' ], 
-			['K', 'soma', 'Gbar', '1000' ]],
-		chemProto = [['./chem/osc.sbml', 'osc']],
-		chemDistrib = [[ 'osc', 'soma', 'install', '1' ]],
-		adaptorList = [
-			[ 'dend/K', 'n', 'K', 'modulation', 0.5, 0.002 ],
-			[ '.', 'Vm', 'osc_input', 'concInit', 0.1, 0.001 ]
-		],
-		plot = [['chem/soma', '1', 'A'],['soma', '1', 'Vm']],
+	rdes = rd.rdesigneur(
+        	# We want just one compartment so we set diffusion length to be
+        	# bigger than the 0.5 mm HH axon compartment default. 
+    			diffusionLength = 1e-3,
+    			chanProto = [['make_HH_Na()', 'Na'], ['make_HH_K()', 'K']],
+    			chanDistrib = [
+        			['Na', 'soma', 'Gbar', '1200' ],
+        			['K', 'soma', 'Gbar', '360' ]],
+    		chemProto = [['make_Chem_Oscillator()', 'osc']],
+    		chemDistrib = [['osc', 'soma', 'install', '1' ]],
+       		# These adaptor parameters give interesting-looking but
+       		# not particularly physiological behaviour.
+    		adaptorList = [
+        		[ 'dend/a', 'conc', 'Na', 'modulation', 1, -5.0 ],
+        		[ 'dend/b', 'conc', 'K', 'modulation', 1, -0.2],
+        		[ 'dend/b', 'conc', '.', 'inject', -1.0e-7, 4e-7 ],
+        		[ '.', 'Vm', 'dend/s', 'conc', 2.5, 20.0 ]
+    		],
+    		plotList = [['soma', '1', 'dend/a', 'conc', 'a Conc'],
+        		['soma', '1', 'dend/b', 'conc', 'b Conc'],
+        		['soma', '1', 'dend/s', 'conc', 's Conc'],
+        		['soma', '1', 'Na', 'Gk', 'Na Gk'],
+        		['soma', '1', '.', 'Vm', 'Membrane potential']
+		]
 	)
+
+	rdes.buildModel()
 	moose.reinit()
-	moose.start( 10 )
+	moose.start( 250 ) # Takes a few seconds to run this.
 
+	rdes.display()
 
-We've already modeled the HH squid model and the oscillator individually.
+We've already modeled the HH squid model and the oscillator individually,
+and you should recognize the parts of those models above.
 The new section that makes this work the *adaptorList* which specifies how 
-the electrical and chemical parts talk to each other.
-(stuff here)
+the electrical and chemical parts talk to each other. This entirely
+fictional set of interactions goes like this:
 
+	[ 'dend/a', 'conc', 'Na', 'modulation', 1, -5.0 ]
+
++	*dend/a*: The originating variable comes from the 'a' pool on the
+	'dend' compartment.
+
+	*conc*: This is the originating variable name on the 'a' pool.
+
+	*Na*: This is the target variable
+
+	*modulation*: scale the Gbar of Na up and down. Use 'modulation'
+	rather than direct assignment of Gbar since Gbar is different for
+	each differently-sized compartment. 
+
+	*1*: This is the initial offset
+
+	*-5.0*: This is the scaling from the input to the parameter updated
+	in the simulation.
+
+A similar set of adaptor entries couple the molecule  *dend/b* to the 
+K channel, *dend/b* again to the current injection into the soma, and the 
+membrane potential to the concentration of *dend/s*. 
+
+
+![Plot for toy multiscale model ](../../images/rdes6_multiscale.png)
 
 ### Morphology: Load .swc morphology file and view it
 Here we build a passive model using a morphology file in the .swc file format
@@ -272,79 +384,115 @@ To make things interesting we display the morphology in 3-D upon which we
 represent the membrane potential as colors.
 
 	import moose
-	import pylab
 	import rdesigneur as rd
-	rdes = rd.buildRdesigneur(
-		cellProto = [[ './cells/h10.swc', 'elec']],
-		stim = [['elec/soma', 'H((t - 0.1) * (0.2 - t) )*1e-9', 'inject']],
-		plot = [['elec/soma', '1', 'Vm']],
-		moogli = [['elec/#', '1', 'Vm']]
+	rdes = rd.rdesigneur(
+		cellProto = [['./cells/h10.CNG.swc', 'elec']],
+		stimList = [['soma', '1', '.', 'inject', 't * 25e-9' ]], 
+		plotList = [['#', '1', '.', 'Vm', 'Membrane potential'],
+			['#', '1', 'Ca_conc', 'Ca', 'Ca conc (uM)']],
+		moogList = [['#', '1', '.', 'Vm', 'Soma potential']]
 	)
-	moose.reinit()
-	moose.start( 0.3 )
 
-### Build a spiny neuron from a morphology file and put active channels in it.
-This is where we begin to use some of the power of Rdesigneur.
-We decorate a bare neuronal morphology file with dendritic spines and
-distribute voltage-gated ion channels over the neuron. This time the voltage-
-gated channels are obtained from a number of channelML files, located in the
-`./channels` subdirectory. Since we have a spatially extended neuron, 
-we need to specify the spatial distribution of channel densities too. 
+	rdes.buildModel()
+
+	moose.reinit()
+	rdes.displayMoogli( 0.0002, 0.1 )
+
+Here the new concept is the cellProto line, which loads in the specified cell
+model:
+
+	`[ filename, cellname ]`
+
+The system recognizes the filename extension and builds a model from the swc
+file. It uses the cellname **elec** in this example.
+
+We use a similar line as in the reaction-diffusion example, to build up a 
+Moogli display of the cell model:
+
+	`moogList = [['#', '1', '.', 'Vm', 'Soma potential']]`
+
+Here we have:
+
+	*#*: the path to use for selecting the compartments to display. 
+	This wildcard means use all compartments.
+	*1*: The expression to use for the compartments. Again, `1` means use
+	all of them.
+	*.*: Which object in the compartment to display. Here we are using the
+	compartment itself, so it is just a dot.
+	*Vm*: Field to display
+	*Soma potential*: Title for display.
+
+![3-D display for passive neuron](../../images/rdes7_passive.png)
+
+### Build an active neuron model by putting channels into a morphology file
+We load in a morphology file and distribute voltage-gated ion channels over 
+the neuron. Here the voltage-gated channels are obtained from a number of 
+channelML files, located in the `./channels` subdirectory. Since we have a 
+spatially extended neuron, we need to specify the spatial distribution of 
+channel densities too. 
 
 
 	import moose
-	import pylab
 	import rdesigneur as rd
-	rdes = rd.buildRdesigneur(
-		cellProto = [[ './cells/h10.swc', 'elec']],
-		chanProto = [
-			['./channels/hd.xml'],
-			['./channels/kap.xml'],
-			['./channels/kad.xml'],
-			['./channels/kdr.xml'],
-			['./channels/na3.xml'],
-			['./channels/nax.xml'],
-			['./channels/CaConc.xml'],
-			['./channels/Ca.xml']
-		],
-		spineProto = [[ 'makePassiveSpineProto()', 'spine' ] ],
-		chanDistrib = [ 
-			['hd', '#dend#,#apical#,' 'Gbar', '5e-2*(1+(p*3e4))' ],
-			['kdr', '#', 'Gbar', '100' ],
-			['na3', '#', 'Gbar', '250' ],
-			['nax', '#axon#', 'Gbar', '1250' ],
-			['nax', '#soma#', 'Gbar', '100' ],
-			['kap', '#axon#,#soma#', 'Gbar', '300' ],
-			['kap', '#dend#,#apical#,#user#', 'Gbar',
-				'300*(H(100-p*1e6)) * (1+(p*1e4))' ],
-			['Ca_conc', '#', 'tau', '0.0133' ],
-			['kad', '#dend#,#apical#', 'Gbar',
-				'300*H(p*1e6-100)*(1+p*1e4)' ]
-		],
-		spineDistrib = [
-			["spine", '#apical#,#dend#', "spineSpacing", "5e-6",
-			"spineSpacingDistrib", "1e-6",
-			"angle", "0",
-			"angleDistrib", str( 2*PI ),
-			"size", "1",
-			"sizeDistrib", "0.5" ] 
-		],
-		stim = [['elec/soma', 'H((t - 0.02) * (0.12 - t) )*1e-9', 'inject']],
-		plot = [['elec/soma', '1', 'Vm']],
-		moogli = [['elec/#', '1', 'Vm']]
+	rdes = rd.rdesigneur(
+    	chanProto = [
+        	['./chans/hd.xml'],
+        	['./chans/kap.xml'],
+        	['./chans/kad.xml'],
+        	['./chans/kdr.xml'],
+        	['./chans/na3.xml'],
+        	['./chans/nax.xml'],
+        	['./chans/CaConc.xml'],
+        	['./chans/Ca.xml']
+    	],
+    	cellProto = [['./cells/h10.CNG.swc', 'elec']],
+    	chanDistrib = [ \
+        	["hd", "#dend#,#apical#", "Gbar", "50e-2*(1+(p*3e4))" ],
+        	["kdr", "#", "Gbar", "p < 50e-6 ? 500 : 100" ],
+        	["na3", "#soma#,#dend#,#apical#", "Gbar", "850" ],
+        	["nax", "#soma#,#axon#", "Gbar", "1250" ],
+        	["kap", "#axon#,#soma#", "Gbar", "300" ],
+        	["kap", "#dend#,#apical#", "Gbar",
+            	"300*(H(100-p*1e6)) * (1+(p*1e4))" ],
+        	["Ca_conc", "#", "tau", "0.0133" ],
+        	["kad", "#soma#,#dend#,#apical#", "Gbar", "50" ],
+        	["Ca", "#", "Gbar", "50" ]
+    	],
+    	stimList = [['soma', '1', '.', 'inject', '(t>0.02) * 1e-9' ]],
+    	plotList = [['#', '1', '.', 'Vm', 'Membrane potential'],
+            	['#', '1', 'Ca_conc', 'Ca', 'Ca conc (uM)']],
+    	moogList = [['#', '1', 'Ca_conc', 'Ca', 'Calcium conc (uM)', 0, 120],
+        	['#', '1', '.', 'Vm', 'Soma potential']]
 	)
+	
+	rdes.buildModel()
+	
 	moose.reinit()
-	moose.start( 0.15 )
+	rdes.displayMoogli( 0.0002, 0.052 )
 
 
-As before, the channel distributions are specified by a list of entries each
-containing:
+Here we make more extensive use of two concepts which we've already seen from 
+the single compartment squid model:
 
-`[name, region_in_cell, parameter, expression_string]`
+1. *chanProto*: This defines numerous channels, each of which is of the form:
 
-- The *name* is the name of the prototype. This is usually an ion channel, 
-but in the example above you can also see a calcium concentration pool
-defined.
+	`[ filename ]`
+
+	or 
+
+	`[ filename, channelname ]`
+
+If the *channelname* is not specified the system uses the last part of the
+channel name, before the filetype suffix.
+
+2. *chanDistrib*: This defines the spatial distribution of each channel type.
+Each line is of a form that should be familiar now:
+
+	`[channelname, region_in_cell, parameter, expression_string]`
+
+- The *channelname* is the name of the prototype from *chanproto*. This is 
+usually an ion channel, but in the example above you can also see a calcium 
+concentration pool defined.
 - The *region_in_cell* is typically defined using wildcards, so that it
 generalizes to any cell morphology.
 For example, the plain wildcard `#` means to consider 
@@ -354,49 +502,140 @@ somewhere in the name. Wildcards can be comma-separated, so
 their name. The naming in MOOSE is defined by the model file. Importantly,
 in **.swc** files MOOSE generates names that respect the classification of 
 compartments into axon, soma, dendrite, and apical dendrite compartments 
-respectively.
+respectively. SWC files generate compartment names such as:
+
+		soma_<number>
+		dend_<number>
+		apical_<number>
+		axon_<number>
+
+where the number is automatically assigned by the reader. In order to 
+select all dendritic compartments, for example, one would use *"#dend#"*
+where the *"#"* acts as a wildcard to accept any string.
 - The *parameter* is usually Gbar, the channel conductance density in *S/m^2*.
-If *Gbar* is zero or less, then the system economizes by not incorporating any
-calculations for this channel. Similarly, for calcium pools, if the *tau* is
-below zero then the calcium pool object is simply not inserted into this part 
-of the cell.
+If *Gbar* is zero or less, then the system economizes by not incorporating this
+channel mechanism in this part of the cell. Similarly, for calcium pools, if 
+the *tau* is below zero then the calcium pool object is simply not inserted 
+into this part of the cell.
 - The *expression_string* defines the value of the parameter, such as Gbar.
 This is typically a function of position in the cell. The expression evaluator 
 knows about several parameters of cell geometry. All units are in metres: 
-	+ *x*, *y* and *z* coordinates.
-	+ *g*, the geometrical distance from the soma
-	+ *p*, the path length from the soma, measured along the dendrites. 
-	+ *dia*, the diameter of the dendrite.
-	+ *L*, The electrotonic length from the soma (no units).
+
++ *x*, *y* and *z* coordinates.
++ *g*, the geometrical distance from the soma
++ *p*, the path length from the soma, measured along the dendrites. 
++ *dia*, the diameter of the dendrite.
++ *L*, The electrotonic length from the soma (no units).
 
 Along with these geometrical arguments, we make liberal use of the Heaviside 
 function H(x) to set up the channel distributions. The expression evaluator
 also knows about pretty much all common algebraic, trignometric, and logarithmic
 functions, should you wish to use these.
 
-The spine distributions are specified in a similar way, but here we get to
-see the full parameter definition string where we assign multiple parameters
-for the spine distribution. We start out as before:
+Also note the two Moogli displays. The first is the calcium 
+concentration. The second is the membrane potential in each compartment. Easy!
 
-- *spine*: The prototype name
-- *#apical#,#dend#'*: Put the spines on the any of ithe apical and basal dendrites.
-- *'spineSpacing' '5e-6'*: Put the spines in 5 microns apart. Here the spacing
-expression could have been any function of cell geometry, as above. Also, if
-the spacing is zero or less, no spines are inserted.
-- *'spineSpacingDistrib' '1e-6'*: Granularity for recomputing whether to put
-in a new spine. In other words, every 1 micron we recompute whether to put in
-a new spine. Given that the spacing is 5e-6, the likelihood of a spine coming
-in to any given 1-micron segment is 0.2.
-- *angle*: This specifies the initial angle at which the spine sticks out of
-the dendrite. If all angles were zero, they would all point away from the soma.
-- *angleDistrib*: Specifies a random number to add to the initial angle. In 
-this example we have *2 * PI* as the range of the number, so the spines stick
-out at any angle.
-- *size*: Linear scale factor for size of spine. The default spine head here is 
-0.5 microns in diameter and length. If the scale factor were to be 2, the
-volume would be 8 times as large.
-- *sizeDistrib*: Range for size of spine. A random number R is computed in the
-range 0 to 1, and the final size used is `size + (R - 0.5) * sizeDistrib`.
+![3-D display for active neuron](../../images/rdes8_active.png)
+
+### Build a spiny neuron from a morphology file and put active channels in it.
+This model is one step elaborated from the previous one, in that we now also
+have dendritic spines. MOOSE lets one decorate a bare neuronal morphology file 
+with dendritic spines, specifying various geometric parameters of their
+location. As before, we use an swc file for the morphology, and the same 
+ion channels and distribution.
+
+	import moose
+	import pylab
+	import rdesigneur as rd
+	rdes = rd.rdesigneur(
+    	chanProto = [
+        	['./chans/hd.xml'],
+        	['./chans/kap.xml'],
+        	['./chans/kad.xml'],
+        	['./chans/kdr.xml'],
+        	['./chans/na3.xml'],
+        	['./chans/nax.xml'],
+        	['./chans/CaConc.xml'],
+        	['./chans/Ca.xml']
+    	],
+    	cellProto = [['./cells/h10.CNG.swc', 'elec']],
+    	spineProto = [['make_active_spine()', 'spine']],
+    	chanDistrib = [
+        	["hd", "#dend#,#apical#", "Gbar", "50e-2*(1+(p*3e4))" ],
+        	["kdr", "#", "Gbar", "p < 50e-6 ? 500 : 100" ],
+        	["na3", "#soma#,#dend#,#apical#", "Gbar", "850" ],
+        	["nax", "#soma#,#axon#", "Gbar", "1250" ],
+        	["kap", "#axon#,#soma#", "Gbar", "300" ],
+        	["kap", "#dend#,#apical#", "Gbar",
+            	"300*(H(100-p*1e6)) * (1+(p*1e4))" ],
+        	["Ca_conc", "#", "tau", "0.0133" ],
+        	["kad", "#soma#,#dend#,#apical#", "Gbar", "50" ],
+        	["Ca", "#", "Gbar", "50" ]
+    	],
+    	spineDistrib = [['spine', '#dend#,#apical#', '20e-6', '1e-6']],
+    	stimList = [['soma', '1', '.', 'inject', '(t>0.02) * 1e-9' ]],
+    	plotList = [['#', '1', '.', 'Vm', 'Membrane potential'],
+            	['#', '1', 'Ca_conc', 'Ca', 'Ca conc (uM)']],
+    	moogList = [['#', '1', 'Ca_conc', 'Ca', 'Calcium conc (uM)', 0, 120],
+        	['#', '1', '.', 'Vm', 'Soma potential']]
+	)
+	
+	rdes.buildModel()
+	
+	moose.reinit()
+	rdes.displayMoogli( 0.0002, 0.023 )
+
+
+Spines are set up in a familiar way: we first define one (or more) prototype
+spines, and then distribute these around the cell. Here is the prototype
+string:
+
+    	[spine_proto, spinename]
+
+*spine_proto*: This is typically a function. One can define one's own,
+but there are several predefined ones in rdesigneur. All these define a 
+spine with the following parameters:
+
+- head diameter 0.5 microns
+- head length 0.5 microns
+- shaft length 1 micron
+- shaft diameter of 0.2 microns
+- RM = 1.0 ohm-metre square
+- RA = 1.0 ohm-meter
+- CM = 0.01 Farads per square metre.
+	
+Here are the predefined spine prototypes:
+
+- *make_passive_spine()*: This just makes a passive spine with the 
+default parameters
+- *make_exc_spine()*: This makes a spine with NMDA and glu receptors,
+and also a calcium pool. The NMDA channel feeds the Ca pool.
+- *make_active_spine()*: This adds a Ca channel to the exc_spine.
+and also a calcium pool.
+
+The spine distributions are specified in a familiar way for the first few 
+arguments, and then there are multiple (optional) spine-specific parameters:
+
+*[spinename, region_in_cell, spacing, spacing_distrib, size, size_distrib, angle, angle_distrib ]*
+
+Only the first two arguments are mandatory.
+
+- *spinename*: The prototype name
+- *region_in_cell*: Usual wildcard specification of names of compartments in which to put the spines.
+- *spacing*: Math expression to define spacing between spines. In the current implementation this evaluates to `1/probability_of_spine_per_unit_length`.
+Defaults to 10 microns. Thus, there is a 10% probability of a spine insertion in every micron. This evaluation method has the drawback that it is possible to space spines rather too close to each other. If spacing is zero or less, no spines are inserted.
+- *spacing_distrib*: Math expression for distribution of spacing. In the current implementation, this specifies the interval at which the system samples from the spacing probability above. Defaults to 1 micron.
+- *size*: Linear scale factor for size of spine. All dimensions are scaled by this factor. The default spine head here is 0.5 microns in diameter and length. If the scale factor were to be 2, the volume would be 8 times as large. Defaults to 1.0.
+- *size_distrib*: Range for size of spine. A random number R is computed in the range 0 to 1, and the final size used is `size + (R - 0.5) * size_distrib`. Defaults to 0.5
+- *angle*: This specifies the initial angle at which the spine sticks out of the dendrite. If all angles were zero, they would all point away from the soma. Defaults to 0 radians.
+- *angle_distrib*: Specifies a random number to add to the initial angle. Defaults to 2 PI radians, so the spines come out in any direction.
+
+One may well ask why we are not using a Python dictionary to handle all 
+these parameters. Short answer is: terseness. Longer answer is that the 
+rdesigneur format is itself meant to be an intermediate form for an 
+eventual high-level, possibly XML-based multiscale modeling format.
+
+![3-D display for spiny active neuron](../../images/rdes9_spiny_active.png)
 
 ### Build a spiny neuron from a morphology file and put a reaction-diffusion system in it.
 Rdesigneur is specially designed to take reaction systems with a dendrite,
@@ -416,27 +655,7 @@ electrical calculations here as they are not needed.
 Here we plot out the number of receptors on every single spine as a function
 of time.
 
-	import moose
-	import pylab
-	import rdesigneur as rd
-	rdes = rd.buildRdesigneur(
-		turnOffElec = True,
-		cellProto = [[ './cells/h10.swc', 'elec']],
-		spineProto = [[ 'makePassiveSpineProto()', 'spine' ] ],
-		spineDistrib = [
-			["spine", '#apical#,#dend#', "spineSpacing", "5e-6",
-			"spineSpacingDistrib", "1e-6",
-			"angle", "0",
-			"angleDistrib", str( 2*PI ),
-			"size", "1",
-			"sizeDistrib", "0.5" ] 
-		],
-		chemProto = [['./chem/psd.sbml', 'spiny']]
-		chemDistrib = [[ 'spiny', '#apical#,#dend#', 'install', 'H(p - 5e-4)' ]],
-		plot = [['chem/#/PSDR', '1', 'n']],
-	)
-	moose.reinit()
-	moose.start( 0.15 )
+(stuff here)
 
 ### Make a full multiscale model with complex spiny morphology and electrical and chemical signaling.
 
