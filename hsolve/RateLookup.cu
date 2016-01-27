@@ -34,7 +34,10 @@ LookupTable::LookupTable(
 	
 	//~ interpolate_.resize( nSpecies );
 	table_.resize( nPts_ * nColumns_ );
+
+#ifdef USE_CUDA
 	is_set_ = false;
+#endif
 }
 
 void LookupTable::addColumns(

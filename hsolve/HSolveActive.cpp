@@ -44,6 +44,7 @@ u64 getTime()
  return ret;
 }
 
+
 using namespace moose;
 using namespace thrust;
 
@@ -69,6 +70,7 @@ HSolveActive::HSolveActive()
 	}
 	total_count = 0;
 #endif
+
 
     // Default lookup table size
     //~ vDiv_ = 3000;    // for voltage
@@ -115,8 +117,11 @@ void HSolveActive::step( ProcPtr info )
         current_.resize( channel_.size() );
     }
     
+#ifdef USE_CUDA
     total_count ++;
+#endif
     
+
 #ifdef PROFILE_CUDA
     u64 start_time, end_time;
     start_time = getTime();
@@ -370,6 +375,9 @@ void HSolveActive::advanceChannels( double dt )
 
     LookupRow vRow;
 #ifdef USE_CUDA
+    printf("Running advanceChannels Using Cuda\n");
+
+
 #ifdef DEBUG_STEP
     printf("Press [ENTER] to start advanceChannels...\n");
     getchar();
@@ -602,10 +610,13 @@ void HSolveActive::advanceChannels( double dt )
 #endif
       
 }
+
+#ifdef USE_CUDA
 LookupColumn * HSolveActive::get_column_d()
 {
 	return column_d;
 }
+#endif
 
 /**
  * SynChans are currently not under solver's control

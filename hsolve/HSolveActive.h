@@ -39,7 +39,9 @@ public:
     void setup( Id seed, double dt );
     void step( ProcPtr info );			///< Equivalent to process
     void reinit( ProcPtr info );
+#ifdef USE_CUDA
     LookupColumn * get_column_d();
+#endif
 protected:
     /**
      * Solver parameters: exposed as fields in MOOSE
