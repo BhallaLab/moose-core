@@ -21,16 +21,13 @@ import moose
 import numpy as np
 import pylab
 import math
+import rmoogli
 #import rdesigneurProtos
 from rdesigneurProtos import *
-
 from moose.neuroml.NeuroML import NeuroML
 from moose.neuroml.ChannelML import ChannelML
 
 #EREST_ACT = -70e-3
-NA = 6.022e23
-PI = 3.14159265359
-FaradayConst = 96485.3365 # Coulomb/mol
 
 class BuildError(Exception):
     def __init__(self, value):
@@ -75,7 +72,7 @@ class rdesigneur:
             adaptorList= [], \
             stimList = [], \
             plotList = [], \
-            moogliList = [] \
+            moogList = [] \
         ):
         """ Constructor of the rdesigner. This just sets up internal fields
             for the model building, it doesn't actually create any objects.
@@ -105,9 +102,9 @@ class rdesigneur:
         self.adaptorList = adaptorList
         self.stimList = stimList
         self.plotList = plotList
-        self.moogliList = moogliList
+        self.moogList = moogList
         self.plotNames = []
-        self.mooNames = []
+        self.moogNames = []
         self.cellPortionElist = []
         self.spineComptElist = []
 
@@ -139,6 +136,7 @@ class rdesigneur:
                 modelPath, "' already exists."
             return
         self.model = moose.Neutral( modelPath )
+        self.modelPath = modelPath
         try:
             self.buildCellProto()
             self.buildChanProto()
@@ -363,10 +361,25 @@ class rdesigneur:
         self.elecid.channelDistribution = temp
 
     def buildSpineDistrib( self ):
+        # For uniformity and conciseness, we don't use a dictionary.
+        # ordering of spine distrib is 
+        # name, path, spacing, spacingDistrib, size, sizeDistrib, angle, angleDistrib
+        # The first two args are compulsory, and don't need arg keys.
         temp = []
+        defaults = ['spine', '#dend#,#apical#', '10e-6', '1e-6', '1', '0.5', '0', '6.2831853' ]
+        argKeys = ['spacing', 'spacingDistrib', 'size', 'sizeDistrib', 'angle', 'angleDistrib' ]
         for i in self.spineDistrib:
-            temp.extend( i )
-            temp.extend( [""] )
+            if len(i) >= 2 :
+                arg = i[:2]
+                if len( i ) > len( defaults ):
+                    print 'Rdesigneur::buildSpineDistrib: Warning: too many arguments in spine definition'
+                    print 'Usage: name, path, [spacing, spacingDistrib, size, sizeDistrib, angle, angleDistrib]'
+                    continue
+                optArg = i[2:] + defaults[ len(i):]
+                assert( len( optArg ) == len( argKeys ) )
+                for j in zip( argKeys, optArg ):
+                    arg.extend( [j[0], j[1]] )
+                temp.extend( arg + [''] )
         self.elecid.spineDistribution = temp
 
     def buildChemDistrib( self ):
@@ -469,15 +482,15 @@ class rdesigneur:
 
     def _buildPlots( self ):
         knownFields = { 
-                'Vm':('CompartmentBase', 'getVm'),
-                'Im':('CompartmentBase', 'getVm'),
-                'inject':('CompartmentBase', 'getInject'),
-                'Gbar':('ChanBase', 'getGbar'),
-                'Gk':('ChanBase', 'getGk'),
-                'Ik':('ChanBase', 'getIk'),
-                'Ca':('CaConcBase', 'getCa'),
-                'n':('PoolBase', 'getN'),
-                'conc':('PoolBase', 'getConc' )
+            'Vm':('CompartmentBase', 'getVm', 1000, 'Memb. Potential (mV)' ),
+            'Im':('CompartmentBase', 'getIm', 1e9, 'Memb. current (nA)' ),
+            'inject':('CompartmentBase', 'getInject', 1e9, 'inject current (nA)' ),
+            'Gbar':('ChanBase', 'getGbar', 1e9, 'chan max conductance (nS)' ),
+            'Gk':('ChanBase', 'getGk', 1e9, 'chan conductance (nS)' ),
+            'Ik':('ChanBase', 'getIk', 1e9, 'chan current (nA)' ),
+            'Ca':('CaConcBase', 'getCa', 1e3, 'Ca conc (uM)' ),
+            'n':('PoolBase', 'getN', 1, '# of molecules'),
+            'conc':('PoolBase', 'getConc', 1000, 'Concentration (uM)' )
         } 
         graphs = moose.Neutral( self.modelPath + '/graphs' )
         dummy = moose.element( '/' )
@@ -493,7 +506,9 @@ class rdesigneur:
             numPlots = sum( i != dummy for i in plotObj3 )
             if numPlots > 0:
                 tabname = graphs.path + '/plot' + str(k)
-                self.plotNames.append( ( tabname, i[4], k ) )
+                scale = knownFields[i[3]][2]
+                units = knownFields[i[3]][3]
+                self.plotNames.append( ( tabname, i[4], k, scale, units ) )
                 k += 1
                 if i[3] == 'n' or i[3] == 'conc':
                     tabs = moose.Table2( tabname, numPlots )
@@ -507,43 +522,68 @@ class rdesigneur:
 
     def _buildMoogli( self ):
         knownFields = { 
-                'Vm':('CompartmentBase', 'getVm'),
-                'Im':('CompartmentBase', 'getVm'),
-                'inject':('CompartmentBase', 'getInject'),
-                'Ca':('CaConcBase', 'getCa'),
-                'n':('PoolBase', 'getN'),
-                'conc':('PoolBase', 'getConc' )
+            'Vm':('CompartmentBase', 'getVm', 1000, 'Memb. Potential (mV)', -80.0, 40.0 ),
+            'Im':('CompartmentBase', 'getIm', 1e9, 'Memb. current (nA)', -10, 10 ),
+            'inject':('CompartmentBase', 'getInject', 1e9, 'inject current (nA)', -10, 10 ),
+            'Gbar':('ChanBase', 'getGbar', 1e9, 'chan max conductance (nS)', 0, 1 ),
+            'Gk':('ChanBase', 'getGk', 1e9, 'chan conductance (nS)', 0, 1 ),
+            'Ik':('ChanBase', 'getIk', 1e9, 'chan current (nA)', -10, 10 ),
+            'Ca':('CaConcBase', 'getCa', 1e3, 'Ca conc (uM)', 0, 10 ),
+            'n':('PoolBase', 'getN', 1, '# of molecules', 0, 200 ),
+            'conc':('PoolBase', 'getConc', 1000, 'Concentration (uM)', 0, 2 )
         } 
-        moogli = moose.Neutral( self.modelPath + '/moogli' )
+        moogliBase = moose.Neutral( self.modelPath + '/moogli' )
         k = 0
-        for i in self.moogliList:
+        for i in self.moogList:
+            kf = knownFields[i[3]]
             pair = i[0] + " " + i[1]
             dendCompts = self.elecid.compartmentsFromExpression[ pair ]
             spineCompts = self.elecid.spinesFromExpression[ pair ]
-            mooObj, mooField = self._parseComptField( dendCompts, i, knownFields )
-            mooObj2, mooField2 = self._parseComptField( spineCompts, i, knownFields )
+            dendObj, mooField = self._parseComptField( dendCompts, i, knownFields )
+            spineObj, mooField2 = self._parseComptField( spineCompts, i, knownFields )
             assert( mooField == mooField2 )
-            mooObj3 = mooObj + mooObj2
+            mooObj3 = dendObj + spineObj
             numMoogli = len( mooObj3 )
+            #dendComptMap = self.dendCompt.elecComptMap
+            #self.moogliViewer = rmoogli.makeMoogli( self, mooObj3, mooField )
+            if len( i ) == 5:
+                i.extend( kf[4:6] )
+            elif len( i ) == 6:
+                i.extend( [kf[5]] )
+            '''
+            moogliDt = 0.0001
+            if ( i[3] == 'conc' or i[3] == 'n' ):
+                moogliDt = 1
+            self.moogliViewer = rmoogli.makeMoogli( self, mooObj3, i, kf, moogliDt )
+            '''
+            #self.moogliViewer = rmoogli.makeMoogli( self, mooObj3, i, kf )
+            self.moogNames.append( rmoogli.makeMoogli( self, mooObj3, i, kf ) )
+
+            '''
             if numMoogli > 0:
                 muw = MoogliUpdateWrapper( mooObj3, mooField, indexing )
                 tabname = moogli.path + '/draw' + str(k)
+                '''
+
+
     ################################################################
     # Here we display the plots and moogli
     ################################################################
+    def displayMoogli( self, moogliDt, runtime, rotation = math.pi/500.0):
+        rmoogli.displayMoogli( self, moogliDt, runtime, rotation )
+
     def display( self ):
         for i in self.plotNames:
             pylab.figure( i[2] )
             pylab.title( i[1] )
             pylab.xlabel( "Time (s)" )
+            pylab.ylabel( i[4] )
             vtab = moose.vec( i[0] )
-            if vtab[0].isA[ "Table2" ]:
-                pylab.ylabel( "Conc (mM)" )
-            else:
-                pylab.ylabel( "Vm (V)" )
             t = np.arange( 0, vtab[0].vector.size, 1 ) * vtab[0].dt
             for j in vtab:
-                pylab.plot( t, j.vector )
+                pylab.plot( t, j.vector * i[3] )
+        if len( self.moogList ) > 0:
+            pylab.ion()
         pylab.show()
 
     ################################################################
@@ -573,7 +613,6 @@ class rdesigneur:
                 func = moose.Function( funcname )
                 func.expr = i[4]
                 for q in stimObj3:
-                    print q, stimField
                     moose.connect( func, 'valueOut', q, stimField )
 
     ################################################################
@@ -914,7 +953,7 @@ class rdesigneur:
     ################################################################
     def _buildAdaptor( self, meshName, elecRelPath, elecField, \
             chemRelPath, chemField, isElecToChem, offset, scale ):
-        print "offset = ", offset, ", scale = ", scale
+        #print "offset = ", offset, ", scale = ", scale
         mesh = moose.element( '/model/chem/' + meshName )
         #elecComptList = mesh.elecComptList
         if elecRelPath == 'spine':
@@ -954,8 +993,7 @@ class rdesigneur:
                 adName += elecRelPath[1-i]
                 break
         ad = moose.Adaptor( chemObj.path + adName, len( elecComptList ) )
-        print 'building ', len( elecComptList ), 'adaptors ', adName, \
-               ' for: ', mesh.name, elecRelPath, elecField, chemRelPath
+        #print 'building ', len( elecComptList ), 'adaptors ', adName, ' for: ', mesh.name, elecRelPath, elecField, chemRelPath
         av = ad.vec
         chemVec = moose.element( mesh.path + '/' + chemRelPath ).vec
 
@@ -985,182 +1023,4 @@ class rdesigneur:
                     moose.connect( i[3], 'requestOut', chemVec[j], chemFieldSrc)
                 msg = moose.connect( i[3], 'output', elObj, elecFieldDest )
 
-
-
-
-
-    #################################################################
-    # Here we have a series of utility functions for building cell
-    # prototypes.
-    #################################################################
-def transformNMDAR( path ):
-    for i in moose.wildcardFind( path + "/##/#NMDA#[ISA!=NMDAChan]" ):
-        chanpath = i.path
-        pa = i.parent
-        i.name = '_temp'
-        if ( chanpath[-3:] == "[0]" ):
-            chanpath = chanpath[:-3]
-        nmdar = moose.NMDAChan( chanpath )
-        sh = moose.SimpleSynHandler( chanpath + '/sh' )
-        moose.connect( sh, 'activationOut', nmdar, 'activation' )
-        sh.numSynapses = 1
-        sh.synapse[0].weight = 1
-        nmdar.Ek = i.Ek
-        nmdar.tau1 = i.tau1
-        nmdar.tau2 = i.tau2
-        nmdar.Gbar = i.Gbar
-        nmdar.CMg = 12
-        nmdar.KMg_A = 1.0 / 0.28
-        nmdar.KMg_B = 1.0 / 62
-        nmdar.temperature = 300
-        nmdar.extCa = 1.5
-        nmdar.intCa = 0.00008
-        nmdar.intCaScale = 1
-        nmdar.intCaOffset = 0.00008
-        nmdar.condFraction = 0.02
-        moose.delete( i )
-        moose.connect( pa, 'channel', nmdar, 'channel' )
-        caconc = moose.wildcardFind( pa.path + '/#[ISA=CaConcBase]' )
-        if ( len( caconc ) < 1 ):
-            print 'no caconcs found on ', pa.path
-        else:
-            moose.connect( nmdar, 'ICaOut', caconc[0], 'current' )
-            moose.connect( caconc[0], 'concOut', nmdar, 'assignIntCa' )
-    ################################################################
-    # Utility function for building a compartment, used for spines.
-def buildCompt( pa, name, length, dia, xoffset, RM, RA, CM ):
-    compt = moose.Compartment( pa.path + '/' + name )
-    compt.x0 = xoffset
-    compt.y0 = 0
-    compt.z0 = 0
-    compt.x = length + xoffset
-    compt.y = 0
-    compt.z = 0
-    compt.diameter = dia
-    compt.length = length
-    xa = dia * dia * PI / 4.0
-    sa = length * dia * PI
-    compt.Ra = length * RA / xa
-    compt.Rm = RM / sa
-    compt.Cm = CM * sa
-    return compt
-
-    ################################################################
-    # Utility function for building a synapse, used for spines.
-def buildSyn( name, compt, Ek, tau1, tau2, Gbar, CM ):
-    syn = moose.SynChan( compt.path + '/' + name )
-    syn.Ek = Ek
-    syn.tau1 = tau1
-    syn.tau2 = tau2
-    syn.Gbar = Gbar * compt.Cm / CM
-    #print "BUILD SYN: ", name, Gbar, syn.Gbar, CM
-    moose.connect( compt, 'channel', syn, 'channel' )
-    sh = moose.SimpleSynHandler( syn.path + '/sh' )
-    moose.connect( sh, 'activationOut', syn, 'activation' )
-    sh.numSynapses = 1
-    sh.synapse[0].weight = 1
-    return syn
-
-######################################################################
-# Utility function, borrowed from proto18.py, for making an LCa channel.
-# Based on Traub's 91 model, I believe.
-def make_LCa():
-        EREST_ACT = -0.060 #/* hippocampal cell resting potl */
-        ECA = 0.140 + EREST_ACT #// 0.080
-	if moose.exists( 'LCa' ):
-		return
-	Ca = moose.HHChannel( 'LCa' )
-	Ca.Ek = ECA
-	Ca.Gbar = 0
-	Ca.Gk = 0
-	Ca.Xpower = 2
-	Ca.Ypower = 1
-	Ca.Zpower = 0
-
-	xgate = moose.element( 'LCa/gateX' )
-	xA = np.array( [ 1.6e3, 0, 1.0, -1.0 * (0.065 + EREST_ACT), -0.01389, -20e3 * (0.0511 + EREST_ACT), 20e3, -1.0, -1.0 * (0.0511 + EREST_ACT), 5.0e-3, 3000, -0.1, 0.05 ] )
-        xgate.alphaParms = xA
-	ygate = moose.element( 'LCa/gateY' )
-	ygate.min = -0.1
-	ygate.max = 0.05
-	ygate.divs = 3000
-	yA = np.zeros( (ygate.divs + 1), dtype=float)
-	yB = np.zeros( (ygate.divs + 1), dtype=float)
-
-
-#Fill the Y_A table with alpha values and the Y_B table with (alpha+beta)
-	dx = (ygate.max - ygate.min)/ygate.divs
-	x = ygate.min
-	for i in range( ygate.divs + 1 ):
-		if ( x > EREST_ACT):
-			yA[i] = 5.0 * math.exp( -50 * (x - EREST_ACT) )
-		else:
-			yA[i] = 5.0
-		yB[i] = 5.0
-		x += dx
-	ygate.tableA = yA
-	ygate.tableB = yB
-        return Ca
-
-    ################################################################
-    # API function for building spine prototypes. Here we put in the
-    # spine dimensions, and options for standard channel types.
-    # The synList tells it to create dual alpha function synchans:
-    # [name, Erev, tau1, tau2, conductance_density, connectToCa]
-    # The chanList tells it to copy over channels defined in /library
-    # and assign the specified conductance density.
-    # If caTau <= zero then there is no caConc created, otherwise it
-    # creates one and assigns the desired tau in seconds.
-    # With the default arguments here it will create a glu, NMDA and LCa,
-    # and add a Ca_conc.
-def addSpineProto( name = 'spine', \
-        RM = 1.0, RA = 1.0, CM = 0.01, \
-        shaftLen = 1.e-6 , shaftDia = 0.2e-6, \
-        headLen = 0.5e-6, headDia = 0.5e-6, \
-        synList = ( ['glu', 0.0, 2e-3, 9e-3, 200.0, False],
-                    ['NMDA', 0.0, 20e-3, 20e-3, 80.0, True] ),
-        chanList = ( ['Ca', 1.0, True ], ),
-        caTau = 13.333e-3
-        ):
-    if not moose.exists( '/library' ):
-        library = moose.Neutral( '/library' )
-    spine = moose.Neutral( '/library/spine' )
-    shaft = buildCompt( spine, 'shaft', shaftLen, shaftDia, 0.0, RM, RA, CM )
-    head = buildCompt( spine, 'head', headLen, headDia, shaftLen, RM, RA, CM )
-    moose.connect( shaft, 'axial', head, 'raxial' )
-
-    if caTau > 0.0:
-        conc = moose.CaConc( head.path + '/Ca_conc' )
-        conc.tau = caTau
-        conc.length = head.length
-        conc.diameter = head.diameter
-        conc.thick = 0.0
-        # The 'B' field is deprecated.
-        # B = 1/(ion_charge * Faraday * volume)
-        #vol = head.length * head.diameter * head.diameter * PI / 4.0
-        #conc.B = 1.0 / ( 2.0 * FaradayConst * vol )
-        conc.Ca_base = 0.0
-    for i in synList:
-        syn = buildSyn( i[0], head, i[1], i[2], i[3], i[4], CM )
-        if i[5] and caTau > 0.0:
-            moose.connect( syn, 'IkOut', conc, 'current' )
-    for i in chanList:
-        if ( moose.exists( '/library/' + i[0] ) ):
-            chan = moose.copy( '/library/' + i[0], head )
-        else:
-            moose.setCwe( head )
-            chan = make_LCa()
-            chan.name = i[0]
-            moose.setCwe( '/' )
-        chan.Gbar = i[1] * head.Cm / CM
-        #print "CHAN = ", chan, chan.tick, chan.Gbar
-        moose.connect( head, 'channel', chan, 'channel' )
-        if i[2] and caTau > 0.0:
-            moose.connect( chan, 'IkOut', conc, 'current' )
-    transformNMDAR( '/library/spine' )
-    return spine
-
-# Wrapper function. This is used by the proto builder from rdesigneur
-def makeSpineProto( name ):
-    addSpineProto( name = name, chanList = () )
 

@@ -2,7 +2,7 @@
 #
 # MOOSE documentation build configuration file, created by
 # sphinx-quickstart on Tue Jul  1 19:05:47 2014.
-# updated on Thr Jan 21 00:30:10 2016
+#
 # This file is execfile()d with the current directory set to its containing dir.
 #
 # Note that not all possible configuration values are present in this
@@ -16,13 +16,8 @@ import sys, os
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath('../../../python'))
+#sys.path.insert(0, os.path.abspath('../../moose/moose-core/python'))
 sys.path.append(os.path.abspath('../../../../moose-examples/snippets'))
-sys.path.append(os.path.abspath('../../../../moose-examples/tutorials/ChemicalOscillators'))
-sys.path.append(os.path.abspath('../../../../moose-examples/tutorials/ChemicalBistables'))
-sys.path.append(os.path.abspath('../../../../moose-examples/tutorials/ExcInhNet'))
-sys.path.append(os.path.abspath('../../../../moose-examples/neuroml/lobster_pyloric'))
-sys.path.append(os.path.abspath('../../../../moose-examples/tutorials/ExcInhNetCaPlasticity'))
 
 # -- General configuration -----------------------------------------------------
 
@@ -35,8 +30,7 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.mathjax',
               'sphinx.ext.autosummary',
               'sphinx.ext.viewcode',
-              'numpydoc'
-		]
+              'numpydoc']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -52,7 +46,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'MOOSE'
-copyright = u'2016, Upinder Bhalla, Niraj Dudani, Aditya Gilra, Aviral Goel, Subhasis Ray, Harsha Rani and Dilawar Singh'
+copyright = u'2016'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -89,7 +83,7 @@ add_function_parentheses = True
 
 # If true, sectionauthor and moduleauthor directives will be shown in the
 # output. They are ignored by default.
-#show_authors = False
+#show_authors = True
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
@@ -196,12 +190,12 @@ latex_elements = {
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
   ('index', 'MOOSE.tex', u'MOOSE Documentation',
-   u'Upinder Bhalla, Niraj Dudani, Aditya Gilra, Aviral Goel, Subhasis Ray,Harsha Rani and Dilawar Singh', 'manual'),
+   u'Upinder Bhalla, Aviral Goel and Harsha Rani', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
-latex_logo = 'images/moose_logo.png'
+latex_logo = '../images/moose_logo.png'
 
 # For "manual" documents, if this is true, then toplevel headings are parts,
 # not chapters.
@@ -226,7 +220,7 @@ latex_domain_indices = True
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'moose', u'MOOSE Documentation',
-     [u'Upinder Bhalla, Niraj Dudani, Aditya Gilra, Aviral Goel, Subhasis Ray,Harsha Rani and Dilawar Singh'], 1)
+     [u'Upinder Bhalla, Aviral Goel and Harsha Rani'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -240,7 +234,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'MOOSE', u'MOOSE Documentation',
-   u'Upinder Bhalla, Niraj Dudani, Aditya Gilra, Aviral Goel, Subhasis Ray,Harsha Rani and Dilawar Singh', 'MOOSE', 'MOOSE is the Multiscale Object-Oriented Simulation Environment.',
+   u'Upinder Bhalla, Aviral Goel and Harsha Rani', 'MOOSE', 'MOOSE is the Multiscale Object-Oriented Simulation Environment.',
    'Science'),
 ]
 

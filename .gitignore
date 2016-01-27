@@ -114,6 +114,9 @@ coverage.xml
 
 # Sphinx documentation
 Docs/user/py/_build/
+Docs/user/GUI/_build/
+Docs/user/snippets_tutorial/_build
+
 # doxygen documentation
 Docs/doxygen/cpp
 
