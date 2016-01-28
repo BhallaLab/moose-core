@@ -27,6 +27,7 @@
 
 #include "CudaGlobal.h"
 #include "RateLookup.h"
+#include "Gpu_timer.h"
 #include <thrust/scan.h>
 
 class HSolveActive: public HSolvePassive
@@ -181,6 +182,9 @@ protected:
 	// CUDA Active helper data
 	int* d_V_rows;
 	double* d_V_fractions;
+
+	// temp code
+	int num_time_prints = 5;
 
 #endif
     static const int INSTANT_X;

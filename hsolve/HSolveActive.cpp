@@ -376,49 +376,58 @@ void HSolveActive::advanceChannels( double dt )
 
     LookupRow vRow;
 #ifdef USE_CUDA
-    printf("Running advanceChannels Using Cuda\n");
+    if(num_time_prints ==5 )
+    	printf("Running advanceChannels Using Cuda\n");
 
     // Useful numbers
     int num_comps = V_.size();
     int num_gates = channel_.size()*3;
 
-    get_lookup_rows_and_fractions_cuda_wrapper(dt);
-    advance_channels_cuda_wrapper(dt);
+    GpuTimer tejaTimer;
+    GpuTimer wenyanLookupTimer, wenyanComputeTimer;
+
+
+    tejaTimer.Start();
+		get_lookup_rows_and_fractions_cuda_wrapper(dt);
+		advance_channels_cuda_wrapper(dt);
+	tejaTimer.Stop();
 
 #ifdef DEBUG_STEP
     printf("Press [ENTER] to start advanceChannels...\n");
     getchar();
 #endif    
+    wenyanLookupTimer.Start();
 
-    vector<double> caRow_ac;
-    vector<LookupColumn> column_ac;
-    
-    iv = V_.begin();
+		vector<double> caRow_ac;
+		vector<LookupColumn> column_ac;
 
-    double * v_row_array_d;
+		iv = V_.begin();
 
-    /*
-     * If number of compartments are not sufficiently large,
-     * we use CPU to calculate for rows.
-     * However, here 1024 is a magic value. It could be optimized
-     * by testing out different values.
-     */
-    if(V_.size() < 1024)
-    {
-        vector<double> v_row_temp(V_.size());
-        vector<double>::iterator v_row_iter = v_row_temp.begin();
-        for(u32 i = 0 ; i < V_.size(); ++i)
-        {
-            vTable_.row(*iv, *v_row_iter);
-            iv++;
-            v_row_iter++;
-        }       
+		double * v_row_array_d;
 
-        copy_to_device(&v_row_array_d, &v_row_temp.front(), V_.size());
+		/*
+		 * If number of compartments are not sufficiently large,
+		 * we use CPU to calculate for rows.
+		 * However, here 1024 is a magic value. It could be optimized
+		 * by testing out different values.
+		 */
+		if(V_.size() < 1024)
+		{
+			vector<double> v_row_temp(V_.size());
+			vector<double>::iterator v_row_iter = v_row_temp.begin();
+			for(u32 i = 0 ; i < V_.size(); ++i)
+			{
+				vTable_.row(*iv, *v_row_iter);
+				iv++;
+				v_row_iter++;
+			}
 
-    } else {
-        vTable_.row_gpu(iv, &v_row_array_d, V_.size());
-    }
+			copy_to_device(&v_row_array_d, &v_row_temp.front(), V_.size());
+
+		} else {
+			vTable_.row_gpu(iv, &v_row_array_d, V_.size());
+		}
+    wenyanLookupTimer.Stop();
 
 #if defined(DEBUG_) && defined(DEBUG_VERBOSE) 
     printf("Trying to access v_row_array_d...\n");
@@ -504,6 +513,7 @@ void HSolveActive::advanceChannels( double dt )
               HSolveActive::INSTANT_Y,
               HSolveActive::INSTANT_Z);
 
+    wenyanComputeTimer.Start();
     /* 
      * The call to the function that does the actual
      * calculations.
@@ -520,6 +530,18 @@ void HSolveActive::advanceChannels( double dt )
                        (int)(column_.size()),
                        (int)(channel_data_.size()),
                        V_.size());
+    wenyanComputeTimer.Stop();
+
+    if(num_time_prints > 0){
+    	// Printing times.
+		printf("%f %f(%f+%f)\n", tejaTimer.Elapsed(),
+				wenyanLookupTimer.Elapsed()+wenyanComputeTimer.Elapsed(),
+				wenyanLookupTimer.Elapsed(),
+				wenyanComputeTimer.Elapsed());
+		num_time_prints--;
+    }
+
+
 
     caRow_ac.clear();
 
