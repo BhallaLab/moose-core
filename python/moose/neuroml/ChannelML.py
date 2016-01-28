@@ -263,8 +263,8 @@ class ChannelML():
             for fn_element,fn_name,fn_expr in [(time_course,'tau',"1/(alpha+beta)"),\
                                                 (steady_state,'inf',"alpha/(alpha+beta)")]:
                 ## put in args for alpha and beta, could be v and Ca dep.
-                expr_string = self.replace(fn_expr, 'alpha', 'self.alpha(v'+ca_name+')')
-                expr_string = self.replace(expr_string, 'beta', 'self.beta(v'+ca_name+')')                
+                expr_string = fn_expr.replace('alpha', 'self.alpha(v'+ca_name+')')
+                expr_string = expr_string.replace('beta', 'self.beta(v'+ca_name+')')                
                 ## if time_course/steady_state are not present,
                 ## then alpha annd beta transition elements should be present, and fns created.
                 if fn_element is None:
@@ -411,8 +411,8 @@ class ChannelML():
             expr_string = element.attrib['expr']
             if concdep is None: ca_name = ''                        # no Ca dependence
             else: ca_name = ','+concdep.attrib['variable_name']     # Ca dependence
-            expr_string = self.replace(expr_string, 'alpha', 'self.alpha(v'+ca_name+')')
-            expr_string = self.replace(expr_string, 'beta', 'self.beta(v'+ca_name+')')                
+            expr_string = expr_string.replace( 'alpha', 'self.alpha(v'+ca_name+')')
+            expr_string = expr_string.replace( 'beta', 'self.beta(v'+ca_name+')')                
             fn = self.make_function( fn_name, fn_type, expr_string=expr_string, concdep=concdep )
         else:
             pu.fatal("Unsupported function type %s "% fn_type)
@@ -462,15 +462,13 @@ class ChannelML():
                     else:
                         val = eval(alternativeFalse,{"__builtins__":None},allowed_locals)
                 else:
-                    val = eval(expr_str,{"__builtins__":None},allowed_locals)
+                    val = eval(expr_str,{"__builtins__" : None},allowed_locals)
                 if fn_name == 'tau': return val/self.q10factor
                 else: return val
 
         fn.__name__ = fn_name
         setattr(self.__class__, fn.__name__, fn)
 
-    def replace(self, text, findstr, replacestr):
-        return string.join(string.split(text,findstr),replacestr)
 
 def make_new_synapse(syn_name, postcomp, syn_name_full, nml_params):
     ## if channel does not exist in library load it from xml file
