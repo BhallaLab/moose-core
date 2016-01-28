@@ -184,7 +184,7 @@ protected:
 	double* d_V_fractions;
 
 	// temp code
-	int num_time_prints = 5;
+	int num_time_prints = 50;
 
 #endif
     static const int INSTANT_X;
@@ -232,7 +232,7 @@ private:
     void copy_hsolve_information_cuda();
 
     void get_lookup_rows_and_fractions_cuda_wrapper(double dt);
-    void advance_channels_cuda_wrapper(double dt);
+    void advance_channels_cuda_wrapper(double dt, float &time_taken);
 
 
 	void advanceChannel_gpu(
@@ -246,7 +246,8 @@ private:
     double                          dt,
     int                             set_size,
     int                             channel_size,
-    int                             num_of_compartment
+    int                             num_of_compartment,
+    float							&kernel_time
     );
 #endif
 

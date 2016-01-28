@@ -10,6 +10,8 @@
 
 #ifdef USE_CUDA
 
+#include "Gpu_timer.h"
+
 #include <thrust/device_vector.h>
 #include <thrust/host_vector.h>
 #include <thrust/system/system_error.h>
@@ -50,6 +52,7 @@ void advance_channels_cuda(
 		double* v_table,
 		double* gate_values,
 		int* gate_columns,
+		int* chan_to_comp,
 		int* chan_instants,
 		unsigned int nColumns,
 		double dt,
@@ -58,18 +61,20 @@ void advance_channels_cuda(
 	int tid = threadIdx.x + blockIdx.x * blockDim.x;
 	if(tid >= size) return;
 
+	int comp = chan_to_comp[tid/3];
+
 	int col = gate_columns[tid];
-	int row_start_ind = v_rows[tid];
+	int row_start_ind = v_rows[comp];
 
 	double a = v_table[row_start_ind+col];
 	double b = v_table[row_start_ind+col+nColumns];
 
-	double C1 = a + (b-a)*v_fracs[tid];
+	double C1 = a + (b-a)*v_fracs[comp];
 
 	a = v_table[row_start_ind+col+1];
 	b = v_table[row_start_ind+col+1+nColumns];
 
-	double C2 = a + (b-a)*v_fracs[tid];
+	double C2 = a + (b-a)*v_fracs[comp];
 
 	if(!chan_instants[tid/3]){ // tid/3 bcos #gates = 3*#chans
 		a = 1.0 + dt/2.0 * C2; // reusing a
@@ -85,7 +90,6 @@ void HSolveActive::get_lookup_rows_and_fractions_cuda_wrapper(double dt){
 
 	int num_comps = V_.size();
 
-	int THREADS_PER_BLOCK = 512;
 	int BLOCKS = num_comps/THREADS_PER_BLOCK;
 	BLOCKS = (num_comps%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
 
@@ -98,25 +102,31 @@ void HSolveActive::get_lookup_rows_and_fractions_cuda_wrapper(double dt){
 }
 
 
-void HSolveActive::advance_channels_cuda_wrapper(double dt){
+void HSolveActive::advance_channels_cuda_wrapper(double dt, float &tejaTime){
 
 	int num_gates = 3*channel_.size();
 
     // Get the Row number and fraction values of Vm's from vTable
-    int THREADS_PER_BLOCK = 512;
     int BLOCKS = num_gates/THREADS_PER_BLOCK;
     BLOCKS = (num_gates%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
 
+    GpuTimer tejaTimer;
 
-    advance_channels_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(
-    		d_V_rows,
-			d_V_fractions,
-			d_V_table,
-			d_gate_values,
-			d_gate_columns,
-			d_chan_instant,
-			vTable_.get_num_of_columns(),
-			dt, num_gates);
+    tejaTimer.Start();
+		advance_channels_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(
+				d_V_rows,
+				d_V_fractions,
+				d_V_table,
+				d_gate_values,
+				d_gate_columns,
+				d_chan_to_comp,
+				d_chan_instant,
+				vTable_.get_num_of_columns(),
+				dt, num_gates);
+		cudaSafeCall(cudaDeviceSynchronize());
+    tejaTimer.Stop();
+
+    tejaTime = tejaTimer.Elapsed();
 
 }
 
@@ -269,7 +279,8 @@ void HSolveActive::advanceChannel_gpu(
     double                          dt,
     int 							set_size,
     int 							channel_size,
-    int 							num_of_compartment
+    int 							num_of_compartment,
+    float 							&kernel_time
 )
 {
     double * caRow_array_d;
@@ -326,21 +337,31 @@ void HSolveActive::advanceChannel_gpu(
         blockSize.x = channel_size;
     }
 
-    //Launch CUDA kernel.
-    advanceChannel_kernel<<<gridSize,blockSize>>>(
-        vTable.get_table_d(),
-        vTable.get_num_of_columns(),
-        v_row_d,
-        column,
-        caTable.get_table_d(),
-        caTable.get_num_of_columns(),
-        channel,
-        caRow_array_d,
-        istate_d,
-        channel_size,
-        dt,
-        num_of_compartment
-    );
+    int BLOCKS = channel_size/THREADS_PER_BLOCK;
+    BLOCKS = (channel_size%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
+
+    GpuTimer wenyanKernelTimer;
+
+    wenyanKernelTimer.Start();
+		//Launch CUDA kernel.
+		advanceChannel_kernel<<<BLOCKS,THREADS_PER_BLOCK>>>(
+			vTable.get_table_d(),
+			vTable.get_num_of_columns(),
+			v_row_d,
+			column,
+			caTable.get_table_d(),
+			caTable.get_num_of_columns(),
+			channel,
+			caRow_array_d,
+			istate_d,
+			channel_size,
+			dt,
+			num_of_compartment
+		);
+		cudaSafeCall(cudaDeviceSynchronize());
+    wenyanKernelTimer.Stop();
+
+    kernel_time = wenyanKernelTimer.Elapsed();
 
     //cudaCheckError();
 

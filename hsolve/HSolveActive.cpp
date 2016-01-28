@@ -376,27 +376,68 @@ void HSolveActive::advanceChannels( double dt )
 
     LookupRow vRow;
 #ifdef USE_CUDA
-    if(num_time_prints ==5 )
-    	printf("Running advanceChannels Using Cuda\n");
 
     // Useful numbers
     int num_comps = V_.size();
     int num_gates = channel_.size()*3;
 
-    GpuTimer tejaTimer;
-    GpuTimer wenyanLookupTimer, wenyanComputeTimer;
+    float tejaTime = 0 , wenyanTime = 0;
+
+    // TODO This should be done only at the begining of simulation not in each step
+    // ----------------------------------------------------------------------------
+    cudaMemcpy(d_V, &(V_.front()), nCompt_* sizeof(double), cudaMemcpyHostToDevice);
+
+	double* test_gate_values = new double[num_gates]();
+	// Getting the indices
+	vector<int> cmprsd_gate_indices;
+	for(int i=0;i<channel_.size();i++){
+		int x = 0;
+		if(channel_[i].Xpower_ > 0){
+			cmprsd_gate_indices.push_back(3*i+x);
+			x++;
+		}
+
+		if(channel_[i].Ypower_ > 0){
+			cmprsd_gate_indices.push_back(3*i+x);
+			x++;
+		}
+
+		if(channel_[i].Zpower_ > 0){
+			cmprsd_gate_indices.push_back(3*i+x);
+			x++;
+		}
+	}
+
+	// Copying from state_ to test_gate_values
+	for(int i=0;i<cmprsd_gate_indices.size();i++){
+		test_gate_values[cmprsd_gate_indices[i]] = state_[i];
+	}
+
+	cudaMemcpy(d_gate_values, test_gate_values, num_gates*sizeof(double), cudaMemcpyHostToDevice);
+	// ----------------------------------------------------------------------------
+
+	get_lookup_rows_and_fractions_cuda_wrapper(dt);
+
+	/*
+	// Checking correctness of get_lookup_rows_and_fractions_cuda Kernel
+	double test_V[num_comps];
+	int test_rows[num_comps];
+	double test_fracs[num_comps];
+
+	cudaMemcpy(test_V, d_V, num_comps*sizeof(double), cudaMemcpyDeviceToHost);
+	cudaMemcpy(test_rows, d_V_rows, num_comps*sizeof(int), cudaMemcpyDeviceToHost);
+	cudaMemcpy(test_fracs, d_V_fractions, num_comps*sizeof(double), cudaMemcpyDeviceToHost);
+	*/
 
 
-    tejaTimer.Start();
-		get_lookup_rows_and_fractions_cuda_wrapper(dt);
-		advance_channels_cuda_wrapper(dt);
-	tejaTimer.Stop();
+	// Calling kernel
+	advance_channels_cuda_wrapper(dt, tejaTime);
 
 #ifdef DEBUG_STEP
     printf("Press [ENTER] to start advanceChannels...\n");
     getchar();
 #endif    
-    wenyanLookupTimer.Start();
+
 
 		vector<double> caRow_ac;
 		vector<LookupColumn> column_ac;
@@ -405,29 +446,34 @@ void HSolveActive::advanceChannels( double dt )
 
 		double * v_row_array_d;
 
-		/*
-		 * If number of compartments are not sufficiently large,
-		 * we use CPU to calculate for rows.
-		 * However, here 1024 is a magic value. It could be optimized
-		 * by testing out different values.
-		 */
-		if(V_.size() < 1024)
-		{
-			vector<double> v_row_temp(V_.size());
-			vector<double>::iterator v_row_iter = v_row_temp.begin();
-			for(u32 i = 0 ; i < V_.size(); ++i)
+			/*
+			 * If number of compartments are not sufficiently large,
+			 * we use CPU to calculate for rows.
+			 * However, here 1024 is a magic value. It could be optimized
+			 * by testing out different values.
+			 */
+			if(V_.size() < 1024)
 			{
-				vTable_.row(*iv, *v_row_iter);
-				iv++;
-				v_row_iter++;
+				vector<double> v_row_temp(V_.size());
+				vector<double>::iterator v_row_iter = v_row_temp.begin();
+				for(u32 i = 0 ; i < V_.size(); ++i)
+				{
+					vTable_.row(*iv, *v_row_iter);
+					iv++;
+					v_row_iter++;
+				}
+
+				copy_to_device(&v_row_array_d, &v_row_temp.front(), V_.size());
+
+				/*
+				for(int i=0;i<nCompt_;i++){
+					printf("%lf, %d, %lf | %lf %lf\n", test_V[i], test_rows[i], test_fracs[i], V_[i], v_row_temp[i]);
+				}
+				*/
+			} else {
+				vTable_.row_gpu(iv, &v_row_array_d, V_.size());
 			}
 
-			copy_to_device(&v_row_array_d, &v_row_temp.front(), V_.size());
-
-		} else {
-			vTable_.row_gpu(iv, &v_row_array_d, V_.size());
-		}
-    wenyanLookupTimer.Stop();
 
 #if defined(DEBUG_) && defined(DEBUG_VERBOSE) 
     printf("Trying to access v_row_array_d...\n");
@@ -513,7 +559,6 @@ void HSolveActive::advanceChannels( double dt )
               HSolveActive::INSTANT_Y,
               HSolveActive::INSTANT_Z);
 
-    wenyanComputeTimer.Start();
     /* 
      * The call to the function that does the actual
      * calculations.
@@ -529,19 +574,21 @@ void HSolveActive::advanceChannels( double dt )
                        dt,
                        (int)(column_.size()),
                        (int)(channel_data_.size()),
-                       V_.size());
-    wenyanComputeTimer.Stop();
+                       V_.size(), wenyanTime);
+
+    /*
+	cudaMemcpy(test_gate_values, d_gate_values, num_gates*sizeof(double), cudaMemcpyDeviceToHost);
+    for(int i=0;i<state_.size();i++){
+    	printf("%lf %lf\n",test_gate_values[cmprsd_gate_indices[i]] , state_[i]);
+    }
+    */
+
 
     if(num_time_prints > 0){
     	// Printing times.
-		printf("%f %f(%f+%f)\n", tejaTimer.Elapsed(),
-				wenyanLookupTimer.Elapsed()+wenyanComputeTimer.Elapsed(),
-				wenyanLookupTimer.Elapsed(),
-				wenyanComputeTimer.Elapsed());
+		printf("%f %f\n", tejaTime, wenyanTime);
 		num_time_prints--;
     }
-
-
 
     caRow_ac.clear();
 
@@ -699,6 +746,7 @@ void HSolveActive::copy_hsolve_information_cuda(){
 	int num_gates = 3*num_chans;
 
 	// Gate variables
+	double h_gate_values[num_gates];
 	double h_gate_powers[num_gates];
 	unsigned int h_gate_columns[num_gates];
 
@@ -739,28 +787,35 @@ void HSolveActive::copy_hsolve_information_cuda(){
 		// For x
 		if(h_gate_powers[3*i] > 0){
 			h_gate_columns[3*i] = column_[temp_pivot].column;
+			h_gate_values[3*i] = state_[temp_pivot];
 			temp_pivot++;
 		}else{
 			h_gate_columns[3*i] = 0; // Default to zero column
+			h_gate_values[3*i] = 0;
 		}
 
 		// For y
 		if(h_gate_powers[3*i+1] > 0){
 			h_gate_columns[3*i+1] = column_[temp_pivot].column;
+			h_gate_values[3*i+1] = state_[temp_pivot];
 			temp_pivot++;
 		}else{
 			h_gate_columns[3*i+1] = 0; // Default to zero column
+			h_gate_values[3*i+1] = 0;
 		}
 
 		// For z
 		if(h_gate_powers[3*i+2] > 0){
 			h_gate_columns[3*i+2] = column_[temp_pivot].column;
+			h_gate_values[3*i+2] = state_[temp_pivot];
 			temp_pivot++;
 		}else{
 			h_gate_columns[3*i+2] = 0; // Default to zero column
+			h_gate_values[3*i+2] = 0;
 		}
 	}
 
+	cudaMemcpy(d_gate_values, h_gate_values, num_gates * sizeof(double), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_gate_powers, h_gate_powers, num_gates * sizeof(double), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_gate_columns, h_gate_columns, num_gates * sizeof(int), cudaMemcpyHostToDevice);
 
