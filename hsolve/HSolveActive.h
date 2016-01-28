@@ -153,6 +153,35 @@ protected:
                              const int                  x,
                              const int                  y,
                              const int                  z);
+
+	// CUDA Passive Data
+
+	// LookUp Tables
+	double* d_V_table;
+	double* d_Ca_table;
+
+	// Gate related
+	double* d_gate_values; // Values of x,y,x for all channels.
+	double* d_gate_powers; // Powers of x,y,z for all channels.
+	int* d_gate_columns; // Corresponding columns of lookup tables
+	int* d_gate_to_comp; // Which compartment does a gate belong to.
+  //int* d_gate_to_chan; // Not needed as we store 3 gates(x,y,z) for each channel.
+
+	// Channel related
+	int* d_chan_instant;
+	double* d_chan_modulation;
+	double* d_chan_Gbar;
+	int* d_chan_to_comp; // Which compartment does a Channel belong to.
+
+	// Compartment related
+
+	// CUDA Active Permanent data
+	double* d_V;
+
+	// CUDA Active helper data
+	int* d_V_rows;
+	double* d_V_fractions;
+
 #endif
     static const int INSTANT_X;
     static const int INSTANT_Y;
@@ -193,6 +222,15 @@ private:
     void sendValues( ProcPtr info );
 
 #ifdef USE_CUDA
+    // Hsolve GPU set up kernels
+    void allocate_hsolve_device_memory_cuda();
+    void copy_table_data_cuda();
+    void copy_hsolve_information_cuda();
+
+    void get_lookup_rows_and_fractions_cuda_wrapper(double dt);
+    void advance_channels_cuda_wrapper(double dt);
+
+
 	void advanceChannel_gpu(
     double *                          v_row,
     vector<double>&                   caRow,

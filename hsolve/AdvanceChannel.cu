@@ -17,6 +17,109 @@
 
 __device__ __constant__ int instant_xyz_d[3];
 
+__global__
+void get_lookup_rows_and_fractions_cuda(
+		double* lookups,
+		double* table,
+		double min, double max, double dx,
+		int* rows, double* fracs,
+		unsigned int nColumns, unsigned int size){
+
+	int tid = threadIdx.x + blockIdx.x * blockDim.x;
+
+	if(tid >= size) return;
+
+	double x = lookups[tid];
+
+	if ( x < min )
+		x = min;
+	else if ( x > max )
+		x = max;
+
+	double div = ( x - min ) / dx;
+	unsigned int integer = ( unsigned int )( div );
+
+	rows[tid] = integer*nColumns;
+	fracs[tid] = div-integer;
+}
+
+__global__
+void advance_channels_cuda(
+		int* v_rows,
+		double* v_fracs,
+		double* v_table,
+		double* gate_values,
+		int* gate_columns,
+		int* chan_instants,
+		unsigned int nColumns,
+		double dt,
+		int size
+		){
+	int tid = threadIdx.x + blockIdx.x * blockDim.x;
+	if(tid >= size) return;
+
+	int col = gate_columns[tid];
+	int row_start_ind = v_rows[tid];
+
+	double a = v_table[row_start_ind+col];
+	double b = v_table[row_start_ind+col+nColumns];
+
+	double C1 = a + (b-a)*v_fracs[tid];
+
+	a = v_table[row_start_ind+col+1];
+	b = v_table[row_start_ind+col+1+nColumns];
+
+	double C2 = a + (b-a)*v_fracs[tid];
+
+	if(!chan_instants[tid/3]){ // tid/3 bcos #gates = 3*#chans
+		a = 1.0 + dt/2.0 * C2; // reusing a
+		gate_values[tid] = ( gate_values[tid] * ( 2.0 - a ) + dt * C1 ) / a;
+	}
+	else{
+		gate_values[tid] = C1/C2;
+	}
+
+}
+
+void HSolveActive::get_lookup_rows_and_fractions_cuda_wrapper(double dt){
+
+	int num_comps = V_.size();
+
+	int THREADS_PER_BLOCK = 512;
+	int BLOCKS = num_comps/THREADS_PER_BLOCK;
+	BLOCKS = (num_comps%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
+
+
+	get_lookup_rows_and_fractions_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(d_V,
+    		d_V_table,
+    		vTable_.get_min(), vTable_.get_max(), vTable_.get_dx(),
+    		d_V_rows, d_V_fractions,
+    		vTable_.get_num_of_columns(), num_comps);
+}
+
+
+void HSolveActive::advance_channels_cuda_wrapper(double dt){
+
+	int num_gates = 3*channel_.size();
+
+    // Get the Row number and fraction values of Vm's from vTable
+    int THREADS_PER_BLOCK = 512;
+    int BLOCKS = num_gates/THREADS_PER_BLOCK;
+    BLOCKS = (num_gates%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
+
+
+    advance_channels_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(
+    		d_V_rows,
+			d_V_fractions,
+			d_V_table,
+			d_gate_values,
+			d_gate_columns,
+			d_chan_instant,
+			vTable_.get_num_of_columns(),
+			dt, num_gates);
+
+}
+
 /*
  * Copy row arrays to device.
  * To isolate CUDA functions from HSolveActive.cpp

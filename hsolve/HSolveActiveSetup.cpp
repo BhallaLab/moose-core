@@ -28,6 +28,15 @@ void HSolveActive::setup( Id seed, double dt )
     readExternalChannels();
     manageOutgoingMessages(); // Manages messages going out from the cell's components.
 
+#ifdef USE_CUDA
+    // Cuda realted setup
+    allocate_hsolve_device_memory_cuda();
+    copy_table_data_cuda();
+    copy_hsolve_information_cuda();
+
+#endif
+
+
     //~ reinit();
     cleanup();
 
