@@ -39,12 +39,18 @@ Load Kinetics Models
 .. automodule:: loadKineticModel
   :members:
 
+Load SBML Models
+^^^^^^^^^^^^^^^^^
+.. automodule:: loadSbmlmodel
+  :members:
+
 Load Cspace Models
 ^^^^^^^^^^^^^^^^^^^
 .. automodule:: loadCspaceModel
    :members:
 
-Convert Genesis Model to Sbml format
+Save Models to Sbml format
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. automodule:: convert_Genesis2Sbml
    :members:
+   
