@@ -156,6 +156,7 @@ protected:
                              const int                  z);
 
 	// CUDA Passive Data
+	vector<int> h_gate_expand_indices;
 
 	// LookUp Tables
 	double* d_V_table;
@@ -167,6 +168,8 @@ protected:
 	int* d_gate_columns; // Corresponding columns of lookup tables
 	int* d_gate_ca_index; // -1 -> V_lookup , (>0) -> Ca_lookup
 	int* d_gate_to_comp; // Which compartment does a gate belong to.
+	int* d_gate_expand_indices;
+	double* d_state_;
   //int* d_gate_to_chan; // Not needed as we store 3 gates(x,y,z) for each channel.
 
 	// Channel related
@@ -174,8 +177,6 @@ protected:
 	double* d_chan_modulation;
 	double* d_chan_Gbar;
 	int* d_chan_to_comp; // Which compartment does a Channel belong to.
-
-
 
 	// Compartment related
 
@@ -192,6 +193,7 @@ protected:
 
 	// temp code
 	int num_time_prints = 0;
+	bool init_gate_values = false;
 
 #endif
     static const int INSTANT_X;
@@ -240,6 +242,7 @@ private:
 
     void get_lookup_rows_and_fractions_cuda_wrapper(double dt);
     void advance_channels_cuda_wrapper(double dt, float &time_taken);
+    void get_compressed_gate_values_wrapper();
 
 
 	void advanceChannel_gpu(

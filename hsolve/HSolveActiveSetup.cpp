@@ -269,6 +269,26 @@ void HSolveActive::readHHChannels()
             chan2compt_.push_back( icompt - compartmentId_.begin() );            
         }
     }
+#ifdef USE_CUDA
+    // Getting indices in the expanded(3*) array
+	for(int i=0;i<channel_.size();i++){
+		int x = 0;
+		if(channel_[i].Xpower_ > 0){
+			h_gate_expand_indices.push_back(3*i+x);
+			x++;
+		}
+
+		if(channel_[i].Ypower_ > 0){
+			h_gate_expand_indices.push_back(3*i+x);
+			x++;
+		}
+
+		if(channel_[i].Zpower_ > 0){
+			h_gate_expand_indices.push_back(3*i+x);
+			x++;
+		}
+	}
+#endif
 
     int nCumulative = 0;
     currentBoundary_.resize( nCompt_ );

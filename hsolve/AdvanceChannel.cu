@@ -137,6 +137,16 @@ void advance_channels_cuda(
 
 }
 
+__global__
+void get_compressed_gate_values(double* expanded_array,
+		int* expanded_indices, double* d_cmprsd_state, int size){
+
+	int tid = threadIdx.x + blockIdx.x * blockDim.x;
+	if(tid < size)
+		d_cmprsd_state[tid] = expanded_array[expanded_indices[tid]];
+}
+
+
 void HSolveActive::get_lookup_rows_and_fractions_cuda_wrapper(double dt){
 
 	int num_comps = V_.size();
@@ -192,7 +202,19 @@ void HSolveActive::advance_channels_cuda_wrapper(double dt, float &tejaTime){
 
     tejaTime = tejaTimer.Elapsed();
 
-    cudaCheckError();
+
+}
+
+
+void HSolveActive::get_compressed_gate_values_wrapper(){
+
+	int num_cmprsd_gates = state_.size();
+
+	int BLOCKS = num_cmprsd_gates/THREADS_PER_BLOCK;
+	BLOCKS = (num_cmprsd_gates%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
+
+	//get_compressed_gate_values<<<BLOCKS,THREADS_PER_BLOCK>>>(d_gate_values, d_gate_expand_indices, d_state_, num_cmprsd_gates);
+	//cudaSafeCall(cudaMemcpy(&(state_.front()), d_state_, num_cmprsd_gates*sizeof(double), cudaMemcpyDeviceToHost));
 
 }
 
@@ -202,6 +224,7 @@ void HSolveActive::advance_channels_cuda_wrapper(double dt, float &tejaTime){
  */
 void HSolveActive::copy_to_device(double ** v_row_array, double * v_row_temp, int size)
 {
+
     cudaSafeCall(cudaMalloc((void**)v_row_array, sizeof(double) * size));
     cudaSafeCall(cudaMemcpy(*v_row_array, v_row_temp, sizeof(double) * size, cudaMemcpyHostToDevice));
 }

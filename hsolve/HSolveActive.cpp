@@ -375,6 +375,9 @@ void HSolveActive::advanceChannels( double dt )
     vector< LookupRow* >::iterator icarow = caRow_.begin();
 
     LookupRow vRow;
+
+    //double* gate_values_after_cuda = new double[h_gate_expand_indices.size()]();
+
 #ifdef USE_CUDA
 
     // Useful numbers
@@ -385,38 +388,34 @@ void HSolveActive::advanceChannels( double dt )
 
     // TODO This should be done only at the beginning of simulation not in each step
     // ----------------------------------------------------------------------------
-    cudaMemcpy(d_V, &(V_.front()), nCompt_* sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_V, &(V_.front()), nCompt_ * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_ca, &(ca_.front()), ca_.size()*sizeof(double), cudaMemcpyHostToDevice);
 
-	double* test_gate_values = new double[num_gates]();
-	// Getting the indices
-	vector<int> cmprsd_gate_indices;
-	for(int i=0;i<channel_.size();i++){
-		int x = 0;
-		if(channel_[i].Xpower_ > 0){
-			cmprsd_gate_indices.push_back(3*i+x);
-			x++;
+	if(!init_gate_values){
+		printf("INITIALIZING Gate Values\n");
+		double* test_gate_values = new double[num_gates]();
+		// Copying from state_ to test_gate_values
+		for(int i=0;i<h_gate_expand_indices.size();i++){
+			test_gate_values[h_gate_expand_indices[i]] = state_[i];
 		}
 
-		if(channel_[i].Ypower_ > 0){
-			cmprsd_gate_indices.push_back(3*i+x);
-			x++;
-		}
-
-		if(channel_[i].Zpower_ > 0){
-			cmprsd_gate_indices.push_back(3*i+x);
-			x++;
-		}
+		cudaMemcpy(d_gate_values, test_gate_values, num_gates*sizeof(double), cudaMemcpyHostToDevice);
+		init_gate_values = true;
 	}
 
-	// Copying from state_ to test_gate_values
-	for(int i=0;i<cmprsd_gate_indices.size();i++){
-		test_gate_values[cmprsd_gate_indices[i]] = state_[i];
-	}
-
-	cudaMemcpy(d_gate_values, test_gate_values, num_gates*sizeof(double), cudaMemcpyHostToDevice);
 	// ----------------------------------------------------------------------------
 
 	get_lookup_rows_and_fractions_cuda_wrapper(dt);
+	advance_channels_cuda_wrapper(dt, tejaTime); // Calling kernel
+	get_compressed_gate_values_wrapper(); // Getting values of new state
+
+	double temp[channel_.size()*3];
+	cudaSafeCall(cudaMemcpy(temp, d_gate_values, channel_.size()*3*sizeof(double), cudaMemcpyDeviceToHost));
+
+	for(unsigned int i=0;i<h_gate_expand_indices.size();i++){
+		state_[i] = temp[h_gate_expand_indices[i]];
+		//gate_values_after_cuda[i] = temp[h_gate_expand_indices[i]];
+	}
 
 	/*
 	// Checking correctness of get_lookup_rows_and_fractions_cuda Kernel
@@ -430,10 +429,7 @@ void HSolveActive::advanceChannels( double dt )
 	*/
 
 
-	// Calling kernel
-	advance_channels_cuda_wrapper(dt, tejaTime);
-	cudaCheckError();
-
+	/*
 #ifdef DEBUG_STEP
     printf("Press [ENTER] to start advanceChannels...\n");
     getchar();
@@ -447,12 +443,12 @@ void HSolveActive::advanceChannels( double dt )
 
 		double * v_row_array_d;
 
-			/*
-			 * If number of compartments are not sufficiently large,
-			 * we use CPU to calculate for rows.
-			 * However, here 1024 is a magic value. It could be optimized
-			 * by testing out different values.
-			 */
+
+			 // If number of compartments are not sufficiently large,
+			 // we use CPU to calculate for rows.
+			 // However, here 1024 is a magic value. It could be optimized
+			 // by testing out different values.
+
 			if(V_.size() < 1024)
 			{
 				vector<double> v_row_temp(V_.size());
@@ -465,12 +461,6 @@ void HSolveActive::advanceChannels( double dt )
 				}
 
 				copy_to_device(&v_row_array_d, &v_row_temp.front(), V_.size());
-
-				/*
-				for(int i=0;i<nCompt_;i++){
-					printf("%lf, %d, %lf | %lf %lf\n", test_V[i], test_rows[i], test_fracs[i], V_[i], v_row_temp[i]);
-				}
-				*/
 			} else {
 				vTable_.row_gpu(iv, &v_row_array_d, V_.size());
 			}
@@ -496,10 +486,9 @@ void HSolveActive::advanceChannels( double dt )
 #endif    
 #endif 
     
-    /*
-     * Convert rows from row structs to double values
-     * in order to reduce memory usage.
-     */
+
+     // Convert rows from row structs to double values
+     // in order to reduce memory usage.
     caRow_ac.resize(caRow_.size());
     for(u32 i = 0; i < caRow_.size(); ++i)
     {
@@ -542,15 +531,15 @@ void HSolveActive::advanceChannels( double dt )
 #endif    
 #endif    
 
-    /*
-     * Copy static infos, such as mappings and indices.
-     * Such infos will be kept in device memory until the
-     * program exits. Therefore copy_data function will 
-     * check if the copy has been done before. 
-     * This function will only be executed once so no worry
-     * about the performance.
-     * See AdvanceChannel.cu for more details.
-     */
+
+     // Copy static infos, such as mappings and indices.
+     // Such infos will be kept in device memory until the
+     // program exits. Therefore copy_data function will
+     // check if the copy has been done before.
+     // This function will only be executed once so no worry
+     // about the performance.
+     // See AdvanceChannel.cu for more details.
+
     copy_data(column_,
     		  &column_d,
     		  &is_inited_,
@@ -560,11 +549,11 @@ void HSolveActive::advanceChannels( double dt )
               HSolveActive::INSTANT_Y,
               HSolveActive::INSTANT_Z);
 
-    /* 
-     * The call to the function that does the actual
-     * calculations.
-     * See AdvanceChannel.cu for more details.
-     */
+
+     // The call to the function that does the actual
+     // calculations.
+     // See AdvanceChannel.cu for more details.
+
     advanceChannel_gpu(v_row_array_d, 
                        caRow_ac, 
                        column_d, 
@@ -576,13 +565,6 @@ void HSolveActive::advanceChannels( double dt )
                        (int)(column_.size()),
                        (int)(channel_data_.size()),
                        V_.size(), wenyanTime);
-
-    /*
-	cudaMemcpy(test_gate_values, d_gate_values, num_gates*sizeof(double), cudaMemcpyDeviceToHost);
-    for(int i=0;i<state_.size();i++){
-    	printf("%lf %lf\n",test_gate_values[cmprsd_gate_indices[i]] , state_[i]);
-    }
-    */
 
 
     if(num_time_prints > 0){
@@ -599,7 +581,8 @@ void HSolveActive::advanceChannels( double dt )
     getchar();
 #endif    
 #endif 
-#else    
+    */
+#else
     double C1, C2;
 
     for ( iv = V_.begin(); iv != V_.end(); ++iv )
@@ -684,6 +667,21 @@ void HSolveActive::advanceChannels( double dt )
 
         ++ichannelcount, ++icacount;
     }
+
+    /*
+    // Printing values of cuda call and cpu call
+    float error = 0;
+    for(int i=0;i<state_.size();i++){
+    	error += gate_values_after_cuda[i]-state_[i];
+    	//printf("%lf %lf\n",state_[i], gate_values_after_cuda[i]);
+    }
+    printf("Error %f\n",error);
+    getchar();
+    */
+
+
+
+
 #endif
       
 }
@@ -697,6 +695,7 @@ void HSolveActive::allocate_hsolve_device_memory_cuda(){
 	int num_compts = V_.size();
 	int num_channels = channel_.size() ;
 	int num_gates = 3*num_channels;
+	int num_cmprsd_gates = state_.size();
 	int num_Ca_pools = ca_.size();
 
 	// LookUp Tables
@@ -714,6 +713,9 @@ void HSolveActive::allocate_hsolve_device_memory_cuda(){
 	cudaMalloc((void**)&d_gate_columns, num_gates*sizeof(double));
 	cudaMalloc((void**)&d_gate_to_comp, num_gates*sizeof(int));
 	cudaMalloc((void**)&d_gate_ca_index, num_gates*sizeof(int));
+
+	cudaMalloc((void**)&d_state_, num_cmprsd_gates*sizeof(double));
+	cudaMalloc((void**)&d_gate_expand_indices, num_cmprsd_gates*sizeof(int));
 
 	// Channel related
 
@@ -751,6 +753,7 @@ void HSolveActive::copy_hsolve_information_cuda(){
 	int num_compts = V_.size();
 	int num_chans = channel_.size();
 	int num_gates = 3*num_chans;
+	int num_cmprsd_gates = state_.size();
 	int num_Ca_pools = ca_.size();
 
 	// Gate variables
@@ -857,6 +860,8 @@ void HSolveActive::copy_hsolve_information_cuda(){
 	cudaMemcpy(d_gate_powers, h_gate_powers, num_gates * sizeof(double), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_gate_columns, h_gate_columns, num_gates * sizeof(int), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_gate_ca_index, h_gate_ca_index, num_gates * sizeof(int), cudaMemcpyHostToDevice);
+
+	cudaMemcpy(d_gate_expand_indices, &(h_gate_expand_indices.front()), num_cmprsd_gates * sizeof(double), cudaMemcpyHostToDevice);
 
 }
 
