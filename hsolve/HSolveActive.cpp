@@ -383,7 +383,7 @@ void HSolveActive::advanceChannels( double dt )
 
     float tejaTime = 0 , wenyanTime = 0;
 
-    // TODO This should be done only at the begining of simulation not in each step
+    // TODO This should be done only at the beginning of simulation not in each step
     // ----------------------------------------------------------------------------
     cudaMemcpy(d_V, &(V_.front()), nCompt_* sizeof(double), cudaMemcpyHostToDevice);
 
@@ -432,6 +432,7 @@ void HSolveActive::advanceChannels( double dt )
 
 	// Calling kernel
 	advance_channels_cuda_wrapper(dt, tejaTime);
+	cudaCheckError();
 
 #ifdef DEBUG_STEP
     printf("Press [ENTER] to start advanceChannels...\n");
@@ -696,6 +697,7 @@ void HSolveActive::allocate_hsolve_device_memory_cuda(){
 	int num_compts = V_.size();
 	int num_channels = channel_.size() ;
 	int num_gates = 3*num_channels;
+	int num_Ca_pools = ca_.size();
 
 	// LookUp Tables
 	int V_table_size = vTable_.get_table().size();
@@ -703,13 +705,15 @@ void HSolveActive::allocate_hsolve_device_memory_cuda(){
 
 	cudaMalloc((void **)&(d_V), num_compts * sizeof(double));
 	cudaMalloc((void **)&(d_V_table), V_table_size * sizeof(double));
-	cudaMalloc((void **)&(d_Ca_table), V_table_size * sizeof(double));
 
+	cudaMalloc((void **)&(d_ca), num_Ca_pools * sizeof(double));
+	cudaMalloc((void **)&(d_Ca_table), Ca_table_size * sizeof(double));
 
 	cudaMalloc((void**)&d_gate_values, num_gates*sizeof(double));
 	cudaMalloc((void**)&d_gate_powers, num_gates*sizeof(double));
 	cudaMalloc((void**)&d_gate_columns, num_gates*sizeof(double));
 	cudaMalloc((void**)&d_gate_to_comp, num_gates*sizeof(int));
+	cudaMalloc((void**)&d_gate_ca_index, num_gates*sizeof(int));
 
 	// Channel related
 
@@ -724,6 +728,9 @@ void HSolveActive::allocate_hsolve_device_memory_cuda(){
 
 	cudaMalloc((void**)&d_V_rows, num_compts*sizeof(int));
 	cudaMalloc((void**)&d_V_fractions, num_compts*sizeof(double));
+
+	cudaMalloc((void**)&d_Ca_rows, num_Ca_pools*sizeof(int));
+	cudaMalloc((void**)&d_Ca_fractions, num_Ca_pools*sizeof(double));
 
 }
 
@@ -744,11 +751,13 @@ void HSolveActive::copy_hsolve_information_cuda(){
 	int num_compts = V_.size();
 	int num_chans = channel_.size();
 	int num_gates = 3*num_chans;
+	int num_Ca_pools = ca_.size();
 
 	// Gate variables
 	double h_gate_values[num_gates];
 	double h_gate_powers[num_gates];
 	unsigned int h_gate_columns[num_gates];
+	int h_gate_ca_index[num_gates];
 
 	// Channel variables
 	double h_chan_Gbar[num_chans];
@@ -756,8 +765,10 @@ void HSolveActive::copy_hsolve_information_cuda(){
 	double h_chan_modulation[num_chans];
 	unsigned int h_chan_to_comp[num_chans];
 
-	// Transferring V_ values to GPU
+	// Transferring Vm and Ca concentration values to GPU
 	cudaMemcpy(d_V, &(V_.front()), num_compts*sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_ca, &(ca_.front()), num_Ca_pools*sizeof(double), cudaMemcpyHostToDevice);
+
 
 	// Gathering data for each channel
 	for(int i=0;i<num_chans;i++){
@@ -777,18 +788,20 @@ void HSolveActive::copy_hsolve_information_cuda(){
 	cudaMemcpy(d_chan_to_comp, h_chan_to_comp, num_chans * sizeof(unsigned int), cudaMemcpyHostToDevice);
 
 	// Gathering data for each gate
-	int temp_pivot = 0; // If the logic is true temp_pivot value at the end of for loop = # of gates with powers > 0
+	unsigned int temp_piv1 = 0; // If the logic is true temp_piv1 value at the end of for loop = # of gates with powers > 0
 	for(int i=0;i<num_chans;i++){
 
 		h_gate_powers[3*i] = channel_[i].Xpower_;
 		h_gate_powers[3*i+1] = channel_[i].Ypower_;
 		h_gate_powers[3*i+2] = channel_[i].Zpower_;
 
+		for(int j=0;j<3;j++) h_gate_ca_index[3*i+j] = -1; // Initializing to -1
+
 		// For x
 		if(h_gate_powers[3*i] > 0){
-			h_gate_columns[3*i] = column_[temp_pivot].column;
-			h_gate_values[3*i] = state_[temp_pivot];
-			temp_pivot++;
+			h_gate_columns[3*i] = column_[temp_piv1].column;
+			h_gate_values[3*i] = state_[temp_piv1];
+			temp_piv1++;
 		}else{
 			h_gate_columns[3*i] = 0; // Default to zero column
 			h_gate_values[3*i] = 0;
@@ -796,9 +809,9 @@ void HSolveActive::copy_hsolve_information_cuda(){
 
 		// For y
 		if(h_gate_powers[3*i+1] > 0){
-			h_gate_columns[3*i+1] = column_[temp_pivot].column;
-			h_gate_values[3*i+1] = state_[temp_pivot];
-			temp_pivot++;
+			h_gate_columns[3*i+1] = column_[temp_piv1].column;
+			h_gate_values[3*i+1] = state_[temp_piv1];
+			temp_piv1++;
 		}else{
 			h_gate_columns[3*i+1] = 0; // Default to zero column
 			h_gate_values[3*i+1] = 0;
@@ -806,18 +819,44 @@ void HSolveActive::copy_hsolve_information_cuda(){
 
 		// For z
 		if(h_gate_powers[3*i+2] > 0){
-			h_gate_columns[3*i+2] = column_[temp_pivot].column;
-			h_gate_values[3*i+2] = state_[temp_pivot];
-			temp_pivot++;
+			h_gate_columns[3*i+2] = column_[temp_piv1].column;
+			h_gate_values[3*i+2] = state_[temp_piv1];
+			temp_piv1++;
 		}else{
 			h_gate_columns[3*i+2] = 0; // Default to zero column
 			h_gate_values[3*i+2] = 0;
 		}
 	}
 
+	// Gathering calcium related information
+	// Get ca row ptr
+	int ca_row_ptr[V_.size()+1];
+	int sum = 0;
+	for(unsigned int i=0;i<V_.size();i++){
+		ca_row_ptr[i] = sum;
+		sum += caCount_[i];
+	}
+
+	// Setting ca pool index for ca dependent channels
+	int chan_num = 0;
+	int num_chan_in_compt = 0;
+	for(unsigned int i=0;i<V_.size();i++){
+
+		for(int j=chan_num;j<(chan_num + channelCount_[i]);j++){
+			if(channel_[j].Zpower_ > 0){
+				//Possible calcium dependency
+				if(caDependIndex_[chan_num] != -1){
+					h_gate_ca_index[3*chan_num+2] = ca_row_ptr[i]+caDependIndex_[chan_num];
+				}
+			}
+		}
+		chan_num += channelCount_[i];
+	}
+
 	cudaMemcpy(d_gate_values, h_gate_values, num_gates * sizeof(double), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_gate_powers, h_gate_powers, num_gates * sizeof(double), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_gate_columns, h_gate_columns, num_gates * sizeof(int), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_gate_ca_index, h_gate_ca_index, num_gates * sizeof(int), cudaMemcpyHostToDevice);
 
 }
 

@@ -165,6 +165,7 @@ protected:
 	double* d_gate_values; // Values of x,y,x for all channels.
 	double* d_gate_powers; // Powers of x,y,z for all channels.
 	int* d_gate_columns; // Corresponding columns of lookup tables
+	int* d_gate_ca_index; // -1 -> V_lookup , (>0) -> Ca_lookup
 	int* d_gate_to_comp; // Which compartment does a gate belong to.
   //int* d_gate_to_chan; // Not needed as we store 3 gates(x,y,z) for each channel.
 
@@ -174,17 +175,23 @@ protected:
 	double* d_chan_Gbar;
 	int* d_chan_to_comp; // Which compartment does a Channel belong to.
 
+
+
 	// Compartment related
 
 	// CUDA Active Permanent data
 	double* d_V;
+	double* d_ca;
+
 
 	// CUDA Active helper data
 	int* d_V_rows;
 	double* d_V_fractions;
+	int* d_Ca_rows;
+	double* d_Ca_fractions;
 
 	// temp code
-	int num_time_prints = 50;
+	int num_time_prints = 0;
 
 #endif
     static const int INSTANT_X;

@@ -6,7 +6,7 @@
 #ifdef USE_CUDA
 
 #define BLOCK_WIDTH 64
-#define THREADS_PER_BLOCK 512
+#define THREADS_PER_BLOCK 128
 
 #ifndef DEBUG_
 #define DEBUG_

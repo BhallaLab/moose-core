@@ -50,17 +50,67 @@ void advance_channels_cuda(
 		int* v_rows,
 		double* v_fracs,
 		double* v_table,
+		int* ca_rows,
+		double* ca_fracs,
+		double* ca_table,
 		double* gate_values,
 		int* gate_columns,
+		int* gate_ca_index,
 		int* chan_to_comp,
 		int* chan_instants,
-		unsigned int nColumns,
+		unsigned int v_Columns,
+		unsigned int ca_Columns,
 		double dt,
 		int size
 		){
 	int tid = threadIdx.x + blockIdx.x * blockDim.x;
 	if(tid >= size) return;
 
+
+	double a,b,C1,C2;
+	int lookup_index, row_start_index, column, nColumns;
+	double* table,*fracs;
+
+	if(gate_ca_index[tid] == -1){
+		// Use V table
+		lookup_index = chan_to_comp[tid/3];
+		row_start_index = v_rows[lookup_index];
+		table = v_table;
+		fracs = v_fracs;
+		nColumns = v_Columns;
+
+	}else{
+		// Use Ca table
+		lookup_index = gate_ca_index[tid];
+		row_start_index = ca_rows[lookup_index];
+		table = ca_table;
+		fracs = ca_fracs;
+		nColumns = ca_Columns;
+	}
+
+	column = gate_columns[tid];
+
+
+	a = table[row_start_index + column];
+	b = table[row_start_index + column + nColumns];
+
+	C1 = a + (b-a)*fracs[lookup_index];
+
+	a = table[row_start_index + column + 1];
+	b = table[row_start_index + column + 1 + nColumns];
+
+	C2 = a + (b-a)*fracs[lookup_index];
+
+	if(!chan_instants[tid/3]){ // tid/3 bcos #gates = 3*#chans
+		a = 1.0 + dt/2.0 * C2; // reusing a
+		gate_values[tid] = ( gate_values[tid] * ( 2.0 - a ) + dt * C1 ) / a;
+	}
+	else{
+		gate_values[tid] = C1/C2;
+	}
+
+	/*
+	 * No Ca
 	int comp = chan_to_comp[tid/3];
 
 	int col = gate_columns[tid];
@@ -83,22 +133,31 @@ void advance_channels_cuda(
 	else{
 		gate_values[tid] = C1/C2;
 	}
+	*/
 
 }
 
 void HSolveActive::get_lookup_rows_and_fractions_cuda_wrapper(double dt){
 
 	int num_comps = V_.size();
+	int num_Ca_pools = ca_.size();
 
 	int BLOCKS = num_comps/THREADS_PER_BLOCK;
 	BLOCKS = (num_comps%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
 
-
+	// Getting lookup metadata for Vm
 	get_lookup_rows_and_fractions_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(d_V,
     		d_V_table,
     		vTable_.get_min(), vTable_.get_max(), vTable_.get_dx(),
     		d_V_rows, d_V_fractions,
     		vTable_.get_num_of_columns(), num_comps);
+
+	// Getting lookup metadata from Ca pools
+	get_lookup_rows_and_fractions_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(d_ca,
+			d_Ca_table,
+			caTable_.get_min(), caTable_.get_max(), caTable_.get_dx(),
+			d_Ca_rows, d_Ca_fractions,
+			caTable_.get_num_of_columns(), num_Ca_pools);
 }
 
 
@@ -117,16 +176,23 @@ void HSolveActive::advance_channels_cuda_wrapper(double dt, float &tejaTime){
 				d_V_rows,
 				d_V_fractions,
 				d_V_table,
+				d_Ca_rows,
+				d_Ca_fractions,
+				d_Ca_table,
 				d_gate_values,
 				d_gate_columns,
+				d_gate_ca_index,
 				d_chan_to_comp,
 				d_chan_instant,
 				vTable_.get_num_of_columns(),
+				caTable_.get_num_of_columns(),
 				dt, num_gates);
-		cudaSafeCall(cudaDeviceSynchronize());
     tejaTimer.Stop();
+    cudaSafeCall(cudaDeviceSynchronize());
 
     tejaTime = tejaTimer.Elapsed();
+
+    cudaCheckError();
 
 }
 
@@ -358,8 +424,8 @@ void HSolveActive::advanceChannel_gpu(
 			dt,
 			num_of_compartment
 		);
-		cudaSafeCall(cudaDeviceSynchronize());
     wenyanKernelTimer.Stop();
+    cudaSafeCall(cudaDeviceSynchronize());
 
     kernel_time = wenyanKernelTimer.Elapsed();
 
