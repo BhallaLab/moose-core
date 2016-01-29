@@ -50,29 +50,30 @@ class rdesigneur:
     I need to put the extra channels now into the NeuroML definition.
     """
     ################################################################
-    def __init__(self, \
-            modelPath = '/model', \
-            turnOffElec = False, \
-            useGssa = True, \
-            combineSegments = True, \
-            stealCellFromLibrary = False, \
-            diffusionLength= 2e-6, \
-            temperature = 32, \
-            chemDt= 0.001, \
-            diffDt= 0.001, \
-            elecDt= 50e-6, \
-            cellProto = [], \
-            spineProto = [], \
-            chanProto = [], \
-            chemProto = [], \
-            passiveDistrib= [], \
-            spineDistrib= [], \
-            chanDistrib = [], \
-            chemDistrib = [], \
-            adaptorList= [], \
-            stimList = [], \
-            plotList = [], \
-            moogList = [] \
+    def __init__(self,
+            modelPath = '/model',
+            turnOffElec = False,
+            useGssa = True,
+            combineSegments = True,
+            stealCellFromLibrary = False,
+            diffusionLength= 2e-6,
+            meshLambda = -1.0,    #This is a backward compatibility hack
+            temperature = 32,
+            chemDt= 0.001,
+            diffDt= 0.001,
+            elecDt= 50e-6,
+            cellProto = [],
+            spineProto = [],
+            chanProto = [],
+            chemProto = [],
+            passiveDistrib= [],
+            spineDistrib= [],
+            chanDistrib = [],
+            chemDistrib = [],
+            adaptorList= [],
+            stimList = [],
+            plotList = [],
+            moogList = []
         ):
         """ Constructor of the rdesigner. This just sets up internal fields
             for the model building, it doesn't actually create any objects.
@@ -84,6 +85,9 @@ class rdesigneur:
         self.combineSegments = combineSegments
         self.stealCellFromLibrary = stealCellFromLibrary
         self.diffusionLength= diffusionLength
+        if meshLambda > 0.0:
+            print "Warning: meshLambda argument is deprecated. Please use 'diffusionLength' instead.\nFor now rdesigneur will accept this argument."
+            self.diffusionLength = meshLambda
         self.temperature = temperature
         self.chemDt= chemDt
         self.diffDt= diffDt
