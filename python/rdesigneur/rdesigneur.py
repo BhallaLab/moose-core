@@ -364,22 +364,31 @@ class rdesigneur:
         # For uniformity and conciseness, we don't use a dictionary.
         # ordering of spine distrib is 
         # name, path, spacing, spacingDistrib, size, sizeDistrib, angle, angleDistrib
+        # [i for i in L1 if i in L2]
         # The first two args are compulsory, and don't need arg keys.
+        usageStr = 'Usage: name, path, [spacing, spacingDistrib, size, sizeDistrib, angle, angleDistrib]'
         temp = []
         defaults = ['spine', '#dend#,#apical#', '10e-6', '1e-6', '1', '0.5', '0', '6.2831853' ]
         argKeys = ['spacing', 'spacingDistrib', 'size', 'sizeDistrib', 'angle', 'angleDistrib' ]
         for i in self.spineDistrib:
             if len(i) >= 2 :
                 arg = i[:2]
-                if len( i ) > len( defaults ):
+                # Backward compat hack here
+                bcKeys = [ j for j in i[2:] if j in argKeys ]
+                if len( bcKeys ) > 0: # Looks like we have an old arg str
+                    print 'Rdesigneur::buildSpineDistrib: Warning: Deprecated argument format.\nWill accept for now.'
+                    print usageStr
+                    temp.extend( i + [''] )
+                elif len( i ) > len( defaults ):
                     print 'Rdesigneur::buildSpineDistrib: Warning: too many arguments in spine definition'
-                    print 'Usage: name, path, [spacing, spacingDistrib, size, sizeDistrib, angle, angleDistrib]'
-                    continue
-                optArg = i[2:] + defaults[ len(i):]
-                assert( len( optArg ) == len( argKeys ) )
-                for j in zip( argKeys, optArg ):
-                    arg.extend( [j[0], j[1]] )
-                temp.extend( arg + [''] )
+                    print usageStr
+                else:
+                    optArg = i[2:] + defaults[ len(i):]
+                    assert( len( optArg ) == len( argKeys ) )
+                    for j in zip( argKeys, optArg ):
+                        arg.extend( [j[0], j[1]] )
+                    temp.extend( arg + [''] )
+
         self.elecid.spineDistribution = temp
 
     def buildChemDistrib( self ):
@@ -469,11 +478,15 @@ class rdesigneur:
                 for i in comptList:
                     voxelVec.extend( cc.dendVoxelsOnCompartment[i] )
             else:
+                em = cc.elecComptMap
+                elecComptMap = { moose.element(em[i]):i for i in range(len(em)) }
                 for i in comptList:
-                    voxelVec.extend( cc.spineVoxelsOnCompartment[i] )
+                    if i in elecComptMap:
+                        voxelVec.extend( [ elecComptMap[i] ] )
             # Here we collapse the voxelVec into objects to plot.
             allObj = moose.vec( self.modelPath + '/chem/' + plotSpec[2] )
             objList = [ allObj[int(j)] for j in voxelVec]
+            #print "############", chemCompt, len(objList), kf[1]
             return objList, kf[1]
 
         else:
@@ -550,20 +563,8 @@ class rdesigneur:
                 i.extend( kf[4:6] )
             elif len( i ) == 6:
                 i.extend( [kf[5]] )
-            '''
-            moogliDt = 0.0001
-            if ( i[3] == 'conc' or i[3] == 'n' ):
-                moogliDt = 1
-            self.moogliViewer = rmoogli.makeMoogli( self, mooObj3, i, kf, moogliDt )
-            '''
             #self.moogliViewer = rmoogli.makeMoogli( self, mooObj3, i, kf )
             self.moogNames.append( rmoogli.makeMoogli( self, mooObj3, i, kf ) )
-
-            '''
-            if numMoogli > 0:
-                muw = MoogliUpdateWrapper( mooObj3, mooField, indexing )
-                tabname = moogli.path + '/draw' + str(k)
-                '''
 
 
     ################################################################
