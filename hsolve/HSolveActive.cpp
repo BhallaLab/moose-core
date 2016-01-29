@@ -386,12 +386,15 @@ void HSolveActive::advanceChannels( double dt )
 
     float tejaTime = 0 , wenyanTime = 0;
 
-    // TODO This should be done only at the beginning of simulation not in each step
+    GpuTimer tejaTimer;
+
+    tejaTimer.Start();
     // ----------------------------------------------------------------------------
     cudaMemcpy(d_V, &(V_.front()), nCompt_ * sizeof(double), cudaMemcpyHostToDevice);
     cudaMemcpy(d_ca, &(ca_.front()), ca_.size()*sizeof(double), cudaMemcpyHostToDevice);
 
 	if(!init_gate_values){
+		// TODO Move it to appropriate place
 		printf("INITIALIZING Gate Values\n");
 		double* test_gate_values = new double[num_gates]();
 		// Copying from state_ to test_gate_values
@@ -415,6 +418,12 @@ void HSolveActive::advanceChannels( double dt )
 	for(unsigned int i=0;i<h_gate_expand_indices.size();i++){
 		state_[i] = temp[h_gate_expand_indices[i]];
 		//gate_values_after_cuda[i] = temp[h_gate_expand_indices[i]];
+	}
+	tejaTimer.Stop();
+
+	if(num_time_prints > 0){
+		printf("%lf\n", tejaTimer.Elapsed());
+		num_time_prints--;
 	}
 
 	/*
@@ -583,6 +592,9 @@ void HSolveActive::advanceChannels( double dt )
 #endif 
     */
 #else
+
+	u64 cpu_advchan_start = getTime();
+
     double C1, C2;
 
     for ( iv = V_.begin(); iv != V_.end(); ++iv )
@@ -666,6 +678,13 @@ void HSolveActive::advanceChannels( double dt )
         }
 
         ++ichannelcount, ++icacount;
+    }
+
+    u64 cpu_advchan_end = getTime();
+
+    if(num_time_prints > 0){
+    	printf("%f\n", (cpu_advchan_end-cpu_advchan_start)/1000.0f);
+    	num_time_prints--;
     }
 
     /*

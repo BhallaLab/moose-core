@@ -192,10 +192,11 @@ protected:
 	double* d_Ca_fractions;
 
 	// temp code
-	int num_time_prints = 0;
 	bool init_gate_values = false;
-
 #endif
+
+	int num_time_prints = 0;
+
     static const int INSTANT_X;
     static const int INSTANT_Y;
     static const int INSTANT_Z;
