@@ -16,3 +16,4 @@ Contents:
 
 
    snippet
+   tutorial
