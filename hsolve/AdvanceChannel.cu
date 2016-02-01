@@ -168,59 +168,47 @@ void HSolveActive::get_lookup_rows_and_fractions_cuda_wrapper(double dt){
 }
 
 
-void HSolveActive::advance_channels_cuda_wrapper(double dt, float &tejaTime){
+void HSolveActive::advance_channels_cuda_wrapper(double dt){
 
-	int num_gates = 3*channel_.size();
 	int num_vdep_gates = h_vgate_expand_indices.size();
 	int num_cadep_gates = h_cagate_expand_indices.size();
 
 
     // Get the Row number and fraction values of Vm's from vTable
     int BLOCKS;
-    BLOCKS = num_gates/THREADS_PER_BLOCK;
-    BLOCKS = (num_gates%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
+	BLOCKS = num_vdep_gates/THREADS_PER_BLOCK;
+	BLOCKS = (num_vdep_gates%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
 
-    GpuTimer tejaTimer;
+	// For V dependent gates
+	advance_channels_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(
+			d_V_rows,
+			d_V_fractions,
+			d_V_table,
+			d_vgate_expand_indices,
+			d_vgate_compt_indices,
+			d_gate_values,
+			d_gate_columns,
+			d_chan_instant,
+			vTable_.get_num_of_columns(),
+			dt, num_vdep_gates );
 
-    tejaTimer.Start();
+	if(num_cadep_gates > 0){
+		BLOCKS = num_cadep_gates/THREADS_PER_BLOCK;
+		BLOCKS = (num_cadep_gates%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
 
-    	BLOCKS = num_vdep_gates/THREADS_PER_BLOCK;
-        BLOCKS = (num_vdep_gates%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
-
-        // For V dependent gates
+		// For Ca dependent gates.
 		advance_channels_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(
-				d_V_rows,
-				d_V_fractions,
-				d_V_table,
-				d_vgate_expand_indices,
-				d_vgate_compt_indices,
-				d_gate_values,
-				d_gate_columns,
-				d_chan_instant,
-				vTable_.get_num_of_columns(),
-				dt, num_vdep_gates );
-
-		if(num_cadep_gates > 0){
-			BLOCKS = num_cadep_gates/THREADS_PER_BLOCK;
-			BLOCKS = (num_cadep_gates%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
-
-			// For Ca dependent gates.
-			advance_channels_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(
-							d_Ca_rows,
-							d_Ca_fractions,
-							d_Ca_table,
-							d_cagate_expand_indices,
-							d_cagate_capool_indices,
-							d_gate_values,
-							d_gate_columns,
-							d_chan_instant,
-							caTable_.get_num_of_columns(),
-							dt, num_cadep_gates );
-		}
-
-    tejaTimer.Stop();
-    cudaSafeCall(cudaDeviceSynchronize());
-    tejaTime = tejaTimer.Elapsed();
+						d_Ca_rows,
+						d_Ca_fractions,
+						d_Ca_table,
+						d_cagate_expand_indices,
+						d_cagate_capool_indices,
+						d_gate_values,
+						d_gate_columns,
+						d_chan_instant,
+						caTable_.get_num_of_columns(),
+						dt, num_cadep_gates );
+	}
 
 }
 

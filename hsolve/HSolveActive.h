@@ -209,7 +209,7 @@ protected:
 	bool init_gate_values = false;
 #endif
 
-	int num_time_prints = 0;
+	int num_time_prints = 100;
 
     static const int INSTANT_X;
     static const int INSTANT_Y;
@@ -256,7 +256,7 @@ private:
     void copy_hsolve_information_cuda();
 
     void get_lookup_rows_and_fractions_cuda_wrapper(double dt);
-    void advance_channels_cuda_wrapper(double dt, float &time_taken);
+    void advance_channels_cuda_wrapper(double dt);
     void get_compressed_gate_values_wrapper();
 
     void calculate_channel_currents_cuda_wrapper();

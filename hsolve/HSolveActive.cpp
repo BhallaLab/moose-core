@@ -424,8 +424,6 @@ void HSolveActive::advanceChannels( double dt )
     int num_comps = V_.size();
     int num_gates = channel_.size()*3;
 
-    float tejaTime = 0 , wenyanTime = 0;
-
     GpuTimer tejaTimer;
 
     tejaTimer.Start();
@@ -449,7 +447,7 @@ void HSolveActive::advanceChannels( double dt )
 	// ----------------------------------------------------------------------------
 
 	get_lookup_rows_and_fractions_cuda_wrapper(dt);
-	advance_channels_cuda_wrapper(dt, tejaTime); // Calling kernel
+	advance_channels_cuda_wrapper(dt); // Calling kernel
 	get_compressed_gate_values_wrapper(); // Getting values of new state
 
 	cudaCheckError(); // Making sure no CUDA errors occured
