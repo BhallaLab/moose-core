@@ -214,6 +214,25 @@ void HSolveActive::step( ProcPtr info )
 
 void HSolveActive::calculateChannelCurrents()
 {
+#ifdef USE_CUDA
+	//printf("Calculating Channel Currents\n");
+	GpuTimer currentTimer;
+
+	currentTimer.Start();
+		calculate_channel_currents_cuda_wrapper();
+		cudaCheckError(); // Making sure no CUDA error occured
+		for(unsigned int i=0;i<current_.size();i++)
+			current_[i].Gk = h_chan_Gk[i];
+	currentTimer.Stop();
+
+	if(num_time_prints > 0){
+		printf("curr,%lf\n", currentTimer.Elapsed());
+		num_time_prints--;
+	}
+
+#else
+	u64 cpu_current_start = getTime();
+
     vector< ChannelStruct >::iterator ichan;
     vector< CurrentStruct >::iterator icurrent = current_.begin();
 
@@ -227,6 +246,23 @@ void HSolveActive::calculateChannelCurrents()
             ++icurrent;
         }
     }
+
+    u64 cpu_current_end = getTime();
+
+    if(num_time_prints > 0)
+    	printf("curr,%lf\n",(cpu_current_end-cpu_current_start)/1000.0f);
+
+    /*
+    double error = 0;
+    for(unsigned int i=0;i<current_.size();i++){
+    	printf("%lf %lf \n", current_[i].Gk, h_chan_Gk[i]);
+    	error += (current_[i].Gk - h_chan_Gk[i]);
+    }
+    getchar();
+    printf("%lf error in channel currents\n", error);
+    */
+
+#endif
 }
 
 void HSolveActive::updateMatrix()
@@ -432,7 +468,7 @@ void HSolveActive::advanceChannels( double dt )
 	tejaTimer.Stop();
 
 	if(num_time_prints > 0){
-		printf("%lf\n", tejaTimer.Elapsed());
+		printf("chan,%lf\n", tejaTimer.Elapsed());
 		num_time_prints--;
 	}
 
@@ -638,7 +674,7 @@ void HSolveActive::advanceChannels( double dt )
     u64 cpu_advchan_end = getTime();
 
     if(num_time_prints > 0){
-    	printf("%f\n", (cpu_advchan_end-cpu_advchan_start)/1000.0f);
+    	printf("chan,%lf\n", (cpu_advchan_end-cpu_advchan_start)/1000.0f);
     	num_time_prints--;
     }
 
@@ -649,7 +685,7 @@ void HSolveActive::advanceChannels( double dt )
 #ifdef USE_CUDA
 
 /* Used to allocate device memory on GPU for Hsolve variables */
-void HSolveActive::allocate_hsolve_device_memory_cuda(){
+void HSolveActive::allocate_hsolve_memory_cuda(){
 
 	// Important numbers
 	int num_compts = V_.size();
@@ -661,6 +697,10 @@ void HSolveActive::allocate_hsolve_device_memory_cuda(){
 	// LookUp Tables
 	int V_table_size = vTable_.get_table().size();
 	int Ca_table_size = caTable_.get_table().size();
+
+	// CPU related
+	h_chan_Gk = (double*) malloc(num_channels * sizeof(double));
+
 
 	cudaMalloc((void **)&(d_V), num_compts * sizeof(double));
 	cudaMalloc((void **)&(d_V_table), V_table_size * sizeof(double));
@@ -682,6 +722,7 @@ void HSolveActive::allocate_hsolve_device_memory_cuda(){
 	cudaMalloc((void**)&d_chan_modulation, num_channels*sizeof(double));
 	cudaMalloc((void**)&d_chan_Gbar, num_channels*sizeof(double));
 	cudaMalloc((void**)&d_chan_to_comp, num_channels*sizeof(double));
+	cudaMalloc((void**)&d_chan_Gk, num_channels*sizeof(double));
 
 	// Compartment related
 

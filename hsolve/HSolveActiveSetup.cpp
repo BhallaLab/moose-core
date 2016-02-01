@@ -30,7 +30,7 @@ void HSolveActive::setup( Id seed, double dt )
 
 #ifdef USE_CUDA
     // Cuda realted setup
-    allocate_hsolve_device_memory_cuda();
+    allocate_hsolve_memory_cuda();
     copy_table_data_cuda();
     copy_hsolve_information_cuda();
 

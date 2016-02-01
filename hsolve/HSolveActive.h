@@ -162,6 +162,9 @@ protected:
 	vector<int> h_cagate_expand_indices;
 	vector<int> h_cagate_capool_indices;
 
+	// Channel related
+	double* h_chan_Gk;
+
 	// LookUp Tables
 	double* d_V_table;
 	double* d_Ca_table;
@@ -186,6 +189,8 @@ protected:
 	double* d_chan_modulation;
 	double* d_chan_Gbar;
 	int* d_chan_to_comp; // Which compartment does a Channel belong to.
+
+	double* d_chan_Gk;
 
 	// Compartment related
 
@@ -246,13 +251,15 @@ private:
 
 #ifdef USE_CUDA
     // Hsolve GPU set up kernels
-    void allocate_hsolve_device_memory_cuda();
+    void allocate_hsolve_memory_cuda();
     void copy_table_data_cuda();
     void copy_hsolve_information_cuda();
 
     void get_lookup_rows_and_fractions_cuda_wrapper(double dt);
     void advance_channels_cuda_wrapper(double dt, float &time_taken);
     void get_compressed_gate_values_wrapper();
+
+    void calculate_channel_currents_cuda_wrapper();
 
 
 	void advanceChannel_gpu(

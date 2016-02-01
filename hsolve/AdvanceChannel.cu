@@ -116,8 +116,6 @@ void advance_channels_cuda(
 
 }
 
-
-
 __global__
 void get_compressed_gate_values(double* expanded_array,
 		int* expanded_indices, double* d_cmprsd_state, int size){
@@ -125,6 +123,24 @@ void get_compressed_gate_values(double* expanded_array,
 	int tid = threadIdx.x + blockIdx.x * blockDim.x;
 	if(tid < size)
 		d_cmprsd_state[tid] = expanded_array[expanded_indices[tid]];
+}
+
+__global__
+void calculate_channel_currents(double* d_gate_values,
+		double* d_gate_powers,
+		double* d_chan_modulation,
+		double* d_chan_Gbar,
+		double* d_chan_Gk,
+		int size){
+	int tid = threadIdx.x + blockIdx.x * blockDim.x;
+	if(tid < size){
+		 d_chan_Gk[tid] = d_chan_modulation[tid] *
+				 d_chan_Gbar[tid] *
+				 pow(d_gate_values[3*tid], d_gate_powers[3*tid]) *
+				 pow(d_gate_values[3*tid], d_gate_powers[3*tid]) *
+				 pow(d_gate_values[3*tid], d_gate_powers[3*tid]);
+	}
+
 }
 
 
@@ -220,6 +236,19 @@ void HSolveActive::get_compressed_gate_values_wrapper(){
 	//cudaSafeCall(cudaMemcpy(&(state_.front()), d_state_, num_cmprsd_gates*sizeof(double), cudaMemcpyDeviceToHost));
 
 }
+
+void HSolveActive::calculate_channel_currents_cuda_wrapper(){
+	int num_channels = channel_.size();
+
+	int BLOCKS = num_channels/THREADS_PER_BLOCK;
+	BLOCKS = (num_channels%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
+
+	calculate_channel_currents<<<BLOCKS,THREADS_PER_BLOCK>>>(d_gate_values, d_gate_powers, d_chan_modulation, d_chan_Gbar, d_chan_Gk, num_channels);
+	cudaMemcpy(h_chan_Gk, d_chan_Gk, num_channels*sizeof(double), cudaMemcpyDeviceToHost);
+
+}
+
+
 
 /*
  * Copy row arrays to device.
