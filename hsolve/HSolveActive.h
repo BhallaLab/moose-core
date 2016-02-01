@@ -157,6 +157,10 @@ protected:
 
 	// CUDA Passive Data
 	vector<int> h_gate_expand_indices;
+	vector<int> h_vgate_expand_indices;
+	vector<int> h_vgate_compt_indices;
+	vector<int> h_cagate_expand_indices;
+	vector<int> h_cagate_capool_indices;
 
 	// LookUp Tables
 	double* d_V_table;
@@ -167,8 +171,13 @@ protected:
 	double* d_gate_powers; // Powers of x,y,z for all channels.
 	int* d_gate_columns; // Corresponding columns of lookup tables
 	int* d_gate_ca_index; // -1 -> V_lookup , (>0) -> Ca_lookup
-	int* d_gate_to_comp; // Which compartment does a gate belong to.
-	int* d_gate_expand_indices;
+
+	int* d_gate_expand_indices; // Srotes the indices of gates for which power is > 0
+	int* d_vgate_expand_indices; // Stores the indices of gates using vmtable in gates array.
+	int* d_vgate_compt_indices; // Stores the compartment index for this gate.
+	int* d_cagate_expand_indices; // Stores the indices of gates using cmtable in gates array.
+	int* d_cagate_capool_indices; // Stores the indices of calcium pools in ca_ array.
+
 	double* d_state_;
   //int* d_gate_to_chan; // Not needed as we store 3 gates(x,y,z) for each channel.
 

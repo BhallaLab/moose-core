@@ -47,49 +47,28 @@ void get_lookup_rows_and_fractions_cuda(
 
 __global__
 void advance_channels_cuda(
-		int* v_rows,
-		double* v_fracs,
-		double* v_table,
-		int* ca_rows,
-		double* ca_fracs,
-		double* ca_table,
+		int* rows,
+		double* fracs,
+		double* table,
+		int* expand_indices,
+		int* gate_to_comp,
 		double* gate_values,
 		int* gate_columns,
-		int* gate_ca_index,
-		int* chan_to_comp,
 		int* chan_instants,
-		unsigned int v_Columns,
-		unsigned int ca_Columns,
+		unsigned int nColumns,
 		double dt,
 		int size
 		){
 	int tid = threadIdx.x + blockIdx.x * blockDim.x;
 	if(tid >= size) return;
 
-
 	double a,b,C1,C2;
-	int lookup_index, row_start_index, column, nColumns;
-	double* table,*fracs;
+	int index, lookup_index, row_start_index, column;
 
-	if(gate_ca_index[tid] == -1){
-		// Use V table
-		lookup_index = chan_to_comp[tid/3];
-		row_start_index = v_rows[lookup_index];
-		table = v_table;
-		fracs = v_fracs;
-		nColumns = v_Columns;
-
-	}else{
-		// Use Ca table
-		lookup_index = gate_ca_index[tid];
-		row_start_index = ca_rows[lookup_index];
-		table = ca_table;
-		fracs = ca_fracs;
-		nColumns = ca_Columns;
-	}
-
-	column = gate_columns[tid];
-
+	index = expand_indices[tid];
+	lookup_index = gate_to_comp[tid];
+	row_start_index = rows[lookup_index];
+	column = gate_columns[index];
 
 	a = table[row_start_index + column];
 	b = table[row_start_index + column + nColumns];
@@ -101,12 +80,12 @@ void advance_channels_cuda(
 
 	C2 = a + (b-a)*fracs[lookup_index];
 
-	if(!chan_instants[tid/3]){ // tid/3 bcos #gates = 3*#chans
+	if(!chan_instants[index/3]){ // tid/3 bcos #gates = 3*#chans
 		a = 1.0 + dt/2.0 * C2; // reusing a
-		gate_values[tid] = ( gate_values[tid] * ( 2.0 - a ) + dt * C1 ) / a;
+		gate_values[index] = ( gate_values[index] * ( 2.0 - a ) + dt * C1 ) / a;
 	}
 	else{
-		gate_values[tid] = C1/C2;
+		gate_values[index] = C1/C2;
 	}
 
 	/*
@@ -136,6 +115,8 @@ void advance_channels_cuda(
 	*/
 
 }
+
+
 
 __global__
 void get_compressed_gate_values(double* expanded_array,
@@ -174,34 +155,56 @@ void HSolveActive::get_lookup_rows_and_fractions_cuda_wrapper(double dt){
 void HSolveActive::advance_channels_cuda_wrapper(double dt, float &tejaTime){
 
 	int num_gates = 3*channel_.size();
+	int num_vdep_gates = h_vgate_expand_indices.size();
+	int num_cadep_gates = h_cagate_expand_indices.size();
+
 
     // Get the Row number and fraction values of Vm's from vTable
-    int BLOCKS = num_gates/THREADS_PER_BLOCK;
+    int BLOCKS;
+    BLOCKS = num_gates/THREADS_PER_BLOCK;
     BLOCKS = (num_gates%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
 
     GpuTimer tejaTimer;
 
     tejaTimer.Start();
+
+    	BLOCKS = num_vdep_gates/THREADS_PER_BLOCK;
+        BLOCKS = (num_vdep_gates%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
+
+        // For V dependent gates
 		advance_channels_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(
 				d_V_rows,
 				d_V_fractions,
 				d_V_table,
-				d_Ca_rows,
-				d_Ca_fractions,
-				d_Ca_table,
+				d_vgate_expand_indices,
+				d_vgate_compt_indices,
 				d_gate_values,
 				d_gate_columns,
-				d_gate_ca_index,
-				d_chan_to_comp,
 				d_chan_instant,
 				vTable_.get_num_of_columns(),
-				caTable_.get_num_of_columns(),
-				dt, num_gates);
+				dt, num_vdep_gates );
+
+		if(num_cadep_gates > 0){
+			BLOCKS = num_cadep_gates/THREADS_PER_BLOCK;
+			BLOCKS = (num_cadep_gates%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
+
+			// For Ca dependent gates.
+			advance_channels_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(
+							d_Ca_rows,
+							d_Ca_fractions,
+							d_Ca_table,
+							d_cagate_expand_indices,
+							d_cagate_capool_indices,
+							d_gate_values,
+							d_gate_columns,
+							d_chan_instant,
+							caTable_.get_num_of_columns(),
+							dt, num_cadep_gates );
+		}
+
     tejaTimer.Stop();
     cudaSafeCall(cudaDeviceSynchronize());
-
     tejaTime = tejaTimer.Elapsed();
-
 
 }
 

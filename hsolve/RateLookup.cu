@@ -325,7 +325,6 @@ void LookupTable::row_gpu(vector<double>::iterator& x, double ** row, unsigned i
     									dx_, 
     									nColumns_, 
     									size);	
-    cudaCheckError();
     cudaSafeCall(cudaDeviceSynchronize()); 
 
 #ifdef DEBUG_VERBOSE    

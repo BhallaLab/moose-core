@@ -21,6 +21,8 @@
 #include "CudaGlobal.h"
 #include "RateLookup.h"
 
+//#define TEST_CORRECTNESS
+
 #ifdef USE_CUDA
 
 #include <thrust/device_vector.h>
@@ -376,7 +378,9 @@ void HSolveActive::advanceChannels( double dt )
 
     LookupRow vRow;
 
-    //double* gate_values_after_cuda = new double[h_gate_expand_indices.size()]();
+#ifdef TEST_CORRECTNESS
+    double* gate_values_after_cuda = new double[h_gate_expand_indices.size()]();
+#endif
 
 #ifdef USE_CUDA
 
@@ -401,8 +405,8 @@ void HSolveActive::advanceChannels( double dt )
 		for(int i=0;i<h_gate_expand_indices.size();i++){
 			test_gate_values[h_gate_expand_indices[i]] = state_[i];
 		}
-
 		cudaMemcpy(d_gate_values, test_gate_values, num_gates*sizeof(double), cudaMemcpyHostToDevice);
+
 		init_gate_values = true;
 	}
 
@@ -412,12 +416,18 @@ void HSolveActive::advanceChannels( double dt )
 	advance_channels_cuda_wrapper(dt, tejaTime); // Calling kernel
 	get_compressed_gate_values_wrapper(); // Getting values of new state
 
+	cudaCheckError(); // Making sure no CUDA errors occured
+
 	double temp[channel_.size()*3];
 	cudaSafeCall(cudaMemcpy(temp, d_gate_values, channel_.size()*3*sizeof(double), cudaMemcpyDeviceToHost));
 
 	for(unsigned int i=0;i<h_gate_expand_indices.size();i++){
-		state_[i] = temp[h_gate_expand_indices[i]];
-		//gate_values_after_cuda[i] = temp[h_gate_expand_indices[i]];
+		#ifdef TEST_CORRECTNESS
+			gate_values_after_cuda[i] = temp[h_gate_expand_indices[i]];
+		#else
+			state_[i] = temp[h_gate_expand_indices[i]];
+		#endif
+
 	}
 	tejaTimer.Stop();
 
@@ -435,162 +445,107 @@ void HSolveActive::advanceChannels( double dt )
 	cudaMemcpy(test_V, d_V, num_comps*sizeof(double), cudaMemcpyDeviceToHost);
 	cudaMemcpy(test_rows, d_V_rows, num_comps*sizeof(int), cudaMemcpyDeviceToHost);
 	cudaMemcpy(test_fracs, d_V_fractions, num_comps*sizeof(double), cudaMemcpyDeviceToHost);
+
 	*/
 
+#ifdef TEST_CORRECTNESS
+	double C1, C2;
+	for ( iv = V_.begin(); iv != V_.end(); ++iv )
+	{
+		vTable_.row( *iv, vRow );
+		icarowcompt = caRowCompt_.begin();
+		caBoundary = ica + *icacount;
 
-	/*
-#ifdef DEBUG_STEP
-    printf("Press [ENTER] to start advanceChannels...\n");
-    getchar();
-#endif    
-
-
-		vector<double> caRow_ac;
-		vector<LookupColumn> column_ac;
-
-		iv = V_.begin();
-
-		double * v_row_array_d;
-
-
-			 // If number of compartments are not sufficiently large,
-			 // we use CPU to calculate for rows.
-			 // However, here 1024 is a magic value. It could be optimized
-			 // by testing out different values.
-
-			if(V_.size() < 1024)
+		for ( ; ica < caBoundary; ++ica )
+		{
+			caTable_.row( *ica, * icarowcompt );
+			++icarowcompt;
+		}
+		/*
+		 * Optimize by moving "if ( instant )" outside the loop, because it is
+		 * rarely used. May also be able to avoid "if ( power )".
+		 *
+		 * Or not: excellent branch predictors these days.
+		 *
+		 * Will be nice to test these optimizations.
+		 */
+		chanBoundary = ichan + *ichannelcount;
+		for ( ; ichan < chanBoundary; ++ichan )
+		{
+			if ( ichan->Xpower_ > 0.0 )
 			{
-				vector<double> v_row_temp(V_.size());
-				vector<double>::iterator v_row_iter = v_row_temp.begin();
-				for(u32 i = 0 ; i < V_.size(); ++i)
+				vTable_.lookup( *icolumn, vRow, C1, C2 );
+				//~ *istate = *istate * C1 + C2;
+				//~ *istate = ( C1 + ( 2 - C2 ) * *istate ) / C2;
+				if ( ichan->instant_ & INSTANT_X )
+					*istate = C1 / C2;
+				else
 				{
-					vTable_.row(*iv, *v_row_iter);
-					iv++;
-					v_row_iter++;
+					double temp = 1.0 + dt / 2.0 * C2;
+					*istate = ( *istate * ( 2.0 - temp ) + dt * C1 ) / temp;
 				}
 
-				copy_to_device(&v_row_array_d, &v_row_temp.front(), V_.size());
-			} else {
-				vTable_.row_gpu(iv, &v_row_array_d, V_.size());
+				++icolumn, ++istate;
 			}
 
+			if ( ichan->Ypower_ > 0.0 )
+			{
+				vTable_.lookup( *icolumn, vRow, C1, C2 );
+				//~ *istate = *istate * C1 + C2;
+				//~ *istate = ( C1 + ( 2 - C2 ) * *istate ) / C2;
+				if ( ichan->instant_ & INSTANT_Y )
+					*istate = C1 / C2;
+				else
+				{
+					double temp = 1.0 + dt / 2.0 * C2;
+					*istate = ( *istate * ( 2.0 - temp ) + dt * C1 ) / temp;
+				}
 
-#if defined(DEBUG_) && defined(DEBUG_VERBOSE) 
-    printf("Trying to access v_row_array_d...\n");
-    
-    std::vector<double> h_row(V_.size());
-    cudaSafeCall(cudaMemcpy(&h_row.front(), v_row_array_d, sizeof(double) * V_.size(), cudaMemcpyDeviceToHost));
-    printf("row 0 is %f.\n", h_row[0]);
-    printf("last row is %f.\n", h_row[V_.size() - 1]);
-#ifdef DEBUG_STEP
-    getchar();
-#endif    
-#endif  
+				++icolumn, ++istate;
+			}
+
+			if ( ichan->Zpower_ > 0.0 )
+			{
+				LookupRow* caRow = *icarow;
+				if ( caRow )
+				{
+					caTable_.lookup( *icolumn, *caRow, C1, C2 );
+				}
+				else
+				{
+					vTable_.lookup( *icolumn, vRow, C1, C2 );
+				}
+
+				//~ *istate = *istate * C1 + C2;
+				//~ *istate = ( C1 + ( 2 - C2 ) * *istate ) / C2;
+				if ( ichan->instant_ & INSTANT_Z )
+					*istate = C1 / C2;
+				else
+				{
+					double temp = 1.0 + dt / 2.0 * C2;
+					*istate = ( *istate * ( 2.0 - temp ) + dt * C1 ) / temp;
+				}
+
+				++icolumn, ++istate, ++icarow;
+			}
+		}
+
+		++ichannelcount, ++icacount;
+	}
 
 
-#if defined(DEBUG_) && defined(DEBUG_VERBOSE) 
-    printf("Starting converting caRow_ to caRow_ac...\n");
-#ifdef DEBUG_STEP
-    getchar();
-#endif    
-#endif 
-    
+	// Printing values of cuda call and cpu call
+	float error = 0;
+	for(int i=0;i<state_.size();i++){
+		error += gate_values_after_cuda[i]-state_[i];
+		printf("%lf %lf\n",state_[i], gate_values_after_cuda[i]);
+	}
+	printf("Error %f\n",error);
+	getchar();
 
-     // Convert rows from row structs to double values
-     // in order to reduce memory usage.
-    caRow_ac.resize(caRow_.size());
-    for(u32 i = 0; i < caRow_.size(); ++i)
-    {
-        if(caRow_[i])
-        {
-            caRow_ac[i] = caRow_[i]->rowIndex + caRow_[i]->fraction;
-        } 
-        else
-        {
-            caRow_ac[i] = -1.0f;
-        } 
-       
-    }
 
-#if defined(DEBUG_) && defined(DEBUG_VERBOSE)   
-    printf("Starting find-row for caRowCompt_ and vRow_ac construction...\n");
-#ifdef DEBUG_STEP
-    getchar();
-#endif    
 #endif
 
-    for (int i = 0; i < V_.size(); ++i) {
-        icarowcompt = caRowCompt_.begin();
-        caBoundary = ica + *icacount;
-        
-        for ( ; ica < caBoundary; ++ica )
-        {
-            caTable_.row( *ica, * icarowcompt );
-            ++icarowcompt;
-        }
-        
-        ++icacount;
-    }
-
-#if defined(DEBUG_) && defined(DEBUG_VERBOSE)  
-    printf("Finish preparing CUDA advanceChannel! \n");
-    printf("Starting kernel...\n");
-#ifdef DEBUG_STEP
-    getchar();
-#endif    
-#endif    
-
-
-     // Copy static infos, such as mappings and indices.
-     // Such infos will be kept in device memory until the
-     // program exits. Therefore copy_data function will
-     // check if the copy has been done before.
-     // This function will only be executed once so no worry
-     // about the performance.
-     // See AdvanceChannel.cu for more details.
-
-    copy_data(column_,
-    		  &column_d,
-    		  &is_inited_,
-    		  channel_data_,
-    		  &channel_data_d,
-    		  HSolveActive::INSTANT_X,
-              HSolveActive::INSTANT_Y,
-              HSolveActive::INSTANT_Z);
-
-
-     // The call to the function that does the actual
-     // calculations.
-     // See AdvanceChannel.cu for more details.
-
-    advanceChannel_gpu(v_row_array_d, 
-                       caRow_ac, 
-                       column_d, 
-                       vTable_, 
-                       caTable_, 
-                       &state_.front(), 
-                       channel_data_d,
-                       dt,
-                       (int)(column_.size()),
-                       (int)(channel_data_.size()),
-                       V_.size(), wenyanTime);
-
-
-    if(num_time_prints > 0){
-    	// Printing times.
-		printf("%f %f\n", tejaTime, wenyanTime);
-		num_time_prints--;
-    }
-
-    caRow_ac.clear();
-
-#if defined(DEBUG_) && defined(DEBUG_VERBOSE)  
-    printf("Finish launching CUDA advanceChannel! \n");
-#ifdef DEBUG_STEP
-    getchar();
-#endif    
-#endif 
-    */
 #else
 
 	u64 cpu_advchan_start = getTime();
@@ -687,20 +642,6 @@ void HSolveActive::advanceChannels( double dt )
     	num_time_prints--;
     }
 
-    /*
-    // Printing values of cuda call and cpu call
-    float error = 0;
-    for(int i=0;i<state_.size();i++){
-    	error += gate_values_after_cuda[i]-state_[i];
-    	//printf("%lf %lf\n",state_[i], gate_values_after_cuda[i]);
-    }
-    printf("Error %f\n",error);
-    getchar();
-    */
-
-
-
-
 #endif
       
 }
@@ -730,7 +671,6 @@ void HSolveActive::allocate_hsolve_device_memory_cuda(){
 	cudaMalloc((void**)&d_gate_values, num_gates*sizeof(double));
 	cudaMalloc((void**)&d_gate_powers, num_gates*sizeof(double));
 	cudaMalloc((void**)&d_gate_columns, num_gates*sizeof(double));
-	cudaMalloc((void**)&d_gate_to_comp, num_gates*sizeof(int));
 	cudaMalloc((void**)&d_gate_ca_index, num_gates*sizeof(int));
 
 	cudaMalloc((void**)&d_state_, num_cmprsd_gates*sizeof(double));
@@ -809,78 +749,77 @@ void HSolveActive::copy_hsolve_information_cuda(){
 	cudaMemcpy(d_chan_modulation, h_chan_modulation, num_chans * sizeof(double), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_chan_to_comp, h_chan_to_comp, num_chans * sizeof(unsigned int), cudaMemcpyHostToDevice);
 
-	// Gathering data for each gate
-	unsigned int temp_piv1 = 0; // If the logic is true temp_piv1 value at the end of for loop = # of gates with powers > 0
-	for(int i=0;i<num_chans;i++){
-
-		h_gate_powers[3*i] = channel_[i].Xpower_;
-		h_gate_powers[3*i+1] = channel_[i].Ypower_;
-		h_gate_powers[3*i+2] = channel_[i].Zpower_;
-
-		for(int j=0;j<3;j++) h_gate_ca_index[3*i+j] = -1; // Initializing to -1
-
-		// For x
-		if(h_gate_powers[3*i] > 0){
-			h_gate_columns[3*i] = column_[temp_piv1].column;
-			h_gate_values[3*i] = state_[temp_piv1];
-			temp_piv1++;
-		}else{
-			h_gate_columns[3*i] = 0; // Default to zero column
-			h_gate_values[3*i] = 0;
-		}
-
-		// For y
-		if(h_gate_powers[3*i+1] > 0){
-			h_gate_columns[3*i+1] = column_[temp_piv1].column;
-			h_gate_values[3*i+1] = state_[temp_piv1];
-			temp_piv1++;
-		}else{
-			h_gate_columns[3*i+1] = 0; // Default to zero column
-			h_gate_values[3*i+1] = 0;
-		}
-
-		// For z
-		if(h_gate_powers[3*i+2] > 0){
-			h_gate_columns[3*i+2] = column_[temp_piv1].column;
-			h_gate_values[3*i+2] = state_[temp_piv1];
-			temp_piv1++;
-		}else{
-			h_gate_columns[3*i+2] = 0; // Default to zero column
-			h_gate_values[3*i+2] = 0;
-		}
-	}
-
-	// Gathering calcium related information
-	// Get ca row ptr
+	// Constructing ca and channel row ptrs with nCompt as rows.
 	int ca_row_ptr[V_.size()+1];
-	int sum = 0;
-	for(unsigned int i=0;i<V_.size();i++){
-		ca_row_ptr[i] = sum;
-		sum += caCount_[i];
+	int chan_row_ptr[V_.size()+1];
+	int sum1 = 0, sum2 = 0;
+	for(unsigned int i=0;i<=V_.size();i++){
+		ca_row_ptr[i] = sum1;
+		chan_row_ptr[i] = sum2;
+
+		if(i < V_.size()){
+			// Last one should be just set.
+			sum1 += caCount_[i];
+			sum2 += channelCount_[i];
+		}
 	}
 
-	// Setting ca pool index for ca dependent channels
-	int chan_num = 0;
-	int num_chan_in_compt = 0;
+	// Gathering gate information and separating gates (with power < 0) , (with vm dependent) , (with ca dependent)
+	int cmprsd_gate_index = 0; // If the logic is true cmprsd_gate_index value at the end of for loop = # of gates with powers > 0
 	for(unsigned int i=0;i<V_.size();i++){
+		for(int j=chan_row_ptr[i]; j<chan_row_ptr[i+1]; j++){
 
-		for(int j=chan_num;j<(chan_num + channelCount_[i]);j++){
-			if(channel_[j].Zpower_ > 0){
-				//Possible calcium dependency
-				if(caDependIndex_[chan_num] != -1){
-					h_gate_ca_index[3*chan_num+2] = ca_row_ptr[i]+caDependIndex_[chan_num];
+			// Setting powers
+			h_gate_powers[3*j] = channel_[j].Xpower_;
+			h_gate_powers[3*j+1] = channel_[j].Ypower_;
+			h_gate_powers[3*j+2] = channel_[j].Zpower_;
+
+			for(int k=0;k<3;k++){
+				h_gate_ca_index[3*j+k] = -1;
+				if(h_gate_powers[3*j+k] > 0){
+					// Setting column index and values
+					h_gate_columns[3*j+k] = column_[cmprsd_gate_index].column;
+					h_gate_values[3*j+k] = state_[cmprsd_gate_index];
+					cmprsd_gate_index++; // cmprsd_gate_index is incremented only if power > 0 is found.
+
+					// Partitioning of vm and ca dependent gates.
+					if(k == 2 && caDependIndex_[j] != -1){
+						h_gate_ca_index[3*j+k] = ca_row_ptr[i] + caDependIndex_[j];
+						h_cagate_expand_indices.push_back(3*j+k);
+						h_cagate_capool_indices.push_back(ca_row_ptr[i] + caDependIndex_[j]);
+					}else{
+						h_vgate_expand_indices.push_back(3*j+k);
+						h_vgate_compt_indices.push_back((int)chan2compt_[j]);
+					}
+				}else{
+					h_gate_columns[3*j+k] = 0;
+					h_gate_values[3*j+k] = 0;
 				}
 			}
 		}
-		chan_num += channelCount_[i];
 	}
+	assert(cmprsd_gate_index == num_cmprsd_gates);
+
+	// Allocating memory
+	cudaMalloc((void**)&d_vgate_expand_indices, h_vgate_expand_indices.size()* sizeof(int));
+	cudaMalloc((void**)&d_vgate_compt_indices, h_vgate_compt_indices.size()* sizeof(int));
+
+	cudaMalloc((void**)&d_cagate_expand_indices, h_cagate_expand_indices.size()* sizeof(int));
+	cudaMalloc((void**)&d_cagate_capool_indices, h_cagate_capool_indices.size()* sizeof(int));
+
 
 	cudaMemcpy(d_gate_values, h_gate_values, num_gates * sizeof(double), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_gate_powers, h_gate_powers, num_gates * sizeof(double), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_gate_columns, h_gate_columns, num_gates * sizeof(int), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_gate_ca_index, h_gate_ca_index, num_gates * sizeof(int), cudaMemcpyHostToDevice);
 
-	cudaMemcpy(d_gate_expand_indices, &(h_gate_expand_indices.front()), num_cmprsd_gates * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_gate_ca_index, h_gate_ca_index, num_gates * sizeof(int), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_gate_expand_indices, &(h_gate_expand_indices.front()), h_gate_expand_indices.size()* sizeof(int), cudaMemcpyHostToDevice);
+
+	cudaMemcpy(d_vgate_expand_indices, &(h_vgate_expand_indices.front()), h_vgate_expand_indices.size()* sizeof(int), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_vgate_compt_indices, &(h_vgate_compt_indices.front()), h_vgate_compt_indices.size()* sizeof(int), cudaMemcpyHostToDevice);
+
+	cudaMemcpy(d_cagate_expand_indices, &(h_cagate_expand_indices.front()), h_cagate_expand_indices.size()* sizeof(int), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_cagate_capool_indices, &(h_cagate_capool_indices.front()), h_cagate_capool_indices.size()* sizeof(int), cudaMemcpyHostToDevice);
 
 }
 
