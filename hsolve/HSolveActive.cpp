@@ -220,10 +220,14 @@ void HSolveActive::calculateChannelCurrents()
 
 	currentTimer.Start();
 		calculate_channel_currents_cuda_wrapper();
-		cudaCheckError(); // Making sure no CUDA error occured
-		for(unsigned int i=0;i<current_.size();i++)
-			current_[i].Gk = h_chan_Gk[i];
+		cudaSafeCall(cudaMemcpy(&current_[0], d_current_, current_.size()*sizeof(CurrentStruct), cudaMemcpyDeviceToHost));
 	currentTimer.Stop();
+
+	/*
+	cudaCheckError(); // Making sure no CUDA error occured
+	for(unsigned int i=0;i<current_.size();i++)
+		current_[i].Gk = h_chan_Gk[i];
+	*/
 
 	if(num_time_prints > 0){
 		printf("curr,%lf\n", currentTimer.Elapsed());
@@ -713,6 +717,7 @@ void HSolveActive::allocate_hsolve_memory_cuda(){
 	cudaMalloc((void**)&d_chan_Gbar, num_channels*sizeof(double));
 	cudaMalloc((void**)&d_chan_to_comp, num_channels*sizeof(double));
 	cudaMalloc((void**)&d_chan_Gk, num_channels*sizeof(double));
+	cudaMalloc((void**)&d_current_, current_.size()*sizeof(CurrentStruct));
 
 	// Compartment related
 
@@ -851,6 +856,9 @@ void HSolveActive::copy_hsolve_information_cuda(){
 
 	cudaMemcpy(d_cagate_expand_indices, &(h_cagate_expand_indices.front()), h_cagate_expand_indices.size()* sizeof(int), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_cagate_capool_indices, &(h_cagate_capool_indices.front()), h_cagate_capool_indices.size()* sizeof(int), cudaMemcpyHostToDevice);
+
+	// Current Data
+	cudaMemcpy(d_current_, &(current_.front()), current_.size()*sizeof(CurrentStruct), cudaMemcpyHostToDevice);
 
 }
 

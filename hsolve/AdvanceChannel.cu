@@ -130,11 +130,11 @@ void calculate_channel_currents(double* d_gate_values,
 		double* d_gate_powers,
 		double* d_chan_modulation,
 		double* d_chan_Gbar,
-		double* d_chan_Gk,
+		CurrentStruct* d_current_,
 		int size){
 	int tid = threadIdx.x + blockIdx.x * blockDim.x;
 	if(tid < size){
-		 d_chan_Gk[tid] = d_chan_modulation[tid] *
+		 d_current_[tid].Gk = d_chan_modulation[tid] *
 				 d_chan_Gbar[tid] *
 				 pow(d_gate_values[3*tid], d_gate_powers[3*tid]) *
 				 pow(d_gate_values[3*tid+1], d_gate_powers[3*tid+1]) *
@@ -230,8 +230,8 @@ void HSolveActive::calculate_channel_currents_cuda_wrapper(){
 	int BLOCKS = num_channels/THREADS_PER_BLOCK;
 	BLOCKS = (num_channels%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
 
-	calculate_channel_currents<<<BLOCKS,THREADS_PER_BLOCK>>>(d_gate_values, d_gate_powers, d_chan_modulation, d_chan_Gbar, d_chan_Gk, num_channels);
-	cudaMemcpy(h_chan_Gk, d_chan_Gk, num_channels*sizeof(double), cudaMemcpyDeviceToHost);
+	calculate_channel_currents<<<BLOCKS,THREADS_PER_BLOCK>>>(d_gate_values, d_gate_powers, d_chan_modulation, d_chan_Gbar, d_current_, num_channels);
+	//cudaMemcpy(h_chan_Gk, d_chan_Gk, num_channels*sizeof(double), cudaMemcpyDeviceToHost);
 
 }
 

@@ -191,6 +191,7 @@ protected:
 	int* d_chan_to_comp; // Which compartment does a Channel belong to.
 
 	double* d_chan_Gk;
+	CurrentStruct* d_current_;
 
 	// Compartment related
 
