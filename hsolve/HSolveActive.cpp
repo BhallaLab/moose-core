@@ -414,11 +414,11 @@ void HSolveActive::advanceChannels( double dt )
 
     LookupRow vRow;
 
+#ifdef USE_CUDA
+
 #ifdef TEST_CORRECTNESS
     double* gate_values_after_cuda = new double[h_gate_expand_indices.size()]();
 #endif
-
-#ifdef USE_CUDA
 
     // Useful numbers
     int num_comps = V_.size();
@@ -449,20 +449,12 @@ void HSolveActive::advanceChannels( double dt )
 	get_lookup_rows_and_fractions_cuda_wrapper(dt);
 	advance_channels_cuda_wrapper(dt); // Calling kernel
 	get_compressed_gate_values_wrapper(); // Getting values of new state
-
+#ifdef TEST_CORRECTNESS
+	cudaSafeCall(cudaMemcpy(gate_values_after_cuda, d_state_, state_.size()*3*sizeof(double), cudaMemcpyDeviceToHost));
+#else
+	cudaSafeCall(cudaMemcpy(&state_[0], d_state_, state_.size()*sizeof(double), cudaMemcpyDeviceToHost));
+#endif
 	cudaCheckError(); // Making sure no CUDA errors occured
-
-	double temp[channel_.size()*3];
-	cudaSafeCall(cudaMemcpy(temp, d_gate_values, channel_.size()*3*sizeof(double), cudaMemcpyDeviceToHost));
-
-	for(unsigned int i=0;i<h_gate_expand_indices.size();i++){
-		#ifdef TEST_CORRECTNESS
-			gate_values_after_cuda[i] = temp[h_gate_expand_indices[i]];
-		#else
-			state_[i] = temp[h_gate_expand_indices[i]];
-		#endif
-
-	}
 	tejaTimer.Stop();
 
 	if(num_time_prints > 0){
