@@ -717,6 +717,11 @@ void HSolveActive::allocate_hsolve_memory_cuda(){
 	cudaMalloc((void**)&d_chan_Gbar, num_channels*sizeof(double));
 	cudaMalloc((void**)&d_chan_to_comp, num_channels*sizeof(double));
 	cudaMalloc((void**)&d_chan_Gk, num_channels*sizeof(double));
+	cudaMalloc((void**)&d_chan_GkEk, num_channels*sizeof(double));
+
+	cudaMalloc((void**)&d_comp_Gksum, num_compts*sizeof(double));
+	cudaMalloc((void**)&d_comp_GkEksum, num_compts*sizeof(double));
+
 	cudaMalloc((void**)&d_current_, current_.size()*sizeof(CurrentStruct));
 
 	// Compartment related

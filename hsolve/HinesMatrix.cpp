@@ -48,6 +48,45 @@ void HinesMatrix::setup( const vector< TreeNodeStruct >& tree, double dt )
     makeJunctions();
     makeMatrix();
     makeOperands();
+    /*
+    // Printing stuff
+    for ( unsigned int i = 0; i < nCompt_; ++i )
+    {
+    	vector< unsigned int > c = ( *tree_ )[ i ].children;
+    	printf("%d -> ",i);
+    	for(int j=0;j<c.size();j++){
+    		printf("%d,",c[j]);
+    	}
+    	printf("\n");
+    }
+    printf("Coupled data\n");
+    for(int i=0;i<coupled_.size();i++){
+    	for(int j=0;j<coupled_[i].size();j++){
+    		printf("%d,",coupled_[i][j]);
+    	}
+    	printf("\n");
+    }
+
+    printf("Junction Data\n");
+    vector< JunctionStruct >::iterator junction = junction_.begin();
+    for(;junction != junction_.end();junction++){
+    	printf("%d %d\n",junction->index, junction->rank);
+    }
+
+    printf("Group Number Data \n");
+    map< unsigned int, unsigned int >::iterator groupNo_iter;
+    for(groupNo_iter = groupNumber_.begin(); groupNo_iter != groupNumber_.end(); groupNo_iter++){
+    	printf("%d,%d \n", groupNo_iter->first, groupNo_iter->second);
+    }
+
+
+    // Printing Ga values
+    for (int i = 0; i < nCompt_; ++i) {
+		printf("%lf, ", Ga_[i]);
+	}
+    printf("\n");
+    */
+
 }
 
 void HinesMatrix::clear()
