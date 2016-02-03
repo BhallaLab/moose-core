@@ -1,7 +1,8 @@
 {% extends "!layout.html" %}
 {% block rootrellink %}
     <li><a href="http://moose.ncbs.res.in/">MOOSE Homepage</a> &raquo;</li>
-        {{ super() }}
+    <li><a href="http://moose.ncbs.res.in/moose">HomePage</a>{{ reldelim1 }}</li>
+    {{super()}}
 {% endblock %}
 {% block sidebartitle %}
 
@@ -30,4 +31,20 @@
 
           {% include "searchbox.html" %}
 {% endblock %}
+ <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          {% block menu %}
+            {% set toctree = toctree(maxdepth=4, collapse=theme_collapse_navigation, includehidden=True) %}
+            {% if toctree %}
+                {{ toctree }}
+            {% else %}
+                <!-- Local TOC -->
+                <div class="local-toc">{{ toc }}</div>
+            {% endif %}
+          {% endblock %}
+        </div>
+      </div>
 
+{% block breadcrumbsnavigation %}
+    <li><a href="http://moose.ncbs.res.in/moose/">MOOSE Homepage</a> &raquo;</li>
+    {{super()}}
+{% endblock %}
