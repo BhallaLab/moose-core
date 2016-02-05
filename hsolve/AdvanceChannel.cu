@@ -274,33 +274,29 @@ void HSolveActive::calculate_channel_currents_cuda_wrapper(){
 
 }
 
-void HSolveActive::update_matrix_cuda_wrapper(int size){
-	int BLOCKS = size/THREADS_PER_BLOCK;
-	BLOCKS = (size%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
+void HSolveActive::update_matrix_cuda_wrapper(){
+	int BLOCKS = num_comps_with_chans/THREADS_PER_BLOCK;
+	BLOCKS = (num_comps_with_chans%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
 
 	int num_channels = channel_.size();
 
 	thrust::device_ptr<int> d_th_chan_to_comp(d_chan_to_comp);
 	thrust::device_ptr<double> d_th_chan_Gk(d_chan_Gk);
 	thrust::device_ptr<double> d_th_chan_GkEk(d_chan_GkEk);
-
-	int* d_temp_keys;
-	double* d_temp_values;
-
-	cudaMalloc((void**)&d_temp_keys, size*sizeof(int));
-	cudaMalloc((void**)&d_temp_values, size*sizeof(double));
-
 	thrust::device_ptr<int> d_th_temp_keys(d_temp_keys);
 	thrust::device_ptr<double> d_th_temp_values(d_temp_values);
 
 	thrust::reduce_by_key(d_th_chan_to_comp, d_th_chan_to_comp+num_channels, d_th_chan_Gk, d_th_temp_keys, d_th_temp_values);
-	populating_expand_indices<<<BLOCKS,THREADS_PER_BLOCK>>>(d_temp_keys, d_temp_values, d_comp_Gksum, size);
+	populating_expand_indices<<<BLOCKS,THREADS_PER_BLOCK>>>(d_temp_keys, d_temp_values, d_comp_Gksum, num_comps_with_chans);
 
 	thrust::reduce_by_key(d_th_chan_to_comp, d_th_chan_to_comp+num_channels, d_th_chan_GkEk, d_th_temp_keys, d_th_temp_values);
-	populating_expand_indices<<<BLOCKS,THREADS_PER_BLOCK>>>(d_temp_keys, d_temp_values, d_comp_GkEksum, size);
+	populating_expand_indices<<<BLOCKS,THREADS_PER_BLOCK>>>(d_temp_keys, d_temp_values, d_comp_GkEksum, num_comps_with_chans);
 
 	BLOCKS = nCompt_/THREADS_PER_BLOCK;
 	BLOCKS = (nCompt_%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
+
+	cudaMemcpy(d_inject_, &inject_[0], nCompt_*sizeof(InjectStruct), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_HS_, &HS_[0], HS_.size()*sizeof(double), cudaMemcpyHostToDevice);
 
 	update_matrix_kernel<<<BLOCKS, THREADS_PER_BLOCK>>>(d_V,
 			d_HS_,
@@ -313,9 +309,6 @@ void HSolveActive::update_matrix_cuda_wrapper(int size){
 
 	cudaMemcpy(&inject_[0], d_inject_, nCompt_*sizeof(InjectStruct), cudaMemcpyDeviceToHost );
 	cudaMemcpy(&HS_[0], d_HS_, HS_.size()*sizeof(double), cudaMemcpyDeviceToHost );
-
-	cudaFree(d_temp_keys);
-	cudaFree(d_temp_values);
 
 	//printf("completed computation\n");
 	/*

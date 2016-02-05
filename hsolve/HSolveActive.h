@@ -213,12 +213,17 @@ protected:
 	double* d_V_fractions;
 	int* d_Ca_rows;
 	double* d_Ca_fractions;
+	int* d_temp_keys;
+	double* d_temp_values;
+
+	int num_comps_with_chans = 0; // Stores number of compartments with >=1 channels.
 
 	// temp code
 	bool init_gate_values = false;
 #endif
 
 	int num_time_prints = 0;
+	int num_um_prints = 50;
 
     static const int INSTANT_X;
     static const int INSTANT_Y;
@@ -270,7 +275,7 @@ private:
 
     void calculate_channel_currents_cuda_wrapper();
 
-    void update_matrix_cuda_wrapper(int size);
+    void update_matrix_cuda_wrapper();
 
 
 	void advanceChannel_gpu(

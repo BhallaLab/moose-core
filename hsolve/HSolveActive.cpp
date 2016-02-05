@@ -282,21 +282,24 @@ void HSolveActive::updateMatrix()
 		memcpy( &HJ_[ 0 ], &HJCopy_[ 0 ], sizeof( double ) * HJ_.size() );
 
 #ifdef USE_CUDA
+	GpuTimer gpuTimer;
 
-	int num_unique_keys = 0;
-	set<int> keys;
-	for(unsigned int i=0;i<chan2compt_.size();i++){
-		keys.insert(chan2compt_[i]);
-	}
-	num_unique_keys = keys.size();
-
-	update_matrix_cuda_wrapper(num_unique_keys);
+	gpuTimer.Start();
+		update_matrix_cuda_wrapper();
+	gpuTimer.Stop();
 	cudaCheckError();
+
+	if(num_um_prints > 0){
+		printf("%lf\n",gpuTimer.Elapsed());
+		num_um_prints--;
+	}
 
 	// Use thrust reduce_by_key to find GkSum and GKEkSum
 	// Use Gksum, GkEksum,
 #else
 	// CPU PART
+	u64 cpu_start = getTime();
+
     double GkSum, GkEkSum; vector< CurrentStruct >::iterator icurrent = current_.begin();
     vector< currentVecIter >::iterator iboundary = currentBoundary_.begin();
     vector< double >::iterator ihs = HS_.begin();
@@ -356,6 +359,13 @@ void HSolveActive::updateMatrix()
 
         ihs += 4;
     }
+
+    u64 cpu_end = getTime();
+
+    if(num_um_prints > 0){
+		printf("um,%lf\n", (cpu_end-cpu_start)/1000.0f);
+		num_um_prints--;
+	}
 #endif
     stage_ = 0;    // Update done.
 }
@@ -790,6 +800,9 @@ void HSolveActive::allocate_hsolve_memory_cuda(){
 	cudaMalloc((void**)&d_Ca_rows, num_Ca_pools*sizeof(int));
 	cudaMalloc((void**)&d_Ca_fractions, num_Ca_pools*sizeof(double));
 
+	cudaMalloc((void**)&d_temp_keys, num_compts*sizeof(int));
+	cudaMalloc((void**)&d_temp_values, num_compts*sizeof(double));
+
 }
 
 void HSolveActive::copy_table_data_cuda(){
@@ -926,6 +939,16 @@ void HSolveActive::copy_hsolve_information_cuda(){
 
 	// Hines Matrix related
 	cudaMemcpy(d_HS_, &(HS_.front()), HS_.size()*sizeof(double), cudaMemcpyHostToDevice);
+
+
+	int num_unique_keys = 0;
+	set<int> keys;
+	for(unsigned int i=0;i<chan2compt_.size();i++){
+		keys.insert(chan2compt_[i]);
+	}
+	num_unique_keys = keys.size();
+
+	num_comps_with_chans = num_unique_keys; // Contains number of compartments with >= 1 chans
 
 }
 
