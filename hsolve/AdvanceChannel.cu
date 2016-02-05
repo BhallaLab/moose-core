@@ -150,6 +150,37 @@ void calculate_channel_currents(double* d_gate_values,
 
 }
 
+__global__
+void populating_expand_indices(int* d_keys, double* d_values, double* d_expand_values, int size){
+	int tid = threadIdx.x + blockIdx.x * blockDim.x;
+	if(tid < size){
+		d_expand_values[d_keys[tid]] = d_values[tid];
+	}
+
+}
+
+__global__
+void update_matrix_kernel(double* d_V,
+		double* d_HS_,
+		double* d_comp_Gksum,
+		double* d_comp_GkEksum,
+		CompartmentStruct* d_compartment_,
+		InjectStruct* d_inject_,
+		double*	d_externalCurrent_,
+		int size){
+
+	int tid = threadIdx.x + blockIdx.x * blockDim.x;
+	if(tid < size){
+		d_HS_[4*tid] = d_HS_[4*tid+2] + d_comp_Gksum[tid] + d_externalCurrent_[2*tid];
+		d_HS_[4*tid+3] = d_V[tid]*d_compartment_[tid].CmByDt + d_compartment_[tid].EmByRm + d_comp_GkEksum[tid] +
+				(d_inject_[tid].injectVarying + d_inject_[tid].injectBasal) + d_externalCurrent_[2*tid+1];
+
+		d_inject_[tid].injectVarying = 0;
+
+	}
+
+}
+
 
 void HSolveActive::get_lookup_rows_and_fractions_cuda_wrapper(double dt){
 
@@ -243,7 +274,87 @@ void HSolveActive::calculate_channel_currents_cuda_wrapper(){
 
 }
 
+void HSolveActive::update_matrix_cuda_wrapper(int size){
+	int BLOCKS = size/THREADS_PER_BLOCK;
+	BLOCKS = (size%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
 
+	int num_channels = channel_.size();
+
+	thrust::device_ptr<int> d_th_chan_to_comp(d_chan_to_comp);
+	thrust::device_ptr<double> d_th_chan_Gk(d_chan_Gk);
+	thrust::device_ptr<double> d_th_chan_GkEk(d_chan_GkEk);
+
+	int* d_temp_keys;
+	double* d_temp_values;
+
+	cudaMalloc((void**)&d_temp_keys, size*sizeof(int));
+	cudaMalloc((void**)&d_temp_values, size*sizeof(double));
+
+	thrust::device_ptr<int> d_th_temp_keys(d_temp_keys);
+	thrust::device_ptr<double> d_th_temp_values(d_temp_values);
+
+	thrust::reduce_by_key(d_th_chan_to_comp, d_th_chan_to_comp+num_channels, d_th_chan_Gk, d_th_temp_keys, d_th_temp_values);
+	populating_expand_indices<<<BLOCKS,THREADS_PER_BLOCK>>>(d_temp_keys, d_temp_values, d_comp_Gksum, size);
+
+	thrust::reduce_by_key(d_th_chan_to_comp, d_th_chan_to_comp+num_channels, d_th_chan_GkEk, d_th_temp_keys, d_th_temp_values);
+	populating_expand_indices<<<BLOCKS,THREADS_PER_BLOCK>>>(d_temp_keys, d_temp_values, d_comp_GkEksum, size);
+
+	BLOCKS = nCompt_/THREADS_PER_BLOCK;
+	BLOCKS = (nCompt_%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
+
+	update_matrix_kernel<<<BLOCKS, THREADS_PER_BLOCK>>>(d_V,
+			d_HS_,
+			d_comp_Gksum,
+			d_comp_GkEksum,
+			d_compartment_,
+			d_inject_,
+			d_externalCurrent_,
+			(int)nCompt_);
+
+	cudaMemcpy(&inject_[0], d_inject_, nCompt_*sizeof(InjectStruct), cudaMemcpyDeviceToHost );
+	cudaMemcpy(&HS_[0], d_HS_, HS_.size()*sizeof(double), cudaMemcpyDeviceToHost );
+
+	cudaFree(d_temp_keys);
+	cudaFree(d_temp_values);
+
+	//printf("completed computation\n");
+	/*
+	// CHECKING correctness
+	double error = 0;
+	// GPU calculations
+	double gksum_values[nCompt_];
+	cudaMemcpy(gksum_values, d_comp_Gksum, nCompt_*sizeof(double), cudaMemcpyDeviceToHost);
+
+	// CPU calculations
+	double GkSum, GkEkSum;
+	vector< CurrentStruct >::iterator icurrent = current_.begin();
+	vector< currentVecIter >::iterator iboundary = currentBoundary_.begin();
+
+	vector< CompartmentStruct >::iterator ic;
+	int i = 0;
+	for ( ic = compartment_.begin(); ic != compartment_.end(); ++ic )
+	{
+		GkSum   = 0.0;
+		GkEkSum = 0.0;
+		for ( ; icurrent < *iboundary; ++icurrent )
+		{
+			GkSum   += icurrent->Gk;
+			GkEkSum += icurrent->Gk * icurrent->Ek;
+		}
+		error += (GkSum-gksum_values[i]);
+		i++;
+
+		//printf("%lf %lf\n",GkSum, gksum_values[i-1]);
+
+		++iboundary;
+	}
+
+	//printf("%lf errror\n",error);
+	//getchar();
+	 */
+
+
+}
 
 /*
  * Copy row arrays to device.

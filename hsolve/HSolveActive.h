@@ -28,7 +28,6 @@
 #include "CudaGlobal.h"
 #include "RateLookup.h"
 #include "Gpu_timer.h"
-#include <thrust/scan.h>
 
 class HSolveActive: public HSolvePassive
 {
@@ -194,7 +193,13 @@ protected:
 	double* d_chan_GkEk;
 	double* d_comp_Gksum;
 	double* d_comp_GkEksum;
+	double* d_externalCurrent_;
 	CurrentStruct* d_current_;
+	InjectStruct* d_inject_;
+	CompartmentStruct* d_compartment_;
+
+	// Hines Matrix related
+	double* d_HS_;
 
 	// Compartment related
 
@@ -213,7 +218,7 @@ protected:
 	bool init_gate_values = false;
 #endif
 
-	int num_time_prints = 100;
+	int num_time_prints = 0;
 
     static const int INSTANT_X;
     static const int INSTANT_Y;
@@ -264,6 +269,8 @@ private:
     void get_compressed_gate_values_wrapper();
 
     void calculate_channel_currents_cuda_wrapper();
+
+    void update_matrix_cuda_wrapper(int size);
 
 
 	void advanceChannel_gpu(

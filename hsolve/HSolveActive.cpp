@@ -24,11 +24,12 @@
 //#define TEST_CORRECTNESS
 
 #ifdef USE_CUDA
+#include <thrust/device_ptr.h>
+#include <thrust/reduce.h>
+#include <thrust/detail/static_assert.h>
 
-#include <thrust/device_vector.h>
-#include <thrust/host_vector.h>
 #endif
-
+using namespace std;
 #include <sys/time.h>
 
 typedef unsigned long long u64;
@@ -271,13 +272,31 @@ void HSolveActive::calculateChannelCurrents()
 
 void HSolveActive::updateMatrix()
 {
-    /*
-     * Copy contents of HJCopy_ into HJ_. Cannot do a vector assign() because
-     * iterators to HJ_ get invalidated in MS VC++
-     */
-    if ( HJ_.size() != 0 )
-        memcpy( &HJ_[ 0 ], &HJCopy_[ 0 ], sizeof( double ) * HJ_.size() );
 
+	/*
+	 * Copy contents of HJCopy_ into HJ_. Cannot do a vector assign() because
+	 * iterators to HJ_ get invalidated in MS VC++
+	 * TODO Is it needed to do a memcpy each time?
+	 */
+	if ( HJ_.size() != 0 )
+		memcpy( &HJ_[ 0 ], &HJCopy_[ 0 ], sizeof( double ) * HJ_.size() );
+
+#ifdef USE_CUDA
+
+	int num_unique_keys = 0;
+	set<int> keys;
+	for(unsigned int i=0;i<chan2compt_.size();i++){
+		keys.insert(chan2compt_[i]);
+	}
+	num_unique_keys = keys.size();
+
+	update_matrix_cuda_wrapper(num_unique_keys);
+	cudaCheckError();
+
+	// Use thrust reduce_by_key to find GkSum and GKEkSum
+	// Use Gksum, GkEksum,
+#else
+	// CPU PART
     double GkSum, GkEkSum; vector< CurrentStruct >::iterator icurrent = current_.begin();
     vector< currentVecIter >::iterator iboundary = currentBoundary_.begin();
     vector< double >::iterator ihs = HS_.begin();
@@ -337,7 +356,7 @@ void HSolveActive::updateMatrix()
 
         ihs += 4;
     }
-
+#endif
     stage_ = 0;    // Update done.
 }
 
@@ -451,6 +470,28 @@ void HSolveActive::advanceChannels( double dt )
 		cudaMemcpy(d_gate_values, test_gate_values, num_gates*sizeof(double), cudaMemcpyHostToDevice);
 
 		init_gate_values = true;
+
+		/*
+		set<int> comps;
+		for(int i=0;i<channel_.size();i++){
+			comps.insert(chan2compt_[i]);
+		}
+
+		for (set<int>::iterator i = comps.begin(); i != comps.end(); i++) {
+		   cout << *i << endl;
+		}
+
+		cout << nCompt_ << " " << comps.size() << endl;
+
+		int count = 0;
+		for (int i = 0; i < channelCount_.size(); ++i) {
+			if(channelCount_[i] == 0)
+				count++;
+		}
+
+		cout << "# of compartments with zero channels " << count << endl;
+		*/
+
 	}
 
 	// ----------------------------------------------------------------------------
@@ -725,11 +766,21 @@ void HSolveActive::allocate_hsolve_memory_cuda(){
 	cudaMalloc((void**)&d_chan_GkEk, num_channels*sizeof(double));
 
 	cudaMalloc((void**)&d_comp_Gksum, num_compts*sizeof(double));
+	cudaMemset(d_comp_Gksum, 0, num_compts*sizeof(double));
 	cudaMalloc((void**)&d_comp_GkEksum, num_compts*sizeof(double));
+	cudaMemset(d_comp_GkEksum, 0, num_compts*sizeof(double));
+	cudaMalloc((void**)&d_externalCurrent_, 2*num_compts*sizeof(double));
+
 
 	cudaMalloc((void**)&d_current_, current_.size()*sizeof(CurrentStruct));
+	cudaMalloc((void**)&d_inject_, inject_.size()*sizeof(InjectStruct));
+	cudaMalloc((void**)&d_compartment_, compartment_.size()*sizeof(CompartmentStruct));
+
 
 	// Compartment related
+
+	// Hines Matrix related
+	cudaMalloc((void**)&d_HS_, HS_.size()*sizeof(double));
 
 	// Intermediate data for computation
 
@@ -868,7 +919,13 @@ void HSolveActive::copy_hsolve_information_cuda(){
 	cudaMemcpy(d_cagate_capool_indices, &(h_cagate_capool_indices.front()), h_cagate_capool_indices.size()* sizeof(int), cudaMemcpyHostToDevice);
 
 	// Current Data
+	cudaMemcpy(d_externalCurrent_, &(externalCurrent_.front()), 2 * num_compts * sizeof(double), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_current_, &(current_.front()), current_.size()*sizeof(CurrentStruct), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_inject_, &(inject_.front()), inject_.size()*sizeof(InjectStruct), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_compartment_, &(compartment_.front()), compartment_.size()*sizeof(CompartmentStruct), cudaMemcpyHostToDevice);
+
+	// Hines Matrix related
+	cudaMemcpy(d_HS_, &(HS_.front()), HS_.size()*sizeof(double), cudaMemcpyHostToDevice);
 
 }
 
