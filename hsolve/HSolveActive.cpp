@@ -299,7 +299,12 @@ void HSolveActive::updateMatrix()
 
         ++iboundary, ihs += 4, ++iv;
     }
-
+#ifdef USE_CUDA
+    for(int i=0;i<inject_.size();i++){
+    	HS_[ 4 * i + 3 ] += inject_[i].injectVarying + inject_[i].injectBasal;
+    	inject_[i].injectVarying = 0;
+    }
+#else
     map< unsigned int, InjectStruct >::iterator inject;
     for ( inject = inject_.begin(); inject != inject_.end(); ++inject )
     {
@@ -310,7 +315,7 @@ void HSolveActive::updateMatrix()
 
         value.injectVarying = 0.0;
     }
-
+#endif
     // Synapses are being handled as external channels.
     //~ double Gk, Ek;
     //~ vector< SynChanStruct >::iterator isyn;
