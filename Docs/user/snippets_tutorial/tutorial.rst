@@ -11,15 +11,22 @@ This reference has prepared for the users to help them understand from the basic
 
 Chemical Signalling Models
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+`Load Kinetic Model <loadKineticModel.html>`_
+----------------------------------------------
 
-`Building Simple Reaction Model <../../Building_Simple_Reaction_Model.html>`_
-------------------------------------------------------------------------------
-`Finding Steady State  <../../SteadyState.html>`_
--------------------------------------------------
-`Deterministic Simulation <../../DeterministicSimulation.html>`_
+`Deterministic Simulation <DeterministicSolver.html>`_
 ----------------------------------------------------------------
-`Stochastic Simulation <../../StochasticSimulation.html>`_
+
+`Stochastic Simulation <StochasticSolver.html>`_
 -----------------------------------------------------------
+
+`Finding Steady State  <SteadyState.html>`_
+-------------------------------------------------
+
+`Building Simple Reaction Model <Building_Simple_Reaction_Model.html>`_
+------------------------------------------------------------------------------
+
+
 
 Building of Electical Signalling Models
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

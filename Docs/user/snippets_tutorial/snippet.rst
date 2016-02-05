@@ -24,6 +24,16 @@ Signaling Pathways
 ------------------
 This section show some of the chemical signaling pathways related settings
 
+Define a kinetic model using the scripting in moose
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: scriptKineticModel
+  :members:
+
+Set up of kinetic solver
+^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: scriptKineticSolver
+  :members:
+
 Multi scale models
 -------------------
 

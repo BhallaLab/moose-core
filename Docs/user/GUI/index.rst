@@ -19,10 +19,3 @@ Contents:
    MooseGuiDocs
    Kkit12Documentation
    RdesigneurDocumentation
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
