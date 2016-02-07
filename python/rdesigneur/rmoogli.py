@@ -116,7 +116,7 @@ def makeMoogli( rd, mooObj, moogliEntry, fieldInfo ):
                                  size=moogli.geometry.Vec3f(0.30, 0.05, 0.0),
                                  text_font="/usr/share/fonts/truetype/ubuntu-font-family/Ubuntu-R.ttf",
                                  orientation=math.pi / 2.0,
-                                 text_character_size=20,
+                                 text_character_size=16,
                                  label_formatting_precision=0,
                                  colormap=moogli.colors.MatplotlibColorMap(matplotlib.cm.rainbow),
                                  color_resolution=100,

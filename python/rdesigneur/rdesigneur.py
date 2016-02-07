@@ -293,13 +293,18 @@ class rdesigneur:
             ''' Make HH squid model sized compartment: 
             len and dia 500 microns. CM = 0.01 F/m^2, RA = 
             '''
+            self.elecid = makePassiveHHsoma( name = 'cell' )
+            assert( moose.exists( '/library/cell/soma' ) )
+            self.soma = moose.element( '/library/cell/soma' )
+
+            '''
             self.elecid = moose.Neuron( '/library/cell' )
             dia = 500e-6
             self.soma = buildCompt( self.elecid, 'soma', dia, dia, 0.0, 
                 0.33333333, 3000, 0.01 )
             self.soma.initVm = -65e-3 # Resting of -65, from HH
             self.soma.Em = -54.4e-3 # 10.6 mV above resting of -65, from HH
-
+            '''
 
         for i in self.cellProtoList:
             if self.checkAndBuildProto( "cell", i, \
@@ -469,7 +474,7 @@ class rdesigneur:
         if ( kf[0] == 'CaConcBase' or kf[0] == 'ChanBase' ):
             objList = self._collapseElistToPathAndClass( comptList, plotSpec[2], kf[0] )
             return objList, kf[1]
-        elif (field == 'n' or field == 'conc' ):
+        elif (field == 'n' or field == 'conc'  ):
             path = plotSpec[2]
             pos = path.find( '/' )
             if pos == -1:   # Assume it is in the dend compartment.
@@ -489,6 +494,8 @@ class rdesigneur:
                         voxelVec.extend( [ elecComptMap[i] ] )
             # Here we collapse the voxelVec into objects to plot.
             allObj = moose.vec( self.modelPath + '/chem/' + plotSpec[2] )
+            #print "####### allObj=", self.modelPath + '/chem/' + plotSpec[2]
+            #print len( allObj )
             objList = [ allObj[int(j)] for j in voxelVec]
             #print "############", chemCompt, len(objList), kf[1]
             return objList, kf[1]

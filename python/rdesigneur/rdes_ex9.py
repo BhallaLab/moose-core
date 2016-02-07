@@ -13,7 +13,7 @@ rdes = rd.rdesigneur(
         ['./chans/Ca.xml']
     ],
     cellProto = [['./cells/h10.CNG.swc', 'elec']],
-    spineProto = [['make_active_spine()', 'spine']],
+    spineProto = [['makeActiveSpine()', 'spine']],
     chanDistrib = [
         ["hd", "#dend#,#apical#", "Gbar", "50e-2*(1+(p*3e4))" ],
         ["kdr", "#", "Gbar", "p < 50e-6 ? 500 : 100" ],

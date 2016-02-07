@@ -9,7 +9,7 @@ rdes = rd.rdesigneur(
     chanDistrib = [ 
         ['Na', 'soma', 'Gbar', '1200' ], 
         ['K', 'soma', 'Gbar', '360' ]],
-    chemProto = [['make_Chem_Oscillator()', 'osc']],
+    chemProto = [['makeChemOscillator()', 'osc']],
     chemDistrib = [['osc', 'soma', 'install', '1' ]],
 	# These adaptor parameters give interesting-looking but not
 	# particularly physiological behaviour.

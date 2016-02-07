@@ -2,7 +2,7 @@ import moose
 import rdesigneur as rd
 
 library = moose.Neutral( '/library' )
-compt = rd.make_Chem_Oscillator( 'osc' )
+compt = rd.makeChemOscillator( 'osc' )
 compt.volume = 1e-18
 moose.copy( compt, '/library/osc', 'spine' )
 moose.element( '/library/osc/spine' ).volume = 1e-19
@@ -13,7 +13,7 @@ rdes = rd.rdesigneur(
     turnOffElec = True,
     useGssa = False,
     cellProto = [[ './cells/h10.CNG.swc', 'elec']],
-    spineProto = [[ 'make_passive_spine()', 'spine' ] ],
+    spineProto = [[ 'makePassiveSpine()', 'spine' ] ],
     spineDistrib = [ ["spine", '#apical#,#dend#', '10e-6', '1e-6' ]],
     chemProto = [['/library/osc', 'osc']],
     chemDistrib =[[ 'osc', '#apical#,#dend#', 'install', 'H(p - 5e-4)' ]],

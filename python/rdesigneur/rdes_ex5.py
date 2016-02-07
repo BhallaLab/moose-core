@@ -3,7 +3,7 @@ import pylab
 import rdesigneur as rd
 rdes = rd.rdesigneur(
     turnOffElec = True,
-    chemProto = [['make_Chem_Oscillator()', 'osc']],
+    chemProto = [['makeChemOscillator()', 'osc']],
     chemDistrib = [['osc', 'soma', 'install', '1' ]],
     plotList = [['soma', '1', 'dend/a', 'conc', 'Concentration of a'],
         ['soma', '1', 'dend/b', 'conc', 'Concentration of b']],
