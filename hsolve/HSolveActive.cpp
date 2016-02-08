@@ -526,6 +526,14 @@ void HSolveActive::advanceChannels( double dt )
 
 		init_gate_values = true;
 
+		// Setting up cusparse information
+		cusparseCreate(&cusparse_handle);
+
+		// create and setup matrix descriptors A, B & C
+		cusparseCreateMatDescr(&cusparse_descr);
+		cusparseSetMatType(cusparse_descr, CUSPARSE_MATRIX_TYPE_GENERAL);
+		cusparseSetMatIndexBase(cusparse_descr, CUSPARSE_INDEX_BASE_ZERO);
+
 		/*
 		set<int> comps;
 		for(int i=0;i<channel_.size();i++){
@@ -839,6 +847,12 @@ void HSolveActive::allocate_hsolve_memory_cuda(){
 	cudaMalloc((void**)&d_HS_1, nCompt_*sizeof(double));
 	cudaMalloc((void**)&d_HS_2, nCompt_*sizeof(double));
 
+	cudaMalloc((void**)&d_chan_colIndex, num_channels*sizeof(int));
+	cudaMalloc((void**)&d_chan_rowPtr, (nCompt_+1)*sizeof(int));
+	cudaMalloc((void**)&d_chan_x, nCompt_*sizeof(double));
+
+
+
 	// Intermediate data for computation
 
 	cudaMalloc((void**)&d_V_rows, num_compts*sizeof(int));
@@ -867,8 +881,8 @@ void HSolveActive::copy_table_data_cuda(){
 
 void HSolveActive::copy_hsolve_information_cuda(){
 	int num_compts = V_.size();
-	int num_chans = channel_.size();
-	int num_gates = 3*num_chans;
+	int num_channels = channel_.size();
+	int num_gates = 3*num_channels;
 	int num_cmprsd_gates = state_.size();
 	int num_Ca_pools = ca_.size();
 
@@ -879,10 +893,10 @@ void HSolveActive::copy_hsolve_information_cuda(){
 	int h_gate_ca_index[num_gates];
 
 	// Channel variables
-	double h_chan_Gbar[num_chans];
-	int h_chan_instant[num_chans];
-	double h_chan_modulation[num_chans];
-	unsigned int h_chan_to_comp[num_chans];
+	double h_chan_Gbar[num_channels];
+	int h_chan_instant[num_channels];
+	double h_chan_modulation[num_channels];
+	unsigned int h_chan_to_comp[num_channels];
 
 	// Transferring Vm and Ca concentration values to GPU
 	cudaMemcpy(d_V, &(V_.front()), num_compts*sizeof(double), cudaMemcpyHostToDevice);
@@ -890,7 +904,7 @@ void HSolveActive::copy_hsolve_information_cuda(){
 
 
 	// Gathering data for each channel
-	for(int i=0;i<num_chans;i++){
+	for(int i=0;i<num_channels;i++){
 		h_chan_Gbar[i] = channel_[i].Gbar_;
 
 		h_chan_instant[i] = channel_[i].instant_;
@@ -901,18 +915,18 @@ void HSolveActive::copy_hsolve_information_cuda(){
 	}
 
 	// Transferring channel data to GPU
-	cudaMemcpy(d_chan_Gbar, h_chan_Gbar, num_chans * sizeof(double), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_chan_instant, h_chan_instant, num_chans * sizeof(int), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_chan_modulation, h_chan_modulation, num_chans * sizeof(double), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_chan_to_comp, h_chan_to_comp, num_chans * sizeof(unsigned int), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_chan_Gbar, h_chan_Gbar, num_channels * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_chan_instant, h_chan_instant, num_channels * sizeof(int), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_chan_modulation, h_chan_modulation, num_channels * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_chan_to_comp, h_chan_to_comp, num_channels * sizeof(unsigned int), cudaMemcpyHostToDevice);
 
 	// Constructing ca and channel row ptrs with nCompt as rows.
-	int ca_row_ptr[V_.size()+1];
-	int chan_row_ptr[V_.size()+1];
+	int ca_rowPtr[V_.size()+1];
+	int chan_rowPtr[V_.size()+1];
 	int sum1 = 0, sum2 = 0;
 	for(unsigned int i=0;i<=V_.size();i++){
-		ca_row_ptr[i] = sum1;
-		chan_row_ptr[i] = sum2;
+		ca_rowPtr[i] = sum1;
+		chan_rowPtr[i] = sum2;
 
 		if(i < V_.size()){
 			// Last one should be just set.
@@ -924,7 +938,7 @@ void HSolveActive::copy_hsolve_information_cuda(){
 	// Gathering gate information and separating gates (with power < 0) , (with vm dependent) , (with ca dependent)
 	int cmprsd_gate_index = 0; // If the logic is true cmprsd_gate_index value at the end of for loop = # of gates with powers > 0
 	for(unsigned int i=0;i<V_.size();i++){
-		for(int j=chan_row_ptr[i]; j<chan_row_ptr[i+1]; j++){
+		for(int j=chan_rowPtr[i]; j<chan_rowPtr[i+1]; j++){
 
 			// Setting powers
 			h_gate_powers[3*j] = channel_[j].Xpower_;
@@ -941,9 +955,9 @@ void HSolveActive::copy_hsolve_information_cuda(){
 
 					// Partitioning of vm and ca dependent gates.
 					if(k == 2 && caDependIndex_[j] != -1){
-						h_gate_ca_index[3*j+k] = ca_row_ptr[i] + caDependIndex_[j];
+						h_gate_ca_index[3*j+k] = ca_rowPtr[i] + caDependIndex_[j];
 						h_cagate_expand_indices.push_back(3*j+k);
-						h_cagate_capool_indices.push_back(ca_row_ptr[i] + caDependIndex_[j]);
+						h_cagate_capool_indices.push_back(ca_rowPtr[i] + caDependIndex_[j]);
 					}else{
 						h_vgate_expand_indices.push_back(3*j+k);
 						h_vgate_compt_indices.push_back((int)chan2compt_[j]);
@@ -998,6 +1012,21 @@ void HSolveActive::copy_hsolve_information_cuda(){
 	cudaMemcpy(d_HS_1, temp_hs_1 , nCompt_*sizeof(double), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_HS_2, temp_hs_2 , nCompt_*sizeof(double), cudaMemcpyHostToDevice);
 
+	int* chan_colIndex = new int[num_channels]();
+	int* chan_x = new int[nCompt_];
+
+	std::fill_n(chan_x, nCompt_, 1);
+
+	// Filling column indices
+	for(int i=0;i<nCompt_;i++){
+		for(int j=chan_rowPtr[i];j<chan_rowPtr[i+1];j++){
+			chan_colIndex[j] = j-chan_rowPtr[i];
+		}
+	}
+
+	cudaMemcpy(d_chan_x, chan_x, nCompt_*sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_chan_colIndex, chan_colIndex , num_channels*sizeof(int), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_chan_rowPtr, chan_rowPtr, (nCompt_+1)*sizeof(int), cudaMemcpyHostToDevice);
 
 	int num_unique_keys = 0;
 	set<int> keys;

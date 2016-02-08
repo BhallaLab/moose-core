@@ -17,6 +17,7 @@
 #include <thrust/system/system_error.h>
 #include <thrust/copy.h>
 
+
 __device__ __constant__ int instant_xyz_d[3];
 
 __global__
@@ -281,7 +282,8 @@ void HSolveActive::update_matrix_cuda_wrapper(){
 	BLOCKS = (num_comps_with_chans%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
 
 	int num_channels = channel_.size();
-
+	/*
+	// Using THRUST
 	thrust::device_ptr<int> d_th_chan_to_comp(d_chan_to_comp);
 	thrust::device_ptr<double> d_th_chan_Gk(d_chan_Gk);
 	thrust::device_ptr<double> d_th_chan_GkEk(d_chan_GkEk);
@@ -293,6 +295,55 @@ void HSolveActive::update_matrix_cuda_wrapper(){
 
 	thrust::reduce_by_key(d_th_chan_to_comp, d_th_chan_to_comp+num_channels, d_th_chan_GkEk, d_th_temp_keys, d_th_temp_values);
 	populating_expand_indices<<<BLOCKS,THREADS_PER_BLOCK>>>(d_temp_keys, d_temp_values, d_comp_GkEksum, num_comps_with_chans);
+	*/
+	// Using Cusparse
+	const double alpha = 1.0;
+	const double beta = 0.0;
+
+	cusparseDcsrmv(cusparse_handle,  CUSPARSE_OPERATION_NON_TRANSPOSE,
+		nCompt_, nCompt_, num_channels, &alpha, cusparse_descr,
+		d_chan_Gk, d_chan_rowPtr, d_chan_colIndex,
+		d_chan_x , &beta, d_comp_Gksum);
+
+	cusparseDcsrmv(cusparse_handle,  CUSPARSE_OPERATION_NON_TRANSPOSE,
+		nCompt_, nCompt_, num_channels, &alpha, cusparse_descr,
+		d_chan_GkEk, d_chan_rowPtr, d_chan_colIndex,
+		d_chan_x , &beta, d_comp_GkEksum);
+
+
+	// -----------------------------------------------CUSPARSE------------------------------------------------
+	/*
+
+	const double alpha = 1.0;
+	const double beta = 0.0;
+
+	double* d_temp_Gksum;
+	cudaMalloc((void**)&d_temp_Gksum, nCompt_*sizeof(double));
+
+	cusparseDcsrmv(cusparse_handle,  CUSPARSE_OPERATION_NON_TRANSPOSE,
+		nCompt_, nCompt_, num_channels, &alpha, cusparse_descr,
+		d_chan_Gk, d_chan_rowPtr, d_chan_colIndex,
+		d_chan_x , &beta, d_temp_Gksum);
+
+
+	// Checking gksum with others.
+	double h_temp_Gksum[nCompt_];
+	double h_comp_Gksum[nCompt_];
+	cudaMemcpy(h_temp_Gksum, d_temp_Gksum, nCompt_*sizeof(double), cudaMemcpyDeviceToHost);
+	cudaMemcpy(h_comp_Gksum, d_comp_Gksum, nCompt_*sizeof(double), cudaMemcpyDeviceToHost);
+	float error = 0;
+	for(int i=0;i<nCompt_;i++){
+		error += (h_comp_Gksum[i]-h_temp_Gksum[i]);
+	}
+
+	printf("error %lf\n",error);
+	getchar();
+	*/
+
+
+	// -----------------------------------------------CUSPARSE------------------------------------------------
+
+
 
 	BLOCKS = nCompt_/THREADS_PER_BLOCK;
 	BLOCKS = (nCompt_%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
