@@ -1023,8 +1023,9 @@ void Stoich::buildFuncLookup()
 void Stoich::installAndUnschedFunc( Id func, Id pool, double volScale )
 {
 	static const Cinfo* varCinfo = Cinfo::find( "Variable" );
-	static const Finfo* funcSrcFinfo = varCinfo->findFinfo( "input" );
-	assert( funcSrcFinfo );
+	static const Finfo* funcInputFinfo = varCinfo->findFinfo( "input" );
+	static const DestFinfo* df = dynamic_cast< const DestFinfo* >( funcInputFinfo );
+	assert( df );
 	// Unsched Func
 	func.element()->setTick( -2 ); // Disable with option to resurrect.
 
@@ -1034,15 +1035,20 @@ void Stoich::installAndUnschedFunc( Id func, Id pool, double volScale )
 	Id ei( func.value() + 1 );
 
 	unsigned int numSrc = Field< unsigned int >::get( func, "numVars" );
-	vector< Id > srcPools;
+	vector< pair< Id, unsigned int> > srcPools;
 #ifndef NDEBUG
 	unsigned int n = 
 #endif
-			ei.element()->getNeighbors( srcPools, funcSrcFinfo);
+		ei.element()->getInputsWithTgtIndex( srcPools, df );
 	assert( numSrc == n );
 	vector< unsigned int > poolIndex( numSrc, 0 );
 	for ( unsigned int i = 0; i < numSrc; ++i ) {
-		poolIndex[i] = convertIdToPoolIndex( srcPools[i] );
+		unsigned int j = srcPools[i].second;
+		if ( j >= numSrc ) {
+			cout << "Warning: Stoich::installAndUnschedFunc: tgt index not allocated, " << j << ",	" << numSrc << endl;
+			continue;
+		}
+		poolIndex[j] = convertIdToPoolIndex( srcPools[i].first );
 	}
 	ft->setReactantIndex( poolIndex );
 	string expr = Field< string >::get( func, "expr" );
@@ -1058,8 +1064,9 @@ void Stoich::installAndUnschedFunc( Id func, Id pool, double volScale )
 void Stoich::installAndUnschedFuncRate( Id func, Id pool )
 {
 	static const Cinfo* varCinfo = Cinfo::find( "Variable" );
-	static const Finfo* funcSrcFinfo = varCinfo->findFinfo( "input" );
-	assert( funcSrcFinfo );
+	static const Finfo* funcInputFinfo = varCinfo->findFinfo( "input" );
+	static const DestFinfo* df = dynamic_cast< const DestFinfo* >( funcInputFinfo );
+	assert( df );
 	// Unsched Func
 	func.element()->setTick( -2 ); // Disable with option to resurrect.
 
@@ -1077,15 +1084,21 @@ void Stoich::installAndUnschedFuncRate( Id func, Id pool )
 	Id ei( func.value() + 1 );
 
 	unsigned int numSrc = Field< unsigned int >::get( func, "numVars" );
-	vector< Id > srcPools;
+	vector< pair< Id, unsigned int > > srcPools;
 #ifndef NDEBUG
 	unsigned int n = 
 #endif
-			ei.element()->getNeighbors( srcPools, funcSrcFinfo);
+			ei.element()->getInputsWithTgtIndex( srcPools, df );
 	assert( numSrc == n );
 	vector< unsigned int > poolIndex( numSrc, 0 );
-	for ( unsigned int i = 0; i < numSrc; ++i )
-		poolIndex[i] = convertIdToPoolIndex( srcPools[i] );
+	for ( unsigned int i = 0; i < numSrc; ++i ) {
+		unsigned int j = srcPools[i].second;
+		if ( j >= numSrc ) {
+			cout << "Warning: Stoich::installAndUnschedFuncRate: tgt index not allocated, " << j << ",	" << numSrc << endl;
+			continue;
+		}
+		poolIndex[j] = convertIdToPoolIndex( srcPools[i].first );
+	}
 	fr->setFuncArgIndex( poolIndex );
 	string expr = Field< string >::get( func, "expr" );
 	fr->setExpr( expr );

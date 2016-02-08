@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Fri Jul 10 10:02:45 2015 (+0530)
-//           By: subha
-//     Update #: 11007
+// Last-Updated: Wed Jan 27 12:56:40 2016 (-0500)
+//           By: Subhasis Ray
+//     Update #: 11013
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -2182,7 +2182,14 @@ extern "C" {
         PyTypeObject * new_class =
                 (PyTypeObject*)PyType_Type.tp_alloc(&PyType_Type, 0);
         // Py_TYPE(new_class) = &PyType_Type;
+// Python3 does not like it without heaptype: aborts on import 
+// Fatal Python error:
+// type_traverse() called for non-heap type 'moose.Neutral'
+#ifdef PY3K
+        new_class->tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HEAPTYPE;
+#else
         new_class->tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE; // | Py_TPFLAGS_HEAPTYPE;
+#endif
         /*
           Thu Jul 9 09:58:09 IST 2015 - commenting out
           Py_TPFLAGS_HEAPTYPE because it causes segfault on accessing

@@ -50,29 +50,30 @@ class rdesigneur:
     I need to put the extra channels now into the NeuroML definition.
     """
     ################################################################
-    def __init__(self, \
-            modelPath = '/model', \
-            turnOffElec = False, \
-            useGssa = True, \
-            combineSegments = True, \
-            stealCellFromLibrary = False, \
-            diffusionLength= 2e-6, \
-            temperature = 32, \
-            chemDt= 0.001, \
-            diffDt= 0.001, \
-            elecDt= 50e-6, \
-            cellProto = [], \
-            spineProto = [], \
-            chanProto = [], \
-            chemProto = [], \
-            passiveDistrib= [], \
-            spineDistrib= [], \
-            chanDistrib = [], \
-            chemDistrib = [], \
-            adaptorList= [], \
-            stimList = [], \
-            plotList = [], \
-            moogList = [] \
+    def __init__(self,
+            modelPath = '/model',
+            turnOffElec = False,
+            useGssa = True,
+            combineSegments = True,
+            stealCellFromLibrary = False,
+            diffusionLength= 2e-6,
+            meshLambda = -1.0,    #This is a backward compatibility hack
+            temperature = 32,
+            chemDt= 0.001,
+            diffDt= 0.001,
+            elecDt= 50e-6,
+            cellProto = [],
+            spineProto = [],
+            chanProto = [],
+            chemProto = [],
+            passiveDistrib= [],
+            spineDistrib= [],
+            chanDistrib = [],
+            chemDistrib = [],
+            adaptorList= [],
+            stimList = [],
+            plotList = [],
+            moogList = []
         ):
         """ Constructor of the rdesigner. This just sets up internal fields
             for the model building, it doesn't actually create any objects.
@@ -84,6 +85,9 @@ class rdesigneur:
         self.combineSegments = combineSegments
         self.stealCellFromLibrary = stealCellFromLibrary
         self.diffusionLength= diffusionLength
+        if meshLambda > 0.0:
+            print "Warning: meshLambda argument is deprecated. Please use 'diffusionLength' instead.\nFor now rdesigneur will accept this argument."
+            self.diffusionLength = meshLambda
         self.temperature = temperature
         self.chemDt= chemDt
         self.diffDt= diffDt
@@ -289,13 +293,18 @@ class rdesigneur:
             ''' Make HH squid model sized compartment: 
             len and dia 500 microns. CM = 0.01 F/m^2, RA = 
             '''
+            self.elecid = makePassiveHHsoma( name = 'cell' )
+            assert( moose.exists( '/library/cell/soma' ) )
+            self.soma = moose.element( '/library/cell/soma' )
+
+            '''
             self.elecid = moose.Neuron( '/library/cell' )
             dia = 500e-6
             self.soma = buildCompt( self.elecid, 'soma', dia, dia, 0.0, 
                 0.33333333, 3000, 0.01 )
             self.soma.initVm = -65e-3 # Resting of -65, from HH
             self.soma.Em = -54.4e-3 # 10.6 mV above resting of -65, from HH
-
+            '''
 
         for i in self.cellProtoList:
             if self.checkAndBuildProto( "cell", i, \
@@ -364,22 +373,31 @@ class rdesigneur:
         # For uniformity and conciseness, we don't use a dictionary.
         # ordering of spine distrib is 
         # name, path, spacing, spacingDistrib, size, sizeDistrib, angle, angleDistrib
+        # [i for i in L1 if i in L2]
         # The first two args are compulsory, and don't need arg keys.
+        usageStr = 'Usage: name, path, [spacing, spacingDistrib, size, sizeDistrib, angle, angleDistrib]'
         temp = []
         defaults = ['spine', '#dend#,#apical#', '10e-6', '1e-6', '1', '0.5', '0', '6.2831853' ]
         argKeys = ['spacing', 'spacingDistrib', 'size', 'sizeDistrib', 'angle', 'angleDistrib' ]
         for i in self.spineDistrib:
             if len(i) >= 2 :
                 arg = i[:2]
-                if len( i ) > len( defaults ):
+                # Backward compat hack here
+                bcKeys = [ j for j in i[2:] if j in argKeys ]
+                if len( bcKeys ) > 0: # Looks like we have an old arg str
+                    print 'Rdesigneur::buildSpineDistrib: Warning: Deprecated argument format.\nWill accept for now.'
+                    print usageStr
+                    temp.extend( i + [''] )
+                elif len( i ) > len( defaults ):
                     print 'Rdesigneur::buildSpineDistrib: Warning: too many arguments in spine definition'
-                    print 'Usage: name, path, [spacing, spacingDistrib, size, sizeDistrib, angle, angleDistrib]'
-                    continue
-                optArg = i[2:] + defaults[ len(i):]
-                assert( len( optArg ) == len( argKeys ) )
-                for j in zip( argKeys, optArg ):
-                    arg.extend( [j[0], j[1]] )
-                temp.extend( arg + [''] )
+                    print usageStr
+                else:
+                    optArg = i[2:] + defaults[ len(i):]
+                    assert( len( optArg ) == len( argKeys ) )
+                    for j in zip( argKeys, optArg ):
+                        arg.extend( [j[0], j[1]] )
+                    temp.extend( arg + [''] )
+
         self.elecid.spineDistribution = temp
 
     def buildChemDistrib( self ):
@@ -456,7 +474,7 @@ class rdesigneur:
         if ( kf[0] == 'CaConcBase' or kf[0] == 'ChanBase' ):
             objList = self._collapseElistToPathAndClass( comptList, plotSpec[2], kf[0] )
             return objList, kf[1]
-        elif (field == 'n' or field == 'conc' ):
+        elif (field == 'n' or field == 'conc'  ):
             path = plotSpec[2]
             pos = path.find( '/' )
             if pos == -1:   # Assume it is in the dend compartment.
@@ -469,11 +487,17 @@ class rdesigneur:
                 for i in comptList:
                     voxelVec.extend( cc.dendVoxelsOnCompartment[i] )
             else:
+                em = cc.elecComptMap
+                elecComptMap = { moose.element(em[i]):i for i in range(len(em)) }
                 for i in comptList:
-                    voxelVec.extend( cc.spineVoxelsOnCompartment[i] )
+                    if i in elecComptMap:
+                        voxelVec.extend( [ elecComptMap[i] ] )
             # Here we collapse the voxelVec into objects to plot.
             allObj = moose.vec( self.modelPath + '/chem/' + plotSpec[2] )
+            #print "####### allObj=", self.modelPath + '/chem/' + plotSpec[2]
+            #print len( allObj )
             objList = [ allObj[int(j)] for j in voxelVec]
+            #print "############", chemCompt, len(objList), kf[1]
             return objList, kf[1]
 
         else:
@@ -550,20 +574,8 @@ class rdesigneur:
                 i.extend( kf[4:6] )
             elif len( i ) == 6:
                 i.extend( [kf[5]] )
-            '''
-            moogliDt = 0.0001
-            if ( i[3] == 'conc' or i[3] == 'n' ):
-                moogliDt = 1
-            self.moogliViewer = rmoogli.makeMoogli( self, mooObj3, i, kf, moogliDt )
-            '''
             #self.moogliViewer = rmoogli.makeMoogli( self, mooObj3, i, kf )
             self.moogNames.append( rmoogli.makeMoogli( self, mooObj3, i, kf ) )
-
-            '''
-            if numMoogli > 0:
-                muw = MoogliUpdateWrapper( mooObj3, mooField, indexing )
-                tabname = moogli.path + '/draw' + str(k)
-                '''
 
 
     ################################################################

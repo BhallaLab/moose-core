@@ -104,7 +104,7 @@ def make_HH_K(name = 'HH_K', parent='/library', vmin=-120e-3, vmax=40e-3, vdivs=
     k.tick = -1
     return k
 
-def make_Chem_Oscillator( name = 'osc', parent = '/library' ):
+def makeChemOscillator( name = 'osc', parent = '/library' ):
     model = moose.Neutral( parent + '/' + name )
     compt = moose.CubeMesh( model.path + '/kinetics' )
     """
@@ -338,8 +338,26 @@ def addSpineProto( name = 'spine',
     transformNMDAR( parent + '/' + name )
     return spine
 
+#######################################################################
+# Here are some compartment related prototyping functions
+def makePassiveHHsoma(name = 'passiveHHsoma', parent='/library'):
+    ''' Make HH squid model sized compartment: 
+    len and dia 500 microns. CM = 0.01 F/m^2, RA = 
+    '''
+    elecpath = parent + '/' + name
+    if not moose.exists( elecpath ):
+        elecid = moose.Neuron( elecpath )
+        dia = 500e-6
+        soma = buildCompt( elecid, 'soma', dia, dia, 0.0, 
+            0.33333333, 3000, 0.01 )
+        soma.initVm = -65e-3 # Resting of -65, from HH
+        soma.Em = -54.4e-3 # 10.6 mV above resting of -65, from HH
+    else:
+        elecid = moose.element( elecpath )
+    return elecid
+
 # Wrapper function. This is used by the proto builder from rdesigneur
-def make_active_spine(name = 'active_spine', parent='/library'):
+def makeActiveSpine(name = 'active_spine', parent='/library'):
     return addSpineProto( name = name, parent = parent, 
             synList = ( ['glu', 0.0, 2e-3, 9e-3, 200.0, False],
             ['NMDA', 0.0, 20e-3, 20e-3, 80.0, True] ),
@@ -347,16 +365,19 @@ def make_active_spine(name = 'active_spine', parent='/library'):
             caTau = 13.333e-3
         )
 
-def make_exc_spine(name = 'exc_spine', parent='/library'):
+# Wrapper function. This is used by the proto builder from rdesigneur
+def makeExcSpine(name = 'exc_spine', parent='/library'):
     return addSpineProto( name = name, parent = parent, 
             synList = ( ['glu', 0.0, 2e-3, 9e-3, 200.0, False],
             ['NMDA', 0.0, 20e-3, 20e-3, 80.0, True] ),
             caTau = 13.333e-3 )
 
-def make_passive_spine(name = 'passive_spine', parent='/library'):
+# Wrapper function. This is used by the proto builder from rdesigneur
+def makePassiveSpine(name = 'passive_spine', parent='/library'):
     return addSpineProto( name = name, parent = parent)
 
 
+# legacy function. This is used by the proto builder from rdesigneur
 def makeSpineProto( name ):
     addSpineProto( name = name, chanList = () )
 

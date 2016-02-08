@@ -6,7 +6,8 @@
 {% block sidebartitle %}
 
           {% if logo and theme_logo_only %}
-            <a href="{{ pathto(master_doc) }}">
+            <a href="http://moose.ncbs.res.in">
+
           {% else %}
             <a href="http://moose.ncbs.res.in/" class="icon icon-home"> {{ project }}
           {% endif %}
@@ -30,4 +31,3 @@
 
           {% include "searchbox.html" %}
 {% endblock %}
-

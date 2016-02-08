@@ -817,6 +817,41 @@ unsigned int Element::getInputs( vector< Id >& ret, const DestFinfo* finfo )
 	return ret.size() - oldSize;
 }
 
+/**
+ * Returns vectors of sources of messages to a field or data element.
+ * To go with each entry, also return the field or data index of _target_.
+ * Needed to track which inputs go to with field index of current element.
+ * So if A-->x0, B-->x1, and C-->x2, it will return A, B, C, no matter
+ * in which order the messages were created. 
+ * If there are multiple messages to x0, it will return the first.
+ */
+unsigned int Element::getInputsWithTgtIndex( vector< pair< Id, unsigned int> >& ret, const DestFinfo* finfo )
+	const
+{
+	assert( finfo ); // would like to check that finfo is on src.
+	ret.clear();
+	
+	FuncId fid = finfo->getFid();
+	vector< ObjId > caller;
+	getInputMsgs( caller, fid );
+	for ( vector< ObjId >::iterator i = caller.begin(); 
+		i != caller.end(); ++i  ) {
+		const Msg* m = Msg::getMsg( *i );
+		assert( m );
+
+		if ( m->e1() == this ) {
+			Eref tgt = m->firstTgt( Eref( m->e2(), 0 ) );
+			unsigned int idx = this->hasFields() ? tgt.fieldIndex(): tgt.dataIndex();
+			ret.push_back( pair< Id, unsigned int >( m->e2()->id(), idx ) );
+		} else if ( m->e2() == this ) {
+			Eref tgt = m->firstTgt( Eref( m->e1(), 0 ) );
+			unsigned int idx = this->hasFields() ? tgt.fieldIndex(): tgt.dataIndex();
+			ret.push_back( pair< Id, unsigned int >( m->e1()->id(), idx ) );
+		}
+	}
+	return ret.size();
+}
+
 unsigned int Element::getNeighbors( vector< Id >& ret, const Finfo* finfo )
 	const
 {

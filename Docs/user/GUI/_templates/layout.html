@@ -1,10 +1,5 @@
 {% extends "!layout.html" %}
-{% block rootrellink %}
-    <li><a href="http://moose.ncbs.res.in/">MOOSE Homepage</a> &raquo;</li>
-        {{ super() }}
-{% endblock %}
 {% block sidebartitle %}
-
           {% if logo and theme_logo_only %}
             <a href="{{ pathto(master_doc) }}">
           {% else %}
@@ -30,4 +25,3 @@
 
           {% include "searchbox.html" %}
 {% endblock %}
-

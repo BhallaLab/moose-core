@@ -2,18 +2,33 @@ import moose
 import pylab
 import rdesigneur as rd
 rdes = rd.rdesigneur(
-    turnOffElec = True,
-    chemProto = [['make_Chem_Oscillator()', 'osc']],
+	# We want just one compartment so we set diffusion length to be
+	# bigger than the 0.5 mm HH axon compartment default. 
+    diffusionLength = 1e-3, 
+    chanProto = [['make_HH_Na()', 'Na'], ['make_HH_K()', 'K']],
+    chanDistrib = [ 
+        ['Na', 'soma', 'Gbar', '1200' ], 
+        ['K', 'soma', 'Gbar', '360' ]],
+    chemProto = [['makeChemOscillator()', 'osc']],
     chemDistrib = [['osc', 'soma', 'install', '1' ]],
-    plotList = [['soma', '1', 'dend/a', 'conc', 'Concentration of a'],
-        ['soma', '1', 'dend/b', 'conc', 'Concentration of b']],
-    moogList = [['soma', '1', 'dend/a', 'conc', 'a Conc', 0, 360 ]]
+	# These adaptor parameters give interesting-looking but not
+	# particularly physiological behaviour.
+    adaptorList = [
+        [ 'dend/a', 'conc', 'Na', 'modulation', 1, -5.0 ],
+        [ 'dend/b', 'conc', 'K', 'modulation', 1, -0.2],
+        [ 'dend/b', 'conc', '.', 'inject', -1.0e-7, 4e-7 ],
+        [ '.', 'Vm', 'dend/s', 'conc', 2.5, 20.0 ]
+    ],
+    plotList = [['soma', '1', 'dend/a', 'conc', 'a Conc'],
+        ['soma', '1', 'dend/b', 'conc', 'b Conc'],
+        ['soma', '1', 'dend/s', 'conc', 's Conc'],
+        ['soma', '1', 'Na', 'Gk', 'Na Gk'],
+        ['soma', '1', '.', 'Vm', 'Membrane potential']
+    ]
 )
 
 rdes.buildModel()
-bv = moose.vec( '/model/chem/dend/b' )
-bv[0].concInit *= 2
-bv[-1].concInit *= 2
 moose.reinit()
+moose.start( 250 ) # Takes a few seconds to run this.
 
-rdes.displayMoogli( 1, 400, 0.001 )
+rdes.display()
