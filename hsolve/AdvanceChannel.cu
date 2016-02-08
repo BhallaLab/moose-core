@@ -161,7 +161,7 @@ void populating_expand_indices(int* d_keys, double* d_values, double* d_expand_v
 
 __global__
 void update_matrix_kernel(double* d_V,
-		double* d_HS_,
+		double* d_HS_, double* d_HS_1, double* d_HS_2,
 		double* d_comp_Gksum,
 		double* d_comp_GkEksum,
 		CompartmentStruct* d_compartment_,
@@ -171,7 +171,9 @@ void update_matrix_kernel(double* d_V,
 
 	int tid = threadIdx.x + blockIdx.x * blockDim.x;
 	if(tid < size){
-		d_HS_[4*tid] = d_HS_[4*tid+2] + d_comp_Gksum[tid] + d_externalCurrent_[2*tid];
+		d_HS_[4*tid] = d_HS_2[tid] + d_comp_Gksum[tid] + d_externalCurrent_[2*tid];
+		d_HS_[4*tid+1] = d_HS_1[tid];
+		d_HS_[4*tid+2] = d_HS_2[tid];
 		d_HS_[4*tid+3] = d_V[tid]*d_compartment_[tid].CmByDt + d_compartment_[tid].EmByRm + d_comp_GkEksum[tid] +
 				(d_inject_[tid].injectVarying + d_inject_[tid].injectBasal) + d_externalCurrent_[2*tid+1];
 
@@ -296,10 +298,10 @@ void HSolveActive::update_matrix_cuda_wrapper(){
 	BLOCKS = (nCompt_%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
 
 	cudaMemcpy(d_inject_, &inject_[0], nCompt_*sizeof(InjectStruct), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_HS_, &HS_[0], HS_.size()*sizeof(double), cudaMemcpyHostToDevice);
+	//cudaMemcpy(d_HS_, &HS_[0], HS_.size()*sizeof(double), cudaMemcpyHostToDevice);
 
 	update_matrix_kernel<<<BLOCKS, THREADS_PER_BLOCK>>>(d_V,
-			d_HS_,
+			d_HS_, d_HS_1, d_HS_2,
 			d_comp_Gksum,
 			d_comp_GkEksum,
 			d_compartment_,

@@ -282,12 +282,57 @@ void HSolveActive::updateMatrix()
 		memcpy( &HJ_[ 0 ], &HJCopy_[ 0 ], sizeof( double ) * HJ_.size() );
 
 #ifdef USE_CUDA
+	/*
+	if(num_um_prints > 0){
+		// Printing external sums
+		double extsum1 = 0;
+		double extsum2 = 0;
+		int nzero_count1 = 0;
+		int nzero_count2 = 0;
+		for(int i=0;i<externalCurrent_.size();i=i+2){
+			extsum1 += externalCurrent_[i];
+			extsum2 += externalCurrent_[i+1];
+
+			if(externalCurrent_[i] != 0)
+				nzero_count1++;
+			if(externalCurrent_[i+1] != 0)
+				nzero_count2++;
+
+
+		}
+		if(nzero_count1 > 0 || nzero_count2 > 0)
+			printf("sum1 %lf sum2 %lf count1 %d count2 %d \n",extsum1,extsum2, nzero_count1, nzero_count2);
+
+		// Printing inject_
+		double injsum1 = 0;
+		double injsum2 = 0;
+		nzero_count1 = 0;
+		nzero_count2 = 0;
+		for(int i=0;i<inject_.size();i++){
+			injsum1 += inject_[i].injectVarying;
+			injsum2 += inject_[i].injectBasal;
+
+			if(inject_[i].injectVarying != 0) nzero_count1++;
+			if(inject_[i].injectBasal != 0) {
+				//printf("%d comaprtment inject basal %lf\n", i, inject_[i].injectBasal*100000);
+				nzero_count2++;
+			}
+
+		}
+
+		if(nzero_count1 > 0)
+			printf("varying %lf base %lf total %lf sum1 %d sum2 %d\n",injsum1, injsum2, injsum1+injsum2, nzero_count1, nzero_count2);
+
+		num_um_prints--;
+	}
+	*/
+
 	GpuTimer gpuTimer;
 
 	gpuTimer.Start();
 		update_matrix_cuda_wrapper();
+		cudaCheckError();
 	gpuTimer.Stop();
-	cudaCheckError();
 
 	if(num_um_prints > 0){
 		printf("%lf\n",gpuTimer.Elapsed());
@@ -791,6 +836,8 @@ void HSolveActive::allocate_hsolve_memory_cuda(){
 
 	// Hines Matrix related
 	cudaMalloc((void**)&d_HS_, HS_.size()*sizeof(double));
+	cudaMalloc((void**)&d_HS_1, nCompt_*sizeof(double));
+	cudaMalloc((void**)&d_HS_2, nCompt_*sizeof(double));
 
 	// Intermediate data for computation
 
@@ -939,6 +986,17 @@ void HSolveActive::copy_hsolve_information_cuda(){
 
 	// Hines Matrix related
 	cudaMemcpy(d_HS_, &(HS_.front()), HS_.size()*sizeof(double), cudaMemcpyHostToDevice);
+
+	double* temp_hs_1 = new double[nCompt_]();
+	double* temp_hs_2 = new double[nCompt_]();
+
+	for(int i=0;i<nCompt_;i++){
+		temp_hs_1[i] = HS_[4*i+1];
+		temp_hs_2[i] = HS_[4*i+2];
+	}
+
+	cudaMemcpy(d_HS_1, temp_hs_1 , nCompt_*sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_HS_2, temp_hs_2 , nCompt_*sizeof(double), cudaMemcpyHostToDevice);
 
 
 	int num_unique_keys = 0;

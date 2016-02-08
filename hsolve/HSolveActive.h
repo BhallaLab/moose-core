@@ -200,6 +200,8 @@ protected:
 
 	// Hines Matrix related
 	double* d_HS_;
+	double* d_HS_1;
+	double* d_HS_2;
 
 	// Compartment related
 
