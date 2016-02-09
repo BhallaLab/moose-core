@@ -1013,7 +1013,7 @@ void HSolveActive::copy_hsolve_information_cuda(){
 	cudaMemcpy(d_HS_2, temp_hs_2 , nCompt_*sizeof(double), cudaMemcpyHostToDevice);
 
 	int* chan_colIndex = new int[num_channels]();
-	int* chan_x = new int[nCompt_];
+	double* chan_x = new double[nCompt_];
 
 	std::fill_n(chan_x, nCompt_, 1);
 
