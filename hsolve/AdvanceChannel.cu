@@ -17,6 +17,7 @@
 #include <thrust/system/system_error.h>
 #include <thrust/copy.h>
 
+
 __device__ __constant__ int instant_xyz_d[3];
 
 __global__
@@ -282,6 +283,8 @@ void HSolveActive::update_matrix_cuda_wrapper(){
 
 	int num_channels = channel_.size();
 
+	/*
+	// Using THRUST
 	thrust::device_ptr<int> d_th_chan_to_comp(d_chan_to_comp);
 	thrust::device_ptr<double> d_th_chan_Gk(d_chan_Gk);
 	thrust::device_ptr<double> d_th_chan_GkEk(d_chan_GkEk);
@@ -293,6 +296,108 @@ void HSolveActive::update_matrix_cuda_wrapper(){
 
 	thrust::reduce_by_key(d_th_chan_to_comp, d_th_chan_to_comp+num_channels, d_th_chan_GkEk, d_th_temp_keys, d_th_temp_values);
 	populating_expand_indices<<<BLOCKS,THREADS_PER_BLOCK>>>(d_temp_keys, d_temp_values, d_comp_GkEksum, num_comps_with_chans);
+	*/
+
+
+	// Using Cusparse
+	const double alpha = 1.0;
+	const double beta = 0.0;
+
+	cusparseDcsrmv(cusparse_handle,  CUSPARSE_OPERATION_NON_TRANSPOSE,
+		nCompt_, nCompt_, num_channels, &alpha, cusparse_descr,
+		d_chan_Gk, d_chan_rowPtr, d_chan_colIndex,
+		d_chan_x , &beta, d_comp_Gksum);
+
+	cusparseDcsrmv(cusparse_handle,  CUSPARSE_OPERATION_NON_TRANSPOSE,
+		nCompt_, nCompt_, num_channels, &alpha, cusparse_descr,
+		d_chan_GkEk, d_chan_rowPtr, d_chan_colIndex,
+		d_chan_x , &beta, d_comp_GkEksum);
+
+
+
+	// -----------------------------------------------CUSPARSE------------------------------------------------
+
+	/*
+	const double alpha = 1.0;
+	const double beta = 0.0;
+
+	double* d_temp_Gksum, *d_temp_GkEksum;
+	cudaMalloc((void**)&d_temp_Gksum, nCompt_*sizeof(double));
+	cudaMalloc((void**)&d_temp_GkEksum, nCompt_*sizeof(double));
+
+	cudaMemset(d_temp_Gksum, 0, nCompt_ * sizeof(double));
+	cudaMemset(d_temp_GkEksum, 0, nCompt_ * sizeof(double));
+
+	cusparseDcsrmv(cusparse_handle,  CUSPARSE_OPERATION_NON_TRANSPOSE,
+		nCompt_, nCompt_, num_channels, &alpha, cusparse_descr,
+		d_chan_Gk, d_chan_rowPtr, d_chan_colIndex,
+		d_chan_x , &beta, d_temp_Gksum);
+
+	cusparseDcsrmv(cusparse_handle,  CUSPARSE_OPERATION_NON_TRANSPOSE,
+		nCompt_, nCompt_, num_channels, &alpha, cusparse_descr,
+		d_chan_GkEk, d_chan_rowPtr, d_chan_colIndex,
+		d_chan_x , &beta, d_temp_GkEksum);
+
+	// Checking gksum with others.
+	double h_temp_Gksum[nCompt_];
+	double h_temp_GkEksum[nCompt_];
+	double h_comp_Gksum[nCompt_];
+	double h_comp_GkEksum[nCompt_];
+	int h_chan_colIndex[channel_.size()];
+
+	cudaMemcpy(h_temp_Gksum, d_temp_Gksum, nCompt_*sizeof(double), cudaMemcpyDeviceToHost);
+	cudaMemcpy(h_comp_Gksum, d_comp_Gksum, nCompt_*sizeof(double), cudaMemcpyDeviceToHost);
+
+	cudaMemcpy(h_temp_GkEksum, d_temp_GkEksum, nCompt_*sizeof(double), cudaMemcpyDeviceToHost);
+	cudaMemcpy(h_comp_GkEksum, d_comp_GkEksum, nCompt_*sizeof(double), cudaMemcpyDeviceToHost);
+
+	cudaMemcpy(h_chan_colIndex, d_chan_colIndex, channel_.size()*sizeof(int), cudaMemcpyDeviceToHost);
+
+	// Checking whether compartment id of channels are in increasing order
+	int max = 0;
+	bool inorder = true;
+	for(int i=0;i<chan2compt_.size() && inorder;i++){
+		if(chan2compt_[i] >= max)
+			max = chan2compt_[i];
+		else
+			inorder = false;
+	}
+
+	if(inorder) printf("they are in order\n");
+	else printf("No they are not and broked at %d\n",max);
+
+	// Constructing channel row ptrs with nCompt as rows.
+	int chan_rowPtr[V_.size()+1];
+	int sum2 = 0;
+	for(unsigned int i=0;i<=V_.size();i++){
+		chan_rowPtr[i] = sum2;
+		sum2 += channelCount_[i];
+	}
+
+	// Filling column indices
+	for(int i=0;i<5;i++){
+		printf("Compartment %d \n",i);
+		for(int j=chan_rowPtr[i];j<chan_rowPtr[i+1];j++){
+			printf("%lf %lf %d\n",h_temp_Gksum[j]*1000000, h_comp_Gksum[j]*1000000, h_chan_colIndex[j]);
+		}
+
+	}
+
+	double error1 = 0;
+	double error2 = 0;
+	for(int i=0;i<nCompt_;i++){
+		error1 += (h_comp_Gksum[i]-h_temp_Gksum[i]);
+		error2 += (h_comp_GkEksum[i]-h_temp_GkEksum[i]);
+	}
+
+	printf("error %lf error %lf\n",error1*100000, error2*100000);
+	getchar();
+	*/
+
+
+	// -----------------------------------------------CUSPARSE------------------------------------------------
+
+
 
 	BLOCKS = nCompt_/THREADS_PER_BLOCK;
 	BLOCKS = (nCompt_%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads

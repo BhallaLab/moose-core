@@ -203,6 +203,14 @@ protected:
 	double* d_HS_1;
 	double* d_HS_2;
 
+	double* d_chan_x;
+	int* d_chan_colIndex;
+	int* d_chan_rowPtr;
+
+	// Cusparse related
+	cusparseHandle_t cusparse_handle = 0;
+	cusparseMatDescr_t cusparse_descr = 0;
+
 	// Compartment related
 
 	// CUDA Active Permanent data

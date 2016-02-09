@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <cuda.h>
 #include <cuda_runtime_api.h>
+#include <cusparse_v2.h>
 
 typedef unsigned int u32;
 typedef unsigned long long u64;
