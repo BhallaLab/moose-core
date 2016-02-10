@@ -233,7 +233,7 @@ protected:
 #endif
 
 	int num_time_prints = 0;
-	int num_um_prints = 50;
+	int num_um_prints = 0;
 
     static const int INSTANT_X;
     static const int INSTANT_Y;

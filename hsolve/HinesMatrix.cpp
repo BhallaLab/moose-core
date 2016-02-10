@@ -13,6 +13,7 @@
 #include <iomanip>
 #include <stdexcept>
 
+
 HinesMatrix::HinesMatrix()
     :
     nCompt_( 0 ),
@@ -48,6 +49,12 @@ void HinesMatrix::setup( const vector< TreeNodeStruct >& tree, double dt )
     makeJunctions();
     makeMatrix();
     makeOperands();
+
+#ifdef USE_CUDA
+    allocateMemoryGpu();
+    makeCsrMatrixGpu();
+#endif
+
     /*
     // Printing stuff
     for ( unsigned int i = 0; i < nCompt_; ++i )
@@ -82,10 +89,119 @@ void HinesMatrix::setup( const vector< TreeNodeStruct >& tree, double dt )
 
     // Printing Ga values
     for (int i = 0; i < nCompt_; ++i) {
-		printf("%lf, ", Ga_[i]);
+		printf("%lf, ", Ga_[i]*100000);
 	}
     printf("\n");
     */
+
+
+}
+
+void HinesMatrix::allocateMemoryGpu(){
+	h_main_diag_passive = new double[nCompt_]();
+	h_main_diag_map = new int[nCompt_]();
+}
+
+void HinesMatrix::makeCsrMatrixGpu(){
+
+	// Adding passive data to main diagonal
+	for(int i=0;i<nCompt_;i++){
+		h_main_diag_passive[i] = (*tree_)[i].Cm/(dt_ / 2.0) + 1.0/(*tree_)[i].Rm;
+	}
+
+	// From the children data.
+	vector<pair<int,double> > non_zero_elements;
+	int node1, node2;
+	double gi, gj, gij;
+	double junction_sum;
+	for(int i=0;i<nCompt_;i++){
+		// calculating junction sum
+		junction_sum = 0;
+
+		// Calculating junction_sum
+		vector< unsigned int > branch_nodes;
+		branch_nodes.push_back(i);  // pushing the parent to the front of branch_nodes
+		branch_nodes.insert(branch_nodes.end(), ( *tree_ )[ i ].children.begin(), ( *tree_ )[ i ].children.end()); // Appending children later
+
+		for(int j=0;j<branch_nodes.size();j++){
+			junction_sum += Ga_[branch_nodes[j]];
+		}
+
+		// Calculating admittance values and pushing off-diag elements to non-zero set
+		for(int j=0;j<branch_nodes.size();j++){
+			node1 = branch_nodes[j];
+
+			// Including passive effect to main diagonal elements
+			h_main_diag_passive[node1] += Ga_[node1]*(1.0 - Ga_[node1]/junction_sum);
+
+			for(int k=j+1;k<branch_nodes.size();k++){
+				node2 = branch_nodes[k];
+
+				gi = Ga_[node1];
+				gj = Ga_[node2];
+				gij = (gi*gj)/junction_sum;
+
+				non_zero_elements.push_back(make_pair(node1*nCompt_+node2, -1*gij));
+				non_zero_elements.push_back(make_pair(node2*nCompt_+node1, -1*gij)); // Adding symmetric element
+			}
+		}
+	}
+
+	// Pushing main diagonal elements to non-zero set
+	for(int i=0;i<nCompt_;i++){
+		non_zero_elements.push_back(make_pair(i*nCompt_+i, h_main_diag_passive[i]));
+	}
+
+	// Number of non zero elements in the matrix.
+	int nnz = non_zero_elements.size();
+
+	// Getting elements in csr format
+	sort(non_zero_elements.begin(), non_zero_elements.end());
+
+	// Allocating memory for matrix
+	h_mat_values = new double[nnz]();
+	h_mat_colIndex = new int[nnz]();
+	h_mat_rowPtr = new int[nCompt_+1]();
+
+	// Filling up matrix
+	int r,c;
+	double value;
+	for(int i=0;i<nnz;i++){
+		r = non_zero_elements[i].first/nCompt_;
+		c = non_zero_elements[i].first%nCompt_;
+		value = non_zero_elements[i].second;
+
+		if(r==c){
+			// map the index of main diagonal element.
+			h_main_diag_map[r] = i;
+		}
+
+		h_mat_rowPtr[r]++;
+		h_mat_colIndex[i] = c;
+		h_mat_values[i] = value;
+	}
+
+	// Making rowCounts to rowPtr
+	int temp;
+	int sum = 0;
+	// Scan operation on rowPtr;
+	for (int i = 0; i < nCompt_+1; ++i)
+	{
+		temp = h_mat_rowPtr[i];
+		h_mat_rowPtr[i] = sum;
+		sum += temp;
+	}
+
+	/*
+	// Print passive data
+	double error = 0;
+	for(int i=0;i<nCompt_;i++){
+		error += (HS_[4*i+2] - h_main_diag_passive[i]);
+		//printf("%lf %lf \n", HS_[4*i+2]*100000, h_main_diag_passive[i]*100000);
+	}
+	printf("%lf is error\n",error*100000);
+	*/
+
 
 }
 

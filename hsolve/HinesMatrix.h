@@ -22,6 +22,8 @@
 # define ASSERT( unused, message ) do {} while ( false )
 #endif
 
+#include "CudaGlobal.h"
+
 struct JunctionStruct
 {
     JunctionStruct( unsigned int i, unsigned int r ) :
@@ -87,6 +89,15 @@ protected:
     int                       stage_;		///< Which stage the simulation has
     ///< reached. Used in getA.
 
+#ifdef USE_CUDA
+    double* h_mat_values;
+    int* h_mat_colIndex;
+    int* h_mat_rowPtr;
+    int* h_main_diag_map;
+
+    double* h_main_diag_passive;
+#endif
+
 private:
     void clear();
     void makeJunctions();
@@ -124,6 +135,17 @@ private:
     map< unsigned int, unsigned int >  groupNumber_;
     /**< Tells you the index of a compartment's group within coupled_,
      *   given the compartment's Hines index. */
+
+#ifdef USE_CUDA
+    /*
+     * Allocates memory for GPU.
+     */
+    void allocateMemoryGpu();
+    /*
+     * Creates hines matrix and stores it in CSR format.
+     */
+    void makeCsrMatrixGpu();
+#endif
 };
 
 #endif // _HINES_MATRIX_H
