@@ -207,7 +207,14 @@ protected:
 	int* d_chan_colIndex;
 	int* d_chan_rowPtr;
 
-	// Cusparse related
+	// Conjugate Gradient related.
+	double* d_x, *d_r, *d_p, *d_Ax;
+
+	/* Get handle to the CUBLAS context */
+	cublasHandle_t cublas_handle = 0;
+	cublasStatus_t cublasStatus;
+
+	/* Get handle to the CUSPARSE context */
 	cusparseHandle_t cusparse_handle = 0;
 	cusparseMatDescr_t cusparse_descr = 0;
 
@@ -286,6 +293,8 @@ private:
     void calculate_channel_currents_cuda_wrapper();
 
     void update_matrix_cuda_wrapper();
+
+    void hinesMatrixSolverWrapper();
 
 
 	void advanceChannel_gpu(

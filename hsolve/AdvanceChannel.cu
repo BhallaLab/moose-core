@@ -184,6 +184,25 @@ void update_matrix_kernel(double* d_V,
 
 }
 
+__global__
+void update_csr_matrix_kernel(double* d_V,
+				double* d_mat_values, double* d_main_diag_passive, int* d_main_diag_map, double* d_b,
+				double* d_comp_Gksum,
+				double* d_comp_GkEksum,
+				CompartmentStruct* d_compartment_,
+				InjectStruct* d_inject_,
+				double*	d_externalCurrent_,
+				int size){
+	int tid = threadIdx.x + blockIdx.x * blockDim.x;
+	if(tid < size){
+		d_mat_values[d_main_diag_map[tid]] = d_main_diag_passive[tid] + d_comp_Gksum[tid] + d_externalCurrent_[2*tid];
+		d_b[tid] = d_V[tid]*d_compartment_[tid].CmByDt + d_compartment_[tid].EmByRm + d_comp_GkEksum[tid] +
+				(d_inject_[tid].injectVarying + d_inject_[tid].injectBasal) + d_externalCurrent_[2*tid+1];
+
+		d_inject_[tid].injectVarying = 0;
+	}
+}
+
 
 void HSolveActive::get_lookup_rows_and_fractions_cuda_wrapper(double dt){
 
@@ -456,6 +475,108 @@ void HSolveActive::update_matrix_cuda_wrapper(){
 
 
 }
+
+void HSolveActive::hinesMatrixSolverWrapper(){
+
+	int BLOCKS = nCompt_/THREADS_PER_BLOCK;
+	BLOCKS = (nCompt_%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
+
+	// ----------------------------- UPDATE MATRIX ----------------------------------------
+	cudaMemcpy(d_inject_, &inject_[0], nCompt_*sizeof(InjectStruct), cudaMemcpyHostToDevice);
+		cudaMemcpy(d_externalCurrent_, &(externalCurrent_.front()), 2 * nCompt_ * sizeof(double), cudaMemcpyHostToDevice);
+		//cudaMemcpy(d_HS_, &HS_[0], HS_.size()*sizeof(double), cudaMemcpyHostToDevice);
+
+		update_csr_matrix_kernel<<<BLOCKS, THREADS_PER_BLOCK>>>(d_V,
+				d_mat_values, d_main_diag_passive, d_main_diag_map, d_b,
+				d_comp_Gksum,
+				d_comp_GkEksum,
+				d_compartment_,
+				d_inject_,
+				d_externalCurrent_,
+				(int)nCompt_);
+
+	cudaMemcpy(&inject_[0], d_inject_, nCompt_*sizeof(InjectStruct), cudaMemcpyDeviceToHost );
+
+	// ----------------------------- CONJUGATE GRADIENT SOLVER  ----------------------------------------
+	const double tol = 1e-5f;
+	const int max_iter = 10000;
+	double a, b, na, r0, r1;
+	double alpha, beta, alpham1;
+	double dot;
+	int k;
+
+	alpha = 1.0;
+	alpham1 = -1.0;
+	beta = 0.0;
+	r0 = 0.0;
+
+	cudaMemset(d_x, 0, nCompt_*sizeof(double));
+	cublasStatus_t cublasStatus;
+
+	cusparseDcsrmv(cusparse_handle,CUSPARSE_OPERATION_NON_TRANSPOSE, nCompt_, nCompt_, mat_nnz, &alpha, cusparse_descr,
+			d_mat_values, d_mat_rowPtr, d_mat_colIndex, d_x,
+			&beta, d_Ax);
+
+	cublasDaxpy(cublas_handle, nCompt_, &alpham1, d_Ax, 1, d_r, 1);
+	cublasStatus = cublasDdot(cublas_handle, nCompt_, d_r, 1, d_r, 1, &r1);
+
+	k = 1;
+
+	while (r1 > tol*tol && k <= max_iter)
+	{
+		if (k > 1)
+		{
+			b = r1 / r0;
+			cublasStatus = cublasDscal(cublas_handle, nCompt_, &b, d_p, 1);
+			cublasStatus = cublasDaxpy(cublas_handle, nCompt_, &alpha, d_r, 1, d_p, 1);
+		}
+		else
+		{
+			cublasStatus = cublasDcopy(cublas_handle, nCompt_, d_r, 1, d_p, 1);
+		}
+
+		cusparseDcsrmv(cusparse_handle, CUSPARSE_OPERATION_NON_TRANSPOSE, nCompt_, nCompt_, mat_nnz, &alpha, cusparse_descr,
+				d_mat_values, d_mat_rowPtr, d_mat_colIndex,
+				d_p, &beta, d_Ax);
+		cublasStatus = cublasDdot(cublas_handle, nCompt_, d_p, 1, d_Ax, 1, &dot);
+		a = r1 / dot;
+
+		cublasStatus = cublasDaxpy(cublas_handle, nCompt_, &a, d_p, 1, d_x, 1);
+		na = -a;
+		cublasStatus = cublasDaxpy(cublas_handle, nCompt_, &na, d_Ax, 1, d_r, 1);
+
+		r0 = r1;
+		cublasStatus = cublasDdot(cublas_handle, nCompt_, d_r, 1, d_r, 1, &r1);
+		cudaThreadSynchronize();
+		printf("iteration = %3d, residual = %e\n", k, sqrt(r1));
+		k++;
+	}
+
+	double x[nCompt_];
+	cudaMemcpy(x, d_x, nCompt_*sizeof(double), cudaMemcpyDeviceToHost);
+
+	/*
+	float rsum, diff, err = 0.0;
+
+	for (int i = 0; i < nCompt_; i++)
+	{
+		rsum = 0.0;
+
+		for (int j = I[i]; j < I[i+1]; j++)
+		{
+			rsum += val[j]*x[J[j]];
+		}
+
+		diff = fabs(rsum - rhs[i]);
+
+		if (diff > err)
+		{
+			err = diff;
+		}
+	}
+	*/
+}
+
 
 /*
  * Copy row arrays to device.

@@ -96,6 +96,18 @@ protected:
     int* h_main_diag_map;
 
     double* h_main_diag_passive;
+    double* h_b;
+
+    double* d_mat_values;
+    int* d_mat_colIndex;
+    int* d_mat_rowPtr;
+    int* d_main_diag_map;
+
+    double* d_main_diag_passive;
+    double* d_b;
+
+    int mat_nnz = 0;
+
 #endif
 
 private:

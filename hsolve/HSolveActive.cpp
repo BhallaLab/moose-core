@@ -147,6 +147,7 @@ void HSolveActive::step( ProcPtr info )
     start_time = end_time;   
 #endif
     
+    hinesMatrixSolverWrapper();
     updateMatrix();
 
 #ifdef PROFILE_CUDA
@@ -415,6 +416,9 @@ void HSolveActive::updateMatrix()
     stage_ = 0;    // Update done.
 }
 
+
+
+
 void HSolveActive::advanceCalcium()
 {
     vector< double* >::iterator icatarget = caTarget_.begin();
@@ -528,6 +532,7 @@ void HSolveActive::advanceChannels( double dt )
 
 		// Setting up cusparse information
 		cusparseCreate(&cusparse_handle);
+		cublasCreate_v2(&cublas_handle);
 
 		// create and setup matrix descriptors A, B & C
 		cusparseCreateMatDescr(&cusparse_descr);
@@ -851,7 +856,11 @@ void HSolveActive::allocate_hsolve_memory_cuda(){
 	cudaMalloc((void**)&d_chan_rowPtr, (nCompt_+1)*sizeof(int));
 	cudaMalloc((void**)&d_chan_x, nCompt_*sizeof(double));
 
-
+	// Conjugate Gradient related
+	cudaMalloc((void**)&d_x, nCompt_*sizeof(double));
+	cudaMalloc((void**)&d_r, nCompt_*sizeof(double));
+	cudaMalloc((void**)&d_p, nCompt_*sizeof(double));
+	cudaMalloc((void**)&d_Ax, nCompt_*sizeof(double));
 
 	// Intermediate data for computation
 

@@ -98,8 +98,7 @@ void HinesMatrix::setup( const vector< TreeNodeStruct >& tree, double dt )
 }
 
 void HinesMatrix::allocateMemoryGpu(){
-	h_main_diag_passive = new double[nCompt_]();
-	h_main_diag_map = new int[nCompt_]();
+
 }
 
 void HinesMatrix::makeCsrMatrixGpu(){
@@ -155,6 +154,9 @@ void HinesMatrix::makeCsrMatrixGpu(){
 	// Number of non zero elements in the matrix.
 	int nnz = non_zero_elements.size();
 
+	// Setting up nnz.
+	mat_nnz = nnz;
+
 	// Getting elements in csr format
 	sort(non_zero_elements.begin(), non_zero_elements.end());
 
@@ -162,6 +164,9 @@ void HinesMatrix::makeCsrMatrixGpu(){
 	h_mat_values = new double[nnz]();
 	h_mat_colIndex = new int[nnz]();
 	h_mat_rowPtr = new int[nCompt_+1]();
+	h_main_diag_map = new int[nCompt_]();
+	h_main_diag_passive = new double[nCompt_]();
+	h_b = new double[nCompt_]();
 
 	// Filling up matrix
 	int r,c;
@@ -191,6 +196,20 @@ void HinesMatrix::makeCsrMatrixGpu(){
 		h_mat_rowPtr[i] = sum;
 		sum += temp;
 	}
+
+	// Allocating memory on GPU
+	cudaMalloc((void**)&d_mat_values, mat_nnz*sizeof(double));
+	cudaMalloc((void**)&d_mat_colIndex, mat_nnz*sizeof(int));
+	cudaMalloc((void**)&d_mat_rowPtr, (nCompt_+1)*sizeof(int));
+	cudaMalloc((void**)&d_main_diag_map, nCompt_*sizeof(int));
+	cudaMalloc((void**)&d_main_diag_passive, nCompt_*sizeof(double));
+	cudaMalloc((void**)&d_b, nCompt_*sizeof(double));
+
+	cudaMemcpy(d_mat_values, h_mat_values, mat_nnz*sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_mat_colIndex, h_mat_colIndex, mat_nnz*sizeof(int), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_mat_rowPtr, h_mat_rowPtr, (nCompt_+1)*sizeof(int), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_main_diag_map, h_main_diag_map, nCompt_*sizeof(int), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_main_diag_passive, h_main_diag_passive, nCompt_*sizeof(double), cudaMemcpyHostToDevice);
 
 	/*
 	// Print passive data
