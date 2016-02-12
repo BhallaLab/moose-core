@@ -208,7 +208,7 @@ protected:
 	int* d_chan_rowPtr;
 
 	// Conjugate Gradient related.
-	double* d_x, *d_r, *d_p, *d_Ax;
+	double* d_Vmid, *d_p, *d_Ax;
 
 	/* Get handle to the CUBLAS context */
 	cublasHandle_t cublas_handle = 0;

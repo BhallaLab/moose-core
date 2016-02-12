@@ -146,8 +146,9 @@ void HSolveActive::step( ProcPtr info )
     update_info(total_time, 1, end_time - start_time, total_count ,info->dt);
     start_time = end_time;   
 #endif
-    
+
     hinesMatrixSolverWrapper();
+/*
     updateMatrix();
 
 #ifdef PROFILE_CUDA
@@ -171,7 +172,7 @@ void HSolveActive::step( ProcPtr info )
     update_info(total_time, 4, end_time - start_time, total_count ,info->dt);
     start_time = end_time;   
 #endif
-        
+*/
     advanceCalcium();
     
 #ifdef PROFILE_CUDA
@@ -857,8 +858,7 @@ void HSolveActive::allocate_hsolve_memory_cuda(){
 	cudaMalloc((void**)&d_chan_x, nCompt_*sizeof(double));
 
 	// Conjugate Gradient related
-	cudaMalloc((void**)&d_x, nCompt_*sizeof(double));
-	cudaMalloc((void**)&d_r, nCompt_*sizeof(double));
+	cudaMalloc((void**)&d_Vmid, nCompt_*sizeof(double));
 	cudaMalloc((void**)&d_p, nCompt_*sizeof(double));
 	cudaMalloc((void**)&d_Ax, nCompt_*sizeof(double));
 

@@ -102,6 +102,8 @@ void HinesMatrix::allocateMemoryGpu(){
 }
 
 void HinesMatrix::makeCsrMatrixGpu(){
+	// Allocating memory for matrix data
+	h_main_diag_passive = new double[nCompt_]();
 
 	// Adding passive data to main diagonal
 	for(int i=0;i<nCompt_;i++){
@@ -165,7 +167,6 @@ void HinesMatrix::makeCsrMatrixGpu(){
 	h_mat_colIndex = new int[nnz]();
 	h_mat_rowPtr = new int[nCompt_+1]();
 	h_main_diag_map = new int[nCompt_]();
-	h_main_diag_passive = new double[nCompt_]();
 	h_b = new double[nCompt_]();
 
 	// Filling up matrix

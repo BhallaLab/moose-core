@@ -203,6 +203,14 @@ void update_csr_matrix_kernel(double* d_V,
 	}
 }
 
+__global__
+void calculate_V_from_Vmid(double* d_Vmid, double* d_V, int size){
+	int tid = blockIdx.x * blockDim.x + threadIdx.x;
+
+	if(tid < size)
+		d_V[tid] = 2*d_Vmid[tid] - d_V[tid];
+}
+
 
 void HSolveActive::get_lookup_rows_and_fractions_cuda_wrapper(double dt){
 
@@ -483,7 +491,7 @@ void HSolveActive::hinesMatrixSolverWrapper(){
 
 	// ----------------------------- UPDATE MATRIX ----------------------------------------
 	cudaMemcpy(d_inject_, &inject_[0], nCompt_*sizeof(InjectStruct), cudaMemcpyHostToDevice);
-		cudaMemcpy(d_externalCurrent_, &(externalCurrent_.front()), 2 * nCompt_ * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_externalCurrent_, &(externalCurrent_.front()), 2 * nCompt_ * sizeof(double), cudaMemcpyHostToDevice);
 		//cudaMemcpy(d_HS_, &HS_[0], HS_.size()*sizeof(double), cudaMemcpyHostToDevice);
 
 		update_csr_matrix_kernel<<<BLOCKS, THREADS_PER_BLOCK>>>(d_V,
@@ -498,7 +506,7 @@ void HSolveActive::hinesMatrixSolverWrapper(){
 	cudaMemcpy(&inject_[0], d_inject_, nCompt_*sizeof(InjectStruct), cudaMemcpyDeviceToHost );
 
 	// ----------------------------- CONJUGATE GRADIENT SOLVER  ----------------------------------------
-	const double tol = 1e-5f;
+	const double tol = 1e-8f;
 	const int max_iter = 10000;
 	double a, b, na, r0, r1;
 	double alpha, beta, alpham1;
@@ -510,15 +518,15 @@ void HSolveActive::hinesMatrixSolverWrapper(){
 	beta = 0.0;
 	r0 = 0.0;
 
-	cudaMemset(d_x, 0, nCompt_*sizeof(double));
+	cudaMemset(d_Vmid, 0, nCompt_*sizeof(double));
 	cublasStatus_t cublasStatus;
 
 	cusparseDcsrmv(cusparse_handle,CUSPARSE_OPERATION_NON_TRANSPOSE, nCompt_, nCompt_, mat_nnz, &alpha, cusparse_descr,
-			d_mat_values, d_mat_rowPtr, d_mat_colIndex, d_x,
+			d_mat_values, d_mat_rowPtr, d_mat_colIndex, d_Vmid,
 			&beta, d_Ax);
 
-	cublasDaxpy(cublas_handle, nCompt_, &alpham1, d_Ax, 1, d_r, 1);
-	cublasStatus = cublasDdot(cublas_handle, nCompt_, d_r, 1, d_r, 1, &r1);
+	cublasDaxpy(cublas_handle, nCompt_, &alpham1, d_Ax, 1, d_b, 1);
+	cublasStatus = cublasDdot(cublas_handle, nCompt_, d_b, 1, d_b, 1, &r1);
 
 	k = 1;
 
@@ -528,11 +536,11 @@ void HSolveActive::hinesMatrixSolverWrapper(){
 		{
 			b = r1 / r0;
 			cublasStatus = cublasDscal(cublas_handle, nCompt_, &b, d_p, 1);
-			cublasStatus = cublasDaxpy(cublas_handle, nCompt_, &alpha, d_r, 1, d_p, 1);
+			cublasStatus = cublasDaxpy(cublas_handle, nCompt_, &alpha, d_b, 1, d_p, 1);
 		}
 		else
 		{
-			cublasStatus = cublasDcopy(cublas_handle, nCompt_, d_r, 1, d_p, 1);
+			cublasStatus = cublasDcopy(cublas_handle, nCompt_, d_b, 1, d_p, 1);
 		}
 
 		cusparseDcsrmv(cusparse_handle, CUSPARSE_OPERATION_NON_TRANSPOSE, nCompt_, nCompt_, mat_nnz, &alpha, cusparse_descr,
@@ -541,19 +549,20 @@ void HSolveActive::hinesMatrixSolverWrapper(){
 		cublasStatus = cublasDdot(cublas_handle, nCompt_, d_p, 1, d_Ax, 1, &dot);
 		a = r1 / dot;
 
-		cublasStatus = cublasDaxpy(cublas_handle, nCompt_, &a, d_p, 1, d_x, 1);
+		cublasStatus = cublasDaxpy(cublas_handle, nCompt_, &a, d_p, 1, d_Vmid, 1);
 		na = -a;
-		cublasStatus = cublasDaxpy(cublas_handle, nCompt_, &na, d_Ax, 1, d_r, 1);
+		cublasStatus = cublasDaxpy(cublas_handle, nCompt_, &na, d_Ax, 1, d_b, 1);
 
 		r0 = r1;
-		cublasStatus = cublasDdot(cublas_handle, nCompt_, d_r, 1, d_r, 1, &r1);
+		cublasStatus = cublasDdot(cublas_handle, nCompt_, d_b, 1, d_b, 1, &r1);
 		cudaThreadSynchronize();
-		printf("iteration = %3d, residual = %e\n", k, sqrt(r1));
+		//printf("iteration = %3d, residual = %e\n", k, sqrt(r1));
 		k++;
 	}
 
-	double x[nCompt_];
-	cudaMemcpy(x, d_x, nCompt_*sizeof(double), cudaMemcpyDeviceToHost);
+	cudaMemcpy(&(VMid_[0]) , d_Vmid, nCompt_*sizeof(double), cudaMemcpyDeviceToHost);
+	calculate_V_from_Vmid<<<BLOCKS,THREADS_PER_BLOCK>>>(d_Vmid, d_V, nCompt_);
+
 
 	/*
 	float rsum, diff, err = 0.0;
