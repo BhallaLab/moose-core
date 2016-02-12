@@ -85,32 +85,6 @@ HSolveActive::HSolveActive()
 // Solving differential equations
 //////////////////////////////////////////////////////////////////////
 
-/*
- * A debug function to profile the performance of selected modules.
- */
-void update_info(double* time, int func, int elapsed, int count, double dt)
-{
-	time[func] += elapsed / 1000.0f;
-	char * str;
-	if(count >= (0.2/dt) - 1)
-	{
-		switch(func)
-		{
-			case 0: str = "advanceChannels";break;
-			case 1: str = "calculateChannelCurrents";break;
-			case 2: str = "updateMatrix";break;
-			case 3: str = "forwardEliminate";break;
-			case 4: str = "backwardSubstitute";break;
-			case 5: str = "advanceCalcium";break;
-			case 6: str = "advanceSynChans";break;
-			case 7: str = "sendValues";break;
-			case 8: str = "sendSpikes";break;
-			case 9: str = "externalCurrent_.assign";break;
-			default: str = "Unkown";break;
-		}
-		printf("Function %s takes %fs.\n", str, time[func]/ 1000.0f);
-	}
-}
 void HSolveActive::step( ProcPtr info )
 {	
     if ( nCompt_ <= 0 )
@@ -124,95 +98,82 @@ void HSolveActive::step( ProcPtr info )
 #ifdef USE_CUDA
     total_count ++;
 #endif
-    
+    u64 start, end;
+    double advanceChannelsTime;
+    double calcChanCurTime;
+    double updateMatTime;
+    double forwardElimTime;
+    double backwardSubTime;
+    double advCalcTime;
+    double advSynchanTime;
+    double sendValuesTime;
+    double sendSpikesTime;
 
-#ifdef PROFILE_CUDA
-    u64 start_time, end_time;
-    start_time = getTime();
-#endif
-    
-    advanceChannels( info->dt );
-    
-#ifdef PROFILE_CUDA
-    end_time = getTime();
-    update_info(total_time, 0, end_time - start_time, total_count ,info->dt);
-    start_time = end_time;
-#endif
-    
-    calculateChannelCurrents();
 
-#ifdef PROFILE_CUDA
-    end_time = getTime();
-    update_info(total_time, 1, end_time - start_time, total_count ,info->dt);
-    start_time = end_time;   
-#endif
+    start = getTime();
+    	advanceChannels( info->dt );
+    end = getTime();
+    advanceChannelsTime = (end-start)/1000.0f;
 
-    hinesMatrixSolverWrapper();
-/*
-    updateMatrix();
+    start = getTime();
+    	calculateChannelCurrents();
+	end = getTime();
+	calcChanCurTime = (end-start)/1000.0f;
 
-#ifdef PROFILE_CUDA
-    end_time = getTime();
-    update_info(total_time, 2, end_time - start_time, total_count ,info->dt);
-    start_time = end_time;   
-#endif
-        
-    HSolvePassive::forwardEliminate();
-    
-#ifdef PROFILE_CUDA
-    end_time = getTime();
-    update_info(total_time, 3, end_time - start_time, total_count ,info->dt);
-    start_time = end_time;   
-#endif
-        
-    HSolvePassive::backwardSubstitute();
-    
-#ifdef PROFILE_CUDA
-    end_time = getTime();
-    update_info(total_time, 4, end_time - start_time, total_count ,info->dt);
-    start_time = end_time;   
-#endif
-*/
-    advanceCalcium();
-    
-#ifdef PROFILE_CUDA
-    end_time = getTime();
-    update_info(total_time, 5, end_time - start_time, total_count ,info->dt);
-    start_time = end_time;   
-#endif
-        
-    advanceSynChans( info );
-    
-#ifdef PROFILE_CUDA
-    end_time = getTime();
-    update_info(total_time, 6, end_time - start_time, total_count ,info->dt);
-    start_time = end_time;   
-#endif
-    
-    sendValues( info );
-    
-#ifdef PROFILE_CUDA
-    end_time = getTime();
-    update_info(total_time, 7, end_time - start_time, total_count ,info->dt);
-    start_time = end_time;   
-#endif
-        
-    sendSpikes( info );
-     
-#ifdef PROFILE_CUDA
-    end_time = getTime();
-    update_info(total_time, 8, end_time - start_time, total_count ,info->dt);
-    start_time = end_time;   
-#endif
-       
+	start = getTime();
+		// hinesMatrixSolverWrapper();
+		updateMatrix();
+	end = getTime();
+	updateMatTime = (end-start)/1000.0f;
+
+
+	start = getTime();
+		HSolvePassive::forwardEliminate();
+	end = getTime();
+	forwardElimTime = (end-start)/1000.0f;
+
+	start = getTime();
+		HSolvePassive::backwardSubstitute();
+	end = getTime();
+	backwardSubTime = (end-start)/1000.0f;
+
+
+	start = getTime();
+		advanceCalcium();
+	end = getTime();
+	advCalcTime = (end-start)/1000.0f;
+
+	start = getTime();
+		advanceSynChans( info );
+	end = getTime();
+	advSynchanTime = (end-start)/1000.0f;
+
+	start = getTime();
+		sendValues( info );
+	end = getTime();
+	sendValuesTime = (end-start)/1000.0f;
+
+	start = getTime();
+		sendSpikes( info );
+	end = getTime();
+	sendSpikesTime = (end-start)/1000.0f;
+
+	if(num_profile_prints > 0){
+	printf("%lf %lf %lf %lf %lf %lf %lf %lf %lf \n"
+			,advanceChannelsTime
+			    ,calcChanCurTime
+			    ,updateMatTime
+			    ,forwardElimTime
+			    ,backwardSubTime
+			    ,advCalcTime
+			    ,advSynchanTime
+			    ,sendValuesTime
+			    ,sendSpikesTime);
+	num_profile_prints--;
+	}
 
     externalCurrent_.assign( externalCurrent_.size(), 0.0 );
     
-#ifdef PROFILE_CUDA
-    end_time = getTime();
-    update_info(total_time, 9, end_time - start_time, total_count ,info->dt);
-#endif
-
 }
 
 void HSolveActive::calculateChannelCurrents()
