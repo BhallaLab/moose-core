@@ -100,6 +100,7 @@ void HinesMatrix::setup( const vector< TreeNodeStruct >& tree, double dt )
 void HinesMatrix::allocateMemoryGpu(){
 	h_main_diag_passive = new double[nCompt_]();
 	h_main_diag_map = new int[nCompt_]();
+	h_tridiag_data = new double[3*nCompt_]();
 }
 
 void HinesMatrix::makeCsrMatrixGpu(){
@@ -174,6 +175,18 @@ void HinesMatrix::makeCsrMatrixGpu(){
 		if(r==c){
 			// map the index of main diagonal element.
 			h_main_diag_map[r] = i;
+		}
+
+		switch(c-r){
+			case -1:
+				h_tridiag_data[r] = value;
+				break;
+			case 0:
+				h_tridiag_data[nCompt_+r] = value;
+				break;
+			case 1:
+				h_tridiag_data[2*nCompt_+r] = value;
+				break;
 		}
 
 		h_mat_rowPtr[r]++;

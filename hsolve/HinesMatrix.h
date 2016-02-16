@@ -96,6 +96,7 @@ protected:
     int* h_main_diag_map;
 
     double* h_main_diag_passive;
+    double* h_tridiag_data;
 #endif
 
 private:
