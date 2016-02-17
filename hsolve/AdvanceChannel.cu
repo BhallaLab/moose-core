@@ -307,26 +307,8 @@ void HSolveActive::calculate_channel_currents_cuda_wrapper(){
 }
 
 void HSolveActive::update_matrix_cuda_wrapper(){
-	int BLOCKS = num_comps_with_chans/THREADS_PER_BLOCK;
-	BLOCKS = (num_comps_with_chans%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
 
 	int num_channels = channel_.size();
-
-	/*
-	// Using THRUST
-	thrust::device_ptr<int> d_th_chan_to_comp(d_chan_to_comp);
-	thrust::device_ptr<double> d_th_chan_Gk(d_chan_Gk);
-	thrust::device_ptr<double> d_th_chan_GkEk(d_chan_GkEk);
-	thrust::device_ptr<int> d_th_temp_keys(d_temp_keys);
-	thrust::device_ptr<double> d_th_temp_values(d_temp_values);
-
-	thrust::reduce_by_key(d_th_chan_to_comp, d_th_chan_to_comp+num_channels, d_th_chan_Gk, d_th_temp_keys, d_th_temp_values);
-	populating_expand_indices<<<BLOCKS,THREADS_PER_BLOCK>>>(d_temp_keys, d_temp_values, d_comp_Gksum, num_comps_with_chans);
-
-	thrust::reduce_by_key(d_th_chan_to_comp, d_th_chan_to_comp+num_channels, d_th_chan_GkEk, d_th_temp_keys, d_th_temp_values);
-	populating_expand_indices<<<BLOCKS,THREADS_PER_BLOCK>>>(d_temp_keys, d_temp_values, d_comp_GkEksum, num_comps_with_chans);
-	*/
-
 
 	// Using Cusparse
 	const double alpha = 1.0;
@@ -342,93 +324,9 @@ void HSolveActive::update_matrix_cuda_wrapper(){
 		d_chan_GkEk, d_chan_rowPtr, d_chan_colIndex,
 		d_chan_x , &beta, d_comp_GkEksum);
 
-
-
 	// -----------------------------------------------CUSPARSE------------------------------------------------
 
-	/*
-	const double alpha = 1.0;
-	const double beta = 0.0;
-
-	double* d_temp_Gksum, *d_temp_GkEksum;
-	cudaMalloc((void**)&d_temp_Gksum, nCompt_*sizeof(double));
-	cudaMalloc((void**)&d_temp_GkEksum, nCompt_*sizeof(double));
-
-	cudaMemset(d_temp_Gksum, 0, nCompt_ * sizeof(double));
-	cudaMemset(d_temp_GkEksum, 0, nCompt_ * sizeof(double));
-
-	cusparseDcsrmv(cusparse_handle,  CUSPARSE_OPERATION_NON_TRANSPOSE,
-		nCompt_, nCompt_, num_channels, &alpha, cusparse_descr,
-		d_chan_Gk, d_chan_rowPtr, d_chan_colIndex,
-		d_chan_x , &beta, d_temp_Gksum);
-
-	cusparseDcsrmv(cusparse_handle,  CUSPARSE_OPERATION_NON_TRANSPOSE,
-		nCompt_, nCompt_, num_channels, &alpha, cusparse_descr,
-		d_chan_GkEk, d_chan_rowPtr, d_chan_colIndex,
-		d_chan_x , &beta, d_temp_GkEksum);
-
-	// Checking gksum with others.
-	double h_temp_Gksum[nCompt_];
-	double h_temp_GkEksum[nCompt_];
-	double h_comp_Gksum[nCompt_];
-	double h_comp_GkEksum[nCompt_];
-	int h_chan_colIndex[channel_.size()];
-
-	cudaMemcpy(h_temp_Gksum, d_temp_Gksum, nCompt_*sizeof(double), cudaMemcpyDeviceToHost);
-	cudaMemcpy(h_comp_Gksum, d_comp_Gksum, nCompt_*sizeof(double), cudaMemcpyDeviceToHost);
-
-	cudaMemcpy(h_temp_GkEksum, d_temp_GkEksum, nCompt_*sizeof(double), cudaMemcpyDeviceToHost);
-	cudaMemcpy(h_comp_GkEksum, d_comp_GkEksum, nCompt_*sizeof(double), cudaMemcpyDeviceToHost);
-
-	cudaMemcpy(h_chan_colIndex, d_chan_colIndex, channel_.size()*sizeof(int), cudaMemcpyDeviceToHost);
-
-	// Checking whether compartment id of channels are in increasing order
-	int max = 0;
-	bool inorder = true;
-	for(int i=0;i<chan2compt_.size() && inorder;i++){
-		if(chan2compt_[i] >= max)
-			max = chan2compt_[i];
-		else
-			inorder = false;
-	}
-
-	if(inorder) printf("they are in order\n");
-	else printf("No they are not and broked at %d\n",max);
-
-	// Constructing channel row ptrs with nCompt as rows.
-	int chan_rowPtr[V_.size()+1];
-	int sum2 = 0;
-	for(unsigned int i=0;i<=V_.size();i++){
-		chan_rowPtr[i] = sum2;
-		sum2 += channelCount_[i];
-	}
-
-	// Filling column indices
-	for(int i=0;i<5;i++){
-		printf("Compartment %d \n",i);
-		for(int j=chan_rowPtr[i];j<chan_rowPtr[i+1];j++){
-			printf("%lf %lf %d\n",h_temp_Gksum[j]*1000000, h_comp_Gksum[j]*1000000, h_chan_colIndex[j]);
-		}
-
-	}
-
-	double error1 = 0;
-	double error2 = 0;
-	for(int i=0;i<nCompt_;i++){
-		error1 += (h_comp_Gksum[i]-h_temp_Gksum[i]);
-		error2 += (h_comp_GkEksum[i]-h_temp_GkEksum[i]);
-	}
-
-	printf("error %lf error %lf\n",error1*100000, error2*100000);
-	getchar();
-	*/
-
-
-	// -----------------------------------------------CUSPARSE------------------------------------------------
-
-
-
-	BLOCKS = nCompt_/THREADS_PER_BLOCK;
+	int BLOCKS = nCompt_/THREADS_PER_BLOCK;
 	BLOCKS = (nCompt_%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
 
 	cudaMemcpy(d_inject_, &inject_[0], nCompt_*sizeof(InjectStruct), cudaMemcpyHostToDevice);
@@ -447,51 +345,35 @@ void HSolveActive::update_matrix_cuda_wrapper(){
 	cudaMemcpy(&inject_[0], d_inject_, nCompt_*sizeof(InjectStruct), cudaMemcpyDeviceToHost );
 	cudaMemcpy(&HS_[0], d_HS_, HS_.size()*sizeof(double), cudaMemcpyDeviceToHost );
 
-	//printf("completed computation\n");
-	/*
-	// CHECKING correctness
-	double error = 0;
-	// GPU calculations
-	double gksum_values[nCompt_];
-	cudaMemcpy(gksum_values, d_comp_Gksum, nCompt_*sizeof(double), cudaMemcpyDeviceToHost);
-
-	// CPU calculations
-	double GkSum, GkEkSum;
-	vector< CurrentStruct >::iterator icurrent = current_.begin();
-	vector< currentVecIter >::iterator iboundary = currentBoundary_.begin();
-
-	vector< CompartmentStruct >::iterator ic;
-	int i = 0;
-	for ( ic = compartment_.begin(); ic != compartment_.end(); ++ic )
-	{
-		GkSum   = 0.0;
-		GkEkSum = 0.0;
-		for ( ; icurrent < *iboundary; ++icurrent )
-		{
-			GkSum   += icurrent->Gk;
-			GkEkSum += icurrent->Gk * icurrent->Ek;
-		}
-		error += (GkSum-gksum_values[i]);
-		i++;
-
-		//printf("%lf %lf\n",GkSum, gksum_values[i-1]);
-
-		++iboundary;
-	}
-
-	//printf("%lf errror\n",error);
-	//getchar();
-	 */
-
-
 }
 
 void HSolveActive::hinesMatrixSolverWrapper(){
 
+	// TODO once a suitable gpu solver is found, remove this.
+	if ( HJ_.size() != 0 )
+		memcpy( &HJ_[ 0 ], &HJCopy_[ 0 ], sizeof( double ) * HJ_.size() );
+
+	// ---------------------------- GKSum & GkEkSum ---------------------------------------
+	int num_channels = channel_.size();
+	// Using Cusparse
+	const double alpha_ = 1.0;
+	const double beta_ = 0.0;
+
+	cusparseDcsrmv(cusparse_handle,  CUSPARSE_OPERATION_NON_TRANSPOSE,
+		nCompt_, nCompt_, num_channels, &alpha_, cusparse_descr,
+		d_chan_Gk, d_chan_rowPtr, d_chan_colIndex,
+		d_chan_x , &beta_, d_comp_Gksum);
+
+	cusparseDcsrmv(cusparse_handle,  CUSPARSE_OPERATION_NON_TRANSPOSE,
+		nCompt_, nCompt_, num_channels, &alpha_, cusparse_descr,
+		d_chan_GkEk, d_chan_rowPtr, d_chan_colIndex,
+		d_chan_x , &beta_, d_comp_GkEksum);
+
+
+	// ----------------------------- UPDATE MATRIX ----------------------------------------
 	int BLOCKS = nCompt_/THREADS_PER_BLOCK;
 	BLOCKS = (nCompt_%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
 
-	// ----------------------------- UPDATE MATRIX ----------------------------------------
 	cudaMemcpy(d_inject_, &inject_[0], nCompt_*sizeof(InjectStruct), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_externalCurrent_, &(externalCurrent_.front()), 2 * nCompt_ * sizeof(double), cudaMemcpyHostToDevice);
 		//cudaMemcpy(d_HS_, &HS_[0], HS_.size()*sizeof(double), cudaMemcpyHostToDevice);
@@ -507,6 +389,17 @@ void HSolveActive::hinesMatrixSolverWrapper(){
 
 	cudaMemcpy(&inject_[0], d_inject_, nCompt_*sizeof(InjectStruct), cudaMemcpyDeviceToHost );
 
+	// Updating HS_ data
+	cudaMemcpy(h_mat_values, d_mat_values, mat_nnz*sizeof(double), cudaMemcpyDeviceToHost);
+	cudaMemcpy(h_b, d_b, nCompt_*sizeof(double), cudaMemcpyDeviceToHost);
+
+	for(int i=0;i<nCompt_;i++){
+		HS_[4*i] = h_mat_values[h_main_diag_map[i]];
+		HS_[4*i+3] = h_b[i];
+	}
+
+
+	/*
 	// ---------------------------- BASIS AS TRI-DIAG SOLUTION ----------------------------------------
 	cudaMemcpy(d_Vmid, d_b, nCompt_*sizeof(double), cudaMemcpyDeviceToDevice);
 	cusparseDgtsv_nopivot(cusparse_handle, nCompt_, 1, &(d_tridiag_data[0]), &(d_tridiag_data[nCompt_]), &(d_tridiag_data[2*nCompt_]),d_Vmid,nCompt_);
@@ -569,6 +462,7 @@ void HSolveActive::hinesMatrixSolverWrapper(){
 
 	cudaMemcpy(&(VMid_[0]) , d_Vmid, nCompt_*sizeof(double), cudaMemcpyDeviceToHost);
 	calculate_V_from_Vmid<<<BLOCKS,THREADS_PER_BLOCK>>>(d_Vmid, d_V, nCompt_);
+	cudaMemcpy(&(V_[0]), d_V, nCompt_*sizeof(double), cudaMemcpyDeviceToHost);
 
 	//getchar();
 
