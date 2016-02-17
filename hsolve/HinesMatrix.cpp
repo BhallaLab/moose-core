@@ -92,18 +92,23 @@ void HinesMatrix::setup( const vector< TreeNodeStruct >& tree, double dt )
 		printf("%lf, ", Ga_[i]*100000);
 	}
     printf("\n");
+
+
+    cout << nCompt_ << " " << HJ_.size() << " " << mat_nnz << endl;
+    cout << operandBase_.size() << endl;
     */
 
 
 }
 
 void HinesMatrix::allocateMemoryGpu(){
-	h_tridiag_data = new double[3*nCompt_]();
+
 }
 
 void HinesMatrix::makeCsrMatrixGpu(){
 	// Allocating memory for matrix data
 	h_main_diag_passive = new double[nCompt_]();
+	h_tridiag_data = new double[3*nCompt_]();
 
 	// Adding passive data to main diagonal
 	for(int i=0;i<nCompt_;i++){
@@ -216,6 +221,7 @@ void HinesMatrix::makeCsrMatrixGpu(){
 	cudaMalloc((void**)&d_mat_rowPtr, (nCompt_+1)*sizeof(int));
 	cudaMalloc((void**)&d_main_diag_map, nCompt_*sizeof(int));
 	cudaMalloc((void**)&d_main_diag_passive, nCompt_*sizeof(double));
+	cudaMalloc((void**)&d_tridiag_data, 3*nCompt_*sizeof(double));
 	cudaMalloc((void**)&d_b, nCompt_*sizeof(double));
 
 	cudaMemcpy(d_mat_values, h_mat_values, mat_nnz*sizeof(double), cudaMemcpyHostToDevice);
@@ -223,15 +229,86 @@ void HinesMatrix::makeCsrMatrixGpu(){
 	cudaMemcpy(d_mat_rowPtr, h_mat_rowPtr, (nCompt_+1)*sizeof(int), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_main_diag_map, h_main_diag_map, nCompt_*sizeof(int), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_main_diag_passive, h_main_diag_passive, nCompt_*sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_tridiag_data, h_tridiag_data, 3*nCompt_*sizeof(double), cudaMemcpyHostToDevice);
+
+
+	// Compare two CSR matrices, one from HS_,HJ_ and other from direct method.
+	vector<pair<int,double> > non_zeros;
+
+	for(int i=0;i<nCompt_;i++){
+		if(HS_[4*i] != 0)
+			non_zeros.push_back(make_pair(i*nCompt_+i, HS_[4*i]));
+
+		if(HS_[4*i+1] != 0){
+			non_zeros.push_back(make_pair(i*nCompt_+(i+1), HS_[4*i+1]));
+			non_zeros.push_back(make_pair((i+1)*nCompt_+i, HS_[4*i+1]));
+		}
+
+	}
+
+
+	// Read off diagonal elements from HJ_
+	int comp_num;
+	int size;
+	int col_ind, col;
+	for(int i=0;i<junction_.size();i++){
+		comp_num = junction_[i].index;
+		size = junction_[i].rank;
+
+		vdIterator elem = operandBase_[comp_num];
+
+		for(int j=0;j<size;j++){
+			col_ind = coupled_[groupNumber_[comp_num]].size() - size + j;
+			col = coupled_[groupNumber_[comp_num]][col_ind];
+
+			non_zeros.push_back(make_pair(comp_num*nCompt_+col, *elem));
+			elem++;
+			non_zeros.push_back(make_pair(col*nCompt_+comp_num, *elem));
+			elem++;
+		}
+
+	}
+
+	cout << non_zeros.size() << " recovered " << mat_nnz << " exists" << endl;
+
+	sort(non_zeros.begin(), non_zeros.end());
+
+	// Check error
+	double error = 0;
+	double cur_error = 0;
+	for(int i=0;i<nCompt_;i++){
+		for(int j=h_mat_rowPtr[i];j<h_mat_rowPtr[i+1];j++){
+			cur_error = (non_zeros[j].second - h_mat_values[j]);
+			error += cur_error;
+
+			//if(cur_error != 0) printf("(%d %d) %lf %lf %lf\n", i, h_mat_colIndex[j], non_zeros[j].second*pow(10,9), h_mat_values[j]*pow(10,9), cur_error*pow(10,9));
+		}
+	}
+
+	printf("%lf is error\n",error*pow(10,12));
+
 
 	/*
 	// Print passive data
-	double error = 0;
+	double main_error = 0;
+	double passive_error = 0;
+	double right_error = 0;
+	int count = 0;
 	for(int i=0;i<nCompt_;i++){
-		error += (HS_[4*i+2] - h_main_diag_passive[i]);
-		//printf("%lf %lf \n", HS_[4*i+2]*100000, h_main_diag_passive[i]*100000);
+		main_error += (HS_[4*i] - h_tridiag_data[nCompt_+i]);
+		right_error += (HS_[4*i+1] - h_tridiag_data[2*nCompt_+i]);
+		passive_error += (HS_[4*i+2] - h_main_diag_passive[i]);
+		//printf("%lf %lf |", HS_[4*i]*100000, h_tridiag_data[nCompt_+i]*100000);
+		//printf("%lf %lf |", HS_[4*i+2]*100000, h_main_diag_passive[i]*100000);
+		if((HS_[4*i+1] - h_tridiag_data[2*nCompt_+i]) != 0)
+			printf("%d %lf %lf |\n", i, HS_[4*i+1]*100000, h_tridiag_data[2*nCompt_+i]*100000);
+		if(HS_[4*i+1] != 0)
+			count++;
+
+
 	}
-	printf("%lf is error\n",error*100000);
+	printf("Errors | %lf | %lf | %lf |\n",right_error*1000000, main_error*1000000, passive_error*1000000);
+	printf("count %d \n",count);
 	*/
 
 

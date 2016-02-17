@@ -105,6 +105,7 @@ protected:
     int* d_main_diag_map;
 
     double* d_main_diag_passive;
+    double* d_tridiag_data;
     double* d_b;
 
     int mat_nnz = 0;

@@ -121,7 +121,7 @@ void HSolveActive::step( ProcPtr info )
 	calcChanCurTime = (end-start)/1000.0f;
 
 	start = getTime();
-		// hinesMatrixSolverWrapper();
+		//hinesMatrixSolverWrapper();
 		updateMatrix();
 	end = getTime();
 	updateMatTime = (end-start)/1000.0f;
