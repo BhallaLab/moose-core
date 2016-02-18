@@ -163,6 +163,8 @@ endif
 
 # Insert the svn revision no. into the code as a preprocessor macro.
 # Only for release versions we want to pass SVN=0 to make.
+# No more SVN so pass zero
+SVN=0
 ifndef SVN
 SVN?=1
 endif
@@ -295,7 +297,7 @@ else
 endif
 
 ifeq ($(USE_HDF5),1)
-	CXXFLAGS+= -DUSE_HDF5  -DH5_NO_DEPRECATED_SYMBOLS -I/usr/local/hdf5/include
+	CXXFLAGS+= -DUSE_HDF5  -DH5_NO_DEPRECATED_SYMBOLS -I/usr/local/hdf5/include -I/usr/include/hdf5/serial
 	LIBS+= -lhdf5 -lhdf5_hl -L/usr/local/hdf5/lib -L/usr/lib/x86_64-linux-gnu/hdf5/serial/
 endif
 
@@ -371,7 +373,7 @@ export LIBS
 export USE_GSL
 export USE_SBML
 
-all: moose pymoose neurokit
+all: moose pymoose
 
 neurokit: ./python/moogli/setup.py
 	$(NEUROKIT_COMMAND)
@@ -398,7 +400,7 @@ PYTHON_LDFLAGS := $(shell python-config --ldflags)
 else
 PYTHON_CFLAGS := $(shell python-config --includes) \
     -fno-strict-aliasing -fwrapv \
-    # -Wstrict-prototypes  \ # This option is not supported by g++-4.8
+    -Wstrict-prototypes  \
     -Wformat -Wformat-security -Werror=format-security \
     -fstack-protector --param=ssp-buffer-size=4
 

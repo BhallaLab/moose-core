@@ -218,6 +218,13 @@ class Stoich
 		 * also work if there has been a change in voxelization.
 		 */
 		void setupCrossSolverReacVols() const;
+
+		/**
+		 * Finds all the input molecules contributing to any of the
+		 * Function cases: poolFunc, incrementFunc or reacFunc
+		void inputsToPoolFuncs( 
+				vector< pair< Id, vector< unsigned int > > >& ret ) const;
+		 */
 		//////////////////////////////////////////////////////////////////
 		// Zombification functions.
 		//////////////////////////////////////////////////////////////////
@@ -238,6 +245,13 @@ class Stoich
 		void unZombifyPools();
 
 		void zombifyChemCompt( Id compt );
+
+		/**
+		 * Utility function to find if incoming message assigns N or conc,
+		 * and to appropriately zombify the function and set up its 
+		 * parameters including volume scaling.
+		 */
+		Id zombifyPoolFuncWithScaling( Id pool );
 
 		unsigned int convertIdToReacIndex( Id id ) const;
 		unsigned int convertIdToPoolIndex( Id id ) const;
@@ -298,7 +312,7 @@ class Stoich
 		 * This installs a FuncTerm, which evaluates a function to specify
 		 * the conc of the specific pool. The pool is a BufPool.
 		 */
-		void installAndUnschedFunc( Id func, Id pool );
+		void installAndUnschedFunc( Id func, Id pool, double volScale );
 
 		/**
 		 * This installs a FuncRate, which evaluates a function to specify

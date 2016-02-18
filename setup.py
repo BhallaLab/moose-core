@@ -343,7 +343,7 @@ DEFINE_MACROS = [('USE_GSL', None),
 
 EXTRA_LINK_ARGS = ['-L/usr/lib64', '-Wl,-R/usr/lib64'] # distutils disregards everything in LIBRARY_DIRS except /usr/local/lib, hence this
 PACKAGES = ['moose', 'moose.backend', 'moose.neuroml', 'moose.topology']
-PACKAGE_DATA = {'moose': ['copyleft', 'README.md'], 'mgui': ['icons/*', 'colormaps/*', 'bioModels/*']}
+PACKAGE_DATA = {'moose': ['LICENSE', 'README.md'], 'mgui': ['icons/*', 'colormaps/*', 'bioModels/*']}
 REQUIRES = ['numpy'] #, 'gsl', 'hdf5', 'libsbml'] # using full-dependency
 # python-libsbml, although available on PyPI, does not build with pip
 # install and gsl is a C library. The links are just for informing the

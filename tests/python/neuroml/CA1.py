@@ -8,7 +8,7 @@ sys.path.append('../../../python/')
 import moose
 from moose.utils import *
 import moose.utils as mu
-import count
+from . import count
 import numpy as np
 
 from moose.neuroml.NeuroML import NeuroML

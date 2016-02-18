@@ -1,21 +1,16 @@
 language: cpp
 compiler:
     - gcc
+    - clang
 os:
     - linux
-    - osx
-matrix:
-    allow_failures:
-        - os: osx
-branches:
-    only:
-        - master
-        - mpi
 notifications:
     email:
         recipients:
             - dilawar.s.rajput@gmail.com
             - bhalla@ncbs.res.in
+            - hrani@ncbs.res.in
+            - ray.subhasis@gmail.com
         on_success: change
         on_failure: always
 
@@ -23,15 +18,18 @@ env:
     - CTEST_MODEL=Nightly
 cache: apt
 
+matrix:
+    allow_failures:
+        - compiler: clang
+
 before_script:
+    - sudo add-apt-repository ppa:takluyver/python3 -y
     - sudo apt-get update -qq
     - sudo apt-get install libxml2-dev libbz2-dev
     - sudo apt-get install libhdf5-serial-dev
-    - sudo apt-get install python-numpy python-setuptools python-networkx
-    - sudo apt-get install make texinfo cmake
-    - sudo apt-get install python-suds python-matplotlib
-    - sudo apt-get install python-qt4-dev python-qt4-gl python-sip-dev libqt4-dev libopenscenegraph-dev
-    - sudo apt-get install doxygen python-sphinx
+    - sudo apt-get install make cmake
+    - sudo apt-get install python-numpy python-matplotlib
+    - sudo apt-get install python3-numpy  python3-matplotlib
 
 before_install:
     - sbmlurl="http://sourceforge.net/projects/sbml/files/libsbml/5.9.0/stable/Linux/64-bit/libSBML-5.9.0-Linux-x64.deb"
@@ -46,5 +44,8 @@ install:
 
 script:
     - make BUILD=debug USE_NEUROKIT=1 && make clean
-    - mkdir -p _build && cd _build && cmake -DDEBUG=ON -DWITH_DOC=ON -DBUILD_MOOGLI=ON .. && make
+    - mkdir -p _build && cd _build && cmake -DDEBUG=ON -DWITH_DOC=OFF .. && make
     - ctest --output-on-failure
+    - cd ..
+    - mkdir -p _BUILD && cd _BUILD && cmake -DDEBUG=ON -DPYTHON_EXECUTABLE=/usr/bin/python3 ..
+    - make 

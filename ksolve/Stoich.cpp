@@ -401,6 +401,45 @@ void Stoich::setupCrossSolverReacVols() const
 	kinterface_->setupCrossSolverReacVols( subComptVec_, prdComptVec_);
 }
 
+/*
+// Utility function for getting inputs to a single Function object.
+static vector< ObjId > inputsToFunc( Id func )
+{
+	static const Finfo* inputFinfo = 
+			Cinfo::find( "Variable" )->findFinfo("input");
+	static const DestFinfo* df = dynamic_cast< const DestFinfo* >( inputFinfo );
+	assert( df );
+	static FuncId fid = df->funcId();
+	assert( func.element()->cinfo()->isA( "Function" );
+	unsigned int numInputs = Field< unsigned int >::get( func, "numVars" );
+	Id varId( func.value() );
+	vector< ObjId > caller;
+	varId.element()->getInputMsgs( caller, fid );
+	cout << "NUM Inputs = " << numInputs << ", numObjId = " << caller.size() << endl;
+	return caller;
+}
+
+// routine to get all inputs (pool Ids) to Pool Functions
+void Stoich::inputsToPoolFuncs( 
+		vector< pair< Id, vector< unsigned int> >& ret ) const 
+{
+	ret.clear();
+	vector< Id >::iterator i;
+	vector< ObjId >::iterator j;
+	for ( i = poolFuncVec_.begin(); i != poolFuncVec_.end(); ++i )
+		vector< ObjId > ovec = inputsToFunc( *i );
+		vector< unsigned int > poolIndex;
+		poolIndex.reserve( ovec.size() );
+		for ( j = ovec.begin(); j != ovec.end(); ++j ) {
+			unsigned int poolIndex = 
+			poolIndex.push_back( convertIdToPoolIndex( j->id ) );
+		}
+		ret.push_back( pair( *i, poolIndex) );
+	return ret;
+}
+*/
+
+//////////////////////////////////////////////////////////////////////
 
 string Stoich::getPath( const Eref& e ) const
 {
@@ -632,16 +671,16 @@ static bool isOffSolverReac( const Element* e, Id myCompt,
 	for ( vector< Id >::const_iterator 
 			j = neighbors.begin(); j != neighbors.end(); ++j )
 	{
-		if ( j->element()->cinfo()->isA( "BufPool" ) ) {
-			cout << "Warning: Avoid BufPool: " << j->path() << 
-				   "\n as reactant in cross-compartment reactions\n";
-		}
 		Id otherCompt = getCompt( *j );
 		if ( myCompt != otherCompt ) {
 			// offSolverPools.push_back( *j );
 			poolCompts.push_back( otherCompt );
 			poolComptMap[ *j ] = otherCompt; // Avoids duplication of pools
 			ret = true;
+			if ( j->element()->cinfo()->isA( "BufPool" ) ) {
+				cout << "Warning: Avoid BufPool: " << j->path() << 
+				   	"\n as reactant in cross-compartment reactions\n";
+			}
 		}
 	}
 	return ret;
@@ -981,11 +1020,12 @@ void Stoich::buildFuncLookup()
 // Stoich building stuff here for installing model components.
 ///////////////////////////////////////////////////////////////////
 
-void Stoich::installAndUnschedFunc( Id func, Id pool )
+void Stoich::installAndUnschedFunc( Id func, Id pool, double volScale )
 {
 	static const Cinfo* varCinfo = Cinfo::find( "Variable" );
-	static const Finfo* funcSrcFinfo = varCinfo->findFinfo( "input" );
-	assert( funcSrcFinfo );
+	static const Finfo* funcInputFinfo = varCinfo->findFinfo( "input" );
+	static const DestFinfo* df = dynamic_cast< const DestFinfo* >( funcInputFinfo );
+	assert( df );
 	// Unsched Func
 	func.element()->setTick( -2 ); // Disable with option to resurrect.
 
@@ -995,21 +1035,27 @@ void Stoich::installAndUnschedFunc( Id func, Id pool )
 	Id ei( func.value() + 1 );
 
 	unsigned int numSrc = Field< unsigned int >::get( func, "numVars" );
-	vector< Id > srcPools;
+	vector< pair< Id, unsigned int> > srcPools;
 #ifndef NDEBUG
 	unsigned int n = 
 #endif
-			ei.element()->getNeighbors( srcPools, funcSrcFinfo);
+		ei.element()->getInputsWithTgtIndex( srcPools, df );
 	assert( numSrc == n );
 	vector< unsigned int > poolIndex( numSrc, 0 );
 	for ( unsigned int i = 0; i < numSrc; ++i ) {
-		poolIndex[i] = convertIdToPoolIndex( srcPools[i] );
+		unsigned int j = srcPools[i].second;
+		if ( j >= numSrc ) {
+			cout << "Warning: Stoich::installAndUnschedFunc: tgt index not allocated, " << j << ",	" << numSrc << endl;
+			continue;
+		}
+		poolIndex[j] = convertIdToPoolIndex( srcPools[i].first );
 	}
 	ft->setReactantIndex( poolIndex );
 	string expr = Field< string >::get( func, "expr" );
 	ft->setExpr( expr );
 	// Tie the output of the FuncTerm to the pool it controls.
 	ft->setTarget( convertIdToPoolIndex( pool ) );
+	ft->setVolScale( volScale );
 	unsigned int funcIndex = convertIdToFuncIndex( func );
 	assert( funcIndex != ~0U );
 	funcs_[ funcIndex ] = ft;
@@ -1018,8 +1064,9 @@ void Stoich::installAndUnschedFunc( Id func, Id pool )
 void Stoich::installAndUnschedFuncRate( Id func, Id pool )
 {
 	static const Cinfo* varCinfo = Cinfo::find( "Variable" );
-	static const Finfo* funcSrcFinfo = varCinfo->findFinfo( "input" );
-	assert( funcSrcFinfo );
+	static const Finfo* funcInputFinfo = varCinfo->findFinfo( "input" );
+	static const DestFinfo* df = dynamic_cast< const DestFinfo* >( funcInputFinfo );
+	assert( df );
 	// Unsched Func
 	func.element()->setTick( -2 ); // Disable with option to resurrect.
 
@@ -1037,15 +1084,21 @@ void Stoich::installAndUnschedFuncRate( Id func, Id pool )
 	Id ei( func.value() + 1 );
 
 	unsigned int numSrc = Field< unsigned int >::get( func, "numVars" );
-	vector< Id > srcPools;
+	vector< pair< Id, unsigned int > > srcPools;
 #ifndef NDEBUG
 	unsigned int n = 
 #endif
-			ei.element()->getNeighbors( srcPools, funcSrcFinfo);
+			ei.element()->getInputsWithTgtIndex( srcPools, df );
 	assert( numSrc == n );
 	vector< unsigned int > poolIndex( numSrc, 0 );
-	for ( unsigned int i = 0; i < numSrc; ++i )
-		poolIndex[i] = convertIdToPoolIndex( srcPools[i] );
+	for ( unsigned int i = 0; i < numSrc; ++i ) {
+		unsigned int j = srcPools[i].second;
+		if ( j >= numSrc ) {
+			cout << "Warning: Stoich::installAndUnschedFuncRate: tgt index not allocated, " << j << ",	" << numSrc << endl;
+			continue;
+		}
+		poolIndex[j] = convertIdToPoolIndex( srcPools[i].first );
+	}
 	fr->setFuncArgIndex( poolIndex );
 	string expr = Field< string >::get( func, "expr" );
 	fr->setExpr( expr );
@@ -1157,6 +1210,65 @@ void Stoich::comptsOnCrossReacTerms( vector< pair< Id, Id > >& xr ) const
 // Model zombification functions
 //////////////////////////////////////////////////////////////
 
+/// Returns Function, if any, acting as src of specified msg into pa.
+static Id findFuncMsgSrc( Id pa, const string& msg )
+{
+	const Finfo *finfo = pa.element()->cinfo()->findFinfo( msg );
+	if ( !finfo ) return Id();
+	vector< Id > ret;
+	if ( pa.element()->getNeighbors( ret, finfo ) > 0 ) {
+		if ( ret[0].element()->cinfo()->isA( "Function" ) )
+			return ret[0];
+	}
+	return Id(); // failure
+
+
+	/*
+	cout << "fundFuncMsgSrc:: convert to DestFinfo\n";
+	const DestFinfo *df = dynamic_cast< const DestFinfo* >( finfo );
+	if ( !df ) return Id();
+	FuncId fid = df->getFid();
+
+	cout << "fundFuncMsgSrc:: findCaller\n";
+	ObjId caller = pa.element()->findCaller( fid );
+	if ( caller.bad() )
+		return Id();
+	cout << "Found Func for " << pa.path() << " on " << msg << endl;
+	cout << "Func was " << caller.path() << endl;
+	return caller.id;
+	*/
+
+/*
+	vector< Id > kids = Neutral::getChildren( pa.eref() );
+	for ( vector< Id >::iterator i = kids.begin(); i != kids.end(); ++i )
+		if ( i->element()->cinfo()->isA( "Function" ) )
+			return( *i );
+	return Id();
+*/
+
+}
+
+Id Stoich::zombifyPoolFuncWithScaling( Id pool ) 
+{
+	static const Cinfo* zfCinfo = Cinfo::find( "ZombieFunction" );
+	Id funcId = findFuncMsgSrc( pool, "setN" );
+	if ( funcId != Id() ) {
+		Element* fe = funcId.element();
+		installAndUnschedFunc( funcId, pool, 1.0 );
+		ZombieFunction::zombify( fe, zfCinfo,ksolve_,dsolve_);
+	} else {
+		funcId = findFuncMsgSrc( pool, "setConc" );
+		if ( funcId != Id() ) {
+			// cout << "Warning: Stoich::zombifyModel: Prefer to use setN rather than setConc:" << pool.path() << endl;
+			Element* fe = funcId.element();
+			double vol = Field< double >::get( pool, "volume" );
+			installAndUnschedFunc( funcId, pool, vol * NA );
+			ZombieFunction::zombify( fe, zfCinfo,ksolve_,dsolve_);
+		}
+	}
+	return funcId;
+}
+
 // e is the stoich Eref, elist is list of all Ids to zombify.
 void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 {
@@ -1171,8 +1283,7 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 	static const Cinfo* zombieMMenzCinfo = Cinfo::find( "ZombieMMenz");
 	static const Cinfo* zombieEnzCinfo = Cinfo::find( "ZombieEnz");
 	static const Cinfo* zfCinfo = Cinfo::find( "ZombieFunction" );
-	static const Finfo* funcSrcFinfo = Cinfo::find( "Function")->
-			findFinfo( "valueOut" );
+	// static const Finfo* funcSrcFinfo = Cinfo::find( "Function")->findFinfo( "valueOut" );
 	// vector< Id > meshEntries;
 	vector< Id > temp = elist;
 
@@ -1183,61 +1294,63 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 	for ( vector< Id >::const_iterator i = temp.begin(); i != temp.end(); ++i ){
 		Element* ei = i->element();
 		if ( ei->cinfo() == poolCinfo ) {
+			// We need to check the increment message before we zombify the
+			// pool, because ZombiePool doesn't have this message.
+			Id funcId = findFuncMsgSrc( *i, "increment" );
 			double concInit = 
 				Field< double >::get( ObjId( ei->id(), 0 ), "concInit" );
+			// Look for func setting rate of change of pool
+			// Id funcId = Neutral::child( i->eref(), "func" );
+			if ( funcId != Id() ) {
+				// cout << "Found Msg src for increment at " << funcId.path() << endl;
+				Element* fe = funcId.element();
+				installAndUnschedFuncRate( funcId, (*i) );
+				ZombieFunction::zombify( fe, zfCinfo,ksolve_,dsolve_);
+			} else {
+				funcId = zombifyPoolFuncWithScaling( *i );
+			}
 			PoolBase::zombify( ei, zombiePoolCinfo, ksolve_, dsolve_ );
 			ei->resize( numVoxels_ );
 			for ( unsigned int j = 0; j < numVoxels_; ++j ) {
 				ObjId oi( ei->id(), j );
 				Field< double >::set( oi, "concInit", concInit );
 			}
-			// Look for func setting rate of change of pool
-			Id funcId = Neutral::child( i->eref(), "func" );
-			Element* fe = funcId.element();
-			if ( funcId != Id() ) {
-				vector< Id > ret;
-				fe->getNeighbors( ret, funcSrcFinfo );
-				if ( ret.size() > 0 && ret[0] == *i ) {
-					assert( fe->cinfo()->isA( "Function" ) );
-					installAndUnschedFuncRate( funcId, (*i) );
-					ZombieFunction::zombify( fe, zfCinfo,ksolve_,dsolve_);
-				}
-			}
 		}
 		else if ( ei->cinfo() == bufPoolCinfo ) {
 			double concInit = 
 				Field< double >::get( ObjId( ei->id(), 0 ), "concInit" );
+			// Look for func setting conc of pool
+			// Id funcId = Neutral::child( i->eref(), "func" );
+			Id funcId = zombifyPoolFuncWithScaling( *i );
+			if ( funcId == Id() ) {
+				funcId = findFuncMsgSrc( *i, "increment" );
+				if ( funcId != Id() ) {
+					cout << "Warning: Stoich::zombifyModel: Probably you don't want to send increment to a BufPool:" << i->path() << endl;
+					Element* fe = funcId.element();
+					installAndUnschedFuncRate( funcId, (*i) );
+					ZombieFunction::zombify( fe, zfCinfo,ksolve_,dsolve_);
+				}
+			}
 			PoolBase::zombify( ei, zombieBufPoolCinfo, ksolve_, dsolve_ );
 			ei->resize( numVoxels_ );
 			for ( unsigned int j = 0; j < numVoxels_; ++j ) {
 				ObjId oi( ei->id(), j );
 				Field< double >::set( oi, "concInit", concInit );
 			}
-			// Look for func setting conc of pool
-			Id funcId = Neutral::child( i->eref(), "func" );
-			if ( funcId != Id() ) {
-				Element* fe = funcId.element();
-				vector< Id > ret;
-				fe->getNeighbors( ret, funcSrcFinfo );
-				if ( ret.size() > 0 && ret[0] == *i ) {
-					assert( fe->cinfo()->isA( "Function" ) );
-					installAndUnschedFunc( funcId, (*i) );
-					ZombieFunction::zombify( fe, zfCinfo,ksolve_,dsolve_);
-				}
-			}
 		}
 		else if ( ei->cinfo() == reacCinfo ) {
 			ReacBase::zombify( ei, zombieReacCinfo, e.id() );
-			Id funcId = Neutral::child( i->eref(), "func" );
+			// Id funcId = Neutral::child( i->eref(), "func" );
+			Id funcId = findFuncMsgSrc( *i, "setNumKf" );
 			if ( funcId != Id() ) {
 				Element* fe = funcId.element();
-				vector< Id > ret;
-				fe->getNeighbors( ret, funcSrcFinfo );
-				if ( ret.size() > 0 && ret[0] == *i ) {
-					assert( fe->cinfo()->isA( "Function" ) );
-					installAndUnschedFuncReac( funcId, (*i) );
-					ZombieFunction::zombify( fe, zfCinfo,ksolve_,dsolve_);
-				}
+				installAndUnschedFuncReac( funcId, (*i) );
+				ZombieFunction::zombify( fe, zfCinfo,ksolve_,dsolve_);
+				/*
+			} else {
+				cout << "Warning: Stoich::zombifyModel: Failed to connect Func to Reac :" << i->path() << endl;
+				return;
+				*/
 			}
 		}
 		else if ( ei->cinfo() == mmEnzCinfo ) {

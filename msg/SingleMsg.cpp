@@ -110,11 +110,11 @@ Msg* SingleMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 		SingleMsg* ret = 0;
 		if ( orig == e1() ) {
 			ret = new SingleMsg( Eref( newSrc.element(), i1_ ), 
-				Eref( newTgt.element(), i2_ ), 0 );
+				Eref( newTgt.element(), i2_, f2_ ), 0 );
 			ret->e1()->addMsgAndFunc( ret->mid(), fid, b );
 		} else if ( orig == e2() ) {
 			ret = new SingleMsg( Eref( newTgt.element(), i1_ ), 
-				Eref( newSrc.element(), i2_ ), 0 );
+				Eref( newSrc.element(), i2_, f2_ ), 0 );
 			ret->e2()->addMsgAndFunc( ret->mid(), fid, b );
 		} else {
 			assert( 0 );

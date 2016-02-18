@@ -22,8 +22,9 @@ class GssaVoxelPools: public VoxelPoolsBase
 		// Solver interface functions
 		//////////////////////////////////////////////////////////////////
 		void advance( const ProcInfo* p );
+		void recalcTime( const GssaSystem* g, double currTime );
 		void updateDependentMathExpn( 
-				const GssaSystem* g, unsigned int rindex );
+				const GssaSystem* g, unsigned int rindex, double time );
 		void updateDependentRates( 
 			const vector< unsigned int >& deps, const Stoich* stoich );
 		unsigned int pickReac() const;

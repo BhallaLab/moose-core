@@ -3,7 +3,9 @@ Getting started with python scripting for MOOSE
 ***********************************************
 
 .. :Author: Subhasis Ray
-.. :Date:   December 12, 2012, Updated: September 9, 2014
+.. :Date:   December 12, 2012, 
+.. :Last-Updated: Jan 21, 2016
+.. :By:	    Harsha Rani
 		  
 .. _quickstart-intro:
 
@@ -208,7 +210,7 @@ voltage ``Em`` is in series with the resistor, as shown below:
 
 
 
-.. figure:: images/neuronalcompartment.jpg
+.. figure:: ../../images/neuronalcompartment.jpg
    :alt: **Passive neuronal compartment**
 
    **Passive neuronal compartment**
@@ -544,13 +546,13 @@ Finally, we run the simulation for 300 ms ::
 
 The data will be recorded by the ``soma_vm`` table, which is referenced
 by the variable ``vmtab``. The ``Table`` class provides a numpy array
-interface to its content. The field is ``vec``. So you can easily plot
+interface to its content. The field is ``vector``. So you can easily plot
 the membrane potential using the `matplotlib <http://matplotlib.org/>`__
 library. ::
 
         >>> import pylab
-        >>> t = pylab.linspace(0, 300e-3, len(vmtab.vec))
-        >>> pylab.plot(t, vmtab.vec)
+        >>> t = pylab.linspace(0, 300e-3, len(vmtab.vector))
+        >>> pylab.plot(t, vmtab.vector)
         >>> pylab.show()
 	
 The first line imports the pylab submodule from matplotlib. This useful
@@ -611,7 +613,7 @@ references to ``soma`` in the example this way ::
 Any MOOSE class can be extended in Python. But any additional attributes
 added in Python are invisible to MOOSE. So those can be used for
 functionalities at the Python level only. You can see
-``Demos/squid/squid.py`` for an example.
+``moose-examples/squid/squid.py`` for an example.
 
 ``Finfos``
 ----------
@@ -642,10 +644,10 @@ Moving on
 
 Now you know the basics of pymoose and how to access the help
 system. You can figure out how to do specific things by looking at the
-:doc:`moose_cookbook`.  In addition, the ``Demos/snippets`` directory
+:doc:`moose_cookbook`.  In addition, the ``moose-examples/snippets`` directory
 in your MOOSE installation has small executable python scripts that
 show usage of specific classes or functionalities. Beyond that you can
-browse the code in the ``Demos`` directory to see some more complex
+browse the code in the ``moose-examples`` directory to see some more complex
 models.
 
 MOOSE is backward compatible with GENESIS and most GENESIS classes have
