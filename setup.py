@@ -6,9 +6,9 @@
 # Maintainer:
 # Created: Sun Dec  7 20:32:02 2014 (+0530)
 # Version:
-# Last-Updated: Thu Feb 18 15:03:46 2016 (-0500)
+# Last-Updated: Thu Feb 18 15:42:34 2016 (-0500)
 #           By: Subhasis Ray
-#     Update #: 19
+#     Update #: 21
 # URL:
 # Keywords:
 # Compatibility:
@@ -300,6 +300,7 @@ SOURCES=['external/muparser/src/muParser.cpp',
 INCLUDE_DIRS=['/usr/include',
               '/usr/local/include',
               np.get_include(),
+              '.',
               'external/muparser/include',
               'basecode',
               'biophysics',
