@@ -58,7 +58,7 @@ private:
     //sbmlId_convUnit poolMap_;
     Model* model_;
     SBMLDocument* document_;
-    SBMLReader reader_;
+    /* SBMLReader reader_; */
     map< string, Id >molSidMIdMap_;
     int noOfsub_;
     int noOfprd_;

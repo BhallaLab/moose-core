@@ -6,9 +6,9 @@
 # Maintainer:
 # Created: Sun Dec  7 20:32:02 2014 (+0530)
 # Version:
-# Last-Updated: Tue Oct 27 14:55:03 2015 (-0400)
+# Last-Updated: Thu Feb 18 15:42:34 2016 (-0500)
 #           By: Subhasis Ray
-#     Update #: 17
+#     Update #: 21
 # URL:
 # Keywords:
 # Compatibility:
@@ -88,12 +88,12 @@ PLATFORMS = "Linux, Windows/cygwin"
 VERSION = '3.0.1'
 
 BUILD_TARGET = 'moose._moose'
-SOURCES=['external/muparser/muParser.cpp',
-         'external/muparser/muParserBase.cpp',
-         'external/muparser/muParserTokenReader.cpp',
-         'external/muparser/muParserError.cpp',
-         'external/muparser/muParserCallback.cpp',
-         'external/muparser/muParserBytecode.cpp',
+SOURCES=['external/muparser/src/muParser.cpp',
+         'external/muparser/src/muParserBase.cpp',
+         'external/muparser/src/muParserTokenReader.cpp',
+         'external/muparser/src/muParserError.cpp',
+         'external/muparser/src/muParserCallback.cpp',
+         'external/muparser/src/muParserBytecode.cpp',
          'basecode/consts.cpp',
          'basecode/Element.cpp',
          'basecode/DataElement.cpp',
@@ -300,7 +300,8 @@ SOURCES=['external/muparser/muParser.cpp',
 INCLUDE_DIRS=['/usr/include',
               '/usr/local/include',
               np.get_include(),
-              'external/muparser',
+              '.',
+              'external/muparser/include',
               'basecode',
               'biophysics',
               'builtins',
