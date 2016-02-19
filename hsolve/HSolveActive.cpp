@@ -389,6 +389,11 @@ void HSolveActive::advanceCalcium()
     vector< CurrentStruct >::iterator icurrent = current_.begin();
     vector< currentVecIter >::iterator iboundary = currentBoundary_.begin();
 
+#ifdef USE_CUDA
+    cudaMemset(d_caActivation_values, 0, ca_.size()*sizeof(float));
+   advance_calcium_cuda_wrapper();
+
+#else
     /*
      * caAdvance_: This flag determines how current flowing into a calcium pool
      * is computed. A value of 0 means that the membrane potential at the
@@ -445,6 +450,7 @@ void HSolveActive::advanceCalcium()
     }
 
     caActivation_.assign( caActivation_.size(), 0.0 );
+#endif
 }
 
 void HSolveActive::advanceChannels( double dt )
@@ -478,8 +484,8 @@ void HSolveActive::advanceChannels( double dt )
 
     tejaTimer.Start();
     // ----------------------------------------------------------------------------
-    cudaMemcpy(d_V, &(V_.front()), nCompt_ * sizeof(double), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_ca, &(ca_.front()), ca_.size()*sizeof(double), cudaMemcpyHostToDevice);
+    cudaSafeCall(cudaMemcpy(d_V, &(V_.front()), nCompt_ * sizeof(double), cudaMemcpyHostToDevice));
+    cudaSafeCall(cudaMemcpy(d_ca, &(ca_.front()), ca_.size()*sizeof(double), cudaMemcpyHostToDevice));
 
 	if(!init_gate_values){
 		// TODO Move it to appropriate place
@@ -807,7 +813,7 @@ void HSolveActive::allocate_hsolve_memory_cuda(){
 	cudaMalloc((void**)&d_current_, current_.size()*sizeof(CurrentStruct));
 	cudaMalloc((void**)&d_inject_, inject_.size()*sizeof(InjectStruct));
 	cudaMalloc((void**)&d_compartment_, compartment_.size()*sizeof(CompartmentStruct));
-
+	cudaMalloc((void**)&d_caConc_, caConc_.size()*sizeof(CaConcStruct));
 
 	// Compartment related
 
@@ -943,12 +949,17 @@ void HSolveActive::copy_hsolve_information_cuda(){
 	}
 	assert(cmprsd_gate_index == num_cmprsd_gates);
 
+
 	// Allocating memory
 	cudaMalloc((void**)&d_vgate_expand_indices, h_vgate_expand_indices.size()* sizeof(int));
 	cudaMalloc((void**)&d_vgate_compt_indices, h_vgate_compt_indices.size()* sizeof(int));
 
 	cudaMalloc((void**)&d_cagate_expand_indices, h_cagate_expand_indices.size()* sizeof(int));
 	cudaMalloc((void**)&d_cagate_capool_indices, h_cagate_capool_indices.size()* sizeof(int));
+
+	cudaMalloc((void**)&d_catarget_channel_indices, h_catarget_channel_indices.size()* sizeof(int));
+	cudaMalloc((void**)&d_catarget_capool_indices, h_catarget_capool_indices.size()* sizeof(int));
+	cudaMalloc((void**)&d_caActivation_values, ca_.size()* sizeof(float));
 
 
 	cudaMemcpy(d_gate_values, h_gate_values, num_gates * sizeof(double), cudaMemcpyHostToDevice);
@@ -964,11 +975,16 @@ void HSolveActive::copy_hsolve_information_cuda(){
 	cudaMemcpy(d_cagate_expand_indices, &(h_cagate_expand_indices.front()), h_cagate_expand_indices.size()* sizeof(int), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_cagate_capool_indices, &(h_cagate_capool_indices.front()), h_cagate_capool_indices.size()* sizeof(int), cudaMemcpyHostToDevice);
 
+	cudaMemcpy(d_catarget_channel_indices, &(h_catarget_channel_indices.front()), h_catarget_channel_indices.size()* sizeof(int), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_catarget_capool_indices, &(h_catarget_capool_indices.front()), h_catarget_capool_indices.size()* sizeof(int), cudaMemcpyHostToDevice);
+
+
 	// Current Data
 	cudaMemcpy(d_externalCurrent_, &(externalCurrent_.front()), 2 * num_compts * sizeof(double), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_current_, &(current_.front()), current_.size()*sizeof(CurrentStruct), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_inject_, &(inject_.front()), inject_.size()*sizeof(InjectStruct), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_compartment_, &(compartment_.front()), compartment_.size()*sizeof(CompartmentStruct), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_caConc_, &(caConc_.front()), caConc_.size()*sizeof(CaConcStruct), cudaMemcpyHostToDevice);
 
 	// Hines Matrix related
 	cudaMemcpy(d_HS_, &(HS_.front()), HS_.size()*sizeof(double), cudaMemcpyHostToDevice);

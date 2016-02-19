@@ -386,6 +386,24 @@ void HSolveActive::readCalcium()
         else
             caTarget_[ ichan ] = &caActivation_[ caTargetIndex[ ichan ] ];
     }
+
+#ifdef USE_CUDA
+    for (int ichan = 0; ichan < channel_.size(); ++ichan )
+    {
+    	if(caTargetIndex[ichan] != -1){
+    		h_catarget_channel_indices.push_back(ichan);
+    		h_catarget_capool_indices.push_back(caTargetIndex[ichan]);
+
+    		/*
+    		if(caTargetIndex[ichan] >= caConc_.size() || caTargetIndex[ichan] < 0)
+    			cout << ichan << " " << caTargetIndex[ichan] << endl;
+    		*/
+    	}
+    }
+
+#endif
+
+
 }
 
 void HSolveActive::createLookupTables()

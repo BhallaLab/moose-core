@@ -213,6 +213,49 @@ void calculate_V_from_Vmid(double* d_Vmid, double* d_V, int size){
 		d_V[tid] = 2*d_Vmid[tid] - d_V[tid];
 }
 
+__global__
+void advance_calcium_cuda(int* d_catarget_channel_indices,
+			int* d_catarget_capool_indices,
+			double* d_chan_Gk, double* d_chan_GkEk,
+			double* d_Vmid,
+			float* d_caActivation_values, int* d_chan_to_comp,
+			CaConcStruct* d_caConc_,
+			int size){
+	int tid = blockIdx.x * blockDim.x + threadIdx.x;
+
+	if(tid < size){
+		int chan_id = d_catarget_channel_indices[tid];
+		float current = d_chan_GkEk[chan_id] - d_chan_Gk[chan_id]*d_Vmid[d_chan_to_comp[chan_id]];
+		//d_caActivation_values[d_catarget_capool_indices[tid]] += current;
+		atomicAdd(&(d_caActivation_values[d_catarget_capool_indices[tid]]), current);
+
+	}
+}
+
+__global__
+void advance_calcium_conc_cuda(CaConcStruct* d_caConc_, double* d_Ca, float* d_caActivation_values, int size ){
+
+	int tid = blockIdx.x * blockDim.x + threadIdx.x;
+
+	if(tid < size){
+		d_caConc_[tid].c_ = d_caConc_[tid].factor1_ * d_caConc_[tid].c_ + d_caConc_[tid].factor2_ * d_caActivation_values[tid];
+		double new_ca = d_caConc_[tid].CaBasal_ + d_caConc_[tid].c_;
+
+		if(new_ca >  d_caConc_[tid].ceiling_){
+			new_ca = d_caConc_[tid].ceiling_;
+			d_caConc_[tid].c_ = new_ca - d_caConc_[tid].ceiling_;
+		}
+
+		if(new_ca < d_caConc_[tid].floor_){
+			new_ca = d_caConc_[tid].floor_;
+			d_caConc_[tid].c_ = new_ca - d_caConc_[tid].floor_;
+		}
+
+		d_Ca[tid] = new_ca;
+	}
+
+}
+
 
 void HSolveActive::get_lookup_rows_and_fractions_cuda_wrapper(double dt){
 
@@ -506,6 +549,34 @@ void HSolveActive::hinesMatrixSolverWrapper(){
 	}
 	*/
 }
+
+void HSolveActive::advance_calcium_cuda_wrapper(){
+	int num_catarget_channels = h_catarget_channel_indices.size();
+
+	int BLOCKS = num_catarget_channels/THREADS_PER_BLOCK;
+	BLOCKS = (num_catarget_channels%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
+
+	advance_calcium_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(d_catarget_channel_indices,
+			d_catarget_capool_indices,
+			d_chan_Gk, d_chan_GkEk,
+			d_Vmid,
+			d_caActivation_values, d_chan_to_comp,
+			d_caConc_,
+			num_catarget_channels);
+
+	int num_ca_pools = caConc_.size();
+
+	BLOCKS = num_ca_pools/THREADS_PER_BLOCK;
+	BLOCKS = (num_ca_pools%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
+
+	advance_calcium_conc_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(d_caConc_, d_ca, d_caActivation_values, num_ca_pools);
+
+	cudaMemcpy(&(ca_[0]), d_ca, ca_.size()*sizeof(double), cudaMemcpyDeviceToHost);
+	cudaMemcpy(&(caConc_[0]), d_caConc_, caConc_.size()*sizeof(CaConcStruct), cudaMemcpyDeviceToHost);
+
+	cudaCheckError();
+}
+
 
 
 /*

@@ -161,6 +161,9 @@ protected:
 	vector<int> h_cagate_expand_indices;
 	vector<int> h_cagate_capool_indices;
 
+	vector<int> h_catarget_channel_indices; // Stores the indices of channel which are ca targets in order
+	vector<int> h_catarget_capool_indices; // Store the index of calcium pool
+
 	// Channel related
 	double* h_chan_Gk;
 
@@ -180,6 +183,11 @@ protected:
 	int* d_cagate_expand_indices; // Stores the indices of gates using cmtable in gates array.
 	int* d_cagate_capool_indices; // Stores the indices of calcium pools in ca_ array.
 
+	int* d_catarget_channel_indices;
+	int* d_catarget_capool_indices;
+	float* d_caActivation_values; // Stores ca currents for that pool.
+
+
 	double* d_state_;
   //int* d_gate_to_chan; // Not needed as we store 3 gates(x,y,z) for each channel.
 
@@ -197,6 +205,7 @@ protected:
 	CurrentStruct* d_current_;
 	InjectStruct* d_inject_;
 	CompartmentStruct* d_compartment_;
+	CaConcStruct* d_caConc_;
 
 	// Hines Matrix related
 	double* d_HS_;
@@ -299,6 +308,8 @@ private:
     void update_matrix_cuda_wrapper();
 
     void hinesMatrixSolverWrapper();
+
+    void advance_calcium_cuda_wrapper();
 
 
 	void advanceChannel_gpu(
