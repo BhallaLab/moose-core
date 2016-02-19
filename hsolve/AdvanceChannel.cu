@@ -348,11 +348,11 @@ void HSolveActive::update_matrix_cuda_wrapper(){
 }
 
 void HSolveActive::hinesMatrixSolverWrapper(){
-
+	/*
 	// TODO once a suitable gpu solver is found, remove this.
 	if ( HJ_.size() != 0 )
 		memcpy( &HJ_[ 0 ], &HJCopy_[ 0 ], sizeof( double ) * HJ_.size() );
-
+	*/
 	// ---------------------------- GKSum & GkEkSum ---------------------------------------
 	int num_channels = channel_.size();
 	// Using Cusparse
@@ -398,6 +398,24 @@ void HSolveActive::hinesMatrixSolverWrapper(){
 		HS_[4*i+3] = h_b[i];
 	}
 
+	double tol = 0.1;
+	int reorder = 0;
+	int singularity;
+
+	// Solve using cusparseDcsrlu host method
+	cusolverStatus_t cusolver_status = cusolverSpDcsrlsvluHost(cusolver_handle,
+			nCompt_,
+			mat_nnz,
+			cusparse_descr,
+			h_mat_values,
+			h_mat_rowPtr,
+			h_mat_colIndex,
+			h_b, tol, reorder,
+			&(VMid_[0]), &singularity);
+
+	cudaMemcpy(d_Vmid, &(VMid_[0]) , nCompt_*sizeof(double), cudaMemcpyHostToDevice);
+	calculate_V_from_Vmid<<<BLOCKS,THREADS_PER_BLOCK>>>(d_Vmid, d_V, nCompt_);
+	cudaMemcpy(&(V_[0]), d_V, nCompt_*sizeof(double), cudaMemcpyDeviceToHost);
 
 	/*
 	// ---------------------------- BASIS AS TRI-DIAG SOLUTION ----------------------------------------

@@ -218,6 +218,9 @@ protected:
 	cusparseHandle_t cusparse_handle = 0;
 	cusparseMatDescr_t cusparse_descr = 0;
 
+	/* Get handle for CUSOLVER context*/
+	cusolverSpHandle_t cusolver_handle = 0;
+
 	// Compartment related
 
 	// CUDA Active Permanent data

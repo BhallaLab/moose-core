@@ -120,9 +120,11 @@ void HSolveActive::step( ProcPtr info )
 	end = getTime();
 	calcChanCurTime = (end-start)/1000.0f;
 
+	hinesMatrixSolverWrapper();
+
+	/*
 	start = getTime();
-		hinesMatrixSolverWrapper();
-		//updateMatrix();
+		updateMatrix();
 	end = getTime();
 	updateMatTime = (end-start)/1000.0f;
 
@@ -135,7 +137,7 @@ void HSolveActive::step( ProcPtr info )
 		HSolvePassive::backwardSubstitute();
 	end = getTime();
 	backwardSubTime = (end-start)/1000.0f;
-
+	*/
 
 	start = getTime();
 		advanceCalcium();
@@ -494,6 +496,7 @@ void HSolveActive::advanceChannels( double dt )
 		// Setting up cusparse information
 		cusparseCreate(&cusparse_handle);
 		cublasCreate_v2(&cublas_handle);
+		cusolverSpCreate(&cusolver_handle);
 
 		// create and setup matrix descriptors A, B & C
 		cusparseCreateMatDescr(&cusparse_descr);

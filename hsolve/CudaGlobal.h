@@ -27,6 +27,9 @@
 #include <cusparse_v2.h>
 #include <cublas_v2.h>
 
+#include <cusolverSp.h>
+#include <cusolverSp_LOWLEVEL_PREVIEW.h>
+
 typedef unsigned int u32;
 typedef unsigned long long u64;
 typedef u64 ChannelData;
