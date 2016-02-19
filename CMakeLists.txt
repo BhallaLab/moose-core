@@ -447,6 +447,7 @@ ENDIF(WITH_DOC)
 SET(PROJECT_PYTHON_PATH ${CMAKE_CURRENT_SOURCE_DIR}/python)
 if(WITH_PYTHON)
     message(STATUS "Building native python extension of MOOSE")
+
     set(PYMOOSE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/python/moose")
 
     find_package(NumPy REQUIRED)
@@ -455,6 +456,11 @@ if(WITH_PYTHON)
     MESSAGE("Python include dir: ${PYTHON_INCLUDE_DIRS}")
     MESSAGE("Python libraries: ${PYTHON_LIBRARIES}")
     MESSAGE("Python executable: ${PYTHON_EXECUTABLE}")
+
+    EXEC_PROGRAM(${PYTHON_EXECUTABLE}
+        ARGS "-c 'try: import importlib.machinery; print(importlib.machinery.EXTENSION_SUFFIXES[0])
+except Exception: pass'"
+        OUTPUT_VARIABLE PYTHON_SO_EXTENSION)
 
     add_subdirectory(pymoose)
 
@@ -466,8 +472,11 @@ if(WITH_PYTHON)
     set_target_properties(_moose PROPERTIES COMPILE_DEFINITIONS "PYMOOSE")
     set_target_properties(_moose PROPERTIES 
         LIBRARY_OUTPUT_DIRECTORY ${PYMOOSE_OUTPUT_DIRECTORY}
-        PREFIX ""
-        )
+        PREFIX "")
+    if(NOT(PYTHON_SO_EXTENSION STREQUAL ""))
+        set_target_properties(_moose PROPERTIES
+        SUFFIX ${PYTHON_SO_EXTENSION})
+    endif()
 
 if(MACOSX)
     set(CMAKE_MODULE_LINKER_FLAGS "-undefined dynamic_lookup")
