@@ -716,7 +716,7 @@ string SbmlWriter :: getGroupinfo(Id itr)
 bool SbmlWriter::writeModel( const SBMLDocument* sbmlDoc, const string& filename )
 {
   SBMLWriter sbmlWriter;
-  //cout << "sbml writer" << filename << sbmlDoc << endl;
+  // cout << "sbml writer" << filename << sbmlDoc << endl;
   bool result = sbmlWriter.writeSBML( sbmlDoc, filename );
   if ( result )
     {

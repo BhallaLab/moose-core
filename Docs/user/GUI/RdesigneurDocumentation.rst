@@ -356,6 +356,29 @@ come up.
    :alt: Display for oscillatory reaction-diffusion simulation
 
    Display for oscillatory reaction-diffusion simulation
+Primer on using the 3-D MOOGLI display
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Here is a short primer on the 3-D display controls.
+
+-  *Roll, pitch, and yaw*: Use the letters *r*, *p*, and *y*. To rotate
+   backwards, use capitals.
+-  *Zoom out and in*: Use the *,* and *.* keys, or their upper-case
+   equivalents, *<* and *>*. Easier to remember if you think in terms of
+   the upper-case.
+-  *Left/right/up/down*: Arrow keys.
+-  *Quit*: control-q or control-w.
+-  You can also use the mouse or trackpad to control most of the above.
+-  By default rdesigneur gives Moogli a small rotation each frame. It is
+   the *rotation* argument in the line:
+
+   ``displayMoogli( frametime, runtime, rotation )``
+
+These controls operate over and above this rotation, but the rotation
+continues. If you set the rotation to zero you can, with a suitable
+flick of the mouse, get the image to rotate in any direction you choose
+as long as the window is updating.
+
 Make a toy multiscale model with electrical and chemical signaling.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
