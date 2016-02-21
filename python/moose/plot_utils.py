@@ -208,6 +208,7 @@ def saveRecords(records, xvec = None, **kwargs):
     :param outfile
     :param dataDict:
     :param **kwargs:
+        comment: Adds comments below the header.
     """
     if len(records) == 0:
         pu.warn("No data in dictionary to save.")
@@ -223,7 +224,9 @@ def saveRecords(records, xvec = None, **kwargs):
         yvecs.append(yvec)
     xvec = np.linspace(0, clock.currentTime, len(yvecs[0]))
     yvecs = [ xvec ] + yvecs
-    np.savetxt(outfile, np.array(yvecs).T, delimiter=',', header = text)
+    if kwargs.get('comment', ''):
+        text += ("\n"  + kwargs['comment'] )
+    np.savetxt(outfile, np.array(yvecs).T, delimiter=',' , header = text)
     pu.info("Done writing data to %s" % outfile)
 
 def plotRecords(records, xvec = None, **kwargs):
