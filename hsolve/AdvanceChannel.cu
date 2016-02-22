@@ -432,6 +432,7 @@ void HSolveActive::hinesMatrixSolverWrapper(){
 
 	cudaMemcpy(&inject_[0], d_inject_, nCompt_*sizeof(InjectStruct), cudaMemcpyDeviceToHost );
 
+	/*
 	// Updating HS_ data
 	cudaMemcpy(h_mat_values, d_mat_values, mat_nnz*sizeof(double), cudaMemcpyDeviceToHost);
 	cudaMemcpy(h_b, d_b, nCompt_*sizeof(double), cudaMemcpyDeviceToHost);
@@ -441,6 +442,11 @@ void HSolveActive::hinesMatrixSolverWrapper(){
 		HS_[4*i+3] = h_b[i];
 	}
 
+	HSolvePassive::forwardEliminate();
+	HSolvePassive::backwardSubstitute();
+	*/
+
+	/*
 	double tol = 0.1;
 	int reorder = 0;
 	int singularity;
@@ -459,14 +465,20 @@ void HSolveActive::hinesMatrixSolverWrapper(){
 	cudaMemcpy(d_Vmid, &(VMid_[0]) , nCompt_*sizeof(double), cudaMemcpyHostToDevice);
 	calculate_V_from_Vmid<<<BLOCKS,THREADS_PER_BLOCK>>>(d_Vmid, d_V, nCompt_);
 	cudaMemcpy(&(V_[0]), d_V, nCompt_*sizeof(double), cudaMemcpyDeviceToHost);
+	*/
 
-	/*
+	GpuTimer cgTimer;
+
+
 	// ---------------------------- BASIS AS TRI-DIAG SOLUTION ----------------------------------------
-	cudaMemcpy(d_Vmid, d_b, nCompt_*sizeof(double), cudaMemcpyDeviceToDevice);
-	cusparseDgtsv_nopivot(cusparse_handle, nCompt_, 1, &(d_tridiag_data[0]), &(d_tridiag_data[nCompt_]), &(d_tridiag_data[2*nCompt_]),d_Vmid,nCompt_);
-	cudaDeviceSynchronize();
+	if(step_num == 1){
+		// Find the initial solution using tri-diagonal
+		cudaMemcpy(d_Vmid, d_b, nCompt_*sizeof(double), cudaMemcpyDeviceToDevice);
+		cusparseDgtsv_nopivot(cusparse_handle, nCompt_, 1, &(d_tridiag_data[0]), &(d_tridiag_data[nCompt_]), &(d_tridiag_data[2*nCompt_]),d_Vmid,nCompt_);
+		cudaDeviceSynchronize();
+	}
 	// ----------------------------- CONJUGATE GRADIENT SOLVER  ----------------------------------------
-	const double tol = 1e-6f;
+	const double tol = 1e-16f;
 	const int max_iter = 10000;
 	double a, b, na, r0, r1;
 	double alpha, beta, alpham1;
@@ -477,6 +489,7 @@ void HSolveActive::hinesMatrixSolverWrapper(){
 	alpham1 = -1.0;
 	beta = 0.0;
 	r0 = 0.0;
+	cgTimer.Start();
 
 //	cudaMemset(d_Vmid, 0, nCompt_*sizeof(double));
 	cublasStatus_t cublasStatus;
@@ -489,8 +502,6 @@ void HSolveActive::hinesMatrixSolverWrapper(){
 	cublasStatus = cublasDdot(cublas_handle, nCompt_, d_b, 1, d_b, 1, &r1);
 
 	k = 1;
-	//printf("%lf %lf %lf\n",r1, tol*tol, (r1-tol*tol)*1000000000);
-
 	while (r1 > tol*tol && k <= max_iter)
 	{
 		if (k > 1)
@@ -517,8 +528,14 @@ void HSolveActive::hinesMatrixSolverWrapper(){
 		r0 = r1;
 		cublasStatus = cublasDdot(cublas_handle, nCompt_, d_b, 1, d_b, 1, &r1);
 		cudaThreadSynchronize();
-		printf("iteration = %3d, residual = %e\n", k, sqrt(r1));
+		//printf("iteration = %3d, residual = %e\n", k, sqrt(r1));
 		k++;
+	}
+	cgTimer.Stop();
+
+	if(num_um_prints > -50){
+		printf("%lf \n", cgTimer.Elapsed());
+		num_um_prints--;
 	}
 
 	cudaMemcpy(&(VMid_[0]) , d_Vmid, nCompt_*sizeof(double), cudaMemcpyDeviceToHost);
@@ -526,6 +543,23 @@ void HSolveActive::hinesMatrixSolverWrapper(){
 	cudaMemcpy(&(V_[0]), d_V, nCompt_*sizeof(double), cudaMemcpyDeviceToHost);
 
 	//getchar();
+	/*
+	// Check Vm from CG and gem
+	double h_vmid[nCompt_];
+	//double h_v[nCompt_];
+
+	cudaMemcpy(h_vmid, d_Vmid, nCompt_*sizeof(double), cudaMemcpyDeviceToHost);
+	//cudaMemcpy(h_v, d_V, nCompt_*sizeof(double), cudaMemcpyDeviceToHost);
+	double error = 0;
+	for(int i=0;i<nCompt_;i++){
+		printf("%d %lf %lf %lf\n", i,  h_vmid[i], VMid_[i], h_vmid[i]-VMid_[i]);
+		error += (h_vmid[i] - VMid_[i]);
+	}
+
+	printf("error %lf \n",error);
+	getchar();
+	*/
+
 
 
 	/*
@@ -548,6 +582,7 @@ void HSolveActive::hinesMatrixSolverWrapper(){
 		}
 	}
 	*/
+
 }
 
 void HSolveActive::advance_calcium_cuda_wrapper(){

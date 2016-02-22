@@ -97,6 +97,7 @@ void HSolveActive::step( ProcPtr info )
     
 #ifdef USE_CUDA
     total_count ++;
+    step_num++;
 #endif
     u64 start, end;
     double advanceChannelsTime;
@@ -830,6 +831,8 @@ void HSolveActive::allocate_hsolve_memory_cuda(){
 	cudaMalloc((void**)&d_Vmid, nCompt_*sizeof(double));
 	cudaMalloc((void**)&d_p, nCompt_*sizeof(double));
 	cudaMalloc((void**)&d_Ax, nCompt_*sizeof(double));
+	cudaMalloc((void**)&d_r, nCompt_*sizeof(double));
+	cudaMalloc((void**)&d_x, nCompt_*sizeof(double));
 
 	// Intermediate data for computation
 

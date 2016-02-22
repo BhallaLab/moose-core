@@ -139,6 +139,9 @@ protected:
 #ifdef USE_CUDA    
 		double total_time[10];
 		int total_count;
+
+	int step_num = 0;
+
     int                       current_ca_position;
     vector<ChannelData>		  channel_data_;
     ChannelData 			  * channel_data_d;
@@ -217,7 +220,7 @@ protected:
 	int* d_chan_rowPtr;
 
 	// Conjugate Gradient related.
-	double* d_Vmid, *d_p, *d_Ax;
+	double* d_Vmid, *d_p, *d_Ax, *d_r, *d_x;
 
 	/* Get handle to the CUBLAS context */
 	cublasHandle_t cublas_handle = 0;
