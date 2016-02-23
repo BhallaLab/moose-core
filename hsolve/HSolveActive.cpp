@@ -510,6 +510,25 @@ void HSolveActive::advanceChannels( double dt )
 		cusparseSetMatType(cusparse_descr, CUSPARSE_MATRIX_TYPE_GENERAL);
 		cusparseSetMatIndexBase(cusparse_descr, CUSPARSE_INDEX_BASE_ZERO);
 
+		// Setting up information fo host solver.
+		cusolverStatus_t cusolver_status;
+
+	 	cusolver_status =  cusolverSpCreateCsrluInfoHost(&infoA); // Creating info of A
+	 	cout << "Creating info " << cusolver_status << endl;
+
+		cusolver_status = cusolverSpXcsrluAnalysisHost(cusolver_handle, nCompt_, mat_nnz, cusparse_descr, h_mat_rowPtr, h_mat_colIndex, infoA);
+		cout << "Performing analysis " << cusolver_status << endl;
+
+		double pivot_thresh = 0;
+		cusolver_status = cusolverSpDcsrluBufferInfoHost(cusolver_handle, nCompt_, mat_nnz, cusparse_descr, h_mat_values, h_mat_rowPtr, h_mat_colIndex,
+				infoA, &internalDataInBytes, &workspaceInBytes);
+		cout << "Gettting buffer info " << cusolver_status << endl;
+
+		// Allocate memory
+		cout << internalDataInBytes << " " << workspaceInBytes << endl;
+		internalBuffer = (double*) malloc(internalDataInBytes);
+		workspaceBuffer = (double*) malloc(workspaceInBytes);
+
 		/*
 		set<int> comps;
 		for(int i=0;i<channel_.size();i++){

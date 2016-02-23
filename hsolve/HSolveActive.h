@@ -219,8 +219,16 @@ protected:
 	int* d_chan_colIndex;
 	int* d_chan_rowPtr;
 
-	// Conjugate Gradient related.
+	// Conjugate Gradient based GPU solver
 	double* d_Vmid, *d_p, *d_Ax, *d_r, *d_x;
+
+	// LU based CPU solver
+	csrluInfoHost_t infoA;
+	size_t internalDataInBytes;
+	size_t workspaceInBytes;
+
+	double* internalBuffer;
+	double* workspaceBuffer;
 
 	/* Get handle to the CUBLAS context */
 	cublasHandle_t cublas_handle = 0;

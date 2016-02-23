@@ -396,11 +396,14 @@ void HSolveActive::hinesMatrixSolverWrapper(){
 	if ( HJ_.size() != 0 )
 		memcpy( &HJ_[ 0 ], &HJCopy_[ 0 ], sizeof( double ) * HJ_.size() );
 	*/
+	GpuTimer umTimer, solverTimer;
 	// ---------------------------- GKSum & GkEkSum ---------------------------------------
 	int num_channels = channel_.size();
 	// Using Cusparse
 	const double alpha_ = 1.0;
 	const double beta_ = 0.0;
+
+	umTimer.Start();
 
 	cusparseDcsrmv(cusparse_handle,  CUSPARSE_OPERATION_NON_TRANSPOSE,
 		nCompt_, nCompt_, num_channels, &alpha_, cusparse_descr,
@@ -421,18 +424,48 @@ void HSolveActive::hinesMatrixSolverWrapper(){
 	cudaMemcpy(d_externalCurrent_, &(externalCurrent_.front()), 2 * nCompt_ * sizeof(double), cudaMemcpyHostToDevice);
 		//cudaMemcpy(d_HS_, &HS_[0], HS_.size()*sizeof(double), cudaMemcpyHostToDevice);
 
-		update_csr_matrix_kernel<<<BLOCKS, THREADS_PER_BLOCK>>>(d_V,
-				d_mat_values, d_main_diag_passive, d_main_diag_map, d_tridiag_data, d_b,
-				d_comp_Gksum,
-				d_comp_GkEksum,
-				d_compartment_,
-				d_inject_,
-				d_externalCurrent_,
-				(int)nCompt_);
+	update_csr_matrix_kernel<<<BLOCKS, THREADS_PER_BLOCK>>>(d_V,
+			d_mat_values, d_main_diag_passive, d_main_diag_map, d_tridiag_data, d_b,
+			d_comp_Gksum,
+			d_comp_GkEksum,
+			d_compartment_,
+			d_inject_,
+			d_externalCurrent_,
+			(int)nCompt_);
 
 	cudaMemcpy(&inject_[0], d_inject_, nCompt_*sizeof(InjectStruct), cudaMemcpyDeviceToHost );
 
-	/*
+	umTimer.Stop();
+
+	// ---------------------- USING CUSOLVER LOW LEVEL LU SOLVER ---------------------------------------
+	// copy updated matrix values back to CPU
+
+	double pivot_thresh = 0; // No pivoting
+	cusolverStatus_t cusolver_status;
+
+	solverTimer.Start();
+
+	cudaMemcpy(h_mat_values, d_mat_values, mat_nnz*sizeof(double), cudaMemcpyDeviceToHost);
+	cudaMemcpy(h_b, d_b, nCompt_*sizeof(double), cudaMemcpyDeviceToHost);
+
+	cusolver_status = cusolverSpDcsrluFactorHost(cusolver_handle, nCompt_, mat_nnz, cusparse_descr, h_mat_values, h_mat_rowPtr, h_mat_colIndex,
+			infoA, pivot_thresh ,workspaceBuffer);
+	//cout << "Factorization " << cusolver_status << endl;
+
+	cusolver_status = cusolverSpDcsrluSolveHost(cusolver_handle, nCompt_, h_b, &(VMid_[0]), infoA, internalBuffer);
+
+	cudaMemcpy(d_Vmid, &(VMid_[0]) , nCompt_*sizeof(double), cudaMemcpyHostToDevice);
+	calculate_V_from_Vmid<<<BLOCKS,THREADS_PER_BLOCK>>>(d_Vmid, d_V, nCompt_);
+	cudaMemcpy(&(V_[0]), d_V, nCompt_*sizeof(double), cudaMemcpyDeviceToHost);
+
+	solverTimer.Stop();
+
+	if(num_um_prints > -50){
+		cout <<  umTimer.Elapsed() << " " << solverTimer.Elapsed() << endl;
+		num_um_prints--;
+	}
+
+	/* ---------------------- USING CUSOLVER HIGH LEVEL LU SOLVER ---------------------------------------
 	// Updating HS_ data
 	cudaMemcpy(h_mat_values, d_mat_values, mat_nnz*sizeof(double), cudaMemcpyDeviceToHost);
 	cudaMemcpy(h_b, d_b, nCompt_*sizeof(double), cudaMemcpyDeviceToHost);
@@ -467,10 +500,10 @@ void HSolveActive::hinesMatrixSolverWrapper(){
 	cudaMemcpy(&(V_[0]), d_V, nCompt_*sizeof(double), cudaMemcpyDeviceToHost);
 	*/
 
-	GpuTimer cgTimer;
 
-
+	/*
 	// ---------------------------- BASIS AS TRI-DIAG SOLUTION ----------------------------------------
+	GpuTimer cgTimer;
 	if(step_num == 1){
 		// Find the initial solution using tri-diagonal
 		cudaMemcpy(d_Vmid, d_b, nCompt_*sizeof(double), cudaMemcpyDeviceToDevice);
@@ -558,29 +591,6 @@ void HSolveActive::hinesMatrixSolverWrapper(){
 
 	printf("error %lf \n",error);
 	getchar();
-	*/
-
-
-
-	/*
-	float rsum, diff, err = 0.0;
-
-	for (int i = 0; i < nCompt_; i++)
-	{
-		rsum = 0.0;
-
-		for (int j = I[i]; j < I[i+1]; j++)
-		{
-			rsum += val[j]*x[J[j]];
-		}
-
-		diff = fabs(rsum - rhs[i]);
-
-		if (diff > err)
-		{
-			err = diff;
-		}
-	}
 	*/
 
 }
