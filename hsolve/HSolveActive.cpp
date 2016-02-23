@@ -103,8 +103,7 @@ void HSolveActive::step( ProcPtr info )
     double advanceChannelsTime;
     double calcChanCurTime;
     double updateMatTime;
-    double forwardElimTime;
-    double backwardSubTime;
+    double solverTime;
     double advCalcTime;
     double advSynchanTime;
     double sendValuesTime;
@@ -121,24 +120,18 @@ void HSolveActive::step( ProcPtr info )
 	end = getTime();
 	calcChanCurTime = (end-start)/1000.0f;
 
-	hinesMatrixSolverWrapper();
-
-	/*
 	start = getTime();
 		updateMatrix();
 	end = getTime();
 	updateMatTime = (end-start)/1000.0f;
 
 	start = getTime();
-		HSolvePassive::forwardEliminate();
+		//HSolvePassive::forwardEliminate();
+		//HSolvePassive::backwardSubstitute();
+		hinesMatrixSolverWrapper();
 	end = getTime();
-	forwardElimTime = (end-start)/1000.0f;
+	solverTime = (end-start)/1000.0f;
 
-	start = getTime();
-		HSolvePassive::backwardSubstitute();
-	end = getTime();
-	backwardSubTime = (end-start)/1000.0f;
-	*/
 
 	start = getTime();
 		advanceCalcium();
@@ -160,13 +153,12 @@ void HSolveActive::step( ProcPtr info )
 	end = getTime();
 	sendSpikesTime = (end-start)/1000.0f;
 
-	if(num_profile_prints > 0){
-	printf("%lf %lf %lf %lf %lf %lf %lf %lf %lf \n"
+	if(num_profile_prints > -50){
+	printf("%lf %lf %lf %lf %lf %lf %lf %lf \n"
 			,advanceChannelsTime
 			    ,calcChanCurTime
 			    ,updateMatTime
-			    ,forwardElimTime
-			    ,backwardSubTime
+			    ,solverTime
 			    ,advCalcTime
 			    ,advSynchanTime
 			    ,sendValuesTime
@@ -243,8 +235,6 @@ void HSolveActive::updateMatrix()
 	 * iterators to HJ_ get invalidated in MS VC++
 	 * TODO Is it needed to do a memcpy each time?
 	 */
-	if ( HJ_.size() != 0 )
-		memcpy( &HJ_[ 0 ], &HJCopy_[ 0 ], sizeof( double ) * HJ_.size() );
 
 #ifdef USE_CUDA
 	/*
@@ -295,9 +285,15 @@ void HSolveActive::updateMatrix()
 	GpuTimer gpuTimer;
 
 	gpuTimer.Start();
-		update_matrix_cuda_wrapper();
-		cudaCheckError();
+		/* Updates HS matrix and sends it to CPU
+		 if ( HJ_.size() != 0 )
+				memcpy( &HJ_[ 0 ], &HJCopy_[ 0 ], sizeof( double ) * HJ_.size() );
+		  update_matrix_cuda_wrapper();
+		 */
+
+		update_csrmatrix_cuda_wrapper();
 	gpuTimer.Stop();
+	cudaCheckError();
 
 	if(num_um_prints > 0){
 		printf("%lf\n",gpuTimer.Elapsed());
@@ -309,6 +305,9 @@ void HSolveActive::updateMatrix()
 #else
 	// CPU PART
 	u64 cpu_start = getTime();
+
+	if ( HJ_.size() != 0 )
+			memcpy( &HJ_[ 0 ], &HJCopy_[ 0 ], sizeof( double ) * HJ_.size() );
 
     double GkSum, GkEkSum; vector< CurrentStruct >::iterator icurrent = current_.begin();
     vector< currentVecIter >::iterator iboundary = currentBoundary_.begin();
@@ -391,7 +390,7 @@ void HSolveActive::advanceCalcium()
     vector< currentVecIter >::iterator iboundary = currentBoundary_.begin();
 
 #ifdef USE_CUDA
-    cudaMemset(d_caActivation_values, 0, ca_.size()*sizeof(float));
+    cudaMemset(d_caActivation_values, 0, ca_.size()*sizeof(double));
    advance_calcium_cuda_wrapper();
 
 #else
@@ -864,6 +863,10 @@ void HSolveActive::allocate_hsolve_memory_cuda(){
 	cudaMalloc((void**)&d_temp_keys, num_compts*sizeof(int));
 	cudaMalloc((void**)&d_temp_values, num_compts*sizeof(double));
 
+	// AdvanceCalcium related
+	cudaMalloc((void**)&d_capool_values, h_catarget_channel_indices.size()*sizeof(double));
+	cudaMalloc((void**)&d_capool_onex, h_catarget_channel_indices.size()*sizeof(double));
+
 }
 
 void HSolveActive::copy_table_data_cuda(){
@@ -981,8 +984,10 @@ void HSolveActive::copy_hsolve_information_cuda(){
 
 	cudaMalloc((void**)&d_catarget_channel_indices, h_catarget_channel_indices.size()* sizeof(int));
 	cudaMalloc((void**)&d_catarget_capool_indices, h_catarget_capool_indices.size()* sizeof(int));
-	cudaMalloc((void**)&d_caActivation_values, ca_.size()* sizeof(float));
+	cudaMalloc((void**)&d_caActivation_values, ca_.size()* sizeof(double));
 
+	cudaMalloc((void**)&d_capool_rowPtr, (num_Ca_pools+1)*sizeof(int));
+	cudaMalloc((void**)&d_capool_colIndex, h_catarget_channel_indices.size()*sizeof(int));
 
 	cudaMemcpy(d_gate_values, h_gate_values, num_gates * sizeof(double), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_gate_powers, h_gate_powers, num_gates * sizeof(double), cudaMemcpyHostToDevice);
@@ -1046,6 +1051,38 @@ void HSolveActive::copy_hsolve_information_cuda(){
 	num_unique_keys = keys.size();
 
 	num_comps_with_chans = num_unique_keys; // Contains number of compartments with >= 1 chans
+
+	// Ca Target related
+	int num_catarget_chans = h_catarget_channel_indices.size();
+	int* temp_rowPtr = new int[num_Ca_pools+1]();
+	int* temp_colIndex = new int[num_catarget_chans]();
+
+	// Setting up row count
+	for(int i=0;i<h_catarget_capool_indices.size();i++){
+		temp_rowPtr[h_catarget_capool_indices[i]]++;
+	}
+
+	// Setting up row pointer
+	int sum = 0, temp;
+	for(int i=0;i<num_Ca_pools+1;i++){
+		temp = temp_rowPtr[i];
+		temp_rowPtr[i] = sum;
+		sum += temp;
+	}
+
+	// Setting up column indices
+	for(int i=0;i<num_Ca_pools;i++){
+		for(int j=temp_rowPtr[i];j<temp_rowPtr[i+1];j++){
+			temp_colIndex[j] = j-temp_rowPtr[i];
+		}
+	}
+
+	cudaMemcpy(d_capool_rowPtr, temp_rowPtr, (num_Ca_pools+1)*sizeof(int), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_capool_colIndex, temp_colIndex, num_catarget_chans*sizeof(int), cudaMemcpyHostToDevice);
+
+	double temp_x[num_catarget_chans];
+	for(int i=0;i<num_catarget_chans;i++) temp_x[i] = 1;
+	cudaMemcpy(d_capool_onex, temp_x, num_catarget_chans*sizeof(double), cudaMemcpyHostToDevice);
 
 }
 

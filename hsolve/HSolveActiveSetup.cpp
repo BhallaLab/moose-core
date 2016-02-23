@@ -394,6 +394,8 @@ void HSolveActive::readCalcium()
     		h_catarget_channel_indices.push_back(ichan);
     		h_catarget_capool_indices.push_back(caTargetIndex[ichan]);
 
+    		// Assumption: values in h_catarget_capool_indices array will be in increasing order.
+
     		/*
     		if(caTargetIndex[ichan] >= caConc_.size() || caTargetIndex[ichan] < 0)
     			cout << ichan << " " << caTargetIndex[ichan] << endl;

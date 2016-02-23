@@ -215,25 +215,23 @@ void calculate_V_from_Vmid(double* d_Vmid, double* d_V, int size){
 
 __global__
 void advance_calcium_cuda(int* d_catarget_channel_indices,
-			int* d_catarget_capool_indices,
 			double* d_chan_Gk, double* d_chan_GkEk,
 			double* d_Vmid,
-			float* d_caActivation_values, int* d_chan_to_comp,
-			CaConcStruct* d_caConc_,
+			double* d_capool_values, int* d_chan_to_comp,
 			int size){
 	int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
 	if(tid < size){
 		int chan_id = d_catarget_channel_indices[tid];
-		float current = d_chan_GkEk[chan_id] - d_chan_Gk[chan_id]*d_Vmid[d_chan_to_comp[chan_id]];
+		d_capool_values[tid] = d_chan_GkEk[chan_id] - d_chan_Gk[chan_id]*d_Vmid[d_chan_to_comp[chan_id]];
 		//d_caActivation_values[d_catarget_capool_indices[tid]] += current;
-		atomicAdd(&(d_caActivation_values[d_catarget_capool_indices[tid]]), current);
+		//atomicAdd(&(d_caActivation_values[d_catarget_capool_indices[tid]]), current);
 
 	}
 }
 
 __global__
-void advance_calcium_conc_cuda(CaConcStruct* d_caConc_, double* d_Ca, float* d_caActivation_values, int size ){
+void advance_calcium_conc_cuda(CaConcStruct* d_caConc_, double* d_Ca, double* d_caActivation_values, int size ){
 
 	int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -390,20 +388,12 @@ void HSolveActive::update_matrix_cuda_wrapper(){
 
 }
 
-void HSolveActive::hinesMatrixSolverWrapper(){
-	/*
-	// TODO once a suitable gpu solver is found, remove this.
-	if ( HJ_.size() != 0 )
-		memcpy( &HJ_[ 0 ], &HJCopy_[ 0 ], sizeof( double ) * HJ_.size() );
-	*/
-	GpuTimer umTimer, solverTimer;
+void HSolveActive::update_csrmatrix_cuda_wrapper(){
 	// ---------------------------- GKSum & GkEkSum ---------------------------------------
 	int num_channels = channel_.size();
 	// Using Cusparse
 	const double alpha_ = 1.0;
 	const double beta_ = 0.0;
-
-	umTimer.Start();
 
 	cusparseDcsrmv(cusparse_handle,  CUSPARSE_OPERATION_NON_TRANSPOSE,
 		nCompt_, nCompt_, num_channels, &alpha_, cusparse_descr,
@@ -435,10 +425,16 @@ void HSolveActive::hinesMatrixSolverWrapper(){
 
 	cudaMemcpy(&inject_[0], d_inject_, nCompt_*sizeof(InjectStruct), cudaMemcpyDeviceToHost );
 
-	umTimer.Stop();
+}
 
+
+void HSolveActive::hinesMatrixSolverWrapper(){
 	// ---------------------- USING CUSOLVER LOW LEVEL LU SOLVER ---------------------------------------
+	int BLOCKS = nCompt_/THREADS_PER_BLOCK;
+	BLOCKS = (nCompt_%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
+
 	// copy updated matrix values back to CPU
+	GpuTimer solverTimer;
 
 	double pivot_thresh = 0; // No pivoting
 	cusolverStatus_t cusolver_status;
@@ -460,9 +456,8 @@ void HSolveActive::hinesMatrixSolverWrapper(){
 
 	solverTimer.Stop();
 
-	if(num_um_prints > -50){
-		cout <<  umTimer.Elapsed() << " " << solverTimer.Elapsed() << endl;
-		num_um_prints--;
+	if(step_num < 0){
+		cout << solverTimer.Elapsed() << endl;
 	}
 
 	/* ---------------------- USING CUSOLVER HIGH LEVEL LU SOLVER ---------------------------------------
@@ -602,14 +597,18 @@ void HSolveActive::advance_calcium_cuda_wrapper(){
 	BLOCKS = (num_catarget_channels%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
 
 	advance_calcium_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(d_catarget_channel_indices,
-			d_catarget_capool_indices,
 			d_chan_Gk, d_chan_GkEk,
 			d_Vmid,
-			d_caActivation_values, d_chan_to_comp,
-			d_caConc_,
+			d_capool_values, d_chan_to_comp,
 			num_catarget_channels);
 
 	int num_ca_pools = caConc_.size();
+
+	double alpha = 1;
+	double beta = 0;
+	cusparseDcsrmv(cusparse_handle, CUSPARSE_OPERATION_NON_TRANSPOSE, num_ca_pools, num_catarget_channels, num_catarget_channels , &alpha,
+			cusparse_descr, d_capool_values, d_capool_rowPtr, d_capool_colIndex, d_capool_onex, &beta, d_caActivation_values);
+
 
 	BLOCKS = num_ca_pools/THREADS_PER_BLOCK;
 	BLOCKS = (num_ca_pools%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads

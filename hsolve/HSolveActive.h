@@ -188,7 +188,12 @@ protected:
 
 	int* d_catarget_channel_indices;
 	int* d_catarget_capool_indices;
-	float* d_caActivation_values; // Stores ca currents for that pool.
+	double* d_caActivation_values; // Stores ca currents for that pool.
+
+	int* d_capool_rowPtr;
+	int* d_capool_colIndex;
+	double* d_capool_values;
+	double* d_capool_onex;
 
 
 	double* d_state_;
@@ -317,6 +322,7 @@ private:
     void calculate_channel_currents_cuda_wrapper();
 
     void update_matrix_cuda_wrapper();
+    void update_csrmatrix_cuda_wrapper();
 
     void hinesMatrixSolverWrapper();
 
