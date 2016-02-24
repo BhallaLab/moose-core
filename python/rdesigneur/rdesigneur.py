@@ -291,8 +291,8 @@ class rdesigneur:
     ################################################################
     def buildCellProto( self ):
         if len( self.cellProtoList ) == 0:
-            ''' Make HH squid model sized compartment: 
-            len and dia 500 microns. CM = 0.01 F/m^2, RA = 
+            ''' Make HH squid model sized compartment:
+            len and dia 500 microns. CM = 0.01 F/m^2, RA =
             '''
             self.elecid = makePassiveHHsoma( name = 'cell' )
             assert( moose.exists( '/library/cell/soma' ) )
@@ -301,7 +301,7 @@ class rdesigneur:
             '''
             self.elecid = moose.Neuron( '/library/cell' )
             dia = 500e-6
-            self.soma = buildCompt( self.elecid, 'soma', dia, dia, 0.0, 
+            self.soma = buildCompt( self.elecid, 'soma', dia, dia, 0.0,
                 0.33333333, 3000, 0.01 )
             self.soma.initVm = -65e-3 # Resting of -65, from HH
             self.soma.Em = -54.4e-3 # 10.6 mV above resting of -65, from HH
@@ -372,7 +372,7 @@ class rdesigneur:
 
     def buildSpineDistrib( self ):
         # For uniformity and conciseness, we don't use a dictionary.
-        # ordering of spine distrib is 
+        # ordering of spine distrib is
         # name, path, spacing, spacingDistrib, size, sizeDistrib, angle, angleDistrib
         # [i for i in L1 if i in L2]
         # The first two args are compulsory, and don't need arg keys.
@@ -462,7 +462,7 @@ class rdesigneur:
         return ret
 
     # Returns vector of source objects, and the field to use.
-    # plotSpec is of the form 
+    # plotSpec is of the form
     #   [ region_wildcard, region_expr, path, field, title]
     def _parseComptField( self, comptList, plotSpec, knownFields ):
         # Put in stuff to go through fields if the target is a chem object
@@ -506,7 +506,7 @@ class rdesigneur:
 
 
     def _buildPlots( self ):
-        knownFields = { 
+        knownFields = {
             'Vm':('CompartmentBase', 'getVm', 1000, 'Memb. Potential (mV)' ),
             'Im':('CompartmentBase', 'getIm', 1e9, 'Memb. current (nA)' ),
             'inject':('CompartmentBase', 'getInject', 1e9, 'inject current (nA)' ),
@@ -516,7 +516,7 @@ class rdesigneur:
             'Ca':('CaConcBase', 'getCa', 1e3, 'Ca conc (uM)' ),
             'n':('PoolBase', 'getN', 1, '# of molecules'),
             'conc':('PoolBase', 'getConc', 1000, 'Concentration (uM)' )
-        } 
+        }
         graphs = moose.Neutral( self.modelPath + '/graphs' )
         dummy = moose.element( '/' )
         k = 0
@@ -546,7 +546,7 @@ class rdesigneur:
                     q += 1
 
     def _buildMoogli( self ):
-        knownFields = { 
+        knownFields = {
             'Vm':('CompartmentBase', 'getVm', 1000, 'Memb. Potential (mV)', -80.0, 40.0 ),
             'Im':('CompartmentBase', 'getIm', 1e9, 'Memb. current (nA)', -10, 10 ),
             'inject':('CompartmentBase', 'getInject', 1e9, 'inject current (nA)', -10, 10 ),
@@ -556,7 +556,7 @@ class rdesigneur:
             'Ca':('CaConcBase', 'getCa', 1e3, 'Ca conc (uM)', 0, 10 ),
             'n':('PoolBase', 'getN', 1, '# of molecules', 0, 200 ),
             'conc':('PoolBase', 'getConc', 1000, 'Concentration (uM)', 0, 2 )
-        } 
+        }
         moogliBase = moose.Neutral( self.modelPath + '/moogli' )
         k = 0
         for i in self.moogList:
@@ -603,12 +603,12 @@ class rdesigneur:
     # Here we set up the stims
     ################################################################
     def _buildStims( self ):
-        knownFields = { 
+        knownFields = {
                 'inject':('CompartmentBase', 'setInject'),
                 'Ca':('CaConcBase', 'getCa'),
                 'n':('PoolBase', 'setN'),
                 'conc':('PoolBase''setConc')
-        } 
+        }
         stims = moose.Neutral( self.modelPath + '/stims' )
         k = 0
         for i in self.stimList:
