@@ -47,9 +47,13 @@
 """Test script for memory allocation and garbage collection issues."""
 
 from __future__ import print_function
+try:
+    from future_builtins import zip, range
+except ImportError:
+    pass
 import random
 from collections import defaultdict
-from itertools import cycle, izip
+from itertools import cycle
 import sys
 sys.path.append('../../python')
 import moose
@@ -71,7 +75,7 @@ def allocate_large_vecs(m, n):
     """Allocate m vecs with n elements each"""
     test = moose.Neutral('/test')
     ret = []    
-    for jj, mclass in izip(xrange(m), cycle(classes)):
+    for jj, mclass in zip(range(m), cycle(classes)):
         eval_str = 'moose.vec(path="%s/%s_%d", n=%d, dtype="%s")' % (test.path,
                                                                      mclass,
                                                                      jj,
