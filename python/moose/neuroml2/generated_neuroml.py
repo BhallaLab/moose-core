@@ -14200,7 +14200,7 @@ def parseEtree(inFileName):
 
 
 def parseString(inString):
-    from StringIO import StringIO
+    from io import StringIO
     doc = parsexml_(StringIO(inString))
     rootNode = doc.getroot()
     roots = get_root_tag(rootNode)
