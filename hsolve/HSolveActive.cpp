@@ -27,7 +27,7 @@
 #include <thrust/device_ptr.h>
 #include <thrust/reduce.h>
 #include <thrust/detail/static_assert.h>
-
+using namespace thrust;
 #endif
 using namespace std;
 #include <sys/time.h>
@@ -50,7 +50,6 @@ u64 getTime()
 
 
 using namespace moose;
-using namespace thrust;
 
 //~ #include "ZombieCompartment.h"
 //~ #include "ZombieCaConc.h"
@@ -108,15 +107,65 @@ void HSolveActive::step( ProcPtr info )
     double advSynchanTime;
     double sendValuesTime;
     double sendSpikesTime;
+    double memoryTransferTime;
 
-
-    start = getTime();
+    GpuTimer advChanTimer, calcChanTimer, umTimer, solverTimer, advCalcTimer;
+#ifdef USE_CUDA
+    advCalcTimer.Start();
     	advanceChannels( info->dt );
-    end = getTime();
-    advanceChannelsTime = (end-start)/1000.0f;
+    advCalcTimer.Stop();
+    advanceChannelsTime = advCalcTimer.Elapsed();
 
-    start = getTime();
+    calcChanTimer.Start();
     	calculateChannelCurrents();
+	calcChanTimer.Stop();
+	calcChanCurTime = calcChanTimer.Elapsed();
+
+	umTimer.Start();
+		updateMatrix();
+	umTimer.Stop();
+	updateMatTime = umTimer.Elapsed();
+
+	solverTimer.Start();
+		//HSolvePassive::forwardEliminate();
+		//HSolvePassive::backwardSubstitute();
+		hinesMatrixSolverWrapper();
+	solverTimer.Stop();
+	solverTime = solverTimer.Elapsed();
+
+	advCalcTimer.Start();
+		advanceCalcium();
+	advCalcTimer.Stop();
+	advCalcTime = advCalcTimer.Elapsed();
+
+	start = getTime();
+		advanceSynChans( info );
+	end = getTime();
+	advSynchanTime = (end-start)/1000.0f;
+
+	start = getTime();
+		sendValues( info );
+	end = getTime();
+	sendValuesTime = (end-start)/1000.0f;
+
+	start = getTime();
+		sendSpikes( info );
+	end = getTime();
+	sendSpikesTime = (end-start)/1000.0f;
+
+	start = getTime();
+		transfer_memory2cpu_cuda();
+	end = getTime();
+	memoryTransferTime = (end-start)/1000.0f;
+#else
+
+	start = getTime();
+		advanceChannels( info->dt );
+	end = getTime();
+	advanceChannelsTime = (end-start)/1000.0f;
+
+	start = getTime();
+		calculateChannelCurrents();
 	end = getTime();
 	calcChanCurTime = (end-start)/1000.0f;
 
@@ -126,12 +175,10 @@ void HSolveActive::step( ProcPtr info )
 	updateMatTime = (end-start)/1000.0f;
 
 	start = getTime();
-		//HSolvePassive::forwardEliminate();
-		//HSolvePassive::backwardSubstitute();
-		hinesMatrixSolverWrapper();
+		HSolvePassive::forwardEliminate();
+		HSolvePassive::backwardSubstitute();
 	end = getTime();
 	solverTime = (end-start)/1000.0f;
-
 
 	start = getTime();
 		advanceCalcium();
@@ -153,8 +200,10 @@ void HSolveActive::step( ProcPtr info )
 	end = getTime();
 	sendSpikesTime = (end-start)/1000.0f;
 
-	if(num_profile_prints > -50){
-	printf("%lf %lf %lf %lf %lf %lf %lf %lf \n"
+#endif
+
+	if(num_profile_prints > 0){
+	printf("%lf %lf %lf %lf %lf %lf %lf %lf %lf\n"
 			,advanceChannelsTime
 			    ,calcChanCurTime
 			    ,updateMatTime
@@ -162,7 +211,8 @@ void HSolveActive::step( ProcPtr info )
 			    ,advCalcTime
 			    ,advSynchanTime
 			    ,sendValuesTime
-			    ,sendSpikesTime);
+			    ,sendSpikesTime,
+			    memoryTransferTime);
 	num_profile_prints--;
 	}
 
@@ -178,7 +228,7 @@ void HSolveActive::calculateChannelCurrents()
 
 	currentTimer.Start();
 		calculate_channel_currents_cuda_wrapper();
-		cudaSafeCall(cudaMemcpy(&current_[0], d_current_, current_.size()*sizeof(CurrentStruct), cudaMemcpyDeviceToHost));
+		//cudaSafeCall(cudaMemcpy(&current_[0], d_current_, current_.size()*sizeof(CurrentStruct), cudaMemcpyDeviceToHost));
 	currentTimer.Stop();
 
 	/*
@@ -484,10 +534,15 @@ void HSolveActive::advanceChannels( double dt )
 
     tejaTimer.Start();
     // ----------------------------------------------------------------------------
-    cudaSafeCall(cudaMemcpy(d_V, &(V_.front()), nCompt_ * sizeof(double), cudaMemcpyHostToDevice));
-    cudaSafeCall(cudaMemcpy(d_ca, &(ca_.front()), ca_.size()*sizeof(double), cudaMemcpyHostToDevice));
 
 	if(!init_gate_values){
+
+		cudaSafeCall(cudaMemcpy(d_V, &(V_.front()), nCompt_ * sizeof(double), cudaMemcpyHostToDevice));
+		cudaSafeCall(cudaMemcpy(d_ca, &(ca_.front()), ca_.size()*sizeof(double), cudaMemcpyHostToDevice));
+
+		cudaMemcpy(d_inject_, &inject_[0], nCompt_*sizeof(InjectStruct), cudaMemcpyHostToDevice);
+		cudaMemcpy(d_externalCurrent_, &(externalCurrent_.front()), 2 * nCompt_ * sizeof(double), cudaMemcpyHostToDevice);
+
 		// TODO Move it to appropriate place
 		printf("INITIALIZING Gate Values\n");
 		double* test_gate_values = new double[num_gates]();
@@ -559,7 +614,7 @@ void HSolveActive::advanceChannels( double dt )
 #ifdef TEST_CORRECTNESS
 	cudaSafeCall(cudaMemcpy(gate_values_after_cuda, d_state_, state_.size()*3*sizeof(double), cudaMemcpyDeviceToHost));
 #else
-	cudaSafeCall(cudaMemcpy(&state_[0], d_state_, state_.size()*sizeof(double), cudaMemcpyDeviceToHost));
+	// cudaSafeCall(cudaMemcpy(&state_[0], d_state_, state_.size()*sizeof(double), cudaMemcpyDeviceToHost));
 #endif
 	cudaCheckError(); // Making sure no CUDA errors occured
 	tejaTimer.Stop();
@@ -1084,6 +1139,14 @@ void HSolveActive::copy_hsolve_information_cuda(){
 	for(int i=0;i<num_catarget_chans;i++) temp_x[i] = 1;
 	cudaMemcpy(d_capool_onex, temp_x, num_catarget_chans*sizeof(double), cudaMemcpyHostToDevice);
 
+}
+
+void HSolveActive::transfer_memory2cpu_cuda(){
+	cudaSafeCall(cudaMemcpy(&state_[0], d_state_, state_.size()*sizeof(double), cudaMemcpyDeviceToHost));
+	cudaSafeCall(cudaMemcpy(&current_[0], d_current_, current_.size()*sizeof(CurrentStruct), cudaMemcpyDeviceToHost));
+	cudaSafeCall(cudaMemcpy(&(V_[0]), d_V, nCompt_*sizeof(double), cudaMemcpyDeviceToHost));
+	cudaSafeCall(cudaMemcpy(&(ca_[0]), d_ca, ca_.size()*sizeof(double), cudaMemcpyDeviceToHost));
+	cudaSafeCall(cudaMemcpy(&(caConc_[0]), d_caConc_, caConc_.size()*sizeof(CaConcStruct), cudaMemcpyDeviceToHost));
 }
 
 

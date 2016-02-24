@@ -8,7 +8,6 @@
 **********************************************************************/
 
 #include "HSolvePassive.h"
-#define USE_CUDA
 
 extern ostream& operator <<( ostream& s, const HinesMatrix& m );
 

@@ -6,7 +6,6 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
-#define USE_CUDA
 
 #include "HSolveActive.h"
 

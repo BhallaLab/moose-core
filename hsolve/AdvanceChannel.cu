@@ -452,7 +452,7 @@ void HSolveActive::hinesMatrixSolverWrapper(){
 
 	cudaMemcpy(d_Vmid, &(VMid_[0]) , nCompt_*sizeof(double), cudaMemcpyHostToDevice);
 	calculate_V_from_Vmid<<<BLOCKS,THREADS_PER_BLOCK>>>(d_Vmid, d_V, nCompt_);
-	cudaMemcpy(&(V_[0]), d_V, nCompt_*sizeof(double), cudaMemcpyDeviceToHost);
+	//cudaMemcpy(&(V_[0]), d_V, nCompt_*sizeof(double), cudaMemcpyDeviceToHost);
 
 	solverTimer.Stop();
 
@@ -615,8 +615,8 @@ void HSolveActive::advance_calcium_cuda_wrapper(){
 
 	advance_calcium_conc_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(d_caConc_, d_ca, d_caActivation_values, num_ca_pools);
 
-	cudaMemcpy(&(ca_[0]), d_ca, ca_.size()*sizeof(double), cudaMemcpyDeviceToHost);
-	cudaMemcpy(&(caConc_[0]), d_caConc_, caConc_.size()*sizeof(CaConcStruct), cudaMemcpyDeviceToHost);
+	//cudaMemcpy(&(ca_[0]), d_ca, ca_.size()*sizeof(double), cudaMemcpyDeviceToHost);
+	//cudaMemcpy(&(caConc_[0]), d_caConc_, caConc_.size()*sizeof(CaConcStruct), cudaMemcpyDeviceToHost);
 
 	cudaCheckError();
 }

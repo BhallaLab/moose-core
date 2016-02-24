@@ -17,7 +17,7 @@ using namespace moose; // For moose::Compartment from 'Compartment.h'
 #include "HSolveStruct.h"
 #include "HinesMatrix.h"
 
-#define USE_CUDA
+#include "CudaGlobal.h"
 
 class HSolvePassive: public HinesMatrix
 {

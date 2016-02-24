@@ -100,7 +100,7 @@ void HinesMatrix::setup( const vector< TreeNodeStruct >& tree, double dt )
 
 
 }
-
+#ifdef USE_CUDA
 void HinesMatrix::allocateMemoryGpu(){
 
 }
@@ -313,6 +313,7 @@ void HinesMatrix::makeCsrMatrixGpu(){
 
 
 }
+#endif
 
 void HinesMatrix::clear()
 {

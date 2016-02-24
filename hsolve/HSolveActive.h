@@ -314,6 +314,7 @@ private:
     void allocate_hsolve_memory_cuda();
     void copy_table_data_cuda();
     void copy_hsolve_information_cuda();
+    void transfer_memory2cpu_cuda();
 
     void get_lookup_rows_and_fractions_cuda_wrapper(double dt);
     void advance_channels_cuda_wrapper(double dt);
@@ -327,6 +328,7 @@ private:
     void hinesMatrixSolverWrapper();
 
     void advance_calcium_cuda_wrapper();
+
 
 
 	void advanceChannel_gpu(
