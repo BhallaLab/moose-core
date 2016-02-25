@@ -151,7 +151,7 @@ def writeGraphviz(pat='/##', filename=None, filterList=[]):
         if ignore(p):
             continue
         else:
-            p = p.translate(None, '[]()')
+            p = re.sub('[]()]', '', p)
             dot.append('\t'+' -> '.join(filter(None, p.split('/'))))
     dot.append('}')
     dot = '\n'.join(dot)

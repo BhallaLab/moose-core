@@ -366,7 +366,7 @@ def writeGraphviz(filename=None, root='', cluster=True, ignore=None, **kwargs):
         print_utils.info("Clustering nodes together")
         pops = b.clusterNodes()
         for pop in pops:
-            clustername = pop.translate(None, '/[]')
+            clustername = re.sub('[][/]', '', pop)
             subgraphDict[clustername] = pops[pop]
             for x in pops[pop]: dotFile.subgraphDict[x] = clustername
     dotFile.textDict['subgraphs'] = subgraphDict
