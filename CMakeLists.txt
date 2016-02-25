@@ -446,13 +446,15 @@ ENDIF(WITH_DOC)
 # Root of all python module.
 SET(PROJECT_PYTHON_PATH ${CMAKE_CURRENT_SOURCE_DIR}/python)
 if(WITH_PYTHON)
-    set(Python_ADDITIONAL_VERSION 2.6 2.7)
     message(STATUS "Building native python extension of MOOSE")
     set(PYMOOSE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/python/moose")
 
     find_package(NumPy REQUIRED)
     find_package(PythonDev REQUIRED)
     include_directories(${PYTHON_INCLUDE_DIRS})
+    MESSAGE("Python include dir: ${PYTHON_INCLUDE_DIRS}")
+    MESSAGE("Python libraries: ${PYTHON_LIBRARIES}")
+    MESSAGE("Python executable: ${PYTHON_EXECUTABLE}")
 
     add_subdirectory(pymoose)
 
@@ -489,6 +491,7 @@ ELSE(MACOSX)
         ${MOOSE_LIBRARIES}
         ${STATIC_LIBRARIES}
         "-Wl,--no-whole-archive"
+        ${PYTHON_LIBRARIES}
         ${SYSTEM_SHARED_LIBS}
         )
 ENDIF(MACOSX)
