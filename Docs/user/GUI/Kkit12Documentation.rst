@@ -5,7 +5,7 @@ Kinetikit 12: Interface for chemical kinetic models in MOOSEGUI
 
 Upinder Bhalla, Harsha Rani
 
-Sep 5 2013.
+Feb 25 2016.
 
 --------------
 
@@ -101,9 +101,7 @@ chemical calculations.
 -  Run models using **``Run``** button.
 -  Select numerical method using options under **``Preferences``**
    button in simulation control.
-
-<!--\* Save plots using the icons at the bottom of the
-**``Plot Window``**.
+-  Save plots using the icons at the bottom of the **``Plot Window``**.
 
 Most of these operations are detailed in other sections, and are shared
 with other aspects of the MOOSE simulation interface. Here we focus on
@@ -112,7 +110,7 @@ the Kinetikit-specific items.
 `Model layout and icons <#TOC>`_
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-When you are in the **``Model View``** tab you will see a collection of
+When you are in the **``Model View``** (``Editor``) tab you will see a collection of
 icons, arrows, and grey boxes surrounding these. This is a schematic of
 the reaction scheme being modeled. You can view and change parameters,
 and change the layout of the model.
@@ -444,27 +442,32 @@ the source message must have the variable name as the first argument.
 
    ::
 
-       *   Compartment has to be created firstly \n(At present only single compartment model is allowed)
+      *    Firstly Compartment has to be created.
+       (At present only single compartment model is allowed)
 
    -  Enzyme should be dropped on a pool as parent and function should
       be dropped on buffPool for output
 
-      .. raw:: html
-
-         <li> 
-
-      Drag in pool's and reaction on to the editor widget, now one can
-      set up a reaction.Click on mooseObject one can find a little arrow
-      on the top right corner of the object, drag from this little arrow
-      to any object for connection.E.g pool to reaction and reaction to
-      pool. Specific connection type gets specific colored arrow. E.g.
+   -  Drag in pool's and reaction on to the editor widget, now one can
+      set up a reaction.Click on mooseObject drag the mouse (a black dotted line for ExpectedConnection will appear)
+      to any object for connection.
+      E.g Pool to reaction and reaction to pool. Pool to function and function to Pool.
+      Specific connection type gets specific colored arrow. E.g.
       Green color arrow for specifying connection between reactant and
-      product for reaction. Clicking on the object one can rearrange
-      object for clean layout. Second order reaction can also be done by
+      product for reaction. Second order reaction can also be done by
       repeating the connection over again
+   -  Each connection can be deleted and using rubberband selection each moose object can be deleted
+   -  When clicked on pool object 4 icons comes up
 
--  Each connection can be deleted and using rubberband selection each
-   moose object can be deleted
+      |delete| : This deletes the object, its associated connection and if its enzyme's parent then enzyme and its associated connection is also deleted.
+
+      |clone|  : Clones the object
+
+      |move|   : Object can be moved around
+
+      |plot|   : Plot the object in plotWidget at Graph 1
+
+      Note: Missing icon means the operation is not permitted 
 
 .. figure:: ../../images/Chemical_run.png
    :align: center
@@ -482,3 +485,7 @@ the source message must have the variable name as the first argument.
 .. |image2| image:: ../../images/KkitReacIcon.png
 .. |image3| image:: ../../images/MassActionEnzIcon.png
 .. |image4| image:: ../../images/MM_EnzIcon.png
+.. |delete| image:: ../../images/delete.png
+.. |clone| image:: ../../images/clone.png
+.. |move| image:: ../../images/move.png
+.. |plot| image:: ../../images/plot.png
