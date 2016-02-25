@@ -589,7 +589,7 @@ class MorphML():
                 if not moose.exists(compartment.path+'/'+syn_name):
                     make_new_synapse(syn_name, compartment, syn_name, self.nml_params)
             ## I assume below that compartment name has _segid at its end
-            segid = string.split(compartment.name,'_')[-1] # get segment id from compartment name
+            segid = compartment.name.split('_')[-1] # get segment id from compartment name
             self.segDict[segid][5].append(value)
         elif mechanismname is 'spikegen': # spikegen being added to the compartment
             ## these are potential locations, we do not actually make the spikegens.

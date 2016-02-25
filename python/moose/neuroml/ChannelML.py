@@ -155,11 +155,11 @@ class ChannelML():
         nernstnote = IVrelation.find('./{'+utils.meta_ns+'}notes')
         if nernstnote is not None:
             ## the text in nernstnote is "Nernst,Cout=<float>,z=<int>"
-            nernst_params = string.split(nernstnote.text,',')
+            nernst_params = nernstnote.text.split(',')
             if nernst_params[0] == 'Nernst':
                 nernstMstring = moose.Mstring(moosechannel.path+'/nernst_str')
-                nernstMstring.value = str( float(string.split(nernst_params[1],'=')[1]) * concfactor ) + \
-                                        ',' + str( int(string.split(nernst_params[2],'=')[1]) )
+                nernstMstring.value = str( float(nernst_params[1].split('=')[1]) * concfactor ) + \
+                                        ',' + str( int(nernst_params[2].split('=')[1]) )
         
         gates = IVrelation.findall('./{'+self.cml+'}gate')
         if len(gates)>3:

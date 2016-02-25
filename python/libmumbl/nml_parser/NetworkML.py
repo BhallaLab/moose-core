@@ -422,7 +422,7 @@ class NetworkML(object):
                 rotationnote = instance.find('./{'+nmu.meta_ns+'}notes')
                 if rotationnote is not None:
                     # the text in rotationnote is zrotation=xxxxxxx
-                    zrotation = float(string.split(rotationnote.text,'=')[1])
+                    zrotation = float(rotationnote.text.split('=')[1])
                 else:
                     zrotation = 0
                 if cellname == 'LIF':

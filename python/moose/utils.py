@@ -979,7 +979,7 @@ def connect_CaConc(compartment_list, temperature=None):
                                 ## temperature is used only by Nernst part here...
                                 if child.name=='nernst_str':
                                     nernst = _moose.Nernst(channel.path+'/nernst')
-                                    nernst_params = string.split(child.value,',')
+                                    nernst_params = child.value.split(',')
                                     nernst.Cout = float(nernst_params[0])
                                     nernst.valence = float(nernst_params[1])
                                     nernst.Temperature = temperature

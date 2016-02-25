@@ -172,12 +172,12 @@ class ChannelML:
         nernstnote = IVrelation.find('./{'+utils.meta_ns+'}notes')
         if nernstnote is not None:
             # the text in nernstnote is "Nernst,Cout=<float>,z=<int>"
-            nernst_params = string.split(nernstnote.text,',')
+            nernst_params = nernstnote.text.split(',')
             if nernst_params[0] == 'Nernst':
                 nernstMstring = moose.Mstring(channel.path+'/nernst_str')
                 nernstMstring.value = str(
-                        float(string.split(nernst_params[1],'=')[1]) * concfactor 
-                        ) + ',' + str(int(string.split(nernst_params[2],'=')[1]))
+                        float(nernst_params[1].split('=')[1]) * concfactor
+                ) + ',' + str(int(nernst_params[2].split('=')[1]))
 
         gates = IVrelation.findall('./{'+self.cml+'}gate')
         if len(gates) > 3:
@@ -299,14 +299,8 @@ class ChannelML:
                     , (steady_state,'inf',"alpha/(alpha+beta)")
                     ]:
                 # put in args for alpha and beta, could be v and Ca dep.
-                expr_string = self.replace(fn_expr
-                        , 'alpha'
-                        , 'self.alpha(v'+ca_name+')'
-                        )
-                expr_string = self.replace(expr_string
-                        , 'beta'
-                        , 'self.beta(v'+ca_name+')'
-                        )
+                expr_string = fn_expr.replace('alpha', 'self.alpha(v'+ca_name+')')
+                expr_string = expr_string.replace('beta', 'self.beta(v'+ca_name+')')
                 # if time_course/steady_state are not present, then alpha annd
                 # beta transition elements should be present, and fns created.
                 if fn_element is None:
@@ -490,16 +484,8 @@ class ChannelML:
             else: 
                 ca_name = ','+concdep.attrib['variable_name']     
                 # Ca dependence
-            expr_string = self.replace(
-                    expr_string
-                    , 'alpha'
-                    , 'self.alpha(v'+ca_name+')'
-                    )
-            expr_string = self.replace(
-                    expr_string
-                    , 'beta'
-                    , 'self.beta(v'+ca_name+')'
-                    )
+            expr_string = expr_string.replace('alpha', 'self.alpha(v'+ca_name+')')
+            expr_string = expr_string.replace('beta', 'self.beta(v'+ca_name+')')
             fn = self.make_function(
                     fn_name
                     , fn_type
@@ -585,6 +571,3 @@ class ChannelML:
 
         fn.__name__ = fn_name
         setattr(self.__class__, fn.__name__, fn)
-
-    def replace(self, text, findstr, replacestr):
-        return string.join(string.split(text,findstr),replacestr)
