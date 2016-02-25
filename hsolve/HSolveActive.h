@@ -139,9 +139,6 @@ protected:
 #ifdef USE_CUDA    
 		double total_time[10];
 		int total_count;
-
-	int step_num = 0;
-
     int                       current_ca_position;
     vector<ChannelData>		  channel_data_;
     ChannelData 			  * channel_data_d;
@@ -166,9 +163,6 @@ protected:
 
 	vector<int> h_catarget_channel_indices; // Stores the indices of channel which are ca targets in order
 	vector<int> h_catarget_capool_indices; // Store the index of calcium pool
-
-	// Channel related
-	double* h_chan_Gk;
 
 	// LookUp Tables
 	double* d_V_table;
@@ -217,8 +211,6 @@ protected:
 
 	// Hines Matrix related
 	double* d_HS_;
-	double* d_HS_1;
-	double* d_HS_2;
 
 	double* d_chan_x;
 	int* d_chan_colIndex;
@@ -264,12 +256,13 @@ protected:
 	int num_comps_with_chans = 0; // Stores number of compartments with >=1 channels.
 
 	// temp code
-	bool init_gate_values = false;
+	bool is_initialized = false;
 #endif
 
 	int num_time_prints = 0;
 	int num_um_prints = 0;
 	int num_profile_prints = 0;
+	int step_num = 0;
 
     static const int INSTANT_X;
     static const int INSTANT_Y;
@@ -328,8 +321,6 @@ private:
     void hinesMatrixSolverWrapper();
 
     void advance_calcium_cuda_wrapper();
-
-
 
 	void advanceChannel_gpu(
     double *                          v_row,

@@ -129,6 +129,9 @@ void HSolveActive::step( ProcPtr info )
 	solverTimer.Start();
 		//HSolvePassive::forwardEliminate();
 		//HSolvePassive::backwardSubstitute();
+		//cudaMemcpy(d_V, &(V_[0]), nCompt_*sizeof(double), cudaMemcpyHostToDevice);
+		//cudaMemcpy(d_Vmid, &(VMid_[0]), nCompt_*sizeof(double), cudaMemcpyHostToDevice);
+
 		hinesMatrixSolverWrapper();
 	solverTimer.Stop();
 	solverTime = solverTimer.Elapsed();
@@ -223,24 +226,8 @@ void HSolveActive::step( ProcPtr info )
 void HSolveActive::calculateChannelCurrents()
 {
 #ifdef USE_CUDA
-	//printf("Calculating Channel Currents\n");
-	GpuTimer currentTimer;
-
-	currentTimer.Start();
-		calculate_channel_currents_cuda_wrapper();
-		//cudaSafeCall(cudaMemcpy(&current_[0], d_current_, current_.size()*sizeof(CurrentStruct), cudaMemcpyDeviceToHost));
-	currentTimer.Stop();
-
-	/*
-	cudaCheckError(); // Making sure no CUDA error occured
-	for(unsigned int i=0;i<current_.size();i++)
-		current_[i].Gk = h_chan_Gk[i];
-	*/
-
-	if(num_time_prints > 0){
-		printf("curr,%lf\n", currentTimer.Elapsed());
-		num_time_prints--;
-	}
+	calculate_channel_currents_cuda_wrapper();
+	//cudaSafeCall(cudaMemcpy(&current_[0], d_current_, current_.size()*sizeof(CurrentStruct), cudaMemcpyDeviceToHost));
 
 #else
 	u64 cpu_current_start = getTime();
@@ -264,98 +251,33 @@ void HSolveActive::calculateChannelCurrents()
     if(num_time_prints > 0)
     	printf("curr,%lf\n",(cpu_current_end-cpu_current_start)/1000.0f);
 
-    /*
-    double error = 0;
-    for(unsigned int i=0;i<current_.size();i++){
-    	printf("%lf %lf \n", current_[i].Gk, h_chan_Gk[i]);
-    	error += (current_[i].Gk - h_chan_Gk[i]);
-    }
-    getchar();
-    printf("%lf error in channel currents\n", error);
-    */
-
 #endif
 }
 
 void HSolveActive::updateMatrix()
 {
 
+	#ifdef USE_CUDA
+	 //Updates HS matrix and sends it to CPU
+
+	/*
+	if ( HJ_.size() != 0 )
+		memcpy( &HJ_[ 0 ], &HJCopy_[ 0 ], sizeof( double ) * HJ_.size() );
+	update_matrix_cuda_wrapper();
+	*/
+
+	// Updates CSR matrix and sends it to CPU.
+	update_csrmatrix_cuda_wrapper();
+
+#else
+	// CPU PART
+	u64 cpu_start = getTime();
+
 	/*
 	 * Copy contents of HJCopy_ into HJ_. Cannot do a vector assign() because
 	 * iterators to HJ_ get invalidated in MS VC++
 	 * TODO Is it needed to do a memcpy each time?
 	 */
-
-#ifdef USE_CUDA
-	/*
-	if(num_um_prints > 0){
-		// Printing external sums
-		double extsum1 = 0;
-		double extsum2 = 0;
-		int nzero_count1 = 0;
-		int nzero_count2 = 0;
-		for(int i=0;i<externalCurrent_.size();i=i+2){
-			extsum1 += externalCurrent_[i];
-			extsum2 += externalCurrent_[i+1];
-
-			if(externalCurrent_[i] != 0)
-				nzero_count1++;
-			if(externalCurrent_[i+1] != 0)
-				nzero_count2++;
-
-
-		}
-		if(nzero_count1 > 0 || nzero_count2 > 0)
-			printf("sum1 %lf sum2 %lf count1 %d count2 %d \n",extsum1,extsum2, nzero_count1, nzero_count2);
-
-		// Printing inject_
-		double injsum1 = 0;
-		double injsum2 = 0;
-		nzero_count1 = 0;
-		nzero_count2 = 0;
-		for(int i=0;i<inject_.size();i++){
-			injsum1 += inject_[i].injectVarying;
-			injsum2 += inject_[i].injectBasal;
-
-			if(inject_[i].injectVarying != 0) nzero_count1++;
-			if(inject_[i].injectBasal != 0) {
-				//printf("%d comaprtment inject basal %lf\n", i, inject_[i].injectBasal*100000);
-				nzero_count2++;
-			}
-
-		}
-
-		if(nzero_count1 > 0)
-			printf("varying %lf base %lf total %lf sum1 %d sum2 %d\n",injsum1, injsum2, injsum1+injsum2, nzero_count1, nzero_count2);
-
-		num_um_prints--;
-	}
-	*/
-
-	GpuTimer gpuTimer;
-
-	gpuTimer.Start();
-		/* Updates HS matrix and sends it to CPU
-		 if ( HJ_.size() != 0 )
-				memcpy( &HJ_[ 0 ], &HJCopy_[ 0 ], sizeof( double ) * HJ_.size() );
-		  update_matrix_cuda_wrapper();
-		 */
-
-		update_csrmatrix_cuda_wrapper();
-	gpuTimer.Stop();
-	cudaCheckError();
-
-	if(num_um_prints > 0){
-		printf("%lf\n",gpuTimer.Elapsed());
-		num_um_prints--;
-	}
-
-	// Use thrust reduce_by_key to find GkSum and GKEkSum
-	// Use Gksum, GkEksum,
-#else
-	// CPU PART
-	u64 cpu_start = getTime();
-
 	if ( HJ_.size() != 0 )
 			memcpy( &HJ_[ 0 ], &HJCopy_[ 0 ], sizeof( double ) * HJ_.size() );
 
@@ -434,16 +356,19 @@ void HSolveActive::updateMatrix()
 
 void HSolveActive::advanceCalcium()
 {
+#ifdef USE_CUDA
+   cudaMemset(d_caActivation_values, 0, ca_.size()*sizeof(double));
+   advance_calcium_cuda_wrapper();
+   //cudaMemcpy(&(ca_[0]), d_ca, ca_.size()*sizeof(double), cudaMemcpyDeviceToHost);
+   //cudaMemcpy(&(caConc_[0]), d_caConc_, caConc_.size()*sizeof(CaConcStruct), cudaMemcpyDeviceToHost);
+
+#else
+
     vector< double* >::iterator icatarget = caTarget_.begin();
     vector< double >::iterator ivmid = VMid_.begin();
     vector< CurrentStruct >::iterator icurrent = current_.begin();
     vector< currentVecIter >::iterator iboundary = currentBoundary_.begin();
 
-#ifdef USE_CUDA
-    cudaMemset(d_caActivation_values, 0, ca_.size()*sizeof(double));
-   advance_calcium_cuda_wrapper();
-
-#else
     /*
      * caAdvance_: This flag determines how current flowing into a calcium pool
      * is computed. A value of 0 means that the membrane potential at the
@@ -506,6 +431,76 @@ void HSolveActive::advanceCalcium()
 void HSolveActive::advanceChannels( double dt )
 {
 
+#ifdef USE_CUDA
+
+    // Useful variables
+    int num_comps = V_.size();
+    int num_gates = channel_.size()*3;
+
+	if(!is_initialized){
+		// TODO Move it to appropriate place
+		double* test_gate_values = new double[num_gates]();
+		double pivot_thresh = 0;
+
+		// Initializing device Vm and Ca pools
+		cudaSafeCall(cudaMemcpy(d_V, &(V_.front()), nCompt_ * sizeof(double), cudaMemcpyHostToDevice));
+		cudaSafeCall(cudaMemcpy(d_ca, &(ca_.front()), ca_.size()*sizeof(double), cudaMemcpyHostToDevice));
+
+		// Initializing device inject and external current.
+		cudaMemcpy(d_inject_, &inject_[0], nCompt_*sizeof(InjectStruct), cudaMemcpyHostToDevice);
+		cudaMemcpy(d_externalCurrent_, &(externalCurrent_.front()), 2 * nCompt_ * sizeof(double), cudaMemcpyHostToDevice);
+
+		// Initializing device gate fraction values.
+		for(int i=0;i<h_gate_expand_indices.size();i++){
+			test_gate_values[h_gate_expand_indices[i]] = state_[i];
+		}
+		cudaMemcpy(d_gate_values, test_gate_values, num_gates*sizeof(double), cudaMemcpyHostToDevice);
+
+		// Setting up cusparse information
+		cusparseCreate(&cusparse_handle);
+		cublasCreate_v2(&cublas_handle);
+		cusolverSpCreate(&cusolver_handle);
+
+		// create and setup matrix descriptors A, B & C
+		cusparseCreateMatDescr(&cusparse_descr);
+		cusparseSetMatType(cusparse_descr, CUSPARSE_MATRIX_TYPE_GENERAL);
+		cusparseSetMatIndexBase(cusparse_descr, CUSPARSE_INDEX_BASE_ZERO);
+
+		cusolverStatus_t cusolver_status;
+
+		// Analyzing the matrix structure
+	 	cusolver_status =  cusolverSpCreateCsrluInfoHost(&infoA); // Creating info of A
+		cusolver_status = cusolverSpXcsrluAnalysisHost(cusolver_handle,
+														nCompt_,
+														mat_nnz,
+														cusparse_descr,
+														h_mat_rowPtr, h_mat_colIndex,
+														infoA);
+
+		// Getting the memory requirements for LU factorization.
+
+		cusolver_status = cusolverSpDcsrluBufferInfoHost(cusolver_handle,
+														nCompt_,
+														mat_nnz,
+														cusparse_descr,
+														h_mat_values, h_mat_rowPtr, h_mat_colIndex,
+														infoA, &internalDataInBytes, &workspaceInBytes);
+
+		// Allocate memory for CPU solver.
+		internalBuffer = (double*) malloc(internalDataInBytes);
+		workspaceBuffer = (double*) malloc(workspaceInBytes);
+
+		is_initialized = true;
+	}
+
+	// Calling the kernels
+	get_lookup_rows_and_fractions_cuda_wrapper(dt); // Gets lookup values for Vm and Ca_.
+	advance_channels_cuda_wrapper(dt); // Advancing fraction values.
+	get_compressed_gate_values_wrapper(); // Getting values of new state
+	// cudaSafeCall(cudaMemcpy(&state_[0], d_state_, state_.size()*sizeof(double), cudaMemcpyDeviceToHost));
+
+#else
+
     vector< double >::iterator iv;
     vector< double >::iterator istate = state_.begin();
     vector< int >::iterator ichannelcount = channelCount_.begin();
@@ -519,222 +514,6 @@ void HSolveActive::advanceChannels( double dt )
     vector< LookupRow* >::iterator icarow = caRow_.begin();
 
     LookupRow vRow;
-
-#ifdef USE_CUDA
-
-#ifdef TEST_CORRECTNESS
-    double* gate_values_after_cuda = new double[h_gate_expand_indices.size()]();
-#endif
-
-    // Useful numbers
-    int num_comps = V_.size();
-    int num_gates = channel_.size()*3;
-
-    GpuTimer tejaTimer;
-
-    tejaTimer.Start();
-    // ----------------------------------------------------------------------------
-
-	if(!init_gate_values){
-
-		cudaSafeCall(cudaMemcpy(d_V, &(V_.front()), nCompt_ * sizeof(double), cudaMemcpyHostToDevice));
-		cudaSafeCall(cudaMemcpy(d_ca, &(ca_.front()), ca_.size()*sizeof(double), cudaMemcpyHostToDevice));
-
-		cudaMemcpy(d_inject_, &inject_[0], nCompt_*sizeof(InjectStruct), cudaMemcpyHostToDevice);
-		cudaMemcpy(d_externalCurrent_, &(externalCurrent_.front()), 2 * nCompt_ * sizeof(double), cudaMemcpyHostToDevice);
-
-		// TODO Move it to appropriate place
-		printf("INITIALIZING Gate Values\n");
-		double* test_gate_values = new double[num_gates]();
-		// Copying from state_ to test_gate_values
-		for(int i=0;i<h_gate_expand_indices.size();i++){
-			test_gate_values[h_gate_expand_indices[i]] = state_[i];
-		}
-		cudaMemcpy(d_gate_values, test_gate_values, num_gates*sizeof(double), cudaMemcpyHostToDevice);
-
-		init_gate_values = true;
-
-		// Setting up cusparse information
-		cusparseCreate(&cusparse_handle);
-		cublasCreate_v2(&cublas_handle);
-		cusolverSpCreate(&cusolver_handle);
-
-		// create and setup matrix descriptors A, B & C
-		cusparseCreateMatDescr(&cusparse_descr);
-		cusparseSetMatType(cusparse_descr, CUSPARSE_MATRIX_TYPE_GENERAL);
-		cusparseSetMatIndexBase(cusparse_descr, CUSPARSE_INDEX_BASE_ZERO);
-
-		// Setting up information fo host solver.
-		cusolverStatus_t cusolver_status;
-
-	 	cusolver_status =  cusolverSpCreateCsrluInfoHost(&infoA); // Creating info of A
-	 	cout << "Creating info " << cusolver_status << endl;
-
-		cusolver_status = cusolverSpXcsrluAnalysisHost(cusolver_handle, nCompt_, mat_nnz, cusparse_descr, h_mat_rowPtr, h_mat_colIndex, infoA);
-		cout << "Performing analysis " << cusolver_status << endl;
-
-		double pivot_thresh = 0;
-		cusolver_status = cusolverSpDcsrluBufferInfoHost(cusolver_handle, nCompt_, mat_nnz, cusparse_descr, h_mat_values, h_mat_rowPtr, h_mat_colIndex,
-				infoA, &internalDataInBytes, &workspaceInBytes);
-		cout << "Gettting buffer info " << cusolver_status << endl;
-
-		// Allocate memory
-		cout << internalDataInBytes << " " << workspaceInBytes << endl;
-		internalBuffer = (double*) malloc(internalDataInBytes);
-		workspaceBuffer = (double*) malloc(workspaceInBytes);
-
-		/*
-		set<int> comps;
-		for(int i=0;i<channel_.size();i++){
-			comps.insert(chan2compt_[i]);
-		}
-
-		for (set<int>::iterator i = comps.begin(); i != comps.end(); i++) {
-		   cout << *i << endl;
-		}
-
-		cout << nCompt_ << " " << comps.size() << endl;
-
-		int count = 0;
-		for (int i = 0; i < channelCount_.size(); ++i) {
-			if(channelCount_[i] == 0)
-				count++;
-		}
-
-		cout << "# of compartments with zero channels " << count << endl;
-		*/
-
-	}
-
-	// ----------------------------------------------------------------------------
-
-	get_lookup_rows_and_fractions_cuda_wrapper(dt);
-	advance_channels_cuda_wrapper(dt); // Calling kernel
-	get_compressed_gate_values_wrapper(); // Getting values of new state
-#ifdef TEST_CORRECTNESS
-	cudaSafeCall(cudaMemcpy(gate_values_after_cuda, d_state_, state_.size()*3*sizeof(double), cudaMemcpyDeviceToHost));
-#else
-	// cudaSafeCall(cudaMemcpy(&state_[0], d_state_, state_.size()*sizeof(double), cudaMemcpyDeviceToHost));
-#endif
-	cudaCheckError(); // Making sure no CUDA errors occured
-	tejaTimer.Stop();
-
-	if(num_time_prints > 0){
-		printf("chan,%lf\n", tejaTimer.Elapsed());
-		num_time_prints--;
-	}
-
-	/*
-	// Checking correctness of get_lookup_rows_and_fractions_cuda Kernel
-	double test_V[num_comps];
-	int test_rows[num_comps];
-	double test_fracs[num_comps];
-
-	cudaMemcpy(test_V, d_V, num_comps*sizeof(double), cudaMemcpyDeviceToHost);
-	cudaMemcpy(test_rows, d_V_rows, num_comps*sizeof(int), cudaMemcpyDeviceToHost);
-	cudaMemcpy(test_fracs, d_V_fractions, num_comps*sizeof(double), cudaMemcpyDeviceToHost);
-
-	*/
-
-#ifdef TEST_CORRECTNESS
-	double C1, C2;
-	for ( iv = V_.begin(); iv != V_.end(); ++iv )
-	{
-		vTable_.row( *iv, vRow );
-		icarowcompt = caRowCompt_.begin();
-		caBoundary = ica + *icacount;
-
-		for ( ; ica < caBoundary; ++ica )
-		{
-			caTable_.row( *ica, * icarowcompt );
-			++icarowcompt;
-		}
-		/*
-		 * Optimize by moving "if ( instant )" outside the loop, because it is
-		 * rarely used. May also be able to avoid "if ( power )".
-		 *
-		 * Or not: excellent branch predictors these days.
-		 *
-		 * Will be nice to test these optimizations.
-		 */
-		chanBoundary = ichan + *ichannelcount;
-		for ( ; ichan < chanBoundary; ++ichan )
-		{
-			if ( ichan->Xpower_ > 0.0 )
-			{
-				vTable_.lookup( *icolumn, vRow, C1, C2 );
-				//~ *istate = *istate * C1 + C2;
-				//~ *istate = ( C1 + ( 2 - C2 ) * *istate ) / C2;
-				if ( ichan->instant_ & INSTANT_X )
-					*istate = C1 / C2;
-				else
-				{
-					double temp = 1.0 + dt / 2.0 * C2;
-					*istate = ( *istate * ( 2.0 - temp ) + dt * C1 ) / temp;
-				}
-
-				++icolumn, ++istate;
-			}
-
-			if ( ichan->Ypower_ > 0.0 )
-			{
-				vTable_.lookup( *icolumn, vRow, C1, C2 );
-				//~ *istate = *istate * C1 + C2;
-				//~ *istate = ( C1 + ( 2 - C2 ) * *istate ) / C2;
-				if ( ichan->instant_ & INSTANT_Y )
-					*istate = C1 / C2;
-				else
-				{
-					double temp = 1.0 + dt / 2.0 * C2;
-					*istate = ( *istate * ( 2.0 - temp ) + dt * C1 ) / temp;
-				}
-
-				++icolumn, ++istate;
-			}
-
-			if ( ichan->Zpower_ > 0.0 )
-			{
-				LookupRow* caRow = *icarow;
-				if ( caRow )
-				{
-					caTable_.lookup( *icolumn, *caRow, C1, C2 );
-				}
-				else
-				{
-					vTable_.lookup( *icolumn, vRow, C1, C2 );
-				}
-
-				//~ *istate = *istate * C1 + C2;
-				//~ *istate = ( C1 + ( 2 - C2 ) * *istate ) / C2;
-				if ( ichan->instant_ & INSTANT_Z )
-					*istate = C1 / C2;
-				else
-				{
-					double temp = 1.0 + dt / 2.0 * C2;
-					*istate = ( *istate * ( 2.0 - temp ) + dt * C1 ) / temp;
-				}
-
-				++icolumn, ++istate, ++icarow;
-			}
-		}
-
-		++ichannelcount, ++icacount;
-	}
-
-
-	// Printing values of cuda call and cpu call
-	float error = 0;
-	for(int i=0;i<state_.size();i++){
-		error += gate_values_after_cuda[i]-state_[i];
-		printf("%lf %lf\n",state_[i], gate_values_after_cuda[i]);
-	}
-	printf("Error %f\n",error);
-	getchar();
-
-
-#endif
-
-#else
 
 	u64 cpu_advchan_start = getTime();
 
@@ -850,10 +629,6 @@ void HSolveActive::allocate_hsolve_memory_cuda(){
 	int V_table_size = vTable_.get_table().size();
 	int Ca_table_size = caTable_.get_table().size();
 
-	// CPU related
-	h_chan_Gk = (double*) malloc(num_channels * sizeof(double));
-
-
 	cudaMalloc((void **)&(d_V), num_compts * sizeof(double));
 	cudaMalloc((void **)&(d_V_table), V_table_size * sizeof(double));
 
@@ -893,8 +668,6 @@ void HSolveActive::allocate_hsolve_memory_cuda(){
 
 	// Hines Matrix related
 	cudaMalloc((void**)&d_HS_, HS_.size()*sizeof(double));
-	cudaMalloc((void**)&d_HS_1, nCompt_*sizeof(double));
-	cudaMalloc((void**)&d_HS_2, nCompt_*sizeof(double));
 
 	cudaMalloc((void**)&d_chan_colIndex, num_channels*sizeof(int));
 	cudaMalloc((void**)&d_chan_rowPtr, (nCompt_+1)*sizeof(int));
@@ -908,7 +681,6 @@ void HSolveActive::allocate_hsolve_memory_cuda(){
 	cudaMalloc((void**)&d_x, nCompt_*sizeof(double));
 
 	// Intermediate data for computation
-
 	cudaMalloc((void**)&d_V_rows, num_compts*sizeof(int));
 	cudaMalloc((void**)&d_V_fractions, num_compts*sizeof(double));
 
@@ -1071,17 +843,6 @@ void HSolveActive::copy_hsolve_information_cuda(){
 	// Hines Matrix related
 	cudaMemcpy(d_HS_, &(HS_.front()), HS_.size()*sizeof(double), cudaMemcpyHostToDevice);
 
-	double* temp_hs_1 = new double[nCompt_]();
-	double* temp_hs_2 = new double[nCompt_]();
-
-	for(int i=0;i<nCompt_;i++){
-		temp_hs_1[i] = HS_[4*i+1];
-		temp_hs_2[i] = HS_[4*i+2];
-	}
-
-	cudaMemcpy(d_HS_1, temp_hs_1 , nCompt_*sizeof(double), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_HS_2, temp_hs_2 , nCompt_*sizeof(double), cudaMemcpyHostToDevice);
-
 	int* chan_colIndex = new int[num_channels]();
 	double* chan_x = new double[nCompt_];
 
@@ -1148,7 +909,6 @@ void HSolveActive::transfer_memory2cpu_cuda(){
 	cudaSafeCall(cudaMemcpy(&(ca_[0]), d_ca, ca_.size()*sizeof(double), cudaMemcpyDeviceToHost));
 	cudaSafeCall(cudaMemcpy(&(caConc_[0]), d_caConc_, caConc_.size()*sizeof(CaConcStruct), cudaMemcpyDeviceToHost));
 }
-
 
 LookupColumn * HSolveActive::get_column_d()
 {
