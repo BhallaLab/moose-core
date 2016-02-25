@@ -127,12 +127,12 @@ void HSolveActive::step( ProcPtr info )
 	updateMatTime = umTimer.Elapsed();
 
 	solverTimer.Start();
-		//HSolvePassive::forwardEliminate();
-		//HSolvePassive::backwardSubstitute();
+		HSolvePassive::forwardEliminate();
+		HSolvePassive::backwardSubstitute();
+		cudaMemcpy(d_Vmid, &(VMid_[0]), nCompt_*sizeof(double), cudaMemcpyHostToDevice);
 		//cudaMemcpy(d_V, &(V_[0]), nCompt_*sizeof(double), cudaMemcpyHostToDevice);
-		//cudaMemcpy(d_Vmid, &(VMid_[0]), nCompt_*sizeof(double), cudaMemcpyHostToDevice);
 
-		hinesMatrixSolverWrapper();
+		//hinesMatrixSolverWrapper();
 	solverTimer.Stop();
 	solverTime = solverTimer.Elapsed();
 
@@ -157,7 +157,7 @@ void HSolveActive::step( ProcPtr info )
 	sendSpikesTime = (end-start)/1000.0f;
 
 	start = getTime();
-		transfer_memory2cpu_cuda();
+		//transfer_memory2cpu_cuda();
 	end = getTime();
 	memoryTransferTime = (end-start)/1000.0f;
 #else
@@ -227,11 +227,8 @@ void HSolveActive::calculateChannelCurrents()
 {
 #ifdef USE_CUDA
 	calculate_channel_currents_cuda_wrapper();
-	//cudaSafeCall(cudaMemcpy(&current_[0], d_current_, current_.size()*sizeof(CurrentStruct), cudaMemcpyDeviceToHost));
-
+	cudaSafeCall(cudaMemcpy(&current_[0], d_current_, current_.size()*sizeof(CurrentStruct), cudaMemcpyDeviceToHost));
 #else
-	u64 cpu_current_start = getTime();
-
     vector< ChannelStruct >::iterator ichan;
     vector< CurrentStruct >::iterator icurrent = current_.begin();
 
@@ -245,34 +242,23 @@ void HSolveActive::calculateChannelCurrents()
             ++icurrent;
         }
     }
-
-    u64 cpu_current_end = getTime();
-
-    if(num_time_prints > 0)
-    	printf("curr,%lf\n",(cpu_current_end-cpu_current_start)/1000.0f);
-
 #endif
 }
 
 void HSolveActive::updateMatrix()
 {
 
-	#ifdef USE_CUDA
-	 //Updates HS matrix and sends it to CPU
-
-	/*
+#ifdef USE_CUDA
+	// Updates HS matrix and sends it to CPU
 	if ( HJ_.size() != 0 )
 		memcpy( &HJ_[ 0 ], &HJCopy_[ 0 ], sizeof( double ) * HJ_.size() );
 	update_matrix_cuda_wrapper();
-	*/
 
 	// Updates CSR matrix and sends it to CPU.
-	update_csrmatrix_cuda_wrapper();
+	//update_csrmatrix_cuda_wrapper();
 
 #else
 	// CPU PART
-	u64 cpu_start = getTime();
-
 	/*
 	 * Copy contents of HJCopy_ into HJ_. Cannot do a vector assign() because
 	 * iterators to HJ_ get invalidated in MS VC++
@@ -340,13 +326,6 @@ void HSolveActive::updateMatrix()
 
         ihs += 4;
     }
-
-    u64 cpu_end = getTime();
-
-    if(num_um_prints > 0){
-		printf("um,%lf\n", (cpu_end-cpu_start)/1000.0f);
-		num_um_prints--;
-	}
 #endif
     stage_ = 0;    // Update done.
 }
@@ -357,12 +336,16 @@ void HSolveActive::updateMatrix()
 void HSolveActive::advanceCalcium()
 {
 #ifdef USE_CUDA
-   cudaMemset(d_caActivation_values, 0, ca_.size()*sizeof(double));
-   advance_calcium_cuda_wrapper();
-   //cudaMemcpy(&(ca_[0]), d_ca, ca_.size()*sizeof(double), cudaMemcpyDeviceToHost);
-   //cudaMemcpy(&(caConc_[0]), d_caConc_, caConc_.size()*sizeof(CaConcStruct), cudaMemcpyDeviceToHost);
+	/*
+	 * Disabling it as of now as CPU is faster.
+	cudaMemset(d_caActivation_values, 0, ca_.size()*sizeof(double));
 
-#else
+	advance_calcium_cuda_wrapper();
+
+	cudaMemcpy(&(ca_[0]), d_ca, ca_.size()*sizeof(double), cudaMemcpyDeviceToHost);
+	cudaMemcpy(&(caConc_[0]), d_caConc_, caConc_.size()*sizeof(CaConcStruct), cudaMemcpyDeviceToHost);
+	*/
+#endif //#else
 
     vector< double* >::iterator icatarget = caTarget_.begin();
     vector< double >::iterator ivmid = VMid_.begin();
@@ -425,7 +408,7 @@ void HSolveActive::advanceCalcium()
     }
 
     caActivation_.assign( caActivation_.size(), 0.0 );
-#endif
+//#endif
 }
 
 void HSolveActive::advanceChannels( double dt )
@@ -494,10 +477,14 @@ void HSolveActive::advanceChannels( double dt )
 	}
 
 	// Calling the kernels
+	cudaSafeCall(cudaMemcpy(d_V, &(V_.front()), nCompt_ * sizeof(double), cudaMemcpyHostToDevice));
+	cudaSafeCall(cudaMemcpy(d_ca, &(ca_.front()), ca_.size()*sizeof(double), cudaMemcpyHostToDevice));
+
 	get_lookup_rows_and_fractions_cuda_wrapper(dt); // Gets lookup values for Vm and Ca_.
 	advance_channels_cuda_wrapper(dt); // Advancing fraction values.
 	get_compressed_gate_values_wrapper(); // Getting values of new state
-	// cudaSafeCall(cudaMemcpy(&state_[0], d_state_, state_.size()*sizeof(double), cudaMemcpyDeviceToHost));
+
+	cudaSafeCall(cudaMemcpy(&state_[0], d_state_, state_.size()*sizeof(double), cudaMemcpyDeviceToHost));
 
 #else
 
