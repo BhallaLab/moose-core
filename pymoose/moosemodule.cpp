@@ -2191,7 +2191,9 @@ extern "C" {
         new_class->tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HEAPTYPE;
         PyHeapTypeObject* et = (PyHeapTypeObject*)new_class;
         et->ht_name = PyUnicode_FromString(className.c_str());
+#if PY_MINOR_VERSION >= 3
         et->ht_qualname = PyUnicode_FromString(str.c_str());
+#endif
 #else
         new_class->tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
 #endif
