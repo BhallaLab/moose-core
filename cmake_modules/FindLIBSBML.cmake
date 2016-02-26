@@ -5,9 +5,9 @@
 
 # Locate libsbml
 # This module defines:
-# LIBSBML_INCLUDE_DIR, where to find the headers
+# LIBSBML_INCLUDE_DIRS, where to find the headers
 #
-# LIBSBML_LIBRARY, LIBSBML_LIBRARY_DEBUG
+# LIBSBML_LIBRARIES, LIBSBML_LIBRARIES_DEBUG
 # LIBSBML_FOUND
 #
 # $LIBSBML_DIR is an environment variable that would
@@ -18,7 +18,7 @@
 
 message (STATUS "$ENV{LIBSBML_DIR}")
 
-find_path(LIBSBML_INCLUDE_DIR sbml/SBase.h
+find_path(LIBSBML_INCLUDE_DIRS sbml/SBase.h
     PATHS $ENV{LIBSBML_DIR}/include
           $ENV{LIBSBML_DIR}
           ~/Library/Frameworks
@@ -33,11 +33,11 @@ find_path(LIBSBML_INCLUDE_DIR sbml/SBase.h
           /usr/freeware/include
     NO_DEFAULT_PATH)
 
-if (NOT LIBSBML_INCLUDE_DIR)
-    find_path(LIBSBML_INCLUDE_DIR sbml/SBase.h)
-endif (NOT LIBSBML_INCLUDE_DIR)
+if (NOT LIBSBML_INCLUDE_DIRS)
+    find_path(LIBSBML_INCLUDE_DIRS sbml/SBase.h)
+endif (NOT LIBSBML_INCLUDE_DIRS)
 
-find_library(LIBSBML_LIBRARY 
+find_library(LIBSBML_LIBRARIES
     NAMES sbml-static 
           sbml
           libsbml-static 
@@ -56,22 +56,22 @@ find_library(LIBSBML_LIBRARY
           /usr/freeware/lib64
     NO_DEFAULT_PATH)
 
-if (NOT LIBSBML_LIBRARY)
-    find_library(LIBSBML_LIBRARY 
+if (NOT LIBSBML_LIBRARIES)
+    find_library(LIBSBML_LIBRARIES
         NAMES sbml-static 
               sbml)
-endif (NOT LIBSBML_LIBRARY)
+endif (NOT LIBSBML_LIBRARIES)
 
 set(LIBSBML_FOUND "NO")
-if(LIBSBML_LIBRARY)
-    if   (LIBSBML_INCLUDE_DIR)
+if(LIBSBML_LIBRARIES)
+    if   (LIBSBML_INCLUDE_DIRS)
         SET(LIBSBML_FOUND "YES")
-    endif(LIBSBML_INCLUDE_DIR)
-endif(LIBSBML_LIBRARY)
+    endif(LIBSBML_INCLUDE_DIRS)
+endif(LIBSBML_LIBRARIES)
 
 # handle the QUIETLY and REQUIRED arguments and set LIBSBML_FOUND to TRUE if 
 # all listed variables are TRUE
 include(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(LIBSBML DEFAULT_MSG LIBSBML_LIBRARY LIBSBML_INCLUDE_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(LIBSBML DEFAULT_MSG LIBSBML_LIBRARIES LIBSBML_INCLUDE_DIRS)
 
-mark_as_advanced(LIBSBML_INCLUDE_DIR LIBSBML_LIBRARY)
+mark_as_advanced(LIBSBML_INCLUDE_DIRS LIBSBML_LIBRARIES)

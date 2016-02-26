@@ -154,31 +154,38 @@ if(GPROF AND DEBUG)
 endif()
 
 ################################### SETUP BUILD ################################
-
-IF(WITH_SBML)
-    find_package(LIBSBML REQUIRED)
-ELSE(WITH_SBML)
-    find_package(LIBSBML)
-ENDIF()
-
 if(SBML_STATIC_HOME)
     MESSAGE(STATUS "Using local SBML. Support is ON")
     include_directories(${SBML_STATIC_HOME}/include)
-    find_library(LIBSBML_LIBRARY
+    find_library(LIBSBML_LIBRARIES
         NAMES libsbml_static.a libsbml.a
         PATHS ${SBML_STATIC_HOME}/lib ${SBML_STATIC_HOME}/lib64
         NO_DEFAULT_PATH
         )
-    MESSAGE(STATUS "Using static sbml library: ${LIBSBML_LIBRARY}")
-    IF(LIBSBML_LIBRARY)
+    MESSAGE(STATUS "Using static sbml library: ${LIBSBML_LIBRARIES}")
+    IF(LIBSBML_LIBRARIES)
         set(LIBSBML_FOUND ON)
     ENDIF()
+else()
+    pkg_check_modules(LIBSBML libsbml)
+    if(!LIBSBML_FOUND)
+        IF(WITH_SBML)
+            find_package(LIBSBML REQUIRED)
+        ELSE(WITH_SBML)
+            find_package(LIBSBML)
+        ENDIF()
+    endif()
 endif()
 
 if(LIBSBML_FOUND)
-    MESSAGE(STATUS "SBML found. Support is ON: ${LIBSBML_LIBRARY}")
-    include_directories(${LIBSBML_INCLUDE_DIR})
-    find_package(LibXML2 REQUIRED)
+    MESSAGE(STATUS "SBML found. Support is ON: ${LIBSBML_LIBRARIES}")
+    include_directories(${LIBSBML_INCLUDE_DIRS})
+    pkg_check_modules(LibXML2 libxml-2.0)
+    if (!LibXML2_FOUND)
+        find_package(LibXML2 REQUIRED)
+    endif()
+    include_directories(${LibXML2_INCLUDE_DIRS})
+    add_definitions(-DUSE_SBML)
 else()
     MESSAGE(
         "======================================================================\n"
@@ -348,9 +355,9 @@ endif()
 
 LIST(APPEND STATIC_LIBRARIES moose_sbml)
 IF(SBML_STATIC_HOME)
-    list(APPEND STATIC_LIBRARIES ${LIBSBML_LIBRARY})
+    list(APPEND STATIC_LIBRARIES ${LIBSBML_LIBRARIES})
 ELSEIF()
-    list(APPEND SYSTEM_SHARED_LIBS ${LIBSBML_LIBRARY})
+    list(APPEND SYSTEM_SHARED_LIBS ${LIBSBML_LIBRARIES})
 ENDIF()
 
 
