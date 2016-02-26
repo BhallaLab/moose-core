@@ -448,11 +448,13 @@ SET(PROJECT_PYTHON_PATH ${CMAKE_CURRENT_SOURCE_DIR}/python)
 if(WITH_PYTHON)
     set(Python_ADDITIONAL_VERSION 2.6 2.7)
     message(STATUS "Building native python extension of MOOSE")
-    set(PYMOOSE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/python/moose")
+    set(PYMOOSE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/python/moose")
 
     find_package(NumPy REQUIRED)
     find_package(PythonDev REQUIRED)
     include_directories(${PYTHON_INCLUDE_DIRS})
+
+    file(COPY python DESTINATION .)
 
     add_subdirectory(pymoose)
 
@@ -484,22 +486,12 @@ IF(MACOSX)
         )
 ELSE(MACOSX)
     target_link_libraries(_moose 
-        "-Wl,--whole-archive"
         moosepython  
         ${MOOSE_LIBRARIES}
         ${STATIC_LIBRARIES}
-        "-Wl,--no-whole-archive"
         ${SYSTEM_SHARED_LIBS}
         )
 ENDIF(MACOSX)
-
-    add_custom_command(TARGET _moose POST_BUILD
-        COMMAND ${PYTHON_EXECUTABLE} setup.py sdist --dist-dir
-        ${CMAKE_CURRENT_BINARY_DIR}
-        WORKING_DIRECTORY ${PROJECT_PYTHON_PATH}
-        COMMENT "Generating moose source distribution using setuptools"
-        VERBATIM
-        )
 
 IF(WITH_DOC)
     # Also generate the documents
@@ -538,10 +530,8 @@ IF(MACOSX)
         )
 ELSE(MACOSX)
     target_link_libraries(cymoose 
-        "-Wl,--whole-archive"
         ${MOOSE_LIBRARIES}
         ${LIBRARIES}
-        "-Wl,--no-whole-archive"
         ${SYSTEM_LIBRARIES}
         )
 ENDIF(MACOSX)
@@ -578,17 +568,11 @@ install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/moose
     )
 
 if(WITH_PYTHON)
-    SET(MOOSE_SRC_TAR ${CMAKE_CURRENT_BINARY_DIR}/moose-${MOOSE_VERSION}.tar.gz)
-
     install(CODE 
         "
         execute_process(
-            COMMAND tar xvf ${MOOSE_SRC_TAR} -C /tmp
-            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-            )
-        execute_process(
             COMMAND ${PYTHON_EXECUTABLE} setup.py install --prefix=${CMAKE_INSTALL_PREFIX}
-            WORKING_DIRECTORY /tmp/moose-${MOOSE_VERSION}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/python
             )
         "
         )
