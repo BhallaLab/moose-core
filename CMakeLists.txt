@@ -11,6 +11,7 @@ endif(COMMAND cmake_policy)
 
 project(moose)
 set(MOOSE_VERSION "3.0.2")
+include(FindPkgConfig)
 
 # This snippet is from LLVM project.
 # Sanity check our source directory to make sure that we are not trying to
@@ -313,8 +314,6 @@ add_subdirectory(scheduling)
 add_subdirectory(biophysics)
 add_subdirectory(builtins)
 add_subdirectory(utility)
-add_subdirectory(external/muparser)
-add_subdirectory(external/tinyxml)
 add_subdirectory(mesh)
 add_subdirectory(sbml)
 add_subdirectory(mpi)
@@ -373,8 +372,28 @@ if(WITH_MPI)
     endif()
 endif(WITH_MPI)
 
+pkg_check_modules(MUPARSER muparser)
+if(MUPARSER_FOUND)
+    message("Using system muparser ${MUPARSER_VERSION}")
+    list(APPEND SYSTEM_SHARED_LIBS ${MUPARSER_LIBRARIES})
+else()
+    message("Using private muparser")
+    add_subdirectory(external/muparser)
+    list(APPEND MOOSE_LIBRARIES muparser)
+endif()
+
+pkg_check_modules(TINYXML tinyxml)
+if(TINYXML_FOUND)
+    message("Using system tinyxml ${TINYXML_VERSION}")
+    list(APPEND SYSTEM_SHARED_LIBS ${TINYXML_LIBRARIES})
+else()
+    message("Using private tinyxml")
+    add_subdirectory(external/tinyxml)
+    list(APPEND MOOSE_LIBRARIES tinyxml)
+endif()
+
 ###################################### LINKING #################################
-set(MOOSE_LIBRARIES
+list(APPEND MOOSE_LIBRARIES
     moose_builtins
     msg
     benchmarks
@@ -384,14 +403,12 @@ set(MOOSE_LIBRARIES
     moose_mpi
     biophysics 
     utility 
-    muparser
     kinetics 
     synapse
     intfire
     hsolve 
     mesh
     signeur
-    tinyxml
     diffusion 
     ksolve
     device
