@@ -716,13 +716,13 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
 #ifdef NOTIFY_PROGRESS
                 // Don't write too much. When 1% of simulation is over, write to
                 // the file.
-                if( sin(100 * M_PI * currentTime_ / runTime_) == 1.0) 
+                if( sin(20 * M_PI * currentTime_ / runTime_) == 1.0) 
                 {
                     time( &rawtime );
                     timeinfo = localtime( &rawtime );
                     strftime(now, 80, "%c", timeinfo);
                     progressFile << "@"  << now << ":Done " << currentTime_ << " out of " << runTime_ << endl;
-                    cout << "@ " << now << ": " << currentTime_ << " out of " << runTime_ << " is over " << endl;
+                    cout << "@ " << now << ": " << 100 * currentTime_ / runTime_ << "\% of total " << runTime_ << " is over." << endl;
                 }
 #endif
 
