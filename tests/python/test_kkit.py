@@ -1,6 +1,7 @@
 """
 Test Kkit capabilities of PyMOOSE
 """
+from __future__ import print_function
     
 __author__           = "Dilawar Singh"
 __copyright__        = "Copyright 2015, Dilawar Singh and NCBS Bangalore"

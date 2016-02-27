@@ -186,7 +186,9 @@ extern "C" {
     /* Id functions to allow part of sequence protocol */
     Py_ssize_t moose_Id_getLength(_Id * self);
     PyObject * moose_Id_getItem(_Id * self, Py_ssize_t index);
+#ifndef PY3K
     PyObject * moose_Id_getSlice(_Id * self, Py_ssize_t start, Py_ssize_t end);    
+#endif
     PyObject * moose_Id_getShape(_Id * self);
     PyObject * moose_Id_subscript(_Id * self, PyObject * op);
     PyObject * moose_Id_richCompare(_Id * self, PyObject * args, int op);

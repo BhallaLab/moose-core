@@ -24,6 +24,7 @@ EM = -0.065 Volts		= -65 mV
 Last modified: Sat Jan 18, 2014  05:01PM
 
 """
+from __future__ import print_function
     
 __author__           = "Dilawar Singh"
 __copyright__        = "Copyright 2013, NCBS Bangalore"
@@ -52,8 +53,8 @@ def testPowerLaw():
     """Test power law """
     l = [ 32.0 ]
     d = [ 16.0 ]
-    print nextValuePowerOf2Law( d[-1] )
-    print nextValuePowerOf2Law( l[-1], 1.0/3.0 )
+    print(nextValuePowerOf2Law( d[-1] ))
+    print(nextValuePowerOf2Law( l[-1], 1.0/3.0 ))
 
 class BinaryCable( ):
 

@@ -51,8 +51,13 @@ TODO: handle include statements (start with simple ion channel
 prototype includes.
 
 """
+
+from __future__ import print_function
+try:
+    from future_builtins import zip, map
+except ImportError:
+    pass
 import sys, os
-from itertools import izip
 from urllib2 import urlopen
 import numpy as np
 import moose
@@ -211,9 +216,9 @@ class NML2Reader(object):
                     p0 = parent.distal
                 else:
                     raise Exception('No proximal point and no parent segment for segment: name=%s, id=%s' % (segment.name, segment.id))
-            comp.x0, comp.y0, comp.z0 = map(lambda x: x * self.lunit, map(float, (p0.x, p0.y, p0.z)))            
+            comp.x0, comp.y0, comp.z0 = (x * self.lunit for x in map(float, (p0.x, p0.y, p0.z)))
             p1 = segment.distal
-            comp.x, comp.y, comp.z = map(lambda x: x * self.lunit, map(float, (p1.x, p1.y, p1.z)))
+            comp.x, comp.y, comp.z = (x * self.lunit for x in map(float, (p1.x, p1.y, p1.z)))
             comp.length = np.sqrt((comp.x - comp.x0)**2
                                   + (comp.y - comp.y0)**2
                                   + (comp.z - comp.z0)**2)
@@ -235,7 +240,7 @@ class NML2Reader(object):
         according to NeuroML2 cell `nmlcell`."""
         bp = nmlcell.biophysicalProperties
         if bp is None:
-            print 'Warning: %s in %s has no biophysical properties' % (nmlcell.id, self.filename)
+            print('Warning: %s in %s has no biophysical properties' % (nmlcell.id, self.filename))
             return
         self.importMembraneProperties(nmlcell, moosecell, bp.membraneProperties)
         self.importIntracellularProperties(nmlcell, moosecell, bp.intracellularProperties)
@@ -302,7 +307,7 @@ class NML2Reader(object):
             try:
                 ionChannel = self.id_to_ionChannel[chdens.ionChannel]
             except KeyError:
-                print 'No channel with id', chdens.ionChannel
+                print('No channel with id', chdens.ionChannel)
                 continue
             if ionChannel.type_ == 'ionChannelPassive':
                 for seg in segments:
@@ -341,7 +346,7 @@ class NML2Reader(object):
             for path in paths:
                 try:
                     inner.read(path)                    
-                except IOError, e:
+                except IOError as e:
                     error = e
                 else:
                     self.includes[include.href] = inner
@@ -351,7 +356,7 @@ class NML2Reader(object):
                     error = None
                     break
             if error:
-                print 'Last exception:', error
+                print('Last exception:', error)
                 raise IOError('Could not read any of the locations: %s' % (paths))
 
     def importIonChannels(self, doc, vmin=-120e-3, vmax=40e-3, vdivs=3000):
@@ -361,7 +366,7 @@ class NML2Reader(object):
                 mchan = moose.HHChannel('%s/%s' % (self.lib.path, chan.id))
                 mgates = map(moose.element, (mchan.gateX, mchan.gateY, mchan.gateZ))
                 assert(len(chan.gate) <= 3) # We handle only up to 3 gates in HHCHannel
-                for ngate, mgate in izip(chan.gate, mgates):
+                for ngate, mgate in zip(chan.gate, mgates):
                     if mgate.name.endswith('X'):
                         mchan.Xpower = ngate.instances
                     elif mgate.name.endswith('Y'):
@@ -411,9 +416,9 @@ class NML2Reader(object):
         else:
             name = concModel.id
         ca = moose.CaConc('%s/%s' % (self.lib.path, id))
-        print '11111', concModel.restingConc
-        print '2222', concModel.decayConstant
-        print '33333', concModel.shellThickness
+        print('11111', concModel.restingConc)
+        print('2222', concModel.decayConstant)
+        print('33333', concModel.shellThickness)
 
         ca.CaBasal = SI(concModel.restingConc)
         ca.tau = SI(concModel.decayConstant)

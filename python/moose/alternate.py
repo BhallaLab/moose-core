@@ -669,7 +669,7 @@ class Neutral(object):
         return self.oid_.getFieldNames(ftype)
 
     def getNeighbors(self, fieldName):
-        if fieldName in list(getFieldDict(self.className).keys()):
+        if fieldName in getFieldDict(self.className):
             return [eval('%s("%s")' % (id_[0].getField('class'), id_.getPath())) for id_ in self.oid_.getNeighbors(fieldName)]
         raise ValueError('%s: no such field on %s' % (fieldName, self.path))
         
@@ -885,8 +885,8 @@ def showfield(element, field='*', showtype=False):
         element = Neutral(element)
     if field == '*':        
         value_field_dict = getFieldDict(element.className, 'valueFinfo')
-        max_type_len = max([len(dtype) for dtype in list(value_field_dict.values())])
-        max_field_len = max([len(dtype) for dtype in list(value_field_dict.keys())])
+        max_type_len = max(len(dtype) for dtype in value_field_dict.values())
+        max_field_len = max(len(dtype) for dtype in value_field_dict.keys())
         print() 
         print('[', element.path, ']')
         for key, dtype in list(value_field_dict.items()):
@@ -1003,7 +1003,7 @@ def update_class(cls, class_id):
 def define_class(class_id):
     """Define a class based on Cinfo element with Id=class_id."""
     class_name = class_id[0].getField('name')
-    if class_name in list(globals().keys()):
+    if class_name in globals():
         return
     base = class_id[0].getField('baseClass')
     if base != 'none':

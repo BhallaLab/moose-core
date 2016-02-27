@@ -43,6 +43,7 @@ In [2]: import moose.neuroml
 In [3]: moose.neuroml.loadNeuroML_L123('Generated.net.xml')
 """
 
+from __future__ import print_function
 import moose
 from moose.utils import *
 from xml.etree import cElementTree as ET
@@ -77,7 +78,6 @@ class NeuroML():
          see doc string of NetworkML.readNetworkML() for details.
         """
         _logger.info("Loading neuroml file %s " % filename)
-
         moose.Neutral('/library') # creates /library in MOOSE tree; elif present, wraps
         tree = ET.parse(filename)
         root_element = tree.getroot()
@@ -165,4 +165,3 @@ if __name__ == "__main__":
         _logger.error("You need to specify the neuroml filename.")
         sys.exit(1)
     print(loadNeuroML_L123(sys.argv[1]))
-    

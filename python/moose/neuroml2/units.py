@@ -49,6 +49,7 @@
 in NeuroMLCoreDimensions.xml) to SI
 
 """
+from __future__ import print_function
 import numpy as np
 import re
 from xml.etree import ElementTree
