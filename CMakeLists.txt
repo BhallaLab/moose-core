@@ -69,7 +69,7 @@ option(NOTIFY_PROGRESS "Show progress of simulation" OFF)
 option(ENABLE_LOGGER  "Enable MOOSE logger [Deprecated]" OFF)
 
 ## Unit testing and debug mode.
-option(DEBUG "Build with debug support" ON)
+option(DEBUG "Build with debug support" OFF)
 option(GPROF "Build for profiling using gprof" OFF)
 option(ENABLE_UNIT_TESTS "Enable unit tests (DEBUG should also be ON)" OFF)
 option(WITH_PYTHON "Build native python extension" ON)
@@ -110,6 +110,9 @@ add_definitions(-Wall
     )
 add_definitions(-fPIC)
 
+include(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
 if(COMPILER_SUPPORTS_CXX11)
     MESSAGE(STATUS "Your compiler supports c++11 features. Enabling it")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
@@ -155,6 +158,18 @@ if(GPROF AND DEBUG)
     add_definitions(-pg)
     set(CMAKE_EXE_LINKER_FLAGS_DEBUG "-pg")
 endif()
+
+IF(NOTIFY_PROGRESS)
+    IF(COMPILER_SUPPORTS_CXX11 OR COMPILER_SUPPORTS_CXX0X)
+        MESSAGE(STATUS "MOOSE will occasionally write to __moose__progress__ file "
+            " status of simulation (done time/total time)"
+            )
+    ELSE()
+        MESSAGE(FATAL_ERROR "No c++11 or c++0x support in compiler."
+            "You can not use -DNOTIFY_PROGRESS=ON without it"
+            )
+    ENDIF()
+ENDIF()
 
 ################################### SETUP BUILD ################################
 
