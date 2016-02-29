@@ -139,7 +139,7 @@ def timetable_file(filename='timetable.txt', simtime=100):
 def timetable_demo():
 
     tt_array, sp_array = timetable_nparray()
-    print sp_array
+    print(sp_array)
     tt_file, sp_file = timetable_file()
     # Create a synchan inside a compartment to demonstrate how to use
     # TimeTable to send artificial spike events to a synapse.

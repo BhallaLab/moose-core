@@ -26,7 +26,7 @@ class DoubleDict:
         txt = []
         for k in self.k:
             if k == self.v[self.k.get(k, None)]:
-                txt.append(unicode('{} <-> {}'.format(k, self.k[k])))
+                txt.append(u'{} <-> {}'.format(k, self.k[k]))
             else:
                 raise UserWarning, "Duplicate Entries: {} {}".format(
                         self.k
@@ -75,4 +75,4 @@ if __name__ == "__main__":
     for s in b:
         a.insertUniqueVal(s)
 
-    print a
+    print(a)

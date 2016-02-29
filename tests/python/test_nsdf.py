@@ -2,6 +2,7 @@
 # Changed from nsdf.py from
 # https://github.com/BhallaLab/moose-examples/snippets/nsdf.py
 
+from __future__ import print_function
 import numpy as np
 from datetime import datetime
 import getpass

@@ -45,6 +45,7 @@
 
 # Code:
 
+from __future__ import print_function
 import unittest
 import numpy as np
 import moose
@@ -110,7 +111,7 @@ class TestFullCell(unittest.TestCase):
     def test_protochans(self):
         """TODO: verify the prototype cahnnel."""
         for chan_id in moose.wildcardFind('/library/##[ISA=HHChannel]'):
-            print moose.element(chan_id)
+            print(moose.element(chan_id))
     
     def test_HHChannels(self):
         """Verify copied channel in membrane properties."""

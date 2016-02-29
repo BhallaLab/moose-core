@@ -608,7 +608,29 @@ extern "C" {
         }
         return oid_to_element(oid);
     }
+
+    static PyObject* moose_Id_fillSlice(_Id *self,
+                                        Py_ssize_t start,
+                                        Py_ssize_t end,
+                                        Py_ssize_t step,
+                                        Py_ssize_t slicelength) {
+
+        PyObject * ret = PyTuple_New(slicelength);
+        bool has_fields = self->id_.element()->hasFields();
+        for (int ii = start; ii < end; ii += step){
+                ObjId oid(self->id_.path());
+                PyObject *value;
+                if (has_fields)
+                    value = oid_to_element(ObjId(self->id_, oid.dataIndex, ii));
+                else
+                    value = oid_to_element(ObjId(self->id_, ii));
+
+                PyTuple_SET_ITEM(ret, (Py_ssize_t)(ii-start)/step, value);
+        }
+        return ret;
+    }
     
+#ifndef PY3K
     PyObject * moose_Id_getSlice(_Id * self, Py_ssize_t start, Py_ssize_t end)
     {
         if (!Id::isValid(self->id_)){
@@ -621,42 +643,31 @@ extern "C" {
         while (end < 0){
             end += len;
         }
-        if (start > end){
-            // PyErr_SetString(PyExc_IndexError, "Start index must be less than end.");
-            // return NULL;
-            // Python itself returns empty tuple in such cases, follow that
-            return PyTuple_New(0);
-        }
-        PyObject * ret = PyTuple_New((Py_ssize_t)(end - start));
-        // Py_XINCREF(ret);
-        if (self->id_.element()->hasFields()){ // FieldElement - fieldIndex changing index
-            for (int ii = start; ii < end; ++ii){
-                ObjId oid(self->id_.path());
-                PyObject * value = oid_to_element(ObjId(self->id_, oid.dataIndex, ii));
-                if (PyTuple_SetItem(ret, (Py_ssize_t)(ii-start), value)){
-                    Py_XDECREF(ret);
-                    PyErr_SetString(PyExc_RuntimeError, "moose_Id_getSlice: could not assign tuple entry.");
-                    return NULL;
-                }
-            }
-        } else { // Ordinary element - dataIndex changing index
-            for ( int ii = start; ii < end; ++ii){
-                PyObject * value = oid_to_element(ObjId(self->id_, ii));
-                if (PyTuple_SetItem(ret, (Py_ssize_t)(ii-start), value)){
-                    Py_XDECREF(ret);
-                    PyErr_SetString(PyExc_RuntimeError, "moose_Id_getSlice: could not assign tuple entry.");
-                    return NULL;
-                }
-            }
-        }
-        return ret;
+        return moose_Id_fillSlice(self, start, end, 1, std::max(end - start, (Py_ssize_t) 0));
     }
+#endif
+
+#ifdef PY3K
+#  define SLICE_OBJ(x) (x)
+#else
+#  define SLICE_OBJ(x) ((PySliceObject*)(x))
+#endif
 
     ///////////////////////////////////////////////////
     // Mapping protocol
     ///////////////////////////////////////////////////
      PyObject * moose_Id_subscript(_Id * self, PyObject *op)
     {
+        if (PySlice_Check(op)) {
+            const Py_ssize_t len = moose_Id_getLength(self);
+            Py_ssize_t start, stop, step, slicelength;
+
+            if (PySlice_GetIndicesEx(SLICE_OBJ(op), len, &start, &stop, &step, &slicelength) < 0)
+                return NULL;
+
+            return moose_Id_fillSlice(self, start, stop, step, slicelength);
+        }
+
         if (PyInt_Check(op) || PyLong_Check(op)){
             Py_ssize_t value = PyInt_AsLong(op);
             return moose_Id_getItem(self, value);

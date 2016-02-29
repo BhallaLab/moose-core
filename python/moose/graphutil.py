@@ -170,7 +170,7 @@ class TestMooseGraph(unittest.TestCase):
 
     def test_edgelabels(self):
         for ee in self.graph.edges():
-            keys = list(self.graph.edge[ee[0]][ee[1]].keys())
+            keys = self.graph.edge[ee[0]][ee[1]].keys()
             self.assertTrue('src' in keys)
             self.assertTrue('dest' in keys)
 

@@ -93,17 +93,13 @@ extern "C" {
     int moose_ObjId_init_from_id(_ObjId * self, PyObject * args, PyObject * kwargs)
     {
         extern PyTypeObject ObjIdType;
-        // The char arrays are to avoid deprecation warning
-        char _id[] = "id";
-        char _dataIndex[] = "dataIndex";
-        char _fieldIndex[] = "fieldIndex";
-        static char * kwlist[] = {_id, _dataIndex, _fieldIndex, NULL};
+        static const char* const kwlist[] = {"id", "dataIndex", "fieldIndex", NULL};
         unsigned int id = 0, data = 0, field = 0;
         PyObject * obj = NULL;
         if (PyArg_ParseTupleAndKeywords(args, kwargs,
-                                        "I|III:moose_ObjId_init_from_id",
-                                        kwlist,
-                                        &id, &data, &field )){
+                                        "I|II:moose_ObjId_init_from_id",
+                                        (char**)kwlist,
+                                        &id, &data, &field)){
             PyErr_Clear();
             if (!Id::isValid(id)){
                 RAISE_INVALID_ID(-1, "moose_ObjId_init_from_id");
@@ -117,8 +113,9 @@ extern "C" {
         }
         PyErr_Clear();
         if (PyArg_ParseTupleAndKeywords(args, kwargs,
-                                        "O|III:moose_ObjId_init_from_id",
-                                        kwlist, &obj, &data, &field)){
+                                        "O|II:moose_ObjId_init_from_id",
+                                        (char**)kwlist,
+                                        &obj, &data, &field)){
             PyErr_Clear();
             // If first argument is an Id object, construct an ObjId out of it
             if (Id_Check(obj)){
@@ -149,16 +146,12 @@ extern "C" {
     int moose_ObjId_init_from_path(_ObjId * self, PyObject * args,
                                    PyObject * kwargs)
     {
+        static const char* const kwlist[] = {"path", "n", "g", "dtype", NULL};
+        const char* parsedPath;
         unsigned int numData = 1;
-        char * parsedPath = NULL;
-        char * type = NULL;
-        char _path[] = "path";
-        char _dtype[] = "dtype";
-        char _size[] = "n";
-        char _global[] = "g";
         unsigned int isGlobal = 0;
-        static char * kwlist [] = {_path, _size, _global, _dtype, NULL};
-        static const string default_type = "Neutral";
+        char* type = NULL;
+
         self->oid_ = ObjId( 0, BADINDEX );
         PyTypeObject * mytype = Py_TYPE(self);
         string mytypename(mytype->tp_name);
@@ -167,8 +160,8 @@ extern "C" {
         bool parse_success = false;
         if (PyArg_ParseTupleAndKeywords(args, kwargs,
                                         "s|IIs:moose_ObjId_init_from_path",
-                                        kwlist, &parsedPath, &numData,
-                                        &isGlobal, &type)){
+                                        (char**)kwlist,
+                                        &parsedPath, &numData, &isGlobal, &type)){
             parse_success = true;
         }
         // we need to clear the parse error so that the callee can try
