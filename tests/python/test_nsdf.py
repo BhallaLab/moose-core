@@ -9,8 +9,6 @@ import getpass
 import os
 
 # Use in-repo moose to install.
-import sys
-sys.path = ['../../python'] + sys.path
 import moose
 print('using moose from: %s' % moose.__file__)
 

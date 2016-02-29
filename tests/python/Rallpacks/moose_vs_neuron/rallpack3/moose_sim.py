@@ -18,7 +18,7 @@ __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
 import sys
-sys.path.append('../../../python')
+
 import moose
 from moose import utils
 

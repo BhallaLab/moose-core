@@ -19,7 +19,6 @@ __status__           = "Development"
 
 
 import sys
-sys.path.append('../../../python')
 
 import moose
 import unittest

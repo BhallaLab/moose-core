@@ -1,10 +1,9 @@
 from __future__ import print_function
-import os
+
 import random
 import time
 from numpy import random as nprand
-import sys
-sys.path.append('/home/subha/src/moose_async13/python')
+
 import moose
 
 def make_network():

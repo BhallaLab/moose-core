@@ -17,8 +17,7 @@ from __future__ import print_function
 
 import os
 os.environ['NUMPTHREADS'] = '1'
-import sys
-sys.path.append('./../../python/')
+
 import moose
 from moose.neuroml.NeuroML import NeuroML
 
