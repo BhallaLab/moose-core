@@ -93,6 +93,7 @@ def makeMoogli( rd, mooObj, moogliEntry, fieldInfo ):
 
 
     viewer = moogli.Viewer("Viewer")
+    viewer.setWindowTitle( moogliEntry[4] )
     if ( mooField == 'n' or mooField == 'conc' ):
         viewer.attach_shapes( updateGroup.shapes.values())
         viewer.detach_shape(soma)
