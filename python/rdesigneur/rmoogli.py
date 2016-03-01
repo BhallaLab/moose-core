@@ -9,14 +9,20 @@
 #########################################################################
 
 import math
-from PyQt4 import QtGui
-import moogli
-import moogli.extensions.moose
 import matplotlib
 import sys
 import moose
+hasMoogli = True
+try: 
+    from PyQt4 import QtGui
+    import moogli
+    import moogli.extensions.moose
+    app = QtGui.QApplication(sys.argv)
+except Exception as e:
+    print( 'Warning: Moogli not found. All moogli calls will use dummy functions' )
+    hasMoogli = False
 
-app = QtGui.QApplication(sys.argv)
+
 runtime = 0.0
 moogliDt = 1.0
 rotation = math.pi / 500.0
@@ -62,6 +68,8 @@ def postlude( view ):
     view.rd.display()
 
 def makeMoogli( rd, mooObj, moogliEntry, fieldInfo ):
+    if not hasMoogli:
+        return None
     mooField = moogliEntry[3]
     numMoogli = len( mooObj )
     network = moogli.extensions.moose.read( path = rd.elecid.path, vertices=15)
@@ -135,6 +143,8 @@ def makeMoogli( rd, mooObj, moogliEntry, fieldInfo ):
     return viewer
 
 def displayMoogli( rd, _dt, _runtime, _rotation ):
+    if not hasMoogli:
+        return None
     global runtime
     global moogliDt
     global rotation
