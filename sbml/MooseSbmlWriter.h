@@ -1,5 +1,5 @@
 /*******************************************************************
- * File:            SbmlWriter.h
+ * File:            MooseSbmlWriter.h
  * Description:      
  * Author:          HarsnaRani
  * E-mail:          hrani@ncbs.res.in
@@ -19,12 +19,12 @@
 #ifdef USE_SBML
 #include <sbml/SBMLTypes.h>
 
-class SbmlWriter
+class MooseSbmlWriter
 {
 		
 	public:
-		SbmlWriter() {;}
-		~SbmlWriter() {;}
+		MooseSbmlWriter() {;}
+		~MooseSbmlWriter() {;}
 		int write( string location, string filename );
 #ifdef USE_SBML
 		void createModel( string filename, SBMLDocument& doc ,string target);
