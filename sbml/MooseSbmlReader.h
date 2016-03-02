@@ -1,5 +1,5 @@
 /*******************************************************************
- * File:            SbmlReader.h
+ * File:            MooseSbmlReader.h
  * Description:
  * Author:          HarshaRani G.V
  * E-mail:          hrani@ncbs.res.in
@@ -14,8 +14,8 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifndef _SBMLREADER_H
-#define _SBMLREADER_H
+#ifndef _MOOSESBMLREADER_H
+#define _MOOSESBMLREADER_H
 #ifdef USE_SBML
 
 #include <sbml/SBMLTypes.h>
@@ -36,12 +36,12 @@ typedef struct {
     string ycord;
 } EnzymeInfo;
 
-class SbmlReader {
+class MooseSbmlReader {
 public:
-    SbmlReader() {
+    MooseSbmlReader() {
         errorFlag_ = false;
     }
-    ~SbmlReader() {
+    ~MooseSbmlReader() {
         ;
     }
     Id read(string filename,string location,string solverClass);
@@ -80,5 +80,5 @@ private:
     void getGlobalParameter();
 };
 #endif //USE_SBML
-#endif // _SBMLREADER_H
+#endif // _MOOSESBMLREADER_H
 
