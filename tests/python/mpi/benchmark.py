@@ -50,6 +50,7 @@ runs with increasing number of processes in an attempt to avoid
 systematic error based on process sequence.
 
 """
+from __future__ import print_function
 
 import getopt
 import subprocess
@@ -83,36 +84,36 @@ def run(script, scriptargs=[], hostfile='hostfile', np=2, ni=1, oversubscribe=Fa
     for jj in range(ni):
         random.shuffle(procs)
         for ii in procs:
-            print 'Running with', ii, 'processes'
+            print('Running with', ii, 'processes')
             if ii > 0:
                 args = ['mpirun', '--hostfile', hostfile, '-np', '1', 'python', script] + scriptargs + [':', '-np', str(ii), '../../../moose']
             else:
                 args = ['mpirun', '--hostfile', hostfile, '-np',  '1', 'python', script] + scriptargs
-            print 'Running:', args
+            print('Running:', args)
             s1 = datetime.now()
             ret = subprocess.check_output(args)
-            print '====================== OUTPUT START ======================'
-            print ret
-            print '====================== OUTPUT   END ======================'
+            print('====================== OUTPUT START ======================')
+            print(ret)
+            print('====================== OUTPUT   END ======================')
             e1 = datetime.now()
             d1 = e1 - s1
             avg[ii] += d1
-            print 'Time to run ', args
-            print '            =', d1.days * 86400 + d1.seconds + 1e-6 * d1.microseconds
+            print('Time to run ', args)
+            print('            =', d1.days * 86400 + d1.seconds + 1e-6 * d1.microseconds)
     e0 = datetime.now()
     d0 = e0 - s0
     avg['all'] += d0
     for ii in sorted(procs):
-        print 'Time to run using', ii, 'additional moose processes: '
-        print '            =', (avg[ii].days * 86400 + avg[ii].seconds + 1e-6 * avg[ii].microseconds) / ni
-    print 'Total time for all different process counts averaged over all', ni, 'iterations:', (avg['all'].days * 86400 + avg['all'].seconds + 1e-6 * avg['all'].microseconds) / ni
+        print('Time to run using', ii, 'additional moose processes: ')
+        print('            =', (avg[ii].days * 86400 + avg[ii].seconds + 1e-6 * avg[ii].microseconds) / ni)
+    print('Total time for all different process counts averaged over all', ni, 'iterations:', (avg['all'].days * 86400 + avg['all'].seconds + 1e-6 * avg['all'].microseconds) / ni)
 
 def print_usage(argv0):
-    print '''Usage: %s [-s slotcount]  [-f hostfile] [-n maxprocess] [-i iterations] {script} [script arguments]
+    print('''Usage: %s [-s slotcount]  [-f hostfile] [-n maxprocess] [-i iterations] {script} [script arguments]
     
     Run {script} using up to {slotcount} slots and display
     execution time. If specified, the host information will be
-    written in `hostfile`. Default is "hostfile".''' % (argv0)
+    written in `hostfile`. Default is "hostfile".''' % (argv0))
     sys.exit(1)
     
 if __name__ == '__main__':

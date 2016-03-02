@@ -422,7 +422,7 @@ class NetworkML(object):
                 rotationnote = instance.find('./{'+nmu.meta_ns+'}notes')
                 if rotationnote is not None:
                     # the text in rotationnote is zrotation=xxxxxxx
-                    zrotation = float(string.split(rotationnote.text,'=')[1])
+                    zrotation = float(rotationnote.text.split('=')[1])
                 else:
                     zrotation = 0
                 if cellname == 'LIF':
@@ -557,7 +557,7 @@ class NetworkML(object):
         except KeyError as e:
             utils.dump("ERR", "Failed find key {0}".format(e)
                     , frame = inspect.currentframe())
-            print self.projectionDict.keys()
+            print(self.projectionDict.keys())
             sys.exit(0)
 
         properties = connection.findall('./{'+nmu.nml_ns+'}properties')

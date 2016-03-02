@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Feb  8 11:29:36 2013 (+0530)
 # Version: 
-# Last-Updated: Sat Mar  2 13:53:34 2013 (+0530)
+# Last-Updated: Tue Mar  1 02:52:35 2016 (-0500)
 #           By: subha
-#     Update #: 180
+#     Update #: 182
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -45,6 +45,7 @@
 
 # Code:
 
+from __future__ import print_function
 import re
 from . import moose
 
@@ -53,7 +54,7 @@ from . import moose
 ## http://eli.thegreenplace.net/2011/10/19/perls-guess-if-file-is-text-or-binary-implemented-in-python/#id2
 
 import sys
-PY3 = sys.version_info[0] == 3
+PY3 = sys.version_info[0] >= 3
 
 # A function that takes an integer in the 8-bit range and returns
 # a single-character byte object in py3 / a single-character string

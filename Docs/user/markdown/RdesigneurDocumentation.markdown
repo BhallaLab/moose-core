@@ -110,8 +110,9 @@ The *stimList* defines a stimulus. Each entry has four arguments:
 +	`parameter` specifies the simulation parameter to assign. Here it is
 	the injection current to the compartment.
 +	`expression_string` calculates the value of the parameter, typically
-	as a function of time. Here we use the function sign(x),
-	where sign(x) == +1 for x > 0, 0 for x = 0 and -1 for x < 0. 
+	as a function of time. Here we use the function 
+	`(t>0.1 && t<0.2) * 2e-8` which evaluates as 2e-8 between the times of
+	0.1 and 0.2 seconds.
 
 To summarise this, the *stimList* here means *inject a current of 20nA to the
 soma between the times of 0.1 and 0.2 s*.
@@ -613,7 +614,7 @@ string:
 
     	[spine_proto, spinename]
 
-*spine_proto*: This is typically a function. One can define one's own,
+*spineProto*: This is typically a function. One can define one's own,
 but there are several predefined ones in rdesigneur. All these define a 
 spine with the following parameters:
 
@@ -627,11 +628,11 @@ spine with the following parameters:
 	
 Here are the predefined spine prototypes:
 
-- *make_passive_spine()*: This just makes a passive spine with the 
+- *makePassiveSpine()*: This just makes a passive spine with the 
 default parameters
-- *make_exc_spine()*: This makes a spine with NMDA and glu receptors,
+- *makeExcSpine()*: This makes a spine with NMDA and glu receptors,
 and also a calcium pool. The NMDA channel feeds the Ca pool.
-- *make_active_spine()*: This adds a Ca channel to the exc_spine.
+- *makeActiveSpine()*: This adds a Ca channel to the exc_spine.
 and also a calcium pool.
 
 The spine distributions are specified in a familiar way for the first few 

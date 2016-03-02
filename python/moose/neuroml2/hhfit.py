@@ -214,7 +214,7 @@ def find_ratefn(x, y, **kwargs):
     rms_error = 1e10 # arbitrarily setting this
     best_fn = None
     best_p = None
-    for fn in fn_rate_map.keys():
+    for fn in fn_rate_map:
         p = randomized_curve_fit(fn, x, y, **kwargs)
         if p is None:
             continue

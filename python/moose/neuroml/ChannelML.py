@@ -12,6 +12,7 @@ readChannelMLFromFile(...) to load a standalone ChannelML file (synapse/channel)
 readChannelML(...) / readSynapseML to load from an xml.etree xml element (could be part of a larger NeuroML file).
 """
 
+from __future__ import print_function
 from xml.etree import cElementTree as ET
 import string
 import os, sys
@@ -154,11 +155,11 @@ class ChannelML():
         nernstnote = IVrelation.find('./{'+utils.meta_ns+'}notes')
         if nernstnote is not None:
             ## the text in nernstnote is "Nernst,Cout=<float>,z=<int>"
-            nernst_params = string.split(nernstnote.text,',')
+            nernst_params = nernstnote.text.split(',')
             if nernst_params[0] == 'Nernst':
                 nernstMstring = moose.Mstring(moosechannel.path+'/nernst_str')
-                nernstMstring.value = str( float(string.split(nernst_params[1],'=')[1]) * concfactor ) + \
-                                        ',' + str( int(string.split(nernst_params[2],'=')[1]) )
+                nernstMstring.value = str( float(nernst_params[1].split('=')[1]) * concfactor ) + \
+                                        ',' + str( int(nernst_params[2].split('=')[1]) )
         
         gates = IVrelation.findall('./{'+self.cml+'}gate')
         if len(gates)>3:
@@ -197,7 +198,7 @@ class ChannelML():
             self.gate_name = gate.attrib['name']
             for q10settings in IVrelation.findall('./{'+self.cml+'}q10_settings'):
                 ## self.temperature from neuro.utils
-                if 'gate' in list(q10settings.attrib.keys()):
+                if 'gate' in q10settings.attrib:
                     if q10settings.attrib['gate'] == self.gate_name:
                         self.setQ10(q10settings)
                         break
@@ -344,10 +345,10 @@ class ChannelML():
                 #moosegate.dyB = dCa*concfactor
 
     def setQ10(self,q10settings):
-        if 'q10_factor' in list(q10settings.attrib.keys()):
+        if 'q10_factor' in q10settings.attrib:
             self.q10factor = float(q10settings.attrib['q10_factor'])\
                 **((self.temperature-float(q10settings.attrib['experimental_temp']))/10.0)
-        elif 'fixed_q10' in list(q10settings.attrib.keys()):
+        elif 'fixed_q10' in q10settings.attrib:
             self.q10factor = float(q10settings.attrib['fixed_q10'])
 
 
