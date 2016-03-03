@@ -73,7 +73,7 @@ map< string,double> :: iterator pvm_iter;
  *
  * @return  Id on success. Some expcetion on failure.
  */
-Id MooseSbmlReader::read( string filename, string location, string solverClass) 
+Id moose::SbmlReader::read( string filename, string location, string solverClass) 
 {
     FILE * fp = fopen( filename.c_str(), "r" );
     if ( fp == NULL) {
@@ -304,7 +304,7 @@ Id MooseSbmlReader::read( string filename, string location, string solverClass)
  *
  * @return std::map<string, Id>.
  */
-map< string,Id > MooseSbmlReader::createCompartment(string location, Id parentId, string modelName, Id base_) 
+map< string,Id > moose::SbmlReader::createCompartment(string location, Id parentId, string modelName, Id base_) 
 {
     /* In compartment: pending to add
        -- the group
@@ -375,7 +375,7 @@ map< string,Id > MooseSbmlReader::createCompartment(string location, Id parentId
 }
 
 /* create MOLECULE  */
-const MooseSbmlReader::sbmlStr_mooseId MooseSbmlReader::createMolecule( map< string,Id > &comptSidMIdMap) {
+const moose::SbmlReader::sbmlStr_mooseId moose::SbmlReader::createMolecule( map< string,Id > &comptSidMIdMap) {
     Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
     map< string, Id >molSidcmptMIdMap;
     double transvalue = 0.0;
@@ -530,7 +530,7 @@ const MooseSbmlReader::sbmlStr_mooseId MooseSbmlReader::createMolecule( map< str
 
 /* Assignment Rule */
 
-void MooseSbmlReader::getRules() {
+void moose::SbmlReader::getRules() {
     unsigned int nr = model_->getNumRules();
     //if (nr > 0)
     //  cout << "\n ##### Need to populate funcpool and sumtotal which is pending due to equations \n";
@@ -597,7 +597,7 @@ void MooseSbmlReader::getRules() {
                     }
                 }
                 if (!rulePar.empty())
-                {   string t = "MooseSbmlReader::getRules: Assignment rule \"";
+                {   string t = "moose::SbmlReader::getRules: Assignment rule \"";
                     t += rule_variable;
                     t += "\" variable member \"";
                     t += rulePar;
@@ -624,7 +624,7 @@ void MooseSbmlReader::getRules() {
 
 //REACTION
 
-void MooseSbmlReader::createReaction(const map< string, Id > &molSidcmptMIdMap ) {
+void moose::SbmlReader::createReaction(const map< string, Id > &molSidcmptMIdMap ) {
     Reaction* reac;
 
     map< string,double > rctMap;
@@ -754,7 +754,7 @@ void MooseSbmlReader::createReaction(const map< string, Id > &molSidcmptMIdMap )
 } //reaction
 
 /* Enzymatic Reaction  */
-void MooseSbmlReader::setupEnzymaticReaction( const EnzymeInfo & einfo,string enzname, const map< string, Id > &molSidcmptMIdMap,string name1) {
+void moose::SbmlReader::setupEnzymaticReaction( const EnzymeInfo & einfo,string enzname, const map< string, Id > &molSidcmptMIdMap,string name1) {
     string enzPool = einfo.enzyme;
     Id comptRef = molSidcmptMIdMap.find(enzPool)->second; //gives compartment of sp
     Id meshEntry = Neutral::child( comptRef.eref(), "mesh" );
@@ -810,7 +810,7 @@ void MooseSbmlReader::setupEnzymaticReaction( const EnzymeInfo & einfo,string en
 }
 
 /*  get annotation  */
-pair<string, pair< string, string> > MooseSbmlReader :: getAnnotation_Spe_Reac(XMLNode * annotationSpe_Rec)
+pair<string, pair< string, string> > moose::SbmlReader :: getAnnotation_Spe_Reac(XMLNode * annotationSpe_Rec)
 {   string groupName = "";
     string xcord = "";
     string ycord = "";
@@ -840,7 +840,7 @@ pair<string, pair< string, string> > MooseSbmlReader :: getAnnotation_Spe_Reac(X
         }//annotation Node
     return make_pair(groupName, make_pair(xcord,ycord));
 }
-string MooseSbmlReader::getAnnotation( Reaction* reaction,map<string,EnzymeInfo> &enzInfoMap ) {
+string moose::SbmlReader::getAnnotation( Reaction* reaction,map<string,EnzymeInfo> &enzInfoMap ) {
     XMLNode * annotationNode = reaction->getAnnotation();
     EnzymeInfo einfo;
     string grpname = "",stage,group;
@@ -932,7 +932,7 @@ string MooseSbmlReader::getAnnotation( Reaction* reaction,map<string,EnzymeInfo>
 }
 
 /*    set up Michalies Menten reaction  */
-void MooseSbmlReader::setupMMEnzymeReaction( Reaction * reac,string rid,string rname,const map< string, Id > &molSidcmptMIdMap ) {
+void moose::SbmlReader::setupMMEnzymeReaction( Reaction * reac,string rid,string rname,const map< string, Id > &molSidcmptMIdMap ) {
     string::size_type loc = rid.find( "_MM_Reaction_" );
     if( loc != string::npos ) {
         int strlen = rid.length();
@@ -1002,7 +1002,7 @@ void MooseSbmlReader::setupMMEnzymeReaction( Reaction * reac,string rid,string r
 }
 
 /*    get Parameters from Kinetic Law  */
-void MooseSbmlReader::getParameters( const ASTNode* node,vector <string> & parameters ) {
+void moose::SbmlReader::getParameters( const ASTNode* node,vector <string> & parameters ) {
     assert( parameters.empty() );
     //cout << " parameter type " <<node->getType();
 
@@ -1037,7 +1037,7 @@ void MooseSbmlReader::getParameters( const ASTNode* node,vector <string> & param
 
 /*   push the Parameters used in Kinetic law to a vector  */
 
-void MooseSbmlReader::pushParmstoVector(const ASTNode* p,vector <string> & parameters) {
+void moose::SbmlReader::pushParmstoVector(const ASTNode* p,vector <string> & parameters) {
     string parm = "";
     //cout << "\n there " << p->getType();
     //cout << "_NAME" << " = " <<p->getName();
@@ -1056,7 +1056,7 @@ void MooseSbmlReader::pushParmstoVector(const ASTNode* p,vector <string> & param
 }
 
 /*     get Kinetic Law  */
-void MooseSbmlReader::getKLaw( KineticLaw * klaw,bool rev,vector< double > & rate ) {
+void moose::SbmlReader::getKLaw( KineticLaw * klaw,bool rev,vector< double > & rate ) {
     std::string id;
     double value = 0.0;
     UnitDefinition * kfud;
@@ -1148,7 +1148,7 @@ void MooseSbmlReader::getKLaw( KineticLaw * klaw,bool rev,vector< double > & rat
         rate.push_back( kb );
     }
 }
-double MooseSbmlReader::unitsforRates() {
+double moose::SbmlReader::unitsforRates() {
     double lvalue =1;
     for (unsigned int n=0; n < model_->getNumUnitDefinitions(); n++) {
         UnitDefinition * ud = model_->getUnitDefinition(n);
@@ -1168,7 +1168,7 @@ double MooseSbmlReader::unitsforRates() {
     }
     return lvalue;
 }//unitforRates
-void MooseSbmlReader::addSubPrd(Reaction * reac,Id reaction_,string type) {
+void moose::SbmlReader::addSubPrd(Reaction * reac,Id reaction_,string type) {
     if (reaction_ != Id())
     {
         map< string,double > rctMap;
@@ -1207,7 +1207,7 @@ void MooseSbmlReader::addSubPrd(Reaction * reac,Id reaction_,string type) {
    volume -- cubic meter
 */
 
-double MooseSbmlReader::transformUnits( double mvalue,UnitDefinition * ud,string type, bool hasonlySubUnit ) {
+double moose::SbmlReader::transformUnits( double mvalue,UnitDefinition * ud,string type, bool hasonlySubUnit ) {
     assert (ud);
 
     double lvalue = mvalue;
@@ -1261,7 +1261,7 @@ double MooseSbmlReader::transformUnits( double mvalue,UnitDefinition * ud,string
     }
     return lvalue;
 }
-void MooseSbmlReader::printMembers( const ASTNode* p,vector <string> & ruleMembers ) {
+void moose::SbmlReader::printMembers( const ASTNode* p,vector <string> & ruleMembers ) {
     if ( p->getType() == AST_NAME ) {
         //cout << "_NAME" << " = " << p->getName() << endl;
         ruleMembers.push_back( p->getName() );
@@ -1273,7 +1273,7 @@ void MooseSbmlReader::printMembers( const ASTNode* p,vector <string> & ruleMembe
     }
 }
 
-void MooseSbmlReader ::findModelParent( Id cwe, const string& path, Id& parentId, string& modelName ) {
+void moose::SbmlReader ::findModelParent( Id cwe, const string& path, Id& parentId, string& modelName ) {
     //Taken from LoadModels.cpp
     //If path exist example /model when come from GUI it creates model under /model/filename
     // i.e. because by default we creat genesis,sbml models under '/model', which is created before and path exist
@@ -1317,7 +1317,7 @@ void MooseSbmlReader ::findModelParent( Id cwe, const string& path, Id& parentId
  * @brief Populate parmValueMap; a member variable with keeps all the gloabals
  * parameters of SBML model.
  */
-void MooseSbmlReader::getGlobalParameter() {
+void moose::SbmlReader::getGlobalParameter() {
     for ( unsigned int pm = 0; pm < model_->getNumParameters(); pm++ ) {
         Parameter* prm = model_->getParameter( pm );
         std::string id,unit;
@@ -1332,7 +1332,7 @@ void MooseSbmlReader::getGlobalParameter() {
     }
 }
 
-string MooseSbmlReader::nameString( string str ) {
+string moose::SbmlReader::nameString( string str ) {
     string str1;
 
     int len = str.length();

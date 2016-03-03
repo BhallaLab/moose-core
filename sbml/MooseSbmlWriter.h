@@ -18,13 +18,13 @@
 #define _SBMLWRITER_H
 #ifdef USE_SBML
 #include <sbml/SBMLTypes.h>
-
-class MooseSbmlWriter
+namespace moose{
+class SbmlWriter
 {
 		
 	public:
-		MooseSbmlWriter() {;}
-		~MooseSbmlWriter() {;}
+		SbmlWriter() {;}
+		~SbmlWriter() {;}
 		int write( string location, string filename );
 #ifdef USE_SBML
 		void createModel( string filename, SBMLDocument& doc ,string target);
@@ -47,6 +47,7 @@ class MooseSbmlWriter
 		string getGroupinfo(Id itr);
 #endif
 };
+} // namespace moose
 //extern const Cinfo* initCinfo();
 #endif //USE_SBML
 #endif // _SBMLWRITER_H

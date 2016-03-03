@@ -37,7 +37,7 @@
 
 using namespace std;
 
-int MooseSbmlWriter::write( string target , string filepath)
+int moose::SbmlWriter::write( string target , string filepath)
 {
   //cout << "Sbml Writer: " << filepath << " ---- " << target << endl;
 #ifdef USE_SBML
@@ -113,7 +113,7 @@ int MooseSbmlWriter::write( string target , string filepath)
 //* Check : first will put a model in according to l3v1 with libsbml5.9.0 **/
 
 //* Create an SBML model in the SBML Level 3 version 1 specification **/
-void MooseSbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
+void moose::SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 { 
   XMLNamespaces  xmlns;
   xmlns.add("http://www.sbml.org/sbml/level3/version1");
@@ -673,7 +673,7 @@ void MooseSbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string p
 
 /** Writes the given SBMLDocument to the given file. **/
 
-string MooseSbmlWriter :: getGroupinfo(Id itr)
+string moose::SbmlWriter :: getGroupinfo(Id itr)
 {   //#Harsha: Note: At this time I am assuming that if group exist 
   	//  1. for 'pool' its between compartment and pool, /modelpath/Compartment/Group/pool 
   	//  2. for 'enzComplx' in case of ExpilcityEnz its would be, /modelpath/Compartment/Group/Pool/Enz/Pool_cplx 
@@ -713,7 +713,7 @@ string MooseSbmlWriter :: getGroupinfo(Id itr)
 	} //else
 	return( groupName);
 }
-bool MooseSbmlWriter::writeModel( const SBMLDocument* sbmlDoc, const string& filename )
+bool moose::SbmlWriter::writeModel( const SBMLDocument* sbmlDoc, const string& filename )
 {
   SBMLWriter sbmlWriter;
   // cout << "sbml writer" << filename << sbmlDoc << endl;
@@ -729,9 +729,9 @@ bool MooseSbmlWriter::writeModel( const SBMLDocument* sbmlDoc, const string& fil
       return false;
     }
 }
-//string MooseSbmlWriter::cleanNameId(vector < Id > const &itr,int index)
+//string moose::SbmlWriter::cleanNameId(vector < Id > const &itr,int index)
 
-string MooseSbmlWriter::cleanNameId(Id itrid,int  index)
+string moose::SbmlWriter::cleanNameId(Id itrid,int  index)
 { string objname = Field<string> :: get(itrid,"name");
   string objclass = Field<string> :: get(itrid,"className");
   ostringstream Objid;
@@ -752,7 +752,7 @@ string MooseSbmlWriter::cleanNameId(Id itrid,int  index)
   string clean_nameid = idBeginWith(objname_id);
   return clean_nameid ;
 }
-void MooseSbmlWriter::getSubPrd(Reaction* rec,string type,string enztype,Id itrRE, int index,ostringstream& rate_law,double &rct_order,bool w,string re_enClass)
+void moose::SbmlWriter::getSubPrd(Reaction* rec,string type,string enztype,Id itrRE, int index,ostringstream& rate_law,double &rct_order,bool w,string re_enClass)
 {
   nameList_.clear();
   SpeciesReference* spr;
@@ -812,7 +812,7 @@ void MooseSbmlWriter::getSubPrd(Reaction* rec,string type,string enztype,Id itrR
   //return rctprdUniq ;
 }
 
-void MooseSbmlWriter::getModifier(ModifierSpeciesReference* mspr,vector < Id> mod, int index,ostringstream& rate_law,double &rct_order,bool w)
+void moose::SbmlWriter::getModifier(ModifierSpeciesReference* mspr,vector < Id> mod, int index,ostringstream& rate_law,double &rct_order,bool w)
 { 
   std::set < Id > modifierUniq;
   modifierUniq.insert(mod.begin(),mod.end());
@@ -834,7 +834,7 @@ void MooseSbmlWriter::getModifier(ModifierSpeciesReference* mspr,vector < Id> mo
 }
 /* *  removes special characters  **/
 
-string MooseSbmlWriter::nameString1( string str )
+string moose::SbmlWriter::nameString1( string str )
 { string str1;
   int len = str.length();
   int i= 0;
@@ -868,7 +868,7 @@ string MooseSbmlWriter::nameString1( string str )
   return str;
 
 }
-string MooseSbmlWriter::nameString( string str )
+string moose::SbmlWriter::nameString( string str )
 { string str1;
 
   int len = str.length();
@@ -944,19 +944,19 @@ string MooseSbmlWriter::nameString( string str )
   return str;
 }
 /*   id preceeded with its parent Name   */
-string MooseSbmlWriter::changeName( string parent, string child )
+string moose::SbmlWriter::changeName( string parent, string child )
 {string newName = parent + "_" + child + "_";
  return newName;
 }
 /* *  change id  if it starts with  a numeric  */
-string MooseSbmlWriter::idBeginWith( string name )
+string moose::SbmlWriter::idBeginWith( string name )
 {
   string changedName = name;
   if ( isdigit(name.at(0)) )
     changedName = "_" + name;
   return changedName;
 }
-string MooseSbmlWriter::parmUnit( double rct_order )
+string moose::SbmlWriter::parmUnit( double rct_order )
 {
   ostringstream unit_stream;
   int order = ( int) rct_order;
@@ -1010,7 +1010,7 @@ string MooseSbmlWriter::parmUnit( double rct_order )
   }
   return unit_stream.str();
 }
-void MooseSbmlWriter::printParameters( KineticLaw* kl,string k,double kvalue,string unit )
+void moose::SbmlWriter::printParameters( KineticLaw* kl,string k,double kvalue,string unit )
 {
   Parameter* para = kl->createParameter();
   para->setId( k );
@@ -1018,7 +1018,7 @@ void MooseSbmlWriter::printParameters( KineticLaw* kl,string k,double kvalue,str
   para->setUnits( unit );
 }
 
-string MooseSbmlWriter::findNotes(Id itr)
+string moose::SbmlWriter::findNotes(Id itr)
 { string path = Field<string> :: get(itr,"path");
   Id annotaId( path+"/info");
   string noteClass = Field<string> :: get(annotaId,"className");
@@ -1031,7 +1031,7 @@ string MooseSbmlWriter::findNotes(Id itr)
 
 /* *  validate a model before writing */
 
-bool MooseSbmlWriter::validateModel( SBMLDocument* sbmlDoc )
+bool moose::SbmlWriter::validateModel( SBMLDocument* sbmlDoc )
 {
   if ( !sbmlDoc )
     {cerr << "validateModel: given a null SBML Document" << endl;

@@ -1,5 +1,5 @@
 /*******************************************************************
- * File:            MooseSbmlReader.h
+ * File:            moose::SbmlReader.h
  * Description:
  * Author:          HarshaRani G.V
  * E-mail:          hrani@ncbs.res.in
@@ -36,12 +36,13 @@ typedef struct {
     string ycord;
 } EnzymeInfo;
 
-class MooseSbmlReader {
+namespace moose{
+class SbmlReader {
 public:
-    MooseSbmlReader() {
+    SbmlReader() {
         errorFlag_ = false;
     }
-    ~MooseSbmlReader() {
+    ~SbmlReader() {
         ;
     }
     Id read(string filename,string location,string solverClass);
@@ -79,6 +80,7 @@ private:
     void findModelParent( Id cwe, const string& path,Id& parentId, string& modelName );
     void getGlobalParameter();
 };
+} // namespace moose
 #endif //USE_SBML
 #endif // _MOOSESBMLREADER_H
 
