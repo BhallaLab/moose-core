@@ -1,5 +1,5 @@
 /*******************************************************************
- * File:            SbmlWriter.h
+ * File:            MooseSbmlWriter.h
  * Description:      
  * Author:          HarsnaRani
  * E-mail:          hrani@ncbs.res.in
@@ -18,7 +18,7 @@
 #define _SBMLWRITER_H
 #ifdef USE_SBML
 #include <sbml/SBMLTypes.h>
-
+namespace moose{
 class SbmlWriter
 {
 		
@@ -47,6 +47,7 @@ class SbmlWriter
 		string getGroupinfo(Id itr);
 #endif
 };
+} // namespace moose
 //extern const Cinfo* initCinfo();
 #endif //USE_SBML
 #endif // _SBMLWRITER_H
