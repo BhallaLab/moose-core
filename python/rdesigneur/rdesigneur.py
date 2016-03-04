@@ -113,6 +113,18 @@ class rdesigneur:
         self.cellPortionElist = []
         self.spineComptElist = []
 
+        if not moose.exists( '/library' ):
+            library = moose.Neutral( '/library' )
+        try:
+            self.buildCellProto()
+            self.buildChanProto()
+            self.buildSpineProto()
+            self.buildChemProto()
+        except BuildError as msg:
+            print("Error: rdesigneur: Prototype build failed:", msg)
+            quit()
+            
+
 
     ################################################################
     def _printModelStats( self ):
@@ -134,8 +146,6 @@ class rdesigneur:
                     pmstoich.numAllPools, "pools.")
 
     def buildModel( self, modelPath = '/model' ):
-        if not moose.exists( '/library' ):
-            library = moose.Neutral( '/library' )
         if moose.exists( modelPath ):
             print("rdesigneur::buildModel: Build failed. Model '",
                 modelPath, "' already exists.")
@@ -143,11 +153,8 @@ class rdesigneur:
         self.model = moose.Neutral( modelPath )
         self.modelPath = modelPath
         try:
-            self.buildCellProto()
-            self.buildChanProto()
-            self.buildSpineProto()
-            self.buildChemProto()
-            # Protos made. Now install the elec and chem protos on model.
+            # Protos made in the init phase. Now install the elec and 
+            # chem protos on model.
             self.installCellFromProtos()
             # Now assign all the distributions
             self.buildPassiveDistrib()
