@@ -50,7 +50,6 @@ from __future__ import print_function
 __author__ = 'Subhasis Ray'
 
 import sys
-sys.path.append('/home/subha/src/moose_async13/python')
 
 import moose
 from moose import utils as mutils

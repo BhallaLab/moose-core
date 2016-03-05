@@ -35,9 +35,6 @@ __maintainer__       = "Dilawar Singh"
 __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
-import os
-import sys
-sys.path.append('../../../python/')
 import moose
 import moose.utils as utils
 import compartment as comp
