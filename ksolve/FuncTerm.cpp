@@ -140,7 +140,17 @@ double FuncTerm::operator() ( const double* S, double t ) const
 	for ( i = 0; i < reactantIndex_.size(); ++i )
 		args_[i] = S[reactantIndex_[i]];
 	args_[i] = t;
-	return parser_.Eval() * volScale_;
+        try 
+        {
+            double result = parser_.Eval() * volScale_;
+            return result;
+        }
+        catch (mu::Parser::exception_type &e )
+        {
+            cerr << "Error: " << e.GetMsg() << endl;
+            throw e;
+        }
+
 }
 
 void FuncTerm::evalPool( double* S, double t ) const
@@ -151,5 +161,13 @@ void FuncTerm::evalPool( double* S, double t ) const
 	for ( i = 0; i < reactantIndex_.size(); ++i )
 		args_[i] = S[reactantIndex_[i]];
 	args_[i] = t;
-	S[ target_] = parser_.Eval() * volScale_;
+        try 
+        {
+            S[ target_] = parser_.Eval() * volScale_;
+        }
+        catch ( mu::Parser::exception_type & e )
+        {
+            showError( e );
+            //throw e;
+        }
 }

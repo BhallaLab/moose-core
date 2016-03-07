@@ -105,6 +105,24 @@ class Function
 
     double getDerivative() const;
 
+#if 0
+    /**
+     * @brief Extend standard muparser library. This add some binary operators
+     * and user-defined functions.
+     */
+    void extendMuParser( void );
+
+    /**
+     * @brief callback function for floating point mod-operator.
+     *
+     * @param a double
+     * @param b double
+     *
+     * @return  double using std::fmod(a, b)
+     */
+    static mu::value_type muCallbackFMod( mu::value_type a, mu::value_type b );
+#endif
+
     Function& operator=(const Function rhs);
 
     unsigned int addVar();
@@ -142,4 +160,4 @@ protected:
 
 
 // 
-//// Function.h ends here
+//// Function.h ends here_parser.DefineVar( _T("t"), 
