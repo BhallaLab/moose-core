@@ -167,7 +167,7 @@ void FuncTerm::evalPool( double* S, double t ) const
         }
         catch ( mu::Parser::exception_type & e )
         {
-            cerr << "Error: " << e.GetMsg() << endl;
-            throw e;
+            showError( e );
+            //throw e;
         }
 }

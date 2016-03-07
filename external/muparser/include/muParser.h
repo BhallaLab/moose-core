@@ -95,6 +95,9 @@ namespace mu
     static value_type  Sqrt(value_type);
     static value_type  Rint(value_type);
     static value_type  Sign(value_type);
+    static value_type  Fmod(value_type, value_type);
+    static value_type  Rand2(value_type, value_type); // Random between a and b
+    static value_type  Rand( );           // Random number between 0 and 1.
 
     // Prefix operators
     // !!! Unary Minus is a MUST if you want to use negative signs !!!
