@@ -41,11 +41,9 @@ setup(
         packages=['libmumbl'
             , 'rdesigneur'
             , 'moose', 'moose.kkit', 'moose.neuroml'
-            , 'moose.backend', 'moose.topology'
             , 'moose.genesis'
             ],
         package_dir = { 'moose' : 'moose' 
-            , 'libmumbl' : 'libmumbl' 
             , 'rdesigneur' : 'rdesigneur'
             , 'genesis' : 'genesis'
             },

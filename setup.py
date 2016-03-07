@@ -6,9 +6,9 @@
 # Maintainer:
 # Created: Sun Dec  7 20:32:02 2014 (+0530)
 # Version:
-# Last-Updated: Thu Feb 18 15:42:34 2016 (-0500)
+# Last-Updated: Wed Mar  2 12:23:55 2016 (-0500)
 #           By: Subhasis Ray
-#     Update #: 21
+#     Update #: 32
 # URL:
 # Keywords:
 # Compatibility:
@@ -267,8 +267,8 @@ SOURCES=['external/muparser/src/muParser.cpp',
          'pymoose/melement.cpp',
          'pymoose/test_moosemodule.cpp',
          'randnum/mt19937ar.cpp',
-         'sbml/SbmlWriter.cpp',
-         'sbml/SbmlReader.cpp',
+         'sbml/MooseSbmlWriter.cpp',
+         'sbml/MooseSbmlReader.cpp',
          'scheduling/Clock.cpp',
          'scheduling/testScheduling.cpp',
          'shell/Shell.cpp',
@@ -371,6 +371,37 @@ setup_info = dict(
     package_dir={'': 'python'},
     #scripts=SCRIPTS,
 )
+
+
+## The following monkey patch allows parallel compilation of the C++
+## files Taken from here: From here:
+## http://stackoverflow.com/questions/11013851/speeding-up-build-process-with-distutils
+##
+## Also, if you are rerunning setup.py after checking out a few
+## changes, consider using cccache as suggested in the above discussion
+## to avoid recompiling every file.
+##
+## monkey-patch for parallel compilation
+##
+# def parallelCCompile(self, sources, output_dir=None, macros=None, include_dirs=None, debug=0, extra_preargs=None, extra_postargs=None, depends=None):
+#     # those lines are copied from distutils.ccompiler.CCompiler directly
+#     macros, objects, extra_postargs, pp_opts, build = self._setup_compile(output_dir, macros, include_dirs, sources, depends, extra_postargs)
+#     cc_args = self._get_cc_args(pp_opts, debug, extra_preargs)
+#     # parallel code
+#     N=4 # number of parallel compilations
+#     import multiprocessing.pool
+#     def _single_compile(obj):
+#         try: src, ext = build[obj]
+#         except KeyError: return
+#         self._compile(obj, src, ext, cc_args, extra_postargs, pp_opts)
+#     # convert to list, imap is evaluated on-demand
+#     list(multiprocessing.pool.ThreadPool(N).imap(_single_compile,objects))
+#     return objects
+
+# import distutils.ccompiler
+# distutils.ccompiler.CCompiler.compile=parallelCCompile
+
+## Monkey-patch ends here.
 
 try:
     from setuptools import setup

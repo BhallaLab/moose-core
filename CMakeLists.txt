@@ -11,6 +11,7 @@ endif(COMMAND cmake_policy)
 
 project(moose)
 set(MOOSE_VERSION "3.0.2")
+include(FindPkgConfig)
 
 # This snippet is from LLVM project.
 # Sanity check our source directory to make sure that we are not trying to
@@ -172,31 +173,38 @@ IF(NOTIFY_PROGRESS)
 ENDIF()
 
 ################################### SETUP BUILD ################################
-
-IF(WITH_SBML)
-    find_package(LIBSBML REQUIRED)
-ELSE(WITH_SBML)
-    find_package(LIBSBML)
-ENDIF()
-
 if(SBML_STATIC_HOME)
     MESSAGE(STATUS "Using local SBML. Support is ON")
     include_directories(${SBML_STATIC_HOME}/include)
-    find_library(LIBSBML_LIBRARY
+    find_library(LIBSBML_LIBRARIES
         NAMES libsbml_static.a libsbml.a
         PATHS ${SBML_STATIC_HOME}/lib ${SBML_STATIC_HOME}/lib64
         NO_DEFAULT_PATH
         )
-    MESSAGE(STATUS "Using static sbml library: ${LIBSBML_LIBRARY}")
-    IF(LIBSBML_LIBRARY)
+    MESSAGE(STATUS "Using static sbml library: ${LIBSBML_LIBRARIES}")
+    IF(LIBSBML_LIBRARIES)
         set(LIBSBML_FOUND ON)
     ENDIF()
+else()
+    pkg_check_modules(LIBSBML libsbml)
+    if(!LIBSBML_FOUND)
+        IF(WITH_SBML)
+            find_package(LIBSBML REQUIRED)
+        ELSE(WITH_SBML)
+            find_package(LIBSBML)
+        ENDIF()
+    endif()
 endif()
 
 if(LIBSBML_FOUND)
-    MESSAGE(STATUS "SBML found. Support is ON: ${LIBSBML_LIBRARY}")
-    include_directories(${LIBSBML_INCLUDE_DIR})
-    find_package(LibXML2 REQUIRED)
+    MESSAGE(STATUS "SBML found. Support is ON: ${LIBSBML_LIBRARIES}")
+    include_directories(${LIBSBML_INCLUDE_DIRS})
+    pkg_check_modules(LibXML2 libxml-2.0)
+    if (!LibXML2_FOUND)
+        find_package(LibXML2 REQUIRED)
+    endif()
+    include_directories(${LibXML2_INCLUDE_DIRS})
+    add_definitions(-DUSE_SBML)
 else()
     MESSAGE(
         "======================================================================\n"
@@ -332,8 +340,6 @@ add_subdirectory(scheduling)
 add_subdirectory(biophysics)
 add_subdirectory(builtins)
 add_subdirectory(utility)
-add_subdirectory(external/muparser)
-add_subdirectory(external/tinyxml)
 add_subdirectory(mesh)
 add_subdirectory(sbml)
 add_subdirectory(mpi)
@@ -368,9 +374,9 @@ endif()
 
 LIST(APPEND STATIC_LIBRARIES moose_sbml)
 IF(SBML_STATIC_HOME)
-    list(APPEND STATIC_LIBRARIES ${LIBSBML_LIBRARY})
-ELSEIF()
-    list(APPEND SYSTEM_SHARED_LIBS ${LIBSBML_LIBRARY})
+    list(APPEND STATIC_LIBRARIES ${LIBSBML_LIBRARIES})
+ELSE()
+    list(APPEND SYSTEM_SHARED_LIBS ${LIBSBML_LIBRARIES})
 ENDIF()
 
 
@@ -392,8 +398,28 @@ if(WITH_MPI)
     endif()
 endif(WITH_MPI)
 
+pkg_check_modules(MUPARSER muparser)
+if(MUPARSER_FOUND)
+    message("Using system muparser ${MUPARSER_VERSION}")
+    list(APPEND SYSTEM_SHARED_LIBS ${MUPARSER_LIBRARIES})
+else()
+    message("Using private muparser")
+    add_subdirectory(external/muparser)
+    list(APPEND MOOSE_LIBRARIES muparser)
+endif()
+
+pkg_check_modules(TINYXML tinyxml)
+if(TINYXML_FOUND)
+    message("Using system tinyxml ${TINYXML_VERSION}")
+    list(APPEND SYSTEM_SHARED_LIBS ${TINYXML_LIBRARIES})
+else()
+    message("Using private tinyxml")
+    add_subdirectory(external/tinyxml)
+    list(APPEND MOOSE_LIBRARIES tinyxml)
+endif()
+
 ###################################### LINKING #################################
-set(MOOSE_LIBRARIES
+list(APPEND MOOSE_LIBRARIES
     moose_builtins
     msg
     benchmarks
@@ -403,14 +429,12 @@ set(MOOSE_LIBRARIES
     moose_mpi
     biophysics 
     utility 
-    muparser
     kinetics 
     synapse
     intfire
     hsolve 
     mesh
     signeur
-    tinyxml
     diffusion 
     ksolve
     device
@@ -465,13 +489,21 @@ ENDIF(WITH_DOC)
 # Root of all python module.
 SET(PROJECT_PYTHON_PATH ${CMAKE_CURRENT_SOURCE_DIR}/python)
 if(WITH_PYTHON)
-    set(Python_ADDITIONAL_VERSION 2.6 2.7)
     message(STATUS "Building native python extension of MOOSE")
-    set(PYMOOSE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/python/moose")
+
+    set(PYMOOSE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/python/moose")
 
     find_package(NumPy REQUIRED)
     find_package(PythonDev REQUIRED)
     include_directories(${PYTHON_INCLUDE_DIRS})
+    MESSAGE("Python include dir: ${PYTHON_INCLUDE_DIRS}")
+    MESSAGE("Python libraries: ${PYTHON_LIBRARIES}")
+    MESSAGE("Python executable: ${PYTHON_EXECUTABLE}")
+
+    EXEC_PROGRAM(${PYTHON_EXECUTABLE}
+        ARGS "-c 'try: import importlib.machinery; print(importlib.machinery.EXTENSION_SUFFIXES[0])
+except Exception: pass'"
+        OUTPUT_VARIABLE PYTHON_SO_EXTENSION)
 
     add_subdirectory(pymoose)
 
@@ -483,8 +515,11 @@ if(WITH_PYTHON)
     set_target_properties(_moose PROPERTIES COMPILE_DEFINITIONS "PYMOOSE")
     set_target_properties(_moose PROPERTIES 
         LIBRARY_OUTPUT_DIRECTORY ${PYMOOSE_OUTPUT_DIRECTORY}
-        PREFIX ""
-        )
+        PREFIX "")
+    if(NOT(PYTHON_SO_EXTENSION STREQUAL ""))
+        set_target_properties(_moose PROPERTIES
+        SUFFIX ${PYTHON_SO_EXTENSION})
+    endif()
 
 if(MACOSX)
     set(CMAKE_MODULE_LINKER_FLAGS "-undefined dynamic_lookup")
@@ -508,17 +543,19 @@ ELSE(MACOSX)
         ${MOOSE_LIBRARIES}
         ${STATIC_LIBRARIES}
         "-Wl,--no-whole-archive"
+        ${PYTHON_LIBRARIES}
         ${SYSTEM_SHARED_LIBS}
         )
 ENDIF(MACOSX)
 
-    add_custom_command(TARGET _moose POST_BUILD
-        COMMAND ${PYTHON_EXECUTABLE} setup.py sdist --dist-dir
-        ${CMAKE_CURRENT_BINARY_DIR}
-        WORKING_DIRECTORY ${PROJECT_PYTHON_PATH}
-        COMMENT "Generating moose source distribution using setuptools"
-        VERBATIM
-        )
+    add_custom_target(copy_python_files
+      COMMAND ${CMAKE_COMMAND} -E copy_directory
+              ${CMAKE_CURRENT_SOURCE_DIR}/python
+              ${CMAKE_CURRENT_BINARY_DIR}/python
+          COMMENT "Copying python files to build directory"
+          VERBATIM
+      )
+    add_dependencies(_moose copy_python_files)
 
 IF(WITH_DOC)
     # Also generate the documents
@@ -597,17 +634,11 @@ install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/moose
     )
 
 if(WITH_PYTHON)
-    SET(MOOSE_SRC_TAR ${CMAKE_CURRENT_BINARY_DIR}/moose-${MOOSE_VERSION}.tar.gz)
-
     install(CODE 
         "
         execute_process(
-            COMMAND tar xvf ${MOOSE_SRC_TAR} -C /tmp
-            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-            )
-        execute_process(
             COMMAND ${PYTHON_EXECUTABLE} setup.py install --prefix=${CMAKE_INSTALL_PREFIX}
-            WORKING_DIRECTORY /tmp/moose-${MOOSE_VERSION}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/python
             )
         "
         )

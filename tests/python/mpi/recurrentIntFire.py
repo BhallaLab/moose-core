@@ -1,9 +1,9 @@
-import os
+from __future__ import print_function
+
 import random
 import time
 from numpy import random as nprand
-import sys
-sys.path.append('/home/subha/src/moose_async13/python')
+
 import moose
 
 def make_network():
@@ -34,25 +34,25 @@ def make_network():
 	# don't have allocations.
 	#synapse = moose.element( '/network/synapse' )
 	sv = moose.vec( '/network/synapse' )
-	print 'before connect t = ', time.time() - t0
+	print('before connect t = ', time.time() - t0)
 	mid = moose.connect( network, 'spikeOut', sv, 'addSpike', 'Sparse')
-	print 'after connect t = ', time.time() - t0
+	print('after connect t = ', time.time() - t0)
 	#print mid.destFields
 	m2 = moose.element( mid )
 	m2.setRandomConnectivity( connectionProbability, 5489 )
-	print 'after setting connectivity, t = ', time.time() - t0
+	print('after setting connectivity, t = ', time.time() - t0)
 	network.vec.Vm = [(Vmax*random.random()) for r in range(size)]
 	network.vec.thresh = thresh
 	network.vec.refractoryPeriod = [( refr0 + refr * random.random()) for r in range( size) ]
 	network.vec.tau = [(tau0 + tau*random.random()) for r in range(size)]
 	numSynVec = network.vec.numSynapses
-	print 'Middle of setup, t = ', time.time() - t0
+	print('Middle of setup, t = ', time.time() - t0)
 	numTotSyn = sum( numSynVec )
 	for item in network.vec:
 		neuron = moose.element( item )
 		neuron.synapse.delay = [ (delayMin + random.random() * delayMax) for r in range( len( neuron.synapse ) ) ] 
 		neuron.synapse.weight = nprand.rand( len( neuron.synapse ) ) * weightMax
-	print 'after setup, t = ', time.time() - t0, ", numTotSyn = ", numTotSyn
+	print('after setup, t = ', time.time() - t0, ", numTotSyn = ", numTotSyn)
 
 	"""
 
@@ -69,16 +69,16 @@ def make_network():
 	moose.setClock( 9, timestep )
 	t1 = time.time()
 	moose.reinit()
-	print 'reinit time t = ', time.time() - t1
+	print('reinit time t = ', time.time() - t1)
 	network.vec.Vm = [(Vmax*random.random()) for r in range(size)]
-	print 'setting Vm , t = ', time.time() - t1
+	print('setting Vm , t = ', time.time() - t1)
 	t1 = time.time()
-	print 'starting'
+	print('starting')
 	moose.start(runtime)
-	print 'runtime, t = ', time.time() - t1
-	print 'Vm100:103', network.vec.Vm[100:103]
-	print 'Vm900:903', network.vec.Vm[900:903]
-	print 'weights 100:', network.vec[100].synapse.delay[0:5]
-	print 'weights 900:', network.vec[900].synapse.delay[0:5]
+	print('runtime, t = ', time.time() - t1)
+	print('Vm100:103', network.vec.Vm[100:103])
+	print('Vm900:903', network.vec.Vm[900:903])
+	print('weights 100:', network.vec[100].synapse.delay[0:5])
+	print('weights 900:', network.vec[900].synapse.delay[0:5])
 
 make_network()

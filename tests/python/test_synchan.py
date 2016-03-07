@@ -45,8 +45,6 @@
 
 # Code:
 
-import sys
-sys.path.append('../../python')
 import moose
 
 def make_synapse(path):

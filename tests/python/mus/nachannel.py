@@ -45,8 +45,6 @@
 
 # Code:
 
-import sys
-sys.path.append('/home/subha/src/moose_async13/python')
 import moose
 from settings import *
 import numpy as np

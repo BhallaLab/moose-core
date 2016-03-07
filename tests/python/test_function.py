@@ -45,8 +45,8 @@
 
 # Code:
 """Check variable ordering - bug #161"""
-import sys
-sys.path.append('../../python')
+from __future__ import print_function
+
 import numpy as np
 import moose
 

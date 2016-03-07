@@ -47,6 +47,7 @@
 
 # Code:
 
+from __future__ import print_function
 import os
 import numpy as np
 import uuid
@@ -59,7 +60,7 @@ from neuroml.writers import NeuroMLWriter
 
 outdir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tmp')
 if not os.access(outdir, os.F_OK):
-    print 'Creating output directory', outdir
+    print('Creating output directory', outdir)
     os.mkdir(outdir)
 
 class TestConvertMorphology(unittest.TestCase):
@@ -91,7 +92,7 @@ class TestConvertMorphology(unittest.TestCase):
         doc.id = 'TestNeuroMLDocument'
         fname = os.path.join(outdir, 'test_morphology_conversion.nml')        
         NeuroMLWriter.write(doc, fname)
-        print 'Wrote', fname
+        print('Wrote', fname)
 
 if __name__ == '__main__':
     unittest.main()
