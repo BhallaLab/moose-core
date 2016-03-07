@@ -31,6 +31,12 @@ __status__           = "Development"
 import os
 from distutils.core import setup
 
+try:
+    import importlib.machinery
+    suffix = importlib.machinery.EXTENSION_SUFFIXES[0]
+except Exception:
+    suffix = '.so'
+
 setup(
         name='moose',
         version='3.0.2',
@@ -47,5 +53,5 @@ setup(
             , 'rdesigneur' : 'rdesigneur'
             , 'genesis' : 'genesis'
             },
-        package_data = { 'moose' : ['_moose.so'] },
+        package_data = { 'moose' : ['_moose' + suffix] },
     ) 
