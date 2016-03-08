@@ -26,6 +26,11 @@
 #include "muParser.h"
 #include "muParserTemplateMagic.h"
 
+#if __cplusplus > 199711L
+#include <random>
+#endif
+
+
 //--- Standard includes ------------------------------------------------------------------------
 #include <cmath>
 #include <algorithm>
@@ -108,11 +113,25 @@ namespace mu
   value_type Parser::Abs(value_type v)  { return MathImpl<value_type>::Abs(v);  }
   value_type Parser::Fmod(value_type v1, value_type v2) { return fmod(v1, v2); }
   value_type Parser::Rand( ) { 
+#if __cplusplus > 199711L
+      static std::default_random_engine generator;
+      static std::uniform_real_distribution< value_type > distribution(0.0, 1.0);
+      return distribution( generator );
+#else
       return ((value_type) rand()) / (value_type) RAND_MAX;
+#endif
   }
   value_type Parser::Rand2(value_type v1, value_type v2) {
+
+#if __cplusplus > 199711L
+      static std::default_random_engine generator;
+      static std::uniform_real_distribution< value_type > distribution(v1, v2);
+      return distribution( generator );
+#else 
       value_type random = ((value_type) rand()) / (value_type) RAND_MAX;
       return v1 + (random * (v2 - v1));
+#endif 
+
   }
   value_type Parser::Sqrt(value_type v) 
   { 
