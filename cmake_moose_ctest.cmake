@@ -51,6 +51,16 @@ ADD_TEST(NAME pymoose-nsdf-sanity-test
     )
 set_tests_properties(pymoose-nsdf-sanity-test PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python")
 
+# Test basic SBML support.
+ADD_TEST(NAME pymoose-test-basic-sbml-support
+    COMMAND ${PYTHON_EXECUTABLE}
+    ${PROJECT_SOURCE_DIR}/tests/python/test_sbml_support.py
+    )
+set_tests_properties(pymoose-test-basic-sbml-support 
+    PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
+    )
+
+
 ##IF(WITH_SBML)
 ##    ADD_TEST(NAME pymoose-test-sbml 
 ##        COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/tests/python/test_sbml.py

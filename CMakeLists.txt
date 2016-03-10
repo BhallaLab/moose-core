@@ -470,9 +470,7 @@ IF(CMAKE_VERSION VERSION_LESS "2.8.0")
     MESSAGE(STATUS "Using a fix for cmake ( < 2.8)")
     target_link_libraries(moose.bin PUBLIC moose) 
 ELSE()
-    target_link_libraries(moose.bin
-        LINK_PUBLIC moose
-        )
+    target_link_libraries(moose.bin LINK_PUBLIC moose ${LIBSBML_LIBRARIES})
 ENDIF()
 
 IF(WITH_DOC)
