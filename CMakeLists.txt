@@ -173,19 +173,26 @@ IF(NOTIFY_PROGRESS)
 ENDIF()
 
 ################################### SETUP BUILD ################################
+
+# If this variable is used while packaging; we build this project using another
+# cmake script and pass the location of SBML static library using this variable.
+# Otherwise, this is useless. FIXME: This is not a clean solution.
 if(SBML_STATIC_HOME)
-    MESSAGE(STATUS "Using local SBML. Support is ON")
     include_directories(${SBML_STATIC_HOME}/include)
     find_library(LIBSBML_LIBRARIES
-        NAMES libsbml_static.a libsbml.a
-        PATHS ${SBML_STATIC_HOME}/lib ${SBML_STATIC_HOME}/lib64
+        NAMES libsbml-static.a libsbml.a
+        PATHS "${SBML_STATIC_HOME}/lib" "${SBML_STATIC_HOME}/lib64"
         NO_DEFAULT_PATH
         )
-    MESSAGE(STATUS "Using static sbml library: ${LIBSBML_LIBRARIES}")
+    MESSAGE(STATUS "LIBSBML_LIBRARIES: ${LIBSBML_LIBRARIES}")
     IF(LIBSBML_LIBRARIES)
-        set(LIBSBML_FOUND ON)
+        MESSAGE(STATUS "Successfully located SBML static library: ${LIBSBML_LIBRARIES}")
+    ELSE()
+        MESSAGE(FATAL_ERROR "Can't find static libsbml libraries at path
+        ${SBML_STATIC_HOME}")
     ENDIF()
-else()
+    set(LIBSBML_FOUND ON)
+else(SBML_STATIC_HOME)
     pkg_check_modules(LIBSBML libsbml)
     if(!LIBSBML_FOUND)
         IF(WITH_SBML)
@@ -194,10 +201,10 @@ else()
             find_package(LIBSBML)
         ENDIF()
     endif()
-endif()
+endif(SBML_STATIC_HOME)
 
 if(LIBSBML_FOUND)
-    MESSAGE(STATUS "SBML found. Support is ON: ${LIBSBML_LIBRARIES}")
+    MESSAGE(STATUS "SBML found ${LIBSBML_LIBRARIES}")
     include_directories(${LIBSBML_INCLUDE_DIRS})
     pkg_check_modules(LibXML2 libxml-2.0)
     if (!LibXML2_FOUND)
@@ -470,9 +477,7 @@ IF(CMAKE_VERSION VERSION_LESS "2.8.0")
     MESSAGE(STATUS "Using a fix for cmake ( < 2.8)")
     target_link_libraries(moose.bin PUBLIC moose) 
 ELSE()
-    target_link_libraries(moose.bin
-        LINK_PUBLIC moose
-        )
+    target_link_libraries(moose.bin LINK_PUBLIC moose ${LIBSBML_LIBRARIES})
 ENDIF()
 
 IF(WITH_DOC)
