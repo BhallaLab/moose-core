@@ -16,7 +16,7 @@
 # Created by Robert Osfield.
 # Modified by Ralph Gauges
 
-message (STATUS "$ENV{LIBSBML_DIR}")
+message (STATUS "Environment variable pointing to SBML?: $ENV{LIBSBML_DIR}")
 
 find_path(LIBSBML_INCLUDE_DIRS sbml/SBase.h
     PATHS $ENV{LIBSBML_DIR}/include
