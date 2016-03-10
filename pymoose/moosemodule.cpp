@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Fri Jul 10 10:02:45 2015 (+0530)
-//           By: subha
-//     Update #: 11007
+// Last-Updated: Wed Jan 27 12:56:40 2016 (-0500)
+//           By: Subhasis Ray
+//     Update #: 11013
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -2179,10 +2179,24 @@ extern "C" {
         if (base && !defineClass(module_dict, base)){
             return 0;
         }
+
+        string str = "moose." + className;
+
         PyTypeObject * new_class =
                 (PyTypeObject*)PyType_Type.tp_alloc(&PyType_Type, 0);
-        // Py_TYPE(new_class) = &PyType_Type;
-        new_class->tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE; // | Py_TPFLAGS_HEAPTYPE;
+// Python3 does not like it without heaptype: aborts on import 
+// Fatal Python error:
+// type_traverse() called for non-heap type 'moose.Neutral'
+#ifdef PY3K
+        new_class->tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HEAPTYPE;
+        PyHeapTypeObject* et = (PyHeapTypeObject*)new_class;
+        et->ht_name = PyUnicode_FromString(className.c_str());
+#if PY_MINOR_VERSION >= 3
+        et->ht_qualname = PyUnicode_FromString(str.c_str());
+#endif
+#else
+        new_class->tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
+#endif
         /*
           Thu Jul 9 09:58:09 IST 2015 - commenting out
           Py_TPFLAGS_HEAPTYPE because it causes segfault on accessing
@@ -2210,12 +2224,7 @@ extern "C" {
         heaptype is not set it uses tp_name to print the help.
         Py_SIZE(new_class) = sizeof(_ObjId);        
         */
-        string str = "moose." + className;
-        new_class->tp_name = (char *)calloc(str.length()+1,
-                                            sizeof(char));
-        strncpy(const_cast<char*>(new_class->tp_name), str.c_str(),
-                str.length());
-
+        new_class->tp_name = strdup(str.c_str());
         new_class->tp_doc = moose_Class_documentation;
 
         // strncpy(new_class->tp_doc, moose_Class_documentation, strlen(moose_Class_documentation));
@@ -2274,7 +2283,9 @@ extern "C" {
             cout << "Created class " << new_class->tp_name << endl
                  << "\tbase=" << new_class->tp_base->tp_name << endl;
         }
-        // PyDict_SetItemString(new_class->tp_dict, "__module__", PyString_FromString("moose"));
+#ifdef PY3K
+        PyDict_SetItemString(new_class->tp_dict, "__module__", PyUnicode_InternFromString("moose"));
+#endif
         // string doc = const_cast<Cinfo*>(cinfo)->getDocs();
         // PyDict_SetItemString(new_class->tp_dict, "__doc__", PyString_FromString(" \0"));
         // PyDict_SetItemString(module_dict, className.c_str(), (PyObject *)new_class);
@@ -2316,7 +2327,6 @@ extern "C" {
     
     int defineDestFinfos(const Cinfo * cinfo)
     {
-        static char doc[] = "Destination field";
         const string& className = cinfo->name();
 #ifndef NDEBUG
         if (verbosity > 1){
@@ -2355,10 +2365,7 @@ extern "C" {
                     const_cast<char*>(name.c_str()),
                     name.size()); 
 
-            vec[currIndex].doc = doc;
-
-            vec[currIndex].doc = doc;
-
+            vec[currIndex].doc = (char*) "Destination field";
             vec[currIndex].get = (getter)moose_ObjId_get_destField_attr;
             PyObject * args = PyTuple_New(1);            
             if (args == NULL){
@@ -2428,7 +2435,6 @@ extern "C" {
     
     int defineLookupFinfos(const Cinfo * cinfo)
     {
-        static char doc[] = "Lookup field";
         const string & className = cinfo->name();
 #ifndef NDEBUG
         if (verbosity > 1){
@@ -2444,9 +2450,7 @@ extern "C" {
             get_getsetdefs()[className][currIndex].name = (char*)calloc(name.size() + 1, sizeof(char));
             strncpy(const_cast<char*>(get_getsetdefs()[className][currIndex].name)
                     , const_cast<char*>(name.c_str()), name.size());
-
-            get_getsetdefs()[className][currIndex].doc = doc; //moose_LookupField_documentation;
-
+            get_getsetdefs()[className][currIndex].doc = (char*) "Lookup field";
             get_getsetdefs()[className][currIndex].get = (getter)moose_ObjId_get_lookupField_attr;
             PyObject * args = PyTuple_New(1);
             PyTuple_SetItem(args, 0, PyString_FromString(name.c_str()));
@@ -2501,7 +2505,6 @@ extern "C" {
 
     int defineElementFinfos(const Cinfo * cinfo)
     {
-        static char doc[] = "Element field\0";
         const string & className = cinfo->name();
 #ifndef NDEBUG
         if (verbosity > 1){
@@ -2517,7 +2520,7 @@ extern "C" {
             get_getsetdefs()[className][currIndex].name = (char*)calloc(name.size() + 1, sizeof(char));
             strncpy(const_cast<char*>(get_getsetdefs()[className][currIndex].name)
                     , const_cast<char*>(name.c_str()), name.size());
-            get_getsetdefs()[className][currIndex].doc = doc;
+            get_getsetdefs()[className][currIndex].doc = (char*) "Element field";
             get_getsetdefs()[className][currIndex].get = (getter)moose_ObjId_get_elementField_attr;
             PyObject * args = PyTuple_New(1);
             PyTuple_SetItem(args, 0, PyString_FromString(name.c_str()));

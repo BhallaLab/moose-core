@@ -45,8 +45,8 @@
 
 # Code:
 """Check variable ordering - bug #161"""
-import sys
-sys.path.append('../../python')
+from __future__ import print_function
+
 import numpy as np
 import moose
 
@@ -100,7 +100,7 @@ def test_var_order():
     moose.reinit()
     moose.start(simtime)
     for ii in range(len(z1.vector)):
-        print ii, z1.vector[ii]
+        print(ii, z1.vector[ii])
 
 if __name__ == '__main__':
     test_var_order()

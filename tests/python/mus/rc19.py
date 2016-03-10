@@ -45,11 +45,11 @@
 
 # Code:
 """Cell morphology and passive properties from Branco et al 2010."""
+from __future__ import print_function
 
 __author__ = 'Subhasis Ray'
 
 import sys
-sys.path.append('/home/subha/src/moose_async13/python')
 
 import moose
 from moose import utils as mutils
@@ -121,7 +121,7 @@ def make_prototype(passive=True):
     try:        
         proto = moose.element(path)
     except ValueError:
-        print 'Loading model %s to %s' % (pfile, path)
+        print('Loading model %s to %s' % (pfile, path))
         proto = moose.loadModel(pfile, path, 'ee') # hsolve is not functional yet
         for comp in proto[0].children:
             comp.initVm = -75e-3
@@ -147,13 +147,13 @@ def setup_model(model_path, synapse_locations, passive=False, solver='hsolve'):
     syninfo_list = []
     for compname in synapse_locations:
         comppath = '%s/%s' % (cell.path, compname)
-        print '1111 Creating synapse in', comppath
+        print('1111 Creating synapse in', comppath)
         compartment = moose.element(comppath)
         syninfo = make_synapse(compartment)
         syninfo_list.append(syninfo)
         # connect  pulse stimulus
         stim_path = '%s/%s/stim' % (cell.path, compname)
-        print '2222 Creating stimuls in', stim_path
+        print('2222 Creating stimuls in', stim_path)
         stim = moose.PulseGen(stim_path)
         moose.connect(stim, 'output', syninfo['spike'], 'Vm')
         syninfo['stimulus'] = stim
@@ -169,7 +169,7 @@ def setup_recording(data_path, neuron, syninfo_list):
     data_container = moose.Neutral(data_path)
     soma_vm = moose.Table('%s/Vm_soma' % (data_path))
     soma_path = '%s/soma_1' % (neuron_path)
-    print '5555 Soma path', soma_path
+    print('5555 Soma path', soma_path)
     soma = moose.element(soma_path)
     moose.connect(soma_vm, 'requestOut', soma, 'getVm')
     ampa_data = moose.Neutral('%s/G_AMPA' % (data_path))
@@ -207,10 +207,10 @@ def setup_experiment(name, stim_order, onset, interval, passive=False, solver='h
         stim.delay[0] = onset + ii * interval
         stim.width[0] = 1e9 # The spike generator is edge triggered. A single level change will suffice.
         stim.level[0] = 1.0
-    print 'Experiment %s has been setup.' % (name)
-    print 'Stimulus order:', [synloc[ii] for ii in stim_order]
-    print 'Stimulus onset:', onset
-    print 'Inter stimulus interval:', interval
+    print('Experiment %s has been setup.' % (name))
+    print('Stimulus order:', [synloc[ii] for ii in stim_order])
+    print('Stimulus onset:', onset)
+    print('Inter stimulus interval:', interval)
     return (data_info, model_info)
         
 
@@ -230,7 +230,7 @@ def run_sim_parallel(passive=True, solver='hsolve'):
     mutils.assignDefaultTicks()
     moose.reinit()
     moose.start(tstop)
-    print '$$$$$$$$$$$', moose.element('/clock'    ).currentTime  
+    print('$$$$$$$$$$$', moose.element('/clock'    ).currentTime)
     fig = plt.figure()
     axes_vm = fig.add_subplot(111)
     # axes_vm_out = fig.add_subplot(121)
@@ -242,13 +242,13 @@ def run_sim_parallel(passive=True, solver='hsolve'):
     for jj, ti in enumerate(intervals):
         for ii, st in enumerate(stim_order):
             dinfo = data_info_list[jj * len(stim_order) + ii]
-            print 'Interval=', ti, 'Stim order=', st
-            print 'dinfo:', dinfo
-            print dinfo['soma_vm']
-            print dinfo['soma_vm'].vector
+            print('Interval=', ti, 'Stim order=', st)
+            print('dinfo:', dinfo)
+            print(dinfo['soma_vm'])
+            print(dinfo['soma_vm'].vector)
             v = dinfo['soma_vm'].vector
             t = np.linspace(0, tstop, len(v))
-            print 'num points=', len(t), 't0=', t[0], 't_last=', t[-1], 'v0=', v[0], 'v_last=', v[-1]
+            print('num points=', len(t), 't0=', t[0], 't_last=', t[-1], 'v0=', v[0], 'v_last=', v[-1])
             axes_vm.plot(t, v)
             # if ii % 2 == 0:
             #     axes_vm_in.plot(t,
@@ -281,7 +281,7 @@ if __name__ == '__main__':
         solver = sys.argv[2].lower()
     else:
         solver = 'hsolve'
-    print 'running simulation using: model with solver %s. Model is passive? %s' % (solver, passive)
+    print('running simulation using: model with solver %s. Model is passive? %s' % (solver, passive))
     run_sim_parallel(passive=passive, solver=solver)
 
 

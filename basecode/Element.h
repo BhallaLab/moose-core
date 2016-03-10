@@ -371,6 +371,15 @@ class Element
 		/// Support function for zombieSwap, replaces Cinfo.
 		void replaceCinfo( const Cinfo* newCinfo );
 
+		/**
+ 		 * Returns vectors of sources of messages to a field or data 
+		 * element. To go with each entry, also return the field or data 
+		 * index of _target_.
+		 */
+		unsigned int getInputsWithTgtIndex(
+			vector< pair< Id, unsigned int> >& ret, const DestFinfo* finfo)
+			const;
+
 	private:
 		/**
 		 * Fills in vector of Ids receiving messages from this SrcFinfo. 
@@ -385,6 +394,7 @@ class Element
 		 */
 		unsigned int getInputs( vector< Id >& ret, const DestFinfo* finfo )
 			const;
+
 
 		string name_; /// Name of the Element.
 

@@ -18,12 +18,10 @@ __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
 
-import sys
-sys.path.append('../../../python')
-
-import moose
 import unittest
 import math
+
+import moose
 import moose.utils as utils
 
 class MooseCompartment():
@@ -58,7 +56,7 @@ class MooseCompartment():
                         , "Failed with error %s " % e
                         ]
                     )
-            sys.exit(0)
+            raise
         #utils.dump('DEBUG', [ 'Compartment: {}'.format( self ) ] )
 
 
