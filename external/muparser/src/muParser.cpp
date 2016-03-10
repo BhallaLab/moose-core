@@ -112,27 +112,63 @@ namespace mu
   value_type Parser::Exp(value_type v)  { return MathImpl<value_type>::Exp(v);  }
   value_type Parser::Abs(value_type v)  { return MathImpl<value_type>::Abs(v);  }
   value_type Parser::Fmod(value_type v1, value_type v2) { return fmod(v1, v2); }
-  value_type Parser::Rand( ) { 
+
+  // If no seed is given, 
+  value_type Parser::Rand( value_type seed ) { 
+      static bool isSeedSet = false;
 #if __cplusplus > 199711L
-      static std::default_random_engine generator;
+      static std::mt19937 generator;
+      if(! isSeedSet ) {
+          if ( seed < 0 ) {
+              static std::random_device rd;
+              generator.seed( rd() );
+          }
+          else
+              generator.seed( seed );
+      }
+      isSeedSet = true;
       static std::uniform_real_distribution< value_type > distribution(0.0, 1.0);
       return distribution( generator );
 #else
+      if( ! isSeedSet ) {
+          if( seed < 0 )
+              srand( time(NULL) );
+          else
+              srand( seed );
+      }
       return ((value_type) rand()) / (value_type) RAND_MAX;
 #endif
   }
-  value_type Parser::Rand2(value_type v1, value_type v2) {
 
+  value_type Parser::Rand2(value_type v1, value_type v2, value_type seed = -1 ) {
+      static bool isSeedSet = false;
 #if __cplusplus > 199711L
-      static std::default_random_engine generator;
+      static std::mt19937 generator;
+      if( ! isSeedSet ) {
+          if( seed < 0 ) {
+              static std::random_device rd;
+              generator.seed( rd() );
+          }
+          else
+              generator.seed( seed );
+      }
+
+      isSeedSet = true;
       static std::uniform_real_distribution< value_type > distribution(v1, v2);
       return distribution( generator );
 #else 
+      if( ! isSeedSet ) {
+          if( seed < 0 )
+              srand( time(NULL) );
+          else
+              srand( seed );
+      }
+      isSeedSet = true;
       value_type random = ((value_type) rand()) / (value_type) RAND_MAX;
       return v1 + (random * (v2 - v1));
 #endif 
-
   }
+
   value_type Parser::Sqrt(value_type v) 
   { 
     #ifdef MUP_MATH_EXCEPTIONS
