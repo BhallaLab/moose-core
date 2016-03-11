@@ -4,7 +4,7 @@
 #
 # HDF5_INCLUDE_DIR  = where hdf5.h can be found
 # HDF5_LIBRARY      = the library to link against (hdf5 etc)
-# FOUND_HDF5        = set to true after finding the library
+# HDF5_FOUND        = set to true after finding the library
 #
 IF(EXISTS ${PROJECT_CMAKE}/Hdf5Config.cmake)
   INCLUDE(${PROJECT_CMAKE}/Hdf5Config.cmake)
@@ -22,11 +22,17 @@ ELSE(Hdf5_INCLUDE_DIRS)
 
   SET(TRIAL_LIBRARY_PATHS
     $ENV{HDF5_HOME}/lib
+    $ENV{HDF5_HOME}/lib64
     /usr/apps/lib
+    /usr/apps/lib64
     /usr/lib 
+    /usr/lib64
     /usr/local/lib
+    /usr/local/lib64
     /opt/lib
+    /opt/lib64
     /sw/lib
+    /sw/lib64
     )
 
   SET(TRIAL_INCLUDE_PATHS
@@ -56,13 +62,13 @@ ELSE(Hdf5_INCLUDE_DIRS)
 ENDIF(Hdf5_INCLUDE_DIRS)
 
 IF(HDF5_INCLUDE_DIR AND HDF5_LIBRARY)
-  SET(FOUND_HDF5 1 CACHE BOOL "Found hdf5 library")
+  SET(HDF5_FOUND 1 CACHE BOOL "Found hdf5 library")
 ELSE(HDF5_INCLUDE_DIR AND HDF5_LIBRARY)
-  SET(FOUND_HDF5 0 CACHE BOOL "Not fount hdf5 library")
+  SET(HDF5_FOUND 0 CACHE BOOL "Not found hdf5 library")
 ENDIF(HDF5_INCLUDE_DIR AND HDF5_LIBRARY)
 
 MARK_AS_ADVANCED(
   HDF5_INCLUDE_DIR 
   HDF5_LIBRARY 
-  FOUND_HDF5
+  HDF5_FOUND
 )
