@@ -211,7 +211,7 @@ include_directories(msg basecode)
 add_executable(moose.bin basecode/main.cpp)
 
 add_library(libmoose SHARED basecode/main.cpp)
-set_target_properties(libmoose PROPERTIES COMPILE_FLAGS  "-DMOOSE_LIB")
+set_target_properties(libmoose PROPERTIES COMPILE_DEFINITIONS  "MOOSE_LIB")
 set_target_properties(libmoose PROPERTIES PREFIX "")
 
 ## GSL
@@ -455,7 +455,6 @@ ELSE(MACOSX)
         ${SYSTEM_SHARED_LIBS}
         )
 ENDIF(MACOSX)
-set_target_properties(libmoose PROPERTIES LINK_FLAGS "-L${HDF5_LIBRARY_DIRS}")
 
 add_dependencies(moose.bin libmoose)
 
@@ -488,14 +487,15 @@ if(WITH_PYTHON)
     find_package(NumPy REQUIRED)
     find_package(PythonDev REQUIRED)
     include_directories(${PYTHON_INCLUDE_DIRS})
-    MESSAGE("Python include dir: ${PYTHON_INCLUDE_DIRS}")
-    MESSAGE("Python libraries: ${PYTHON_LIBRARIES}")
-    MESSAGE("Python executable: ${PYTHON_EXECUTABLE}")
+    MESSAGE(STATUS "Python include dir: ${PYTHON_INCLUDE_DIRS}")
+    MESSAGE(STATUS "Python libraries: ${PYTHON_LIBRARIES}")
+    MESSAGE(STATUS "Python executable: ${PYTHON_EXECUTABLE}")
 
     EXEC_PROGRAM(${PYTHON_EXECUTABLE}
         ARGS "-c 'try: import importlib.machinery; print(importlib.machinery.EXTENSION_SUFFIXES[0])
 except Exception: pass'"
-        OUTPUT_VARIABLE PYTHON_SO_EXTENSION)
+        OUTPUT_VARIABLE PYTHON_SO_EXTENSION
+        )
 
     add_subdirectory(pymoose)
 
@@ -512,7 +512,6 @@ except Exception: pass'"
         set_target_properties(_moose PROPERTIES
         SUFFIX ${PYTHON_SO_EXTENSION})
     endif()
-    set_target_properties(_moose PROPERTIES LINK_FLAGS "-L${HDF5_LIBRARY_DIRS}")
 if(MACOSX)
     set(CMAKE_MODULE_LINKER_FLAGS "-undefined dynamic_lookup")
     MESSAGE(STATUS "ADDING some linker flags ${CMAKE_EXE_LINKER_FLAGS}")
