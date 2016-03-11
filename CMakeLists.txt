@@ -296,8 +296,11 @@ IF(!HDF5_FOUND)
         " variable HDF5_HOME to the location. Rerun cmake \n"
         "================================================================ \n"
         )
+ELSE(!HDF5_FOUND)
+    # Setup linker flags in all targets pointing to hdf5 libraries.
 endif(!HDF5_FOUND)
 
+set_target_properties( libmoose PROPERTIES LINK_FLAGS "-L${HDF5_LIBRARY_DIRS}" )
 
 find_package(Termcap)
 find_package(Readline)
@@ -445,7 +448,6 @@ IF(MACOSX)
     target_link_libraries(libmoose
         ${SYSTEM_SHARED_LIBS}
         )
-
 ELSE(MACOSX)
     target_link_libraries(libmoose 
         "-Wl,--whole-archive"
@@ -512,6 +514,8 @@ except Exception: pass'"
         set_target_properties(_moose PROPERTIES
         SUFFIX ${PYTHON_SO_EXTENSION})
     endif()
+    set_target_properties( _moose PROPERTIES LINK_FLAGS "-L${HDF5_LIBRARY_DIRS}" )
+
 if(MACOSX)
     set(CMAKE_MODULE_LINKER_FLAGS "-undefined dynamic_lookup")
     MESSAGE(STATUS "ADDING some linker flags ${CMAKE_EXE_LINKER_FLAGS}")
