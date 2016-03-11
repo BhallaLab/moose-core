@@ -11,7 +11,7 @@ endif(COMMAND cmake_policy)
 
 project(moose)
 set(MOOSE_VERSION "3.0.2")
-include(FindPkgConfig)
+include(FindPkgConfig REQUIRED)
 
 # This snippet is from LLVM project.
 # Sanity check our source directory to make sure that we are not trying to
@@ -83,21 +83,21 @@ option(WITH_SBML  "Enable SBML support. Automatically detected." OFF)
 
 # If GSL_STATIC_HOME is set, we use it to search for static gsl libs.
 option(GSL_STATIC_HOME 
-    "Installation prefix where static gsl library can be found" 
+    "Path prefix where static gsl library can be found e.g. /opt/sw/gsl116 " 
     OFF
     )
 option(SBML_STATIC_HOME 
-    "Installation prefix where static sbml library can be found"
+    "Path prefix where static sbml library can be found e.g. /opt/sbml/"
     OFF
     )
 option(HDF5_STATIC_HOME
-    "Installation prefix where static hdf5 library can be found"
+    "Path prefix where static hdf5 library can be found e.g /opt/sw/hdf5 "
     OFF
     )
 
 ################################# CMKAE MACROS #################################
 
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules")
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules")
 
 ########################### COMPILER MACROS #####################################
 
@@ -165,7 +165,7 @@ if(SBML_STATIC_HOME)
         PATHS "${SBML_STATIC_HOME}/lib" "${SBML_STATIC_HOME}/lib64"
         NO_DEFAULT_PATH
         )
-    MESSAGE(STATUS "LIBSBML_LIBRARIES: ${LIBSBML_LIBRARIES}")
+    MESSAGE(STATUS "Using static version of LIBSBML_LIBRARIES: ${LIBSBML_LIBRARIES}")
     IF(LIBSBML_LIBRARIES)
         MESSAGE(STATUS "Successfully located SBML static library: ${LIBSBML_LIBRARIES}")
     ELSE()
@@ -174,18 +174,16 @@ if(SBML_STATIC_HOME)
     ENDIF()
     set(LIBSBML_FOUND ON)
 else(SBML_STATIC_HOME)
-    FIND_PACKAGE(LIBSBML)
+    find_package(LIBSBML)
     if(!LIBSBML_FOUND)
         IF(WITH_SBML)
             find_package(LIBSBML REQUIRED)
-        ELSE(WITH_SBML)
-            find_package(LIBSBML)
         ENDIF()
     endif()
 endif(SBML_STATIC_HOME)
 
 if(LIBSBML_FOUND)
-    MESSAGE(STATUS "SBML found ${LIBSBML_LIBRARIES}")
+    MESSAGE(STATUS "LIBSBML found ${LIBSBML_LIBRARIES}")
     include_directories(${LIBSBML_INCLUDE_DIRS})
     pkg_check_modules(LibXML2 libxml-2.0)
     if (!LibXML2_FOUND)
@@ -273,26 +271,32 @@ IF(HDF5_STATIC_HOME)
     add_definitions(-DUSE_HDF5)
     include_directories(${HDF5_INCLUDE_DIR})
 ELSE(HDF5_STATIC_HOME)
-    find_package(HDF5)
-    if(FOUND_HDF5)
+    pkg_check_modules(HDF5 hdf5)
+    if(HDF5_FOUND)
         add_definitions(-DUSE_HDF5)
-        include_directories(${HDF5_INCLUDE_DIR})
-    else(FOUND_HDF5)
-        message(
-            "==================================================================\n"
-            " HDF5 not found. Disabling support. Required for nsdf. \n\n"
-            " If you need hdf5 support, please install hdf5-dev or hdf5-devel\n"
-            " package or equivalent.\n\n"
-            "     $ sudo apt-get install libhdf5-dev \n"
-            "     $ sudo yum install libhdf5-devel \n"
-            "     $ brew install hdf5 \n\n"
-            " Otherwise, continue with 'make' and 'make install' \n"
-            " If you install hdf5 to non-standard path, export environment \n"
-            " variable HDF5_HOME to the location. Rerun cmake \n"
-            "================================================================ \n"
-            )
-    endif(FOUND_HDF5)
+        set(HDF5_LIBRARIES "${HDF5_LIBRARIES} -lhdf5_hl")
+        include_directories(${HDF5_INCLUDE_DIRS})
+    else(HDF5_FOUND)
+        # Try native script to locate hdf5. This is deprecated.
+        find_package(HDF5)
+     endif()
 ENDIF(HDF5_STATIC_HOME)
+
+IF(!HDF5_FOUND)
+    message(
+        "==================================================================\n"
+        " HDF5 not found. Disabling support. Required for nsdf. \n\n"
+        " If you need hdf5 support, please install hdf5-dev or hdf5-devel\n"
+        " package or equivalent.\n\n"
+        "     $ sudo apt-get install libhdf5-dev \n"
+        "     $ sudo yum install libhdf5-devel \n"
+        "     $ brew install hdf5 \n\n"
+        " Otherwise, continue with 'make' and 'make install' \n"
+        " If you install hdf5 to non-standard path, export environment \n"
+        " variable HDF5_HOME to the location. Rerun cmake \n"
+        "================================================================ \n"
+        )
+endif(!HDF5_FOUND)
 
 
 find_package(Termcap)
@@ -356,7 +360,7 @@ set(STATIC_LIBRARIES  "")
 
 if(HDF5_STATIC_HOME)
     list(APPEND STATIC_LIBRARIES ${HDF5_LIBRARIES})
-elseif(FOUND_HDF5)
+elseif(HDF5_FOUND)
     list(APPEND SYSTEM_SHARED_LIBS ${HDF5_LIBRARIES})
 endif()
 
@@ -451,14 +455,16 @@ ELSE(MACOSX)
         ${SYSTEM_SHARED_LIBS}
         )
 ENDIF(MACOSX)
+set_target_properties(libmoose PROPERTIES LINK_FLAGS "-L${HDF5_LIBRARY_DIRS}")
 
 add_dependencies(moose.bin libmoose)
 
+# This target is only for testing purpose. It links to libmoose.
 IF(CMAKE_VERSION VERSION_LESS "2.8.0")
     MESSAGE(STATUS "Using a fix for cmake ( < 2.8)")
-    target_link_libraries(moose.bin PUBLIC moose) 
+    target_link_libraries(moose.bin PUBLIC moose)
 ELSE()
-    target_link_libraries(moose.bin LINK_PUBLIC moose ${LIBSBML_LIBRARIES})
+    target_link_libraries(moose.bin LINK_PUBLIC moose)
 ENDIF()
 
 IF(WITH_DOC)
@@ -506,7 +512,7 @@ except Exception: pass'"
         set_target_properties(_moose PROPERTIES
         SUFFIX ${PYTHON_SO_EXTENSION})
     endif()
-
+    set_target_properties(_moose PROPERTIES LINK_FLAGS "-L${HDF5_LIBRARY_DIRS}")
 if(MACOSX)
     set(CMAKE_MODULE_LINKER_FLAGS "-undefined dynamic_lookup")
     MESSAGE(STATUS "ADDING some linker flags ${CMAKE_EXE_LINKER_FLAGS}")
