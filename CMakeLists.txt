@@ -11,7 +11,7 @@ endif(COMMAND cmake_policy)
 
 project(moose)
 set(MOOSE_VERSION "3.0.2")
-include(FindPkgConfig REQUIRED)
+include(FindPkgConfig)
 
 # This snippet is from LLVM project.
 # Sanity check our source directory to make sure that we are not trying to
@@ -374,7 +374,7 @@ endif()
 LIST(APPEND STATIC_LIBRARIES moose_sbml)
 IF(SBML_STATIC_HOME)
     list(APPEND STATIC_LIBRARIES ${LIBSBML_LIBRARIES})
-ELSE()
+ELIF(LIBSBML_FOUND)
     list(APPEND SYSTEM_SHARED_LIBS ${LIBSBML_LIBRARIES})
 ENDIF()
 
@@ -662,7 +662,8 @@ endif()
 if(${CMAKE_BUILD_TOOL} MATCHES "make")
     MESSAGE(
         "=======================================\n"
-        "Now run 'make' to build  MOOSE \n"
+        "If cmake did not report any error, run \n"
+	" 'make' to build  MOOSE \n"
         "=======================================\n"
         )
 endif()
