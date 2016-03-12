@@ -255,7 +255,7 @@ endif()
 
 ## Setup hdf5
 if(HDF5_STATIC_HOME)
-    SET(HDF5_INCLUDE_DIR "${HDF5_STATIC_HOME}/include")
+    SET(HDF5_INCLUDE_DIRS "${HDF5_STATIC_HOME}/include")
     find_library(HDF5_LIBRARY 
         NAME libhdf5-static.a
         PATHS ${HDF5_STATIC_HOME}/lib ${HDF5_STATIC_HOME}/lib64
@@ -267,7 +267,7 @@ if(HDF5_STATIC_HOME)
         NO_DEFAULT_PATH
         )
     SET(HDF5_LIBRARIES ${HDF5_LIBRARY} ${HDF5_HL_LIBRARY})
-    include_directories(${HDF5_INCLUDE_DIR})
+    SET(HDF5_FOUND TRUE)
 ELSE(HDF5_STATIC_HOME)
     pkg_check_modules(HDF5 hdf5)
     if(NOT HDF5_FOUND)
@@ -293,8 +293,13 @@ if(NOT HDF5_FOUND)
         )
 ELSE(NOT HDF5_FOUND)
     add_definitions(-DUSE_HDF5)
-    message(STATUS "Debug HDF5: ${HDF5_HL_LIBRARIES}")
-    SET(HDF5_LIBRARIES ${HDF5_HL_LIBRARIES})
+    message(STATUS "Debug HDF5: ${HDF5_LIBRARIES} ${HDF5_CXX_LIBRARIES} ${HDF5_HL_LIBRARIES}")
+    if(${HDF5_HL_LIBRARIES})
+        set(HDF5_LIBRARIES ${HDF5_HL_LIBRARIES})
+    else()
+        set(HDF5_LIBRARIES "${HDF5_LIBRARIES} -lhdf5_hl")
+    endif()
+    include_directories(${HDF5_INCLUDE_DIRS})
 endif(NOT HDF5_FOUND)
 
 # This is a fix for new HDF5 package on Debian/Ubuntu which installs hdf5
