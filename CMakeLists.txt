@@ -300,7 +300,11 @@ ELSE(!HDF5_FOUND)
     # Setup linker flags in all targets pointing to hdf5 libraries.
 endif(!HDF5_FOUND)
 
-set_target_properties( libmoose PROPERTIES LINK_FLAGS "-L${HDF5_LIBRARY_DIRS}" )
+# This is a fix for new HDF5 package on Debian/Ubuntu which installs hdf5
+# headers in non-standard path. issue #80.
+if(HDF5_LIBRARY_DIRS)
+    set_target_properties( libmoose PROPERTIES LINK_FLAGS "-L${HDF5_LIBRARY_DIRS}" )
+endif()
 
 find_package(Termcap)
 find_package(Readline)
@@ -514,7 +518,10 @@ except Exception: pass'"
         set_target_properties(_moose PROPERTIES
         SUFFIX ${PYTHON_SO_EXTENSION})
     endif()
-    set_target_properties( _moose PROPERTIES LINK_FLAGS "-L${HDF5_LIBRARY_DIRS}" )
+    # see issue #80
+    if(HDF5_LIBRARY_DIRS)
+        set_target_properties( _moose PROPERTIES LINK_FLAGS "-L${HDF5_LIBRARY_DIRS}" )
+    endif()
 
 if(MACOSX)
     set(CMAKE_MODULE_LINKER_FLAGS "-undefined dynamic_lookup")
