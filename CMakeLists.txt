@@ -153,7 +153,15 @@ if(GPROF AND DEBUG)
     set(CMAKE_EXE_LINKER_FLAGS_DEBUG "-pg")
 endif()
 
+################################### TARGETS ####################################
+
+add_library(_moose MODULE pymoose/moosemodule.cpp)
+add_library(libmoose SHARED basecode/main.cpp)
+add_executable(moose.bin basecode/main.cpp)
+
+
 ################################### SETUP BUILD ################################
+
 
 # If this variable is used while packaging; we build this project using another
 # cmake script and pass the location of SBML static library using this variable.
@@ -190,6 +198,15 @@ if(LIBSBML_FOUND)
         find_package(LibXML2 REQUIRED)
     endif()
     include_directories(${LibXML2_INCLUDE_DIRS})
+    if(${LIBSBML_LIBRARY_DIRS})
+        target_link_libraries(libmoose PROPERTIES LINK_FLAGS
+            "-L${LIBSBML_LIBRARY_DIRS}"
+            )
+        target_link_libraries(_moose PROPERTIES LINK_FLAGS
+            "-L${LIBSBML_LIBRARY_DIRS}"
+            )
+    endif()
+
 else()
     message(
         "======================================================================\n"
@@ -207,9 +224,7 @@ else()
 endif()
 
 include_directories(msg basecode)
-add_executable(moose.bin basecode/main.cpp)
 
-add_library(libmoose SHARED basecode/main.cpp)
 set_target_properties(libmoose PROPERTIES COMPILE_DEFINITIONS  "MOOSE_LIB")
 set_target_properties(libmoose PROPERTIES PREFIX "")
 
@@ -288,13 +303,13 @@ if(NOT HDF5_FOUND)
         "     $ brew install hdf5 \n\n"
         " Otherwise, continue with 'make' and 'make install' \n"
         " If you install hdf5 to non-standard path, export environment \n"
-        " variable HDF5_HOME to the location. Rerun cmake \n"
+        " variable HDF5_ROOT to the location. Rerun cmake \n"
         "================================================================ \n"
         )
 ELSE(NOT HDF5_FOUND)
     add_definitions(-DUSE_HDF5)
     message(STATUS "Debug HDF5: ${HDF5_LIBRARIES} ${HDF5_CXX_LIBRARIES} ${HDF5_HL_LIBRARIES}")
-    if(${HDF5_HL_LIBRARIES})
+    if(HDF5_HL_LIBRARIES)
         set(HDF5_LIBRARIES ${HDF5_HL_LIBRARIES})
     else()
         set(HDF5_LIBRARIES "${HDF5_LIBRARIES} -lhdf5_hl")
@@ -510,8 +525,6 @@ except Exception: pass'"
 
     include_directories(${NUMPY_INCLUDE_DIRS})
     add_definitions(-DUSE_NUMPY)
-
-    add_library(_moose MODULE pymoose/moosemodule.cpp)
 
     set_target_properties(_moose PROPERTIES COMPILE_DEFINITIONS "PYMOOSE")
     set_target_properties(_moose PROPERTIES 
