@@ -15,6 +15,7 @@
 #
 # Created by Robert Osfield.
 # Modified by Ralph Gauges
+# Modified by Dilawar Singh
 
 message (STATUS "Environment variable pointing to SBML?: $ENV{LIBSBML_DIR}")
 
@@ -61,7 +62,8 @@ find_library(LIBSBML_LIBRARIES
           /opt/lib
           /opt/lib64
           /usr/freeware/lib64
-    NO_DEFAULT_PATH)
+      )
+
 
 if (NOT LIBSBML_LIBRARIES)
     find_library(LIBSBML_LIBRARIES
