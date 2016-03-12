@@ -20,7 +20,7 @@ include(FindPkgConfig)
 # (which would end up getting picked up by header search, instead of the correct
 # versions).
 
-MESSAGE(STATUS "CMAKE_INSTALL_PREFIX : ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "CMAKE_INSTALL_PREFIX : ${CMAKE_INSTALL_PREFIX}")
 if( CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT MSVC_IDE )
     message(FATAL_ERROR 
         "======================================================================\n"
@@ -49,7 +49,7 @@ add_custom_target(uninstall
 link_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 ################################# OS Specific ##################################
-MESSAGE(STATUS "Operating system: ${CMAKE_SYSTEM_NAME}")
+message(STATUS "Operating system: ${CMAKE_SYSTEM_NAME}")
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     CMAKE_POLICY(SET CMP0042 NEW)
     set(MACOSX TRUE)
@@ -112,10 +112,10 @@ add_definitions(-Wall
 add_definitions(-fPIC)
 
 if(COMPILER_SUPPORTS_CXX11)
-    MESSAGE(STATUS "Your compiler supports c++11 features. Enabling it")
+    message(STATUS "Your compiler supports c++11 features. Enabling it")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 elseif(COMPILER_SUPPORTS_CXX0X)
-    MESSAGE(STATUS "Your compiler supports c++0x features. Enabling it")
+    message(STATUS "Your compiler supports c++0x features. Enabling it")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 else()
     message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support.")
@@ -138,11 +138,11 @@ endif()
 add_definitions(-DUSE_GENESIS_PARSER)
 
 if(ENABLE_UNIT_TESTS AND DEBUG)
-    MESSAGE(STATUS "Building for Debug/Unit testing")
+    message(STATUS "Building for Debug/Unit testing")
     add_definitions(-DDO_UNIT_TESTS)
     set(CMAKE_BUILD_TYPE Debug)
 else()
-    MESSAGE(STATUS "Building for Release/No unit tests.")
+    message(STATUS "Building for Release/No unit tests.")
     set(CMAKE_BUILD_TYPE Release)
     add_definitions(-UDO_UNIT_TESTS -O3)
 endif()
@@ -165,34 +165,33 @@ if(SBML_STATIC_HOME)
         PATHS "${SBML_STATIC_HOME}/lib" "${SBML_STATIC_HOME}/lib64"
         NO_DEFAULT_PATH
         )
-    MESSAGE(STATUS "Using static version of LIBSBML_LIBRARIES: ${LIBSBML_LIBRARIES}")
-    IF(LIBSBML_LIBRARIES)
-        MESSAGE(STATUS "Successfully located SBML static library: ${LIBSBML_LIBRARIES}")
+    message(STATUS "- Using static version of LIBSBML_LIBRARIES: ${LIBSBML_LIBRARIES}")
+    if(LIBSBML_LIBRARIES)
+        message(STATUS "- Successfully located SBML static library: ${LIBSBML_LIBRARIES}")
     ELSE()
-        MESSAGE(FATAL_ERROR "Can't find static libsbml libraries at path
-        ${SBML_STATIC_HOME}")
-    ENDIF()
+        message(FATAL_ERROR 
+            "Can't find static libsbml libraries at path ${SBML_STATIC_HOME}"
+            )
+    endif()
     set(LIBSBML_FOUND ON)
 else(SBML_STATIC_HOME)
-    find_package(LIBSBML)
-    if(!LIBSBML_FOUND)
-        IF(WITH_SBML)
-            find_package(LIBSBML REQUIRED)
-        ENDIF()
+    pkg_check_modules(LIBSBML libsbml)
+    if(NOT LIBSBML_FOUND)
+        message(STATUS "pkg-config could not find sbml. Fallback to default")
+        find_package(LIBSBML)
     endif()
 endif(SBML_STATIC_HOME)
 
 if(LIBSBML_FOUND)
-    MESSAGE(STATUS "LIBSBML found ${LIBSBML_LIBRARIES}")
+    message(STATUS "LIBSBML found ${LIBSBML_LIBRARIES}")
     include_directories(${LIBSBML_INCLUDE_DIRS})
     pkg_check_modules(LibXML2 libxml-2.0)
     if (!LibXML2_FOUND)
         find_package(LibXML2 REQUIRED)
     endif()
     include_directories(${LibXML2_INCLUDE_DIRS})
-    add_definitions(-DUSE_SBML)
 else()
-    MESSAGE(
+    message(
         "======================================================================\n"
         "libsbml NOT found. \n\n"
         "If you want to compile with SBML support, download and install \n"
@@ -217,7 +216,7 @@ set_target_properties(libmoose PROPERTIES PREFIX "")
 ## GSL
 add_definitions(-DUSE_GSL)
 
-IF(GSL_STATIC_HOME)
+if(GSL_STATIC_HOME)
     SET(GSL_INCLUDE_DIR "${GSL_STATIC_HOME}/include")
     find_library(GSL_LIBRARY 
         NAME libgsl.a 
@@ -231,12 +230,12 @@ IF(GSL_STATIC_HOME)
         )
     SET(GSL_LIBRARIES ${GSL_LIBRARY} ${GSLCBLAS_LIBRARY})
     set(GSL_INCLUDE_DIR ${GSL_STATIC_HOME}/include)
-    MESSAGE(STATUS "STATIC GSL_LIBRARIES ${GSL_LIBRARIES}")
+    message(STATUS "STATIC GSL_LIBRARIES ${GSL_LIBRARIES}")
     set(GSL_FOUND TRUE)
 ELSE()
     find_package(GSL 1.16)
-    IF(NOT GSL_FOUND)
-        MESSAGE(FATAL_ERROR 
+    if(NOT GSL_FOUND)
+        message(FATAL_ERROR 
             "=====================================================================\n"
             " FATAL gsl(>1.16) not found.\n\n"
             " MOOSE requires Gnu Scientific Library (GSL) 1.16 or higher. \n"
@@ -251,11 +250,11 @@ ELSE()
             " variable. CMAKE use this to search for required files. \n"
             "====================================================================\n"
             )
-    ENDIF(NOT GSL_FOUND)
-ENDIF()
+    endif(NOT GSL_FOUND)
+endif()
 
 ## Setup hdf5
-IF(HDF5_STATIC_HOME)
+if(HDF5_STATIC_HOME)
     SET(HDF5_INCLUDE_DIR "${HDF5_STATIC_HOME}/include")
     find_library(HDF5_LIBRARY 
         NAME libhdf5-static.a
@@ -268,21 +267,17 @@ IF(HDF5_STATIC_HOME)
         NO_DEFAULT_PATH
         )
     SET(HDF5_LIBRARIES ${HDF5_LIBRARY} ${HDF5_HL_LIBRARY})
-    add_definitions(-DUSE_HDF5)
     include_directories(${HDF5_INCLUDE_DIR})
 ELSE(HDF5_STATIC_HOME)
     pkg_check_modules(HDF5 hdf5)
-    if(HDF5_FOUND)
-        add_definitions(-DUSE_HDF5)
-        set(HDF5_LIBRARIES "${HDF5_LIBRARIES} -lhdf5_hl")
-        include_directories(${HDF5_INCLUDE_DIRS})
-    else(HDF5_FOUND)
-        # Try native script to locate hdf5. This is deprecated.
-        find_package(HDF5)
+    if(NOT HDF5_FOUND)
+        message(STATUS "pkg-config could not find hdf5. fallback to default")
+        find_package(HDF5 COMPONENTS CXX HL)
      endif()
-ENDIF(HDF5_STATIC_HOME)
+endif(HDF5_STATIC_HOME)
 
-IF(!HDF5_FOUND)
+#message(STATUS "Debug: HDF5_FOUND? = ${HDF5_FOUND}")
+if(NOT HDF5_FOUND)
     message(
         "==================================================================\n"
         " HDF5 not found. Disabling support. Required for nsdf. \n\n"
@@ -296,9 +291,11 @@ IF(!HDF5_FOUND)
         " variable HDF5_HOME to the location. Rerun cmake \n"
         "================================================================ \n"
         )
-ELSE(!HDF5_FOUND)
-    # Setup linker flags in all targets pointing to hdf5 libraries.
-endif(!HDF5_FOUND)
+ELSE(NOT HDF5_FOUND)
+    add_definitions(-DUSE_HDF5)
+    message(STATUS "Debug HDF5: ${HDF5_HL_LIBRARIES}")
+    SET(HDF5_LIBRARIES ${HDF5_HL_LIBRARIES})
+endif(NOT HDF5_FOUND)
 
 # This is a fix for new HDF5 package on Debian/Ubuntu which installs hdf5
 # headers in non-standard path. issue #80.
@@ -372,18 +369,18 @@ elseif(HDF5_FOUND)
 endif()
 
 LIST(APPEND STATIC_LIBRARIES moose_sbml)
-IF(SBML_STATIC_HOME)
+if(SBML_STATIC_HOME)
     list(APPEND STATIC_LIBRARIES ${LIBSBML_LIBRARIES})
-ELIF(LIBSBML_FOUND)
+elseif(LIBSBML_FOUND)
     list(APPEND SYSTEM_SHARED_LIBS ${LIBSBML_LIBRARIES})
-ENDIF()
+endif()
 
 
 if(GSL_STATIC_HOME)
-    MESSAGE(STATUS "Using STATIC gsl libraries: ${GSL_LIBRARIES}")
+    message(STATUS "Using STATIC gsl libraries: ${GSL_LIBRARIES}")
     list(APPEND STATIC_LIBRARIES ${GSL_LIBRARIES})
 else()
-    MESSAGE(STATUS "Using system gsl : ${GSL_LIBRARIES}")
+    message(STATUS "Using system gsl : ${GSL_LIBRARIES}")
     list(APPEND SYSTEM_SHARED_LIBS ${GSL_LIBRARIES})
 endif()
 
@@ -399,20 +396,20 @@ endif(WITH_MPI)
 
 pkg_check_modules(MUPARSER muparser)
 if(MUPARSER_FOUND)
-    message("Using system muparser ${MUPARSER_VERSION}")
+    message(STATUS "Using system muparser ${MUPARSER_VERSION}")
     list(APPEND SYSTEM_SHARED_LIBS ${MUPARSER_LIBRARIES})
 else()
-    message("Using private muparser")
+    message(STATUS "Using private muparser")
     add_subdirectory(external/muparser)
     list(APPEND MOOSE_LIBRARIES muparser)
 endif()
 
 pkg_check_modules(TINYXML tinyxml)
 if(TINYXML_FOUND)
-    message("Using system tinyxml ${TINYXML_VERSION}")
+    message(STATUS "Using system tinyxml ${TINYXML_VERSION}")
     list(APPEND SYSTEM_SHARED_LIBS ${TINYXML_LIBRARIES})
 else()
-    message("Using private tinyxml")
+    message(STATUS "Using private tinyxml")
     add_subdirectory(external/tinyxml)
     list(APPEND MOOSE_LIBRARIES tinyxml)
 endif()
@@ -442,7 +439,8 @@ list(APPEND MOOSE_LIBRARIES
 
 
 # MAC linker does not understand many of gnu-ld options.
-IF(MACOSX)
+message( STATUS "Shared libs: ${SYSTEM_SHARED_LIBS}")
+if(MACOSX)
     target_link_libraries(libmoose
         "-Wl,-all_load"
         ${MOOSE_LIBRARIES}
@@ -460,19 +458,19 @@ ELSE(MACOSX)
         "-Wl,--no-whole-archive"
         ${SYSTEM_SHARED_LIBS}
         )
-ENDIF(MACOSX)
+endif(MACOSX)
 
 add_dependencies(moose.bin libmoose)
 
 # This target is only for testing purpose. It links to libmoose.
-IF(CMAKE_VERSION VERSION_LESS "2.8.0")
-    MESSAGE(STATUS "Using a fix for cmake ( < 2.8)")
+if(CMAKE_VERSION VERSION_LESS "2.8.0")
+    message(STATUS "Using a fix for cmake ( < 2.8)")
     target_link_libraries(moose.bin PUBLIC moose)
 ELSE()
     target_link_libraries(moose.bin LINK_PUBLIC moose)
-ENDIF()
+endif()
 
-IF(WITH_DOC)
+if(WITH_DOC)
     FIND_PACKAGE(Doxygen REQUIRED)
     add_custom_command(TARGET libmoose POST_BUILD
         COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.full
@@ -480,7 +478,7 @@ IF(WITH_DOC)
         COMMENT "Building developer documentation"
         VERBATIM
         )
-ENDIF(WITH_DOC)
+endif(WITH_DOC)
 
 ######################### BUILD PYMOOSE ########################################
 # Root of all python module.
@@ -493,9 +491,9 @@ if(WITH_PYTHON)
     find_package(NumPy REQUIRED)
     find_package(PythonDev REQUIRED)
     include_directories(${PYTHON_INCLUDE_DIRS})
-    MESSAGE(STATUS "Python include dir: ${PYTHON_INCLUDE_DIRS}")
-    MESSAGE(STATUS "Python libraries: ${PYTHON_LIBRARIES}")
-    MESSAGE(STATUS "Python executable: ${PYTHON_EXECUTABLE}")
+    message(STATUS "Python include dir: ${PYTHON_INCLUDE_DIRS}")
+    message(STATUS "Python libraries: ${PYTHON_LIBRARIES}")
+    message(STATUS "Python executable: ${PYTHON_EXECUTABLE}")
 
     EXEC_PROGRAM(${PYTHON_EXECUTABLE}
         ARGS "-c 'try: import importlib.machinery; print(importlib.machinery.EXTENSION_SUFFIXES[0])
@@ -525,10 +523,10 @@ except Exception: pass'"
 
 if(MACOSX)
     set(CMAKE_MODULE_LINKER_FLAGS "-undefined dynamic_lookup")
-    MESSAGE(STATUS "ADDING some linker flags ${CMAKE_EXE_LINKER_FLAGS}")
+    message(STATUS "ADDING some linker flags ${CMAKE_EXE_LINKER_FLAGS}")
 endif(MACOSX)
 
-IF(MACOSX)
+if(MACOSX)
     target_link_libraries( _moose 
         "-Wl,-all_load"
         moosepython  
@@ -548,7 +546,7 @@ ELSE(MACOSX)
         ${PYTHON_LIBRARIES}
         ${SYSTEM_SHARED_LIBS}
         )
-ENDIF(MACOSX)
+endif(MACOSX)
 
     add_custom_target(copy_python_files
       COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -559,7 +557,7 @@ ENDIF(MACOSX)
       )
     add_dependencies(_moose copy_python_files)
 
-IF(WITH_DOC)
+if(WITH_DOC)
     # Also generate the documents
     FIND_PROGRAM(Sphinx REQUIRED)
     add_custom_command(TARGET _moose
@@ -586,7 +584,7 @@ if(BUILD_CYMOOSE)
         LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/cymoose"
             )
 
-IF(MACOSX)
+if(MACOSX)
     target_link_libraries(cymoose 
         "-Wl,-all_load"
         ${MOOSE_LIBRARIES}
@@ -602,7 +600,7 @@ ELSE(MACOSX)
         "-Wl,--no-whole-archive"
         ${SYSTEM_LIBRARIES}
         )
-ENDIF(MACOSX)
+endif(MACOSX)
 
 endif(BUILD_CYMOOSE)
 
@@ -610,7 +608,7 @@ endif(BUILD_CYMOOSE)
 option(WITH_DOC "Build documentation using python-sphinx and doxygen" OFF)
 if(WITH_DOC)
     FIND_PACKAGE(Sphinx REQUIRED)
-    MESSAGE(STATUS "Build documentation.")
+    message(STATUS "Build documentation.")
     set(USER_DOC_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Docs/user/py/_build/html)
     set(DEVELOPER_DOC_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Docs/developer/html)
     ADD_CUSTOM_TARGET(docs ALL
@@ -660,7 +658,7 @@ endif()
 
 # Print message to start build process
 if(${CMAKE_BUILD_TOOL} MATCHES "make")
-    MESSAGE(
+    message(
         "=======================================\n"
         "If cmake did not report any error, run \n"
 	" 'make' to build  MOOSE \n"
