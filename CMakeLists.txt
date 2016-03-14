@@ -247,10 +247,8 @@ set_target_properties(libmoose PROPERTIES COMPILE_DEFINITIONS  "MOOSE_LIB")
 set_target_properties(libmoose PROPERTIES PREFIX "")
 
 ## GSL
-add_definitions(-DUSE_GSL)
-
 if(GSL_STATIC_HOME)
-    SET(GSL_INCLUDE_DIR "${GSL_STATIC_HOME}/include")
+    SET(GSL_INCLUDE_DIRS "${GSL_STATIC_HOME}/include")
     find_library(GSL_LIBRARY 
         NAME libgsl.a 
         PATHS ${GSL_STATIC_HOME}/lib ${GSL_STATIC_HOME}/lib64
@@ -262,7 +260,6 @@ if(GSL_STATIC_HOME)
         NO_DEFAULT_PATH
         )
     SET(GSL_LIBRARIES ${GSL_LIBRARY} ${GSLCBLAS_LIBRARY})
-    set(GSL_INCLUDE_DIR ${GSL_STATIC_HOME}/include)
     message(STATUS "STATIC GSL_LIBRARIES ${GSL_LIBRARIES}")
     set(GSL_FOUND TRUE)
 ELSE()
@@ -285,6 +282,7 @@ ELSE()
             )
     endif(NOT GSL_FOUND)
 endif()
+add_definitions(-DUSE_GSL)
 
 ## Setup hdf5
 if(HDF5_STATIC_HOME)
@@ -326,11 +324,11 @@ if(NOT HDF5_FOUND)
         )
 ELSE(NOT HDF5_FOUND)
     add_definitions(-DUSE_HDF5)
-    message(STATUS "Debug HDF5: ${HDF5_LIBRARIES} ${HDF5_CXX_LIBRARIES} ${HDF5_HL_LIBRARIES}")
+    message(STATUS "DBG -- HDF5: ${HDF5_LIBRARIES} ## ${HDF5_CXX_LIBRARIES} ## ${HDF5_HL_LIBRARIES}")
     if(HDF5_HL_LIBRARIES)
         set(HDF5_LIBRARIES ${HDF5_HL_LIBRARIES})
     else()
-        set(HDF5_LIBRARIES "${HDF5_LIBRARIES} -lhdf5_hl")
+        set(HDF5_LIBRARIES "-lhdf5 -lhdf5_hl")
     endif()
     include_directories(${HDF5_INCLUDE_DIRS})
 endif(NOT HDF5_FOUND)
@@ -339,6 +337,7 @@ endif(NOT HDF5_FOUND)
 # headers in non-standard path. issue #80.
 if(HDF5_LIBRARY_DIRS)
     set_target_properties( libmoose PROPERTIES LINK_FLAGS "-L${HDF5_LIBRARY_DIRS}" )
+    set_target_properties( _moose PROPERTIES LINK_FLAGS "-L${HDF5_LIBRARY_DIRS}" )
 endif()
 
 find_package(Termcap)
@@ -442,15 +441,15 @@ else()
     list(APPEND MOOSE_LIBRARIES muparser)
 endif()
 
-pkg_check_modules(TINYXML tinyxml)
-if(TINYXML_FOUND)
-    message(STATUS "Using system tinyxml ${TINYXML_VERSION}")
-    list(APPEND SYSTEM_SHARED_LIBS ${TINYXML_LIBRARIES})
-else()
-    message(STATUS "Using private tinyxml")
-    add_subdirectory(external/tinyxml)
-    list(APPEND MOOSE_LIBRARIES tinyxml)
-endif()
+#pkg_check_modules(TINYXML tinyxml)
+#if(TINYXML_FOUND)
+    #message(STATUS "Using system tinyxml ${TINYXML_VERSION}")
+    #list(APPEND SYSTEM_SHARED_LIBS ${TINYXML_LIBRARIES})
+#else()
+    #message(STATUS "Using private tinyxml")
+    #add_subdirectory(external/tinyxml)
+    #list(APPEND MOOSE_LIBRARIES tinyxml)
+#endif()
 
 ###################################### LINKING #################################
 list(APPEND MOOSE_LIBRARIES

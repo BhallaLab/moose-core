@@ -32,8 +32,8 @@ before_script:
     - sudo apt-get install python3-numpy  python3-matplotlib
 
 before_install:
-    - ##sbmlurl="http://sourceforge.net/projects/sbml/files/libsbml/5.9.0/stable/Linux/64-bit/libSBML-5.9.0-Linux-x64.deb"
-    - ##wget "$sbmlurl" -O libsbml.deb && sudo dpkg -i libsbml.deb 
+    - sbmlurl="http://sourceforge.net/projects/sbml/files/libsbml/5.9.0/stable/Linux/64-bit/libSBML-5.9.0-Linux-x64.deb"
+    - wget "$sbmlurl" -O libsbml.deb && sudo dpkg -i libsbml.deb 
     - wget http://ftp.debian.org/debian/pool/main/g/gsl/libgsl0ldbl_1.16+dfsg-4_amd64.deb -O gsl_1.16.deb
     - sudo dpkg -i gsl_1.16.deb
     - wget "http://ftp.debian.org/debian/pool/main/g/gsl/libgsl0-dev_1.16+dfsg-4_amd64.deb" -O gsl_1.16-dev.deb
@@ -44,6 +44,7 @@ install:
     - echo "nothing to do here"
 
 script:
+    - sudo ldconfig /usr/lib64
     - make BUILD=debug USE_NEUROKIT=1 && make clean
     - mkdir -p _build && cd _build && cmake -DDEBUG=ON -DWITH_DOC=OFF .. && make
     - ctest --output-on-failure

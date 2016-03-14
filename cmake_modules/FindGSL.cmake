@@ -10,7 +10,7 @@
 ## 
 ## CMAKE_GSL_CXX_FLAGS  = Unix compiler flags for GSL, essentially "`gsl-config --cxxflags`"
 ##
-## GSL_INCLUDE_DIR      = where to find headers 
+## GSL_INCLUDE_DIRS      = where to find headers 
 ##
 ## GSL_LINK_DIRECTORIES = link directories, useful for rpath on Unix
 ## GSL_EXE_LINKER_FLAGS = rpath on Unix
@@ -37,7 +37,7 @@ IF(WIN32)
     ${GSL_MSVC_PREFIX}/lib
     )
 
-  FIND_PATH(GSL_INCLUDE_DIR gsl/gsl_blas.h 
+  FIND_PATH(GSL_INCLUDE_DIRS gsl/gsl_blas.h 
     ${GSL_MINGW_PREFIX}/include 
     ${GSL_MSVC_PREFIX}/include
     )
@@ -56,7 +56,7 @@ ELSE(WIN32)
     if(EXISTS "$ENV{GSL_HOME}")
 	set(GSL_CONFIG "$ENV{GSL_HOME}/bin/gsl-config")
 	MESSAGE(STATUS "gsl-config from environment variable: ${GSL_CONFIG}")
-	set(GSL_INCLUDE_DIR)
+	set(GSL_INCLUDE_DIRS)
         set(GSL_LIBRARIES)
         set(GSL_VERSION)
         set(GSL_CONFIG_LIBS)
@@ -76,7 +76,7 @@ ELSE(WIN32)
       EXEC_PROGRAM(${GSL_CONFIG}
         ARGS --prefix
         OUTPUT_VARIABLE GSL_PREFIX)
-      SET(GSL_INCLUDE_DIR ${GSL_PREFIX}/include CACHE STRING INTERNAL)
+      SET(GSL_INCLUDE_DIRS ${GSL_PREFIX}/include CACHE STRING INTERNAL)
 
       # set link libraries and link flags
       EXEC_PROGRAM(${GSL_CONFIG}
@@ -114,7 +114,7 @@ ELSE(WIN32)
       #      SET(GSL_DEFINITIONS "-DHAVE_GSL")
       MARK_AS_ADVANCED(
         GSL_CXX_FLAGS
-        GSL_INCLUDE_DIR
+        GSL_INCLUDE_DIRS
         GSL_LIBRARIES
         GSL_LINK_DIRECTORIES
         GSL_DEFINITIONS
@@ -136,12 +136,12 @@ ENDIF(WIN32)
 
 
 IF(GSL_LIBRARIES)
-  IF(GSL_INCLUDE_DIR OR GSL_CXX_FLAGS)
+  IF(GSL_INCLUDE_DIRS OR GSL_CXX_FLAGS)
 
     SET(GSL_FOUND 1)
     
     MESSAGE(STATUS "Using GSL from ${GSL_PREFIX}")
 
-  ENDIF(GSL_INCLUDE_DIR OR GSL_CXX_FLAGS)
+  ENDIF(GSL_INCLUDE_DIRS OR GSL_CXX_FLAGS)
 ENDIF(GSL_LIBRARIES)
 
