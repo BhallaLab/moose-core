@@ -42,13 +42,8 @@ except:
 try: from .print_utils import *
 except: pass
 
-from .sim_utils import *
-
-try: from .backend import graphviz
+try: from .sim_utils import *
 except: pass
-
-try: from .topology import topology
-except Exception as e: pass
 
 from .moose_constants import *
 

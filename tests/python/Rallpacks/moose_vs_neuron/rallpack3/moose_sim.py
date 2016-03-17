@@ -17,15 +17,10 @@ __maintainer__       = "Dilawar Singh"
 __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
-import sys
-sys.path.append('../../../python')
+import numpy as np
+
 import moose
 from moose import utils
-
-import os
-import numpy as np
-import matplotlib.pyplot as plt
-
 
 EREST_ACT = -65e-3
 per_ms = 1e3
@@ -66,7 +61,7 @@ class MooseCompartment():
                         , "Failed with error %s " % e
                         ]
                     )
-            sys.exit(0)
+            raise
         #utils.dump('DEBUG', [ 'Compartment: {}'.format( self ) ] )
 
 

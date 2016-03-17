@@ -1,16 +1,7 @@
-# import os
-# import subprocess
-# import uuid
 from __future__ import print_function
-import sys
-from datetime import datetime
 
-sys.path.append('../../python')
-try:
-    import moose
-except ImportError:    
-    print('Please include the directory containing moose.py and _moose.so in your PYTHONPATH environmental variable.')
-    sys.exit(1)
+from datetime import datetime
+import moose
 
 def time_creation(n=1000):
     elist = []

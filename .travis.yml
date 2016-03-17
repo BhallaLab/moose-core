@@ -38,14 +38,18 @@ before_install:
     - sudo dpkg -i gsl_1.16.deb
     - wget "http://ftp.debian.org/debian/pool/main/g/gsl/libgsl0-dev_1.16+dfsg-4_amd64.deb" -O gsl_1.16-dev.deb
     - sudo dpkg -i gsl_1.16-dev.deb
+    - sudo apt-get install -f
 
 install:
     - echo "nothing to do here"
 
 script:
+    - sudo ldconfig /usr/lib64
     - make BUILD=debug USE_NEUROKIT=1 && make clean
     - mkdir -p _build && cd _build && cmake -DDEBUG=ON -DWITH_DOC=OFF .. && make
     - ctest --output-on-failure
     - cd ..
     - mkdir -p _BUILD && cd _BUILD && cmake -DDEBUG=ON -DPYTHON_EXECUTABLE=/usr/bin/python3 ..
     - make 
+    - ctest --output-on-failure 
+    - cd ..

@@ -7,12 +7,7 @@ except:
 import uuid
 import platform
 
-sys.path = ['../../python'] + sys.path
-try:
-    import moose
-except ImportError:    
-    print('Please include the directory containing moose.py and _moose.so in your PYTHONPATH environmental variable.')
-    sys.exit(1)
+import moose
 
 class TestVec(unittest.TestCase):
     """Test pymoose basics"""
