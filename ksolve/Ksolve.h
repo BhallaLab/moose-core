@@ -10,13 +10,60 @@
 #ifndef _KSOLVE_H
 #define _KSOLVE_H
 
+#define _KSOLVE_SEQ 0
+#define _KSOLVE_OPENMP_FOR 1
+#define _KSOLVE_OPENMP_TASK 0
+#define _KSOLVE_PTHREADS 0
+
+#include <pthread.h>
+#include <semaphore.h>
+#include <signal.h>
+#include <sys/syscall.h>
+
 class Stoich;
+
+//////////////////////////////////////////////////////////////////
+//For Pthread Parallelism by Rahul
+//////////////////////////////////////////////////////////////////
+#if _KSOLVE_PTHREADS
+
+#define NTHREADS 1
+		
+bool threadWork[NTHREADS];
+
+struct pthreadWrap
+{
+	   long tid;
+	   sem_t* sThread, *sMain;
+	   bool* destroySig;
+	   ProcPtr *p;
+	   VoxelPools** poolsArr_;
+	   int *pthreadBlock;
+
+	   pthreadWrap (long Id, sem_t* S1, sem_t* S2, bool* destroySignal, ProcPtr *ptr, VoxelPools** PA, int* block) : tid(Id), sThread(S1), sMain(S2), destroySig(destroySignal), p(ptr), poolsArr_(PA), pthreadBlock(block) {}
+};
+
+extern "C" void* call_func( void* f );
+
+#endif // _KSOLVE_PTHREADS
 
 class Ksolve: public ZombiePoolInterface
 {
 	public: 
 		Ksolve();
 		~Ksolve();
+
+#if _KSOLVE_PTHREADS
+		pthread_t threads[NTHREADS];
+		sem_t threadSemaphor[NTHREADS];
+		bool* destroySignal;
+		ProcPtr *pthreadP;
+		VoxelPools** poolArray_;
+		int *pthreadBlock;
+		sem_t mainSemaphor[NTHREADS];
+
+#endif
+
 
 		//////////////////////////////////////////////////////////////////
 		// Field assignment stuff
@@ -63,6 +110,8 @@ class Ksolve: public ZombiePoolInterface
 		// Dest Finfos
 		//////////////////////////////////////////////////////////////////
 		void process( const Eref& e, ProcPtr p );
+
+
 		void reinit( const Eref& e, ProcPtr p );
 		void initProc( const Eref& e, ProcPtr p );
 		void initReinit( const Eref& e, ProcPtr p );
@@ -140,6 +189,8 @@ class Ksolve: public ZombiePoolInterface
 		//////////////////////////////////////////////////////////////////
 		static SrcFinfo2< Id, vector< double > >* xComptOut();
 		static const Cinfo* initCinfo();
+
+
 	private:
 		string method_;
 		double epsAbs_;
@@ -166,6 +217,7 @@ class Ksolve: public ZombiePoolInterface
 
 		/// Pointer to diffusion solver
 		ZombiePoolInterface* dsolvePtr_;
+
 };
 
 #endif	// _KSOLVE_H

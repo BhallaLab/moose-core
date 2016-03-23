@@ -447,6 +447,7 @@ string Stoich::getPath( const Eref& e ) const
 }
 
 void Stoich::setKsolve( Id ksolve ) {
+
 	ksolve_ = Id();
 	kinterface_ = 0;
 	if ( ! ( 

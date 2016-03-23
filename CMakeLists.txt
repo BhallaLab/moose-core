@@ -122,6 +122,11 @@ elseif(COMPILER_SUPPORTS_CXX0X)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 else()
     message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support.")
+## DO UNIT TEST
+option(ENABLE_UNIT_TESTS "ENABLE UNIT TESTS IN MOOSE" ON)
+if(ENABLE_UNIT_TESTS)
+    MESSAGE("++ Unit testing enabled.")
+    add_definitions(-DDO_UNIT_TESTS)
 endif()
 
 
@@ -152,7 +157,7 @@ elseif(DEBUG)
 else()
     message(STATUS "Building for Release/No unit tests.")
     set(CMAKE_BUILD_TYPE Release)
-    add_definitions(-UDO_UNIT_TESTS -O3)
+    add_definitions(-UDO_UNIT_TESTS )
 endif()
 
 if(GPROF AND DEBUG)
@@ -251,14 +256,18 @@ set_target_properties(libmoose PROPERTIES PREFIX "")
 if(GSL_STATIC_HOME)
     SET(GSL_INCLUDE_DIRS "${GSL_STATIC_HOME}/include")
     find_library(GSL_LIBRARY 
-        NAME libgsl.a 
-        PATHS ${GSL_STATIC_HOME}/lib ${GSL_STATIC_HOME}/lib64
-        NO_DEFAULT_PATH
+        NAME libgsl.so 
+	   #NAME libgsl.a 
+	   # PATHS ${GSL_STATIC_HOME}/lib ${GSL_STATIC_HOME}/lib64
+        PATHS /usr/lib
+	       NO_DEFAULT_PATH
         )
     find_library(GSLCBLAS_LIBRARY
-        NAME libgslcblas.a 
-        PATHS ${GSL_STATIC_HOME}/lib ${GSL_STATIC_HOME}/lib64 
-        NO_DEFAULT_PATH
+        NAME libgslcblas.so 
+	   #NAME libgslcblas.a 
+	   #PATHS ${GSL_STATIC_HOME}/lib ${GSL_STATIC_HOME}/lib64 
+        PATHS /usr/lib
+	       NO_DEFAULT_PATH
         )
     SET(GSL_LIBRARIES ${GSL_LIBRARY} ${GSLCBLAS_LIBRARY})
     message(STATUS "STATIC GSL_LIBRARIES ${GSL_LIBRARIES}")
@@ -373,6 +382,13 @@ if(WITH_MPI)
     ##        PROPERTIES LINK_FLAGS "${MPI_LINK_FLAGS}"
     ##        )
     ##endif(MPI_LINK_FLAGS)
+    find_package(OpenMP REQUIRED)
+    MESSAGE("++ OpenMPI support is ON")
+    add_definitions(-DUSE_OPENMPI -O1)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${-pthread}")
+	
 endif(WITH_MPI)
 
 # Add subdirectroeis

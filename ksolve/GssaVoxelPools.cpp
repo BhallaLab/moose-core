@@ -95,6 +95,7 @@ void GssaVoxelPools::updateDependentRates(
 unsigned int GssaVoxelPools::pickReac() const
 {
 	// double r =  gsl_rng_uniform( rng ) * atot_;
+	cout << "From gssaVoxelPools " << endl;
 	double r = mtrand() * atot_;
 	double sum = 0.0;
 
