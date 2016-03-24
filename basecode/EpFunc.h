@@ -236,4 +236,5 @@ template< class T, class L, class A > class GetEpFunc1:
 		A ( T::*func_ )( const Eref& e, L ) const;
 };
 
+
 #endif //_EPFUNC_H
