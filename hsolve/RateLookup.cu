@@ -34,7 +34,10 @@ LookupTable::LookupTable(
 	
 	//~ interpolate_.resize( nSpecies );
 	table_.resize( nPts_ * nColumns_ );
+
+#ifdef USE_CUDA
 	is_set_ = false;
+#endif
 }
 
 void LookupTable::addColumns(
@@ -322,7 +325,6 @@ void LookupTable::row_gpu(vector<double>::iterator& x, double ** row, unsigned i
     									dx_, 
     									nColumns_, 
     									size);	
-    cudaCheckError();
     cudaSafeCall(cudaDeviceSynchronize()); 
 
 #ifdef DEBUG_VERBOSE    

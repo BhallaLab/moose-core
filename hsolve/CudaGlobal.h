@@ -6,6 +6,7 @@
 #ifdef USE_CUDA
 
 #define BLOCK_WIDTH 64
+#define THREADS_PER_BLOCK 128
 
 #ifndef DEBUG_
 #define DEBUG_
@@ -23,6 +24,11 @@
 #include <stdio.h>
 #include <cuda.h>
 #include <cuda_runtime_api.h>
+#include <cusparse_v2.h>
+#include <cublas_v2.h>
+
+#include <cusolverSp.h>
+#include <cusolverSp_LOWLEVEL_PREVIEW.h>
 
 typedef unsigned int u32;
 typedef unsigned long long u64;

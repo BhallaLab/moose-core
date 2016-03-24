@@ -17,6 +17,8 @@ using namespace moose; // For moose::Compartment from 'Compartment.h'
 #include "HSolveStruct.h"
 #include "HinesMatrix.h"
 
+#include "CudaGlobal.h"
+
 class HSolvePassive: public HinesMatrix
 {
 #ifdef DO_UNIT_TESTS
@@ -42,9 +44,17 @@ protected:
 		* The tree is used to acquire various values during setup. It contains
 		* the user-defined original values of all compartment parameters.
 		* Therefore, it is also used during reinit. */
+#ifdef USE_CUDA
+	/*
+	 * Stores the inject structures of all compartments. Map is not suitable for
+	 * GPU memory transfers.
+	 */
+	vector<InjectStruct> inject_; // Stores the inject values for all the compartments.
+#else
 	map< unsigned int, InjectStruct > inject_;			/**< inject map.
 		* contains the list of compartments that have current injections into
 		* them. */
+#endif
 	
 private:
 	// Setting up of data structures

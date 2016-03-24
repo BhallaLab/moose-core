@@ -27,7 +27,7 @@
 
 #include "CudaGlobal.h"
 #include "RateLookup.h"
-#include <thrust/scan.h>
+#include "Gpu_timer.h"
 
 class HSolveActive: public HSolvePassive
 {
@@ -39,7 +39,9 @@ public:
     void setup( Id seed, double dt );
     void step( ProcPtr info );			///< Equivalent to process
     void reinit( ProcPtr info );
+#ifdef USE_CUDA
     LookupColumn * get_column_d();
+#endif
 protected:
     /**
      * Solver parameters: exposed as fields in MOOSE
@@ -151,7 +153,117 @@ protected:
                              const int                  x,
                              const int                  y,
                              const int                  z);
+
+	// CUDA Passive Data
+	vector<int> h_gate_expand_indices;
+	vector<int> h_vgate_expand_indices;
+	vector<int> h_vgate_compt_indices;
+	vector<int> h_cagate_expand_indices;
+	vector<int> h_cagate_capool_indices;
+
+	vector<int> h_catarget_channel_indices; // Stores the indices of channel which are ca targets in order
+	vector<int> h_catarget_capool_indices; // Store the index of calcium pool
+
+	// LookUp Tables
+	double* d_V_table;
+	double* d_Ca_table;
+
+	// Gate related
+	double* d_gate_values; // Values of x,y,x for all channels.
+	double* d_gate_powers; // Powers of x,y,z for all channels.
+	int* d_gate_columns; // Corresponding columns of lookup tables
+	int* d_gate_ca_index; // -1 -> V_lookup , (>0) -> Ca_lookup
+
+	int* d_gate_expand_indices; // Srotes the indices of gates for which power is > 0
+	int* d_vgate_expand_indices; // Stores the indices of gates using vmtable in gates array.
+	int* d_vgate_compt_indices; // Stores the compartment index for this gate.
+	int* d_cagate_expand_indices; // Stores the indices of gates using cmtable in gates array.
+	int* d_cagate_capool_indices; // Stores the indices of calcium pools in ca_ array.
+
+	int* d_catarget_channel_indices;
+	int* d_catarget_capool_indices;
+	double* d_caActivation_values; // Stores ca currents for that pool.
+
+	int* d_capool_rowPtr;
+	int* d_capool_colIndex;
+	double* d_capool_values;
+	double* d_capool_onex;
+
+
+	double* d_state_;
+  //int* d_gate_to_chan; // Not needed as we store 3 gates(x,y,z) for each channel.
+
+	// Channel related
+	int* d_chan_instant;
+	double* d_chan_modulation;
+	double* d_chan_Gbar;
+	int* d_chan_to_comp; // Which compartment does a Channel belong to.
+
+	double* d_chan_Gk;
+	double* d_chan_GkEk;
+	double* d_comp_Gksum;
+	double* d_comp_GkEksum;
+	double* d_externalCurrent_;
+	CurrentStruct* d_current_;
+	InjectStruct* d_inject_;
+	CompartmentStruct* d_compartment_;
+	CaConcStruct* d_caConc_;
+
+	// Hines Matrix related
+	double* d_HS_;
+
+	double* d_chan_x;
+	int* d_chan_colIndex;
+	int* d_chan_rowPtr;
+
+	// Conjugate Gradient based GPU solver
+	double* d_Vmid, *d_p, *d_Ax, *d_r, *d_x;
+
+	// LU based CPU solver
+	csrluInfoHost_t infoA;
+	size_t internalDataInBytes;
+	size_t workspaceInBytes;
+
+	double* internalBuffer;
+	double* workspaceBuffer;
+
+	/* Get handle to the CUBLAS context */
+	cublasHandle_t cublas_handle = 0;
+	cublasStatus_t cublasStatus;
+
+	/* Get handle to the CUSPARSE context */
+	cusparseHandle_t cusparse_handle = 0;
+	cusparseMatDescr_t cusparse_descr = 0;
+
+	/* Get handle for CUSOLVER context*/
+	cusolverSpHandle_t cusolver_handle = 0;
+
+	// Compartment related
+
+	// CUDA Active Permanent data
+	double* d_V;
+	double* d_ca;
+
+
+	// CUDA Active helper data
+	int* d_V_rows;
+	double* d_V_fractions;
+	int* d_Ca_rows;
+	double* d_Ca_fractions;
+	int* d_temp_keys;
+	double* d_temp_values;
+
+	int num_comps_with_chans = 0; // Stores number of compartments with >=1 channels.
+
+	// temp code
+	bool is_initialized = false;
 #endif
+
+	int num_time_prints = 0;
+	int num_um_prints = 0;
+	int num_profile_prints = 0;
+	int step_num = 0;
+
     static const int INSTANT_X;
     static const int INSTANT_Y;
     static const int INSTANT_Z;
@@ -191,6 +303,25 @@ private:
     void sendValues( ProcPtr info );
 
 #ifdef USE_CUDA
+    // Hsolve GPU set up kernels
+    void allocate_hsolve_memory_cuda();
+    void copy_table_data_cuda();
+    void copy_hsolve_information_cuda();
+    void transfer_memory2cpu_cuda();
+
+    void get_lookup_rows_and_fractions_cuda_wrapper(double dt);
+    void advance_channels_cuda_wrapper(double dt);
+    void get_compressed_gate_values_wrapper();
+
+    void calculate_channel_currents_cuda_wrapper();
+
+    void update_matrix_cuda_wrapper();
+    void update_csrmatrix_cuda_wrapper();
+
+    void hinesMatrixSolverWrapper();
+
+    void advance_calcium_cuda_wrapper();
+
 	void advanceChannel_gpu(
     double *                          v_row,
     vector<double>&                   caRow,
@@ -202,7 +333,8 @@ private:
     double                          dt,
     int                             set_size,
     int                             channel_size,
-    int                             num_of_compartment
+    int                             num_of_compartment,
+    float							&kernel_time
     );
 #endif
 

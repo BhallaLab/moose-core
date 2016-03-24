@@ -6,7 +6,6 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
-#define USE_CUDA
 
 #include "HSolveActive.h"
 
@@ -27,6 +26,15 @@ void HSolveActive::setup( Id seed, double dt )
     readSynapses(); // Reads SynChans, SpikeGens. Drops process msg for SpikeGens.
     readExternalChannels();
     manageOutgoingMessages(); // Manages messages going out from the cell's components.
+
+#ifdef USE_CUDA
+    // Cuda realted setup
+    allocate_hsolve_memory_cuda();
+    copy_table_data_cuda();
+    copy_hsolve_information_cuda();
+
+#endif
+
 
     //~ reinit();
     cleanup();
@@ -260,6 +268,26 @@ void HSolveActive::readHHChannels()
             chan2compt_.push_back( icompt - compartmentId_.begin() );            
         }
     }
+#ifdef USE_CUDA
+    // Getting indices in the expanded(3*) array
+	for(int i=0;i<channel_.size();i++){
+		int x = 0;
+		if(channel_[i].Xpower_ > 0){
+			h_gate_expand_indices.push_back(3*i+x);
+			x++;
+		}
+
+		if(channel_[i].Ypower_ > 0){
+			h_gate_expand_indices.push_back(3*i+x);
+			x++;
+		}
+
+		if(channel_[i].Zpower_ > 0){
+			h_gate_expand_indices.push_back(3*i+x);
+			x++;
+		}
+	}
+#endif
 
     int nCumulative = 0;
     currentBoundary_.resize( nCompt_ );
@@ -357,6 +385,26 @@ void HSolveActive::readCalcium()
         else
             caTarget_[ ichan ] = &caActivation_[ caTargetIndex[ ichan ] ];
     }
+
+#ifdef USE_CUDA
+    for (int ichan = 0; ichan < channel_.size(); ++ichan )
+    {
+    	if(caTargetIndex[ichan] != -1){
+    		h_catarget_channel_indices.push_back(ichan);
+    		h_catarget_capool_indices.push_back(caTargetIndex[ichan]);
+
+    		// Assumption: values in h_catarget_capool_indices array will be in increasing order.
+
+    		/*
+    		if(caTargetIndex[ichan] >= caConc_.size() || caTargetIndex[ichan] < 0)
+    			cout << ichan << " " << caTargetIndex[ichan] << endl;
+    		*/
+    	}
+    }
+
+#endif
+
+
 }
 
 void HSolveActive::createLookupTables()
