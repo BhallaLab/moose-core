@@ -18,24 +18,41 @@
 #include <vector>
 #include <random>
 #include <ctime>
+#include <cmath>
 #include "../randnum/randnum.h"
 using namespace std;
 
-int main(int argc, char *argv[])
+void benchmark1( unsigned int N )
 {
-    vector<double> randVec( 500000000 );
-    cerr << "here we are" << endl;
+    cout << "N=" << N;
+    vector<double> randVec( N );
     clock_t startT = clock();
-    for( unsigned int i = 0; i < 500000000; ++i )
-        randVec[i] = mtrand();
-    cerr << "Time taken (MOOSE) " << clock() - startT << endl;
+    for( unsigned int i = 0; i < N; ++i )
+    {
+        mtrand();
+        //randVec[i] = mtrand();
+    }
+    double mooseT = (float)(clock() - startT)/CLOCKS_PER_SEC/N;
+    cout << ",MOOSE=" << mooseT; 
 
     // Using c++ library
     mt19937 rng( 0 );
     startT = clock();
-    for( unsigned int i = 0; i < 500000000; ++i )
-        randVec[i] = mtrand();
-    cerr << "Time taken (STL) " << clock() - startT << endl;
-    
+    for( unsigned int i = 0; i < N; ++i )
+    {
+        //randVec[i] = rng();
+        rng();
+    }
+    double stlT = (float)(clock() - startT)/CLOCKS_PER_SEC/N;
+    cout << ",STL=" << stlT;
+    cout << ",STL/MOOSE=" << mooseT / stlT << endl;
+}
+
+
+int main(int argc, char *argv[])
+{
+    cerr << "Running benchmark 1" << endl;
+    for(unsigned int i = 1; i < 9; i++)
+        benchmark1( pow(10,i) );
     return 0;
 }
