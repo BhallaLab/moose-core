@@ -15,8 +15,9 @@
 #
 # Created by Robert Osfield.
 # Modified by Ralph Gauges
+# Modified by Dilawar Singh
 
-message (STATUS "$ENV{LIBSBML_DIR}")
+message (STATUS "Environment variable pointing to SBML?: $ENV{LIBSBML_DIR}")
 
 find_path(LIBSBML_INCLUDE_DIRS sbml/SBase.h
     PATHS $ENV{LIBSBML_DIR}/include
@@ -38,8 +39,9 @@ if (NOT LIBSBML_INCLUDE_DIRS)
 endif (NOT LIBSBML_INCLUDE_DIRS)
 
 find_library(LIBSBML_LIBRARIES
-    NAMES sbml-static 
+    NAMES libsbml
           sbml
+	  sbml-static 
           libsbml-static 
           libsbml-static
           libsbml
@@ -47,19 +49,27 @@ find_library(LIBSBML_LIBRARIES
           $ENV{LIBSBML_DIR}
           /usr/lib
           /usr/local/lib
+	  /usr/lib64
+	  /usr/local/lib64
           ~/Library/Frameworks
           /Library/Frameworks
           /sw/lib        # Fink
+          /sw/lib64        # Fink
           /opt/local/lib # MacPorts
+	  /opt/local/lib64
           /opt/csw/lib   # Blastwave
+          /opt/csw/lib64   # Blastwave
           /opt/lib
+          /opt/lib64
           /usr/freeware/lib64
-    NO_DEFAULT_PATH)
+      )
+
 
 if (NOT LIBSBML_LIBRARIES)
     find_library(LIBSBML_LIBRARIES
         NAMES sbml-static 
-              sbml)
+              sbml
+        )
 endif (NOT LIBSBML_LIBRARIES)
 
 set(LIBSBML_FOUND "NO")

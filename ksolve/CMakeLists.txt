@@ -1,8 +1,12 @@
 cmake_minimum_required(VERSION 2.6)
+
 include_directories(../builtins ../basecode ../utility ../kinetics)
 include_directories(../)
 include_directories(../mesh)
-include_directories(../external/muparser/include)
+include_directories(../external/muparser/include )
+message(STATUS "Debug: GSL_INCLUDE_DIRS ${GSL_INCLUDE_DIRS}")
+include_directories( ${GSL_INCLUDE_DIRS} )
+
 add_library(ksolve
 	KinSparseMatrix.cpp	
 	ZombiePool.cpp 
@@ -23,7 +27,3 @@ add_library(ksolve
         ZombiePoolInterface.cpp
         testKsolve.cpp
     )
-
-#if(USE_GSL)
-    #target_link_libraries(ksolve gsl gslcblas)
-#endif()
