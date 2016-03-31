@@ -519,6 +519,7 @@ except Exception: pass'"
         SUFFIX ${PYTHON_SO_EXTENSION})
     endif()
 
+
 if(MACOSX)
     set(CMAKE_MODULE_LINKER_FLAGS "-undefined dynamic_lookup")
     MESSAGE(STATUS "ADDING some linker flags ${CMAKE_EXE_LINKER_FLAGS}")
@@ -546,14 +547,15 @@ ELSE(MACOSX)
         )
 ENDIF(MACOSX)
 
-    add_custom_target(copy_python_files
-      COMMAND ${CMAKE_COMMAND} -E copy_directory
-              ${CMAKE_CURRENT_SOURCE_DIR}/python
-              ${CMAKE_CURRENT_BINARY_DIR}/python
-          COMMENT "Copying python files to build directory"
-          VERBATIM
-      )
-    add_dependencies(_moose copy_python_files)
+# Make this target dependant on all python files in python folder.
+add_custom_target(copy_python_files ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_CURRENT_SOURCE_DIR}/python
+    ${CMAKE_CURRENT_BINARY_DIR}/python
+    COMMENT "Copying python files to build directory"
+    VERBATIM
+    )
+add_dependencies(_moose copy_python_files)
 
 IF(WITH_DOC)
     # Also generate the documents

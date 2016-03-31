@@ -220,7 +220,10 @@ def saveRecords(records, xvec = None, **kwargs):
     yvecs = [ ]
     text = "time," + ",".join([ str(x) for x in records ])
     for k in records:
-        yvec = records[k].vector
+        try:
+            yvec = records[k].vector
+        except AtrributeError as e:
+            yevc = records[k]
         yvecs.append(yvec)
     xvec = np.linspace(0, clock.currentTime, len(yvecs[0]))
     yvecs = [ xvec ] + yvecs
