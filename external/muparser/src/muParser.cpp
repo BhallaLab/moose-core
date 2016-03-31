@@ -26,6 +26,11 @@
 #include "muParser.h"
 #include "muParserTemplateMagic.h"
 
+#if __cplusplus > 199711L
+#include <random>
+#endif
+
+
 //--- Standard includes ------------------------------------------------------------------------
 #include <cmath>
 #include <algorithm>
@@ -106,6 +111,64 @@ namespace mu
   //  misc
   value_type Parser::Exp(value_type v)  { return MathImpl<value_type>::Exp(v);  }
   value_type Parser::Abs(value_type v)  { return MathImpl<value_type>::Abs(v);  }
+  value_type Parser::Fmod(value_type v1, value_type v2) { return fmod(v1, v2); }
+
+  // If no seed is given, 
+  value_type Parser::Rand( value_type seed ) { 
+      static bool isSeedSet = false;
+#if __cplusplus > 199711L
+      static std::mt19937 generator;
+      if(! isSeedSet ) {
+          if ( seed < 0 ) {
+              static std::random_device rd;
+              generator.seed( rd() );
+          }
+          else
+              generator.seed( seed );
+      }
+      isSeedSet = true;
+      static std::uniform_real_distribution< value_type > distribution(0.0, 1.0);
+      return distribution( generator );
+#else
+      if( ! isSeedSet ) {
+          if( seed < 0 )
+              srand( time(NULL) );
+          else
+              srand( seed );
+      }
+      return ((value_type) rand()) / (value_type) RAND_MAX;
+#endif
+  }
+
+  value_type Parser::Rand2(value_type v1, value_type v2, value_type seed = -1 ) {
+      static bool isSeedSet = false;
+#if __cplusplus > 199711L
+      static std::mt19937 generator;
+      if( ! isSeedSet ) {
+          if( seed < 0 ) {
+              static std::random_device rd;
+              generator.seed( rd() );
+          }
+          else
+              generator.seed( seed );
+      }
+
+      isSeedSet = true;
+      static std::uniform_real_distribution< value_type > distribution(v1, v2);
+      return distribution( generator );
+#else 
+      if( ! isSeedSet ) {
+          if( seed < 0 )
+              srand( time(NULL) );
+          else
+              srand( seed );
+      }
+      isSeedSet = true;
+      value_type random = ((value_type) rand()) / (value_type) RAND_MAX;
+      return v1 + (random * (v2 - v1));
+#endif 
+  }
+
   value_type Parser::Sqrt(value_type v) 
   { 
     #ifdef MUP_MATH_EXCEPTIONS
@@ -302,6 +365,9 @@ namespace mu
       DefineFun(_T("sign"), Sign);
       DefineFun(_T("rint"), Rint);
       DefineFun(_T("abs"), Abs);
+      DefineFun(_T("fmod"), Fmod);
+      DefineFun(_T("rand"), Rand);
+      DefineFun(_T("rand2"), Rand2);
       // Functions with variable number of arguments
       DefineFun(_T("sum"), Sum);
       DefineFun(_T("avg"), Avg);

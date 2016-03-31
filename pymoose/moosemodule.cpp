@@ -71,6 +71,7 @@
 //
 // 2012-04-20 Finalized the C interface
 
+
 // Code:
 
 //////////////////////////// Headers ////////////////////////////////
@@ -86,6 +87,8 @@
 #include <cstring>
 #include <map>
 #include <ctime>
+#include <csignal>
+#include <exception>
 
 #ifdef USE_MPI
 #include <mpi.h>
@@ -163,6 +166,21 @@ vector<ObjId> all_elements(Id id)
     return ret;
 }
 
+
+/**
+ * @brief Handle signal raised by user during simulation.
+ *
+ * @param signum
+ */
+void handle_keyboard_interrupts( int signum )
+{
+    cout << "Interrupt signal (" << signum << ") received.\n";
+    cout << "Terminating simulation !";
+    // TODO: leanup and close up stuff here  
+    // TODO: Perhaps I should throw exception. Might require c++11 support by
+    // default.
+    exit( signum );
+}
 
 // C-wrapper to be used by Python
 extern "C" {
@@ -1476,6 +1494,13 @@ extern "C" {
             PyErr_SetString(PyExc_ValueError, "simulation runtime must be positive.");
             return NULL;
         }
+
+        // This is from http://stackoverflow.com/questions/1641182/how-can-i-catch-a-ctrl-c-event-c
+        struct sigaction sigHandler;
+        sigHandler.sa_handler = handle_keyboard_interrupts;
+        sigemptyset(&sigHandler.sa_mask);
+        sigHandler.sa_flags = 0;
+        sigaction(SIGINT, &sigHandler, NULL);
 
         // Py_BEGIN_ALLOW_THREADS
                 SHELLPTR->doStart(runtime);

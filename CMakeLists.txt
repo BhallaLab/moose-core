@@ -111,6 +111,9 @@ add_definitions(-Wall
     )
 add_definitions(-fPIC)
 
+include(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
 if(COMPILER_SUPPORTS_CXX11)
     message(STATUS "Your compiler supports c++11 features. Enabling it")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
@@ -141,6 +144,10 @@ if(ENABLE_UNIT_TESTS AND DEBUG)
     message(STATUS "Building for Debug/Unit testing")
     add_definitions(-DDO_UNIT_TESTS)
     set(CMAKE_BUILD_TYPE Debug)
+    add_definitions(-g)
+elseif(DEBUG AND ENABLE_UNIT_TESTS)
+    MESSAGE(STATUS "Enabled Unit tests")
+    add_definitions(-DDO_UNIT_TESTS -g)
 else()
     message(STATUS "Building for Release/No unit tests.")
     set(CMAKE_BUILD_TYPE Release)
@@ -153,6 +160,17 @@ if(GPROF AND DEBUG)
     set(CMAKE_EXE_LINKER_FLAGS_DEBUG "-pg")
 endif()
 
+IF(NOTIFY_PROGRESS)
+    IF(COMPILER_SUPPORTS_CXX11 OR COMPILER_SUPPORTS_CXX0X)
+        MESSAGE(STATUS "MOOSE will occasionally write to __moose__progress__ file "
+            " status of simulation (done time/total time)"
+            )
+    ELSE()
+        MESSAGE(FATAL_ERROR "No c++11 or c++0x support in compiler."
+            "You can not use -DNOTIFY_PROGRESS=ON without it"
+            )
+    ENDIF()
+ENDIF()
 ################################### TARGETS ####################################
 
 add_library(_moose MODULE pymoose/moosemodule.cpp)
@@ -486,8 +504,8 @@ if(CMAKE_VERSION VERSION_LESS "2.8.0")
     message(STATUS "Using a fix for cmake ( < 2.8)")
     target_link_libraries(moose.bin PUBLIC moose)
 ELSE()
-    target_link_libraries(moose.bin LINK_PUBLIC moose)
-endif()
+    target_link_libraries(moose.bin LINK_PUBLIC moose ${LIBSBML_LIBRARIES})
+ENDIF()
 
 if(WITH_DOC)
     FIND_PACKAGE(Doxygen REQUIRED)
@@ -538,6 +556,7 @@ except Exception: pass'"
         set_target_properties( _moose PROPERTIES LINK_FLAGS "-L${HDF5_LIBRARY_DIRS}" )
     endif()
 
+
 if(MACOSX)
     set(CMAKE_MODULE_LINKER_FLAGS "-undefined dynamic_lookup")
     message(STATUS "ADDING some linker flags ${CMAKE_EXE_LINKER_FLAGS}")
@@ -565,14 +584,15 @@ ELSE(MACOSX)
         )
 endif(MACOSX)
 
-    add_custom_target(copy_python_files
-      COMMAND ${CMAKE_COMMAND} -E copy_directory
-              ${CMAKE_CURRENT_SOURCE_DIR}/python
-              ${CMAKE_CURRENT_BINARY_DIR}/python
-          COMMENT "Copying python files to build directory"
-          VERBATIM
-      )
-    add_dependencies(_moose copy_python_files)
+# Make this target dependant on all python files in python folder.
+add_custom_target(copy_python_files ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_CURRENT_SOURCE_DIR}/python
+    ${CMAKE_CURRENT_BINARY_DIR}/python
+    COMMENT "Copying python files to build directory"
+    VERBATIM
+    )
+add_dependencies(_moose copy_python_files)
 
 if(WITH_DOC)
     # Also generate the documents
