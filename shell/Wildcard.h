@@ -72,4 +72,19 @@ int wildcardFind(const string& n, vector<ObjId>& ret);
 int allChildren( ObjId start, unsigned int index, 
 				const string& insideBrace, vector< ObjId >& ret );
 
+
+/**
+ * matchBeforeBrace checks to see if the wildcard string 'name' matches
+ * up with the name of the id.
+ * Rules:
+ *      # may be used at multiple places in the wildcard.
+ *      It substitutes for any number of characters.
+ *
+ * 		? may be used any number of times in the wildcard, and
+ * 		must substitute exactly for characters.
+ *
+ * 		If bracesInName, then the Id name itself includes braces.
+ */
+bool matchBeforeBrace( ObjId id, const string& wild );
+
 #endif // _WILDCARD_H

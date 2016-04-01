@@ -45,6 +45,7 @@
 # Code:
 import numpy as np
 import moose
+import math
 from moose import utils
 
 EREST_ACT = -70e-3
@@ -248,7 +249,7 @@ def make_LCa( name = 'LCa', parent = '/library' ):
         ECA = 0.140 + EREST_ACT #// 0.080
         if moose.exists( parent + '/' + name ):
                 return
-        Ca = moose.HHChannel( parent + '/' + 'name' )
+        Ca = moose.HHChannel( parent + '/' + name )
         Ca.Ek = ECA
         Ca.Gbar = 0
         Ca.Gk = 0
