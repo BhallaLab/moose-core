@@ -411,7 +411,17 @@ const moose::SbmlReader::sbmlStr_mooseId moose::SbmlReader::createMolecule( map<
         }
         if (name.empty())
             name = id;
-
+        string speciesNotes = "";
+        if (spe->isSetNotes())
+        {
+            XMLNode* xnode = spe->getNotes();
+            string testnotes = spe->getNotesString();
+            XMLNode nodec = xnode->getChild(0);
+            XMLNode tnodec = nodec.getChild(0);
+            //cout << "\n$$$! " << name << " " << tnodec.getCharacters();
+            speciesNotes = tnodec.getCharacters();
+            //Id annotaIdE(pathE+"/info");
+        }
         double initvalue =0.0;
         if ( spe->isSetInitialConcentration() )
             initvalue = spe->getInitialConcentration();
@@ -521,6 +531,17 @@ const moose::SbmlReader::sbmlStr_mooseId moose::SbmlReader::createMolecule( map<
             double y = atof( yCord.c_str() );
             Field< double >::set( poolInfo, "x", x );
             Field< double >::set( poolInfo, "y", y );
+            
+
+        }
+        if (!speciesNotes.empty())
+        {   Id poolInfo;
+            string poolPath = Field<string> :: get(pool,"path");
+            poolInfo = Id( poolPath + "/info");
+            if ( poolInfo == Id() ) 
+                poolInfo = shell->doCreate( "Annotator", pool, "info", 1 );
+            assert( poolInfo != Id() );
+            Field< string >::set( poolInfo, "notes", speciesNotes );
         }
         }//Pool_ != Id()
     }
