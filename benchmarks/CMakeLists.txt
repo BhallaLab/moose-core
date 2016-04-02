@@ -9,8 +9,10 @@ if(ENABLE_BENCHMARKS)
     # This target run benchmarks. Not a part of moose distribution
     add_executable( 
         randnum_benchmark 
-        ${CMAKE_CURRENT_SOURCE_DIR}/benchmark_random_numbers.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/benchmark_rngs.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/genrand_nishimura_masumoto.cpp
         )
+
     target_link_libraries(randnum_benchmark randnum  )
 
     if(GSL_FOUND)
