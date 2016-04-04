@@ -1585,7 +1585,7 @@ static void testNeuronBuildTree()
 	// a compartment. So the indexing of the arrays e, p and g needs care.
 	unsigned int nuParserNumVal = 13;
 	vector< ObjId > elist;
-	wildcardFind( "/n/#", elist );
+	wildcardFind( "/n/#[ISA=Compartment]", elist );
 	Neuron* n = reinterpret_cast< Neuron* >( nid.eref().data() );
 	vector< double > val;
 	n->evalExprForElist( elist, "p + g + L + len + dia + H(1-L)", val );
@@ -1633,8 +1633,8 @@ static void testNeuronBuildTree()
 	// assert( doubleEq( pos.back(), 500e-6 - 7.5e-6 ) );
 	assert( seglistIndex[0] == 2 );
 	assert( seglistIndex.back() == 3 );
-	assert( elistIndex[0] == 3 );
-	assert( elistIndex.back() == 4 );
+	assert( elistIndex[0] == 2 );
+	assert( elistIndex.back() == 3 );
 
 	shell->doDelete( nid );
 }
