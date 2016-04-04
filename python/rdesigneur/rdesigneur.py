@@ -60,9 +60,11 @@ class rdesigneur:
             diffusionLength= 2e-6,
             meshLambda = -1.0,    #This is a backward compatibility hack
             temperature = 32,
-            chemDt= 0.001,
-            diffDt= 0.001,
-            elecDt= 50e-6,
+            chemDt= 0.001,          # Much finer than MOOSE, for multiscale
+            diffDt= 0.001,          # 10x finer than MOOSE, for multiscale
+            elecDt= 50e-6,          # Same default as from MOOSE
+            chemPlotDt = 1.0,       # Same default as from MOOSE
+            elecPlotDt = 0.1e-3,    # Same default as from MOOSE
             cellProto = [],
             spineProto = [],
             chanProto = [],
@@ -93,6 +95,8 @@ class rdesigneur:
         self.chemDt= chemDt
         self.diffDt= diffDt
         self.elecDt= elecDt
+        self.elecPlotDt= elecPlotDt
+        self.chemPlotDt= chemPlotDt
 
         self.cellProtoList = cellProto
         self.spineProtoList = spineProto
@@ -503,8 +507,11 @@ class rdesigneur:
             # Here we collapse the voxelVec into objects to plot.
             allObj = moose.vec( self.modelPath + '/chem/' + plotSpec[2] )
             #print "####### allObj=", self.modelPath + '/chem/' + plotSpec[2]
-            #print len( allObj )
-            objList = [ allObj[int(j)] for j in voxelVec]
+            if len( allObj ) >= len( voxelVec ):
+                objList = [ allObj[int(j)] for j in voxelVec]
+            else:
+                objList = []
+                print( "Warning: Rdesigneur::_parseComptField: unknown Object: '", plotSpec[2], "'" )
             #print "############", chemCompt, len(objList), kf[1]
             return objList, kf[1]
 
@@ -531,6 +538,8 @@ class rdesigneur:
             pair = i[0] + " " + i[1]
             dendCompts = self.elecid.compartmentsFromExpression[ pair ]
             spineCompts = self.elecid.spinesFromExpression[ pair ]
+            #print( "DENDENDENDNEDN = ", len(dendCompts), pair )
+            #print( "SPINESPINESPINE = ", len(spineCompts), pair )
             plotObj, plotField = self._parseComptField( dendCompts, i, knownFields )
             plotObj2, plotField2 = self._parseComptField( spineCompts, i, knownFields )
             assert( plotField == plotField2 )
@@ -640,8 +649,9 @@ class rdesigneur:
     def _configureClocks( self ):
         if self.turnOffElec:
             elecDt = 1e6
-            diffDt = 0.1
-            chemDt = 0.1
+            elecPlotDt = 1e6
+            diffDt = 0.1    # Slow it down again because no multiscaling
+            chemDt = 0.1    # Slow it down again because no multiscaling
         else:
             elecDt = self.elecDt
             diffDt = self.diffDt
@@ -651,7 +661,8 @@ class rdesigneur:
         moose.setClock( 10, diffDt )
         for i in range( 11, 18 ):
             moose.setClock( i, chemDt )
-        moose.setClock( 18, chemDt * 5.0 )
+        moose.setClock( 8, self.elecPlotDt )
+        moose.setClock( 18, self.chemPlotDt )
         hsolve = moose.HSolve( self.elecid.path + '/hsolve' )
         hsolve.dt = elecDt
         hsolve.target = self.soma.path
