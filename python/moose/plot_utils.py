@@ -220,8 +220,10 @@ def saveRecords(records, xvec = None, **kwargs):
     yvecs = [ ]
     text = "time," + ",".join([ str(x) for x in records ])
     for k in records:
-        yvec = records[k].vector
-        yvecs.append(yvec)
+        try:
+            yvecs.append(records[k].vector)
+        except Exception as e:
+            yvecs.append(records[k])
     xvec = np.linspace(0, clock.currentTime, len(yvecs[0]))
     yvecs = [ xvec ] + yvecs
     if kwargs.get('comment', ''):

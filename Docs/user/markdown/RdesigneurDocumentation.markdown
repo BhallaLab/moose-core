@@ -90,25 +90,29 @@ discharges.
 	import moose
 	import rdesigneur as rd
 	rdes = rd.rdesigneur(
-		stimList = [['soma', '1', 'inject', '(t>0.1 && t<0.2) * 2e-8']],
-		plotList = [['soma', '1', 'Vm', 'Soma membrane potential']],
+		stimList = [['soma', '1', '.', 'inject', '(t>0.1 && t<0.2) * 2e-8']],
+		plotList = [['soma', '1', '.', 'Vm', 'Soma membrane potential']],
 	)
 	rdes.buildModel()
 	moose.reinit()
 	moose.start( 0.3 )
 	rdes.display()
 
-The *stimList* defines a stimulus. Each entry has four arguments:
+The *stimList* defines a stimulus. Each entry has five arguments:
 
-	`[region_in_cell, region_expression, parameter, expression_string]`
+	`[region_in_cell, region_expression, moose_object, parameter, expression_string]`
 
 +	`region_in_cell` specifies the objects to stimulate. Here it is just the
 	soma.
 +	`region_expression` specifies a geometry based calculation to decide
 	whether to apply the stimulus. The value must be >0 for the stimulus
 	to be present. Here it is just 1.
-+	`parameter` specifies the simulation parameter to assign. Here it is
-	the injection current to the compartment.
+	`moose_object` specifies the simulation object to operate upon during 
+	the stimulus. Here the `.` means that it is the soma itself. In other
+	models it might be a channel on the soma, or a synapse, and so on.
++	`parameter` specifies the simulation parameter on the moose object that
+	the stimulus will modify. Here it is
+	the injection current to the soma compartment.
 +	`expression_string` calculates the value of the parameter, typically
 	as a function of time. Here we use the function 
 	`(t>0.1 && t<0.2) * 2e-8` which evaluates as 2e-8 between the times of
@@ -119,7 +123,7 @@ soma between the times of 0.1 and 0.2 s*.
 
 The *plotList* defines what to plot. It has a similar set of arguments:
 
-	`[region_in_cell, region_expression, parameter, title_of_plot]`
+	`[region_in_cell, region_expression, moose_object, parameter, title_of_plot]`
 These mean the same thing as for the stimList except for the title of the plot.
 
 The *rdes.display()* function causes the plots to be displayed.
@@ -144,8 +148,8 @@ The HH channels are predefined as prototype channels for Rdesigneur,
     	chanDistrib = [
         	['Na', 'soma', 'Gbar', '1200' ],
         	['K', 'soma', 'Gbar', '360' ]],
-    	stimList = [['soma', '1', 'inject', '(t>0.1 && t<0.2) * 1e-8' ]],
-    	plotList = [['soma', '1', 'Vm', 'Membrane potential']]
+    	stimList = [['soma', '1', '.', 'inject', '(t>0.1 && t<0.2) * 1e-8' ]],
+    	plotList = [['soma', '1', '.', 'Vm', 'Membrane potential']]
 	)
 	
 	rdes.buildModel()
@@ -198,7 +202,7 @@ The chemical oscillator model is predefined in the rdesigneur prototypes.
 	rdes = rd.rdesigneur(
     		turnOffElec = True,
     		diffusionLength = 1e-3, # Default diffusion length is 2 microns
-    		chemProto = [['make_Chem_Oscillator()', 'osc']],
+    		chemProto = [['makeChemOscillator()', 'osc']],
     		chemDistrib = [['osc', 'soma', 'install', '1' ]],
     		plotList = [['soma', '1', 'dend/a', 'conc', 'a Conc'],
         		['soma', '1', 'dend/b', 'conc', 'b Conc']]
@@ -218,12 +222,26 @@ chemical calculations from them.
 
 We also have a line which sets the `diffusionLength` to 1 mm, so that it is 
 bigger than the 0.5 mm squid axon segment in the default compartment. If you 
-don't do this the system will subdivide the compartment into 2 micron voxels for
-the purposes of putting in a reaction-diffusion system, which we discuss below.
+don't do this the system will subdivide the compartment into the default 
+2 micron voxels for the purposes of putting in a reaction-diffusion system.
+We discuss this case below.
 
-There are a couple of lines to change the initial concentration of the 
-molecular pool b. It is scaled up 5x to give rise to slowly decaying 
-oscillations.
+Note how the *plotList* is done here. To remind you, each entry has five 
+arguments
+
+	[region_in_cell, region_expression, moose_object, parameter, title_of_plot]
+
+The change from the earlier usage is that the `moose_object` now refers to 
+a chemical entity, in this example the molecule *dend/a*. The simulator 
+builds a default chemical compartment named *dend* to hold the reactions 
+defined in the *chemProto*. What we do in this plot is to select molecule *a*
+sitting in *dend*, and plot its concentration. Then we do this again for
+molecule *b*. 
+
+After the model is built, we add a couple of lines to change the 
+initial concentration of the molecular pool *b*. Note its full path within 
+MOOSE: */model/chem/dend/b*. It is scaled up 5x to give rise to slowly 
+decaying oscillations.
 
 ![Plot for single-compartment reaction simulation ](../../images/rdes4_osc.png)
 
@@ -238,7 +256,7 @@ to set up 3-D graphics for the reaction-diffusion product:
 	import rdesigneur as rd
 	rdes = rd.rdesigneur(
     		turnOffElec = True,
-    		chemProto = [['make_Chem_Oscillator()', 'osc']],
+    		chemProto = [['makeChemOscillator()', 'osc']],
     		chemDistrib = [['osc', 'soma', 'install', '1' ]],
     		plotList = [['soma', '1', 'dend/a', 'conc', 'Concentration of a'],
         		['soma', '1', 'dend/b', 'conc', 'Concentration of b']],
@@ -257,7 +275,7 @@ to set up 3-D graphics for the reaction-diffusion product:
 
 This is the line we deleted. 
 
-    	`diffusionLength = 1e-3,`
+    	diffusionLength = 1e-3,
 
 With this change we permit
 *rdesigneur* to use the default diffusion length of 2 microns. 
@@ -266,7 +284,7 @@ which has a reaction system and diffusing molecules. To make it more
 picturesque, we have added a line after the plotList, to display the outcome 
 in 3-D:
 
-	'moogList = [['soma', '1', 'dend/a', 'conc', 'a Conc', 0, 360 ]]'
+	moogList = [['soma', '1', 'dend/a', 'conc', 'a Conc', 0, 360 ]]
 
 This line says: take the model compartments defined by `soma` as the region
 to display, do so throughout the the geometry (the `1` signifies this), and
@@ -341,7 +359,7 @@ chemical oscillator. This is a recipe for some strange firing patterns.
     			chanDistrib = [
         			['Na', 'soma', 'Gbar', '1200' ],
         			['K', 'soma', 'Gbar', '360' ]],
-    		chemProto = [['make_Chem_Oscillator()', 'osc']],
+    		chemProto = [['makeChemOscillator()', 'osc']],
     		chemDistrib = [['osc', 'soma', 'install', '1' ]],
        		# These adaptor parameters give interesting-looking but
        		# not particularly physiological behaviour.
@@ -581,7 +599,7 @@ ion channels and distribution.
         	['./chans/Ca.xml']
     	],
     	cellProto = [['./cells/h10.CNG.swc', 'elec']],
-    	spineProto = [['make_active_spine()', 'spine']],
+    	spineProto = [['makeActiveSpine()', 'spine']],
     	chanDistrib = [
         	["hd", "#dend#,#apical#", "Gbar", "50e-2*(1+(p*3e4))" ],
         	["kdr", "#", "Gbar", "p < 50e-6 ? 500 : 100" ],
@@ -677,8 +695,8 @@ electrical calculations here as they are not needed.
 Here we plot out the number of receptors on every single spine as a function
 of time.
 
-(stuff here)
+(Documentation still to come here)
 
 ### Make a full multiscale model with complex spiny morphology and electrical and chemical signaling.
 
-(stuff here)
+(Documentation still to come here)

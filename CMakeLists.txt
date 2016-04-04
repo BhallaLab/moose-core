@@ -504,8 +504,8 @@ if(CMAKE_VERSION VERSION_LESS "2.8.0")
     message(STATUS "Using a fix for cmake ( < 2.8)")
     target_link_libraries(moose.bin PUBLIC moose)
 ELSE()
-    target_link_libraries(moose.bin LINK_PUBLIC moose)
-endif()
+    target_link_libraries(moose.bin LINK_PUBLIC moose ${LIBSBML_LIBRARIES})
+ENDIF()
 
 if(WITH_DOC)
     FIND_PACKAGE(Doxygen REQUIRED)
@@ -556,6 +556,7 @@ except Exception: pass'"
         set_target_properties( _moose PROPERTIES LINK_FLAGS "-L${HDF5_LIBRARY_DIRS}" )
     endif()
 
+
 if(MACOSX)
     set(CMAKE_MODULE_LINKER_FLAGS "-undefined dynamic_lookup")
     message(STATUS "ADDING some linker flags ${CMAKE_EXE_LINKER_FLAGS}")
@@ -583,14 +584,15 @@ ELSE(MACOSX)
         )
 endif(MACOSX)
 
-    add_custom_target(copy_python_files
-      COMMAND ${CMAKE_COMMAND} -E copy_directory
-              ${CMAKE_CURRENT_SOURCE_DIR}/python
-              ${CMAKE_CURRENT_BINARY_DIR}/python
-          COMMENT "Copying python files to build directory"
-          VERBATIM
-      )
-    add_dependencies(_moose copy_python_files)
+# Make this target dependant on all python files in python folder.
+add_custom_target(copy_python_files ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_CURRENT_SOURCE_DIR}/python
+    ${CMAKE_CURRENT_BINARY_DIR}/python
+    COMMENT "Copying python files to build directory"
+    VERBATIM
+    )
+add_dependencies(_moose copy_python_files)
 
 if(WITH_DOC)
     # Also generate the documents
