@@ -140,14 +140,15 @@ endif()
 # Default macros
 add_definitions(-DUSE_GENESIS_PARSER)
 
-if(ENABLE_UNIT_TESTS AND DEBUG)
+if(ENABLE_UNIT_TESTS)
     message(STATUS "Building for Debug/Unit testing")
     add_definitions(-DDO_UNIT_TESTS)
     set(CMAKE_BUILD_TYPE Debug)
     add_definitions(-g)
-elseif(DEBUG AND ENABLE_UNIT_TESTS)
-    MESSAGE(STATUS "Enabled Unit tests")
-    add_definitions(-DDO_UNIT_TESTS -g)
+elseif(DEBUG)
+    MESSAGE(STATUS "Building for debug")
+    add_definitions(-g)
+    set(CMAKE_BUILD_TYPE Debug)
 else()
     message(STATUS "Building for Release/No unit tests.")
     set(CMAKE_BUILD_TYPE Release)
@@ -353,12 +354,12 @@ if(WITH_MPI)
     find_package(MPI REQUIRED)
     message(STATUS "Using MPI compiler  ${MPI_CXX_COMPILER}")
     set(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
+    add_definitions( -DUSE_MPI )
     set_target_properties( moose.bin libmoose _moose 
         PROPERTIES 
-        COMPILE_FLAGS "${CMAKE_CXX_COMPILE_FLAGS} -DUSE_MPI -fopenmp"
+        COMPILE_FLAGS "${CMAKE_CXX_COMPILE_FLAGS} -fopenmp"
         LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -fopenmp"
         )
-
     ## NOTE: Following does not work
     ##include_directories(${MPI_CXX_INCLUDE_PATH})
     ##if(MPI_COMPILE_FLAGS)
