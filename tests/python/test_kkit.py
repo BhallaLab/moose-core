@@ -1,6 +1,7 @@
 """
 Test Kkit capabilities of PyMOOSE
 """
+from __future__ import print_function
     
 __author__           = "Dilawar Singh"
 __copyright__        = "Copyright 2015, Dilawar Singh and NCBS Bangalore"
@@ -12,12 +13,13 @@ __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
 import sys
-sys.path.append('../../python')
+import os
+
 import moose
 import moose.utils as mu
-import sys
-import pylab
-import os
+
+# the model lives in the same directory as the test script
+modeldir = os.path.dirname(__file__)
 
 # All conc in micro-molar. MOOSE units are SI units.
 genesisReference = {
@@ -32,7 +34,7 @@ genesisReference = {
         }
 
 def main():
-    modelname = './chem_models/mkp1_feedback_effects_acc4.g'
+    modelname = os.path.join(modeldir, 'chem_models/mkp1_feedback_effects_acc4.g')
     model = moose.loadModel(modelname, '/model', 'gsl')
     tables = moose.wildcardFind('/##[TYPE=Table2]')
     records = {}

@@ -8,7 +8,6 @@ SET(ENV{CTEST_OUTPUT_ON_FAILURE} ON)
 
 ADD_TEST(NAME moose.bin-raw-run
     COMMAND moose.bin -u -q
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     )
 
 ## PyMOOSE tests.
@@ -22,49 +21,52 @@ SET(PYMOOSE_TEST_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/python)
 #    )
 
 ADD_TEST(NAME pymoose-test-synchan
-    COMMAND ${PYTHON_EXECUTABLE} test_synchan.py
-    WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
+    COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/tests/python/test_synchan.py
     )
+set_tests_properties(pymoose-test-synchan PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python")
 
 ADD_TEST(NAME pymoose-test-function
-    COMMAND ${PYTHON_EXECUTABLE} test_function.py
-    WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
+    COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/tests/python/test_function.py
     )
+set_tests_properties(pymoose-test-function PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python")
 
 ADD_TEST(NAME pymoose-test-vec
-    COMMAND ${PYTHON_EXECUTABLE} test_vec.py
-    WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
+    COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/tests/python/test_vec.py
     )
+set_tests_properties(pymoose-test-vec PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python")
 
 ADD_TEST(NAME pymoose-pyrun
-    COMMAND ${PYTHON_EXECUTABLE} test_pyrun.py
-    WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
+    COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/tests/python/test_pyrun.py
     )
+set_tests_properties(pymoose-pyrun PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python")
 
 # Do not run this test after packaging.
 ADD_TEST(NAME pymoose-neuroml-reader-test 
-    COMMAND ${PYTHON_EXECUTABLE} test_neuroml.py
-    WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
+    COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/tests/python/test_neuroml.py
+    )
+set_tests_properties(pymoose-neuroml-reader-test PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python")
+
+ADD_TEST(NAME pymoose-nsdf-sanity-test
+    COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/tests/python/test_nsdf.py
+    )
+set_tests_properties(pymoose-nsdf-sanity-test PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python")
+
+# Test basic SBML support.
+ADD_TEST(NAME pymoose-test-basic-sbml-support
+    COMMAND ${PYTHON_EXECUTABLE}
+    ${PROJECT_SOURCE_DIR}/tests/python/test_sbml_support.py
+    )
+set_tests_properties(pymoose-test-basic-sbml-support 
+    PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
     )
 
 
-#ADD_TEST(NAME pymoose-test-sbml 
-#    COMMAND ${PYTHON_EXECUTABLE} test_sbml.py
-#    CONFIGURATIONS Nightly
-#    WORKING_DIRECTORY ${TEST_DIRECTORY}
-#    )
-#
-#ADD_TEST(NAME pymoose-test-kkit 
-#    COMMAND ${PYTHON_EXECUTABLE} test_kkit.py
-#    CONFIGURATIONS Nightly
-#    WORKING_DIRECTORY ${TEST_DIRECTORY}
-#    )
-#
-if(BUILD_MOOGLI)
+##IF(WITH_SBML)
+##    ADD_TEST(NAME pymoose-test-sbml 
+##        COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/tests/python/test_sbml.py
+##        )
+##ENDIF(WITH_SBML)
 
-#    ADD_TEST(NAME moogli_sanity_test
-#        COMMAND ${PYTHON_EXECUTABLE} test_moogli.py
-#        WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
-#        )
-
-endif(BUILD_MOOGLI)
+##ADD_TEST(NAME pymoose-test-kkit 
+##    COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/tests/python/test_kkit.py
+##    )

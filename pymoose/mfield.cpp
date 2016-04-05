@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Mon Jul 22 17:03:03 2013 (+0530)
 // Version: 
-// Last-Updated: Tue Jul 23 16:11:50 2013 (+0530)
-//           By: subha
-//     Update #: 13
+// Last-Updated: Fri Jan 22 11:50:17 2016 (-0500)
+//           By: Subhasis Ray
+//     Update #: 16
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -127,16 +127,10 @@ extern "C" {
         return 0;
     }
 
-    // void moose_Field_dealloc(_Field * self)
-    // {
-    //     Py_XDECREF((PyObject*)self->name);
-    //     self->ob_type->tp_free((PyObject*)self);
-    // }
-
     void moose_Field_dealloc(_Field * self)
     {
         Py_DECREF(self->owner);
-        self->ob_type->tp_free((PyObject*)self);
+        Py_TYPE(self)->tp_free((PyObject*)self);
     }
         
 

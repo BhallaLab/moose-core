@@ -12,19 +12,17 @@ __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
 import sys
-sys.path.append('../../python')
+import os
+
 import moose
 import moose.utils as mu
-import sys
-import pylab
+
+# the model lives in the same directory as the test script
+modeldir = os.path.dirname(__file__)
 
 def main():
-    modelname = './chem_models/mkp1_feedback_effects_acc4.xml'
-    modelType = modelname.split(".")[-1]
-    if modelType == "xml":
-        model = moose.readSBML(modelname, '/model')
-    else:
-        raise IOError("Input is not XML model. Wrong extension %s" % modelType)
+    modelname = os.path.join(modeldir, 'chem_models/mkp1_feedback_effects_acc4.xml')
+    model = moose.readSBML(modelname, '/model')
     tables = moose.wildcardFind('/##[TYPE=Table2]')
     records = {}
     for t in tables: records[t.path.split('/')[-1]] = t
@@ -38,7 +36,6 @@ def check(tables):
     for t in tables:
         assert len(t.vec) > 100
     # TODO: Add more tests here.
-
 
 if __name__ == '__main__':
     main()

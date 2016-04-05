@@ -42,13 +42,8 @@ except:
 try: from .print_utils import *
 except: pass
 
-from .sim_utils import *
-
-try: from .backend import graphviz
+try: from .sim_utils import *
 except: pass
-
-try: from .topology import topology
-except Exception as e: pass
 
 from .moose_constants import *
 
@@ -364,7 +359,7 @@ def printtree(root, vchar='|', hchar='__', vcount=1, depth=0, prefix='', is_last
     else:
         prefix = prefix + vchar
 
-    print((root.name))
+    print(root.name)
     children = []
     for child_vec in root.children:
         try:
@@ -979,7 +974,7 @@ def connect_CaConc(compartment_list, temperature=None):
                                 ## temperature is used only by Nernst part here...
                                 if child.name=='nernst_str':
                                     nernst = _moose.Nernst(channel.path+'/nernst')
-                                    nernst_params = string.split(child.value,',')
+                                    nernst_params = child.value.split(',')
                                     nernst.Cout = float(nernst_params[0])
                                     nernst.valence = float(nernst_params[1])
                                     nernst.Temperature = temperature

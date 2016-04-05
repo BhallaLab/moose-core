@@ -40,8 +40,9 @@ the implementation of the rdesigneur class and affiliated features.
 
 # LICENSE
 
-MOOSE is released under GPLv3.
-
+MOOSE is released under the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or (at
+your option) any later version.
 
 # HOMEPAGE 
 
@@ -58,7 +59,7 @@ Old [SourceForge repository](https://sourceforge.net/projects/moose/) is no long
 ## Core MOOSE
 
 - g++     (>= 4.6.x)  REQUIRED For building the C++ MOOSE core.
-- GSL     (1.16.x)    OPTIONAL For core moose numerical computation
+- GSL     (>=1.16.x)  REQUIRED For core moose numerical computation
 - OpenMPI (1.8.x)     OPTIONAL For running moose in parallel on clusters
 - SBML    (5.9.x)     OPTIONAL For reading and writing signalling models in SBML format
 - HDF5    (1.8.x)     OPTIONAL For reading and writing data in HDF5 based formats
@@ -73,9 +74,7 @@ In addition to core MOOSE requirements:
 - Python-dev ( >= 2.7.x) REQUIRED Python development headers and libraries
 - NumPy      ( >= 1.6.x) REQUIRED For array interface
 
-
 ## Graphical User Interface
-
 
 - PyQt4         (4.8.x)                 REQUIRED For Python GUI    
 - Matplotlib    ( >= 1.1.x)             REQUIRED For plotting simulation results
@@ -84,11 +83,8 @@ In addition to core MOOSE requirements:
 
 ### Compartmental Model Visualization       OPTIONAL
 
-
-- GSL     (1.16.x)                      REQUIRED For core moose numerical computation
 - OSG     (3.2.x)                       REQUIRED For 3D rendering and simulation of neuronal models
 - Qt4     (4.8.x)                       REQUIRED For C++ GUI of Moogli
-
 
 ## Demos
 
@@ -104,7 +100,7 @@ In addition to core MOOSE requirements:
 - G.V.HarshaRani        -   Web page design, SBML support, Kinetikit Plugin Development
 - Aditya Gilra          -   NeuroML reader development, integrate-and-fire neurons/networks, STDP
 - Aviral Goel           -   Moogli/Neurokit Development
-- Dilawar Singh         - [Packaging](https://github.com/BhallaLab/moose-full/blob/master/README.md)
+- Dilawar Singh         -   Packaging
 
 
 # Support:

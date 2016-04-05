@@ -1526,9 +1526,9 @@ void testCinfoFields()
 	assert( cinfo->getSrcFinfo( 0 + nsf ) == cinfo->findFinfo( "spikeOut" ) );
 
 	unsigned int ndf = neutralCinfo->getNumDestFinfo();
-	assert( ndf == 28 );
+	assert( ndf == 29 );
 	unsigned int sdf = IntFire::initCinfo()->getNumDestFinfo();
-	assert( sdf == 39 );
+	assert( sdf == 40 );
 
 	/*
 	assert( cinfo->getDestFinfo( 0+ndf )->name() == "setNumSynapses" );
@@ -1560,7 +1560,7 @@ void testCinfoFields()
 	assert( cinfo->getValueFinfo( 3 + nvf ) == cinfo->findFinfo( "refractoryPeriod" ) );
 
 	unsigned int nlf = neutralCinfo->getNumLookupFinfo();
-	assert( nlf == 3 ); // Neutral inserts a lookup field for neighbors
+	assert( nlf == 4 ); // Neutral inserts a lookup field for neighbors
 	assert( cinfo->getNumLookupFinfo() == 0 + nlf );
 	assert( cinfo->getLookupFinfo( 0 + nlf )->name() == "dummy");
 

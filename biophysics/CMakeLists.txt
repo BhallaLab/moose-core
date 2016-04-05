@@ -1,4 +1,5 @@
-include_directories(../basecode ../synapse ../utility)
+include_directories(../basecode ../synapse ../utility ../)
+include_directories(../external/muparser/include ${GSL_INCLUDE_DIR})
 add_library(biophysics 
 	IntFire.cpp	
 	SpikeGen.cpp	

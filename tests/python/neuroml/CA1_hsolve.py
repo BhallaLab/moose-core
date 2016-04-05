@@ -6,6 +6,7 @@ python testNeuroML_CA1.py
 (other channels and morph xml files are already present in this same directory).
 The soma name below is hard coded for CA1, else any other file can be used by modifying this script.
 """
+from __future__ import print_function
 
 import moose
 from moose.utils import *
@@ -21,8 +22,8 @@ def loadGran98NeuroML_L123(filename,params):
     neuromlR = NeuroML()
     populationDict, projectionDict = \
         neuromlR.readNeuroMLFromFile(filename,params=params)
-    print "Number of compartments =",\
-        len(moose.Neuron(populationDict['CA1group'][1][0].path).children)
+    print("Number of compartments =",
+          len(moose.Neuron(populationDict['CA1group'][1][0].path).children))
     soma_path = populationDict['CA1group'][1][0].path+'/Seg0_soma_0_0'
     somaVm = setupTable('somaVm',moose.Compartment(soma_path),'Vm')
     #somaCa = setupTable('somaCa',moose.CaConc(soma_path+'/Gran_CaPool_98'),'Ca')
@@ -30,9 +31,9 @@ def loadGran98NeuroML_L123(filename,params):
     #KDrX = setupTable('ChanX',moose.HHChannel(soma_path+'/Gran_KDr_98'),'X')
     soma = moose.Compartment(soma_path)
     
-    print "Reinit MOOSE ... "
+    print("Reinit MOOSE ... ")
     resetSim(['/elec','/cells'],simdt,plotdt,simmethod='hsolve') # from moose.utils
-    print "Running ... "
+    print("Running ... ")
     moose.start(runtime)
     tvec = arange(0.0,runtime,simdt)
 

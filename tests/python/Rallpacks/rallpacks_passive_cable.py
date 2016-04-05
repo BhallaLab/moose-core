@@ -17,8 +17,7 @@ __status__           = "Development"
 
 
 import compartment as comp
-import sys
-sys.path.append('../../python/')
+
 import moose
 import moose.utils as utils
 import os

@@ -24,8 +24,8 @@
 #include "../external/debug/simple_logger.hpp"
 
 #ifdef USE_SBML
-#include "../sbml/SbmlWriter.h"
-#include "../sbml/SbmlReader.h"
+#include "../sbml/MooseSbmlWriter.h"
+#include "../sbml/MooseSbmlReader.h"
 #endif
 
 #ifdef USE_OPENMPI
@@ -441,7 +441,7 @@ void Shell::doUseClock( string path, string field, unsigned int tick )
 int Shell::doWriteSBML( const string& fname, const string& modelpath )
 { 
 #ifdef USE_SBML
-	SbmlWriter sw;
+	moose::SbmlWriter sw;
 	int ret = sw.write( fname, modelpath );
 	return ret;
 #else
@@ -457,7 +457,7 @@ int Shell::doWriteSBML( const string& fname, const string& modelpath )
 Id Shell::doReadSBML( const string& fname, const string& modelpath, const string& solverclass )
 {
 #ifdef USE_SBML
-	SbmlReader sr;
+	moose::SbmlReader sr;
 	return sr.read( fname, modelpath,solverclass);
 #else
     cerr << "Shell::ReadSBML: This copy of MOOSE has not been compiled with SBML reading support.\n";

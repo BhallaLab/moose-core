@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Thu Jun 18 23:16:11 2015 (-0400)
 // Version: 
-// Last-Updated: Sat Aug 29 12:41:00 2015 (-0400)
+// Last-Updated: Sun Dec 20 23:20:19 2015 (-0500)
 //           By: subha
-//     Update #: 38
+//     Update #: 49
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -155,6 +155,14 @@ NSDFWriter::NSDFWriter(): eventGroup_(-1), uniformGroup_(-1), dataGroup_(-1), mo
 
 NSDFWriter::~NSDFWriter()
 {
+    close();
+}
+
+void NSDFWriter::close()
+{
+    if (filehandle_ < 0){
+        return;
+    }
     flush();
     closeUniformData();
     if (uniformGroup_ >= 0){
@@ -167,6 +175,7 @@ NSDFWriter::~NSDFWriter()
     if (dataGroup_ >= 0){
         H5Gclose(dataGroup_);
     }
+    HDF5DataWriter::close();
 }
 
 void NSDFWriter::closeUniformData()

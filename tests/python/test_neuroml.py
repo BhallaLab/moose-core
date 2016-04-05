@@ -13,6 +13,10 @@ __maintainer__       = "Dilawar Singh"
 __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
+import sys
+import os
+# the model lives in the same directory as the test script
+modeldir = os.path.dirname(__file__)
 
 from neuroml.FvsI_CA1 import ca1_main, loadModel
 from neuroml.CA1 import loadGran98NeuroML_L123
@@ -22,14 +26,16 @@ def test_all():
     test_gran()
 
 def test_ca1():
-    loadModel('./neuroml/cells_channels/CA1soma.morph.xml')
+    p = os.path.join(modeldir, 'neuroml/cells_channels/CA1soma.morph.xml')
+    loadModel(p)
     assert 10 == ca1_main(4e-13)
     assert 20 == ca1_main(8e-13)
     assert 29 == ca1_main(14e-13)
     assert 34 == ca1_main(18e-13)
 
 def test_gran():
-    assert loadGran98NeuroML_L123('neuroml/CA1soma.net.xml') in [8,9]
+    p = os.path.join(modeldir, 'neuroml/CA1soma.net.xml')
+    assert loadGran98NeuroML_L123(p) in [8,9]
 
 if __name__ == '__main__':
     #unittest.main()
