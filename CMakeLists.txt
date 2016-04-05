@@ -351,14 +351,27 @@ endif()
 # Openmpi
 if(WITH_MPI)
     find_package(MPI REQUIRED)
-    if(MPI_CXX_FOUND)
-        message(STATUS "Using MPI from ${MPI_CXX_INCLUDE_PATH}")
-        include_directories(${MPI_CXX_INCLUDE_PATH})
-        set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
-        add_definitions(-DUSE_MPI)
-        SET(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
-        SET(CMAKE_C_COMPILER ${MPI_C_COMPILER})
-    endif()
+    message(STATUS "Using MPI compiler  ${MPI_CXX_COMPILER}")
+    set(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
+    set_target_properties( moose.bin libmoose _moose 
+        PROPERTIES 
+        COMPILE_FLAGS "${CMAKE_CXX_COMPILE_FLAGS} -DUSE_MPI -fopenmp"
+        LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -fopenmp"
+        )
+
+    ## NOTE: Following does not work
+    ##include_directories(${MPI_CXX_INCLUDE_PATH})
+    ##if(MPI_COMPILE_FLAGS)
+    ##    set_target_properties(libmoose _moose 
+    ##        PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}"
+    ##        )
+    ##endif(MPI_COMPILE_FLAGS)
+
+    ##if(MPI_LINK_FLAGS)
+    ##    set_target_properties(libmoose _moose 
+    ##        PROPERTIES LINK_FLAGS "${MPI_LINK_FLAGS}"
+    ##        )
+    ##endif(MPI_LINK_FLAGS)
 endif(WITH_MPI)
 
 # Add subdirectroeis
@@ -386,6 +399,9 @@ add_subdirectory(examples)
 
 # These are always shared libraries.
 set(SYSTEM_SHARED_LIBS ${LibXML2_LIBRARIES})
+if(WITH_MPI)
+    LIST(APPEND SYSTEM_SHARED_LIBS ${MPI_CXX_LIBRARIES})
+endif(WITH_MPI)
 
 # These libraries could be static of dynamic.
 # When building packages on OBS or launchpad, we build static library of a
@@ -422,12 +438,6 @@ if(READLINE_FOUND AND TERMCAP_FOUND)
     list(APPEND SYSTEM_SHARED_LIBS ${Readline_LIBRARY} ${TERMCAP_LIBRARY})
 endif()
 
-if(WITH_MPI)
-    if(MPI_CXX_FOUND)
-        list(APPEND SYSTEM_SHARED_LIBS ${MPI_CXX_LIBRARIES})
-    endif()
-endif(WITH_MPI)
-
 pkg_check_modules(MUPARSER muparser)
 if(MUPARSER_FOUND)
     message(STATUS "Using system muparser ${MUPARSER_VERSION}")
@@ -437,16 +447,6 @@ else()
     add_subdirectory(external/muparser)
     list(APPEND MOOSE_LIBRARIES muparser)
 endif()
-
-#pkg_check_modules(TINYXML tinyxml)
-#if(TINYXML_FOUND)
-    #message(STATUS "Using system tinyxml ${TINYXML_VERSION}")
-    #list(APPEND SYSTEM_SHARED_LIBS ${TINYXML_LIBRARIES})
-#else()
-    #message(STATUS "Using private tinyxml")
-    #add_subdirectory(external/tinyxml)
-    #list(APPEND MOOSE_LIBRARIES tinyxml)
-#endif()
 
 ###################################### LINKING #################################
 list(APPEND MOOSE_LIBRARIES
