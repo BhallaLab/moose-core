@@ -20,40 +20,48 @@ SET(PYMOOSE_TEST_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/python)
 #    WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
 #    )
 
+IF(WITH_MPI)
+    SET(TEST_COMMAND ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} 4
+        ${MPIEXEC_PREFLAGS} ${PYTHON_EXECUTABLE} ${MPIEXEC_POSTFLAGS}
+        )
+else(WITH_MPI)
+    SET(TEST_COMMAND ${PYTHON_EXECUTABLE})
+endif(WITH_MPI)
+
 ADD_TEST(NAME pymoose-test-synchan
-    COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/tests/python/test_synchan.py
+    COMMAND ${TEST_COMMAND} ${PROJECT_SOURCE_DIR}/tests/python/test_synchan.py
     )
 set_tests_properties(pymoose-test-synchan PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python")
 
 ADD_TEST(NAME pymoose-test-function
-    COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/tests/python/test_function.py
+    COMMAND ${TEST_COMMAND} ${PROJECT_SOURCE_DIR}/tests/python/test_function.py
     )
 set_tests_properties(pymoose-test-function PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python")
 
 ADD_TEST(NAME pymoose-test-vec
-    COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/tests/python/test_vec.py
+    COMMAND ${TEST_COMMAND} ${PROJECT_SOURCE_DIR}/tests/python/test_vec.py
     )
 set_tests_properties(pymoose-test-vec PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python")
 
 ADD_TEST(NAME pymoose-pyrun
-    COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/tests/python/test_pyrun.py
+    COMMAND ${TEST_COMMAND} ${PROJECT_SOURCE_DIR}/tests/python/test_pyrun.py
     )
 set_tests_properties(pymoose-pyrun PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python")
 
 # Do not run this test after packaging.
 ADD_TEST(NAME pymoose-neuroml-reader-test 
-    COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/tests/python/test_neuroml.py
+    COMMAND ${TEST_COMMAND} ${PROJECT_SOURCE_DIR}/tests/python/test_neuroml.py
     )
 set_tests_properties(pymoose-neuroml-reader-test PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python")
 
 ADD_TEST(NAME pymoose-nsdf-sanity-test
-    COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/tests/python/test_nsdf.py
+    COMMAND ${TEST_COMMAND} ${PROJECT_SOURCE_DIR}/tests/python/test_nsdf.py
     )
 set_tests_properties(pymoose-nsdf-sanity-test PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python")
 
 # Test basic SBML support.
 ADD_TEST(NAME pymoose-test-basic-sbml-support
-    COMMAND ${PYTHON_EXECUTABLE}
+    COMMAND ${TEST_COMMAND}
     ${PROJECT_SOURCE_DIR}/tests/python/test_sbml_support.py
     )
 set_tests_properties(pymoose-test-basic-sbml-support 
