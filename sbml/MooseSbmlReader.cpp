@@ -539,6 +539,8 @@ const moose::SbmlReader::sbmlStr_mooseId moose::SbmlReader::createMolecule( map<
             if ( poolInfo == Id() ) 
                 poolInfo = shell->doCreate( "Annotator", pool, "info", 1 );
             assert( poolInfo != Id() );
+            speciesNotes.erase(std::remove(speciesNotes.begin(), speciesNotes.end(), '\n'), speciesNotes.end());
+            speciesNotes.erase(std::remove(speciesNotes.begin(), speciesNotes.end(), '\t'), speciesNotes.end());
             Field< string >::set( poolInfo, "notes", speciesNotes );
         }
         }//Pool_ != Id()
@@ -673,7 +675,16 @@ void moose::SbmlReader::createReaction(const map< string, Id > &molSidcmptMIdMap
                 name = id;
         }
         string grpname = getAnnotation( reac,enzInfoMap );
-       
+        string reactionNotes = "";
+       if (reac->isSetNotes())
+        {
+            XMLNode* xnode = reac->getNotes();
+            string testnotes = reac->getNotesString();
+            XMLNode nodec = xnode->getChild(0);
+            XMLNode tnodec = nodec.getChild(0);
+            reactionNotes = tnodec.getCharacters();
+        }
+
        if ( (grpname != "") && (enzInfoMap[grpname].stage == 3) )
             setupEnzymaticReaction( enzInfoMap[grpname],grpname ,molSidcmptMIdMap,name);
         
@@ -745,6 +756,17 @@ void moose::SbmlReader::createReaction(const map< string, Id > &molSidcmptMIdMap
                         double y = atof( yCord.c_str() );
                         Field< double >::set( reacInfo, "x", x );
                         Field< double >::set( reacInfo, "y", y );
+                    }
+                    if (!reactionNotes.empty())
+                    {   Id reacInfo;
+                        string reacPath = Field<string> :: get(reaction_,"path");
+                        reacInfo = Id( reacPath + "/info");
+                        if ( reacInfo == Id() ) 
+                            reacInfo = shell->doCreate( "Annotator", reaction_, "info", 1 );
+                        assert( reacInfo != Id() );
+                        reactionNotes.erase(std::remove(reactionNotes.begin(), reactionNotes.end(), '\n'), reactionNotes.end());
+                        reactionNotes.erase(std::remove(reactionNotes.begin(), reactionNotes.end(), '\t'), reactionNotes.end());
+                        Field< string >::set( reacInfo, "notes", reactionNotes );
                     }
                     if ( reac->isSetKineticLaw() ) {
                         KineticLaw * klaw=reac->getKineticLaw();
