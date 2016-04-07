@@ -686,7 +686,7 @@ void moose::SbmlReader::createReaction(const map< string, Id > &molSidcmptMIdMap
         }
 
        if ( (grpname != "") && (enzInfoMap[grpname].stage == 3) )
-            setupEnzymaticReaction( enzInfoMap[grpname],grpname ,molSidcmptMIdMap,name);
+            setupEnzymaticReaction( enzInfoMap[grpname],grpname ,molSidcmptMIdMap,name, reactionNotes);
         
         // if (grpname != "")
         // {
@@ -795,7 +795,7 @@ void moose::SbmlReader::createReaction(const map< string, Id > &molSidcmptMIdMap
 } //reaction
 
 /* Enzymatic Reaction  */
-void moose::SbmlReader::setupEnzymaticReaction( const EnzymeInfo & einfo,string enzname, const map< string, Id > &molSidcmptMIdMap,string name1) {
+void moose::SbmlReader::setupEnzymaticReaction( const EnzymeInfo & einfo,string enzname, const map< string, Id > &molSidcmptMIdMap,string name1,string enzNotes) {
     string enzPool = einfo.enzyme;
     Id comptRef = molSidcmptMIdMap.find(enzPool)->second; //gives compartment of sp
     Id meshEntry = Neutral::child( comptRef.eref(), "mesh" );
@@ -810,6 +810,7 @@ void moose::SbmlReader::setupEnzymaticReaction( const EnzymeInfo & einfo,string 
     
     Id enzyme_ = shell->doCreate("Enz", enzPoolId, name1, 1);
     //shell->doAddMsg( "Single", meshEntry, "remeshReacs", enzyme_, "remesh");
+
     if (enzyme_ != Id())
     {
         Id complex = einfo.complex;
@@ -846,6 +847,17 @@ void moose::SbmlReader::setupEnzymaticReaction( const EnzymeInfo & einfo,string 
             double y = atof( yCord.c_str() );
             Field< double >::set( enzInfo, "x", x );
             Field< double >::set( enzInfo, "y", y );
+        } //xCord.empty
+        if (!enzNotes.empty())
+        {  Id enzInfo;
+            string enzPath = Field<string> :: get(enzyme_,"path");
+            enzInfo = Id( enzPath + "/info");
+            if ( enzInfo == Id() ) 
+                enzInfo = shell->doCreate( "Annotator", enzyme_, "info", 1 );
+            assert( enzInfo != Id() );
+            enzNotes.erase(std::remove(enzNotes.begin(), enzNotes.end(), '\n'), enzNotes.end());
+            enzNotes.erase(std::remove(enzNotes.begin(), enzNotes.end(), '\t'), enzNotes.end());
+            Field< string >::set( enzInfo, "notes", enzNotes );
         } //xCord.empty
     }//enzyme_
 }
@@ -987,6 +999,16 @@ void moose::SbmlReader::setupMMEnzymeReaction( Reaction * reac,string rid,string
     string groupName = group.first;
     string xCord = group.second.first;
     string yCord = group.second.second;
+    string MMEnznotes = " ";
+    if (reac->isSetNotes())
+        {
+            XMLNode* xnode = reac->getNotes();
+            string testnotes = reac->getNotesString();
+            XMLNode nodec = xnode->getChild(0);
+            XMLNode tnodec = nodec.getChild(0);
+            MMEnznotes = tnodec.getCharacters();
+        }
+
     for ( unsigned int m = 0; m < num_modifr; m++ ) {
         const ModifierSpeciesReference* modifr=reac->getModifier( m );
         std::string sp = modifr->getSpecies();
@@ -1014,6 +1036,19 @@ void moose::SbmlReader::setupMMEnzymeReaction( Reaction * reac,string rid,string
                 Field< double >::set( enzInfo, "x", x );
                 Field< double >::set( enzInfo, "y", y );
             }
+            if(!MMEnznotes.empty())
+            {
+                Id enzInfo;
+                string enzPath = Field<string> :: get(enzyme_,"path");
+                enzInfo = Id( enzPath + "/info");
+                if ( enzInfo == Id() ) 
+                    enzInfo = shell->doCreate( "Annotator", enzyme_, "info", 1 );
+                assert( enzInfo != Id() );
+                MMEnznotes.erase(std::remove(MMEnznotes.begin(), MMEnznotes.end(), '\n'), MMEnznotes.end());
+                MMEnznotes.erase(std::remove(MMEnznotes.begin(), MMEnznotes.end(), '\t'), MMEnznotes.end());
+                Field< string >::set( enzInfo, "notes", MMEnznotes );
+            }
+
             KineticLaw * klaw=reac->getKineticLaw();
             vector< double > rate;
             rate.clear();
