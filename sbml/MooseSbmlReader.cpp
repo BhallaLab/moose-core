@@ -418,9 +418,7 @@ const moose::SbmlReader::sbmlStr_mooseId moose::SbmlReader::createMolecule( map<
             string testnotes = spe->getNotesString();
             XMLNode nodec = xnode->getChild(0);
             XMLNode tnodec = nodec.getChild(0);
-            //cout << "\n$$$! " << name << " " << tnodec.getCharacters();
             speciesNotes = tnodec.getCharacters();
-            //Id annotaIdE(pathE+"/info");
         }
         double initvalue =0.0;
         if ( spe->isSetInitialConcentration() )
