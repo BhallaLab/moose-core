@@ -259,7 +259,8 @@ def trimPath(mobj):
                         slash = original.path.find('/',pos+1)
                         splitpath = original.path[slash+1:len(original.path)]
                 splitpath = re.sub("\[[0-9]+\]", "", splitpath)
-                return splitpath
+                s = splitpath.replace("_dash_",'-')
+                return s
 
 def writeSumtotal( modelpath,f):
         funclist = wildcardFind(modelpath+'/##[ISA=Function]')
