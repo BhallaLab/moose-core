@@ -131,8 +131,8 @@ const Cinfo * Function::initCinfo()
     static ElementValueFinfo< Function, string > expr(
         "expr",
         "Mathematical expression defining the function. The underlying parser\n"
-        "is muParser. Hence the available functions and operators are (from\n"
-        "muParser docs):\n"
+        "is muParser. In addition to the available functions and operators  from\n"
+        "muParser, some more functions are added.\n"
         "\nFunctions\n"
         "Name        args    explanation\n"
         "sin         1       sine function\n"
@@ -160,6 +160,11 @@ const Cinfo * Function::initCinfo()
         "max         var.    max of all arguments\n"
         "sum         var.    sum of all arguments\n"
         "avg         var.    mean value of all arguments\n"
+        "rand        1       rand(seed), random float between 0 and 1, \n"
+        "                    if seed = -1, then a 'random' seed is created.\n"
+        "rand2       3       rand(a, b, seed), random float between a and b, \n"
+        "                    if seed = -1, a 'random' seed is created using either\n"
+        "                    by random_device or by reading system clock\n"
         "\nOperators\n"
         "Op  meaning         priority\n"
         "=   assignment     -1\n"

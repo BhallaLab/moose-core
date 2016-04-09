@@ -20,7 +20,6 @@ cache: apt
 
 matrix:
     allow_failures:
-        - compiler: clang
 
 before_script:
     - sudo add-apt-repository ppa:takluyver/python3 -y
