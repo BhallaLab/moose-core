@@ -76,7 +76,9 @@ option(ENABLE_UNIT_TESTS "Enable unit tests (DEBUG should also be ON)" OFF)
 option(WITH_PYTHON "Build native python extension" ON)
 option(WITH_MPI  "Enable Openmpi support" OFF)
 option(WITH_CURSES "Enable ncurses support (deprecated)" OFF)
+
 option(USE_BOOST "Use boost library (experimental, development)" ON)
+option(USE_GSL   "Use gsl library instead of boost" OFF)
 
 # If SBML is available, it will automaticall enable the support. If ON, then
 # libSBML must be present.
@@ -461,8 +463,8 @@ list(APPEND MOOSE_LIBRARIES
     moose_builtins
     msg
     benchmarks
-    shell
     randnum
+    shell
     scheduling
     moose_mpi
     biophysics 
@@ -478,6 +480,7 @@ list(APPEND MOOSE_LIBRARIES
     device
     basecode
     )
+
 
 
 # MAC linker does not understand many of gnu-ld options.

@@ -25,7 +25,7 @@ typedef boost::numeric::ublas::matrix< double > matrix_type_;
 class BoostSys
 {
     public:
-        BoostSys ();                             /* constructor */
+        BoostSys (){ };                             /* constructor */
 
         /*-----------------------------------------------------------------------------
          *  Following functiors implement equivalent of 'function' and
