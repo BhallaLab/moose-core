@@ -10,6 +10,54 @@
 #ifndef _ODE_SYSTEM_H
 #define _ODE_SYSTEM_H
 
+#ifdef USE_BOOST
+
+#include <boost/numeric/odeint.hpp>
+typedef boost::numeric::ublas::vector< double > vector_type_;
+typedef boost::numeric::ublas::matrix< double > matrix_type_;
+
+/*
+ * =====================================================================================
+ *        Class:  BoostSys
+ *  Description:  The ode system describing chemical kinetics in BOOST.
+ * =====================================================================================
+ */
+class BoostSys
+{
+    public:
+        BoostSys ();                             /* constructor */
+
+        /*-----------------------------------------------------------------------------
+         *  Following functiors implement equivalent of 'function' and
+         *  `jacobian` of gsl_odeiv2_system. These wrappers are just to have
+         *  consistency between calls to gsl or boost solver.
+         *-----------------------------------------------------------------------------*/
+        int (*rhs) ( const vector_type_ &y
+                , matrix_type_ &dydt
+                , double t 
+                , void * params 
+                );
+
+        // Fixme: Change the types of argument.
+        int (*jacobian) ( double t
+                , const double y[]
+                , double dfdt[]
+                , void* params
+                );
+
+        size_t dimensions;                      /* dimensions of the system */
+
+        /* Pointer to the arbitrary parameters of the system */
+        void * params;
+
+        boost::numeric::odeint::runge_kutta_dopri5< double > stepper;
+
+}; /* -----  end of class BoostSys  ----- */
+
+
+#endif
+
+
 class OdeSystem {
 	public:
 		OdeSystem()
@@ -24,6 +72,9 @@ class OdeSystem {
 #ifdef USE_GSL
 		gsl_odeiv2_system gslSys;
 		const gsl_odeiv2_step_type* gslStep;
+
+#elif defined(USE_BOOST)
+                BoostSys boostSys;
 #endif
 		double initStepSize;
 
