@@ -32,9 +32,9 @@ class BoostSys
          *  `jacobian` of gsl_odeiv2_system. These wrappers are just to have
          *  consistency between calls to gsl or boost solver.
          *-----------------------------------------------------------------------------*/
-        int (*rhs) ( const vector_type_ &y
-                , matrix_type_ &dydt
-                , double t 
+        int (*rhs) ( const double y
+                , double &dydt
+                , const double t 
                 , void * params 
                 );
 

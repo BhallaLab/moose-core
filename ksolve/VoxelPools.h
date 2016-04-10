@@ -44,9 +44,9 @@ public:
 
 #ifdef USE_BOOST
     static int evalRatesUsingBoost( 
-            const vector_type_&y
-            , matrix_type_ &dydt
-            , double t
+            const double y
+            , double &dydt
+            , const double t
             , void * params 
             );
 #endif

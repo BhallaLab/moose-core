@@ -150,12 +150,16 @@ int VoxelPools::evalRatesUsingGSL( double t, const double* y, double *dydt, void
 #endif
 }
 
-int VoxelPools::evalRatesUsingBoost( const vector_type_ &y
-        , matrix_type_ &dydt
-        , double t
+int VoxelPools::evalRatesUsingBoost( const double y
+        , double &dydt
+        , const double t
         , void *params 
         )
 {
+    VoxelPools* vp = reinterpret_cast< VoxelPools* >( params );
+    double q = y;
+    vp->stoichPtr_->updateFuncs( &q, t );
+    vp->updateRates( &y, &dydt );
     return 0;
 }
 
