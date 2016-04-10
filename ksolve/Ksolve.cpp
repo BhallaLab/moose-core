@@ -383,11 +383,11 @@ void Ksolve::setStoich( Id stoich )
         }
 #elif defined(USE_BOOST)
         unsigned int dimension = stoichPtr_->getNumAllPools();
-        if( 0 <= dimension )
+        if( 0 == dimension )
             return;
 
-        ode.boostSys.rhs = &VoxelPools::evalRatesUsingBoost;
-        ode.boostSys.jacobian = 0;
+        //ode.boostSys.rhs = &VoxelPools::evalRatesUsingBoost;
+        ode.boostSys.jacobian = NULL;
         unsigned int numVoxels = pools_.size();
         for ( unsigned int i = 0 ; i < numVoxels; ++i )
         {

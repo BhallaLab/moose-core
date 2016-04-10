@@ -21,5 +21,7 @@ stoich.compartment = compt
 stoich.path = '/compt/##'
 
 moose.reinit()
+print a.conc, b.conc
 moose.start( 1.0 )
+print a.conc, b.conc
 

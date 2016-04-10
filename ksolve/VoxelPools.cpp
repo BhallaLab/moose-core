@@ -110,7 +110,7 @@ void VoxelPools::advance( const ProcInfo* p )
     double x = *varS();
     int status = integrate_const( 
             sys_.stepper
-            , sys_.rhs
+            , sys_
             , x
             , t 
             , p->currTime 
@@ -150,21 +150,6 @@ int VoxelPools::evalRatesUsingGSL( double t, const double* y, double *dydt, void
 #else
     return 0;
 #endif
-}
-
-int VoxelPools::evalRatesUsingBoost( double y
-        , double& dydt
-        , double t
-        //, void *params 
-        )
-{
-    return 0;
-
-    //VoxelPools* vp = reinterpret_cast< VoxelPools* >( params );
-    //double q = y;
-    //vp->stoichPtr_->updateFuncs( &q, t );
-    //vp->updateRates( &y, &dydt );
-    //return 0;
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -275,6 +260,11 @@ void VoxelPools::setVolumeAndDependencies( double vol )
     stoichPtr_->setupCrossSolverReacVols();
     updateAllRateTerms( stoichPtr_->getRateTerms(),
                         stoichPtr_->getNumCoreRates() );
+}
+
+const Stoich* VoxelPools::getStoich( )
+{
+    return stoichPtr_;
 }
 
 ////////////////////////////////////////////////////////////

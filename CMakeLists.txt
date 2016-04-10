@@ -381,7 +381,6 @@ add_subdirectory(biophysics)
 add_subdirectory(builtins)
 add_subdirectory(utility)
 add_subdirectory(mesh)
-add_subdirectory(sbml)
 add_subdirectory(mpi)
 add_subdirectory(signeur)
 add_subdirectory(ksolve)
@@ -393,6 +392,10 @@ add_subdirectory(kinetics)
 add_subdirectory(synapse)
 add_subdirectory(intfire)
 add_subdirectory(examples)
+
+if(WITH_SBML)
+    add_subdirectory(sbml)
+endif(WITH_SBML)
 
 # These are always shared libraries.
 set(SYSTEM_SHARED_LIBS ${LibXML2_LIBRARIES})
@@ -412,7 +415,10 @@ elseif(HDF5_FOUND)
     list(APPEND SYSTEM_SHARED_LIBS ${HDF5_LIBRARIES})
 endif()
 
-LIST(APPEND STATIC_LIBRARIES moose_sbml)
+if(WITH_SBML)
+    LIST(APPEND STATIC_LIBRARIES moose_sbml)
+endif(WITH_SBML)
+
 if(SBML_STATIC_HOME)
     list(APPEND STATIC_LIBRARIES ${LIBSBML_LIBRARIES})
 elseif(LIBSBML_FOUND)
@@ -480,7 +486,6 @@ list(APPEND MOOSE_LIBRARIES
     device
     basecode
     )
-
 
 
 # MAC linker does not understand many of gnu-ld options.

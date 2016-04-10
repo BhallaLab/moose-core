@@ -199,6 +199,8 @@ class VoxelPoolsBase
 		/// Debugging utility
 		void print() const;
 
+
+
 	protected:
 		const Stoich* stoichPtr_;
 		vector< RateTerm* > rates_;
