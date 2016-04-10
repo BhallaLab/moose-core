@@ -107,13 +107,14 @@ void VoxelPools::advance( const ProcInfo* p )
     }
 #elif defined(USE_BOOST)
     double t = p->currTime - p->dt;
-#if 0
     int status = integrate_const( 
-            sys_.stepper, sys_.get_system()
-            , varS(), &t 
-            , &t, p->currTime 
+            sys_.stepper
+            , sys_.rhs
+            , varS()
+            , t 
+            , p->currTime 
+            , p->dt
             );
-#endif
 #endif
 }
 

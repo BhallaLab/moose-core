@@ -50,7 +50,8 @@ class BoostSys
         /* Pointer to the arbitrary parameters of the system */
         void * params;
 
-        boost::numeric::odeint::runge_kutta_dopri5< double > stepper;
+        boost::numeric::odeint::runge_kutta_dopri5< double, double , double
+            , double, boost::numeric::odeint::vector_space_algebra > stepper;
 
 }; /* -----  end of class BoostSys  ----- */
 
