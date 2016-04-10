@@ -32,10 +32,10 @@ class BoostSys
          *  `jacobian` of gsl_odeiv2_system. These wrappers are just to have
          *  consistency between calls to gsl or boost solver.
          *-----------------------------------------------------------------------------*/
-        int (*rhs) ( const double y
-                , double &dydt
-                , const double t 
-                , void * params 
+        int (*rhs) (  double y
+                , double& dydt
+                ,  double t 
+                //, void * params 
                 );
 
         // Fixme: Change the types of argument.
@@ -50,7 +50,7 @@ class BoostSys
         /* Pointer to the arbitrary parameters of the system */
         void * params;
 
-        boost::numeric::odeint::runge_kutta_dopri5< double, double , double
+        boost::numeric::odeint::runge_kutta_dopri5< double, double ,double
             , double, boost::numeric::odeint::vector_space_algebra > stepper;
 
 }; /* -----  end of class BoostSys  ----- */

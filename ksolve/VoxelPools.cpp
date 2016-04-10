@@ -107,10 +107,11 @@ void VoxelPools::advance( const ProcInfo* p )
     }
 #elif defined(USE_BOOST)
     double t = p->currTime - p->dt;
+    double x = *varS();
     int status = integrate_const( 
             sys_.stepper
             , sys_.rhs
-            , varS()
+            , x
             , t 
             , p->currTime 
             , p->dt
@@ -151,17 +152,19 @@ int VoxelPools::evalRatesUsingGSL( double t, const double* y, double *dydt, void
 #endif
 }
 
-int VoxelPools::evalRatesUsingBoost( const double y
-        , double &dydt
-        , const double t
-        , void *params 
+int VoxelPools::evalRatesUsingBoost( double y
+        , double& dydt
+        , double t
+        //, void *params 
         )
 {
-    VoxelPools* vp = reinterpret_cast< VoxelPools* >( params );
-    double q = y;
-    vp->stoichPtr_->updateFuncs( &q, t );
-    vp->updateRates( &y, &dydt );
     return 0;
+
+    //VoxelPools* vp = reinterpret_cast< VoxelPools* >( params );
+    //double q = y;
+    //vp->stoichPtr_->updateFuncs( &q, t );
+    //vp->updateRates( &y, &dydt );
+    //return 0;
 }
 
 ///////////////////////////////////////////////////////////////////////

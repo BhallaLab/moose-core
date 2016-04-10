@@ -44,10 +44,10 @@ public:
 
 #ifdef USE_BOOST
     static int evalRatesUsingBoost( 
-            const double y
-            , double &dydt
-            , const double t
-            , void * params 
+             double y
+            , double& dydt
+            , double t
+            //, void * params 
             );
 #endif
 
