@@ -124,6 +124,7 @@ void VoxelPools::advance( const ProcInfo* p )
     for( auto & v : Svec() ) cerr << v  << ", " ;
     cerr << endl;
     //sys_->stepper.do_step( system, Svec(), t, dt );
+    boost::numeric::odeint::integrate(system, Svec(), t, currTime, dt );
 
 #endif
 }
@@ -152,7 +153,7 @@ int VoxelPools::evalRatesUsingGSL( double t, const double* y, double *dydt, void
     	*b++ = *sinit++;
     	*/
     vp->stoichPtr_->updateFuncs( q, t );
-    vp->updateRates<double>( y, dydt );
+    vp->updateRates( y, dydt );
 #ifdef USE_GSL
     return GSL_SUCCESS;
 #else
@@ -166,7 +167,14 @@ void VoxelPools::evalRatesUsingBoost( const state_type_& y,  state_type_& dydt
     VoxelPools* vp = reinterpret_cast< VoxelPools* >( params );
     double q = y[0];
     vp->stoichPtr_->updateFuncs( &q, t );
-    //vp->updateRates( &y, &dydt);
+    double y1[y.size()];
+    double dydt1[dydt.size()];
+    for(size_t i = 0; i < y.size(); i++)
+    {
+        y1[i] = y[i];
+        dydt1[i] = dydt[1];
+    }
+    vp->updateRates( y1, dydt1 );
     //cerr << "Debug: t = " << t << " y = " << y << " dydt = " << dydt << endl;
 }
 
@@ -210,8 +218,7 @@ void VoxelPools::updateRateTerms( const vector< RateTerm* >& rates,
                             getVolume(), 1.0, 1.0 );
 }
 
-template<typename T>
-void VoxelPools::updateRates( const T* s, T* yprime ) const
+void VoxelPools::updateRates( const double* s, double* yprime ) const
 {
     const KinSparseMatrix& N = stoichPtr_->getStoichiometryMatrix();
     vector< double > v( N.nColumns(), 0.0 );
@@ -236,6 +243,9 @@ void VoxelPools::updateRates( const T* s, T* yprime ) const
         *yprime++ = N.computeRowRate( i , v );
     for (unsigned int i = 0; i < totInvar ; ++i)
         *yprime++ = 0.0;
+    
+    cerr << " y' = " << *yprime;
+
 }
 
 /**

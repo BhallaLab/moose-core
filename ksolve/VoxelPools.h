@@ -75,8 +75,7 @@ public:
      * Core computation function. Updates the reaction velocities
      * vector yprime given the current mol 'n' vector s.
      */
-    template<typename T>
-    void updateRates( const T* s, T* yprime ) const;
+    void updateRates( const double* s, double* yprime ) const;
 
     /**
      * updateReacVelocities computes the velocity *v* of each reaction
