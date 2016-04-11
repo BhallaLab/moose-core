@@ -13,7 +13,8 @@
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_odeiv2.h>
 #elif defined(USE_BOOST)
-#include <boost/bind.hpp>
+#include <functional>
+using namespace std::placeholders;
 #endif
 
 #include "OdeSystem.h"
@@ -112,13 +113,14 @@ void VoxelPools::advance( const ProcInfo* p )
     }
 #elif defined(USE_BOOST)
     double t = p->currTime - p->dt;
-    double x = *varS();
+    double x = Svec()[0];
     double dt = p->dt;
     double currTime = p->currTime;
 
     // This should call VoxelPools::evalRatesUsingBoost with extra void* but the
     // type of bound function matches the signature of System.
-    auto system = boost::bind(&VoxelPools::evalRatesUsingBoost, _1, _2, _3, sys_->params);
+    auto system = std::bind(&VoxelPools::evalRatesUsingBoost, _1, _2, _3, sys_->params);
+    printf( "|| t = %f, dt = %f, currtime = %f, x = %f\n", t, dt, currTime, x);
     integrate_const( sys_->stepper , system , x , t , currTime , dt);
 #endif
 }
@@ -156,13 +158,16 @@ int VoxelPools::evalRatesUsingGSL( double t, const double* y, double *dydt, void
 #endif
 }
 
-void VoxelPools::evalRatesUsingBoost( const double y, const double& dydt, const double t, void* params)
+void VoxelPools::evalRatesUsingBoost( const double y,  double& dydt, const double t, void* params)
 {
     VoxelPools* vp = reinterpret_cast< VoxelPools* >( params );
     double q = y;
-    double dydt1 = dydt;
     vp->stoichPtr_->updateFuncs( &q, t );
-    vp->updateRates( &y, &dydt1);
+    vp->updateRates( &y, &dydt);
+    cerr << "Debug: t = " << t 
+        << " y = " << y 
+        << " dydt = " << dydt 
+        << endl;
 }
 
 ///////////////////////////////////////////////////////////////////////
