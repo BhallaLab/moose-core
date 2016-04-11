@@ -23,6 +23,9 @@ class BoostSys
          *  Following functiors implement equivalent of 'function' and
          *  `jacobian` of gsl_odeiv2_system. These wrappers are just to have
          *  consistency between calls to gsl or boost solver.
+         *
+         *  We are not using them in this implementation but rather using
+         *  VoxelPools::evalRatesUsingBoost function. 
          *-----------------------------------------------------------------------------*/
         int operator()( double y , double& dydt ,  double t );
 

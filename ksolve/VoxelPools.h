@@ -10,15 +10,7 @@
 #ifndef _VOXEL_POOLS_H
 #define _VOXEL_POOLS_H
 
-#include "BoostSystem.h"
-#include <vector>
-
-using namespace std;
-
-class OdeSystem;
-class RateTerm;
-class Stoich;
-class ProcInfo;
+class BoostSys;
 
 /**
  * This is the class for handling reac-diff voxels used for deterministic
@@ -53,6 +45,9 @@ public:
     /// This is the function which evaluates the rates.
     static int evalRatesUsingGSL( double t, const double* y, double *dydt, void* params );
 
+#ifdef USE_BOOST
+    static void evalRatesUsingBoost( const double y, double& dydt, const double t, void* params);
+#endif
 
     //////////////////////////////////////////////////////////////////
     // Rate manipulation and calculation functions
@@ -99,7 +94,7 @@ private:
     gsl_odeiv2_driver* driver_;
     gsl_odeiv2_system sys_;
 #elif defined(USE_BOOST)
-    BoostSys sys_;
+    BoostSys* sys_;
 #endif
 };
 

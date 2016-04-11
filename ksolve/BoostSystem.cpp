@@ -32,10 +32,3 @@ BoostSys::~BoostSys()
 {
 
 }
-
-
-int BoostSys::operator()( double y , double& dydt ,  double t )
-{
-    cerr << "here" << endl;
-
-}

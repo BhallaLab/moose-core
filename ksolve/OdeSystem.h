@@ -10,7 +10,7 @@
 #ifndef _ODE_SYSTEM_H
 #define _ODE_SYSTEM_H
 
-#include "BoostSystem.h"
+class BoostSys;
 
 class OdeSystem {
 	public:
@@ -28,7 +28,7 @@ class OdeSystem {
 		const gsl_odeiv2_step_type* gslStep;
 
 #elif defined(USE_BOOST)
-                BoostSys boostSys;
+                BoostSys* boostSys;
 #endif
 		double initStepSize;
 

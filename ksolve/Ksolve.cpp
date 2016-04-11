@@ -16,7 +16,8 @@
 #elif defined(USE_BOOST)
 
 #include <boost/numeric/odeint.hpp>
-
+#include <boost/bind.hpp>
+#include "BoostSystem.h"
 #endif
 
 #include "OdeSystem.h"
@@ -362,6 +363,7 @@ void Ksolve::setStoich( Id stoich )
     if ( !isBuilt_ )
     {
         OdeSystem ode;
+        ode.boostSys = new BoostSys();
         ode.epsAbs = epsAbs_;
         ode.epsRel = epsRel_;
         // ode.initStepSize = getEstimatedDt();
@@ -386,12 +388,12 @@ void Ksolve::setStoich( Id stoich )
         if( 0 == dimension )
             return;
 
-        //ode.boostSys.rhs = &VoxelPools::evalRatesUsingBoost;
-        ode.boostSys.jacobian = NULL;
+        // We assign the function in VoxelPools.cpp file.
+        ode.boostSys->jacobian = NULL;
         unsigned int numVoxels = pools_.size();
         for ( unsigned int i = 0 ; i < numVoxels; ++i )
         {
-            ode.boostSys.params = &pools_[i];
+            ode.boostSys->params = &pools_[i];
             pools_[i].setStoich( stoichPtr_, &ode );
         }
 #endif
