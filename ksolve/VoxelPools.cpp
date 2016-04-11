@@ -119,8 +119,11 @@ void VoxelPools::advance( const ProcInfo* p )
     // This should call VoxelPools::evalRatesUsingBoost with extra void* but the
     // type of bound function matches the signature of System.
     auto system = std::bind(&VoxelPools::evalRatesUsingBoost, _1, _2, _3, sys_->params);
-    printf( "|| t = %f, dt = %f, currtime = %f, y = %f\n", t, dt, currTime, *varS());
-    integrate_const( sys_->stepper , system , Svec()[0], t , currTime , dt);
+    printf( "|| t = %f, dt = %f, ys=", t, dt);
+    for( auto & v : Svec() ) cerr << v  << ", " ;
+    cerr << endl;
+    sys_->stepper.do_step( system, *varS(), t, dt );
+
 #endif
 }
 
@@ -162,7 +165,7 @@ void VoxelPools::evalRatesUsingBoost( const double y,  double& dydt, const doubl
     VoxelPools* vp = reinterpret_cast< VoxelPools* >( params );
     double q = y;
     vp->stoichPtr_->updateFuncs( &q, t );
-    dydt = vp->updateRates( &y, &dydt);
+    vp->updateRates( &y, &dydt);
     cerr << "Debug: t = " << t 
         << " y = " << y 
         << " dydt = " << dydt 
