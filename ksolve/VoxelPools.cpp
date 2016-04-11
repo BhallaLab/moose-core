@@ -112,21 +112,14 @@ void VoxelPools::advance( const ProcInfo* p )
     }
 #elif defined(USE_BOOST)
     double t = p->currTime - p->dt;
-    const double x = *varS();
+    double x = *varS();
     double dt = p->dt;
     double currTime = p->currTime;
 
     // This should call VoxelPools::evalRatesUsingBoost with extra void* but the
     // type of bound function matches the signature of System.
     auto system = boost::bind(&VoxelPools::evalRatesUsingBoost, _1, _2, _3, sys_->params);
-    //int status = integrate_const( 
-    //        sys_->stepper
-    //        , system
-    //        , x
-    //        , t 
-    //        , currTime
-    //        , dt
-    //        );
+    integrate_const( sys_->stepper , system , x , t , currTime , dt);
 #endif
 }
 
@@ -163,9 +156,13 @@ int VoxelPools::evalRatesUsingGSL( double t, const double* y, double *dydt, void
 #endif
 }
 
-void VoxelPools::evalRatesUsingBoost( const double y, double& dydt, const double t, void* params)
+void VoxelPools::evalRatesUsingBoost( const double y, const double& dydt, const double t, void* params)
 {
-    cerr << "Doing nothing" << endl;
+    VoxelPools* vp = reinterpret_cast< VoxelPools* >( params );
+    double q = y;
+    double dydt1 = dydt;
+    vp->stoichPtr_->updateFuncs( &q, t );
+    vp->updateRates( &y, &dydt1);
 }
 
 ///////////////////////////////////////////////////////////////////////

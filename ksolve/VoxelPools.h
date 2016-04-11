@@ -46,7 +46,7 @@ public:
     static int evalRatesUsingGSL( double t, const double* y, double *dydt, void* params );
 
 #ifdef USE_BOOST
-    static void evalRatesUsingBoost( const double y, double& dydt, const double t, void* params);
+    static void evalRatesUsingBoost( const double y, const double& dydt, const double t, void* params);
 #endif
 
     //////////////////////////////////////////////////////////////////
