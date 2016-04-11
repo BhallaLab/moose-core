@@ -6,6 +6,7 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
+
 #include "header.h"
 
 #ifdef USE_GSL
@@ -15,10 +16,10 @@
 #elif defined(USE_BOOST)
 #include <functional>
 using namespace std::placeholders;
+#include  "BoostSystem.h"
 #endif
 
 #include "OdeSystem.h"
-#include  "BoostSystem.h"
 
 #include "VoxelPoolsBase.h"
 #include "VoxelPools.h"
@@ -122,7 +123,7 @@ void VoxelPools::advance( const ProcInfo* p )
     printf( "|| t = %f, dt = %f, ys=", t, dt);
     for( auto & v : Svec() ) cerr << v  << ", " ;
     cerr << endl;
-    sys_->stepper.do_step( system, *varS(), t, dt );
+    //sys_->stepper.do_step( system, Svec(), t, dt );
 
 #endif
 }
@@ -150,9 +151,8 @@ int VoxelPools::evalRatesUsingGSL( double t, const double* y, double *dydt, void
     for ( unsigned int i = 0; i < s->getNumBufPools(); ++i )
     	*b++ = *sinit++;
     	*/
-
     vp->stoichPtr_->updateFuncs( q, t );
-    vp->updateRates( y, dydt );
+    vp->updateRates<double>( y, dydt );
 #ifdef USE_GSL
     return GSL_SUCCESS;
 #else
@@ -160,16 +160,14 @@ int VoxelPools::evalRatesUsingGSL( double t, const double* y, double *dydt, void
 #endif
 }
 
-void VoxelPools::evalRatesUsingBoost( const double y,  double& dydt, const double t, void* params)
+void VoxelPools::evalRatesUsingBoost( const state_type_& y,  state_type_& dydt
+        , const double t, void* params)
 {
     VoxelPools* vp = reinterpret_cast< VoxelPools* >( params );
-    double q = y;
+    double q = y[0];
     vp->stoichPtr_->updateFuncs( &q, t );
-    vp->updateRates( &y, &dydt);
-    cerr << "Debug: t = " << t 
-        << " y = " << y 
-        << " dydt = " << dydt 
-        << endl;
+    //vp->updateRates( &y, &dydt);
+    //cerr << "Debug: t = " << t << " y = " << y << " dydt = " << dydt << endl;
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -212,7 +210,8 @@ void VoxelPools::updateRateTerms( const vector< RateTerm* >& rates,
                             getVolume(), 1.0, 1.0 );
 }
 
-double VoxelPools::updateRates( const double* s, double* yprime ) const
+template<typename T>
+void VoxelPools::updateRates( const T* s, T* yprime ) const
 {
     const KinSparseMatrix& N = stoichPtr_->getStoichiometryMatrix();
     vector< double > v( N.nColumns(), 0.0 );
@@ -237,8 +236,6 @@ double VoxelPools::updateRates( const double* s, double* yprime ) const
         *yprime++ = N.computeRowRate( i , v );
     for (unsigned int i = 0; i < totInvar ; ++i)
         *yprime++ = 0.0;
-    
-    return *yprime;
 }
 
 /**

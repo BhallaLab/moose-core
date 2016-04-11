@@ -10,7 +10,8 @@
 #ifndef _VOXEL_POOLS_H
 #define _VOXEL_POOLS_H
 
-class BoostSys;
+#include "BoostSystem.h"
+
 
 /**
  * This is the class for handling reac-diff voxels used for deterministic
@@ -47,8 +48,8 @@ public:
 
 #ifdef USE_BOOST
     static void evalRatesUsingBoost( 
-            const double y ,  double& dydt
-            , const double t , void* params
+            const state_type_& y ,  state_type_& dydt
+            ,  const double t , void* params
             );
 #endif
 
@@ -74,7 +75,8 @@ public:
      * Core computation function. Updates the reaction velocities
      * vector yprime given the current mol 'n' vector s.
      */
-    double updateRates( const double* s, double* yprime ) const;
+    template<typename T>
+    void updateRates( const T* s, T* yprime ) const;
 
     /**
      * updateReacVelocities computes the velocity *v* of each reaction

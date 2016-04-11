@@ -368,29 +368,32 @@ void Ksolve::setStoich( Id stoich )
         ode.epsRel = epsRel_;
         // ode.initStepSize = getEstimatedDt();
         ode.initStepSize = 0.01; // This will be overridden at reinit.
+        unsigned int numVoxels = pools_.size();
+        unsigned int dimension = stoichPtr_->getNumAllPools();
+
 #ifdef USE_GSL
         ode.gslSys.dimension = stoichPtr_->getNumAllPools();
         if ( ode.gslSys.dimension == 0 )
             return; // No pools, so don't bother.
+
         innerSetMethod( ode, method_ );
         ode.gslSys.function = &VoxelPools::evalRatesUsingGSL;
         ode.gslSys.jacobian = 0;
         innerSetMethod( ode, method_ );
-        unsigned int numVoxels = pools_.size();
         for ( unsigned int i = 0 ; i < numVoxels; ++i )
         {
             ode.gslSys.params = &pools_[i];
             pools_[i].setStoich( stoichPtr_, &ode );
             // pools_[i].setIntDt( ode.initStepSize ); // We're setting it up anyway
         }
+
 #elif defined(USE_BOOST)
-        unsigned int dimension = stoichPtr_->getNumAllPools();
+        // We assign the function in VoxelPools.cpp file.
+        ode.boostSys->jacobian = NULL;
+        ode.boostSys->dimensions = dimension;
         if( 0 == dimension )
             return;
 
-        // We assign the function in VoxelPools.cpp file.
-        ode.boostSys->jacobian = NULL;
-        unsigned int numVoxels = pools_.size();
         for ( unsigned int i = 0 ; i < numVoxels; ++i )
         {
             ode.boostSys->params = &pools_[i];
