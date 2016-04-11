@@ -120,9 +120,9 @@ void VoxelPools::advance( const ProcInfo* p )
     // This should call VoxelPools::evalRatesUsingBoost with extra void* but the
     // type of bound function matches the signature of System.
     auto system = std::bind(&VoxelPools::evalRatesUsingBoost, _1, _2, _3, sys_->params);
-    printf( "|| t = %f, dt = %f, ys=", t, dt);
-    for( auto & v : Svec() ) cerr << v  << ", " ;
-    cerr << endl;
+    //printf( "|| t = %f, dt = %f, ys=", t, dt);
+    //for( auto & v : Svec() ) cerr << v  << ", " ;
+    //cerr << endl;
     //sys_->stepper.do_step( system, Svec(), t, dt );
     boost::numeric::odeint::integrate(system, Svec(), t, currTime, dt );
 
@@ -172,10 +172,13 @@ void VoxelPools::evalRatesUsingBoost( const state_type_& y,  state_type_& dydt
     for(size_t i = 0; i < y.size(); i++)
     {
         y1[i] = y[i];
-        dydt1[i] = dydt[1];
+        dydt1[i] = dydt[i];
     }
     vp->updateRates( y1, dydt1 );
-    //cerr << "Debug: t = " << t << " y = " << y << " dydt = " << dydt << endl;
+    for(size_t i = 0; i < y.size(); i++)
+    {
+        dydt[i] = dydt1[i];
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -220,6 +223,7 @@ void VoxelPools::updateRateTerms( const vector< RateTerm* >& rates,
 
 void VoxelPools::updateRates( const double* s, double* yprime ) const
 {
+    //cerr << "sin " << *s << " y' in " << *yprime << endl;
     const KinSparseMatrix& N = stoichPtr_->getStoichiometryMatrix();
     vector< double > v( N.nColumns(), 0.0 );
     vector< double >::iterator j = v.begin();
@@ -244,7 +248,7 @@ void VoxelPools::updateRates( const double* s, double* yprime ) const
     for (unsigned int i = 0; i < totInvar ; ++i)
         *yprime++ = 0.0;
     
-    cerr << " y' = " << *yprime;
+    //cerr << " y' = " << *yprime;
 
 }
 
