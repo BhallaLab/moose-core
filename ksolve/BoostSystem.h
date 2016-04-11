@@ -3,9 +3,12 @@
 
 #ifdef USE_BOOST
 
+#include <vector>
+
 #include <boost/numeric/odeint.hpp>
-typedef boost::numeric::ublas::vector< double > vector_type_;
-typedef boost::numeric::ublas::matrix< double > matrix_type_;
+//typedef boost::numeric::ublas::vector< double > state_type_;
+typedef std::vector<double> state_type_;
+typedef boost::numeric::ublas::matrix< double > jocobian_type;
 
 /*
  * =====================================================================================
@@ -27,7 +30,7 @@ class BoostSys
          *  We are not using them in this implementation but rather using
          *  VoxelPools::evalRatesUsingBoost function. 
          *-----------------------------------------------------------------------------*/
-        int operator()( double y , double& dydt ,  double t );
+        int operator()( const state_type_ y , state_type_& dydt ,  double t );
 
         // Fixme: Change the types of argument.
         int (*jacobian) ( double t

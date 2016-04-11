@@ -46,7 +46,10 @@ public:
     static int evalRatesUsingGSL( double t, const double* y, double *dydt, void* params );
 
 #ifdef USE_BOOST
-    static void evalRatesUsingBoost( const double y, const double& dydt, const double t, void* params);
+    static void evalRatesUsingBoost( 
+            const double y ,  double& dydt
+            , const double t , void* params
+            );
 #endif
 
     //////////////////////////////////////////////////////////////////
@@ -71,7 +74,7 @@ public:
      * Core computation function. Updates the reaction velocities
      * vector yprime given the current mol 'n' vector s.
      */
-    void updateRates( const double* s, double* yprime ) const;
+    double updateRates( const double* s, double* yprime ) const;
 
     /**
      * updateReacVelocities computes the velocity *v* of each reaction

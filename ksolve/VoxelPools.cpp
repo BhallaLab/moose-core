@@ -113,15 +113,14 @@ void VoxelPools::advance( const ProcInfo* p )
     }
 #elif defined(USE_BOOST)
     double t = p->currTime - p->dt;
-    double x = Svec()[0];
     double dt = p->dt;
     double currTime = p->currTime;
 
     // This should call VoxelPools::evalRatesUsingBoost with extra void* but the
     // type of bound function matches the signature of System.
     auto system = std::bind(&VoxelPools::evalRatesUsingBoost, _1, _2, _3, sys_->params);
-    printf( "|| t = %f, dt = %f, currtime = %f, x = %f\n", t, dt, currTime, x);
-    integrate_const( sys_->stepper , system , x , t , currTime , dt);
+    printf( "|| t = %f, dt = %f, currtime = %f, y = %f\n", t, dt, currTime, *varS());
+    integrate_const( sys_->stepper , system , Svec()[0], t , currTime , dt);
 #endif
 }
 
@@ -163,7 +162,7 @@ void VoxelPools::evalRatesUsingBoost( const double y,  double& dydt, const doubl
     VoxelPools* vp = reinterpret_cast< VoxelPools* >( params );
     double q = y;
     vp->stoichPtr_->updateFuncs( &q, t );
-    vp->updateRates( &y, &dydt);
+    dydt = vp->updateRates( &y, &dydt);
     cerr << "Debug: t = " << t 
         << " y = " << y 
         << " dydt = " << dydt 
@@ -210,7 +209,7 @@ void VoxelPools::updateRateTerms( const vector< RateTerm* >& rates,
                             getVolume(), 1.0, 1.0 );
 }
 
-void VoxelPools::updateRates( const double* s, double* yprime ) const
+double VoxelPools::updateRates( const double* s, double* yprime ) const
 {
     const KinSparseMatrix& N = stoichPtr_->getStoichiometryMatrix();
     vector< double > v( N.nColumns(), 0.0 );
@@ -235,6 +234,8 @@ void VoxelPools::updateRates( const double* s, double* yprime ) const
         *yprime++ = N.computeRowRate( i , v );
     for (unsigned int i = 0; i < totInvar ; ++i)
         *yprime++ = 0.0;
+    
+    return *yprime;
 }
 
 /**
