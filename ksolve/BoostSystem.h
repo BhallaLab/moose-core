@@ -17,6 +17,7 @@ class BoostSys
 {
     public:
         BoostSys (); 
+        ~BoostSys();
 
         /*-----------------------------------------------------------------------------
          *  Following functiors implement equivalent of 'function' and
