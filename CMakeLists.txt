@@ -393,9 +393,9 @@ add_subdirectory(synapse)
 add_subdirectory(intfire)
 add_subdirectory(examples)
 
-if(WITH_SBML)
+if(LIBSBML_FOUND)
     add_subdirectory(sbml)
-endif(WITH_SBML)
+endif(LIBSBML_FOUND)
 
 # These are always shared libraries.
 set(SYSTEM_SHARED_LIBS ${LibXML2_LIBRARIES})
@@ -415,9 +415,9 @@ elseif(HDF5_FOUND)
     list(APPEND SYSTEM_SHARED_LIBS ${HDF5_LIBRARIES})
 endif()
 
-if(WITH_SBML)
+if(LIBSBML_FOUND)
     LIST(APPEND STATIC_LIBRARIES moose_sbml)
-endif(WITH_SBML)
+endif(LIBSBML_FOUND)
 
 if(SBML_STATIC_HOME)
     list(APPEND STATIC_LIBRARIES ${LIBSBML_LIBRARIES})
