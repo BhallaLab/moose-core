@@ -392,9 +392,6 @@ void Ksolve::setStoich( Id stoich )
             return;
 
         ode.boostSys = new BoostSys();
-        ode.boostSys->jacobian = NULL;
-        ode.boostSys->dimensions = dimension;
-
         for ( unsigned int i = 0 ; i < numVoxels; ++i )
         {
             ode.boostSys->params = &pools_[i];

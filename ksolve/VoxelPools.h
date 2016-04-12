@@ -48,8 +48,10 @@ public:
 
 #ifdef USE_BOOST
     static void evalRatesUsingBoost( 
-            const state_type_& y ,  state_type_& dydt
-            ,  const double t , void* params
+            const state_type_& y 
+            ,  state_type_& dydt
+            ,  const double t 
+            , void* params
             );
 #endif
 

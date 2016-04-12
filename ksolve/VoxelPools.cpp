@@ -114,19 +114,23 @@ void VoxelPools::advance( const ProcInfo* p )
     }
 #elif defined(USE_BOOST)
     double t = p->currTime - p->dt;
-    double dt = p->dt;
-    double currTime = p->currTime;
-
-    // This should call VoxelPools::evalRatesUsingBoost with extra void* but the
-    // type of bound function matches the signature of System.
     auto system = std::bind(&VoxelPools::evalRatesUsingBoost, _1, _2, _3, sys_->params);
-    //printf( "|| t = %f, dt = %f, ys=", t, dt);
-    //for( auto & v : Svec() ) cerr << v  << ", " ;
-    //cerr << endl;
 
-    // This works. Let try to get do_step working with custom stepper
-    // boost::numeric::odeint::integrate(system, Svec(), t, currTime, dt );
-    sys_->stepper.do_step( system, Svec(), t, dt );
+
+    /*-----------------------------------------------------------------------------
+     * Using integrate function works with with default stepper type.
+     *
+     *  FIXME: If you are writing your own custom typdedef of stepper_type_ (see
+     *  file BoostSystem.h), the you may run into troble.
+     *
+     *  http://boostw.boost.org/doc/libs/1_56_0/boost/numeric/odeint/integrate/integrate.hpp
+     *-----------------------------------------------------------------------------
+     */
+#ifndef USE_CUDA
+    boost::numeric::odeint::integrate(system, Svec(), t, p->currTime, p->dt );
+#else
+    sys_->stepper.do_step( system , Svec(), t, p->currTime, p->dt);
+#endif
 
 #endif
 }

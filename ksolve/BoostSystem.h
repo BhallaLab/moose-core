@@ -4,11 +4,25 @@
 #ifdef USE_BOOST
 
 #include <vector>
-
 #include <boost/numeric/odeint.hpp>
-//typedef boost::numeric::ublas::vector< double > state_type_;
-typedef std::vector<double> state_type_;
-typedef boost::numeric::ublas::matrix< double > jocobian_type;
+
+
+#ifndef USE_CUDA
+typedef double value_type_;
+typedef std::vector<value_type_> state_type_;
+typedef boost::numeric::odeint::runge_kutta_dopri5< state_type_ > stepper_type_;
+#else
+typedef double value_type_;
+typedef trust::device_vector< value_type_ > state_type_;
+typedef boost::numeric::odeint::runge_kutta_dopri5< 
+        state_type_
+        , value_type_
+        , state_type_
+        , value_type_
+        , boost::numeric::odeint::thrust_algebra
+        , boost::numeric::odeint::thrust_operations
+    >  stepper_type_;
+#endif
 
 /*
  * =====================================================================================
@@ -22,35 +36,10 @@ class BoostSys
         BoostSys (); 
         ~BoostSys();
 
-        /*-----------------------------------------------------------------------------
-         *  Following functiors implement equivalent of 'function' and
-         *  `jacobian` of gsl_odeiv2_system. These wrappers are just to have
-         *  consistency between calls to gsl or boost solver.
-         *
-         *  We are not using them in this implementation but rather using
-         *  VoxelPools::evalRatesUsingBoost function. 
-         *-----------------------------------------------------------------------------*/
-        int operator()( const state_type_ y , state_type_& dydt ,  double t );
-
-        // Fixme: Change the types of argument.
-        int (*jacobian) ( double t
-                , const double y[]
-                , double dfdt[]);
-
-        size_t dimensions;                      /* dimensions of the system */
-
         /* Pointer to the arbitrary parameters of the system */
         void * params;
 
-//        boost::numeric::odeint::runge_kutta_dopri5< 
-//            state_type_, double
-//            , state_type_, double
-//            , boost::numeric::odeint::vector_space_algebra > stepper;
-        boost::numeric::odeint::runge_kutta_cash_karp54< state_type_ 
-//            , double
-//            , state_type_, double
-//            , boost::numeric::odeint::vector_space_algebra 
-            > stepper;
+        stepper_type_ stepper;
 };
 
 #endif // USE_BOOST
