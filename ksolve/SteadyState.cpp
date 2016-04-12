@@ -572,10 +572,11 @@ void SteadyState::showMatrices()
 
 void SteadyState::setupSSmatrix()
 {
-#ifdef USE_GSL
+
     if ( numVarPools_ == 0 || nReacs_ == 0 )
         return;
 
+#ifdef USE_GSL
     int nTot = numVarPools_ + nReacs_;
     gsl_matrix* N = gsl_matrix_calloc (numVarPools_, nReacs_);
     if ( LU_ )   // Clear out old one.
@@ -676,6 +677,86 @@ void SteadyState::setupSSmatrix()
     gsl_matrix_free( N );
 #elif defined(USE_BOOST)
     cerr << "Debug: Using boost place A" << endl;
+    int nTot = numVarPools_ + nReacs_;
+    ublas::matrix<double> N(numVarPools_, nReacs_);
+    LU_.clear();
+    vector< int > entry = Field< vector< int > >::get(
+                              stoich_, "matrixEntry" );
+    vector< unsigned int > colIndex = Field< vector< unsigned int > >::get(
+                                          stoich_, "columnIndex" );
+    vector< unsigned int > rowStart = Field< vector< unsigned int > >::get(
+                                          stoich_, "rowStart" );
+
+    for ( unsigned int i = 0; i < numVarPools_; ++i )
+    {
+        LU_(i, i + nReacs_) = 1;
+        unsigned int k = rowStart[i];
+        for ( unsigned int j = 0; j < nReacs_; ++j )
+        {
+            double x = 0;
+            if ( j == colIndex[k] && k < rowStart[i+1] )
+            {
+                x = entry[k++];
+            }
+            N(i,j) = x;
+            LU_(i,j) = x;
+        }
+    }
+
+    rank_ = myGaussianDecomp( LU_ );
+
+    unsigned int nConsv = numVarPools_ - rank_;
+    if ( nConsv == 0 )
+    {
+        cout << "SteadyState::setupSSmatrix(): Number of conserved species == 0. Aborting\n";
+        return;
+    }
+
+    Nr_.clear();
+    // Fill up Nr.
+    for ( unsigned int i = 0; i < rank_; i++)
+        for ( unsigned int j = i; j < nReacs_; j++)
+            Nr_(i,j) = LU_(i, j);
+
+    gamma_.clear();
+
+    // Fill up gamma
+    for ( unsigned int i = rank_; i < numVarPools_; ++i )
+        for ( unsigned int j = 0; j < numVarPools_; ++j )
+            gamma_(i-rank_, j) = LU_(i, j+nReacs_);
+
+    // Fill up boundary condition values
+    total_.resize( nConsv );
+    total_.assign( nConsv, 0.0 );
+
+    /*
+    cout << "S = (";
+    for ( unsigned int j = 0; j < numVarPools_; ++j )
+    	cout << s_->S()[ j ] << ", ";
+    cout << "), Sinit = ( ";
+    for ( unsigned int j = 0; j < numVarPools_; ++j )
+    	cout << s_->Sinit()[ j ] << ", ";
+    cout << ")\n";
+    */
+    Id ksolve = Field< Id >::get( stoich_, "ksolve" );
+    vector< double > nVec =
+        LookupField< unsigned int, vector< double > >::get(
+            ksolve,"nVec", 0 );
+
+    if ( nVec.size() >= numVarPools_ )
+    {
+        for ( unsigned int i = 0; i < nConsv; ++i )
+            for ( unsigned int j = 0; j < numVarPools_; ++j )
+                total_[i] += gamma_(i,j) * nVec[ j ];
+        isSetup_ = 1;
+    }
+    else
+    {
+        cout << "Error: SteadyState::setupSSmatrix(): unable to get"
+             "pool numbers from ksolve.\n";
+        isSetup_ = 0;
+    }
+
 #endif
 }
 
@@ -859,15 +940,16 @@ static bool isSolutionPositive( const vector< double >& x )
  */
 void SteadyState::settle( bool forceSetup )
 {
-#ifdef USE_GSL
-
-    gsl_set_error_handler_off();
-
     if ( !isInitialized_ )
     {
         cout << "Error: SteadyState object has not been initialized. No calculations done\n";
         return;
     }
+
+#ifdef USE_GSL
+
+    gsl_set_error_handler_off();
+
     if ( forceSetup || isSetup_ == 0 )
     {
         setupSSmatrix();
@@ -941,8 +1023,11 @@ void SteadyState::settle( bool forceSetup )
     free( T );
 
 #elif defined(USE_BOOST)
-    printf( "Debug: %s:%d Using boost\n", __FILE__, __LINE__ );
+
+
+
 #endif
+
 }
 
 // Long section here of functions using GSL
@@ -1086,6 +1171,84 @@ int myGaussianDecomp( gsl_matrix* U )
     }
     return i + 1;
 }
+
+#ifdef USE_BOOST
+
+
+/*-----------------------------------------------------------------------------
+ *  These functions computes rank of a matrix.
+ *-----------------------------------------------------------------------------*/
+int reorderRows( ublas::matrix< value_type_ >& U, int start, int leftCol )
+{
+    int leftMostRow = start;
+    int numReacs = U->size2() - U->size1();
+    int newLeftCol = numReacs;
+    for ( size_t i = start; i < U->size1; ++i )
+    {
+        for ( int j = leftCol; j < numReacs; ++j )
+        {
+            if ( fabs( U(i,j) > SteadyState::EPSILON )
+            {
+                if ( j < newLeftCol )
+                {
+                    newLeftCol = j;
+                    leftMostRow = i;
+                }
+                break;
+            }
+        }
+    }
+    if ( leftMostRow != start )   // swap them.
+    {
+        ublas::swap_rows( U, start, leftMostRow );
+    }
+    return newLeftCol;
+}
+
+void eliminateRowsBelow( ublas::matrix< value_type_ >& U, int start, int leftCol )
+{
+    int numMols = U->size1();
+    double pivot = U( start, leftCol );
+    assert( fabs( pivot ) > SteadyState::EPSILON );
+    for ( int i = start + 1; i < numMols; ++i )
+    {
+        double factor = U(i, leftCol);
+        if ( fabs ( factor ) > SteadyState::EPSILON )
+        {
+            factor = factor / pivot;
+            for ( size_t j = leftCol + 1; j < U->size2; ++j )
+            {
+                double x = U(i,j);
+                double y = U( start, j );
+                x -= y * factor;
+                if ( fabs( x ) < SteadyState::EPSILON )
+                    x = 0.0;
+                U( i, j ) = x;
+            }
+        }
+        U(i, leftCol) = 0.0;
+    }
+}
+
+int myGaussianDecomp( ublas::matrix<value_type_>& U )
+{
+    int numMols = U->size1();
+    int numReacs = U->size2() - numMols;
+    int i;
+    // Start out with a nonzero entry at 0,0
+    int leftCol = reorderRows( U, 0, 0 );
+
+    for ( i = 0; i < numMols - 1; ++i )
+    {
+        eliminateRowsBelow( U, i, leftCol );
+        leftCol = reorderRows( U, i + 1, leftCol );
+        if ( leftCol == numReacs )
+            break;
+    }
+    return i + 1;
+}
+
+#endif
 
 //////////////////////////////////////////////////////////////////
 // Utility functions for doing scans for steady states
