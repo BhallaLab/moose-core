@@ -268,6 +268,7 @@ if(GSL_STATIC_HOME)
 ELSEIF(USE_BOOST)
     find_package( Boost REQUIRED  )
     add_definitions( -DUSE_BOOST )
+    add_definitions( -UUSE_GSL )
     include_directories( ${Boost_INCLUDE_DIRS} )
 ELSE()        # Fixme: If boost works, this should go away.
     find_package(GSL 1.16)

@@ -129,11 +129,7 @@ void VoxelPools::advance( const ProcInfo* p )
      *  http://boostw.boost.org/doc/libs/1_56_0/boost/numeric/odeint/integrate/integrate.hpp
      *-----------------------------------------------------------------------------
      */
-#ifndef USE_CUDA
-    boost::numeric::odeint::integrate(system, Svec(), t, p->currTime, p->dt );
-#else
-    sys_->stepper.do_step( system , Svec(), t, p->currTime, p->dt);
-#endif
+    sys_->stepper.do_step( system , Svec(),  p->currTime, p->dt);
 
 #endif
 }
