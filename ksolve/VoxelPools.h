@@ -10,7 +10,7 @@
 #ifndef _VOXEL_POOLS_H
 #define _VOXEL_POOLS_H
 
-#include "BoostSystem.h"
+#include "BoostSys.h"
 
 
 /**
@@ -100,7 +100,7 @@ private:
     gsl_odeiv2_driver* driver_;
     gsl_odeiv2_system sys_;
 #elif defined(USE_BOOST)
-    BoostSys* sys_;
+    BoostSys* sys_;                             /* The BOOST ode system. */
 #endif
 };
 

@@ -17,7 +17,7 @@
 
 #include <boost/numeric/odeint.hpp>
 #include <boost/bind.hpp>
-#include "BoostSystem.h"
+#include "BoostSys.h"
 #endif
 
 #include "OdeSystem.h"

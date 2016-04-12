@@ -26,6 +26,6 @@ add_library(ksolve
         SteadyState.cpp
         Gsolve.cpp
         ZombiePoolInterface.cpp
-        BoostSystem.cpp
+        BoostSys.cpp
         testKsolve.cpp
     )

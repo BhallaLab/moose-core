@@ -13,10 +13,12 @@
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_odeiv2.h>
+
 #elif defined(USE_BOOST)
 #include <functional>
 using namespace std::placeholders;
-#include  "BoostSystem.h"
+#include  "BoostSys.h"
+
 #endif
 
 #include "OdeSystem.h"
@@ -51,6 +53,8 @@ VoxelPools::~VoxelPools()
 #ifdef USE_GSL
     if ( driver_ )
         gsl_odeiv2_driver_free( driver_ );
+#elif defined(USE_BOOST)
+    
 #endif
 }
 
@@ -115,7 +119,6 @@ void VoxelPools::advance( const ProcInfo* p )
 #elif defined(USE_BOOST)
     double t = p->currTime - p->dt;
     auto system = std::bind(&VoxelPools::evalRatesUsingBoost, _1, _2, _3, sys_->params);
-
 
     /*-----------------------------------------------------------------------------
      * Using integrate function works with with default stepper type.
