@@ -43,6 +43,8 @@
 #include <gsl/gsl_odeiv2.h>
 #elif defined(USE_BOOST)
 #include <boost/math/tools/roots.hpp>
+#include <boost/numeric/ublas/lu.hpp>
+
 #endif
 
 #include "VoxelPoolsBase.h"
@@ -53,14 +55,16 @@
 #ifdef USE_GSL
 int ss_func( const gsl_vector* x, void* params, gsl_vector* f );
 int myGaussianDecomp( gsl_matrix* U );
-#elif defined(USE_BOOST)
+#endif
+
+#ifdef  USE_BOOST
 using namespace boost::numeric;
 int ss_func(
-    const ublas::vector<value_type_>& x
-    , void* params, ublas::vector<value_type_>& f
-);
-int myGaussianDecomp( ublas::matrix<value_type_>& U );
-#endif
+        const ublas::vector<value_type_>& x
+        , void* params, ublas::vector<value_type_>& f
+        );
+unsigned int rankUsingBoost( ublas::matrix<value_type_>& U );
+#endif     /* -----  not USE_BOOST  ----- */
 
 // Limit below which small numbers are treated as zero.
 const double SteadyState::EPSILON = 1e-9;
@@ -703,7 +707,7 @@ void SteadyState::setupSSmatrix()
         }
     }
 
-    rank_ = myGaussianDecomp( LU_ );
+    rank_ = rankUsingBoost( LU_ );
 
     unsigned int nConsv = numVarPools_ - rank_;
     if ( nConsv == 0 )
@@ -1031,7 +1035,8 @@ void SteadyState::settle( bool forceSetup )
 }
 
 // Long section here of functions using GSL
-#ifdef USE_GSL
+
+#ifdef  USE_GSL
 int ss_func( const gsl_vector* x, void* params, gsl_vector* f )
 {
     struct reac_info* ri = (struct reac_info *)params;
@@ -1070,7 +1075,7 @@ int ss_func( const gsl_vector* x, void* params, gsl_vector* f )
         double dT = - ri->T[i];
         for ( unsigned int j = 0; j < ri->num_mols; ++j )
             dT += gsl_matrix_get( ri->gamma, i, j) *
-                  op( gsl_vector_get( x, j ) );
+                op( gsl_vector_get( x, j ) );
 
         gsl_vector_set( f, i + ri->rank, dT );
     }
@@ -1171,23 +1176,23 @@ int myGaussianDecomp( gsl_matrix* U )
     }
     return i + 1;
 }
+#endif     /* -----  not USE_GSL  ----- */
 
-#ifdef USE_BOOST
 
-
+#ifdef  USE_BOOST
 /*-----------------------------------------------------------------------------
  *  These functions computes rank of a matrix.
  *-----------------------------------------------------------------------------*/
 int reorderRows( ublas::matrix< value_type_ >& U, int start, int leftCol )
 {
     int leftMostRow = start;
-    int numReacs = U->size2() - U->size1();
+    int numReacs = U.size2() - U.size1();
     int newLeftCol = numReacs;
-    for ( size_t i = start; i < U->size1; ++i )
+    for ( size_t i = start; i < U.size1(); ++i )
     {
         for ( int j = leftCol; j < numReacs; ++j )
         {
-            if ( fabs( U(i,j) > SteadyState::EPSILON )
+            if ( fabs( U(i,j )) > SteadyState::EPSILON )
             {
                 if ( j < newLeftCol )
                 {
@@ -1198,6 +1203,7 @@ int reorderRows( ublas::matrix< value_type_ >& U, int start, int leftCol )
             }
         }
     }
+
     if ( leftMostRow != start )   // swap them.
     {
         ublas::swap_rows( U, start, leftMostRow );
@@ -1207,16 +1213,16 @@ int reorderRows( ublas::matrix< value_type_ >& U, int start, int leftCol )
 
 void eliminateRowsBelow( ublas::matrix< value_type_ >& U, int start, int leftCol )
 {
-    int numMols = U->size1();
+    int numMols = U.size1();
     double pivot = U( start, leftCol );
     assert( fabs( pivot ) > SteadyState::EPSILON );
     for ( int i = start + 1; i < numMols; ++i )
     {
         double factor = U(i, leftCol);
-        if ( fabs ( factor ) > SteadyState::EPSILON )
+        if( fabs ( factor ) > SteadyState::EPSILON )
         {
             factor = factor / pivot;
-            for ( size_t j = leftCol + 1; j < U->size2; ++j )
+            for ( size_t j = leftCol + 1; j < U.size2(); ++j )
             {
                 double x = U(i,j);
                 double y = U( start, j );
@@ -1230,10 +1236,10 @@ void eliminateRowsBelow( ublas::matrix< value_type_ >& U, int start, int leftCol
     }
 }
 
-int myGaussianDecomp( ublas::matrix<value_type_>& U )
+unsigned rankUsingBoost( ublas::matrix<value_type_>& U )
 {
-    int numMols = U->size1();
-    int numReacs = U->size2() - numMols;
+    int numMols = U.size1();
+    int numReacs = U.size2() - numMols;
     int i;
     // Start out with a nonzero entry at 0,0
     int leftCol = reorderRows( U, 0, 0 );
@@ -1248,7 +1254,7 @@ int myGaussianDecomp( ublas::matrix<value_type_>& U )
     return i + 1;
 }
 
-#endif
+#endif     /* -----  not USE_BOOST  ----- */
 
 //////////////////////////////////////////////////////////////////
 // Utility functions for doing scans for steady states
@@ -1288,7 +1294,7 @@ void SteadyState::randomizeInitialCondition( const Eref& me )
     Id ksolve = Field< Id >::get( stoich_, "ksolve" );
     vector< double > nVec =
         LookupField< unsigned int, vector< double > >::get(
-            ksolve,"nVec", 0 );
+                ksolve,"nVec", 0 );
     int numConsv = total_.size();
     recalcTotal( total_, gamma_, &nVec[0] );
     // The reorderRows function likes to have an I matrix at the end of
