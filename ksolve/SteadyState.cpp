@@ -1176,6 +1176,23 @@ int myGaussianDecomp( gsl_matrix* U )
     }
     return i + 1;
 }
+
+//////////////////////////////////////////////////////////////////
+// Utility functions for doing scans for steady states
+//////////////////////////////////////////////////////////////////
+
+void recalcTotal( vector< double >& tot, gsl_matrix* g, const double* S )
+{
+    assert( g->size1 == tot.size() );
+    for ( unsigned int i = 0; i < g->size1; ++i )
+    {
+        double t = 0.0;
+        for ( unsigned int j = 0; j < g->size2; ++j )
+            t += gsl_matrix_get( g, i, j ) * S[j];
+        tot[ i ] = t;
+    }
+}
+
 #endif     /* -----  not USE_GSL  ----- */
 
 
@@ -1183,6 +1200,22 @@ int myGaussianDecomp( gsl_matrix* U )
 /*-----------------------------------------------------------------------------
  *  These functions computes rank of a matrix.
  *-----------------------------------------------------------------------------*/
+
+/**
+ * @brief Swap row r1 and r2.
+ *
+ * @param mat Matrix input
+ * @param r1 index of row 1
+ * @param r2 index of row 2
+ */
+void swapRows( ublas::matrix< value_type_ >& mat, unsigned int r1, unsigned int r2)
+{
+    auto row1 = row( mat, r1 );
+    row(mat, r1) = row(mat, r2);
+    row(mat, r2) = row1;
+}
+
+
 int reorderRows( ublas::matrix< value_type_ >& U, int start, int leftCol )
 {
     int leftMostRow = start;
@@ -1205,9 +1238,8 @@ int reorderRows( ublas::matrix< value_type_ >& U, int start, int leftCol )
     }
 
     if ( leftMostRow != start )   // swap them.
-    {
-        ublas::swap_rows( U, start, leftMostRow );
-    }
+        swapRows( U, start, leftMostRow );
+
     return newLeftCol;
 }
 
@@ -1256,22 +1288,6 @@ unsigned rankUsingBoost( ublas::matrix<value_type_>& U )
 
 #endif     /* -----  not USE_BOOST  ----- */
 
-//////////////////////////////////////////////////////////////////
-// Utility functions for doing scans for steady states
-//////////////////////////////////////////////////////////////////
-
-void recalcTotal( vector< double >& tot, gsl_matrix* g, const double* S )
-{
-    assert( g->size1 == tot.size() );
-    for ( unsigned int i = 0; i < g->size1; ++i )
-    {
-        double t = 0.0;
-        for ( unsigned int j = 0; j < g->size2; ++j )
-            t += gsl_matrix_get( g, i, j ) * S[j];
-        tot[ i ] = t;
-    }
-}
-#endif // end of long section of functions using GSL
 
 static bool checkAboveZero( const vector< double >& y )
 {
