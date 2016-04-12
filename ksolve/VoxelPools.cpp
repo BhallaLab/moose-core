@@ -123,8 +123,10 @@ void VoxelPools::advance( const ProcInfo* p )
     //printf( "|| t = %f, dt = %f, ys=", t, dt);
     //for( auto & v : Svec() ) cerr << v  << ", " ;
     //cerr << endl;
-    //sys_->stepper.do_step( system, Svec(), t, dt );
-    boost::numeric::odeint::integrate(system, Svec(), t, currTime, dt );
+
+    // This works. Let try to get do_step working with custom stepper
+    // boost::numeric::odeint::integrate(system, Svec(), t, currTime, dt );
+    sys_->stepper.do_step( system, Svec(), t, dt );
 
 #endif
 }

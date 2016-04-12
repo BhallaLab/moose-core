@@ -363,7 +363,6 @@ void Ksolve::setStoich( Id stoich )
     if ( !isBuilt_ )
     {
         OdeSystem ode;
-        ode.boostSys = new BoostSys();
         ode.epsAbs = epsAbs_;
         ode.epsRel = epsRel_;
         // ode.initStepSize = getEstimatedDt();
@@ -389,10 +388,12 @@ void Ksolve::setStoich( Id stoich )
 
 #elif defined(USE_BOOST)
         // We assign the function in VoxelPools.cpp file.
-        ode.boostSys->jacobian = NULL;
-        ode.boostSys->dimensions = dimension;
         if( 0 == dimension )
             return;
+
+        ode.boostSys = new BoostSys();
+        ode.boostSys->jacobian = NULL;
+        ode.boostSys->dimensions = dimension;
 
         for ( unsigned int i = 0 ; i < numVoxels; ++i )
         {

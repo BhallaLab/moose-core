@@ -42,10 +42,15 @@ class BoostSys
         /* Pointer to the arbitrary parameters of the system */
         void * params;
 
-        boost::numeric::odeint::runge_kutta_dopri5< 
-            state_type_, double
-            , state_type_, double
-            , boost::numeric::odeint::vector_space_algebra > stepper;
+//        boost::numeric::odeint::runge_kutta_dopri5< 
+//            state_type_, double
+//            , state_type_, double
+//            , boost::numeric::odeint::vector_space_algebra > stepper;
+        boost::numeric::odeint::runge_kutta_cash_karp54< state_type_ 
+//            , double
+//            , state_type_, double
+//            , boost::numeric::odeint::vector_space_algebra 
+            > stepper;
 };
 
 #endif // USE_BOOST
