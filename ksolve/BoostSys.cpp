@@ -19,9 +19,6 @@
 #include "BoostSys.h"
 #include <iostream>
 
-using namespace std;
-
-
 BoostSys::BoostSys()
 {
 
