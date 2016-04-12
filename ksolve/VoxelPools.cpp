@@ -173,18 +173,7 @@ void VoxelPools::evalRatesUsingBoost( const state_type_& y,  state_type_& dydt
     VoxelPools* vp = reinterpret_cast< VoxelPools* >( params );
     double q = y[0];
     vp->stoichPtr_->updateFuncs( &q, t );
-    double y1[y.size()];
-    double dydt1[dydt.size()];
-    for(size_t i = 0; i < y.size(); i++)
-    {
-        y1[i] = y[i];
-        dydt1[i] = dydt[i];
-    }
-    vp->updateRates( y1, dydt1 );
-    for(size_t i = 0; i < y.size(); i++)
-    {
-        dydt[i] = dydt1[i];
-    }
+    vp->updateRates( &y[0], &dydt[0] );
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -229,7 +218,6 @@ void VoxelPools::updateRateTerms( const vector< RateTerm* >& rates,
 
 void VoxelPools::updateRates( const double* s, double* yprime ) const
 {
-    //cerr << "sin " << *s << " y' in " << *yprime << endl;
     const KinSparseMatrix& N = stoichPtr_->getStoichiometryMatrix();
     vector< double > v( N.nColumns(), 0.0 );
     vector< double >::iterator j = v.begin();
@@ -253,9 +241,6 @@ void VoxelPools::updateRates( const double* s, double* yprime ) const
         *yprime++ = N.computeRowRate( i , v );
     for (unsigned int i = 0; i < totInvar ; ++i)
         *yprime++ = 0.0;
-    
-    //cerr << " y' = " << *yprime;
-
 }
 
 /**
