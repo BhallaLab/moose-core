@@ -96,6 +96,8 @@ public:
 
         x2.resize( size, 0);
         x1.resize( size, 0);
+
+        ri.nVec.resize( size );
     }
 
     vector_type compute_at(const vector_type& x)
@@ -161,6 +163,7 @@ public:
     int system( const vector_type& x, vector_type& f )
     {
         int num_consv = ri.num_mols - ri.rank;
+
         for ( unsigned int i = 0; i < ri.num_mols; ++i )
         {
             double temp = x[i] * x[i] ;
@@ -223,12 +226,19 @@ public:
             compute_jacobian( argument );
             iter += 1;
             value = compute_at( argument );
+
             ublas::vector<value_type> s = argument - ublas::prod( invJacobian, value );
+
 #ifdef DEUBG
             cerr << "Previous " << argument << " Next : " << s << endl;
 #endif
             argument = s;
+            for( size_t ii = 0; ii < size; ii ++)
+                ri.nVec[ii] = argument[ii];
         }
+
+
+        ri.nIter = iter;
 
         if( iter > max_iter )
         {
@@ -241,6 +251,7 @@ public:
         cerr << "Info: Computed roots succesfully in " << iter 
             << " iterations " << endl;
         return true;
+
     }
 
     vector_type value;

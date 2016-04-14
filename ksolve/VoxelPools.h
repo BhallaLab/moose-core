@@ -12,6 +12,8 @@
 
 #include "BoostSys.h"
 
+class OdeSystem;
+
 
 /**
  * This is the class for handling reac-diff voxels used for deterministic

@@ -31,6 +31,7 @@
 #include "../randnum/randnum.h"
 
 #ifdef USE_GSL
+
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
@@ -41,9 +42,11 @@
 #include <gsl/gsl_sort_vector.h>
 #include <gsl/gsl_eigen.h>
 #include <gsl/gsl_odeiv2.h>
+
 #elif defined(USE_BOOST)
-#include <boost/math/tools/roots.hpp>
-#include <boost/numeric/ublas/lu.hpp>
+
+/* Root finding algorithm is implemented here */
+#include "NonLinearSystem.h"                    
 
 #endif
 
@@ -55,14 +58,12 @@
 #ifdef USE_GSL
 int ss_func( const gsl_vector* x, void* params, gsl_vector* f );
 int myGaussianDecomp( gsl_matrix* U );
+#elif defined(USE_BOOST)
+void ss_func( const vector_type& x, void* params, vector_type& f );
 #endif
 
 #ifdef  USE_BOOST
 using namespace boost::numeric;
-int ss_func(
-        const ublas::vector<value_type_>& x
-        , void* params, ublas::vector<value_type_>& f
-        );
 unsigned int rankUsingBoost( ublas::matrix<value_type_>& U );
 #endif     /* -----  not USE_BOOST  ----- */
 
@@ -77,6 +78,7 @@ const double SteadyState::DELTA = 1e-6;
  */
 struct reac_info
 {
+
     int rank;
     int num_reacs;
     size_t num_mols;
@@ -91,8 +93,8 @@ struct reac_info
     gsl_matrix* Nr;
     gsl_matrix* gamma;
 #elif defined(USE_BOOST)
-    ublas::matrix< value_type_ >& Nr;
-    ublas::matrix< value_type_ >& gamma;
+    ublas::matrix< value_type_ >* Nr;
+    ublas::matrix< value_type_ >* gamma;
 #endif
 };
 
@@ -679,11 +681,17 @@ void SteadyState::setupSSmatrix()
     }
 
     gsl_matrix_free( N );
+
 #elif defined(USE_BOOST)
-    cerr << "Debug: Using boost place A" << endl;
+
     int nTot = numVarPools_ + nReacs_;
+
     ublas::matrix<double> N(numVarPools_, nReacs_);
-    LU_.clear();
+    N.assign( ublas::zero_matrix< value_type_ >( numVarPools_, nReacs_));
+
+    LU_ = ublas::matrix< value_type_ >( numVarPools_, nTot);
+    LU_.assign( ublas::zero_matrix< value_type_ >( numVarPools_, nTot) );
+
     vector< int > entry = Field< vector< int > >::get(
                               stoich_, "matrixEntry" );
     vector< unsigned int > colIndex = Field< vector< unsigned int > >::get(
@@ -708,6 +716,8 @@ void SteadyState::setupSSmatrix()
     }
 
     rank_ = rankUsingBoost( LU_ );
+    Nr_ = ublas::matrix< value_type_ >( rank_, nReacs_ );
+    Nr_.assign( ublas::zero_matrix< value_type_ >( rank_, nReacs_ ) );
 
     unsigned int nConsv = numVarPools_ - rank_;
     if ( nConsv == 0 )
@@ -716,12 +726,13 @@ void SteadyState::setupSSmatrix()
         return;
     }
 
-    Nr_.clear();
     // Fill up Nr.
     for ( unsigned int i = 0; i < rank_; i++)
         for ( unsigned int j = i; j < nReacs_; j++)
             Nr_(i,j) = LU_(i, j);
 
+    gamma_ = ublas::matrix< value_type_ >( nConsv, numVarPools_ );
+    gamma_.assign( ublas::zero_matrix< value_type_ >( nConsv, numVarPools_ ) );
     gamma_.clear();
 
     // Fill up gamma
@@ -733,15 +744,6 @@ void SteadyState::setupSSmatrix()
     total_.resize( nConsv );
     total_.assign( nConsv, 0.0 );
 
-    /*
-    cout << "S = (";
-    for ( unsigned int j = 0; j < numVarPools_; ++j )
-    	cout << s_->S()[ j ] << ", ";
-    cout << "), Sinit = ( ";
-    for ( unsigned int j = 0; j < numVarPools_; ++j )
-    	cout << s_->Sinit()[ j ] << ", ";
-    cout << ")\n";
-    */
     Id ksolve = Field< Id >::get( stoich_, "ksolve" );
     vector< double > nVec =
         LookupField< unsigned int, vector< double > >::get(
@@ -762,6 +764,7 @@ void SteadyState::setupSSmatrix()
     }
 
 #endif
+
 }
 
 static double op( double x )
@@ -944,29 +947,29 @@ static bool isSolutionPositive( const vector< double >& x )
  */
 void SteadyState::settle( bool forceSetup )
 {
+
     if ( !isInitialized_ )
     {
         cout << "Error: SteadyState object has not been initialized. No calculations done\n";
         return;
     }
 
-#ifdef USE_GSL
-
-    gsl_set_error_handler_off();
 
     if ( forceSetup || isSetup_ == 0 )
-    {
         setupSSmatrix();
-    }
 
     // Setting up matrices and vectors for the calculation.
     unsigned int nConsv = numVarPools_ - rank_;
     double * T = (double *) calloc( nConsv, sizeof( double ) );
-
     unsigned int i, j;
 
-
+    // Setting up matrices and vectors for the calculation.
     Id ksolve = Field< Id >::get( stoich_, "ksolve" );
+
+#ifdef USE_GSL
+
+    gsl_set_error_handler_off();
+
     struct reac_info ri;
     ri.rank = rank_;
     ri.num_reacs = nReacs_;
@@ -975,9 +978,10 @@ void SteadyState::settle( bool forceSetup )
     ri.Nr = Nr_;
     ri.gamma = gamma_;
     ri.pool = &pool_;
-    ri.nVec =
-        LookupField< unsigned int, vector< double > >::get(
+
+    ri.nVec = LookupField< unsigned int, vector< double > >::get(
             ksolve,"nVec", 0 );
+
     ri.convergenceCriterion = convergenceCriterion_;
 
     // Fill up boundary condition values
@@ -1003,9 +1007,63 @@ void SteadyState::settle( bool forceSetup )
     if ( status ) // It failed. Fall back with the Newton method
         status = iterate( gsl_multiroot_fsolver_dnewton, &ri, maxIter_ );
     status_ = string( gsl_strerror( status ) );
-    nIter_ = ri.nIter;
-    if ( status == GSL_SUCCESS && isSolutionPositive( ri.nVec ) )
+
+#elif defined(USE_BOOST)
+
+    auto ssSystem = NonlinearSystem( numVarPools_ );
+    ssSystem.ri.rank = rank_;
+    ssSystem.ri.num_reacs = nReacs_;
+    ssSystem.ri.num_mols = numVarPools_;
+    ssSystem.ri.T = T;
+    ssSystem.ri.Nr = Nr_;
+    ssSystem.ri.gamma = gamma_;
+    ssSystem.ri.pool = &pool_;
+    ssSystem.ri.nVec = LookupField< unsigned int, vector< double > >::get( ksolve,"nVec", 0 );
+    ssSystem.ri.convergenceCriterion = convergenceCriterion_;
+
+
+    // Starting point 
+    vector<value_type_> init( numVarPools_ );
+    for( size_t i = 0; i < numVarPools_; i ++ )
+        init[i] = i;
+
+    ssSystem.initialize<vector<value_type_>>( init );
+
+    auto ri = ssSystem.ri;
+
+    // Fill up boundary condition values
+    if ( reassignTotal_ )   // The user has defined new conservation values.
     {
+        for ( i = 0; i < nConsv; ++i )
+            T[i] = total_[i];
+        reassignTotal_ = 0;
+    }
+    else
+    {
+        for ( i = 0; i < nConsv; ++i )
+            for ( j = 0; j < numVarPools_; ++j )
+                T[i] += gamma_( i, j ) * ri.nVec[ j ];
+        total_.assign( T, T + nConsv );
+    }
+
+    vector< double > repair( numVarPools_, 0.0 );
+    for ( unsigned int j = 0; j < numVarPools_; ++j )
+        repair[j] = ri.nVec[j];
+
+    int status = 1;
+
+    // Find roots 
+    if( ssSystem.find_roots_gnewton( ) )
+        status = 0;
+
+#endif
+    nIter_ = ri.nIter;
+    if ( status == 0 && isSolutionPositive( ri.nVec ) )
+    {
+        cerr << "Good solution ";
+        for( auto v : ri.nVec ) cerr << v << " ";
+        cerr << endl;
+
         solutionStatus_ = 0; // Good solution
         LookupField< unsigned int, vector< double > >::set(
             ksolve,"nVec", 0, ri.nVec );
@@ -1026,17 +1084,24 @@ void SteadyState::settle( bool forceSetup )
     // Clean up.
     free( T );
 
-#elif defined(USE_BOOST)
-
-
-
-#endif
-
 }
 
 // Long section here of functions using GSL
 
 #ifdef  USE_GSL
+
+/** @brief Function used in gsl_multiroot_fsolver_X call. This represent the
+ * system of non-linear equations f = g(x) for which we are trying to find
+ * roots. 
+ *
+ * @param x Input vector.  
+ * @param params parameters.  
+ * @param f output vector.
+ * @return void.
+ *
+ * See the documentation of gsl_multiroot_fsolver_hybrid and
+ * gsl_multiroot_fsolver_dnewton to see how this function is used.
+ */
 int ss_func( const gsl_vector* x, void* params, gsl_vector* f )
 {
     struct reac_info* ri = (struct reac_info *)params;
@@ -1082,6 +1147,15 @@ int ss_func( const gsl_vector* x, void* params, gsl_vector* f )
 
     return GSL_SUCCESS;
 }
+
+#elif defined(USE_BOOST)
+
+// NOTE: The eqivalen system is described in file NonlinearSystem.h. Its name is 
+// system( ... ) 
+
+#endif
+
+#ifdef USE_GSL
 
 /**
  * eliminateRowsBelow:
