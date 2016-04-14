@@ -920,9 +920,95 @@ void SteadyState::classifyState( const double* T )
     gsl_vector_complex_free( vec );
     gsl_matrix_free ( J );
     gsl_eigen_nonsymm_free( workspace );
+
 #elif defined(USE_BOOST)
-    cerr << "Debug " << __FILE__ << ":" << __LINE__  <<
-         " using boost " << endl;
+
+    ublas::matrix<double> J( numVarPools_, numVarPools_);
+    double tot = 0.0;
+    Stoich* s = reinterpret_cast< Stoich* >( stoich_.eref().data() );
+    vector< double > nVec = LookupField< unsigned int, vector< double > >::get(
+                                s->getKsolve(), "nVec", 0 );
+    for ( unsigned int i = 0; i < numVarPools_; ++i )
+        tot += nVec[i];
+
+    tot *= DELTA;
+
+    vector< double > yprime( nVec.size(), 0.0 );
+    // Fill up Jacobian
+    for ( unsigned int i = 0; i < numVarPools_; ++i )
+    {
+        double orig = nVec[i];
+        if ( isNaN( orig ) )
+        {
+            cout << "Warning: SteadyState::classifyState: orig=nan\n";
+            solutionStatus_ = 2; // Steady state OK, eig failed
+            J.clear();
+            return;
+        }
+        if ( isNaN( tot ) )
+        {
+            cout << "Warning: SteadyState::classifyState: tot=nan\n";
+            solutionStatus_ = 2; // Steady state OK, eig failed
+            J.clear();
+            return;
+        }
+        nVec[i] = orig + tot;
+
+        pool_.updateRates( &nVec[0], &yprime[0] );
+        nVec[i] = orig;
+
+        // Assign the rates for each mol.
+        for ( unsigned int j = 0; j < numVarPools_; ++j )
+            J(i, j) = yprime[j];
+    }
+
+    // Jacobian is now ready. Find eigenvalues.
+    ublas::vector< std::complex< value_type_ > > vec( numVarPools_ );
+
+    gsl_vector_complex* vec = gsl_vector_complex_alloc( numVarPools_ );
+    gsl_eigen_nonsymm_workspace* workspace =
+        gsl_eigen_nonsymm_alloc( numVarPools_ );
+    int status = gsl_eigen_nonsymm( J, vec, workspace );
+    eigenvalues_.clear();
+    eigenvalues_.resize( numVarPools_, 0.0 );
+    if ( status != GSL_SUCCESS )
+    {
+        cout << "Warning: SteadyState::classifyState failed to find eigenvalues. Status = " <<
+             status << endl;
+        solutionStatus_ = 2; // Steady state OK, eig classification failed
+    }
+    else     // Eigenvalues are ready. Classify state.
+    {
+        nNegEigenvalues_ = 0;
+        nPosEigenvalues_ = 0;
+        for ( unsigned int i = 0; i < numVarPools_; ++i )
+        {
+            gsl_complex z = gsl_vector_complex_get( vec, i );
+            double r = GSL_REAL( z );
+            nNegEigenvalues_ += ( r < -EPSILON );
+            nPosEigenvalues_ += ( r > EPSILON );
+            eigenvalues_[i] = r;
+            // We have a problem here because numVarPools_ usually > rank
+            // This means we have several zero eigenvalues.
+        }
+
+        if ( nNegEigenvalues_ == rank_ )
+            stateType_ = 0; // Stable
+        else if ( nPosEigenvalues_ == rank_ ) // Never see it.
+            stateType_ = 1; // Unstable
+        else  if (nPosEigenvalues_ == 1)
+            stateType_ = 2; // Saddle
+        else if ( nPosEigenvalues_ >= 2 )
+            stateType_ = 3; // putative oscillatory
+        else if ( nNegEigenvalues_ == ( rank_ - 1) && nPosEigenvalues_ == 0 )
+            stateType_ = 4; // one zero or unclassified eigenvalue. Messy.
+        else
+            stateType_ = 5; // Other
+    }
+
+    gsl_vector_complex_free( vec );
+    gsl_matrix_free ( J );
+    gsl_eigen_nonsymm_free( workspace );
 #endif
 
 }
