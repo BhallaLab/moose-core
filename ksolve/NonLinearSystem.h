@@ -22,7 +22,7 @@
 #include <functional>
 #include <cerrno>
 #include <iomanip>
-#include <limits>
+#include <algorithm>
 
 // Boost ublas library of matrix algebra.
 #include <boost/numeric/ublas/matrix.hpp>
@@ -88,49 +88,49 @@ class NonlinearSystem
 {
 public:
 
-    NonlinearSystem( size_t systemSize ) : size( systemSize )
+    NonlinearSystem( size_t systemSize ) : size_( systemSize )
     {
-        value.resize( size, 0);
-        currentPos.resize( size, 0 );
+        f_.resize( size_, 0);
+        x_.resize( size_, 0 );
 
-        jacobian.resize( size, size, 0);
-        invJacobian.resize( size, size, 0);
+        J_.resize( size_, size_, 0);
+        invJ_.resize( size_, size_, 0);
 
-        x2.resize( size, 0);
-        x1.resize( size, 0);
+        x2.resize( size_, 0);
+        x1.resize( size_, 0);
 
-        ri.nVec.resize( size );
+        ri.nVec.resize( size_ );
     }
 
     vector_type compute_at(const vector_type& x)
     {
-        vector_type result( size );
+        vector_type result( size_ );
         system(x, result);
         return result;
     }
 
     int compute_jacobians( const vector_type& x )
     {
-        for( size_t i = 0; i < size; i++)
-            for( size_t j = 0; j < size; j++)
+        for( size_t i = 0; i < size_; i++)
+            for( size_t j = 0; j < size_; j++)
             {
                 vector_type temp = x;
                 temp[j] += step_;
                 system( temp, x2 ); 
                 system( x, x1 );
-                value_type dvalue = (x2[i] - x1[i]) / step_;
-                if( std::isnan( dvalue ) || std::isinf( dvalue ) )
+                value_type df_ = (x2[i] - x1[i]) / step_;
+                if( std::isnan( df_ ) || std::isinf( df_ ) )
                 {
-                    jacobianValid = false;
+                    is_jacobian_valid_ = false;
                     return ERANGE;
                 }
-                jacobian(i, j) = dvalue;
+                J_(i, j) = df_;
             }
 
-        jacobianValid = true;
-        // Keep the inverted jacobian ready
-        if(jacobianValid)
-            inverse( jacobian, invJacobian );
+        is_jacobian_valid_ = true;
+        // Keep the inverted J_ ready
+        if(is_jacobian_valid_)
+            inverse( J_, invJ_ );
 
         //cout  << "Debug: " << to_string( ) << endl;
         return 0;
@@ -140,15 +140,15 @@ public:
     void initialize( const T& x )
     {
         vector_type init;
-        init.resize(size, 0);
+        init.resize(size_, 0);
 
-        for( size_t i = 0; i < size; i++)
+        for( size_t i = 0; i < size_; i++)
             init[i] = x[i];
 
-        currentPos = init;
+        x_ = init;
         compute_jacobians( init );
-        if( jacobianValid )
-            value = compute_at( init );
+        if( is_jacobian_valid_ )
+            f_ = compute_at( init );
     }
 
     string to_string( )
@@ -157,9 +157,9 @@ public:
 
         ss << "=======================================================";
         ss << endl << setw(25) << "State of system: " ;
-        ss << " Argument: " << currentPos << " Value : " << value;
-        ss << endl << setw(25) << "Jacobian: " << jacobian;
-        ss << endl << setw(25) << "Inverse Jacobian: " << invJacobian;
+        ss << " Argument: " << x_ << " Value : " << f_;
+        ss << endl << setw(25) << "Jacobian: " << J_;
+        ss << endl << setw(25) << "Inverse Jacobian: " << invJ_;
         ss << endl;
         return ss.str();
     }
@@ -184,7 +184,7 @@ public:
         vector< double > vels;
 
         ri.pool->updateReacVelocities( &ri.nVec[0], vels );
-        assert( vels.size() == static_cast< unsigned int >( ri.num_reacs ) );
+        assert( vels.size_() == static_cast< unsigned int >( ri.num_reacs ) );
 
         // y = Nr . v
         // Note that Nr is row-echelon: diagonal and above.
@@ -223,8 +223,8 @@ public:
      * @param tolerance  Default to 1e-12
      * @param max_iter  Maximum number of iteration allowed , default 100
      *
-     * @return  If successful, return true. Check the variable `currentPos` at
-     * which the system value is close to zero (within  the tolerance).
+     * @return  If successful, return true. Check the variable `x_` at
+     * which the system f_ is close to zero (within  the tolerance).
      */
     bool find_roots_gnewton( 
             double tolerance = 1e-16
@@ -233,25 +233,25 @@ public:
     {
         double norm2OfDiff = 1.0;
         size_t iter = 0;
-        while( ublas::norm_2(value) > tolerance and iter <= max_iter)
+        while( ublas::norm_2(f_) > tolerance and iter <= max_iter)
         {
             iter += 1;
-            cerr << "| " << currentPos << endl;
+            cerr << "| " << x_ << endl;
             // Compute the jacoboian at this input.
-            compute_jacobians( currentPos );
-            if( ! jacobianValid )
+            compute_jacobians( x_ );
+            if( ! is_jacobian_valid_ )
             {
                 cerr << "Debug: Jacobian not valid " << endl;
                 return false;
             }
 
-            // Compute the value of system at this currentPos, store the value in
-            // second currentPos.
-            system( currentPos, value );
+            // Compute the f_ of system at this x_, store the f_ in
+            // second x_.
+            system( x_, f_ );
 
             // Now compute the next step_. Compute stepSize; if it is zero then
             // we are stuck. Else add it to the current step_.
-            vector_type stepSize =  - ublas::prod( invJacobian, value );
+            vector_type stepSize =  - ublas::prod( invJ_, f_ );
             cerr << "Step  " << stepSize << endl;
             {
                 cerr << "Debug: stuck state " << endl;
@@ -260,11 +260,11 @@ public:
                 return false;
             }
 
-            // Update the input to the system by adding the step_ size.
-            currentPos +=  stepSize;
+            // Update the input to the system by adding the step_ size_.
+            x_ +=  stepSize;
 
-            for( size_t ii = 0; ii < size; ii ++)
-                ri.nVec[ii] = currentPos[ii];
+            for( size_t ii = 0; ii < size_; ii ++)
+                ri.nVec[ii] = x_[ii];
         }
 
         ri.nIter = iter;
@@ -283,19 +283,81 @@ public:
 
     }
 
-    vector_type value;
-    vector_type currentPos;
-    matrix_type jacobian;
-    matrix_type invJacobian;
+    value_type slope( size_t which_dimen )
+    {
+        vector_type x = x_;
+        x[which_dimen] += step_;
 
-    bool jacobianValid;
+        // x1 and x2 holds the f_ of system at x_ and x (which is x +
+        // some step)
+        system( x_, x1 );
+        system( x, x2 );
+        return ublas::norm_2( x2 - x1 );
+    }
+
+    /** 
+     * @brief Suggest the direction to step into. 
+     *
+     * If value of the function is positive at starting point, then we want to
+     * descent into the direction of negative slope otherwise we want to go into
+     * the direction of positive slope.
+     *
+     * @return  Number of dimension (0 to n-1 ).
+     */
+    int which_direction_to_stepinto( )
+    {
+        vector<unsigned int> slopes(size_);
+        for( size_t i = 0; i < size_; i++)
+            slopes[i] = slope(i);
+
+        auto iter = slopes.begin();
+
+        // FIXME: min and max does not neccessarily mean negative and positive. Let's
+        // hope that they are.
+        if( is_f_positive_ )
+            iter = std::min_element( slopes.begin(), slopes.end() );
+        else
+            iter = std::max( slopes.begin(), slopes.end() );
+
+        return std::distance( slopes.begin(), iter );
+    }
+
+    bool find_roots_gradient_descent ( double tolerance = 1e-16 
+            , size_t max_iter = 50)
+    {
+        cerr << "Searching for roots using gradient descent method" << endl;
+        
+        /*-----------------------------------------------------------------------------
+         *  This algorithm has following steps.
+         *
+         *  while "not satisfied" do
+         *      find a good search direction (usually the steepest slope).
+         *      step into that direction by "some amount"
+         *-----------------------------------------------------------------------------*/
+        for (size_t i = 0; i < size_; i++) 
+        {
+            cerr << "Slope at " << i << " " << slope( i ) << endl;
+        }
+        cerr << to_string( ) << endl;
+        cerr << which_direction_to_stepinto() << endl;
+
+        exit(1);
+    }
+
+public:
+    const size_t size_;
+    double step_ = 1e1;
+
+    vector_type f_;
+    vector_type x_;
+    matrix_type J_;
+    matrix_type invJ_;
+
+    bool is_jacobian_valid_;
+    bool is_f_positive_;
 
     // These vector keeps the temporary state computation.
     vector_type x2, x1;
-    double step_ = 1e1;
-
-    const size_t size;
     
     ReacInfo ri;
-
 };

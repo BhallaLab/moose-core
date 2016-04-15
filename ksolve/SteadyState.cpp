@@ -1149,7 +1149,7 @@ void SteadyState::settle( bool forceSetup )
     int status = 1;
 
     // Find roots 
-    if( ss.find_roots_gnewton( ) )
+    if( ss.find_roots_gradient_descent( ) )
         status = 0;
 
 #endif
