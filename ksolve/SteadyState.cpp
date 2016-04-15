@@ -47,7 +47,9 @@
 
 /* Root finding algorithm is implemented here */
 #include "NonLinearSystem.h"                    
-
+#include <boost/numeric/bindings/lapack/lapack.hpp>
+#include <boost/numeric/bindings/lapack/geev.hpp>
+using namespace boost::numeric::bindings;
 #endif
 
 #include "VoxelPoolsBase.h"
@@ -923,7 +925,11 @@ void SteadyState::classifyState( const double* T )
 
 #elif defined(USE_BOOST)
 
-    ublas::matrix<double> J( numVarPools_, numVarPools_);
+    /* column_major trait is needed for fortran */
+    ublas::matrix<value_type_, ublas::column_major> J( 
+            numVarPools_, numVarPools_
+            );
+
     double tot = 0.0;
     Stoich* s = reinterpret_cast< Stoich* >( stoich_.eref().data() );
     vector< double > nVec = LookupField< unsigned int, vector< double > >::get(
@@ -963,15 +969,23 @@ void SteadyState::classifyState( const double* T )
     }
 
     // Jacobian is now ready. Find eigenvalues.
-    ublas::vector< std::complex< value_type_ > > vec( numVarPools_ );
+    ublas::vector< std::complex< value_type_ > > eigenVec ( J.size1() );
 
-    gsl_vector_complex* vec = gsl_vector_complex_alloc( numVarPools_ );
-    gsl_eigen_nonsymm_workspace* workspace =
-        gsl_eigen_nonsymm_alloc( numVarPools_ );
-    int status = gsl_eigen_nonsymm( J, vec, workspace );
+    ublas::matrix< std::complex<value_type_>, ublas::column_major >* vl, *vr;
+    vl = NULL; vr = NULL;
+
+    /*-----------------------------------------------------------------------------
+     *  INFO: Calling lapack routine geev to compute eigen vector of matrix J. 
+     *
+     *  Argument 3 and 4 are left- and right-eigenvectors. Since we do not need
+     *  them, they are set to NULL. Argument 2 holds eigen-vector and result is
+     *  copied to it (output ).
+     *-----------------------------------------------------------------------------*/
+    int status = lapack::geev( J, eigenVec, vl, vr, lapack::optimal_workspace() );
+
     eigenvalues_.clear();
     eigenvalues_.resize( numVarPools_, 0.0 );
-    if ( status != GSL_SUCCESS )
+    if ( status != 0 )
     {
         cout << "Warning: SteadyState::classifyState failed to find eigenvalues. Status = " <<
              status << endl;
@@ -983,8 +997,8 @@ void SteadyState::classifyState( const double* T )
         nPosEigenvalues_ = 0;
         for ( unsigned int i = 0; i < numVarPools_; ++i )
         {
-            gsl_complex z = gsl_vector_complex_get( vec, i );
-            double r = GSL_REAL( z );
+            std::complex<value_type> z = eigenVec[ i ];
+            double r = z.real();
             nNegEigenvalues_ += ( r < -EPSILON );
             nPosEigenvalues_ += ( r > EPSILON );
             eigenvalues_[i] = r;
@@ -1006,9 +1020,6 @@ void SteadyState::classifyState( const double* T )
             stateType_ = 5; // Other
     }
 
-    gsl_vector_complex_free( vec );
-    gsl_matrix_free ( J );
-    gsl_eigen_nonsymm_free( workspace );
 #endif
 
 }

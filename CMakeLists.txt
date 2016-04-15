@@ -267,6 +267,7 @@ if(GSL_STATIC_HOME)
     set(GSL_FOUND TRUE)
 ELSEIF(USE_BOOST)
     find_package( Boost REQUIRED  )
+    find_package( LAPACK REQUIRED )
     add_definitions( -DUSE_BOOST )
     add_definitions( -UUSE_GSL )
     include_directories( ${Boost_INCLUDE_DIRS} )
@@ -426,6 +427,11 @@ elseif(LIBSBML_FOUND)
     list(APPEND SYSTEM_SHARED_LIBS ${LIBSBML_LIBRARIES})
 endif()
 
+# When boost is used, we use lapack binding instead of gsl to compute steady
+# state.
+if(USE_BOOST)
+    list( APPEND SYSTEM_SHARED_LIBS ${LAPACK_LIBRARIES} )
+endif(USE_BOOST)
 
 if(GSL_STATIC_HOME)
     message(STATUS "Using STATIC gsl libraries: ${GSL_LIBRARIES}")
