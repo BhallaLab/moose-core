@@ -22,12 +22,14 @@
 #include <functional>
 #include <cerrno>
 #include <iomanip>
+#include <limits>
 
 // Boost ublas library of matrix algebra.
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/lu.hpp>
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/io.hpp>
+
 
 #include "VoxelPools.h"
 
@@ -113,7 +115,7 @@ public:
 #ifdef  DEBUG
         cout  << "Debug: computing jacobian at " << x << endl;
 #endif     /* -----  not DEBUG  ----- */
-        double step = 0.0001;
+        double step = 2 * std::numeric_limits< value_type >::min();
         for( size_t i = 0; i < size; i++)
             for( size_t j = 0; j < size; j++)
             {
@@ -164,7 +166,7 @@ public:
     {
         int num_consv = ri.num_mols - ri.rank;
 
-        for ( unsigned int i = 0; i < ri.num_mols; ++i )
+        for ( size_t i = 0; i < ri.num_mols; ++i )
         {
             double temp = x[i] * x[i] ;
             if ( isNaN( temp ) || isInfinity( temp ) )
@@ -177,6 +179,7 @@ public:
             }
         }
         vector< double > vels;
+
         ri.pool->updateReacVelocities( &ri.nVec[0], vels );
         assert( vels.size() == static_cast< unsigned int >( ri.num_reacs ) );
 
@@ -195,8 +198,8 @@ public:
         for ( int i = 0; i < num_consv; ++i )
         {
             double dT = - ri.T[i];
-            for ( unsigned int j = 0; j < ri.num_mols; ++j )
-                dT += ri.gamma( i, j) * x[j] * x[j];
+            for ( size_t  j = 0; j < ri.num_mols; ++j )
+                dT += ri.gamma( i, j) * (x[j] * x[j]);
 
             f[ i + ri.rank] = dT ;
         }
@@ -215,12 +218,13 @@ public:
      * which the system value is close to zero (within  the tolerance).
      */
     bool find_roots_gnewton( 
-            double tolerance = 1e-12
-            , size_t max_iter = 100
+            double tolerance = 1e-10
+            , size_t max_iter = 500
             )
     {
         double norm2OfDiff = 1.0;
         size_t iter = 0;
+        cerr << "Debug: Starting with " << argument << endl;
         while( ublas::norm_2(value) > tolerance and iter <= max_iter)
         {
             compute_jacobian( argument );

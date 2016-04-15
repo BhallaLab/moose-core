@@ -1107,26 +1107,25 @@ void SteadyState::settle( bool forceSetup )
 
 #elif defined(USE_BOOST)
 
-    auto ssSystem = NonlinearSystem( numVarPools_ );
-    ssSystem.ri.rank = rank_;
-    ssSystem.ri.num_reacs = nReacs_;
-    ssSystem.ri.num_mols = numVarPools_;
-    ssSystem.ri.T = T;
-    ssSystem.ri.Nr = Nr_;
-    ssSystem.ri.gamma = gamma_;
-    ssSystem.ri.pool = &pool_;
-    ssSystem.ri.nVec = LookupField< unsigned int, vector< double > >::get( ksolve,"nVec", 0 );
-    ssSystem.ri.convergenceCriterion = convergenceCriterion_;
+    auto ss = NonlinearSystem( numVarPools_ );
+    ss.ri.rank = rank_;
+    ss.ri.num_reacs = nReacs_;
+    ss.ri.num_mols = numVarPools_;
+    ss.ri.T = T;
+    ss.ri.Nr = Nr_;
+    ss.ri.gamma = gamma_;
+    ss.ri.pool = &pool_;
+    ss.ri.nVec = LookupField< unsigned int, vector< double > >::get( ksolve,"nVec", 0 );
+    ss.ri.convergenceCriterion = convergenceCriterion_;
 
 
     // Starting point 
     vector<value_type_> init( numVarPools_ );
     for( size_t i = 0; i < numVarPools_; i ++ )
-        init[i] = i;
+        init[i] = sqrt( max(0.0, ss.ri.nVec[i]) );
 
-    ssSystem.initialize<vector<value_type_>>( init );
+    ss.initialize<vector<value_type_>>( init );
 
-    auto ri = ssSystem.ri;
 
     // Fill up boundary condition values
     if ( reassignTotal_ )   // The user has defined new conservation values.
@@ -1139,31 +1138,32 @@ void SteadyState::settle( bool forceSetup )
     {
         for ( i = 0; i < nConsv; ++i )
             for ( j = 0; j < numVarPools_; ++j )
-                T[i] += gamma_( i, j ) * ri.nVec[ j ];
+                T[i] += gamma_( i, j ) * ss.ri.nVec[ j ];
         total_.assign( T, T + nConsv );
     }
 
     vector< double > repair( numVarPools_, 0.0 );
     for ( unsigned int j = 0; j < numVarPools_; ++j )
-        repair[j] = ri.nVec[j];
+        repair[j] = ss.ri.nVec[j];
 
     int status = 1;
 
     // Find roots 
-    if( ssSystem.find_roots_gnewton( ) )
+    if( ss.find_roots_gnewton( ) )
         status = 0;
 
 #endif
-    nIter_ = ri.nIter;
-    if ( status == 0 && isSolutionPositive( ri.nVec ) )
+    nIter_ = ss.ri.nIter;
+    if ( status == 0 && isSolutionPositive( ss.ri.nVec ) )
     {
-        cerr << "Good solution ";
-        for( auto v : ri.nVec ) cerr << v << " ";
+        cerr << "Good solution: ";
+        for( auto v : ss.ri.nVec ) cerr << v << ",";
         cerr << endl;
 
         solutionStatus_ = 0; // Good solution
+        
         LookupField< unsigned int, vector< double > >::set(
-            ksolve,"nVec", 0, ri.nVec );
+            ksolve,"nVec", 0, ss.ri.nVec );
         classifyState( T );
     }
     else
@@ -1172,10 +1172,10 @@ void SteadyState::settle( bool forceSetup )
              status_ << ", nIter = " << nIter_ << endl;
         // Repair the mess
         for ( unsigned int j = 0; j < numVarPools_; ++j )
-            ri.nVec[j] = repair[j];
+            ss.ri.nVec[j] = repair[j];
         solutionStatus_ = 1; // Steady state failed.
         LookupField< unsigned int, vector< double > >::set(
-            ksolve,"nVec", 0, ri.nVec );
+            ksolve,"nVec", 0, ss.ri.nVec );
     }
 
     // Clean up.
