@@ -91,6 +91,7 @@ public:
     NonlinearSystem( size_t systemSize ) : size_( systemSize )
     {
         f_.resize( size_, 0);
+        slopes_.resize( size_, 0);
         x_.resize( size_, 0 );
 
         J_.resize( size_, size_, 0);
@@ -306,20 +307,19 @@ public:
      */
     int which_direction_to_stepinto( )
     {
-        vector<unsigned int> slopes(size_);
         for( size_t i = 0; i < size_; i++)
-            slopes[i] = slope(i);
+            slopes_[i] = slope(i);
 
-        auto iter = slopes.begin();
+        auto iter = slopes_.begin();
 
         // FIXME: min and max does not neccessarily mean negative and positive. Let's
         // hope that they are.
         if( is_f_positive_ )
-            iter = std::min_element( slopes.begin(), slopes.end() );
+            iter = std::min_element( slopes_.begin(), slopes_.end() );
         else
-            iter = std::max( slopes.begin(), slopes.end() );
+            iter = std::max( slopes_.begin(), slopes_.end() );
 
-        return std::distance( slopes.begin(), iter );
+        return std::distance( slopes_.begin(), iter );
     }
 
     bool find_roots_gradient_descent ( double tolerance = 1e-16 
@@ -350,6 +350,7 @@ public:
 
     vector_type f_;
     vector_type x_;
+    vector_type slopes_;
     matrix_type J_;
     matrix_type invJ_;
 
