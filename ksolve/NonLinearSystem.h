@@ -41,7 +41,6 @@ typedef ublas::vector<value_type> vector_type;
 typedef ublas::matrix<value_type> matrix_type;
 typedef function<value_type( const vector_type&  )> equation_type;
 
-
 class ReacInfo
 {
 public:
@@ -110,6 +109,11 @@ public:
         return result;
     }
 
+    void apply( )
+    {
+        system(x_, f_);
+    }
+
     int compute_jacobians( const vector_type& x )
     {
         for( size_t i = 0; i < size_; i++)
@@ -147,9 +151,9 @@ public:
             init[i] = x[i];
 
         x_ = init;
+        apply();
+
         compute_jacobians( init );
-        if( is_jacobian_valid_ )
-            f_ = compute_at( init );
     }
 
     string to_string( )
@@ -284,11 +288,10 @@ public:
 
     }
 
-    value_type slope( size_t which_dimen )
+    value_type slope( unsigned int which_dimen )
     {
         vector_type x = x_;
         x[which_dimen] += step_;
-
         // x1 and x2 holds the f_ of system at x_ and x (which is x +
         // some step)
         system( x_, x1 );
@@ -297,11 +300,8 @@ public:
     }
 
     /** 
-     * @brief Suggest the direction to step into. 
-     *
-     * If value of the function is positive at starting point, then we want to
-     * descent into the direction of negative slope otherwise we want to go into
-     * the direction of positive slope.
+     * @brief Suggest the direction to step into.  Take the steepest descent
+     * direction.
      *
      * @return  Number of dimension (0 to n-1 ).
      */
@@ -309,16 +309,7 @@ public:
     {
         for( size_t i = 0; i < size_; i++)
             slopes_[i] = slope(i);
-
-        auto iter = slopes_.begin();
-
-        // FIXME: min and max does not neccessarily mean negative and positive. Let's
-        // hope that they are.
-        if( is_f_positive_ )
-            iter = std::min_element( slopes_.begin(), slopes_.end() );
-        else
-            iter = std::max( slopes_.begin(), slopes_.end() );
-
+        auto iter = std::max_element( slopes_.begin(), slopes_.end());
         return std::distance( slopes_.begin(), iter );
     }
 
@@ -334,12 +325,16 @@ public:
          *      find a good search direction (usually the steepest slope).
          *      step into that direction by "some amount"
          *-----------------------------------------------------------------------------*/
-        for (size_t i = 0; i < size_; i++) 
+        for(size_t i = 0; i < 50; i++ )
         {
-            cerr << "Slope at " << i << " " << slope( i ) << endl;
+             unsigned int dir = which_direction_to_stepinto();
+             // Let's step into this direction.
+             cerr << "Stepping into dimension " << dir << endl;
+             x_[dir] -= 10;
+             apply();
+             cerr << "Value of system " << f_ << endl;
+             cerr << "Norm : " << ublas::norm_2( f_ ) << endl;
         }
-        cerr << to_string( ) << endl;
-        cerr << which_direction_to_stepinto() << endl;
 
         exit(1);
     }
