@@ -91,7 +91,7 @@ public:
     NonlinearSystem( size_t systemSize ) : size( systemSize )
     {
         value.resize( size, 0);
-        argument.resize( size, 0 );
+        currentPos.resize( size, 0 );
 
         jacobian.resize( size, size, 0);
         invJacobian.resize( size, size, 0);
@@ -109,30 +109,31 @@ public:
         return result;
     }
 
-    void compute_jacobian( const vector_type& x )
+    int compute_jacobians( const vector_type& x )
     {
-
-#ifdef  DEBUG
-        cout  << "Debug: computing jacobian at " << x << endl;
-#endif     /* -----  not DEBUG  ----- */
-        double step = 2 * std::numeric_limits< value_type >::min();
         for( size_t i = 0; i < size; i++)
             for( size_t j = 0; j < size; j++)
             {
                 vector_type temp = x;
-                temp[j] += step;
+                temp[j] += step_;
                 system( temp, x2 ); 
                 system( x, x1 );
-                value_type dvalue = (x2[i] - x1[i])/ step;
+                value_type dvalue = (x2[i] - x1[i]) / step_;
+                if( std::isnan( dvalue ) || std::isinf( dvalue ) )
+                {
+                    jacobianValid = false;
+                    return ERANGE;
+                }
                 jacobian(i, j) = dvalue;
             }
 
+        jacobianValid = true;
         // Keep the inverted jacobian ready
-        inverse( jacobian, invJacobian );
+        if(jacobianValid)
+            inverse( jacobian, invJacobian );
 
-#ifdef  DEBUG
-        cout  << "Debug: " << to_string( ) << endl;
-#endif     /* -----  not DEBUG  ----- */
+        //cout  << "Debug: " << to_string( ) << endl;
+        return 0;
     }
 
     template<typename T>
@@ -144,9 +145,10 @@ public:
         for( size_t i = 0; i < size; i++)
             init[i] = x[i];
 
-        argument = init;
-        value = compute_at( init );
-        compute_jacobian( init );
+        currentPos = init;
+        compute_jacobians( init );
+        if( jacobianValid )
+            value = compute_at( init );
     }
 
     string to_string( )
@@ -155,7 +157,7 @@ public:
 
         ss << "=======================================================";
         ss << endl << setw(25) << "State of system: " ;
-        ss << " Argument: " << argument << " Value : " << value;
+        ss << " Argument: " << currentPos << " Value : " << value;
         ss << endl << setw(25) << "Jacobian: " << jacobian;
         ss << endl << setw(25) << "Inverse Jacobian: " << invJacobian;
         ss << endl;
@@ -169,14 +171,15 @@ public:
         for ( size_t i = 0; i < ri.num_mols; ++i )
         {
             double temp = x[i] * x[i] ;
-            if ( isNaN( temp ) || isInfinity( temp ) )
+
+            // if overflow
+            if ( std::isnan( temp ) || std::isinf( temp ) )
             {
+                cerr << "here with temp " << temp << endl;
                 return ERANGE;
             }
-            else
-            {
-                ri.nVec[i] = temp;
-            }
+
+            ri.nVec[i] = temp;
         }
         vector< double > vels;
 
@@ -191,16 +194,22 @@ public:
             for ( int j = i; j < ri.num_reacs; ++j )
                 temp += ri.Nr(i, j ) * vels[j];
             f[i] = temp ;
-
         }
 
         // dT = gamma.S - T
         for ( int i = 0; i < num_consv; ++i )
         {
             double dT = - ri.T[i];
-            for ( size_t  j = 0; j < ri.num_mols; ++j )
-                dT += ri.gamma( i, j) * (x[j] * x[j]);
 
+            for ( size_t  j = 0; j < ri.num_mols; ++j )
+            {
+                // if overflow
+                double temp = x[j] * x[j];
+                if ( std::isnan( temp ) || std::isinf( temp ) )
+                    return ERANGE;
+
+                dT += ri.gamma( i, j) * temp;
+            }
             f[ i + ri.rank] = dT ;
         }
 
@@ -214,33 +223,49 @@ public:
      * @param tolerance  Default to 1e-12
      * @param max_iter  Maximum number of iteration allowed , default 100
      *
-     * @return  If successful, return true. Check the variable `argument` at
+     * @return  If successful, return true. Check the variable `currentPos` at
      * which the system value is close to zero (within  the tolerance).
      */
     bool find_roots_gnewton( 
-            double tolerance = 1e-10
-            , size_t max_iter = 500
+            double tolerance = 1e-16
+            , size_t max_iter = 50
             )
     {
         double norm2OfDiff = 1.0;
         size_t iter = 0;
-        cerr << "Debug: Starting with " << argument << endl;
         while( ublas::norm_2(value) > tolerance and iter <= max_iter)
         {
-            compute_jacobian( argument );
             iter += 1;
-            value = compute_at( argument );
+            cerr << "| " << currentPos << endl;
+            // Compute the jacoboian at this input.
+            compute_jacobians( currentPos );
+            if( ! jacobianValid )
+            {
+                cerr << "Debug: Jacobian not valid " << endl;
+                return false;
+            }
 
-            ublas::vector<value_type> s = argument - ublas::prod( invJacobian, value );
+            // Compute the value of system at this currentPos, store the value in
+            // second currentPos.
+            system( currentPos, value );
 
-#ifdef DEUBG
-            cerr << "Previous " << argument << " Next : " << s << endl;
-#endif
-            argument = s;
+            // Now compute the next step_. Compute stepSize; if it is zero then
+            // we are stuck. Else add it to the current step_.
+            vector_type stepSize =  - ublas::prod( invJacobian, value );
+            cerr << "Step  " << stepSize << endl;
+            {
+                cerr << "Debug: stuck state " << endl;
+                cerr << to_string();
+                exit(1);
+                return false;
+            }
+
+            // Update the input to the system by adding the step_ size.
+            currentPos +=  stepSize;
+
             for( size_t ii = 0; ii < size; ii ++)
-                ri.nVec[ii] = argument[ii];
+                ri.nVec[ii] = currentPos[ii];
         }
-
 
         ri.nIter = iter;
 
@@ -259,12 +284,15 @@ public:
     }
 
     vector_type value;
-    vector_type argument;
+    vector_type currentPos;
     matrix_type jacobian;
     matrix_type invJacobian;
 
+    bool jacobianValid;
+
     // These vector keeps the temporary state computation.
     vector_type x2, x1;
+    double step_ = 1e1;
 
     const size_t size;
     
