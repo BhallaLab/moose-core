@@ -1148,7 +1148,7 @@ void SteadyState::settle( bool forceSetup )
     int status = 1;
 
     // Find roots 
-    if( ss.find_roots_gradient_descent( ) )
+    if( ss.find_roots_gnewton( ) )
         status = 0;
 
 #endif
@@ -1161,6 +1161,11 @@ void SteadyState::settle( bool forceSetup )
         
         LookupField< unsigned int, vector< double > >::set(
             ksolve,"nVec", 0, ss.ri.nVec );
+
+        cerr << "Good solution : ";
+        for( auto v : ss.ri.nVec ) cerr << v << ",";
+        cerr << endl;
+
         classifyState( T );
     }
     else

@@ -123,7 +123,7 @@ public:
                 temp[j] += step_;
                 system( temp, x2 ); 
                 system( x, x1 );
-                value_type df_ = (x2[i] - x1[i]) / step_;
+                double df = (x2[i] - x1[i]) / step_;
 
                 // if( std::isnan( df_ ) || std::isinf( df_ ) )
                 // {
@@ -131,7 +131,10 @@ public:
                 //     return ERANGE;
                 // }
 
-                J_(i, j) = df_;
+                if( df != 0 )
+                    J_(i, j) = df;
+                else
+                    J_(i, j) = 1e-9;
             }
 
         // is_jacobian_valid_ = true;
@@ -182,7 +185,9 @@ public:
 
             // if overflow
             if ( std::isnan( temp ) || std::isinf( temp ) )
-                return ERANGE;
+            {
+                return 1;
+            }
 
             ri.nVec[i] = temp;
         }
@@ -211,7 +216,7 @@ public:
                 // if overflow
                 double temp = x[j] * x[j];
                 if ( std::isnan( temp ) || std::isinf( temp ) )
-                    return ERANGE;
+                    return 1;
 
                 dT += ri.gamma( i, j) * temp;
             }
@@ -238,33 +243,43 @@ public:
     {
         double norm2OfDiff = 1.0;
         size_t iter = 0;
-        while( ublas::norm_2(f_) > tolerance and iter <= max_iter)
+        cerr << "Staring with : " << x_ << endl;
+        while( ublas::norm_2(compute_at(x_)) > tolerance and iter <= max_iter)
         {
             iter += 1;
             // Compute the jacoboian at this input.
             compute_jacobians( x_, true );
-            if( ! is_jacobian_valid_ )
-                return false;
+
+            //if( ! is_jacobian_valid_ )
+                //return false;
 
             // Compute the f_ of system at this x_, store the f_ in
             // second x_.
-            system( x_, f_ );
+            if( 0 != system( x_, f_ ))
+                return false;
 
             // Now compute the next step_. Compute stepSize; if it is zero then
             // we are stuck. Else add it to the current step_.
-            vector_type stepSize =  - ublas::prod( invJ_, f_ );
+            vector_type correction = ublas::prod( invJ_, f_ );
 
             // Update the input to the system by adding the step_ size_.
-            x_ +=  stepSize;
+            x_ = x_ -  correction;
 
-            for( size_t ii = 0; ii < size_; ii ++)
-                ri.nVec[ii] = x_[ii];
         }
+
+        for( size_t ii = 0; ii < size_; ii ++)
+            ri.nVec[ii] = x_[ii];
+
+        cerr << "Final: " << compute_at( x_ ) << endl;
+//        cerr << to_string() << endl;
 
         ri.nIter = iter;
 
         if( iter > max_iter )
+        {
+            cerr << "Warn: Cant compute in given iter nums " << iter << endl;
             return false;
+        }
         return true;
     }
 
@@ -402,7 +417,7 @@ public:
 
 public:
     const size_t size_;
-    double step_ = 2.220e-16; // This is roughly the same as GSL_DBL_EPLILON
+    double step_ = 1.49e-8;  // roughly the same as GNU-GSL 
 
     vector_type f_;
     vector_type x_;
