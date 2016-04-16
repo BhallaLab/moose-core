@@ -1122,10 +1122,9 @@ void SteadyState::settle( bool forceSetup )
     // Starting point 
     vector<value_type_> init( numVarPools_ );
     for( size_t i = 0; i < numVarPools_; i ++ )
-        init[i] = sqrt( max(100.0, ss.ri.nVec[i]) );
+        init[i] = max( 0.0, sqrt( ss.ri.nVec[i]) );
 
     ss.initialize<vector<value_type_>>( init );
-
 
     // Fill up boundary condition values
     if ( reassignTotal_ )   // The user has defined new conservation values.
@@ -1149,8 +1148,7 @@ void SteadyState::settle( bool forceSetup )
     int status = 1;
 
     // Find roots 
-    //if( ss.find_roots_gradient_descent( ) )
-    if( ss.find_roots_gnewton( ) )
+    if( ss.find_roots_gradient_descent( ) )
         status = 0;
 
 #endif

@@ -402,7 +402,7 @@ public:
 
 public:
     const size_t size_;
-    double step_ = 1e-6;
+    double step_ = 2.220e-16; // This is roughly the same as GSL_DBL_EPLILON
 
     vector_type f_;
     vector_type x_;
