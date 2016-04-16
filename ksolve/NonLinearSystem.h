@@ -114,7 +114,7 @@ public:
         system(x_, f_);
     }
 
-    int compute_jacobians( const vector_type& x )
+    int compute_jacobians( const vector_type& x, bool compute_inverse = true )
     {
         for( size_t i = 0; i < size_; i++)
             for( size_t j = 0; j < size_; j++)
@@ -124,17 +124,20 @@ public:
                 system( temp, x2 ); 
                 system( x, x1 );
                 value_type df_ = (x2[i] - x1[i]) / step_;
-                if( std::isnan( df_ ) || std::isinf( df_ ) )
-                {
-                    is_jacobian_valid_ = false;
-                    return ERANGE;
-                }
+
+                // if( std::isnan( df_ ) || std::isinf( df_ ) )
+                // {
+                //     is_jacobian_valid_ = false;
+                //     return ERANGE;
+                // }
+
                 J_(i, j) = df_;
             }
 
-        is_jacobian_valid_ = true;
+        // is_jacobian_valid_ = true;
         // Keep the inverted J_ ready
-        if(is_jacobian_valid_)
+        //if(is_jacobian_valid_ and compute_inverse )
+        if( compute_inverse )
             inverse( J_, invJ_ );
 
         //cout  << "Debug: " << to_string( ) << endl;
@@ -288,6 +291,13 @@ public:
 
     }
 
+    /**
+     * @brief Compute the slope of function in given dimension.
+     *
+     * @param which_dimen The index of dimension.
+     *
+     * @return  Slope.
+     */
     value_type slope( unsigned int which_dimen )
     {
         vector_type x = x_;
@@ -296,7 +306,7 @@ public:
         // some step)
         system( x_, x1 );
         system( x, x2 );
-        return ublas::norm_2( x2 - x1 );
+        return ublas::norm_2( (x2 - x1)/step_ );
     }
 
     /** 
@@ -313,6 +323,68 @@ public:
         return std::distance( slopes_.begin(), iter );
     }
 
+    /**
+     * @brief Computes the correction term.
+     *
+     */
+    bool correction_step(  )
+    {
+        // Get the jacobian at current point. Notice that in this method, we
+        // don't have to compute inverse of jacobian
+
+        compute_jacobians( x_, false );
+        //cerr << "Jacobian now is " << J_ << endl;
+        
+        vector_type direction = ublas::prod( J_, x_ );
+
+        // Now take the largest step possible such that the value of system at
+        // (x_ - step ) is lower than the value of system as x_.
+        vector_type nextState( size_ );
+
+        double diffF = 10.0;
+        double factor = 0.13;
+        while( true )
+        {
+            nextState = x_ - (factor * direction);
+            diffF = ublas::norm_2( compute_at( nextState )) 
+                - ublas::norm_2( compute_at(x_) );
+
+            /** 
+             * No need to contnue. Usually we should get negative value.
+             */
+            if( diffF < 0.0 )
+            {
+                x_ = nextState;
+                return true;
+            }
+
+            /** 
+             * But we don't want to get caught in infinite loop. So when diffF
+             * goes to zero, just terminate. 
+             */
+            else if( diffF == 0.0 )
+            {
+#if 0
+                cerr << "Warn: Failed to get a good diff. " 
+                    << " Diff : " << diffF 
+                    << " and factor : " << factor << endl;
+                cerr << J_ << endl;
+#endif
+                return false;
+            }
+
+#if 0
+            cerr << "Prev: " << x_ << " " 
+                << ublas::norm_2( compute_at(x_) ) << endl;
+            cerr << "Next: " << nextState << " "
+                << ublas::norm_2( compute_at(nextState ) ) << endl;
+#endif
+
+            factor = factor / 2.0;
+        }
+        return true;
+    }
+
     bool find_roots_gradient_descent ( double tolerance = 1e-16 
             , size_t max_iter = 50)
     {
@@ -325,23 +397,35 @@ public:
          *      find a good search direction (usually the steepest slope).
          *      step into that direction by "some amount"
          *-----------------------------------------------------------------------------*/
-        for(size_t i = 0; i < 50; i++ )
+        double startVal = ublas::norm_2( compute_at( x_ ));
+        double currentVal;
+        cerr << "Starting at " << startVal << endl;
+        while( true )
         {
-             unsigned int dir = which_direction_to_stepinto();
-             // Let's step into this direction.
-             cerr << "Stepping into dimension " << dir << endl;
-             x_[dir] -= 10;
-             apply();
-             cerr << "Value of system " << f_ << endl;
-             cerr << "Norm : " << ublas::norm_2( f_ ) << endl;
-        }
+#if 0
+            cerr << "Debug: start : " << x_ << " value : " 
+                << ublas::norm_2( compute_at( x_ ) ) 
+                << endl;
+#endif
 
-        exit(1);
+            if( ! correction_step( ) )
+                return false;
+            else
+                currentVal = ublas::norm_2( compute_at( x_ ));
+
+            // This is a cool solution.
+            if( currentVal <= tolerance )
+                return true;
+
+            // We are stuck
+            if( currentVal == startVal )
+                return false;
+        }
     }
 
 public:
     const size_t size_;
-    double step_ = 1e1;
+    double step_ = 1e-6;
 
     vector_type f_;
     vector_type x_;
