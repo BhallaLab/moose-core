@@ -182,10 +182,7 @@ public:
 
             // if overflow
             if ( std::isnan( temp ) || std::isinf( temp ) )
-            {
-                cerr << "here with temp " << temp << endl;
                 return ERANGE;
-            }
 
             ri.nVec[i] = temp;
         }
@@ -244,14 +241,10 @@ public:
         while( ublas::norm_2(f_) > tolerance and iter <= max_iter)
         {
             iter += 1;
-            cerr << "| " << x_ << endl;
             // Compute the jacoboian at this input.
-            compute_jacobians( x_ );
+            compute_jacobians( x_, true );
             if( ! is_jacobian_valid_ )
-            {
-                cerr << "Debug: Jacobian not valid " << endl;
                 return false;
-            }
 
             // Compute the f_ of system at this x_, store the f_ in
             // second x_.
@@ -260,13 +253,6 @@ public:
             // Now compute the next step_. Compute stepSize; if it is zero then
             // we are stuck. Else add it to the current step_.
             vector_type stepSize =  - ublas::prod( invJ_, f_ );
-            cerr << "Step  " << stepSize << endl;
-            {
-                cerr << "Debug: stuck state " << endl;
-                cerr << to_string();
-                exit(1);
-                return false;
-            }
 
             // Update the input to the system by adding the step_ size_.
             x_ +=  stepSize;
@@ -278,17 +264,8 @@ public:
         ri.nIter = iter;
 
         if( iter > max_iter )
-        {
-            cerr << "[WARN] Could not find roots of system." << endl;
-            cerr <<  "\tTried " << iter << " times." << endl;
-            cerr << "\tIteration limits reached" << endl;
             return false;
-        }
-
-        cerr << "Info: Computed roots succesfully in " << iter 
-            << " iterations " << endl;
         return true;
-
     }
 
     /**

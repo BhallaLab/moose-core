@@ -1122,7 +1122,7 @@ void SteadyState::settle( bool forceSetup )
     // Starting point 
     vector<value_type_> init( numVarPools_ );
     for( size_t i = 0; i < numVarPools_; i ++ )
-        init[i] = sqrt( max(0.0, ss.ri.nVec[i]) );
+        init[i] = sqrt( max(100.0, ss.ri.nVec[i]) );
 
     ss.initialize<vector<value_type_>>( init );
 
@@ -1149,16 +1149,15 @@ void SteadyState::settle( bool forceSetup )
     int status = 1;
 
     // Find roots 
-    if( ss.find_roots_gradient_descent( ) )
+    //if( ss.find_roots_gradient_descent( ) )
+    if( ss.find_roots_gnewton( ) )
         status = 0;
 
 #endif
     nIter_ = ss.ri.nIter;
     if ( status == 0 && isSolutionPositive( ss.ri.nVec ) )
     {
-        cerr << "Good solution: ";
         for( auto v : ss.ri.nVec ) cerr << v << ",";
-        cerr << endl;
 
         solutionStatus_ = 0; // Good solution
         
