@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jul 24 16:02:21 2013 (+0530)
 # Version: 
-# Last-Updated: Fri Jul 26 17:07:22 2013 (+0530)
+# Last-Updated: Sun Apr 17 16:13:01 2016 (-0400)
 #           By: subha
-#     Update #: 111
+#     Update #: 112
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -54,7 +54,8 @@ from reader import NML2Reader
 
 class TestFullCell(unittest.TestCase):
     def setUp(self):
-        self.reader = NML2Reader()
+        self.reader = NML2Reader(verbose=True)
+        
         self.lib = moose.Neutral('/library')
         self.filename = 'test_files/NML2_FullCell.nml'
         self.reader.read(self.filename)
