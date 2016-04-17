@@ -23,6 +23,7 @@
 #include <cerrno>
 #include <iomanip>
 #include <algorithm>
+#include <stdexcept>
 
 // Boost ublas library of matrix algebra.
 #include <boost/numeric/ublas/matrix.hpp>
@@ -124,17 +125,7 @@ public:
                 system( temp, x2 ); 
                 system( x, x1 );
                 double df = (x2[i] - x1[i]) / step_;
-
-                // if( std::isnan( df_ ) || std::isinf( df_ ) )
-                // {
-                //     is_jacobian_valid_ = false;
-                //     return ERANGE;
-                // }
-
-                if( df != 0 )
-                    J_(i, j) = df;
-                else
-                    J_(i, j) = 1e-9;
+                J_(i, j) = df;
             }
 
         // is_jacobian_valid_ = true;
@@ -185,9 +176,7 @@ public:
 
             // if overflow
             if ( std::isnan( temp ) || std::isinf( temp ) )
-            {
-                return 1;
-            }
+                throw overflow_error( "overflow in x[i]" );
 
             ri.nVec[i] = temp;
         }
@@ -210,19 +199,11 @@ public:
         for ( int i = 0; i < num_consv; ++i )
         {
             double dT = - ri.T[i];
-
             for ( size_t  j = 0; j < ri.num_mols; ++j )
-            {
-                // if overflow
-                double temp = x[j] * x[j];
-                if ( std::isnan( temp ) || std::isinf( temp ) )
-                    return 1;
+                dT += ri.gamma(i, j) * x[j] * x[j];
 
-                dT += ri.gamma( i, j) * temp;
-            }
             f[ i + ri.rank] = dT ;
         }
-
         return 0;
     }
 
@@ -230,55 +211,44 @@ public:
     /**
      * @brief Find roots using Newton-Raphson method.
      *
-     * @param tolerance  Default to 1e-12
+     * @param tolerance  Default to 1e-6
      * @param max_iter  Maximum number of iteration allowed , default 100
      *
      * @return  If successful, return true. Check the variable `x_` at
      * which the system f_ is close to zero (within  the tolerance).
      */
     bool find_roots_gnewton( 
-            double tolerance = 1e-16
+            double tolerance = 1e-6
             , size_t max_iter = 50
             )
     {
         double norm2OfDiff = 1.0;
         size_t iter = 0;
-        cerr << "Staring with : " << x_ << endl;
-        while( ublas::norm_2(compute_at(x_)) > tolerance and iter <= max_iter)
+        apply();
+        // Step towards zero.
+        cerr << "Before loop: " << to_string() << endl;
+        while( ublas::norm_2(f_) > tolerance and iter <= max_iter)
         {
+            cerr << x_ << " " << f_ << endl;
+            apply();
             iter += 1;
-            // Compute the jacoboian at this input.
             compute_jacobians( x_, true );
-
-            //if( ! is_jacobian_valid_ )
-                //return false;
-
-            // Compute the f_ of system at this x_, store the f_ in
-            // second x_.
-            if( 0 != system( x_, f_ ))
-                return false;
-
-            // Now compute the next step_. Compute stepSize; if it is zero then
-            // we are stuck. Else add it to the current step_.
             vector_type correction = ublas::prod( invJ_, f_ );
-
-            // Update the input to the system by adding the step_ size_.
-            x_ = x_ -  correction;
-
+            x_ -=  correction;
         }
 
-        for( size_t ii = 0; ii < size_; ii ++)
-            ri.nVec[ii] = x_[ii];
+        cerr << "After loop: " << to_string() << endl;
 
-        cerr << "Final: " << compute_at( x_ ) << endl;
-//        cerr << to_string() << endl;
+        for( size_t ii = 0; ii < size_; ii ++)
+            ri.nVec[ii] = f_[ii];
+
 
         ri.nIter = iter;
 
         if( iter > max_iter )
         {
             cerr << "Warn: Cant compute in given iter nums " << iter << endl;
-            return false;
+            return true;
         }
         return true;
     }
@@ -356,21 +326,9 @@ public:
              */
             else if( diffF == 0.0 )
             {
-#if 0
-                cerr << "Warn: Failed to get a good diff. " 
-                    << " Diff : " << diffF 
-                    << " and factor : " << factor << endl;
-                cerr << J_ << endl;
-#endif
                 return false;
             }
 
-#if 0
-            cerr << "Prev: " << x_ << " " 
-                << ublas::norm_2( compute_at(x_) ) << endl;
-            cerr << "Next: " << nextState << " "
-                << ublas::norm_2( compute_at(nextState ) ) << endl;
-#endif
 
             factor = factor / 2.0;
         }

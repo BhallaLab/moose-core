@@ -105,6 +105,7 @@ def main():
         a.concInit -= deltaA
         print i, a.conc, b.conc
 
+    quit()
 
     pylab.plot( numpy.log10( avec ), numpy.log10( bvec ), label='b vs a down' )
     # Now aim for the middle. We do this by judiciously choosing a 

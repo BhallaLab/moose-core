@@ -373,7 +373,12 @@ SteadyState::~SteadyState()
         gsl_matrix_free( Nr_ );
     if ( gamma_ != 0 )
         gsl_matrix_free( gamma_ );
+#elif defined(USE_BOOST)
+    LU_.clear();
+    Nr_.clear();
+    gamma_.clear();
 #endif
+
 }
 
 ///////////////////////////////////////////////////
@@ -617,8 +622,6 @@ void SteadyState::setupSSmatrix()
             gsl_matrix_set (LU_, i, j, x );
         }
     }
-    cout << endl << endl;
-
     rank_ = myGaussianDecomp( LU_ );
 
     unsigned int nConsv = numVarPools_ - rank_;
@@ -688,11 +691,9 @@ void SteadyState::setupSSmatrix()
 
     int nTot = numVarPools_ + nReacs_;
 
-    ublas::matrix<double> N(numVarPools_, nReacs_);
-    N.assign( ublas::zero_matrix< value_type_ >( numVarPools_, nReacs_));
+    ublas::matrix<double> N(numVarPools_, nReacs_, 0.0);
 
-    LU_ = ublas::matrix< value_type_ >( numVarPools_, nTot);
-    LU_.assign( ublas::zero_matrix< value_type_ >( numVarPools_, nTot) );
+    LU_ = ublas::matrix< value_type_ >( numVarPools_, nTot, 0.0);
 
     vector< int > entry = Field< vector< int > >::get(
                               stoich_, "matrixEntry" );
@@ -717,7 +718,9 @@ void SteadyState::setupSSmatrix()
         }
     }
 
+    // This function reorgranize LU_.
     rank_ = rankUsingBoost( LU_ );
+
     Nr_ = ublas::matrix< value_type_ >( rank_, nReacs_ );
     Nr_.assign( ublas::zero_matrix< value_type_ >( rank_, nReacs_ ) );
 
@@ -733,9 +736,7 @@ void SteadyState::setupSSmatrix()
         for ( unsigned int j = i; j < nReacs_; j++)
             Nr_(i,j) = LU_(i, j);
 
-    gamma_ = ublas::matrix< value_type_ >( nConsv, numVarPools_ );
-    gamma_.assign( ublas::zero_matrix< value_type_ >( nConsv, numVarPools_ ) );
-    gamma_.clear();
+    gamma_ = ublas::matrix< value_type_ >( nConsv, numVarPools_, 0.0 );
 
     // Fill up gamma
     for ( unsigned int i = rank_; i < numVarPools_; ++i )
@@ -882,7 +883,6 @@ void SteadyState::classifyState( const double* T )
     gsl_eigen_nonsymm_workspace* workspace =
         gsl_eigen_nonsymm_alloc( numVarPools_ );
     int status = gsl_eigen_nonsymm( J, vec, workspace );
-    eigenvalues_.clear();
     eigenvalues_.resize( numVarPools_, 0.0 );
     if ( status != GSL_SUCCESS )
     {
@@ -1051,7 +1051,6 @@ void SteadyState::settle( bool forceSetup )
         return;
     }
 
-
     if ( forceSetup || isSetup_ == 0 )
         setupSSmatrix();
 
@@ -1152,6 +1151,7 @@ void SteadyState::settle( bool forceSetup )
         status = 0;
 
 #endif
+
     nIter_ = ss.ri.nIter;
     if ( status == 0 && isSolutionPositive( ss.ri.nVec ) )
     {
@@ -1182,6 +1182,7 @@ void SteadyState::settle( bool forceSetup )
 
     // Clean up.
     free( T );
+    exit(1);
 
 }
 
@@ -1383,9 +1384,15 @@ void recalcTotal( vector< double >& tot, gsl_matrix* g, const double* S )
  */
 void swapRows( ublas::matrix< value_type_ >& mat, unsigned int r1, unsigned int r2)
 {
-    auto row1 = row( mat, r1 );
-    row(mat, r1) = row(mat, r2);
-    row(mat, r2) = row1;
+    ublas::vector<value_type> temp( mat.size2() );
+    for (size_t i = 0; i < mat.size2(); i++) 
+    {
+        temp[i] = mat(r1, i );
+        mat(r1, i ) = mat(r2, i );
+    }
+
+    for (size_t i = 0; i < mat.size2(); i++) 
+        mat(r2, i) = temp[i]; 
 }
 
 
@@ -1441,7 +1448,7 @@ void eliminateRowsBelow( ublas::matrix< value_type_ >& U, int start, int leftCol
     }
 }
 
-unsigned rankUsingBoost( ublas::matrix<value_type_>& U )
+unsigned int rankUsingBoost( ublas::matrix<value_type_>& U )
 {
     int numMols = U.size1();
     int numReacs = U.size2() - numMols;
