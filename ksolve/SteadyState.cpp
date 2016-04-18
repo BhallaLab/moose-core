@@ -622,9 +622,7 @@ static double invop( double x )
 void SteadyState::classifyState( const double* T )
 {
     /* column_major trait is needed for fortran */
-    ublas::matrix<value_type_, ublas::column_major> J( 
-            numVarPools_, numVarPools_
-            );
+    ublas::matrix<value_type_, ublas::column_major> J(numVarPools_, numVarPools_);
 
     double tot = 0.0;
     Stoich* s = reinterpret_cast< Stoich* >( stoich_.eref().data() );
@@ -640,14 +638,14 @@ void SteadyState::classifyState( const double* T )
     for ( unsigned int i = 0; i < numVarPools_; ++i )
     {
         double orig = nVec[i];
-        if ( isNaN( orig ) )
+        if ( std::isnan( orig ) )
         {
             cout << "Warning: SteadyState::classifyState: orig=nan\n";
             solutionStatus_ = 2; // Steady state OK, eig failed
             J.clear();
             return;
         }
-        if ( isNaN( tot ) )
+        if ( std::isnan( tot ) )
         {
             cout << "Warning: SteadyState::classifyState: tot=nan\n";
             solutionStatus_ = 2; // Steady state OK, eig failed
@@ -661,7 +659,16 @@ void SteadyState::classifyState( const double* T )
 
         // Assign the rates for each mol.
         for ( unsigned int j = 0; j < numVarPools_; ++j )
+        {
+            if( std::isnan( yprime[j] ) or std::isinf( yprime[j] ) )
+            {
+                cout << "Warning: Overflow/underflow. Can't continue " << endl;
+                stateType_ = 5;
+                return;
+            }
+
             J(i, j) = yprime[j];
+        }
     }
 
     // Jacobian is now ready. Find eigenvalues.
@@ -701,6 +708,9 @@ void SteadyState::classifyState( const double* T )
             // We have a problem here because numVarPools_ usually > rank
             // This means we have several zero eigenvalues.
         }
+        cerr << "Eigenvalues : " << endl;
+        for( auto e : eigenvalues_ ) cerr << e << ", ";
+        cerr << endl;
 
         if ( nNegEigenvalues_ == rank_ )
             stateType_ = 0; // Stable
@@ -715,7 +725,6 @@ void SteadyState::classifyState( const double* T )
         else
             stateType_ = 5; // Other
     }
-
 }
 
 static bool isSolutionPositive( const vector< double >& x )

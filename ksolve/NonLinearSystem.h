@@ -234,19 +234,12 @@ public:
             x_ -=  correction;
         }
 
-
-#if 0
-        for( size_t ii = 0; ii < size_; ii ++)
-            ri.nVec[ii] = f_[ii];
-#endif
-
-
         ri.nIter = iter;
 
         if( iter > max_iter )
         {
             cerr << "Warn: Cant compute in given iter nums " << iter << endl;
-            return true;
+            return false;
         }
         return true;
     }
@@ -366,7 +359,7 @@ public:
 public:
     const size_t size_;
 
-    double dx_ = 1e-4; 
+    double dx_ = 1.5e-6; 
 
     vector_type f_;
     vector_type x_;
