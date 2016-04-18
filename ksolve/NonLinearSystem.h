@@ -121,10 +121,10 @@ public:
             for( size_t j = 0; j < size_; j++)
             {
                 vector_type temp = x;
-                temp[j] += step_;
+                temp[j] += dx_;
                 system( temp, x2 ); 
                 system( x, x1 );
-                double df = (x2[i] - x1[i]) / step_;
+                double df = (x2[i] - x1[i]) / dx_;
                 J_(i, j) = df;
             }
 
@@ -134,7 +134,6 @@ public:
         if( compute_inverse )
             inverse( J_, invJ_ );
 
-        //cout  << "Debug: " << to_string( ) << endl;
         return 0;
     }
 
@@ -169,20 +168,20 @@ public:
     int system( const vector_type& x, vector_type& f )
     {
         int num_consv = ri.num_mols - ri.rank;
-
         for ( size_t i = 0; i < ri.num_mols; ++i )
         {
             double temp = x[i] * x[i] ;
 
             // if overflow
             if ( std::isnan( temp ) || std::isinf( temp ) )
-                throw overflow_error( "overflow in x[i]" );
+                return ERANGE;
 
             ri.nVec[i] = temp;
         }
         vector< double > vels;
 
         ri.pool->updateReacVelocities( &ri.nVec[0], vels );
+
         assert( vels.size_() == static_cast< unsigned int >( ri.num_reacs ) );
 
         // y = Nr . v
@@ -204,7 +203,7 @@ public:
 
             f[ i + ri.rank] = dT ;
         }
-        return 0;
+        return EXIT_SUCCESS;
     }
 
 
@@ -219,17 +218,15 @@ public:
      */
     bool find_roots_gnewton( 
             double tolerance = 1e-6
-            , size_t max_iter = 50
+            , size_t max_iter = 100
             )
     {
         double norm2OfDiff = 1.0;
         size_t iter = 0;
         apply();
         // Step towards zero.
-        cerr << "Before loop: " << to_string() << endl;
         while( ublas::norm_2(f_) > tolerance and iter <= max_iter)
         {
-            cerr << x_ << " " << f_ << endl;
             apply();
             iter += 1;
             compute_jacobians( x_, true );
@@ -237,10 +234,11 @@ public:
             x_ -=  correction;
         }
 
-        cerr << "After loop: " << to_string() << endl;
 
+#if 0
         for( size_t ii = 0; ii < size_; ii ++)
             ri.nVec[ii] = f_[ii];
+#endif
 
 
         ri.nIter = iter;
@@ -263,12 +261,12 @@ public:
     value_type slope( unsigned int which_dimen )
     {
         vector_type x = x_;
-        x[which_dimen] += step_;
+        x[which_dimen] += dx_;
         // x1 and x2 holds the f_ of system at x_ and x (which is x +
         // some step)
         system( x_, x1 );
         system( x, x2 );
-        return ublas::norm_2( (x2 - x1)/step_ );
+        return ublas::norm_2( (x2 - x1)/dx_ );
     }
 
     /** 
@@ -295,7 +293,6 @@ public:
         // don't have to compute inverse of jacobian
 
         compute_jacobians( x_, false );
-        //cerr << "Jacobian now is " << J_ << endl;
         
         vector_type direction = ublas::prod( J_, x_ );
 
@@ -335,10 +332,9 @@ public:
         return true;
     }
 
-    bool find_roots_gradient_descent ( double tolerance = 1e-16 
+    bool find_roots_gradient_descent ( double tolerance = 1e-6 
             , size_t max_iter = 50)
     {
-        cerr << "Searching for roots using gradient descent method" << endl;
         
         /*-----------------------------------------------------------------------------
          *  This algorithm has following steps.
@@ -349,14 +345,8 @@ public:
          *-----------------------------------------------------------------------------*/
         double startVal = ublas::norm_2( compute_at( x_ ));
         double currentVal;
-        cerr << "Starting at " << startVal << endl;
         while( true )
         {
-#if 0
-            cerr << "Debug: start : " << x_ << " value : " 
-                << ublas::norm_2( compute_at( x_ ) ) 
-                << endl;
-#endif
 
             if( ! correction_step( ) )
                 return false;
@@ -375,7 +365,8 @@ public:
 
 public:
     const size_t size_;
-    double step_ = 1.49e-8;  // roughly the same as GNU-GSL 
+
+    double dx_ = 1e-4; 
 
     vector_type f_;
     vector_type x_;
