@@ -25,3 +25,13 @@ Builtin functions and classes in moose module (Python only)
 from .moose import *
 # import genesis
 
+import os
+cmake_file = os.path.dirname(moose.__file__)+'/../../CMakeLists.txt'
+
+if os.path.isfile(cmake_file):
+    for line in open(cmake_file):
+        if 'MOOSE_VERSION' in line:
+            __version__ = line.split('"')[1]
+
+    
+

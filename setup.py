@@ -85,7 +85,9 @@ DOWNLOAD_URL = 'http://sourceforge.net/projects/moose/files/latest/download'
 LICENSE = "GPLv3"
 AUTHOR = '(alphabetically) Upinder Bhalla, Niraj Dudani, Aditya Gilra, Aviral Goel, GV Harsharani, Subhasis Ray and Dilawar Singh'
 PLATFORMS = "Linux, Windows/cygwin"
-VERSION = '3.0.1'
+
+import neuroml
+VERSION = neuroml.__version__
 
 BUILD_TARGET = 'moose._moose'
 SOURCES=['external/muparser/src/muParser.cpp',
