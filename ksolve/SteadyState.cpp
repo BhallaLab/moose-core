@@ -553,11 +553,6 @@ void SteadyState::setupSSmatrix()
 
     // This function reorgranize LU_.
     rank_ = rankUsingBoost( LU_ );
-#if 0 
-    cerr << "Rank is " << rank_ << endl;
-    cerr << "Computed LU_ : " << LU_ << endl;
-#endif
-
     Nr_ = ublas::matrix< value_type_ >( rank_, nReacs_ );
     Nr_.assign( ublas::zero_matrix< value_type_ >( rank_, nReacs_ ) );
 
@@ -605,20 +600,6 @@ void SteadyState::setupSSmatrix()
 
 }
 
-static double op( double x )
-{
-    return x * x;
-}
-
-static double invop( double x )
-{
-    if ( x > 0.0 )
-        return sqrt( x );
-    return 0.0;
-}
-
-
-
 void SteadyState::classifyState( const double* T )
 {
     /* column_major trait is needed for fortran */
@@ -638,14 +619,14 @@ void SteadyState::classifyState( const double* T )
     for ( unsigned int i = 0; i < numVarPools_; ++i )
     {
         double orig = nVec[i];
-        if ( std::isnan( orig ) )
+        if ( std::isnan( orig ) or std::isinf( orig ) )
         {
             cout << "Warning: SteadyState::classifyState: orig=nan\n";
             solutionStatus_ = 2; // Steady state OK, eig failed
             J.clear();
             return;
         }
-        if ( std::isnan( tot ) )
+        if ( std::isnan( tot ) or std::isinf( tot ))
         {
             cout << "Warning: SteadyState::classifyState: tot=nan\n";
             solutionStatus_ = 2; // Steady state OK, eig failed
@@ -663,10 +644,9 @@ void SteadyState::classifyState( const double* T )
             if( std::isnan( yprime[j] ) or std::isinf( yprime[j] ) )
             {
                 cout << "Warning: Overflow/underflow. Can't continue " << endl;
-                stateType_ = 5;
+                solutionStatus_ = 2;
                 return;
             }
-
             J(i, j) = yprime[j];
         }
     }
@@ -727,12 +707,16 @@ void SteadyState::classifyState( const double* T )
     }
 }
 
-static bool isSolutionPositive( const vector< double >& x )
+static bool isSolutionValid( const vector< double >& x )
 {
-    for ( vector< double >::const_iterator
-            i = x.begin(); i != x.end(); ++i )
+    for( auto v : x )
     {
-        if ( *i < 0.0 )
+        if ( std::isnan( v ) or std::isinf( v ) )
+        {
+            cout << "Warning: SteadyState iteration gave nan/inf concs\n";
+            return false;
+        }
+        else if( v < 0.0 )
         {
             cout << "Warning: SteadyState iteration gave negative concs\n";
             return false;
@@ -760,7 +744,6 @@ void SteadyState::settle( bool forceSetup )
     // Setting up matrices and vectors for the calculation.
     unsigned int nConsv = numVarPools_ - rank_;
     double * T = (double *) calloc( nConsv, sizeof( double ) );
-    unsigned int i, j;
 
     // Setting up matrices and vectors for the calculation.
     Id ksolve = Field< Id >::get( stoich_, "ksolve" );
@@ -773,63 +756,85 @@ void SteadyState::settle( bool forceSetup )
     ss.ri.Nr = Nr_;
     ss.ri.gamma = gamma_;
     ss.ri.pool = &pool_;
-    ss.ri.nVec = LookupField< unsigned int, vector< double > >::get( ksolve,"nVec", 0 );
+    ss.ri.nVec = LookupField< unsigned int, vector< double > >::get(
+             ksolve,"nVec", 0 
+             );
     ss.ri.convergenceCriterion = convergenceCriterion_;
 
-
-    // Starting point 
+    // This gives the starting point for finding the solution.
     vector<value_type_> init( numVarPools_ );
-    for( size_t i = 0; i < numVarPools_; i ++ )
-        init[i] = max( 0.0, sqrt( ss.ri.nVec[i]) );
+
+    // Instead of starting at sqrt( x ), 
+    for( size_t i = 0; i < numVarPools_; ++i )
+        init[i] = max( 0.0, sqrt(ss.ri.nVec[i]) );
 
     ss.initialize<vector<value_type_>>( init );
 
     // Fill up boundary condition values
     if ( reassignTotal_ )   // The user has defined new conservation values.
     {
-        for ( i = 0; i < nConsv; ++i )
+        for (size_t i = 0; i < nConsv; ++i )
             T[i] = total_[i];
         reassignTotal_ = 0;
     }
     else
     {
-        for ( i = 0; i < nConsv; ++i )
-            for ( j = 0; j < numVarPools_; ++j )
+        for ( size_t i = 0; i < nConsv; ++i )
+            for ( size_t j = 0; j < numVarPools_; ++j )
                 T[i] += gamma_( i, j ) * ss.ri.nVec[ j ];
         total_.assign( T, T + nConsv );
     }
 
     vector< double > repair( numVarPools_, 0.0 );
+
     for ( unsigned int j = 0; j < numVarPools_; ++j )
         repair[j] = ss.ri.nVec[j];
 
+
     int status = 1;
 
-    // Find roots 
+    // Find roots . If successful, set status to 0.
     if( ss.find_roots_gnewton( ) )
         status = 0;
 
-    nIter_ = ss.ri.nIter;
-    if ( status == 0 && isSolutionPositive( ss.ri.nVec ) )
+    if ( status == 0 && isSolutionValid( ss.ri.nVec ) )
     {
-
         solutionStatus_ = 0; // Good solution
-        
-        LookupField< unsigned int, vector< double > >::set(
-            ksolve,"nVec", 0, ss.ri.nVec );
 
-        classifyState( T );
+        cerr << "Good solution: ";
+        for( auto v : ss.ri.nVec ) cerr  << v << ",";
+        cerr << endl;
+
+        LookupField< unsigned int, vector< double > >::set(
+            ksolve, "nVec", 0, ss.ri.nVec 
+            );
+        // Check what we set
+        auto t = LookupField< unsigned int, vector< double > >::get(
+             ksolve,"nVec", 0 
+             );
+        cerr << "Checking: ";
+        for( auto v : t ) cerr << v << ",";
+        cerr << endl;
+
+        //classifyState( T );
     }
     else
     {
         cout << "Warning: SteadyState iteration failed, status = " <<
-             status_ << ", nIter = " << nIter_ << endl;
+             status_ << ", nIter = " << ss.ri.nIter << endl;
         // Repair the mess
-        for ( unsigned int j = 0; j < numVarPools_; ++j )
+        cerr << "Repair: ";
+        for( auto f : repair ) cerr << f << ", ";
+        cerr << endl;
+
+        for ( unsigned int j = 0; j < numVarPools_; j++ )
             ss.ri.nVec[j] = repair[j];
+
         solutionStatus_ = 1; // Steady state failed.
         LookupField< unsigned int, vector< double > >::set(
-            ksolve,"nVec", 0, ss.ri.nVec );
+            ksolve, "nVec", 0, ss.ri.nVec 
+            );
+
     }
 
     // Clean up.

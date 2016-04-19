@@ -9,17 +9,9 @@
 
 #include "header.h"
 
-#ifdef USE_GSL
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_odeiv2.h>
-
-#elif defined(USE_BOOST)
 #include <functional>
 using namespace std::placeholders;
 #include  "BoostSys.h"
-
-#endif
 
 #include "OdeSystem.h"
 
@@ -40,22 +32,12 @@ using namespace std::placeholders;
 
 VoxelPools::VoxelPools()
 {
-#ifdef USE_GSL
-    driver_ = 0;
-#elif defined(USE_BOOST)
-#endif
 }
 
 VoxelPools::~VoxelPools()
 {
     for ( unsigned int i = 0; i < rates_.size(); ++i )
         delete( rates_[i] );
-#ifdef USE_GSL
-    if ( driver_ )
-        gsl_odeiv2_driver_free( driver_ );
-#elif defined(USE_BOOST)
-    
-#endif
 }
 
 //////////////////////////////////////////////////////////////
@@ -64,59 +46,18 @@ VoxelPools::~VoxelPools()
 void VoxelPools::reinit( double dt )
 {
     VoxelPoolsBase::reinit();
-#ifdef USE_GSL
-    if ( !driver_ )
-        return;
-    gsl_odeiv2_driver_reset( driver_ );
-    gsl_odeiv2_driver_reset_hstart( driver_, dt );
-#elif defined(USE_BOOST)
-
-    // Fixme: Do I need to do anything here.
-#endif
 }
 
 void VoxelPools::setStoich( Stoich* s, const OdeSystem* ode )
 {
     stoichPtr_ = s;
-#ifdef USE_GSL
-    if ( ode )
-    {
-        sys_ = ode->gslSys;
-        if ( driver_ )
-            gsl_odeiv2_driver_free( driver_ );
-
-        driver_ = gsl_odeiv2_driver_alloc_y_new(
-                &sys_, ode->gslStep, ode->initStepSize,
-                ode->epsAbs, ode->epsRel 
-                );
-    }
-#elif defined(USE_BOOST)
     if(ode)
         sys_ = ode->boostSys;
-#endif
     VoxelPoolsBase::reinit();
 }
 
 void VoxelPools::advance( const ProcInfo* p )
 {
-#ifdef USE_GSL
-    double t = p->currTime - p->dt;
-    int status = gsl_odeiv2_driver_apply( driver_, &t, p->currTime, varS());
-    if ( status != GSL_SUCCESS )
-    {
-        cout << "Error: VoxelPools::advance: GSL integration error at time "
-             << t << "\n";
-        cout << "Error info: " << status << ", " <<
-             gsl_strerror( status ) << endl;
-        if ( status == GSL_EMAXITER )
-            cout << "Max number of steps exceeded\n";
-        else if ( status == GSL_ENOPROG )
-            cout << "Timestep has gotten too small\n";
-        else if ( status == GSL_EBADFUNC )
-            cout << "Internal error\n";
-        assert( 0 );
-    }
-#elif defined(USE_BOOST)
     double t = p->currTime - p->dt;
     auto system = std::bind(&VoxelPools::evalRatesUsingBoost, _1, _2, _3, sys_->params);
 
@@ -130,15 +71,10 @@ void VoxelPools::advance( const ProcInfo* p )
      *-----------------------------------------------------------------------------
      */
     sys_->stepper.do_step( system , Svec(),  p->currTime, p->dt);
-
-#endif
 }
 
 void VoxelPools::setInitDt( double dt )
 {
-#ifdef USE_GSL
-    gsl_odeiv2_driver_reset_hstart( driver_, dt );
-#endif
 }
 
 // static func. This is the function that goes into either Gsl solver.
@@ -159,18 +95,15 @@ int VoxelPools::evalRatesUsingGSL( double t, const double* y, double *dydt, void
     	*/
     vp->stoichPtr_->updateFuncs( q, t );
     vp->updateRates( y, dydt );
-#ifdef USE_GSL
-    return GSL_SUCCESS;
-#else
     return 0;
-#endif
 }
 
-void VoxelPools::evalRatesUsingBoost( const state_type_& y,  state_type_& dydt
+void VoxelPools::evalRatesUsingBoost( const vector_type_& y,  vector_type_& dydt
         , const double t, void* params)
 {
     VoxelPools* vp = reinterpret_cast< VoxelPools* >( params );
     double q = y[0];
+
     vp->stoichPtr_->updateFuncs( &q, t );
     vp->updateRates( &y[0], &dydt[0] );
 }

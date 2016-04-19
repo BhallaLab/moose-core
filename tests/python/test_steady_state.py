@@ -93,6 +93,7 @@ def main():
         bvec.append( b.conc )
         a.concInit += deltaA
         print i, a.conc, b.conc
+
     pylab.plot( numpy.log10( avec ), numpy.log10( bvec ), label='b vs a up' )
     # Now go down.
     avec = []

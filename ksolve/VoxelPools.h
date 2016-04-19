@@ -48,14 +48,12 @@ public:
     /// This is the function which evaluates the rates.
     static int evalRatesUsingGSL( double t, const double* y, double *dydt, void* params );
 
-#ifdef USE_BOOST
     static void evalRatesUsingBoost( 
-            const state_type_& y 
-            ,  state_type_& dydt
+            const vector_type_& y 
+            ,  vector_type_& dydt
             ,  const double t 
             , void* params
             );
-#endif
 
     //////////////////////////////////////////////////////////////////
     // Rate manipulation and calculation functions
@@ -98,12 +96,7 @@ public:
     /// Used for debugging.
     void print() const;
 private:
-#ifdef USE_GSL
-    gsl_odeiv2_driver* driver_;
-    gsl_odeiv2_system sys_;
-#elif defined(USE_BOOST)
     BoostSys* sys_;                             /* The BOOST ode system. */
-#endif
 };
 
 #endif	// _VOXEL_POOLS_H

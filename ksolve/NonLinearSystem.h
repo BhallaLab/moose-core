@@ -22,8 +22,8 @@
 #include <functional>
 #include <cerrno>
 #include <iomanip>
+#include <limits>
 #include <algorithm>
-#include <stdexcept>
 
 // Boost ublas library of matrix algebra.
 #include <boost/numeric/ublas/matrix.hpp>
@@ -110,9 +110,9 @@ public:
         return result;
     }
 
-    void apply( )
+    int apply( )
     {
-        system(x_, f_);
+        return system(x_, f_);
     }
 
     int compute_jacobians( const vector_type& x, bool compute_inverse = true )
@@ -122,10 +122,7 @@ public:
             {
                 vector_type temp = x;
                 temp[j] += dx_;
-                system( temp, x2 ); 
-                system( x, x1 );
-                double df = (x2[i] - x1[i]) / dx_;
-                J_(i, j) = df;
+                J_(i, j) = (compute_at(temp)[i] - compute_at(x)[i]) / dx_;
             }
 
         // is_jacobian_valid_ = true;
@@ -172,17 +169,23 @@ public:
         {
             double temp = x[i] * x[i] ;
 
+#if 0
             // if overflow
-            if ( std::isnan( temp ) || std::isinf( temp ) )
-                return ERANGE;
-
+            if ( std::isnan( temp ) or std::isinf( temp ) )
+            {
+                cerr << "Failed: ";
+                for( auto v : ri.nVec ) cerr << v << ", ";
+                cerr << endl;
+                return -1;
+            }
+#endif
             ri.nVec[i] = temp;
         }
-        vector< double > vels;
 
+        vector< double > vels;
         ri.pool->updateReacVelocities( &ri.nVec[0], vels );
 
-        assert( vels.size_() == static_cast< unsigned int >( ri.num_reacs ) );
+        assert( vels.size() == static_cast< unsigned int >( ri.num_reacs ) );
 
         // y = Nr . v
         // Note that Nr is row-echelon: diagonal and above.
@@ -203,7 +206,7 @@ public:
 
             f[ i + ri.rank] = dT ;
         }
-        return EXIT_SUCCESS;
+        return 0;
     }
 
 
@@ -216,31 +219,36 @@ public:
      * @return  If successful, return true. Check the variable `x_` at
      * which the system f_ is close to zero (within  the tolerance).
      */
-    bool find_roots_gnewton( 
-            double tolerance = 1e-6
-            , size_t max_iter = 100
-            )
+    bool find_roots_gnewton( double tolerance = 1e-7 , size_t max_iter = 100)
     {
         double norm2OfDiff = 1.0;
         size_t iter = 0;
-        apply();
-        // Step towards zero.
-        while( ublas::norm_2(f_) > tolerance and iter <= max_iter)
+        int status = apply();
+
+        cerr << "Begin with" << x_ << endl;
+
+        while( ublas::norm_2(f_) >= tolerance )
         {
-            apply();
             iter += 1;
             compute_jacobians( x_, true );
             vector_type correction = ublas::prod( invJ_, f_ );
             x_ -=  correction;
+
+            // If could not compute the value of system successfully.
+            status = apply();
+            if( 0 != status )
+                return false;
+
+            if( iter >= max_iter )
+                break;
+
         }
 
         ri.nIter = iter;
 
-        if( iter > max_iter )
-        {
-            cerr << "Warn: Cant compute in given iter nums " << iter << endl;
+        if( iter >= max_iter )
             return false;
-        }
+
         return true;
     }
 
@@ -277,89 +285,51 @@ public:
     }
 
     /**
-     * @brief Computes the correction term.
-     *
+     * @brief Makes the first guess. After this call the Newton method.
      */
-    bool correction_step(  )
+    void correction_step(  )
     {
         // Get the jacobian at current point. Notice that in this method, we
         // don't have to compute inverse of jacobian
 
-        compute_jacobians( x_, false );
-        
-        vector_type direction = ublas::prod( J_, x_ );
+        vector_type direction( size_ );
 
         // Now take the largest step possible such that the value of system at
         // (x_ - step ) is lower than the value of system as x_.
         vector_type nextState( size_ );
 
-        double diffF = 10.0;
-        double factor = 0.13;
+        apply();
+
+        unsigned int i = 0;
+
+        double factor = 1e-2;
         while( true )
         {
-            nextState = x_ - (factor * direction);
-            diffF = ublas::norm_2( compute_at( nextState )) 
-                - ublas::norm_2( compute_at(x_) );
-
-            /** 
-             * No need to contnue. Usually we should get negative value.
-             */
-            if( diffF < 0.0 )
-            {
-                x_ = nextState;
-                return true;
-            }
-
-            /** 
-             * But we don't want to get caught in infinite loop. So when diffF
-             * goes to zero, just terminate. 
-             */
-            else if( diffF == 0.0 )
-            {
-                return false;
-            }
-
-
-            factor = factor / 2.0;
-        }
-        return true;
-    }
-
-    bool find_roots_gradient_descent ( double tolerance = 1e-6 
-            , size_t max_iter = 50)
-    {
-        
-        /*-----------------------------------------------------------------------------
-         *  This algorithm has following steps.
-         *
-         *  while "not satisfied" do
-         *      find a good search direction (usually the steepest slope).
-         *      step into that direction by "some amount"
-         *-----------------------------------------------------------------------------*/
-        double startVal = ublas::norm_2( compute_at( x_ ));
-        double currentVal;
-        while( true )
-        {
-
-            if( ! correction_step( ) )
-                return false;
+            i += 1;
+            compute_jacobians( x_, false );
+            // Make a move in either side of direction. In whichever direction
+            // the function decreases.
+            direction = ublas::prod( J_, f_ );
+            nextState = x_ - factor * direction;
+            if( ublas::norm_2( compute_at( nextState ) ) >= ublas::norm_2(compute_at(x_)))
+                factor = factor / 2.0;
             else
-                currentVal = ublas::norm_2( compute_at( x_ ));
+            {
+                cerr << "Correction term applied ";
+                x_ = nextState;
+                apply();
+                break;
+            }
 
-            // This is a cool solution.
-            if( currentVal <= tolerance )
-                return true;
-
-            // We are stuck
-            if( currentVal == startVal )
-                return false;
+            if ( i > 20 )
+                break;
         }
     }
 
 public:
     const size_t size_;
 
-    double dx_ = 1.5e-6; 
+    double dx_ = sqrt( numeric_limits<double>::epsilon() ); 
 
     vector_type f_;
     vector_type x_;

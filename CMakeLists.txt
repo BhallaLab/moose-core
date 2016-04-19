@@ -70,9 +70,9 @@ option(NOTIFY_PROGRESS "Show progress of simulation" OFF)
 option(ENABLE_LOGGER  "Enable MOOSE logger [Deprecated]" OFF)
 
 ## Unit testing and debug mode.
-option(DEBUG "Build with debug support" OFF)
+option(DEBUG "Build with debug support" ON)
 option(GPROF "Build for profiling using gprof" OFF)
-option(ENABLE_UNIT_TESTS "Enable unit tests (DEBUG should also be ON)" OFF)
+option(ENABLE_UNIT_TESTS "Enable unit tests (DEBUG should also be ON)" ON)
 option(WITH_PYTHON "Build native python extension" ON)
 option(WITH_MPI  "Enable Openmpi support" OFF)
 option(WITH_CURSES "Enable ncurses support (deprecated)" OFF)

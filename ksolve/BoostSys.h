@@ -12,23 +12,25 @@
  *  Before writing typedef for stepper read this 
  *  http://stackoverflow.com/questions/36564285/template-parameters-of-boostnumericodeintrunge-kutta-x-compatible-with-c/36564610?noredirect=1#comment60732822_36564610
  *-----------------------------------------------------------------------------*/
-#ifndef USE_CUDA
+#ifdef USE_CUDA
 typedef double value_type_;
-typedef std::vector<value_type_> state_type_;
-typedef boost::numeric::odeint::runge_kutta4< state_type_ > stepper_type_;
-//typedef boost::numeric::odeint::runge_kutta_dopri5< state_type_ > stepper_type_;
-//typedef boost::numeric::odeint::runge_kutta_cash_karp54< state_type_ > stepper_type_;
-#else
-typedef double value_type_;
-typedef trust::device_vector< value_type_ > state_type_;
+typedef trust::device_vector< value_type_ > vector_type_;
 typedef boost::numeric::odeint::runge_kutta_dopri5< 
-        state_type_
+        vector_type_
         , value_type_
-        , state_type_
+        , vector_type_
         , value_type_
         , boost::numeric::odeint::thrust_algebra
         , boost::numeric::odeint::thrust_operations
     >  stepper_type_;
+#else
+
+typedef double value_type_;
+typedef std::vector<value_type_> vector_type_;
+typedef boost::numeric::odeint::runge_kutta4< vector_type_ > stepper_type_;
+// typedef boost::numeric::odeint::runge_kutta_dopri5< vector_type_ > stepper_type_;
+//typedef boost::numeric::odeint::runge_kutta_cash_karp54< vector_type_ > stepper_type_;
+//
 #endif
 
 /*
