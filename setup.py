@@ -86,8 +86,8 @@ LICENSE = "GPLv3"
 AUTHOR = '(alphabetically) Upinder Bhalla, Niraj Dudani, Aditya Gilra, Aviral Goel, GV Harsharani, Subhasis Ray and Dilawar Singh'
 PLATFORMS = "Linux, Windows/cygwin"
 
-import neuroml
-VERSION = neuroml.__version__
+import moose
+VERSION = moose.__version__
 
 BUILD_TARGET = 'moose._moose'
 SOURCES=['external/muparser/src/muParser.cpp',

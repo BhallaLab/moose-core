@@ -37,9 +37,12 @@ try:
 except Exception:
     suffix = '.so'
 
+import moose
+VERSION = moose.__version__
+
 setup(
         name='moose',
-        version='3.0.2',
+        version=VERSION,
         description='MOOSE python scripting module.',
         author='Dilwar Singh',
         author_email='dilawars@ncbs.res.in',

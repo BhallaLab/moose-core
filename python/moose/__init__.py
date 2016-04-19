@@ -32,6 +32,8 @@ if os.path.isfile(cmake_file):
     for line in open(cmake_file):
         if 'MOOSE_VERSION' in line:
             __version__ = line.split('"')[1]
+else:
+    print("Cannot set Moose version")
 
     
 
