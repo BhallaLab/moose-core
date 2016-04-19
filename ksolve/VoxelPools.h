@@ -97,6 +97,10 @@ public:
     void print() const;
 private:
     BoostSys* sys_;                             /* The BOOST ode system. */
+
+    std::function< void( const vector_type_&
+            , vector_type_&
+            , const double ) > system;
 };
 
 #endif	// _VOXEL_POOLS_H

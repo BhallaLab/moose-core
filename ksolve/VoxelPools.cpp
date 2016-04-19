@@ -59,7 +59,7 @@ void VoxelPools::setStoich( Stoich* s, const OdeSystem* ode )
 void VoxelPools::advance( const ProcInfo* p )
 {
     double t = p->currTime - p->dt;
-    auto system = std::bind(&VoxelPools::evalRatesUsingBoost, _1, _2, _3, sys_->params);
+    system = std::bind(&VoxelPools::evalRatesUsingBoost, _1, _2, _3, sys_->params);
 
     /*-----------------------------------------------------------------------------
      * Using integrate function works with with default stepper type.
