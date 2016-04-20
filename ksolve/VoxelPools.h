@@ -48,7 +48,7 @@ public:
 
 #ifdef USE_BOOST
     static void evalRatesUsingBoost( 
-            const state_type_& y 
+             const state_type_& y
             ,  state_type_& dydt
             ,  const double t 
             , void* params

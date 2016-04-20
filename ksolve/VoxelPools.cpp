@@ -129,6 +129,9 @@ void VoxelPools::advance( const ProcInfo* p )
      *  http://boostw.boost.org/doc/libs/1_56_0/boost/numeric/odeint/integrate/integrate.hpp
      *-----------------------------------------------------------------------------
      */
+    VoxelPools* vp = reinterpret_cast< VoxelPools* >( sys_->params );
+    vp->stoichPtr_->updateFuncs( &Svec()[0], t );
+
     sys_->stepper.do_step( system , Svec(),  p->currTime, p->dt);
 
 #endif
@@ -166,12 +169,11 @@ int VoxelPools::evalRatesUsingGSL( double t, const double* y, double *dydt, void
 #endif
 }
 
-void VoxelPools::evalRatesUsingBoost( const state_type_& y,  state_type_& dydt
+// state_type_ y is no longer constant since updateFuncs updates it.
+void VoxelPools::evalRatesUsingBoost( const state_type_& y , state_type_& dydt
         , const double t, void* params)
 {
     VoxelPools* vp = reinterpret_cast< VoxelPools* >( params );
-    double q = y[0];
-    vp->stoichPtr_->updateFuncs( &q, t );
     vp->updateRates( &y[0], &dydt[0] );
 }
 
