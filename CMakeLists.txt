@@ -10,7 +10,17 @@ if(COMMAND cmake_policy)
 endif(COMMAND cmake_policy)
 
 project(moose)
-set(MOOSE_VERSION "3.0.2")
+
+# Set moose version
+# Get the latest abbreviated commit hash of the working branch
+execute_process(
+  COMMAND git describe --tags --long
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  OUTPUT_VARIABLE GIT_VERSION_OUTPUT
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+add_definitions( -DMOOSE_VERSION="${GIT_VERSION_OUTPUT}")
+
 include(FindPkgConfig)
 
 # This snippet is from LLVM project.
