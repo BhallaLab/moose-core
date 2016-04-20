@@ -9,9 +9,8 @@
 
 #include "header.h"
 
-#include <functional>
-using namespace std::placeholders;
 #include  "BoostSys.h"
+#include <boost/bind.hpp>
 
 #include "OdeSystem.h"
 
@@ -59,7 +58,7 @@ void VoxelPools::setStoich( Stoich* s, const OdeSystem* ode )
 void VoxelPools::advance( const ProcInfo* p )
 {
     double t = p->currTime - p->dt;
-    system = std::bind(&VoxelPools::evalRatesUsingBoost, _1, _2, _3, sys_->params);
+    system = boost::bind(&VoxelPools::evalRatesUsingBoost, _1, _2, _3, sys_->params);
 
     /*-----------------------------------------------------------------------------
      * Using integrate function works with with default stepper type.
@@ -70,7 +69,17 @@ void VoxelPools::advance( const ProcInfo* p )
      *  http://boostw.boost.org/doc/libs/1_56_0/boost/numeric/odeint/integrate/integrate.hpp
      *-----------------------------------------------------------------------------
      */
+    // If step is not already taken, take the step.
     sys_->stepper.do_step( system , Svec(),  p->currTime, p->dt);
+#if 0
+    static double oldTime = 0;
+    if( p->currTime > oldTime )
+    {
+        //integrate_const( sys_->stepper, system, Svec(), t, p->currTime, p->dt);
+        sys_->stepper.do_step( system , Svec(),  p->currTime, p->dt);
+        oldTime = p->currTime;
+    }
+#endif
 }
 
 void VoxelPools::setInitDt( double dt )
@@ -102,10 +111,14 @@ void VoxelPools::evalRatesUsingBoost( const vector_type_& y,  vector_type_& dydt
         , const double t, void* params)
 {
     VoxelPools* vp = reinterpret_cast< VoxelPools* >( params );
-    double q = y[0];
+    double y0 = y[0];
+    vp->stoichPtr_->updateFuncs( &y0, t );
 
-    vp->stoichPtr_->updateFuncs( &q, t );
-    vp->updateRates( &y[0], &dydt[0] );
+    double dydt0[dydt.size()];
+    for( size_t i = 0; i < dydt.size(); i ++ )
+        dydt0[i] = dydt[i];
+
+    vp->updateRates( &y[0], dydt0 );
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -170,9 +183,14 @@ void VoxelPools::updateRates( const double* s, double* yprime ) const
     }
 
     for (unsigned int i = 0; i < totVar; ++i)
-        *yprime++ = N.computeRowRate( i , v );
+    {
+        yprime[i] = N.computeRowRate( i , v );
+    }
+
     for (unsigned int i = 0; i < totInvar ; ++i)
-        *yprime++ = 0.0;
+    {
+        yprime[totVar+i]= 0.0;
+    }
 }
 
 /**
