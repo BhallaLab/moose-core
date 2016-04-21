@@ -15,8 +15,8 @@
 #ifndef USE_CUDA
 typedef double value_type_;
 typedef std::vector<value_type_> state_type_;
-//typedef boost::numeric::odeint::runge_kutta4< state_type_ > stepper_type_;
-typedef boost::numeric::odeint::runge_kutta_dopri5< state_type_ > stepper_type_;
+typedef boost::numeric::odeint::runge_kutta4< state_type_ > stepper_type_;
+//typedef boost::numeric::odeint::runge_kutta_dopri5< state_type_ > stepper_type_;
 //typedef boost::numeric::odeint::runge_kutta_cash_karp54< state_type_ > stepper_type_;
 #else
 typedef double value_type_;
