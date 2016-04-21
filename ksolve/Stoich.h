@@ -458,7 +458,13 @@ public:
     void updateReacVelocities( const double* s, vector< double >& vel,
                                unsigned int volIndex ) const;
 
-    /// Updates the function values, within s.
+    /**
+     * @brief  Updates the function values (within s). The value comes from
+     * evaluation from muParser code.
+     *
+     * @param s An array of double. 
+     * @param t Time.
+     */
     void updateFuncs( double* s, double t ) const;
 
     /// Updates the rates for cross-compartment reactions.

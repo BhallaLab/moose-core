@@ -58,8 +58,19 @@ void VoxelPools::setStoich( Stoich* s, const OdeSystem* ode )
 
 void VoxelPools::advance( const ProcInfo* p )
 {
-    double t = p->currTime - p->dt;
-    auto system = std::bind(&VoxelPools::evalRatesUsingBoost, _1, _2, _3, sys_->params);
+
+    /*-----------------------------------------------------------------------------
+    NOTICE: 04/21/2016 11:31:42 AM
+
+    We need to call this function here (unlike in GSL solver) because there
+    is no way we can update const vector_type_& y in evalRatesUsingBoost
+    function. In gsl implmentation one could do it, because const_cast can
+    take away the constantness of double*. This probably makes the call bit
+    cleaner.
+     *-----------------------------------------------------------------------------*/
+
+    VoxelPools* vp = reinterpret_cast< VoxelPools* >( sys_->params );
+    vp->stoichPtr_->updateFuncs( &Svec()[0], p->currTime );
 
     /*-----------------------------------------------------------------------------
      * Using integrate function works with with default stepper type.
@@ -70,6 +81,7 @@ void VoxelPools::advance( const ProcInfo* p )
      *  http://boostw.boost.org/doc/libs/1_56_0/boost/numeric/odeint/integrate/integrate.hpp
      *-----------------------------------------------------------------------------
      */
+    auto system = std::bind(&VoxelPools::evalRatesUsingBoost, _1, _2, _3, sys_->params);
     sys_->stepper.do_step( system , Svec(),  p->currTime, p->dt);
 }
 
@@ -102,9 +114,6 @@ void VoxelPools::evalRatesUsingBoost( const vector_type_& y,  vector_type_& dydt
         , const double t, void* params)
 {
     VoxelPools* vp = reinterpret_cast< VoxelPools* >( params );
-    double q = y[0];
-
-    vp->stoichPtr_->updateFuncs( &q, t );
     vp->updateRates( &y[0], &dydt[0] );
 }
 
