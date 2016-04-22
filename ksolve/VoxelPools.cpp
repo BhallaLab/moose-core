@@ -85,9 +85,9 @@ void VoxelPools::advance( const ProcInfo* p )
      *-----------------------------------------------------------------------------
      */
     auto system = std::bind(&VoxelPools::evalRates, _1, _2, _3, vp);
-    auto stepper = odeint::make_controlled<rk_karp_stepper_type_>( 1e-4, 1e-6 );
-    double absTol = 1e-4;
-    double relTol = 1e-6;
+
+    double absTol = sys_->epsAbs_;
+    double relTol = sys_->epsRel_;
 
     string method = sys_->getMethod();
     if( method == "rk2" )
@@ -156,7 +156,6 @@ void VoxelPools::advance( const ProcInfo* p )
         rk_felhberg_stepper_type_ stepper;
         stepper.do_step( system , Svec(),  p->currTime, p->dt);
     }
-
     else if( method == "rk8a" ) 
     {
         auto stepper = odeint::make_controlled<rk_felhberg_stepper_type_>( 

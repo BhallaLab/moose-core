@@ -8,17 +8,9 @@
 **********************************************************************/
 #include "header.h"
 
-#ifdef USE_GSL
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_odeiv2.h>
-
-#elif defined(USE_BOOST)
-
 #include <boost/numeric/odeint.hpp>
 #include <boost/bind.hpp>
 #include "BoostSys.h"
-#endif
 
 #include "OdeSystem.h"
 #include "VoxelPoolsBase.h"
@@ -319,10 +311,12 @@ void Ksolve::setStoich( Id stoich )
     if ( !isBuilt_ )
     {
         OdeSystem ode;
+
         ode.epsAbs = epsAbs_;
         ode.epsRel = epsRel_;
-        // ode.initStepSize = getEstimatedDt();
+
         ode.initStepSize = 0.01; // This will be overridden at reinit.
+
         unsigned int numVoxels = pools_.size();
         unsigned int dimension = stoichPtr_->getNumAllPools();
 
@@ -331,6 +325,9 @@ void Ksolve::setStoich( Id stoich )
             return;
 
         ode.boostSys = new BoostSys( method_ );
+        ode.boostSys->epsRel_ = epsRel_;
+        ode.boostSys->epsAbs_ = epsAbs_;
+
         for ( unsigned int i = 0 ; i < numVoxels; ++i )
         {
             ode.boostSys->params = &pools_[i];

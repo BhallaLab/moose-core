@@ -41,6 +41,9 @@ class BoostSys
 
         std::string getMethod( void );
 
+    public:
+        double epsAbs_;
+        double epsRel_;
 
     private:
         std::string method_;
