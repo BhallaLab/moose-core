@@ -3,12 +3,10 @@
  *
  *       Filename:  BoostSystem.cpp
  *
- *    Description:  
+ *    Description:  Ode system described boost library.
  *
- *        Version:  1.0
  *        Created:  04/11/2016 10:58:34 AM
- *       Revision:  none
- *       Compiler:  gcc
+ *       Compiler:  g++
  *
  *         Author:  Dilawar Singh (), dilawars@ncbs.res.in
  *   Organization:  NCBS Bangalore
@@ -19,14 +17,17 @@
 #include "BoostSys.h"
 #include <iostream>
 
-BoostSys::BoostSys()
-{
-
+BoostSys::BoostSys( std::string method )
+{  
+    method_ = method;
 }
 
 
 BoostSys::~BoostSys()
+{  }
+
+
+std::string BoostSys::getMethod( )
 {
-
+    return method_;
 }
-

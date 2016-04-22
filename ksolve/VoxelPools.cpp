@@ -85,20 +85,104 @@ void VoxelPools::advance( const ProcInfo* p )
      *-----------------------------------------------------------------------------
      */
     auto system = std::bind(&VoxelPools::evalRates, _1, _2, _3, vp);
-
-#if 0
-    // do_step only works if stepper is not ErrorStepper or DenseStepper.
-    rk4_stepper_type_ stepper;
-    stepper.do_step( system , Svec(),  p->currTime, p->dt);
-#else
     auto stepper = odeint::make_controlled<rk_karp_stepper_type_>( 1e-4, 1e-6 );
-    odeint::integrate_adaptive( stepper, system, Svec()
-            , p->currTime - p->dt 
-            , p->currTime
-            , p->dt 
-            );
-#endif
+    double absTol = 1e-4;
+    double relTol = 1e-6;
+
+    string method = sys_->getMethod();
+    if( method == "rk2" )
+    {
+        rk_midpoint_stepper_type_ stepper;
+        stepper.do_step( system , Svec(),  p->currTime, p->dt);
+    }
+    else if( method == "rk4" )
+    {
+        // Fixed step size stepper.
+        rk_karp_stepper_type_ stepper;
+        stepper.do_step( system , Svec(),  p->currTime, p->dt);
+    }
+    else if( method == "rk5")
+    {
+        // Adaptive step size stepper.
+        rk_karp_stepper_type_ stepper;
+        stepper.do_step( system , Svec(),  p->currTime, p->dt);
+    }
+    else if( method == "rk5a")
+    {
+        // Adaptive step size stepper.
+        auto stepper = odeint::make_controlled<rk_karp_stepper_type_>( absTol, relTol);
+        odeint::integrate_adaptive( stepper, system, Svec()
+                , p->currTime - p->dt 
+                , p->currTime
+                , p->dt 
+                );
+    }
+    else if ("rk54" == method )
+    {
+        rk_karp_stepper_type_ stepper;
+        stepper.do_step( system , Svec(),  p->currTime, p->dt);
+    }
+    else if ("rk54a" == method )
+    {
+        auto stepper = odeint::make_controlled<rk_karp_stepper_type_>(
+                absTol, relTol 
+                );
+
+        odeint::integrate_adaptive( stepper, system, Svec()
+                , p->currTime - p->dt 
+                , p->currTime
+                , p->dt 
+                );
+    }
+    else if ("rk5" == method )
+    {
+        rk_dopri_stepper_type_ stepper;
+        stepper.do_step( system , Svec(),  p->currTime, p->dt);
+    }
+    else if ("rk5a" == method )
+    {
+        auto stepper = odeint::make_controlled<rk_dopri_stepper_type_>( 
+                absTol, relTol 
+                );
+
+        odeint::integrate_adaptive( stepper, system, Svec()
+                , p->currTime - p->dt 
+                , p->currTime
+                , p->dt 
+                );
+    }
+    else if( method == "rk8" ) 
+    {
+        rk_felhberg_stepper_type_ stepper;
+        stepper.do_step( system , Svec(),  p->currTime, p->dt);
+    }
+
+    else if( method == "rk8a" ) 
+    {
+        auto stepper = odeint::make_controlled<rk_felhberg_stepper_type_>( 
+                absTol, relTol 
+                );
+        odeint::integrate_adaptive( stepper, system, Svec()
+                , p->currTime - p->dt 
+                , p->currTime
+                , p->dt 
+                );
+    }
+
+    else
+    {
+        auto stepper = odeint::make_controlled<rk_karp_stepper_type_>( 
+                absTol, relTol 
+                );
+
+        odeint::integrate_adaptive( stepper, system, Svec()
+                , p->currTime - p->dt 
+                , p->currTime
+                , p->dt 
+                );
+    }
 }
+
 
 
 void VoxelPools::setInitDt( double dt )

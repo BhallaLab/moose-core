@@ -267,21 +267,7 @@ string Ksolve::getMethod() const
 
 void Ksolve::setMethod( string method )
 {
-    if ( method == "rk5" || method == "gsl" )
-    {
-        method_ = "rk5";
-    }
-    else if ( method == "rk4"  || method == "rk2" ||
-              method == "rk8" || method == "rkck" )
-    {
-        method_ = method;
-    }
-    else
-    {
-        cout << "Warning: Ksolve::setMethod: '" << method <<
-             "' not known, using rk5\n";
-        method_ = "rk5";
-    }
+    method_ = method;
 }
 
 double Ksolve::getEpsAbs() const
@@ -324,36 +310,6 @@ Id Ksolve::getStoich() const
     return stoich_;
 }
 
-#ifdef USE_GSL
-void innerSetMethod( OdeSystem& ode, const string& method )
-{
-    ode.method = method;
-    if ( method == "rk5" )
-    {
-        ode.gslStep = gsl_odeiv2_step_rkf45;
-    }
-    else if ( method == "rk4" )
-    {
-        ode.gslStep = gsl_odeiv2_step_rk4;
-    }
-    else if ( method == "rk2" )
-    {
-        ode.gslStep = gsl_odeiv2_step_rk2;
-    }
-    else if ( method == "rkck" )
-    {
-        ode.gslStep = gsl_odeiv2_step_rkck;
-    }
-    else if ( method == "rk8" )
-    {
-        ode.gslStep = gsl_odeiv2_step_rk8pd;
-    }
-    else
-    {
-        ode.gslStep = gsl_odeiv2_step_rkf45;
-    }
-}
-#endif
 
 void Ksolve::setStoich( Id stoich )
 {
@@ -370,34 +326,16 @@ void Ksolve::setStoich( Id stoich )
         unsigned int numVoxels = pools_.size();
         unsigned int dimension = stoichPtr_->getNumAllPools();
 
-#ifdef USE_GSL
-        ode.gslSys.dimension = stoichPtr_->getNumAllPools();
-        if ( ode.gslSys.dimension == 0 )
-            return; // No pools, so don't bother.
-
-        innerSetMethod( ode, method_ );
-        ode.gslSys.function = &VoxelPools::evalRatesUsingGSL;
-        ode.gslSys.jacobian = 0;
-        innerSetMethod( ode, method_ );
-        for ( unsigned int i = 0 ; i < numVoxels; ++i )
-        {
-            ode.gslSys.params = &pools_[i];
-            pools_[i].setStoich( stoichPtr_, &ode );
-            // pools_[i].setIntDt( ode.initStepSize ); // We're setting it up anyway
-        }
-
-#elif defined(USE_BOOST)
         // We assign the function in VoxelPools.cpp file.
         if( 0 == dimension )
             return;
 
-        ode.boostSys = new BoostSys();
+        ode.boostSys = new BoostSys( method_ );
         for ( unsigned int i = 0 ; i < numVoxels; ++i )
         {
             ode.boostSys->params = &pools_[i];
             pools_[i].setStoich( stoichPtr_, &ode );
         }
-#endif
         isBuilt_ = true;
     }
 }

@@ -63,7 +63,7 @@ def main():
     """
     compartment = makeModel()
     ksolve = moose.Ksolve( '/model/compartment/ksolve' )
-    ksolve.setMethod('rk4')
+    ksolve.setMethod('rk5a')
     stoich = moose.Stoich( '/model/compartment/stoich' )
     stoich.compartment = compartment
     stoich.ksolve = ksolve
