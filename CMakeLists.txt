@@ -78,7 +78,6 @@ option(WITH_MPI  "Enable Openmpi support" OFF)
 option(WITH_CURSES "Enable ncurses support (deprecated)" OFF)
 
 option(USE_BOOST "Use boost library (experimental, development)" ON)
-option(USE_GSL   "Use gsl library instead of boost" OFF)
 
 # If SBML is available, it will automaticall enable the support. If ON, then
 # libSBML must be present.
@@ -269,28 +268,7 @@ ELSEIF(USE_BOOST)
     find_package( Boost REQUIRED  )
     find_package( LAPACK REQUIRED )
     add_definitions( -DUSE_BOOST )
-    add_definitions( -UUSE_GSL )
     include_directories( ${Boost_INCLUDE_DIRS} )
-ELSE()        # Fixme: If boost works, this should go away.
-    find_package(GSL 1.16)
-    if(NOT GSL_FOUND)
-        message(FATAL_ERROR 
-            "=====================================================================\n"
-            " FATAL gsl(>1.16) not found.\n\n"
-            " MOOSE requires Gnu Scientific Library (GSL) 1.16 or higher. \n"
-            " Please install the `dev` or `devel` package e.g. \n"
-            "     $ sudo apt-get install libgsl0-dev \n"
-            "     $ sudo yum install libgsl-devel \n"
-            "     $ brew install gsl \n\n"
-            " Or build and install gsl from source code \n"
-            "     https://www.gnu.org/software/gsl/ \n"
-            " After installing gsl, rerun cmake.\n\n"
-            " If you install gsl in non-standard place, set the GSL_HOME environment \n"
-            " variable. CMAKE use this to search for required files. \n"
-            "====================================================================\n"
-            )
-    endif(NOT GSL_FOUND)
-    add_definitions(-DUSE_GSL)
 endif()
 
 ## Setup hdf5
