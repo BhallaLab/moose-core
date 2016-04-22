@@ -10,8 +10,6 @@
 #include "header.h"
 
 #include <functional>
-using namespace std::placeholders;
-#include  "BoostSys.h"
 #include <boost/numeric/odeint/stepper/generation.hpp>
 
 #include "OdeSystem.h"
@@ -26,12 +24,14 @@ using namespace std::placeholders;
 #include "XferInfo.h"
 #include "ZombiePoolInterface.h"
 #include "Stoich.h"
+#include  "BoostSys.h"
 
 //////////////////////////////////////////////////////////////
 // Class definitions
 //////////////////////////////////////////////////////////////
 
 using namespace  boost::numeric;
+using namespace std::placeholders;
 
 VoxelPools::VoxelPools()
 {
@@ -85,12 +85,21 @@ void VoxelPools::advance( const ProcInfo* p )
      *-----------------------------------------------------------------------------
      */
     auto system = std::bind(&VoxelPools::evalRatesUsingBoost, _1, _2, _3, vp);
-    //sys_->stepper.do_step( system , Svec(),  p->currTime, p->dt);
 
-    auto stepper = odeint::make_controlled<stepper_type_>( 1e-4, 1e-6 );
-    odeint::integrate_adaptive( stepper, system, Svec(), p->currTime - p->dt
-            , p->currTime, p->dt );
+#if 0
+    // do_step only works if stepper is not ErrorStepper or DenseStepper.
+    rk4_stepper_type_ stepper;
+    stepper.do_step( system , Svec(),  p->currTime, p->dt);
+#else
+    auto stepper = odeint::make_controlled<rk_karp_stepper_type_>( 1e-4, 1e-6 );
+    odeint::integrate_adaptive( stepper, system, Svec()
+            , p->currTime - p->dt 
+            , p->currTime
+            , p->dt 
+            );
+#endif
 }
+
 
 void VoxelPools::setInitDt( double dt )
 {
