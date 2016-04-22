@@ -219,13 +219,11 @@ public:
      * @return  If successful, return true. Check the variable `x_` at
      * which the system f_ is close to zero (within  the tolerance).
      */
-    bool find_roots_gnewton( double tolerance = 1e-7 , size_t max_iter = 100)
+    bool find_roots_gnewton( double tolerance = 1e-7 , size_t max_iter = 20)
     {
         double norm2OfDiff = 1.0;
         size_t iter = 0;
         int status = apply();
-
-        cerr << "Begin with" << x_ << endl;
 
         while( ublas::norm_2(f_) >= tolerance )
         {

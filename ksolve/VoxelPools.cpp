@@ -12,6 +12,7 @@
 #include <functional>
 using namespace std::placeholders;
 #include  "BoostSys.h"
+#include <boost/numeric/odeint/stepper/generation.hpp>
 
 #include "OdeSystem.h"
 
@@ -29,6 +30,8 @@ using namespace std::placeholders;
 //////////////////////////////////////////////////////////////
 // Class definitions
 //////////////////////////////////////////////////////////////
+
+using namespace  boost::numeric;
 
 VoxelPools::VoxelPools()
 {
@@ -81,8 +84,12 @@ void VoxelPools::advance( const ProcInfo* p )
      *  http://boostw.boost.org/doc/libs/1_56_0/boost/numeric/odeint/integrate/integrate.hpp
      *-----------------------------------------------------------------------------
      */
-    auto system = std::bind(&VoxelPools::evalRatesUsingBoost, _1, _2, _3, sys_->params);
-    sys_->stepper.do_step( system , Svec(),  p->currTime, p->dt);
+    auto system = std::bind(&VoxelPools::evalRatesUsingBoost, _1, _2, _3, vp);
+    //sys_->stepper.do_step( system , Svec(),  p->currTime, p->dt);
+
+    auto stepper = odeint::make_controlled<stepper_type_>( 1e-6, 1e-10 );
+    odeint::integrate_adaptive( stepper, system, Svec(), p->currTime - p->dt
+            , p->currTime, p->dt );
 }
 
 void VoxelPools::setInitDt( double dt )
@@ -111,10 +118,18 @@ int VoxelPools::evalRatesUsingGSL( double t, const double* y, double *dydt, void
 }
 
 void VoxelPools::evalRatesUsingBoost( const vector_type_& y,  vector_type_& dydt
-        , const double t, void* params)
+        , const double t, VoxelPools* vp)
 {
-    VoxelPools* vp = reinterpret_cast< VoxelPools* >( params );
     vp->updateRates( &y[0], &dydt[0] );
+
+#if 0
+    // Now print y and dydt.
+    cerr << "y: ";
+    for( auto v : y ) cerr << v << ",";
+    cerr << endl << "dydt: ";
+    for( auto v : dydt ) cerr << v << ",";
+    cerr << endl;
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////

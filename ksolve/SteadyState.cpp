@@ -801,9 +801,11 @@ void SteadyState::settle( bool forceSetup )
     {
         solutionStatus_ = 0; // Good solution
 
+#if 0
         cerr << "Good solution: ";
         for( auto v : ss.ri.nVec ) cerr  << v << ",";
         cerr << endl;
+#endif
 
         LookupField< unsigned int, vector< double > >::set(
             ksolve, "nVec", 0, ss.ri.nVec 
