@@ -9,12 +9,14 @@
 
 /**
  * This program works out a steady-state value for a reaction system.
- * It uses GSL heavily, and isn't even compiled if the flag isn't set.
+ * It uses boost-ublas and lapack heavily.
+ *
  * It finds the ss value closest to the initial conditions.
  *
  * If you want to find multiple stable states, it is best to do this
  * in Python as it gives a lot of flexibility in working out how to
  * find steady states.
+ *
  * Likewise, if you want to carry out a dose-response calculation.
  */
 
@@ -67,13 +69,8 @@ struct reac_info
     VoxelPools* pool;
     vector< double > nVec;
 
-#ifdef USE_GSL
-    gsl_matrix* Nr;
-    gsl_matrix* gamma;
-#elif defined(USE_BOOST)
     ublas::matrix< value_type_ >* Nr;
     ublas::matrix< value_type_ >* gamma;
-#endif
 };
 
 const Cinfo* SteadyState::initCinfo()
@@ -263,7 +260,7 @@ const Cinfo* SteadyState::initCinfo()
         "Author", "Upinder S. Bhalla, 2009, updated 2014, NCBS",
         "Description", "SteadyState: works out a steady-state value for "
         "a reaction system. "
-        "This class uses the GSL multidimensional root finder algorithms "
+        "This class uses the multidimensional root finder algorithms "
         "to find the fixed points closest to the "
         "current molecular concentrations. "
         "When it finds the fixed points, it figures out eigenvalues of "

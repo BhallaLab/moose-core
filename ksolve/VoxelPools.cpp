@@ -84,7 +84,7 @@ void VoxelPools::advance( const ProcInfo* p )
      *  http://boostw.boost.org/doc/libs/1_56_0/boost/numeric/odeint/integrate/integrate.hpp
      *-----------------------------------------------------------------------------
      */
-    auto system = std::bind(&VoxelPools::evalRatesUsingBoost, _1, _2, _3, vp);
+    auto system = std::bind(&VoxelPools::evalRates, _1, _2, _3, vp);
 
 #if 0
     // do_step only works if stepper is not ErrorStepper or DenseStepper.
@@ -105,28 +105,7 @@ void VoxelPools::setInitDt( double dt )
 {
 }
 
-// static func. This is the function that goes into either Gsl solver.
-int VoxelPools::evalRatesUsingGSL( double t, const double* y, double *dydt, void* params )
-{
-    VoxelPools* vp = reinterpret_cast< VoxelPools* >( params );
-    // Stoich* s = reinterpret_cast< Stoich* >( params );
-    double* q = const_cast< double* >( y ); // Assign the func portion.
-
-    // Assign the buffered pools
-    // Not possible because this is a static function
-    // Not needed because dydt = 0;
-    /*
-    double* b = q + s->getNumVarPools();
-    vector< double >::const_iterator sinit = Sinit_.begin() + s->getNumVarPools();
-    for ( unsigned int i = 0; i < s->getNumBufPools(); ++i )
-    	*b++ = *sinit++;
-    	*/
-    vp->stoichPtr_->updateFuncs( q, t );
-    vp->updateRates( y, dydt );
-    return 0;
-}
-
-void VoxelPools::evalRatesUsingBoost( const vector_type_& y,  vector_type_& dydt
+void VoxelPools::evalRates( const vector_type_& y,  vector_type_& dydt
         , const double t, VoxelPools* vp)
 {
     vp->updateRates( &y[0], &dydt[0] );

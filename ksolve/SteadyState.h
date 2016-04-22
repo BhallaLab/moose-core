@@ -70,20 +70,12 @@ public:
     void recalcRemainingTotal(
     	vector< double >& y, vector< double >& tot );
     */
-#ifdef USE_GSL
-    void fitConservationRules(
-        gsl_matrix* U,
-        const vector< double >& eliminatedTotal,
-        vector< double >&yi
-    );
 
-#elif defined(USE_BOOST)
     void fitConservationRules(
         boost::numeric::ublas::matrix< value_type_ >& U
         , const vector< value_type_ >& eliminatedTotal
         , vector <value_type_> &yi
     );
-#endif
 
     ////////////////////////////////////////////////////
     // funcs to handle externally imposed changes in mol N
@@ -112,15 +104,10 @@ private:
     bool isSetup_;
     double convergenceCriterion_;
 
-#ifdef USE_GSL
-    gsl_matrix* LU_;
-    gsl_matrix* Nr_;
-    gsl_matrix* gamma_;
-#elif defined(USE_BOOST)
     boost::numeric::ublas::matrix< value_type_ > LU_;
     boost::numeric::ublas::matrix< value_type_ > Nr_;
     boost::numeric::ublas::matrix< value_type_ > gamma_;
-#endif
+
     Id stoich_;
     unsigned int numVarPools_;
     unsigned int nReacs_;

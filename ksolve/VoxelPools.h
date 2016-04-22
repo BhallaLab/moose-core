@@ -45,13 +45,8 @@ public:
     /// Set initial timestep to use by the solver.
     void setInitDt( double dt );
 
-    /// This is the function which evaluates the rates.
-    static int evalRatesUsingGSL( double t, const double* y, double *dydt, void* params );
-
-    static void evalRatesUsingBoost( 
-            const vector_type_& y 
-            ,  vector_type_& dydt
-            ,  const double t 
+    static void evalRates( const vector_type_& y 
+            ,  vector_type_& dydt ,  const double t 
             , VoxelPools* params
             );
 
