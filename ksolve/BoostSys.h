@@ -29,8 +29,15 @@ typedef double value_type_;
 typedef std::vector<value_type_> vector_type_;
 //typedef boost::numeric::odeint::runge_kutta4< vector_type_ > stepper_type_;
 //typedef boost::numeric::odeint::runge_kutta_dopri5< vector_type_ > stepper_type_;
+
+
+/*-----------------------------------------------------------------------------
+ *  This stepper type found to be most suitable for adaptive solver. The gsl
+ *  implementation has runge_kutta_fehlberg78 solver.
+ *-----------------------------------------------------------------------------*/
 typedef boost::numeric::odeint::runge_kutta_cash_karp54< vector_type_ > stepper_type_;
-//
+
+//typedef boost::numeric::odeint::runge_kutta_fehlberg78< vector_type_ > stepper_type_;
 #endif
 
 /*

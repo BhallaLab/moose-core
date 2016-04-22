@@ -87,7 +87,7 @@ void VoxelPools::advance( const ProcInfo* p )
     auto system = std::bind(&VoxelPools::evalRatesUsingBoost, _1, _2, _3, vp);
     //sys_->stepper.do_step( system , Svec(),  p->currTime, p->dt);
 
-    auto stepper = odeint::make_controlled<stepper_type_>( 1e-6, 1e-10 );
+    auto stepper = odeint::make_controlled<stepper_type_>( 1e-4, 1e-6 );
     odeint::integrate_adaptive( stepper, system, Svec(), p->currTime - p->dt
             , p->currTime, p->dt );
 }

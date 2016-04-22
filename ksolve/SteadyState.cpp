@@ -688,10 +688,6 @@ void SteadyState::classifyState( const double* T )
             // We have a problem here because numVarPools_ usually > rank
             // This means we have several zero eigenvalues.
         }
-        cerr << "Eigenvalues : " << endl;
-        for( auto e : eigenvalues_ ) cerr << e << ", ";
-        cerr << endl;
-
         if ( nNegEigenvalues_ == rank_ )
             stateType_ = 0; // Stable
         else if ( nPosEigenvalues_ == rank_ ) // Never see it.
@@ -801,12 +797,6 @@ void SteadyState::settle( bool forceSetup )
     {
         solutionStatus_ = 0; // Good solution
 
-#if 0
-        cerr << "Good solution: ";
-        for( auto v : ss.ri.nVec ) cerr  << v << ",";
-        cerr << endl;
-#endif
-
         LookupField< unsigned int, vector< double > >::set(
             ksolve, "nVec", 0, ss.ri.nVec 
             );
@@ -814,9 +804,6 @@ void SteadyState::settle( bool forceSetup )
         auto t = LookupField< unsigned int, vector< double > >::get(
              ksolve,"nVec", 0 
              );
-        cerr << "Checking: ";
-        for( auto v : t ) cerr << v << ",";
-        cerr << endl;
 
         //classifyState( T );
     }
@@ -824,10 +811,6 @@ void SteadyState::settle( bool forceSetup )
     {
         cout << "Warning: SteadyState iteration failed, status = " <<
              status_ << ", nIter = " << ss.ri.nIter << endl;
-        // Repair the mess
-        cerr << "Repair: ";
-        for( auto f : repair ) cerr << f << ", ";
-        cerr << endl;
 
         for ( unsigned int j = 0; j < numVarPools_; j++ )
             ss.ri.nVec[j] = repair[j];
