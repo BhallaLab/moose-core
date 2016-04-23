@@ -35,15 +35,16 @@ set( SRCS
     VectorTable.cpp	
     MarkovRateTable.cpp	
     MarkovChannel.cpp	
-    #MarkovGslSolver.cpp	
     MatrixOps.cpp	
     MarkovSolverBase.cpp	
     MarkovSolver.cpp	
+    MarkovBoostSolver.cpp
     VClamp.cpp	
     Spine.cpp
     )
-if(WITH_GSL)
-    list( APPEND SRCS MarkovGslSolver.cpp )
-endif(WITH_GSL)
+
+#if(WITH_GSL)
+#    list( APPEND SRCS MarkovGslSolver.cpp )
+#endif(WITH_GSL)
 
 add_library(biophysics  ${SRCS} )
