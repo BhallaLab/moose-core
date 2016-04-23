@@ -470,3 +470,10 @@ char* SparseMsg::lookupMsg( unsigned int index )
 	assert( index < msg_.size() );
 	return reinterpret_cast< char* >( msg_[index] );
 }
+
+#ifdef USE_BOOST
+double SparseMsg::mtrand( void )
+{
+    return dist( rng );
+}
+#endif

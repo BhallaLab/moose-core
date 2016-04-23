@@ -1863,3 +1863,11 @@ void Neuron::scaleHeadDiffusion( unsigned int spineNum,
 	SetGet2< unsigned int, double >::set( 
 		psdDsolve_, "setDiffScale", meshIndex, diffScale );
 }
+
+#ifdef USE_BOOST
+// return next random number generator using boost
+double Neuron::mtrand( void )
+{
+    return dist( rng );
+}
+#endif

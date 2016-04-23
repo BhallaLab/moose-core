@@ -13,6 +13,7 @@
 #include "../randnum/randnum.h"
 #include "CompartmentBase.h"
 #include "Compartment.h"
+
 /*
 #include "HHGate.h"
 #include "ChanBase.h"
@@ -211,6 +212,29 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
 		assert( doubleEq( retVm901, 0.28303358631241327 ) );
 		assert( doubleEq( retVm902, 0.0096374021108587178 ) );
 		*/
+
+
+#if 0
+                cout.precision( 12 );
+                cout << retVm100<< endl; 
+                cout << retVm101<< endl;
+                cout << retVm102<< endl;
+                cout << retVm99<< endl;
+                cout << retVm900<< endl;
+                cout << retVm901<< endl;
+                cout << retVm902<< endl;
+#endif
+
+#ifdef USE_BOOST
+
+		assert( doubleEq( retVm100, 0.189304207678 ) );
+		assert( doubleEq( retVm101, 0.352776164289 ) );
+		assert( doubleEq( retVm102, 0.367242141036 ) );
+		assert( doubleEq( retVm99,  0.123552428475 ) );
+		assert( doubleEq( retVm900, 0.0714865703958 ) );
+		assert( doubleEq( retVm901, 0.35823689362  ) );
+		assert( doubleEq( retVm902, 0.0307787676562 ) );
+#else
 		assert( doubleEq( retVm100, 0.069517018453329804 ) );
 		assert( doubleEq( retVm101, 0.32823493598699577 ) );
 		assert( doubleEq( retVm102, 0.35036493874475361 ) );
@@ -218,6 +242,7 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
 		assert( doubleEq( retVm900, 0.26414663635984065 ) );
 		assert( doubleEq( retVm901, 0.39864519810259352 ) );
 		assert( doubleEq( retVm902, 0.04818717439429359 ) );
+#endif
 
 	}
 	/*

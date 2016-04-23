@@ -27,7 +27,10 @@ class GssaVoxelPools: public VoxelPoolsBase
 				const GssaSystem* g, unsigned int rindex, double time );
 		void updateDependentRates( 
 			const vector< unsigned int >& deps, const Stoich* stoich );
-		unsigned int pickReac() const;
+
+                // Its calling its own RNG, cant be constant.
+		unsigned int pickReac();
+
 		void setNumReac( unsigned int n );
 
 		void advance( const ProcInfo* p, const GssaSystem* g );

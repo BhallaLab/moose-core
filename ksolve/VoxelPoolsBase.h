@@ -10,6 +10,12 @@
 #ifndef _VOXEL_POOLS_BASE_H
 #define _VOXEL_POOLS_BASE_H
 
+#if USE_BOOST
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_01.hpp>
+#else
+#endif
+
 /**
  * This is the base class for voxels used in reac-diffusion systems.
  * Each voxel manages all the molecular pools that live in it. This
@@ -201,6 +207,9 @@ class VoxelPoolsBase
 		/// Debugging utility
 		void print() const;
 
+#ifdef USE_BOOST
+                double mtrand( void );
+#endif
 
 
 	protected:
@@ -284,6 +293,11 @@ class VoxelPoolsBase
 		 * Applied to R2 of the RateTerm. Used only for cross reactions.
 		 */
 		vector< double > xReacScaleProducts_;
+
+#if USE_BOOST
+                boost::random::mt19937 rng;
+                boost::random::uniform_01<double> dist;
+#endif
 };
 
 #endif	// _VOXEL_POOLS_BASE_H
