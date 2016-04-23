@@ -60,6 +60,7 @@ public:
     void showMatrices();
     void randomizeInitialCondition( const Eref& e);
     static void assignY( double* S );
+
     // static void randomInitFunc();
     // void randomInit();
     ////////////////////////////////////////////////////
@@ -122,6 +123,11 @@ private:
     unsigned int solutionStatus_;
     unsigned int numFailed_;
     VoxelPools pool_;
+
+    int seed = 0;
+    boost::random::mt19937 rng;
+    boost::random::uniform_01<double> dist;
+
 };
 
 extern const Cinfo* initSteadyStateCinfo();

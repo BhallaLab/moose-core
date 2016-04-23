@@ -109,6 +109,7 @@ add_definitions(-Wall
     #-Wno-return-type-c-linkage
     -Wno-unused-variable
     -Wno-unused-function
+    -Wno-unused-local-typedefs
     #-Wno-unused-private-field
     )
 add_definitions(-fPIC)
@@ -268,7 +269,10 @@ ELSEIF(USE_BOOST)
     find_package( Boost REQUIRED  )
     find_package( LAPACK REQUIRED )
     add_definitions( -DUSE_BOOST )
-    include_directories( ${Boost_INCLUDE_DIRS} )
+    include_directories( 
+        ${Boost_INCLUDE_DIRS}
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost-numeric-bindings
+        )
 endif()
 
 ## Setup hdf5

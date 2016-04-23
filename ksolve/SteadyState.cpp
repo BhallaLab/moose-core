@@ -30,21 +30,31 @@
 #include "XferInfo.h"
 #include "ZombiePoolInterface.h"
 #include "Stoich.h"
-#include "../randnum/randnum.h"
 
 /* Root finding algorithm is implemented here */
 #include "NonLinearSystem.h"                    
-#include <boost/numeric/bindings/lapack/lapack.hpp>
-#include <boost/numeric/bindings/lapack/geev.hpp>
-using namespace boost::numeric::bindings;
+
+/*
+ * Bindings to lapack. These headers are not part of standard boost
+ * distribution. They are available with moose distribution. See 'external'
+ * folder.
+ */
+#include "boost/numeric/bindings/lapack/lapack.hpp"
+#include "boost/numeric/bindings/lapack/geev.hpp"
+
+// Random number generator
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_01.hpp>
 
 #include "VoxelPoolsBase.h"
 #include "OdeSystem.h"
 #include "VoxelPools.h"
 #include "SteadyState.h"
 
-void ss_func( const vector_type& x, void* params, vector_type& f );
+using namespace boost::numeric::bindings;
 using namespace boost::numeric;
+
+void ss_func( const vector_type& x, void* params, vector_type& f );
 unsigned int rankUsingBoost( ublas::matrix<value_type_>& U );
 
 // Limit below which small numbers are treated as zero.
@@ -329,7 +339,8 @@ SteadyState::SteadyState()
     solutionStatus_( 0 ),
     numFailed_( 0 )
 {
-    ;
+    // NOTE: Currently the RNG is seeded with 0. 
+    rng.seed( seed );
 }
 
 SteadyState::~SteadyState()
@@ -1034,7 +1045,7 @@ void SteadyState::fitConservationRules(
                 double ytot = 0.0;
                 for ( int k = j; k < lastJ; ++k )
                 {
-                    y[k] = mtrand();
+                    y[k] = dist( rng );
                     ytot += y[k] * U( i, k );
                 }
                 assert( fabs( ytot ) > EPSILON );
