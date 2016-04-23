@@ -359,7 +359,6 @@ endif(WITH_MPI)
 add_subdirectory(basecode)
 add_subdirectory(msg)
 add_subdirectory(shell)
-add_subdirectory(randnum)
 add_subdirectory(scheduling)
 add_subdirectory(biophysics)
 add_subdirectory(builtins)
@@ -458,7 +457,6 @@ list(APPEND MOOSE_LIBRARIES
     moose_builtins
     msg
     benchmarks
-    randnum
     shell
     scheduling
     moose_mpi

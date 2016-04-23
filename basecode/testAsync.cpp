@@ -23,11 +23,15 @@
 #include "SparseMsg.h"
 #include "SingleMsg.h"
 #include "OneToOneMsg.h"
-#include "../randnum/randnum.h"
 #include "../scheduling/Clock.h"
 
 #include "../shell/Shell.h"
 #include "../mpi/PostMaster.h"
+
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_01.hpp>
+
+extern double mtrand( void );
 
 void showFields()
 {
@@ -776,7 +780,6 @@ void printGrid( Element* e, const string& field, double min, double max )
 	}
 	cout << endl;
 }
-
 
 void testSparseMsg()
 {

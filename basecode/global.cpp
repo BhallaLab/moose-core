@@ -18,8 +18,11 @@
  */
 
 #include "global.h"
-#include "../external/debug/simple_logger.hpp"
 #include <numeric>
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_01.hpp>
+
+#include "../external/debug/simple_logger.hpp"
 
 /*-----------------------------------------------------------------------------
  *  This variable keep track of how many tests have been performed.
@@ -37,8 +40,35 @@ extern string joinPath( string pathA, string pathB);
 extern string fixPath( string path);
 extern string dumpStats( int  );
 
+int __rng_seed__ = 0;
+
 /* Logger */
 SimpleLogger logger;
+
+/** 
+ * @brief Set the global seed for random number generators. 
+ *
+ * FIXME: When reinit() is * called, each rng should use this value to seed
+ * itself, really?
+ *
+ * @param seed
+ */
+void mtseed( int seed ) 
+{ 
+    __rng_seed__ = seed; 
+}
+
+/**
+ * @brief Global function to generate a random number.
+ *
+ * @return 
+ */
+double mtrand( void )
+{
+    static boost::random::mt19937 rng( __rng_seed__ );
+    static boost::random::uniform_01<double> dist;
+    return dist( rng );
+}
 
 namespace moose {
     /* Check if path is OK */

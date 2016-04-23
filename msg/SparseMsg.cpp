@@ -10,8 +10,7 @@
 #include "header.h"
 #include "SparseMatrix.h"
 #include "SparseMsg.h"
-#include "../randnum/randnum.h"
-#include "../shell/Shell.h"
+#include "global.h"
 
 // Initializing static variables
 Id SparseMsg::managerId_;

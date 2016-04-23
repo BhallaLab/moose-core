@@ -18,7 +18,6 @@
 #include "Stoich.h"
 #include "GssaSystem.h"
 #include "GssaVoxelPools.h"
-#include "../randnum/randnum.h"
 
 /**
  * The SAFETY_FACTOR Protects against the total propensity exceeding
@@ -213,7 +212,6 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
 			double base = floor( n[i] );
 			assert( base >= 0.0 );
 			double frac = n[i] - base;
-			// if ( gsl_rng_uniform( rng ) > frac )
 			if ( mtrand() > frac )
 				n[i] = base;
 			else

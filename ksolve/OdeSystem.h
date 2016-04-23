@@ -13,27 +13,24 @@
 class BoostSys;
 
 class OdeSystem {
-	public:
-		OdeSystem()
-				: method( "rk5" ),
-					initStepSize( 1 ),
-					epsAbs( 1e-6 ),
-					epsRel( 1e-6 )
-		{;}
+    public:
+        OdeSystem()
+            : method( "rk54" ),
+            initStepSize( 1 ),
+            epsAbs( 1e-6 ),
+            epsRel( 1e-6 )
+    {;}
 
-		string method;
-		// GSL stuff
-#ifdef USE_GSL
-		gsl_odeiv2_system gslSys;
-		const gsl_odeiv2_step_type* gslStep;
+        string method;
 
-#elif defined(USE_BOOST)
-                BoostSys* boostSys;
+#ifdef USE_BOOST
+        BoostSys* boostSys;
 #endif
-		double initStepSize;
 
-		double epsAbs; // Absolute error
-		double epsRel; // Relative error
+        double initStepSize;
+
+        double epsAbs; // Absolute error
+        double epsRel; // Relative error
 };
 
 #endif // _ODE_SYSTEM_H
