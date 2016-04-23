@@ -932,13 +932,30 @@ static bool checkAboveZero( const vector< double >& y )
 }
 
 /**
+ * @brief Utility funtion to doing scans for steady states.
+ *
+ * @param tot
+ * @param g
+ * @param S
+ */
+void recalcTotal( vector< double >& tot, ublas::matrix<double>& g, const double* S )
+{
+    assert( g.size1() == tot.size() );
+    for ( size_t i = 0; i < g.size1(); ++i ) 
+    {
+        double t = 0.0;
+        for ( unsigned int j = 0; j < g.size2(); ++j )
+            t += g( i, j ) * S[j];
+        tot[ i ] = t;
+    }
+}
+
+/**
  * Generates a new set of values for the S vector that is a) random
  * and b) obeys the conservation rules.
  */
 void SteadyState::randomizeInitialCondition( const Eref& me )
 {
-    cerr << "yet to implement using boost" << endl;
-#ifdef USE_GSL
     Id ksolve = Field< Id >::get( stoich_, "ksolve" );
     vector< double > nVec =
         LookupField< unsigned int, vector< double > >::get(
@@ -948,24 +965,22 @@ void SteadyState::randomizeInitialCondition( const Eref& me )
     // The reorderRows function likes to have an I matrix at the end of
     // numVarPools_, so we provide space for it, although only its first
     // column is used for the total vector.
-    gsl_matrix* U = gsl_matrix_calloc ( numConsv, numVarPools_ + numConsv );
+    ublas::matrix<double> U(numConsv, numVarPools_ + numConsv, 0);
+
     for ( int i = 0; i < numConsv; ++i )
     {
         for ( unsigned int j = 0; j < numVarPools_; ++j )
-        {
-            gsl_matrix_set( U, i, j, gsl_matrix_get( gamma_, i, j ) );
-        }
-        gsl_matrix_set( U, i, numVarPools_, total_[i] );
+            U(i, j) = gamma_(i, j);
+
+        U(i, numVarPools_) = total_[i];
     }
     // Do the forward elimination
-    int rank = myGaussianDecomp( U );
+    int rank = rankUsingBoost( U );
     assert( rank = numConsv );
 
     vector< double > eliminatedTotal( numConsv, 0.0 );
     for ( int i = 0; i < numConsv; ++i )
-    {
-        eliminatedTotal[i] = gsl_matrix_get( U, i, numVarPools_ );
-    }
+        eliminatedTotal[i] = U( i, numVarPools_ );
 
     // Put Find a vector Y that fits the consv rules.
     vector< double > y( numVarPools_, 0.0 );
@@ -981,7 +996,7 @@ void SteadyState::randomizeInitialCondition( const Eref& me )
         double tot = 0.0;
         for ( unsigned int j = 0; j < numVarPools_; ++j )
         {
-            tot += y[j] * gsl_matrix_get( gamma_, i, j );
+            tot += y[j] * gamma_( i, j );
         }
         assert( fabs( tot - total_[i] ) / tot < EPSILON );
     }
@@ -995,27 +1010,24 @@ void SteadyState::randomizeInitialCondition( const Eref& me )
     }
     LookupField< unsigned int, vector< double > >::set(
         ksolve,"nVec", 0, nVec );
-#endif
 }
 
 /**
  * This does the actual work of generating random numbers and
  * making sure they fit.
  */
-#ifdef USE_GSL
 void SteadyState::fitConservationRules(
-    gsl_matrix* U, const vector< double >& eliminatedTotal,
+    ublas::matrix<double>& U, const vector< double >& eliminatedTotal,
     vector< double >&y
 )
 {
-    cerr << "TODO: yet it implement using boost " << endl;
     int numConsv = total_.size();
     int lastJ = numVarPools_;
     for ( int i = numConsv - 1; i >= 0; --i )
     {
         for ( unsigned int j = 0; j < numVarPools_; ++j )
         {
-            double g = gsl_matrix_get( U, i, j );
+            double g = U( i, j );
             if ( fabs( g ) > EPSILON )
             {
                 // double ytot = calcTot( g, i, j, lastJ );
@@ -1023,13 +1035,13 @@ void SteadyState::fitConservationRules(
                 for ( int k = j; k < lastJ; ++k )
                 {
                     y[k] = mtrand();
-                    ytot += y[k] * gsl_matrix_get( U, i, k );
+                    ytot += y[k] * U( i, k );
                 }
                 assert( fabs( ytot ) > EPSILON );
                 double lastYtot = 0.0;
                 for ( unsigned int k = lastJ; k < numVarPools_; ++k )
                 {
-                    lastYtot += y[k] * gsl_matrix_get( U, i, k );
+                    lastYtot += y[k] * U( i, k );
                 }
                 double scale = ( eliminatedTotal[i] - lastYtot ) / ytot;
                 for ( int k = j; k < lastJ; ++k )
@@ -1043,4 +1055,3 @@ void SteadyState::fitConservationRules(
     }
 }
 
-#endif

@@ -59,12 +59,15 @@ const Cinfo* Ksolve::initCinfo()
     static ValueFinfo< Ksolve, string > method (
         "method",
         "Integration method, using GSL. So far only explict. Options are:"
-        "rk5: The default Runge-Kutta-Fehlberg 5th order adaptive dt method"
-        "gsl: alias for the above"
+        "rk5: The default Runge-Kutta-Fehlberg 5th order fixed dt method"
+        "rk5a: The default Runge-Kutta-Fehlberg 5th order adaptive dt method"
         "rk4: The Runge-Kutta 4th order fixed dt method"
+        "rk4a: The Runge-Kutta 4th order adaptive dt method"
         "rk2: The Runge-Kutta 2,3 embedded fixed dt method"
-        "rkck: The Runge-Kutta Cash-Karp (4,5) method"
-        "rk8: The Runge-Kutta Prince-Dormand (8,9) method" ,
+        "rk54: The Runge-Kutta Cash-Karp (4,5) method (fixed dt)"
+        "rk54a: The Runge-Kutta Cash-Karp (4,5) method (adpative dt)"
+        "rk8: The Runge-Kutta Prince-Dormand (8,9) method (fixed dt)" 
+        "rk8a: The Runge-Kutta Prince-Dormand (8,9) method (adpative dt)" ,
         &Ksolve::setMethod,
         &Ksolve::getMethod
     );
@@ -232,7 +235,7 @@ static const Cinfo* ksolveCinfo = Ksolve::initCinfo();
 
 Ksolve::Ksolve()
     :
-    method_( "rk5" ),
+    method_( "rk5a" ),                          /* Adpative dt method is default. */
     epsAbs_( 1e-4 ),
     epsRel_( 1e-6 ),
     pools_( 1 ),
