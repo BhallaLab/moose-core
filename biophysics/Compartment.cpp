@@ -8,9 +8,15 @@
 **********************************************************************/
 
 #include "header.h"
-#include "../randnum/randnum.h"
 #include "CompartmentBase.h"
 #include "Compartment.h"
+
+#ifdef USE_BOOST
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_01.hpp>
+#else
+#include "../randnum/randnum.h"
+#endif
 
 using namespace moose;
 const double Compartment::EPSILON = 1.0e-15;
@@ -254,10 +260,15 @@ void Compartment::vInjectMsg( const Eref& e, double current)
 
 void Compartment::vRandInject( const Eref& e, double prob, double current)
 {
-	if ( mtrand() < prob * dt_ ) {
-		sumInject_ += current;
-		Im_ += current;
-	}
+
+#ifdef USE_BOOST
+    if ( dist( rng ) < prob * dt_ ) {
+#else
+    if ( mtrand( ) < prob * dt_ ) {
+#endif
+        sumInject_ += current;
+        Im_ += current;
+    }
 }
 
 /////////////////////////////////////////////////////////////////////
