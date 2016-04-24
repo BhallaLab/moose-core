@@ -11,6 +11,11 @@
 #ifndef _NEURON_H
 #define _NEURON_H
 
+#if USE_BOOST
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_01.hpp>
+#else
+#endif
 /**
  * The Neuron class to hold the Compartment class elements.
  */
@@ -100,6 +105,11 @@ class Neuron
 		 * Initializes the class info.
 		 */
 		static const Cinfo* initCinfo();
+
+#if USE_BOOST
+                double mtrand( );
+#endif
+
 	private:
 		double RM_;
 		double RA_;
@@ -142,6 +152,14 @@ class Neuron
 		vector< Id > segId_; /// Id of each Seg entry, below.
 		vector< SwcSegment > segs_;
 		vector< SwcBranch > branches_;
+
+                
+#ifdef  USE_BOOST
+                boost::random::mt19937 rng;
+                boost::random::uniform_01<double> dist;
+                
+#else      /* -----  not USE_BOOST  ----- */
+#endif     /* -----  not USE_BOOST  ----- */
 
 };
 

@@ -21,7 +21,6 @@
 #include "GssaSystem.h"
 #include "Stoich.h"
 #include "GssaVoxelPools.h"
-#include "../randnum/randnum.h"
 
 #include "Gsolve.h"
 
@@ -982,3 +981,10 @@ double Gsolve::volume( unsigned int i ) const
 		return pools_[i].getVolume();
 	return 0.0;
 }
+
+#ifdef USE_BOOST
+double Gsolve::mtrand( void )
+{
+    return dist( rng );
+}
+#endif

@@ -14,7 +14,6 @@
 #include "ChanBase.h"
 #include "ChanCommon.h"
 #include "MarkovChannel.h"
-#include <gsl/gsl_errno.h>
 
 const Cinfo* MarkovChannel::initCinfo()
 {

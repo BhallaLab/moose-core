@@ -37,6 +37,11 @@ extern unsigned int totalTests;
 #define TEST_END totalTests++; \
     cout << std::right <<  setw(20) << "test of " << SIMPLE_CURRENT_FUNCTION << " finished."; 
 
+/**
+ * @brief Global variable for seeding random number generators.
+ */
+extern int __rng_seed__;
+void mtseed( int seed );
 
 /*-----------------------------------------------------------------------------
  *  Global clock in moose.

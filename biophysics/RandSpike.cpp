@@ -8,8 +8,13 @@
 **********************************************************************/
 
 #include "header.h"
-#include "../randnum/randnum.h"
 #include "RandSpike.h"
+#if USE_BOOST
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_01.hpp>
+#else
+#include "../randnum/randnum.h"
+#endif
 
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
@@ -149,6 +154,10 @@ bool RandSpike::getFired() const
 	return fired_;
 }
 
+double RandSpike::mtrand( )
+{
+    return dist( rng );
+}
 
 //////////////////////////////////////////////////////////////////
 // RandSpike::Dest function definitions.
@@ -159,6 +168,7 @@ void RandSpike::process( const Eref& e, ProcPtr p )
 	if ( refractT_ > p->currTime - lastEvent_ )
 		return;
 	double prob = realRate_ * p->dt;
+
 	if ( prob >= 1.0 || prob >= mtrand() ) 
 	{
 		lastEvent_ = p->currTime;

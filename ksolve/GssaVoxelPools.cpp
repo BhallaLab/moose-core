@@ -18,7 +18,6 @@
 #include "Stoich.h"
 #include "GssaSystem.h"
 #include "GssaVoxelPools.h"
-#include "../randnum/randnum.h"
 
 /**
  * The SAFETY_FACTOR Protects against the total propensity exceeding
@@ -92,10 +91,9 @@ void GssaVoxelPools::updateDependentRates(
 	}
 }
 
-unsigned int GssaVoxelPools::pickReac() const
+unsigned int GssaVoxelPools::pickReac() 
 {
-	// double r =  gsl_rng_uniform( rng ) * atot_;
-	double r = mtrand() * atot_;
+	double r = this->mtrand() * atot_;
 	double sum = 0.0;
 
 	// This is an inefficient way to do it. Can easily get to 
@@ -152,9 +150,9 @@ void GssaVoxelPools::recalcTime( const GssaSystem* g, double currTime )
 	refreshAtot( g );
 	assert( t_ > currTime );
 	t_ = currTime;
-	double r = mtrand();
+	double r = this->mtrand();
 	while ( r <= 0.0 ) {
-		r = mtrand();
+		r = this->mtrand();
 	}
 	t_ -= ( 1.0 / atot_ ) * log( r );
 }
@@ -189,9 +187,9 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
 
 		double sign = double(v_[rindex] >= 0) - double(0 > v_[rindex] );
 		g->transposeN.fireReac( rindex, Svec(), sign );
-		double r = mtrand();
+		double r = this->mtrand();
 		while ( r <= 0.0 ) {
-			r = mtrand();
+			r = this->mtrand();
 		}
 		t_ -= ( 1.0 / atot_ ) * log( r );
 		// g->stoich->updateFuncs( varS(), t_ ); // Handled next line.
@@ -214,8 +212,7 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
 			double base = floor( n[i] );
 			assert( base >= 0.0 );
 			double frac = n[i] - base;
-			// if ( gsl_rng_uniform( rng ) > frac )
-			if ( mtrand() > frac )
+			if ( this->mtrand() > frac )
 				n[i] = base;
 			else
 				n[i] = base + 1.0;
@@ -341,7 +338,7 @@ void GssaVoxelPools::xferIn( XferInfo& xf,
 		// cout << x << "	i = " << *i << *j << "	m = " << *m << endl;
 		double dx = *i++ - *j++;
 		double base = floor( dx );
-		if ( mtrand() > dx - base )
+		if ( this->mtrand() > dx - base )
 			x += base;
 		else
 			x += base + 1.0;
@@ -391,7 +388,7 @@ void GssaVoxelPools::xferInOnlyProxies(
 		if ( *k >= stoichPtr_->getNumVarPools() && *k < proxyEndIndex )
 		{
 			double base = floor( *i );
-			if ( mtrand() > *i - base )
+			if ( this->mtrand() > *i - base )
 				varSinit()[*k] = (varS()[*k] += base );
 			else
 				varSinit()[*k] = (varS()[*k] += base + 1.0 );

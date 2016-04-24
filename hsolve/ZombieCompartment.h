@@ -13,7 +13,14 @@
 #include "header.h"
 #include "ElementValueFinfo.h"
 #include "../external/debug/print_function.hpp"
+
+#ifdef  USE_BOOST
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_01.hpp>
+#else      /* -----  not USE_BOOST  ----- */
 #include "../randnum/randnum.h"
+#endif     /* -----  not USE_BOOST  ----- */
+
 #include "../biophysics/CompartmentBase.h"
 #include "../biophysics/Compartment.h"
 #include "HinesMatrix.h"
@@ -132,12 +139,22 @@ public:
     //////////////////////////////////////////////////////////////////
     // utility funcs
     //////////////////////////////////////////////////////////////////
+#ifdef USE_BOOST
+    double mtrand( void );
+#endif
+
 private:
     HSolve* hsolve_;
 
     static const double EPSILON;
 
     void copyFields( moose::Compartment* c );
+
+#if USE_BOOST
+    boost::random::mt19937 rng;
+    boost::random::uniform_01<double> dist;
+#endif
+
 };
 
 #endif // _ZOMBIE_COMPARTMENT_H

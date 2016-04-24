@@ -14,13 +14,14 @@
 #include "shell/Wildcard.h"
 #include "ReadCell.h"
 #include "utility/Vec.h"
-#include "randnum/Normal.h"
-#include "randnum/randnum.h"
 #include "SwcSegment.h"
 #include "Spine.h"
 #include "Neuron.h"
-
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_01.hpp>
 #include "muParser.h"
+
+extern double mtrand( void );
 
 class nuParser: public mu::Parser
 {
@@ -1567,13 +1568,14 @@ static void addPos( unsigned int segIndex, unsigned int eIndex,
 		minSpacing = spacing * 0.5;
 	unsigned int n = 1 + dendLength / minSpacing;
 	double dx = dendLength / n;
-	for( unsigned int i = 0; i < n; ++i ) {
-		if ( mtrand() < dx / spacing ) {
-			seglistIndex.push_back( segIndex );
-			elistIndex.push_back( eIndex );
-			pos.push_back( i * dx + dx*0.5 );
-		}
-	}
+	for( unsigned int i = 0; i < n; ++i ) 
+        {
+            if ( mtrand() < dx / spacing ) {
+                seglistIndex.push_back( segIndex );
+                elistIndex.push_back( eIndex );
+                pos.push_back( i * dx + dx*0.5 );
+            }
+        }
 }
 /*
  * This version tries to put in Pos using simple increments from the
@@ -1608,45 +1610,45 @@ static void addPos( unsigned int segIndex, unsigned int eIndex,
 */
 
 void Neuron::makeSpacingDistrib( const vector< ObjId >& elist, 
-		const vector< double >& val,
-		vector< unsigned int >& seglistIndex,
-		vector< unsigned int >& elistIndex,
-		vector< double >& pos,
-		const vector< string >& line ) const
+        const vector< double >& val,
+        vector< unsigned int >& seglistIndex,
+        vector< unsigned int >& elistIndex,
+        vector< double >& pos,
+        const vector< string >& line ) const
 {
-	string distribExpr = findArg( line, "spacingDistrib"  );
-	pos.resize( 0 );
-	elistIndex.resize( 0 );
+    string distribExpr = findArg( line, "spacingDistrib"  );
+    pos.resize( 0 );
+    elistIndex.resize( 0 );
 
-	try {
-		nuParser parser( distribExpr );
+    try {
+        nuParser parser( distribExpr );
 
-		for ( unsigned int i = 0; i < elist.size(); ++i ) {
-			unsigned int j = i * nuParser::numVal;
-			if ( val[ j + nuParser::EXPR ] > 0 ) {
-				double spacing = val[ j + nuParser::EXPR ];
-				double spacingDistrib = parser.eval( val.begin() + j );
-				if ( spacingDistrib > spacing || spacingDistrib < 0 ) {
-					cout << "Warning: Neuron::makeSpacingDistrib: " << 
-						"0 < " << spacingDistrib << " < " << spacing <<
-						" fails on " << elist[i].path() << ". Using 0.\n";
-					spacingDistrib = 0.0;
-				}
-				map< Id, unsigned int>::const_iterator 
-					lookupDend = segIndex_.find( elist[i] );
-				if ( lookupDend != segIndex_.end() ) {
-					double dendLength = segs_[lookupDend->second].length();
-					addPos( lookupDend->second, i, 
-								spacing, spacingDistrib, dendLength, 
-								seglistIndex, elistIndex, pos );
-				}
-			}
-		}
-	}
-	catch ( mu::Parser::exception_type& err )
-	{
-		cout << err.GetMsg() << endl;
-	}
+        for ( unsigned int i = 0; i < elist.size(); ++i ) {
+            unsigned int j = i * nuParser::numVal;
+            if ( val[ j + nuParser::EXPR ] > 0 ) {
+                double spacing = val[ j + nuParser::EXPR ];
+                double spacingDistrib = parser.eval( val.begin() + j );
+                if ( spacingDistrib > spacing || spacingDistrib < 0 ) {
+                    cout << "Warning: Neuron::makeSpacingDistrib: " << 
+                        "0 < " << spacingDistrib << " < " << spacing <<
+                        " fails on " << elist[i].path() << ". Using 0.\n";
+                    spacingDistrib = 0.0;
+                }
+                map< Id, unsigned int>::const_iterator 
+                    lookupDend = segIndex_.find( elist[i] );
+                if ( lookupDend != segIndex_.end() ) {
+                    double dendLength = segs_[lookupDend->second].length();
+                    addPos( lookupDend->second, i, 
+                            spacing, spacingDistrib, dendLength, 
+                            seglistIndex, elistIndex, pos );
+                }
+            }
+        }
+    }
+    catch ( mu::Parser::exception_type& err )
+    {
+        cout << err.GetMsg() << endl;
+    }
 }
 
 static void makeAngleDistrib ( const vector< ObjId >& elist, 
@@ -1863,3 +1865,11 @@ void Neuron::scaleHeadDiffusion( unsigned int spineNum,
 	SetGet2< unsigned int, double >::set( 
 		psdDsolve_, "setDiffScale", meshIndex, diffScale );
 }
+
+#ifdef USE_BOOST
+// return next random number generator using boost
+double Neuron::mtrand( void )
+{
+    return dist( rng );
+}
+#endif

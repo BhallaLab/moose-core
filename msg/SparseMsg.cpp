@@ -10,8 +10,7 @@
 #include "header.h"
 #include "SparseMatrix.h"
 #include "SparseMsg.h"
-#include "../randnum/randnum.h"
-#include "../shell/Shell.h"
+#include "global.h"
 
 // Initializing static variables
 Id SparseMsg::managerId_;
@@ -470,3 +469,10 @@ char* SparseMsg::lookupMsg( unsigned int index )
 	assert( index < msg_.size() );
 	return reinterpret_cast< char* >( msg_[index] );
 }
+
+#ifdef USE_BOOST
+double SparseMsg::mtrand( void )
+{
+    return dist( rng );
+}
+#endif

@@ -10,6 +10,12 @@
 #ifndef _SPARSE_MSG_H
 #define _SPARSE_MSG_H
 
+#if USE_BOOST
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_01.hpp>
+#else
+#endif
+
 /**
  * This is a parallelized sparse message.
  * It is a general message type optimized for sparse matrix like
@@ -122,6 +128,10 @@ class SparseMsg: public Msg
 
 		static const Cinfo* initCinfo();
 
+#ifdef USE_BOOST
+                double mtrand( void );
+#endif
+
 	private:
 		SparseMatrix< unsigned int > matrix_;
 		unsigned int numThreads_; // Number of threads to partition
@@ -130,6 +140,11 @@ class SparseMsg: public Msg
 		unsigned long seed_;
 		static Id managerId_; // The Element that manages Sparse Msgs.
 		static vector< SparseMsg* > msg_;
+
+#if USE_BOOST
+                boost::random::mt19937 rng;
+                boost::random::uniform_01<double> dist;
+#endif
 };
 
 #endif // _SPARSE_MSG_H

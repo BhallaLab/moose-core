@@ -95,11 +95,10 @@
 #endif
 
 #include "../basecode/header.h"
+#include "../basecode/global.h"
 #include "../basecode/Id.h"
 #include "../basecode/ObjId.h"
 #include "../utility/utility.h"
-#include "../external/debug/simple_logger.hpp"
-#include "../randnum/randnum.h"
 #include "../shell/Shell.h"
 #include "../shell/Wildcard.h"
 
@@ -143,6 +142,8 @@ extern void speedTestMultiNodeIntFireNetwork(
 	extern void testSmoldyn();
 #endif
 extern void mooseBenchmarks( unsigned int option );
+
+extern double mtrand( void );
 
 /**
    Utility function to get all the individual elements when ALLDATA is dataIndex.

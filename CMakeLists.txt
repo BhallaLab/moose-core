@@ -80,12 +80,14 @@ option(NOTIFY_PROGRESS "Show progress of simulation" OFF)
 option(ENABLE_LOGGER  "Enable MOOSE logger [Deprecated]" OFF)
 
 ## Unit testing and debug mode.
-option(DEBUG "Build with debug support" OFF)
+option(DEBUG "Build with debug support" ON)
 option(GPROF "Build for profiling using gprof" OFF)
-option(ENABLE_UNIT_TESTS "Enable unit tests (DEBUG should also be ON)" OFF)
+option(ENABLE_UNIT_TESTS "Enable unit tests (DEBUG should also be ON)" ON)
 option(WITH_PYTHON "Build native python extension" ON)
 option(WITH_MPI  "Enable Openmpi support" OFF)
 option(WITH_CURSES "Enable ncurses support (deprecated)" OFF)
+
+option(USE_BOOST "Use boost library (experimental, development)" ON)
 
 # If SBML is available, it will automaticall enable the support. If ON, then
 # libSBML must be present.
@@ -117,6 +119,7 @@ add_definitions(-Wall
     #-Wno-return-type-c-linkage
     -Wno-unused-variable
     -Wno-unused-function
+    -Wno-unused-local-typedefs
     #-Wno-unused-private-field
     )
 add_definitions(-fPIC)
@@ -272,27 +275,15 @@ if(GSL_STATIC_HOME)
     SET(GSL_LIBRARIES ${GSL_LIBRARY} ${GSLCBLAS_LIBRARY})
     message(STATUS "STATIC GSL_LIBRARIES ${GSL_LIBRARIES}")
     set(GSL_FOUND TRUE)
-ELSE()
-    find_package(GSL 1.16)
-    if(NOT GSL_FOUND)
-        message(FATAL_ERROR 
-            "=====================================================================\n"
-            " FATAL gsl(>1.16) not found.\n\n"
-            " MOOSE requires Gnu Scientific Library (GSL) 1.16 or higher. \n"
-            " Please install the `dev` or `devel` package e.g. \n"
-            "     $ sudo apt-get install libgsl0-dev \n"
-            "     $ sudo yum install libgsl-devel \n"
-            "     $ brew install gsl \n\n"
-            " Or build and install gsl from source code \n"
-            "     https://www.gnu.org/software/gsl/ \n"
-            " After installing gsl, rerun cmake.\n\n"
-            " If you install gsl in non-standard place, set the GSL_HOME environment \n"
-            " variable. CMAKE use this to search for required files. \n"
-            "====================================================================\n"
-            )
-    endif(NOT GSL_FOUND)
+ELSEIF(USE_BOOST)
+    find_package( Boost REQUIRED  )
+    find_package( LAPACK REQUIRED )
+    add_definitions( -DUSE_BOOST )
+    include_directories( 
+        ${Boost_INCLUDE_DIRS}
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost-numeric-bindings
+        )
 endif()
-add_definitions(-DUSE_GSL)
 
 ## Setup hdf5
 if(HDF5_STATIC_HOME)
@@ -378,13 +369,11 @@ endif(WITH_MPI)
 add_subdirectory(basecode)
 add_subdirectory(msg)
 add_subdirectory(shell)
-add_subdirectory(randnum)
 add_subdirectory(scheduling)
 add_subdirectory(biophysics)
 add_subdirectory(builtins)
 add_subdirectory(utility)
 add_subdirectory(mesh)
-add_subdirectory(sbml)
 add_subdirectory(mpi)
 add_subdirectory(signeur)
 add_subdirectory(ksolve)
@@ -396,6 +385,10 @@ add_subdirectory(kinetics)
 add_subdirectory(synapse)
 add_subdirectory(intfire)
 add_subdirectory(examples)
+
+if(LIBSBML_FOUND)
+    add_subdirectory(sbml)
+endif(LIBSBML_FOUND)
 
 # These are always shared libraries.
 set(SYSTEM_SHARED_LIBS ${LibXML2_LIBRARIES})
@@ -415,13 +408,21 @@ elseif(HDF5_FOUND)
     list(APPEND SYSTEM_SHARED_LIBS ${HDF5_LIBRARIES})
 endif()
 
-LIST(APPEND STATIC_LIBRARIES moose_sbml)
+if(LIBSBML_FOUND)
+    LIST(APPEND STATIC_LIBRARIES moose_sbml)
+endif(LIBSBML_FOUND)
+
 if(SBML_STATIC_HOME)
     list(APPEND STATIC_LIBRARIES ${LIBSBML_LIBRARIES})
 elseif(LIBSBML_FOUND)
     list(APPEND SYSTEM_SHARED_LIBS ${LIBSBML_LIBRARIES})
 endif()
 
+# When boost is used, we use lapack binding instead of gsl to compute steady
+# state.
+if(USE_BOOST)
+    list( APPEND SYSTEM_SHARED_LIBS ${LAPACK_LIBRARIES} )
+endif(USE_BOOST)
 
 if(GSL_STATIC_HOME)
     message(STATUS "Using STATIC gsl libraries: ${GSL_LIBRARIES}")
@@ -467,7 +468,6 @@ list(APPEND MOOSE_LIBRARIES
     msg
     benchmarks
     shell
-    randnum
     scheduling
     moose_mpi
     biophysics 

@@ -1,43 +1,50 @@
 include_directories(../basecode ../synapse ../utility ../)
 include_directories(../external/muparser/include ${GSL_INCLUDE_DIRS})
-add_library(biophysics 
-	IntFire.cpp	
-	SpikeGen.cpp	
-        RandSpike.cpp
-	CompartmentDataHolder.cpp	
-	CompartmentBase.cpp	
-	Compartment.cpp	
-	SymCompartment.cpp	
-        GapJunction.cpp
-	ChanBase.cpp	
-        ChanCommon.cpp
-	HHChannel.cpp	
-        HHChannelBase.cpp
-        HHChannel2D.cpp
-	HHGate.cpp	
-	HHGate2D.cpp	
-	HHChannel2D.cpp	
-        CaConcBase.cpp
-	CaConc.cpp	
-	MgBlock.cpp	
-        Nernst.cpp
-	Neuron.cpp	
-	ReadCell.cpp	
-        SwcSegment.cpp
-        ReadSwc.cpp
-	SynChan.cpp	
-        NMDAChan.cpp
-	testBiophysics.cpp	
-	IzhikevichNrn.cpp	
-	DifShell.cpp	
-	Leakage.cpp	
-	VectorTable.cpp	
-	MarkovRateTable.cpp	
-	MarkovChannel.cpp	
-	MarkovGslSolver.cpp	
-	MatrixOps.cpp	
-	MarkovSolverBase.cpp	
-	MarkovSolver.cpp	
-	VClamp.cpp	
-        Spine.cpp
+
+set( SRCS
+    IntFire.cpp	
+    SpikeGen.cpp	
+    RandSpike.cpp
+    CompartmentDataHolder.cpp	
+    CompartmentBase.cpp	
+    Compartment.cpp	
+    SymCompartment.cpp	
+    GapJunction.cpp
+    ChanBase.cpp	
+    ChanCommon.cpp
+    HHChannel.cpp	
+    HHChannelBase.cpp
+    HHChannel2D.cpp
+    HHGate.cpp	
+    HHGate2D.cpp	
+    HHChannel2D.cpp	
+    CaConcBase.cpp
+    CaConc.cpp	
+    MgBlock.cpp	
+    Nernst.cpp
+    Neuron.cpp	
+    ReadCell.cpp	
+    SwcSegment.cpp
+    ReadSwc.cpp
+    SynChan.cpp	
+    NMDAChan.cpp
+    testBiophysics.cpp	
+    IzhikevichNrn.cpp	
+    DifShell.cpp	
+    Leakage.cpp	
+    VectorTable.cpp	
+    MarkovRateTable.cpp	
+    MarkovChannel.cpp	
+    MatrixOps.cpp	
+    MarkovSolverBase.cpp	
+    MarkovSolver.cpp	
+    MarkovBoostSolver.cpp
+    VClamp.cpp	
+    Spine.cpp
     )
+
+#if(WITH_GSL)
+#    list( APPEND SRCS MarkovGslSolver.cpp )
+#endif(WITH_GSL)
+
+add_library(biophysics  ${SRCS} )

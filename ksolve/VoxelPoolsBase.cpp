@@ -392,3 +392,10 @@ void VoxelPoolsBase::print() const
 				rates_[i]->getR2() << endl;
 	}
 }
+
+#ifdef USE_BOOST
+double VoxelPoolsBase::mtrand( void )
+{
+    return dist( rng );
+}
+#endif

@@ -10,6 +10,10 @@
 #ifndef _GRAUPNER_BRUNEL_2012_CA_PLASTICITY_SYN_HANDLER_H
 #define _GRAUPNER_BRUNEL_2012_CA_PLASTICITY_SYN_HANDLER_H
 
+#include <boost/random/normal_distribution.hpp>
+#include <boost/random/mersenne_twister.hpp>
+
+
 class PreSynEvent: public SynEvent
 {
 	public:
@@ -161,7 +165,8 @@ class GraupnerBrunel2012CaPlasticitySynHandler: public SynHandlerBase
         double weightMin_;
         double weightScale_;
         double lastCaUpdateTime_;
-        Normal normalGenerator_;
+        boost::random::normal_distribution<double> normalGenerator_;
+        boost::random::mt19937 rng;
 };
 
 #endif // _GRAUPNER_BRUNEL_2012_CA_PLASTICITY_SYN_HANDLER_H
