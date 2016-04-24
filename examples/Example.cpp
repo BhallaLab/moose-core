@@ -91,10 +91,11 @@ static const Cinfo* exampleCinfo = Example::initCinfo();
 
 Example::Example()
 	: 
-	output_( 0.0 ),
-	x_( 0.0 ), y_( 0.0 )
+	x_( 0.0 ),
+	y_( 0.0 ),
+        output_( 0.0 )
 {
-	;
+    ;
 }
 
 void Example::process( const Eref& e, ProcPtr p )

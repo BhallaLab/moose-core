@@ -591,8 +591,8 @@ bool Shell::chopPath( const string& path, vector< string >& ret,
 				index.resize( 0 );
 				return isAbsolute;
 		}
-		unsigned int pos = ret[i].find_first_of( '[' );
-		if ( pos != string::npos )
+		size_t pos = ret[i].find_first_of( '[' );
+		if ( ret[i].find_first_of( '[' ) != string::npos )
 			ret[i] = ret[i].substr( 0, pos );
 	}
 

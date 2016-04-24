@@ -312,6 +312,7 @@ void TableBase::loadXplotRange( string fname, string plotname,
 void TableBase::loadCSV( 
 	string fname, int startLine, int colNum, char separator )
 {
+    cout << "TODO: Not implemented yet" << endl;
 }
 
 double getRMSDiff( const vector< double >& v1, const vector< double >& v2 )

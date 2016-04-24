@@ -78,7 +78,7 @@ option(ENABLE_UNIT_TESTS "Enable unit tests (DEBUG should also be ON)" ON)
 option(WITH_PYTHON "Build native python extension" ON)
 option(WITH_MPI  "Enable Openmpi support" OFF)
 option(WITH_CURSES "Enable ncurses support (deprecated)" OFF)
-
+option(WARN_AS_ERROR "Treat warnings as error while compiling" OFF)
 option(USE_BOOST "Use boost library (experimental, development)" ON)
 
 # If SBML is available, it will automaticall enable the support. If ON, then
@@ -107,14 +107,26 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules")
 
 # Turn warning to error: Not all of the options may be supported on all
 # versions of compilers. be careful here.
-add_definitions(-Wall
-    #-Wno-return-type-c-linkage
-    -Wno-unused-variable
-    -Wno-unused-function
-    -Wno-unused-local-typedefs
-    #-Wno-unused-private-field
-    )
 add_definitions(-fPIC)
+
+if(WARN_AS_ERROR)
+    message(STATUS "Treating compiler warnings as errors" )
+    add_definitions( -Wall
+        -Wno-unused-variable
+        -Wno-unused-function
+        -Wno-macro-redefined
+        -Wno-unused-local-typedefs
+        -Werror 
+        )
+else(WARN_AS_ERROR)
+    add_definitions(-Wall
+        #-Wno-return-type-c-linkage
+        -Wno-unused-variable
+        -Wno-unused-function
+        -Wno-unused-local-typedefs
+        #-Wno-unused-private-field
+        )
+endif(WARN_AS_ERROR)
 
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)

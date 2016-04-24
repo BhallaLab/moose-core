@@ -28,12 +28,14 @@ ReadCell::ReadCell()
 	EREST_ACT_( -0.065 ),
 	ELEAK_( -0.065 ),
 	
-	dendrDiam( 0.0 ),
-	aveLength( 0.0 ),
-	spineSurf( 0.0 ),
-	spineDens( 0.0 ),
-	spineFreq( 0.0 ),
-	membFactor( 0.0 ),
+#if 0
+	//dendrDiam( 0.0 ),
+	//aveLength( 0.0 ),
+	//spineSurf( 0.0 ),
+	//spineDens( 0.0 ),
+	//spineFreq( 0.0 ),
+	//membFactor( 0.0 ),
+#endif
 
 	erestFlag_( 0 ),
 	eleakFlag_( 0 ),

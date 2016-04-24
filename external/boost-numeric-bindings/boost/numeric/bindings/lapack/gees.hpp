@@ -140,7 +140,7 @@ namespace boost { namespace numeric { namespace bindings {
          >::value)); 
 #endif 
 
-         typedef typename MatrA::value_type                            value_type ;
+         typedef typename MatrA::value_type  value_type ;
 
          int const n = traits::matrix_size1 (a);
          assert (n == traits::matrix_size2 (a)); 

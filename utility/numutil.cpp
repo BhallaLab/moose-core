@@ -17,7 +17,9 @@
 
 #ifndef _NUMUTIL_CPP
 #define _NUMUTIL_CPP
-#include <math.h>	// Solaris CC compiler did not like <cmath>
+
+#include <ctgmath>
+
 bool almostEqual(float x, float y, float epsilon)
 {
     if (x == 0.0 && y == 0.0) {
@@ -48,10 +50,10 @@ bool almostEqual(long double x, long double y, long double epsilon)
     if (x == 0.0 && y == 0.0){
         return true;
     }
-    if (fabs(x) > fabs(y)){
-        return fabs((x - y) / x) < epsilon;
+    if (std::fabs(x) > std::fabs(y)){
+        return std::fabs((x - y) / x) < epsilon;
     } else {
-        return fabs((x - y) / y) < epsilon;
+        return std::fabs((x - y) / y) < epsilon;
     }
 }
 

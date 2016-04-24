@@ -75,7 +75,7 @@
 using namespace std;
 
 extern int verbosity;
-extern "C" {
+//extern "C" {
     ///////////////////////////////////////////////
     // Python method lists for PyObject of Id
     ///////////////////////////////////////////////
@@ -325,7 +325,7 @@ extern "C" {
         string parent_path;
         string name;
 
-		string trimmed_path = trim( path );
+        string trimmed_path = trim( path );
         size_t pos = trimmed_path.rfind("/");
         if (pos != string::npos){
             name = trimmed_path.substr(pos+1);
@@ -364,9 +364,6 @@ extern "C" {
 
         }
 
-#ifdef ENABLE_LOGGER
-        logger.updateGlobalCount(type);
-#endif
         return nId;
     }
     
@@ -1088,7 +1085,7 @@ extern "C" {
     }
     
 
-} // end extern "C"
+//} // end extern "C"
 
 // 
 // vec.cpp ends here

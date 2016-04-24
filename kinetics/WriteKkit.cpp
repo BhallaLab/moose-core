@@ -257,7 +257,8 @@ void writePool( ofstream& fout, Id id,
 		geometryTemp << "/geometry[" << comptIndex <<"]";
 	else
 		geometryTemp << "/geometry";
-	//simobjdump kpool DiffConst CoInit Co n nInit mwt nMin vol slave_enable \
+
+	// simobjdump kpool DiffConst CoInit Co n nInit mwt nMin vol slave_enable 
 
 	fout << "simundump kpool /kinetics" << trimPath(id,comptid) << " 0 " <<
 			diffConst << " " <<

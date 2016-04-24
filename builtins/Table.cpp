@@ -146,6 +146,7 @@ Table::Table()
 void Table::process( const Eref& e, ProcPtr p )
 {
 	lastTime_ = p->currTime;
+        // Copy incoming data to ret and insert into vector.
 	vector< double > ret;
 	requestOut()->send( e, &ret );
 	vec().insert( vec().end(), ret.begin(), ret.end() );

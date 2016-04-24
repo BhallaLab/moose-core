@@ -15,13 +15,11 @@
 
 #include <string>
 
-#include "../basecode/Id.h"
-#include "../basecode/global.h"
-
 extern char shortType(string);
 extern char innerType(char); // declared in utility.h, defined in utility/types.cpp
 
-extern "C" {
+
+//extern "C" {
 
     // This had to be defined for py3k, but does not harm 2.
     struct module_state {
@@ -295,7 +293,7 @@ extern "C" {
     PyObject * convert_and_set_tuple_entry(PyObject * tuple, unsigned int index, void * vptr, char typecode);
     
     
-} //!extern "C"
+// } //!extern "C"
 
 
 /**

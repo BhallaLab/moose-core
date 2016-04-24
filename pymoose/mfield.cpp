@@ -65,7 +65,7 @@
 
 using namespace std;
 
-extern "C" {
+//extern "C" {
 
     extern PyTypeObject ObjIdType;
     extern PyTypeObject IdType;
@@ -962,7 +962,7 @@ extern "C" {
             
     // PyObject * moose_ElementField_richcmp(_Field * self, void * closure);
 
-} // extern "C"
+//} // extern "C"
 
 
 // 

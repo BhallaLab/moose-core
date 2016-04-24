@@ -70,7 +70,7 @@
 
 using namespace std;
 
-extern "C" {
+//extern "C" {
 
     extern PyTypeObject ObjIdType;
     extern PyTypeObject IdType;
@@ -2046,7 +2046,7 @@ PyObject* setDestFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type1
 
     
 
-}// extern "C"
+//}// extern "C"
 
 // 
 // melement.cpp ends here

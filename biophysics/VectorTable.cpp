@@ -124,9 +124,11 @@ double VectorTable::lookupByIndex( unsigned int index ) const
 	if ( tableIsEmpty() )
 		return 0;
 
+#if 0    // This is a tautology
 	//Applying similar wrapping as is done in lookupByValue.
 	if ( index < 0 )
 		index = 0;
+#endif
 
 	if ( index >= table_.size() )
 		index = table_.size() - 1;
