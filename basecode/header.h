@@ -38,6 +38,10 @@
 
 using namespace std;
 
+#ifndef MOOSE_VERSION
+#define MOOSE_VERSION "3.0.2"
+#endif
+
 /**
  * Looks up and uniquely identifies functions, on a per-Cinfo basis.
  * These are NOT global indices to identify the function.
