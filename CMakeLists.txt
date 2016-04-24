@@ -71,14 +71,6 @@ endif()
 
 option(WITH_DOC "Build documentation using python-sphinx and doxygen" OFF)
 
-option(VERBOSITY "SET MOOSE VERBOSITY LEVEL" 0)
-
-# Whether to notify the user after 1 second of simulation.
-option(NOTIFY_PROGRESS "Show progress of simulation" OFF)
-
-# STATS INSIDE MOOSE. TODO: Remove it and add support for gprof
-option(ENABLE_LOGGER  "Enable MOOSE logger [Deprecated]" OFF)
-
 ## Unit testing and debug mode.
 option(DEBUG "Build with debug support" ON)
 option(GPROF "Build for profiling using gprof" OFF)

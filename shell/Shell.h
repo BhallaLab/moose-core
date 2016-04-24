@@ -139,9 +139,10 @@ class Shell
 		/**
 		 * Starts off simulation, to run for 'runtime' more than current
 		 * time. This version is blocking, and returns only when the 
-		 * simulation is done.
+		 * simulation is done. If `nofity = true' then also notify user
+                 * whenever 10\% of simulation is over.
 		 */
-		void doStart( double runtime );
+		void doStart( double runtime, bool notify = false );
 
 		/**
 		 * Starts off simulation, to run for 'runtime' more than current

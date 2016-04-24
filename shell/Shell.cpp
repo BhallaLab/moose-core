@@ -369,21 +369,10 @@ void Shell::doQuit()
 #endif
 }
 
-void Shell::doStart( double runtime )
+void Shell::doStart( double runtime, bool notify )
 {
-#ifdef ENABLE_LOGGER
-        clock_t t = clock();
-        stringstream ss;
-        ss << "Running moose for " << runtime << " seconds";
-        logger.log("INFO", ss.str());
-#endif
-	Id clockId( 1 );
-	SetGet1< double >::set( clockId, "start", runtime );
-
-#ifdef ENABLE_LOGGER
-        float time = (float(clock() - t) / CLOCKS_PER_SEC);
-        logger.simulationTime.push_back(time);
-#endif
+    Id clockId( 1 );
+    SetGet2< double, bool >::set( clockId, "start", runtime, notify );
 }
 
 bool isDoingReinit()

@@ -1460,10 +1460,11 @@ extern "C" {
     }
 
     PyDoc_STRVAR(moose_start_documentation,
-                 "start(time) -> None\n"
+                 "start(time, notify = False) -> None\n"
                  "\n"
                  "Run simulation for `t` time. Advances the simulator clock by `t`\n"
-                 "time.\n"                 
+                 "time. If 'notify = True', a message is written to terminal whenever \n"                 
+                 "10\% of simulation time is over. \n"
                  "\n"
                  "After setting up a simulation, YOU MUST CALL MOOSE.REINIT() before\n"
                  "CALLING MOOSE.START() TO EXECUTE THE SIMULATION. Otherwise, the\n"
@@ -1475,6 +1476,9 @@ extern "C" {
                  "----------\n"
                  "t : float\n"
                  "    duration of simulation.\n"
+                 "notify: bool\n"
+                 "     default False. If True, notify user whenever 10\% of simultion \n"
+                 "     is over.\n"
                  "\n"
                  "Returns\n"
                  "--------\n"
@@ -1485,13 +1489,15 @@ extern "C" {
                  "moose.reinit : (Re)initialize simulation\n"
                  "\n"
                  );
-    PyObject * moose_start(PyObject * dummy, PyObject * args)
+    PyObject * moose_start(PyObject * dummy, PyObject * args ) 
     {
-        double runtime;
-        if(!PyArg_ParseTuple(args, "d:moose_start", &runtime)){
-            return NULL;
-        }
-        if (runtime <= 0.0){
+        double runtime = 0.0;
+        bool notify = false;
+
+        PyArg_ParseTuple(args, "d|I:moose_start", &runtime, &notify);
+
+        if (runtime <= 0.0)
+        {
             PyErr_SetString(PyExc_ValueError, "simulation runtime must be positive.");
             return NULL;
         }
@@ -1503,10 +1509,17 @@ extern "C" {
         sigHandler.sa_flags = 0;
         sigaction(SIGINT, &sigHandler, NULL);
 
+#if 0
+        // NOTE: (dilawar) Does not know if Py_BEGIN_ALLOW_THREADS is
+        // neccessary.
         // Py_BEGIN_ALLOW_THREADS
                 SHELLPTR->doStart(runtime);
         // Py_END_ALLOW_THREADS
                 Py_RETURN_NONE;
+#endif
+        SHELLPTR->doStart( runtime, notify );
+        Py_RETURN_NONE;
+
     }
 
     PyDoc_STRVAR(moose_reinit_documentation,
