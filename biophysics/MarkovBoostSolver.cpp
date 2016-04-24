@@ -142,7 +142,9 @@ MarkovBoostSolver::MarkovBoostSolver()
     absAccuracy_ = 1.0e-8;
     relAccuracy_ = 1.0e-8;
     internalStepSize_ = 1.0e-6;
-    stateBoost_ = 0;
+    cout << "Warn: "
+        << " This implementation is not tested yet. It replaced MarkovGslSolver "
+        << endl;
 }
 
 MarkovBoostSolver::~MarkovBoostSolver()
@@ -254,8 +256,7 @@ void MarkovBoostSolver::init( vector< double > initialState )
 {
     nVars_ = initialState.size();
 
-    if ( stateBoost_ == 0 )
-        stateBoost_ = new double[ nVars_ ];
+    stateBoost_.resize( nVars_ );
 
     state_ = initialState;
     initialState_ = initialState;
@@ -287,7 +288,7 @@ void MarkovBoostSolver::process( const Eref& e, ProcPtr info )
             );
 
     {
-        system = std::bind( &MarkovBoostSolver::evalSystem , _1, _2, _3, Q_ );
+        auto system = std::bind( &MarkovBoostSolver::evalSystem , _1, _2, _3, Q_ );
 
         int status = odeint::integrate_adaptive ( stepper, system, stateBoost_
                 , t , nextt, info->dt

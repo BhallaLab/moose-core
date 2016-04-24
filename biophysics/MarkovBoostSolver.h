@@ -60,6 +60,8 @@ class MarkovBoostSolver
 		double internalStepSize_;
 		double* stateGsl_;
 
+                vector<double> stateBoost_;
+
 		//The following four variables should be members of any solver class that
 		//will be implmented.
 		unsigned int nVars_;
@@ -70,7 +72,6 @@ class MarkovBoostSolver
                 // Gsl replacement
 		unsigned int boostStep_;
                 unsigned int boostStepType_;
-                double* stateBoost_;
 
 //		static int evalSystem( double, const double*, double*, void* );
                 static int evalSystem( 
