@@ -398,5 +398,4 @@ double VoxelPoolsBase::mtrand( void )
 {
     return dist( rng );
 }
-
 #endif
