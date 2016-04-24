@@ -11,12 +11,6 @@
 #ifndef _HEADER_H
 #define _HEADER_H
 
-#ifdef USE_BOOST
-#include <boost/log/trivial.hpp>
-#endif
-
-#define     MOOSE_VERSION   "3.1.0.dev"
-
 #include "../external/debug/print_function.hpp"
 
 #include <math.h>
