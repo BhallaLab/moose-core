@@ -201,6 +201,7 @@ add_executable(moose.bin basecode/main.cpp)
 # If this variable is used while packaging; we build this project using another
 # cmake script and pass the location of SBML static library using this variable.
 # Otherwise, this is useless. FIXME: This is not a clean solution.
+
 if(SBML_STATIC_HOME)
     include_directories(${SBML_STATIC_HOME}/include)
     find_library(LIBSBML_LIBRARIES
@@ -238,6 +239,9 @@ if(LIBSBML_FOUND)
             "-L${LIBSBML_LIBRARY_DIRS}"
             )
         target_link_libraries(_moose PROPERTIES LINK_FLAGS
+            "-L${LIBSBML_LIBRARY_DIRS}"
+            )
+        target_link_libraries(cymoose PROPERTIES LINK_FLAGS
             "-L${LIBSBML_LIBRARY_DIRS}"
             )
     endif()

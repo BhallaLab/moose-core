@@ -123,46 +123,6 @@ benchmarks/fast:
 	$(MAKE) -f CMakeFiles/benchmarks.dir/build.make CMakeFiles/benchmarks.dir/build
 .PHONY : benchmarks/fast
 
-#=============================================================================
-# Target rules for targets named randnum_benchmark
-
-# Build rule for target.
-randnum_benchmark: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 randnum_benchmark
-.PHONY : randnum_benchmark
-
-# fast build rule for target.
-randnum_benchmark/fast:
-	$(MAKE) -f CMakeFiles/randnum_benchmark.dir/build.make CMakeFiles/randnum_benchmark.dir/build
-.PHONY : randnum_benchmark/fast
-
-benchmark_random_numbers.o: benchmark_random_numbers.cpp.o
-
-.PHONY : benchmark_random_numbers.o
-
-# target to build an object file
-benchmark_random_numbers.cpp.o:
-	$(MAKE) -f CMakeFiles/randnum_benchmark.dir/build.make CMakeFiles/randnum_benchmark.dir/benchmark_random_numbers.cpp.o
-.PHONY : benchmark_random_numbers.cpp.o
-
-benchmark_random_numbers.i: benchmark_random_numbers.cpp.i
-
-.PHONY : benchmark_random_numbers.i
-
-# target to preprocess a source file
-benchmark_random_numbers.cpp.i:
-	$(MAKE) -f CMakeFiles/randnum_benchmark.dir/build.make CMakeFiles/randnum_benchmark.dir/benchmark_random_numbers.cpp.i
-.PHONY : benchmark_random_numbers.cpp.i
-
-benchmark_random_numbers.s: benchmark_random_numbers.cpp.s
-
-.PHONY : benchmark_random_numbers.s
-
-# target to generate assembly for a file
-benchmark_random_numbers.cpp.s:
-	$(MAKE) -f CMakeFiles/randnum_benchmark.dir/build.make CMakeFiles/randnum_benchmark.dir/benchmark_random_numbers.cpp.s
-.PHONY : benchmark_random_numbers.cpp.s
-
 benchmarks.o: benchmarks.cpp.o
 
 .PHONY : benchmarks.o
@@ -225,11 +185,7 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... randnum_benchmark"
 	@echo "... benchmarks"
-	@echo "... benchmark_random_numbers.o"
-	@echo "... benchmark_random_numbers.i"
-	@echo "... benchmark_random_numbers.s"
 	@echo "... benchmarks.o"
 	@echo "... benchmarks.i"
 	@echo "... benchmarks.s"

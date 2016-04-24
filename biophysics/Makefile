@@ -68,7 +68,7 @@ default: $(TARGET)
 $(OBJ)	: $(HEADERS)
 IntFire.o:	IntFire.h
 SpikeGen.o: SpikeGen.h
-RandSpike.o: RandSpike.h ../randnum/randnum.h
+RandSpike.o: RandSpike.h 
 CompartmentDataHolder.o: CompartmentDataHolder.h
 CompartmentBase.o: CompartmentBase.h CompartmentDataHolder.h
 Compartment.o: CompartmentBase.h Compartment.h
