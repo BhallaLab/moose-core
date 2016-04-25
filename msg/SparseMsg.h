@@ -10,11 +10,10 @@
 #ifndef _SPARSE_MSG_H
 #define _SPARSE_MSG_H
 
-#if USE_BOOST
+#include "global.h"
+
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_01.hpp>
-#else
-#endif
 
 /**
  * This is a parallelized sparse message.
@@ -29,7 +28,7 @@
  * equivalent of the original sparse matrix, but using only the appropriate
  * RNG seed.
  *
- * A typical case is from an array of IntFire objects to an array of 
+ * A typical case is from an array of IntFire objects to an array of
  * Synapses, which are array fields of IntFire objects.
  * The sparse connectivity maps between the source IntFire and target
  * Synapses.
@@ -41,110 +40,111 @@
  * any two IntFire objects.
  *
  * It is optimized for input coming on Element e1, and going to Element e2.
- * If you expect any significant backward data flow, please use 
+ * If you expect any significant backward data flow, please use
  * BiSparseMsg.
  * It can be modified after creation to add or remove message entries.
  */
 class SparseMsg: public Msg
 {
-	friend unsigned int Msg::initMsgManagers(); // for initializing Id.
-	public:
-		SparseMsg( Element* e1, Element* e2, unsigned int msgIndex );
-		~SparseMsg();
+    friend unsigned int Msg::initMsgManagers(); // for initializing Id.
+public:
+    SparseMsg( Element* e1, Element* e2, unsigned int msgIndex );
+    ~SparseMsg();
 
-		Eref firstTgt( const Eref& src ) const;
+    Eref firstTgt( const Eref& src ) const;
 
-		void sources( vector< vector< Eref > >& v ) const;
-		void targets( vector< vector< Eref > >& v ) const;
-		
-		unsigned int randomConnect( double probability );
+    void sources( vector< vector< Eref > >& v ) const;
+    void targets( vector< vector< Eref > >& v ) const;
 
-		Id managerId() const;
+    unsigned int randomConnect( double probability );
 
-		ObjId findOtherEnd( ObjId end ) const;
+    Id managerId() const;
 
-		Msg* copy( Id origSrc, Id newSrc, Id newTgt,
-			FuncId fid, unsigned int b, unsigned int n ) const;
+    ObjId findOtherEnd( ObjId end ) const;
 
-		/**
-		 * Assigns the whole connection matrix
-		 */
-		void setMatrix( const SparseMatrix< unsigned int >& m );
+    Msg* copy( Id origSrc, Id newSrc, Id newTgt,
+               FuncId fid, unsigned int b, unsigned int n ) const;
 
-		/**
-		 * Returns the connection matrix
-		 */
-		SparseMatrix< unsigned int >& getMatrix();
+    /**
+     * Assigns the whole connection matrix
+     */
+    void setMatrix( const SparseMatrix< unsigned int >& m );
 
-		// Uses default addToQ function.
+    /**
+     * Returns the connection matrix
+     */
+    SparseMatrix< unsigned int >& getMatrix();
 
-		/////////////////////////////////////////////////////////////////
-		// Here we define the Element interface functions for SparseMsg
-		/////////////////////////////////////////////////////////////////
-		void setRandomConnectivity( double probability, long seed );
-		double getProbability() const;
-		void setProbability( double value );
+    // Uses default addToQ function.
 
-		long getSeed() const;
-		void setSeed( long value );
+    /////////////////////////////////////////////////////////////////
+    // Here we define the Element interface functions for SparseMsg
+    /////////////////////////////////////////////////////////////////
+    void setRandomConnectivity( double probability, long seed );
+    double getProbability() const;
+    void setProbability( double value );
 
-		void setEntry( unsigned int row, unsigned int column, 
-			unsigned int value );
+    long getSeed() const;
+    void setSeed( long value );
 
-		void unsetEntry( unsigned int row, unsigned int column );
+    void setEntry( unsigned int row, unsigned int column,
+                   unsigned int value );
 
-		// Still need to implement array field gets.
+    void unsetEntry( unsigned int row, unsigned int column );
 
-		unsigned int getNumRows() const;
-		unsigned int getNumColumns() const;
-		unsigned int getNumEntries() const;
-		void clear();
-		void transpose();
+    // Still need to implement array field gets.
 
-		/**
-		 * Fills up the entire message based on pairs of src,dest (i.e.,
-		 * row,column) values. All filled entries are set to zero.
-		 */
-		void pairFill( vector< unsigned int > src, 
-						vector< unsigned int> dest );
+    unsigned int getNumRows() const;
+    unsigned int getNumColumns() const;
+    unsigned int getNumEntries() const;
+    void clear();
+    void transpose();
 
-		/**
-		 * Fills up the entire message based on triplets of 
-		 * src,destDataIndex,destFieldIndex
-		 */
-		void tripletFill( vector< unsigned int > src, 
-					vector< unsigned int> dest,
-					vector< unsigned int > field );
-		
-		/**
-		 * Utility function to update all sorts of values after we've
-		 * rebuilt the matrix.
-		 */
-		void updateAfterFill();
+    /**
+     * Fills up the entire message based on pairs of src,dest (i.e.,
+     * row,column) values. All filled entries are set to zero.
+     */
+    void pairFill( vector< unsigned int > src,
+                   vector< unsigned int> dest );
 
-		/// Msg lookup functions
-		static unsigned int numMsg();
-		static char* lookupMsg( unsigned int index );
+    /**
+     * Fills up the entire message based on triplets of
+     * src,destDataIndex,destFieldIndex
+     */
+    void tripletFill( vector< unsigned int > src,
+                      vector< unsigned int> dest,
+                      vector< unsigned int > field );
 
-		static const Cinfo* initCinfo();
+    /**
+     * Utility function to update all sorts of values after we've
+     * rebuilt the matrix.
+     */
+    void updateAfterFill();
 
-#ifdef USE_BOOST
-                double mtrand( void );
-#endif
+    /// Msg lookup functions
+    static unsigned int numMsg();
+    static char* lookupMsg( unsigned int index );
 
-	private:
-		SparseMatrix< unsigned int > matrix_;
-		unsigned int numThreads_; // Number of threads to partition
-		unsigned int nrows_; // The original size of the matrix.
-		double p_;
-		unsigned long seed_;
-		static Id managerId_; // The Element that manages Sparse Msgs.
-		static vector< SparseMsg* > msg_;
+    static const Cinfo* initCinfo();
 
-#if USE_BOOST
-                boost::random::mt19937 rng;
-                boost::random::uniform_01<double> dist;
-#endif
+    double mtrand( void );
+
+private:
+    SparseMatrix< unsigned int > matrix_;
+    unsigned int numThreads_; // Number of threads to partition
+    unsigned int nrows_; // The original size of the matrix.
+    double p_;
+    unsigned long seed_;
+    static Id managerId_; // The Element that manages Sparse Msgs.
+    static vector< SparseMsg* > msg_;
+
+    
+    /*-----------------------------------------------------------------------------
+     *  This RNG does not use global seed.
+     *-----------------------------------------------------------------------------*/
+    moose::global::rng_type_ rng;
+    moose::global::distribution_type_ dist;
+
 };
 
 #endif // _SPARSE_MSG_H

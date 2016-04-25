@@ -68,13 +68,10 @@ set_tests_properties(pymoose-test-basic-sbml-support
     PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
     )
 
-
-##IF(WITH_SBML)
-##    ADD_TEST(NAME pymoose-test-sbml 
-##        COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/tests/python/test_sbml.py
-##        )
-##ENDIF(WITH_SBML)
-
-##ADD_TEST(NAME pymoose-test-kkit 
-##    COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/tests/python/test_kkit.py
-##    )
+# Test basic SBML support.
+ADD_TEST(NAME pymoose-test-rng
+    COMMAND ${PROJECT_SOURCE_DIR}/tests/python/test_random_gen.sh
+    )
+set_tests_properties(pymoose-test-rng
+    PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
+    )

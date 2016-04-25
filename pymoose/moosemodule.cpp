@@ -2356,18 +2356,21 @@ PyObject * moose_getField(PyObject * dummy, PyObject * args)
 }
 
 PyDoc_STRVAR(moose_seed_documentation,
-             "moose.seed(seedvalue) -> None\n"
+             "moose.seed(seedvalue) -> seed \n"
              "\n"
              "Reseed MOOSE random number generator.\n"
              "\n"
              "Parameters\n"
              "----------\n"
              "seed : int\n"
-             "    Optional value to use for seeding. If 0, a random seed is\n"
-             "    automatically created using the current system time and other\n"
-             "    information. If not specified, it defaults to 0.\n"
+             "    Value to use for seeding. \n"
+             "    All RNGs in moose except rand functions in moose.Function \n"
+             "    expression use this seed.\n"
+             "    By default (when this function is not called) seed is initializecd \n"
+             "    to some random value using system random device (if available). \n"
+             "    \n"
              "\n"
-             "    default: 0\n"
+             "    default: random number generated using system random device\n"
              "\n"
              "Returns\n"
              "-------\n"
@@ -2380,7 +2383,7 @@ PyDoc_STRVAR(moose_seed_documentation,
 
 PyObject * moose_seed(PyObject * dummy, PyObject * args)
 {
-    long seed = 0;
+    size_t seed = 0;
     if (!PyArg_ParseTuple(args, "|l", &seed))
     {
         return NULL;
