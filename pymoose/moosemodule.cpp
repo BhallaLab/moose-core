@@ -65,16 +65,21 @@
 #include "../shell/Wildcard.h"
 
 #include "moosemodule.h"
+#include "global.h"
 
 using namespace std;
 
-//////////////////////// External functions /////////////////////////
 #ifdef DO_UNIT_TESTS
+
 extern void testSync();
 extern void testAsync();
-extern void testSyncArray( unsigned int size,
-                           unsigned int numThreads,
-                           unsigned int method );
+
+extern void testSyncArray( 
+        unsigned int size,
+        unsigned int numThreads,
+        unsigned int method 
+        );
+
 extern void testShell();
 extern void testScheduling();
 extern void testSchedulingProcess();
@@ -87,22 +92,27 @@ extern void testMpiShell();
 extern void testMsg();
 extern void testMpiMsg();
 extern void testKinetics();
+
 #endif
+
 extern void mpiTests();
 extern void processTests( Shell* );
 extern void nonMpiTests(Shell *);
 extern void test_moosemodule();
 
 
-extern Id init(int argc, char ** argv, bool& doUnitTests, bool& doRegressionTests, unsigned int& benchmark );
+extern Id init(
+        int argc, char ** argv, bool& doUnitTests
+        , bool& doRegressionTests, unsigned int& benchmark 
+        );
 
 extern void initMsgManagers();
 extern void destroyMsgManagers();
+
 extern void speedTestMultiNodeIntFireNetwork(
-    unsigned int size, unsigned int runsteps );
-#ifdef USE_SMOLDYN
-extern void testSmoldyn();
-#endif
+        unsigned int size, unsigned int runsteps 
+        );
+
 extern void mooseBenchmarks( unsigned int option );
 
 
@@ -121,9 +131,15 @@ void pymoose_mtseed_( unsigned int seed )
 
 double pymoose_mtrand_( void )
 {
-    static boost::random::mt19937 rng( moose::global::__rng_seed__ );
-    static boost::random::uniform_01<double> dist;
+
+#if 0
+    static moose::global::rng_type_ rng( moose::global::__rng_seed__ );
+    static moose::global::distribution_type_ dist;
     return dist( rng );
+#else
+    return moose::global::mtrand( );
+#endif
+
 }
 
 /**
