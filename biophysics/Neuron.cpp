@@ -17,9 +17,11 @@
 #include "SwcSegment.h"
 #include "Spine.h"
 #include "Neuron.h"
+#include "muParser.h"
+#include "global.h"
+
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_01.hpp>
-#include "muParser.h"
 
 class nuParser: public mu::Parser
 {
@@ -1568,44 +1570,13 @@ static void addPos( unsigned int segIndex, unsigned int eIndex,
 	double dx = dendLength / n;
 	for( unsigned int i = 0; i < n; ++i ) 
         {
-            if ( moose::mtrand() < dx / spacing ) {
+            if ( moose::global::mtrand() < dx / spacing ) {
                 seglistIndex.push_back( segIndex );
                 elistIndex.push_back( eIndex );
                 pos.push_back( i * dx + dx*0.5 );
             }
         }
 }
-/*
- * This version tries to put in Pos using simple increments from the
- * start of each compt. Multiple issues including inability to put 
- * spines in small compartments, even if many of them.
- *
-static void addPos( unsigned int segIndex, unsigned int eIndex,
-		double spacing, double spacingDistrib, 
-		double dendLength,
-		vector< unsigned int >& seglistIndex,
-		vector< unsigned int >& elistIndex,
-		vector< double >& pos )
-{
-	if ( spacingDistrib > 0.0 ) {
-		double position = spacing * 0.5 + 
-				( mtrand() - 0.5 ) * spacingDistrib;
-		while ( position < dendLength ) {
-			seglistIndex.push_back( segIndex );
-			elistIndex.push_back( eIndex );
-			pos.push_back( position );
-			position += spacing + ( mtrand() - 0.5 ) * spacingDistrib;
-		} 
-	} else {
-		for ( double position = spacing * 0.5; 
-				position < dendLength; position += spacing ) {
-			seglistIndex.push_back( segIndex );
-			elistIndex.push_back( eIndex );
-			pos.push_back( position );
-		}
-	}
-}
-*/
 
 void Neuron::makeSpacingDistrib( const vector< ObjId >& elist, 
         const vector< double >& val,
@@ -1677,7 +1648,7 @@ static void makeAngleDistrib ( const vector< ObjId >& elist,
 				angleDistrib = distribParser.eval( val.begin() + j);
 			}
 			if ( angleDistrib > 0 )
-				theta[k] = angle + ( moose::mtrand() - 0.5 ) * angleDistrib;
+				theta[k] = angle + ( moose::global::mtrand() - 0.5 ) * angleDistrib;
 			else
 				theta[k] = angle;
 		}
@@ -1714,7 +1685,7 @@ static void makeSizeDistrib ( const vector< ObjId >& elist,
 				sizeDistrib = distribParser.eval( val.begin() + j);
 			}
 			if ( sizeDistrib > 0 )
-				size[k] = sz + ( moose::mtrand() - 0.5 ) * sizeDistrib;
+				size[k] = sz + ( moose::global::mtrand() - 0.5 ) * sizeDistrib;
 			else
 				size[k] = sz;
 		}
@@ -1864,10 +1835,8 @@ void Neuron::scaleHeadDiffusion( unsigned int spineNum,
 		psdDsolve_, "setDiffScale", meshIndex, diffScale );
 }
 
-#ifdef USE_BOOST
 // return next random number generator using boost
 double Neuron::mtrand( void )
 {
     return dist( rng );
 }
-#endif

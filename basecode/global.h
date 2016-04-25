@@ -12,16 +12,14 @@
 #ifndef  __MOOSE_GLOBAL_INC_
 #define  __MOOSE_GLOBAL_INC_
 
-#include "header.h"
-#include "../external/debug/simple_test.hpp"
 #include <ctime>
 #include <map>
+#include <sstream>
+
+using namespace std;
 
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_01.hpp>
-
-typedef boost::random::mt19937 rng_type_;
-typedef boost::random::uniform_01<double> distribution_type_;
 
 /**
  * @brief Global stringstream for message printing.
@@ -42,14 +40,6 @@ extern unsigned int totalTests;
 #define TEST_END totalTests++; \
     cout << std::right <<  setw(20) << "test of " << SIMPLE_CURRENT_FUNCTION << " finished."; 
 
-/**
- * @brief A global seed for all RNGs in moose. When moose.seed( x ) is called,
- * this variable is set. Other's RNGs (except muparser) uses this seed to
- * initialize them. By default it is initialized by random_device (see
- * global.cpp).
- */
-extern int __rng_seed__;
-
 /*-----------------------------------------------------------------------------
  *  Global functions in namespace moose
  *-----------------------------------------------------------------------------*/
@@ -63,45 +53,65 @@ extern int __rng_seed__;
 
 namespace moose
 {
-    /**
-     * @brief Fix a path. For testing purpose.
-     *
-     * @param path Path as string.
-     *
-     * @return  A fixed path.
-     */
-     string fixPath(string path);
+    namespace global {
 
-    /**
-     * @brief Checks if given path is correct. 
-     * If not, return false and error-code as well.
-     *
-     * @param path Path name.
-     *
-     * @return 0 if path is all-right. Negative number if path is not OK.
-     */
-     int checkPath( const string& path );
+        typedef boost::random::mt19937 rng_type_;
+        typedef boost::random::uniform_01<double> distribution_type_;
 
-    /** @brief Append pathB to pathA and return the result. 
-     *
-     * If pathA does not have [indexs] at the end, append "[0]" to pathA and
-     * then add pathB to it.  This version does not care if the result has '[0]'
-     * at its end.
-     *
-     * @param pathA First path.  
-     * @param pathB Second path.
-     *
-     * @return A string representing moose-path.
-     */
-     string joinPath(string pathA, string pathB);
+        /**
+         * @brief A global seed for all RNGs in moose. When moose.seed( x ) is called,
+         * this variable is set. Other's RNGs (except muparser) uses this seed to
+         * initialize them. By default it is initialized by random_device (see
+         * global.cpp).
+         */
+        extern int __rng_seed__;
 
+        /**
+         * @brief Fix a path. For testing purpose.
+         *
+         * @param path Path as string.
+         *
+         * @return  A fixed path.
+         */
+        string fixPath(string path);
 
-     /**
-      * @brief Generate a random double between 0 and 1
-      *
-      * @return  A random number between 0 and 1.
-      */
-     double mtrand( void );
+        /**
+         * @brief Checks if given path is correct. 
+         * If not, return false and error-code as well.
+         *
+         * @param path Path name.
+         *
+         * @return 0 if path is all-right. Negative number if path is not OK.
+         */
+        int checkPath( const string& path );
+
+        /** @brief Append pathB to pathA and return the result. 
+         *
+         * If pathA does not have [indexs] at the end, append "[0]" to pathA and
+         * then add pathB to it.  This version does not care if the result has '[0]'
+         * at its end.
+         *
+         * @param pathA First path.  
+         * @param pathB Second path.
+         *
+         * @return A string representing moose-path.
+         */
+        string joinPath(string pathA, string pathB);
+
+        /**
+         * @brief Seed seed for RNG.
+         *
+         * @param seed
+         */
+        void mtseed( unsigned int seed );
+
+        /**
+         * @brief Generate a random double between 0 and 1
+         *
+         * @return  A random number between 0 and 1.
+         */
+        double mtrand( void );
+    }
 }
 
 #endif   /* ----- #ifndef __MOOSE_GLOBAL_INC_  ----- */

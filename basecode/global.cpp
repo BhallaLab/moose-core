@@ -39,56 +39,65 @@ extern string fixPath( string path);
 extern string dumpStats( int  );
 
 std::random_device rd;
-int __rng_seed__ = rd();
+
 
 namespace moose {
+    namespace global {
 
-    /* Check if path is OK */
-    int checkPath( const string& path  )
-    {
-        if( path.size() < 1)
-            return EMPTY_PATH;
+        int __rng_seed__ = rd();
 
-        if( path.find_first_of( " \\!") != std::string::npos )
-            return BAD_CHARACTER_IN_PATH;
-
-        if ( path[path.size() - 1 ] != ']')
+        /* Check if path is OK */
+        int checkPath( const string& path  )
         {
-            return MISSING_BRACKET_AT_END;
+            if( path.size() < 1)
+                return EMPTY_PATH;
+
+            if( path.find_first_of( " \\!") != std::string::npos )
+                return BAD_CHARACTER_IN_PATH;
+
+            if ( path[path.size() - 1 ] != ']')
+            {
+                return MISSING_BRACKET_AT_END;
+            }
+            return 0;
         }
-        return 0;
-    }
 
-    /* Join paths */
-    string joinPath( string pathA, string pathB )
-    {
-        errorSS.str("");
-        errorSS << "Calling a hacky function to fix paths. Ticket #134"
-            << endl;
-        dump(errorSS.str(), "BUG");
-        pathA = moose::fixPath( pathA );
-        string newPath = pathA + "/" + pathB;
-        return moose::fixPath( newPath );
-    }
+        /* Join paths */
+        string joinPath( string pathA, string pathB )
+        {
+            pathA = moose::global::fixPath( pathA );
+            string newPath = pathA + "/" + pathB;
+            return moose::global::fixPath( newPath );
+        }
 
-    /* Fix given path */
-    string fixPath(string path)
-    {
-        int pathOk = moose::checkPath( path );
-        if( pathOk == 0)
+        /* Fix given path */
+        string fixPath(string path)
+        {
+            int pathOk = moose::global::checkPath( path );
+            if( pathOk == 0)
+                return path;
+            else if( pathOk == MISSING_BRACKET_AT_END)
+                return path + "[0]";
             return path;
-        else if( pathOk == MISSING_BRACKET_AT_END)
-            return path + "[0]";
-        dump("I don't know how to fix this path: " + path, "FIXME");
-        return path;
+        }
+
+        /**
+         * @brief Set the global seed or all rngs.
+         *
+         * @param x 
+         */
+        void mtseed( unsigned int x )
+        {
+            moose::global::__rng_seed__ = x;
+        }
+
+        /*  Generate a random number */
+        double mtrand( void )
+        {
+            static rng_type_ rng;
+            static distribution_type_ dist;
+            return dist( rng );
+
+        }
     }
-
-    /*  Generate a random number */
-     double mtrand( void )
-     {
-         static rng_type_ rng;
-         static distribution_type_ dist;
-         return dist( rng );
-
-     }
 }

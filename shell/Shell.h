@@ -10,7 +10,12 @@
 #ifndef _SHELL_H
 #define _SHELL_H
 
-#include "../basecode/global.h"
+#include <string>
+
+using namespace std;
+
+
+class DestFinfo;
 
 enum AssignmentType { SINGLE, VECTOR, REPEAT };
 

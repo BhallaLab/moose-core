@@ -111,17 +111,17 @@ extern void mooseBenchmarks( unsigned int option );
  *
  *  moose.seed( int ) sets the global seed __rng_seed__ declared in global.h as
  *  extern and defined in global.cpp. Various RNGs uses this seed to initialize
- *  themselves. If seed is not set by user, it uses boost::random_device to
+ *  themselves. If seed is not set by user, it uses std::random_device to
  *  initialize itself.
  *-----------------------------------------------------------------------------*/
 void pymoose_mtseed_( unsigned int seed )
 {
-    __rng_seed__ = seed;
+    moose::global::__rng_seed__ = seed;
 }
 
 double pymoose_mtrand_( void )
 {
-    static boost::random::mt19937 rng( __rng_seed__ );
+    static boost::random::mt19937 rng( moose::global::__rng_seed__ );
     static boost::random::uniform_01<double> dist;
     return dist( rng );
 }

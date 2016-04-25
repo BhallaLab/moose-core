@@ -354,14 +354,11 @@ map< string,Id > moose::SbmlReader::createCompartment(string location, Id parent
         if (dimension < 3)
             cout << "\n ###### Spatial Dimension is " << dimension <<" volume should not be converted from liter to cubicmeter which is happening as default check \n";
 
-        ASSERT_FALSE(name.empty() && id.empty()
-                , "Compartment name and id are empty"
-                );
-
-        if (name.empty()) {
+        if(name.empty() && id.empty())
+            cout << "Warn: " << "Compartment name and id are empty" << endl;
+        else if (name.empty()) 
             if(! id.empty() )
                 name = id;
-        }
 
         Id compt = s->doCreate( "CubeMesh", base_, name,  1);
         comptSidMIdMap[id] = compt;

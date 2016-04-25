@@ -11,10 +11,10 @@
 #ifndef _COMPARTMENT_H
 #define _COMPARTMENT_H
 
-#ifdef USE_BOOST
+#include "global.h"
+
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_01.hpp>
-#endif 
 
 /**
  * The Compartment class sets up an asymmetric compartment for
@@ -138,10 +138,8 @@ namespace moose
             double dt_;
             static const double EPSILON;
 
-#if USE_BOOST
-            boost::random::mt19937 rng;
-            boost::random::uniform_01<double> dist;
-#endif
+            moose::global::rng_type_ rng;
+            moose::global::distribution_type_ dist;
 
     };
 }

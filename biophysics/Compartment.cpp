@@ -11,12 +11,8 @@
 #include "CompartmentBase.h"
 #include "Compartment.h"
 
-#ifdef USE_BOOST
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_01.hpp>
-#else
-#include "../randnum/randnum.h"
-#endif
 
 using namespace moose;
 const double Compartment::EPSILON = 1.0e-15;
@@ -214,6 +210,8 @@ void Compartment::vReinit(  const Eref& e, ProcPtr p )
         lastIm_ = 0.0;
 	sumInject_ = 0.0;
 	dt_ = p->dt;
+
+        rng.seed( moose::global::__rng_seed__ );
 	
 	// Send out the resting Vm to channels, SpikeGens, etc.
 	VmOut()->send( e, Vm_ );

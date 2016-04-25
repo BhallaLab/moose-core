@@ -7,6 +7,10 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+#include <string>
+using namespace std;
+
+
 #include "header.h"
 #include "global.h"
 #include "SingleMsg.h"
