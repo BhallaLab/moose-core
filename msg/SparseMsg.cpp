@@ -139,7 +139,6 @@ static const Cinfo* sparseMsgCinfo = SparseMsg::initCinfo();
 void SparseMsg::setProbability ( double probability )
 {
 	p_ = probability;
-	mtseed( seed_ );
 	randomConnect( probability );
 }
 
@@ -151,7 +150,7 @@ double SparseMsg::getProbability ( ) const
 void SparseMsg::setSeed ( long seed )
 {
 	seed_ = seed;
-	mtseed( seed_ );
+	rng.seed( seed_ );
 	randomConnect( p_ );
 }
 
@@ -183,7 +182,7 @@ void SparseMsg::setRandomConnectivity( double probability, long seed )
 {
 	p_ = probability;
 	seed_ = seed;
-	mtseed( seed );
+        rng.seed( seed_ );
 	randomConnect( probability );
 }
 

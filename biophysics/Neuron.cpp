@@ -21,8 +21,6 @@
 #include <boost/random/uniform_01.hpp>
 #include "muParser.h"
 
-extern double mtrand( void );
-
 class nuParser: public mu::Parser
 {
 	public:
@@ -1570,7 +1568,7 @@ static void addPos( unsigned int segIndex, unsigned int eIndex,
 	double dx = dendLength / n;
 	for( unsigned int i = 0; i < n; ++i ) 
         {
-            if ( mtrand() < dx / spacing ) {
+            if ( moose::mtrand() < dx / spacing ) {
                 seglistIndex.push_back( segIndex );
                 elistIndex.push_back( eIndex );
                 pos.push_back( i * dx + dx*0.5 );
@@ -1679,7 +1677,7 @@ static void makeAngleDistrib ( const vector< ObjId >& elist,
 				angleDistrib = distribParser.eval( val.begin() + j);
 			}
 			if ( angleDistrib > 0 )
-				theta[k] = angle + ( mtrand() - 0.5 ) * angleDistrib;
+				theta[k] = angle + ( moose::mtrand() - 0.5 ) * angleDistrib;
 			else
 				theta[k] = angle;
 		}
@@ -1716,7 +1714,7 @@ static void makeSizeDistrib ( const vector< ObjId >& elist,
 				sizeDistrib = distribParser.eval( val.begin() + j);
 			}
 			if ( sizeDistrib > 0 )
-				size[k] = sz + ( mtrand() - 0.5 ) * sizeDistrib;
+				size[k] = sz + ( moose::mtrand() - 0.5 ) * sizeDistrib;
 			else
 				size[k] = sz;
 		}

@@ -9,14 +9,19 @@
 **********************************************************************/
 
 
-#ifndef  GLOBAL_INC
-#define  GLOBAL_INC
+#ifndef  __MOOSE_GLOBAL_INC_
+#define  __MOOSE_GLOBAL_INC_
 
 #include "header.h"
 #include "../external/debug/simple_test.hpp"
 #include <ctime>
 #include <map>
 
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_01.hpp>
+
+typedef boost::random::mt19937 rng_type_;
+typedef boost::random::uniform_01<double> distribution_type_;
 
 /**
  * @brief Global stringstream for message printing.
@@ -38,15 +43,12 @@ extern unsigned int totalTests;
     cout << std::right <<  setw(20) << "test of " << SIMPLE_CURRENT_FUNCTION << " finished."; 
 
 /**
- * @brief Global variable for seeding random number generators.
+ * @brief A global seed for all RNGs in moose. When moose.seed( x ) is called,
+ * this variable is set. Other's RNGs (except muparser) uses this seed to
+ * initialize them. By default it is initialized by random_device (see
+ * global.cpp).
  */
 extern int __rng_seed__;
-void mtseed( int seed );
-
-/*-----------------------------------------------------------------------------
- *  Global clock in moose.
- *-----------------------------------------------------------------------------*/
-
 
 /*-----------------------------------------------------------------------------
  *  Global functions in namespace moose
@@ -61,7 +63,6 @@ void mtseed( int seed );
 
 namespace moose
 {
-
     /**
      * @brief Fix a path. For testing purpose.
      *
@@ -93,6 +94,14 @@ namespace moose
      * @return A string representing moose-path.
      */
      string joinPath(string pathA, string pathB);
+
+
+     /**
+      * @brief Generate a random double between 0 and 1
+      *
+      * @return  A random number between 0 and 1.
+      */
+     double mtrand( void );
 }
 
-#endif   /* ----- #ifndef GLOBAL_INC  ----- */
+#endif   /* ----- #ifndef __MOOSE_GLOBAL_INC_  ----- */

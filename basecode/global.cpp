@@ -3,8 +3,7 @@
  *
  *       Filename:  global.cpp
  *
- *    Description:  It contains global variables to track no of test run and
- *    running performance of moose basecode.
+ *    Description:  Some global declarations.
  *
  *        Version:  1.0
  *        Created:  Tuesday 29 April 2014 10:18:35  IST
@@ -19,8 +18,7 @@
 
 #include "global.h"
 #include <numeric>
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_01.hpp>
+#include <random>
 
 #include "../external/debug/simple_logger.hpp"
 
@@ -40,37 +38,11 @@ extern string joinPath( string pathA, string pathB);
 extern string fixPath( string path);
 extern string dumpStats( int  );
 
-int __rng_seed__ = 0;
-
-/* Logger */
-SimpleLogger logger;
-
-/** 
- * @brief Set the global seed for random number generators. 
- *
- * FIXME: When reinit() is * called, each rng should use this value to seed
- * itself, really?
- *
- * @param seed
- */
-void mtseed( int seed ) 
-{ 
-    __rng_seed__ = seed; 
-}
-
-/**
- * @brief Global function to generate a random number.
- *
- * @return 
- */
-double mtrand( void )
-{
-    static boost::random::mt19937 rng( __rng_seed__ );
-    static boost::random::uniform_01<double> dist;
-    return dist( rng );
-}
+std::random_device rd;
+int __rng_seed__ = rd();
 
 namespace moose {
+
     /* Check if path is OK */
     int checkPath( const string& path  )
     {
@@ -111,4 +83,12 @@ namespace moose {
         return path;
     }
 
+    /*  Generate a random number */
+     double mtrand( void )
+     {
+         static rng_type_ rng;
+         static distribution_type_ dist;
+         return dist( rng );
+
+     }
 }

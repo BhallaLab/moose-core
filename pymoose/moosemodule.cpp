@@ -7,50 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version:
-// Last-Updated: Wed Jan 27 12:56:40 2016 (-0500)
-//           By: Subhasis Ray
-//     Update #: 11013
-// URL:
-// Keywords:
-// Compatibility:
+// Last-Updated: Mon 25 Apr 2016 11:17:24 AM IST
+//           By: Dilawar Singh
 //
-//
-
-// Commentary:
-//
-// 2012-04-20 11:35:59 (+0530)
-//
-// This version will crash for debug build of Python. In Python the
-// flag Py_TPFLAGS_HEAPTYPE is heavily overloaded and hinders dynamic
-// class definition. Python expects non-heap-types to be defined
-// statically. But we need to define the MOOSE classes dynamically by
-// traversing the class definition objects (Cinfo) under /classes/
-// element which are setup at initialization. Once defined, these
-// class objects are not to be deallocated until program exit. Since
-// all malloced memory is from heap, these classes qualify for
-// heaptype, but setting Py_TPFLAGS_HEAPTYPE causes many other issues.
-// One I encountered was that if HEAPTYPE is true, then
-// help(classname) tries to convert the class object to a heaptype
-// object (resulting in an invalid pointer) and causes a segmentation
-// fault. If heaptype is not set it uses tp_name to print the help.
-// See the following link for a discussion about this:
-// http://mail.python.org/pipermail/python-dev/2009-July/090921.html
-//
-// On the other hand, if we do not set Py_TPFLAGS_HEAPTYPE, GC tries
-// tp_traverse on these classes (even when I unset Py_TPFLAGS_HAVE_GC)
-// and fails the assertion in debug build of Python:
-//
-// python: Objects/typeobject.c:2683: type_traverse: Assertion `type->tp_flags & Py_TPFLAGS_HEAPTYPE' failed.
-//
-// Other projects have also encountered this issue:
-//  https://bugs.launchpad.net/meliae/+bug/893461
-// And from the comments it seems that the bug does not really hurt.
-//
-// See also:
-// http://stackoverflow.com/questions/8066438/how-to-dynamically-create-a-derived-type-in-the-python-c-api
-// and the two discussions in Python mailing list referenced there.
-
-
 
 // Change log:
 //
@@ -70,11 +29,11 @@
 //            Decided not to expose any lower level moose API.
 //
 // 2012-04-20 Finalized the C interface
-
-
-// Code:
-
-//////////////////////////// Headers ////////////////////////////////
+//
+// 2016-04-25 Using boost::random to genearte random numbers.
+//            extern "C" is removed. 
+//            Old commentry is deleted. 
+//            Disabled old numpy API.
 
 #include <Python.h>
 #include <structmember.h> // This defines the type id macros like T_STRING
@@ -90,6 +49,8 @@
 #include <ctime>
 #include <csignal>
 #include <exception>
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_01.hpp>
 
 #ifdef USE_MPI
 #include <mpi.h>
@@ -144,7 +105,26 @@ extern void testSmoldyn();
 #endif
 extern void mooseBenchmarks( unsigned int option );
 
-extern double mtrand( void );
+
+/*-----------------------------------------------------------------------------
+ *  Random number generator for this module.
+ *
+ *  moose.seed( int ) sets the global seed __rng_seed__ declared in global.h as
+ *  extern and defined in global.cpp. Various RNGs uses this seed to initialize
+ *  themselves. If seed is not set by user, it uses boost::random_device to
+ *  initialize itself.
+ *-----------------------------------------------------------------------------*/
+void pymoose_mtseed_( unsigned int seed )
+{
+    __rng_seed__ = seed;
+}
+
+double pymoose_mtrand_( void )
+{
+    static boost::random::mt19937 rng( __rng_seed__ );
+    static boost::random::uniform_01<double> dist;
+    return dist( rng );
+}
 
 /**
    Utility function to get all the individual elements when ALLDATA is dataIndex.
@@ -2405,7 +2385,7 @@ PyObject * moose_seed(PyObject * dummy, PyObject * args)
     {
         return NULL;
     }
-    mtseed(seed);
+    pymoose_mtseed_(seed);
     Py_RETURN_NONE;
 }
 
@@ -2429,7 +2409,7 @@ PyDoc_STRVAR(moose_rand_documentation,
 
 PyObject * moose_rand(PyObject * dummy)
 {
-    return PyFloat_FromDouble(mtrand());
+    return PyFloat_FromDouble(pymoose_mtrand_());
 }
 
 PyDoc_STRVAR(moose_wildcardFind_documentation,
