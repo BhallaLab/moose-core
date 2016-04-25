@@ -178,8 +178,12 @@ void HSolveActive::step( ProcPtr info )
 	updateMatTime = (end-start)/1000.0f;
 
 	start = getTime();
+		/*
 		HSolvePassive::forwardEliminate();
 		HSolvePassive::backwardSubstitute();
+		*/
+		// Using forward flow solution
+		forwardFlowSolver();
 	end = getTime();
 	solverTime = (end-start)/1000.0f;
 
@@ -329,8 +333,30 @@ void HSolveActive::updateMatrix()
 #endif
     stage_ = 0;    // Update done.
 }
+void HSolveActive::updateForwardFlowMatrix()
+{
+	// TODO
+}
 
+void HSolveActive::forwardFlowSolver(){
+	// Forward Elimination
+	for(int i=1;i<nCompt_;i++){
+		int parentId = ff_offdiag_mapping[i-1];
+		ff_system[nCompt_+parentId] -= (ff_system[i])*(ff_system[i])/ff_system[nCompt_+i-1];
+		ff_system[3*nCompt_+parentId] -= (ff_system[3*nCompt_+(i-1)]*ff_system[i])/ff_system[nCompt_+i-1];
+	}
 
+	// Backward Substitution
+	VMid_[nCompt_-1] = ff_system[3*nCompt_ + (nCompt_-1)]/ff_system[2*nCompt_-1];
+	for(int i=nCompt_-2;i>=0;i--){
+		int columnId = ff_offdiag_mapping[i];
+		VMid_[i] = (ff_system[3*nCompt_+i]-VMid_[columnId]*ff_system[i+1])/ff_system[nCompt_+i];
+	}
+
+	for (int i = 0; i < nCompt_; ++i) {
+		V_[i] = 2*VMid_[i] - V_[i];
+	}
+}
 
 
 void HSolveActive::advanceCalcium()

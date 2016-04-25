@@ -302,6 +302,9 @@ private:
     void sendSpikes( ProcPtr info );
     void sendValues( ProcPtr info );
 
+    void updateForwardFlowMatrix();
+    void forwardFlowSolver();
+
 #ifdef USE_CUDA
     // Hsolve GPU set up kernels
     void allocate_hsolve_memory_cuda();

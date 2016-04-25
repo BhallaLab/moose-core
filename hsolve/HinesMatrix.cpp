@@ -58,8 +58,9 @@ void HinesMatrix::setup( const vector< TreeNodeStruct >& tree, double dt )
 #ifdef USE_CUDA
     allocateMemoryGpu();
     makeCsrMatrixGpu();
-    makeForwardFlowMatrix();
 #endif
+    // Forward flow matrix
+    makeForwardFlowMatrix();
 
     /*
     // Printing swc file of MOOSE numbering.
@@ -351,6 +352,7 @@ void HinesMatrix::makeCsrMatrixGpu(){
 
 
 }
+#endif
 
 // Printing tri-diagonal system in octave format.
 void print_tridiagonal_matrix_system(double* data, int* misplaced_info, int rows){
@@ -502,7 +504,7 @@ void HinesMatrix::makeForwardFlowMatrix(){
    cout << "Initial matrix error " <<  error << endl;
    //print_tridiagonal_matrix_system(ff_system, ff_offdiag_mapping, nCompt_);
 }
-#endif
+
 
 void HinesMatrix::clear()
 {
