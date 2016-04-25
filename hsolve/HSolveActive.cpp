@@ -173,7 +173,8 @@ void HSolveActive::step( ProcPtr info )
 	calcChanCurTime = (end-start)/1000.0f;
 
 	start = getTime();
-		updateMatrix();
+		//updateMatrix();
+		updateForwardFlowMatrix();
 	end = getTime();
 	updateMatTime = (end-start)/1000.0f;
 
@@ -335,7 +336,50 @@ void HSolveActive::updateMatrix()
 }
 void HSolveActive::updateForwardFlowMatrix()
 {
-	// TODO
+	if(num_profile_prints > -1) {
+		cout << compartment_.size() << endl;
+		cout << externalCurrent_.size() << endl;
+		num_profile_prints--;
+	}
+
+	double GkSum, GkEkSum; vector< CurrentStruct >::iterator icurrent = current_.begin();
+	vector< currentVecIter >::iterator iboundary = currentBoundary_.begin();
+	for (int i = 0; i < compartment_.size(); ++i)
+	{
+		GkSum   = 0.0;
+		GkEkSum = 0.0;
+		for ( ; icurrent < *iboundary; ++icurrent )
+		{
+			GkSum   += icurrent->Gk;
+			GkEkSum += icurrent->Gk * icurrent->Ek;
+		}
+
+		ff_system[nCompt_+i] = ff_system[2*nCompt_+i] + GkSum;
+		ff_system[3*nCompt_+i] = V_[i] * compartment_[i].CmByDt + compartment_[i].EmByRm + GkEkSum;
+
+		++iboundary;
+	}
+
+    map< unsigned int, InjectStruct >::iterator inject;
+    for ( inject = inject_.begin(); inject != inject_.end(); ++inject )
+    {
+        unsigned int ic = inject->first;
+        InjectStruct& value = inject->second;
+
+        ff_system[3*nCompt_+ic] += value.injectVarying + value.injectBasal;
+        value.injectVarying = 0.0;
+    }
+
+
+    vector< double >::iterator iec;
+    for (int i = 0; i < nCompt_; i = i+2)
+    {
+    	ff_system[nCompt_+i] = externalCurrent_[i];
+    	ff_system[3*nCompt_+i] = externalCurrent_[i+1];
+    }
+
+    stage_ = 0;
+
 }
 
 void HSolveActive::forwardFlowSolver(){
@@ -356,6 +400,8 @@ void HSolveActive::forwardFlowSolver(){
 	for (int i = 0; i < nCompt_; ++i) {
 		V_[i] = 2*VMid_[i] - V_[i];
 	}
+
+	stage_ = 2;
 }
 
 
