@@ -16,6 +16,7 @@
 
 
 #include "header.h"
+
 #include "Streamer.h"
 
 const Cinfo* Streamer::initCinfo()
@@ -24,27 +25,32 @@ const Cinfo* Streamer::initCinfo()
      * Finfos
      *-----------------------------------------------------------------------------*/
     static ValueFinfo< Streamer, string > streamname(
-        "streamname",
-        "File/stream to write table data to. Default is 'stdout'.",
-        &Streamer::setStreamname,
-        &Streamer::getStreamname
-    );
+            "streamname"
+            , "File/stream to write table data to. Default is 'stdout'."
+            , &Streamer::setStreamname
+            , &Streamer::getStreamname
+            );
 
+    static ReadOnlyValueFinfo< Streamer, size_t > numTables (
+            "numTables"
+            , "Number of Tables handled by Streamer "
+            , &Streamer::getNumTables
+            );
 
     /*-----------------------------------------------------------------------------
      *
      *-----------------------------------------------------------------------------*/
     static DestFinfo process(
-        "process",
-        "Handle process call",
-        new ProcOpFunc< Streamer >( &Streamer::process )
-    );
+            "process"
+            , "Handle process call"
+            , new ProcOpFunc< Streamer >( &Streamer::process )
+            );
 
     static DestFinfo reinit(
-        "reinit",
-        "Handles reinit call",
-        new ProcOpFunc< Streamer > ( &Streamer::reinit )
-    );
+            "reinit"
+            , "Handles reinit call"
+            , new ProcOpFunc< Streamer > ( &Streamer::reinit )
+            );
 
 
     static DestFinfo addTable(
@@ -64,8 +70,7 @@ const Cinfo* Streamer::initCinfo()
      *-----------------------------------------------------------------------------*/
     static Finfo* procShared[] =
     {
-        &process , &reinit
-        , &addTable, &removeTable
+        &process , &reinit , &addTable, &removeTable
     };
 
     static SharedFinfo proc(
@@ -78,6 +83,7 @@ const Cinfo* Streamer::initCinfo()
     {
         &streamname,
         &proc,
+        &numTables,
     };
 
     static string doc[] =
@@ -143,8 +149,8 @@ void Streamer::addTable( Id table )
     for( auto &t : tables_ )
         if( table.path() == t.path() )
             return;
+
     tables_.push_back( table );
-    cerr << "Debug: " << tables_.size() << endl;
 }
 
 /**
@@ -164,9 +170,20 @@ void Streamer::removeTable( Id table )
         }
 
     if( found )
+    {
         tables_.erase( it );
+    }
 }
 
+/**
+ * @brief Get the number of tables handled by Streamer.
+ *
+ * @return  Number of tables.
+ */
+size_t Streamer::getNumTables( void ) const
+{
+    return tables_.size();
+}
 
 ///////////////////////////////////////////////////
 // Dest function definitions

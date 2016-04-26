@@ -41,8 +41,9 @@ public:
     void addTable( Id table );
     void removeTable( Id table );
 
-    /* Dest functions */
-    /**
+    size_t getNumTables( void ) const;
+
+    /* Dest functions.
      * The process function called by scheduler on every tick
      */
     void process(const Eref& e, ProcPtr p);
@@ -61,6 +62,8 @@ private:
 
     // These Tables are handled by Streamer 
     vector< Id > tables_;
+
+    size_t numTables_;
 };
 
 #endif   /* ----- #ifndef Streamer_INC  ----- */
