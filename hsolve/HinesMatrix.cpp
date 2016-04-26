@@ -62,6 +62,8 @@ void HinesMatrix::setup( const vector< TreeNodeStruct >& tree, double dt )
     // Forward flow matrix
     makeForwardFlowMatrix();
 
+    // Pervasive flow matrix
+    makePervasiveFlowMatrix();
 
     // Printing swc file of MOOSE numbering.
    printf("Num of compts : %d\n",nCompt_);
@@ -399,6 +401,37 @@ void HinesMatrix::print_tridiagonal_matrix_system(double* data, int* misplaced_i
 	*/
 }
 
+void HinesMatrix::print_csr_matrix(coosr_matrix &matrix){
+	int startIndex, endIndex, runningIndex;
+	string delimeter = " , ";
+
+	cout << "A = [" << endl;
+	for(int i=0;i< matrix.rows;i++){
+		startIndex = matrix.rowPtr[i];
+		endIndex =  matrix.rowPtr[i+1]-1;
+		runningIndex = startIndex;
+
+
+		int curCol = 0;
+
+		while(runningIndex <= endIndex){
+			for (int i = curCol; i < matrix.colIndex[runningIndex]; ++i) {
+				cout << setw(5) << 0 << delimeter;
+			}
+			cout << setw(5) << matrix.values[runningIndex] << delimeter;
+			curCol = matrix.colIndex[runningIndex]+1;
+
+			runningIndex++;
+		}
+
+		for (int i = curCol; i < matrix.cols; ++i) {
+			cout << setw(5) << 0  << delimeter;
+		}
+		cout << ";" << endl;
+	}
+	cout << "]" << endl;
+}
+
 void HinesMatrix::makeForwardFlowMatrix(){
 	ff_system = new double[4*nCompt_]();
 	ff_offdiag_mapping = new int[nCompt_]();
@@ -508,6 +541,282 @@ void HinesMatrix::makeForwardFlowMatrix(){
    }
    cout << "Initial matrix error " <<  error << endl;
    //print_tridiagonal_matrix_system(ff_system, ff_offdiag_mapping, nCompt_);
+}
+
+void HinesMatrix::exclusive_scan(int* data, int rows){
+	int temp,sum = 0;
+	for(int i=0;i<rows+1;i++){
+		temp = data[i];
+		data[i] = sum;
+		sum += temp;
+	}
+}
+
+void HinesMatrix::generate_coosr_matrix(int num_comp, const vector<pair<long long int,double> > &full_tri, coosr_matrix &full_mat){
+	// Generating full matrix
+	full_mat.rows = num_comp;
+	full_mat.cols = num_comp;
+	full_mat.nnz = full_tri.size();
+	full_mat.values = new double[full_mat.nnz]();
+	full_mat.rowIndex = new int[full_mat.nnz]();
+	full_mat.colIndex = new int[full_mat.nnz]();
+	full_mat.rowPtr = new int[full_mat.rows+1]();
+
+	int r,c;
+	double value;
+	for(int i=0;i<full_tri.size();i++){
+		r = full_tri[i].first/num_comp;
+		c = full_tri[i].first%num_comp;
+		value = full_tri[i].second;
+
+		full_mat.rowIndex[i] = r;
+		full_mat.colIndex[i] = c;
+		full_mat.values[i] = value;
+		full_mat.rowPtr[r]++;
+	}
+
+	exclusive_scan(full_mat.rowPtr, num_comp);
+}
+
+void HinesMatrix::construct_elimination_information(coosr_matrix full_mat, coosr_matrix upper_mat, coosr_matrix lower_mat,
+			vector<int> &ut_lt_upper, vector<int> &ut_lt_lower, vector<int> &ut_ut_upper, vector<int> &ut_ut_lower ,
+			int* ut_lt_rowPtr, int* ut_ut_rowPtr){
+
+	int r,c;
+	for(int i=0;i<lower_mat.nnz;i++){
+		r = lower_mat.rowIndex[i];
+		c = lower_mat.colIndex[i];
+
+		// Setting counts to zero
+		ut_lt_rowPtr[i] = 0;
+		ut_ut_rowPtr[i] = 0;
+
+		// UT LT paris
+		int u_ul_curId = upper_mat.rowPtr[c]+1; // No need to add the elimination element
+		int l_ul_curId = lower_mat.rowPtr[r];
+
+		while(l_ul_curId < lower_mat.rowPtr[r+1] and u_ul_curId < upper_mat.rowPtr[c+1]){
+			if(upper_mat.colIndex[u_ul_curId] ==  lower_mat.colIndex[l_ul_curId]){
+				ut_lt_upper.push_back(u_ul_curId);
+				ut_lt_lower.push_back(l_ul_curId);
+				ut_lt_rowPtr[i] += 1;
+				// Advancing positions
+				u_ul_curId++;
+				l_ul_curId++;
+			}else{
+				if(upper_mat.colIndex[u_ul_curId] <  lower_mat.colIndex[l_ul_curId]){
+					u_ul_curId++;
+				}else{
+					l_ul_curId++;
+				}
+			}
+		}
+
+		// UT UT pairs
+		int u_uu_curId = upper_mat.rowPtr[c];
+		int l_uu_curId = upper_mat.rowPtr[r];
+
+		// Ignoring row c until column r-1
+		while(upper_mat.colIndex[u_uu_curId] < r and u_uu_curId < upper_mat.rowPtr[c+1]){
+			u_uu_curId++;
+		}
+
+		while(l_uu_curId < upper_mat.rowPtr[r+1] and u_uu_curId < upper_mat.rowPtr[c+1]){
+			if(upper_mat.colIndex[u_uu_curId] == upper_mat.colIndex[l_uu_curId]){
+				ut_ut_upper.push_back(u_uu_curId);
+				ut_ut_lower.push_back(l_uu_curId);
+				ut_ut_rowPtr[i] += 1;
+				// Advancing positions
+				u_uu_curId++;
+				l_uu_curId++;
+			}else{
+				if(upper_mat.colIndex[u_uu_curId] < upper_mat.colIndex[l_uu_curId]){
+					u_uu_curId++;
+				}else{
+					l_uu_curId++;
+				}
+			}
+		}
+	}
+
+	exclusive_scan(ut_lt_rowPtr, lower_mat.nnz);
+	exclusive_scan(ut_ut_rowPtr, lower_mat.nnz);
+
+	/*
+	print_csr_matrix(full_mat);
+	// Debug information
+	for(int i=0;i<lower_mat.nnz;i++){
+		cout << "Elimination Info (" << lower_mat.rowIndex[i] << "," << lower_mat.colIndex[i] << ")" << lower_mat.values[i] << endl;
+		cout << "UT-LT" << endl;
+		for(int j=ut_lt_rowPtr[i];j < ut_lt_rowPtr[i+1]; j++){
+			cout << "(" << upper_mat.values[ut_lt_upper[j]] << "," << lower_mat.values[ut_lt_lower[j]] << ")" << endl;
+		}
+
+		cout << "UT-UT" << endl;
+		for(int j=ut_ut_rowPtr[i]; j < ut_ut_rowPtr[i+1]; j++){
+			cout << "(" << upper_mat.values[ut_ut_upper[j]] << "," << upper_mat.values[ut_ut_lower[j]] << ")" << endl;
+		}
+	}
+	*/
+
+}
+
+void HinesMatrix::storePervasiveMatrix(vector<vector<int> > &child_list){
+
+	int node1,node2;
+	double gi,gj,gij,junction_sum;
+	vector<pair<long long int,double> > full_mat_flat;
+	vector<pair<long long int,double> > lower_mat_flat; // Does not include main diagonal elements
+	vector<pair<long long int,double> > upper_mat_flat; // Includes main diagonal elements
+
+	// Setting up passive part of main diagonal
+	for(int i=0;i<nCompt_;i++){
+		per_mainDiag_passive[i] = (*tree_)[i].Cm/(dt_ / 2.0) + 1.0/(*tree_)[i].Rm;
+	}
+
+	// Getting all non-zero elements with values.
+	for (int i = 0; i < nCompt_; ++i)
+	{
+		// Calculating junction sum
+		junction_sum = 0;
+		for (int k = 0; k < child_list[i].size(); ++k)
+			junction_sum += Ga_[child_list[i][k]];
+
+		// Putting admittance in off diagonal elements.
+		for (int j = 0; j < child_list[i].size(); ++j)
+		{
+			node1 = child_list[i][j];
+
+			// Inducing passive effect to main diagonal elements
+			per_mainDiag_passive[node1] += Ga_[node1]*(1.0 - Ga_[node1]/junction_sum);
+
+			for (int k = j+1; k < child_list[i].size(); ++k)
+			{
+				node2 = child_list[i][k];
+
+				gi = Ga_[node1];
+				gj = Ga_[node2];
+				gij = (gi*gj)/junction_sum;
+
+				//cout << junction_sum << " " << gi[node1] << " " << gi[node2] << " " << admittance << endl;
+
+				// Pushing element and its symmetry.
+				full_mat_flat.push_back(make_pair(node1*nCompt_+node2, -1*gij));
+				full_mat_flat.push_back(make_pair(node2*nCompt_+node1, -1*gij));
+
+				if(node1 > node2){
+					lower_mat_flat.push_back(make_pair(node1*nCompt_+node2, -1*gij));
+					upper_mat_flat.push_back(make_pair(node2*nCompt_+node1, -1*gij));
+				}else{
+					lower_mat_flat.push_back(make_pair(node2*nCompt_+node1, -1*gij));
+					upper_mat_flat.push_back(make_pair(node1*nCompt_+node2, -1*gij));
+				}
+
+			}
+		}
+	}
+
+	// Add main diagonal to non_zero_elements.
+	for (int i = 0; i < nCompt_; ++i){
+		full_mat_flat.push_back(make_pair(i*nCompt_+i, per_mainDiag_passive[i]));
+		upper_mat_flat.push_back(make_pair(i*nCompt_+i, per_mainDiag_passive[i]));
+	}
+
+	// Sorting arranges elements in a row order fashion
+	sort(full_mat_flat.begin(), full_mat_flat.end());
+	sort(upper_mat_flat.begin(), upper_mat_flat.end());
+	sort(lower_mat_flat.begin(), lower_mat_flat.end());
+
+	generate_coosr_matrix(nCompt_, full_mat_flat, full_mat);
+	generate_coosr_matrix(nCompt_, upper_mat_flat, upper_mat);
+	generate_coosr_matrix(nCompt_, lower_mat_flat, lower_mat);
+
+	// Storing indices of main diagonal elements in upper matrix.
+	for (int i = 0; i < nCompt_; ++i) {
+		per_mainDiag_map[i] = upper_mat.rowPtr[i];
+	}
+
+	// Allocating size for ut_lt rowPtr and ut_ut_rowPtr
+	ut_lt_rowPtr = new int[lower_mat.nnz+1]();
+	ut_ut_rowPtr = new int[lower_mat.nnz+1]();
+
+	construct_elimination_information(full_mat, upper_mat, lower_mat,
+				ut_lt_upper, ut_lt_lower, ut_ut_upper, ut_ut_lower ,
+				ut_lt_rowPtr, ut_ut_rowPtr);
+
+}
+
+void HinesMatrix::makePervasiveFlowMatrix(){
+	per_rhs = new double[nCompt_]();
+	per_mainDiag_passive = new double[nCompt_]();
+	per_mainDiag_map = new int[nCompt_]();
+
+	vector< vector<int> > child_list(nCompt_);
+
+	// Adding itself
+	for (int i = 0; i < nCompt_; ++i) {
+		child_list[i].push_back(i);
+	}
+
+	// edge information at junctions.
+   for(int i=0;i<coupled_.size();i++){
+	   int parentId = coupled_[i][coupled_[i].size()-1];
+	   for(int j=0;j<coupled_[i].size()-1;j++){
+		   child_list[parentId].push_back(coupled_[i][j]);
+	   }
+	}
+
+   // edge information of branches
+	for (int i = 0; i < nCompt_; ++i) {
+		vector<unsigned int> children = (*tree_)[i].children;
+		if(children.size() == 1){
+		   if(children[0] > i)
+			   child_list[children[0]].push_back(i);
+		   else
+			   child_list[i].push_back(children[0]);
+		}
+	}
+
+	// Sort children of each compartment.
+	for(vector< vector<int> >::iterator it = child_list.begin(); it != child_list.end(); ++it){
+		sort(it->begin(),it->end());
+	}
+
+	storePervasiveMatrix(child_list);
+
+	// Verification
+	double error = 0;
+	double* row_sums = new double[nCompt_]();
+	for(int i=0;i<upper_mat.rows;i++){
+		for(int j=upper_mat.rowPtr[i];j<upper_mat.rowPtr[i+1];j++){
+			row_sums[upper_mat.rowIndex[j]] += upper_mat.values[j];
+		}
+	}
+	for(int i=0;i<lower_mat.rows;i++){
+		for(int j=lower_mat.rowPtr[i];j<lower_mat.rowPtr[i+1];j++){
+			row_sums[lower_mat.rowIndex[j]] += lower_mat.values[j];
+		}
+	}
+
+	for(int i=0;i<nCompt_;i++){
+	   //cout << row_sums[i] << endl;
+	   error += row_sums[i];
+	}
+	cout << "Initial matrix error " <<  error << endl;
+
+
+	/*
+	print_csr_matrix(full_mat);
+	print_csr_matrix(lower_mat);
+	print_csr_matrix(upper_mat);
+
+	cout << "Main diagonal indices " << endl;
+	for (int i = 0; i < upper_mat.rows; ++i) {
+		printf("%d,",upper_mat.rowPtr[i]);
+	}
+	cout << endl;
+	*/
+
 }
 
 
