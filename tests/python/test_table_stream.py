@@ -8,7 +8,6 @@
     This way, moose never runs out of memory during simulation.
 
 """
-    
 __author__           = "Dilawar Singh"
 __copyright__        = "Copyright 2016, Dilawar Singh"
 __credits__          = ["NCBS Bangalore"]

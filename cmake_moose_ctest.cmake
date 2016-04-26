@@ -75,3 +75,12 @@ ADD_TEST(NAME pymoose-test-rng
 set_tests_properties(pymoose-test-rng
     PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
     )
+
+# Test Streamer class
+ADD_TEST( NAME pymoose-test-streamer 
+    COMMAND ${TEST_COMMAND} 
+    ${PROJECT_SOURCE_DIR}/tests/python/test_streamer.py 
+    )
+set_tests_properties(pymoose-test-streamer
+    PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
+    )
