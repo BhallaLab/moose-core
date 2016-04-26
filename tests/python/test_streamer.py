@@ -25,6 +25,9 @@ def main( ):
     st = moose.Streamer( '/s' )
     assert st.streamname == 'stdout', 'Expecting stdout, got %s' % st.streamname
 
+    st.streamname = 'a.txt'
+    assert st.streamname == 'a.txt'
+
     st.addTable( a )
     assert( st.numTables == 1 )
     st.addTable( b )
