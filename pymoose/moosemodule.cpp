@@ -126,7 +126,7 @@ extern void mooseBenchmarks( unsigned int option );
  *-----------------------------------------------------------------------------*/
 void pymoose_mtseed_( unsigned int seed )
 {
-    moose::global::__rng_seed__ = seed;
+    moose::global::mtseed( seed );
 }
 
 double pymoose_mtrand_( void )
@@ -2399,7 +2399,7 @@ PyDoc_STRVAR(moose_seed_documentation,
 
 PyObject * moose_seed(PyObject * dummy, PyObject * args)
 {
-    size_t seed = 0;
+    long int seed = 0;
     if (!PyArg_ParseTuple(args, "|l", &seed))
     {
         return NULL;

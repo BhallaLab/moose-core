@@ -94,7 +94,7 @@ namespace moose {
         /*  Generate a random number */
         double mtrand( void )
         {
-            static rng_type_ rng;
+            static rng_type_ rng( moose::global::__rng_seed__ );
             static distribution_type_ dist;
             return dist( rng );
 
