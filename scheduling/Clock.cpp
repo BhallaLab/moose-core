@@ -411,6 +411,7 @@ const Cinfo* Clock::initCinfo()
 		"	Stats				17		0.1\n"
 
 		"	Table2				18		1\n"
+		"	TableStream			18		1\n"
 		"	HDF5DataWriter			30		1\n"
 		"	HDF5WriterBase			30		1\n"
 		"	NSDFWriter			30		1\n"
@@ -847,7 +848,6 @@ void Clock::buildDefaultTick()
 	defaultTick_["SpikeStats"] = 7;
 	defaultTick_["Table"] = 8;
 	defaultTick_["TimeTable"] = 8;
-
 	defaultTick_["Dsolve"] = 10;
 	defaultTick_["Adaptor"] = 11;
 	defaultTick_["Func"] = 12;
@@ -873,6 +873,7 @@ void Clock::buildDefaultTick()
 	defaultTick_["Stats"] = 17;
 
 	defaultTick_["Table2"] = 18;
+	defaultTick_["TableStream"] = 18;
 	defaultTick_["HDF5DataWriter"] = 30;
 	defaultTick_["HDF5WriterBase"] = 30;
 	defaultTick_["NSDFWriter"] = 30;

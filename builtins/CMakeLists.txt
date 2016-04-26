@@ -14,6 +14,7 @@ add_library(moose_builtins
     Interpol.cpp
     StimulusTable.cpp
     TimeTable.cpp
+    TableStream.cpp
     Stats.cpp
     Interpol2D.cpp
     HDF5WriterBase.cpp
