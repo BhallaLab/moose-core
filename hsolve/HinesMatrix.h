@@ -109,8 +109,23 @@ protected:
     double* d_b;
 
     int mat_nnz = 0;
-
 #endif
+
+    //// Forward flow matrix data structures
+	/*
+	 * ff_system stores the tri-diagonal system as an array of size (4*num_comp)
+	 * Column1 - lower diagonal elements
+	 * Column2 - main diagonal elements
+	 * Column3 - Passive main diagonal elements.
+	 * Column4 - RHS
+	 */
+	double* ff_system;
+	/*
+	 * Stores the row values of lower off-diagonal elements ordered column wise.
+	 */
+	int* ff_offdiag_mapping;
+
+	void print_tridiagonal_matrix_system(double* data, int* misplaced_info, int rows);
 
 private:
     void clear();
@@ -160,6 +175,14 @@ private:
      */
     void makeCsrMatrixGpu();
 #endif
+    /*
+	 * Create forward flow hines matrix
+	 */
+    void makeForwardFlowMatrix();
+    /*
+     * Create pervasive flow hines matrix
+     */
+
 };
 
 #endif // _HINES_MATRIX_H

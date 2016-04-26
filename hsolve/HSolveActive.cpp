@@ -111,10 +111,10 @@ void HSolveActive::step( ProcPtr info )
 
     GpuTimer advChanTimer, calcChanTimer, umTimer, solverTimer, advCalcTimer;
 #ifdef USE_CUDA
-    advCalcTimer.Start();
+    advChanTimer.Start();
     	advanceChannels( info->dt );
-    advCalcTimer.Stop();
-    advanceChannelsTime = advCalcTimer.Elapsed();
+    advChanTimer.Stop();
+    advanceChannelsTime = advChanTimer.Elapsed();
 
     calcChanTimer.Start();
     	calculateChannelCurrents();
@@ -173,13 +173,19 @@ void HSolveActive::step( ProcPtr info )
 	calcChanCurTime = (end-start)/1000.0f;
 
 	start = getTime();
-		updateMatrix();
+		//updateMatrix();
+		updateForwardFlowMatrix();
 	end = getTime();
 	updateMatTime = (end-start)/1000.0f;
 
 	start = getTime();
+		/*
 		HSolvePassive::forwardEliminate();
 		HSolvePassive::backwardSubstitute();
+		*/
+
+		// Using forward flow solution
+		forwardFlowSolver();
 	end = getTime();
 	solverTime = (end-start)/1000.0f;
 
@@ -217,6 +223,11 @@ void HSolveActive::step( ProcPtr info )
 			    ,sendSpikesTime,
 			    memoryTransferTime);
 	num_profile_prints--;
+	}
+
+	if(num_profile_prints > 0){
+		printf("%lf\n",solverTime);
+		num_profile_prints--;
 	}
 
     externalCurrent_.assign( externalCurrent_.size(), 0.0 );
@@ -329,8 +340,78 @@ void HSolveActive::updateMatrix()
 #endif
     stage_ = 0;    // Update done.
 }
+void HSolveActive::updateForwardFlowMatrix()
+{
+	double GkSum, GkEkSum; vector< CurrentStruct >::iterator icurrent = current_.begin();
+	vector< currentVecIter >::iterator iboundary = currentBoundary_.begin();
+	for (int i = 0; i < compartment_.size(); ++i)
+	{
+		GkSum   = 0.0;
+		GkEkSum = 0.0;
+		for ( ; icurrent < *iboundary; ++icurrent )
+		{
+			GkSum   += icurrent->Gk;
+			GkEkSum += icurrent->Gk * icurrent->Ek;
+		}
+
+		ff_system[nCompt_+i] = ff_system[2*nCompt_+i] + GkSum;
+		ff_system[3*nCompt_+i] = V_[i] * compartment_[i].CmByDt + compartment_[i].EmByRm + GkEkSum;
+
+		++iboundary;
+	}
+
+    map< unsigned int, InjectStruct >::iterator inject;
+    for ( inject = inject_.begin(); inject != inject_.end(); ++inject )
+    {
+        unsigned int ic = inject->first;
+        InjectStruct& value = inject->second;
+
+        ff_system[3*nCompt_+ic] += value.injectVarying + value.injectBasal;
+        value.injectVarying = 0.0;
+    }
 
 
+    vector< double >::iterator iec;
+    for (int i = 0; i < nCompt_; i = i+2)
+    {
+    	ff_system[nCompt_+i] += externalCurrent_[i];
+    	ff_system[3*nCompt_+i] += externalCurrent_[i+1];
+    }
+
+    stage_ = 0;
+
+}
+
+void HSolveActive::forwardFlowSolver(){
+	/*
+	for (int i = 0; i < V_.size(); ++i) {
+		if(i==0) cout << "Voltages" << endl;
+		cout << V_[i] << endl;
+	}
+	*/
+
+	//print_tridiagonal_matrix_system(ff_system, ff_offdiag_mapping, nCompt_);
+
+	// Forward Elimination
+	for(int i=1;i<nCompt_;i++){
+		int parentId = ff_offdiag_mapping[i-1];
+		ff_system[nCompt_+parentId] -= (ff_system[i])*(ff_system[i])/ff_system[nCompt_+i-1];
+		ff_system[3*nCompt_+parentId] -= (ff_system[3*nCompt_+(i-1)]*ff_system[i])/ff_system[nCompt_+i-1];
+	}
+
+	// Backward Substitution
+	VMid_[nCompt_-1] = ff_system[3*nCompt_ + (nCompt_-1)]/ff_system[2*nCompt_-1];
+	for(int i=nCompt_-2;i>=0;i--){
+		int columnId = ff_offdiag_mapping[i];
+		VMid_[i] = (ff_system[3*nCompt_+i]-VMid_[columnId]*ff_system[i+1])/ff_system[nCompt_+i];
+	}
+
+	for (int i = 0; i < nCompt_; ++i) {
+		V_[i] = 2*VMid_[i] - V_[i];
+	}
+
+	stage_ = 2;
+}
 
 
 void HSolveActive::advanceCalcium()

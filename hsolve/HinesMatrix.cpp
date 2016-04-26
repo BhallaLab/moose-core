@@ -13,6 +13,11 @@
 #include <iomanip>
 #include <stdexcept>
 
+#include <fstream>
+#include <iostream>
+
+#include <vector>
+using namespace std;
 
 HinesMatrix::HinesMatrix()
     :
@@ -54,8 +59,44 @@ void HinesMatrix::setup( const vector< TreeNodeStruct >& tree, double dt )
     allocateMemoryGpu();
     makeCsrMatrixGpu();
 #endif
+    // Forward flow matrix
+    makeForwardFlowMatrix();
 
-    /*
+
+    // Printing swc file of MOOSE numbering.
+   printf("Num of compts : %d\n",nCompt_);
+   // SWC file
+   vector<pair<int,int> > edges;
+   // edge information at junctions.
+   for(int i=0;i<coupled_.size();i++){
+	   int parentId = coupled_[i][coupled_[i].size()-1];
+	   for(int j=0;j<coupled_[i].size()-1;j++){
+		   edges.push_back(make_pair(coupled_[i][j]+1,parentId+1));
+	   }
+   	}
+
+   // edge information of branches
+   for (int i = 0; i < nCompt_; ++i) {
+	   vector<unsigned int> children = tree[i].children;
+	   if(children.size() == 1){
+		   if(children[0] > i)
+			   edges.push_back(make_pair(i+1,children[0]+1));
+		   else
+			   edges.push_back(make_pair(children[0]+1,i+1));
+		}
+   	}
+
+	sort(edges.begin(), edges.end());
+	edges.insert(edges.begin(), make_pair(nCompt_,-1));
+
+   ofstream swc_file("neuron.swc");
+   for(int i=0;i<edges.size();i++){
+	   //printf("%d %d\n",edges[i].first, edges[i].second);
+	   swc_file << edges[i].first << " " << edges[i].second << endl;
+   }
+   swc_file.close();
+
+   /*
     // Printing stuff
     for ( unsigned int i = 0; i < nCompt_; ++i )
     {
@@ -66,6 +107,7 @@ void HinesMatrix::setup( const vector< TreeNodeStruct >& tree, double dt )
     	}
     	printf("\n");
     }
+
     printf("Coupled data\n");
     for(int i=0;i<coupled_.size();i++){
     	for(int j=0;j<coupled_[i].size();j++){
@@ -73,7 +115,6 @@ void HinesMatrix::setup( const vector< TreeNodeStruct >& tree, double dt )
     	}
     	printf("\n");
     }
-
     printf("Junction Data\n");
     vector< JunctionStruct >::iterator junction = junction_.begin();
     for(;junction != junction_.end();junction++){
@@ -93,11 +134,9 @@ void HinesMatrix::setup( const vector< TreeNodeStruct >& tree, double dt )
 	}
     printf("\n");
 
-
     cout << nCompt_ << " " << HJ_.size() << " " << mat_nnz << endl;
     cout << operandBase_.size() << endl;
     */
-
 
 }
 #ifdef USE_CUDA
@@ -315,6 +354,163 @@ void HinesMatrix::makeCsrMatrixGpu(){
 }
 #endif
 
+// Printing tri-diagonal system in octave format.
+void HinesMatrix::print_tridiagonal_matrix_system(double* data, int* misplaced_info, int rows){
+
+	double full[rows][rows];
+
+	for (int i = 0; i < rows; ++i)
+	{
+		for (int j = 0; j < rows; ++j)
+		{
+			full[i][j] = 0;
+		}
+	}
+
+	for (int i = 0; i < rows; ++i)
+	{
+		full[i][i] = data[rows+i];
+	}
+
+	for (int i = 0; i < rows-1; ++i)
+	{
+		full[i][misplaced_info[i]] = data[i+1];
+		full[misplaced_info[i]][i] = data[i+1];
+	}
+
+	cout << "A = [" << endl;
+	for (int i = 0; i < rows; ++i)
+	{
+		for (int j = 0; j < rows; ++j)
+		{
+			cout << full[i][j] << ",";
+		}
+		cout << ";" << endl;
+	}
+	cout << "]" << endl;
+
+	/*
+	cout << "B = [" << endl;
+	for (int i = 0; i < rows; ++i)
+	{
+		cout << rhs[i] << endl;
+	}
+	cout << "]" << endl;
+	*/
+}
+
+void HinesMatrix::makeForwardFlowMatrix(){
+	ff_system = new double[4*nCompt_]();
+	ff_offdiag_mapping = new int[nCompt_]();
+
+	// Setting up passive part of main diagonal
+	for(int i=0;i<nCompt_;i++){
+		ff_system[2*nCompt_ + i] = (*tree_)[i].Cm/(dt_ / 2.0) + 1.0/(*tree_)[i].Rm;
+	}
+
+   // Mapping is nothing but swc file with -1 parent entry.
+   // Edge information at junctions.
+   for(int i=0;i<coupled_.size();i++){
+	   int parentId = coupled_[i][coupled_[i].size()-1];
+	   for(int j=0;j<coupled_[i].size()-1;j++){
+		   ff_offdiag_mapping[coupled_[i][j]] = parentId;
+	   }
+	}
+
+   // Edge information of branches
+   for (int i = 0; i < nCompt_; ++i) {
+	   vector<unsigned int> children = ( *tree_ )[ i ].children;
+	   if(children.size() == 1){
+		   if(children[0] > i)
+			   ff_offdiag_mapping[i] = children[0];
+		   else
+			   ff_offdiag_mapping[children[0]] = i;
+		}
+	}
+
+   /*
+   // Temporary code
+   for(int i=0;i<nCompt_;i++)
+	   Ga_[i] = rand()%10+2;
+    */
+
+   //// MATRIX construction
+	int node1, node2;
+	double gi, gj, gij;
+	double junction_sum;
+   // Contributing junctions to matrix
+   for(int i=0;i<coupled_.size();i++){
+   	   int parentId = coupled_[i][coupled_[i].size()-1];
+   	   junction_sum = 0;
+   	   for(int j=0;j<coupled_[i].size();j++){
+   		   junction_sum += Ga_[coupled_[i][j]];
+   	   }
+
+   	   node1 = parentId;
+   	   // Including passive effect to main diagonal elements
+   	   ff_system[nCompt_+node1] += Ga_[node1]*(1.0 - Ga_[node1]/junction_sum);
+   	   ff_system[2*nCompt_+node1] += Ga_[node1]*(1.0 - Ga_[node1]/junction_sum);
+
+   	   for(int j=0;j<coupled_[i].size()-1;j++){
+   		   node2 = coupled_[i][j];
+
+   		   gi = Ga_[node1];
+   		   gj = Ga_[node2];
+   		   gij = (gi*gj)/junction_sum;
+
+   		   ff_system[nCompt_+node2] += gij;
+   		   ff_system[2*nCompt_+node2] += gij;
+
+   		   ff_system[node2+1] = -1*gij;
+   	   }
+   	}
+
+   // Contributing branches to matrix
+   for (int i = 0; i < nCompt_; ++i) {
+	   vector<unsigned int> children = ( *tree_ )[ i ].children;
+   	   if(children.size() == 1){
+   		   if(children[0] > i){
+   			   node1 = children[0];
+   			   node2 = i;
+   		   }else{
+   			node1 = i;
+   			node2 = children[0];
+   		   }
+
+   		   gi = Ga_[node1];
+   		   gj = Ga_[node2];
+   		   gij = (gi*gj)/(gi+gj);
+
+   		   ff_system[nCompt_+node1] += gij;
+   		   ff_system[nCompt_+node2] += gij;
+
+   		   ff_system[2*nCompt_+node1] += gij;
+   		   ff_system[2*nCompt_+node2] += gij;
+
+   		   ff_system[node2+1] = -1*gij;
+   		}
+   	}
+
+   // Verification
+   double error = 0;
+   double* row_sums = new double[nCompt_]();
+   for(int i=0;i<nCompt_;i++){
+	   row_sums[i] += ff_system[nCompt_+i];
+   }
+   for(int i=0;i<nCompt_-1;i++){
+	   row_sums[ff_offdiag_mapping[i]] += ff_system[i+1];
+	   row_sums[i] += ff_system[i+1];
+   }
+
+   for(int i=0;i<nCompt_;i++){
+	   //cout << row_sums[i] << endl;
+	   error += row_sums[i];
+   }
+   cout << "Initial matrix error " <<  error << endl;
+   //print_tridiagonal_matrix_system(ff_system, ff_offdiag_mapping, nCompt_);
+}
+
+
 void HinesMatrix::clear()
 {
     nCompt_ = 0;
@@ -371,11 +567,13 @@ void HinesMatrix::makeJunctions()
     }
 
     // 3.2
+
     vector< vector< unsigned int > >::iterator group;
     for ( group = coupled_.begin(); group != coupled_.end(); ++group )
         sort( group->begin(), group->end() );
 
     sort( coupled_.begin(), coupled_.end(), groupCompare );
+
 
     // 3.3
     unsigned int index;
