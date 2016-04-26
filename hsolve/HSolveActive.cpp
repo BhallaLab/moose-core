@@ -174,7 +174,8 @@ void HSolveActive::step( ProcPtr info )
 
 	start = getTime();
 		//updateMatrix();
-		updateForwardFlowMatrix();
+		//updateForwardFlowMatrix();
+		updatePervasiveFlowMatrix();
 	end = getTime();
 	updateMatTime = (end-start)/1000.0f;
 
@@ -185,7 +186,10 @@ void HSolveActive::step( ProcPtr info )
 		*/
 
 		// Using forward flow solution
-		forwardFlowSolver();
+		//forwardFlowSolver();
+
+		// Using pervasive flow solution
+		pervasiveFlowSolver();
 	end = getTime();
 	solverTime = (end-start)/1000.0f;
 
@@ -372,10 +376,10 @@ void HSolveActive::updateForwardFlowMatrix()
 
 
     vector< double >::iterator iec;
-    for (int i = 0; i < nCompt_; i = i+2)
+    for (int i = 0; i < nCompt_; i++)
     {
-    	ff_system[nCompt_+i] += externalCurrent_[i];
-    	ff_system[3*nCompt_+i] += externalCurrent_[i+1];
+    	ff_system[nCompt_+i] += externalCurrent_[2*i];
+    	ff_system[3*nCompt_+i] += externalCurrent_[2*i+1];
     }
 
     stage_ = 0;
@@ -413,6 +417,88 @@ void HSolveActive::forwardFlowSolver(){
 	stage_ = 2;
 }
 
+void HSolveActive::updatePervasiveFlowMatrix(){
+
+	// Copying initial matrix
+	memcpy(upper_mat.values, upper_mat_values_copy, upper_mat.nnz*sizeof(double));
+	memcpy(lower_mat.values, lower_mat_values_copy, lower_mat.nnz*sizeof(double));
+
+	double GkSum, GkEkSum; vector< CurrentStruct >::iterator icurrent = current_.begin();
+	vector< currentVecIter >::iterator iboundary = currentBoundary_.begin();
+	for (int i = 0; i < compartment_.size(); ++i)
+	{
+		GkSum   = 0.0;
+		GkEkSum = 0.0;
+		for ( ; icurrent < *iboundary; ++icurrent )
+		{
+			GkSum   += icurrent->Gk;
+			GkEkSum += icurrent->Gk * icurrent->Ek;
+		}
+
+		upper_mat.values[per_mainDiag_map[i]] = per_mainDiag_passive[i] + GkSum;
+		per_rhs[i] = V_[i] * compartment_[i].CmByDt + compartment_[i].EmByRm + GkEkSum;
+
+		++iboundary;
+	}
+
+    map< unsigned int, InjectStruct >::iterator inject;
+    for ( inject = inject_.begin(); inject != inject_.end(); ++inject )
+    {
+        unsigned int ic = inject->first;
+        InjectStruct& value = inject->second;
+
+        per_rhs[ic] += value.injectVarying + value.injectBasal;
+        value.injectVarying = 0.0;
+    }
+
+
+    vector< double >::iterator iec;
+    for (int i = 0; i < nCompt_; i++)
+    {
+    	upper_mat.values[per_mainDiag_map[i]] += externalCurrent_[2*i];
+    	per_rhs[i] += externalCurrent_[2*i+1];
+    }
+
+    stage_ = 0;
+}
+
+void HSolveActive::pervasiveFlowSolver(){
+   	// TODO
+	// Gauss elimination
+	for(int i=0;i<lower_mat.nnz;i++){
+		double scaling = lower_mat.values[i]/upper_mat.values[upper_mat.rowPtr[lower_mat.colIndex[i]]];
+		// UT-LT
+		for(int j=ut_lt_rowPtr[i];j < ut_lt_rowPtr[i+1]; j++){
+			lower_mat.values[ut_lt_lower[j]] -= (upper_mat.values[ut_lt_upper[j]]*scaling);
+		}
+
+		// UT-UT
+		for(int j=ut_ut_rowPtr[i]; j < ut_ut_rowPtr[i+1]; j++){
+			upper_mat.values[ut_ut_lower[j]] -= (upper_mat.values[ut_ut_upper[j]]*scaling);
+		}
+
+		// RHS
+		per_rhs[lower_mat.rowIndex[i]] -= (per_rhs[lower_mat.colIndex[i]]*scaling);
+	}
+
+	//print_csr_matrix(upper_mat);
+	//print_matrix(rhs,num_comp,1);
+
+	// Backward substitution
+	for(int i=nCompt_-1;i>=0;i--){
+		double sum = 0;
+		for(int j=upper_mat.rowPtr[i]+1;j<upper_mat.rowPtr[i+1];j++){
+			sum += (upper_mat.values[j]*VMid_[upper_mat.colIndex[j]]);
+		}
+		VMid_[i] = (per_rhs[i]-sum)/upper_mat.values[upper_mat.rowPtr[i]];
+	}
+
+	for (int i = 0; i < nCompt_; ++i) {
+		V_[i] = 2*VMid_[i] - V_[i];
+	}
+
+	stage_ = 2;
+}
 
 void HSolveActive::advanceCalcium()
 {

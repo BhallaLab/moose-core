@@ -305,6 +305,9 @@ private:
     void updateForwardFlowMatrix();
     void forwardFlowSolver();
 
+    void updatePervasiveFlowMatrix();
+    void pervasiveFlowSolver();
+
 #ifdef USE_CUDA
     // Hsolve GPU set up kernels
     void allocate_hsolve_memory_cuda();

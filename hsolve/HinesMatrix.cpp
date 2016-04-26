@@ -784,6 +784,13 @@ void HinesMatrix::makePervasiveFlowMatrix(){
 
 	storePervasiveMatrix(child_list);
 
+	// Making copy of values.
+	upper_mat_values_copy = new double[upper_mat.nnz]();
+	lower_mat_values_copy = new double[lower_mat.nnz]();
+
+	memcpy(upper_mat_values_copy, upper_mat.values, upper_mat.nnz*sizeof(double));
+	memcpy(lower_mat_values_copy, lower_mat.values, lower_mat.nnz*sizeof(double));
+
 	// Verification
 	double error = 0;
 	double* row_sums = new double[nCompt_]();

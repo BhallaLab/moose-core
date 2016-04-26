@@ -135,6 +135,8 @@ protected:
 
 	vector<int> ut_lt_upper, ut_lt_lower, ut_ut_upper, ut_ut_lower;
 	int* ut_lt_rowPtr, *ut_ut_rowPtr;
+	double* upper_mat_values_copy;
+	double* lower_mat_values_copy;
 
 	void print_tridiagonal_matrix_system(double* data, int* misplaced_info, int rows);
 	void print_csr_matrix(coosr_matrix &matrix);
