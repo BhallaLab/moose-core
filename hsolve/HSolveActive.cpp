@@ -111,10 +111,10 @@ void HSolveActive::step( ProcPtr info )
 
     GpuTimer advChanTimer, calcChanTimer, umTimer, solverTimer, advCalcTimer;
 #ifdef USE_CUDA
-    advCalcTimer.Start();
+    advChanTimer.Start();
     	advanceChannels( info->dt );
-    advCalcTimer.Stop();
-    advanceChannelsTime = advCalcTimer.Elapsed();
+    advChanTimer.Stop();
+    advanceChannelsTime = advChanTimer.Elapsed();
 
     calcChanTimer.Start();
     	calculateChannelCurrents();
@@ -183,6 +183,7 @@ void HSolveActive::step( ProcPtr info )
 		HSolvePassive::forwardEliminate();
 		HSolvePassive::backwardSubstitute();
 		*/
+
 		// Using forward flow solution
 		forwardFlowSolver();
 	end = getTime();
@@ -222,6 +223,11 @@ void HSolveActive::step( ProcPtr info )
 			    ,sendSpikesTime,
 			    memoryTransferTime);
 	num_profile_prints--;
+	}
+
+	if(num_profile_prints > 0){
+		printf("%lf\n",solverTime);
+		num_profile_prints--;
 	}
 
     externalCurrent_.assign( externalCurrent_.size(), 0.0 );
@@ -336,12 +342,6 @@ void HSolveActive::updateMatrix()
 }
 void HSolveActive::updateForwardFlowMatrix()
 {
-	if(num_profile_prints > -1) {
-		cout << compartment_.size() << endl;
-		cout << externalCurrent_.size() << endl;
-		num_profile_prints--;
-	}
-
 	double GkSum, GkEkSum; vector< CurrentStruct >::iterator icurrent = current_.begin();
 	vector< currentVecIter >::iterator iboundary = currentBoundary_.begin();
 	for (int i = 0; i < compartment_.size(); ++i)
@@ -374,8 +374,8 @@ void HSolveActive::updateForwardFlowMatrix()
     vector< double >::iterator iec;
     for (int i = 0; i < nCompt_; i = i+2)
     {
-    	ff_system[nCompt_+i] = externalCurrent_[i];
-    	ff_system[3*nCompt_+i] = externalCurrent_[i+1];
+    	ff_system[nCompt_+i] += externalCurrent_[i];
+    	ff_system[3*nCompt_+i] += externalCurrent_[i+1];
     }
 
     stage_ = 0;
@@ -383,6 +383,15 @@ void HSolveActive::updateForwardFlowMatrix()
 }
 
 void HSolveActive::forwardFlowSolver(){
+	/*
+	for (int i = 0; i < V_.size(); ++i) {
+		if(i==0) cout << "Voltages" << endl;
+		cout << V_[i] << endl;
+	}
+	*/
+
+	//print_tridiagonal_matrix_system(ff_system, ff_offdiag_mapping, nCompt_);
+
 	// Forward Elimination
 	for(int i=1;i<nCompt_;i++){
 		int parentId = ff_offdiag_mapping[i-1];

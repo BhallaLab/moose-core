@@ -125,6 +125,8 @@ protected:
 	 */
 	int* ff_offdiag_mapping;
 
+	void print_tridiagonal_matrix_system(double* data, int* misplaced_info, int rows);
+
 private:
     void clear();
     void makeJunctions();

@@ -62,7 +62,7 @@ void HinesMatrix::setup( const vector< TreeNodeStruct >& tree, double dt )
     // Forward flow matrix
     makeForwardFlowMatrix();
 
-    /*
+
     // Printing swc file of MOOSE numbering.
    printf("Num of compts : %d\n",nCompt_);
    // SWC file
@@ -96,7 +96,7 @@ void HinesMatrix::setup( const vector< TreeNodeStruct >& tree, double dt )
    }
    swc_file.close();
 
-
+   /*
     // Printing stuff
     for ( unsigned int i = 0; i < nCompt_; ++i )
     {
@@ -355,7 +355,7 @@ void HinesMatrix::makeCsrMatrixGpu(){
 #endif
 
 // Printing tri-diagonal system in octave format.
-void print_tridiagonal_matrix_system(double* data, int* misplaced_info, int rows){
+void HinesMatrix::print_tridiagonal_matrix_system(double* data, int* misplaced_info, int rows){
 
 	double full[rows][rows];
 
@@ -449,6 +449,7 @@ void HinesMatrix::makeForwardFlowMatrix(){
    	   node1 = parentId;
    	   // Including passive effect to main diagonal elements
    	   ff_system[nCompt_+node1] += Ga_[node1]*(1.0 - Ga_[node1]/junction_sum);
+   	   ff_system[2*nCompt_+node1] += Ga_[node1]*(1.0 - Ga_[node1]/junction_sum);
 
    	   for(int j=0;j<coupled_[i].size()-1;j++){
    		   node2 = coupled_[i][j];
@@ -458,6 +459,7 @@ void HinesMatrix::makeForwardFlowMatrix(){
    		   gij = (gi*gj)/junction_sum;
 
    		   ff_system[nCompt_+node2] += gij;
+   		   ff_system[2*nCompt_+node2] += gij;
 
    		   ff_system[node2+1] = -1*gij;
    	   }
@@ -481,6 +483,9 @@ void HinesMatrix::makeForwardFlowMatrix(){
 
    		   ff_system[nCompt_+node1] += gij;
    		   ff_system[nCompt_+node2] += gij;
+
+   		   ff_system[2*nCompt_+node1] += gij;
+   		   ff_system[2*nCompt_+node2] += gij;
 
    		   ff_system[node2+1] = -1*gij;
    		}
