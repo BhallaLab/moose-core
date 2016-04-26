@@ -23,5 +23,13 @@ import moose
 
 print( '[INFO] Using moose from %s' % moose.__file__ )
 
-a = moose.TableStream( '/a' )
+t1 = moose.Table( '/t1' )
+t2 = moose.Table( '/t1/t1' )
+
+a = moose.Streamer( '/a' )
 assert( a.streamname == 'stdout' ), 'default is stdout, got %s' % a.streamname
+
+# Add another table
+a.addTable( t1 )
+a.addTable( t2 )
+a.removeTable( t1 )
