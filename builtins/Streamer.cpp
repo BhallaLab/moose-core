@@ -18,6 +18,8 @@
 #include "header.h"
 
 #include "Streamer.h"
+#include "Table.h"
+
 
 const Cinfo* Streamer::initCinfo()
 {
@@ -114,14 +116,12 @@ static const Cinfo* tableStreamCinfo = Streamer::initCinfo();
 // Class function definitions
 ///////////////////////////////////////////////////
 
-Streamer::Streamer() : streamname_("stdout")
+Streamer::Streamer() : streamname_("stdout"), of_( &std::cout )
 {
-    ;
 }
 
 Streamer::~Streamer()
 {
-    ;
 }
 
 ///////////////////////////////////////////////////
@@ -185,16 +185,35 @@ size_t Streamer::getNumTables( void ) const
     return tables_.size();
 }
 
-///////////////////////////////////////////////////
-// Dest function definitions
-///////////////////////////////////////////////////
-
+/**
+ * @brief Reinit.
+ *
+ * @param e
+ * @param p
+ */
 void Streamer::reinit(const Eref& e, ProcPtr p)
 {
-
+    if( streamname_ == "stdout" )
+        of_ = &std::cout;
 }
 
+/**
+ * @brief This function is called at its clock tick.
+ *
+ * @param e
+ * @param p
+ */
 void Streamer::process(const Eref& e, ProcPtr p)
 {
+    if( tables_.size() < 1 )
+        return;
 
+    cout << "Total tables: " << tables_.size() << endl;
+
+    for( auto t : tables_ )
+    {
+        Table* tt  = reinterpret_cast< Table* >( t.eref().data() );
+        cout << "Id : " << t << endl;
+        cout << tt->getVecSize() << endl;
+    }
 }

@@ -21,6 +21,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <fstream>
+
 
 using namespace std;
 
@@ -64,6 +66,14 @@ private:
     vector< Id > tables_;
 
     size_t numTables_;
+
+    /**
+     * @brief If header is already written to stdout/stream, set it true.
+     */
+    bool isHeaderWritten = false;
+
+    std::ostream* of_;
+
 };
 
 #endif   /* ----- #ifndef Streamer_INC  ----- */

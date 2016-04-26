@@ -17,10 +17,13 @@ import sys
 import moose
 print( '[INFO] Using moose form %s' % moose.__file__ )
 
-def main( ):
+def sanity_test( ):
     a = moose.Table( '/t1' )
     b = moose.Table( '/t1/t1' )
     c = moose.Table( '/t1/t1/t1' )
+    print a
+    print b 
+    print c
 
     st = moose.Streamer( '/s' )
     assert st.streamname == 'stdout', 'Expecting stdout, got %s' % st.streamname
@@ -49,6 +52,48 @@ def main( ):
     assert( st.numTables == 0 )
     st.removeTable( b )
     assert( st.numTables == 0 )
+    print( 'Sanity test passed' )
+
+def test( ):
+    compt = moose.CubeMesh( '/compt' )
+    r = moose.Reac( '/compt/r' )
+    a = moose.Pool( '/compt/a' )
+    a.concInit = 1
+    b = moose.Pool( '/compt/b' )
+    b.concInit = 2
+    c = moose.Pool( '/compt/c' )
+    c.concInit = 0.5
+    moose.connect( r, 'sub', a, 'reac' )
+    moose.connect( r, 'prd', b, 'reac' )
+    moose.connect( r, 'prd', c, 'reac' )
+    r.Kf = 10.0
+    r.Kb = 3.2
+
+    tabA = moose.Table2( '/compt/a/tab' )
+    tabB = moose.Table2( '/compt/tabB' )
+    tabC = moose.Table2( '/compt/tabB/tabC' )
+    print tabA, tabB, tabC
+
+    moose.connect( tabA, 'requestOut', a, 'getConc' )
+    moose.connect( tabB, 'requestOut', b, 'getConc' )
+    moose.connect( tabC, 'requestOut', c, 'getConc' )
+
+    # Now create a streamer and use it to write to a stream
+    st = moose.Streamer( '/compt/streamer' )
+    for t in [ tabA, tabB, tabC ]:
+        st.addTable( t )
+    assert st.numTables == 3
+
+    moose.reinit( )
+    moose.start( 5 )
+    print tabA.vector
+    print tabB.vector
+    print tabC.vector
+
+
+def main( ):
+    sanity_test( )
+    test( )
 
 
 if __name__ == '__main__':

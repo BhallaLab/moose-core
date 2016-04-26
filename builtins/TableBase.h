@@ -55,7 +55,7 @@ class TableBase
 		double interpolate( double x, double xmin, double xmax ) const;
 
 		static const Cinfo* initCinfo();
-	protected:
+//	protected:
 		vector< double >& vec();
 	private:
 		double output_;
