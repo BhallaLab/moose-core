@@ -20,6 +20,7 @@ using namespace std;
 
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_01.hpp>
+#include <boost/lexical_cast.hpp>
 
 /**
  * @brief Global stringstream for message printing.
@@ -111,6 +112,20 @@ namespace moose
          * @return  A random number between 0 and 1.
          */
         double mtrand( void );
+
+        /**
+         * @brief Convert a given value to string.
+         *
+         * @tparam T
+         * @param x
+         *
+         * @return  String representation
+         */
+        template<typename T>
+        string to_string( T x )
+        {
+            return boost::lexical_cast<string>( x );
+        }
     }
 }
 

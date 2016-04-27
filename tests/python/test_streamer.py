@@ -13,8 +13,10 @@ __maintainer__       = "Dilawar Singh"
 __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
+import os
 import sys
 import moose
+import numpy as np
 print( '[INFO] Using moose form %s' % moose.__file__ )
 
 def sanity_test( ):
@@ -26,10 +28,10 @@ def sanity_test( ):
     print c
 
     st = moose.Streamer( '/s' )
-    assert st.streamname == '', 'Expecting "", got %s' % st.streamname
+    assert st.outfile == '', 'Expecting "", got %s' % st.streamname
 
-    st.streamname = 'a.txt'
-    assert st.streamname == 'a.txt'
+    st.outfile = 'a.txt'
+    assert st.outfile == 'a.txt'
 
     st.addTable( a )
     assert( st.numTables == 1 )
@@ -66,8 +68,8 @@ def test( ):
     moose.connect( r, 'sub', a, 'reac' )
     moose.connect( r, 'prd', b, 'reac' )
     moose.connect( r, 'prd', c, 'reac' )
-    r.Kf = 10.0
-    r.Kb = 3.2
+    r.Kf = 0.1
+    r.Kb = 0.01
 
     tabA = moose.Table2( '/compt/a/tab' )
     tabB = moose.Table2( '/compt/tabB' )
@@ -80,6 +82,9 @@ def test( ):
 
     # Now create a streamer and use it to write to a stream
     st = moose.Streamer( '/compt/streamer' )
+    st.outfile = os.path.join( os.getcwd(), 'temp.dat' )
+    print st.outfile
+
     for t in [ tabA, tabB, tabC ]:
         st.addTable( t )
 
@@ -87,10 +92,11 @@ def test( ):
 
     moose.reinit( )
     moose.start( 57 )
-    print tabA.vector
-    print tabB.vector
-    print tabC.vector
 
+    # Now read the table and verify that we have written
+    print( '[INFO] Reading file %s' % st.outfile )
+    data = np.loadtxt( st.outfile, delimiter=',', skiprows=1 )
+    print data
 
 def main( ):
     sanity_test( )

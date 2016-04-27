@@ -20,6 +20,7 @@
 #include <numeric>
 #include <random>
 
+
 #include "../external/debug/simple_logger.hpp"
 
 /*-----------------------------------------------------------------------------
@@ -99,5 +100,6 @@ namespace moose {
             return dist( rng );
 
         }
+
     }
 }

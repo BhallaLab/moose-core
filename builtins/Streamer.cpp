@@ -15,6 +15,7 @@
  */
 
 
+#include "global.h"
 #include "header.h"
 #include "Streamer.h"
 #include "../scheduling/Clock.h"
@@ -28,11 +29,11 @@ const Cinfo* Streamer::initCinfo()
     /*-----------------------------------------------------------------------------
      * Finfos
      *-----------------------------------------------------------------------------*/
-    static ValueFinfo< Streamer, string > streamname(
-        "streamname"
+    static ValueFinfo< Streamer, string > outfile(
+        "outfile"
         , "File/stream to write table data to. Default is 'stdout'."
-        , &Streamer::setStreamname
-        , &Streamer::getStreamname
+        , &Streamer::setOutFilename
+        , &Streamer::getOutFilename
     );
 
     static ReadOnlyValueFinfo< Streamer, size_t > numTables (
@@ -85,7 +86,7 @@ const Cinfo* Streamer::initCinfo()
 
     static Finfo * tableStreamFinfos[] =
     {
-        &streamname,
+        &outfile,
         &proc,
         &numTables,
     };
@@ -118,14 +119,14 @@ static const Cinfo* tableStreamCinfo = Streamer::initCinfo();
 // Class function definitions
 ///////////////////////////////////////////////////
 
-Streamer::Streamer() : streamname_("")
+Streamer::Streamer() : outfile_("")
 {
     ss_.precision( STRINGSTREAM_DOUBLE_PRECISION );
 }
 
 Streamer& Streamer::operator=( const Streamer& st )
 {
-    this->streamname_ = st.streamname_;
+    this->outfile_ = st.outfile_;
     return *this;
 }
 
@@ -142,14 +143,14 @@ Streamer::~Streamer()
 // Field function definitions
 ///////////////////////////////////////////////////
 
-string Streamer::getStreamname() const
+string Streamer::getOutFilename() const
 {
-    return streamname_;
+    return outfile_;
 }
 
-void Streamer::setStreamname( string streamname )
+void Streamer::setOutFilename( string filename )
 {
-    streamname_ = streamname;
+    outfile_ = filename;
 }
 
 /**
@@ -199,21 +200,26 @@ size_t Streamer::getNumTables( void ) const
 void Streamer::reinit(const Eref& e, ProcPtr p)
 {
     // If it is not stdout, then open a file and write standard header to it.
-    if( streamname_.size() < 1 )
-        streamname_ = "tables.dat";
+    if( outfile_.size() < 1 )
+        outfile_ = "tables.dat";
 
-    of_.open( streamname_, ios::out );
+    of_.open( outfile_, ios::out );
 
     if( ! of_.is_open() )
-        std::cerr << "Warn: Could not open file " << streamname_
+        std::cerr << "Warn: Could not open file " << outfile_
                   << ". I am going to write to 'tables.dat'. "
                   << endl;
 
     // Now write header to this file. First column is always time
-    of_ << "time(seconds),";
+    string line;
+    line = "time" + delimiter_;
     for( auto t : tables_ )
-        of_ << t.first.path() << ",";
-    of_ << "\n";
+        line += t.first.path() + delimiter_;
+    // Remove the last command and add newline.
+    line.pop_back(); line += '\n';
+
+    // Write to stream.
+    of_ << line;
 
     // Initialize the clock and it dt.
     int numTick = e.element()->getTick();
@@ -244,8 +250,10 @@ void Streamer::process(const Eref& e, ProcPtr p)
         // If any table has fewer data points then the threshold for writing to
         // file then return without doing anything.
         data[i] = tab.second->getVec();
-        // Clear the data from tables.
+
+        // Clear the data from vector
         tab.second->clearVec();
+
         i++;
     }
 
@@ -261,15 +269,15 @@ void Streamer::process(const Eref& e, ProcPtr p)
     }
 
     // All vectors must be of same size otherwise we are in trouble.
+    string line;
     for (size_t i = 0; i < dataSize[0]; i++)
     {
-        ss_ << (dt_ * numLinesWritten_) << ",";
+        line += moose::global::to_string<double>(dt_ * numLinesWritten_) + delimiter_;
         for (size_t ii = 0; ii < data.size(); ii++)
-            ss_ << data[ii][i] << ",";
-        ss_ << "\n";
+            line += moose::global::to_string<double>(data[ii][i]) + delimiter_;
+        // Remove last "," and append a new line.
+        line.pop_back(); line += '\n';
         numLinesWritten_ += 1;
     }
-
-    of_ << ss_.str();
-    ss_.str( "" );
+    of_ << line;
 }

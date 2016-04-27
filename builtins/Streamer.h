@@ -41,8 +41,8 @@ public:
     Streamer& operator=( const Streamer& st );
 
     /* Functions to set and get Streamer fields */
-    void setStreamname( string stream );
-    string getStreamname() const;
+    void setOutFilename( string stream );
+    string getOutFilename() const;
 
     /*-----------------------------------------------------------------------------
      *  Following function adds or remove a table from vector of table tables_
@@ -67,7 +67,8 @@ public:
 private:
 
     // Name of the stream to which to write table data.
-    string streamname_;
+    string outfile_;
+    string delimiter_ = ",";
 
     // These Tables are handled by Streamer 
     map< Id, TableBase* > tables_;

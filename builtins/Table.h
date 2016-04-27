@@ -43,6 +43,7 @@ private:
     double threshold_;
     double lastTime_;
     double input_;
+
 };
 
 #endif	// _TABLE_H
