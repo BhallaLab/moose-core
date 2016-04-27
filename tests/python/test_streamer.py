@@ -82,10 +82,11 @@ def test( ):
     st = moose.Streamer( '/compt/streamer' )
     for t in [ tabA, tabB, tabC ]:
         st.addTable( t )
+
     assert st.numTables == 3
 
     moose.reinit( )
-    moose.start( 5000 )
+    moose.start( 57 )
     print tabA.vector
     print tabB.vector
     print tabC.vector

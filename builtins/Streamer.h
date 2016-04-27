@@ -17,13 +17,15 @@
 #ifndef  Streamer_INC
 #define  Streamer_INC
 
+#define STRINGSTREAM_DOUBLE_PRECISION       10
+
 #include <iostream>
 #include <string>
 #include <map>
 #include <fstream>
+#include <sstream>
 
 #include "TableBase.h"
-
 
 using namespace std;
 
@@ -35,6 +37,8 @@ class Streamer : public TableBase
 public:
     Streamer();
     ~Streamer();
+
+    Streamer& operator=( const Streamer& st );
 
     /* Functions to set and get Streamer fields */
     void setStreamname( string stream );
@@ -70,24 +74,15 @@ private:
 
     size_t numTables_;
 
-    /**
-     * @brief If vector of all table has entries >= than this  number, dump to
-     * given file and delete these elements.
-     */
-    size_t criticalSize_ = 1000;
+    // How many lines are written to the file.
+    size_t numLinesWritten_ = 0;
 
-    /**
-     * @brief If header is already written to stdout/stream, set it true.
-     */
-    bool isHeaderWritten = false;
+    // Write to file stream.
+    std::ofstream of_;
+    std::stringstream ss_;
 
-    size_t previousWriteIndex_ = 0;
-    size_t currentWriteIndex_ = 0;
-
-    // Output stream. Either assign to std::cout or to a file.
-    std::ostream* os_;
-
-
+    /*  Step size of this class */
+    double dt_;
 };
 
 #endif   /* ----- #ifndef Streamer_INC  ----- */

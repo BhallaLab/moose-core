@@ -17,7 +17,11 @@
 
 #include "header.h"
 #include "Streamer.h"
+#include "../scheduling/Clock.h"
+
 #include <algorithm>
+#include <sstream>
+
 
 const Cinfo* Streamer::initCinfo()
 {
@@ -114,13 +118,24 @@ static const Cinfo* tableStreamCinfo = Streamer::initCinfo();
 // Class function definitions
 ///////////////////////////////////////////////////
 
-Streamer::Streamer() : streamname_(""), os_( &std::cout )
+Streamer::Streamer() : streamname_("")
 {
+    ss_.precision( STRINGSTREAM_DOUBLE_PRECISION );
 }
+
+Streamer& Streamer::operator=( const Streamer& st )
+{
+    this->streamname_ = st.streamname_;
+    return *this;
+}
+
 
 Streamer::~Streamer()
 {
-    delete os_;
+    // Before closing the stream, write the left-over of stringstream to ss_
+    of_ << ss_.str();
+    ss_.str( "" );
+    of_.close( );
 }
 
 ///////////////////////////////////////////////////
@@ -184,23 +199,26 @@ size_t Streamer::getNumTables( void ) const
 void Streamer::reinit(const Eref& e, ProcPtr p)
 {
     // If it is not stdout, then open a file and write standard header to it.
-    if( streamname_.size() > 0 )
-    {
-        std::ofstream* f = new std::ofstream( streamname_ );
-        if( ! f->is_open() )
-            os_ = f;
-        else
-        {
-            std::cerr << "Warn: Could not open file " << streamname_ 
-                << ". I am going to write to stdout. " << endl;
-        }
-    }
+    if( streamname_.size() < 1 )
+        streamname_ = "tables.dat";
+
+    of_.open( streamname_, ios::out );
+
+    if( ! of_.is_open() )
+        std::cerr << "Warn: Could not open file " << streamname_
+                  << ". I am going to write to 'tables.dat'. "
+                  << endl;
 
     // Now write header to this file. First column is always time
-    *os_ << "time(seconds),";
+    of_ << "time(seconds),";
     for( auto t : tables_ )
-        *os_ << t.first.path() << "," << endl;
-    *os_ << endl;
+        of_ << t.first.path() << ",";
+    of_ << "\n";
+
+    // Initialize the clock and it dt.
+    int numTick = e.element()->getTick();
+    Clock* clk = reinterpret_cast<Clock*>(Id(1).eref().data());
+    dt_ = clk->getTickDt( numTick );
 }
 
 /**
@@ -211,6 +229,7 @@ void Streamer::reinit(const Eref& e, ProcPtr p)
  */
 void Streamer::process(const Eref& e, ProcPtr p)
 {
+
     if( tables_.size() <= 0 )
         return;
 
@@ -224,32 +243,33 @@ void Streamer::process(const Eref& e, ProcPtr p)
 
         // If any table has fewer data points then the threshold for writing to
         // file then return without doing anything.
-        if( dataSize[i] < criticalSize_ )
-            return;
-
         data[i] = tab.second->getVec();
+        // Clear the data from tables.
+        tab.second->clearVec();
         i++;
     }
 
-    if( std::min_element( dataSize.begin(), dataSize.end() ) != 
-            std::max_element( dataSize.begin(), dataSize.end() ) 
-            )
+    if( std::min_element( dataSize.begin(), dataSize.end() ) !=
+            std::max_element( dataSize.begin(), dataSize.end() )
+      )
     {
         cout << "WARNING: One or more tables handled by this Streamer are collecting "
-            << "data at different rate than others. I'll continue dumping data to "
-            << "stream/file but it will get corrupted. I'll advise you to delete  "
-            << "such tables." 
-            << endl;
+             << "data at different rate than others. I'll continue dumping data to "
+             << "stream/file but it will get corrupted. I'll advise you to delete  "
+             << "such tables."
+             << endl;
     }
 
     // All vectors must be of same size otherwise we are in trouble.
     for (size_t i = 0; i < dataSize[0]; i++)
     {
-        for (size_t ii = 0; ii < getNumTables(); ii++)
-            *os_ << data[ii][i] << ",";
-        *os_ << endl;
+        ss_ << (dt_ * numLinesWritten_) << ",";
+        for (size_t ii = 0; ii < data.size(); ii++)
+            ss_ << data[ii][i] << ",";
+        ss_ << "\n";
+        numLinesWritten_ += 1;
     }
 
-    for( auto t : tables_ )
-        t.second->clearVec();
+    of_ << ss_.str();
+    ss_.str( "" );
 }
