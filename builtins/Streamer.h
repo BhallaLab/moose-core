@@ -17,14 +17,17 @@
 #ifndef  Streamer_INC
 #define  Streamer_INC
 
-#include "TableBase.h"
 #include <iostream>
 #include <string>
-#include <vector>
+#include <map>
 #include <fstream>
+
+#include "TableBase.h"
 
 
 using namespace std;
+
+class TableBase;
 
 class Streamer : public TableBase
 {
@@ -63,16 +66,27 @@ private:
     string streamname_;
 
     // These Tables are handled by Streamer 
-    vector< Id > tables_;
+    map< Id, TableBase* > tables_;
 
     size_t numTables_;
+
+    /**
+     * @brief If vector of all table has entries >= than this  number, dump to
+     * given file and delete these elements.
+     */
+    size_t criticalSize_ = 1000;
 
     /**
      * @brief If header is already written to stdout/stream, set it true.
      */
     bool isHeaderWritten = false;
 
-    std::ostream* of_;
+    size_t previousWriteIndex_ = 0;
+    size_t currentWriteIndex_ = 0;
+
+    // Output stream. Either assign to std::cout or to a file.
+    std::ostream* os_;
+
 
 };
 

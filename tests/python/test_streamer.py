@@ -26,7 +26,7 @@ def sanity_test( ):
     print c
 
     st = moose.Streamer( '/s' )
-    assert st.streamname == 'stdout', 'Expecting stdout, got %s' % st.streamname
+    assert st.streamname == '', 'Expecting "", got %s' % st.streamname
 
     st.streamname = 'a.txt'
     assert st.streamname == 'a.txt'
@@ -85,7 +85,7 @@ def test( ):
     assert st.numTables == 3
 
     moose.reinit( )
-    moose.start( 5 )
+    moose.start( 5000 )
     print tabA.vector
     print tabB.vector
     print tabC.vector

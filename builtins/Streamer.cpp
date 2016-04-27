@@ -16,10 +16,8 @@
 
 
 #include "header.h"
-
 #include "Streamer.h"
-#include "Table.h"
-
+#include <algorithm>
 
 const Cinfo* Streamer::initCinfo()
 {
@@ -27,45 +25,45 @@ const Cinfo* Streamer::initCinfo()
      * Finfos
      *-----------------------------------------------------------------------------*/
     static ValueFinfo< Streamer, string > streamname(
-            "streamname"
-            , "File/stream to write table data to. Default is 'stdout'."
-            , &Streamer::setStreamname
-            , &Streamer::getStreamname
-            );
+        "streamname"
+        , "File/stream to write table data to. Default is 'stdout'."
+        , &Streamer::setStreamname
+        , &Streamer::getStreamname
+    );
 
     static ReadOnlyValueFinfo< Streamer, size_t > numTables (
-            "numTables"
-            , "Number of Tables handled by Streamer "
-            , &Streamer::getNumTables
-            );
+        "numTables"
+        , "Number of Tables handled by Streamer "
+        , &Streamer::getNumTables
+    );
 
     /*-----------------------------------------------------------------------------
      *
      *-----------------------------------------------------------------------------*/
     static DestFinfo process(
-            "process"
-            , "Handle process call"
-            , new ProcOpFunc< Streamer >( &Streamer::process )
-            );
+        "process"
+        , "Handle process call"
+        , new ProcOpFunc< Streamer >( &Streamer::process )
+    );
 
     static DestFinfo reinit(
-            "reinit"
-            , "Handles reinit call"
-            , new ProcOpFunc< Streamer > ( &Streamer::reinit )
-            );
+        "reinit"
+        , "Handles reinit call"
+        , new ProcOpFunc< Streamer > ( &Streamer::reinit )
+    );
 
 
     static DestFinfo addTable(
-            "addTable"
-            , "Add a table to Streamer"
-            , new OpFunc1<Streamer, Id>( &Streamer::addTable )
-            );
+        "addTable"
+        , "Add a table to Streamer"
+        , new OpFunc1<Streamer, Id>( &Streamer::addTable )
+    );
 
-    static DestFinfo removeTable( 
-            "removeTable"
-            , "Remove a table from Streamer"
-            , new OpFunc1<Streamer, Id>( &Streamer::removeTable )
-            );
+    static DestFinfo removeTable(
+        "removeTable"
+        , "Remove a table from Streamer"
+        , new OpFunc1<Streamer, Id>( &Streamer::removeTable )
+    );
 
     /*-----------------------------------------------------------------------------
      *  ShareMsg definitions.
@@ -116,12 +114,13 @@ static const Cinfo* tableStreamCinfo = Streamer::initCinfo();
 // Class function definitions
 ///////////////////////////////////////////////////
 
-Streamer::Streamer() : streamname_("stdout"), of_( &std::cout )
+Streamer::Streamer() : streamname_(""), os_( &std::cout )
 {
 }
 
 Streamer::~Streamer()
 {
+    delete os_;
 }
 
 ///////////////////////////////////////////////////
@@ -146,11 +145,12 @@ void Streamer::setStreamname( string streamname )
 void Streamer::addTable( Id table )
 {
     // If this table is not already in the vector, add it.
-    for( auto &t : tables_ )
-        if( table.path() == t.path() )
-            return;
+    for( auto t : tables_ )
+        if( table.path() == t.first.path() )
+            return;                             /* Already added. */
 
-    tables_.push_back( table );
+    TableBase* t = reinterpret_cast<TableBase*>(table.eref().data());
+    tables_[ table ] = t;
 }
 
 /**
@@ -160,19 +160,9 @@ void Streamer::addTable( Id table )
  */
 void Streamer::removeTable( Id table )
 {
-    bool found = false;
-    vector<Id>::iterator it = tables_.begin ();
-    for( ; it != tables_.end(); it++)
-        if( table.path() == it->path() )
-        {
-            found = true;
-            break;
-        }
-
-    if( found )
-    {
+    auto it = tables_.find( table );
+    if( it != tables_.end() )
         tables_.erase( it );
-    }
 }
 
 /**
@@ -193,8 +183,24 @@ size_t Streamer::getNumTables( void ) const
  */
 void Streamer::reinit(const Eref& e, ProcPtr p)
 {
-    if( streamname_ == "stdout" )
-        of_ = &std::cout;
+    // If it is not stdout, then open a file and write standard header to it.
+    if( streamname_.size() > 0 )
+    {
+        std::ofstream* f = new std::ofstream( streamname_ );
+        if( ! f->is_open() )
+            os_ = f;
+        else
+        {
+            std::cerr << "Warn: Could not open file " << streamname_ 
+                << ". I am going to write to stdout. " << endl;
+        }
+    }
+
+    // Now write header to this file. First column is always time
+    *os_ << "time(seconds),";
+    for( auto t : tables_ )
+        *os_ << t.first.path() << "," << endl;
+    *os_ << endl;
 }
 
 /**
@@ -205,15 +211,45 @@ void Streamer::reinit(const Eref& e, ProcPtr p)
  */
 void Streamer::process(const Eref& e, ProcPtr p)
 {
-    if( tables_.size() < 1 )
+    if( tables_.size() <= 0 )
         return;
 
-    cout << "Total tables: " << tables_.size() << endl;
+    vector<vector<double> > data( tables_.size() );
+    vector<size_t> dataSize( tables_.size() );
+
+    size_t i = 0;
+    for( auto tab : tables_ )
+    {
+        dataSize[i] = tab.second->getVecSize();
+
+        // If any table has fewer data points then the threshold for writing to
+        // file then return without doing anything.
+        if( dataSize[i] < criticalSize_ )
+            return;
+
+        data[i] = tab.second->getVec();
+        i++;
+    }
+
+    if( std::min_element( dataSize.begin(), dataSize.end() ) != 
+            std::max_element( dataSize.begin(), dataSize.end() ) 
+            )
+    {
+        cout << "WARNING: One or more tables handled by this Streamer are collecting "
+            << "data at different rate than others. I'll continue dumping data to "
+            << "stream/file but it will get corrupted. I'll advise you to delete  "
+            << "such tables." 
+            << endl;
+    }
+
+    // All vectors must be of same size otherwise we are in trouble.
+    for (size_t i = 0; i < dataSize[0]; i++)
+    {
+        for (size_t ii = 0; ii < getNumTables(); ii++)
+            *os_ << data[ii][i] << ",";
+        *os_ << endl;
+    }
 
     for( auto t : tables_ )
-    {
-        Table* tt  = reinterpret_cast< Table* >( t.eref().data() );
-        cout << "Id : " << t << endl;
-        cout << tt->getVecSize() << endl;
-    }
+        t.second->clearVec();
 }
