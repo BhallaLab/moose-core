@@ -36,6 +36,7 @@
 //            Disabled old numpy API.
 
 #include <Python.h>
+
 #include <structmember.h> // This defines the type id macros like T_STRING
 #ifdef USE_NUMPY
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION

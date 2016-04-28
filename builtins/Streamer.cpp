@@ -14,15 +14,13 @@
  *        License:  GNU GPL2
  */
 
+#include <algorithm>
+#include <sstream>
 
 #include "global.h"
 #include "header.h"
 #include "Streamer.h"
-#include "../scheduling/Clock.h"
-
-#include <algorithm>
-#include <sstream>
-
+#include "Clock.h"
 
 const Cinfo* Streamer::initCinfo()
 {
@@ -31,9 +29,9 @@ const Cinfo* Streamer::initCinfo()
      *-----------------------------------------------------------------------------*/
     static ValueFinfo< Streamer, string > outfile(
         "outfile"
-        , "File/stream to write table data to. Default is 'stdout'."
-        , &Streamer::setOutFilename
-        , &Streamer::getOutFilename
+        , "File/stream to write table data to. Default is is tables.dat."
+        , &Streamer::setOutFilepath
+        , &Streamer::getOutFilepath
     );
 
     static ValueFinfo< Streamer, string > format(
@@ -134,52 +132,45 @@ static const Cinfo* tableStreamCinfo = Streamer::initCinfo();
 
 // Class function definitions
 
-Streamer::Streamer() : outfile_(""), format_( "csv" )
+Streamer::Streamer() : delimiter_( ","), format_( "csv" )
 {
-    ss_.precision( STRINGSTREAM_DOUBLE_PRECISION );
 }
 
 Streamer& Streamer::operator=( const Streamer& st )
 {
-    this->outfile_ = st.outfile_;
     return *this;
 }
 
 
 Streamer::~Streamer()
 {
-    // Before closing the stream, write the left-over of stringstream to ss_
-    of_ << ss_.str();
-    ss_.str( "" );
-    of_.close( );
 }
 
-///////////////////////////////////////////////////
-// Field function definitions
-///////////////////////////////////////////////////
-
-string Streamer::getOutFilename() const
+/**
+ * @brief Reinit.
+ *
+ * @param e
+ * @param p
+ */
+void Streamer::reinit(const Eref& e, ProcPtr p)
 {
-    return outfile_;
+    // If it is not stdout, then open a file and write standard header to it.
+    initOutfile( e );
 }
 
-void Streamer::setOutFilename( string filename )
+/**
+ * @brief This function is called at its clock tick.
+ *
+ * @param e
+ * @param p
+ */
+void Streamer::process(const Eref& e, ProcPtr p)
 {
-    outfile_ = filename;
-}
 
 
-string Streamer::getFormat( ) const
-{
-    return format_;
+    writeTablesToOutfile( );
 }
 
-void Streamer::setFormat( string format )
-{
-    cout << "Lazy developer is yet is to support it. Currently only csv is supported"
-        << endl;
-    format_ = "csv";
-}
 
 /**
  * @brief Add a table to streamer.
@@ -241,8 +232,9 @@ size_t Streamer::getNumTables( void ) const
 }
 
 /**
- * @brief Write  text to of_. Clean the text.
- * FIXME: Currently only csv is supported.
+ * @brief Write given string to text file and clear it.
+ *
+ * @param text
  */
 void Streamer::write( string& text )
 {
@@ -250,22 +242,11 @@ void Streamer::write( string& text )
     text = "";
 }
 
-/**
- * @brief Reinit.
- *
- * @param e
- * @param p
- */
-void Streamer::reinit(const Eref& e, ProcPtr p)
+
+void Streamer::initOutfile( const Eref& e )
 {
-    // If it is not stdout, then open a file and write standard header to it.
-    if( outfile_.size() < 1 )
-        outfile_ = "tables.dat";
-
-    of_.open( outfile_, ios::out );
-
     if( ! of_.is_open() )
-        std::cerr << "Warn: Could not open file " << outfile_
+        std::cerr << "Warn: Could not open file " << outfilePath_
                   << ". I am going to write to 'tables.dat'. "
                   << endl;
 
@@ -285,15 +266,34 @@ void Streamer::reinit(const Eref& e, ProcPtr p)
     dt_ = clk->getTickDt( numTick );
 }
 
-/**
- * @brief This function is called at its clock tick.
- *
- * @param e
- * @param p
- */
-void Streamer::process(const Eref& e, ProcPtr p)
-{
 
+string Streamer::getOutFilepath( void ) const
+{
+    return outfilePath_;
+}
+
+void Streamer::setOutFilepath( string filepath )
+{
+    outfilePath_ = filepath;
+}
+
+/* Set the format of all Tables */
+void Streamer::setFormat( string format )
+{
+    format_ = format;
+}
+
+/*  Get the format of all tables. */
+string Streamer::getFormat( void ) const 
+{
+    return format_;
+}
+
+/**
+ * @brief Write data of its table to output file.
+ */
+void Streamer::writeTablesToOutfile( void )
+{
     if( tables_.size() <= 0 )
         return;
 
@@ -338,5 +338,6 @@ void Streamer::process(const Eref& e, ProcPtr p)
     }
 
     write( text_ );
-
 }
+
+

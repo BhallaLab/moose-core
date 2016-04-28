@@ -85,11 +85,6 @@ option(USE_BOOST "Use boost library (experimental, development)" ON)
 # libSBML must be present.
 option(WITH_SBML  "Enable SBML support. Automatically detected." OFF)
 
-# If GSL_STATIC_HOME is set, we use it to search for static gsl libs.
-option(GSL_STATIC_HOME 
-    "Path prefix where static gsl library can be found e.g. /opt/sw/gsl116 " 
-    OFF
-    )
 option(SBML_STATIC_HOME 
     "Path prefix where static sbml library can be found e.g. /opt/sbml/"
     OFF
@@ -267,31 +262,15 @@ include_directories(msg basecode)
 set_target_properties(libmoose PROPERTIES COMPILE_DEFINITIONS  "MOOSE_LIB")
 set_target_properties(libmoose PROPERTIES PREFIX "")
 
-## GSL
-if(GSL_STATIC_HOME)
-    SET(GSL_INCLUDE_DIRS "${GSL_STATIC_HOME}/include")
-    find_library(GSL_LIBRARY 
-        NAME libgsl.a 
-        PATHS ${GSL_STATIC_HOME}/lib ${GSL_STATIC_HOME}/lib64
-        NO_DEFAULT_PATH
-        )
-    find_library(GSLCBLAS_LIBRARY
-        NAME libgslcblas.a 
-        PATHS ${GSL_STATIC_HOME}/lib ${GSL_STATIC_HOME}/lib64 
-        NO_DEFAULT_PATH
-        )
-    SET(GSL_LIBRARIES ${GSL_LIBRARY} ${GSLCBLAS_LIBRARY})
-    message(STATUS "STATIC GSL_LIBRARIES ${GSL_LIBRARIES}")
-    set(GSL_FOUND TRUE)
-ELSEIF(USE_BOOST)
-    find_package( Boost REQUIRED  )
-    find_package( LAPACK REQUIRED )
-    add_definitions( -DUSE_BOOST )
-    include_directories( 
-        ${Boost_INCLUDE_DIRS}
-        ${CMAKE_CURRENT_SOURCE_DIR}/external/boost-numeric-bindings
-        )
-endif()
+set(Boost_USE_STATIC_LIBS OFF)
+find_package( Boost REQUIRED COMPONENTS system filesystem  )
+find_package( LAPACK REQUIRED )
+add_definitions( -DUSE_BOOST )
+
+include_directories( 
+    ${Boost_INCLUDE_DIRS}
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/boost-numeric-bindings
+    )
 
 ## Setup hdf5
 if(HDF5_STATIC_HOME)
@@ -408,7 +387,7 @@ set(SYSTEM_SHARED_LIBS ${LibXML2_LIBRARIES})
 # shared version is found then link the shared version in SYSTEM_SHARED_LIBS.
 
 # If CMAKE_STATIC_LIBRARIES are mentiond on command line, use it as list.
-set(STATIC_LIBRARIES  "")
+set(STATIC_LIBRARIES "${Boost_LIBRARIES}")
 
 if(HDF5_STATIC_HOME)
     list(APPEND STATIC_LIBRARIES ${HDF5_LIBRARIES})
@@ -431,14 +410,6 @@ endif()
 if(USE_BOOST)
     list( APPEND SYSTEM_SHARED_LIBS ${LAPACK_LIBRARIES} )
 endif(USE_BOOST)
-
-if(GSL_STATIC_HOME)
-    message(STATUS "Using STATIC gsl libraries: ${GSL_LIBRARIES}")
-    list(APPEND STATIC_LIBRARIES ${GSL_LIBRARIES})
-else()
-    message(STATUS "Using system gsl : ${GSL_LIBRARIES}")
-    list(APPEND SYSTEM_SHARED_LIBS ${GSL_LIBRARIES})
-endif()
 
 if(READLINE_FOUND AND TERMCAP_FOUND)
     list(APPEND SYSTEM_SHARED_LIBS ${Readline_LIBRARY} ${TERMCAP_LIBRARY})
