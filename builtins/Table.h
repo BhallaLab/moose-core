@@ -19,6 +19,10 @@ class Table: public TableBase
 {
 public:
     Table();
+    ~Table();
+
+    Table& operator=( const Table& tab );
+
     //////////////////////////////////////////////////////////////////
     // Field assignment stuff
     //////////////////////////////////////////////////////////////////
@@ -28,6 +32,14 @@ public:
 
     void setFormat( string format );
     string getFormat( ) const;
+
+    void setUseStreamer( bool status );
+    bool getUseStreamer( void ) const;
+
+    void setOutfile( string outfilepath );
+    string getOutfile( void ) const;
+
+    void writeToOutfile( );
 
     //////////////////////////////////////////////////////////////////
     // Dest funcs
@@ -49,27 +61,45 @@ private:
     double threshold_;
     double lastTime_;
     double input_;
-    
 
-#if 0
     /**
      * @brief If stream is set to true, then stream to outfile_. Default value
-     * of outfile_ is table path starting from `pwd`/_table_streams/
+     * of outfile_ is table path starting from `pwd`/_tables_ . On table, set
+     * streamToFile to true.
      */
-    bool stream_;
+    bool useStreamer_ = false;
 
     /**
      * @brief Table directory into which dump the stream data.
      */
     boost::filesystem::path rootdir_;
+
+    // On Table, set outfile to change this variable. By default it sets to,
+    // `pwd1/_tables_/table.path().
     boost::filesystem::path outfile_;
-#endif
+    bool outfileIsSet = false;
 
     /**
      * @brief format of data. Currently fixed to csv.
      */
-    string format_;
+    string format_ = "csv";
     string delimiter_ = ",";
+
+    /**
+     * @brief text_ to write.
+     */
+    string text_ = "";
+
+    /**
+     * @brief dt of its clock. Needed for creating time co-ordinates,
+     */
+    double dt_ = 0.0;
+    size_t numLines = 0;
+
+    /**
+     * @brief Output stream.
+     */
+    ofstream of_;
 
 };
 

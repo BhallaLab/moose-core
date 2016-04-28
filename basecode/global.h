@@ -21,6 +21,7 @@ using namespace std;
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_01.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/filesystem.hpp>
 
 /**
  * @brief Global stringstream for message printing.
@@ -114,6 +115,14 @@ namespace moose
         double mtrand( void );
 
         /**
+         * @brief Create a POSIX compatible path from a given string.
+         * Remove/replace bad characters.
+         *
+         * @param path
+         */
+        string createPosixPath( string path );
+
+        /**
          * @brief Convert a given value to string.
          *
          * @tparam T
@@ -122,10 +131,17 @@ namespace moose
          * @return  String representation
          */
         template<typename T>
-        string to_string( T x )
+        string toString( T x )
         {
             return boost::lexical_cast<string>( x );
         }
+
+        /**
+         * @brief Create directory, recursively.
+         *
+         * @param path
+         */
+        void createDirs( boost::filesystem::path path );
     }
 }
 

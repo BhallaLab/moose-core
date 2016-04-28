@@ -8,10 +8,13 @@
 **********************************************************************/
 
 #include "header.h"
+#include "global.h"
 #include <fstream>
 
 #include "TableBase.h"
 #include "Table.h"
+#include "Clock.h"
+
 
 static SrcFinfo1< vector< double >* > *requestOut()
 {
@@ -24,10 +27,11 @@ static SrcFinfo1< vector< double >* > *requestOut()
 
 static DestFinfo *handleInput()
 {
-    static DestFinfo input( "input",
-                            "Fills data into table. Also handles data sent back following request",
-                            new OpFunc1< Table, double >( &Table::input )
-                          );
+    static DestFinfo input(
+        "input",
+        "Fills data into table. Also handles data sent back following request",
+        new OpFunc1< Table, double >( &Table::input )
+    );
     return &input;
 }
 
@@ -43,6 +47,22 @@ const Cinfo* Table::initCinfo()
         , &Table::getThreshold
     );
 
+    static ValueFinfo< Table, bool > useStreamer(
+        "useStreamer"
+        , "When set to true, write to a file instead writing in memory."
+        " If `outfile` is not set, streamer writes to default path."
+        , &Table::setUseStreamer
+        , &Table::getUseStreamer
+    );
+
+    static ValueFinfo< Table, string > outfile(
+        "outfile"
+        , "Set the name of file to which data is written to. If set, "
+        " streaming support is automatically enabled."
+        , &Table::setOutfile
+        , &Table::getOutfile
+    );
+
     static ValueFinfo< Table, string > format(
         "format"
         , "Data format for table: default csv"
@@ -54,16 +74,24 @@ const Cinfo* Table::initCinfo()
     // MsgDest Definitions
     //////////////////////////////////////////////////////////////
 
-    static DestFinfo spike( "spike",
-                            "Fills spike timings into the Table. Signal has to exceed thresh",
-                            new OpFunc1< Table, double >( &Table::spike ) );
+    static DestFinfo spike(
+        "spike",
+        "Fills spike timings into the Table. Signal has to exceed thresh",
+        new OpFunc1< Table, double >( &Table::spike )
+    );
 
-    static DestFinfo process( "process",
-                              "Handles process call, updates internal time stamp.",
-                              new ProcOpFunc< Table >( &Table::process ) );
-    static DestFinfo reinit( "reinit",
-                             "Handles reinit call.",
-                             new ProcOpFunc< Table >( &Table::reinit ) );
+    static DestFinfo process(
+        "process",
+        "Handles process call, updates internal time stamp.",
+        new ProcOpFunc< Table >( &Table::process )
+    );
+
+    static DestFinfo reinit(
+        "reinit",
+        "Handles reinit call.",
+        new ProcOpFunc< Table >( &Table::reinit )
+    );
+
     //////////////////////////////////////////////////////////////
     // SharedMsg Definitions
     //////////////////////////////////////////////////////////////
@@ -72,11 +100,11 @@ const Cinfo* Table::initCinfo()
         &process, &reinit
     };
 
-    static SharedFinfo proc( 
-            "proc"
-            , "Shared message for process and reinit"
-            , procShared, sizeof( procShared ) / sizeof( const Finfo* )
-            );
+    static SharedFinfo proc(
+        "proc"
+        , "Shared message for process and reinit"
+        , procShared, sizeof( procShared ) / sizeof( const Finfo* )
+    );
 
     //////////////////////////////////////////////////////////////
     // Field Element for the vector data
@@ -87,6 +115,8 @@ const Cinfo* Table::initCinfo()
     {
         &threshold,		// Value
         &format,                // Value
+        &outfile,               // Value 
+        &useStreamer,           // Value
         handleInput(),		// DestFinfo
         &spike,			// DestFinfo
         requestOut(),		// SrcFinfo
@@ -117,7 +147,9 @@ const Cinfo* Table::initCinfo()
         "These are just the default values and Tables can be assigned"
         " to any Clock Tick and timestep in the usual manner.",
     };
+
     static Dinfo< Table > dinfo;
+
     static Cinfo tableCinfo (
         "Table",
         TableBase::initCinfo(),
@@ -127,10 +159,14 @@ const Cinfo* Table::initCinfo()
         doc,
         sizeof( doc ) / sizeof( string )
     );
-    static string doc2[] = {doc[0], "Table2", doc[2], doc[3],
-                            doc[4], doc[5]
-                           };
+
+    static string doc2[] =
+    {
+        doc[0], "Table2", doc[2], doc[3], doc[4], doc[5]
+    };
+
     doc2[1] = "Table2";
+
     static Cinfo table2Cinfo (
         "Table2",
         TableBase::initCinfo(),
@@ -150,11 +186,35 @@ const Cinfo* Table::initCinfo()
 
 static const Cinfo* tableCinfo = Table::initCinfo();
 
-Table::Table()
-    : threshold_( 0.0 ), lastTime_( 0.0 ), input_( 0.0 ), format_( "csv" )
+Table::Table() : threshold_( 0.0 ) , lastTime_( 0.0 ) , input_( 0.0 ) 
 {
-    // Initialize the directory to which each table should stream. If directory
-    // exists do not create one.
+    // Initialize the directory to which each table should stream.
+    rootdir_ /= "_tables";
+
+    // If this directory does not exists, craete it. Following takes care of it.
+    boost::filesystem::create_directories( rootdir_ );
+}
+
+Table::~Table( )
+{
+    of_.close();
+}
+
+Table& Table::operator=( const Table& tab )
+{
+    return *this;
+}
+
+void Table::writeToOutfile( )
+{
+    for( auto v : vec() ) 
+    {
+        text_ += moose::global::toString( dt_ * numLines ) + delimiter_
+             + moose::global::toString( v ) + '\n';
+        numLines += 1;
+    }
+    of_ << text_; text_ = "";
+    if( getVecSize() > 0) clearVec();
 }
 
 //////////////////////////////////////////////////////////////
@@ -164,22 +224,56 @@ Table::Table()
 void Table::process( const Eref& e, ProcPtr p )
 {
     lastTime_ = p->currTime;
+
     // Copy incoming data to ret and insert into vector.
     vector< double > ret;
     requestOut()->send( e, &ret );
     vec().insert( vec().end(), ret.begin(), ret.end() );
+
+    /*  If we are streaming to a file, let's write to a file. And clean the
+     *  vector.  
+     */
+    writeToOutfile( );
+    clearVec();
 }
 
 void Table::reinit( const Eref& e, ProcPtr p )
 {
+    unsigned int numTick = e.element()->getTick();
+    Clock* clk = reinterpret_cast<Clock*>(Id(1).eref().data());
+    dt_ = clk->getTickDt( numTick );
+
+    /** Create the default filepath for this table.  */
+    if( useStreamer_ )
+    {
+        // If useStreamer is set then we need to construct the table path, if
+        // not set by user.
+        if( ! outfileIsSet )
+            setOutfile( 
+                    moose::global::createPosixPath( 
+                        rootdir_.string() + e.id().path() + "." + format_ 
+                        )
+                    );
+
+        // Create its root directory.
+        moose::global::createDirs( outfile_.parent_path() );
+
+        // Open the stream to write to file.
+        of_.open( outfile_.string(), ios::out );
+        of_ << "time,value\n";
+
+    }
+
     input_ = 0.0;
     vec().resize( 0 );
     lastTime_ = 0;
-    // cout << "tabReinit on :" << p->groupId << ":" << p->threadIndexInGroup << endl << flush;
-    // requestOut()->send( e, handleInput()->getFid());
+
     vector< double > ret;
     requestOut()->send( e, &ret );
     vec().insert( vec().end(), ret.begin(), ret.end() );
+
+    if( useStreamer_ )
+        writeToOutfile( );
 }
 
 //////////////////////////////////////////////////////////////
@@ -212,7 +306,7 @@ double Table::getThreshold() const
 }
 
 // Set the format of table to which its data should be written.
-void Table::setFormat( string format ) 
+void Table::setFormat( string format )
 {
     format_ = format;
 }
@@ -222,3 +316,30 @@ string Table::getFormat( void ) const
 {
     return format_;
 }
+
+/* Enable/disable streamer support. */
+void Table::setUseStreamer( bool useStreamer )
+{
+    useStreamer_ = useStreamer;
+}
+
+bool Table::getUseStreamer( void ) const
+{
+    return useStreamer_;
+}
+
+/*  set/get outfile_ */
+void Table::setOutfile( string outpath )
+{
+    outfile_ /= moose::global::createPosixPath( outpath );
+    outfile_.make_preferred();
+    outfileIsSet = true;
+    setUseStreamer( true );
+}
+
+string Table::getOutfile( void ) const
+{
+    return outfile_.string();
+}
+
+

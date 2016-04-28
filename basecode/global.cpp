@@ -101,5 +101,40 @@ namespace moose {
 
         }
 
+        // Fix the given path.
+        string createPosixPath( string s )
+        {
+            string undesired = ":?\"<>|[]";
+            for (auto it = s.begin() ; it < s.end() ; ++it)
+            {
+                bool found = undesired.find(*it) != string::npos;
+                if(found){
+                    *it = '_';
+                }
+            }
+            return s;
+        }
+
+        /**
+         * @brief Create directories recursively
+         *
+         * @param path
+         */
+        void createDirs( boost::filesystem::path p )
+        {
+            if( p.string().size() == 0 )
+                return;
+            try 
+            {
+                boost::filesystem::create_directories( p );
+            } 
+            catch(const boost::filesystem::filesystem_error& e)
+            {
+                std::cout << "create_directories(" << p << ") failed with "
+                    << e.code().message() << '\n';
+            }
+
+        }
+
     }
 }

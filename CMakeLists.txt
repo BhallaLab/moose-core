@@ -386,8 +386,6 @@ set(SYSTEM_SHARED_LIBS ${LibXML2_LIBRARIES})
 # Here we make sure that the correct static version is linked; if a correct
 # shared version is found then link the shared version in SYSTEM_SHARED_LIBS.
 
-# If CMAKE_STATIC_LIBRARIES are mentiond on command line, use it as list.
-set(STATIC_LIBRARIES "${Boost_LIBRARIES}")
 
 if(HDF5_STATIC_HOME)
     list(APPEND STATIC_LIBRARIES ${HDF5_LIBRARIES})
@@ -409,6 +407,8 @@ endif()
 # state.
 if(USE_BOOST)
     list( APPEND SYSTEM_SHARED_LIBS ${LAPACK_LIBRARIES} )
+    list( APPEND SYSTEM_SHARED_LIBS ${Boost_SYSTEM_LIBRARY}
+        ${Boost_FILESYSTEM_LIBRARY} )
 endif(USE_BOOST)
 
 if(READLINE_FOUND AND TERMCAP_FOUND)
@@ -489,15 +489,14 @@ endif(MACOSX)
 add_dependencies(moose.bin libmoose)
 
 # This target is only for testing purpose. It links to libmoose.
-if(CMAKE_VERSION VERSION_LESS "2.8.0")
-    message(STATUS "Using a fix for cmake ( < 2.8)")
-    target_link_libraries(moose.bin PUBLIC moose)
-ELSE()
-    target_link_libraries(moose.bin LINK_PUBLIC moose)
-    if(LIBSBML_FOUND)
-        target_link_libraries(moose.bin LINK_PUBLIC ${LIBSBML_LIBRARIES})
-    endif(LIBSBML_FOUND)
-ENDIF()
+#if(CMAKE_VERSION VERSION_LESS "2.8.0")
+#    message(STATUS "Using a fix for cmake ( < 2.8)")
+#    target_link_libraries(moose.bin PUBLIC moose)
+#ELSE()
+
+target_link_libraries(moose.bin LINK_PUBLIC moose ${SYSTEM_SHARED_LIBS})
+
+# ENDIF()
 
 if(WITH_DOC)
     FIND_PACKAGE(Doxygen REQUIRED)

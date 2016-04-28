@@ -329,9 +329,9 @@ void Streamer::writeTablesToOutfile( void )
     // All vectors must be of same size otherwise we are in trouble.
     for (size_t i = 0; i < dataSize[0]; i++)
     {
-        text_ += moose::global::to_string<double>(dt_ * numLinesWritten_) + delimiter_;
+        text_ += moose::global::toString<double>(dt_ * numLinesWritten_) + delimiter_;
         for (size_t ii = 0; ii < data.size(); ii++)
-            text_ += moose::global::to_string<double>(data[ii][i]) + delimiter_;
+            text_ += moose::global::toString<double>(data[ii][i]) + delimiter_;
         // Remove last "," and append a new line.
         text_.pop_back(); text_ += '\n';
         numLinesWritten_ += 1;
