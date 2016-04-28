@@ -44,11 +44,21 @@ public:
     void setOutFilename( string stream );
     string getOutFilename() const;
 
+    /*  To set and get format names.  */
+    void setFormat( string formatname );
+    string getFormat( ) const;
+
     /*-----------------------------------------------------------------------------
      *  Following function adds or remove a table from vector of table tables_
      *-----------------------------------------------------------------------------*/
     void addTable( Id table );
+    void addTables( vector<Id> tables);
+
     void removeTable( Id table );
+    void removeTables( vector<Id> table );
+
+    // Write given text to output file. Clear the text after writing it.
+    void write( string& text );
 
     size_t getNumTables( void ) const;
 
@@ -68,6 +78,9 @@ private:
 
     // Name of the stream to which to write table data.
     string outfile_;
+    string format_ = "csv";
+
+    // delimiter in rows
     string delimiter_ = ",";
 
     // These Tables are handled by Streamer 
@@ -81,6 +94,9 @@ private:
     // Write to file stream.
     std::ofstream of_;
     std::stringstream ss_;
+
+    // Temporary storage to lines
+    std::string text_;
 
     /*  Step size of this class */
     double dt_;

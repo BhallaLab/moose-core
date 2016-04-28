@@ -36,6 +36,13 @@ const Cinfo* Streamer::initCinfo()
         , &Streamer::getOutFilename
     );
 
+    static ValueFinfo< Streamer, string > format(
+        "format"
+        , "Format of output file, default is csv"
+        , &Streamer::setFormat
+        , &Streamer::getFormat
+    );
+
     static ReadOnlyValueFinfo< Streamer, size_t > numTables (
         "numTables"
         , "Number of Tables handled by Streamer "
@@ -64,10 +71,22 @@ const Cinfo* Streamer::initCinfo()
         , new OpFunc1<Streamer, Id>( &Streamer::addTable )
     );
 
+    static DestFinfo addTables(
+        "addTables"
+        , "Add many tables to Streamer"
+        , new OpFunc1<Streamer, vector<Id> >( &Streamer::addTables )
+    );
+
     static DestFinfo removeTable(
         "removeTable"
         , "Remove a table from Streamer"
         , new OpFunc1<Streamer, Id>( &Streamer::removeTable )
+    );
+
+    static DestFinfo removeTables(
+        "removeTables"
+        , "Remove tables -- if found -- from Streamer"
+        , new OpFunc1<Streamer, vector<Id> >( &Streamer::removeTables )
     );
 
     /*-----------------------------------------------------------------------------
@@ -75,7 +94,7 @@ const Cinfo* Streamer::initCinfo()
      *-----------------------------------------------------------------------------*/
     static Finfo* procShared[] =
     {
-        &process , &reinit , &addTable, &removeTable
+        &process , &reinit , &addTable, &addTables, &removeTable, &removeTables
     };
 
     static SharedFinfo proc(
@@ -86,9 +105,7 @@ const Cinfo* Streamer::initCinfo()
 
     static Finfo * tableStreamFinfos[] =
     {
-        &outfile,
-        &proc,
-        &numTables,
+        &outfile, &format, &proc, &numTables
     };
 
     static string doc[] =
@@ -115,11 +132,9 @@ const Cinfo* Streamer::initCinfo()
 
 static const Cinfo* tableStreamCinfo = Streamer::initCinfo();
 
-///////////////////////////////////////////////////
 // Class function definitions
-///////////////////////////////////////////////////
 
-Streamer::Streamer() : outfile_("")
+Streamer::Streamer() : outfile_(""), format_( "csv" )
 {
     ss_.precision( STRINGSTREAM_DOUBLE_PRECISION );
 }
@@ -153,6 +168,19 @@ void Streamer::setOutFilename( string filename )
     outfile_ = filename;
 }
 
+
+string Streamer::getFormat( ) const
+{
+    return format_;
+}
+
+void Streamer::setFormat( string format )
+{
+    cout << "Lazy developer is yet is to support it. Currently only csv is supported"
+        << endl;
+    format_ = "csv";
+}
+
 /**
  * @brief Add a table to streamer.
  *
@@ -170,6 +198,17 @@ void Streamer::addTable( Id table )
 }
 
 /**
+ * @brief Add multiple tables to Streamer.
+ *
+ * @param tables
+ */
+void Streamer::addTables( vector<Id> tables )
+{
+    for( auto t : tables ) addTable( t );
+}
+
+
+/**
  * @brief Remove a table from Streamer.
  *
  * @param table. Id of table.
@@ -182,6 +221,16 @@ void Streamer::removeTable( Id table )
 }
 
 /**
+ * @brief Remove multiple tables -- if found -- from Streamer.
+ *
+ * @param tables
+ */
+void Streamer::removeTables( vector<Id> tables )
+{
+    for( auto t : tables ) removeTable( t );
+}
+
+/**
  * @brief Get the number of tables handled by Streamer.
  *
  * @return  Number of tables.
@@ -189,6 +238,16 @@ void Streamer::removeTable( Id table )
 size_t Streamer::getNumTables( void ) const
 {
     return tables_.size();
+}
+
+/**
+ * @brief Write  text to of_. Clean the text.
+ * FIXME: Currently only csv is supported.
+ */
+void Streamer::write( string& text )
+{
+    of_ << text;
+    text = "";
 }
 
 /**
@@ -211,15 +270,14 @@ void Streamer::reinit(const Eref& e, ProcPtr p)
                   << endl;
 
     // Now write header to this file. First column is always time
-    string line;
-    line = "time" + delimiter_;
+    text_ = "time" + delimiter_;
     for( auto t : tables_ )
-        line += t.first.path() + delimiter_;
+        text_ += t.first.path() + delimiter_;
     // Remove the last command and add newline.
-    line.pop_back(); line += '\n';
+    text_.pop_back(); text_ += '\n';
 
     // Write to stream.
-    of_ << line;
+    write( text_ );
 
     // Initialize the clock and it dt.
     int numTick = e.element()->getTick();
@@ -269,15 +327,16 @@ void Streamer::process(const Eref& e, ProcPtr p)
     }
 
     // All vectors must be of same size otherwise we are in trouble.
-    string line;
     for (size_t i = 0; i < dataSize[0]; i++)
     {
-        line += moose::global::to_string<double>(dt_ * numLinesWritten_) + delimiter_;
+        text_ += moose::global::to_string<double>(dt_ * numLinesWritten_) + delimiter_;
         for (size_t ii = 0; ii < data.size(); ii++)
-            line += moose::global::to_string<double>(data[ii][i]) + delimiter_;
+            text_ += moose::global::to_string<double>(data[ii][i]) + delimiter_;
         // Remove last "," and append a new line.
-        line.pop_back(); line += '\n';
+        text_.pop_back(); text_ += '\n';
         numLinesWritten_ += 1;
     }
-    of_ << line;
+
+    write( text_ );
+
 }

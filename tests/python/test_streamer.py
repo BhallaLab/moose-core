@@ -56,6 +56,11 @@ def sanity_test( ):
     assert( st.numTables == 0 )
     print( 'Sanity test passed' )
 
+    st.addTables( [a, b, c ])
+    assert st.numTables == 3
+    st.removeTables( [a, a, c] )
+    assert st.numTables == 1
+
 def test( ):
     compt = moose.CubeMesh( '/compt' )
     r = moose.Reac( '/compt/r' )
@@ -85,8 +90,8 @@ def test( ):
     st.outfile = os.path.join( os.getcwd(), 'temp.dat' )
     print st.outfile
 
-    for t in [ tabA, tabB, tabC ]:
-        st.addTable( t )
+    st.addTable( tabA )
+    st.addTables( [ tabB, tabC ] )
 
     assert st.numTables == 3
 
@@ -96,11 +101,14 @@ def test( ):
     # Now read the table and verify that we have written
     print( '[INFO] Reading file %s' % st.outfile )
     data = np.loadtxt( st.outfile, delimiter=',', skiprows=1 )
-    print data
+    # Total rows should be 58 (counting zero as well).
+    assert data.shape == (58,4), data.shape
+    print( '[INFO] Test 2 passed' )
 
 def main( ):
     sanity_test( )
     test( )
+    print( '[INFO] All tests passed' )
 
 
 if __name__ == '__main__':
