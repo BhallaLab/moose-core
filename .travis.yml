@@ -22,12 +22,12 @@ matrix:
     allow_failures:
 
 before_script:
-    - sudo apt-get install libxml2-dev libbz2-dev
-    - sudo apt-get install libhdf5-serial-dev
-    - sudo apt-get install make cmake
-    - sudo apt-get install python-numpy python-matplotlib
-    - sudo apt-get install python3-numpy  python3-matplotlib
-    - sudo apt-get install libboost-all-dev
+    - sudo apt-get install -qq libxml2-dev libbz2-dev
+    - sudo apt-get install -qq libhdf5-serial-dev
+    - sudo apt-get install -qq make cmake
+    - sudo apt-get install -qq python-numpy python-matplotlib
+    - sudo apt-get install -qq python3-numpy  python3-matplotlib
+    - sudo apt-get install -qq libboost-all-dev
 
 before_install:
     - sbmlurl="http://sourceforge.net/projects/sbml/files/libsbml/5.9.0/stable/Linux/64-bit/libSBML-5.9.0-Linux-x64.deb"
