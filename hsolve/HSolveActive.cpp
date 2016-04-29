@@ -397,20 +397,19 @@ void HSolveActive::forwardFlowSolver(){
 	//print_tridiagonal_matrix_system(ff_system, ff_offdiag_mapping, nCompt_);
 
 	// Forward Elimination
+	int parentId;
 	for(int i=1;i<nCompt_;i++){
-		int parentId = ff_offdiag_mapping[i-1];
+		parentId = ff_offdiag_mapping[i-1];
 		ff_system[nCompt_+parentId] -= (ff_system[i])*(ff_system[i])/ff_system[nCompt_+i-1];
 		ff_system[3*nCompt_+parentId] -= (ff_system[3*nCompt_+(i-1)]*ff_system[i])/ff_system[nCompt_+i-1];
 	}
 
 	// Backward Substitution
 	VMid_[nCompt_-1] = ff_system[3*nCompt_ + (nCompt_-1)]/ff_system[2*nCompt_-1];
+	V_[nCompt_-1] = 2*VMid_[nCompt_-1] - V_[nCompt_-1];
+	int columnId;
 	for(int i=nCompt_-2;i>=0;i--){
-		int columnId = ff_offdiag_mapping[i];
-		VMid_[i] = (ff_system[3*nCompt_+i]-VMid_[columnId]*ff_system[i+1])/ff_system[nCompt_+i];
-	}
-
-	for (int i = 0; i < nCompt_; ++i) {
+		VMid_[i] = (ff_system[3*nCompt_+i]-VMid_[ff_offdiag_mapping[i]]*ff_system[i+1])/ff_system[nCompt_+i];
 		V_[i] = 2*VMid_[i] - V_[i];
 	}
 
