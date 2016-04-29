@@ -11,10 +11,9 @@
 #ifndef _STEADYSTATE_H
 #define _STEADYSTATE_H
 
-#ifdef USE_BOOST
+#include "global.h"
 #include <boost/numeric/ublas/matrix.hpp>
 #include "BoostSys.h"
-#endif
 
 class SteadyState
 {
@@ -124,11 +123,11 @@ private:
     unsigned int numFailed_;
     VoxelPools pool_;
 
-    int seed = 0;
-    boost::random::mt19937 rng;
-    boost::random::uniform_01<double> dist;
+    moose::global::rng_type_ rng;
+    moose::global::distribution_type_ dist;
 
 };
 
 extern const Cinfo* initSteadyStateCinfo();
+
 #endif // _STEADYSTATE_H

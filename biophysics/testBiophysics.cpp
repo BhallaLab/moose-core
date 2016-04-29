@@ -33,8 +33,6 @@ extern void testVectorTable();	//Defined in VectorTable.cpp
 
 #ifdef DO_UNIT_TESTS
 
-extern double mtrand( void );
-
 // Use a larger value of runsteps when benchmarking
 void testIntFireNetwork( unsigned int runsteps = 5 )
 {
@@ -113,9 +111,10 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
     // Here we have an interesting problem. The mtRand might be called
     // by multiple threads if the above Set call is not complete.
 
+    moose::global::mtseed( 5489U );
     vector< double > origVm( size, 0.0 );
     for ( unsigned int i = 0; i < size; ++i )
-        origVm[i] = mtrand() * Vmax;
+        origVm[i] = moose::global::mtrand() * Vmax;
 
     double origVm100 = origVm[100];
     double origVm900 = origVm[900];
@@ -144,8 +143,8 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
         weight[i].resize( numSynVec[i], 0.0 );
         vector< double > delay( numSynVec[i], 0.0 );
         for ( unsigned int j = 0; j < numSynVec[i]; ++j ) {
-            weight[i][ j ] = mtrand() * weightMax;
-            delay[ j ] = delayMin + mtrand() * ( delayMax - delayMin );
+            weight[i][ j ] = moose::global::mtrand() * weightMax;
+            delay[ j ] = delayMin + moose::global::mtrand() * ( delayMax - delayMin );
         }
         ret = Field< double >::
             setVec( ObjId( synId, i ), "weight", weight[i] );
@@ -225,13 +224,13 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
         cout << retVm902<< endl;
 #endif
 
-        assert( doubleEq( retVm100, 0.213325376245 ) );
-        assert( doubleEq( retVm101, 0.215303129134 ) );
-        assert( doubleEq( retVm102, 0.201777877283 ) );
-        assert( doubleEq( retVm99,  0.14123386779  ) );
-        assert( doubleEq( retVm900, 0.175566513594 ) );
-        assert( doubleEq( retVm901, 0.102656911994 ) );
-        assert( doubleEq( retVm902, 0.180634819513 ) );
+        assert( doubleEq( retVm100, 0.158155894544  ) );
+        assert( doubleEq( retVm101, 0.0787406321424 ) );
+        assert( doubleEq( retVm102, 0.112282091194  ) );
+        assert( doubleEq( retVm99,  0.0614945481554 ) );
+        assert( doubleEq( retVm900, 0.259239075066  ) );
+        assert( doubleEq( retVm901, 0.19530866066   ) );
+        assert( doubleEq( retVm902, 0.236583352978  ) );
 
     }
 

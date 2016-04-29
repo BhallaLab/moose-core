@@ -159,7 +159,7 @@ void testClock()
 	assert( cdata->activeTicks_[3] == 1 );
 	assert( cdata->activeTicks_[4] == 3 );
 	assert( cdata->activeTicks_[5] == 5 );
-	cdata->handleStart( clocker, runtime );
+	cdata->handleStart( clocker, runtime, false );
 	assert( doubleEq( cdata->getCurrentTime(), runtime ) );
 	test.destroy();
 	for ( unsigned int i = 0; i < Clock::numTicks; ++i )

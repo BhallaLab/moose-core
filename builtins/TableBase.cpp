@@ -48,9 +48,9 @@ const Cinfo* TableBase::initCinfo()
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
 
-		static DestFinfo linearTransform( "linearTransform",
-			"Linearly scales and offsets data. Scale first, then offset.",
-			new OpFunc2< TableBase, double, double >( &TableBase::linearTransform ) );
+                static DestFinfo linearTransform( "linearTransform",
+                        "Linearly scales and offsets data. Scale first, then offset.",
+                        new OpFunc2< TableBase, double, double >( &TableBase::linearTransform ) );
 
 		static DestFinfo xplot( "xplot",
 			"Dumps table contents to xplot-format file. "
@@ -147,9 +147,9 @@ const Cinfo* TableBase::initCinfo()
 
 static const Cinfo* tableBaseCinfo = TableBase::initCinfo();
 
-TableBase::TableBase()
-	: output_( 0 )
-{ ; }
+TableBase::TableBase() : output_( 0 )
+{ 
+}
 
 //////////////////////////////////////////////////////////////
 // MsgDest Definitions
@@ -157,8 +157,8 @@ TableBase::TableBase()
 
 void TableBase::linearTransform( double scale, double offset )
 {
-	for ( vector< double >::iterator i = vec_.begin(); i != vec_.end(); ++i)
-		*i = *i * scale + offset;
+    for ( vector< double >::iterator i = vec_.begin(); i != vec_.end(); ++i)
+        *i = *i * scale + offset;
 }
 
 void TableBase::plainPlot( string fname )
@@ -312,6 +312,7 @@ void TableBase::loadXplotRange( string fname, string plotname,
 void TableBase::loadCSV( 
 	string fname, int startLine, int colNum, char separator )
 {
+    cout << "TODO: Not implemented yet" << endl;
 }
 
 double getRMSDiff( const vector< double >& v1, const vector< double >& v2 )

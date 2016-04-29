@@ -10,54 +10,46 @@
 #ifndef _RANDSPIKE_H
 #define _RANDSPIKE_H
 
-
-#if USE_BOOST
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_01.hpp>
-#else
-#endif
+#include "global.h"
 
 class RandSpike
 {
-    public:
-        RandSpike();
+public:
+    RandSpike();
 
-        //////////////////////////////////////////////////////////////////
-        // Field functions.
-        //////////////////////////////////////////////////////////////////
-        void setRate( double rate );
-        double getRate() const;
+    //////////////////////////////////////////////////////////////////
+    // Field functions.
+    //////////////////////////////////////////////////////////////////
+    void setRate( double rate );
+    double getRate() const;
 
-        void setRefractT( double val );
-        double getRefractT() const;
+    void setRefractT( double val );
+    double getRefractT() const;
 
-        bool getFired() const;
+    bool getFired() const;
 
-        double mtrand( );
+    double mtrand( );
 
-        //////////////////////////////////////////////////////////////////
-        // Message dest functions.
-        //////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////
+    // Message dest functions.
+    //////////////////////////////////////////////////////////////////
 
-        void process( const Eref& e, ProcPtr p );
-        void reinit( const Eref& e, ProcPtr p );
+    void process( const Eref& e, ProcPtr p );
+    void reinit( const Eref& e, ProcPtr p );
 
-        //////////////////////////////////////////////////////////////////
-        static const Cinfo* initCinfo();
+    //////////////////////////////////////////////////////////////////
+    static const Cinfo* initCinfo();
 
-    private:
-        double rate_;
-        double realRate_;
-        double refractT_;
-        double lastEvent_;
-        double threshold_;
-        bool fired_;
+private:
+    double rate_;
+    double realRate_;
+    double refractT_;
+    double lastEvent_;
+    double threshold_;
+    bool fired_;
 
-#ifdef  USE_BOOST
-        boost::random::mt19937 rng;
-        boost::random::uniform_01<double> dist;
-#else      /* -----  not USE_BOOST  ----- */
-#endif     /* -----  not USE_BOOST  ----- */
+    moose::global::rng_type_ rng;
+    moose::global::distribution_type_ dist;
 
 };
 

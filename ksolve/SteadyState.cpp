@@ -339,8 +339,7 @@ SteadyState::SteadyState()
     solutionStatus_( 0 ),
     numFailed_( 0 )
 {
-    // NOTE: Currently the RNG is seeded with 0. 
-    rng.seed( seed );
+    rng.seed( moose::global::__rng_seed__ );
 }
 
 SteadyState::~SteadyState()

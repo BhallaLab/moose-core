@@ -189,7 +189,7 @@ void MarkovBoostSolver::setMethod( string method )
 
 #if 0
     if ( method == "rk2" ) {
-        boostStepType_ = "rk
+        boostStepType_ = "rk2"
     } else if ( method == "rk4" ) {
         boostStepType_ = gsl_odeiv_step_rk4;
     } else if ( method == "rk5" ) {

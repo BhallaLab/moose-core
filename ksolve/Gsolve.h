@@ -10,13 +10,13 @@
 #ifndef _GSOLVE_H
 #define _GSOLVE_H
 
-#if USE_BOOST
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_01.hpp>
-#else
-#endif
+
+#include "global.h"
 
 class Stoich;
+
 class Gsolve: public ZombiePoolInterface
 {
     public: 
@@ -51,6 +51,7 @@ class Gsolve: public ZombiePoolInterface
         /// Returns the vector of pool Num at the specified voxel.
         vector< double > getNvec( unsigned int voxel) const;
         void setNvec( unsigned int voxel, vector< double > vec );
+
         //////////////////////////////////////////////////////////////////
         // Dest Finfos
         //////////////////////////////////////////////////////////////////
@@ -158,10 +159,8 @@ class Gsolve: public ZombiePoolInterface
         /// Flag: True if atot should be updated every clock tick
         bool useClockedUpdate_;
 
-#if USE_BOOST
-        boost::random::mt19937 rng;
-        boost::random::uniform_01<double> dist;
-#endif
+        moose::global::rng_type_ rng;
+        moose::global::distribution_type_ dist;
 
 };
 
