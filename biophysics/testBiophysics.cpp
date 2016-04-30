@@ -225,13 +225,13 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
         cout << retVm902<< endl;
 #endif
 
-        ASSERT_EQ(  retVm100, 0.158155894544  , "" );
-        ASSERT_EQ(  retVm101, 0.0787406321424 , "" );
-        ASSERT_EQ(  retVm102, 0.112282091194  , "" );
-        ASSERT_EQ(  retVm99,  0.0614945481554 , "" );
-        ASSERT_EQ(  retVm900, 0.259239075066  , "" );
-        ASSERT_EQ(  retVm901, 0.19530866066   , "" );
-        ASSERT_EQ(  retVm902, 0.236583352978  , "" );
+        ASSERT_EQ( retVm100,  0.189304207678  , "" );
+        ASSERT_EQ( retVm101,  0.352776164289  , "" );
+        ASSERT_EQ( retVm102,  0.367242141036  , "" );
+        ASSERT_EQ( retVm99,   0.123552428475  , "" );
+        ASSERT_EQ( retVm900,  0.0714865703958 , "" );
+        ASSERT_EQ( retVm901,  0.35823689362   , "" );
+        ASSERT_EQ( retVm902,  0.0307787676562 , "" );
 
     }
 

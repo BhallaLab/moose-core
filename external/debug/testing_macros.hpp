@@ -24,10 +24,17 @@
 #include <exception>
 #include <iostream>
 #include <exception>
+#include <limits>
+
 #include "current_function.hpp"
 #include "print_function.hpp"
 
 using namespace std;
+
+inline bool doubleEq(double a, double b)
+{
+    return std::abs(a-b) < 1e-7;
+}
 
 class FatalTestFailure : public exception
 {
@@ -150,7 +157,7 @@ static ostringstream assertStream;
     throw FatalTestFailure( assertStream.str() ); \
 
 #define ASSERT_EQ(a, b, token)  \
-    if( (a) != (b)) { \
+    if( ! doubleEq((a), (b)) ) { \
         assertStream.str(""); \
         assertStream.precision( 9 ); \
         LOCATION(assertStream) \
