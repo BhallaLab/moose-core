@@ -21,6 +21,7 @@
 
 
 #include <sstream>
+#include <exception>
 #include <iostream>
 #include <exception>
 #include "current_function.hpp"
@@ -28,22 +29,24 @@
 
 using namespace std;
 
-class FatalTestFailure 
+class FatalTestFailure : public exception
 {
-    public:
-        FatalTestFailure()
-        {
-            msg = string("");
-        }
 
-        FatalTestFailure(string msg)
-        {
-            msg = msg;
-            dump( msg, "ASSERTION_FAILURE");
-        }
+public:
 
-    public:
-        string msg;
+    FatalTestFailure( string msg = "" ) : msg_( msg )
+    {
+        msg_ = msg;
+    }
+
+    virtual const char* what() const throw()
+    {
+        dump( "ASSERT_FAILURE", msg_ );
+        return msg_.c_str();
+    }
+
+private:
+    string msg_;
 };
 
 static ostringstream assertStream;
@@ -134,6 +137,7 @@ static ostringstream assertStream;
 #define ASSERT_FALSE( condition, msg) \
     if( (condition) ) {\
         assertStream.str(""); \
+        assertStream.precision( 9 ); \
         assertStream << msg << endl; \
         throw FatalTestFailure(assertStream.str()); \
     }
@@ -141,12 +145,14 @@ static ostringstream assertStream;
 #define ASSERT_LT( a, b, msg) \
     EXPECT_LT(a, b, msg); \
     assertStream.str(""); \
+    assertStream.precision( 9 ); \
     assertStream << msg; \
     throw FatalTestFailure( assertStream.str() ); \
 
 #define ASSERT_EQ(a, b, token)  \
     if( (a) != (b)) { \
         assertStream.str(""); \
+        assertStream.precision( 9 ); \
         LOCATION(assertStream) \
         assertStream << "Expected " << a << ", received " << b  << endl; \
         assertStream << token << endl; \

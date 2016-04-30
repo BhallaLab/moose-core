@@ -31,6 +31,10 @@
 unsigned int totalTests = 0;
 
 stringstream errorSS;
+std::random_device rd;
+
+
+bool isRNGInitialized = false;
 
 clock_t simClock = clock();
 
@@ -39,13 +43,15 @@ extern string joinPath( string pathA, string pathB);
 extern string fixPath( string path);
 extern string dumpStats( int  );
 
-std::random_device rd;
 
 
 namespace moose {
     namespace global {
 
         int __rng_seed__ = rd();
+
+        rng_type_ rng( __rng_seed__ );
+        distribution_type_ dist;
 
         /* Check if path is OK */
         int checkPath( const string& path  )
@@ -89,16 +95,15 @@ namespace moose {
          */
         void mtseed( unsigned int x )
         {
+            moose::global::rng.seed( x );
             moose::global::__rng_seed__ = x;
+            isRNGInitialized = true;
         }
 
         /*  Generate a random number */
         double mtrand( void )
         {
-            static rng_type_ rng( moose::global::__rng_seed__ );
-            static distribution_type_ dist;
-            return dist( rng );
-
+            return moose::global::dist( rng );
         }
 
         // Fix the given path.

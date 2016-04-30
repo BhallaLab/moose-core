@@ -12,6 +12,7 @@
 #include "../shell/Shell.h"
 #include "CompartmentBase.h"
 #include "Compartment.h"
+#include "testing_macros.hpp"
 
 /*
 #include "HHGate.h"
@@ -224,13 +225,13 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
         cout << retVm902<< endl;
 #endif
 
-        assert( doubleEq( retVm100, 0.158155894544  ) );
-        assert( doubleEq( retVm101, 0.0787406321424 ) );
-        assert( doubleEq( retVm102, 0.112282091194  ) );
-        assert( doubleEq( retVm99,  0.0614945481554 ) );
-        assert( doubleEq( retVm900, 0.259239075066  ) );
-        assert( doubleEq( retVm901, 0.19530866066   ) );
-        assert( doubleEq( retVm902, 0.236583352978  ) );
+        ASSERT_EQ(  retVm100, 0.158155894544  , "" );
+        ASSERT_EQ(  retVm101, 0.0787406321424 , "" );
+        ASSERT_EQ(  retVm102, 0.112282091194  , "" );
+        ASSERT_EQ(  retVm99,  0.0614945481554 , "" );
+        ASSERT_EQ(  retVm900, 0.259239075066  , "" );
+        ASSERT_EQ(  retVm901, 0.19530866066   , "" );
+        ASSERT_EQ(  retVm902, 0.236583352978  , "" );
 
     }
 

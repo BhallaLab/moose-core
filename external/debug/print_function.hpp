@@ -142,7 +142,8 @@ inline string debugPrint(string msg, string prefix = "DEBUG"
 
 inline void dump(string msg, string type = "DEBUG", bool autoFormat = true)
 {
-#if QUIET_MODE || VERBOSITY < 0
+
+#if VERBOSITY < 1
     return;
 #else
     stringstream ss;

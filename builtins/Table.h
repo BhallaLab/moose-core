@@ -39,6 +39,10 @@ public:
     void setOutfile( string outfilepath );
     string getOutfile( void ) const;
 
+    /**
+     * @brief When useStreamer_ is set to True, write to outfile_ and do not
+     * store values in memory (stl::vec )
+     */
     void writeToOutfile( );
 
     //////////////////////////////////////////////////////////////////

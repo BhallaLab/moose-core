@@ -7,6 +7,8 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+#include <boost/log/trivial.hpp>
+
 #include "header.h"
 #include "global.h"
 #include <fstream>
@@ -207,6 +209,10 @@ Table& Table::operator=( const Table& tab )
 
 void Table::writeToOutfile( )
 {
+    // Just to be safe.
+    if( ! useStreamer_ )
+        return;
+
     for( auto v : vec() ) 
     {
         text_ += moose::global::toString( dt_ * numLines ) + delimiter_
@@ -233,8 +239,11 @@ void Table::process( const Eref& e, ProcPtr p )
     /*  If we are streaming to a file, let's write to a file. And clean the
      *  vector.  
      */
-    writeToOutfile( );
-    clearVec();
+    if( useStreamer_ )
+    {
+        writeToOutfile( );
+        clearVec();
+    }
 }
 
 void Table::reinit( const Eref& e, ProcPtr p )
@@ -256,6 +265,9 @@ void Table::reinit( const Eref& e, ProcPtr p )
                     );
 
         // Create its root directory.
+        BOOST_LOG_TRIVIAL( debug ) << "Creating directory " 
+            << outfile_.parent_path();
+
         moose::global::createDirs( outfile_.parent_path() );
 
         // Open the stream to write to file.

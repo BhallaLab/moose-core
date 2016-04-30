@@ -33,6 +33,7 @@ extern stringstream errorSS;
  */
 extern unsigned int totalTests;
 
+
 /** @brief This macro prints the output of a test function onto console.  It
  * also keep track of index of the current test. The index of test is
  * automatically computed by increamenting the counter.
@@ -59,6 +60,9 @@ namespace moose
 
         typedef boost::random::mt19937 rng_type_;
         typedef boost::random::uniform_01<double> distribution_type_;
+
+        extern rng_type_ rng;
+        extern distribution_type_ dist;
 
         /**
          * @brief A global seed for all RNGs in moose. When moose.seed( x ) is called,
