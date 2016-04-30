@@ -45,7 +45,7 @@ setup(
         author_email='dilawars@ncbs.res.in',
         url='http://moose.ncbs.res.in',
         packages=[
-            , 'rdesigneur'
+            'rdesigneur'
             , 'moose'
             , 'moose.neuroml'
             , 'moose.genesis'
