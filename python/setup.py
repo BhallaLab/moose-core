@@ -44,12 +44,14 @@ setup(
         author='Dilwar Singh',
         author_email='dilawars@ncbs.res.in',
         url='http://moose.ncbs.res.in',
-        packages=['libmumbl'
-            , 'rdesigneur'
-            , 'moose', 'moose.kkit', 'moose.neuroml'
+        packages=[
+            'rdesigneur'
+            , 'moose'
+            , 'moose.neuroml'
             , 'moose.genesis'
             ],
-        package_dir = { 'moose' : 'moose' 
+        package_dir = { 
+            'moose' : 'moose' 
             , 'rdesigneur' : 'rdesigneur'
             , 'genesis' : 'genesis'
             },

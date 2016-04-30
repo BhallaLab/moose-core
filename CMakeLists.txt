@@ -295,7 +295,6 @@ ELSE(HDF5_STATIC_HOME)
      endif()
 endif(HDF5_STATIC_HOME)
 
-#message(STATUS "Debug: HDF5_FOUND? = ${HDF5_FOUND}")
 if(NOT HDF5_FOUND)
     message(
         "==================================================================\n"
@@ -310,9 +309,7 @@ if(NOT HDF5_FOUND)
         " variable HDF5_ROOT to the location. Rerun cmake \n"
         "================================================================ \n"
         )
-ELSE(NOT HDF5_FOUND)
-    add_definitions(-DUSE_HDF5)
-    message(STATUS "DBG -- HDF5: ${HDF5_LIBRARIES} ## ${HDF5_CXX_LIBRARIES} ## ${HDF5_HL_LIBRARIES}")
+ELSEIF(HDF5_FOUND AND (NOT HDF5_STATIC_HOME))
     if(HDF5_HL_LIBRARIES)
         set(HDF5_LIBRARIES ${HDF5_HL_LIBRARIES})
     else()
@@ -320,6 +317,11 @@ ELSE(NOT HDF5_FOUND)
     endif()
     include_directories(${HDF5_INCLUDE_DIRS})
 endif(NOT HDF5_FOUND)
+
+if(HDF5_FOUND)
+    add_definitions( -DUSE_HDF5 )
+    include_directories( ${HDF5_INCLUDE_DIRS} )
+endif( HDF5_FOUND )
 
 # This is a fix for new HDF5 package on Debian/Ubuntu which installs hdf5
 # headers in non-standard path. issue #80.
