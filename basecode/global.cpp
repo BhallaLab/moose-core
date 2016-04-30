@@ -20,8 +20,7 @@
 #include <numeric>
 #include <random>
 
-
-#include "../external/debug/simple_logger.hpp"
+#include "../external/debug/print_function.hpp"
 
 /*-----------------------------------------------------------------------------
  *  This variable keep track of how many tests have been performed.
@@ -139,7 +138,9 @@ namespace moose {
                     << e.code().message() << '\n';
             }
 
+            __dump__( "Created directory " + p.string(), "INFO" );
         }
+
 
     }
 }

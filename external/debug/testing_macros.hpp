@@ -48,7 +48,7 @@ public:
 
     virtual const char* what() const throw()
     {
-        dump( "ASSERT_FAILURE", msg_ );
+        __dump__( msg_, "ASSERT_FAILURE" );
         return msg_.c_str();
     }
 
@@ -67,7 +67,7 @@ static ostringstream assertStream;
         assertStream.str(""); \
         LOCATION( assertStream ); \
         assertStream << msg << endl; \
-        dump(assertStream.str(), "EXPECT_FAILURE"); \
+        __dump__(assertStream.str(), "EXPECT_FAILURE"); \
     }
 
 #define EXPECT_FALSE( condition, msg) \
@@ -75,7 +75,7 @@ static ostringstream assertStream;
         assertStream.str(""); \
         LOCATION( assertStream ); \
         assertStream << msg << endl; \
-        dump(assertStream.str(), "EXPECT_FAILURE"); \
+        __dump__(assertStream.str(), "EXPECT_FAILURE"); \
     }
 
 #define EXPECT_EQ(a, b, token)  \
@@ -84,7 +84,7 @@ static ostringstream assertStream;
         LOCATION(assertStream) \
         assertStream << "Expected " << a << ", received " << b  << endl; \
         assertStream << token << endl; \
-        dump(assertStream.str(), "EXPECT_FAILURE"); \
+        __dump__(assertStream.str(), "EXPECT_FAILURE"); \
     }
 
 #define EXPECT_NEQ(a, b, token)  \
@@ -93,7 +93,7 @@ static ostringstream assertStream;
         LOCATION(assertStream); \
         assertStream << "Not expected " << a << endl; \
         assertStream << token << endl; \
-        dump(assertStream.str(), "EXPECT_FAILURE"); \
+        __dump__(assertStream.str(), "EXPECT_FAILURE"); \
     }
 
 #define EXPECT_GT(a, b, token)  \
@@ -102,7 +102,7 @@ static ostringstream assertStream;
         LOCATION(assertStream); \
         assertStream << "Expected greater than " << a << ", received " << b << endl; \
         assertStream << token << endl; \
-        dump(assertStream.str(), "EXPECT_FAILURE"); \
+        __dump__(assertStream.str(), "EXPECT_FAILURE"); \
     }
 
 #define EXPECT_GTE(a, b, token)  \
@@ -112,7 +112,7 @@ static ostringstream assertStream;
         assertStream << "Expected greater than or equal to " << a  \
             << ", received " << b << endl; \
         assertStream << token << endl; \
-        dump(assertStream.str(), "EXPECT_FAILURE"); \
+        __dump__(assertStream.str(), "EXPECT_FAILURE"); \
     }
 
 #define EXPECT_LT(a, b, token)  \
@@ -121,7 +121,7 @@ static ostringstream assertStream;
         LOCATION(assertStream); \
         assertStream << "Expected less than " << a << ", received " << b << endl; \
         assertStream << token << endl; \
-        dump(assertStream.str(), "EXPECT_FAILURE"); \
+        __dump__(assertStream.str(), "EXPECT_FAILURE"); \
     }
 
 #define EXPECT_LTE(a, b, token)  \
@@ -131,7 +131,7 @@ static ostringstream assertStream;
         assertStream << "Expected less than or equal to " << a \
             << ", received " << b << endl; \
         assertStream << token << endl; \
-        dump(assertStream.str(), "EXPECT_FAILURE"); \
+        __dump__(assertStream.str(), "EXPECT_FAILURE"); \
     }
 
 #define ASSERT_TRUE( condition, msg) \

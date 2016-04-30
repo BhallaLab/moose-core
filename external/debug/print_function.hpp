@@ -30,6 +30,7 @@
 #include <string>
 #include <map>
 #include <iomanip>
+
 //#include <sys/ioctl.h>
 
 #define T_RESET       "\033[0m"
@@ -135,12 +136,11 @@ inline string debugPrint(string msg, string prefix = "DEBUG"
 }
 
 /*-----------------------------------------------------------------------------
- *  This function dumps a message onto console. Fills appropriate colors as
- *  needed. What can I do, I love colors.
+ *  This function __dump__s a message onto console. Fills appropriate colors as
+ *  needed. 
  *-----------------------------------------------------------------------------*/
 
-
-inline void dump(string msg, string type = "DEBUG", bool autoFormat = true)
+inline void __dump__(string msg, string type = "DEBUG", bool autoFormat = true)
 {
 
 #if VERBOSITY < 1
@@ -196,7 +196,7 @@ inline void dump(string msg, string type = "DEBUG", bool autoFormat = true)
 #define DUMP(a, t) \
     ostringstream ss; \
     ss << a << endl;\
-    dump(ss.str(), t); \
+    __dump__(ss.str(), t); \
 
 /*-----------------------------------------------------------------------------
  *  Log to a file, and also to console.
@@ -220,7 +220,7 @@ inline void log(string msg, string type = "DEBUG"
         )
 {
     if(redirectToConsole)
-        dump(msg, type, true);
+        __dump__(msg, type, true);
 
     /* remove any backtick from the string. */
     formattedMsg( msg );
