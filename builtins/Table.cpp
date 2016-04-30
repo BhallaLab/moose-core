@@ -354,4 +354,9 @@ string Table::getOutfile( void ) const
     return outfile_.string();
 }
 
+// Get the dt_ of this table
+double Table::getDt( void ) const
+{
+    return dt_;
+}
 

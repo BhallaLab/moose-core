@@ -16,6 +16,7 @@
 
 #include <algorithm>
 #include <sstream>
+#include <boost/log/trivial.hpp>
 
 #include "global.h"
 #include "header.h"
@@ -29,7 +30,8 @@ const Cinfo* Streamer::initCinfo()
      *-----------------------------------------------------------------------------*/
     static ValueFinfo< Streamer, string > outfile(
         "outfile"
-        , "File/stream to write table data to. Default is is tables.dat."
+        , "File/stream to write table data to. Default is is __moose_tables__.dat.n"
+        " By default, this object writes data every second \n"
         , &Streamer::setOutFilepath
         , &Streamer::getOutFilepath
     );
@@ -132,7 +134,10 @@ static const Cinfo* tableStreamCinfo = Streamer::initCinfo();
 
 // Class function definitions
 
-Streamer::Streamer() : delimiter_( ","), format_( "csv" )
+Streamer::Streamer() : 
+    outfilePath_( "__moose_tables__.dat")
+    , delimiter_( ",")
+    , format_( "csv" )
 {
 }
 
@@ -144,6 +149,7 @@ Streamer& Streamer::operator=( const Streamer& st )
 
 Streamer::~Streamer()
 {
+    of_.close();
 }
 
 /**
@@ -156,6 +162,10 @@ void Streamer::reinit(const Eref& e, ProcPtr p)
 {
     // If it is not stdout, then open a file and write standard header to it.
     initOutfile( e );
+
+    // Push each table dt_ into vector of dt
+    for( auto & t : tables_ )
+        tableDt_.push_back( t.second->getDt() );
 }
 
 /**
@@ -166,8 +176,6 @@ void Streamer::reinit(const Eref& e, ProcPtr p)
  */
 void Streamer::process(const Eref& e, ProcPtr p)
 {
-
-
     writeTablesToOutfile( );
 }
 
@@ -184,7 +192,8 @@ void Streamer::addTable( Id table )
         if( table.path() == t.first.path() )
             return;                             /* Already added. */
 
-    TableBase* t = reinterpret_cast<TableBase*>(table.eref().data());
+    Table* t = reinterpret_cast<Table*>(table.eref().data());
+
     tables_[ table ] = t;
 }
 
@@ -238,6 +247,8 @@ size_t Streamer::getNumTables( void ) const
  */
 void Streamer::write( string& text )
 {
+    if( ! of_.is_open() )
+        return;
     of_ << text;
     text = "";
 }
@@ -245,11 +256,12 @@ void Streamer::write( string& text )
 
 void Streamer::initOutfile( const Eref& e )
 {
+    of_.open( outfilePath_ );
     if( ! of_.is_open() )
-        std::cerr << "Warn: Could not open file " << outfilePath_
-                  << ". I am going to write to 'tables.dat'. "
-                  << endl;
-
+    {
+        BOOST_LOG_TRIVIAL( warning ) << "Could not open file " << outfilePath_;
+        return;
+    }
     // Now write header to this file. First column is always time
     text_ = "time" + delimiter_;
     for( auto t : tables_ )
@@ -264,6 +276,7 @@ void Streamer::initOutfile( const Eref& e )
     int numTick = e.element()->getTick();
     Clock* clk = reinterpret_cast<Clock*>(Id(1).eref().data());
     dt_ = clk->getTickDt( numTick );
+    of_.close();
 }
 
 
@@ -294,50 +307,52 @@ string Streamer::getFormat( void ) const
  */
 void Streamer::writeTablesToOutfile( void )
 {
+    of_.open( outfilePath_, ios::app);
     if( tables_.size() <= 0 )
         return;
 
-    vector<vector<double> > data( tables_.size() );
-    vector<size_t> dataSize( tables_.size() );
+    vector<vector<double> > tableData( tables_.size() );
+    vector<size_t> eachVectorSize( tables_.size() );
 
     size_t i = 0;
     for( auto tab : tables_ )
     {
-        dataSize[i] = tab.second->getVecSize();
+        eachVectorSize[i] = tab.second->getVecSize();
 
-        // If any table has fewer data points then the threshold for writing to
+        // If any table has fewer tableData points then the threshold for writing to
         // file then return without doing anything.
-        data[i] = tab.second->getVec();
+        tableData[i] = tab.second->getVec();
 
-        // Clear the data from vector
+        // Clear the tableData from vector
         tab.second->clearVec();
 
         i++;
     }
 
-    if( std::min_element( dataSize.begin(), dataSize.end() ) !=
-            std::max_element( dataSize.begin(), dataSize.end() )
+    if( std::min_element( eachVectorSize.begin(), eachVectorSize.end() ) !=
+            std::max_element( eachVectorSize.begin(), eachVectorSize.end() )
       )
     {
         cout << "WARNING: One or more tables handled by this Streamer are collecting "
-             << "data at different rate than others. I'll continue dumping data to "
+             << "tableData at different rate than others. I'll continue dumping tableData to "
              << "stream/file but it will get corrupted. I'll advise you to delete  "
              << "such tables."
              << endl;
     }
 
     // All vectors must be of same size otherwise we are in trouble.
-    for (size_t i = 0; i < dataSize[0]; i++)
+    size_t sizeOfVec = eachVectorSize[0];
+    for (size_t i = 0; i < sizeOfVec; i++)
     {
-        text_ += moose::global::toString<double>(dt_ * numLinesWritten_) + delimiter_;
-        for (size_t ii = 0; ii < data.size(); ii++)
-            text_ += moose::global::toString<double>(data[ii][i]) + delimiter_;
+        text_ += moose::global::toString<double>(tableDt_[0] * numLinesWritten_) + delimiter_;
+        for (size_t ii = 0; ii < tableData.size(); ii++)
+            text_ += moose::global::toString<double>(tableData[ii][i]) + delimiter_;
         // Remove last "," and append a new line.
         text_.pop_back(); text_ += '\n';
         numLinesWritten_ += 1;
     }
-
     write( text_ );
+    of_.close();
 }
 
 

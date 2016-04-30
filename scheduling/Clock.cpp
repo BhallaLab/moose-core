@@ -411,7 +411,7 @@ const Cinfo* Clock::initCinfo()
 		"	Stats				17		0.1\n"
 
 		"	Table2				18		1\n"
-		"	Streamer			20		5\n"
+		"	Streamer			19		1\n"
 		"	HDF5DataWriter			30		1\n"
 		"	HDF5WriterBase			30		1\n"
 		"	NSDFWriter			30		1\n"
@@ -873,7 +873,7 @@ void Clock::buildDefaultTick()
 	defaultTick_["Stats"] = 17;
 
 	defaultTick_["Table2"] = 18;
-	defaultTick_["Streamer"] = 20;
+	defaultTick_["Streamer"] = 19;
 	defaultTick_["HDF5DataWriter"] = 30;
 	defaultTick_["HDF5WriterBase"] = 30;
 	defaultTick_["NSDFWriter"] = 30;
@@ -949,7 +949,8 @@ void Clock::buildDefaultTick()
 	defaultDt_[16] = 0.1;
 	defaultDt_[17] = 0.1;
 	defaultDt_[18] = 1; // For tables for chemical calculations.
-	// 19-29 are not assigned.
+	defaultDt_[19] = 1; // For Streamer 
+	// 20-29 are not assigned.
 	defaultDt_[30] = 1;	// For the HDF writer
 	defaultDt_[31] = 0.01; // For the postmaster.
 }

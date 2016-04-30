@@ -25,8 +25,8 @@
 #include <fstream>
 #include <sstream>
 
-#include "TableBase.h"
 #include "StreamerBase.h"
+#include "Table.h"
 
 using namespace std;
 
@@ -76,12 +76,13 @@ public:
 private:
 
     ofstream of_;
-    string outfilePath_ = "";
+    string outfilePath_;
     string text_ = "";
     string delimiter_= ",";
     string format_ = "csv";
 
     // dt_ of its clock
+    vector<double> tableDt_;
     double dt_;
 
     // No of lines written.
@@ -91,7 +92,7 @@ private:
     unsigned int numTables_ = 0;
 
     // These Tables are handled by StreamerBase 
-    map< Id, TableBase* > tables_;
+    map< Id, Table* > tables_;
 };
 
 #endif   /* ----- #ifndef Streamer_INC  ----- */

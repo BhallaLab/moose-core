@@ -15,6 +15,7 @@ __status__           = "Development"
 
 import os
 import sys
+import time
 import moose
 import numpy as np
 print( '[INFO] Using moose form %s' % moose.__file__ )
@@ -28,7 +29,7 @@ def sanity_test( ):
     print c
 
     st = moose.Streamer( '/s' )
-    assert st.outfile == '', 'Expecting "", got %s' % st.streamname
+    assert st.outfile == '__moose_tables__.dat', 'Expecting "", got %s' % st.outfile
 
     st.outfile = 'a.txt'
     assert st.outfile == 'a.txt'
@@ -88,7 +89,7 @@ def test( ):
     # Now create a streamer and use it to write to a stream
     st = moose.Streamer( '/compt/streamer' )
     st.outfile = os.path.join( os.getcwd(), 'temp.dat' )
-    print st.outfile
+    assert st.outfile  == os.path.join( os.getcwd(), 'temp.dat' )
 
     st.addTable( tabA )
     st.addTables( [ tabB, tabC ] )
@@ -96,11 +97,13 @@ def test( ):
     assert st.numTables == 3
 
     moose.reinit( )
+    print( '[INFO] Running for 57 seconds' )
     moose.start( 57 )
 
+    time.sleep( 0.1 )
     # Now read the table and verify that we have written
     print( '[INFO] Reading file %s' % st.outfile )
-    data = np.loadtxt( st.outfile, delimiter=',', skiprows=1 )
+    data = np.genfromtxt(st.outfile, delimiter=',', skip_header=1 )
     # Total rows should be 58 (counting zero as well).
     assert data.shape == (58,4), data.shape
     print( '[INFO] Test 2 passed' )
