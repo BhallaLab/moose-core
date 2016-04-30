@@ -20,7 +20,7 @@
 #include <numeric>
 #include <random>
 
-#include "../external/debug/print_function.hpp"
+#include <boost/log/trivial.hpp>
 
 /*-----------------------------------------------------------------------------
  *  This variable keep track of how many tests have been performed.
@@ -138,7 +138,7 @@ namespace moose {
                     << e.code().message() << '\n';
             }
 
-            __dump__( "Created directory " + p.string(), "INFO" );
+            BOOST_LOG_TRIVIAL( info ) << "Created directory " + p.string();
         }
 
 

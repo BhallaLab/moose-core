@@ -143,9 +143,6 @@ inline string debugPrint(string msg, string prefix = "DEBUG"
 inline void __dump__(string msg, string type = "DEBUG", bool autoFormat = true)
 {
 
-#if VERBOSITY < 1
-    return;
-#else
     stringstream ss;
     ss << "[" << type << "] ";
     bool set = false;
@@ -189,7 +186,7 @@ inline void __dump__(string msg, string type = "DEBUG", bool autoFormat = true)
     if(!reset)
         ss << T_RESET;
     cerr << ss.str() << endl;
-#endif
+
 }
 
 /* A macro would be cool. */

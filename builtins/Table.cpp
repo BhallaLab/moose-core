@@ -192,9 +192,6 @@ Table::Table() : threshold_( 0.0 ) , lastTime_( 0.0 ) , input_( 0.0 )
 {
     // Initialize the directory to which each table should stream.
     rootdir_ /= "_tables";
-
-    // If this directory does not exists, craete it. Following takes care of it.
-    boost::filesystem::create_directories( rootdir_ );
 }
 
 Table::~Table( )
