@@ -3296,14 +3296,20 @@ PyMODINIT_FUNC MODINIT(_moose)
     }
 
     clock_t defclasses_end = clock();
-#ifndef QUIET_MODE
-    cout << "Info: Time to define moose classes:" << (defclasses_end - defclasses_start) * 1.0 /CLOCKS_PER_SEC << endl;
-#endif
+
+    LOG( "`Time to define moose classes:" 
+            << (defclasses_end - defclasses_start) * 1.0 /CLOCKS_PER_SEC
+            , "DEBUG"
+       );
+
     PyGILState_Release(gstate);
     clock_t modinit_end = clock();
-#ifndef QUIET_MODE
-    cout << "Info: Time to initialize module:" << (modinit_end - modinit_start) * 1.0 /CLOCKS_PER_SEC << endl;
-#endif
+
+    LOG( "`Time to initialize module:" 
+            << (modinit_end - modinit_start) * 1.0 /CLOCKS_PER_SEC 
+            , "DEBUG"
+       );
+
     if (doUnitTests)
     {
         test_moosemodule();

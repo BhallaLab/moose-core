@@ -196,7 +196,7 @@ inline void __dump__(string msg, string type = "DEBUG", bool autoFormat = true)
 #ifdef  NDEBUG
 #define LOG(a, t ) ((void)0);
 #else      /* -----  not NDEBUG  ----- */
-#define LOG(a, t) ostringstream ss;  ss << a; __dump__(ss.str(), t ); 
+#define LOG(a, t) { stringstream __ss__;  __ss__ << a; __dump__(__ss__.str(), t ); } 
 #endif     /* -----  not NDEBUG  ----- */
 
 /*-----------------------------------------------------------------------------
