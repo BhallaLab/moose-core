@@ -246,15 +246,27 @@ void Table::process( const Eref& e, ProcPtr p )
  */
 void Table::writeToBinaryCSVfile( )
 {
+    if( ! useStreamer_ )
+        return;
 
+    of_.open( outfile_.string(), ios::app | ios::binary );
+    for( auto v : vec() ) 
+    {
+        text_ += moose::global::toString( dt_ * numLines ) + delimiter_
+             + moose::global::toString( v ) + '\n';
+        numLines += 1;
+    }
+
+    of_.write( text_.c_str(), text_.size()); 
+
+    of_.close( );
+    clearVec();
 }
 
 /**
  * @brief Write to csv file.
- * 
- * FIXME: File should be closed properly. 
- *        Do not write at each tick. Fill the buffer and when size is bigger
- *        than a given size, write to file.
+ *
+ * Open to append and close.
  */
 void Table::writeToCSVfile( )
 {
@@ -262,13 +274,18 @@ void Table::writeToCSVfile( )
     if( ! useStreamer_ )
         return;
 
+    of_.open( outfile_.string(), ios::app );
     for( auto v : vec() ) 
     {
         text_ += moose::global::toString( dt_ * numLines ) + delimiter_
              + moose::global::toString( v ) + '\n';
         numLines += 1;
     }
-    of_ << text_; text_ = "";
+
+    of_ << text_; 
+    text_ = "";
+
+    of_.close( );
     clearVec();
 }
 
@@ -297,6 +314,8 @@ void Table::reinit( const Eref& e, ProcPtr p )
                     );
 
         moose::global::createDirs( outfile_.parent_path() );
+
+#if 0
         // Open the stream to write to file.
         if( "csv" == format_ )
         {
@@ -311,10 +330,9 @@ void Table::reinit( const Eref& e, ProcPtr p )
         else
         {
             cerr << "Binary  csv file : " << format_;
-            of_.open( outfile_.string());
+            of_.open( outfile_.string(), ios::binary );
         }
-
-        of_ << "time,value\n";
+#endif
 
     }
 

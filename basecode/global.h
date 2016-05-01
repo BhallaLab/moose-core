@@ -16,8 +16,6 @@
 #include <map>
 #include <sstream>
 
-#include "../external/debug/print_function.hpp"
-
 
 using namespace std;
 
@@ -25,6 +23,8 @@ using namespace std;
 #include <boost/random/uniform_01.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/filesystem.hpp>
+
+#include "../external/debug/print_function.hpp"
 
 /**
  * @brief Global stringstream for message printing.

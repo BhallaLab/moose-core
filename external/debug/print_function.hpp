@@ -53,6 +53,21 @@
 
 using namespace std;
 
+/**
+ * @brief Enumerate type for debug and log.
+ */
+enum serverity_level_ { 
+    trace, debug, info
+        , warning, fixme
+        , error, fatal, failed 
+};
+
+static vector<string> levels_ = { 
+    "TRACE", "DEBUG", "INFO", "LOG"
+        , "WARNING", "FIXME"
+        , "ERROR", "FATAL", "FAILED" 
+};
+
 /* 
  * ===  FUNCTION  ==============================================================
  *         Name:  mapToString
@@ -134,27 +149,25 @@ inline string debugPrint(string msg, string prefix = "DEBUG"
 }
 
 /*-----------------------------------------------------------------------------
- *  This function __dump__s a message onto console. Fills appropriate colors as
+ *  This function __dump__ a message onto console. Fills appropriate colors as
  *  needed. 
  *-----------------------------------------------------------------------------*/
 
-inline void __dump__(string msg, string type = "DEBUG", bool autoFormat = true)
+inline void __dump__(string msg, serverity_level_ type = debug, bool autoFormat = true)
 {
     stringstream ss;
-    ss << "[" << type << "] ";
+    ss << "[" << levels_[type] << "] ";
     bool set = false;
     bool reset = true;
     string color = T_GREEN;
-    if(type == "WARNING" || type == "WARN" || type == "FIXME")
+    if(type == warning || type == fixme )
         color = T_YELLOW;
-    else if(type == "DEBUG")
+    else if(type ==  debug )
         color = T_CYAN;
-    else if(type == "ERROR" || type == "FAIL" || type == "FATAL" || type == "ASSERT_FAILURE")
+    else if(type == error || type == failed )
         color = T_RED;
-    else if(type == "INFO" || type == "EXPECT_FAILURE")
+    else if(type == info )
         color = T_MAGENTA;
-    else if(type == "LOG")
-        color = T_BLUE;
 
     for(unsigned int i = 0; i < msg.size(); ++i)
     {
@@ -196,7 +209,7 @@ inline void __dump__(string msg, string type = "DEBUG", bool autoFormat = true)
 #ifdef  NDEBUG
 #define LOG(a, t ) ((void)0);
 #else      /* -----  not NDEBUG  ----- */
-#define LOG(a, t) { stringstream __ss__;  __ss__ << a; __dump__(__ss__.str(), t ); } 
+#define LOG(t, a) { stringstream __ss__;  __ss__ << a; __dump__(__ss__.str(), t ); } 
 #endif     /* -----  not NDEBUG  ----- */
 
 /*-----------------------------------------------------------------------------
@@ -223,7 +236,7 @@ inline string formattedMsg(string& msg)
  * @param redirectToConsole 
  * @param removeTicks
  */
-inline void log(string msg, string type = "DEBUG"
+inline void log(string msg, serverity_level_ type = debug
         , bool redirectToConsole = true
         , bool removeTicks = true 
         )

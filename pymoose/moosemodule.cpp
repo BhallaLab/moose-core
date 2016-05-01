@@ -2692,13 +2692,14 @@ int defineClass(PyObject * module_dict, const Cinfo * cinfo)
     get_moose_classes().insert(pair<string, PyTypeObject*> (className, new_class));
     Py_INCREF(new_class);
 
-    LOG( boost::format( "%1% %2% %|40t|%3% %4%")
+#if 0
+    LOG( debug, boost::format( "%1% %2% %|40t|%3% %4%")
                 % "`Created class " 
                 % new_class->tp_name 
                 % "base=" 
                 % new_class->tp_base->tp_name 
-                , "DEBUG" 
        );
+#endif
 
 #ifdef PY3K
     PyDict_SetItemString(new_class->tp_dict, "__module__", PyUnicode_InternFromString("moose"));
@@ -2799,7 +2800,7 @@ int defineDestFinfos(const Cinfo * cinfo)
         PyTuple_SetItem(args, 0, PyString_FromString(name.c_str()));
         vec[currIndex].closure = (void*)args;
 
-        //LOG( "\tCreated destField " << vec[currIndex].name, "DEBUG");
+        //LOG( debug, "\tCreated destField " << vec[currIndex].name );
 
         ++currIndex;
     } // ! for
@@ -3297,17 +3298,15 @@ PyMODINIT_FUNC MODINIT(_moose)
 
     clock_t defclasses_end = clock();
 
-    LOG( "`Time to define moose classes:" 
+    LOG( info, "`Time to define moose classes:" 
             << (defclasses_end - defclasses_start) * 1.0 /CLOCKS_PER_SEC
-            , "DEBUG"
        );
 
     PyGILState_Release(gstate);
     clock_t modinit_end = clock();
 
-    LOG( "`Time to initialize module:" 
+    LOG( info, "`Time to initialize module:" 
             << (modinit_end - modinit_start) * 1.0 /CLOCKS_PER_SEC 
-            , "DEBUG"
        );
 
     if (doUnitTests)

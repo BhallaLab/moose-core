@@ -48,7 +48,7 @@ public:
 
     virtual const char* what() const throw()
     {
-        __dump__( msg_, "ASSERT_FAILURE" );
+        __dump__( msg_, failed );
         return msg_.c_str();
     }
 
