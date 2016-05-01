@@ -134,10 +134,7 @@ static const Cinfo* tableStreamCinfo = Streamer::initCinfo();
 
 // Class function definitions
 
-Streamer::Streamer() : 
-    outfilePath_( "__moose_tables__.dat")
-    , delimiter_( ",")
-    , format_( "csv" )
+Streamer::Streamer() 
 {
 }
 
@@ -149,7 +146,6 @@ Streamer& Streamer::operator=( const Streamer& st )
 
 Streamer::~Streamer()
 {
-    of_.close();
 }
 
 /**
@@ -160,12 +156,25 @@ Streamer::~Streamer()
  */
 void Streamer::reinit(const Eref& e, ProcPtr p)
 {
-    // If it is not stdout, then open a file and write standard header to it.
-    initOutfile( e );
-
     // Push each table dt_ into vector of dt
-    for( auto & t : tables_ )
-        tableDt_.push_back( t.second->getDt() );
+    for( auto t : tables_ )
+        tableDt_.push_back( t->getDt() );
+
+    if( ! isOutfilePathSet_ )
+    {
+        string defaultPath = "_tables/" + e.id().path();
+        setOutFilepath( defaultPath );
+    }
+
+    double currTime = 0;
+
+    // Prepare data.
+    vector<double> data;
+    zipWithTime( data, currTime );
+    StreamerBase::writeToOutFile( outfilePath_, format_, "w", data, columns_ );
+    // clean the arrays
+    for( auto t : tables_ )
+        t->clearVec();
 }
 
 /**
@@ -176,7 +185,14 @@ void Streamer::reinit(const Eref& e, ProcPtr p)
  */
 void Streamer::process(const Eref& e, ProcPtr p)
 {
-    writeTablesToOutfile( );
+    double currTime = p->currTime;
+    // Prepare data.
+    vector<double> data;
+    zipWithTime( data, currTime );
+    StreamerBase::writeToOutFile( outfilePath_, format_, "a", data, columns_ );
+    // clean the arrays
+    for( auto t : tables_ )
+        t->clearVec();
 }
 
 
@@ -188,13 +204,15 @@ void Streamer::process(const Eref& e, ProcPtr p)
 void Streamer::addTable( Id table )
 {
     // If this table is not already in the vector, add it.
-    for( auto t : tables_ )
-        if( table.path() == t.first.path() )
+    for( auto t : tableIds_ )
+        if( table.path() == t.path() )
             return;                             /* Already added. */
 
     Table* t = reinterpret_cast<Table*>(table.eref().data());
 
-    tables_[ table ] = t;
+    tableIds_.push_back( table );
+    tables_.push_back( t );
+    columns_.push_back( moose::pathToName( table.path() ) );
 }
 
 /**
@@ -215,9 +233,20 @@ void Streamer::addTables( vector<Id> tables )
  */
 void Streamer::removeTable( Id table )
 {
-    auto it = tables_.find( table );
-    if( it != tables_.end() )
-        tables_.erase( it );
+    int matchIndex = -1;
+    for (size_t i = 0; i < tableIds_.size(); i++) 
+        if( table.path() == tableIds_[i].path() )
+        {
+            matchIndex = i;
+            break;
+        }
+
+    if( matchIndex > -1 )
+    {
+        tableIds_.erase( tableIds_.begin() + matchIndex );
+        tables_.erase( tables_.begin() + matchIndex );
+        columns_.erase( columns_.begin() + matchIndex );
+    }
 }
 
 /**
@@ -240,45 +269,6 @@ size_t Streamer::getNumTables( void ) const
     return tables_.size();
 }
 
-/**
- * @brief Write given string to text file and clear it.
- *
- * @param text
- */
-void Streamer::write( string& text )
-{
-    if( ! of_.is_open() )
-        return;
-    of_ << text;
-    text = "";
-}
-
-
-void Streamer::initOutfile( const Eref& e )
-{
-    of_.open( outfilePath_ );
-    if( ! of_.is_open() )
-    {
-        BOOST_LOG_TRIVIAL( warning ) << "Could not open file " << outfilePath_;
-        return;
-    }
-    // Now write header to this file. First column is always time
-    text_ = "time" + delimiter_;
-    for( auto t : tables_ )
-        text_ += t.first.path() + delimiter_;
-    // Remove the last command and add newline.
-    text_.pop_back(); text_ += '\n';
-
-    // Write to stream.
-    write( text_ );
-
-    // Initialize the clock and it dt.
-    int numTick = e.element()->getTick();
-    Clock* clk = reinterpret_cast<Clock*>(Id(1).eref().data());
-    dt_ = clk->getTickDt( numTick );
-    of_.close();
-}
-
 
 string Streamer::getOutFilepath( void ) const
 {
@@ -287,13 +277,17 @@ string Streamer::getOutFilepath( void ) const
 
 void Streamer::setOutFilepath( string filepath )
 {
-    outfilePath_ = filepath;
+    outfilePath_ = moose::createParentDirs( filepath );
+    isOutfilePathSet_ = true;
+    string format = moose::getExtension( outfilePath_, true );
+    if( format.size() > 0)
+        setFormat( format );
 }
 
 /* Set the format of all Tables */
-void Streamer::setFormat( string format )
+void Streamer::setFormat( string fmt )
 {
-    format_ = format;
+    format_ = fmt;
 }
 
 /*  Get the format of all tables. */
@@ -302,57 +296,13 @@ string Streamer::getFormat( void ) const
     return format_;
 }
 
-/**
- * @brief Write data of its table to output file.
- */
-void Streamer::writeTablesToOutfile( void )
+void Streamer::zipWithTime( vector<double>& data, double currTime)
 {
-    of_.open( outfilePath_, ios::app);
-    if( tables_.size() <= 0 )
-        return;
-
-    vector<vector<double> > tableData( tables_.size() );
-    vector<size_t> eachVectorSize( tables_.size() );
-
-    size_t i = 0;
-    for( auto tab : tables_ )
+    size_t N = tables_[0]->getVecSize();
+    for (size_t i = 0; i < N; i++) 
     {
-        eachVectorSize[i] = tab.second->getVecSize();
-
-        // If any table has fewer tableData points then the threshold for writing to
-        // file then return without doing anything.
-        tableData[i] = tab.second->getVec();
-
-        // Clear the tableData from vector
-        tab.second->clearVec();
-
-        i++;
+        data.emplace_back( currTime - (N - i - 1)* dt_ );
+        for ( auto t : tables_ )
+            data.emplace_back( t->getVec()[i] );
     }
-
-    if( std::min_element( eachVectorSize.begin(), eachVectorSize.end() ) !=
-            std::max_element( eachVectorSize.begin(), eachVectorSize.end() )
-      )
-    {
-        cout << "WARNING: One or more tables handled by this Streamer are collecting "
-             << "tableData at different rate than others. I'll continue dumping tableData to "
-             << "stream/file but it will get corrupted. I'll advise you to delete  "
-             << "such tables."
-             << endl;
-    }
-
-    // All vectors must be of same size otherwise we are in trouble.
-    size_t sizeOfVec = eachVectorSize[0];
-    for (size_t i = 0; i < sizeOfVec; i++)
-    {
-        text_ += moose::global::toString<double>(tableDt_[0] * numLinesWritten_) + delimiter_;
-        for (size_t ii = 0; ii < tableData.size(); ii++)
-            text_ += moose::global::toString<double>(tableData[ii][i]) + delimiter_;
-        // Remove last "," and append a new line.
-        text_.pop_back(); text_ += '\n';
-        numLinesWritten_ += 1;
-    }
-    write( text_ );
-    of_.close();
 }
-
-

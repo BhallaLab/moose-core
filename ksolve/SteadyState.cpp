@@ -89,18 +89,18 @@ const Cinfo* SteadyState::initCinfo()
      * This picks up the entire Stoich data structure
     static Finfo* gslShared[] =
     {
-    	new SrcFinfo( "reinitSrc", Ftype0::global() ),
+    	new SrcFinfo( "reinitSrc", Ftype0() ),
     	new DestFinfo( "assignStoich",
-    		Ftype1< void* >::global(),
+    		Ftype1< void* >(),
     		RFCAST( &SteadyState::assignStoichFunc )
     		),
     	new DestFinfo( "setMolN",
-    		Ftype2< double, unsigned int >::global(),
+    		Ftype2< double, unsigned int >(),
     		RFCAST( &SteadyState::setMolN )
     		),
-    	new SrcFinfo( "requestYsrc", Ftype0::global() ),
+    	new SrcFinfo( "requestYsrc", Ftype0() ),
     	new DestFinfo( "assignY",
-    		Ftype1< double* >::global(),
+    		Ftype1< double* >(),
     		RFCAST( &SteadyState::assignY )
     		),
     };
@@ -339,7 +339,7 @@ SteadyState::SteadyState()
     solutionStatus_( 0 ),
     numFailed_( 0 )
 {
-    rng.seed( moose::global::__rng_seed__ );
+    rng.seed( moose::__rng_seed__ );
 }
 
 SteadyState::~SteadyState()

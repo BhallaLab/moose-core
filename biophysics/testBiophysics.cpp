@@ -112,10 +112,10 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
     // Here we have an interesting problem. The mtRand might be called
     // by multiple threads if the above Set call is not complete.
 
-    moose::global::mtseed( 5489U );
+    moose::mtseed( 5489U );
     vector< double > origVm( size, 0.0 );
     for ( unsigned int i = 0; i < size; ++i )
-        origVm[i] = moose::global::mtrand() * Vmax;
+        origVm[i] = moose::mtrand() * Vmax;
 
     double origVm100 = origVm[100];
     double origVm900 = origVm[900];
@@ -144,8 +144,8 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
         weight[i].resize( numSynVec[i], 0.0 );
         vector< double > delay( numSynVec[i], 0.0 );
         for ( unsigned int j = 0; j < numSynVec[i]; ++j ) {
-            weight[i][ j ] = moose::global::mtrand() * weightMax;
-            delay[ j ] = delayMin + moose::global::mtrand() * ( delayMax - delayMin );
+            weight[i][ j ] = moose::mtrand() * weightMax;
+            delay[ j ] = delayMin + moose::mtrand() * ( delayMax - delayMin );
         }
         ret = Field< double >::
             setVec( ObjId( synId, i ), "weight", weight[i] );

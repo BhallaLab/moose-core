@@ -162,7 +162,7 @@ void ZombieCompartment::vProcess( const Eref& e, ProcPtr p )
 
 void ZombieCompartment::vReinit(  const Eref& e, ProcPtr p )
 {
-    rng.seed( moose::global::__rng_seed__ );
+    rng.seed( moose::__rng_seed__ );
 }
 
 void ZombieCompartment::vInitProc( const Eref& e, ProcPtr p )

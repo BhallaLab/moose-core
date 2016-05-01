@@ -369,7 +369,7 @@ add_subdirectory(benchmarks)
 add_subdirectory(kinetics)
 add_subdirectory(synapse)
 add_subdirectory(intfire)
-add_subdirectory(examples)
+add_subdirectory(external/muparser)
 
 if(LIBSBML_FOUND)
     add_subdirectory(sbml)
@@ -418,15 +418,6 @@ if(WITH_MPI)
     endif()
 endif(WITH_MPI)
 
-pkg_check_modules(MUPARSER muparser)
-if(MUPARSER_FOUND)
-    message(STATUS "Using system muparser ${MUPARSER_VERSION}")
-    list(APPEND SYSTEM_SHARED_LIBS ${MUPARSER_LIBRARIES})
-else()
-    message(STATUS "Using private muparser")
-    add_subdirectory(external/muparser)
-    list(APPEND MOOSE_LIBRARIES muparser)
-endif()
 
 #pkg_check_modules(TINYXML tinyxml)
 #if(TINYXML_FOUND)
@@ -458,6 +449,7 @@ list(APPEND MOOSE_LIBRARIES
     ksolve
     device
     basecode
+    muparser
     )
 
 

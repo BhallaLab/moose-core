@@ -38,6 +38,7 @@
 #include <Python.h>
 
 #include <structmember.h> // This defines the type id macros like T_STRING
+
 #ifdef USE_NUMPY
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <numpy/arrayobject.h>
@@ -52,11 +53,13 @@
 #include <exception>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_01.hpp>
+#include <boost/format.hpp>
 
 #ifdef USE_MPI
 #include <mpi.h>
 #endif
 
+#include "../external/debug/print_function.hpp"
 #include "../basecode/header.h"
 #include "../basecode/global.h"
 #include "../basecode/Id.h"
@@ -127,18 +130,18 @@ extern void mooseBenchmarks( unsigned int option );
  *-----------------------------------------------------------------------------*/
 void pymoose_mtseed_( unsigned int seed )
 {
-    moose::global::mtseed( seed );
+    moose::mtseed( seed );
 }
 
 double pymoose_mtrand_( void )
 {
 
 #if 0
-    static moose::global::rng_type_ rng( moose::global::__rng_seed__ );
-    static moose::global::distribution_type_ dist;
+    static moose::rng_type_ rng( moose::global::__rng_seed__ );
+    static moose::distribution_type_ dist;
     return dist( rng );
 #else
-    return moose::global::mtrand( );
+    return moose::mtrand( );
 #endif
 
 }
@@ -177,15 +180,13 @@ vector<ObjId> all_elements(Id id)
  */
 void handle_keyboard_interrupts( int signum )
 {
-    cout << "Interrupt signal (" << signum << ") received.\n";
-    cout << "Terminating simulation !";
-    // TODO: leanup and close up stuff here
-    // TODO: Perhaps I should throw exception. Might require c++11 support by
-    // default.
+    LOG( moose::info, "Interrupt signal (" << signum << ") received.");
+
+    // Get the shell and cleanup.
+    Shell* shell = reinterpret_cast<Shell*>(getShell(0, nullptr).eref().data());
+    shell->cleanSimulation();
     exit( signum );
 }
-
-// C-wrapper to be used by Python
 
 // IdType and ObjIdType are defined in vec.cpp and
 // melement.cpp respectively.
@@ -2688,11 +2689,16 @@ int defineClass(PyObject * module_dict, const Cinfo * cinfo)
     }
     get_moose_classes().insert(pair<string, PyTypeObject*> (className, new_class));
     Py_INCREF(new_class);
-    if (verbosity > 0)
-    {
-        cout << "Created class " << new_class->tp_name << endl
-             << "\tbase=" << new_class->tp_base->tp_name << endl;
-    }
+
+#if 0
+    LOG( debug, boost::format( "%1% %2% %|40t|%3% %4%")
+                % "`Created class " 
+                % new_class->tp_name 
+                % "base=" 
+                % new_class->tp_base->tp_name 
+       );
+#endif
+
 #ifdef PY3K
     PyDict_SetItemString(new_class->tp_dict, "__module__", PyUnicode_InternFromString("moose"));
 #endif
@@ -2791,12 +2797,9 @@ int defineDestFinfos(const Cinfo * cinfo)
         }
         PyTuple_SetItem(args, 0, PyString_FromString(name.c_str()));
         vec[currIndex].closure = (void*)args;
-#ifndef NDEBUG
-        if (verbosity > 1)
-        {
-            cout << "\tCreated destField " << vec[currIndex].name << endl;
-        }
-#endif
+
+        //LOG( debug, "\tCreated destField " << vec[currIndex].name );
+
         ++currIndex;
     } // ! for
 
@@ -3292,14 +3295,18 @@ PyMODINIT_FUNC MODINIT(_moose)
     }
 
     clock_t defclasses_end = clock();
-#ifndef QUIET_MODE
-    cout << "Info: Time to define moose classes:" << (defclasses_end - defclasses_start) * 1.0 /CLOCKS_PER_SEC << endl;
-#endif
+
+    LOG( moose::info, "`Time to define moose classes:" 
+            << (defclasses_end - defclasses_start) * 1.0 /CLOCKS_PER_SEC
+       );
+
     PyGILState_Release(gstate);
     clock_t modinit_end = clock();
-#ifndef QUIET_MODE
-    cout << "Info: Time to initialize module:" << (modinit_end - modinit_start) * 1.0 /CLOCKS_PER_SEC << endl;
-#endif
+
+    LOG( moose::info, "`Time to initialize module:" 
+            << (modinit_end - modinit_start) * 1.0 /CLOCKS_PER_SEC 
+       );
+
     if (doUnitTests)
     {
         test_moosemodule();

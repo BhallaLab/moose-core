@@ -16,15 +16,14 @@
 #include <map>
 #include <sstream>
 
-#include "../external/debug/print_function.hpp"
-
 
 using namespace std;
 
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_01.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/filesystem.hpp>
+
+#include "../external/debug/print_function.hpp"
 
 /**
  * @brief Global stringstream for message printing.
@@ -59,97 +58,121 @@ extern unsigned int totalTests;
 
 namespace moose
 {
-    namespace global {
 
-        typedef boost::random::mt19937 rng_type_;
-        typedef boost::random::uniform_01<double> distribution_type_;
+    typedef boost::random::mt19937 rng_type_;
+    typedef boost::random::uniform_01<double> distribution_type_;
 
-        extern rng_type_ rng;
-        extern distribution_type_ dist;
+    extern rng_type_ rng;
+    extern distribution_type_ dist;
 
-        /**
-         * @brief A global seed for all RNGs in moose. When moose.seed( x ) is called,
-         * this variable is set. Other's RNGs (except muparser) uses this seed to
-         * initialize them. By default it is initialized by random_device (see
-         * global.cpp).
-         */
-        extern int __rng_seed__;
+    /**
+     * @brief A global seed for all RNGs in moose. When moose.seed( x ) is called,
+     * this variable is set. Other's RNGs (except muparser) uses this seed to
+     * initialize them. By default it is initialized by random_device (see
+     * global.cpp).
+     */
+    extern int __rng_seed__;
 
-        /**
-         * @brief Fix a path. For testing purpose.
-         *
-         * @param path Path as string.
-         *
-         * @return  A fixed path.
-         */
-        string fixPath(string path);
+    /**
+     * @brief Fix a path. For testing purpose.
+     *
+     * @param path Path as string.
+     *
+     * @return  A fixed path.
+     */
+    string fixPath(string path);
 
-        /**
-         * @brief Checks if given path is correct. 
-         * If not, return false and error-code as well.
-         *
-         * @param path Path name.
-         *
-         * @return 0 if path is all-right. Negative number if path is not OK.
-         */
-        int checkPath( const string& path );
+    /**
+     * @brief Checks if given path is correct. 
+     * If not, return false and error-code as well.
+     *
+     * @param path Path name.
+     *
+     * @return 0 if path is all-right. Negative number if path is not OK.
+     */
+    int checkPath( const string& path );
 
-        /** @brief Append pathB to pathA and return the result. 
-         *
-         * If pathA does not have [indexs] at the end, append "[0]" to pathA and
-         * then add pathB to it.  This version does not care if the result has '[0]'
-         * at its end.
-         *
-         * @param pathA First path.  
-         * @param pathB Second path.
-         *
-         * @return A string representing moose-path.
-         */
-        string joinPath(string pathA, string pathB);
+    /** @brief Append pathB to pathA and return the result. 
+     *
+     * If pathA does not have [indexs] at the end, append "[0]" to pathA and
+     * then add pathB to it.  This version does not care if the result has '[0]'
+     * at its end.
+     *
+     * @param pathA First path.  
+     * @param pathB Second path.
+     *
+     * @return A string representing moose-path.
+     */
+    string joinPath(string pathA, string pathB);
 
-        /**
-         * @brief Seed seed for RNG.
-         *
-         * @param seed
-         */
-        void mtseed( unsigned int seed );
+    /**
+     * @brief Seed seed for RNG.
+     *
+     * @param seed
+     */
+    void mtseed( unsigned int seed );
 
-        /**
-         * @brief Generate a random double between 0 and 1
-         *
-         * @return  A random number between 0 and 1.
-         */
-        double mtrand( void );
+    /**
+     * @brief Generate a random double between 0 and 1
+     *
+     * @return  A random number between 0 and 1.
+     */
+    double mtrand( void );
 
-        /**
-         * @brief Create a POSIX compatible path from a given string.
-         * Remove/replace bad characters.
-         *
-         * @param path
-         */
-        string createPosixPath( string path );
+    /**
+     * @brief Create a POSIX compatible path from a given string.
+     * Remove/replace bad characters.
+     *
+     * @param path
+     */
+    string createPosixPath( string path );
 
-        /**
-         * @brief Convert a given value to string.
-         *
-         * @tparam T
-         * @param x
-         *
-         * @return  String representation
-         */
-        template<typename T>
-        string toString( T x )
-        {
-            return boost::lexical_cast<string>( x );
-        }
+    /**
+     * @brief Convert a given value to string.
+     *
+     * @tparam T
+     * @param x
+     *
+     * @return  String representation
+     */
+    string toString( double x );
 
-        /**
-         * @brief Create directory, recursively.
-         *
-         * @param path
-         */
-        void createDirs( boost::filesystem::path path );
-    }
+    /**
+     * @brief Create directory, recursively.
+     *
+     * @param path
+     */
+    string createParentDirs( string path );
+
+    /**
+     * @brief Get the extension of a given filepath.
+     *
+     * @param path Given path.
+     *
+     * @return Extension (with or without preceeding '.' )
+     */
+    string getExtension( const string& path, bool without_dot = true );
+
+    /**
+     * @brief Return the name when path is given. Its behaviour is exactly the
+     * same as of `basename`  command on unix system.
+     *
+     * @param path
+     *
+     * @return  name.
+     */
+    string pathToName( const string& path );
+
+    /**
+     * @brief When user gives a path /a/b/c, moose creates a path
+     * /a[0]/b[0]/c[0]. This is helpful in cases where one needs to create more
+     * than 1 element.
+     *
+     * @param path Removed '[0]' from path and return.
+     *
+     * @return 
+     */
+    string moosePathToUserPath( string path );
 }
 
 #endif   /* ----- #ifndef __MOOSE_GLOBAL_INC_  ----- */
