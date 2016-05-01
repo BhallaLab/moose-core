@@ -209,9 +209,9 @@ Table& Table::operator=( const Table& tab )
  */
 void Table::writeToOutfile( )
 {
-    if( "csv" == format_ )
+    if( ".csv" == format_ )
         writeToCSVfile();
-    else if( "dat" == format_ )
+    else if( ".dat" == format_ )
         writeToBinaryCSVfile();
     else
         writeToCSVfile();
@@ -235,10 +235,7 @@ void Table::process( const Eref& e, ProcPtr p )
      *  vector.  
      */
     if( useStreamer_ )
-    {
         writeToOutfile( );
-        clearVec();
-    }
 }
 
 /**
@@ -258,8 +255,9 @@ void Table::writeToBinaryCSVfile( )
     }
 
     of_.write( text_.c_str(), text_.size()); 
-
     of_.close( );
+
+    text_.clear();
     clearVec();
 }
 
@@ -283,9 +281,10 @@ void Table::writeToCSVfile( )
     }
 
     of_ << text_; 
-    text_ = "";
 
     of_.close( );
+
+    text_.clear();
     clearVec();
 }
 
@@ -309,31 +308,21 @@ void Table::reinit( const Eref& e, ProcPtr p )
         if( ! outfileIsSet )
             setOutfile( 
                     moose::global::createPosixPath( 
-                        rootdir_.string() + e.id().path() + "." + format_ 
+                        rootdir_.string() + e.id().path() + format_ 
                         )
                     );
 
         moose::global::createDirs( outfile_.parent_path() );
 
-#if 0
-        // Open the stream to write to file.
-        if( "csv" == format_ )
-        {
-            cerr << "Plain text csv file ";
-            of_.open( outfile_.string());
-        }
-        else if( "dat" == format_ )
-        {
-            cerr << "Binary  csv file ";
+        // Initialize file once. It will also clear out the old file.
+        if( ".csv" == format_ )
+            of_.open( outfile_.string() );
+        else if( ".dat" == format_ )
             of_.open( outfile_.string(), ios::binary );
-        }
         else
-        {
-            cerr << "Binary  csv file : " << format_;
             of_.open( outfile_.string(), ios::binary );
-        }
-#endif
 
+        of_.close();
     }
 
     input_ = 0.0;

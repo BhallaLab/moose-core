@@ -91,7 +91,7 @@ private:
     /**
      * @brief format of data. Currently fixed to csv.
      */
-    string format_ = "csv";
+    string format_ = ".csv";
     string delimiter_ = ",";
 
     /**
