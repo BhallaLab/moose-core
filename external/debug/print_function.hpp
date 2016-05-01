@@ -30,8 +30,8 @@
 #include <string>
 #include <map>
 #include <iomanip>
-
-//#include <sys/ioctl.h>
+#include <ctime>
+#include <algorithm>
 
 #define T_RESET       "\033[0m"
 #define T_BLACK       "\033[30m"      /* Black */
@@ -62,6 +62,7 @@ using namespace std;
  *  is true.
  * ==============================================================================
  */
+
     template<typename A, typename B>
 string mapToString(const map<A, B>& m, bool value=true)
 {
@@ -105,9 +106,6 @@ string mapToString(const map<A, B>& m, bool value=true)
     return ss.str();
 }
 
-#include <ctime>
-#include <algorithm>
-
 inline string colored(string msg)
 {
     stringstream ss;
@@ -142,7 +140,6 @@ inline string debugPrint(string msg, string prefix = "DEBUG"
 
 inline void __dump__(string msg, string type = "DEBUG", bool autoFormat = true)
 {
-
     stringstream ss;
     ss << "[" << type << "] ";
     bool set = false;
@@ -185,15 +182,22 @@ inline void __dump__(string msg, string type = "DEBUG", bool autoFormat = true)
     /*  Be safe than sorry */
     if(!reset)
         ss << T_RESET;
-    cerr << ss.str() << endl;
-
+    cout << ss.str() << endl;
 }
 
-/* A macro would be cool. */
-#define DUMP(a, t) \
-    ostringstream ss; \
-    ss << a << endl;\
-    __dump__(ss.str(), t); \
+/**
+ * @brief This macro only expands when not compiling for release.
+ *
+ * @param a Stream to write to logger /console.
+ * @param t Type of the stream.
+ * @return  Nothing.
+ */
+
+#ifdef  NDEBUG
+#define LOG(a, t ) ((void)0);
+#else      /* -----  not NDEBUG  ----- */
+#define LOG(a, t) ostringstream ss;  ss << a; __dump__(ss.str(), t ); 
+#endif     /* -----  not NDEBUG  ----- */
 
 /*-----------------------------------------------------------------------------
  *  Log to a file, and also to console.
@@ -211,11 +215,20 @@ inline string formattedMsg(string& msg)
     return msg;
 }
 
+/**
+ * @brief Log to console (and to a log-file)
+ *
+ * @param msg String, message to be written.
+ * @param type Type of the message.
+ * @param redirectToConsole 
+ * @param removeTicks
+ */
 inline void log(string msg, string type = "DEBUG"
         , bool redirectToConsole = true
         , bool removeTicks = true 
         )
 {
+
     if(redirectToConsole)
         __dump__(msg, type, true);
 

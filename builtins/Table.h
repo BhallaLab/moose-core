@@ -47,6 +47,8 @@ public:
      * store values in memory (stl::vec )
      */
     void writeToOutfile( );
+    void writeToCSVfile( );
+    void writeToBinaryCSVfile( );
 
     //////////////////////////////////////////////////////////////////
     // Dest funcs

@@ -38,6 +38,7 @@
 #include <Python.h>
 
 #include <structmember.h> // This defines the type id macros like T_STRING
+
 #ifdef USE_NUMPY
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <numpy/arrayobject.h>
@@ -52,11 +53,13 @@
 #include <exception>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_01.hpp>
+#include <boost/format.hpp>
 
 #ifdef USE_MPI
 #include <mpi.h>
 #endif
 
+#include "../external/debug/print_function.hpp"
 #include "../basecode/header.h"
 #include "../basecode/global.h"
 #include "../basecode/Id.h"
@@ -2688,11 +2691,15 @@ int defineClass(PyObject * module_dict, const Cinfo * cinfo)
     }
     get_moose_classes().insert(pair<string, PyTypeObject*> (className, new_class));
     Py_INCREF(new_class);
-    if (verbosity > 0)
-    {
-        cout << "Created class " << new_class->tp_name << endl
-             << "\tbase=" << new_class->tp_base->tp_name << endl;
-    }
+
+    LOG( boost::format( "%1% %2% %|40t|%3% %4%")
+                % "`Created class " 
+                % new_class->tp_name 
+                % "base=" 
+                % new_class->tp_base->tp_name 
+                , "DEBUG" 
+       );
+
 #ifdef PY3K
     PyDict_SetItemString(new_class->tp_dict, "__module__", PyUnicode_InternFromString("moose"));
 #endif
@@ -2791,12 +2798,9 @@ int defineDestFinfos(const Cinfo * cinfo)
         }
         PyTuple_SetItem(args, 0, PyString_FromString(name.c_str()));
         vec[currIndex].closure = (void*)args;
-#ifndef NDEBUG
-        if (verbosity > 1)
-        {
-            cout << "\tCreated destField " << vec[currIndex].name << endl;
-        }
-#endif
+
+        //LOG( "\tCreated destField " << vec[currIndex].name, "DEBUG");
+
         ++currIndex;
     } // ! for
 

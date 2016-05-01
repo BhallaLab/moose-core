@@ -204,21 +204,19 @@ Table& Table::operator=( const Table& tab )
     return *this;
 }
 
+/**
+ * @brief Write to a ftream.
+ */
 void Table::writeToOutfile( )
 {
-    // Just to be safe.
-    if( ! useStreamer_ )
-        return;
-
-    for( auto v : vec() ) 
-    {
-        text_ += moose::global::toString( dt_ * numLines ) + delimiter_
-             + moose::global::toString( v ) + '\n';
-        numLines += 1;
-    }
-    of_ << text_; text_ = "";
-    if( getVecSize() > 0) clearVec();
+    if( "csv" == format_ )
+        writeToCSVfile();
+    else if( "dat" == format_ )
+        writeToBinaryCSVfile();
+    else
+        writeToCSVfile();
 }
+
 
 //////////////////////////////////////////////////////////////
 // MsgDest Definitions
@@ -243,6 +241,43 @@ void Table::process( const Eref& e, ProcPtr p )
     }
 }
 
+/**
+ * @brief Write to a HDF5 stream.
+ */
+void Table::writeToBinaryCSVfile( )
+{
+
+}
+
+/**
+ * @brief Write to csv file.
+ * 
+ * FIXME: File should be closed properly. 
+ *        Do not write at each tick. Fill the buffer and when size is bigger
+ *        than a given size, write to file.
+ */
+void Table::writeToCSVfile( )
+{
+    // Just to be safe.
+    if( ! useStreamer_ )
+        return;
+
+    for( auto v : vec() ) 
+    {
+        text_ += moose::global::toString( dt_ * numLines ) + delimiter_
+             + moose::global::toString( v ) + '\n';
+        numLines += 1;
+    }
+    of_ << text_; text_ = "";
+    clearVec();
+}
+
+/**
+ * @brief Reinitialize
+ *
+ * @param e
+ * @param p
+ */
 void Table::reinit( const Eref& e, ProcPtr p )
 {
     unsigned int numTick = e.element()->getTick();
@@ -261,14 +296,24 @@ void Table::reinit( const Eref& e, ProcPtr p )
                         )
                     );
 
-        // Create its root directory.
-        BOOST_LOG_TRIVIAL( debug ) << "Creating directory " 
-            << outfile_.parent_path();
-
         moose::global::createDirs( outfile_.parent_path() );
-
         // Open the stream to write to file.
-        of_.open( outfile_.string(), ios::out );
+        if( "csv" == format_ )
+        {
+            cerr << "Plain text csv file ";
+            of_.open( outfile_.string());
+        }
+        else if( "dat" == format_ )
+        {
+            cerr << "Binary  csv file ";
+            of_.open( outfile_.string(), ios::binary );
+        }
+        else
+        {
+            cerr << "Binary  csv file : " << format_;
+            of_.open( outfile_.string());
+        }
+
         of_ << "time,value\n";
 
     }
@@ -344,6 +389,9 @@ void Table::setOutfile( string outpath )
     outfile_.make_preferred();
     outfileIsSet = true;
     setUseStreamer( true );
+
+    // If possible get the format of file as well.
+    format_ = outfile_.extension().string();
 }
 
 string Table::getOutfile( void ) const
