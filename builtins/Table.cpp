@@ -247,6 +247,10 @@ void Table::writeToBinaryCSVfile( )
         return;
 
     of_.open( outfile_.string(), ios::app | ios::binary );
+
+    if( ! of_.good() )
+        return;
+
     for( auto v : vec() ) 
     {
         text_ += moose::global::toString( dt_ * numLines ) + delimiter_
