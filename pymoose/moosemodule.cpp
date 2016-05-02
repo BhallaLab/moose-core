@@ -180,15 +180,13 @@ vector<ObjId> all_elements(Id id)
  */
 void handle_keyboard_interrupts( int signum )
 {
-    cout << "Interrupt signal (" << signum << ") received.\n";
-    cout << "Terminating simulation !";
-    // TODO: leanup and close up stuff here
-    // TODO: Perhaps I should throw exception. Might require c++11 support by
-    // default.
+    LOG( moose::info, "Interrupt signal (" << signum << ") received.");
+
+    // Get the shell and cleanup.
+    Shell* shell = reinterpret_cast<Shell*>(getShell(0, nullptr).eref().data());
+    shell->cleanSimulation();
     exit( signum );
 }
-
-// C-wrapper to be used by Python
 
 // IdType and ObjIdType are defined in vec.cpp and
 // melement.cpp respectively.

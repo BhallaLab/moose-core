@@ -1117,9 +1117,11 @@ void Shell::cleanSimulation()
     {
         if ( i->value() > 4 )
         {
-            cout << "Shell::cleanSimulation: deleted cruft at " <<
-                 i->value() << ": " << i->path() << endl;
+            LOG( moose::debug
+                    , "Shell::cleanSimulation: deleted cruft at " <<
+                 i->value() << ": " << i->path());
             s->doDelete( *i );
         }
     }
+    LOG( moose::info, "Cleaned up!");
 }
