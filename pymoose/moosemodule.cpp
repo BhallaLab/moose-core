@@ -2840,7 +2840,6 @@ extern "C" {
         PyModule_AddIntConstant(moose_module, "INFINITE", isInfinite);
         PyModule_AddStringConstant(moose_module, "__version__", SHELLPTR->doVersion().c_str());
         PyModule_AddStringConstant(moose_module, "VERSION", SHELLPTR->doVersion().c_str());
-        PyModule_AddStringConstant(moose_module, "SVN_REVISION", SHELLPTR->doRevision().c_str());
         PyObject * module_dict = PyModule_GetDict(moose_module);
         clock_t defclasses_start = clock();
         if (!defineAllClasses(module_dict)){

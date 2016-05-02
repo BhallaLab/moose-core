@@ -6,28 +6,10 @@
 // Maintainer: 
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 17:11:06 2011 (+0530)
-// Version: 
 // Last-Updated: Tue Jul 23 19:31:10 2013 (+0530)
 //           By: subha
-//     Update #: 1410
 // URL: 
-// Keywords: 
-// Compatibility: 
-// 
-// 
 
-// Commentary: 
-// 
-// 
-// 
-// 
-
-// Change log:
-// 
-// 
-// 
-
-// Code:
 #ifndef _MOOSEMODULE_H
 #define _MOOSEMODULE_H
 

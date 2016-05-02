@@ -692,11 +692,6 @@ string Shell::doVersion()
     return MOOSE_VERSION;
 }
 
-string Shell::doRevision()
-{
-    return SVN_REVISION;
-}
-
 void Shell::setCwe( ObjId val )
 {
 	cwe_ = val;
